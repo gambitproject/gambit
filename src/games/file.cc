@@ -1080,10 +1080,10 @@ Game ReadGame(std::istream &p_file)
       return game;
     }
     else if (parser.GetLastText() == "#AGG") {
-      return GameAggRep::ReadAggFile(buffer);
+      return GameAGGRep::ReadAggFile(buffer);
     }
     else if (parser.GetLastText() == "#BAGG") {
-      return GameBagentRep::ReadBaggFile(buffer);
+      return GameBAGGRep::ReadBaggFile(buffer);
     }
     else {
       throw InvalidFileException("Tokens 'EFG' or 'NFG' or '#AGG' or '#BAGG' expected at start of file");

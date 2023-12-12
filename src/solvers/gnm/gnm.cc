@@ -75,7 +75,7 @@ std::shared_ptr<gnmgame>
 NashGNMStrategySolver::BuildRepresentation(const Game &p_game) const
 {
   if (p_game->IsAgg()) {
-    return std::shared_ptr<gnmgame>(new aggame(dynamic_cast<GameAggRep &>(*p_game)));
+    return std::shared_ptr<gnmgame>(new aggame(dynamic_cast<GameAGGRep &>(*p_game)));
   }
   else {
     Rational maxPay = p_game->GetMaxPayoff();

@@ -27,10 +27,9 @@
 
 namespace Gambit {
 
-class GameBagentRep : public GameRep {
-  template <class T> friend class MixedStrategyProfile;
-  template <class T> friend class BagentMixedStrategyProfileRep;
-  friend class BagentPureStrategyProfileRep;
+class GameBAGGRep : public GameRep {
+  template <class T> friend class BAGGMixedStrategyProfileRep;
+  friend class BAGGPureStrategyProfileRep;
 
 private:
   std::shared_ptr<agg::BAGG> baggPtr;
@@ -38,7 +37,7 @@ private:
   Array<GamePlayerRep *> m_players;
 
   /// Constructor
-  explicit GameBagentRep(std::shared_ptr<agg::BAGG> _baggPtr);
+  explicit GameBAGGRep(std::shared_ptr<agg::BAGG> _baggPtr);
 
 public:
   /// @name Lifecycle
@@ -46,7 +45,7 @@ public:
   /// Create a game from a serialized file in BAGG format
   static Game ReadBaggFile(std::istream &);
   /// Destructor
-  ~GameBagentRep() override {
+  ~GameBAGGRep() override {
     for (auto player : m_players) {
       player->Invalidate();
     }

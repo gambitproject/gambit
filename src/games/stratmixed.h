@@ -56,81 +56,6 @@ public:
   T GetRegret(const GameStrategy &) const;
 };
 
-template <class T> class TreeMixedStrategyProfileRep 
-  : public MixedStrategyProfileRep<T> {
-public:
-  explicit TreeMixedStrategyProfileRep(const StrategySupportProfile &p_support)
-    : MixedStrategyProfileRep<T>(p_support)
-  { }
-  explicit TreeMixedStrategyProfileRep(const MixedBehaviorProfile<T> &);
-  ~TreeMixedStrategyProfileRep() override = default;
-  
-  MixedStrategyProfileRep<T> *Copy() const override;
-  T GetPayoff(int pl) const override;
-  T GetPayoffDeriv(int pl, const GameStrategy &) const override;
-  T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const override;
-};
-
-template <class T> class TableMixedStrategyProfileRep
-  : public MixedStrategyProfileRep<T> {
-private:
-  /// @name Private recursive payoff functions
-  //@{
-  /// Recursive computation of payoff to player pl
-  T GetPayoff(int pl, int index, int i) const;
-  /// Recursive computation of payoff derivative
-  void GetPayoffDeriv(int pl, int const_pl, int cur_pl, long index,
-		      const T &prob, T &value) const;
-  /// Recursive computation of payoff second derivative
-  void GetPayoffDeriv(int pl, int const_pl1, int const_pl2, 
-		      int cur_pl, long index, const T &prob, T &value) const;
-  //@}
-
-public:
-  explicit TableMixedStrategyProfileRep(const StrategySupportProfile &p_support)
-    : MixedStrategyProfileRep<T>(p_support)
-  { }
-  ~TableMixedStrategyProfileRep() override = default;
-
-  MixedStrategyProfileRep<T> *Copy() const override;
-  T GetPayoff(int pl) const override;
-  T GetPayoffDeriv(int pl, const GameStrategy &) const override;
-  T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const override;
-};
-
-template <class T> class AggMixedStrategyProfileRep
-  : public MixedStrategyProfileRep<T> {
-
-public:
-  explicit AggMixedStrategyProfileRep(const StrategySupportProfile &p_support)
-   : MixedStrategyProfileRep<T>(p_support)
-    { }
-  ~AggMixedStrategyProfileRep() override = default;
-
-  MixedStrategyProfileRep<T> *Copy() const override {
-    return new AggMixedStrategyProfileRep(*this);
-  }
-  T GetPayoff(int pl) const override;
-  T GetPayoffDeriv(int pl, const GameStrategy &) const override;
-  T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const override;
-};
-
-template <class T> class BagentMixedStrategyProfileRep
-  : public MixedStrategyProfileRep<T> {
-
-public:
-  explicit BagentMixedStrategyProfileRep(const StrategySupportProfile &p_support)
-    : MixedStrategyProfileRep<T>(p_support)
-    { }
-  ~BagentMixedStrategyProfileRep() override = default;
-
-  MixedStrategyProfileRep<T> *Copy() const override {
-    return new BagentMixedStrategyProfileRep(*this);
-  }
-  T GetPayoff(int pl) const override;
-  T GetPayoffDeriv(int pl, const GameStrategy &) const override;
-  T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const override;
-};
 
 /// \brief A probability distribution over strategies in a game
 ///
@@ -138,29 +63,18 @@ public:
 /// independently chooses from among his strategies with specified
 /// probabilities.
 template <class T> class MixedStrategyProfile {
-  friend class StrategySupportProfile;
-  friend class MixedStrategyProfileRep<T>;
-  friend class TreeMixedStrategyProfileRep<T>;
-  friend class AggMixedStrategyProfileRep<T>;
-  friend class BagentMixedStrategyProfileRep<T>;
-  friend class TableMixedStrategyProfileRep<T>;
-  friend class GameAggRep;
-  friend class GameBagentRep;
-  friend class GameTableRep;
-  friend class GameTreeRep;
-  friend class MixedBehaviorProfile<T>;
 private:
   MixedStrategyProfileRep<T> *m_rep;
 
+public:
+  /// @name Lifecycle
+  //@{
   explicit MixedStrategyProfile(MixedStrategyProfileRep<T> *p_rep)
     : m_rep(p_rep)
   { }
   /// Convert a behavior strategy profile to a mixed strategy profile
   explicit MixedStrategyProfile(const MixedBehaviorProfile<T> &);
 
-public:
-  /// @name Lifecycle
-  //@{
   /// Make a copy of the mixed strategy profile
   MixedStrategyProfile(const MixedStrategyProfile<T> &);
   /// Destructor

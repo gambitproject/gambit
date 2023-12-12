@@ -3,7 +3,7 @@
 // Copyright (c) 1994-2023, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/libgambit/gameagg.h
-// Declaration of GameAggRep, the action-graph game representation
+// Declaration of GameAGGRep, the action-graph game representation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -27,22 +27,16 @@
 
 namespace Gambit {
 
-namespace gametracer {
-class aggame;
-}
-
-class GameAggRep : public GameRep {
-  template <class T> friend class MixedStrategyProfile;
-  template <class T> friend class AggMixedStrategyProfileRep;
-  friend class AggPureStrategyProfileRep;
-  friend class gametracer::aggame;
+class GameAGGRep : public GameRep {
+  template <class T> friend class AGGMixedStrategyProfileRep;
+  friend class AGGPureStrategyProfileRep;
 
 private:
   std::shared_ptr<agg::AGG> aggPtr;
   Array<GamePlayerRep *> m_players;
 
   /// Constructor
-  explicit GameAggRep(std::shared_ptr<agg::AGG>);
+  explicit GameAGGRep(std::shared_ptr<agg::AGG>);
 
 public:
   /// @name Lifecycle
@@ -50,7 +44,7 @@ public:
   /// Create a game from a serialized file in AGG format
   static Game ReadAggFile(std::istream &);
   /// Destructor
-  ~GameAggRep() override {
+  ~GameAGGRep() override {
     for (auto player : m_players) {
       player->Invalidate();
     }
@@ -59,6 +53,7 @@ public:
   Game Copy() const override;
   //@}
 
+  std::shared_ptr<agg::AGG> GetUnderlyingAGG() const { return aggPtr; }
   /// @name Dimensions of the game
   //@{
   /// The number of actions in each information set

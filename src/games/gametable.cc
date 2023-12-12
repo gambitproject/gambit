@@ -118,6 +118,161 @@ PureStrategyProfile GameTableRep::NewPureStrategyProfile() const
   return PureStrategyProfile(new TablePureStrategyProfileRep(const_cast<GameTableRep *>(this)));
 }
 
+//========================================================================
+//                   TableMixedStrategyProfileRep<T>
+//========================================================================
+
+template <class T> class TableMixedStrategyProfileRep
+  : public MixedStrategyProfileRep<T> {
+private:
+  /// @name Private recursive payoff functions
+  //@{
+  /// Recursive computation of payoff to player pl
+  T GetPayoff(int pl, int index, int i) const;
+  /// Recursive computation of payoff derivative
+  void GetPayoffDeriv(int pl, int const_pl, int cur_pl, long index,
+                      const T &prob, T &value) const;
+  /// Recursive computation of payoff second derivative
+  void GetPayoffDeriv(int pl, int const_pl1, int const_pl2,
+                      int cur_pl, long index, const T &prob, T &value) const;
+  //@}
+
+public:
+  explicit TableMixedStrategyProfileRep(const StrategySupportProfile &p_support)
+    : MixedStrategyProfileRep<T>(p_support)
+  { }
+  ~TableMixedStrategyProfileRep() override = default;
+
+  MixedStrategyProfileRep<T> *Copy() const override;
+  T GetPayoff(int pl) const override;
+  T GetPayoffDeriv(int pl, const GameStrategy &) const override;
+  T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const override;
+};
+
+template <class T>
+MixedStrategyProfileRep<T> *TableMixedStrategyProfileRep<T>::Copy() const
+{
+  return new TableMixedStrategyProfileRep(*this);
+}
+
+template <class T>
+T TableMixedStrategyProfileRep<T>::GetPayoff(int pl, int index, int current) const
+{
+  if (current > this->m_support.GetGame()->NumPlayers())  {
+    Game game = this->m_support.GetGame();
+    auto &g = dynamic_cast<GameTableRep &>(*game);
+    GameOutcomeRep *outcome = g.m_results[index];
+    if (outcome) {
+      return static_cast<T>(outcome->GetPayoff(pl));
+    }
+    else {
+      return (T) 0;
+    }
+  }
+
+  T sum = (T) 0;
+  for (int j = 1; j <= this->m_support.NumStrategies(current); j++) {
+    GameStrategyRep *s = this->m_support.GetStrategy(current, j);
+    if ((*this)[s] != (T) 0) {
+      sum += ((*this)[s] *
+              GetPayoff(pl, index + s->m_offset, current + 1));
+    }
+  }
+  return sum;
+}
+
+template <class T> T TableMixedStrategyProfileRep<T>::GetPayoff(int pl) const
+{
+  return GetPayoff(pl, 1, 1);
+}
+
+template <class T>
+void
+TableMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, int const_pl,
+                                                int cur_pl, long index,
+                                                const T &prob, T &value) const
+{
+  if (cur_pl == const_pl) {
+    cur_pl++;
+  }
+  if (cur_pl > this->m_support.GetGame()->NumPlayers())  {
+    Game game = this->m_support.GetGame();
+    auto &g = dynamic_cast<GameTableRep &>(*game);
+    GameOutcomeRep *outcome = g.m_results[index];
+    if (outcome) {
+      value += prob * static_cast<T>(outcome->GetPayoff(pl));
+    }
+  }
+  else   {
+    for (int j = 1; j <= this->m_support.NumStrategies(cur_pl); j++)  {
+      GameStrategyRep *s = this->m_support.GetStrategy(cur_pl, j);
+      if ((*this)[s] > (T) 0)  {
+        GetPayoffDeriv(pl, const_pl, cur_pl + 1,
+                       index + s->m_offset, prob * (*this)[s], value);
+      }
+    }
+  }
+}
+
+template <class T> T
+TableMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl,
+                                                const GameStrategy &strategy) const
+{
+  T value = (T) 0;
+  GetPayoffDeriv(pl, strategy->GetPlayer()->GetNumber(), 1,
+                 strategy->m_offset + 1, (T) 1, value);
+  return value;
+}
+
+template <class T>
+void
+TableMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, int const_pl1,
+                                                int const_pl2,
+                                                int cur_pl, long index,
+                                                const T &prob, T &value) const
+{
+  while (cur_pl == const_pl1 || cur_pl == const_pl2) {
+    cur_pl++;
+  }
+  if (cur_pl > this->m_support.GetGame()->NumPlayers())  {
+    Game game = this->m_support.GetGame();
+    auto &g = dynamic_cast<GameTableRep &>(*game);
+    GameOutcomeRep *outcome = g.m_results[index];
+    if (outcome) {
+      value += prob * static_cast<T>(outcome->GetPayoff(pl));
+    }
+  }
+  else   {
+    for (int j = 1; j <= this->m_support.NumStrategies(cur_pl); j++ ) {
+      GameStrategyRep *s = this->m_support.GetStrategy(cur_pl, j);
+      if ((*this)[s] > (T) 0) {
+        GetPayoffDeriv(pl, const_pl1, const_pl2,
+                       cur_pl + 1, index + s->m_offset,
+                       prob * (*this)[s],
+                       value);
+      }
+    }
+  }
+}
+
+template <class T> T
+TableMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl,
+                                                const GameStrategy &strategy1,
+                                                const GameStrategy &strategy2) const
+{
+  GamePlayerRep *player1 = strategy1->GetPlayer();
+  GamePlayerRep *player2 = strategy2->GetPlayer();
+  if (player1 == player2) return (T) 0;
+
+  T value = (T) 0;
+  GetPayoffDeriv(pl, player1->GetNumber(), player2->GetNumber(),
+                 1, strategy1->m_offset + strategy2->m_offset + 1,
+                 (T) 1, value);
+  return value;
+}
+
+template class TableMixedStrategyProfileRep<double>;
+template class TableMixedStrategyProfileRep<Rational>;
 
 
 //------------------------------------------------------------------------

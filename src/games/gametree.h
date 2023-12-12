@@ -291,8 +291,21 @@ public:
 
 };
 
+template <class T> class TreeMixedStrategyProfileRep
+  : public MixedStrategyProfileRep<T> {
+public:
+  explicit TreeMixedStrategyProfileRep(const StrategySupportProfile &p_support)
+    : MixedStrategyProfileRep<T>(p_support)
+  { }
+  explicit TreeMixedStrategyProfileRep(const MixedBehaviorProfile<T> &);
+  ~TreeMixedStrategyProfileRep() override = default;
+
+  MixedStrategyProfileRep<T> *Copy() const override;
+  T GetPayoff(int pl) const override;
+  T GetPayoffDeriv(int pl, const GameStrategy &) const override;
+  T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const override;
+};
+
 }
-
-
 
 #endif  // GAMETREE_H

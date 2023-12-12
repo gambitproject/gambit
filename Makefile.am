@@ -349,6 +349,7 @@ game_SOURCES = \
 	src/games/gameobject.h \
 	src/games/game.cc \
 	src/games/game.h \
+	src/games/gameexpl.cc \
 	src/games/gameexpl.h \
 	src/games/gametable.cc \
 	src/games/gametable.h \
@@ -365,9 +366,7 @@ game_SOURCES = \
 	src/games/stratspt.h \
 	src/games/stratpure.cc \
 	src/games/stratpure.h \
-	src/games/stratmixed.cc \
 	src/games/stratmixed.h \
-	src/games/stratmixed.imp \
 	src/games/nash.cc \
 	src/games/file.cc \
 	src/games/writer.cc \
