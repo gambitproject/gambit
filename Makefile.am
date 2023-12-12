@@ -346,6 +346,7 @@ agg_SOURCES = \
 game_SOURCES = \
 	src/gambit.h \
 	src/games/number.h \
+	src/games/gameobject.h \
 	src/games/game.cc \
 	src/games/game.h \
 	src/games/gameexpl.h \

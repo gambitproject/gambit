@@ -726,7 +726,7 @@ LrsData::LrsData(const Game &p_game)
     throw Exception("Error in allocating lrslib data");
   }
   Q1->nash = TRUE;
-  Q1->n = p_game->GetPlayer(1)->Strategies().size() + 2;
+  Q1->n = p_game->GetPlayer(1)->GetStrategies().size() + 2;
   Q1->m = p_game->MixedProfileLength() + 1;
   
   P1 = lrs_alloc_dic(Q1);
@@ -740,7 +740,7 @@ LrsData::LrsData(const Game &p_game)
     throw Exception("Error in allocating lrslib data");
   }
   Q2->nash = TRUE;
-  Q2->n = p_game->GetPlayer(2)->Strategies().size() + 2;
+  Q2->n = p_game->GetPlayer(2)->GetStrategies().size() + 2;
   Q2->m = p_game->MixedProfileLength() + 1;
 
   P2 = lrs_alloc_dic(Q2);
@@ -782,14 +782,14 @@ void LrsData::BuildRep(lrs_dic *P, lrs_dat *Q, const Game &p_game, int p1)
 
   if (p1 == 1) {
     FillConstraintRows(P, Q, p_game, p1, p2, 1);
-    FillNonnegativityRows(P, Q, p_game->GetPlayer(p1)->Strategies().size() + 1,
+    FillNonnegativityRows(P, Q, p_game->GetPlayer(p1)->GetStrategies().size() + 1,
 			  p_game->MixedProfileLength(), n);
   }
   else {
-    FillNonnegativityRows(P, Q, 1, 
-			  p_game->GetPlayer(p2)->Strategies().size(), n);
+    FillNonnegativityRows(P, Q, 1,
+                          p_game->GetPlayer(p2)->GetStrategies().size(), n);
     FillConstraintRows(P, Q, p_game, p1, p2,
-		       p_game->GetPlayer(p2)->Strategies().size() + 1);
+                       p_game->GetPlayer(p2)->GetStrategies().size() + 1);
   }
   FillLinearityRow(P, Q, m, n);
 }
@@ -824,23 +824,23 @@ void LrsData::FillConstraintRows(lrs_dic *P, lrs_dat *Q,
   PureStrategyProfile cont = p_game->NewPureStrategyProfile();
 
   for (size_t row = firstRow; 
-       row < firstRow + p_game->GetPlayer(p1)->Strategies().size();
+       row < firstRow + p_game->GetPlayer(p1)->GetStrategies().size();
        row++) {
     num[0] = 0;
     den[0] = 1;
 
-    cont->SetStrategy(p_game->GetPlayer(p1)->Strategies()[row - firstRow + 1]);
+    cont->SetStrategy(p_game->GetPlayer(p1)->GetStrategies()[row - firstRow + 1]);
 
-    for (size_t st = 1; st <= p_game->GetPlayer(p2)->Strategies().size(); st++) {
-      cont->SetStrategy(p_game->GetPlayer(p2)->Strategies()[st]);
+    for (size_t st = 1; st <= p_game->GetPlayer(p2)->GetStrategies().size(); st++) {
+      cont->SetStrategy(p_game->GetPlayer(p2)->GetStrategies()[st]);
       Rational x = cont->GetPayoff(p1) - min;
 
       num[st] = -x.numerator().as_long();
       den[st] = x.denominator().as_long();
     }
 
-    num[p_game->GetPlayer(p2)->Strategies().size()+1] = 1;
-    den[p_game->GetPlayer(p2)->Strategies().size()+1] = 1;
+    num[p_game->GetPlayer(p2)->GetStrategies().size() + 1] = 1;
+    den[p_game->GetPlayer(p2)->GetStrategies().size() + 1] = 1;
     lrs_set_row(P, Q, row, num, den, GE);
   }
 }

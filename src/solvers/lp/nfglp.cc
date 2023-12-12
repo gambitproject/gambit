@@ -86,8 +86,8 @@ NashLpStrategySolver<T>::Solve(const Game &p_game) const
     throw UndefinedException("Computing equilibria of games with imperfect recall is not supported.");
   }
 
-  int m = p_game->GetPlayer(1)->Strategies().size();
-  int k = p_game->GetPlayer(2)->Strategies().size();
+  int m = p_game->GetPlayer(1)->GetStrategies().size();
+  int k = p_game->GetPlayer(2)->GetStrategies().size();
 
   Matrix<T> A(1,k+1,1,m+1);
   Vector<T> b(1,k+1);
@@ -97,9 +97,9 @@ NashLpStrategySolver<T>::Solve(const Game &p_game) const
   Rational minpay = p_game->GetMinPayoff() - Rational(1);
 
   for (int i = 1; i <= k; i++)  {
-    profile->SetStrategy(p_game->GetPlayer(2)->Strategies()[i]);
+    profile->SetStrategy(p_game->GetPlayer(2)->GetStrategies()[i]);
     for (int j = 1; j <= m; j++)  {
-      profile->SetStrategy(p_game->GetPlayer(1)->Strategies()[j]);
+      profile->SetStrategy(p_game->GetPlayer(1)->GetStrategies()[j]);
       A(i, j) = minpay - profile->GetPayoff(1);
     }
     A(i,m+1) = (T) 1;
@@ -121,10 +121,10 @@ NashLpStrategySolver<T>::Solve(const Game &p_game) const
 
   MixedStrategyProfile<T> eqm(p_game->NewMixedStrategyProfile(static_cast<T>(0)));
   for (int j = 1; j <= m; j++) {
-    eqm[p_game->GetPlayer(1)->Strategies()[j]] = primal[j];
+    eqm[p_game->GetPlayer(1)->GetStrategies()[j]] = primal[j];
   }
   for (int j = 1; j <= k; j++) {
-    eqm[p_game->GetPlayer(2)->Strategies()[j]] = dual[j];
+    eqm[p_game->GetPlayer(2)->GetStrategies()[j]] = dual[j];
   }
   this->m_onEquilibrium->Render(eqm);
   List<MixedStrategyProfile<T> > solution;

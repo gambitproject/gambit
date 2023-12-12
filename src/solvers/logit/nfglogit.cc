@@ -62,12 +62,12 @@ StrategicQREPathTracer::EquationSystem::GetValue(const Vector<double> &p_point,
   p_lhs = 0.0;
   for (int rowno = 0, pl = 1; pl <= m_game->NumPlayers(); pl++) {
     GamePlayer player = m_game->GetPlayer(pl);
-    for (size_t st = 1; st <= player->Strategies().size(); st++) {
+    for (size_t st = 1; st <= player->GetStrategies().size(); st++) {
       rowno++;
       if (st == 1) {
 	// This is a sum-to-one equation
 	p_lhs[rowno] = -1.0;
-	for (size_t j = 1; j <= player->Strategies().size(); j++) {
+	for (size_t j = 1; j <= player->GetStrategies().size(); j++) {
 	  p_lhs[rowno] += profile[player->GetStrategy(j)];
 	}
       }
@@ -98,13 +98,13 @@ StrategicQREPathTracer::EquationSystem::GetJacobian(const Vector<double> &p_poin
 
   for (int rowno = 0, i = 1; i <= m_game->NumPlayers(); i++) {
     GamePlayer player = m_game->GetPlayer(i);
-    for (size_t j = 1; j <= player->Strategies().size(); j++) {
+    for (size_t j = 1; j <= player->GetStrategies().size(); j++) {
       rowno++;
       if (j == 1) {
 	// This is a sum-to-one equation
 	for (int colno = 0, ell = 1; ell <= m_game->NumPlayers(); ell++) {
 	  GamePlayer player2 = m_game->GetPlayer(ell);
-	  for (size_t m = 1; m <= player2->Strategies().size(); m++) {
+	  for (size_t m = 1; m <= player2->GetStrategies().size(); m++) {
 	    colno++;
 	    if (i == ell) {
 	      p_matrix(colno, rowno) = profile[player2->GetStrategy(m)];
@@ -118,7 +118,7 @@ StrategicQREPathTracer::EquationSystem::GetJacobian(const Vector<double> &p_poin
 	// This is a ratio equation
 	for (int colno = 0, ell = 1; ell <= m_game->NumPlayers(); ell++) {
 	  GamePlayer player2 = m_game->GetPlayer(ell);
-  	  for (size_t m = 1; m <= player2->Strategies().size(); m++) {
+  	  for (size_t m = 1; m <= player2->GetStrategies().size(); m++) {
 	    colno++;
 	    if (i == ell) {
 	      if (m == 1) {

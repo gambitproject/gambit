@@ -33,16 +33,6 @@ protected:
   Array<GamePlayerRep *> m_players;
   Array<GameOutcomeRep *> m_outcomes;
 
-  /// @name Writing data files
-  //@{
-  /// Write the game in .efg format to the specified stream
-  virtual void WriteEfgFile(std::ostream &) const
-  { throw UndefinedException(); }
-  /// Write the game in .nfg format to the specified stream
-  void WriteNfgFile(std::ostream &) const override
-  { throw UndefinedException(); }
-  //@}
-
 public:
   /// @name Lifecycle
   //@{

@@ -208,11 +208,9 @@ protected:
 
   /// @name Managing the representation
   //@{
-  void Canonicalize() override;
+  void Canonicalize();
   void BuildComputedValues() override;
-  void ClearComputedValues() const override;
-  /// Have computed values been built?
-  bool HasComputedValues() const override { return m_computedValues; }
+  void ClearComputedValues() const;
   //@}
 
 public: 

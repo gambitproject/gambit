@@ -48,8 +48,8 @@ MixedStrategyDetailRenderer<T>::Render(const MixedStrategyProfile<T> &p_profile,
     m_stream << "--------   -----------   -----------\n";
 
     for (Array<GameStrategyRep *>::const_iterator 
-	   strategy = player->Strategies().begin();
-	 strategy != player->Strategies().end(); ++strategy) {
+	   strategy = player->GetStrategies().begin();
+	 strategy != player->GetStrategies().end(); ++strategy) {
       if (!strategy->GetLabel().empty()) {
 	m_stream << std::setw(8) << strategy->GetLabel() << "    ";
       }

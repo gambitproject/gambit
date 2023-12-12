@@ -27,166 +27,33 @@
 #include <memory>
 #include "core/dvector.h"
 #include "number.h"
+#include "gameobject.h"
 
 namespace Gambit {
-
-/// This is a base class for all game-related objects.  Primary among
-/// its responsibility is maintaining a reference count.  Calling code
-/// which maintains pointers to objects representing parts of a game
-/// (e.g., nodes) which may be deleted should increment the reference
-/// count for that object.  The library guarantees that any object
-/// with a positive reference count will not have its memory deleted,
-/// but will instead be marked as deleted.  Calling code should always
-/// be careful to check the deleted status of the object before any
-/// operations on it.
-class GameObject {
-protected:
-  int m_refCount;
-  bool m_valid;
-
-public:
-  /// @name Lifecycle
-  //@{
-  /// Constructor; initializes reference count
-  GameObject() : m_refCount(0), m_valid(true) { }
-  /// Destructor
-  virtual ~GameObject() = default;
-  //@}
-
-  /// @name Validation
-  //@{
-  /// Is the object still valid?
-  bool IsValid() const { return m_valid; }
-  /// Invalidate the object; delete if not referenced elsewhere
-  void Invalidate()
-  { if (!m_refCount) delete this; else m_valid = false; }
-  //@}
-
-  /// @name Reference counting
-  //@{
-  /// Increment the reference count
-  void IncRef() { m_refCount++; }
-  /// Decrement the reference count; delete if reference count is zero.
-  void DecRef() { if (!--m_refCount && !m_valid) delete this; }
-  /// Returns the reference count
-  int RefCount() const { return m_refCount; }
-  //@}
-};
-
-
-class BaseGameRep {
-protected:
-    int m_refCount;
-
-public:
-    /// @name Lifecycle
-    //@{
-    /// Constructor; initializes reference count
-    BaseGameRep() : m_refCount(0) { }
-    /// Destructor
-    virtual ~BaseGameRep() = default;
-    //@}
-
-    /// @name Validation
-    //@{
-    /// Is the object still valid?
-    bool IsValid() const { return true; }
-    /// Invalidate the object; delete if not referenced elsewhere
-    void Invalidate()
-    { if (!m_refCount) delete this; }
-    //@}
-
-    /// @name Reference counting
-    //@{
-    /// Increment the reference count
-    void IncRef() { m_refCount++; }
-    /// Decrement the reference count; delete if reference count is zero.
-    void DecRef() { if (!--m_refCount) delete this; }
-    /// Returns the reference count
-    int RefCount() const { return m_refCount; }
-    //@}
-};
-
-/// An exception thrown when attempting to dereference an invalidated object 
-class InvalidObjectException : public Exception {
-public:
-  ~InvalidObjectException() noexcept override = default;
-  const char *what() const noexcept override  { return "Dereferencing an invalidated object"; }
-};
-
-
-//
-// This is a handle class that is used by all calling code to refer to
-// member objects of games.  It takes care of all the reference-counting
-// considerations.
-//
-template <class T> class GameObjectPtr {
-private:
-  T *rep;
-
-public:
-  GameObjectPtr(T *r = nullptr) : rep(r)
-    { if (rep) rep->IncRef(); }
-  GameObjectPtr(const GameObjectPtr<T> &r) : rep(r.rep)
-    { if (rep) rep->IncRef(); }
-  ~GameObjectPtr() { if (rep) rep->DecRef(); }
-
-  GameObjectPtr<T> &operator=(const GameObjectPtr<T> &r)
-    { if (&r != this) {
-	if (rep) rep->DecRef();
-	rep = r.rep;
-	if (rep) rep->IncRef();
-      }
-      return *this;
-    }
-
-  T *operator->() const 
-    { if (!rep) throw NullException();
-      if (!rep->IsValid()) throw InvalidObjectException(); 
-      return rep; }
-
-  bool operator==(const GameObjectPtr<T> &r) const
-  { return (rep == r.rep); }
-  bool operator==(T *r) const { return (rep == r); }
-  bool operator!=(const GameObjectPtr<T> &r) const 
-  { return (rep != r.rep); }
-  bool operator!=(T *r) const { return (rep != r); }
-
-  operator T *() const { return rep; }
-
-  bool operator!() const { return !rep; }
-};
 
 //
 // Forward declarations of classes defined in this file.
 //
-
 class GameOutcomeRep;
-typedef GameObjectPtr<GameOutcomeRep> GameOutcome;
+using GameOutcome = GameObjectPtr<GameOutcomeRep>;
 
 class GameActionRep;
-typedef GameObjectPtr<GameActionRep> GameAction;
+using GameAction = GameObjectPtr<GameActionRep>;
 
 class GameInfosetRep;
-typedef GameObjectPtr<GameInfosetRep> GameInfoset;
-class GameTreeInfosetRep;
+using GameInfoset = GameObjectPtr<GameInfosetRep>;
 
 class GameStrategyRep;
-typedef GameObjectPtr<GameStrategyRep> GameStrategy;
+using GameStrategy = GameObjectPtr<GameStrategyRep>;
 
 class GamePlayerRep;
-typedef GameObjectPtr<GamePlayerRep> GamePlayer;
+using GamePlayer = GameObjectPtr<GamePlayerRep>;
 
 class GameNodeRep;
-typedef GameObjectPtr<GameNodeRep> GameNode;
-class GameTreeNodeRep;
+using GameNode = GameObjectPtr<GameNodeRep>;
 
 class GameRep;
-typedef GameObjectPtr<GameRep> Game;
-
-class PureStrategyProfileRep;
-class PureStrategyProfile;
-
+using Game = GameObjectPtr<GameRep>;
 
 // 
 // Forward declarations of classes defined elsewhere.
@@ -228,15 +95,11 @@ public:
 //=======================================================================
 
 /// This class represents an outcome in a game.  An outcome
-/// specifies a vector of payoffs to players.  Payoffs are specified
-/// using text strings, in either decimal or rational format.  All
-/// payoffs are treated as exact (that is, no conversion to floating
-/// point is done).
+/// specifies a vector of payoffs to players.
 class GameOutcomeRep : public GameObject  {
   friend class GameExplicitRep;
   friend class GameTreeRep;
   friend class GameTableRep;
-  friend class TableFileGameRep;
 
 private:
   GameRep *m_game;
@@ -276,8 +139,6 @@ public:
 
   //@}
 };
-
-typedef GameObjectPtr<GameOutcomeRep> GameOutcome;
 
 /// An action at an information set in an extensive game
 class GameActionRep : public GameObject {
@@ -395,8 +256,6 @@ public:
   //@}
 };
 
-typedef Array<GameStrategyRep *> GameStrategyArray;
-
 /// A player in a game
 class GamePlayerRep : public GameObject {
   friend class GameExplicitRep;
@@ -404,7 +263,6 @@ class GamePlayerRep : public GameObject {
   friend class GameTableRep;
   friend class GameAggRep;
   friend class GameBagentRep;
-  friend class GameBaggRep;
   friend class GameTreeInfosetRep;
   friend class GameStrategyRep;
   friend class GameTreeNodeRep;
@@ -415,15 +273,15 @@ class GamePlayerRep : public GameObject {
   /// @name Building reduced form strategies
   //@{
   void MakeStrategy();
-  void MakeReducedStrats(GameTreeNodeRep *, GameTreeNodeRep *);
+  void MakeReducedStrats(class GameTreeNodeRep *, class GameTreeNodeRep *);
   //@}
   
 private:
   GameRep *m_game;
   int m_number;
   std::string m_label;
-  Array<GameTreeInfosetRep *> m_infosets;
-  GameStrategyArray m_strategies;
+  Array<class GameTreeInfosetRep *> m_infosets;
+  Array<GameStrategyRep *> m_strategies;
 
   GamePlayerRep(GameRep *p_game, int p_id) 
     : m_game(p_game), m_number(p_id) { }
@@ -453,7 +311,7 @@ public:
   /// Returns the st'th strategy for the player
   GameStrategy GetStrategy(int st) const;
   /// Returns the array of strategies available to the player
-  const GameStrategyArray &Strategies() const;
+  const Array<GameStrategyRep *> &GetStrategies() const;
   /// Creates a new strategy for the player
   GameStrategy NewStrategy();
   //@}
@@ -655,17 +513,8 @@ protected:
 
   GameRep() = default;
 
-  /// @name Managing the representation
-  //@{
-  /// Renumber all game objects in a canonical way
-  virtual void Canonicalize() { }  
-  /// Clear out any computed values
-  virtual void ClearComputedValues() const { }
   /// Build any computed values anew
   virtual void BuildComputedValues() { }
-  /// Have computed values been built?
-  virtual bool HasComputedValues() const { return false; }
-  //@}
 
 public:
   class Players {
@@ -770,6 +619,9 @@ public:
   virtual void Write(std::ostream &p_stream,
 		     const std::string &p_format="native") const
   { throw UndefinedException(); }
+  /// Write the game in .efg format to the specified stream
+  virtual void WriteEfgFile(std::ostream &) const
+  { throw UndefinedException(); }
   /// Write the game to a file in .nfg payoff format.
   virtual void WriteNfgFile(std::ostream &p_stream) const;
   //@}
@@ -850,13 +702,6 @@ public:
   //@}
 };
 
-typedef GameObjectPtr<GameRep> Game;
-
-/// Factory function to create new game tree
-Game NewTree();
-/// Factory function to create new game table
-Game NewTable(const Array<int> &p_dim, bool p_sparseOutcomes = false);
-
 //=======================================================================
 //          Inline members of game representation classes
 //=======================================================================
@@ -887,7 +732,7 @@ inline int GamePlayerRep::NumStrategies() const
 { m_game->BuildComputedValues(); return m_strategies.size(); }
 inline GameStrategy GamePlayerRep::GetStrategy(int st) const 
 { m_game->BuildComputedValues(); return m_strategies[st]; }
-inline const GameStrategyArray &GamePlayerRep::Strategies() const
+inline const Array<GameStrategyRep *> &GamePlayerRep::GetStrategies() const
 { m_game->BuildComputedValues(); return m_strategies; }
 
 template<> inline double PureBehaviorProfile::GetPayoff(int pl) const
@@ -901,7 +746,10 @@ template<> inline std::string PureBehaviorProfile::GetPayoff(int pl) const
 
 //=======================================================================
 
-
+/// Factory function to create new game tree
+Game NewTree();
+/// Factory function to create new game table
+Game NewTable(const Array<int> &p_dim, bool p_sparseOutcomes = false);
 /// Reads a game in .efg or .nfg format from the input stream
 Game ReadGame(std::istream &);
 

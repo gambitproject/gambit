@@ -34,8 +34,8 @@ namespace Nash {
 namespace {
 template <class T> Matrix<T> Make_A1(const Game &p_game)
 {
-  int n1 = p_game->GetPlayer(1)->Strategies().size();
-  int n2 = p_game->GetPlayer(2)->Strategies().size();
+  int n1 = p_game->GetPlayer(1)->GetStrategies().size();
+  int n2 = p_game->GetPlayer(2)->GetStrategies().size();
   Matrix<T> A1(1, n1, n1+1, n1+n2);
 
   PureStrategyProfile profile = p_game->NewPureStrategyProfile();
@@ -54,9 +54,9 @@ template <class T> Matrix<T> Make_A1(const Game &p_game)
   Rational fac(1, max - min);
 
   for (int i = 1; i <= n1; i++)  {
-    profile->SetStrategy(p_game->GetPlayer(1)->Strategies()[i]);
+    profile->SetStrategy(p_game->GetPlayer(1)->GetStrategies()[i]);
     for (int j = 1; j <= n2; j++)  {
-      profile->SetStrategy(p_game->GetPlayer(2)->Strategies()[j]);
+      profile->SetStrategy(p_game->GetPlayer(2)->GetStrategies()[j]);
       A1(i, n1 + j) = fac * (profile->GetPayoff(1) - min);
     }
   }
@@ -65,8 +65,8 @@ template <class T> Matrix<T> Make_A1(const Game &p_game)
 
 template <class T> Matrix<T> Make_A2(const Game &p_game)
 {
-  int n1 = p_game->GetPlayer(1)->Strategies().size();
-  int n2 = p_game->GetPlayer(2)->Strategies().size();
+  int n1 = p_game->GetPlayer(1)->GetStrategies().size();
+  int n2 = p_game->GetPlayer(2)->GetStrategies().size();
   Matrix<T> A2(n1+1, n1+n2, 1, n1);
 
   PureStrategyProfile profile = p_game->NewPureStrategyProfile();
@@ -85,9 +85,9 @@ template <class T> Matrix<T> Make_A2(const Game &p_game)
   Rational fac(1, max - min);
 
   for (int i = 1; i <= n1; i++)  {
-    profile->SetStrategy(p_game->GetPlayer(1)->Strategies()[i]);
+    profile->SetStrategy(p_game->GetPlayer(1)->GetStrategies()[i]);
     for (int j = 1; j <= n2; j++)  {
-      profile->SetStrategy(p_game->GetPlayer(2)->Strategies()[j]);
+      profile->SetStrategy(p_game->GetPlayer(2)->GetStrategies()[j]);
       A2(n1 + j, i) = fac * (profile->GetPayoff(2) - min);
     }
   }
@@ -96,16 +96,16 @@ template <class T> Matrix<T> Make_A2(const Game &p_game)
 
 template <class T> Vector<T> Make_b1(const Game &p_game)
 {
-  Vector<T> b1(1, p_game->GetPlayer(1)->Strategies().size());
+  Vector<T> b1(1, p_game->GetPlayer(1)->GetStrategies().size());
   b1 = -(T) 1;
   return b1;
 }
 
 template <class T> Vector<T> Make_b2(const Game &p_game)
 {
-  Vector<T> b2(p_game->GetPlayer(1)->Strategies().size() + 1,
-	       p_game->GetPlayer(1)->Strategies().size() +
-	       p_game->GetPlayer(2)->Strategies().size());
+  Vector<T> b2(p_game->GetPlayer(1)->GetStrategies().size() + 1,
+               p_game->GetPlayer(1)->GetStrategies().size() +
+               p_game->GetPlayer(2)->GetStrategies().size());
   b2 = -(T) 1;
   return b2;
 }
@@ -146,8 +146,8 @@ NashLcpStrategySolver<T>::OnBFS(const Game &p_game,
   p_solution.push_back(cbfs);
 
   MixedStrategyProfile<T> profile(p_game->NewMixedStrategyProfile(static_cast<T>(0.0)));
-  int n1 = p_game->GetPlayer(1)->Strategies().size();
-  int n2 = p_game->GetPlayer(2)->Strategies().size();
+  int n1 = p_game->GetPlayer(1)->GetStrategies().size();
+  int n2 = p_game->GetPlayer(2)->GetStrategies().size();
   T sum = (T) 0;
 
   for (int j = 1; j <= n1; j++) {
@@ -159,7 +159,7 @@ NashLcpStrategySolver<T>::OnBFS(const Game &p_game,
   }
 
   for (int j = 1; j <= n1; j++) {
-    GameStrategy strategy = p_game->GetPlayer(1)->Strategies()[j];
+    GameStrategy strategy = p_game->GetPlayer(1)->GetStrategies()[j];
     if (cbfs.count(j)) {
       profile[strategy] = cbfs[j] / sum;
     }
@@ -174,7 +174,7 @@ NashLcpStrategySolver<T>::OnBFS(const Game &p_game,
   }
 
   for (int j = 1; j <= n2; j++) {
-    GameStrategy strategy = p_game->GetPlayer(2)->Strategies()[j];
+    GameStrategy strategy = p_game->GetPlayer(2)->GetStrategies()[j];
     if (cbfs.count(n1 + j)) {
       profile[strategy] = cbfs[n1 + j] / sum;
     }
