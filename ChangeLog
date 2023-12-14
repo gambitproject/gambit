@@ -1,5 +1,13 @@
 # Changelog
 
+## [16.2.0] - unreleased
+
+### Changed
+
+- Convert test suite for mixed behavior profiles to pytest style; added parametrizations for
+  test_realiz_prob; added test_martingale_property_of_node_value (#375)
+
+
 ## [16.1.1] - unreleased
 
 ### Fixed
