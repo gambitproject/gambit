@@ -383,7 +383,7 @@ class MixedBehaviorProfile:
         return self._action_value(resolved_action)
 
     def realiz_prob(self, node: typing.Union[Node, str]):
-        """Returns the probability with which an node is reached.
+        """Returns the probability with which a node is reached.
 
         Parameters
         ----------
