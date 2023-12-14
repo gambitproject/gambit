@@ -8,6 +8,8 @@
   uniform across nodes (#63)
 - Corrected outdated code in `fit_fixedpoint` and `fit_empirical`, and added extended documentation
   of both methods (#1)
+- Fixed bug in gambit-lp which would return non-Nash output on extensive games if the game had chance nodes
+  other than the root node (#134)
 
 
 
