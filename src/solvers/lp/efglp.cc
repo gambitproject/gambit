@@ -85,8 +85,7 @@ NashLpBehavSolver<T>::GameData::BuildConstraintMatrix(const BehaviorSupportProfi
 {
   GameOutcome outcome = n->GetOutcome();
   if (outcome) {
-    A(s1,s2) += 
-      (T) (Rational(prob) * static_cast<Rational>(outcome->GetPayoff(1)) - minpay);
+    A(s1,s2) += Rational(prob) * (static_cast<Rational>(outcome->GetPayoff(1)) - minpay);
   }
 
   if (n->NumChildren() == 0) {
