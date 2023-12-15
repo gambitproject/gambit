@@ -74,6 +74,6 @@ def test_game_dereference_invalid():
     game = gbt.Game.new_tree()
     game.add_player("One")
     strategy = game.players[0].strategies[0]
-    game.append_move(game.root, game.players[0], ["a", "b"])
+    game.append_move([game.root], game.players[0], ["a", "b"])
     with pytest.raises(RuntimeError):
         _ = strategy.label

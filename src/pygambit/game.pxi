@@ -994,9 +994,12 @@ class Game:
                 raise KeyError(f"{funcname}(): no action with label '{action}'")
         raise TypeError(f"{funcname}(): {argname} must be Action or str, not {action.__class__.__name__}")
 
-    def append_move(self, node: typing.Union[Node, str],
-                    player: typing.Union[Player, str],
-                    actions: typing.List[str]) -> None:
+    NodeReference = typing.Union[Node, str]
+    NodeReferenceSet = typing.Iterable[NodeReference]
+
+    def append_move(self, nodes: typing.Union[NodeReference, NodeReferenceSet],
+                          player: typing.Union[Player, str],
+                          actions: typing.List[str]) -> None:
         """Add a move for `player` at the terminal node `node`.  `node` becomes part of
         a new information set, with actions labeled according to `actions`.
 
@@ -1008,17 +1011,22 @@ class Game:
             If `node` is a `Node` from a different game, or `player` is a `Player` from a
             different game.
         """
-        resolved_node = cython.cast(Node, self._resolve_node(node, 'append_move'))
-        resolved_player = cython.cast(Player, self._resolve_player(player, 'append_move'))
-        if len(resolved_node.children) > 0:
-            raise UndefinedOperationError("append_move(): `node` must be a terminal node")
-        if len(actions) == 0:
-            raise UndefinedOperationError("append_move(): `actions` must be a nonempty list")
-        resolved_node.node.deref().AppendMove(resolved_player.player, len(actions))
-        for label, action in zip(actions, resolved_node.infoset.actions):
-            action.label = label
+        L = []
+        for node in nodes:
+           resolved_node = cython.cast(Node, self._resolve_node(node, 'append_move'))
+           resolved_player = cython.cast(Player, self._resolve_player(player, 'append_move'))
+           if len(resolved_node.children) > 0:
+              raise UndefinedOperationError("append_move(): `node` must be a terminal node")
+           if len(actions) == 0:
+              raise UndefinedOperationError("append_move(): `actions` must be a nonempty list")
+           resolved_node.node.deref().AppendMove(resolved_player.player, len(actions))
+           for label, action in zip(actions, resolved_node.infoset.actions):
+              action.label = label
+           if resolved_node in L:
+              raise UndefinedOperationError("append_move(): `nodes` resolve to the same terminal node") 
+           L.append(resolved_node)
 
-    def append_infoset(self, node: typing.Union[Node, str],
+    def append_infoset(self, nodes: typing.Union[NodeReference, NodeReferenceSet],
                        infoset: typing.Union[Infoset, str]) -> None:
         """Add a move in information set `infoset` at the terminal node `node`.
 
@@ -1030,12 +1038,17 @@ class Game:
             If `node` is a `Node` from a different game, or `infoset` is an `Infoset` from a
             different game.
         """
-        resolved_node = cython.cast(Node, self._resolve_node(node, 'append_infoset'))
-        resolved_infoset = cython.cast(Infoset, self._resolve_infoset(infoset, 'append_infoset'))
-        if len(resolved_node.children) > 0:
-            raise UndefinedOperationError("append_move(): `node` must be a terminal node")
-        resolved_node.node.deref().AppendMove(resolved_infoset.infoset)
-
+        L = []
+        for node in nodes:
+           resolved_node = cython.cast(Node, self._resolve_node(node, 'append_infoset'))
+           resolved_infoset = cython.cast(Infoset, self._resolve_infoset(infoset, 'append_infoset'))
+           if len(resolved_node.children) > 0:
+              raise UndefinedOperationError("append_move(): `node` must be a terminal node")
+           resolved_node.node.deref().AppendMove(resolved_infoset.infoset)
+           if resolved_node in L:
+              raise UndefinedOperationError("append_move(): `nodes` resolve to the same terminal node") 
+           L.append(resolved_node)
+		
     def insert_move(self, node: typing.Union[Node, str],
                     player: typing.Union[Player, str], actions: int) -> None:
         """Insert a move for `player` prior to the node `node`, with `actions` actions.
