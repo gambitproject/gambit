@@ -289,11 +289,8 @@ class TestGambitNode(unittest.TestCase):
         nodes to the game before checking all the elements of the
         list.
         """
-        self.assertRaises(
-            IndexError,
-            self.basic_game.append_move,
-            [self.basic_game.root.children[1],
-             self.basic_game.root.children[1].children[0]],
-            "Player 3",
-            ["F", "B"]
-        )
+        with self.assertRaises(IndexError):
+            _ = self.basic_game.append_move([self.basic_game.root.children[1],
+                                            self.basic_game.root.children[1].children[0]],
+                                            "Player 3",
+                                            ["F", "B"])
