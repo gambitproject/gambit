@@ -33,20 +33,40 @@ template <class T> class NashLcpBehaviorSolver<T>::Solution {
 public:
   int ns1, ns2, ni1, ni2;
   Rational maxpay;
+  std::map<GameInfoset, int> infosetOffset;
   T eps;
-  List<GameInfoset> isets1, isets2;
-  List<Gambit::linalg::BFS<T> > m_list;
+  List<linalg::BFS<T> > m_list;
   List<MixedBehaviorProfile<T> > m_equilibria;
+
+  explicit Solution(const Game &);
 
   bool AddBFS(const linalg::LemkeTableau<T> &);
 
   int EquilibriumCount() const { return m_equilibria.size(); }
 };
 
+template <class T>
+NashLcpBehaviorSolver<T>::Solution::Solution(const Game &p_game)
+  : ns1(p_game->GetPlayer(1)->NumSequences()),
+    ns2(p_game->GetPlayer(2)->NumSequences()),
+    ni1(p_game->GetPlayer(1)->NumInfosets() + 1),
+    ni2(p_game->GetPlayer(2)->NumInfosets() + 1),
+    maxpay(p_game->GetMaxPayoff() + Rational(1))
+{
+  for (const auto &player : p_game->GetPlayers()) {
+    int offset = 1;
+    for (const auto &infoset : player->GetInfosets()) {
+      infosetOffset[infoset] = offset;
+      offset += infoset->NumActions();
+    }
+  }
+}
+
+
 template <class T> bool 
 NashLcpBehaviorSolver<T>::Solution::AddBFS(const linalg::LemkeTableau<T> &tableau)
 {
-  Gambit::linalg::BFS<T> cbfs;
+  linalg::BFS<T> cbfs;
   Vector<T> v(tableau.MinRow(), tableau.MaxRow());
   tableau.BasisVector(v);
 
@@ -66,11 +86,9 @@ NashLcpBehaviorSolver<T>::Solution::AddBFS(const linalg::LemkeTableau<T> &tablea
 }
 
 //
-// Lemke implements the Lemke's algorithm (as refined by Eaves 
-// for degenerate problems) for  Linear Complementarity
-// problems, starting from the primary ray.  
+// Lemke implements Lemke's algorithm for linear complementarity problems,
+// as refined by Eaves for degenerate problems, starting from the primary ray.
 //
-
 template <class T> List<MixedBehaviorProfile<T> > 
 NashLcpBehaviorSolver<T>::Solve(const Game &p_game) const
 {
@@ -81,75 +99,46 @@ NashLcpBehaviorSolver<T>::Solve(const Game &p_game) const
     throw UndefinedException("Computing equilibria of games with imperfect recall is not supported.");
   }
 
-  Gambit::linalg::BFS<T> cbfs;
-  int i, j;
-  Solution solution;
+  linalg::BFS<T> cbfs;
+  Solution solution(p_game);
 
-  // TODO: This is legacy from when the implementation was based on support profiles.
-  // This can be simplified!
-  BehaviorSupportProfile support(p_game);
-  solution.isets1 = support.ReachableInfosets(p_game->GetPlayer(1));
-  solution.isets2 = support.ReachableInfosets(p_game->GetPlayer(2));
-
-  int ntot;
-  solution.ns1 = support.NumSequences(1);
-  solution.ns2 = support.NumSequences(2);
-  solution.ni1 = p_game->GetPlayer(1)->NumInfosets()+1;
-  solution.ni2 = p_game->GetPlayer(2)->NumInfosets()+1;
-
-  ntot = solution.ns1+solution.ns2+solution.ni1+solution.ni2;
-
+  int ntot = solution.ns1+solution.ns2+solution.ni1+solution.ni2;
   Matrix<T> A(1,ntot,0,ntot);
-  Vector<T> b(1,ntot);
-
-  solution.maxpay = p_game->GetMaxPayoff() + Rational(1);
-
-  T prob = (T)1;
-  for (i = A.MinRow(); i <= A.MaxRow(); i++) {
-    b[i] = (T) 0;
-    for (j = A.MinCol(); j <= A.MaxCol(); j++) {
-      A(i,j) = (T) 0; 
-    }
+  A = static_cast<T>(0);
+  FillTableau(A, p_game->GetRoot(), static_cast<T>(1), 1, 1, solution);
+  for (int i = A.MinRow(); i <= A.MaxRow(); i++) {
+    A(i,0) = static_cast<T>(-1);
   }
+  A(1,solution.ns1+solution.ns2+1) = static_cast<T>(1);
+  A(solution.ns1+solution.ns2+1,1) = static_cast<T>(-1);
+  A(solution.ns1+1,solution.ns1+solution.ns2+solution.ni1+1) = static_cast<T>(1);
+  A(solution.ns1+solution.ns2+solution.ni1+1,solution.ns1+1) = static_cast<T>(-1);
 
-  FillTableau(support, A, p_game->GetRoot(), prob, 1, 1, 0, 0,
-	      solution);
-  for (i = A.MinRow(); i <= A.MaxRow(); i++) { 
-    A(i,0) = -(T) 1;
-  }
-  A(1,solution.ns1+solution.ns2+1) = (T) 1;
-  A(solution.ns1+solution.ns2+1,1) = -(T) 1;
-  A(solution.ns1+1,solution.ns1+solution.ns2+solution.ni1+1) = (T) 1;
-  A(solution.ns1+solution.ns2+solution.ni1+1,solution.ns1+1) = -(T) 1;
-  b[solution.ns1+solution.ns2+1] = -(T)1;
-  b[solution.ns1+solution.ns2+solution.ni1+1] = -(T)1;
+  Vector<T> b(1, ntot);
+  b = static_cast<T>(0);
+  b[solution.ns1+solution.ns2+1] = static_cast<T>(-1);
+  b[solution.ns1+solution.ns2+solution.ni1+1] = static_cast<T>(-1);
 
-  linalg::LemkeTableau<T> tab(A,b);
+  linalg::LemkeTableau<T> tab(A, b);
   solution.eps = tab.Epsilon();
   
   try {
     if (m_stopAfter != 1) {
       try {
-	AllLemke(support, solution.ns1+solution.ns2+1,
-		 tab, 0, A, solution);
+        AllLemke(p_game, solution.ns1 + solution.ns2 + 1, tab, 0, A, solution);
       }
       catch (EquilibriumLimitReached &) {
-	// Just handle this silently; equilibria are already printed
-	// as they are found.
+        // Handle this silently; equilibria are recorded as found so no action needed
       }
     }
     else {
-      MixedBehaviorProfile<T> profile(support);
-      Vector<T> sol(tab.MinRow(),tab.MaxRow());
-  
-      tab.Pivot(solution.ns1+solution.ns2+1,0);
-      tab.SF_LCPPath(solution.ns1+solution.ns2+1);
-      
+      tab.Pivot(solution.ns1 + solution.ns2 + 1, 0);
+      tab.SF_LCPPath(solution.ns1 + solution.ns2 + 1);
       solution.AddBFS(tab);
+      Vector<T> sol(tab.MinRow(), tab.MaxRow());
       tab.BasisVector(sol);
-      GetProfile(support, tab,
-		 profile,sol,p_game->GetRoot(), 1, 1,
-		 solution);
+      MixedBehaviorProfile<T> profile(p_game);
+      GetProfile(tab, profile, sol, p_game->GetRoot(), 1, 1, solution);
       profile.UndefinedToCentroid();
       solution.m_equilibria.push_back(profile);
       this->m_onEquilibrium->Render(profile);
@@ -169,27 +158,27 @@ NashLcpBehaviorSolver<T>::Solve(const Game &p_game) const
 // From each new accessible equilibrium, it follows
 // all possible paths, adding any new equilibria to the List.  
 //
-template <class T> void
-NashLcpBehaviorSolver<T>::AllLemke(const BehaviorSupportProfile &p_support,
-				   int j, linalg::LemkeTableau<T> &B, int depth,
-				   Matrix<T> &A,
-				   Solution &p_solution) const
+template<class T>
+void
+NashLcpBehaviorSolver<T>::AllLemke(const Game &p_game,
+                                   int j, linalg::LemkeTableau<T> &B, int depth,
+                                   Matrix<T> &A,
+                                   Solution &p_solution) const
 {
   if (m_maxDepth != 0 && depth > m_maxDepth) {
     return;
   }
 
-  T small_num = (T)1/(T)1000;
-
-  Vector<T> sol(B.MinRow(),B.MaxRow());
-  MixedBehaviorProfile<T> profile(p_support);
+  Vector<T> sol(B.MinRow(), B.MaxRow());
+  MixedBehaviorProfile<T> profile(p_game);
 
   bool newsol = false;
   for (int i = B.MinRow(); i <= B.MaxRow() && !newsol; i++) {
     if (i == j) continue;
 
     linalg::LemkeTableau<T> BCopy(B);
-    A(i,0) = -small_num;
+    // Perturb tableau by a small number
+    A(i,0) = static_cast<T>(-1) / static_cast<T>(1000);
     BCopy.Refactor();
 
     int missing;
@@ -206,168 +195,130 @@ NashLcpBehaviorSolver<T>::AllLemke(const BehaviorSupportProfile &p_support,
     if (BCopy.SF_LCPPath(-missing) == 1) {
       newsol = p_solution.AddBFS(BCopy);
       BCopy.BasisVector(sol);
-      GetProfile(p_support, BCopy, profile, sol,
-		 p_support.GetGame()->GetRoot(), 1, 1,
-		 p_solution);
+      GetProfile(BCopy, profile, sol, p_game->GetRoot(), 1, 1, p_solution);
       profile.UndefinedToCentroid();
       if (newsol) {
-	this->m_onEquilibrium->Render(profile);
-	p_solution.m_equilibria.push_back(profile);
-	if (m_stopAfter > 0 && p_solution.EquilibriumCount() >= m_stopAfter) {
-	  throw EquilibriumLimitReached();
-	}
+        this->m_onEquilibrium->Render(profile);
+        p_solution.m_equilibria.push_back(profile);
+        if (m_stopAfter > 0 && p_solution.EquilibriumCount() >= m_stopAfter) {
+          throw EquilibriumLimitReached();
+        }
       }
     }
     else {
-      // gout << ": Dead End";
+      // Dead end
     }
-      
-    A(i,0) = (T) -1;
+
+    A(i, 0) = static_cast<T>(-1);
     if (newsol) {
       BCopy.Refactor();
-      AllLemke(p_support, i, BCopy, depth+1, A, p_solution);
+      AllLemke(p_game, i, BCopy, depth + 1, A, p_solution);
     }
   }
 }
 
 template <class T>
-void NashLcpBehaviorSolver<T>::FillTableau(const BehaviorSupportProfile &p_support, 
-					Matrix<T> &A,
-					const GameNode &n, T prob,
-					int s1, int s2, int i1, int i2,
-					Solution &p_solution) const
+void NashLcpBehaviorSolver<T>::FillTableau(Matrix<T> &A,
+                                           const GameNode &n, T prob,
+                                           int s1, int s2,
+                                           Solution &p_solution) const
 {
-  int snew;
   int ns1 = p_solution.ns1;
   int ns2 = p_solution.ns2;
   int ni1 = p_solution.ni1;
 
   GameOutcome outcome = n->GetOutcome();
   if (outcome) {
-    A(s1,ns1+s2) = Rational(A(s1,ns1+s2)) +
-      Rational(prob) * (static_cast<Rational>(outcome->GetPayoff(1)) - p_solution.maxpay);
-    A(ns1+s2,s1) = Rational(A(ns1+s2,s1)) +
-      Rational(prob) * (static_cast<Rational>(outcome->GetPayoff(2)) - p_solution.maxpay);
+    A(s1, ns1+s2) += Rational(prob) * (static_cast<Rational>(outcome->GetPayoff(1)) - p_solution.maxpay);
+    A(ns1+s2, s1) += Rational(prob) * (static_cast<Rational>(outcome->GetPayoff(2)) - p_solution.maxpay);
   }
-  if (n->GetInfoset()) {
-    if (n->GetPlayer()->IsChance()) {
-      GameInfoset infoset = n->GetInfoset();
-      for (int i = 1; i <= n->NumChildren(); i++) {
-        FillTableau(p_support, A, n->GetChild(i),
-                    Rational(prob) * static_cast<Rational>(infoset->GetActionProb(i)),
-                    s1, s2, i1, i2, p_solution);
-      }
+  if (n->IsTerminal()) {
+    return;
+  }
+  GameInfoset infoset = n->GetInfoset();
+  if (n->GetPlayer()->IsChance()) {
+    for (const auto& action : infoset->GetActions()) {
+      FillTableau(A, n->GetChild(action),
+                  Rational(prob) * static_cast<Rational>(infoset->GetActionProb(action)),
+                  s1, s2, p_solution);
     }
-    int pl = n->GetPlayer()->GetNumber();
-    if (pl == 1) {
-      i1 = p_solution.isets1.Find(n->GetInfoset());
-      snew = 1;
-      for (int i = 1; i < i1; i++) {
-        snew += p_support.NumActions(p_solution.isets1[i]->GetPlayer()->GetNumber(),
-                                     p_solution.isets1[i]->GetNumber());
-      }
-      A(s1, ns1 + ns2 + i1 + 1) = -(T) 1;
-      A(ns1 + ns2 + i1 + 1, s1) = (T) 1;
-      for (int i = 1;
-           i <= p_support.NumActions(n->GetInfoset()->GetPlayer()->GetNumber(), n->GetInfoset()->GetNumber()); i++) {
-        A(snew + i, ns1 + ns2 + i1 + 1) = (T) 1;
-        A(ns1 + ns2 + i1 + 1, snew + i) = -(T) 1;
-        FillTableau(p_support, A, n->GetChild(
-                      p_support.GetAction(n->GetInfoset()->GetPlayer()->GetNumber(), n->GetInfoset()->GetNumber(), i)->GetNumber()),
-                    prob, snew + i, s2, i1, i2, p_solution);
-      }
+  }
+  else if (n->GetPlayer()->GetNumber() == 1) {
+    int infoset_idx = ns1 + ns2 + infoset->GetNumber() + 1;
+    A(s1, infoset_idx) = static_cast<T>(-1);
+    A(infoset_idx, s1) = static_cast<T>(1);
+    int snew = p_solution.infosetOffset.at(infoset);
+    for (const auto& child : n->GetChildren()) {
+      snew++;
+      A(snew, infoset_idx) = static_cast<T>(1);
+      A(infoset_idx, snew) = static_cast<T>(-1);
+      FillTableau(A, child, prob, snew, s2, p_solution);
     }
-    if (pl == 2) {
-      i2 = p_solution.isets2.Find(n->GetInfoset());
-      snew = 1;
-      for (int i = 1; i < i2; i++) {
-        snew += p_support.NumActions(p_solution.isets2[i]->GetPlayer()->GetNumber(),
-                                     p_solution.isets2[i]->GetNumber());
-      }
-      A(ns1 + s2, ns1 + ns2 + ni1 + i2 + 1) = -(T) 1;
-      A(ns1 + ns2 + ni1 + i2 + 1, ns1 + s2) = (T) 1;
-      for (int i = 1;
-           i <= p_support.NumActions(n->GetInfoset()->GetPlayer()->GetNumber(), n->GetInfoset()->GetNumber()); i++) {
-        A(ns1 + snew + i, ns1 + ns2 + ni1 + i2 + 1) = (T) 1;
-        A(ns1 + ns2 + ni1 + i2 + 1, ns1 + snew + i) = -(T) 1;
-        FillTableau(p_support, A, n->GetChild(
-                      p_support.GetAction(n->GetInfoset()->GetPlayer()->GetNumber(), n->GetInfoset()->GetNumber(), i)->GetNumber()),
-                    prob, s1, snew + i, i1, i2, p_solution);
-      }
+  }
+  else {
+    int infoset_idx = ns1 + ns2 + ni1 + n->GetInfoset()->GetNumber() + 1;
+    A(ns1 + s2, infoset_idx) = static_cast<T>(-1);
+    A(infoset_idx, ns1 + s2) = static_cast<T>(1);
+    int snew = p_solution.infosetOffset.at(n->GetInfoset());
+    for (const auto& child : n->GetChildren()) {
+      snew++;
+      A(ns1 + snew, infoset_idx) = static_cast<T>(1);
+      A(infoset_idx, ns1 + snew) = static_cast<T>(-1);
+      FillTableau(A, child, prob, s1, snew, p_solution);
     }
-    
   }
 }
 
 
 template <class T> void
-NashLcpBehaviorSolver<T>::GetProfile(const BehaviorSupportProfile &p_support,
-				     const linalg::LemkeTableau<T> &tab, 
-				     MixedBehaviorProfile<T> &v, 
-				     const Vector<T> &sol,
-				     const GameNode &n, int s1, int s2,
-				     Solution &p_solution) const
+NashLcpBehaviorSolver<T>::GetProfile(const linalg::LemkeTableau<T> &tab,
+                                     MixedBehaviorProfile<T> &v,
+                                     const Vector<T> &sol,
+                                     const GameNode &n, int s1, int s2,
+                                     Solution &p_solution) const
 {
   int ns1 = p_solution.ns1;
 
-  if (n->GetInfoset()) {
-    int pl = n->GetPlayer()->GetNumber();
-    int iset = n->GetInfoset()->GetNumber();
-
-    if (n->GetPlayer()->IsChance()) {
-      for (auto child : n->GetChildren()) {
-        GetProfile(p_support, tab, v, sol, child, s1, s2, p_solution);
-      }
+  if (n->IsTerminal()) {
+    return;
+  }
+  if (n->GetPlayer()->IsChance()) {
+    for (const auto& child : n->GetChildren()) {
+      GetProfile(tab, v, sol, child, s1, s2, p_solution);
     }
-    else if (pl == 1) {
-      int inf = p_solution.isets1.Find(n->GetInfoset());
-      int snew = 1;
-      for (int i = 1; i < inf; i++) {
-	snew += p_support.NumActions(1, p_solution.isets1[i]->GetNumber()); 
+  }
+  else if (n->GetPlayer()->GetNumber() == 1) {
+    int snew = p_solution.infosetOffset.at(n->GetInfoset());
+    for (const auto& action : n->GetInfoset()->GetActions()) {
+      snew++;
+      v(action) = static_cast<T>(0);
+      if (tab.Member(s1)) {
+        int ind = tab.Find(s1);
+        if (sol[ind] > p_solution.eps && tab.Member(snew)) {
+          int ind2 = tab.Find(snew);
+          if (sol[ind2] > p_solution.eps) {
+            v(action) = sol[ind2] / sol[ind];
+          }
+        }
       }
-      
-      for (int i = 1; i <= p_support.NumActions(pl, iset); i++) {
-	v(pl,inf,i) = (T) 0;
-	if (tab.Member(s1)) {
-	  int ind = tab.Find(s1);
-	  if (sol[ind] > p_solution.eps) {
-	    if (tab.Member(snew+i)) {
-	      int ind2 = tab.Find(snew+i);
-	      if (sol[ind2] > p_solution.eps) {
-		v(pl,inf,i) = sol[ind2] / sol[ind];
-	      }
-	    }
-	  } 
-	} 
-	GetProfile(p_support, tab, v, sol,
-		   n->GetChild(p_support.GetAction(pl, iset, i)->GetNumber()),
-		   snew+i, s2, p_solution);
-      }
+      GetProfile(tab, v, sol, n->GetChild(action), snew, s2, p_solution);
     }
-    else if (pl == 2) { 
-      int inf = p_solution.isets2.Find(n->GetInfoset());
-      int snew = 1;
-      for (int i = 1; i < inf; i++) {
-	snew += p_support.NumActions(2, p_solution.isets2[i]->GetNumber()); 
+  }
+  else {
+    int snew = p_solution.infosetOffset.at(n->GetInfoset());
+    for (const auto& action : n->GetInfoset()->GetActions()) {
+      snew++;
+      v(action) = static_cast<T>(0);
+      if (tab.Member(ns1 + s2)) {
+        int ind = tab.Find(ns1 + s2);
+        if (sol[ind] > p_solution.eps && tab.Member(ns1 + snew)) {
+          int ind2 = tab.Find(ns1 + snew);
+          if (sol[ind2] > p_solution.eps) {
+            v(action) = sol[ind2] / sol[ind];
+          }
+        }
       }
-
-      for (int i = 1; i<= p_support.NumActions(pl, iset); i++) {
-	v(pl,inf,i) = (T) 0;
-	if (tab.Member(ns1+s2)) {
-	  int ind = tab.Find(ns1+s2);
-	  if (sol[ind] > p_solution.eps) {
-	    if (tab.Member(ns1+snew+i)) {
-	      int ind2 = tab.Find(ns1+snew+i);
-	      if (sol[ind2] > p_solution.eps) {
-		v(pl,inf,i) = sol[ind2] / sol[ind];
-	      }
-	    }
-	  } 
-	} 
-	GetProfile(p_support, tab, v, sol,
-		   n->GetChild(p_support.GetAction(pl, iset, i)->GetNumber()),
-		   s1, snew+i, p_solution);
-      }
+      GetProfile(tab, v, sol, n->GetChild(action), s1, snew, p_solution);
     }
   }
 }

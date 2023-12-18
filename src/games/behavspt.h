@@ -101,11 +101,6 @@ public:
   /// Do all information sets have at least one active action?
   bool HasActiveActionsAtAllInfosets() const;
 
-  /// Total number of sequences 
-  int NumSequences() const;
-  /// Number of sequences for a player
-  int NumSequences(int pl) const;
-
   /// Is the information set reachable?
   bool IsActive(const GameInfoset &p_infoset) const
   { return m_infosetReachable.at(p_infoset); }

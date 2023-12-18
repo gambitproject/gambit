@@ -115,7 +115,13 @@ public:
   bool Precedes(GameNode) const override;
 
   const Number &GetActionProb(int i) const override { return m_probs[i]; }
-
+  const Number &GetActionProb(const GameAction &p_action) const override
+  {
+    if (p_action->GetInfoset() != GameInfoset(const_cast<GameTreeInfosetRep *>(this))) {
+      throw MismatchException();
+    }
+    return m_probs[p_action->GetNumber()];
+  }
   void Reveal(GamePlayer) override;
 };
 
@@ -156,6 +162,13 @@ public:
 
   int NumChildren() const override    { return children.size(); }
   GameNode GetChild(int i) const override    { return children[i]; }
+  GameNode GetChild(const GameAction &p_action) const override
+  {
+    if (p_action->GetInfoset() != infoset) {
+      throw MismatchException();
+    }
+    return children[p_action->GetNumber()];
+  }
   Array<GameNode> GetChildren() const override;
 
   GameInfoset GetInfoset() const override   { return infoset; }

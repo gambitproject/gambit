@@ -31,96 +31,75 @@ template <class T> class NashLpBehavSolver<T>::GameData {
 public:
   int ns1, ns2, ni1, ni2;
   Rational minpay;
-  PVector<int> infosetIndex, infosetOffset;
+  std::map<GameInfoset, int> infosetOffset;
   
-  explicit GameData(const BehaviorSupportProfile &);
+  explicit GameData(const Game &);
 
-  void BuildConstraintMatrix(const BehaviorSupportProfile &,
-			     Matrix<T> &, const GameNode &, const T &,
-			     int, int, int, int);
-  void GetBehavior(const BehaviorSupportProfile &, MixedBehaviorProfile<T> &v,
-		   const Array<T> &, const Array<T> &,
-		   const GameNode &, int, int);
+  void FillTableau(Matrix<T> &A, const GameNode &n, const T &prob,
+                   int s1, int s2);
+
+  void GetBehavior(MixedBehaviorProfile<T> &v,
+                   const Array<T> &, const Array<T> &,
+                   const GameNode &, int, int);
 };
 
 template <class T>
-NashLpBehavSolver<T>::GameData::GameData(const BehaviorSupportProfile &p_support)
-  : infosetIndex(p_support.GetGame()->NumInfosets()), 
-    infosetOffset(p_support.GetGame()->NumInfosets())
+NashLpBehavSolver<T>::GameData::GameData(const Game &p_game)
 {
-  infosetIndex = 0;
-  infosetOffset = 0;
-  ns1 = p_support.NumSequences(1);
-  ns2 = p_support.NumSequences(2);
-  ni1 = p_support.GetGame()->GetPlayer(1)->NumInfosets()+1;  
-  ni2 = p_support.GetGame()->GetPlayer(2)->NumInfosets()+1; 
-  p_support.ReachableInfosets(p_support.GetGame()->GetRoot(), infosetIndex);
-  for (int iset = 1, offset = 1, index = 1; iset < ni1; iset++) {
-    if (infosetIndex(1, iset) > 0) {
-      infosetOffset(1, iset) = offset;
-      infosetIndex(1, iset) = index++;
-      offset += p_support.NumActions(1, iset);
+  ns1 = p_game->GetPlayer(1)->NumSequences();
+  ns2 = p_game->GetPlayer(2)->NumSequences();
+  ni1 = p_game->GetPlayer(1)->NumInfosets()+1;
+  ni2 = p_game->GetPlayer(2)->NumInfosets()+1;
+  for (const auto& player : p_game->GetPlayers()) {
+    int offset = 1;
+    for (const auto& infoset : player->GetInfosets()) {
+      infosetOffset[infoset] = offset;
+      offset += infoset->NumActions();
     }
   }
-  for (int iset = 1, offset = 1, index = 1; iset < ni2; iset++) {
-    if (infosetIndex(2, iset) > 0) {
-      infosetOffset(2, iset) = offset;
-      infosetIndex(2, iset) = index++;
-      offset += p_support.NumActions(2, iset);
-    }
-  }
-  minpay = p_support.GetGame()->GetMinPayoff();
+  minpay = p_game->GetMinPayoff();
 }
 
 //
 // Recursively fills the constraint matrix A for the subtree rooted at 'n'.
 //
 template <class T> void
-NashLpBehavSolver<T>::GameData::BuildConstraintMatrix(const BehaviorSupportProfile &p_support,
-						      Matrix<T> &A, 
-						      const GameNode &n, 
-						      const T &prob,
-						      int s1, int s2, 
-						      int i1, int i2)
+NashLpBehavSolver<T>::GameData::FillTableau(Matrix<T> &A,
+                                            const GameNode &n,
+                                            const T &prob,
+                                            int s1, int s2)
 {
   GameOutcome outcome = n->GetOutcome();
   if (outcome) {
-    A(s1,s2) += Rational(prob) * (static_cast<Rational>(outcome->GetPayoff(1)) - minpay);
+    A(s1, s2) += Rational(prob) * (static_cast<Rational>(outcome->GetPayoff(1)) - minpay);
   }
-
-  if (n->NumChildren() == 0) {
-    // Terminal node, recursion ends
+  if (n->IsTerminal()) {
     return;
   }
-
+  GameInfoset infoset = n->GetInfoset();
   if (n->GetPlayer()->IsChance()) {
-    GameInfoset infoset = n->GetInfoset();
-    for (int i = 1; i <= n->NumChildren(); i++) {
-      BuildConstraintMatrix(p_support, A, n->GetChild(i),
-			    prob * static_cast<T>(infoset->GetActionProb(i)),
-			    s1, s2, i1, i2);
+    for (const auto& action : infoset->GetActions()) {
+      FillTableau(A, n->GetChild(action),
+                  prob * static_cast<T>(infoset->GetActionProb(action)),
+                  s1, s2);
     }
   }
   else if (n->GetPlayer()->GetNumber() == 1) {
-    i1 = infosetIndex(1, n->GetInfoset()->GetNumber());
-    int snew = infosetOffset(1, n->GetInfoset()->GetNumber());
-    A(s1, ns2+i1+1) = (T) 1;
-    for (int i = 1; i <= p_support.NumActions(n->GetInfoset()); i++) {
-      A(snew+i, ns2+i1+1) = (T) -1;
-      BuildConstraintMatrix(p_support, A, 
-			    n->GetChild(p_support.GetAction(n->GetInfoset(), i)->GetNumber()),
-			    prob, snew+i, s2, i1, i2);
+    int col = ns2 + infoset->GetNumber() + 1;
+    int snew = infosetOffset.at(infoset);
+    A(s1, col) = static_cast<T>(1);
+    for (const auto& child : n->GetChildren()) {
+      A(++snew, col) = static_cast<T>(-1);
+      FillTableau(A, child, prob, snew, s2);
     }
   }
-  else {  // Must be player 2
-    i2 = infosetIndex(2, n->GetInfoset()->GetNumber());
-    int snew = infosetOffset(2, n->GetInfoset()->GetNumber());
-    A(ns1+i2+1, s2) = (T) -1;
-    for (int i = 1; i <= p_support.NumActions(n->GetInfoset()); i++) {
-      A(ns1+i2+1, snew+i) = (T) 1;
-      BuildConstraintMatrix(p_support, A, 
-			    n->GetChild(p_support.GetAction(n->GetInfoset(), i)->GetNumber()),
-			    prob, s1, snew+i, i1, i2);
+  else {
+    int row = ns1 + infoset->GetNumber() + 1;
+    int snew = infosetOffset.at(infoset);
+    A(row, s2) = static_cast<T>(-1);
+    for (const auto& child : n->GetChildren()) {
+      A(row, ++snew) = static_cast<T>(1);
+      FillTableau(A, child, prob, s1, snew);
     }
   }
 }
@@ -140,30 +119,19 @@ NashLpBehavSolver<T>::GameData::BuildConstraintMatrix(const BehaviorSupportProfi
 // replace this function.
 //
 template <class T> bool
-NashLpBehavSolver<T>::SolveLP(const Matrix<T> &A, 
-			      const Vector<T> &b, const Vector<T> &c,
-			      int nequals,
-			      Array<T> &p_primal, Array<T> &p_dual) const
+NashLpBehavSolver<T>::SolveLP(const Matrix<T> &A,
+                              const Vector<T> &b, const Vector<T> &c,
+                              int nequals,
+                              Array<T> &p_primal, Array<T> &p_dual) const
 {
-  Gambit::linalg::LPSolve<T> LP(A, b, c, nequals);
-  const Gambit::linalg::BFS<T> &cbfs(LP.OptimumBFS());
+  linalg::LPSolve<T> LP(A, b, c, nequals);
+  const auto& cbfs(LP.OptimumBFS());
   
   for (int i = 1; i <= A.NumColumns(); i++) {
-    if (cbfs.count(i)) {
-      p_primal[i] = cbfs[i];
-    }
-    else {
-      p_primal[i] = (T) 0;
-    }
+    p_primal[i] = (cbfs.count(i)) ? cbfs[i] : static_cast<T>(0);
   }
-
   for (int i = 1; i <= A.NumRows(); i++) {
-    if (cbfs.count(-i)) {
-      p_dual[i] = cbfs[-i];
-    }
-    else {
-      p_dual[i] = (T) 0;
-    }
+    p_dual[i] = (cbfs.count(-i)) ? cbfs[-i] : static_cast<T>(0);
   }
   return true;
 }
@@ -176,51 +144,36 @@ NashLpBehavSolver<T>::SolveLP(const Matrix<T> &A,
 // Any information sets not reached with positive probability have
 // their action probabilities set to zero.
 //
-template <class T> void
-NashLpBehavSolver<T>::GameData::GetBehavior(const BehaviorSupportProfile &p_support,
-					    MixedBehaviorProfile<T> &v,
-					    const Array<T> &p_primal, 
-					    const Array<T> &p_dual,
-					    const GameNode &n,
-					    int s1, int s2)
+template<class T>
+void
+NashLpBehavSolver<T>::GameData::GetBehavior(MixedBehaviorProfile<T> &v,
+                                            const Array<T> &p_primal,
+                                            const Array<T> &p_dual,
+                                            const GameNode &n,
+                                            int s1, int s2)
 {
-  if (n->NumChildren() == 0) {
+  if (n->IsTerminal()) {
     return;
   }
-
   if (n->GetPlayer()->IsChance()) {
-    for (auto child : n->GetChildren()) {
-      GetBehavior(p_support, v, p_primal, p_dual, child, s1, s2);
+    for (const auto& child : n->GetChildren()) {
+      GetBehavior(v, p_primal, p_dual, child, s1, s2);
     }
   }
   else if (n->GetPlayer()->GetNumber() == 2) {
-    int inf = infosetIndex(2, n->GetInfoset()->GetNumber());
-    int snew = infosetOffset(2, n->GetInfoset()->GetNumber());
-    for (int i = 1; i <= p_support.NumActions(n->GetInfoset()); i++) {
-      if (p_primal[s1] > (T) 0) {
-	v(2,inf,i) = p_primal[snew+i] / p_primal[s1];
-      } 
-      else {
-	v(2,inf,i) = (T) 0;
-      }
-      GetBehavior(p_support, v, p_primal, p_dual,
-		  n->GetChild(p_support.GetAction(n->GetInfoset(), i)->GetNumber()),
-		  snew+i, s2);
+    int snew = infosetOffset.at(n->GetInfoset());
+    for (const auto& action : n->GetInfoset()->GetActions()) {
+      snew++;
+      v(action) = (p_primal[s1] > (T) 0) ? p_primal[snew] / p_primal[s1] : (T) 0;
+      GetBehavior(v, p_primal, p_dual, n->GetChild(action), snew, s2);
     }
   }
-  else {  // Must be player 1
-    int inf = infosetIndex(1, n->GetInfoset()->GetNumber());
-    int snew = infosetOffset(1, n->GetInfoset()->GetNumber());
-    for (int i = 1; i <= p_support.NumActions(n->GetInfoset()); i++) {
-      if (p_dual[s2] > (T) 0) {
-	v(1,inf,i) = p_dual[snew+i] / p_dual[s2];
-      }
-      else {
-	v(1,inf,i) = (T) 0;
-      }
-      GetBehavior(p_support, v, p_primal, p_dual,
-		  n->GetChild(p_support.GetAction(n->GetInfoset(), i)->GetNumber()),
-		  s1, snew+i);
+  else {
+    int snew = infosetOffset.at(n->GetInfoset());
+    for (const auto& action : n->GetInfoset()->GetActions()) {
+      snew++;
+      v(action) = (p_dual[s2] > (T) 0) ? p_dual[snew] / p_dual[s2] : (T) 0;
+      GetBehavior(v, p_primal, p_dual, n->GetChild(action), s1, snew);
     }
   }
 }
@@ -245,10 +198,7 @@ NashLpBehavSolver<T>::Solve(const Game &p_game) const
 
   Gambit::linalg::BFS<T> cbfs;
 
-  // TODO: The below is in an intermediate stage - we no longer call by support
-  // but the implementation has not yet been rewritten to work directly on the game
-  BehaviorSupportProfile support(p_game);
-  GameData data = GameData(support);
+  GameData data = GameData(p_game);
 
   Matrix<T> A(1, data.ns1 + data.ni2, 1, data.ns2 + data.ni1);
   Vector<T> b(1, data.ns1 + data.ni2);
@@ -258,8 +208,7 @@ NashLpBehavSolver<T>::Solve(const Game &p_game) const
   b = (T) 0;
   c = (T) 0;
 
-  data.BuildConstraintMatrix(support, A, p_game->GetRoot(),
-			     (T) 1, 1, 1, 0, 0);
+  data.FillTableau(A, p_game->GetRoot(), (T) 1, 1, 1);
   A(1, data.ns2 + 1) = (T) -1;
   A(data.ns1 + 1, 1) = (T) 1;
 
@@ -270,8 +219,7 @@ NashLpBehavSolver<T>::Solve(const Game &p_game) const
   List<MixedBehaviorProfile<T> > solution;
   if (SolveLP(A, b, c, data.ni2, primal, dual)) {
     MixedBehaviorProfile<T> profile(p_game);
-    data.GetBehavior(support, profile, primal, dual,
-                     p_game->GetRoot(), 1, 1);
+    data.GetBehavior(profile, primal, dual, p_game->GetRoot(), 1, 1);
     profile.UndefinedToCentroid();
     this->m_onEquilibrium->Render(profile);
     solution.push_back(profile);

@@ -22,6 +22,7 @@
 
 #include <iostream>
 #include <algorithm>
+#include <numeric>
 
 #include "gambit.h"
 
@@ -213,6 +214,14 @@ Array<GameInfoset> GamePlayerRep::GetInfosets() const
   return ret;
 }
 
+int GamePlayerRep::NumSequences() const
+{
+  if (!m_game->IsTree()) {
+    throw UndefinedException();
+  }
+  return std::accumulate(m_infosets.cbegin(), m_infosets.cend(), 1,
+                         [](int ct, GameTreeInfosetRep *s) -> int { return ct + s->m_actions.size(); });
+}
 
 //========================================================================
 //                            class GameRep

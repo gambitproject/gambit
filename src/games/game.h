@@ -204,6 +204,7 @@ public:
   virtual bool Precedes(GameNode) const = 0;
 
   virtual const Number &GetActionProb(int i) const = 0;
+  virtual const Number &GetActionProb(const GameAction &) const = 0;
   virtual void Reveal(GamePlayer) = 0;
 };
 
@@ -326,6 +327,12 @@ public:
   /// Creates a new strategy for the player
   GameStrategy NewStrategy();
   //@}
+
+  /// @name Sequences
+  //@{
+  /// Returns the number of sequences available to the player
+  int NumSequences() const;
+  //@}
 };
 
 /// A node in an extensive game
@@ -345,6 +352,7 @@ public:
 
   virtual int NumChildren() const = 0;
   virtual GameNode GetChild(int i) const = 0;
+  virtual GameNode GetChild(const GameAction &) const = 0;
   virtual Array<GameNode> GetChildren() const = 0;
 
   virtual GameInfoset GetInfoset() const = 0;

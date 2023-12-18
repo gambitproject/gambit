@@ -81,11 +81,11 @@ private:
 
   class Solution;
 
-  void FillTableau(const BehaviorSupportProfile &, Matrix<T> &, const GameNode &, T,
-		   int, int, int, int, Solution &) const;
-  void AllLemke(const BehaviorSupportProfile &, int dup, Gambit::linalg::LemkeTableau<T> &B,
+  void FillTableau(Matrix<T> &, const GameNode &, T,
+		   int, int, Solution &) const;
+  void AllLemke(const Game &, int dup, linalg::LemkeTableau<T> &B,
 	       int depth, Matrix<T> &, Solution &) const; 
-  void GetProfile(const BehaviorSupportProfile &, const Gambit::linalg::LemkeTableau<T> &tab, 
+  void GetProfile(const linalg::LemkeTableau<T> &tab,
 		  MixedBehaviorProfile<T> &, const Vector<T> &, 
 		  const GameNode &n, int, int,
 		  Solution &) const;

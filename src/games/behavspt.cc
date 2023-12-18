@@ -187,25 +187,6 @@ void BehaviorSupportProfile::AddAction(const GameAction &s)
   }
 }
 
-int BehaviorSupportProfile::NumSequences(int j) const
-{
-  if (j < 1 || j > m_efg->NumPlayers()) return 1;
-  List<GameInfoset> isets = ReachableInfosets(m_efg->GetPlayer(j));
-  int num = 1;
-  for(int i = 1; i <= isets.Length(); i++)
-    num+=NumActions(isets[i]->GetPlayer()->GetNumber(),
-		    isets[i]->GetNumber());
-  return num;
-}
-
-int BehaviorSupportProfile::NumSequences() const
-{
-  int total = 0;
-  for (int i = 1 ; i <= m_efg->NumPlayers(); i++)
-    total += NumSequences(i);
-  return total;
-}
-
 List<GameInfoset>
 BehaviorSupportProfile::ReachableInfosets(const GamePlayer &p) const
 { 
