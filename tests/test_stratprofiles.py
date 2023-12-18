@@ -2,9 +2,11 @@ import pytest
 
 import pygambit as gbt
 
+from . import games
+
 
 def test_remove_strategy():
-    game = gbt.Game.read_game("test_games/mixed_strategy.nfg")
+    game = games.read_from_file("mixed_strategy.nfg")
     support_profile = game.support_profile()
     strategy = support_profile[0]
     new_profile = support_profile.remove(strategy)
@@ -13,7 +15,7 @@ def test_remove_strategy():
 
 
 def test_difference():
-    game = gbt.Game.read_game("test_games/mixed_strategy.nfg")
+    game = games.read_from_file("mixed_strategy.nfg")
     support_profile = game.support_profile()
     strat_list = [support_profile[0], support_profile[4]]
     dif_profile = gbt.StrategySupportProfile(game, strat_list)
@@ -24,7 +26,7 @@ def test_difference():
 
 
 def test_difference_error():
-    game = gbt.Game.read_game("test_games/mixed_strategy.nfg")
+    game = games.read_from_file("mixed_strategy.nfg")
     support_profile = game.support_profile()
     strat_list = [support_profile[0], support_profile[4]]
     dif_profile = gbt.StrategySupportProfile(game, strat_list)
@@ -33,7 +35,7 @@ def test_difference_error():
 
 
 def test_intersection():
-    game = gbt.Game.read_game("test_games/mixed_strategy.nfg")
+    game = games.read_from_file("mixed_strategy.nfg")
     support_profile = game.support_profile()
     strat_list = [support_profile[0], support_profile[2],
                   support_profile[4]]
@@ -46,7 +48,7 @@ def test_intersection():
 
 
 def test_intersection_error():
-    game = gbt.Game.read_game("test_games/mixed_strategy.nfg")
+    game = games.read_from_file("mixed_strategy.nfg")
     support_profile = game.support_profile()
     strat_list = [support_profile[0], support_profile[2],
                   support_profile[4]]
@@ -57,7 +59,7 @@ def test_intersection_error():
 
 
 def test_union():
-    game = gbt.Game.read_game("test_games/mixed_strategy.nfg")
+    game = games.read_from_file("mixed_strategy.nfg")
     support_profile = game.support_profile()
     strat_list = [support_profile[0], support_profile[2],
                   support_profile[4]]
@@ -68,7 +70,7 @@ def test_union():
 
 
 def test_undominated():
-    game = gbt.Game.read_game("test_games/mixed_strategy.nfg")
+    game = games.read_from_file("mixed_strategy.nfg")
     support_profile = game.support_profile()
     new_profile = support_profile
     loop_profile = gbt.supports.undominated_strategies_solve(new_profile)
@@ -82,7 +84,7 @@ def test_undominated():
 
 
 def test_remove_error():
-    game = gbt.Game.read_game("test_games/mixed_strategy.nfg")
+    game = games.read_from_file("mixed_strategy.nfg")
     support_profile = game.support_profile()
     profile = support_profile.remove(support_profile[3])
     with pytest.raises(gbt.UndefinedOperationError):

@@ -30,9 +30,7 @@ jobs:
           cd dist
           pip install -v pygambit*.tar.gz
       - name: Run tests
-        run: |
-          cd src/pygambit/tests
-          pytest
+        run: pytest
 
   windows:
     runs-on: windows-latest
@@ -55,6 +53,4 @@ jobs:
         run: |
           python -m pip install -v .
       - name: Run tests
-        run: |
-          cd src/pygambit/tests
-          pytest
+        run: pytest

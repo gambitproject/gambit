@@ -2,10 +2,11 @@ import pytest
 
 import pygambit as gbt
 
+from . import games
 
 @pytest.mark.parametrize(
     "game,label",
-    [(gbt.Game.read_game("test_games/complicated_extensive_game.efg"), "random label")]
+    [(games.read_from_file("complicated_extensive_game.efg"), "random label")]
 )
 def test_set_action_label(game: gbt.Game, label: str):
     game.root.infoset.actions[0].label = label
@@ -14,9 +15,9 @@ def test_set_action_label(game: gbt.Game, label: str):
 
 @pytest.mark.parametrize(
     "game,inprobs,outprobs",
-    [(gbt.Game.read_game("test_games/complicated_extensive_game.efg"),
+    [(games.read_from_file("complicated_extensive_game.efg"),
       [0.75, 0.25], [0.75, 0.25]),
-     (gbt.Game.read_game("test_games/complicated_extensive_game.efg"),
+     (games.read_from_file("complicated_extensive_game.efg"),
       ["16/17", "1/17"], [gbt.Rational("16/17"), gbt.Rational("1/17")])]
 )
 def test_set_chance_valid_probability(game: gbt.Game, inprobs: list, outprobs: list):
@@ -27,9 +28,9 @@ def test_set_chance_valid_probability(game: gbt.Game, inprobs: list, outprobs: l
 
 @pytest.mark.parametrize(
     "game,inprobs",
-    [(gbt.Game.read_game("test_games/complicated_extensive_game.efg"), [0.75, -0.10]),
-     (gbt.Game.read_game("test_games/complicated_extensive_game.efg"), [0.75, 0.40]),
-     (gbt.Game.read_game("test_games/complicated_extensive_game.efg"), ["foo", "bar"])]
+    [(games.read_from_file("complicated_extensive_game.efg"), [0.75, -0.10]),
+     (games.read_from_file("complicated_extensive_game.efg"), [0.75, 0.40]),
+     (games.read_from_file("complicated_extensive_game.efg"), ["foo", "bar"])]
 )
 def test_set_chance_improper_probability(game: gbt.Game, inprobs: list):
     with pytest.raises(ValueError):
@@ -38,8 +39,8 @@ def test_set_chance_improper_probability(game: gbt.Game, inprobs: list):
 
 @pytest.mark.parametrize(
     "game,inprobs",
-    [(gbt.Game.read_game("test_games/complicated_extensive_game.efg"), [0.25, 0.75, 0.25]),
-     (gbt.Game.read_game("test_games/complicated_extensive_game.efg"), [1.00])]
+    [(games.read_from_file("complicated_extensive_game.efg"), [0.25, 0.75, 0.25]),
+     (games.read_from_file("complicated_extensive_game.efg"), [1.00])]
 )
 def test_set_chance_bad_dimension(game: gbt.Game, inprobs: list):
     with pytest.raises(IndexError):
@@ -48,7 +49,7 @@ def test_set_chance_bad_dimension(game: gbt.Game, inprobs: list):
 
 @pytest.mark.parametrize(
     "game",
-    [gbt.Game.read_game("test_games/complicated_extensive_game.efg")]
+    [games.read_from_file("complicated_extensive_game.efg")]
 )
 def test_set_chance_personal(game: gbt.Game):
     with pytest.raises(gbt.UndefinedOperationError):
@@ -57,7 +58,7 @@ def test_set_chance_personal(game: gbt.Game):
 
 @pytest.mark.parametrize(
     "game",
-    [gbt.Game.read_game("test_games/complicated_extensive_game.efg")]
+    [games.read_from_file("complicated_extensive_game.efg")]
 )
 def test_action_precedes(game: gbt.Game):
     child = game.root.children[0]
@@ -67,7 +68,7 @@ def test_action_precedes(game: gbt.Game):
 
 @pytest.mark.parametrize(
     "game",
-    [gbt.Game.read_game("test_games/complicated_extensive_game.efg")]
+    [games.read_from_file("complicated_extensive_game.efg")]
 )
 def test_action_precedes_nonnode(game: gbt.Game):
     with pytest.raises(TypeError):
@@ -76,7 +77,7 @@ def test_action_precedes_nonnode(game: gbt.Game):
 
 @pytest.mark.parametrize(
     "game",
-    [gbt.Game.read_game("test_games/complicated_extensive_game.efg")]
+    [games.read_from_file("complicated_extensive_game.efg")]
 )
 def test_action_delete_personal(game: gbt.Game):
     node = game.players[0].infosets[0].members[0]
@@ -88,7 +89,7 @@ def test_action_delete_personal(game: gbt.Game):
 
 @pytest.mark.parametrize(
     "game",
-    [gbt.Game.read_game("test_games/complicated_extensive_game.efg")]
+    [games.read_from_file("complicated_extensive_game.efg")]
 )
 def test_action_delete_last(game: gbt.Game):
     node = game.players[0].infosets[0].members[0]
@@ -100,9 +101,9 @@ def test_action_delete_last(game: gbt.Game):
 
 @pytest.mark.parametrize(
     "game",
-    [gbt.Game.read_game("test_games/chance_root_3_moves_only_one_nonzero_prob.efg"),
-     gbt.Game.read_game("test_games/complicated_extensive_game.efg"),
-     gbt.Game.read_game("test_games/chance_root_5_moves_no_nonterm_player_nodes.efg")]
+    [games.read_from_file("chance_root_3_moves_only_one_nonzero_prob.efg"),
+     games.read_from_file("complicated_extensive_game.efg"),
+     games.read_from_file("chance_root_5_moves_no_nonterm_player_nodes.efg")]
 )
 def test_action_delete_chance(game: gbt.Game):
     """Test the renormalization of action probabilities when an action is deleted at a chance

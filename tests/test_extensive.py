@@ -1,9 +1,9 @@
 import typing
-
 import pytest
 
 import pygambit as gbt
 
+from . import games
 
 @pytest.mark.parametrize(
     "players,title",
@@ -54,22 +54,22 @@ def test_game_add_players_nolabel():
 
 
 def test_game_num_nodes():
-    game = gbt.Game.read_game("test_games/basic_extensive_game.efg")
+    game = games.read_from_file("basic_extensive_game.efg")
     assert len(game.nodes()) == 15
 
 
 def test_game_is_perfect_recall():
-    game = gbt.Game.read_game("test_games/perfect_recall.efg")
+    game = games.read_from_file("perfect_recall.efg")
     assert game.is_perfect_recall
 
 
 def test_game_is_not_perfect_recall():
-    game = gbt.Game.read_game("test_games/not_perfect_recall.efg")
+    game = games.read_from_file("not_perfect_recall.efg")
     assert not game.is_perfect_recall
 
 
 def test_getting_payoff_by_label_string():
-    game = gbt.Game.read_game("test_games/sample_extensive_game.efg")
+    game = games.read_from_file("sample_extensive_game.efg")
     assert game[[0, 0]]['Player 1'] == 2
     assert game[[0, 1]]['Player 1'] == 2
     assert game[[1, 0]]['Player 1'] == 4
@@ -81,7 +81,7 @@ def test_getting_payoff_by_label_string():
 
 
 def test_getting_payoff_by_player():
-    game = gbt.Game.read_game("test_games/sample_extensive_game.efg")
+    game = games.read_from_file("sample_extensive_game.efg")
     player1 = game.players[0]
     player2 = game.players[1]
     assert game[[0, 0]][player1] == 2
@@ -95,6 +95,6 @@ def test_getting_payoff_by_player():
 
 
 def test_outcome_index_exception_label():
-    game = gbt.Game.read_game("test_games/sample_extensive_game.efg")
+    game = games.read_from_file("sample_extensive_game.efg")
     with pytest.raises(KeyError):
         _ = game[[0, 0]]["Not a player"]

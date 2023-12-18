@@ -2,6 +2,8 @@ import pytest
 
 import pygambit as gbt
 
+from . import games
+
 
 def test_strategic_game_actions():
     game = gbt.Game.new_table([2, 2])
@@ -33,20 +35,20 @@ def test_game_behav_profile_error():
 
 
 def test_game_is_const_sum():
-    game = gbt.Game.read_game("test_games/const_sum_game.nfg")
+    game = games.read_from_file("const_sum_game.nfg")
     assert game.is_const_sum
 
 
 def test_game_is_not_const_sum():
-    game = gbt.Game.read_game("test_games/non_const_sum_game.nfg")
+    game = games.read_from_file("non_const_sum_game.nfg")
     assert not game.is_const_sum
 
 
 def test_game_get_min_payoff():
-    game = gbt.Game.read_game("test_games/payoff_game.nfg")
+    game = games.read_from_file("payoff_game.nfg")
     assert game.min_payoff == 1
 
 
 def test_game_get_max_payoff():
-    game = gbt.Game.read_game("test_games/payoff_game.nfg")
+    game = games.read_from_file("payoff_game.nfg")
     assert game.max_payoff == 10

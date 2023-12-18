@@ -7,6 +7,7 @@
 - Converted test suite for mixed behavior profiles to pytest style; added parametrizations for
   test_realiz_prob; added test_martingale_property_of_node_value (#375)
 - Improved test suite for mixed strategy profiles (#374)
+- Test suite for pygambit moved from src/pygambit/tests/ to tests/
 
 
 ## [16.1.1] - unreleased
