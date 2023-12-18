@@ -21,6 +21,7 @@
 //
 
 #include <iostream>
+#include <algorithm>
 
 #include "gambit.h"
 #include "gametree.h"
@@ -75,15 +76,13 @@ TreeMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl,
   if (player1 == player2) return (T) 0;
 
   MixedStrategyProfile<T> foo(Copy());
-  for (auto strategy = this->m_support.Strategies(player1).begin();
-       strategy != this->m_support.Strategies(player1).end(); ++strategy) {
-    foo[*strategy] = (T) 0;
+  for (auto strategy : this->m_support.GetStrategies(player1)) {
+    foo[strategy] = (T) 0;
   }
   foo[strategy1] = (T) 1;
 
-  for (auto strategy = this->m_support.Strategies(player2).begin();
-       strategy != this->m_support.Strategies(player2).end(); ++strategy) {
-    foo[*strategy] = (T) 0;
+  for (auto strategy : this->m_support.GetStrategies(player2)) {
+    foo[strategy] = (T) 0;
   }
   foo[strategy2] = (T) 1;
 
@@ -168,10 +167,19 @@ GameTreeInfosetRep::GameTreeInfosetRep(GameTreeRep *p_efg, int p_number,
 
 GameTreeInfosetRep::~GameTreeInfosetRep()  
 {
-  for (int act = 1; act <= m_actions.Length(); m_actions[act++]->Invalidate());
+  std::for_each(m_actions.begin(), m_actions.end(),
+                [](GameActionRep *a) { a->Invalidate(); });
 }
 
 Game GameTreeInfosetRep::GetGame() const { return m_efg; }
+
+Array<GameAction> GameTreeInfosetRep::GetActions() const
+{
+  Array<GameAction> ret(m_actions.size());
+  std::transform(m_actions.cbegin(), m_actions.end(),
+                 ret.begin(), [](GameActionRep *a) -> GameAction { return a; });
+  return ret;
+}
 
 void GameTreeInfosetRep::SetPlayer(GamePlayer p_player)
 {
@@ -261,26 +269,24 @@ void GameTreeInfosetRep::RemoveMember(GameTreeNodeRep *p_node)
 void GameTreeInfosetRep::Reveal(GamePlayer p_player)
 {
   m_efg->IncrementVersion();
-  for (int act = 1; act <= m_actions.Length(); act++) {
-    GameActionRep *action = m_actions[act];
-    for (int iset = 1; iset <= p_player->m_infosets.Length(); iset++) {
+  for (auto action : m_actions) {
+    for (auto infoset : p_player->m_infosets) {
       // make copy of members to iterate correctly 
       // (since the information set may be changed in the process)
-      Array<GameTreeNodeRep *> members = p_player->m_infosets[iset]->m_members;
+      auto members = infoset->m_members;
 
       // This information set holds all members of information set
       // which follow 'action'.
       GameInfoset newiset = nullptr;
-
       for (int m = 1; m <= members.Length(); m++) {
-	if (action->Precedes(members[m])) {
-	  if (!newiset) {
-	    newiset = members[m]->LeaveInfoset();
-	  }
-	  else {
-	    members[m]->SetInfoset(newiset);
-	  }
-	} 
+        if (action->Precedes(members[m])) {
+          if (!newiset) {
+            newiset = members[m]->LeaveInfoset();
+          }
+          else {
+            members[m]->SetInfoset(newiset);
+          }
+        }
       }
     }
   }
@@ -290,9 +296,22 @@ void GameTreeInfosetRep::Reveal(GamePlayer p_player)
 }
 
 GameNode GameTreeInfosetRep::GetMember(int p_index) const 
-{ return m_members[p_index]; }
+{
+  return m_members[p_index];
+}
 
-GamePlayer GameTreeInfosetRep::GetPlayer() const { return m_player; }
+Array<GameNode> GameTreeInfosetRep::GetMembers() const
+{
+  Array<GameNode> ret(m_members.size());
+  std::transform(m_members.cbegin(), m_members.cend(),
+                 ret.begin(), [](GameTreeNodeRep *n) -> GameNode { return n; });
+  return ret;
+}
+
+GamePlayer GameTreeInfosetRep::GetPlayer() const
+{
+  return m_player;
+}
 
 bool GameTreeInfosetRep::IsChanceInfoset() const
 { return m_player->IsChance(); }
@@ -308,29 +327,44 @@ GameTreeNodeRep::GameTreeNodeRep(GameTreeRep *e, GameTreeNodeRep *p)
 
 GameTreeNodeRep::~GameTreeNodeRep()
 {
-  for (int i = children.Length(); i; children[i--]->Invalidate());
+  std::for_each(children.begin(), children.end(),
+                [](GameNodeRep *n) { n->Invalidate(); });
 }
 
 Game GameTreeNodeRep::GetGame() const { return m_efg; }
 
+Array<GameNode> GameTreeNodeRep::GetChildren() const
+{
+  Array<GameNode> ret(children.size());
+  std::transform(children.cbegin(), children.cend(),
+                 ret.begin(), [](GameTreeNodeRep *n) -> GameNode { return n; });
+  return ret;
+}
+
 GameNode GameTreeNodeRep::GetNextSibling() const  
 {
-  if (!m_parent)   return nullptr;
-  if (m_parent->children.Find(const_cast<GameTreeNodeRep *>(this)) == 
-      m_parent->children.Length())
+  if (!m_parent) {
     return nullptr;
-  else
+  }
+  if (m_parent->children.back() == this) {
+    return nullptr;
+  }
+  else {
     return m_parent->children[m_parent->children.Find(const_cast<GameTreeNodeRep *>(this)) + 1];
+  }
 }
 
 GameNode GameTreeNodeRep::GetPriorSibling() const
 { 
-  if (!m_parent)   return nullptr;
-  if (m_parent->children.Find(const_cast<GameTreeNodeRep *>(this)) == 1)
+  if (!m_parent) {
     return nullptr;
-  else
+  }
+  if (m_parent->children.front() == this) {
+    return nullptr;
+  }
+  else {
     return m_parent->children[m_parent->children.Find(const_cast<GameTreeNodeRep *>(this)) - 1];
-
+  }
 }
 
 GameAction GameTreeNodeRep::GetPriorAction() const
@@ -338,14 +372,12 @@ GameAction GameTreeNodeRep::GetPriorAction() const
   if (!m_parent) {
     return nullptr;
   }
-  
   GameTreeInfosetRep *infoset = m_parent->infoset;
   for (int i = 1; i <= infoset->NumActions(); i++) {
     if (GameNode(const_cast<GameTreeNodeRep *>(this)) == GetParent()->GetChild(i)) {
       return infoset->GetAction(i);
     }
   }
-
   return nullptr;
 }
 
@@ -383,18 +415,14 @@ bool GameTreeNodeRep::IsSubgameRoot() const
   // A node is a subgame root if and only if in every information set,
   // either all members succeed the node in the tree,
   // or all members do not succeed the node in the tree.
-  for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
-    GamePlayerRep *player = m_efg->GetPlayer(pl);
-    
-    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      GameTreeInfosetRep *infoset = dynamic_cast<GameTreeInfosetRep *>(player->GetInfoset(iset).operator->());
-
+  for (auto player : m_efg->GetPlayers()) {
+    for (auto infoset : player->GetInfosets()) {
       bool precedes = infoset->GetMember(1)->IsSuccessorOf(const_cast<GameTreeNodeRep *>(this));
-
       for (int mem = 2; mem <= infoset->NumMembers(); mem++) {
-	if (infoset->GetMember(mem)->IsSuccessorOf(const_cast<GameTreeNodeRep *>(this)) != precedes) {
-	  return false;
-	}
+        if (infoset->GetMember(mem)->IsSuccessorOf(const_cast<GameTreeNodeRep *>(this)) !=
+            precedes) {
+          return false;
+        }
       }
     }
   }

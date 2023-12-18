@@ -168,12 +168,11 @@ MixedBehaviorProfile<T>::MixedBehaviorProfile(const MixedStrategyProfile<T> &p_p
     m_nvals = (T) 0;
     m_bvals = (T) 0;
 
-    for (Array<GameStrategy>::const_iterator strategy = support.Strategies(player).begin();
-	 strategy != support.Strategies(player).end(); ++strategy) {
-      if (p_profile[*strategy] > (T) 0) {
-	const Array<int> &actions = strategy->m_behav;
-	m_bvals[root->GetNumber()] = p_profile[*strategy];
-	RealizationProbs(p_profile, player->GetNumber(), actions, root);
+    for (auto strategy : support.GetStrategies(player)) {
+      if (p_profile[strategy] > (T) 0) {
+        const Array<int> &actions = strategy->m_behav;
+        m_bvals[root->GetNumber()] = p_profile[strategy];
+        RealizationProbs(p_profile, player->GetNumber(), actions, root);
       }
     }
  

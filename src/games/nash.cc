@@ -47,20 +47,18 @@ MixedStrategyDetailRenderer<T>::Render(const MixedStrategyProfile<T> &p_profile,
     m_stream << "Strategy   Prob          Value\n";
     m_stream << "--------   -----------   -----------\n";
 
-    for (Array<GameStrategyRep *>::const_iterator 
-	   strategy = player->GetStrategies().begin();
-	 strategy != player->GetStrategies().end(); ++strategy) {
+    for (auto strategy : player->GetStrategies()) {
       if (!strategy->GetLabel().empty()) {
-	m_stream << std::setw(8) << strategy->GetLabel() << "    ";
+        m_stream << std::setw(8) << strategy->GetLabel() << "    ";
       }
       else {
-	m_stream << std::setw(8) << strategy->GetNumber() << "    ";
+        m_stream << std::setw(8) << strategy->GetNumber() << "    ";
       }
       m_stream << std::setw(10);
-      m_stream << lexical_cast<std::string>(p_profile[*strategy], m_numDecimals);
+      m_stream << lexical_cast<std::string>(p_profile[strategy], m_numDecimals);
       m_stream << "   ";
       m_stream << std::setw(11);
-      m_stream << lexical_cast<std::string>(p_profile.GetPayoff(*strategy),
+      m_stream << lexical_cast<std::string>(p_profile.GetPayoff(strategy),
 					    m_numDecimals);
       m_stream << std::endl;
     }

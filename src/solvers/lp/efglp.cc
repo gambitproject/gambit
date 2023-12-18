@@ -189,9 +189,8 @@ NashLpBehavSolver<T>::GameData::GetBehavior(const BehaviorSupportProfile &p_supp
   }
 
   if (n->GetPlayer()->IsChance()) {
-    for (int i = 1; i <= n->NumChildren(); i++) {
-      GetBehavior(p_support, v, p_primal, p_dual,
-		  n->GetChild(i), s1, s2);
+    for (auto child : n->GetChildren()) {
+      GetBehavior(p_support, v, p_primal, p_dual, child, s1, s2);
     }
   }
   else if (n->GetPlayer()->GetNumber() == 2) {

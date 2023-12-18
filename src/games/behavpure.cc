@@ -105,13 +105,10 @@ template Rational PureBehaviorProfile::GetPayoff(const GameAction &) const;
 
 bool PureBehaviorProfile::IsAgentNash() const
 {
-  for (int pl = 1; pl <= m_efg->NumPlayers(); pl++)  {
-    GamePlayer player = m_efg->GetPlayer(pl);
+  for (auto player : m_efg->GetPlayers()) {
     Rational current = GetPayoff<Rational>(player);
-    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      GameInfoset infoset = player->GetInfoset(iset);
-      for (int act = 1; act <= infoset->NumActions(); act++) {
-        GameAction action = infoset->GetAction(act);
+    for (auto infoset : player->GetInfosets()) {
+      for (auto action : infoset->GetActions()) {
         if (GetPayoff<Rational>(action) > current)  {
           return false;
         }
@@ -126,10 +123,9 @@ PureBehaviorProfile::ToMixedBehaviorProfile() const
 {
   MixedBehaviorProfile<Rational> temp(m_efg);
   temp = Rational(0);
-  for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
-    GamePlayer player = m_efg->GetPlayer(pl);
-    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      temp(GetAction(player->GetInfoset(iset))) = Rational(1);
+  for (auto player : m_efg->GetPlayers()) {
+    for (auto infoset : player->GetInfosets()) {
+      temp(GetAction(infoset)) = Rational(1);
     }
   }
   return temp;

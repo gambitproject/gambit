@@ -94,8 +94,10 @@ public:
 
   /// Returns the number of players in the game
   int NumPlayers() const { return m_nfg->NumPlayers(); }
+  /// Returns the set of players in the game
+  Array<GamePlayer> GetPlayers() const { return m_nfg->GetPlayers(); }
   /// Returns the set of strategies in the support for a player
-  const Array<GameStrategy> &Strategies(const GamePlayer &p_player) const
+  const Array<GameStrategy> &GetStrategies(const GamePlayer &p_player) const
     { return m_support[p_player->GetNumber()]; }
 
   /// Returns the index of the strategy in the support.

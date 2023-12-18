@@ -832,21 +832,21 @@ void gbtTreeLayout::BuildNodeList(const Gambit::GameNode &p_node, const Gambit::
     Gambit::GameInfoset infoset = p_node->GetInfoset();
     if (infoset) {
       if (infoset->GetPlayer()->IsChance()) {
-	for (int i = 1; i <= p_node->NumChildren(); i++) {
-	  BuildNodeList(p_node->GetChild(i), p_support, p_level + 1);
-	}
+        for (int i = 1; i <= p_node->NumChildren(); i++) {
+          BuildNodeList(p_node->GetChild(i), p_support, p_level + 1);
+        }
       }
       else {
-	for (int i = 1; i <= p_support.NumActions(infoset); i++) {
-	  BuildNodeList(p_node->GetChild(p_support.GetAction(infoset, i)->GetNumber()),
-			p_support, p_level + 1);
-	}
+        for (int i = 1; i <= p_support.NumActions(infoset); i++) {
+          BuildNodeList(p_node->GetChild(p_support.GetAction(infoset, i)->GetNumber()),
+                        p_support, p_level + 1);
+        }
       }
     }
   }
   else {
-    for (int i = 1; i <= p_node->NumChildren(); i++) {
-      BuildNodeList(p_node->GetChild(i), p_support, p_level + 1);
+    for (auto child : p_node->GetChildren()) {
+      BuildNodeList(child, p_support, p_level + 1);
     }
   }
   m_maxLevel = std::max(p_level, m_maxLevel);
