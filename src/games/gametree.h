@@ -104,13 +104,13 @@ public:
   int NumActions() const override { return m_actions.size(); }
   /// Returns the p_index'th action at the information set
   GameAction GetAction(int p_index) const override { return m_actions[p_index]; }
-  /// Returns a forward iterator over the available actions
-  //virtual GameActionIterator Actions(void) const 
-  //  { return GameActionIterator(m_actions); }
+  /// Returns the actions available at the information set
+  Array<GameAction> GetActions() const override;
   //@}
 
   int NumMembers() const override { return m_members.size(); }
   GameNode GetMember(int p_index) const override;
+  Array<GameNode> GetMembers() const override;
 
   bool Precedes(GameNode) const override;
 
@@ -155,6 +155,8 @@ public:
   { return infoset->m_members.Find(const_cast<GameTreeNodeRep *>(this)); }
 
   int NumChildren() const override    { return children.size(); }
+  GameNode GetChild(int i) const override    { return children[i]; }
+  Array<GameNode> GetChildren() const override;
 
   GameInfoset GetInfoset() const override   { return infoset; }
   void SetInfoset(GameInfoset) override;
@@ -164,7 +166,6 @@ public:
   GamePlayer GetPlayer() const override
     { return (infoset) ? infoset->GetPlayer() : nullptr; }
   GameAction GetPriorAction() const override; // returns null if root node
-  GameNode GetChild(int i) const override    { return children[i]; }
   GameNode GetParent() const override    { return m_parent; }
   GameNode GetNextSibling() const override;
   GameNode GetPriorSibling() const override;

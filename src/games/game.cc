@@ -85,6 +85,14 @@ GamePlayerRep::~GamePlayerRep()
   }
 }
 
+Array<GameStrategy> GamePlayerRep::GetStrategies() const
+{
+  m_game->BuildComputedValues();
+  Array<GameStrategy> ret(m_strategies.size());
+  std::transform(m_strategies.cbegin(), m_strategies.cend(),
+                 ret.begin(), [](GameStrategyRep *s) -> GameStrategy { return s; });
+  return ret;
+}
 
 GameStrategy GamePlayerRep::NewStrategy()
 {
@@ -192,12 +200,32 @@ void GamePlayerRep::MakeReducedStrats(GameTreeNodeRep *n, GameTreeNodeRep *nn)
   }
 }
 
-GameInfoset GamePlayerRep::GetInfoset(int p_index) const { return m_infosets[p_index]; }
+GameInfoset GamePlayerRep::GetInfoset(int p_index) const
+{
+  return m_infosets[p_index];
+}
+
+Array<GameInfoset> GamePlayerRep::GetInfosets() const
+{
+  Array<GameInfoset> ret(m_infosets.size());
+  std::transform(m_infosets.cbegin(), m_infosets.cend(),
+                 ret.begin(), [](GameTreeInfosetRep *s) -> GameInfoset { return s; });
+  return ret;
+}
 
 
 //========================================================================
 //                            class GameRep
 //========================================================================
+
+Array<GamePlayer> GameRep::GetPlayers() const
+{
+  Array<GamePlayer> ret(NumPlayers());
+  for (int pl = 1; pl <= NumPlayers(); pl++) {
+    ret[pl] = GetPlayer(pl);
+  }
+  return ret;
+}
 
 //------------------------------------------------------------------------
 //                     GameRep: Writing data files
@@ -232,19 +260,20 @@ std::string EscapeQuotes(const std::string &s)
 /// but rather a probability distribution over outcomes.
 ///
 void GameRep::WriteNfgFile(std::ostream &p_file) const
-{ 
+{
+  auto players = GetPlayers();
   p_file << "NFG 1 R";
   p_file << " \"" << EscapeQuotes(GetTitle()) << "\" { ";
-  for (int i = 1; i <= NumPlayers(); i++)
-    p_file << '"' << EscapeQuotes(GetPlayer(i)->GetLabel()) << "\" ";
-
+  for (auto player : players) {
+    p_file << '"' << EscapeQuotes(player->GetLabel()) << "\" ";
+  }
   p_file << "}\n\n{ ";
   
-  for (int i = 1; i <= NumPlayers(); i++)   {
-    GamePlayerRep *player = GetPlayer(i);
+  for (auto player : players) {
     p_file << "{ ";
-    for (int j = 1; j <= player->NumStrategies(); j++)
-      p_file << '"' << EscapeQuotes(player->GetStrategy(j)->GetLabel()) << "\" ";
+    for (auto strategy : player->GetStrategies()) {
+      p_file << '"' << EscapeQuotes(strategy->GetLabel()) << "\" ";
+    }
     p_file << "}\n";
   }
   p_file << "}\n";
@@ -252,8 +281,8 @@ void GameRep::WriteNfgFile(std::ostream &p_file) const
 
   for (StrategyProfileIterator iter(StrategySupportProfile(Game(const_cast<GameRep *>(this))));
        !iter.AtEnd(); iter++) {
-    for (int pl = 1; pl <= NumPlayers(); pl++) {
-      p_file << (*iter)->GetPayoff(pl) << " ";
+    for (auto player : players) {
+      p_file << (*iter)->GetPayoff(player) << " ";
     }
     p_file << "\n";
   }
@@ -277,9 +306,8 @@ template <class T> void MixedStrategyProfileRep<T>::SetCentroid()
 {
   for (auto player : m_support.GetGame()->GetPlayers()) {
     T center = ((T) 1) / ((T) m_support.NumStrategies(player->GetNumber()));
-    for (Array<GameStrategy>::const_iterator strategy = m_support.Strategies(player).begin();
-         strategy != m_support.Strategies(player).end(); ++strategy) {
-      (*this)[*strategy] = center;
+    for (auto strategy : m_support.GetStrategies(player)) {
+      (*this)[strategy] = center;
     }
   }
 }
@@ -290,14 +318,12 @@ MixedStrategyProfileRep<T> *MixedStrategyProfileRep<T>::Normalize() const
   auto norm = Copy();
   for (auto player : m_support.GetGame()->GetPlayers()) {
     T sum = (T) 0;
-    for (auto strategy = m_support.Strategies(player).begin();
-         strategy != m_support.Strategies(player).end(); ++strategy) {
-      sum += (*this)[*strategy];
+    for (auto strategy : m_support.GetStrategies(player)) {
+      sum += (*this)[strategy];
     }
     if (sum == (T) 0) continue;
-    for (auto strategy = m_support.Strategies(player).begin();
-         strategy != m_support.Strategies(player).end(); ++strategy) {
-      (*norm)[*strategy] /= sum;
+    for (auto strategy : m_support.GetStrategies(player)) {
+      (*norm)[strategy] /= sum;
     }
   }
   return norm;
@@ -311,11 +337,9 @@ template<> void MixedStrategyProfileRep<double>::Randomize()
   // To generate a uniform distribution on the simplex correctly,
   // take i.i.d. samples from an exponential distribution, and
   // renormalize at the end (this is a special case of the Dirichlet distribution).
-  for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
-    GamePlayer player = nfg->GetPlayer(pl);
-    for (size_t st = 1; st <= player->GetStrategies().size(); st++) {
-      (*this)[player->GetStrategies()[st]] = -std::log(((double) std::rand()) /
-                                                       ((double) RAND_MAX));
+  for (auto player : nfg->GetPlayers()) {
+    for (auto strategy : player->GetStrategies()) {
+      (*this)[strategy] = -std::log(((double) std::rand()) / ((double) RAND_MAX));
     }
   }
   auto normed = Normalize();
@@ -335,8 +359,7 @@ template <class T> void MixedStrategyProfileRep<T>::Randomize(int p_denom)
   Game nfg = m_support.GetGame();
   m_probs = T(0);
 
-  for (int pl = 1; pl <= nfg->NumPlayers(); pl++) {
-    GamePlayer player = nfg->GetPlayer(pl);
+  for (auto player : nfg->GetPlayers()) {
     std::vector<int> cutoffs;
     for (size_t st = 1; st < player->GetStrategies().size(); st++) {
       // When we support C++11, we will be able to implement uniformity better here.
@@ -359,10 +382,10 @@ T MixedStrategyProfileRep<T>::GetRegret(const GameStrategy &p_strategy) const
   GamePlayer player = p_strategy->GetPlayer();
   T payoff = GetPayoffDeriv(player->GetNumber(), p_strategy);
   T brpayoff = payoff;
-  for (int st = 1; st <= player->NumStrategies(); st++) {
-    if (st != p_strategy->GetNumber()) {
+  for (auto strategy : player->GetStrategies()) {
+    if (strategy != p_strategy) {
       brpayoff = std::max(brpayoff,
-                          GetPayoffDeriv(player->GetNumber(), player->GetStrategy(st)));
+                          GetPayoffDeriv(player->GetNumber(), strategy));
     }
   }
   return brpayoff - payoff;
@@ -423,12 +446,11 @@ template <class T>
 Vector<T> MixedStrategyProfile<T>::operator[](const GamePlayer &p_player) const
 {
   CheckVersion();
-  Vector<T> probs(m_rep->m_support.Strategies(p_player).size());
-  const Array<GameStrategy> &strategies = m_rep->m_support.Strategies(p_player);
+  auto strategies = m_rep->m_support.GetStrategies(p_player);
+  Vector<T> probs(strategies.size());
   int st = 1;
-  for (Array<GameStrategy>::const_iterator strategy = strategies.begin();
-       strategy != strategies.end(); ++st, ++strategy) {
-    probs[st] = (*this)[*strategy];
+  for (auto strategy : strategies) {
+    probs[st] = (*this)[strategy];
   }
   return probs;
 }
@@ -466,16 +488,15 @@ template <class T> T MixedStrategyProfile<T>::GetLiapValue() const
 
   T liapValue = (T) 0;
 
-  for (auto player : m_rep->m_support.GetGame()->GetPlayers()) {
+  for (auto player : m_rep->m_support.GetPlayers()) {
     // values of the player's strategies
     Array<T> values(m_rep->m_support.NumStrategies(player->GetNumber()));
 
     T avg = (T) 0, sum = (T) 0;
-    for (Array<GameStrategy>::const_iterator strategy = m_rep->m_support.Strategies(player).begin();
-         strategy != m_rep->m_support.Strategies(player).end(); ++strategy) {
-      const T &prob = (*this)[*strategy];
-      values[m_rep->m_support.GetIndex(*strategy)] = GetPayoff(*strategy);
-      avg += prob * values[m_rep->m_support.GetIndex(*strategy)];
+    for (auto strategy : m_rep->m_support.GetStrategies(player)) {
+      const T &prob = (*this)[strategy];
+      values[m_rep->m_support.GetIndex(strategy)] = GetPayoff(strategy);
+      avg += prob * values[m_rep->m_support.GetIndex(strategy)];
       sum += prob;
       if (prob < (T) 0) {
         liapValue += BIG1*prob*prob;  // penalty for negative probabilities

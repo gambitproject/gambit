@@ -315,9 +315,8 @@ NashLcpBehaviorSolver<T>::GetProfile(const BehaviorSupportProfile &p_support,
     int iset = n->GetInfoset()->GetNumber();
 
     if (n->GetPlayer()->IsChance()) {
-      for (int i = 1; i <= n->NumChildren(); i++) {
-	GetProfile(p_support, tab, v, sol, n->GetChild(i), s1, s2,
-		   p_solution);
+      for (auto child : n->GetChildren()) {
+        GetProfile(p_support, tab, v, sol, child, s1, s2, p_solution);
       }
     }
     else if (pl == 1) {

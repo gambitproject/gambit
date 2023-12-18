@@ -23,6 +23,9 @@
 #ifndef LIBGAMBIT_ARRAY_H
 #define LIBGAMBIT_ARRAY_H
 
+#include <vector>
+#include <iterator>
+
 namespace Gambit {
 
 /// A basic bounds-checked array
@@ -51,32 +54,46 @@ protected:
 public:
   class iterator {
   private:
-    Array &m_array;
+    Array *m_array;
     int m_index;
+
   public:
-    iterator(Array &p_array, int p_index)
+    using iterator_category = std::input_iterator_tag;
+    using difference_type = typename std::vector<T>::iterator::difference_type;
+    using value_type = T;
+    using pointer = value_type*;
+    using reference = value_type&;
+
+    iterator(Array *p_array, int p_index)
       : m_array(p_array), m_index(p_index)  { }
-    T &operator*()  { return m_array[m_index]; }
-    T &operator->()  { return m_array[m_index]; }
+    reference operator*()  { return (*m_array)[m_index]; }
+    pointer operator->()  { return &(*m_array)[m_index]; }
     iterator &operator++()  { m_index++; return *this; }
     bool operator==(const iterator &it) const
-    { return (&m_array == &it.m_array) && (m_index == it.m_index); }
+    { return (m_array == it.m_array) && (m_index == it.m_index); }
     bool operator!=(const iterator &it) const
     { return !(*this == it); }
   };
 
   class const_iterator {
   private:
-    const Array &m_array;
+    const Array *m_array;
     int m_index;
+
   public:
-    const_iterator(const Array &p_array, int p_index)
+    using iterator_category = std::input_iterator_tag;
+    using difference_type = typename std::vector<T>::iterator::difference_type;
+    using value_type = T;
+    using pointer = value_type*;
+    using reference = value_type&;
+
+    const_iterator(const Array *p_array, int p_index)
       : m_array(p_array), m_index(p_index)  { }
-    const T &operator*() const { return m_array[m_index]; }
-    const T &operator->() const { return m_array[m_index]; }
+    const T &operator*() const { return (*m_array)[m_index]; }
+    const T &operator->() const { return (*m_array)[m_index]; }
     const_iterator &operator++()  { m_index++; return *this; }
     bool operator==(const const_iterator &it) const
-    { return (&m_array == &it.m_array) && (m_index == it.m_index); }
+    { return (m_array == it.m_array) && (m_index == it.m_index); }
     bool operator!=(const const_iterator &it) const
     { return !(*this == it); }
   };
@@ -154,17 +171,17 @@ public:
   int Last() const { return maxdex; }
 
   /// Return a forward iterator starting at the beginning of the array
-  iterator begin()  { return iterator(*this, mindex); }
+  iterator begin()  { return iterator(this, mindex); }
   /// Return a forward iterator past the end of the array
-  iterator end()    { return iterator(*this, maxdex + 1); }
+  iterator end()    { return iterator(this, maxdex + 1); }
   /// Return a const forward iterator starting at the beginning of the array
-  const_iterator begin() const { return const_iterator(*this, mindex); }
+  const_iterator begin() const { return const_iterator(this, mindex); }
   /// Return a const forward iterator past the end of the array
-  const_iterator end() const   { return const_iterator(*this, maxdex + 1); }
+  const_iterator end() const   { return const_iterator(this, maxdex + 1); }
   /// Return a const forward iterator starting at the beginning of the array
-  const_iterator cbegin() const { return const_iterator(*this, mindex); }
+  const_iterator cbegin() const { return const_iterator(this, mindex); }
   /// Return a const forward iterator past the end of the array
-  const_iterator cend() const   { return const_iterator(*this, maxdex + 1); }
+  const_iterator cend() const   { return const_iterator(this, maxdex + 1); }
 
   /// Access the index'th entry in the array
   const T &operator[](int index) const 

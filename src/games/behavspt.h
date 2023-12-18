@@ -86,6 +86,8 @@ public:
   { return m_actions[p_infoset->GetPlayer()->GetNumber()][p_infoset->GetNumber()][p_act]; }
   GameAction GetAction(int pl, int iset, int act) const
   { return m_actions[pl][iset][act]; }
+  const Array<GameAction> &GetActions(const GameInfoset &p_infoset)
+  { return m_actions[p_infoset->GetPlayer()->GetNumber()][p_infoset->GetNumber()]; }
 
   /// Returns the position of the action in the support. 
   int GetIndex(const GameAction &) const;

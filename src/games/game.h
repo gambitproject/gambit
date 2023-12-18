@@ -193,12 +193,13 @@ public:
   virtual int NumActions() const = 0;
   /// Returns the p_index'th action at the information set
   virtual GameAction GetAction(int p_index) const = 0;
-  /// Returns a forward iterator over the available actions
-  //virtual GameActionIterator Actions(void) const = 0; 
+  /// Returns the actions available at the information set
+  virtual Array<GameAction> GetActions() const = 0;
   //@}
 
   virtual int NumMembers() const = 0;
   virtual GameNode GetMember(int p_index) const = 0;
+  virtual Array<GameNode> GetMembers() const = 0;
 
   virtual bool Precedes(GameNode) const = 0;
 
@@ -311,6 +312,8 @@ public:
   int NumInfosets() const { return m_infosets.size(); }
   /// Returns the p_index'th information set
   GameInfoset GetInfoset(int p_index) const;
+  /// Returns the information sets for the players
+  Array<GameInfoset> GetInfosets() const;
 
   /// @name Strategies
   //@{
@@ -319,7 +322,7 @@ public:
   /// Returns the st'th strategy for the player
   GameStrategy GetStrategy(int st) const;
   /// Returns the array of strategies available to the player
-  const Array<GameStrategyRep *> &GetStrategies() const;
+  Array<GameStrategy> GetStrategies() const;
   /// Creates a new strategy for the player
   GameStrategy NewStrategy();
   //@}
@@ -341,6 +344,8 @@ public:
   virtual int NumberInInfoset() const = 0;
 
   virtual int NumChildren() const = 0;
+  virtual GameNode GetChild(int i) const = 0;
+  virtual Array<GameNode> GetChildren() const = 0;
 
   virtual GameInfoset GetInfoset() const = 0;
   virtual void SetInfoset(GameInfoset) = 0;
@@ -349,7 +354,6 @@ public:
   virtual bool IsTerminal() const = 0;
   virtual GamePlayer GetPlayer() const = 0;
   virtual GameAction GetPriorAction() const = 0;
-  virtual GameNode GetChild(int i) const = 0;
   virtual GameNode GetParent() const = 0;
   virtual GameNode GetNextSibling() const = 0;
   virtual GameNode GetPriorSibling() const = 0;
@@ -404,61 +408,6 @@ protected:
   virtual void BuildComputedValues() { }
 
 public:
-  class Players {
-    friend class GameRep;
-  public:
-    class iterator {
-    private:
-      Game m_game;
-      int m_index;
-    public:
-      iterator(Game &p_game, int p_index)
-        : m_game(p_game), m_index(p_index)  { }
-      GamePlayer operator*()  { return m_game->GetPlayer(m_index); }
-      GamePlayer operator->()  { return m_game->GetPlayer(m_index); }
-      iterator &operator++()  { m_index++; return *this; }
-      bool operator==(const iterator &it) const
-      { return (m_game == it.m_game) && (m_index == it.m_index); }
-      bool operator!=(const iterator &it) const
-      { return !(*this == it); }
-    };
-
-    class const_iterator {
-    private:
-      const Game m_game;
-      int m_index;
-    public:
-      const_iterator(const Game &p_game, int p_index)
-        : m_game(p_game), m_index(p_index)  { }
-      const GamePlayer operator*()  { return m_game->GetPlayer(m_index); }
-      const GamePlayer operator->()  { return m_game->GetPlayer(m_index); }
-      const_iterator &operator++()  { m_index++; return *this; }
-      bool operator==(const const_iterator &it) const
-      { return (m_game == it.m_game) && (m_index == it.m_index); }
-      bool operator!=(const const_iterator &it) const
-      { return !(*this == it); }
-    };
-
-    /// Return a forward iterator starting at the beginning of the array
-    iterator begin()  { return iterator(m_game, 1); }
-    /// Return a forward iterator past the end of the array
-    iterator end()    { return iterator(m_game, m_game->NumPlayers() + 1); }
-    /// Return a const forward iterator starting at the beginning of the array
-    const_iterator begin() const { return const_iterator(m_game, 1); }
-    /// Return a const forward iterator past the end of the array
-    const_iterator end() const   { return const_iterator(m_game, m_game->NumPlayers()); }
-    /// Return a const forward iterator starting at the beginning of the array
-    const_iterator cbegin() const { return const_iterator(m_game, 1); }
-    /// Return a const forward iterator past the end of the array
-    const_iterator cend() const   { return const_iterator(m_game, m_game->NumPlayers()); }
-
-  private:
-    Game m_game;
-
-    Players(Game p_game) : m_game(p_game) { }
-  };
-
-
   /// @name Lifecycle
   //@{
   /// Clean up the game
@@ -548,8 +497,7 @@ public:
   /// Returns the pl'th player in the game
   virtual GamePlayer GetPlayer(int pl) const = 0;
   /// Returns the set of players in the game 
-  Players GetPlayers()
-  { return Players(Game(this)); }
+  virtual Array<GamePlayer> GetPlayers() const;
   /// Returns the chance (nature) player
   virtual GamePlayer GetChance() const = 0;
   /// Creates a new player in the game, with no moves
@@ -631,8 +579,6 @@ inline int GamePlayerRep::NumStrategies() const
 { m_game->BuildComputedValues(); return m_strategies.size(); }
 inline GameStrategy GamePlayerRep::GetStrategy(int st) const 
 { m_game->BuildComputedValues(); return m_strategies[st]; }
-inline const Array<GameStrategyRep *> &GamePlayerRep::GetStrategies() const
-{ m_game->BuildComputedValues(); return m_strategies; }
 
 //=======================================================================
 
