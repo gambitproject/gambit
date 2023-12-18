@@ -27,7 +27,7 @@ ACLOCAL_AMFLAGS = -I m4
 EXTRA_DIST = \
 	gambit.spec \
 	gambit.desktop \
-        gambit.wxs \
+    gambit.wxs \
 	contrib/mac/Info.plist \
 	contrib/mac/gambit.icns \
 	src/labenski/README.txt \
@@ -244,59 +244,7 @@ EXTRA_DIST = \
 	contrib/games/winkels.nfg \
 	contrib/games/yamamoto.nfg \
 	contrib/games/zero.nfg \
-	setup.py \
-	src/README.rst \
-	src/pygambit/__init__.py \
-	src/pygambit/enumeration.py \
-	src/pygambit/gameiter.py \
-	src/pygambit/gte.py \
-	src/pygambit/levelk.py \
-	src/pygambit/nash.py \
-	src/pygambit/pctrace.py \
-	src/pygambit/profiles.py \
-	src/pygambit/qre.py \
-	src/pygambit/supports.py \
-	src/pygambit/__init__.py \
-	src/pygambit/action.pxi \
-	src/pygambit/behav.pxi \
-	src/pygambit/error.py \
-	src/pygambit/game.pxi \
-	src/pygambit/infoset.pxi \
-	src/pygambit/gambit.pxd \
-	src/pygambit/gambit.pyx \
-	src/pygambit/mixed.pxi \
-	src/pygambit/nash.pxi \
-	src/pygambit/node.pxi \
-	src/pygambit/outcome.pxi \
-	src/pygambit/player.pxi \
-	src/pygambit/strategy.pxi \
-	src/pygambit/stratspt.pxi \
-    src/pygambit/nash.h \
-	src/pygambit/util.h \
-	src/pygambit/tests/test_actions.py \
-	src/pygambit/tests/test_behav.py \
-	src/pygambit/tests/test_extensive.py \
-	src/pygambit/tests/test_game.py \
-	src/pygambit/tests/test_game_resolve_functions.py \
-	src/pygambit/tests/test_infosets.py \
-	src/pygambit/tests/test_mixed.py \
-	src/pygambit/tests/test_nash.py \
-	src/pygambit/tests/test_node.py \
-	src/pygambit/tests/test_outcomes.py \
-	src/pygambit/tests/test_players.py \
-	src/pygambit/tests/test_strategic.py \
-	src/pygambit/tests/test_stratprofiles.py \
-	src/pygambit/tests/test_userguide.py \
-	src/pygambit/tests/test_games/basic_extensive_game.efg \
-	src/pygambit/tests/test_games/complicated_extensive_game.efg \
-	src/pygambit/tests/test_games/const_sum_game.nfg \
-	src/pygambit/tests/test_games/mixed_behavior_game.efg \
-	src/pygambit/tests/test_games/mixed_strategy.nfg \
-	src/pygambit/tests/test_games/non_const_sum_game.nfg \
-	src/pygambit/tests/test_games/not_perfect_recall.efg \
-	src/pygambit/tests/test_games/payoff_game.nfg \
-	src/pygambit/tests/test_games/perfect_recall.efg
-
+	src/README.rst
 
 core_SOURCES = \
 	src/core/array.h \

@@ -2,6 +2,8 @@ import pytest
 
 import pygambit as gbt
 
+from . import games
+
 
 def _generate_strategic_game() -> gbt.Game:
     game = gbt.Game.new_table([2, 2])
@@ -124,7 +126,7 @@ def test_player_strategy_bad_type():
 
 
 def test_player_get_min_payoff():
-    game = gbt.Game.read_game("test_games/payoff_game.nfg")
+    game = games.read_from_file("payoff_game.nfg")
     assert game.players[0].min_payoff == 4
     assert game.players["Player 1"].min_payoff == 4
     assert game.players[1].min_payoff == 1
@@ -132,7 +134,7 @@ def test_player_get_min_payoff():
 
 
 def test_player_get_max_payoff():
-    game = gbt.Game.read_game("test_games/payoff_game.nfg")
+    game = games.read_from_file("payoff_game.nfg")
     assert game.players[0].max_payoff == 10
     assert game.players["Player 1"].max_payoff == 10
     assert game.players[1].max_payoff == 8

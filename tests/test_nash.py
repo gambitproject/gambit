@@ -8,11 +8,13 @@ rigorous test suite for the algorithms across all games.
 import pygambit as gbt
 import unittest
 
+from . import games
+
 
 class TestNash(unittest.TestCase):
     """Test calls to Nash algorithms using Myerson poker - a game to which all algorithms apply."""
     def setUp(self):
-        self.poker = gbt.Game.read_game("test_games/poker.efg")
+        self.poker = games.read_from_file("poker.efg")
         self.mixed_rat = self.poker.mixed_strategy_profile(
             rational=True,
             data=[[gbt.Rational(1, 3), gbt.Rational(2, 3), gbt.Rational(0), gbt.Rational(0)],

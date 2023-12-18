@@ -5,7 +5,7 @@ import pygambit
 
 class TestGambitEfgFile(unittest.TestCase):
     def setUp(self):
-        self.file_text = open("../../../contrib/games/e02.efg").read()
+        self.file_text = open("contrib/games/e02.efg").read()
 
     def tearDown(self):
         pass
@@ -80,7 +80,7 @@ class TestGambitEfgFile(unittest.TestCase):
 
 class TestGambitNfgFile(unittest.TestCase):
     def setUp(self):
-        self.file_text = open("../../../contrib/games/e02.nfg").read()
+        self.file_text = open("contrib/games/e02.nfg").read()
 
     def tearDown(self):
         pass

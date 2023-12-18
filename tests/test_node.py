@@ -2,12 +2,14 @@ import unittest
 
 import pygambit
 
+from . import games
+
 
 class TestGambitNode(unittest.TestCase):
     def setUp(self):
         self.game = pygambit.Game.new_tree()
         self.extensive_game = (
-            pygambit.Game.read_game("test_games/basic_extensive_game.efg")
+            games.read_from_file("basic_extensive_game.efg")
         )
 
     def tearDown(self):

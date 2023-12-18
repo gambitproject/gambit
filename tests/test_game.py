@@ -3,6 +3,8 @@ import numpy as np
 
 import pygambit as gbt
 
+from . import games
+
 
 def test_from_arrays():
     m = np.array([[8, 2], [10, 5]])
@@ -116,7 +118,7 @@ def test_strategy_profile_invalidation_payoff():
 def test_behavior_profile_invalidation():
     """Test for invalidating mixed strategy profiles on tables when game changes.
     """
-    g = gbt.Game.read_game("test_games/basic_extensive_game.efg")
+    g = games.read_from_file("basic_extensive_game.efg")
     profiles = [g.mixed_behavior_profile(rational=b) for b in [False, True]]
     g.delete_action(g.players[0].infosets[0].actions[0])
     for profile in profiles:

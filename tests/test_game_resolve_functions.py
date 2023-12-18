@@ -1,23 +1,16 @@
 import unittest
 
-import pygambit as gbt
-
+from . import games
 
 class TestGambitResolveFunctions(unittest.TestCase):
     def setUp(self):
-        self.game1 = gbt.Game.read_game(
-            "./test_games/sample_extensive_game.efg"
-        )
+        self.game1 = games.read_from_file("sample_extensive_game.efg")
 
         # has named outcomes
-        self.game2 = gbt.Game.read_game(
-            "./test_games/basic_extensive_game.efg"
-        )
+        self.game2 = games.read_from_file("basic_extensive_game.efg")
 
         # has named infosets
-        self.game3 = gbt.Game.read_game(
-            "./test_games/mixed_behavior_game.efg"
-        )
+        self.game3 = games.read_from_file("mixed_behavior_game.efg")
 
     def tearDown(self):
         del self.game1
