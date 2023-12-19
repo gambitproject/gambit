@@ -21,6 +21,7 @@
 #
 import itertools
 import pathlib
+import threading
 
 import numpy as np
 from deprecated import deprecated
@@ -886,13 +887,13 @@ class Game:
                 raise KeyError(f"{funcname}(): no strategy with label '{strategy}'")
         raise TypeError(f"{funcname}(): {argname} must be Strategy or str, not {strategy.__class__.__name__}")
 
-    def _resolve_node(self, node: typing.Any, funcname: str, argname: str = "node") -> Node:
-        """Resolve an attempt to reference a node of the game.
+    def _resolve_node(self, nodes: typing.Any, funcname: str, argname: str = "node") -> typing.Iterable[Node]:
+        """Resolve an attempt to reference a group of nodes of the game.
 
         Parameters
         ----------
-        node : Any
-            An object to resolve as a reference to a node.
+        nodes : Any
+            A group of nodes to resolve as a reference to a node.
         funcname : str
             The name of the function to raise any exception on behalf of.
         argname : str, default 'node'
@@ -905,23 +906,42 @@ class Game:
         KeyError
             If `node` is a string and no node in the game has that label.
         TypeError
-            If `node` is not a `Node` or a `str`
+            If `node` is not either a `Node` or a `str` or an `Iterable`.
         ValueError
             If `node` is an empty `str` or all spaces
         """
-        if isinstance(node, Node):
-            if node.game != self:
-                raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
-            return node
-        elif isinstance(node, str):
-            if not node.strip():
-                raise ValueError(f"{funcname}(): {argname} cannot be an empty string or all spaces")
-            for n in self.nodes():
-                if n.label == node:
-                    return n
-            raise KeyError(f"{funcname}(): no node with label '{node}'")
-        raise TypeError(f"{funcname}(): {argname} must be Node or str, not {node.__class__.__name__}")
+        ReferenceSet = []
+        if isinstance(nodes, Node):
+           if nodes.game != self:
+              raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
+           else:
+              return nodes
+        elif isinstance(nodes, str):
+           if not nodes.strip():
+              raise ValueError(f"{funcname}(): {argname} cannot be an empty string or all spaces")
+           for n in self.nodes():
+              if n.label == nodes:
+                 return n
+           raise KeyError(f"{funcname}(): no node with label '{nodes}'")
+        elif hasattr(nodes, '__iter__'):
+           for node in nodes: 
+              if isinstance(nodes, Node):
+                 if nodes.game != self:
+                    raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
+                 else:
+                    ReferenceSet.append(node)
+              elif isinstance(nodes, str):
+                  if not nodes.strip():
+                      raise ValueError(f"{funcname}(): {argname} cannot be an empty string or all spaces")
+                  for n in self.nodes():
+                      if n.label == nodes:
+                         ReferenceSet.append(n)
+                  raise KeyError(f"{funcname}(): no node with label '{nodes}'")
+           return ReferenceSet
 
+        if not isinstance(argname, (Node, str)) and not hasattr(argname, '__iter__'):
+           raise TypeError(f"{funcname}(): {argname} must be either Node, or str, or Iterable")
+		
     def _resolve_infoset(self, infoset: typing.Any, funcname: str, argname: str = "infoset") -> Infoset:
         """Resolve an attempt to reference an information set of the game.
 
@@ -1000,55 +1020,73 @@ class Game:
     def append_move(self, nodes: typing.Union[NodeReference, NodeReferenceSet],
                           player: typing.Union[Player, str],
                           actions: typing.List[str]) -> None:
-        """Add a move for `player` at the terminal node `node`.  `node` becomes part of
+        """Add a move for `player` at terminal`nodes`.  All elements of `nodes` become part of
         a new information set, with actions labeled according to `actions`.
 
         Raises
         ------
         UndefinedOperationError
-            If `node` is not a terminal node, or `actions` is not a positive number.
+            If `nodes` are not terminal nodes, or `actions` is not a positive number.
         MismatchError
-            If `node` is a `Node` from a different game, or `player` is a `Player` from a
-            different game.
+            If an element from `nodes` is a `Node` from a different game,
+            or `player` is a `Player` from a different game.
         """
-        L = []
-        for node in nodes:
-           resolved_node = cython.cast(Node, self._resolve_node(node, 'append_move'))
-           resolved_player = cython.cast(Player, self._resolve_player(player, 'append_move'))
+        resolved_player = cython.cast(Player, self._resolve_player(player, 'append_move'))
+        if len(actions) == 0:
+           raise UndefinedOperationError("append_move(): `actions` must be a nonempty list")
+        lock = threading.Lock()
+        if hasattr(nodes, '__iter__'):
+           with lock:
+              L = []
+              for nd in nodes:
+                 rs = cython.cast(Node, self._resolve_node(nd, 'append_move'))
+                 if rs in L:
+                    raise UndefinedOperationError("append_move(): `nodes` resolve to the same terminal node")
+                 if len(rs.children) > 0:
+                    raise UndefinedOperationError("append_move(): `node` must be a terminal node") 
+                 L.append(rs) 
+              for nd in nodes:
+                 resolved_node = cython.cast(Node, self._resolve_node(nd, 'append_move'))
+                 resolved_node.node.deref().AppendMove(resolved_player.player, len(actions))
+                 for label, action in zip(actions, resolved_node.infoset.actions):
+                    action.label = label
+        else:
+           resolved_node = cython.cast(Node, self._resolve_node(nodes, 'append_move'))
            if len(resolved_node.children) > 0:
               raise UndefinedOperationError("append_move(): `node` must be a terminal node")
-           if len(actions) == 0:
-              raise UndefinedOperationError("append_move(): `actions` must be a nonempty list")
            resolved_node.node.deref().AppendMove(resolved_player.player, len(actions))
            for label, action in zip(actions, resolved_node.infoset.actions):
               action.label = label
-           if resolved_node in L:
-              raise UndefinedOperationError("append_move(): `nodes` resolve to the same terminal node") 
-           L.append(resolved_node)
 
     def append_infoset(self, nodes: typing.Union[NodeReference, NodeReferenceSet],
                        infoset: typing.Union[Infoset, str]) -> None:
-        """Add a move in information set `infoset` at the terminal node `node`.
+        """Add a move in information set `infoset` at the group of terminal nodes `nodes`.
 
         Raises
         ------
         UndefinedOperationError
-            If `node` is not a terminal node.
+            If an element in `nodes` is not a terminal node.
         MismatchError
-            If `node` is a `Node` from a different game, or `infoset` is an `Infoset` from a
+            If an element in `nodes` is a `Node` from a different game, or `infoset` is an `Infoset` from a
             different game.
         """
-        L = []
-        for node in nodes:
-           resolved_node = cython.cast(Node, self._resolve_node(node, 'append_infoset'))
-           resolved_infoset = cython.cast(Infoset, self._resolve_infoset(infoset, 'append_infoset'))
+        resolved_infoset = cython.cast(Infoset, self._resolve_infoset(infoset, 'append_infoset'))
+        if hasattr(nodes, '__iter__'):
+           lock = threading.Lock()
+           with lock:
+              for nd in nodes:
+                 resolved_nodes = cython.cast(Node, self._resolve_node(nd, 'append_infoset'))
+                 if len(resolved_nodes.children) > 0:
+                    raise UndefinedOperationError("append_move(): `node` must be a terminal node")
+              for nd in nodes:
+                 resolved_nodes = cython.cast(Node, self._resolve_node(nd, 'append_infoset'))
+                 resolved_nodes.node.deref().AppendMove(resolved_infoset.infoset)          					
+        else:
+           resolved_node = cython.cast(Node, self._resolve_node(nodes, 'append_infoset'))
            if len(resolved_node.children) > 0:
               raise UndefinedOperationError("append_move(): `node` must be a terminal node")
            resolved_node.node.deref().AppendMove(resolved_infoset.infoset)
-           if resolved_node in L:
-              raise UndefinedOperationError("append_move(): `nodes` resolve to the same terminal node") 
-           L.append(resolved_node)
-		
+		   
     def insert_move(self, node: typing.Union[Node, str],
                     player: typing.Union[Player, str], actions: int) -> None:
         """Insert a move for `player` prior to the node `node`, with `actions` actions.

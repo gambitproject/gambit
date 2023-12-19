@@ -9,9 +9,9 @@ def _extensive_game() -> gbt.Game:
 
 def _create_game() -> gbt.Game:
     game = gbt.Game.new_tree(players=["Player 1", "Player 2", "Player 3"])
-    game.append_move([game.root], "Player 1", ["U", "M", "D"])
-    game.append_move([game.root.children[0]], "Player 2", ["L", "R"])
-    game.append_infoset([game.root.children[2]], game.root.children[0].infoset)
+    game.append_move(game.root, "Player 1", ["U", "M", "D"])
+    game.append_move(game.root.children[0], "Player 2", ["L", "R"])
+    game.append_infoset(game.root.children[2], game.root.children[0].infoset)
     return game
 
 
@@ -67,16 +67,16 @@ def test_infoset_add_action_error():
 
 def test_append_infoset_node_is_not_terminal():
     game = _create_game()
-    game.append_move([game.root.children[0].children[0]], "Player 3", ["B", "F"])
+    game.append_move(game.root.children[0].children[0], "Player 3", ["B", "F"])
 
     with pytest.raises(gbt.UndefinedOperationError):
-        _ = game.append_infoset([game.root.children[2]],
+        _ = game.append_infoset(game.root.children[2],
                                 game.root.children[0].children[0].infoset)
 
 
 def test_append_infoset_node_list_with_not_terminal_node():
     game = _create_game()
-    game.append_move([game.root.children[0].children[0]], "Player 3", ["B", "F"])
+    game.append_move(game.root.children[0].children[0], "Player 3", ["B", "F"])
 
     with pytest.raises(gbt.UndefinedOperationError):
         _ = game.append_infoset([game.root.children[1],
@@ -86,10 +86,10 @@ def test_append_infoset_node_list_with_not_terminal_node():
 
 def test_append_infoset_node_list_with_duplciate_nodes():
     game = _create_game()
-    game.append_move([game.root.children[0].children[0]], "Player 3", ["B", "F"])
+    game.append_move(game.root.children[0].children[0], "Player 3", ["B", "F"])
 
-    with pytest.raises(gbt.UndefinedOperationError):
+    with pytest.raises(ValueError):
         _ = game.append_infoset([game.root.children[0].children[1],
-                                game.root.children[1],
-                                game.root.children[0].children[1]],
+                                 game.root.children[1],
+                                 game.root.children[0].children[1]],
                                 game.root.children[0].children[0].infoset)

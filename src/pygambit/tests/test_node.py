@@ -12,8 +12,8 @@ class TestGambitNode(unittest.TestCase):
         self.basic_game = (
             pygambit.Game.new_tree(players=["Player 1", "Player 2", "Player 3"])
         )
-        self.basic_game.append_move([self.basic_game.root], "Player 1", ["U", "M", "D"])
-        self.basic_game.append_move([self.basic_game.root.children[0]], "Player 2", ["L", "R"])
+        self.basic_game.append_move(self.basic_game.root, "Player 1", ["U", "M", "D"])
+        self.basic_game.append_move(self.basic_game.root.children[0], "Player 2", ["L", "R"])
 
     def tearDown(self):
         del self.game
@@ -128,7 +128,7 @@ class TestGambitNode(unittest.TestCase):
         self.assertRaises(
             pygambit.UndefinedOperationError,
             self.extensive_game.append_move,
-            [self.extensive_game.root],
+            self.extensive_game.root,
             self.extensive_game.players[0],
             []
         )
@@ -138,7 +138,7 @@ class TestGambitNode(unittest.TestCase):
         self.assertRaises(
             pygambit.pygambit.MismatchError,
             self.game.append_move,
-            [self.game.root],
+            self.game.root,
             self.extensive_game.players[0],
             ["a"]
         )
@@ -147,7 +147,7 @@ class TestGambitNode(unittest.TestCase):
         "Test to ensure the node and the player are from the same game"
         self.assertRaises(pygambit.MismatchError,
                           self.game.append_infoset,
-                          [self.game.root],
+                          self.game.root,
                           self.extensive_game.players[0].infosets[0])
 
     def test_insert_move_error_player_actions(self):
@@ -220,26 +220,23 @@ class TestGambitNode(unittest.TestCase):
         self.assertRaises(pygambit.MismatchError, self.game.move_tree,
                           self.extensive_game.root, self.game.root)
 
-    def test_append_move_TypeError(self):
-        """Raise an error if try to add a move for player at terminal node
-        and the node is not of list type.
+    def test_en_passant_invalid_node(self):
+        """Test the case where we input the same valid nodes in append_move.
+        As the first is resolves the second becomes invalid. Then check if
+        the append_move added anything to the game.
         """
+        nodes_prior = self.basic_game.nodes()
         self.assertRaises(
-            TypeError,
+            pygambit.UndefinedOperationError,
             self.basic_game.append_move,
-            self.basic_game.root.children[0].children[0],
+            [self.basic_game.root.children[0],
+             self.basic_game.root.children[0]],
             "Player 3",
             ["B", "F"]
         )
+        nodes_posterior = self.basic_game.nodes()
 
-    def test_append_move_list_with_duplicate_nodes(self):
-        """Raise an error when a node is duplicated in list of nodes."""
-        nodes = [self.basic_game.root.children[0].children[0],
-                 self.basic_game.root.children[0].children[1],
-                 self.basic_game.root.children[0].children[0]]
-
-        self.assertRaises(pygambit.UndefinedOperationError, self.basic_game.append_move,
-                          nodes, "Player 3", ["B", "F"])
+        assert nodes_posterior == nodes_prior
 
     def test_append_move_parent_of_a_list_of_nodes(self):
         """Test the parent of the terminal nodes"""
@@ -250,19 +247,6 @@ class TestGambitNode(unittest.TestCase):
         assert (
             self.basic_game.root.children[1].player ==
             self.basic_game.root.children[0].children[0].player
-        )
-
-    def test_append_move_list_with_not_terminal_node(self):
-        """Test the parent of the terminal nodes"""
-        nodes = [self.basic_game.root.children[1],
-                 self.basic_game.root.children[0].children]
-
-        self.assertRaises(
-            TypeError,
-            self.basic_game.append_move,
-            nodes,
-            "Player 3",
-            ["F", "B"]
         )
 
     def test_append_move_not_terminal_node(self):
@@ -294,3 +278,7 @@ class TestGambitNode(unittest.TestCase):
                                             self.basic_game.root.children[1].children[0]],
                                             "Player 3",
                                             ["F", "B"])
+
+    def test_non_iterable_object(self):
+        self.assertRaises(AttributeError, self.basic_game.append_move,
+                          self.basic_game.nodes, "Player 2", ["L", "R"])
