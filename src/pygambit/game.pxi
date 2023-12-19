@@ -887,12 +887,12 @@ class Game:
                 raise KeyError(f"{funcname}(): no strategy with label '{strategy}'")
         raise TypeError(f"{funcname}(): {argname} must be Strategy or str, not {strategy.__class__.__name__}")
 
-    def _resolve_node(self, nodes: typing.Any, funcname: str, argname: str = "node") -> typing.Iterable[Node]:
+    def _resolve_node(self, node: typing.Any, funcname: str, argname: str = "node") -> typing.Iterable[Node]:
         """Resolve an attempt to reference a group of nodes of the game.
 
         Parameters
         ----------
-        nodes : Any
+        node : Any
             A group of nodes to resolve as a reference to a node.
         funcname : str
             The name of the function to raise any exception on behalf of.
@@ -911,32 +911,32 @@ class Game:
             If `node` is an empty `str` or all spaces
         """
         ReferenceSet = []
-        if isinstance(nodes, Node):
-           if nodes.game != self:
+        if isinstance(node, Node):
+           if node.game != self:
               raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
            else:
-              return nodes
-        elif isinstance(nodes, str):
-           if not nodes.strip():
+              return node
+        elif isinstance(node, str):
+           if not node.strip():
               raise ValueError(f"{funcname}(): {argname} cannot be an empty string or all spaces")
            for n in self.nodes():
-              if n.label == nodes:
+              if n.label == node:
                  return n
-           raise KeyError(f"{funcname}(): no node with label '{nodes}'")
-        elif hasattr(nodes, '__iter__'):
-           for node in nodes: 
-              if isinstance(nodes, Node):
-                 if nodes.game != self:
+           raise KeyError(f"{funcname}(): no node with label '{node}'")
+        elif hasattr(node, '__iter__'):
+           for nd in node: 
+              if isinstance(node, Node):
+                 if node.game != self:
                     raise MismatchError(f"{funcname}(): {argname} must be part of the same game")
                  else:
-                    ReferenceSet.append(node)
-              elif isinstance(nodes, str):
-                  if not nodes.strip():
+                    ReferenceSet.append(nd)
+              elif isinstance(node, str):
+                  if not node.strip():
                       raise ValueError(f"{funcname}(): {argname} cannot be an empty string or all spaces")
                   for n in self.nodes():
-                      if n.label == nodes:
+                      if n.label == node:
                          ReferenceSet.append(n)
-                  raise KeyError(f"{funcname}(): no node with label '{nodes}'")
+                  raise KeyError(f"{funcname}(): no node with label '{node}'")
            return ReferenceSet
 
         if not isinstance(argname, (Node, str)) and not hasattr(argname, '__iter__'):
