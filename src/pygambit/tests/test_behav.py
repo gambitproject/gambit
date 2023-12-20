@@ -8,17 +8,17 @@ class TestGambitMixedBehavGame(unittest.TestCase):
         self.game = gbt.Game.read_game(
             "test_games/mixed_behavior_game.efg"
         )
-        self.profile_double = self.game.mixed_behavior_profile()
-        self.profile_rational = self.game.mixed_behavior_profile(rational=True)
+        self.profile_double = self.game.mixed_behavior_profile(None, rational=False)
+        self.profile_rational = self.game.mixed_behavior_profile(None, rational=True)
 
         self.game_with_chance = gbt.Game.read_game(
             "test_games/complicated_extensive_game.efg"
         )
         self.profile_double_w_chance = (
-            self.game_with_chance.mixed_behavior_profile(rational=False)
+            self.game_with_chance.mixed_behavior_profile(None, rational=False)
         )
         self.profile_rational_w_chance = (
-            self.game_with_chance.mixed_behavior_profile(rational=True)
+            self.game_with_chance.mixed_behavior_profile(None, rational=True)
         )
 
     def tearDown(self):
@@ -705,3 +705,59 @@ class TestGambitMixedBehavGame(unittest.TestCase):
                           chance_action)
         self.assertRaises(ValueError, self.profile_rational_w_chance.action_value,
                           chance_action)
+
+    def test_specific_distribution(self):
+        """Test that the mixed behavior profile is initialized from a specific distribution
+        for each player over his actions.
+        """
+        data_double = [[[1/5, 4/5]], [[1/4, 3/4]], [[1, 0]]]
+        profile = self.game.mixed_behavior_profile(data_double, False)
+
+        assert profile[self.game.players[0]] == data_double[0]
+        assert profile[self.game.players[1]] == data_double[1]
+        assert profile[self.game.players[2]] == data_double[2]
+
+        data_rational = [[[gbt.Rational(1, 5), gbt.Rational(4, 5)]],
+                         [[gbt.Rational(1, 4), gbt.Rational(3, 4)]],
+                         [[gbt.Rational(1, 1), gbt.Rational(0, 1)]]]
+        profile = self.game.mixed_behavior_profile(data_rational, True)
+
+        assert profile[self.game.players[0]] == data_rational[0]
+        assert profile[self.game.players[1]] == data_rational[1]
+        assert profile[self.game.players[2]] == data_rational[2]
+
+        data_double = [[[1/5, 4/5], [1/4, 3/4]], [[1, 0]]]
+
+        profile = self.game_with_chance.mixed_behavior_profile(data_double, False)
+
+        assert profile[self.game_with_chance.players[0]] == data_double[0]
+        assert profile[self.game_with_chance.players[1]] == data_double[1]
+
+    def test_probabilities_infoset_by_label_for_specific_distribution(self):
+        data_double = [[[1/5, 4/5]], [[1/4, 3/4]], [[1, 0]]]
+        profile = self.game.mixed_behavior_profile(data_double, False)
+
+        assert profile["Infoset 1:1"] == data_double[0][0]
+        assert profile["Infoset 2:1"] == data_double[1][0]
+        assert profile["Infoset 3:1"] == data_double[2][0]
+
+    def test_normalize(self):
+        data_double = [[[2/5, 8/5]], [[3/4, 9/4]], [[5, 0]]]
+        expected_double = [[[1/5, 4/5]], [[1/4, 3/4]], [[1, 0]]]
+
+        assert (
+           self.game.mixed_behavior_profile(data_double, False).normalize() ==
+           self.game.mixed_behavior_profile(expected_double, False)
+        )
+
+        data_rational = [[[gbt.Rational(10, 5), gbt.Rational(40, 5)]],
+                         [[gbt.Rational(4, 4), gbt.Rational(12, 4)]],
+                         [[gbt.Rational(7, 1), gbt.Rational(0, 1)]]]
+        expected_rational = [[[gbt.Rational(1, 5), gbt.Rational(4, 5)]],
+                             [[gbt.Rational(1, 4), gbt.Rational(3, 4)]],
+                             [[gbt.Rational(1, 1), gbt.Rational(0, 1)]]]
+
+        assert (
+           self.game.mixed_behavior_profile(data_rational, True).normalize() ==
+           self.game.mixed_behavior_profile(expected_rational, True)
+        )

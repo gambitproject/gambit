@@ -741,7 +741,7 @@ class Game:
                                 f"actions for the infoset {i} for {p}"
                             )
                         for (a, u) in zip(i.actions, v):
-                            mbpr[a] = float(u)
+                            mbpr[a] = Rational(u)
                 return mbpr
         else:
             raise UndefinedOperationError(
