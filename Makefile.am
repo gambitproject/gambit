@@ -731,8 +731,8 @@ msw-msi:
 	light -ext WixUIExtension gambit.wixobj
 
 clang-tidy:
-	## clang-tidy ${top_srcdir}/src/core/*.cc -- --std=c++11 -I ${top_srcdir}/src -I ${top_srcdir}/src/labenski/include -DVERSION="" ${WX_CXXFLAGS}
-	## clang-tidy ${top_srcdir}/src/games/*.cc ${top_srcdir}/src/games/*/*.cc -- --std=c++11 -I ${top_srcdir}/src -I ${top_srcdir}/src/labenski/include -DVERSION="" ${WX_CXXFLAGS}
-	## clang-tidy ${top_srcdir}/src/solvers/*/*.cc -- --std=c++11 -I ${top_srcdir}/src -I ${top_srcdir}/src/labenski/include -DVERSION="" ${WX_CXXFLAGS}
-	## clang-tidy ${top_srcdir}/src/tools/*/*.cc -- --std=c++11 -I ${top_srcdir}/src -I ${top_srcdir}/src/labenski/include -DVERSION="" ${WX_CXXFLAGS}
+	clang-tidy ${top_srcdir}/src/core/*.cc -- --std=c++11 -I ${top_srcdir}/src -I ${top_srcdir}/src/labenski/include -DVERSION="" ${WX_CXXFLAGS}
+    clang-tidy ${top_srcdir}/src/games/*.cc ${top_srcdir}/src/games/*/*.cc -- --std=c++11 -I ${top_srcdir}/src -I ${top_srcdir}/src/labenski/include -DVERSION="" ${WX_CXXFLAGS}
+	clang-tidy ${top_srcdir}/src/solvers/*/*.cc -- --std=c++11 -I ${top_srcdir}/src -I ${top_srcdir}/src/labenski/include -DVERSION="" ${WX_CXXFLAGS}
+	clang-tidy ${top_srcdir}/src/tools/*/*.cc -- --std=c++11 -I ${top_srcdir}/src -I ${top_srcdir}/src/labenski/include -DVERSION="" ${WX_CXXFLAGS}
 	clang-tidy ${top_srcdir}/src/gui/*.cc -- --std=c++11 -I ${top_srcdir}/src -I ${top_srcdir}/src/labenski/include -DVERSION="" ${WX_CXXFLAGS}

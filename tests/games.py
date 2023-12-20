@@ -19,16 +19,16 @@ def create_mixed_behav_game() -> gbt.Game:
     return read_from_file("mixed_behavior_game.efg")
 
 
-def create_complicated_extensive_game() -> gbt.Game:
+def create_myerson_2_card_poker() -> gbt.Game:
     """
     Returns
     -------
     Game
-        Two-player extensive poker game with a chance move with two moves, then player 1 can raise
-        or fold; after raising player 2 is in an infoset with two nodes and can choose to meet or
-        pass
+        Myerson 2-card poker: Two-player extensive poker game with a chance move with two moves,
+        then player 1 can raise or fold; after raising player 2 is in an infoset with two nodes
+        and can choose to meet or pass
     """
-    return read_from_file("complicated_extensive_game.efg")
+    return read_from_file("myerson_2_card_poker.efg")
 
 
 def create_strategic_game() -> gbt.Game:
