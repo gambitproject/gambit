@@ -169,7 +169,7 @@ BehaviorProfileIterator::BehaviorProfileIterator(const BehaviorSupportProfile &p
     m_numActiveInfosets[pl] = 0;
     Array<bool> activeForPl(player->NumInfosets());
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      activeForPl[iset] = p_support.MayReach(player->GetInfoset(iset));
+      activeForPl[iset] = p_support.IsReachable(player->GetInfoset(iset));
       m_numActiveInfosets[pl]++;
     }
     m_isActive.push_back(activeForPl);

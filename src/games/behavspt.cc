@@ -81,6 +81,17 @@ PVector<int> BehaviorSupportProfile::NumActions() const
   return answer;
 }  
 
+size_t BehaviorSupportProfile::BehaviorProfileLength() const
+{
+  size_t answer = 0;
+  for (const auto& player : m_actions) {
+    for (const auto& infoset : player) {
+      answer += infoset.size();
+    }
+  }
+  return answer;
+}
+
 int BehaviorSupportProfile::GetIndex(const GameAction &a) const
 {
   if (a->GetInfoset()->GetGame() != m_efg)  throw MismatchException();
@@ -95,41 +106,11 @@ int BehaviorSupportProfile::GetIndex(const GameAction &a) const
   }
 }
 
-int BehaviorSupportProfile::NumDegreesOfFreedom() const
-{
-  int answer = 0;
-  PVector<int> reachable(GetGame()->NumInfosets());
-  reachable = 0;
-
-  ReachableInfosets(GetGame()->GetRoot(), reachable);
-  for (int i = 1; i <= reachable.Length(); i++) {
-    answer += reachable[i];
-  }
-
-  return answer;  
-}
-
-bool BehaviorSupportProfile::HasActiveActionAt(const GameInfoset &infoset) const
-{
-  return (m_actions[infoset->GetPlayer()->GetNumber()][infoset->GetNumber()].Length() > 0);
-}
-
-bool BehaviorSupportProfile::HasActiveActionsAtAllInfosets() const
-{
-  for (int pl = 1; pl <= m_actions.Length(); pl++) {
-    for (int iset = 1; iset <= m_actions[pl].Length(); iset++) {
-      if (m_actions[pl][iset].Length() == 0) return false;
-    }
-  }
-
-  return true;
-}
-
 bool BehaviorSupportProfile::RemoveAction(const GameAction &s)
 {
-  List<GameNode> startlist(ReachableMembers(s->GetInfoset()));
-  for (int i = 1; i <= startlist.Length(); i++)
-    DeactivateSubtree(startlist[i]->GetChild(s->GetNumber()));
+  for (const auto& node : GetMembers(s->GetInfoset())) {
+    DeactivateSubtree(node->GetChild(s));
+  }
 
   GameInfoset infoset = s->GetInfoset();
   GamePlayer player = infoset->GetPlayer();
@@ -150,11 +131,9 @@ bool BehaviorSupportProfile::RemoveAction(const GameAction &s)
 
 bool BehaviorSupportProfile::RemoveAction(const GameAction &s, List<GameInfoset> &list)
 {
-  List<GameNode> startlist(ReachableMembers(s->GetInfoset()));
-  for (int i = 1; i <= startlist.Length(); i++) {
-    DeactivateSubtree(startlist[i]->GetChild(s->GetNumber()), list);
+  for (const auto& node : GetMembers(s->GetInfoset())) {
+    DeactivateSubtree(node->GetChild(s->GetNumber()), list);
   }
-
   // the following returns false if s was not in the support
   return RemoveAction(s);
 }
@@ -181,68 +160,49 @@ void BehaviorSupportProfile::AddAction(const GameAction &s)
     actions.push_back(s);
   }
 
-  List<GameNode> startlist(ReachableMembers(s->GetInfoset()));
-  for (const auto &node : ReachableMembers(s->GetInfoset())) {
+  for (const auto &node : GetMembers(s->GetInfoset())) {
     DeactivateSubtree(node);
   }
 }
 
-List<GameInfoset>
-BehaviorSupportProfile::ReachableInfosets(const GamePlayer &p) const
+std::list<GameInfoset>
+BehaviorSupportProfile::GetInfosets(const GamePlayer &p_player) const
 { 
-  Array<GameInfoset> isets;
-  for (int iset = 1; iset <= p->NumInfosets(); iset++) {
-    isets.push_back(p->GetInfoset(iset));
+  std::list<GameInfoset> answer;
+  for (const auto& infoset : p_player->GetInfosets()) {
+    if (m_infosetReachable.at(infoset)) {
+      answer.push_back(infoset);
+    }
   }
-  List<GameInfoset> answer;
-
-  for (int i = isets.First(); i <= isets.Last(); i++)
-    if (MayReach(isets[i]))
-      answer.push_back(isets[i]);
   return answer;
 }
 
+namespace {
+/// Sets p_reachable(pl,iset) to 1 if infoset (pl,iset) reachable after p_node
 void
-BehaviorSupportProfile::ReachableInfosets(const GameNode &p_node,
-				PVector<int> &p_reached) const
+ReachableInfosets(const BehaviorSupportProfile &p_support,
+                  const GameNode &p_node,
+                  PVector<int> &p_reached)
 {
-  if (p_node->NumChildren() == 0)  return;
+  if (p_node->IsTerminal()) {
+    return;
+  }
 
   GameInfoset infoset = p_node->GetInfoset();
   if (!infoset->GetPlayer()->IsChance()) {
     p_reached(infoset->GetPlayer()->GetNumber(), infoset->GetNumber()) = 1;
-
-    for (int act = 1; act <= NumActions(infoset); act++) {
-      ReachableInfosets(p_node->GetChild(GetAction(infoset, act)->GetNumber()),
-			p_reached);
+    for (const auto &action: p_support.GetActions(infoset)) {
+      ReachableInfosets(p_support, p_node->GetChild(action), p_reached);
     }
   }
   else {
-    for (int act = 1; act <= infoset->NumActions(); act++) {
-      ReachableInfosets(p_node->GetChild(act), p_reached);
+    for (const auto &child: p_node->GetChildren()) {
+      ReachableInfosets(p_support, child, p_reached);
     }
   }
 }
 
-bool BehaviorSupportProfile::MayReach(const GameInfoset &i) const
-{
-  for (int j = 1; j <= i->NumMembers(); j++)
-    if (MayReach(i->GetMember(j)))
-      return true;
-  return false;
-}
-
-bool BehaviorSupportProfile::MayReach(const GameNode &n) const
-{
-  if (n == m_efg->GetRoot())
-    return true;
-  else {
-    if (!Contains(n->GetPriorAction()))
-      return false;
-    else
-      return MayReach(n->GetParent());
-  }
-}
+}  // end anonymous namespace
 
 // This class iterates
 // over contingencies that are relevant once a particular node 
@@ -385,39 +345,39 @@ bool BehaviorSupportProfile::Dominates(const GameAction &a, const GameAction &b,
   }
 
   else {
-    List<GameNode> nodelist = ReachableMembers(infoset);  
+    auto nodelist = GetMembers(infoset);
     if (nodelist.empty()) {
       // This may not be a good idea; I suggest checking for this
       // prior to entry
-      for (int i = 1; i <= infoset->NumMembers(); i++) {
-        nodelist.push_back(infoset->GetMember(i));
+      for (const auto& member : infoset->GetMembers()) {
+        nodelist.push_back(member);
       }
     }
-    
-    for (int n = 1; n <= nodelist.Length(); n++) {
+
+    for (const auto& node : nodelist) {
       PVector<int> reachable(GetGame()->NumInfosets());
       reachable = 0;
-      ReachableInfosets(nodelist[n]->GetChild(a->GetNumber()), reachable);
-      ReachableInfosets(nodelist[n]->GetChild(b->GetNumber()), reachable);
-      
-      for (BehavConditionalIterator iter(*this, reachable); 
-	   !iter.AtEnd(); iter++) {
-	Rational ap = iter->GetPayoff<Rational>(nodelist[n]->GetChild(a->GetNumber()), pl);
-	Rational bp = iter->GetPayoff<Rational>(nodelist[n]->GetChild(b->GetNumber()), pl);
-	
-	if (p_strict) {
-	  if (ap <= bp) {
-	    return false;
-	  }
-	}
-	else {
-	  if (ap < bp) { 
-	    return false;
-	  } 
-	  else if (ap > bp) {
-	    equal = false;
-	  }
-	}
+      ReachableInfosets(*this, node->GetChild(a), reachable);
+      ReachableInfosets(*this, node->GetChild(b), reachable);
+
+      for (BehavConditionalIterator iter(*this, reachable);
+           !iter.AtEnd(); iter++) {
+        Rational ap = iter->GetPayoff<Rational>(node->GetChild(a), pl);
+        Rational bp = iter->GetPayoff<Rational>(node->GetChild(b), pl);
+
+        if (p_strict) {
+          if (ap <= bp) {
+            return false;
+          }
+        }
+        else {
+          if (ap < bp) {
+            return false;
+          }
+          else if (ap > bp) {
+            equal = false;
+          }
+        }
       }
     }
   }
@@ -610,56 +570,16 @@ BehaviorSupportProfile::DeactivateSubtree(const GameNode &n, List<GameInfoset> &
   }
 }
 
-List<GameNode> 
-BehaviorSupportProfile::ReachableMembers(const GameInfoset &i) const
+std::list<GameNode>
+BehaviorSupportProfile::GetMembers(const GameInfoset &p_infoset) const
 {
-  List<GameNode> answer;
-  for (auto member : i->GetMembers()) {
+  std::list<GameNode> answer;
+  for (const auto& member : p_infoset->GetMembers()) {
     if (m_nonterminalReachable.at(member)) {
       answer.push_back(member);
     }
   }
   return answer;
-}
-
-int BehaviorSupportProfile::NumActiveMembers(const GameInfoset &p_infoset) const
-{
-  int answer = 0;
-  for (auto member : p_infoset->GetMembers()) {
-    if (m_nonterminalReachable.at(member)) {
-      answer++;
-    }
-  }
-  return answer;
-}
-
-bool BehaviorSupportProfile::HasActiveActionsAtActiveInfosets() const
-{
-  for (int pl = 1; pl <= GetGame()->NumPlayers(); pl++) {
-    GamePlayer player = GetGame()->GetPlayer(pl);
-    for (int iset = 1; iset <= GetGame()->GetPlayer(pl)->NumInfosets(); iset++) {
-      if (m_infosetReachable.at(player->GetInfoset(iset)) && NumActions(pl, iset) == 0) {
-        return false;
-      }
-    }
-  }
-  return true;
-}
-
-bool BehaviorSupportProfile::HasActiveActionsAtActiveInfosetsAndNoOthers() const
-{
-  for (int pl = 1; pl <= GetGame()->NumPlayers(); pl++) {
-    GamePlayer player = GetGame()->GetPlayer(pl);
-    for (int iset = 1; iset <= GetGame()->GetPlayer(pl)->NumInfosets(); iset++) {
-      if (m_infosetReachable.at(player->GetInfoset(iset)) && NumActions(pl, iset) == 0) {
-        return false;
-      }
-      if (!m_infosetReachable.at(player->GetInfoset(iset)) && NumActions(pl, iset) > 0) {
-        return false;
-      }
-    }
-  }
-  return true;
 }
 
 } // end namespace Gambit

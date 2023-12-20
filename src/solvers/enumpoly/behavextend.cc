@@ -120,7 +120,7 @@ ActionProbsSumToOneIneqs(const Gambit::MixedBehaviorProfile<double> &p_solution,
   for (int pl = 1; pl <= p_solution.GetGame()->NumPlayers(); pl++) 
     for (int i = 1; i <= p_solution.GetGame()->GetPlayer(pl)->NumInfosets(); i++) {
       Gambit::GameInfoset current_infoset = p_solution.GetGame()->GetPlayer(pl)->GetInfoset(i);
-      if ( !big_supp.HasActiveActionAt(current_infoset) ) {
+      if ( !big_supp.HasAction(current_infoset) ) {
 	int index_base = var_index[pl][i];
 	gPoly<double> factor(&BehavStratSpace, (double)1.0, &Lex);
 	for (int k = 1; k < current_infoset->NumActions(); k++)
@@ -223,7 +223,7 @@ NashNodeProbabilityPoly(const Gambit::MixedBehaviorProfile<double> &p_solution,
     if (last_infoset->IsChanceInfoset()) 
       node_prob *= static_cast<double>(last_infoset->GetActionProb(last_action->GetNumber()));
     else 
-      if (dsupp.HasActiveActionAt(last_infoset)) {
+      if (dsupp.HasAction(last_infoset)) {
 	if (last_infoset == iset) {
 	  if (act != last_action) {
 	    return false;
@@ -280,7 +280,7 @@ NashExpectedPayoffDiffPolys(const Gambit::MixedBehaviorProfile<double> &p_soluti
     }
 			  
     for (int i = 1; i <= isets_for_pl.Length(); i++) {
-      if (little_supp.MayReach(isets_for_pl[i])) {
+      if (little_supp.IsReachable(isets_for_pl[i])) {
 	Gambit::Array<Gambit::GameAction> acts_for_iset;
 	for (int act = 1; act <= isets_for_pl[i]->NumActions(); act++) {
 	  acts_for_iset.push_back(isets_for_pl[i]->GetAction(act));
@@ -375,7 +375,7 @@ bool algExtendsToNash::ExtendsToNash(const Gambit::MixedBehaviorProfile<double> 
 
     for (int i = 1; i <= p_solution.GetGame()->GetPlayer(pl)->NumInfosets(); i++) {
       list_for_pl.push_back(num_vars);
-      if ( !big_supp.HasActiveActionAt(p_solution.GetGame()->GetPlayer(pl)->GetInfoset(i)) ) {
+      if ( !big_supp.HasAction(p_solution.GetGame()->GetPlayer(pl)->GetInfoset(i)) ) {
 	num_vars += p_solution.GetGame()->GetPlayer(pl)->GetInfoset(i)->NumActions() - 1;
       }
     }
@@ -434,7 +434,7 @@ static bool ANFNodeProbabilityPoly(const Gambit::MixedBehaviorProfile<double> &p
     if (last_infoset->IsChanceInfoset()) 
       node_prob *= static_cast<double>(last_infoset->GetActionProb(last_action->GetNumber()));
     else 
-      if (big_supp.HasActiveActionAt(last_infoset)) {
+      if (big_supp.HasAction(last_infoset)) {
 	if (last_infoset == p_solution.GetGame()->GetPlayer(pl)->GetInfoset(i)) {
 	  if (j != last_action->GetNumber()) 
 	    return false;
@@ -481,7 +481,7 @@ ANFExpectedPayoffDiffPolys(const Gambit::MixedBehaviorProfile<double> &p_solutio
   for (int pl = 1; pl <= p_solution.GetGame()->NumPlayers(); pl++)
     for (int i = 1; i <= p_solution.GetGame()->GetPlayer(pl)->NumInfosets(); i++) {
       Gambit::GameInfoset infoset = p_solution.GetGame()->GetPlayer(pl)->GetInfoset(i);
-      if (little_supp.MayReach(infoset)) 
+      if (little_supp.IsReachable(infoset))
 	for (int j = 1; j <= infoset->NumActions(); j++)
 	  if (!little_supp.Contains(infoset->GetAction(j))) {
 	
@@ -552,7 +552,7 @@ bool algExtendsToAgentNash::ExtendsToAgentNash(const Gambit::MixedBehaviorProfil
 
     for (int i = 1; i <= p_solution.GetGame()->GetPlayer(pl)->NumInfosets(); i++) {
       list_for_pl.push_back(num_vars);
-      if ( !big_supp.HasActiveActionAt(p_solution.GetGame()->GetPlayer(pl)->GetInfoset(i)) ) {
+      if ( !big_supp.HasAction(p_solution.GetGame()->GetPlayer(pl)->GetInfoset(i)) ) {
 	num_vars += p_solution.GetGame()->GetPlayer(pl)->GetInfoset(i)->NumActions() - 1;
       }
     }

@@ -57,6 +57,30 @@ Gambit::List<Gambit::BehaviorSupportProfile> AllSubsupports(const Gambit::Behavi
   return answer;
 }
 
+bool HasActiveActionsAtActiveInfosets(const Gambit::BehaviorSupportProfile &p_support)
+{
+  for (auto player : p_support.GetGame()->GetPlayers()) {
+    for (auto infoset : player->GetInfosets()) {
+      if (p_support.IsReachable(infoset) && !p_support.HasAction(infoset)) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+bool HasActiveActionsAtActiveInfosetsAndNoOthers(const Gambit::BehaviorSupportProfile &p_support)
+{
+  for (auto player : p_support.GetGame()->GetPlayers()) {
+    for (auto infoset : player->GetInfosets()) {
+      if (p_support.IsReachable(infoset) != p_support.HasAction(infoset)) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 
 // Subsupports of a given support are _path equivalent_ if they
 // agree on every infoset that can be reached under either, hence both,
@@ -70,7 +94,7 @@ void AllInequivalentSubsupportsRECURSIVE(const Gambit::BehaviorSupportProfile &s
 					 ActionCursorForSupport *c,
 					 Gambit::List<Gambit::BehaviorSupportProfile> &list)
 { 
-  if (sact->HasActiveActionsAtActiveInfosetsAndNoOthers())
+  if (HasActiveActionsAtActiveInfosetsAndNoOthers(*sact))
     list.push_back(*sact);
 
   ActionCursorForSupport c_copy(*c);
@@ -109,7 +133,7 @@ void AllUndominatedSubsupportsRECURSIVE(const Gambit::BehaviorSupportProfile &s,
   bool abort = false;
   bool no_deletions = true;
   bool check_domination = false;
-  if (sact->HasActiveActionsAtActiveInfosets()) 
+  if (HasActiveActionsAtActiveInfosets(*sact))
     check_domination = true;
   Gambit::List<Gambit::GameAction> deletion_list;
   ActionCursorForSupport scanner(s);
@@ -120,7 +144,7 @@ void AllUndominatedSubsupportsRECURSIVE(const Gambit::BehaviorSupportProfile &s,
     bool delete_this_action = false;
 
     if ( sact->Contains(this_action) ) { 
-      if ( !sact->IsActive(this_action->GetInfoset()) ) {
+      if ( !sact->IsReachable(this_action->GetInfoset()) ) {
 	delete_this_action = true;  
       }
       else { 
@@ -170,7 +194,7 @@ void AllUndominatedSubsupportsRECURSIVE(const Gambit::BehaviorSupportProfile &s,
 
   // If there are no deletions, we ask if it is consistent, then recurse.
   if (!abort && no_deletions) {
-    if (sact->HasActiveActionsAtActiveInfosetsAndNoOthers())
+    if (HasActiveActionsAtActiveInfosetsAndNoOthers(*sact))
       list.push_back(*sact);
     
     ActionCursorForSupport c_copy(*c);
@@ -222,7 +246,7 @@ void PossibleNashSubsupportsRECURSIVE(const Gambit::BehaviorSupportProfile &s,
   bool add_support = true;
 
   bool check_domination = false;
-  if (sact->HasActiveActionsAtActiveInfosets()) 
+  if (HasActiveActionsAtActiveInfosets(*sact))
     check_domination = true;
   Gambit::List<Gambit::GameAction> deletion_list;
   ActionCursorForSupport scanner(s);
@@ -232,7 +256,7 @@ void PossibleNashSubsupportsRECURSIVE(const Gambit::BehaviorSupportProfile &s,
     bool delete_this_action = false;
 
     if ( sact->Contains(this_action) ) {
-      if ( !sact->IsActive(this_action->GetInfoset()) ) {
+      if ( !sact->IsReachable(this_action->GetInfoset()) ) {
 	delete_this_action = true;  
       }
       else {
@@ -280,7 +304,7 @@ void PossibleNashSubsupportsRECURSIVE(const Gambit::BehaviorSupportProfile &s,
 
   if (!abort && deletion_list.Length() == 0) {
 
-    if (add_support && sact->HasActiveActionsAtActiveInfosetsAndNoOthers())
+    if (add_support && HasActiveActionsAtActiveInfosetsAndNoOthers(*sact))
       list.push_back(*sact);
     ActionCursorForSupport c_copy(*c);
     do {
@@ -301,7 +325,7 @@ Gambit::List<Gambit::BehaviorSupportProfile> SortSupportsBySize(Gambit::List<Gam
 {
   Gambit::Array<int> sizes(list.Length());
   for (int i = 1; i <= list.Length(); i++)
-    sizes[i] = list[i].NumDegreesOfFreedom();
+    sizes[i] = list[i].BehaviorProfileLength();
 
   Gambit::Array<int> listproxy(list.Length());
   for (int i = 1; i <= list.Length(); i++)
@@ -380,13 +404,13 @@ PossibleNashSubsupports(const Gambit::BehaviorSupportProfile &p_support,
 {
   ActionCursorForSupport copy(p_cursor);
   if (!copy.GoToNext()) {
-    if (p_support.HasActiveActionsAtActiveInfosetsAndNoOthers()) {
+    if (HasActiveActionsAtActiveInfosetsAndNoOthers(p_support)) {
       p_list.push_back(p_support);
     }
 
     Gambit::BehaviorSupportProfile copySupport(p_support);
     copySupport.RemoveAction(p_cursor.GetAction());
-    if (copySupport.HasActiveActionsAtActiveInfosetsAndNoOthers()) {
+    if (HasActiveActionsAtActiveInfosetsAndNoOthers(copySupport)) {
       p_list.push_back(copySupport);
     }
     return;

@@ -595,11 +595,10 @@ int gbtTreeLayout::LayoutSubtree(const Gambit::GameNode &p_node, const Gambit::B
   if (m_doc->GetStyle().RootReachable() &&
       p_node->GetInfoset() && !p_node->GetInfoset()->GetPlayer()->IsChance()) {
     Gambit::GameInfoset infoset = p_node->GetInfoset();
-    for (int i = 1; i <= p_support.NumActions(infoset); i++) {
-      yn = LayoutSubtree(p_node->GetChild(p_support.GetAction(infoset, i)->GetNumber()),
-			 p_support, p_maxy, p_miny, p_ycoord);
+    for (auto action : p_support.GetActions(infoset)) {
+      yn = LayoutSubtree(p_node->GetChild(action), p_support, p_maxy, p_miny, p_ycoord);
       if (y1 == -1) {
-	y1 = yn;
+        y1 = yn;
       }
     }
     entry->SetY((y1 + yn) / 2);
@@ -832,20 +831,19 @@ void gbtTreeLayout::BuildNodeList(const Gambit::GameNode &p_node, const Gambit::
     Gambit::GameInfoset infoset = p_node->GetInfoset();
     if (infoset) {
       if (infoset->GetPlayer()->IsChance()) {
-        for (int i = 1; i <= p_node->NumChildren(); i++) {
-          BuildNodeList(p_node->GetChild(i), p_support, p_level + 1);
+        for (const auto& child : p_node->GetChildren()) {
+          BuildNodeList(child, p_support, p_level + 1);
         }
       }
       else {
-        for (int i = 1; i <= p_support.NumActions(infoset); i++) {
-          BuildNodeList(p_node->GetChild(p_support.GetAction(infoset, i)->GetNumber()),
-                        p_support, p_level + 1);
+        for (const auto& action : p_support.GetActions(infoset)) {
+          BuildNodeList(p_node->GetChild(action), p_support, p_level + 1);
         }
       }
     }
   }
   else {
-    for (auto child : p_node->GetChildren()) {
+    for (const auto& child : p_node->GetChildren()) {
       BuildNodeList(child, p_support, p_level + 1);
     }
   }
