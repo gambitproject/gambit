@@ -22,19 +22,34 @@
 from deprecated import deprecated
 
 @cython.cclass
-class Children(Collection):
-    """Represents the collection of direct children of a node."""
+class NodeChildren:
+    """The set of nodes which are direct descendants of a node."""
     parent = cython.declare(c_GameNode)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return self.parent.deref().NumChildren()
 
-    def __getitem__(self, i):
-        if not isinstance(i, int):
-            return Collection.__getitem__(self, i)
-        n = Node()
-        n.node = self.parent.deref().GetChild(i+1)
-        return n
+    def __iter__(self) -> typing.Iterator[Node]:
+        for i in range(self.parent.deref().NumChildren()):
+            c = Node()
+            c.node = self.parent.deref().GetChild(i + 1)
+            yield c
+
+    def __getitem__(self, index: typing.Union[int, str]) -> Node:
+        if isinstance(index, str):
+            if not index.strip():
+                raise ValueError("Node label cannot be empty or all whitespace")
+            matches = [x for x in self if x.label == index.strip()]
+            if not matches:
+                raise KeyError(f"Node has no child with label '{index}'")
+            if len(matches) > 1:
+                raise ValueError(f"Node has multiple children with label '{index}'")
+            return matches[0]
+        if isinstance(index, int):
+            c = Node()
+            c.node = self.parent.deref().GetChild(index + 1)
+            return c
+        raise TypeError(f"Child index must be int or str, not {index.__class__.__name__}")
 
 
 @cython.cclass
@@ -199,9 +214,9 @@ class Node:
         self.node.deref().SetLabel(value.encode('ascii'))
 
     @property
-    def children(self) -> Children:
+    def children(self) -> NodeChildren:
         """The set of children of this node."""
-        c = Children()
+        c = NodeChildren()
         c.parent = self.node
         return c
 

@@ -76,22 +76,6 @@ def _to_number(value: typing.Any) -> c_Number:
     return c_Number(value.encode('ascii'))
 
 
-@cython.cclass
-class Collection:
-    """Represents a collection of related objects in a game."""
-    def __repr__(self):
-        return str(list(self))
-
-    def __getitem__(self, i):
-        if isinstance(i, str):
-            try:
-                return self[[x.label for x in self].index(i)]
-            except ValueError:
-                raise IndexError(f"no object with label '{i}'")
-        else:
-            raise TypeError(f"collection indexes must be int or str, not {i.__class__.__name__}")
-
-
 ######################
 # Includes
 ######################

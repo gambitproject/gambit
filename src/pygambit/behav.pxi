@@ -53,14 +53,30 @@ class MixedAgentStrategy:
         return len(self.infoset.actions)
 
     def __getitem__(self, action: typing.Union[Action, str]):
-        if isinstance(action, Action) and action.infoset != self.infoset:
-            raise MismatchError("action must belong to this infoset")
-        return self.profile[action]
+        if isinstance(action, Action):
+            if action.infoset != self.infoset:
+                raise MismatchError("action must belong to this infoset")
+            return self.profile._getprob_action(action)
+        if isinstance(action, str):
+            try:
+                return self.profile._getprob_action(self.infoset.actions[action])
+            except KeyError:
+                raise KeyError(f"no action with label '{index}' at infoset") from None
+        raise TypeError(f"strategy index must be Action or str, not {index.__class__.__name__}")
 
     def __setitem__(self, action: typing.Union[Action, str], value: typing.Any) -> None:
-        if isinstance(action, Action) and action.infoset != self.infoset:
-            raise MismatchError("action must belong to this infoset")
-        self.profile[action] = value
+        if isinstance(action, Action):
+            if action.infoset != self.infoset:
+                raise MismatchError("action must belong to this infoset")
+            self.profile._setprob_action(action, value)
+            return
+        if isinstance(action, str):
+            try:
+                self.profile._setprob_action(self.infoset.actions[action], value)
+                return
+            except KeyError:
+                raise KeyError(f"no action with label '{index}' at infoset") from None
+        raise TypeError(f"strategy index must be Action or str, not {index.__class__.__name__}")
 
 
 class MixedBehaviorStrategy:
@@ -92,20 +108,74 @@ class MixedBehaviorStrategy:
     def __len__(self) -> int:
         return len(self.player.infosets)
 
-    def __getitem__(self, infoset: typing.Union[Infoset, str]):
-        if isinstance(infoset, Infoset) and infoset.player != self.player:
-            raise MismatchError("infoset must belong to this player")
-        return self.profile[infoset]
+    def __getitem__(self, index: typing.Union[Infoset, Action, str]):
+        if isinstance(index, Infoset):
+            if index.player != self.player:
+                raise MismatchError("infoset must belong to this player")
+            return self.profile[index]
+        if isinstance(index, Action):
+            if index.player != self.player:
+                raise MismatchError("action must belong to this player")
+            return self.profile[index]
+        if isinstance(index, str):
+            try:
+                return self.profile[self.player.infosets[index]]
+            except KeyError:
+                pass
+            try:
+                return self.profile[self.player.actions[index]]
+            except KeyError:
+                raise KeyError(f"no infoset or action with label '{index}' for player") from None
+        raise TypeError(f"strategy index must be Infoset, Action or str, not {index.__class__.__name__}")
 
-    def __setitem__(self, infoset: typing.Union[Infoset, str], value: typing.Any) -> None:
-        if isinstance(infoset, Infoset) and infoset.player != self.player:
-            raise MismatchError("infoset must belong to this player")
-        self.profile[infoset] = value
+    def __setitem__(self, index: typing.Union[Infoset, Action, str], value: typing.Any) -> None:
+        if isinstance(index, Infoset):
+            if index.player != self.player:
+                raise MismatchError("infoset must belong to this player")
+            self.profile[index] = value
+            return
+        if isinstance(index, Action):
+            if index.player != self.player:
+                raise MismatchError("action must belong to this player")
+            self.profile[index] = value
+            return
+        if isinstance(index, str):
+            try:
+                self.profile[self.player.infosets[index]] = value
+                return
+            except KeyError:
+                pass
+            try:
+                self.profile[self.player.actions[index]] = value
+            except KeyError:
+                raise KeyError(f"no infoset or action with label '{index}' for player") from None
+            return
+        raise TypeError(f"strategy index must be Infoset, Action or str, not {index.__class__.__name__}")
 
 
 @cython.cclass
 class MixedBehaviorProfile:
-    """A behavior strategy profile over the actions in a game."""
+    """Represents a mixed behavior profile over the actions in a ``Game``.
+
+    A mixed behavior profile is a dict-like object, mapping each action at each information
+    set in a game to the corresponding probability with which the action is played, conditional
+    on that information set being reached.
+
+    Mixed behavior profiles may represent probabilities as either exact (rational)
+    numbers, or floating-point numbers.  These may not be combined in the same mixed
+    behavior profile.
+
+    .. versionchanged:: 16.1.0
+        Profiles are accessed as dict-like objects; indexing by integer player, infoset, or
+        action indices is no longer supported.
+
+    See Also
+    --------
+    Game.mixed_behavior_profile
+        Creates a new mixed behavior profile on a game.
+    MixedStrategyProfile
+        Represents a mixed strategy profile over a ``Game``.
+    """
     def __repr__(self) -> str:
         return str([self[player] for player in self.game.players])
 
@@ -118,7 +188,7 @@ class MixedBehaviorProfile:
 
     @property
     def game(self) -> Game:
-        """The game on which this mixed behaviour profile is defined."""
+        """The game on which this mixed behavior profile is defined."""
         return self._game
 
     def __getitem__(self, index: typing.Union[Player, Infoset, Action, str]):
@@ -163,7 +233,10 @@ class MixedBehaviorProfile:
                return MixedAgentStrategy(self, self.game._resolve_infoset(index, '__getitem__'))
             except KeyError:
                 pass
-            return self._getprob_action(self.game._resolve_action(index, '__getitem__'))
+            try:
+                return self._getprob_action(self.game._resolve_action(index, '__getitem__'))
+            except KeyError:
+                raise KeyError(f"no player, infoset, or action with label '{index}'")
         raise TypeError(
             f"profile index must be Player, Infoset, Action, or str, not {index.__class__.__name__}"
         )
@@ -229,7 +302,10 @@ class MixedBehaviorProfile:
                 return
             except KeyError:
                 pass
-            self._setprob_action(self.game._resolve_action(index, '__getitem__'), value)
+            try:
+                self._setprob_action(self.game._resolve_action(index, '__getitem__'), value)
+            except KeyError:
+                raise KeyError(f"no player, infoset, or action with label '{index}'")
             return
         raise TypeError(
             f"profile index must be Player, Infoset, Action, or str, not {index.__class__.__name__}"

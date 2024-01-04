@@ -22,24 +22,73 @@
 from deprecated import deprecated
 
 @cython.cclass
-class Infosets(Collection):
+class PlayerInfosets:
     """The set of information sets at which a player has the decision."""
     player = cython.declare(c_GamePlayer)
 
-    def __len__(self):
+    def __len__(self) -> int:
         """The number of information sets at which the player has the decision."""
         return self.player.deref().NumInfosets()
 
-    def __getitem__(self, iset):
-        if not isinstance(iset, int):
-            return Collection.__getitem__(self, iset)
-        s = Infoset()
-        s.infoset = self.player.deref().GetInfoset(iset+1)
-        return s
+    def __iter__(self) -> typing.Iterator[Infoset]:
+        for i in range(self.player.deref().NumInfosets()):
+            s = Infoset()
+            s.infoset = self.player.deref().GetInfoset(i + 1)
+            yield s
+
+    def __getitem__(self, index: typing.Union[int, str]) -> Infoset:
+        if isinstance(index, str):
+            if not index.strip():
+                raise ValueError("Infoset label cannot be empty or all whitespace")
+            matches = [x for x in self if x.label == index.strip()]
+            if not matches:
+                raise KeyError(f"Player has no infoset with label '{index}'")
+            if len(matches) > 1:
+                raise ValueError(f"Player has multiple infosets with label '{index}'")
+            return matches[0]
+        if isinstance(index, int):
+            s = Infoset()
+            s.infoset = self.player.deref().GetInfoset(index + 1)
+            return s
+        raise TypeError(f"Infoset index must be int or str, not {index.__class__.__name__}")
 
 
 @cython.cclass
-class Strategies(Collection):
+class PlayerActions:
+    """Represents the set of all actions available to a player at some information set."""
+    player = cython.declare(Player)
+
+    def __init__(self, player: Player) -> None:
+        self.player = player
+
+    def __len__(self) -> int:
+        return sum(len(s.actions) for s in self.player.actions)
+
+    def __iter__(self) -> typing.Iterator[Action]:
+        for infoset in self.player.infosets:
+            yield from infoset.actions
+
+    def __getitem__(self, index: typing.Union[int, str]) -> Action:
+        if isinstance(index, str):
+            if not index.strip():
+                raise ValueError("Action label cannot be empty or all whitespace")
+            matches = [x for x in self if x.label == index.strip()]
+            if not matches:
+                raise KeyError(f"Player has no action with label '{index}'")
+            if len(matches) > 1:
+                raise ValueError(f"Player has multiple actions with label '{index}'")
+            return matches[0]
+        if isinstance(index, int):
+            for i, action in enumerate(self):
+                if i == index:
+                    return action
+            else:
+                raise IndexError("Index out of range")
+        raise TypeError(f"Action index must be int or str, not {index.__class__.__name__}")
+
+
+@cython.cclass
+class PlayerStrategies:
     """The set of strategies available to a player."""
     player = cython.declare(c_GamePlayer)
 
@@ -67,16 +116,31 @@ class Strategies(Collection):
         s.label = str(label)
         return s
 
-    def __len__(self):
+    def __len__(self) -> int:
         """The number of strategies for the player in the game."""
         return self.player.deref().NumStrategies()
 
-    def __getitem__(self, st):
-        if not isinstance(st, int):
-            return Collection.__getitem__(self, st)
-        s = Strategy()
-        s.strategy = self.player.deref().GetStrategy(st+1)
-        return s
+    def __iter__(self) -> typing.Iterator[Strategy]:
+        for i in range(self.player.deref().NumStrategies()):
+            s = Strategy()
+            s.strategy = self.player.deref().GetStrategy(i + 1)
+            yield s
+
+    def __getitem__(self, index: typing.Union[int, str]) -> Strategy:
+        if isinstance(index, str):
+            if not index.strip():
+                raise ValueError("Strategy label cannot be empty or all whitespace")
+            matches = [x for x in self if x.label == index.strip()]
+            if not matches:
+                raise KeyError(f"Player has no strategy with label '{index}'")
+            if len(matches) > 1:
+                raise ValueError(f"Player has multiple strategies with label '{index}'")
+            return matches[0]
+        if isinstance(index, int):
+            s = Strategy()
+            s.strategy = self.player.deref().GetStrategy(index + 1)
+            return s
+        raise TypeError(f"Strategy index must be int or str, not {index.__class__.__name__}")
 
 
 @cython.cclass
@@ -131,18 +195,23 @@ class Player:
         return self.player.deref().IsChance() != 0
 
     @property
-    def strategies(self) -> Strategies:
+    def strategies(self) -> PlayerStrategies:
         """Returns the set of strategies belonging to the player."""
-        s = Strategies()
+        s = PlayerStrategies()
         s.player = self.player
         return s
 
     @property
-    def infosets(self) -> Infosets:
+    def infosets(self) -> PlayerInfosets:
         """Returns the set of information sets at which the player has the decision."""
-        s = Infosets()
+        s = PlayerInfosets()
         s.player = self.player
         return s
+
+    @property
+    def actions(self) -> PlayerActions:
+        """Returns the set of actions available to the player at some information set."""
+        return PlayerActions(self)
 
     @property
     def min_payoff(self) -> Rational:
