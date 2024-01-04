@@ -52,19 +52,53 @@ class MixedStrategy:
         return len(self.player.strategies)
 
     def __getitem__(self, strategy: typing.Union[Strategy, str]):
-        if isinstance(strategy, Strategy) and strategy.player != self.player:
-            raise MismatchError("strategy must belong to this player")
-        return self.profile[strategy]
+        if isinstance(strategy, Strategy):
+            if strategy.player != self.player:
+                raise MismatchError("strategy must belong to this player")
+            return self.profile._getprob_strategy(strategy)
+        if isinstance(strategy, str):
+            try:
+                return self.profile._getprob_strategy(self.player.strategies[strategy])
+            except KeyError:
+                raise KeyError(f"no strategy with label '{index}' for player") from None
+        raise TypeError(f"strategy index must be Strategy or str, not {index.__class__.__name__}")
 
     def __setitem__(self, strategy: typing.Union[Strategy, str], value: typing.Any) -> None:
-        if isinstance(strategy, Strategy) and strategy.player != self.player:
-            raise MismatchError("strategy must belong to this player")
-        self.profile[strategy] = value
-
+        if isinstance(strategy, Strategy):
+            if strategy.player != self.player:
+                raise MismatchError("strategy must belong to this player")
+            self.profile._setprob_strategy(strategy, value)
+            return
+        if isinstance(strategy, str):
+            try:
+                self.profile._setprob_strategy(self.player.strategies[strategy], value)
+                return
+            except KeyError:
+                raise KeyError(f"no strategy with label '{index}' for player") from None
+        raise TypeError(f"strategy index must be Strategy or str, not {index.__class__.__name__}")
 
 @cython.cclass
 class MixedStrategyProfile:
-    """Represents a mixed strategy profile over the strategies in a Game.
+    """Represents a mixed strategy profile over the strategies in a ``Game``.
+
+    A mixed strategy profile is a dict-like object, mapping each strategy in a game to
+    the corresponding probability with which that strategy is played.
+
+    Mixed strategy profiles may represent probabilities as either exact (rational)
+    numbers, or floating-point numbers.  These may not be combined in the same mixed
+    strategy profile.
+
+    .. versionchanged:: 16.1.0
+        Profiles are accessed as dict-like objects; indexing by integer player or strategy
+        indices is no longer supported.
+
+    See Also
+    --------
+    Game.mixed_strategy_profile
+        Creates a new mixed strategy profile on a game.
+    MixedBehaviorProfile
+        Represents a mixed behavior profile over a ``Game`` with an extensive
+        representation.
     """
     def __repr__(self):   
         return str([ self[player] for player in self.game.players ])
@@ -109,7 +143,10 @@ class MixedStrategyProfile:
                 return MixedStrategy(self, self.game._resolve_player(index, '__getitem__'))
             except KeyError:
                 pass
-            return self._getprob_strategy(self.game._resolve_strategy(index, '__getitem__'))
+            try:
+                return self._getprob_strategy(self.game._resolve_strategy(index, '__getitem__'))
+            except KeyError:
+                raise KeyError(f"no player or strategy with label '{index}'")
         raise TypeError(f"profile index must be Player, Strategy, or str, not {index.__class__.__name__}")
 
     def _setprob_player(self, player: Player, value: typing.Any) -> None:
@@ -154,7 +191,10 @@ class MixedStrategyProfile:
                 return
             except KeyError:
                 pass
-            self._setprob_strategy(self.game._resolve_strategy(index, '__setitem__'), value)
+            try:
+                self._setprob_strategy(self.game._resolve_strategy(index, '__setitem__'), value)
+            except KeyError:
+                raise KeyError(f"no player or strategy with label '{index}'")
             return
         raise TypeError(f"profile index must be Player, Strategy, or str, not {index.__class__.__name__}")
 

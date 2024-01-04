@@ -22,26 +22,41 @@
 from deprecated import deprecated
 
 @cython.cclass
-class Members(Collection):
+class InfosetMembers:
     """The set of nodes which are members of an information set."""
     infoset = cython.declare(c_GameInfoset)
 
     def __init__(self, infoset: Infoset):
         self.infoset = infoset.infoset
 
-    def __len__(self):
+    def __len__(self) -> int:
         return self.infoset.deref().NumMembers()
 
-    def __getitem__(self, i):
-        if not isinstance(i, int):
-            return Collection.__getitem__(self, i)
-        n = Node()
-        n.node = self.infoset.deref().GetMember(i+1)
-        return n
+    def __iter__(self) -> typing.Iterator[Node]:
+        for i in range(self.infoset.deref().NumMembers()):
+            m = Node()
+            m.node = self.infoset.deref().GetMember(i + 1)
+            yield m
+
+    def __getitem__(self, index: typing.Union[int, str]) -> Node:
+        if isinstance(index, str):
+            if not index.strip():
+                raise ValueError("Node label cannot be empty or all whitespace")
+            matches = [x for x in self if x.label == index.strip()]
+            if not matches:
+                raise KeyError(f"Infoset has no member with label '{index}'")
+            if len(matches) > 1:
+                raise ValueError(f"Infoset has multiple members with label '{index}'")
+            return matches[0]
+        if isinstance(index, int):
+            m = Node()
+            m.node = self.infoset.deref().GetMember(index + 1)
+            return m
+        raise TypeError(f"Member index must be int or str, not {index.__class__.__name__}")
 
 
 @cython.cclass
-class Actions(Collection):
+class InfosetActions:
     """The set of actions which are available at an information set."""
     infoset = cython.declare(c_GameInfoset)
 
@@ -64,16 +79,31 @@ class Actions(Collection):
         else:
             raise TypeError("insert_action takes an Action object as its input")
 
-    def __len__(self):
+    def __len__(self) -> int:
         """The number of actions at the information set."""
         return self.infoset.deref().NumActions()
 
-    def __getitem__(self, act):
-        if not isinstance(act, int):
-            return Collection.__getitem__(self, act)
-        a = Action()
-        a.action = self.infoset.deref().GetAction(act+1)
-        return a
+    def __iter__(self) -> typing.Iterator[Action]:
+        for i in range(self.infoset.deref().NumActions()):
+            a = Action()
+            a.action = self.infoset.deref().GetAction(i + 1)
+            yield a
+
+    def __getitem__(self, index: typing.Union[int, str]) -> Action:
+        if isinstance(index, str):
+            if not index.strip():
+                raise ValueError("Action label cannot be empty or all whitespace")
+            matches = [x for x in self if x.label == index.strip()]
+            if not matches:
+                raise KeyError(f"Infoset has no action with label '{index}'")
+            if len(matches) > 1:
+                raise ValueError(f"Infoset has multiple actions with label '{index}'")
+            return matches[0]
+        if isinstance(index, int):
+            a = Action()
+            a.action = self.infoset.deref().GetAction(index + 1)
+            return a
+        raise TypeError(f"Action index must be int or str, not {index.__class__.__name__}")
 
 
 @cython.cclass
@@ -157,16 +187,16 @@ class Infoset:
         return self.infoset.deref().IsChanceInfoset()
 
     @property
-    def actions(self) -> Actions:
+    def actions(self) -> InfosetActions:
         """The set of actions at the information set."""
-        a = Actions()
+        a = InfosetActions()
         a.infoset = self.infoset
         return a
 
     @property
-    def members(self) -> Members:
+    def members(self) -> InfosetMembers:
         """The set of nodes which are members of the information set."""
-        return Members(self)
+        return InfosetMembers(self)
 
     @property
     def player(self) -> Player:

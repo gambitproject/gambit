@@ -108,7 +108,9 @@ Information about the game
    Player.label
    Player.number
    Player.game
+   Player.strategies
    Player.infosets
+   Player.actions
    Player.is_chance
    Player.min_payoff
    Player.max_payoff

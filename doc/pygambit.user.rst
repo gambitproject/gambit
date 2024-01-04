@@ -165,7 +165,7 @@ by a collection of payoff tables, one per player.  The most direct way to create
 a strategic game is via :py:meth:`.Game.from_arrays`.  This function takes one
 n-dimensional array per player, where n is the number of players in the game.
 The arrays can be any object that can be indexed like an n-times-nested Python list;
-so, for example, NumPy arrays can be used directly.
+so, for example, `numpy` arrays can be used directly.
 
 For example, to create a standard prisoner's dilemma game in which the cooperative
 payoff is 8, the betrayal payoff is 10, the sucker payoff is 2, and the noncooperative
@@ -349,11 +349,11 @@ the extensive representation.  Assuming that ``g`` refers to the game
    len(eqa)
 
 The result of the calculation is a list of :py:class:`~pygambit.gambit.MixedBehaviorProfile`.
-A mixed behavior profile specifies, for each information set, the probability distribution over
-actions at that information set.
+A mixed behavior profile is a ``dict``-like object which specifies, for each information set,
+the probability distribution over actions at that information set, conditional on the
+information set being reached.
 Indexing a :py:class:`.MixedBehaviorProfile` by a player gives the probability distributions
 over each of that player's information sets:
-
 
 .. ipython:: python
 
@@ -361,13 +361,44 @@ over each of that player's information sets:
 
 In this case, at Alice's first information set, the one at which she has the King, she always raises.
 At her second information set, where she has the Queen, she sometimes bluffs, raising with
-probability one-third.  Looking at Bob's strategy,
+probability one-third:
+
+.. ipython:: python
+
+   [eqa[0]["Alice"][infoset]["Raise"] for infoset in g.players["Alice"].infosets]
+
+In larger games, labels may not always be the most convenient way to refer to specific
+actions.  We can also index profiles directly with :py:class:`.Action` objects.
+So an alternative way to extract the probabilities of playing "Raise" would be by
+iterating Alice's list of actions:
+
+.. ipython:: python
+
+   [eqa[0][action] for action in g.players["Alice"].actions if action.label == "Raise"]
+
+
+Looking at Bob's strategy,
 
 .. ipython:: python
 
    eqa[0]["Bob"]
 
-Bob meets Alice's raise two-thirds of the time.
+Bob meets Alice's raise two-thirds of the time.  The label "Raise" is used in more than one
+information set for Alice, so in the above we had to specify information sets when indexing.
+When there is no ambiguity, we can specify action labels directly.  So for example, because
+Bob has only one action named "Meet" in the game, we can extract the probability that Bob plays
+"Meet" by:
+
+.. ipython:: python
+
+   eqa[0]["Bob"]["Meet"]
+
+Moreover, this is the only action with that label in the game, so we can index the
+profile directly using the action label without any ambiguity:
+
+.. ipython:: python
+
+   eqa[0]["Meet"]
 
 Because this is an equilibrium, the fact that Bob randomizes at his information set must mean he
 is indifferent between the two actions at his information set.  :py:meth:`.MixedBehaviorProfile.action_value`

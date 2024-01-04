@@ -26,7 +26,7 @@ from libcpp.memory cimport unique_ptr
 from deprecated import deprecated
 
 @cython.cclass
-class StrategySupportProfile(Collection):
+class StrategySupportProfile:
     """A set-like object representing a subset of the strategies in game.
     A StrategySupportProfile always contains at least one strategy for each player
     in the game.
@@ -92,7 +92,6 @@ class StrategySupportProfile(Collection):
         return deref(self.support).Contains(strategy.strategy)
 
     def __iter__(self) -> typing.Generator[Strategy, None, None]:
-        cdef Strategy s
         for pl in range(len(self.game.players)):
             for st in range(deref(self.support).NumStrategiesPlayer(pl+1)):
                 s = Strategy()

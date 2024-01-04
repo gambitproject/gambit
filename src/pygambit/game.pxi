@@ -29,20 +29,35 @@ import pygambit.gte
 import pygambit.gameiter
 
 @cython.cclass
-class Outcomes(Collection):
-    """Represents a collection of outcomes in a game."""
+class GameOutcomes:
+    """Represents the set of outcomes in a game."""
     game = cython.declare(c_Game)
 
-    def __len__(self):
+    def __len__(self) -> int:
         """The number of outcomes in the game."""
         return self.game.deref().NumOutcomes()
 
-    def __getitem__(self, outc):
-        if not isinstance(outc, int):
-            return Collection.__getitem__(self, outc)
-        c = Outcome()
-        c.outcome = self.game.deref().GetOutcome(outc+1)
-        return c
+    def __iter__(self) -> typing.Iterator[Outcome]:
+        for i in range(self.game.deref().NumOutcomes()):
+            c = Outcome()
+            c.outcome = self.game.deref().GetOutcome(i + 1)
+            yield c
+
+    def __getitem__(self, index: typing.Union[int, str]) -> Outcome:
+        if isinstance(index, str):
+            if not index.strip():
+                raise ValueError("Outcome label cannot be empty or all whitespace")
+            matches = [x for x in self if x.label == index.strip()]
+            if not matches:
+                raise KeyError(f"Game has no outcome with label '{index}'")
+            if len(matches) > 1:
+                raise ValueError(f"Game has multiple outcomes with label '{index}'")
+            return matches[0]
+        if isinstance(index, int):
+            c = Outcome()
+            c.outcome = self.game.deref().GetOutcome(index + 1)
+            return c
+        raise TypeError(f"Outcome index must be int or str, not {index.__class__.__name__}")
 
     @deprecated(version='16.1.0',
                 reason='Use Game.add_outcome() instead of Game.outcomes.add()',
@@ -61,20 +76,35 @@ class Outcomes(Collection):
 
 
 @cython.cclass
-class Players(Collection):
+class GamePlayers:
     """Represents a collection of players in a game."""
     game = cython.declare(c_Game)
 
-    def __len__(self):
+    def __len__(self) -> int:
         """Returns the number of players in the game."""
         return self.game.deref().NumPlayers()
 
-    def __getitem__(self, pl):
-        if not isinstance(pl, int):
-            return Collection.__getitem__(self, pl)
-        p = Player()
-        p.player = self.game.deref().GetPlayer(pl+1)
-        return p
+    def __iter__(self) -> typing.Iterator[Player]:
+        for i in range(self.game.deref().NumPlayers()):
+            p = Player()
+            p.player = self.game.deref().GetPlayer(i + 1)
+            yield p
+
+    def __getitem__(self, index: typing.Union[int, str]) -> Player:
+        if isinstance(index, str):
+            if not index.strip():
+                raise ValueError("Player label cannot be empty or all whitespace")
+            matches = [x for x in self if x.label == index.strip()]
+            if not matches:
+                raise KeyError(f"Game has no player with label '{index}'")
+            if len(matches) > 1:
+                raise ValueError(f"Game has multiple players with label '{index}'")
+            return matches[0]
+        if isinstance(index, int):
+            p = Player()
+            p.player = self.game.deref().GetPlayer(index + 1)
+            return p
+        raise TypeError(f"Player index must be int or str, not {index.__class__.__name__}")
 
     @deprecated(version='16.1.0',
                 reason='Use Game.add_player() instead of Game.players.add()',
@@ -96,56 +126,105 @@ class Players(Collection):
 
 
 @cython.cclass
-class GameActions(Collection):
-    """Represents a collection of actions in a game."""
-    game = cython.declare(c_Game)
+class GameActions:
+    """Represents the set of all actions in a game."""
+    game = cython.declare(Game)
 
-    def __len__(self):
-        return self.game.deref().BehavProfileLength()
+    def __init__(self, game: Game) -> None:
+        self.game = game
 
-    def __getitem__(self, action):
-        if not isinstance(action, int):
-            return Collection.__getitem__(self, action)
-        a = Action()
-        a.action = self.game.deref().GetAction(action+1)
-        return a
+    def __len__(self) -> int:
+        return sum(len(s.actions) for s in self.game.infosets)
 
+    def __iter__(self) -> typing.Iterator[Action]:
+        for infoset in self.game.infosets:
+            yield from infoset.actions
 
-@cython.cclass
-class GameInfosets(Collection):
-    """Represents a collection of infosets in a game."""
-    game = cython.declare(c_Game)
-
-    def __len__(self):
-        num_infosets = self.game.deref().NumInfosets()
-        size = num_infosets.Length()
-        n = 0
-        for i in range(1, size+1):
-            n += num_infosets.getitem(i)
-        return n
-
-    def __getitem__(self, infoset):
-        if not isinstance(infoset, int):
-            return Collection.__getitem__(self, infoset)
-        i = Infoset()
-        i.infoset = self.game.deref().GetInfoset(infoset+1)
-        return i
+    def __getitem__(self, index: typing.Union[int, str]) -> Action:
+        if isinstance(index, str):
+            if not index.strip():
+                raise ValueError("Action label cannot be empty or all whitespace")
+            matches = [x for x in self if x.label == index.strip()]
+            if not matches:
+                raise KeyError(f"Game has no action with label '{index}'")
+            if len(matches) > 1:
+                raise ValueError(f"Game has multiple actions with label '{index}'")
+            return matches[0]
+        if isinstance(index, int):
+            for i, action in enumerate(self):
+                if i == index:
+                    return action
+            else:
+                raise IndexError("Index out of range")
+        raise TypeError(f"Action index must be int or str, not {index.__class__.__name__}")
 
 
 @cython.cclass
-class GameStrategies(Collection):
-    """Represents a collection of strategies in a game."""
-    game = cython.declare(c_Game)
+class GameInfosets:
+    """Represents the set of all infosets in a game."""
+    game = cython.declare(Game)
 
-    def __len__(self):
-        return self.game.deref().MixedProfileLength()
+    def __init__(self, game: Game) -> None:
+        self.game = game
 
-    def __getitem__(self, st):
-        if not isinstance(st, int):
-            return Collection.__getitem__(self, st)
-        s = Strategy()
-        s.strategy = self.game.deref().GetStrategy(st+1)
-        return s
+    def __len__(self) -> int:
+        return sum(len(p.infosets) for p in self.game.players)
+
+    def __iter__(self) -> typing.Iterator[Infoset]:
+        for player in self.game.players:
+            yield from player.infosets
+
+    def __getitem__(self, index: typing.Union[int, str]) -> Infoset:
+        if isinstance(index, str):
+            if not index.strip():
+                raise ValueError("Infoset label cannot be empty or all whitespace")
+            matches = [x for x in self if x.label == index.strip()]
+            if not matches:
+                raise KeyError(f"Game has no infoset with label '{index}'")
+            if len(matches) > 1:
+                raise ValueError(f"Game has multiple infosets with label '{index}'")
+            return matches[0]
+        if isinstance(index, int):
+            for i, infoset in enumerate(self):
+                if i == index:
+                    return infoset
+            else:
+                raise IndexError("Index out of range")
+        raise TypeError(f"Infoset index must be int or str, not {index.__class__.__name__}")
+
+
+@cython.cclass
+class GameStrategies:
+    """Represents the set of all strategies in the game."""
+    game = cython.declare(Game)
+
+    def __init__(self, game: Game) -> None:
+        self.game = game
+
+    def __len__(self) -> int:
+        return sum(len(p.strategies) for p in self.game.players)
+
+    def __iter__(self) -> typing.Iterator[Strategy]:
+        for player in self.game.players:
+            yield from player.strategies
+
+    def __getitem__(self, index: typing.Union[int, str]) -> Strategy:
+        if isinstance(index, str):
+            if not index.strip():
+                raise ValueError("Strategy label cannot be empty or all whitespace")
+            matches = [x for x in self if x.label == index.strip()]
+            if not matches:
+                raise KeyError(f"Game has no strategy with label '{index}'")
+            if len(matches) > 1:
+                raise ValueError(f"Game has multiple strategies with label '{index}'")
+            return matches[0]
+        if isinstance(index, int):
+            for i, strat in enumerate(self):
+                if i == index:
+                    return strat
+            else:
+                raise IndexError("Index out of range")
+        raise TypeError(f"Strategy index must be int or str, not {index.__class__.__name__}")
 
 
 @cython.cclass
@@ -431,9 +510,7 @@ class Game:
         """
         if not self.is_tree:
             raise UndefinedOperationError("Operation only defined for games with a tree representation")
-        a = GameActions()
-        a.game = self.game
-        return a
+        return GameActions(self)
 
     @property
     def infosets(self) -> GameInfosets:
@@ -446,28 +523,24 @@ class Game:
         """
         if not self.is_tree:
             raise UndefinedOperationError("Operation only defined for games with a tree representation")
-        i = GameInfosets()
-        i.game = self.game
-        return i
+        return GameInfosets(self)
 
     @property
-    def players(self) -> Players:
+    def players(self) -> GamePlayers:
         """The set of players in the game."""
-        p = Players()
+        p = GamePlayers()
         p.game = self.game
         return p
 
     @property
     def strategies(self) -> GameStrategies:
         """The set of strategies in the game."""
-        s = GameStrategies()
-        s.game = self.game
-        return s
+        return GameStrategies(self)
 
     @property
-    def outcomes(self) -> Outcomes:
+    def outcomes(self) -> GameOutcomes:
         """The set of outcomes in the game."""
-        c = Outcomes()
+        c = GameOutcomes()
         c.game = self.game
         return c
 
@@ -807,7 +880,7 @@ class Game:
                 raise ValueError(f"{funcname}(): {argname} cannot be an empty string or all spaces")
             try:
                 return self.players[player]
-            except IndexError:
+            except KeyError:
                 raise KeyError(f"{funcname}(): no player with label '{player}'")
         raise TypeError(f"{funcname}(): {argname} must be Player or str, not {player.__class__.__name__}")
 
@@ -843,7 +916,7 @@ class Game:
                 raise ValueError(f"{funcname}(): {argname} cannot be an empty string or all spaces")
             try:
                 return self.outcomes[outcome]
-            except IndexError:
+            except KeyError:
                 raise KeyError(f"{funcname}(): no node with label '{outcome}'")
         raise TypeError(f"{funcname}(): {argname} must be Outcome or str, not {outcome.__class__.__name__}")
 
@@ -879,7 +952,7 @@ class Game:
                 raise ValueError(f"{funcname}(): {argname} cannot be an empty string or all spaces")
             try:
                 return self.strategies[strategy]
-            except IndexError:
+            except KeyError:
                 raise KeyError(f"{funcname}(): no strategy with label '{strategy}'")
         raise TypeError(f"{funcname}(): {argname} must be Strategy or str, not {strategy.__class__.__name__}")
 
@@ -951,9 +1024,9 @@ class Game:
                 raise ValueError(f"{funcname}(): {argname} cannot be an empty string or all spaces")
             try:
                 return self.infosets[infoset]
-            except IndexError:
+            except KeyError:
                 raise KeyError(f"{funcname}(): no information set with label '{infoset}'")
-        raise TypeError(f"{funcname}(): {argname} must be Infoset or str, not {infoset.__class__.__name__}")
+        raise TypeError(f"{funcname}(): {argname} must be Infoset or str, not {node.__class__.__name__}")
 
     def _resolve_action(self, action: typing.Any, funcname: str, argname: str = "action") -> Action:
         """Resolve an attempt to reference an action of the game.
@@ -987,7 +1060,7 @@ class Game:
                 raise ValueError(f"{funcname}(): {argname} cannot be an empty string or all spaces")
             try:
                 return self.actions[action]
-            except IndexError:
+            except KeyError:
                 raise KeyError(f"{funcname}(): no action with label '{action}'")
         raise TypeError(f"{funcname}(): {argname} must be Action or str, not {action.__class__.__name__}")
 
