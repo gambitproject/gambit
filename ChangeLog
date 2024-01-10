@@ -1,6 +1,6 @@
 # Changelog
 
-## [16.1.1] - unreleased
+## [16.1.1] - 2024-01-10
 
 ### Fixed
 - In gambit-logit, if there are chance actions with zero probability, information sets may be reached
