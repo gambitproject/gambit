@@ -2,7 +2,7 @@
 # This file is part of Gambit
 # Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
 #
-# FILE: src/python/gambit/lib/player.pxi
+# FILE: src/pygambit/player.pxi
 # Cython wrapper for players
 #
 # This program is free software; you can redistribute it and/or modify
@@ -24,6 +24,11 @@
 class PlayerInfosets:
     """The set of information sets at which a player has the decision."""
     player = cython.declare(c_GamePlayer)
+
+    def __repr__(self) -> str:
+        player = Player()
+        player.player = self.player
+        return f"PlayerInfosets(player={player})"
 
     def __len__(self) -> int:
         """The number of information sets at which the player has the decision."""
@@ -60,6 +65,9 @@ class PlayerActions:
     def __init__(self, player: Player) -> None:
         self.player = player
 
+    def __repr__(self) -> str:
+        return f"PlayerActions(player={self.player})"
+
     def __len__(self) -> int:
         return sum(len(s.actions) for s in self.player.actions)
 
@@ -90,6 +98,11 @@ class PlayerActions:
 class PlayerStrategies:
     """The set of strategies available to a player."""
     player = cython.declare(c_GamePlayer)
+
+    def __repr__(self) -> str:
+        player = Player()
+        player.player = self.player
+        return f"PlayerStrategies(player={player})"
 
     def __len__(self):
         """The number of strategies for the player in the game."""
@@ -123,14 +136,13 @@ class Player:
     """A player in a ``Game``."""
     player = cython.declare(c_GamePlayer)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         if self.is_chance:
-            return f"<Player [CHANCE] in game '{self.game.title}'>"
+            return f"ChancePlayer(game={self.game})"
+        if self.label:
+            return f"Player(game={self.game}, label='{self.label}')"
         else:
-            return (
-                f"<Player [{self.number}] '{self.label}' "
-                f"in game '{self.game.title}'>"
-            )
+            return f"Player(game={self.game}, number={self.number})"
 
     def __eq__(self, other: typing.Any) -> bool:
         return (

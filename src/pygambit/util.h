@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: src/python/gambit/lib/util.h
+// FILE: src/pygambit/util.h
 // Convenience functions for Cython wrapper
 //
 // This program is free software; you can redistribute it and/or modify

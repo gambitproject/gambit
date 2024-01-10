@@ -195,6 +195,8 @@ Probability distributions over strategies
 
    MixedStrategyProfile
    MixedStrategyProfile.game
+   MixedStrategyProfile.mixed_strategies
+   MixedStrategyProfile.__iter__
    MixedStrategyProfile.__getitem__
    MixedStrategyProfile.__setitem__
    MixedStrategyProfile.payoff
@@ -207,6 +209,11 @@ Probability distributions over strategies
    MixedStrategyProfile.normalize
    MixedStrategyProfile.copy
 
+   MixedStrategy
+   MixedStrategy.__iter__
+   MixedStrategy.__getitem__
+   MixedStrategy.__setitem__
+
 
 Probability distributions over behavior
 .......................................
@@ -216,6 +223,9 @@ Probability distributions over behavior
 
    MixedBehaviorProfile
    MixedBehaviorProfile.game
+   MixedBehaviorProfile.mixed_behaviors
+   MixedBehaviorProfile.mixed_actions
+   MixedBehaviorProfile.__iter__
    MixedBehaviorProfile.__getitem__
    MixedBehaviorProfile.__setitem__
    MixedBehaviorProfile.payoff
@@ -232,6 +242,17 @@ Probability distributions over behavior
    MixedBehaviorProfile.randomize
    MixedBehaviorProfile.normalize
    MixedBehaviorProfile.copy
+
+   MixedBehavior
+   MixedBehavior.mixed_actions
+   MixedBehavior.__iter__
+   MixedBehavior.__getitem__
+   MixedBehavior.__setitem__
+
+   MixedAction
+   MixedAction.__iter__
+   MixedAction.__getitem__
+   MixedAction.__setitem__
 
 
 Computation on supports

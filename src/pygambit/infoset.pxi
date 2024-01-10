@@ -2,7 +2,7 @@
 # This file is part of Gambit
 # Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
 #
-# FILE: src/python/gambit/lib/infoset.pxi
+# FILE: src/pygambit/infoset.pxi
 # Cython wrapper for information sets
 #
 # This program is free software; you can redistribute it and/or modify
@@ -27,6 +27,11 @@ class InfosetMembers:
 
     def __init__(self, infoset: Infoset):
         self.infoset = infoset.infoset
+
+    def __repr__(self) -> str:
+        infoset = Infoset()
+        infoset.infoset = self.infoset
+        return f"InfosetMembers(infoset={infoset})"
 
     def __len__(self) -> int:
         return self.infoset.deref().NumMembers()
@@ -58,6 +63,11 @@ class InfosetMembers:
 class InfosetActions:
     """The set of actions which are available at an information set."""
     infoset = cython.declare(c_GameInfoset)
+
+    def __repr__(self) -> str:
+        infoset = Infoset()
+        infoset.infoset = self.infoset
+        return f"InfosetActions(infoset={infoset})"
 
     def __len__(self):
         """The number of actions at the information set."""
@@ -92,10 +102,10 @@ class Infoset:
     infoset = cython.declare(c_GameInfoset)
 
     def __repr__(self) -> str:
-        return (
-            f"<Infoset [{self.infoset.deref().GetNumber()-1}] '{self.label}' "
-            f"for player '{self.player.label}' in game '{self.game.title}'>"
-         )
+        if self.label:
+            return f"Infoset(player={self.player}, label='{self.label}')"
+        else:
+            return f"Infoset(player={self.player}, number={self.number})"
 
     def __eq__(self, other: typing.Any) -> bool:
         return (
@@ -125,6 +135,13 @@ class Infoset:
     @label.setter
     def label(self, value: str) -> None:
         self.infoset.deref().SetLabel(value.encode("ascii"))
+
+    @property
+    def number(self) -> int:
+        """Returns the number of the information set for its player.
+        Information sets are numbered starting with 0.
+        """
+        return self.infoset.deref().GetNumber() - 1
 
     @property
     def is_chance(self) -> bool:

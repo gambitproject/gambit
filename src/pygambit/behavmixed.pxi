@@ -2,8 +2,8 @@
 # This file is part of Gambit
 # Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
 #
-# FILE: src/python/gambit/lib/behav.pxi
-# Cython wrapper for behavior strategies
+# FILE: src/pygambit/behavmixed.pxi
+# Cython wrapper for mixed behavior profiles
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,12 +22,26 @@
 from cython.operator cimport dereference as deref
 
 
-class MixedAgentStrategy:
-    """Represents a probability distribution over a player's actions at an information set.
+class MixedAction:
+    """A probability distribution over a player's actions at an information set.
+
+    A ``MixedAction`` represents a component of a ``MixedBehaviorProfile``.  The
+    full profile is accessible via the `profile` attribute, and the information set
+    at which the ``MixedAction`` applies is accessible via `infoset`.
     """
-    def __init__(self, profile, infoset):
-        self.profile = profile
-        self.infoset = infoset
+    def __init__(self, profile: MixedBehaviorProfile, infoset: Infoset) -> None:
+        self._profile = profile
+        self._infoset = infoset
+
+    @property
+    def profile(self) -> MixedBehaviorProfile:
+        """The full profile of which this is a part."""
+        return self._profile
+
+    @property
+    def infoset(self) -> Infoset:
+        """The information set over which this mixed action is defined."""
+        return self._infoset
 
     def __repr__(self) -> str:
         return str([self.profile[action] for action in self.infoset.actions])
@@ -36,17 +50,16 @@ class MixedAgentStrategy:
         if isinstance(self.profile, MixedBehaviorProfileRational):
             return (
                 r"$\left[" +
-                ",".join(self.profile[i]._repr_latex_().replace("$", "")
-                         for i in self.infoset.actions) +
+                ",".join(self._profile[act]._repr_latex_().replace("$", "")
+                         for act in self.infoset.actions) +
                 r"\right]$"
             )
-        else:
-            return repr(self)
+        return repr(self)
 
     def __eq__(self, other: typing.Any) -> bool:
         if isinstance(other, list):
             return [self[action] for action in self.infoset.actions] == other
-        if not isinstance(other, MixedAgentStrategy) or self.infoset != other.infoset:
+        if not isinstance(other, MixedAction) or self.infoset != other.infoset:
             return False
         return (
             [self[action] for action in self.infoset.actions] ==
@@ -56,38 +69,112 @@ class MixedAgentStrategy:
     def __len__(self) -> len:
         return len(self.infoset.actions)
 
-    def __getitem__(self, action: typing.Union[Action, str]):
-        if isinstance(action, Action):
-            if action.infoset != self.infoset:
+    def __iter__(self) -> typing.Iterator[typing.Tuple[Action, ProfileDType], None, None]:
+        """Iterate over the probabilities assigned to actions by the mixed action.
+
+        .. versionadded:: 16.2.0
+
+        Yields
+        ------
+        action : Action
+            An action at the information set
+        probability : float or Rational
+            The probability the mixed action assigns to the action being played
+        """
+        for action in self.infoset.actions:
+            yield action, self[action]
+
+    def __getitem__(self, index: ActionReference) -> ProfileDType:
+        """Returns the probability that the action referred to by `index` is played.
+
+        Parameters
+        ----------
+        index : Action or str
+
+            * If `index` is an ``Action``, returns the probability the action is played.
+            * If `index` is a ``str``, attempts to resolve the referenced object by searching
+              for an action with that label.
+
+        Returns
+        -------
+        float or Rational
+            The probability assigned to the action.
+
+        Raises
+        ------
+        MismatchError
+            If `index` is an ``Action`` that does not belong to this ``MixedAction``'s
+            information set.
+        """
+        self.profile._check_validity()
+        if isinstance(index, Action):
+            if index.infoset != self.infoset:
                 raise MismatchError("action must belong to this infoset")
-            return self.profile._getprob_action(action)
-        if isinstance(action, str):
+            return self.profile._getprob_action(index)
+        if isinstance(index, str):
             try:
-                return self.profile._getprob_action(self.infoset.actions[action])
+                return self.profile._getprob_action(self.infoset.actions[index])
             except KeyError:
                 raise KeyError(f"no action with label '{index}' at infoset") from None
         raise TypeError(f"strategy index must be Action or str, not {index.__class__.__name__}")
 
-    def __setitem__(self, action: typing.Union[Action, str], value: typing.Any) -> None:
-        if isinstance(action, Action):
-            if action.infoset != self.infoset:
+    def __setitem__(self, index: ActionReference, value: typing.Any) -> None:
+        """Sets the probability an action is played.
+
+        Parameters
+        ----------
+        index : Action or str
+            The part of the profile to set:
+
+            * If `index` is an ``Action``, sets the probability the action is played.
+            * If `index` is a ``str``, attempts to resolve the referenced object by searching
+              for an action with that label, and sets the probability for that action.
+
+        value
+            Any value which can be converted to the data type of the ``MixedBehaviorProfile``.
+
+        Raises
+        ------
+        MismatchError
+            If `action` is an ``Action`` that does not belong to this ``MixedAction``'s
+            information set.
+        """
+        self.profile._check_validity()
+        if isinstance(index, Action):
+            if index.infoset != self.infoset:
                 raise MismatchError("action must belong to this infoset")
-            self.profile._setprob_action(action, value)
+            self.profile._setprob_action(index, value)
             return
-        if isinstance(action, str):
+        if isinstance(index, str):
             try:
-                self.profile._setprob_action(self.infoset.actions[action], value)
+                self.profile._setprob_action(self.infoset.actions[index], value)
                 return
             except KeyError:
                 raise KeyError(f"no action with label '{index}' at infoset") from None
         raise TypeError(f"strategy index must be Action or str, not {index.__class__.__name__}")
 
 
-class MixedBehaviorStrategy:
-    """Represents a probability distribution over a player's actions."""
-    def __init__(self, profile, player):
-        self.profile = profile
-        self.player = player
+class MixedBehavior:
+    """A set of probability distributions describing a player's behavior.
+
+    A ``MixedBehavior`` represents the component of a ``MixedBehaviorProfile``
+    associated with a given ``Player``.  The  full profile is accessible via the `profile`
+    attribute, and the player for whom the  ``MixedBehavior`` applies is accessible
+    via `player`.
+    """
+    def __init__(self, profile: MixedBehaviorProfile, player: Player) -> None:
+        self._profile = profile
+        self._player = player
+
+    @property
+    def profile(self) -> MixedBehaviorProfile:
+        """The full profile of which this is a part."""
+        return self._profile
+
+    @property
+    def player(self) -> Player:
+        """The player for whom this mixed behavior strategy is defined."""
+        return self._player
 
     def __repr__(self) -> str:
         return str([self.profile[infoset] for infoset in self.player.infosets])
@@ -96,17 +183,16 @@ class MixedBehaviorStrategy:
         if isinstance(self.profile, MixedBehaviorProfileRational):
             return (
                 r"$\left[" +
-                ",".join(self.profile[i]._repr_latex_().replace("$", "")
-                         for i in self.player.infosets) +
+                ",".join(self.profile[infoset]._repr_latex_().replace("$", "")
+                         for infoset in self.player.infosets) +
                 r"\right]$"
             )
-        else:
-            return repr(self)
+        return repr(self)
 
     def __eq__(self, other: typing.Any) -> bool:
         if isinstance(other, list):
             return [self[infoset] for infoset in self.player.infosets] == other
-        if not isinstance(other, MixedBehaviorStrategy) or self.player != other.player:
+        if not isinstance(other, MixedBehavior) or self.player != other.player:
             return False
         return (
             [self[infoset] for infoset in self.player.infosets] ==
@@ -114,9 +200,60 @@ class MixedBehaviorStrategy:
         )
 
     def __len__(self) -> int:
-        return len(self.player.infosets)
+        return len(self.player.actions)
 
-    def __getitem__(self, index: typing.Union[Infoset, Action, str]):
+    def mixed_actions(self) -> typing.Iterator[typing.Tuple[Infoset, MixedAction], None, None]:
+        """Iterate over the mixed actions specified by the mixed behavior.
+
+        .. versionadded:: 16.2.0
+
+        Yields
+        ------
+        infoset : Infoset
+            An information set belonging to the player
+        action : MixedAction
+            The player's mixed action specified in the mixed behavior
+        """
+        for infoset in self.player.infosets:
+            yield infoset, self[infoset]
+
+    def __iter__(self) -> typing.Iterator[typing.Tuple[Action, ProfileDType], None, None]:
+        """Iterate over the probabilities assigned to actions by the mixed behavior.
+
+        .. versionadded:: 16.2.0
+
+        Yields
+        ------
+        action : Action
+            An action for the player
+        probability : float or Rational
+            The probability the behavior assigns to the action being played
+        """
+        for action in self.player.actions:
+            yield action, self[action]
+
+    def __getitem__(
+            self,
+            index: typing.Union[InfosetReference, ActionReference]
+    ) -> typing.Union[MixedAction, ProfileDType]:
+        """Access a component of the mixed behavior specified by `index`.
+
+        Parameters
+        ----------
+        index : Infoset, Action, or str
+            The part of the mixed behavior to return:
+
+            * If `index` is an ``Infoset``, returns a ``MixedAction`` over the infoset's actions
+            * If `index` is an ``Action``, returns the probability the action is played
+            * If `index` is a ``str``, attempts to resolve the referenced object by first searching
+              for an infoset with that label, and then for an action with that label.
+
+        Raises
+        ------
+        MismatchError
+            If `infoset` not an ``Infoset`` for the mixed behavior's player, or `action`
+            is not an ``Action`` for the mixed behavior's player.
+        """
         if isinstance(index, Infoset):
             if index.player != self.player:
                 raise MismatchError("infoset must belong to this player")
@@ -135,10 +272,30 @@ class MixedBehaviorStrategy:
             except KeyError:
                 raise KeyError(f"no infoset or action with label '{index}' for player") from None
         raise TypeError(
-            f"strategy index must be Infoset, Action or str, not {index.__class__.__name__}"
+            f"behavior index must be Infoset, Action or str, not {index.__class__.__name__}"
         )
 
-    def __setitem__(self, index: typing.Union[Infoset, Action, str], value: typing.Any) -> None:
+    def __setitem__(self,
+                    index: typing.Union[InfosetReference, ActionReference],
+                    value: typing.Any) -> None:
+        """Sets a component of the mixed behavior to `value`.
+
+        Parameters
+        ----------
+        index : Infoset, Action, or str
+            The component of the mixed behavior to set:
+
+            * If `index` is an `Infoset`, sets the mixed action over that infoset's actions
+            * If `index` is an `Action`, sets the probability the action is played
+            * If `index` is a `str`, attempts to resolve the referenced object by first searching
+              for an infoset with that label, and then for an action with that label.
+
+        Raises
+        ------
+        MismatchError
+            If `infoset` not an ``Infoset`` for the mixed behavior's player, or `action`
+            is not an ``Action`` for the mixed behavior's player.
+        """
         if isinstance(index, Infoset):
             if index.player != self.player:
                 raise MismatchError("infoset must belong to this player")
@@ -161,7 +318,7 @@ class MixedBehaviorStrategy:
                 raise KeyError(f"no infoset or action with label '{index}' for player") from None
             return
         raise TypeError(
-            f"strategy index must be Infoset, Action or str, not {index.__class__.__name__}"
+            f"behavior index must be Infoset, Action or str, not {index.__class__.__name__}"
         )
 
 
@@ -204,20 +361,66 @@ class MixedBehaviorProfile:
         """The game on which this mixed behavior profile is defined."""
         return self._game
 
-    def __getitem__(self, index: typing.Union[Player, Infoset, Action, str]):
-        """Returns a probability, mixed agent strategy, or mixed behavior strategy.
+    def mixed_behaviors(self) -> typing.Iterator[typing.Tuple[Player, MixedBehavior], None, None]:
+        """Iterate over the mixed behaviors in the profile.
+
+        .. versionadded:: 16.2.0
+
+        Yields
+        ------
+        player : Player
+            A player in the game
+        behavior : MixedBehavior
+            The player's mixed behavior specified in the profile
+        """
+        for player in self.game.players:
+            yield player, self[player]
+
+    def mixed_actions(self) -> typing.Iterator[typing.Tuple[Infoset, MixedAction], None, None]:
+        """Iterate over the mixed actions specified by the profile.
+
+        .. versionadded:: 16.2.0
+
+        Yields
+        ------
+        infoset : Infoset
+            An information set in the game
+        action : MixedAction
+            The mixed action specified at the information set by the profile.
+        """
+        for infoset in self.game.infosets:
+            yield infoset, self[infoset]
+
+    def __iter__(self) -> typing.Iterator[typing.Tuple[Action, ProfileDType], None, None]:
+        """Iterate over the probabilities assigned to actions by the profile.
+
+        .. versionadded:: 16.2.0
+
+        Yields
+        ------
+        action : Action
+            An action in the game
+        probability : float or Rational
+            The probability the profile assigns to the action being played
+        """
+        for action in self.game.actions:
+            yield action, self[action]
+
+    def __getitem__(
+            self,
+            index: typing.Union[PlayerReference, InfosetReference, ActionReference]
+    ) -> typing.Union[MixedBehavior, MixedAction, ProfileDType]:
+        """Access a component of the mixed behavior specified by `index`.
 
         Parameters
         ----------
         index : Player, Infoset, Action, or str
             The part of the profile to return:
 
-            * If `index` is a `Player`, returns a ``MixedBehaviorStrategy`` over the player's
-              infosets
-            * If `index` is an `Infoset`, returns a ``MixedAgentStrategy`` over the infoset's
-              actions
-            * If `index` is an `Action`, returns the probability the action is playe
-            * If `index` is a `str`, attempts to resolve the referenced object by first searching
+            * If `index` is a ``Player``, returns a ``MixedBehavior`` over the player's infosets
+            * If `index` is an ``Infoset``, returns a ``MixedAction`` over the infoset's actions
+            * If `index` is an ``Action``, returns the probability the action is played
+            * If `index` is a ``str``, attempts to resolve the referenced object by first searching
               for a player with that label, then for an infoset with that label, and finally for an
               action with that label.
 
@@ -235,18 +438,18 @@ class MixedBehaviorProfile:
         if isinstance(index, Infoset):
             if index.game != self.game:
                 raise MismatchError("infoset must belong to this game")
-            return MixedAgentStrategy(self, index)
+            return MixedAction(self, index)
         if isinstance(index, Player):
             if index.game != self.game:
                 raise MismatchError("player must belong to this game")
-            return MixedBehaviorStrategy(self, index)
+            return MixedBehavior(self, index)
         if isinstance(index, str):
             try:
-                return MixedBehaviorStrategy(self, self.game._resolve_player(index, "__getitem__"))
+                return MixedBehavior(self, self.game._resolve_player(index, "__getitem__"))
             except KeyError:
                 pass
             try:
-                return MixedAgentStrategy(self, self.game._resolve_infoset(index, "__getitem__"))
+                return MixedAction(self, self.game._resolve_infoset(index, "__getitem__"))
             except KeyError:
                 pass
             try:
@@ -275,8 +478,11 @@ class MixedBehaviorProfile:
         for s, v in zip(player.infosets, value):
             self._setprob_infoset(s, v)
 
-    def __setitem__(self,
-                    index: typing.Union[Player, Infoset, Action, str], value: typing.Any) -> None:
+    def __setitem__(
+            self,
+            index: typing.Union[PlayerReference, InfosetReference, ActionReference],
+            value: typing.Any
+    ) -> None:
         """Sets a probability, mixed agent strategy, or mixed behavior strategy to `value`.
 
         Parameters
@@ -284,20 +490,18 @@ class MixedBehaviorProfile:
         index : Player, Infoset, Action, or str
             The part of the profile to return:
 
-            * If `index` is a `Player`, returns a ``MixedBehaviorStrategy`` over the player's
-              infosets
-            * If `index` is an `Infoset`, returns a ``MixedAgentStrategy`` over the infoset's
-              actions
-            * If `index` is an `Action`, returns the probability the action is playe
-            * If `index` is a `str`, attempts to resolve the referenced object by first searching
+            * If `index` is a ``Player``, sets the ``MixedBehavior`` over the player's infosets
+            * If `index` is an ``Infoset``, sets the ``MixedAction`` over the infoset's actions
+            * If `index` is an ``Action``, sets the probability the action is played
+            * If `index` is a ``str``, attempts to resolve the referenced object by first searching
               for a player with that label, then for an infoset with that label, and finally for an
               action with that label.
 
         Raises
         ------
         MismatchError
-            If `player` is a `Player` from a different game, `infoset` is an `Infoset` from a
-            different game, or `action` is an `Action` from a different game.`
+            If `player` is a ``Player`` from a different game, `infoset` is an ``Infoset`` from a
+            different game, or `action` is an ``Action`` from a different game.`
         """
         self._check_validity()
         if isinstance(index, Action):
@@ -336,7 +540,7 @@ class MixedBehaviorProfile:
             f"not {index.__class__.__name__}"
         )
 
-    def is_defined_at(self, infoset: typing.Union[Infoset, str]) -> bool:
+    def is_defined_at(self, infoset: InfosetReference) -> bool:
         """Returns whether the profile has probabilities defined at the information set.
         A profile can be well-defined if probabilities are not specified at some information sets,
         as long as those information sets are reached with zero probability.
@@ -350,14 +554,14 @@ class MixedBehaviorProfile:
         Raises
         ------
         MismatchError
-            If `infoset` is an `Infoset` from a different game.
+            If `infoset` is an ``Infoset`` from a different game.
         KeyError
             If `infoset` is a string and no information set in the game has that label.
         """
         self._check_validity()
         return self._is_defined_at(self.game._resolve_infoset(infoset, "is_defined_at"))
 
-    def belief(self, node: typing.Union[Node, str]):
+    def belief(self, node: NodeReference) -> ProfileDType:
         """Returns the conditional probability that a node is reached, given that
         its information set is reached.
 
@@ -374,7 +578,7 @@ class MixedBehaviorProfile:
         self._check_validity()
         return self._belief(self.game._resolve_node(node, "belief"))
 
-    def payoff(self, player: typing.Union[Player, str]):
+    def payoff(self, player: PlayerReference) -> ProfileDType:
         """Returns the expected payoff to a player if all players play
         according to the profile.
 
@@ -387,7 +591,7 @@ class MixedBehaviorProfile:
         Raises
         ------
         MismatchError
-            If `player` is a `Player` from a different game.
+            If `player` is a ``Player`` from a different game.
         KeyError
             If `player` is a string and no player in the game has that label.
         ValueError
@@ -399,8 +603,8 @@ class MixedBehaviorProfile:
             raise ValueError("payoff() is not defined for the chance player")
         return self._payoff(resolved_player)
 
-    def node_value(self, player: typing.Union[Player, str],
-                   node: typing.Union[Node, str]):
+    def node_value(self, player: PlayerReference,
+                   node: NodeReference) -> ProfileDType:
         """Returns the expected payoff to `player` conditional on play reaching `node`,
         if all players play according to the profile.
 
@@ -416,7 +620,7 @@ class MixedBehaviorProfile:
         Raises
         ------
         MismatchError
-            If `player` is a `Player` from a different game or `node` is a `Node`
+            If `player` is a ``Player`` from a different game or `node` is a ``Node``
             from a different game.
         KeyError
             If `player` is a string and no player in the game has that label, or
@@ -431,7 +635,7 @@ class MixedBehaviorProfile:
             raise ValueError("node_value() is not defined for the chance player")
         return self._node_value(resolved_player, resolved_node)
 
-    def infoset_value(self, infoset: typing.Union[Infoset, str]):
+    def infoset_value(self, infoset: InfosetReference) -> ProfileDType:
         """Returns the expected payoff to the player conditional on reaching an information set,
         if all players play according to the profile.
 
@@ -444,7 +648,7 @@ class MixedBehaviorProfile:
         Raises
         ------
         MismatchError
-            If `infoset` is an `Infoset` from a different game.
+            If `infoset` is an ``Infoset`` from a different game.
         KeyError
             If `infoset` is a string and no information set in the game has that label.
         ValueError
@@ -456,7 +660,7 @@ class MixedBehaviorProfile:
             raise ValueError("infoset_value() is not defined for the chance player")
         return self._infoset_value(resolved_infoset)
 
-    def action_value(self, action: typing.Union[Action, str]):
+    def action_value(self, action: ActionReference) -> ProfileDType:
         """Returns the expected payoff to the player of playing an action conditional on reaching
         its information set, if all players play according to the profile.
 
@@ -469,7 +673,7 @@ class MixedBehaviorProfile:
         Raises
         ------
         MismatchError
-            If `action` is an `Action` from a different game.
+            If `action` is an ``Action`` from a different game.
         KeyError
             If `action` is a string and no action in the game has that label.
         ValueError
@@ -481,7 +685,7 @@ class MixedBehaviorProfile:
             raise ValueError("action_value() is not defined for the chance player")
         return self._action_value(resolved_action)
 
-    def realiz_prob(self, node: typing.Union[Node, str]):
+    def realiz_prob(self, node: NodeReference) -> ProfileDType:
         """Returns the probability with which a node is reached.
 
         Parameters
@@ -493,14 +697,14 @@ class MixedBehaviorProfile:
         Raises
         ------
         MismatchError
-            If `node` is an `Node` from a different game.
+            If `node` is a ``Node`` from a different game.
         KeyError
             If `node` is a string and no node in the game has that label.
         """
         self._check_validity()
         return self._realiz_prob(self.game._resolve_node(node, "realiz_prob"))
 
-    def infoset_prob(self, infoset: typing.Union[Infoset, str]):
+    def infoset_prob(self, infoset: NodeReference) -> ProfileDType:
         """Returns the probability with which an information set is reached.
 
         Parameters
@@ -512,14 +716,14 @@ class MixedBehaviorProfile:
         Raises
         ------
         MismatchError
-            If `infoset` is an `Infoset` from a different game.
+            If `infoset` is an ``Infoset`` from a different game.
         KeyError
             If `infoset` is a string and no information set in the game has that label.
         """
         self._check_validity()
         return self._infoset_prob(self.game._resolve_infoset(infoset, "infoset_prob"))
 
-    def regret(self, action: typing.Union[Action, str]):
+    def regret(self, action: ActionReference) -> ProfileDType:
         """Returns the regret to playing `action`, if all other
         players play according to the profile.
 
@@ -537,14 +741,14 @@ class MixedBehaviorProfile:
         Raises
         ------
         MismatchError
-            If `action` is an `Action` from a different game.
+            If `action` is an ``Action`` from a different game.
         KeyError
             If `action` is a string and no action in the game has that label.
         """
         self._check_validity()
         return self._regret(self.game._resolve_action(action, "regret"))
 
-    def liap_value(self):
+    def liap_value(self) -> ProfileDType:
         """Returns the Lyapunov value (see [McK91]_) of the strategy profile.
 
         The Lyapunov value is a non-negative number which is zero exactly at

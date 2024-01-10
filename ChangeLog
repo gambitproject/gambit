@@ -2,6 +2,10 @@
 
 ## [16.2.0a1] - unreleased
 
+### Added
+- MixedStrategyProfile and MixedBehaviorProfile objects in pygambit can now be iterated in
+  various dict-like ways
+
 ### Changed
 - Functions to compute Nash equilibria now return a NashComputationResult object instead of a bare
   list of profiles (#190)
@@ -9,6 +13,7 @@
   test_realiz_prob; added test_martingale_property_of_node_value (#375)
 - Improved test suite for mixed strategy profiles (#374)
 - Test suite for pygambit moved from src/pygambit/tests/ to tests/
+- Improved __repr__ methods in pygambit for game-related classes
 
 
 ## [16.1.1] - 2024-01-10

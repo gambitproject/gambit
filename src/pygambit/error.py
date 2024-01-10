@@ -2,7 +2,7 @@
 # This file is part of Gambit
 # Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
 #
-# FILE: src/python/gambit/lib/error.py
+# FILE: src/pygambit/error.py
 # Exceptions raised by Gambit Python interface
 #
 # This program is free software; you can redistribute it and/or modify

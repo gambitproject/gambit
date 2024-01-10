@@ -2,7 +2,7 @@
 # This file is part of Gambit
 # Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
 #
-# FILE: src/python/gambit/lib/strategy.pxi
+# FILE: src/pygambit/strategy.pxi
 # Cython wrapper for strategies
 #
 # This program is free software; you can redistribute it and/or modify
@@ -25,12 +25,11 @@ class Strategy:
     """A plan of action for a ``Player`` in a ``Game``."""
     strategy = cython.declare(c_GameStrategy)
 
-    def __repr__(self):
-        return (
-            f"<Strategy [{self.number}] '{self.label}' "
-            f"for player '{self.player.label}' "
-            f"in game '{self.player.game.title}'>"
-        )
+    def __repr__(self) -> str:
+        if self.label:
+            return f"Strategy(player={self.player}, label='{self.label}')"
+        else:
+            return f"Strategy(player={self.player}, number={self.number})"
 
     def __eq__(self, other: typing.Any) -> bool:
         return (

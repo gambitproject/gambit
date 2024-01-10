@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: src/python/gambit/lib/nash.h
+// FILE: src/pygambit/nash.h
 // Shims for Cython wrapper for computation of equilibrium
 //
 // This program is free software; you can redistribute it and/or modify

@@ -2,7 +2,7 @@
 # This file is part of Gambit
 # Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
 #
-# FILE: src/python/gambit/lib/outcome.pxi
+# FILE: src/pygambit/outcome.pxi
 # Cython wrapper for outcomes
 #
 # This program is free software; you can redistribute it and/or modify
@@ -30,11 +30,11 @@ class Outcome:
     """An outcome in a ``Game``."""
     outcome = cython.declare(c_GameOutcome)
 
-    def __repr__(self):
-        return (
-            f"<Outcome [{self.outcome.deref().GetNumber()-1}] '{self.label}' "
-            f"in game '{self.game.title}'>"
-        )
+    def __repr__(self) -> str:
+        if self.label:
+            return f"Outcome(game={self.game}, label='{self.label}')"
+        else:
+            return f"Outcome(game={self.game}, number={self.number})"
 
     def __eq__(self, other: typing.Any) -> bool:
         return (

@@ -2,7 +2,7 @@
 # This file is part of Gambit
 # Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
 #
-# FILE: src/python/gambit/lib/game.pxi
+# FILE: src/pygambit/game.pxi
 # Cython wrapper for games
 #
 # This program is free software; you can redistribute it and/or modify
@@ -32,6 +32,11 @@ import pygambit.gameiter
 class GameOutcomes:
     """Represents the set of outcomes in a game."""
     game = cython.declare(c_Game)
+
+    def __repr__(self) -> str:
+        game = Game()
+        game.game = self.game
+        return f"GameOutcomes(game={game})"
 
     def __len__(self) -> int:
         """The number of outcomes in the game."""
@@ -64,6 +69,11 @@ class GameOutcomes:
 class GamePlayers:
     """Represents a collection of players in a game."""
     game = cython.declare(c_Game)
+
+    def __repr__(self) -> str:
+        game = Game()
+        game.game = self.game
+        return f"GamePlayers(game={game})"
 
     def __len__(self) -> int:
         """Returns the number of players in the game."""
@@ -107,6 +117,9 @@ class GameActions:
     def __init__(self, game: Game) -> None:
         self.game = game
 
+    def __repr__(self) -> str:
+        return f"GameActions(game={self.game})"
+
     def __len__(self) -> int:
         return sum(len(s.actions) for s in self.game.infosets)
 
@@ -141,6 +154,9 @@ class GameInfosets:
     def __init__(self, game: Game) -> None:
         self.game = game
 
+    def __repr__(self) -> str:
+        return f"GameInfosets(game={self.game})"
+
     def __len__(self) -> int:
         return sum(len(p.infosets) for p in self.game.players)
 
@@ -174,6 +190,9 @@ class GameStrategies:
 
     def __init__(self, game: Game) -> None:
         self.game = game
+
+    def __repr__(self) -> str:
+        return f"GameOutcomes(game={self.game})"
 
     def __len__(self) -> int:
         return sum(len(p.strategies) for p in self.game.players)
@@ -424,15 +443,15 @@ class Game:
             raise ValueError(f"Parse error in game file: {exc}") from None
         return g
 
-    def __str__(self):
-        return f"<Game '{self.title}'>"
-
-    def __repr__(self):
-        return self.write()
+    def __repr__(self) -> str:
+        if self.title:
+            return f"Game(title='{self.title}')"
+        else:
+            return f"Game(id={hash(self)}"
 
     def _repr_html_(self):
         if self.is_tree:
-            return self.write()
+            return repr(self)
         else:
             return self.write("html")
 

@@ -353,8 +353,8 @@ The set of equilibria found is reported in :py:attr:`.NashComputationResult.equi
 in this case, this is a list of mixed behavior profiles.
 A mixed behavior profile specifies, for each information set, the probability distribution over
 actions at that information set.
-Indexing a :py:class:`.MixedBehaviorProfile` by a player gives the probability distributions
-over each of that player's information sets:
+Indexing a :py:class:`.MixedBehaviorProfile` by a player gives a :py:class:`.MixedBehavior`,
+which specifies probability distributions at each of the player's information sets:
 
 .. ipython:: python
 
@@ -363,11 +363,22 @@ over each of that player's information sets:
 
 In this case, at Alice's first information set, the one at which she has the King, she always raises.
 At her second information set, where she has the Queen, she sometimes bluffs, raising with
-probability one-third:
+probability one-third.
+The probability distribution at an information set is represented by a :py:class:`.MixedAction`.
+:py:meth:`.MixedBehavior.mixed_actions` iterates over these for the player:
 
 .. ipython:: python
 
-   [eqm["Alice"][infoset]["Raise"] for infoset in g.players["Alice"].infosets]
+   for infoset, mixed_action in eqm["Alice"].mixed_actions():
+       print(infoset)
+       print(mixed_action)
+
+So we could extract Alice's probabilities of raising at her respective information sets
+like this:
+
+.. ipython:: python
+
+   {infoset: mixed_action["Raise"] for infoset, mixed_action in eqm["Alice"].mixed_actions()}
 
 In larger games, labels may not always be the most convenient way to refer to specific
 actions.  We can also index profiles directly with :py:class:`.Action` objects.
@@ -376,7 +387,7 @@ iterating Alice's list of actions:
 
 .. ipython:: python
 
-   [eqm[action] for action in g.players["Alice"].actions if action.label == "Raise"]
+   {action.infoset: eqm[action] for action in g.players["Alice"].actions if action.label == "Raise"}
 
 
 Looking at Bob's strategy,
@@ -408,7 +419,7 @@ returns the expected payoff of taking an action, conditional on reaching that ac
 
 .. ipython:: python
 
-   [eqm.action_value(action) for action in g.players["Bob"].infosets[0].actions]
+   {action: eqm.action_value(action) for action in g.players["Bob"].infosets[0].actions}
 
 Bob's indifference between his actions arises because of his beliefs given Alice's strategy.
 :py:meth:`.MixedBehaviorProfile.belief` returns the probability of reaching a node, conditional on
@@ -416,7 +427,7 @@ its information set being reached:
 
 .. ipython:: python
 
-   [eqm.belief(node) for node in g.players["Bob"].infosets[0].members]
+   {node: eqm.belief(node) for node in g.players["Bob"].infosets[0].members}
 
 Bob believes that, conditional on Alice raising, there's a 75% chance that she has the king;
 therefore, the expected payoff to meeting is in fact -1 as computed.
@@ -433,7 +444,7 @@ conditional on reaching a node is given by :py:meth:`.MixedBehaviorProfile.node_
 
 .. ipython:: python
 
-   [eqm.node_value("Bob", node) for node in g.players["Bob"].infosets[0].members]
+   {node: eqm.node_value("Bob", node) for node in g.players["Bob"].infosets[0].members}
 
 The overall expected payoff to a player given the behavior profile is returned by
 :py:meth:`.MixedBehaviorProfile.payoff`:
@@ -484,8 +495,8 @@ The expected payoff to a strategy is provided by :py:meth:`.MixedStrategyProfile
 
 .. ipython:: python
 
-   [eqm.strategy_value(strategy) for strategy in g.players["Alice"].strategies]
-   [eqm.strategy_value(strategy) for strategy in g.players["Bob"].strategies]
+   {strategy: eqm.strategy_value(strategy) for strategy in g.players["Alice"].strategies}
+   {strategy: eqm.strategy_value(strategy) for strategy in g.players["Bob"].strategies}
 
 The overall expected payoff to a player is returned by :py:meth:`.MixedStrategyProfile.payoff`:
 

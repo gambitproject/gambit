@@ -2,7 +2,7 @@
 # This file is part of Gambit
 # Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
 #
-# FILE: src/python/gambit/lib/libgambit.pyx
+# FILE: src/pygambit/libgambit.pyx
 # Cython wrapper for Gambit C++ library
 #
 # This program is free software; you can redistribute it and/or modify
@@ -74,6 +74,15 @@ def _to_number(value: typing.Any) -> c_Number:
     return c_Number(value.encode("ascii"))
 
 
+PlayerReference = typing.Union[Player, str]
+StrategyReference = typing.Union[Strategy, str]
+InfosetReference = typing.Union[Infoset, str]
+ActionReference = typing.Union[Action, str]
+NodeReference = typing.Union[Node, str]
+
+ProfileDType = typing.Union[float, Rational]
+
+
 ######################
 # Includes
 ######################
@@ -85,7 +94,7 @@ include "player.pxi"
 include "outcome.pxi"
 include "node.pxi"
 include "stratspt.pxi"
-include "mixed.pxi"
-include "behav.pxi"
+include "stratmixed.pxi"
+include "behavmixed.pxi"
 include "game.pxi"
 include "nash.pxi"

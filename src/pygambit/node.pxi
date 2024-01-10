@@ -2,7 +2,7 @@
 # This file is part of Gambit
 # Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
 #
-# FILE: src/python/gambit/lib/node.pxi
+# FILE: src/pygambit/node.pxi
 # Cython wrapper for nodes
 #
 # This program is free software; you can redistribute it and/or modify
@@ -27,6 +27,11 @@ class NodeChildren:
 
     def __len__(self) -> int:
         return self.parent.deref().NumChildren()
+
+    def __repr__(self) -> str:
+        node = Node()
+        node.node = self.parent
+        return f"NodeChildren(parent={node})"
 
     def __iter__(self) -> typing.Iterator[Node]:
         for i in range(self.parent.deref().NumChildren()):
@@ -57,10 +62,14 @@ class Node:
     node = cython.declare(c_GameNode)
 
     def __repr__(self) -> str:
-        return (
-            f"<Node [{self.node.deref().GetNumber()}] '{self.label}' "
-            f"in game '{self.game.title}'>"
-        )
+        if self.label:
+            return f"Node(game={self.game}, label='{self.label}')"
+        path = []
+        node = self
+        while node.parent:
+            path.append(node.prior_action.number)
+            node = node.parent
+        return f"Node(game={self.game}, path={path})"
 
     def __eq__(self, other: typing.Any) -> bool:
         return (

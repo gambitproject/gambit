@@ -2,7 +2,7 @@
 # This file is part of Gambit
 # Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
 #
-# FILE: src/python/gambit/lib/action.pxi
+# FILE: src/pygambit/action.pxi
 # Cython wrapper for actions
 #
 # This program is free software; you can redistribute it and/or modify
@@ -25,13 +25,11 @@ class Action:
     """A choice available at an ``Infoset`` in a ``Game``."""
     action = cython.declare(c_GameAction)
 
-    def __repr__(self):
-        return (
-            f"<Action [{self.action.deref().GetNumber()-1}] '{self.label}' "
-            f"at infoset '{self.infoset.label}' "
-            f"for player '{self.infoset.player.label}' "
-            f"in game '{self.infoset.game.title}'>"
-        )
+    def __repr__(self) -> str:
+        if self.label:
+            return f"Action(infoset={self.infoset}, label='{self.label}')"
+        else:
+            return f"Action(infoset={self.infoset}, number={self.number})"
 
     def __eq__(self, other: typing.Any) -> bool:
         return (
@@ -41,6 +39,13 @@ class Action:
 
     def __hash__(self) -> int:
         return cython.cast(cython.long, self.action.deref())
+
+    @property
+    def number(self) -> int:
+        """Returns the number of the action at its information set.
+        Actions are numbered starting with 0.
+        """
+        return self.action.deref().GetNumber() - 1
 
     def precedes(self, node: Node) -> bool:
         """Returns whether `node` precedes this action in the

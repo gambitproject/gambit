@@ -2,7 +2,7 @@
 # This file is part of Gambit
 # Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
 #
-# FILE: src/python/gambit/lib/mixed.pxi
+# FILE: src/pygambit/stratmixed.pxi
 # Cython wrapper for mixed strategy profiles
 #
 # This program is free software; you can redistribute it and/or modify
@@ -23,20 +23,36 @@ from cython.operator cimport dereference as deref
 
 
 class MixedStrategy:
-    """Represents a probability distribution over a player's strategies."""
-    def __init__(self, profile, player):
-        self.profile = profile
-        self.player = player
+    """A probability distribution over a player's strategies.
 
-    def __repr__(self):
+    A ``MixedStrategy`` represents the component of a ``MixedStrategyProfile``
+    associated with a given ``Player``.  The  full profile is accessible via the `profile`
+    attribute, and the player for whom the  ``MixedStrategy`` applies is accessible
+    via `player`.
+    """
+    def __init__(self, profile: MixedStrategyProfile, player: Player) -> None:
+        self._profile = profile
+        self._player = player
+
+    @property
+    def profile(self) -> MixedStrategyProfile:
+        """The full profile of which this is a part."""
+        return self._profile
+
+    @property
+    def player(self) -> Player:
+        """The player for whom this mixed strategy is defined."""
+        return self._player
+
+    def __repr__(self) -> str:
         return str([self.profile[s] for s in self.player.strategies])
 
-    def _repr_latex_(self):
+    def _repr_latex_(self) -> str:
         if isinstance(self.profile, MixedStrategyProfileRational):
             return (
                 r"$\left[" +
-                ",".join(self.profile[i]._repr_latex_().replace("$", "")
-                         for i in self.player.strategies) +
+                ",".join(self.profile[strategy]._repr_latex_().replace("$", "")
+                         for strategy in self.player.strategies) +
                 r"\right]$"
             )
         else:
@@ -55,27 +71,84 @@ class MixedStrategy:
     def __len__(self) -> int:
         return len(self.player.strategies)
 
-    def __getitem__(self, strategy: typing.Union[Strategy, str]):
-        if isinstance(strategy, Strategy):
-            if strategy.player != self.player:
+    def __iter__(self) -> typing.Iterator[typing.Tuple[Strategy, ProfileDType], None, None]:
+        """Iterate over the probabilities assigned to strategies by the mixed strategy.
+
+        .. versionadded:: 16.2.0
+
+        Yields
+        ------
+        strategy : Strategy
+            A strategy for the player
+        probability: float or Rational
+            The probability the mixed strategy assigns to the strategy being played
+        """
+        for strategy in self.player.strategies:
+            yield strategy, self[strategy]
+
+    def __getitem__(self, index: StrategyReference) -> ProfileDType:
+        """Returns the probability that the strategy referred to by `index` is played.
+
+        Parameters
+        ----------
+        index : Strategy or str
+
+            * If `index` is a ``Strategy``, returns the probability the strategy is played.
+            * If `index` is a ``str``, attempts to resolve the referenced object by searching
+              for a strategy with that label.
+
+        Returns
+        -------
+        float or Rational
+            The probability assigned to the strategy.
+
+        Raises
+        ------
+        MismatchError
+            If `index` is a ``Strategy`` that does not belong to this ``MixedStrategy``'s player.
+        """
+        self.profile._check_validity()
+        if isinstance(index, Strategy):
+            if index.player != self.player:
                 raise MismatchError("strategy must belong to this player")
-            return self.profile._getprob_strategy(strategy)
-        if isinstance(strategy, str):
+            return self.profile._getprob_strategy(index)
+        if isinstance(index, str):
             try:
-                return self.profile._getprob_strategy(self.player.strategies[strategy])
+                return self.profile._getprob_strategy(self.player.strategies[index])
             except KeyError:
                 raise KeyError(f"no strategy with label '{index}' for player") from None
         raise TypeError(f"strategy index must be Strategy or str, not {index.__class__.__name__}")
 
-    def __setitem__(self, strategy: typing.Union[Strategy, str], value: typing.Any) -> None:
-        if isinstance(strategy, Strategy):
-            if strategy.player != self.player:
+    def __setitem__(self, index: StrategyReference, value: typing.Any) -> None:
+        """Sets the probability a strategy is played.
+
+        Parameters
+        ----------
+        index : Strategy, or str
+            The part of the profile to set:
+
+            * If `index` is a ``Strategy``, sets the probability the strategy is played.
+            * If `index` is a ``str``, attempts to resolve the referenced object by searching
+              for a strategy with that label, and sets the probability for that strategy.
+
+        value
+            Any value which can be converted to the data type of the ``MixedStrategyProfile``.
+
+        Raises
+        ------
+        MismatchError
+            If `strategy` is a ``Strategy`` that does not belong to this ``MixedStrategy``'s
+            player.
+        """
+        self.profile._check_validity()
+        if isinstance(index, Strategy):
+            if index.player != self.player:
                 raise MismatchError("strategy must belong to this player")
-            self.profile._setprob_strategy(strategy, value)
+            self.profile._setprob_strategy(index, value)
             return
-        if isinstance(strategy, str):
+        if isinstance(index, str):
             try:
-                self.profile._setprob_strategy(self.player.strategies[strategy], value)
+                self.profile._setprob_strategy(self.player.strategies[index], value)
                 return
             except KeyError:
                 raise KeyError(f"no strategy with label '{index}' for player") from None
@@ -105,10 +178,10 @@ class MixedStrategyProfile:
         Represents a mixed behavior profile over a ``Game`` with an extensive
         representation.
     """
-    def __repr__(self):
+    def __repr__(self) -> str:
         return str([self[player] for player in self.game.players])
 
-    def _repr_latex_(self):
+    def _repr_latex_(self) -> str:
         return (
             r"$\left[" +
             ",".join([self[player]._repr_latex_().replace("$", "")
@@ -121,8 +194,41 @@ class MixedStrategyProfile:
         """The game on which this mixed strategy profile is defined."""
         return self._game
 
-    def __getitem__(self, index: typing.Union[Player, Strategy, str]):
-        """Returns a probability or mixed strategy.
+    def mixed_strategies(self) -> typing.Iterator[typing.Tuple[Player, MixedStrategy], None, None]:
+        """Iterate over the mixed strategies in the profile.
+
+        .. versionadded:: 16.2.0
+
+        Yields
+        ------
+        player : Player
+            A player in the game
+        strategy : MixedStrategy
+            The player's mixed strategy specified in the profile
+        """
+        for player in self.game.players:
+            yield player, self[player]
+
+    def __iter__(self) -> typing.Iterator[typing.Tuple[Strategy, ProfileDType], None, None]:
+        """Iterate over the probabilities assigned to strategies by the profile.
+
+        .. versionadded:: 16.2.0
+
+        Yields
+        ------
+        strategy : Strategy
+            A strategy in the game
+        probability: float or Rational
+            The probability the profile assigns to the strategy being played
+        """
+        for strategy in self.game.strategies:
+            yield strategy, self[strategy]
+
+    def __getitem__(
+            self,
+            index: typing.Union[PlayerReference, StrategyReference]
+    ) -> typing.Union[MixedStrategy, ProfileDType]:
+        """Access a component of the mixed strategy profile specified by `index`.
 
         Parameters
         ----------
@@ -137,8 +243,8 @@ class MixedStrategyProfile:
         Raises
         ------
         MismatchError
-            If `player` is a ``Player`` from a different game, or
-            `strategy` is a ``Strategy`` from a different game.
+            If `player` is a ``Player`` from a different game, or `strategy` is a ``Strategy``
+             from a different game.
         """
         self._check_validity()
         if isinstance(index, Strategy):
@@ -171,7 +277,11 @@ class MixedStrategyProfile:
         for s, v in zip(player.strategies, value):
             self._setprob_strategy(s, v)
 
-    def __setitem__(self, index: typing.Union[Player, Strategy, str], value: typing.Any) -> None:
+    def __setitem__(
+            self,
+            index: typing.Union[PlayerReference, StrategyReference],
+            value: typing.Any
+    ) -> None:
         """Sets a probability or a mixed strategy to `value`.
 
         Parameters
@@ -184,11 +294,14 @@ class MixedStrategyProfile:
             * If `index` is a ``str``, attempts to resolve the referenced object by first searching
               for a player with that label, and then for a strategy with that label.
 
+        value
+            Any value which can be converted to the data type of the ``MixedStrategyProfile``.
+
         Raises
         ------
         MismatchError
-            If `player` is a ``Player`` from a different game, or
-            `strategy` is a ``Strategy`` from a different game.
+            If `player` is a ``Player`` from a different game, or `strategy` is a ``Strategy``
+            from a different game.
         """
         self._check_validity()
         if isinstance(index, Strategy):
@@ -216,7 +329,7 @@ class MixedStrategyProfile:
             f"profile index must be Player, Strategy, or str, not {index.__class__.__name__}"
         )
 
-    def payoff(self, player: typing.Union[Player, str]):
+    def payoff(self, player: PlayerReference) -> ProfileDType:
         """Returns the expected payoff to a player if all players play
         according to the profile.
 
@@ -236,7 +349,7 @@ class MixedStrategyProfile:
         self._check_validity()
         return self._payoff(self.game._resolve_player(player, "payoff"))
 
-    def strategy_value(self, strategy: typing.Union[Strategy, str]):
+    def strategy_value(self, strategy: StrategyReference) -> ProfileDType:
         """Returns the expected payoff to playing the strategy, if all other
         players play according to the profile.
 
@@ -256,7 +369,7 @@ class MixedStrategyProfile:
         self._check_validity()
         return self._strategy_value(self.game._resolve_strategy(strategy, "strategy_value"))
 
-    def regret(self, strategy: typing.Union[Strategy, str]):
+    def regret(self, strategy: StrategyReference) -> ProfileDType:
         """Returns the regret to playing `strategy`, if all other
         players play according to the profile.
 
@@ -281,8 +394,8 @@ class MixedStrategyProfile:
         return self._regret(self.game._resolve_strategy(strategy, "regret"))
 
     def strategy_value_deriv(self,
-                             strategy: typing.Union[Strategy, str],
-                             other: typing.Union[Strategy, str]):
+                             strategy: StrategyReference,
+                             other: StrategyReference) -> ProfileDType:
         """Returns the derivative of the payoff to playing `strategy`, with respect to the
         probability that `other` is played.
 
@@ -299,7 +412,7 @@ class MixedStrategyProfile:
             self.game._resolve_strategy(strategy, "strategy_value_deriv", "other")
         )
 
-    def liap_value(self):
+    def liap_value(self) -> ProfileDType:
         """Returns the Lyapunov value (see [McK91]_) of the strategy profile.
 
         The Lyapunov value is a non-negative number which is zero exactly at
