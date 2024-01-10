@@ -51,7 +51,7 @@ def test_player_index_invalid():
 
 def test_player_label_invalid():
     game = gbt.Game.new_table([2, 2])
-    with pytest.raises(IndexError):
+    with pytest.raises(KeyError):
         _ = game.players["Not a player"]
 
 
@@ -115,7 +115,7 @@ def test_player_strategy_bad_index():
 
 def test_player_strategy_bad_label():
     game = gbt.Game.new_table([2, 2])
-    with pytest.raises(IndexError):
+    with pytest.raises(KeyError):
         _ = game.players[0].strategies["Cooperate"]
 
 

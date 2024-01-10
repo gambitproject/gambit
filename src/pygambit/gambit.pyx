@@ -1,6 +1,6 @@
 #
 # This file is part of Gambit
-# Copyright (c) 1994-2023, The Gambit Project (http://www.gambit-project.org)
+# Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
 #
 # FILE: src/python/gambit/lib/libgambit.pyx
 # Cython wrapper for Gambit C++ library
@@ -74,22 +74,6 @@ def _to_number(value: typing.Any) -> c_Number:
         except decimal.InvalidOperation:
             raise ValueError(f"Cannot convert '{value}' to a number") from None
     return c_Number(value.encode('ascii'))
-
-
-@cython.cclass
-class Collection:
-    """Represents a collection of related objects in a game."""
-    def __repr__(self):
-        return str(list(self))
-
-    def __getitem__(self, i):
-        if isinstance(i, str):
-            try:
-                return self[[x.label for x in self].index(i)]
-            except ValueError:
-                raise IndexError(f"no object with label '{i}'")
-        else:
-            raise TypeError(f"collection indexes must be int or str, not {i.__class__.__name__}")
 
 
 ######################

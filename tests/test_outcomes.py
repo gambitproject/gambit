@@ -52,7 +52,7 @@ def test_outcome_index_int_range(game: gbt.Game):
     "game", [gbt.Game.new_table([2, 2])]
 )
 def test_outcome_index_label_range(game: gbt.Game):
-    with pytest.raises(IndexError):
+    with pytest.raises(KeyError):
         _ = game.outcomes["not an outcome"]
 
 

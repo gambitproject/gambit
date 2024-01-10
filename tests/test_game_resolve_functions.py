@@ -59,8 +59,8 @@ class TestGambitResolveFunctions(unittest.TestCase):
         assert self.game1._resolve_strategy(strategy='11', funcname='test')
         assert self.game1._resolve_strategy(strategy='12', funcname='test')
         self.assertRaises(KeyError, self.game1._resolve_strategy, strategy='13', funcname='test')
-        assert self.game2._resolve_strategy(strategy='1', funcname='test')
-        assert self.game2._resolve_strategy(strategy='2', funcname='test')
+        self.assertRaises(ValueError, self.game2._resolve_strategy, strategy='1', funcname='test')
+        self.assertRaises(ValueError, self.game2._resolve_strategy, strategy='2', funcname='test')
         self.assertRaises(KeyError, self.game2._resolve_strategy, strategy='3', funcname='test')
 
     def test_resolve_node_empty_strings(self):
@@ -100,8 +100,8 @@ class TestGambitResolveFunctions(unittest.TestCase):
 
     def test_resolve_action_nonempty_strings(self):
         """Test _resolve_action with non-empty strings, some that resolve some that don't"""
-        assert self.game1._resolve_action(action='1', funcname='test')
-        assert self.game1._resolve_action(action='2', funcname='test')
+        self.assertRaises(ValueError, self.game1._resolve_action, action='1', funcname='test')
+        self.assertRaises(ValueError, self.game1._resolve_action, action='2', funcname='test')
         self.assertRaises(KeyError, self.game1._resolve_action, action='3', funcname='test')
         assert self.game2._resolve_action(action='U1', funcname='test')
         assert self.game2._resolve_action(action='D1', funcname='test')

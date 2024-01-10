@@ -11,7 +11,7 @@
 - Test suite for pygambit moved from src/pygambit/tests/ to tests/
 
 
-## [16.1.1] - unreleased
+## [16.1.1] - 2024-01-10
 
 ### Fixed
 - In gambit-logit, if there are chance actions with zero probability, information sets may be reached
@@ -21,7 +21,13 @@
   of both methods (#1)
 - Fixed bug in gambit-lp which would return non-Nash output on extensive games if the game had chance nodes
   other than the root node (#134)
+- In pygambit, fixed indexing in mixed behavior and mixed strategy profiles, which could result
+  in strategies or actions belonging to other players or information sets being referenced when
+  indexing by string label
 
+### Changed
+- In pygambit, resolving game objects with ambiguous or duplicated labels results in a ValueError,
+  instead of silently returning the first matching object found.
 
 
 ## [16.1.0] - 2023-11-09
