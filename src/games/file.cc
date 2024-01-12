@@ -28,7 +28,7 @@
 #include "gambit.h"
 // for explicit access to turning off canonicalization
 #include "gametree.h"
-  
+
 
 namespace {
 // This anonymous namespace encapsulates the file-parsing code
@@ -1034,7 +1034,7 @@ Game GameXMLSavefile::GetGame() const
     std::istringstream s(efgfile->FirstChild()->Value());
     return ReadGame(s);
   }
-  
+
   const TiXmlNode *nfgfile = game->FirstChild("nfgfile");
   if (nfgfile) {
     std::istringstream s(nfgfile->FirstChild()->Value());

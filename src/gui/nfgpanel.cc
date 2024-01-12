@@ -73,7 +73,7 @@ void gbtTablePlayerIcon::OnLeftClick(wxMouseEvent &)
   wxIcon image;
   image.CopyFromBitmap(bitmap);
 #endif // _WXMSW__
-      
+
   wxTextDataObject textData(wxString::Format(wxT("P%d"), m_player));
   wxDropSource source(textData, this, image, image, image);
   source.DoDragDrop(wxDrag_DefaultMove);
@@ -104,7 +104,7 @@ private:
   //@}
 
 public:
-  gbtTablePlayerPanel(wxWindow *, gbtNfgPanel *, 
+  gbtTablePlayerPanel(wxWindow *, gbtNfgPanel *,
 		      gbtGameDocument *, int p_player);
 
   void OnUpdate();
@@ -121,7 +121,7 @@ gbtTablePlayerPanel::gbtTablePlayerPanel(wxWindow *p_parent,
 					 gbtNfgPanel *p_nfgPanel,
 					 gbtGameDocument *p_doc,
 					 int p_player)
-  : wxPanel(p_parent, wxID_ANY), 
+  : wxPanel(p_parent, wxID_ANY),
   /* m_nfgPanel(p_nfgPanel),*/ m_doc(p_doc), m_player(p_player)
 {
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
@@ -132,7 +132,7 @@ gbtTablePlayerPanel::gbtTablePlayerPanel(wxWindow *p_parent,
   labelSizer->Add(playerIcon, 0, wxALL | wxALIGN_CENTER, 0);
 
   if (!m_doc->IsTree()) {
-    auto *addStrategyIcon = 
+    auto *addStrategyIcon =
       new wxBitmapButton(this, wxID_ANY, wxBitmap(newrow_xpm),
 			 wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
     addStrategyIcon->SetToolTip(_("Add a strategy for this player"));
@@ -188,7 +188,7 @@ void gbtTablePlayerPanel::OnUpdate()
     m_payoff->SetForegroundColour(color);
 
     std::string pay = m_doc->GetProfiles().GetPayoff(m_player);
-    m_payoff->SetLabel(wxT("Payoff: ") + 
+    m_payoff->SetLabel(wxT("Payoff: ") +
 		       wxString(pay.c_str(), *wxConvCurrent));
     GetSizer()->Show(m_payoff, true);
   }
@@ -274,12 +274,12 @@ public:
 };
 
 
-gbtTablePlayerToolbar::gbtTablePlayerToolbar(gbtNfgPanel *p_parent, 
+gbtTablePlayerToolbar::gbtTablePlayerToolbar(gbtNfgPanel *p_parent,
 					     gbtGameDocument *p_doc)
-  : wxPanel(p_parent, wxID_ANY, wxDefaultPosition, wxSize(210, -1)), 
+  : wxPanel(p_parent, wxID_ANY, wxDefaultPosition, wxSize(210, -1)),
     gbtGameView(p_doc),
     m_nfgPanel(p_parent)
-{ 
+{
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
   for (int pl = 1; pl <= m_doc->NumPlayers(); pl++) {
@@ -294,7 +294,7 @@ gbtTablePlayerToolbar::gbtTablePlayerToolbar(gbtNfgPanel *p_parent,
 void gbtTablePlayerToolbar::OnUpdate()
 {
   while (m_playerPanels.Length() < m_doc->NumPlayers()) {
-    auto *panel = 
+    auto *panel =
       new gbtTablePlayerPanel(this, m_nfgPanel, m_doc,
 			      m_playerPanels.Length()+1);
     m_playerPanels.push_back(panel);
@@ -306,7 +306,7 @@ void gbtTablePlayerToolbar::OnUpdate()
     GetSizer()->Detach(panel);
     panel->Destroy();
   }
-  
+
   for (int pl = 1; pl <= m_playerPanels.Length(); pl++) {
     m_playerPanels[pl]->OnUpdate();
   }
@@ -385,7 +385,7 @@ gbtStrategyDominanceToolbar::gbtStrategyDominanceToolbar(wxWindow *p_parent,
 	  wxCommandEventHandler(gbtStrategyDominanceToolbar::OnPreviousLevel));
   topSizer->Add(m_prevButton, 0, wxALL | wxALIGN_CENTER, 5);
 
-  m_level = new wxStaticText(this, wxID_STATIC, 
+  m_level = new wxStaticText(this, wxID_STATIC,
 			     wxT("All strategies shown"),
 			     wxDefaultPosition, wxDefaultSize,
 			     wxALIGN_CENTER | wxST_NO_AUTORESIZE);
@@ -442,10 +442,10 @@ void gbtStrategyDominanceToolbar::OnUpdate()
     m_level->SetLabel(wxT("All strategies shown"));
   }
   else if (m_doc->GetStrategyElimLevel() == 2) {
-    m_level->SetLabel(wxT("Eliminated 1 level")); 
+    m_level->SetLabel(wxT("Eliminated 1 level"));
   }
   else {
-    m_level->SetLabel(wxString::Format(wxT("Eliminated %d levels"), 
+    m_level->SetLabel(wxString::Format(wxT("Eliminated %d levels"),
 				       m_doc->GetStrategyElimLevel()-1));
   }
   GetSizer()->Layout();
@@ -483,7 +483,7 @@ void gbtNfgPanel::OnToolsDominance(wxCommandEvent &p_event)
 {
   GetSizer()->Show(m_dominanceToolbar, p_event.IsChecked(), true);
   GetSizer()->Layout();
-  
+
   // Redraw the table with/without dominance markings
   m_tableWidget->OnUpdate();
 
@@ -495,7 +495,7 @@ void gbtNfgPanel::OnToolsDominance(wxCommandEvent &p_event)
 }
 
 void gbtNfgPanel::OnUpdate()
-{ 
+{
   m_playerToolbar->OnUpdate();
   m_tableWidget->OnUpdate();
   GetSizer()->Layout();

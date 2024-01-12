@@ -39,7 +39,7 @@ void print_Gen_list(Gen_node g);
 Gen_node Cat(Gen_node g1,Gen_node g2);
 
 Gen_node copy_Gen_list(Gen_node a);
-     
+
 Gen_node copy_Gen_node(Gen_node a);
 
 
@@ -66,10 +66,10 @@ Gen_node Gen_elt(Gen_node g, int idx);
 polynomial1 Gen_poly(Gen_node g);
 
 node Gen_aset(Gen_node g);
-   
+
 void print_Proc(Gen_node (*p)(Gen_node));
 
-/*used for reader.lex-- 
+/*used for reader.lex--
 takes a string in quotes and removes outside quotes*/
 char *Copy_String_NQ(char *s);
 

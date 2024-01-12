@@ -3,6 +3,7 @@ import pathlib
 
 import pygambit as gbt
 
+
 def read_from_file(fn: str) -> gbt.Game:
     return gbt.Game.read_game(pathlib.Path("tests/test_games")/fn)
 
@@ -58,5 +59,3 @@ def create_el_farol_bar_game() -> gbt.Game:
 
 def create_selten_horse_game() -> gbt.Game:
     return read_from_file("e01.efg")
-
-

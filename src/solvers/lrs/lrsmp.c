@@ -44,7 +44,7 @@ long lrs_record_digits;		/* this is the biggest acheived so far.     */
 /* Initialization and allocation procedures - must use!  */
 /******************************************************* */
 
-long 
+long
 lrs_mp_init (long dec_digits, FILE * fpin, FILE * fpout)
 /* max number of decimal digits for the computation */
 {
@@ -86,7 +86,7 @@ lrs_alloc_mp_t ()
   return p;
 }
 
-lrs_mp_vector 
+lrs_mp_vector
 lrs_alloc_mp_vector (long n)
  /* allocate lrs_mp_vector for n+1 lrs_mp numbers */
 {
@@ -110,7 +110,7 @@ lrs_clear_mp_vector (lrs_mp_vector p, long n)
   free (p);
 }
 
-lrs_mp_matrix 
+lrs_mp_matrix
 lrs_alloc_mp_matrix (long m, long n)
 /* allocate lrs_mp_matrix for m+1 x n+1 lrs_mp numbers */
 {
@@ -135,7 +135,7 @@ lrs_alloc_mp_matrix (long m, long n)
   return a;
 }
 
-void 
+void
 lrs_clear_mp_matrix (lrs_mp_matrix p, long m, long n)
 /* free space allocated to lrs_mp_matrix p */
 {
@@ -167,7 +167,7 @@ void copy (lrs_mp a, lrs_mp b)	/* assigns a=b  */
 /* From Knuth Vol.2 SemiNumerical Algorithms            */
 /* coded by J. Quinn                                    */
 /********************************************************/
-void 
+void
 divint (lrs_mp a, lrs_mp b, lrs_mp c)	/* c=a/b, a contains remainder on return */
 {
   long cy, la, lb, lc, d1, s, t, sig;
@@ -323,9 +323,9 @@ divint (lrs_mp a, lrs_mp b, lrs_mp c)	/* c=a/b, a contains remainder on return *
 }
 /* end of divint */
 
-void 
+void
 gcd (lrs_mp u, lrs_mp v)	/*returns u=gcd(u,v) destroying v */
-	     /*Euclid's algorithm.  Knuth, II, p.320  
+	     /*Euclid's algorithm.  Knuth, II, p.320
 	        modified to avoid copies r=u,u=v,v=r
 	        Switches to single precision when possible for greater speed */
 {
@@ -405,7 +405,7 @@ qv:
   goto qu;
 }
 
-long 
+long
 compare (lrs_mp a, lrs_mp b)	/* a ? b and returns -1,0,1 for <,=,> */
 {
   long i;
@@ -464,7 +464,7 @@ long mp_greater (lrs_mp a, lrs_mp b)	/* tests if a > b and returns (TRUE=POS) */
     }
   return (0);
 }
-void 
+void
 itomp (long in, lrs_mp a)
     /* convert integer i to multiple precision with base BASE */
 {
@@ -488,7 +488,7 @@ itomp (long in, lrs_mp a)
 }				/* end of itomp */
 
 
-void 
+void
 linint (lrs_mp a, long ka, lrs_mp b, long kb)	/*compute a*ka+b*kb --> a */
 /***Handbook of Algorithms and Data Structures P.239 ***/
 {
@@ -512,7 +512,7 @@ linint (lrs_mp a, long ka, lrs_mp b, long kb)	/*compute a*ka+b*kb --> a */
 /***end of linint***/
 
 
-void 
+void
 mptodouble (lrs_mp a, double *x)	/* convert lrs_mp to double */
 {
   long i, la;
@@ -529,7 +529,7 @@ mptodouble (lrs_mp a, double *x)	/* convert lrs_mp to double */
     (*x)= -(*x);
 }
 
-void 
+void
 mulint (lrs_mp a, lrs_mp b, lrs_mp c)	/* multiply two integers a*b --> c */
 
 /***Handbook of Algorithms and Data Structures, p239  ***/
@@ -561,7 +561,7 @@ mulint (lrs_mp a, lrs_mp b, lrs_mp c)	/* multiply two integers a*b --> c */
 }
 /***end of mulint ***/
 
-void 
+void
 normalize (lrs_mp a)
 {
   long cy, i, la;
@@ -610,7 +610,7 @@ length (lrs_mp a)
   return ((a[0] > 0) ? a[0] : -a[0]);
 }
 
-long 
+long
 mptoi (lrs_mp a)		/* convert lrs_mp to long integer */
 {
   long len = length (a);
@@ -627,13 +627,13 @@ mptoi (lrs_mp a)		/* convert lrs_mp to long integer */
 string prat (const char name[], lrs_mp Nin, lrs_mp Din)	/*reduce and print Nin/Din  */
 {
 
-	
+
   	lrs_mp Nt, Dt;
 	long i;
 	//create stream to collect output
 	stringstream ss;
 	string str;
-	
+
 	ss<<name;
 
 	/* reduce fraction */
@@ -641,7 +641,7 @@ string prat (const char name[], lrs_mp Nin, lrs_mp Din)	/*reduce and print Nin/D
 	copy (Dt, Din);
 	reduce (Nt, Dt);
 	/* pipe output to stream */
-	if (sign (Nin) * sign (Din) == NEG) 
+	if (sign (Nin) * sign (Din) == NEG)
 		ss<<"-";
 	else
 		ss<<" ";
@@ -692,7 +692,7 @@ char *cprat (const char name[], lrs_mp Nin, lrs_mp Din)
 
 string pmp (char name[], lrs_mp a)	/*print the long precision integer a */
 {
-	
+
   	long i;
 	//create stream to collect output
 	stringstream ss;
@@ -704,11 +704,11 @@ string pmp (char name[], lrs_mp a)	/*print the long precision integer a */
 	else
 	ss<<" ";
 
-	ss<<a[length(a) -1];	
+	ss<<a[length(a) -1];
 	for (i = length (a) - 2; i >= 1; i--)
 		ss<<a[i];
 
-	ss<<" ";	
+	ss<<" ";
 
 	//pipe stream to single string
 	str = ss.str();
@@ -740,7 +740,7 @@ void prat (const char name[], lrs_mp Nin, lrs_mp Din)	/*reduce and print Nin/Din
 	fprintf (lrs_ofp, FORMAT, Dt[i]);
 	}
 	fprintf (lrs_ofp, " ");
-	
+
 }
 
 void pmp (char name[], lrs_mp a)	/*print the long precision integer a */
@@ -755,13 +755,13 @@ void pmp (char name[], lrs_mp a)	/*print the long precision integer a */
 	fprintf (lrs_ofp, "%lu", a[length (a) - 1]);
 	for (i = length (a) - 2; i >= 1; i--)
 	fprintf (lrs_ofp, FORMAT, a[i]);
-	fprintf (lrs_ofp, " ");	
+	fprintf (lrs_ofp, " ");
 }
 #endif
 
 
 
-long 
+long
 readrat (lrs_mp Na, lrs_mp Da)
  /* read a rational or integer and convert to lrs_mp with base BASE */
  /* returns true if denominator is not one                      */
@@ -770,7 +770,7 @@ readrat (lrs_mp Na, lrs_mp Da)
   char in[MAXINPUT], num[MAXINPUT], den[MAXINPUT];
   if(fscanf (lrs_ifp, "%s", in)==EOF)
                  {
-                   fprintf (lrs_ofp, "\nInvalid input: check you have entered enough data!\n"); 
+                   fprintf (lrs_ofp, "\nInvalid input: check you have entered enough data!\n");
                    exit(1);
                  }
   if(!strcmp(in,"end"))          /*premature end of input file */
@@ -790,14 +790,14 @@ readrat (lrs_mp Na, lrs_mp Da)
 
 
 
-void 
+void
 addint (lrs_mp a, lrs_mp b, lrs_mp c)	/* compute c=a+b */
 {
   copy (c, a);
   linint (c, 1, b, 1);
 }
 
-void 
+void
 atomp (char s[], lrs_mp a)	/*convert string to lrs_mp integer */
 {
   lrs_mp mpone;
@@ -826,7 +826,7 @@ atomp (char s[], lrs_mp a)	/*convert string to lrs_mp integer */
 }				/* end of atomp */
 
 
-void 
+void
 subint (lrs_mp a, lrs_mp b, lrs_mp c)	/* compute c=a-b */
 
 {
@@ -834,7 +834,7 @@ subint (lrs_mp a, lrs_mp b, lrs_mp c)	/* compute c=a-b */
   linint (a, 1, b, -1);
 }
 
-void 
+void
 decint (lrs_mp a, lrs_mp b)	/* compute a=a-b */
 
 {
@@ -842,7 +842,7 @@ decint (lrs_mp a, lrs_mp b)	/* compute a=a-b */
 }
 
 
-long 
+long
 myrandom (long num, long nrange)
 /* return a random number in range 0..nrange-1 */
 
@@ -853,7 +853,7 @@ myrandom (long num, long nrange)
 }
 
 
-long 
+long
 atos (char s[])			/* convert s to integer */
 {
   long i, j;
@@ -863,14 +863,14 @@ atos (char s[])			/* convert s to integer */
   return (j);
 }
 
-void 
+void
 stringcpy (char *s, char *t)	/*copy t to s pointer version */
 {
   while (((*s++) = (*t++)) != '\0');
 }
 
 
-void 
+void
 rattodouble (lrs_mp a, lrs_mp b, double *x)	/* convert lrs_mp rational to double */
 
 {
@@ -881,7 +881,7 @@ rattodouble (lrs_mp a, lrs_mp b, double *x)	/* convert lrs_mp rational to double
 }
 
 
-void 
+void
 atoaa (char in[], char num[], char den[])
 /* convert rational string in to num/den strings */
 {
@@ -899,7 +899,7 @@ atoaa (char in[], char num[], char den[])
 }				/* end of atoaa */
 
 
-void 
+void
 lcm (lrs_mp a, lrs_mp b)
 /* a = least common multiple of a, b; b is preserved */
 {
@@ -911,7 +911,7 @@ lcm (lrs_mp a, lrs_mp b)
   mulint (v, b, a);
 }				/* end of lcm */
 
-void 
+void
 reducearray (lrs_mp_vector p, long n)
 /* find largest gcd of p[0]..p[n-1] and divide through */
 {
@@ -946,7 +946,7 @@ reducearray (lrs_mp_vector p, long n)
 }				/* end of reducearray */
 
 
-void 
+void
 reduceint (lrs_mp Na, lrs_mp Da)	/* divide Na by Da and return */
 {
   lrs_mp Temp;
@@ -954,7 +954,7 @@ reduceint (lrs_mp Na, lrs_mp Da)	/* divide Na by Da and return */
   exactdivint (Temp, Da, Na);
 }
 
-void 
+void
 reduce (lrs_mp Na, lrs_mp Da)	/* reduces Na Da by gcd(Na,Da) */
 {
   lrs_mp Nb, Db, Nc, Dc;
@@ -970,7 +970,7 @@ reduce (lrs_mp Na, lrs_mp Da)	/* reduces Na Da by gcd(Na,Da) */
 }
 
 
-long 
+long
 comprod (lrs_mp Na, lrs_mp Nb, lrs_mp Nc, lrs_mp Nd)	/* +1 if Na*Nb > Nc*Nd  */
 			  /* -1 if Na*Nb < Nc*Nd  */
 			  /*  0 if Na*Nb = Nc*Nd  */
@@ -987,7 +987,7 @@ comprod (lrs_mp Na, lrs_mp Nb, lrs_mp Nc, lrs_mp Nd)	/* +1 if Na*Nb > Nc*Nd  */
 }
 
 
-void 
+void
 notimpl (char s[])
 {
   fflush (stdout);
@@ -995,7 +995,7 @@ notimpl (char s[])
   exit (1);
 }
 
-void 
+void
 getfactorial (lrs_mp factorial, long k)		/* compute k factorial in lrs_mp */
 {
   lrs_mp temp;
@@ -1011,7 +1011,7 @@ getfactorial (lrs_mp factorial, long k)		/* compute k factorial in lrs_mp */
 /*     Package of routines for rational arithmetic             */
 /***************************************************************/
 
-void 
+void
 scalerat (lrs_mp Na, lrs_mp Da, long ka)	/* scales rational by ka */
 {
   lrs_mp Nt;
@@ -1021,7 +1021,7 @@ scalerat (lrs_mp Na, lrs_mp Da, long ka)	/* scales rational by ka */
   reduce (Na, Da);
 }
 
-void 
+void
 linrat (lrs_mp Na, lrs_mp Da, long ka, lrs_mp Nb, lrs_mp Db, long kb, lrs_mp Nc, lrs_mp Dc)
 /* computes Nc/Dc = ka*Na/Da  +kb* Nb/Db
    and reduces answer by gcd(Nc,Dc) */
@@ -1034,7 +1034,7 @@ linrat (lrs_mp Na, lrs_mp Da, long ka, lrs_mp Nb, lrs_mp Db, long kb, lrs_mp Nc,
   reduce (Nc, Dc);
 }
 
-void 
+void
 divrat (lrs_mp Na, lrs_mp Da, lrs_mp Nb, lrs_mp Db, lrs_mp Nc, lrs_mp Dc)
  /* computes Nc/Dc = (Na/Da)  / ( Nb/Db )
     and reduces answer by gcd(Nc,Dc) */
@@ -1044,7 +1044,7 @@ divrat (lrs_mp Na, lrs_mp Da, lrs_mp Nb, lrs_mp Db, lrs_mp Nc, lrs_mp Dc)
   reduce (Nc, Dc);
 }
 
-void 
+void
 mulrat (lrs_mp Na, lrs_mp Da, lrs_mp Nb, lrs_mp Db, lrs_mp Nc, lrs_mp Dc)
 /* computes Nc/Dc = Na/Da  * Nb/Db and reduces by gcd(Nc,Dc) */
 {
@@ -1079,7 +1079,7 @@ xcalloc (long n, long s, long l, char *f)
   return tmp;
 }
 
-void 
+void
 lrs_getdigits (long *a, long *b)
 {
 /* send digit information to user */
@@ -1088,7 +1088,7 @@ lrs_getdigits (long *a, long *b)
   return;
 }
 
-void 
+void
 lrs_default_digits_overflow ()
 {
   fprintf (stdout, "\nOverflow at digits=%ld", DIG2DEC (lrs_digits));

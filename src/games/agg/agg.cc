@@ -541,7 +541,7 @@ AggNumber AGG::getJ(int player1, int act1, int player2, int act2, StrategyProfil
 
 //getSymMixedPayoff: compute expected payoff under a symmetric mixed strat,
 //  for a symmetric game.
-// parameter: s is the mixed strategy of one player. It is a vector of 
+// parameter: s is the mixed strategy of one player. It is a vector of
 // probabilities, indexed by the action node.
 
 AggNumber AGG::getSymMixedPayoff(StrategyProfile &s)

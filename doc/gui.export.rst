@@ -70,5 +70,3 @@ Encapsulated PostScript output is generally useful for inclusion in
 LaTeX and other scientific document preparation systems. This is a
 vector-based output, and thus can be rescaled much more effectively
 than the other output formats.
-
-

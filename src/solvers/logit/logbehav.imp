@@ -83,28 +83,28 @@ template <class T> void LogBehavProfile<T>::SetCentroid()
 
 template <class T>
 const T &LogBehavProfile<T>::GetRealizProb(const GameNode &node) const
-{ 
+{
   ComputeSolutionData();
   return m_realizProbs[node->GetNumber()];
 }
 
 template <class T>
 const T &LogBehavProfile<T>::GetBeliefProb(const GameNode &node) const
-{ 
+{
   ComputeSolutionData();
   return m_beliefs[node->GetNumber()];
 }
 
 template <class T>
 Vector<T> LogBehavProfile<T>::GetPayoff(const GameNode &node) const
-{ 
+{
   ComputeSolutionData();
   return m_nodeValues.Row(node->GetNumber());
 }
 
 template <class T>
 T LogBehavProfile<T>::GetInfosetProb(const GameInfoset &iset) const
-{ 
+{
   ComputeSolutionData();
   T prob = (T) 0;
   for (int i = 1; i <= iset->NumMembers(); i++) {
@@ -115,14 +115,14 @@ T LogBehavProfile<T>::GetInfosetProb(const GameInfoset &iset) const
 
 template <class T>
 const T &LogBehavProfile<T>::GetPayoff(const GameInfoset &iset) const
-{ 
+{
   ComputeSolutionData();
   return m_infosetValues(iset->GetPlayer()->GetNumber(), iset->GetNumber());
 }
 
 template <class T>
 T LogBehavProfile<T>::GetActionProb(const GameAction &action) const
-{ 
+{
   if (action->GetInfoset()->GetPlayer()->IsChance()) {
     GameTreeInfosetRep *infoset = dynamic_cast<GameTreeInfosetRep *>(action->GetInfoset().operator->());
     return static_cast<T>(infoset->GetActionProb(action->GetNumber()));
@@ -139,7 +139,7 @@ T LogBehavProfile<T>::GetActionProb(const GameAction &action) const
 
 template <class T>
 T LogBehavProfile<T>::GetLogActionProb(const GameAction &action) const
-{ 
+{
   if (action->GetInfoset()->GetPlayer()->IsChance()) {
     GameTreeInfosetRep *infoset = dynamic_cast<GameTreeInfosetRep *>(action->GetInfoset().operator->());
     return log(static_cast<T>(infoset->GetActionProb(action->GetNumber())));
@@ -153,7 +153,7 @@ T LogBehavProfile<T>::GetLogActionProb(const GameAction &action) const
 
 template <class T>
 const T &LogBehavProfile<T>::GetPayoff(const GameAction &act) const
-{ 
+{
   ComputeSolutionData();
   return m_actionValues(act->GetInfoset()->GetPlayer()->GetNumber(),
 			act->GetInfoset()->GetNumber(),
@@ -161,7 +161,7 @@ const T &LogBehavProfile<T>::GetPayoff(const GameAction &act) const
 }
 
 template <class T>
-void LogBehavProfile<T>::GetPayoff(GameTreeNodeRep *node, 
+void LogBehavProfile<T>::GetPayoff(GameTreeNodeRep *node,
 				     const T &prob, int player, T &value) const
 {
   if (node->GetOutcome()) {
@@ -232,10 +232,10 @@ T LogBehavProfile<T>::DiffActionValue(const GameAction &p_action,
   // for each node, divided by the realization probability of the infoset,
   // times the probability with which p_oppAction is played
   Array<T> derivs(infoset->NumMembers());
-  
+
   for (int i = 1; i <= infoset->NumMembers(); i++) {
     derivs[i] = 0.0;
-    GameAction act = GetPrecedingAction(infoset->GetMember(i), 
+    GameAction act = GetPrecedingAction(infoset->GetMember(i),
 					p_oppAction->GetInfoset());
 
     if (act == p_oppAction) {
@@ -256,7 +256,7 @@ T LogBehavProfile<T>::DiffActionValue(const GameAction &p_action,
 }
 
 template <class T>
-T LogBehavProfile<T>::DiffNodeValue(const GameNode &p_node, 
+T LogBehavProfile<T>::DiffNodeValue(const GameNode &p_node,
 				    const GamePlayer &p_player,
 				    const GameAction &p_oppAction) const
 {
@@ -296,7 +296,7 @@ void LogBehavProfile<T>::ComputeSolutionDataPass2(const GameNode &node) const
 {
   if (node->GetOutcome()) {
     GameOutcome outcome = node->GetOutcome();
-    for (int pl = 1; pl <= m_support.GetGame()->NumPlayers(); pl++) { 
+    for (int pl = 1; pl <= m_support.GetGame()->NumPlayers(); pl++) {
       m_nodeValues(node->GetNumber(), pl) += static_cast<T>(outcome->GetPayoff(pl));
     }
   }
@@ -308,12 +308,12 @@ void LogBehavProfile<T>::ComputeSolutionDataPass2(const GameNode &node) const
     for (int i = 1; i <= iset->NumMembers(); i++) {
       infosetProb += m_realizProbs[iset->GetMember(i)->GetNumber()];
     }
-    
-    // push down payoffs from outcomes attached to non-terminal nodes 
-    for (int child = 1; child <= node->NumChildren(); child++) { 
-      m_nodeValues.SetRow(node->GetChild(child)->GetNumber(), 
+
+    // push down payoffs from outcomes attached to non-terminal nodes
+    for (int child = 1; child <= node->NumChildren(); child++) {
+      m_nodeValues.SetRow(node->GetChild(child)->GetNumber(),
 			  m_nodeValues.Row(node->GetNumber()));
-    }    
+    }
 
     for (int pl = 1; pl <= m_support.GetGame()->NumPlayers(); pl++) {
       m_nodeValues(node->GetNumber(), pl) = (T) 0;
@@ -340,7 +340,7 @@ void LogBehavProfile<T>::ComputeSolutionDataPass2(const GameNode &node) const
   }
 }
 
-// compute realization probabilities for nodes and isets.  
+// compute realization probabilities for nodes and isets.
 template <class T>
 void LogBehavProfile<T>::ComputeSolutionDataPass1(const GameNode &node) const
 {
@@ -352,7 +352,7 @@ void LogBehavProfile<T>::ComputeSolutionDataPass1(const GameNode &node) const
     m_realizProbs[node->GetNumber()] = (T) 1;
     m_logRealizProbs[node->GetNumber()] = (T) 0.0;
   }
-  
+
   if (node->GetInfoset()) {
     for (int i = 1; i <= node->NumChildren(); i++) {
       ComputeSolutionDataPass1(node->GetChild(i));

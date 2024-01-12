@@ -33,8 +33,12 @@ class MixedStrategy:
 
     def _repr_latex_(self):
         if isinstance(self.profile, MixedStrategyProfileRational):
-            return r"$\left[" + ",".join(
-                self.profile[i]._repr_latex_().replace("$", "") for i in self.player.strategies) + r"\right]$"
+            return (
+                r"$\left[" +
+                ",".join(self.profile[i]._repr_latex_().replace("$", "")
+                         for i in self.player.strategies) +
+                r"\right]$"
+            )
         else:
             return repr(self)
 
@@ -77,6 +81,7 @@ class MixedStrategy:
                 raise KeyError(f"no strategy with label '{index}' for player") from None
         raise TypeError(f"strategy index must be Strategy or str, not {index.__class__.__name__}")
 
+
 @cython.cclass
 class MixedStrategyProfile:
     """Represents a mixed strategy profile over the strategies in a ``Game``.
@@ -100,11 +105,16 @@ class MixedStrategyProfile:
         Represents a mixed behavior profile over a ``Game`` with an extensive
         representation.
     """
-    def __repr__(self):   
-        return str([ self[player] for player in self.game.players ])
+    def __repr__(self):
+        return str([self[player] for player in self.game.players])
 
     def _repr_latex_(self):
-        return r"$\left[" + ",".join([ self[player]._repr_latex_().replace("$","") for player in self.game.players ]) + r"\right]$"
+        return (
+            r"$\left[" +
+            ",".join([self[player]._repr_latex_().replace("$", "")
+                      for player in self.game.players]) +
+            r"\right]$"
+        )
 
     @property
     def game(self) -> Game:
@@ -141,19 +151,23 @@ class MixedStrategyProfile:
             return MixedStrategy(self, index)
         if isinstance(index, str):
             try:
-                return MixedStrategy(self, self.game._resolve_player(index, '__getitem__'))
+                return MixedStrategy(self, self.game._resolve_player(index, "__getitem__"))
             except KeyError:
                 pass
             try:
-                return self._getprob_strategy(self.game._resolve_strategy(index, '__getitem__'))
+                return self._getprob_strategy(self.game._resolve_strategy(index, "__getitem__"))
             except KeyError:
                 raise KeyError(f"no player or strategy with label '{index}'")
-        raise TypeError(f"profile index must be Player, Strategy, or str, not {index.__class__.__name__}")
+        raise TypeError(
+            f"profile index must be Player, Strategy, or str, not {index.__class__.__name__}"
+        )
 
     def _setprob_player(self, player: Player, value: typing.Any) -> None:
         """Helper function to set the mixed strategy for a player."""
         if len(value) != len(player.strategies):
-            raise ValueError("when setting a mixed strategy, must specify exactly one value per strategy")
+            raise ValueError(
+                "when setting a mixed strategy, must specify exactly one value per strategy"
+            )
         for s, v in zip(player.strategies, value):
             self._setprob_strategy(s, v)
 
@@ -189,16 +203,18 @@ class MixedStrategyProfile:
             return
         if isinstance(index, str):
             try:
-                self._setprob_player(self.game._resolve_player(index, '__setitem__'), value)
+                self._setprob_player(self.game._resolve_player(index, "__setitem__"), value)
                 return
             except KeyError:
                 pass
             try:
-                self._setprob_strategy(self.game._resolve_strategy(index, '__setitem__'), value)
+                self._setprob_strategy(self.game._resolve_strategy(index, "__setitem__"), value)
             except KeyError:
                 raise KeyError(f"no player or strategy with label '{index}'")
             return
-        raise TypeError(f"profile index must be Player, Strategy, or str, not {index.__class__.__name__}")
+        raise TypeError(
+            f"profile index must be Player, Strategy, or str, not {index.__class__.__name__}"
+        )
 
     def payoff(self, player: typing.Union[Player, str]):
         """Returns the expected payoff to a player if all players play
@@ -218,7 +234,7 @@ class MixedStrategyProfile:
             If `player` is a string and no player in the game has that label.
         """
         self._check_validity()
-        return self._payoff(self.game._resolve_player(player, 'payoff'))
+        return self._payoff(self.game._resolve_player(player, "payoff"))
 
     def strategy_value(self, strategy: typing.Union[Strategy, str]):
         """Returns the expected payoff to playing the strategy, if all other
@@ -238,7 +254,7 @@ class MixedStrategyProfile:
             If `strategy` is a string and no strategy in the game has that label.
         """
         self._check_validity()
-        return self._strategy_value(self.game._resolve_strategy(strategy, 'strategy_value'))
+        return self._strategy_value(self.game._resolve_strategy(strategy, "strategy_value"))
 
     def regret(self, strategy: typing.Union[Strategy, str]):
         """Returns the regret to playing `strategy`, if all other
@@ -262,11 +278,13 @@ class MixedStrategyProfile:
             If `strategy` is a string and no strategy in the game has that label.
         """
         self._check_validity()
-        return self._regret(self.game._resolve_strategy(strategy, 'regret'))
+        return self._regret(self.game._resolve_strategy(strategy, "regret"))
 
-    def strategy_value_deriv(self, strategy: typing.Union[Strategy, str], other: typing.Union[Strategy, str]):
-        """Returns the derivative of the payoff to playing `strategy`, with respect to the probability
-        that `other` is played.
+    def strategy_value_deriv(self,
+                             strategy: typing.Union[Strategy, str],
+                             other: typing.Union[Strategy, str]):
+        """Returns the derivative of the payoff to playing `strategy`, with respect to the
+        probability that `other` is played.
 
         Raises
         ------
@@ -277,8 +295,8 @@ class MixedStrategyProfile:
         """
         self._check_validity()
         return self._strategy_value_deriv(
-            self.game._resolve_strategy(strategy, 'strategy_value_deriv', 'strategy'),
-            self.game._resolve_strategy(strategy, 'strategy_value_deriv', 'other')
+            self.game._resolve_strategy(strategy, "strategy_value_deriv", "strategy"),
+            self.game._resolve_strategy(strategy, "strategy_value_deriv", "other")
         )
 
     def liap_value(self):
@@ -341,11 +359,13 @@ class MixedStrategyProfile:
         self._check_validity()
         if self._all_zero_probs():
             raise ValueError(
-                "Trying to normalize a MixedStrategyProfile, but one player's probabilities are all zero"
+                "Trying to normalize a MixedStrategyProfile, "
+                "but one player's probabilities are all zero"
             )
         if self._negative_prob():
             raise ValueError(
-                "Trying to normalize a MixedStrategyProfile, but a player has a negative probability"
+                "Trying to normalize a MixedStrategyProfile, "
+                "but a player has a negative probability"
             )
         return self._normalize()
 
@@ -363,6 +383,7 @@ class MixedStrategyProfile:
         """Returns True if at least one player has a negative probability."""
         return any([any([self._getprob_strategy(s) < 0 for s in p.strategies])
                     for p in self.game.players])
+
 
 @cython.cclass
 class MixedStrategyProfileDouble(MixedStrategyProfile):
@@ -416,7 +437,9 @@ class MixedStrategyProfileDouble(MixedStrategyProfile):
 
     def _normalize(self) -> MixedStrategyProfileDouble:
         profile = MixedStrategyProfileDouble()
-        profile.profile = make_shared[c_MixedStrategyProfileDouble](deref(self.profile).Normalize())
+        profile.profile = (
+            make_shared[c_MixedStrategyProfileDouble](deref(self.profile).Normalize())
+        )
         return profile
 
     def _randomize(self, denom: typing.Optional[int] = None) -> None:
@@ -451,7 +474,8 @@ class MixedStrategyProfileRational(MixedStrategyProfile):
             raise TypeError("probability should be int or Fraction instance; received {}"
                             .format(value.__class__.__name__))
         setitem_mspr_strategy(deref(self.profile), strategy.strategy,
-                              to_rational(str(value).encode('ascii')))
+                              to_rational(str(value).encode("ascii")))
+
     def _payoff(self, player: Player) -> Rational:
         return rat_to_py(deref(self.profile).GetPayoff(player.player))
 
@@ -487,7 +511,9 @@ class MixedStrategyProfileRational(MixedStrategyProfile):
 
     def _normalize(self) -> MixedStrategyProfileRational:
         profile = MixedStrategyProfileRational()
-        profile.profile = make_shared[c_MixedStrategyProfileRational](deref(self.profile).Normalize())
+        profile.profile = (
+            make_shared[c_MixedStrategyProfileRational](deref(self.profile).Normalize())
+        )
         return profile
 
     def _randomize(self, denom: typing.Optional[int] = None) -> None:

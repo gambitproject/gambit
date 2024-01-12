@@ -44,7 +44,7 @@ public:
 
 private:
   bool m_verbose;
-  
+
   List<MixedStrategyProfile<double> > Solve(const Game &p_game,
 					    const std::shared_ptr<gametracer::gnmgame> &A,
 					    const gametracer::cvector &p_pert) const;

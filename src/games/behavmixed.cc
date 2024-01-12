@@ -25,8 +25,3 @@
 
 template class Gambit::MixedBehaviorProfile<double>;
 template class Gambit::MixedBehaviorProfile<Gambit::Rational>;
-
-
-
-
-

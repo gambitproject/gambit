@@ -23,7 +23,7 @@ http://netlib2.cs.utk.edu/hompack/
 */
 
 /*
-** System.h    interface to psys class 
+** System.h    interface to psys class
 **             requires Dvector.
 */
 #ifndef PSYS_INC
@@ -84,7 +84,7 @@ psys psys_copy(psys);
 
 /* transformations */
 Dvector psys_scale(psys);
-psys psys_lift(psys,int);                  
+psys psys_lift(psys,int);
 psys psys_lead(psys);
 psys psys_saturate(psys);
 psys psys_norm_sub(psys,Ivector);
@@ -96,7 +96,7 @@ node psys_solve(psys sys, Imatrix norm, int tweak);
 
 /* evaluators */
 Dmatrix psys_jac(psys,Dvector,Dmatrix);
-double psys_abs(psys,Dvector);          
+double psys_abs(psys,Dvector);
 Dvector psys_eval(psys,Dvector,Dvector);
 Dvector psys_moment(psys,Dvector,Dvector); /*untried*/
 

@@ -21,8 +21,8 @@
 //
 // Note: When created all the HasXXX return false, use Copy, Merge, or SetXXX
 //
-// The default attr for the different wxSheet areas must be complete so that 
-// when a new attr is assigned you need only set the values you want to be 
+// The default attr for the different wxSheet areas must be complete so that
+// when a new attr is assigned you need only set the values you want to be
 // different than the default's. Unset values are retrieved from the default
 // attr which gets them from it's def attr and so on, they're chained together.
 // ----------------------------------------------------------------------------
@@ -46,7 +46,7 @@ public:
     bool UpdateWith(const wxSheetCellAttr& other);
     // Merges this with the other, copy values of other only this doesn't have them
     bool MergeWith(const wxSheetCellAttr &mergefrom);
-    
+
     // setters
     void SetForegroundColour(const wxColour& foreColour);
     void SetBackgroundColour(const wxColour& backColour);
@@ -83,7 +83,7 @@ public:
 
     // does this attr define all the HasXXX properties, except DefaultAttr
     //   if this is true, it's a suitable default attr for an area
-    bool IsComplete() const;  
+    bool IsComplete() const;
 
     // accessors
     const wxColour& GetForegroundColour() const;
@@ -110,11 +110,11 @@ public:
     bool operator == (const wxSheetCellAttr& obj) const { return m_refData == obj.m_refData; }
     bool operator != (const wxSheetCellAttr& obj) const { return m_refData != obj.m_refData; }
     wxSheetCellAttr& operator = (const wxSheetCellAttr& obj)
-    {   
+    {
         if ( (*this) != obj ) Ref(obj);
-        return *this;   
+        return *this;
     }
-    
+
     wxSheetCellAttr Clone() const     { wxSheetCellAttr obj; obj.Copy(*this); return obj; }
     wxSheetCellAttr* NewClone() const { return new wxSheetCellAttr(Clone()); }
 
@@ -128,18 +128,18 @@ protected:
     virtual wxObjectRefData *CreateRefData() const;
     // override wxObject's create a new m_refData initialized with the given one
     virtual wxObjectRefData *CloneRefData(const wxObjectRefData *data) const;
-    
+
     DECLARE_DYNAMIC_CLASS(wxSheetCellAttr)
 };
 
 // ----------------------------------------------------------------------------
 // wxSheetCellAttrRefData : data for the wxSheetCellAttr
-// 
+//
 // only use this as a LAST resort for overriding the behavior
 // ----------------------------------------------------------------------------
 class WXDLLIMPEXP_SHEET wxSheetCellAttrRefData : public wxObjectRefData
 {
-public:    
+public:
     wxSheetCellAttrRefData();
     wxSheetCellAttrRefData( const wxSheetCellAttrRefData& data );
     virtual ~wxSheetCellAttrRefData();
@@ -148,8 +148,8 @@ public:
              m_backColour;
     wxFont   m_font;
     // stores wxSheetAttr_Type, align, orient, overflow, show edit, read, level
-    wxUint32 m_attrTypes; 
-    
+    wxUint32 m_attrTypes;
+
     // these are pointers since we can't define the edit/ren/attr all at once
     wxSheetCellRenderer *m_renderer;
     wxSheetCellEditor   *m_editor;
@@ -164,19 +164,19 @@ WXDLLIMPEXP_DATA_SHEET(extern const wxSheetCellAttr) wxNullSheetCellAttr;
 
 // ----------------------------------------------------------------------------
 // wxArraySheetCellAttr - wxArray of wxSheetCellAttr
-// wxPairArrayIntSheetCellAttr - int key, wxSheetCellAttr value pairs 
-// wxPairArraySheetCoordsCellAttr - wxSheetCoords key, wxSheetCellAttr value pairs 
+// wxPairArrayIntSheetCellAttr - int key, wxSheetCellAttr value pairs
+// wxPairArraySheetCoordsCellAttr - wxSheetCoords key, wxSheetCellAttr value pairs
 // ----------------------------------------------------------------------------
 
 // Create a 1-D array of wxArraySheetCellAttr for row/col labels
 WX_DECLARE_OBJARRAY_WITH_DECL(wxSheetCellAttr, wxArraySheetCellAttr,
                               class WXDLLIMPEXP_SHEET);
 // Create the paired array of attrs for row/col labels
-DECLARE_PAIRED_INT_DATA_ARRAYS( wxSheetCellAttr, wxArraySheetCellAttr, 
+DECLARE_PAIRED_INT_DATA_ARRAYS( wxSheetCellAttr, wxArraySheetCellAttr,
                                 wxPairArrayIntSheetCellAttr, class WXDLLIMPEXP_SHEET)
 
 // Create wxPairArraySheetCoordsCellAttr for storing coords keys and attr values.
-DECLARE_PAIREDSHEETCOORDS_DATA_ARRAYS(wxSheetCellAttr, wxArraySheetCellAttr, 
+DECLARE_PAIREDSHEETCOORDS_DATA_ARRAYS(wxSheetCellAttr, wxArraySheetCellAttr,
                                       wxPairArraySheetCoordsCellAttr, class WXDLLIMPEXP_SHEET)
 
 // ----------------------------------------------------------------------------
@@ -188,7 +188,7 @@ DECLARE_PAIREDSHEETCOORDS_DATA_ARRAYS(wxSheetCellAttr, wxArraySheetCellAttr,
 //
 // the default implementation is reasonably efficient for the generic case,
 // but you might still wish to implement your own for some specific situations
-// if you have performance problems with the stock one or the attribute 
+// if you have performance problems with the stock one or the attribute
 // properties lend themselves to be calculated on the fly
 // ----------------------------------------------------------------------------
 class WXDLLIMPEXP_SHEET wxSheetCellAttrProvider : public wxClientDataContainer
@@ -207,17 +207,17 @@ public:
     // return wxNullSheetCellAttr if none set for coords and type
     virtual wxSheetCellAttr GetAttr( const wxSheetCoords& coords,
                                      wxSheetAttr_Type type );
-    
+
     // Set the attribute for the coords, see GetAttr for coords and type
     //  if the !attr.Ok() the attr is removed w/o error even if it didn't exist
     // use wxNullSheetCellAttr to remove attr for coords and type
-    virtual void SetAttr( const wxSheetCoords& coords, 
+    virtual void SetAttr( const wxSheetCoords& coords,
                           const wxSheetCellAttr& attr,
                           wxSheetAttr_Type type );
 
     // Update internal data whenever # rows/cols change (must be called)
     //  this shifts rows/cols and deletes them as appropriate
-    //  you can specificly update only some of the attributes by ORing 
+    //  you can specificly update only some of the attributes by ORing
     //  enum wxSheetUpdate_Type for the attributes.
     virtual void UpdateRows( size_t pos, int numRows, int update = wxSHEET_UpdateAttributes );
     virtual void UpdateCols( size_t pos, int numCols, int update = wxSHEET_UpdateAttributes );

@@ -8,7 +8,7 @@
 // The original copyright and license are included below.
 //
 
-/* 
+/*
 Copyright (C) 1988 Free Software Foundation
     written by Doug Lea (dl@rocky.oswego.edu)
 
@@ -121,4 +121,3 @@ template<> Rational lexical_cast(const std::string &);
 } // end namespace Gambit
 
 #endif // LIBGAMBIT_RATIONAL_H
-

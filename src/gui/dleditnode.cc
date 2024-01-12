@@ -32,7 +32,7 @@
 //======================================================================
 
 dialogEditNode::dialogEditNode(wxWindow *p_parent, const Gambit::GameNode &p_node)
-  : wxDialog(p_parent, wxID_ANY, _("Node properties"), wxDefaultPosition), 
+  : wxDialog(p_parent, wxID_ANY, _("Node properties"), wxDefaultPosition),
     m_node(p_node)
 {
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
@@ -40,7 +40,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, const Gambit::GameNode &p_nod
   auto *labelSizer = new wxBoxSizer(wxHORIZONTAL);
   labelSizer->Add(new wxStaticText(this, wxID_STATIC, _("Node label")),
 		  0, wxALL | wxCENTER, 5);
-  m_nodeName = new wxTextCtrl(this, wxID_ANY, 
+  m_nodeName = new wxTextCtrl(this, wxID_ANY,
 			      wxString(m_node->GetLabel().c_str(), *wxConvCurrent));
   labelSizer->Add(m_nodeName, 1, wxALL | wxCENTER | wxEXPAND, 5);
   topSizer->Add(labelSizer, 0, wxALL | wxEXPAND, 5);
@@ -121,7 +121,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, const Gambit::GameNode &p_nod
       item = "Outcome" + Gambit::lexical_cast<std::string>(outc);
     }
 
-    item += (" (" + 
+    item += (" (" +
 	     static_cast<std::string>(outcome->GetPayoff(1)) + ", " +
 	     static_cast<std::string>(outcome->GetPayoff(2)));
     if (efg->NumPlayers() > 2) {

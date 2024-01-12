@@ -5,7 +5,7 @@
 #include "pelgmatr.h"
 
 #define min(i,j) ((i) < (j) ? (i): (j))
-/*--------------------------------------------------------------- 
+/*---------------------------------------------------------------
   vector/matrix type  a linear array of int, whith auxilary info.
        *) the number of elements that can be stored is in elt[0]
        *) the current number of rows is in elt[1]
@@ -18,7 +18,7 @@ The actual data are then stored in row major order from elt[3] on
 /*-------------------------------------------------------------
  vector access macroes (which ignore any rows except for first)
 -------------------------------------------------------------*/
-#define Vstore(V)  ((V->store))	
+#define Vstore(V)  ((V->store))
 #define Vlength(V) ((V->topr))
 #define Vref1(V,i) (&(((V->coords)[i-1])))
 #define Vref0(V,i)  (&(((V->coords)[i])))
@@ -28,7 +28,7 @@ The actual data are then stored in row major order from elt[3] on
  matrix access macroes
 -------------------------------------------------------------*/
 #define Mstore(V)  ((V->store))
-#define MMrows(V)  ((V->store/V->ncols))	
+#define MMrows(V)  ((V->store/V->ncols))
 #define Mrows(V) ((V->topr))
 #define Mcols(V) ((V->topc))
 #define MNcols(V) ((V->ncols))
@@ -63,8 +63,8 @@ Gen_node *GMref1(Gmatrix M, int i, int j)
 
 /*
    **   Constructor/Destructors for Gmatrixes
-   ** 
-   ** Gmatrix Gmatrix_free(int r, int c); 
+   **
+   ** Gmatrix Gmatrix_free(int r, int c);
    **       New Gmatrix cabable of holding r rows, and c collumbs.
    ** Gmatrix Gmatrix_new(Gmatrix V);
  */
@@ -157,15 +157,15 @@ Gmatrix Gmatrix_print(Gmatrix M)
 	return nullptr;
     }
     fprintf(stdout /* was Pel_Out */,"<");
-   
+
  for (i = 1; i <= Mrows(M); i++) {
 	for (j = 1; j <= Mcols(M); j++) {
-	    print_Gen_list(*Mref(M, i, j)); 
+	    print_Gen_list(*Mref(M, i, j));
 	    /*
-	    if (j < Mcols(M)) 
+	    if (j < Mcols(M))
 	      printf(",\n ");
 	    */
-	}  
+	}
 	if (i < Mrows(M))
 	    fprintf(stdout,";\n");
     }
@@ -294,7 +294,7 @@ int Gen_Mtx_Specs(Gen_node g,int *r, int *c, int *t){
 }
 
 Gen_node Link(Gen_node g1, Gen_node g2)
-{ 
+{
 
 #ifdef LOG_PRINT
    if (g1->next!=nullptr)
@@ -322,4 +322,3 @@ Gen_node XPLND(Gen_node g)
   a->Genval.lval=g;
   return a;
  }
-

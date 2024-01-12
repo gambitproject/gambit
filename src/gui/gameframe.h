@@ -46,7 +46,7 @@ private:
 
   void MakeMenus();
   void MakeToolbar();
-  
+
   // Event handlers
   void OnCloseWindow(wxCloseEvent &);
 
@@ -107,7 +107,7 @@ private:
   /// Flush any pending changes in document before processing event
   bool ProcessEvent(wxEvent &) override;
   //@}
-  
+
   // Overriding gbtGameView members
   void OnUpdate() override;
 
@@ -120,4 +120,3 @@ public:
 };
 
 #endif // GAMEFRAME_H
-

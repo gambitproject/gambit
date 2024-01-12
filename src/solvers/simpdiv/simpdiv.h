@@ -27,7 +27,7 @@
 
 namespace Gambit {
 namespace Nash {
-  
+
 ///
 /// This is a simplicial subdivision algorithm with restart, for finding
 /// mixed strategy solutions to general finite n-person games.  It is based on
@@ -58,10 +58,10 @@ private:
   Rational Simplex(MixedStrategyProfile<Rational> &, const Rational &d) const;
   void update(State &, RectArray<int> &, RectArray<int> &, PVector<Rational> &,
 	      const PVector<int> &, int j, int i) const;
-  void getY(State &, MixedStrategyProfile<Rational> &x, PVector<Rational> &, 
-	    const PVector<int> &, const PVector<int> &, 
+  void getY(State &, MixedStrategyProfile<Rational> &x, PVector<Rational> &,
+	    const PVector<int> &, const PVector<int> &,
 	    const PVector<Rational> &, const RectArray<int> &, int k) const;
-  void getnexty(State &, 
+  void getnexty(State &,
 		MixedStrategyProfile<Rational> &x, const RectArray<int> &,
 		const PVector<int> &, int i) const;
   int get_c(int j, int h, int nstrats, const PVector<int> &) const;

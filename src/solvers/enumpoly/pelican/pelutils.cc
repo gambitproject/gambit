@@ -1,7 +1,7 @@
 /*
   This file contains the implementation information that had been in globals.h,
 and also the various implementation files that formerly resided in the Utils
-subdirectory of the Pelican distribution.  
+subdirectory of the Pelican distribution.
 */
 
 #include "pelutils.h"
@@ -14,22 +14,22 @@ subdirectory of the Pelican distribution.
 /*
    **  Mem.c               Created 1-27-95                Birk Huber
    **
-   **  Memory Management for Pelican Shell. 
-   **  
+   **  Memory Management for Pelican Shell.
+   **
    **  Maintains storage for the basic unit of storage from which
    **  lists are built.
-   ** 
+   **
    **  A node consists of left,and right (values,type) combinations, and
    **  a boolean for garbage collection. The values are often pointers to
    **  other structures wich must be freed when nodes are freed.
    **
-   ** The Free_Stack is used to store a list of (known) free nodes, 
+   ** The Free_Stack is used to store a list of (known) free nodes,
    ** The Local_Stack points to a list of pointers to nodes
    **                           which are known to be in use.
-   **               
-   **  Any time a new_node is requested and the Free_Stack is 
-   **  empty garbage collection is initiated. Garbage collection 
-   **  proceeds by  first marking all nodes accessable from the 
+   **
+   **  Any time a new_node is requested and the Free_Stack is
+   **  empty garbage collection is initiated. Garbage collection
+   **  proceeds by  first marking all nodes accessable from the
    **  Local_Stack and then putting the rest on the free list.
    **
    **  Any time garbage collection fails node_more_store() is called
@@ -66,8 +66,8 @@ struct node_t {
     } L, R;
 };
 
-/* 
-   ** 
+/*
+   **
  */
 typedef struct node_block_t *node_block;
 struct node_block_t {
@@ -81,7 +81,7 @@ static int N_MALLOC = 0;	/*number of mallocs called from module */
 static int N_FREE = 0;		/*number of frees called from this module */
 static node_block Node_Store = nullptr;	/*beginning of node storage */
 static node Free_List = nullptr;	/*top of free node list */
-static local_v Locals_Stack = nullptr;	/*stack of  declared pointers 
+static local_v Locals_Stack = nullptr;	/*stack of  declared pointers
 					   into node storage */
 
 
@@ -222,7 +222,7 @@ node Cdr(node N1)
 
 int node_atomp(node N1)
 {
-    
+
     if ((N1!=nullptr) && (node_get_type(N1, LEFT)) == NODE)
         return FALSE;
     else
@@ -268,12 +268,12 @@ static node node_free(node N)
     return N;
 }
 
-/* 
+/*
    **  storage is stored in blocks of size BLOCKSIZEg. whenever
-   **  node_new is called and garbage collection fails to produce 
-   **  new nodes (because there is no more free storage) 
-   **  node_more_store() is called. 
-   **  It is responcible for 
+   **  node_new is called and garbage collection fails to produce
+   **  new nodes (because there is no more free storage)
+   **  node_more_store() is called.
+   **  It is responcible for
    **     a) claiming another block of nodes with malloc
    **     b) adding this block to the storage list
    **     c) putting all the new blocks on the free list.
@@ -284,7 +284,7 @@ static int node_more_store()
 {
     int i;
     node_block next_node = nullptr;
-  
+
     next_node = (node_block) malloc(sizeof(struct node_block_t));
     if (next_node == nullptr) {
 #ifdef LOG_PRINT
@@ -328,7 +328,7 @@ void node_free_store()
 }
 
 
-/* 
+/*
    ** Allocate nodes from free list-- If no nodes available initiate
    ** a garbage collection.  Note: routines which call new-node directly
    ** must protect their arguments, and localvariables themselve rather
@@ -349,7 +349,7 @@ node node_new()
 	return node_new();
     if (node_more_store() != FALSE)
 	return node_new();
-#ifdef LOPG_PRINT  
+#ifdef LOPG_PRINT
   fprintf(stderr, "out of nodes: system not giving more memory\n")
 #endif
 ;
@@ -359,8 +359,8 @@ node node_new()
 
 /*
    ** void node_push_local(node *local)
-   **   puts the address of a local variable onto the Locals_Stack stack 
-   **   ( of starting points for garbage collection). 
+   **   puts the address of a local variable onto the Locals_Stack stack
+   **   ( of starting points for garbage collection).
    **
    ** void node_pop_local()
    **     removes one ptr off the Locals_Stack stack.
@@ -402,9 +402,9 @@ void node_pop_local()
 
 /*
    **  Mark all nodes accessable from a node n.
-   **  if n is marked Yes then both its subtrees are already 
-   **  marked and should be skipped. 
-   **  otherwise cal mark on any pointers to nodes stored in the 
+   **  if n is marked Yes then both its subtrees are already
+   **  marked and should be skipped.
+   **  otherwise cal mark on any pointers to nodes stored in the
    **  node (is_node is used to check this)
  */
 static int mark(node n)
@@ -432,7 +432,7 @@ static int node_gc()
     int i, free_cnt = 0;
     node_block next_block = Node_Store;
     local_v ptr;
-#ifdef LOG_PRINT   
+#ifdef LOG_PRINT
   fprintf(stdout, "Colecting Garbage .. ")
 #endif
 ;
@@ -459,7 +459,7 @@ static int node_gc()
 	next_block = next_block->next;
     }
 
-#ifdef LOG_PRINT   
+#ifdef LOG_PRINT
  fprintf(stdout, "Done  %d nodes freed\n", free_cnt)
 #endif
 ;
@@ -527,9 +527,9 @@ srand(seedval);
 int rand_int(int low, int high)
 {
 #if defined(HAVE_DRAND48)
-  return (int)(low+drand48()*(high-low)+.499999999999); 
+  return (int)(low+drand48()*(high-low)+.499999999999);
 #else
-  return (int)(low+rand()*(high-low)+.499999999999); 
+  return (int)(low+rand()*(high-low)+.499999999999);
 #endif  /* defined(HAVE_DRAND48) */
 }
 
@@ -553,15 +553,15 @@ double rand_double(int low, int high)
 void Dlist_empty(node L){ Dlist_first(L)=nullptr;}
 
 /*
-** invariants: Dnode_next(Dnode_prev(pos)) ==pos 
+** invariants: Dnode_next(Dnode_prev(pos)) ==pos
 **             for all pointers to Dlist node entrees.
-**             (NOTE: Dnode_next(L) := Dlist_first(L), 
-**                    where L is list header) 
+**             (NOTE: Dnode_next(L) := Dlist_first(L),
+**                    where L is list header)
 **
 **             Dnode_prev(Dnode_next(pos))=pos
-**             for all non-zero pointers to Dlist node entrees 
+**             for all non-zero pointers to Dlist node entrees
 **             and also for list header
-**             
+**
 */
 
 node Dlist_add(node L, node data){
@@ -575,7 +575,7 @@ node Dlist_add(node L, node data){
   Dnode_prev(tmp)=L;
   Dnode_next(tmp)=Dlist_first(L);
   if (Dnode_next(tmp)!=nullptr) Dnode_prev(Dnode_next(tmp))=tmp;
-  Dlist_first(L)=tmp; 
+  Dlist_first(L)=tmp;
   POP_LOCS();
   return tmp;
 }
@@ -597,7 +597,7 @@ node Dlist_data(node pos){ return (node)Dnode_data(pos);}
 /******************** implementations from Dmatrix.c **********************/
 /**************************************************************************/
 
-/*--------------------------------------------------------------- 
+/*---------------------------------------------------------------
   vector/matrix type  a linear array of int, whith auxilary info.
        *) the number of elements that can be stored is in elt[0]
        *) the current number of rows is in elt[1]
@@ -659,12 +659,12 @@ double *DMref_P(Dmatrix M, int i, int j)
     return &(Mref0(M, i, j));
 }
 
-#endif 
+#endif
 
 /*
    **   Constructor/Destructors for Dmatrixes
-   ** 
-   ** Dmatrix Dmatrix_free(int r, int c); 
+   **
+   ** Dmatrix Dmatrix_free(int r, int c);
    **       New Dmatrix cabable of holding r rows, and c collumbs.
    ** Dmatrix Dmatrix_new(Dmatrix V);
  */
@@ -746,7 +746,7 @@ Dmatrix Dmatrix_fprint(FILE *fout, Dmatrix M)
 #endif
 ;
 	    if (j < Mcols(M))
-#ifdef LOG_PRINT	
+#ifdef LOG_PRINT
 	fprintf(fout,", ")
 #endif
 ;
@@ -827,10 +827,10 @@ Dmatrix Dmatrix_mull(Dmatrix M1, Dmatrix M2, Dmatrix * M3)
 }
 
 /*
-   ** Dmatrix_dot(M1,M2,&M3) -- calculate M1*Transpose(M2):                
+   ** Dmatrix_dot(M1,M2,&M3) -- calculate M1*Transpose(M2):
    ** if M1, and M2 are incompatable (or null) complain and return false.
-   ** if *M3 has too little storage (or is null) free *M3 if nescesary 
-   **                                           and create new storage.   
+   ** if *M3 has too little storage (or is null) free *M3 if nescesary
+   **                                           and create new storage.
  */
 Dmatrix Dmatrix_dot(Dmatrix M1, Dmatrix M2, Dmatrix M3)
 {
@@ -856,7 +856,7 @@ Dmatrix Dmatrix_dot(Dmatrix M1, Dmatrix M2, Dmatrix M3)
 
 
 /*
-** Dmatrix_equal(M1,M2)  
+** Dmatrix_equal(M1,M2)
 **     return true if matrices represented by M1 and M2 are equal.
 **     false otherwise.                     NOT TESTED YET
 */
@@ -915,7 +915,7 @@ void Dmatrix_GQR(Dmatrix Q,Dmatrix A)
              }
          }
 
-/* 
+/*
 ** Dmatrix_Solve, Solve a square matrix in place
 */
 #define LHS(i,j) Mref(LHS,i,j)
@@ -984,8 +984,8 @@ void Dmatrix_Solve(Dmatrix LHS, Dmatrix RHS,int n){
 #endif
 
 
-#ifndef IMATRIX_FAST 
-/*--------------------------------------------------------------- 
+#ifndef IMATRIX_FAST
+/*---------------------------------------------------------------
   vector/matrix type  a linear array of int, whith auxilary info.
        *) the number of elements that can be stored is in elt[0]
        *) the current number of rows is in elt[1]
@@ -1067,8 +1067,8 @@ int *IMref1(Imatrix M, int i, int j)
 
 /*
    **   Constructor/Destructors for Imatrixes
-   ** 
-   ** Imatrix Imatrix_free(int r, int c); 
+   **
+   ** Imatrix Imatrix_free(int r, int c);
    **       New Imatrix cabable of holding r rows, and c collumbs.
    ** Imatrix Imatrix_new(Imatrix V);
  */
@@ -1160,7 +1160,7 @@ Imatrix Imatrix_fprint(FILE *fout,Imatrix M)
          fprintf(fout,"%d", ImatrixMref(M, i, j))
 #endif
 ;
-            if (j < ImatrixMcols(M))  
+            if (j < ImatrixMcols(M))
 #ifdef LOG_PRINT
                 fprintf(fout,", ")
 #endif
@@ -1219,7 +1219,7 @@ Imatrix Imatrix_mul(Imatrix M1, Imatrix M2, Imatrix M3)
     Imatrix R;
 
     if (M1 == nullptr || M2 == nullptr || ImatrixMcols(M1) != ImatrixMrows(M2)) {
-#ifdef LOG_PRINT	
+#ifdef LOG_PRINT
 fprintf(stderr, "Imatrix_mull: incompatible matrices\n")
 #endif
 ;
@@ -1238,10 +1238,10 @@ fprintf(stderr, "Imatrix_mull: incompatible matrices\n")
 }
 
 /*
-   ** Imatrix_dot(M1,M2,&M3) -- calculate M1*Transpose(M2):                
+   ** Imatrix_dot(M1,M2,&M3) -- calculate M1*Transpose(M2):
    ** if M1, and M2 are incompatable (or null) complain and return false.
-   ** if *M3 has too little storage (or is null) free *M3 if nescesary 
-   **                                           and create new storage.   
+   ** if *M3 has too little storage (or is null) free *M3 if nescesary
+   **                                           and create new storage.
  */
 Imatrix Imatrix_dot(Imatrix M1, Imatrix M2, Imatrix M3)
 {
@@ -1287,9 +1287,9 @@ int dot_Ivector(Imatrix M1, Imatrix M2)
 }
 
 /*
-   ** Imatrix_equal(M1,M2)  
+   ** Imatrix_equal(M1,M2)
    **     return true if matrices represented by M1 and M2 are equal.
-   **     false otherwise.  
+   **     false otherwise.
  */
 int Imatrix_equal(Imatrix M1, Imatrix M2)
 {
@@ -1377,14 +1377,14 @@ int Imatrix_rref(Imatrix N,int *det){
   int divisor=1,sign=1,r=1,p,k,j,i,g;
 
   for(k=1;k<=ImatrixMcols(N)&&r<=ImatrixMrows(N);k++){
-    for(p=r; p<=ImatrixMrows(N)&&M(p,k)==0;p++); 
+    for(p=r; p<=ImatrixMrows(N)&&M(p,k)==0;p++);
     if (p<=ImatrixMrows(N)) {
         for(j=k;j<=ImatrixMcols(N);j++){i=M(p,j); M(p,j)=M(r,j); M(r,j)=i;}
         if (r!=p) sign*=-1;
         for(i=r+1;i<=ImatrixMrows(N);i++){
-          g=gcd(M(i,k),M(r,k)); 
+          g=gcd(M(i,k),M(r,k));
           for(j=k+1;j<=ImatrixMcols(N);j++){
-            M(i,j)=(M(r,k)*M(i,j)-M(r,j)*M(i,k))/divisor; 
+            M(i,j)=(M(r,k)*M(i,j)-M(r,j)*M(i,k))/divisor;
           }
           M(i,k)=0;
         }
@@ -1404,14 +1404,14 @@ int Imatrix_backsolve(Imatrix N, Imatrix S){
  int p,j,g,k;
 
 
- if (N==nullptr || S==nullptr || IMcols(N)!=IMcols(S)||IMcols(N)<=IMrows(N)) 
+ if (N==nullptr || S==nullptr || IMcols(N)!=IMcols(S)||IMcols(N)<=IMrows(N))
      bad_error("bad dimensions in backsolve");
- 
- /* 
+
+ /*
  ** find first missing pivot (in row p;  p=IMrows(N)+1 if no missing pivots
  */
  for(p=1;p<=ImatrixMrows(N) && ImatrixMref(N,p,p)!=0;p++) /* null body*/;
- /* 
+ /*
  ** now set up for a solution to the AX=0 problem with A a p-1xp matrix whoose
  ** first pxp minor is nonsingular (use simple minded back substitution)
  */
@@ -1433,11 +1433,11 @@ return 1;
 /*
 ** Imatrix_hermite:
 **    Input: S an n by m Imatrix.
-**   Output: True 
+**   Output: True
 **
 **   Sidefects: U points to a unitary nxn matrix
 **              S gets replaced by its hermite normal form (U*S)
-**            
+**
 **  Method:
 **    U = Inxn
 **    c = 1
@@ -1445,7 +1445,7 @@ return 1;
 **      find mc>=c such that abs(S(mc,c)) has minimum non-zero value
 **      if (mc!=c) then  switch rows mc and c (in S, and U)
 **      if (S(c,c)<0) then multiply row c by -1
-**      if (S(c,c)!=0) then 
+**      if (S(c,c)!=0) then
 **        for i in c+1:n  add S(i,c)/S(c,c) times row c to row i;
 **      end(if)
 **      if S(i,c)==0 for all i in c+1 ... n set c=c+1
@@ -1468,7 +1468,7 @@ int Imatrix_hermite(Imatrix S, Imatrix U){
     for(j=1;j<=n;j++){
       if (i==j) ImatrixMref(U,i,j)=1;
       else ImatrixMref(U,i,j)=0;
-    }     
+    }
   }
 
   while(c<=n){
@@ -1476,7 +1476,7 @@ int Imatrix_hermite(Imatrix S, Imatrix U){
     mv=abs(ImatrixMref(S,c,c));
     mc=c;
     for(i=c+1;i<=n;i++){
-      t=abs(ImatrixMref(S,i,c)); 
+      t=abs(ImatrixMref(S,i,c));
       if(mv==0 || (mv>t && t!=0)){
            mv=t;
            mc=i;
@@ -1555,8 +1555,8 @@ void mem_free(void *);
 node list_push(node item,node *stack){
    *stack=Cons(item,*stack);
    return item;
-} 
-  
+}
+
 int list_length(node L){
   int ct=0;
   while(L!=nullptr){
@@ -1572,7 +1572,7 @@ node list_pop(node *stack){
    *stack=Cdr(*stack);
    return temp;
 }
-  
+
 node list_first(node list){
   return Car(list);
 }
@@ -1586,10 +1586,10 @@ int list_empty(node list){
   else return FALSE;
 }
 
-/* 
+/*
 ** Inserts a node g onto a list L in order (according to a comparison
 ** function comp) -- IF There is allready and equivalent object on
-** the list and uniq is TRUE it is not inserted, and a value of zero 
+** the list and uniq is TRUE it is not inserted, and a value of zero
 ** is returned, otherwise it is inserted and a value of 1 is returned.
 */
 
@@ -1603,7 +1603,7 @@ int list_insert(node g, node * L, int (*comp) (node, node), int uniq)
 
   if ((*L == nullptr) || ((flg = comp(g, Car(*L))) >= 0)) {
     if (uniq==FALSE || flg != 0) *L = Cons(g, *L);
-  } 
+  }
   else {
     while ((Cdr(ptr) != nullptr) &&
       ((flg = comp(g, Car(Cdr(ptr))))< 0)) {
@@ -1616,8 +1616,8 @@ int list_insert(node g, node * L, int (*comp) (node, node), int uniq)
   return flg;
 }
 
-/* 
-** list remove -- remove a specific elt from a list 
+/*
+** list remove -- remove a specific elt from a list
 */
 
 int list_Imatrix_comp(node g1, node g2)
@@ -1647,7 +1647,7 @@ void xpl_fprint(FILE *fout,node L){
  int i;
 #ifdef LOG_PRINT
  fprintf(fout, "%% Solution list :\n");
- fprintf(fout, 
+ fprintf(fout,
  "%%      Re(H) ,       Im(H) ,      Re(Xi) ,      Im(Xi) ,          T  \n");
  fprintf(fout, "%%\n");
  fprintf(fout,"{\n")
@@ -1665,7 +1665,7 @@ ptr=L;
 #ifdef LOG_PRINT
          fprintf(fout," %12g,",DVref(P,i))
 #endif
-; 
+;
          if (i%2==0 && i<DVlength(P)-1)
       #ifdef LOG_PRINT
            fprintf(fout,"\n                            ")
@@ -1680,7 +1680,7 @@ ptr=L;
 
 ;
    ptr=Cdr(ptr);
-   if (ptr!=nullptr) 
+   if (ptr!=nullptr)
 #ifdef LOG_PRINT
 fprintf(fout,",")
 
@@ -1710,23 +1710,23 @@ fprintf(fout,",")
 **
 **  A point are represented by a node with a label(cstring) on the
 **     left and a vector of coordinates(Imatrix) on the right.
-**    
+**
 **       -----------------------
 **       | PNT      | IMTX     |
 **       -----------------------
 **       |(char *)  | Imatrix  | ------> structure holding coords
 **       -----------------------
 **           |------------------------> string
-** 
-** A point configuration is represented by a node with a list of 
-**      points on the right and the number of points in the list 
-**      stored on the 
+**
+** A point configuration is represented by a node with a list of
+**      points on the right and the number of points in the list
+**      stored on the
 **      left.
 **
 **       -----------------------
-**       | PCFG     |  NODE    |    
+**       | PCFG     |  NODE    |
 **       -----------------------        ------------------
-**       | int      | Imatrix  | ------>| NODE   | NODE  | 
+**       | int      | Imatrix  | ------>| NODE   | NODE  |
 **       -----------------------        ------------------
 **                                      | node   | node  | ----->
 **                                      ------------------
@@ -1735,7 +1735,7 @@ fprintf(fout,",")
  */
 
 node pcfg_start(node P){ return Cdr(P);}
-node pcfg_next_pnt(node *ptc){ 
+node pcfg_next_pnt(node *ptc){
     node pt;
     pt=Car(*ptc);
     *ptc=Cdr(*ptc);
@@ -1743,7 +1743,7 @@ node pcfg_next_pnt(node *ptc){
 
 /*
 ** node pnt_new(char *s,Imatrix m)
-**       input:  a string s 
+**       input:  a string s
 **               an integer matrix m
 **      output: a point with lable s, and coordinates m
 */
@@ -1791,12 +1791,12 @@ int pnt_print(node n)
 }
 
 /*
-** pnt_is_point  
+** pnt_is_point
 **       input: a node n
 **       output:  TRUE if n is a point (and non-null)
 **               FALSE  otherwise
 */
-int pnt_is_point(node n){ 
+int pnt_is_point(node n){
       if (n!=nullptr&&node_get_type(n,LEFT)==PNT) return TRUE;
       else return FALSE;
 }
@@ -1813,7 +1813,7 @@ int pnt_comp_lbl(node g1, node g2){
   return strcmp(pnt_lable(g2),pnt_lable(g1));
 }
 
-/* 
+/*
 ** pnt_comp_rand
 **    input:  two points
 **   output:  1 or -1 randomly chosen.
@@ -1854,7 +1854,7 @@ char *pnt_lable(node n)
 /*
 ** POINT CONFIGURATIONS
 */
-/* 
+/*
 ** pcfg_new
 **      input: none
 **     output: an empty point configuration.
@@ -1899,15 +1899,15 @@ node pcfg_print_short(node n)
 **           a point config "config"
 **   output: TRUE on successfull completion
 **           (right now failure causes the program to abort)
-**  side effects: point is added into config 
+**  side effects: point is added into config
 **                (which is kept in order according to point lables)
 */
 int pcfg_add(node point, node config)
 {   node ptr;
     LOCS(1);
     PUSH_LOC(config);
-    if (config == nullptr || 
-         point == nullptr || 
+    if (config == nullptr ||
+         point == nullptr ||
          node_get_type(config, LEFT) != PCFG ||
 	 node_get_type(point, LEFT) != PNT){
 	    bad_error("error: pcfg_add() called on non-PCFG\n");
@@ -1924,15 +1924,15 @@ int pcfg_add(node point, node config)
 **   input:  a point "point"
 **           a point configuration "config"
 **           a pointer ptr locating "point" in "config" i.e.
-**   output: TRUE if point is in config  
+**   output: TRUE if point is in config
 **           FALSE if point is not in config
 **  side effect: if point is in config it is removed from config.
 **  error conditions: checks that config is non-null pcfg
 **                                pnt is non-null pnt
 **  Note: ptr should point to the cons node for the point before
-**        "point" in config's point list, if it doesn't then 
+**        "point" in config's point list, if it doesn't then
 **        pcfg_remove will find the previous point itself
-**           
+**
 */
 int pcfg_remove(node point, node config, node ptr)
 {
@@ -1941,13 +1941,13 @@ int pcfg_remove(node point, node config, node ptr)
         node_get_type(point, LEFT) != PNT)
      bad_error("error: pcfg_add() called on non-PCFG\n");
  /* check if location given for point is really right*/
-  if (Car(Cdr(ptr))!=point) ptr=nullptr;  
+  if (Car(Cdr(ptr))!=point) ptr=nullptr;
  /* find location of point if it is not allready known*/
   if (ptr==nullptr)
      for(ptr=Cdr(config); Car(ptr)!=point && ptr!=nullptr; ptr=Cdr(ptr)){
         ; /* null body*/
      }
-  if (ptr==nullptr) return FALSE; 
+  if (ptr==nullptr) return FALSE;
   node_set_ptr(ptr,Cdr(Cdr(ptr)),NODE,RIGHT);
   node_set_int(config,node_get_int(config,LEFT)-1,PCFG,LEFT);
   return TRUE;
@@ -1956,10 +1956,10 @@ int pcfg_remove(node point, node config, node ptr)
 /*
 **pcfg_in(node point, node config);
 **  test if point is in config. point must be given by a pointer
-**  to a point in config. 
+**  to a point in config.
 **
 ** Warning: Point must be given by a pointer to a point in config.
-**          Point_config_in DOES NOT TELL wheather their is a point 
+**          Point_config_in DOES NOT TELL wheather their is a point
 **          in Config with same coords/lable.
 */
 int pcfg_in(node point, node config)
@@ -1973,7 +1973,7 @@ int pcfg_in(node point, node config)
     return FALSE;
 }
 
-/* 
+/*
 ** Imatrix pcfg_coords(node n, Imatrix R)
 **    returns a matrix whoose rows are the coordinates of
 **    points in the configuration. Space for the matrix is
@@ -1996,10 +1996,10 @@ Imatrix pcfg_coords(node n, Imatrix R)
     return R;
 }
 
-/* 
+/*
 ** Imatrix pcfg_M(node n, Imatrix R)
 **    returns a matrix whoose rows are the coordinates of
-**    points in the configuration, after translation to put the 
+**    points in the configuration, after translation to put the
 **    first point at the origen.    Space for the matrix is
 **    allocated from R if possible, otherwise R is freed and
 **    space realocated.
@@ -2025,9 +2025,9 @@ Imatrix pcfg_M(node n, Imatrix R)
     }
     return R;
 }
-/* 
+/*
 ** node pcfg_face(node PC, Imatrix norm);
-**   returns the point configuration consisting of points 
+**   returns the point configuration consisting of points
 **   of PC which lie on the face suported by N.
 */
 node pcfg_face(node PC, Imatrix norm)
@@ -2120,7 +2120,7 @@ fcomplex Cmul(fcomplex a,fcomplex b)
 	return c;
 }
 
-              
+
 fcomplex ItoC(int i)
 { fcomplex c;
   c.r=i;
@@ -2292,7 +2292,7 @@ int *poly_exp(monomial m, int i){
       bad_error("index out of bounds in monomial");
  }
   return &(m->exps[i-1]);
-}   
+}
 
 int poly_deg(polynomial1 p){
     int i,n,deg=0,tdeg;
@@ -2318,15 +2318,15 @@ void ring_set_def(Pring R,  char *lable){
    strncpy(R->def,lable,RING_VAR_L);
 }
 char *ring_def(Pring R){return R->def;}
-int poly_dim(monomial m){  
+int poly_dim(monomial m){
   if (m==nullptr) bad_error("null monomial in poly_def");
   return m->R->n;
 }
-int ring_dim(Pring R){  
+int ring_dim(Pring R){
   if (R==nullptr) bad_error("null Ring in ring_dim");
   return R->n;
 }
-int *poly_def(monomial m){  
+int *poly_def(monomial m){
   if (m==nullptr) bad_error("null monomial in poly_def");
   return &(m->def);
 }
@@ -2351,19 +2351,19 @@ Pring poly_ring(monomial m){
 
 Pring makePR(int n)
 
-{ 
+{
 	int i;
 	Pring a;
-	a=(Pring)mem_malloc(sizeof(struct Pring_tag)); 
+	a=(Pring)mem_malloc(sizeof(struct Pring_tag));
 	if (a==nullptr) bad_error("malloc failed 1 in make_PR");
 	a->n=n;
-	a->vars=(char **)mem_malloc(n*sizeof(char *));  
+	a->vars=(char **)mem_malloc(n*sizeof(char *));
 	if (a->vars==nullptr) bad_error("malloc failed 2 in make_PR");
-	for(i=0;i<n;i++) { 
-		a->vars[i]=(char *)mem_malloc(RING_VAR_L*sizeof(char)); 
+	for(i=0;i<n;i++) {
+		a->vars[i]=(char *)mem_malloc(RING_VAR_L*sizeof(char));
 		if (a->vars==nullptr) bad_error("malloc failed 3 in make_PR");
 	}
-        a->def=(char *)mem_malloc(RING_VAR_L*sizeof(char)); 
+        a->def=(char *)mem_malloc(RING_VAR_L*sizeof(char));
         if (a->vars==nullptr) bad_error("malloc failed 4 in make_PR");
     return a;
 }
@@ -2371,16 +2371,16 @@ Pring makePR(int n)
 Pring free_Pring(Pring R)
  {
  int i;
- mem_free(R->def);  
+ mem_free(R->def);
  for (i=0;i<R->n;i++){ mem_free(R->vars[i]);}
  mem_free( (char *) R->vars);
- mem_free( R); 
+ mem_free( R);
  return nullptr;
  }
-       
+
 polynomial1 makeP(Pring R)
 
-{ 
+{
   polynomial1 m;
   int i,n;
 
@@ -2396,14 +2396,14 @@ polynomial1 makeP(Pring R)
   m->next=nullptr;
   return m;
 }
-     
+
 polynomial1 freeP(polynomial1 p)
 {
   polynomial1 m=p;
   while (m!=nullptr){
       p=p->next;
-      mem_free((char *)m->exps); 
-      mem_free((char *)m); 
+      mem_free((char *)m->exps);
+      mem_free((char *)m);
       m=p;
   }
   return nullptr;
@@ -2421,12 +2421,12 @@ polynomial1 copyM(polynomial1 p)
  return p1;
 }
 
- 
+
 polynomial1 copyP(polynomial1 p)
-{   
+{
   polynomial1 p1,p2;
   int i;
-	
+
   if (p==nullptr) return nullptr;
   p1=makeP(p->R);
   p2=p1;
@@ -2440,14 +2440,14 @@ polynomial1 copyP(polynomial1 p)
   }
  return p1;
 }
-    
+
 void printP(polynomial1 P)
-{ 
+{
   int i,zt=0;
 
   /* DEBUG */
   /* printf(" In "); */
- 
+
   while (P!=nullptr){
      if (P->coef.i!=0 || P->coef.r!=0){
         printC(P->coef);
@@ -2455,8 +2455,8 @@ void printP(polynomial1 P)
 
 	/*	printf("("); */
 
-        for (i=0;i<P->R->n;i++) { 
-      
+        for (i=0;i<P->R->n;i++) {
+
 	  /*       printf("\n(P->exps([%d])= %d\n", i,P->exps[i]);    */
 	  /*
 	  printf("%d", P->exps[i]);
@@ -2468,19 +2468,19 @@ void printP(polynomial1 P)
 
        if (P->exps[i]!=0) {
            zt=1;
-	   
+
 	   printf("*%s",P->R->vars[i]);
     	   if (P->exps[i]!=1) {
 	     /*              printf("^{without P->def-loop}");   */
-              if (P->exps[i]>0) 
+              if (P->exps[i]>0)
 		printf("^%d",P->exps[i]);
-              else 
+              else
 		printf("(%d)",P->exps[i]);
            }
         }
      }
      if (P->def!=0){
- 
+
 
       printf("*%s\n",P->R->def);
         if (P->def !=1) {
@@ -2488,7 +2488,7 @@ void printP(polynomial1 P)
              if (P->def >0) printf("%d ",P->def);
               else printf("(%d){second} ",P->def);
              }
-     } 
+     }
      /*     if (P->next != 0) printf("+{new mono}\n");   */
      if (P->next != nullptr) printf(" + ");
      }
@@ -2498,7 +2498,7 @@ void printP(polynomial1 P)
 
   /* DEBUG */
   /* printf("  Out  "); */
-} 
+}
 
 int orderMM(polynomial1 P1,polynomial1 P2)
 {
@@ -2506,14 +2506,14 @@ int orderMM(polynomial1 P1,polynomial1 P2)
   if (P1==nullptr && P2==nullptr) return 0;
    else if (P1==nullptr) return -1;
     else if (P2==nullptr) return 1;
-  if (P1->R != P2->R) 
+  if (P1->R != P2->R)
     bad_error("error in order: monomials must belong to same ring");
-	
+
   d=P1->def-P2->def;
   if (d>0) return 1;
   else if (d<0) return -1;
 
-  for (i=0;i<P1->R->n;i++) { 
+  for (i=0;i<P1->R->n;i++) {
     d=P1->exps[i]-P2->exps[i];
     if (d>0) return 1;
      else if (d<0) return -1;
@@ -2541,9 +2541,9 @@ int orderPP(polynomial1 P1,polynomial1 P2)
          else if (P2 !=nullptr) return -1;
           else return 0;
 }
-   
+
 polynomial1 ItoP(int c,Pring R)
-{ 
+{
   polynomial1 p;
   p=makeP(R);
   p->coef.r=c;
@@ -2551,7 +2551,7 @@ polynomial1 ItoP(int c,Pring R)
 }
 
 polynomial1 DtoP(double c, Pring R)
-{ 
+{
   polynomial1 p;
   p=makeP(R);
   p->coef.r=c;
@@ -2559,19 +2559,19 @@ polynomial1 DtoP(double c, Pring R)
 }
 
 polynomial1 CtoP(fcomplex c, Pring R)
-{ 
+{
   polynomial1 p;
   p=makeP(R);
   p->coef=c;
   return p;
 }
- 
+
 polynomial1 addPPP(polynomial1 P1, polynomial1 P2, polynomial1 P3)
 {
   polynomial1 pt;
   struct mono_tag A;
   int d,i;
-	
+
   pt=&(A);
 if (P1==nullptr){ if (P3==nullptr) freeP(P3);
             return copyP(P2);
@@ -2581,7 +2581,7 @@ if (P2==nullptr){ if (P3==nullptr) freeP(P3);
           }
 /*
 if (P1->R != P2->R) bad_error(" polynomial1s in addPPP must have equal rings");
-*/ 
+*/
  A.R=P1->R;
   A.next=nullptr;
   while(P1!=nullptr&&P2!=nullptr){
@@ -2623,7 +2623,7 @@ if (P3!=nullptr) freeP(P3);
 
 if (A.next==nullptr) A.next=makeP(A.R);
 return A.next;
-}		
+}
 
 polynomial1 subPPP(polynomial1 P1, polynomial1 P2, polynomial1 P3)
 {
@@ -2683,7 +2683,7 @@ polynomial1 mulCPP(fcomplex c, polynomial1 P1, polynomial1 P2)
 
   if (P1==nullptr) { if (P2!=nullptr) freeP(P2);
                           return nullptr;}
-  if (P2!=P1 ) { if ( P2 !=nullptr)  freeP(P2); 
+  if (P2!=P1 ) { if ( P2 !=nullptr)  freeP(P2);
                  P2=copyP(P1);}
   p=P2;
   while (p!=nullptr){
@@ -2723,7 +2723,7 @@ if (P1==nullptr||m==nullptr) { if (P2!=nullptr) freeP(P2);
                    if (P2!=nullptr) freeP(P2);
                           return nullptr;}
   if (P2==m) free_m = 1;
-  if (P2!=P1 ) { if ( P2 !=nullptr && P2 !=m)  freeP(P2); 
+  if (P2!=P1 ) { if ( P2 !=nullptr && P2 !=m)  freeP(P2);
                  P2=copyP(P1);}
   p=P2;
   while (p!=nullptr){
@@ -2751,7 +2751,7 @@ polynomial1 divMPP(polynomial1 mi, polynomial1 P1, polynomial1 P2)
                     return nullptr;}
 
   if (P2==m) free_m = 1;
-  if (P2!=P1 ) { if ( P2 !=nullptr && P2 !=m)  freeP(P2); 
+  if (P2!=P1 ) { if ( P2 !=nullptr && P2 !=m)  freeP(P2);
                  P2=copyP(P1);}
   p=P2;
   while (p!=nullptr){
@@ -2768,8 +2768,8 @@ polynomial1 divMPP(polynomial1 mi, polynomial1 P1, polynomial1 P2)
 polynomial1 mulPPP(polynomial1 P1, polynomial1 P2, polynomial1 P3)
 {
   polynomial1 pt2,pt3=nullptr;
-    
-  if (P1==nullptr || P2==nullptr) { 
+
+  if (P1==nullptr || P2==nullptr) {
     if (P3!=nullptr) freeP(P3);
     return nullptr;
   }
@@ -2779,7 +2779,7 @@ polynomial1 mulPPP(polynomial1 P1, polynomial1 P2, polynomial1 P3)
     bad_error("error in addPP: unequal rings");
   }
   */
-  while(P1!=nullptr) { 
+  while(P1!=nullptr) {
     pt2=mulMPP(P1,P2,nullptr);
     pt3=addPPP(pt2,pt3,pt3);
     freeP(pt2);               /* this realy should be done more efficiently */
@@ -2791,7 +2791,7 @@ polynomial1 mulPPP(polynomial1 P1, polynomial1 P2, polynomial1 P3)
 }
 
 
-			
+
 polynomial1 expIPP(int x, polynomial1 P, polynomial1 P3)
 {
   polynomial1 m,tmp;
@@ -2816,7 +2816,7 @@ polynomial1 expIPP(int x, polynomial1 P, polynomial1 P3)
        if (P3!=nullptr) freeP(P3);
        return m;
        }
-       
+
 polynomial1 unliftP(polynomial1 p)
 {
   polynomial1 p1,p2;
@@ -2837,7 +2837,7 @@ polynomial1 unliftP(polynomial1 p)
 }
 
 polynomial1 Homogenize(polynomial1 pi,Pring R)
-{ 
+{
   polynomial1 pt,p;
   int i = 0;
   int d = 0;
@@ -2857,7 +2857,7 @@ polynomial1 Homogenize(polynomial1 pi,Pring R)
   pt=p;
   while (pt!=nullptr){
     d=0;
-    for (i=0;i<p->R->n-1;i++) d+=pt->exps[i];        
+    for (i=0;i<p->R->n-1;i++) d+=pt->exps[i];
     pt->exps[p->R->n-1]=dp-d;
     pt=pt->next;
   }
@@ -2895,12 +2895,12 @@ int read_mark(int timeset){
 /*********************** implementations from Aset.c **********************/
 /**************************************************************************/
 
-/* 
+/*
 ** An Aset is an r-tupple of point configurations. It represents
 ** the support set of a polynomial system, and is a presentation for
 ** the minkowski sum of the convex hulls of its constituent
-** point configurations. 
-** 
+** point configurations.
+**
 ** Asets are constructed from nodes as follows:
 ** _____________     ____________     _____________       ------------
 **| ASET | NODE |   | INT | NODE |   | NODE | NODE |     | NODE | NODE
@@ -2908,7 +2908,7 @@ int read_mark(int timeset){
 **|  R   | node-|-->|  D  | node |-->| node | node |->...| node | NULL
 ** -------------     ------------     --|----------       --|---------
 **                                    point config 1.   point config R
-**                                                       
+**
 **
 */
 
@@ -3058,7 +3058,7 @@ node aset_print(node A)
              first=0;
         }
         else printf("    ");
-        Coords=pnt_coords(Car(ptc));    
+        Coords=pnt_coords(Car(ptc));
         printf("<");
         for(i=1;i<=D;i++) {
            printf(" %d",*IVref(Coords,i));
@@ -3080,7 +3080,7 @@ node aset_print(node A)
 
 node aset_print_short(node A)
 {
- int R,N,first=1;  
+ int R,N,first=1;
  node ptr,ptc;
  if (A != nullptr && node_get_type(A, LEFT) == ASET) {
    R = R(A);
@@ -3095,7 +3095,7 @@ node aset_print_short(node A)
              printf("{");
              first=0;
         }
-        printf(" %s",(char *)pnt_lable(Car(ptc)));   
+        printf(" %s",(char *)pnt_lable(Car(ptc)));
         if (--N ==0) printf("}");
         else printf(",");
      }
@@ -3215,7 +3215,7 @@ node node_print(node N)
           printf(" . ");
         else printf("  ");
         node_print((node) Cdr(N));
-        if ((node_atomp(Cdr(N))==TRUE)||(node_nullp(Cdr(N))==TRUE)){ 
+        if ((node_atomp(Cdr(N))==TRUE)||(node_nullp(Cdr(N))==TRUE)){
            printf(" )");
         }
         level--;
@@ -3263,8 +3263,8 @@ node atom_proc(node (*prc)(node))
 }
 
 node ERRND(char *s)
-{ node ans;                                
-  ans=node_new();                          
+{ node ans;
+  ans=node_new();
   node_set_ptr(ans,mem_strdup(s),ERR,LEFT);
   return ans;
 }
@@ -3405,7 +3405,7 @@ void xpnt_affine(xpnt X){
 }
 
 /*
-** xpnt_normalize 
+** xpnt_normalize
 **     rescale an xpnt so that it has norm 1 (not including t coord).
 */
 void xpnt_normalize(xpnt X){
@@ -3413,10 +3413,10 @@ void xpnt_normalize(xpnt X){
   double abs=0.0;
   fcomplex ctmp;
   n=(int)xpnt_n(X);
-  
+
   for(i=1;i<=2*n+2;i++){
     abs+= DVref(X,i)*DVref(X,i);
-         
+
   }
   abs=1/sqrt(abs);
   for(i=1;i<=n;i++){
@@ -3445,20 +3445,20 @@ extern double RS_zt;
 
 /*
 **  int  pcfg_vertex(node pnt,node PC)
-** 
-** 
-**   return TRUE if pnt is a vertex of PC, 
+**
+**
+**   return TRUE if pnt is a vertex of PC,
 **          FALSE otherwise (also if pnt not in PC)
-**  
+**
 **   Notes) a)should check its arguments.
 **          b)ratio,LP,and basis should be pointers to matrices
 **            of the appropriate type, (they can be 0 to begin
 **            with). After completion they will point to the space
 **            allocated for the linear program, this allows vertex
-**            to be called a number of times without having to 
+**            to be called a number of times without having to
 **            constantly reallocate blocks of space.
 **          c)ignores lifting values.
-**           
+**
 */
 
 int pcfg_vertex(node pnt,
@@ -3470,18 +3470,18 @@ int pcfg_vertex(node pnt,
     N = pcfg_npts(PC)-1;
     D = pcfg_dim(PC)-1; /* ignore last coord ... treat it as a lifting value*/
 
-  /* 
+  /*
   ** initialize basis,nonbasis,X and DtypesC
-  */ 
+  */
     for (i = 1; i <= N; i++){
       *IVref(LP_nonbasis,i)=i;
-      X(i)=0.0;   
-      DtypesC(i)=0.0;   
+      X(i)=0.0;
+      DtypesC(i)=0.0;
     }
    for (i=1; i<= D+1; i++){
       *IVref(LP_basis,i)=N+i;
-      X(N+i)=1.0;   
-      DtypesC(N+i)=1.0;   
+      X(N+i)=1.0;
+      DtypesC(N+i)=1.0;
     }
 
 /* load matrix for linear program */
@@ -3505,7 +3505,7 @@ int pcfg_vertex(node pnt,
       B(i)=*IVref(pnt_coords(pnt),i);
       X(N+1+i)=B(i);
     }
- Rsimp(LP_A,LP_B,LP_C,LP_X,LP_basis,LP_nonbasis,LP_R,LP_Q,LP_T1,LP_T2); 
+ Rsimp(LP_A,LP_B,LP_C,LP_X,LP_basis,LP_nonbasis,LP_R,LP_Q,LP_T1,LP_T2);
  for(i=N+1;i<=N+1+D;i++) if (X(i)>RS_zt) return TRUE;
  return FALSE;
 }
@@ -3515,14 +3515,14 @@ int pcfg_vertex(node pnt,
 #undef DtypesC
 
 /*
-** pcfg_extremal(node PC)  
+** pcfg_extremal(node PC)
 **         Input: A point configuration PC.
 **         Outut: Same point configuration PC.
 **  Side Effects: All non-extremal points are removed from PC.
-** 
+**
 **      Method: Calls pcfg_vertex on each point to see if it
 **              is a vertex and removes those that arent.
-**             
+**
 **       note:
 **       The main loop maintains the following invariant conditions
 **                    Car(ptr_nxt) is point being checked
@@ -3532,7 +3532,7 @@ node pcfg_extremal(node PC)
 {
   node ptr_old, ptr_nxt;
   int N,D;
-  
+
 /* allocate space for the linear program and initialize */
     N = pcfg_npts(PC)-1;
     D = pcfg_dim(PC)-1; /* ignore last coord ... treat it as a lifting value*/
@@ -3551,12 +3551,12 @@ node pcfg_extremal(node PC)
 
 
   ptr_nxt=Cdr(PC);
-  ptr_old=PC;        
+  ptr_old=PC;
   while(ptr_nxt != nullptr) {
     if (pcfg_vertex(Car(ptr_nxt), PC) != TRUE){
-      pcfg_remove(Car(ptr_nxt),PC,ptr_old); 
+      pcfg_remove(Car(ptr_nxt),PC,ptr_old);
     }
-    else ptr_old= ptr_nxt; 
+    else ptr_old= ptr_nxt;
     ptr_nxt = Cdr(ptr_nxt);
   }
 
@@ -3589,50 +3589,50 @@ node aset_extremal(node A)
 /***********************************************************************/
 /****************** implementation code from RSimp.c *******************/
 /***********************************************************************/
-                  
+
 /*
-** Rsimp   revised simplex method (Using Bland's rule) 
+** Rsimp   revised simplex method (Using Bland's rule)
 **        and a qr factorization to solve the linear equations
 **
-**      Adapted from algorithms presented in 
-**             Linear Approximations and Extensions                  
+**      Adapted from algorithms presented in
+**             Linear Approximations and Extensions
 **             (theory and algorithms)
 **             Fang & Puthenpura
 **             Prentice Hall, Engelwood Cliffs NJ (1993)
-**      and 
+**      and
 **            Linear Programming
-**            Chvatal 
+**            Chvatal
 **            Freeman and Company, New York, 1983
-** 
-**      (developed first in Octave, many thanks to the author)
-** 
 **
-**  Solve the problem 
-**       minimize C'x, 
+**      (developed first in Octave, many thanks to the author)
+**
+**
+**  Solve the problem
+**       minimize C'x,
 **       subject to A*x=b,  x>=0
-**       for x,c,b n-vectors, and A an m,n matrix with full row rank 
-** 
+**       for x,c,b n-vectors, and A an m,n matrix with full row rank
+**
 ** Assumptions:
 **    A mxn matrix with full row rank.
-**    b an m matrix. 
+**    b an m matrix.
 **    c an n-vector.
-**    x an n-vector holding a basic feasible solution, 
+**    x an n-vector holding a basic feasible solution,
 **    basis m-vector holding indices of the basic variables in x
 **    nonbasis n-m vector holding the indices not appearing in x.
-** 
-**  Returns: 
+**
+**  Returns:
 **      FAIL if algorithm doesn't terminate.
 **      UNBD if problem is unbounded
 **      OPT  if optimum found
 **  efects:
 **    A,b,c unchanged.
-**    x basis, nonbasis, hold info describing last basic feasible 
+**    x basis, nonbasis, hold info describing last basic feasible
 **                       solution.
 **    Q,R hold qrdecomp of last basis matrix.
 **    t1,t2 undefined.
 **
 **
-*/ 
+*/
 
 /* #include "pelutils.h" */
 
@@ -3670,16 +3670,16 @@ int Rsimp(Dmatrix A, Dvector b, Dvector c,
 
  /*
  **  Dimension assumptions:
- **     A(m,n) x(n) c(n) b(m) Q(mxm) DtypesR(m,m) t1(m) t2(m) 
- **     basis(m) nonbasis(n-m)   
- */   
+ **     A(m,n) x(n) c(n) b(m) Q(mxm) DtypesR(m,m) t1(m) t2(m)
+ **     basis(m) nonbasis(n-m)
+ */
 
  for(k=0; k<=max_steps;k++){
    /*
    ** Step 0) load new basis matrix and factor it
    */
     for(i=1;i<=m;i++){
-      for(j=1;j<=m;j++){ 
+      for(j=1;j<=m;j++){
         DtypesR(i,j)=AB(i,j);
       }
     }
@@ -3696,7 +3696,7 @@ int Rsimp(Dmatrix A, Dvector b, Dvector c,
       }
       Y(i)=(CB(i)-Y(i))/DtypesR(i,i);
     }
-   /*  
+   /*
    **      b) find w=Q*y
    **         note: B'*w=(Q*DtypesR)'*Q*y= DtypesR'*(Q'*Q)*y=DtypesR'*y=c(basis)
    */
@@ -3708,7 +3708,7 @@ int Rsimp(Dmatrix A, Dvector b, Dvector c,
     }
 
    /*
-   ** Step 2)find entering variable, 
+   ** Step 2)find entering variable,
    ** (use lexicographically first variable with negative reduced cost)
    */
     q=n+1;
@@ -3716,22 +3716,22 @@ int Rsimp(Dmatrix A, Dvector b, Dvector c,
       /* calculate reduced cost */
       r=CN(i);
       for(j=1;j<=m;j++){
-        r-=W(j)*AN(j,i);      
+        r-=W(j)*AN(j,i);
       }
       if (r<-zero_tol){
         if (q==n+1 || nonbasis(i)<nonbasis(q)){
-          q=i;                 
+          q=i;
         }
       }
     }
    /*
    ** if ratios were all nonnegative current solution is optimal
    */
-    if (q==n+1){           
+    if (q==n+1){
       if (verbose>0) printf("optimal solution found in %d iterations\n",k);
       return OPT;
     }
-   /* 
+   /*
    ** Step 3)Calculate translation direction for q entering
    **        by solving system  B*d=-A(:,nonbasis(q));
    **   a) let y=-Q'*A(:,nonbasis(q));
@@ -3742,10 +3742,10 @@ int Rsimp(Dmatrix A, Dvector b, Dvector c,
         Y(i)-=Q(j,i)*AN(j,q);
       }
     }
-  
+
    /*
    **  b) back solve Rd=y  (d=R\y)
-   **     note B*d= Q*DtypesR*d=Q*y=Q*-Q'*A(:nonbasis(q))=-A(:,nonbasis(q)) 
+   **     note B*d= Q*DtypesR*d=Q*y=Q*-Q'*A(:nonbasis(q))=-A(:,nonbasis(q))
    */
     for(i=m;i>=1;i--){
       DtypesD(i)=0.0;
@@ -3755,7 +3755,7 @@ int Rsimp(Dmatrix A, Dvector b, Dvector c,
       DtypesD(i)=(Y(i)-DtypesD(i))/DtypesR(i,i);
     }
    /*
-   ** Step 4 Choose leaving variable 
+   ** Step 4 Choose leaving variable
    **     (first variable to become negative, by moving in direction DtypesD)
    **     (if none become negative, then objective function unbounded)
    */
@@ -3779,7 +3779,7 @@ int Rsimp(Dmatrix A, Dvector b, Dvector c,
    /*
    ** Step 5) Update solution and basis data
    */
-    XN(q)=a;        
+    XN(q)=a;
     for(j=1;j<=m;j++){
       XB(j)+=a*DtypesD(j);
     }
@@ -3788,7 +3788,7 @@ int Rsimp(Dmatrix A, Dvector b, Dvector c,
     nonbasis(q)=basis(l);
     basis(l)=qv;
   }
-  if (verbose>=0){ 
+  if (verbose>=0){
       printf("Simplex Algorithm did not Terminate in %d iterations\n",k);
   }
   return FAIL;
@@ -3803,7 +3803,7 @@ int Rsimp(Dmatrix A, Dvector b, Dvector c,
 */
 
 /*
-** MSD.c     
+** MSD.c
 **        Prune and search based computation of cells of mixed subdivisions
 */
 
@@ -3816,20 +3816,20 @@ int Rsimp(Dmatrix A, Dvector b, Dvector c,
 
 /*
 *********************************************************************
-** Aset_I: internal representation for Asets 
+** Aset_I: internal representation for Asets
 ** logical layout:
 **   (indices start at one for all vector typesin Aset_I)
 **    A_r(A)      ---- number of point configs
 **    A_n(A)      ---- dimension (without the lifting value).
 **    A_m(A)      ---- total number of points in Aset
-**    A_npts(A,i) ---- number of points in ith polytope 
+**    A_npts(A,i) ---- number of points in ith polytope
 **    A_pt(A,i,j) ---- return jth point of ith polytope
 **    A_pt_coords(A,i,j) --- return coordinate vector of jth pnt of ith ptope
 **    A_pt_coord(A,i,j,k) --- return kth coord of jth pnt of ith ptope
 **
 **  physical layout:
 **  r,n,m are stored seperatly as integers.
-**  all points are stored in one C-vector, with indexing information 
+**  all points are stored in one C-vector, with indexing information
 **  stored in one long integer vector brocken up logically as
 **  |m_1,....,m_r|s1,....,sr|
 */
@@ -3853,7 +3853,7 @@ typedef struct Aset_Itag{
      }*Aset_I; */
 
 /*
-** Internalize_Aset 
+** Internalize_Aset
 **    Input: an Aset S.
 **   Output: an internal (Aset_I) representation of S.
 */
@@ -3883,7 +3883,7 @@ Aset_I internalize_aset(aset S){
     }
   return A;
 }
-/* 
+/*
 ** Aset_I_free
 **     free all storage allocated to an Aset_I.
 */
@@ -3900,17 +3900,17 @@ void Aset_I_free(Aset_I A){
 */
 void Aset_I_print(Aset_I A){
  int i,r;
-#ifdef LOG_PRINT   
+#ifdef LOG_PRINT
 fprintf(msd_out," R=%d, N=%d, M=%d \n",A_r(A),A_n(A),A_m(A));
    fprintf(msd_out," tops = <")
 #endif
 ;
    for(i=1;i<=A_r(A);i++){
- #ifdef LOG_PRINT    
+ #ifdef LOG_PRINT
     fprintf(msd_out,"%d ",A_npts(A,i))
 #endif
 ;
-         if (i<A_r(A)) 
+         if (i<A_r(A))
 #ifdef LOG_PRINT
 fprintf(msd_out,",")
 #endif
@@ -3921,12 +3921,12 @@ fprintf(msd_out,",")
    fprintf(msd_out," sts = <")
 #endif
 ;
-      for(i=1;i<=A_r(A);i++){       
+      for(i=1;i<=A_r(A);i++){
 #ifdef LOG_PRINT
          fprintf(msd_out,"%d ",A_ptst(A,i))
 #endif
 ;
-         if (i<A_r(A)) 
+         if (i<A_r(A))
 #ifdef LOG_PRINT
 fprintf(msd_out,",")
 #endif
@@ -3945,17 +3945,17 @@ fprintf(msd_out,",")
       pnt_print(A_pt(A,r,i));
     }
    }
-} 
+}
 /*
 *****************************************************************
 ** Internal representation for mixed cells
 ** logical layout:
 **   C_r(C)          number of point configs
-**   C_type(C,i)        dimension of ith peice, 
+**   C_type(C,i)        dimension of ith peice,
 **                      i from 1 to r.
-**   C_idx(C,i,j)     index of jth point of ith peice. 
-**                      j from 0 to T[i].      
-** 
+**   C_idx(C,i,j)     index of jth point of ith peice.
+**                      j from 0 to T[i].
+**
 ** physical layout:
 **     store[0] ... store[r-1]     hold T.
 **     store[r] ... store[2r-1]    hold indices to first rows of Pt
@@ -3987,10 +3987,10 @@ typedef struct Cell_Itag {
 Cell_I initialize_cell(Aset_I A, Ivector T){
  Cell_I C;
  int i,j;
- if ((C=(Cell_I)malloc(sizeof(struct Cell_Itag)))==nullptr) 
+ if ((C=(Cell_I)malloc(sizeof(struct Cell_Itag)))==nullptr)
      bad_error("malloc failed in initialize_cell");
  C_r(C)=A_r(A);
- if((C->store = (int *)malloc((3*C_r(C)+A_n(A))*sizeof(int)))==nullptr) 
+ if((C->store = (int *)malloc((3*C_r(C)+A_n(A))*sizeof(int)))==nullptr)
       bad_error("malloc failed in initialize_cell");
  j=2*C_r(C);             /* location of C_Pt(C,1,0) */
  for(i=1;i<=C_r(C);i++){
@@ -4031,13 +4031,13 @@ void Cell_I_print(Cell_I C){
       fprintf(msd_out,"%d",C_idx(C,i,j))
 #endif
 ;
-      if (j<C_type(C,i)) 
+      if (j<C_type(C,i))
 #ifdef LOG_PRINT
 fprintf(msd_out,", ")
 #endif
 ;
    }
-   if (i<C_r(C)) 
+   if (i<C_r(C))
 #ifdef LOG_PRINT
 fprintf(msd_out,": ")
 #endif
@@ -4053,7 +4053,7 @@ fprintf(msd_out,": ")
 ** Face lists  list of faces of an Aset
 **
 ** Logically: A collection of r lists of Ivectors, the Ivectors in the
-**            ith list contain the indices of points in the various 
+**            ith list contain the indices of points in the various
 **            faces of type i in the lower hull of A_i
 **            List_Start(i) -- a pointer to the node holding a pointer to the
 **                             start of the ith list.
@@ -4066,7 +4066,7 @@ fprintf(msd_out,": ")
 **    -----+-      ----+-      ----+-
 **         |           |           |
 **     List_1      List_2       List_R
-**   
+**
 **                    ________      ________
 **   where List_i ==  | | |  -+---->| | |  -+---> ,,,,,,,
 **                    --+-----      --+-----
@@ -4084,11 +4084,11 @@ fprintf(msd_out,": ")
 **    Input: A number R of lists to create.
 **    Output: FALSE if error occurs, TRUE otherwise.
 **    Sets List_R to DtypesR.
-**    Creates a chain of DtypesR nodes starting at List_Store, (with nodes linked 
+**    Creates a chain of DtypesR nodes starting at List_Store, (with nodes linked
 **       through their Left pointers, violating the usual convention for lists)
 **    The List_Start, and List_Ptr, arrays are created and initialized so that
 **       the ith entrees point to the ith nodes on the list List_Store.
-**    The Right Pointer of each of these nodes should be interpereted as a 
+**    The Right Pointer of each of these nodes should be interpereted as a
 **       pointer to the start of the corresponding list, initialized to 0.
 */
 int init_Face_List_storeage(int r){
@@ -4131,7 +4131,7 @@ void print_Face_list(){
    ptr=LStart(i);
    while((ptr=(node)node_get_ptr(ptr,RIGHT))!=nullptr){
        Imatrix_print((Imatrix)node_get_ptr(ptr,LEFT));
-#ifdef LOG_PRINT     
+#ifdef LOG_PRINT
   fprintf(msd_out,"\n")
 #endif
 ;
@@ -4179,9 +4179,9 @@ static Ivector MSD_LP_basis=nullptr, MSD_LP_nonbasis=nullptr;
 
 /*
 ** set_up_LP
-**   Input: An Aset_I A and a Cell_I C 
+**   Input: An Aset_I A and a Cell_I C
 **   Output: LP,Ratio, and Basis have enough space reserved for them
-**           to allow them to hold any of the linear programs 
+**           to allow them to hold any of the linear programs
 **           required by MSD for A and C with only reseting bounds.
 */
 void set_up_LP(Aset_I A, Cell_I C){
@@ -4258,9 +4258,9 @@ void Load_LP(int st,int tp,Cell_I C, Aset_I A){
         MSD_X(j)=0.0;
         for(i=1;i<=nrows;i++) MSD_A(i,j)=0;
    }
-   for(i=1;i<=nrows;i++) MSD_B(i)=0; 
+   for(i=1;i<=nrows;i++) MSD_B(i)=0;
 
-   /* 
+   /*
    ** put n independent collumns at start of lp
    */
    for(j=1;j<=n;j++){
@@ -4268,8 +4268,8 @@ void Load_LP(int st,int tp,Cell_I C, Aset_I A){
      MSD_C(j)=1500.0;
    }
 
-   /* 
-   ** 
+   /*
+   **
    */
    cidx=n;
    bidx=0;
@@ -4280,7 +4280,7 @@ void Load_LP(int st,int tp,Cell_I C, Aset_I A){
          for(k=1;k<=n;k++){
             MSD_A(tr+k,cidx+j)=*IVref(coords,k);
          }
-         MSD_C(cidx+j)=*IVref(coords,n+1); 
+         MSD_C(cidx+j)=*IVref(coords,n+1);
       }
       MSD_B(1+i-st)=1.0;
       tmp=1.0/(C_type(C,i)+1);
@@ -4311,7 +4311,7 @@ void Load_LP(int st,int tp,Cell_I C, Aset_I A){
 ** Final testing -- Verification of complete cells
 */
 Imatrix M;
-Imatrix U; 
+Imatrix U;
 Imatrix Norm;
 int vol;
 void set_up_Final(int n){
@@ -4332,7 +4332,7 @@ void free_Final(){
 int Final_Check(Aset_I A, Cell_I C){
  int i,j,k;
  int row=0,s0,s1;
- 
+
  /* load matrix */
  for(i=1;i<=A_r(A);i++){
     for(j=1;j<=C_type(C,i);j++){
@@ -4355,8 +4355,8 @@ int Final_Check(Aset_I A, Cell_I C){
  Imatrix_backsolve(M,Norm);
  if (*IVref(Norm,A_n(A)+1)<0){
   for(i=1;i<=A_n(A)+1;i++) *IVref(Norm,i)*=-1;
- } 
- 
+ }
+
  for(i=1;i<=A_r(A);i++){
     /* find offset of first point of cell */
     s0=0;
@@ -4365,7 +4365,7 @@ int Final_Check(Aset_I A, Cell_I C){
     }
     /*check that remaining points have same norm */
     for(j=1;j<=C_type(C,i);j++){
-       s1=0;  
+       s1=0;
        for(k=1;k<=A_n(A)+1;k++){
            s1+=*IVref(Norm,k)*C_pt_coord(A,C,i,j,k);
        }
@@ -4374,7 +4374,7 @@ int Final_Check(Aset_I A, Cell_I C){
     }
     /* check that no points have lower offset */
     for(j=1;j<=A_npts(A,i);j++){
-       s1=0;                
+       s1=0;
        for(k=1;k<=A_n(A)+1;k++){
          s1+=(*IVref(Norm,k))*A_pt_coord(A,i,j,k);
        }
@@ -4430,9 +4430,9 @@ node MSD(aset Ast, Ivector T){
 
   /* input verification should check A and T for consistancy*/
   if (T==nullptr) bad_error("type vector must be specified in MSD");
-  
+
   /*
-  **  Initialization 
+  **  Initialization
   */
   A=internalize_aset(Ast);
   C=initialize_cell(A,T);
@@ -4440,7 +4440,7 @@ node MSD(aset Ast, Ivector T){
   set_up_Final(A_n(A));
   set_up_FaceLists(A,C);
 
-  /* 
+  /*
   ** Iteration
   */
   zeroth_face(1);
@@ -4455,21 +4455,21 @@ node MSD(aset Ast, Ivector T){
      }
      else {
        if (Final_Check(A,C)==TRUE){
-         Cell_I_print(C); 
+         Cell_I_print(C);
 #ifdef LOG_PRINT
 fprintf(msd_out," vol %d\n",vol)
 #endif
 ;
          mv+=vol;
          Normals=Cons(atom_new((char *)Imatrix_dup(Norm,nullptr),IMTX),
-                      Normals);         
+                      Normals);
        }
      }
    }
    else i--;
   }
 
-/* 
+/*
 **Clean Up
 */
  Aset_I_free(A);
@@ -4479,15 +4479,15 @@ fprintf(msd_out," vol %d\n",vol)
  free_Face_list();
  POP_LOCS();
 
- #ifdef LOG_PRINT  
+ #ifdef LOG_PRINT
  fprintf(msd_out,"Mixed Volume = %d",mv)
 #endif
 ;
  return Normals;
  }
 
-/* 
-** Enumerate all k_i Faces 
+/*
+** Enumerate all k_i Faces
 */
 
 void zeroth_set(Cell_I *C,int j){
@@ -4513,7 +4513,7 @@ int next_set(Cell_I *C,Aset_I A, int j){
 
 
 node set_up_FaceLists(Aset_I A, Cell_I C){
-  int i,j,k;     
+  int i,j,k;
   Imatrix ML,UL,Itmp;
   LOCS(1);
   PUSH_LOC(List_Store);
@@ -4527,7 +4527,7 @@ node set_up_FaceLists(Aset_I A, Cell_I C){
     UL=Imatrix_submat(UL,A_n(A),A_n(A));
     zeroth_set(&C,i);
     while(next_set(&C,A,i)>0){
-      Load_LP(i,i,C,A); 
+      Load_LP(i,i,C,A);
       if ( TRUE==IsLower()){
         for(j=1;j<=C_type(C,i);j++){
           for(k=1;k<=A_n(A);k++){
@@ -4542,8 +4542,8 @@ node set_up_FaceLists(Aset_I A, Cell_I C){
           for(j=0;j<C_type(C,i)+1;j++)*IVref0(Itmp,j)=C_idx(C,i,j);
           Push_Face(Itmp,i);
         }
-      }  
-    }   
+      }
+    }
   }
   Imatrix_free(ML);
   Imatrix_free(UL);
@@ -4583,9 +4583,9 @@ int IsLower(){
 
  /*
  **  Dimension assumptions:
- **     A(m,n) x(n) c(n) b(m) Q(mxm) R(m,m) t1(m) t2(m) 
- **     MSDbasis(m) MSDnonbasis(n-m)   
- */   
+ **     A(m,n) x(n) c(n) b(m) Q(mxm) R(m,m) t1(m) t2(m)
+ **     MSDbasis(m) MSDnonbasis(n-m)
+ */
 /*
    printf("\n A=\n");
    Dmatrix_print(MSD_LP_A);printf("\n B=");fflush(stdout);
@@ -4602,7 +4602,7 @@ int IsLower(){
    ** Step 0) load new basis matrix and factor it
    */
     for(i=1;i<=m;i++){
-      for(j=1;j<=m;j++){ 
+      for(j=1;j<=m;j++){
         MSD_R(i,j)=MSD_AB(i,j);
       }
     }
@@ -4623,7 +4623,7 @@ int IsLower(){
         return TRUE;
       }
     }
-   /*  
+   /*
    **      b) find w=Q*y
    **         note: B'*w=(Q*R)'*Q*y= R'*(Q'*Q)*y=R'*y=c(basis)
    */
@@ -4635,7 +4635,7 @@ int IsLower(){
     }
 
    /*
-   ** Step 2)find entering variable, 
+   ** Step 2)find entering variable,
    ** (use lexicographically first variable with negative reduced cost)
    */
     q=n+1;
@@ -4643,24 +4643,24 @@ int IsLower(){
       /* calculate reduced cost */
       r=MSD_CN(i);
       for(j=1;j<=m;j++){
-        r-=MSD_W(j)*MSD_AN(j,i);      
+        r-=MSD_W(j)*MSD_AN(j,i);
       }
       if (r<-MSDzero_tol){
         if (q==n+1 || MSDnonbasis(i)<MSDnonbasis(q)){
-          q=i;                 
+          q=i;
         }
       }
     }
    /*
    ** if ratios were all nonnegative current solution is optimal
    */
-    if (q==n+1){           
+    if (q==n+1){
       if (verbose>0){
          printf("optimal solution found in %d iterations\n",k);
       }
       return TRUE;
     }
-   /* 
+   /*
    ** Step 3)Calculate translation direction for q entering
    **        by solving system  B*d=-A(:,MSDnonbasis(q));
    **   a) let y=-Q'*A(:,MSDnonbasis(q));
@@ -4671,10 +4671,10 @@ int IsLower(){
         MSD_Y(i)-=MSD_Q(j,i)*MSD_AN(j,q);
       }
     }
-  
+
    /*
    **  b) back solve Rd=y  (d=R\y)
-   **     note B*d= Q*R*d=Q*y=Q*-Q'*A(:MSDnonbasis(q))=-A(:,MSDnonbasis(q)) 
+   **     note B*d= Q*R*d=Q*y=Q*-Q'*A(:MSDnonbasis(q))=-A(:,MSDnonbasis(q))
    */
     for(i=m;i>=1;i--){
       MSD_D(i)=0.0;
@@ -4684,7 +4684,7 @@ int IsLower(){
       MSD_D(i)=(MSD_Y(i)-MSD_D(i))/MSD_R(i,i);
     }
    /*
-   ** Step 4 Choose leaving variable 
+   ** Step 4 Choose leaving variable
    **     (first variable to become negative, by moving in direction D)
    */
     a=0;
@@ -4705,7 +4705,7 @@ int IsLower(){
       return FAIL;
     }
    /*
-   ** Step 5) If step is non-degenerate stop. otherwise update basis 
+   ** Step 5) If step is non-degenerate stop. otherwise update basis
    */
    if (a>=MSDzero_tol){
      if (verbose>0){
@@ -4717,8 +4717,8 @@ int IsLower(){
     MSDnonbasis(q)=MSDbasis(l);
     MSDbasis(l)=qv;
    }
-   
-  if (verbose>=0){ 
+
+  if (verbose>=0){
       printf("Simplex Algorithm did not Terminate in %d iterations\n",k);
   }
   return FAIL;
@@ -4727,6 +4727,3 @@ int IsLower(){
 
 
 /* end Dtypes.c */
-
-
-

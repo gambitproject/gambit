@@ -80,13 +80,13 @@ void TablePureStrategyProfileRep::SetStrategy(const GameStrategy &s)
 }
 
 GameOutcome TablePureStrategyProfileRep::GetOutcome() const
-{ 
-  return dynamic_cast<GameTableRep &>(*m_nfg).m_results[m_index]; 
+{
+  return dynamic_cast<GameTableRep &>(*m_nfg).m_results[m_index];
 }
 
 void TablePureStrategyProfileRep::SetOutcome(GameOutcome p_outcome)
 {
-  dynamic_cast<GameTableRep &>(*m_nfg).m_results[m_index] = p_outcome; 
+  dynamic_cast<GameTableRep &>(*m_nfg).m_results[m_index] = p_outcome;
 }
 
 Rational TablePureStrategyProfileRep::GetPayoff(int pl) const
@@ -290,8 +290,8 @@ int Product(const Array<int> &dim)
 
 } // end anonymous namespace
 
-  
-GameTableRep::GameTableRep(const Array<int> &dim, 
+
+GameTableRep::GameTableRep(const Array<int> &dim,
 			   bool p_sparseOutcomes /* = false */)
 {
   m_results = Array<GameOutcomeRep *>(Product(dim));
@@ -344,7 +344,7 @@ bool GameTableRep::IsConstSum() const
     for (int pl = 1; pl <= m_players.Length(); pl++) {
       newsum += (*iter)->GetPayoff(pl);
     }
-    
+
     if (newsum != sum) {
       return false;
     }
@@ -362,7 +362,7 @@ namespace {
 std::string EscapeQuotes(const std::string &s)
 {
   std::string ret;
-  
+
   for (unsigned int i = 0; i < s.length(); i++)  {
     if (s[i] == '"')   ret += '\\';
     ret += s[i];
@@ -381,9 +381,9 @@ std::string EscapeQuotes(const std::string &s)
 /// the entries of the N-dimensional payoff table are written as
 /// indexes into the list of outcomes, rather than the payoffs
 /// directly.  This preserves the outcome structure of the game.
-///  
+///
 void GameTableRep::WriteNfgFile(std::ostream &p_file) const
-{ 
+{
   p_file << "NFG 1 R";
   p_file << " \"" << EscapeQuotes(GetTitle()) << "\" { ";
 
@@ -391,7 +391,7 @@ void GameTableRep::WriteNfgFile(std::ostream &p_file) const
     p_file << '"' << EscapeQuotes(GetPlayer(i)->GetLabel()) << "\" ";
 
   p_file << "}\n\n{ ";
-  
+
   for (int i = 1; i <= NumPlayers(); i++)   {
     GamePlayerRep *player = GetPlayer(i);
     p_file << "{ ";
@@ -399,7 +399,7 @@ void GameTableRep::WriteNfgFile(std::ostream &p_file) const
       p_file << '"' << EscapeQuotes(player->GetStrategy(j)->GetLabel()) << "\" ";
     p_file << "}\n";
   }
-  
+
   p_file << "}\n";
 
   p_file << "\"" << EscapeQuotes(m_comment) << "\"\n\n";
@@ -422,7 +422,7 @@ void GameTableRep::WriteNfgFile(std::ostream &p_file) const
     }
   }
   p_file << "}\n";
-  
+
   for (int cont = 1; cont <= ncont; cont++)  {
     if (m_results[cont] != 0) {
       p_file << m_results[cont]->m_number << ' ';

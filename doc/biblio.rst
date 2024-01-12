@@ -13,7 +13,7 @@ Articles on computation of Nash equilibria
    Management Science , 17, 1971.
 
 .. [GovWil03] Govindan, Srihari and Robert Wilson. (2003)
-   “A Global Newton Method to Compute Nash Equilibria.” 
+   “A Global Newton Method to Compute Nash Equilibria.”
    Journal of Economic Theory 110(1): 65-86.
 
 .. [GovWil04] Govindan, Srihari and Robert Wilson. (2004)
@@ -58,7 +58,7 @@ Articles on computation of Nash equilibria
    logistic quantal response equilibrium correspondence", 243-263, Games
    and Economic Behavior, 51, 2005.
 
-.. [Tur10] Theodore L. Turocy, "Using Quantal Response to Compute 
+.. [Tur10] Theodore L. Turocy, "Using Quantal Response to Compute
    Nash and Sequential Equilibria." Economic Theory 42(1): 255-269, 2010.
 
 .. [VTH87] G. van der Laan, A. J. J. Talman, and L. van Der Heyden,
@@ -120,4 +120,3 @@ Textbooks and general reference
 
 .. [Mye91] Roger Myerson, 1991, Game Theory : Analysis of Conflict ,
    Harvard University Press.
-

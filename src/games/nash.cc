@@ -43,7 +43,7 @@ MixedStrategyDetailRenderer<T>::Render(const MixedStrategyProfile<T> &p_profile,
 {
   for (auto player : p_profile.GetGame()->GetPlayers()) {
     m_stream << "Strategy profile for player " << player->GetNumber() << ":\n";
-    
+
     m_stream << "Strategy   Prob          Value\n";
     m_stream << "--------   -----------   -----------\n";
 
@@ -82,7 +82,7 @@ BehavStrategyDetailRenderer<T>::Render(const MixedBehaviorProfile<T> &p_profile,
 {
   for (auto player : p_profile.GetGame()->GetPlayers()) {
     m_stream << "Behavior profile for player " << player->GetNumber() << ":\n";
-    
+
     m_stream << "Infoset    Action     Prob          Value\n";
     m_stream << "-------    -------    -----------   -----------\n";
 
@@ -105,12 +105,12 @@ BehavStrategyDetailRenderer<T>::Render(const MixedBehaviorProfile<T> &p_profile,
 	  m_stream << std::setw(7) << action->GetNumber() << "   ";
 	}
 	m_stream << std::setw(11);
-	m_stream << lexical_cast<std::string>(p_profile(player->GetNumber(), 
-							iset, act), 
+	m_stream << lexical_cast<std::string>(p_profile(player->GetNumber(),
+							iset, act),
 					      m_numDecimals);
 	m_stream << "   ";
 	m_stream << std::setw(11);
-	m_stream << lexical_cast<std::string>(p_profile.GetPayoff(infoset->GetAction(act)), 
+	m_stream << lexical_cast<std::string>(p_profile.GetPayoff(infoset->GetAction(act)),
 					      m_numDecimals);
 	m_stream << std::endl;
       }
@@ -122,7 +122,7 @@ BehavStrategyDetailRenderer<T>::Render(const MixedBehaviorProfile<T> &p_profile,
 
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       GameInfoset infoset = player->GetInfoset(iset);
-      
+
       for (int n = 1; n <= infoset->NumMembers(); n++) {
 	GameNode node = infoset->GetMember(n);
 	if (!infoset->GetLabel().empty()) {
@@ -138,11 +138,11 @@ BehavStrategyDetailRenderer<T>::Render(const MixedBehaviorProfile<T> &p_profile,
 	  m_stream << std::setw(7) << node->GetNumber() << "   ";
 	}
 	m_stream << std::setw(11);
-	m_stream << lexical_cast<std::string>(p_profile.GetBeliefProb(infoset->GetMember(n)), 
+	m_stream << lexical_cast<std::string>(p_profile.GetBeliefProb(infoset->GetMember(n)),
 					     m_numDecimals);
 	m_stream << "   ";
 	m_stream << std::setw(11);
-	m_stream << lexical_cast<std::string>(p_profile.GetRealizProb(infoset->GetMember(n)), 
+	m_stream << lexical_cast<std::string>(p_profile.GetRealizProb(infoset->GetMember(n)),
 					      m_numDecimals);
 	m_stream << std::endl;
       }
@@ -201,7 +201,7 @@ BehavViaStrategySolver<T>::BehavViaStrategySolver(std::shared_ptr<StrategySolver
   : BehavSolver<T>(p_onEquilibrium), m_solver(p_solver)
 { }
 
-template <class T> List<MixedBehaviorProfile<T> > 
+template <class T> List<MixedBehaviorProfile<T> >
 BehavViaStrategySolver<T>::Solve(const Game &p_game) const
 {
   List<MixedStrategyProfile<T> > output = m_solver->Solve(p_game);
@@ -219,21 +219,21 @@ SubgameBehavSolver<T>::SubgameBehavSolver(std::shared_ptr<BehavSolver<T> > p_sol
   : BehavSolver<T>(p_onEquilibrium), m_solver(p_solver)
 { }
 
-// A nested anonymous namespace to privatize these functions 
+// A nested anonymous namespace to privatize these functions
 
 namespace {
 
 ///
 /// Returns a list of the root nodes of all the immediate proper subgames
 /// in the subtree rooted at 'p_node'.
-/// 
+///
 void ChildSubgames(const GameNode &p_node, List<GameNode> &p_list)
 {
   if (p_node->IsSubgameRoot()) {
     p_list.push_back(p_node);
   }
   else {
-    for (int i = 1; i <= p_node->NumChildren(); 
+    for (int i = 1; i <= p_node->NumChildren();
 	 ChildSubgames(p_node->GetChild(i++), p_list));
   }
 }
@@ -267,15 +267,15 @@ void SubgameBehavSolver<T>::SolveSubgames(const Game &p_game,
   List<DVector<T> > thissolns;
   thissolns.push_back(p_templateSolution);
   ((Vector<T> &) thissolns[1]).operator=(T(0));
-  
+
   List<GameNode> subroots;
   for (int i = 1; i <= n->NumChildren(); i++) {
     ChildSubgames(n->GetChild(i), subroots);
   }
-  
+
   List<Array<GameOutcome> > subrootvalues;
   subrootvalues.push_back(Array<GameOutcome>(subroots.Length()));
-  
+
   for (int i = 1; i <= subroots.Length(); i++)  {
     //printf("Looking at subgame %d of %d\n", i, subroots.Length());
     List<DVector<T> > subsolns;
@@ -283,7 +283,7 @@ void SubgameBehavSolver<T>::SolveSubgames(const Game &p_game,
 
     SolveSubgames(p_game, p_templateSolution,
                   subroots[i], subsolns, subvalues);
-    
+
     if (subsolns.empty())  {
       solns = List<DVector<T> >();
       return;
@@ -305,18 +305,18 @@ void SubgameBehavSolver<T>::SolveSubgames(const Game &p_game,
         newsubrootvalues[newsubrootvalues.Length()][i] = subvalues[subsoln];
       }
     }
-    
+
     thissolns = newsolns;
     subrootvalues = newsubrootvalues;
     //printf("Finished solving subgame %d\n", i);
   }
-  
+
   for (int soln = 1; soln <= thissolns.Length(); soln++)   {
     //printf("Analyzing scenario %d of %d\n", soln, thissolns.Length());
     for (int i = 1; i <= subroots.Length(); i++) {
       subroots[i]->SetOutcome(subrootvalues[soln][i]);
     }
-    
+
     Game subgame = n->CopySubgame();
     // this prevents double-counting of outcomes at roots of subgames
     // by convention, we will just put the payoffs in the parent subgame
@@ -324,16 +324,16 @@ void SubgameBehavSolver<T>::SolveSubgames(const Game &p_game,
 
     BehaviorSupportProfile subsupport(subgame);
     List<MixedBehaviorProfile<T> > sol = m_solver->Solve(p_game);
-    
+
     if (sol.empty())  {
       solns = List<DVector<T> >();
       return;
     }
-    
+
     // Put behavior profile in "total" solution here...
     for (int solno = 1; solno <= sol.Length(); solno++)  {
       solns.push_back(thissolns[soln]);
-      
+
       for (int pl = 1; pl <= subgame->NumPlayers(); pl++)  {
 	GamePlayer subplayer = subgame->GetPlayer(pl);
 	GamePlayer player = p_game->GetPlayer(pl);
@@ -346,14 +346,14 @@ void SubgameBehavSolver<T>::SolveSubgames(const Game &p_game,
 	      int id = atoi(subinfoset->GetLabel().c_str());
 	      for (int act = 1; act <= subsupport.NumActions(pl, iset); act++) {
 		int actno = subsupport.GetAction(pl, iset, act)->GetNumber();
-		solns[solns.Length()](pl, id, actno) = sol[solno](pl, iset, act);	  
+		solns[solns.Length()](pl, id, actno) = sol[solno](pl, iset, act);
 	      }
 	      break;
 	    }
 	  }
 	}
       }
-      
+
       Vector<T> subval(subgame->NumPlayers());
       GameOutcome outcome = n->GetOutcome();
       for (int pl = 1; pl <= subgame->NumPlayers(); pl++)  {
@@ -367,7 +367,7 @@ void SubgameBehavSolver<T>::SolveSubgames(const Game &p_game,
       for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
         ov->SetPayoff(pl, Number(static_cast<Rational>(subval[pl])));
       }
- 
+
       values.push_back(ov);
     }
     //printf("Finished with scenario %d of %d; total solutions so far = %d\n",
@@ -378,7 +378,7 @@ void SubgameBehavSolver<T>::SolveSubgames(const Game &p_game,
 }
 
 template <class T>
-List<MixedBehaviorProfile<T> > 
+List<MixedBehaviorProfile<T> >
 SubgameBehavSolver<T>::Solve(const Game &p_game) const
 {
   Game efg = p_game->GetRoot()->CopySubgame();
@@ -420,5 +420,5 @@ template class SubgameBehavSolver<double>;
 template class SubgameBehavSolver<Rational>;
 
 } // end namespace Gambit::Nash
-  
+
 } // end namespace Gambit

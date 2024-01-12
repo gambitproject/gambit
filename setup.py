@@ -22,29 +22,30 @@
 
 import glob
 import platform
-import setuptools
+
 import Cython.Build
+import setuptools
 
 # By compiling this separately as a C library, we avoid problems
 # with passing C++-specific flags when building the extension
-lrslib = ('lrslib', {'sources': glob.glob("src/solvers/lrs/*.c")})
+lrslib = ("lrslib", {"sources": glob.glob("src/solvers/lrs/*.c")})
 
 cppgambit = (
-    'cppgambit',
+    "cppgambit",
     {
-        'sources': (
+        "sources": (
             glob.glob("src/core/*.cc") +
             glob.glob("src/games/*.cc") +
             glob.glob("src/games/agg/*.cc") +
             [fn for fn in glob.glob("src/solvers/*/*.cc") if "enumpoly" not in fn]
          ),
-         'include_dirs': ["src"],
-         'cflags': (
+         "include_dirs": ["src"],
+         "cflags": (
              ["-std=c++11"] if platform.system() == "Darwin" else []
          )
     }
 )
-    
+
 
 libgambit = setuptools.Extension(
     "pygambit.gambit",
@@ -60,7 +61,7 @@ libgambit = setuptools.Extension(
 def readme():
     with open("src/README.rst") as f:
         return f.read()
-    
+
 
 setuptools.setup(
     name="pygambit",
@@ -85,21 +86,21 @@ setuptools.setup(
     author_email="ted.turocy@gmail.com",
     url="http://www.gambit-project.org",
     project_urls={
-        'Documentation': 'https://gambitproject.readthedocs.io/',
-        'Source': 'https://github.com/gambitproject/gambit',
-        'Tracker': 'https://github.com/gambitproject/gambit/issues',
+        "Documentation": "https://gambitproject.readthedocs.io/",
+        "Source": "https://github.com/gambitproject/gambit",
+        "Tracker": "https://github.com/gambitproject/gambit/issues",
     },
     python_requires=">=3.8",
     install_requires=[
-        'lxml',  # used for reading/writing GTE files
-        'numpy',
-        'scipy',
-        'deprecated',
+        "lxml",  # used for reading/writing GTE files
+        "numpy",
+        "scipy",
+        "deprecated",
     ],
     libraries=[cppgambit, lrslib],
-    package_dir={'': 'src'},
-    packages=['pygambit'],
+    package_dir={"": "src"},
+    packages=["pygambit"],
     ext_modules=Cython.Build.cythonize(libgambit,
                                        language_level="3str",
-                                       compiler_directives={'binding': True})
+                                       compiler_directives={"binding": True})
 )

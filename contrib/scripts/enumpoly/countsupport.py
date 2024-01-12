@@ -13,7 +13,7 @@ if __name__ == '__main__':
     if argv[1] == '-e':
         solve = False
         argv = [ argv[0] ] + argv[2:]
-    
+
     game = randomnfg.CreateNfg([int(x) for x in argv[2:]])
     strategies = [ strategy
                    for player in game.Players()
@@ -38,4 +38,3 @@ if __name__ == '__main__':
                 logger.nash,
                 logger.nonnash))
         sys.stdout.flush()
-

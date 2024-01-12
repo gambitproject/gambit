@@ -45,7 +45,7 @@ protected:
   public:
     T m_data;
     Node *m_prev, *m_next;
-    
+
     // CONSTRUCTOR
     Node(const T &p_data, Node *p_prev, Node *p_next);
   };
@@ -92,9 +92,9 @@ public:
   List();
   List(const List<T> &);
   virtual ~List();
-  
+
   List<T> &operator=(const List<T> &);
-  
+
   bool operator==(const List<T> &b) const;
   bool operator!=(const List<T> &b) const;
 
@@ -157,7 +157,7 @@ public:
 //                 Node: Member function implementations
 //--------------------------------------------------------------------------
 
-template <class T> 
+template <class T>
 List<T>::Node::Node(const T &p_data,
 		    typename List<T>::Node *p_prev, typename List<T>::Node *p_next)
   : m_data(p_data), m_prev(p_prev), m_next(p_next)
@@ -167,19 +167,19 @@ List<T>::Node::Node(const T &p_data,
 //                 List<T>: Member function implementations
 //--------------------------------------------------------------------------
 
-template <class T> List<T>::List() 
+template <class T> List<T>::List()
   : m_length(0), m_head(0), m_tail(0), m_currentIndex(0), m_currentNode(0)
 { }
 
 template <class T> List<T>::List(const List<T> &b)
   : m_length(b.m_length)
 {
-  if (m_length)  {  
+  if (m_length)  {
     Node *n = b.m_head;
     m_head = new Node(n->m_data, 0, 0);
     n = n->m_next;
     m_tail = m_head;
-    while (n)  { 
+    while (n)  {
       m_tail->m_next = new Node(n->m_data, m_tail, 0);
       n = n->m_next;
       m_tail = m_tail->m_next;
@@ -207,7 +207,7 @@ template <class T> List<T>::~List()
 template <class T> int List<T>::InsertAt(const T &t, int num)
 {
   if (num < 1 || num > m_length + 1)   throw IndexException();
-  
+
   if (!m_length)  {
     m_head = m_tail = new Node(t, 0, 0);
     m_length = 1;
@@ -218,7 +218,7 @@ template <class T> int List<T>::InsertAt(const T &t, int num)
 
   Node *n;
   int i;
-  
+
   if( num <= 1 )  {
     n = new Node(t, 0, m_head);
     m_head->m_prev = n;
@@ -332,7 +332,7 @@ template <class T> List<T> List<T>::operator+(const List<T> &b) const
 template <class T> List<T> &List<T>::operator+=(const List<T> &b)
 {
   Node *n = b.m_head;
-  
+
   while (n)  {
     push_back(n->m_data);
     n = n->m_next;
@@ -414,4 +414,3 @@ template <class T> void List<T>::clear()
 }
 
 #endif // LIBGAMBIT_LIST_H
-

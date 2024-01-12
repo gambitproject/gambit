@@ -31,11 +31,11 @@ class gbtStaticTextButton : public wxStaticText {
 private:
   // Event handlers
   void OnLeftClick(wxMouseEvent &);
-  
+
 public:
   gbtStaticTextButton(wxWindow *p_parent, wxWindowID p_id,
 		      const wxString &,
-		      const wxPoint & = wxDefaultPosition, 
+		      const wxPoint & = wxDefaultPosition,
 		      const wxSize & = wxDefaultSize,
 		      long = 0);
 
@@ -78,6 +78,6 @@ public:
   bool SetBackgroundColour(const wxColour &) override;
   bool SetFont(const wxFont &) override;
   //@}
-}; 
+};
 
 #endif // EDITTEXT_H

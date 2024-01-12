@@ -27,7 +27,7 @@
 #include "gambit.h"
 
 /*
-   The classes in this file are prior to the notion of a 
+   The classes in this file are prior to the notion of a
 multivariate polynomial.  First of all, one needs a space which the
 polynomials refer to.  This is given by the notion of a gSpace.
 A polynomial is a sum of monomials, where each monomial is a
@@ -46,13 +46,13 @@ built on top of a pointer to a function for computing an order.
 // gSpace declaration
 // *************************
 
-struct Variable  { 
+struct Variable  {
   std::string Name;
   int number;
 };
 
 class gSpace {
-private:  
+private:
   Gambit::Array < Variable * > Variables;
 
 public:
@@ -66,7 +66,7 @@ public:
   Variable*       operator[](int)              const;
   bool            operator==(const gSpace & rhs) const;
   bool            operator!=(const gSpace & rhs) const;
-  
+
   // information
   int             Dmnsn()              const;
   Variable*       VariableWithNumber(int)  const;
@@ -80,7 +80,7 @@ public:
 
 
 // ***********************
-// class exp_vect 
+// class exp_vect
 // ***********************
 
 /*
@@ -154,15 +154,15 @@ public:
    A term order is a total order of the set of exponent vectors
 associated with a particular variable list, that has the properties:
 
-   a) 1 < alpha for all alpha \ne 1; 
+   a) 1 < alpha for all alpha \ne 1;
    b) if alpha < beta, then alpha + gamma < beta + gamma for all gamma >= 0.
 
    In our implementation we take the view that the order itself is a
 variable of an object of the class, and implement this in terms of
-pointers to functions. 
+pointers to functions.
 */
 
-// THE FOLLOWING FUNCTIONS SHOULD BE VIEWED AS PRIVATE MEMBERS OF 
+// THE FOLLOWING FUNCTIONS SHOULD BE VIEWED AS PRIVATE MEMBERS OF
 // class term_order  I WAS BAFFLED AS TO HOW TO HAVE A MEMBER THAT
 // IS A POINTER-TO-OTHER-MEMBER-FUNCTION
 typedef  bool (*ORD_PTR)(const exp_vect &, const exp_vect &);

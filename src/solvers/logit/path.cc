@@ -34,7 +34,7 @@ namespace Gambit {
 //----------------------------------------------------------------------------
 
 namespace {
-  
+
 inline double sqr(double x) { return x*x; }
 
 void Givens(Matrix<double> &b, Matrix<double> &q,
@@ -112,7 +112,7 @@ void NewtonStep(Matrix<double> &q, Matrix<double> &b,
 //             PathTracer: Implementation of path-following engine
 //----------------------------------------------------------------------------
 
-void 
+void
 PathTracer::TracePath(const EquationSystem &p_system,
 		      Vector<double> &x,
 		      double p_maxLambda, double &p_omega,
@@ -127,7 +127,7 @@ PathTracer::TracePath(const EquationSystem &p_system,
   double h = m_hStart;             // initial stepsize
   const double c_hmin = 1.0e-8;    // minimal stepsize
   const int c_maxIter = 100;       // maximum iterations in corrector
-  
+
   bool newton = false;             // using Newton steplength (for zero-finding)
 
   Vector<double> u(x.Length()), restart(x.Length());
@@ -141,7 +141,7 @@ PathTracer::TracePath(const EquationSystem &p_system,
   p_system.GetJacobian(x, b);
   QRDecomp(b, q);
   q.GetRow(q.NumRows(), t);
-  
+
   while (x[x.Length()] >= 0.0 && x[x.Length()] < p_maxLambda) {
     bool accept = true;
 
@@ -168,13 +168,13 @@ PathTracer::TracePath(const EquationSystem &p_system,
       double dist;
 
       p_system.GetValue(u, y);
-      NewtonStep(q, b, u, y, dist); 
+      NewtonStep(q, b, u, y, dist);
 
       if (dist >= c_maxDist) {
 	accept = false;
 	break;
       }
-      
+
       decel = std::max(decel, std::sqrt(dist / c_maxDist) * m_maxDecel);
       if (iter >= 2) {
 	double contr = dist / (disto + c_tol * c_eta);
@@ -221,7 +221,7 @@ PathTracer::TracePath(const EquationSystem &p_system,
     }
 
     // Obtain the tangent at the next step
-    q.GetRow(q.NumRows(), newT); 
+    q.GetRow(q.NumRows(), newT);
 
     // If we are at a bifurcation point, the orientation of the tangent
     // will flip.  This will confuse many criterion functions, especially

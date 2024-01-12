@@ -32,12 +32,11 @@
 class gbtExceptionDialog : public wxMessageDialog  {
 public:
   gbtExceptionDialog(wxWindow *p_parent, const std::string &p_message)
-    : wxMessageDialog(p_parent, 
-		      wxString(p_message.c_str(), *wxConvCurrent), 
+    : wxMessageDialog(p_parent,
+		      wxString(p_message.c_str(), *wxConvCurrent),
 		      wxT("Internal exception in Gambit"),
-		      wxICON_ERROR | wxCANCEL) 
+		      wxICON_ERROR | wxCANCEL)
     { }
 };
 
 #endif  // DLEXCEPT_H
-

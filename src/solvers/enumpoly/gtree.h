@@ -36,8 +36,8 @@ template <class T> class gTreeNode   {
 
   public:
     // Constructor
-    gTreeNode(const T& _data, 
-	      gTreeNode<T>* _parent, 
+    gTreeNode(const T& _data,
+	      gTreeNode<T>* _parent,
 	      gTreeNode<T>* _prev,
 	      gTreeNode<T>* _next,
 	      gTreeNode<T>* _eldest,
@@ -63,12 +63,12 @@ template <class T> class gTreeNode   {
 
 template <class T> class gTree  {
   protected:
-    gTreeNode<T>* root; 
+    gTreeNode<T>* root;
 
     gTreeNode<T>* RecursiveFind(const T&, gTreeNode<T>*) const;
     void RecursiveCopy(gTreeNode<T>*, const gTreeNode<T>*);
     void RecursiveFlush(const gTreeNode<T>*);
-    void Flush(); 
+    void Flush();
 
   public:
     gTree();
@@ -89,7 +89,7 @@ template <class T> class gTree  {
     gTreeNode<T>*        RootNode()                                 const;
     gTreeNode<T>*        Find(const T&)                             const;
     bool                 Contains(const T& t)                       const;
-    bool                 SubtreesAreIsomorphic(const gTreeNode<T>*, 
+    bool                 SubtreesAreIsomorphic(const gTreeNode<T>*,
 					       const gTreeNode<T>*) const;
 
 };

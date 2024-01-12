@@ -27,7 +27,7 @@ class QRE:
     def __init__(self, lam, profile):
         self.lam = lam
         self.profile = profile
-        
+
     def ExpectedChoice(self):
         """
         If the game's strategies have labels which are numeric, this
@@ -44,7 +44,7 @@ def ComputeQRE(game):
         if "Bifurcation" in line: continue
 
         entries = line.split(",")
-        
+
         soln = game.NewMixedStrategyDouble()
         for (i, p) in enumerate(entries[1:]):
             soln[i+1] = float(p)
@@ -63,6 +63,5 @@ def PlotAverages(profiles):
     p = pylab.plot([ qre.lam/(1.0+qre.lam) for qre in profiles ],
                    [ qre.ExpectedChoice()[0] for qre in profiles ])
     ax.xaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda x, pos: f"{x / (1.0 - x):.2f}"))
-    
+
     pylab.show()
-    

@@ -11,7 +11,7 @@ the Gambit distribution.  It differs in practice in two (useful) ways:
 (1) The support enumeration method is slightly different (although it
 appears to produce identical output, just in a different order).
 The correctness of the implementation here has been established
-formally, in that it will (a) visit any support at most once, and 
+formally, in that it will (a) visit any support at most once, and
 (b) visit any support that may harbor a Nash equilibrium.  It is somewhat
 more efficient than the implementation in gambit-enumpoly, although
 the support enumeration process is typically a small portion of the
@@ -99,7 +99,7 @@ output:
     "noneqm".  In addition, to these lines is appended the Lyapunov value
     of the profile.  This is a nonnegative value which is zero exactly
     at Nash equilibria.  Small values of the Lyapunov value might indicate
-    that the profile is in fact an approximate Nash equilibrium, i.e., 
+    that the profile is in fact an approximate Nash equilibrium, i.e.,
     there is in fact an equilibrium nearby, but the profile fails the
     equilibrium test for numerical reasons.  This value can thus be used
     as a diagnostic for setting the -t and -n parameters (above) appropriately.
@@ -109,5 +109,3 @@ Games: Finding All Nash Equilibria with Gambit and PHCpack," which is
 available at
 
 http://econweb.tamu.edu/turocy/papers/enumpoly.html
-
-

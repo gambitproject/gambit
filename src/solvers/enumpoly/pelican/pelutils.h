@@ -55,10 +55,10 @@ dependencies on the rest of the code.
 **    copyright (c) 1995  Birk Huber
 */
 
-/* 
+/*
 **    The types wich can be stored in the left and right fields
 **    of a node and the integers that represent them:
-** 
+**
 ** Note type names should all consist of 3 or 4 CAPITOL letters
 **      These are not nescessarily constants the interpreter should
 **      know about but constants wich the diferent modules may need
@@ -106,18 +106,18 @@ dependencies on the rest of the code.
 **    copyright (c) 1995  Birk Huber
 */
 
-/* 
+/*
 ** elements of type node are pointers to an s-expression structure
 ** whose elements are a left (right)value and a left (right) type.
 ** The type is an integer, refering to the constants in XXX.h,
 ** and the left will be a value of the associated type,(stored as
-** a char pointer). 
+** a char pointer).
 **
 */
 
 #define RIGHT 10
 #define LEFT 20
-typedef struct node_t *node;              
+typedef struct node_t *node;
 
 typedef struct local_t {
         struct local_t *next;
@@ -132,7 +132,7 @@ struct node_t {
         int ival;
         double dval;
     } L, R;
-};     
+};
 #define Node_LT(n) ((n->LT))
 #define Node_L(n) ((n->L))
 #define Node_RT(n) ((n->RT))
@@ -149,26 +149,26 @@ int    node_init_store();   /*reserves space for the node stack */
 void    node_free_store();   /*frees node stack*/
 node node_new();          /*allocates a node from stack*/
 
-char  *mem_strdup(char *); /*call strdup, with bookkeeping*/ 
-void  *mem_malloc(int); /* call malloc,keep running total of calls*/ 
+char  *mem_strdup(char *); /*call strdup, with bookkeeping*/
+void  *mem_malloc(int); /* call malloc,keep running total of calls*/
 void   mem_free(void *); /* call free, keep running total */
 
 /*
-** node_push_local and node_pop_local maintain the 
+** node_push_local and node_pop_local maintain the
 ** the garbage collector's list of starting points.
 ** any function which (indirectly) calls new_node must
-** protect any local variables it uses, by putting their 
+** protect any local variables it uses, by putting their
 ** addresses on the list with node_push_local(&ptr) and
 ** must have a cooresponding call to node_pop_local before
-** returning 
+** returning
 */
-void   node_push_local(local_v, node *);                             
-void   node_pop_local();         
+void   node_push_local(local_v, node *);
+void   node_pop_local();
 
 
 
-/* 
-** access functions 
+/*
+** access functions
 */
 node node_set_ptr(node N,void *v, int tp, int side);
 node node_set_int(node N,int v, int tp, int side);
@@ -211,7 +211,7 @@ void warning(const char *);
 #define USE_HOMPACK 1
 #define USE_PNEWTON 2
 
-#ifndef IN_GLOBALS_C 
+#ifndef IN_GLOBALS_C
   extern FILE *Pel_Err;
   extern FILE *Pel_Out;
   extern FILE *Pel_Log;
@@ -237,7 +237,7 @@ double rand_double(int low, int high);
 /**************************************************************************/
 
 /*
-** Define a list type for safe protection from garbage collection. 
+** Define a list type for safe protection from garbage collection.
 **
 ** L is assumed to be a safe local node variable for the procedure
 ** main(); After initialization (with Dlist_new())
@@ -246,10 +246,10 @@ double rand_double(int low, int high);
 ** Dlist_add(L,data) --- crates an entree to hold the node data in
 **                       L, inserted at the front of the list, and
 **                       returns the pointer to the list entry.
-** Dlist_rem(L,node) --- takes a pointer to a list entry unlinks 
-**                       it from the list L and returns the 
+** Dlist_rem(L,node) --- takes a pointer to a list entry unlinks
+**                       it from the list L and returns the
 **                       original data node.
-**  Dlist_data(node)  -- takes a list entry and returns the 
+**  Dlist_data(node)  -- takes a list entry and returns the
 **                       original data node.
 **
 **
@@ -280,15 +280,15 @@ double rand_double(int low, int high);
 void Dlist_empty(node L);
 
 /*
-** invariants: Dnode_next(Dnode_prev(pos)) ==pos 
+** invariants: Dnode_next(Dnode_prev(pos)) ==pos
 **             for all pointers to Dlist node entrees.
-**             (NOTE: Dnode_next(L) := Dlist_first(L), 
-**                    where L is list header) 
+**             (NOTE: Dnode_next(L) := Dlist_first(L),
+**                    where L is list header)
 **
 **             Dnode_prev(Dnode_next(pos))=pos
-**             for all non-zero pointers to Dlist node entrees 
+**             for all non-zero pointers to Dlist node entrees
 **             and also for list header
-**             
+**
 */
 
 node Dlist_add(node L, node data);
@@ -302,8 +302,8 @@ node Dlist_data(node pos);
 /********************** declarations from Dmatrix.h ***********************/
 /**************************************************************************/
 
- typedef struct Dmatrix_t *Dmatrix;           
- typedef struct Dmatrix_t *Dvector;           
+ typedef struct Dmatrix_t *Dmatrix;
+ typedef struct Dmatrix_t *Dvector;
 
  #ifdef DMATRIX_FAST
    struct Dmatrix_t {
@@ -313,34 +313,34 @@ node Dlist_data(node pos);
        double *coords;
    };
    #define DVstore(V)  (((V)->store))
-   #define DVlength(V) (((V)->ncols)) 
-   #define DVref1(V,j) (((V)->coords)[(j)-1]) 
+   #define DVlength(V) (((V)->ncols))
+   #define DVref1(V,j) (((V)->coords)[(j)-1])
    #define DVref0(V,j) (((V)->coords)[j])
    #define DVref(V,i)  DVref1(V,i)
    #define DMstore(V)  (((V)->store))
    #define DMMrows(V)  (((V)->store/(V)->ncols))
-   #define DMrows(V)  ((V)->nrows) 
-   #define DMcols(V) ((V)->ncols)  
-   #define DMelts(V) ((V)->coords)  
-   #define DMref1(V,i,j) (((V)->coords)[((i)-1)*DMcols(V)+(j)-1]) 
+   #define DMrows(V)  ((V)->nrows)
+   #define DMcols(V) ((V)->ncols)
+   #define DMelts(V) ((V)->coords)
+   #define DMref1(V,i,j) (((V)->coords)[((i)-1)*DMcols(V)+(j)-1])
    #define DMref0(V,i,j) (((V)->coords)[(i)*DMcols(V)+(j)])
    #define DMref(V,i,j)  DMref1((V),i,j)
- #else 
+ #else
     /*
     ** matrix access macroes
     */
    double DMstore(Dmatrix M);    /* maximum #elts available*/
    double DMMrows(Dmatrix M);    /* maximum #rows          */
-   double DMrows(Dmatrix M);     /* number rows stored */   
-   double DMcols(Dmatrix M);     /* number cols stored */   
+   double DMrows(Dmatrix M);     /* number rows stored */
+   double DMcols(Dmatrix M);     /* number cols stored */
    double *DMref_P(Dmatrix M,int i,int j);  /* acces starting at 1*/
    double *DMelts(Dmatrix M);        /* acces starting at 1*/
-   #define DMref0(M,i,j) (*DMref_P(M,i,j))   
-   #define DMref1(M,i,j) (*DMref_P(M,(i)-1,(j)-1))   
+   #define DMref0(M,i,j) (*DMref_P(M,i,j))
+   #define DMref1(M,i,j) (*DMref_P(M,(i)-1,(j)-1))
    #define DMref(M,i,j)    DMref1(M,i,j)
-   
-   /* 
-   ** Vectors are implemented as 1xM matrices, and acces is through 
+
+   /*
+   ** Vectors are implemented as 1xM matrices, and acces is through
    ** usual matrix functions via macroes
    */
    #define DVstore(V)  (DMstore(V)) /* maximum #elts available */
@@ -349,7 +349,7 @@ node Dlist_data(node pos);
    #define DVref0(V,i)  (DMref0(V,0,i))   /* acces ith elt (starting at 0)*/
    #define DVref(V,i)   (DVref1(V,i))
  #endif
- 
+
 
 /*
 **  Constructor/Destructors/Display
@@ -369,8 +369,8 @@ Dmatrix Dmatrix_fprint(FILE *fout,Dmatrix M);
 */
 Dmatrix Dmatrix_add(Dmatrix M1, Dmatrix M2, Dmatrix *M3);
 #define add_Dvector(V1,V2,V3) add_Dmatrix(V1,V2,V3)
-Dmatrix Dmatrix_mull(Dmatrix M1, Dmatrix M2, Dmatrix *M3);  
-Dmatrix Dmatrix_dot(Dmatrix M1, Dmatrix M2, Dmatrix M3);  
+Dmatrix Dmatrix_mull(Dmatrix M1, Dmatrix M2, Dmatrix *M3);
+Dmatrix Dmatrix_dot(Dmatrix M1, Dmatrix M2, Dmatrix M3);
 int Dvector_dot(Dmatrix M1, Dmatrix M2);
 int equal_Dmatrix(Dmatrix M1,Dmatrix M2);
 void Dmatrix_GQR(Dmatrix,Dmatrix);
@@ -382,8 +382,8 @@ void Dmatrix_Solve(Dmatrix,Dmatrix,int);
 /********************** declarations from Imatrix.h ***********************/
 /**************************************************************************/
 
-typedef struct Imatrix_t *Imatrix;           
-typedef struct Imatrix_t *Ivector;           
+typedef struct Imatrix_t *Imatrix;
+typedef struct Imatrix_t *Ivector;
 
 #define IMATRIX_FAST 1
 #ifdef IMATRIX_FAST
@@ -394,16 +394,16 @@ typedef struct Imatrix_t *Ivector;
        int ncols;
        int *elts;
   };
-  #define IVstore(V)    (((V)->store)) 
-  #define IVlength(V)   (((V)->topc)) 
+  #define IVstore(V)    (((V)->store))
+  #define IVlength(V)   (((V)->topc))
   #define IVref1(V,i)   (&((V)->elts[i-1]))
   #define IVref0(V,i)   (&((V)->elts[i]))
   #define IVref(V,i)    IVref1(V,i)
-  #define IMstore(V)    (((V)->store))  
+  #define IMstore(V)    (((V)->store))
   #define IMMrows(V)    (((V)->store/(V)->ncols))
-  #define IMrows(V)     (((V)->topr))  
-  #define IMcols(V)     (((V)->topc)) 
-  #define IMNcols(V)    (((V)->ncols))      
+  #define IMrows(V)     (((V)->topr))
+  #define IMcols(V)     (((V)->topc))
+  #define IMNcols(V)    (((V)->ncols))
   #define IMref1(V,i,j) (&(((V))->elts[(i-1)*((V)->ncols)+j-1]))
   #define IMref0(V,i,j) (&((V)->elts[(i*(V)->ncols)+j]))
   #define IMref(V,i,j)  IMref1(V,i,j)
@@ -414,14 +414,14 @@ typedef struct Imatrix_t *Ivector;
   */
   int IMstore(Imatrix M);                        /* maximum #elts available*/
   int IMMrows(Imatrix M);                        /* maximum #rows          */
-  int IMrows(Imatrix M);                         /* number rows stored     */   
-  int IMcols(Imatrix M);                         /* number cols stored     */   
+  int IMrows(Imatrix M);                         /* number rows stored     */
+  int IMcols(Imatrix M);                         /* number cols stored     */
   int* IMref1(Imatrix M,int i,int j);            /* acces starting at 1    */
   #define IMref0(M,i,j) (IMref(M,(i+1),(j+1)))   /* acces starting at 0    */
   #define IMref(M,i,j)  (IMref1((M),i,j))        /* use Mref1 by default   */
 
-  /* 
-  ** Vectors are implemented as 1xM matrices, and acces is through 
+  /*
+  ** Vectors are implemented as 1xM matrices, and acces is through
   ** usual matrix functions via macroes
   */
   #define IVstore(V)  (IMstore(V)) /* maximum #elts available */
@@ -429,14 +429,14 @@ typedef struct Imatrix_t *Ivector;
   #define IVref1(V,i)  (IMref1(V,1,i))  /* acces ith elt (starting at 1)*/
   #define IVref0(V,i)  (IMref0(V,0,i))   /* acces ith elt (starting at 0)*/
   #define IVref(V,i)   (IVref1(V,i))
-#endif 
+#endif
 
  /*
  **  Constructor/Destructors/Display
  */
  Imatrix Imatrix_new(int r, int c);
  Imatrix Imatrix_resize(Imatrix M, int r, int d);
- Imatrix Imatrix_submat(Imatrix R, int r, int c); 
+ Imatrix Imatrix_submat(Imatrix R, int r, int c);
  void    Imatrix_free(Imatrix V);
  Imatrix Imatrix_fprint(FILE *fout, Imatrix M);
  #define Imatrix_print(M) (Imatrix_fprint(stdout,M))
@@ -450,8 +450,8 @@ typedef struct Imatrix_t *Ivector;
  */
   Imatrix Imatrix_add(int i1, Imatrix M1,int i2, Imatrix M2, Imatrix M3);
   #define add_Ivector(V1,V2,V3) add_Imatrix(V1,V2,V3)
-  Imatrix Imatrix_mul(Imatrix M1, Imatrix M2, Imatrix M3);  
-  Imatrix Imatrix_dot(Imatrix M1, Imatrix M2, Imatrix M3);  
+  Imatrix Imatrix_mul(Imatrix M1, Imatrix M2, Imatrix M3);
+  Imatrix Imatrix_dot(Imatrix M1, Imatrix M2, Imatrix M3);
   int Ivector_dot(Imatrix M1, Imatrix M2);
   int Imatrix_equal(Imatrix M1,Imatrix M2);
   int Imatrix_rref(Imatrix M,int *);
@@ -494,9 +494,9 @@ void xpl_fprint(FILE *fout,node L);
   #define pnt_dim(g)   ((IVlength((Imatrix)node_get_ptr(g,RIGHT))))
 
   /* I don't remember where these are used? */
-  #define LABLES_ONLY 1                               
-  #define COORDS_ONLY 2                                      
-  #define ALL 3                                                 
+  #define LABLES_ONLY 1
+  #define COORDS_ONLY 2
+  #define ALL 3
 
   node pnt_new(char *s,Imatrix m);
   void pnt_free(node n);
@@ -525,7 +525,7 @@ void xpl_fprint(FILE *fout,node L);
 /********************** declarations from Pcomplex.h **********************/
 /**************************************************************************/
 
-typedef struct FCOMPLEX {double r,i;} fcomplex; 
+typedef struct FCOMPLEX {double r,i;} fcomplex;
 
 #define Real(c) ((c).r)
 #define Imag(c) ((c).i)
@@ -559,28 +559,28 @@ struct Pring_tag {
   char *def;};
 
 typedef struct Pring_tag *Pring;
- 
+
 struct mono_tag {
         Pring R;
         int *exps;
         int def;
         int homog;
         fcomplex coef;
- 
-  
+
+
        struct mono_tag *next;
-      
-  
- 
-    int remaining;}; 
+
+
+
+    int remaining;};
 
 typedef struct mono_tag *monomial;
 typedef struct mono_tag *polynomial1;
- 
+
 void ring_set_var(Pring R, int n, char *lable);
-void ring_set_def(Pring R,  char *lable);      
+void ring_set_def(Pring R,  char *lable);
 char *ring_var(Pring R, int n);
-char *ring_def(Pring R);      
+char *ring_def(Pring R);
  int *poly_exp(monomial, int);
  int *poly_def(monomial);
  int *poly_homog(monomial);
@@ -591,9 +591,9 @@ char *ring_def(Pring R);
  fcomplex *poly_coef(monomial);
  monomial poly_next(monomial);
  Pring poly_ring(monomial);
- Pring makePR(int);   
+ Pring makePR(int);
  Pring free_Pring(Pring);
- polynomial1 makeP(Pring);  
+ polynomial1 makeP(Pring);
  polynomial1 freeP(polynomial1 p);  /* frees space allocated to a polynomial1*/
  polynomial1 copyP(polynomial1 p);
  polynomial1 copyM();
@@ -611,7 +611,7 @@ char *ring_def(Pring R);
  polynomial1 divMPP(polynomial1 mi, polynomial1 P1, polynomial1 P2);
  polynomial1 expIPP(int x, polynomial1 P, polynomial1 P3);
  polynomial1 unliftP(polynomial1 p);
- 
+
  polynomial1 Homogenize();
  polynomial1 Prog_Eq();
 monomial poly_set_next(monomial m,monomial m2);
@@ -677,21 +677,21 @@ node atom_new(char *val, int tp);
 /*********************** definitions from Dtypes.h ************************/
 /**************************************************************************/
 
-/* 
+/*
 ** Dtypes.h--- Definition of access to several types represented
 **             by Dvectors: (bundeled to make location of fields
 **             within vector transparent)
-**         
+**
 **        xpnt (=<hr,hi,x1r,x1i,.....,xnr,xni, t>)
-**             represents a point of CP^nxC, 
-**             where 
-**             xj=(xjr+I*xji) is the coordinate associated 
+**             represents a point of CP^nxC,
+**             where
+**             xj=(xjr+I*xji) is the coordinate associated
 **                          to the jth variable
-**             h=(hr+I*hi)  is the coordinate associated to the 
+**             h=(hr+I*hi)  is the coordinate associated to the
 **                          homog param
 **             t         is the deformation variable.
 **
-**        ptrans (=<cr,ci,c1r,c1i,.....,cnr,cni>)         
+**        ptrans (=<cr,ci,c1r,c1i,.....,cnr,cni>)
 **          represents a relation  h=c+c1x1+...+cnxn
 **          usually used to define a random affine chart
 **
@@ -700,7 +700,7 @@ node atom_new(char *val, int tp);
 typedef  Dmatrix xpnt;
 typedef  Dmatrix sclvect;
 
-/* 
+/*
 ** access macroes treating an xpntM as a complex matrix:
 **                      and an xpnt as a complex vector:
 */
@@ -767,14 +767,3 @@ int Rsimp(Dmatrix A, Dvector b, Dvector c,
       Dmatrix DtypesR, Dmatrix Q, Dvector t1, Dvector t2);
 
 #endif // PELUTILS
-
-
-
-
-
-
-
-
-
-
-

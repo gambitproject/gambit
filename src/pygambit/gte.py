@@ -25,6 +25,7 @@ File format interface with Game Theory Explorer
 """
 
 from fractions import Fraction
+
 from lxml import etree
 
 import pygambit
@@ -50,7 +51,7 @@ def read_game_subtree(game, node, xml_node):
             node.infoset.actions[i].label = xml_child.get("move")
         if xml_child.tag == "outcome":
             node.children[i].outcome = game.outcomes.add()
-            for (j, xml_payoff) in enumerate(xml_child.xpath("./payoff")):
+            for xml_payoff in xml_child.xpath("./payoff"):
                 node.children[i].outcome[int(xml_payoff.get("player"))-1] = (
                     Fraction(xml_payoff.text)
                 )
@@ -99,9 +100,8 @@ def write_game_node(game, node, doc, xml_node):
 
 
 def write_game_display(game, doc, xml_display):
-    for (i, p) in enumerate(game.players):
-        color = etree.SubElement(xml_display, "color",
-                                 player=str(i+1))
+    for i in range(len(game.players)):
+        color = etree.SubElement(xml_display, "color", player=str(i+1))
         if i % 2 == 0:
             color.text = "#FF0000"
         else:

@@ -44,4 +44,3 @@ public:
 
 
 #endif   // DLNFGNASH_H
-

@@ -18,7 +18,7 @@ int N;
 Gen_node gen_node()
 {
  Gen_node a;
- a=(Gen_node)mem_malloc(sizeof(struct Gen_node_tag)); 
+ a=(Gen_node)mem_malloc(sizeof(struct Gen_node_tag));
  if (a == nullptr) bad_error(" malloc failure in gen_node()");
  a->next=nullptr;
  a->type=0;
@@ -28,31 +28,31 @@ Gen_node free_Gen_node(Gen_node a)
 {
  if (a==nullptr) return nullptr;
  switch (a->type){
-   case Xpl_T:  
+   case Xpl_T:
    case Npl_T:
    case Lst_T: if(a->Genval.lval!=nullptr) free_Gen_list(a->Genval.lval);
                break;
    case Ast_T: Dlist_del(SaveList,(node)(a->Genval.gval));
                break;
-   case Sys_T: 
-   case Mtx_T: if(a->Genval.lval!=nullptr) 
+   case Sys_T:
+   case Mtx_T: if(a->Genval.lval!=nullptr)
                      Gmatrix_free((Gmatrix)a->Genval.gval);
                break;
-   case Err_T: break; 
-   case Idf_T: if(a->Genval.idval!=nullptr) mem_free(a->Genval.idval); 
+   case Err_T: break;
+   case Idf_T: if(a->Genval.idval!=nullptr) mem_free(a->Genval.idval);
                break;
-   case Str_T: if(a->Genval.gval!=nullptr) mem_free(a->Genval.gval); 
+   case Str_T: if(a->Genval.gval!=nullptr) mem_free(a->Genval.gval);
                break;
-   case Ply_T: if(a->Genval.pval!=nullptr) freeP(a->Genval.pval); 
+   case Ply_T: if(a->Genval.pval!=nullptr) freeP(a->Genval.pval);
                break;
    default : break;
   }
- mem_free((char *)a); 
+ mem_free((char *)a);
  return nullptr;
-} 
+}
 
 Gen_node free_Gen_list(Gen_node a)
-{ 
+{
   Gen_node b;
   while(a!=nullptr){
     b=a->next;
@@ -69,33 +69,33 @@ void print_Gen_node(Gen_node g)
 /* DEBUG */
   /*
   if (g->type > 10)
-    fprintf(stdout, "The type number is %d.\n", g->type);  
+    fprintf(stdout, "The type number is %d.\n", g->type);
   */
- 
+
   switch (g->type) {
 
-  case Int_T: 
+  case Int_T:
 #ifdef LOG_PRINT
     fprintf(stdout /* was Pel_Out */," %d ",g->Genval.ival)
 #endif
       ;
     break;
 
-  case Dbl_T:  
+  case Dbl_T:
 #ifdef LOG_PRINT
     fprintf(stdout /* was Pel_Out */," %f ",g->Genval.dval)
 #endif
       ;
     break;
 
-  case Idf_T:  
+  case Idf_T:
 #ifdef LOG_PRINT
     fprintf(stdout /* was Pel_Out */," %s ",g->Genval.idval)
 #endif
       ;
     break;
 
-  case Str_T: 
+  case Str_T:
 #ifdef LOG_PRINT
     fprintf(stdout /* was Pel_Out */," %s ",g->Genval.gval);
     fprintf(stdout /* was Pel_Out */," %s "," case Str_T")
@@ -103,26 +103,26 @@ void print_Gen_node(Gen_node g)
       ;
     break;
 
-  case Err_T: 
+  case Err_T:
 #ifdef LOG_PRINT
     fprintf(stdout /* was Pel_Out */," %s \n", "new gen_node:\n\n")
 #endif
       ;
-    break;                   
-    
-  case Xpl_T: 
+    break;
+
+  case Xpl_T:
     free_Gen_node(G_Print(copy_Gen_node(g)));
 #ifdef LOG_PRINT
     /*     fprintf(stdout," %s "," case Xpl_T") */
 #endif
-      ; 
+      ;
     break;
 
   case Npl_T:
     ;
     break;
 
-  case Lst_T: 
+  case Lst_T:
 #ifdef LOG_PRINT
     fprintf(stdout /* was Pel_Out */,"{") ;
     print_Gen_list(g->Genval.lval);
@@ -131,8 +131,8 @@ void print_Gen_node(Gen_node g)
 ;
 							       ;
     break;
-  
-  case Ast_T: 
+
+  case Ast_T:
 	/* DEBUG */
 	/* printf("The type is Ast_T which is %d.\n",Ast_T); */
     node_print(Dlist_data((node)g->Genval.gval));
@@ -142,22 +142,22 @@ void print_Gen_node(Gen_node g)
     ;
     break;
 
-  case Sys_T: 
+  case Sys_T:
 	/* DEBUG */
 	  /* printf("The type is Sys_T which is %d.\n",Sys_T); */
     free_Gen_node(G_Print(copy_Gen_node(g)));
 #ifdef LOG_PRINT
 /* fprintf(stdout */ /* was Pel_Out */ /*, " %s "," case Sys_T") */
 #endif
-    ; 
+    ;
     break;
 
-  case Mtx_T: 
+  case Mtx_T:
     fprintf(stdout /* was Pel_Out */, "%s","The vector of numbers of polynomials of each support type is:\n");
     Gmatrix_print((Gmatrix)g->Genval.gval);
     break;
 
-  case Prc_T: 
+  case Prc_T:
 
 	/* DEBUG */
     printf("The type is Prc_T which is %d.\n",Prc_T);
@@ -165,9 +165,9 @@ void print_Gen_node(Gen_node g)
 #ifdef LOG_PRINT
     fprintf(stdout /* was Pel_Out */, " %s "," case Prc_T:")
 #endif
-      ; 
+      ;
     break;
-    
+
   case Cpx_T:  printC(g->Genval.cval);
 
 	/* DEBUG */
@@ -179,7 +179,7 @@ void print_Gen_node(Gen_node g)
       ;
     break;
 
-  case Ply_T: 
+  case Ply_T:
 
 	/* DEBUG */
 	  /*  printf("  The type is Ply_T which is %d.  ",Ply_T);  */
@@ -187,14 +187,14 @@ void print_Gen_node(Gen_node g)
     printP(g->Genval.pval);
     break;
 
-  case Rng_T:  
+  case Rng_T:
 #ifdef LOG_PRINT
     fprintf(stdout /* was Pel_Out */,"cannot display ring yet\n");
     fprintf(stdout /* was Pel_Out */, " %s "," case Rng_T")
 #endif
-      ; 
+      ;
     break;
-    
+
   default: bad_error("unknown type in print_Gen_node");
   }
 }
@@ -202,7 +202,7 @@ void print_Gen_node(Gen_node g)
 void print_Gen_list(Gen_node g)
  {
    int tog=0;
-   while (g!=nullptr){ 
+   while (g!=nullptr){
      if (tog==1)
        fprintf(stdout /* was Pel_Out */,",");
      print_Gen_node(g);
@@ -248,7 +248,7 @@ Gen_node n,pt;
             }
 return n;
 }
-     
+
 Gen_node copy_Gen_node(Gen_node a)
  { Gen_node b;
    b=gen_node();
@@ -258,33 +258,33 @@ Gen_node copy_Gen_node(Gen_node a)
                      break;
          case Dbl_T: b->Genval.dval=a->Genval.dval;
                      break;
-         case Prc_T: b->Genval.proc=a->Genval.proc; 
+         case Prc_T: b->Genval.proc=a->Genval.proc;
                      break;
         case Xpl_T:
         case Npl_T:
-         case Lst_T: b->Genval.lval=copy_Gen_list(a->Genval.lval); 
+         case Lst_T: b->Genval.lval=copy_Gen_list(a->Genval.lval);
                      break;
          case Ast_T: b->Genval.gval=
                     (char *)Dlist_add(SaveList,
                                     Dlist_data((node)a->Genval.gval));
                      break;
-         case Sys_T: 
-         case Mtx_T: 
+         case Sys_T:
+         case Mtx_T:
 	   b->Genval.gval=(char *)Gmatrix_copy((Gmatrix)a->Genval.lval);
                      break;
-         case Idf_T: b->Genval.idval=Copy_String(a->Genval.idval); 
+         case Idf_T: b->Genval.idval=Copy_String(a->Genval.idval);
                      break;
          case Str_T: b->Genval.gval=Copy_String(a->Genval.gval);
                      break;
-         case Err_T: break; 
+         case Err_T: break;
          case Cpx_T:
                      b->Genval.cval=a->Genval.cval;
                      break;
-         case Ply_T: 
+         case Ply_T:
                     b->Genval.pval=copyP(a->Genval.pval);
                     break;
          case Rng_T:  warning("can not copy ring");
-         default: warning("incomplete copy in copy_Gen_node()"); 
+         default: warning("incomplete copy in copy_Gen_node()");
          break;
        }
 
@@ -317,7 +317,7 @@ int Gen_type(Gen_node g){
   if (g==nullptr) bad_error("requesting type of null node");
   return g->type;
 }
-int Gen_set_int(Gen_node g,int i){ 
+int Gen_set_int(Gen_node g,int i){
   if (g==nullptr) bad_error("setting int field of null node");
   return g->Genval.ival=i;
 }
@@ -347,16 +347,16 @@ node Gen_aset(Gen_node g){
  if (g==nullptr) bad_error("getting aset from null node");
  return Dlist_data((node)(g->Genval.gval));
 }
-  
+
 void print_Proc(Gen_node (*p)(Gen_node))
 {
 #ifdef LOG_PRINT
   std::cout << p;
 #endif
 }
-				     
 
-/*used for reader.lex-- 
+
+/*used for reader.lex--
 takes a string in quotes and removes outside quotes*/
 char *Copy_String_NQ(char *s)
 { int l,i,j=0;
@@ -393,9 +393,9 @@ Gen_node IDND(const char *s){
 }
 
 
-Gen_node ASTND(node n){ 
+Gen_node ASTND(node n){
      Gen_node a;
-  
+
     a=gen_node();
 
     a->type=Ast_T;
@@ -408,7 +408,7 @@ Gen_node ASTND(node n){
     return a;
 }
 
-Gen_node INTND(int n){ 
+Gen_node INTND(int n){
      Gen_node a;
      a=gen_node();
      a->type=Int_T;
@@ -417,7 +417,7 @@ Gen_node INTND(int n){
      return a;
 }
 
-Gen_node DBLND(double d){ 
+Gen_node DBLND(double d){
      Gen_node a;
      a=gen_node();
      a->type=Dbl_T;
@@ -426,7 +426,7 @@ Gen_node DBLND(double d){
      return a;
 }
 
-Gen_node CPXND(fcomplex c){ 
+Gen_node CPXND(fcomplex c){
      Gen_node a;
      a=gen_node();
      a->type=Cpx_T;
@@ -454,7 +454,7 @@ Gen_node PND(Gen_node p(Gen_node)) {
 }
 
 Gen_node Rerror(const char *s,Gen_node g)
-{ 
+{
   bad_error("We had an Rerror");
 
   Gen_node ans;
@@ -475,20 +475,20 @@ Gen_node Rerror(const char *s,Gen_node g)
 Gen_node G_Print(Gen_node g){
   psys sys;
   node xl;
-  if (Gen_length(g)!=1) 
+  if (Gen_length(g)!=1)
     return Rerror("Print: too many arguments",g);
 ;
   switch (Gen_type(g)){
    case Ast_T:  aset_print(Gen_aset(g));
                 break;
-  case Sys_T:  sys=Gen_to_psys(g); 
-                
+  case Sys_T:  sys=Gen_to_psys(g);
+
      psys_print(sys);
      psys_free(sys);
                 break;
 
    case Xpl_T:  xl=Gen_to_Dvector_list(Gen_lval(g));
-#ifdef LOG_PRINT           
+#ifdef LOG_PRINT
      xpl_fprint(stdout /* was Pel_Out */,xl)
 #endif
 ;
@@ -500,5 +500,5 @@ Gen_node G_Print(Gen_node g){
 #endif
 ;
  free_Gen_list(g);
- return IDND(""); 
+ return IDND("");
  }

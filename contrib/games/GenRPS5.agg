@@ -8,27 +8,27 @@
 # Function nodes
 0
 # |Action sets|
-5 5 5 5 5 
+5 5 5 5 5
 
 # Action sets
-0 1 2 3 4 
-0 1 2 3 4 
-0 1 2 3 4 
-0 1 2 3 4 
-0 1 2 3 4 
+0 1 2 3 4
+0 1 2 3 4
+0 1 2 3 4
+0 1 2 3 4
+0 1 2 3 4
 
 
 # Arcs
 # Node 0: Action0
-4 1 2 3 4 
+4 1 2 3 4
 # Node 1: Action1
-4 0 2 3 4 
+4 0 2 3 4
 # Node 2: Action2
-4 0 1 3 4 
+4 0 1 3 4
 # Node 3: Action3
-4 0 1 2 4 
+4 0 1 2 4
 # Node 4: Action4
-4 0 1 2 3 
+4 0 1 2 3
 
 
 # Types of function nodes

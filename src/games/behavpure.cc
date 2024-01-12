@@ -159,8 +159,8 @@ BehaviorProfileIterator::BehaviorProfileIterator(const BehaviorSupportProfile &p
 			     const GameAction &p_action)
   : m_atEnd(false), m_support(p_support),
     m_currentBehav(p_support.GetGame()->NumInfosets()),
-    m_profile(p_support.GetGame()), 
-    m_frozenPlayer(p_action->GetInfoset()->GetPlayer()->GetNumber()), 
+    m_profile(p_support.GetGame()),
+    m_frozenPlayer(p_action->GetInfoset()->GetPlayer()->GetNumber()),
     m_frozenInfoset(p_action->GetInfoset()->GetNumber()),
     m_numActiveInfosets(m_support.GetGame()->NumPlayers())
 {
@@ -200,17 +200,17 @@ void BehaviorProfileIterator::operator++()
   while (pl > 0 && m_numActiveInfosets[pl] == 0)
     --pl;
   if (pl == 0) {
-    m_atEnd = true; 
+    m_atEnd = true;
     return;
   }
 
   int iset = m_support.GetGame()->GetPlayer(pl)->NumInfosets();
-    
+
   while (true) {
-    if (m_isActive[pl][iset] && 
+    if (m_isActive[pl][iset] &&
 	(pl != m_frozenPlayer || iset != m_frozenInfoset)) {
       if (m_currentBehav(pl, iset) < m_support.NumActions(pl, iset))  {
-	m_profile.SetAction(m_support.GetAction(pl, iset, 
+	m_profile.SetAction(m_support.GetAction(pl, iset,
 						++m_currentBehav(pl, iset)));
 	return;
       }
@@ -219,13 +219,13 @@ void BehaviorProfileIterator::operator++()
 	m_profile.SetAction(m_support.GetAction(pl, iset, 1));
       }
     }
-    
+
     iset--;
     if (iset == 0)  {
       do  {
 	--pl;
       }  while (pl > 0 && m_numActiveInfosets[pl] == 0);
-      
+
       if (pl == 0) {
 	m_atEnd = true;
 	return;

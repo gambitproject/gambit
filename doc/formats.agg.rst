@@ -116,4 +116,3 @@ The rest of the file consists of 8 sections, separated by whitespaces. Lines wit
       1 2
       [1 0] 2.5
       [1 1] -1.2
-

@@ -67,7 +67,7 @@ public:
   /// Returns the total number of actions in the game
   int BehavProfileLength() const override  { throw UndefinedException(); }
   /// Returns the total number of strategies in the game
-  int MixedProfileLength() const override 
+  int MixedProfileLength() const override
   { return aggPtr->getNumActions(); }
   int NumStrategyContingencies() const override
   { throw UndefinedException(); }
@@ -135,10 +135,10 @@ public:
   { return true; }
   bool IsConstSum() const override;
   /// Returns the smallest payoff in any outcome of the game
-  Rational GetMinPayoff(int) const override 
+  Rational GetMinPayoff(int) const override
   { return Rational(aggPtr->getMinPayoff()); }
   /// Returns the largest payoff in any outcome of the game
-  Rational GetMaxPayoff(int) const override 
+  Rational GetMaxPayoff(int) const override
   { return Rational(aggPtr->getMaxPayoff()); }
 
   //@}

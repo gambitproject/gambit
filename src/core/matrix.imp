@@ -47,7 +47,7 @@ template <class T> Matrix<T>::Matrix(int rl, int rh, int cl, int ch)
 template <class T> Matrix<T>::Matrix(const Matrix<T> &M)
   : RectArray<T>(M)
 { }
- 
+
 template <class T> Matrix<T>::~Matrix()
 = default;
 
@@ -59,8 +59,8 @@ template <class T> Matrix<T> &Matrix<T>::operator=(const Matrix<T> &M)
 
 template <class T> Matrix<T> &Matrix<T>::operator=(const T &c)
 {
-  for (int i = this->minrow; i <= this->maxrow; i++) 
-    for (int j = this->mincol; j <= this->maxcol; j++) 
+  for (int i = this->minrow; i <= this->maxrow; i++)
+    for (int j = this->mincol; j <= this->maxcol; j++)
       (*this)(i, j) = c;
   return *this;
 }
@@ -145,7 +145,7 @@ template <class T> Matrix<T> &Matrix<T>::operator-=(const Matrix<T> &M)
     int j = this->maxcol - this->mincol + 1;
     while (j--)
       *(dst++) -= *(src++);
-    //assert((dst - 1) == this->data[i] + this->maxcol); 
+    //assert((dst - 1) == this->data[i] + this->maxcol);
   }
   return (*this);
 }
@@ -316,15 +316,15 @@ template <class T> Matrix<T> &Matrix<T>::operator/=(const T &s)
 
 template <class T> Matrix<T> Matrix<T>::operator&(const Matrix<T> &M) const
 {
-  Matrix<T> tmp(1, (this->maxrow - this->minrow + 1)*(M.maxrow - M.minrow + 1), 
+  Matrix<T> tmp(1, (this->maxrow - this->minrow + 1)*(M.maxrow - M.minrow + 1),
 		1, (this->maxcol - this->mincol + 1)*(M.maxcol - M.mincol + 1));
- 
+
   for (int i = 0; i <= this->maxrow - this->minrow; i++)
     for (int j = 1; j <= M.maxrow - M.minrow + 1; j++)
       for (int k = 0; k <= this->maxcol - this->mincol; k++)
 	for (int l = 1; l <= M.maxcol - M.mincol + 1; l++)
 
-	  tmp((M.maxrow - M.minrow + 1)*i + j, (M.maxcol - M.mincol + 1)*k + l) = 
+	  tmp((M.maxrow - M.minrow + 1)*i + j, (M.maxcol - M.mincol + 1)*k + l) =
 	    (*this)(i+this->minrow, k+this->mincol) * M(j+M.minrow-1,l+M.mincol-1);
 
   return tmp;
@@ -337,7 +337,7 @@ template <class T> Matrix<T> Matrix<T>::operator&(const Matrix<T> &M) const
 template <class T> Matrix<T> Matrix<T>::Transpose() const
 {
   Matrix<T> tmp(this->mincol, this->maxcol, this->minrow, this->maxrow);
- 
+
   for (int i = this->minrow; i <= this->maxrow; i++)
     for (int j = this->mincol; j <= this->maxcol; j++)
       tmp(j,i) = (*this)(i,j);
@@ -375,7 +375,7 @@ template <class T> bool Matrix<T>::operator==(const T &s) const
   for (int i = this->minrow; i <= this->maxrow; i++)   {
     T *src = this->data[i] + this->mincol;
     int j = this->maxcol - this->mincol + 1;
-    while (j--) 
+    while (j--)
       if (*(src++) != s)   return false;
     //assert(src - 1 == this->data[i] + this->maxcol);
   }
@@ -408,7 +408,7 @@ template <class T> Vector<T> Matrix<T>::Column(int j) const
 
 template <class T> void Matrix<T>::MakeIdent()
 {
-  for (int i = this->minrow; i <= this->maxrow; i++) 
+  for (int i = this->minrow; i <= this->maxrow; i++)
     for (int j = this->mincol; j <= this->maxcol; j++) {
       if (i == j) (*this)(i,j) = (T) 1;
       else (*this)(i,j)=(T) 0;

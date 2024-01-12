@@ -51,7 +51,7 @@ public:
   /// Construct a new number with representation p_text
   /// @param p_text The text representation of the number
   explicit Number(const std::string &p_text)
-    : m_text(p_text), m_rational(lexical_cast<Rational>(p_text)), 
+    : m_text(p_text), m_rational(lexical_cast<Rational>(p_text)),
       m_double(static_cast<double>(m_rational))
   { }
   /// Construct a new number with rational representation p_rational
@@ -70,7 +70,7 @@ public:
     m_rational = lexical_cast<Rational>(p_text);
     m_text = p_text;
     m_double = static_cast<double>(m_rational);
-    return *this; 
+    return *this;
   }
   Number &operator=(const Rational &p_rational)
   {

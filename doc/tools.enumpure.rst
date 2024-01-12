@@ -94,4 +94,3 @@ only one information set; therefore the set of solutions is larger::
    NE,1,0,1,0,1,0
    NE,1,0,1,0,0,1
    NE,1,0,0,1,1,0
-

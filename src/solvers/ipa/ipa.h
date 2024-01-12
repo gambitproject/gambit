@@ -47,5 +47,5 @@ inline List<MixedStrategyProfile<double> > IPAStrategySolve(const Game &p_game)
 
 }  // end namespace Gambit::Nash
 }  // end namespace Gambit
- 
+
 #endif  // GAMBIT_NASH_IPA_H

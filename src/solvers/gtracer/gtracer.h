@@ -44,4 +44,3 @@ IPA(gnmgame &A, cvector &g, cvector &zh, double alpha, double fuzz, cvector &ans
 }  // end namespace Gambit
 
 #endif  // GAMBIT_GTRACER_GTRACER_H
-

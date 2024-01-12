@@ -36,7 +36,7 @@ DEFINE_PAIRED_INT_DATA_ARRAYS(wxString, wxPairArrayIntSheetString)
 DEFINE_PAIRED_INT_DATA_ARRAYS(wxPairArrayIntSheetString, wxPairArrayIntPairArraySheetString)
 
 #if !wxUSE_GRID
-    WX_DEFINE_OBJARRAY(wxSheetStringArray) // else use wxGridStringArray 
+    WX_DEFINE_OBJARRAY(wxSheetStringArray) // else use wxGridStringArray
 #endif // wxUSE_GRID
 
 // ----------------------------------------------------------------------------
@@ -67,7 +67,7 @@ bool wxArrayStringUpdatePos(wxArrayString& arr, size_t pos, int num, bool no_err
                          wxStrF(wxT("Called wxArrayStringUpdatePos(pos=%d, N=%d)\nPos value is invalid for present array with %d elements"),
                                 int(pos), num, count) );
         }
-    
+
         if ((pos == 0u) && (num == count))
             arr.Clear();
         else
@@ -78,7 +78,7 @@ bool wxArrayStringUpdatePos(wxArrayString& arr, size_t pos, int num, bool no_err
 }
 
 // ----------------------------------------------------------------------------
-// wxSheetDataBase 
+// wxSheetDataBase
 // ----------------------------------------------------------------------------
 IMPLEMENT_ABSTRACT_CLASS( wxSheetValueProviderBase, wxObject )
 
@@ -99,7 +99,7 @@ void wxSheetValueProviderBase::Copy(const wxSheetValueProviderBase& other)
     UpdateRows(0, numRows);
     UpdateCols(0, numCols);
     wxSheetCoords c;
-        
+
     for (c.m_row = 0; c.m_row < numRows; c.m_row++)
     {
         for (c.m_col = 0; c.m_col < numCols; c.m_col++)
@@ -117,7 +117,7 @@ void wxSheetValueProviderBase::Copy(const wxSheetValueProviderBase& other)
 IMPLEMENT_ABSTRACT_CLASS( wxSheetValueProviderString, wxSheetValueProviderBase )
 
 wxSheetValueProviderString::wxSheetValueProviderString(size_t numRows, size_t numCols, int options)
-                           :wxSheetValueProviderBase(0, 0, options) 
+                           :wxSheetValueProviderBase(0, 0, options)
 {
     m_numRows += numRows;
     m_numCols += numCols;
@@ -125,29 +125,29 @@ wxSheetValueProviderString::wxSheetValueProviderString(size_t numRows, size_t nu
     DoUpdateCols(0, HasOption(wxSHEET_ValueProviderColPref) ? numCols : numRows);
 }
 
-wxString wxSheetValueProviderString::GetValue( const wxSheetCoords& coords_ ) const 
-{ 
-    wxCHECK_MSG(ContainsCell(coords_), wxEmptyString, wxT("Invalid coords"));    
+wxString wxSheetValueProviderString::GetValue( const wxSheetCoords& coords_ ) const
+{
+    wxCHECK_MSG(ContainsCell(coords_), wxEmptyString, wxT("Invalid coords"));
     wxSheetCoords coords(HasOption(wxSHEET_ValueProviderColPref) ? coords_ : coords_.GetSwapped());
 
-    //wxPrintf(wxT("RC %d %d - NumRC %d %d DataRC %d %d '%s'\n"), coords_.m_row, coords_.m_col, m_numRows, m_numCols, 
+    //wxPrintf(wxT("RC %d %d - NumRC %d %d DataRC %d %d '%s'\n"), coords_.m_row, coords_.m_col, m_numRows, m_numCols,
     //    m_data.GetCount(), int(m_data.GetCount()) > coords.m_col ? m_data[coords.m_col].GetCount() : 0,
     //    wxDateTime::Now().FormatISOTime().c_str());
-    
-    if ((int(m_data.GetCount()) > coords.m_row) && 
+
+    if ((int(m_data.GetCount()) > coords.m_row) &&
         (int(m_data[coords.m_row].GetCount()) > coords.m_col))
         return m_data[coords.m_row][coords.m_col];
-    
+
     return wxEmptyString;
 }
 void wxSheetValueProviderString::SetValue( const wxSheetCoords& coords_, const wxString& value )
-{ 
+{
     wxCHECK_RET(ContainsCell(coords_), wxT("Invalid coords"));
     wxSheetCoords coords(HasOption(wxSHEET_ValueProviderColPref) ? coords_ : coords_.GetSwapped());
-    
+
     // add "rows" as necessary to store value
     int count = m_data.GetCount();
-    if (count <= coords.m_row) 
+    if (count <= coords.m_row)
     {
         wxArrayString sa;
         sa.Add( wxEmptyString, 1+coords.m_col );
@@ -161,14 +161,14 @@ void wxSheetValueProviderString::SetValue( const wxSheetCoords& coords_, const w
         {
             m_data.Item(coords.m_row).Insert( wxEmptyString, count, 1+coords.m_col-count );
         }
-    }    
+    }
     m_data[coords.m_row][coords.m_col] = value;
 }
 
 int wxSheetValueProviderString::GetFirstNonEmptyColToLeft( const wxSheetCoords& coords ) const
 {
     wxCHECK_MSG(ContainsCell(coords), coords.m_col - 1, wxT("Invalid coords"));
-    if (HasOption(wxSHEET_ValueProviderColPref)) 
+    if (HasOption(wxSHEET_ValueProviderColPref))
     {
         if (int(m_data.GetCount()) <= coords.m_row)
             return -1;
@@ -180,23 +180,23 @@ int wxSheetValueProviderString::GetFirstNonEmptyColToLeft( const wxSheetCoords& 
 }
 
 bool wxSheetValueProviderString::UpdateRows( size_t row, int numRows )
-{ 
+{
     wxSHEET_CHECKUPDATE_MSG(row, numRows, m_numRows, false);
     m_numRows += numRows;
-    return HasOption(wxSHEET_ValueProviderColPref) ? DoUpdateRows(row, numRows) : 
-                                                     DoUpdateCols(row, numRows); 
+    return HasOption(wxSHEET_ValueProviderColPref) ? DoUpdateRows(row, numRows) :
+                                                     DoUpdateCols(row, numRows);
 }
 bool wxSheetValueProviderString::UpdateCols( size_t col, int numCols )
-{ 
+{
     wxSHEET_CHECKUPDATE_MSG(col, numCols, m_numCols, false);
     m_numCols += numCols;
-    return HasOption(wxSHEET_ValueProviderColPref) ? DoUpdateCols(col, numCols) : 
-                                                     DoUpdateRows(col, numCols); 
+    return HasOption(wxSHEET_ValueProviderColPref) ? DoUpdateCols(col, numCols) :
+                                                     DoUpdateRows(col, numCols);
 }
 
 bool wxSheetValueProviderString::DoUpdateRows( size_t row, int numRows )
 {
-    // get things right before calling this, remember the rows may not be 
+    // get things right before calling this, remember the rows may not be
     //  filled completely and this won't error out
     const int curNumRows = m_data.GetCount();
     //const int curNumCols = curNumRows > 0 ? m_data.Item(0).GetCount() : m_numCols;
@@ -207,7 +207,7 @@ bool wxSheetValueProviderString::DoUpdateRows( size_t row, int numRows )
     {
         if (curNumRows > int(row)) // only insert, no need to append
         {
-            wxArrayString sa;       
+            wxArrayString sa;
             m_data.Insert( sa, row, numRows );
         }
     }
@@ -223,7 +223,7 @@ bool wxSheetValueProviderString::DoUpdateRows( size_t row, int numRows )
 }
 bool wxSheetValueProviderString::DoUpdateCols( size_t col, int numCols )
 {
-    // only insert or delete cols, no need to append    
+    // only insert or delete cols, no need to append
     const int curNumRows = m_data.GetCount();
 
     if (numCols == 0)
@@ -232,7 +232,7 @@ bool wxSheetValueProviderString::DoUpdateCols( size_t col, int numCols )
     {
         for ( int row = 0; row < curNumRows; row++ )
         {
-            if (m_data[row].GetCount() > col) 
+            if (m_data[row].GetCount() > col)
                 m_data[row].Insert( wxEmptyString, col, numCols );
         }
     }
@@ -252,7 +252,7 @@ bool wxSheetValueProviderString::DoUpdateCols( size_t col, int numCols )
 }
 
 void wxSheetValueProviderString::SetOptions(int options)
-{ 
+{
     if (options == m_options) return;
     wxSheetValueProviderString data(0,0,options);
     data.Copy(*this);
@@ -266,7 +266,7 @@ void wxSheetValueProviderString::SetOptions(int options)
 IMPLEMENT_ABSTRACT_CLASS( wxSheetValueProviderSparseString, wxSheetValueProviderBase )
 
 wxSheetValueProviderSparseString::wxSheetValueProviderSparseString(size_t numRows, size_t numCols, int options)
-                                 :wxSheetValueProviderBase(0, 0, options) 
+                                 :wxSheetValueProviderBase(0, 0, options)
 {
     m_numRows += numRows;
     m_numCols += numCols;
@@ -274,7 +274,7 @@ wxSheetValueProviderSparseString::wxSheetValueProviderSparseString(size_t numRow
     DoUpdateCols(0, HasOption(wxSHEET_ValueProviderColPref) ? numCols : numRows);
 }
 
-wxString wxSheetValueProviderSparseString::GetValue( const wxSheetCoords& coords_ ) const 
+wxString wxSheetValueProviderSparseString::GetValue( const wxSheetCoords& coords_ ) const
 {
     wxCHECK_MSG(ContainsCell(coords_), wxEmptyString, wxT("Invalid coords"));
     wxSheetCoords coords(HasOption(wxSHEET_ValueProviderColPref) ? coords_ : coords_.GetSwapped());
@@ -282,17 +282,17 @@ wxString wxSheetValueProviderSparseString::GetValue( const wxSheetCoords& coords
     const int rowPos = m_data.FindIndex(coords.m_row);
     if (rowPos != wxNOT_FOUND)
         return m_data.GetItemValue(rowPos).GetValue(coords.m_col);
-    
+
     return wxEmptyString;
 }
 
-void wxSheetValueProviderSparseString::SetValue( const wxSheetCoords& coords_, 
+void wxSheetValueProviderSparseString::SetValue( const wxSheetCoords& coords_,
                                                  const wxString& value )
 {
     wxCHECK_RET(ContainsCell(coords_), wxT("Invalid coords"));
     wxSheetCoords coords(HasOption(wxSHEET_ValueProviderColPref) ? coords_ : coords_.GetSwapped());
     const int rowPos = m_data.FindIndex(coords.m_row);
-    
+
     if (value.IsEmpty())
     {
         // remove the value if empty
@@ -320,7 +320,7 @@ bool wxSheetValueProviderSparseString::HasValue( const wxSheetCoords& coords_ ) 
     const int rowPos = m_data.FindIndex(coords.m_row);
     if (rowPos == wxNOT_FOUND)
         return false;
-    
+
     return m_data.GetItemValue(rowPos).FindIndex(coords.m_col) != wxNOT_FOUND;
 }
 
@@ -337,25 +337,25 @@ int wxSheetValueProviderSparseString::GetFirstNonEmptyColToLeft( const wxSheetCo
             if (colPos > 0)
                 return m_data.GetItemValue(rowPos).GetItemKey(colPos-1);
         }
-        return -1;    
+        return -1;
     }
-    
+
     return coords.m_col - 1;
 }
 
 bool wxSheetValueProviderSparseString::UpdateRows( size_t row, int numRows )
-{ 
+{
     wxSHEET_CHECKUPDATE_MSG(row, numRows, m_numRows, false)
     m_numRows += numRows;
-    return HasOption(wxSHEET_ValueProviderColPref) ? DoUpdateRows(row, numRows) : 
-                                                     DoUpdateCols(row, numRows); 
+    return HasOption(wxSHEET_ValueProviderColPref) ? DoUpdateRows(row, numRows) :
+                                                     DoUpdateCols(row, numRows);
 }
 bool wxSheetValueProviderSparseString::UpdateCols( size_t col, int numCols )
-{ 
+{
     wxSHEET_CHECKUPDATE_MSG(col, numCols, m_numRows, false)
     m_numCols += numCols;
-    return HasOption(wxSHEET_ValueProviderColPref) ? DoUpdateCols(col, numCols) : 
-                                                     DoUpdateRows(col, numCols); 
+    return HasOption(wxSHEET_ValueProviderColPref) ? DoUpdateCols(col, numCols) :
+                                                     DoUpdateRows(col, numCols);
 }
 bool wxSheetValueProviderSparseString::DoUpdateRows( size_t row, int numRows )
 {
@@ -386,7 +386,7 @@ void wxSheetValueProviderSparseString::RemoveEmpty()
 }
 
 void wxSheetValueProviderSparseString::SetOptions(int options)
-{ 
+{
     if (options == m_options) return;
     wxSheetValueProviderSparseString data(0,0,options);
     data.Copy(*this);
@@ -401,16 +401,16 @@ void wxSheetValueProviderSparseString::SetOptions(int options)
 IMPLEMENT_ABSTRACT_CLASS( wxSheetValueProviderHashString, wxSheetValueProviderBase )
 
 wxSheetValueProviderHashString::wxSheetValueProviderHashString(size_t numRows, size_t numCols, int options)
-                               :wxSheetValueProviderBase(0, 0, options) 
+                               :wxSheetValueProviderBase(0, 0, options)
 {
     m_numRows += numRows;
     m_numCols += numCols;
-    // FIXME UpdateRows/Cols for wxSheetValueProviderHashString 
+    // FIXME UpdateRows/Cols for wxSheetValueProviderHashString
     //DoUpdateRows(0, HasOption(wxSHEET_ValueProviderColPref) ? numRows : numCols);
     //DoUpdateCols(0, HasOption(wxSHEET_ValueProviderColPref) ? numCols : numRows);
 }
 
-wxString wxSheetValueProviderHashString::GetValue( const wxSheetCoords& coords_ ) const 
+wxString wxSheetValueProviderHashString::GetValue( const wxSheetCoords& coords_ ) const
 {
     wxCHECK_MSG(ContainsCell(coords_), wxEmptyString, wxT("Invalid coords"));
     wxSheetCoords coords(HasOption(wxSHEET_ValueProviderColPref) ? coords_ : coords_.GetSwapped());
@@ -421,11 +421,11 @@ wxString wxSheetValueProviderHashString::GetValue( const wxSheetCoords& coords_ 
         wxSheetStringHash::const_iterator col_iter = row_iter->second.find(coords.m_col);
         if (col_iter != row_iter->second.end())
             return col_iter->second;
-    }    
+    }
     return wxEmptyString;
 }
 
-void wxSheetValueProviderHashString::SetValue( const wxSheetCoords& coords_, 
+void wxSheetValueProviderHashString::SetValue( const wxSheetCoords& coords_,
                                                  const wxString& value )
 {
     wxCHECK_RET(ContainsCell(coords_), wxT("Invalid coords"));
@@ -453,7 +453,7 @@ bool wxSheetValueProviderHashString::HasValue( const wxSheetCoords& coords_ ) co
         wxSheetStringHash::const_iterator col_iter = row_iter->second.find(coords.m_col);
         if (col_iter != row_iter->second.end())
             return true;
-    }    
+    }
     return false;
 }
 
@@ -466,12 +466,12 @@ int wxSheetValueProviderHashString::GetFirstNonEmptyColToLeft( const wxSheetCoor
         if (row_iter == m_data.end())
             return -1;
     }
-    
+
     return coords.m_col - 1;
 }
 
 bool wxSheetValueProviderHashString::UpdateRows( size_t row, int numRows )
-{ 
+{
     wxSHEET_CHECKUPDATE_MSG(row, numRows, m_numRows, false)
     bool append = (int(row) == m_numRows);
     m_numRows += numRows;
@@ -480,14 +480,14 @@ bool wxSheetValueProviderHashString::UpdateRows( size_t row, int numRows )
         ClearValues();
         return true;
     }
-        
+
     if (!append)
-        return HasOption(wxSHEET_ValueProviderColPref) ? DoUpdateRows(row, numRows) : 
-                                                         DoUpdateCols(row, numRows); 
+        return HasOption(wxSHEET_ValueProviderColPref) ? DoUpdateRows(row, numRows) :
+                                                         DoUpdateCols(row, numRows);
     return true;
 }
 bool wxSheetValueProviderHashString::UpdateCols( size_t col, int numCols )
-{ 
+{
     wxSHEET_CHECKUPDATE_MSG(col, numCols, m_numRows, false)
     bool append = (int(col) == m_numRows);
     m_numCols += numCols;
@@ -497,8 +497,8 @@ bool wxSheetValueProviderHashString::UpdateCols( size_t col, int numCols )
         return true;
     }
     if (!append)
-        return HasOption(wxSHEET_ValueProviderColPref) ? DoUpdateCols(col, numCols) : 
-                                                         DoUpdateRows(col, numCols);     
+        return HasOption(wxSHEET_ValueProviderColPref) ? DoUpdateCols(col, numCols) :
+                                                         DoUpdateRows(col, numCols);
     return true;
 }
 
@@ -565,14 +565,14 @@ bool wxSheetValueProviderHashString::DoUpdateCols( size_t col, int numCols )
                     col_iter++;
             }
             row_iter++;
-        }        
+        }
     }
 
     return true;
 }
 
 void wxSheetValueProviderHashString::SetOptions(int options)
-{ 
+{
     if (options == m_options) return;
     wxSheetValueProviderHashString data(0,0,options);
     data.Copy(*this);
@@ -587,7 +587,7 @@ void wxSheetValueProviderHashString::SetOptions(int options)
 IMPLEMENT_ABSTRACT_CLASS( wxSheetTable, wxObject )
 
 wxSheetTable::wxSheetTable(wxSheet *view)
-             :wxObject(), m_view(view), 
+             :wxObject(), m_view(view),
               m_attrProvider(NULL),   m_own_attr_provider(true),
               m_gridCellValues(NULL), m_own_grid_cell_values(true),
               m_rowLabelValues(NULL), m_own_row_label_values(true),
@@ -621,13 +621,13 @@ wxString wxSheetTable::GetValue( const wxSheetCoords& coords )
 {
     switch (wxSheet::GetCellCoordsType(coords))
     {
-        case wxSHEET_CELL_GRID : 
+        case wxSHEET_CELL_GRID :
         {
             // need cell data for values, or override this
             wxCHECK_MSG(GetGridCellValueProvider(), wxEmptyString, wxT("Invalid grid cell data for the table"));
             return GetGridCellValueProvider()->GetValue(coords);
         }
-        case wxSHEET_CELL_ROWLABEL : 
+        case wxSHEET_CELL_ROWLABEL :
         {
             // just return default if no row label data
             wxSheetCoords rowCoords(coords.SheetToRowLabel());
@@ -636,7 +636,7 @@ wxString wxSheetTable::GetValue( const wxSheetCoords& coords )
 
             return GetDefaultRowLabelValue(coords.m_row);
         }
-        case wxSHEET_CELL_COLLABEL : 
+        case wxSHEET_CELL_COLLABEL :
         {
             wxSheetCoords colCoords(coords.SheetToColLabel());
             if (GetColLabelValueProvider() && GetColLabelValueProvider()->HasValue(colCoords))
@@ -650,7 +650,7 @@ wxString wxSheetTable::GetValue( const wxSheetCoords& coords )
         }
         default :
             return wxEmptyString;
-    }   
+    }
 }
 
 void wxSheetTable::SetValue( const wxSheetCoords& coords, const wxString& value )
@@ -658,19 +658,19 @@ void wxSheetTable::SetValue( const wxSheetCoords& coords, const wxString& value 
     // You must override this or have set data containers for this to work
     switch (wxSheet::GetCellCoordsType(coords))
     {
-        case wxSHEET_CELL_GRID : 
+        case wxSHEET_CELL_GRID :
         {
             wxCHECK_RET(GetGridCellValueProvider(), wxT("Invalid grid cell data for the table"));
             GetGridCellValueProvider()->SetValue(coords, value);
             break;
         }
-        case wxSHEET_CELL_ROWLABEL : 
+        case wxSHEET_CELL_ROWLABEL :
         {
             wxCHECK_RET(GetRowLabelValueProvider(), wxT("Invalid row label data for the table"));
             GetRowLabelValueProvider()->SetValue(coords.SheetToRowLabel(), value);
             break;
         }
-        case wxSHEET_CELL_COLLABEL : 
+        case wxSHEET_CELL_COLLABEL :
         {
             wxCHECK_RET(GetColLabelValueProvider(), wxT("Invalid col label data for the table"));
             GetColLabelValueProvider()->SetValue(coords.SheetToColLabel(), value);
@@ -683,68 +683,68 @@ void wxSheetTable::SetValue( const wxSheetCoords& coords, const wxString& value 
         }
         default :
             break;
-    }   
+    }
 }
-bool wxSheetTable::HasValue( const wxSheetCoords& coords ) 
-{ 
+bool wxSheetTable::HasValue( const wxSheetCoords& coords )
+{
     switch (wxSheet::GetCellCoordsType(coords))
     {
-        case wxSHEET_CELL_GRID : 
+        case wxSHEET_CELL_GRID :
         {
-            if (GetGridCellValueProvider()) 
+            if (GetGridCellValueProvider())
                 return GetGridCellValueProvider()->HasValue(coords);
-            
+
             break;
         }
-        case wxSHEET_CELL_ROWLABEL : 
+        case wxSHEET_CELL_ROWLABEL :
         {
-            if (GetRowLabelValueProvider()) 
+            if (GetRowLabelValueProvider())
                 return GetRowLabelValueProvider()->HasValue(coords.SheetToRowLabel());
-            
+
             break;
         }
-        case wxSHEET_CELL_COLLABEL : 
+        case wxSHEET_CELL_COLLABEL :
         {
-            if (GetColLabelValueProvider()) 
+            if (GetColLabelValueProvider())
                 return GetColLabelValueProvider()->HasValue(coords.SheetToColLabel());
-            
+
             break;
         }
         case wxSHEET_CELL_CORNERLABEL :
         default : break;
-    }   
-    
-    return !GetValue(coords).IsEmpty(); 
+    }
+
+    return !GetValue(coords).IsEmpty();
 }
-int wxSheetTable::GetFirstNonEmptyColToLeft( const wxSheetCoords& coords ) 
-{ 
+int wxSheetTable::GetFirstNonEmptyColToLeft( const wxSheetCoords& coords )
+{
     switch (wxSheet::GetCellCoordsType(coords))
     {
-        case wxSHEET_CELL_GRID : 
+        case wxSHEET_CELL_GRID :
         {
-            if (GetGridCellValueProvider()) 
+            if (GetGridCellValueProvider())
                 return GetGridCellValueProvider()->GetFirstNonEmptyColToLeft(coords);
-            
+
             break;
         }
-        case wxSHEET_CELL_ROWLABEL : 
+        case wxSHEET_CELL_ROWLABEL :
         {
-            if (GetRowLabelValueProvider()) 
+            if (GetRowLabelValueProvider())
                 return GetRowLabelValueProvider()->GetFirstNonEmptyColToLeft(coords.SheetToRowLabel());
-            
+
             break;
         }
-        case wxSHEET_CELL_COLLABEL : 
+        case wxSHEET_CELL_COLLABEL :
         {
-            if (GetColLabelValueProvider()) 
+            if (GetColLabelValueProvider())
                 return GetColLabelValueProvider()->GetFirstNonEmptyColToLeft(coords.SheetToColLabel());
-            
+
             break;
         }
         case wxSHEET_CELL_CORNERLABEL :
         default : break;
-    }   
-    
+    }
+
     return coords.m_col-1;
 }
 
@@ -756,7 +756,7 @@ void wxSheetTable::ClearValues(int update)
         GetRowLabelValueProvider()->ClearValues();
     if (((update & wxSHEET_UpdateColLabelValues) != 0) && GetColLabelValueProvider())
         GetColLabelValueProvider()->ClearValues();
-/*    
+/*
     FIXME should add clearing attrs here
     if (((update & wxSHEET_UpdateGridCellAttrs) != 0) && GetAttrProvider())
         GetAttrProvider()->
@@ -764,7 +764,7 @@ void wxSheetTable::ClearValues(int update)
         GetAttrProvider()->
     if (((update & wxSHEET_UpdateColLabelAttrs) != 0) && GetAttrProvider())
         GetAttrProvider()->
-*/    
+*/
 }
 
 wxString wxSheetTable::GetDefaultRowLabelValue( int row ) const
@@ -784,12 +784,12 @@ wxString wxSheetTable::GetDefaultColLabelValue( int col ) const
         if ( col < 0 ) break;
     }
     // reverse the string...
-    for ( i = n; i > 0; i-- ) s2 += s[i-1]; 
+    for ( i = n; i > 0; i-- ) s2 += s[i-1];
     //for ( i = 0; i < n;  i++ )  s2 += s[n-i-1];
 
     return s2;
 */
- 
+
     // new method using log function so you don't have to reverse the string
     wxCHECK_MSG(col >= 0, wxEmptyString, wxT("Invalid col"));
     const size_t chars = (col > 0) ? size_t(log((double) col)/3.2580965380) : 0; // log_26(x) = log(x)/log(26.0)
@@ -799,7 +799,7 @@ wxString wxSheetTable::GetDefaultColLabelValue( int col ) const
         s[size_t(chars - n)] = wxChar(_T('A') + (wxChar)(col%26));
         col = col/26 - 1;
     }
-    
+
     return s;
 }
 
@@ -822,10 +822,10 @@ double wxSheetTable::GetValueAsDouble( const wxSheetCoords& coords )
 bool wxSheetTable::GetValueAsBool( const wxSheetCoords& coords )
 {
     const wxString val(GetValue(coords));
-    if (val.IsEmpty() || (val == wxT("0")) || 
+    if (val.IsEmpty() || (val == wxT("0")) ||
        (val.CmpNoCase(wxT("f")) == 0) || (val.CmpNoCase(wxT("false")) == 0))
         return false;
-    
+
     return true;
 }
 void wxSheetTable::SetValueAsLong( const wxSheetCoords& coords, long value )
@@ -845,7 +845,7 @@ void* wxSheetTable::GetValueAsCustom( const wxSheetCoords& coords,
 {
     wxFAIL_MSG(wxStrF(wxT("Unable to return wxSheetTable::GetValueAsCustom for cell (%d, %d) and type '%s'"),
                       coords.m_row, coords.m_col, typeName.c_str()));
-    
+
     return NULL;
 }
 void  wxSheetTable::SetValueAsCustom( const wxSheetCoords& coords,
@@ -874,7 +874,7 @@ bool wxSheetTable::CanGetValueAs( const wxSheetCoords& coords,
     else if (typeName == wxSHEET_VALUE_BOOL)
     {
         const wxString val(GetValue(coords));
-        return val.IsEmpty() || (val == wxT("0")) || (val == wxT("1")) || 
+        return val.IsEmpty() || (val == wxT("0")) || (val == wxT("1")) ||
                (val.CmpNoCase(wxT("f")) == 0) || (val.CmpNoCase(wxT("t")) == 0) ||
                (val.CmpNoCase(wxT("false")) == 0) || (val.CmpNoCase(wxT("true")) == 0);
     }
@@ -895,7 +895,7 @@ void wxSheetTable::SetGridCellValueProvider(wxSheetValueProviderBase *gridCellVa
 {
     if (m_gridCellValues && m_own_grid_cell_values)
         delete m_gridCellValues;
-    
+
     m_gridCellValues = gridCellValues;
     m_own_grid_cell_values = is_owner;
 }
@@ -903,7 +903,7 @@ void wxSheetTable::SetRowLabelValueProvider(wxSheetValueProviderBase *rowLabelVa
 {
     if (m_rowLabelValues && m_own_row_label_values)
         delete m_rowLabelValues;
-    
+
     m_rowLabelValues = rowLabelValues;
     m_own_row_label_values = is_owner;
 }
@@ -911,14 +911,14 @@ void wxSheetTable::SetColLabelValueProvider(wxSheetValueProviderBase *colLabelVa
 {
     if (m_colLabelValues && m_own_col_label_values)
         delete m_colLabelValues;
-    
+
     m_colLabelValues = colLabelValues;
     m_own_col_label_values = is_owner;
 }
 
-wxSheetCellAttr wxSheetTable::GetAttr( const wxSheetCoords& coords, 
+wxSheetCellAttr wxSheetTable::GetAttr( const wxSheetCoords& coords,
                                        wxSheetAttr_Type kind )
-{  
+{
     // Ok to return nothing
     if (GetAttrProvider())
         return GetAttrProvider()->GetAttr(coords, kind);
@@ -926,19 +926,19 @@ wxSheetCellAttr wxSheetTable::GetAttr( const wxSheetCoords& coords,
     return wxNullSheetCellAttr;
 }
 
-void wxSheetTable::SetAttr( const wxSheetCoords& coords, 
+void wxSheetTable::SetAttr( const wxSheetCoords& coords,
                             const wxSheetCellAttr& attr, wxSheetAttr_Type kind)
 {
-    // This is called from the 
-    wxCHECK_RET(GetAttrProvider(), wxT("Invalid attr provider in table")); 
-    GetAttrProvider()->SetAttr(coords, attr, kind);    
+    // This is called from the
+    wxCHECK_RET(GetAttrProvider(), wxT("Invalid attr provider in table"));
+    GetAttrProvider()->SetAttr(coords, attr, kind);
 }
 
 void wxSheetTable::SetAttrProvider(wxSheetCellAttrProvider *attrProvider, bool is_owner)
 {
     if (m_attrProvider && m_own_attr_provider)
         delete m_attrProvider;
-    
+
     m_attrProvider = attrProvider;
     m_own_attr_provider = is_owner;
 }
@@ -952,10 +952,10 @@ wxSheetBlock wxSheetTable::GetCellBlock( const wxSheetCoords& coords )
     if (GetSpannedBlocks()) // ok not to have this, just return 1x1
     {
         const int n = GetSpannedBlocks()->Index(coords);
-        if (n != wxNOT_FOUND) 
+        if (n != wxNOT_FOUND)
             return GetSpannedBlocks()->GetBlock(n);
     }
-    
+
     return wxSheetBlock(coords, 1, 1);
 }
 void wxSheetTable::SetCellSpan( const wxSheetBlock& block )
@@ -964,9 +964,9 @@ void wxSheetTable::SetCellSpan( const wxSheetBlock& block )
     wxCHECK_RET(!block.IsEmpty(), wxT("Cannot set cell size smaller than (1,1)"));
     wxCHECK_RET((ContainsGridCell(block.GetLeftTop()) && ContainsGridCell(block.GetRightBottom())) ||
                 (ContainsRowLabelCell(block.GetLeftTop()) && ContainsRowLabelCell(block.GetRightBottom())) ||
-                (ContainsColLabelCell(block.GetLeftTop()) && ContainsColLabelCell(block.GetRightBottom())), 
+                (ContainsColLabelCell(block.GetLeftTop()) && ContainsColLabelCell(block.GetRightBottom())),
                   wxT("Cannot set cell size for cell out of grid"));
-    
+
     wxSheetBlock bounds(block);
     const wxArraySheetBlock &arrBlock = GetSpannedBlocks()->GetBlockArray();
     int n, index = wxNOT_FOUND, intersections = 0, count = arrBlock.GetCount();
@@ -981,14 +981,14 @@ void wxSheetTable::SetCellSpan( const wxSheetBlock& block )
             index = n;
         }
     }
-    
-    wxCHECK_RET( (intersections < 2) && 
-                ((intersections == 0) || (arrBlock[index].GetLeftTop() == block.GetLeftTop())), 
+
+    wxCHECK_RET( (intersections < 2) &&
+                ((intersections == 0) || (arrBlock[index].GetLeftTop() == block.GetLeftTop())),
                  wxT("Setting cell span for cells already spanned"));
 
     wxSheetSelection *sel = (wxSheetSelection*)GetSpannedBlocks();
-    
-    // delete old block and expand refresh bounds 
+
+    // delete old block and expand refresh bounds
     if (index != wxNOT_FOUND)
     {
         bounds = bounds.Union(arrBlock[index]);
@@ -999,9 +999,9 @@ void wxSheetTable::SetCellSpan( const wxSheetBlock& block )
     if ((block.GetWidth() > 1) || (block.GetHeight() > 1))
     {
         // don't combine them
-        sel->SelectBlock(block, false); 
+        sel->SelectBlock(block, false);
     }
-    
+
     if (GetView()) GetView()->RefreshGridCellBlock(bounds);
 }
 
@@ -1009,7 +1009,7 @@ void wxSheetTable::SetSpannedBlocks(wxSheetSelection *spannedCells, bool is_owne
 {
     if (m_spannedCells && m_own_spanned_cells)
         delete m_spannedCells;
-    
+
     m_spannedCells = spannedCells;
     m_own_spanned_cells = is_owner;
 }
@@ -1023,29 +1023,29 @@ bool wxSheetTable::UpdateRows( size_t row, int numRows, int update)
         GetGridCellValueProvider()->UpdateRows(row, numRows);
     if (((update & wxSHEET_UpdateRowLabelValues) != 0) && GetRowLabelValueProvider())
         GetRowLabelValueProvider()->UpdateRows(row, numRows);
-    
-    if (((update & wxSHEET_UpdateSpanned) != 0) && GetSpannedBlocks()) 
-        ((wxSheetSelection*)GetSpannedBlocks())->UpdateRows( row, numRows );    
+
+    if (((update & wxSHEET_UpdateSpanned) != 0) && GetSpannedBlocks())
+        ((wxSheetSelection*)GetSpannedBlocks())->UpdateRows( row, numRows );
     if (((update & wxSHEET_UpdateAttributes) != 0) && GetAttrProvider())
-        GetAttrProvider()->UpdateRows( row, numRows, update );    
-    
+        GetAttrProvider()->UpdateRows( row, numRows, update );
+
     return UpdateSheetRows(row, numRows, update);
 }
 bool wxSheetTable::UpdateCols( size_t col, int numCols, int update )
 {
     const int curNumCols = GetNumberCols();
-                              
+
     wxSHEET_CHECKUPDATE_MSG(col, numCols, curNumCols, false);
     if (((update & wxSHEET_UpdateGridCellValues) != 0) && GetGridCellValueProvider())
         GetGridCellValueProvider()->UpdateCols(col, numCols);
     if (((update & wxSHEET_UpdateColLabelValues) != 0) && GetColLabelValueProvider())
         GetColLabelValueProvider()->UpdateCols(col, numCols);
-    
+
     if (((update & wxSHEET_UpdateSpanned) != 0) && GetSpannedBlocks())
-        ((wxSheetSelection*)GetSpannedBlocks())->UpdateCols( col, numCols );    
+        ((wxSheetSelection*)GetSpannedBlocks())->UpdateCols( col, numCols );
     if (((update & wxSHEET_UpdateAttributes) != 0) && GetAttrProvider())
         GetAttrProvider()->UpdateCols( col, numCols, update );
-    
+
     return UpdateSheetCols(col, numCols, update);
 }
 
@@ -1061,17 +1061,17 @@ bool wxSheetTable::UpdateSheetRowsCols(int update)
 {
     bool done = false;
     if (!GetView()) return done;
-    
+
     const int tableRows = GetNumberRows();
     const int tableCols = GetNumberCols();
     const int sheetRows = GetView()->GetNumberRows();
     const int sheetCols = GetView()->GetNumberCols();
     if (tableRows != sheetRows)
-        done |= UpdateSheetRows(tableRows < sheetRows ? tableRows : sheetRows, 
+        done |= UpdateSheetRows(tableRows < sheetRows ? tableRows : sheetRows,
                                 tableRows - sheetRows, update);
     if (tableCols != sheetCols)
-        done |= UpdateSheetCols(tableCols < sheetCols ? tableCols : sheetCols, 
+        done |= UpdateSheetCols(tableCols < sheetCols ? tableCols : sheetCols,
                                 tableCols - sheetCols, update);
-    
+
     return done;
 }

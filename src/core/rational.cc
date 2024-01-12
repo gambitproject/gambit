@@ -8,7 +8,7 @@
 //
 // The original copyright and license are included below.
 //
-/* 
+/*
 Copyright (C) 1988 Free Software Foundation
     written by Doug Lea (dl@rocky.oswego.edu)
 
@@ -124,9 +124,9 @@ void      div(const Rational& x, const Rational& y, Rational& r)
 
 void Rational::invert()
 {
-  Integer tmp = num;  
-  num = den;  
-  den = tmp;  
+  Integer tmp = num;
+  num = den;
+  den = tmp;
   int s = sign(den);
   if (s == 0) {
     throw ZeroDivideException();
@@ -194,14 +194,14 @@ Rational pow(const Rational& x, const Integer& y)
 {
   long yy = y.as_long();
   return pow(x, yy);
-}               
+}
 
 Rational Rational::operator-() const
 {
   Rational r(*this); r.negate(); return r;
 }
 
-Rational abs(const Rational& x) 
+Rational abs(const Rational& x)
 {
   Rational r(x);
   if (sign(r.num) < 0) r.negate();
@@ -236,7 +236,7 @@ Integer ceil(const Rational& x)
   return q;
 }
 
-Integer round(const Rational& x) 
+Integer round(const Rational& x)
 {
   Integer q;
   Integer r;
@@ -299,13 +299,13 @@ std::istream &operator>>(std::istream &f, Rational &y)
       throw ValueException();
     }
   }
-  
-  if (ch == '-')  { 
+
+  if (ch == '-')  {
     sign = -1;
     f.get(ch);
     if (f.eof() || f.bad()) {
       ch = ' ';
-    }    
+    }
   }
   else if ((ch < '0' || ch > '9') && ch != '.') {
     throw ValueException();
@@ -399,7 +399,7 @@ Rational::Rational(const Rational& y)  = default;
 
 Rational::Rational(const Integer& n) :num(n), den(&OneRep) {}
 
-Rational::Rational(const Integer& n, const Integer& d) 
+Rational::Rational(const Integer& n, const Integer& d)
  : num(n), den(d)
 {
   if (d == 0)  {
@@ -412,7 +412,7 @@ Rational::Rational(long n) :num(n), den(&OneRep) { }
 
 Rational::Rational(int n) :num(n), den(&OneRep) { }
 
-Rational::Rational(long n, long d) 
+Rational::Rational(long n, long d)
  : num(n), den(d)
 {
   if (d == 0) {
@@ -421,13 +421,13 @@ Rational::Rational(long n, long d)
   normalize();
 }
 
-Rational::Rational(int n, int d) 
- : num(n), den(d) 
-{ 
+Rational::Rational(int n, int d)
+ : num(n), den(d)
+{
   if (d == 0) {
     throw ZeroDivideException();
   }
-  normalize(); 
+  normalize();
 }
 
 Rational &Rational::operator =  (const Rational& y)
@@ -445,22 +445,22 @@ bool Rational::operator!=(const Rational &y) const
 
 bool Rational::operator< (const Rational &y) const
 {
-  return compare(*this, y) <  0; 
+  return compare(*this, y) <  0;
 }
 
 bool Rational::operator<=(const Rational &y) const
 {
-  return compare(*this, y) <= 0; 
+  return compare(*this, y) <= 0;
 }
 
 bool Rational::operator> (const Rational &y) const
 {
-  return compare(*this, y) >  0; 
+  return compare(*this, y) >  0;
 }
 
 bool Rational::operator>=(const Rational &y) const
 {
-  return compare(*this, y) >= 0; 
+  return compare(*this, y) >= 0;
 }
 
 int sign(const Rational& x)
@@ -474,25 +474,25 @@ void Rational::negate()
 }
 
 
-Rational &Rational::operator+=(const Rational& y) 
+Rational &Rational::operator+=(const Rational& y)
 {
   add(*this, y, *this);
   return *this;
 }
 
-Rational &Rational::operator-=(const Rational& y) 
+Rational &Rational::operator-=(const Rational& y)
 {
   sub(*this, y, *this);
   return *this;
 }
 
-Rational &Rational::operator*=(const Rational& y) 
+Rational &Rational::operator*=(const Rational& y)
 {
   mul(*this, y, *this);
   return *this;
 }
 
-Rational &Rational::operator/=(const Rational& y) 
+Rational &Rational::operator/=(const Rational& y)
 {
   div(*this, y, *this);
   return *this;
@@ -501,7 +501,7 @@ Rational &Rational::operator/=(const Rational& y)
 const Integer& Rational::numerator() const { return num; }
 const Integer& Rational::denominator() const { return den; }
 
-Rational::operator double() const 
+Rational::operator double() const
 {
   // We approach this in terms of absolute values because there is
   // (apparently) a bug in ratio() which yields incorrect results
@@ -509,7 +509,7 @@ Rational::operator double() const
   Integer x(num), y(den);
   x.abs();
   y.abs();
-  
+
   return sign(*this) * ratio(x, y);
 }
 
@@ -575,7 +575,7 @@ Rational lexical_cast(const std::string &f)
       num += (int) (ch - '0');
       ch=f[index++];
     }
-    
+
     if (ch == 'e' || ch == 'E') {
       int expsign = 1;
       Integer exponent(0);

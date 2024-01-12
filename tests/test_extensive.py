@@ -1,9 +1,10 @@
 import typing
-import pytest
 
 import pygambit as gbt
+import pytest
 
 from . import games
+
 
 @pytest.mark.parametrize(
     "players,title",
@@ -70,14 +71,14 @@ def test_game_is_not_perfect_recall():
 
 def test_getting_payoff_by_label_string():
     game = games.read_from_file("sample_extensive_game.efg")
-    assert game[[0, 0]]['Player 1'] == 2
-    assert game[[0, 1]]['Player 1'] == 2
-    assert game[[1, 0]]['Player 1'] == 4
-    assert game[[1, 1]]['Player 1'] == 6
-    assert game[[0, 0]]['Player 2'] == 3
-    assert game[[0, 1]]['Player 2'] == 3
-    assert game[[1, 0]]['Player 2'] == 5
-    assert game[[1, 1]]['Player 2'] == 7
+    assert game[[0, 0]]["Player 1"] == 2
+    assert game[[0, 1]]["Player 1"] == 2
+    assert game[[1, 0]]["Player 1"] == 4
+    assert game[[1, 1]]["Player 1"] == 6
+    assert game[[0, 0]]["Player 2"] == 3
+    assert game[[0, 1]]["Player 2"] == 3
+    assert game[[1, 0]]["Player 2"] == 5
+    assert game[[1, 1]]["Player 2"] == 7
 
 
 def test_getting_payoff_by_player():

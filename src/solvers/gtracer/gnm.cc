@@ -103,13 +103,13 @@ double LNM(const gnmgame &game,
 // Interpretation of parameters:
 // g: perturbation ray.
 // Eq: an array of equilibria will be stored here
-// steps: number of steps to take within a support cell; higher 
+// steps: number of steps to take within a support cell; higher
 //        values of this parameter slow GNM down, but may help it
 //        avoid getting off the path.
 // fuzz: a small floating point cutoff for a variety of things.
 //       can probably be left at 1e-12.
 // LNMFreq: a Local Newton Method subroutine will be run every
-//          LNMFreq steps to decrease accumulated errors.  This 
+//          LNMFreq steps to decrease accumulated errors.  This
 //          executes fairly quickly, so LNMFreq can be around 3.
 // LNMMax: the maximum allowed iterations within the LNM algorithm.
 // LambdaMin: should always be negative.  Once the trajectory
@@ -254,7 +254,7 @@ int GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz, 
     k = 0; // iteration counter; when k reaches LNMFreq, run LNM
     // within a single boundary, support unchanged
 
-    // take the specified number of steps within these support boundaries.  
+    // take the specified number of steps within these support boundaries.
     for (stepsLeft = steps; stepsLeft > 0; stepsLeft--) {
       //find J = Adj psi
       J = I;

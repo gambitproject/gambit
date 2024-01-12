@@ -23,15 +23,15 @@ Call_Hompack.c    created 9/15/1994         last modified 9/15/1994
                              Birk Huber     (birk@math.cornell.edu
 ALL RIGHTS RESERVED
 
-  This File represents the interface between Pelican and Hompacks 
-  FIXPNF path tracker. The HOMPACK routines it calls have actually 
+  This File represents the interface between Pelican and Hompacks
+  FIXPNF path tracker. The HOMPACK routines it calls have actually
   been translated from fortran into c with f2c and then modified a
   little so as not to require the f2c library.
 
-  The two routines the user needs to be aware of are init_HPK 
-  which takes a pelican Pvector, converts it to "tableau" format, 
-  and initialies all the nescessary global variables to represent 
-  the homotopy.   Call_HPK_Hom wich takes a double vector and uses 
+  The two routines the user needs to be aware of are init_HPK
+  which takes a pelican Pvector, converts it to "tableau" format,
+  and initialies all the nescessary global variables to represent
+  the homotopy.   Call_HPK_Hom wich takes a double vector and uses
   it as a starting point for path continuation.
 --------------------------------------------------------------------*/
 
@@ -40,7 +40,7 @@ ALL RIGHTS RESERVED
 
 #include "pelhomot.h"
 
-void print_proj_trans();          
+void print_proj_trans();
 
 int HPK_cont(Dvector X, int tweak);
 

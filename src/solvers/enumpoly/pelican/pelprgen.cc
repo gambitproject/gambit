@@ -1,7 +1,7 @@
 /*
-**  Proc_Gen.c 
-**     Commands defining Pelican functions 
-** 
+**  Proc_Gen.c
+**     Commands defining Pelican functions
+**
 **    copyright (c) 1995  Birk Huber
 */
 
@@ -14,27 +14,27 @@ static int time0 = 0; /* initialized to 0 to get rid of warning - AMM */
 /* --------------------------------------------------------------
  Install_Command(Gen_node (*G)(),char *s)
    takes a pointer to a Shell Procedure and a string s, installs
-   the pair on the symbol table-- and returns the value of the 
-   resulting symbol table entry. 
+   the pair on the symbol table-- and returns the value of the
+   resulting symbol table entry.
 
- Error Conditions: 
+ Error Conditions:
     if either G or S are NULL nothing is done and Null is returned
     if Gen_node() fails NULL is returned.
     install will return NULL on some error conditions and this
     will be passed through lock and returned.
-                   
+
 --------------------------------------------------------------*/
 /*
 Sym_ent Install_Command(Gen_node (*G)(),char *s){
-    return lock(install(s,PND(G))); 
+    return lock(install(s,PND(G)));
 }
 */
 
-/*----------------------------------------------------------------- 
-int Install_Gen_Commands()    
+/*-----------------------------------------------------------------
+int Install_Gen_Commands()
         Uses Install_Command to install all Commands
         On the symbol table. Always returns 1;
-  
+
 Error Conditions: None;
 -----------------------------------------------------------------*/
 
@@ -56,7 +56,7 @@ Gen_node G_Help(Gen_node g){
  return g;
 }
 
-/* 
+/*
 ** Aset Command          (tested on poly's)
 */
 /* aset psys_to_aset(psys); IN psys.h */
@@ -65,11 +65,11 @@ Gen_node G_Aset(Gen_node g){
   aset A=nullptr;
   /*
   if (Gen_length(g)==1&&Can_Be_Vector(g,Ply_T)>0){
-  
- 
+
+
   */
 if (Gen_length(g)==1&&Can_Be_Vector(g,Ply_T)>0){
-  
+
 P=Gen_to_psys(g);
 /*
     free_Gen_list(g);
@@ -84,7 +84,7 @@ P=Gen_to_psys(g);
  return List_To_Aset(g);
 }
 
-/* 
+/*
 ** Cayley Triangulation Command      (tested: looses 2 )
 **                                (problem probably in cly_triangulate)
 */
@@ -112,10 +112,10 @@ Gen_node G_Ctrig(Gen_node g){
        return Rerror("Usage: Ctrig(Aset,<Int>)",g);
      }
   }
-  
+
   time0=set_mark();
-  CP=cly_triangulate(A,T,TRUE,TRUE); 
-#ifdef LOG_PRINT 
+  CP=cly_triangulate(A,T,TRUE,TRUE);
+#ifdef LOG_PRINT
  fprintf(stdout /* was Pel_Out */,"\ntime used %d,\n",read_mark(time0))
 #endif
 ;
@@ -173,7 +173,7 @@ Gen_node G_GenSolve(Gen_node g, int tweak){
 
   time0=set_mark();
   Sys=Cayley_continue(A,T,&Sols,seed,tweak);
-#ifdef LOG_PRINT  
+#ifdef LOG_PRINT
 fprintf(stdout /* was Pel_Out */,"\ntime used %d,\n",read_mark(time0))
 #endif
 ;
@@ -182,7 +182,7 @@ fprintf(stdout /* was Pel_Out */,"\ntime used %d,\n",read_mark(time0))
 #endif
 ;
   free_Gen_list(g);
-  g=Gen_node_to_List(Link(Gen_from_psys(Sys),Xpl_to_Gen(Sols))); 
+  g=Gen_node_to_List(Link(Gen_from_psys(Sys),Xpl_to_Gen(Sols)));
   if (T!=nullptr) Imatrix_free(T);
   psys_free(Sys);
   POP_LOCS();
@@ -218,8 +218,8 @@ Gen_node G_MSD(Gen_node g){
   }
 
   time0=set_mark();
-  CP=MSD(A,T); 
-#ifdef LOG_PRINT 
+  CP=MSD(A,T);
+#ifdef LOG_PRINT
  fprintf(stdout /* was Pel_Out */,"\ntime used %d,\n",read_mark(time0))
 #endif
 ;
@@ -264,10 +264,10 @@ Gen_node G_Qtrig(Gen_node g){
     }
   }
   time0=set_mark();
-  CP=aset_print_subdiv(A,aset_lower_facets(A),T);   
+  CP=aset_print_subdiv(A,aset_lower_facets(A),T);
 
   /*
-#ifdef LOG_PRINT 
+#ifdef LOG_PRINT
  fprintf(stdout // was Pel_Out
  ,"\ntime used %d,\n",read_mark(time0))
 #endif
@@ -275,7 +275,7 @@ Gen_node G_Qtrig(Gen_node g){
 */
   /*  -- SUSPICIOUS
  free_Gen_list(g);
- */  
+ */
 if (CP!=nullptr){
     ptr=(g=Imatrix_to_Gen((Imatrix)Car(Car(CP))));
     while((CP=Cdr(CP))!=nullptr){
@@ -290,7 +290,7 @@ if (CP!=nullptr){
 }
 
 
-/* 
+/*
 ** Extremal Command                 (tested)
 */
 Gen_node G_Extremal(Gen_node g){
@@ -331,16 +331,16 @@ Gen_node G_UnLift(Gen_node g){
        case Sys_T:
        case Mtx_T: if (Can_Be_Vector(g,Ply_T)>0){
                     M=Gen_to_psys(g);
-		    /*                    
+		    /*
 free_Gen_list(g);
-*/                    
+*/
 psys_lift(M,0);
                     g=Gen_from_psys(M);
                     psys_free(M);
                     return g;
                    }
                    break;
-       default: 
+       default:
           if ( Can_Be_List(g)==TRUE ){
               ptr=Gen_lval(g);
               while(ptr!=nullptr){
@@ -366,10 +366,10 @@ return nullptr; /* not reachable */
 */
 Gen_node G_RandLift(Gen_node g){
   aset A;
-  /* 
+  /*
   int seed, low, high;
 
- if (Gen_length(g)!=4 || 
+ if (Gen_length(g)!=4 ||
       Can_Be_Aset(Gen_elt(g,1))!=TRUE||
       Can_Be_Int(Gen_elt(g,2))!=TRUE||
       Can_Be_Int(Gen_elt(g,3))!=TRUE||
@@ -381,10 +381,10 @@ Gen_node G_RandLift(Gen_node g){
   high=Gen_To_Int(Gen_elt(g,4));
   aset_randlift(A,seed,low,high);
   free_Gen_list(Gen_elt(g,2));
-   
+
  return g;
  */
-  
+
   A=Gen_aset(g);
   aset_randlift(A,10,0,200);
   return g;
@@ -419,47 +419,47 @@ Gen_node G_Save(Gen_node g){
   FILE *tmp;
   if (Gen_length(g)!=1) return Rerror("Print: too many arguments",g);
   tmp=stdout /* was Pel_Out */;
-/*  stdout // was Pel_Out 
+/*  stdout // was Pel_Out
 =Pel_Log; */
 #ifdef LOG_PRINT
   fprintf(stdout /* was Pel_Out */,"\n")
 #endif
-;                                             
-  switch (Gen_type(g)){ 
+;
+  switch (Gen_type(g)){
       case Ast_T:  aset_print(Gen_aset(g));
-                    break;                 
-      default: print_Gen_node(g);          
-  }                              
+                    break;
+      default: print_Gen_node(g);
+  }
 
 #ifdef LOG_PRINT
  fprintf(stdout /* was Pel_Out */,"\n")
 #endif
-;          
+;
  /*  Pel_Log=tmp;  */
  free_Gen_list(g);
- return IDND("");      
- }                     
+ return IDND("");
+ }
 
 
-/* 
+/*
 ** System Command                     (tested)
 */
-Gen_node G_System(Gen_node g) { 
+Gen_node G_System(Gen_node g) {
   int i,order=0;
   Gmatrix M;
   /*   Gen_node SYSND(); IN gennode.h */
   Gen_node T;
 
-if (Can_Be_Vector(Gen_elt(g,1),Ply_T)<0){    
+if (Can_Be_Vector(Gen_elt(g,1),Ply_T)<0){
 
 
 return Rerror("System: Usage System(<Ply>)",g);
   }
- 
+
 
 
  M=Gmatrix_copy(Gen_Mtx(g));
- 
+
   free_Gen_list(g);
   while (order==0){
      order=1;
@@ -472,15 +472,15 @@ return Rerror("System: Usage System(<Ply>)",g);
            T=*GMref(M,1,i+1);
            *GMref(M,1,i+1)=*GMref(M,1,i);
            *GMref(M,1,i)=T;
-	     
+
   }
-  
+
      }
  }
 return SYSND(M);
 }
 
-/* 
+/*
 ** GenPoly Command         (tested)
 */
 psys aset_to_psys(aset,Ivector,int);
@@ -523,9 +523,9 @@ Gen_node G_AType(Gen_node g){
   return Rerror("Usage: AType(<Ply>);",g);
   }
   P=Gen_to_psys(g);
-  /* 
+  /*
  free_Gen_list(g);
- */  
+ */
 I=psys_type(P);
   g=Imatrix_to_Gen(I);
   Imatrix_free(I);
@@ -533,7 +533,7 @@ I=psys_type(P);
   return g;
 }
 
-/* 
+/*
 ** Continuation Command    (tested)
 */
 Gen_node G_Cont(Gen_node g, int tweak){
@@ -549,12 +549,12 @@ Gen_node G_Cont(Gen_node g, int tweak){
    time0=set_mark();
    Sl=psys_hom(P,Sl,tweak);
    /*
-#ifdef LOG_PRINT 
-  fprintf(stdout // was Pel_Out 
+#ifdef LOG_PRINT
+  fprintf(stdout // was Pel_Out
 ,"time used %d,\n",read_mark(time0))
 #endif
 ;
-*/  
+*/
  free_Gen_list(g);
    psys_free(P);
    return Xpl_to_Gen(Sl);
@@ -574,7 +574,7 @@ Gen_node G_Solve(Gen_node g, int tweak){
         Can_Be_Vector(Gen_elt(g,1),Ply_T)<=0||
         Can_Be_List(Gen_elt(g,2))!=TRUE)
         return Rerror("Usage: Solve(PSys,{<Int>})",g);
-   
+
    P=Gen_to_psys(Gen_elt(g,1));
    Nl=Gen_to_Ivector_list(Gen_lval(Gen_elt(g,2)));
    time0=set_mark();
@@ -583,7 +583,7 @@ Gen_node G_Solve(Gen_node g, int tweak){
      Nl=Cdr(Nl);
    }
    /*   Pel_New_Log(strcat(FilePrefix,".start")); */
-#ifdef G_SOLVE_PRINT 
+#ifdef G_SOLVE_PRINT
   fprintf(stdout /* was Pel_Log */,"%% Pelican Output File: Generic System and Solutions\n");
 
    fprintf(stdout /* was Pel_Log */,"G=");
@@ -592,8 +592,8 @@ Gen_node G_Solve(Gen_node g, int tweak){
    fprintf(stdout /* was Pel_Log */,"S=\n");
    xpl_fprint(stdout /* was Pel_Log */,Sl);
    /*   Pel_Open_Log(Pel_LogName);  */
-   
-  
+
+
 #endif
 ;
    /*  SUSPICIOUS
@@ -760,13 +760,13 @@ Gen_node G_NormSub(Gen_node g){
 /*
 ** Lead Command (tested)
 */
-Gen_node G_Lead(Gen_node g){                                 
+Gen_node G_Lead(Gen_node g){
   psys PS1,PS2;
   if (Gen_length(g)!=1 ||
      (Can_Be_Vector(Gen_elt(g,1),Ply_T)<=0))
       return Rerror("Usage: <Ply> Lead(<Ply>)",g);
-  PS1=Gen_to_psys(g);             
-  free_Gen_list(g);                 
+  PS1=Gen_to_psys(g);
+  free_Gen_list(g);
   PS2=psys_lead(PS1);
   g=Gen_from_psys(PS2);
   psys_free(PS2);
@@ -782,7 +782,7 @@ Gen_node G_Verify(Gen_node g){
   psys PS;
   Dmatrix D;
 
-  if (Gen_length(g)!=2|| 
+  if (Gen_length(g)!=2||
       Can_Be_Vector(Gen_elt(g,1),Ply_T)<0||
       Can_Be_List(Gen_elt(g,2))!=TRUE)
   return Rerror("Usage: Verify(<Ply>,{<Dbl>}",g);
@@ -801,7 +801,7 @@ Gen_node G_Verify(Gen_node g){
   psys_free(PS);
   /*
   free_Gen_list(g);
-  */ 
+  */
  g=Gen_node_to_List(Gen_next(res));
   free_Gen_node(res);
   return g;
@@ -874,7 +874,7 @@ Gen_node G_Scale(Gen_node g){
  psys PS;
  Dmatrix S;
  int l;
- if ( 
+ if (
     ((l=Gen_length(g))<1)||
     ((l>=1)&&(Can_Be_Vector(Gen_elt(g,1),Ply_T)<=0))||
     ((l>=2)&&(Gen_type(Gen_elt(g,2))!=Idf_T))||
@@ -885,14 +885,14 @@ Gen_node G_Scale(Gen_node g){
  if (l==2) install(Gen_idval(Gen_elt(g,2)),Dmatrix_to_Gen(S));
  /*
  free_Gen_list(g);
- */ 
+ */
 g=Gen_from_psys(PS);
  Dmatrix_free(S);
  psys_free(PS);
 return g;
 }
 
-/* 
+/*
 ** UnScale Command         (tested)
 */
 Gen_node G_UnScale(Gen_node g){
@@ -900,13 +900,13 @@ Gen_node G_UnScale(Gen_node g){
  Dmatrix scl;
  Dmatrix root = nullptr;  /* Initialized to get rid of C++ warning */
 
- if (g==nullptr || 
-     Gen_length(g)!=2 || 
+ if (g==nullptr ||
+     Gen_length(g)!=2 ||
      Can_Be_Vector(Gen_elt(g,2),Dbl_T)!=N ||
      Can_Be_List(g)!=TRUE)
-    
+
   return Rerror("Usage: UnScale({<Dbl>},<Dbl>)version 1",g);
- 
+
  rptr=(res=gen_node());
  ptr=Gen_lval(g);
  scl=Gen_to_Dmatrix(Gen_elt(g,2));
@@ -927,12 +927,12 @@ Gen_node G_UnScale(Gen_node g){
  }
  /*
  free_Gen_list(g);
- */ 
+ */
  g=XPLND(Gen_next(res));
  free_Gen_node(res);
  Dmatrix_free(scl);
  Dmatrix_free(root);
- return g;             
+ return g;
 }
 
 /*
@@ -943,13 +943,13 @@ Gen_node G_ScaleXPL(Gen_node g){
  Dmatrix scl;
  Dmatrix root = nullptr; /* Initialized to get rid of C++ warning. */
  int i;
-   
+
  if (g==nullptr ||
      Gen_length(g)!=2 ||
      Can_Be_Vector(Gen_elt(g,2),Dbl_T)!=N ||
      Can_Be_List(g)!=TRUE)
      return Rerror("Usage: XScale({<Dbl>},<Dbl>)",g);
-    
+
  rptr=(res=gen_node());
  ptr=Gen_lval(g);
  scl=Gen_to_Dmatrix(Gen_elt(g,2));
@@ -967,10 +967,10 @@ Gen_node G_ScaleXPL(Gen_node g){
   Gen_set_next(rptr,Dmatrix_to_Gen(root));
   rptr=Gen_next(rptr);
   ptr=Gen_next(ptr);
- } 
- /* 
+ }
+ /*
 free_Gen_list(g);
-*/ 
+*/
 g=XPLND(Gen_next(res));
  free_Gen_node(res);
  Dmatrix_free(scl);
@@ -982,12 +982,12 @@ g=XPLND(Gen_next(res));
 
 /*
 ** Affine Command
-*/ 
+*/
 Gen_node G_Affine(Gen_node g){
  Gen_node ptr, res,rptr;
  Dmatrix root;
 
- 
+
  if (g==nullptr ||
      Gen_length(g)!=1 ||
      Can_Be_List(g)!=TRUE)
@@ -1010,7 +1010,7 @@ Gen_node G_Affine(Gen_node g){
  }
  /*
  free_Gen_list(g);
- */ 
+ */
 g=XPLND(Gen_next(res));
  free_Gen_node(res);
  return g;
@@ -1084,15 +1084,13 @@ Gen_node G_Re(Gen_node g){
    free_Gen_list(g);
    return DBLND(Real(c));
 }
- 
 
-Gen_node G_Im(Gen_node g){ 
-   fcomplex c; 
+
+Gen_node G_Im(Gen_node g){
+   fcomplex c;
    if ( Gen_length(g)!=1|| Can_Be_Cpx(Gen_elt(g,1))!=TRUE)
-        return Rerror("Usage: Re(Cpx)",g); 
-   c=Gen_To_Cpx(g); 
-   free_Gen_list(g); 
-   return DBLND(Imag(c)); 
-} 
-
-
+        return Rerror("Usage: Re(Cpx)",g);
+   c=Gen_To_Cpx(g);
+   free_Gen_list(g);
+   return DBLND(Imag(c));
+}

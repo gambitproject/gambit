@@ -31,7 +31,7 @@
 using namespace Gambit;
 using namespace Gambit::Nash;
 
-List<MixedStrategyProfile<Rational> > 
+List<MixedStrategyProfile<Rational> >
 ReadProfiles(const Game &p_game, std::istream &p_stream)
 {
   List<MixedStrategyProfile<Rational> > profiles;
@@ -55,7 +55,7 @@ ReadProfiles(const Game &p_game, std::istream &p_stream)
   return profiles;
 }
 
-List<MixedStrategyProfile<Rational> > 
+List<MixedStrategyProfile<Rational> >
 RandomProfiles(const Game &p_game, int p_count, const Rational &denom)
 {
   List<MixedStrategyProfile<Rational> > profiles;

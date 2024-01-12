@@ -89,9 +89,9 @@ NashGNMStrategySolver::BuildRepresentation(const Game &p_game) const
       veclength *= p_game->GetPlayer(pl)->NumStrategies();
     }
     cvector payoffs(veclength);
-  
+
     std::shared_ptr<gnmgame> A(new nfgame(actions, payoffs));
-  
+
     std::vector<int> profile(p_game->NumPlayers());
     for (StrategyProfileIterator iter(p_game); !iter.AtEnd(); iter++) {
       for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
@@ -107,7 +107,7 @@ NashGNMStrategySolver::BuildRepresentation(const Game &p_game) const
     return A;
   }
 }
- 
+
 List<MixedStrategyProfile<double> >
 NashGNMStrategySolver::Solve(const Game &p_game) const
 {
@@ -116,7 +116,7 @@ NashGNMStrategySolver::Solve(const Game &p_game) const
   }
 
   std::shared_ptr<gnmgame> A = BuildRepresentation(p_game);
-  cvector g(A->getNumActions()); 
+  cvector g(A->getNumActions());
   g[0] = 1.0;
   for (int i = 1; i < A->getNumActions(); i++) {
     g[i] = 0.0;

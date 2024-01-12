@@ -44,7 +44,7 @@ using namespace Gambit;
 // vector perpendicular to the plane, then subtracting to compute the
 // component parallel to the plane.)
 //
-void FunctionOnSimplices::Project(Vector<double> &x, 
+void FunctionOnSimplices::Project(Vector<double> &x,
 				  const Array<int> &lengths) const
 {
   int index = 1;
@@ -79,12 +79,12 @@ ConjugatePRMinimizer::AlphaXPlusY(double alpha,
   }
 }
 
-// These routines are drawn from comparably-named ones in 
+// These routines are drawn from comparably-named ones in
 // multimin/directional_minimize.c in GSL.
 
 void
 ConjugatePRMinimizer::TakeStep(const Vector<double> &x, const Vector<double> &p,
-			       double step, double lambda, 
+			       double step, double lambda,
 			       Vector<double> &x1, Vector<double> &dx)
 {
   dx = 0.0;
@@ -93,11 +93,11 @@ ConjugatePRMinimizer::TakeStep(const Vector<double> &x, const Vector<double> &p,
   AlphaXPlusY(1.0, dx, x1);
 }
 
-void 
+void
 ConjugatePRMinimizer::IntermediatePoint(const Function &fdf,
-					const Vector<double> &x, 
+					const Vector<double> &x,
 					const Vector<double> &p,
-					double lambda, 
+					double lambda,
 					double pg,
 					double stepa, double stepc,
 					double fa, double fc,
@@ -138,8 +138,8 @@ ConjugatePRMinimizer::Minimize(const Function &fdf,
 			       double lambda,
 			       double stepa, double stepb, double stepc,
 			       double fa, double fb, double fc, double tol,
-			       Vector<double> &x1, Vector<double> &dx1, 
-			       Vector<double> &x2, Vector<double> &dx2, 
+			       Vector<double> &x1, Vector<double> &dx1,
+			       Vector<double> &x2, Vector<double> &dx2,
 			       Vector<double> &gradient,
 			       double &step, double &f, double &gnorm)
 {
@@ -303,7 +303,7 @@ void ConjugatePRMinimizer::Restart()
 
 bool ConjugatePRMinimizer::Iterate(const Function &fdf,
 				   Vector<double> &x, double &f,
-				   Vector<double> &gradient, 
+				   Vector<double> &gradient,
 				   Vector<double> &dx)
 {
   double fa = f, fb, fc;

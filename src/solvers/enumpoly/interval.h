@@ -31,7 +31,7 @@
    gInterval
 
 which models the concept of a nonempty compact interval.
-Since boundary points can be identified, open and half 
+Since boundary points can be identified, open and half
 open (bounded) intervals can be effected, but less directly.
 */
 
@@ -41,7 +41,7 @@ template<class T> class gInterval {
 private:
     T lower_bd;
     T upper_bd;
-    
+
 public:
     // constructors
     gInterval(const gInterval<T> &p_interval)

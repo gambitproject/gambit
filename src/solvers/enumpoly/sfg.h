@@ -34,7 +34,7 @@ private:
   const Gambit::BehaviorSupportProfile &efsupp;
   Gambit::Array<SFSequenceSet *> *sequences;
   gNArray<Gambit::Array<Gambit::Rational> *> *SF;  // sequence form
-  Gambit::Array<Gambit::RectArray<Gambit::Rational> *> *E;   // constraint matrices for sequence form.  
+  Gambit::Array<Gambit::RectArray<Gambit::Rational> *> *E;   // constraint matrices for sequence form.
   Gambit::Array<int> seq;
   Gambit::PVector<int> isetFlag,isetRow;
   Gambit::Array<Gambit::List<Gambit::GameInfoset> > infosets;
@@ -45,7 +45,7 @@ private:
 
 public:
   explicit Sfg(const Gambit::BehaviorSupportProfile &);
-  virtual ~Sfg();  
+  virtual ~Sfg();
 
   inline int NumSequences(int pl) const {return seq[pl];}
   inline int NumInfosets(int pl) const {return infosets[pl].Length();}
@@ -53,7 +53,7 @@ public:
   int TotalNumSequences() const;
   int NumPlayerInfosets() const;
   inline int NumPlayers() const {return EF->NumPlayers();}
-  
+
   inline Gambit::Array<Gambit::Rational> Payoffs(const Gambit::Array<int> & index) const {return *((*SF)[index]);}
   Gambit::Rational Payoff(const Gambit::Array<int> & index,int pl) const;
 
@@ -69,4 +69,3 @@ public:
 };
 
 #endif    // SFG_H
-

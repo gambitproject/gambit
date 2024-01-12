@@ -1,7 +1,6 @@
-import pytest
 import numpy as np
-
 import pygambit as gbt
+import pytest
 
 from . import games
 

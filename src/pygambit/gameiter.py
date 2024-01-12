@@ -30,9 +30,9 @@ class Contingencies:
     Contingencies may be restricted by specifying the strategies of any number
     of players via calls to __getitem__.
     """
-    def __init__(self, game, cont={}):
+    def __init__(self, game, cont=None):
         self.game = game
-        self.cont = cont
+        self.cont = cont if cont is not None else {}
 
     def __getitem__(self, strategy):
         cont = dict(self.cont)
@@ -54,7 +54,5 @@ class Contingencies:
         else:
             nextpl = min(pl for (pl, player) in enumerate(self.game.players)
                          if player not in self.cont)
-            for (st, strategy) in enumerate(
-                    self.game.players[nextpl].strategies
-            ):
+            for strategy in self.game.players[nextpl].strategies:
                 yield from self[strategy]

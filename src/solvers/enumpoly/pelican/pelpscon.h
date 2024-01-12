@@ -18,7 +18,7 @@ http://netlib2.cs.utk.edu/hompack/
 
 ***************************************************************** */
 
-extern double PN_dt0;        
+extern double PN_dt0;
 extern double PN_maxdt;
 extern double PN_mindt;
 extern double PN_scaledt;
@@ -29,6 +29,5 @@ extern double PN_Nratio;
 extern double PN_tfinal;
 extern double PN_FYtol;
 extern double PN_FDtol;
-extern double PN_Fratio; 
+extern double PN_Fratio;
 extern int    PN_maxsteps;
-

@@ -107,4 +107,3 @@ As it is a new format, the Gambit workbook format is still under
 development and may change in details. It is intended that newer
 versions of the graphical interface will still be able to read
 workbook files written in older formats.
-

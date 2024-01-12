@@ -69,4 +69,3 @@ strategies each, with a unique equilibrium in mixed strategies::
    This is free software, distributed under the GNU GPL
 
    NE,1/3,2/3,1/3,2/3
-

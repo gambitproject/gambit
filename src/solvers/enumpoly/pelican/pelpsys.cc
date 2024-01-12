@@ -1,7 +1,7 @@
 /* psys.c */
 
 /*
-  This file now houses all the implementation code from files beginning with 
+  This file now houses all the implementation code from files beginning with
 psys in the original distribution.
 */
 
@@ -37,14 +37,14 @@ aset psys_to_aset(psys P){
       aset_pnt_set(pnt,d+1,*psys_def(P));
       aset_add(res,psys_bkno(P),pnt);
     )
-  )  
-     
+  )
+
   POP_LOCS();
   return res;
-}    
+}
 
 
- 
+
 #define T(i) (*IVref(T,i))
 #define Pcoord(i) (*IVref(pnt_coords(P),i))
 psys aset_to_psys(aset A,Ivector T, int seed){
@@ -53,14 +53,14 @@ psys aset_to_psys(aset A,Ivector T, int seed){
  psys Sys;
  node Aptr,C,Cptr,P;
  double t;
- 
+
 N=aset_dim(A)-1;
 
  if ((R=aset_r(A))!=IVlength(T))
       bad_error("Gen_Poly: Aset and Type Vector incompatible");
- 
+
   rand_seed(seed);
- 
+
   /* determine dimensions of psys */
   Aptr=aset_start_cfg(A);
   while((C=aset_next_cfg(&Aptr))!=nullptr){
@@ -70,7 +70,7 @@ N=aset_dim(A)-1;
   }
   if (n!=N) bad_error("Gen_Poly: bad Type Vector");
   Sys=psys_new(N,M,R);
- 
+
   /* set up semi-mixed structure data */
   Aptr=aset_start_cfg(A);
   while((C=aset_next_cfg(&Aptr))!=nullptr){
@@ -81,7 +81,7 @@ N=aset_dim(A)-1;
       P=Car(Cptr);
       eqno++;
       r=0;
-      do{ 
+      do{
         psys_init_mon(Sys);
         t=rand_double(0,1);
         *psys_coef_real(Sys)=cos(2*PI*t);
@@ -100,7 +100,7 @@ N=aset_dim(A)-1;
       psys_set_eqno(Sys,eqno);
       FORALL_MONO(Sys, (*psys_homog(Sys))+=r;)
     }
-  }  
+  }
   return Sys;
 }
 #undef Pcoord
@@ -117,11 +117,11 @@ N=aset_dim(A)-1;
 */
 
 /*
-** psys_binsolve.c                             Birkett Huber 
+** psys_binsolve.c                             Birkett Huber
 **                                     Created On: 4-2-95
-**                                  Last Modified: 8-6-95         
-** Use Hermite normal form algorithm and gaussian elimination to 
-** solve a simplicial system -- used to find initial solutions in 
+**                                  Last Modified: 8-6-95
+** Use Hermite normal form algorithm and gaussian elimination to
+** solve a simplicial system -- used to find initial solutions in
 ** lifting homotopy.
 */
 
@@ -140,11 +140,11 @@ N=aset_dim(A)-1;
 #define Idx(i)  (*IVref(Idx,i))
 
 /*
-** psys_binsolve 
+** psys_binsolve
 **       Input: a  polynomial vector P.
 **      Output: On success a matrix of solutions.
 **              On failure the null pointer (and an error message)
-**              
+**
 */
 node psys_binsolve(psys sys){
  int n,i,j,k;
@@ -160,9 +160,9 @@ node psys_binsolve(psys sys){
 
  n=psys_d(sys);
 
- /* 
- ** reserve and initialize auxilary space 
- */     
+ /*
+ ** reserve and initialize auxilary space
+ */
  Coef=Dmatrix_new(2*n,2*n);   /* non-constant monomial coefs  */
  Cf  =Dvector_new(2*n);     /* constant term for each equation */
  S   =Imatrix_new(n,n);   /* non-constant monomials exps in rows */
@@ -180,7 +180,7 @@ node psys_binsolve(psys sys){
  }
 
 /*
-** Load matrix representation of Equation Coef*X^S = C 
+** Load matrix representation of Equation Coef*X^S = C
 */
  psys_start_block(sys);
  psys_start_poly(sys);
@@ -212,14 +212,14 @@ node psys_binsolve(psys sys){
    bstart+=block_size;
  }while (psys_next_block(sys)==TRUE);
 
-   
+
 
  /*
  ** find equivalent binomial sytem X^S=Cf
  */
  Dmatrix_Solve(Coef,Cf,2*n);
 
- /* 
+ /*
  ** use hermite normal form to get a triangulated system X^(US)=C^U
  **   (use first row of Coef as temporary storage for calculating C^U)
  */
@@ -239,8 +239,8 @@ node psys_binsolve(psys sys){
    }
  }
 
- /* 
- ** Calculate number of solutions to be found 
+ /*
+ ** Calculate number of solutions to be found
  ** (determinant of triangular matrix S)
  */
  for(i=1;i<=n;i++){
@@ -305,7 +305,7 @@ node psys_binsolve(psys sys){
    Sol_List=Cons(atom_new((char *)Dsol,DMTX),Sol_List);
  }
 
-/* 
+/*
 ** clean up and leave
 */
 cleanup:
@@ -315,7 +315,7 @@ cleanup:
   Dmatrix_free(Cf);
   Dmatrix_free(Coef);
   Dmatrix_free(Sol);
-  
+
 POP_LOCS();
 return Sol_List;
 }
@@ -333,17 +333,17 @@ return Sol_List;
 /**************************************************************************/
 
 /*******************************************************************
-**  
+**
 **  Projective Newton Path Following                    Birk Huber
 **                                                      Dec 31 1995
 **  This is based on a description by T.Y. Li given in a lecture
 **  at the SEA-95  (Nov 23-17) at CIRM
 **
-**  This version is written to allow for quick change to run as 
+**  This version is written to allow for quick change to run as
 **  C-code. (i.e. only access/change singel elts in arrays).
 **  uses auxilary functions norm, and GQR which must be modified to
 **  take a basis indicating which collumns to use.
-**  
+**
 ** Changes
 **   1: Endgame strategy  use dt=(1-t) if t+dt is > final tol
 **      sugested strategy seemed to prevent actual completion.
@@ -366,7 +366,7 @@ return Sol_List;
 
 /*
 **     Controll Parameters
-**        
+**
 **       PN_dt0         initial stepsize
 **       PN_maxdt       maximum stepsize
 **       PN_mindt       minimum stepsize
@@ -376,26 +376,26 @@ return Sol_List;
 **       PN_NDtol       Stop final Newton when |DX|<PN_FDtol
 **       PN_Nratio      Stop Newton when |DX|/|F(X)| < PN_Nratio
 **       PN_tfinal      Destination Value. (just short of 1)
-**       PN_FYtol       Stop final Newton when |F(X)|<PN_FYtol 
+**       PN_FYtol       Stop final Newton when |F(X)|<PN_FYtol
 **       PN_FDtol       Stop final Newton when |DX|<PN_FDtol
 **       PN_Fratio      Stop final Newton when |DX|/|F(X)| < PN_Fratio
 **       PN_maxsteps    Give up after PN_maxsteps iterations of main loop
-**        
+**
 */
 
-double PN_dt0=.01;        
-double PN_maxdt=0.1;        
-double PN_mindt=1E-14;  
-double PN_scaledt=2;        
-double PN_cfac=10;      
-double PN_NYtol=1E-8;     
-double PN_NDtol=1E-12;     
-double PN_Nratio=1E-4;   
+double PN_dt0=.01;
+double PN_maxdt=0.1;
+double PN_mindt=1E-14;
+double PN_scaledt=2;
+double PN_cfac=10;
+double PN_NYtol=1E-8;
+double PN_NDtol=1E-12;
+double PN_Nratio=1E-4;
 double PN_tfinal=1-1E-10;
-double PN_FYtol=1E-10;   
-double PN_FDtol=1E-14;   
-double PN_Fratio = 1E-8; 
-int    PN_maxsteps=1000; 
+double PN_FYtol=1E-10;
+double PN_FDtol=1E-14;
+double PN_Fratio = 1E-8;
+int    PN_maxsteps=1000;
 #define Zero_Tol 1E-13
 /*
 **  Auxilary Macroes/Functions
@@ -426,7 +426,7 @@ int    PN_maxsteps=1000;
     DX(i)=(QY(i)-DX(i))/(R(i,i));\
   }
 
-   
+
 double norm(Dvector X){
   int i;
   double abs=0.0,tmp;
@@ -440,7 +440,7 @@ double norm(Dvector X){
 double BGQR(Dmatrix A,Ivector Basis,int N,Dmatrix Q,Dmatrix R){
   int i,j,k;
   double s,s1,s2,t1,t2, max_e=-1,min_e=-1;
-  
+
   for (i=1;i<=N;i++){
     for (j=1;j<=N;j++) {
        Q(i,j)=0.0;
@@ -453,7 +453,7 @@ double BGQR(Dmatrix A,Ivector Basis,int N,Dmatrix Q,Dmatrix R){
       if (R(k,i)>Zero_Tol || R(k,i)<-Zero_Tol){
          s2=R(k,i);      s1=R(i,i);
          s=sqrt(s1*s1+s2*s2);
-         s1=s1/s;        
+         s1=s1/s;
          s2=s2/s;
          for(j=1;j<=N;j++){
            t1= s1*R(i,j)+s2*R(k,j);
@@ -472,7 +472,7 @@ double BGQR(Dmatrix A,Ivector Basis,int N,Dmatrix Q,Dmatrix R){
     else if(s1<min_e || min_e<0) min_e=s1;
   }
   return max_e/min_e;
-}                        
+}
 /*
 **       Variable Definition and Initialization
 */
@@ -514,16 +514,16 @@ for(i=3;i<=T-1;i++) Basis(i-2)=i;
 **      Main Predictor Corrector Loop
 */
 while (tsteps<PN_maxsteps && X(T)<=PN_tfinal){
-  tsteps=tsteps+1;   
+  tsteps=tsteps+1;
 
-  /* 
+  /*
   ** End game Step size (THIS DIFFERS FROM LI'S SUGGESTION)
   */
   if (X(T)+dt > PN_tfinal) dt=1-X(T);
-  
+
   /*
   ** Choose Basis:
-  ** A) Find complex coordinate with largest norm 
+  ** A) Find complex coordinate with largest norm
   */
   max_c = X(Z(1))*X(Z(1))+X(Z(2))*X(Z(2));
   max_idx=0;
@@ -552,13 +552,13 @@ while (tsteps<PN_maxsteps && X(T)<=PN_tfinal){
   for (i=1;i<=T;i++) XOld(i)=X(i);
 
   /*
-  ** Predictor:  Euler predictor step 
+  ** Predictor:  Euler predictor step
   ** A) Solve system JC(:,Basis)DX=-JC(:,T)
   */
   JC=psys_jac(P,X,JC);
   cond_num=BGQR(JC,Basis,N,QT,R);
-  /* 
-  ** Form RHS 
+  /*
+  ** Form RHS
   */
   for(i=1;i<=N;i++){
     QY(i)=0.0;
@@ -566,7 +566,7 @@ while (tsteps<PN_maxsteps && X(T)<=PN_tfinal){
       QY(i)=QY(i)-QT(i,j)*JC(j,T);
     }
   }
-  /* 
+  /*
   ** Backsolve
   */
   Backsolve(R,QY,DX,i,j)
@@ -579,8 +579,8 @@ while (tsteps<PN_maxsteps && X(T)<=PN_tfinal){
 
   /* Corrector First Step */
   Y=psys_eval(P,X,Y);
-  Nold=norm(Y);             
-  JC=psys_jac(P,X,JC); 
+  Nold=norm(Y);
+  JC=psys_jac(P,X,JC);
   cond_num=BGQR(JC,Basis,N,QT,R);
   /* form RHS: */
   for(i=1;i<=N;i++){
@@ -594,14 +594,14 @@ while (tsteps<PN_maxsteps && X(T)<=PN_tfinal){
 
   /* update */
   for(i=1; i<=N;i++) X(Basis(i))=X(Basis(i))+DX(i);
-  Y=psys_eval(P,X,Y); 
+  Y=psys_eval(P,X,Y);
   Nnew=norm(Y);
 
   /*Decide if performance is o.k.*/
   if (Nnew>(Nold/PN_cfac)&&(Nnew>PN_NYtol)){
     /*if performance is not o.k. decrease step size and try again*/
     if (dt>PN_mindt){
-      dt=dt/PN_scaledt;     
+      dt=dt/PN_scaledt;
       for(i=1;i<=T;i++)X(i)=XOld(i);
     }
     else {
@@ -612,14 +612,14 @@ while (tsteps<PN_maxsteps && X(T)<=PN_tfinal){
     }
     fprintf(stdout /* was psys_logfile */,"Stp=%d, T=%g, dt=%g\n", tsteps,X(T),dt);
   }
-  else{     
-    /* 
+  else{
+    /*
     ** if performance is o.k. run Corrector loop
     ** (Maybe a good idea to limit number of Newton Steps)
     */
     Ndx=norm(DX);
     while (Nnew>PN_NYtol && Ndx>PN_NDtol && Ndx/Nnew > PN_Nratio){
-    JC=psys_jac(P,X,JC); 
+    JC=psys_jac(P,X,JC);
     cond_num=BGQR(JC,Basis,N,QT,R);
       /* form RHS*/
       for(i=1;i<=N;i++){
@@ -629,7 +629,7 @@ while (tsteps<PN_maxsteps && X(T)<=PN_tfinal){
       Backsolve(R,QY,DX,i,j)
 
       for (i=1;i<=N;i++) X(Basis(i))=X(Basis(i))+DX(i);
-      Y=psys_eval(P,X,Y); 
+      Y=psys_eval(P,X,Y);
       Nnew=norm(Y);
       Ndx=norm(DX);
     }
@@ -640,8 +640,8 @@ while (tsteps<PN_maxsteps && X(T)<=PN_tfinal){
     arclen=arclen+sqrt(arcstep);
 
     /* increase step size if allowed*/
-    if (dt <PN_maxdt) dt=dt*PN_scaledt;      
-    fprintf(stdout /* was psys_logfile */,"Stp=%d, T=%g, Y=%g, arclen=%f\n", 
+    if (dt <PN_maxdt) dt=dt*PN_scaledt;
+    fprintf(stdout /* was psys_logfile */,"Stp=%d, T=%g, Y=%g, arclen=%f\n",
            tsteps,X(T),Nnew,arclen);
   }
 }
@@ -651,16 +651,16 @@ if (tsteps>PN_maxsteps){
  Rval=1;
  goto cleanup;
 }
-  
+
 /* RUN NEWTON's METHOD TO FINAL TOLERANCE (IF DESIRED).*/
   X(T)=1.0;
-  Y=psys_eval(P,X,Y); 
+  Y=psys_eval(P,X,Y);
   Nnew=norm(Y);
   if (Nnew>PN_FYtol){
     fprintf(stdout /* was psys_logfile */,
            "Starting final Newton iteration: T=%g,Y=%g\n",X(T),Nnew);
    do {
-     JC=psys_jac(P,X,JC); 
+     JC=psys_jac(P,X,JC);
      cond_num=BGQR(JC,Basis,N,QT,R);
      /* form RHS: */
      for(i=1;i<=N;i++){
@@ -669,7 +669,7 @@ if (tsteps>PN_maxsteps){
       }
       Backsolve(R,QY,DX,i,j)
       for(i=1;i<=N;i++) X(Basis(i))=X(Basis(i))+DX(i);
-      Y=psys_eval(P,X,Y); 
+      Y=psys_eval(P,X,Y);
       Nnew=norm(Y);
       Ndx=norm(DX);
       fprintf(stdout /* was psys_logfile */,
@@ -678,13 +678,13 @@ if (tsteps>PN_maxsteps){
   }
 
 cleanup:
-printf("Stp=%d, T=%g,Y=%g, arclen=%f, FLAG=%d\n", 
+printf("Stp=%d, T=%g,Y=%g, arclen=%f, FLAG=%d\n",
            tsteps,X(T),Nnew,arclen,Rval);
 Ivector_free(Z);
 Ivector_free(Basis);
 Dvector_free(XOld);
 Dvector_free(DX);
-Dvector_free(Y); 
+Dvector_free(Y);
 Dvector_free(QY);
 Dmatrix_free(JC);
 Dmatrix_free(QT);
@@ -700,7 +700,7 @@ return Rval;}
 /**************************************************************************/
 
 /*
-** Psys class definition. 
+** Psys class definition.
 **    -  square system of equations, listed by blocks
 */
 struct psys_t{
@@ -712,7 +712,7 @@ struct psys_t{
     int *estart;
     int *bstart;
     int *degrees;
-    int *tops;  /* a vector of info desribing system */ 
+    int *tops;  /* a vector of info desribing system */
     int *istore; /* an Mx(N+3) matrix of exponents for monomials*/
  double *dstore; /* and Mx2 matrix of coeficients for monomials */
     int curr_eqn;
@@ -763,7 +763,7 @@ psys psys_new(int n, int m, int r){
     res=(psys)mem_malloc(sizeof(struct psys_t));
     res->istore=(int *)mem_malloc(ISTORE_SIZE*sizeof(int));
     res->dstore=(double *)mem_malloc(2*m*sizeof(double));
-    res->aux=(void **)mem_malloc(m*sizeof(void *)); 
+    res->aux=(void **)mem_malloc(m*sizeof(void *));
     Sys_N(res)=n;
     Sys_Neq(res)=n;
     Sys_R(res)=r;
@@ -779,7 +779,7 @@ psys psys_new(int n, int m, int r){
     Sys_Mon_New(res)=1;
     for(i=1;i<=m;i++){
         Mon_next(res,i)=i+1;
-        Mon_aux(res,i)=nullptr; 
+        Mon_aux(res,i)=nullptr;
         Mon_coefR(res,i)=0.0;
         Mon_coefI(res,i)=0.0;
     }
@@ -792,7 +792,7 @@ psys psys_new(int n, int m, int r){
 void psys_free(psys sys){
   mem_free((void *)(sys->dstore));
   mem_free((void *)(sys->istore));
-  mem_free((void *)(sys->aux)); 
+  mem_free((void *)(sys->aux));
   mem_free((void *)(sys));
 }
 
@@ -816,7 +816,7 @@ void psys_save_mon(psys sys, int i){
    int tmp=0,j,idx;
    /* calculate  degree of new monomial */
    for(j=1;j<=Sys_N(sys);j++) tmp+=Mon_exp(sys,Sys_Mon_New(sys),j);
-  
+
    if (Eqn_start(sys,i)==0){ /* if first monomial set degree */
          Eqn_deg(sys,i)=tmp;
          Mon_homog(sys,Sys_Mon_New(sys))=0;
@@ -832,12 +832,12 @@ void psys_save_mon(psys sys, int i){
        idx=Mon_next(sys,idx);
      }
      Eqn_deg(sys,i)=tmp;
-   }  
+   }
    tmp=Mon_next(sys,Sys_Mon_New(sys));
    Mon_next(sys,Sys_Mon_New(sys))=Eqn_start(sys,i);
    Eqn_start(sys,i)=Sys_Mon_New(sys);
    Sys_Mon_New(sys)=tmp;
-   Sys_M(sys)++; 
+   Sys_M(sys)++;
    Eqn_size(sys,i)++;
 }
 
@@ -852,13 +852,13 @@ psys psys_fprint(FILE *fout,psys sys){
  Blk_curr(sys)=1;
   do {
     Eqn_curr(sys)=Blk_start(sys,Blk_curr(sys));
-    do { 
+    do {
       if (pct++==0)
 #ifdef LOG_PRINT
  fprintf(fout,"< ")
 #endif
 ;
-      else 
+      else
 #ifdef LOG_PRINT
 fprintf(fout,",\n  ")
 #endif
@@ -866,7 +866,7 @@ fprintf(fout,",\n  ")
       Mon_curr(sys)=Eqn_start(sys,Eqn_curr(sys));
       mct=0;
       do {
-        if (mct++!=0) 
+        if (mct++!=0)
 #ifdef LOG_PRINT
 fprintf(fout," + ")
 #endif
@@ -899,7 +899,7 @@ fprintf(fout," + ")
   while((++Blk_curr(sys))<=Sys_R(sys));
  fprintf(fout," >\n");
 return sys;
-}   
+}
 
 
 /*
@@ -917,7 +917,7 @@ double *psys_coef_imag(psys sys){
    return &(Mon_coefI(sys,Mon_curr(sys)));
 }
 
-int *psys_exp(psys sys,int d){ 
+int *psys_exp(psys sys,int d){
    return &(Mon_exp(sys,Mon_curr(sys),d));
  }
 
@@ -925,7 +925,7 @@ int *psys_homog(psys sys){
    return &((Mon_homog(sys,Mon_curr(sys))));
 }
 
-int *psys_def(psys sys){ 
+int *psys_def(psys sys){
    return &(Mon_defv(sys,Mon_curr(sys)));
 }
 
@@ -938,7 +938,7 @@ int psys_start_poly(psys sys){
       return TRUE;
 }
 
-int psys_next_poly(psys sys){ 
+int psys_next_poly(psys sys){
      if (++(Eqn_curr(sys))<=Sys_N(sys)) return TRUE;
         else return FALSE;
 }
@@ -965,15 +965,15 @@ int psys_bkno(psys sys){
   return Blk_curr(sys);
 }
 
-int psys_Bstart_poly(psys sys,int i){         
-      Eqn_curr(sys)=Blk_start(sys,i);       
-      return TRUE;                                   
-}                         
- 
+int psys_Bstart_poly(psys sys,int i){
+      Eqn_curr(sys)=Blk_start(sys,i);
+      return TRUE;
+}
+
 int psys_Bnext_poly(psys sys,int i){
      if (++(Eqn_curr(sys))<Blk_start(sys,i+1)) return TRUE;
-        else return FALSE;                           
-}                         
+        else return FALSE;
+}
 
 int psys_start_mon(psys sys){
     Mon_curr(sys)=Eqn_start(sys,Eqn_curr(sys));
@@ -1012,9 +1012,9 @@ int psys_size(psys sys){
   return Sys_M(sys);
 }
 
-/* 
+/*
 ** finds number of consecutive equations starting with current
-** equation share a common support. 
+** equation share a common support.
 */
 int psys_r(psys sys){ return Sys_R(sys);}
 int psys_block_size(psys sys){
@@ -1023,9 +1023,9 @@ int psys_block_size(psys sys){
 /*
 ** finds number of monomials in current equation
 */
-int psys_eq_size(psys sys){                 
+int psys_eq_size(psys sys){
     return Eqn_size(sys,Eqn_curr(sys));
-} 
+}
 
 int *psys_block_start(psys sys,int i){return &(Blk_start(sys,i));}
 
@@ -1042,7 +1042,7 @@ psys psys_copy(psys sys)
     FORALL_POLY(sys,
       FORALL_MONO(sys,
         psys_init_mon(res);
-        *psys_aux(res)=*psys_aux(sys); 
+        *psys_aux(res)=*psys_aux(sys);
         *psys_coef_real(res)=*psys_coef_real(sys);
         *psys_coef_imag(res)=*psys_coef_imag(sys);
         *psys_def(res)=*psys_def(sys);
@@ -1069,7 +1069,7 @@ psys psys_copy(psys sys)
 **             of polynomials of sys at X.
 **    output: Y
 **    error conditions: if X and sys are not comatable abort program
-*/        
+*/
 #define Y(i) (DVref(Y,i))
 Dvector psys_eval(psys sys, xpnt X, Dvector Y){
   int n,i,eqno=0;
@@ -1077,7 +1077,7 @@ Dvector psys_eval(psys sys, xpnt X, Dvector Y){
   n=psys_d(sys);
   if(xpnt_n(X)!=n) bad_error("bad argument in psys_eval");
   if(Y==nullptr || DVlength(Y)!=2*n) Y=Dmatrix_resize(Y,1,2*n);
-  
+
   for(i=1;i<=2*n;i++) Y(i)=0;
   FORALL_POLY(sys,
     eqno++;
@@ -1107,7 +1107,7 @@ Dvector psys_jac(psys sys, xpnt X, Dmatrix J){
   if(DMrows(J)!=2*n || DMcols(J)!=2*n+3) J=Dmatrix_resize(J,2*n,2*n+3);
 
   for(i=1;i<=2*n;i++)for(j=1;j<=2*n+3;j++) J(i,j)=0;
-  
+
   FORALL_POLY(sys,
     eqno++;
     FORALL_MONO(sys,
@@ -1136,7 +1136,7 @@ Dvector psys_jac(psys sys, xpnt X, Dmatrix J){
         tmp=RCmul(pow(xpnt_t(X),(long)(*psys_def(sys)-1)),tmp);
         tmp=RCmul(*psys_def(sys),tmp);
         J(2*eqno-1,2*n+3)+=tmp.r;
-        J(2*eqno  ,2*n+3)+=tmp.i;                          
+        J(2*eqno  ,2*n+3)+=tmp.i;
       }
      /* DM/DXi*/
      for(j=1;j<=n;j++){
@@ -1159,7 +1159,7 @@ Dvector psys_jac(psys sys, xpnt X, Dmatrix J){
     )
   )
   return J;
-}                                     
+}
 #undef J
 
 /*
@@ -1171,7 +1171,7 @@ Dvector psys_jac(psys sys, xpnt X, Dmatrix J){
 **             values of polynomials of sys at evaluated at X.
 **    output: Y
 **    error conditions: if X and sys are not comatable abort program
-*/                
+*/
 
 double psys_abs(psys sys, xpnt X){
   int n,i;
@@ -1198,8 +1198,8 @@ double psys_abs(psys sys, xpnt X){
 /*
 ** moment_sys
 **      input: a pvector P
-**             a xpnt X 
-**                        
+**             a xpnt X
+**
 **    output:  a Dvector M representing a point on the newton
 **             polytope of the system, the sum of the images of
 **             the moment maps defined by the supporting Aset of
@@ -1246,7 +1246,7 @@ return M;}
 static Imatrix Norm=nullptr;
 
 node psys_hom(psys sys, node point_list, int tweak){
-  node ptr=point_list;   
+  node ptr=point_list;
 
 #ifdef PSYS_HOM_PRINT
   fprintf(stdout /* was psys_logfile */,"S starting continuation:\n");
@@ -1317,7 +1317,7 @@ psys psys_lead(psys sys)
     psys res;
     n=psys_d(sys);
     res=psys_new(n,psys_size(sys),psys_r(sys));
-    for(i=1;i<=psys_r(sys);i++){ 
+    for(i=1;i<=psys_r(sys);i++){
        *psys_block_start(res,i)=*psys_block_start(sys,i);
     }
     FORALL_POLY(sys,
@@ -1353,7 +1353,7 @@ psys psys_lead(psys sys)
 
 /*
 ** psys_saturate
-**       input: psys 
+**       input: psys
 **      output: psys with largest common monomial factor removed.
 **      side effects: original psys is equal to output psys.
 **      error contitions:
@@ -1396,7 +1396,7 @@ psys psys_saturate(psys sys)
 ** psys_lift:
 **    input: a system S (psys)
 **           a lifting value l (int)
-**    output: original system with deformation parameter for each 
+**    output: original system with deformation parameter for each
 **            monomial set to l
 **    side effects: original system equals output system.
 */
@@ -1457,16 +1457,16 @@ psys psys_norm_sub(psys sys,Ivector norm)
 **   in variables X_1,...,X_n  calculates constants d_i
 **   and c_i so that the new equations
 **      10^{d_i}F_i(10^{c_1}X_1,...,10^{c_n}X_n)
-**   will have coefitients as close to one as possible (i.e. the 
+**   will have coefitients as close to one as possible (i.e. the
 **   two norm of the vector of logarithms will be minimized).
 **
 **   The book on continuation by Morgan describes a similar algorithm,
 **   in which variation among the coeficients is also minimized
-**   explicitly. This code does not take speciall steps to also 
+**   explicitly. This code does not take speciall steps to also
 **   minimize the diferences -- It is sort of taken care of allready
-**   by the least squares problem allready. (might add it later need 
+**   by the least squares problem allready. (might add it later need
 **   only new rows in matrix).
-*/ 
+*/
 
 /* NOW REDUNDANT
 #include <stdio.h>
@@ -1474,7 +1474,7 @@ psys psys_norm_sub(psys sys,Ivector norm)
 #include "psys.h"
 */
 
-/* 
+/*
 ** Array and Polynomial data acces macroes
 */
 #define LHS(i,j) (DMref(LHS,i,j))
@@ -1505,10 +1505,10 @@ Dvector psys_scale(psys Sys){
 **
 **  Under scaling 10^d_i*F_i(x_1^e_1,...,x_n^e_n) each monomial m=a*x_1^e_1*...*x_n^e_n
 **   becomes 10^{d_i}*a*10^{c_1*e_1+...+c_n*e_n}x_1^{e_1}*...x_n^{e_n}
-**   taking logarithms the goal that the new coeficient should be equal to one 
+**   taking logarithms the goal that the new coeficient should be equal to one
 **   becomes a linear condition  d_i+c_1*e_1+...c_n*e_n = -log(a)
 **   which gets writen out as a matrix equation for the unknown
-**         X=[d_1,...,d_n,c_1,...,c_n]. 
+**         X=[d_1,...,d_n,c_1,...,c_n].
 */
  RHS=Dvector_new(m);
  LHS=Dmatrix_new(m,2*n);
@@ -1523,15 +1523,15 @@ Dvector psys_scale(psys Sys){
      for(j=1;j<=n;j++) LHS(row,j)=0;
      LHS(row,eqno)=1.0;
      for(j=1;j<=n;j++) LHS(row,n+j)=CEXP(j);
-     RHS(row)=-1.0*log10(sqrt(CCR*CCR+CCI*CCI)); 
+     RHS(row)=-1.0*log10(sqrt(CCR*CCR+CCI*CCI));
      row++;
    }
    while(psys_next_mon(Sys)==TRUE);
  }
  while(psys_next_poly(Sys)==TRUE);
 
-/* 
-** Use Givens rotations to triangularize LHS,i.e.LHS becomes Q*LHS.(triangular) 
+/*
+** Use Givens rotations to triangularize LHS,i.e.LHS becomes Q*LHS.(triangular)
 ** and also apply same givens rotations to RHS  i.e. RHS becomes Q*RHS.
 */
  for (i=1;i<=2*n;i++){
@@ -1557,7 +1557,7 @@ Dvector psys_scale(psys Sys){
    }
  }
 
-/* 
+/*
 ** Back solve   R*X=Y
 **   R=top square portion of LHS. (2nx2nupper triangular)
 **   Y=top 2n entrees of RHS.
@@ -1570,7 +1570,7 @@ for(j=2*n;j>=1;j--){
   X(j)=t;
 }
 
-/* 
+/*
 ** Actually perform scaling   (X=[d_1,...,d_n,c_1,...,c_n])
 **  adjust coeficients to those of new system (exponents remain unchanged)
 **         10^{d_i}F_i(10^{c_1}x_1,...,10^{c_n}x_n)
@@ -1582,7 +1582,7 @@ for(j=2*n;j>=1;j--){
    psys_start_mon(Sys);
    do {
    t=X(eqno);
-   for(j=1;j<=n;j++) t+=(X(n+j)*CEXP(j));  
+   for(j=1;j<=n;j++) t+=(X(n+j)*CEXP(j));
    CCR*=pow(10.0,t);
    CCI*=pow(10.0,t);
    }
@@ -1591,8 +1591,8 @@ for(j=2*n;j>=1;j--){
  while(psys_next_poly(Sys)==TRUE);
 
 
-/* 
-** clean-up and return vector defining inverse scaling factors 
+/*
+** clean-up and return vector defining inverse scaling factors
 ** to be used to get solutions for original problem.
 */
 Dmatrix_free(LHS);

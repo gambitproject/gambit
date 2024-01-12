@@ -148,4 +148,3 @@ inputting the payoff for the first (row) player, pressing the :kbd:`Tab`
 key, inputting the payoff for the second (column) player, pressing the
 :kbd:`Tab` key, and so forth, until all the payoff entries in the table
 have been filled.
-

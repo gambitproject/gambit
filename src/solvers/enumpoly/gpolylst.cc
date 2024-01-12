@@ -35,4 +35,3 @@ template class gPolyList<double>;
 
 template class Gambit::RectArray<gPoly<double>*>;
 //template class Gambit::RectArray<gPoly<Gambit::Rational>*>;
-

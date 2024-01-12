@@ -30,7 +30,7 @@ namespace Gambit {
 namespace Nash {
 
 // Anonymous namespace to encapsulate local utility functions
-  
+
 namespace {
 template <class T> Matrix<T> Make_A1(const Game &p_game)
 {
@@ -70,7 +70,7 @@ template <class T> Matrix<T> Make_A2(const Game &p_game)
   Matrix<T> A2(n1+1, n1+n2, 1, n1);
 
   PureStrategyProfile profile = p_game->NewPureStrategyProfile();
-  
+
   Rational min = p_game->GetMinPayoff();
   if (min > Rational(0)) {
     min = Rational(0);
@@ -111,7 +111,7 @@ template <class T> Vector<T> Make_b2(const Game &p_game)
 }
 
 }  // end anonymous namespace
-  
+
 
 template <class T>
 class NashLcpStrategySolver<T>::Solution {
@@ -126,7 +126,7 @@ public:
 
   int EquilibriumCount() const { return m_equilibria.size(); }
 };
-  
+
 //
 // Function called when a CBFS is encountered.
 // If it is not already in the list p_list, it is added.
@@ -182,7 +182,7 @@ NashLcpStrategySolver<T>::OnBFS(const Game &p_game,
       profile[strategy] = (T) 0;
     }
   }
-  
+
   this->m_onEquilibrium->Render(profile);
   p_solution.m_equilibria.push_back(profile);
 
@@ -194,13 +194,13 @@ NashLcpStrategySolver<T>::OnBFS(const Game &p_game,
 }
 
 //
-// AllLemke finds all accessible Nash equilibria by recursively 
-// calling itself.  p_list maintains the list of basic variables 
-// for the equilibria that have already been found.  
+// AllLemke finds all accessible Nash equilibria by recursively
+// calling itself.  p_list maintains the list of basic variables
+// for the equilibria that have already been found.
 // From each new accessible equilibrium, it follows
-// all possible paths, adding any new equilibria to the List.  
+// all possible paths, adding any new equilibria to the List.
 //
-template <class T> void 
+template <class T> void
 NashLcpStrategySolver<T>::AllLemke(const Game &p_game,
 				   int j, linalg::LHTableau<T> &B,
 				   Solution &p_solution,
@@ -215,7 +215,7 @@ NashLcpStrategySolver<T>::AllLemke(const Game &p_game,
   if (depth > 0 && !OnBFS(p_game, B, p_solution)) {
     return;
   }
-  
+
   for (int i = B.MinCol(); i <= B.MaxCol(); i++) {
     if (i != j)  {
       linalg::LHTableau<T> Bcopy(B);
@@ -225,7 +225,7 @@ NashLcpStrategySolver<T>::AllLemke(const Game &p_game,
   }
 }
 
-template <class T> List<MixedStrategyProfile<T> > 
+template <class T> List<MixedStrategyProfile<T> >
 NashLcpStrategySolver<T>::Solve(const Game &p_game) const
 {
   if (p_game->NumPlayers() != 2) {
@@ -266,6 +266,3 @@ template class NashLcpStrategySolver<Rational>;
 
 }  // end namespace Gambit::Nash
 }  // end namespace Gambit
-
-
-

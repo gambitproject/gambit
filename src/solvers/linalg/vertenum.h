@@ -31,15 +31,15 @@ namespace Gambit {
 namespace linalg {
 
 //
-// This class enumerates the vertices of the convex polyhedron 
+// This class enumerates the vertices of the convex polyhedron
 //
 //        P = { y : Ay + b <= 0, y>=0 }
-// 
+//
 // where b <= 0.  Enumeration starts from the vertex y = 0.
-// All computation is done in the class constructor. The 
+// All computation is done in the class constructor. The
 // list of vertices can be accessed by VertexList()
-//  
-// The code is based on the reverse Pivoting algorithm of Avis 
+//
+// The code is based on the reverse Pivoting algorithm of Avis
 // and Fukuda, Discrete Computational Geom (1992) 8:295-313.
 //
 template <class T> class VertexEnumerator {
@@ -47,7 +47,7 @@ private:
   int mult_opt,depth;
   int n;  // N is the number of columns, which is the # of dimensions.
   int k;  // K is the number of inequalities given.
-  const Matrix<T> &A;   
+  const Matrix<T> &A;
   const Vector<T> &b;
   Vector<T> btemp,c;
   Gambit::List<BFS<T> > List;
@@ -66,7 +66,7 @@ public:
   VertexEnumerator(const Matrix<T> &, const Vector<T> &);
   explicit VertexEnumerator(LPTableau<T> &);
   ~VertexEnumerator() = default;
-  
+
   const Gambit::List<BFS<T> > &VertexList() const
   { return List; }
   const Gambit::List<BFS<T> > &DualVertexList() const
@@ -77,5 +77,5 @@ public:
 
 }  // end namespace Gambit::linalg
 }  // end namespace Gambit
- 
+
 #endif // GAMBIT_LINALG_VERTENUM_H

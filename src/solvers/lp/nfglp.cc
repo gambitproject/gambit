@@ -41,7 +41,7 @@ using namespace Gambit;
 // replace this function.
 //
 template <class T> bool
-NashLpStrategySolver<T>::SolveLP(const Matrix<T> &A, 
+NashLpStrategySolver<T>::SolveLP(const Matrix<T> &A,
 				 const Vector<T> &b, const Vector<T> &c,
 				 int nequals,
 				 Array<T> &p_primal, Array<T> &p_dual) const
@@ -73,7 +73,7 @@ NashLpStrategySolver<T>::SolveLP(const Matrix<T> &A,
 // Compute and print one equilibrium by solving a linear program based
 // on the strategic game representation.
 //
-template <class T> List<MixedStrategyProfile<T> > 
+template <class T> List<MixedStrategyProfile<T> >
 NashLpStrategySolver<T>::Solve(const Game &p_game) const
 {
   if (p_game->NumPlayers() != 2) {
@@ -113,7 +113,7 @@ NashLpStrategySolver<T>::Solve(const Game &p_game) const
   b[k+1] = (T) 1;
   c = (T) 0;
   c[m+1] = (T) 1;
-  
+
   Array<T> primal(A.NumColumns()), dual(A.NumRows());
   if (!SolveLP(A, b, c, 1, primal, dual)) {
     return List<MixedStrategyProfile<T> >();

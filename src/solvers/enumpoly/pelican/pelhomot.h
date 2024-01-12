@@ -20,7 +20,7 @@ http://netlib2.cs.utk.edu/hompack/
 
 /* Homotopies.h */
 
-/* 
+/*
    This file and Homotopies.c contain the code that was in the Cont
 subdirectory of the source directory of the original Pelican 0.80
 */
@@ -37,7 +37,7 @@ subdirectory of the source directory of the original Pelican 0.80
 
 #define Hom_LogFile stdout /* was Pel_Log */
 #define Hom_OutFile stdout /* was Pel_Out */
-extern int     Hom_defd; 
+extern int     Hom_defd;
 extern int     Hom_use_proj;
 extern int     Hom_use_scale;
 extern int     Hom_num_vars;
@@ -56,7 +56,7 @@ void print_Hom_params(FILE *);
 /************************************************************************/
 
 double *Dres(int);
-int Dtop();                                    
+int Dtop();
 int Dfree(int ntop);
 
 int *Ires(int sz);
@@ -280,21 +280,21 @@ typedef doublereal E_f;	/* real function with -R not specified */
 /***************** header information from Pmatrix.h *****************/
 /************************************************************************/
 
-typedef struct Pmatrix_t *Pmatrix;           
-typedef struct Pmatrix_t *Pvector;           
+typedef struct Pmatrix_t *Pmatrix;
+typedef struct Pmatrix_t *Pvector;
 
 /*
 ** matrix access macroes
 */
 int PMstore(Pmatrix M);    /* maximum #elts available*/
 int PMMrows(Pmatrix M);    /* maximum #rows          */
-int PMrows(Pmatrix M);     /* number rows stored */   
-int PMcols(Pmatrix M);     /* number cols stored */   
+int PMrows(Pmatrix M);     /* number rows stored */
+int PMcols(Pmatrix M);     /* number cols stored */
 polynomial1 *PMref1(Pmatrix,int,int);
-#define PMref0(M,i,j) (PMref(M,(i+1),(j+1)))   
-#define PMref(M,i,j)  (PMref1((M),i,j))  
-#define PVref0(M,j) (PMref(M,1,(j+1)))   
-#define PVref(M,j)  (PMref1((M),1,j))       
+#define PMref0(M,i,j) (PMref(M,(i+1),(j+1)))
+#define PMref(M,i,j)  (PMref1((M),i,j))
+#define PVref0(M,j) (PMref(M,1,(j+1)))
+#define PVref(M,j)  (PMref1((M),1,j))
 #define PVlength(M)  (PMcols(M))
 
 
@@ -317,9 +317,9 @@ Pmatrix Pmatrix_print(Pmatrix M);
 Pmatrix Pmatrix_add(Pmatrix M1, Pmatrix M2, Pmatrix *M3);
 #define add_Pvector(V1,V2,V3) add_Pmatrix(V1,V2,V3)
 /*Pmatrix Pmatrix_mull(Pmatrix M1, Pmatrix M2, Pmatrix *M3);  */
-Pmatrix Pmatrix_dot(Pmatrix M1, Pmatrix M2, Pmatrix M3);  
+Pmatrix Pmatrix_dot(Pmatrix M1, Pmatrix M2, Pmatrix M3);
 void PMset(Pmatrix M, int i, int j, signed int k);
-signed long int PMget(Pmatrix M, int i, int j);    
+signed long int PMget(Pmatrix M, int i, int j);
 
 int Pmatrix_gcd_reduce(Pmatrix M);
 int Pmatrix_backsolve(Pmatrix N, Pmatrix S);
@@ -348,30 +348,30 @@ int HPK_cont(Dvector X);
 /************************************************************************/
 
 void print_proj_trans();
-int fixpnf_(int    *n, 
-	    double *y, 
-	    int    *iflag, 
-	    double *arcre, 
-	    double *arcae, 
-	    double *ansre, 
-	    double *ansae, 
-	    int    *trace, 
-	    double *a, 
-	    int    *nfe, 
-	    double *arclen, 
-	    double *yp, 
-	    double *yold, 
-	    double *ypold, 
-	    double *qr, 
-	    double *alpha, 
-	    double *tz, 
-	    int    *pivot, 
-	    double *w, 
-	    double *wp, 
-	    double *z0, 
-	    double *z1, 
-	    double *sspar, 
-	    double *par, 
+int fixpnf_(int    *n,
+	    double *y,
+	    int    *iflag,
+	    double *arcre,
+	    double *arcae,
+	    double *ansre,
+	    double *ansae,
+	    int    *trace,
+	    double *a,
+	    int    *nfe,
+	    double *arclen,
+	    double *yp,
+	    double *yold,
+	    double *ypold,
+	    double *qr,
+	    double *alpha,
+	    double *tz,
+	    int    *pivot,
+	    double *w,
+	    double *wp,
+	    double *z0,
+	    double *z1,
+	    double *sspar,
+	    double *par,
 	    int    *ipar,
 
 	    int    tweak); /* Reduce step size, increase # of steps */
@@ -381,21 +381,19 @@ int fixpnf_(int    *n,
 /******************* header information for tangnf.c *******************/
 /***********************************************************************/
 
-int tangnf_(double *rholen, 
-	    double *y, 
-	    double *yp, 
-	    double *ypold, 
-	    double *a, 
-	    double *qr, 
-	    double *alpha, 
-	    double *tz, 
-	    int    *pivot, 
-	    int    *nfe, 
-	    int    *n, 
-	    int    *iflag, 
-	    double *par, 
+int tangnf_(double *rholen,
+	    double *y,
+	    double *yp,
+	    double *ypold,
+	    double *a,
+	    double *qr,
+	    double *alpha,
+	    double *tz,
+	    int    *pivot,
+	    int    *nfe,
+	    int    *n,
+	    int    *iflag,
+	    double *par,
 	    int    *ipar);
 
 #endif /* HOMOTOPIES_H */
-
-

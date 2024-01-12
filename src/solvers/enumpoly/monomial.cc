@@ -25,4 +25,3 @@
 template class gMono<int>;
 template class gMono<double>;
 //template class gMono<Gambit::Rational>;
-

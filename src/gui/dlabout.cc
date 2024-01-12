@@ -42,16 +42,16 @@ static wxStaticText *FormattedText(wxWindow *p_parent, const wxString &p_label,
 }
 
 gbtAboutDialog::gbtAboutDialog(wxWindow *p_parent)
-  : wxDialog(p_parent, wxID_ANY, _T("About Gambit..."), 
+  : wxDialog(p_parent, wxID_ANY, _T("About Gambit..."),
 	     wxDefaultPosition, wxDefaultSize)
 {
   SetFont(wxFont(12, wxFONTFAMILY_ROMAN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
-  topSizer->Add(new wxStaticBitmap(this, wxID_STATIC, 
+  topSizer->Add(new wxStaticBitmap(this, wxID_STATIC,
 				   wxBitmap(gambitbig_xpm)),
 		0, wxALL | wxALIGN_CENTER, 20);
-  topSizer->Add(new wxStaticText(this, wxID_STATIC, 
+  topSizer->Add(new wxStaticText(this, wxID_STATIC,
 				 _T("Gambit: Software Tools for Game Theory")),
 		0, wxTOP | wxLEFT | wxRIGHT | wxALIGN_CENTER, 20);
   topSizer->Add(new wxStaticText(this, wxID_STATIC,
@@ -60,7 +60,7 @@ gbtAboutDialog::gbtAboutDialog(wxWindow *p_parent)
   topSizer->Add(new wxStaticText(this, wxID_STATIC, _T("Version " VERSION)),
 		0, wxALIGN_CENTER, 5);
 
-  topSizer->Add(FormattedText(this, 
+  topSizer->Add(FormattedText(this,
 			      _T("http://www.gambit-project.org"),
 			      wxFont(12, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL)),
 		0, wxTOP | wxALIGN_CENTER, 10);
@@ -72,15 +72,15 @@ gbtAboutDialog::gbtAboutDialog(wxWindow *p_parent)
 			      wxFont(12, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL)),
 		0, wxALIGN_CENTER, 5);
 
-  topSizer->Add(FormattedText(this, 
+  topSizer->Add(FormattedText(this,
 			      _T("Copyright (C) 1994-2024, The Gambit Project"),
 			      wxFont(12, wxFONTFAMILY_ROMAN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL)),
 		0, wxTOP | wxALIGN_CENTER, 20);
-  topSizer->Add(FormattedText(this, 
+  topSizer->Add(FormattedText(this,
 			      _("Theodore Turocy, Project Maintainer"),
 			      wxFont(12, wxFONTFAMILY_ROMAN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL)),
 		0, wxALIGN_CENTER, 5);
-  topSizer->Add(FormattedText(this, 
+  topSizer->Add(FormattedText(this,
 			      _T("T.Turocy@uea.ac.uk"),
 			      wxFont(12, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL)),
 		0, wxALIGN_CENTER, 5);

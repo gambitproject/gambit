@@ -23,7 +23,7 @@ int next_id=1; /*for debuging cells are labled by a unique id*/
 ** they will eventually be stored with the individual cells.
 */
 
-HMatrix cly_U=nullptr;   /* factor matrix */ 
+HMatrix cly_U=nullptr;   /* factor matrix */
 HMatrix cly_M=nullptr;   /* an n+1xn+1 matrix   */
 HMatrix cly_L=nullptr;   /* an n+1 vector   */
 Imatrix cly_T=nullptr;   /* an R vector */
@@ -41,7 +41,7 @@ int cly_order=TRUE;
 int cly_lift=TRUE;
 
 
-/* 
+/*
 ** Display functions: mainly for debugging
 **  Ipnt_print  print complete list of data fields.
 **  Ipnt_list_print  print list print lables of all points accesable
@@ -53,7 +53,7 @@ void Ipnt_fprint(FILE *fout,Ipnt p){
   fprintf(fout,"%% %s,",Ipnt_lable(p))
 #endif
 ;
-  for (i=1;i<=cly_N;i++) 
+  for (i=1;i<=cly_N;i++)
 #ifdef LOG_PRINT
 fprintf(fout,"%d, ",Ipnt_coord(p,i))
 #endif
@@ -211,7 +211,7 @@ void lift_original_points(Ipnt p){
    fprintf(fout,"}   < %d",cell_type(c,1))
 #endif
 ;
-   for(i=2;i<=cly_R;i++) 
+   for(i=2;i<=cly_R;i++)
 #ifdef LOG_PRINT
 fprintf(fout,", %d",cell_type(c,i))
 #endif
@@ -228,7 +228,7 @@ fprintf(fout,", %d",cell_type(c,i))
 **    subdivision, a list of cells linked through their next fields
 */
  void subdiv_fprint(FILE *fout, cell c){
-#ifdef LOG_PRINT 
+#ifdef LOG_PRINT
   fprintf(fout,"\n")
 #endif
 ;
@@ -296,7 +296,7 @@ fprintf(fout,", %d",cell_type(c,i))
   fprintf(fout,"%% Vol( %d", cell_type(S,1))
 #endif
 ;
-        for(i=2;i<=cly_R;i++) 
+        for(i=2;i<=cly_R;i++)
 #ifdef LOG_PRINT
 fprintf(fout,", %d",cell_type(S,i))
 #endif
@@ -419,10 +419,10 @@ cell  cly_initial_splx(Ipnt *S1, Ipnt *S2){
     ** Calculate new search direction L
     ** (normal to affine span of points allready chosen)
     */
-    
+
     HMfactor(CM,CU);
     HMbacksolve(CM,CL);
-    HMgcd_reduce(CL); 
+    HMgcd_reduce(CL);
 
 
     /*
@@ -430,7 +430,7 @@ cell  cly_initial_splx(Ipnt *S1, Ipnt *S2){
     ** normal to L, as points allready chosen.
     */
     if (check_normal(ptr,CL,&refpt,&newpt)==FALSE){
- #ifdef LOG_PRINT     
+ #ifdef LOG_PRINT
       fprintf(stderr /* was cly_err */,"Failure in initial_simplex():");
       fprintf(stderr /* was cly_err */,"Point Config is not full dimensional\n")
 #endif
@@ -443,8 +443,8 @@ cell  cly_initial_splx(Ipnt *S1, Ipnt *S2){
     for(i=1;i<=cly_N;i++)
        HLMset(CM,r,i,cell_point(initial,r,i)-cell_point(initial,0,i));
   }
-  /* 
-  ** reset sizes for matrices in cell 
+  /*
+  ** reset sizes for matrices in cell
   */
   HMresize(cell_norm(initial),1,cly_N+1);
   HMresize(cell_U(initial),cly_N,cly_N);
@@ -504,25 +504,25 @@ cell  cly_initial_splx(Ipnt *S1, Ipnt *S2){
 /*
 ** int check_normal(node PC,Imatrix norm, node *refpt, node *newpt){
 **
-** (auxilary function for initial_simplex)                        
-**                                                                
-**  input:                                                        
-**    A point configuration "PC"                                  
-**    A normal direction "N" and a reference point "refpt"        
-**          (if "refpt" is null, "refpt" gets initalized to point 
-**            to a point on the lower hull)                       
-**          ("norm" and "refpt" together determin a hyperplane H) 
-**                                                                
-**  output:                                                       
+** (auxilary function for initial_simplex)
+**
+**  input:
+**    A point configuration "PC"
+**    A normal direction "N" and a reference point "refpt"
+**          (if "refpt" is null, "refpt" gets initalized to point
+**            to a point on the lower hull)
+**          ("norm" and "refpt" together determin a hyperplane H)
+**
+**  output:
 **    FALSE if the point configuration lies hyperplane normal to N
-**    TRUE otherwise.                                             
-**                                                                
-**  side effects:                                                 
-**   "newpt" holds a point which has maximal distance from (H).   
-**    if refpt was null it gets initialized (see "input").        
-**                                                                
+**    TRUE otherwise.
+**
+**  side effects:
+**   "newpt" holds a point which has maximal distance from (H).
+**    if refpt was null it gets initialized (see "input").
+**
 **  method:  just computes dot products and save a point acheiving
-**           maximum and minimum values.                       
+**           maximum and minimum values.
 **           then compair these against value for refpt.
 */
 
@@ -578,7 +578,7 @@ static int check_normal(Ipnt PC,
 /***************** implementation code from cly_update.c ****************/
 /************************************************************************/
 
-static int is_flipped(cell c1, cell c2, int *i1, int *i2); 
+static int is_flipped(cell c1, cell c2, int *i1, int *i2);
 static cell cell_pivot(cell C, Ipnt x, int idx);
 static cell subdiv_add_cell(cell c, cell SDx);
 int cell_find_lift(cell c, Ipnt pt);
@@ -623,7 +623,7 @@ static int is_flipped(cell c1, cell c2, int *i1, int *i2){
 **    Output.  A copy of C, with point x substituted for vertex idx.
 **             (the pointer field is set to indicate that cell C
 **              and the new cell are related by a flip).
-** 
+**
 */
 static cell cell_pivot(cell C, Ipnt x, int idx){
   int i,j;
@@ -652,7 +652,7 @@ static cell cell_pivot(cell C, Ipnt x, int idx){
       }
     HLMset(cell_H(ncell),i,cly_N+1,cell_lift(ncell,i)-cell_lift(ncell,0));
   }
-  
+
   /* calculate normal and remove common factors from coordinates*/
   HMfactor(cell_H(ncell),cell_U(ncell));
   HMbacksolve(cell_H(ncell),cell_norm(ncell));
@@ -662,7 +662,7 @@ static cell cell_pivot(cell C, Ipnt x, int idx){
   if (HLlt(HVget(cell_norm(ncell),cly_N+1),0)) {
      for(j=1;j<=cly_N+1;j++) Hneg(HVget(cell_norm(ncell),j));
   }
-  else if (HLeq(HVget(cell_norm(ncell),cly_N+1),0)) 
+  else if (HLeq(HVget(cell_norm(ncell),cly_N+1),0))
       bad_error("Cell perpendicular in Cell_norm");
 
  /* load and factor point matrix */
@@ -676,7 +676,7 @@ static cell cell_pivot(cell C, Ipnt x, int idx){
   HMfactor(cell_H(ncell),cell_U(ncell));
 
   cell_set_volume(ncell);
-  
+
   return ncell;
 }
 
@@ -773,10 +773,10 @@ static cell subdiv_add_cell(cell c, cell SDx){
       /* put U*L in last collumb of H */
       for(i=1;i<=n;i++){
         HLMset(cell_H(B),i,cly_N+1,0);
-        for(j=1;j<=n;j++){ 
+        for(j=1;j<=n;j++){
           HHmul(tmp,HMget(cell_U(B),i,j),HMget(cly_L,1,j));
           HHadd(HMget(cell_H(B),i,cly_N+1),HMget(cell_H(B),i,cly_N+1),tmp);
-        }   
+        }
       }
       /* solve H*L=0 */
       HMbacksolve(cell_H(B),cly_L);
@@ -886,7 +886,7 @@ node cly_triangulate(aset A, Imatrix T, int order, int lift){
    PUSH_LOC(Res);
    Pts=Internalize_Aset(A);
    cly_order = order;
-   cly_lift = lift; 
+   cly_lift = lift;
 
    D=new_cayley_triangulate(&Pts);
 
@@ -962,7 +962,7 @@ static cell new_cayley_triangulate(Ipnt *PC)
 {
     Ipnt x=nullptr,S1=nullptr,S2=nullptr;
     cell Dl=nullptr;
- 
+
     S1=*PC;
     if ((Dl=cly_initial_splx(&S1,&S2))==nullptr)
          bad_error("failure in initial simplex");
@@ -970,7 +970,7 @@ static cell new_cayley_triangulate(Ipnt *PC)
     while(S1!=nullptr){
       x=S1;
       S1=Ipnt_next(x);
-      if (cly_lift==TRUE) Ipnt_lift(x)=cly_find_lift(Dl,x);          
+      if (cly_lift==TRUE) Ipnt_lift(x)=cly_find_lift(Dl,x);
       Dl=cly_subdiv_union(Dl,cly_new_cells(nullptr,Dl,x));
       Ipnt_next(x)=S2;
       S2=x;
@@ -1054,23 +1054,23 @@ psys Cayley_continue(aset A,Imatrix T,node *Sols,int seed,int tweak){
    *Sols=Poly_Sols;
    res=Poly_Sys;
    free_continuation_globals();
-   return res; 
+   return res;
 }
 
 #define T(i) (*IVref(T,i))
 Ipnt Internalize_Aset_Cont(aset A, Imatrix T,int seed){
   Ipnt Pts, res;
   int i,tmp,max_monomials=0;
-  /* 
+  /*
   ** seed random number generator
   */
   rand_seed(seed);
-  /* 
+  /*
   ** initialize regular triangulation globals
   */
   res=(Pts=Internalize_Aset(A));
   Poly_Pnts=(Ipnt *)mem_malloc(cly_Npts*sizeof(Ipnt));
-  /* 
+  /*
   ** Store type vector in globally accessable location
   */
   Poly_Type=T;
@@ -1112,7 +1112,7 @@ void free_continuation_globals(){
 }
 
 
- 
+
 
 /*
 **  Alg 2.10 of Vershelde
@@ -1134,14 +1134,14 @@ static cell cayley_continue(Ipnt *PC, int threshold, int tweak)
     S1=*PC;
     D=cly_initial_splx(&S1,&S2);
     for(l=0;l<=cell_n(D);l++) Update_Poly(cell_pnt(D,l));
-    
+
     while(S1!=nullptr){
       x=S1;
       S1=Ipnt_next(x);
       Ipnt_lift(x)=(l=cly_find_lift(Dl,x));
       Update_Poly(x);
       if (l>threshold){
-        Update_Solutions(Dl,tweak); 
+        Update_Solutions(Dl,tweak);
  #ifdef LOG_PRINT
 	fprintf(stdout /* was cly_out */,"flattening\n")
 #endif
@@ -1163,7 +1163,7 @@ static cell cayley_continue(Ipnt *PC, int threshold, int tweak)
    return D;
 }
 
-  
+
 /*
 ** Update_Poly(Ipnt x)  a monomail representing x is chosen with
 **                      a random coefficient and added to the poly.
@@ -1171,7 +1171,7 @@ static cell cayley_continue(Ipnt *PC, int threshold, int tweak)
 static void Update_Poly(Ipnt x){
      int j,n;
      double t;
-     
+
      n=psys_d(Poly_Sys);
      psys_Bstart_poly(Poly_Sys,Ipnt_idx(x));
      do{
@@ -1185,7 +1185,7 @@ static void Update_Poly(Ipnt x){
            *psys_exp(Poly_Sys,j)=Ipnt_coord(x,j);
        }
        psys_save_mon(Poly_Sys,psys_eqno(Poly_Sys));
-     } 
+     }
      while(psys_Bnext_poly(Poly_Sys,Ipnt_idx(x))==TRUE);
 }
 
@@ -1203,7 +1203,7 @@ void update_list_insert(node g, node * L)
   if (g==nullptr) bad_error("null node passed to update list");
   if (*L == nullptr || comp(g, Car(*L)) > 0) *L = Cons(g, *L);
   else {
-    while ((Cdr(ptr) != nullptr) && comp(g, Car(Cdr(ptr))) <= 0) 
+    while ((Cdr(ptr) != nullptr) && comp(g, Car(Cdr(ptr))) <= 0)
        ptr = (node) Cdr(ptr);
     node_set_ptr(ptr,Cons(g, Cdr(ptr)), NODE, RIGHT);
   }
@@ -1212,7 +1212,7 @@ void update_list_insert(node g, node * L)
 
 /*
 ** Udate_Solutions(cell D)
-**                      use continuation on all solutions already 
+**                      use continuation on all solutions already
 **                      found.
 **                      then for each cell in D do a lifting homotopy
 **                      to add more solutions.
@@ -1230,12 +1230,12 @@ static void Update_Solutions(cell Dl, int tweak){
    }
 
    if (Poly_Sols!=nullptr){
-  #ifdef LOG_PRINT     
+  #ifdef LOG_PRINT
      fprintf(stdout /* was cly_out */,"updating old cells\n")
 #endif
 ;
-       Poly_Sols=psys_hom(Poly_Sys,Poly_Sols,tweak); 
-   }     
+       Poly_Sols=psys_hom(Poly_Sys,Poly_Sols,tweak);
+   }
 
    /* find new solutions */
 
@@ -1243,20 +1243,20 @@ static void Update_Solutions(cell Dl, int tweak){
    /*      (with low numbered cells first) */
    while(Dl!=nullptr){
      if (Imatrix_equal(Poly_Type,cell_T(Dl))==TRUE){
-       update_list_insert(atom_new((char *)Dl,CELL),&lhead); 
+       update_list_insert(atom_new((char *)Dl,CELL),&lhead);
      }
      Dl=cell_next(Dl);
    }
    /* cut out blocks, of cells */
    while(lhead!=nullptr){
       Poly_Sols=list_cat(relift(&lhead,tweak),Poly_Sols);
-   }   
+   }
    psys_lift(Poly_Sys,0);
    POP_LOCS();
 }
-   
+
 /*
-** 
+**
 */
 #define Tmp_Norm(i) (*IVref(Tmp_Norm,i))
 static node relift(node *lhead, int tweak){
@@ -1282,14 +1282,14 @@ static node relift(node *lhead, int tweak){
        Poly_Norm(i)=Tmp_Norm(i);
     }
     Poly_Norm(cly_Dim+1)=Tmp_Norm(cly_N+1);
-    /* 
-    ** set up transformed and leading equations 
+    /*
+    ** set up transformed and leading equations
     */
     Norm_Sys=psys_norm_sub(psys_copy(Poly_Sys),Poly_Norm);
     Lead_Sys=psys_lead(Norm_Sys);
     /*
     ** initialize all points to unseen.
-    */ 
+    */
     for(i=1;i<=cly_Npts;i++){
         Ipnt_seen(PPnts(i))=FALSE;
     }
@@ -1343,7 +1343,7 @@ static node relift(node *lhead, int tweak){
       }
       );
     );
-    /* 
+    /*
     ** take solutions to Lead_Sys, as starting points for
     ** Norm_Sys and use homotopy.
     */
@@ -1361,9 +1361,9 @@ static node relift(node *lhead, int tweak){
      Lead_Sols=list_cat(psys_solve(Lead_Sys,Poly_TNorm,tweak),Lead_Sols);
     lptr=Cdr(lptr);
     }
-   /* 
+   /*
    ** reset t value for these and use continuation on Sys_Norm,
-   ** and return 
+   ** and return
    */
    lptr=Lead_Sols;
    while(lptr!=nullptr){

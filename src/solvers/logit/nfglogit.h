@@ -39,11 +39,11 @@ public:
   double GetLambda() const { return m_lambda; }
   const MixedStrategyProfile<double> &GetProfile() const { return m_profile; }
   double GetLogLike() const { return m_logLike; }
- 
+
   Game GetGame() const           { return m_profile.GetGame(); }
   int MixedProfileLength() const { return m_profile.MixedProfileLength(); }
   double operator[](int i) const     { return m_profile[i]; }
-  
+
 private:
   // Construct a logit QRE with a given strategy profile and lambda value.
   // Access is restricted to classes in this module, which ensure that
@@ -52,7 +52,7 @@ private:
 			       double p_lambda, double p_logLike)
     : m_profile(p_profile), m_lambda(p_lambda), m_logLike(p_logLike)
   { }
-  
+
   const MixedStrategyProfile<double> m_profile;
   double m_lambda;
   double m_logLike;
@@ -65,7 +65,7 @@ public:
     { }
   ~StrategicQREPathTracer() override = default;
 
-  List<LogitQREMixedStrategyProfile> 
+  List<LogitQREMixedStrategyProfile>
   TraceStrategicPath(const LogitQREMixedStrategyProfile &p_start,
 		     std::ostream &p_logStream,
 		     double p_maxLambda, double p_omega) const;
@@ -73,7 +73,7 @@ public:
 					     std::ostream &p_logStream,
 					     double p_targetLambda,
 					     double p_omega) const;
-  
+
   void SetFullGraph(bool p_fullGraph) { m_fullGraph = p_fullGraph; }
   bool GetFullGraph() const { return m_fullGraph; }
 
@@ -100,7 +100,7 @@ public:
            const MixedStrategyProfile<double> &p_frequencies,
 	   std::ostream &p_logStream,
 	   double p_maxLambda, double p_omega);
-  
+
 protected:
   class CriterionFunction;
   class CallbackFunction;
@@ -120,5 +120,5 @@ inline List<MixedStrategyProfile<double> > LogitStrategySolve(const Game &p_game
 
 
 }  // end namespace Gambit
- 
+
 #endif // NFGLOGIT_H

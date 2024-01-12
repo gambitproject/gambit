@@ -48,7 +48,7 @@ AC_ARG_ENABLE(enumpoly,
 AM_CONDITIONAL(WITH_ENUMPOLY, test x$with_enumpoly = xtrue)
 
 AC_DEFUN([MINGW_AC_WIN32_NATIVE_HOST],
-[AC_CACHE_CHECK([whether we are building for a Win32 host], 
+[AC_CACHE_CHECK([whether we are building for a Win32 host],
                 [mingw_cv_win32_host],
 AC_COMPILE_IFELSE([AC_LANG_SOURCE([
 #ifdef _WIN32
@@ -157,7 +157,7 @@ if test x$with_gui = xtrue; then
             of Gambit graphical interface.
     ])
     AM_CONDITIONAL(WITH_GUI, test x0 = x1)
-  fi	
+  fi
 fi
 
 AC_SUBST(WX_LIBS)

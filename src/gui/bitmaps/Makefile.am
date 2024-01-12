@@ -55,5 +55,3 @@ SUFFIXES = .rc
 	$(target_alias)-windres @REZFLAGS@ $< $@
 
 noinst_DATA = @RC_OBJECT@
-
-

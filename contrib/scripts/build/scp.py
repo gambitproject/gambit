@@ -29,7 +29,7 @@ def Qsuper(q, i):
         return q[0] + q[1] + q[2] + (N-3)*q[3]
     else:
         raise IndexError
-    
+
 # Function mapping own choice and choices of others into payoffs
 def Payoff(alpha, omega, own, others):
     # Cost share depends only on lower quantities and one's own

@@ -30,7 +30,7 @@ namespace Nash {
 
 using namespace Gambit::linalg;
 
-template <class T> List<List<MixedStrategyProfile<T> > > 
+template <class T> List<List<MixedStrategyProfile<T> > >
 EnumMixedStrategySolution<T>::GetCliques() const
 {
   if (m_cliques1.empty()) {
@@ -140,7 +140,7 @@ EnumMixedStrategySolver<T>::SolveDetailed(const Game &p_game) const
     for (int i1 = 2; i1 <= solution->m_v1; i1++) {
       const BFS<T> &bfs2 = verts1[i1];
 
-      // check if solution is nash 
+      // check if solution is nash
       // need only check complementarity, since it is feasible
       bool nash = true;
       for (size_t k = 1; nash && k <= p_game->GetPlayer(1)->GetStrategies().size(); k++) {
@@ -193,11 +193,11 @@ EnumMixedStrategySolver<T>::SolveDetailed(const Game &p_game) const
   return solution;
 }
 
-template<> bool EnumMixedStrategySolver<double>::EqZero(const double &x) 
+template<> bool EnumMixedStrategySolver<double>::EqZero(const double &x)
 {
   double eps = ::pow(10.0, -15.0);
   return (x <= eps && x >= -eps);
-}     
+}
 
 template<> bool EnumMixedStrategySolver<Rational>::EqZero(const Rational &x)
 {
@@ -206,10 +206,10 @@ template<> bool EnumMixedStrategySolver<Rational>::EqZero(const Rational &x)
 
 
 template class EnumMixedStrategySolver<double>;
-template class EnumMixedStrategySolver<Rational>;  
+template class EnumMixedStrategySolver<Rational>;
 
 template class EnumMixedStrategySolution<double>;
 template class EnumMixedStrategySolution<Rational>;
-  
+
 } // end namespace Gambit::Nash
 } // end namespace Gambit

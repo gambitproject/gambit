@@ -5,7 +5,7 @@ Detailed table of contents
 
 .. toctree::
    :maxdepth: 3
-  
+
    intro
    tools
    pygambit
@@ -14,7 +14,7 @@ Detailed table of contents
    build
    formats
    biblio
-   
+
 .. Indices and tables
 .. ==================
 

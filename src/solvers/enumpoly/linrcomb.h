@@ -43,17 +43,17 @@ template <class T> class LinearCombination  {
     Gambit::Vector<T> weights;
     bool       last_row_is_spanned;
 
-    void AddMultipleOfRowiToRowj(const int& i, 
-				 const int& j, 
+    void AddMultipleOfRowiToRowj(const int& i,
+				 const int& j,
 				 const T& scalar);
-    void AddMultipleOfRowiToRowj(const int& i, 
-				 const int& j, 
+    void AddMultipleOfRowiToRowj(const int& i,
+				 const int& j,
 				 const T& scalar,
 				 Gambit::Matrix<T>& B);
 
   // This function is left unimplemented to avoid copying
     LinearCombination<T>& operator=(const LinearCombination<T> &);
-  
+
   public:
        // Constructors, Destructor, Constructive Operators
     explicit LinearCombination(const Gambit::Matrix<T> &);
@@ -72,7 +72,3 @@ template <class T> class LinearCombination  {
 };
 
 #endif     // LinearCombination_H
-
-
-
-

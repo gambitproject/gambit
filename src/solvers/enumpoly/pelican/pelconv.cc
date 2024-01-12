@@ -12,7 +12,7 @@ suitability of g for conversion */
 /* Scalors first: */
 polynomial1  Gen_To_Ply(Gen_node g) {
   polynomial1 p=nullptr;
- if (g==nullptr)  bad_error("NULL arg to Gen_To_Ply");             
+ if (g==nullptr)  bad_error("NULL arg to Gen_To_Ply");
   switch (g->type){
      case Int_T: p=ItoP(g->Genval.ival,Def_Ring);
                  break;
@@ -26,7 +26,7 @@ polynomial1  Gen_To_Ply(Gen_node g) {
                  break;
   }
   return p;
-}            
+}
 
 fcomplex  Gen_To_Cpx(Gen_node g){
   fcomplex c;
@@ -45,12 +45,12 @@ fcomplex  Gen_To_Cpx(Gen_node g){
 }
 
 double Gen_To_Dbl(Gen_node g)  {
-  double d = 0.0;    
- if (g==nullptr) bad_error("NULL arg to Gen_To_Dbl");             
+  double d = 0.0;
+ if (g==nullptr) bad_error("NULL arg to Gen_To_Dbl");
   switch (g->type){
-     case Int_T: d=g->Genval.ival;       
+     case Int_T: d=g->Genval.ival;
                  break;
-     case Dbl_T: d=g->Genval.dval;  
+     case Dbl_T: d=g->Genval.dval;
                  break;
         default: bad_error("Don't Know how to coerce in Gen_To_Dbl");
                  break;
@@ -60,7 +60,7 @@ double Gen_To_Dbl(Gen_node g)  {
 
 int  Gen_To_Int(Gen_node g){
   int d = 0;
- if (g==nullptr) bad_error("NULL arg to Gen_To_Int");             
+ if (g==nullptr) bad_error("NULL arg to Gen_To_Int");
   switch (g->type){
      case Int_T: d=g->Genval.ival;
                  break;
@@ -115,10 +115,10 @@ Gen_node Imatrix_to_Gen(Imatrix M){
       *GMref(Res,i,j)=Int_To_Gen(*IMref(M,i,j));
   return GMND(Res);
 }
-  
- 
- 
- 
+
+
+
+
 /*-----------------------------------------------------------
  Conversions to Gen
 ------------------------------------------------------------*/
@@ -147,7 +147,7 @@ Gen_node Cpx_To_Gen(fcomplex c)
   return g;
 }
 
-Gen_node Ply_To_Gen(polynomial1 p)  
+Gen_node Ply_To_Gen(polynomial1 p)
 { Gen_node g;
   g=gen_node();
   g->type=Ply_T;
@@ -286,7 +286,7 @@ psys Gen_to_psys(Gen_node g){
   int n,m,r,i,j,deg,td;
   psys sys;
   polynomial1 ptr;
- 
+
   PV=Gen_Mtx(g);
   /* pass1 collect stats on polynomial1  */
   n=poly_dim(PV(1));

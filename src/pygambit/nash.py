@@ -195,7 +195,7 @@ def lcp_solve(
         rational=rational,
         use_strategic=not game.is_tree or use_strategic,
         equilibria=equilibria,
-        parameters={'stop_after': stop_after, 'max_depth': max_depth}
+        parameters={"stop_after": stop_after, "max_depth": max_depth}
     )
 
 
@@ -279,7 +279,7 @@ def liap_solve(
         rational=False,
         use_strategic=not game.is_tree or use_strategic,
         equilibria=equilibria,
-        parameters={'maxiter': maxiter}
+        parameters={"maxiter": maxiter}
     )
 
 
@@ -312,9 +312,8 @@ def simpdiv_solve(
     """
     if not isinstance(refine, int) or refine < 2:
         raise ValueError("simpdiv_solve(): refine must be an integer no less than 2")
-    if leash is not None:
-        if not isinstance(leash, int) or leash <= 0:
-            raise ValueError("simpdiv_solve(): leash must be a non-negative integer")
+    if leash is not None and (not isinstance(leash, int) or leash <= 0):
+        raise ValueError("simpdiv_solve(): leash must be a non-negative integer")
     equilibria = libgbt._simpdiv_strategy_solve(game, refine, leash or 0)
     return NashComputationResult(
         game=game,
@@ -322,7 +321,7 @@ def simpdiv_solve(
         rational=True,
         use_strategic=True,
         equilibria=equilibria,
-        parameters={'leash': leash}
+        parameters={"leash": leash}
     )
 
 

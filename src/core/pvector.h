@@ -85,6 +85,3 @@ template <class T> class PVector : public Vector<T> {
 } // end namespace Gambit
 
 #endif // LIBGAMBIT_PVECTOR_H
-
-
-

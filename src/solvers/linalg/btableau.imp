@@ -55,29 +55,29 @@ void BaseTableau<T>::CompPivot(int outlabel, int col)
 // ---------------------------------------------------------------------------
 
 // Constructors and Destructor
- 
-template <class T> 
+
+template <class T>
 TableauInterface<T>::TableauInterface(const Gambit::Matrix<T> &A, const Gambit::Vector<T> &b)
-  : A(&A), b(&b), basis(A.MinRow(),A.MaxRow(),A.MinCol(),A.MaxCol()), 
-    solution(A.MinRow(),A.MaxRow()), npivots(0), 
+  : A(&A), b(&b), basis(A.MinRow(),A.MaxRow(),A.MinCol(),A.MaxCol()),
+    solution(A.MinRow(),A.MaxRow()), npivots(0),
     artificial(A.MaxCol()+1,A.MaxCol())
 
-{ 
-  // These are the values recommended by Murtagh (1981) for 15 digit 
-  // accuracy in LP problems 
+{
+  // These are the values recommended by Murtagh (1981) for 15 digit
+  // accuracy in LP problems
   // Note: for Rational, eps1 and eps2 resolve to 0
   Gambit::linalg::epsilon(eps1, 5);
   Gambit::linalg::epsilon(eps2);
 }
 
-template <class T> 
-TableauInterface<T>::TableauInterface(const Gambit::Matrix<T> &A, 
+template <class T>
+TableauInterface<T>::TableauInterface(const Gambit::Matrix<T> &A,
 				      const Gambit::Array<int> &art, const Gambit::Vector<T> &b)
-  : A(&A), b(&b), 
-    basis(A.MinRow(),A.MaxRow(),A.MinCol(),A.MaxCol()+art.Length()), 
+  : A(&A), b(&b),
+    basis(A.MinRow(),A.MaxRow(),A.MinCol(),A.MaxCol()+art.Length()),
     solution(A.MinRow(),A.MaxRow()), npivots(0),
     artificial(A.MaxCol()+1,A.MaxCol()+art.Length())
-{ 
+{
   Gambit::linalg::epsilon(eps1, 5);
   Gambit::linalg::epsilon(eps2);
   for(int i = 0;i<art.Length();i++)
@@ -85,9 +85,9 @@ TableauInterface<T>::TableauInterface(const Gambit::Matrix<T> &A,
 }
 
 template <class T>
-TableauInterface<T>::TableauInterface(const TableauInterface<T> &orig) 
+TableauInterface<T>::TableauInterface(const TableauInterface<T> &orig)
   : A(orig.A), b(orig.b), basis(orig.basis), solution(orig.solution),
-    npivots(orig.npivots), eps1(orig.eps1), eps2(orig.eps2), 
+    npivots(orig.npivots), eps1(orig.eps1), eps2(orig.eps2),
     artificial(orig.artificial)
 { }
 
@@ -239,4 +239,3 @@ bool TableauInterface<T>::IsArtifColumn(int col) const
 }  // end namespace Gambit::linalg
 
 }  // end namespace Gambit
-

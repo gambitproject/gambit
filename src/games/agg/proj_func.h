@@ -299,5 +299,5 @@ inline projtype make_proj_func(TypeEnum type, std::istream &in, int S, int P)
 }  // end namespace Gambit::agg
 
 }  // end namespace Gambit
- 
+
 #endif  // GAMBIT_AGG_PROJFUNC_H

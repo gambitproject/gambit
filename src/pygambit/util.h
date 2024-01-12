@@ -40,7 +40,7 @@ inline Game NewTable(Array<int> *dim)
 { return NewTable(*dim); }
 
 Game ReadGame(char *fn)
-{ 
+{
   std::ifstream f(fn);
   return ReadGame(f);
 }
@@ -67,7 +67,7 @@ std::string WriteGame(const Game &p_game, const std::string &p_format)
   else {
     throw ValueException("Unknown game save file format '" + p_format + "'");
   }
-}        
+}
 
 std::string WriteGame(const StrategySupportProfile &p_support)
 {
@@ -76,7 +76,7 @@ std::string WriteGame(const StrategySupportProfile &p_support)
   return f.str();
 }
 
-// Create a copy on the heap (via new) of the element at index p_index of 
+// Create a copy on the heap (via new) of the element at index p_index of
 // container p_container.
 template <template<class> class C, class T, class X>
 T *copyitem(const C<T> &p_container, const X &p_index)
@@ -87,7 +87,7 @@ std::shared_ptr<T> sharedcopyitem(const C<T> &p_container, const X &p_index)
 { return make_shared<T>(p_container[p_index]); }
 
 // Set item p_index to value p_value in container p_container
-template <class C, class X, class T> 
+template <class C, class X, class T>
 void setitem(C *p_container, const X &p_index, const T &p_value)
 { (*p_container)[p_index] = p_value; }
 

@@ -47,7 +47,7 @@ std::string HTMLGameWriter::Write(const Game &p_game,
 	theHtml += "</b></center>";
       }
     }
-    
+
     theHtml += "<table>";
     theHtml += "<tr>";
     theHtml += "<td></td>";
@@ -55,7 +55,7 @@ std::string HTMLGameWriter::Write(const Game &p_game,
       theHtml += "<td align=center><b>";
       theHtml += p_game->GetPlayer(p_colPlayer)->GetStrategy(st)->GetLabel();
       theHtml += "</b></td>";
-    } 
+    }
     theHtml += "</tr>";
     for (int st1 = 1; st1 <= p_game->GetPlayer(p_rowPlayer)->NumStrategies(); st1++) {
       PureStrategyProfile profile = *iter;
@@ -86,7 +86,7 @@ std::string HTMLGameWriter::Write(const Game &p_game,
 	theHtml += "</td>";
       }
       theHtml += "</tr>";
-    } 
+    }
 
     theHtml += "</table>";
   }
@@ -134,7 +134,7 @@ std::string LaTeXGameWriter::Write(const Game &p_game,
       if (st < p_game->GetPlayer(p_colPlayer)->NumStrategies()) {
 	theHtml += " & ";
       }
-    } 
+    }
     theHtml += "\\\\\n";
 
     for (int st1 = 1; st1 <= p_game->GetPlayer(p_rowPlayer)->NumStrategies(); st1++) {
@@ -169,11 +169,10 @@ std::string LaTeXGameWriter::Write(const Game &p_game,
       if (st1 < p_game->GetPlayer(p_rowPlayer)->NumStrategies()) {
 	theHtml += "\\\\\n";
       }
-    } 
+    }
 
     theHtml += "\n\\end{game}";
   }
   theHtml += "\n";
   return theHtml;
 }
-

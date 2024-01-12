@@ -47,7 +47,7 @@ private:
   double LiapDerivValue(int, int, const MixedStrategyProfile<double> &) const;
 };
 
-double 
+double
 StrategicLyapunovFunction::LiapDerivValue(int i1, int j1,
 					  const MixedStrategyProfile<double> &p) const
 {
@@ -79,7 +79,7 @@ StrategicLyapunovFunction::LiapDerivValue(int i1, int j1,
   return 2.0 * x;
 }
 
-bool 
+bool
 StrategicLyapunovFunction::Gradient(const Vector<double> &v, Vector<double> &d) const
 {
   m_profile = v;
@@ -91,7 +91,7 @@ StrategicLyapunovFunction::Gradient(const Vector<double> &v, Vector<double> &d) 
   Project(d, m_game->NumStrategies());
   return true;
 }
-  
+
 double StrategicLyapunovFunction::Value(const Vector<double> &v) const
 {
   m_profile = v;
@@ -102,7 +102,7 @@ double StrategicLyapunovFunction::Value(const Vector<double> &v) const
 //                     class NashLiapStrategySolver
 //------------------------------------------------------------------------
 
-List<MixedStrategyProfile<double> > 
+List<MixedStrategyProfile<double> >
 NashLiapStrategySolver::Solve(const MixedStrategyProfile<double> &p_start) const
 {
   if (!p_start.GetGame()->IsPerfectRecall()) {
@@ -155,7 +155,3 @@ NashLiapStrategySolver::Solve(const MixedStrategyProfile<double> &p_start) const
 
   return solutions;
 }
-
-
-
-

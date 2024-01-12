@@ -33,15 +33,15 @@
 //==========================================================================
 
 gbtLegendDialog::gbtLegendDialog(wxWindow *p_parent,
-			   const gbtStyle &p_options)	
+			   const gbtStyle &p_options)
   : wxDialog(p_parent, wxID_ANY, _("Labels"), wxDefaultPosition)
 {
-  auto *nodeGroup = 
+  auto *nodeGroup =
     new wxStaticBoxSizer(new wxStaticBox(this, wxID_ANY, _("Node labeling")),
 			 wxVERTICAL);
 
-  wxString nodeLabelList[] = { _("no label"), 
-			       _("the node's label"), 
+  wxString nodeLabelList[] = { _("no label"),
+			       _("the node's label"),
 			       _("the player's name"),
 			       _("the information set's label"),
 			       _("the information set's number"),
@@ -78,13 +78,13 @@ gbtLegendDialog::gbtLegendDialog(wxWindow *p_parent,
   nodeGroup->Add(nodeBelowSizer, 0, wxALL | wxEXPAND, 5);
 
 
-  auto *actionGroup = 
+  auto *actionGroup =
     new wxStaticBoxSizer(new wxStaticBox(this, wxID_ANY, _("Action labeling")),
 			 wxVERTICAL);
 
-  wxString actionLabelList[] = { _("no label"), 
+  wxString actionLabelList[] = { _("no label"),
 				 _("the name of the action"),
-				 _("the probability the action is played"), 
+				 _("the probability the action is played"),
 				 _("the value of the action") };
 
   auto *actionAboveSizer = new wxBoxSizer(wxHORIZONTAL);

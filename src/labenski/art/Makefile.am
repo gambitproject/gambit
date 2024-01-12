@@ -5,5 +5,3 @@ EXTRA_DIST = \
 	hand.xpm \
 	ledgreen.xpm \
 	ledgrey.xpm
-
-

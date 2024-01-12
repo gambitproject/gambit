@@ -44,6 +44,3 @@ template gPoly<double> TogDouble(const gPoly<double>&);
 template gPoly<double> NormalizationOfPoly(const gPoly<double>&);
 
 template std::string &operator<<(std::string &, const gPoly<double> &);
-
-
-

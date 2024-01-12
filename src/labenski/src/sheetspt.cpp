@@ -2,7 +2,7 @@
 // Name:        sheetspt.cpp
 // Purpose:     wxSheetSplitter and related classes
 // Author:      John Labenski
-// Modified by: 
+// Modified by:
 // Created:     4/1/2004
 // RCS-ID:      $Id$
 // Copyright:   (c) John Labenski
@@ -39,7 +39,7 @@ BEGIN_EVENT_TABLE( wxSheetSplitter, wxNavigationEnabled<wxWindow> )
     EVT_MOUSE_EVENTS       ( wxSheetSplitter::OnMouse )
     EVT_SHEET_SPLIT_BEGIN  ( wxID_ANY, wxSheetSplitter::OnSplit )
     EVT_SHEET_VIEW_CHANGED ( wxID_ANY, wxSheetSplitter::OnViewChanged )
-    
+
     // WX_EVENT_TABLE_CONTROL_CONTAINER(wxSheetSplitter)
 END_EVENT_TABLE()
 
@@ -58,11 +58,11 @@ void wxSheetSplitter::Init()
     m_trSheet = NULL;
     m_blSheet = NULL;
     m_brSheet = NULL;
-    
+
     m_splitMode   = wxSHEET_SPLIT_NONE;
     m_splitCursor = wxSHEET_SPLIT_NONE;
     //m_sash_width  = 4;
-    
+
     m_enable_split_vert = true;
     m_enable_split_horiz = true;
 }
@@ -80,16 +80,16 @@ bool wxSheetSplitter::Create(wxWindow *parent, wxWindowID id,
 
     if (!wxWindow::Create(parent, id, pos, size, style|wxCLIP_CHILDREN, name))
         return false;
-    
+
     //SetForegroundColour(*wxBLACK);
 
     // don't erase the splitter background, it's pointless as we overwrite it
     SetBackgroundStyle(wxBG_STYLE_CUSTOM);
-   
+
     return true;
 }
-    
-wxSheetSplitter::~wxSheetSplitter() 
+
+wxSheetSplitter::~wxSheetSplitter()
 {
     // stop paint events, probably not necessary anymore, doesn't hurt though
     if (m_tlSheet) m_tlSheet->GetSheetRefData()->RemoveSheet(m_tlSheet);
@@ -105,7 +105,7 @@ bool wxSheetSplitter::Destroy()
     if (m_trSheet) m_trSheet->GetSheetRefData()->RemoveSheet(m_trSheet);
     if (m_blSheet) m_blSheet->GetSheetRefData()->RemoveSheet(m_blSheet);
     if (m_brSheet) m_brSheet->GetSheetRefData()->RemoveSheet(m_brSheet);
-    
+
     return wxWindow::Destroy();
 }
 
@@ -114,7 +114,7 @@ void wxSheetSplitter::Initialize(wxSheet* sheet)
     wxCHECK_RET(sheet && (sheet->GetParent() == this), wxT("Invalid sheet or parent"));
     m_tlSheet = sheet;
     // In >= wx25 a window's min size is set when created with a size, breaks splitting
-    m_tlSheet->SetSizeHints(-1, -1); 
+    m_tlSheet->SetSizeHints(-1, -1);
     ConfigureWindows();
     LayoutWindows();
 }
@@ -130,7 +130,7 @@ wxSheet* wxSheetSplitter::CreateSheet(wxWindowID id)
     {
         wxSheet *sheet = event.GetSheet();
         wxCHECK_MSG(sheet->GetParent() == this, sheet, wxT("Invalid parent for wxSheet in splitter"));
-        return sheet; 
+        return sheet;
     }
 
     return m_tlSheet->Clone(id);
@@ -155,7 +155,7 @@ wxSheet* wxSheetSplitter::CreateBottomLeftSheet(wxWindowID id)
     sheet->GetColLabelWindow()->Show(false);
     sheet->GetCornerLabelWindow()->Show(false);
     sheet->EnableSplitVertically(false);
-    sheet->SetGridOrigin(m_tlSheet->GetGridOrigin());    
+    sheet->SetGridOrigin(m_tlSheet->GetGridOrigin());
     return sheet;
 }
 wxSheet* wxSheetSplitter::CreateBottomRightSheet(wxWindowID id)
@@ -176,10 +176,10 @@ void wxSheetSplitter::SplitVertically(int y_pos, bool sendEvt)
 {
     wxCHECK_RET(m_tlSheet, wxT("Unable to split vertically, not initialized yet."));
     wxCHECK_RET(!IsSplitVertically(), wxT("Already vertically split"));
-    wxCHECK_RET((y_pos >= m_minSize.y) || 
+    wxCHECK_RET((y_pos >= m_minSize.y) ||
                 (y_pos < GetClientSize().GetHeight() - m_minSize.y),
                 wxT("Invalid vertical split position"));
-    
+
     m_blSheet = CreateBottomLeftSheet();
     wxCHECK_RET(m_blSheet, wxT("Unable to create wxSheet child in splitter"));
 
@@ -201,24 +201,24 @@ void wxSheetSplitter::SplitHorizontally(int x_pos, bool sendEvt)
 {
     wxCHECK_RET(m_tlSheet, wxT("Unable to split horizontally, not initialized yet."));
     wxCHECK_RET(!IsSplitHorizontally(), wxT("Already horizontally split"));
-    wxCHECK_RET((x_pos >= m_minSize.x) || 
+    wxCHECK_RET((x_pos >= m_minSize.x) ||
                 (x_pos < GetClientSize().GetWidth() - m_minSize.x),
                 wxT("Invalid horizontal split position"));
 
     m_trSheet = CreateTopRightSheet();
     wxCHECK_RET(m_trSheet, wxT("Unable to create wxSheet child in splitter"));
-    
+
     if (m_blSheet && !m_brSheet)
     {
         m_brSheet = CreateBottomRightSheet();
         wxCHECK_RET(m_brSheet, wxT("Unable to create wxSheet child in splitter"));
     }
-    
+
     m_splitPos.x = x_pos;
     ConfigureWindows();
     LayoutWindows();
     Refresh(false);
-    
+
     if (sendEvt)
         SendEvent( wxEVT_SHEET_SPLIT_CHANGED, false );
 }
@@ -231,14 +231,14 @@ void wxSheetSplitter::UnsplitVertically(bool remove_bottom, bool sendEvt)
     m_blSheet->Show(false);
     m_blSheet->Destroy();
     m_blSheet = NULL;
-            
+
     if (m_brSheet)
     {
         wxPoint brOrigin = m_brSheet->GetGridOrigin();
         m_brSheet->Show(false);
         m_brSheet->Destroy();
         m_brSheet = NULL;
-                
+
         if (!remove_bottom)
             m_trSheet->SetGridOrigin(brOrigin);
     }
@@ -250,30 +250,30 @@ void wxSheetSplitter::UnsplitVertically(bool remove_bottom, bool sendEvt)
     ConfigureWindows();
     LayoutWindows();
     Refresh(false);
-    
+
     if (sendEvt)
         SendEvent( wxEVT_SHEET_SPLIT_UNSPLIT, true );
 }
 void wxSheetSplitter::UnsplitHorizontally(bool remove_right, bool sendEvt)
 {
     wxCHECK_RET(IsSplitHorizontally(), wxT("Not horizontally split"));
-    
+
     wxPoint trOrigin = m_trSheet->GetGridOrigin();
     m_trSheet->Show(false);
     m_trSheet->Destroy();
     m_trSheet = NULL;
-    
+
     if (m_brSheet)
     {
         wxPoint brOrigin = m_brSheet->GetGridOrigin();
         m_brSheet->Show(false);
         m_brSheet->Destroy();
         m_brSheet = NULL;
-        
+
         if (!remove_right)
             m_blSheet->SetGridOrigin(brOrigin);
     }
-    
+
     if (!remove_right)
         m_tlSheet->SetGridOrigin(trOrigin);
 
@@ -291,8 +291,8 @@ void wxSheetSplitter::SetVerticalSplitPosition(int y_pos, bool sendEvt)
     wxCHECK_RET(m_tlSheet, wxT("wxSheetSplitter not initialized"));
     y_pos = GetAdjustedVerticalSashPosition(y_pos);
     wxSize clientSize(GetClientSize());
-    int border_size = GetBorderSize();   
-    
+    int border_size = GetBorderSize();
+
     if ((y_pos <= border_size) || (y_pos >= clientSize.y-border_size))
     {
         if (IsSplitVertically())
@@ -303,11 +303,11 @@ void wxSheetSplitter::SetVerticalSplitPosition(int y_pos, bool sendEvt)
         SplitVertically(y_pos, sendEvt);
     }
     else if (m_splitPos.y != y_pos)
-    {    
-        m_splitPos.y = y_pos;    
+    {
+        m_splitPos.y = y_pos;
         LayoutWindows();
         Refresh(false);
-        
+
         if (sendEvt)
             SendEvent( wxEVT_SHEET_SPLIT_CHANGED, true );
     }
@@ -319,7 +319,7 @@ void wxSheetSplitter::SetHorizontalSplitPosition(int x_pos, bool sendEvt)
     x_pos = GetAdjustedHorizontalSashPosition(x_pos);
     wxSize clientSize(GetClientSize());
     int border_size = GetBorderSize();
-    
+
     if ((x_pos <= border_size) || (x_pos >= clientSize.x-border_size))
     {
         if (IsSplitHorizontally())
@@ -334,7 +334,7 @@ void wxSheetSplitter::SetHorizontalSplitPosition(int x_pos, bool sendEvt)
         m_splitPos.x = x_pos;
         LayoutWindows();
         Refresh(false);
-        
+
         if (sendEvt)
             SendEvent( wxEVT_SHEET_SPLIT_CHANGED, false );
     }
@@ -350,14 +350,14 @@ int wxSheetSplitter::GetAdjustedVerticalSashPosition(int pos) const
         pos = m_minSize.x;
     else if (pos >= width - m_minSize.x)
         pos = width - m_minSize.x;
-    
-    return pos;    
+
+    return pos;
 }
 
 int wxSheetSplitter::GetAdjustedHorizontalSashPosition(int pos) const
 {
     int height = GetClientSize().GetHeight();
-    
+
     if (height < m_minSize.y)
         pos = height/2;
     else if (pos <= m_minSize.y)
@@ -365,19 +365,19 @@ int wxSheetSplitter::GetAdjustedHorizontalSashPosition(int pos) const
     else if (pos >= height - m_minSize.y)
         return height - m_minSize.y;
 
-    return pos;    
+    return pos;
 }
 
 void wxSheetSplitter::ConfigureWindows()
 {
     if (!m_tlSheet)
         return;
-    
+
     if (m_tlSheet)
     {
         int sb_mode = (m_trSheet ? wxSheet::SB_VERT_NEVER  : wxSheet::SB_AS_NEEDED) |
                       (m_blSheet ? wxSheet::SB_HORIZ_NEVER : wxSheet::SB_AS_NEEDED);
-        
+
         m_tlSheet->SetScrollBarMode(sb_mode);
         m_tlSheet->EnableSplitVertically(!m_blSheet && m_enable_split_vert);
         m_tlSheet->EnableSplitHorizontally(!m_trSheet && m_enable_split_horiz);
@@ -385,26 +385,26 @@ void wxSheetSplitter::ConfigureWindows()
     if (m_trSheet)
     {
         int sb_mode = (m_brSheet ? wxSheet::SB_HORIZ_NEVER : wxSheet::SB_AS_NEEDED);
-        
+
         m_trSheet->SetHorizontalScrollBarMode(sb_mode);
         m_trSheet->EnableSplitVertically(!m_brSheet && m_enable_split_vert);
     }
     if (m_blSheet)
     {
         int sb_mode = (m_brSheet ? wxSheet::SB_VERT_NEVER : wxSheet::SB_AS_NEEDED);
-        
+
         m_blSheet->SetVerticalScrollBarMode(sb_mode);
         m_blSheet->EnableSplitHorizontally(!m_brSheet && m_enable_split_horiz);
-    }    
+    }
 }
 
 void wxSheetSplitter::LayoutWindows()
 {
     if (!m_tlSheet)
         return;
-    
+
     wxSize clientSize(GetClientSize());
-    
+
     int x = m_splitPos.x;
     int y = m_splitPos.y;
     int sash_size   = GetSashSize();
@@ -412,36 +412,36 @@ void wxSheetSplitter::LayoutWindows()
 
     if (!m_trSheet)
         x = clientSize.x - 2*border_size;
-/*    
+/*
     else if (m_trSheet && (x > clientSize.x - m_minSize.x))
     {
         // fix sash position to stay within visible part of window
         x = clientSize.x - m_minSize.x;
         if (x < sash_size + border_size + 2)
             x = clientSize.x/2;
-        
+
         m_splitPos.x = x;
     }
-*/  
-    
+*/
+
     if (!m_blSheet)
         y = clientSize.y - 2*border_size;
-/*    
+/*
     else if (m_blSheet && (y > clientSize.y - m_minSize.y))
     {
         // fix sash position to stay within visible part of window
         y = clientSize.y - m_minSize.y;
         if (y < sash_size + border_size + 2)
             y = clientSize.y/2;
-        
+
         m_splitPos.y = y;
     }
 */
-    
+
     wxRect rect = wxRect(border_size, border_size, x, y);
     if (m_tlSheet->GetRect() != rect)
         m_tlSheet->SetSize(rect);
-    
+
     if (m_trSheet)
     {
         rect = wxRect(x+sash_size, border_size, clientSize.x-x-sash_size-border_size, y);
@@ -463,7 +463,7 @@ void wxSheetSplitter::LayoutWindows()
 }
 
 void wxSheetSplitter::OnSize( wxSizeEvent& event )
-{    
+{
     m_splitPos.x = GetAdjustedVerticalSashPosition(m_splitPos.x);
     m_splitPos.y = GetAdjustedHorizontalSashPosition(m_splitPos.y);
     LayoutWindows();
@@ -475,7 +475,7 @@ void wxSheetSplitter::OnViewChanged(wxSheetEvent& event)
 {
     wxSheet *sheet = (wxSheet*)event.GetEventObject();
     wxPoint origin = sheet->GetGridOrigin();
-    
+
     if (sheet == m_tlSheet)
     {
         if (m_trSheet)
@@ -512,20 +512,20 @@ void wxSheetSplitter::OnSplit(wxSheetSplitterEvent& event)
     GetParent()->GetEventHandler()->ProcessEvent(event);
     if (!event.IsAllowed())
         return;
-    
+
     if (!HasCapture())
         CaptureMouse();
-    
+
     m_splitMode = event.IsVerticalSplit() ? wxSHEET_SPLIT_VERTICAL : wxSHEET_SPLIT_HORIZONTAL;
     SetMouseCursor(m_splitMode);
     // out of bounds, don't draw initial tracker
-    m_mousePos = wxPoint(-10, -10); 
+    m_mousePos = wxPoint(-10, -10);
 }
 
 void wxSheetSplitter::OnMouse(wxMouseEvent& event)
 {
     wxPoint mousePos(event.GetPosition());
-    
+
     if (event.LeftDown())
     {
         m_splitMode = SashHitTest(mousePos);
@@ -540,7 +540,7 @@ void wxSheetSplitter::OnMouse(wxMouseEvent& event)
     else if (event.Dragging() && HasCapture())
     {
         DrawSashTracker(m_mousePos.x, m_mousePos.y);
-        
+
         bool vert = (m_splitMode == wxSHEET_SPLIT_VERTICAL);
 
         wxSheetSplitterEvent sEvent(GetId(), wxEVT_SHEET_SPLIT_CHANGING);
@@ -555,13 +555,13 @@ void wxSheetSplitter::OnMouse(wxMouseEvent& event)
             else
                 m_mousePos.y = sEvent.GetSashPosition();
         }
-        
+
         DrawSashTracker(m_mousePos.x, m_mousePos.y);
     }
     else if (event.LeftUp() && HasCapture())
     {
         ReleaseMouse();
-        
+
         DrawSashTracker(m_mousePos.x, m_mousePos.y);
         m_mousePos = mousePos;
 
@@ -572,12 +572,12 @@ void wxSheetSplitter::OnMouse(wxMouseEvent& event)
 
         m_mousePos = wxPoint(-10, -10);
         m_splitMode = wxSHEET_SPLIT_NONE;
-    }    
+    }
     else if (event.LeftDClick())
     {
         m_splitMode = SashHitTest(mousePos);
-        
-        if (SendEvent(wxEVT_SHEET_SPLIT_DOUBLECLICKED, 
+
+        if (SendEvent(wxEVT_SHEET_SPLIT_DOUBLECLICKED,
                       m_splitMode == wxSHEET_SPLIT_VERTICAL))
         {
             if ((m_minSize.y == 0) && (m_splitMode == wxSHEET_SPLIT_VERTICAL))
@@ -609,7 +609,7 @@ void wxSheetSplitter::DrawSash(wxDC &dc)
     {
         int sash_size = GetSashSize();
         dc.SetPen(wxPen(GetForegroundColour(), sash_size, wxSOLID));
-        
+
         if (draw_horiz)
             dc.DrawLine(m_splitPos.x + sash_size/2, 0, m_splitPos.x + sash_size/2, clientSize.y);
         if (draw_vert)
@@ -626,7 +626,7 @@ void wxSheetSplitter::DrawSash(wxDC &dc)
         return;
 
     if (draw_horiz)
-        ren.DrawSplitterSash(this, dc, clientSize, m_splitPos.x, wxVERTICAL, 
+        ren.DrawSplitterSash(this, dc, clientSize, m_splitPos.x, wxVERTICAL,
               (m_splitCursor == wxSHEET_SPLIT_HORIZONTAL) ? (int)wxCONTROL_CURRENT : 0);
     if (draw_vert)
         ren.DrawSplitterSash(this, dc, clientSize, m_splitPos.y, wxHORIZONTAL,
@@ -638,7 +638,7 @@ void wxSheetSplitter::DrawSashTracker(int x, int y)
 {
     if ((x < 0) && (y < 0))
         return;
-    
+
     int w, h;
     GetClientSize(&w, &h);
 
@@ -650,15 +650,15 @@ void wxSheetSplitter::DrawSashTracker(int x, int y)
 
     if ( m_splitMode == wxSHEET_SPLIT_HORIZONTAL )
     {
-        x1 = x2 = ((x > w) ? w : ((x < 0) ? 0 : x)) + sash_size/2; 
+        x1 = x2 = ((x > w) ? w : ((x < 0) ? 0 : x)) + sash_size/2;
         y1 = border_size;
         y2 = h-border_size;
     }
     else
     {
-        x1 = border_size;   
-        x2 = w-border_size; 
-        y1 = y2 = ((y > h) ? h : ((y < 0) ? 0 : y)) + sash_size/2; 
+        x1 = border_size;
+        x2 = w-border_size;
+        y1 = y2 = ((y > h) ? h : ((y < 0) ? 0 : y)) + sash_size/2;
     }
 
     ClientToScreen(&x1, &y1);
@@ -686,7 +686,7 @@ int wxSheetSplitter::SashHitTest(const wxPoint& pt) const
 {
     if ((m_splitPos.x <= 0) && (m_splitPos.y <= 0))
         return wxSHEET_SPLIT_NONE;
-    
+
     wxSize clientSize = GetClientSize();
     int sash_size   = GetSashSize();
     int border_size = GetBorderSize();
@@ -724,7 +724,7 @@ void wxSheetSplitter::SetMouseCursor(int sheet_split_mode)
     m_splitCursor = sheet_split_mode;
     wxClientDC dc(this);
     DrawSash(dc);
-    
+
     switch (sheet_split_mode)
     {
         case wxSHEET_SPLIT_VERTICAL   : SetCursor(wxCURSOR_SIZENS); break;

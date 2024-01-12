@@ -48,6 +48,3 @@ public:
 };
 
 #endif  // DLINSERTMOVE_H
-
-
-

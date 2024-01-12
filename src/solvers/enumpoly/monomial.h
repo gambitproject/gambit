@@ -28,8 +28,8 @@
 //              gMono
 //
 // whose objects are monomials in several variables
-// with coefficients of class T and nonnegative exponents. 
-// This role of this class is to support the class gPoly. 
+// with coefficients of class T and nonnegative exponents.
+// This role of this class is to support the class gPoly.
 
 
 template<class T> class gMono {
@@ -53,8 +53,8 @@ public:
           gMono<T>  operator /  (const gMono<T>&) const;
           gMono<T>  operator +  (const gMono<T>&) const; // assert exps ==
           gMono<T>& operator += (const gMono<T>&);       // assert exps ==
-          gMono<T>& operator *= (const T&);      
-          gMono<T>  operator -  ()                const; 
+          gMono<T>& operator *= (const T&);
+          gMono<T>  operator -  ()                const;
 
     // information
     const T &       Coef()                      const;
@@ -66,24 +66,3 @@ public:
     T               Evaluate(const Gambit::Array<T>&)  const;
     T               Evaluate(const Gambit::Vector<T>&) const;
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

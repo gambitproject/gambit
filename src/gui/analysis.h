@@ -29,8 +29,8 @@ class gbtGameDocument;
 // This file contains classes which manage the output of analysis tools.
 // Currently, one class is supported, which is simply a list of profiles
 // output by, e.g., an algorithm to compute Nash equilibria.
-// Future classes will be adapted to other types of output (e.g., 
-// output of stable sets or convex components of equilibria, etc.) 
+// Future classes will be adapted to other types of output (e.g.,
+// output of stable sets or convex components of equilibria, etc.)
 //
 
 class TiXmlNode;
@@ -61,7 +61,7 @@ public:
 
   /// Get the description of the list
   const wxString &GetDescription() const { return m_description; }
-    
+
   /// Set the description of the list
   void SetDescription(const wxString &p_desc) { m_description = p_desc; }
 
@@ -87,15 +87,15 @@ public:
 
   virtual std::string GetPayoff(int pl, int p_index = -1) const = 0;
 
-  virtual std::string GetRealizProb(const Gambit::GameNode &, 
+  virtual std::string GetRealizProb(const Gambit::GameNode &,
 				    int p_index = -1) const = 0;
-  virtual std::string GetBeliefProb(const Gambit::GameNode &, 
+  virtual std::string GetBeliefProb(const Gambit::GameNode &,
 				    int p_index = -1) const = 0;
-  virtual std::string GetNodeValue(const Gambit::GameNode &, int pl, 
+  virtual std::string GetNodeValue(const Gambit::GameNode &, int pl,
 				   int p_index = -1) const = 0;
-  virtual std::string GetInfosetProb(const Gambit::GameNode &, 
+  virtual std::string GetInfosetProb(const Gambit::GameNode &,
 				     int p_index = -1) const = 0;
-  virtual std::string GetInfosetValue(const Gambit::GameNode &, 
+  virtual std::string GetInfosetValue(const Gambit::GameNode &,
 				      int p_index = -1) const = 0;
   virtual std::string GetActionValue(const Gambit::GameNode &, int act,
 				     int p_index = -1) const = 0;
@@ -153,14 +153,14 @@ public:
   int NumProfiles() const override;
 
   std::string GetPayoff(int pl, int p_index = -1) const override;
-  /// Return the realization probability of the node for the given 
+  /// Return the realization probability of the node for the given
   /// profile.  (index == -1 for currently selected profile)
   std::string GetRealizProb(const Gambit::GameNode &, int p_index = -1) const override;
   std::string GetBeliefProb(const Gambit::GameNode &, int p_index = -1) const override;
-  std::string GetNodeValue(const Gambit::GameNode &, int pl, 
+  std::string GetNodeValue(const Gambit::GameNode &, int pl,
 			   int p_index = -1) const override;
   std::string GetInfosetProb(const Gambit::GameNode &, int p_index = -1) const override;
-  std::string GetInfosetValue(const Gambit::GameNode &, 
+  std::string GetInfosetValue(const Gambit::GameNode &,
 			      int p_index = -1) const override;
   std::string GetActionValue(const Gambit::GameNode &, int act,
 			     int p_index = -1) const override;
@@ -196,7 +196,7 @@ public:
   //! @name Saving and loading profile lists
   //!
   //@{
-  /// Build a profile list from XML savefile 
+  /// Build a profile list from XML savefile
   void Load(TiXmlNode *analysis);
   /// Write a profile list to XML savefile
   void Save(std::ostream &) const override;

@@ -33,7 +33,7 @@
 /************** Implementation of class Pelview **************/
 /*************************************************************/
 
-node SaveList=nullptr; 
+node SaveList=nullptr;
 
 void PelView::InitializePelicanMemory() const
 {
@@ -48,14 +48,14 @@ void PelView::InitializePelicanMemory() const
 
 Pring PelView::MakePring(const int num) const
 {
-  const char* q[] = {"","n1","n2" , "n3", "n4", "n5", "n6", "n7", "n8", 
-		     "n9", "n10", "n11", "n12", "n13", "n14", "n15", "n16", 
-		     "n17", "n18","n19", "n20", "n21", "n22", "n23", "n24", 
+  const char* q[] = {"","n1","n2" , "n3", "n4", "n5", "n6", "n7", "n8",
+		     "n9", "n10", "n11", "n12", "n13", "n14", "n15", "n16",
+		     "n17", "n18","n19", "n20", "n21", "n22", "n23", "n24",
 		     "n25", "n26", "n27", "n28","n29", "n30"};
-  
+
   Pring R = makePR(num);    // makePR is a memory malloc routine
 
-  for(int j=1; j<=R->n; j++) 
+  for(int j=1; j<=R->n; j++)
     R->vars[j-1] = const_cast<char *>(q[j]);
   R->def = const_cast<char *>("t");
   R->n = num;
@@ -67,7 +67,7 @@ void PelView::PrintPring(const Pring &ring) const
   //  gout << "The Pring has " << ring->n << " variables: ";
   for (int i = 1; i <= ring->n; i++) {
     //    gout << ring->vars[i-1];
-    //if (i < ring->n) 
+    //if (i < ring->n)
     //  gout << ", ";
     //else
     //  gout << ".\n";
@@ -75,7 +75,7 @@ void PelView::PrintPring(const Pring &ring) const
   // gout << "  The homotopy variable is " << ring->def << ".\n";
 }
 
-void PelView::Initialize_Idf_T_Gen_node(const Gen_node &node, 
+void PelView::Initialize_Idf_T_Gen_node(const Gen_node &node,
 					const char * label) const
 {
   node->type=Idf_T;
@@ -85,9 +85,9 @@ void PelView::Initialize_Idf_T_Gen_node(const Gen_node &node,
 
 Gen_node PelView::CreateRing(const int numvar) const
 {
-  const char* q[] = {" ", "","n1","n2" , "n3", "n4", "n5", "n6", "n7", "n8", 
-		     "n9", "n10", "n11", "n12", "n13", "n14", "n15", "n16", 
-		     "n17", "n18","n19", "n20", "n21", "n22", "n23", "n24", 
+  const char* q[] = {" ", "","n1","n2" , "n3", "n4", "n5", "n6", "n7", "n8",
+		     "n9", "n10", "n11", "n12", "n13", "n14", "n15", "n16",
+		     "n17", "n18","n19", "n20", "n21", "n22", "n23", "n24",
 		     "n25", "n26", "n27", "n28","n29", "n30"};
 
   Gen_node a1 = gen_node();
@@ -104,96 +104,96 @@ Gen_node PelView::CreateRing(const int numvar) const
 	Gen_node a = gen_node();
 	Initialize_Idf_T_Gen_node(a,q[j]);
 	a->next = nullptr;
-	
+
 	atemp->next = a;
-	atemp = a;	
+	atemp = a;
       }
   }
   atemp->next=nullptr;
   Initialize_Idf_T_Gen_node(atemp,"t");
-  
+
   return a1;
 }
 
-polynomial1 PelView::GamPolyToPelPoly(const gPoly<double> &p, 
-				      const int n, 
+polynomial1 PelView::GamPolyToPelPoly(const gPoly<double> &p,
+				      const int n,
 				      const Pring ring) const
 {
   if ((p.MonomialList().Length() == 0))  {
-      
+
     polynomial1 P;
     P = makeP(ring);
     P->coef.r=0;
     P->coef.i=0;
-    
+
     for (int i=0;i<P->R->n;i++)
       P->exps[i]=0;
     P->next= nullptr;
     return P;
   }
-  
+
   else {
     polynomial1  P,Ptemp;
     P = makeP(ring);
-    
+
     Ptemp= P;
-    
+
     if (p.MonomialList()[1].IsConstant()) {
       Ptemp->coef.r= p.MonomialList()[1].Coef();
       Ptemp->coef.i= 0;
-      
+
       for (int i=0;i<Ptemp->R->n;i++)
 	Ptemp->exps[i]=0;
       Ptemp->next=nullptr;
     }
-    
+
     else {
       Ptemp->coef.r= p.MonomialList()[1].Coef();
       Ptemp->coef.i= 0;
-      
+
       for (int i=0;i<Ptemp->R->n;i++)
 	Ptemp->exps[i]= p.MonomialList()[1].ExpV() [i+1];
       Ptemp->next=nullptr;
     }
-    
+
     for (int j = 2; j <=p.MonomialList().Length(); j++) {
       polynomial1 a;
       a = makeP(ring);
       if (p.MonomialList()[j].IsConstant()) {
 	a->coef.r= p.MonomialList()[j].Coef();
 	a->coef.i= 0;
-	
+
 	for (int i=0;i<a->R->n;i++)
 	  a->exps[i]=0;
 	a->next = nullptr;
 	Ptemp->next = a;
 	Ptemp = a;
-	
+
       }
-      
+
       else {
 	a->coef.r= p.MonomialList()[j].Coef();
 	a->coef.i= 0;
-	
-	
+
+
 	for (int i=0;i<a->R->n;i++)
 	  a->exps[i]= p.MonomialList()[j].ExpV() [i+1];
-		
+
 	//     printP(a);
 	//	      cout;
 	a->next = nullptr;
 	Ptemp->next = a;
 	Ptemp = a;
-	
-      }  
+
+      }
     }
-    
+
     return P;
   }
-}  
+}
 
-Gen_node 
-PelView::CreatePelicanVersionOfSystem(const gPolyList<double> &input, 
+Gen_node
+PelView::CreatePelicanVersionOfSystem(const gPolyList<double> &input,
 				      const Pring ring) const
 {
   Gen_node a;
@@ -207,7 +207,7 @@ PelView::CreatePelicanVersionOfSystem(const gPolyList<double> &input,
   V->topc = input.Length();
   V->ncols = input.Length();
   V->topr=1;
-  
+
   for(int j=1; j<=input.Length(); j++)
     {
       Gen_node b;
@@ -216,17 +216,17 @@ PelView::CreatePelicanVersionOfSystem(const gPolyList<double> &input,
       b->next = nullptr;
       b->Genval.pval=(GamPolyToPelPoly(input[j], input.Length(), ring));
       b->Genval.gval=(char*) (GamPolyToPelPoly(input[j], input.Length(), ring));
-      b->Genval.idval=(char*) (GamPolyToPelPoly(input[j], input.Length(), ring)); 
-      
+      b->Genval.idval=(char*) (GamPolyToPelPoly(input[j], input.Length(), ring));
+
       (V->coords[j-1])= b;
     }
-  
+
   a->Genval.gval=(char *)V;
   return G_System(a);
 }
 
-int PelView::GutsOfGetMixedVolume(      node A, 
-				        node norms, 
+int PelView::GutsOfGetMixedVolume(      node A,
+				        node norms,
 				  const Imatrix T) const
 {
   node ptr = nullptr, ptc = nullptr, res = nullptr;
@@ -238,14 +238,14 @@ int PelView::GutsOfGetMixedVolume(      node A,
   PUSH_LOC(ptc);
   PUSH_LOC(ptr);
   PUSH_LOC(norms);
-  
+
   ptr = norms;
   while (ptr != nullptr) {
-    
+
     ptc = aset_face(A, (Imatrix) Car((node) Car(ptr)));
-    
+
     Tp = aset_type(ptc, Tp);
-    
+
     if (T != nullptr && Imatrix_equal(Tp, T) == TRUE) {
       t = 1;
       list_insert(Car(ptr),&res, &(list_Imatrix_comp),FALSE);
@@ -256,14 +256,14 @@ int PelView::GutsOfGetMixedVolume(      node A,
 	(Imatrix_rref(M, &v) == aset_dim(A) - 1) &&
 	(IMrows(M) == aset_dim(A) - 1)
 	) {
-      
+
       if (t == 1)
 	mv += abs(v);
     }
-    
+
     ptr = Cdr(ptr);
   }
-  
+
   Imatrix_free(Tp);
   Imatrix_free(M);
   POP_LOCS();
@@ -279,22 +279,22 @@ int PelView::GetMixedVolume(const Gen_node g) const
   int nargs;
   LOCS(2);
   PUSH_LOC(A);
-  
+
   nargs=Gen_length(g);
-  //Something happens right here and is necessary for the code, 
-  //but don't ask me what...       
+  //Something happens right here and is necessary for the code,
+  //but don't ask me what...
   if ((nargs ==0) ||
       (nargs==1  && Can_Be_Aset(Gen_elt(g,1))!=TRUE )||
       (nargs==2  && (r=Can_Be_Vector(Gen_elt(g,2),Int_T))<0)){
   }
 
   A=Gen_aset(Gen_elt(g,1));
- 
+
   if (nargs==2 )
-    if (r==aset_r(A)) 
+    if (r==aset_r(A))
       T=Gen_to_Imatrix(Gen_elt(g,2));
- 
-  CP= GutsOfGetMixedVolume(A,aset_lower_facets(A),T);    
+
+  CP= GutsOfGetMixedVolume(A,aset_lower_facets(A),T);
 
   return CP;
 }
@@ -316,11 +316,11 @@ Gen_node PelView::ToDmatrixGen_node(const Gen_node g) const
   Gen_node a;
   psys PS;
   Dmatrix S;
-  
+
   PS=Gen_to_psys(g);
   S=psys_scale(PS);
   a= Dmatrix_to_Gen(S);
-  
+
   return a;
 }
 
@@ -339,7 +339,7 @@ polynomial1 PelView::IdentityElementPoly(const Pring ring) const
   return P;
 }
 
-polynomial1 PelView::HomotopyVariableMonomialPoly(const Pring ring, 
+polynomial1 PelView::HomotopyVariableMonomialPoly(const Pring ring,
 						  const int comp) const
 {
   polynomial1 P;
@@ -353,7 +353,7 @@ polynomial1 PelView::HomotopyVariableMonomialPoly(const Pring ring,
     P->exps[i]=0;
   P->def = comp;
   P->next= nullptr;
-  
+
   return P;
 }
 
@@ -365,7 +365,7 @@ Gen_node PelView::SolutionsDerivedFromContinuation(const Pring &ring,
 {
   pel_system->next = nullptr;
 
-  Gen_node temp= Link(pel_system ,Make_scl_Gen_node()); 
+  Gen_node temp= Link(pel_system ,Make_scl_Gen_node());
   Gen_node scl= ToDmatrixGen_node(temp);
   Gen_node fs = G_Scale(temp);
 
@@ -376,10 +376,10 @@ Gen_node PelView::SolutionsDerivedFromContinuation(const Pring &ring,
   tee = Ply_To_Gen(HomotopyVariableMonomialPoly(ring, unity));
   one=Ply_To_Gen(IdentityElementPoly(ring));
   tee1=Ply_To_Gen(HomotopyVariableMonomialPoly(ring, unity));
-  
+
   tee->next=nullptr;
   one->next=nullptr;
-  
+
 // Define the homothopy
 
   //  gout<< " Step 13 \n";
@@ -396,7 +396,7 @@ Gen_node PelView::SolutionsDerivedFromContinuation(const Pring &ring,
   Gen_node cs = G_Cont(Link(h5,G_UnLift(Solve)), tweak);
 
   //  gout<< " Step 15 \n";
-  Gen_node sols = G_Affine(G_UnScale(Link(cs, scl)));  
+  Gen_node sols = G_Affine(G_UnScale(Link(cs, scl)));
 
   free_Gen_list(scl);
 
@@ -405,11 +405,11 @@ Gen_node PelView::SolutionsDerivedFromContinuation(const Pring &ring,
 
 template <class T> bool HasARedundancy(const Gambit::List<T> &p_list)
 {
-  int i = 1; int j = 2;		
+  int i = 1; int j = 2;
   while (i < p_list.Length()) {
     if (p_list[i] == p_list[j])
       return true;
-    else 
+    else
       j++;
     if (j > p_list.Length()) { i++; j = i+1; }
   }
@@ -442,16 +442,16 @@ Gen_node PelView::SolveCheckMaybeTryAgain(const Pring &ring,
       //      gout<<" \n The solution list produced by Pelican is:\n";
       print_Gen_list(sols);
 #endif
-      
+
       //The same little trick
       pel_system->next= nullptr;
-      
+
 #ifdef PELVIEW_DEBUG
       //      gout << "\n Step 12 \n";
 #endif
       solutionsarecorrect = CheckSolutions(G_Verify(Link(pel_system,sols)));
-      if (solutionsarecorrect && 
-	  !HasARedundancy(GambitRootsFromPelRoots(sols))) 
+      if (solutionsarecorrect &&
+	  !HasARedundancy(GambitRootsFromPelRoots(sols)))
 	done = true;
       if (!done) free_Gen_list(sols);
 #ifdef PELVIEW_DEBUG
@@ -461,15 +461,15 @@ Gen_node PelView::SolveCheckMaybeTryAgain(const Pring &ring,
       //      gout << "correct.\n";
 #endif
     }
-  
+
   return sols;
-  
+
    // gout<< "\n Solve \n";  print_Gen_list(Solve);
 //   free_Gen_list(Solve);
-// Solve doesn't seem to exist at this point, yet this is very ambiguous.  
+// Solve doesn't seem to exist at this point, yet this is very ambiguous.
 }
 
-Gambit::List<Gambit::Vector<gComplex> > 
+Gambit::List<Gambit::Vector<gComplex> >
 PelView::GambitRootsFromPelRoots(const Gen_node g) const
 {
   Gambit::List<Gambit::Vector<gComplex> > alist;
@@ -484,8 +484,8 @@ PelView::GambitRootsFromPelRoots(const Gen_node g) const
     P=(Dmatrix)(Car(Car(ptr)));
 
     int numbervar;
-    numbervar= (int)(DVlength(P)-3)/2;  
-    
+    numbervar= (int)(DVlength(P)-3)/2;
+
     Gambit::Vector<gComplex> vector(1, numbervar);
 
     int j = 1;
@@ -496,24 +496,24 @@ PelView::GambitRootsFromPelRoots(const Gen_node g) const
 	im = DVref(P,i);
 	gComplex complexsol(re, im);
 
-	vector[j] = complexsol; 
-	j+=1;	  
+	vector[j] = complexsol;
+	j+=1;
       }
     }
     alist.push_back(vector);
-    ptr=Cdr(ptr); 
+    ptr=Cdr(ptr);
   }
-  
+
   return alist;
 }
 
-void PelView::DisplayComplexRootList(const Gambit::List<Gambit::Vector<gComplex> > 
+void PelView::DisplayComplexRootList(const Gambit::List<Gambit::Vector<gComplex> >
 				                       &complexroots) const
 {
 #ifdef UNUSED
   for (int k = 1; k <= complexroots.Length(); k++)
     for (int m = 1; m <= complexroots[k].Length(); m++) {
-      if (m ==1) 
+      if (m ==1)
 	gout << "{";
       for (int n = 1; n <= m; n++)
 	gout << "  ";
@@ -531,7 +531,7 @@ int PelView::Dmnsn() const
   return input.Dmnsn();
 }
 
-Gambit::List<Gambit::Vector<double> > 
+Gambit::List<Gambit::Vector<double> >
 PelView::RealRoots(const Gambit::List<Gambit::Vector<gComplex> > &clist) const
 {
   Gambit::List<Gambit::Vector<double> > answer;
@@ -540,12 +540,12 @@ PelView::RealRoots(const Gambit::List<Gambit::Vector<gComplex> > &clist) const
 
     bool is_real = true;
     for (int j = 1; j <= Dmnsn(); j++)
-      if (Gambit::abs(clist[i][j].ImaginaryPart()) > 0.0001) 
+      if (Gambit::abs(clist[i][j].ImaginaryPart()) > 0.0001)
 	is_real = false;
 
     if (is_real) {
       Gambit::Vector<double> next(Dmnsn());
-      for (int j = 1; j <= Dmnsn(); j++) 
+      for (int j = 1; j <= Dmnsn(); j++)
 	next[j] = (double)clist[i][j].RealPart();
       answer.push_back(next);
     }
@@ -559,8 +559,8 @@ bool PelView::CheckSolutions(const Gen_node g) const
 {
   Gen_node goo;
   goo = g->Genval.lval;
-  while (goo!=nullptr) { 
-    if (Gambit::abs(goo->Genval.dval) > 0.01) 
+  while (goo!=nullptr) {
+    if (Gambit::abs(goo->Genval.dval) > 0.01)
       return false;
 
     goo = goo->next;
@@ -572,12 +572,12 @@ bool PelView::CheckSolutions(const Gen_node g) const
 PelView::PelView(const gPolyList<double> &mylist):input(mylist)
 {
   InitializePelicanMemory();
-  
+
 #ifdef PELVIEW_DEBUG
   //  gout << "We begin with the polynomial list\n" << mylist << "\n";
 #endif
 
-  Pring ring = MakePring(input.Length());  
+  Pring ring = MakePring(input.Length());
 
 #ifdef PELVIEW_DEBUG
   //  gout<< " Step 1 \n";
@@ -591,13 +591,13 @@ PelView::PelView(const gPolyList<double> &mylist):input(mylist)
   print_Gen_node(vic);
 #endif
 
-  //  Gen_node pel_system = G_System(translate(input,ring)); 
-  Gen_node pel_system = CreatePelicanVersionOfSystem(input,ring); 
+  //  Gen_node pel_system = G_System(translate(input,ring));
+  Gen_node pel_system = CreatePelicanVersionOfSystem(input,ring);
 
 #ifdef PELVIEW_DEBUG
   //  gout<< "\n\n Step 3 \n";
   //  gout << "The translated system is:\n";
-  print_Gen_node(pel_system); 
+  print_Gen_node(pel_system);
 #endif
 
   Gen_node Atype= G_AType(pel_system); // Atype is the vector of numbers of
@@ -628,8 +628,8 @@ PelView::PelView(const gPolyList<double> &mylist):input(mylist)
 
   Gen_node Qtrig = G_Qtrig(Link(Randlift, Atype));
 
-  /* - There is a commented out error in node_push_local that was triggered 
-by this in various conditions.  In particular, commented out the final print 
+  /* - There is a commented out error in node_push_local that was triggered
+by this in various conditions.  In particular, commented out the final print
 avoids the error, somehow!!
 //  gout<< "\n Step 8 \n";
 //  gout<< "Before Randlift is ";
@@ -674,13 +674,13 @@ avoids the error, somehow!!
   //    gout << realroots[k] << "\n";
   //  gout<< "\n Step 15 \n";
   //  gout<< "\n Memory testing \n";
-  print_Gen_list(Genpoly); 
+  print_Gen_list(Genpoly);
 #endif
-  
+
   free_Gen_list(Genpoly);
 
 #ifdef PELVIEW_DEBUG
-  //  gout<< "\n Qtrig \n";  print_Gen_list(Qtrig);   
+  //  gout<< "\n Qtrig \n";  print_Gen_list(Qtrig);
 #endif
 
   free_Gen_list(Qtrig);
@@ -693,8 +693,8 @@ avoids the error, somehow!!
 }
 
 PelView::PelView(const PelView & given)
-  
-    
+
+
 = default;
 
 PelView::~PelView()
@@ -704,7 +704,7 @@ PelView& PelView::operator =(const PelView &rhs)
 {
   //  gout << "For (eventual) const'ness, operator = not allowed for PelView\n";
   exit (0);
-  return *this;  
+  return *this;
 }
 
 bool PelView::operator ==(const PelView &rhs) const
@@ -743,7 +743,7 @@ int PelView::NumComplexRoots() const
 
 bool PelView::FoundAllRoots() const
 {
-  return (NumComplexRoots() == MixedVolume()); 
+  return (NumComplexRoots() == MixedVolume());
 }
 
 int PelView::NumRealRoots() const
@@ -759,21 +759,21 @@ int old_main()
  //stuff for Gambit-text to Gambit-data
   for (int loop = 1; loop <= 3; loop++) {
 
-  gSpace Space(4); 
+  gSpace Space(4);
   ORD_PTR ptr = &lex;
   term_order Lex(&Space, ptr);
   ptr =  &reversedeglex;
   term_order  ReverseDegLex(&Space, ptr);
   ptr = &reverselex;
   term_order ReverseLex(&Space, ptr);
-  
+
   //Default system
   std::string gx = " 2 + n2 ";
   std::string gy = " 1 + 78 * n1 + 2 * n2  + n4 * n1^2";
   std::string gz = " 3 + n3 + n4";
   std::string gu = " 4 * n1 - n2 * n3 + 6 * n1 * n4^3";
   gPoly<double> px(&Space,gx,&Lex);
-  gPoly<double> py(&Space,gy,&Lex); 
+  gPoly<double> py(&Space,gy,&Lex);
   gPoly<double> pz(&Space,gz,&Lex);
   gPoly<double> pu(&Space,gu,&Lex);
   gPolyList<double> mylist(&Space, &ReverseDegLex);
@@ -781,31 +781,31 @@ int old_main()
   mylist += py;
   mylist += pz;
   mylist += pu;
-  
+
   PelView atlast(mylist);
 
 
-  gSpace NewSpace(3); 
+  gSpace NewSpace(3);
   ptr = &lex;
   term_order NewLex(&NewSpace, ptr);
   ptr =  &reversedeglex;
   term_order  NewReverseDegLex(&NewSpace, ptr);
   ptr = &reverselex;
   term_order NewReverseLex(&NewSpace, ptr);
-  
+
   //Default system
   std::string newgx = " 2 + n2 ";
   std::string newgy = " 1 + 78 * n1 + 2 * n2  + n3 * n1^2";
   std::string newgz = " 3 + n3";
   gPoly<double> newpx(&NewSpace,newgx,&NewLex);
-  gPoly<double> newpy(&NewSpace,newgy,&NewLex); 
+  gPoly<double> newpy(&NewSpace,newgy,&NewLex);
   gPoly<double> newpz(&NewSpace,newgz,&NewLex);
   gPolyList<double> mynewlist(&NewSpace, &NewReverseDegLex);
   mynewlist += newpx;
   mynewlist += newpy;
   mynewlist += newpz;
 
-  
+
   PelView newatlast(mynewlist);
 
   }

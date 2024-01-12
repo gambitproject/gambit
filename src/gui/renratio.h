@@ -34,7 +34,7 @@
 #define DECLARE_GAMBIT_SHEETOBJREFDATA_COPY_CLASS(classname, basename)         \
     DECLARE_DYNAMIC_CLASS(classname)                                    \
     public:                                                             \
-    basename * Clone() const override { classname * aclass = new classname(); aclass->Copy( * ((classname * )this)); return (basename * )aclass; } 
+    basename * Clone() const override { classname * aclass = new classname(); aclass->Copy( * ((classname * )this)); return (basename * )aclass; }
 
 
 //
@@ -43,10 +43,10 @@
 class gbtRationalRendererRefData : public wxSheetCellRendererRefData {
 public:
   gbtRationalRendererRefData() = default;
-    
+
   // draw the string
   void Draw(wxSheet& grid, const wxSheetCellAttr& attr,
-		    wxDC& dc, const wxRect& rect, 
+		    wxDC& dc, const wxRect& rect,
 		    const wxSheetCoords& coords, bool isSelected) override;
 
   // return the string extent
@@ -54,7 +54,7 @@ public:
 			     wxDC& dc, const wxSheetCoords& coords) override;
 
   void DoDraw(wxSheet& grid, const wxSheetCellAttr& attr,
-	      wxDC& dc, const wxRect& rect, 
+	      wxDC& dc, const wxRect& rect,
 	      const wxSheetCoords& coords, bool isSelected);
 
   // set the text colours before drawing
@@ -62,15 +62,15 @@ public:
 			     wxDC& dc, bool isSelected);
 
   // calc the string extent for given string/font
-  wxSize DoGetBestSize(wxSheet& grid, const wxSheetCellAttr& attr, 
+  wxSize DoGetBestSize(wxSheet& grid, const wxSheetCellAttr& attr,
 		       wxDC& dc, const wxString& text);
 
-  bool Copy(const gbtRationalRendererRefData& other) 
+  bool Copy(const gbtRationalRendererRefData& other)
   { return wxSheetCellRendererRefData::Copy(other); }
 
   // NOLINTNEXTLINE(modernize-use-auto)
   DECLARE_GAMBIT_SHEETOBJREFDATA_COPY_CLASS(gbtRationalRendererRefData,
-					    wxSheetCellRendererRefData)    
+					    wxSheetCellRendererRefData)
 
 
 };
@@ -89,7 +89,7 @@ public:
 
   // NOLINTNEXTLINE(modernize-use-auto)
   DECLARE_GAMBIT_SHEETOBJREFDATA_COPY_CLASS(gbtRationalEditorRefData,
-					    wxSheetCellTextEditorRefData)    
+					    wxSheetCellTextEditorRefData)
 };
 
 #endif  // RENRATIO_H

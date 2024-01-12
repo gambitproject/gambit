@@ -67,12 +67,3 @@ typedef enum {
 
 
 #endif // MENUCONST_H
-
-
-
-
-
-
-
-
-

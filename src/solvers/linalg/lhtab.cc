@@ -32,6 +32,3 @@ template class LHTableau<Rational>;
 }  // end namespace Gambit::linalg
 
 }  // end namespace Gambit
-
-
-

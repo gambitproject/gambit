@@ -53,7 +53,7 @@ GameExplicitRep::~GameExplicitRep()
 Rational GameExplicitRep::GetMinPayoff(int player) const
 {
   int p1, p2;
-  
+
   if (m_outcomes.empty()) {
     return Rational(0);
   }
@@ -178,7 +178,5 @@ void GameExplicitRep::Write(std::ostream &p_stream,
 
 
 
-  
+
 }  // end namespace Gambit
-
-

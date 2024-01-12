@@ -62,7 +62,7 @@ public:
   void operator/=(const gComplex &y);
 
 // friends outside the class
-  friend double    fabs(const gComplex& x);              
+  friend double    fabs(const gComplex& x);
   friend gComplex  pow(const gComplex& x, long y);
 };
 
@@ -75,4 +75,3 @@ inline double fabs(const gComplex &x)
 
 
 #endif  // GCOMPLEX_H
-

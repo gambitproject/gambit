@@ -33,17 +33,17 @@
 class index_pair {
 private:
   const int m_first, m_second;
-  
+
 public:
-  index_pair(int p_first, int p_second) 
+  index_pair(int p_first, int p_second)
     : m_first(p_first), m_second(p_second) { }
-  
+
   bool operator==(const index_pair &p_other) const
     { return (m_first == p_other.m_first && m_second == p_other.m_second); }
   bool operator!=(const index_pair &p_other) const
     { return (m_first != p_other.m_first || m_second != p_other.m_second); }
   int operator[](int p_index) const
-    { return (p_index == 1) ? m_first : m_second; } 
+    { return (p_index == 1) ? m_first : m_second; }
 };
 
 
@@ -53,16 +53,16 @@ public:
 
 template <class T> class gPolyList
 //  : private Counted<gPolyList<T> >
-{ 
+{
  private:
    const gSpace*      Space;
    const term_order*  Order;
    Gambit::List< gPoly<T> *> List;
-   
-   // SubProcedures of ToSortedReducedGrobner   
+
+   // SubProcedures of ToSortedReducedGrobner
    void        Sort(const term_order &);
-   void        CriterionTwo(      Gambit::List<index_pair>&, 
-			    const Gambit::List<index_pair>&, 
+   void        CriterionTwo(      Gambit::List<index_pair>&,
+			    const Gambit::List<index_pair>&,
 			    const int&,
 			    const term_order&) const;
                      // See Adams and Loustaunau, p. 130
@@ -71,7 +71,7 @@ template <class T> class gPolyList
    void        MinimalGrobnerToReducedGrobner(const term_order &);
 
  public:
-   gPolyList(const gSpace *, const term_order*);  
+   gPolyList(const gSpace *, const term_order*);
    gPolyList(const gSpace *, const term_order*, const Gambit::List< gPoly<T> *> &);
    gPolyList(const gSpace *, const term_order*, const Gambit::List< gPoly<T> > &);
    gPolyList(const gPolyList<T> &);
@@ -83,12 +83,12 @@ template <class T> class gPolyList
 
    bool       operator==(const gPolyList<T> &) const;
    bool       operator!=(const gPolyList<T> &) const;
-   void       operator+=(const gPoly<T> &); 
-   void       operator+=(const gPolyList<T> &); 
+   void       operator+=(const gPoly<T> &);
+   void       operator+=(const gPolyList<T> &);
 
    void       operator+=(      gPoly<T> *); // NB - Doesn't copy pointee
                               // This can save a copy when one must create a
-                              // polynomial, then do something in order to 
+                              // polynomial, then do something in order to
                               // decide whether it should be added to the List
 
    gPoly<T>   operator[](const int)         const;
@@ -126,7 +126,6 @@ template <class T> class gPolyList
    // Conversion
    Gambit::List<gPoly<double> > ListTogDouble()  const;
    Gambit::List<gPoly<double> > NormalizedList() const;
-};  
+};
 
 #endif // GPOLYLST_H
-

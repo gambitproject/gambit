@@ -50,7 +50,7 @@ protected:
   mutable DVector<T> m_actionValues;   // aka conditional payoffs
   mutable DVector<T> m_regret;
 
-  const T &ActionValue(const GameAction &act) const 
+  const T &ActionValue(const GameAction &act) const
     { return m_actionValues(act->GetInfoset()->GetPlayer()->GetNumber(),
 			    act->GetInfoset()->GetNumber(),
 			    act->GetNumber()); }
@@ -58,11 +58,11 @@ protected:
     { return m_actionValues(act->GetInfoset()->GetPlayer()->GetNumber(),
 			    act->GetInfoset()->GetNumber(),
 			    act->GetNumber()); }
-  
+
   /// @name Auxiliary functions for computation of interesting values
   //@{
   void GetPayoff(GameTreeNodeRep *, const T &, int, T &) const;
-  
+
   void ComputeSolutionDataPass2(const GameNode &node) const;
   void ComputeSolutionDataPass1(const GameNode &node) const;
   void ComputeSolutionData() const;
@@ -95,15 +95,15 @@ public:
   MixedBehaviorProfile<T> &operator=(const MixedBehaviorProfile<T> &);
   MixedBehaviorProfile<T> &operator=(const Vector<T> &p)
     { InvalidateCache(); m_probs = p; return *this;}
-  MixedBehaviorProfile<T> &operator=(const T &x)  
+  MixedBehaviorProfile<T> &operator=(const T &x)
     { InvalidateCache(); m_probs = x; return *this; }
 
   //@}
-  
+
   /// @name Operator overloading
   //@{
   bool operator==(const MixedBehaviorProfile<T> &) const;
-  bool operator!=(const MixedBehaviorProfile<T> &x) const 
+  bool operator!=(const MixedBehaviorProfile<T> &x) const
   { return !(*this == x); }
 
   bool operator==(const DVector<T> &x) const
@@ -131,7 +131,7 @@ public:
 
   const T &operator()(int a, int b, int c) const
     { return m_probs(a, b, c); }
-  T &operator()(int a, int b, int c) 
+  T &operator()(int a, int b, int c)
     { InvalidateCache();  return m_probs(a, b, c); }
   const T &operator[](int a) const
     { return m_probs[a]; }
@@ -187,9 +187,9 @@ public:
   T GetActionProb(const GameAction &act) const;
   const T &GetRegret(const GameAction &act) const;
 
-  T DiffActionValue(const GameAction &action, 
+  T DiffActionValue(const GameAction &action,
 		    const GameAction &oppAction) const;
-  T DiffRealizProb(const GameNode &node, 
+  T DiffRealizProb(const GameNode &node,
 		   const GameAction &oppAction) const;
   T DiffNodeValue(const GameNode &node, const GamePlayer &player,
 		  const GameAction &oppAction) const;

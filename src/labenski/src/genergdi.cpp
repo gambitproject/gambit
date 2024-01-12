@@ -705,7 +705,7 @@ bool wxGenericBrush::IsSameAs(const wxGenericBrush& brush) const
     return (M_GBRUSHDATA->m_colour  == bData->m_colour) &&
            (M_GBRUSHDATA->m_style   == bData->m_style) &&
            (M_GBRUSHDATA->m_stipple == bData->m_stipple);
-#endif 
+#endif
 }
 bool wxGenericBrush::IsSameAs(const wxBrush& brush) const
 {

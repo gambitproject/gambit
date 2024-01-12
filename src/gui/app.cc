@@ -63,9 +63,9 @@ bool gbtApplication::OnInit()
     gbtAppLoadResult result = LoadFile(wxApp::argv[i]);
     if (result == GBT_APP_OPEN_FAILED) {
       wxMessageDialog dialog(nullptr,
-			     wxT("Gambit could not open file '") + 
+			     wxT("Gambit could not open file '") +
 			     wxApp::argv[i] +
-			     wxT("' for reading."), 
+			     wxT("' for reading."),
 			     wxT("Unable to open file"),
 			     wxOK | wxICON_ERROR);
       dialog.ShowModal();
@@ -101,7 +101,7 @@ bool gbtApplication::OnInit()
 }
 
 gbtAppLoadResult gbtApplication::LoadFile(const wxString &p_filename)
-{    
+{
   std::ifstream infile((const char *) p_filename.mb_str());
   if (!infile.good()) {
     return GBT_APP_OPEN_FAILED;
@@ -134,9 +134,9 @@ gbtAppLoadResult gbtApplication::LoadFile(const wxString &p_filename)
   }
 }
 
-void gbtApplication::SetCurrentDir(const wxString &p_dir)  
-{ 
-  m_currentDir = p_dir; 
+void gbtApplication::SetCurrentDir(const wxString &p_dir)
+{
+  m_currentDir = p_dir;
   wxConfigBase::Get()->Write(_T("/General/CurrentDirectory"), p_dir);
 }
 
@@ -152,4 +152,3 @@ bool gbtApplication::AreDocumentsModified() const
 
 
 IMPLEMENT_APP(gbtApplication)
-

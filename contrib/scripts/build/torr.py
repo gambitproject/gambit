@@ -36,7 +36,7 @@ class Move:
             for (i, name) in enumerate(self.actions):
                 self.infoset.GetAction(i+1).SetLabel(name)
         return [ node.GetChild(i) for i in xrange(1, len(self.actions)+1) ]
-            
+
 class TerminalPayoff:
     def __init__(self, payoffs):
         self.payoffs = payoffs
@@ -46,10 +46,10 @@ class TerminalPayoff:
             self.outcome = node.GetGame().NewOutcome()
             for (i, payoff) in enumerate(self.payoffs):
                 self.outcome.SetPayoff(i+1, str(payoff))
-                
+
         node.SetOutcome(self.outcome)
         return [ ]
-        
+
 
 class GenericHistory:
     def __init__(self, actions = [ ]):
@@ -61,7 +61,7 @@ class GenericHistory:
     def __getitem__(self, i):  return self.actions[i]
 
     def __len__(self): return len(self.actions)
-    
+
 
 
 def BuildSubtree(rules, node, history):
@@ -79,6 +79,5 @@ def BuildTree(players, rules, starthistory):
         tree.NewPlayer().SetLabel(player)
 
     BuildSubtree(rules, tree.GetRoot(), starthistory())
-    
+
     return tree
-    

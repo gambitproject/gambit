@@ -11,7 +11,7 @@
 
         <Directory Id="TARGETDIR" Name="SourceDir">
             <Directory Id="ProgramFilesFolder">
-                <Directory Id="ApplicationRootDirectory" Name="Gambit"/> 
+                <Directory Id="ApplicationRootDirectory" Name="Gambit"/>
             </Directory>
             <Directory Id="ProgramMenuFolder">
                 <Directory Id="ApplicationProgramsFolder" Name="Gambit"/>
@@ -55,7 +55,7 @@
                           Target="[System64Folder]msiexec.exe"
                           Arguments="/x [ProductCode]"/>
                 <RemoveFolder Id="ApplicationProgramsFolder" On="uninstall"/>
-                <RegistryValue Root="HKCU" Key="Software\Microsoft\Gambit 16" Name="installed" Type="integer" Value="1" KeyPath="yes"/> 
+                <RegistryValue Root="HKCU" Key="Software\Microsoft\Gambit 16" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
             </Component>
         </DirectoryRef>
         <Feature Id="Complete" Level="1">

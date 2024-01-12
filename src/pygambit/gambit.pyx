@@ -29,8 +29,6 @@ import typing
 
 from .error import *
 
-from cython.cimports.src.pygambit import gambit    # noqa
-
 
 class Decimal(decimal.Decimal):
     pass
@@ -44,15 +42,15 @@ class Rational(fractions.Fraction):
     """
     def _repr_latex_(self) -> str:
         if self.denominator != 1:
-            return r'$\frac{%s}{%s}$' % (self.numerator, self.denominator)
+            return r"$\frac{%s}{%s}$" % (self.numerator, self.denominator)
         else:
-            return r'$%s$' % self.numerator
+            return r"$%s$" % self.numerator
 
 
 @cython.cfunc
 def rat_to_py(r: c_Rational):
     """Convert a C++ Rational number to a Python Rational."""
-    return Rational(rat_str(r).decode('ascii'))
+    return Rational(rat_str(r).decode("ascii"))
 
 
 @cython.cfunc
@@ -73,7 +71,7 @@ def _to_number(value: typing.Any) -> c_Number:
             value = str(Decimal(str(value)))
         except decimal.InvalidOperation:
             raise ValueError(f"Cannot convert '{value}' to a number") from None
-    return c_Number(value.encode('ascii'))
+    return c_Number(value.encode("ascii"))
 
 
 ######################

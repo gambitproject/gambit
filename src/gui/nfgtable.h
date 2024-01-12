@@ -115,7 +115,7 @@ public:
   /// Sets the index'th column player (1=slowest, n+1=fastest)
   void SetColPlayer(int index, int pl);
 
-  /// Returns the number of column contingencies 
+  /// Returns the number of column contingencies
   /// (Note that each column contingency corresponds to #players cols!)
   int NumColContingencies() const;
 

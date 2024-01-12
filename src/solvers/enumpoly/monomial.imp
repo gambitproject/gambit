@@ -27,23 +27,23 @@
 //                 gMono -- constructors and destructor
 //--------------------------------------------------------------------------
 
-template<class T> gMono<T>::gMono(const gSpace* p, const T& x) 
+template<class T> gMono<T>::gMono(const gSpace* p, const T& x)
 : coef(x), exps(p)
-{ 
+{
 }
 
-template<class T> gMono<T>::gMono(const T& x, const exp_vect& e) 
+template<class T> gMono<T>::gMono(const T& x, const exp_vect& e)
 : coef(x), exps(e)
-{ 
+{
   if (x == (T)0) exps.ToZero();
 }
 
-template<class T> gMono<T>::gMono(const gMono<T>& y) 
+template<class T> gMono<T>::gMono(const gMono<T>& y)
 : coef(y.coef), exps(y.exps)
 {
 }
 
-template<class T> gMono<T>::~gMono() 
+template<class T> gMono<T>::~gMono()
 = default;
 
 //--------------------------------------------------------------------------
@@ -83,14 +83,14 @@ template<class T> gMono<T> gMono<T>::operator + (const gMono<T> & y) const
   return gMono<T>(coef + y.coef,exps);
 }
 
-template<class T> gMono<T>& gMono<T>::operator += (const gMono<T> & y) 
+template<class T> gMono<T>& gMono<T>::operator += (const gMono<T> & y)
 {
   //assert (exps == y.exps);
   coef += y.coef;
   return *this;
 }
 
-template<class T> gMono<T>& gMono<T>::operator *= (const T& val) 
+template<class T> gMono<T>& gMono<T>::operator *= (const T& val)
 {
   coef *= val;
   return *this;
@@ -105,38 +105,38 @@ template<class T> gMono<T> gMono<T>::operator - () const
 //                             gMono -- information
 //--------------------------------------------------------------------------
 
-template<class T> const T &gMono<T>::Coef() const 
-{ 
-  return coef; 
+template<class T> const T &gMono<T>::Coef() const
+{
+  return coef;
 }
 
-template<class T> int gMono<T>::Dmnsn() const 
-{ 
-  return exps.Dmnsn(); 
+template<class T> int gMono<T>::Dmnsn() const
+{
+  return exps.Dmnsn();
 }
 
-template<class T> int gMono<T>::TotalDegree() const 
-{ 
-  return exps.TotalDegree(); 
+template<class T> int gMono<T>::TotalDegree() const
+{
+  return exps.TotalDegree();
 }
 
-template<class T> const exp_vect &gMono<T>::ExpV() const 
-{ 
-  return exps; 
+template<class T> const exp_vect &gMono<T>::ExpV() const
+{
+  return exps;
 }
 
-template<class T> bool gMono<T>::IsConstant() const 
-{ 
-  return exps.IsConstant(); 
+template<class T> bool gMono<T>::IsConstant() const
+{
+  return exps.IsConstant();
 }
 
-template<class T> bool gMono<T>::IsMultiaffine() const 
-{ 
-  return exps.IsMultiaffine(); 
+template<class T> bool gMono<T>::IsMultiaffine() const
+{
+  return exps.IsMultiaffine();
 }
 
-template<class T> T gMono<T>::Evaluate(const Gambit::Array<T>& vals) const 
-{ 
+template<class T> T gMono<T>::Evaluate(const Gambit::Array<T>& vals) const
+{
   T answer = Coef();
 
   for (int i = 1; i <= Dmnsn(); i++)
@@ -146,8 +146,8 @@ template<class T> T gMono<T>::Evaluate(const Gambit::Array<T>& vals) const
   return answer;
 }
 
-template<class T> T gMono<T>::Evaluate(const Gambit::Vector<T>& vals) const 
-{ 
+template<class T> T gMono<T>::Evaluate(const Gambit::Vector<T>& vals) const
+{
   T answer = Coef();
 
   for (int i = 1; i <= Dmnsn(); i++)
@@ -156,4 +156,3 @@ template<class T> T gMono<T>::Evaluate(const Gambit::Vector<T>& vals) const
 
   return answer;
 }
-

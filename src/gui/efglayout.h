@@ -32,7 +32,7 @@ private:
   Gambit::GameNode m_node;        // the corresponding node in the game
   gbtNodeEntry *m_parent; // parent node
   int m_x, m_y;        // Cartesian coordinates of node
-  gbtNodeEntry *m_nextMember;  // entry of next information set member 
+  gbtNodeEntry *m_nextMember;  // entry of next information set member
   bool m_inSupport;    // true if node reachable in current support
   int m_size;         // horizontal size of the node
   mutable wxRect m_outcomeRect;
@@ -76,7 +76,7 @@ public:
   bool InSupport() const { return m_inSupport; }
   void SetInSupport(bool p_inSupport) { m_inSupport = p_inSupport; }
 
-  int GetChildNumber() const; 
+  int GetChildNumber() const;
 
   const wxColour &GetColor() const { return m_color; }
   void SetColor(const wxColour &p_color) { m_color = p_color; }
@@ -110,12 +110,12 @@ public:
   void SetNodeBelowLabel(const wxString &p_label)
     { m_nodeBelowLabel = p_label; }
 
-  const wxString &GetBranchAboveLabel() const 
+  const wxString &GetBranchAboveLabel() const
     { return m_branchAboveLabel; }
   void SetBranchAboveLabel(const wxString &p_label)
     { m_branchAboveLabel = p_label; }
 
-  const wxString &GetBranchBelowLabel() const 
+  const wxString &GetBranchBelowLabel() const
     { return m_branchBelowLabel; }
   void SetBranchBelowLabel(const wxString &p_label)
     { m_branchBelowLabel = p_label; }
@@ -214,4 +214,3 @@ public:
 };
 
 #endif  // EFGLAYOUT_H
-

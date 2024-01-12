@@ -279,7 +279,7 @@ template <class T> void PVector<T>::CopyRow(int row, const PVector<T> &v)
   }
 
   if (svlen.First() > row || row > svlen.Last()) {
-    throw IndexException(); 
+    throw IndexException();
   }
 
   for (int i = 1; i <= svlen[row]; i++)

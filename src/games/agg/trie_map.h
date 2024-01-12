@@ -54,7 +54,7 @@ struct TrieNode
 
   //methods:
 
-  //constructor  
+  //constructor
   TrieNode(size_t branches, typename std::list<std::pair<std::vector<int>, V> >::iterator v)
     : children(branches, (TrieNode *) NULL), val(v)
   {}
@@ -85,7 +85,7 @@ public:
 
   //friends
   friend std::ostream& operator<< <V>(std::ostream& s, const trie_map<V>& t);
-  
+
   friend class agg;
 
   //constructors
@@ -162,7 +162,7 @@ public:
   }
 
   //number of elements with key exactly k.
-  // returns 1 or 0 
+  // returns 1 or 0
   size_type count(const key_type &k)
   {
     size_t i = 0;
@@ -206,7 +206,7 @@ public:
   //polynomial division
   trie_map<V>& operator/=(const std::vector<V>& denom);
 
-  
+
 private:
   //member variables:
   std::list<value_type> data;

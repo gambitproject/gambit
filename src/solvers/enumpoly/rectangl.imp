@@ -28,7 +28,7 @@
 //                   rectangle -- constructors and destructor
 //--------------------------------------------------------------------------
 
-template<class T> gRectangle<T>::gRectangle(const gRectangle<T>& given) 
+template<class T> gRectangle<T>::gRectangle(const gRectangle<T>& given)
 : sides(given.sides)
 {
 }
@@ -41,7 +41,7 @@ template<class T> gRectangle<T>::gRectangle(const Gambit::List< gInterval<T> >& 
 template<class T> gRectangle<T>::gRectangle(const Gambit::Vector<T> &lower_bd,
                                             const Gambit::Vector<T> &upper_bd)
 : sides()
-{ 
+{
   //assert (lower_bd.Check(upper_bd));
   for (int i = 1; i <= upper_bd.Length(); i++) {
     gInterval<T> side(lower_bd[i],upper_bd[i]);
@@ -50,7 +50,7 @@ template<class T> gRectangle<T>::gRectangle(const Gambit::Vector<T> &lower_bd,
 }
 
 
-template<class T> gRectangle<T>::~gRectangle() 
+template<class T> gRectangle<T>::~gRectangle()
 = default;
 
 //--------------------------------------------------------------------------
@@ -58,7 +58,7 @@ template<class T> gRectangle<T>::~gRectangle()
 //--------------------------------------------------------------------------
 
 
-template<class T> gRectangle<T>& 
+template<class T> gRectangle<T>&
 gRectangle<T>::operator = (const gRectangle<T>& /* rhs */)
 {
   //  gout << "For const'ness, operator = not allowed for gRectangles\n";
@@ -85,61 +85,61 @@ template<class T> bool gRectangle<T>::operator != (const gRectangle<T>& rhs)
 //                             interval -- information
 //--------------------------------------------------------------------------
 
-template<class T> const int gRectangle<T>::Dmnsn() const 
-{ 
+template<class T> const int gRectangle<T>::Dmnsn() const
+{
   return sides.Length();
 }
 
 template <class T> Gambit::Vector<T> gRectangle<T>::LowerBound() const
-{ 
+{
   Gambit::Vector<T> answer(Dmnsn());
   for (int i = 1; i <= Dmnsn(); i++) answer[i] = sides[i].LowerBound();
   return answer;
 }
 
 template <class T> Gambit::Vector<T> gRectangle<T>::UpperBound() const
-{ 
+{
   Gambit::Vector<T> answer(Dmnsn());
   for (int i = 1; i <= Dmnsn(); i++) answer[i] = sides[i].UpperBound();
   return answer;
 }
 
-template<class T> const T gRectangle<T>::LowerBoundOfCoord(const int& i) const 
-{ 
+template<class T> const T gRectangle<T>::LowerBoundOfCoord(const int& i) const
+{
   //assert (1 <= i && i <= Dmnsn());
   return sides[i].LowerBound();
 }
 
-template<class T> const T gRectangle<T>::UpperBoundOfCoord(const int& i) const 
-{ 
+template<class T> const T gRectangle<T>::UpperBoundOfCoord(const int& i) const
+{
   //assert (1 <= i && i <= Dmnsn());
   return sides[i].UpperBound();
 }
 
-template<class T> const T gRectangle<T>::HeightInCoord(const int& i) const 
-{ 
+template<class T> const T gRectangle<T>::HeightInCoord(const int& i) const
+{
   //assert (1 <= i && i <= Dmnsn());
   return sides[i].Length();
 }
 
-template<class T> 
-const gInterval<T> gRectangle<T>::CartesianFactor(const int& i) const 
-{ 
+template<class T>
+const gInterval<T> gRectangle<T>::CartesianFactor(const int& i) const
+{
   return sides[i];
 }
 
-template<class T> 
-const gRectangle<T> gRectangle<T>::SameCenterDoubleSideLengths() const 
-{ 
+template<class T>
+const gRectangle<T> gRectangle<T>::SameCenterDoubleSideLengths() const
+{
   Gambit::List<gInterval<T> > new_sides;
   for (int i = 1; i <= Dmnsn(); i++)
     new_sides.push_back(CartesianFactor(i).SameCenterTwiceLength());
   return gRectangle<T>(new_sides);
 }
 
-template<class T> 
-const gRectangle<T> gRectangle<T>::CubeContainingCrcmscrbngSphere() const 
-{ 
+template<class T>
+const gRectangle<T> gRectangle<T>::CubeContainingCrcmscrbngSphere() const
+{
   T maxlength((T)0);
   T sumsquares((T)0);
   int i;
@@ -150,17 +150,17 @@ const gRectangle<T> gRectangle<T>::CubeContainingCrcmscrbngSphere() const
   }
   T diameter((T)0);
   while (diameter * diameter < sumsquares) diameter += maxlength;
-  
+
   Gambit::List<gInterval<T> > new_sides;
   for (i = 1; i <= Dmnsn(); i++)
     new_sides.push_back(CartesianFactor(i).SameCenterWithNewLength(diameter));
   return gRectangle<T>(new_sides);
 }
 
-template<class T> 
-const gRectangle<T> 
-gRectangle<T>::Orthant(const Gambit::Array<int>& top_or_bot) const 
-{ 
+template<class T>
+const gRectangle<T>
+gRectangle<T>::Orthant(const Gambit::Array<int>& top_or_bot) const
+{
   Gambit::List<gInterval<T> > new_sides;
   for (int i = 1; i <= Dmnsn(); i++)
     if (top_or_bot[i] == 0)
@@ -170,10 +170,10 @@ gRectangle<T>::Orthant(const Gambit::Array<int>& top_or_bot) const
   return gRectangle<T>(new_sides);
 }
 
-template<class T> const Gambit::Vector<T> gRectangle<T>::SideLengths() const 
-{ 
+template<class T> const Gambit::Vector<T> gRectangle<T>::SideLengths() const
+{
   Gambit::Vector<T> answer(Dmnsn());
-  for (int i = 1; i <= Dmnsn(); i++) 
+  for (int i = 1; i <= Dmnsn(); i++)
     answer[i] = sides[i].UpperBound() - sides[i].LowerBound();
   return answer;
 }
@@ -182,13 +182,13 @@ template<class T> const T gRectangle<T>::MaximalSideLength() const
 {
   T answer((T)0);
   for (int i = 1; i <= Dmnsn(); i++)
-    if (HeightInCoord(i) > answer) 
+    if (HeightInCoord(i) > answer)
       answer = HeightInCoord(i);
   return answer;
 }
 
-template<class T> bool gRectangle<T>::Contains(const Gambit::Vector<T>& point) const 
-{ 
+template<class T> bool gRectangle<T>::Contains(const Gambit::Vector<T>& point) const
+{
   //assert (point.Length() == Dmnsn());
 
   for (int i = 1; i <= Dmnsn(); i++)
@@ -197,8 +197,8 @@ template<class T> bool gRectangle<T>::Contains(const Gambit::Vector<T>& point) c
   return true;
 }
 
-template<class T> bool gRectangle<T>::Contains(const gRectangle<T>& R) const 
-{ 
+template<class T> bool gRectangle<T>::Contains(const gRectangle<T>& R) const
+{
   //assert (R.Dmnsn() == Dmnsn());
 
   for (int i = 1; i <= Dmnsn(); i++)
@@ -207,30 +207,30 @@ template<class T> bool gRectangle<T>::Contains(const gRectangle<T>& R) const
   return true;
 }
 
-template<class T> const T gRectangle<T>::Volume() const 
-{ 
+template<class T> const T gRectangle<T>::Volume() const
+{
   T answer = (T)1;
   for (int i = 1; i <= Dmnsn(); i++)
     answer *= ( sides[i].UpperBound() - sides[i].LowerBound() );
   return answer;
 }
 
-template<class T> const Gambit::Vector<T> gRectangle<T>::Center() const 
-{ 
+template<class T> const Gambit::Vector<T> gRectangle<T>::Center() const
+{
   Gambit::Vector<T> answer(Dmnsn());
-  for (int i = 1; i <= Dmnsn(); i++) 
+  for (int i = 1; i <= Dmnsn(); i++)
     answer[i] = (sides[i].UpperBound() + sides[i].LowerBound())
 		                     / ((T)2);
   return answer;
 }
 
-template<class T> const gRectangle<T> gRectangle<T>::BoundingRectangle() const 
-{ 
+template<class T> const gRectangle<T> gRectangle<T>::BoundingRectangle() const
+{
   return *this;
 }
 
-template<class T> const Gambit::List<Gambit::Vector<T> > gRectangle<T>::VertexList() const 
-{ 
+template<class T> const Gambit::List<Gambit::Vector<T> > gRectangle<T>::VertexList() const
+{
   Gambit::List<Gambit::Vector<T> > answer;
 
   Gambit::Array<int> ListOfTwos(Dmnsn());
@@ -242,25 +242,25 @@ template<class T> const Gambit::List<Gambit::Vector<T> > gRectangle<T>::VertexLi
     for (int i = 1; i <= Dmnsn(); i++)
       if (ListOfTopBottoms[i] == 1)
 	next[i] = LowerBoundOfCoord(i);
-      else 
+      else
 	next[i] = UpperBoundOfCoord(i);
     answer.push_back(next);
   }
   return answer;
 }
 
-template<class T> 
-const int gRectangle<T>::NumberOfCellsInSubdivision() const 
-{ 
+template<class T>
+const int gRectangle<T>::NumberOfCellsInSubdivision() const
+{
   int answer = 1;
   for (int i = 1; i <= Dmnsn(); i++)
     answer *= 2;
   return answer;
 }
 
-template<class T> 
-const gRectangle<T> gRectangle<T>::SubdivisionCell(const int& index) const 
-{ 
+template<class T>
+const gRectangle<T> gRectangle<T>::SubdivisionCell(const int& index) const
+{
   int tmp = index;
   Gambit::Array<int> updowns(Dmnsn());
   for (int i = 1; i <= Dmnsn(); i++) {
@@ -287,13 +287,12 @@ const T gRectangle<T>::DiameterSquared() const
 //           Conversion
 //----------------------------------
 
-template<class T>  
-gRectangle<double>  TogDouble(const gRectangle<T>& given) 
+template<class T>
+gRectangle<double>  TogDouble(const gRectangle<T>& given)
 {
   Gambit::List<gInterval<double> > cartesian_factors;
-  for (int i = 1; i <= given.Dmnsn(); i++) 
+  for (int i = 1; i <= given.Dmnsn(); i++)
     cartesian_factors.push_back(gInterval<double>((double)given.LowerBound()[i],
                                                   (double) given.UpperBound()[i]));
   return gRectangle<double>(cartesian_factors);
 }
-

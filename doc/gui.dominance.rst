@@ -106,4 +106,3 @@ thick, solid line.
 
 Clicking the next level icon removes the strictly dominated strategies
 from the display.
-

@@ -133,7 +133,10 @@ class Player:
             )
 
     def __eq__(self, other: typing.Any) -> bool:
-        return isinstance(other, Player) and self.player.deref() == cython.cast(Player, other).player.deref()
+        return (
+            isinstance(other, Player) and
+            self.player.deref() == cython.cast(Player, other).player.deref()
+        )
 
     def __hash__(self) -> int:
         return cython.cast(cython.long, self.player.deref())
@@ -148,14 +151,14 @@ class Player:
     @property
     def label(self) -> str:
         """Gets or sets the text label of the player."""
-        return self.player.deref().GetLabel().decode('ascii')
+        return self.player.deref().GetLabel().decode("ascii")
 
     @label.setter
     def label(self, value: str) -> None:
         # check to see if the player's name has been used elsewhere
         if value in [i.label for i in self.game.players]:
             warnings.warn("Another player with an identical label exists")
-        self.player.deref().SetLabel(value.encode('ascii'))
+        self.player.deref().SetLabel(value.encode("ascii"))
 
     @property
     def number(self) -> int:

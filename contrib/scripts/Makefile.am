@@ -22,4 +22,4 @@
 
 SUBDIRS = enumpoly
 
-EXTRA_DIST = 
+EXTRA_DIST =

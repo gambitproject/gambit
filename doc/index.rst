@@ -5,7 +5,7 @@ Welcome to Gambit
 
 
 **Gambit** is a library of game theory software and tools for the
-construction and analysis of finite extensive and strategic games. 
+construction and analysis of finite extensive and strategic games.
 Gambit is fully-cross platform, and is supported on Linux, Mac OS X,
 and Microsoft Windows.
 
@@ -97,7 +97,7 @@ different release.
 .. toctree::
    :hidden:
    :maxdepth: 1
-  
+
    intro
    tools
    pygambit
@@ -120,4 +120,3 @@ different release.
 .. * :ref:`genindex`
 .. * :ref:`modindex`
 .. * :ref:`search`
-

@@ -48,7 +48,7 @@ http://netlib2.cs.utk.edu/hompack/
 #define Prc_T 90
 #define Rng_T 1000
 #define Err_T 1100
-/* 
+/*
 ** Alias Types
 */
 #define Sys_T 100
@@ -72,10 +72,10 @@ struct Gen_node_tag {
 	 int ival;
          double dval;
 	 fcomplex cval;
-	 polynomial1 pval; 
+	 polynomial1 pval;
          char   *gval;
          char   *idval;
-	 Gen_node  (*proc)(Gen_node); 
+	 Gen_node  (*proc)(Gen_node);
 	 struct Gen_node_tag *lval;
        } Genval;
      };
@@ -83,11 +83,11 @@ extern Pring Def_Ring;
 extern int N;
 
 Gen_node gen_node(); /* constructor for Gen_node */
-Gen_node free_Gen_node(Gen_node); 
-Gen_node free_Gen_list(Gen_node); 
+Gen_node free_Gen_node(Gen_node);
+Gen_node free_Gen_list(Gen_node);
 Gen_node copy_Gen_node(Gen_node);
 Gen_node copy_Gen_list(Gen_node);
-void print_Gen_list(Gen_node); 
+void print_Gen_list(Gen_node);
 void print_Gen_node(Gen_node);
 Gen_node GMND();
 Gen_node INTND(int);
@@ -101,28 +101,28 @@ Gen_node PND(Gen_node p(Gen_node));
 Gen_node Rerror(const char *s, Gen_node g);
 
 /* accessors for Gen_nodes*/
-Gen_node Gen_next(Gen_node); 
-Gen_node Gen_set_next(Gen_node,Gen_node); 
+Gen_node Gen_next(Gen_node);
+Gen_node Gen_set_next(Gen_node,Gen_node);
 int Gen_set_int(Gen_node g,int i);
-int Gen_int(Gen_node g);          
-char    *Gen_idval(Gen_node); 
-Gen_node Gen_lval(Gen_node); 
-Gen_node Gen_set_lval(Gen_node,Gen_node); 
-int      Gen_type(Gen_node); 
+int Gen_int(Gen_node g);
+char    *Gen_idval(Gen_node);
+Gen_node Gen_lval(Gen_node);
+Gen_node Gen_set_lval(Gen_node,Gen_node);
+int      Gen_type(Gen_node);
 
 /* operations on Gen_Lists */
 int Gen_length(Gen_node g);
 Gen_node Gen_elt(Gen_node g, int idx);
 Gen_node Gen_node_to_List(Gen_node);       /*enclose a Gen_node in a list */
-Gen_node Link();       /*link two gen nodes by their next pointers*/ 
-Gen_node Cat();        
+Gen_node Link();       /*link two gen nodes by their next pointers*/
+Gen_node Cat();
 
 
 /* miscalaneous */
 char *Copy_String(const char *);
 char *Copy_String_NQ(char *);
 
-Gen_node ASTND(node n); 
+Gen_node ASTND(node n);
 node Gen_aset(Gen_node g);
 polynomial1 Gen_poly(Gen_node g);
 

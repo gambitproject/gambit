@@ -157,13 +157,13 @@ wxEND_EVENT_TABLE()
 
 gbtEditMoveDialog::gbtEditMoveDialog(wxWindow *p_parent,
 				     const Gambit::GameInfoset &p_infoset)
-  : wxDialog(p_parent, wxID_ANY, _("Move properties"), wxDefaultPosition), 
+  : wxDialog(p_parent, wxID_ANY, _("Move properties"), wxDefaultPosition),
     m_infoset(p_infoset)
 {
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
   auto *labelSizer = new wxBoxSizer(wxHORIZONTAL);
-  labelSizer->Add(new wxStaticText(this, wxID_STATIC, 
+  labelSizer->Add(new wxStaticText(this, wxID_STATIC,
 				   _("Information set label")),
 		  0, wxALL | wxALIGN_CENTER, 5);
   m_infosetName = new wxTextCtrl(this, wxID_ANY,
@@ -188,7 +188,7 @@ gbtEditMoveDialog::gbtEditMoveDialog(wxWindow *p_parent,
     for (int pl = 1; pl <= p_infoset->GetGame()->NumPlayers(); pl++) {
       m_player->Append(wxString::Format(_T("%d: "), pl) +
 		       wxString(p_infoset->GetGame()->GetPlayer(pl)->GetLabel().c_str(), *wxConvCurrent));
-    } 
+    }
     m_player->SetSelection(p_infoset->GetPlayer()->GetNumber() - 1);
   }
   playerSizer->Add(m_player, 1, wxALL | wxEXPAND, 5);
@@ -241,22 +241,17 @@ void gbtEditMoveDialog::OnOK(wxCommandEvent &p_event)
   }
 }
 
-int gbtEditMoveDialog::NumActions() const 
-{ 
-  return m_actionSheet->NumActions(); 
+int gbtEditMoveDialog::NumActions() const
+{
+  return m_actionSheet->NumActions();
 }
 
-wxString gbtEditMoveDialog::GetActionName(int p_act) const 
-{ 
+wxString gbtEditMoveDialog::GetActionName(int p_act) const
+{
   return m_actionSheet->GetActionName(p_act);
 }
 
 Array<Number> gbtEditMoveDialog::GetActionProbs() const
-{ 
+{
   return m_actionSheet->GetActionProbs();
 }
-
-
-
-
-

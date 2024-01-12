@@ -63,7 +63,10 @@ class Node:
         )
 
     def __eq__(self, other: typing.Any) -> bool:
-        return isinstance(other, Node) and self.node.deref() == cython.cast(Node, other).node.deref()
+        return (
+            isinstance(other, Node) and
+            self.node.deref() == cython.cast(Node, other).node.deref()
+        )
 
     def __hash__(self) -> long:
         return cython.cast(long, self.node.deref())
@@ -75,11 +78,11 @@ class Node:
     @property
     def label(self) -> str:
         """The text label associated with the node."""
-        return self.node.deref().GetLabel().decode('ascii')
+        return self.node.deref().GetLabel().decode("ascii")
 
     @label.setter
     def label(self, value: str) -> None:
-        self.node.deref().SetLabel(value.encode('ascii'))
+        self.node.deref().SetLabel(value.encode("ascii"))
 
     @property
     def children(self) -> NodeChildren:
@@ -195,4 +198,3 @@ class Node:
         o = Outcome()
         o.outcome = self.node.deref().GetOutcome()
         return o
-

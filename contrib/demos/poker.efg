@@ -12,4 +12,3 @@ p "" 2 1 "b" { "M" "P" } 0
 t "" 3 "Bob wins big" { -2, 2 }
 t "" 2 "Alice wins" { 1, -1 }
 t "" 4 "Bob wins" { -1, 1 }
-

@@ -58,11 +58,11 @@ gSpace::gSpace(const gSpace &p)
     newvar->number = i;
     Variables.push_back(newvar);
   }
-} 
+}
 
 gSpace::~gSpace()
 {
-  for (int i = 1; i <= Variables.Length(); i++) delete Variables[i]; 
+  for (int i = 1; i <= Variables.Length(); i++) delete Variables[i];
 }
 
 //-----------------
@@ -134,7 +134,7 @@ bool gSpace::operator==(const gSpace & rhs) const
 {
   // gout<<"IF OK, ZAP ME:prepoly.cc15\n";//**
 
-  if (Variables.Length() == rhs.Variables.Length() && 
+  if (Variables.Length() == rhs.Variables.Length() &&
       Variables          == rhs.Variables)
     return true;
   else
@@ -174,8 +174,8 @@ bool gSpace::operator!=(const gSpace & rhs) const
 // Constructors/Destructors
 //-------------------------
 
-exp_vect::exp_vect(const gSpace* p) 
-: Space(p), components(p->Dmnsn())     
+exp_vect::exp_vect(const gSpace* p)
+: Space(p), components(p->Dmnsn())
 {
   for (int i = 1; i <= p->Dmnsn(); i++) components[i] = 0;
 }
@@ -250,7 +250,7 @@ bool exp_vect::operator<=(const exp_vect & RHS) const
 
   return true;
 }
- 
+
 bool exp_vect::operator>=(const exp_vect & RHS) const
 {
   //assert (Space == RHS.Space);
@@ -303,7 +303,7 @@ exp_vect  exp_vect::operator- (const exp_vect & debit) const
   return tmp;
 }
 
-void exp_vect::operator+=(const exp_vect & credit) 
+void exp_vect::operator+=(const exp_vect & credit)
 {
 
   //assert (Space == credit.Space);
@@ -312,7 +312,7 @@ void exp_vect::operator+=(const exp_vect & credit)
     components[i] += credit.components[i];
 }
 
-void exp_vect::operator-=(const exp_vect & debit) 
+void exp_vect::operator-=(const exp_vect & debit)
 {
   //assert (Space == debit.Space);
 
@@ -438,7 +438,7 @@ int  exp_vect::SoleActiveVariable() const
 int  exp_vect::TotalDegree() const
 {
   int exp_sum = 0;
-  for (int i = 1; i <= Dmnsn(); i++) 
+  for (int i = 1; i <= Dmnsn(); i++)
     exp_sum += (*this)[i];
   return exp_sum;
 }
@@ -551,7 +551,7 @@ bool reversedegrevlex(const exp_vect & LHS, const exp_vect & RHS)
 // Constructors/Destructors
 //-------------------------
 
-term_order::term_order(const gSpace* p, ORD_PTR act_ord) 
+term_order::term_order(const gSpace* p, ORD_PTR act_ord)
 : Space(p), actual_order(act_ord)
 {
 }
@@ -605,7 +605,7 @@ bool term_order::Greater(const exp_vect & LHS, const exp_vect & RHS) const
   return !(LessOrEqual(LHS, RHS));
 }
 
-bool term_order::GreaterOrEqual(const exp_vect & LHS, 
+bool term_order::GreaterOrEqual(const exp_vect & LHS,
 				const exp_vect & RHS) const
 {
   // gout<<"IF OK, ZAP ME:prepoly.cc56\n";//**

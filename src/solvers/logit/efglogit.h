@@ -43,7 +43,7 @@ public:
   Game GetGame() const              { return m_profile.GetGame(); }
   size_t BehaviorProfileLength() const { return m_profile.BehaviorProfileLength(); }
   double operator[](int i) const        { return m_profile[i]; }
-  
+
 private:
   const MixedBehaviorProfile<double> m_profile;
   double m_lambda;
@@ -91,4 +91,3 @@ inline List<MixedBehaviorProfile<double> > LogitBehaviorSolve(const Game &p_game
 }  // end namespace Gambit
 
 #endif  // EFGLOGIT_H
- 

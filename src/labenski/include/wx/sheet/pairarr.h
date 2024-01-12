@@ -2,7 +2,7 @@
 // Name:        pairarr.h
 // Purpose:     Sorted Key/Value pairs of wxArrays using a binary search lookup
 // Author:      John Labenski
-// Modified by: 
+// Modified by:
 // Created:     1/08/2004
 // RCS-ID:      $Id$
 // Copyright:   (c) John Labenski
@@ -18,14 +18,14 @@
 
 // ============================================================================
 // Provides macros for creating your own (key, value) pair arrays using a binary
-// search to insert/retrieve values using a key. While this doesn't have the 
+// search to insert/retrieve values using a key. While this doesn't have the
 // performance of a good hash table O(n), it is smaller and with a lookup speed
 // O(log(n)) is suitable for some applications. You can use virtually any
 // class for keys and values that can be put into wxArrays so long as they
 // define the standard comparison operators ==, <, >, <=, >=.
 //
-// Implementation note: I've chosen to use two independent arrays instead of 
-// a single array of a data struct with (key, value) members to squeeze out the 
+// Implementation note: I've chosen to use two independent arrays instead of
+// a single array of a data struct with (key, value) members to squeeze out the
 // slightest increase in performance.
 // ----------------------------------------------------------------------------
 // DECLARE_PAIRED_DATA_ARRAYS(Tkey, TkeyArray, Tval, TvalArray, name, classexp)
@@ -44,22 +44,22 @@
 // DECLARE_PAIRED_INT_DATA_ARRAYS(Tval, TvalArray, name, classexp)
 // DEFINE_PAIRED_INT_DATA_ARRAYS(Tval, name)
 //   Tkey is an int (wxArrayInt), Tval may be anything
-//   UpdatePos(int pos, int num) is added for inserting if num > 0 and 
+//   UpdatePos(int pos, int num) is added for inserting if num > 0 and
 //     deleting if num < 0. The keys above pos are shifted.
 //
 // ----------------------------------------------------------------------------
 // name() - default constructor
-// name(const Tval& defaultVal) - initialize the class with the default value, 
+// name(const Tval& defaultVal) - initialize the class with the default value,
 //     see Get/SetDefaultValue to change it later.
 // name(const name& other) - full copy constructor
-// name(Tkey key, const Tval& val) - create with the first pair 
+// name(Tkey key, const Tval& val) - create with the first pair
 // int GetCount() - get the number of pairs
 // int FindIndex(Tkey) - find this key returning position in pair array or wxNOT_FOUND
-// size_t FindInsertIndex(Tkey) - find array position to insert key at, returns 
+// size_t FindInsertIndex(Tkey) - find array position to insert key at, returns
 //     GetCount for append (check first in case count=0), the pos to insert
 //     before, or the pos with existing key  (see SetValue for code)
 // bool HasKey(Tkey) - does this key exist
-// Tval& GetValue(Tkey) - get the value for this key or it it doesn't exist 
+// Tval& GetValue(Tkey) - get the value for this key or it it doesn't exist
 //     the default value, see also Get/SetDefaultValue.
 // Tval& GetOrCreateValue(Tkey key) - get or create a GetDefaultValue() value for this key
 // void SetValue(Tkey, Tval) - set the Tval for this Tkey, replacing if exists
@@ -72,47 +72,47 @@
 // void RemoveAt(index) - remove the key and value at this array index
 // TvalArray& GetValues() - get the TvalArray
 // TkeyArray& GetKeys() - get the TkeyArray (don't unsort them)
-// const Tval& GetDefaultValue() const - get the default value to return for 
+// const Tval& GetDefaultValue() const - get the default value to return for
 //   GetValue(Tkey) when the key doesn't exist. (inits to Tval())
 // void SetDefaultValue(const Tval& val) - set the default value to return for
-//   GetValue(Tkey) when the key doesn't exist. If your values don't have a 
+//   GetValue(Tkey) when the key doesn't exist. If your values don't have a
 //   default constructor (eg. ints) you'll want to set this.
 // void Copy(const name& other) - make full copy of other
-// void Sort() - sort the pairs by the keys (only necessary if you want to  
+// void Sort() - sort the pairs by the keys (only necessary if you want to
 //   quickly add unorderered pairs using GetKeys().Add(x); GetValues().Add(x);)
 //   You MUST keep them sorted for the lookup mechanism to work.
 // name& operator=(const name& other) - make full copy of other
 //
 // ----------------------------------------------------------------------------
 // DECLARE_PAIRED_INT_DATA_ARRAYS - added functions
-// bool UpdatePos(int pos, int numPos) - 
-//   if numPos > 0 - shifts keys greater than pos by numPos 
-//   if numPos < 0 - deletes keys between pos and pos-numPos, 
+// bool UpdatePos(int pos, int numPos) -
+//   if numPos > 0 - shifts keys greater than pos by numPos
+//   if numPos < 0 - deletes keys between pos and pos-numPos,
 //     shifts keys greater than by pos-numPos by -numPos
-// 
+//
 // ============================================================================
 // Examples:
 //
 // 1.) For string arrays you'll write this in the header
-// DECLARE_PAIRED_DATA_ARRAYS(wxString, wxArrayString, wxString, wxArrayString, 
+// DECLARE_PAIRED_DATA_ARRAYS(wxString, wxArrayString, wxString, wxArrayString,
 //                            wxPairArrayStringString, class WXDLLIMPEXP_ADV)
 // And this code in some cpp file.
 // DEFINE_PAIRED_DATA_ARRAYS(wxString, wxString, wxPairArrayStringString)
 //
 // 2.) For int pairs and wxString values, write this in your header
-// DECLARE_PAIRED_INT_DATA_ARRAYS(wxString, wxArrayString, 
+// DECLARE_PAIRED_INT_DATA_ARRAYS(wxString, wxArrayString,
 //                                wxPairArrayIntSheetString, class WXDLLIMPEXP_ADV)
 //
 // You can even make nested pair arrays, 2D arrays (wxSheetStringSparseTable)
-// WX_DECLARE_OBJARRAY_WITH_DECL(wxPairArrayIntSheetString, 
+// WX_DECLARE_OBJARRAY_WITH_DECL(wxPairArrayIntSheetString,
 //                               wxArrayPairArrayIntSheetString,
 //                               class WXDLLIMPEXP_ADV);
-// DECLARE_PAIRED_INT_DATA_ARRAYS(wxPairArrayIntSheetString, wxArrayPairArrayIntSheetString, 
+// DECLARE_PAIRED_INT_DATA_ARRAYS(wxPairArrayIntSheetString, wxArrayPairArrayIntSheetString,
 //                                wxPairArrayIntPairArraySheetStringBase, class WXDLLIMPEXP_ADV)
 //
 // In your source file write this to get the code for the pair array
 // DEFINE_PAIRED_INT_DATA_ARRAYS(wxString, wxPairArrayIntSheetString)
-// DEFINE_PAIRED_INT_DATA_ARRAYS(wxPairArrayIntSheetString, 
+// DEFINE_PAIRED_INT_DATA_ARRAYS(wxPairArrayIntSheetString,
 //                               wxPairArrayIntPairArraySheetStringBase)
 //
 // ============================================================================
@@ -155,7 +155,7 @@ protected :                                                                  \
     TkeyArray m_keys;                                                        \
     TvalArray m_values;                                                      \
     Tval m_defaultValue;
- 
+
 // ----------------------------------------------------------------------------
 // Note: The above macros is incomplete to allow you to extend the class.
 

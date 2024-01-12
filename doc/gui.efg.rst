@@ -424,4 +424,3 @@ is not available.
 
 The color-coding for each player can be changed by clicking on the
 color icon to the left of the corresponding player.
-

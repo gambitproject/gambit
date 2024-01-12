@@ -35,5 +35,3 @@
 //template gOutput &operator<<(gOutput &f, const gBasis<double> &y);
 
 template class gIdeal<double>;
-
-

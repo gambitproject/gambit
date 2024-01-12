@@ -17,4 +17,4 @@ NFG 1 R "Three person version of perfect2" { "Player 1" "Player 2" "Player 3" }
 { "321" 0, 0, 1 }
 { "331" 4, 0, 1 }
 }
-1 4 7 2 5 8 3 6 9 
+1 4 7 2 5 8 3 6 9

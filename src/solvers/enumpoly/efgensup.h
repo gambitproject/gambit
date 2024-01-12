@@ -40,8 +40,8 @@ Gambit::List<Gambit::BehaviorSupportProfile> AllSubsupports(const Gambit::Behavi
 // Subsupports of a given support are _path equivalent_ if they
 // agree on every infoset that can be reached under either, hence both,
 // of them.  The next routine outputs one support for each equivalence
-// class by outputting only those subsupports with _no_ active 
-// actions at each unreached infoset.  
+// class by outputting only those subsupports with _no_ active
+// actions at each unreached infoset.
 
 void AllInequivalentSubsupportsRECURSIVE(const Gambit::BehaviorSupportProfile &s,
 					 Gambit::BehaviorSupportProfile *sact,
@@ -50,10 +50,10 @@ void AllInequivalentSubsupportsRECURSIVE(const Gambit::BehaviorSupportProfile &s
 
 Gambit::List<Gambit::BehaviorSupportProfile> AllInequivalentSubsupports(const Gambit::BehaviorSupportProfile &S);
 
-// The following routines combine to return all supports that do not 
-// exhibit particular type of domination.  This was a prototype for 
+// The following routines combine to return all supports that do not
+// exhibit particular type of domination.  This was a prototype for
 // PossibleNashSubsupports, and displays the methods used there,
-// but it does NOT do exactly what is advertised with respect to 
+// but it does NOT do exactly what is advertised with respect to
 // weak domination.  This is because the recursion may eliminate
 // an action that is weakly dominated at some stage of the truncation
 // process, when, after more truncations, it might be no longer weakly
@@ -64,7 +64,7 @@ void AllUndominatedSubsupportsRECURSIVE(const Gambit::BehaviorSupportProfile &s,
 					ActionCursorForSupport *c,
 					bool strong, bool conditional,
 					Gambit::List<Gambit::BehaviorSupportProfile> &list);
-  
+
 Gambit::List<Gambit::BehaviorSupportProfile> AllUndominatedSubsupports(const Gambit::BehaviorSupportProfile &S,
 					       bool strong, bool conditional);
 
@@ -72,7 +72,7 @@ Gambit::List<Gambit::BehaviorSupportProfile> AllUndominatedSubsupports(const Gam
 // host the path of a behavioral Nash equilibrium.  These are subsupports
 // that have no action, at an active infoset, that is weakly dominated by
 // another active action, either in the conditional sense (for any active
-// node in the infoset) or the unconditional sense.  In addition we 
+// node in the infoset) or the unconditional sense.  In addition we
 // check for domination by actions that are inactive, but whose activation
 // would not activate any currently inactive infosets, so that the
 // subsupport resulting from activation is consistent, in the sense
@@ -85,7 +85,7 @@ void PossibleNashSubsupportsRECURSIVE(const Gambit::BehaviorSupportProfile &s,
 				      Gambit::List<Gambit::BehaviorSupportProfile> &list);
 
 Gambit::List<Gambit::BehaviorSupportProfile> SortSupportsBySize(Gambit::List<Gambit::BehaviorSupportProfile> &);
-  
+
 Gambit::List<Gambit::BehaviorSupportProfile> PossibleNashSubsupports(const Gambit::BehaviorSupportProfile &S);
 
 ///////////////// Utility Cursor Class /////////////////////
@@ -123,11 +123,9 @@ public:
   bool IsSubsequentTo(const Gambit::GameAction &) const;
 
   // Special
-  bool InfosetGuaranteedActiveByPriorCommitments(const 
+  bool InfosetGuaranteedActiveByPriorCommitments(const
 						 Gambit::BehaviorSupportProfile *,
 						 const Gambit::GameInfoset &);
   bool DeletionsViolateActiveCommitments(const Gambit::BehaviorSupportProfile *,
 					 const Gambit::List<Gambit::GameInfoset> *);
 };
-
-

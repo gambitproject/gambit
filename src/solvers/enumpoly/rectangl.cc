@@ -24,7 +24,3 @@
 
 template class gRectangle<double>;
 template gRectangle<double> TogDouble(const gRectangle<double>&);
-
-
-
-

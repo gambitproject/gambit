@@ -37,7 +37,7 @@ private:
   wxButton *m_stopButton, *m_okButton;
   wxTimer m_timer;
   gbtAnalysisOutput *m_output;
-  
+
   void Start(gbtAnalysisOutput *);
 
   void OnStop(wxCommandEvent &);

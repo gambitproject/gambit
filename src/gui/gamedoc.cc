@@ -80,9 +80,9 @@ bool gbtBehavDominanceStack::NextLevel()
   for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
     players.push_back(pl);
   }
-  
+
   std::ostringstream gnull;
-  Gambit::BehaviorSupportProfile newSupport = 
+  Gambit::BehaviorSupportProfile newSupport =
     m_supports[m_current]->Undominated(m_strict, true, players, gnull);
 
   if (newSupport != *m_supports[m_current]) {
@@ -154,7 +154,7 @@ bool gbtStrategyDominanceStack::NextLevel()
     players.push_back(pl);
   }
 
-  Gambit::StrategySupportProfile newSupport = 
+  Gambit::StrategySupportProfile newSupport =
     m_supports[m_current]->Undominated(m_strict, players);
 
   if (newSupport != *m_supports[m_current]) {
@@ -183,7 +183,7 @@ bool gbtStrategyDominanceStack::PreviousLevel()
 //                          class gbtGameDocument
 //=========================================================================
 
-gbtGameDocument::gbtGameDocument(Gambit::Game p_game) 
+gbtGameDocument::gbtGameDocument(Gambit::Game p_game)
   : m_game(p_game),
     m_selectNode(nullptr), m_modified(false),
     m_behavSupports(this, true), m_stratSupports(this, true),
@@ -233,7 +233,7 @@ bool gbtGameDocument::LoadDocument(const wxString &p_filename,
       return false;
     }
   }
-  
+
   TiXmlNode *nfgfile = game->FirstChild("nfgfile");
   if (nfgfile) {
     try {
@@ -249,7 +249,7 @@ bool gbtGameDocument::LoadDocument(const wxString &p_filename,
     // No game representation... punt!
     return false;
   }
-  
+
   m_behavSupports.Reset();
   m_stratSupports.Reset();
 
@@ -271,9 +271,9 @@ bool gbtGameDocument::LoadDocument(const wxString &p_filename,
 	  break;
 	}
       }
-      
+
       if (isFloat) {
-	auto *plist = 
+	auto *plist =
 	  new gbtAnalysisProfileList<double>(this, false);
 	plist->Load(analysis);
 	m_profiles.push_back(plist);
@@ -387,7 +387,7 @@ void gbtGameDocument::PostPendingChanges()
 }
 
 void gbtGameDocument::BuildNfg()
-{ 
+{
   if (m_game->IsTree()) {
     m_stratSupports.Reset();
     for (int i = 1; i <= m_profiles.Length(); m_profiles[i++]->BuildNfg());
@@ -623,7 +623,7 @@ void gbtGameDocument::DoExportNfg(const wxString &p_filename)
 }
 
 
-void gbtGameDocument::DoSetTitle(const wxString &p_title, 
+void gbtGameDocument::DoSetTitle(const wxString &p_title,
 				 const wxString &p_comment)
 {
   m_game->SetTitle(static_cast<const char *>(p_title.mb_str()));
@@ -634,7 +634,7 @@ void gbtGameDocument::DoSetTitle(const wxString &p_title,
 void gbtGameDocument::DoNewPlayer()
 {
   GamePlayer player = m_game->NewPlayer();
-  player->SetLabel("Player " + 
+  player->SetLabel("Player " +
 		   lexical_cast<std::string>(player->GetNumber()));
   if (!m_game->IsTree()) {
     player->GetStrategy(1)->SetLabel("1");

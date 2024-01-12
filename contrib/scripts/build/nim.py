@@ -40,9 +40,9 @@ class NimOutcome:
             outcome.SetPayoff(pl+1, str(int(history.CurrentMove() == pl)))
 
         node.SetOutcome(outcome)
-        
+
         return [ ]
-            
+
 
 import torr
 
@@ -53,7 +53,7 @@ rules = [ { "condition": lambda history: history.PebblesLeft() <= K,
 
 startPebbles = 5
 
-tree = torr.BuildTree([ "One", "Two" ], rules, 
+tree = torr.BuildTree([ "One", "Two" ], rules,
                       lambda: NimHistory(0, startPebbles))
 tree.SetTitle("Nim with %d pebbles" % startPebbles)
 print tree.AsEfgFile()

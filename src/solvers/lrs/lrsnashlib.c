@@ -783,7 +783,7 @@ int lrs_solve_nash_legacy (int argc, char *argv[])
   long startcol = 0;
   long prune = FALSE;		/* if TRUE, getnextbasis will prune tree and backtrack  */
   long numequilib=0;            /* number of nash equilibria found                      */
-  long oldnum=0;                                                                            
+  long oldnum=0;
 
 
 /* global variables lrs_ifp and lrs_ofp are file pointers for input and output   */
@@ -795,7 +795,7 @@ int lrs_solve_nash_legacy (int argc, char *argv[])
   }
 
 /***************************************************
- Step 0: 
+ Step 0:
   Do some global initialization that should only be done once,
   no matter how many lrs_dat records are allocated. db
 
@@ -834,7 +834,7 @@ int lrs_solve_nash_legacy (int argc, char *argv[])
 /* allocate and init structure for player 2's problem data                                   */
 
   printf ("\n*Second input taken from file %s\n", argv[2]);
-  Q2 = lrs_alloc_dat ("LRS globals"); 
+  Q2 = lrs_alloc_dat ("LRS globals");
   if (Q2 == NULL)
           return 1;
 
@@ -913,7 +913,7 @@ int lrs_solve_nash_legacy (int argc, char *argv[])
     {
       prune=lrs_checkbound(P1,Q1);
       if (!prune && lrs_getsolution (P1, Q1, output1, col))
-	{ 
+	{
            oldnum=numequilib;
            nash2_main(P1,Q1,P2orig,Q2,&numequilib,output2,linindex);
 	   if (numequilib > oldnum || Q1->verbose)

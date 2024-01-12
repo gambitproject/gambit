@@ -54,7 +54,7 @@ public:
   int MinCol() const;
   int MaxCol() const;
   //@}
-    
+
   /// @name Indexing operations
   //@{
   T &operator()(int r, int c);
@@ -195,16 +195,16 @@ RectArray<T> &RectArray<T>::operator=(const RectArray<T> &a)
     maxrow = a.maxrow;
     mincol = a.mincol;
     maxcol = a.maxcol;
-    
+
     data = (maxrow >= minrow) ? new T *[maxrow - minrow + 1] - minrow : nullptr;
-  
+
     for (i = minrow; i <= maxrow; i++)  {
       data[i] = (maxcol >= mincol) ? new T[maxcol - mincol + 1] - mincol : nullptr;
       for (int j = mincol; j <= maxcol; j++)
 	data[i][j] = a.data[i][j];
     }
   }
-    
+
   return *this;
 }
 
@@ -264,7 +264,7 @@ template <class T> void RectArray<T>::RotateDown(int lo, int hi)
 template <class T> void RectArray<T>::RotateLeft(int lo, int hi)
 {
   if (lo < mincol || hi < lo || maxcol < hi)   throw IndexException();
-  
+
   T temp;
   for (int i = minrow; i <= maxrow; i++)  {
     T *row = data[i];
@@ -386,7 +386,7 @@ template <class T> void RectArray<T>::SetColumn(int col, const Array<T> &v)
 template <class T> RectArray<T> RectArray<T>::Transpose() const
 {
   RectArray<T> tmp(mincol, maxcol, minrow, maxrow);
- 
+
   for (int i = minrow; i <= maxrow; i++)
     for (int j = mincol; j <= maxrow; j++)
       tmp(j,i) = (*this)(i,j);

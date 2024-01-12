@@ -118,7 +118,7 @@ static void NewtonStep(Matrix<double> &q, Matrix<double> &b,
 }
 
 
-void QreLHS(const StrategySupportProfile &p_support, 
+void QreLHS(const StrategySupportProfile &p_support,
 	    const Vector<double> &p_point,
 	    Vector<double> &p_lhs)
 {
@@ -128,7 +128,7 @@ void QreLHS(const StrategySupportProfile &p_support,
     logprofile[i] = p_point[i];
   }
   double lambda = p_point[p_point.Length()];
-  
+
   p_lhs = 0.0;
 
   int rowno = 0;
@@ -144,7 +144,7 @@ void QreLHS(const StrategySupportProfile &p_support,
 	}
       }
       else {
-	p_lhs[rowno] = (logprofile[player->GetStrategy(st)] - 
+	p_lhs[rowno] = (logprofile[player->GetStrategy(st)] -
 			logprofile[player->GetStrategy(1)] -
 			lambda * (profile.GetStrategyValue(player->GetStrategy(st)) -
 				  profile.GetStrategyValue(player->GetStrategy(1))));
@@ -154,7 +154,7 @@ void QreLHS(const StrategySupportProfile &p_support,
   }
 }
 
-void SymmetricQreLHS(const StrategySupportProfile &p_support, 
+void SymmetricQreLHS(const StrategySupportProfile &p_support,
 		     const Vector<double> &p_point,
 		     Vector<double> &p_lhs)
 {
@@ -166,7 +166,7 @@ void SymmetricQreLHS(const StrategySupportProfile &p_support,
     }
   }
   double lambda = p_point[p_point.Length()];
-  
+
   p_lhs = 0.0;
 
   int rowno = 0;
@@ -181,7 +181,7 @@ void SymmetricQreLHS(const StrategySupportProfile &p_support,
       }
     }
     else {
-      p_lhs[rowno] = (logprofile[player->GetStrategy(st)] - 
+      p_lhs[rowno] = (logprofile[player->GetStrategy(st)] -
 		      logprofile[player->GetStrategy(1)] -
 		      lambda * (profile.GetStrategyValue(player->GetStrategy(st)) -
 				profile.GetStrategyValue(player->GetStrategy(1))));
@@ -210,14 +210,14 @@ void QreJacobian(const StrategySupportProfile &p_support,
       rowno++;
       if (j == 1) {
 	// Should be j == lead: sum-to-one equation
-	
+
 	int colno = 0;
 	for (int ell = 1; ell <= p_support.GetGame()->NumPlayers(); ell++) {
 	  GamePlayer player2 = p_support.GetGame()->GetPlayer(ell);
 
 	  for (int m = 1; m <= player2->NumStrategies(); m++) {
 	    colno++;
-	    
+
 	    if (i == ell) {
 	      p_matrix(colno, rowno) = profile[player2->GetStrategy(m)];
 	    }
@@ -226,7 +226,7 @@ void QreJacobian(const StrategySupportProfile &p_support,
 	    }
 	  }
 	}
-	
+
 	// Derivative wrt lambda is zero
 	p_matrix(p_matrix.NumRows(), rowno) = 0.0;
       }
@@ -256,21 +256,21 @@ void QreJacobian(const StrategySupportProfile &p_support,
 	      // 1 == lead
 	      p_matrix(colno, rowno) =
 		-lambda * profile[player2->GetStrategy(m)] *
-		(profile.GetPayoffDeriv(i, 
+		(profile.GetPayoffDeriv(i,
 					p_support.GetStrategy(i, j),
 					p_support.GetStrategy(ell, m)) -
-		 profile.GetPayoffDeriv(i, 
+		 profile.GetPayoffDeriv(i,
 					p_support.GetStrategy(i, 1),
 					p_support.GetStrategy(ell, m)));
 	    }
 	  }
 
 	}
-	
+
 	// column wrt lambda
 	// 1 == lead
 	p_matrix(p_matrix.NumRows(), rowno) =
-	  (profile.GetStrategyValue(p_support.GetStrategy(i, 1)) - 
+	  (profile.GetStrategyValue(p_support.GetStrategy(i, 1)) -
 	   profile.GetStrategyValue(p_support.GetStrategy(i, j)));
       }
     }
@@ -311,37 +311,37 @@ void SymmetricQreJacobian(const StrategySupportProfile &p_support,
     rowno++;
     if (j == 1) {
       // Should be j == lead: sum-to-one equation
-	
+
       int colno = 0;
       GamePlayer player2 = p_support.GetGame()->GetPlayer(2);
 
       for (int m = 1; m <= player2->NumStrategies(); m++) {
 	colno++;
-	  
+
 	p_matrix(colno, rowno) = profile[player2->GetStrategy(m)];
       }
-      
+
       // Derivative wrt lambda is zero
       p_matrix(p_matrix.NumRows(), rowno) = 0.0;
     }
     else {
       // This is a ratio equation
-      
+
       int colno = 0;
       GamePlayer player2 = p_support.GetGame()->GetPlayer(2);
-	
+
       for (int m = 1; m <= player2->NumStrategies(); m++) {
 	colno++;
-	 
-	p_matrix(colno, rowno) = 
+
+	p_matrix(colno, rowno) =
 	  -(N-1) * lambda * profile[player2->GetStrategy(m)] *
-	  (profile.GetPayoffDeriv(1, 
+	  (profile.GetPayoffDeriv(1,
 				  p_support.GetStrategy(1, j),
 				  p_support.GetStrategy(2, m)) -
-	   profile.GetPayoffDeriv(1, 
+	   profile.GetPayoffDeriv(1,
 				  p_support.GetStrategy(1, 1),
 				  p_support.GetStrategy(2, m)));
-      
+
 	if (m == 1) {
 	  p_matrix(colno, rowno) -= 1.0;
 	}
@@ -349,11 +349,11 @@ void SymmetricQreJacobian(const StrategySupportProfile &p_support,
 	  p_matrix(colno, rowno) += 1.0;
 	}
       }
-	
+
       // column wrt lambda
       // 1 == lead
       p_matrix(p_matrix.NumRows(), rowno) =
-	(profile.GetStrategyValue(p_support.GetStrategy(1, 1)) - 
+	(profile.GetStrategyValue(p_support.GetStrategy(1, 1)) -
 	 profile.GetStrategyValue(p_support.GetStrategy(1, j)));
     }
   }
@@ -380,7 +380,7 @@ extern double g_targetLambda;
 double LogLike(const Array<double> &p_point)
 {
   double ret = 0.0;
-  
+
   for (int i = 1; i <= g_obsProbs.Length(); i++) {
     ret += g_obsProbs[i] * log(p_point[i]);
   }
@@ -462,7 +462,7 @@ extern double g_maxDecel;
 extern double g_hStart;
 extern bool g_fullGraph;
 
-void 
+void
 TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
 		   double p_startLambda, double p_maxLambda, double p_omega,
 		   bool p_symmetric = false)
@@ -511,7 +511,7 @@ TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
   }
   QRDecomp(b, q);
   q.GetRow(q.NumRows(), t);
-  
+
   while (x[x.Length()] >= 0.0 && x[x.Length()] < p_maxLambda) {
     bool accept = true;
 
@@ -565,13 +565,13 @@ TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
       else {
 	QreLHS(p_start.GetSupport(), u, y);
       }
-      NewtonStep(q, b, u, y, dist); 
+      NewtonStep(q, b, u, y, dist);
 
       if (dist >= c_maxDist) {
 	accept = false;
 	break;
       }
-      
+
       decel = max(decel, sqrt(dist / c_maxDist) * g_maxDecel);
       if (iter >= 2) {
 	double contr = dist / (disto + c_tol * c_eta);
@@ -629,9 +629,9 @@ TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
       // Currently, 't' is the tangent at 'x'.  We also need the
       // tangent at 'u'.
       Vector<double> newT(t);
-      q.GetRow(q.NumRows(), newT); 
+      q.GetRow(q.NumRows(), newT);
 
-      if (!restarting && 
+      if (!restarting &&
 	  DiffLogLike(x, t) * DiffLogLike(u, newT) < 0.0) {
 	// Store the current state, to resume later
 	pushX = x;
@@ -655,9 +655,9 @@ TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
     if (newton && g_maxLike) {
       // Newton-type steplength adaptation, secant method
       Vector<double> newT(t);
-      q.GetRow(q.NumRows(), newT); 
+      q.GetRow(q.NumRows(), newT);
 
-      h *= -DiffLogLike(u, newT) / (DiffLogLike(u, newT) - 
+      h *= -DiffLogLike(u, newT) / (DiffLogLike(u, newT) -
 				    DiffLogLike(x, t));
     }
     else if (newton && g_targetLambda > 0.0) {
@@ -676,7 +676,7 @@ TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
     if (g_fullGraph) {
       PrintProfile(std::cout, p_start.GetSupport(), x);
     }
-    
+
 
     Vector<double> newT(t);
     q.GetRow(q.NumRows(), newT);  // new tangent
@@ -695,6 +695,3 @@ TraceStrategicPath(const MixedStrategyProfile<double> &p_start,
     PrintProfile(std::cout, p_start.GetSupport(), x, true);
   }
 }
-
-
-

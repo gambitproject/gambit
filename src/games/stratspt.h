@@ -51,8 +51,8 @@ protected:
 
   /// The index into a strategy profile for a strategy (-1 if not in support)
   Array<int> m_profileIndex;
-  
-  bool Undominated(StrategySupportProfile &newS, int p_player, 
+
+  bool Undominated(StrategySupportProfile &newS, int p_player,
 		   bool p_strict, bool p_external = false) const;
 
 public:
@@ -89,7 +89,7 @@ public:
   template <class T> MixedStrategyProfile<T> NewMixedStrategyProfile() const;
 
   /// Returns the strategy in the st'th position for player pl.
-  GameStrategy GetStrategy(int pl, int st) const 
+  GameStrategy GetStrategy(int pl, int st) const
     { return m_support[pl][st]; }
 
   /// Returns the number of players in the game
@@ -132,8 +132,8 @@ public:
   //@{
   bool Dominates(const GameStrategy &s, const GameStrategy &t,
 		 bool p_strict) const;
-  bool IsDominated(const GameStrategy &s, bool p_strict, 
-		   bool p_external = false) const; 
+  bool IsDominated(const GameStrategy &s, bool p_strict,
+		   bool p_external = false) const;
 
   /// Returns a copy of the support with dominated strategies eliminated
   StrategySupportProfile Undominated(bool p_strict, bool p_external = false) const;
@@ -142,7 +142,7 @@ public:
 
   /// @name Identification of overwhelmed strategies
   //@{
-  bool Overwhelms(const GameStrategy &s, const GameStrategy &t, 
+  bool Overwhelms(const GameStrategy &s, const GameStrategy &t,
                   bool p_strict) const;
   //@}
 
@@ -194,9 +194,7 @@ public:
   iterator begin() const { return iterator(*this); }
   iterator end() const   { return iterator(*this, m_nfg->NumPlayers() + 1); }
 };
-  
+
 } // end namespace Gambit
 
 #endif // LIBGAMBIT_STRATSPT_H
-
-

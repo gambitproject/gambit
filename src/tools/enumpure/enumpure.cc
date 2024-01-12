@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
   opterr = 0;
   bool quiet = false, reportStrategic = false, solveAgent = false, bySubgames = false;
   bool printDetail = false;
-  
+
   int long_opt_index = 0;
   struct option long_options[] = {
     { "help", 0, nullptr, 'h'   },
@@ -176,8 +176,3 @@ int main(int argc, char *argv[])
     return 1;
   }
 }
-
-
-
-
-

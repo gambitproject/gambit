@@ -135,7 +135,7 @@ public:
   //@{
   bool IsTree() const override { return false; }
   virtual bool IsBagg() const { return true; }
-  bool IsPerfectRecall(GameInfoset &, GameInfoset &) const override 
+  bool IsPerfectRecall(GameInfoset &, GameInfoset &) const override
   { return true; }
   bool IsConstSum() const override { throw UndefinedException(); }
   /// Returns the smallest payoff in any outcome of the game
@@ -151,7 +151,7 @@ public:
   		     const std::string &p_format="native") const override;
   void WriteNfgFile(std::ostream &) const override
   { throw UndefinedException(); }
-  virtual void WriteBaggFile(std::ostream &) const;  
+  virtual void WriteBaggFile(std::ostream &) const;
   //@}
 
   /// @name Modification

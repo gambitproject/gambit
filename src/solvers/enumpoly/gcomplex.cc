@@ -56,14 +56,14 @@ gComplex gComplex::operator / (const gComplex& y) const
 
 gComplex pow(const gComplex& x, long y)
 {
-  if (y < 0) { 
+  if (y < 0) {
     if (x == (gComplex) 0) {
       throw Gambit::AssertionException("Raising 0^0.");
     }
-    gComplex x1((gComplex)1/x); 
+    gComplex x1((gComplex)1/x);
     return pow(x1,-y);
-  } 
-  else if (y == 0) 
+  }
+  else if (y == 0)
     return gComplex(1);
   else if (y == 1)
     return x;

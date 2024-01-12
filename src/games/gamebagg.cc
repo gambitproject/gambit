@@ -313,4 +313,3 @@ Game GameBAGGRep::ReadBaggFile(std::istream &in)
 }
 
 }  // end namespace Gambit
-

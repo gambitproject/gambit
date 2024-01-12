@@ -67,7 +67,7 @@ protected:
   // structures for storing cached data: actions
   mutable DVector<T> m_actionValues;   // aka conditional payoffs
 
-  const T &ActionValue(const GameAction &act) const 
+  const T &ActionValue(const GameAction &act) const
     { return m_actionValues(act->GetInfoset()->GetPlayer()->GetNumber(),
 			    act->GetInfoset()->GetNumber(),
 			    act->GetNumber()); }
@@ -75,7 +75,7 @@ protected:
   /// @name Auxiliary functions for computation of interesting values
   //@{
   void GetPayoff(GameTreeNodeRep *, const T &, int, T &) const;
-  
+
   void ComputeSolutionDataPass2(const GameNode &node) const;
   void ComputeSolutionDataPass1(const GameNode &node) const;
   void ComputeSolutionData() const;
@@ -90,15 +90,15 @@ public:
   LogBehavProfile<T> &operator=(const LogBehavProfile<T> &) = delete;
   LogBehavProfile<T> &operator=(const Vector<T> &p)
     { Invalidate(); Vector<T>::operator=(p); return *this;}
-  LogBehavProfile<T> &operator=(const T &x)  
+  LogBehavProfile<T> &operator=(const T &x)
     { Invalidate(); DVector<T>::operator=(x); return *this; }
 
   //@}
-  
+
   /// @name Operator overloading
   //@{
   bool operator==(const LogBehavProfile<T> &) const;
-  bool operator!=(const LogBehavProfile<T> &x) const 
+  bool operator!=(const LogBehavProfile<T> &x) const
   { return !(*this == x); }
 
   const T &GetProb(const GameAction &p_action) const
@@ -111,7 +111,7 @@ public:
     { return DVector<T>::operator()(a, b, c); }
 
   void SetLogProb(int a, const T &p_value)
-    { Invalidate();  
+    { Invalidate();
       m_logProbs[a] = p_value;
       Array<T>::operator[](a) = exp(p_value);
     }
@@ -145,7 +145,7 @@ public:
   T GetLogActionProb(const GameAction &) const;
   const T &GetPayoff(const GameAction &act) const;
 
-  T DiffActionValue(const GameAction &action, 
+  T DiffActionValue(const GameAction &action,
 		    const GameAction &oppAction) const;
   T DiffNodeValue(const GameNode &node, const GamePlayer &player,
 		  const GameAction &oppAction) const;

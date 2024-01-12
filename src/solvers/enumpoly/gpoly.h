@@ -32,16 +32,16 @@
 
 //  **NOTE**
 //  Every type T to be used needs a procedure to convert a gText coefficient
-//  to the type T for the gText SOP input form and a procedure to convert 
-//  the coefficient into a gText for the SOP output form.  
+//  to the type T for the gText SOP input form and a procedure to convert
+//  the coefficient into a gText for the SOP output form.
 
 
 // *******************
 //  gPoly declaration
 // *******************
-  
+
 template <class T> class gPoly {
-  
+
 private:
   const gSpace*        Space;    // pointer to variable Space of space
   const term_order*    Order;
@@ -58,15 +58,15 @@ private:
   exp_vect  OrderMaxMonomialDivisibleBy(const term_order& order,
 					const exp_vect& expv);
     // Arithmetic
-  Gambit::List<gMono<T> > Adder(const Gambit::List<gMono<T> >&, 
+  Gambit::List<gMono<T> > Adder(const Gambit::List<gMono<T> >&,
 			 const Gambit::List<gMono<T> >&)          const;
-  Gambit::List<gMono<T> > Mult(const Gambit::List<gMono<T> >&, 
+  Gambit::List<gMono<T> > Mult(const Gambit::List<gMono<T> >&,
 			const Gambit::List<gMono<T> >&)           const;
-  gPoly<T>         DivideByPolynomial(const gPoly<T> &den) const; 
+  gPoly<T>         DivideByPolynomial(const gPoly<T> &den) const;
 
   // The following is used to construct the translate of *this.
   gPoly<T> TranslateOfMono(const gMono<T>&, const Gambit::Vector<T>&) const;
-  gPoly<T> MonoInNewCoordinates(const gMono<T>&, 
+  gPoly<T> MonoInNewCoordinates(const gMono<T>&,
 				const Gambit::SquareMatrix<T>&)       const;
 
 
@@ -116,9 +116,9 @@ public:
   //----------
   //Operators:
   //----------
-  
+
   gPoly<T>& operator =  (const gPoly<T> &);
-  gPoly<T>& operator =  (const std::string &);  
+  gPoly<T>& operator =  (const std::string &);
                         //Set polynomial equal to the SOP form in the string
   gPoly<T>  operator -  ()                  const;
   gPoly<T>  operator -  (const gPoly<T> &) const;
@@ -139,8 +139,8 @@ public:
   // Information:
   //-------------
 
-  const gSpace*       GetSpace()                       const; 
-  const term_order*   GetOrder()                       const; 
+  const gSpace*       GetSpace()                       const;
+  const term_order*   GetOrder()                       const;
   int                 Dmnsn()                              const;
   bool                IsZero()                             const;
   int                 DegreeOfVar(int var_no)              const;
@@ -174,10 +174,10 @@ public:
   T              LeadingCoefficient(const term_order &)               const;
   gPoly<T>       LeadingTerm(const term_order &)                      const;
   void           ToMonic(const term_order &)                               ;
-  void           ReduceByDivisionAtExpV(const term_order &, 
-					const gPoly<T> &, 
+  void           ReduceByDivisionAtExpV(const term_order &,
+					const gPoly<T> &,
 					const exp_vect &);
-  void           ReduceByRepeatedDivision(const term_order &, 
+  void           ReduceByRepeatedDivision(const term_order &,
 					  const gPoly<T> &);
   gPoly<T>       S_Polynomial(const term_order &, const gPoly<T> &) const;
 
@@ -209,16 +209,3 @@ template <class T> gPoly<T> operator+(const gPoly<T> &poly, const T &val);
 template <class T> std::string ToText(const gPoly<T> &p);
 
 #endif //# GPOLY_H
-
-
-
-
-
-
-
-
-
-
-
-
-

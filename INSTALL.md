@@ -11,7 +11,7 @@ usual
     sudo make install
 
 Command-line options are available to modify the configuration process;
-do `./configure --help` for information.  
+do `./configure --help` for information.
 
 By default Gambit will be installed in /usr/local.  You can change this
 by replacing configure step with one of the form
@@ -136,4 +136,3 @@ from the root directory, execute
 
 As in general with Python, it is strongly recommended to install `pygambit`
 as part of a virtual environment rather than in the system's Python.
-

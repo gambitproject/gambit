@@ -40,33 +40,29 @@ def CreateNfg(dim):
             range(1, nfg.NumPlayers() + 1))
         profile.SetOutcome(nfg.NewOutcome())
     return nfg
-    
+
 
 def CorrelatedNormal(rho):
     z1 = random.normalvariate(0, 1)
     z2 = random.normalvariate(0, 1)
     return z1, z1*rho + z2*sqrt(1.0-rho*rho)
-    
+
 def RandomizeGame(game, func):
     """
     Randomize the payoffs at the outcomes of a game.
     func is a pointer to a function that produces a (pseudo)random
     number with the desired distribution.
     """
-    
+
     for outc in xrange(1, game.NumOutcomes() + 1):
         for pl in xrange(1, game.NumPlayers() + 1):
            game.GetOutcome(outc).SetPayoff(pl, func())
-    
+
 
 if __name__ == '__main__':
     import sys
-    nfg = CreateNfg([eval(sys.argv[i]) for i in range(2, len(sys.argv))]) 
+    nfg = CreateNfg([eval(sys.argv[i]) for i in range(2, len(sys.argv))])
 
     for iter in xrange(eval(sys.argv[1])):
         RandomizeGame(nfg, lambda: random.normalvariate(0, 1))
         print nfg.AsNfgFile()
-
-
-        
-

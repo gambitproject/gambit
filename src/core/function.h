@@ -28,10 +28,10 @@
 namespace Gambit {
 
 class Function {
-public:  
+public:
   virtual ~Function() = default;
   virtual double Value(const Vector<double> &) const = 0;
-  virtual bool Gradient(const Vector<double> &, 
+  virtual bool Gradient(const Vector<double> &,
 			Vector<double> &) const = 0;
 };
 
@@ -101,11 +101,11 @@ private:
 
   void AlphaXPlusY(double alpha, const Vector<double> &x, Vector<double> &y);
   void TakeStep(const Vector<double> &x, const Vector<double> &p,
-		double step, double lambda, 
+		double step, double lambda,
 		Vector<double> &x1, Vector<double> &dx);
   void IntermediatePoint(const Function &fdf,
 			 const Vector<double> &x, const Vector<double> &p,
-			 double lambda, 
+			 double lambda,
 			 double pg,
 			 double stepa, double stepc,
 			 double fa, double fc,
@@ -117,8 +117,8 @@ private:
 		double lambda,
 		double stepa, double stepb, double stepc,
 		double fa, double fb, double fc, double tol,
-		Vector<double> &x1, Vector<double> &dx1, 
-		Vector<double> &x2, Vector<double> &dx2, 
+		Vector<double> &x1, Vector<double> &dx1,
+		Vector<double> &x2, Vector<double> &dx2,
 		Vector<double> &gradient,
 		double &step, double &f, double &gnorm);
 

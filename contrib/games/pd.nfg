@@ -11,4 +11,4 @@ NFG 1 R "Two person Prisoner's Dilemma game" { "Player 1" "Player 2" }
 { "" 0, 10 }
 { "" 1, 1 }
 }
-1 2 3 4 
+1 2 3 4

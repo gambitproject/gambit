@@ -35,7 +35,7 @@ def Equations(support, player):
     players = [ (pl, oplayer)
                 for (pl, oplayer) in enumerate(support.GetGame().Players())
                 if player != oplayer ]
-    strategies = [ (st, strategy) 
+    strategies = [ (st, strategy)
                    for (st, strategy) in enumerate(support.Strategies(player)) ]
     for profile in gambit.StrategyIterator(support,
                                            support.GetStrategy(player.GetNumber(),
@@ -51,7 +51,7 @@ def Equations(support, player):
 
     equations = [ "(%s)-(%s);\n" % ("+".join(payoffs[0]), "+".join(s2))
                   for s2 in payoffs[1:] ]
-        
+
     # Substitute in sum-to-one constraints
     for (pl, oplayer) in enumerate(support.GetGame().Players()):
         if player == oplayer: continue
@@ -91,7 +91,7 @@ def IsNash(profile, vars):
                     return False
             else:
                 total += vars["%s%d" % (playerchar, st)].real
-        
+
     return True
 
 def CheckEquilibrium(game, support, entry, logger):
@@ -125,7 +125,7 @@ def IsPureSupport(support):
     return reduce(lambda x, y: x and y,
                   [ support.NumStrategies(pl+1) == 1
                     for (pl, player) in enumerate(support.Players()) ])
-                 
+
 def ProfileFromPureSupport(game, support):
     profile = game.NewMixedStrategyDouble()
 
@@ -168,14 +168,14 @@ class PHCSolver(SupportSolver):
 
     def Solve(self, support):
         game = support.GetGame()
-        
+
         eqns = reduce(lambda x, y: x + y,
                       [ Equations(support, player)
                         for player in game.Players() ])
-    
+
         phcinput = ("%d\n" % len(eqns)) + "".join(eqns)
         #print phcinput
-        
+
         try:
             phcoutput = phc.RunPHC("./phc", self.prefix, phcinput)
             #print "%d solutions found; checking for equilibria now" % len(phcoutput)
@@ -203,7 +203,7 @@ class BertiniSolver(SupportSolver):
 
     def Solve(self, support):
         game = support.GetGame()
-        
+
         eqns = reduce(lambda x, y: x + y,
                       [ Equations(support, player)
                         for player in game.Players() ])
@@ -212,7 +212,7 @@ class BertiniSolver(SupportSolver):
         for (pl, player) in enumerate(game.Players()):
             for st in xrange(support.NumStrategies(pl+1) - 1):
                 variables.append("%c%d" % (playerletters[pl], st+1))
-                           
+
         bertiniInput = "CONFIG\n\nEND;\n\nINPUT\n\n"
         bertiniInput += "variable_group %s;\n" % ", ".join(variables)
         bertiniInput += "function %s;\n\n" % ", ".join([ "e%d" % i
@@ -290,8 +290,8 @@ class VerboseLogger(StandardLogger):
                ",".join([str(profile[i])
                          for i in xrange(1, profile.MixedProfileLength() + 1)]) +
                "," + str(profile.GetLiapValue()))
-                                
-        
+
+
 class CountLogger:
     def __init__(self):
         self.candidates = 0
@@ -365,7 +365,7 @@ def AdmissibleSubsupports(game, setin, setout, setfree, skipdom = False):
         else:
             subsetout = setout[:]
             subsetfree = setfree[:]
-            
+
         # Switching the order of the following two calls (roughly)
         # switches whether supports are tried largest first, or
         # smallest first
@@ -374,7 +374,7 @@ def AdmissibleSubsupports(game, setin, setout, setfree, skipdom = False):
         # When we add a strategy to 'setin', we can skip the dominance
         # check at the next iteration, because it will return the same
         # result as here
-            
+
         for subsupport in AdmissibleSubsupports(game,
                                                  setin,
                                                  subsetout + [subsetfree[0]],
@@ -397,7 +397,7 @@ def Enumerate(game, solver):
                                            for player in game.Players()
                                            for strategy in player.Strategies() ]):
         solver.GetLogger().OnCandidateSupport(support)
-        
+
         if IsPureSupport(support):
             # By definition, if this is a pure-strategy support, it
             # must be an equilibrium (because of the dominance
@@ -499,5 +499,3 @@ if __name__ == '__main__':
         Enumerate(game, solver=PHCSolver(prefix, logger))
     else:
         Enumerate(game, solver=NullSolver(logger))
-
-    

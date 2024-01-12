@@ -27,5 +27,5 @@ for profile in gambit.StrategyIterator(gambit.StrategySupportProfile(nfg)):
             break
     # If we don't have a winner, leave outcome null, payoffs zero
 
-    
+
 print nfg.AsNfgFile()

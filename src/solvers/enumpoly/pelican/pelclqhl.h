@@ -24,7 +24,7 @@ http://netlib2.cs.utk.edu/hompack/
 
 #include "pelutils.h"
 
-node pcfg_facets(node PC,Imatrix Controll); 
+node pcfg_facets(node PC,Imatrix Controll);
   aset aset_cayley(aset,int);
   node aset_print_subdiv(aset,node, Imatrix);
   node aset_lower_facets(aset);

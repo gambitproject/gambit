@@ -34,7 +34,7 @@ using namespace Gambit::linalg;
 // -----------------------
 
 Basis::Basis(int first, int last, int firstlabel, int lastlabel)
-  : basis(first, last), cols(firstlabel, lastlabel), 
+  : basis(first, last), cols(firstlabel, lastlabel),
     slacks(first, last), colBlocked(firstlabel,lastlabel),
     rowBlocked(first,last)
 {
@@ -53,8 +53,8 @@ Basis::Basis(int first, int last, int firstlabel, int lastlabel)
 }
 
 Basis::Basis(const Basis &bas)
- 
-  
+
+
 = default;
 
 Basis::~Basis()
@@ -63,7 +63,7 @@ Basis::~Basis()
 Basis& Basis::operator=(const Basis &orig)
 {
   if(this != &orig) {
-    basis = orig.basis; 
+    basis = orig.basis;
     cols = orig.cols;
     slacks = orig.slacks;
     rowBlocked = orig.rowBlocked;
@@ -91,29 +91,29 @@ int Basis::MaxCol() const
 { return cols.Last();}
 
 bool Basis::IsRegColumn( int col ) const
-{return col >= cols.First() && col <= cols.Last();} 
-  
-bool Basis::IsSlackColumn( int col ) const 
-{return  -col >= basis.First() && -col <= basis.Last();} 
-  
+{return col >= cols.First() && col <= cols.Last();}
+
+bool Basis::IsSlackColumn( int col ) const
+{return  -col >= basis.First() && -col <= basis.Last();}
+
 int Basis::Pivot(int outindex, int col)
 {
   int outlabel = basis[outindex];
- 
+
   if (IsSlackColumn(col)) slacks[-col] = outindex;
   else if (IsRegColumn(col)) cols[col] = outindex;
   else throw Gambit::IndexException(); // not a valid column to pivot in.
-  
+
   if (IsSlackColumn(outlabel)) slacks[-outlabel] = 0;
   else if (IsRegColumn(outlabel)) cols[outlabel] = 0;
   else {
-    // Note: here, should back out outindex.    
-    throw Gambit::IndexException(); // not a valid column to pivot out. 
+    // Note: here, should back out outindex.
+    throw Gambit::IndexException(); // not a valid column to pivot out.
   }
-  
+
   basis[outindex] = col;
   CheckBasis();
-  
+
   return outlabel;
 }
 
@@ -136,7 +136,7 @@ int Basis::Find( int col ) const
   if ( IsSlackColumn(col)) ret = slacks[-col];
   else if (IsRegColumn(col)) ret = cols[col];
   else throw Gambit::IndexException();
-  
+
   return ret;
 }
 
@@ -164,15 +164,12 @@ bool Basis::IsBlocked(int col) const
   return false;
 }
 
-void Basis::CheckBasis() 
+void Basis::CheckBasis()
 {
   bool check = true;
 
   for (int i =basis.First(); i <= basis.Last() && check; i++)
     if(basis[i] != -i) check = false;
-  
+
   IsBasisIdent = check;
 }
-
-
-

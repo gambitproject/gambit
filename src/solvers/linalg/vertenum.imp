@@ -35,8 +35,8 @@ VertexEnumerator<T>::VertexEnumerator(const Matrix<T> &A, const Vector<T> &b)
 
 template <class T>
 VertexEnumerator<T>::VertexEnumerator(LPTableau<T> &tab)
-  : mult_opt(0), depth(0), A(tab.Get_A()), b(tab.Get_b()), 
-    btemp(tab.Get_b()), c(tab.GetCost()), 
+  : mult_opt(0), depth(0), A(tab.Get_A()), b(tab.Get_b()),
+    btemp(tab.Get_b()), c(tab.GetCost()),
     npivots(0), nodes(0)
 {
   int i;
@@ -50,7 +50,7 @@ VertexEnumerator<T>::VertexEnumerator(LPTableau<T> &tab)
   Vector<T> uc(tab.MinRow(),tab.MaxRow());
   c = (T)1;
   uc = (T)1;
-  
+
   for(i=-tab.MaxRow();i<=-tab.MinRow();i++)
     if(tab.Member(i)) uc[-i]=(T)0;
 
@@ -79,10 +79,10 @@ template <class T> void VertexEnumerator<T>::Enum()
 
   LPTableau<T> tab(A,b);
   tab.SetCost(c);
-  
+
   DualSearch(tab);
 }
-  
+
 
 template <class T> void VertexEnumerator<T>::Report()
 {
@@ -90,7 +90,7 @@ template <class T> void VertexEnumerator<T>::Report()
   double x, estNodes;
 
   estNodes=x=(double)1;
-  
+
   while(i<=visits.Length()) {
     if(visits[i]) {
       x*=(double)branches[i]/(double)visits[i];
@@ -135,7 +135,7 @@ template <class T> void VertexEnumerator<T>::Search(LPTableau<T> &tab)
   else Report();  // Report progress at terminal leafs
   depth--;
 }
-  
+
 template <class T> void VertexEnumerator<T>::DualSearch(LPTableau<T> &tab)
 {
   int i,j;
@@ -163,13 +163,13 @@ template <class T> void VertexEnumerator<T>::DualSearch(LPTableau<T> &tab)
   Search(tab);         // do primal search
   depth--;
 }
-  
+
 template <class T> void VertexEnumerator<T>::Vertices(Gambit::List<Vector<T> > &verts) const
-{ 
+{
   for(int i=1;i<=List.Length();i++) {
     Vector<T> vert(A.NumColumns());
     vert = (T)0;
-    for(int j=1;j<=vert.Length();j++) 
+    for(int j=1;j<=vert.Length();j++)
       if(List[i].IsDefined(j)) vert[j]=-List[i](j);
     verts.Append(vert);
   }
@@ -178,4 +178,3 @@ template <class T> void VertexEnumerator<T>::Vertices(Gambit::List<Vector<T> > &
 
 } // end namespace Gambit::linalg
 } // end namespace Gambit
-

@@ -43,7 +43,7 @@ public:
   const Game &GetGame() const { return m_game; }
   const List<MixedStrategyProfile<T> > &GetExtremeEquilibria() const
   { return m_extremeEquilibria; }
-  
+
   List<List<MixedStrategyProfile<T> > > GetCliques() const;
 
 private:
@@ -52,7 +52,7 @@ private:
 
   /// Representation of the graph connecting the extreme equilibria
   ///@{
-  List<Vector<T> > m_key1, m_key2;  
+  List<Vector<T> > m_key1, m_key2;
   List<int> m_node1, m_node2; // IDs of each component of the extreme equilibria
   int m_v1, m_v2;
   ///@}
@@ -72,8 +72,8 @@ public:
   std::shared_ptr<EnumMixedStrategySolution<T> > SolveDetailed(const Game &p_game) const;
   List<MixedStrategyProfile<T> > Solve(const Game &p_game) const
   { return SolveDetailed(p_game)->GetExtremeEquilibria(); }
-  
-  
+
+
 private:
   /// Implement fuzzy equality for floating-point version when testing Nashness
   static bool EqZero(const T &x);
@@ -91,7 +91,7 @@ inline List<MixedStrategyProfile<Rational> > EnumMixedStrategySolveRational(cons
 }
 
 
- 
+
 //
 // Enumerate all mixed-strategy Nash equilibria of a two-player game
 // using the lrslib backend.
@@ -112,5 +112,5 @@ inline List<MixedStrategyProfile<Rational> > EnumMixedStrategySolveLrs(const Gam
 
 }  // end namespace Gambit::Nash
 }  // end namespace Gambit
-    
+
 #endif  // GAMBIT_NASH_ENUMMIXED_H

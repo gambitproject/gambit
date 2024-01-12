@@ -48,7 +48,7 @@ gbtNashMonitorDialog::gbtNashMonitorDialog(wxWindow *p_parent,
 					   gbtAnalysisOutput *p_command)
   : wxDialog(p_parent, wxID_ANY, wxT("Computing Nash equilibria"),
 	     wxDefaultPosition),
-    m_doc(p_doc), 
+    m_doc(p_doc),
     m_process(nullptr), m_timer(this, GBT_ID_TIMER),
     m_output(p_command)
 {
@@ -61,10 +61,10 @@ gbtNashMonitorDialog::gbtNashMonitorDialog(wxWindow *p_parent,
   m_statusText->SetForegroundColour(*wxBLUE);
   startSizer->Add(m_statusText, 0, wxALL | wxALIGN_CENTER, 5);
 
-  m_countText = new wxStaticText(this, wxID_STATIC, 
+  m_countText = new wxStaticText(this, wxID_STATIC,
 				 wxT("Number of equilibria found so far: 0  "));
   startSizer->Add(m_countText, 0, wxALL | wxALIGN_CENTER, 5);
-  
+
   m_stopButton = new wxBitmapButton(this, wxID_CANCEL, wxBitmap(stop_xpm));
   m_stopButton->Enable(false);
   m_stopButton->SetToolTip(_("Stop the computation"));
@@ -83,7 +83,7 @@ gbtNashMonitorDialog::gbtNashMonitorDialog(wxWindow *p_parent,
   }
   m_profileList->SetSizeHints(wxSize(500, 300));
   sizer->Add(m_profileList, 1, wxALL | wxEXPAND, 5);
-  
+
   m_okButton = new wxButton(this, wxID_OK, wxT("OK"));
   sizer->Add(m_okButton, 0, wxALL | wxALIGN_RIGHT, 5);
   m_okButton->Enable(false);
@@ -110,7 +110,7 @@ void gbtNashMonitorDialog::Start(gbtAnalysisOutput *p_command)
   m_process->Redirect();
 
   m_pid = wxExecute(p_command->GetCommand(), wxEXEC_ASYNC, m_process);
-  
+
   std::ostringstream s;
   if (p_command->IsBehavior()) {
     m_doc->GetGame()->Write(s, "efg");
@@ -119,7 +119,7 @@ void gbtNashMonitorDialog::Start(gbtAnalysisOutput *p_command)
     m_doc->GetGame()->Write(s, "nfg");
   }
   wxString str(wxString(s.str().c_str(), *wxConvCurrent));
-  
+
   // It is possible that the whole string won't write on one go, so
   // we should take this possibility into account.  If the write doesn't
   // complete the whole way, we take a 100-millisecond siesta and try
@@ -212,4 +212,3 @@ void gbtNashMonitorDialog::OnStop(wxCommandEvent &p_event)
   wxProcess::Kill(m_pid, wxSIGTERM);
 #endif  // __WXMSW__
 }
-

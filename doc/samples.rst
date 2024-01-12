@@ -2,19 +2,19 @@ Sample games
 ~~~~~~~~~~~~
 
 :download:`2x2x2.nfg <../contrib/games/2x2x2.nfg>`
-  A three-player normal form game with two strategies per player. 
+  A three-player normal form game with two strategies per player.
   This game has nine Nash equilibria,
-  which is the maximal number of regular Nash equilibria possible 
+  which is the maximal number of regular Nash equilibria possible
   for a game of this size. See
-  `McKelvey, Richard D. and McLennan, Andrew (1997). 
+  `McKelvey, Richard D. and McLennan, Andrew (1997).
   The maximal number of regular totally mixed Nash equilibria.
   Journal of Economic Theory 72(2): 411-425.
   <http://dx.doi.org/10.1006/jeth.1996.2214>`_
 
 :download:`2x2x2-nau.nfg <../contrib/games/2x2x2-nau.nfg>`
-  A three-player normal form game with two strategies per player. 
+  A three-player normal form game with two strategies per player.
   This game has three pure strategy equilibria, two
-  equilibria which are incompletely mixed, and a continuum of 
+  equilibria which are incompletely mixed, and a continuum of
   completely mixed equilibria. This game appears as an example in
   `Nau, Robert, Gomez Canovas, Sabrina, and Hansen, Pierre (2004).
   On the geometry of Nash equilibria and correlated equilibria.
@@ -22,7 +22,7 @@ Sample games
   <http://dx.doi.org/10.1007/s001820300162>`_
 
 :download:`bagwell.efg <../contrib/games/bagwell.efg>`
-  Stackelberg leader game with imperfectly observed commitment, 
+  Stackelberg leader game with imperfectly observed commitment,
   from `Bagwell, Kyle (1993) Commitment and observability in games.
   Games and Economic Behavior 8: 271-280.
   <http://dx.doi.org/10.1016/S0899-8256(05)80001-6>`_
@@ -42,7 +42,7 @@ Sample games
   803-836. <http://www.jstor.org/stable/2951567>`_
 
 :download:`condjury.efg <../contrib/games/condjury.efg>`
-  A three-person Condorcet jury game, after the analysis of 
+  A three-person Condorcet jury game, after the analysis of
   `Feddersen, Timothy and Pesendorfer, Wolfgang (1998)
   Convicting the innocent: The inferiority of unanimous jury verdicts
   under strategic voting. American Political Science Review 92(1):
@@ -53,14 +53,14 @@ Sample games
   response equilibrium correspondence can have a "backward-bending"
   segment on the principal branch.
 
-:download:`montyhal.efg <../contrib/games/montyhal.efg>` 
+:download:`montyhal.efg <../contrib/games/montyhal.efg>`
   The famous
   `Monty Hall problem
   <http://en.wikipedia.org/wiki/Monty_Hall_problem>`_: if Monty offers
   to let you switch doors, should you?
 
 :download:`nim.efg <../contrib/games/nim.efg>`
-  The classic game of 
+  The classic game of
   `Nim <http://en.wikipedia.org/wiki/Nim>`_, which is a useful example
   of the value of backward induction. This version starts with five
   stones.  An interesting experimental study of this class of games is
@@ -69,7 +69,7 @@ Sample games
   games. Games and Economic Behavior 79:
   223-232. <http:dx.doi.org/10.1016/j.geb.2013.02.003>`_
 
-:download:`pbride.efg <../contrib/games/pbride.efg>` 
+:download:`pbride.efg <../contrib/games/pbride.efg>`
   A signaling game from
   `Joel Watson's Strategy textbook
   <http://books.wwnorton.com/books/detail.aspx?ID=4294969499>`_,
@@ -77,8 +77,8 @@ Sample games
   and Roberts in the bedchamber.
 
 :download:`poker.efg <../contrib/games/poker.efg>`
-  A simple game of one-card poker introduced in 
-  `Myerson, Roger (1991) Game Theory: Analysis of Conflict. 
+  A simple game of one-card poker introduced in
+  `Myerson, Roger (1991) Game Theory: Analysis of Conflict.
   <http://www.hup.harvard.edu/catalog.php?isbn=9780674341166>`_.
   A bit unusually for poker, the "fold" action by a player with a
   strong hand counts for a win for that player, so folding is only

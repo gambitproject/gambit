@@ -31,7 +31,7 @@
    gRectangle
 
 which models the concept of a nonempty compact interval.
-Since boundary points can be identified, open and half 
+Since boundary points can be identified, open and half
 open (bounded) intervals can be effected, but less directly.
 */
 

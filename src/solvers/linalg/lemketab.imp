@@ -29,17 +29,17 @@ namespace linalg {
 //                        Lemke Tableau: member functions
 //---------------------------------------------------------------------------
 
-template <class T> LemkeTableau<T>::LemkeTableau(const Matrix<T> &A, 
+template <class T> LemkeTableau<T>::LemkeTableau(const Matrix<T> &A,
 					 const Vector<T> &b)
   : Tableau<T>(A,b)
-{ } 
+{ }
 
 template <class T> LemkeTableau<T>::LemkeTableau(const Tableau<T> &tab)
-  : Tableau<T>(tab) 
+  : Tableau<T>(tab)
 { }
 
 template <class T> int LemkeTableau<T>::SF_PivotIn(int inlabel)
-{ 
+{
   //* gout << "\n inlabel = " << inlabel;
   int outindex = SF_ExitIndex(inlabel);
 //  gout << " outindex = " << outindex;
@@ -55,7 +55,7 @@ template <class T> int LemkeTableau<T>::SF_PivotIn(int inlabel)
 }
 
 template <class T> int LemkeTableau<T>::PivotIn(int inlabel)
-{ 
+{
   //   gout << "\n inlabel = " << inlabel;
   int outindex = ExitIndex(inlabel);
 //  gout << " outindex = " << outindex;
@@ -77,7 +77,7 @@ template <class T> int LemkeTableau<T>::SF_ExitIndex(int inlabel)
   T ratio, tempmax;
   Vector<T> incol(this->MinRow(), this->MaxRow());
   Vector<T> col(this->MinRow(), this->MaxRow());
-  
+
   this->SolveColumn(inlabel,incol);
   //* gout << "\nincol = " << incol;
       // Find all row indices for which column col has positive entries.
@@ -88,17 +88,17 @@ template <class T> int LemkeTableau<T>::SF_ExitIndex(int inlabel)
     //* gout << "\nBestSet.Length() == 0, Find(0): " << Find(0);
     return 0;
   }
-  // Is this really needed?  
+  // Is this really needed?
   /*
-    if(BestSet.Length()==0  
+    if(BestSet.Length()==0
        && incol[Find(0)]<=eps2 && incol[Find(0)] >= (-eps2) )
       return Find(0);
   */
     if(BestSet.Length() <= 0) throw BadExitIndex();
-  
+
       // If there are multiple candidates, break ties by
       // looking at ratios with other columns,
-      // eliminating nonmaximizers of 
+      // eliminating nonmaximizers of
       // a similar ratio, until only one candidate remains.
   c = this->MinRow()-1;
   this->BasisVector(col);
@@ -112,14 +112,14 @@ template <class T> int LemkeTableau<T>::SF_ExitIndex(int inlabel)
     }
 	// Initialize tempmax.
     tempmax = col[BestSet[1]] / incol[BestSet[1]];
-	// Find the maximum ratio. 
+	// Find the maximum ratio.
     for (i = 2; i <= BestSet.Length(); i++)  {
       ratio = col[BestSet[i]] / incol[BestSet[i]];
 //*      if (ratio > tempmax)  tempmax = ratio;
       if (ratio < tempmax)  tempmax = ratio;
     }
 //    if (tempmax <= (T 2)*eps1) throw BadExitIndex();
-    
+
 	// Remove nonmaximizers from the list of candidate columns.
     for (i = BestSet.Length(); i >= 1; i--)  {
       ratio = col[BestSet[i]] / incol[BestSet[i]];
@@ -159,7 +159,7 @@ template <class T> int LemkeTableau<T>::ExitIndex(int inlabel)
   for (i = this->MinRow(); i <= this->MaxRow(); i++)
     if (incol[i] > this->eps2)
       BestSet.push_back(i);
-  // Is this really needed?  
+  // Is this really needed?
   if (BestSet.Length() == 0)
     //   gout << "\nBestSet.Length() == 0, Find(0):\n" << Find(0);
     if (BestSet.Length() == 0
@@ -221,7 +221,7 @@ template <class T> int LemkeTableau<T>::SF_LCPPath(int dup)
   else {
     enter = -SF_PivotIn(dup);
     if(enter==0) throw BadPivot();
-  }      
+  }
 */
       // Central loop - pivot until another CBFS is found
   long nits = 0;
@@ -246,17 +246,17 @@ template <class T> int LemkeTableau<T>::LemkePath(int dup)
   int enter, exit;
 //  if(params.plev >=2) {
 //    (*params.output) << "\nbegin path " << dup << "\n";
-//    Dump(*params.output); 
+//    Dump(*params.output);
 //  }
     //   gout << "\nbegin path " << dup << "\n";
-    //   Dump(gout); 
+    //   Dump(gout);
   enter = dup;
   if (this->Member(dup))
     enter = -dup;
       // Central loop - pivot until another CBFS is found
-  do  { 
+  do  {
     exit = PivotIn(enter);
-//    if(params.plev >=2) 
+//    if(params.plev >=2)
 //      Dump(*params.output);
 //      Dump(gout);
 

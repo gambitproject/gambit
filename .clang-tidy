@@ -54,4 +54,3 @@ CheckOptions:
   - key:             google-readability-function-size.StatementThreshold
     value:           '800'
 ...
-

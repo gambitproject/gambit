@@ -37,7 +37,7 @@ template<class T>  gIdeal<T>::gIdeal(const gSpace * ls,
 {
 }
 
-template<class T>  gIdeal<T>::gIdeal(const gSpace * ls, 
+template<class T>  gIdeal<T>::gIdeal(const gSpace * ls,
 				     const term_order * ordr,
 				     const Gambit::List< gPoly<T> *> & polys)
 : Space(ls), order(ordr), basis(ls,ordr,polys)
@@ -46,8 +46,8 @@ template<class T>  gIdeal<T>::gIdeal(const gSpace * ls,
 
 template<class T>  gIdeal<T>::gIdeal(const term_order * ordr,
 				     const gPolyList<T> & bss)
-: Space(bss.AmbientSpace()), 
-  order(ordr), 
+: Space(bss.AmbientSpace()),
+  order(ordr),
   basis(bss)
 {
   basis.ToSortedReducedGrobner(*ordr);
@@ -82,7 +82,7 @@ template<class T>  bool gIdeal<T>::operator==(const gIdeal<T> & rhs) const
   if (Space != rhs.Space) { return false; }
   else {
     if (*order == *(rhs.order)) {
-      if (basis == rhs.basis) return true;  
+      if (basis == rhs.basis) return true;
       else                    return false;
     }
     if (basis.Length() != rhs.basis.Length()) return false;
@@ -121,7 +121,7 @@ template<class T>  gIdeal<T> gIdeal<T>::operator* (const gIdeal<T> & rhs) const
 {
   Gambit::List<gPoly<T> *> basis_products;
 
-  for (int i = 1; i <= basis.Length(); i++) 
+  for (int i = 1; i <= basis.Length(); i++)
     for (int j = 1; j <= rhs.basis.Length(); j++) {
       auto* temp = new gPoly<T>(basis[i] * rhs.basis[j]);
       basis_products.push_back(temp);
@@ -133,16 +133,16 @@ template<class T>  gIdeal<T> gIdeal<T>::operator* (const gIdeal<T> & rhs) const
 //----------------------------------
 //          Information
 //----------------------------------
-  
+
 template<class T> gIdeal<T> gIdeal<T>::MonomialIdeal() const
 {
   gPolyList<T> mon_bss(Space,order);
-  for (int i = 1; i <= basis.Length(); i++) 
+  for (int i = 1; i <= basis.Length(); i++)
     mon_bss += basis[i].LeadingTerm(*order);
 
   return gIdeal<T>(order,mon_bss);
 }
-  
+
 template<class T> Gambit::List<exp_vect> gIdeal<T>::MonomialBasis() const
 {
   Gambit::List<exp_vect> answer;
@@ -152,7 +152,7 @@ template<class T> Gambit::List<exp_vect> gIdeal<T>::MonomialBasis() const
 
   for (int j = 1; j <= basis.Length(); j++) {
     if (basis[j].LeadingPowerProduct(*order).IsUnivariate())
-      MaxIndices[basis[j].LeadingPowerProduct(*order).SoleActiveVariable()] 
+      MaxIndices[basis[j].LeadingPowerProduct(*order).SoleActiveVariable()]
 	= basis[j].LeadingPowerProduct(*order).TotalDegree() - 1;
   }
 
@@ -160,21 +160,21 @@ template<class T> Gambit::List<exp_vect> gIdeal<T>::MonomialBasis() const
   while (odometer.Turn()) {
     exp_vect candidate(Space,odometer.CurrentIndices());
     bool add = true;
-    for (int j = 1; j <= basis.Length(); j++) 
+    for (int j = 1; j <= basis.Length(); j++)
       if (basis[j].LeadingPowerProduct(*order) <= candidate) add = false;
     if (add) answer.push_back(candidate);
   }
 
   return answer;
 }
-  
+
 template<class T> bool gIdeal<T>::IsRoot(const Gambit::Vector<T>& v) const
 {
   for (int i = 1; i <= basis.Length(); i++)
     if (basis[i].Evaluate(v) != (T)0) return false;
   return true;
 }
-  
+
 template<class T> bool gIdeal<T>::ZeroDimensional() const
 {
   if (Dmnsn() == 0) return true;
@@ -204,12 +204,9 @@ template<class T> bool gIdeal<T>::Contains(gPoly<T> & f) const
   gPoly<T> zero(Space,(T)0,order);
   return (basis.ReductionOf(f,*order) == zero);
 }
-  
+
 template<class T> bool gIdeal<T>::IsEntireRing() const
 {
   gPoly<T> one(Space,(T)1,order);
   return Contains(one);
 }
-
-
-

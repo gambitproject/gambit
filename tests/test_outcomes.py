@@ -1,6 +1,5 @@
-import pytest
-
 import pygambit as gbt
+import pytest
 
 
 @pytest.mark.parametrize(
@@ -72,10 +71,10 @@ def test_outcome_payoff_by_player_label():
     game.outcomes[0]["dan"] = 2
     game.outcomes[1]["joe"] = 3
     game.outcomes[1]["dan"] = 4
-    assert game.outcomes[0]['joe'] == 1
-    assert game.outcomes[0]['dan'] == 2
-    assert game.outcomes[1]['joe'] == 3
-    assert game.outcomes[1]['dan'] == 4
+    assert game.outcomes[0]["joe"] == 1
+    assert game.outcomes[0]["dan"] == 2
+    assert game.outcomes[1]["joe"] == 3
+    assert game.outcomes[1]["dan"] == 4
 
 
 def test_outcome_payoff_by_player():

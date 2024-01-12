@@ -24,4 +24,3 @@
 
 template class polynomial<int>;
 template class polynomial<double>;
-

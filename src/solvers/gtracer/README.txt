@@ -207,25 +207,25 @@ DARPA's TASK program and ONR contract N00014-00-1-0637 under the MURI
 program "Decision Making under Uncertainty"
 
 The GNM algorithm is outlined in a paper by Srihari Govindan and
-Robert Wilson titled "A global Newton method to compute Nash 
-equilibria".  It will appear in the Journal of Economic Theory in 
-2003.  
+Robert Wilson titled "A global Newton method to compute Nash
+equilibria".  It will appear in the Journal of Economic Theory in
+2003.
 
-It can be found at 
+It can be found at
 http://faculty-gsb.stanford.edu/wilson/pdf%20files/GovindanWilsonGlobalNewtonMethod010904.pdf
 
 The IPA algorithm is outlined in a companion to the above paper, also
 by Govindan and Wilson, titled "Computing Nash Equilibria by Iterated
-Polymatrix Approximation".  It will appear in the Journal of Economic 
+Polymatrix Approximation".  It will appear in the Journal of Economic
 Dynamics and Control in 2003.
 
 It can be found at
 http://faculty-gsb.stanford.edu/wilson/pdf%20files/PolymatrixApproximationJEDC,010718.pdf
 
-For information about similar results for extensive form games, please 
+For information about similar results for extensive form games, please
 refer to the following paper by Govindan and Wilson:
-Structure theorems for game trees. Govindan, S., and Wilson, R.  
-Proceedings of the National Academy of Sciences, 2002. Vol. 99, 
+Structure theorems for game trees. Govindan, S., and Wilson, R.
+Proceedings of the National Academy of Sciences, 2002. Vol. 99,
 Issue 13: 9077-9080
 
 It can be found at

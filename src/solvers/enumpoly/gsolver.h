@@ -37,7 +37,7 @@ private:
   Gambit::List<gPoly<double> > BasisTogDouble() const;
 
 // Recursive Call in Solver
-  Gambit::List<Gambit::Vector<double> >  
+  Gambit::List<Gambit::Vector<double> >
     ContinuationSolutions(const Gambit::List<gPoly<double> >& list,
 			  int dmnsn,
 			  int curvar,

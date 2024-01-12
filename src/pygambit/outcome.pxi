@@ -24,6 +24,7 @@ from libcpp.memory cimport shared_ptr
 
 import typing
 
+
 @cython.cclass
 class Outcome:
     """An outcome in a ``Game``."""
@@ -34,9 +35,12 @@ class Outcome:
             f"<Outcome [{self.outcome.deref().GetNumber()-1}] '{self.label}' "
             f"in game '{self.game.title}'>"
         )
-    
+
     def __eq__(self, other: typing.Any) -> bool:
-        return isinstance(other, Outcome) and self.outcome.deref() == cython.cast(Outcome, other).outcome.deref()
+        return (
+            isinstance(other, Outcome) and
+            self.outcome.deref() == cython.cast(Outcome, other).outcome.deref()
+        )
 
     def __hash__(self) -> int:
         return cython.cast(cython.long, self.outcome.deref())
@@ -51,13 +55,13 @@ class Outcome:
     @property
     def label(self) -> str:
         """The text label associated with this outcome."""
-        return self.outcome.deref().GetLabel().decode('ascii')
+        return self.outcome.deref().GetLabel().decode("ascii")
 
     @label.setter
     def label(self, value: str) -> None:
         if value in [i.label for i in self.game.outcomes]:
             warnings.warn("Another outcome with an identical label exists")
-        self.outcome.deref().SetLabel(value.encode('ascii'))
+        self.outcome.deref().SetLabel(value.encode("ascii"))
 
     def __getitem__(
             self, player: typing.Union[Player, str]
@@ -70,11 +74,11 @@ class Outcome:
             If `player` is a ``Player`` from a different game than the outcome.
         """
         resolved_player = cython.cast(Player,
-                                      self.game._resolve_player(player, 'Outcome.__getitem__'))
+                                      self.game._resolve_player(player, "Outcome.__getitem__"))
         payoff = (
             cython.cast(bytes,
                         self.outcome.deref().GetPayoff(resolved_player.player).as_string())
-            .decode('ascii')
+            .decode("ascii")
         )
         if "." in payoff:
             return decimal.Decimal(payoff)
@@ -100,7 +104,7 @@ class Outcome:
             If `value` cannot be interpreted as a number.
         """
         resolved_player = cython.cast(Player,
-                                      self.game._resolve_player(player, 'Outcome.__setitem__'))
+                                      self.game._resolve_player(player, "Outcome.__setitem__"))
         self.outcome.deref().SetPayoff(resolved_player.player, _to_number(value))
 
 
@@ -147,7 +151,7 @@ class TreeGameOutcome:
             If `player` is a ``Player`` from a different game than the outcome.
         """
         resolved_player = cython.cast(Player,
-                                      self.game._resolve_player(player, 'Outcome.__getitem__'))
+                                      self.game._resolve_player(player, "Outcome.__getitem__"))
         return rat_to_py(deref(self.psp).deref().GetPayoff(resolved_player.player))
 
     def delete(self):
@@ -158,7 +162,8 @@ class TreeGameOutcome:
         """The text label associated with this outcome."""
         return "(%s)" % (
             ",".join(
-                [deref(self.psp).deref().GetStrategy((<Player>player).player).deref().GetLabel().c_str()
+                [deref(self.psp).deref().GetStrategy(cython.cast(Player, player).player)
+                 .deref().GetLabel().c_str()
                  for player in self.game.players]
             )
         )

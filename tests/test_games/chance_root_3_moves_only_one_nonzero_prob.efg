@@ -1,7 +1,7 @@
 EFG 2 R "A chance node with 3 moves, 2 with zero prob; one non-terminal player node" { "Player" }
 ""
 
-c "" 1 "(0,1)" { "A" 1 "B" 0 "C" 0 } 0 
+c "" 1 "(0,1)" { "A" 1 "B" 0 "C" 0 } 0
 p "" 1 1 "(1,1)" { "LEFT" "RIGHT" } 0
 t "" 1 "Outcome 1" { 0 }
 t "" 2 "Outcome 2" { 1 }

@@ -22,6 +22,7 @@
 """Trace a smooth parameterized curve using a predictor-corrector method.
 """
 import math
+
 import numpy
 import scipy.linalg
 
@@ -239,11 +240,7 @@ def upd(q, b, x, u, y, w, t, h, angmax):
     if ang < -1.0:
         ang = -1.0
 
-    ang = math.acos(ang)
-    if ang > angmax:
-        return False
-    else:
-        return True
+    return math.acos(ang) <= angmax
 
 
 def ynorm(y):

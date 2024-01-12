@@ -19,14 +19,14 @@
 class WXDLLIMPEXP_SHEET wxSheetCellRendererRefData;
 
 // ----------------------------------------------------------------------------
-// wxSheetCellRenderer: 
+// wxSheetCellRenderer:
 // ----------------------------------------------------------------------------
 // This class is responsible for actually drawing the cell in the sheet.
-// You may pass it to a wxSheetCellAttr to change the format of one given cell 
-// or to wxSheet::SetDefaultRenderer() to change the view of all default cells. 
-// 
+// You may pass it to a wxSheetCellAttr to change the format of one given cell
+// or to wxSheet::SetDefaultRenderer() to change the view of all default cells.
+//
 // Rendering is done by the wxObject::m_refData which must be derived from
-// wxSheetCellRendererRefData. All the functions are passed directly to the 
+// wxSheetCellRendererRefData. All the functions are passed directly to the
 // ref counted renderer.
 // ----------------------------------------------------------------------------
 class WXDLLIMPEXP_SHEET wxSheetCellRenderer : public wxObject
@@ -38,12 +38,12 @@ public:
     void Destroy() { UnRef(); }
 
     bool Ok() const { return m_refData != NULL; }
-    
+
     // draw the given cell on the provided DC inside the given rectangle
     // using the style specified by the attribute and the default or selected
     // state corresponding to the isSelected value.
-    void Draw(wxSheet& sheet, const wxSheetCellAttr& attr, 
-              wxDC& dc, const wxRect& rect, 
+    void Draw(wxSheet& sheet, const wxSheetCellAttr& attr,
+              wxDC& dc, const wxRect& rect,
               const wxSheetCoords& coords, bool isSelected);
 
     // get the preferred size of the cell for its contents
@@ -53,21 +53,21 @@ public:
     // interpret renderer parameters: arbitrary string whose interpretation is
     // left to the derived classes
     void SetParameters(const wxString& params);
-  
-    bool Copy(const wxSheetCellRenderer& other);    
+
+    bool Copy(const wxSheetCellRenderer& other);
 
     // operators
     bool operator == (const wxSheetCellRenderer& obj) const { return m_refData == obj.m_refData; }
     bool operator != (const wxSheetCellRenderer& obj) const { return m_refData != obj.m_refData; }
     wxSheetCellRenderer& operator = (const wxSheetCellRenderer& obj)
-    {   
+    {
         if ( (*this) != obj ) Ref(obj);
-        return *this;   
+        return *this;
     }
 
     wxSheetCellRenderer Clone() const     { wxSheetCellRenderer obj; obj.Copy(*this); return obj; }
-    wxSheetCellRenderer* NewClone() const { return new wxSheetCellRenderer(Clone()); }   
-    DECLARE_DYNAMIC_CLASS(wxSheetCellRenderer)    
+    wxSheetCellRenderer* NewClone() const { return new wxSheetCellRenderer(Clone()); }
+    DECLARE_DYNAMIC_CLASS(wxSheetCellRenderer)
 };
 
 WXDLLIMPEXP_DATA_SHEET(extern const wxSheetCellRenderer) wxNullSheetCellRenderer;
@@ -83,8 +83,8 @@ public:
     // this pure virtual function has a default implementation which will
     // prepare the DC using the given attribute: it will draw the cell rectangle
     // with the bg colour from attr and set the dc's text colour and font
-    virtual void Draw(wxSheet& sheet, const wxSheetCellAttr& attr, 
-                      wxDC& dc, const wxRect& rect, 
+    virtual void Draw(wxSheet& sheet, const wxSheetCellAttr& attr,
+                      wxDC& dc, const wxRect& rect,
                       const wxSheetCoords& coords, bool isSelected);
 
     // get the preferred size of the cell for its contents
@@ -97,11 +97,11 @@ public:
     // interpret renderer parameters: arbitrary string whose interpretation is
     // left to the derived classes
     virtual void SetParameters(const wxString& WXUNUSED(params)) {}
-  
+
     // always define Copy for DECLARE_SHEETOBJREFDATA_COPY_CLASS
-    bool Copy(const wxSheetCellRendererRefData& WXUNUSED(other)) { return true; }    
-    DECLARE_SHEETOBJREFDATA_COPY_CLASS(wxSheetCellRendererRefData, 
-                                       wxSheetCellRendererRefData)    
+    bool Copy(const wxSheetCellRendererRefData& WXUNUSED(other)) { return true; }
+    DECLARE_SHEETOBJREFDATA_COPY_CLASS(wxSheetCellRendererRefData,
+                                       wxSheetCellRendererRefData)
 };
 
 // ----------------------------------------------------------------------------
@@ -113,10 +113,10 @@ class WXDLLIMPEXP_SHEET wxSheetCellStringRendererRefData : public wxSheetCellRen
 {
 public:
     wxSheetCellStringRendererRefData();
-    
+
     // draw the string
     virtual void Draw(wxSheet& sheet, const wxSheetCellAttr& attr,
-                      wxDC& dc, const wxRect& rect, 
+                      wxDC& dc, const wxRect& rect,
                       const wxSheetCoords& coords, bool isSelected);
 
     // return the string extent
@@ -124,7 +124,7 @@ public:
                                wxDC& dc, const wxSheetCoords& coords);
 
     void DoDraw(wxSheet& sheet, const wxSheetCellAttr& attr,
-                wxDC& dc, const wxRect& rect, 
+                wxDC& dc, const wxRect& rect,
                 const wxSheetCoords& coords, bool isSelected);
 
     // set the text colours before drawing
@@ -132,12 +132,12 @@ public:
                                wxDC& dc, bool isSelected);
 
     // calc the string extent for given string/font
-    wxSize DoGetBestSize(wxSheet& sheet, const wxSheetCellAttr& attr, 
+    wxSize DoGetBestSize(wxSheet& sheet, const wxSheetCellAttr& attr,
                          wxDC& dc, const wxString& text);
 
-    bool Copy(const wxSheetCellStringRendererRefData& other) 
+    bool Copy(const wxSheetCellStringRendererRefData& other)
         { return wxSheetCellRendererRefData::Copy(other); }
-    DECLARE_SHEETOBJREFDATA_COPY_CLASS(wxSheetCellStringRendererRefData, 
+    DECLARE_SHEETOBJREFDATA_COPY_CLASS(wxSheetCellStringRendererRefData,
                                        wxSheetCellRendererRefData)
 };
 
@@ -151,7 +151,7 @@ public:
     wxSheetCellAutoWrapStringRendererRefData() : wxSheetCellStringRendererRefData() { }
 
     virtual void Draw(wxSheet& sheet, const wxSheetCellAttr& attr,
-                      wxDC& dc, const wxRect& rect, 
+                      wxDC& dc, const wxRect& rect,
                       const wxSheetCoords& coords, bool isSelected);
 
     virtual wxSize GetBestSize(wxSheet& sheet, const wxSheetCellAttr& attr,
@@ -159,11 +159,11 @@ public:
 
     wxArrayString GetTextLines( wxSheet& sheet, wxDC& dc, const wxSheetCellAttr& attr,
                                 const wxRect& rect, const wxSheetCoords& coords);
-    
-    bool Copy(const wxSheetCellAutoWrapStringRendererRefData& other) 
+
+    bool Copy(const wxSheetCellAutoWrapStringRendererRefData& other)
         { return wxSheetCellStringRendererRefData::Copy(other); }
     DECLARE_SHEETOBJREFDATA_COPY_CLASS(wxSheetCellAutoWrapStringRendererRefData,
-                                       wxSheetCellRendererRefData)                
+                                       wxSheetCellRendererRefData)
 };
 
 // ----------------------------------------------------------------------------
@@ -175,16 +175,16 @@ class WXDLLIMPEXP_SHEET wxSheetCellNumberRendererRefData : public wxSheetCellStr
 {
 public:
     wxSheetCellNumberRendererRefData() {}
-    
+
     virtual void Draw(wxSheet& sheet, const wxSheetCellAttr& attr,
-                      wxDC& dc, const wxRect& rect, 
+                      wxDC& dc, const wxRect& rect,
                       const wxSheetCoords& coords, bool isSelected);
-   
+
     virtual wxString GetString(wxSheet& sheet, const wxSheetCoords& coords);
-        
-    bool Copy(const wxSheetCellNumberRendererRefData& other) 
+
+    bool Copy(const wxSheetCellNumberRendererRefData& other)
         { return wxSheetCellStringRendererRefData::Copy(other); }
-    DECLARE_SHEETOBJREFDATA_COPY_CLASS(wxSheetCellNumberRendererRefData, 
+    DECLARE_SHEETOBJREFDATA_COPY_CLASS(wxSheetCellNumberRendererRefData,
                                        wxSheetCellRendererRefData)
 };
 
@@ -204,18 +204,18 @@ public:
     void SetPrecision(int precision) { m_precision = precision; m_format.clear(); }
 
     virtual void Draw(wxSheet& sheet, const wxSheetCellAttr& attr,
-                      wxDC& dc, const wxRect& rect, 
+                      wxDC& dc, const wxRect& rect,
                       const wxSheetCoords& coords, bool isSelected);
 
     // parameters string format is "width[,precision]"
     virtual void SetParameters(const wxString& params);
 
     virtual wxString GetString(wxSheet& sheet, const wxSheetCoords& coords);
-    
+
     bool Copy(const wxSheetCellFloatRendererRefData& other);
-    DECLARE_SHEETOBJREFDATA_COPY_CLASS(wxSheetCellFloatRendererRefData, 
+    DECLARE_SHEETOBJREFDATA_COPY_CLASS(wxSheetCellFloatRendererRefData,
                                        wxSheetCellRendererRefData)
-    
+
 protected:
     int m_width,
         m_precision;
@@ -241,10 +241,10 @@ class WXDLLIMPEXP_SHEET wxSheetCellBitmapRendererRefData : public wxSheetCellStr
 public:
     wxSheetCellBitmapRendererRefData(const wxBitmap& bitmap = wxNullBitmap,
                                      int align = 0) : m_bitmap(bitmap), m_align(align) {}
-    
+
     // draw a the bitmap
     virtual void Draw(wxSheet& sheet, const wxSheetCellAttr& attr,
-                      wxDC& dc, const wxRect& rect, 
+                      wxDC& dc, const wxRect& rect,
                       const wxSheetCoords& coords, bool isSelected);
 
     // return the bitmap size
@@ -261,12 +261,12 @@ public:
     //   The cell attribute's alignment sets the alignment of the text in it's area of the cell
     int GetAlignment() const { return m_align; }
     void SetAlignment(int align) { m_align = align; }
-    
-    bool Copy(const wxSheetCellBitmapRendererRefData& other) 
+
+    bool Copy(const wxSheetCellBitmapRendererRefData& other)
         { SetBitmap(other.GetBitmap()); return wxSheetCellStringRendererRefData::Copy(other); }
-    DECLARE_SHEETOBJREFDATA_COPY_CLASS(wxSheetCellBitmapRendererRefData, 
+    DECLARE_SHEETOBJREFDATA_COPY_CLASS(wxSheetCellBitmapRendererRefData,
                                        wxSheetCellRendererRefData)
-        
+
     wxBitmap m_bitmap;
     int m_align;
 };
@@ -279,23 +279,23 @@ class WXDLLIMPEXP_SHEET wxSheetCellBoolRendererRefData : public wxSheetCellRende
 {
 public:
     wxSheetCellBoolRendererRefData() {}
-    
+
     // draw a check mark or nothing
     virtual void Draw(wxSheet& sheet, const wxSheetCellAttr& attr,
-                      wxDC& dc, const wxRect& rect, 
+                      wxDC& dc, const wxRect& rect,
                       const wxSheetCoords& coords, bool isSelected);
 
     // return the checkmark size
     virtual wxSize GetBestSize(wxSheet& sheet, const wxSheetCellAttr& attr,
                                wxDC& dc, const wxSheetCoords& coords);
 
-    bool Copy(const wxSheetCellBoolRendererRefData& other) 
+    bool Copy(const wxSheetCellBoolRendererRefData& other)
         { return wxSheetCellRendererRefData::Copy(other); }
-    DECLARE_SHEETOBJREFDATA_COPY_CLASS(wxSheetCellBoolRendererRefData, 
+    DECLARE_SHEETOBJREFDATA_COPY_CLASS(wxSheetCellBoolRendererRefData,
                                        wxSheetCellRendererRefData)
-    
+
 protected:
-    static wxSize ms_sizeCheckMark;        
+    static wxSize ms_sizeCheckMark;
 };
 
 // ----------------------------------------------------------------------------
@@ -309,11 +309,11 @@ class WXDLLIMPEXP_SHEET wxSheetCellDateTimeRendererRefData : public wxSheetCellS
 public:
     wxSheetCellDateTimeRendererRefData(wxString outFormat = wxDefaultDateTimeFormat, //_T("%c"),
                                        wxString inFormat  = wxDefaultDateTimeFormat)
-        : m_outFormat(outFormat), m_inFormat(inFormat), 
+        : m_outFormat(outFormat), m_inFormat(inFormat),
           m_dateTime(wxDefaultDateTime), m_tz(wxDateTime::Local) {}
 
     virtual void Draw(wxSheet& sheet, const wxSheetCellAttr& attr,
-                      wxDC& dc, const wxRect& rect, 
+                      wxDC& dc, const wxRect& rect,
                       const wxSheetCoords& coords, bool isSelected);
 
     // parameters string format is "width[,precision]"
@@ -323,18 +323,18 @@ public:
     wxString GetOutFormat() const { return m_outFormat; }
     void SetInFormat(const wxString& inFormat)   { m_inFormat = inFormat; }
     void SetOutFormat(const wxString& outFormat) { m_outFormat = outFormat; }
-    
+
     virtual wxString GetString(wxSheet& sheet, const wxSheetCoords& coords);
-    
+
     bool Copy(const wxSheetCellDateTimeRendererRefData& other);
-    DECLARE_SHEETOBJREFDATA_COPY_CLASS(wxSheetCellDateTimeRendererRefData, 
-                                       wxSheetCellRendererRefData) 
-    
-protected:    
+    DECLARE_SHEETOBJREFDATA_COPY_CLASS(wxSheetCellDateTimeRendererRefData,
+                                       wxSheetCellRendererRefData)
+
+protected:
     wxString m_outFormat;
     wxString m_inFormat;
     wxDateTime m_dateTime;
-    wxDateTime::TimeZone m_tz;    
+    wxDateTime::TimeZone m_tz;
 };
 
 #endif // wxUSE_DATETIME
@@ -348,7 +348,7 @@ public:
     wxSheetCellEnumRendererRefData( const wxString& choices = wxEmptyString );
 
     virtual void Draw(wxSheet& sheet, const wxSheetCellAttr& attr,
-                      wxDC& dc, const wxRect& rect, 
+                      wxDC& dc, const wxRect& rect,
                       const wxSheetCoords& coords, bool isSelected);
 
     // parameters string format is "item1[,item2[...,itemN]]"
@@ -358,10 +358,10 @@ public:
     virtual wxString GetString(wxSheet& sheet, const wxSheetCoords& coords);
 
     bool Copy(const wxSheetCellEnumRendererRefData& other);
-    DECLARE_SHEETOBJREFDATA_COPY_CLASS(wxSheetCellEnumRendererRefData, 
-                                       wxSheetCellRendererRefData)        
+    DECLARE_SHEETOBJREFDATA_COPY_CLASS(wxSheetCellEnumRendererRefData,
+                                       wxSheetCellRendererRefData)
 protected:
-    wxArrayString m_choices;    
+    wxArrayString m_choices;
 };
 
 // ----------------------------------------------------------------------------
@@ -373,14 +373,14 @@ class WXDLLIMPEXP_SHEET wxSheetCellRolColLabelRendererRefData : public wxSheetCe
 {
 public:
     wxSheetCellRolColLabelRendererRefData() {}
-    
+
     virtual void Draw(wxSheet& sheet, const wxSheetCellAttr& attr,
-                      wxDC& dc, const wxRect& rect, 
+                      wxDC& dc, const wxRect& rect,
                       const wxSheetCoords& coords, bool isSelected);
 
-    bool Copy(const wxSheetCellRolColLabelRendererRefData& other) 
+    bool Copy(const wxSheetCellRolColLabelRendererRefData& other)
         { return wxSheetCellStringRendererRefData::Copy(other); }
-    DECLARE_SHEETOBJREFDATA_COPY_CLASS( wxSheetCellRolColLabelRendererRefData, 
+    DECLARE_SHEETOBJREFDATA_COPY_CLASS( wxSheetCellRolColLabelRendererRefData,
                                         wxSheetCellRendererRefData)
 };
 

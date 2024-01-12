@@ -736,6 +736,5 @@ inline std::ostream &operator<<(std::ostream &s, const cmatrix &ma)
 
 }  // end namespace Gambit::gametracer
 }  // end namespace Gambit
- 
-#endif // GAMBIT_GTRACER_CMATRIX_H
 
+#endif // GAMBIT_GTRACER_CMATRIX_H

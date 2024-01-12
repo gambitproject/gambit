@@ -31,7 +31,7 @@ protected:
   wxString *m_stringValue;
   bool m_hasMin, m_hasMax;
   Gambit::Rational m_minValue, m_maxValue;
-  
+
   // Event handlers
   void OnChar(wxKeyEvent &);
 

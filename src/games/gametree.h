@@ -39,7 +39,7 @@ private:
   std::string m_label;
   GameTreeInfosetRep *m_infoset;
 
-  GameTreeActionRep(int p_number, const std::string &p_label, 
+  GameTreeActionRep(int p_number, const std::string &p_label,
 		    GameTreeInfosetRep *p_infoset)
     : m_number(p_number), m_label(p_label), m_infoset(p_infoset) { }
   ~GameTreeActionRep()   override = default;
@@ -72,10 +72,10 @@ protected:
   Array<GameTreeNodeRep *> m_members;
   int flag, whichbranch;
   Array<Number> m_probs;
-  
-  GameTreeInfosetRep(GameTreeRep *p_efg, int p_number, GamePlayerRep *p_player, 
+
+  GameTreeInfosetRep(GameTreeRep *p_efg, int p_number, GamePlayerRep *p_player,
 		 int p_actions);
-  ~GameTreeInfosetRep() override;  
+  ~GameTreeInfosetRep() override;
 
   /// Adds the node to the information set
   void AddMember(GameTreeNodeRep *p_node) { m_members.push_back(p_node); }
@@ -87,7 +87,7 @@ protected:
 public:
   Game GetGame() const override;
   int GetNumber() const override { return m_number; }
-  
+
   GamePlayer GetPlayer() const override;
   void SetPlayer(GamePlayer p) override;
 
@@ -95,7 +95,7 @@ public:
 
   void SetLabel(const std::string &p_label) override { m_label = p_label; }
   const std::string &GetLabel() const override { return m_label; }
-  
+
   GameAction InsertAction(GameAction p_where = nullptr) override;
 
   /// @name Actions
@@ -133,9 +133,9 @@ class GameTreeNodeRep : public GameNodeRep {
   friend class GamePlayerRep;
   friend class PureBehaviorProfile;
   template <class T> friend class MixedBehaviorProfile;
-  
+
 protected:
-  int number; 
+  int number;
   GameTreeRep *m_efg;
   std::string m_label;
   GameTreeInfosetRep *infoset;
@@ -151,9 +151,9 @@ protected:
   void CopySubtree(GameTreeNodeRep *, GameTreeNodeRep *);
 
 public:
-  Game GetGame() const override; 
+  Game GetGame() const override;
 
-  const std::string &GetLabel() const override { return m_label; } 
+  const std::string &GetLabel() const override { return m_label; }
   void SetLabel(const std::string &p_label) override { m_label = p_label; }
 
   int GetNumber() const override { return number; }
@@ -227,7 +227,7 @@ protected:
   void ClearComputedValues() const;
   //@}
 
-public: 
+public:
   /// @name Lifecycle
   //@{
   GameTreeRep();
@@ -250,7 +250,7 @@ public:
   /// @name Players
   //@{
   /// Returns the chance (nature) player
-  GamePlayer GetChance() const override { return m_chance; } 
+  GamePlayer GetChance() const override { return m_chance; }
   /// Creates a new player in the game, with no moves
   GamePlayer NewPlayer() override;
   //@}
@@ -258,7 +258,7 @@ public:
   /// @name Nodes
   //@{
   /// Returns the root node of the game
-  GameNode GetRoot() const override { return m_root; } 
+  GameNode GetRoot() const override { return m_root; }
   /// Returns the number of nodes in the game
   int NumNodes() const override;
   //@}
@@ -299,7 +299,7 @@ public:
 
   PureStrategyProfile NewPureStrategyProfile() const override;
   MixedStrategyProfile<double> NewMixedStrategyProfile(double) const override;
-  MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &) const override; 
+  MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &) const override;
   MixedStrategyProfile<double> NewMixedStrategyProfile(double, const StrategySupportProfile&) const override;
   MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &, const StrategySupportProfile&) const override;
 

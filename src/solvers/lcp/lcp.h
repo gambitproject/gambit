@@ -33,7 +33,7 @@ template <class T> class LemkeTableau;
 }
 
 namespace Nash {
- 
+
 template <class T> class NashLcpStrategySolver : public StrategySolver<T> {
 public:
   NashLcpStrategySolver(int p_stopAfter, int p_maxDepth,
@@ -84,9 +84,9 @@ private:
   void FillTableau(Matrix<T> &, const GameNode &, T,
 		   int, int, Solution &) const;
   void AllLemke(const Game &, int dup, linalg::LemkeTableau<T> &B,
-	       int depth, Matrix<T> &, Solution &) const; 
+	       int depth, Matrix<T> &, Solution &) const;
   void GetProfile(const linalg::LemkeTableau<T> &tab,
-		  MixedBehaviorProfile<T> &, const Vector<T> &, 
+		  MixedBehaviorProfile<T> &, const Vector<T> &,
 		  const GameNode &n, int, int,
 		  Solution &) const;
 };
@@ -105,5 +105,5 @@ LcpBehaviorSolveRational(const Game &p_game, int p_stopAfter, int p_maxDepth)
 
 }  // end namespace Nash
 }  // end namespace Gambit
- 
+
 #endif  // GAMBIT_NASH_LCP_H

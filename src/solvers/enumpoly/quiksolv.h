@@ -81,9 +81,9 @@ template <class T> class QuikSolv {
 
   // Get Roots Using Pelican
 
-  bool AllRealRootsFromPelican(const gPolyList<double> &, 
+  bool AllRealRootsFromPelican(const gPolyList<double> &,
 			             Gambit::List<Gambit::Vector<double> > &)         const;
-  bool PelicanRoots(const gRectangle<T> &, 
+  bool PelicanRoots(const gRectangle<T> &,
 		          Gambit::List<Gambit::Vector<double> > &)                    const;
 
   // Check whether roots are impossible
@@ -91,15 +91,15 @@ template <class T> class QuikSolv {
    bool SystemHasNoRootsIn(const gRectangle<double>& r, Gambit::Array<int>&)   const;
 
 
-  // Ask whether Newton's method leads to a root 
+  // Ask whether Newton's method leads to a root
 
-   bool NewtonRootInRectangle(  const gRectangle<double>&, 
+   bool NewtonRootInRectangle(  const gRectangle<double>&,
 			              Gambit::Vector<double>&) const;
-   bool NewtonRootNearRectangle(const gRectangle<double>&, 
+   bool NewtonRootNearRectangle(const gRectangle<double>&,
 			              Gambit::Vector<double>&) const;
 
 
-  // Ask whether we can prove that there is no root other than 
+  // Ask whether we can prove that there is no root other than
   // the one produced by the last step
 
    double MaxDistanceFromPointToVertexAfterTransformation(
@@ -114,14 +114,14 @@ template <class T> class QuikSolv {
 
   // Combine the last two steps into a single query
 
-   bool NewtonRootIsOnlyInRct(const gRectangle<double>&, 
+   bool NewtonRootIsOnlyInRct(const gRectangle<double>&,
 			            Gambit::Vector<double>&) const;
 
 
   // Recursive parts of recursive methods
 
   void               FindRootsRecursion(      Gambit::List<Gambit::Vector<double> >*,
-					const gRectangle<double>&, 
+					const gRectangle<double>&,
 					const int&,
 					      Gambit::Array<int>&,
 					      int &iterations,
@@ -131,7 +131,7 @@ template <class T> class QuikSolv {
 
   bool         ARootExistsRecursion(const gRectangle<double>&,
 					        Gambit::Vector<double>&,
-					  const gRectangle<double>&, 
+					  const gRectangle<double>&,
 					        Gambit::Array<int>&)        const;
 
  public:
@@ -142,7 +142,7 @@ template <class T> class QuikSolv {
     { return "Newton method failed to polish approximate root"; }
   };
    explicit QuikSolv(const gPolyList<T> &);
-   QuikSolv(const gPolyList<T> &, const int &);  
+   QuikSolv(const gPolyList<T> &, const int &);
    QuikSolv(const QuikSolv<T> &);
    ~QuikSolv();
 
@@ -152,9 +152,9 @@ template <class T> class QuikSolv {
    bool         operator!=(const QuikSolv<T> &) const;
 
    // Information
-   inline const gSpace*                  AmbientSpace()              const 
+   inline const gSpace*                  AmbientSpace()              const
      { return System.AmbientSpace(); }
-   inline const term_order*              TermOrder()                 const 
+   inline const term_order*              TermOrder()                 const
      { return System.TermOrder(); }
    inline int                      Dmnsn()                     const
      { return System.Dmnsn(); }
@@ -176,11 +176,11 @@ template <class T> class QuikSolv {
    bool     MightHaveSingularRoots()                                 const;
 
   // The grand calculation - returns true if successful
-   bool     FindCertainNumberOfRoots  (const gRectangle<T>&, 
+   bool     FindCertainNumberOfRoots  (const gRectangle<T>&,
 				       const int&,
 				       const int&);
    bool     FindRoots  (const gRectangle<T>&, const int&);
    bool     ARootExists (const gRectangle<T>&, Gambit::Vector<double>&)    const;
-};  
+};
 
 #endif // QUIKSOLV_H

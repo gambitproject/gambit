@@ -32,7 +32,7 @@ public:
   int ns1, ns2, ni1, ni2;
   Rational minpay;
   std::map<GameInfoset, int> infosetOffset;
-  
+
   explicit GameData(const Game &);
 
   void FillTableau(Matrix<T> &A, const GameNode &n, const T &prob,
@@ -126,7 +126,7 @@ NashLpBehavSolver<T>::SolveLP(const Matrix<T> &A,
 {
   linalg::LPSolve<T> LP(A, b, c, nequals);
   const auto& cbfs(LP.OptimumBFS());
-  
+
   for (int i = 1; i <= A.NumColumns(); i++) {
     p_primal[i] = (cbfs.count(i)) ? cbfs[i] : static_cast<T>(0);
   }
@@ -183,7 +183,7 @@ NashLpBehavSolver<T>::GameData::GetBehavior(MixedBehaviorProfile<T> &v,
 // Compute and print one equilibrium by solving a linear program based
 // on the sequence form representation of the game.
 //
-template <class T> List<MixedBehaviorProfile<T> > 
+template <class T> List<MixedBehaviorProfile<T> >
 NashLpBehavSolver<T>::Solve(const Game &p_game) const
 {
   if (p_game->NumPlayers() != 2) {
@@ -229,4 +229,3 @@ NashLpBehavSolver<T>::Solve(const Game &p_game) const
 
 template class NashLpBehavSolver<double>;
 template class NashLpBehavSolver<Rational>;
-

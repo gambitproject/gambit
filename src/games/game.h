@@ -80,7 +80,7 @@ public:
 class MismatchException : public Exception {
 public:
   ~MismatchException() noexcept override = default;
-  const char *what() const noexcept override  
+  const char *what() const noexcept override
   { return "Operation between objects in different games"; }
 };
 
@@ -176,7 +176,7 @@ protected:
 public:
   virtual Game GetGame() const = 0;
   virtual int GetNumber() const = 0;
-  
+
   virtual GamePlayer GetPlayer() const = 0;
   virtual void SetPlayer(GamePlayer p) = 0;
 
@@ -184,7 +184,7 @@ public:
 
   virtual void SetLabel(const std::string &p_label) = 0;
   virtual const std::string &GetLabel() const = 0;
-  
+
   virtual GameAction InsertAction(GameAction p_where = nullptr) = 0;
 
   /// @name Actions
@@ -211,7 +211,7 @@ public:
 /// \brief A strategy in a game.
 ///
 /// This class represents a strategy in a game.
-/// For strategic games, this object internally stores an offset.  
+/// For strategic games, this object internally stores an offset.
 /// This offset has the
 /// property that, for a strategy profile, adding the offsets of the
 /// strategies gives the index into the strategic game's table to
@@ -253,7 +253,7 @@ public:
   const std::string &GetLabel() const { return m_label; }
   /// Sets the text label associated with the strategy
   void SetLabel(const std::string &p_label) { m_label = p_label; }
-  
+
   /// Returns the player for whom this is a strategy
   GamePlayer GetPlayer() const;
   /// Returns the index of the strategy for its player
@@ -285,7 +285,7 @@ class GamePlayerRep : public GameObject {
   void MakeStrategy();
   void MakeReducedStrats(class GameTreeNodeRep *, class GameTreeNodeRep *);
   //@}
-  
+
 private:
   GameRep *m_game;
   int m_number;
@@ -293,7 +293,7 @@ private:
   Array<class GameTreeInfosetRep *> m_infosets;
   Array<GameStrategyRep *> m_strategies;
 
-  GamePlayerRep(GameRep *p_game, int p_id) 
+  GamePlayerRep(GameRep *p_game, int p_id)
     : m_game(p_game), m_number(p_id) { }
   GamePlayerRep(GameRep *p_game, int p_id, int m_strats);
   ~GamePlayerRep() override;
@@ -301,10 +301,10 @@ private:
 public:
   int GetNumber() const { return m_number; }
   Game GetGame() const;
-  
+
   const std::string &GetLabel() const { return m_label; }
   void SetLabel(const std::string &p_label) { m_label = p_label; }
-  
+
   bool IsChance() const { return (m_number == 0); }
 
   /// @name Information sets
@@ -319,7 +319,7 @@ public:
   /// @name Strategies
   //@{
   /// Returns the number of strategies available to the player
-  int NumStrategies() const; 
+  int NumStrategies() const;
   /// Returns the st'th strategy for the player
   GameStrategy GetStrategy(int st) const;
   /// Returns the array of strategies available to the player
@@ -342,7 +342,7 @@ protected:
   ~GameNodeRep() override = default;
 
 public:
-  virtual Game GetGame() const = 0; 
+  virtual Game GetGame() const = 0;
 
   virtual const std::string &GetLabel() const = 0;
   virtual void SetLabel(const std::string &p_label) = 0;
@@ -447,14 +447,14 @@ public:
   unsigned int GetVersion() const { return m_version; }
 
   /// Returns true if the game is constant-sum
-  virtual bool IsConstSum() const = 0; 
+  virtual bool IsConstSum() const = 0;
   /// Returns the smallest payoff in any outcome of the game
   virtual Rational GetMinPayoff(int pl = 0) const = 0;
   /// Returns the largest payoff in any outcome of the game
   virtual Rational GetMaxPayoff(int pl = 0) const = 0;
 
   /// Returns true if the game is perfect recall.  If not,
-  /// a pair of violating information sets is returned in the parameters.  
+  /// a pair of violating information sets is returned in the parameters.
   virtual bool IsPerfectRecall(GameInfoset &, GameInfoset &) const = 0;
   /// Returns true if the game is perfect recall
   bool IsPerfectRecall() const
@@ -494,7 +494,7 @@ public:
 
   virtual PureStrategyProfile NewPureStrategyProfile() const = 0;
   virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double) const = 0;
-  virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &) const = 0; 
+  virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &) const = 0;
   virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double, const StrategySupportProfile&) const = 0;
   virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &, const StrategySupportProfile&) const = 0;
 
@@ -504,7 +504,7 @@ public:
   virtual int NumPlayers() const = 0;
   /// Returns the pl'th player in the game
   virtual GamePlayer GetPlayer(int pl) const = 0;
-  /// Returns the set of players in the game 
+  /// Returns the set of players in the game
   virtual Array<GamePlayer> GetPlayers() const;
   /// Returns the chance (nature) player
   virtual GamePlayer GetChance() const = 0;
@@ -583,9 +583,9 @@ inline void GameOutcomeRep::SetPayoff(const GamePlayer &p_player, const Number &
 inline GamePlayer GameStrategyRep::GetPlayer() const { return m_player; }
 
 inline Game GamePlayerRep::GetGame() const { return m_game; }
-inline int GamePlayerRep::NumStrategies() const 
+inline int GamePlayerRep::NumStrategies() const
 { m_game->BuildComputedValues(); return m_strategies.size(); }
-inline GameStrategy GamePlayerRep::GetStrategy(int st) const 
+inline GameStrategy GamePlayerRep::GetStrategy(int st) const
 { m_game->BuildComputedValues(); return m_strategies[st]; }
 
 //=======================================================================

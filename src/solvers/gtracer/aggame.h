@@ -98,5 +98,5 @@ class aggame : public gnmgame {
 
 }  // end namespace Gambit::gametracer
 }  // end namespace Gambit
- 
+
 #endif  // GAMBIT_GTRACER_AGGAME_H

@@ -7,4 +7,3 @@ include src/pygambit/*.pyx
 include src/pygambit/*.pxi
 include src/pygambit/*.h
 include src/README.rst
-

@@ -48,7 +48,7 @@ template <class T> class gIdeal {
    const gSpace*      Space;
    const term_order*  order;
          gPolyList<T> basis;
-   
+
  public:
   gIdeal(const gSpace *, const term_order *); // Null gIdeal constructor
   gIdeal(const gSpace *, const term_order *,
@@ -82,6 +82,6 @@ template <class T> class gIdeal {
    bool ZeroDimensional()    const;
    bool IsEntireRing()       const;
    bool Contains(gPoly<T> &) const;
-};  
+};
 
 #endif //# IDEAL_H

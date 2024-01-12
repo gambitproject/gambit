@@ -45,7 +45,7 @@ private:
   // Overriding wxSheet members for data access
   wxString GetCellValue(const wxSheetCoords &) override;
   wxSheetCellAttr GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const override;
-  
+
   // Overriding wxSheet members to disable selection behavior
   bool SelectRow(int, bool = false, bool = false) override
     { return false; }
@@ -71,8 +71,8 @@ public:
   void AddProfile(const wxString &p_text, bool p_forceShow);
 };
 
-gbtLogitBehavList::gbtLogitBehavList(wxWindow *p_parent, 
-				     gbtGameDocument *p_doc) 
+gbtLogitBehavList::gbtLogitBehavList(wxWindow *p_parent,
+				     gbtGameDocument *p_doc)
   : wxSheet(p_parent, wxID_ANY), m_doc(p_doc)
 {
   CreateGrid(0, 0);
@@ -94,7 +94,7 @@ wxString gbtLogitBehavList::GetCellValue(const wxSheetCoords &p_coords)
     }
     else {
       Gambit::GameAction action = m_doc->GetGame()->GetAction(p_coords.GetCol());
-      return (wxString::Format(wxT("%d: "), 
+      return (wxString::Format(wxT("%d: "),
 			       action->GetInfoset()->GetNumber())+
 	      wxString(action->GetLabel().c_str(), *wxConvCurrent));
     }
@@ -112,7 +112,7 @@ wxString gbtLogitBehavList::GetCellValue(const wxSheetCoords &p_coords)
   else {
     auto profile = m_profiles[p_coords.GetRow()+1];
     return wxString(Gambit::lexical_cast<std::string>((*profile)[p_coords.GetCol()],
-				   m_doc->GetStyle().NumDecimals()).c_str(), 
+				   m_doc->GetStyle().NumDecimals()).c_str(),
 		    *wxConvCurrent);
   }
 }
@@ -125,7 +125,7 @@ static wxColour GetPlayerColor(gbtGameDocument *p_doc, int p_index)
   return p_doc->GetStyle().GetPlayerColor(action->GetInfoset()->GetPlayer()->GetNumber());
 }
 
-wxSheetCellAttr gbtLogitBehavList::GetAttr(const wxSheetCoords &p_coords, 
+wxSheetCellAttr gbtLogitBehavList::GetAttr(const wxSheetCoords &p_coords,
 					   wxSheetAttr_Type) const
 {
   if (IsRowLabelCell(p_coords)) {
@@ -150,7 +150,7 @@ wxSheetCellAttr gbtLogitBehavList::GetAttr(const wxSheetCoords &p_coords,
   }
 
   wxSheetCellAttr attr(GetSheetRefData()->m_defaultGridCellAttr);
-  attr.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL)); 
+  attr.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
   attr.SetAlignment(wxALIGN_RIGHT, wxALIGN_CENTER);
   attr.SetOrientation(wxHORIZONTAL);
   if (p_coords.GetCol() > 0) {
@@ -167,7 +167,7 @@ wxSheetCellAttr gbtLogitBehavList::GetAttr(const wxSheetCoords &p_coords,
     attr.SetForegroundColour(*wxBLACK);
     attr.SetBackgroundColour(wxColour(250, 250, 250));
   }
-			   
+
   attr.SetReadOnly(true);
   return attr;
 }
@@ -212,7 +212,7 @@ END_EVENT_TABLE()
 
 #include "bitmaps/stop.xpm"
 
-gbtLogitBehavDialog::gbtLogitBehavDialog(wxWindow *p_parent, 
+gbtLogitBehavDialog::gbtLogitBehavDialog(wxWindow *p_parent,
 					 gbtGameDocument *p_doc)
   : wxDialog(p_parent, wxID_ANY, wxT("Compute quantal response equilibria"),
 	     wxDefaultPosition),
@@ -240,7 +240,7 @@ gbtLogitBehavDialog::gbtLogitBehavDialog(wxWindow *p_parent,
   sizer->Add(m_behavList, 0, wxALL | wxALIGN_CENTER, 5);
 
   auto *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
-  m_saveButton = new wxButton(this, wxID_SAVE, 
+  m_saveButton = new wxButton(this, wxID_SAVE,
 			      wxT("Save correspondence to .csv file"));
   m_saveButton->Enable(false);
   buttonSizer->Add(m_saveButton, 0, wxALL | wxALIGN_CENTER, 5);
@@ -266,14 +266,14 @@ void gbtLogitBehavDialog::Start()
 #ifdef __WXMAC__
   m_pid = wxExecute(wxStandardPaths::Get().GetExecutablePath() + wxT("-logit"),
 		    wxEXEC_ASYNC, m_process);
-#else	
+#else
   m_pid = wxExecute(wxT("gambit-logit"), wxEXEC_ASYNC, m_process);
 #endif // __WXMAC__
-  
+
   std::ostringstream s;
   m_doc->GetGame()->Write(s, "efg");
   wxString str(wxString(s.str().c_str(), *wxConvCurrent));
-  
+
   // It is possible that the whole string won't write on one go, so
   // we should take this possibility into account.  If the write doesn't
   // complete the whole way, we take a 100-millisecond siesta and try

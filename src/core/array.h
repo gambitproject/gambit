@@ -102,7 +102,7 @@ public:
   //@{
   /// Constructs an array of length 'len', starting at '1'
   explicit Array(unsigned int len = 0)
-    : mindex(1), maxdex(len), data((len) ? new T[len] - 1 : 0) { } 
+    : mindex(1), maxdex(len), data((len) ? new T[len] - 1 : 0) { }
   /// Constructs an array starting at lo and ending at hi
   Array(int lo, int hi) : mindex(lo), maxdex(hi)
   {
@@ -134,7 +134,7 @@ public:
 	mindex = a.mindex;   maxdex = a.maxdex;
 	data = (maxdex >= mindex) ? new T[maxdex - mindex + 1] - mindex : 0;
       }
-      
+
       for (int i = mindex; i <= maxdex; i++) data[i] = a.data[i];
     }
 
@@ -165,7 +165,7 @@ public:
   int Length() const  { return maxdex - mindex + 1; }
 
   /// Return the first index
-  int First() const { return mindex; } 
+  int First() const { return mindex; }
 
   /// Return the last index
   int Last() const { return maxdex; }
@@ -184,7 +184,7 @@ public:
   const_iterator cend() const   { return const_iterator(this, maxdex + 1); }
 
   /// Access the index'th entry in the array
-  const T &operator[](int index) const 
+  const T &operator[](int index) const
   {
     if (index < mindex || index > maxdex)  throw IndexException();
     return data[index];
@@ -203,7 +203,7 @@ public:
     int i;
     for (i = this->mindex; i <= this->maxdex && this->data[i] != t; i++);
     return (i <= this->maxdex) ? i : (mindex-1);
-  } 
+  }
 
   /// Return true if the element is currently residing in the array
   bool Contains(const T &t) const
@@ -233,7 +233,7 @@ public:
 
     T ret(this->data[n]);
     T *new_data = (--this->maxdex>=this->mindex) ? new T[this->maxdex-this->mindex+1] - this->mindex : 0;
-    
+
     int i;
     for (i = this->mindex; i < n; i++) new_data[i] = this->data[i];
     for (; i <= this->maxdex; i++)     new_data[i] = this->data[i + 1];
@@ -264,7 +264,7 @@ public:
   const T &back() const  { return data[maxdex]; }
   /// Access last element.
   T &back()              { return data[maxdex]; }
-  
+
   /// Adds a new element at the end of the array container, after its
   /// current last element.
   void push_back(const T &val) { InsertAt(val, this->maxdex + 1); }

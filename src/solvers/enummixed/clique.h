@@ -20,9 +20,9 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-//  connected components and their maximal cliques in bipartite graphs 
+//  connected components and their maximal cliques in bipartite graphs
 //  Bernhard von Stengel
-// 
+//
 //  update 15 August 1998:
 //
 //    - candidate passed to  candtry12  without  poscand,  similarly
@@ -31,11 +31,11 @@
 //
 //    - if CAND1 and CLIQUE1 both empty, terminate search;
 //      dito CAND2 and CLIQUE2
-//    - outgraph left in;  
-//    
+//    - outgraph left in;
+//
 //    8 March 1998
 //
-//    For a bipartite graph given as a set of pairs  (i,j), it outputs 
+//    For a bipartite graph given as a set of pairs  (i,j), it outputs
 //    - the connected components of that graph, and for each component
 //    - the maximal product sets   U x V
 //      so that all  (i,j)  in U x V  are edges of the graph
@@ -49,7 +49,7 @@
 //    On standard output,
 //    a headline for each connected component, then
 //    the cliques  U x V  listing  U  and  V  separately as lists
-//    of integers, separated by  "x"  and each set enclosed in braces, 
+//    of integers, separated by  "x"  and each set enclosed in braces,
 //    one clique per line.
 //
 //    METHOD:
@@ -99,14 +99,14 @@
 //
 //    A possible improvement is to keep extra lists of the
 //    equivalence classes for the nodes for each component so only
-//    these have to be updated, which makes it faster.  
-//    
+//    these have to be updated, which makes it faster.
+//
 //    b) Clique enumeration
 //
 //    The procedure  extend  recursively extends a current set of pairs
 //    clique1, clique2  that eventually will form a maximal clique.
 //    In [BK], this is only a single set  COMPSUB (here called CLIQUE),
-//    here two sets are used since the graph is bipartite.  
+//    here two sets are used since the graph is bipartite.
 //    Cliques of a bipartite graph are equivalent to the cliques of
 //    the ordinary graph obtained by connecting all left nodes by
 //    themselves and all right nodes by themselves, except for
@@ -118,14 +118,14 @@
 //    to the recursive call.  The top of the stack  tos  is passed
 //    as a parameter.
 //
-//    The extension is done by adding points from a set CAND of 
+//    The extension is done by adding points from a set CAND of
 //    candidates to CLIQUE.  Throughout, the points in CAND are
 //    connected to all points in  CLIQUE,  which holds at initialization
-//    when CAND contains all points and CLIQUE is empty.  
+//    when CAND contains all points and CLIQUE is empty.
 //
 //    Traversing the backtracking tree:  Extending its depth is
 //    done by picking  c  (cand  in the code below) from CAND,
-//    adding  c  to CLIQUE, removing all points not connected to  c 
+//    adding  c  to CLIQUE, removing all points not connected to  c
 //    from CAND, and handing the new sets CLIQUE and CAND
 //    to the recursive call.
 //    For extending the backtracking tree in its breadth, this is
@@ -134,10 +134,10 @@
 //    return from the recursive call).  In order to avoid the output
 //    of cliques that are not maximal, an additional set NOT is passed
 //    down as a parameter to the recursive call of  extend.
-//    This set NOT contains candidates  c  that 
+//    This set NOT contains candidates  c  that
 //    - are all connected to the elements in CLIQUE but
 //    - have already been tried out, that is, all extensions of CLIQUE
-//      containing any point in NOT have already been generated [BK, p.577].  
+//      containing any point in NOT have already been generated [BK, p.577].
 //
 //    Hence, the recursive call proceeds downwards by
 //    - removing  c  from CAND and adding it to CLIQUE
@@ -157,7 +157,7 @@
 //    are added.  Their number is the smallest possible.
 //
 //    This is version2 of the algorithm in [BK]:
-//    a - pick  fixp  in NOT or CAND  with the smallest number of 
+//    a - pick  fixp  in NOT or CAND  with the smallest number of
 //        disconnections to the other nodes in CAND,
 //    b - if  fixp  is a candidate, try it out as a candidate, i.e.
 //        extend  CLIQUE  with  fixp  (procedures  candtry  below),
@@ -192,9 +192,9 @@ const int MAXN = MAXM;    // max. no of right nodes for incidence matrix
 // #define MAXEDGES   50000       // max. no of edges in input
 // #define MAXCO  MIN(MAXINP1, MAXINP2) + 1
   // max. no of connected components;  on the smaller side,
-  // each node could be in different component 
+  // each node could be in different component
 const int STKSIZE = (MAXM + 1) * (MAXN + 1);
-  // largest stack usage for full graph 
+  // largest stack usage for full graph
 
 
 class CliqueEnumerator {
@@ -205,8 +205,8 @@ public:
     int node2;
     int nextedge;
     Edge() = default;
-    ~Edge() = default; 
-    bool operator==(const Edge &y) const 
+    ~Edge() = default;
+    bool operator==(const Edge &y) const
     { return (node1 == y.node1 && node2 == y.node2); }
     bool operator!=(const Edge &y) const
     { return !(*this == y); }
@@ -223,47 +223,47 @@ private:
   int maxinp1,maxinp2;
   List<Array<int> > m_cliques1, m_cliques2;
 
-  void candtry1 (int stk[], // stack 
+  void candtry1 (int stk[], // stack
 	 bool connected[MAXM][MAXN],
-	 int cand,  // the candidate from NODES1  to be added to CLIQUE	 
-	 int clique1[], int cliqsize1,  // CLIQUE so far in NODES1 
-	 int clique2[], int cliqsize2,  // CLIQUE so far in NODES2 
-	 int sn1, int *sc1, int ec1,   // start NOT1, start CAND1, end CAND1 
-	 int sn2, int sc2, int ec2,   // start NOT2, start CAND2, end CAND2 
-	 int tos,  // top of stack 
+	 int cand,  // the candidate from NODES1  to be added to CLIQUE
+	 int clique1[], int cliqsize1,  // CLIQUE so far in NODES1
+	 int clique2[], int cliqsize2,  // CLIQUE so far in NODES2
+	 int sn1, int *sc1, int ec1,   // start NOT1, start CAND1, end CAND1
+	 int sn2, int sc2, int ec2,   // start NOT2, start CAND2, end CAND2
+	 int tos,  // top of stack
 	 int orignode1[],
 	 int orignode2[]
          );
-  void candtry2 (int stk[], // stack 
+  void candtry2 (int stk[], // stack
 	 bool connected[MAXM][MAXN],
-	 int cand,  // the candidate from NODES2  to be added to CLIQUE 
-	 int clique1[], int cliqsize1,  // CLIQUE so far in NODES1 
-	 int clique2[], int cliqsize2,  // CLIQUE so far in NODES2 
-	 int sn1, int sc1, int ec1,   // start NOT1, start CAND1, end CAND1 
-	 int sn2, int *sc2, int ec2,   // start NOT2, start CAND2, end CAND2 
-	 int tos,  // top of stack 
+	 int cand,  // the candidate from NODES2  to be added to CLIQUE
+	 int clique1[], int cliqsize1,  // CLIQUE so far in NODES1
+	 int clique2[], int cliqsize2,  // CLIQUE so far in NODES2
+	 int sn1, int sc1, int ec1,   // start NOT1, start CAND1, end CAND1
+	 int sn2, int *sc2, int ec2,   // start NOT2, start CAND2, end CAND2
+	 int tos,  // top of stack
 	 int orignode1[MAXM],
 	 int orignode2[MAXN]);
-  void extend (int stk[], // stack 
+  void extend (int stk[], // stack
        bool connected[MAXM][MAXN],
-       int clique1[], int cliqsize1,  // CLIQUE so far in NODES1 
-       int clique2[], int cliqsize2,  // CLIQUE so far in NODES2 
-       int sn1, int sc1, int ec1,   // start NOT1, start CAND1, end CAND1 
-       int sn2, int sc2, int ec2,   // start NOT2, start CAND2, end CAND2 
-       int tos,   // top of stack,   tos >= ec1, ec2  
-       int orignode1[MAXM],   // original node numbers as input 
+       int clique1[], int cliqsize1,  // CLIQUE so far in NODES1
+       int clique2[], int cliqsize2,  // CLIQUE so far in NODES2
+       int sn1, int sc1, int ec1,   // start NOT1, start CAND1, end CAND1
+       int sn2, int sc2, int ec2,   // start NOT2, start CAND2, end CAND2
+       int tos,   // top of stack,   tos >= ec1, ec2
+       int orignode1[MAXM],   // original node numbers as input
        int orignode2[MAXN]);
-  void findfixpoint(int stk[], // stack 
+  void findfixpoint(int stk[], // stack
 	    bool connected[MAXM][MAXN],
-	    int *savelist,      // position of savelist on the stack 
-	    int *tmplist,       // position of tmplist on the stack 
-	    int *minnod,        // currently lowest no. of disconnections 
+	    int *savelist,      // position of savelist on the stack
+	    int *tmplist,       // position of tmplist on the stack
+	    int *minnod,        // currently lowest no. of disconnections
 	    int sninspect, int ecinspect,
 	    int scother, int ecother,
-	    bool binspect1,  // inspected nodes are in class1, o/w class2 
-	    bool *bfound,  // a new lower no. of disconnections was found 
-	    int *fixp,     // the new fixpoint, if *bfound = true  
-	    int *posfix);    // position of fixpoint on the stack, if *bfound 
+	    bool binspect1,  // inspected nodes are in class1, o/w class2
+	    bool *bfound,  // a new lower no. of disconnections was found
+	    int *fixp,     // the new fixpoint, if *bfound = true
+	    int *posfix);    // position of fixpoint on the stack, if *bfound
 
   void genincidence(int e,
 		    Array<Edge> &edgelist,
@@ -274,7 +274,7 @@ private:
 		    int *n);
   int getconnco(Array<int> &firstedge,
 		Array<Edge> &edgelist);
-  void outCLIQUE(int clique1[], int cliqsize1, 
+  void outCLIQUE(int clique1[], int cliqsize1,
 		 int clique2[], int cliqsize2,
 		 int orignode1[MAXM],
 		 int orignode2[MAXN]);
@@ -288,5 +288,3 @@ private:
 } // end namespace Gambit
 
 #endif // GAMBIT_ENUMMIXED_CLIQUE_H
-
-

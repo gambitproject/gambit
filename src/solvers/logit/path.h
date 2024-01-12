@@ -86,7 +86,7 @@ public:
     void operator()(const Vector<double> &p_point,
 			    bool p_isTerminal) const override { }
   };
-  
+
 
   void SetMaxDecel(double p_maxDecel) { m_maxDecel = p_maxDecel; }
   double GetMaxDecel() const { return m_maxDecel; }
@@ -96,7 +96,7 @@ public:
 
 protected:
   PathTracer() : m_maxDecel(1.1), m_hStart(0.03)
-    { } 
+    { }
   virtual ~PathTracer() = default;
 
   void TracePath(const EquationSystem &p_system,
@@ -109,5 +109,5 @@ private:
 };
 
 }  // end namespace Gambit
- 
+
 #endif  // PATH_H

@@ -29,7 +29,7 @@
     polynomial
 
 These are univariate polynomials with coefficients of class T.
-Polynomials are implemented as Gambit::List's of coefficients.  There is no 
+Polynomials are implemented as Gambit::List's of coefficients.  There is no
 attempt to maintain sparseness.
 
 */
@@ -37,9 +37,9 @@ attempt to maintain sparseness.
 template <class T> class polynomial {
 
 private:
-  Gambit::List<T> coeflist; 
+  Gambit::List<T> coeflist;
 
-public: 
+public:
     // constructors and destructor
   explicit polynomial(int=-1);
   polynomial(const polynomial<T> &);
@@ -75,7 +75,7 @@ public:
 
   // information
   bool                   IsZero()                                     const;
-  T                      EvaluationAt(const T& arg)                   const;  
+  T                      EvaluationAt(const T& arg)                   const;
   int                    Degree()                                     const;
   T                      LeadingCoefficient()                         const;
   Gambit::List<T> CoefficientList()                            const;
@@ -108,9 +108,9 @@ and the RHS will be positive whenever
 class complexpoly {
 
 private:
-  Gambit::List<gComplex> coeflist; 
+  Gambit::List<gComplex> coeflist;
 
-public: 
+public:
     // constructors and destructor
   explicit complexpoly(int=-1);
   complexpoly(const complexpoly &);
@@ -136,13 +136,13 @@ public:
   complexpoly&            operator *= (const complexpoly& y);
   complexpoly&            operator /= (const complexpoly& y);
   complexpoly             operator %  (const complexpoly& y) const;
-  
+
   // manipulation
   void                   ToMonic()                                         ;
 
   // information
   bool                   IsZero()                                     const;
-  gComplex               EvaluationAt(const gComplex& arg)            const;  
+  gComplex               EvaluationAt(const gComplex& arg)            const;
   int                    Degree()                                     const;
   gComplex               LeadingCoefficient()                         const;
   complexpoly            GcdWith(const complexpoly&)                  const;
@@ -150,9 +150,3 @@ public:
   Gambit::List<gComplex>        Roots()                                      const;
 
 };
-
-
-
-
-
-

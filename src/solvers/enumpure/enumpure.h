@@ -31,7 +31,7 @@ namespace Nash {
 ///
 /// Enumerate pure-strategy Nash equilibria of a game.  By definition,
 /// pure-strategy equilibrium uses the strategic representation of a game.
-/// 
+///
 class EnumPureStrategySolver : public StrategySolver<Rational> {
 public:
   explicit EnumPureStrategySolver(std::shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = nullptr)
@@ -79,7 +79,7 @@ public:
   List<MixedBehaviorProfile<Rational> > Solve(const Game &) const override;
 };
 
-inline List<MixedBehaviorProfile<Rational> > 
+inline List<MixedBehaviorProfile<Rational> >
 EnumPureAgentSolver::Solve(const Game &p_game) const
 {
   List<MixedBehaviorProfile<Rational> > solutions;
@@ -101,5 +101,5 @@ inline List<MixedBehaviorProfile<Rational> > EnumPureAgentSolve(const Game &p_ga
 
 }  // end namespace Nash
 }  // end namespace Gambit
- 
+
 #endif  // GAMBIT_NASH_ENUMPURE_H

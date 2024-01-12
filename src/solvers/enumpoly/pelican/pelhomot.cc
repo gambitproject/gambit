@@ -1,7 +1,7 @@
 /* Homotopies.c */
 
 /*
-  This is the implementation code from the various files that used 
+  This is the implementation code from the various files that used
 to reside in the Cont subdirectory of Pelican0.80/source.
 */
 
@@ -37,31 +37,31 @@ double coord_r, coord_i;
 static integer c_4 = 4;
 static integer c_1 = 1;
 
-/* Subroutine */ int fixpnf_0_(int     n_, 
-			       int    *n, 
-			       double *y, 
-			       int    *iflag, 
-			       double *arcre, 
-			       double *arcae, 
-			       double *ansre, 
-			       double *ansae, 
-			       int    *trace, 
-			       double *a, 
-			       int    *nfe, 
-			       double *arclen, 
-			       double *yp, 
-			       double *yold, 
-			       double *ypold, 
-			       double *qr, 
-			       double *alpha, 
-			       double *tz, 
-			       int    *pivot, 
-			       double *w, 
-			       double *wp, 
-			       double *z0, 
-			       double *z1, 
-			       double *sspar, 
-			       double *par, 
+/* Subroutine */ int fixpnf_0_(int     n_,
+			       int    *n,
+			       double *y,
+			       int    *iflag,
+			       double *arcre,
+			       double *arcae,
+			       double *ansre,
+			       double *ansae,
+			       int    *trace,
+			       double *a,
+			       int    *nfe,
+			       double *arclen,
+			       double *yp,
+			       double *yold,
+			       double *ypold,
+			       double *qr,
+			       double *alpha,
+			       double *tz,
+			       int    *pivot,
+			       double *w,
+			       double *wp,
+			       double *z0,
+			       double *z1,
+			       double *sspar,
+			       double *par,
 			       int    *ipar,
 
 			       int    tweak) /* added to adjust step size */
@@ -78,8 +78,8 @@ static integer c_1 = 1;
     static int nfec;
     static double hold;
     static int iter;
-    extern double dnrm2_(integer    *n, 
-			 doublereal *dx, 
+    extern double dnrm2_(integer    *n,
+			 doublereal *dx,
 			 integer    *incx);
     static double h, s;
     static long int crash;
@@ -88,52 +88,52 @@ static integer c_1 = 1;
     static long int start;
     static int nc, iflagc, jw;
     static double abserr, relerr;
-    extern /* Subroutine */ int stepnf_(integer    *n, 
-					integer    *nfe, 
-					integer    *iflag, 
-					logical    *start, 
-					logical    *crash, 
-					doublereal *hold, 
-					doublereal *h, 
-					doublereal *relerr, 
-					doublereal *abserr, 
-					doublereal *s, 
-					doublereal *y, 
-					doublereal *yp, 
-					doublereal *yold, 
-					doublereal *ypold, 
-					doublereal *a, 
-					doublereal *qr, 
-					doublereal *alpha, 
-					doublereal *tz, 
-					integer    *pivot, 
-					doublereal *w, 
-					doublereal *wp, 
-					doublereal *z0, 
+    extern /* Subroutine */ int stepnf_(integer    *n,
+					integer    *nfe,
+					integer    *iflag,
+					logical    *start,
+					logical    *crash,
+					doublereal *hold,
+					doublereal *h,
+					doublereal *relerr,
+					doublereal *abserr,
+					doublereal *s,
+					doublereal *y,
+					doublereal *yp,
+					doublereal *yold,
+					doublereal *ypold,
+					doublereal *a,
+					doublereal *qr,
+					doublereal *alpha,
+					doublereal *tz,
+					integer    *pivot,
+					doublereal *w,
+					doublereal *wp,
+					doublereal *z0,
 					doublereal *z1,
-					doublereal *sspar, 
-					doublereal *par, 
+					doublereal *sspar,
+					doublereal *par,
 					integer    *ipar);
 
     static double curtol;
 
-    extern /* Subroutine */ int rootnf_(int    *n, 
-					int    *nfe, 
-					int    *iflag, 
+    extern /* Subroutine */ int rootnf_(int    *n,
+					int    *nfe,
+					int    *iflag,
 					double *relerr,
 					double *abserr,
 					double *y,
-					double *yp, 
-					double *yold, 
-					double *ypold, 
+					double *yp,
+					double *yold,
+					double *ypold,
 					double *a,
-					double *qr, 
-					double *alpha, 
-					double *tz, 
-					int    *pivot, 
-					double *w, 
-					double *wp, 
-					double *par, 
+					double *qr,
+					double *alpha,
+					double *tz,
+					int    *pivot,
+					double *w,
+					double *wp,
+					double *par,
 					int    *ipar);
     static int np1;
     static long int polsys;
@@ -337,13 +337,13 @@ static integer c_1 = 1;
 /* LIMITD  IS AN UPPER BOUND ON THE NUMBER OF STEPS.  IT MAY BE */
 /* CHANGED BY CHANGING THE FOLLOWING PARAMETER STATEMENT: */
 
-/* SWITCH FROM THE TOLERANCE  ARC?E  TO THE (FINER) TOLERANCE  ANS?E  IF 
+/* SWITCH FROM THE TOLERANCE  ARC?E  TO THE (FINER) TOLERANCE  ANS?E  IF
 */
 /* THE CURVATURE OF ANY COMPONENT OF  Y  EXCEEDS  CURSW. */
 
 
 
-/* :  :  :  :  :  :  :  :  :  :  :  :  :  :  :  :  :  :  :  :  :  :  :  : 
+/* :  :  :  :  :  :  :  :  :  :  :  :  :  :  :  :  :  :  :  :  :  :  :  :
 */
 /* SET LOGICAL SWITCH TO REFLECT ENTRY POINT. */
     /* Parameter adjustments */
@@ -461,11 +461,11 @@ L20:
 
     /* Adjustments of step size */
     if (tweak == 1)
-      sspar[5] = (float).1; 
+      sspar[5] = (float).1;
     else if (tweak == 2)
       sspar[5] = (float).01;
     else if (tweak == 3)
-      sspar[5] = (float).001; 
+      sspar[5] = (float).001;
 
 
 /* LOAD  A  FOR THE FIXED POINT AND ZERO FINDING PROBLEMS. */
@@ -501,7 +501,7 @@ L120:
 	    return 0;
 	}
 
-/* SET DIFFERENT ERROR TOLERANCE IF THE TRAJECTORY Y(S) HAS ANY HIGH 
+/* SET DIFFERENT ERROR TOLERANCE IF THE TRAJECTORY Y(S) HAS ANY HIGH
 */
 /* CURVATURE COMPONENTS. */
 /* L140: */
@@ -520,30 +520,30 @@ L120:
 
 /* TAKE A STEP ALONG THE CURVE. */
 L200:
-	stepnf_((integer *)&nc, (integer *)&nfec, (integer *)&iflagc, &start, 
-		&crash, &hold, &h, &relerr, &abserr, 
+	stepnf_((integer *)&nc, (integer *)&nfec, (integer *)&iflagc, &start,
+		&crash, &hold, &h, &relerr, &abserr,
 		&s, &y[1], &yp[1], &yold[1], &ypold[1], &a[1], &qr[
-		qr_offset], &alpha[1], &tz[1], (integer *)&pivot[1], 
+		qr_offset], &alpha[1], &tz[1], (integer *)&pivot[1],
 		&w[1], &wp[1], &z0[
 		1], &z1[1], &sspar[1], &par[1], (integer *)&ipar[1]);
 /* PRINT LATEST POINT ON CURVE IF REQUESTED. */
-	if (*trace > 0) { 
+	if (*trace > 0) {
      print_homog(y+2,&coord_r, &coord_i);
-#ifdef HOM_PRINT    
+#ifdef HOM_PRINT
  fprintf(Hom_LogFile,"C %g %g",coord_r,coord_i)
 #endif
-; 
+;
      for(jw=2; jw<=np1; jw++){
       #ifdef HOM_PRINT
    fprintf(Hom_LogFile," %d = %g",jw,y[jw])
 #endif
 ;
      }
-#ifdef HOM_PRINT  
+#ifdef HOM_PRINT
    fprintf(Hom_LogFile," %g",y[1])
 #endif
 ;
-     } 
+     }
 #ifdef HOM_PRINT
      fprintf(Hom_LogFile," 4 0 %d %d %f\n",iter,nfec,s)
 #endif
@@ -594,7 +594,7 @@ L200:
 
 	    *nfe = nfec;
 	    *iflag = 1;
-/* SET ERROR FLAG IF  ROOTNF  COULD NOT GET THE POINT ON THE ZERO 
+/* SET ERROR FLAG IF  ROOTNF  COULD NOT GET THE POINT ON THE ZERO
 */
 /* CURVE AT  LAMBDA = 1.0  . */
 	    if (iflagc > 0) {
@@ -611,7 +611,7 @@ L200:
 	}
 
 /* FOR POLYNOMIAL SYSTEMS AND THE  POLSYS  HOMOTOPY MAP, */
-/* D LAMBDA/DS .GE. 0 NECESSARILY.  THIS CONDITION IS FORCED HERE IF 
+/* D LAMBDA/DS .GE. 0 NECESSARILY.  THIS CONDITION IS FORCED HERE IF
 */
 /* THE ENTRY POINT WAS  POLYNF . */
 
@@ -642,68 +642,68 @@ P ONLY. */
 
 } /* fixpnf_ */
 
-/* Subroutine */ int fixpnf_(int    *n, 
-			     double *y, 
-			     int    *iflag, 
-			     double *arcre, 
-			     double *arcae, 
-			     double *ansre, 
-			     double *ansae, 
-			     int    *trace, 
-			     double *a, 
-			     int    *nfe, 
-			     double *arclen, 
-			     double *yp, 
-			     double *yold, 
-			     double *ypold, 
-			     double *qr, 
-			     double *alpha, 
-			     double *tz, 
-			     int    *pivot, 
-			     double *w, 
-			     double *wp, 
-			     double *z0, 
-			     double *z1, 
-			     double *sspar, 
-			     double *par, 
+/* Subroutine */ int fixpnf_(int    *n,
+			     double *y,
+			     int    *iflag,
+			     double *arcre,
+			     double *arcae,
+			     double *ansre,
+			     double *ansae,
+			     int    *trace,
+			     double *a,
+			     int    *nfe,
+			     double *arclen,
+			     double *yp,
+			     double *yold,
+			     double *ypold,
+			     double *qr,
+			     double *alpha,
+			     double *tz,
+			     int    *pivot,
+			     double *w,
+			     double *wp,
+			     double *z0,
+			     double *z1,
+			     double *sspar,
+			     double *par,
 			     int    *ipar,
 
 			     int    tweak)
 {
-    return fixpnf_0_(0, n, y, iflag, arcre, arcae, ansre, ansae, trace, a, 
+    return fixpnf_0_(0, n, y, iflag, arcre, arcae, ansre, ansae, trace, a,
 	    nfe, arclen, yp, yold, ypold, qr, alpha, tz, pivot, w, wp, z0, z1,
 	     sspar, par, ipar, tweak);
     }
 
-/* Subroutine */ int polynf_(int    *n, 
-			     double *y, 
-			     int    *iflag, 
-			     double *arcre, 
-			     double *arcae, 
-			     double *ansre, 
-			     double *ansae, 
-			     int    *trace, 
-			     double *a, 
-			     int    *nfe, 
-			     double *arclen, 
-			     double *yp, 
-			     double *yold, 
-			     double *ypold, 
-			     double *qr, 
-			     double *alpha, 
-			     double *tz, 
-			     int    *pivot, 
-			     double *w, 
-			     double *wp, 
-			     double *z0, 
-			     double *z1, 
-			     double *sspar, 
-			     double *par, 
+/* Subroutine */ int polynf_(int    *n,
+			     double *y,
+			     int    *iflag,
+			     double *arcre,
+			     double *arcae,
+			     double *ansre,
+			     double *ansae,
+			     int    *trace,
+			     double *a,
+			     int    *nfe,
+			     double *arclen,
+			     double *yp,
+			     double *yold,
+			     double *ypold,
+			     double *qr,
+			     double *alpha,
+			     double *tz,
+			     int    *pivot,
+			     double *w,
+			     double *wp,
+			     double *z0,
+			     double *z1,
+			     double *sspar,
+			     double *par,
 			     int    *ipar,
 
 			     int    tweak)
 {
-    return fixpnf_0_(1, n, y, iflag, arcre, arcae, ansre, ansae, trace, a, 
+    return fixpnf_0_(1, n, y, iflag, arcre, arcae, ansre, ansae, trace, a,
 	    nfe, arclen, yp, yold, ypold, qr, alpha, tz, pivot, w, wp, z0, z1,
 	     sspar, par, ipar, tweak);
     }
@@ -754,7 +754,7 @@ doublereal d1mach_(integer *i)
     static struct {
 	integer e_1[10];
 	doublereal e_2;
-    } equiv_4 = { { 0, 1048576, -1, 2146435071, 0, 1017118720, 0, 
+    } equiv_4 = { { 0, 1048576, -1, 2146435071, 0, 1017118720, 0,
 		    1018167296, 1352628735, 1070810131 }, 0.0 };
 
 
@@ -974,7 +974,7 @@ doublereal d1mach_(integer *i)
 /*      DATA LARGE(1),LARGE(2) / O376777777777, O777777777777 / */
 /*      DATA RIGHT(1),RIGHT(2) / O604400000000, O000000000000 / */
 /*      DATA DIVER(1),DIVER(2) / O606400000000, O000000000000 / */
-/*      DATA LOG10(1),LOG10(2) / O776464202324, O117571775714 /, SC/987/ 
+/*      DATA LOG10(1),LOG10(2) / O776464202324, O117571775714 /, SC/987/
 */
 
 /*     MACHINE CONSTANTS FOR THE IBM 360/370 SERIES, */
@@ -1004,7 +1004,7 @@ doublereal d1mach_(integer *i)
 /*      DATA LARGE(1),LARGE(2) / "377777777777, "344777777777 / */
 /*      DATA RIGHT(1),RIGHT(2) / "113400000000, "000000000000 / */
 /*      DATA DIVER(1),DIVER(2) / "114400000000, "000000000000 / */
-/*      DATA LOG10(1),LOG10(2) / "177464202324, "144117571776 /, SC/987/ 
+/*      DATA LOG10(1),LOG10(2) / "177464202324, "144117571776 /, SC/987/
 */
 
 /*     MACHINE CONSTANTS FOR THE PDP-10 (KI PROCESSOR). */
@@ -1013,7 +1013,7 @@ doublereal d1mach_(integer *i)
 /*      DATA LARGE(1),LARGE(2) / "377777777777, "377777777777 / */
 /*      DATA RIGHT(1),RIGHT(2) / "103400000000, "000000000000 / */
 /*      DATA DIVER(1),DIVER(2) / "104400000000, "000000000000 / */
-/*      DATA LOG10(1),LOG10(2) / "177464202324, "047674776746 /, SC/987/ 
+/*      DATA LOG10(1),LOG10(2) / "177464202324, "047674776746 /, SC/987/
 */
 
 /*     MACHINE CONSTANTS FOR PDP-11 FORTRANS SUPPORTING */
@@ -1091,7 +1091,7 @@ doublereal d1mach_(integer *i)
 /*      DATA LARGE(1),LARGE(2) / O377777777777, O777777777777 / */
 /*      DATA RIGHT(1),RIGHT(2) / O170540000000, O000000000000 / */
 /*      DATA DIVER(1),DIVER(2) / O170640000000, O000000000000 / */
-/*      DATA LOG10(1),LOG10(2) / O177746420232, O411757177572 /, SC/987/ 
+/*      DATA LOG10(1),LOG10(2) / O177746420232, O411757177572 /, SC/987/
 */
 
 /*     MACHINE CONSTANTS FOR THE VAX UNIX F77 COMPILER */
@@ -1153,11 +1153,11 @@ L999:
 /***************** implementation code from daxpy.c *******************/
 /**********************************************************************/
 
-/* Subroutine */ int daxpy_(integer    *n, 
-			    doublereal *da, 
-			    doublereal *dx, 
-			    integer    *incx, 
-			    doublereal *dy, 
+/* Subroutine */ int daxpy_(integer    *n,
+			    doublereal *da,
+			    doublereal *dx,
+			    integer    *incx,
+			    doublereal *dy,
 			    integer    *incy)
 {
     /* System generated locals */
@@ -1244,10 +1244,10 @@ L40:
 /***************** implementation code from dcopy.c *******************/
 /**********************************************************************/
 
-/* Subroutine */ int dcopy_(integer    *n, 
-			    doublereal *dx, 
-			    integer    *incx, 
-			    doublereal *dy, 
+/* Subroutine */ int dcopy_(integer    *n,
+			    doublereal *dx,
+			    integer    *incx,
+			    doublereal *dy,
 			    integer    *incy)
 {
     /* System generated locals */
@@ -1338,13 +1338,13 @@ L40:
 
 /* static integer c_1 = 1; NOW REDUNDANT */
 
-/* Subroutine */ int dcpose_(integer    *ndim, 
-			     integer    *n, 
-			     doublereal *qr, 
-			     doublereal *alpha, 
-			     integer    *pivot, 
-			     integer    *ierr, 
-			     doublereal *y, 
+/* Subroutine */ int dcpose_(integer    *ndim,
+			     integer    *n,
+			     doublereal *qr,
+			     doublereal *alpha,
+			     integer    *pivot,
+			     integer    *ierr,
+			     doublereal *y,
 			     doublereal *sum)
 {
     /* System generated locals */
@@ -1448,7 +1448,7 @@ L60:
 	for (j = kp1; j <= i_2; ++j) {
 /* L80: */
 	    i_3 = *n - k + 1;
-	    y[j] = beta * ddot_(&i_3, &qr[k + k * qr_dim1], &c_1, &qr[k + j 
+	    y[j] = beta * ddot_(&i_3, &qr[k + k * qr_dim1], &c_1, &qr[k + j
 		    * qr_dim1], &c_1);
 	}
 	i_3 = np1;
@@ -1554,7 +1554,7 @@ L40:
     mp1 = m + 1;
     i_1 = *n;
     for (i = mp1; i <= i_1; i += 5) {
-	dtemp = dtemp + dx[i] * dy[i] + dx[i + 1] * dy[i + 1] + dx[i + 2] * 
+	dtemp = dtemp + dx[i] * dy[i] + dx[i + 1] * dy[i + 1] + dx[i + 2] *
 		dy[i + 2] + dx[i + 3] * dy[i + 3] + dx[i + 4] * dy[i + 4];
 /* L50: */
     }
@@ -1573,9 +1573,9 @@ L60:
 
 static integer c_2 = 2;
 
-/* Subroutine */ int divp_(doublereal *xxxx, 
-			   doublereal *yyyy, 
-			   doublereal *zzzz, 
+/* Subroutine */ int divp_(doublereal *xxxx,
+			   doublereal *yyyy,
+			   doublereal *zzzz,
 			   integer    *ierr)
 {
     static doublereal xnum, denom;
@@ -1623,7 +1623,7 @@ static integer c_2 = 2;
     *ierr = 0;
     denom = yyyy[1] * yyyy[1] + yyyy[2] * yyyy[2];
     xnum = xxxx[1] * yyyy[1] + xxxx[2] * yyyy[2];
-    if (dblabs(denom) >= (float)1. || (dblabs(denom) < (float)1. && dblabs(xnum) / 
+    if (dblabs(denom) >= (float)1. || (dblabs(denom) < (float)1. && dblabs(xnum) /
 	    d1mach_(&c_2) < dblabs(denom)) ) {
 	zzzz[1] = xnum / denom;
     } else {
@@ -1631,7 +1631,7 @@ static integer c_2 = 2;
 	*ierr = 1;
     }
     xnum = xxxx[2] * yyyy[1] - xxxx[1] * yyyy[2];
-    if (dblabs(denom) >= (float)1. || (dblabs(denom) < (float)1. && dblabs(xnum) / 
+    if (dblabs(denom) >= (float)1. || (dblabs(denom) < (float)1. && dblabs(xnum) /
 	    d1mach_(&c_2) < dblabs(denom))) {
 	zzzz[2] = xnum / denom;
     } else {
@@ -1647,8 +1647,8 @@ static integer c_2 = 2;
 /****************** implementation code from dnrm2.c ******************/
 /**********************************************************************/
 
-doublereal dnrm2_(integer    *n, 
-		  doublereal *dx, 
+doublereal dnrm2_(integer    *n,
+		  doublereal *dx,
 		  integer    *incx)
 {
     /* Initialized data */
@@ -1713,7 +1713,7 @@ doublereal dnrm2_(integer    *n,
 /*     values for cutlo and cuthi.. */
 /*     from the environmental parameters listed in the imsl converter */
 /*     document the limiting values are as follows.. */
-/*     cutlo, s.p.   u/eps = 2**(-102) for  honeywell.  close seconds are 
+/*     cutlo, s.p.   u/eps = 2**(-102) for  honeywell.  close seconds are
 */
 /*                   univac and dec at 2**(-103) */
 /*                   thus cutlo = 2**(-51) = 4.44089e-16 */
@@ -1788,7 +1788,7 @@ L70:
     }
 
 /*                     common code for phases 2 and 4. */
-/*                     in phase 4 sum is large.  scale to avoid overflow. 
+/*                     in phase 4 sum is large.  scale to avoid overflow.
 */
 
 L110:
@@ -1858,9 +1858,9 @@ L300:
 /***************** implementation code from dscal.c *******************/
 /**********************************************************************/
 
-/* Subroutine */ int dscal_(integer    *n, 
-			    doublereal *da, 
-			    doublereal *dx, 
+/* Subroutine */ int dscal_(integer    *n,
+			    doublereal *da,
+			    doublereal *dx,
 			    integer    *incx)
 {
     /* System generated locals */
@@ -1936,7 +1936,7 @@ L40:
 /******************* implementation code from f.c *********************/
 /**********************************************************************/
 
-/* Subroutine */ int f_(doublereal *x, 
+/* Subroutine */ int f_(doublereal *x,
 			doublereal *v)
 {
 
@@ -1956,8 +1956,8 @@ L40:
 /***************** implementation code from fjac.c ********************/
 /**********************************************************************/
 
-/* Subroutine */ int fjac_(doublereal *x, 
-			   doublereal *v, 
+/* Subroutine */ int fjac_(doublereal *x,
+			   doublereal *v,
 			   integer    *k)
 {
 
@@ -1978,8 +1978,8 @@ L40:
 /***************** implementation code from idamax.c ******************/
 /**********************************************************************/
 
-integer idamax_(integer    *n, 
-		doublereal *dx, 
+integer idamax_(integer    *n,
+		doublereal *dx,
 		integer    *incx)
 {
     /* System generated locals */
@@ -2063,12 +2063,12 @@ double d_sign(double *arg1, double *arg2){
 /* static integer c_4 = 4; NOW REDUNDANT */
 static doublereal c_b17 = 1.;
 
-/* Subroutine */ int root_(doublereal *t, 
-			   doublereal *ft, 
-			   doublereal *b, 
-			   doublereal *c, 
-			   doublereal *relerr, 
-			   doublereal *abserr, 
+/* Subroutine */ int root_(doublereal *t,
+			   doublereal *ft,
+			   doublereal *b,
+			   doublereal *c,
+			   doublereal *relerr,
+			   doublereal *abserr,
 			   integer    *iflag)
 {
     /* System generated locals */
@@ -2312,23 +2312,23 @@ static int c_4 = 4;
 static int c_1 = 1;
 */
 
-/* Subroutine */ int rootnf_(int    *n, 
-			     int    *nfe, 
-			     int    *iflag, 
+/* Subroutine */ int rootnf_(int    *n,
+			     int    *nfe,
+			     int    *iflag,
 			     double *relerr,
 			     double *abserr,
 			     double *y,
-			     double *yp, 
-			     double *yold, 
-			     double *ypold, 
+			     double *yp,
+			     double *yold,
+			     double *ypold,
 			     double *a,
-			     double *qr, 
-			     double *alpha, 
-			     double *tz, 
-			     int    *pivot, 
-			     double *w, 
-			     double *wp, 
-			     double *par, 
+			     double *qr,
+			     double *alpha,
+			     double *tz,
+			     int    *pivot,
+			     double *w,
+			     double *wp,
+			     double *par,
 			     int    *ipar)
 {
     /* System generated locals */
@@ -2338,16 +2338,16 @@ static int c_1 = 1;
     /* Local variables */
     static double dels, aerr, rerr;
     static int judy;
-    extern /* Subroutine */ int root_(doublereal *t, 
-				      doublereal *ft, 
-				      doublereal *b, 
-				      doublereal *c, 
-				      doublereal *relerr, 
-				      doublereal *abserr, 
+    extern /* Subroutine */ int root_(doublereal *t,
+				      doublereal *ft,
+				      doublereal *b,
+				      doublereal *c,
+				      doublereal *relerr,
+				      doublereal *abserr,
 				      integer    *iflag);
     static double sout;
-    extern double dnrm2_(integer    *n, 
-			 doublereal *dx, 
+    extern double dnrm2_(integer    *n,
+			 doublereal *dx,
 			 integer    *incx);
     static double u;
     static int lcode;
@@ -2372,7 +2372,7 @@ static int c_1 = 1;
 
 /* IFLAG = -2, -1, OR 0, INDICATING THE PROBLEM TYPE. */
 
-/* RELERR, ABSERR = RELATIVE AND ABSOLUTE ERROR VALUES.  THE ITERATION IS 
+/* RELERR, ABSERR = RELATIVE AND ABSOLUTE ERROR VALUES.  THE ITERATION IS
 */
 /*    CONSIDERED TO HAVE CONVERGED WHEN A POINT Y=(LAMBDA,X) IS FOUND */
 /*    SUCH THAT */
@@ -2385,7 +2385,7 @@ static int c_1 = 1;
 
 /* Y(1:N+1) = POINT (LAMBDA(S), X(S)) ON ZERO CURVE OF HOMOTOPY MAP. */
 
-/* YP(1:N+1) = UNIT TANGENT VECTOR TO THE ZERO CURVE OF THE HOMOTOPY MAP 
+/* YP(1:N+1) = UNIT TANGENT VECTOR TO THE ZERO CURVE OF THE HOMOTOPY MAP
 */
 /*    AT  Y . */
 
@@ -2419,7 +2419,7 @@ static int c_1 = 1;
 /*    = 6 IF THE ITERATION FAILED TO CONVERGE.  Y  AND  YOLD  CONTAIN */
 /*        THE LAST TWO POINTS FOUND ON THE ZERO CURVE. */
 
-/* Y  IS THE POINT ON THE ZERO CURVE OF THE HOMOTOPY MAP AT  LAMBDA = 1 . 
+/* Y  IS THE POINT ON THE ZERO CURVE OF THE HOMOTOPY MAP AT  LAMBDA = 1 .
 */
 
 
@@ -2474,7 +2474,7 @@ static int c_1 = 1;
 
 /* USING TWO POINTS AND TANGENTS ON THE HOMOTOPY ZERO CURVE, CONSTRUCT
  */
-/* THE HERMITE CUBIC INTERPOLANT Q(S).  THEN USE  ROOT  TO FIND THE S 
+/* THE HERMITE CUBIC INTERPOLANT Q(S).  THEN USE  ROOT  TO FIND THE S
 */
 /* CORRESPONDING TO  LAMBDA = 1 .  THE TWO POINTS ON THE ZERO CURVE AR
 E */
@@ -2490,8 +2490,8 @@ L130:
 	    goto L140;
 	}
 	qsout = ((((yp[1] - (y[1] - yold[1]) / dels) / dels - ((y[1] - yold[1]
-		) / dels - ypold[1]) / dels) / dels * (sout - dels) + ((y[1] 
-		- yold[1]) / dels - ypold[1]) / dels) * sout + ypold[1]) * 
+		) / dels - ypold[1]) / dels) / dels * (sout - dels) + ((y[1]
+		- yold[1]) / dels - ypold[1]) / dels) * sout + ypold[1]) *
 		sout + yold[1] - (float)1.;
 	goto L130;
 /* IF LAMBDA = 1 WERE BRACKETED,  ROOT  CANNOT FAIL. */
@@ -2504,9 +2504,9 @@ L140:
 /* CALCULATE Q(SA) AS THE INITIAL POINT FOR A NEWTON ITERATION. */
 	i_1 = np1;
 	for (jw = 1; jw <= i_1; ++jw) {
-	    w[jw] = ((((yp[jw] - (y[jw] - yold[jw]) / dels) / dels - ((y[jw] 
-		    - yold[jw]) / dels - ypold[jw]) / dels) / dels * (sa - 
-		    dels) + ((y[jw] - yold[jw]) / dels - ypold[jw]) / dels) * 
+	    w[jw] = ((((yp[jw] - (y[jw] - yold[jw]) / dels) / dels - ((y[jw]
+		    - yold[jw]) / dels - ypold[jw]) / dels) / dels * (sa -
+		    dels) + ((y[jw] - yold[jw]) / dels - ypold[jw]) / dels) *
 		    sa + ypold[jw]) * sa + yold[jw];
 /* L150: */
 	}
@@ -2543,7 +2543,7 @@ L140:
 	    }
 	    return 0;
 	}
-/* IF THE ITERATION HAS NOT CONVERGED, DISCARD ONE OF THE OLD POINTS 
+/* IF THE ITERATION HAS NOT CONVERGED, DISCARD ONE OF THE OLD POINTS
 */
 /* SUCH THAT  LAMBDA = 1  IS STILL BRACKETED. */
 	if ((yold[1] - (float)1.) * (w[1] - (float)1.) > (float)0.) {
@@ -2585,31 +2585,31 @@ static integer c_4 = 4;
 static integer c_1 = 1;
 */
 
-/* Subroutine */ int stepnf_(integer    *n, 
-			     integer    *nfe, 
-			     integer    *iflag, 
-			     logical    *start, 
-			     logical    *crash, 
-			     doublereal *hold, 
-			     doublereal *h, 
-			     doublereal *relerr, 
-			     doublereal *abserr, 
-			     doublereal *s, 
-			     doublereal *y, 
-			     doublereal *yp, 
-			     doublereal *yold, 
-			     doublereal *ypold, 
-			     doublereal *a, 
-			     doublereal *qr, 
-			     doublereal *alpha, 
-			     doublereal *tz, 
-			     integer    *pivot, 
-			     doublereal *w, 
-			     doublereal *wp, 
-			     doublereal *z0, 
+/* Subroutine */ int stepnf_(integer    *n,
+			     integer    *nfe,
+			     integer    *iflag,
+			     logical    *start,
+			     logical    *crash,
+			     doublereal *hold,
+			     doublereal *h,
+			     doublereal *relerr,
+			     doublereal *abserr,
+			     doublereal *s,
+			     doublereal *y,
+			     doublereal *yp,
+			     doublereal *yold,
+			     doublereal *ypold,
+			     doublereal *a,
+			     doublereal *qr,
+			     doublereal *alpha,
+			     doublereal *tz,
+			     integer    *pivot,
+			     doublereal *w,
+			     doublereal *wp,
+			     doublereal *z0,
 			     doublereal *z1,
-			     doublereal *sspar, 
-			     doublereal *par, 
+			     doublereal *sspar,
+			     doublereal *par,
 			     integer    *ipar)
 {
     /* System generated locals */
@@ -2624,8 +2624,8 @@ static integer c_1 = 1;
     static doublereal temp;
     static integer judy;
     static doublereal twou;
-    extern doublereal dnrm2_(integer    *n, 
-			     doublereal *dx, 
+    extern doublereal dnrm2_(integer    *n,
+			     doublereal *dx,
 			     integer    *incx);
     static doublereal dcalc;
     static integer j;
@@ -2659,13 +2659,13 @@ static integer c_1 = 1;
 
 /* HOLD = ||Y - YOLD||; SHOULD NOT BE MODIFIED BY THE USER. */
 
-/* H = UPPER LIMIT ON LENGTH OF STEP THAT WILL BE ATTEMPTED.  H  MUST BE 
+/* H = UPPER LIMIT ON LENGTH OF STEP THAT WILL BE ATTEMPTED.  H  MUST BE
 */
 /*    SET TO A POSITIVE NUMBER ON THE FIRST CALL TO  STEPNF . */
 /*    THEREAFTER  STEPNF  CALCULATES AN OPTIMAL VALUE FOR  H , AND  H */
 /*    SHOULD NOT BE MODIFIED BY THE USER. */
 
-/* RELERR, ABSERR = RELATIVE AND ABSOLUTE ERROR VALUES.  THE ITERATION IS 
+/* RELERR, ABSERR = RELATIVE AND ABSOLUTE ERROR VALUES.  THE ITERATION IS
 */
 /*    CONSIDERED TO HAVE CONVERGED WHEN A POINT W=(LAMBDA,X) IS FOUND */
 /*    SUCH THAT */
@@ -2677,11 +2677,11 @@ static integer c_1 = 1;
 /* S = (APPROXIMATE) ARC LENGTH ALONG THE HOMOTOPY ZERO CURVE UP TO */
 /*    Y(S) = (LAMBDA(S), X(S)). */
 
-/* Y(1:N+1) = PREVIOUS POINT (LAMBDA(S), X(S)) FOUND ON THE ZERO CURVE OF 
+/* Y(1:N+1) = PREVIOUS POINT (LAMBDA(S), X(S)) FOUND ON THE ZERO CURVE OF
 */
 /*    THE HOMOTOPY MAP. */
 
-/* YP(1:N+1) = UNIT TANGENT VECTOR TO THE ZERO CURVE OF THE HOMOTOPY MAP 
+/* YP(1:N+1) = UNIT TANGENT VECTOR TO THE ZERO CURVE OF THE HOMOTOPY MAP
 */
 /*    AT  Y . */
 
@@ -2737,13 +2737,13 @@ static integer c_1 = 1;
 
 /* HOLD = ||Y - YOLD||. */
 
-/* H = OPTIMAL VALUE FOR NEXT STEP TO BE ATTEMPTED.  NORMALLY  H  SHOULD 
+/* H = OPTIMAL VALUE FOR NEXT STEP TO BE ATTEMPTED.  NORMALLY  H  SHOULD
 */
 /*    NOT BE MODIFIED BY THE USER. */
 
 /* RELERR, ABSERR  ARE UNCHANGED ON A NORMAL RETURN. */
 
-/* S = (APPROXIMATE) ARC LENGTH ALONG THE ZERO CURVE OF THE HOMOTOPY MAP 
+/* S = (APPROXIMATE) ARC LENGTH ALONG THE ZERO CURVE OF THE HOMOTOPY MAP
 */
 /*    UP TO THE LATEST POINT FOUND, WHICH IS RETURNED IN  Y . */
 
@@ -2801,7 +2801,7 @@ static integer c_1 = 1;
 	*h = fouru * (*s + (float)1.);
 	return 0;
     }
-/* IF ERROR TOLERANCES ARE TOO SMALL, INCREASE THEM TO ACCEPTABLE VALUES. 
+/* IF ERROR TOLERANCES ARE TOO SMALL, INCREASE THEM TO ACCEPTABLE VALUES.
 */
     temp = dnrm2_(&np1, &y[1], &c_1);
     if ((*relerr * temp + *abserr) * (float).5 >= twou * temp) {
@@ -2836,8 +2836,8 @@ L40:
 	ypold[j] = (float)0.;
 /* L50: */
     }
-    tangnf_(s, &y[1], &yp[1], &ypold[1], &a[1], &qr[qr_offset], &alpha[1], 
-	    &tz[1], (int *)&pivot[1], (int *)nfe, 
+    tangnf_(s, &y[1], &yp[1], &ypold[1], &a[1], &qr[qr_offset], &alpha[1],
+	    &tz[1], (int *)&pivot[1], (int *)nfe,
 	    (int *)n, (int *)iflag, &par[1], (int *)&ipar[1]);
     if (*iflag > 0) {
 	return 0;
@@ -2853,8 +2853,8 @@ L70:
     for (judy = 1; judy <= 4; ++judy) {
 	rholen = (float)-1.;
 /* CALCULATE THE NEWTON STEP  TZ  AT THE CURRENT POINT  W . */
-	tangnf_(&rholen, &w[1], &wp[1], &ypold[1], &a[1], &qr[qr_offset], 
-		&alpha[1], &tz[1], (int *)&pivot[1], (int *)nfe, 
+	tangnf_(&rholen, &w[1], &wp[1], &ypold[1], &a[1], &qr[qr_offset],
+		&alpha[1], &tz[1], (int *)&pivot[1], (int *)nfe,
 		(int *)n, (int *)iflag, &par[1], (int *)&ipar[1])
 		;
 	if (*iflag > 0) {
@@ -2926,8 +2926,8 @@ L320:
     for (judy = 1; judy <= 4; ++judy) {
 	rholen = (float)-1.;
 /* CALCULATE THE NEWTON STEP  TZ  AT THE CURRENT POINT  W . */
-	tangnf_(&rholen, &w[1], &wp[1], &yp[1], &a[1], &qr[qr_offset], 
-		&alpha[1], &tz[1], (int *)&pivot[1], (int *)nfe, 
+	tangnf_(&rholen, &w[1], &wp[1], &yp[1], &a[1], &qr[qr_offset],
+		&alpha[1], &tz[1], (int *)&pivot[1], (int *)nfe,
 		(int *)n, (int *)iflag, &par[1], (int *)&ipar[1]);
 	if (*iflag > 0) {
 	    return 0;
@@ -3033,7 +3033,7 @@ L600:
 		d_3), d_3 = dcalc / sspar[3];
 	d_1 = (float)1. / max(d_2,d_3);
 	d_4 = (float)1. / sspar[8];
- /*	ht = pow_dd(&d_1, &d_4) * *hold; */ ht=pow(d_1,d_4) * *hold; 
+ /*	ht = pow_dd(&d_1, &d_4) * *hold; */ ht=pow(d_1,d_4) * *hold;
     }
 /*  HT  CONTAINS THE ESTIMATED OPTIMAL STEP SIZE.  NOW PUT IT WITHIN */
 /* REASONABLE BOUNDS. */
@@ -3043,7 +3043,7 @@ L600:
     d_1 = max(d_3,sspar[4]), d_2 = sspar[7] * *hold, d_1 = min(d_1,d_2);
     *h = min(d_1,sspar[5]);
     if (itnum == 1) {
-/* IF CONVERGENCE HAD OCCURRED AFTER 1 ITERATION, DON'T DECREASE  H . 
+/* IF CONVERGENCE HAD OCCURRED AFTER 1 ITERATION, DON'T DECREASE  H .
 */
 	*h = max(*h,*hold);
     } else if (itnum == 4) {
@@ -3070,7 +3070,7 @@ L600:
 #define min(i,j) ((i) < (j) ? (i): (j))
 #define FALSE 0
 #define TRUE 1
-/*--------------------------------------------------------------- 
+/*---------------------------------------------------------------
   vector/matrix type  a linear array of int, whith auxilary info.
        *) the number of elements that can be stored is in elt[0]
        *) the current number of rows is in elt[1]
@@ -3098,12 +3098,12 @@ void bad_error(const char *);
 
 
 /* WEIRD - The first pair of declarations below are the global one,
-which are now (6/13/99) included from pelutils.h.  They replace the 
+which are now (6/13/99) included from pelutils.h.  They replace the
 second pair, which had been declared at this point, specifically
 for this file, EVEN THOUGH THE ARGUMENT LIST IS DIFFERENT.
 I do not understand. - AMM */
 /*
-void  *mem_malloc(int); 
+void  *mem_malloc(int);
 void   mem_free(void *);
 */
 /*
@@ -3162,8 +3162,8 @@ polynomial1 *PMref1(Pmatrix M, int i, int j)
 
 /*
    **   Constructor/Destructors for Pmatrixes
-   ** 
-   ** Pmatrix Pmatrix_free(int r, int c); 
+   **
+   ** Pmatrix Pmatrix_free(int r, int c);
    **       New Pmatrix cabable of holding r rows, and c collumbs.
    ** Pmatrix Pmatrix_new(Pmatrix V);
  */
@@ -3293,7 +3293,7 @@ Homotopies.c       created 9/15/1994         last modified 9/15/994
 ALL RIGHTS RESERVED
 
 Store and evaluate Homotopies for Continuation module of Pelican.
-the functions rho and rhojac are defined to be usable by the 
+the functions rho and rhojac are defined to be usable by the
 hompack code (originaly in fortran translated with the help of f2c).
 
 The representation of Homotopies and implementation is very similar
@@ -3302,7 +3302,7 @@ to that used by hompack and described in Morgans book.
 
 /*------------------------------------------------------------------
  globals representing the homotopy and macroes for accessing them
- The system of complex polynomial1s is represented in real form 
+ The system of complex polynomial1s is represented in real form
 -----------------------------------------------------------------*/
 
 /* parameters affecting the homotopy */
@@ -3311,14 +3311,14 @@ int Hom_use_proj = 1;     /* 0 dont use proj trans, 1 else*/
 int Hom_num_vars = 0;     /* number of complex vars in curr hom*/
 
 /* private variables defining homotopy */
-static int NV,N,N1,M; 
-static int *Starting_Monomial; 
+static int NV,N,N1,M;
+static int *Starting_Monomial;
 static int *Number_of_Monomials;
-static int *Exponents; 
+static int *Exponents;
 static int *Hdegree;
 static int *Edegree;
-static double *Coefitients; 
-static int *Deformation; 
+static double *Coefitients;
+static int *Deformation;
 static double *Proj_Trans;
 
 /* index in monomial list (starting at 0) of equation i*/
@@ -3338,7 +3338,7 @@ static double *Proj_Trans;
 #define RCoef(i,j) Coefitients[2*(monst(i,j))]
 #define ICoef(i,j) Coefitients[2*(monst(i,j))+1]
 
-/* real and imaginary parts of coordinates defining the 
+/* real and imaginary parts of coordinates defining the
    projective transformation */
 #define RPtrans(j) Proj_Trans[2*(j)-2]
 #define IPtrans(j) Proj_Trans[2*(j)-1]
@@ -3373,7 +3373,7 @@ Pvector psys_to_Pvec(psys sys){
 }
 
 /*-------------------------------------------------------------------
- init_hom  takes a Pvector and loads the above data structures 
+ init_hom  takes a Pvector and loads the above data structures
            to hold a representation of the system.
 -------------------------------------------------------------------*/
 int init_hom(psys PS){
@@ -3427,22 +3427,22 @@ srand48(seed);
 srand(seed);
 #endif  /* defined(HAVE_SRAND48) */
 
-for(i=1;i<=NV;i++){                             
+for(i=1;i<=NV;i++){
     j=1; ptr=*PMref(P,1,i); Edeg(i)=0;
     while(ptr!=nullptr){
       Hdeg(i,j)=0;
-      RCoef(i,j)=(*poly_coef(ptr)).r; 
-      ICoef(i,j)=(*poly_coef(ptr)).i; 
+      RCoef(i,j)=(*poly_coef(ptr)).r;
+      ICoef(i,j)=(*poly_coef(ptr)).i;
       for(k=1;k<=NV;k++){
                   Exp(i,j,k)=*poly_exp(ptr,k);
                   Hdeg(i,j)+=Exp(i,j,k);
                 }
       Edeg(i)=max(Edeg(i),Hdeg(i,j));
-      Def(i,j)=*poly_def(ptr); 
+      Def(i,j)=*poly_def(ptr);
       j++; ptr=poly_next(ptr);
     }
-    for(j=1;j<=Nmon(i);j++) Hdeg(i,j)=Edeg(i)-Hdeg(i,j); 
-}      
+    for(j=1;j<=Nmon(i);j++) Hdeg(i,j)=Edeg(i)-Hdeg(i,j);
+}
 
 /*Define Projective transformation */
 for(j=1;j<=NV+1;j++){
@@ -3452,9 +3452,9 @@ for(j=1;j<=NV+1;j++){
   t=rand()*2*PI;
 #endif  /* defined(HAVE_DRAND48) */
   RPtrans(j)=cos(t);
-  IPtrans(j)=sin(t); 
+  IPtrans(j)=sin(t);
  }
-Hom_defd=1;   
+Hom_defd=1;
 Pvector_free(P);
 return Hom_defd;
 }
@@ -3475,7 +3475,7 @@ void print_proj_trans(){
 #ifdef HOM_PRINT
  fprintf(Hom_LogFile,"T %d ", NV)
 #endif
-; 
+;
    for(i=1;i<=NV+1;i++) {
 #ifdef HOM_PRINT
       fprintf(Hom_LogFile,"%10g %10g",RPtrans(i),IPtrans(i))
@@ -3485,26 +3485,26 @@ void print_proj_trans(){
 #ifdef HOM_PRINT
  fprintf(Hom_LogFile,"\n")
 #endif
-; 
+;
  }
 
- 
-/* 
+
+/*
 ** Htransform takes a vector in RP^(2*NV) and scales it so that
-**            it lies on the hyperplane defining the projective 
+**            it lies on the hyperplane defining the projective
 **            transformation. (Using the scaling factor
 **                             L=pn1/(Z-(p1X1+...+pnXn)).)
 ** Huntransform takes a 2*NV+2 dvector whoose first 2*NV coords
-**          define a point in the affine chart defined by the 
+**          define a point in the affine chart defined by the
 **          projective transformation and fills in the last two
-**          coords with the value Z=pn1+p1X1+...+pnXn. 
+**          coords with the value Z=pn1+p1X1+...+pnXn.
 **
 */
 #define X(i) (DVref(X,i))
 void Htransform(Dvector X){
   int i;
   fcomplex C,L;
-  
+
    L=Complex(0.0,0.0);
    for(i=1;i<=NV;i++){
      L=Cadd(L,Cmul(Complex(RPtrans(i),IPtrans(i)),
@@ -3536,11 +3536,11 @@ fcomplex Hpath(double t){ return Complex(t,0.0);}
 
 fcomplex DHpath(double t){return Complex(1.0,0.0);}
 
-int rho_(double *a, 
-	 double *lambda, 
-	 double *x, 
-	 double *v, 
-	 double *par, 
+int rho_(double *a,
+	 double *lambda,
+	 double *x,
+	 double *v,
+	 double *par,
 	 int    *ipar)
 {int i,j,h;
  fcomplex c,Hpath(double),PN;
@@ -3559,32 +3559,32 @@ if (Hom_use_proj==1){
    for(j=1;j<=Nmon(i);j++){
       c=Cmul(Complex(RCoef(i,j),ICoef(i,j)),
              Cpow(Hpath(*lambda),Def(i,j)));
-      for(h=1;h<=NV;h++) 
+      for(h=1;h<=NV;h++)
             c=Cmul(c,Cpow(Complex(x[2*h-2],x[2*h-1]),Exp(i,j,h)));
-if (Hom_use_proj==1)   c=Cmul(c,Cpow(PN,Hdeg(i,j))); 
+if (Hom_use_proj==1)   c=Cmul(c,Cpow(PN,Hdeg(i,j)));
       v[2*i-2]+=c.r;
-      v[2*i-1]+=c.i; 
+      v[2*i-1]+=c.i;
    }
  }
  return 0;
-} 
+}
 
-int rhojac_(double *a, 
-	    double *lambda, 
-	    double *x, 
-	    double *v, 
-	    int    *k, 
-	    double *par, 
+int rhojac_(double *a,
+	    double *lambda,
+	    double *x,
+	    double *v,
+	    int    *k,
+	    double *par,
 	    int    *ipar)
 {
  int i,j,h,d;
- fcomplex c,Hpath(double), DHpath(double),PN;  
+ fcomplex c,Hpath(double), DHpath(double),PN;
  double t;
 
  if (*lambda < 0.) *lambda = 0.;
  if(Hom_use_proj==1){
    PN=Complex(RPtrans((NV+1)),IPtrans((NV+1)));
-   for(i=1;i<=NV;i++) 
+   for(i=1;i<=NV;i++)
        PN=Cadd(PN,Cmul(Complex(RPtrans(i),IPtrans(i)),
                        Complex(x[2*i-2],x[2*i-1])));
  }
@@ -3608,7 +3608,7 @@ int rhojac_(double *a,
          }
        }
      }
-         
+
      for(j=1;j<=Nmon(i);j++){
       if (Exp(i,j,d)!=0){
         c=Cmul(Complex(RCoef(i,j),ICoef(i,j)),
@@ -3667,19 +3667,19 @@ return 0;
 
 /* Table of constant values */
 
-/* Subroutine */ int tangnf_(double *rholen, 
-			     double *y, 
-			     double *yp, 
-			     double *ypold, 
-			     double *a, 
-			     double *qr, 
-			     double *alpha, 
-			     double *tz, 
-			     int    *pivot, 
-			     int    *nfe, 
-			     int    *n, 
-			     int    *iflag, 
-			     double *par, 
+/* Subroutine */ int tangnf_(double *rholen,
+			     double *y,
+			     double *yp,
+			     double *ypold,
+			     double *a,
+			     double *qr,
+			     double *alpha,
+			     double *tz,
+			     int    *pivot,
+			     int    *nfe,
+			     int    *n,
+			     int    *iflag,
+			     double *par,
 			     int    *ipar)
 {
     /* System generated locals */
@@ -3713,7 +3713,7 @@ return 0;
 /* ON INPUT: */
 
 /* RHOLEN < 0 IF THE NORM OF THE HOMOTOPY MAP EVALUATED AT */
-/*    (A, LAMBDA, X) IS TO BE COMPUTED.  IF  RHOLEN >= 0  THE NORM IS NOT 
+/*    (A, LAMBDA, X) IS TO BE COMPUTED.  IF  RHOLEN >= 0  THE NORM IS NOT
 */
 /*    COMPUTED AND  RHOLEN  IS NOT CHANGED. */
 
@@ -3748,14 +3748,14 @@ return 0;
 /* YP(1:N+1) = DY/DS = UNIT TANGENT VECTOR TO INTEGRAL CURVE OF */
 /*    D(HOMOTOPY MAP)/DS = 0  AT  Y(S) = (LAMBDA(S), X(S)) . */
 
-/* TZ = THE NEWTON STEP = -(PSEUDO INVERSE OF  (D RHO(A,Y(S))/D LAMBDA , 
+/* TZ = THE NEWTON STEP = -(PSEUDO INVERSE OF  (D RHO(A,Y(S))/D LAMBDA ,
 */
 /*    D RHO(A,Y(S))/DX)) * RHO(A,Y(S)) . */
 
 /* NFE  HAS BEEN INCRMENTED BY 1. */
 
 /* IFLAG  IS UNCHANGED, UNLESS THE QR FACTORIZATION DETECTS A RANK < N, */
-/*    IN WHICH CASE THE TANGENT AND NEWTON STEP VECTORS ARE NOT COMPUTED 
+/*    IN WHICH CASE THE TANGENT AND NEWTON STEP VECTORS ARE NOT COMPUTED
 */
 /*    AND  TANGNF  RETURNS WITH  IFLAG = 4 . */
 
@@ -3798,12 +3798,12 @@ return 0;
     if (*iflag == -2) {
 
 /*  QR = ( D RHO(A,LAMBDA,X)/D LAMBDA , D RHO(A,LAMBDA,X)/DX , */
-/*                                              RHO(A,LAMBDA,X) )  . 
+/*                                              RHO(A,LAMBDA,X) )  .
 */
 
 	i_1 = np1;
 	for (k = 1; k <= i_1; ++k) {
-	    rhojac_(&a[1], &lambda, &y[2], &qr[k * qr_dim1 + 1], &k, &par[1], 
+	    rhojac_(&a[1], &lambda, &y[2], &qr[k * qr_dim1 + 1], &k, &par[1],
 		    &ipar[1]);
 /* L30: */
 	}
@@ -3814,7 +3814,7 @@ return 0;
 	if (*iflag == 0) {
 
 /*      QR = ( A - F(X), I - LAMBDA*DF(X) , */
-/*                                 X - A + LAMBDA*(A - F(X)) )  . 
+/*                                 X - A + LAMBDA*(A - F(X)) )  .
 */
 
 	    i_1 = *n;
@@ -3840,7 +3840,7 @@ return 0;
 	} else {
 
 /*   QR = ( F(X) - X + A, LAMBDA*DF(X) + (1 - LAMBDA)*I , */
-/*                                  X - A + LAMBDA*(F(X) - X + A) 
+/*                                  X - A + LAMBDA*(F(X) - X + A)
 )  . */
 
 /* L140: */
@@ -3862,7 +3862,7 @@ return 0;
 		    qr[j + kp1 * qr_dim1] = lambda * tz[j];
 		}
 /* L170: */
-		qr[k + kp1 * qr_dim1] = (float)1. - lambda + qr[k + kp1 * 
+		qr[k + kp1 * qr_dim1] = (float)1. - lambda + qr[k + kp1 *
 			qr_dim1];
 	    }
 	}
@@ -3883,7 +3883,7 @@ return 0;
 
     i_1 = np1;
     for (j = 1; j <= i_1; ++j) {
-	yp[j] = ddot_((integer *)n, &qr[j * qr_dim1 + 1], 
+	yp[j] = ddot_((integer *)n, &qr[j * qr_dim1 + 1],
 		      &c_1, &qr[j * qr_dim1 + 1], &c_1);
 /* L220: */
 	pivot[j] = j;
@@ -3921,7 +3921,7 @@ L240:
 /*   END OF COLUMN INTERCHANGE. */
 L260:
 	i_2 = *n - k + 1;
-	sigma = ddot_((integer *)&i_2, &qr[k + k * qr_dim1], 
+	sigma = ddot_((integer *)&i_2, &qr[k + k * qr_dim1],
 		      &c_1, &qr[k + k * qr_dim1], &c_1);
 	if (sigma == (float)0.) {
 	    *iflag = 4;
@@ -3942,7 +3942,7 @@ L260:
 	i_2 = np2;
 	for (j = kp1; j <= i_2; ++j) {
 	    i_3 = *n - k + 1;
-	    sigma = beta * ddot_((integer *)&i_3, &qr[k + k * qr_dim1], 
+	    sigma = beta * ddot_((integer *)&i_3, &qr[k + k * qr_dim1],
 				 &c_1, &qr[k + j * qr_dim1], &c_1);
 	    i_3 = *n;
 	    for (i = k; i <= i_3; ++i) {
@@ -4019,7 +4019,7 @@ L380:
 	tz[j] -= sigma * yp[j];
 /* L470: */
     }
-/* TZ IS THE NEWTON STEP FROM THE CURRENT POINT Y(S) = (LAMBDA(S), X(S)). 
+/* TZ IS THE NEWTON STEP FROM THE CURRENT POINT Y(S) = (LAMBDA(S), X(S)).
 */
     return 0;
 } /* tangnf_ */

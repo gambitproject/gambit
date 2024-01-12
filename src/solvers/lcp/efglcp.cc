@@ -63,7 +63,7 @@ NashLcpBehaviorSolver<T>::Solution::Solution(const Game &p_game)
 }
 
 
-template <class T> bool 
+template <class T> bool
 NashLcpBehaviorSolver<T>::Solution::AddBFS(const linalg::LemkeTableau<T> &tableau)
 {
   linalg::BFS<T> cbfs;
@@ -89,7 +89,7 @@ NashLcpBehaviorSolver<T>::Solution::AddBFS(const linalg::LemkeTableau<T> &tablea
 // Lemke implements Lemke's algorithm for linear complementarity problems,
 // as refined by Eaves for degenerate problems, starting from the primary ray.
 //
-template <class T> List<MixedBehaviorProfile<T> > 
+template <class T> List<MixedBehaviorProfile<T> >
 NashLcpBehaviorSolver<T>::Solve(const Game &p_game) const
 {
   if (p_game->NumPlayers() != 2) {
@@ -121,7 +121,7 @@ NashLcpBehaviorSolver<T>::Solve(const Game &p_game) const
 
   linalg::LemkeTableau<T> tab(A, b);
   solution.eps = tab.Epsilon();
-  
+
   try {
     if (m_stopAfter != 1) {
       try {
@@ -152,11 +152,11 @@ NashLcpBehaviorSolver<T>::Solve(const Game &p_game) const
 
 
 //
-// All_Lemke finds all accessible Nash equilibria by recursively 
-// calling itself.  List maintains the list of basic variables 
-// for the equilibria that have already been found.  
+// All_Lemke finds all accessible Nash equilibria by recursively
+// calling itself.  List maintains the list of basic variables
+// for the equilibria that have already been found.
 // From each new accessible equilibrium, it follows
-// all possible paths, adding any new equilibria to the List.  
+// all possible paths, adding any new equilibria to the List.
 //
 template<class T>
 void

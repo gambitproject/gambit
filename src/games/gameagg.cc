@@ -227,7 +227,7 @@ GameStrategy GameAGGRep::GetStrategy(int p_index) const
   }
   throw IndexException();
 }
- 
+
 //------------------------------------------------------------------------
 //                    GameAGGRep: Factory functions
 //------------------------------------------------------------------------
@@ -316,7 +316,7 @@ void GameAGGRep::WriteAggFile(std::ostream &s) const
   }
   s << std::endl;
   for (int i = 0; i < aggPtr->getNumPlayers(); i++) {
-    std::copy(aggPtr->getActionSet(i).begin(), 
+    std::copy(aggPtr->getActionSet(i).begin(),
 	      aggPtr->getActionSet(i).end(),
 	      std::ostream_iterator<int>(s," "));
     s << std::endl;

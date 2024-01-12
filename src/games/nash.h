@@ -57,7 +57,7 @@ public:
   { Render(p_profile.ToMixedProfile(), p_label); }
 };
 
-template <class T> 
+template <class T>
 class MixedStrategyNullRenderer : public MixedStrategyRenderer<T> {
 public:
   ~MixedStrategyNullRenderer() override = default;
@@ -106,7 +106,7 @@ public:
 		      const std::string &p_label = "NE") const override = 0;
 };
 
-template <class T> 
+template <class T>
 class BehavStrategyNullRenderer : public BehavStrategyRenderer<T> {
 public:
   ~BehavStrategyNullRenderer() override = default;
@@ -217,7 +217,7 @@ public:
 };
 
 }  // namespace Gambit::Nash
- 
+
 }  // namespace Gambit
 
 

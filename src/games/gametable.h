@@ -84,7 +84,7 @@ public:
   /// @name Information sets
   //@{
   /// Returns the iset'th information set in the game (numbered globally)
-  GameInfoset GetInfoset(int iset) const override 
+  GameInfoset GetInfoset(int iset) const override
   { throw UndefinedException(); }
   /// Returns an array with the number of information sets per personal player
   Array<int> NumInfosets() const override
@@ -97,7 +97,7 @@ public:
   /// @name Nodes
   //@{
   /// Returns the root node of the game
-  GameNode GetRoot() const override { throw UndefinedException(); } 
+  GameNode GetRoot() const override { throw UndefinedException(); }
   /// Returns the number of nodes in the game
   int NumNodes() const override { throw UndefinedException(); }
   //@}
@@ -120,7 +120,7 @@ public:
 
   PureStrategyProfile NewPureStrategyProfile() const override;
   MixedStrategyProfile<double> NewMixedStrategyProfile(double) const override;
-  MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &) const override; 
+  MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &) const override;
   MixedStrategyProfile<double> NewMixedStrategyProfile(double, const StrategySupportProfile&) const override;
   MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &, const StrategySupportProfile&) const override;
 

@@ -28,7 +28,7 @@ namespace Gambit {
 //                      BehaviorSupportProfile: Lifecycle
 //========================================================================
 
-BehaviorSupportProfile::BehaviorSupportProfile(const Game &p_efg) 
+BehaviorSupportProfile::BehaviorSupportProfile(const Game &p_efg)
   : m_efg(p_efg)
 {
   for (int pl = 1; pl <= p_efg->NumPlayers(); pl++) {
@@ -79,7 +79,7 @@ PVector<int> BehaviorSupportProfile::NumActions() const
   }
 
   return answer;
-}  
+}
 
 size_t BehaviorSupportProfile::BehaviorProfileLength() const
 {
@@ -167,7 +167,7 @@ void BehaviorSupportProfile::AddAction(const GameAction &s)
 
 std::list<GameInfoset>
 BehaviorSupportProfile::GetInfosets(const GamePlayer &p_player) const
-{ 
+{
   std::list<GameInfoset> answer;
   for (const auto& infoset : p_player->GetInfosets()) {
     if (m_infosetReachable.at(infoset)) {
@@ -205,7 +205,7 @@ ReachableInfosets(const BehaviorSupportProfile &p_support,
 }  // end anonymous namespace
 
 // This class iterates
-// over contingencies that are relevant once a particular node 
+// over contingencies that are relevant once a particular node
 // has been reached.
 class BehavConditionalIterator  {
 private:
@@ -217,7 +217,7 @@ private:
   Array<int> m_numActiveInfosets;
 
   /// Reset the iterator to the first contingency (this is called by ctors)
-  void First(); 
+  void First();
 
 public:
   /// @name Lifecycle
@@ -227,9 +227,9 @@ public:
 
   /// @name Iteration and data access
   //@{
-  /// Advance to the next contingency (prefix version) 
+  /// Advance to the next contingency (prefix version)
   void operator++();
-  /// Advance to the next contingency (postfix version) 
+  /// Advance to the next contingency (postfix version)
   void operator++(int) { ++(*this); }
   /// Has iterator gone past the end?
   bool AtEnd() const { return m_atEnd; }
@@ -239,11 +239,11 @@ public:
 };
 
 
-BehavConditionalIterator::BehavConditionalIterator(const BehaviorSupportProfile &p_support, 
+BehavConditionalIterator::BehavConditionalIterator(const BehaviorSupportProfile &p_support,
 						   const PVector<int> &p_active)
   : m_atEnd(false), m_support(p_support),
     m_currentBehav(m_support.GetGame()->NumInfosets()),
-    m_profile(m_support.GetGame()), 
+    m_profile(m_support.GetGame()),
     m_isActive(p_active),
     m_numActiveInfosets(m_support.GetGame()->NumPlayers())
 {
@@ -282,11 +282,11 @@ void BehavConditionalIterator::operator++()
   }
 
   int iset = m_support.GetGame()->GetPlayer(pl)->NumInfosets();
-    
+
   while (true) {
     if (m_isActive(pl, iset)) {
       if (m_currentBehav(pl, iset) < m_support.NumActions(pl, iset))  {
-	m_profile.SetAction(m_support.GetAction(pl, iset, 
+	m_profile.SetAction(m_support.GetAction(pl, iset,
 						++m_currentBehav(pl, iset)));
 	return;
       }
@@ -295,13 +295,13 @@ void BehavConditionalIterator::operator++()
 	m_profile.SetAction(m_support.GetAction(pl, iset, 1));
       }
     }
-    
+
     iset--;
     if (iset == 0)  {
       do  {
 	--pl;
       }  while (pl > 0 && m_numActiveInfosets[pl] == 0);
-      
+
       if (pl == 0) {
 	m_atEnd = true;
 	return;
@@ -335,7 +335,7 @@ bool BehaviorSupportProfile::Dominates(const GameAction &a, const GameAction &b,
       }
       else {
 	if (ap < bp) {
-	  return false; 
+	  return false;
 	}
 	else if (ap > bp) {
 	  equal = false;
@@ -381,18 +381,18 @@ bool BehaviorSupportProfile::Dominates(const GameAction &a, const GameAction &b,
       }
     }
   }
-  
+
   if (p_strict) {
     return true;
   }
   else {
-    return !equal; 
+    return !equal;
   }
 }
 
-bool SomeElementDominates(const BehaviorSupportProfile &S, 
+bool SomeElementDominates(const BehaviorSupportProfile &S,
 			  const Array<GameAction> &array,
-			  const GameAction &a, 
+			  const GameAction &a,
 			  const bool strong,
 			  const bool conditional)
 {
@@ -404,7 +404,7 @@ bool SomeElementDominates(const BehaviorSupportProfile &S,
   return false;
 }
 
-bool BehaviorSupportProfile::IsDominated(const GameAction &a, 
+bool BehaviorSupportProfile::IsDominated(const GameAction &a,
 			       bool strong, bool conditional) const
 {
   int pl = a->GetInfoset()->GetPlayer()->GetNumber();
@@ -413,7 +413,7 @@ bool BehaviorSupportProfile::IsDominated(const GameAction &a,
   return SomeElementDominates(*this,array,a,strong,conditional);
 }
 
-bool InfosetHasDominatedElement(const BehaviorSupportProfile &S, 
+bool InfosetHasDominatedElement(const BehaviorSupportProfile &S,
 				const GameInfoset &p_infoset,
 				bool strong,
 				bool conditional)
@@ -433,7 +433,7 @@ bool InfosetHasDominatedElement(const BehaviorSupportProfile &S,
 }
 
 bool ElimDominatedInInfoset(const BehaviorSupportProfile &S, BehaviorSupportProfile &T,
-			    int pl, int iset, 
+			    int pl, int iset,
 			    bool strong, bool conditional)
 {
   Array<GameAction> actions;
@@ -446,11 +446,11 @@ bool ElimDominatedInInfoset(const BehaviorSupportProfile &S, BehaviorSupportProf
 
   for (int i = 1; i <= actions.Length(); i++)
     for (int j = 1; j <= actions.Length(); j++)
-      if (i != j && !is_dominated[i] && !is_dominated[j]) 
+      if (i != j && !is_dominated[i] && !is_dominated[j])
 	if (S.Dominates(actions[i], actions[j], strong, conditional)) {
 	  is_dominated[j] = true;
 	}
-      
+
   bool action_was_eliminated = false;
   int k = 1;
   while (k <= actions.Length() && !action_was_eliminated) {
@@ -458,7 +458,7 @@ bool ElimDominatedInInfoset(const BehaviorSupportProfile &S, BehaviorSupportProf
     else k++;
   }
   while (k <= actions.Length()) {
-    if (is_dominated[k]) 
+    if (is_dominated[k])
       T.RemoveAction(actions[k]);
     k++;
   }
@@ -475,7 +475,7 @@ bool ElimDominatedForPlayer(const BehaviorSupportProfile &S, BehaviorSupportProf
 
   for (int iset = 1; iset <= S.GetGame()->GetPlayer(pl)->NumInfosets();
        iset++, cumiset++) {
-    if (ElimDominatedInInfoset(S, T, pl, iset, strong, conditional)) 
+    if (ElimDominatedInInfoset(S, T, pl, iset, strong, conditional))
       action_was_eliminated = true;
   }
 
@@ -491,15 +491,15 @@ BehaviorSupportProfile BehaviorSupportProfile::Undominated(bool strong, bool con
 
   for (int i = 1; i <= players.Length(); i++)   {
     int pl = players[i];
-    ElimDominatedForPlayer(*this, T, pl, cumiset, 
-			   strong, conditional); 
+    ElimDominatedForPlayer(*this, T, pl, cumiset,
+			   strong, conditional);
   }
 
   return T;
 }
 
 
-// Utilities 
+// Utilities
 bool BehaviorSupportProfile::HasActiveMembers(int pl, int iset) const
 {
   for (auto member : m_efg->GetPlayer(pl)->GetInfoset(iset)->GetMembers()) {
@@ -553,7 +553,7 @@ void BehaviorSupportProfile::DeactivateSubtree(const GameNode &n)
   }
 }
 
-void 
+void
 BehaviorSupportProfile::DeactivateSubtree(const GameNode &n, List<GameInfoset> &list)
 {
   if (!n->IsTerminal()) {
@@ -565,7 +565,7 @@ BehaviorSupportProfile::DeactivateSubtree(const GameNode &n, List<GameInfoset> &
     }
     Array<GameAction> actions(m_actions[n->GetInfoset()->GetPlayer()->GetNumber()][n->GetInfoset()->GetNumber()]);
     for (int i = 1; i <= actions.Length(); i++) {
-      DeactivateSubtree(n->GetChild(actions[i]->GetNumber()), list);    
+      DeactivateSubtree(n->GetChild(actions[i]->GetNumber()), list);
     }
   }
 }

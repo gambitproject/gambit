@@ -31,7 +31,7 @@ private:
   // Overriding wxSheet members for data access
   wxString GetCellValue(const wxSheetCoords &) override;
   wxSheetCellAttr GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const override;
-  
+
   // Overriding wxSheet members to disable selection behavior
   bool SelectRow(int, bool = false, bool = false) override
     { return false; }
@@ -53,7 +53,7 @@ private:
   // Event handlers
   void OnLabelClick(wxSheetEvent &);
   void OnCellClick(wxSheetEvent &);
-    
+
   // Overriding gbtGameView members
   void OnUpdate() override;
 

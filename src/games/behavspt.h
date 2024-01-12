@@ -52,7 +52,7 @@ protected:
 public:
   /// @name Lifecycle
   //@{
-  /// Constructor.  By default, a support contains all strategies. 
+  /// Constructor.  By default, a support contains all strategies.
   explicit BehaviorSupportProfile(const Game &);
   ~BehaviorSupportProfile() = default;
 
@@ -91,7 +91,7 @@ public:
   bool HasAction(const GameInfoset &p_infoset) const
   { return !m_actions[p_infoset->GetPlayer()->GetNumber()][p_infoset->GetNumber()].empty(); }
 
-  /// Returns the position of the action in the support. 
+  /// Returns the position of the action in the support.
   int GetIndex(const GameAction &) const;
 
   /// Returns whether the action is in the support.
@@ -127,7 +127,7 @@ public:
   bool Dominates(const GameAction &a, const GameAction &b,
 		 bool p_strict, bool p_conditional) const;
   /// Returns true if the action is dominated by some other action
-  bool IsDominated(const GameAction &a, 
+  bool IsDominated(const GameAction &a,
 		   bool p_strict, bool p_conditional) const;
   /// Returns a copy of the support with dominated actions eliminated
   BehaviorSupportProfile Undominated(bool p_strict, bool p_conditional,
@@ -139,12 +139,3 @@ public:
 } // end namespace Gambit
 
 #endif  // LIBGAMBIT_BEHAVSPT_H
-
-
-
-
-
-
-
-
-

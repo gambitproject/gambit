@@ -27,17 +27,17 @@
 //--------------------------------------------------------------------------
 
 template <class T>
-gTreeNode<T>::gTreeNode(const T& _data, 
-			gTreeNode<T>* _parent, 
-			gTreeNode<T>* _prev, 
-			gTreeNode<T>* _next, 
-			gTreeNode<T>* _eldest, 
+gTreeNode<T>::gTreeNode(const T& _data,
+			gTreeNode<T>* _parent,
+			gTreeNode<T>* _prev,
+			gTreeNode<T>* _next,
+			gTreeNode<T>* _eldest,
 			gTreeNode<T>* _youngest)
-  : data(_data), 
-    parent(_parent), 
-    prev(_prev), 
-    next(_next), 
-    eldest(_eldest), 
+  : data(_data),
+    parent(_parent),
+    prev(_prev),
+    next(_next),
+    eldest(_eldest),
     youngest(_youngest)
 { }
 
@@ -50,13 +50,13 @@ template <class T> gTreeNode<T>::~gTreeNode()
 //                 gTree<T>: Member function implementations
 //--------------------------------------------------------------------------
 
-template <class T> gTree<T>::gTree() 
+template <class T> gTree<T>::gTree()
 : root(nullptr)
 { }
 
-template <class T> gTree<T>::gTree(const T& rootdatum) 
+template <class T> gTree<T>::gTree(const T& rootdatum)
 : root(nullptr)
-{ 
+{
   root = new gTreeNode<T>(rootdatum,nullptr,nullptr,nullptr,nullptr,nullptr);
 }
 
@@ -131,7 +131,7 @@ template <class T> bool gTree<T>::operator!=(const gTree<T>& b) const
   return !(*this == b);
 }
 
-template <class T> 
+template <class T>
 Gambit::List<gTreeNode<T>*> gTree<T>::Children(const gTreeNode<T>* n) const
 {
   //assert(n != NULL);
@@ -146,7 +146,7 @@ template <class T> gTreeNode<T>* gTree<T>::RootNode() const
   return root;
 }
 
-template <class T> 
+template <class T>
 gTreeNode<T>* gTree<T>::RecursiveFind(const T& t, gTreeNode<T>* n) const
 {
   gTreeNode<T>* answer = nullptr;
@@ -171,8 +171,8 @@ template <class T> bool gTree<T>::Contains(const T& t) const
   return (Find(t) != nullptr);
 }
 
-template <class T> 
-bool gTree<T>::SubtreesAreIsomorphic(const gTreeNode<T>* lhs, 
+template <class T>
+bool gTree<T>::SubtreesAreIsomorphic(const gTreeNode<T>* lhs,
 				     const gTreeNode<T>* rhs) const
 {
   if (lhs->data != rhs->data) return false;
@@ -197,6 +197,3 @@ template <class T> void gTree<T>::Flush()
   RecursiveFlush(root);
   root = nullptr;
 }
-
-
-

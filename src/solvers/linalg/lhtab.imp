@@ -31,9 +31,9 @@ namespace linalg {
 //---------------------------------------------------------------------------
 
 template <class T>
-LHTableau<T>::LHTableau(const Matrix<T> &A1, const Matrix<T> &A2, 
+LHTableau<T>::LHTableau(const Matrix<T> &A1, const Matrix<T> &A2,
 			const Vector<T> &b1, const Vector<T> &b2)
-  : T1(A1,b1), T2(A2,b2), 
+  : T1(A1,b1), T2(A2,b2),
     tmp1(b1.First(), b1.Last()), tmp2(b2.First(), b2.Last()),
     solution(b1.First(), b2.Last())
 { }
@@ -57,7 +57,7 @@ LHTableau<T>& LHTableau<T>::operator=(const LHTableau<T> &orig)
 
 template <class T>
 int LHTableau<T>::Label(int i) const
-{ 
+{
   if (T1.RowIndex(i))  return T1.Label(i);
   if (T2.RowIndex(i))  return T2.Label(i);
   return 0;
@@ -65,7 +65,7 @@ int LHTableau<T>::Label(int i) const
 
 template <class T>
 int LHTableau<T>::Find(int i) const
-{ 
+{
   if (T1.ValidIndex(i))  return T1.Find(i);
   if (T2.ValidIndex(i))  return T2.Find(i);
   return 0;
@@ -118,7 +118,7 @@ template <class T> Gambit::linalg::BFS<T> LHTableau<T>::GetBFS()
 }
 
 template <class T> int LHTableau<T>::PivotIn(int inlabel)
-{ 
+{
   int outindex = ExitIndex(inlabel);
   int outlabel = Label(outindex);
   if (outlabel == 0)  return 0;
@@ -145,7 +145,7 @@ template <class T> int LHTableau<T>::LemkePath(int dup)
     enter = -dup;
   }
   // Central loop - pivot until another CBFS is found
-  do  { 
+  do  {
     exit = PivotIn(enter);
     enter = -exit;
   } while ((exit != dup) && (exit != -dup));

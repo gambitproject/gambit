@@ -136,6 +136,5 @@ protected:
 
 }  // end namespace Gambit::gametracer
 }  // end namespace Gambit
- 
-#endif  // GAMBIT_GTRACER_GNMGAME_H
 
+#endif  // GAMBIT_GTRACER_GNMGAME_H

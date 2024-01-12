@@ -327,7 +327,7 @@ int IPA(gnmgame &A, cvector &g, cvector &zh, double alpha, double fuzz, cvector 
     ym1 -= zh;
     ym2 = s;
     ym2 -= sh;
-    // if z and zh or s and sh are close enough, 
+    // if z and zh or s and sh are close enough,
     // we've got an approximate equilibrium, so we can quit
     // if (g_verbose) {
     //  std::cerr << "iter " << iter << "\tz diff " << ym1.norm() << "\ts diff " << ym2.norm()
@@ -388,4 +388,3 @@ int IPA(gnmgame &A, cvector &g, cvector &zh, double alpha, double fuzz, cvector 
 
 }  // end namespace Gambit::gametracer
 }  // end namespace Gambit
-  

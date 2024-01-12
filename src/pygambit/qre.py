@@ -22,13 +22,13 @@
 """
 A set of utilities for computing and analyzing quantal response equilbria
 """
-
+import contextlib
 import math
+
 import numpy
 import scipy.optimize
 
-from . import gambit
-from . import pctrace
+from . import gambit, pctrace
 from .profiles import Solution
 
 
@@ -45,7 +45,7 @@ def sym_compute_lhs(game, point):
 
     lhs = numpy.zeros(len(profile))
 
-    for (st, cont) in enumerate(game.choices):
+    for st in range(len(game.choices)):
         if st == 0:
             # sum-to-one equation
             lhs[st] = -1.0 + sum(profile)
@@ -68,20 +68,21 @@ def sym_compute_jac(game, point):
 
     matrix = numpy.zeros((len(point), len(profile)))
 
-    for (st, cont) in enumerate(game.choices):
+    for st in range(len(game.choices)):
         if st == 0:
             # sum-to-one equation
-            for (sto, conto) in enumerate(game.choices):
+            for sto in range(len(game.choices)):
                 matrix[sto, st] = profile[sto]
 
             # derivative wrt lambda is zero, so don't need to fill last col
         else:
             # this is a ratio equation
-            for (sto, conto) in enumerate(game.choices):
-                matrix[sto, st] = \
-                           -(game.N-1) * lam * profile[sto] * \
-                           (profile.strategy_value_deriv(st, sto) -
-                            profile.strategy_value_deriv(0, sto))
+            for sto in range(len(game.choices)):
+                matrix[sto, st] = (
+                    -(game.N-1) * lam * profile[sto] *
+                     (profile.strategy_value_deriv(st, sto) -
+                      profile.strategy_value_deriv(0, sto))
+                )
                 if sto == 0:
                     matrix[sto, st] -= 1.0
                 elif sto == st:
@@ -147,7 +148,7 @@ class StrategicQREPathTracer:
         if game.is_symmetric:
             p = game.mixed_strategy_profile()
 
-            try:
+            with contextlib.suppress(KeyboardInterrupt):
                 pctrace.trace_path(
                     [math.log(x) for x in p.profile],
                     0.0, max_lambda,
@@ -159,8 +160,6 @@ class StrategicQREPathTracer:
                     crit=None,
                     maxIter=100
                 )
-            except KeyboardInterrupt:
-                pass
 
             return points
         else:

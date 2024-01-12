@@ -38,11 +38,11 @@ PrintCliques(const List<List<MixedStrategyProfile<T> > > &p_cliques,
   for (int cl = 1; cl <= p_cliques.size(); cl++) {
     for (int i = 1; i <= p_cliques[cl].size(); i++) {
       p_renderer->Render(p_cliques[cl][i],
-			 "convex-" + lexical_cast<std::string>(cl)); 
+			 "convex-" + lexical_cast<std::string>(cl));
     }
   }
 }
-      
+
 void PrintBanner(std::ostream &p_stream)
 {
   p_stream << "Compute Nash equilibria by enumerating extreme points\n";
@@ -177,13 +177,3 @@ int main(int argc, char *argv[])
     return 1;
   }
 }
-
-
-
-
-
-
-
-
-
-

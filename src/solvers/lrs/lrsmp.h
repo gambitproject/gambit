@@ -149,8 +149,8 @@ typedef long ***lrs_mp_matrix;
 /******************************************************* */
 
 /* next two functions are not used by lrsmp, but are for lrsgmp compatability */
-#define lrs_alloc_mp(a)    
-#define lrs_clear_mp(a)  
+#define lrs_alloc_mp(a)
+#define lrs_clear_mp(a)
 lrs_mp_t lrs_alloc_mp_t();                      /* dynamic allocation of lrs_mp                  */
 lrs_mp_vector lrs_alloc_mp_vector (long n);	/* allocate lrs_mp_vector for n+1 lrs_mp numbers */
 lrs_mp_matrix lrs_alloc_mp_matrix (long m, long n);	/* allocate lrs_mp_matrix for m+1 x n+1 lrs_mp   */
@@ -201,7 +201,7 @@ void decint (lrs_mp a, lrs_mp b);	/* compute a=a-b                              
 void divrat (lrs_mp Na, lrs_mp Da, lrs_mp Nb, lrs_mp Db, lrs_mp Nc, lrs_mp Dc);
 						       /* computes Nc/Dc = (Na/Da) /( Nb/Db ) and reduce */
 void getfactorial (lrs_mp factorial, long k);	/* compute k factorial in lrs_mp                  */
-                                               /* NC/DC = ka*Na/Da + kb*Nb/Db */ 
+                                               /* NC/DC = ka*Na/Da + kb*Nb/Db */
 void linrat (lrs_mp Na, lrs_mp Da, long ka, lrs_mp Nb, lrs_mp Db, long kb, lrs_mp Nc, lrs_mp Dc);
 void lcm (lrs_mp a, lrs_mp b);	/* a = least common multiple of a, b; b is saved  */
 void mulrat (lrs_mp Na, lrs_mp Da, lrs_mp Nb, lrs_mp Db, lrs_mp Nc, lrs_mp Dc);

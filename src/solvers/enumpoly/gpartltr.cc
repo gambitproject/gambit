@@ -32,14 +32,14 @@ template class ListOfPartialTrees<double>;
 //template class TreeOfPartials<double>;
 //template gOutput &operator<<(gOutput &f, const TreeOfPartials<double> &y);
 //template class Gambit::List<TreeOfPartials<double> >;
-//template gOutput &operator<<(gOutput &f, 
+//template gOutput &operator<<(gOutput &f,
 //			     const Gambit::List<TreeOfPartials<double> > &y);
 //template class Gambit::List<Gambit::List<TreeOfPartials<double> > >;
-//template gOutput &operator<<(gOutput &f, 
+//template gOutput &operator<<(gOutput &f,
 //			     const Gambit::List<Gambit::List<TreeOfPartials<double> > > &y);
 //template class Gambit::List<Gambit::List<Gambit::List<TreeOfPartials<double> > > >;
 //template class ListOfPartialTrees<double>;
-//template gOutput &operator<<(gOutput &f, 
+//template gOutput &operator<<(gOutput &f,
 //			     const ListOfPartialTrees<double> &y);
 
 #include "gtree.imp"

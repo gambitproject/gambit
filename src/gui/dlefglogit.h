@@ -38,7 +38,7 @@ private:
   wxButton *m_stopButton, *m_okButton, *m_saveButton;
   wxTimer m_timer;
   wxString m_output;
-    
+
   void OnStop(wxCommandEvent &);
   void OnTimer(wxTimerEvent &);
   void OnIdle(wxIdleEvent &);

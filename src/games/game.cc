@@ -69,7 +69,7 @@ void GameStrategyRep::DeleteStrategy()
 
 GamePlayerRep::GamePlayerRep(GameRep *p_game, int p_id, int p_strats)
   : m_game(p_game), m_number(p_id), m_strategies(p_strats)
-{ 
+{
   for (int j = 1; j <= p_strats; j++) {
     m_strategies[j] = new GameStrategyRep(this);
     m_strategies[j]->m_number = j;
@@ -111,14 +111,14 @@ GameStrategy GamePlayerRep::NewStrategy()
 void GamePlayerRep::MakeStrategy()
 {
   Array<int> c(NumInfosets());
-  
+
   for (int i = 1; i <= NumInfosets(); i++)  {
     if (m_infosets[i]->flag == 1)
       c[i] = m_infosets[i]->whichbranch;
     else
       c[i] = 0;
   }
-  
+
   auto *strategy = new GameStrategyRep(this);
   m_strategies.push_back(strategy);
   strategy->m_number = m_strategies.Length();
@@ -240,13 +240,13 @@ Array<GamePlayer> GameRep::GetPlayers() const
 //                     GameRep: Writing data files
 //------------------------------------------------------------------------
 
-  
+
 namespace {
 
 std::string EscapeQuotes(const std::string &s)
 {
   std::string ret;
-  
+
   for (unsigned int i = 0; i < s.length(); i++)  {
     if (s[i] == '"')   ret += '\\';
     ret += s[i];
@@ -277,7 +277,7 @@ void GameRep::WriteNfgFile(std::ostream &p_file) const
     p_file << '"' << EscapeQuotes(player->GetLabel()) << "\" ";
   }
   p_file << "}\n\n{ ";
-  
+
   for (auto player : players) {
     p_file << "{ ";
     for (auto strategy : player->GetStrategies()) {
@@ -534,5 +534,3 @@ template class MixedStrategyProfile<Rational>;
 
 
 }  // end namespace Gambit
-
-

@@ -19,26 +19,26 @@ http://netlib2.cs.utk.edu/hompack/
 ***************************************************************** */
 
 /* qhull.h -- user-level header file for using qhull.a library
-   
+
    see README, qhull_a.h
 
    copyright (c) 1993-1994, The Geometry Center
 
-   defines qh_qh, global data structure for qhull.  
-   
+   defines qh_qh, global data structure for qhull.
+
    NOTE: access to qh_qh is via the 'qh' macro.  This allows
    qh_qh to be either a pointer or a structure.  An example
    of using qh is "qh DROPdim" which accesses the DROPdim
    field of qh_qh.  Similarly, access to qh_qhstat is via
    the 'qhstat' macro.
-   
+
    includes function prototypes for qhull.c, geom.c, global.c, io.c, user.c
 
    use mem.h for mem.c
    use set.h for set.c
-   
+
    see unix.c for an example of using qhull.h
-   
+
    recompile qhull if you change this file
 */
 
@@ -70,7 +70,7 @@ typedef enum {False, True} boolT;     /* True=1, False= 0 */
 enum qh_CENTER {qh_none, qh_voronoi, qh_centrum};
 
 /* -output formats for printing (qh PRINTout) */
-enum qh_PRINT {qh_PRINTnone, qh_PRINTfacets, qh_PRINTgeom, qh_PRINTnormals, 
+enum qh_PRINT {qh_PRINTnone, qh_PRINTfacets, qh_PRINTgeom, qh_PRINTnormals,
   qh_PRINTincidences, qh_PRINTmathematica, qh_PRINToff, qh_PRINTpoints,
   qh_PRINTEND};
 
@@ -120,13 +120,13 @@ enum qh_PRINT {qh_PRINTnone, qh_PRINTfacets, qh_PRINTgeom, qh_PRINTnormals,
 
 /*------------------------------------
 	Conditional compilation
-	
+
 -COMPUTEfurthest computing furthest saves 4% of memory and costs ca. 3% time
                          (about 40% more distance tests for partitioning)
 -MAXoutside      keep maxoutside for each facet
 		   this takes a realT per facet and slightly slows down qhull
 		   it should speed up pre-merging with Wn or Qm
-		   better outer planes for geomview output 
+		   better outer planes for geomview output
 */
 
 #define qh_COMPUTEfurthest 0    /* 1 removes facet->furthestdist */
@@ -181,7 +181,7 @@ struct facetT {
   			   for simplicial facets, neighbors defines ridge */
   setT    *neighbors;   /* neighbors of the facet.
   			   if simplicial, kth neighbor skips kth vertex.
-  			   if visible, 1st neighbor (if any) is newfacet 
+  			   if visible, 1st neighbor (if any) is newfacet
   			         or deleted newfacet (visible) */
   setT    *outsideset;  /* set of points outside this facet
 		           if non-empty, last point is furthest */
@@ -191,7 +191,7 @@ struct facetT {
 		           if non-empty, last point is furthest away */
   unsigned visitid;     /* visit_id, for visiting all neighbors,
 			   all uses must be independent */
-  unsigned id:24;       /* unique identifier, =>room for 8 flags 
+  unsigned id:24;       /* unique identifier, =>room for 8 flags
   			   new facet if >= qh newfacet_id */
   flagT    toporient:1; /* True if created with top orientation
 			   after merging, use ridge orientation */
@@ -212,7 +212,7 @@ struct facetT {
 */
 
 struct ridgeT {
-  setT    *vertices;    /* vertices belonging to this ridge, inverse sorted by id 
+  setT    *vertices;    /* vertices belonging to this ridge, inverse sorted by id
                            NULL if a degen ridge (matchsame) */
   facetT  *top;         /* top facet this ridge is part of */
   facetT  *bottom;      /* bottom facet this ridge is part of */
@@ -241,17 +241,17 @@ struct vertexT {
   flagT    newlist:1;   /* true if vertex on qh newvertex_list */
 };
 
-/* ======= -global variables -qh ============================ 
+/* ======= -global variables -qh ============================
 
    all global variables for qhull are in qh, qhmem, and qhstat
-   
+
    qhmem is defined in mem.h and qhstat is defined in stat.h
-   
+
    set qh_QHpointer 1 to enable qh_saveqhull() and qh_restoreqhull()
      this costs about 7% in time and space.
 */
 
-typedef struct qhT qhT;    
+typedef struct qhT qhT;
 
 #define qh_QHpointer 0  /* 1 for dynamic allocation, 0 for global structure */
 #if qh_QHpointer
@@ -280,7 +280,7 @@ struct qhT {
   boolT FORCEoutput;      /* true 'Po' if forcing output despite degeneracies */
   int   GOODpoint;        /* 1+n, good facet if visible/not(-) from point n*/
   pointT *GOODpointp;     /*   the actual point */
-  boolT GOODthreshold;    /* true if qh lower_threshold/upper_threshold defined 
+  boolT GOODthreshold;    /* true if qh lower_threshold/upper_threshold defined
   			     false if qh SPLITthreshold */
   int   GOODvertex;       /* 1+n, good facet if vertex for point n */
   pointT *GOODvertexp;     /*   the actual point */
@@ -349,11 +349,11 @@ struct qhT {
   			     if Delaunay, default is 0.0 for upper envelope */
   realT *lower_threshold; /* don't print if facet->normal[k] <=lower_threshold[k] */
   realT *upper_bound;     /* scale point[k] to new upper bound */
-  realT *lower_bound;     /* scale point[k] to new lower bound 
+  realT *lower_bound;     /* scale point[k] to new lower bound
   			     project if both upper_ and lower_bound == 0 */
 
   /* -precision constants, computed in qh_maxmin */
-  
+
   realT centrum_radius;   /* max centrum radius for convexity (roundoff added) */
   realT cos_max;	  /* max cosine for convexity (roundoff added) */
   realT maxmaxcoord;      /* max coordinate in any dimension */
@@ -364,7 +364,7 @@ struct qhT {
   realT MINdenom_1_2;     /* min. abs. val for 1/x that allows normalization */
   realT MINdenom_2;       /*    use divzero if denominator < MINdenom_2 */
   realT *NEARzero;        /* hull_dim array for near zero in gausselim */
-  
+
   /* -internal constants */
 
   char qhull[sizeof("qhull")]; /* for checking ownership */
@@ -379,7 +379,7 @@ struct qhT {
   int   TEMPsize;         /* size for small, temporary sets (in quick mem) */
 
   /* -list of all facets, from facet_list to facet_tail, see qh_appendfacet */
- 
+
   facetT *facet_list;     /* first facet */
   facetT *facet_next;     /* next facet for buildhull()
     			     all previous facets do not have outside sets*/
@@ -392,8 +392,8 @@ struct qhT {
   unsigned tracevertex_id;  /* set at buildtracing, can print whenever */
   vertexT *tracevertex;     /*   set in newvertex, undone in delvertex*/
   vertexT *vertex_list;   /* list of all vertices, to vertex_tail */
-  vertexT *vertex_tail;   
-  vertexT *newvertex_list; /* list of vertices in newfacet_list 
+  vertexT *vertex_tail;
+  vertexT *newvertex_list; /* list of vertices in newfacet_list
                              all vertices have 'new' set */
   int 	num_facets;	  /* number of facets in facet_list
 			     includes visble faces (num_visible) */
@@ -407,7 +407,7 @@ struct qhT {
   unsigned vertex_id;        /* id of next, new vertex from newvertex() */
 
   /* -variables */
-  
+
   clock_t hulltime;       /* ignore time to set up input and randomize */
   int	CENTERtype;       /* current type of facet->center, qh_CENTER */
   int 	furthest_id;      /* pointid of furthest point, for tracing */
@@ -417,7 +417,7 @@ struct qhT {
   realT max_vertex;       /* maximum distance (>0) from vertex to a facet,
 			       before roundoff, not simplicial vertices */
   realT min_vertex;       /* minimum distance (<0) from vertex to a facet,
-			       before roundoff, not simplicial vertices 
+			       before roundoff, not simplicial vertices
 			       defines coplanar points */
   boolT NEWfacets;        /* true while visible facets invalid
 			      from makecone/attachnewfacets to deletevisible */
@@ -432,15 +432,15 @@ struct qhT {
   boolT QHULLfinished;    /* True after qhull() is finished */
   int 	visit_id;         /* unique id for searching neighborhoods, */
   int 	vertex_visit;     /* unique id for searching vertices */
-  
+
   /* -sets */
   setT *facet_mergeset;   /* temporary set of merges to be done */
   setT *initial_points;   /* initial simplex for buildhull() */
-  setT *hash_table;	  /* hash table for matching ridges in qh_matchfacets 
+  setT *hash_table;	  /* hash table for matching ridges in qh_matchfacets
                              size is setsize() */
   int   num_hashentries;  /* current number of hashentries */
   setT *other_points;     /* additional points (first is qh interior_point) */
-  setT *del_vertices;     /* vertices to partition and delete with visible 
+  setT *del_vertices;     /* vertices to partition and delete with visible
                              facets.  Have deleted set for checkfacet */
 
   /* -buffers */
@@ -448,7 +448,7 @@ struct qhT {
   coordT **gm_row;        /* array of gm_matrix rows */
   char* line;             /* malloc'd input line of maxline+1 chars */
   int maxline;
-  
+
   /* -statics */
   boolT firstcentrum; 	  /* for qh_printcentrum */
   int  lastreport;        /* for qh_buildtracing */
@@ -459,7 +459,7 @@ struct qhT {
   setT *old_tempstack;     /* for saving qhmem.tempstack in save_qhull */
 };
 
-/* =========== -macros- ========================= 
+/* =========== -macros- =========================
 -otherfacet_(ridge, facet)   return neighboring facet for a ridge in facet
 -getid_(p)		     return id or -1 if NULL
 */
@@ -475,7 +475,7 @@ struct qhT {
    and FOREACHfacet_ uses 'facet' declared by 'facetT *facet'.  The macros
    may use auxiliary variables as indicated.
 
--FORALLfacets                iterate over all facets in facetlist 
+-FORALLfacets                iterate over all facets in facetlist
 -FORALLpoint_(points, num)   iterate over num points (uses 'pointT *pointtemp')
 -FORALLvertices              iterate over all vertices in vertex_list
 
@@ -484,8 +484,8 @@ struct qhT {
 -FOREACHpoint_(points)       iterate over point set (uses 'pointT **pointp')
 -FOREACHridge_(ridges)	     iterate over ridge set (uses 'ridgeT **ridgep')
 -FOREACHvertex_(vertice)     iterate over vertex set (uses 'vertexT **vertexp')
--FOREACHadjacent_(vertex)    iterate over adjacent vertices to vertex 
--FOREACHneighbor_(vertex)    iterate over neighboring facets to vertex 
+-FOREACHadjacent_(vertex)    iterate over adjacent vertices to vertex
+-FOREACHneighbor_(vertex)    iterate over neighboring facets to vertex
 
 -FOREACHfacet_i_(facets)    iterate over facets by facet_i and facet_n
 -FOREACHneighbor_i_(facet)  iterate over facet->neighbors by neighbor_i, neighbor_n
@@ -520,7 +520,7 @@ struct qhT {
 #define FOREACHridge_i_(ridges)    FOREACHsetelement_i_(ridgeT, ridges, ridge)
 #define FOREACHvertex_i_(vertices) FOREACHsetelement_i_(vertexT, vertices,vertex)
 
-/* ======= -functions =========== 
+/* ======= -functions ===========
 
   	see corresponding .c file for definitions
 
@@ -534,7 +534,7 @@ struct qhT {
 -errprint		print erroneous facets, ridge, and vertex
 -printfacetlist		print all fields for a list of facets
 -user_memsizes          define up to 10 additional quick allocation sizes
-  	
+
 	Geometric functions (see geom.c and geom.h, other useful functions)
 -gram_schmidt   implements Gram-Schmidt orthogonalization by rows
 -projectinput  project input along one or more dimensions + Delaunay projection
@@ -588,7 +588,7 @@ void    qh_scaleinput ();
 
 /***** -global.c prototypes (alphabetical) ***********************/
 
-void    qhull_fatal(int); 
+void    qhull_fatal(int);
 void 	qh_freebuffers ();
 void    qh_freeqhull (boolT allmem);
 void 	qh_init_qhull_command (int argc, char *argv[]);
@@ -627,7 +627,7 @@ void    qh_printallstatistics (FILE *fp, const char *string);
 void    qh_printstatistics (FILE *fp, const char *string);
 
 
-/* ======= -constants- ====================== 
+/* ======= -constants- ======================
 
         System dependent constants
 -SECticks       ticks per second from clock()
@@ -643,7 +643,7 @@ void    qh_printstatistics (FILE *fp, const char *string);
 -HASHfactor     total hash slots / used hash slots
 -VERIFYdirect   verify all points against all facets if op count smaller
 -MAXrandom      maximum random number
--ORIENTclock    true if clockwise orientation on output 
+-ORIENTclock    true if clockwise orientation on output
 
 	Conditional compilation
 -KEEPstatistics 1 removes most of statistic gathering and reporting
@@ -691,9 +691,9 @@ void    qh_printstatistics (FILE *fp, const char *string);
    its own memory, we need to explicitly specify alignment in
    qh_meminitbuffers().
 
-   A safe choice is sizeof(double).  sizeof(float) may be used if doubles 
+   A safe choice is sizeof(double).  sizeof(float) may be used if doubles
    do not occur in data structures and pointers are the same size.  Be careful
-   of machines (e.g., DEC Alpha) with large pointers.  If gcc is available, 
+   of machines (e.g., DEC Alpha) with large pointers.  If gcc is available,
    use __alignof__(double) or fmax_(__alignof__(float), __alignof__(void *)).
 
    see qhull_a.h for qhull's alignment
@@ -706,9 +706,9 @@ void    qh_printstatistics (FILE *fp, const char *string);
 -qhmemT - global memory structure for mem.c
 
    users should ignore qhmem except for writing extensions
-   
+
    qhmem could be swapable like qh and qhstat, but then
-   multiple qh's and qhmem's would need to keep in synch.  
+   multiple qh's and qhmem's would need to keep in synch.
    A swapable qhmem would also waste memory buffers.  As long
    as memory operations are atomic, there is no problem with
    multiple qh structures being active at the same time.
@@ -750,9 +750,9 @@ struct qhmemT {               /* global memory management variables */
 };
 
 
-/* ======= -macros =========== 
+/* ======= -macros ===========
 
-qh_memalloc_(size, freelistp, object)  returns object of size bytes 
+qh_memalloc_(size, freelistp, object)  returns object of size bytes
 	assumes size<=qhmem.LASTsize and void **freelistp is a temp
 
 qh_memfree_(object, size, freelistp) free up quick object
@@ -802,7 +802,7 @@ qh_memfree_(object, size, freelistp) free up quick object
     *((void **)object)= *freelistp;\
     *freelistp= object;}}
 
-/* ======= -functions =========== 
+/* ======= -functions ===========
 
 	see mem.c for definitions
 
@@ -856,7 +856,7 @@ typedef struct setT setT;   /* a set is a sorted or unsorted array of pointers *
 struct setT {
   unsigned int maxsize; /* maximum number of elements (except NULL) */
   void *e[1];           /* array of pointers, tail is NULL */
-                        /* last slot (unless NULL) is actual size+1 
+                        /* last slot (unless NULL) is actual size+1
                            e[maxsize]==NULL or e[e[maxsize]-1]==NULL */
 };
 
@@ -867,7 +867,7 @@ struct setT {
 -FOREACHsetelement_(type, set, variable)- define FOREACH iterator
     variable is NULL at end of loop
     assumes *variable and **variablep are declared
-    variablep is one beyond variable.  
+    variablep is one beyond variable.
     to repeat an element,
           variablep--; / *repeat* /
     use FOREACHsetelement_i_() if need index or include NULLs
@@ -920,7 +920,7 @@ struct setT {
 -SETelem_(set, n)- return the n'th element of set
       assumes that n is valid [0..size] and that set is defined
       may need a type cast
-      
+
 -SETelemaddr_(set, n, type)-return address of the n'th element of a set
       assumes that n is valid [0..size] and set is defined
 
@@ -945,7 +945,7 @@ struct setT {
 #define SETreturnsize_(set, size) (((size)= (long)((set)->e[(set)->maxsize]))?(--(size)):((size)= (set)->maxsize))
 #define SETempty_(set) 	          (!set || (SETfirst_(set) ? 0:1))
 
-/* ======= -functions =========== 
+/* ======= -functions ===========
 
    see set.c for function definitions
 
@@ -959,7 +959,7 @@ struct setT {
 -setreplace	    replaces oldelem in set with newelem
 -setunique	    add an element if not already in set
 
-	Access and predicate functions	
+	Access and predicate functions
 -setin		    returns 1 if setelem is in a set, 0 otherwise
 -setindex	    returns the index of elem in set.   If none, returns -1
 -setlast	    return last element of set or NULL
@@ -1063,7 +1063,7 @@ void qh_setzero (setT *set, int index, int size);
 */
 #define det2_(a1,a2,b1,b2) ((a1)*(b2) - (a2)*(b1))
 #define det3_(a1,a2,a3,b1,b2,b3,c1,c2,c3) ( (a1)*det2_(b2,b3,c2,c3) \
-		- (b1)*det2_(a2,a3,c2,c3) + (c1)*det2_(a2,a3,b2,b3) )  
+		- (b1)*det2_(a2,a3,c2,c3) + (c1)*det2_(a2,a3,b2,b3) )
 
 /*-----------------------------------------------
 -dX, dY, dZ- coordinate differences given row pointers rows[]
@@ -1073,7 +1073,7 @@ void qh_setzero (setT *set, int index, int size);
 #define dZ(p1,p2)  (*(rows[p1]+2) - *(rows[p2]+2))
 #define dW(p1,p2)  (*(rows[p1]+3) - *(rows[p2]+3))
 
-/* ======= -functions =========== 
+/* ======= -functions ===========
 
    see geom.c for definitions
 
@@ -1087,12 +1087,12 @@ void qh_setzero (setT *set, int index, int size);
 -gram_schmidt   implements Gram-Schmidt orthogonalization by rows
 -inthresholds   return True if normal within qh lower_/upper_threshold
 -maxabsval      return max absolute value of a vector
--maxsimplex	determines maximum simplex for a set of points 
+-maxsimplex	determines maximum simplex for a set of points
 -minabsval     return min absolute value of a dim vector
 -normalize      normalize a vector
 -pointdist      return distance between two points
 -printmatrix    print matrix given by row vectors
--printpoints    print pointids for a set of points starting at index 
+-printpoints    print pointids for a set of points starting at index
 -projectpoints  project points along one or more dimensions
 -randomfactor	return a random factor within qh RANDOMdistmax of 1.0
 -randommatrix   generate a random dimXdim matrix in range (-1,1)
@@ -1149,7 +1149,7 @@ void    qh_printmatrix (FILE *fp, const char *string, realT **rows, int numrow, 
 void    qh_printpoints (FILE *fp, const char *string, setT *points);
 void    qh_projectinput ();
 pointT *qh_projectpoint(pointT *point, facetT *facet, realT dist);
-void 	qh_projectpoints (signed char *project, int n, realT *points, 
+void 	qh_projectpoints (signed char *project, int n, realT *points,
              int numpoints, int dim, realT *newpoints, int newdim);
 realT   qh_randomfactor ();
 void    qh_randommatrix (realT *buffer, int dim, realT **row);
@@ -1159,9 +1159,9 @@ void    qh_scaleinput ();
 void 	qh_scalepoints (pointT *points, int numpoints, int dim,
   		realT *newlows, realT *newhighs);
 void    qh_setfacetplane(facetT *newfacets);
-void 	qh_sethyperplane_det (int dim, coordT **rows, coordT *point0, 
+void 	qh_sethyperplane_det (int dim, coordT **rows, coordT *point0,
          	boolT toporient, coordT *normal, realT *offset);
-void 	qh_sethyperplane_gauss (int dim, coordT **rows, pointT *point0, 
+void 	qh_sethyperplane_gauss (int dim, coordT **rows, pointT *point0,
 	     boolT toporient, coordT *normal, coordT *offset, boolT *nearzero);
 pointT *qh_voronoi_center (int dim, setT *points);
 
@@ -1178,12 +1178,12 @@ pointT *qh_voronoi_center (int dim, setT *points);
 
 -BESTnonconvex   if > dim*n neighbors, findbestneighbor tests nonconvex ridges
                    needed because findbestneighbor is slow for large facets
-		   
+
 -MAXnewmerges    if >n newmerges, merge_nonconvex calls reducevertices_centrums
                    needed because postmerge can merge many facets at once
 
 -MAXnewcentrum   if <= dim+n vertices (n approximates the number of merges),
-                    reset the centrum in reducevertices_centrum 
+                    reset the centrum in reducevertices_centrum
                   needed to reduce cost and because centrums may move
 		        too much if many vertices in high-d
 
@@ -1209,7 +1209,7 @@ typedef struct mergeT mergeT;
 
 struct mergeT {
   realT   angle;          /* angle between normals of facet1 and facet2 */
-  facetT *facet1; 
+  facetT *facet1;
   facetT *facet2;
   flagT   mergeridge:1;   /* set if merge due to qh_MERGEridge */
   flagT   newmerge:1;     /* set if new merge, for forcedmerges() */
@@ -1223,7 +1223,7 @@ struct mergeT {
 */
 #define FOREACHmerge_(merges) FOREACHsetelement_(mergeT, merges, merge)
 
-/* ======= -functions and procedures- =========== 
+/* ======= -functions and procedures- ===========
 
 	top-level merge functions
 -merge_nonconvex   merges all nonconvex facets
@@ -1258,7 +1258,7 @@ struct mergeT {
 -reducevertices_centrums reduce vertex sets and reset centrums
 -rename_sharedvertex  detect and rename if shared vertex in facet
 -redundant_vertex   returns true if detect and rename redundant vertex
--renamevertex	   renames oldvertex as newvertex in ridges 
+-renamevertex	   renames oldvertex as newvertex in ridges
 -renameridgevertex renames oldvertex as newvertex in ridge
 -maydropneighbor   drop neighbor relationship if no ridge between facet and neighbor
 -remove_extravertices remove extra vertices in non-simplicial facets
@@ -1293,7 +1293,7 @@ realT   qh_getdistance(facetT *facet, facetT *neighbor, realT *mindist, realT *m
 void	qh_getmergeset(facetT *facetlist);
 void 	qh_getmergeset_initial (facetT *facetlist);
 void    qh_hashridge (setT *hashtable, int hashsize, ridgeT *ridge, vertexT *oldvertex);
-ridgeT *qh_hashridge_find (setT *hashtable, int hashsize, ridgeT *ridge, 
+ridgeT *qh_hashridge_find (setT *hashtable, int hashsize, ridgeT *ridge,
               vertexT *vertex, vertexT *oldvertex, int *hashslot);
 void 	qh_makeridges(facetT *facet);
 void    qh_maydropneighbor (facetT *facet);
@@ -1359,7 +1359,7 @@ struct hashentryT {
   unsigned    skipindex;    /* skipped vertex in facet, for orientation */
 };
 
-/* =========== -macros- ========================= 
+/* =========== -macros- =========================
 */
 
 /* ----------------------------------------------
@@ -1377,7 +1377,7 @@ struct hashentryT {
 #define FOREACHvertexA_(vertices) FOREACHsetelement_(vertexT, vertices, vertexA)
 #define FOREACHvertexreverse12_(vertices) FOREACHsetelementreverse12_(vertexT, vertices, vertex)
 
-/* ======= -functions =========== 
+/* ======= -functions ===========
 
 see poly.c for definitions
 
@@ -1432,7 +1432,7 @@ see poly.c for definitions
 -delridge	    deletes ridge from data structures it belongs to and frees up the
 -delvertex	    deletes vertex and its memory
 -clearcenters       clear old data from facet->center
-	
+
 	Check functions
 -check_bestdist	    check that points are not outside their best facet
 -check_maxout       updates max_outside, checks all points against bestfacet
@@ -1489,7 +1489,7 @@ boolT   qh_matchmatch (facetT *facet, int skip, facetT *matchfacet,
 void    qh_matchneighbor (facetT *newfacet, int newskip, int hashsize,
 			  int *hashcount, boolT matchall);
 void	qh_matchnewfacets ();
-boolT   qh_matchvertices (int firstindex, setT *verticesA, int skipA, 
+boolT   qh_matchvertices (int firstindex, setT *verticesA, int skipA,
 			  setT *verticesB, int *skipB, boolT *same);
 int 	qh_newhashtable(int newsize);
 facetT *qh_newfacet();
@@ -1565,7 +1565,7 @@ enum statistics {     /* alphabetical after Z/W */
     Wdegenmax,
     Wdegentot,
     Zdegenvertex,
-    Zdelfacetdup, 
+    Zdelfacetdup,
     Zdelridge,
     Zdetsimplex,
     Zdistcheck,
@@ -1592,9 +1592,9 @@ enum statistics {     /* alphabetical after Z/W */
     Zdupridge,
     Zfindvertex,
     Zfindfail,
-    Zflipped, 
-    Wflippedmax, 
-    Wflippedtot, 
+    Zflipped,
+    Wflippedmax,
+    Wflippedtot,
     Zflippedfacets,
     Zgauss0,
     Zgoodfacet,
@@ -1646,12 +1646,12 @@ enum statistics {     /* alphabetical after Z/W */
     Zpartcoplanar,
     Zpartneighbor,
     Zpartinside,
-    Zpartition, 
+    Zpartition,
     Zpartitionall,
     Zpbalance,
     Wpbalance,
-    Wpbalance2, 
-    Zpostfacets, 
+    Wpbalance2,
+    Zpostfacets,
     Zprocessed,
     Zremvertex,
     Zremvertexdel,
@@ -1758,7 +1758,7 @@ macros:
 #define zdef_(type,name,doc,count)
 #define ZMAXlevel 1
 #endif
-  
+
 /* -typedef and extern-  types are defined below */
 
 typedef struct qhstatT qhstatT;     /* global data structure for statistics */
@@ -1783,7 +1783,7 @@ union intrealT {
 /*--------------------------------------------
 -qhstatT- global data structure for statistics
 */
-struct qhstatT {  
+struct qhstatT {
   intrealT stats[ZEND];  /* integer and real statistics */
   unsigned char id[ZEND];  /* id's in print order */
   char *doc[ZEND];     /* array of documentation strings */
@@ -1806,7 +1806,7 @@ struct qhstatT {
 -nostatistic    true if no statistic to print
 -stddev		compute the standard deviation and average from statistics
 */
-  
+
 void    qh_collectstatistics ();
 void	qh_freestatistics ();
 void    qh_initstatistics ();
@@ -1834,7 +1834,7 @@ realT   qh_stddev (int num, realT tot, realT tot2, realT *ave);
 #define trace5(args) {if (qh IStracing >= 5) fprintf args;}
 
 
-/* ======= -functions =========== 
+/* ======= -functions ===========
 
 see corresponding .c file for definitions
 
@@ -1856,7 +1856,7 @@ see corresponding .c file for definitions
 -partitionvisible partitions points in visible_list to newfacet_list
 
 	Global.c internal functions (others in qhull.h)
--freebuffers	free up global memory buffers 
+-freebuffers	free up global memory buffers
 -initbuffers	initialize global memory buffers
 -strtod/tol     duplicates strtod/tol
 */
@@ -1888,6 +1888,3 @@ double  qh_strtod (const char *s, char **endp);
 
 
 #endif /* qhDEFqhull */
-
-
-

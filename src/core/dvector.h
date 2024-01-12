@@ -51,6 +51,3 @@ public:
 } // end namespace Gambit
 
 #endif // LIBGAMBIT_DVECTOR_H
-
-
-

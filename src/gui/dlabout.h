@@ -30,5 +30,3 @@ public:
 };
 
 #endif  // DLABOUT_H
-
-

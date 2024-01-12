@@ -34,7 +34,7 @@
 
 gbtGamePropertiesDialog::gbtGamePropertiesDialog(wxWindow *p_parent,
 						 gbtGameDocument *p_doc)
-  : wxDialog(p_parent, wxID_ANY, _("Game properties"), wxDefaultPosition), 
+  : wxDialog(p_parent, wxID_ANY, _("Game properties"), wxDefaultPosition),
     m_doc(p_doc)
 {
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
@@ -42,7 +42,7 @@ gbtGamePropertiesDialog::gbtGamePropertiesDialog(wxWindow *p_parent,
   auto *titleSizer = new wxBoxSizer(wxHORIZONTAL);
   titleSizer->Add(new wxStaticText(this, wxID_STATIC, _("Title")),
 		  0, wxALL | wxALIGN_CENTER, 5);
-  m_title = new wxTextCtrl(this, wxID_ANY, 
+  m_title = new wxTextCtrl(this, wxID_ANY,
 			   wxString(m_doc->GetGame()->GetTitle().c_str(),
 				    *wxConvCurrent),
 			   wxDefaultPosition, wxSize(400, -1));
@@ -53,19 +53,19 @@ gbtGamePropertiesDialog::gbtGamePropertiesDialog(wxWindow *p_parent,
   auto *commentSizer = new wxBoxSizer(wxHORIZONTAL);
   commentSizer->Add(new wxStaticText(this, wxID_STATIC, _("Comment")),
 		    0, wxALL | wxALIGN_CENTER, 5);
-  m_comment = new wxTextCtrl(this, wxID_ANY, 
+  m_comment = new wxTextCtrl(this, wxID_ANY,
 			     wxString(m_doc->GetGame()->GetComment().c_str(),
 				      *wxConvCurrent),
 			     wxDefaultPosition, wxSize(400, -1),
 			     wxTE_MULTILINE);
   commentSizer->Add(m_comment, 1, wxALL | wxALIGN_CENTER, 5);
   topSizer->Add(commentSizer, 1, wxALL | wxEXPAND, 0);
-	
-  auto *boxSizer = 
+
+  auto *boxSizer =
     new wxStaticBoxSizer(wxVERTICAL, this, _("Information about this game"));
 
   boxSizer->Add(new wxStaticText(this, wxID_STATIC,
-				 wxString(_("Filename: ")) + 
+				 wxString(_("Filename: ")) +
 				 m_doc->GetFilename()),
 		0, wxALL, 5);
 
@@ -76,12 +76,12 @@ gbtGamePropertiesDialog::gbtGamePropertiesDialog(wxWindow *p_parent,
 						  game->NumPlayers())),
 		0, wxALL, 5);
   if (game->IsConstSum()) {
-    boxSizer->Add(new wxStaticText(this, wxID_STATIC, 
+    boxSizer->Add(new wxStaticText(this, wxID_STATIC,
 				   _("This is a constant-sum game")),
 		  0, wxALL, 5);
   }
   else {
-    boxSizer->Add(new wxStaticText(this, wxID_STATIC, 
+    boxSizer->Add(new wxStaticText(this, wxID_STATIC,
 				   _("This is not a constant-sum game")),
 		  0, wxALL, 5);
   }
@@ -116,4 +116,3 @@ gbtGamePropertiesDialog::gbtGamePropertiesDialog(wxWindow *p_parent,
   Layout();
   CenterOnParent();
 }
-

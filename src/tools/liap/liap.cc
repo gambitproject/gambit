@@ -56,7 +56,7 @@ void PrintHelp(char *progname)
   exit(1);
 }
 
-List<MixedStrategyProfile<double> > 
+List<MixedStrategyProfile<double> >
 ReadStrategyProfiles(const Game &p_game, std::istream &p_stream)
 {
   List<MixedStrategyProfile<double> > profiles;
@@ -80,7 +80,7 @@ ReadStrategyProfiles(const Game &p_game, std::istream &p_stream)
   return profiles;
 }
 
-List<MixedStrategyProfile<double> > 
+List<MixedStrategyProfile<double> >
 RandomStrategyProfiles(const Game &p_game, int p_count)
 {
   List<MixedStrategyProfile<double> > profiles;
@@ -92,7 +92,7 @@ RandomStrategyProfiles(const Game &p_game, int p_count)
   return profiles;
 }
 
-List<MixedBehaviorProfile<double> > 
+List<MixedBehaviorProfile<double> >
 ReadBehaviorProfiles(const Game &p_game, std::istream &p_stream)
 {
   List<MixedBehaviorProfile<double> > profiles;
@@ -116,7 +116,7 @@ ReadBehaviorProfiles(const Game &p_game, std::istream &p_stream)
   return profiles;
 }
 
-List<MixedBehaviorProfile<double> > 
+List<MixedBehaviorProfile<double> >
 RandomBehaviorProfiles(const Game &p_game, int p_count)
 {
   List<MixedBehaviorProfile<double> > profiles;
@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
   int numDecimals = 6;
   double tolN = 1.0e-10;
   std::string startFile;
- 
+
   int long_opt_index = 0;
   struct option long_options[] = {
     { "help", 0, nullptr, 'h'   },

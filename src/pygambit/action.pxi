@@ -34,7 +34,10 @@ class Action:
         )
 
     def __eq__(self, other: typing.Any) -> bool:
-        return isinstance(other, Action) and self.action.deref() == cython.cast(Action, other).action.deref()
+        return (
+            isinstance(other, Action) and
+            self.action.deref() == cython.cast(Action, other).action.deref()
+        )
 
     def __hash__(self) -> int:
         return cython.cast(cython.long, self.action.deref())
@@ -55,11 +58,11 @@ class Action:
     @property
     def label(self) -> str:
         """Get or set the text label of the action."""
-        return self.action.deref().GetLabel().decode('ascii')
+        return self.action.deref().GetLabel().decode("ascii")
 
     @label.setter
     def label(self, value: str) -> None:
-        self.action.deref().SetLabel(value.encode('ascii'))
+        self.action.deref().SetLabel(value.encode("ascii"))
 
     @property
     def infoset(self) -> Infoset:
@@ -79,12 +82,14 @@ class Action:
             If the action does not belong to the chance player.
         """
         if not self.infoset.is_chance:
-            raise UndefinedOperationError("action probabilities are only defined at chance information sets")
+            raise UndefinedOperationError(
+                "action probabilities are only defined at chance information sets"
+            )
         py_string = cython.cast(
             string,
             self.action.deref().GetInfoset().deref().GetActionProb(self.action.deref().GetNumber())
         )
-        if "." in py_string.decode('ascii'):
-            return decimal.Decimal(py_string.decode('ascii'))
+        if "." in py_string.decode("ascii"):
+            return decimal.Decimal(py_string.decode("ascii"))
         else:
-            return Rational(py_string.decode('ascii'))
+            return Rational(py_string.decode("ascii"))

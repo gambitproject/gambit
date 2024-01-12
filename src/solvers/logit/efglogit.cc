@@ -53,7 +53,7 @@ private:
     virtual ~Equation() = default;
     virtual double Value(const LogBehavProfile<double> &p_point,
 			 double p_lambda) const = 0;
-    virtual void Gradient(const LogBehavProfile<double> &p_point, 
+    virtual void Gradient(const LogBehavProfile<double> &p_point,
 			  double p_lambda,
 			  Vector<double> &p_gradient) const = 0;
   };
@@ -81,7 +81,7 @@ private:
   };
 
   //
-  // This class represents the equation relating the probability of 
+  // This class represents the equation relating the probability of
   // playing action (pl,iset,act) to the probability of playing action
   // (pl,iset,1)
   //
@@ -97,7 +97,7 @@ private:
 	m_infoset(p_game->GetPlayer(p_player)->GetInfoset(p_infoset))
     { }
 
-    double Value(const LogBehavProfile<double> &p_profile, 
+    double Value(const LogBehavProfile<double> &p_profile,
 		 double p_lambda) const override;
     void Gradient(const LogBehavProfile<double> &p_profile, double p_lambda,
 		  Vector<double> &p_gradient) const override;
@@ -165,14 +165,14 @@ AgentQREPathTracer::EquationSystem::SumToOneEquation::Gradient(const LogBehavPro
   // Derivative wrt lambda is zero
   p_gradient[i] = 0.0;
 }
-			       
+
 
 
 double
 AgentQREPathTracer::EquationSystem::RatioEquation::Value(const LogBehavProfile<double> &p_profile,
 							 double p_lambda) const
 {
-  return (p_profile.GetLogProb(m_pl, m_iset, m_act) - 
+  return (p_profile.GetLogProb(m_pl, m_iset, m_act) -
 	  p_profile.GetLogProb(m_pl, m_iset, 1) -
 	  p_lambda *
 	  (p_profile.GetPayoff(m_infoset->GetAction(m_act)) -
@@ -195,15 +195,15 @@ AgentQREPathTracer::EquationSystem::RatioEquation::Gradient(const LogBehavProfil
 	    p_gradient[i] = -1.0;
 	  }
 	  else if (act == m_act) {
-	    p_gradient[i] = 1.0; 
+	    p_gradient[i] = 1.0;
 	  }
 	  else {
 	    p_gradient[i] = 0.0;
 	  }
 	}
 	else {   // infoset1 != infoset2
-	  p_gradient[i] = 
-	    -p_lambda * 
+	  p_gradient[i] =
+	    -p_lambda *
 	    (p_profile.DiffActionValue(m_infoset->GetAction(m_act),
 				       infoset->GetAction(act)) -
 	     p_profile.DiffActionValue(m_infoset->GetAction(1),
@@ -235,7 +235,7 @@ AgentQREPathTracer::EquationSystem::GetValue(const Vector<double> &p_point,
 }
 
 void
-AgentQREPathTracer::EquationSystem::GetJacobian(const Vector<double> &p_point, 
+AgentQREPathTracer::EquationSystem::GetJacobian(const Vector<double> &p_point,
 						Matrix<double> &p_matrix) const
 {
   LogBehavProfile<double> profile((BehaviorSupportProfile(m_game)));
@@ -324,8 +324,8 @@ private:
 
 List<LogitQREMixedBehaviorProfile>
 AgentQREPathTracer::TraceAgentPath(const LogitQREMixedBehaviorProfile &p_start,
-				   std::ostream &p_stream, 
-				   double p_maxLambda, 
+				   std::ostream &p_stream,
+				   double p_maxLambda,
 				   double p_omega, double p_targetLambda)
 {
   List<LogitQREMixedBehaviorProfile> ret;
@@ -349,7 +349,3 @@ AgentQREPathTracer::TraceAgentPath(const LogitQREMixedBehaviorProfile &p_start,
 }
 
 }  // end namespace Gambit
-
-
-
-

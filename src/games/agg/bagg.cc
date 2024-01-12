@@ -12,7 +12,7 @@ namespace Gambit {
 
 namespace agg {
 
-BAGG::BAGG(int N, int S, 
+BAGG::BAGG(int N, int S,
 	   vector<int>& numTypes,
 	   vector<ProbDist>& TDist,
 	   vector<vector<vector<int > > > &typeActionSets,

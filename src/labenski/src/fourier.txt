@@ -47,7 +47,7 @@ consistent routines for both single- and double-precision math.
 I am considering changing my code to be compatible with MATLAB, but
 first I would like to find out if there is some definitely "correct"
 or "preferred" definition within the mathematical community.  If you
-have any comments on this issue, please let me know at the following 
+have any comments on this issue, please let me know at the following
 email address, because I'm stumped and need help!
 
    dcross@intersrv.com

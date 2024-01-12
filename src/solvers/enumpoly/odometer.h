@@ -3,7 +3,7 @@
 // Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/tools/enumpoly/odometer.h
-// Declaration of gIndexOdometer class 
+// Declaration of gIndexOdometer class
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 //
 
 /*
-   When the cartesian product of ordered sets is ordered 
+   When the cartesian product of ordered sets is ordered
 lexicographically, there is a relation between such a relation,
 and the numerical indexing derived from the lexicographical
 ordering, that is similar to an odometer.  Here the least
@@ -44,7 +44,7 @@ class gIndexOdometer {
   Gambit::Array<int> MinIndices;
   Gambit::Array<int> MaxIndices;
   Gambit::Array<int> CurIndices;
-   
+
  public:
    explicit gIndexOdometer(const Gambit::Array<int> &);
    gIndexOdometer(const Gambit::Array<int> &, const Gambit::Array<int> &);
@@ -71,7 +71,7 @@ class gIndexOdometer {
   Gambit::Array<int>     CurrentIndices()      const;
   gIndexOdometer  AfterExcisionOf(int&) const;
 
-};  
+};
 
 
 // *****************************
@@ -104,6 +104,6 @@ class gPermutationOdometer {
   const Gambit::Array<int> &CurrentIndices() const { return CurIndices; }
   int CurrentSign() const { return CurSign; }
 
-};  
+};
 
 #endif // ODOMETER_H

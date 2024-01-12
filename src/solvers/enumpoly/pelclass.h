@@ -45,16 +45,16 @@ class PelView {
   void        InitializePelicanMemory()                                 const;
   Pring       MakePring(const int num)                                  const;
   void        PrintPring(const Pring &ring)                             const;
-  void        Initialize_Idf_T_Gen_node(const Gen_node &node, 
+  void        Initialize_Idf_T_Gen_node(const Gen_node &node,
 					const char * label)             const;
   Gen_node    CreateRing(const int numvar)                              const;
-  polynomial1 GamPolyToPelPoly(const gPoly<double> &p, 
-			       const int n, 
+  polynomial1 GamPolyToPelPoly(const gPoly<double> &p,
+			       const int n,
 			       const Pring ring)                        const;
   Gen_node    CreatePelicanVersionOfSystem(const gPolyList<double> &input,
 					   const Pring ring)            const;
-  int         GutsOfGetMixedVolume(      node A, 
-		   	                 node norms, 
+  int         GutsOfGetMixedVolume(      node A,
+		   	                 node norms,
 			           const Imatrix T)                     const;
   int         GetMixedVolume(const Gen_node g)                          const;
 
@@ -62,7 +62,7 @@ class PelView {
   Gen_node    Make_scl_Gen_node()                                       const;
   Gen_node    ToDmatrixGen_node(const Gen_node g)                       const;
   polynomial1 IdentityElementPoly(const Pring ring)                     const;
-  polynomial1 HomotopyVariableMonomialPoly(const Pring ring, 
+  polynomial1 HomotopyVariableMonomialPoly(const Pring ring,
 					   const int comp)              const;
   Gen_node    SolutionsDerivedFromContinuation(const Pring &ring,
 					    const Gen_node &Genpoly,

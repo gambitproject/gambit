@@ -22,18 +22,18 @@
 //
 // where game.nfg is a Gambit normal form game file.
 //
-//  
+//
 // ALGORITHM PARAMETERS
 //
 // The behavior of the algorithm may be modified by the following
 // parameters (currently, these are hardcoded into the source
 // file; you'll have to modify them and recompile to change them):
 //
-// typesol:	
+// typesol:
 // 0 = simply stable (Beware!! Doesn't work yet)
 // 1 = primal simply stable (default)
 // 2 = dual simply stable (Beware!! Doesn't work yet)
-//  
+//
 // maxnum: 	Maximum number of solutions to compute
 // 0 = all accessible(default)
 // i = stop after i
@@ -41,8 +41,8 @@
 // maxlev: 	Maximum level to recurse for additional solutions
 // 0 = all (default)
 // i = stop at level i
-// 
-// whichkeep:	
+//
+// whichkeep:
 // 0 = keep all equilibria found (default)
 // 1 = keep only solutions of type typesol
 //
@@ -52,12 +52,12 @@
 // 4 = output entire route
 // 5 = output tableaus after each pivot
 // 6 = output tableaus before and after each pivot
-//  
+//
 // OUTPUT
 // The solutions are output in the following format
-//  
+//
 // num direc ipath M level setnum sstab value_1 value_2 (p_1, p_2, ... ) (q_1, q_2, ... )
-//  
+//
 // where
 // num: equilibrium number
 // direc:
@@ -206,7 +206,7 @@ class Equilibrium {
 public:
   int equinumber;
   Equilibrium *nextequi;
-  
+
   int stable, level,setnum,direction,ipath,M;
   double value[3];
   /* data for mixed strategy representation */
@@ -305,7 +305,7 @@ Equilibrium *AlgorithmState::NewEquilibrium(void)
   if (firstequi != NULL) {
     Equilibrium *e;
     int i;
-    
+
     for (e = firstequi, i = 1;
 	 e->nextequi != NULL; e = e->nextequi, i++) {
       e->equinumber = i;
@@ -344,7 +344,7 @@ void AlgorithmState::FreeEquilibrium(Equilibrium *ee)
   else {
     (PriorEquilibrium(ee))->nextequi = ee->nextequi;
   }
-    
+
   delete ee;
   nequi--;
 }
@@ -368,12 +368,12 @@ void Pivot(AlgorithmState &, int k, int pr,int pc);
 int IsOldComponent(AlgorithmState &p_state, Equilibrium *ee)
 {
   for (Equilibrium *e = p_state.firstequi; e != ee; e = e->nextequi) {
-    if (AreSameEquilibrium(e, ee) || 
+    if (AreSameEquilibrium(e, ee) ||
 	(ee->nstrats[1]==0 && ee->nstrats[2]==0)) {
       return true;
     }
   }
-  
+
   return false;
 }
 
@@ -397,15 +397,15 @@ int new_component(AlgorithmState &p_state)
   lastnew=e;
 
   if(!lastnew || lastnew==p_state.lastequi)return 0;
-   
+
   /* for each component . . . */
   for(e=firstnew;e!=NULL;) {
     /* get next component */
-      
+
     for(ee=e;ee!=NULL && ee->setnum==e->setnum;ee=ee->nextequi);
-      
+
     /* toss if already found  */
-    if (IsOldComponent(p_state, e) || 
+    if (IsOldComponent(p_state, e) ||
 	(e->setnum!=lastnew->setnum && st_whichkeep==1)) {
       while(e!=ee) {
 	e1=e->nextequi;
@@ -533,27 +533,27 @@ int get_sol(AlgorithmState &p_state, Gambit::Array<int> &p_lex)
   if(st_printlev>=5)
     {
       if(st_printlev>=4)fprintf(outfl,"\nlbl = \n");
-      
+
       for(i1=1;i1<=2;i1++)
 	{
 	  for(i2=1;i2<=dimlbl;i2++)
 	    if(st_printlev>=4)fprintf(outfl,"%4d",lbl[i1][i2]);
 	  if(st_printlev>=4)fprintf(outfl,"\n");
 	}
-      
+
       if(st_printlev>=4)fprintf(outfl,"\nm= %d, n= %d, lex = ",_m,_n);
       for(i1=0;i1<=dimlex;i1++)
 	if(st_printlev>=4)fprintf(outfl,"%4d",p_lex[i1]);
       if(st_printlev>=4)fprintf(outfl,"\n");
-      
+
       if(st_printlev>=4)fprintf(outfl,"\njvec[1]= \n");
       for(i=1;i<=_m+_n+1;i++)
 	if(st_printlev>=4)fprintf(outfl,"%4d",jvec[1][i]);
-      
+
       if(st_printlev>=4)fprintf(outfl,"\njvec[2]= \n");
       for(i=1;i<=_m+_n+1;i++)
 	if(st_printlev>=4)fprintf(outfl,"%4d",jvec[2][i]);
-      
+
     }
 
   /**/
@@ -574,7 +574,7 @@ int get_sol(AlgorithmState &p_state, Gambit::Array<int> &p_lex)
   for(;;)
     {								/*   R1   */
       /* check for i-feasibility */
-      
+
       k=1;							/* for each row r */
       for(r=1;r<=rows[k];r++)
 	{
@@ -591,7 +591,7 @@ int get_sol(AlgorithmState &p_state, Gambit::Array<int> &p_lex)
 	    }
 	quit1:;
 	}
-      
+
       k=2;
       for(r=1;r<=rows[k];r++)
 	{
@@ -612,24 +612,24 @@ int get_sol(AlgorithmState &p_state, Gambit::Array<int> &p_lex)
 	      if(jj==_m+r) goto R2;
 	    }
 	quit2:;
-	  
+
 	}
-      
-      
+
+
       if(p_lex[ilast]==_M && dr==-1)
 	{
 	  if(st_printlev>=4)fprintf(outfl,"\nBase level (I=%d); iter=%d",_M,it); /* R4 */
 	  if(Ipath(p_state, p_lex))goto Rotate;
 	  else goto Error;
 	}
-      
+
       if(p_lex[ilast]==_N && dr==1)
 	{
 	  if(st_printlev>=4)fprintf(outfl,"\nEnd of route %d.", _N);          /* REnd */
 	  Ps+=p_state.delp;
 	  goto End;
 	}
-      
+
       p_state.delp+=dr;
       rlex(p_state, p_lex, dr);
     }
@@ -642,7 +642,7 @@ int get_sol(AlgorithmState &p_state, Gambit::Array<int> &p_lex)
       if(Ipath(p_state, p_lex))goto Rotate;
       else goto Error;
     }
-  
+
   if(st_printlev>=4)fprintf(outfl,"\nTableau infeasible");
 
  End:
@@ -695,7 +695,7 @@ int Ipath(AlgorithmState &p_state, Gambit::Array<int> &p_lex)
   }
  Findpr:
   pr=findpr(p_state, p_lex, k,pc);
-  
+
  Pivot:
   if(pr == 0 || pr==-pc) {
     printf("\nEq# %d, level %d, lex # %d, pass %d.  Accuracy lost: Can't find pivot row",
@@ -703,10 +703,10 @@ int Ipath(AlgorithmState &p_state, Gambit::Array<int> &p_lex)
     return 0;
   }
   Pivot(p_state, k, pr, pc);
-  
+
  Check:
   pc=-pr;
-  
+
   k++;
   if(k==3)k=1;
   /* check these statements */
@@ -773,7 +773,7 @@ void Pivot(AlgorithmState &p_state, int k, int pr, int pc)
 {
   int ix,iy;
   double p,pvt,d,d1,d2;
-  
+
   if(st_printlev>=6)print_tableau(k);
   p_state.del=1;
   /* get index of pivot row = ix
@@ -784,11 +784,11 @@ void Pivot(AlgorithmState &p_state, int k, int pr, int pc)
   while(lbl[k][ix]!=pr && ix <=_m+_n)ix++;
   while(lbl[k][iy]!=pc && iy <=_m+_n)iy++;
   iy-=rows[k];
-  
+
   if(st_printlev>=5)fprintf(outfl,":%d,%d",ix,iy);
   /* get pivot row = xx
      pivot col = yy, and pivot = pvt */
-  
+
   for (int i = 1; i <= cols[k]+1; i++) {
     xx[i] = T[k][ix][i];
   }
@@ -869,15 +869,15 @@ int findpr(AlgorithmState &p_state, Gambit::Array<int> &p_lex, int k, int pc)
 {
   int l,jj,dimy,dimS,L;
   double maxr;
-  
+
 /* get pivot column */
   int m = 1;
   while (lbl[k][m] != pc && m <= dimlbl) m++;
   jj = m-rows[k];
-  
+
   for (int i = 1; i <= rows[k]; i++) {
     yy[i] = T[k][i][jj] * p_state.del;
-  }  
+  }
 
   dimy=rows[k];
   /* get positive elements of pivot column */
@@ -911,7 +911,7 @@ int findpr(AlgorithmState &p_state, Gambit::Array<int> &p_lex, int k, int pc)
   for (int i = 1; i <= dimS; i++) {
     xS[i] = T[k][iS[i]][jj-rows[k]];
   }
-  
+
  IP5:
   maxr=-100.0;
   for (int i = 1; i <= dimS; i++) {
@@ -933,7 +933,7 @@ int findpr(AlgorithmState &p_state, Gambit::Array<int> &p_lex, int k, int pc)
 void rlex(AlgorithmState &p_state, Gambit::Array<int> &lx, int dir)
 {
   int k,is,ns;
-  
+
   k=2;
   ns=rows[1];
 
@@ -941,7 +941,7 @@ void rlex(AlgorithmState &p_state, Gambit::Array<int> &lx, int dir)
     is=lx[1];
     for (int i = 1; i < ilast; i++) lx[i] = lx[i+1];
     lx[ilast]=is;
-    
+
     if(is>=MMM){k=1;ns=rows[2];}
     is=jvec[k][2];
     for (int i = 2; i <= ns; i++)  jvec[k][i] = jvec[k][i+1];
@@ -951,7 +951,7 @@ void rlex(AlgorithmState &p_state, Gambit::Array<int> &lx, int dir)
     is=lx[ilast];
     for (int i = ilast; i > 1; i--)  lx[i] = lx[i-1];
     lx[1]=is;
-    
+
     if(is>=MMM){k=1;ns=rows[2];}
     is=jvec[k][ns+1];
     for(int i = ns+1; i > 2; i--)  jvec[k][i] = jvec[k][i-1];
@@ -959,11 +959,11 @@ void rlex(AlgorithmState &p_state, Gambit::Array<int> &lx, int dir)
   }
 }
 
-void lexorder(AlgorithmState &p_state, 
+void lexorder(AlgorithmState &p_state,
 	      Gambit::Array<int> &p_lex, int *j, int k)
 {
   int i1;
-  
+
   if (k == 1) {
     for (int i = 1; i <= _m+_n+1; i++) {
       i1=0;
@@ -994,7 +994,7 @@ void lexorder(AlgorithmState &p_state,
 void setup(AlgorithmState &p_state)
 {
   int i,k,i1,i2;
-  
+
   for(i=1;i<=_m;i++)
     {
       T0[1][i][_n+1]=-1.0;
@@ -1027,7 +1027,7 @@ void setup(AlgorithmState &p_state)
   if(st_printlev>=4)
     {
       fprintf(outfl,"\nT0 = \n");
-      
+
       for(k=1;k<=2;k++)
 	{
 	  for(i1=1;i1<=rows[k]+1;i1++)
@@ -1038,7 +1038,7 @@ void setup(AlgorithmState &p_state)
 	    }
 	  fprintf(outfl,"\n");
 	}
-      
+
       fprintf(outfl,"\nlbl0 = \n");
       for(k=1;k<=2;k++)
 	{
@@ -1240,7 +1240,7 @@ void get_data(AlgorithmState &p_state, const Gambit::Game &p_game)
   _n = p_game->GetPlayer(2)->NumStrategies();
   rows[1] = cols[2] = _m;
   rows[2] = cols[1] = _n;
-  
+
   p_state.dA[1]=0.0;
   p_state.dA[2]=0.0;
   if (minA < 1.0) {
@@ -1252,19 +1252,19 @@ void get_data(AlgorithmState &p_state, const Gambit::Game &p_game)
   }
   if (st_printlev >= 4) {
     fprintf(outfl,
-	    "\nAdded %8.4f %8.4f to A B to form tableau", 
+	    "\nAdded %8.4f %8.4f to A B to form tableau",
 	    p_state.dA[1], p_state.dA[2]);
   }
 
   MMM=10*(1+(int)((1+_m)/10));
-  
+
   allocate(p_state);
 
   for (Gambit::StrategyIterator iter(p_game); !iter.AtEnd(); iter++) {
     int i1 = iter->GetStrategy(1)->GetNumber();
     int i2 = iter->GetStrategy(2)->GetNumber();
     printf("%d,%d,%f,%f\n", i1, i2,
-	   iter->GetOutcome()->GetPayoff<double>(1), 
+	   iter->GetOutcome()->GetPayoff<double>(1),
 	   iter->GetOutcome()->GetPayoff<double>(2));
 
     T0[1][i1][i2] = iter->GetOutcome()->GetPayoff<double>(1) + p_state.dA[1];
@@ -1306,7 +1306,7 @@ void RecursiveSolve(AlgorithmState &p_state,
 	T[i][i1][i2]=T1[i][i1][i2];
 
   get_sol(p_state, lex2);
-  
+
   if(st_printlev>=3)
     {
       fprintf(outfl,"\n");
@@ -1343,7 +1343,7 @@ void ComputeStable(AlgorithmState &p_state)
   Equilibrium *e;
 
   setnum=0; setnum1=0; setnum2=0;
-  level=0; count=1; 
+  level=0; count=1;
 
   if(st_maxnum==1) {
     lbl=lbl0; T=T0; D=D0;
@@ -1360,7 +1360,7 @@ void ComputeStable(AlgorithmState &p_state)
       rlex(p_state, p_state.lex0,1);
     }
   }
-  
+
   for(e=p_state.firstequi,i=1;e!=NULL;e=e->nextequi,i++)e->equinumber=i;
 
   fprintf(outfl,"\nSolutions\n");
@@ -1374,15 +1374,15 @@ void ComputeStable(AlgorithmState &p_state)
 int main(int argc, char *argv[])
 {
   int i;
-  
+
   st_typesol=PRIMAL_STABLE;
   st_maxnum=0; st_maxlev=0; st_printlev=0;
   st_whichkeep=0;
-  
+
   fprintf(outfl,"\ntypesol:%3d, maxnum:%3d, maxlev:%3d, whichkeep:%3d",
 	  st_typesol, st_maxnum, st_maxlev,st_whichkeep);
   fprintf(outfl,"\nprintlev:%3d", st_printlev);
-  
+
   if(st_maxnum==0)st_maxnum=10000;
   if(st_maxlev==0)st_maxlev=10000;
 
@@ -1393,7 +1393,7 @@ int main(int argc, char *argv[])
 
     get_data(state, game);   /* get lex0, lbl0, T0, and D0 */
     setup(state);
-  
+
     ComputeStable(state);
     return 0;
   }
@@ -1406,4 +1406,3 @@ int main(int argc, char *argv[])
     return 1;
   }
 }
-

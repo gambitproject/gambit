@@ -98,7 +98,10 @@ class Infoset:
          )
 
     def __eq__(self, other: typing.Any) -> bool:
-        return isinstance(other, Infoset) and self.infoset.deref() == cython.cast(Infoset, other).infoset.deref()
+        return (
+            isinstance(other, Infoset) and
+            self.infoset.deref() == cython.cast(Infoset, other).infoset.deref()
+        )
 
     def __hash__(self) -> int:
         return cython.cast(cython.long, self.infoset.deref())
@@ -117,11 +120,11 @@ class Infoset:
     @property
     def label(self) -> str:
         """Get or set the text label of the information set."""
-        return self.infoset.deref().GetLabel().decode('ascii')
+        return self.infoset.deref().GetLabel().decode("ascii")
 
     @label.setter
     def label(self, value: str) -> None:
-        self.infoset.deref().SetLabel(value.encode('ascii'))
+        self.infoset.deref().SetLabel(value.encode("ascii"))
 
     @property
     def is_chance(self) -> bool:

@@ -5,7 +5,8 @@ import pygambit
 
 class TestGambitEfgFile(unittest.TestCase):
     def setUp(self):
-        self.file_text = open("contrib/games/e02.efg").read()
+        with open("contrib/games/e02.efg") as f:
+            self.file_text = f.read()
 
     def tearDown(self):
         pass
@@ -56,7 +57,7 @@ class TestGambitEfgFile(unittest.TestCase):
         )
 
     def test_parse_string_removed_player(self):
-        ft = self.file_text.replace('"Player 2"', '')
+        ft = self.file_text.replace('"Player 2"', "")
         with self.assertRaises(ValueError) as e:
             pygambit.Game.parse_game(ft)
         self.assertEqual(
@@ -75,12 +76,13 @@ class TestGambitEfgFile(unittest.TestCase):
 
     def test_write_game_gte_sanity(self):
         g = pygambit.Game.parse_game(self.file_text)
-        g.write('gte')
+        g.write("gte")
 
 
 class TestGambitNfgFile(unittest.TestCase):
     def setUp(self):
-        self.file_text = open("contrib/games/e02.nfg").read()
+        with open("contrib/games/e02.nfg") as f:
+            self.file_text = f.read()
 
     def tearDown(self):
         pass
@@ -97,7 +99,7 @@ class TestGambitNfgFile(unittest.TestCase):
         )
 
     def test_parse_string_removed_player(self):
-        ft = self.file_text.replace('"Player 2"', '')
+        ft = self.file_text.replace('"Player 2"', "")
         with self.assertRaises(ValueError) as e:
             pygambit.Game.parse_game(ft)
         self.assertEqual(

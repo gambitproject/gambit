@@ -37,8 +37,8 @@ template <class D, class S> D lexical_cast(const S &p_value)
 { std::ostringstream s; s << p_value; return s.str(); }
 
 template <class D, class S> D lexical_cast(const S &p_value, int p_prec)
-{ 
-  std::ostringstream s; 
+{
+  std::ostringstream s;
   s.setf(std::ios::fixed);
   s << std::setprecision(p_prec) << p_value;
   return s.str();
@@ -114,7 +114,7 @@ public:
   ~NullException() noexcept override = default;
 };
 
- 
+
 } // end namespace Gambit
 
 #include "core/array.h"

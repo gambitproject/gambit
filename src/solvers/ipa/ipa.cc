@@ -38,7 +38,7 @@ NashIPAStrategySolver::Solve(const Game &p_game) const
   }
   return Solve(p_game, pert);
 }
-  
+
 List<MixedStrategyProfile<double> >
 NashIPAStrategySolver::Solve(const Game &p_game,
 			     const Array<double> &p_pert) const
@@ -49,7 +49,7 @@ NashIPAStrategySolver::Solve(const Game &p_game,
 
   std::shared_ptr<gnmgame> A;
   List<MixedStrategyProfile<double> > solutions;
-  
+
   if (p_game->IsAgg()) {
     A = std::make_shared<aggame>(dynamic_cast<GameAGGRep &>(*p_game));
   }
@@ -61,9 +61,9 @@ NashIPAStrategySolver::Solve(const Game &p_game,
       veclength *= p_game->GetPlayer(pl)->NumStrategies();
     }
     cvector payoffs(veclength);
-  
+
     A = std::make_shared<nfgame>(actions, payoffs);
-  
+
     std::vector<int> profile(p_game->NumPlayers());
     for (StrategyProfileIterator iter(p_game); !iter.AtEnd(); iter++) {
       for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
@@ -103,6 +103,3 @@ NashIPAStrategySolver::Solve(const Game &p_game,
 
 }  // end namespace Gambit::Nash
 }  // end namespace Gambit
-
-
-    

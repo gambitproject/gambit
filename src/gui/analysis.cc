@@ -46,11 +46,11 @@ namespace {
 class gbtNotNashException : public Exception {
 public:
   ~gbtNotNashException() noexcept override = default;
-  const char *what() const noexcept override 
+  const char *what() const noexcept override
   { return "Output line does not contain a Nash equilibrium"; }
 };
 
-template <class T> MixedStrategyProfile<T> 
+template <class T> MixedStrategyProfile<T>
 OutputToMixedProfile(gbtGameDocument *p_doc, const wxString &p_text)
 {
   MixedStrategyProfile<T> profile(p_doc->GetGame()->NewMixedStrategyProfile((T) 0.0));
@@ -141,13 +141,13 @@ void gbtAnalysisProfileList<T>::Clear()
 }
 
 //-------------------------------------------------------------------------
-//         gbtAnalysisProfileList: Saving and loading profile lists 
+//         gbtAnalysisProfileList: Saving and loading profile lists
 //-------------------------------------------------------------------------
 
 // Use anonymous namespace to make these helpers private
 namespace {
 
-template <class T> MixedStrategyProfile<T> 
+template <class T> MixedStrategyProfile<T>
 TextToMixedProfile(gbtGameDocument *p_doc, const wxString &p_text)
 {
   MixedStrategyProfile<T> profile(p_doc->GetGame()->NewMixedStrategyProfile((T) 0));
@@ -161,7 +161,7 @@ TextToMixedProfile(gbtGameDocument *p_doc, const wxString &p_text)
   return profile;
 }
 
-template <class T> MixedBehaviorProfile<T> 
+template <class T> MixedBehaviorProfile<T>
 TextToBehavProfile(gbtGameDocument *p_doc, const wxString &p_text)
 {
   MixedBehaviorProfile<T> profile(p_doc->GetGame());
@@ -195,7 +195,7 @@ void gbtAnalysisProfileList<T>::Load(TiXmlNode *p_analysis)
        node = node->NextSiblingElement()) {
     const char *type = node->ToElement()->Attribute("type");
     if (!strcmp(type, "behav")) {
-      MixedBehaviorProfile<T> profile = 
+      MixedBehaviorProfile<T> profile =
 	TextToBehavProfile<T>(m_doc,
 			      wxString(node->FirstChild()->Value(),
 				       *wxConvCurrent));
@@ -235,7 +235,7 @@ gbtAnalysisProfileList<T>::GetPayoff(int pl, int p_index) const
   }
 }
 
-template <class T> std::string 
+template <class T> std::string
 gbtAnalysisProfileList<T>::GetRealizProb(const GameNode &p_node,
 					 int p_index) const
 {
@@ -250,7 +250,7 @@ gbtAnalysisProfileList<T>::GetRealizProb(const GameNode &p_node,
   }
 }
 
-template <class T> std::string 
+template <class T> std::string
 gbtAnalysisProfileList<T>::GetBeliefProb(const GameNode &p_node,
 					 int p_index) const
 {
@@ -273,7 +273,7 @@ gbtAnalysisProfileList<T>::GetBeliefProb(const GameNode &p_node,
   }
 }
 
-template <class T> std::string 
+template <class T> std::string
 gbtAnalysisProfileList<T>::GetNodeValue(const GameNode &p_node,
 					int p_player, int p_index) const
 {
@@ -288,7 +288,7 @@ gbtAnalysisProfileList<T>::GetNodeValue(const GameNode &p_node,
   }
 }
 
-template <class T> std::string 
+template <class T> std::string
 gbtAnalysisProfileList<T>::GetInfosetProb(const GameNode &p_node,
 					  int p_index) const
 {
@@ -305,7 +305,7 @@ gbtAnalysisProfileList<T>::GetInfosetProb(const GameNode &p_node,
   }
 }
 
-template <class T> std::string 
+template <class T> std::string
 gbtAnalysisProfileList<T>::GetInfosetValue(const GameNode &p_node,
 					   int p_index) const
 {
@@ -328,7 +328,7 @@ gbtAnalysisProfileList<T>::GetInfosetValue(const GameNode &p_node,
   }
 }
 
-template <class T> std::string 
+template <class T> std::string
 gbtAnalysisProfileList<T>::GetActionProb(const GameNode &p_node, int p_act,
 					 int p_index) const
 {
@@ -340,14 +340,14 @@ gbtAnalysisProfileList<T>::GetActionProb(const GameNode &p_node, int p_act,
   }
 
   if (!p_node->GetPlayer())  return "";
-  
+
   try {
     const MixedBehaviorProfile<T> &profile = *m_behavProfiles[index];
 
     if (!profile.IsDefinedAt(p_node->GetInfoset())) {
       return "*";
     }
-  
+
     return lexical_cast<std::string>(profile.GetActionProb(p_node->GetInfoset()->GetAction(p_act)),
 		  m_doc->GetStyle().NumDecimals());
   }
@@ -367,7 +367,7 @@ gbtAnalysisProfileList<T>::GetActionProb(int p_action, int p_index) const
     if (!profile.IsDefinedAt(profile.GetGame()->GetAction(p_action)->GetInfoset())) {
       return "*";
     }
-    
+
     return lexical_cast<std::string>(profile[p_action], m_doc->GetStyle().NumDecimals());
   }
   catch (IndexException &) {
@@ -375,14 +375,14 @@ gbtAnalysisProfileList<T>::GetActionProb(int p_action, int p_index) const
   }
 }
 
-template <class T> std::string 
+template <class T> std::string
 gbtAnalysisProfileList<T>::GetActionValue(const GameNode &p_node, int p_act,
 					  int p_index) const
 {
   int index = (p_index == -1) ? m_current : p_index;
 
   if (!p_node->GetPlayer() || p_node->GetPlayer()->IsChance()) return "";
-  
+
   try {
     if (m_behavProfiles[index]->GetInfosetProb(p_node->GetInfoset()) > Rational(0)) {
       return lexical_cast<std::string>(m_behavProfiles[index]->GetPayoff(p_node->GetInfoset()->GetAction(p_act)),
@@ -428,7 +428,7 @@ gbtAnalysisProfileList<T>::GetStrategyValue(int p_strategy, int p_index) const
   }
 }
 
-template <class T> void 
+template <class T> void
 gbtAnalysisProfileList<T>::Save(std::ostream &p_file) const
 {
   p_file << "<analysis type=\"list\">\n";

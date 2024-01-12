@@ -4,7 +4,7 @@ For developers: Building Gambit from source
 This section covers instructions for building Gambit from source.
 This is for those who are interested in developing Gambit, or who
 want to play around with the latest features before they make it
-into a pre-compiled binary version.  
+into a pre-compiled binary version.
 
 This section requires at least some familiarity with programming.
 Most users will want to stick with binary distributions; see
@@ -15,9 +15,9 @@ General information
 -------------------
 
 Gambit uses the standard autotools mechanism for configuring and building.
-This should be familiar to most users of Un*ces and MacOS X.  
+This should be familiar to most users of Un*ces and MacOS X.
 
-If you are building from a source tarball, 
+If you are building from a source tarball,
 you just need to unpack the sources, change directory to the top level
 of the sources (typically of the form gambit-xx.y.z), and do the
 usual ::
@@ -99,7 +99,7 @@ that you'll need the appropriate -dev package for wxWidgets to get the
 header files needed to build Gambit.
 
 Un*x users, please note that Gambit at this time only supports the
-GTK port of wxWidgets. 
+GTK port of wxWidgets.
 
 If wxWidgets it isn't installed in a standard place (e.g., /usr or
 /usr/local), you'll need to tell configure where to find it with the

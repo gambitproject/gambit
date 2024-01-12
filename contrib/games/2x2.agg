@@ -23,11 +23,11 @@
 0
 
 #sizes of action sets:
-2 2 
+2 2
 
 #action sets:
-0 1 
-0 1 
+0 1
+0 1
 
 
 #the action graph:
@@ -45,5 +45,5 @@
 #now the payoff values: one row per action node.
 #For each row: first, the type of the payoff format
 #Then payoffs are given in lexicographical order of the input configurations
-0	35.622809717175556 -3.7188980070375948 
-0	-10.180526107272556 95.1203958671928 
+0	35.622809717175556 -3.7188980070375948
+0	-10.180526107272556 95.1203958671928

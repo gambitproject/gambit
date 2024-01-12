@@ -27,7 +27,7 @@
 #include "nfgcpoly.h"
 #include "nfghs.h"
 
-extern MixedStrategyProfile<double> 
+extern MixedStrategyProfile<double>
 ToFullSupport(const MixedStrategyProfile<double> &p_profile);
 
 extern
@@ -113,8 +113,8 @@ void gbtNfgHs::Initialize(const Game &p_game) {
   numPlayers = p_game->NumPlayers();
   numActions = p_game->NumStrategies();
 
-  int i; 
-  minActions = numActions[1]; 
+  int i;
+  minActions = numActions[1];
   maxActions = numActions[1];
 
   for (i = 2; i <= numPlayers; i++) {
@@ -132,7 +132,7 @@ void gbtNfgHs::Cleanup(const Game &game) {
 }
 
 
-gbtNfgHs::gbtNfgHs(int p_stopAfter) 
+gbtNfgHs::gbtNfgHs(int p_stopAfter)
   : m_iteratedRemoval(true), m_removalWhenUninstantiated(1),
     m_ordering("automatic")
 #ifdef DEBUG
@@ -494,7 +494,7 @@ bool gbtNfgHs::IteratedRemovalStrictlyDominatedStrategies(const Game &game,
 	    }
 	  }
 	}
-      }           
+      }
       // construct end
 
       for (int ai = 1; ai <= numActions[i]; ai++) {
@@ -673,7 +673,7 @@ bool gbtNfgHs::FeasibilityProgram(const Game &game,
       }
     }
   }
-     
+
   Gambit::List < MixedStrategyProfile < double > > newSolutions;
   HeuristicPolEnumModule module(restrictedGame, (m_stopAfter == 1) ? 1 : 0);
   module.PolEnum();
@@ -698,4 +698,3 @@ bool gbtNfgHs::FeasibilityProgram(const Game &game,
     return false;
   }
 }
-

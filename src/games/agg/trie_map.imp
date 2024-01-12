@@ -36,13 +36,13 @@ trie_map<V>::insert(const trie_map<V>::value_type& x) {
   static std::vector<int>::const_iterator p;//,s;
   //s=x.first.end();
   TrieNode<V>* ptr = root;
-   
+
   for (p=x.first.begin();p!=x.first.end(); ){
     //ind=x.first[i];
     ind=*(p++);
     if (ind>=ptr->children.size())
       ptr->children.resize(ind+1, (TrieNode<V>*)NULL);
-    if (ptr->children[ind]==NULL) 
+    if (ptr->children[ind]==NULL)
       ptr->children[ind] = new TrieNode<V>(initBranches,data.end());
     ptr=ptr->children[ind];
   }
@@ -61,7 +61,7 @@ trie_map<V>::find(const trie_map<V>::key_type& k) const
   size_t i=0;
   TrieNode<V>* ptr=root;
   for(;i<k.size()&&k[i]<(int)ptr->children.size()&&  ptr->children[k[i]]; ptr=ptr->children[k[i++]]) ;
-      
+
   return ptr->val;
 }
 
@@ -73,7 +73,7 @@ trie_map<V>::findExact(const trie_map<V>::key_type& k)
     size_t i=0;
     TrieNode<V>* ptr=root;
     for (;i<k.size()&&k[i]<(int)ptr->children.size()&&  ptr->children[k[i]];ptr=ptr->children[k[i++]]) ;
-    
+
     if (i>=k.size()&&ptr->val!=data.end()) return ptr->val;
     else return data.end();
 }
@@ -92,7 +92,7 @@ root(new TrieNode<V>(other.initBranches, data.end()))
 
 template <class V>
 trie_map<V>&
-trie_map<V>::operator= (const trie_map<V>& other) 
+trie_map<V>::operator= (const trie_map<V>& other)
 {
   if (this!=&other){
     reset();
@@ -162,7 +162,7 @@ void trie_map<V>::multiply(const trie_map<V>& other,size_t keylen, std::vector<p
 	  v.first[i]= (*(f[i])) ((*p1).first[i], (*p2).first[i]);
 	  if (v.first[i]>=(int)ptr->children.size())
 	    ptr->children.resize(v.first[i]+1, (TrieNode<V>*)NULL);
-	  if (ptr->children[v.first[i]]==NULL) 
+	  if (ptr->children[v.first[i]]==NULL)
 	    ptr->children[v.first[i]] = new TrieNode<V>(initBranches,data.end());
 	  ptr=ptr->children[v.first[i]];
 	}
@@ -173,9 +173,9 @@ void trie_map<V>::multiply(const trie_map<V>& other,size_t keylen, std::vector<p
 	  // insert the item
 	  leaves.push_back(ptr);
 	  ptr->val=data.insert(data.begin(),v);
-	}	  
+	}
       }//end for(p2
-  }//end for(p1 
+  }//end for(p1
 }
 
 template <class V>
@@ -337,9 +337,9 @@ trie_map<V>::operator/= (const std::vector<V>& denom){
 template <class V>
 void trie_map<V>:: div(const std::vector<V>& denom,TrieNode<V>* n, int current, int pivot){
   int i;
-  if ( pivot != current) { 
+  if ( pivot != current) {
     int s=n->children.size();
-    for (i=0;i<s;i++)if(n->children[i]) 
+    for (i=0;i<s;i++)if(n->children[i])
 	div(denom,n->children[i], current+1, pivot);
     return;
   }
@@ -354,7 +354,7 @@ void trie_map<V>:: div(const std::vector<V>& denom,TrieNode<V>* n, int current, 
       typename trie_map<V>::div_helper_mul  g(denom,pivot, n->children[i],data.end());
       in_order_subtree(g, n->children[i+1]);
     }
-    in_order_subtree (f, n->children[i]); 
+    in_order_subtree (f, n->children[i]);
   }
 }
 

@@ -3,7 +3,7 @@
 // Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/tools/enumpoly/ineqsolv.h
-// Declaration of IneqSolv 
+// Declaration of IneqSolv
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -37,12 +37,12 @@
 system of weak inequalities has a solution (a point where all are satisfied)
 in a given rectangle.  Ir is modeled on QuikSolv, but simpler.  There is
 no Newton search, only repeated subdivision, queries at the center, and
-tests against whether one of the inequalities is provably everywhere 
+tests against whether one of the inequalities is provably everywhere
 negative in the rectangle.
 */
 
 /*
-   The main constructor for this takes a gPolyList<T>, interpreted as 
+   The main constructor for this takes a gPolyList<T>, interpreted as
 inequalities in the sense that, at a solution, all the polynomials
 are required to be nonnegative.
 */
@@ -82,9 +82,9 @@ template <class T> class IneqSolv {
    bool         operator!=(const IneqSolv<T> &) const;
 
    // Information
-   inline const gSpace*                  AmbientSpace()              const 
+   inline const gSpace*                  AmbientSpace()              const
      { return System.AmbientSpace(); }
-   inline const term_order*              TermOrder()                 const 
+   inline const term_order*              TermOrder()                 const
      { return System.TermOrder(); }
    inline int                      Dmnsn()                     const
      { return System.Dmnsn(); }
@@ -95,7 +95,7 @@ template <class T> class IneqSolv {
 
   // The function that does everything
   bool ASolutionExists(const gRectangle<T>&, Gambit::Vector<T>& sample);
-};  
+};
 
 
 #endif // INEQSOLV_H

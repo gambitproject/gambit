@@ -158,7 +158,7 @@ int main(int argc, char *argv[])
 
   std::istream* input_stream = &std::cin;
   std::ifstream file_stream;
-  if (optind < argc) { 
+  if (optind < argc) {
     file_stream.open(argv[optind]);
     if (!file_stream.is_open()) {
       std::ostringstream error_message;

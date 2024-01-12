@@ -35,17 +35,17 @@
 
 gbtRevealMoveDialog::gbtRevealMoveDialog(wxWindow *p_parent,
 					 gbtGameDocument *p_doc)
-  : wxDialog(p_parent, wxID_ANY, _("Reveal this move to players"), 
-	     wxDefaultPosition), 
+  : wxDialog(p_parent, wxID_ANY, _("Reveal this move to players"),
+	     wxDefaultPosition),
     m_doc(p_doc)
 {
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
   auto *playerBox =
-    new wxStaticBoxSizer(wxHORIZONTAL, this, 
+    new wxStaticBoxSizer(wxHORIZONTAL, this,
 			 _("Reveal the move to players"));
 
-  auto *boxSizer = new wxBoxSizer(wxVERTICAL);	
+  auto *boxSizer = new wxBoxSizer(wxVERTICAL);
 
   for (int pl = 1; pl <= m_doc->NumPlayers(); pl++) {
     Gambit::GamePlayer player = m_doc->GetGame()->GetPlayer(pl);

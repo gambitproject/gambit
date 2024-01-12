@@ -13,7 +13,7 @@ Gambit is a collection of tools for interactively building and
 analyzing finite games.
 
 %prep
-%setup -q 
+%setup -q
 %configure
 
 %build
@@ -24,7 +24,7 @@ make
 
 mkdir -p $RPM_BUILD_ROOT%{_datadir}/gambit
 cp -R efg $RPM_BUILD_ROOT%{_datadir}/gambit
-cp -R nfg $RPM_BUILD_ROOT%{_datadir}/gambit 
+cp -R nfg $RPM_BUILD_ROOT%{_datadir}/gambit
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -52,7 +52,5 @@ rm -rf $RPM_BUILD_ROOT
 * Wed Mar 10 2004 Christopher C. Weis <christopher-c-weis@uiowa.edu>
 - cleaned up spec file to use macros and proper file inclusions
 
-* Thu Oct 23 2003 Paul E. Johnson <pauljohn@pjdell.pols.ukans.edu> 
+* Thu Oct 23 2003 Paul E. Johnson <pauljohn@pjdell.pols.ukans.edu>
 - Initial build.
-
-

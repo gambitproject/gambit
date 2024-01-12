@@ -26,21 +26,21 @@ namespace Gambit {
 
 namespace linalg {
 
-template <class T> 
+template <class T>
 LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b,
 		    const Vector<T> &c, int nequals)
-  : well_formed(true), feasible(true), bounded(true), 
+  : well_formed(true), feasible(true), bounded(true),
     nvars(c.Length()),neqns(b.Length()), nequals(nequals),
-    total_cost(0),tmin(0), 
+    total_cost(0),tmin(0),
     tab(A,Artificials(b),b), UB(nullptr), LB(nullptr), ub(0), lb(0), xx(0), cost(0),
     y(b.Length()),x(b.Length()),d(b.Length())
 {
-  // These are the values recommended by Murtagh (1981) for 15 digit 
-  // accuracy in LP problems 
+  // These are the values recommended by Murtagh (1981) for 15 digit
+  // accuracy in LP problems
   Gambit::linalg::epsilon(eps1, 5);
   Gambit::linalg::epsilon(eps2, 8);
   Gambit::linalg::epsilon(eps3, 6);
-  
+
   // Check dimensions
   if (A.NumRows() != b.Length() || A.NumColumns() != c.Length()) {
     well_formed = false;
@@ -51,13 +51,13 @@ LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b,
 
   // initialize data
   int i,j,num_inequals,xlab,num_artific;
-  
+
   num_inequals = A.NumRows() - nequals;
   num_artific=Artificials(b).Length();
   nvars+=num_artific;
-  
+
   // gout << "\n--- Begin Phase I ---\n";
-  
+
   UB = new Array<bool>(nvars+neqns);
   LB = new Array<bool>(nvars+neqns);
   ub = new Array<T>(nvars+neqns);
@@ -69,15 +69,15 @@ LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b,
     (*UB)[j] = false; (*LB)[j] = false;
     (*ub)[j] = (T)0; (*lb)[j] = (T)0;
   }
-  
+
   // Define Phase I upper and lower bounds
   for(i=1;i<=nvars;i++) {
-    (*LB)[i]=true;              // original and artificial variables 
+    (*LB)[i]=true;              // original and artificial variables
 //    (*lb)[i]=(T)0;         // have lower bounds of 0
   }
   // for slack variables
   for(i = 1;i<= neqns;i++) {
-    if(b[i] >= (T)0) (*LB)[nvars+i] = true;  
+    if(b[i] >= (T)0) (*LB)[nvars+i] = true;
     else (*UB)[nvars+i] = true;
   }
   // define Phase 1 unit cost vector
@@ -87,22 +87,22 @@ LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b,
     if ((*UB)[nvars+i]) {
       (*cost)[nvars+i] = (T)1;
     }
-    else 
+    else
       if(i > num_inequals) (*cost)[nvars+i] = -(T)1;
   }
-  
+
   // gout << "\nUB = " <<  *UB << " " << "\nLB = " << *LB;
   // gout << "\nub = " <<  *ub << " " << "\nlb = " << *lb;
   // gout << "\ncost = " <<  (*cost);
-  
+
   // Initialize the tableau
-  
+
   tab.SetCost(*cost);
-  
+
   // gout << "\nInitial Tableau = \n";
   // tab.Dump(gout);
-  
-  // set xx to be initial feasible solution to phase II  
+
+  // set xx to be initial feasible solution to phase II
   for(i=1;i<=(*xx).Length();i++) {
     if((*LB)[i]) (*xx)[i]=(*lb)[i];
     else if((*UB)[i]) (*xx)[i]=(*ub)[i];
@@ -116,59 +116,59 @@ LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b,
   }
   // gout << "\nxx: " << (*xx);
 
-  
+
   Solve(1);
-  
+
   total_cost = tab.TotalCost();
 
   // gout << "\nFinal Phase I tableau: ";
-  // tab.Dump(gout); 
+  // tab.Dump(gout);
   // gout << ", cost: " << total_cost;
 
   // gout << "\n--- End Phase I ---\n";
-  
+
   if (!bounded) {
     // gout << "\nPhase 1 Unbounded\n";
   }
   //assert(bounded);
-  
-  // which eps should be used here?  
-  if(total_cost < -eps1) {   
+
+  // which eps should be used here?
+  if(total_cost < -eps1) {
     feasible = false;
     // gout << "\nProblem Infeasible\n\n";
     return;
   }
-  
+
   // gout << "\n--- Begin Phase II ---\n";
-  
+
   // Define Phase II upper and lower bounds for slack variables
-  
+
   // gout << "\nxx: " << (*xx);
 
-  for(i=num_inequals+1;i<=neqns;i++) 
+  for(i=num_inequals+1;i<=neqns;i++)
     (*UB)[nvars+i] = true;
   for(i=1;i<=neqns;i++) {
     if(b[i] < (T)0) (*LB)[nvars+i] = true;
   }
-  
+
   // install Phase II unit cost vector
-  
+
   for(i=c.First();i<=c.Last();i++)
     (*cost)[i] = c[i];
   for(i=c.Last()+1;i<=nvars+neqns;i++)
     (*cost)[i] = (T)0;
-  
+
   // gout << "\nUB = " <<  *UB << " " << " LB = " << *LB;
   // gout << "\nub = " <<  *ub << " " << " lb = " << *lb;
   // gout << "\nc = " <<  (*cost);
-  
+
   tab.SetCost(*cost);
-  
+
   // gout << "\nInitial basis: ";
   // tab.Dump(gout);   gout << '\n';
-  
+
   Solve(2);
-  
+
   // gout << "\n--- End Phase II ---\n";
 
   if (!bounded) {
@@ -191,8 +191,8 @@ LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b,
   for(i=1;i<=neqns;i++) {
     if(dual_bfs.count(-i)) {
       opt_bfs.insert(-i,dual_bfs[-i]);
-    }     
-  }     
+    }
+  }
   // gout << "\n--- End LPSolve ---\n";
 }
 
@@ -213,13 +213,13 @@ template <class T> void LPSolve<T>::Solve(int phase)
   int outlab = 0;
   int out = 0;
   Vector<T> a(neqns);
-  
-  do { 
+
+  do {
     // step 1: Solve y B = c_B
     // tab.DualVector(y);         // step 1: Solve y B = c_B
     // gout << "\nstep 1, y: " << y;
     do {
-      in = Enter();            // step 2: Choose entering variable 
+      in = Enter();            // step 2: Choose entering variable
       // gout << "\nstep 2, in: " << in;
       if(in) {
 	// tab.GetColumn(in,a);
@@ -249,7 +249,7 @@ template <class T> void LPSolve<T>::Solve(int phase)
 	  (*xx)[nvars-in] -= (T)flag*tmin;
 	// gout << "\nstep 5a, xx: " << (*xx);
       }
-    } while(outlab==in && outlab !=0); 
+    } while(outlab==in && outlab !=0);
     if(in) {
       // gout << "\nstep 5b, Pivot in: " << in << " out: " << out;
       tab.Pivot(out,in);       // step5b: Pivot new variable into basis
@@ -264,14 +264,14 @@ template <class T> void LPSolve<T>::Solve(int phase)
   }
   while(in);
 }
-  
+
 template <class T> int LPSolve<T>::Enter()
-{ 
+{
   // gout << "\nIn LPSolve<T>::Enter()";
   int i,in;
   T rc;
   in = 0;
-  
+
   T test = (T)0;
   for(i=1;i<=nvars+neqns;i++) {
     int lab = i;
@@ -280,12 +280,12 @@ template <class T> int LPSolve<T>::Enter()
       rc = tab.RelativeCost(lab);
       //      gout << "\nCost: " << tab.GetCost();
       // gout << "\n i = " << i << " cost: " << (*cost)[i] << " rc: " << rc << " test: " << test;
-      if(rc > test+eps1) 
+      if(rc > test+eps1)
 	if(!(*UB)[i] || ((*UB)[i] && (*xx)[i] - (*ub)[i] < -eps1)) {
 	  {test=rc;in = lab;flag = -1;}
 	  // gout << "\nflag: -1  in: " << in << " test: " << test;
 	}
-      if(-rc > test+eps1) 
+      if(-rc > test+eps1)
 	if(!(*LB)[i] || ((*LB)[i] && (*xx)[i] - (*lb)[i] > eps1)) {
 	  {test=-rc;in=lab;flag = 1;}
 	  // gout << "\nflag: +1  in: " << in << " test: " << test;
@@ -320,7 +320,7 @@ template <class T> int LPSolve<T>::Exit(int in)
 	out = j;
       }
       // gout << "\nd[" << j << "]: " << d[j] << " col: " << col << " xx: " << (*xx)[col];
-      // gout << " t: " << t << " tmin: " << tmin; 
+      // gout << " t: " << t << " tmin: " << tmin;
     }
     if(flag == 1) {
       t = (T)1000000000;
@@ -334,16 +334,16 @@ template <class T> int LPSolve<T>::Exit(int in)
 	tmin = t;
 	out = j;
       }
-      // gout << "\nd[" << j << "]: " << d[j] << " col: " << col << " xx: " << (*xx)[col]; 
-      // gout << " t: " << t << " tmin: " << tmin; 
+      // gout << "\nd[" << j << "]: " << d[j] << " col: " << col << " xx: " << (*xx)[col];
+      // gout << " t: " << t << " tmin: " << tmin;
     }
   }
   col=in;
     if(in<0)col=nvars-in;
   t = (T)1000000000;
-  if(flag == -1 && (*UB)[col]) 
+  if(flag == -1 && (*UB)[col])
     t = (*ub)[col]-(*xx)[col];
-  if(flag == 1 && (*LB)[col]) 
+  if(flag == 1 && (*LB)[col])
     t = (*xx)[col]-(*lb)[col];
   if(t > eps2 && t < tmin-eps2) {
     tmin = t;
@@ -354,13 +354,13 @@ template <class T> int LPSolve<T>::Exit(int in)
 }
 
 template <class T> LPSolve<T>::~LPSolve()
-{ 
-  if(UB) delete UB; 
-  if(LB) delete LB; 
-  if(ub) delete ub; 
-  if(lb) delete lb; 
-  if(xx) delete xx; 
-  if(cost) delete cost; 
+{
+  if(UB) delete UB;
+  if(LB) delete LB;
+  if(ub) delete ub;
+  if(lb) delete lb;
+  if(xx) delete xx;
+  if(cost) delete cost;
 }
 
 }  // end namespace Gambit::linalg

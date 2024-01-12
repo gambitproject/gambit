@@ -6,26 +6,7 @@ providing tools and methods for computation in game theory.
 Contacting Gambit:
 ------------------
 
-The Gambit developers can be reached at
-gambit (at) econmail (dot) tamu (dot) edu, or individually at email 
-addresses listed below.
-
-The surface mail contact address for Gambit is
-
-The Gambit Project
-c/o Theodore Turocy
-Department of Economics
-Texas A&M University
-4228 TAMU
-College Station TX 77843
-
-Main Developers:
-----------------
-
-Richard D. McKelvey
-Andrew M. McLennan -- mclennan (at) icarus (dot) socsci (dot) umn (dot) edu
-Theodore L. Turocy -- arbiter (at) econ (dot) tamu (dot) edu
-
+The Gambit developers can be reached at ted.turocy (at) uea.ac.uk
 
 Other sources of code in this distribution:
 -------------------------------------------
@@ -35,7 +16,7 @@ These are acknowledged individually below.
 
 Pelican:
 --------
-The code in sources/pelican is the Pelican system, 
+The code in sources/pelican is the Pelican system,
 copyright (C) 1995 by Birk Huber, modified only to work within the
 Gambit build system.
 
@@ -63,7 +44,7 @@ to use the gFunction class.
 
 Clique determination:
 ---------------------
-The gambit-nfg-enummixed program incorporates the code of 
+The gambit-nfg-enummixed program incorporates the code of
 Bernhard von Stengel to determine the connectedness of components of
 Nash equilibria.  (BvS has also contributed numerous other improvements
 and fixes to other areas of Gambit.)
@@ -89,11 +70,3 @@ The graphical interface reads and writes files in XML format.  The parsing
 is done using the TinyXml package from http://www.grinninglizard.com/tinyxml,
 and is distributed under the zlib license.  These are the files named
 tiny* in the sources/gui directory of the distribution.
-
-
-
-
-
-
-
-

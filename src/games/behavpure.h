@@ -104,12 +104,12 @@ public:
   /// Construct a new iterator on the support, holding the action fixed
   BehaviorProfileIterator(const BehaviorSupportProfile &, const GameAction &);
   //@}
-  
+
   /// @name Iteration and data access
   //@{
-  /// Advance to the next contingency (prefix version) 
+  /// Advance to the next contingency (prefix version)
   void operator++();
-  /// Advance to the next contingency (postfix version) 
+  /// Advance to the next contingency (postfix version)
   void operator++(int) { ++(*this); }
   /// Has iterator gone past the end?
   bool AtEnd() const { return m_atEnd; }
@@ -121,7 +121,3 @@ public:
 } // end namespace Gambit
 
 #endif // GAMBIT_GAMES_BEHAVPURE_H
-
-
-
-

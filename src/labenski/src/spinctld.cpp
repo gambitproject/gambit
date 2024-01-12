@@ -353,7 +353,7 @@ void wxSpinCtrlDbl::OnChar( wxKeyEvent &event )
             DoSendEvent();
             break;
         }
-        case WXK_PAGEDOWN :  
+        case WXK_PAGEDOWN :
         {
             if (m_textCtrl && m_textCtrl->IsModified()) SyncSpinToText(false);
             SetValue( m_value - m_increment * 10.0 * modifier );

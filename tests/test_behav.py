@@ -1,10 +1,9 @@
-import pytest
 import typing
 
 import pygambit as gbt
+import pytest
 
 from . import games
-
 
 # tolerance for floating point assertions
 TOL = 1e-13
@@ -585,11 +584,16 @@ def test_as_strategy(game: gbt.Game, rational_flag: bool):
      (games.create_mixed_behav_game(), TOL, [0.8, 0.2, 0.4, 0.6, 0.0, 1.0], 1, 1, 0.2, False),
      (games.create_mixed_behav_game(), TOL, [0.8, 0.2, 0.4, 0.6, 0.0, 1.0], 2, 0, 0.32, False),
      (games.create_mixed_behav_game(), TOL, [0.8, 0.2, 0.4, 0.6, 0.0, 1.0], 2, 1, 0.48, False),
-     (games.create_mixed_behav_game(), TOL, ["4/5", "1/5", "2/5", "3/5", "0", "1"], 0, 0, "1", True),
-     (games.create_mixed_behav_game(), TOL, ["4/5", "1/5", "2/5", "3/5", "0", "1"], 1, 0, "4/5", True),
-     (games.create_mixed_behav_game(), TOL, ["4/5", "1/5", "2/5", "3/5", "0", "1"], 1, 1, "1/5", True),
-     (games.create_mixed_behav_game(), TOL, ["4/5", "1/5", "2/5", "3/5", "0", "1"], 2, 0, "8/25", True),
-     (games.create_mixed_behav_game(), TOL, ["4/5", "1/5", "2/5", "3/5", "0", "1"], 2, 1, "12/25", True)
+     (games.create_mixed_behav_game(),
+      TOL, ["4/5", "1/5", "2/5", "3/5", "0", "1"], 0, 0, "1", True),
+     (games.create_mixed_behav_game(),
+      TOL, ["4/5", "1/5", "2/5", "3/5", "0", "1"], 1, 0, "4/5", True),
+     (games.create_mixed_behav_game(),
+      TOL, ["4/5", "1/5", "2/5", "3/5", "0", "1"], 1, 1, "1/5", True),
+     (games.create_mixed_behav_game(),
+      TOL, ["4/5", "1/5", "2/5", "3/5", "0", "1"], 2, 0, "8/25", True),
+     (games.create_mixed_behav_game(),
+      TOL, ["4/5", "1/5", "2/5", "3/5", "0", "1"], 2, 1, "12/25", True)
      ]
     )
 def test_node_belief(game: gbt.Game, tol: float, values: list, infoset_idx: int,

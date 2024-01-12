@@ -38,7 +38,7 @@ logit_estimate(std::shared_ptr<MixedStrategyProfile<double>> p_frequencies)
   StrategicQREEstimator alg;
   NullBuffer null_buffer;
   std::ostream null_stream(&null_buffer);
-  LogitQREMixedStrategyProfile result = alg.Estimate(start, *p_frequencies, 
+  LogitQREMixedStrategyProfile result = alg.Estimate(start, *p_frequencies,
 						     null_stream, 1000000.0, 1.0);
   return make_shared<LogitQREMixedStrategyProfile>(result);
 }
@@ -64,4 +64,3 @@ logit_principal_branch(const Game &p_game, double p_maxLambda=1000000.0)
   std::ostream null_stream(&null_buffer);
   return alg.TraceStrategicPath(start, null_stream, p_maxLambda, 1.0);
 }
-

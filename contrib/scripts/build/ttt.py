@@ -84,4 +84,3 @@ rules = [ { "condition": lambda history: history.IsWin("X"),
 
 tree = torr.BuildTree([ "X", "O" ], rules, TicTacToeHistory)
 print tree.AsEfgFile()
-

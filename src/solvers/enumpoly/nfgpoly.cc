@@ -31,7 +31,7 @@
 #include "quiksolv.h"
 
 extern int g_numDecimals;
-extern bool g_verbose; 
+extern bool g_verbose;
 
 class PolEnumModule  {
 private:
@@ -47,29 +47,29 @@ private:
   bool is_singular;
 
   bool EqZero(double x) const;
-  
+
   // p_i_j as a gPoly, with last prob in terms of previous probs
   gPoly<double> Prob(int i,int j) const;
 
   // equation for when player i sets strat1 = strat2
-  // with last probs for each player substituted out.  
+  // with last probs for each player substituted out.
   gPoly<double> IndifferenceEquation(int i, int strat1, int strat2) const;
   gPolyList<double>   IndifferenceEquations()                 const;
   gPolyList<double>   LastActionProbPositiveInequalities()    const;
   gPolyList<double>   NashOnSupportEquationsAndInequalities() const;
-  Gambit::List<Gambit::Vector<double> > 
+  Gambit::List<Gambit::Vector<double> >
                NashOnSupportSolnVectors(const gPolyList<double> &equations,
 					const gRectangle<double> &Cube);
 
   int SaveSolutions(const Gambit::List<Gambit::Vector<double> > &list);
 public:
   explicit PolEnumModule(const Gambit::StrategySupportProfile &);
-  
+
   int PolEnum();
-  
+
   long NumEvals() const;
   double Time() const;
-  
+
   const Gambit::List<Gambit::MixedStrategyProfile<double> > &GetSolutions() const;
   Gambit::Vector<double> SolVarsFromMixedProfile(const Gambit::MixedStrategyProfile<double> &) const;
 
@@ -86,10 +86,10 @@ public:
 
 PolEnumModule::PolEnumModule(const Gambit::StrategySupportProfile &S)
   : NF(S.GetGame()), support(S),
-    Space(support.MixedProfileLength()-NF->NumPlayers()), 
-    Lex(&Space, lex), num_vars(support.MixedProfileLength()-NF->NumPlayers()), 
+    Space(support.MixedProfileLength()-NF->NumPlayers()),
+    Lex(&Space, lex), num_vars(support.MixedProfileLength()-NF->NumPlayers()),
     nevals(0), is_singular(false)
-{ 
+{
 //  Gambit::Epsilon(eps,12);
 }
 
@@ -100,12 +100,12 @@ int PolEnumModule::PolEnum()
 
   /*
   // equations for equality of strat j to strat j+1
-  for( i=1;i<=NF->NumPlayers();i++) 
-    for(j=1;j<support.NumStrats(i);j++) 
+  for( i=1;i<=NF->NumPlayers();i++)
+    for(j=1;j<support.NumStrats(i);j++)
       equations+=IndifferenceEquation(i,j,j+1);
 
   for( i=1;i<=NF->NumPlayers();i++)
-    if(support.NumStrats(i)>2) 
+    if(support.NumStrats(i)>2)
       equations+=Prob(i,support.NumStrats(i));
   */
 
@@ -113,15 +113,15 @@ int PolEnumModule::PolEnum()
   Gambit::Vector<double> bottoms(num_vars), tops(num_vars);
   bottoms = (double)0;
   tops = (double)1;
- 
-  gRectangle<double> Cube(bottoms, tops); 
+
+  gRectangle<double> Cube(bottoms, tops);
 
   // start QuikSolv
   Gambit::List<Gambit::Vector<double> > solutionlist = NashOnSupportSolnVectors(equations,
 								   Cube);
 
   int index = SaveSolutions(solutionlist);
-  return index;	 
+  return index;
 }
 
 int PolEnumModule::SaveSolutions(const Gambit::List<Gambit::Vector<double> > &list)
@@ -151,7 +151,7 @@ bool PolEnumModule::EqZero(double x) const
 {
   if(x <= eps && x >= -eps) return true;
   return false;
-}     
+}
 
 long PolEnumModule::NumEvals() const
 {
@@ -173,8 +173,8 @@ gPoly<double> PolEnumModule::Prob(int p, int strat) const
   gPoly<double> equation(&Space,&Lex);
   Gambit::Vector<int> exps(num_vars);
   int i,j,kk = 0;
-  
-  for(i=1;i<p;i++) 
+
+  for(i=1;i<p;i++)
     kk+=(support.NumStrategies(i)-1);
 
   if(strat<support.NumStrategies(p)) {
@@ -203,7 +203,7 @@ gPoly<double> PolEnumModule::Prob(int p, int strat) const
   return equation;
 }
 
-gPoly<double> 
+gPoly<double>
 PolEnumModule::IndifferenceEquation(int i, int strat1, int strat2) const
 {
   gPoly<double> equation(&Space,&Lex);
@@ -231,19 +231,19 @@ gPolyList<double>   PolEnumModule::IndifferenceEquations()  const
 {
   gPolyList<double> equations(&Space,&Lex);
 
-  for(int pl=1;pl<=NF->NumPlayers();pl++) 
-    for(int j=1;j<support.NumStrategies(pl);j++) 
+  for(int pl=1;pl<=NF->NumPlayers();pl++)
+    for(int j=1;j<support.NumStrategies(pl);j++)
       equations+=IndifferenceEquation(pl,j,j+1);
 
   return equations;
 }
- 
+
 gPolyList<double> PolEnumModule::LastActionProbPositiveInequalities() const
 {
   gPolyList<double> equations(&Space,&Lex);
 
   for(int pl=1;pl<=NF->NumPlayers();pl++)
-    if(support.NumStrategies(pl)>2) 
+    if(support.NumStrategies(pl)>2)
       equations+=Prob(pl,support.NumStrategies(pl));
 
   return equations;
@@ -252,7 +252,7 @@ gPolyList<double> PolEnumModule::LastActionProbPositiveInequalities() const
 gPolyList<double> PolEnumModule::NashOnSupportEquationsAndInequalities() const
 {
   gPolyList<double> equations(&Space,&Lex);
-  
+
   equations += IndifferenceEquations();
   equations += LastActionProbPositiveInequalities();
 
@@ -260,10 +260,10 @@ gPolyList<double> PolEnumModule::NashOnSupportEquationsAndInequalities() const
 }
 
 
-Gambit::List<Gambit::Vector<double> > 
+Gambit::List<Gambit::Vector<double> >
 PolEnumModule::NashOnSupportSolnVectors(const gPolyList<double> &equations,
 					const gRectangle<double> &Cube)
-{  
+{
   QuikSolv<double> quickie(equations);
   //  p_status.SetProgress(0);
 
@@ -292,7 +292,7 @@ bool PolEnumModule::IsSingular() const
 //---------------------------------------------------------------------------
 
 int PolEnum(const Gambit::StrategySupportProfile &support,
-	    Gambit::List<Gambit::MixedStrategyProfile<double> > &solutions, 
+	    Gambit::List<Gambit::MixedStrategyProfile<double> > &solutions,
 	    long &nevals, double &time, bool &is_singular)
 {
   PolEnumModule module(support);
@@ -300,9 +300,9 @@ int PolEnum(const Gambit::StrategySupportProfile &support,
   nevals = module.NumEvals();
   time = module.Time();
   solutions = module.GetSolutions();
-  if (module.IsSingular()) 
+  if (module.IsSingular())
     is_singular = true;
-  else 
+  else
     is_singular = false;
   return 1;
 }
@@ -315,7 +315,7 @@ int PolEnum(const Gambit::StrategySupportProfile &support,
 #ifdef UNUSED
 static
 Gambit::MixedStrategyProfile<double> PolishEquilibrium(const Gambit::StrategySupportProfile &support,
-				       const Gambit::MixedStrategyProfile<double> &sol, 
+				       const Gambit::MixedStrategyProfile<double> &sol,
 				       bool &is_singular)
 {
   PolEnumModule module(support);
@@ -349,18 +349,18 @@ Gambit::MixedStrategyProfile<double> PolishEquilibrium(const Gambit::StrategySup
 }
 #endif  // UNUSED
 
-Gambit::Vector<double> 
+Gambit::Vector<double>
 PolEnumModule::SolVarsFromMixedProfile(const Gambit::MixedStrategyProfile<double> &sol) const
 {
   int numvars(0);
 
-  for (int pl = 1; pl <= NF->NumPlayers(); pl++) 
+  for (int pl = 1; pl <= NF->NumPlayers(); pl++)
     numvars += support.NumStrategies(pl) - 1;
 
   Gambit::Vector<double> answer(numvars);
   int count(0);
 
-  for (int pl = 1; pl <= NF->NumPlayers(); pl++) 
+  for (int pl = 1; pl <= NF->NumPlayers(); pl++)
     for (int j = 1; j < support.NumStrategies(pl); j++) {
       count ++;
       answer[count] = (double)sol[support.GetStrategy(pl,j)];
@@ -383,14 +383,14 @@ int PolEnumModule::PolishKnownRoot(Gambit::Vector<double> &point) const
     //    gout << "We are about to construct quickie with Dmnsn() = "
     //  << Space->Dmnsn() << " and equations = \n"
     //	 << equations << "\n";
-    
+
     // start QuikSolv
     QuikSolv<double> quickie(equations);
-    
+
     //DEBUG
     //    gout << "We constructed quickie.\n";
-    
-    try { 
+
+    try {
       point = quickie.NewtonPolishedRoot(point);
     }
     catch (Gambit::SingularMatrixException &) {
@@ -402,7 +402,7 @@ int PolEnumModule::PolishKnownRoot(Gambit::Vector<double> &point) const
 
   }
 
-  return 1;	 
+  return 1;
 }
 
 Gambit::MixedStrategyProfile<double>
@@ -421,7 +421,7 @@ PolEnumModule::ReturnPolishedSolution(const Gambit::Vector<double> &root) const
     profile[support.GetStrategy(pl,j)] = (double)1.0 - sum;
     kk+=(support.NumStrategies(pl)-1);
   }
-       
+
   return profile;
 }
 
@@ -459,7 +459,7 @@ Gambit::MixedStrategyProfile<double> ToFullSupport(const Gambit::MixedStrategyPr
   return fullProfile;
 }
 
-void PrintSupport(std::ostream &p_stream, 
+void PrintSupport(std::ostream &p_stream,
 		  const std::string &p_label, const Gambit::StrategySupportProfile &p_support)
 {
   p_stream << p_label;
@@ -489,13 +489,13 @@ void EnumPolySolveStrategic(const Gambit::Game &p_nfg)
     double newtime = 0.0;
     Gambit::List<Gambit::MixedStrategyProfile<double> > newsolns;
     bool is_singular = false;
-    
+
     if (g_verbose) {
       PrintSupport(std::cout, "candidate", supports[i]);
     }
 
     PolEnum(supports[i], newsolns, newevals, newtime, is_singular);
-      
+
     for (int j = 1; j <= newsolns.Length(); j++) {
       Gambit::MixedStrategyProfile<double> fullProfile = ToFullSupport(newsolns[j]);
       if (fullProfile.GetLiapValue() < 1.0e-6) {
@@ -508,9 +508,3 @@ void EnumPolySolveStrategic(const Gambit::Game &p_nfg)
     }
   }
 }
-
-
-
-
-
-

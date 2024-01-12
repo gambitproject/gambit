@@ -102,7 +102,7 @@ gbtBehavDominanceToolbar::gbtBehavDominanceToolbar(wxWindow *p_parent,
 	  wxCommandEventHandler(gbtBehavDominanceToolbar::OnPreviousLevel));
   topSizer->Add(m_prevButton, 0, wxALL | wxALIGN_CENTER, 5);
 
-  m_level = new wxStaticText(this, wxID_STATIC, 
+  m_level = new wxStaticText(this, wxID_STATIC,
 			     wxT("All actions shown"),
 			     wxDefaultPosition, wxDefaultSize,
 			     wxALIGN_CENTER | wxST_NO_AUTORESIZE);
@@ -173,10 +173,10 @@ void gbtBehavDominanceToolbar::OnUpdate()
     m_level->SetLabel(wxT("All actions shown"));
   }
   else if (m_doc->GetBehavElimLevel() == 2) {
-    m_level->SetLabel(wxT("Eliminated 1 level")); 
+    m_level->SetLabel(wxT("Eliminated 1 level"));
   }
   else {
-    m_level->SetLabel(wxString::Format(wxT("Eliminated %d levels"), 
+    m_level->SetLabel(wxString::Format(wxT("Eliminated %d levels"),
 				       m_doc->GetBehavElimLevel()-1));
   }
   GetSizer()->Layout();
@@ -216,7 +216,7 @@ void gbtTreePlayerIcon::OnLeftClick(wxMouseEvent &)
   wxIcon image;
   image.CopyFromBitmap(bitmap);
 #endif // _WXMSW__
-      
+
   wxTextDataObject textData(wxString::Format(wxT("P%d"), m_player));
   wxDropSource source(textData, this, image, image, image);
   source.DoDragDrop(wxDrag_DefaultMove);
@@ -229,7 +229,7 @@ private:
   gbtEditableText *m_playerLabel;
   wxStaticText *m_payoff, *m_nodeValue, *m_nodeProb;
   wxStaticText *m_infosetValue, *m_infosetProb, *m_belief;
-  
+
   /// @name Event handlers
   //@{
   /// The set color icon is clicked
@@ -349,7 +349,7 @@ void gbtTreePlayerPanel::OnUpdate()
   m_payoff->SetForegroundColour(color);
   if (m_doc->GetCurrentProfile() > 0) {
     std::string pay = m_doc->GetProfiles().GetPayoff(m_player);
-    m_payoff->SetLabel(wxT("Payoff: ") + 
+    m_payoff->SetLabel(wxT("Payoff: ") +
 		       wxString(pay.c_str(), *wxConvCurrent));
     GetSizer()->Show(m_payoff, true);
 
@@ -380,7 +380,7 @@ void gbtTreePlayerPanel::OnUpdate()
 	m_infosetProb->SetLabel(wxT("Infoset reached: ") +
 				wxString(value.c_str(), *wxConvCurrent));
 	GetSizer()->Show(m_infosetProb, true);
-	
+
 	m_belief->SetForegroundColour(color);
 	value = m_doc->GetProfiles().GetBeliefProb(node);
 	m_belief->SetLabel(wxT("Belief: ") +
@@ -454,7 +454,7 @@ void gbtTreePlayerPanel::PostPendingChanges()
 {
   if (m_playerLabel->IsEditing()) {
     m_playerLabel->EndEdit(true);
-    m_doc->DoSetPlayerLabel(m_doc->GetGame()->GetPlayer(m_player), 
+    m_doc->DoSetPlayerLabel(m_doc->GetGame()->GetPlayer(m_player),
 			    m_playerLabel->GetValue());
   }
 }
@@ -490,7 +490,7 @@ void gbtTreeChanceIcon::OnLeftClick(wxMouseEvent &)
   wxIcon image;
   image.CopyFromBitmap(bitmap);
 #endif // _WXMSW__
-      
+
   wxTextDataObject textData(wxT("P0"));
   wxDropSource source(textData, this, image, image, image);
   source.DoDragDrop(wxDrag_DefaultMove);
@@ -590,11 +590,11 @@ public:
 };
 
 
-gbtTreePlayerToolbar::gbtTreePlayerToolbar(wxWindow *p_parent, 
+gbtTreePlayerToolbar::gbtTreePlayerToolbar(wxWindow *p_parent,
 					   gbtGameDocument *p_doc)
-  : wxPanel(p_parent, wxID_ANY, wxDefaultPosition, wxSize(210, -1)), 
+  : wxPanel(p_parent, wxID_ANY, wxDefaultPosition, wxSize(210, -1)),
     gbtGameView(p_doc)
-{ 
+{
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
   m_chancePanel = new gbtTreeChancePanel(this, m_doc);
@@ -623,7 +623,7 @@ void gbtTreePlayerToolbar::OnUpdate()
     GetSizer()->Detach(panel);
     panel->Destroy();
   }
-  
+
   for (int pl = 1; pl <= m_playerPanels.Length(); pl++) {
     m_playerPanels[pl]->OnUpdate();
   }
@@ -664,7 +664,7 @@ gbtEfgPanel::gbtEfgPanel(wxWindow *p_parent, gbtGameDocument *p_doc)
   auto *treeSizer = new wxBoxSizer(wxHORIZONTAL);
   treeSizer->Add(m_playerToolbar, 0, wxEXPAND, 0);
   treeSizer->Add(m_treeWindow, 1, wxEXPAND, 0);
-  
+
   topSizer->Add(treeSizer, 1, wxEXPAND, 0);
   SetSizer(topSizer);
   Layout();
@@ -703,7 +703,7 @@ void gbtEfgPanel::OnViewZoomFit(wxCommandEvent &)
 class gbtEfgPrintout : public wxPrintout {
 private:
   gbtEfgPanel *m_efgPanel;
-    
+
 public:
   gbtEfgPrintout(gbtEfgPanel *p_efgPanel, const wxString &p_label)
     : wxPrintout(p_label), m_efgPanel(p_efgPanel) { }

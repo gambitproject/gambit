@@ -100,7 +100,7 @@ public:
   //!
   //! Returns 'false' if it is known that no further eliminations can be done
   //!
-  bool CanEliminate() const 
+  bool CanEliminate() const
     { return (m_current < m_supports.Length() || !m_noFurther); }
 };
 
@@ -177,9 +177,9 @@ public:
   //!
   //! Returns 'false' if it is known that no further eliminations can be done
   //!
-  bool CanEliminate() const 
+  bool CanEliminate() const
     { return (m_current < m_supports.Length() || !m_noFurther); }
-	      
+
 };
 
 
@@ -202,7 +202,7 @@ public:
 // GBT_DOC_MODIFIED_VIEWS: Information about how the document is viewed
 // (e.g., player colors) has changed.  We want to track this for undo,
 // but, again, this has no effect on the game mathematically.
-// 
+//
 typedef enum {
   GBT_DOC_MODIFIED_NONE = 0x00,
   GBT_DOC_MODIFIED_GAME = 0x01,
@@ -218,8 +218,8 @@ private:
 
   void AddView(gbtGameView *p_view)  { m_views.push_back(p_view); }
   void RemoveView(gbtGameView *p_view)
-    { 
-      m_views.Remove(m_views.Find(p_view)); 
+    {
+      m_views.Remove(m_views.Find(p_view));
       if (m_views.Length() == 0)  delete this;
     }
 
@@ -296,7 +296,7 @@ public:
   int NumProfileLists() const { return m_profiles.Length(); }
   int GetCurrentProfileList() const { return m_currentProfileList; }
 
-  int GetCurrentProfile() const 
+  int GetCurrentProfile() const
   { return (m_profiles.Length() == 0) ? 0 : GetProfiles().GetCurrent(); }
   void SetCurrentProfile(int p_profile);
   /*

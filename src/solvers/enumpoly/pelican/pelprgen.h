@@ -19,15 +19,15 @@ http://netlib2.cs.utk.edu/hompack/
 ***************************************************************** */
 
 /*
-  This is a header file derived from the file below due to Huber.  
-It was created by transporting all normal header information from 
+  This is a header file derived from the file below due to Huber.
+It was created by transporting all normal header information from
 that file to here.
  */
 
 /*
-**  Proc_Gen.c 
-**     Commands defining Pelican functions 
-** 
+**  Proc_Gen.c
+**     Commands defining Pelican functions
+**
 **    copyright (c) 1995  Birk Huber
 */
 
@@ -61,8 +61,8 @@ Gen_node G_Cont(Gen_node g, int tweak);
 Gen_node G_BinSolve(Gen_node g);
 Gen_node G_NormSub(Gen_node g);
 Gen_node G_Lead(Gen_node g);
-Gen_node G_Solve(Gen_node g, int tweak);     
-Gen_node G_GenSolve(Gen_node g, int tweak);     
+Gen_node G_Solve(Gen_node g, int tweak);
+Gen_node G_GenSolve(Gen_node g, int tweak);
 Gen_node G_Verify(Gen_node g);
 Gen_node G_Eval(Gen_node g);
 Gen_node G_ParamSet(Gen_node g);
@@ -76,25 +76,25 @@ Gen_node G_Normalize(Gen_node g);
 /* --------------------------------------------------------------
  Install_Command(Gen_node (*G)(),char *s)
    takes a pointer to a Shell Procedure and a string s, installs
-   the pair on the symbol table-- and returns the value of the 
-   resulting symbol table entry. 
+   the pair on the symbol table-- and returns the value of the
+   resulting symbol table entry.
 
- Error Conditions: 
+ Error Conditions:
     if either G or S are NULL nothing is done and Null is returned
     if Gen_node() fails NULL is returned.
     install will return NULL on some error conditions and this
     will be passed through lock and returned.
-                   
+
 --------------------------------------------------------------*/
 /*
 Sym_ent Install_Command(Gen_node (*G)(),char *s);
 */
 
-/*----------------------------------------------------------------- 
-int Install_Gen_Commands()    
+/*-----------------------------------------------------------------
+int Install_Gen_Commands()
         Uses Install_Command to install all Commands
         On the symbol table. Always returns 1;
-  
+
 Error Conditions: None;
 -----------------------------------------------------------------*/
 /*
@@ -110,13 +110,13 @@ int Install_Gen_Commands();
 */
 Gen_node G_Help(Gen_node g);
 
-/* 
+/*
 ** Aset Command          (tested on poly's)
 */
 /* aset psys_to_aset(psys); IN psys.h */
 Gen_node G_Aset(Gen_node g);
 
-/* 
+/*
 ** Cayley Triangulation Command      (tested: looses 2 )
 **                                (problem probably in cly_triangulate)
 */
@@ -137,12 +137,12 @@ Gen_node G_MSD(Gen_node g);
 /*
 ** Qtrig Command               (tested)
 */
-Gen_node G_Qtrig(Gen_node g); 
+Gen_node G_Qtrig(Gen_node g);
 
-/* 
+/*
 ** Extremal Command                 (tested)
 */
-Gen_node G_Extremal(Gen_node g); 
+Gen_node G_Extremal(Gen_node g);
 
 /*
 ** UnLift Command         (tested)
@@ -171,12 +171,12 @@ Gen_node G_Face(Gen_node g);
 Gen_node G_Save(Gen_node g);
 
 
-/* 
+/*
 ** System Command                     (tested)
 */
 Gen_node G_System(Gen_node g);
 
-/* 
+/*
 ** GenPoly Command         (tested)
 */
 psys aset_to_psys(aset,Ivector,int);
@@ -187,7 +187,7 @@ Gen_node G_Gen_Poly(Gen_node g);
 */
 Gen_node G_AType(Gen_node g);
 
-/* 
+/*
 ** Continuation Command    (tested)
 */
 Gen_node G_Cont(Gen_node g, int tweak);
@@ -224,8 +224,8 @@ Gen_node G_Solve(Gen_node g, int tweak);
       return Rerror(#Svar "requires a floating point argument",g);\
     Svar=ptr->next->Genval.ival;\
     ptr=ptr->next->next;\
-   }   
- 
+   }
+
 #define SET_S_PARAM(Svar)\
    else if (strcmp(ptr->Genval.idval,#Svar)==0){\
     if (ptr->next==0 ||\
@@ -236,7 +236,7 @@ Gen_node G_Solve(Gen_node g, int tweak);
    }
 
 
-  
+
 
 Gen_node G_ParamSet(Gen_node g);
 
@@ -301,7 +301,7 @@ Gen_node G_BinSolve(Gen_node g);
 */
 Gen_node G_Scale(Gen_node g);
 
-/* 
+/*
 ** UnScale Command         (tested)
 */
 Gen_node G_UnScale(Gen_node g);
@@ -313,7 +313,7 @@ Gen_node G_ScaleXPL(Gen_node g);
 
 /*
 ** Affine Command
-*/ 
+*/
 Gen_node G_Affine(Gen_node g);
 
 /*
@@ -328,8 +328,6 @@ Gen_node G_Normalize(Gen_node g);
 Gen_node G_Set_T(Gen_node g);
 
 Gen_node G_Re(Gen_node g);
- 
+
 
 Gen_node G_Im(Gen_node g);
-
-

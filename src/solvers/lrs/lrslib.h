@@ -1,6 +1,6 @@
 /* lrslib.hpp (vertex enumeration using lexicographic reverse search) */
 #define TITLE "lrslib "
-#define LRS_VERSION "v.6.2 2016.3.28"   
+#define LRS_VERSION "v.6.2 2016.3.28"
 #define AUTHOR "*Copyright (C) 1995,2016, David Avis   avis@cs.mcgill.ca "
 
 /* This program is free software; you can redistribute it and/or modify
@@ -323,10 +323,7 @@ void reorder1 (long a[], long b[], long newone, long range); /* reorder array a 
 /* lp_solve like functions */
 /***************************/
 long lrs_solve_lp(lrs_dic *P, lrs_dat *Q);/* solve lp only for given dictionary */
-void lrs_set_row(lrs_dic *P, lrs_dat *Q, long row, long num[], long den[], long ineq);/* load row i of dictionary from num[]/den[] ineq=GE       */ 
+void lrs_set_row(lrs_dic *P, lrs_dat *Q, long row, long num[], long den[], long ineq);/* load row i of dictionary from num[]/den[] ineq=GE       */
 void lrs_set_row_mp(lrs_dic *P, lrs_dat *Q, long row, lrs_mp_vector num, lrs_mp_vector den, long ineq);/* same as lrs_set_row except num/den is lrs_mp type       */
 void lrs_set_obj(lrs_dic *P, lrs_dat *Q, long num[], long den[], long max); /* set up objective function with coeffs num[]/den[] max=MAXIMIZE or MINIMIZE  */
 void lrs_set_obj_mp(lrs_dic *P, lrs_dat *Q, lrs_mp_vector num, lrs_mp_vector den, long max);/* same as lrs_set_obj but num/den has lrs_mp type */
-
-
-

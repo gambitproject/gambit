@@ -88,12 +88,12 @@ bool ReadProfile(std::istream &p_stream, Gambit::Array<double> &p_profile)
   return true;
 }
 
-extern void 
+extern void
 TraceStrategicPath(const Gambit::MixedStrategyProfile<double> &p_start,
 		   double p_startLambda, double p_maxLambda, double p_omega,
 		   bool p_symmetric = false);
 /*
-extern void 
+extern void
 TraceAgentPath(const LogBehavProfile<double> &p_start,
 	       double p_startLambda, double p_maxLambda, double p_omega);
 */
@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
       ReadProfile(mleData, g_obsProbs);
       g_maxLike = true;
     }
-  
+
 
     if (!game->IsTree() || useStrategic) {
       game->BuildComputedValues();

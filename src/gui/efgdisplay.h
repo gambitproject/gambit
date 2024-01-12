@@ -48,7 +48,7 @@ public:
   gbtNodeEntry *GetNodeEntry() const { return m_entry; }
   Gambit::GameOutcome GetOutcome() const { return m_outcome; }
   int GetPlayer() const { return m_player; }
- 
+
   DECLARE_EVENT_TABLE()
 };
 
@@ -74,7 +74,7 @@ private:
   void OnAcceptPayoffEdit(wxCommandEvent &);
   //@}
 
-    
+
   /// @name Overriding gbtGameView members
   //@{
   void OnUpdate() override;
@@ -82,17 +82,17 @@ private:
   //@}
 
   void RefreshTree();
-  
+
 public:
   gbtEfgDisplay(wxWindow *p_parent, gbtGameDocument *p_doc);
-    
+
   void OnDraw(wxDC &dc) override;
   void OnDraw(wxDC &, double);
 
   int GetZoom() const { return m_zoom; }
   void SetZoom(int p_zoom);
   void FitZoom();
-  
+
   const gbtTreeLayout &GetLayout() const { return m_layout; }
 
   void EnsureNodeVisible(const Gambit::GameNode &);
@@ -101,4 +101,3 @@ public:
 };
 
 #endif   // EFGDISPLAY_H
-

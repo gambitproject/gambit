@@ -39,7 +39,7 @@ template <class T> gPoly<T>::gPoly(const gSpace* p, const term_order* o)
 {
 }
 
-template <class T> gPoly<T>::gPoly(const gSpace*     p, 
+template <class T> gPoly<T>::gPoly(const gSpace*     p,
 				     const T&          constant,
 				     const term_order* o)
 : Space(p), Order(o), Terms()
@@ -47,7 +47,7 @@ template <class T> gPoly<T>::gPoly(const gSpace*     p,
   if (constant != (T)0)   Terms.push_back(gMono<T>(p,constant));
 }
 
-template <class T> gPoly<T>::gPoly(const gSpace *p, 
+template <class T> gPoly<T>::gPoly(const gSpace *p,
 				       const std::string &s,
 				       const term_order* o)
 : Space(p), Order(o), Terms()
@@ -62,8 +62,8 @@ template <class T> gPoly<T>::gPoly(const gSpace *p, int var_no, int exp,
   Terms.push_back(gMono<T>((T)1,exp_vect(p,var_no,exp)));
 }
 
-template <class T> gPoly<T>::gPoly(const gSpace* p, 
-				       exp_vect exps, 
+template <class T> gPoly<T>::gPoly(const gSpace* p,
+				       exp_vect exps,
 				       T coeff,
 				       const term_order* o)
 : Space(p), Order(o), Terms()
@@ -71,8 +71,8 @@ template <class T> gPoly<T>::gPoly(const gSpace* p,
   Terms.push_back(gMono<T>(coeff,exps));
 }
 
-template <class T> gPoly<T>::gPoly(const gSpace* p, 
-				   const gMono<T>& mono, 
+template <class T> gPoly<T>::gPoly(const gSpace* p,
+				   const gMono<T>& mono,
 				   const term_order* o)
 : Space(p), Order(o), Terms()
 {
@@ -82,7 +82,7 @@ template <class T> gPoly<T>::gPoly(const gSpace* p,
 template <class T> gPoly<T>::gPoly(const gPoly<T> &p)
 : Space(p.Space), Order(p.Order), Terms(p.Terms)
 {
-  *this=p; 
+  *this=p;
 }
 
 //----------------------------------
@@ -177,7 +177,7 @@ template<class T> void gPoly<T>::operator-=(const gPoly<T> &p)
 }
 
 template<class T> gPoly<T> gPoly<T>::operator+(const gPoly<T> &p) const
-{ 
+{
   gPoly<T> sum(*this);
   sum += p;
   return sum;
@@ -187,7 +187,7 @@ template<class T> void gPoly<T>::operator+=(const gPoly<T> &p)
 {
   //assert(Space == p.Space);
 
-  Terms = Adder(Terms,p.Terms); 
+  Terms = Adder(Terms,p.Terms);
 }
 
 template<class T> void gPoly<T>::operator+=(const T& val)
@@ -211,21 +211,21 @@ template<class T> gPoly<T> gPoly<T>::operator/(const T &val) const
   return (one/val) * (*this);
 }
 
-template<class T> 
+template<class T>
 gPoly<T> gPoly<T>::operator/(const gPoly<T> & den) const
 {
   return DivideByPolynomial(den);
 }
 
 template<class T> void gPoly<T>::operator*=(const gPoly<T> &p)
-{ 
+{
   //assert(Space == p.Space);
 
   Terms = Mult(Terms,p.Terms);
 }
 
 template<class T> void gPoly<T>::operator*=(const T& val)
-{ 
+{
   for (int j = 1; j <= Terms.Length(); j++)
     Terms[j] *= val;
 }
@@ -257,7 +257,7 @@ template <class T> void gPoly<T>::String_Term(T nega)
   for (int a=1; a<= Dmnsn(); a++) PowArray[a] = 0;
   T val;
   val = String_Coeff(nega);
-  
+
   while (charc != '+' && charc != '-') {
     if (charc == ' ') { charnum++; charc = TheString[charnum]; }
     else String_VarAndPow(PowArray);
@@ -292,13 +292,13 @@ template <class T> void gPoly<T>::String_VarAndPow(Gambit::Array<int> &PowArray)
     charnum++;
     charc = TheString[charnum];
   }
-  if (charc == '^') { 
-    charnum++; 
-    charc = TheString[charnum]; 
-    pow = String_GetPow(); 
+  if (charc == '^') {
+    charnum++;
+    charc = TheString[charnum];
+    pow = String_GetPow();
   }
   else pow = 1;
-  for(varname = 1;varname <= Dmnsn() &&  
+  for(varname = 1;varname <= Dmnsn() &&
       VarName != (Space->VariableWithNumber(varname))->Name;
       varname ++);
   if (varname <= Dmnsn()) PowArray[varname] = pow;
@@ -313,10 +313,10 @@ template <class T> bool gPoly<T>::Check_String(const std::string &Hold){
  int statenumber=0;
  int statevar=0;
  int statesign=1;
-//values of the state variables 
+//values of the state variables
  enum number {nonumberbef, numberbef};
  enum var {novarbef, varbef};
- enum sign {nosignbef, signbef}; 
+ enum sign {nosignbef, signbef};
  std::string TheString = Hold;
  char charc = TheString[charnum];
 //movement along the string with a switch case
@@ -366,11 +366,11 @@ template <class T> bool gPoly<T>::Check_String(const std::string &Hold){
     statesign=signbef;
     break;
    case ' ':
-    break;  
-   default:
-    boolflag++; 
     break;
-   }    
+   default:
+    boolflag++;
+    break;
+   }
  charnum++;
  charc = TheString[charnum];
  }
@@ -378,7 +378,7 @@ template <class T> bool gPoly<T>::Check_String(const std::string &Hold){
  if (boolflag==0) return true;
  else return false;
 }
- 
+
 template <class T> void gPoly<T>::GetChar()
 {
   charc = TheString[charnum];
@@ -387,15 +387,15 @@ template <class T> void gPoly<T>::GetChar()
 //----------------------------------
 //           Information
 //----------------------------------
-  
+
 template <class T> const gSpace* gPoly<T>::GetSpace() const
 {
-  return (gSpace *) Space;  
+  return (gSpace *) Space;
 }
-  
+
 template <class T> const term_order* gPoly<T>::GetOrder() const
 {
-  return (term_order *) Order;  
+  return (term_order *) Order;
 }
 
 template <class T> int gPoly<T>::Dmnsn() const
@@ -406,8 +406,8 @@ template <class T> int gPoly<T>::Dmnsn() const
 template <class T> int gPoly<T>::DegreeOfVar(int var_no) const
 {
   int max = 0;
-  for (int j = 1; j <= Terms.Length(); j++) 
-    if (max < Terms[j].ExpV()[var_no]) 
+  for (int j = 1; j <= Terms.Length(); j++)
+    if (max < Terms[j].ExpV()[var_no])
       max = Terms[j].ExpV()[var_no];
   return max;
 }
@@ -422,7 +422,7 @@ template <class T> int gPoly<T>::Degree() const
 {
   int max = 0;
   for (int j = 1; j <= Terms.Length(); j++)
-    if (Terms[j].TotalDegree() > max)  
+    if (Terms[j].TotalDegree() > max)
       max = Terms[j].TotalDegree();
   return max;
 }
@@ -512,7 +512,7 @@ template <class T> int gPoly<T>::UniqueActiveVariable() const
   return activar;
 }
 
-template <class T> 
+template <class T>
 polynomial<T> gPoly<T>::UnivariateEquivalent(int activar) const
 {
   //assert(UniqueActiveVariable() >= 0);
@@ -527,14 +527,14 @@ polynomial<T> gPoly<T>::UnivariateEquivalent(int activar) const
   }
 
   return  polynomial<T>(coefs);
-} 
+}
 
 //-------------------------------------------------------------
 //           Private Versions of Arithmetic Operators
 //-------------------------------------------------------------
 
-template <class T> 
-Gambit::List< gMono<T> > gPoly<T>::Adder(const Gambit::List<gMono<T> >& One, 
+template <class T>
+Gambit::List< gMono<T> > gPoly<T>::Adder(const Gambit::List<gMono<T> >& One,
 				   const Gambit::List<gMono<T> >& Two) const
 {
   if (One.Length() == 0) return Two; if (Two.Length() == 0) return One;
@@ -546,14 +546,14 @@ Gambit::List< gMono<T> > gPoly<T>::Adder(const Gambit::List<gMono<T> >& One,
     if      (i > One.Length()) { answer.push_back(Two[j]); j++; }
     else if (j > Two.Length()) { answer.push_back(One[i]); i++; }
     else {
-      if      ( Order->Less(   One[i].ExpV(),Two[j].ExpV()) ) 
+      if      ( Order->Less(   One[i].ExpV(),Two[j].ExpV()) )
 	{ answer.push_back(One[i]); i++; }
-      else if ( Order->Greater(One[i].ExpV(),Two[j].ExpV()) ) 
+      else if ( Order->Greater(One[i].ExpV(),Two[j].ExpV()) )
 	{ answer.push_back(Two[j]); j++; }
       else {
-	if (One[i].Coef() + Two[j].Coef() != (T)0) 
+	if (One[i].Coef() + Two[j].Coef() != (T)0)
 	  answer.push_back(One[i] + Two[j]);
-	i++; j++; 
+	i++; j++;
       }
     }
   }
@@ -561,8 +561,8 @@ Gambit::List< gMono<T> > gPoly<T>::Adder(const Gambit::List<gMono<T> >& One,
   return answer;
 }
 
-template <class T> 
-Gambit::List< gMono<T> > gPoly<T>::Mult(const Gambit::List<gMono<T> >& One, 
+template <class T>
+Gambit::List< gMono<T> > gPoly<T>::Mult(const Gambit::List<gMono<T> >& One,
 				  const Gambit::List<gMono<T> >& Two) const
 {
   Gambit::List<gMono<T> > answer;
@@ -571,7 +571,7 @@ Gambit::List< gMono<T> > gPoly<T>::Mult(const Gambit::List<gMono<T> >& One,
 
   int i;
   for (i = 1; i <= One.Length(); i++)
-    for (int j = 1; j <= Two.Length(); j++) 
+    for (int j = 1; j <= Two.Length(); j++)
       {
 	gMono<T> next = One[i] * Two[j];
 
@@ -580,7 +580,7 @@ Gambit::List< gMono<T> > gPoly<T>::Mult(const Gambit::List<gMono<T> >& One,
 	else
 	  {
 	    int bot = 1; int top = answer.Length();
-	    if      ( Order->Less   (answer[top].ExpV(),next.ExpV()) ) 
+	    if      ( Order->Less   (answer[top].ExpV(),next.ExpV()) )
 	      answer.push_back(next);
 	    else if ( Order->Greater(answer[bot].ExpV(),next.ExpV()) )
 	      answer.Insert(next,1);
@@ -588,7 +588,7 @@ Gambit::List< gMono<T> > gPoly<T>::Mult(const Gambit::List<gMono<T> >& One,
 	      {
 		if      ( answer[bot].ExpV() == next.ExpV() ) top = bot;
 		else if ( answer[top].ExpV() == next.ExpV() ) bot = top;
-		
+
 		while (bot < top - 1)
 		  {
 		    int test = bot + (top - bot)/2;
@@ -608,7 +608,7 @@ Gambit::List< gMono<T> > gPoly<T>::Mult(const Gambit::List<gMono<T> >& One,
   return answer;
 }
 
-template<class T> 
+template<class T>
 gPoly<T> gPoly<T>::DivideByPolynomial(const gPoly<T> &den) const
 {
   gPoly<T> zero(Space,(T)0,Order);
@@ -636,24 +636,24 @@ gPoly<T> gPoly<T>::DivideByPolynomial(const gPoly<T> &den) const
 	{
 	  gPoly<T> quot = remainder.LeadingCoefficient(last) /
 	                     den.LeadingCoefficient(last);
-	  gPoly<T> power_of_last(Space,last,remainder.DegreeOfVar(last) - 
+	  gPoly<T> power_of_last(Space,last,remainder.DegreeOfVar(last) -
 			                        den.DegreeOfVar(last),Order);
 	  result += quot * power_of_last;
 	  remainder -= quot * power_of_last * den;
 	}
     }
   return result;
-} 
+}
 
-template <class T> 
+template <class T>
 gPoly<T> gPoly<T>::EvaluateOneVar( int varnumber, T val) const
 {
   gPoly<T> answer(Space,(T)0,Order);
 
-  for (int i = 1; i <= Terms.Length(); i++) 
+  for (int i = 1; i <= Terms.Length(); i++)
     answer += gPoly<T>(Space,
 	          Terms[i].ExpV().AfterZeroingOutExpOfVariable(varnumber),
-	   	      ((T) Terms[i].Coef())* ((T) pow(val, (double) Terms[i].ExpV()[varnumber])), 
+	   	      ((T) Terms[i].Coef())* ((T) pow(val, (double) Terms[i].ExpV()[varnumber])),
 		      	   Order);
   return answer;
 }
@@ -671,10 +671,10 @@ exp_vect gPoly<T>::OrderMaxMonomialDivisibleBy(const term_order& order,
   return answer;
 }
 
-template <class T> 
+template <class T>
 gPoly<T> gPoly<T>::PartialDerivative(int varnumber) const
 {
-  gPoly<T> newPoly(*this); 
+  gPoly<T> newPoly(*this);
 
   for (int i = 1; i <= newPoly.Terms.Length(); i++)
     newPoly.Terms[i] = gMono<T>(newPoly.Terms[i].Coef()
@@ -688,12 +688,12 @@ gPoly<T> gPoly<T>::PartialDerivative(int varnumber) const
   }
 
   return (newPoly);
-} 
+}
 
-template <class T> 
+template <class T>
 gPoly<T> gPoly<T>::LeadingCoefficient(int varnumber) const
 {
-  gPoly<T> newPoly(*this); 
+  gPoly<T> newPoly(*this);
 
   int degree = DegreeOfVar(varnumber);
 
@@ -711,7 +711,7 @@ gPoly<T> gPoly<T>::LeadingCoefficient(int varnumber) const
 // Term Order Concepts
 //--------------------
 
-template <class T> 
+template <class T>
 exp_vect gPoly<T>::LeadingPowerProduct(const term_order & order) const
 {
   //assert (Terms.Length() > 0);
@@ -728,7 +728,7 @@ exp_vect gPoly<T>::LeadingPowerProduct(const term_order & order) const
   }
 }
 
-template <class T> 
+template <class T>
 T gPoly<T>::LeadingCoefficient(const term_order & order) const
 {
   if (*Order == order) // worth a try ...
@@ -757,30 +757,30 @@ gPoly<T> gPoly<T>::LeadingTerm(const term_order & order) const
 }
 
 template <class T>
-void gPoly<T>::ToMonic(const term_order & order) 
+void gPoly<T>::ToMonic(const term_order & order)
 {
   *this = *this/LeadingCoefficient(order);
 }
 
 template <class T>
-void gPoly<T>::ReduceByDivisionAtExpV(const term_order & order, 
-				      const gPoly<T> & divisor, 
+void gPoly<T>::ReduceByDivisionAtExpV(const term_order & order,
+				      const gPoly<T> & divisor,
 				      const exp_vect & expv)
 {
   //assert(expv >= divisor.LeadingPowerProduct(order));
   //assert(divisor.LeadingCoefficient(order) != (T)0);
 
-  gPoly<T> factor(Space, 
-		    expv - divisor.LeadingPowerProduct(order), 
+  gPoly<T> factor(Space,
+		    expv - divisor.LeadingPowerProduct(order),
 		    (T)1,
 		    Order);
 
-  *this -= (GetCoef(expv) / divisor.LeadingCoefficient(order)) * 
+  *this -= (GetCoef(expv) / divisor.LeadingCoefficient(order)) *
            factor * divisor;
 }
 
 template <class T>
-void gPoly<T>::ReduceByRepeatedDivision(const term_order & order, 
+void gPoly<T>::ReduceByRepeatedDivision(const term_order & order,
 					const gPoly<T> & divisor)
 {
   exp_vect zero_exp_vec(Space);
@@ -796,10 +796,10 @@ void gPoly<T>::ReduceByRepeatedDivision(const term_order & order,
 }
 
 template <class T>
-gPoly<T> gPoly<T>::S_Polynomial(const term_order& order, 
+gPoly<T> gPoly<T>::S_Polynomial(const term_order& order,
                                 const gPoly<T>& arg2) const
 {
-  exp_vect exp_lcm = 
+  exp_vect exp_lcm =
         (LeadingPowerProduct(order)).LCM(arg2.LeadingPowerProduct(order));
   gPoly<T> lcm = gPoly<T>(Space,exp_lcm,(T)1,Order);
   gPoly<T> L1 = lcm/LeadingTerm(order);
@@ -808,8 +808,8 @@ gPoly<T> gPoly<T>::S_Polynomial(const term_order& order,
   return L1*(*this) - L2*arg2;
 }
 
-template<class T> gPoly<T> 
-gPoly<T>::TranslateOfMono(const gMono<T>& m, 
+template<class T> gPoly<T>
+gPoly<T>::TranslateOfMono(const gMono<T>& m,
 			  const Gambit::Vector<T>& new_origin) const
 {
   gPoly<T> answer(GetSpace(), (T)1, GetOrder());
@@ -828,18 +828,18 @@ gPoly<T>::TranslateOfMono(const gMono<T>& m,
   return answer;
 }
 
-template<class T> gPoly<T> 
+template<class T> gPoly<T>
 gPoly<T>::TranslateOfPoly(const Gambit::Vector<T>& new_origin) const
 {
   gPoly<T> answer(GetSpace(), GetOrder());
-  for (int i = 1; i <= this->MonomialList().Length(); i++) 
+  for (int i = 1; i <= this->MonomialList().Length(); i++)
     answer += TranslateOfMono(this->MonomialList()[i],new_origin);
   return answer;
 }
 
 
-template<class T> gPoly<T>  
-gPoly<T>::MonoInNewCoordinates(const gMono<T>& m, 
+template<class T> gPoly<T>
+gPoly<T>::MonoInNewCoordinates(const gMono<T>& m,
 			       const Gambit::SquareMatrix<T>& M) const
 {
   //assert(M.NumRows() == Dmnsn());
@@ -862,11 +862,11 @@ gPoly<T>::MonoInNewCoordinates(const gMono<T>& m,
   return answer;
 }
 
-template<class T> 
+template<class T>
 gPoly<T> gPoly<T>::PolyInNewCoordinates(const Gambit::SquareMatrix<T>& M) const
 {
   gPoly<T> answer(GetSpace(), GetOrder());
-  for (int i = 1; i <= MonomialList().Length(); i++) 
+  for (int i = 1; i <= MonomialList().Length(); i++)
     answer += MonoInNewCoordinates(MonomialList()[i],M);
   return answer;
 }
@@ -875,9 +875,9 @@ template<class T>
 T gPoly<T>::MaximalValueOfNonlinearPart(const T& radius)  const
 {
   T maxcon = (T)0;
-  for (int i = 1; i <= MonomialList().Length(); i++) 
-    if (MonomialList()[i].TotalDegree() > 1) 
-          maxcon += MonomialList()[i].Coef() * 
+  for (int i = 1; i <= MonomialList().Length(); i++)
+    if (MonomialList()[i].TotalDegree() > 1)
+          maxcon += MonomialList()[i].Coef() *
 	              pow(radius, MonomialList()[i].TotalDegree());
 
   return maxcon;
@@ -924,16 +924,16 @@ template <class T> void gPoly<T>::Output(std::string &t) const
 	if (j > 1) s += " ";
       }
       else if (j > 1) s += "+ ";
-	
+
       if ((Terms[j].Coef() != (T)1 && -Terms[j].Coef() != (T)1) ||
 	  Terms[j].IsConstant() ) {
-	if (Terms[j].Coef() < (T)0) { 
+	if (Terms[j].Coef() < (T)0) {
 	  s += Gambit::lexical_cast<std::string>(-Terms[j].Coef());
 	}
-	else {                        
+	else {
 	  s += Gambit::lexical_cast<std::string>( Terms[j].Coef());
 	}
-	
+
 	for (int k = 1; k <= Space->Dmnsn(); k++) {
 	  int exp = Terms[j].ExpV() [k];
 	  if (exp > 0) {
@@ -945,13 +945,13 @@ template <class T> void gPoly<T>::Output(std::string &t) const
 	    }
 	  }
 	}
-	
+
 	if (j < Terms.Length()) s += " ";
       }
     }
   }
   if (s == "") s = " 0";
-  
+
   t += s;
 }
 
@@ -965,8 +965,8 @@ template <class T> std::string &operator<<(std::string &p_text, const gPoly<T> &
 //           Conversion
 //----------------------------------
 
-template<class T>  
-gPoly<double>  TogDouble(const gPoly<T>& given) 
+template<class T>
+gPoly<double>  TogDouble(const gPoly<T>& given)
 {
   gPoly<double>   answer(given.GetSpace(),given.GetOrder());
   Gambit::List<gMono<T> > list = given.MonomialList();
@@ -978,12 +978,12 @@ gPoly<double>  TogDouble(const gPoly<T>& given)
 		       given.GetOrder());
     answer += next;
   }
-  
+
   return answer;
 }
 
-template<class T>  
-gPoly<double>  NormalizationOfPoly(const gPoly<T>& given) 
+template<class T>
+gPoly<double>  NormalizationOfPoly(const gPoly<T>& given)
 {
   Gambit::List<gMono<T> > list = given.MonomialList();
   double maxcoeff = 0.0;
@@ -1002,8 +1002,6 @@ gPoly<double>  NormalizationOfPoly(const gPoly<T>& given)
 		       given.GetOrder());
     answer += next;
   }
-  
+
   return answer;
 }
-
-

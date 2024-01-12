@@ -31,22 +31,22 @@
 //---------------------------
 
 template <class T> IneqSolv<T>::IneqSolv(const gPolyList<T>& given)
-  : System(given), 
+  : System(given),
     TreesOfPartials(given),
     Epsilon((T)1/(T)1000000)
     //    Epsilon((T)0),
-    //    HasBeenSolved(false), 
-    //    HasASolution(triUNKNOWN), 
+    //    HasBeenSolved(false),
+    //    HasASolution(triUNKNOWN),
     //    Sample(given.Dmnsn()),
 
 { }
 
 template<class T> IneqSolv<T>::IneqSolv(const IneqSolv& qs)
-  : System(qs.System), 
-    TreesOfPartials(qs.TreesOfPartials), 
+  : System(qs.System),
+    TreesOfPartials(qs.TreesOfPartials),
     Epsilon(qs.Epsilon)
-    //    HasBeenSolved(qs.HasBeenSolved), 
-    //    HasASolution(qs.HasASolution), 
+    //    HasBeenSolved(qs.HasBeenSolved),
+    //    HasASolution(qs.HasASolution),
     //    Sample(qs.Sample),
 { }
 
@@ -57,7 +57,7 @@ template<class T> IneqSolv<T>::~IneqSolv()
 //        Operators
 //----------------------------------
 
-template<class T> 
+template<class T>
 IneqSolv<T>& IneqSolv<T>::operator=(const IneqSolv<T> & rhs)
 {
   //assert (System == rhs.System);
@@ -68,7 +68,7 @@ IneqSolv<T>& IneqSolv<T>::operator=(const IneqSolv<T> & rhs)
   return *this;
 }
 
-template<class T>  
+template<class T>
 bool IneqSolv<T>::operator==(const IneqSolv<T> & rhs) const
 {
     if (System  != rhs.System || Epsilon != rhs.Epsilon)
@@ -76,7 +76,7 @@ bool IneqSolv<T>::operator==(const IneqSolv<T> & rhs) const
     else return true;
 }
 
-template<class T>  
+template<class T>
 bool IneqSolv<T>::operator!=(const IneqSolv<T> & rhs) const
 {
   return !(*this == rhs);
@@ -87,7 +87,7 @@ bool IneqSolv<T>::operator!=(const IneqSolv<T> & rhs) const
 //      Calculations
 //---------------------------
 
-template<class T> 
+template<class T>
 bool IneqSolv<T>::IsASolution(const Gambit::Vector<T>& v) const
 {
   bool answer(true);
@@ -97,7 +97,7 @@ bool IneqSolv<T>::IsASolution(const Gambit::Vector<T>& v) const
   return answer;
 }
 
-template<class T> 
+template<class T>
 bool IneqSolv<T>::SystemHasNoSolutionIn(const gRectangle<T>& r,
 					      Gambit::Array<int>& precedence) const
 {
@@ -107,7 +107,7 @@ bool IneqSolv<T>::SystemHasNoSolutionIn(const gRectangle<T>& r,
 
       /*
       //DEBUG
-      gout << "The polynomial " << System[precedence[i]] 
+      gout << "The polynomial " << System[precedence[i]]
 	   << " has no roots in ";
       gRectangle<T> newrect(r);
       gout << newrect;
@@ -116,18 +116,18 @@ bool IneqSolv<T>::SystemHasNoSolutionIn(const gRectangle<T>& r,
 
       if (i != 1) { // We have found a new "most likely to never be positive"
 	int tmp = precedence[i];
-	for (int j = 1; j <= i-1; j++) 
+	for (int j = 1; j <= i-1; j++)
 	  precedence[i - j + 1] = precedence[i - j];
 	precedence[1] = tmp;
       }
-      return true; 
+      return true;
     }
   }
   return false;
 }
 
 template <class T> bool
-IneqSolv<T>::ASolutionExistsRecursion(const gRectangle<T>& r, 
+IneqSolv<T>::ASolutionExistsRecursion(const gRectangle<T>& r,
 				            Gambit::Vector<T>& sample,
 				            Gambit::Array<int>& precedence) const
 {
@@ -136,7 +136,7 @@ IneqSolv<T>::ASolutionExistsRecursion(const gRectangle<T>& r,
   gout << "The rectangle is\n";
   for (int i = 1; i <= r.Dmnsn() - 1; i++)
     gout << r.CartesianFactor(i) << "x";
-  if (r.Dmnsn() > 0) 
+  if (r.Dmnsn() > 0)
     gout << r.CartesianFactor(r.Dmnsn()) << "\n";
   */
 
@@ -144,23 +144,23 @@ IneqSolv<T>::ASolutionExistsRecursion(const gRectangle<T>& r,
   if ( IsASolution(r.Center()) )
     return true;
 
-  if ( SystemHasNoSolutionIn(r, precedence) ) 
+  if ( SystemHasNoSolutionIn(r, precedence) )
     return false;
 
   int N = r.NumberOfCellsInSubdivision();
-  for (int i = 1; i <= N; i++) 
+  for (int i = 1; i <= N; i++)
     if (ASolutionExistsRecursion(r.SubdivisionCell(i),
 				 sample,
 				 precedence))
       return true;
-  return false; 
+  return false;
 }
 
 template <class T> bool
 IneqSolv<T>::ASolutionExists (const gRectangle<T>& r, Gambit::Vector<T>& sample)
 {
      // precedence orders search for everywhere negative poly
-  Gambit::Array<int> precedence(System.Length());  
+  Gambit::Array<int> precedence(System.Length());
   for (int i = 1; i <= System.Length(); i++) precedence[i] = i;
 
   /*
@@ -172,4 +172,3 @@ IneqSolv<T>::ASolutionExists (const gRectangle<T>& r, Gambit::Vector<T>& sample)
 
   return answer;
 }
-

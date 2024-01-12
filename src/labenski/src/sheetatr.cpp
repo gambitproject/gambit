@@ -41,19 +41,19 @@ DEFINE_PAIRED_INT_DATA_ARRAYS(wxSheetCellAttr, wxPairArrayIntSheetCellAttr)
 // ----------------------------------------------------------------------------
 #define M_CELLATTRDATA ((wxSheetCellAttrRefData*)m_refData)
 
-wxSheetCellAttrRefData::wxSheetCellAttrRefData() 
+wxSheetCellAttrRefData::wxSheetCellAttrRefData()
                        : wxObjectRefData(),
                          // other m_attrTypes unset values are 0
-                         m_attrTypes(wxSHEET_AttrCell|wxSHEET_AttrAlignUnset),  
-                         m_renderer(NULL), m_editor(NULL), m_defaultAttr(NULL) 
+                         m_attrTypes(wxSHEET_AttrCell|wxSHEET_AttrAlignUnset),
+                         m_renderer(NULL), m_editor(NULL), m_defaultAttr(NULL)
 {
 }
 
-wxSheetCellAttrRefData::wxSheetCellAttrRefData( const wxSheetCellAttrRefData& data ) 
+wxSheetCellAttrRefData::wxSheetCellAttrRefData( const wxSheetCellAttrRefData& data )
                        : wxObjectRefData(),
-                         m_foreColour(data.m_foreColour), 
+                         m_foreColour(data.m_foreColour),
                          m_backColour(data.m_backColour),
-                         m_font(data.m_font), 
+                         m_font(data.m_font),
                          m_attrTypes(data.m_attrTypes)
 {
     m_renderer    = !data.m_renderer    ? NULL : new wxSheetCellRenderer(*data.m_renderer);
@@ -82,27 +82,27 @@ wxSheetCellAttr::wxSheetCellAttr(bool create) : wxObject()
 bool wxSheetCellAttr::Create()
 {
     UnRef();
-    m_refData = new wxSheetCellAttrRefData;    
+    m_refData = new wxSheetCellAttrRefData;
     return m_refData != NULL;
 }
 
-wxObjectRefData *wxSheetCellAttr::CreateRefData() const 
-{ 
-    return new wxSheetCellAttrRefData; 
+wxObjectRefData *wxSheetCellAttr::CreateRefData() const
+{
+    return new wxSheetCellAttrRefData;
 }
 wxObjectRefData *wxSheetCellAttr::CloneRefData(const wxObjectRefData *data) const
-{ 
+{
     wxCHECK_MSG(data, new wxSheetCellAttrRefData, wxT("Invalid data for CloneRefData"));
-    return new wxSheetCellAttrRefData(*(const wxSheetCellAttrRefData *)data); 
+    return new wxSheetCellAttrRefData(*(const wxSheetCellAttrRefData *)data);
 }
 
-bool wxSheetCellAttr::Copy(const wxSheetCellAttr& other) 
-{ 
+bool wxSheetCellAttr::Copy(const wxSheetCellAttr& other)
+{
     wxCHECK_MSG(other.Ok(), false, wxT("Attr to copy from is not created"));
-    
+
     if (!Create())
         return false;
-    
+
     M_CELLATTRDATA->m_foreColour = ((wxSheetCellAttrRefData*)other.GetRefData())->m_foreColour;
     M_CELLATTRDATA->m_backColour = ((wxSheetCellAttrRefData*)other.GetRefData())->m_backColour;
     M_CELLATTRDATA->m_font       = ((wxSheetCellAttrRefData*)other.GetRefData())->m_font;
@@ -111,13 +111,13 @@ bool wxSheetCellAttr::Copy(const wxSheetCellAttr& other)
         SetEditor(((wxSheetCellAttrRefData*)other.m_refData)->m_editor->Clone());
     if (other.HasRenderer())
         SetRenderer(((wxSheetCellAttrRefData*)other.m_refData)->m_renderer->Clone());
-    
+
     SetDefaultAttr(other.GetDefaultAttr());
     return true;
 }
 
-bool wxSheetCellAttr::UpdateWith(const wxSheetCellAttr& other) 
-{ 
+bool wxSheetCellAttr::UpdateWith(const wxSheetCellAttr& other)
+{
     wxCHECK_MSG(Ok() && other.Ok(), false, wxT("this or Attr to UpdateWith from is not created"));
 
     if ( other.HasForegoundColour() )
@@ -140,7 +140,7 @@ bool wxSheetCellAttr::UpdateWith(const wxSheetCellAttr& other)
         SetOverflowMarker(other.GetOverflowMarker());
     if ( other.HasShowEditorMode() )
         SetShowEditor(other.GetShowEditor());
-    
+
     // Directly access m_renderer/m_editor as GetRender/Editor may return different one
 
     // Maybe add support for merge of Render and Editor?
@@ -151,14 +151,14 @@ bool wxSheetCellAttr::UpdateWith(const wxSheetCellAttr& other)
 
     if ( other.HasDefaultAttr() )
         SetDefaultAttr(other.GetDefaultAttr());
-    
+
     return true;
 }
-    
+
 bool wxSheetCellAttr::MergeWith(const wxSheetCellAttr &other)
 {
     wxCHECK_MSG(Ok() && other.Ok(), false, wxT("this or Attr to MergeWith from is not created"));
-    
+
     if ( !HasForegoundColour() && other.HasForegoundColour() )
         SetForegroundColour(other.GetForegroundColour());
     if ( !HasBackgroundColour() && other.HasBackgroundColour() )
@@ -179,7 +179,7 @@ bool wxSheetCellAttr::MergeWith(const wxSheetCellAttr &other)
         SetOverflowMarker(other.GetOverflowMarker());
     if ( !HasShowEditorMode() && other.HasShowEditorMode() )
         SetShowEditor(other.GetShowEditor());
-    
+
     // Directly access m_renderer/m_editor as GetRender/Editor may return different one
 
     // Maybe add support for merge of Render and Editor?
@@ -190,24 +190,24 @@ bool wxSheetCellAttr::MergeWith(const wxSheetCellAttr &other)
 
     if ( !HasDefaultAttr() && other.HasDefaultAttr() )
         SetDefaultAttr(other.GetDefaultAttr());
-    
+
     return true;
 }
 
-void wxSheetCellAttr::SetForegroundColour(const wxColour& foreColour) 
-{ 
+void wxSheetCellAttr::SetForegroundColour(const wxColour& foreColour)
+{
     wxCHECK_RET(m_refData, wxT("wxSheetCellAttr not initializied"));
-    M_CELLATTRDATA->m_foreColour = foreColour; 
+    M_CELLATTRDATA->m_foreColour = foreColour;
 }
-void wxSheetCellAttr::SetBackgroundColour(const wxColour& backColour) 
-{ 
+void wxSheetCellAttr::SetBackgroundColour(const wxColour& backColour)
+{
     wxCHECK_RET(m_refData, wxT("wxSheetCellAttr not initializied"));
-    M_CELLATTRDATA->m_backColour = backColour; 
+    M_CELLATTRDATA->m_backColour = backColour;
 }
-void wxSheetCellAttr::SetFont(const wxFont& font) 
-{ 
+void wxSheetCellAttr::SetFont(const wxFont& font)
+{
     wxCHECK_RET(m_refData, wxT("wxSheetCellAttr not initializied"));
-    M_CELLATTRDATA->m_font = font; 
+    M_CELLATTRDATA->m_font = font;
 }
 void wxSheetCellAttr::SetAlignment(int align)
 {
@@ -215,7 +215,7 @@ void wxSheetCellAttr::SetAlignment(int align)
 }
 void wxSheetCellAttr::SetAlignment(int horizAlign, int vertAlign)
 {
-    SetType(wxSheet::SetAlignment(M_CELLATTRDATA->m_attrTypes, horizAlign, vertAlign), 
+    SetType(wxSheet::SetAlignment(M_CELLATTRDATA->m_attrTypes, horizAlign, vertAlign),
             wxSHEET_AttrAlignType_Mask);
 }
 void wxSheetCellAttr::SetOrientation(int orientation)
@@ -227,27 +227,27 @@ void wxSheetCellAttr::SetLevel(wxSheetAttrLevel_Type level)
     SetType(level, wxSHEET_AttrLevelType_Mask);
 }
 void wxSheetCellAttr::SetOverflow(bool allow)
-{ 
+{
     SetType(allow ? wxSHEET_AttrOverflow : wxSHEET_AttrOverflowNot,
             wxSHEET_AttrOverflowType_Mask);
 }
 void wxSheetCellAttr::SetOverflowMarker(bool draw_marker)
-{ 
+{
     SetType(draw_marker ? wxSHEET_AttrOverflowMarker : wxSHEET_AttrOverflowMarkerNot,
             wxSHEET_AttrOverflowMarkerType_Mask);
 }
 void wxSheetCellAttr::SetShowEditor(bool show_editor)
-{ 
-    SetType(show_editor ? wxSHEET_AttrShowEditor : wxSHEET_AttrShowEditorNot, 
+{
+    SetType(show_editor ? wxSHEET_AttrShowEditor : wxSHEET_AttrShowEditorNot,
             wxSHEET_AttrShowEditorType_Mask);
 }
 void wxSheetCellAttr::SetReadOnly(bool isReadOnly)
-{ 
-    SetType(isReadOnly ? wxSHEET_AttrReadOnly : wxSHEET_AttrReadWrite, 
+{
+    SetType(isReadOnly ? wxSHEET_AttrReadOnly : wxSHEET_AttrReadWrite,
             wxSHEET_AttrReadType_Mask);
 }
 void wxSheetCellAttr::SetRenderer(const wxSheetCellRenderer& renderer)
-{ 
+{
     wxCHECK_RET(m_refData, wxT("wxSheetCellAttr not initializied"));
     if (M_CELLATTRDATA->m_renderer)
     {
@@ -255,10 +255,10 @@ void wxSheetCellAttr::SetRenderer(const wxSheetCellRenderer& renderer)
         M_CELLATTRDATA->m_renderer = NULL;
     }
     if (renderer.Ok())
-        M_CELLATTRDATA->m_renderer = new wxSheetCellRenderer(renderer); 
+        M_CELLATTRDATA->m_renderer = new wxSheetCellRenderer(renderer);
 }
 void wxSheetCellAttr::SetEditor(const wxSheetCellEditor& editor)
-{ 
+{
     wxCHECK_RET(m_refData, wxT("wxSheetCellAttr not initializied"));
     if (M_CELLATTRDATA->m_editor)
     {
@@ -266,80 +266,80 @@ void wxSheetCellAttr::SetEditor(const wxSheetCellEditor& editor)
         M_CELLATTRDATA->m_editor = NULL;
     }
     if (editor.Ok())
-        M_CELLATTRDATA->m_editor = new wxSheetCellEditor(editor); 
+        M_CELLATTRDATA->m_editor = new wxSheetCellEditor(editor);
 }
-void wxSheetCellAttr::SetKind(wxSheetAttr_Type kind) 
-{ 
+void wxSheetCellAttr::SetKind(wxSheetAttr_Type kind)
+{
     SetType(kind, wxSHEET_AttrAny);
 }
 
-bool wxSheetCellAttr::HasForegoundColour() const       
-{ 
+bool wxSheetCellAttr::HasForegoundColour() const
+{
     wxCHECK_MSG(m_refData, false, wxT("wxSheetCellAttr not initializied"));
-    return M_CELLATTRDATA->m_foreColour.Ok(); 
+    return M_CELLATTRDATA->m_foreColour.Ok();
 }
-bool wxSheetCellAttr::HasBackgroundColour() const 
-{ 
+bool wxSheetCellAttr::HasBackgroundColour() const
+{
     wxCHECK_MSG(m_refData, false, wxT("wxSheetCellAttr not initializied"));
-    return M_CELLATTRDATA->m_backColour.Ok(); 
+    return M_CELLATTRDATA->m_backColour.Ok();
 }
-bool wxSheetCellAttr::HasFont() const             
-{ 
+bool wxSheetCellAttr::HasFont() const
+{
     wxCHECK_MSG(m_refData, false, wxT("wxSheetCellAttr not initializied"));
-    return M_CELLATTRDATA->m_font.Ok(); 
+    return M_CELLATTRDATA->m_font.Ok();
 }
-bool wxSheetCellAttr::HasAlignment() const        
-{ 
+bool wxSheetCellAttr::HasAlignment() const
+{
     wxCHECK_MSG(m_refData, false, wxT("wxSheetCellAttr not initializied"));
-    // note: Left and Top is 0 
-    return (((M_CELLATTRDATA->m_attrTypes) & wxSHEET_AttrAlignHorizUnset) == 0) && 
+    // note: Left and Top is 0
+    return (((M_CELLATTRDATA->m_attrTypes) & wxSHEET_AttrAlignHorizUnset) == 0) &&
            (((M_CELLATTRDATA->m_attrTypes) & wxSHEET_AttrAlignVertUnset ) == 0);
 }
-bool wxSheetCellAttr::HasOrientation() const        
-{ 
+bool wxSheetCellAttr::HasOrientation() const
+{
     wxCHECK_MSG(m_refData, false, wxT("wxSheetCellAttr not initializied"));
-    return ((M_CELLATTRDATA->m_attrTypes & wxSHEET_AttrOrientHoriz) != 0) || 
-           ((M_CELLATTRDATA->m_attrTypes & wxSHEET_AttrOrientVert ) != 0);    
+    return ((M_CELLATTRDATA->m_attrTypes & wxSHEET_AttrOrientHoriz) != 0) ||
+           ((M_CELLATTRDATA->m_attrTypes & wxSHEET_AttrOrientVert ) != 0);
 }
-bool wxSheetCellAttr::HasLevel() const        
-{ 
+bool wxSheetCellAttr::HasLevel() const
+{
     return HasType(wxSHEET_AttrLevelType_Mask);
 }
-bool wxSheetCellAttr::HasOverflowMode() const     
-{ 
+bool wxSheetCellAttr::HasOverflowMode() const
+{
     return HasType(wxSHEET_AttrOverflowType_Mask);
 }
-bool wxSheetCellAttr::HasOverflowMarkerMode() const     
-{ 
+bool wxSheetCellAttr::HasOverflowMarkerMode() const
+{
     return HasType(wxSHEET_AttrOverflowMarkerType_Mask);
 }
-bool wxSheetCellAttr::HasShowEditorMode() const     
-{ 
+bool wxSheetCellAttr::HasShowEditorMode() const
+{
     return HasType(wxSHEET_AttrShowEditorType_Mask);
 }
-bool wxSheetCellAttr::HasReadWriteMode() const    
-{ 
+bool wxSheetCellAttr::HasReadWriteMode() const
+{
     return HasType(wxSHEET_AttrReadType_Mask);
 }
-bool wxSheetCellAttr::HasRenderer() const         
-{ 
+bool wxSheetCellAttr::HasRenderer() const
+{
     wxCHECK_MSG(m_refData, false, wxT("wxSheetCellAttr not initializied"));
-    return M_CELLATTRDATA->m_renderer && M_CELLATTRDATA->m_renderer->Ok(); 
+    return M_CELLATTRDATA->m_renderer && M_CELLATTRDATA->m_renderer->Ok();
 }
-bool wxSheetCellAttr::HasEditor() const           
-{ 
+bool wxSheetCellAttr::HasEditor() const
+{
     wxCHECK_MSG(m_refData, false, wxT("wxSheetCellAttr not initializied"));
-    return M_CELLATTRDATA->m_editor && M_CELLATTRDATA->m_editor->Ok(); 
+    return M_CELLATTRDATA->m_editor && M_CELLATTRDATA->m_editor->Ok();
 }
-bool wxSheetCellAttr::HasDefaultAttr() const           
-{ 
+bool wxSheetCellAttr::HasDefaultAttr() const
+{
     wxCHECK_MSG(m_refData, false, wxT("wxSheetCellAttr not initializied"));
-    return M_CELLATTRDATA->m_defaultAttr && M_CELLATTRDATA->m_defaultAttr->Ok(); 
+    return M_CELLATTRDATA->m_defaultAttr && M_CELLATTRDATA->m_defaultAttr->Ok();
 }
-bool wxSheetCellAttr::IsComplete() const 
-{ 
+bool wxSheetCellAttr::IsComplete() const
+{
     return Ok() && HasForegoundColour() && HasBackgroundColour() && HasFont() &&
-           HasAlignment() && HasOverflowMode() && HasLevel() && 
+           HasAlignment() && HasOverflowMode() && HasLevel() &&
            HasReadWriteMode() && HasRenderer() && HasEditor();
 }
 
@@ -383,7 +383,7 @@ int wxSheetCellAttr::GetAlignment() const
         return M_CELLATTRDATA->m_attrTypes & wxSHEET_AttrAlignType_Mask;
     else if (GetDefaultAttr().Ok()) // && GetDefaultAttr().HasAlignment())
         return GetDefaultAttr().GetAlignment();
-    
+
     wxFAIL_MSG(wxT("Missing default cell attribute"));
     return wxSHEET_AttrAlignLeft|wxSHEET_AttrAlignCenterVert;
 }
@@ -394,7 +394,7 @@ wxOrientation wxSheetCellAttr::GetOrientation() const
         return wxOrientation(M_CELLATTRDATA->m_attrTypes & wxSHEET_AttrOrientType_Mask);
     else if (GetDefaultAttr().Ok()) // && GetDefaultAttr().HasOrientation())
         return GetDefaultAttr().GetOrientation();
-    
+
     wxFAIL_MSG(wxT("Missing default cell attribute"));
     return wxHORIZONTAL;
 }
@@ -405,7 +405,7 @@ wxSheetAttrLevel_Type wxSheetCellAttr::GetLevel() const
         return wxSheetAttrLevel_Type(M_CELLATTRDATA->m_attrTypes & wxSHEET_AttrLevelType_Mask);
     else if (GetDefaultAttr().Ok()) // && GetDefaultAttr().HasLevel())
         return GetDefaultAttr().GetLevel();
-    
+
     wxFAIL_MSG(wxT("Missing default cell attribute"));
     return wxSHEET_AttrLevelTop;
 }
@@ -413,45 +413,45 @@ bool wxSheetCellAttr::GetOverflow() const
 {
     wxCHECK_MSG(m_refData, false, wxT("wxSheetCellAttr not initializied"));
     if (HasOverflowMode())
-        return (M_CELLATTRDATA->m_attrTypes & wxSHEET_AttrOverflow) != 0; 
+        return (M_CELLATTRDATA->m_attrTypes & wxSHEET_AttrOverflow) != 0;
     else if (GetDefaultAttr().Ok()) // && GetDefaultAttr().HasOverflowMode())
         return GetDefaultAttr().GetOverflow();
-    
+
     wxFAIL_MSG(wxT("Missing default cell attribute"));
-    return false;    
+    return false;
 }
 bool wxSheetCellAttr::GetOverflowMarker() const
 {
     wxCHECK_MSG(m_refData, false, wxT("wxSheetCellAttr not initializied"));
     if (HasOverflowMarkerMode())
-        return (M_CELLATTRDATA->m_attrTypes & wxSHEET_AttrOverflowMarker) != 0; 
+        return (M_CELLATTRDATA->m_attrTypes & wxSHEET_AttrOverflowMarker) != 0;
     else if (GetDefaultAttr().Ok()) // && GetDefaultAttr().HasOverflowMarkerMode())
         return GetDefaultAttr().GetOverflowMarker();
-    
+
     wxFAIL_MSG(wxT("Missing default cell attribute"));
-    return false;    
+    return false;
 }
 bool wxSheetCellAttr::GetShowEditor() const
 {
     wxCHECK_MSG(m_refData, false, wxT("wxSheetCellAttr not initializied"));
     if (HasShowEditorMode())
-        return (M_CELLATTRDATA->m_attrTypes & wxSHEET_AttrShowEditor) != 0; 
+        return (M_CELLATTRDATA->m_attrTypes & wxSHEET_AttrShowEditor) != 0;
     else if (GetDefaultAttr().Ok()) // && GetDefaultAttr().HasShowEditorMode())
         return GetDefaultAttr().GetShowEditor();
-    
+
     wxFAIL_MSG(wxT("Missing default cell attribute"));
-    return false;    
+    return false;
 }
-bool wxSheetCellAttr::GetReadOnly() const 
-{ 
+bool wxSheetCellAttr::GetReadOnly() const
+{
     wxCHECK_MSG(m_refData, false, wxT("wxSheetCellAttr not initializied"));
     if (HasReadWriteMode())
-        return (M_CELLATTRDATA->m_attrTypes & wxSHEET_AttrReadOnly) != 0; 
+        return (M_CELLATTRDATA->m_attrTypes & wxSHEET_AttrReadOnly) != 0;
     else if (GetDefaultAttr().Ok()) // && GetDefaultAttr().HasReadWriteMode())
         return GetDefaultAttr().GetReadOnly();
-    
+
     wxFAIL_MSG(wxT("Missing default cell attribute"));
-    return false;    
+    return false;
 }
 
 // Labenski - the logic is now different, I didn't understand what it was
@@ -474,13 +474,13 @@ wxSheetCellRenderer wxSheetCellAttr::GetRenderer(wxSheet* sheet, const wxSheetCo
     // first try to get the renderer for the cell from the sheet, if this is default
     if (sheet && (sheet->GetDefaultAttr(coords) == *this))
         renderer = sheet->GetDefaultRendererForCell(coords);
-    
+
     // then see if this has a renderer and return it if valid
     if ( !renderer.Ok() )
     {
         if ( M_CELLATTRDATA->m_renderer && M_CELLATTRDATA->m_renderer->Ok() )
             renderer = *M_CELLATTRDATA->m_renderer;
-        else 
+        else
         {
             // couldn't get it from the sheet try attr default
             wxSheetCellAttr defAttr(GetDefaultAttr());
@@ -501,13 +501,13 @@ wxSheetCellEditor wxSheetCellAttr::GetEditor(wxSheet* sheet, const wxSheetCoords
     // first try to get the editor for the cell from the sheet, if this is default
     if (sheet && (sheet->GetDefaultAttr(coords) == *this))
         editor = sheet->GetDefaultEditorForCell(coords);
-    
+
     // then see if this has a editor and return it if valid
     if ( !editor.Ok() )
     {
         if ( M_CELLATTRDATA->m_editor && M_CELLATTRDATA->m_editor->Ok() )
             editor = *M_CELLATTRDATA->m_editor;
-        else 
+        else
         {
             // couldn't get it from the sheet try attr default
             wxSheetCellAttr defAttr(GetDefaultAttr());
@@ -518,12 +518,12 @@ wxSheetCellEditor wxSheetCellAttr::GetEditor(wxSheet* sheet, const wxSheetCoords
 
     // we're supposed to always find something
     wxASSERT_MSG(editor.Ok(), wxT("Missing default cell editor"));
-    return editor;    
+    return editor;
 }
 wxSheetAttr_Type wxSheetCellAttr::GetKind() const
-{ 
+{
     wxCHECK_MSG(m_refData, wxSHEET_AttrCell, wxT("wxSheetCellAttr not initializied"));
-    return wxSheetAttr_Type(M_CELLATTRDATA->m_attrTypes & wxSHEET_AttrAny); 
+    return wxSheetAttr_Type(M_CELLATTRDATA->m_attrTypes & wxSHEET_AttrAny);
 }
 
 const wxSheetCellAttr& wxSheetCellAttr::GetDefaultAttr() const
@@ -531,12 +531,12 @@ const wxSheetCellAttr& wxSheetCellAttr::GetDefaultAttr() const
     wxCHECK_MSG(m_refData, wxNullSheetCellAttr, wxT("wxSheetCellAttr not initializied"));
     if (M_CELLATTRDATA->m_defaultAttr != NULL)
         return *M_CELLATTRDATA->m_defaultAttr;
-    
+
     return wxNullSheetCellAttr;
 }
-void wxSheetCellAttr::SetDefaultAttr(const wxSheetCellAttr& defAttr) 
-{ 
-    wxCHECK_RET(m_refData, wxT("wxSheetCellAttr not initializied"));    
+void wxSheetCellAttr::SetDefaultAttr(const wxSheetCellAttr& defAttr)
+{
+    wxCHECK_RET(m_refData, wxT("wxSheetCellAttr not initializied"));
     if (M_CELLATTRDATA->m_defaultAttr)
     {
         delete M_CELLATTRDATA->m_defaultAttr;
@@ -545,7 +545,7 @@ void wxSheetCellAttr::SetDefaultAttr(const wxSheetCellAttr& defAttr)
     // don't set defAttr to this, you don't gain anything, but a memory leak
     //if (defAttr.Ok() && (defAttr.m_refData != m_refData))
     //    M_CELLATTRDATA->m_defaultAttr = new wxSheetCellAttr(defAttr);
-    
+
     if (defAttr.Ok())
     {
         wxSheetCellAttr attr(defAttr);
@@ -576,7 +576,7 @@ int wxSheetCellAttr::GetType(int mask) const
 // ----------------------------------------------------------------------------
 wxSheetCellAttr wxSheetCellAttrProvider::GetAttr(const wxSheetCoords& coords,
                                                  wxSheetAttr_Type type )
-{   
+{
     switch (wxSheet::GetCellCoordsType(coords))
     {
         case wxSHEET_CELL_GRID :
@@ -624,7 +624,7 @@ wxSheetCellAttr wxSheetCellAttrProvider::GetAttr(const wxSheetCoords& coords,
 */
                     // This is not a "real" attr but created
                     attr.SetKind(wxSHEET_AttrAny);
-                    
+
                     return attr;
                 }
                 case wxSHEET_AttrCell : return m_cellAttrs.GetValue(coords);
@@ -648,8 +648,8 @@ wxSheetCellAttr wxSheetCellAttrProvider::GetAttr(const wxSheetCoords& coords,
     return wxNullSheetCellAttr;
 }
 
-void wxSheetCellAttrProvider::SetAttr(const wxSheetCoords& coords, 
-                                      const wxSheetCellAttr &attr, 
+void wxSheetCellAttrProvider::SetAttr(const wxSheetCoords& coords,
+                                      const wxSheetCellAttr &attr,
                                       wxSheetAttr_Type type)
 {
     switch (wxSheet::GetCellCoordsType(coords))
@@ -657,13 +657,13 @@ void wxSheetCellAttrProvider::SetAttr(const wxSheetCoords& coords,
         case wxSHEET_CELL_GRID :
         {
             switch (type)
-            {   
+            {
                 case wxSHEET_AttrCell :
                 {
                     if (attr.Ok()) m_cellAttrs.SetValue(coords, attr);
-                    else           m_cellAttrs.RemoveValue(coords);            
+                    else           m_cellAttrs.RemoveValue(coords);
                     return;
-                } 
+                }
                 case wxSHEET_AttrRow :
                 {
                     if (attr.Ok()) m_rowAttrs.SetValue(coords.m_row, attr);
@@ -693,8 +693,8 @@ void wxSheetCellAttrProvider::SetAttr(const wxSheetCoords& coords,
                     if (attr.Ok()) m_rowLabelAttrs.SetValue(coords.m_row, attr);
                     else           m_rowLabelAttrs.RemoveValue(coords.m_row);
                     return;
-                } 
-                default : 
+                }
+                default :
                 {
                     wxFAIL_MSG(wxT("Unhandled attr type for row label coords"));
                     return;
@@ -711,8 +711,8 @@ void wxSheetCellAttrProvider::SetAttr(const wxSheetCoords& coords,
                     if (attr.Ok()) m_colLabelAttrs.SetValue(coords.m_col, attr);
                     else           m_colLabelAttrs.RemoveValue(coords.m_col);
                     return;
-                } 
-                default : 
+                }
+                default :
                 {
                     wxFAIL_MSG(wxT("Unhandled attr type for col label coords"));
                     return;
@@ -731,7 +731,7 @@ void wxSheetCellAttrProvider::UpdateRows( size_t row, int numRows, int update )
     if ((update & wxSHEET_UpdateGridCellAttrs) != 0)
         m_rowAttrs.UpdatePos( row, numRows );
     if ((update & wxSHEET_UpdateGridCellAttrs) != 0)
-        m_cellAttrs.UpdateRows( row, numRows );    
+        m_cellAttrs.UpdateRows( row, numRows );
     if ((update & wxSHEET_UpdateRowLabelAttrs) != 0)
         m_rowLabelAttrs.UpdatePos( row, numRows );
 }

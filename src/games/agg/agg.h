@@ -200,7 +200,7 @@ private:
   // foreach s in S, i in N, the full set of projected actions.
   std::vector<std::vector<aggdistrib> >fullProjectedStrat;
 
-  //foreach s in S, foreach neighbor of s, its projection function 
+  //foreach s in S, foreach neighbor of s, its projection function
   std::vector<std::vector<projtype> > projFunctions;
 
   //foreach i \in N, foreach s_i in S_i, the order of agents o_1.. o_{n-1}
@@ -208,12 +208,12 @@ private:
   std::vector< std::vector< std::vector<int> > > Porder;
 
   //when computing the induced distribution via ComputeP():
-  //foreach k<= n-1,  
+  //foreach k<= n-1,
   //prob. distrib P_k induced by the partial strat profile of agents o_1..o_k
 
   //when computing the partial distributions for the payoff jacobian:
   //  foreach  j \in N,
-  // the partial distribution induced by all agents except j. 
+  // the partial distribution induced by all agents except j.
   std::vector<aggdistrib>  Pr;
 
   //foreach s in S, whether s's neighbors are all action nodes
@@ -241,7 +241,7 @@ private:
   std::vector<int> kSymStrategyOffset;
 
 
-  //input functor 
+  //input functor
   struct input {
     explicit input(std::istream &i): in(i) {}
     void operator() (aggpayoff::iterator p) {
@@ -288,6 +288,6 @@ private:
 
 }  // end namespace Gambit
 
- 
+
 
 #endif  // GAMBIT_AGG_AGG_H

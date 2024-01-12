@@ -29,7 +29,7 @@
 namespace Gambit {
 
 namespace linalg {
-    
+
 template <class T> class Tableau;
 
 // ---------------------------------------------------------------------------
@@ -40,7 +40,7 @@ template <class T> class EtaMatrix {
   public:
   int col;
   Vector<T> etadata;
-  
+
   EtaMatrix(int c, Vector<T> &v) : col(c), etadata(v) {}
 
   // required for list class
@@ -94,7 +94,7 @@ public:
   // ------------------------
   // Constructors, Destructor
   // ------------------------
-    
+
 
   // copy constructor
   // note:  Copying will fail an assertion if you try to update or delete
@@ -119,9 +119,9 @@ public:
   // replace (update) the column given with the vector given.
   void update( int, int matcol ); // matcol is the column number in the matrix
 
-  // refactor 
+  // refactor
   void refactor();
-  
+
   // solve: Bk d = a
   void solve (const Vector<T> &, Vector<T> & ) const;
 
@@ -138,7 +138,7 @@ public:
   //-------------------
 
 private:
-  
+
   void FactorBasis();
 
   void GaussElem( Matrix<T> &, int, int );
@@ -153,11 +153,11 @@ private:
   void LPd_Trans( Vector<T> & ) const;
   void yLP_Trans( Vector<T> & ) const;
 
-  void VectorEtaSolve( const Vector<T> &v,  
-		      const EtaMatrix<T> &, 
+  void VectorEtaSolve( const Vector<T> &v,
+		      const EtaMatrix<T> &,
 		      Vector<T> &y ) const;
 
-  void EtaVectorSolve( const Vector<T> &v, 
+  void EtaVectorSolve( const Vector<T> &v,
 		      const EtaMatrix<T> &,
 		      Vector<T> &d ) const;
 
@@ -171,15 +171,5 @@ private:
 }  // end namespace Gambit::linalg
 
 }  // end namespace Gambit
- 
+
 #endif // LUDECOMP_H
-
-
-
-
-
-
-
-
-
-

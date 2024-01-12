@@ -114,7 +114,7 @@ std::string gbtStyle::GetColorXML() const
     s <<"<player id=\"" << pl << "\" ";
     s <<"red=\"" << ((int) m_playerColors[pl].Red()) << "\" ";
     s <<"green=\"" << ((int) m_playerColors[pl].Green()) << "\" ";
-    s <<"blue=\"" << ((int) m_playerColors[pl].Blue()) << "\" "; 
+    s <<"blue=\"" << ((int) m_playerColors[pl].Blue()) << "\" ";
     s <<"/>\n";
   }
 
@@ -193,12 +193,12 @@ std::string gbtStyle::GetLayoutXML() const
   s << "branch=\"" << branchStyles[m_branchStyle] << "\" ";
   std::string branchLabels[] = { "horizontal", "rotated" };
   s << "labels=\"" << branchLabels[m_branchLabels] << "\"/>\n";
-  
+
   std::string infosetConnect[] = { "none", "same", "all" };
   s << "<infosets connect=\"" << infosetConnect[m_infosetConnect] << "\" ";
   std::string infosetStyle[] = { "lines", "circles" };
   s << "style=\"" << infosetStyle[m_infosetJoin] << "\"/>\n";
-  
+
   s << "</autolayout>\n";
   return s.str();
 }
@@ -251,7 +251,7 @@ void gbtStyle::SetLayoutXML(TiXmlNode *p_node)
       if (s == "line")           m_branchStyle = GBT_BRANCH_STYLE_LINE;
       else if (s == "forktine")  m_branchStyle = GBT_BRANCH_STYLE_FORKTINE;
     }
-   
+
     const char *labels = branches->ToElement()->Attribute("labels");
     if (labels) {
       std::string s = labels;

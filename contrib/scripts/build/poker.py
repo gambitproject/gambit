@@ -49,7 +49,7 @@ rules = [ { "condition": AtRoot,
             "action":    torr.TerminalPayoff([-2, 2]) },
           { "condition": AliceWinsBig,
             "action":    torr.TerminalPayoff([2, -2]) } ]
-          
+
 
 tree = torr.BuildTree([ "Alice", "Bob" ], rules, torr.GenericHistory)
 

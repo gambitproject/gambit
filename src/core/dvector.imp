@@ -31,7 +31,7 @@ namespace Gambit {
 template <class T> void DVector<T>::setindex()
 {
   int index = 1;
-  
+
   for (int i = 1; i <= dvlen.Length(); i++)  {
     dvptr[i] = this->svptr + index - 1;
     dvidx[i] = index;

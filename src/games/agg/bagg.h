@@ -45,7 +45,7 @@ public:
 
   static std::shared_ptr<BAGG> makeBAGG(std::istream &in);
 
-  BAGG(int N, int S, 
+  BAGG(int N, int S,
     std::vector<int>& numTypes,
     std::vector<ProbDist>& TDist,
     std::vector<std::vector<std::vector<int > > > &typeActionSets,
@@ -125,5 +125,5 @@ std::ostream& operator<< (std::ostream& s, const BAGG& g);
 
 }  // end namespace Gambit
 
- 
+
 #endif  // GAMBIT_AGG_BAGG_H

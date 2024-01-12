@@ -33,7 +33,10 @@ class Strategy:
         )
 
     def __eq__(self, other: typing.Any) -> bool:
-        return isinstance(other, Strategy) and self.strategy.deref() == cython.cast(Strategy, other).strategy.deref()
+        return (
+            isinstance(other, Strategy) and
+            self.strategy.deref() == cython.cast(Strategy, other).strategy.deref()
+        )
 
     def __hash__(self) -> int:
         return cython.cast(cython.long, self.strategy.deref())
@@ -41,13 +44,13 @@ class Strategy:
     @property
     def label(self) -> str:
         """Get or set the text label associated with the strategy."""
-        return self.strategy.deref().GetLabel().decode('ascii')
+        return self.strategy.deref().GetLabel().decode("ascii")
 
     @label.setter
     def label(self, value: str) -> None:
         if value in [i.label for i in self.player.strategies]:
             warnings.warn("This player has another strategy with an identical label")
-        self.strategy.deref().SetLabel(value.encode('ascii'))
+        self.strategy.deref().SetLabel(value.encode("ascii"))
 
     @property
     def game(self) -> Game:

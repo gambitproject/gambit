@@ -25,5 +25,3 @@
 
 template class Gambit::SquareMatrix<double>;
 template class Gambit::SquareMatrix<Gambit::Rational>;
-
-

@@ -37,13 +37,13 @@ class MSGame:
         return [ [ own, others, self.Payoff(own, others) ]
                  for (own, others) in cartesian(self.contribs,
                                                 self.statistics) ]
-    
+
     def AsMatrix(self):
         return [ [ "" ] + [ other for other in self.statistics ] ] + \
                [ [ own ] + [ self.Payoff(own, other)
                              for other in self.statistics ]
                  for own in self.statistics ]
-            
+
     def AsNfg(self):
         game = gambit.NewTable([ len(self.contribs) for i in xrange(self.N) ])
 
@@ -101,8 +101,8 @@ class MSTableGame(MSGame):
             return self.payoffs[(own, others)]
         except KeyError:
             return 0.0
-        
-            
+
+
 
 
 class CobbDouglasPGGame(MSGame):
@@ -119,7 +119,7 @@ class CobbDouglasPGGame(MSGame):
     def Payoff(self, own, others):
         return (self.omega-own-self.tax)**self.alpha * \
                (self.N*self.tax+own+others)**(1.0-self.alpha)
-        
+
 class QuadraticPGGame(MSGame):
     """
     A symmetric public goods game with a quadratic payoff specification.
@@ -135,7 +135,7 @@ class QuadraticPGGame(MSGame):
         return self.omega-own-self.tax \
                + self.m*(self.N*self.tax+own+others) \
                - self.c*(self.N*self.tax+own+others)**2
-        
+
 
 class LotteryChoiceGame(MSGame):
     """
@@ -151,4 +151,3 @@ class LotteryChoiceGame(MSGame):
             return self.omega - own + self.price * own / (own+others)
         except ZeroDivisionError:
             return self.omega
-

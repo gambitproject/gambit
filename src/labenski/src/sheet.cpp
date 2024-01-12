@@ -154,7 +154,7 @@ private:
 };
 
 wxSheetTypeRegistry::~wxSheetTypeRegistry()
-{    
+{
     size_t i, count = m_typeInfo.Count();
     for ( i = 0; i < count; i++ )
         delete (wxSheetDataTypeInfo*)m_typeInfo[i];
@@ -184,7 +184,7 @@ int wxSheetTypeRegistry::FindRegisteredDataType(const wxString& typeName)
 {
     if (typeName.IsEmpty())
         return wxNOT_FOUND;
-    
+
     size_t i, count = m_typeInfo.GetCount();
     for ( i = 0; i < count; i++ )
     {
@@ -200,7 +200,7 @@ int wxSheetTypeRegistry::FindDataType(const wxString& typeName)
     int index = FindRegisteredDataType(typeName);
     if (index != wxNOT_FOUND)
         return index;
-    
+
     // if one of the standard ones, register it "on the fly"
 #if wxUSE_TEXTCTRL
     if ( typeName == wxSHEET_VALUE_STRING )
@@ -255,7 +255,7 @@ int wxSheetTypeRegistry::FindOrCloneDataType(const wxString& typeName)
     int index = FindDataType(typeName);
     if ( index != wxNOT_FOUND )
         return index;
-    
+
     // the first part of the typename is the "real" type, anything after ':'
     // are the parameters for the renderer
     index = FindDataType(typeName.BeforeFirst(_T(':')));
@@ -264,7 +264,7 @@ int wxSheetTypeRegistry::FindOrCloneDataType(const wxString& typeName)
 
     wxSheetCellRenderer renderer(GetRenderer(index).Clone());
     wxSheetCellEditor editor(GetEditor(index).Clone());
-    
+
     // do it even if there are no parameters to reset them to defaults
     wxString params = typeName.AfterFirst(_T(':'));
     renderer.SetParameters(params);
@@ -276,7 +276,7 @@ int wxSheetTypeRegistry::FindOrCloneDataType(const wxString& typeName)
 const wxSheetCellRenderer& wxSheetTypeRegistry::GetRenderer(int index)
 {
     wxCHECK_MSG((index >= 0) && (index < int(m_typeInfo.GetCount())), wxNullSheetCellRenderer,
-                wxT("Invalid index in wxSheetTypeRegistry::GetRenderer"));    
+                wxT("Invalid index in wxSheetTypeRegistry::GetRenderer"));
     return ((wxSheetDataTypeInfo*)m_typeInfo[index])->m_renderer;
 }
 
@@ -300,7 +300,7 @@ BEGIN_EVENT_TABLE( wxSheetChildWindow, wxWindow )
     EVT_KEY_UP       ( wxSheetChildWindow::OnKeyAndChar )
     EVT_CHAR         ( wxSheetChildWindow::OnKeyAndChar )
     EVT_SET_FOCUS    ( wxSheetChildWindow::OnFocus )
-    EVT_KILL_FOCUS   ( wxSheetChildWindow::OnFocus )          
+    EVT_KILL_FOCUS   ( wxSheetChildWindow::OnFocus )
 END_EVENT_TABLE()
 
 wxSheetChildWindow::wxSheetChildWindow( wxSheet *parent, wxWindowID id,
@@ -322,14 +322,14 @@ void wxSheetChildWindow::OnPaint( wxPaintEvent& event )
 void wxSheetChildWindow::OnMouse( wxMouseEvent& event )
 {
     if (!m_owner || !m_owner->GetEventHandler()->ProcessEvent(event))
-        event.Skip();    
+        event.Skip();
 }
 
 // This seems to be required for wxMotif otherwise the mouse
 // cursor must be in the cell edit control to get key events
 void wxSheetChildWindow::OnKeyAndChar( wxKeyEvent& event )
 {
-    if (!m_owner || !m_owner->GetEventHandler()->ProcessEvent(event)) 
+    if (!m_owner || !m_owner->GetEventHandler()->ProcessEvent(event))
         event.Skip();
 }
 
@@ -354,7 +354,7 @@ wxSheetRefData::wxSheetRefData()
     m_ownTable = false;
 
     m_typeRegistry = new wxSheetTypeRegistry;
-    
+
     m_rowEdges.SetDefaultSize(WXSHEET_DEFAULT_ROW_HEIGHT);
     m_colEdges.SetDefaultSize(WXSHEET_DEFAULT_COL_WIDTH);
     m_rowEdges.SetMinAllowedSize(WXSHEET_MIN_ROW_HEIGHT);
@@ -362,7 +362,7 @@ wxSheetRefData::wxSheetRefData()
 
     m_rowLabelWidth  = WXSHEET_DEFAULT_ROW_LABEL_WIDTH;
     m_colLabelHeight = WXSHEET_DEFAULT_COL_LABEL_HEIGHT;
-   
+
     m_equal_col_widths = 0;
 
     m_gridLineColour   = wxColour( 192, 192, 192 );
@@ -386,19 +386,19 @@ wxSheetRefData::wxSheetRefData()
     m_selection       = new wxSheetSelection;
     m_selectionBackground = wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHT);
     m_selectionForeground = wxSystemSettings::GetColour(wxSYS_COLOUR_HIGHLIGHTTEXT);
-        
+
     m_cellEditorCoords = wxNullSheetCoords;
 
     m_pasting = false;
 }
 
-wxSheetRefData::~wxSheetRefData() 
+wxSheetRefData::~wxSheetRefData()
 {
     if (m_ownTable && m_table)
         delete m_table;
-    
+
     delete m_typeRegistry;
-    delete m_selection;    
+    delete m_selection;
 }
 
 int wxSheetRefData::FindSheet(wxSheet* sheet) const
@@ -408,7 +408,7 @@ int wxSheetRefData::FindSheet(wxSheet* sheet) const
 void wxSheetRefData::AddSheet(wxSheet* sheet)
 {
     wxCHECK_RET(sheet, wxT("Invalid sheet"));
-    
+
     // not an error, just let them do it to avoid having to check
     if (!HasSheet(sheet))
         m_sheets.Add(sheet);
@@ -424,7 +424,7 @@ void wxSheetRefData::RemoveSheet(wxSheet* sheet)
 }
 
 //-----------------------------------------------------------------------------
-// RTTI stuff for ? 
+// RTTI stuff for ?
 //-----------------------------------------------------------------------------
 
 #if wxUSE_EXTENDED_RTTI
@@ -439,7 +439,7 @@ wxBEGIN_FLAGS( wxSheetStyle )
     wxFLAGS_MEMBER(wxBORDER_RAISED)
     wxFLAGS_MEMBER(wxBORDER_STATIC)
     wxFLAGS_MEMBER(wxBORDER_NONE)
-    
+
     // old style border flags
     wxFLAGS_MEMBER(wxSIMPLE_BORDER)
     wxFLAGS_MEMBER(wxSUNKEN_BORDER)
@@ -470,7 +470,7 @@ wxEND_PROPERTIES_TABLE()
 wxBEGIN_HANDLERS_TABLE(wxSheet)
 wxEND_HANDLERS_TABLE()
 
-wxCONSTRUCTOR_5( wxSheet , wxWindow* , Parent , wxWindowID , Id , wxPoint , Position , wxSize , Size , long , WindowStyle ) 
+wxCONSTRUCTOR_5( wxSheet , wxWindow* , Parent , wxWindowID , Id , wxPoint , Position , wxSize , Size , long , WindowStyle )
 
 /*
  TODO : Expose more information of a list's layout etc. via appropriate objects (a la NotebookPageInfo)
@@ -494,14 +494,14 @@ BEGIN_EVENT_TABLE( wxSheet, wxWindow )
 END_EVENT_TABLE()
 
 void wxSheet::Init()
-{    
+{
     m_cornerLabelWin = NULL;
     m_rowLabelWin    = NULL;
     m_colLabelWin    = NULL;
     m_gridWin        = NULL;
     m_horizScrollBar = NULL;
     m_vertScrollBar  = NULL;
-    
+
     m_scrollBarMode  = wxSheet::SB_AS_NEEDED;
 
     m_keySelecting    = false;
@@ -510,16 +510,16 @@ void wxSheet::Init()
     m_cacheAttr       = wxNullSheetCellAttr;
     m_cacheAttrCoords = wxNullSheetCoords;
     m_cacheAttrType   = -1;
-    
+
     m_inOnKeyDown = false;
     m_batchCount  = 0;
     m_resizing    = false;
-    
+
     m_mouseCursorMode = WXSHEET_CURSOR_SELECT_CELL;
     m_mouseCursor     = WXSHEET_CURSOR_SELECT_CELL;
 
     m_winCapture = (wxWindow *)NULL;
-    
+
     m_dragLastPos     = -1;
     m_dragRowOrCol    = -1;
     m_isDragging      = false;
@@ -527,10 +527,10 @@ void wxSheet::Init()
 
     m_waitForSlowClick = false;
     m_mouseTimer       = NULL;
-    
+
     m_enable_split_vert  = false;
-    m_enable_split_horiz = false;    
-    
+    m_enable_split_horiz = false;
+
     m_refData = new wxSheetRefData; // ALWAYS CREATED and ALWAYS EXISTS!
 }
 
@@ -548,7 +548,7 @@ bool wxSheet::Create( wxWindow *parent, wxWindowID id,
 {
     if (!wxWindow::Create(parent, id, pos, size, style | wxWANTS_CHARS, name))
         return false;
-    
+
 #if wxCHECK_VERSION(2,5,2) && _USE_VISATTR
     wxVisualAttributes gva = wxListBox::GetClassDefaultAttributes();
     wxVisualAttributes lva = wxPanel::GetClassDefaultAttributes();
@@ -557,13 +557,13 @@ bool wxSheet::Create( wxWindow *parent, wxWindowID id,
     wxColour gbg = gva.colBg;  // grid background
     wxColour lfg = lva.colFg;  // label foreground
     wxColour lbg = lva.colBg;  // label background
-#else // 2.4.x     
+#else // 2.4.x
     wxColour gfg = wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOWTEXT );
     wxColour gbg = wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOW );
     wxColour lfg = wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOWTEXT );
     wxColour lbg = wxSystemSettings::GetColour( wxSYS_COLOUR_BTNFACE );
-#endif //wxCHECK_VERSION(2,5,2)   
-    
+#endif //wxCHECK_VERSION(2,5,2)
+
     // Set default cell attributes
     wxSheetCellAttr *attr = &GetSheetRefData()->m_defaultGridCellAttr;
     attr->Create();
@@ -583,7 +583,7 @@ bool wxSheet::Create( wxWindow *parent, wxWindowID id,
 
     wxFont labelFont = wxWindow::GetFont();
     labelFont.SetWeight( wxFONTWEIGHT_BOLD );
-    
+
     // default row label attr
     attr = &GetSheetRefData()->m_defaultRowLabelAttr;
     attr->Create();
@@ -606,7 +606,7 @@ bool wxSheet::Create( wxWindow *parent, wxWindowID id,
     GetSheetRefData()->m_defaultCornerLabelAttr = attr->Clone();
 
     // subwindow components that make up the wxSheet
-    m_gridWin        = new wxSheetChildWindow( this, ID_GRID_WINDOW );    
+    m_gridWin        = new wxSheetChildWindow( this, ID_GRID_WINDOW );
     m_rowLabelWin    = new wxSheetChildWindow( this, ID_ROW_LABEL_WINDOW );
     m_colLabelWin    = new wxSheetChildWindow( this, ID_COL_LABEL_WINDOW );
     m_cornerLabelWin = new wxSheetChildWindow( this, ID_CORNER_LABEL_WINDOW );
@@ -615,7 +615,7 @@ bool wxSheet::Create( wxWindow *parent, wxWindowID id,
     m_vertScrollBar  = new wxScrollBar(this, ID_VERT_SCROLLBAR, wxDefaultPosition,
                                        wxDefaultSize, wxSB_VERTICAL);
 
-    // det the default colours for each window 
+    // det the default colours for each window
     m_cornerLabelWin->SetOwnForegroundColour(lfg);
     m_cornerLabelWin->SetOwnBackgroundColour(lbg);
     m_rowLabelWin->SetOwnForegroundColour(lfg);
@@ -626,10 +626,10 @@ bool wxSheet::Create( wxWindow *parent, wxWindowID id,
     m_gridWin->SetOwnForegroundColour(gfg);
     m_gridWin->SetOwnBackgroundColour(gbg);
 
-    // figure out what a reasonable size would be 
+    // figure out what a reasonable size would be
     int char_w = 5, char_h = 10;
     GetTextExtent(wxT("W1!(jJ"), &char_w, &char_h, NULL, NULL, &labelFont);
-    
+
 #if defined(__WXMOTIF__) || defined(__WXGTK__)  // see also text ctrl sizing in ShowCellEditControl()
     char_h += 8;
 #else
@@ -654,11 +654,11 @@ wxSheet::~wxSheet()
     SetCaptureWindow(NULL);
     StopMouseTimer();
     GetSheetRefData()->RemoveSheet(this);
-    
+
     // destroy the edit control if this is the "parent"
     if (GetEditControl().Ok() && GetEditControl().GetControl())
     {
-        wxWindowID win_id = GetEditControl().GetControl()->GetId(); 
+        wxWindowID win_id = GetEditControl().GetControl()->GetId();
         if (FindWindow(win_id) == GetEditControl().GetControl())
         {
             GetSheetRefData()->m_cellEditor.DestroyControl();
@@ -707,10 +707,10 @@ bool wxSheet::Enable(bool enable)
 {
     if ( !wxWindow::Enable(enable) )
   	    return false;
-  	 
+
   	// redraw in the new state
   	Refresh();
-  	 
+
   	return true;
 }
 
@@ -730,7 +730,7 @@ bool wxSheet::SetTable( wxSheetTable *table, bool takeOwnership )
         GetSheetRefData()->m_rowEdges.Clear();
         GetSheetRefData()->m_colEdges.Clear();
     }
-    
+
     if (table)
     {
         GetSheetRefData()->m_rowEdges.UpdatePos(0, table->GetNumberRows());
@@ -739,7 +739,7 @@ bool wxSheet::SetTable( wxSheetTable *table, bool takeOwnership )
         GetSheetRefData()->m_table = table;
         GetSheetRefData()->m_table->SetView( this );
         GetSheetRefData()->m_ownTable = takeOwnership;
-        
+
         CalcWindowSizes();
     }
 
@@ -752,14 +752,14 @@ bool wxSheet::CreateGrid( int numRows, int numCols, int options )
     wxSheetTable *table = new wxSheetTable( this );
     table->SetGridCellValueProvider(new wxSheetValueProviderString(numRows, numCols, options), true);
     //table->SetGridCellValueProvider(new wxSheetValueProviderSparseString(numRows, numCols, options), true);
-    
+
     // label data containers are optional and needed only if you Set values for them
     // we create both of them.
-    // NB. They're the same as the grid data but only have one row or col each. 
-    // NB. wxSHEET_ValueProviderColPref is used for the col labels since 
+    // NB. They're the same as the grid data but only have one row or col each.
+    // NB. wxSHEET_ValueProviderColPref is used for the col labels since
     //     we expect more cols than rows
     table->SetRowLabelValueProvider(new wxSheetValueProviderString(numRows, 1), true);
-    table->SetColLabelValueProvider(new wxSheetValueProviderString(1, numCols, wxSHEET_ValueProviderColPref), true);    
+    table->SetColLabelValueProvider(new wxSheetValueProviderString(1, numCols, wxSHEET_ValueProviderColPref), true);
     // Set the attribute provider if you plan to "Set" attributes for particular
     //  cells/rows/cols, otherwise the default attributes will suffice
     table->SetAttrProvider(new wxSheetCellAttrProvider, true);
@@ -824,27 +824,27 @@ bool wxSheet::SetNumberCols( size_t cols, int update )
         return AppendCols(n_cols, update);
     else if (n_cols < 0)
         return DeleteCols(cols, -n_cols, update);
-    
+
     return false;
 }
 
 bool wxSheet::SetNumberRows( size_t rows, int update )
 {
     const int n_rows = int(rows) - GetNumberRows();
-    if (n_rows > 0) 
+    if (n_rows > 0)
         return AppendRows(n_rows, update);
-    else if (n_rows < 0) 
+    else if (n_rows < 0)
         return DeleteRows(rows, -n_rows, update);
-    
+
     return false;
 }
 
 bool wxSheet::DoUpdateRows( size_t row, int numRows, int update)
-{    
+{
     // Clear the attribute cache as the attribute might refer to a invalid cell
     ClearAttrCache();
     if (numRows == 0) return false;
-    
+
     // By the same reasoning, the editor should be dismissed if columns are
     // added or removed. And for consistency, it should IMHO always be
     // removed, not only if the cell "underneath" it actually changes.
@@ -852,11 +852,11 @@ bool wxSheet::DoUpdateRows( size_t row, int numRows, int update)
     // cell it might want to save that stuff to might no longer exist.
     if (IsCellEditControlCreated())
         DisableCellEditControl(false);
-    
+
     // FIXME - do I want to UpdateRows/Cols for selection or just clear them
     //         the event it would send would be confusing at best
     //         first a deselect and then a select... should sel follow insert?
-    //         I don't think it's worth the confusion and since a click on 
+    //         I don't think it's worth the confusion and since a click on
     //         a cell is deselect all, the selection is not that precious.
     //ClearSelection(true);
 
@@ -866,7 +866,7 @@ bool wxSheet::DoUpdateRows( size_t row, int numRows, int update)
     if ( ((update & wxSHEET_UpdateSelection) != 0) && GetSelection() )
         GetSelection()->UpdateRows( row, numRows );
 
-    GetSheetRefData()->m_cursorCoords.UpdateRows(row, numRows);    
+    GetSheetRefData()->m_cursorCoords.UpdateRows(row, numRows);
     // try to force the cursor to a valid cell
     if ( !ContainsGridCell(GetGridCursorCell()) && ContainsGridCell(wxSheetCoords(0,0)) )
         SetGridCursorCell( wxSheetCoords(0, 0) );
@@ -875,7 +875,7 @@ bool wxSheet::DoUpdateRows( size_t row, int numRows, int update)
 
     AdjustScrollbars();
     RefreshRowLabelWindow(true);
-    RefreshGridWindow();    
+    RefreshGridWindow();
     return true;
 }
 
@@ -883,16 +883,16 @@ bool wxSheet::DoUpdateCols( size_t col, int numCols, int update)
 {
     ClearAttrCache();
     if (numCols == 0) return false;
-    
+
     if (IsCellEditControlCreated())
         DisableCellEditControl(false);
-       
+
     GetSheetRefData()->m_colEdges.UpdatePos(col, numCols);
 
     if ( ((update & wxSHEET_UpdateSelection) != 0) && GetSelection() )
-        GetSelection()->UpdateCols( col, numCols );   
+        GetSelection()->UpdateCols( col, numCols );
 
-    GetSheetRefData()->m_cursorCoords.UpdateCols(col, numCols);    
+    GetSheetRefData()->m_cursorCoords.UpdateCols(col, numCols);
     if ( !ContainsGridCell(GetGridCursorCell()) && ContainsGridCell(wxSheetCoords(0,0)) )
         SetGridCursorCell( wxSheetCoords(0, 0) );
     else
@@ -900,7 +900,7 @@ bool wxSheet::DoUpdateCols( size_t col, int numCols, int update)
 
     AdjustScrollbars();
     RefreshColLabelWindow(true);
-    RefreshGridWindow();   
+    RefreshGridWindow();
     return true;
 }
 
@@ -928,7 +928,7 @@ void wxSheet::SetRowHeight( int row, int height )
         SetColLabelHeight(height);
         return;
     }
-    
+
     wxCHECK_RET(ContainsGridRow(row), _T("invalid row index") );
 
     const int old_height = GetRowHeight(row);
@@ -936,19 +936,19 @@ void wxSheet::SetRowHeight( int row, int height )
     // if < 0 calc new height from label
     if ( height < 0 )
         height = GetCellBestSize(wxSheetCoords(row, -1)).y + 6; // FIXME test this
-    
+
     // should we check that it's bigger than GetMinimalRowHeight(row) here?
     //                                                                 (VZ)
     // No, because it is reasonable to assume the library user know's
     // what he is doing. However whe should test against the weaker
     // constariant of minimalAcceptableHeight, as this breaks rendering
     if ( height == old_height )
-        return; 
-    if (height < GetMinimalAcceptableRowHeight()) 
+        return;
+    if (height < GetMinimalAcceptableRowHeight())
         height = GetMinimalAcceptableRowHeight();
-    
+
     GetSheetRefData()->m_rowEdges.SetSize(row, height);
-    
+
     if ( !GetBatchCount() )
     {
         CalcWindowSizes(true);
@@ -968,13 +968,13 @@ void wxSheet::SetColWidth( int col, int width )
     wxCHECK_RET(ContainsGridCol(col), _T("invalid column index") );
 
     const int old_width = GetColWidth(col);
-    
+
     if ( width < 0 )
         width = GetCellBestSize(wxSheetCoords(-1, col)).x + 6;
-    
+
     if ( width == old_width )
-        return; 
-    if ( width < GetMinimalAcceptableColWidth() ) 
+        return;
+    if ( width < GetMinimalAcceptableColWidth() )
         width = GetMinimalAcceptableColWidth();
 
     GetSheetRefData()->m_colEdges.SetSize(col, width);
@@ -996,7 +996,7 @@ int wxSheet::GetColWidth(int col) const
 }
 int wxSheet::GetColLeft(int col) const
 {
-    if (col == -1)  
+    if (col == -1)
         return 1; // 1 for border
 
     return GetSheetRefData()->m_colEdges.GetMin(col);
@@ -1020,14 +1020,14 @@ int wxSheet::GetRowTop(int row) const
 {
     if (row == -1)
         return 1; // 1 for border
-    
+
     return GetSheetRefData()->m_rowEdges.GetMin(row);
 }
 int wxSheet::GetRowBottom(int row) const
 {
     if (row == -1)
         return GetColLabelHeight();
-    
+
     return GetSheetRefData()->m_rowEdges.GetMax(row);
 }
 
@@ -1053,7 +1053,7 @@ wxSize wxSheet::GetCellBestSize(const wxSheetCoords& coords, wxDC *dc) const
         wxClientDC cdc(sheet);
         return renderer.GetBestSize(*sheet, attr, cdc, coords);
     }
-    
+
     return renderer.GetBestSize(*sheet, attr, *dc, coords);
 }
 
@@ -1094,26 +1094,26 @@ int wxSheet::GetColBestWidth(int col) const
 // ----------------------------------------------------------------------------
 // Row/Col label size and attributes
 
-int wxSheet::GetRowLabelWidth(bool zero_not_shown) const 
-{ 
+int wxSheet::GetRowLabelWidth(bool zero_not_shown) const
+{
     if (zero_not_shown && !m_cornerLabelWin->IsShown() && !m_rowLabelWin->IsShown())
         return 0;
-    
-    return GetSheetRefData()->m_rowLabelWidth; 
+
+    return GetSheetRefData()->m_rowLabelWidth;
 }
 
-int wxSheet::GetColLabelHeight(bool zero_not_shown) const 
-{ 
+int wxSheet::GetColLabelHeight(bool zero_not_shown) const
+{
     if (zero_not_shown && !m_cornerLabelWin->IsShown() && !m_colLabelWin->IsShown())
         return 0;
-    
-    return GetSheetRefData()->m_colLabelHeight; 
-}    
+
+    return GetSheetRefData()->m_colLabelHeight;
+}
 
 void wxSheet::SetRowLabelWidth( int width )
 {
     width = wxMax( width, 0 );
-    
+
     if ( width == 0 )
     {
         m_rowLabelWin->Show( false );
@@ -1122,9 +1122,9 @@ void wxSheet::SetRowLabelWidth( int width )
     else if ( GetRowLabelWidth(false) > 0 )
     {
         GetSheetRefData()->m_rowLabelWidth = width;
-        
+
         m_rowLabelWin->Show( true );
-        if ( GetColLabelHeight() > 0 ) 
+        if ( GetColLabelHeight() > 0 )
             m_cornerLabelWin->Show( true );
     }
 
@@ -1134,7 +1134,7 @@ void wxSheet::SetRowLabelWidth( int width )
 void wxSheet::SetColLabelHeight( int height )
 {
     height = wxMax( height, 0 );
-    
+
     if ( height == 0 )
     {
         m_colLabelWin->Show( false );
@@ -1143,9 +1143,9 @@ void wxSheet::SetColLabelHeight( int height )
     else if ( GetColLabelHeight(false) > 0 )
     {
         GetSheetRefData()->m_colLabelHeight = height;
-        
+
         m_colLabelWin->Show( true );
-        if ( GetRowLabelWidth() > 0 ) 
+        if ( GetRowLabelWidth() > 0 )
             m_cornerLabelWin->Show( true );
     }
 
@@ -1220,18 +1220,18 @@ void wxSheet::AutoSize(bool setAsMin)
     SetMargins(0, 0);
     AutoSizeRows(setAsMin);
     AutoSizeCols(setAsMin);
-    
+
     wxSize sizeFit(GetGridVirtualSize());
     sizeFit.x += GetRowLabelWidth();
     sizeFit.y += GetColLabelHeight();
-    
+
     wxSize winSize(GetClientSize());
 
     // distribute the extra space between the columns/rows to avoid having
     // extra white space
     const int numCols = GetNumberCols();
     const int numRows = GetNumberRows();
-    
+
     // Remove the extra m_extraWidth + 1 added above
     wxCoord diff = winSize.x - sizeFit.x;
     if ( diff && numCols )
@@ -1277,7 +1277,7 @@ void wxSheet::AutoSize(bool setAsMin)
     sizeFit = GetGridVirtualSize();
     sizeFit.x += GetRowLabelWidth();
     sizeFit.y += GetColLabelHeight();
-    
+
     SetClientSize(sizeFit + wxSize(2,2)); // FIXME ? Where's the extra 2 from in wxGTK
     EndBatch();
 }
@@ -1296,7 +1296,7 @@ void wxSheet::AutoSizeRowLabelHeight( int row )
 
     if (size.y < GetDefaultRowHeight())
         size.y = GetDefaultRowHeight();
-    
+
     SetRowHeight(row, size.y);
 }
 void wxSheet::AutoSizeColLabelWidth( int col )
@@ -1310,10 +1310,10 @@ void wxSheet::AutoSizeColLabelWidth( int col )
     // autosize column width depending on label text
     const wxSheetCoords coords(-1, col);
     wxSize size(GetCellBestSize(coords));
-    
+
     if (size.x < GetDefaultColWidth())
         size.x = GetDefaultColWidth();
-    
+
     SetColWidth(col, size.x);
 }
 
@@ -1321,8 +1321,8 @@ void wxSheet::SetEqualColWidths(int min_width)
 {
     GetSheetRefData()->m_equal_col_widths = wxMax(min_width, 0);
     const int numCols = GetNumberCols();
-    
-    // don't fail here, since EVT_SIZEs are generated before the grid is 
+
+    // don't fail here, since EVT_SIZEs are generated before the grid is
     if ((min_width > 0) && (numCols > 0) && GetTable() && m_gridWin)
     {
         const int colwidth = m_gridWin->GetClientSize().GetWidth()/numCols;
@@ -1341,14 +1341,14 @@ void wxSheet::EnableGridLines( int dir )
 
 void wxSheet::SetGridLineColour( const wxColour& colour )
 {
-    wxCHECK_RET(colour.Ok(), wxT("Invalid colour in wxSheet::SetGridLineColour"));   
+    wxCHECK_RET(colour.Ok(), wxT("Invalid colour in wxSheet::SetGridLineColour"));
     GetSheetRefData()->m_gridLineColour = colour;
     RefreshGridWindow(false);
 }
 
 void wxSheet::SetCursorCellHighlightColour( const wxColour& colour )
 {
-    wxCHECK_RET(colour.Ok(), wxT("Invalid colour in wxSheet::SetGridLineColour"));      
+    wxCHECK_RET(colour.Ok(), wxT("Invalid colour in wxSheet::SetGridLineColour"));
     GetSheetRefData()->m_cursorCellHighlightColour = colour;
 
     if (ContainsCell(GetGridCursorCell()))
@@ -1357,7 +1357,7 @@ void wxSheet::SetCursorCellHighlightColour( const wxColour& colour )
 
 void wxSheet::SetCursorCellHighlightPenWidth(int width)
 {
-    wxCHECK_RET(width >= 0, wxT("Invalid pen width in wxSheet::SetGridLineColour"));       
+    wxCHECK_RET(width >= 0, wxT("Invalid pen width in wxSheet::SetGridLineColour"));
     GetSheetRefData()->m_cursorCellHighlightPenWidth = width;
 
     if (ContainsCell(GetGridCursorCell()))
@@ -1366,7 +1366,7 @@ void wxSheet::SetCursorCellHighlightPenWidth(int width)
 
 void wxSheet::SetCursorCellHighlightROPenWidth(int width)
 {
-    wxCHECK_RET(width >= 0, wxT("Invalid pen width in wxSheet::SetCursorCellHighlightROPenWidth"));   
+    wxCHECK_RET(width >= 0, wxT("Invalid pen width in wxSheet::SetCursorCellHighlightROPenWidth"));
     GetSheetRefData()->m_cursorCellHighlightROPenWidth = width;
 
     if (ContainsCell(GetGridCursorCell()))
@@ -1375,7 +1375,7 @@ void wxSheet::SetCursorCellHighlightROPenWidth(int width)
 
 void wxSheet::SetLabelOutlineColour( const wxColour& colour )
 {
-    wxCHECK_RET(colour.Ok(), wxT("Invalid colour in wxSheet::SetLabelOutlineColour"));   
+    wxCHECK_RET(colour.Ok(), wxT("Invalid colour in wxSheet::SetLabelOutlineColour"));
     GetSheetRefData()->m_labelOutlineColour = colour;
 
     RefreshColLabelWindow(true);
@@ -1388,7 +1388,7 @@ void wxSheet::SetLabelOutlineColour( const wxColour& colour )
 
 bool wxSheet::HasSpannedCells() const
 {
-    return GetTable() && GetTable()->HasSpannedCells(); 
+    return GetTable() && GetTable()->HasSpannedCells();
 }
 wxSheetCoords wxSheet::GetCellOwner( const wxSheetCoords& coords ) const
 {
@@ -1418,7 +1418,7 @@ wxSheetCellAttr wxSheet::GetOrCreateAttr(const wxSheetCoords& coords, wxSheetAtt
 {
     wxSheetCellAttr attr;
     wxCHECK_MSG( type != wxSHEET_AttrAny, attr, wxT("Cannot create attribute of type wxSHEET_AttrAny") );
-    
+
     if (IsGridCell(coords))
     {
         switch (type)
@@ -1439,10 +1439,10 @@ wxSheetCellAttr wxSheet::GetOrCreateAttr(const wxSheetCoords& coords, wxSheetAtt
                 }
                 else
                     InitAttr(attr, DoGetDefaultGridAttr());
-                
+
                 return attr;
-            } 
-            default : 
+            }
+            default :
             {
                 wxFAIL_MSG(wxT("Grid cell attribute kind invalid for GetOrCreateAttr"));
                 return attr;
@@ -1480,10 +1480,10 @@ wxSheetCellAttr wxSheet::GetOrCreateAttr(const wxSheetCoords& coords, wxSheetAtt
                 }
                 else
                     InitAttr(attr, DoGetDefaultRowLabelAttr());
-                
+
                 return attr;
             }
-            default : 
+            default :
             {
                 wxFAIL_MSG(wxT("Grid cell attribute kind invalid for GetOrCreateAttr"));
                 return attr;
@@ -1508,17 +1508,17 @@ wxSheetCellAttr wxSheet::GetOrCreateAttr(const wxSheetCoords& coords, wxSheetAtt
                 }
                 else
                     InitAttr(attr, DoGetDefaultColLabelAttr());
-                
+
                 return attr;
             }
-            default : 
+            default :
             {
                 wxFAIL_MSG(wxT("Grid cell attribute kind invalid for GetOrCreateAttr"));
                 return attr;
             }
         }
     }
-    
+
     wxFAIL_MSG(wxString::Format(wxT("Unable to get or create attribute for cell(%d,%d)"), coords.m_row, coords.m_col));
     return wxSheetCellAttr();
 }
@@ -1534,24 +1534,24 @@ wxSheetCellAttr wxSheet::GetAttr(const wxSheetCoords& coords, wxSheetAttr_Type t
             case wxSHEET_AttrRow     :
             case wxSHEET_AttrCol     :
             case wxSHEET_AttrAny     :
-            default                  : 
+            default                  :
             {
                 wxCHECK_MSG(ContainsGridCell(coords), DoGetDefaultGridAttr(), wxT("Invalid attr coords"));
                 wxSheetCellAttr attr;
-                
+
                 if ( !LookupAttr(coords, type, attr) )
                 {
                     if (GetTable())
                     {
                         attr = GetTable()->GetAttr(coords, type);
-                        if (attr.Ok())                    
+                        if (attr.Ok())
                             CacheAttr(coords, attr, type);
                     }
                 }
-    
+
                 if ((type == wxSHEET_AttrAny) && !attr.Ok())
                     attr = DoGetDefaultGridAttr();
-        
+
                 return attr;
             }
         }
@@ -1560,15 +1560,15 @@ wxSheetCellAttr wxSheet::GetAttr(const wxSheetCoords& coords, wxSheetAttr_Type t
     {
         switch (type)
         {
-            case wxSHEET_AttrDefault : 
+            case wxSHEET_AttrDefault :
             case wxSHEET_AttrCell    : // only one of these, ever
             case wxSHEET_AttrAny     : return DoGetDefaultCornerLabelAttr();
-            default : 
+            default :
             {
                 wxFAIL_MSG(wxT("Invalid attr type for corner label"));
             }
         }
-        
+
         return wxNullSheetCellAttr;
     }
     else if (IsRowLabelCell(coords))
@@ -1585,10 +1585,10 @@ wxSheetCellAttr wxSheet::GetAttr(const wxSheetCoords& coords, wxSheetAttr_Type t
                     attr = GetTable()->GetAttr(coords, type);
                 if ((type == wxSHEET_AttrAny) && !attr.Ok())
                     attr = DoGetDefaultRowLabelAttr();
-                
+
                 return attr;
             }
-            default : 
+            default :
             {
                 wxFAIL_MSG(wxT("Invalid attr type for row label"));
             }
@@ -1608,22 +1608,22 @@ wxSheetCellAttr wxSheet::GetAttr(const wxSheetCoords& coords, wxSheetAttr_Type t
                     attr = GetTable()->GetAttr(coords, type);
                 if ((type == wxSHEET_AttrAny) && !attr.Ok())
                     attr = DoGetDefaultColLabelAttr();
-                
+
                 return attr;
             }
-            default : 
+            default :
             {
                 wxFAIL_MSG(wxT("Invalid attr type for col label"));
             }
         }
     }
-    
+
     // return garbage, maybe they can hobble along for a bit this way
     wxFAIL_MSG(wxString::Format(wxT("Unable to get attribute for cell(%d,%d)"), coords.m_row, coords.m_col));
     return wxSheetCellAttr(true);
 }
 
-void wxSheet::SetAttr(const wxSheetCoords& coords, 
+void wxSheet::SetAttr(const wxSheetCoords& coords,
                       const wxSheetCellAttr& attr_, wxSheetAttr_Type type)
 {
     wxCHECK_RET(attr_.Ok(), wxT("Invalid attribute in wxSheet::SetDefaultAttr"));
@@ -1635,10 +1635,10 @@ void wxSheet::SetAttr(const wxSheetCoords& coords,
     {
         switch (type)
         {
-            case wxSHEET_AttrDefault : 
+            case wxSHEET_AttrDefault :
             {
                 wxSheetCellAttr defAttr(DoGetDefaultGridAttr());
-                defAttr.UpdateWith(attr); 
+                defAttr.UpdateWith(attr);
                 // force good vals after update
                 defAttr.SetDefaultAttr(wxNullSheetCellAttr);
                 defAttr.SetKind(wxSHEET_AttrDefault);
@@ -1651,11 +1651,11 @@ void wxSheet::SetAttr(const wxSheetCoords& coords,
                 wxCHECK_RET(GetTable() && ContainsGridCell(coords), wxT("Invalid table or attr coords"));
                 if (attr.Ok())
                     InitAttr(attr, DoGetDefaultGridAttr());
-     
+
                 GetTable()->SetAttr(coords, attr, type);
                 return;
             }
-            default : 
+            default :
             {
                 wxFAIL_MSG(wxT("Invalid attr type for grid cell"));
                 return;
@@ -1677,7 +1677,7 @@ void wxSheet::SetAttr(const wxSheetCoords& coords,
                 defAttr.SetKind(wxSHEET_AttrDefault);
                 return;
             }
-            default : 
+            default :
             {
                 wxFAIL_MSG(wxT("Invalid attr type for corner label"));
                 return;
@@ -1689,9 +1689,9 @@ void wxSheet::SetAttr(const wxSheetCoords& coords,
         switch (type)
         {
             case wxSHEET_AttrDefault :
-            {    
+            {
                 wxSheetCellAttr defAttr(DoGetDefaultRowLabelAttr());
-                defAttr.UpdateWith(attr); 
+                defAttr.UpdateWith(attr);
                 // force good vals after update
                 defAttr.SetDefaultAttr(wxNullSheetCellAttr);
                 defAttr.SetKind(wxSHEET_AttrDefault);
@@ -1702,11 +1702,11 @@ void wxSheet::SetAttr(const wxSheetCoords& coords,
                 wxCHECK_RET(GetTable() && ContainsRowLabelCell(coords), wxT("Invalid table or attr coords"));
                 if (attr.Ok())
                     InitAttr(attr, DoGetDefaultRowLabelAttr());
-        
+
                 GetTable()->SetAttr(coords, attr, type);
                 return;
             }
-            default : 
+            default :
             {
                 wxFAIL_MSG(wxT("Invalid attr type for row label"));
                 return;
@@ -1718,9 +1718,9 @@ void wxSheet::SetAttr(const wxSheetCoords& coords,
         switch (type)
         {
             case wxSHEET_AttrDefault :
-            {    
+            {
                 wxSheetCellAttr defAttr(DoGetDefaultRowLabelAttr());
-                defAttr.UpdateWith(attr); 
+                defAttr.UpdateWith(attr);
                 // force good vals after update
                 defAttr.SetDefaultAttr(wxNullSheetCellAttr);
                 defAttr.SetKind(wxSHEET_AttrDefault);
@@ -1731,18 +1731,18 @@ void wxSheet::SetAttr(const wxSheetCoords& coords,
                 wxCHECK_RET(GetTable() && ContainsColLabelCell(coords), wxT("Invalid table or attr coords"));
                 if (attr.Ok())
                     InitAttr(attr, DoGetDefaultColLabelAttr());
-      
+
                 GetTable()->SetAttr(coords, attr, type);
                 return;
             }
-            default : 
+            default :
             {
                 wxFAIL_MSG(wxT("Invalid attr type for col label"));
                 return;
             }
         }
     }
-    
+
     wxFAIL_MSG(wxString::Format(wxT("Unable to set attribute for cell(%d,%d)"), coords.m_row, coords.m_col));
 }
 
@@ -1750,7 +1750,7 @@ bool wxSheet::InitAttr( wxSheetCellAttr& initAttr, const wxSheetCellAttr& defAtt
 {
     if (initAttr == defAttr)
         return false;
-    
+
     wxSheetCellAttr attr(initAttr);
     wxSheetCellAttr attrDef(attr.GetDefaultAttr());
     // only 100000 def attr, should be enough?
@@ -1769,7 +1769,7 @@ bool wxSheet::InitAttr( wxSheetCellAttr& initAttr, const wxSheetCellAttr& defAtt
         attr = attrDef;
         attrDef = attr.GetDefaultAttr();
     }
-    
+
     wxFAIL_MSG(wxT("Unable to set default attribute for cell"));
     return false;
 }
@@ -1911,7 +1911,7 @@ wxString wxSheet::GetCellValue( const wxSheetCoords& coords )
 {
     if ( GetTable() )
         return GetTable()->GetValue( coords );
-    
+
     return wxEmptyString;
 }
 
@@ -1927,7 +1927,7 @@ void wxSheet::SetCellValue( const wxSheetCoords& coords, const wxString& s )
     {
         HideCellEditControl();
         ShowCellEditControl(); // will reread data from table
-    }   
+    }
     else
         RefreshCell(coords, false);
 }
@@ -1936,7 +1936,7 @@ bool wxSheet::HasCellValue( const wxSheetCoords& coords )
 {
     if ( GetTable() )
         return GetTable()->HasValue( coords );
-    
+
     // this tries the table too, but maybe they've only overridden GetCellValue
     return !GetCellValue(coords).IsEmpty();
 }
@@ -1970,18 +1970,18 @@ wxSheetCellEditor wxSheet::GetDefaultEditorForCell(const wxSheetCoords& coords) 
 {
     wxCHECK_MSG(GetTable(), wxNullSheetCellEditor, wxT("Grid table is not created"));
     //return GetDefaultEditorForType(GetTable()->GetTypeName(coords));
-    
+
     // Default is to NOT use this as a default, but the defAttr's editor
     int index = GetSheetRefData()->m_typeRegistry->FindOrCloneDataType(GetTable()->GetTypeName(coords));
     if (index == wxNOT_FOUND)
         return wxNullSheetCellEditor;
 
     return GetSheetRefData()->m_typeRegistry->GetEditor(index);
-    
+
 }
 wxSheetCellRenderer wxSheet::GetDefaultRendererForCell(const wxSheetCoords& coords) const
 {
-    if (!GetTable()) return wxNullSheetCellRenderer; 
+    if (!GetTable()) return wxNullSheetCellRenderer;
     //return GetDefaultRendererForType(GetTable()->GetTypeName(coords));
 
     // Default is to NOT use this as a default, but the defAttr's renderer
@@ -1998,66 +1998,66 @@ wxSheetCellRenderer wxSheet::GetDefaultRendererForCell(const wxSheetCoords& coor
 bool wxSheet::IsCellVisible( const wxSheetCoords& coords, bool wholeCellVisible ) const
 {
     wxCHECK_MSG(ContainsCell(coords), false, wxT("Invalid coords in wxSheet::IsCellVisible"));
-    
+
     const wxRect clientRect(wxPoint(0,0), GetWindowForCoords(coords)->GetClientSize());
     const wxRect devRect(CellToRect(coords, true));  // rect in device coords
-    
+
     if ( wholeCellVisible )                     // is the whole cell visible?
     {
         wxRect intersectRect( devRect.Intersect(clientRect) );
         return intersectRect == devRect;
     }
-    
+
     return devRect.Intersects(clientRect); // is the cell partly visible ?
 }
 bool wxSheet::IsRowVisible( int row, bool wholeRowVisible ) const
 {
     if (row == -1)
         return m_colLabelWin && m_colLabelWin->IsShown();
-    
+
     wxCHECK_MSG(ContainsGridRow(row), false, wxT("Invalid row in wxSheet::IsRowVisible"));
-    
+
     const wxRect clientRect(wxPoint(0,0), m_gridWin->GetClientSize());
     const wxRect logRect(0, GetRowTop(row), clientRect.width, GetRowHeight(row));
     const wxRect devRect(clientRect.x, CalcScrolledRect(logRect).y, logRect.width, logRect.height);
-    
+
     if (wholeRowVisible)                  // is the whole row visible?
-    {        
+    {
         wxRect intersectRect( devRect.Intersect(clientRect) );
         return intersectRect == devRect;
-    }    
-    
+    }
+
     return devRect.Intersects(clientRect); // is the cell partly visible ?
 }
 bool wxSheet::IsColVisible( int col, bool wholeColVisible ) const
 {
     if (col == -1)
         return m_rowLabelWin && m_rowLabelWin->IsShown();
-    
+
     wxCHECK_MSG(ContainsGridCol(col), false, wxT("Invalid row in wxSheet::IsColVisible"));
-    
+
     const wxRect clientRect(wxPoint(0,0), m_gridWin->GetClientSize());
     const wxRect logRect(GetColLeft(col), 0, GetColWidth(col), clientRect.height);
     const wxRect devRect(CalcScrolledRect(logRect).x, clientRect.y, logRect.width, logRect.height);
-    
+
     if (wholeColVisible)                  // is the whole row visible?
-    {        
+    {
         wxRect intersectRect( devRect.Intersect(clientRect) );
         return intersectRect == devRect;
-    }    
-    
+    }
+
     return devRect.Intersects(clientRect); // is the cell partly visible ?
 }
 
 void wxSheet::MakeCellVisible( const wxSheetCoords& coords )
 {
     wxCHECK_RET(ContainsCell(coords), wxT("Invalid coords in wxSheet::MakeCellVisible"));
-    
+
     if (IsCornerLabelCell(coords))
         return;
-    
+
     int xpos = -1, ypos = -1;
-    
+
     const wxRect logRect( CellToRect(coords) );        // cell rect in logical coords
     const wxRect devRect( CalcScrolledRect(logRect) ); // rect in device coords
 
@@ -2095,26 +2095,26 @@ void wxSheet::MakeCellVisible( const wxSheetCoords& coords )
             xpos += SHEET_SCROLL_LINE_X;
             if (xpos < 0) xpos = 0;
         }
-        
+
     }
-    
+
     // -1 means leave that postion the same, see if (x/ypos < 0) x/ypos = 0 above
     if ((xpos != -1) || (ypos != -1))
         SetGridOrigin( xpos, ypos, true, true );
 }
 
 void wxSheet::SetGridCursorCell( const wxSheetCoords& coords )
-{   
+{
     // Note: can set to invalid coords < 0 to hide cursor, but not out of range
-    wxCHECK_RET((coords.GetRow() < GetNumberRows()) && 
+    wxCHECK_RET((coords.GetRow() < GetNumberRows()) &&
                 (coords.GetCol() < GetNumberCols()),
                 wxT("Invalid coords in wxSheet::SetGridCursorCell"));
-    
+
     if (GetGridCursorCell() == coords)
         return;
-    
+
     m_waitForSlowClick = false;
-    
+
     // the event has been intercepted - do nothing
     if (SendEvent(wxEVT_SHEET_SELECTING_CELL, coords) != EVT_SKIPPED)
         return;
@@ -2124,17 +2124,17 @@ void wxSheet::SetGridCursorCell( const wxSheetCoords& coords )
     {
         if (IsCellEditControlCreated())
             DisableCellEditControl(true);
-        
+
         // Otherwise refresh redraws the highlight!
-        GetSheetRefData()->m_cursorCoords = coords; 
+        GetSheetRefData()->m_cursorCoords = coords;
         RefreshCell(oldCursorCell, true);
-    }    
+    }
 
     GetSheetRefData()->m_cursorCoords = coords;
-    
+
     if (ContainsGridCell(GetGridCursorCell()))
         RefreshCell(GetGridCursorCell(), true);
-    
+
     SendEvent(wxEVT_SHEET_SELECTED_CELL, coords);
 }
 
@@ -2142,7 +2142,7 @@ bool wxSheet::DoMoveCursor( const wxSheetCoords& relCoords, bool expandSelection
 {
     const wxSheetCoords cursorCoords(GetGridCursorCell());
     const wxSheetCoords coords( cursorCoords + relCoords );
-    if ( (relCoords == wxSheetCoords(0,0)) || 
+    if ( (relCoords == wxSheetCoords(0,0)) ||
          !ContainsGridCell(cursorCoords) || !ContainsGridCell(coords) )
         return false;
 
@@ -2154,12 +2154,12 @@ bool wxSheet::DoMoveCursor( const wxSheetCoords& relCoords, bool expandSelection
     }
     else
         ClearSelection(true);
-    
+
     MakeCellVisible( coords );
     SetGridCursorCell( coords );
     if (expandSelection && !HasSelectionMode(wxSHEET_SelectNone))
         HighlightSelectingBlock( GetSelectingAnchor(), GetGridCursorCell() );
-        
+
     return true;
 }
 
@@ -2177,7 +2177,7 @@ bool wxSheet::DoMoveCursorBlock( const wxSheetCoords& relDir, bool expandSelecti
         {
             if (HasCellValue(coords) || !ContainsGridCell(coords + relDir))
                 break;
-                
+
             coords += relDir;
         }
     }
@@ -2198,7 +2198,7 @@ bool wxSheet::DoMoveCursorBlock( const wxSheetCoords& relDir, bool expandSelecti
         {
             if ( !HasCellValue(coords + relDir) )
                 break;
-            
+
             coords += relDir;
         }
     }
@@ -2208,14 +2208,14 @@ bool wxSheet::DoMoveCursorBlock( const wxSheetCoords& relDir, bool expandSelecti
 
 bool wxSheet::DoMoveCursorUpDownPage( bool page_up, bool expandSelection )
 {
-    if (!ContainsGridCell(GetGridCursorCell())) 
+    if (!ContainsGridCell(GetGridCursorCell()))
         return false;
 
     const int row = GetGridCursorRow();
-    
+
     if ((page_up && (row < 1)) || (!page_up && (row >= GetNumberRows() - 1)))
         return false;
-    
+
     int cw, ch;
     m_gridWin->GetClientSize( &cw, &ch );
 
@@ -2230,26 +2230,26 @@ bool wxSheet::DoMoveCursorUpDownPage( bool page_up, bool expandSelection )
 bool wxSheet::HasSelection(bool selecting) const
 {
     if (selecting)
-        return (!GetSelectingBlock().IsEmpty() || 
+        return (!GetSelectingBlock().IsEmpty() ||
                 (GetSelection() && GetSelection()->HasSelection()));
 
     return GetSelection() && GetSelection()->HasSelection();
 }
 bool wxSheet::IsCellSelected( const wxSheetCoords& coords ) const
 {
-    return ( GetSelectingBlock().Contains(coords) || 
+    return ( GetSelectingBlock().Contains(coords) ||
             (GetSelection() && GetSelection()->Contains(coords)) );
 }
 bool wxSheet::IsRowSelected( int row ) const
 {
-    wxSheetBlock rowBlock(row, 0, 1, GetNumberCols()); // not +1 
-    return ( GetSelectingBlock().Contains(rowBlock) || 
+    wxSheetBlock rowBlock(row, 0, 1, GetNumberCols()); // not +1
+    return ( GetSelectingBlock().Contains(rowBlock) ||
             (GetSelection() && GetSelection()->Contains(rowBlock)) );
 }
 bool wxSheet::IsColSelected( int col ) const
 {
-    wxSheetBlock colBlock(0, col, GetNumberRows(), 1); // not +1 
-    return ( GetSelectingBlock().Contains(colBlock) || 
+    wxSheetBlock colBlock(0, col, GetNumberRows(), 1); // not +1
+    return ( GetSelectingBlock().Contains(colBlock) ||
             (GetSelection() && GetSelection()->Contains(colBlock)) );
 }
 
@@ -2268,47 +2268,47 @@ bool wxSheet::SelectRow( int row, bool addToSelected, bool sendEvt )
 {
     if (HasSelectionMode(wxSHEET_SelectCols))
         return false;
-    
+
     // selection to # of cols means whole row is selected
-    return SelectBlock( wxSheetBlock(row, 0, 1, GetNumberCols()+1), 
+    return SelectBlock( wxSheetBlock(row, 0, 1, GetNumberCols()+1),
                         addToSelected, sendEvt );
 }
 bool wxSheet::SelectRows( int rowTop, int rowBottom, bool addToSelected, bool sendEvt )
 {
     if (HasSelectionMode(wxSHEET_SelectCols) || (rowTop > rowBottom))
         return false;
-    
+
     // selection to # of cols means whole row is selected
-    return SelectBlock( wxSheetBlock(rowTop, 0, rowBottom-rowTop+1, GetNumberCols()+1), 
+    return SelectBlock( wxSheetBlock(rowTop, 0, rowBottom-rowTop+1, GetNumberCols()+1),
                         addToSelected, sendEvt );
 }
 bool wxSheet::SelectCol( int col, bool addToSelected, bool sendEvt )
 {
     if (HasSelectionMode(wxSHEET_SelectRows))
         return false;
-    
+
     // selection to # of rows means whole col is selected
-    return SelectBlock( wxSheetBlock(0, col, GetNumberRows()+1, 1), 
+    return SelectBlock( wxSheetBlock(0, col, GetNumberRows()+1, 1),
                         addToSelected, sendEvt );
 }
 bool wxSheet::SelectCols( int colLeft, int colRight, bool addToSelected, bool sendEvt )
 {
     if (HasSelectionMode(wxSHEET_SelectRows) || (colLeft > colRight))
         return false;
-    
+
     // selection to # of rows means whole col is selected
-    return SelectBlock( wxSheetBlock(0, colLeft, GetNumberRows()+1, colRight-colLeft+1), 
+    return SelectBlock( wxSheetBlock(0, colLeft, GetNumberRows()+1, colRight-colLeft+1),
                         addToSelected, sendEvt );
 }
 bool wxSheet::SelectCell( const wxSheetCoords& coords, bool addToSelected, bool sendEvt )
-{ 
-    return SelectBlock(wxSheetBlock(coords, 1, 1), addToSelected, sendEvt); 
+{
+    return SelectBlock(wxSheetBlock(coords, 1, 1), addToSelected, sendEvt);
 }
 bool wxSheet::SelectBlock( const wxSheetBlock& block, bool addToSelected, bool sendEvt )
 {
     if (!GetSelection())
         return false;
-    
+
     if ( !addToSelected )
         ClearSelection(sendEvt);
 
@@ -2319,16 +2319,16 @@ bool wxSheet::SelectBlock( const wxSheetBlock& block, bool addToSelected, bool s
     if (!GetBatchCount())
     {
         wxSheetBlock bounds;
-        
+
         for (size_t n=0; n<addedBlocks.GetCount(); n++)
             bounds = bounds.ExpandUnion(addedBlocks[n]);
-        
+
         RefreshGridCellBlock(bounds);
     }
-    
+
     if (sendEvt)
         SendRangeEvent(wxEVT_SHEET_RANGE_SELECTED, block, true, addToSelected);
-    
+
     return true;
 }
 
@@ -2346,7 +2346,7 @@ bool wxSheet::DeselectRow( int row, bool sendEvt )
 {
     if (HasSelectionMode(wxSHEET_SelectCols))
         return false;
-    
+
     // deselection to # of cols means whole row is deselected
     return DeselectBlock( wxSheetBlock(row, 0, 1, GetNumberCols()), sendEvt );
 }
@@ -2354,16 +2354,16 @@ bool wxSheet::DeselectRows( int rowTop, int rowBottom, bool sendEvt )
 {
     if (HasSelectionMode(wxSHEET_SelectCols) || (rowTop > rowBottom))
         return false;
-    
+
     // selection to # of cols means whole row is deselected
-    return DeselectBlock( wxSheetBlock(rowTop, 0, rowBottom-rowTop+1, GetNumberCols()+1), 
+    return DeselectBlock( wxSheetBlock(rowTop, 0, rowBottom-rowTop+1, GetNumberCols()+1),
                           sendEvt );
 }
 bool wxSheet::DeselectCol( int col, bool sendEvt )
 {
     if (HasSelectionMode(wxSHEET_SelectRows))
         return false;
-    
+
     // deselection to # of rows means whole col is deselected
     return DeselectBlock( wxSheetBlock(0, col, GetNumberRows(), 1), sendEvt );
 }
@@ -2371,9 +2371,9 @@ bool wxSheet::DeselectCols( int colLeft, int colRight, bool sendEvt )
 {
     if (HasSelectionMode(wxSHEET_SelectRows) || (colLeft > colRight))
         return false;
-    
+
     // selection to # of rows means whole col is deselected
-    return DeselectBlock( wxSheetBlock(0, colLeft, GetNumberRows()+1, colRight-colLeft+1), 
+    return DeselectBlock( wxSheetBlock(0, colLeft, GetNumberRows()+1, colRight-colLeft+1),
                           sendEvt );
 }
 bool wxSheet::DeselectCell( const wxSheetCoords& coords, bool sendEvt )
@@ -2385,12 +2385,12 @@ bool wxSheet::DeselectBlock( const wxSheetBlock& block, bool sendEvt )
 {
     if (!GetSelection())
         return false;
-    
+
     // do they want to clear the whole grid
     wxSheetBlock gridBlock(0, 0, GetNumberRows(), GetNumberCols());
     if (gridBlock.Intersect(block) == gridBlock)
         return ClearSelection(sendEvt);
-    
+
     wxArraySheetBlock deletedBlocks;
     if (!GetSelection()->DeselectBlock( block, true, &deletedBlocks ))
         return false;
@@ -2398,16 +2398,16 @@ bool wxSheet::DeselectBlock( const wxSheetBlock& block, bool sendEvt )
     if (!GetBatchCount())
     {
         wxSheetBlock bounds;
-        
+
         for (size_t n=0; n<deletedBlocks.GetCount(); n++)
             bounds = bounds.ExpandUnion(deletedBlocks[n]);
-        
+
         RefreshGridCellBlock(bounds);
     }
-    
+
     if (sendEvt)
         SendRangeEvent(wxEVT_SHEET_RANGE_SELECTED, block, false, false);
-    
+
     return true;
 }
 
@@ -2419,21 +2419,21 @@ bool wxSheet::ClearSelection(bool send_event)
     // no evt for clearing m_selectingBlock, it's not a real selection
     if ( !HasSelection(false) )
         send_event = false;
-    
+
     wxSheetBlock bounds(GetSelectingBlock().ExpandUnion(GetSelection()->GetBoundingBlock()));
     SetSelectingBlock(wxNullSheetBlock);
-    GetSelection()->Clear(); 
-    
+    GetSelection()->Clear();
+
     RefreshGridCellBlock(bounds);
-    
+
     if (send_event)
     {
         // One deselection event, indicating deselection of _all_ cells.
-        SendRangeEvent( wxEVT_SHEET_RANGE_SELECTED, 
+        SendRangeEvent( wxEVT_SHEET_RANGE_SELECTED,
                         wxSheetBlock(0, 0, GetNumberRows(), GetNumberCols()),
                         false, false );
     }
-    
+
     return true;
 }
 
@@ -2477,20 +2477,20 @@ public:
     wxSheetDataObject(const wxSheetValueProviderSparseString &values)
         : wxDataObjectSimple(wxDF_wxSHEET), m_values(values)
         {
-            CreateDataString(); 
+            CreateDataString();
             m_values.ClearValues();
         }
-        
+
     virtual size_t GetDataSize() const { return (m_data.Len()+1)*sizeof(wxChar); }
     virtual bool GetDataHere(void *buf) const;
     virtual bool SetData(size_t len, const void *buf);
-    
+
     const wxSheetValueProviderSparseString& GetValues() const { return m_values; }
- 
+
     void CreateDataString();
-    
+
 protected:
-    wxSheetValueProviderSparseString m_values;    
+    wxSheetValueProviderSparseString m_values;
     wxString m_data;
 private:
     // I don't understand these? from include/wx/gtk/dataobj2.h
@@ -2527,17 +2527,17 @@ const wxString s_newCol(wxT("\1\4"), 2);  // specify a col number
 
 void wxSheetDataObject::CreateDataString()
 {
-    m_data.Clear();    
+    m_data.Clear();
     wxPairArrayIntPairArraySheetString &values = m_values.GetData();
     m_values.RemoveEmpty();
 
     if (values.GetCount() == 0u)
         return;
-    
+
     int c, ncols, r, nrows = values.GetCount();
     int row, col;
     int last_row = values.GetItemKey(0) - 10, last_col;
-    
+
     for (r=0; r<nrows; r++)
     {
         row = values.GetItemKey(r);
@@ -2545,11 +2545,11 @@ void wxSheetDataObject::CreateDataString()
             m_data += s_newRow + wxString::Format(wxT("%d:"), row);
         else
             m_data += s_nextRow;
-        
+
         col = values.GetItemValue(r).GetItemKey(0);
         m_data += s_newCol + wxString::Format(wxT("%d:"), col);
         last_col = col;
-        
+
         ncols = values.GetItemValue(r).GetCount();
         for (c=0; c<ncols; c++)
         {
@@ -2563,37 +2563,37 @@ void wxSheetDataObject::CreateDataString()
     }
 }
 
-bool wxSheetDataObject::GetDataHere(void *buf) const 
+bool wxSheetDataObject::GetDataHere(void *buf) const
 {
     size_t len = GetDataSize();
     memset( (char *)buf, 0, len );
     memcpy( buf, m_data.c_str(), len );
     return true;
-}    
+}
 
 bool wxSheetDataObject::SetData(size_t len, const void *buf)
 {
     wxPairArrayIntPairArraySheetString &values = m_values.GetData();
     values.Clear();
     m_data.Clear();
-    
+
     if (len < 2u)
         return false; // I guess?
-    
+
 #if wxCHECK_VERSION(2, 9, 0)
     wxString strBuf((const wchar_t*) wxConvertMB2WX((const char *)buf), len); // probably not Unicode safe
 #else
     wxString strBuf(wxConvertMB2WX((const char *)buf), len); // probably not Unicode safe
 #endif
     m_data = strBuf;
-    
+
     //wxPrintf(wxT("Data len %d %d\n"), m_data.Len(), len);
-    
+
     const wxChar *c = strBuf.GetData();
     size_t n, last_n = 0, str_len = strBuf.Len();
     int row=0, col=0;
     long long_val = 0;
-    
+
     for ( n=0; n < str_len-1; n++, c++ )
     {
         // The next row, increment row counter
@@ -2608,17 +2608,17 @@ bool wxSheetDataObject::SetData(size_t len, const void *buf)
         {
             c++; n++; last_n = n+1;
             for ( ; n < str_len-1; n++, c++ ) { if (*c == wxT(':')) break; }
-            
+
             wxString strVal(strBuf.Mid(last_n, n-last_n));
             //wxPrintf(wxT("Getting rownum %d %d '%s'\n"), last_n, n, strVal.c_str());
             if ( strVal.ToLong(&long_val) )
                 row = int(long_val);
             else
                 return false;
-            
+
             last_n = n+1;
         }
-        // read the next col value 
+        // read the next col value
         else if ( (*c == s_nextCol[0]) && (*(c+1) == s_nextCol[1]) ) // s_nextCol
         {
             wxString strVal(strBuf.Mid(last_n, n-last_n));
@@ -2639,26 +2639,26 @@ bool wxSheetDataObject::SetData(size_t len, const void *buf)
                 col = int(long_val);
             else
                 return false;
-            
+
             last_n = n+1;
         }
     }
-    
+
     //wxPrintf(wxT("Got some data %d %d\n"), len, m_values.GetCount());
     return true;
 }
 
 bool wxSheet::CopyInternalSelectionToClipboard(const wxChar& colSep)
 {
-    if (!wxTheClipboard->Open()) 
+    if (!wxTheClipboard->Open())
         return false;
-    
+
     // save data to clipboard, we want the internal data back if possible
     wxDataObjectComposite *data = new wxDataObjectComposite;
     data->Add(new wxSheetDataObject(GetSheetRefData()->m_copiedData), true);
     data->Add(new wxTextDataObject(CopyInternalSelectionToString(colSep)), false);
     wxTheClipboard->SetData( data );
-    
+
     wxTheClipboard->Close();
     return true;
 }
@@ -2671,12 +2671,12 @@ bool wxSheet::CopyCurrentSelectionToClipboard(bool copy_cursor, const wxChar& co
 
 bool wxSheet::PasteFromClipboard( const wxSheetCoords &topLeft,
                                   const wxChar& colSep )
-{    
+{
     if ( !wxTheClipboard->Open() )
         return false;
 
     bool ret = false;
-    
+
     wxSheetDataObject sheetData;
     if (wxTheClipboard->IsSupported(wxDF_wxSHEET) && wxTheClipboard->GetData(sheetData))
     {
@@ -2701,13 +2701,13 @@ bool wxSheet::CopyCurrentSelectionInternal(bool copy_cursor)
 {
     wxPairArrayIntPairArraySheetString &copiedData = GetSheetRefData()->m_copiedData.GetData();
     copiedData.Clear();
-    
+
     wxSheetSelection sel = *GetSelection();
     if (!GetSelectingBlock().IsEmpty())
         sel.SelectBlock(GetSelectingBlock());
 
     sel.SetBoundingBlock(wxSheetBlock(0, 0, GetNumberRows(), GetNumberCols()));
-    
+
     if (!sel.HasSelection())
     {
         if (copy_cursor && ContainsGridCell(GetGridCursorCell()))
@@ -2715,12 +2715,12 @@ bool wxSheet::CopyCurrentSelectionInternal(bool copy_cursor)
         else
             return false;
     }
-    
+
     wxSheetSelectionIterator selIter(sel);
     wxSheetCoords cell;
     while (selIter.GetNext(cell))
         copiedData.GetOrCreateValue(cell.m_row).SetValue(cell.m_col, GetCellValue(cell));
-    
+
     return copiedData.GetCount() > 0;
 }
 
@@ -2735,15 +2735,15 @@ wxString wxSheet::CopyInternalSelectionToString(const wxChar& colSep)
     int i, r, c;
     int row, col;
     int nrows = copiedData.GetCount();
-    
+
     // find leftmost col
     int left_col = copiedData.GetItemValue(0).GetItemKey(0);
     for (r=1; r<nrows; r++)
     {
         if (left_col > copiedData.GetItemValue(r).GetItemKey(0))
             left_col = copiedData.GetItemValue(r).GetItemKey(0);
-    }    
-    
+    }
+
     int last_row=copiedData.GetItemKey(0), last_col=left_col;
     for (r=0; r<nrows; r++)
     {
@@ -2753,20 +2753,20 @@ wxString wxSheet::CopyInternalSelectionToString(const wxChar& colSep)
             value += wxT("\n");
 
         last_col = left_col;
-        
+
         for (c=0; c<ncols; c++)
         {
             col = copiedData.GetItemValue(r).GetItemKey(c);
             for (i = last_col; i<col; i++)
                 value += colSep;
-            
+
             value += copiedData.GetItemValue(r).GetItemValue(c);
             last_col = col;
         }
         last_row = row;
     }
-    
-    return value;    
+
+    return value;
 }
 
 bool wxSheet::CopyStringToSelection(const wxString &string, const wxChar& colSep)
@@ -2776,13 +2776,13 @@ bool wxSheet::CopyStringToSelection(const wxString &string, const wxChar& colSep
 
     if (string.IsEmpty())
         return false;
-    
+
     const wxChar *c = string.GetData();
     int n, len = string.Length();
-    
+
     int row = 0, col = 0;
     wxString buf;
-    
+
     for (n=0; n<len; n++, c++)
     {
         if (((*c) == wxT('\r')) || ((*c) == wxT('\n')))
@@ -2790,10 +2790,10 @@ bool wxSheet::CopyStringToSelection(const wxString &string, const wxChar& colSep
             // check for DOS's \r\n and discard the trailing \n
             if (((*c) == wxT('\r')) && (n < len - 1) && (c[1] == wxT('\n')))
             {
-                c++;   
+                c++;
                 n++;
             }
-            
+
             copiedData.GetOrCreateValue(row).SetValue(col, buf);
             col = 0;
             row++;
@@ -2807,11 +2807,11 @@ bool wxSheet::CopyStringToSelection(const wxString &string, const wxChar& colSep
         }
         else
             buf += *c;
-    }    
-    
+    }
+
     if (!buf.IsEmpty())
         copiedData.GetOrCreateValue(row).SetValue(col, buf);
-    
+
     return true;
 }
 
@@ -2824,7 +2824,7 @@ bool wxSheet::PasteInternalCopiedSelection(const wxSheetCoords &topLeft_)
 
     wxSheetBlock currentBlock = GetSelection()->GetBoundingBlock().ExpandUnion(GetSelectingBlock());
     bool is_selection = !currentBlock.IsEmpty();
-    
+
     wxSheetCoords topLeft(topLeft_);
     if (topLeft == wxNullSheetCoords)
     {
@@ -2833,17 +2833,17 @@ bool wxSheet::PasteInternalCopiedSelection(const wxSheetCoords &topLeft_)
         else
             topLeft = GetGridCursorCell();
     }
-    
-    if (!ContainsGridCell(topLeft)) 
+
+    if (!ContainsGridCell(topLeft))
         return false;
-    
-    wxSheetCoords copiedTopLeft( copiedData.GetItemKey(0), 
+
+    wxSheetCoords copiedTopLeft( copiedData.GetItemKey(0),
                                  copiedData.GetItemValue(0).GetItemKey(0) );
-    
+
     wxSheetCoords shiftCell = topLeft - copiedTopLeft;
-    
+
     GetSheetRefData()->m_pasting = true;
-    
+
     wxSheetCoords cell, pasteCell;
     size_t r, nrows = copiedData.GetCount();
     size_t c, ncols;
@@ -2855,14 +2855,14 @@ bool wxSheet::PasteInternalCopiedSelection(const wxSheetCoords &topLeft_)
         // all done
         if (cell.m_row+shiftCell.m_row >= GetNumberRows())
             break;
-        
+
         for (c=0; c<ncols; c++)
         {
             cell.m_col = copiedData.GetItemValue(r).GetItemKey(c);
             pasteCell = cell + shiftCell;
             if (pasteCell.m_col >= GetNumberCols())
                 break;
-            
+
             const wxString& value = copiedData.GetItemValue(r).GetItemValue(c);
             // only paste into selected cells if selection
             if (is_selection && IsCellSelected(pasteCell))
@@ -2871,7 +2871,7 @@ bool wxSheet::PasteInternalCopiedSelection(const wxSheetCoords &topLeft_)
                 SetCellValue(pasteCell, value);
         }
     }
-    
+
     GetSheetRefData()->m_pasting = false;
     return true;
 }
@@ -2884,9 +2884,9 @@ void wxSheet::EnableEditing( bool edit )
     // TODO: improve this ?
     if ( edit != IsEditable() )
     {
-        if (!edit && IsCellEditControlCreated()) 
+        if (!edit && IsCellEditControlCreated())
             DisableCellEditControl(true);
-        
+
         GetSheetRefData()->m_editable = edit;
     }
 }
@@ -2903,14 +2903,14 @@ bool wxSheet::EnableCellEditControl( const wxSheetCoords& coords_ )
     // already editing elsewhere, disable it
     if (IsCellEditControlCreated() && !DisableCellEditControl(true))
         return false;
-    
+
     if (SendEvent( wxEVT_SHEET_EDITOR_ENABLED, coords ) == EVT_VETOED)
         return false;
 
     // guarantee that it's visible
     MakeCellVisible(coords);
     GetSheetRefData()->m_cellEditorCoords = coords;
-    
+
     // Get the appropriate editor for this cell
     wxSheetCellAttr attr(GetAttr(coords));
     GetSheetRefData()->m_cellEditor = attr.GetEditor(this, coords);
@@ -2919,12 +2919,12 @@ bool wxSheet::EnableCellEditControl( const wxSheetCoords& coords_ )
         GetSheetRefData()->m_cellEditorCoords = wxNullSheetCoords;
         wxFAIL_MSG(wxT("Unable to get cell edit control"));
         return false;
-    }        
-    
+    }
+
     return ShowCellEditControl();
 }
 
-bool wxSheet::DisableCellEditControl( bool save_value ) 
+bool wxSheet::DisableCellEditControl( bool save_value )
 {
     //wxCHECK_RET(, wxT("Edit control not enabled in wxSheet::DisableCellEditControl"));
     if (!IsCellEditControlCreated())
@@ -2932,20 +2932,20 @@ bool wxSheet::DisableCellEditControl( bool save_value )
         // just in case something failed earlier, make sure it's gone
         if (GetEditControl().Ok())
             GetSheetRefData()->m_cellEditor.Destroy();
-        
+
         GetSheetRefData()->m_cellEditorCoords = wxNullSheetCoords;
         return true;
     }
 
     if (SendEvent(wxEVT_SHEET_EDITOR_DISABLED, GetEditControlCoords()) == EVT_VETOED)
         return false;
-    
-    if (save_value) 
-        SaveEditControlValue(); 
-    
+
+    if (save_value)
+        SaveEditControlValue();
+
     HideCellEditControl();
     // FIXME always destroy it else memory leak, maybe fixed with handler OnDestroy
-    GetSheetRefData()->m_cellEditor.DestroyControl(); 
+    GetSheetRefData()->m_cellEditor.DestroyControl();
     GetSheetRefData()->m_cellEditor.Destroy();
     GetSheetRefData()->m_cellEditorCoords = wxNullSheetCoords;
     return true;
@@ -2962,7 +2962,7 @@ bool wxSheet::IsCellEditControlCreated() const
 }
 bool wxSheet::IsCellEditControlShown() const
 {
-    return GetEditControl().Ok() && GetEditControl().IsCreated() && 
+    return GetEditControl().Ok() && GetEditControl().IsCreated() &&
            GetEditControl().IsShown();
 }
 
@@ -2970,13 +2970,13 @@ bool wxSheet::ShowCellEditControl()
 {
     wxCHECK_MSG(CanEnableCellControl(GetEditControlCoords()), false, // also checks coords
                 wxT("Editor not enabled in wxSheet::ShowCellEditControl"));
-    
+
     wxWindow *win = GetWindowForCoords(GetEditControlCoords());
-    
-    // If the control's parent is not correct we must recreate it 
+
+    // If the control's parent is not correct we must recreate it
     if (GetEditControl().GetControl() && (GetEditControl().GetControl()->GetParent() != win))
         GetSheetRefData()->m_cellEditor.DestroyControl();
-    
+
     // Make sure the editor is created
     if (!GetEditControl().IsCreated())
     {
@@ -2985,23 +2985,23 @@ bool wxSheet::ShowCellEditControl()
                                this);
 
         wxSheetEditorCreatedEvent evt(GetId(), wxEVT_SHEET_EDITOR_CREATED,
-                                      this, GetEditControlCoords(), 
+                                      this, GetEditControlCoords(),
                                       GetSheetRefData()->m_cellEditor.GetControl());
         GetEventHandler()->ProcessEvent(evt);
-        
+
         if (!GetEditControl().IsCreated())
         {
             // kill it all off, something went wrong
             if (GetEditControl().GetControl())
                 GetSheetRefData()->m_cellEditor.DestroyControl();
-            
+
             GetSheetRefData()->m_cellEditor.Destroy();
             GetSheetRefData()->m_cellEditorCoords = wxNullSheetCoords;
             wxFAIL_MSG(wxT("Unable to create edit control"));
             return false;
         }
     }
-    
+
     wxSheetCellAttr attr(GetAttr(GetEditControlCoords()));
 
     // the rectangle bounding the cell
@@ -3036,10 +3036,10 @@ bool wxSheet::ShowCellEditControl()
             }
         }
     }
-    
+
     // clip width to window size
     rect.width = wxMin(rect.width, clientWidth - rect.x);
-    
+
     GetSheetRefData()->m_cellEditor.SetSize( rect, attr );
     GetSheetRefData()->m_cellEditor.Show( true, attr );
 
@@ -3047,12 +3047,12 @@ bool wxSheet::ShowCellEditControl()
     CalcWindowSizes();
 
     GetSheetRefData()->m_cellEditor.BeginEdit(GetEditControlCoords(), this);
-    
+
     // FIXME other spreadsheets don't clear cells to right, it looks weird? why not?
     // if this is empty, cell to right maybe overflowed into from left, clear it
     //if (value.IsEmpty() && (m_cellEditorCoords.m_col < m_numCols - 1))
     //    RefreshCell(m_cellEditorCoords+wxSheetCoords(0, 1));
-    
+
     return true;
 }
 
@@ -3075,7 +3075,7 @@ void wxSheet::SaveEditControlValue()
     if (GetSheetRefData()->m_cellEditor.EndEdit(GetEditControlCoords(), this))
     {
         // Event has been vetoed, set the data back.
-        if ( SendEvent(wxEVT_SHEET_CELL_VALUE_CHANGED, GetEditControlCoords()) == EVT_VETOED ) 
+        if ( SendEvent(wxEVT_SHEET_CELL_VALUE_CHANGED, GetEditControlCoords()) == EVT_VETOED )
             SetCellValue(GetEditControlCoords(), oldval);
     }
 }
@@ -3128,11 +3128,11 @@ void wxSheet::Refresh(bool eraseb, const wxRect* rect_)
         gridRect.x -= rowLabelWidth;
         gridRect.y -= colLabelHeight;
 
-        if ( !wxRectIsEmpty(cornerRect) ) 
+        if ( !wxRectIsEmpty(cornerRect) )
             RefreshCornerLabelWindow(eraseb, &cornerRect);
         if ( !wxRectIsEmpty(rowLabelRect) )
             RefreshRowLabelWindow(eraseb, &rowLabelRect);
-        if ( !wxRectIsEmpty(colLabelRect) ) 
+        if ( !wxRectIsEmpty(colLabelRect) )
             RefreshColLabelWindow(eraseb, &colLabelRect);
         if ( !wxRectIsEmpty(gridRect) )
             RefreshGridWindow(eraseb, &gridRect);
@@ -3194,7 +3194,7 @@ void wxSheet::RefreshRowLabelWindow(bool eraseb, const wxRect* rect)
             else
                 win->Refresh(eraseb, NULL);
         }
-    }    
+    }
 }
 void wxSheet::RefreshColLabelWindow(bool eraseb, const wxRect* rect)
 {
@@ -3220,7 +3220,7 @@ void wxSheet::RefreshColLabelWindow(bool eraseb, const wxRect* rect)
             else
                 win->Refresh(eraseb, NULL);
         }
-    }    
+    }
 }
 void wxSheet::RefreshCornerLabelWindow(bool eraseb, const wxRect* rect)
 {
@@ -3243,15 +3243,15 @@ void wxSheet::RefreshCell(const wxSheetCoords& coords, bool single_cell)
         return;
 
     //wxPrintf(wxT("RefreshCell %d %d\n"), coords.m_row, coords.m_col);
-    
+
     if (IsCornerLabelCell(coords))
     {
         RefreshCornerLabelWindow(true);
         return;
     }
-    
+
     wxRect rect(CellToRect(coords, false));
-    
+
     if (ContainsRowLabelCell(coords))
     {
         RefreshRowLabelWindow( true, &rect );
@@ -3263,7 +3263,7 @@ void wxSheet::RefreshCell(const wxSheetCoords& coords, bool single_cell)
         return;
     }
     else if (ContainsGridCell(coords))
-    {   
+    {
         if (!single_cell)
         {
             // hack to draw previous cell, if this cell turns empty and can be
@@ -3271,9 +3271,9 @@ void wxSheet::RefreshCell(const wxSheetCoords& coords, bool single_cell)
             if (coords.m_col > 0)
                 rect.x = GetColLeft(coords.m_col-1);
             // we do have to draw the whole row right though
-            rect.width = GetVirtualSize().x - rect.x; 
+            rect.width = GetVirtualSize().x - rect.x;
         }
-    
+
         RefreshGridWindow( false, &rect );
     }
     else
@@ -3285,8 +3285,8 @@ void wxSheet::RefreshBlock(const wxSheetBlock& block)
         return;
 
     //PRINT_BLOCK(wxT("RefreshBlock "), block)
-    
-    // This function also refreshes beyond the labels and grid since if a 
+
+    // This function also refreshes beyond the labels and grid since if a
     //   cell is resized smaller that may have to be repainted
 
     wxSheetBlock b;
@@ -3351,7 +3351,7 @@ void wxSheet::RefreshAttrChange(const wxSheetCoords& coords, wxSheetAttr_Type ty
         {
             switch (type)
             {
-                case wxSHEET_AttrDefault : 
+                case wxSHEET_AttrDefault :
                 {
                     m_gridWin->SetBackgroundColour(DoGetDefaultGridAttr().GetBackgroundColour());
                     RefreshGridWindow(false);
@@ -3368,7 +3368,7 @@ void wxSheet::RefreshAttrChange(const wxSheetCoords& coords, wxSheetAttr_Type ty
                     break;
                 }
                 case wxSHEET_AttrCell :
-                default               : 
+                default               :
                 {
                     if (ContainsGridCell(coords)) RefreshCell(coords, false);
                     break;
@@ -3387,13 +3387,13 @@ void wxSheet::RefreshAttrChange(const wxSheetCoords& coords, wxSheetAttr_Type ty
             switch (type)
             {
                 case wxSHEET_AttrDefault :
-                {    
+                {
                     m_rowLabelWin->SetBackgroundColour(DoGetDefaultRowLabelAttr().GetBackgroundColour());
                     RefreshRowLabelWindow(true);
                     break;
                 }
                 case wxSHEET_AttrCell :
-                default               : 
+                default               :
                 {
                     if (ContainsRowLabelCell(coords))
                         RefreshCell(coords);
@@ -3407,13 +3407,13 @@ void wxSheet::RefreshAttrChange(const wxSheetCoords& coords, wxSheetAttr_Type ty
             switch (type)
             {
                 case wxSHEET_AttrDefault :
-                {    
+                {
                     m_colLabelWin->SetBackgroundColour(DoGetDefaultColLabelAttr().GetBackgroundColour());
                     RefreshColLabelWindow(true);
                     break;
                 }
                 case wxSHEET_AttrCell :
-                default               : 
+                default               :
                 {
                     if (ContainsColLabelCell(coords))
                         RefreshCell(coords);
@@ -3431,9 +3431,9 @@ void wxSheet::OnPaint( wxPaintEvent& event )
     wxWindow *win = (wxWindow*)event.GetEventObject();
     wxPaintDC dc(win);
     wxRegion reg(win->GetUpdateRegion());
-    
+
     if (!IsShown()) return;
-    
+
     if (win == this)
     {
         PaintSheetWindow( dc, reg );
@@ -3474,7 +3474,7 @@ void wxSheet::OnPaint( wxPaintEvent& event )
 void wxSheet::OnEraseBackground( wxEraseEvent& event )
 {
     wxWindow *win = (wxWindow*)event.GetEventObject();
-   
+
     if (win == this)
         event.Skip(false);
     else if ((win == m_cornerLabelWin) || (win == m_rowLabelWin) || (win == m_colLabelWin))
@@ -3488,7 +3488,7 @@ void wxSheet::DrawSplitterButton(wxDC &dc, const wxRect& rect)
     //dc.SetPen(*wxBLACK_PEN);
     //dc.SetBrush(*wxBLACK_BRUSH);
     //dc.DrawRectangle(rect);
-    
+
     wxPen highlight(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNHIGHLIGHT),
 		    1, wxPENSTYLE_SOLID);
     wxPen shadow(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNSHADOW),
@@ -3505,7 +3505,7 @@ void wxSheet::DrawSplitterButton(wxDC &dc, const wxRect& rect)
     dc.SetPen(darkShadow);
     dc.DrawLine(rect.GetRight(), rect.y+1, rect.GetRight(), rect.GetBottom());
     dc.DrawLine(rect.x+1, rect.GetBottom(), rect.GetRight(), rect.GetBottom());
-    
+
     dc.SetPen(highlight);
     dc.DrawLine(rect.x+1, rect.y+1, rect.GetRight()-1, rect.y+1);
     dc.DrawLine(rect.x+1, rect.y+1, rect.x+1, rect.GetBottom()-1);
@@ -3513,7 +3513,7 @@ void wxSheet::DrawSplitterButton(wxDC &dc, const wxRect& rect)
 
 void wxSheet::PaintSheetWindow( wxDC& dc, const wxRegion& WXUNUSED(reg) )
 {
-    // draw the bottom right square area between the scrollbars 
+    // draw the bottom right square area between the scrollbars
     // since we trap EVT_ERASE_BACKGROUND
     if (m_vertScrollBar->IsShown() && m_horizScrollBar->IsShown())
     {
@@ -3524,7 +3524,7 @@ void wxSheet::PaintSheetWindow( wxDC& dc, const wxRegion& WXUNUSED(reg) )
         int left = m_horizScrollBar->GetRect().GetRight() + m_horizSplitRect.GetWidth();
         dc.DrawRectangle(left, top, clientSize.x-left, clientSize.y-top);
     }
-    
+
     if (!wxRectIsEmpty(m_vertSplitRect))
         DrawSplitterButton(dc, m_vertSplitRect);
     if (!wxRectIsEmpty(m_horizSplitRect))
@@ -3535,14 +3535,14 @@ void wxSheet::PaintGridWindow( wxDC& dc, const wxRegion& reg )
 {
     wxSheetSelection dirtyBlocks;
     CalcCellsExposed( reg, dirtyBlocks );
-    
-    DrawGridCells( dc, dirtyBlocks ); 
+
+    DrawGridCells( dc, dirtyBlocks );
 #if WXSHEET_DRAW_LINES
     DrawAllGridLines( dc, reg );
 #endif
-    
+
     DrawGridSpace( dc );
-    DrawCursorHighlight( dc, dirtyBlocks );   
+    DrawCursorHighlight( dc, dirtyBlocks );
 }
 void wxSheet::PaintRowLabelWindow( wxDC& dc, const wxRegion& reg )
 {
@@ -3582,16 +3582,16 @@ void wxSheet::PaintCornerLabelWindow( wxDC& dc, const wxRegion& WXUNUSED(reg) )
 }
 
 int wxSheet::FindOverflowCell( const wxSheetCoords& coords, wxDC& dc )
-{    
+{
     wxSheetCoords c(coords);
-    while (c.m_col > 0) 
+    while (c.m_col > 0)
     {
         c.m_col = GetTable()->GetFirstNonEmptyColToLeft(c);
         if (c.m_col < 0)
             return -1;
 
         // if !empty, stop, this is the only cell that could overflow
-        // Must check since default implementation of 
+        // Must check since default implementation of
         // GetFirstNonEmptyColToLeft just returns the previous col
         if (HasCellValue(c))
         {
@@ -3605,7 +3605,7 @@ int wxSheet::FindOverflowCell( const wxSheetCoords& coords, wxDC& dc )
             }
             break;
         }
-    }    
+    }
     return -1;
 }
 
@@ -3613,17 +3613,17 @@ int wxSheet::FindOverflowCell( const wxSheetCoords& coords, wxDC& dc )
 // exposed cells (usually set from the update region by CalcExposedCells)
 void wxSheet::DrawGridCells( wxDC& dc, const wxSheetSelection& blockSel )
 {
-    if ( !GetNumberRows() || !GetNumberCols() || GetBatchCount() ) 
+    if ( !GetNumberRows() || !GetNumberCols() || GetBatchCount() )
         return;
 
-    //static long counter = 0; ++counter;      // for testing only    
-    
+    //static long counter = 0; ++counter;      // for testing only
+
     wxSheetSelection removedSel;                // removed spanned
-    wxSheetCoords coords;    
+    wxSheetCoords coords;
     wxSheetCoords lastCoords(-1,-1);
     wxSheetBlock  cellBlock;
     wxPairArrayIntInt leftCols;
-    
+
     // paint cells in reverse order bottom to top, right to left for overflow
     wxSheetSelectionIterator revIter(blockSel, wxSSI_REVERSE);
     while (revIter.GetNext(coords) != wxSHEET_SELECTIONITER_GET_END)
@@ -3634,17 +3634,17 @@ void wxSheet::DrawGridCells( wxDC& dc, const wxSheetSelection& blockSel )
             lastCoords = coords;
             continue;
         }
-        
+
         // trim out cells part of spanned cells, leaving only the owner cell
         cellBlock = GetCellBlock(coords);
         if (!cellBlock.IsOneCell())
         {
             // forget part of spanned cell, we only care about owner cell
-            coords = cellBlock.GetLeftTop();  
+            coords = cellBlock.GetLeftTop();
             // don't bother checking whole block again
-            removedSel.SelectBlock(cellBlock, false);  
+            removedSel.SelectBlock(cellBlock, false);
         }
-        
+
         // if empty find cell to left that might overflow into this one
         // only need to check left side of each block, when row increments
         if ((lastCoords.m_row > coords.m_row) && !HasCellValue(lastCoords))
@@ -3656,7 +3656,7 @@ void wxSheet::DrawGridCells( wxDC& dc, const wxSheetSelection& blockSel )
 
         //wxPrintf(wxT("%ld Drawing Cell %d %d - has %d %d\n"), counter, coords.m_row, coords.m_col, HasCellValue(coords), HasCellValue(lastCoords)); fflush(stdout);
         DrawCell( dc, coords );
-        lastCoords = coords;        
+        lastCoords = coords;
     }
 
     // check the top left cell of the last block too
@@ -3666,8 +3666,8 @@ void wxSheet::DrawGridCells( wxDC& dc, const wxSheetSelection& blockSel )
         if ((overflow_col >= 0) && !blockSel.Contains(lastCoords.m_row, overflow_col))
             leftCols.SetValue(lastCoords.m_row, overflow_col);
     }
-    
-    // now redraw the cells that could have overflowed into these 
+
+    // now redraw the cells that could have overflowed into these
     int n, count = leftCols.GetCount();
     for (n = 0; n < count; n++)
     {
@@ -3682,56 +3682,56 @@ void wxSheet::DrawGridCells( wxDC& dc, const wxSheetSelection& blockSel )
 // exposed cells (usually set from the update region by CalcExposedCells)
 void wxSheet::DrawGridCells( wxDC& dc, const wxSheetSelection& blockSel_ )
 {
-    if ( !GetNumberRows() || !GetNumberCols() || GetBatchCount() ) 
+    if ( !GetNumberRows() || !GetNumberCols() || GetBatchCount() )
         return;
 
     wxSheetSelection blockSel(blockSel_);       // modified to remove spanned cells
     wxSheetSelection removedSel;                // removed spanned
-    wxSheetSelectionIterator selIter(blockSel); // forward iterator 
- 
-    wxSheetCoords coords;    
+    wxSheetSelectionIterator selIter(blockSel); // forward iterator
+
+    wxSheetCoords coords;
     wxSheetBlock  cellBlock;
-    
+
     int check_overflow_row = -1;
-    
+
     while (selIter.GetNext(coords))
     {
         if (removedSel.Contains(coords))
             continue;
-        
+
         // trim out cells part of spanned cells, leaving only the owner cell
         cellBlock = GetCellBlock(coords);
         if (!cellBlock.IsOneCell())
         {
             // forget part of spanned cell, we only care about owner cell
-            coords = cellBlock.GetLeftTop();  
+            coords = cellBlock.GetLeftTop();
             // remove whole spanned cell and add back the owner
             blockSel.DeselectBlock(cellBlock, false);
             blockSel.SelectBlock(wxSheetBlock(coords, 1, 1), false);
             // don't bother checking whole block again
-            removedSel.SelectBlock(cellBlock, false);  
+            removedSel.SelectBlock(cellBlock, false);
         }
 
         int bottom = cellBlock.GetBottom();
 
         // if empty find cell to left that might overflow into this one
-        // only need to check left side of each block, hence check_overflow_row 
+        // only need to check left side of each block, hence check_overflow_row
         if ((bottom > check_overflow_row) && !HasValue()) //GetTable() && !GetTable()->HasValue(coords))
         {
             check_overflow_row = bottom;
-            
+
             wxSheetCoords c;
             for ( c.m_row = coords.m_row; c.m_row <= bottom; c.m_row++ )
             {
                 c.m_col = coords.m_col;
-                while (c.m_col > 0) 
+                while (c.m_col > 0)
                 {
                     c.m_col = GetTable()->GetFirstNonEmptyColToLeft(c);
                     if (c.m_col < 0)
                         break;
 
                     // if !empty, stop, this is the only cell that could overflow
-                    // Must check since default implementation of 
+                    // Must check since default implementation of
                     // GetFirstNonEmptyColToLeft just returns the previous col
                     if (GetTable()->HasValue(c))
                     {
@@ -3750,16 +3750,16 @@ void wxSheet::DrawGridCells( wxDC& dc, const wxSheetSelection& blockSel_ )
             }
         }
     }
-    
+
     //static long counter = 0; ++counter;
-    
+
     // paint cells in reverse order bottom to top, right to left for overflow
     wxSheetSelectionIterator revIter(blockSel, wxSSI_REVERSE);
     while (revIter.GetNext(coords))
     {
-        //wxPrintf(wxT("%ld Drawing Cell %d %d\n"), counter, coords.m_row, coords.m_col); 
+        //wxPrintf(wxT("%ld Drawing Cell %d %d\n"), counter, coords.m_row, coords.m_col);
         DrawCell( dc, coords );
-    }    
+    }
 }
 */
 
@@ -3804,7 +3804,7 @@ void wxSheet::DrawCell( wxDC& dc, const wxSheetCoords& coords )
 #endif
 
     wxSheetCellAttr attr(GetAttr(coords));
-    
+
     // if the editor is shown, we should use it and not the renderer
     if ( (coords == GetEditControlCoords()) && IsCellEditControlShown() )
         GetSheetRefData()->m_cellEditor.PaintBackground(*this, attr, dc, rect, coords, IsCellSelected(coords));
@@ -3839,7 +3839,7 @@ void wxSheet::DrawCursorCellHighlight( wxDC& dc, const wxSheetCellAttr& attr )
     // for now, I just draw a thinner border than for the other ones, but
     // it doesn't look really good
 
-    int penWidth = attr.GetReadOnly() ? GetCursorCellHighlightROPenWidth() : 
+    int penWidth = attr.GetReadOnly() ? GetCursorCellHighlightROPenWidth() :
                                         GetCursorCellHighlightPenWidth();
 
     if (penWidth > 0)
@@ -3858,7 +3858,7 @@ void wxSheet::DrawCursorCellHighlight( wxDC& dc, const wxSheetCellAttr& attr )
         // use the cellHighlightColour if the cell is inside a selection, this
         // will ensure the cell is always visible.
         dc.SetPen(wxPen(IsCellSelected(coords) ? GetSelectionForeground() :
-                                                 GetCursorCellHighlightColour(), 
+                                                 GetCursorCellHighlightColour(),
                           penWidth, wxPENSTYLE_SOLID));
         dc.SetBrush(*wxTRANSPARENT_BRUSH);
         dc.DrawRectangle(rect);
@@ -3918,8 +3918,8 @@ void wxSheet::DrawAllGridLines( wxDC& dc, const wxRegion & WXUNUSED(reg) )
 
     const int numRows = GetNumberRows();
     const int numCols = GetNumberCols();
-    
-    if ( GetBatchCount() || (GridLinesEnabled() == 0) || !numRows || !numCols ) 
+
+    if ( GetBatchCount() || (GridLinesEnabled() == 0) || !numRows || !numCols )
         return;
 
     int top, bottom, left, right;
@@ -3951,7 +3951,7 @@ void wxSheet::DrawAllGridLines( wxDC& dc, const wxRegion & WXUNUSED(reg) )
     // avoid drawing grid lines past the last row and col
     right  = wxMin( right,  GetColRight(numCols - 1) );
     bottom = wxMin( bottom, GetRowBottom(numRows - 1) );
-    
+
     // no gridlines inside spanned cells, clip them out
     int leftCol   = XToGridCol(left, true);
     int topRow    = YToGridRow(top, true);
@@ -3964,12 +3964,12 @@ void wxSheet::DrawAllGridLines( wxDC& dc, const wxRegion & WXUNUSED(reg) )
         const wxSheetBlock block(topRow, leftCol, bottomRow-topRow+1, rightCol-leftCol+1);
         wxRegion clippedcells(0, 0, cw, ch);
         bool done = false;
-        
+
         if (GetSpannedBlocks())
         {
             const wxSheetSelection* spannedBlocks = GetSpannedBlocks();
             const int count = spannedBlocks->GetCount();
-        
+
             for (i=spannedBlocks->FindTopRow(topRow); i<count; i++)
             {
                 const wxSheetBlock &b = spannedBlocks->GetBlock(i);
@@ -3982,7 +3982,7 @@ void wxSheet::DrawAllGridLines( wxDC& dc, const wxRegion & WXUNUSED(reg) )
                     break;
             }
         }
-        else // grind through it 
+        else // grind through it
         {
             wxSheetCoords c;
             for (c.m_row = topRow; c.m_row <= bottomRow; c.m_row++)
@@ -3998,11 +3998,11 @@ void wxSheet::DrawAllGridLines( wxDC& dc, const wxRegion & WXUNUSED(reg) )
                 }
             }
         }
-        
+
         if (done)
             dc.SetDeviceClippingRegion( clippedcells );
     }
-    
+
     dc.SetPen( wxPen(GetGridLineColour(), 1, wxPENSTYLE_SOLID) );
 
     if ((GridLinesEnabled() & wxHORIZONTAL) != 0)
@@ -4030,7 +4030,7 @@ void wxSheet::DrawAllGridLines( wxDC& dc, const wxRegion & WXUNUSED(reg) )
                 dc.DrawLine( colRight, top, colRight, bottom );
         }
     }
-    
+
     dc.DestroyClippingRegion();
 }
 
@@ -4041,8 +4041,8 @@ void wxSheet::DrawRowLabels( wxDC& dc, const wxArrayInt& rows )
 
     for ( i = 0; i < numLabels; i++ )
         DrawCell( dc, wxSheetCoords(rows[i], -1) );
-    
-/*  // sample native rendernative code - FIXME  
+
+/*  // sample native rendernative code - FIXME
     rect.SetX( 1 );
     rect.SetY( GetRowTop(row) + 1 );
     rect.SetWidth( m_rowLabelWidth - 2 );
@@ -4051,7 +4051,7 @@ void wxSheet::DrawRowLabels( wxDC& dc, const wxArrayInt& rows )
     wxWindowDC *win_dc = (wxWindowDC*) &dc;
     wxRendererNative::Get().DrawHeaderButton( win_dc->m_owner, dc, rect, 0 );
 */
-    
+
     // Now draw the dividing lines
     dc.SetPen( wxPen(GetLabelOutlineColour(), 1, wxPENSTYLE_SOLID) );
     int top;
@@ -4081,21 +4081,21 @@ void wxSheet::DrawColLabels( wxDC& dc, const wxArrayInt& cols )
     for ( i = 0; i < numLabels; i++ )
         DrawCell( dc, wxSheetCoords(-1, cols[i]) );
 
-/*  // sample native rendernative code - FIXME  
+/*  // sample native rendernative code - FIXME
     rect.SetX( colLeft + 1 );
     rect.SetY( 1 );
     rect.SetWidth( GetColWidth(col) - 2 );
     rect.SetHeight( m_colLabelHeight - 2 );
     wxWindowDC *win_dc = (wxWindowDC*) &dc;
-    wxRendererNative::Get().DrawHeaderButton( win_dc->m_owner, dc, rect, 0 );   
+    wxRendererNative::Get().DrawHeaderButton( win_dc->m_owner, dc, rect, 0 );
 */
-    
+
     // Now draw the dividing lines
     dc.SetPen( wxPen(GetLabelOutlineColour(), 1, wxPENSTYLE_SOLID) );
-    int left; 
+    int left;
     CalcUnscrolledPosition(0, 0, &left, NULL);
-    //int left = GetColLeft(cols[0]); 
-    int right = left + m_gridWin->GetSize().x; //GetColRight(cols[numLabels-1]); 
+    //int left = GetColLeft(cols[0]);
+    int right = left + m_gridWin->GetSize().x; //GetColRight(cols[numLabels-1]);
     int height = GetColLabelHeight();
     // top of col labels
     dc.DrawLine(left, 0, right, 0);
@@ -4123,14 +4123,14 @@ void wxSheet::DrawCornerLabel( wxDC& dc )
     //rect.SetWidth( client_width - 2 );
     //rect.SetHeight( client_height - 2 );
     wxRendererNative::Get().DrawHeaderButton( this, dc, rect, 0 );
-#else          
+#else
     // Now draw the dividing lines
     dc.SetPen( wxPen(GetLabelOutlineColour(), 1, wxPENSTYLE_SOLID) );
     dc.DrawLine(0, 0, size.x, 0);                   // top
     dc.DrawLine(0, size.y-1, size.x, size.y-1);     // bottom
     dc.DrawLine(0, 0, 0, size.y-1);                 // left
     dc.DrawLine(size.x-1, 0, size.x-1, size.y-1);   // right
-#endif     
+#endif
 }
 
 void wxSheet::DrawRowColResizingMarker( int newDragPos )
@@ -4138,7 +4138,7 @@ void wxSheet::DrawRowColResizingMarker( int newDragPos )
     if ( !HasMouseCursorMode(WXSHEET_CURSOR_RESIZING) ||
          ((m_dragLastPos == -1) && (newDragPos == -1)) )
         return;
-    
+
     wxClientDC dc( m_gridWin );
     PrepareGridDC( dc );
 
@@ -4153,11 +4153,11 @@ void wxSheet::DrawRowColResizingMarker( int newDragPos )
     bottom = wxMin(top+ch, bottom);
 
     const bool resizingRow = HasMouseCursorMode(WXSHEET_CURSOR_RESIZE_ROW);
-    
+
     if (GridLinesEnabled())
     {
         dc.SetPen(wxPen(GetGridLineColour(), 3, wxPENSTYLE_SOLID));
-    
+
         // Draw the anchor marker so you know what row/col you're resizing
         if (resizingRow)
         {
@@ -4170,7 +4170,7 @@ void wxSheet::DrawRowColResizingMarker( int newDragPos )
             dc.DrawLine( anchor, top, anchor, bottom );
         }
     }
-    
+
 #if wxCHECK_VERSION(2, 9, 0)
     wxRasterOperationMode log_fn = dc.GetLogicalFunction();
 #else
@@ -4189,20 +4189,20 @@ void wxSheet::DrawRowColResizingMarker( int newDragPos )
     if (newDragPos >= 0)
     {
         m_dragLastPos = newDragPos;
-        
+
         if (resizingRow)
             dc.DrawLine( left, m_dragLastPos, right, m_dragLastPos );
         else // resizing col
             dc.DrawLine( m_dragLastPos, top, m_dragLastPos, bottom );
     }
-    
+
     dc.SetLogicalFunction(log_fn); // set it back since nobody else wants invert
 }
 
 bool wxSheet::CalcRowLabelsExposed( const wxRegion& reg, wxArrayInt& rowLabels ) const
 {
     const int numRows = GetNumberRows();
-    if (!numRows) 
+    if (!numRows)
         return false;
 
     const bool spanned = HasSpannedCells();
@@ -4229,7 +4229,7 @@ bool wxSheet::CalcRowLabelsExposed( const wxRegion& reg, wxArrayInt& rowLabels )
         CalcUnscrolledPosition( 0, r.GetTop(), NULL, &top );
         int bottom = top + r.GetHeight();
         //CalcUnscrolledPosition( 0, r.GetBottom(), &dummy, &bottom );
-        
+
         // find the row labels within these bounds
         for ( int row = YToGridRow(top, true); row < numRows;  row++ )
         {
@@ -4241,7 +4241,7 @@ bool wxSheet::CalcRowLabelsExposed( const wxRegion& reg, wxArrayInt& rowLabels )
             if (spanned)
             {
                 const wxSheetBlock block(GetCellBlock(wxSheetCoords(row, -1)));
-                    
+
                 if (block.GetHeight() >= 1)
                 {
                     rowLabels.Add( block.GetTop() );
@@ -4290,7 +4290,7 @@ bool wxSheet::CalcColLabelsExposed( const wxRegion& reg, wxArrayInt& colLabels )
         CalcUnscrolledPosition( r.GetLeft(), 0, &left, NULL );
         int right = left + r.GetWidth();
         //CalcUnscrolledPosition( r.GetRight(), 0, &right, &dummy );
-        
+
         // find the cells within these bounds
         for ( int col = XToGridCol(left, true); col < numCols;  col++ )
         {
@@ -4302,7 +4302,7 @@ bool wxSheet::CalcColLabelsExposed( const wxRegion& reg, wxArrayInt& colLabels )
             if (spanned)
             {
                 const wxSheetBlock block(GetCellBlock(wxSheetCoords(-1, col)));
-                    
+
                 if (block.GetWidth() >= 1)
                 {
                     colLabels.Add( block.GetLeft() );
@@ -4350,7 +4350,7 @@ bool wxSheet::CalcCellsExposed( const wxRegion& reg, wxSheetSelection& blockSel 
         int left, top, right, bottom;
         CalcUnscrolledPosition( r.GetLeft(), r.GetTop(), &left, &top );
         CalcUnscrolledPosition( r.GetRight(), r.GetBottom(), &right, &bottom );
-        
+
         // find the cells within these bounds
         wxSheetBlock block(YToGridRow(top, true), XToGridCol(left, true), 0, 0);
         int row, col;
@@ -4361,7 +4361,7 @@ bool wxSheet::CalcCellsExposed( const wxRegion& reg, wxSheetSelection& blockSel 
             else if ( GetRowTop(row) > bottom )
                 break;
         }
-        
+
         for ( col = block.GetLeft(); col < numCols; col++ )
         {
             if ( GetColRight(col) <= left )
@@ -4372,17 +4372,17 @@ bool wxSheet::CalcCellsExposed( const wxRegion& reg, wxSheetSelection& blockSel 
 
         block.SetRight(col - 1);
         block.SetBottom(row - 1);
-        
+
         blockSel.SelectBlock(block, false);
 
         iter++;
     }
-    
+
     return blockSel.GetCount() > 0;
 }
 
-void wxSheet::DrawTextRectangle( wxDC& dc, const wxString& value, 
-                                 const wxRect& rect, int align, 
+void wxSheet::DrawTextRectangle( wxDC& dc, const wxString& value,
+                                 const wxRect& rect, int align,
                                  int textOrientation )
 {
     wxArrayString lines;
@@ -4397,7 +4397,7 @@ void wxSheet::DrawTextRectangle( wxDC& dc, const wxArrayString& lines,
     int nLines = lines.GetCount();
     if ( (nLines == 0) || ((nLines == 1) && lines[0].IsEmpty()) )
         return;
-    
+
     dc.SetClippingRegion( rect );
 
     int l;
@@ -4405,7 +4405,7 @@ void wxSheet::DrawTextRectangle( wxDC& dc, const wxArrayString& lines,
     long textWidth=0, textHeight=0;
     wxCoord lineWidth=0, lineHeight=0;
     wxArrayInt lineWidths, lineHeights;
-    
+
     // Measure the text extent once, Gtk2 is slow (takes 2sec off 23sec run)
     for ( l = 0; l < nLines; l++ )
     {
@@ -4413,7 +4413,7 @@ void wxSheet::DrawTextRectangle( wxDC& dc, const wxArrayString& lines,
         lineWidths.Add(lineWidth);
         lineHeights.Add(lineHeight);
         textHeight += lineHeight;
-        if (lineWidth > textWidth) 
+        if (lineWidth > textWidth)
             textWidth = lineWidth;
     }
 
@@ -4424,7 +4424,7 @@ void wxSheet::DrawTextRectangle( wxDC& dc, const wxArrayString& lines,
         textHeight = textWidth;
         textWidth = tmp;
     }
-    
+
     if ((align & wxALIGN_BOTTOM) != 0)
     {
         if ( textOrientation == wxHORIZONTAL )
@@ -4446,7 +4446,7 @@ void wxSheet::DrawTextRectangle( wxDC& dc, const wxArrayString& lines,
         else // wxVERTICAL
             x = rect.x + 1;
     }
-    
+
     // Align each line of a multi-line label
     for ( l = 0; l < nLines; l++ )
     {
@@ -4486,7 +4486,7 @@ void wxSheet::DrawTextRectangle( wxDC& dc, const wxArrayString& lines,
             x += lineHeight;
         }
     }
-    
+
     dc.DestroyClippingRegion();
 }
 
@@ -4495,10 +4495,10 @@ int wxSheet::StringToLines( const wxString& value, wxArrayString& lines ) const
     size_t len = value.Length();
     if (!len)
         return 0;
-    
+
     const wxChar *c = value.GetData();
     size_t pos, count = 0, start_pos = 0;
-    
+
     for (pos = 0; pos < len; pos++, c++)
     {
         if ((*c == wxT('\n') || (*c == wxT('\r'))))
@@ -4507,10 +4507,10 @@ int wxSheet::StringToLines( const wxString& value, wxArrayString& lines ) const
                 lines.Add(wxEmptyString);
             else
                 lines.Add(value.Mid(start_pos, pos - start_pos));
-            
+
             start_pos = pos + 1;
             count++;
-            
+
             // Check for DOS line endings and skip them
             if ((*c == wxT('\r')) && (pos + 1 < len) && (c[1] == wxT('\n')))
             {
@@ -4520,17 +4520,17 @@ int wxSheet::StringToLines( const wxString& value, wxArrayString& lines ) const
             }
         }
     }
-    
+
     if ( start_pos < len )
     {
         if (start_pos == 0)
-            lines.Add(value);    
+            lines.Add(value);
         else
-            lines.Add(value.Mid(start_pos));    
-        
+            lines.Add(value.Mid(start_pos));
+
         count++;
     }
-    
+
     return count;
 }
 
@@ -4549,7 +4549,7 @@ bool wxSheet::GetTextBoxSize( wxDC& dc, const wxArrayString& lines,
 
     if (width)  *width  = w;
     if (height) *height = h;
-    
+
     return (w > 0) && (h > 0);
 }
 
@@ -4583,13 +4583,13 @@ wxRect wxSheet::CellToRect( const wxSheetCoords& coords, bool getDeviceRect ) co
 }
 
 wxRect wxSheet::BlockToRect( const wxSheetBlock& block, bool getDeviceRect ) const
-{   
+{
     wxRect rect(BlockToLogicalRect(block, false));
-    
+
     // if grid lines are enabled, then the area of the cell is a bit smaller
-    if ((GridLinesEnabled() & wxHORIZONTAL) != 0) 
+    if ((GridLinesEnabled() & wxHORIZONTAL) != 0)
         rect.height--;
-    if ((GridLinesEnabled() & wxVERTICAL) != 0) 
+    if ((GridLinesEnabled() & wxVERTICAL) != 0)
         rect.width--;
 
     if (getDeviceRect)
@@ -4602,7 +4602,7 @@ wxRect wxSheet::BlockToRect( const wxSheetBlock& block, bool getDeviceRect ) con
             default : break;
         }
     }
-    
+
     return rect;
 }
 
@@ -4610,7 +4610,7 @@ wxSheetBlock wxSheet::ExpandSpannedBlock(const wxSheetBlock& block_) const
 {
     if (!HasSpannedCells() || block_.IsEmpty())
         return block_;
-    
+
     wxSheetBlock block(block_);
 
     if (GetSpannedBlocks())
@@ -4637,8 +4637,8 @@ wxSheetBlock wxSheet::ExpandSpannedBlock(const wxSheetBlock& block_) const
             }
         }
     }
-    
-    return block;    
+
+    return block;
 }
 
 wxRect wxSheet::BlockToLogicalRect( const wxSheetBlock& block_, bool expand_spanned ) const
@@ -4648,11 +4648,11 @@ wxRect wxSheet::BlockToLogicalRect( const wxSheetBlock& block_, bool expand_span
     wxRect rect(GetColLeft(block.GetLeft()), GetRowTop(block.GetTop()), 0, 0);
     rect.width  = GetColRight(block.GetRight())   - rect.x + 1;
     rect.height = GetRowBottom(block.GetBottom()) - rect.y + 1;
-    return rect;    
+    return rect;
 }
 
 wxRect wxSheet::BlockToDeviceRect( const wxSheetBlock &block_, bool expand_spanned) const
-{   
+{
     // merely convert to scrolled coords
     return CalcScrolledRect(BlockToLogicalRect(block_, expand_spanned));
 }
@@ -4667,7 +4667,7 @@ wxSheetBlock wxSheet::LogicalGridRectToBlock(const wxRect &rect, bool wholeCell)
     int topRow    = YToGridRow(rect.GetTop(),    true);
     int rightCol  = XToGridCol(rect.GetRight(),  true);
     int bottomRow = YToGridRow(rect.GetBottom(), true);
-    
+
     if (wholeCell)
     {
         if (GetColLeft(leftCol) < rect.GetLeft())
@@ -4679,7 +4679,7 @@ wxSheetBlock wxSheet::LogicalGridRectToBlock(const wxRect &rect, bool wholeCell)
         if (GetRowBottom(bottomRow) > rect.GetBottom())
             bottomRow--;
     }
-    
+
     wxSheetBlock block(topRow, leftCol, bottomRow-topRow+1, rightCol-leftCol+1);
     return block.Intersect(wxSheetBlock(0, 0, numRows, numCols));
 }
@@ -4693,7 +4693,7 @@ wxSheetBlock wxSheet::GetVisibleGridCellsBlock(bool wholeCellVisible) const
 wxPoint wxSheet::AlignInRect( int align, const wxRect& rect, const wxSize& size, bool inside ) const
 {
     wxPoint origin(rect.x, rect.y);
-    
+
     // if it won't fit horizontally, then it must be aligned left
     if (inside && (size.x > rect.width))
     {
@@ -4706,7 +4706,7 @@ wxPoint wxSheet::AlignInRect( int align, const wxRect& rect, const wxSize& size,
         align &= ~wxALIGN_BOTTOM;
         align &= ~wxALIGN_CENTRE_VERTICAL;
     }
-    
+
     if ((align & wxALIGN_RIGHT) != 0)
         origin.x += rect.width - size.x - 1;
     else if ((align & wxALIGN_CENTRE_HORIZONTAL) != 0)
@@ -4719,7 +4719,7 @@ wxPoint wxSheet::AlignInRect( int align, const wxRect& rect, const wxSize& size,
         origin.y += (rect.height - size.y)/2;
     //else // wxALIGN_TOP
 
-    return origin;    
+    return origin;
 }
 
 // ----------------------------------------------------------------------------
@@ -4735,13 +4735,13 @@ wxSize wxSheet::GetGridVirtualSize(bool add_margin) const
         size.x = GetColRight(numCols - 1);
         size.y = GetRowBottom(numRows - 1);
     }
-    
+
     if (add_margin)
     {
         size.x += GetSheetRefData()->m_marginSize.x;
         size.y += GetSheetRefData()->m_marginSize.y;
     }
-    
+
     return size;
 }
 
@@ -4765,58 +4765,58 @@ void wxSheet::SetGridOrigin( int x, int y, bool adjustScrollBars, bool sendEvt )
     // normally -1 for don't change
     if (x == -1) x = m_gridOrigin.x;
     if (y == -1) y = m_gridOrigin.y;
-    
+
     // during OnSize gridWin isn't resized yet
     int cw, ch;
-    GetClientSize( &cw, &ch );       
+    GetClientSize( &cw, &ch );
     cw -= GetRowLabelWidth();
     ch -= GetColLabelHeight();
     if ( m_vertScrollBar->IsShown() )
         cw -= m_vertScrollBar->GetSize().x;
     if ( m_horizScrollBar->IsShown() )
         ch -= m_horizScrollBar->GetSize().y;
-    
+
     // Force fitting, don't allow scrolling out of bounds
     wxSize virtSize(GetGridVirtualSize());
     if ((x < 0) || (virtSize.x < cw))
-        x = 0; 
-    else if (x > virtSize.x-cw) 
+        x = 0;
+    else if (x > virtSize.x-cw)
         x = virtSize.x - cw;
     if ((y < 0) || (virtSize.y < ch))
-        y = 0; 
-    else if (y > virtSize.y-ch) 
+        y = 0;
+    else if (y > virtSize.y-ch)
         y = virtSize.y - ch;
-    
+
     int dx = m_gridOrigin.x - x;
     int dy = m_gridOrigin.y - y;
-    
+
     if ((dx == 0) && (dy == 0))
         return;
 
     m_gridOrigin.x = x;
     m_gridOrigin.y = y;
-    
+
 /*
-    wxRect rect( (dx >= 0) ? 0 : cw+dx,  
+    wxRect rect( (dx >= 0) ? 0 : cw+dx,
                  (dy >= 0) ? 0 : ch+dy,
-                 dy != 0 ? cw : abs(dx), 
-                 dx != 0 ? ch : abs(dy) );  
-*/    
-    
+                 dy != 0 ? cw : abs(dx),
+                 dx != 0 ? ch : abs(dy) );
+*/
+
     if (adjustScrollBars)
         AdjustScrollbars();
-    
+
     // FIXME - or at least check, GTK calcs rect for you, does MSW?
     m_gridWin->ScrollWindow( dx, dy ); //, &rect );
     if (dx != 0)
         m_colLabelWin->ScrollWindow( dx, 0 ); //, &rect );
     if (dy != 0)
         m_rowLabelWin->ScrollWindow( 0, dy ); //, &rect );
-   
+
     // Let the windows refresh before next scroll event, otherwise windows
     //  don't line up
     //wxYieldIfNeeded();
-    
+
     if (sendEvt)
         SendEvent(wxEVT_SHEET_VIEW_CHANGED, GetGridCursorCell());
 }
@@ -4827,10 +4827,10 @@ void wxSheet::OnScroll( wxScrollEvent &event )
         return;
 
     event.Skip();
-    
+
     int pos = event.GetPosition();
     //wxPrintf(wxT("Pos %d %d Length %d Left %d Right %d\n"), pos, m_horizScrollBar->GetThumbPosition(), m_horizScrollBar->GetThumbSize(), pos*m_horizScrollBar->GetThumbSize(), pos*m_horizScrollBar->GetThumbSize()+GetGridWindow()->GetClientSize().x);
-    
+
     if (event.GetId() == ID_HORIZ_SCROLLBAR)
         SetGridOrigin( pos*15, -1, false, true );
         //SetGridOrigin( pos*m_horizScrollBar->GetThumbSize(), -1, false, true );
@@ -4843,26 +4843,26 @@ void wxSheet::AdjustScrollbars(bool calc_win_sizes)
 {
     if (!m_gridWin || m_resizing)
         return;
-    
+
     m_resizing = true;
 
     bool horizSbShown = m_horizScrollBar->IsShown();
     bool vertSbShown  = m_vertScrollBar->IsShown();
     int  sb_width  = m_vertScrollBar->GetSize().x;
     int  sb_height = m_horizScrollBar->GetSize().y;
-    
+
     int cw, ch;
     GetClientSize( &cw, &ch );
 
     // Grid window width and height, may be in OnSize so not sized yet
     int gw = cw - GetRowLabelWidth();
     int gh = ch - GetColLabelHeight();
-    
+
     // grid total size
     wxSize virtSize(GetGridVirtualSize());
 /*
     // take into account editor if shown // FIXME what is this?
-    if ( 0 && IsCellEditControlShown() ) 
+    if ( 0 && IsCellEditControlShown() )
     {
         int w2, h2;
         int r = GetGridCursorRow();
@@ -4877,43 +4877,43 @@ void wxSheet::AdjustScrollbars(bool calc_win_sizes)
         if( w2 > virtSize.x ) virtSize.x = w2;
         if( h2 > virtSize.y ) virtSize.y = h2;
     }
-*/    
+*/
     // Figure out if we need the scrollbars at all
-    bool need_Xscroll = (m_scrollBarMode & SB_HORIZ_NEVER) != 0 ? false : 
+    bool need_Xscroll = (m_scrollBarMode & SB_HORIZ_NEVER) != 0 ? false :
         (((m_scrollBarMode & SB_HORIZ_ALWAYS) != 0) ? true : virtSize.x > gw);
-    bool need_Yscroll = (m_scrollBarMode & SB_VERT_NEVER ) != 0 ? false : 
+    bool need_Yscroll = (m_scrollBarMode & SB_VERT_NEVER ) != 0 ? false :
         (((m_scrollBarMode & SB_VERT_ALWAYS ) != 0) ? true : virtSize.y > gh);
-    
+
     // Now cut down size due to the scrollbars if shown
     if (need_Xscroll) gh -= sb_height;
     if (need_Yscroll) gw -= sb_width;
-    
+
     // Maybe now that it's smaller we need the other scrollbar
-    need_Xscroll = (m_scrollBarMode & SB_HORIZ_NEVER) != 0 ? false : 
+    need_Xscroll = (m_scrollBarMode & SB_HORIZ_NEVER) != 0 ? false :
         (((m_scrollBarMode & SB_HORIZ_ALWAYS) != 0) ? true : virtSize.x > gw);
-    need_Yscroll = (m_scrollBarMode & SB_VERT_NEVER ) != 0 ? false : 
+    need_Yscroll = (m_scrollBarMode & SB_VERT_NEVER ) != 0 ? false :
         (((m_scrollBarMode & SB_VERT_ALWAYS ) != 0) ? true : virtSize.y > gh);
-    
+
     //if (need_Xscroll) ch -= sb_height;
     //if (need_Yscroll) cw -= sb_width;
     //bool horiz_splitter = need_Xscroll && m_enable_split_horiz;
     //bool vert_splitter  = need_Yscroll && m_enable_split_vert;
-    
+
     // width and height of the horiz and vert scrollbars
     //int sw = cw - (vert_splitter  ? SPLIT_BUTTON_WIDTH : 0);
-    //int sh = ch - (horiz_splitter ? SPLIT_BUTTON_WIDTH : 0);   
-    
+    //int sh = ch - (horiz_splitter ? SPLIT_BUTTON_WIDTH : 0);
+
     // set scrollbar parameters
     int thumbX = SHEET_SCROLL_LINE_X;
     int thumbY = SHEET_SCROLL_LINE_Y;
 
     //virtSize.x += sw - gw;
     //virtSize.y += sh - gh;
-    
+
     // FIXME this is wrong for GTK and MSW, but why?
     int rangeX = !need_Xscroll ? 0 : 1 + (virtSize.x - gw + thumbX - 1)/thumbX;
     int rangeY = !need_Yscroll ? 0 : 1 + (virtSize.y - gh + thumbY - 1)/thumbY;
-    
+
     int pageX = int((gw * 0.9) / thumbX);
     int pageY = int((gh * 0.9) / thumbY);
 
@@ -4923,20 +4923,20 @@ void wxSheet::AdjustScrollbars(bool calc_win_sizes)
     thumbX = 1;
     thumbY = 1;
 
-    //wxPrintf(wxT("Pos %d %d, virtSize %d %d, range %d %d, thumb %d %d page %d %d, win %d %d \n"), 
+    //wxPrintf(wxT("Pos %d %d, virtSize %d %d, range %d %d, thumb %d %d page %d %d, win %d %d \n"),
     //    posX, posY, virtSize.x, virtSize.y, rangeX, rangeY, thumbX, thumbY, pageX, pageY, gw, gh);
-    
+
     if (need_Xscroll)
         m_horizScrollBar->SetScrollbar(posX, thumbX, rangeX, pageX);
     if (need_Yscroll)
         m_vertScrollBar->SetScrollbar(posY, thumbY, rangeY, pageY);
-    
-    //wxPrintf(wxT("Set pos %d range %d, thumb %d, page %d\n"), 
+
+    //wxPrintf(wxT("Set pos %d range %d, thumb %d, page %d\n"),
     //    m_horizScrollBar->GetThumbPosition(), m_horizScrollBar->GetRange(), m_horizScrollBar->GetThumbSize(), m_horizScrollBar->GetPageSize());
-    
+
     // recalculate the windows sizes and positions if we added/removed scrollbar
     bool calcSizes = false;
-    
+
     if (need_Xscroll != horizSbShown)
     {
         calcSizes = true;
@@ -4949,7 +4949,7 @@ void wxSheet::AdjustScrollbars(bool calc_win_sizes)
     }
 
     m_resizing = false;
-    
+
     if (calcSizes && calc_win_sizes)
         CalcWindowSizes(false);
 }
@@ -4976,7 +4976,7 @@ void wxSheet::PrepareColLabelDC( wxDC& dc )
 static int CheckAlignment(int align)
 {
     // note: it's a shame that wxALIGN_LEFT = wxALIGN_TOP = 0
-    
+
     int count = 0;
     if ((align & wxSHEET_AttrAlignRight)       != 0) count++;
     if ((align & wxSHEET_AttrAlignCenterHoriz) != 0) count++;
@@ -4986,7 +4986,7 @@ static int CheckAlignment(int align)
         align &= ~wxSHEET_AttrAlignHoriz_Mask; // clear whatever is there
         align |= wxSHEET_AttrAlignHorizUnset;  // set to no alignment
     }
-    
+
     count = 0;
     if ((align & wxSHEET_AttrAlignBottom)     != 0) count++;
     if ((align & wxSHEET_AttrAlignCenterVert) != 0) count++;
@@ -4996,7 +4996,7 @@ static int CheckAlignment(int align)
         align &= ~wxSHEET_AttrAlignVert_Mask; // clear whatever is there
         align |= wxSHEET_AttrAlignVertUnset;  // set to no alignment
     }
-    
+
     return align;
 }
 
@@ -5012,7 +5012,7 @@ int wxSheet::SetAlignment(int orig_align, int hAlign, int vAlign)
         orig_align &= ~wxSHEET_AttrAlignVert_Mask;
         orig_align |= (vAlign & wxSHEET_AttrAlignVert_Mask);
     }
-    
+
     return CheckAlignment(orig_align);
 }
 
@@ -5030,7 +5030,7 @@ bool wxSheet::HasFocus() const
 void wxSheet::OnMouse( wxMouseEvent& event )
 {
     wxWindow *win = (wxWindow*)event.GetEventObject();
-    
+
     if (win == this)
         ProcessSheetMouseEvent(event);
     else if (win == m_rowLabelWin)
@@ -5048,7 +5048,7 @@ void wxSheet::OnMouse( wxMouseEvent& event )
 void wxSheet::OnMouseWheel( wxMouseEvent& event )
 {
     wxWindow *win = (wxWindow*)event.GetEventObject();
-    
+
     // Scroll up and down by a 1/3 of the height of the window
     if ((win == m_rowLabelWin) || (win == m_gridWin))
     {
@@ -5082,7 +5082,7 @@ void wxSheet::ProcessSheetMouseEvent( wxMouseEvent& event )
         return;
 
     wxPoint mousePos = event.GetPosition();
-    
+
     if (event.LeftDown())
     {
 #if wxCHECK_VERSION(2,7,0)
@@ -5101,7 +5101,7 @@ void wxSheet::ProcessSheetMouseEvent( wxMouseEvent& event )
         wxSheetSplitterEvent splitEvent(GetId(), wxEVT_SHEET_SPLIT_BEGIN);
         splitEvent.SetEventObject(this);
         splitEvent.m_vert_split = HasMouseCursorMode(WXSHEET_CURSOR_SPLIT_VERTICAL);
-        
+
         SetCaptureWindow(NULL);
         SetMouseCursorMode(WXSHEET_CURSOR_SELECT_CELL, this);
         GetEventHandler()->ProcessEvent(splitEvent);
@@ -5141,10 +5141,10 @@ void wxSheet::ProcessRowLabelMouseEvent( wxMouseEvent& event )
     {
         if (!event.Dragging() && !m_isDragging)
             SetMouseCursorMode(WXSHEET_CURSOR_SELECT_CELL, m_rowLabelWin);
-        
+
         return;
     }
-    
+
     if ( event.Dragging() && event.LeftIsDown() )
     {
         if (!m_isDragging)
@@ -5156,12 +5156,12 @@ void wxSheet::ProcessRowLabelMouseEvent( wxMouseEvent& event )
         if ( event.LeftIsDown() )
         {
             bool can_scroll = true;
-            
+
             switch ( GetMouseCursorMode() )
             {
                 case WXSHEET_CURSOR_RESIZE_ROW:
                 {
-                    y = wxMax( y, GetRowTop(m_dragRowOrCol) + 
+                    y = wxMax( y, GetRowTop(m_dragRowOrCol) +
                                   GetMinimalRowHeight(m_dragRowOrCol));
                     can_scroll = false; // y != m_dragLastPos;
                     DrawRowColResizingMarker( y );
@@ -5171,7 +5171,7 @@ void wxSheet::ProcessRowLabelMouseEvent( wxMouseEvent& event )
                 {
                     if (HasSelectionMode(wxSHEET_SelectNone|wxSHEET_SelectCols))
                         break;
-                    
+
                     // check for clearing here since we didn't if editing allowed
                     bool add = event.ShiftDown() || event.ControlDown();
                     if (HasSelection(false) && !add)
@@ -5179,16 +5179,16 @@ void wxSheet::ProcessRowLabelMouseEvent( wxMouseEvent& event )
 
                     if (ContainsGridCell(GetSelectingAnchor()) && ContainsRowLabelCell(coords))
                     {
-                        HighlightSelectingBlock(GetSelectingAnchor(), 
+                        HighlightSelectingBlock(GetSelectingAnchor(),
                                                 wxSheetCoords(coords.m_row, GetNumberCols()+1));
                     }
                     break;
                 }
-                default: 
+                default:
                     break;
             }
-            
-            if (can_scroll && 
+
+            if (can_scroll &&
                 ((m_mousePos.y < 0) || (m_mousePos.y > m_rowLabelWin->GetClientSize().GetHeight())))
             {
                 if (!m_mouseTimer)
@@ -5200,7 +5200,7 @@ void wxSheet::ProcessRowLabelMouseEvent( wxMouseEvent& event )
         return;
     }
 
-    StopMouseTimer();        
+    StopMouseTimer();
     SetCaptureWindow(NULL);
     m_isDragging = false;
 
@@ -5208,7 +5208,7 @@ void wxSheet::ProcessRowLabelMouseEvent( wxMouseEvent& event )
     {
         if (IsCellEditControlShown())
             DisableCellEditControl(true);
-        
+
         // don't send a label click event for a hit on the edge of the row label
         // this is probably the user wanting to resize the row
         if ( YToEdgeOfGridRow(y) < 0 )
@@ -5219,11 +5219,11 @@ void wxSheet::ProcessRowLabelMouseEvent( wxMouseEvent& event )
             {
                 bool add = event.ShiftDown() || event.ControlDown();
                 wxSheetBlock block;
-                
+
                 if ( event.ShiftDown() )
                 {
                     SetSelectingAnchor(wxSheetCoords(GetGridCursorRow(), 0));
-                    block = wxSheetBlock(GetSelectingAnchor(), 
+                    block = wxSheetBlock(GetSelectingAnchor(),
                                          wxSheetCoords(coords.m_row, GetNumberCols()+1));
                 }
                 else
@@ -5231,16 +5231,16 @@ void wxSheet::ProcessRowLabelMouseEvent( wxMouseEvent& event )
                     SetSelectingAnchor(wxSheetCoords(coords.m_row, 0));
                     block = wxSheetBlock(GetSelectingAnchor(), 1, GetNumberCols()+1);
                 }
-                    
+
                 // if you can edit the row label then don't select row until drag
                 bool can_edit = CanEnableCellControl(coords);
-                if (!add && HasSelection() && 
+                if (!add && HasSelection() &&
                     (SendRangeEvent(wxEVT_SHEET_RANGE_SELECTING,
                                    block, false, false, &event) != EVT_VETOED))
-                {   
+                {
                     ClearSelection(true);
                 }
-                
+
                 if (!can_edit)
                     HighlightSelectingBlock(block);
 
@@ -5280,7 +5280,7 @@ void wxSheet::ProcessRowLabelMouseEvent( wxMouseEvent& event )
             // adjust row height depending on label text
             if (CanDragRowSize())
                 AutoSizeRowLabelHeight( row );
-            
+
             SetMouseCursorMode(WXSHEET_CURSOR_SELECT_CELL, m_colLabelWin);
             m_dragLastPos  = -1;
         }
@@ -5299,12 +5299,12 @@ void wxSheet::ProcessRowLabelMouseEvent( wxMouseEvent& event )
         else if ( HasMouseCursorMode(WXSHEET_CURSOR_SELECT_ROW) )
         {
             if (!GetSelectingBlock().IsEmpty())
-            {                
+            {
                 bool add = event.ShiftDown() || event.ControlDown();
 
-                if (SendRangeEvent(wxEVT_SHEET_RANGE_SELECTING, 
+                if (SendRangeEvent(wxEVT_SHEET_RANGE_SELECTING,
                              GetSelectingBlock(), true, add, &event) != EVT_VETOED)
-                {   
+                {
                     SelectRows(GetSelectingBlock().GetTop(), GetSelectingBlock().GetBottom(), add, true);
                     SetSelectingBlock(wxNullSheetBlock);
                 }
@@ -5315,15 +5315,15 @@ void wxSheet::ProcessRowLabelMouseEvent( wxMouseEvent& event )
         m_dragLastPos  = -1;
         if (!m_keySelecting)
             SetSelectingAnchor(wxNullSheetCoords);
-        
-        // send after default processing, they can use own evt handler 
+
+        // send after default processing, they can use own evt handler
         SendEvent(wxEVT_SHEET_LABEL_LEFT_UP, coords, &event);
     }
     else if ( event.RightDown() )
     {
         if (IsCellEditControlCreated())
             DisableCellEditControl(true);
-        
+
         if ( ContainsRowLabelCell(coords) &&
 	        (SendEvent(wxEVT_SHEET_LABEL_RIGHT_DOWN, coords, &event) == EVT_SKIPPED))
         {
@@ -5334,7 +5334,7 @@ void wxSheet::ProcessRowLabelMouseEvent( wxMouseEvent& event )
     {
         if (IsCellEditControlCreated())
             DisableCellEditControl(true);
-        
+
         if ( ContainsRowLabelCell(coords) &&
 	        (SendEvent(wxEVT_SHEET_LABEL_RIGHT_DCLICK, coords, &event) == EVT_SKIPPED))
         {
@@ -5345,7 +5345,7 @@ void wxSheet::ProcessRowLabelMouseEvent( wxMouseEvent& event )
     {
         if (IsCellEditControlCreated())
             DisableCellEditControl(true);
-        
+
         if ( ContainsRowLabelCell(coords) &&
 	        (SendEvent(wxEVT_SHEET_LABEL_RIGHT_UP, coords, &event) == EVT_SKIPPED))
         {
@@ -5384,10 +5384,10 @@ void wxSheet::ProcessColLabelMouseEvent( wxMouseEvent& event )
     {
         if (!event.Dragging() && !m_isDragging)
             SetMouseCursorMode(WXSHEET_CURSOR_SELECT_CELL, m_colLabelWin);
-        
+
         return;
     }
-    
+
     if ( event.Dragging() && event.LeftIsDown() )
     {
         if (!m_isDragging)
@@ -5399,7 +5399,7 @@ void wxSheet::ProcessColLabelMouseEvent( wxMouseEvent& event )
         if ( event.LeftIsDown() )
         {
             bool can_scroll = true;
-            
+
             switch( GetMouseCursorMode() )
             {
                 case WXSHEET_CURSOR_RESIZE_COL :
@@ -5414,7 +5414,7 @@ void wxSheet::ProcessColLabelMouseEvent( wxMouseEvent& event )
                 {
                     if (HasSelectionMode(wxSHEET_SelectNone|wxSHEET_SelectRows))
                         break;
-                    
+
                     // check for clearing here since we didn't if editing allowed
                     bool add = event.ShiftDown() || event.ControlDown();
                     if (HasSelection(false) && !add)
@@ -5422,7 +5422,7 @@ void wxSheet::ProcessColLabelMouseEvent( wxMouseEvent& event )
 
                     if (ContainsGridCell(GetSelectingAnchor()) && ContainsColLabelCell(coords))
                     {
-                        HighlightSelectingBlock(GetSelectingAnchor(), 
+                        HighlightSelectingBlock(GetSelectingAnchor(),
                                                 wxSheetCoords(GetNumberRows()+1, coords.m_col));
                     }
                     break;
@@ -5443,7 +5443,7 @@ void wxSheet::ProcessColLabelMouseEvent( wxMouseEvent& event )
         return;
     }
 
-    StopMouseTimer();        
+    StopMouseTimer();
     SetCaptureWindow(NULL);
     m_isDragging = false;
 
@@ -5462,11 +5462,11 @@ void wxSheet::ProcessColLabelMouseEvent( wxMouseEvent& event )
             {
                 bool add = event.ShiftDown() || event.ControlDown();
                 wxSheetBlock block;
-                
+
                 if ( event.ShiftDown() )
                 {
                     SetSelectingAnchor(wxSheetCoords(0, GetGridCursorCol()));
-                    block = wxSheetBlock(GetSelectingAnchor(), 
+                    block = wxSheetBlock(GetSelectingAnchor(),
                                          wxSheetCoords(GetNumberRows()+1, coords.m_col));
                 }
                 else
@@ -5477,16 +5477,16 @@ void wxSheet::ProcessColLabelMouseEvent( wxMouseEvent& event )
 
                 // if you can edit the row label then don't select row
                 bool can_edit = CanEnableCellControl(coords);
-                if (!add && HasSelection() && 
+                if (!add && HasSelection() &&
                     (SendRangeEvent(wxEVT_SHEET_RANGE_SELECTING,
                                    block, false, false, &event) != EVT_VETOED))
-                {   
+                {
                     ClearSelection(true);
                 }
-                
+
                 if (!can_edit)
                     HighlightSelectingBlock(block);
-                
+
                 SetMouseCursorMode(WXSHEET_CURSOR_SELECT_COL, m_colLabelWin);
             }
         }
@@ -5524,7 +5524,7 @@ void wxSheet::ProcessColLabelMouseEvent( wxMouseEvent& event )
             // adjust column width depending on label text
             if (CanDragColSize())
                 AutoSizeColLabelWidth( col );
-            
+
             SetMouseCursorMode(WXSHEET_CURSOR_SELECT_CELL, m_colLabelWin);
             m_dragLastPos  = -1;
         }
@@ -5533,7 +5533,7 @@ void wxSheet::ProcessColLabelMouseEvent( wxMouseEvent& event )
     {
         StopMouseTimer();
         SetCaptureWindow(NULL);
-        
+
         if ( HasMouseCursorMode(WXSHEET_CURSOR_RESIZE_COL) )
         {
             // Note: send event *after* doing default processing in this case
@@ -5546,29 +5546,29 @@ void wxSheet::ProcessColLabelMouseEvent( wxMouseEvent& event )
             {
                 bool add = event.ShiftDown() || event.ControlDown();
 
-                if (SendRangeEvent(wxEVT_SHEET_RANGE_SELECTING, 
+                if (SendRangeEvent(wxEVT_SHEET_RANGE_SELECTING,
                              GetSelectingBlock(), true, add, &event) != EVT_VETOED)
-                {   
+                {
                     SelectCols(GetSelectingBlock().GetLeft(), GetSelectingBlock().GetRight(), add, true);
                     SetSelectingBlock(wxNullSheetBlock);
                 }
             }
         }
-        
+
         SetMouseCursorMode(WXSHEET_CURSOR_SELECT_CELL, m_colLabelWin);
         m_dragLastPos  = -1;
         if (!m_keySelecting)
             SetSelectingAnchor(wxNullSheetCoords);
-        
-        // send after default processing, they can use own evt handler 
+
+        // send after default processing, they can use own evt handler
         SendEvent(wxEVT_SHEET_LABEL_LEFT_UP, coords, &event);
     }
     else if ( event.RightDown() )
     {
         if (IsCellEditControlCreated())
             DisableCellEditControl(true);
-        
-        if (ContainsColLabelCell(coords) && 
+
+        if (ContainsColLabelCell(coords) &&
             (SendEvent(wxEVT_SHEET_LABEL_RIGHT_DOWN, coords, &event) == EVT_SKIPPED))
         {
             // no default action at the moment
@@ -5578,8 +5578,8 @@ void wxSheet::ProcessColLabelMouseEvent( wxMouseEvent& event )
     {
         if (IsCellEditControlCreated())
             DisableCellEditControl(true);
-        
-        if (ContainsColLabelCell(coords) && 
+
+        if (ContainsColLabelCell(coords) &&
             (SendEvent(wxEVT_SHEET_LABEL_RIGHT_DCLICK, coords, &event) == EVT_SKIPPED))
         {
             // no default action at the moment
@@ -5589,8 +5589,8 @@ void wxSheet::ProcessColLabelMouseEvent( wxMouseEvent& event )
     {
         if (IsCellEditControlCreated())
             DisableCellEditControl(true);
-        
-        if (ContainsColLabelCell(coords) && 
+
+        if (ContainsColLabelCell(coords) &&
             (SendEvent(wxEVT_SHEET_LABEL_RIGHT_UP, coords, &event) == EVT_SKIPPED))
         {
             // no default action at the moment
@@ -5616,7 +5616,7 @@ void wxSheet::ProcessColLabelMouseEvent( wxMouseEvent& event )
 void wxSheet::ProcessCornerLabelMouseEvent( wxMouseEvent& event )
 {
     wxSheetCoords coords(-1,-1);
-    
+
     if ( event.Dragging() )
     {
         if ( event.LeftIsDown() )
@@ -5624,29 +5624,29 @@ void wxSheet::ProcessCornerLabelMouseEvent( wxMouseEvent& event )
             if ((GetNumberRows() > 0) && (GetNumberCols() > 0) && !HasSelectionMode(wxSHEET_SelectNone))
             {
                 SetSelectingAnchor(wxSheetCoords(0, 0));
-                HighlightSelectingBlock(GetSelectingAnchor(), 
+                HighlightSelectingBlock(GetSelectingAnchor(),
                                         wxSheetCoords(GetNumberRows()+1, GetNumberCols()+1));
             }
         }
         return;
     }
-    
+
     if ( event.LeftDown() )
     {
         SetSelectingBlock(wxNullSheetBlock);
-        
+
         if ( SendEvent(wxEVT_SHEET_LABEL_LEFT_DOWN, coords, &event) == EVT_SKIPPED)
         {
             wxSheetBlock block(0, 0, GetNumberRows()+1, GetNumberCols()+1);
-            
+
             // if you can edit the corner label then don't select everything
             bool can_edit = CanEnableCellControl(coords);
             if (!can_edit && !HasSelectionMode(wxSHEET_SelectNone) &&
-                (SendRangeEvent(wxEVT_SHEET_RANGE_SELECTING, 
+                (SendRangeEvent(wxEVT_SHEET_RANGE_SELECTING,
                                block, true, false, &event) != EVT_VETOED))
-            {   
+            {
                 SelectAll(true);
-            }   
+            }
         }
     }
     else if ( event.LeftDClick() )
@@ -5659,7 +5659,7 @@ void wxSheet::ProcessCornerLabelMouseEvent( wxMouseEvent& event )
                 EnableCellEditControl(coords);
                 if ( IsCellEditControlCreated() )
                     GetSheetRefData()->m_cellEditor.StartingClick();
-                
+
                 m_waitForSlowClick = false;
             }
         }
@@ -5668,22 +5668,22 @@ void wxSheet::ProcessCornerLabelMouseEvent( wxMouseEvent& event )
     {
         if (!GetSelectingBlock().IsEmpty())
         {
-            if (SendRangeEvent(wxEVT_SHEET_RANGE_SELECTING, 
+            if (SendRangeEvent(wxEVT_SHEET_RANGE_SELECTING,
                            GetSelectingBlock(), true, false, &event) != EVT_VETOED)
-            {   
+            {
                 SelectAll(true);
                 SetSelectingBlock(wxNullSheetBlock);
             }
         }
-        
-        // send after default processing, they can use own evt handler 
+
+        // send after default processing, they can use own evt handler
         SendEvent(wxEVT_SHEET_LABEL_LEFT_UP, coords, &event);
     }
     else if ( event.RightDown() )
     {
         if (IsCellEditControlCreated())
             DisableCellEditControl(true);
-        
+
         if (SendEvent(wxEVT_SHEET_LABEL_RIGHT_DOWN, coords, &event) == EVT_SKIPPED)
         {
             // no default action at the moment
@@ -5693,7 +5693,7 @@ void wxSheet::ProcessCornerLabelMouseEvent( wxMouseEvent& event )
     {
         if (IsCellEditControlCreated())
             DisableCellEditControl(true);
-        
+
         if (SendEvent(wxEVT_SHEET_LABEL_RIGHT_DCLICK, coords, &event) == EVT_SKIPPED)
         {
             // no default action at the moment
@@ -5703,7 +5703,7 @@ void wxSheet::ProcessCornerLabelMouseEvent( wxMouseEvent& event )
     {
         if (IsCellEditControlCreated())
             DisableCellEditControl(true);
-        
+
         if (SendEvent(wxEVT_SHEET_LABEL_RIGHT_UP, coords, &event) == EVT_SKIPPED)
         {
             // no default action at the moment
@@ -5717,7 +5717,7 @@ void wxSheet::ProcessGridCellMouseEvent( wxMouseEvent& event )
     m_mousePos = event.GetPosition();
     CalcUnscrolledPosition( m_mousePos.x, m_mousePos.y, &x, &y );
     wxSheetCoords coords(XYToGridCell( x, y ));
-    
+
     //wxPrintf("Mouse %d %d, %d %d\n", x, y, m_mousePos.x, m_mousePos.y);
 
     // VZ: if we do this, the mode is reset to WXSHEET_CURSOR_SELECT_CELL
@@ -5728,7 +5728,7 @@ void wxSheet::ProcessGridCellMouseEvent( wxMouseEvent& event )
         //m_gridWin->SetCursor( *wxSTANDARD_CURSOR );
         return;
     }
-    
+
     if ( event.Dragging() && event.LeftIsDown() )
     {
         //wxLogDebug("pos(%d, %d) coords(%d, %d)", pos.x, pos.y, coords.GetRow(), coords.GetCol());
@@ -5738,13 +5738,13 @@ void wxSheet::ProcessGridCellMouseEvent( wxMouseEvent& event )
         if (!m_isDragging)
         {
             SetCaptureWindow(m_gridWin);
-            
+
             if (m_startDragPos == wxDefaultPosition)
             {
                 m_startDragPos = m_mousePos;
                 return;
             }
-            if ((abs(m_startDragPos.x - m_mousePos.x) < 4) && 
+            if ((abs(m_startDragPos.x - m_mousePos.x) < 4) &&
                 (abs(m_startDragPos.y - m_mousePos.y) < 4))
                 return;
         }
@@ -5777,7 +5777,7 @@ void wxSheet::ProcessGridCellMouseEvent( wxMouseEvent& event )
             DrawRowColResizingMarker( x );
         }
 
-        if (can_scroll && 
+        if (can_scroll &&
 #if wxCHECK_VERSION(2,7,0)
             !wxRect(wxPoint(0,0), m_gridWin->GetClientSize()).Contains(m_mousePos))
 #else
@@ -5789,7 +5789,7 @@ void wxSheet::ProcessGridCellMouseEvent( wxMouseEvent& event )
         }
         else
             StopMouseTimer();
-        
+
         return;
     }
 
@@ -5799,29 +5799,29 @@ void wxSheet::ProcessGridCellMouseEvent( wxMouseEvent& event )
     m_startDragPos = wxDefaultPosition;
 
     if ( event.LeftDown() && ContainsGridCell(coords) )
-    {        
+    {
         if ( SendEvent(wxEVT_SHEET_CELL_LEFT_DOWN, coords, &event) == EVT_SKIPPED)
         {
             if ( !event.ControlDown() && HasSelection() )
             {
                 wxSheetBlock block(0, 0, GetNumberRows()-1, GetNumberCols()-1);
-                 
+
                 if (!HasSelectionMode(wxSHEET_SelectNone) &&
-                    SendRangeEvent(wxEVT_SHEET_RANGE_SELECTING, 
+                    SendRangeEvent(wxEVT_SHEET_RANGE_SELECTING,
                                    block, false, false, &event) != EVT_VETOED)
-                {   
+                {
                     ClearSelection(true);
                 }
             }
-            
+
             if ( event.ShiftDown() )
             {
                 wxSheetBlock block(GetGridCursorCell(), coords);
-                
+
                 if (!HasSelectionMode(wxSHEET_SelectNone) &&
-                    SendRangeEvent(wxEVT_SHEET_RANGE_SELECTING, 
+                    SendRangeEvent(wxEVT_SHEET_RANGE_SELECTING,
                                     block, true, true, &event) != EVT_VETOED)
-                {   
+                {
                     SelectBlock(block, event.ControlDown(), true);
                 }
             }
@@ -5829,7 +5829,7 @@ void wxSheet::ProcessGridCellMouseEvent( wxMouseEvent& event )
             {
                 if (IsCellEditControlCreated())
                     DisableCellEditControl(true);
-                
+
                 MakeCellVisible( coords );
 
                 if ( !ContainsGridCell(GetSelectingAnchor()) )
@@ -5841,9 +5841,9 @@ void wxSheet::ProcessGridCellMouseEvent( wxMouseEvent& event )
                     int sel = IsCellSelected(coords);
                     wxSheetBlock block(coords, 1, 1);
                     if (!HasSelectionMode(wxSHEET_SelectNone) &&
-                        SendRangeEvent(wxEVT_SHEET_RANGE_SELECTING, 
+                        SendRangeEvent(wxEVT_SHEET_RANGE_SELECTING,
                                        block, !sel, !sel, &event) != EVT_VETOED)
-                    {   
+                    {
                         ToggleCellSelection(coords, !sel, true);
                         SetSelectingBlock(wxNullSheetBlock);
                     }
@@ -5884,7 +5884,7 @@ void wxSheet::ProcessGridCellMouseEvent( wxMouseEvent& event )
 
         if ( HasMouseCursorMode(WXSHEET_CURSOR_SELECT_CELL) )
         {
-            if ((coords == GetGridCursorCell()) && m_waitForSlowClick && 
+            if ((coords == GetGridCursorCell()) && m_waitForSlowClick &&
                 CanEnableCellControl(GetGridCursorCell()))
             {
                 ClearSelection(true);
@@ -5897,9 +5897,9 @@ void wxSheet::ProcessGridCellMouseEvent( wxMouseEvent& event )
             else if ( !GetSelectingBlock().IsEmpty() )
             {
                 if (!HasSelectionMode(wxSHEET_SelectNone) &&
-                    SendRangeEvent(wxEVT_SHEET_RANGE_SELECTING, 
+                    SendRangeEvent(wxEVT_SHEET_RANGE_SELECTING,
                                    GetSelectingBlock(), true, true, &event) != EVT_VETOED)
-                {   
+                {
                     SelectBlock(GetSelectingBlock(), true, true);
                     SetSelectingBlock(wxNullSheetBlock);
                 }
@@ -5910,7 +5910,7 @@ void wxSheet::ProcessGridCellMouseEvent( wxMouseEvent& event )
             // Note: send event *after* doing default processing in this case
             if (DoEndDragResizeRowCol())
                 SendEvent( wxEVT_SHEET_ROW_SIZE, wxSheetCoords(m_dragRowOrCol, -1), &event );
-            
+
             SetMouseCursorMode(WXSHEET_CURSOR_SELECT_CELL, m_gridWin);
         }
         else if ( HasMouseCursorMode(WXSHEET_CURSOR_RESIZE_COL) )
@@ -5918,27 +5918,27 @@ void wxSheet::ProcessGridCellMouseEvent( wxMouseEvent& event )
             // Note: send event *after* doing default processing in this case
             if (DoEndDragResizeRowCol())
                 SendEvent( wxEVT_SHEET_COL_SIZE, wxSheetCoords(-1, m_dragRowOrCol), &event );
-            
+
             SetMouseCursorMode(WXSHEET_CURSOR_SELECT_CELL, m_gridWin);
         }
 
         // Show edit control, if it has been hidden for drag-shrinking.
         if (IsCellEditControlCreated() && !IsCellEditControlShown())
             ShowCellEditControl();
-        
+
         if (!m_keySelecting)
             SetSelectingAnchor(wxNullSheetCoords);
 
         m_dragLastPos = -1;
-        
-        // send after default processing, they can use own evt handler 
+
+        // send after default processing, they can use own evt handler
         SendEvent(wxEVT_SHEET_CELL_LEFT_UP, coords, &event);
     }
     else if ( event.RightDown() && ContainsGridCell(coords) )
     {
         if (IsCellEditControlCreated())
             DisableCellEditControl(true);
-        
+
         if (SendEvent(wxEVT_SHEET_CELL_RIGHT_DOWN, coords, &event) == EVT_SKIPPED)
         {
             // no default action at the moment
@@ -5948,7 +5948,7 @@ void wxSheet::ProcessGridCellMouseEvent( wxMouseEvent& event )
     {
         if (IsCellEditControlCreated())
             DisableCellEditControl(true);
-        
+
         if (SendEvent(wxEVT_SHEET_CELL_RIGHT_DCLICK, coords, &event) == EVT_SKIPPED)
         {
             // no default action at the moment
@@ -5958,7 +5958,7 @@ void wxSheet::ProcessGridCellMouseEvent( wxMouseEvent& event )
     {
         if (IsCellEditControlCreated())
             DisableCellEditControl(true);
-        
+
         if (SendEvent(wxEVT_SHEET_CELL_RIGHT_UP, coords, &event) == EVT_SKIPPED)
         {
             // no default action at the moment
@@ -5980,7 +5980,7 @@ void wxSheet::ProcessGridCellMouseEvent( wxMouseEvent& event )
         if ( (dragRow >= 0) || (dragCol >= 0) )
         {
             const wxSheetBlock cellBlock(GetCellBlock(coords));
-            if (!cellBlock.IsOneCell() && 
+            if (!cellBlock.IsOneCell() &&
                 ((dragRow != cellBlock.GetBottom()) || (dragCol != cellBlock.GetRight())))
                 dragRow = dragCol = -1;
         }
@@ -6030,19 +6030,19 @@ void wxSheet::OnKeyDown( wxKeyEvent& event )
 {
     //wxCHECK_RET(!m_inOnKeyDown, wxT("wxSheet::OnKeyDown called while already active"));
     // yield called from SetGridOrigin causes this in MSW
-    
+
     if (m_inOnKeyDown)
         return;
 
     m_inOnKeyDown = true;
-    
+
     // FIXME - is this really a good idea? probably not, should make own "key" event
     // propagate the event up and see if it gets processed
     //wxWindow *parent = GetParent();
     //wxKeyEvent keyEvt( event );
     //keyEvt.SetEventObject( parent );
     //!parent->GetEventHandler()->ProcessEvent(keyEvt) &&
-    
+
     if ( GetNumberRows() && GetNumberCols() )
     {
         // try local handlers
@@ -6072,7 +6072,7 @@ void wxSheet::OnKeyDown( wxKeyEvent& event )
                 if (event.ShiftDown())
                 {
                     if ( IsCellEditControlCreated() )
-                        DisableCellEditControl(true);   
+                        DisableCellEditControl(true);
                     if ( GetGridCursorCol() > 0 )
                         MoveCursorLeft( false );
                 }
@@ -6090,55 +6090,55 @@ void wxSheet::OnKeyDown( wxKeyEvent& event )
                 if ( event.ShiftDown() && ContainsGridCell(GetGridCursorCell()) )
                 {
                     wxSheetBlock block(GetGridCursorRow(), 0, 1, GetNumberCols()+1);
-                    
-                    if (!GetSelectingBlock().IsEmpty() && 
+
+                    if (!GetSelectingBlock().IsEmpty() &&
                         GetSelectingBlock().Contains(GetGridCursorCell()))
                     {
                         block.SetTop(GetSelectingBlock().GetTop());
                         block.SetBottom(GetSelectingBlock().GetBottom());
                     }
-                    
+
                     if (!HasSelectionMode(wxSHEET_SelectNone) &&
-                        SendRangeEvent(wxEVT_SHEET_RANGE_SELECTING, 
+                        SendRangeEvent(wxEVT_SHEET_RANGE_SELECTING,
                                        block, true, false, &event) != EVT_VETOED)
-                    {   
+                    {
                         SelectRows(block.GetTop(), block.GetBottom(), false, true);
                     }
-                    
+
                     break;
                 }
                 if ( event.ControlDown() && ContainsGridCell(GetGridCursorCell()) )
                 {
                     wxSheetBlock block(0, GetGridCursorCol(), GetNumberRows()+1, 1);
-                    
-                    if (!GetSelectingBlock().IsEmpty() && 
+
+                    if (!GetSelectingBlock().IsEmpty() &&
                         GetSelectingBlock().Contains(GetGridCursorCell()))
                     {
                         block.SetLeft(GetSelectingBlock().GetLeft());
                         block.SetRight(GetSelectingBlock().GetRight());
                     }
-                    
+
                     if (!HasSelectionMode(wxSHEET_SelectNone) &&
-                        SendRangeEvent(wxEVT_SHEET_RANGE_SELECTING, 
+                        SendRangeEvent(wxEVT_SHEET_RANGE_SELECTING,
                                        block, true, false, &event) != EVT_VETOED)
-                    {   
+                    {
                         SelectCols(block.GetLeft(), block.GetRight(), false, true);
                     }
-                    
+
                     break;
                 }
                 if ( event.AltDown() && ContainsGridCell(GetGridCursorCell()) )
-                {                    
+                {
                     // Toggle cell selection FIXME not sure how useful this is
                     bool sel = IsCellSelected(GetGridCursorCell());
                     wxSheetBlock block(GetGridCursorCell(), 1, 1);
                     if (!HasSelectionMode(wxSHEET_SelectNone) &&
-                        SendRangeEvent(wxEVT_SHEET_RANGE_SELECTING, 
+                        SendRangeEvent(wxEVT_SHEET_RANGE_SELECTING,
                                        block, !sel, !sel, &event) != EVT_VETOED)
-                    {   
+                    {
                         ToggleCellSelection(GetGridCursorCell(), !sel, true);
                     }
-                    
+
                     break;
                 }
                 if ( !IsEditable() )
@@ -6196,19 +6196,19 @@ void wxSheet::OnKeyUp( wxKeyEvent& event )
         if ( !GetSelectingBlock().IsEmpty() )
         {
             if (!HasSelectionMode(wxSHEET_SelectNone) &&
-                SendRangeEvent(wxEVT_SHEET_RANGE_SELECTING, 
+                SendRangeEvent(wxEVT_SHEET_RANGE_SELECTING,
                             GetSelectingBlock(), true, true, &event) != EVT_VETOED)
-            {   
+            {
                 SelectBlock(GetSelectingBlock(), true, true);
                 SetSelectingBlock(wxNullSheetBlock);
             }
-            
+
             SetSelectingAnchor(wxNullSheetCoords);
         }
 
         m_keySelecting = false;
     }
-    
+
     event.Skip();
 }
 
@@ -6227,7 +6227,7 @@ void wxSheet::OnChar( wxKeyEvent& event )
 
     m_inOnKeyDown = true;
     int keyMods = GetKeyModifiers(&event);
-    
+
     // try local handlers
     switch ( event.GetKeyCode() )
     {
@@ -6240,7 +6240,7 @@ void wxSheet::OnChar( wxKeyEvent& event )
                 SetRowHeight(GetGridCursorRow(), GetRowHeight(GetGridCursorRow())-5);
             else
                 MoveCursorUp( event.ShiftDown() );
-            
+
             break;
         }
         case WXK_DOWN:
@@ -6252,7 +6252,7 @@ void wxSheet::OnChar( wxKeyEvent& event )
                 SetRowHeight(GetGridCursorRow(), GetRowHeight(GetGridCursorRow())+5);
             else
                 MoveCursorDown( event.ShiftDown() );
-            
+
             break;
         }
         case WXK_LEFT:
@@ -6264,7 +6264,7 @@ void wxSheet::OnChar( wxKeyEvent& event )
                 SetColWidth(GetGridCursorCol(), GetColWidth(GetGridCursorCol())-5);
             else
                 MoveCursorLeft( event.ShiftDown() );
-            
+
             break;
         }
         case WXK_RIGHT:
@@ -6276,7 +6276,7 @@ void wxSheet::OnChar( wxKeyEvent& event )
                 SetColWidth(GetGridCursorCol(), GetColWidth(GetGridCursorCol())+5);
             else
                 MoveCursorRight( event.ShiftDown() );
-            
+
             break;
         }
         case WXK_PAGEUP:
@@ -6311,7 +6311,7 @@ void wxSheet::OnChar( wxKeyEvent& event )
             }
             else
                 event.Skip();
-            
+
             break;
         }
         case WXK_END:
@@ -6336,13 +6336,13 @@ void wxSheet::OnChar( wxKeyEvent& event )
             }
             else
                 event.Skip();
-            
+
             break;
         }
-        default : 
+        default :
             event.Skip();
     }
-    
+
     m_inOnKeyDown = false;
 }
 
@@ -6352,16 +6352,16 @@ void wxSheet::StopMouseTimer()
     {
         if (m_mouseTimer->IsRunning())
             m_mouseTimer->Stop();
-    
+
         delete m_mouseTimer;
         m_mouseTimer = NULL;
     }
 }
 void wxSheet::StartMouseTimer()
 {
-    if (!m_mouseTimer) 
+    if (!m_mouseTimer)
         m_mouseTimer = new wxTimer(this, ID_MOUSE_DRAG_TIMER);
-                
+
     if (!m_mouseTimer->IsRunning())
         m_mouseTimer->Start(100, true); // one shot
 }
@@ -6370,13 +6370,13 @@ void wxSheet::OnMouseTimer( wxTimerEvent &WXUNUSED(event) )
 {
     // the window must be captured and thus m_mousePos is for that window
     wxWindow *win = GetCaptureWindow();
-    
+
     if (!win || (GetNumberCols() < 1) || (GetNumberRows() < 1))
     {
         StopMouseTimer();
         return;
     }
-    
+
     wxSize clientSize(win->GetClientSize());
     int dx = (m_mousePos.x < 0) ? -1 : ((m_mousePos.x > clientSize.x) ? 1 : 0);
     int dy = (m_mousePos.y < 0) ? -1 : ((m_mousePos.y > clientSize.y) ? 1 : 0);
@@ -6385,24 +6385,24 @@ void wxSheet::OnMouseTimer( wxTimerEvent &WXUNUSED(event) )
         dx = 0;
     else if (win == m_colLabelWin)
         dy = 0;
-    
+
     if ((dx == 0) && (dy == 0)) // mouse is back in the window
     {
         StopMouseTimer();
         return;
     }
-    
+
     /*wxSize cSize = */ m_gridWin->GetClientSize();
-    SetGridOrigin( m_gridOrigin.x + dx*SHEET_SCROLL_LINE_X, 
+    SetGridOrigin( m_gridOrigin.x + dx*SHEET_SCROLL_LINE_X,
                    m_gridOrigin.y + dy*SHEET_SCROLL_LINE_Y, true, true );
-    
+
     // send fake mouse event to process, assume left down and we're dragging
     wxMouseEvent mEvt(wxEVT_MOTION);
     mEvt.SetEventObject(win);
     mEvt.m_leftDown = true;
     mEvt.m_x = m_mousePos.x;
     mEvt.m_y = m_mousePos.y;
-    
+
     win->GetEventHandler()->ProcessEvent(mEvt);
     StartMouseTimer();
 }
@@ -6414,12 +6414,12 @@ bool wxSheet::DoEndDragResizeRowCol()
 
     if (IsCellEditControlCreated())
         DisableCellEditControl(true);
-    
+
     // erase the last line and resize the row/col
     DrawRowColResizingMarker();
 
     if (HasMouseCursorMode(WXSHEET_CURSOR_RESIZE_ROW))
-    {    
+    {
         int height = m_dragLastPos - GetRowTop(m_dragRowOrCol);
         const int minHeight = GetMinimalRowHeight(m_dragRowOrCol);
         if (minHeight > height) height = minHeight;
@@ -6440,7 +6440,7 @@ bool wxSheet::DoEndDragResizeRowCol()
             return true;
         }
     }
-    
+
     return false;
 }
 
@@ -6449,46 +6449,46 @@ void wxSheet::SetMouseCursorMode(MouseCursorMode mode, wxWindow *win)
     wxCHECK_RET(win, wxT("Invalid window"));
 
     m_mouseCursorMode = mode;
-    
+
     if (win == m_gridWin)
     {
         if (m_gridWin->m_mouseCursor == mode)
             return;
-        
+
         m_gridWin->m_mouseCursor = mode;
     }
     else if (win == m_cornerLabelWin)
     {
         if (m_cornerLabelWin->m_mouseCursor == mode)
             return;
-        
+
         m_cornerLabelWin->m_mouseCursor = mode;
     }
     else if (win == m_rowLabelWin)
     {
         if (m_rowLabelWin->m_mouseCursor == mode)
             return;
-        
+
         m_rowLabelWin->m_mouseCursor = mode;
     }
     else if (win == m_colLabelWin)
     {
         if (m_colLabelWin->m_mouseCursor == mode)
             return;
-        
+
         m_colLabelWin->m_mouseCursor = mode;
     }
     else if (win == this)
     {
         if (m_mouseCursor == mode)
             return;
-        
+
         m_mouseCursor = mode;
     }
 
     switch ( mode )
     {
-        case WXSHEET_CURSOR_RESIZE_ROW : 
+        case WXSHEET_CURSOR_RESIZE_ROW :
         case WXSHEET_CURSOR_SPLIT_VERTICAL :
         {
             win->SetCursor( GetSheetRefData()->m_rowResizeCursor );
@@ -6506,12 +6506,12 @@ void wxSheet::SetMouseCursorMode(MouseCursorMode mode, wxWindow *win)
 }
 
 void wxSheet::SetCaptureWindow(wxWindow *win)
-{   
+{
     if (m_winCapture && (m_winCapture != win) && m_winCapture->HasCapture())
         m_winCapture->ReleaseMouse();
 
     m_winCapture = win;
-    
+
     if (m_winCapture && (!m_winCapture->HasCapture()))
         m_winCapture->CaptureMouse();
 }
@@ -6526,7 +6526,7 @@ wxWindow* wxSheet::GetWindowForCoords( const wxSheetCoords& coords ) const
         return m_colLabelWin;
     if (IsCornerLabelCell(coords))
         return m_cornerLabelWin;
-    
+
     wxFAIL_MSG(wxString::Format(wxT("Unable to get window for coords (%d,%d)"), coords.m_row, coords.m_col));
     return NULL;
 }
@@ -6535,30 +6535,30 @@ wxWindow* wxSheet::GetWindowForCoords( const wxSheetCoords& coords ) const
 
 // Generate a grid event based on a mouse/key event and
 // return the result of ProcessEvent()
-int wxSheet::SendEvent( const wxEventType type, const wxSheetCoords& coords, 
+int wxSheet::SendEvent( const wxEventType type, const wxSheetCoords& coords,
                         wxEvent *mouseOrKeyEvt )
 {
-    //wxMouseEvent *mouseEvt = wxDynamicCast(mouseOrKeyEvt, wxMouseEvent);    
-    //wxPoint pos = mouseEvt ? mouseEvt->GetPosition() : wxPoint(-1, -1);   
-    //pos += wxPoint(GetRowLabelWidth(), GetColLabelHeight());       
-    
+    //wxMouseEvent *mouseEvt = wxDynamicCast(mouseOrKeyEvt, wxMouseEvent);
+    //wxPoint pos = mouseEvt ? mouseEvt->GetPosition() : wxPoint(-1, -1);
+    //pos += wxPoint(GetRowLabelWidth(), GetColLabelHeight());
+
     wxSheetEvent sheetEvt(GetId(), type, this, coords, wxPoint(-1,-1), IsSelecting());
     sheetEvt.SetKeysDownMousePos(mouseOrKeyEvt);
     return DoSendEvent(&sheetEvt);
 }
 
-int wxSheet::SendRangeEvent( const wxEventType type, const wxSheetBlock& block, 
+int wxSheet::SendRangeEvent( const wxEventType type, const wxSheetBlock& block,
                              bool selecting, bool add, wxEvent *mouseOrKeyEvt )
 {
     if ( type == wxEVT_SHEET_RANGE_SELECTED )
     {
         wxSheetRangeSelectEvent sheetEvt(GetId(), type, this, block, selecting, add );
-        
+
         sheetEvt.SetKeysDownMousePos(mouseOrKeyEvt);
         sheetEvt.m_coords = GetGridCursorCell();
         return DoSendEvent(&sheetEvt);
     }
-    
+
     return 0;
 }
 
@@ -6567,19 +6567,19 @@ int wxSheet::DoSendEvent(wxSheetEvent *event)
     wxCHECK_MSG(event, 0, wxT("invalid event in wxSheet::DoSendEvent"));
     bool claimed = GetEventHandler()->ProcessEvent(*event);
     bool vetoed  = !event->IsAllowed();
-  
+
     // A Veto'd event may not be claimed, test this first
-    if (vetoed) return EVT_VETOED; 
+    if (vetoed) return EVT_VETOED;
     return claimed ? EVT_CLAIMED : EVT_SKIPPED;
 }
 
 void wxSheet::HighlightSelectingBlock( const wxSheetBlock &block_ )
 {
     wxSheetBlock block(block_.GetAligned());
-    
+
     if (block == GetSelectingBlock())
         return;
-    
+
     if ( GetSelection() && !block.IsEmpty() )
     {
         // make sure block that's selected goes full width/height
@@ -6597,7 +6597,7 @@ void wxSheet::HighlightSelectingBlock( const wxSheetBlock &block_ )
 
     wxSheetBlock oldSelBlock(GetSelectingBlock());
     SetSelectingBlock(block.IsEmpty() ? wxNullSheetBlock : block);
-    
+
     // First the case that we selected a completely new area
     if ( oldSelBlock.IsEmpty() )
     {
@@ -6609,7 +6609,7 @@ void wxSheet::HighlightSelectingBlock( const wxSheetBlock &block_ )
         RefreshGridCellBlock(oldSelBlock);
     }
     // two selections don't intersect at all, not expected, but ok I guess
-    else if ( !block.Intersects(oldSelBlock) )      
+    else if ( !block.Intersects(oldSelBlock) )
     {
         RefreshGridCellBlock(block.Union(oldSelBlock));
     }
@@ -6619,14 +6619,14 @@ void wxSheet::HighlightSelectingBlock( const wxSheetBlock &block_ )
         // FIXME - this is not great
         wxSheetBlock changed[8];
         wxSheetBlock bounds;
-        
+
         oldSelBlock.Delete(block, changed[0], changed[1], changed[2], changed[3]);
         block.Delete(oldSelBlock, changed[4], changed[5], changed[6], changed[7]);
-        
+
         {
             for (int n=0; n<8; n++)
                 bounds = bounds.ExpandUnion(changed[n]);
-            
+
             RefreshGridCellBlock(bounds);
         }
     }
@@ -6674,7 +6674,7 @@ bool wxSheet::SetModelValues()
 }
 
 // ----------------------------------------------------------------------------
-// Attrbitute cache 
+// Attrbitute cache
 
 void wxSheet::ClearAttrCache()
 {
@@ -6698,7 +6698,7 @@ void wxSheet::CacheAttr(const wxSheetCoords& coords, const wxSheetCellAttr &attr
     }
 }
 
-bool wxSheet::LookupAttr(const wxSheetCoords& coords, wxSheetAttr_Type type, 
+bool wxSheet::LookupAttr(const wxSheetCoords& coords, wxSheetAttr_Type type,
                          wxSheetCellAttr &attr ) const
 {
     if ( (type == m_cacheAttrType) && (coords == m_cacheAttrCoords) )
@@ -6711,7 +6711,7 @@ bool wxSheet::LookupAttr(const wxSheetCoords& coords, wxSheetAttr_Type type,
 
         return true;
     }
-    
+
 #ifdef DEBUG_ATTR_CACHE
     gs_nAttrCacheMisses++;
 #endif
@@ -6730,7 +6730,7 @@ void wxSheet::CalcWindowSizes(bool adjustScrollBars)
         AdjustScrollbars(false);
 
     m_resizing = true;
-    
+
     int cw, ch;
     GetClientSize( &cw, &ch );
     wxRect rect;
@@ -6743,10 +6743,10 @@ void wxSheet::CalcWindowSizes(bool adjustScrollBars)
     bool vert_sb   = m_vertScrollBar->IsShown();
     if (horiz_sb) ch -= sb_width;
     if (vert_sb ) cw -= sb_width;
-    
+
     bool horiz_splitter = horiz_sb && m_enable_split_horiz;
     bool vert_splitter  = vert_sb  && m_enable_split_vert;
-    
+
     if ( horiz_sb )
     {
         rect = wxRect(0, ch, cw, sb_height);
@@ -6757,7 +6757,7 @@ void wxSheet::CalcWindowSizes(bool adjustScrollBars)
         }
         else
             m_horizSplitRect = wxRect(0,0,0,0);
-        
+
         if (rect != m_horizScrollBar->GetRect())
             m_horizScrollBar->SetSize( rect );
     }
@@ -6772,7 +6772,7 @@ void wxSheet::CalcWindowSizes(bool adjustScrollBars)
         }
         else
             m_vertSplitRect = wxRect(0,0,0,0);
-        
+
         if (rect != m_vertScrollBar->GetRect())
             m_vertScrollBar->SetSize( rect );
     }
@@ -6799,27 +6799,27 @@ void wxSheet::CalcWindowSizes(bool adjustScrollBars)
         rect = wxRect(rowLabelWidth, colLabelHeight, cw-rowLabelWidth, ch-colLabelHeight);
         if (rect != m_gridWin->GetRect())
             m_gridWin->SetSize( rect );
-        
+
         //PRINT_RECT("Set grid rect ", rect);
         //PRINT_RECT("Get grid rect ", wxRect(wxPoint(0,0), m_gridWin->GetSize()));
     }
 
-    m_resizing = false;    
+    m_resizing = false;
 
 #ifdef __WXMSW__
-    // MSW at least needs a little help making sure that the corner and 
+    // MSW at least needs a little help making sure that the corner and
     //  the splitter rects get painted
     wxClientDC dc(this);
     PaintSheetWindow(dc, wxRect(0, 0, cw, ch));
 #endif // __WXMSW__
-}            
+}
 
 void wxSheet::OnSize(wxSizeEvent& event)
 {
     //PRINT_RECT(wxT("SheetRect"), GetRect());
     CalcWindowSizes(true);
     SetGridOrigin(m_gridOrigin.x, m_gridOrigin.y, true, true);
-    SetEqualColWidths(GetSheetRefData()->m_equal_col_widths);    
+    SetEqualColWidths(GetSheetRefData()->m_equal_col_widths);
 
     event.Skip();
 }
@@ -6833,7 +6833,7 @@ wxSize wxSheet::DoGetBestSize() const
 
     if ( size.x > displaySize.x/2 ) size.x = displaySize.x/2;
     if ( size.y > displaySize.y/2 ) size.y = displaySize.y/2;
-    
+
     // NOTE: This size should be cached, but first we need to add calls to
     // InvalidateBestSize everywhere that could change the results of this
     // calculation.
@@ -6847,37 +6847,37 @@ int wxSheet::GetKeyModifiers(wxEvent *mouseOrKeyEvent) const
     // In GTK meta is the numLock key
     int mods = NO_MODIFIERS;
     wxMouseEvent *mouseEvt = wxDynamicCast(mouseOrKeyEvent, wxMouseEvent);
-    
+
     if (mouseEvt)
     {
         if (mouseEvt->ControlDown())
-            mods |= CTRL_DOWN; 
+            mods |= CTRL_DOWN;
         if (mouseEvt->ShiftDown())
-            mods |= SHIFT_DOWN; 
-        if (mouseEvt->AltDown())     
-            mods |= ALT_DOWN; 
+            mods |= SHIFT_DOWN;
+        if (mouseEvt->AltDown())
+            mods |= ALT_DOWN;
         //if (mouseEvt->MetaDown())    // meta is numlock in GTK
-        //    mods |= META_DOWN; 
+        //    mods |= META_DOWN;
     }
-    else 
+    else
     {
         wxKeyEvent *keyEvt = wxDynamicCast(mouseOrKeyEvent, wxKeyEvent);
         if (keyEvt)
         {
             if (keyEvt->ControlDown())
-                mods |= CTRL_DOWN; 
+                mods |= CTRL_DOWN;
             if (keyEvt->ShiftDown())
-                mods |= SHIFT_DOWN; 
-            if (keyEvt->AltDown())     
-                mods |= ALT_DOWN; 
-            //if (keyEvt->MetaDown())    
-            //    mods |= META_DOWN; 
+                mods |= SHIFT_DOWN;
+            if (keyEvt->AltDown())
+                mods |= ALT_DOWN;
+            //if (keyEvt->MetaDown())
+            //    mods |= META_DOWN;
         }
     }
 
-    //wxPrintf("Mods c%d s%d a%d m%d, %d\n", CTRL_DOWN, SHIFT_DOWN, ALT_DOWN, META_DOWN, mods); 
-    
-    return mods;    
+    //wxPrintf("Mods c%d s%d a%d m%d, %d\n", CTRL_DOWN, SHIFT_DOWN, ALT_DOWN, META_DOWN, mods);
+
+    return mods;
 }
 
 // ----------------------------------------------------------------------------
@@ -6917,7 +6917,7 @@ IMPLEMENT_DYNAMIC_CLASS( wxSheetEvent, wxNotifyEvent )
 wxSheetEvent::wxSheetEvent(int id, wxEventType type, wxObject* obj,
                            const wxSheetCoords& coords, const wxPoint &pos,
                            bool sel )
-    : wxNotifyEvent(type, id), m_coords(coords), m_pos(pos), m_selecting(sel), 
+    : wxNotifyEvent(type, id), m_coords(coords), m_pos(pos), m_selecting(sel),
                   m_control(false), m_shift(false), m_alt(false), m_meta(false)
 {
     SetEventObject(obj);
@@ -6928,27 +6928,27 @@ void wxSheetEvent::SetKeysDownMousePos(wxEvent *mouseOrKeyEvent)
     wxMouseEvent *mouseEvt = wxDynamicCast(mouseOrKeyEvent, wxMouseEvent);
     if (mouseEvt)
     {
-        m_control = mouseEvt->ControlDown(); 
-        m_shift   = mouseEvt->ShiftDown();   
-        m_alt     = mouseEvt->AltDown();     
-        m_meta    = mouseEvt->MetaDown();    
+        m_control = mouseEvt->ControlDown();
+        m_shift   = mouseEvt->ShiftDown();
+        m_alt     = mouseEvt->AltDown();
+        m_meta    = mouseEvt->MetaDown();
         m_pos     = mouseEvt->GetPosition();
     }
-    else 
+    else
     {
         wxKeyEvent *keyEvt = wxDynamicCast(mouseOrKeyEvent, wxKeyEvent);
         if (keyEvt)
         {
-            m_control = keyEvt->ControlDown(); 
-            m_shift   = keyEvt->ShiftDown();   
-            m_alt     = keyEvt->AltDown();     
-            m_meta    = keyEvt->MetaDown();    
+            m_control = keyEvt->ControlDown();
+            m_shift   = keyEvt->ShiftDown();
+            m_alt     = keyEvt->AltDown();
+            m_meta    = keyEvt->MetaDown();
             m_pos     = keyEvt->GetPosition();
         }
         else
             return;  // neither mouse nor key event
     }
-    
+
     // FIXME - do I really want to scroll the position? or leave it as is
     // we've set the position from the event, now scroll it
     wxSheet *sheet = wxDynamicCast(GetEventObject(), wxSheet);
@@ -6972,7 +6972,7 @@ IMPLEMENT_DYNAMIC_CLASS( wxSheetRangeSelectEvent, wxSheetEvent )
 wxSheetRangeSelectEvent::wxSheetRangeSelectEvent(int id, wxEventType type, wxObject* obj,
                                                  const wxSheetBlock& block,
                                                  bool sel, bool add )
-        : wxSheetEvent(id, type, obj, wxNullSheetCoords, wxPoint(-1, -1), sel), 
+        : wxSheetEvent(id, type, obj, wxNullSheetCoords, wxPoint(-1, -1), sel),
           m_block(block), m_add(add)
 {
 }
@@ -6983,7 +6983,7 @@ wxSheetRangeSelectEvent::wxSheetRangeSelectEvent(int id, wxEventType type, wxObj
 IMPLEMENT_DYNAMIC_CLASS(wxSheetEditorCreatedEvent, wxCommandEvent)
 
 wxSheetEditorCreatedEvent::wxSheetEditorCreatedEvent(int id, wxEventType type,
-                                                     wxObject* obj, 
+                                                     wxObject* obj,
                                                      const wxSheetCoords& coords,
                                                      wxWindow* ctrl)
     : wxCommandEvent(type, id), m_coords(coords), m_ctrl(ctrl)
@@ -6993,7 +6993,7 @@ wxSheetEditorCreatedEvent::wxSheetEditorCreatedEvent(int id, wxEventType type,
 
 
 // Notes:
-//   Regex to CSV 
+//   Regex to CSV
 //      http://dotnetjunkies.com/WebLog/chris.taylor/archive/2004/04/09/11039.aspx
 //      ((?<field>[^\",\\r\\n]+)|\"(?<field>([^\"]|\"\")+)\")(,|(?<rowbreak>\\r\\n|\\n|$))
 //
@@ -7033,8 +7033,8 @@ class wxCSV_IO
 {
 public :
     wxCSV_IO( bool t=false );
-    
-   
+
+
     wxArrayString ParseLine(const wxString& line);
     bool Test();
 
@@ -7043,14 +7043,14 @@ public :
 
 wxCSV_IO::wxCSV_IO(bool t)
 {
-        
+
 
 //                      "(\s*""[^""]*""\s*,)|(\s*[^,]*\s*,)" 'The magic...
 //    m_regex.Compile(wxT("(\\s*\"[^\"]*\"\\s*,)|(\\s*[^,]*\\s*,)"), wxRE_ICASE);
     m_regex.Compile(wxT("(\\s*\"[^\"]*\"\\s*,)|(\\s*[^,]*\\s*,)"), wxRE_ICASE);
-    //m_regex.Compile(wxT(",(?=([^\"]*"[^\"]*\")*(?![^\"]*\"))"),  wxRE_ICASE); 
-    //m_regex.Compile(wxT(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))"), wxRE_ICASE); 
-    
+    //m_regex.Compile(wxT(",(?=([^\"]*"[^\"]*\")*(?![^\"]*\"))"),  wxRE_ICASE);
+    //m_regex.Compile(wxT(",(?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))"), wxRE_ICASE);
+
     if (t) Test();
 }
 
@@ -7067,11 +7067,11 @@ wxArrayString wxCSV_IO::ParseLine(const wxString& line_)
         size_t len = val.Length();
         if ((len > 0u) && val.Last() == wxT(',')) // GetMatch returns "val,"
             val = val.Mid(0, len-1);
-        
+
         //wxPrintf(wxT("VALUE '")+val+wxT("' LINE '")+line+wxT("'\n"));
-        
+
         line = line.Mid(len);              // remove the value from the line
-        val = val.Strip(wxString::both);   // strip blank spaces from value 
+        val = val.Strip(wxString::both);   // strip blank spaces from value
                                            // should've quoted ie. "  a a "
         len = val.Length();
         // remove the leading and trailing quotes
@@ -7085,11 +7085,11 @@ wxArrayString wxCSV_IO::ParseLine(const wxString& line_)
 }
 
 
-wxString Joint(const wxArrayString& a) 
-{ 
+wxString Joint(const wxArrayString& a)
+{
     if (a.GetCount() == 0u) return wxEmptyString;
-        
-    wxString s = wxT("'")+ a[0] + wxT("'\t "); 
+
+    wxString s = wxT("'")+ a[0] + wxT("'\t ");
     for (size_t n = 1u; n < a.GetCount(); n++) s += wxT("'")+ a[n] + wxT("'\t ");
     return s;
 }
@@ -7097,13 +7097,13 @@ wxString Joint(const wxArrayString& a)
 void CSV_TEST(const wxString& instr, const wxArrayString& ans, const wxArrayString &res)
 {
     wxString msg(wxT("'") + instr + wxT("'\t ") + Joint(ans) + wxT(" ** \t ") + Joint(res));
-    
+
     if ( ans.GetCount() != res.GetCount() )
         wxPrintf(wxT("COUNT MISMATCH ERROR! \n"));
 
     for (size_t n = 0; n < wxMin(ans.GetCount(), res.GetCount()); n++)
         if (ans[n] != res[n]) wxPrintf(wxT("Error in item %u\n"), n);
-    
+
     wxPrintf(msg + wxT("\n"));
 }
 
@@ -7112,11 +7112,11 @@ void CSV_TEST(const wxString& instr, const wxArrayString& ans, const wxArrayStri
 #define CSVT3(str, a1, a2, a3) { wxArrayString ar; ar.Add(wxT(a1)); ar.Add(wxT(a2)); ar.Add(wxT(a3)); CSV_TEST(wxT(str), ar, ParseLine(wxT(str))); }
 
 bool wxCSV_IO::Test()
-{  
+{
     CSVT3("a,b,c", "a", "b", "c")
     CSVT3("\"a\",b,c", "a", "b", "c")
     CSVT3("'a',b,c", "'a'", "b", "c")
-    CSVT3("  a  ,  b  ,  c  ", "a", "b", "c")  
+    CSVT3("  a  ,  b  ,  c  ", "a", "b", "c")
     CSVT2("aa,bb;cc", "aa", "bb;cc")
     CSVT1("", "")
     CSVT1("a", "a")
@@ -7135,7 +7135,7 @@ bool wxCSV_IO::Test()
     CSVT3("a,b\",c", "a", "b\"", "c")
     CSVT3("a,b\"\",c", "a", "b\"\"", "c")
     CSVT3("a,\"B: \"\"Hi, I'm B\"\"\",c", "a", "B: \"Hi, I'm B\"", "c")
-   
+
     return true;
 }
 

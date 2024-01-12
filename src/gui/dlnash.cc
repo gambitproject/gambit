@@ -42,7 +42,7 @@ static wxString s_liap(wxT("by minimizing the Lyapunov function"));
 static wxString s_logit(wxT("by tracing logit equilibria"));
 static wxString s_simpdiv(wxT("by simplicial subdivision"));
 
-gbtNashChoiceDialog::gbtNashChoiceDialog(wxWindow *p_parent, 
+gbtNashChoiceDialog::gbtNashChoiceDialog(wxWindow *p_parent,
 					 gbtGameDocument *p_doc)
   : wxDialog(p_parent, wxID_ANY, wxT("Compute Nash equilibria"), wxDefaultPosition),
     m_doc(p_doc)
@@ -72,13 +72,13 @@ gbtNashChoiceDialog::gbtNashChoiceDialog(wxWindow *p_parent,
 
   if (p_doc->NumPlayers() == 2 && m_doc->IsConstSum()) {
     wxString methodChoices[] = { s_recommended, s_lp, s_simpdiv, s_logit };
-    m_methodChoice = new wxChoice(this, wxID_ANY, 
+    m_methodChoice = new wxChoice(this, wxID_ANY,
 				  wxDefaultPosition, wxDefaultSize,
 				  4, methodChoices);
   }
   else {
     wxString methodChoices[] = { s_recommended, s_simpdiv, s_logit };
-    m_methodChoice = new wxChoice(this, wxID_ANY, 
+    m_methodChoice = new wxChoice(this, wxID_ANY,
 				  wxDefaultPosition, wxDefaultSize,
 				  3, methodChoices);
   }
@@ -170,7 +170,7 @@ bool gbtNashChoiceDialog::UseStrategic() const
 gbtAnalysisOutput *gbtNashChoiceDialog::GetCommand() const
 {
   bool useEfg = m_repChoice && m_repChoice->GetSelection() == 0;
-  gbtAnalysisOutput *cmd = nullptr; 
+  gbtAnalysisOutput *cmd = nullptr;
 
   wxString method = m_methodChoice->GetStringSelection();
 
@@ -254,7 +254,7 @@ gbtAnalysisOutput *gbtNashChoiceDialog::GetCommand() const
   else if (method == s_enummixed) {
     cmd = new gbtAnalysisProfileList<Rational>(m_doc, false);
     cmd->SetCommand(prefix + wxT("enummixed") + options);
-    cmd->SetDescription(count + 
+    cmd->SetDescription(count +
 			wxT(" by enumeration of mixed strategies ")
 			    wxT("in strategic game"));
   }
@@ -297,7 +297,7 @@ gbtAnalysisOutput *gbtNashChoiceDialog::GetCommand() const
   else if (method == s_logit) {
     cmd = new gbtAnalysisProfileList<double>(m_doc, useEfg);
     cmd->SetCommand(prefix + wxT("logit -e -d 10") + options);
-    cmd->SetDescription(count + wxT(" by logit tracing ") + game); 
+    cmd->SetDescription(count + wxT(" by logit tracing ") + game);
   }
   else if (method == s_simpdiv) {
     cmd = new gbtAnalysisProfileList<double>(m_doc, false);
@@ -311,4 +311,3 @@ gbtAnalysisOutput *gbtNashChoiceDialog::GetCommand() const
 
   return cmd;
 }
-

@@ -89,4 +89,3 @@ number as the lower ones "roll over." The only differences are that
 the counting starts with the digit 1, instead of 0, and that the
 "base" used for each digit is not 10, but instead is the number of
 strategies that player has in the game.
-

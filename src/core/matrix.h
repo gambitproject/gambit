@@ -28,7 +28,7 @@
 
 namespace Gambit {
 
-template <class T> 
+template <class T>
 Vector<T> operator*(const Vector<T> &, const Matrix<T> &);
 
 template <class T> class Matrix : public RectArray<T> {
@@ -95,18 +95,14 @@ public:
   //@{
   Matrix<T> Transpose() const;
   /// Set matrix to identity matrix
-  void MakeIdent();  
+  void MakeIdent();
   void Pivot(int, int);
   //@}
 };
 
-template <class T> 
+template <class T>
 Vector<T> operator*(const Vector<T> &, const Matrix<T> &);
 
 } // end namespace Gambit
 
 #endif  // LIBGAMBIT_MATRIX_H
-
-
-
-

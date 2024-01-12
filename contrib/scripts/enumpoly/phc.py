@@ -32,7 +32,7 @@ def ProcessPHCOutput(output):
 
     if startsol == -1:
         startsol = output.find("THE SOLUTIONS :\n")
-        
+
     solns = output[startsol:]
 
     firstequals = solns.find("solution")
@@ -83,7 +83,7 @@ def ProcessPHCOutput(output):
             # This is a solution line
             solutions[-1]["vars"][tokens[0]] = complex(float(tokens[2]),
                                                        float(tokens[3]))
-            
+
     return solutions
 
 
@@ -114,7 +114,7 @@ def RunPHC(phcpath, filename, equations):
         os.remove(infilename)
         os.remove(outfilename)
         raise ValueError, "PHC run failed"
-    
+
     os.remove(outfilename)
     os.remove(infilename)
 

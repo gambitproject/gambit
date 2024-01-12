@@ -29,11 +29,10 @@ using namespace Gambit;
 // host the path of a behavioral Nash equilibrium.  These are subsupports
 // that have no strategy, at an active infoset, that is weakly dominated by
 // another active strategy, either in the conditional sense (for any active
-// node in the infoset) or the unconditional sense.  In addition we 
+// node in the infoset) or the unconditional sense.  In addition we
 // check for domination by strategys that are inactive, but whose activation
 // would not activate any currently inactive infosets, so that the
 // subsupport resulting from activation is consistent, in the sense
 // of having active strategys at all active infosets, and not at other
 // infosets.
 List<StrategySupportProfile> PossibleNashSubsupports(const StrategySupportProfile &S);
-

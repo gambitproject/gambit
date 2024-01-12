@@ -380,7 +380,7 @@ bin_PROGRAMS = \
 
 if WITH_ENUMPOLY
 bin_PROGRAMS += gambit-enumpoly
-endif 
+endif
 
 bin_PROGRAMS += \
 	gambit-enumpure \
@@ -522,7 +522,7 @@ gambit_enumpoly_SOURCES = \
 gambit_enumpure_SOURCES = \
 	${core_SOURCES} ${game_SOURCES} \
 	src/solvers/enumpure/enumpure.h \
-	src/tools/enumpure/enumpure.cc 
+	src/tools/enumpure/enumpure.cc
 
 gambit_gnm_SOURCES = \
 	${core_SOURCES} ${game_SOURCES} \
@@ -707,7 +707,7 @@ endif
 osx-bundle:
 	make all
 	-rm -rf Gambit.app
-	-mkdir Gambit.app    
+	-mkdir Gambit.app
 	-mkdir Gambit.app/Contents
 	-mkdir Gambit.app/Contents/MacOS
 	-mkdir Gambit.app/Contents/Resources
@@ -724,7 +724,7 @@ osx-dmg:  osx-bundle
 	hdiutil create Gambit.dmg -volname Gambit -srcfolder .dmg -format UDZO -imagekey zlib-level=9
 	rm -rf .dmg
 
-msw-msi: 
+msw-msi:
 	-mkdir installer
 	cp gambit* installer
 	candle gambit.wxs
@@ -736,4 +736,3 @@ clang-tidy:
 	clang-tidy src/solvers/*/*.cc -- -I src -I src/labenski/include -DVERSION="" ${WX_CXXFLAGS}
 	clang-tidy src/tools/*/*.cc -- -I src -I src/labenski/include -DVERSION="" ${WX_CXXFLAGS}
 	clang-tidy src/gui/*.cc -- -I src -I src/labenski/include -DVERSION="" ${WX_CXXFLAGS}
-

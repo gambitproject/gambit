@@ -1,6 +1,6 @@
-/* XPM */     
+/* XPM */
 static const char *  	    color_xpm[] = {
-"24 24 60 1", 
+"24 24 60 1",
 " 	c None",
 ".	c #000000",
 "+	c #FF4B39",

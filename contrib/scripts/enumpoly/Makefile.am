@@ -13,4 +13,3 @@ EXTRA_DIST = \
 	phc.py \
 	setup.py \
 	README
-

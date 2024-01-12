@@ -13,5 +13,3 @@ Gambit's features.  ``pygambit`` is available on PyPI
 
    pygambit.user
    pygambit.api
-
-

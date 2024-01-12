@@ -74,7 +74,7 @@ void PossibleNashSubsupports(const StrategySupportProfile &s,
 			     StrategySupportProfile &sact,
 			     StrategySupportProfile::iterator &c,
 			     List<StrategySupportProfile> &p_list)
-{ 
+{
   bool abort = false;
   bool no_deletions = true;
 
@@ -99,31 +99,31 @@ void PossibleNashSubsupports(const StrategySupportProfile &s,
       }
     }
   } while (!abort && scanner.GoToNext());
-  
+
   if (!abort) {
     List<GameStrategy> actual_deletions;
     for (int i = 1; !abort && i <= deletion_list.Length(); i++) {
       actual_deletions.push_back(deletion_list[i]);
-      sact.RemoveStrategy(deletion_list[i]); 
-    } 
+      sact.RemoveStrategy(deletion_list[i]);
+    }
 
     if (!abort && deletion_list.Length() > 0) {
       PossibleNashSubsupports(s, sact, c, p_list);
     }
-    
+
     for (int i = 1; i <= actual_deletions.Length(); i++) {
       sact.AddStrategy(actual_deletions[i]);
     }
   }
   if (!abort && no_deletions) {
     p_list.push_back(sact);
-    
+
     StrategySupportProfile::iterator c_copy(c);
     do {
       GameStrategy str_ptr = c_copy.GetStrategy();
       if (sact.Contains(str_ptr) &&
 	  sact.NumStrategies(str_ptr->GetPlayer()->GetNumber()) > 1) {
-	sact.RemoveStrategy(str_ptr); 
+	sact.RemoveStrategy(str_ptr);
 	PossibleNashSubsupports(s, sact, c_copy, p_list);
 	sact.AddStrategy(str_ptr);
       }
@@ -133,7 +133,7 @@ void PossibleNashSubsupports(const StrategySupportProfile &s,
 
 }  // end anonymous namespace
 
-  
+
 List<StrategySupportProfile> PossibleNashSubsupports(const StrategySupportProfile &S)
 {
   List<StrategySupportProfile> answer;
@@ -161,7 +161,7 @@ List<StrategySupportProfile> PossibleNashSubsupports(const StrategySupportProfil
 		remove = true;
 	      }
 	    }
-	    else { 
+	    else {
 	      current.AddStrategy(other_strat);
 	      if (current.Dominates(other_strat,strat,false)) {
 		remove = true;
@@ -175,9 +175,7 @@ List<StrategySupportProfile> PossibleNashSubsupports(const StrategySupportProfil
     if (remove)
       answer.Remove(i);
   }
-    
+
   return SortSupportsBySize(answer);
   return answer;
 }
-
-

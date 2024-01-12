@@ -49,7 +49,7 @@ void PrintProfile(std::ostream &p_stream,
 int NumMembers(const Matrix<int> &p_partition, int p_index)
 {
   int count = 0;
-  
+
   for (int col = 1; col <= p_partition.NumColumns(); col++) {
     if (p_partition(p_index, col) > 0) {
       count++;
@@ -71,7 +71,7 @@ static int FirstMember(const Matrix<int> &p_partition, int p_index)
   return 0;
 }
 
-static double Payoff(const MixedStrategyProfile<double> &p_profile, 
+static double Payoff(const MixedStrategyProfile<double> &p_profile,
 		     int p_player,
 		     const Matrix<int> &p_partition, int p_index)
 {
@@ -80,7 +80,7 @@ static double Payoff(const MixedStrategyProfile<double> &p_profile,
       return p_profile.GetStrategyValue(p_profile.GetGame()->GetPlayer(p_player)->GetStrategy(st));
     }
   }
-  
+
   // shouldn't happen!
   return 0.0;
 }
@@ -102,9 +102,9 @@ Matrix<int> RankStrategies(const MixedStrategyProfile<double> &p_profile,
   // bubble sort; crude but effective
   bool changed;
 
-  do { 
+  do {
     changed = false;
-    
+
     for (int i = 1; i <= strategies.Length() - 1; i++) {
       if (payoffs[i] < payoffs[i+1]) {
 	double tmp1 = payoffs[i];
@@ -130,7 +130,7 @@ Matrix<int> RankStrategies(const MixedStrategyProfile<double> &p_profile,
   // FIXME: This assumes that no strategies have the same payoff
   for (int row = 1; row <= strategies.Length(); row++) {
     partition(row, strategies[row]) = 1;
-  } 
+  }
 
   return partition;
 }
@@ -201,7 +201,7 @@ void YamamotoJacobian(const MixedStrategyProfile<double> &p_profile,
 		  continue;
 		}
 
-		p_matrix(rowno, colno) = 
+		p_matrix(rowno, colno) =
 		  p_profile.GetPayoffDeriv(pl, p_profile.GetGame()->GetPlayer(pl)->GetStrategy(st1), p_profile.GetGame()->GetPlayer(pl2)->GetStrategy(st2)) - p_profile.GetPayoffDeriv(pl, p_profile.GetGame()->GetPlayer(pl)->GetStrategy(st), p_profile.GetGame()->GetPlayer(pl2)->GetStrategy(st2));
 	      }
 	    }
@@ -212,14 +212,14 @@ void YamamotoJacobian(const MixedStrategyProfile<double> &p_profile,
     }
   }
 }
-		      
+
 void YamamotoComputeStep(const MixedStrategyProfile<double> &p_profile,
 			 const Matrix<double> &p_matrix,
 			 PVector<double> &p_delta, double &p_lambdainc,
 			 double p_initialsign, double p_stepsize)
 {
   double sign = p_initialsign;
-  int rowno = 0; 
+  int rowno = 0;
 
   SquareMatrix<double> M(p_matrix.NumRows());
 
@@ -232,7 +232,7 @@ void YamamotoComputeStep(const MixedStrategyProfile<double> &p_profile,
   for (int pl = 1; pl <= p_profile.GetGame()->NumPlayers(); pl++) {
     for (int st = 1; st <= p_profile.GetGame()->GetPlayer(pl)->NumStrategies(); st++) {
       rowno++;
-      p_delta(pl, st) = sign * M.Determinant();   
+      p_delta(pl, st) = sign * M.Determinant();
       sign *= -1.0;
 
       for (int row = 1; row <= M.NumRows(); row++) {
@@ -242,7 +242,7 @@ void YamamotoComputeStep(const MixedStrategyProfile<double> &p_profile,
 	}
       }
     }
-  }   
+  }
 
   p_lambdainc = sign * M.Determinant();
 
@@ -252,8 +252,8 @@ void YamamotoComputeStep(const MixedStrategyProfile<double> &p_profile,
       norm += p_delta(pl, st) * p_delta(pl, st);
     }
   }
-  norm += p_lambdainc * p_lambdainc; 
-  
+  norm += p_lambdainc * p_lambdainc;
+
   for (int pl = 1; pl <= p_profile.GetGame()->NumPlayers(); pl++) {
     for (int st = 1; st <= p_profile.GetGame()->GetPlayer(pl)->NumStrategies(); st++) {
       p_delta(pl, st) /= sqrt(norm / p_stepsize);
@@ -280,9 +280,9 @@ List<int> SortProbs(const MixedStrategyProfile<double> &p_profile,
 
   bool changed;
 
-  do { 
+  do {
     changed = false;
-    
+
     for (int i = 1; i <= strategies.Length() - 1; i++) {
       if (probs[i] < probs[i+1]) {
 	double tmp1 = probs[i];
@@ -318,7 +318,7 @@ void Solve(const Game &p_game)
   // and lambda=t
   MixedStrategyProfile<double> profile(p_game);
   double lambda = 1.0;
-  double initialsign = -1.0; 
+  double initialsign = -1.0;
   List<Matrix<int> > partitions;
   Matrix<double> H(p_game->MixedProfileLength(),
 		   p_game->MixedProfileLength() + 1);
@@ -327,9 +327,9 @@ void Solve(const Game &p_game)
     partitions.Append(RankStrategies(profile, pl));
   }
 
-  for (int step = 1; step <= 50000 && lambda > 0.01; step++) { 
+  for (int step = 1; step <= 50000 && lambda > 0.01; step++) {
     YamamotoJacobian(profile, lambda, partitions, H);
-      
+
     PVector<double> delta(profile.GetGame()->NumStrategies());
     for (int i = 1; i <= delta.Length(); i++) {
       delta[i] = profile[i];
@@ -356,11 +356,11 @@ void Solve(const Game &p_game)
 	    partitions[pl].SetRow(part, partitions[pl].Row(part) + partitions[pl].Row(part+1));
 	    for (int p = part + 1; p < p_game->GetPlayer(pl)->NumStrategies(); p++) {
 	      partitions[pl].SetRow(p, partitions[pl].Row(p+1));
-	    }  
+	    }
 	    for (int col = 1; col <= partitions[pl].NumColumns(); col++) {
 	      partitions[pl](partitions[pl].NumRows(), col) = 0;
 	    }
-	    // Redo this partition, in case multiple partitions 
+	    // Redo this partition, in case multiple partitions
 	    // coalesce (non-generic, but conceivable)
 	    // part--;
 	    //    gout << "Relax!\n";
@@ -369,7 +369,7 @@ void Solve(const Game &p_game)
 	  }
 	  else if (NumMembers(partitions[pl], part) > 1) {
 	    // check for possible splitting of partition
-	    List<int> sortstrats = SortProbs(profile, pl, partitions[pl], 
+	    List<int> sortstrats = SortProbs(profile, pl, partitions[pl],
 					      part);
 	    double totX = 0.0, totP = 0.0;
 	    for (int i = 1; i < sortstrats.Length(); i++) {
@@ -379,7 +379,7 @@ void Solve(const Game &p_game)
 		//		gout << pl << " " << part << " " << totP << " " << totX << "Xaler!\n";
 		for (int p = part + 1; p < p_game->GetPlayer(pl)->NumStrategies(); p++) {
 		  partitions[pl].SetRow(p+1, partitions[pl].Row(p));
-		}  
+		}
 		for (int col = 1; col <= partitions[pl].NumColumns(); col++) {
 		  partitions[pl](part, col) = 0;
 		  partitions[pl](part + 1, col) = 0;
@@ -398,7 +398,7 @@ void Solve(const Game &p_game)
 	}
 	strats += NumMembers(partitions[pl], part);
       }
-    } 
+    }
   }
 
   PrintProfile(std::cout, "NE", profile);

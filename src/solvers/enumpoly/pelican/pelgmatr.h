@@ -29,22 +29,22 @@ http://netlib2.cs.utk.edu/hompack/
 #include "pelpred.h"
 
 struct Gmatrix_t {
-    int store;           
-    int topc;           
-    int topr;          
-    int ncols;     
+    int store;
+    int topc;
+    int topr;
+    int ncols;
     Gen_node *coords;
 };
 
-typedef struct Gmatrix_t *Gmatrix;           
+typedef struct Gmatrix_t *Gmatrix;
 
 /*
 ** matrix access macroes
 */
 int GMstore(Gmatrix M);    /* maximum #elts available*/
 int GMMrows(Gmatrix M);    /* maximum #rows          */
-int GMrows(Gmatrix M);     /* number rows stored */   
-int GMcols(Gmatrix M);     /* number cols stored */   
+int GMrows(Gmatrix M);     /* number rows stored */
+int GMcols(Gmatrix M);     /* number cols stored */
 Gen_node *GMref1(Gmatrix M, int i, int j);
 #define GMref0(M,i,j) (GMref(M,(i+1),(j+1)))    /* acces starting at 0
 */

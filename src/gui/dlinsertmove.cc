@@ -31,7 +31,7 @@
 //                   gbtInsertMoveDialog: Member functions
 //=========================================================================
 
-gbtInsertMoveDialog::gbtInsertMoveDialog(wxWindow *p_parent, 
+gbtInsertMoveDialog::gbtInsertMoveDialog(wxWindow *p_parent,
 					 gbtGameDocument *p_doc)
   : wxDialog(p_parent, wxID_ANY, _("Insert Move"), wxDefaultPosition),
     m_doc(p_doc)
@@ -107,17 +107,17 @@ gbtInsertMoveDialog::gbtInsertMoveDialog(wxWindow *p_parent,
   topSizer->Add(m_infosetItem, 0, wxALL | wxEXPAND, 5);
   topSizer->Add(actionSizer, 0, wxALL | wxALIGN_CENTER, 5);
   topSizer->Add(buttonSizer, 0, wxALL | wxALIGN_RIGHT, 5);
-  
-  SetSizer(topSizer); 
+
+  SetSizer(topSizer);
   topSizer->Fit(this);
-  topSizer->SetSizeHints(this); 
+  topSizer->SetSizeHints(this);
   Layout();
   CenterOnParent();
 }
 
 void gbtInsertMoveDialog::OnPlayer(wxCommandEvent &)
 {
-  int playerNumber = m_playerItem->GetSelection(); 
+  int playerNumber = m_playerItem->GetSelection();
 
   Gambit::GamePlayer player;
   if (playerNumber == 0)
@@ -204,7 +204,7 @@ Gambit::GameInfoset gbtInsertMoveDialog::GetInfoset() const
   if (m_playerItem->GetSelection() <= m_doc->NumPlayers()) {
     Gambit::GamePlayer player = GetPlayer();
     int infosetNumber = m_infosetItem->GetSelection();
-    
+
     if (player && infosetNumber > 0) {
       return player->GetInfoset(infosetNumber);
     }
@@ -221,4 +221,3 @@ int gbtInsertMoveDialog::GetActions() const
 {
   return ((GetInfoset()) ? GetInfoset()->NumActions() : m_actions->GetValue());
 }
-

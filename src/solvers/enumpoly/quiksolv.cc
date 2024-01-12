@@ -23,7 +23,3 @@
 #include "quiksolv.imp"
 
 template class QuikSolv<double>;
-
-
-
-

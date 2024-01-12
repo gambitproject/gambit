@@ -33,8 +33,8 @@
 //---------------------------
 
 gIndexOdometer::gIndexOdometer(const Gambit::Array<int> &IndexUpperBounds)
-: MinIndices(IndexUpperBounds.Length()), 
-  MaxIndices(IndexUpperBounds), 
+: MinIndices(IndexUpperBounds.Length()),
+  MaxIndices(IndexUpperBounds),
   CurIndices(IndexUpperBounds.Length())
 {
   int i;
@@ -45,8 +45,8 @@ gIndexOdometer::gIndexOdometer(const Gambit::Array<int> &IndexUpperBounds)
 
 gIndexOdometer::gIndexOdometer(const Gambit::Array<int> &IndexLowerBounds,
                                const Gambit::Array<int> &IndexUpperBounds)
-: MinIndices(IndexLowerBounds), 
-  MaxIndices(IndexUpperBounds), 
+: MinIndices(IndexLowerBounds),
+  MaxIndices(IndexUpperBounds),
   CurIndices(IndexUpperBounds.Length())
 {
   CurIndices[1] = MinIndices[1] - 1;
@@ -83,9 +83,9 @@ bool gIndexOdometer::Turn()
 //           Information
 //----------------------------------
 
-int gIndexOdometer::NoIndices() const 
-{ 
-  return MaxIndices.Length(); 
+int gIndexOdometer::NoIndices() const
+{
+  return MaxIndices.Length();
 }
 
 int gIndexOdometer::LinearIndex() const
@@ -143,22 +143,22 @@ gPermutationOdometer::gPermutationOdometer(int given_n)
 //----------------------------------
 //        Operators
 //----------------------------------
-  
+
 bool gPermutationOdometer::operator==(const gPermutationOdometer & rhs) const
 {
   if (n != rhs.n)                           return false;
-  for (int i = 1; i <= n; i++) 
+  for (int i = 1; i <= n; i++)
     if (CurIndices[i] != rhs.CurIndices[i]) return false;
 
   if (CurSign != rhs.CurSign) {
-    //gout << "Error in gPermutationOdometer\n"; 
+    //gout << "Error in gPermutationOdometer\n";
     exit(1);
   }
 
   return true;
 }
 
-  
+
 bool gPermutationOdometer::operator!=(const gPermutationOdometer & rhs) const
 {
   return !(*this == rhs);
@@ -185,9 +185,9 @@ bool gPermutationOdometer::Turn()
   if (cursor1 == 0) return false;
 
   int cursor2 = cursor1 + 1;
-  while (cursor2 < n && CurIndices[cursor2 + 1] > CurIndices[cursor1]) cursor2++; 
+  while (cursor2 < n && CurIndices[cursor2 + 1] > CurIndices[cursor1]) cursor2++;
 
-  int tmp = CurIndices[cursor2]; 
+  int tmp = CurIndices[cursor2];
   CurIndices[cursor2] = CurIndices[cursor1];
   CurIndices[cursor1] = tmp;
   CurSign *= -1;

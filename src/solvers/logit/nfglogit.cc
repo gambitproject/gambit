@@ -49,7 +49,7 @@ private:
   Game m_game;
 };
 
-void 
+void
 StrategicQREPathTracer::EquationSystem::GetValue(const Vector<double> &p_point,
 						 Vector<double> &p_lhs) const
 {
@@ -73,7 +73,7 @@ StrategicQREPathTracer::EquationSystem::GetValue(const Vector<double> &p_point,
       }
       else {
 	// This is a ratio equation
-	p_lhs[rowno] = (logprofile[player->GetStrategy(st)] - 
+	p_lhs[rowno] = (logprofile[player->GetStrategy(st)] -
 			logprofile[player->GetStrategy(1)] -
 			lambda * (profile.GetPayoff(player->GetStrategy(st)) -
 				  profile.GetPayoff(player->GetStrategy(1))));
@@ -132,10 +132,10 @@ StrategicQREPathTracer::EquationSystem::GetJacobian(const Vector<double> &p_poin
 	    else {
 	      p_matrix(colno, rowno) =
 		-lambda * profile[player2->GetStrategy(m)] *
-		(profile.GetPayoffDeriv(i, 
+		(profile.GetPayoffDeriv(i,
 					player->GetStrategy(j),
 					player2->GetStrategy(m)) -
-		 profile.GetPayoffDeriv(i, 
+		 profile.GetPayoffDeriv(i,
 					player->GetStrategy(1),
 					player2->GetStrategy(m)));
 	    }
@@ -143,7 +143,7 @@ StrategicQREPathTracer::EquationSystem::GetJacobian(const Vector<double> &p_poin
 	}
 	// Fill the last column, the derivative wrt lambda
 	p_matrix(p_matrix.NumRows(), rowno) =
-	  (profile.GetPayoff(player->GetStrategy(1)) - 
+	  (profile.GetPayoff(player->GetStrategy(1)) -
 	   profile.GetPayoff(player->GetStrategy(j)));
       }
     }
@@ -178,11 +178,11 @@ public:
     : m_stream(p_stream), m_game(p_game),
       m_fullGraph(p_fullGraph), m_decimals(p_decimals) { }
   ~CallbackFunction() override = default;
-  
+
   void operator()(const Vector<double> &p_point, bool p_isTerminal) const override;
   const List<LogitQREMixedStrategyProfile> &GetProfiles() const
   { return m_profiles; }
-  
+
 private:
   std::ostream &m_stream;
   Game m_game;
@@ -191,7 +191,7 @@ private:
   mutable List<LogitQREMixedStrategyProfile> m_profiles;
 };
 
-void 
+void
 StrategicQREPathTracer::CallbackFunction::operator()(const Vector<double> &p_point,
                                                      bool p_isTerminal) const
 {
@@ -223,7 +223,7 @@ StrategicQREPathTracer::CallbackFunction::operator()(const Vector<double> &p_poi
 List<LogitQREMixedStrategyProfile>
 StrategicQREPathTracer::TraceStrategicPath(const LogitQREMixedStrategyProfile &p_start,
 					   std::ostream &p_stream,
-					   double p_maxLambda, 
+					   double p_maxLambda,
 					   double p_omega) const
 {
   Vector<double> x(p_start.MixedProfileLength() + 1);
@@ -259,7 +259,7 @@ StrategicQREPathTracer::SolveAtLambda(const LogitQREMixedStrategyProfile &p_star
 //                 StrategicQREEstimator: Criterion function
 //----------------------------------------------------------------------------
 
-namespace { 
+namespace {
 double LogLike(const Vector<double> &p_frequencies, const Vector<double> &p_point)
 {
   double logL = 0.0;
@@ -302,7 +302,7 @@ public:
 		   const Vector<double> &p_frequencies,
 		   bool p_fullGraph, int p_decimals);
   ~CallbackFunction() override = default;
-  
+
   void operator()(const Vector<double> &p_point,
 			  bool p_isTerminal) const override;
 
@@ -310,7 +310,7 @@ public:
     return { m_bestProfile, m_bestLambda, m_maxlogL };
   }
   void PrintMaximizer() const;
-		    
+
 private:
   void PrintProfile(const MixedStrategyProfile<double> &, double) const;
 
@@ -359,7 +359,7 @@ StrategicQREEstimator::CallbackFunction::PrintMaximizer() const
   m_stream << std::endl;
 }
 
-void 
+void
 StrategicQREEstimator::CallbackFunction::operator()(const Vector<double> &x,
 						    bool p_isTerminal) const
 {
@@ -399,7 +399,7 @@ StrategicQREEstimator::Estimate(const LogitQREMixedStrategyProfile &p_start,
   if (p_start.GetGame() != p_frequencies.GetGame()) {
     throw MismatchException();
   }
-  
+
   Vector<double> x(p_start.MixedProfileLength() + 1);
   for (int i = 1; i <= p_start.MixedProfileLength(); i++) {
     x[i] = log(p_start[i]);

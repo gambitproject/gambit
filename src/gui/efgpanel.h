@@ -44,7 +44,7 @@ private:
   void OnViewZoom100(wxCommandEvent &);
   void OnViewZoomFit(wxCommandEvent &);
   //@}
-    
+
 public:
   gbtEfgPanel(wxWindow *p_parent, gbtGameDocument *p_doc);
   ~gbtEfgPanel() override = default;
@@ -65,4 +65,3 @@ public:
 };
 
 #endif // EFGPANEL_H
-

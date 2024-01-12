@@ -20,7 +20,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef TABLEAU_H  
+#ifndef TABLEAU_H
 #define TABLEAU_H
 
 #include "btableau.h"
@@ -35,7 +35,7 @@ template <class T> class LPTableau;
 
 
 // ---------------------------------------------------------------------------
-// We have different implementations of Tableau for double and gbtRational, 
+// We have different implementations of Tableau for double and gbtRational,
 // but with the same interface
 // ---------------------------------------------------------------------------
 
@@ -43,14 +43,14 @@ template<>
 class Tableau<double> : public TableauInterface<double>{
 public:
       // constructors and destructors
-  Tableau(const Matrix<double> &A, const Vector<double> &b); 
-  Tableau(const Matrix<double> &A, const Array<int> &art, 
-	  const Vector<double> &b); 
+  Tableau(const Matrix<double> &A, const Vector<double> &b);
+  Tableau(const Matrix<double> &A, const Array<int> &art,
+	  const Vector<double> &b);
   Tableau(const Tableau<double>&);
   ~Tableau() override;
-  
+
   Tableau<double>& operator=(const Tableau<double>&);
-  
+
   // pivoting
   bool CanPivot(int outgoing, int incoming) const override;
   void Pivot(int outrow,int col) override; // pivot -- outgoing is row, incoming is column
@@ -58,7 +58,7 @@ public:
   void SolveColumn(int, Vector<double> &) override;  // column in new basis
   void Solve(const Vector<double> &b, Vector<double> &x) override;  // solve M x = b
   void SolveT(const Vector<double> &c, Vector<double> &y) override;  // solve y M = c
-  
+
   // raw Tableau functions
 
   void Refactor() override;
@@ -66,7 +66,7 @@ public:
 
   void SetConst(const Vector<double> &bnew);
   void SetBasis( const Basis &); // set new Tableau
-  
+
   bool IsFeasible();
   bool IsLexMin();
 
@@ -91,7 +91,7 @@ private:
 
   mutable Vector<Rational> tmpcol; // temporary column vector, to avoid allocation
 
-  void MySolveColumn(int, Vector<Rational> &);  // column in new basis 
+  void MySolveColumn(int, Vector<Rational> &);  // column in new basis
 
 protected:
   Array<int> nonbasic;     //** nonbasic variables -- should be moved to Basis
@@ -103,20 +103,20 @@ public:
     const char *what() const noexcept override { return "Bad denominator in Tableau"; }
   };
       // constructors and destructors
-  Tableau(const Matrix<Rational> &A, const Vector<Rational> &b); 
-  Tableau(const Matrix<Rational> &A, const Array<int> &art, 
-	  const Vector<Rational> &b); 
+  Tableau(const Matrix<Rational> &A, const Vector<Rational> &b);
+  Tableau(const Matrix<Rational> &A, const Array<int> &art,
+	  const Vector<Rational> &b);
   Tableau(const Tableau<Rational>&);
   ~Tableau() override;
-  
+
   Tableau<Rational>& operator=(const Tableau<Rational>&);
-  
+
   // pivoting
   bool CanPivot(int outgoing, int incoming) const override;
   void Pivot(int outrow, int col) override; // pivot -- outgoing is row, incoming is column
   void SolveColumn(int, Vector<Rational> &) override;  // column in new basis
   void GetColumn(int, Vector<Rational> &) const;  // column in new basis
-  
+
   // raw Tableau functions
 
   void Refactor() override;
@@ -126,7 +126,7 @@ public:
   void SetBasis( const Basis &); // set new Tableau
   void Solve(const Vector<Rational> &b, Vector<Rational> &x) override;  // solve M x = b
   void SolveT(const Vector<Rational> &c, Vector<Rational> &y) override;  // solve y M = c
-  
+
   bool IsFeasible();
   bool IsLexMin();
   void BasisVector(Vector<Rational> &out) const override;
@@ -136,5 +136,5 @@ public:
 }  // end namespace Gambit::linalg
 
 }  // end namespace Gambit
- 
+
 #endif     // TABLEAU_H

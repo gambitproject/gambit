@@ -8,7 +8,7 @@
 // The original copyright and license are included below.
 //
 
-/* 
+/*
 Copyright (C) 1988 Free Software Foundation
     written by Doug Lea (dl@rocky.oswego.edu)
 
@@ -36,7 +36,7 @@ struct IntegerRep                    // internal Integer representations
 {
   unsigned short  len;          // current length
   unsigned short  sz;           // allocated space (0 means static).
-  short           sgn;          // 1 means >= 0; 0 means < 0 
+  short           sgn;          // 1 means >= 0; 0 means < 0
   unsigned short  s[1];         // represented as ushort array starting here
 };
 
@@ -73,7 +73,7 @@ extern int      ucompare(const IntegerRep*, const IntegerRep*);
 extern int      ucompare(const IntegerRep*, long);
 extern std::string Itoa(const IntegerRep* x, int base = 10, int width = 0);
 extern std::string cvtItoa(const IntegerRep* x, std::string fmt, int& fmtlen, int base,
-                           int showbase, int width, int align_right, 
+                           int showbase, int width, int align_right,
                            char fillchar, char Xcase, int showpos);
 extern IntegerRep*  atoIntegerRep(const char* s, int base = 10);
 extern long     Itolong(const IntegerRep*);
@@ -185,21 +185,21 @@ public:
   friend void     negate(const Integer& x, Integer& dest);
   friend void     complement(const Integer& x, Integer& dest);
 
-  friend int      compare(const Integer&, const Integer&);  
-  friend int      ucompare(const Integer&, const Integer&); 
+  friend int      compare(const Integer&, const Integer&);
+  friend int      ucompare(const Integer&, const Integer&);
   friend void     add(const Integer& x, const Integer& y, Integer& dest);
   friend void     sub(const Integer& x, const Integer& y, Integer& dest);
   friend void     mul(const Integer& x, const Integer& y, Integer& dest);
   friend void     div(const Integer& x, const Integer& y, Integer& dest);
   friend void     mod(const Integer& x, const Integer& y, Integer& dest);
-  friend void     divide(const Integer& x, const Integer& y, 
+  friend void     divide(const Integer& x, const Integer& y,
                          Integer& q, Integer& r);
   friend void     lshift(const Integer& x, const Integer& y, Integer& dest);
   friend void     rshift(const Integer& x, const Integer& y, Integer& dest);
   friend void     pow(const Integer& x, const Integer& y, Integer& dest);
 
-  friend int      compare(const Integer&, long);  
-  friend int      ucompare(const Integer&, long); 
+  friend int      compare(const Integer&, long);
+  friend int      ucompare(const Integer&, long);
   friend void     add(const Integer& x, long y, Integer& dest);
   friend void     sub(const Integer& x, long y, Integer& dest);
   friend void     mul(const Integer& x, long y, Integer& dest);
@@ -210,8 +210,8 @@ public:
   friend void     rshift(const Integer& x, long y, Integer& dest);
   friend void     pow(const Integer& x, long y, Integer& dest);
 
-  friend int      compare(long, const Integer&);  
-  friend int      ucompare(long, const Integer&); 
+  friend int      compare(long, const Integer&);
+  friend int      ucompare(long, const Integer&);
   friend void     add(long x, const Integer& y, Integer& dest);
   friend void     sub(long x, const Integer& y, Integer& dest);
   friend void     mul(long x, const Integer& y, Integer& dest);
@@ -226,7 +226,7 @@ public:
 
   friend std::string Itoa(const Integer &x, int base /*= 10*/, int width /*= 0*/);
   friend Integer atoI(const char *s, int base/*= 10*/);
-  
+
   friend std::istream &operator>>(std::istream &s, Integer& y);
   friend std::ostream &operator<<(std::ostream &s, const Integer& y);
 
@@ -234,7 +234,7 @@ public:
 
   int             initialized() const;
   void   error(const char* msg) const;
-  int             OK() const;  
+  int             OK() const;
 };
 
 
@@ -245,7 +245,7 @@ Integer  sqr(const Integer&); // square
 
 Integer  pow(const Integer& x, const Integer& y);
 Integer  pow(const Integer& x, long y);
-Integer  Ipow(long x, long y); // x to the y as Integer 
+Integer  Ipow(long x, long y); // x to the y as Integer
 
 
 extern Integer  sqrt(const Integer&); // floor of square root
@@ -254,6 +254,3 @@ extern Integer  lcm(const Integer& x, const Integer& y); // least common mult
 } // end namespace Gambit
 
 #endif // LIBGAMBIT_INTEGER_H
-
-
-

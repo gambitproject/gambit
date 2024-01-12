@@ -17,12 +17,12 @@
 
 #ifndef WX_PRECOMP
     #include "wx/defs.h"
-    #include "wx/utils.h"    
+    #include "wx/utils.h"
     #include "wx/dc.h"
-    #include "wx/dcclient.h"    
+    #include "wx/dcclient.h"
     #include "wx/log.h"
     #include "wx/valtext.h"
-    #include "wx/settings.h"    
+    #include "wx/settings.h"
     #include "wx/checkbox.h"
     #include "wx/intl.h"
 #endif // WX_PRECOMP
@@ -83,21 +83,21 @@ IMPLEMENT_DYNAMIC_CLASS(wxSheetCellRolColLabelRendererRefData, wxSheetCellString
 #define M_CELLRENREFDATA ((wxSheetCellRendererRefData*)m_refData)
 
 wxSheetCellRenderer::wxSheetCellRenderer(wxSheetCellRendererRefData *renderer)
-{ 
-    m_refData = renderer; 
+{
+    m_refData = renderer;
 }
 
 void wxSheetCellRenderer::Draw(wxSheet& sheet, const wxSheetCellAttr& attr,
                                wxDC& dc, const wxRect& rect,
                                const wxSheetCoords& coords, bool isSelected)
 {
-    wxCHECK_RET(Ok(), wxT("wxSheetCellRenderer is not created"));    
+    wxCHECK_RET(Ok(), wxT("wxSheetCellRenderer is not created"));
     M_CELLRENREFDATA->Draw(sheet, attr, dc, rect, coords, isSelected);
 }
 
 wxSize wxSheetCellRenderer::GetBestSize(wxSheet& sheet, const wxSheetCellAttr& attr,
-                                        wxDC& dc, const wxSheetCoords& coords) 
-{ 
+                                        wxDC& dc, const wxSheetCoords& coords)
+{
     wxCHECK_MSG(Ok(), sheet.GetCellSize(coords), wxT("wxSheetCellRenderer is not created"));
     return M_CELLRENREFDATA->GetBestSize(sheet, attr, dc, coords);
 }
@@ -111,7 +111,7 @@ void wxSheetCellRenderer::SetParameters(const wxString& params)
 bool wxSheetCellRenderer::Copy(const wxSheetCellRenderer& other)
 {
     wxCHECK_MSG(other.Ok(), false, wxT("wxSheetCellRenderer is not created"));
-    
+
     UnRef();
     m_refData = ((wxSheetCellRendererRefData*)other.m_refData)->Clone();
     return true;
@@ -129,24 +129,24 @@ bool wxSheetCellRenderer::Copy(const wxSheetCellRenderer& other)
     #include "math.h"
     #define UNUSE(a) a
     wxColour GetRainbow(double v)
-    {       
+    {
         double vmin = 0, vmax = 255, dv = vmax - vmin;
-        if (v < (vmin + 0.25 * dv)) 
+        if (v < (vmin + 0.25 * dv))
             return wxColour(0, int(255.0*(4.0 * (v - vmin) / dv) + 0.5), 255);
-        else if (v < (vmin + 0.5 * dv)) 
+        else if (v < (vmin + 0.5 * dv))
             return wxColour(0, 255, int(255.0*(1.0 + 4.0 * (vmin + 0.25 * dv - v) / dv) + 0.5));
-        else if (v < (vmin + 0.75 * dv)) 
+        else if (v < (vmin + 0.75 * dv))
             return wxColour(int(255.0*(4.0 * (v - vmin - 0.5 * dv) / dv) + 0.5), 255, 0);
-        else 
+        else
             return wxColour(255, int(255.0*(1.0 + 4.0 * (vmin + 0.75 * dv - v) / dv) + 0.5), 0);
     }
 #else
-    #define UNUSE(a) 
+    #define UNUSE(a)
 #endif
 
-void wxSheetCellRendererRefData::Draw( wxSheet& sheet, 
+void wxSheetCellRendererRefData::Draw( wxSheet& sheet,
                                        const wxSheetCellAttr& attr,
-                                       wxDC& dc, 
+                                       wxDC& dc,
                                        const wxRect& rect,
                                        const wxSheetCoords& UNUSE(coords),
                                        bool isSelected )
@@ -166,33 +166,33 @@ void wxSheetCellRendererRefData::Draw( wxSheet& sheet,
 
     dc.SetPen( *wxTRANSPARENT_PEN );
     dc.DrawRectangle(rect);
-    
+
 #ifdef TEST_SELECTION_BLOCKS // colouring for identifying different blocks
     if (isSelected)
-    {        
+    {
         int i = sheet.GetSelection()->Index(coords);
         wxColour c(GetRainbow(i*10));
         dc.SetBrush( wxBrush(c, wxSOLID) );
         dc.DrawRectangle(rect);
-    
+
         wxFont font = dc.GetFont();
         dc.SetFont(*wxSMALL_FONT);
         dc.DrawText(wxString::Format(wxT("%d"), i), rect.x, rect.y);
     }
 #endif // TEST_SELECTION_BLOCKS
-    
+
     //FIXME - border drawing code, maybe it goes here?
     //dc.SetPen( wxPen(sheet.GetGridLineColour(), 1, wxSOLID) );
     //dc.DrawRectangle(rect.x-1, rect.y-1, rect.width+2, rect.height+2);
 }
 
-wxSize wxSheetCellRendererRefData::GetBestSize(wxSheet& sheet, 
+wxSize wxSheetCellRendererRefData::GetBestSize(wxSheet& sheet,
                                                const wxSheetCellAttr& WXUNUSED(attr),
-                                               wxDC& WXUNUSED(dc), 
-                                               const wxSheetCoords& coords) 
-{ 
+                                               wxDC& WXUNUSED(dc),
+                                               const wxSheetCoords& coords)
+{
     return sheet.GetCellSize(coords); // return current size
-} 
+}
 
 wxString wxSheetCellRendererRefData::GetString(wxSheet& sheet, const wxSheetCoords& coords)
 {
@@ -202,7 +202,7 @@ wxString wxSheetCellRendererRefData::GetString(wxSheet& sheet, const wxSheetCoor
 // ----------------------------------------------------------------------------
 // wxSheetCellStringRendererRefData
 // ----------------------------------------------------------------------------
-wxSheetCellStringRendererRefData::wxSheetCellStringRendererRefData() 
+wxSheetCellStringRendererRefData::wxSheetCellStringRendererRefData()
 {
     if (!s_overflowBitmap.Ok())
         s_overflowBitmap = wxBitmap(s_overflow_arrow_xpm_data);
@@ -236,7 +236,7 @@ void wxSheetCellStringRendererRefData::SetTextColoursAndFont(wxSheet& sheet,
         dc.SetTextBackground(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
         dc.SetTextForeground(wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT));
     }
-    
+
     dc.SetFont( attr.GetFont() );
 }
 
@@ -252,7 +252,7 @@ wxSize wxSheetCellStringRendererRefData::DoGetBestSize(wxSheet& sheet,
         dc.SetFont(attr.GetFont());
         sheet.GetTextBoxSize(dc, lines, &w, &h);
     }
-    
+
     return (attr.GetOrientation() == wxHORIZONTAL) ? wxSize(w, h) : wxSize(h, w);
 }
 
@@ -270,14 +270,14 @@ void wxSheetCellStringRendererRefData::Draw(wxSheet& sheet,
                                             const wxRect& rectCell,
                                             const wxSheetCoords& coords,
                                             bool isSelected)
-{    
+{
     wxRect rect = rectCell;
     rect.Inflate(-1);
 
     // erase only this cells background, overflow cells should have been erased
     wxSheetCellRendererRefData::Draw(sheet, attr, dc, rectCell, coords, isSelected);
     DoDraw(sheet, attr, dc, rectCell, coords, isSelected);
-    
+
     //wxRendererNative &ren = wxRendererNative::Get();
     //ren.DrawComboBoxDropButton(&sheet, dc, rectCell);
 }
@@ -288,10 +288,10 @@ void wxSheetCellStringRendererRefData::DoDraw(wxSheet& sheet,
                                               const wxRect& rectCell,
                                               const wxSheetCoords& coords,
                                               bool isSelected)
-{        
+{
     wxRect rect = rectCell;
     rect.Inflate(-1);
-    
+
     int align = attr.GetAlignment();
 
     wxString value = sheet.GetCellValue(coords);
@@ -299,15 +299,15 @@ void wxSheetCellStringRendererRefData::DoDraw(wxSheet& sheet,
     wxSheetCoords cellSpan(sheet.GetCellSpan(coords)); // shouldn't get here if <=0
     int cell_rows = cellSpan.m_row;
     int cell_cols = cellSpan.m_col;
-    
+
     bool is_grid_cell = wxSheet::IsGridCell(coords);
     // no overflow for row/col/corner labels
     bool overflow = is_grid_cell ? attr.GetOverflow() : false;
     int overflowCols = 0;
     int num_cols = sheet.GetNumberCols();
     // this is the right col which includes overflow
-    int rightCol = coords.m_col + cell_cols - 1; 
-    
+    int rightCol = coords.m_col + cell_cols - 1;
+
     // Check if this cell should overflow to right and for how many cells
     if (overflow)
     {
@@ -325,14 +325,14 @@ void wxSheetCellStringRendererRefData::DoDraw(wxSheet& sheet,
                 {
                     // check w/ anchor cell for spanned cell block
                     ownerCell = sheet.GetCellOwner(cell);
-                    if ( sheet.GetTable()->HasValue(ownerCell) || 
+                    if ( sheet.GetTable()->HasValue(ownerCell) ||
                          (ownerCell == editorCell) )
                     {
                         is_empty = false;
                         break;
                     }
                 }
-                
+
                 if (is_empty)
                     rect.width += sheet.GetColWidth(cell.m_col);
                 else
@@ -340,8 +340,8 @@ void wxSheetCellStringRendererRefData::DoDraw(wxSheet& sheet,
                     cell.m_col--;
                     break;
                 }
-                
-                if (rect.width >= best_width) 
+
+                if (rect.width >= best_width)
                     break;
             }
             // this may extend out of sheet
@@ -350,11 +350,11 @@ void wxSheetCellStringRendererRefData::DoDraw(wxSheet& sheet,
         }
 
         // redraw overflow cells individually for proper selection hilight
-        if (overflowCols > 0) 
+        if (overflowCols > 0)
         {
             // if overflowed then it's left aligned (yes I know ALIGN_LEFT=0)
             align &= ~wxSHEET_AttrAlignHoriz_Mask;
-            align |= wxSHEET_AttrAlignLeft;    
+            align |= wxSHEET_AttrAlignLeft;
 
             wxRect clip(rect);
             clip.x += rectCell.width;
@@ -380,12 +380,12 @@ void wxSheetCellStringRendererRefData::DoDraw(wxSheet& sheet,
         }
     }
 
-    // Draw the text 
+    // Draw the text
     SetTextColoursAndFont(sheet, attr, dc, isSelected);
     sheet.DrawTextRectangle(dc, value, rect, align);
 
     if (attr.GetOverflowMarker())
-    {        
+    {
         // Draw a marker to show that the contents has been clipped off
         int cellRight = sheet.GetColRight(rightCol);
         if (cellRight - rect.x < best_width)
@@ -394,11 +394,11 @@ void wxSheetCellStringRendererRefData::DoDraw(wxSheet& sheet,
             int bmpHeight  = s_overflowBitmap.GetHeight();
             int cellWidth  = sheet.GetColWidth(rightCol);
             int cellHeight = sheet.GetRowHeight(coords.m_row);
-        
+
             if ((bmpWidth < cellWidth-3) && (bmpHeight < cellHeight-3))
             {
                 int cellTop = sheet.GetRowTop(coords.m_row);
-            
+
                 int x = cellRight - bmpWidth - 2;
                 int y = cellTop + (cellHeight - bmpHeight)/2;
                 wxRect r(x-2, cellTop, bmpWidth+4-1, cellHeight-1);
@@ -409,7 +409,7 @@ void wxSheetCellStringRendererRefData::DoDraw(wxSheet& sheet,
                     isSelected = sheet.IsCellSelected(clipCell);
                     rightAttr = sheet.GetAttr(clipCell);
                 }
-            
+
                 // clear background for bitmap
                 wxSheetCellRendererRefData::Draw(sheet, rightAttr, dc, r, coords, isSelected);
                 dc.DrawBitmap( s_overflowBitmap, x, y, true );
@@ -427,7 +427,7 @@ void wxSheetCellAutoWrapStringRendererRefData::Draw(wxSheet& sheet,
                                                     wxDC& dc,
                                                     const wxRect& rectCell,
                                                     const wxSheetCoords& coords,
-                                                    bool isSelected) 
+                                                    bool isSelected)
 {
     wxSheetCellRendererRefData::Draw(sheet, attr, dc, rectCell, coords, isSelected);
     SetTextColoursAndFont(sheet, attr, dc, isSelected);
@@ -470,19 +470,19 @@ wxSheetCellAutoWrapStringRendererRefData::GetTextLines(wxSheet& sheet,
         tok += _T(" ");
 
         dc.GetTextExtent(tok, &x, &y);
-        if ( curr_x + x > max_x) 
+        if ( curr_x + x > max_x)
         {
             lines.Add( thisline );
             thisline = tok;
             curr_x = x;
-        } 
-        else 
+        }
+        else
         {
             thisline += tok;
             curr_x += x;
         }
     }
-    
+
     lines.Add( thisline ); //Add last line
 
     return lines;
@@ -537,7 +537,7 @@ void wxSheetCellNumberRendererRefData::Draw(wxSheet& sheet,
 
     SetTextColoursAndFont(sheet, attr, dc, isSelected);
 
-    // draw the text right aligned by default 
+    // draw the text right aligned by default
     int align = attr.GetAlignment(); // | wxALIGN_RIGHT;  //FIXME Why forced right?
 
     wxRect rect = rectCell;
@@ -552,7 +552,7 @@ void wxSheetCellNumberRendererRefData::Draw(wxSheet& sheet,
 bool wxSheetCellFloatRendererRefData::Copy(const wxSheetCellFloatRendererRefData &other)
 {
     SetWidth(other.GetWidth());
-    SetPrecision(other.GetPrecision());    
+    SetPrecision(other.GetPrecision());
     return wxSheetCellStringRendererRefData::Copy(other);
 }
 
@@ -594,7 +594,7 @@ wxString wxSheetCellFloatRendererRefData::GetString(wxSheet& sheet, const wxShee
         text.Printf(m_format, val);
     }
 
-    return text;    
+    return text;
 }
 
 void wxSheetCellFloatRendererRefData::Draw( wxSheet& sheet,
@@ -609,7 +609,7 @@ void wxSheetCellFloatRendererRefData::Draw( wxSheet& sheet,
     SetTextColoursAndFont(sheet, attr, dc, isSelected);
 
     // draw the text right aligned by default  -- FIXME ? WHY
-    int align = attr.GetAlignment(); // | wxALIGN_RIGHT;     
+    int align = attr.GetAlignment(); // | wxALIGN_RIGHT;
 
     wxRect rect(rectCell);
     rect.Inflate(-1);
@@ -660,9 +660,9 @@ wxSize wxSheetCellBitmapRendererRefData::GetBestSize(wxSheet& sheet,
     wxSize bmpSize;
     if (m_bitmap.Ok())
         bmpSize = wxSize( m_bitmap.GetWidth(), m_bitmap.GetHeight() );
-    
+
     wxSize strSize = wxSheetCellStringRendererRefData::GetBestSize(sheet, attr, dc, coords);
-   
+
     return wxSize(bmpSize.x + strSize.x + 5, wxMax(bmpSize.y, strSize.y));
 }
 
@@ -676,30 +676,30 @@ void wxSheetCellBitmapRendererRefData::Draw(wxSheet& sheet,
 {
     wxSheetCellRendererRefData::Draw(sheet, attr, dc, rect_, coords, isSelected);
 
-    int text_align = attr.GetAlignment();    
+    int text_align = attr.GetAlignment();
 
     wxRect rect(rect_);
-    
+
     wxSize bmpSize;
     if (m_bitmap.Ok())
     {
         bmpSize.x = m_bitmap.GetWidth();
         bmpSize.y = m_bitmap.GetHeight();
     }
-    
+
     wxSize txtSize(wxSheetCellStringRendererRefData::GetBestSize(sheet, attr, dc, coords));
 
     wxRect bmpRect(rect);
     wxRect txtRect(rect);
-    
+
     if ((txtSize.x == 0) && (bmpSize.x == 0))
         return;
-    
+
     int margin = 2;
-    
+
     if ((txtSize.x == 0) || (bmpSize.x == 0))
         margin = 0;
-    
+
     if ((m_align & wxSHEET_BMPREN_BMPRIGHT) != 0)
     {
         //wxPrintf(wxT("1Printing row %d col %d \n"), coords.m_row, coords.m_col);
@@ -735,21 +735,21 @@ void wxSheetCellBitmapRendererRefData::Draw(wxSheet& sheet,
 
     bmpRect.SetPosition(sheet.AlignInRect(m_align, bmpRect, bmpSize));
     txtRect.SetPosition(sheet.AlignInRect(text_align, txtRect, txtSize));
-        
+
     bmpRect.Intersect(rect);
     txtRect.Intersect(rect);
 
     // text renderer will deflate it by 1
     txtRect.Inflate(1);
-    
+
     //wxPrintf(wxT("Printing row %d col %d \n"), coords.m_row, coords.m_col);
     //PRINT_RECT("orig   ", rect);
     //PRINT_RECT("bmpRect", bmpRect);
     //PRINT_RECT("txtRect", txtRect);
-    
+
     if ((txtRect.width > 0) && (txtRect.height > 0))
         wxSheetCellStringRendererRefData::DoDraw(sheet, attr, dc, txtRect, coords, isSelected);
-    
+
     if (m_bitmap.Ok() && (bmpRect.width > 0) && (bmpRect.height > 0))
     {
         dc.SetClippingRegion(rect);
@@ -814,7 +814,7 @@ void wxSheetCellBoolRendererRefData::Draw(wxSheet& sheet,
     int align = attr.GetAlignment();
 
     wxRect rectBorder(rect.GetPosition(), size);
-    
+
     if ((align & wxALIGN_RIGHT) != 0)
         rectBorder.x += rect.width - size.x - 2;
     else if ((align & wxALIGN_CENTRE_HORIZONTAL) != 0)
@@ -916,7 +916,7 @@ void wxSheetCellDateTimeRendererRefData::Draw(wxSheet& sheet,
     SetTextColoursAndFont(sheet, attr, dc, isSelected);
 
     // draw the text right aligned by default FIXME why?
-    int align = attr.GetAlignment(); // | wxRIGHT; 
+    int align = attr.GetAlignment(); // | wxRIGHT;
 
     wxRect rect = rectCell;
     rect.Inflate(-1);
@@ -950,7 +950,7 @@ bool wxSheetCellEnumRendererRefData::Copy(const wxSheetCellEnumRendererRefData& 
     return wxSheetCellStringRendererRefData::Copy(other);
 }
 
-wxString wxSheetCellEnumRendererRefData::GetString( wxSheet& sheet, 
+wxString wxSheetCellEnumRendererRefData::GetString( wxSheet& sheet,
                                                     const wxSheetCoords& coords )
 {
     wxSheetTable *table = sheet.GetTable();
@@ -972,9 +972,9 @@ void wxSheetCellEnumRendererRefData::Draw( wxSheet& sheet,
 {
     wxSheetCellRendererRefData::Draw(sheet, attr, dc, rectCell, coords, isSelected);
     SetTextColoursAndFont(sheet, attr, dc, isSelected);
-    
+
     // draw the text right aligned by default FIXME why?
-    int align = attr.GetAlignment(); // | wxRIGHT;     
+    int align = attr.GetAlignment(); // | wxRIGHT;
 
     wxRect rect = rectCell;
     rect.Inflate(-1);
@@ -983,7 +983,7 @@ void wxSheetCellEnumRendererRefData::Draw( wxSheet& sheet,
 }
 
 void wxSheetCellEnumRendererRefData::SetParameters(const wxString& params)
-{    
+{
     if ( params.IsEmpty() )
         return; // what can we do?
 
@@ -1004,16 +1004,16 @@ void wxSheetCellRolColLabelRendererRefData::Draw(wxSheet& sheet,
                                             const wxRect& rectCell,
                                             const wxSheetCoords& coords,
                                             bool isSelected)
-{    
+{
     // erase this cells background
     wxRect rect(rectCell);
     wxSheetCellRendererRefData::Draw(sheet, attr, dc, rect, coords, isSelected);
-    
+
     int left   = rectCell.x;
     int top    = rectCell.y;
     int right  = rectCell.GetRight();
     int bottom = rectCell.GetBottom();
-    
+
     //dc.SetPen( wxPen(wxSystemSettings::GetColour(wxSYS_COLOUR_3DDKSHADOW),1, wxSOLID) );
     // right side
     //dc.DrawLine( right, top, right, bottom );
@@ -1041,11 +1041,11 @@ void wxSheetCellRolColLabelRendererRefData::Draw(wxSheet& sheet,
         int align  = attr.GetAlignment();
         int orient = attr.GetOrientation();
         rect.Deflate(2); // want margins
-        sheet.DrawTextRectangle(dc, value, rect, align, orient);    
+        sheet.DrawTextRectangle(dc, value, rect, align, orient);
     }
-    
-#if 0    
-    // test code for sizing, draws corner tick marks    
+
+#if 0
+    // test code for sizing, draws corner tick marks
     if (1)
     {
         rect = rectCell;
@@ -1061,5 +1061,5 @@ void wxSheetCellRolColLabelRendererRefData::Draw(wxSheet& sheet,
         dc.DrawLine(r.x, r.y, r.x, r.y+10);
         dc.DrawLine(r.GetRight(), r.GetBottom()-10, r.GetRight(), r.GetBottom());
     }
-#endif // 0    
+#endif // 0
 }

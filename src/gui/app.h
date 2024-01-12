@@ -46,16 +46,16 @@ private:
 public:
   gbtApplication();
   ~gbtApplication() override = default;
-  
+
   const wxString &GetCurrentDir()  { return m_currentDir; }
   void SetCurrentDir(const wxString &p_dir);
 
   wxString GetHistoryFile(int index) const
     { return m_fileHistory.GetHistoryFile(index); }
-  void AddMenu(wxMenu *p_menu) 
+  void AddMenu(wxMenu *p_menu)
     { m_fileHistory.UseMenu(p_menu); m_fileHistory.AddFilesToMenu(p_menu); }
   void RemoveMenu(wxMenu *p_menu)  { m_fileHistory.RemoveMenu(p_menu); }
-  
+
 
   gbtAppLoadResult LoadFile(const wxString &);
 #ifdef __WXMAC__
@@ -66,7 +66,7 @@ public:
   //! These manage the list of open documents
   //!
   //@{
-  void AddDocument(gbtGameDocument *p_doc) 
+  void AddDocument(gbtGameDocument *p_doc)
     { m_documents.push_back(p_doc); }
   void RemoveDocument(gbtGameDocument *p_doc)
     { m_documents.Remove(m_documents.Find(p_doc)); }
@@ -77,4 +77,3 @@ public:
 DECLARE_APP(gbtApplication)
 
 #endif // GAMBIT_H
-

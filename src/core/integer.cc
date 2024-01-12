@@ -7,7 +7,7 @@
 //
 // The original copyright and license are included below.
 
-/* 
+/*
 Copyright (C) 1988 Free Software Foundation
     written by Doug Lea (dl@rocky.oswego.edu)
 
@@ -25,7 +25,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 /*
-  Some of the following algorithms are very loosely based on those from 
+  Some of the following algorithms are very loosely based on those from
   MIT C-Scheme bignum.c, which is
       Copyright (c) 1987 Massachusetts Institute of Technology
 
@@ -180,13 +180,13 @@ static inline void nonnil(const IntegerRep* rep)
 
 static IntegerRep* Inew(int newlen)
 {
-  unsigned int siz = sizeof(IntegerRep) + newlen * sizeof(short) + 
+  unsigned int siz = sizeof(IntegerRep) + newlen * sizeof(short) +
     MALLOC_MIN_OVERHEAD;
   unsigned int allocsiz = MIN_INTREP_SIZE;
   while (allocsiz < siz) allocsiz <<= 1;  // find a power of 2
   allocsiz -= MALLOC_MIN_OVERHEAD;
   //assert((unsigned long) allocsiz < MAX_INTREP_SIZE * sizeof(short));
-    
+
   auto* rep = (IntegerRep *) new char[allocsiz];
   rep->sz = (allocsiz - sizeof(IntegerRep) + sizeof(short)) / sizeof(short);
   return rep;
@@ -245,7 +245,7 @@ IntegerRep* Iresize(IntegerRep* old, int newlen)
     rep = Inew(newlen);
     rep->sgn = I_POSITIVE;
   }
-  else 
+  else
   {
     oldlen = old->len;
     if (newlen > old->sz)
@@ -270,7 +270,7 @@ IntegerRep* Iresize(IntegerRep* old, int newlen)
 
 IntegerRep* Icopy(IntegerRep* old, const IntegerRep* src)
 {
-  if (old == src) return old; 
+  if (old == src) return old;
   IntegerRep* rep;
   if (src == nullptr)
   {
@@ -284,7 +284,7 @@ IntegerRep* Icopy(IntegerRep* old, const IntegerRep* src)
     rep->len = 0;
     rep->sgn = I_POSITIVE;
   }
-  else 
+  else
   {
     int newlen = src->len;
     if (old == nullptr || newlen > old->sz)
@@ -317,7 +317,7 @@ IntegerRep* Icopy_long(IntegerRep* old, long x)
 IntegerRep* Icopy_ulong(IntegerRep* old, unsigned long x)
 {
   unsigned short src[SHORT_PER_LONG];
-  
+
   unsigned short srclen = 0;
   while (x != 0)
   {
@@ -376,7 +376,7 @@ IntegerRep* Icopy_one(IntegerRep* old, int newsgn)
 // if too big, return most negative/positive value
 
 long Itolong(const IntegerRep* rep)
-{ 
+{
   if ((unsigned)(rep->len) > (unsigned)(SHORT_PER_LONG))
     return (rep->sgn == I_POSITIVE) ? LONG_MAX : LONG_MIN;
   else if (rep->len == 0)
@@ -394,7 +394,7 @@ long Itolong(const IntegerRep* rep)
 #endif  // __BCC55__
     return (rep->sgn == I_POSITIVE)? a : -((long)a);
   }
-  else 
+  else
   {
     unsigned long a = rep->s[SHORT_PER_LONG - 1];
     if (a >= I_MINNUM)
@@ -438,10 +438,10 @@ int Iislong(const IntegerRep* rep)
     return 0;
 }
 
-// convert to a double 
+// convert to a double
 
 double Itodouble(const IntegerRep* rep)
-{ 
+{
   double d = 0.0;
   double bound = DBL_MAX / 2.0;
   for (int i = rep->len - 1; i >= 0; --i)
@@ -494,13 +494,13 @@ double ratio(const Integer& num, const Integer& den)
   Integer q, r;
   divide(num, den, q, r);
   double d1 = q.as_double();
- 
+
   if (d1 >= DBL_MAX || d1 <= -DBL_MAX || sign(r) == 0)
     return d1;
   else      // use as much precision as available for fractional part
   {
     double  d2 = 0.0;
-    double  d3 = 0.0; 
+    double  d3 = 0.0;
     int cont = 1;
     for (int i = den.rep->len - 1; i >= 0 && cont; --i)
     {
@@ -535,7 +535,7 @@ double ratio(const Integer& num, const Integer& den)
 }
 
 // comparison functions
-  
+
 int compare(const IntegerRep* x, const IntegerRep* y)
 {
   int diff  = x->sgn - y->sgn;
@@ -634,7 +634,7 @@ int ucompare(const IntegerRep* x, long  y)
 
 // arithmetic functions
 
-IntegerRep* add(const IntegerRep* x, int negatex, 
+IntegerRep* add(const IntegerRep* x, int negatex,
             const IntegerRep* y, int negatey, IntegerRep* r)
 {
   nonnil(x);
@@ -873,7 +873,7 @@ IntegerRep* multiply(const IntegerRep* x, const IntegerRep* y, IntegerRep* r)
   int xrsame = x == r;
   int yrsame = y == r;
   int xysame = x == y;
-  
+
   if (xl == 0 || yl == 0)
     r = Icopy_zero(r);
   else if (xl == 1 && x->s[0] == 1)
@@ -895,8 +895,8 @@ IntegerRep* multiply(const IntegerRep* x, const IntegerRep* y, IntegerRep* r)
     const unsigned short* as;
     const unsigned short* botb;
     const unsigned short* topb;
-    if (xrsame)                 
-    { 
+    if (xrsame)
+    {
       currentr = &(rs[xl-1]);
       bota = rs;
       as = currentr;
@@ -1018,7 +1018,7 @@ IntegerRep* multiply(const IntegerRep* x, long y, IntegerRep* r)
 {
   nonnil(x);
   int xl = x->len;
-    
+
   if (xl == 0 || y == 0)
     r = Icopy_zero(r);
   else if (y == 1)
@@ -1052,7 +1052,7 @@ IntegerRep* multiply(const IntegerRep* x, long y, IntegerRep* r)
     const unsigned short* topb;
 
     if (xrsame)
-    { 
+    {
       currentr = &(rs[xl-1]);
       bota = rs;
       as = currentr;
@@ -1115,10 +1115,10 @@ static void do_divide(unsigned short* rs,
   const unsigned short* topy = &(ys[yl]);
   unsigned short d1 = ys[yl - 1];
   unsigned short d2 = ys[yl - 2];
- 
+
   int l = ql - 1;
   int i = l + yl;
-  
+
   for (; l >= 0; --l, --i)
   {
     unsigned short qhat;       // guess q
@@ -1143,9 +1143,9 @@ static void do_divide(unsigned short* rs,
       else
         break;
     };
-    
+
     // multiply & subtract
-    
+
     const unsigned short* yt = ys;
     unsigned short* rt = &(rs[l]);
     unsigned long prod = 0;
@@ -1160,9 +1160,9 @@ static void do_divide(unsigned short* rs,
     hi += (unsigned long)(*rt) + I_MAXNUM - (unsigned long)(down(prod));
     *rt = extract(hi);
     hi = down(hi);
-    
+
     // off-by-one, add back
-    
+
     if (hi == 0)
     {
       --qhat;
@@ -1265,7 +1265,7 @@ IntegerRep* div(const IntegerRep* x, const IntegerRep* y, IntegerRep* q)
     }
 
     int ql = xl - yl + 1;
-      
+
     q = Icalloc(q, ql);
     do_divide(r->s, yy->s, yl, q->s, ql);
 
@@ -1335,7 +1335,7 @@ IntegerRep* div(const IntegerRep* x, long y, IntegerRep* q)
     }
 
     int ql = xl - yl + 1;
-      
+
     q = Icalloc(q, ql);
     do_divide(r->s, ys, yl, q->s, ql);
 
@@ -1410,9 +1410,9 @@ void divide(const Integer& Ix, long y, Integer& Iq, long& rem)
     }
 
     int ql = xl - yl + 1;
-      
+
     q = Icalloc(q, ql);
-    
+
     do_divide(r->s, ys, yl, q->s, ql);
 
     if (prescale != 1)
@@ -1487,7 +1487,7 @@ void divide(const Integer& Ix, const Integer& Iy, Integer& Iq, Integer& Ir)
     }
 
     int ql = xl - yl + 1;
-      
+
     q = Icalloc(q, ql);
     do_divide(r->s, yy->s, yl, q->s, ql);
 
@@ -1545,7 +1545,7 @@ IntegerRep* mod(const IntegerRep* x, const IntegerRep* y, IntegerRep* r)
       r = Icalloc(r, xl + 1);
       scpy(x->s, r->s, xl);
     }
-      
+
     do_divide(r->s, yy->s, yl, nullptr, xl - yl + 1);
 
     if (yy != y && !STATIC_IntegerRep(yy)) delete yy;
@@ -1613,7 +1613,7 @@ IntegerRep* mod(const IntegerRep* x, long y, IntegerRep* r)
       r = Icalloc(r, xl + 1);
       scpy(x->s, r->s, xl);
     }
-      
+
     do_divide(r->s, ys, yl, nullptr, xl - yl + 1);
 
     if (prescale != 1)
@@ -1902,7 +1902,7 @@ IntegerRep* gcd(const IntegerRep* x, const IntegerRep* y)
   nonnil(y);
   int ul = x->len;
   int vl = y->len;
-  
+
   if (vl == 0)
     return Ialloc(nullptr, x->s, ul, I_POSITIVE, ul);
   else if (ul == 0)
@@ -2009,7 +2009,7 @@ long lg(const IntegerRep* x)
   }
   return l;
 }
-  
+
 IntegerRep* power(const IntegerRep* x, long y, IntegerRep* r)
 {
   nonnil(x);
@@ -2064,7 +2064,7 @@ IntegerRep* negate(const IntegerRep* src, IntegerRep* dest)
   nonnil(src);
   if (src != dest)
     dest = Icopy(dest, src);
-  if (dest->len != 0) 
+  if (dest->len != 0)
     dest->sgn = !dest->sgn;
   return dest;
 }
@@ -2099,15 +2099,15 @@ Integer lcm(const Integer& x, const Integer& y)
   Integer g;
   if (sign(x) == 0 || sign(y) == 0)
     g = 1;
-  else 
+  else
     g = gcd(x, y);
   div(x, g, r);
   mul(r, y, r);
   return r;
 }
 
-#else 
-Integer sqrt(const Integer& x) 
+#else
+Integer sqrt(const Integer& x)
 {
   Integer r(x);
   int s = sign(x);
@@ -2127,7 +2127,7 @@ Integer sqrt(const Integer& x)
   return r;
 }
 
-Integer lcm(const Integer& x, const Integer& y) 
+Integer lcm(const Integer& x, const Integer& y)
 {
   Integer r;
   if (!x.initialized() || !y.initialized())
@@ -2135,7 +2135,7 @@ Integer lcm(const Integer& x, const Integer& y)
   Integer g;
   if (sign(x) == 0 || sign(y) == 0)
     g = 1;
-  else 
+  else
     g = gcd(x, y);
   div(x, g, r);
   mul(r, y, r);
@@ -2200,7 +2200,7 @@ std::ostream &operator<<(std::ostream &s, const Integer &y)
 }
 
 std::string cvtItoa(const IntegerRep *x, std::string fmt, int& fmtlen, int base, int showbase,
-              int width, int align_right, char fillchar, char Xcase, 
+              int width, int align_right, char fillchar, char Xcase,
               int showpos)
 {
   char* e = const_cast<char *>(fmt.c_str()) + fmtlen - 1;
@@ -2213,9 +2213,9 @@ std::string cvtItoa(const IntegerRep *x, std::string fmt, int& fmtlen, int base,
   {
     IntegerRep* z = Icopy(nullptr, x);
 
-    // split division by base into two parts: 
+    // split division by base into two parts:
     // first divide by biggest power of base that fits in an unsigned short,
-    // then use straight signed div/mods from there. 
+    // then use straight signed div/mods from there.
 
     // find power
     int bpower = 1;
@@ -2261,12 +2261,12 @@ std::string cvtItoa(const IntegerRep *x, std::string fmt, int& fmtlen, int base,
     }
   }
 
-  if (base == 8 && showbase) 
+  if (base == 8 && showbase)
     *--s = '0';
-  else if (base == 16 && showbase) 
-  { 
-    *--s = Xcase; 
-    *--s = '0'; 
+  else if (base == 16 && showbase)
+  {
+    *--s = Xcase;
+    *--s = '0';
   }
   if (x->sgn == I_NEGATIVE) *--s = '-';
   else if (showpos) *--s = '+';
@@ -2383,7 +2383,7 @@ Integer &Integer::operator=(const Integer &y)
 
 Integer &Integer::operator=(long y)
 {
-  rep = Icopy_long(rep, y); 
+  rep = Icopy_long(rep, y);
   return *this;
 }
 
@@ -2539,62 +2539,62 @@ void  mul(long x, const Integer& y, Integer& dest)
 
 bool Integer::operator==(const Integer &y) const
 {
-  return compare(*this, y) == 0; 
+  return compare(*this, y) == 0;
 }
 
 bool Integer::operator==(long y) const
 {
-  return compare(*this, y) == 0; 
+  return compare(*this, y) == 0;
 }
 
 bool Integer::operator!=(const Integer &y) const
 {
-  return compare(*this, y) != 0; 
+  return compare(*this, y) != 0;
 }
 
 bool Integer::operator!=(long y) const
 {
-  return compare(*this, y) != 0; 
+  return compare(*this, y) != 0;
 }
 
 bool Integer::operator<(const Integer &y) const
 {
-  return compare(*this, y) <  0; 
+  return compare(*this, y) <  0;
 }
 
 bool Integer::operator<(long y) const
 {
-  return compare(*this, y) <  0; 
+  return compare(*this, y) <  0;
 }
 
 bool Integer::operator<=(const Integer &y) const
 {
-  return compare(*this, y) <= 0; 
+  return compare(*this, y) <= 0;
 }
 
 bool Integer::operator<=(long y) const
 {
-  return compare(*this, y) <= 0; 
+  return compare(*this, y) <= 0;
 }
 
 bool Integer::operator>(const Integer &y) const
 {
-  return compare(*this, y) >  0; 
+  return compare(*this, y) >  0;
 }
 
 bool Integer::operator>(long y) const
 {
-  return compare(*this, y) >  0; 
+  return compare(*this, y) >  0;
 }
 
 bool Integer::operator>=(const Integer &y) const
 {
-  return compare(*this, y) >= 0; 
+  return compare(*this, y) >= 0;
 }
 
 bool Integer::operator>=(long y) const
 {
-  return compare(*this, y) >= 0; 
+  return compare(*this, y) >= 0;
 }
 
 
@@ -2718,12 +2718,12 @@ std::string Itoa(const Integer& y, int base, int width)
 
 
 
-long lg(const Integer& x) 
+long lg(const Integer& x)
 {
   return lg(x.rep);
 }
 
-// constructive operations 
+// constructive operations
 
 Integer Integer::operator+(const Integer &y) const
 {
@@ -2767,7 +2767,7 @@ Integer Integer::operator*(long y) const
   return r;
 }
 
-Integer sqr(const Integer& x) 
+Integer sqr(const Integer& x)
 {
   Integer r;
   mul(x, x, r);
@@ -2788,7 +2788,7 @@ Integer Integer::operator/(long y) const
   return r;
 }
 
-Integer Integer::operator%(const Integer &y) const 
+Integer Integer::operator%(const Integer &y) const
 {
   Integer r;
   mod(*this, y, r);
@@ -2816,7 +2816,7 @@ Integer Integer::operator<<(long y) const
   return r;
 }
 
-Integer Integer::operator>>(const Integer &y) const 
+Integer Integer::operator>>(const Integer &y) const
 {
   Integer r;
   rshift(*this, y, r);
@@ -2844,7 +2844,7 @@ Integer Ipow(long x, long y)
   return r;
 }
 
-Integer pow(const Integer& x, const Integer& y) 
+Integer pow(const Integer& x, const Integer& y)
 {
   Integer r;
   pow(x, y, r);
@@ -2853,7 +2853,7 @@ Integer pow(const Integer& x, const Integer& y)
 
 
 
-Integer abs(const Integer& x) 
+Integer abs(const Integer& x)
 {
   Integer r;
   abs(x, r);
@@ -2868,7 +2868,7 @@ Integer Integer::operator-() const
 }
 
 
-Integer  atoI(const char* s, int base) 
+Integer  atoI(const char* s, int base)
 {
   Integer r;
   r.rep = atoIntegerRep(s, base);

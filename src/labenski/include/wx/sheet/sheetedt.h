@@ -25,8 +25,8 @@ class /* WXDLLEXPORT */ wxTextCtrl;
 class WXDLLEXPORT wxSpinCtrl;
 
 // ----------------------------------------------------------------------------
-// wxSheetCellEditorEvtHandler - an event handler for the editors that 
-//  forwards the keydown and char events to the sheet. 
+// wxSheetCellEditorEvtHandler - an event handler for the editors that
+//  forwards the keydown and char events to the sheet.
 // ----------------------------------------------------------------------------
 
 class WXDLLIMPEXP_SHEET wxSheetCellEditorEvtHandler : public wxEvtHandler
@@ -38,9 +38,9 @@ public:
     void OnKeyDown(wxKeyEvent& event);
     void OnChar(wxKeyEvent& event);
     void OnDestroy(wxWindowDestroyEvent& event);
-    
+
     wxSheet                  *m_sheet;
-    // This is a pointer, not a refed editor since editor's destructor 
+    // This is a pointer, not a refed editor since editor's destructor
     //  pops event handler which deletes this and we don't want recursion
     wxSheetCellEditorRefData *m_editor;
 
@@ -49,12 +49,12 @@ private:
     DECLARE_EVENT_TABLE()
     DECLARE_NO_COPY_CLASS(wxSheetCellEditorEvtHandler)
 };
-    
+
 // ----------------------------------------------------------------------------
 // wxSheetCellEditor
 // ----------------------------------------------------------------------------
-// This class is responsible for providing and manipulating the in-place edit 
-// controls for the grid.  The refdata instances of wxSheetCellEditor 
+// This class is responsible for providing and manipulating the in-place edit
+// controls for the grid.  The refdata instances of wxSheetCellEditor
 // (actually, instances of derived classes since it is an ABC) can be
 // associated with the cell attributes for individual cells, rows, columns, or
 // even for the entire grid (the default).
@@ -68,12 +68,12 @@ public:
 
     void Destroy() { UnRef(); }
     bool Ok() const { return m_refData != NULL; }
-    
+
     // Is this editor ready to use (typically means the control is created)
     bool IsCreated() const;
     // Is the control currently shown
     bool IsShown() const;
-    
+
     // Get a pointer to the control
     wxWindow* GetControl() const;
     // Destroy the old control (if any) and set the new one
@@ -81,9 +81,9 @@ public:
     // Destroy the control, doesn't fail even if the control isn't created
     void DestroyControl();
 
-    // Creates the actual edit control using the parent, id, and 
+    // Creates the actual edit control using the parent, id, and
     //  pushing the evtHandler onto it if !NULL.
-    void CreateEditor(wxWindow* parent, wxWindowID id, 
+    void CreateEditor(wxWindow* parent, wxWindowID id,
                       wxEvtHandler* evtHandler, wxSheet* sheet);
 
     // Size and position the edit control, uses attr.GetAlignment if Ok.
@@ -96,8 +96,8 @@ public:
     void Show(bool show, const wxSheetCellAttr &attr);
     // Draws the part of the cell not occupied by the control: the base class
     // version just fills it with background colour from the attribute
-    void PaintBackground(wxSheet& grid, const wxSheetCellAttr& attr, 
-                         wxDC& dc, const wxRect& rect, 
+    void PaintBackground(wxSheet& grid, const wxSheetCellAttr& attr,
+                         wxDC& dc, const wxRect& rect,
                          const wxSheetCoords& coords, bool isSelected);
     // Fetch the value from the table and prepare the edit control
     // to begin editing.  Set the focus to the edit control.
@@ -137,33 +137,33 @@ public:
     // interpret renderer parameters: arbitrary string whose interpretation is
     // left to the derived classes
     void SetParameters(const wxString& params);
-    
+
     // Get the current value of the control as a string
     wxString GetValue() const;
     // Get the value that the editor started with
     wxString GetInitValue() const;
 
-    bool Copy(const wxSheetCellEditor& other);    
-    
+    bool Copy(const wxSheetCellEditor& other);
+
     // operators
     bool operator == (const wxSheetCellEditor& obj) const { return m_refData == obj.m_refData; }
     bool operator != (const wxSheetCellEditor& obj) const { return m_refData != obj.m_refData; }
     wxSheetCellEditor& operator = (const wxSheetCellEditor& obj)
-    {   
+    {
         if ( (*this) != obj ) Ref(obj);
-        return *this;   
+        return *this;
     }
-    
+
     wxSheetCellEditor Clone() const     { wxSheetCellEditor obj; obj.Copy(*this); return obj; }
     wxSheetCellEditor* NewClone() const { return new wxSheetCellEditor(Clone()); }
-    DECLARE_DYNAMIC_CLASS(wxSheetCellEditor)    
+    DECLARE_DYNAMIC_CLASS(wxSheetCellEditor)
 };
 
 WXDLLIMPEXP_DATA_SHEET(extern const wxSheetCellEditor) wxNullSheetCellEditor;
 
-// ----------------------------------------------------------------------------    
+// ----------------------------------------------------------------------------
 // wxSheetCellEditorRefData
-// ----------------------------------------------------------------------------    
+// ----------------------------------------------------------------------------
 class WXDLLIMPEXP_SHEET wxSheetCellEditorRefData : public wxObject, public wxObjectRefData
 {
 public:
@@ -177,16 +177,16 @@ public:
     virtual void SetControl(wxWindow* control);
     virtual void DestroyControl();
 
-    virtual void CreateEditor(wxWindow* parent, wxWindowID id, 
+    virtual void CreateEditor(wxWindow* parent, wxWindowID id,
                               wxEvtHandler* evtHandler, wxSheet* sheet);
     virtual void SetSize(const wxRect& rect, const wxSheetCellAttr &attr);
     // get the preferred size of the cell for its contents
     virtual wxSize GetBestSize(wxSheet& grid, const wxSheetCellAttr& attr,
                                const wxSheetCoords& coords);
- 
+
     virtual void Show(bool show, const wxSheetCellAttr &attr);
-    virtual void PaintBackground(wxSheet& grid, const wxSheetCellAttr& attr, 
-                                 wxDC& dc, const wxRect& rect, 
+    virtual void PaintBackground(wxSheet& grid, const wxSheetCellAttr& attr,
+                                 wxDC& dc, const wxRect& rect,
                                  const wxSheetCoords& coords, bool isSelected);
     virtual void BeginEdit(const wxSheetCoords& WXUNUSED(coords), wxSheet* WXUNUSED(grid)) {}
     virtual bool EndEdit(const wxSheetCoords& WXUNUSED(coords), wxSheet* WXUNUSED(grid)) { return false; }
@@ -204,7 +204,7 @@ public:
     virtual wxString GetInitValue() const { return wxEmptyString; }
 
     bool Copy(const wxSheetCellEditorRefData& WXUNUSED(other)) { return true; }
-    DECLARE_SHEETOBJREFDATA_COPY_CLASS(wxSheetCellEditorRefData, 
+    DECLARE_SHEETOBJREFDATA_COPY_CLASS(wxSheetCellEditorRefData,
                                        wxSheetCellEditorRefData)
 
     wxWindow* m_control;    // the control we show on screen
@@ -224,8 +224,8 @@ public:
                               wxEvtHandler* evtHandler, wxSheet* sheet);
     virtual void SetSize(const wxRect& rect, const wxSheetCellAttr &attr);
 
-    virtual void PaintBackground(wxSheet& , const wxSheetCellAttr& , 
-                                 wxDC& , const wxRect& , 
+    virtual void PaintBackground(wxSheet& , const wxSheetCellAttr& ,
+                                 wxDC& , const wxRect& ,
                                  const wxSheetCoords& , bool ) {}
 
     virtual bool IsAcceptedKey(wxKeyEvent& event);
@@ -243,9 +243,9 @@ public:
     virtual wxString GetValue() const;
     virtual wxString GetInitValue() const { return m_startValue; }
 
-    bool Copy(const wxSheetCellTextEditorRefData& other) 
+    bool Copy(const wxSheetCellTextEditorRefData& other)
         { return wxSheetCellEditorRefData::Copy(other); }
-    DECLARE_SHEETOBJREFDATA_COPY_CLASS(wxSheetCellTextEditorRefData, 
+    DECLARE_SHEETOBJREFDATA_COPY_CLASS(wxSheetCellTextEditorRefData,
                                        wxSheetCellEditorRefData)
 
     // parts of our virtual functions reused by the derived classes
@@ -253,9 +253,9 @@ public:
     void DoResetValue(const wxString& startValue);
 
     wxTextCtrl *GetTextCtrl() const { return (wxTextCtrl *)GetControl(); }
-    
+
     size_t   m_maxChars;        // max number of chars allowed
-    wxString m_startValue;    
+    wxString m_startValue;
     int      m_maxLength;       // largest length in the textctrl yet
 };
 
@@ -267,14 +267,14 @@ class WXDLLIMPEXP_SHEET wxSheetCellAutoWrapStringEditorRefData : public wxSheetC
 {
 public:
     wxSheetCellAutoWrapStringEditorRefData() : wxSheetCellTextEditorRefData() { }
-    
+
     virtual void CreateEditor(wxWindow* parent, wxWindowID id,
                               wxEvtHandler* evtHandler, wxSheet* sheet);
 
-    bool Copy(const wxSheetCellAutoWrapStringEditorRefData& other) 
+    bool Copy(const wxSheetCellAutoWrapStringEditorRefData& other)
         { return wxSheetCellTextEditorRefData::Copy(other); }
-    DECLARE_SHEETOBJREFDATA_COPY_CLASS(wxSheetCellAutoWrapStringEditorRefData, 
-                                       wxSheetCellEditorRefData)                
+    DECLARE_SHEETOBJREFDATA_COPY_CLASS(wxSheetCellAutoWrapStringEditorRefData,
+                                       wxSheetCellEditorRefData)
 };
 
 #endif // wxUSE_TEXTCTRL
@@ -291,7 +291,7 @@ public:
     wxSheetCellNumberEditorRefData(int min = -1, int max = -1)
         : m_min(min), m_max(max), m_startValue(0) {}
 
-    virtual void CreateEditor(wxWindow* parent, wxWindowID id, 
+    virtual void CreateEditor(wxWindow* parent, wxWindowID id,
                               wxEvtHandler* evtHandler, wxSheet* sheet);
 
     virtual bool IsAcceptedKey(wxKeyEvent& event);
@@ -312,15 +312,15 @@ public:
     bool HasRange() const { return m_min != m_max; }
 
     bool Copy(const wxSheetCellNumberEditorRefData& other);
-    DECLARE_SHEETOBJREFDATA_COPY_CLASS(wxSheetCellNumberEditorRefData, 
-                                       wxSheetCellEditorRefData)    
-    
+    DECLARE_SHEETOBJREFDATA_COPY_CLASS(wxSheetCellNumberEditorRefData,
+                                       wxSheetCellEditorRefData)
+
     wxSpinCtrl *GetSpinCtrl() const { return (wxSpinCtrl *)GetControl(); }
 
     int m_min,
         m_max;
 
-    long m_startValue;    
+    long m_startValue;
 };
 #endif //defined(wxUSE_TEXTCTRL) && defined(wxUSE_SPINCTRL)
 
@@ -351,14 +351,14 @@ public:
     // string representation of a double value
     virtual wxString GetInitValue() const { return GetStringValue(m_startValue); }
     virtual wxString GetStringValue(double value) const;
-    
+
     bool Copy(const wxSheetCellFloatEditorRefData& other);
-    DECLARE_SHEETOBJREFDATA_COPY_CLASS(wxSheetCellFloatEditorRefData, 
-                                       wxSheetCellEditorRefData)    
-    
+    DECLARE_SHEETOBJREFDATA_COPY_CLASS(wxSheetCellFloatEditorRefData,
+                                       wxSheetCellEditorRefData)
+
     int m_width,
         m_precision;
-    double m_startValue;    
+    double m_startValue;
 };
 
 #endif // wxUSE_TEXTCTRL
@@ -388,10 +388,10 @@ public:
 
     virtual wxString GetValue() const;
 
-    bool Copy(const wxSheetCellBoolEditorRefData& other) 
-        { return wxSheetCellEditorRefData::Copy(other); }    
-    DECLARE_SHEETOBJREFDATA_COPY_CLASS(wxSheetCellBoolEditorRefData, 
-                                       wxSheetCellEditorRefData)    
+    bool Copy(const wxSheetCellBoolEditorRefData& other)
+        { return wxSheetCellEditorRefData::Copy(other); }
+    DECLARE_SHEETOBJREFDATA_COPY_CLASS(wxSheetCellBoolEditorRefData,
+                                       wxSheetCellEditorRefData)
 
     wxCheckBox *GetCheckBox() const { return (wxCheckBox *)GetControl(); }
 
@@ -418,8 +418,8 @@ public:
     virtual void CreateEditor(wxWindow* parent, wxWindowID id,
                               wxEvtHandler* evtHandler, wxSheet* sheet);
 
-    virtual void PaintBackground(wxSheet& grid, const wxSheetCellAttr& attr, 
-                                 wxDC& dc, const wxRect& rect, 
+    virtual void PaintBackground(wxSheet& grid, const wxSheetCellAttr& attr,
+                                 wxDC& dc, const wxRect& rect,
                                  const wxSheetCoords& coords, bool isSelected);
 
     virtual void BeginEdit(const wxSheetCoords& coords, wxSheet* grid);
@@ -432,9 +432,9 @@ public:
 
     virtual wxString GetValue() const;
 
-    bool Copy(const wxSheetCellChoiceEditorRefData& other);    
-    DECLARE_SHEETOBJREFDATA_COPY_CLASS(wxSheetCellChoiceEditorRefData, 
-                                       wxSheetCellEditorRefData)    
+    bool Copy(const wxSheetCellChoiceEditorRefData& other);
+    DECLARE_SHEETOBJREFDATA_COPY_CLASS(wxSheetCellChoiceEditorRefData,
+                                       wxSheetCellEditorRefData)
 
     wxComboBox *GetComboBox() const { return (wxComboBox *)GetControl(); }
     wxString        m_startValue;
@@ -453,13 +453,13 @@ public:
 
     virtual bool EndEdit(const wxSheetCoords& coords, wxSheet* grid);
     virtual void BeginEdit(const wxSheetCoords& coords, wxSheet* grid);
-    
-    bool Copy(const wxSheetCellEnumEditorRefData& other) 
-        { return wxSheetCellChoiceEditorRefData::Copy(other); }
-    DECLARE_SHEETOBJREFDATA_COPY_CLASS(wxSheetCellEnumEditorRefData, 
-                                       wxSheetCellEditorRefData)            
 
-    long int m_startint;    
+    bool Copy(const wxSheetCellEnumEditorRefData& other)
+        { return wxSheetCellChoiceEditorRefData::Copy(other); }
+    DECLARE_SHEETOBJREFDATA_COPY_CLASS(wxSheetCellEnumEditorRefData,
+                                       wxSheetCellEditorRefData)
+
+    long int m_startint;
 };
 
 #endif // wxUSE_COMBOBOX

@@ -126,4 +126,3 @@ NashLiapBehaviorSolver::Solve(const MixedBehaviorProfile<double> &p_start) const
 
   return solutions;
 }
-

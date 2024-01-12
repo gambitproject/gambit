@@ -125,7 +125,7 @@ bool gbtNumberValidator::Validate(wxWindow *p_parent)
       (m_hasMax && Gambit::lexical_cast<Gambit::Rational>(std::string((const char *) value.mb_str())) > m_maxValue)) {
     wxMessageBox(_T("The value ") + value + _T(" in ") +
 		 m_validatorWindow->GetName() + _T(" is out of the range [") +
-		 wxString(Gambit::lexical_cast<std::string>(m_minValue).c_str(), *wxConvCurrent) + _T(", ") + 
+		 wxString(Gambit::lexical_cast<std::string>(m_minValue).c_str(), *wxConvCurrent) + _T(", ") +
 		 wxString(Gambit::lexical_cast<std::string>(m_maxValue).c_str(), *wxConvCurrent) + _T("]."),
 		 _("Error"), wxOK | wxICON_EXCLAMATION, p_parent);
     m_validatorWindow->SetFocus();
@@ -165,7 +165,7 @@ void gbtNumberValidator::OnChar(wxKeyEvent &p_event)
     int keyCode = (int) p_event.GetKeyCode();
 
     // we don't filter special keys and Delete
-    if (!(keyCode < WXK_SPACE || keyCode == WXK_DELETE || 
+    if (!(keyCode < WXK_SPACE || keyCode == WXK_DELETE ||
 	  keyCode > WXK_START) &&
 	(!isdigit(keyCode) &&
 	 keyCode != '.' && keyCode != '-' && keyCode != '/')) {
@@ -179,14 +179,14 @@ void gbtNumberValidator::OnChar(wxKeyEvent &p_event)
     auto *control = (wxTextCtrl *) m_validatorWindow;
     wxString value = control->GetValue();
 
-    if ((keyCode == '.' || keyCode == '/') && 
+    if ((keyCode == '.' || keyCode == '/') &&
 	(value.Find('.') != -1 || value.Find('/') != -1)) {
       // At most one slash or decimal point is allowed
       if (!wxValidator::IsSilent())  wxBell();
       return;
     }
 
-    if (keyCode == '/' && 
+    if (keyCode == '/' &&
 	(control->GetInsertionPoint() == 0 ||
 	 (control->GetInsertionPoint() == 1 && value == wxT("-")))) {
       // Can't start with a slash
@@ -198,7 +198,7 @@ void gbtNumberValidator::OnChar(wxKeyEvent &p_event)
       // Only permit minus signs at the start of the text
       long start, end;
       control->GetSelection(&start, &end);
-      
+
       if (start == end) {
 	// No selection; just see if inserting is OK
 	if (control->GetInsertionPoint() != 0) {
@@ -211,14 +211,10 @@ void gbtNumberValidator::OnChar(wxKeyEvent &p_event)
 	if (start != 0) {
 	  if (!wxValidator::IsSilent())  wxBell();
 	  return;
-	}	
+	}
       }
     }
   }
 
   p_event.Skip();
 }
-
-
-
-

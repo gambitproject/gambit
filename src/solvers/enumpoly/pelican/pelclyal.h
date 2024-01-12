@@ -91,7 +91,7 @@ the files cly* in the original distribution.
 
 /*
 ** Global  Variables
-*/ 
+*/
 extern int cly_Npts;   /* The number of points in the pt config*/
 extern int cly_N;       /* the dimension of the cayley point config */
 extern int cly_R;       /* the number of point configs */
@@ -99,7 +99,7 @@ extern int cly_Dim;      /* the dimension of the Aset */
 extern int next_id;     /* unique id#s for cells (for debugging)*/
 extern FILE *cly_out;
 
-/* 
+/*
 ** The matrices here are used for now to avoid problems,
 ** they will eventually be stored with the individual cells.
 */

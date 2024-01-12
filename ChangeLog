@@ -44,7 +44,7 @@
 - Implement MixedBehaviorProfile.realiz_prob to return probability node is reached under the profile.
 
 ### Fixed
-- When an action at a chance node is deleted the probabilities for the remaining actions are 
+- When an action at a chance node is deleted the probabilities for the remaining actions are
   normalized.
 
 ### Changed
@@ -122,10 +122,10 @@
 - Corrected a regression in accessing contingencies of a game in Python.
 - Removed use of explicit StopIteration (a holdover from Python 2.x support).
 
-	
+
 
 ## [16.0.2] - 2022-01-28
 
 ### Fixed
 - Updated build and packaging systems for current compilers across all platforms
-- Refactored Python implementation to make pygambit PyPI-installable	
+- Refactored Python implementation to make pygambit PyPI-installable

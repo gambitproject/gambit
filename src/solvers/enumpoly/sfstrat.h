@@ -34,14 +34,14 @@ private:
   Gambit::GamePlayer player;
   Gambit::GameAction action;
   const Sequence *parent;
-  
+
   Sequence(const Gambit::GamePlayer &pl, const Gambit::GameAction &a, const Sequence *p, int n)
     : number(n), player(pl), action(a), parent(p) { }
   ~Sequence() = default;
 public:
   const std::string &GetName() const   { return name; }
   void SetName(const std::string &s)       { name = s; }
-  
+
   Gambit::List<Gambit::GameAction> History() const;
   int GetNumber() const        { return number; }
   Gambit::GameAction GetAction() const  {return action; }
@@ -54,12 +54,12 @@ class SFSequenceSet {
 protected:
   Gambit::GamePlayer efp;
   Gambit::Array <Sequence *> sequences;
-  
+
 public:
-  SFSequenceSet(const SFSequenceSet &s); 
+  SFSequenceSet(const SFSequenceSet &s);
   explicit SFSequenceSet(const Gambit::GamePlayer &p);
-  
-  SFSequenceSet &operator=(const SFSequenceSet &s); 
+
+  SFSequenceSet &operator=(const SFSequenceSet &s);
   bool operator==(const SFSequenceSet &s);
 
   virtual ~SFSequenceSet();
@@ -69,7 +69,7 @@ public:
 
   // Removes a sequence pointer. Returns true if the sequence was successfully
   // removed, false otherwise.
-  bool RemoveSequence( Sequence *s ); 
+  bool RemoveSequence( Sequence *s );
   Sequence * Find(int j);
 
   // Number of sequences in the SFSequenceSet
@@ -86,10 +86,10 @@ class SFSupport {
 protected:
   const Sfg *bsfg;
   Gambit::Array <SFSequenceSet *> sups;
-  
+
 public:
   explicit SFSupport(const Sfg &);
-  SFSupport(const SFSupport &s); 
+  SFSupport(const SFSupport &s);
   virtual ~SFSupport();
   SFSupport &operator=(const SFSupport &s);
 
@@ -97,7 +97,7 @@ public:
   bool operator!=(const SFSupport &s) const;
 
   const Sfg &Game() const   { return *bsfg; }
-  
+
   const Gambit::Array<Sequence *> &Sequences(int pl) const;
 
   int NumSequences(int pl) const;
@@ -106,12 +106,12 @@ public:
 
   void AddSequence(Sequence *);
   bool RemoveSequence(Sequence *);
-  
+
   bool IsSubset(const SFSupport &s) const;
 
   // returns the index of the sequence in the support if it exists,
   // otherwise returns zero
-  int Find(Sequence *) const; 
+  int Find(Sequence *) const;
 };
 
 class SequenceProfile   {
@@ -119,24 +119,22 @@ class SequenceProfile   {
 private:
   long index;
   Gambit::Array<Sequence *> profile;
-  
+
 public:
   explicit SequenceProfile(const Sfg &);
   SequenceProfile(const SequenceProfile &p);
 
   ~SequenceProfile();
-  
+
   SequenceProfile &operator=(const SequenceProfile &);
-  
-  bool IsValid() const; 
-  
+
+  bool IsValid() const;
+
   long GetIndex() const;
-  
+
   Sequence *const operator[](int p) const;
   Sequence *const Get(int p) const;
   void Set(int p, Sequence  *const s);
 };
 
 #endif    // SFSTRAT_H
-
-

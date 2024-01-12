@@ -32,7 +32,7 @@
 //              class gbtMixedProfileList: Member functions
 //-------------------------------------------------------------------------
 
-gbtMixedProfileList::gbtMixedProfileList(wxWindow *p_parent, 
+gbtMixedProfileList::gbtMixedProfileList(wxWindow *p_parent,
 					 gbtGameDocument *p_doc)
   : wxSheet(p_parent, wxID_ANY), gbtGameView(p_doc),
     m_showProbs(1), m_showPayoff(0)
@@ -131,7 +131,7 @@ static wxColour GetPlayerColor(gbtGameDocument *p_doc, int p_index)
   return *wxBLACK;
 }
 
-wxSheetCellAttr gbtMixedProfileList::GetAttr(const wxSheetCoords &p_coords, 
+wxSheetCellAttr gbtMixedProfileList::GetAttr(const wxSheetCoords &p_coords,
 					     wxSheetAttr_Type) const
 {
   int currentProfile = m_doc->GetCurrentProfile();
@@ -173,7 +173,7 @@ wxSheetCellAttr gbtMixedProfileList::GetAttr(const wxSheetCoords &p_coords,
   attr.SetOrientation(wxHORIZONTAL);
   attr.SetRenderer(wxSheetCellRenderer(new gbtRationalRendererRefData()));
   attr.SetForegroundColour(GetPlayerColor(m_doc, p_coords.GetCol()));
-			   
+
   attr.SetReadOnly(true);
   return attr;
 }
@@ -193,14 +193,14 @@ void gbtMixedProfileList::OnUpdate()
   int newRows = profiles.NumProfiles() * (m_showProbs + m_showPayoff);
   DeleteRows(0, GetNumberRows());
   InsertRows(0, newRows);
-	     
+
   int profileLength = m_doc->GetGame()->MixedProfileLength();
   int newCols = profileLength;
   DeleteCols(0, GetNumberCols());
   InsertCols(0, newCols);
 
   for (int row = 0; row < GetNumberRows(); row += m_showProbs + m_showPayoff) {
-    SetCellSpan(wxSheetCoords(row, -1), 
+    SetCellSpan(wxSheetCoords(row, -1),
 		wxSheetCoords(m_showProbs + m_showPayoff, 1));
   }
 
@@ -218,4 +218,3 @@ void gbtMixedProfileList::OnUpdate()
 
   EndBatch();
 }
-

@@ -26,6 +26,7 @@ from cython.operator cimport dereference as deref
 
 import typing
 
+
 @cython.cfunc
 def _convert_mspd(
         inlist: c_List[c_MixedStrategyProfileDouble]
@@ -36,6 +37,7 @@ def _convert_mspd(
         p.profile = copyitem_list_mspd(inlist, i+1)
         ret.append(p)
     return ret
+
 
 @cython.cfunc
 def _convert_mspr(
@@ -48,6 +50,7 @@ def _convert_mspr(
         ret.append(p)
     return ret
 
+
 @cython.cfunc
 def _convert_mbpd(
         inlist: c_List[c_MixedBehaviorProfileDouble]
@@ -58,6 +61,7 @@ def _convert_mbpd(
         p.profile = copyitem_list_mbpd(inlist, i+1)
         ret.append(p)
     return ret
+
 
 @cython.cfunc
 def _convert_mbpr(
@@ -70,75 +74,96 @@ def _convert_mbpr(
         ret.append(p)
     return ret
 
+
 def _enumpure_strategy_solve(game: Game) -> typing.List[MixedStrategyProfileRational]:
     return _convert_mspr(EnumPureStrategySolve(game.game))
+
 
 def _enumpure_agent_solve(game: Game) -> typing.List[MixedBehaviorProfileRational]:
     return _convert_mbpr(EnumPureAgentSolve(game.game))
 
+
 def _enummixed_strategy_solve_double(game: Game) -> typing.List[MixedStrategyProfileDouble]:
     return _convert_mspd(EnumMixedStrategySolveDouble(game.game))
+
 
 def _enummixed_strategy_solve_rational(game: Game) -> typing.List[MixedStrategyProfileRational]:
     return _convert_mspr(EnumMixedStrategySolveRational(game.game))
 
+
 def _enummixed_strategy_solve_lrs(game: Game) -> typing.List[MixedStrategyProfileRational]:
     return _convert_mspr(EnumMixedStrategySolveLrs(game.game))
+
 
 def _lcp_behavior_solve_double(
         game: Game, stop_after: int, max_depth: int
 ) -> typing.List[MixedBehaviorProfileDouble]:
     return _convert_mbpd(LcpBehaviorSolveDouble(game.game, stop_after, max_depth))
 
+
 def _lcp_behavior_solve_rational(
         game: Game, stop_after: int, max_depth: int
 ) -> typing.List[MixedBehaviorProfileRational]:
     return _convert_mbpr(LcpBehaviorSolveRational(game.game, stop_after, max_depth))
+
 
 def _lcp_strategy_solve_double(
         game: Game, stop_after: int, max_depth: int
 ) -> typing.List[MixedStrategyProfileDouble]:
     return _convert_mspd(LcpStrategySolveDouble(game.game, stop_after, max_depth))
 
+
 def _lcp_strategy_solve_rational(
         game: Game, stop_after: int, max_depth: int
 ) -> typing.List[MixedStrategyProfileRational]:
     return _convert_mspr(LcpStrategySolveRational(game.game, stop_after, max_depth))
 
+
 def _lp_behavior_solve_double(game: Game) -> typing.List[MixedBehaviorProfileDouble]:
     return _convert_mbpd(LpBehaviorSolveDouble(game.game))
+
 
 def _lp_behavior_solve_rational(game: Game) -> typing.List[MixedBehaviorProfileRational]:
     return _convert_mbpr(LpBehaviorSolveRational(game.game))
 
+
 def _lp_strategy_solve_double(game: Game) -> typing.List[MixedStrategyProfileDouble]:
     return _convert_mspd(LpStrategySolveDouble(game.game))
+
 
 def _lp_strategy_solve_rational(game: Game) -> typing.List[MixedStrategyProfileRational]:
     return _convert_mspr(LpStrategySolveRational(game.game))
 
+
 def _liap_strategy_solve(game: Game, maxiter: int) -> typing.List[MixedStrategyProfileDouble]:
     return _convert_mspd(LiapStrategySolve(game.game, maxiter))
 
+
 def _liap_behavior_solve(game: Game, maxiter: int) -> typing.List[MixedBehaviorProfileDouble]:
     return _convert_mbpd(LiapBehaviorSolve(game.game, maxiter))
+
 
 def _simpdiv_strategy_solve(
         game: Game, gridstep: int, leash: int
 ) -> typing.List[MixedStrategyProfileRational]:
     return _convert_mspr(SimpdivStrategySolve(game.game, gridstep, leash))
 
+
 def _ipa_strategy_solve(game: Game) -> typing.List[MixedStrategyProfileDouble]:
     return _convert_mspd(IPAStrategySolve(game.game))
+
 
 def _gnm_strategy_solve(game: Game) -> typing.List[MixedStrategyProfileDouble]:
     return _convert_mspd(GNMStrategySolve(game.game))
 
+
 def _logit_strategy_solve(game: Game) -> typing.List[MixedStrategyProfileDouble]:
     return _convert_mspd(LogitStrategySolve(game.game))
 
+
 def _logit_behavior_solve(game: Game) -> typing.List[MixedBehaviorProfileDouble]:
     return _convert_mbpd(LogitBehaviorSolve(game.game))
+
 
 @cython.cclass
 class LogitQREMixedStrategyProfile:
@@ -180,8 +205,11 @@ class LogitQREMixedStrategyProfile:
     def profile(self) -> MixedStrategyProfileDouble:
         """The mixed strategy profile."""
         profile = MixedStrategyProfileDouble()
-        profile.profile = make_shared[c_MixedStrategyProfileDouble](deref(self.thisptr).GetProfile())
+        profile.profile = (
+            make_shared[c_MixedStrategyProfileDouble](deref(self.thisptr).GetProfile())
+        )
         return profile
+
 
 def logit_estimate(profile: MixedStrategyProfileDouble) -> LogitQREMixedStrategyProfile:
     """Estimate QRE corresponding to mixed strategy profile using
@@ -191,6 +219,7 @@ def logit_estimate(profile: MixedStrategyProfileDouble) -> LogitQREMixedStrategy
     ret.thisptr = _logit_estimate(profile.profile)
     return ret
 
+
 def logit_atlambda(game: Game, lam: float) -> LogitQREMixedStrategyProfile:
     """Compute the first QRE along the principal branch with the given
     lambda parameter.
@@ -198,7 +227,8 @@ def logit_atlambda(game: Game, lam: float) -> LogitQREMixedStrategyProfile:
     ret = LogitQREMixedStrategyProfile()
     ret.thisptr = _logit_atlambda(game.game, lam)
     return ret
-   
+
+
 def logit_principal_branch(game: Game, maxlam: float = 100000.0):
     solns = _logit_principal_branch(game.game, maxlam)
     ret = []

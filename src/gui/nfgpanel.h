@@ -63,9 +63,3 @@ public:
 };
 
 #endif  // NFGPANEL_H
-
-
-
-
-
-

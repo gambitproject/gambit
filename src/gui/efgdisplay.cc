@@ -44,7 +44,7 @@ BEGIN_EVENT_TABLE(gbtPayoffEditor, wxTextCtrl)
 END_EVENT_TABLE()
 
 gbtPayoffEditor::gbtPayoffEditor(wxWindow *p_parent)
-  : wxTextCtrl(p_parent, wxID_ANY, wxT(""), 
+  : wxTextCtrl(p_parent, wxID_ANY, wxT(""),
 	       wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER)
 {
   Show(false);
@@ -130,7 +130,7 @@ public:
 
 //
 // This recurses the subtree starting at 'p_node' looking for a node
-// with the ID 'p_id'. 
+// with the ID 'p_id'.
 //
 static Gambit::GameNode GetNode(const Gambit::GameNode &p_node, int p_id)
 {
@@ -330,25 +330,25 @@ void gbtEfgDisplay::MakeMenus()
 		   _("Redo the last undone change"));
   m_nodeMenu->AppendSeparator();
 
-  m_nodeMenu->Append(GBT_MENU_EDIT_INSERT_MOVE, _("&Insert move"), 
+  m_nodeMenu->Append(GBT_MENU_EDIT_INSERT_MOVE, _("&Insert move"),
 		     _("Insert a move"));
   m_nodeMenu->Append(GBT_MENU_EDIT_INSERT_ACTION, _("Insert &action"),
 		     _("Insert an action at the current move"));
-  m_nodeMenu->Append(GBT_MENU_EDIT_REVEAL, _("&Reveal"), 
+  m_nodeMenu->Append(GBT_MENU_EDIT_REVEAL, _("&Reveal"),
 		     _("Reveal choice at node"));
   m_nodeMenu->AppendSeparator();
-  
-  m_nodeMenu->Append(GBT_MENU_EDIT_DELETE_TREE, 
-		     _("&Delete subtree"), 
+
+  m_nodeMenu->Append(GBT_MENU_EDIT_DELETE_TREE,
+		     _("&Delete subtree"),
 		     _("Delete the subtree starting at the selected node"));
-  m_nodeMenu->Append(GBT_MENU_EDIT_DELETE_PARENT, 
-		     _("Delete &parent"), 
+  m_nodeMenu->Append(GBT_MENU_EDIT_DELETE_PARENT,
+		     _("Delete &parent"),
 		     _("Delete the node directly before the selected node"));
   m_nodeMenu->Append(GBT_MENU_EDIT_REMOVE_OUTCOME,
 		     _("Remove &outcome"),
 		     _("Remove the outcome from the selected node"));
   m_nodeMenu->AppendSeparator();
-  
+
   m_nodeMenu->Append(GBT_MENU_EDIT_NODE, _("&Node properties"),
 		     _("Edit properties of the node"));
   m_nodeMenu->Append(GBT_MENU_EDIT_MOVE, _("&Move properties"),
@@ -371,7 +371,7 @@ static Gambit::GameNode PriorSameIset(const Gambit::GameNode &n)
     if (iset->GetMember(i) == n) {
       if (i > 1) {
 	return iset->GetMember(i-1);
-      } 
+      }
       else {
 	return nullptr;
       }
@@ -387,7 +387,7 @@ static Gambit::GameNode NextSameIset(const Gambit::GameNode &n)
   for (int i = 1; i <= iset->NumMembers(); i++) {
     if (iset->GetMember(i) == n) {
       if (i < iset->NumMembers()) {
-	return iset->GetMember(i+1); 
+	return iset->GetMember(i+1);
       }
       else {
 	return nullptr;
@@ -405,7 +405,7 @@ static Gambit::GameNode NextSameIset(const Gambit::GameNode &n)
 //     up arrow:     go to previous sibling of current node
 //     down arrow:   go to next sibling of current node
 //     ALT-up:       go to previous member of information set
-//     ALT-down:     go to next member of information set    
+//     ALT-down:     go to next member of information set
 //     space:        ensure the selected node is visible
 //     'R', 'r':     select the root node (and make it visible)
 //     delete:       delete the subtree rooted at current node
@@ -414,7 +414,7 @@ static Gambit::GameNode NextSameIset(const Gambit::GameNode &n)
 //     'N', 'n':     edit the properties of the current node
 //     escape:       cancel edit of payoff
 //     tab:          accept edit of payoff, edit next payoff (if any)
-//     
+//
 void gbtEfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
 {
   Gambit::GameNode selectNode = m_doc->GetSelectNode();
@@ -432,15 +432,15 @@ void gbtEfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
     }
     else if (p_event.GetKeyCode() == WXK_TAB) {
       m_payoffEditor->EndEdit();
-      
+
       Gambit::GameOutcome outcome = m_payoffEditor->GetOutcome();
       int player = m_payoffEditor->GetPlayer();
       Gambit::GameNode node = m_payoffEditor->GetNodeEntry()->GetNode();
       try {
 	m_doc->DoSetPayoff(outcome, player, m_payoffEditor->GetValue());
-      }	
+      }
       catch (ValueException &) {
-	// For the moment, we will just silently discard edits which 
+	// For the moment, we will just silently discard edits which
 	// give payoffs that are not valid numbers
 	return;
       }
@@ -481,15 +481,15 @@ void gbtEfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
 
   switch (p_event.GetKeyCode()) {
   case 'M': case 'm': {
-    wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, 
+    wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,
 			 GBT_MENU_EDIT_MOVE);
-    wxPostEvent(this, event); 
+    wxPostEvent(this, event);
     return;
   }
   case 'N': case 'n': {
-    wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, 
+    wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,
 			 GBT_MENU_EDIT_NODE);
-    wxPostEvent(this, event); 
+    wxPostEvent(this, event);
     return;
   }
   case WXK_LEFT:
@@ -505,7 +505,7 @@ void gbtEfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
     }
     return;
   case WXK_UP: {
-    Gambit::GameNode prior = ((!p_event.AltDown()) ? 
+    Gambit::GameNode prior = ((!p_event.AltDown()) ?
 			m_layout.PriorSameLevel(selectNode) :
 			PriorSameIset(selectNode));
     if (prior) {
@@ -528,9 +528,9 @@ void gbtEfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
     EnsureNodeVisible(m_doc->GetSelectNode());
     return;
   case WXK_DELETE: {
-    wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, 
+    wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,
 			 GBT_MENU_EDIT_DELETE_TREE);
-    wxPostEvent(this, event); 
+    wxPostEvent(this, event);
     return;
   }
   case WXK_BACK: {
@@ -554,7 +554,7 @@ void gbtEfgDisplay::OnAcceptPayoffEdit(wxCommandEvent &)
     m_doc->DoSetPayoff(outcome, player, m_payoffEditor->GetValue());
   }
   catch (ValueException &) {
-    // For the moment, we will just silently discard edits which 
+    // For the moment, we will just silently discard edits which
     // give payoffs that are not valid numbers
     return;
   }
@@ -602,7 +602,7 @@ void gbtEfgDisplay::OnUpdate()
   m_nodeMenu->Enable(GBT_MENU_EDIT_REMOVE_OUTCOME,
 		     selectNode && selectNode->GetOutcome());
   m_nodeMenu->Enable(GBT_MENU_EDIT_NODE, selectNode);
-  m_nodeMenu->Enable(GBT_MENU_EDIT_MOVE, 
+  m_nodeMenu->Enable(GBT_MENU_EDIT_MOVE,
 		     selectNode && selectNode->GetInfoset());
 }
 
@@ -639,7 +639,7 @@ void gbtEfgDisplay::FitZoom()
   double zoomx = (double) width / (double) m_layout.MaxX();
   double zoomy = (double) height / (double) m_layout.MaxY();
 
-  zoomx = std::min(zoomx, 1.0); 
+  zoomx = std::min(zoomx, 1.0);
   zoomy = std::min(zoomy, 1.0);  // never zoom in (only out)
   m_zoom = int(100.0 * (std::min(zoomx, zoomy) * .9));
   AdjustScrollbarSteps();
@@ -709,7 +709,7 @@ void gbtEfgDisplay::EnsureNodeVisible(const Gambit::GameNode &p_node)
     xScroll -= -xx / 50 + 1;
   }
 
-  CalcScrolledPosition((int) (entry->X() * (.01 * m_zoom)), 
+  CalcScrolledPosition((int) (entry->X() * (.01 * m_zoom)),
 		       (int) (entry->Y() * (.01 * m_zoom)), &xx, &yy);
   if (xx > width) {
     xScroll += (xx - width) / 50 + 1;
@@ -736,7 +736,7 @@ void gbtEfgDisplay::EnsureNodeVisible(const Gambit::GameNode &p_node)
   }
   else if (yScroll > GetScrollRange(wxVERTICAL)) {
     yScroll = GetScrollRange(wxVERTICAL);
-  } 
+  }
 
   Scroll(xScroll, yScroll);
 }
@@ -775,7 +775,7 @@ void gbtEfgDisplay::OnLeftDoubleClick(wxMouseEvent &p_event)
   if (node) {
     m_doc->SetSelectNode(node);
     wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, GBT_MENU_EDIT_NODE);
-    wxPostEvent(this, event); 
+    wxPostEvent(this, event);
     return;
   }
 
@@ -792,7 +792,7 @@ void gbtEfgDisplay::OnLeftDoubleClick(wxMouseEvent &p_event)
 
       gbtNodeEntry *entry = m_layout.GetNodeEntry(node);
       wxRect rect = entry->GetPayoffExtent(1);
-      
+
       int xx, yy;
       CalcScrolledPosition((int) (.01 * (rect.x - 3) * m_zoom),
 			   (int) (.01 * (rect.y - 3) * m_zoom), &xx, &yy);
@@ -842,7 +842,7 @@ void gbtEfgDisplay::OnLeftDoubleClick(wxMouseEvent &p_event)
     }
   }
 
-  
+
 }
 
 #include "bitmaps/tree.xpm"
@@ -855,9 +855,9 @@ void gbtEfgDisplay::OnMouseMotion(wxMouseEvent &p_event)
     CalcUnscrolledPosition(p_event.GetX(), p_event.GetY(), &x, &y);
     x = (int) ((float) x / (.01 * GetZoom()));
     y = (int) ((float) y / (.01 * GetZoom()));
-  
+
     Gambit::GameNode node = m_layout.NodeHitTest(x, y);
-    
+
     if (node && node->NumChildren() > 0) {
       Gambit::GamePlayer player = node->GetPlayer();
       wxString label;
@@ -907,7 +907,7 @@ void gbtEfgDisplay::OnMouseMotion(wxMouseEvent &p_event)
 	wxIcon image;
 	image.CopyFromBitmap(bitmap);
 #endif // _WXMSW__
-	
+
 	wxTextDataObject textData(wxString::Format(wxT("M%d"), node->GetNumber()));
 
 	wxDropSource source(textData, this, image, image, image);
@@ -917,7 +917,7 @@ void gbtEfgDisplay::OnMouseMotion(wxMouseEvent &p_event)
     }
 
     node = m_layout.OutcomeHitTest(x, y);
-    
+
     if (node && node->GetOutcome()) {
       wxBitmap bitmap = MakeOutcomeBitmap();
 #if defined( __WXMSW__) or defined(__WXMAC__)
@@ -963,4 +963,3 @@ void gbtEfgDisplay::OnRightClick(wxMouseEvent &p_event)
   }
   PopupMenu(m_nodeMenu);
 }
-

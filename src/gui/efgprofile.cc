@@ -32,7 +32,7 @@
 //              class gbtBehavProfileList: Member functions
 //-------------------------------------------------------------------------
 
-gbtBehavProfileList::gbtBehavProfileList(wxWindow *p_parent, 
+gbtBehavProfileList::gbtBehavProfileList(wxWindow *p_parent,
 					 gbtGameDocument *p_doc)
   : wxSheet(p_parent, wxID_ANY), gbtGameView(p_doc)
 {
@@ -75,7 +75,7 @@ wxString gbtBehavProfileList::GetCellValue(const wxSheetCoords &p_coords)
   }
   else if (IsColLabelCell(p_coords)) {
     Gambit::GameAction action = m_doc->GetGame()->GetAction(p_coords.GetCol()+1);
-    return (wxString::Format(wxT("%d: "), 
+    return (wxString::Format(wxT("%d: "),
 			     action->GetInfoset()->GetNumber()) +
 	    wxString(action->GetLabel().c_str(), *wxConvCurrent));
   }
@@ -95,7 +95,7 @@ static wxColour GetPlayerColor(gbtGameDocument *p_doc, int p_index)
   return p_doc->GetStyle().GetPlayerColor(action->GetInfoset()->GetPlayer()->GetNumber());
 }
 
-wxSheetCellAttr gbtBehavProfileList::GetAttr(const wxSheetCoords &p_coords, 
+wxSheetCellAttr gbtBehavProfileList::GetAttr(const wxSheetCoords &p_coords,
 					     wxSheetAttr_Type) const
 {
   int currentProfile = m_doc->GetCurrentProfile();
@@ -187,4 +187,3 @@ void gbtBehavProfileList::OnUpdate()
 
   EndBatch();
 }
-

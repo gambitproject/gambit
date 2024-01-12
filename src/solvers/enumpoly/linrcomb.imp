@@ -28,10 +28,10 @@
 // LinearCombination<T>: Constructors, destructors, constructive operators
 //-------------------------------------------------------------------------
 
-template <class T> 
+template <class T>
 LinearCombination<T>::LinearCombination(const Gambit::Matrix<T> &M)
 : scrambled(M), weights(M.NumRows()), last_row_is_spanned(true)
-{ 
+{
   int K = scrambled.NumRows() - 1;
 
   int i,j;
@@ -119,13 +119,13 @@ LinearCombination<T>::LinearCombination(const Gambit::Matrix<T> &M)
   }
 }
 
-template <class T> 
+template <class T>
 LinearCombination<T>::LinearCombination(const LinearCombination<T> &L)
-: scrambled(L.scrambled), 
+: scrambled(L.scrambled),
   weights(L.weights),
   last_row_is_spanned(L.last_row_is_spanned)
 { }
- 
+
 template <class T> LinearCombination<T>::~LinearCombination()
 = default;
 
@@ -133,17 +133,17 @@ template <class T> LinearCombination<T>::~LinearCombination()
 //                    LinearCombination<T>: Comparison operators
 //-------------------------------------------------------------------------
 
-template <class T> 
+template <class T>
 bool LinearCombination<T>::operator==(const LinearCombination<T> &L) const
 {
-  if (scrambled == L.scrambled && 
+  if (scrambled == L.scrambled &&
       last_row_is_spanned == L.last_row_is_spanned &&
       weights == L.weights)
     return true;
   else return false;
 }
 
-template <class T> 
+template <class T>
 bool LinearCombination<T>::operator!=(const LinearCombination<T> &L) const
 { return !(*this == L); }
 
@@ -165,8 +165,8 @@ template <class T> Gambit::Vector<T> LinearCombination<T>::LinearDependence() co
 //                  LinearCombination<T>: Private Members
 //-------------------------------------------------------------------------
 
-template <class T> 
-void LinearCombination<T>::AddMultipleOfRowiToRowj(const int& i, 
+template <class T>
+void LinearCombination<T>::AddMultipleOfRowiToRowj(const int& i,
 						   const int& j,
 						   const T& scalar,
 						   Gambit::Matrix<T>& B)
@@ -175,8 +175,8 @@ void LinearCombination<T>::AddMultipleOfRowiToRowj(const int& i,
     B(j,k) += scalar * B(i,k);
 }
 
-template <class T> 
-void LinearCombination<T>::AddMultipleOfRowiToRowj(const int& i, 
+template <class T>
+void LinearCombination<T>::AddMultipleOfRowiToRowj(const int& i,
 						   const int& j,
 						   const T& scalar)
 {

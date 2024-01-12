@@ -1,2 +1,35 @@
 [build-system]
 requires = ["setuptools", "wheel", "Cython"]
+
+[tool.ruff]
+line-length = 99
+indent-width = 4
+target-version = "py38"
+include = ["setup.py", "src/pygambit/**/*.py", "tests/**/*.py"]
+exclude = ["contrib/**.py"]
+
+[tool.ruff.lint]
+select = [
+    "E", # pycodestyle
+    "F", # pyflakes
+    "UP", # pyupgrade
+    "B", # flake8-bugbear
+    "SIM", # flake-simplify
+    "I", # isort
+    "Q", # prefer double quotes
+]
+ignore = []
+
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+
+[tool.cython-lint]
+max-line-length = 99

@@ -29,7 +29,7 @@
 namespace Gambit {
 
 namespace agg {
-    
+
 class GrayComposition {
 friend class AGG;
 public:
@@ -107,6 +107,6 @@ private:
 }   // end namespace Gambit::agg
 
 }   // end namespace Gambit
- 
+
 
 #endif  // GAMBIT_AGG_GRAY_H

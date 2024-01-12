@@ -55,13 +55,13 @@ template <class T> Gambit::List<gPoly<double> > gSolver<T>::BasisTogDouble() con
   Gambit::List<gPoly<double> > newlist;
   gPolyList<T> oldlist = TheIdeal.CanonicalBasis();
   for (int i = 1; i <= oldlist.Length(); i++) {
-    
+
     newlist.push_back(TogDouble(oldlist[i]));
   }
   return newlist;
 }
 
-template <class T> Gambit::List<Gambit::Vector<double> >  
+template <class T> Gambit::List<Gambit::Vector<double> >
 gSolver<T>::ContinuationSolutions(const Gambit::List<gPoly<double> >& list,
 				  const int dmnsn,
 				  const int curvar,
@@ -90,16 +90,16 @@ gSolver<T>::ContinuationSolutions(const Gambit::List<gPoly<double> >& list,
       if (curvar == dmnsn) answer.push_back(newvec);
       else {
 	Gambit::List<gPoly<double> > newlist;
-	for (int j = 2; j <= list.Length(); j++) 
+	for (int j = 2; j <= list.Length(); j++)
 	  newlist.push_back(list[j].EvaluateOneVar(curvar,rootlist[i]));
 	answer += ContinuationSolutions(newlist,dmnsn,curvar+1,newvec);
       }
     }
   }
-  
+
   else {   // (list[1].IsZero())
     Gambit::List<gPoly<double> > newlist;
-    for (int j = 2; j <= list.Length(); j++) 
+    for (int j = 2; j <= list.Length(); j++)
       newlist.push_back(list[j]);
     answer += ContinuationSolutions(newlist,dmnsn,curvar,knownvals);
   }
@@ -142,7 +142,7 @@ template<class T> Gambit::List<Gambit::Vector<double> > gSolver<T>::Roots()
   int i;
   for (i = 1; i <= TheIdeal.Dmnsn(); i++) {
     Gambit::Matrix<T> CoefficientMatrix(mon_bss.Length()+1, mon_bss.Length());
-    int j = 0; 
+    int j = 0;
     bool done = false;
     while (!done) {
       exp_vect x_i_to_j(InputList.AmbientSpace(),i,j);
@@ -162,7 +162,7 @@ template<class T> Gambit::List<Gambit::Vector<double> > gSolver<T>::Roots()
 	  SubMatrix(m,n) = CoefficientMatrix(m,n);
 
 //DEBUG
-//gout << "Before entering Linear Combination, SubMatrix is\n" 
+//gout << "Before entering Linear Combination, SubMatrix is\n"
 //  << SubMatrix << "\n";
 
       LinearCombination<T> Attempt(SubMatrix);

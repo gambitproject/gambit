@@ -38,5 +38,3 @@ int Can_Be_Number(Gen_node g, int t);
 int Gen_Can_Be_Aset(Gen_node g,int *r, int *d);
 int Can_Be_List_Of(Gen_node ptr, int (*pred)(Gen_node));
 int Can_Be_Xpnt(Gen_node ptr);
-
-

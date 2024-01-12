@@ -202,5 +202,3 @@ the graph view to the full graph, click on the zoom to fit icon .
 
 To print the graph as shown, click on the print icon . Note that this
 is very experimental, and the output may not be very satisfactory yet.
-
-

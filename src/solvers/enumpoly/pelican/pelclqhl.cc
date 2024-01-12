@@ -1,6 +1,6 @@
 /*
-** Call_Qhull.h 
-**      Old code calling qhull to find a mixed subdivision 
+** Call_Qhull.h
+**      Old code calling qhull to find a mixed subdivision
 **
 **    copyright (c) 1995  Birk Huber
 */
@@ -43,7 +43,7 @@ node pcfg_facets(node PC, Imatrix Controll)
 
     j = Imatrix_rref(M, &i);
 
-   
+
 
     if (j <= D - 1) {
 	if (j == D - 1) {
@@ -54,7 +54,7 @@ node pcfg_facets(node PC, Imatrix Controll)
 	    Imatrix_backsolve(M, Norm);
             Imatrix_gcd_reduce(Norm);
 	    /* printf("Imatrix norm : ");
-	       Imatrix_print(Norm); 
+	       Imatrix_print(Norm);
 	       printf("\n"); */
 	    if (is_normal_good(Norm, Controll) != True) {
 		for (i = 1; i <= D; i++)
@@ -195,7 +195,7 @@ node aset_cayley(node A,int addlift)
             for (i = 1; i < D; i++)
                 *IVref(C, i) = aset_pnt_get(ptp, i);
             for (i = 1; i <= R - 1; i++)
-                if (r - 1 == i)                               
+                if (r - 1 == i)
                     *IVref(C, D + i-1) = 1;
                 else
                     *IVref(C, D + i-1) = 0;
@@ -245,7 +245,7 @@ node aset_lower_facets(node A)
     POP_LOCS();
     return res;
 }
-                        
+
 /* #define ACTUALLY_PRINT */
 node aset_print_subdiv(node A, node norms, Imatrix T)
 {
@@ -309,4 +309,3 @@ node aset_print_subdiv(node A, node norms, Imatrix T)
     return res;
 
 }
-

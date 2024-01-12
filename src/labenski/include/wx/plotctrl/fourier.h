@@ -1,13 +1,13 @@
 /*============================================================================
 
     fourier.h  -  Don Cross <dcross@intersrv.com>
-    
+
     The file FFT.ZIP contains C source code for performing Discrete Fast Fourier
-    Transforms (DFFTs) and inverse DFFTs.  
+    Transforms (DFFTs) and inverse DFFTs.
 
     Please see fouier.txt which was the readme.txt that Don Cross provided.
-    
-    This source code is public domain. Use at your own risk.  
+
+    This source code is public domain. Use at your own risk.
 
     For more information, point your web browser at:  (dead link)
     http://www.intersrv.com/~dcross/fft.html
@@ -18,7 +18,7 @@
 2003 [John Labenski]
     Merged fourierd.c (double), fourierf.c (float), and fftmisc.c into
     fourier.c for simplicity.
-    
+
 ============================================================================*/
 
 #ifndef _FOURIER_FFT_H_

@@ -68,7 +68,7 @@ public:
   const MixedStrategyProfile<double> &GetProfile(int p_index)
   { return *m_profiles[p_index]; }
 };
-  
+
 void LogitMixedBranch::AddProfile(const wxString &p_text)
 {
   auto profile = std::make_shared<MixedStrategyProfile<double>>(m_doc->GetGame()->NewMixedStrategyProfile(0.0));
@@ -96,7 +96,7 @@ private:
   // Overriding wxSheet members for data access
   wxString GetCellValue(const wxSheetCoords &) override;
   wxSheetCellAttr GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const override;
-  
+
   // Overriding wxSheet members to disable selection behavior
   bool SelectRow(int, bool = false, bool = false) override
     { return false; }
@@ -121,9 +121,9 @@ public:
   ~LogitMixedSheet() override;
 };
 
-LogitMixedSheet::LogitMixedSheet(wxWindow *p_parent, 
+LogitMixedSheet::LogitMixedSheet(wxWindow *p_parent,
 				       gbtGameDocument *p_doc,
-				       LogitMixedBranch &p_branch) 
+				       LogitMixedBranch &p_branch)
   : wxSheet(p_parent, wxID_ANY), m_doc(p_doc), m_branch(p_branch)
 {
   CreateGrid(p_branch.NumPoints(), p_doc->GetGame()->MixedProfileLength()+1);
@@ -170,10 +170,10 @@ wxString LogitMixedSheet::GetCellValue(const wxSheetCoords &p_coords)
 		    *wxConvCurrent);
   }
   else {
-    const MixedStrategyProfile<double> &profile = 
+    const MixedStrategyProfile<double> &profile =
       m_branch.GetProfile(p_coords.GetRow()+1);
     return wxString(lexical_cast<std::string>(profile[p_coords.GetCol()],
-				   m_doc->GetStyle().NumDecimals()).c_str(), 
+				   m_doc->GetStyle().NumDecimals()).c_str(),
 		    *wxConvCurrent);
   }
 }
@@ -195,7 +195,7 @@ static wxColour GetPlayerColor(gbtGameDocument *p_doc, int p_index)
   return *wxBLACK;
 }
 
-wxSheetCellAttr LogitMixedSheet::GetAttr(const wxSheetCoords &p_coords, 
+wxSheetCellAttr LogitMixedSheet::GetAttr(const wxSheetCoords &p_coords,
 					 wxSheetAttr_Type) const
 {
   if (IsRowLabelCell(p_coords)) {
@@ -270,7 +270,7 @@ private:
 
   /// Overriding x (lambda) axis labeling
   void CalcXAxisTickPositions() override;
-  
+
 public:
   gbtLogitPlotCtrl(wxWindow *p_parent, gbtGameDocument *p_doc);
 
@@ -282,7 +282,7 @@ public:
   void SetScaleFactor(double p_scale) { m_scaleFactor = p_scale; }
 };
 
-gbtLogitPlotCtrl::gbtLogitPlotCtrl(wxWindow *p_parent, 
+gbtLogitPlotCtrl::gbtLogitPlotCtrl(wxWindow *p_parent,
 				   gbtGameDocument *p_doc)
   : wxPlotCtrl(p_parent), /* m_doc(p_doc), */ m_scaleFactor(1.0)
 {
@@ -308,7 +308,7 @@ gbtLogitPlotCtrl::gbtLogitPlotCtrl(wxWindow *p_parent,
 
   m_xAxisTick_step = 0.2;
   SetViewRect(wxRect2DDouble(0, 0, 1, 1));
-} 
+}
 
 //
 // This differs from the wxPlotWindow original only by the use of
@@ -322,12 +322,12 @@ void gbtLogitPlotCtrl::CalcXAxisTickPositions()
   int i, x, windowWidth = GetPlotAreaRect().width;
   for (i=0; i<m_xAxisTick_count; i++) {
     if (!IsFinite(current, wxT("axis label is not finite"))) return;
-                
+
     x = GetClientCoordFromPlotX( current );
-            
+
     if ((x >= -1) && (x < windowWidth+2)) {
       m_xAxisTicks.Add(x);
-      m_xAxisTickLabels.Add(wxString::Format(m_xAxisTickFormat.c_str(), 
+      m_xAxisTickLabels.Add(wxString::Format(m_xAxisTickFormat.c_str(),
 					     XToLambda(current)));
     }
 
@@ -409,7 +409,7 @@ gbtLogitPlotStrategyList::gbtLogitPlotStrategyList(wxWindow *p_parent,
       SetAttrAlignment(wxSheetCoords(st-1, 0),
 		       wxALIGN_CENTER | wxALIGN_CENTER_VERTICAL);
     }
-    
+
 
     SetCellValue(wxSheetCoords(st-1, 1),
 		 wxString(strategy->GetLabel().c_str(), *wxConvCurrent));
@@ -500,7 +500,7 @@ LogitPlotPanel::LogitPlotPanel(wxWindow *p_parent,
   SetSizer(sizer);
   Layout();
 }
-				    
+
 void LogitPlotPanel::Plot()
 {
   if (m_branch.NumPoints() == 0)  return;
@@ -518,13 +518,13 @@ void LogitPlotPanel::Plot()
     curve->SetFilename(wxString(player->GetLabel().c_str(), *wxConvCurrent) +
 		       wxT(":") +
 		       wxString(strategy->GetLabel().c_str(), *wxConvCurrent));
-    
+
     for (int i = 0; i < m_branch.NumPoints(); i++) {
-      curve->SetValue(i, m_plotCtrl->LambdaToX(m_branch.GetLambda(i+1)), 
+      curve->SetValue(i, m_plotCtrl->LambdaToX(m_branch.GetLambda(i+1)),
 		      m_branch.GetProfile(i+1)[st]);
     }
 
-    curve->SetPen(wxPLOTPEN_NORMAL, 
+    curve->SetPen(wxPLOTPEN_NORMAL,
 		  wxPen(m_doc->GetStyle().GetPlayerColor(player->GetNumber()),
 			1, wxPENSTYLE_SOLID));
 
@@ -550,7 +550,7 @@ void LogitPlotPanel::FitZoom()
 class LogitPrintout : public wxPrintout {
 private:
   wxPlotCtrl *m_plot;
-    
+
 public:
   LogitPrintout(wxPlotCtrl *p_plot, const wxString &p_label)
     : wxPrintout(p_label), m_plot(p_plot) { }
@@ -558,10 +558,10 @@ public:
 
   bool OnPrintPage(int) override
   { wxSize size = GetDC()->GetSize();
-    m_plot->DrawWholePlot(GetDC(), wxRect(50, 50, 
+    m_plot->DrawWholePlot(GetDC(), wxRect(50, 50,
 					  size.GetWidth() - 100,
 					  size.GetHeight() - 100));
-    return true; 
+    return true;
   }
   bool HasPage(int page) override { return (page <= 1); }
   void GetPageInfo(int *minPage, int *maxPage,
@@ -626,7 +626,7 @@ END_EVENT_TABLE()
 #include "bitmaps/datasrc.xpm"
 #include "bitmaps/zoomfit.xpm"
 
-LogitMixedDialog::LogitMixedDialog(wxWindow *p_parent, 
+LogitMixedDialog::LogitMixedDialog(wxWindow *p_parent,
 				   gbtGameDocument *p_doc)
   : wxDialog(p_parent, wxID_ANY, wxT("Compute quantal response equilibria"),
 	     wxDefaultPosition),
@@ -735,17 +735,17 @@ void LogitMixedDialog::Start()
   m_process->Redirect();
 
 #ifdef __WXMAC__
-  m_pid = wxExecute(wxStandardPaths::Get().GetExecutablePath() + 
+  m_pid = wxExecute(wxStandardPaths::Get().GetExecutablePath() +
 		    wxT("-logit -S"),
                     wxEXEC_ASYNC, m_process);
 #else
   m_pid = wxExecute(wxT("gambit-logit -S"), wxEXEC_ASYNC, m_process);
 #endif // __WXMAC__
-  
+
   std::ostringstream s;
   m_doc->GetGame()->Write(s, "nfg");
   wxString str(wxString(s.str().c_str(), *wxConvCurrent));
-  
+
   // It is possible that the whole string won't write on one go, so
   // we should take this possibility into account.  If the write doesn't
   // complete the whole way, we take a 100-millisecond siesta and try

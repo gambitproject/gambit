@@ -49,7 +49,7 @@ public:
   /// Returns the probability the strategy is played
   T &operator[](const GameStrategy &p_strategy)
     { return m_probs[m_support.m_profileIndex[p_strategy->GetId()]]; }
-  
+
   virtual T GetPayoff(int pl) const = 0;
   virtual T GetPayoffDeriv(int pl, const GameStrategy &) const = 0;
   virtual T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const = 0;
@@ -171,12 +171,12 @@ public:
   { CheckVersion(); return GetPayoff(p_player->GetNumber()); }
 
   /// \brief Computes the derivative of the player's payoff
-  /// 
+  ///
   /// Computes the derivative of the payoff to the player with respect
   /// to the probability the strategy is played
   T GetPayoffDeriv(int pl, const GameStrategy &s) const
   { CheckVersion(); return m_rep->GetPayoffDeriv(pl, s); }
-  
+
   /// \brief Computes the second derivative of the player's payoff
   ///
   /// Computes the second derivative of the payoff to the player,
@@ -206,5 +206,3 @@ public:
 } // end namespace Gambit
 
 #endif // LIBGAMBIT_MIXED_H
-
-

@@ -20,11 +20,13 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 
-from .gambit import *  # noqa: F401,F403
+from .gambit import *  # noqa: F401,F403,I001
 
-from . import nash  # noqa: F401
-from . import supports  # noqa: F401
-from . import gte   # noqa: F401
-from . import qre   # noqa: F401
+from . import (
+    gte,  # noqa: F401
+    nash,  # noqa: F401
+    qre,  # noqa: F401
+    supports,  # noqa: F401
+)
 
 __version__ = "16.1.1"

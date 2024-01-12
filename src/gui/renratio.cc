@@ -35,7 +35,7 @@
 
 IMPLEMENT_DYNAMIC_CLASS(gbtRationalRendererRefData, wxSheetCellRendererRefData)
 
-void 
+void
 gbtRationalRendererRefData::SetTextColoursAndFont(wxSheet& grid,
 						  const wxSheetCellAttr& attr,
 						  wxDC& dc,
@@ -57,21 +57,21 @@ gbtRationalRendererRefData::SetTextColoursAndFont(wxSheet& grid,
     dc.SetTextBackground(wxSystemSettings::GetColour(wxSYS_COLOUR_BTNFACE));
     dc.SetTextForeground(wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT));
   }
-    
+
   dc.SetFont(attr.GetFont());
 }
 
 static wxSize GetFractionExtent(wxDC &p_dc, const wxString &p_value)
 {
   p_dc.SetFont(wxFont(7, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
-  
+
   wxString num;
   int i = 0;
   while (p_value[i] != '/')  num += p_value[i++];
   i++;
   wxString den;
   while (p_value[i] != '\0') den += p_value[i++];
-   
+
   int numWidth, numHeight;
   p_dc.GetTextExtent(num, &numWidth, &numHeight);
 
@@ -98,11 +98,11 @@ wxSize gbtRationalRendererRefData::DoGetBestSize(wxSheet& grid,
     dc.SetFont(attr.GetFont());
     grid.GetTextBoxSize(dc, lines, &w, &h);
   }
-    
+
   return wxSize(w, h);
 }
 
-wxSize 
+wxSize
 gbtRationalRendererRefData::GetBestSize(wxSheet& grid,
 					const wxSheetCellAttr& attr,
 					wxDC& dc,
@@ -117,7 +117,7 @@ void gbtRationalRendererRefData::Draw(wxSheet& grid,
 				      const wxRect& rectCell,
 				      const wxSheetCoords& coords,
 				      bool isSelected)
-{    
+{
   wxRect rect = rectCell;
   rect.Inflate(-1);
 
@@ -129,14 +129,14 @@ void gbtRationalRendererRefData::Draw(wxSheet& grid,
 static void DrawFraction(wxDC &p_dc, wxRect p_rect, const wxString &p_value)
 {
   p_dc.SetFont(wxFont(7, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
-  
+
   wxString num;
   int i = 0;
   while (p_value[i] != '/')  num += p_value[i++];
   i++;
   wxString den;
   while (p_value[i] != '\0') den += p_value[i++];
-   
+
   int numWidth, numHeight;
   p_dc.GetTextExtent(num, &numWidth, &numHeight);
 
@@ -154,7 +154,7 @@ static void DrawFraction(wxDC &p_dc, wxRect p_rect, const wxString &p_value)
   p_dc.DrawText(den,
 		point.x + (p_rect.width-denWidth)/2,
 		point.y);
-  p_dc.DrawLine(point.x + (p_rect.width-width)/2 - 2, point.y, 
+  p_dc.DrawLine(point.x + (p_rect.width-width)/2 - 2, point.y,
 		point.x + (p_rect.width-width)/2 + width + 2, point.y);
 }
 
@@ -164,23 +164,23 @@ void gbtRationalRendererRefData::DoDraw(wxSheet& grid,
 					const wxRect& rectCell,
 					const wxSheetCoords& coords,
 					bool isSelected)
-{        
+{
   wxRect rect = rectCell;
   rect.Inflate(-1);
-    
+
   int align = attr.GetAlignment();
-  
+
   wxString value = grid.GetCellValue(coords);
   //int best_width = DoGetBestSize(grid, attr, dc, value).GetWidth();
   // wxSheetCoords cellSpan(grid.GetCellSpan(coords)); // shouldn't get here if <=0
   //int cell_rows = cellSpan.m_row;
   //int cell_cols = cellSpan.m_col;
-  
+
   //bool is_grid_cell = wxSheet::IsGridCell(coords);
   // no overflow for row/col/corner labels
   //int num_cols = grid.GetNumberCols();
 
-  // Draw the text 
+  // Draw the text
   if (value.Find('/') != -1) {
     SetTextColoursAndFont(grid, attr, dc, isSelected);
     DrawFraction(dc, rect, value);
@@ -220,8 +220,8 @@ void gbtRationalEditorRefData::StartingKey(wxKeyEvent &event)
   tmpbuf[0] = (char) keycode;
   tmpbuf[1] = '\0';
   wxString strbuf(tmpbuf, *wxConvCurrent);
-#if wxUSE_INTL        
-  bool is_decimal_point = 
+#if wxUSE_INTL
+  bool is_decimal_point =
     (strbuf == wxLocale::GetInfo(wxLOCALE_DECIMAL_POINT, wxLOCALE_CAT_NUMBER));
 #else
   bool is_decimal_point = ( strbuf == _T(".") );
@@ -242,7 +242,7 @@ bool gbtRationalEditorRefData::IsAcceptedKey(wxKeyEvent &p_event)
     tmpbuf[0] = (char) keycode;
     tmpbuf[1] = '\0';
     wxString strbuf(tmpbuf, *wxConvCurrent);
-#if wxUSE_INTL        
+#if wxUSE_INTL
     bool is_decimal_point =
       (strbuf == wxLocale::GetInfo(wxLOCALE_DECIMAL_POINT,
 				    wxLOCALE_CAT_NUMBER));
@@ -250,7 +250,7 @@ bool gbtRationalEditorRefData::IsAcceptedKey(wxKeyEvent &p_event)
     bool is_decimal_point = ( strbuf == _T(".") );
 #endif
 
-    if ((keycode < 128) && 
+    if ((keycode < 128) &&
 	(wxIsdigit(keycode) || is_decimal_point || keycode == '-') )
       return true;
   }

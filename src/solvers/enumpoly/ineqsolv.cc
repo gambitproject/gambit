@@ -24,4 +24,3 @@
 
 //template class IneqSolv<Gambit::Rational>;
 template class IneqSolv<double>;
-

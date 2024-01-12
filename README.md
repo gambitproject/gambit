@@ -31,4 +31,3 @@ Official Gambit releases are available from
 
 Gambit offers [the Python package `pygambit`](https://pypi.org/project/pygambit/),
 installable via PyPI.
-

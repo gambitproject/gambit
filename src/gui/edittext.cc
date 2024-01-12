@@ -62,17 +62,17 @@ gbtEditableText::gbtEditableText(wxWindow *p_parent, int p_id,
 				 const wxSize &p_size)
   : wxPanel(p_parent, p_id, p_position, p_size)
 {
-  m_staticText = new gbtStaticTextButton(this, wxID_ANY, p_value, 
+  m_staticText = new gbtStaticTextButton(this, wxID_ANY, p_value,
 					 wxPoint(0, 0), p_size,
 					 wxALIGN_LEFT);
   Connect(m_staticText->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
 	  wxCommandEventHandler(gbtEditableText::OnClick));
 
-  m_textCtrl = new wxTextCtrl(this, wxID_ANY, p_value, wxPoint(0, 0), 
+  m_textCtrl = new wxTextCtrl(this, wxID_ANY, p_value, wxPoint(0, 0),
 			      p_size, wxTE_PROCESS_ENTER);
   Connect(m_textCtrl->GetId(), wxEVT_COMMAND_TEXT_ENTER,
 	  wxCommandEventHandler(gbtEditableText::OnAccept));
-  
+
   auto *topSizer = new wxBoxSizer(wxHORIZONTAL);
   topSizer->Add(m_staticText, 1, wxALIGN_CENTER, 0);
   topSizer->Add(m_textCtrl, 1, wxEXPAND, 0);
@@ -104,7 +104,7 @@ void gbtEditableText::EndEdit(bool p_accept)
 
 wxString gbtEditableText::GetValue() const
 {
-  
+
   if (GetSizer()->IsShown(m_textCtrl)) {
     return m_textCtrl->GetValue();
   }
@@ -154,4 +154,3 @@ void gbtEditableText::OnAccept(wxCommandEvent &)
   event.SetId(GetId());
   wxPostEvent(GetParent(), event);
 }
-

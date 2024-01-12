@@ -37,7 +37,7 @@ public:
               bool useDegrees = false);
     const char* ErrorMsg() const;
     inline ParseErrorType GetParseErrorType() const { return parseErrorType; }
-    
+
     double Eval(const double* Vars);
     inline int EvalError() const { return evalErrorType; }
 

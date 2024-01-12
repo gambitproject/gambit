@@ -23,6 +23,7 @@ import cython
 from cython.operator cimport dereference as deref
 from libcpp.memory cimport unique_ptr
 
+
 @cython.cclass
 class StrategySupportProfile:
     """A set-like object representing a subset of the strategies in game.
@@ -247,12 +248,14 @@ class StrategySupportProfile:
             In 16.0.x, this returned a `StrategicRestriction` object.  Strategic restrictions
             have been removed in favor of using deep copies of games.
         """
-        return Game.parse_game(WriteGame(deref(self.support)).decode('ascii'))
+        return Game.parse_game(WriteGame(deref(self.support)).decode("ascii"))
 
 
 def _undominated_strategies_solve(
         profile: StrategySupportProfile, strict: bool, external: bool
 ) -> StrategySupportProfile:
     result = StrategySupportProfile(profile.game)
-    result.support.reset(new c_StrategySupportProfile(deref(profile.support).Undominated(strict, external)))
+    result.support.reset(
+        new c_StrategySupportProfile(deref(profile.support).Undominated(strict, external))
+    )
     return result

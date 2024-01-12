@@ -22,7 +22,7 @@
 
 #include "gpolylst.h"
 
-template <class T> 
+template <class T>
 Gambit::List<T> InteriorSegment(const Gambit::List<T> &p_list, int first, int last)
 {
   Gambit::List<T> answer;
@@ -41,8 +41,8 @@ Gambit::List<T> InteriorSegment(const Gambit::List<T> &p_list, int first, int la
 // Constructors / Destructors
 //---------------------------
 
-template <class T> gPolyList<T>::gPolyList(const gSpace* sp, 
-					   const term_order* to) 
+template <class T> gPolyList<T>::gPolyList(const gSpace* sp,
+					   const term_order* to)
 : Space(sp), Order(to), List()
 {
 }
@@ -53,7 +53,7 @@ template<class T> gPolyList<T>::gPolyList(const gSpace * sp,
 : Space(sp), Order(to), List()
 {
   int ii;
-  for ( ii = 1; ii <= plist.Length(); ii++) 
+  for ( ii = 1; ii <= plist.Length(); ii++)
     { auto* temp = new gPoly<T>(*plist[ii]); List.push_back(temp); }
 }
 
@@ -63,7 +63,7 @@ template<class T> gPolyList<T>::gPolyList(const gSpace * sp,
 : Space(sp), Order(to), List()
 {
   int ii;
-  for ( ii = 1; ii <= list.Length(); ii++) 
+  for ( ii = 1; ii <= list.Length(); ii++)
     { auto* temp = new gPoly<T>(list[ii]); List.push_back(temp); }
 }
 
@@ -71,7 +71,7 @@ template<class T> gPolyList<T>::gPolyList(const gPolyList<T> & lst)
 : Space(lst.Space), Order(lst.Order), List()
 {
   int ii;
-  for ( ii = 1; ii <= lst.List.Length(); ii++) 
+  for ( ii = 1; ii <= lst.List.Length(); ii++)
     { auto* temp = new gPoly<T>(*(lst.List[ii])); List.push_back(temp); }
 }
 
@@ -85,24 +85,24 @@ template<class T> gPolyList<T>::~gPolyList()
 //        Operators
 //----------------------------------
 
-template<class T> 
+template<class T>
 gPolyList<T>& gPolyList<T>::operator=(const gPolyList<T> & rhs)
-{	      
+{
   //assert (Space == rhs.Space && Order == rhs.Order);
 
   if (*this != rhs) {
     int ii;
-    for (ii = List.Length(); ii >= 1; ii--) 
+    for (ii = List.Length(); ii >= 1; ii--)
       { delete List[ii]; List.Remove(ii); }
 
-    for (ii = 1; ii <= rhs.List.Length(); ii++) 
+    for (ii = 1; ii <= rhs.List.Length(); ii++)
       { auto* temp = new gPoly<T>(*(rhs.List[ii])); List.push_back(temp); }
 
   }
   return *this;
 }
 
-template<class T>  
+template<class T>
 bool gPolyList<T>::operator==(const gPolyList<T> & rhs) const
 {
   if (Space != rhs.Space || Order != rhs.Order) return false;
@@ -113,7 +113,7 @@ bool gPolyList<T>::operator==(const gPolyList<T> & rhs) const
   return true;
 }
 
-template<class T>  
+template<class T>
 bool gPolyList<T>::operator!=(const gPolyList<T> & rhs) const
 {
   return !(*this == rhs);
@@ -150,7 +150,7 @@ template<class T>  gPoly<T> gPolyList<T>::operator[](const int index) const
 
 template<class T> bool gPolyList<T>::SelfReduction(const int& target,
 					          const term_order& order)
-{  
+{
   //assert (!List[target]->IsZero());
 
   gPoly<T> tear_up(*List[target]);
@@ -162,7 +162,7 @@ template<class T> bool gPolyList<T>::SelfReduction(const int& target,
       int index = 1;
       while (index <= List.Length() && !tear_up.IsZero()) {
         if (index == target || List[index]->IsZero()) index++;
-	else if ( List[index]->LeadingPowerProduct(order) 
+	else if ( List[index]->LeadingPowerProduct(order)
 	            <= tear_up.LeadingPowerProduct(order) ) {
 	  tear_up.ReduceByDivisionAtExpV(order,
 					 *List[index],
@@ -181,7 +181,7 @@ template<class T> bool gPolyList<T>::SelfReduction(const int& target,
 }
 
 template<class T> gPoly<T> gPolyList<T>::ReductionOf(const gPoly<T>& f,
-					           const term_order& order) 
+					           const term_order& order)
                                                                         const
 {
   //assert (Space == f.GetSpace());
@@ -199,7 +199,7 @@ template<class T> gPoly<T> gPolyList<T>::ReductionOf(const gPoly<T>& f,
       int index = 1;
       while (index <= List.Length() && !tear_up.IsZero()) {
 	if (List[index]->IsZero()) index++;
-	else if ( List[index]->LeadingPowerProduct(order) 
+	else if ( List[index]->LeadingPowerProduct(order)
 	            <= tear_up.LeadingPowerProduct(order) ) {
 
 	  tear_up.ReduceByDivisionAtExpV(order,
@@ -218,7 +218,7 @@ template<class T> gPoly<T> gPolyList<T>::ReductionOf(const gPoly<T>& f,
   return reduction;
 }
 
-template<class T> void gPolyList<T>::Sort(const term_order& order) 
+template<class T> void gPolyList<T>::Sort(const term_order& order)
                                        // bubble sort, justified since
                                        // I expect List.Length() < 10
 {
@@ -231,7 +231,7 @@ template<class T> void gPolyList<T>::Sort(const term_order& order)
 	if (List[j]->IsZero())
 	  swap = true;
 	else if ( order.Less(List[j]->LeadingPowerProduct(order),
-			    List[ii]->LeadingPowerProduct(order)) ) 
+			    List[ii]->LeadingPowerProduct(order)) )
 	  swap = true;
 	if (swap) {
 	  gPoly<T>* temp = List[ii];
@@ -242,9 +242,9 @@ template<class T> void gPolyList<T>::Sort(const term_order& order)
     }
 }
 
-template <class T> 
-void gPolyList<T>::CriterionTwo(      Gambit::List<index_pair>& uncomputed, 
-				const Gambit::List<index_pair>& computed, 
+template <class T>
+void gPolyList<T>::CriterionTwo(      Gambit::List<index_pair>& uncomputed,
+				const Gambit::List<index_pair>& computed,
 				const int&               no_polys,
 				const term_order & order)           const
 {
@@ -252,8 +252,8 @@ void gPolyList<T>::CriterionTwo(      Gambit::List<index_pair>& uncomputed,
     int spot = uncomputed.Find(index_pair(ell,no_polys));
     if (spot != 0) {
       int ii;
-      for (ii = 1; ii < no_polys; ii++) 
-	if (ii != ell && spot != 0) 
+      for (ii = 1; ii < no_polys; ii++)
+	if (ii != ell && spot != 0)
 	  if ( uncomputed.Contains(index_pair(ii,ell)) ||
 	       computed.Contains(index_pair(ii,ell)) )
 	    if (uncomputed.Contains(index_pair(ii,no_polys)))  {
@@ -262,7 +262,7 @@ void gPolyList<T>::CriterionTwo(      Gambit::List<index_pair>& uncomputed,
 	      exp_vect lpp_no_polys = List[no_polys]->
 		LeadingPowerProduct(order);
 	      if ( lpp_ell.Divides(lpp_i.LCM(lpp_no_polys)) ) {
-		uncomputed.Remove(spot); 
+		uncomputed.Remove(spot);
 		spot = 0;
 	      }
 	    }
@@ -301,7 +301,7 @@ template<class T> void gPolyList<T>::Grobnerize(const term_order & order)
   Gambit::List<index_pair>   computed;
 
   for (ii = 2; ii <= List.Length(); ii++) {
-    for (int j = 1; j < ii; j++) 
+    for (int j = 1; j < ii; j++)
       uncomputed.push_back(index_pair(j,ii));
     CriterionTwo(uncomputed, computed, ii, order);
   }
@@ -326,7 +326,7 @@ template<class T> void gPolyList<T>::Grobnerize(const term_order & order)
 	h.ToMonic(order);
 	auto* hptr = new gPoly<T>(h);
 	List.push_back(hptr);
-	for (int k = 1; k < List.Length(); k++) 
+	for (int k = 1; k < List.Length(); k++)
 	  uncomputed.push_back(index_pair(k,List.Length()));
 	CriterionTwo(uncomputed, computed, List.Length(), order);
       }
@@ -334,7 +334,7 @@ template<class T> void gPolyList<T>::Grobnerize(const term_order & order)
   }
 }
 
-template<class T> 
+template<class T>
 void gPolyList<T>::GrobnerToMinimalGrobner(const term_order & order)
 {
   if (Length() <= 1) return;
@@ -342,12 +342,12 @@ void gPolyList<T>::GrobnerToMinimalGrobner(const term_order & order)
   int i = 1; int j = 2;
   while (j <= Length()) {
 
-    if ( List[i]->LeadingPowerProduct(order) <= 
-	List[j]->LeadingPowerProduct(order) )    { 
+    if ( List[i]->LeadingPowerProduct(order) <=
+	List[j]->LeadingPowerProduct(order) )    {
       delete List[j]; List.Remove(j);
     }
 
-    else if ( List[i]->LeadingPowerProduct(order) >= 
+    else if ( List[i]->LeadingPowerProduct(order) >=
 	     List[j]->LeadingPowerProduct(order) )    {
       delete List[i]; List.Remove(i);
       if (i < j-1) j--; else i = 1;
@@ -361,7 +361,7 @@ void gPolyList<T>::GrobnerToMinimalGrobner(const term_order & order)
 }
 
 
-template<class T> 
+template<class T>
 void gPolyList<T>::MinimalGrobnerToReducedGrobner(const term_order & order)
 {
   if (Length() <= 1) return;
@@ -379,7 +379,7 @@ void gPolyList<T>::MinimalGrobnerToReducedGrobner(const term_order & order)
   }
 }
 
-template<class T> 
+template<class T>
 gPolyList<T>& gPolyList<T>::ToSortedReducedGrobner(const term_order & order)
 {
   Grobnerize(order);
@@ -394,24 +394,24 @@ gPolyList<T>& gPolyList<T>::ToSortedReducedGrobner(const term_order & order)
 //           New Coordinate Systems
 //------------------------------------------
 
-template<class T> gPolyList<T> 
+template<class T> gPolyList<T>
 gPolyList<T>::TranslateOfSystem(const Gambit::Vector<T>& new_origin) const
 {
   Gambit::List<gPoly<T> > new_polys;
   for (int i = 1; i <= Length(); i++) {
     new_polys.push_back((*this)[i].TranslateOfPoly(new_origin));
-    //    assert (TranslateOfPoly((*this)[i],new_origin) == 
+    //    assert (TranslateOfPoly((*this)[i],new_origin) ==
     //	    (*this)[i].TranslateOfPoly(new_origin));
   }
   return gPolyList<T>(AmbientSpace(),TermOrder(),new_polys);
 }
 
-template<class T> gPolyList<T> 
+template<class T> gPolyList<T>
 gPolyList<T>::SystemInNewCoordinates(const Gambit::SquareMatrix<T>& M) const
 {
   Gambit::List<gPoly<T> > new_polys;
   for (int i = 1; i <= Length(); i++) {
-    //    assert ( (*this)[i].PolyInNewCoordinates(M) == 
+    //    assert ( (*this)[i].PolyInNewCoordinates(M) ==
     //     	     gPoly<T>( PolyInNewCoordinates((*this)[i],M) ) );
     new_polys.push_back((*this)[i].PolyInNewCoordinates(M));
   }
@@ -422,10 +422,10 @@ gPolyList<T>::SystemInNewCoordinates(const Gambit::SquareMatrix<T>& M) const
 //           Truncations
 //-----------------------------------
 
-template<class T> gPolyList<T> 
+template<class T> gPolyList<T>
 gPolyList<T>::InteriorSegment(int first, int last) const
 {
-  return gPolyList<T>(AmbientSpace(), TermOrder(), 
+  return gPolyList<T>(AmbientSpace(), TermOrder(),
 		      ::InteriorSegment(List, first, last));
 }
 
@@ -438,7 +438,7 @@ template <class T> Gambit::List<gPoly<T> > gPolyList<T>::UnderlyingList() const
 {
   Gambit::List<gPoly<T> > NewList;
   int ii;
-  for (ii = 1; ii <= List.Length(); ii++) 
+  for (ii = 1; ii <= List.Length(); ii++)
     NewList.push_back(*List[ii]);
   return NewList;
 }
@@ -446,12 +446,12 @@ template <class T> Gambit::List<gPoly<T> > gPolyList<T>::UnderlyingList() const
 template <class T> bool gPolyList<T>::IsMultiaffine() const
 {
   for (int i = 1; i <= List.Length(); i++)
-    if (!(*List[i]).IsMultiaffine()) 
+    if (!(*List[i]).IsMultiaffine())
       return false;
   return true;
 }
-  
-template<class T> 
+
+template<class T>
 Gambit::Vector<T> gPolyList<T>::Evaluate(const Gambit::Vector<T>& v) const
 {
   Gambit::Vector<T> answer(Length());
@@ -461,16 +461,16 @@ Gambit::Vector<T> gPolyList<T>::Evaluate(const Gambit::Vector<T>& v) const
 
   return answer;
 }
-  
+
 template<class T> bool gPolyList<T>::IsRoot(const Gambit::Vector<T>& v) const
 {
-  for (int ii = 1; ii <= List.Length(); ii++) 
-    if (List[ii]->Evaluate(v) != (T)0) 
+  for (int ii = 1; ii <= List.Length(); ii++)
+    if (List[ii]->Evaluate(v) != (T)0)
       return false;
   return true;
 }
-  
-template<class T> 
+
+template<class T>
 Gambit::RectArray<gPoly<T>*> gPolyList<T>::DerivativeMatrix() const
 {
   gPoly<T> zero(Space, Order);
@@ -479,11 +479,11 @@ Gambit::RectArray<gPoly<T>*> gPolyList<T>::DerivativeMatrix() const
   for (ii = 1; ii <= Length(); ii++)
     for (int j = 1; j <= Dmnsn(); j++)
       answer(ii,j) = new gPoly<T>(UnderlyingList()[ii].PartialDerivative(j));
-  
+
   return answer;
 }
-  
-template<class T> 
+
+template<class T>
 gPoly<T> gPolyList<T>::DetOfDerivativeMatrix() const
 {
   //assert(List.Length() == Space->Dmnsn());
@@ -503,8 +503,8 @@ gPoly<T> gPolyList<T>::DetOfDerivativeMatrix() const
 
   return answer;
 }
-  
-template<class T> 
+
+template<class T>
 Gambit::Matrix<T> gPolyList<T>::DerivativeMatrix(const Gambit::Vector<T>& p) const
 {
   Gambit::Matrix<T> answer(Length(),Dmnsn());
@@ -513,10 +513,10 @@ Gambit::Matrix<T> gPolyList<T>::DerivativeMatrix(const Gambit::Vector<T>& p) con
   for (ii = 1; ii <= Length(); ii++)
     for (int j = 1; j <= Dmnsn(); j++)
       answer(ii,j) = list[ii].PartialDerivative(j).Evaluate(p);
-  
+
   return answer;
 }
-  
+
 template<class T> Gambit::SquareMatrix<T>
 gPolyList<T>::SquareDerivativeMatrix(const Gambit::Vector<T>& p) const
 {
@@ -528,7 +528,7 @@ gPolyList<T>::SquareDerivativeMatrix(const Gambit::Vector<T>& p) const
   for (ii = 1; ii <= Length(); ii++)
     for (int j = 1; j <= Dmnsn(); j++)
       answer(ii,j) = list[ii].PartialDerivative(j).Evaluate(p);
-  
+
   return answer;
 }
 
@@ -536,7 +536,7 @@ gPolyList<T>::SquareDerivativeMatrix(const Gambit::Vector<T>& p) const
 //          Conversion
 //----------------------------------
 
-template<class T> 
+template<class T>
 Gambit::List<gPoly<double> > gPolyList<T>::ListTogDouble() const
 {
   Gambit::List<gPoly<double> > newlist;
@@ -547,7 +547,7 @@ Gambit::List<gPoly<double> > gPolyList<T>::ListTogDouble() const
   return newlist;
 }
 
-template<class T> 
+template<class T>
 Gambit::List<gPoly<double> > gPolyList<T>::NormalizedList() const
 {
   Gambit::List<gPoly<double> > newlist;
@@ -562,5 +562,3 @@ template <class T> const gSpace* gPolyList<T>::AmbientSpace() const { return Spa
 template <class T> const term_order* gPolyList<T>::TermOrder()  const { return Order; }
 template <class T> int gPolyList<T>::Length() const { return List.Length(); }
 template <class T> int gPolyList<T>::Dmnsn() const { return Space->Dmnsn(); }
-
-

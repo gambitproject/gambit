@@ -57,15 +57,5 @@ public:
 
 }  // end namespace Gambit::linalg
 }  // end namespace Gambit
- 
+
 #endif     // GAMBIT_LINALG_LEMKETAB_H
-
-
-
-
-
-
-
-
-
-

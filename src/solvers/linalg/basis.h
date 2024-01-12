@@ -39,7 +39,7 @@ private:
   Array<int> basis;        // current members of basis (neg for slacks)
   Array<int> cols;         // location of col in basis (0 if not in basis)
   Array<int> slacks;       // location of slacks in basis
-  Array<bool> colBlocked;  
+  Array<bool> colBlocked;
   Array<bool> rowBlocked;
   bool IsBasisIdent;
 
@@ -47,27 +47,27 @@ public:
   //-------------------------------------------
   // Constructors, Destructor, Operators
   //-------------------------------------------
-  
+
   Basis(int first, int last, int firstlabel, int lastlabel);
   Basis(const Basis &);
   virtual ~Basis();
-  
+
   Basis& operator=(const Basis&);
 
   //------------------------------
   // Public Members
   //------------------------------
-  
+
   int First() const;         // First basis index
   int Last() const;          // Last  basis index
   int MinCol() const;    // First Column label
   int MaxCol() const;     // Last Column label
 
   bool IsRegColumn( int col ) const;
-  bool IsSlackColumn( int col ) const; 
+  bool IsSlackColumn( int col ) const;
 
   //remove outindex, insert label, return outlabel
-  int Pivot(int outindex, int col); 
+  int Pivot(int outindex, int col);
 
   // return true iff label is a Basis member
   bool Member(int label) const;
@@ -94,8 +94,7 @@ public:
 };
 
 }  // end namespace Gambit::linalg
- 
-}  // end namespace Gambit
- 
-#endif // BASIS_H
 
+}  // end namespace Gambit
+
+#endif // BASIS_H

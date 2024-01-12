@@ -27,8 +27,8 @@
 // Sequence:  Member functions
 //--------------------------------------
 
-Gambit::List<Gambit::GameAction> Sequence::History() const 
-{ 
+Gambit::List<Gambit::GameAction> Sequence::History() const
+{
   Gambit::List<Gambit::GameAction> h;
   Gambit::GameAction a = action;
   const Sequence * s = (this);
@@ -37,7 +37,7 @@ Gambit::List<Gambit::GameAction> Sequence::History() const
     s = s->parent;
     a = s->GetAction();
   }
-  return h;    
+  return h;
 }
 
 
@@ -54,18 +54,18 @@ SFSequenceSet::SFSequenceSet(const Gambit::GamePlayer &p)
 }
 
 SFSequenceSet::SFSequenceSet(const SFSequenceSet &s)
-   
+
 = default;
 
 SFSequenceSet::~SFSequenceSet()
-{ 
+{
 
-  // potential problem here?  It is not clear this is where this belongs.  
-  // What if there are multiple SFSequenceSets pointing to 
+  // potential problem here?  It is not clear this is where this belongs.
+  // What if there are multiple SFSequenceSets pointing to
   // the same sequences?
 
   for(int i=1;i<=sequences.Length();i++)
-    delete sequences[i];   
+    delete sequences[i];
 }
 
 SFSequenceSet &SFSequenceSet::operator=(const SFSequenceSet &s)
@@ -82,19 +82,19 @@ bool SFSequenceSet::operator==(const SFSequenceSet &s)
 {
   if (sequences.Length() != s.sequences.Length()) return (false);
   int i;
-  for (i = 1; i <= sequences. Length() 
+  for (i = 1; i <= sequences. Length()
        && sequences[i] == s.sequences[i]; i++);
   if (i > sequences.Length()) return (true);
   else return (false);
 }
 
 //------------------------------------------
-// SFSequenceSet: Member functions 
+// SFSequenceSet: Member functions
 //------------------------------------------
 
 // Append a sequences to the SFSequenceSet
-void SFSequenceSet::AddSequence(Sequence *s) 
-{ 
+void SFSequenceSet::AddSequence(Sequence *s)
+{
   if (efp != s->Player()) {
     throw Gambit::MismatchException();
   }
@@ -103,21 +103,21 @@ void SFSequenceSet::AddSequence(Sequence *s)
 
 // Removes a sequence pointer. Returns true if the sequence was successfully
 // removed, false otherwise.
-bool SFSequenceSet::RemoveSequence( Sequence *s ) 
-{ 
+bool SFSequenceSet::RemoveSequence( Sequence *s )
+{
   if (efp != s->Player()) {
     throw Gambit::MismatchException();
   }
-  int t; 
-  t = sequences.Find(s); 
-  if (t>0) sequences.Remove(t); 
-  return (t>0); 
-} 
+  int t;
+  t = sequences.Find(s);
+  if (t>0) sequences.Remove(t);
+  return (t>0);
+}
 
-// Finds the sequence pointer of sequence number j. Returns 0 if there 
-// is no sequence with that number.  
-Sequence *SFSequenceSet::Find( int j ) 
-{ 
+// Finds the sequence pointer of sequence number j. Returns 0 if there
+// is no sequence with that number.
+Sequence *SFSequenceSet::Find( int j )
+{
   int t=1;
   while(t <= sequences.Length()) {
     if(sequences[t]->GetNumber() == j) return sequences[t];
@@ -143,7 +143,7 @@ const Gambit::Array<Sequence *> &SFSequenceSet::GetSFSequenceSet() const
 //-----------------------------------------------
 
 SFSupport::SFSupport(const Sfg &SF) : bsfg(&SF), sups(SF.GetEfg()->NumPlayers())
-{ 
+{
   for (int i = 1; i <= sups.Length(); i++)
     sups[i] = new SFSequenceSet(SF.GetEfg()->GetPlayer(i));
 }
@@ -156,7 +156,7 @@ SFSupport::SFSupport(const SFSupport &s)
 }
 
 SFSupport::~SFSupport()
-{ 
+{
   for (int i = 1; i <= sups.Length(); i++)
     delete sups[i];
 }
@@ -178,7 +178,7 @@ bool SFSupport::operator==(const SFSupport &s) const
   for (i = 1; i <= sups.Length() && *sups[i] == *s.sups[i]; i++);
   return i > sups.Length();
 }
-  
+
 bool SFSupport::operator!=(const SFSupport &s) const
 {
   return !(*this == s);
@@ -247,7 +247,3 @@ bool SFSupport::IsSubset(const SFSupport &s) const
     }
   return true;
 }
-
-
-
-

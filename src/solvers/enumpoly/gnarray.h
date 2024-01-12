@@ -57,4 +57,3 @@ template <class T> class gNArray   {
 };
 
 #endif    // GNARRAY_H
-

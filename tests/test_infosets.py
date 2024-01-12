@@ -1,6 +1,5 @@
-import pytest
-
 import pygambit as gbt
+import pytest
 
 from . import games
 

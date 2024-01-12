@@ -5,8 +5,9 @@ expected results on a very simple game.  This is not intended to be a
 rigorous test suite for the algorithms across all games.
 """
 
-import pygambit as gbt
 import unittest
+
+import pygambit as gbt
 
 from . import games
 

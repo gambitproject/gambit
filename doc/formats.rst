@@ -82,10 +82,3 @@ the file format.
    formats.nfgout
    formats.agg
    formats.bagg
-
-
-
-
-
-
-

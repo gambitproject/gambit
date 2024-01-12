@@ -92,7 +92,7 @@ private:
 public:
   // Lifecycle
   gbtStyle();
-  
+
   // Node styling
   int NodeSize() const { return m_nodeSize; }
   void SetNodeSize(int p_nodeSize) { m_nodeSize = p_nodeSize; }
@@ -148,7 +148,7 @@ public:
   int BranchBelowLabel() const { return m_branchBelowLabel; }
   void SetBranchBelowLabel(int p_label) { m_branchBelowLabel = p_label; }
 
-  // Fonts 
+  // Fonts
   const wxFont &GetFont() const { return m_font; }
   void SetFont(const wxFont &p_font) { m_font = p_font; }
 

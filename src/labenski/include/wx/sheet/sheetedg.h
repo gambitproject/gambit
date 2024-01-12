@@ -2,7 +2,7 @@
 // Name:        sheetedg.h
 // Purpose:     wxSheetArrayEdge
 // Author:      John Labenski
-// Modified by: 
+// Modified by:
 // Created:     1/08/1999
 // RCS-ID:      $Id$
 // Copyright:   (c) John Labenski
@@ -19,7 +19,7 @@
 //   used to store the min col widths for rows and cols
 // ----------------------------------------------------------------------------
 
-DECLARE_PAIRED_INT_DATA_ARRAYS( int, wxArrayInt, 
+DECLARE_PAIRED_INT_DATA_ARRAYS( int, wxArrayInt,
                                 wxPairArrayIntInt, class WXDLLIMPEXP_SHEET )
 
 // ----------------------------------------------------------------------------
@@ -32,10 +32,10 @@ DECLARE_PAIRED_INT_DATA_ARRAYS( int, wxArrayInt,
 // ----------------------------------------------------------------------------
 class WXDLLIMPEXP_SHEET wxSheetArrayEdge
 {
-public:    
+public:
     // Create an array of initial 'count' edges with default_size
-    wxSheetArrayEdge( size_t count = 0, size_t default_size = 1, 
-                      size_t min_allowed_size = 0 ); 
+    wxSheetArrayEdge( size_t count = 0, size_t default_size = 1,
+                      size_t min_allowed_size = 0 );
 
     // Get the number of edges
     int GetCount() const { return m_count; }
@@ -44,7 +44,7 @@ public:
     int FindIndex(int val, bool clipToMinMax) const;
     // Find the index of the element whose max edge is within +/- edge_size
     int FindMaxEdgeIndex(int val, int edge_size = WXSHEET_LABEL_EDGE_ZONE) const;
-    
+
     // Get the minimum of the element (left or top edge)
     int GetMin(size_t index) const;
     // Get the maximum of the element (right or bottom edge)
@@ -53,10 +53,10 @@ public:
     //   note : GetSize(n) = GetMax(n) - GetMin(n) + 1;
     //   eg. 0123|4567|89 for index 1 : min = 4, max = 7, size = 4 = max-min+1
     int GetSize(size_t index) const;
-    
+
     // Set the size of the element (width or height)
     void SetSize(size_t item, int size);
-    
+
     // Get the default size to use between the edges
     int GetDefaultSize() const { return m_default_size; }
     // Set the default size to use between edges, used when inserting
@@ -72,7 +72,7 @@ public:
     int GetMinAllowedSize() const { return m_min_allowed_size; }
     // set the min allowed size, resize the existing sizes to match the min size
     //   if resizeExisting and return if anything was done
-    bool SetMinAllowedSize(int min_allowed_size, bool resizeExisting = false); 
+    bool SetMinAllowedSize(int min_allowed_size, bool resizeExisting = false);
 
     // Clear the number of edges to zero
     void Clear() { m_data.Clear(); m_count = 0; }
