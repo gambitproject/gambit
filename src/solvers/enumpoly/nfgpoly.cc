@@ -41,10 +41,10 @@ private:
   gSpace Space;
   term_order Lex;
   int num_vars;
-  long nevals;
+  long nevals {0};
   double time;
   Gambit::List<Gambit::MixedStrategyProfile<double> > solutions;
-  bool is_singular;
+  bool is_singular {false};
 
   bool EqZero(double x) const;
 
@@ -87,8 +87,7 @@ public:
 PolEnumModule::PolEnumModule(const Gambit::StrategySupportProfile &S)
   : NF(S.GetGame()), support(S),
     Space(support.MixedProfileLength()-NF->NumPlayers()),
-    Lex(&Space, lex), num_vars(support.MixedProfileLength()-NF->NumPlayers()),
-    nevals(0), is_singular(false)
+    Lex(&Space, lex), num_vars(support.MixedProfileLength()-NF->NumPlayers())
 {
 //  Gambit::Epsilon(eps,12);
 }

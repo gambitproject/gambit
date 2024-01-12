@@ -94,7 +94,7 @@ std::shared_ptr<BAGG> BAGG::makeBAGG(istream& in)
   stripComment(in);
   vector<ProbDist> TDist;
   for (int i = 0; i < N; ++i) {
-    TDist.push_back(ProbDist(numTypes[i]));
+    TDist.emplace_back(numTypes[i]);
     for (int j = 0; j < numTypes[i]; ++j) {
       if (in.eof() || in.bad()) {
         throw std::runtime_error("Error in game file: number expected for type distribution");
@@ -113,7 +113,7 @@ std::shared_ptr<BAGG> BAGG::makeBAGG(istream& in)
       }
       int temp;
       in >> temp;
-      typeActionSets[i].push_back(vector<int>(temp));
+      typeActionSets[i].emplace_back(temp);
     }
   }
 
@@ -121,11 +121,11 @@ std::shared_ptr<BAGG> BAGG::makeBAGG(istream& in)
   stripComment(in);
   for (int i = 0; i < N; ++i) {
     for (int j = 0; j < numTypes[i]; ++j) {
-      for (size_t k = 0; k < typeActionSets[i][j].size(); ++k) {
+      for (int &el : typeActionSets[i][j]) {
         if (in.eof() || in.bad()) {
           throw std::runtime_error("Error in game file: integer expected for type action set");
         }
-        in >> typeActionSets[i][j][k];
+        in >> el;
       }
     }
   }
@@ -138,7 +138,7 @@ std::shared_ptr<BAGG> BAGG::makeBAGG(istream& in)
     for (int j = 0; j < numTypes[i]; ++j) {
       aSet.insert(typeActionSets[i][j].begin(), typeActionSets[i][j].end());
     }
-    aggActionSets.push_back(vector<int>(aSet.begin(), aSet.end()));
+    aggActionSets.emplace_back(aSet.begin(), aSet.end());
   }
 
   vector<vector<vector<int> > > typeAction2ActionIndex(typeActionSets);
@@ -157,8 +157,8 @@ std::shared_ptr<BAGG> BAGG::makeBAGG(istream& in)
   aggss << N << endl << S << endl << P << endl;
   for (int i = 0; i < N; i++) { aggss << aggActionSets[i].size() << endl; }
   for (int i = 0; i < N; i++) {
-    for (size_t j = 0; j < aggActionSets[i].size(); j++) {
-      aggss << aggActionSets[i][j] << " ";
+    for (int j : aggActionSets[i]) {
+      aggss << j << " ";
     }
     aggss << endl;
   }

@@ -102,17 +102,17 @@ public:
   //@{
   /// Constructs an array of length 'len', starting at '1'
   explicit Array(unsigned int len = 0)
-    : mindex(1), maxdex(len), data((len) ? new T[len] - 1 : 0) { }
+    : mindex(1), maxdex(len), data((len) ? new T[len] - 1 : nullptr) { }
   /// Constructs an array starting at lo and ending at hi
   Array(int lo, int hi) : mindex(lo), maxdex(hi)
   {
     if (maxdex + 1 < mindex)   throw RangeException();
-    data = (maxdex >= mindex) ? new T[maxdex -mindex + 1] - mindex : 0;
+    data = (maxdex >= mindex) ? new T[maxdex -mindex + 1] - mindex : nullptr;
   }
   /// Copy the contents of another array
   Array(const Array<T> &a)
     : mindex(a.mindex), maxdex(a.maxdex),
-      data((maxdex >= mindex) ? new T[maxdex - mindex + 1] - mindex : 0)
+      data((maxdex >= mindex) ? new T[maxdex - mindex + 1] - mindex : nullptr)
   {
     for (int i = mindex; i <= maxdex; i++)  data[i] = a.data[i];
   }
@@ -132,7 +132,7 @@ public:
       if (!data || (data && (mindex != a.mindex || maxdex != a.maxdex)))  {
 	if (data)   delete [] (data + mindex);
 	mindex = a.mindex;   maxdex = a.maxdex;
-	data = (maxdex >= mindex) ? new T[maxdex - mindex + 1] - mindex : 0;
+	data = (maxdex >= mindex) ? new T[maxdex - mindex + 1] - mindex : nullptr;
       }
 
       for (int i = mindex; i <= maxdex; i++) data[i] = a.data[i];
@@ -232,7 +232,7 @@ public:
     if (n < this->mindex || n > this->maxdex) throw IndexException();
 
     T ret(this->data[n]);
-    T *new_data = (--this->maxdex>=this->mindex) ? new T[this->maxdex-this->mindex+1] - this->mindex : 0;
+    T *new_data = (--this->maxdex>=this->mindex) ? new T[this->maxdex-this->mindex+1] - this->mindex : nullptr;
 
     int i;
     for (i = this->mindex; i < n; i++) new_data[i] = this->data[i];

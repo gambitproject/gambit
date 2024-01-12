@@ -157,7 +157,7 @@ GameTreeInfosetRep::GameTreeInfosetRep(GameTreeRep *p_efg, int p_number,
 
   if (p_player->IsChance()) {
     m_probs = Array<Number>(m_actions.size());
-    std::string prob = lexical_cast<std::string>(Rational(1, m_actions.Length()));
+    auto prob = lexical_cast<std::string>(Rational(1, m_actions.Length()));
     for (int act = 1; act <= m_actions.Length(); act++) {
       m_probs[act] = prob;
     }
@@ -880,9 +880,9 @@ std::string EscapeQuotes(const std::string &s)
 {
   std::string ret;
 
-  for (unsigned int i = 0; i < s.length(); i++)  {
-    if (s[i] == '"')   ret += '\\';
-    ret += s[i];
+  for (char c : s)  {
+    if (c == '"')   ret += '\\';
+    ret += c;
   }
 
   return ret;

@@ -689,8 +689,8 @@ sayonara:
 
 class LrsData {
 public:
-  lrs_dat *Q1, *Q2;  /* structure for holding static problem data            */
-  lrs_dic *P1, *P2;  /* structure for holding current dictionary and indices */
+  lrs_dat *Q1 {nullptr}, *Q2 {nullptr};  /* structure for holding static problem data            */
+  lrs_dic *P1 {nullptr}, *P2 {nullptr};  /* structure for holding current dictionary and indices */
 
   explicit LrsData(const Game &p_game);
   ~LrsData();
@@ -714,7 +714,6 @@ private:
 };
 
 LrsData::LrsData(const Game &p_game)
-  : Q1(nullptr), Q2(nullptr), P1(nullptr), P2(nullptr)
 {
   if (!lrs_init("")) {
     throw Exception("Error in initializing lrslib");

@@ -150,7 +150,7 @@ private:
 
 template <class T> class StrategySolver {
 public:
-  explicit StrategySolver(std::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0);
+  explicit StrategySolver(std::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = nullptr);
   virtual ~StrategySolver()  = default;
 
   virtual List<MixedStrategyProfile<T> > Solve(const Game &) const = 0;
@@ -161,7 +161,7 @@ protected:
 
 template <class T> class BehavSolver {
 public:
-  explicit BehavSolver(std::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0);
+  explicit BehavSolver(std::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = nullptr);
   virtual ~BehavSolver()  = default;
 
   virtual List<MixedBehaviorProfile<T> > Solve(const Game &) const = 0;
@@ -189,7 +189,7 @@ protected:
 template <class T> class SubgameBehavSolver : public BehavSolver<T> {
 public:
   explicit SubgameBehavSolver(std::shared_ptr<BehavSolver<T> > p_solver,
-		     std::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0);
+		     std::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = nullptr);
   ~SubgameBehavSolver()  override = default;
 
   List<MixedBehaviorProfile<T> > Solve(const Game &) const override;

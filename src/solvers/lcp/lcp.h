@@ -37,12 +37,12 @@ namespace Nash {
 template <class T> class NashLcpStrategySolver : public StrategySolver<T> {
 public:
   NashLcpStrategySolver(int p_stopAfter, int p_maxDepth,
-			std::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0)
+			std::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = nullptr)
     : StrategySolver<T>(p_onEquilibrium),
       m_stopAfter(p_stopAfter), m_maxDepth(p_maxDepth) { }
-  virtual ~NashLcpStrategySolver() = default;
+  ~NashLcpStrategySolver() override = default;
 
-  virtual List<MixedStrategyProfile<T> > Solve(const Game &) const;
+  List<MixedStrategyProfile<T> > Solve(const Game &) const override;
 
 private:
   int m_stopAfter, m_maxDepth;
@@ -69,12 +69,12 @@ LcpStrategySolveRational(const Game &p_game, int p_stopAfter, int p_maxDepth)
 template <class T> class NashLcpBehaviorSolver : public BehavSolver<T> {
 public:
   NashLcpBehaviorSolver(int p_stopAfter, int p_maxDepth,
-			std::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0)
+			std::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = nullptr)
     : BehavSolver<T>(p_onEquilibrium),
       m_stopAfter(p_stopAfter), m_maxDepth(p_maxDepth) { }
-  virtual ~NashLcpBehaviorSolver() = default;
+  ~NashLcpBehaviorSolver() override = default;
 
-  virtual List<MixedBehaviorProfile<T> > Solve(const Game &) const;
+  List<MixedBehaviorProfile<T> > Solve(const Game &) const override;
 
 private:
   int m_stopAfter, m_maxDepth;

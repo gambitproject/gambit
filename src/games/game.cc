@@ -247,9 +247,9 @@ std::string EscapeQuotes(const std::string &s)
 {
   std::string ret;
 
-  for (unsigned int i = 0; i < s.length(); i++)  {
-    if (s[i] == '"')   ret += '\\';
-    ret += s[i];
+  for (char c : s)  {
+    if (c == '"')   ret += '\\';
+    ret += c;
   }
 
   return ret;

@@ -44,7 +44,7 @@ public:
   bool operator==(const BFS &M) const {
     if (m_map.size() != M.m_map.size())  return false;
 
-    for (typename std::map<int, T>::const_iterator iter = m_map.begin();
+    for (auto iter = m_map.begin();
 	 iter != m_map.end(); iter++) {
       if (M.m_map.count((*iter).first) == 0) {
 	return false;

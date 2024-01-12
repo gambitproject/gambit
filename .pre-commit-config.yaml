@@ -15,3 +15,15 @@ repos:
   hooks:
     - id: cython-lint
     - id: double-quote-cython-strings
+# - repo: https://github.com/pocc/pre-commit-hooks
+#  rev: master
+#  hooks:
+    # - id: clang-format
+    # - id: clang-tidy
+    #  args: ["--", "-I src", "-I", "src/labenski/include"]
+    # - id: oclint
+    # - id: uncrustify
+#    - id: cppcheck
+#      args: ["--suppressions-list=.cppcheck", "-Isrc", "-Isrc/labenski/include"]
+    # - id: cpplint
+    # - id: include-what-you-use

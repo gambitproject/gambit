@@ -134,8 +134,8 @@ struct proj_func_SUM2 : public proj_func {
   int operator()(std::multiset<int> &s) const override
   {
     int res = Default;
-    for (auto it = s.begin(); it != s.end(); it++) {
-      res += weights.at(*it);
+    for (int it : s) {
+      res += weights.at(it);
     }
     return res;
   }
@@ -161,8 +161,8 @@ struct proj_func_EXIST2 : public proj_func {
     if (Default < 0) {
       throw std::runtime_error("proj_func_EXIST2() error: default value should be nonnegative");
     }
-    for (size_t i = 0; i < weights.size(); i++) {
-      if (weights[i] < 0) {
+    for (int weight : weights) {
+      if (weight < 0) {
         throw std::runtime_error("proj_func_EXIST2() error: weights should be nonnegative");
       }
     }

@@ -80,7 +80,7 @@ static wxSize GetFractionExtent(wxDC &p_dc, const wxString &p_value)
 
   int width = ((numWidth > denWidth) ? numWidth : denWidth);
 
-  return wxSize(width + 4, numHeight + denHeight);
+  return {width + 4, numHeight + denHeight};
 }
 
 wxSize gbtRationalRendererRefData::DoGetBestSize(wxSheet& grid,
@@ -99,7 +99,7 @@ wxSize gbtRationalRendererRefData::DoGetBestSize(wxSheet& grid,
     grid.GetTextBoxSize(dc, lines, &w, &h);
   }
 
-  return wxSize(w, h);
+  return {static_cast<int>(w), static_cast<int>(h)};
 }
 
 wxSize

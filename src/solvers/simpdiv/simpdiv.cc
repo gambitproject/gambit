@@ -38,10 +38,10 @@ inline GameStrategy GetStrategy(const Game &game, int pl, int st)
 class NashSimpdivStrategySolver::State {
   public:
     int m_leashLength;
-    int t, ibar;
+    int t {0}, ibar {1};
     Rational d, pay, maxz, bestz;
 
-    State(int p_leashLength) : m_leashLength(p_leashLength), t(0), ibar(1), bestz(1.0e30) { }
+    State(int p_leashLength) : m_leashLength(p_leashLength), bestz(1.0e30) { }
     Rational getlabel(MixedStrategyProfile<Rational> &yy, Array<int> &,
 		      PVector<Rational> &);
 

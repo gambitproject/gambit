@@ -35,10 +35,10 @@ namespace {
 
 using namespace Gambit;
 
-typedef enum {
+using GameFileToken = enum {
   TOKEN_NUMBER = 0, TOKEN_TEXT = 1, TOKEN_SYMBOL = 2,
   TOKEN_LBRACE = 3, TOKEN_RBRACE = 4, TOKEN_COMMA = 5, TOKEN_EOF = 6
-} GameFileToken;
+};
 
 //!
 //! This parser class implements the semantics of Gambit savefiles,
@@ -49,8 +49,8 @@ class GameParserState {
 private:
   std::istream &m_file;
 
-  int m_currentLine;
-  int m_currentColumn;
+  int m_currentLine {1};
+  int m_currentColumn {1};
   GameFileToken m_lastToken;
   std::string m_lastText;
 
@@ -60,7 +60,7 @@ private:
 
 public:
   explicit GameParserState(std::istream &p_file) :
-    m_file(p_file), m_currentLine(1), m_currentColumn(1) { }
+    m_file(p_file) { }
 
   GameFileToken GetNextToken();
   GameFileToken GetCurrentToken() const { return m_lastToken; }
@@ -275,22 +275,19 @@ class TableFilePlayer {
 public:
   std::string m_name;
   Array<std::string> m_strategies;
-  TableFilePlayer *m_next;
+  TableFilePlayer *m_next {nullptr};
 
-  TableFilePlayer();
+  TableFilePlayer() = default;
 };
 
-TableFilePlayer::TableFilePlayer()
-  : m_next(nullptr)
-{ }
 
 class TableFileGame {
 public:
   std::string m_title, m_comment;
-  TableFilePlayer *m_firstPlayer, *m_lastPlayer;
-  int m_numPlayers;
+  TableFilePlayer *m_firstPlayer {nullptr}, *m_lastPlayer {nullptr};
+  int m_numPlayers {0};
 
-  TableFileGame() : m_firstPlayer(nullptr), m_lastPlayer(nullptr), m_numPlayers(0) { }
+  TableFileGame() = default;
   ~TableFileGame();
 
   void AddPlayer(const std::string &);

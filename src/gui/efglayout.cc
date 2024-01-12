@@ -428,18 +428,18 @@ wxString gbtTreeLayout::CreateNodeLabel(const gbtNodeEntry *p_entry,
     case GBT_NODE_LABEL_NOTHING:
       return wxT("");
     case GBT_NODE_LABEL_LABEL:
-      return wxString(n->GetLabel().c_str(), *wxConvCurrent);
+      return {n->GetLabel().c_str(), *wxConvCurrent};
     case GBT_NODE_LABEL_PLAYER:
       if (n->GetPlayer()) {
-	return wxString(n->GetPlayer()->GetLabel().c_str(), *wxConvCurrent);
+	return {n->GetPlayer()->GetLabel().c_str(), *wxConvCurrent};
       }
       else {
 	return wxT("");
       }
     case GBT_NODE_LABEL_ISETLABEL:
       if (n->GetInfoset()) {
-	return wxString(n->GetInfoset()->GetLabel().c_str(),
-			*wxConvCurrent);
+	return {n->GetInfoset()->GetLabel().c_str(),
+			*wxConvCurrent};
       }
       else {
 	return wxT("");
@@ -459,14 +459,14 @@ wxString gbtTreeLayout::CreateNodeLabel(const gbtNodeEntry *p_entry,
 	return _T("");
       }
     case GBT_NODE_LABEL_REALIZPROB:
-      return wxString(m_doc->GetProfiles().GetRealizProb(n).c_str(),
-		      *wxConvCurrent);
+      return {m_doc->GetProfiles().GetRealizProb(n).c_str(),
+		      *wxConvCurrent};
     case GBT_NODE_LABEL_BELIEFPROB:
-      return wxString(m_doc->GetProfiles().GetBeliefProb(n).c_str(),
-		      *wxConvCurrent);
+      return {m_doc->GetProfiles().GetBeliefProb(n).c_str(),
+		      *wxConvCurrent};
     case GBT_NODE_LABEL_VALUE:
       if (n->GetInfoset() && n->GetPlayer()->GetNumber() > 0) {
-	return wxString(m_doc->GetProfiles().GetNodeValue(n, n->GetPlayer()->GetNumber()).c_str(), *wxConvCurrent);
+	return {m_doc->GetProfiles().GetNodeValue(n, n->GetPlayer()->GetNumber()).c_str(), *wxConvCurrent};
       }
       else {
 	return wxT("");
@@ -490,29 +490,29 @@ wxString gbtTreeLayout::CreateBranchLabel(const gbtNodeEntry *p_entry,
     case GBT_BRANCH_LABEL_NOTHING:
       return wxT("");
     case GBT_BRANCH_LABEL_LABEL:
-      return wxString(parent->GetInfoset()->GetAction(p_entry->GetChildNumber())->GetLabel().c_str(),
-		      *wxConvCurrent);
+      return {parent->GetInfoset()->GetAction(p_entry->GetChildNumber())->GetLabel().c_str(),
+		      *wxConvCurrent};
     case GBT_BRANCH_LABEL_PROBS:
       if (parent->GetPlayer() && parent->GetPlayer()->IsChance()) {
-	return wxString(static_cast<std::string>(parent->GetInfoset()->GetActionProb(p_entry->GetChildNumber())).c_str(),
-			*wxConvCurrent);
+	return {static_cast<std::string>(parent->GetInfoset()->GetActionProb(p_entry->GetChildNumber())).c_str(),
+			*wxConvCurrent};
       }
       else if (m_doc->NumProfileLists() == 0) {
 	return wxT("");
       }
       else {
-	return wxString(m_doc->GetProfiles().GetActionProb(parent,
+	return {m_doc->GetProfiles().GetActionProb(parent,
 							   p_entry->GetChildNumber()).c_str(),
-			*wxConvCurrent);
+			*wxConvCurrent};
       }
     case GBT_BRANCH_LABEL_VALUE:
       if (m_doc->NumProfileLists() == 0) {
 	return wxT("");
       }
       else {
-	return wxString(m_doc->GetProfiles().GetActionValue(parent,
+	return {m_doc->GetProfiles().GetActionValue(parent,
 							    p_entry->GetChildNumber()).c_str(),
-			*wxConvCurrent);
+			*wxConvCurrent};
       }
     default:
       return wxT("");

@@ -74,7 +74,7 @@ LUdecomp<T>::LUdecomp( Tableau<T> &t,
 : tab(t), basis(t.GetBasis()),
   scratch1(basis.First(), basis.Last()),
   scratch2(basis.First(), basis.Last()),
-  refactor_number(rfac), iterations(0), parent(NULL), copycount(0)
+  refactor_number(rfac), iterations(0), parent(nullptr), copycount(0)
 {
   int m = basis.Last() - basis.First() +1;
   total_operations = (m - 1) * m * (2 * m - 1) / 6;
@@ -83,7 +83,7 @@ LUdecomp<T>::LUdecomp( Tableau<T> &t,
 // Destructor
 template <class T> LUdecomp<T>::~LUdecomp()
 {
-  if ( parent != NULL )
+  if ( parent != nullptr )
     ((LUdecomp<T> &) *parent).copycount--;
   // if(copycount != 0) throw BadCount();
 }
@@ -99,7 +99,7 @@ template <class T>
 void LUdecomp<T>::Copy(const LUdecomp<T> &orig, Tableau<T> &t)
 {
   if(this != &orig) {
-    if (parent != NULL)
+    if (parent != nullptr)
       ((LUdecomp<T> &) *parent).copycount--;
 
     tab = t;
@@ -156,8 +156,8 @@ void LUdecomp<T>::refactor( )
   iterations = 0;
   int m = basis.Last() - basis.First() + 1;
   total_operations = (m - 1) * m * (2 * m - 1) / 6;
-  if (parent != NULL) ((LUdecomp<T> &)*parent).copycount--;
-  parent = NULL;
+  if (parent != nullptr) ((LUdecomp<T> &)*parent).copycount--;
+  parent = nullptr;
 
 }
 
@@ -171,7 +171,7 @@ void LUdecomp<T>::solveT( const Vector<T> &c, Vector<T> &y ) const
   y = c;
   if (!basis.IsIdent()) {
     BTransE( y );
-    if ( parent != NULL )
+    if ( parent != nullptr )
       (*parent).solveT( y, y );
     else {
       FTransU( y );
@@ -189,7 +189,7 @@ void LUdecomp<T>::solve( const Vector<T> &a, Vector<T> &d ) const
 
   d = a;
   if (!basis.IsIdent()) {
-    if ( parent != NULL )
+    if ( parent != nullptr )
       (*parent).solve(a,d);
     else {
       LPd_Trans( d );

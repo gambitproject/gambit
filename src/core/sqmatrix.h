@@ -37,11 +37,11 @@ public:
 
 template <class T> class SquareMatrix : public Matrix<T>   {
 public:
-  SquareMatrix();
+  SquareMatrix() = default;
   explicit SquareMatrix(int size);
   explicit SquareMatrix(const Matrix<T> &);
   SquareMatrix(const SquareMatrix<T> &);
-  ~SquareMatrix() override;
+  ~SquareMatrix() override = default;
 
   SquareMatrix<T> &operator=(const SquareMatrix<T> &);
 

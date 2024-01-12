@@ -165,16 +165,16 @@ wxString LogitMixedSheet::GetCellValue(const wxSheetCoords &p_coords)
   }
 
   if (p_coords.GetCol() == 0) {
-    return wxString(lexical_cast<std::string>(m_branch.GetLambda(p_coords.GetRow()+1),
+    return {lexical_cast<std::string>(m_branch.GetLambda(p_coords.GetRow()+1),
 			   m_doc->GetStyle().NumDecimals()).c_str(),
-		    *wxConvCurrent);
+		    *wxConvCurrent};
   }
   else {
     const MixedStrategyProfile<double> &profile =
       m_branch.GetProfile(p_coords.GetRow()+1);
-    return wxString(lexical_cast<std::string>(profile[p_coords.GetCol()],
+    return {lexical_cast<std::string>(profile[p_coords.GetCol()],
 				   m_doc->GetStyle().NumDecimals()).c_str(),
-		    *wxConvCurrent);
+		    *wxConvCurrent};
   }
 }
 
@@ -266,7 +266,7 @@ LogitBranchDialog::LogitBranchDialog(wxWindow *p_parent,
 class gbtLogitPlotCtrl : public wxPlotCtrl {
 private:
   // gbtGameDocument *m_doc;
-  double m_scaleFactor;
+  double m_scaleFactor {1.0};
 
   /// Overriding x (lambda) axis labeling
   void CalcXAxisTickPositions() override;
@@ -284,7 +284,7 @@ public:
 
 gbtLogitPlotCtrl::gbtLogitPlotCtrl(wxWindow *p_parent,
 				   gbtGameDocument *p_doc)
-  : wxPlotCtrl(p_parent), /* m_doc(p_doc), */ m_scaleFactor(1.0)
+  : wxPlotCtrl(p_parent) /* m_doc(p_doc), */
 {
   SetAxisLabelColour(*wxBLUE);
   wxFont labelFont(8, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD);
@@ -578,7 +578,7 @@ class LogitMixedDialog : public wxDialog {
 private:
   gbtGameDocument *m_doc;
   int m_pid;
-  wxProcess *m_process;
+  wxProcess *m_process {nullptr};
   LogitPlotPanel *m_plot;
   wxSpinCtrlDbl *m_scaler;
   wxToolBar *m_toolBar;
@@ -630,7 +630,7 @@ LogitMixedDialog::LogitMixedDialog(wxWindow *p_parent,
 				   gbtGameDocument *p_doc)
   : wxDialog(p_parent, wxID_ANY, wxT("Compute quantal response equilibria"),
 	     wxDefaultPosition),
-    m_doc(p_doc), m_process(nullptr), m_timer(this, GBT_ID_TIMER)
+    m_doc(p_doc), m_timer(this, GBT_ID_TIMER)
 {
   auto *sizer = new wxBoxSizer(wxVERTICAL);
 

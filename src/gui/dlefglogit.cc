@@ -105,15 +105,15 @@ wxString gbtLogitBehavList::GetCellValue(const wxSheetCoords &p_coords)
 
 
   if (p_coords.GetCol() == 0) {
-    return wxString(Gambit::lexical_cast<std::string>(m_lambdas[p_coords.GetRow()+1],
-				   m_doc->GetStyle().NumDecimals()).c_str(),
-		    *wxConvCurrent);
+    return {Gambit::lexical_cast<std::string>(m_lambdas[p_coords.GetRow() + 1],
+                                              m_doc->GetStyle().NumDecimals()).c_str(),
+            *wxConvCurrent};
   }
   else {
-    auto profile = m_profiles[p_coords.GetRow()+1];
-    return wxString(Gambit::lexical_cast<std::string>((*profile)[p_coords.GetCol()],
-				   m_doc->GetStyle().NumDecimals()).c_str(),
-		    *wxConvCurrent);
+    auto profile = m_profiles[p_coords.GetRow() + 1];
+    return {Gambit::lexical_cast<std::string>((*profile)[p_coords.GetCol()],
+                                              m_doc->GetStyle().NumDecimals()).c_str(),
+            *wxConvCurrent};
   }
 }
 

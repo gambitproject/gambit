@@ -231,8 +231,8 @@ wxString gbtRowPlayerWidget::GetCellValue(const wxSheetCoords &p_coords)
   int player = m_table->GetRowPlayer(p_coords.GetCol() + 1);
   int strat = m_table->RowToStrategy(p_coords.GetCol() + 1, p_coords.GetRow());
 
-  return wxString(support.GetStrategy(player, strat)->GetLabel().c_str(),
-		  *wxConvCurrent);
+  return {support.GetStrategy(player, strat)->GetLabel().c_str(),
+		  *wxConvCurrent};
 }
 
 void gbtRowPlayerWidget::SetCellValue(const wxSheetCoords &p_coords,
@@ -468,8 +468,8 @@ wxString gbtColPlayerWidget::GetCellValue(const wxSheetCoords &p_coords)
   int player = m_table->GetColPlayer(p_coords.GetRow() + 1);
   int strat = m_table->ColToStrategy(p_coords.GetRow() + 1, p_coords.GetCol());
 
-  return wxString(support.GetStrategy(player, strat)->GetLabel().c_str(),
-		  *wxConvCurrent);
+  return {support.GetStrategy(player, strat)->GetLabel().c_str(),
+		  *wxConvCurrent};
 }
 
 void gbtColPlayerWidget::SetCellValue(const wxSheetCoords &p_coords,
@@ -653,7 +653,7 @@ wxString gbtPayoffsWidget::GetCellValue(const wxSheetCoords &p_coords)
 
   Gambit::PureStrategyProfile profile = m_table->CellToProfile(p_coords);
   int player = ColToPlayer(p_coords.GetCol());
-  return wxString(Gambit::lexical_cast<std::string>(profile->GetPayoff(player)).c_str(), *wxConvCurrent);
+  return {Gambit::lexical_cast<std::string>(profile->GetPayoff(player)).c_str(), *wxConvCurrent};
 }
 
 void gbtPayoffsWidget::SetCellValue(const wxSheetCoords &p_coords,

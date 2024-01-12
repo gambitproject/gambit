@@ -718,7 +718,7 @@ gComplex complexpoly::EvaluationAt(const gComplex& arg) const
   gComplex answer;
 
   for (int i = 0; i <= Degree(); i++) {
-    gComplex monom_val = (gComplex)1;
+    auto monom_val = static_cast<gComplex>(1);
     for (int j = 1; j <= i; j++) monom_val *= arg;
     answer += coeflist[i+1] * monom_val;
   }

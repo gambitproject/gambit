@@ -209,7 +209,7 @@ ReachableInfosets(const BehaviorSupportProfile &p_support,
 // has been reached.
 class BehavConditionalIterator  {
 private:
-  bool m_atEnd;
+  bool m_atEnd {false};
   BehaviorSupportProfile m_support;
   PVector<int> m_currentBehav;
   PureBehaviorProfile m_profile;
@@ -241,7 +241,7 @@ public:
 
 BehavConditionalIterator::BehavConditionalIterator(const BehaviorSupportProfile &p_support,
 						   const PVector<int> &p_active)
-  : m_atEnd(false), m_support(p_support),
+  : m_support(p_support),
     m_currentBehav(m_support.GetGame()->NumInfosets()),
     m_profile(m_support.GetGame()),
     m_isActive(p_active),
@@ -325,8 +325,8 @@ bool BehaviorSupportProfile::Dominates(const GameAction &a, const GameAction &b,
 
   if (!p_conditional) {
     for (BehaviorProfileIterator iter(*this, a); !iter.AtEnd(); iter++) {
-      Rational ap = (*iter).GetPayoff<Rational>(a);
-      Rational bp = (*iter).GetPayoff<Rational>(b);
+      auto ap = (*iter).GetPayoff<Rational>(a);
+      auto bp = (*iter).GetPayoff<Rational>(b);
 
       if (p_strict) {
 	if (ap <= bp) {
@@ -362,8 +362,8 @@ bool BehaviorSupportProfile::Dominates(const GameAction &a, const GameAction &b,
 
       for (BehavConditionalIterator iter(*this, reachable);
            !iter.AtEnd(); iter++) {
-        Rational ap = iter->GetPayoff<Rational>(node->GetChild(a), pl);
-        Rational bp = iter->GetPayoff<Rational>(node->GetChild(b), pl);
+        auto ap = iter->GetPayoff<Rational>(node->GetChild(a), pl);
+        auto bp = iter->GetPayoff<Rational>(node->GetChild(b), pl);
 
         if (p_strict) {
           if (ap <= bp) {

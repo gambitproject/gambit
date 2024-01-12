@@ -92,26 +92,26 @@ public:
   TableauInterface(const Matrix<T> &A, const Array<int> &art,
 		   const Vector<T> &b);
   TableauInterface(const TableauInterface<T>&);
-  virtual ~TableauInterface() = default;
+  ~TableauInterface() override = default;
 
   TableauInterface<T>& operator=(const TableauInterface<T>&);
 
   // information
 
-  int MinRow() const;
-  int MaxRow() const;
-  int MinCol() const;
-  int MaxCol() const;
+  int MinRow() const override;
+  int MaxRow() const override;
+  int MinCol() const override;
+  int MaxCol() const override;
 
   Basis & GetBasis();
   const Matrix<T> & Get_A() const;
   const Vector<T> & Get_b() const;
 
-  bool Member(int i) const;
-  int Label(int i) const;   // return variable in i'th position of Tableau
-  int Find(int i) const;  // return Tableau position of variable i
+  bool Member(int i) const override;
+  int Label(int i) const override;   // return variable in i'th position of Tableau
+  int Find(int i) const override;  // return Tableau position of variable i
 
-  long NumPivots() const;
+  long NumPivots() const override;
   long &NumPivots();
 
   void Mark(int label);     // marks label to block it from entering basis
@@ -125,13 +125,13 @@ public:
   BFS<T> GetBFS1() const;
   BFS<T> GetBFS();  // used in lpsolve for some reason
 
-  virtual bool CanPivot(int outgoing, int incoming) const = 0;
-  virtual void Pivot(int outrow,int col) = 0; // pivot -- outgoing is row, incoming is column
+  bool CanPivot(int outgoing, int incoming) const override = 0;
+  void Pivot(int outrow,int col) override = 0; // pivot -- outgoing is row, incoming is column
   virtual void SolveColumn(int, Vector<T> &) = 0;  // column in new basis
   virtual void Solve(const Vector<T> &b, Vector<T> &x) = 0;  // solve M x = b
   virtual void SolveT(const Vector<T> &c, Vector<T> &y) = 0;  // solve y M = c
 
-  virtual void Refactor() = 0;
+  void Refactor() override = 0;
   virtual void SetRefactor(int) = 0;
 
       // miscellaneous functions

@@ -47,7 +47,7 @@ public:
   LPTableau(const Matrix<T> &A, const Vector<T> &b);
   LPTableau(const Matrix<T> &A, const Array<int> &art, const Vector<T> &b);
   LPTableau(const LPTableau<T>&);
-  virtual ~LPTableau() = default;
+  ~LPTableau() override = default;
 
   LPTableau<T>& operator=(const LPTableau<T>&);
 
@@ -61,8 +61,8 @@ public:
   void RelativeCostVector(Vector<T> &, Vector<T> &);
   void DualVector(Vector<T> &) const; // column vector
       // Redefined functions
-  void Refactor();
-  void Pivot(int outrow,int col);
+  void Refactor() override;
+  void Pivot(int outrow, int col) override;
   void ReversePivots(List<Array<int> > &);
   bool IsReversePivot(int i, int j);
   void DualReversePivots(List<Array<int> > &);

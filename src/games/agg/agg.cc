@@ -23,7 +23,6 @@
 
 
 #include <iostream>
-#include <fstream>
 #include <sstream>
 #include <cassert>
 #include <algorithm>
@@ -91,13 +90,13 @@ AGG::AGG(int numPlayers, std::vector<int> &_actions, int numANodes, int _numPNod
       throw std::runtime_error("Action set for player " + std::to_string(i) +
                                " is not in ascending order");
     }
-    t.push_back(make_pair(sortedActionSets[i], i));
+    t.emplace_back(sortedActionSets[i], i);
   }
   sort(t.begin(), t.end());
   //vector<pair<vector<int>,int> >::iterator new_end = unique(t.begin(),t.end());
   auto p = t.begin();
   uniqueActionSets.push_back(p->first);
-  playerClasses.push_back(vector<int>(1, p->second));
+  playerClasses.emplace_back(1, p->second);
   player2Class[p->second] = 0;
   numKSymActions = p->first.size();
   kSymStrategyOffset.push_back(numKSymActions);
@@ -108,7 +107,7 @@ AGG::AGG(int numPlayers, std::vector<int> &_actions, int numANodes, int _numPNod
     }
     else {
       uniqueActionSets.push_back(p->first);
-      playerClasses.push_back(vector<int>(1, p->second));
+      playerClasses.emplace_back(1, p->second);
       numKSymActions += p->first.size();
       kSymStrategyOffset.push_back(numKSymActions);
     }
@@ -267,7 +266,7 @@ std::shared_ptr<AGG> AGG::makeAGG(istream &in)
   set<vector<int> > doneASets;
   for (i = 0; i < n; i++) {
     for (j = 0; j < size[i]; j++) {
-      Po[i].push_back(vector<int>(n));
+      Po[i].emplace_back(n);
       initPorder(Po[i][j], i, n, projS[ASets[i][j]]);
     }
     vector<int> as = ASets[i];
@@ -343,14 +342,14 @@ AGG::setProjections(vector < vector < aggdistrib > > &projS,
   proj.clear();
 
   for (Node = 0; Node<S; ++Node) {//for each action node
-    projS.push_back (vector<aggdistrib>(N));
-    proj.push_back(vector<vector < config>>(N));
+    projS.emplace_back(N);
+    proj.emplace_back(N);
     numNei = neighb[Node].size();
 
     for (i = 0; i<N; i++) {//for each player
       actions = AS[i].size();
       for (j = 0; j<actions; j++) {  // for each action in S_i
-        proj[Node][i].push_back( config(numNei));
+        proj[Node][i].emplace_back(numNei);
         for (k = 0; k<numNei; k++) {  //foreach neighbor of Node
           //get i's action j's contribution to the count of node k
           proj[Node][i][j][k]=0;
@@ -384,8 +383,8 @@ AGG::getAn(multiset<int> &dest, vector<vector<int> > &neighb, vector<projtype> &
     return;
   }
   //cycle check
-  for (auto p = path.begin(); p != path.end(); ++p) {
-    if (Node == (*p)) {
+  for (int &p : path) {
+    if (Node == p) {
       throw std::runtime_error(
         "ERROR: cycle of projected nodes at " + std::to_string(Node)
       );
@@ -416,7 +415,7 @@ AGG::initPorder(vector<int> &Po,
   int k;
   for (k = 0; k < N; k++) {
     if (k != i) {
-      order.push_back(make_pair(projS[k].size(), k));
+      order.emplace_back(projS[k].size(), k);
     }
   }
 
@@ -905,11 +904,11 @@ void AGG::makeMAPPINGpayoff(std::istream &in, aggpayoff &pay, int numNei)
 
   }
   //check
-  for (auto it = temp.begin(); it != temp.end(); ++it) {
-    if (pay.count(it->first) == 0) {
+  for (auto &it : temp) {
+    if (pay.count(it.first) == 0) {
       std::stringstream str;
       str << "ERROR: utility at [";
-      copy(it->first.begin(), it->first.end(), ostream_iterator<int>(str, " "));
+      copy(it.first.begin(), it.first.end(), ostream_iterator<int>(str, " "));
       str << "] not specified.";
       throw std::runtime_error(str.str());
     }
@@ -921,8 +920,8 @@ AggNumber AGG::getMaxPayoff() const
   assert(numActionNodes > 0);
   AggNumber result = payoffs[0].begin()->second;
   for (int i = 1; i < numActionNodes; i++) {
-    for (auto it = payoffs[i].begin(); it != payoffs[i].end(); ++it) {
-      result = max(result, it->second);
+    for (const auto &it : payoffs[i]) {
+      result = max(result, it.second);
     }
   }
   return result;
@@ -933,8 +932,8 @@ AggNumber AGG::getMinPayoff() const
   assert(numActionNodes > 0);
   AggNumber result = payoffs[0].begin()->second;
   for (int i = 1; i < numActionNodes; i++) {
-    for (auto it = payoffs[i].begin(); it != payoffs[i].end(); ++it) {
-      result = min(result, it->second);
+    for (const auto &it : payoffs[i]) {
+      result = min(result, it.second);
     }
   }
   return result;

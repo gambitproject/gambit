@@ -1566,8 +1566,8 @@ const char* TiXmlDeclaration::Parse( const char* p, TiXmlParsingData* data, TiXm
 
 bool TiXmlText::Blank() const
 {
-	for ( unsigned i=0; i<value.length(); i++ )
-		if ( !IsWhiteSpace( value[i] ) )
+	for (char c : value)
+		if ( !IsWhiteSpace( c ) )
 			return false;
 	return true;
 }

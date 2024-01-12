@@ -105,14 +105,14 @@ wxString gbtMixedProfileList::GetCellValue(const wxSheetCoords &p_coords)
   int profile = RowToProfile(p_coords.GetRow());
 
   if (IsProbabilityRow(p_coords.GetRow())) {
-    return wxString(m_doc->GetProfiles().GetStrategyProb(p_coords.GetCol()+1,
+    return {m_doc->GetProfiles().GetStrategyProb(p_coords.GetCol()+1,
 							 profile).c_str(),
-		    *wxConvCurrent);
+		    *wxConvCurrent};
   }
   else {
-    return wxString(m_doc->GetProfiles().GetStrategyValue(p_coords.GetCol()+1,
+    return {m_doc->GetProfiles().GetStrategyValue(p_coords.GetCol()+1,
 							  profile).c_str(),
-		    *wxConvCurrent);
+		    *wxConvCurrent};
   }
 }
 

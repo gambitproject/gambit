@@ -34,37 +34,37 @@ public:
   //@{
   LHTableau(const Matrix<T> &A1, const Matrix<T> &A2,
 	    const Vector<T> &b1, const Vector<T> &b2);
-  virtual ~LHTableau() = default;
+  ~LHTableau() override = default;
 
   LHTableau<T>& operator=(const LHTableau<T>&);
   //@}
 
   /// @name General information
   //@{
-  int MinRow() const  { return T1.MinRow(); }
-  int MaxRow() const  { return T2.MaxRow(); }
-  int MinCol() const  { return T2.MinCol(); }
-  int MaxCol() const  { return T1.MaxCol(); }
+  int MinRow() const override { return T1.MinRow(); }
+  int MaxRow() const override { return T2.MaxRow(); }
+  int MinCol() const override { return T2.MinCol(); }
+  int MaxCol() const override { return T1.MaxCol(); }
   T Epsilon() const   { return T1.Epsilon(); }
 
-  bool Member(int i) const  { return T1.Member(i) || T2.Member(i); }
+  bool Member(int i) const override { return T1.Member(i) || T2.Member(i); }
   /// Return variable in i'th position of Tableau
-  int Label(int i) const;
+  int Label(int i) const override;
   /// Return Tableau position of variable i
-  int Find(int i) const;
+  int Find(int i) const override;
   //@}
 
   /// @name Pivoting operations
   //@{
-  bool CanPivot(int outgoing, int incoming) const;
+  bool CanPivot(int outgoing, int incoming) const override;
   /// Perform apivot operation -- outgoing is row, incoming is column
-  void Pivot(int outrow, int inlabel);
-  long NumPivots() const { return T1.NumPivots() + T2.NumPivots(); }
+  void Pivot(int outrow, int inlabel) override;
+  long NumPivots() const override { return T1.NumPivots() + T2.NumPivots(); }
   //@}
 
   /// @name Raw Tableau functions
   //@{
-  void Refactor() { T1.Refactor(); T2.Refactor(); }
+  void Refactor() override { T1.Refactor(); T2.Refactor(); }
   //@}
 
   /// @name Miscellaneous functions

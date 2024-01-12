@@ -106,7 +106,7 @@ template Rational PureBehaviorProfile::GetPayoff(const GameAction &) const;
 bool PureBehaviorProfile::IsAgentNash() const
 {
   for (auto player : m_efg->GetPlayers()) {
-    Rational current = GetPayoff<Rational>(player);
+    auto current = GetPayoff<Rational>(player);
     for (auto infoset : player->GetInfosets()) {
       for (auto action : infoset->GetActions()) {
         if (GetPayoff<Rational>(action) > current)  {

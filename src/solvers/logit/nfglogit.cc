@@ -320,7 +320,7 @@ private:
   bool m_fullGraph;
   int m_decimals;
   mutable MixedStrategyProfile<double> m_bestProfile;
-  mutable double m_bestLambda;
+  mutable double m_bestLambda {0.0};
   mutable double m_maxlogL;
 };
 
@@ -331,7 +331,6 @@ StrategicQREEstimator::CallbackFunction::CallbackFunction(std::ostream &p_stream
   : m_stream(p_stream), m_game(p_game), m_frequencies(p_frequencies),
     m_fullGraph(p_fullGraph), m_decimals(p_decimals),
     m_bestProfile(p_game->NewMixedStrategyProfile(0.0)),
-    m_bestLambda(0.0),
     m_maxlogL(LogLike(p_frequencies, static_cast<const Vector<double> &>(m_bestProfile)))
 { }
 

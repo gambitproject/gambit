@@ -56,14 +56,14 @@ struct TrieNode
 
   //constructor
   TrieNode(size_t branches, typename std::list<std::pair<std::vector<int>, V> >::iterator v)
-    : children(branches, (TrieNode *) NULL), val(v)
+    : children(branches, (TrieNode *) nullptr), val(v)
   {}
 
   TrieNode *&operator[](size_t i)
   {
     if (i < children.size()) { return children[i]; }
     else {
-      children.resize(i + 1, (TrieNode *) NULL);
+      children.resize(i + 1, (TrieNode *) nullptr);
       return children[i];
     }
   }
@@ -227,7 +227,7 @@ private:
   template<class UnaryFunction>
   void in_order_subtree(UnaryFunction &f, TrieNode<V> *n)
   {
-    if (n == NULL) { return; }
+    if (n == nullptr) { return; }
     size_type i, s = n->children.size();
     bool is_leaf = true;
     for (i = 0; i < s; ++i) {

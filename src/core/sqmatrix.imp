@@ -28,8 +28,6 @@ namespace Gambit {
 //     SquareMatrix<T>: Constructors, destructor, constructive operators
 //-----------------------------------------------------------------------------
 
-template <class T> SquareMatrix<T>::SquareMatrix()   { }
-
 template <class T> SquareMatrix<T>::SquareMatrix(int size)
   : Matrix<T>(size, size)
 { }
@@ -41,8 +39,6 @@ template <class T> SquareMatrix<T>::SquareMatrix(const Matrix<T> &M)
 template <class T> SquareMatrix<T>::SquareMatrix(const SquareMatrix<T> &M)
   : Matrix<T>(M)
 { }
-
-template <class T> SquareMatrix<T>::~SquareMatrix()   { }
 
 template <class T>
 SquareMatrix<T> &SquareMatrix<T>::operator=(const SquareMatrix<T> &M)

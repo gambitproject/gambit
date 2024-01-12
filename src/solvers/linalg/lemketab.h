@@ -45,7 +45,7 @@ public:
   };
   LemkeTableau(const Matrix<T> &A, const Vector<T> &b);
   explicit LemkeTableau(const Tableau<T> &);
-  virtual ~LemkeTableau() = default;
+  ~LemkeTableau() override = default;
 
   int SF_PivotIn(int i);
   int SF_ExitIndex(int i);

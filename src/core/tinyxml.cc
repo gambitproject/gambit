@@ -1613,9 +1613,9 @@ TiXmlHandle TiXmlHandle::FirstChild() const
 	{
 		TiXmlNode* child = node->FirstChild();
 		if ( child )
-			return TiXmlHandle( child );
+			return { child };
 	}
-	return TiXmlHandle( nullptr );
+	return { nullptr };
 }
 
 
@@ -1625,9 +1625,9 @@ TiXmlHandle TiXmlHandle::FirstChild( const char * value ) const
 	{
 		TiXmlNode* child = node->FirstChild( value );
 		if ( child )
-			return TiXmlHandle( child );
+			return { child };
 	}
-	return TiXmlHandle( nullptr );
+	return { nullptr };
 }
 
 
@@ -1637,9 +1637,9 @@ TiXmlHandle TiXmlHandle::FirstChildElement() const
 	{
 		TiXmlElement* child = node->FirstChildElement();
 		if ( child )
-			return TiXmlHandle( child );
+			return { child };
 	}
-	return TiXmlHandle( nullptr );
+	return { nullptr };
 }
 
 
@@ -1649,9 +1649,9 @@ TiXmlHandle TiXmlHandle::FirstChildElement( const char * value ) const
 	{
 		TiXmlElement* child = node->FirstChildElement( value );
 		if ( child )
-			return TiXmlHandle( child );
+			return { child };
 	}
-	return TiXmlHandle( nullptr );
+	return { nullptr };
 }
 
 
@@ -1668,9 +1668,9 @@ TiXmlHandle TiXmlHandle::Child( int count ) const
 			// nothing
 		}
 		if ( child )
-			return TiXmlHandle( child );
+			return { child };
 	}
-	return TiXmlHandle( nullptr );
+	return { nullptr };
 }
 
 
@@ -1687,9 +1687,9 @@ TiXmlHandle TiXmlHandle::Child( const char* value, int count ) const
 			// nothing
 		}
 		if ( child )
-			return TiXmlHandle( child );
+			return { child };
 	}
-	return TiXmlHandle( nullptr );
+	return { nullptr };
 }
 
 
@@ -1706,9 +1706,9 @@ TiXmlHandle TiXmlHandle::ChildElement( int count ) const
 			// nothing
 		}
 		if ( child )
-			return TiXmlHandle( child );
+			return { child };
 	}
-	return TiXmlHandle( nullptr );
+	return { nullptr };
 }
 
 
@@ -1725,7 +1725,7 @@ TiXmlHandle TiXmlHandle::ChildElement( const char* value, int count ) const
 			// nothing
 		}
 		if ( child )
-			return TiXmlHandle( child );
+			return { child };
 	}
-	return TiXmlHandle( nullptr );
+	return { nullptr };
 }

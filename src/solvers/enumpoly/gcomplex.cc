@@ -48,8 +48,8 @@ gComplex gComplex::operator / (const gComplex& y) const
   if (y == (gComplex)0)  {
     throw Gambit::ZeroDivideException();
   }
-  return gComplex((re*y.re + im*y.im)/(y.re*y.re + y.im*y.im),
-		  (- re*y.im + im*y.re)/(y.re*y.re + y.im*y.im));
+  return { (re*y.re + im*y.im)/(y.re*y.re + y.im*y.im),
+		   (- re*y.im + im*y.re)/(y.re*y.re + y.im*y.im) };
 }
 
 // FUNCTIONS OUTSIDE THE CLASS

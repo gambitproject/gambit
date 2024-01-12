@@ -634,7 +634,7 @@ Rational lexical_cast(const std::string &f)
     throw ValueException();
   }
 
-  return Rational(num * sign, denom);
+  return { num * sign, denom };
 }
 
 }  // end namespace Gambit

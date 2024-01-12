@@ -33,7 +33,7 @@ namespace Gambit {
 
 class TablePureStrategyProfileRep : public PureStrategyProfileRep {
 protected:
-  long m_index;
+  long m_index {1L};
 
   PureStrategyProfileRep *Copy() const override;
 
@@ -52,7 +52,7 @@ public:
 //------------------------------------------------------------------------
 
 TablePureStrategyProfileRep::TablePureStrategyProfileRep(const Game &p_nfg)
-  : PureStrategyProfileRep(p_nfg), m_index(1L)
+  : PureStrategyProfileRep(p_nfg)
 {
   for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++)   {
     m_index += m_profile[pl]->m_offset;
@@ -363,9 +363,9 @@ std::string EscapeQuotes(const std::string &s)
 {
   std::string ret;
 
-  for (unsigned int i = 0; i < s.length(); i++)  {
-    if (s[i] == '"')   ret += '\\';
-    ret += s[i];
+  for (char c : s)  {
+    if (c == '"')   ret += '\\';
+    ret += c;
   }
 
   return ret;

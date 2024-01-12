@@ -150,16 +150,16 @@ public:
   }
 
   void printActionGraph(std::ostream &s) const {
-    for(size_t i=0;i< neighbors.size(); ++i){
-      s<<neighbors[i].size()<<"\t";
-      copy(neighbors[i].begin(),neighbors[i].end(), std::ostream_iterator<int>(s," ") );
+    for (const auto &neighbor : neighbors) {
+      s<<neighbor.size()<<"\t";
+      copy(neighbor.begin(),neighbor.end(), std::ostream_iterator<int>(s," ") );
       s<<std::endl;
     }
   }
 
   void printTypes(std::ostream &s) const {
-    for(size_t i=0;i<projectionTypes.size();i++ ){
-      projectionTypes[i]->print(s);
+    for (const auto &projectionType : projectionTypes) {
+      projectionType->print(s);
     }
   }
 

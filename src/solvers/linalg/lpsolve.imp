@@ -32,7 +32,7 @@ LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b,
   : well_formed(true), feasible(true), bounded(true),
     nvars(c.Length()),neqns(b.Length()), nequals(nequals),
     total_cost(0),tmin(0),
-    tab(A,Artificials(b),b), UB(nullptr), LB(nullptr), ub(0), lb(0), xx(0), cost(0),
+    tab(A,Artificials(b),b), UB(nullptr), LB(nullptr), ub(nullptr), lb(nullptr), xx(nullptr), cost(nullptr),
     y(b.Length()),x(b.Length()),d(b.Length())
 {
   // These are the values recommended by Murtagh (1981) for 15 digit
