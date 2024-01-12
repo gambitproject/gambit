@@ -51,27 +51,27 @@ class MixedStrategy:
     def __len__(self) -> int:
         return len(self.player.strategies)
 
-    def __getitem__(self, strategy: typing.Union[Strategy, str]):
-        if isinstance(strategy, Strategy):
-            if strategy.player != self.player:
+    def __getitem__(self, index: typing.Union[Strategy, str]):
+        if isinstance(index, Strategy):
+            if index.player != self.player:
                 raise MismatchError("strategy must belong to this player")
-            return self.profile._getprob_strategy(strategy)
-        if isinstance(strategy, str):
+            return self.profile._getprob_strategy(index)
+        if isinstance(index, str):
             try:
-                return self.profile._getprob_strategy(self.player.strategies[strategy])
+                return self.profile._getprob_strategy(self.player.strategies[index])
             except KeyError:
                 raise KeyError(f"no strategy with label '{index}' for player") from None
         raise TypeError(f"strategy index must be Strategy or str, not {index.__class__.__name__}")
 
-    def __setitem__(self, strategy: typing.Union[Strategy, str], value: typing.Any) -> None:
-        if isinstance(strategy, Strategy):
-            if strategy.player != self.player:
+    def __setitem__(self, index: typing.Union[Strategy, str], value: typing.Any) -> None:
+        if isinstance(index, Strategy):
+            if index.player != self.player:
                 raise MismatchError("strategy must belong to this player")
-            self.profile._setprob_strategy(strategy, value)
+            self.profile._setprob_strategy(index, value)
             return
-        if isinstance(strategy, str):
+        if isinstance(index, str):
             try:
-                self.profile._setprob_strategy(self.player.strategies[strategy], value)
+                self.profile._setprob_strategy(self.player.strategies[index], value)
                 return
             except KeyError:
                 raise KeyError(f"no strategy with label '{index}' for player") from None

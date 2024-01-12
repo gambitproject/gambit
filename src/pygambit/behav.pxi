@@ -52,27 +52,27 @@ class MixedAgentStrategy:
     def __len__(self) -> len:
         return len(self.infoset.actions)
 
-    def __getitem__(self, action: typing.Union[Action, str]):
-        if isinstance(action, Action):
-            if action.infoset != self.infoset:
+    def __getitem__(self, index: typing.Union[Action, str]):
+        if isinstance(index, Action):
+            if index.infoset != self.infoset:
                 raise MismatchError("action must belong to this infoset")
-            return self.profile._getprob_action(action)
-        if isinstance(action, str):
+            return self.profile._getprob_action(index)
+        if isinstance(index, str):
             try:
-                return self.profile._getprob_action(self.infoset.actions[action])
+                return self.profile._getprob_action(self.infoset.actions[index])
             except KeyError:
                 raise KeyError(f"no action with label '{index}' at infoset") from None
         raise TypeError(f"strategy index must be Action or str, not {index.__class__.__name__}")
 
-    def __setitem__(self, action: typing.Union[Action, str], value: typing.Any) -> None:
-        if isinstance(action, Action):
-            if action.infoset != self.infoset:
+    def __setitem__(self, index: typing.Union[Action, str], value: typing.Any) -> None:
+        if isinstance(index, Action):
+            if index.infoset != self.infoset:
                 raise MismatchError("action must belong to this infoset")
-            self.profile._setprob_action(action, value)
+            self.profile._setprob_action(index, value)
             return
-        if isinstance(action, str):
+        if isinstance(index, str):
             try:
-                self.profile._setprob_action(self.infoset.actions[action], value)
+                self.profile._setprob_action(self.infoset.actions[index], value)
                 return
             except KeyError:
                 raise KeyError(f"no action with label '{index}' at infoset") from None
