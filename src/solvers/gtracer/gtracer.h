@@ -32,15 +32,14 @@
 namespace Gambit {
 namespace gametracer {
 
-int
-GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz, int LNMFreq, int LNMMax,
-    double LambdaMin, bool wobble, double threshold, bool verbose,
-    std::string &returnMessage);
+int GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz, int LNMFreq,
+        int LNMMax, double LambdaMin, bool wobble, double threshold, bool verbose,
+        std::string &returnMessage);
 
-int
-IPA(gnmgame &A, cvector &g, cvector &zh, double alpha, double fuzz, cvector &ans, int maxiter = -1);
+int IPA(gnmgame &A, cvector &g, cvector &zh, double alpha, double fuzz, cvector &ans,
+        int maxiter = -1);
 
-}  // end namespace Gambit::gametracer
-}  // end namespace Gambit
+} // namespace gametracer
+} // end namespace Gambit
 
-#endif  // GAMBIT_GTRACER_GTRACER_H
+#endif // GAMBIT_GTRACER_GTRACER_H

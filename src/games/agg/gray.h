@@ -31,7 +31,8 @@ namespace Gambit {
 namespace agg {
 
 class GrayComposition {
-friend class AGG;
+  friend class AGG;
+
 public:
   GrayComposition(int _n, int _k)
     : n(_n), k(_k), p(0), i(-1), d(-1), finished(false), current(k, 0)
@@ -41,22 +42,28 @@ public:
 
   bool eof() const { return finished; }
 
-  const std::vector<int>& get() { return current; }
+  const std::vector<int> &get() { return current; }
 
   void incr()
   {
     int b = -1;
-    if (finished) { return; }
+    if (finished) {
+      return;
+    }
     if (current[k - 1] == n) {
       finished = true;
       return;
     }
     if (p == 0) {
       for (b = 1; b < k; ++b) {
-        if (current[b] > 0) { break; }
+        if (current[b] > 0) {
+          break;
+        }
       }
       if (b < k && b == 1) {
-        if (d == 0 && current[0] == 1) { p = 1; }
+        if (d == 0 && current[0] == 1) {
+          p = 1;
+        }
       }
       else if ((n - current[0]) % 2 == 0) {
         d = 0;
@@ -77,13 +84,17 @@ public:
       if ((n - current[p]) % 2 == 1) {
         d = p;
         i = p - 1;
-        if (current[p] % 2 == 0) { i = 0; }
+        if (current[p] % 2 == 0) {
+          i = 0;
+        }
         p = i;
       }
       else if (current[p + 1] % 2 == 0) {
         i = p + 1;
         d = p;
-        if (current[p] == 1) { p = p + 1; }
+        if (current[p] == 1) {
+          p = p + 1;
+        }
       }
       else {
         i = p;
@@ -92,21 +103,21 @@ public:
     }
     current[i] += 1;
     current[d] -= 1;
-    if (current[0] > 0) { p = 0; }
+    if (current[0] > 0) {
+      p = 0;
+    }
   }
 
 private:
-  int n,k;
+  int n, k;
   int p; // idx to first positive
-  int i,d;
+  int i, d;
   bool finished;
   std::vector<int> current;
-
 };
 
-}   // end namespace Gambit::agg
+} // namespace agg
 
-}   // end namespace Gambit
+} // end namespace Gambit
 
-
-#endif  // GAMBIT_AGG_GRAY_H
+#endif // GAMBIT_AGG_GRAY_H

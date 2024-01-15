@@ -27,7 +27,6 @@
 #include "core/matrix.h"
 #include "cmatrix.h"
 
-
 namespace Gambit {
 namespace gametracer {
 
@@ -45,9 +44,13 @@ int cmatrix::LUdecomp(cmatrix &LU, std::vector<int> &ix) const
   for (i = 0; i < n; i++) {
     vv[i] = fabs(x[k]);
     k++;
-    for (j = 1; j < n; j++, k++) { if (vv[i] < (dum = fabs(x[k]))) { vv[i] = dum; }}
-    if (vv[i] == (double) 0.0) {
-      delete[]vv;
+    for (j = 1; j < n; j++, k++) {
+      if (vv[i] < (dum = fabs(x[k]))) {
+        vv[i] = dum;
+      }
+    }
+    if (vv[i] == (double)0.0) {
+      delete[] vv;
       return 0;
     }
     vv[i] = 1 / vv[i];
@@ -57,13 +60,17 @@ int cmatrix::LUdecomp(cmatrix &LU, std::vector<int> &ix) const
   for (j = 0; j < n; j++) {
     for (i = 0; i < j; i++) {
       sum = LU.x[i * n + j];
-      for (k = 0; k < i; k++) { sum -= LU.x[i * n + k] * LU.x[k * n + j]; }
+      for (k = 0; k < i; k++) {
+        sum -= LU.x[i * n + k] * LU.x[k * n + j];
+      }
       LU.x[i * n + j] = sum;
     }
     big = 0;
     for (i = j; i < n; i++) {
       sum = LU.x[i * n + j];
-      for (k = 0; k < j; k++) { sum -= LU.x[i * n + k] * LU.x[k * n + j]; }
+      for (k = 0; k < j; k++) {
+        sum -= LU.x[i * n + k] * LU.x[k * n + j];
+      }
       LU.x[i * n + j] = sum;
       if ((dum = vv[i] * fabs(sum)) >= big) {
         big = dum;
@@ -81,14 +88,16 @@ int cmatrix::LUdecomp(cmatrix &LU, std::vector<int> &ix) const
     }
     ix[j] = imax;
     if (LU.x[j * n + j] == 0) {
-      LU.x[j * n + j] = (double) 1.0e-20;
+      LU.x[j * n + j] = (double)1.0e-20;
     }
     if (j != n - 1) {
       dum = 1 / LU.x[j * n + j];
-      for (i = j + 1; i < n; i++) { LU.x[i * n + j] *= dum; }
+      for (i = j + 1; i < n; i++) {
+        LU.x[i * n + j] *= dum;
+      }
     }
   }
-  delete [] vv;
+  delete[] vv;
   return d;
 }
 
@@ -105,14 +114,20 @@ void cmatrix::LUbacksub(std::vector<int> &ix, cvector &b) const
     sum = b[ip];
     b[ip] = b[i];
     if (ii != -1) {
-      for (int j = ii; j <= i - 1; j++) { sum -= x[i * n + j] * b[j]; }
+      for (int j = ii; j <= i - 1; j++) {
+        sum -= x[i * n + j] * b[j];
+      }
     }
-    else if (sum != 0) { ii = i; }
+    else if (sum != 0) {
+      ii = i;
+    }
     b[i] = sum;
   }
   for (i = n - 1; i >= 0; i--) {
     sum = b[i];
-    for (int j = i + 1; j <= n - 1; j++) { sum -= x[i * n + j] * b[j]; }
+    for (int j = i + 1; j <= n - 1; j++) {
+      sum -= x[i * n + j] * b[j];
+    }
     b[i] = sum / x[i * n + i];
   }
 }
@@ -122,7 +137,9 @@ bool cmatrix::solve(cvector &b, cvector &ret) const
   if (m != n) {
     throw std::out_of_range("invalid cmatrix in solve");
   }
-  for (int i = 0; i < n; i++) { ret[i] = b[i]; }
+  for (int i = 0; i < n; i++) {
+    ret[i] = b[i];
+  }
   std::vector<int> ix(n);
   cmatrix a(n, n);
 
@@ -229,7 +246,6 @@ double cmatrix::adjoint()
   return D;
 }
 
-
 double cmatrix::trace() const
 {
   if (n != m) {
@@ -242,5 +258,5 @@ double cmatrix::trace() const
   return sum;
 }
 
-} // end namespace Gambit::gametracer
+} // namespace gametracer
 } // end namespace Gambit

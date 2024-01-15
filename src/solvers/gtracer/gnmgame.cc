@@ -32,17 +32,13 @@ namespace Gambit {
 namespace gametracer {
 
 gnmgame::gnmgame(const std::vector<int> &p_actions)
-  : strategyOffset(p_actions.size() + 1),
-    numPlayers(p_actions.size()),
-    numStrategies(std::accumulate(begin(p_actions), end(p_actions),
-                                  1, std::multiplies<int>())),
-    numActions(std::accumulate(begin(p_actions), end(p_actions), 0)),
-    actions(p_actions),
+  : strategyOffset(p_actions.size() + 1), numPlayers(p_actions.size()),
+    numStrategies(std::accumulate(begin(p_actions), end(p_actions), 1, std::multiplies<int>())),
+    numActions(std::accumulate(begin(p_actions), end(p_actions), 0)), actions(p_actions),
     maxActions(*std::max_element(begin(p_actions), end(p_actions)))
 {
   strategyOffset[0] = 0;
-  std::partial_sum(begin(p_actions), end(p_actions),
-                   std::next(begin(strategyOffset)));
+  std::partial_sum(begin(p_actions), end(p_actions), std::next(begin(strategyOffset)));
 }
 
 void gnmgame::retractJac(cmatrix &dest, std::vector<int> &support) const
@@ -74,10 +70,10 @@ void gnmgame::retractJac(cmatrix &dest, std::vector<int> &support) const
 
 int compareDouble(const void *d1, const void *d2)
 {
-  if (*(double *) d1 > *(double *) d2) {
+  if (*(double *)d1 > *(double *)d2) {
     return -1;
   }
-  else if (*(double *) d1 < *(double *) d2) {
+  else if (*(double *)d1 < *(double *)d2) {
     return 1;
   }
   else {
@@ -100,7 +96,7 @@ void gnmgame::retract(cvector &dest, cvector &z) const
       }
       sumz += y[i];
     }
-    v = (sumz - 1) / (double) (i - firstAction(n));
+    v = (sumz - 1) / (double)(i - firstAction(n));
     for (i = firstAction(n); i < lastAction(n); i++) {
       dest[i] = z[i] - v;
       if (dest[i] < 0.0) {
@@ -109,7 +105,6 @@ void gnmgame::retract(cvector &dest, cvector &z) const
     }
   }
 }
-
 
 void gnmgame::retract(cvector &dest, cvector &z, bool ksym) const
 {
@@ -127,7 +122,7 @@ void gnmgame::retract(cvector &dest, cvector &z, bool ksym) const
       qsort(y + offs, getNumKSymActions(n), sizeof(double), compareDouble);
       sumz = y[offs];
       for (i = 1; i < getNumKSymActions(n); i++) {
-        if (sumz - (i) * y[i + offs] > 1) {
+        if (sumz - (i)*y[i + offs] > 1) {
           break;
         }
         sumz += y[i + offs];
@@ -149,7 +144,6 @@ void gnmgame::retract(cvector &dest, cvector &z, bool ksym) const
   }
 }
 
-
 void gnmgame::normalizeStrategy(cvector &s)
 {
   double sum;
@@ -164,6 +158,5 @@ void gnmgame::normalizeStrategy(cvector &s)
   }
 }
 
-
-}  // end namespace Gambit::gametracer
-}  // end namespace Gambit
+} // namespace gametracer
+} // end namespace Gambit

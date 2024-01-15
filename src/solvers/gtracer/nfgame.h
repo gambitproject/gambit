@@ -57,11 +57,11 @@ public:
 
   void getPayoffVector(cvector &dest, int player, const cvector &s) const override;
 
-
 private:
   int findIndex(int player, std::vector<int> &s) const;
 
-  void localPayoffMatrix(double *dest, int player1, int player2, cvector &s, double *m, int n) const;
+  void localPayoffMatrix(double *dest, int player1, int player2, cvector &s, double *m,
+                         int n) const;
 
   void localPayoffVector(double *dest, int player, cvector &s, double *m, int n) const;
 
@@ -77,7 +77,9 @@ inline std::ostream &operator<<(std::ostream &s, nfgame &g)
 {
   s << g.numPlayers << std::endl;
   for (int i = 0; i < g.numPlayers; i++) {
-    if (i > 0) { s << " "; }
+    if (i > 0) {
+      s << " ";
+    }
     s << g.actions[i];
   }
   s << std::endl;
@@ -86,7 +88,7 @@ inline std::ostream &operator<<(std::ostream &s, nfgame &g)
   return s;
 }
 
-}  // end namespace Gambit::gametracer
-}  // end namespace Gambit
+} // namespace gametracer
+} // end namespace Gambit
 
-#endif  // GAMBIT_GTRACER_NFGAME_H
+#endif // GAMBIT_GTRACER_NFGAME_H

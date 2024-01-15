@@ -32,11 +32,10 @@ namespace gametracer {
 
 class gnmgame {
 public:
-  //actions[i] = number of actions player i has
+  // actions[i] = number of actions player i has
   gnmgame(const std::vector<int> &actions);
 
   virtual ~gnmgame() = default;
-
 
   // Input: s[i] has integer index of player i's pure strategy
   // s is of length numPlayers
@@ -46,15 +45,9 @@ public:
 
   // The actions of all players are combined in one linear array of length
   // numActions; this gives the index of a player's first action in the array.
-  int firstAction(int player) const
-  {
-    return strategyOffset[player];
-  }
+  int firstAction(int player) const { return strategyOffset[player]; }
 
-  int lastAction(int player) const
-  {
-    return strategyOffset[player + 1];
-  }
+  int lastAction(int player) const { return strategyOffset[player + 1]; }
 
   // s is the mixed strategy profile.  It is of length numActions, and
   // s[i] is the probability that the appropriate player takes action i.
@@ -81,8 +74,7 @@ public:
   {
     if (ksym && s.getm() != getNumKSymActions()) {
       throw std::runtime_error(
-        "payoffMatrix(): k-symmetric version of Jacobian not implemented for this class"
-      );
+          "payoffMatrix(): k-symmetric version of Jacobian not implemented for this class");
     }
     payoffMatrix(dest, s, fuzz);
   }
@@ -103,29 +95,21 @@ public:
   // This normalizes a strategy profile by scaling appropriately.
   void normalizeStrategy(cvector &s);
 
-  int getNumPlayers() const
-  { return numPlayers; }
+  int getNumPlayers() const { return numPlayers; }
 
-  int getNumActions() const
-  { return numActions; }
+  int getNumActions() const { return numActions; }
 
-  int getNumActions(int p) const
-  { return actions[p]; }
+  int getNumActions(int p) const { return actions[p]; }
 
-  virtual int getNumPlayerClasses() const
-  { return numPlayers; }
+  virtual int getNumPlayerClasses() const { return numPlayers; }
 
-  int getNumKSymActions() const
-  { return numActions; }
+  int getNumKSymActions() const { return numActions; }
 
-  virtual int getNumKSymActions(int p) const
-  { return actions[p]; }
+  virtual int getNumKSymActions(int p) const { return actions[p]; }
 
-  virtual int firstKSymAction(int p) const
-  { return strategyOffset[p]; }
+  virtual int firstKSymAction(int p) const { return strategyOffset[p]; }
 
-  virtual int lastKSymAction(int p) const
-  { return strategyOffset[p + 1]; }
+  virtual int lastKSymAction(int p) const { return strategyOffset[p + 1]; }
 
 protected:
   std::vector<int> strategyOffset;
@@ -134,7 +118,7 @@ protected:
   int maxActions;
 };
 
-}  // end namespace Gambit::gametracer
-}  // end namespace Gambit
+} // namespace gametracer
+} // end namespace Gambit
 
-#endif  // GAMBIT_GTRACER_GNMGAME_H
+#endif // GAMBIT_GTRACER_GNMGAME_H

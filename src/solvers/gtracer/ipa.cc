@@ -30,7 +30,6 @@ namespace gametracer {
 // This needs to be made configurable
 // static bool g_verbose = false;
 
-
 int indexOf(const std::vector<int> &list, int target, int length)
 {
   for (int i = 0; i < length; i++) {
@@ -41,8 +40,7 @@ int indexOf(const std::vector<int> &list, int target, int length)
   return -1;
 }
 
-int Pivot(cmatrix &T, int pr, int pc, std::vector<int> &row,
-          std::vector<int> &col, double &D,
+int Pivot(cmatrix &T, int pr, int pc, std::vector<int> &row, std::vector<int> &col, double &D,
           int numActions, int numPlayers)
 {
   double pivot = T(pr, pc);
@@ -81,8 +79,7 @@ int Pivot(cmatrix &T, int pr, int pc, std::vector<int> &row,
   return p;
 }
 
-void LemkeHowson(const gnmgame &game,
-                 cvector &dest, cmatrix &T, std::vector<int> &Im)
+void LemkeHowson(const gnmgame &game, cvector &dest, cmatrix &T, std::vector<int> &Im)
 {
   const double BIGFLOAT = 3.0e+28F;
   int numActions = game.getNumActions(), numPlayers = game.getNumPlayers();
@@ -162,35 +159,31 @@ void LemkeHowson(const gnmgame &game,
 int IPA(gnmgame &A, cvector &g, cvector &zh, double alpha, double fuzz, cvector &ans, int maxiter)
 {
   int N = A.getNumPlayers(),
-    M = A.getNumActions(), // For easy reference
-  i, j, n, bestAction, B, // utility vars
-  iter = 1,
-    firstIteration = 1;
-  std::vector<int> Im(N);   // best actions in perturbed game
+      M = A.getNumActions(),  // For easy reference
+      i, j, n, bestAction, B, // utility vars
+      iter = 1, firstIteration = 1;
+  std::vector<int> Im(N); // best actions in perturbed game
 
   double bestPayoff, l; // utility vars
 
-  cmatrix DG(M, M),
-    O(N, N, 0), // matrix of zeroes
-  S(N, M, 0), //
-  I(M + N, M + N, 1, true), // identity
-  T(M + N, M + N + 2, 0), // tableau for Lemke-Howson
-  T2(M + N, M + N, 0); // submatrix of tableau used if Lemke-Howson is unnecessary
+  cmatrix DG(M, M), O(N, N, 0), // matrix of zeroes
+      S(N, M, 0),               //
+      I(M + N, M + N, 1, true), // identity
+      T(M + N, M + N + 2, 0),   // tableau for Lemke-Howson
+      T2(M + N, M + N, 0);      // submatrix of tableau used if Lemke-Howson is unnecessary
 
   cvector d(M), // diff
-  u(M),
-    y(M), // old z
-  yh(M), // old zh
-  s(M), // current strategy
-  so(M), // old strategy
-  sh(M), // approximate strategy
-  sho(M, 0), // old approximate strategy
-  z(M), // current point in game-space
-  zt(M), // next approximating point
-  ym1(M), // utility vars
-  ym2(M),
-    ymn1(M + N),
-    ymn2(M + N);
+      u(M),
+      y(M),      // old z
+      yh(M),     // old zh
+      s(M),      // current strategy
+      so(M),     // old strategy
+      sh(M),     // approximate strategy
+      sho(M, 0), // old approximate strategy
+      z(M),      // current point in game-space
+      zt(M),     // next approximating point
+      ym1(M),    // utility vars
+      ym2(M), ymn1(M + N), ymn2(M + N);
 
   // Find the best action for each player when the game is highly perturbed
   for (n = 0; n < N; n++) {
@@ -205,13 +198,12 @@ int IPA(gnmgame &A, cvector &g, cvector &zh, double alpha, double fuzz, cvector 
     Im[n] = bestAction;
   }
 
-
   A.retract(sh, zh);
   so = sh;
 
   while (maxiter < 0 || iter <= maxiter) {
     A.payoffMatrix(DG, sh, 0.0);
-    DG /= (double) (N - 1); // find the Jacobian of the approximating bimatrix game
+    DG /= (double)(N - 1); // find the Jacobian of the approximating bimatrix game
 
     // Initialize the Lemke-Howson tableau
     for (n = 0; n < N; n++) {
@@ -386,5 +378,5 @@ int IPA(gnmgame &A, cvector &g, cvector &zh, double alpha, double fuzz, cvector 
   return 0;
 }
 
-}  // end namespace Gambit::gametracer
-}  // end namespace Gambit
+} // namespace gametracer
+} // end namespace Gambit

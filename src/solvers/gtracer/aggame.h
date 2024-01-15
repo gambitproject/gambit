@@ -34,69 +34,78 @@ namespace Gambit {
 namespace gametracer {
 
 class aggame : public gnmgame {
-  public:
-    explicit aggame(const Gambit::GameAGGRep& g)
-      :gnmgame(g.GetUnderlyingAGG()->actions),
-      aggPtr (g.GetUnderlyingAGG())
-    { }
+public:
+  explicit aggame(const Gambit::GameAGGRep &g)
+    : gnmgame(g.GetUnderlyingAGG()->actions), aggPtr(g.GetUnderlyingAGG())
+  {
+  }
 
-    ~aggame() override = default;
-    int getNumActionNodes(){return aggPtr->getNumActionNodes();}
+  ~aggame() override = default;
+  int getNumActionNodes() { return aggPtr->getNumActionNodes(); }
 
+  double getMixedPayoff(int player, cvector &s) const override
+  {
+    std::vector<double> sp(s.values(), s.values() + s.getm());
+    return (double)aggPtr->getMixedPayoff(player, sp);
+  }
 
-    double getMixedPayoff(int player, cvector &s) const override {
-      std::vector<double> sp (s.values(), s.values()+s.getm());
-      return (double)aggPtr->getMixedPayoff(player,sp);
-    }
+  double getKSymMixedPayoff(int cls, cvector &s)
+  {
+    std::vector<double> sp(s.values(), s.values() + s.getm());
+    return (double)aggPtr->getKSymMixedPayoff(cls, sp);
+  }
 
-    double getKSymMixedPayoff(int cls, cvector &s) {
-      std::vector<double> sp (s.values(), s.values()+s.getm());
-      return (double) aggPtr->getKSymMixedPayoff(cls,sp);
-    }
+  void payoffMatrix(cmatrix &dest, cvector &s, double fuzz) const override;
 
-    void payoffMatrix(cmatrix &dest, cvector &s, double fuzz) const override;
+  void KSymPayoffMatrix(cmatrix &dest, cvector &s, double fuzz) const;
 
-    void KSymPayoffMatrix(cmatrix &dest, cvector &s, double fuzz) const;
+  void payoffMatrix(cmatrix &dest, cvector &s, double fuzz, bool ksym) const override
+  {
+    return (ksym) ? KSymPayoffMatrix(dest, s, fuzz) : payoffMatrix(dest, s, fuzz);
+  }
 
-    void payoffMatrix(cmatrix &dest, cvector &s, double fuzz, bool ksym) const override {
-      return (ksym) ? KSymPayoffMatrix(dest, s, fuzz) : payoffMatrix(dest, s, fuzz);
-    }
+  void getPayoffVector(cvector &dest, int player, const cvector &s) const override
+  {
+    auto ss = const_cast<cvector &>(s);
+    std::vector<double> sp(ss.values(), ss.values() + ss.getm());
+    std::vector<double> d(aggPtr->getNumActions(player));
+    aggPtr->getPayoffVector(d, player, sp);
+    std::copy(d.begin(), d.end(), dest.values());
+  }
+  double getPurePayoff(int player, std::vector<int> &s) override
+  {
+    return aggPtr->getPurePayoff(player, s);
+  }
 
-    void getPayoffVector(cvector &dest, int player, const cvector &s) const override {
-      auto ss = const_cast<cvector &>(s);
-      std::vector<double> sp (ss.values(), ss.values()+ss.getm());
-      std::vector<double> d(aggPtr->getNumActions(player));
-      aggPtr->getPayoffVector(d,player,sp);
-      std::copy(d.begin(),d.end(), dest.values());
-    }
-    double getPurePayoff(int player, std::vector<int> &s) override {
-      return aggPtr->getPurePayoff(player,s);
-    }
+  void setPurePayoff(int player, std::vector<int> &s, double value) override
+  {
+    throw Gambit::UndefinedException();
+  }
 
-    void setPurePayoff(int player, std::vector<int> &s, double value) override {
-    	throw Gambit::UndefinedException();
-    }
+  int getNumPlayerClasses() const override { return aggPtr->getNumPlayerClasses(); }
 
-    int getNumPlayerClasses() const override { return aggPtr->getNumPlayerClasses(); }
+  int getNumKSymActions(int p) const override { return aggPtr->getNumKSymActions(p); }
+  int firstKSymAction(int p) const override { return aggPtr->firstKSymAction(p); }
+  int lastKSymAction(int p) const override { return aggPtr->lastKSymAction(p); }
 
-    int getNumKSymActions(int p) const override {return aggPtr->getNumKSymActions(p);}
-    int firstKSymAction(int p) const override {return aggPtr->firstKSymAction(p);}
-    int lastKSymAction(int p) const override {return aggPtr->lastKSymAction(p);}
+private:
+  std::shared_ptr<Gambit::agg::AGG> aggPtr;
 
-  private:
-    std::shared_ptr<Gambit::agg::AGG> aggPtr;
-
-    //helper functions for computing jacobian
-    void computePartialP_PureNode(int player,int act,std::vector<int>& tasks) const;
-    void computePartialP_bisect(int player,int act, std::vector<int>::iterator f,std::vector<int>::iterator l,Gambit::agg::aggdistrib& temp) const;
-    void computePayoff(cmatrix& dest,int player1,int act1,int player2,int act2,Gambit::agg::trie_map<Gambit::agg::AggNumber>& cache) const;
-    void savePayoff(cmatrix& dest,int player1,int act1,int player2,int act2,Gambit::agg::AggNumber result,
-		    Gambit::agg::trie_map<Gambit::agg::AggNumber>& cache, bool partial=false ) const;
-    void computeUndisturbedPayoff(Gambit::agg::AggNumber& undisturbedPayoff,bool& has,int player1,int act1,int player2) const;
-
+  // helper functions for computing jacobian
+  void computePartialP_PureNode(int player, int act, std::vector<int> &tasks) const;
+  void computePartialP_bisect(int player, int act, std::vector<int>::iterator f,
+                              std::vector<int>::iterator l, Gambit::agg::aggdistrib &temp) const;
+  void computePayoff(cmatrix &dest, int player1, int act1, int player2, int act2,
+                     Gambit::agg::trie_map<Gambit::agg::AggNumber> &cache) const;
+  void savePayoff(cmatrix &dest, int player1, int act1, int player2, int act2,
+                  Gambit::agg::AggNumber result,
+                  Gambit::agg::trie_map<Gambit::agg::AggNumber> &cache,
+                  bool partial = false) const;
+  void computeUndisturbedPayoff(Gambit::agg::AggNumber &undisturbedPayoff, bool &has, int player1,
+                                int act1, int player2) const;
 };
 
-}  // end namespace Gambit::gametracer
-}  // end namespace Gambit
+} // namespace gametracer
+} // end namespace Gambit
 
-#endif  // GAMBIT_GTRACER_AGGAME_H
+#endif // GAMBIT_GTRACER_AGGAME_H

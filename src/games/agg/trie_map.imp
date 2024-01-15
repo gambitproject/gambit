@@ -30,85 +30,92 @@ namespace agg {
 
 template <class V>
 std::pair<typename trie_map<V>::iterator, bool>
-trie_map<V>::insert(const trie_map<V>::value_type& x) {
+trie_map<V>::insert(const trie_map<V>::value_type &x)
+{
 
   static size_t ind;
-  static std::vector<int>::const_iterator p;//,s;
-  //s=x.first.end();
-  TrieNode<V>* ptr = root;
+  static std::vector<int>::const_iterator p; //,s;
+  // s=x.first.end();
+  TrieNode<V> *ptr = root;
 
-  for (p=x.first.begin();p!=x.first.end(); ){
-    //ind=x.first[i];
-    ind=*(p++);
-    if (ind>=ptr->children.size())
-      ptr->children.resize(ind+1, (TrieNode<V>*)nullptr);
-    if (ptr->children[ind]==nullptr)
-      ptr->children[ind] = new TrieNode<V>(initBranches,data.end());
-    ptr=ptr->children[ind];
+  for (p = x.first.begin(); p != x.first.end();) {
+    // ind=x.first[i];
+    ind = *(p++);
+    if (ind >= ptr->children.size()) {
+      ptr->children.resize(ind + 1, (TrieNode<V> *)nullptr);
+    }
+    if (ptr->children[ind] == nullptr) {
+      ptr->children[ind] = new TrieNode<V>(initBranches, data.end());
+    }
+    ptr = ptr->children[ind];
   }
-  if (ptr->val!=data.end()) return std::pair<typename trie_map<V>::iterator,bool>(ptr->val, false);
+  if (ptr->val != data.end()) {
+    return std::pair<typename trie_map<V>::iterator, bool>(ptr->val, false);
+  }
 
-  //now insert the item
+  // now insert the item
   leaves.push_back(ptr);
-  return std::pair<typename trie_map<V>::iterator,bool>((ptr->val=data.insert(data.begin(),x)),true);
+  return std::pair<typename trie_map<V>::iterator, bool>((ptr->val = data.insert(data.begin(), x)),
+                                                         true);
 }
 
-
 template <class V>
-typename trie_map<V>::iterator&
-trie_map<V>::find(const trie_map<V>::key_type& k) const
+typename trie_map<V>::iterator &trie_map<V>::find(const trie_map<V>::key_type &k) const
 {
-  size_t i=0;
-  TrieNode<V>* ptr=root;
-  for(;i<k.size()&&k[i]<(int)ptr->children.size()&&  ptr->children[k[i]]; ptr=ptr->children[k[i++]]) ;
+  size_t i = 0;
+  TrieNode<V> *ptr = root;
+  for (; i < k.size() && k[i] < (int)ptr->children.size() && ptr->children[k[i]];
+       ptr = ptr->children[k[i++]])
+    ;
 
   return ptr->val;
 }
 
-
 template <class V>
-typename trie_map<V>::iterator
-trie_map<V>::findExact(const trie_map<V>::key_type& k)
+typename trie_map<V>::iterator trie_map<V>::findExact(const trie_map<V>::key_type &k)
 {
-    size_t i=0;
-    TrieNode<V>* ptr=root;
-    for (;i<k.size()&&k[i]<(int)ptr->children.size()&&  ptr->children[k[i]];ptr=ptr->children[k[i++]]) ;
+  size_t i = 0;
+  TrieNode<V> *ptr = root;
+  for (; i < k.size() && k[i] < (int)ptr->children.size() && ptr->children[k[i]];
+       ptr = ptr->children[k[i++]])
+    ;
 
-    if (i>=k.size()&&ptr->val!=data.end()) return ptr->val;
-    else return data.end();
+  if (i >= k.size() && ptr->val != data.end()) {
+    return ptr->val;
+  }
+  else {
+    return data.end();
+  }
 }
 
-
 template <class V>
-trie_map<V>::trie_map (const trie_map<V>& other) :
-initBranches(other.initBranches),
-root(new TrieNode<V>(other.initBranches, data.end()))
+trie_map<V>::trie_map(const trie_map<V> &other)
+  : initBranches(other.initBranches), root(new TrieNode<V>(other.initBranches, data.end()))
 {
   typename trie_map<V>::const_iterator p;
-  for (p=other.begin(); p!=other.end();++p){
+  for (p = other.begin(); p != other.end(); ++p) {
     insert(*p);
   }
 }
 
-template <class V>
-trie_map<V>&
-trie_map<V>::operator= (const trie_map<V>& other)
+template <class V> trie_map<V> &trie_map<V>::operator=(const trie_map<V> &other)
 {
-  if (this!=&other){
+  if (this != &other) {
     reset();
-    //initBranches = other.initBranches;
-    for (auto p=other.begin(); p!=other.end(); ++p) insert(*p);
+    // initBranches = other.initBranches;
+    for (auto p = other.begin(); p != other.end(); ++p) {
+      insert(*p);
+    }
   }
   return *this;
 }
 
-template <class V>
-void trie_map<V>::swap( trie_map<V>& other )
+template <class V> void trie_map<V>::swap(trie_map<V> &other)
 {
   if (this != &other) {
-    trie_map<V> temp=*this;
-    *this=other;
-    other=temp;
+    trie_map<V> temp = *this;
+    *this = other;
+    other = temp;
   }
 }
 
@@ -119,27 +126,27 @@ void trie_map<V>::multiply(const trie_map<V> &t1, const trie_map<V> &t2, size_t 
   static size_t i;
   static std::pair<std::vector<int>, V> v;
   const_iterator p1, p2;
-  //assert(this!=&t1 && this != &t2);
+  // assert(this!=&t1 && this != &t2);
   v.first.resize(keylen);
   reset();
   for (p1 = t1.begin(); p1 != t1.end(); ++p1) {
-    if ((*p1).second > (V) 0) {
+    if ((*p1).second > (V)0) {
       for (p2 = t2.begin(); p2 != t2.end(); ++p2) {
-        if ((*p2).second > (V) 0) {
-          //assert((*p1).first.size()==keylen&& (*p2).first.size()==keylen);
+        if ((*p2).second > (V)0) {
+          // assert((*p1).first.size()==keylen&& (*p2).first.size()==keylen);
           for (i = 0; i < keylen; ++i) {
             v.first[i] = (*(f[i]))((*p1).first[i], (*p2).first[i]);
           }
           v.second = (V)((*p1).second * (*p2).second);
           (*this) += v;
         }
-      }//end for(p2
+      } // end for(p2
     }
-  }//end for(p1
+  } // end for(p1
 }
 
 template <class V>
-void trie_map<V>::multiply(const trie_map<V>& other,size_t keylen, std::vector<projtype>& f)
+void trie_map<V>::multiply(const trie_map<V> &other, size_t keylen, std::vector<projtype> &f)
 {
   static typename std::list<typename trie_map<V>::value_type>::iterator p1;
   static size_t i;
@@ -148,34 +155,41 @@ void trie_map<V>::multiply(const trie_map<V>& other,size_t keylen, std::vector<p
     std::runtime_error("Error: (in-place) multiply: other should not be the same object as self");
   }
   std::list<typename trie_map<V>::value_type> data2;
-  data2=data;
+  data2 = data;
   reset();
 
   static std::pair<std::vector<int>, V> v;
   v.first.resize(keylen);
-  TrieNode<V>* ptr;
+  TrieNode<V> *ptr;
 
-  for (p1=data2.begin(); p1!=data2.end(); ++p1)if((*p1).second>(V)0.0){
-      for(auto p2=other.begin(); p2!=other.end(); ++p2)if((*p2).second>(V)0.0){
-	ptr=root;
-	for (i=0;i<keylen;++i){
-	  v.first[i]= (*(f[i])) ((*p1).first[i], (*p2).first[i]);
-	  if (v.first[i]>=(int)ptr->children.size())
-	    ptr->children.resize(v.first[i]+1, (TrieNode<V>*)nullptr);
-	  if (ptr->children[v.first[i]]==nullptr)
-	    ptr->children[v.first[i]] = new TrieNode<V>(initBranches,data.end());
-	  ptr=ptr->children[v.first[i]];
-	}
-	v.second = (V)((*p1).second * (*p2).second);
-	if (ptr->val != data.end()) {
-	  ptr->val->second +=v.second;
-	} else {
-	  // insert the item
-	  leaves.push_back(ptr);
-	  ptr->val=data.insert(data.begin(),v);
-	}
-      }//end for(p2
-  }//end for(p1
+  for (p1 = data2.begin(); p1 != data2.end(); ++p1) {
+    if ((*p1).second > (V)0.0) {
+      for (auto p2 = other.begin(); p2 != other.end(); ++p2) {
+        if ((*p2).second > (V)0.0) {
+          ptr = root;
+          for (i = 0; i < keylen; ++i) {
+            v.first[i] = (*(f[i]))((*p1).first[i], (*p2).first[i]);
+            if (v.first[i] >= (int)ptr->children.size()) {
+              ptr->children.resize(v.first[i] + 1, (TrieNode<V> *)nullptr);
+            }
+            if (ptr->children[v.first[i]] == nullptr) {
+              ptr->children[v.first[i]] = new TrieNode<V>(initBranches, data.end());
+            }
+            ptr = ptr->children[v.first[i]];
+          }
+          v.second = (V)((*p1).second * (*p2).second);
+          if (ptr->val != data.end()) {
+            ptr->val->second += v.second;
+          }
+          else {
+            // insert the item
+            leaves.push_back(ptr);
+            ptr->val = data.insert(data.begin(), v);
+          }
+        } // end for(p2
+      }
+    } // end for(p1
+  }
 }
 
 template <class V>
@@ -183,27 +197,28 @@ void trie_map<V>::square(trie_map<V> &dest, size_t keylen, std::vector<projtype>
 {
   static std::pair<std::vector<int>, V> v;
   v.first.resize(keylen);
-  //assert(this!=&dest);
+  // assert(this!=&dest);
   dest.reset();
   for (auto p1 = begin(); p1 != end(); ++p1) {
-    if ((*p1).second > (V) 0) {
+    if ((*p1).second > (V)0) {
       for (auto p2 = p1; p2 != end(); ++p2) {
-        if ((*p2).second > (V) 0) {
-          //assert((*p1).first.size()==keylen&& (*p2).first.size()==keylen);
+        if ((*p2).second > (V)0) {
+          // assert((*p1).first.size()==keylen&& (*p2).first.size()==keylen);
           for (size_t i = 0; i < keylen; ++i) {
             v.first[i] = (*(f[i]))((*p1).first[i], (*p2).first[i]);
           }
           v.second = (V)((*p1).second * (*p2).second);
-          if (p1 != p2) { v.second *= 2; }
+          if (p1 != p2) {
+            v.second *= 2;
+          }
           dest += v;
         }
-      }//end for(p2
+      } // end for(p2
     }
-  }//end for(p1
+  } // end for(p1
 }
 
-template <class V>
-void trie_map<V>::square(size_t keylen, std::vector<projtype> &f)
+template <class V> void trie_map<V>::square(size_t keylen, std::vector<projtype> &f)
 {
   static typename std::list<typename trie_map<V>::value_type>::iterator p1, p2;
   static std::pair<std::vector<int>, V> v;
@@ -212,34 +227,38 @@ void trie_map<V>::square(size_t keylen, std::vector<projtype> &f)
   data2 = data;
   reset();
   for (p1 = data2.begin(); p1 != end(); ++p1) {
-    if ((*p1).second > (V) 0) {
+    if ((*p1).second > (V)0) {
       for (p2 = p1; p2 != data2.end(); ++p2) {
-        if ((*p2).second > (V) 0) {
-          //assert((*p1).first.size()==keylen&& (*p2).first.size()==keylen);
+        if ((*p2).second > (V)0) {
+          // assert((*p1).first.size()==keylen&& (*p2).first.size()==keylen);
           for (size_t i = 0; i < keylen; ++i) {
             v.first[i] = (*(f[i]))((*p1).first[i], (*p2).first[i]);
           }
           v.second = (V)((*p1).second * (*p2).second);
-          if (p1 != p2) { v.second *= 2; }
+          if (p1 != p2) {
+            v.second *= 2;
+          }
           (*this) += v;
         }
-      }//end for(p2
+      } // end for(p2
     }
-  }//end for(p1
+  } // end for(p1
 }
 
-
-template <class V> void
-trie_map<V>::power(size_t p, trie_map<V> &dest, trie_map<V> &scratch, size_t keylen, std::vector<projtype> &f)
+template <class V>
+void trie_map<V>::power(size_t p, trie_map<V> &dest, trie_map<V> &scratch, size_t keylen,
+                        std::vector<projtype> &f)
 {
-  //assert(p>0 && this!=&dest );
+  // assert(p>0 && this!=&dest );
   if (p == 1) {
     dest = *this;
     return;
   }
   square(dest, keylen, f);
   p -= 2;
-  if (p > 1) { scratch = dest; }
+  if (p > 1) {
+    scratch = dest;
+  }
   while (p > 0) {
     if (p == 1) {
       dest.multiply(*this, keylen, f);
@@ -250,15 +269,14 @@ trie_map<V>::power(size_t p, trie_map<V> &dest, trie_map<V> &scratch, size_t key
   }
 }
 
-template <class V>
-V trie_map<V>::inner_prod(trie_map<V> &other, V init /*= (V) (0)*/) const
+template <class V> V trie_map<V>::inner_prod(trie_map<V> &other, V init /*= (V) (0)*/) const
 {
   V result(init);
   for (auto p = begin(); p != end(); ++p) {
-    if ((*p).second > (V) 0) {
+    if ((*p).second > (V)0) {
       auto p2 = other.find((*p).first);
       if (p2 == other.end()) {
-        if (p->second > (V) THRESH) {
+        if (p->second > (V)THRESH) {
           std::stringstream str;
           str << "inner_prod WARNING: discarding [";
           copy(p->first.begin(), p->first.end(), std::ostream_iterator<int>(str, " "));
@@ -276,16 +294,16 @@ V trie_map<V>::inner_prod(trie_map<V> &other, V init /*= (V) (0)*/) const
 
 template <class V>
 V trie_map<V>::inner_prod(const std::vector<int> &x, size_t keylen, std::vector<projtype> &f,
-                          trie_map<V> &other, V init /* = (V) (0)*/ ) const
+                          trie_map<V> &other, V init /* = (V) (0)*/) const
 {
   V result(init);
   V th(THRESH);
   static iterator p2;
-  //V s(-1);
+  // V s(-1);
   for (auto p = begin(); p != end(); ++p) {
-    if ((*p).second > (V) 0) {
+    if ((*p).second > (V)0) {
       value_type y = *p;
-      //assert(y.first.size()==keylen);
+      // assert(y.first.size()==keylen);
       for (size_t i = 0; i < keylen; ++i) {
         y.first[i] = (*(f[i]))(y.first[i], x[i]);
       }
@@ -307,59 +325,68 @@ V trie_map<V>::inner_prod(const std::vector<int> &x, size_t keylen, std::vector<
   return result;
 }
 
-
-template <class V>
-trie_map<V>&
-trie_map<V>::operator/= (const std::vector<V>& denom){
-  //first, find the pivot: the first nonzero element of denom
+template <class V> trie_map<V> &trie_map<V>::operator/=(const std::vector<V> &denom)
+{
+  // first, find the pivot: the first nonzero element of denom
   V th(std::sqrt(THRESH));
-  int piv=-1;
-  for(size_t i=0;i<denom.size(); ++i) if (denom[i]>th) {
-    piv=(int)i;
-    break;
+  int piv = -1;
+  for (size_t i = 0; i < denom.size(); ++i) {
+    if (denom[i] > th) {
+      piv = (int)i;
+      break;
+    }
   }
-  if (piv==-1) return *this;
+  if (piv == -1) {
+    return *this;
+  }
 
-  //get rid of 0th order terms at the pivot level
+  // get rid of 0th order terms at the pivot level
   std::list<typename trie_map<V>::value_type> data2;
-  //data.swap(data2);
-  data2=data;
+  // data.swap(data2);
+  data2 = data;
   clear();
   typename std::list<typename trie_map<V>::value_type>::iterator itr;
-  for (itr=data2.begin(); itr!=data2.end(); ++itr){
-    if (itr->first[piv] > 0) insert(*itr);
+  for (itr = data2.begin(); itr != data2.end(); ++itr) {
+    if (itr->first[piv] > 0) {
+      insert(*itr);
+    }
   }
 
-  div(denom, root,0, piv);
+  div(denom, root, 0, piv);
   return *this;
 }
 
 template <class V>
-void trie_map<V>:: div(const std::vector<V>& denom,TrieNode<V>* n, int current, int pivot){
+void trie_map<V>::div(const std::vector<V> &denom, TrieNode<V> *n, int current, int pivot)
+{
   int i;
-  if ( pivot != current) {
-    int s=n->children.size();
-    for (i=0;i<s;i++)if(n->children[i])
-	div(denom,n->children[i], current+1, pivot);
+  if (pivot != current) {
+    int s = n->children.size();
+    for (i = 0; i < s; i++) {
+      if (n->children[i]) {
+        div(denom, n->children[i], current + 1, pivot);
+      }
+    }
     return;
   }
 
-  for(i=0;i<(int)(n->children.size())-1; i++) n->children[i]=n->children[i+1];
+  for (i = 0; i < (int)(n->children.size()) - 1; i++) {
+    n->children[i] = n->children[i + 1];
+  }
   n->children.pop_back();
 
-  typename trie_map<V>::div_helper f(denom,pivot,data.end());
-  for (i=n->children.size()-1;i>=0;i--){
-    if(i<(int)(n->children.size())-1 && n->children[i+1]){
-      //if(!n->children[i])n->children[i]=new TrieNode<V>(initBranches, data.end());
-      typename trie_map<V>::div_helper_mul  g(denom,pivot, n->children[i],data.end());
-      in_order_subtree(g, n->children[i+1]);
+  typename trie_map<V>::div_helper f(denom, pivot, data.end());
+  for (i = n->children.size() - 1; i >= 0; i--) {
+    if (i < (int)(n->children.size()) - 1 && n->children[i + 1]) {
+      // if(!n->children[i])n->children[i]=new TrieNode<V>(initBranches, data.end());
+      typename trie_map<V>::div_helper_mul g(denom, pivot, n->children[i], data.end());
+      in_order_subtree(g, n->children[i + 1]);
     }
-    in_order_subtree (f, n->children[i]);
+    in_order_subtree(f, n->children[i]);
   }
 }
 
-template <class V>
-std::ostream &operator<<(std::ostream &s, const trie_map<V> &t)
+template <class V> std::ostream &operator<<(std::ostream &s, const trie_map<V> &t)
 {
   for (auto p = t.begin(); p != t.end(); ++p) {
     s << "[ ";
@@ -369,10 +396,11 @@ std::ostream &operator<<(std::ostream &s, const trie_map<V> &t)
   return s;
 }
 
-template <class V>
-void trie_map<V>::deleteNodes(TrieNode<V> *n)
+template <class V> void trie_map<V>::deleteNodes(TrieNode<V> *n)
 {
-  if (!n) { return; }
+  if (!n) {
+    return;
+  }
   size_type i, s = n->children.size();
   for (i = 0; i < s; ++i) {
     if (n->children[i]) {
@@ -382,15 +410,14 @@ void trie_map<V>::deleteNodes(TrieNode<V> *n)
   delete n;
 }
 
-template <class V>
-void trie_map<V>::div_helper_mul::add(const std::vector<int> &conf, V y)
+template <class V> void trie_map<V>::div_helper_mul::add(const std::vector<int> &conf, V y)
 {
   size_t i, keylen = conf.size();
-  double th(THRESH / (double) denom[pivot]);
-  //if (y<=th&&y>=-th) return;
+  double th(THRESH / (double)denom[pivot]);
+  // if (y<=th&&y>=-th) return;
 
   if (!dest) {
-    if ((double) y > th || (double) y < -th) {
+    if ((double)y > th || (double)y < -th) {
       std::stringstream str;
       str << "division (pivot=" << denom[pivot] << ") WARNING: discarding " << y;
       throw std::runtime_error(str.str());
@@ -400,7 +427,7 @@ void trie_map<V>::div_helper_mul::add(const std::vector<int> &conf, V y)
   TrieNode<V> *ptr = dest;
   for (i = pivot + 1; i < keylen; ++i) {
     if ((*ptr)[conf[i]] == nullptr) {
-      if ((double) y > th || (double) y < -th) {
+      if ((double)y > th || (double)y < -th) {
         std::stringstream str;
         str << "division (pivot=" << denom[pivot] << ") WARNING: discarding " << y;
         throw std::runtime_error(str.str());
@@ -410,26 +437,29 @@ void trie_map<V>::div_helper_mul::add(const std::vector<int> &conf, V y)
     ptr = (*ptr)[conf[i]];
   }
   ptr->val->second += y;
-  //assert(ptr->val->second>-THRESH);
-  if ((double) ptr->val->second <= -th) {
+  // assert(ptr->val->second>-THRESH);
+  if ((double)ptr->val->second <= -th) {
     std::stringstream str;
-    str << "division (pivot=" << denom[pivot] << ") WARNING: discarding "
-        << ptr->val->second << std::endl;
+    str << "division (pivot=" << denom[pivot] << ") WARNING: discarding " << ptr->val->second
+        << std::endl;
     throw std::runtime_error(str.str());
   }
-  if (ptr->val->second < (V) 0) { ptr->val->second = 0; }
+  if (ptr->val->second < (V)0) {
+    ptr->val->second = 0;
+  }
 }
 
-template <class V>
-void trie_map<V>::div_helper_mul::operator()(iterator p)
+template <class V> void trie_map<V>::div_helper_mul::operator()(iterator p)
 {
-  if (p == endp) { return; }
+  if (p == endp) {
+    return;
+  }
   size_t i, keylen = p->first.size();
-  //assert(keylen==denom.size());
-  V null_prob(((V) 1) - denom[pivot]);
-  //V th(THRESH);
+  // assert(keylen==denom.size());
+  V null_prob(((V)1) - denom[pivot]);
+  // V th(THRESH);
   for (i = pivot + 1; i < keylen; ++i) {
-    if (denom[i] > (V) 0) {
+    if (denom[i] > (V)0) {
       p->first[i]++;
       add(p->first, -denom[i] * p->second);
       p->first[i]--;
@@ -437,11 +467,11 @@ void trie_map<V>::div_helper_mul::operator()(iterator p)
     }
   }
 
-  if (null_prob > (V) 0) {
+  if (null_prob > (V)0) {
     add(p->first, -null_prob * p->second);
   }
 }
 
-}  // end namespace Gambit::agg
+} // namespace agg
 
-}  // end namespace Gambit
+} // end namespace Gambit

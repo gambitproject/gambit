@@ -28,9 +28,7 @@
 namespace Gambit {
 namespace gametracer {
 
-void PrintProfile(std::ostream &p_stream,
-                  const std::string &p_label,
-                  const cvector &p_profile)
+void PrintProfile(std::ostream &p_stream, const std::string &p_label, const cvector &p_profile)
 {
   const int numDecimals = 6;
   p_stream << p_label;
@@ -47,9 +45,8 @@ const double BIGFLOAT = 3.0e+28F;
 // the image of the graph of the equilibrium correspondence above the ray,
 // under the homeomorphism.  In order to prevent costly memory allocation,
 // a number of scratch vectors are passed in.
-double LNM(const gnmgame &game,
-           cvector &z, const cvector &g, double det, cmatrix &J, cmatrix &DG, cvector &s,
-           int MaxLNM, double fuzz, cvector &del, cvector &scratch, cvector &backup,
+double LNM(const gnmgame &game, cvector &z, const cvector &g, double det, cmatrix &J, cmatrix &DG,
+           cvector &s, int MaxLNM, double fuzz, cvector &del, cvector &scratch, cvector &backup,
            bool ksym = false)
 {
   double b, e = BIGFLOAT, ee;
@@ -59,7 +56,7 @@ double LNM(const gnmgame &game,
     for (k = 0; k < MaxLNM; k++) {
       //      del = z - s - DG*s / (double)(numPlayers - 1) - g;
       DG.multiply(s, del);
-      del /= (double) (game.getNumPlayers() - 1);
+      del /= (double)(game.getNumPlayers() - 1);
       del += g;
       del += s;
       del -= z;
@@ -77,7 +74,7 @@ double LNM(const gnmgame &game,
         if (faulted) { // if we've already failed once, quit.
           return e;
         }
-        b /= MaxLNM; // if the full LNM step fails to improve things,
+        b /= MaxLNM;  // if the full LNM step fails to improve things,
         e = BIGFLOAT; // take smaller steps.
         faulted++;
         continue;
@@ -93,9 +90,10 @@ double LNM(const gnmgame &game,
     }
     return ee;
   }
-  else { return fuzz; }
+  else {
+    return fuzz;
+  }
 }
-
 
 // gnm(A,g,Eq,steps,fuzz,LNMFreq,LNMMax,LambdaMin,wobble,threshold)
 // ----------------------------------------------------------------
@@ -123,58 +121,54 @@ double LNM(const gnmgame &game,
 //            wobbles are disabled, GNM will terminate if the error
 //            reaches this threshold.
 
-int GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz, int LNMFreq, int LNMMax,
-        double LambdaMin, bool wobble, double threshold, bool verbose,
+int GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz, int LNMFreq,
+        int LNMMax, double LambdaMin, bool wobble, double threshold, bool verbose,
         std::string &returnMessage)
 {
   int i, // utility variables
-  bestAction,
-    k,
-    j,
-    n,
-    n_hat, // player whose pure strategy next enters or leaves the support
-  s_hat_old = -1, // the last pure strategy to enter or leave the support
-  s_hat, // the next pure strategy to enter or leave the support
-  Index = 1, // index of the equilibrium we're moving towards
-  numEq = 0, // number of equilibria found so far
-  stepsLeft; // number of linear steps remaining until we hit the boundary
+      bestAction, k, j, n,
+      n_hat,          // player whose pure strategy next enters or leaves the support
+      s_hat_old = -1, // the last pure strategy to enter or leave the support
+      s_hat,          // the next pure strategy to enter or leave the support
+      Index = 1,      // index of the equilibrium we're moving towards
+      numEq = 0,      // number of equilibria found so far
+      stepsLeft;      // number of linear steps remaining until we hit the boundary
 
   int N = A.getNumPlayers(),
-    M = A.getNumActions(); // the two most important cvector sizes, stored locally for brevity
+      M = A.getNumActions(); // the two most important cvector sizes, stored locally for brevity
   double bestPayoff,
-    det, // determinant of the jacobian
-  newV, // utility variable
-  lambda, // current position along the ray
-  dlambda, // derivative of lambda w.r.t time
-  minBound, // distance to the closest change of support
-  bound, // utility variable
-  del, // amount of time required to reach the next support boundary,
-  // assuming linear cvector field
-  delta, // the actual amount of time we will step forward (smaller than del)
-  ee,
-    V = 0.0; // scale factor for perturbation
+      det,      // determinant of the jacobian
+      newV,     // utility variable
+      lambda,   // current position along the ray
+      dlambda,  // derivative of lambda w.r.t time
+      minBound, // distance to the closest change of support
+      bound,    // utility variable
+      del,      // amount of time required to reach the next support boundary,
+      // assuming linear cvector field
+      delta, // the actual amount of time we will step forward (smaller than del)
+      ee,
+      V = 0.0; // scale factor for perturbation
 
   std::vector<int> s(M); // current best responses
   std::vector<int> B(M); // current support
 
-  for (i = 0; i < M; B[i++] = 0) {}
+  for (i = 0; i < M; B[i++] = 0) {
+  }
 
-  cmatrix DG(M, M), // jacobian of the payoff function
-  R(M, M), // jacobian of the retraction operator
-  I(M, M, 1, true), // identity
-  Dpsi, // jacobian of the cvector field
-  J(M, M); // adjoint of Dpsi
+  cmatrix DG(M, M),     // jacobian of the payoff function
+      R(M, M),          // jacobian of the retraction operator
+      I(M, M, 1, true), // identity
+      Dpsi,             // jacobian of the cvector field
+      J(M, M);          // adjoint of Dpsi
 
-  cvector sigma(M), // current strategy profile
-  g0(M), // original perturbation ray
-  z(M), // current position in space of games
-  v(M), // current cvector of payoffs for each pure strategy
-  dz(M), // derivative of z w.r.t. time
-  dv(M), // derivative of v w.r.t. time
-  nothing(M, 0),// cvector of all zeros
-  err(M),
-    backup(M);
-
+  cvector sigma(M),  // current strategy profile
+      g0(M),         // original perturbation ray
+      z(M),          // current position in space of games
+      v(M),          // current cvector of payoffs for each pure strategy
+      dz(M),         // derivative of z w.r.t. time
+      dv(M),         // derivative of v w.r.t. time
+      nothing(M, 0), // cvector of all zeros
+      err(M), backup(M);
 
   // utility variables for use as intermediate values in computations
   cmatrix Y1(M, M), Y2(M, M), Y3(M, M);
@@ -201,7 +195,7 @@ int GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz, 
   // initialize sigma to be the pure strategy profile
   // that is the lone equilibrium of the perturbed game
   for (i = 0; i < M; i++) {
-    sigma[i] = (double) B[i];
+    sigma[i] = (double)B[i];
   }
 
   if (verbose) {
@@ -210,7 +204,7 @@ int GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz, 
 
   A.payoffMatrix(DG, sigma, fuzz);
   DG.multiply(sigma, v);
-  v /= (double) (N - 1);
+  v /= (double)(N - 1);
 
   // Scale g until the equilibrium sigma calculated above
   // is in fact the one unique equilibrium, and set lambda
@@ -224,16 +218,17 @@ int GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz, 
       if (!B[i]) {
         if (G[n] - g[i] < threshold) {
           g[i] -= threshold;
-        }  //make sure we don't divide by (almost) zero
+        } // make sure we don't divide by (almost) zero
         newV = (v[i] - yn1[n]) / (G[n] - g[i]);
-        if (newV > V)
+        if (newV > V) {
           V = newV;
+        }
       }
     }
   }
 
-  lambda = 1.0;  // we scale g instead
-  V = V + 1; // a little extra padding
+  lambda = 1.0; // we scale g instead
+  V = V + 1;    // a little extra padding
   g *= V;
 
   if (N <= 2) { // ensure we don't do small steps and LNM
@@ -256,7 +251,7 @@ int GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz, 
 
     // take the specified number of steps within these support boundaries.
     for (stepsLeft = steps; stepsLeft > 0; stepsLeft--) {
-      //find J = Adj psi
+      // find J = Adj psi
       J = I;
       J += DG;
       J *= R;
@@ -268,29 +263,29 @@ int GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz, 
       // find derivatives of z and lambda
       J.multiply(g, dz);
       dz.negate();
-      //dz = -(J*g);
+      // dz = -(J*g);
       dlambda = -det;
       R.multiply(dz, ym1);
       DG.multiply(ym1, dv);
-      //dv = (DG*(R*dz));
+      // dv = (DG*(R*dz));
       ym1 = g;
       ym1 *= dlambda;
       dv += ym1;
-      //dv += g*dlambda;
+      // dv += g*dlambda;
 
-      //Calculate payoff cvector
+      // Calculate payoff cvector
       DG.multiply(sigma, v);
-      v /= (double) (N - 1);
+      v /= (double)(N - 1);
       ym1 = g;
       ym1 *= lambda;
       v += ym1;
       // v = DG*sigma / (double)(N-1) + g * lambda;
 
-      //Find next action that will enter or leave the support
-      //This bit pretends that z and v change linearly and calculates
-      //at what point z will equal v at a certain action; this
-      //indicates that the action's probability is either
-      //becoming 0 or becoming positive.
+      // Find next action that will enter or leave the support
+      // This bit pretends that z and v change linearly and calculates
+      // at what point z will equal v at a certain action; this
+      // indicates that the action's probability is either
+      // becoming 0 or becoming positive.
       minBound = BIGFLOAT;
       for (n = 0; n < N; n++) {
         for (i = A.firstAction(n); i < A.lastAction(n); i++) {
@@ -343,13 +338,13 @@ int GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz, 
           A.payoffMatrix(DG, sigma, fuzz);
           ee = 0.0;
           if (N > 2) { // if N=2, the graph is linear, so we are at a
-            //precise equilibrium.  otherwise, refine it.
+            // precise equilibrium.  otherwise, refine it.
             J = DG;
             J += I;
             J *= R;
             J -= I;
             J.negate();
-            //J=I-((I+DG)*R);
+            // J=I-((I+DG)*R);
             det = J.adjoint();
             ee = LNM(A, z, nothing, det, J, DG, sigma, LNMMax, fuzz, ym1, ym2, ym3);
           }
@@ -362,7 +357,7 @@ int GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz, 
           if (ee < fuzz) { // only save high quality equilibria;
             // this restriction could be removed.
             Eq.push_back(sigma);
-            //PrintProfile(std::cout, "NE", sigma);
+            // PrintProfile(std::cout, "NE", sigma);
           }
           Index = -Index;
           s_hat_old = -1;
@@ -398,7 +393,7 @@ int GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz, 
       } // already at the support boundary
 
       DG.multiply(sigma, err);
-      err /= (double) (N - 1);
+      err /= (double)(N - 1);
       g0 = g;
       g0 *= lambda;
       err += g0;
@@ -407,13 +402,13 @@ int GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz, 
       err.negate();
       ee = std::max(err.max(), -err.min());
       if (ee < fuzz && stepsLeft > 2) { // path is probably near-linear;
-        stepsLeft = 2;                 // step all the way to boundary
-        k = LNMFreq - 1;               // then run LNM
+        stepsLeft = 2;                  // step all the way to boundary
+        k = LNMFreq - 1;                // then run LNM
       }
       if (ee > threshold) { // if we've accumulated too much error, either
         if (wobble) {       // wobble or quit.
           DG.multiply(sigma, ym1);
-          ym1 /= (double) (N - 1);
+          ym1 /= (double)(N - 1);
           g = z;
           g -= sigma;
           g -= ym1;
@@ -466,16 +461,15 @@ int GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz, 
     if (N > 2 && wobble) {
       A.payoffMatrix(DG, sigma, fuzz);
       DG.multiply(sigma, ym1);
-      ym1 /= (double) (N - 1);
+      ym1 /= (double)(N - 1);
       g = z;
       g -= sigma;
       g -= ym1;
       g /= lambda;
       // g = ((z-sigma)-((DG*sigma) / (double)(N-1)))/lambda;
-
     }
   }
 }
 
-}  // end namespace Gambit::gametracer
-}  // end namespace Gambit
+} // namespace gametracer
+} // end namespace Gambit

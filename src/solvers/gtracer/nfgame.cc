@@ -30,8 +30,7 @@ namespace Gambit {
 namespace gametracer {
 
 nfgame::nfgame(const std::vector<int> &actions, const cvector &payoffs)
-  : gnmgame(actions), payoffs(payoffs),
-    blockSize(actions.size() + 1)
+  : gnmgame(actions), payoffs(payoffs), blockSize(actions.size() + 1)
 {
   blockSize[0] = 1;
   for (int i = 1; i <= numPlayers; i++) {
@@ -103,21 +102,24 @@ void nfgame::payoffMatrix(cmatrix &dest, cvector &s, double fuzz) const
   }
 }
 
+// assumes m = memcpy(m, payoffs + blockSize[numPlayers] * player1,
+// blockSize[numPlayers]*sizeof(double)), player1 != player2 i.e. m points to payoff cmatrix for
+// the desired player
 
-//assumes m = memcpy(m, payoffs + blockSize[numPlayers] * player1, blockSize[numPlayers]*sizeof(double)), player1 != player2
-//i.e. m points to payoff cmatrix for the desired player
-
-void nfgame::localPayoffMatrix(double *dest, int player1, int player2, cvector &s, double *m, int n) const
+void nfgame::localPayoffMatrix(double *dest, int player1, int player2, cvector &s, double *m,
+                               int n) const
 {
   int i;
   if (player1 == n) {
     for (i = 0; i < actions[player1]; i++) {
-      localPayoffVector(dest + i * actions[player2], player2, s, m + i * blockSize[player1], n - 1);
+      localPayoffVector(dest + i * actions[player2], player2, s, m + i * blockSize[player1],
+                        n - 1);
     }
   }
   else if (player2 == n) {
     for (i = 0; i < actions[player2]; i++) {
-      localPayoffVector(dest + i * actions[player1], player1, s, m + i * blockSize[player2], n - 1);
+      localPayoffVector(dest + i * actions[player1], player1, s, m + i * blockSize[player2],
+                        n - 1);
     }
   }
   else {
@@ -174,5 +176,5 @@ double nfgame::localPayoff(cvector &s, double *m, int n) const
   }
 }
 
-}  // end namespace Gambit::gametracer
-}  // end namespace Gambit
+} // namespace gametracer
+} // end namespace Gambit

@@ -27,7 +27,7 @@
 #include <iostream>
 #include "agg.h"
 
-namespace Gambit  {
+namespace Gambit {
 
 class BAGGPureStrategyProfileRep;
 template <class T> class BAGGMixedStrategyProfileRep;
@@ -41,40 +41,37 @@ public:
   friend class Gambit::BAGGPureStrategyProfileRep;
   template <class T> friend class Gambit::BAGGMixedStrategyProfileRep;
 
-  friend std::ostream& operator<< (std::ostream& s, const BAGG& g);
+  friend std::ostream &operator<<(std::ostream &s, const BAGG &g);
 
   static std::shared_ptr<BAGG> makeBAGG(std::istream &in);
 
-  BAGG(int N, int S,
-    std::vector<int>& numTypes,
-    std::vector<ProbDist>& TDist,
-    std::vector<std::vector<std::vector<int > > > &typeActionSets,
-    std::vector<std::vector<std::vector<int > > > &ta2a,
-    std::shared_ptr<AGG> aggPtr);
+  BAGG(int N, int S, std::vector<int> &numTypes, std::vector<ProbDist> &TDist,
+       std::vector<std::vector<std::vector<int>>> &typeActionSets,
+       std::vector<std::vector<std::vector<int>>> &ta2a, std::shared_ptr<AGG> aggPtr);
 
   ~BAGG() = default;
 
-  int getNumPlayers() const {return numPlayers;}
-  int getNumTypes() const {return typeOffset[numPlayers];}
-  int getNumTypes(int i) const {return numTypes[i];}
-  int getNumActions(int pl, int t) const {return typeActionSets[pl][t].size();}
+  int getNumPlayers() const { return numPlayers; }
+  int getNumTypes() const { return typeOffset[numPlayers]; }
+  int getNumTypes(int i) const { return numTypes[i]; }
+  int getNumActions(int pl, int t) const { return typeActionSets[pl][t].size(); }
 
-  int getNumActionNodes() const {return numActionNodes;}
-  int getNumFunctionNodes() const {return aggPtr->getNumFunctionNodes();}
+  int getNumActionNodes() const { return numActionNodes; }
+  int getNumFunctionNodes() const { return aggPtr->getNumFunctionNodes(); }
 
-  int firstAction(int pl,int t) const {return strategyOffset[typeOffset[pl]+t];}
-  int lastAction(int pl, int t) const {return strategyOffset[typeOffset[pl]+t+1];}
+  int firstAction(int pl, int t) const { return strategyOffset[typeOffset[pl] + t]; }
+  int lastAction(int pl, int t) const { return strategyOffset[typeOffset[pl] + t + 1]; }
 
   AggNumber getMaxPayoff() const { return aggPtr->getMaxPayoff(); }
   AggNumber getMinPayoff() const { return aggPtr->getMinPayoff(); }
 
-  //exp. payoff under mixed strat profile
+  // exp. payoff under mixed strat profile
   AggNumber getMixedPayoff(int player, StrategyProfile &s);
-  //exp payoff for player, conditioned on her receiving type tp.
+  // exp payoff for player, conditioned on her receiving type tp.
   AggNumber getMixedPayoff(int player, int tp, StrategyProfile &s);
 
   void getPayoffVector(AggNumberVector &dest, int player, int tp, const StrategyProfile &s);
-  AggNumber getV (int player, int tp, int action,const StrategyProfile &s);
+  AggNumber getV(int player, int tp, int action, const StrategyProfile &s);
 
   AggNumber getPurePayoff(int player, int tp, std::vector<int> &s);
   AggNumber getPurePayoff(int player, std::vector<int> &s)
@@ -100,30 +97,28 @@ private:
   std::vector<int> numTypes;
   std::vector<ProbDist> indepTypeDist;
 
+  // for each player, each of her types, the set of actions
+  std::vector<std::vector<std::vector<int>>> typeActionSets;
 
-  //for each player, each of her types, the set of actions
-  std::vector<std::vector<std::vector<int> > > typeActionSets;
-
-  std::vector<std::vector<std::vector<int > > > typeAction2ActionIndex;
+  std::vector<std::vector<std::vector<int>>> typeAction2ActionIndex;
 
   std::vector<int> typeOffset;
   std::vector<int> strategyOffset;
 
-  //AGG that stores the action graph and utility functions
+  // AGG that stores the action graph and utility functions
   std::shared_ptr<AGG> aggPtr;
 
   bool symmetric;
 
-  void getAGGStrat(StrategyProfile &as, const StrategyProfile &s, int player=-1, int tp=-1, int action=-1);
+  void getAGGStrat(StrategyProfile &as, const StrategyProfile &s, int player = -1, int tp = -1,
+                   int action = -1);
   void getSymAGGStrat(StrategyProfile &as, const StrategyProfile &s);
-
 };
 
-std::ostream& operator<< (std::ostream& s, const BAGG& g);
+std::ostream &operator<<(std::ostream &s, const BAGG &g);
 
-}  // end namespace Gambit::agg
+} // namespace agg
 
-}  // end namespace Gambit
+} // end namespace Gambit
 
-
-#endif  // GAMBIT_AGG_BAGG_H
+#endif // GAMBIT_AGG_BAGG_H

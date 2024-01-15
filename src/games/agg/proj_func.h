@@ -35,8 +35,8 @@ namespace Gambit {
 
 namespace agg {
 
-//types of contribution-independent function:
-//sum, existence, highest, lowest and their extended versions
+// types of contribution-independent function:
+// sum, existence, highest, lowest and their extended versions
 typedef enum {
   P_SUM = 0,
   P_EXIST = 1,
@@ -48,17 +48,15 @@ typedef enum {
   P_LOW2 = 13
 } TypeEnum;
 
-//proj_func: contribution-independent function
+// proj_func: contribution-independent function
 struct proj_func {
   TypeEnum Type;
-  int Default;      //default value
+  int Default; // default value
   std::vector<int> weights;
 
-  proj_func(TypeEnum tp, int def, std::vector<int> &wts) : Type(tp), Default(def), weights(wts)
-  {}
+  proj_func(TypeEnum tp, int def, std::vector<int> &wts) : Type(tp), Default(def), weights(wts) {}
 
-  proj_func(TypeEnum tp, int def) : Type(tp), Default(def)
-  {}
+  proj_func(TypeEnum tp, int def) : Type(tp), Default(def) {}
 
   proj_func(TypeEnum tp, std::istream &in, int S) : Type(tp)
   {
@@ -111,25 +109,19 @@ struct proj_func {
 };
 
 struct proj_func_SUM : public proj_func {
-  proj_func_SUM() : proj_func(P_SUM, 0)
-  {}
+  proj_func_SUM() : proj_func(P_SUM, 0) {}
 
-  int operator()(int x, int y) const override
-  { return x + y; }
+  int operator()(int x, int y) const override { return x + y; }
 
-  int operator()(std::multiset<int> &s) const override
-  { return s.size(); }
+  int operator()(std::multiset<int> &s) const override { return s.size(); }
 
-  void print(std::ostream &out) const override
-  { out << P_SUM << std::endl; }
+  void print(std::ostream &out) const override { out << P_SUM << std::endl; }
 };
 
 struct proj_func_SUM2 : public proj_func {
-  proj_func_SUM2(std::istream &in, int S) : proj_func(P_SUM2, in, S)
-  {}
+  proj_func_SUM2(std::istream &in, int S) : proj_func(P_SUM2, in, S) {}
 
-  int operator()(int x, int y) const override
-  { return x + y; }
+  int operator()(int x, int y) const override { return x + y; }
 
   int operator()(std::multiset<int> &s) const override
   {
@@ -142,17 +134,13 @@ struct proj_func_SUM2 : public proj_func {
 };
 
 struct proj_func_EXIST : public proj_func {
-  proj_func_EXIST() : proj_func(P_EXIST, 0)
-  {}
+  proj_func_EXIST() : proj_func(P_EXIST, 0) {}
 
-  int operator()(int x, int y) const override
-  { return (x + y > 0); }
+  int operator()(int x, int y) const override { return (x + y > 0); }
 
-  int operator()(std::multiset<int> &s) const override
-  { return !s.empty(); }
+  int operator()(std::multiset<int> &s) const override { return !s.empty(); }
 
-  void print(std::ostream &out) const override
-  { out << P_EXIST << std::endl; }
+  void print(std::ostream &out) const override { out << P_EXIST << std::endl; }
 };
 
 struct proj_func_EXIST2 : public proj_func {
@@ -168,8 +156,7 @@ struct proj_func_EXIST2 : public proj_func {
     }
   }
 
-  int operator()(int x, int y) const override
-  { return (x + y > 0); }
+  int operator()(int x, int y) const override { return (x + y > 0); }
 
   int operator()(std::multiset<int> &s) const override
   {
@@ -182,40 +169,49 @@ struct proj_func_EXIST2 : public proj_func {
 };
 
 struct proj_func_HIGH : public proj_func {
-  proj_func_HIGH(int def) : proj_func(P_HIGH, def)
-  {}
+  proj_func_HIGH(int def) : proj_func(P_HIGH, def) {}
 
   int operator()(int x, int y) const override
   {
-    if (x == Default) { return y; }
-    if (y == Default) { return x; }
+    if (x == Default) {
+      return y;
+    }
+    if (y == Default) {
+      return x;
+    }
     return ((x > y) ? x : y);
   }
 
   int operator()(std::multiset<int> &s) const override
   {
-    if (s.empty()) { return Default; }
+    if (s.empty()) {
+      return Default;
+    }
     return *(s.rbegin());
   }
 
-  void print(std::ostream &out) const override
-  { out << P_HIGH << std::endl; }
+  void print(std::ostream &out) const override { out << P_HIGH << std::endl; }
 };
 
 struct proj_func_HIGH2 : public proj_func {
-  proj_func_HIGH2(std::istream &in, int S) : proj_func(P_HIGH2, in, S)
-  {}
+  proj_func_HIGH2(std::istream &in, int S) : proj_func(P_HIGH2, in, S) {}
 
   int operator()(int x, int y) const override
   {
-    if (x == Default) { return y; }
-    if (y == Default) { return x; }
+    if (x == Default) {
+      return y;
+    }
+    if (y == Default) {
+      return x;
+    }
     return ((x > y) ? x : y);
   }
 
   int operator()(std::multiset<int> &s) const override
   {
-    if (s.empty()) { return Default; }
+    if (s.empty()) {
+      return Default;
+    }
     auto it = s.begin();
     int res = weights.at(*it);
     for (; it != s.end(); it++) {
@@ -226,40 +222,49 @@ struct proj_func_HIGH2 : public proj_func {
 };
 
 struct proj_func_LOW : public proj_func {
-  proj_func_LOW(int def) : proj_func(P_LOW, def)
-  {}
+  proj_func_LOW(int def) : proj_func(P_LOW, def) {}
 
   int operator()(int x, int y) const override
   {
-    if (x == Default) { return y; }
-    if (y == Default) { return x; }
+    if (x == Default) {
+      return y;
+    }
+    if (y == Default) {
+      return x;
+    }
     return ((x < y) ? x : y);
   }
 
   int operator()(std::multiset<int> &s) const override
   {
-    if (s.empty()) { return Default; }
+    if (s.empty()) {
+      return Default;
+    }
     return *(s.begin());
   }
 
-  void print(std::ostream &out) const override
-  { out << P_LOW << std::endl; }
+  void print(std::ostream &out) const override { out << P_LOW << std::endl; }
 };
 
 struct proj_func_LOW2 : public proj_func {
-  proj_func_LOW2(std::istream &in, int S) : proj_func(P_LOW2, in, S)
-  {}
+  proj_func_LOW2(std::istream &in, int S) : proj_func(P_LOW2, in, S) {}
 
   int operator()(int x, int y) const override
   {
-    if (x == Default) { return y; }
-    if (y == Default) { return x; }
+    if (x == Default) {
+      return y;
+    }
+    if (y == Default) {
+      return x;
+    }
     return ((x < y) ? x : y);
   }
 
   int operator()(std::multiset<int> &s) const override
   {
-    if (s.empty()) { return Default; }
+    if (s.empty()) {
+      return Default;
+    }
     auto it = s.begin();
     int res = weights.at(*it);
     for (; it != s.end(); it++) {
@@ -269,35 +274,34 @@ struct proj_func_LOW2 : public proj_func {
   }
 };
 
-
 using projtype = std::shared_ptr<proj_func>;
 
 inline projtype make_proj_func(TypeEnum type, std::istream &in, int S, int P)
 {
   switch (type) {
-    case P_SUM:
-      return std::make_shared<proj_func_SUM>();
-    case P_EXIST:
-      return std::make_shared<proj_func_EXIST>();
-    case P_HIGH:
-      return std::make_shared<proj_func_HIGH>(S + P);
-    case P_LOW:
-      return std::make_shared<proj_func_LOW>(S + P);
-    case P_SUM2:
-      return std::make_shared<proj_func_SUM2>(in, S);
-    case P_EXIST2:
-      return std::make_shared<proj_func_EXIST2>(in, S);
-    case P_HIGH2:
-      return std::make_shared<proj_func_HIGH2>(in, S);
-    case P_LOW2:
-      return std::make_shared<proj_func_LOW2>(in, S);
-    default:
-      throw std::runtime_error("error: function type is not recognized");
+  case P_SUM:
+    return std::make_shared<proj_func_SUM>();
+  case P_EXIST:
+    return std::make_shared<proj_func_EXIST>();
+  case P_HIGH:
+    return std::make_shared<proj_func_HIGH>(S + P);
+  case P_LOW:
+    return std::make_shared<proj_func_LOW>(S + P);
+  case P_SUM2:
+    return std::make_shared<proj_func_SUM2>(in, S);
+  case P_EXIST2:
+    return std::make_shared<proj_func_EXIST2>(in, S);
+  case P_HIGH2:
+    return std::make_shared<proj_func_HIGH2>(in, S);
+  case P_LOW2:
+    return std::make_shared<proj_func_LOW2>(in, S);
+  default:
+    throw std::runtime_error("error: function type is not recognized");
   }
 }
 
-}  // end namespace Gambit::agg
+} // namespace agg
 
-}  // end namespace Gambit
+} // end namespace Gambit
 
-#endif  // GAMBIT_AGG_PROJFUNC_H
+#endif // GAMBIT_AGG_PROJFUNC_H
