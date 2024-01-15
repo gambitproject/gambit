@@ -16,6 +16,7 @@
   various dict-like ways
 - `gnm_solve`/`gambit-gnm` now exposes several parameters which control the behavior of the
   path-following procedure
+- The MixedBehaviorProfile object can now be initialized on creation by a given distribution.
 
 ### Changed
 - Gambit now requires a compiler that supports C++17.
