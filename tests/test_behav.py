@@ -1169,3 +1169,71 @@ def test_profile_order_consistency(game: gbt.Game,
                                    objects_to_test: typing.Callable):
     _get_and_check_answers(game, action_probs1, action_probs2, rational_flag, func_to_test,
                            objects_to_test(game))
+
+
+@pytest.mark.parametrize(
+    "game,rational_flag,data",
+    [(games.create_mixed_behav_game_efg(), True, [[[0, 1]], [[0, 1]], [[1, 0]]]),
+     (games.create_mixed_behav_game_efg(), True, [[["1/5", "4/5"]], [["1/4", "3/4"]], [[1, 0]]]),
+     (games.create_myerson_2_card_poker_efg(), True, [[[1/5, 4/5], [3/5, 2/5]], [[1/4, 3/4]]]),
+     (games.create_mixed_behav_game_efg(), False, [[[0, 1]], [[1, 0]], [[1, 0]]]),
+     (games.create_mixed_behav_game_efg(), False, [[[1/5, 4/5]], [[1/4, 3/4]], [[1, 0]]]),
+     (games.create_myerson_2_card_poker_efg(), False, [[[1/5, 4/5], [3/5, 2/5]], [[1/4, 3/4]]])
+     ]
+)
+def test_specific_profile(game: gbt.Game, rational_flag: bool, data: list):
+    """Test that the mixed behavior profile is initialized from a specific distribution
+    for each player over his actions.
+    """
+    profile = game.mixed_behavior_profile(rational=rational_flag, data=data)
+    for (action, prob) in zip(game.actions, [k for i in data for j in i for k in j]):
+        assert profile[action] == (gbt.Rational(prob) if rational_flag else prob)
+
+
+@pytest.mark.parametrize(
+    "game,rational_flag,data",
+    [(games.create_mixed_behav_game_efg(), True,
+      [[[0, 1, 0]], [[1, 0]], [["1/2", "1/2"]]]),
+     (games.create_mixed_behav_game_efg(), True,
+      [[[0, 1]], [[1, 0]], [[1, 0]], [[0, 1]]]),
+     (games.create_myerson_2_card_poker_efg(), True,
+      [[["1/5", "4/5"], ["3/5", "2/5"]], [["1/4", "3/4"], ["1/4", "3/4"]]]),
+     (games.create_el_farol_bar_game_efg(), True,
+      [[4/9, 5/9], [0], [1/2, 1/2], [11/12, 1/12], [1/2, 1/2]]),
+     (games.create_el_farol_bar_game_efg(), True,
+      [[1/2, 1/2]]),
+     (games.create_mixed_behav_game_efg(), False,
+      [[[0, 1, 0]], [[1, 0]], [[1, 0]]]),
+     (games.create_mixed_behav_game_efg(), False,
+      [[[0, 1]], [[1, 0]], [[1, 0]], [[0, 1]]]),
+     (games.create_myerson_2_card_poker_efg(), False,
+      [[[1/5, 4/5], [3/5, 2/5]], [[1/4, 3/4], [1/4, 3/4]]]),
+     (games.create_el_farol_bar_game_efg(), False,
+      [[4/9, 5/9], [0], [1/2, 1/2], [11/12, 1/12], [1/2, 1/2]]),
+     (games.create_el_farol_bar_game_efg(), False,
+      [[1/2, 1/2]])
+     ]
+)
+def test_profile_data_error(game: gbt.Game, rational_flag: bool, data: list):
+    """Test to ensure a pygambit.ValueError is raised when the data do not
+    match with the number of players, the number of the infosets, and the
+    number of actions per infoset.
+    """
+    with pytest.raises(ValueError):
+        game.mixed_behavior_profile(rational=rational_flag, data=data)
+
+
+@pytest.mark.parametrize(
+    "game,rational_flag,data",
+    [(games.create_coord_4x4_nfg(), True,
+      [["1/5", "2/5", 0, "2/5"], ["1/4", "3/8", "1/4", "3/8"]]),
+     (games.create_coord_4x4_nfg(), False,
+      [[1/5, 2/5, 0/5, 2/5], [1/4, 3/8, 1/4, 3/8]]),
+     ]
+)
+def test_tree_representation_error(game: gbt.Game, rational_flag: bool, data: list):
+    """Test to ensure a pygambit.UndefinedOperationError is raised when the game
+    to create a mixed behavior profile does not have a tree representation.
+    """
+    with pytest.raises(gbt.UndefinedOperationError):
+        game.mixed_behavior_profile(rational=rational_flag, data=data)

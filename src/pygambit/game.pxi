@@ -747,15 +747,20 @@ class Game:
                     mspr[s] = Rational(v)
             return mspr
 
-    def mixed_behavior_profile(self, rational=False) -> MixedBehaviorProfile:
-        """Create a behavior strategy profile over the game.
+    def mixed_behavior_profile(self, data=None, rational=False) -> MixedBehaviorProfile:
+        """Create a mixed behavior profile over the game.
 
-        The profile is initialized to uniform randomization for each player
-        over their actions at each information set.
+        If `data` is not specified, the profile is initialized to uniform randomization
+        at each information set.
 
         Parameters
         ----------
-        rational
+        data : array_like of array_like of array_like, optional
+            A nested list (or compatible type) with the
+            same dimension as the action set of the game,
+            specifying the probabilities of the actions.
+
+        rational : bool, optional
             If True, probabilities are represented using rational numbers; otherwise
             double-precision floating point numbers are used.
 
@@ -764,19 +769,58 @@ class Game:
         UndefinedOperationError
             If the game does not have a tree representation.
         """
-        if self.is_tree:
-            if not rational:
-                mbpd = MixedBehaviorProfileDouble()
-                mbpd.profile = make_shared[c_MixedBehaviorProfileDouble](self.game)
-                return mbpd
-            else:
-                mbpr = MixedBehaviorProfileRational()
-                mbpr.profile = make_shared[c_MixedBehaviorProfileRational](self.game)
-                return mbpr
-        else:
+        if not self.is_tree:
             raise UndefinedOperationError(
                 "Game must have a tree representation to create a mixed behavior profile"
             )
+        if not rational:
+            mbpd = MixedBehaviorProfileDouble()
+            mbpd.profile = make_shared[c_MixedBehaviorProfileDouble](self.game)
+            if data is None:
+                return mbpd
+            if len(data) != len(self.players):
+                raise ValueError(
+                    "Number of elements does not match number of players"
+                )
+            for (p, d) in zip(self.players, data):
+                if len(p.infosets) != len(d):
+                    raise ValueError(
+                        f"Number of elements does not match number of "
+                        f"infosets for {p}"
+                    )
+                for (i, v) in zip(p.infosets, d):
+                    if len(i.actions) != len(v):
+                        raise ValueError(
+                            f"Number of elements does not match number of "
+                            f"actions for the infoset {i} for {p}"
+                        )
+                    for (a, u) in zip(i.actions, v):
+                        mbpd[a] = float(u)
+            return mbpd
+        else:
+            mbpr = MixedBehaviorProfileRational()
+            mbpr.profile = make_shared[c_MixedBehaviorProfileRational](self.game)
+            if data is None:
+                return mbpr
+            if len(data) != len(self.players):
+                raise ValueError(
+                    "Number of elements does not match number of players"
+                )
+            for (p, d) in zip(self.players, data):
+                if len(p.infosets) != len(d):
+                    raise ValueError(
+                        f"Number of elements does not match number of "
+                        f"infosets for {p}"
+                    )
+                for (i, v) in zip(p.infosets, d):
+                    if len(i.actions) != len(v):
+                        raise ValueError(
+                            f"Number of elements does not match number of "
+                            f"actions for the infoset {i} for {p}"
+                        )
+                    for (a, u) in zip(i.actions, v):
+                        mbpr[a] = Rational(u)
+            return mbpr
 
     def support_profile(self):
         return StrategySupportProfile(self)
