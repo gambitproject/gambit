@@ -42,10 +42,10 @@ gbtMixedProfileList::gbtMixedProfileList(wxWindow *p_parent,
   SetColLabelHeight(25);
 
   Connect(GetId(), wxEVT_SHEET_LABEL_LEFT_DOWN,
-	  (wxObjectEventFunction) (wxEventFunction) wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtMixedProfileList::OnLabelClick)));
+	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtMixedProfileList::OnLabelClick))));
 
   Connect(GetId(), wxEVT_SHEET_CELL_LEFT_DOWN,
-	  (wxObjectEventFunction) (wxEventFunction) wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtMixedProfileList::OnCellClick)));
+	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtMixedProfileList::OnCellClick))));
 }
 
 gbtMixedProfileList::~gbtMixedProfileList()

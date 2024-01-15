@@ -92,7 +92,7 @@ getabasis2 (lrs_dic * P, lrs_dat * Q, lrs_dic * P2orig, long order[])
   if(firsttime)
   {
     firsttime = FALSE;
-    linindex = (long int *) calloc ((m + d + 2), sizeof (long));
+    linindex = reinterpret_cast<long int *>(calloc ((m + d + 2), sizeof (long)));
   }
   else     /* after first time we update the change in linearities from the last time, saving many pivots */
   {

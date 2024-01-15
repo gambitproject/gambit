@@ -322,20 +322,20 @@ void gbtLayoutDialog::GetSettings(gbtStyle &p_settings)
     return;
   }
 
-  auto *nodes = (gbtLayoutNodesPanel *) m_notebook->GetPage(0);
+  auto *nodes = dynamic_cast<gbtLayoutNodesPanel *>(m_notebook->GetPage(0));
   p_settings.SetNodeSize(nodes->NodeSize());
   p_settings.SetTerminalSpacing(nodes->TerminalSpacing());
   p_settings.SetChanceToken(nodes->ChanceToken());
   p_settings.SetPlayerToken(nodes->PlayerToken());
   p_settings.SetTerminalToken(nodes->TerminalToken());
 
-  auto *branches = (gbtLayoutBranchesPanel *) m_notebook->GetPage(1);
+  auto *branches = dynamic_cast<gbtLayoutBranchesPanel *>(m_notebook->GetPage(1));
   p_settings.SetBranchLength(branches->BranchLength());
   p_settings.SetTineLength(branches->TineLength());
   p_settings.SetBranchStyle(branches->BranchStyle());
   p_settings.SetBranchLabels(branches->BranchLabels());
 
-  auto *infosets = (gbtLayoutInfosetsPanel *) m_notebook->GetPage(2);
+  auto *infosets = dynamic_cast<gbtLayoutInfosetsPanel *>(m_notebook->GetPage(2));
   p_settings.SetInfosetConnect(infosets->InfosetConnect());
   p_settings.SetInfosetJoin(infosets->InfosetJoin());
 }

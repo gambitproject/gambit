@@ -426,10 +426,10 @@ gbtLogitPlotStrategyList::gbtLogitPlotStrategyList(wxWindow *p_parent,
   AutoSizeCols();
 
   Connect(GetId(), wxEVT_SHEET_CELL_LEFT_DOWN,
-	  (wxObjectEventFunction) (wxEventFunction) wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtLogitPlotStrategyList::OnLeftDown)));
+	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtLogitPlotStrategyList::OnLeftDown))));
 
   Connect(GetId(), wxEVT_SHEET_CELL_LEFT_UP,
-	  (wxObjectEventFunction) (wxEventFunction) wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtLogitPlotStrategyList::OnLeftUp)));
+	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtLogitPlotStrategyList::OnLeftUp))));
 }
 
 void gbtLogitPlotStrategyList::OnLeftUp(wxSheetEvent &p_event)
@@ -495,7 +495,7 @@ LogitPlotPanel::LogitPlotPanel(wxWindow *p_parent,
   sizer->Add(m_plotCtrl, 0, wxALL, 5);
 
   Connect(m_plotStrategies->GetId(), wxEVT_SHEET_CELL_LEFT_UP,
-	  (wxObjectEventFunction) (wxEventFunction) wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&LogitPlotPanel::OnChangeStrategies)));
+	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&LogitPlotPanel::OnChangeStrategies))));
 
   SetSizer(sizer);
   Layout();

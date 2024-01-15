@@ -70,10 +70,10 @@ void gnmgame::retractJac(cmatrix &dest, std::vector<int> &support) const
 
 int compareDouble(const void *d1, const void *d2)
 {
-  if (*(double *)d1 > *(double *)d2) {
+  if (*reinterpret_cast<const double *>(d1) > *reinterpret_cast<const double *>(d2)) {
     return -1;
   }
-  else if (*(double *)d1 < *(double *)d2) {
+  else if (*reinterpret_cast<const double *>(d1) < *reinterpret_cast<const double *>(d2)) {
     return 1;
   }
   else {

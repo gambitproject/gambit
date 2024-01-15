@@ -105,7 +105,7 @@ bool gbtNumberValidator::Validate(wxWindow *p_parent)
     return false;
   }
 
-  auto *control = (wxTextCtrl *) m_validatorWindow;
+  auto *control = dynamic_cast<wxTextCtrl *>(m_validatorWindow);
 
   if (!control->IsEnabled()) {
     return true;
@@ -141,7 +141,7 @@ bool gbtNumberValidator::TransferToWindow()
     return false;
   }
 
-  auto *control = (wxTextCtrl *) m_validatorWindow;
+  auto *control = dynamic_cast<wxTextCtrl *>(m_validatorWindow);
   control->SetValue(*m_stringValue);
 
   return true;
@@ -153,7 +153,7 @@ bool gbtNumberValidator::TransferFromWindow()
     return false;
   }
 
-  auto *control = (wxTextCtrl *) m_validatorWindow;
+  auto *control = dynamic_cast<wxTextCtrl *>(m_validatorWindow);
   *m_stringValue = control->GetValue();
 
   return TRUE;
@@ -176,7 +176,7 @@ void gbtNumberValidator::OnChar(wxKeyEvent &p_event)
       return;
     }
 
-    auto *control = (wxTextCtrl *) m_validatorWindow;
+    auto *control = dynamic_cast<wxTextCtrl *>(m_validatorWindow);
     wxString value = control->GetValue();
 
     if ((keyCode == '.' || keyCode == '/') &&

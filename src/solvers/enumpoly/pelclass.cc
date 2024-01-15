@@ -79,8 +79,8 @@ void PelView::Initialize_Idf_T_Gen_node(const Gen_node &node,
 					const char * label) const
 {
   node->type=Idf_T;
-  node->Genval.gval=Copy_String_NQ((char *)label);
-  node->Genval.idval=Copy_String_NQ((char *)label);
+  node->Genval.gval=Copy_String_NQ(const_cast<char *>(label));
+  node->Genval.idval=Copy_String_NQ(const_cast<char *>(label));
 }
 
 Gen_node PelView::CreateRing(const int numvar) const
@@ -214,14 +214,14 @@ PelView::CreatePelicanVersionOfSystem(const gPolyList<double> &input,
       b = gen_node();
       b->type = Ply_T;
       b->next = nullptr;
-      b->Genval.pval=(GamPolyToPelPoly(input[j], input.Length(), ring));
-      b->Genval.gval=(char*) (GamPolyToPelPoly(input[j], input.Length(), ring));
-      b->Genval.idval=(char*) (GamPolyToPelPoly(input[j], input.Length(), ring));
+      b->Genval.pval=GamPolyToPelPoly(input[j], input.Length(), ring);
+      b->Genval.gval=reinterpret_cast<char *>(GamPolyToPelPoly(input[j], input.Length(), ring));
+      b->Genval.idval=reinterpret_cast<char *>(GamPolyToPelPoly(input[j], input.Length(), ring));
 
       (V->coords[j-1])= b;
     }
 
-  a->Genval.gval=(char *)V;
+  a->Genval.gval=reinterpret_cast<char *>(V);
   return G_System(a);
 }
 
@@ -242,7 +242,7 @@ int PelView::GutsOfGetMixedVolume(      node A,
   ptr = norms;
   while (ptr != nullptr) {
 
-    ptc = aset_face(A, (Imatrix) Car((node) Car(ptr)));
+    ptc = aset_face(A, reinterpret_cast<Imatrix>(Car((node) Car(ptr))));
 
     Tp = aset_type(ptc, Tp);
 
@@ -481,7 +481,7 @@ PelView::GambitRootsFromPelRoots(const Gen_node g) const
   int i;
 
   while(ptr!=nullptr) {
-    P=(Dmatrix)(Car(Car(ptr)));
+    P=reinterpret_cast<Dmatrix>(Car(Car(ptr)));
 
     int numbervar;
     numbervar= (int)(DVlength(P)-3)/2;

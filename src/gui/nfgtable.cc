@@ -91,7 +91,7 @@ public:
     : wxSheet(p_parent, p_id, p_pos, p_size, p_style, p_name)
   {
     Connect(GetId(), wxEVT_SHEET_CELL_LEFT_DOWN,
-	    (wxObjectEventFunction) (wxEventFunction) wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidgetBase::OnCellLeftClick)));
+	    (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidgetBase::OnCellLeftClick))));
   }
   //@}
 
@@ -200,7 +200,7 @@ gbtRowPlayerWidget::gbtRowPlayerWidget(gbtTableWidget *p_parent,
   SetDropTarget(new gbtTableWidgetDropTarget(this));
 
   Connect(GetId(), wxEVT_SHEET_CELL_RIGHT_DOWN,
-	  (wxObjectEventFunction) (wxEventFunction) wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtRowPlayerWidget::OnCellRightClick)));
+	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtRowPlayerWidget::OnCellRightClick))));
 
 }
 
@@ -410,7 +410,7 @@ gbtColPlayerWidget::gbtColPlayerWidget(gbtTableWidget *p_parent,
   SetDropTarget(new gbtTableWidgetDropTarget(this));
 
   Connect(GetId(), wxEVT_SHEET_CELL_RIGHT_DOWN,
-	  (wxObjectEventFunction) (wxEventFunction) wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtColPlayerWidget::OnCellRightClick)));
+	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtColPlayerWidget::OnCellRightClick))));
 
 }
 
@@ -829,38 +829,38 @@ gbtTableWidget::gbtTableWidget(gbtNfgPanel *p_parent, wxWindowID p_id,
   Layout();
 
   Connect(m_colSheet->GetId(), wxEVT_SHEET_VIEW_CHANGED,
-	  (wxObjectEventFunction) (wxEventFunction) wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnRowSheetScroll)));
+	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnRowSheetScroll))));
 
   Connect(m_colSheet->GetId(), wxEVT_SHEET_VIEW_CHANGED,
-	  (wxObjectEventFunction) (wxEventFunction) wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnColSheetScroll)));
+	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnColSheetScroll))));
 
   Connect(m_payoffSheet->GetId(), wxEVT_SHEET_VIEW_CHANGED,
-	  (wxObjectEventFunction) (wxEventFunction) wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnPayoffScroll)));
+	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnPayoffScroll))));
 
   Connect(m_rowSheet->GetId(), wxEVT_SHEET_ROW_SIZE,
-	  (wxObjectEventFunction) (wxEventFunction) wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnRowSheetRow)));
+	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnRowSheetRow))));
 
   Connect(m_payoffSheet->GetId(), wxEVT_SHEET_ROW_SIZE,
-	  (wxObjectEventFunction) (wxEventFunction) wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnPayoffRow)));
+	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnPayoffRow))));
 
   Connect(m_colSheet->GetId(), wxEVT_SHEET_COL_SIZE,
-	  (wxObjectEventFunction) (wxEventFunction) wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnColSheetColumn)));
+	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnColSheetColumn))));
 
   Connect(m_payoffSheet->GetId(), wxEVT_SHEET_COL_SIZE,
-	  (wxObjectEventFunction) (wxEventFunction) wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnPayoffColumn)));
+	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnPayoffColumn))));
 
   Connect(m_rowSheet->GetId(), wxEVT_SHEET_COL_SIZE,
-	  (wxObjectEventFunction) (wxEventFunction) wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnRowSheetColumn)));
+	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnRowSheetColumn))));
 
   Connect(m_colSheet->GetId(), wxEVT_SHEET_ROW_SIZE,
-	  (wxObjectEventFunction) (wxEventFunction) wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnColSheetRow)));
+	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnColSheetRow))));
 
   Connect(m_rowSheet->GetId(), wxEVT_SHEET_EDITOR_ENABLED,
-	  (wxObjectEventFunction) (wxEventFunction) wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnBeginEdit)));
+	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnBeginEdit))));
   Connect(m_colSheet->GetId(), wxEVT_SHEET_EDITOR_ENABLED,
-	  (wxObjectEventFunction) (wxEventFunction) wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnBeginEdit)));
+	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnBeginEdit))));
   Connect(m_payoffSheet->GetId(), wxEVT_SHEET_EDITOR_ENABLED,
-	  (wxObjectEventFunction) (wxEventFunction) wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnBeginEdit)));
+	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnBeginEdit))));
 }
 
 //!

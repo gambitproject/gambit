@@ -41,10 +41,10 @@ gbtBehavProfileList::gbtBehavProfileList(wxWindow *p_parent,
   SetColLabelHeight(25);
 
   Connect(GetId(), wxEVT_SHEET_LABEL_LEFT_DOWN,
-	  (wxObjectEventFunction) (wxEventFunction) wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtBehavProfileList::OnLabelClick)));
+	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtBehavProfileList::OnLabelClick))));
 
   Connect(GetId(), wxEVT_SHEET_CELL_LEFT_DOWN,
-	  (wxObjectEventFunction) (wxEventFunction) wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtBehavProfileList::OnCellClick)));
+	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtBehavProfileList::OnCellClick))));
 }
 
 gbtBehavProfileList::~gbtBehavProfileList()

@@ -187,7 +187,7 @@ static IntegerRep* Inew(int newlen)
   allocsiz -= MALLOC_MIN_OVERHEAD;
   //assert((unsigned long) allocsiz < MAX_INTREP_SIZE * sizeof(short));
 
-  auto* rep = (IntegerRep *) new char[allocsiz];
+  auto* rep = reinterpret_cast<IntegerRep *>(new char[allocsiz]);
   rep->sz = (allocsiz - sizeof(IntegerRep) + sizeof(short)) / sizeof(short);
   return rep;
 }
@@ -1259,7 +1259,7 @@ IntegerRep* div(const IntegerRep* x, const IntegerRep* y, IntegerRep* q)
     }
     else
     {
-      yy = (IntegerRep*)y;
+      yy = const_cast<IntegerRep *>(y);
       r = Icalloc(r, xl + 1);
       scpy(x->s, r->s, xl);
     }
@@ -1481,7 +1481,7 @@ void divide(const Integer& Ix, const Integer& Iy, Integer& Iq, Integer& Ir)
     }
     else
     {
-      yy = (IntegerRep*)y;
+      yy = const_cast<IntegerRep *>(y);
       r = Icalloc(r, xl + 1);
       scpy(x->s, r->s, xl);
     }
@@ -1541,7 +1541,7 @@ IntegerRep* mod(const IntegerRep* x, const IntegerRep* y, IntegerRep* r)
     }
     else
     {
-      yy = (IntegerRep*)y;
+      yy = const_cast<IntegerRep *>(y);
       r = Icalloc(r, xl + 1);
       scpy(x->s, r->s, xl);
     }
@@ -1690,7 +1690,7 @@ IntegerRep* lshift(const IntegerRep* x, long y, IntegerRep* r)
         a = down(a);
       }
       *rs++ = extract(a);
-      if (xrsame) topr = (unsigned short*)topx;
+      if (xrsame) topr = const_cast<unsigned short *>(topx);
       while (rs < topr)
         *rs++ = 0;
     }
