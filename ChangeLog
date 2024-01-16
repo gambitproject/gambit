@@ -14,7 +14,8 @@
 - Improved test suite for mixed strategy profiles (#374)
 - Test suite for pygambit moved from src/pygambit/tests/ to tests/
 - Improved __repr__ methods in pygambit for game-related classes
-
+- Further extension of test suite for mixed behavior profiles to cover new indexing and profile
+  order consistency for payoff-related calculations
 
 ## [16.1.1] - 2024-01-10
 
