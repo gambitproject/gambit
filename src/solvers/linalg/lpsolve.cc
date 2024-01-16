@@ -29,5 +29,5 @@ namespace linalg {
 template class LPSolve<double>;
 template class LPSolve<Rational>;
 
-}  // end namespace Gambit::linalg
-}  // end namespace Gambit
+} // namespace linalg
+} // end namespace Gambit

@@ -52,4 +52,4 @@ public:
   DECLARE_EVENT_TABLE()
 };
 
-#endif  // VALNUMBER_H
+#endif // VALNUMBER_H

@@ -30,28 +30,25 @@
 template <class T> class gSolver {
 
 private:
-  const gPolyList<T>& InputList;
-  const gIdeal<T>     TheIdeal;
+  const gPolyList<T> &InputList;
+  const gIdeal<T> TheIdeal;
 
-// Conversion
-  Gambit::List<gPoly<double> > BasisTogDouble() const;
+  // Conversion
+  Gambit::List<gPoly<double>> BasisTogDouble() const;
 
-// Recursive Call in Solver
-  Gambit::List<Gambit::Vector<double> >
-    ContinuationSolutions(const Gambit::List<gPoly<double> >& list,
-			  int dmnsn,
-			  int curvar,
-			  const Gambit::Vector<double>& knownvals);
+  // Recursive Call in Solver
+  Gambit::List<Gambit::Vector<double>>
+  ContinuationSolutions(const Gambit::List<gPoly<double>> &list, int dmnsn, int curvar,
+                        const Gambit::Vector<double> &knownvals);
 
 public:
-
-// Constructor and Destructor
-  gSolver(const term_order* Order,const gPolyList<T>& Inputs);
-  gSolver(const gSolver<T>&);
+  // Constructor and Destructor
+  gSolver(const term_order *Order, const gPolyList<T> &Inputs);
+  gSolver(const gSolver<T> &);
   ~gSolver();
 
-  bool                     IsZeroDimensional();
-  Gambit::List<Gambit::Vector<double> > Roots();
+  bool IsZeroDimensional();
+  Gambit::List<Gambit::Vector<double>> Roots();
 };
 
 #endif // GSOLVER_H

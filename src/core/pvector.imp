@@ -31,26 +31,29 @@ namespace Gambit {
 template <class T> int PVector<T>::sum(const Array<int> &V) const
 {
   int total = 0;
-  for (int i = V.First(); i <= V.Last(); total += V[i++]);
+  for (int i = V.First(); i <= V.Last(); total += V[i++])
+    ;
   return total;
 }
 
 template <class T> void PVector<T>::setindex()
 {
   int index = this->First();
-  for(int i = 1; i <= svlen.Length(); i++)  {
+  for (int i = 1; i <= svlen.Length(); i++) {
     svptr[i] = this->data + index - 1;
     index += svlen[i];
   }
-  //assert(index == this->Last() + 1);
+  // assert(index == this->Last() + 1);
 }
-
 
 template <class T> int PVector<T>::Check(const PVector<T> &v) const
 {
-  if (v.mindex == this->mindex && v.maxdex == this->maxdex)  {
-    for (int i = 1; i <= svlen.Length(); i++)
-      if (svlen[i] != v.svlen[i])   return 0;
+  if (v.mindex == this->mindex && v.maxdex == this->maxdex) {
+    for (int i = 1; i <= svlen.Length(); i++) {
+      if (svlen[i] != v.svlen[i]) {
+        return 0;
+      }
+    }
     return 1;
   }
   return 0;
@@ -60,29 +63,25 @@ template <class T> int PVector<T>::Check(const PVector<T> &v) const
 //     PVector<T>: Constructors, destructor, and constructive operators
 //-------------------------------------------------------------------------
 
-template <class T> PVector<T>::PVector() : svptr(nullptr)
-{ }
+template <class T> PVector<T>::PVector() : svptr(nullptr) {}
 
-template <class T> PVector<T>::PVector(const Array<int> &sig)
-  : Vector<T>(sum(sig)), svlen(sig)
+template <class T> PVector<T>::PVector(const Array<int> &sig) : Vector<T>(sum(sig)), svlen(sig)
 {
   svptr = new T *[sig.Last() - sig.First() + 1];
-  svptr -= 1;    // align things correctly
+  svptr -= 1; // align things correctly
   setindex();
 }
 
-template <class T> PVector<T>::PVector(const Vector<T> &val,
-					 const Array<int> &sig)
-  : Vector<T>(val), svlen(sig)
+template <class T>
+PVector<T>::PVector(const Vector<T> &val, const Array<int> &sig) : Vector<T>(val), svlen(sig)
 {
-  //assert(sum(svlen) == val.Length());
+  // assert(sum(svlen) == val.Length());
   svptr = new T *[sig.Last() - sig.First() + 1];
   svptr -= 1;
   setindex();
 }
 
-template <class T> PVector<T>::PVector(const PVector<T> &v)
-  : Vector<T>(v), svlen(v.svlen)
+template <class T> PVector<T>::PVector(const PVector<T> &v) : Vector<T>(v), svlen(v.svlen)
 {
   svptr = new T *[v.svlen.Last() - v.svlen.First() + 1];
   svptr -= 1;
@@ -91,10 +90,12 @@ template <class T> PVector<T>::PVector(const PVector<T> &v)
 
 template <class T> PVector<T>::~PVector()
 {
-  if (svptr)   delete [] (svptr + 1);
+  if (svptr) {
+    delete[] (svptr + 1);
+  }
 }
 
-template <class T> PVector<T>& PVector<T>::operator=(const PVector<T> &v)
+template <class T> PVector<T> &PVector<T>::operator=(const PVector<T> &v)
 {
   if (!Check(v)) {
     throw DimensionException();
@@ -103,13 +104,13 @@ template <class T> PVector<T>& PVector<T>::operator=(const PVector<T> &v)
   return (*this);
 }
 
-template <class T> PVector<T>& PVector<T>::operator=(const Vector<T> &v)
+template <class T> PVector<T> &PVector<T>::operator=(const Vector<T> &v)
 {
   Vector<T>::operator=(v);
   return (*this);
 }
 
-template <class T> PVector<T>& PVector<T>::operator=(T c)
+template <class T> PVector<T> &PVector<T>::operator=(T c)
 {
   Vector<T>::operator=(c);
   return (*this);
@@ -119,7 +120,7 @@ template <class T> PVector<T>& PVector<T>::operator=(T c)
 //                 PVector<T>: Operator definitions
 //-------------------------------------------------------------------------
 
-template <class T> T& PVector<T>::operator()(int a, int b)
+template <class T> T &PVector<T>::operator()(int a, int b)
 {
   if (svlen.First() > a || a > svlen.Last()) {
     throw IndexException();
@@ -131,19 +132,18 @@ template <class T> T& PVector<T>::operator()(int a, int b)
   return svptr[a][b];
 }
 
-template <class T> const T& PVector<T>::operator()(int a, int b) const
+template <class T> const T &PVector<T>::operator()(int a, int b) const
 {
   if (svlen.First() > a || a > svlen.Last()) {
     throw IndexException();
   }
-  if (1 > b || b > svlen[a])  {
+  if (1 > b || b > svlen[a]) {
     throw IndexException();
   }
   return svptr[a][b];
 }
 
-template <class T>
-PVector<T> PVector<T>::operator+(const PVector<T> &v) const
+template <class T> PVector<T> PVector<T>::operator+(const PVector<T> &v) const
 {
   if (!Check(v)) {
     throw DimensionException();
@@ -153,7 +153,7 @@ PVector<T> PVector<T>::operator+(const PVector<T> &v) const
   return tmp;
 }
 
-template <class T> PVector<T>& PVector<T>::operator+=(const PVector<T> &v)
+template <class T> PVector<T> &PVector<T>::operator+=(const PVector<T> &v)
 {
   if (!Check(v)) {
     throw DimensionException();
@@ -165,13 +165,13 @@ template <class T> PVector<T>& PVector<T>::operator+=(const PVector<T> &v)
 template <class T> PVector<T> PVector<T>::operator-() const
 {
   PVector<T> tmp(*this);
-  for(int i=this->First(); i<=this->Last(); i++)
-    tmp[i]= -tmp[i];
+  for (int i = this->First(); i <= this->Last(); i++) {
+    tmp[i] = -tmp[i];
+  }
   return tmp;
 }
 
-template <class T>
-PVector<T> PVector<T>::operator-(const PVector<T> &v) const
+template <class T> PVector<T> PVector<T>::operator-(const PVector<T> &v) const
 {
   if (!Check(v)) {
     throw DimensionException();
@@ -181,7 +181,7 @@ PVector<T> PVector<T>::operator-(const PVector<T> &v) const
   return tmp;
 }
 
-template <class T> PVector<T>& PVector<T>::operator-=(const PVector<T> &v)
+template <class T> PVector<T> &PVector<T>::operator-=(const PVector<T> &v)
 {
   if (!Check(v)) {
     throw DimensionException();
@@ -205,7 +205,7 @@ template <class T> PVector<T> PVector<T>::operator*(const T &c) const
   return ret;
 }
 
-template <class T> PVector<T>& PVector<T>::operator*=(const T &c)
+template <class T> PVector<T> &PVector<T>::operator*=(const T &c)
 {
   Vector<T>::operator*=(c);
   return (*this);
@@ -214,7 +214,7 @@ template <class T> PVector<T>& PVector<T>::operator*=(const T &c)
 template <class T> PVector<T> PVector<T>::operator/(T c)
 {
   PVector<T> tmp(*this);
-  tmp= tmp.Vector<T>::operator/(c);
+  tmp = tmp.Vector<T>::operator/(c);
   return tmp;
 }
 
@@ -227,7 +227,9 @@ template <class T> bool PVector<T>::operator==(const PVector<T> &v) const
 }
 
 template <class T> bool PVector<T>::operator!=(const PVector<T> &v) const
-{ return !((*this)==v); }
+{
+  return !((*this) == v);
+}
 
 //-------------------------------------------------------------------------
 //                 PVector<T>: General data access
@@ -235,14 +237,15 @@ template <class T> bool PVector<T>::operator!=(const PVector<T> &v) const
 
 template <class T> Vector<T> PVector<T>::GetRow(int row) const
 {
-  if (svlen.First() > row || row > svlen.Last())  {
+  if (svlen.First() > row || row > svlen.Last()) {
     throw IndexException();
   }
 
   Vector<T> v(1, svlen[row]);
 
-  for(int i=v.First(); i<=v.Last(); i++)
-    v[i]= (*this)(row,i);
+  for (int i = v.First(); i <= v.Last(); i++) {
+    v[i] = (*this)(row, i);
+  }
   return v;
 }
 
@@ -255,8 +258,9 @@ template <class T> void PVector<T>::GetRow(int row, Vector<T> &v) const
     throw DimensionException();
   }
 
-  for(int i=v.First(); i<=v.Last(); i++)
-    v[i]= (*this)(row,i);
+  for (int i = v.First(); i <= v.Last(); i++) {
+    v[i] = (*this)(row, i);
+  }
 }
 
 template <class T> void PVector<T>::SetRow(int row, const Vector<T> &v)
@@ -268,8 +272,9 @@ template <class T> void PVector<T>::SetRow(int row, const Vector<T> &v)
     throw DimensionException();
   }
 
-  for(int i=v.First(); i<=v.Last(); i++)
-    (*this)(row,i)= v[i];
+  for (int i = v.First(); i <= v.Last(); i++) {
+    (*this)(row, i) = v[i];
+  }
 }
 
 template <class T> void PVector<T>::CopyRow(int row, const PVector<T> &v)
@@ -282,13 +287,11 @@ template <class T> void PVector<T>::CopyRow(int row, const PVector<T> &v)
     throw IndexException();
   }
 
-  for (int i = 1; i <= svlen[row]; i++)
+  for (int i = 1; i <= svlen[row]; i++) {
     svptr[row][i] = v.svptr[row][i];
+  }
 }
 
-template <class T> const Array<int> &PVector<T>::Lengths() const
-{
-  return svlen;
-}
+template <class T> const Array<int> &PVector<T>::Lengths() const { return svlen; }
 
 } // end namespace Gambit

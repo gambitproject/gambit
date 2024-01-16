@@ -29,51 +29,58 @@ namespace {
 List<StrategySupportProfile> SortSupportsBySize(List<StrategySupportProfile> &p_list)
 {
   Array<int> sizes(p_list.Length());
-  for (int i = 1; i <= p_list.Length(); i++)
+  for (int i = 1; i <= p_list.Length(); i++) {
     sizes[i] = p_list[i].MixedProfileLength();
+  }
 
   Array<int> listproxy(p_list.Length());
-  for (int i = 1; i <= p_list.Length(); i++)
+  for (int i = 1; i <= p_list.Length(); i++) {
     listproxy[i] = i;
+  }
 
   int maxsize = 0;
-  for (int i = 1; i <= p_list.Length(); i++)
-    if (sizes[i] > maxsize)
+  for (int i = 1; i <= p_list.Length(); i++) {
+    if (sizes[i] > maxsize) {
       maxsize = sizes[i];
+    }
+  }
 
   int cursor = 1;
 
   for (int j = 0; j < maxsize; j++) {
     int scanner(p_list.Length());
-    while (cursor < scanner)
-      if (sizes[scanner] != j)
-	scanner--;
-      else {
-	while (sizes[cursor] == j)
-	  cursor++;
-	if (cursor < scanner) {
-	  int tempindex = listproxy[cursor];
-	  listproxy[cursor] = listproxy[scanner];
-	  listproxy[scanner] = tempindex;
-	  int tempsize = sizes[cursor];
-	  sizes[cursor] = sizes[scanner];
-	  sizes[scanner] = tempsize;
-	  cursor++;
-	}
+    while (cursor < scanner) {
+      if (sizes[scanner] != j) {
+        scanner--;
       }
+      else {
+        while (sizes[cursor] == j) {
+          cursor++;
+        }
+        if (cursor < scanner) {
+          int tempindex = listproxy[cursor];
+          listproxy[cursor] = listproxy[scanner];
+          listproxy[scanner] = tempindex;
+          int tempsize = sizes[cursor];
+          sizes[cursor] = sizes[scanner];
+          sizes[scanner] = tempsize;
+          cursor++;
+        }
+      }
+    }
   }
 
   List<StrategySupportProfile> answer;
-  for (int i = 1; i <= p_list.Length(); i++)
+  for (int i = 1; i <= p_list.Length(); i++) {
     answer.push_back(p_list[listproxy[i]]);
+  }
 
   return answer;
 }
 
-void PossibleNashSubsupports(const StrategySupportProfile &s,
-			     StrategySupportProfile &sact,
-			     StrategySupportProfile::iterator &c,
-			     List<StrategySupportProfile> &p_list)
+void PossibleNashSubsupports(const StrategySupportProfile &s, StrategySupportProfile &sact,
+                             StrategySupportProfile::iterator &c,
+                             List<StrategySupportProfile> &p_list)
 {
   bool abort = false;
   bool no_deletions = true;
@@ -85,17 +92,17 @@ void PossibleNashSubsupports(const StrategySupportProfile &s,
     GameStrategy this_strategy = scanner.GetStrategy();
     bool delete_this_strategy = false;
     if (sact.Contains(this_strategy)) {
-      if (sact.IsDominated(this_strategy,true) ) {
-	delete_this_strategy = true;
+      if (sact.IsDominated(this_strategy, true)) {
+        delete_this_strategy = true;
       }
     }
     if (delete_this_strategy) {
       no_deletions = false;
-      if (c.IsSubsequentTo(this_strategy))  {
-	abort = true;
+      if (c.IsSubsequentTo(this_strategy)) {
+        abort = true;
       }
       else {
-	deletion_list.push_back(this_strategy);
+        deletion_list.push_back(this_strategy);
       }
     }
   } while (!abort && scanner.GoToNext());
@@ -121,18 +128,16 @@ void PossibleNashSubsupports(const StrategySupportProfile &s,
     StrategySupportProfile::iterator c_copy(c);
     do {
       GameStrategy str_ptr = c_copy.GetStrategy();
-      if (sact.Contains(str_ptr) &&
-	  sact.NumStrategies(str_ptr->GetPlayer()->GetNumber()) > 1) {
-	sact.RemoveStrategy(str_ptr);
-	PossibleNashSubsupports(s, sact, c_copy, p_list);
-	sact.AddStrategy(str_ptr);
+      if (sact.Contains(str_ptr) && sact.NumStrategies(str_ptr->GetPlayer()->GetNumber()) > 1) {
+        sact.RemoveStrategy(str_ptr);
+        PossibleNashSubsupports(s, sact, c_copy, p_list);
+        sact.AddStrategy(str_ptr);
       }
     } while (c_copy.GoToNext());
   }
 }
 
-}  // end anonymous namespace
-
+} // end anonymous namespace
 
 List<StrategySupportProfile> PossibleNashSubsupports(const StrategySupportProfile &S)
 {
@@ -152,28 +157,29 @@ List<StrategySupportProfile> PossibleNashSubsupports(const StrategySupportProfil
     bool remove = false;
     do {
       GameStrategy strat = crsr.GetStrategy();
-      if (current.Contains(strat))  {
-	for (int j = 1; j <= strat->GetPlayer()->NumStrategies(); j++) {
-	  GameStrategy other_strat = strat->GetPlayer()->GetStrategy(j);
-	  if (other_strat != strat) {
-	    if (current.Contains(other_strat)) {
-	      if (current.Dominates(other_strat,strat,false))  {
-		remove = true;
-	      }
-	    }
-	    else {
-	      current.AddStrategy(other_strat);
-	      if (current.Dominates(other_strat,strat,false)) {
-		remove = true;
-	      }
-	      current.RemoveStrategy(other_strat);
-	    }
-	  }
-	}
+      if (current.Contains(strat)) {
+        for (int j = 1; j <= strat->GetPlayer()->NumStrategies(); j++) {
+          GameStrategy other_strat = strat->GetPlayer()->GetStrategy(j);
+          if (other_strat != strat) {
+            if (current.Contains(other_strat)) {
+              if (current.Dominates(other_strat, strat, false)) {
+                remove = true;
+              }
+            }
+            else {
+              current.AddStrategy(other_strat);
+              if (current.Dominates(other_strat, strat, false)) {
+                remove = true;
+              }
+              current.RemoveStrategy(other_strat);
+            }
+          }
+        }
       }
     } while (crsr.GoToNext() && !remove);
-    if (remove)
+    if (remove) {
       answer.Remove(i);
+    }
   }
 
   return SortSupportsBySize(answer);

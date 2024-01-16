@@ -63,30 +63,34 @@ public:
   private:
     List &m_list;
     Node *m_node;
+
   public:
-    iterator(List &p_list, Node *p_node)
-      : m_list(p_list), m_node(p_node)  { }
-    T &operator*()  { return m_node->m_data; }
-    iterator &operator++()  { m_node = m_node->m_next; return *this; }
-    bool operator==(const iterator &it) const
-    { return (m_node == it.m_node); }
-    bool operator!=(const iterator &it) const
-    { return (m_node != it.m_node); }
+    iterator(List &p_list, Node *p_node) : m_list(p_list), m_node(p_node) {}
+    T &operator*() { return m_node->m_data; }
+    iterator &operator++()
+    {
+      m_node = m_node->m_next;
+      return *this;
+    }
+    bool operator==(const iterator &it) const { return (m_node == it.m_node); }
+    bool operator!=(const iterator &it) const { return (m_node != it.m_node); }
   };
 
   class const_iterator {
   private:
     const List &m_list;
     Node *m_node;
+
   public:
-    const_iterator(const List &p_list, Node *p_node)
-      : m_list(p_list), m_node(p_node)  { }
+    const_iterator(const List &p_list, Node *p_node) : m_list(p_list), m_node(p_node) {}
     const T &operator*() const { return m_node->m_data; }
-    const_iterator &operator++()  { m_node = m_node->m_next; return *this; }
-    bool operator==(const const_iterator &it) const
-    { return (m_node == it.m_node); }
-    bool operator!=(const const_iterator &it) const
-    { return (m_node != it.m_node); }
+    const_iterator &operator++()
+    {
+      m_node = m_node->m_next;
+      return *this;
+    }
+    bool operator==(const const_iterator &it) const { return (m_node == it.m_node); }
+    bool operator!=(const const_iterator &it) const { return (m_node != it.m_node); }
   };
 
   List();
@@ -99,23 +103,23 @@ public:
   bool operator!=(const List<T> &b) const;
 
   /// Return a forward iterator starting at the beginning of the list
-  iterator begin()  { return iterator(*this, m_head); }
+  iterator begin() { return iterator(*this, m_head); }
   /// Return a forward iterator past the end of the list
-  iterator end()    { return iterator(*this, nullptr); }
+  iterator end() { return iterator(*this, nullptr); }
   /// Return a const forward iterator starting at the beginning of the list
   const_iterator begin() const { return const_iterator(*this, m_head); }
   /// Return a const forward iterator past the end of the list
-  const_iterator end() const   { return const_iterator(*this, nullptr); }
+  const_iterator end() const { return const_iterator(*this, nullptr); }
   /// Return a const forward iterator starting at the beginning of the list
   const_iterator cbegin() const { return const_iterator(*this, m_head); }
   /// Return a const forward iterator past the end of the list
-  const_iterator cend() const   { return const_iterator(*this, nullptr); }
+  const_iterator cend() const { return const_iterator(*this, nullptr); }
 
   const T &operator[](int) const;
   T &operator[](int);
 
-  List<T> operator+(const List<T>& b) const;
-  List<T>& operator+=(const List<T>& b);
+  List<T> operator+(const List<T> &b) const;
+  List<T> &operator+=(const List<T> &b);
 
   int Insert(const T &, int);
   T Remove(int);
@@ -142,44 +146,45 @@ public:
   /// leaving the container with a size of 0.
   void clear();
   /// Returns a reference to the first elemnet in the list container.
-  T &front()             { return m_head->m_data; }
+  T &front() { return m_head->m_data; }
   /// Returns a reference to the first element in the list container.
   const T &front() const { return m_head->m_data; }
   /// Returns a reference to the last element in the list container.
-  T &back()             { return m_tail->m_data; }
+  T &back() { return m_tail->m_data; }
   /// Returns a reference to the last element in the list container.
   const T &back() const { return m_tail->m_data; }
   ///@}
 };
-
 
 //--------------------------------------------------------------------------
 //                 Node: Member function implementations
 //--------------------------------------------------------------------------
 
 template <class T>
-List<T>::Node::Node(const T &p_data,
-		    typename List<T>::Node *p_prev, typename List<T>::Node *p_next)
+List<T>::Node::Node(const T &p_data, typename List<T>::Node *p_prev,
+                    typename List<T>::Node *p_next)
   : m_data(p_data), m_prev(p_prev), m_next(p_next)
-{ }
+{
+}
 
 //--------------------------------------------------------------------------
 //                 List<T>: Member function implementations
 //--------------------------------------------------------------------------
 
-template <class T> List<T>::List()
+template <class T>
+List<T>::List()
   : m_length(0), m_head(nullptr), m_tail(nullptr), m_currentIndex(0), m_currentNode(nullptr)
-{ }
-
-template <class T> List<T>::List(const List<T> &b)
-  : m_length(b.m_length)
 {
-  if (m_length)  {
+}
+
+template <class T> List<T>::List(const List<T> &b) : m_length(b.m_length)
+{
+  if (m_length) {
     Node *n = b.m_head;
     m_head = new Node(n->m_data, nullptr, nullptr);
     n = n->m_next;
     m_tail = m_head;
-    while (n)  {
+    while (n) {
       m_tail->m_next = new Node(n->m_data, m_tail, nullptr);
       n = n->m_next;
       m_tail = m_tail->m_next;
@@ -187,7 +192,7 @@ template <class T> List<T>::List(const List<T> &b)
     m_currentIndex = 1;
     m_currentNode = m_head;
   }
-  else  {
+  else {
     m_head = m_tail = nullptr;
     m_currentIndex = 0;
     m_currentNode = nullptr;
@@ -197,7 +202,7 @@ template <class T> List<T>::List(const List<T> &b)
 template <class T> List<T>::~List()
 {
   Node *n = m_head;
-  while (n)  {
+  while (n) {
     Node *m_next = n->m_next;
     delete n;
     n = m_next;
@@ -206,9 +211,11 @@ template <class T> List<T>::~List()
 
 template <class T> int List<T>::InsertAt(const T &t, int num)
 {
-  if (num < 1 || num > m_length + 1)   throw IndexException();
+  if (num < 1 || num > m_length + 1) {
+    throw IndexException();
+  }
 
-  if (!m_length)  {
+  if (!m_length) {
     m_head = m_tail = new Node(t, nullptr, nullptr);
     m_length = 1;
     m_currentIndex = 1;
@@ -219,23 +226,27 @@ template <class T> int List<T>::InsertAt(const T &t, int num)
   Node *n;
   int i;
 
-  if( num <= 1 )  {
+  if (num <= 1) {
     n = new Node(t, nullptr, m_head);
     m_head->m_prev = n;
     m_currentNode = m_head = n;
     m_currentIndex = 1;
   }
-  else if( num >= m_length + 1)  {
+  else if (num >= m_length + 1) {
     n = new Node(t, m_tail, nullptr);
     m_tail->m_next = n;
     m_currentNode = m_tail = n;
     m_currentIndex = m_length + 1;
   }
-  else  {
-    if( num < m_currentIndex )
-      for (i = m_currentIndex, n = m_currentNode; i > num; i--, n = n->m_prev);
-    else
-      for (i = m_currentIndex, n = m_currentNode; i < num; i++, n = n->m_next);
+  else {
+    if (num < m_currentIndex) {
+      for (i = m_currentIndex, n = m_currentNode; i > num; i--, n = n->m_prev)
+        ;
+    }
+    else {
+      for (i = m_currentIndex, n = m_currentNode; i < num; i++, n = n->m_next)
+        ;
+    }
     n = new Node(t, n->m_prev, n);
     m_currentNode = n->m_prev->m_next = n->m_next->m_prev = n;
     m_currentIndex = num;
@@ -249,7 +260,7 @@ template <class T> int List<T>::InsertAt(const T &t, int num)
 
 template <class T> List<T> &List<T>::operator=(const List<T> &b)
 {
-  if (this != &b)   {
+  if (this != &b) {
     Node *n = m_head;
     while (n) {
       Node *m_next = n->m_next;
@@ -259,60 +270,79 @@ template <class T> List<T> &List<T>::operator=(const List<T> &b)
 
     m_length = b.m_length;
     m_currentIndex = b.m_currentIndex;
-    if (m_length)   {
+    if (m_length) {
       Node *n = b.m_head;
       m_head = new Node(n->m_data, nullptr, nullptr);
-      if (b.m_currentNode == n) m_currentNode = m_head;
+      if (b.m_currentNode == n) {
+        m_currentNode = m_head;
+      }
       n = n->m_next;
       m_tail = m_head;
-      while (n)  {
-	m_tail->m_next = new Node(n->m_data, m_tail, nullptr);
-	if (b.m_currentNode == n) m_currentNode = m_tail->m_next;
-	n = n->m_next;
-	m_tail = m_tail->m_next;
+      while (n) {
+        m_tail->m_next = new Node(n->m_data, m_tail, nullptr);
+        if (b.m_currentNode == n) {
+          m_currentNode = m_tail->m_next;
+        }
+        n = n->m_next;
+        m_tail = m_tail->m_next;
       }
     }
-    else
+    else {
       m_head = m_tail = nullptr;
+    }
   }
   return *this;
 }
 
 template <class T> bool List<T>::operator==(const List<T> &b) const
 {
-  if (m_length != b.m_length) return false;
-  for (Node *m = m_head, *n = b.m_head; m; m = m->m_next, n = n->m_next)
-    if (m->m_data != n->m_data)  return false;
+  if (m_length != b.m_length) {
+    return false;
+  }
+  for (Node *m = m_head, *n = b.m_head; m; m = m->m_next, n = n->m_next) {
+    if (m->m_data != n->m_data) {
+      return false;
+    }
+  }
   return true;
 }
 
-template <class T> bool List<T>::operator!=(const List<T> &b) const
-{
-  return !(*this == b);
-}
+template <class T> bool List<T>::operator!=(const List<T> &b) const { return !(*this == b); }
 
 template <class T> const T &List<T>::operator[](int num) const
 {
-  if (num < 1 || num > m_length)    throw IndexException();
+  if (num < 1 || num > m_length) {
+    throw IndexException();
+  }
 
   int i;
   Node *n;
-  if( num < m_currentIndex )
-    for (i = m_currentIndex, n = m_currentNode; i > num; i--, n = n->m_prev);
-  else
-    for (i = m_currentIndex, n = m_currentNode; i < num; i++, n = n->m_next);
+  if (num < m_currentIndex) {
+    for (i = m_currentIndex, n = m_currentNode; i > num; i--, n = n->m_prev)
+      ;
+  }
+  else {
+    for (i = m_currentIndex, n = m_currentNode; i < num; i++, n = n->m_next)
+      ;
+  }
   return n->m_data;
 }
 
 template <class T> T &List<T>::operator[](int num)
 {
-  if (num < 1 || num > m_length)   throw IndexException();
+  if (num < 1 || num > m_length) {
+    throw IndexException();
+  }
   Node *n;
   int i;
-  if( num < m_currentIndex )
-    for (i = m_currentIndex, n = m_currentNode; i > num; i--, n = n->m_prev);
-  else
-    for (i = m_currentIndex, n = m_currentNode; i < num; i++, n = n->m_next);
+  if (num < m_currentIndex) {
+    for (i = m_currentIndex, n = m_currentNode; i > num; i--, n = n->m_prev)
+      ;
+  }
+  else {
+    for (i = m_currentIndex, n = m_currentNode; i < num; i++, n = n->m_next)
+      ;
+  }
   m_currentIndex = i;
   m_currentNode = n;
   return n->m_data;
@@ -322,7 +352,7 @@ template <class T> List<T> List<T>::operator+(const List<T> &b) const
 {
   List<T> result(*this);
   Node *n = b.m_head;
-  while (n)  {
+  while (n) {
     result.Append(n->data);
     n = n->m_next;
   }
@@ -333,7 +363,7 @@ template <class T> List<T> &List<T>::operator+=(const List<T> &b)
 {
   Node *n = b.m_head;
 
-  while (n)  {
+  while (n) {
     push_back(n->m_data);
     n = n->m_next;
   }
@@ -347,23 +377,33 @@ template <class T> int List<T>::Insert(const T &t, int n)
 
 template <class T> T List<T>::Remove(int num)
 {
-  if (num < 1 || num > m_length)   throw IndexException();
+  if (num < 1 || num > m_length) {
+    throw IndexException();
+  }
   Node *n;
   int i;
 
-  if( num < m_currentIndex )
-    for (i = m_currentIndex, n = m_currentNode; i > num; i--, n = n->m_prev);
-  else
-    for (i = m_currentIndex, n = m_currentNode; i < num; i++, n = n->m_next);
+  if (num < m_currentIndex) {
+    for (i = m_currentIndex, n = m_currentNode; i > num; i--, n = n->m_prev)
+      ;
+  }
+  else {
+    for (i = m_currentIndex, n = m_currentNode; i < num; i++, n = n->m_next)
+      ;
+  }
 
-  if (n->m_prev)
+  if (n->m_prev) {
     n->m_prev->m_next = n->m_next;
-  else
+  }
+  else {
     m_head = n->m_next;
-  if (n->m_next)
+  }
+  if (n->m_next) {
     n->m_next->m_prev = n->m_prev;
-  else
+  }
+  else {
     m_tail = n->m_prev;
+  }
 
   m_length--;
   m_currentIndex = i;
@@ -379,27 +419,26 @@ template <class T> T List<T>::Remove(int num)
 
 template <class T> int List<T>::Find(const T &t) const
 {
-  if (m_length == 0)  return 0;
+  if (m_length == 0) {
+    return 0;
+  }
   Node *n = m_head;
-  for (int i = 1; n; i++, n = n->m_next)
-    if (n->m_data == t)   return i;
+  for (int i = 1; n; i++, n = n->m_next) {
+    if (n->m_data == t) {
+      return i;
+    }
+  }
   return 0;
 }
 
-template <class T> bool List<T>::Contains(const T &t) const
-{
-  return (Find(t) != 0);
-}
+template <class T> bool List<T>::Contains(const T &t) const { return (Find(t) != 0); }
 
-template <class T> void List<T>::push_back(const T &val)
-{
-  InsertAt(val, m_length + 1);
-}
+template <class T> void List<T>::push_back(const T &val) { InsertAt(val, m_length + 1); }
 
 template <class T> void List<T>::clear()
 {
   Node *n = m_head;
-  while (n)  {
+  while (n) {
     Node *m_next = n->m_next;
     delete n;
     n = m_next;
@@ -411,6 +450,6 @@ template <class T> void List<T>::clear()
   m_currentNode = nullptr;
 }
 
-}
+} // namespace Gambit
 
 #endif // LIBGAMBIT_LIST_H

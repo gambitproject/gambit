@@ -47,4 +47,4 @@ public:
   int GetActions() const;
 };
 
-#endif  // DLINSERTMOVE_H
+#endif // DLINSERTMOVE_H

@@ -34,6 +34,6 @@ template class BaseTableau<Rational>;
 template class TableauInterface<double>;
 template class TableauInterface<Rational>;
 
-}  // end namespace Gambit::linalg
+} // namespace linalg
 
-}  // end namespace Gambit
+} // end namespace Gambit

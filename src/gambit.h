@@ -34,7 +34,11 @@ namespace Gambit {
 // Naming compatible with Boost's lexical_cast concept for potential future compatibility.
 
 template <class D, class S> D lexical_cast(const S &p_value)
-{ std::ostringstream s; s << p_value; return s.str(); }
+{
+  std::ostringstream s;
+  s << p_value;
+  return s.str();
+}
 
 template <class D, class S> D lexical_cast(const S &p_value, int p_prec)
 {
@@ -53,67 +57,66 @@ inline double abs(double x) { return std::fabs(x); }
 /// A base class for all Gambit exceptions
 class Exception : public std::runtime_error {
 public:
-  Exception() : std::runtime_error("") { }
-  explicit Exception(const std::string &s) : std::runtime_error(s) { }
+  Exception() : std::runtime_error("") {}
+  explicit Exception(const std::string &s) : std::runtime_error(s) {}
   ~Exception() noexcept override = default;
 };
 
 /// Exception thrown on out-of-range index
 class IndexException : public Exception {
 public:
-  IndexException() : Exception("Index out of range") { }
-  explicit IndexException(const std::string &s) : Exception(s) { }
+  IndexException() : Exception("Index out of range") {}
+  explicit IndexException(const std::string &s) : Exception(s) {}
   ~IndexException() noexcept override = default;
 };
 
 /// Exception thrown on invalid index ranges
 class RangeException : public Exception {
 public:
-  RangeException() : Exception("Invalid index range") { }
-  explicit RangeException(const std::string &s) : Exception(s) { }
+  RangeException() : Exception("Invalid index range") {}
+  explicit RangeException(const std::string &s) : Exception(s) {}
   ~RangeException() noexcept override = default;
 };
 
 /// Exception thrown on dimension mismatches
 class DimensionException : public Exception {
 public:
-  DimensionException() : Exception("Mismatched dimensions") { }
-  explicit DimensionException(const std::string &s) : Exception(s) { }
+  DimensionException() : Exception("Mismatched dimensions") {}
+  explicit DimensionException(const std::string &s) : Exception(s) {}
   ~DimensionException() noexcept override = default;
 };
 
 /// Exception thrown on invalid value
 class ValueException : public Exception {
 public:
-  ValueException() : Exception("Invalid value") { }
-  explicit ValueException(const std::string &s) : Exception(s) { }
+  ValueException() : Exception("Invalid value") {}
+  explicit ValueException(const std::string &s) : Exception(s) {}
   ~ValueException() noexcept override = default;
 };
 
 /// Exception thrown on a failed assertion
 class AssertionException : public Exception {
 public:
-  AssertionException() : Exception("Failed assertion") { }
-  explicit AssertionException(const std::string &s) : Exception(s) { }
+  AssertionException() : Exception("Failed assertion") {}
+  explicit AssertionException(const std::string &s) : Exception(s) {}
   ~AssertionException() noexcept override = default;
 };
 
 /// Exception thrown on attempted division by zero
 class ZeroDivideException : public Exception {
 public:
-  ZeroDivideException() : Exception("Attempted division by zero") { }
-  explicit ZeroDivideException(const std::string &s) : Exception(s) { }
+  ZeroDivideException() : Exception("Attempted division by zero") {}
+  explicit ZeroDivideException(const std::string &s) : Exception(s) {}
   ~ZeroDivideException() noexcept override = default;
 };
 
 /// An exception thrown when attempting to dereference a null pointer
 class NullException : public Exception {
 public:
-  NullException() : Exception("Dereferenced null pointer") { }
-  explicit NullException(const std::string &s) : Exception(s) { }
+  NullException() : Exception("Dereferenced null pointer") {}
+  explicit NullException(const std::string &s) : Exception(s) {}
   ~NullException() noexcept override = default;
 };
-
 
 } // end namespace Gambit
 
@@ -125,7 +128,6 @@ public:
 
 #include "core/rational.h"
 
-
 #include "games/game.h"
 #include "games/writer.h"
 
@@ -136,6 +138,5 @@ public:
 #include "games/stratspt.h"
 #include "games/stratpure.h"
 #include "games/stratmixed.h"
-
 
 #endif // LIBGAMBIT_H

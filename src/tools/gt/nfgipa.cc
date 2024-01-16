@@ -30,7 +30,6 @@ using namespace Gambit;
 using namespace Gambit::Nash;
 using namespace Gambit::gametracer;
 
-
 void PrintBanner(std::ostream &p_stream)
 {
   p_stream << "Compute Nash equilibria using iterated polymatrix approximation\n";
@@ -54,7 +53,6 @@ void PrintHelp(char *progname)
   exit(1);
 }
 
-
 int main(int argc, char *argv[])
 {
   opterr = 0;
@@ -62,17 +60,16 @@ int main(int argc, char *argv[])
   int numDecimals = 6;
 
   int long_opt_index = 0;
-  struct option long_options[] = {
-    { "help", 0, nullptr, 'h'   },
-    { "version", 0, nullptr, 'v'  },
-    { "verbose", 0, nullptr, 'V'  },
-    { nullptr,    0,    nullptr,    0   }
-  };
+  struct option long_options[] = {{"help", 0, nullptr, 'h'},
+                                  {"version", 0, nullptr, 'v'},
+                                  {"verbose", 0, nullptr, 'V'},
+                                  {nullptr, 0, nullptr, 0}};
   int c;
   while ((c = getopt_long(argc, argv, "d:vVqhS", long_options, &long_opt_index)) != -1) {
     switch (c) {
     case 'v':
-      PrintBanner(std::cerr); exit(1);
+      PrintBanner(std::cerr);
+      exit(1);
     case 'q':
       quiet = true;
       break;
@@ -89,10 +86,10 @@ int main(int argc, char *argv[])
       break;
     case '?':
       if (isprint(optopt)) {
-	std::cerr << argv[0] << ": Unknown option `-" << ((char) optopt) << "'.\n";
+        std::cerr << argv[0] << ": Unknown option `-" << ((char)optopt) << "'.\n";
       }
       else {
-	std::cerr << argv[0] << ": Unknown option character `\\x" << optopt << "`.\n";
+        std::cerr << argv[0] << ": Unknown option character `\\x" << optopt << "`.\n";
       }
       return 1;
     default:
@@ -104,7 +101,7 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  std::istream* input_stream = &std::cin;
+  std::istream *input_stream = &std::cin;
   std::ifstream file_stream;
   if (optind < argc) {
     file_stream.open(argv[optind]);
@@ -119,9 +116,8 @@ int main(int argc, char *argv[])
 
   try {
     Game game = ReadGame(*input_stream);
-    std::shared_ptr<StrategyProfileRenderer<double> > renderer(
-      new MixedStrategyCSVRenderer<double>(std::cout, numDecimals)
-    );
+    std::shared_ptr<StrategyProfileRenderer<double>> renderer(
+        new MixedStrategyCSVRenderer<double>(std::cout, numDecimals));
     NashIPAStrategySolver solver(renderer);
     solver.Solve(game);
     return 0;

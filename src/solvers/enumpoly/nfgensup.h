@@ -24,7 +24,6 @@
 
 using namespace Gambit;
 
-
 // Produce all subsupports that could
 // host the path of a behavioral Nash equilibrium.  These are subsupports
 // that have no strategy, at an active infoset, that is weakly dominated by

@@ -112,7 +112,6 @@ public:
   bool RootReachable() const { return m_rootReachable; }
   void SetRootReachable(bool p_reachable) { m_rootReachable = p_reachable; }
 
-
   // Branch styling
   int BranchLength() const { return m_branchLength; }
   void SetBranchLength(int p_length) { m_branchLength = p_length; }
@@ -126,14 +125,12 @@ public:
   int BranchLabels() const { return m_branchLabels; }
   void SetBranchLabels(int p_labels) { m_branchLabels = p_labels; }
 
-
   // Information set styling
   int InfosetConnect() const { return m_infosetConnect; }
   void SetInfosetConnect(int p_connect) { m_infosetConnect = p_connect; }
 
   int InfosetJoin() const { return m_infosetJoin; }
   void SetInfosetJoin(int p_join) { m_infosetJoin = p_join; }
-
 
   // Legends
   int NodeAboveLabel() const { return m_nodeAboveLabel; }
@@ -160,8 +157,7 @@ public:
   void SetTerminalColor(const wxColour &p_color) { m_terminalColor = p_color; }
 
   const wxColour &GetPlayerColor(int pl) const;
-  void SetPlayerColor(int pl, const wxColour &p_color)
-    { m_playerColors[pl] = p_color; }
+  void SetPlayerColor(int pl, const wxColour &p_color) { m_playerColors[pl] = p_color; }
 
   // Decimals
   int NumDecimals() const { return m_numDecimals; }
@@ -194,4 +190,4 @@ public:
   //@}
 };
 
-#endif  // STYLE_H
+#endif // STYLE_H

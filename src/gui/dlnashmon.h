@@ -46,10 +46,9 @@ private:
   void OnEndProcess(wxProcessEvent &);
 
 public:
-  gbtNashMonitorDialog(wxWindow *p_parent, gbtGameDocument *p_doc,
-		       gbtAnalysisOutput *p_command);
+  gbtNashMonitorDialog(wxWindow *p_parent, gbtGameDocument *p_doc, gbtAnalysisOutput *p_command);
 
   DECLARE_EVENT_TABLE()
 };
 
-#endif  // DLNASHMON_H
+#endif // DLNASHMON_H

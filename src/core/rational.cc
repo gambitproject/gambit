@@ -40,7 +40,7 @@ static const Integer Int_One(1);
 void Rational::normalize()
 {
   int s = sign(den);
-  if (s == 0)  {
+  if (s == 0) {
     throw ZeroDivideException();
   }
   else if (s < 0) {
@@ -49,78 +49,69 @@ void Rational::normalize()
   }
 
   Integer g = gcd(num, den);
-  if (ucompare(g, Int_One) != 0)  {
+  if (ucompare(g, Int_One) != 0) {
     num /= g;
     den /= g;
   }
 }
 
-void      add(const Rational& x, const Rational& y, Rational& r)
+void add(const Rational &x, const Rational &y, Rational &r)
 {
-  if (&r != &x && &r != &y)
-    {
-      mul(x.num, y.den, r.num);
-      mul(x.den, y.num, r.den);
-      add(r.num, r.den, r.num);
-      mul(x.den, y.den, r.den);
-    }
-  else
-    {
-      Integer tmp;
-      mul(x.den, y.num, tmp);
-      mul(x.num, y.den, r.num);
-      add(r.num, tmp, r.num);
-      mul(x.den, y.den, r.den);
-    }
+  if (&r != &x && &r != &y) {
+    mul(x.num, y.den, r.num);
+    mul(x.den, y.num, r.den);
+    add(r.num, r.den, r.num);
+    mul(x.den, y.den, r.den);
+  }
+  else {
+    Integer tmp;
+    mul(x.den, y.num, tmp);
+    mul(x.num, y.den, r.num);
+    add(r.num, tmp, r.num);
+    mul(x.den, y.den, r.den);
+  }
   r.normalize();
 }
 
-void      sub(const Rational& x, const Rational& y, Rational& r)
+void sub(const Rational &x, const Rational &y, Rational &r)
 {
-  if (&r != &x && &r != &y)
-    {
-      mul(x.num, y.den, r.num);
-      mul(x.den, y.num, r.den);
-      sub(r.num, r.den, r.num);
-      mul(x.den, y.den, r.den);
-    }
-  else
-    {
-      Integer tmp;
-      mul(x.den, y.num, tmp);
-      mul(x.num, y.den, r.num);
-      sub(r.num, tmp, r.num);
-      mul(x.den, y.den, r.den);
-    }
+  if (&r != &x && &r != &y) {
+    mul(x.num, y.den, r.num);
+    mul(x.den, y.num, r.den);
+    sub(r.num, r.den, r.num);
+    mul(x.den, y.den, r.den);
+  }
+  else {
+    Integer tmp;
+    mul(x.den, y.num, tmp);
+    mul(x.num, y.den, r.num);
+    sub(r.num, tmp, r.num);
+    mul(x.den, y.den, r.den);
+  }
   r.normalize();
 }
 
-void      mul(const Rational& x, const Rational& y, Rational& r)
+void mul(const Rational &x, const Rational &y, Rational &r)
 {
   mul(x.num, y.num, r.num);
   mul(x.den, y.den, r.den);
   r.normalize();
 }
 
-void      div(const Rational& x, const Rational& y, Rational& r)
+void div(const Rational &x, const Rational &y, Rational &r)
 {
-  if (&r != &x && &r != &y)
-    {
-      mul(x.num, y.den, r.num);
-      mul(x.den, y.num, r.den);
-    }
-  else
-    {
-      Integer tmp;
-      mul(x.num, y.den, tmp);
-      mul(y.num, x.den, r.den);
-      r.num = tmp;
-    }
+  if (&r != &x && &r != &y) {
+    mul(x.num, y.den, r.num);
+    mul(x.den, y.num, r.den);
+  }
+  else {
+    Integer tmp;
+    mul(x.num, y.den, tmp);
+    mul(y.num, x.den, r.den);
+    r.num = tmp;
+  }
   r.normalize();
 }
-
-
-
 
 void Rational::invert()
 {
@@ -131,18 +122,20 @@ void Rational::invert()
   if (s == 0) {
     throw ZeroDivideException();
   }
-  else if (s < 0)  {
+  else if (s < 0) {
     den.negate();
     num.negate();
   }
 }
 
-int compare(const Rational& x, const Rational& y)
+int compare(const Rational &x, const Rational &y)
 {
   int xsgn = sign(x.num);
   int ysgn = sign(y.num);
   int d = xsgn - ysgn;
-  if (d == 0 && xsgn != 0) d = compare(x.num * y.den, x.den * y.num);
+  if (d == 0 && xsgn != 0) {
+    d = compare(x.num * y.den, x.den * y.num);
+  }
   return d;
 }
 
@@ -150,47 +143,44 @@ Rational::Rational(double x)
 {
   num = 0;
   den = 1;
-  if (x != 0.0)
-    {
-      int neg = x < 0;
-      if (neg)
-	x = -x;
-
-      const long shift = 15;         // a safe shift per step
-      const double width = 32768.0;  // = 2^shift
-      const int maxiter = 20;        // ought not be necessary, but just in case,
-      // max 300 bits of precision
-      int expt;
-      double mantissa = frexp(x, &expt);
-      long exponent = expt;
-      double intpart;
-      int k = 0;
-      while (mantissa != 0.0 && k++ < maxiter)
-	{
-	  mantissa *= width;
-	  mantissa = modf(mantissa, &intpart);
-	  num <<= shift;
-	  num += (long)intpart;
-	  exponent -= shift;
-	}
-      if (exponent > 0)
-	num <<= exponent;
-      else if (exponent < 0)
-	den <<= -exponent;
-      if (neg)
-	num.negate();
+  if (x != 0.0) {
+    int neg = x < 0;
+    if (neg) {
+      x = -x;
     }
+
+    const long shift = 15;        // a safe shift per step
+    const double width = 32768.0; // = 2^shift
+    const int maxiter = 20;       // ought not be necessary, but just in case,
+    // max 300 bits of precision
+    int expt;
+    double mantissa = frexp(x, &expt);
+    long exponent = expt;
+    double intpart;
+    int k = 0;
+    while (mantissa != 0.0 && k++ < maxiter) {
+      mantissa *= width;
+      mantissa = modf(mantissa, &intpart);
+      num <<= shift;
+      num += (long)intpart;
+      exponent -= shift;
+    }
+    if (exponent > 0) {
+      num <<= exponent;
+    }
+    else if (exponent < 0) {
+      den <<= -exponent;
+    }
+    if (neg) {
+      num.negate();
+    }
+  }
   normalize();
 }
 
+Integer trunc(const Rational &x) { return x.num / x.den; }
 
-Integer trunc(const Rational& x)
-{
-  return x.num / x.den ;
-}
-
-
-Rational pow(const Rational& x, const Integer& y)
+Rational pow(const Rational &x, const Integer &y)
 {
   long yy = y.as_long();
   return pow(x, yy);
@@ -198,18 +188,21 @@ Rational pow(const Rational& x, const Integer& y)
 
 Rational Rational::operator-() const
 {
-  Rational r(*this); r.negate(); return r;
-}
-
-Rational abs(const Rational& x)
-{
-  Rational r(x);
-  if (sign(r.num) < 0) r.negate();
+  Rational r(*this);
+  r.negate();
   return r;
 }
 
+Rational abs(const Rational &x)
+{
+  Rational r(x);
+  if (sign(r.num) < 0) {
+    r.negate();
+  }
+  return r;
+}
 
-Rational sqr(const Rational& x)
+Rational sqr(const Rational &x)
 {
   Rational r;
   mul(x.num, x.num, r.num);
@@ -218,72 +211,74 @@ Rational sqr(const Rational& x)
   return r;
 }
 
-Integer floor(const Rational& x)
+Integer floor(const Rational &x)
 {
   Integer q;
   Integer r;
   divide(x.num, x.den, q, r);
-  if (sign(x.num) < 0 && sign(r) != 0) --q;
+  if (sign(x.num) < 0 && sign(r) != 0) {
+    --q;
+  }
   return q;
 }
 
-Integer ceil(const Rational& x)
+Integer ceil(const Rational &x)
 {
   Integer q;
-  Integer  r;
+  Integer r;
   divide(x.num, x.den, q, r);
-  if (sign(x.num) >= 0 && sign(r) != 0) ++q;
+  if (sign(x.num) >= 0 && sign(r) != 0) {
+    ++q;
+  }
   return q;
 }
 
-Integer round(const Rational& x)
+Integer round(const Rational &x)
 {
   Integer q;
   Integer r;
   divide(x.num, x.den, q, r);
   r <<= 1;
-  if (ucompare(r, x.den) >= 0)
-    {
-      if (sign(x.num) >= 0)
-	++q;
-      else
-	--q;
+  if (ucompare(r, x.den) >= 0) {
+    if (sign(x.num) >= 0) {
+      ++q;
     }
+    else {
+      --q;
+    }
+  }
   return q;
 }
 
-Rational pow(const Rational& x, long y)
+Rational pow(const Rational &x, long y)
 {
   Rational r;
-  if (y >= 0)
-    {
-      pow(x.num, y, r.num);
-      pow(x.den, y, r.den);
+  if (y >= 0) {
+    pow(x.num, y, r.num);
+    pow(x.den, y, r.den);
+  }
+  else {
+    y = -y;
+    pow(x.num, y, r.den);
+    pow(x.den, y, r.num);
+    if (sign(r.den) < 0) {
+      r.num.negate();
+      r.den.negate();
     }
-  else
-    {
-      y = -y;
-      pow(x.num, y, r.den);
-      pow(x.den, y, r.num);
-      if (sign(r.den) < 0)
-	{
-	  r.num.negate();
-	  r.den.negate();
-	}
-    }
+  }
   return r;
 }
 
-std::ostream &operator << (std::ostream &s, const Rational& y)
+std::ostream &operator<<(std::ostream &s, const Rational &y)
 {
-  if (y.denominator() == 1L)
+  if (y.denominator() == 1L) {
     s << y.numerator();
-  else
-    {
-      s << y.numerator();
-      s << "/";
-      s << y.denominator();
-    }
+  }
+  else {
+    s << y.numerator();
+    s << "/";
+    s << y.denominator();
+  }
   return s;
 }
 
@@ -295,12 +290,12 @@ std::istream &operator>>(std::istream &f, Rational &y)
 
   while (isspace(ch)) {
     f.get(ch);
-    if (f.eof() || f.bad())  {
+    if (f.eof() || f.bad()) {
       throw ValueException();
     }
   }
 
-  if (ch == '-')  {
+  if (ch == '-') {
     sign = -1;
     f.get(ch);
     if (f.eof() || f.bad()) {
@@ -310,43 +305,43 @@ std::istream &operator>>(std::istream &f, Rational &y)
   else if ((ch < '0' || ch > '9') && ch != '.') {
     throw ValueException();
   }
-  while (ch >= '0' && ch <= '9')   {
+  while (ch >= '0' && ch <= '9') {
     num *= 10;
-    num += (int) (ch - '0');
+    num += (int)(ch - '0');
     f.get(ch);
     if (f.eof() || f.bad()) {
       ch = ' ';
     }
   }
 
-  if (ch == '/')  {
+  if (ch == '/') {
     denom = 0;
     f.get(ch);
     if (f.eof() || f.bad()) {
       ch = ' ';
     }
-    while (ch >= '0' && ch <= '9')  {
+    while (ch >= '0' && ch <= '9') {
       denom *= 10;
-      denom += (int) (ch - '0');
+      denom += (int)(ch - '0');
       f.get(ch);
       if (f.eof() || f.bad()) {
-	ch = ' ';
+        ch = ' ';
       }
     }
   }
-  else if (ch == '.')  {
+  else if (ch == '.') {
     denom = 1;
     f.get(ch);
     if (f.eof() || f.bad()) {
       ch = ' ';
     }
-    while (ch >= '0' && ch <= '9')  {
+    while (ch >= '0' && ch <= '9') {
       denom *= 10;
       num *= 10;
-      num += (int) (ch - '0');
+      num += (int)(ch - '0');
       f.get(ch);
       if (f.eof() || f.bad()) {
-	ch = ' ';
+        ch = ' ';
       }
     }
   }
@@ -364,26 +359,23 @@ std::istream &operator>>(std::istream &f, Rational &y)
 bool Rational::OK() const
 {
   int v = num.OK() && den.OK(); // have valid num and denom
-  if (v)   {
-    v &= sign(den) > 0;           // denominator positive;
-    v &=  ucompare(gcd(num, den), Int_One) == 0; // relatively prime
+  if (v) {
+    v &= sign(den) > 0;                         // denominator positive;
+    v &= ucompare(gcd(num, den), Int_One) == 0; // relatively prime
   }
   // if (!v) error("invariant failure");
   return v;
 }
 
-int
-Rational::fits_in_float() const
+int Rational::fits_in_float() const
 {
-  return Rational (FLT_MIN) <= *this && *this <= Rational (FLT_MAX);
+  return Rational(FLT_MIN) <= *this && *this <= Rational(FLT_MAX);
 }
 
-int
-Rational::fits_in_double() const
+int Rational::fits_in_double() const
 {
-  return Rational (DBL_MIN) <= *this && *this <= Rational (DBL_MAX);
+  return Rational(DBL_MIN) <= *this && *this <= Rational(DBL_MAX);
 }
-
 
 //
 // These were moved from the header file to eliminate warnings
@@ -395,25 +387,11 @@ static IntegerRep OneRep = {1, 0, 1, {1}};
 Rational::Rational() : num(&ZeroRep), den(&OneRep) {}
 Rational::~Rational() = default;
 
-Rational::Rational(const Rational& y)  = default;
+Rational::Rational(const Rational &y) = default;
 
-Rational::Rational(const Integer& n) :num(n), den(&OneRep) {}
+Rational::Rational(const Integer &n) : num(n), den(&OneRep) {}
 
-Rational::Rational(const Integer& n, const Integer& d)
- : num(n), den(d)
-{
-  if (d == 0)  {
-    throw ZeroDivideException();
-  }
-  normalize();
-}
-
-Rational::Rational(long n) :num(n), den(&OneRep) { }
-
-Rational::Rational(int n) :num(n), den(&OneRep) { }
-
-Rational::Rational(long n, long d)
- : num(n), den(d)
+Rational::Rational(const Integer &n, const Integer &d) : num(n), den(d)
 {
   if (d == 0) {
     throw ZeroDivideException();
@@ -421,8 +399,11 @@ Rational::Rational(long n, long d)
   normalize();
 }
 
-Rational::Rational(int n, int d)
- : num(n), den(d)
+Rational::Rational(long n) : num(n), den(&OneRep) {}
+
+Rational::Rational(int n) : num(n), den(&OneRep) {}
+
+Rational::Rational(long n, long d) : num(n), den(d)
 {
   if (d == 0) {
     throw ZeroDivideException();
@@ -430,8 +411,15 @@ Rational::Rational(int n, int d)
   normalize();
 }
 
-Rational &Rational::operator =  (const Rational& y)
-= default;
+Rational::Rational(int n, int d) : num(n), den(d)
+{
+  if (d == 0) {
+    throw ZeroDivideException();
+  }
+  normalize();
+}
+
+Rational &Rational::operator=(const Rational &y) = default;
 
 bool Rational::operator==(const Rational &y) const
 {
@@ -443,63 +431,44 @@ bool Rational::operator!=(const Rational &y) const
   return compare(num, y.num) != 0 || compare(den, y.den) != 0;
 }
 
-bool Rational::operator< (const Rational &y) const
-{
-  return compare(*this, y) <  0;
-}
+bool Rational::operator<(const Rational &y) const { return compare(*this, y) < 0; }
 
-bool Rational::operator<=(const Rational &y) const
-{
-  return compare(*this, y) <= 0;
-}
+bool Rational::operator<=(const Rational &y) const { return compare(*this, y) <= 0; }
 
-bool Rational::operator> (const Rational &y) const
-{
-  return compare(*this, y) >  0;
-}
+bool Rational::operator>(const Rational &y) const { return compare(*this, y) > 0; }
 
-bool Rational::operator>=(const Rational &y) const
-{
-  return compare(*this, y) >= 0;
-}
+bool Rational::operator>=(const Rational &y) const { return compare(*this, y) >= 0; }
 
-int sign(const Rational& x)
-{
-  return sign(x.num);
-}
+int sign(const Rational &x) { return sign(x.num); }
 
-void Rational::negate()
-{
-  num.negate();
-}
+void Rational::negate() { num.negate(); }
 
-
-Rational &Rational::operator+=(const Rational& y)
+Rational &Rational::operator+=(const Rational &y)
 {
   add(*this, y, *this);
   return *this;
 }
 
-Rational &Rational::operator-=(const Rational& y)
+Rational &Rational::operator-=(const Rational &y)
 {
   sub(*this, y, *this);
   return *this;
 }
 
-Rational &Rational::operator*=(const Rational& y)
+Rational &Rational::operator*=(const Rational &y)
 {
   mul(*this, y, *this);
   return *this;
 }
 
-Rational &Rational::operator/=(const Rational& y)
+Rational &Rational::operator/=(const Rational &y)
 {
   div(*this, y, *this);
   return *this;
 }
 
-const Integer& Rational::numerator() const { return num; }
-const Integer& Rational::denominator() const { return den; }
+const Integer &Rational::numerator() const { return num; }
+const Integer &Rational::denominator() const { return den; }
 
 Rational::operator double() const
 {
@@ -515,91 +484,97 @@ Rational::operator double() const
 
 Rational Rational::operator+(const Rational &y) const
 {
-  Rational r; add(*this, y, r); return r;
+  Rational r;
+  add(*this, y, r);
+  return r;
 }
 
 Rational Rational::operator-(const Rational &y) const
 {
-  Rational r; sub(*this, y, r); return r;
+  Rational r;
+  sub(*this, y, r);
+  return r;
 }
 
 Rational Rational::operator*(const Rational &y) const
 {
-  Rational r; mul(*this, y, r); return r;
+  Rational r;
+  mul(*this, y, r);
+  return r;
 }
 
 Rational Rational::operator/(const Rational &y) const
 {
-  Rational r; div(*this, y, r); return r;
+  Rational r;
+  div(*this, y, r);
+  return r;
 }
 
-
-template<>
-Rational lexical_cast(const std::string &f)
+template <> Rational lexical_cast(const std::string &f)
 {
   char ch = ' ';
   int sign = 1;
   unsigned int index = 0, length = f.length();
   Integer num(0), denom(1);
 
-  while (isspace(ch) && index<=length) {
+  while (isspace(ch) && index <= length) {
     ch = f[index++];
   }
 
-  if (ch == '-' && index<=length)  {
+  if (ch == '-' && index <= length) {
     sign = -1;
-    ch=f[index++];
+    ch = f[index++];
   }
 
-  while (ch >= '0' && ch <= '9' && index<=length)   {
+  while (ch >= '0' && ch <= '9' && index <= length) {
     num *= 10;
-    num += (int) (ch - '0');
-    ch=f[index++];
+    num += (int)(ch - '0');
+    ch = f[index++];
   }
 
-  if (ch == '/')  {
+  if (ch == '/') {
     denom = 0;
-    ch=f[index++];
-    while (ch >= '0' && ch <= '9' && index<=length)  {
+    ch = f[index++];
+    while (ch >= '0' && ch <= '9' && index <= length) {
       denom *= 10;
-      denom += (int) (ch - '0');
-      ch=f[index++];
+      denom += (int)(ch - '0');
+      ch = f[index++];
     }
   }
-  else if (ch == '.')  {
+  else if (ch == '.') {
     denom = 1;
-    ch=f[index++];
-    while (ch >= '0' && ch <= '9' && index<=length)  {
+    ch = f[index++];
+    while (ch >= '0' && ch <= '9' && index <= length) {
       denom *= 10;
       num *= 10;
-      num += (int) (ch - '0');
-      ch=f[index++];
+      num += (int)(ch - '0');
+      ch = f[index++];
     }
 
     if (ch == 'e' || ch == 'E') {
       int expsign = 1;
       Integer exponent(0);
       ch = f[index++];
-      if (ch == '-')  {
-	expsign = -1;
-	ch = f[index++];
+      if (ch == '-') {
+        expsign = -1;
+        ch = f[index++];
       }
       while (ch >= '0' && ch <= '9' && index <= length) {
-	exponent *= 10;
-	exponent += (int) (ch - '0');
-	ch = f[index++];
+        exponent *= 10;
+        exponent += (int)(ch - '0');
+        ch = f[index++];
       }
       if (exponent * expsign > 0) {
-	while (exponent > 0) {
-	  num *= 10;
-	  exponent -= 1;
-	}
+        while (exponent > 0) {
+          num *= 10;
+          exponent -= 1;
+        }
       }
       else if (exponent * expsign < 0) {
-	while (exponent > 0) {
-	  denom *= 10;
-	  exponent -= 1;
-	}
+        while (exponent > 0) {
+          denom *= 10;
+          exponent -= 1;
+        }
       }
     }
   }
@@ -607,25 +582,25 @@ Rational lexical_cast(const std::string &f)
     int expsign = 1;
     Integer exponent(0);
     ch = f[index++];
-    if (ch == '-')  {
+    if (ch == '-') {
       expsign = -1;
       ch = f[index++];
     }
     while (ch >= '0' && ch <= '9' && index <= length) {
       exponent *= 10;
-      exponent += (int) (ch - '0');
+      exponent += (int)(ch - '0');
       ch = f[index++];
     }
     if (exponent * expsign > 0) {
       while (exponent > 0) {
-	num *= 10;
-	exponent -= 1;
+        num *= 10;
+        exponent -= 1;
       }
     }
     else if (exponent * expsign < 0) {
       while (exponent > 0) {
-	denom *= 10;
-	exponent -= 1;
+        denom *= 10;
+        exponent -= 1;
       }
     }
   }
@@ -634,7 +609,7 @@ Rational lexical_cast(const std::string &f)
     throw ValueException();
   }
 
-  return { num * sign, denom };
+  return {num * sign, denom};
 }
 
-}  // end namespace Gambit
+} // end namespace Gambit

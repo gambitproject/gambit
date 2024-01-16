@@ -23,4 +23,4 @@
 #include "rectangl.imp"
 
 template class gRectangle<double>;
-template gRectangle<double> TogDouble(const gRectangle<double>&);
+template gRectangle<double> TogDouble(const gRectangle<double> &);

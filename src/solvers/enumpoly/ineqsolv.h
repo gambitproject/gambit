@@ -47,55 +47,47 @@ inequalities in the sense that, at a solution, all the polynomials
 are required to be nonnegative.
 */
 
-
 // ***********************
 //      class IneqSolv
 // ***********************
 
 template <class T> class IneqSolv {
- private:
-  const gPolyList<T>                 System;
-  const ListOfPartialTrees<T>        TreesOfPartials;
-        T                            Epsilon;
+private:
+  const gPolyList<T> System;
+  const ListOfPartialTrees<T> TreesOfPartials;
+  T Epsilon;
   //        bool                         HasBeenSolved;
   //        gTriState                    HasASolution;
   //        Gambit::Vector<T>                   Sample;
 
   // Routines Doing the Actual Work
 
-  bool IsASolution(const Gambit::Vector<T>&)                              const;
+  bool IsASolution(const Gambit::Vector<T> &) const;
 
-  bool SystemHasNoSolutionIn(const gRectangle<T>& r, Gambit::Array<int>&) const;
+  bool SystemHasNoSolutionIn(const gRectangle<T> &r, Gambit::Array<int> &) const;
 
-  bool ASolutionExistsRecursion(const gRectangle<T>&,
-				            Gambit::Vector<T>&,
-				            Gambit::Array<int>&)          const;
+  bool ASolutionExistsRecursion(const gRectangle<T> &, Gambit::Vector<T> &,
+                                Gambit::Array<int> &) const;
 
- public:
-   explicit IneqSolv(const gPolyList<T> &);
-   IneqSolv(const IneqSolv<T> &);
-   ~IneqSolv();
+public:
+  explicit IneqSolv(const gPolyList<T> &);
+  IneqSolv(const IneqSolv<T> &);
+  ~IneqSolv();
 
-   // Operators
-   IneqSolv<T>& operator= (const IneqSolv<T> &);
-   bool         operator==(const IneqSolv<T> &) const;
-   bool         operator!=(const IneqSolv<T> &) const;
+  // Operators
+  IneqSolv<T> &operator=(const IneqSolv<T> &);
+  bool operator==(const IneqSolv<T> &) const;
+  bool operator!=(const IneqSolv<T> &) const;
 
-   // Information
-   inline const gSpace*                  AmbientSpace()              const
-     { return System.AmbientSpace(); }
-   inline const term_order*              TermOrder()                 const
-     { return System.TermOrder(); }
-   inline int                      Dmnsn()                     const
-     { return System.Dmnsn(); }
-   inline gPolyList<T>             UnderlyingEquations()       const
-     { return System; }
-   inline T                        ErrorTolerance()            const
-     { return Epsilon; }
+  // Information
+  inline const gSpace *AmbientSpace() const { return System.AmbientSpace(); }
+  inline const term_order *TermOrder() const { return System.TermOrder(); }
+  inline int Dmnsn() const { return System.Dmnsn(); }
+  inline gPolyList<T> UnderlyingEquations() const { return System; }
+  inline T ErrorTolerance() const { return Epsilon; }
 
   // The function that does everything
-  bool ASolutionExists(const gRectangle<T>&, Gambit::Vector<T>& sample);
+  bool ASolutionExists(const gRectangle<T> &, Gambit::Vector<T> &sample);
 };
-
 
 #endif // INEQSOLV_H

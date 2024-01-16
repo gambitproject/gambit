@@ -29,4 +29,4 @@ public:
   ~gbtAboutDialog() override = default;
 };
 
-#endif  // DLABOUT_H
+#endif // DLABOUT_H

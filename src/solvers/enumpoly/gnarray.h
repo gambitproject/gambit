@@ -28,32 +28,32 @@
 //
 // Basic n-dimensional array
 //
-template <class T> class gNArray   {
-  protected:
-    long storage_size;
-    T *storage;
-    Gambit::Array<int> dim;
+template <class T> class gNArray {
+protected:
+  long storage_size;
+  T *storage;
+  Gambit::Array<int> dim;
 
-  public:
-    gNArray();
-    explicit gNArray(const Gambit::Array<int> &d);
-    gNArray(const gNArray<T>& a);
-    ~gNArray();
+public:
+  gNArray();
+  explicit gNArray(const Gambit::Array<int> &d);
+  gNArray(const gNArray<T> &a);
+  ~gNArray();
 
-    gNArray<T> &operator=(const gNArray<T> &);
+  gNArray<T> &operator=(const gNArray<T> &);
 
-    /* not used for now
-    T operator[](const Gambit::Vector<int> &) const;
-    T &operator[](const Gambit::Vector<int> &);
-    */
+  /* not used for now
+  T operator[](const Gambit::Vector<int> &) const;
+  T &operator[](const Gambit::Vector<int> &);
+  */
 
-    T operator[](const Gambit::Array<int> &) const;
-    T &operator[](const Gambit::Array<int> &);
+  T operator[](const Gambit::Array<int> &) const;
+  T &operator[](const Gambit::Array<int> &);
 
-    const T &operator[](long l) const;
-    T &operator[](long l);
+  const T &operator[](long l) const;
+  T &operator[](long l);
 
-    const Gambit::Array<int> &Dimensionality() const;
+  const Gambit::Array<int> &Dimensionality() const;
 };
 
-#endif    // GNARRAY_H
+#endif // GNARRAY_H

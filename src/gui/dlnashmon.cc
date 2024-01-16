@@ -23,7 +23,7 @@
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
-#endif  // WX_PRECOMP
+#endif // WX_PRECOMP
 #include <wx/txtstrm.h>
 
 #include "dlnashmon.h"
@@ -36,33 +36,28 @@ const int GBT_ID_TIMER = 1000;
 const int GBT_ID_PROCESS = 1001;
 
 BEGIN_EVENT_TABLE(gbtNashMonitorDialog, wxDialog)
-  EVT_END_PROCESS(GBT_ID_PROCESS, gbtNashMonitorDialog::OnEndProcess)
-  EVT_IDLE(gbtNashMonitorDialog::OnIdle)
-  EVT_TIMER(GBT_ID_TIMER, gbtNashMonitorDialog::OnTimer)
+EVT_END_PROCESS(GBT_ID_PROCESS, gbtNashMonitorDialog::OnEndProcess)
+EVT_IDLE(gbtNashMonitorDialog::OnIdle)
+EVT_TIMER(GBT_ID_TIMER, gbtNashMonitorDialog::OnTimer)
 END_EVENT_TABLE()
 
 #include "bitmaps/stop.xpm"
 
-gbtNashMonitorDialog::gbtNashMonitorDialog(wxWindow *p_parent,
-					   gbtGameDocument *p_doc,
-					   gbtAnalysisOutput *p_command)
-  : wxDialog(p_parent, wxID_ANY, wxT("Computing Nash equilibria"),
-	     wxDefaultPosition),
-    m_doc(p_doc),
-    m_process(nullptr), m_timer(this, GBT_ID_TIMER),
-    m_output(p_command)
+gbtNashMonitorDialog::gbtNashMonitorDialog(wxWindow *p_parent, gbtGameDocument *p_doc,
+                                           gbtAnalysisOutput *p_command)
+  : wxDialog(p_parent, wxID_ANY, wxT("Computing Nash equilibria"), wxDefaultPosition),
+    m_doc(p_doc), m_process(nullptr), m_timer(this, GBT_ID_TIMER), m_output(p_command)
 {
   auto *sizer = new wxBoxSizer(wxVERTICAL);
 
   auto *startSizer = new wxBoxSizer(wxHORIZONTAL);
 
-  m_statusText = new wxStaticText(this, wxID_STATIC,
-				  wxT("The computation is currently in progress."));
+  m_statusText =
+      new wxStaticText(this, wxID_STATIC, wxT("The computation is currently in progress."));
   m_statusText->SetForegroundColour(*wxBLUE);
   startSizer->Add(m_statusText, 0, wxALL | wxALIGN_CENTER, 5);
 
-  m_countText = new wxStaticText(this, wxID_STATIC,
-				 wxT("Number of equilibria found so far: 0  "));
+  m_countText = new wxStaticText(this, wxID_STATIC, wxT("Number of equilibria found so far: 0  "));
   startSizer->Add(m_countText, 0, wxALL | wxALIGN_CENTER, 5);
 
   m_stopButton = new wxBitmapButton(this, wxID_CANCEL, wxBitmap(stop_xpm));
@@ -71,7 +66,7 @@ gbtNashMonitorDialog::gbtNashMonitorDialog(wxWindow *p_parent,
   startSizer->Add(m_stopButton, 0, wxALL | wxALIGN_CENTER, 5);
 
   Connect(wxID_CANCEL, wxEVT_COMMAND_BUTTON_CLICKED,
-	  wxCommandEventHandler(gbtNashMonitorDialog::OnStop));
+          wxCommandEventHandler(gbtNashMonitorDialog::OnStop));
 
   sizer->Add(startSizer, 0, wxALL | wxALIGN_CENTER, 5);
 
@@ -147,7 +142,9 @@ void gbtNashMonitorDialog::Start(gbtAnalysisOutput *p_command)
 
 void gbtNashMonitorDialog::OnIdle(wxIdleEvent &p_event)
 {
-  if (!m_process)  return;
+  if (!m_process) {
+    return;
+  }
 
   if (m_process->IsInputAvailable()) {
     wxTextInputStream tis(*m_process->GetInputStream());
@@ -156,7 +153,8 @@ void gbtNashMonitorDialog::OnIdle(wxIdleEvent &p_event)
     msg << tis.ReadLine();
 
     m_doc->DoAddOutput(*m_output, msg);
-    m_countText->SetLabel(wxString::Format(wxT("Number of equilibria found so far: %d"), m_output->NumProfiles()));
+    m_countText->SetLabel(
+        wxString::Format(wxT("Number of equilibria found so far: %d"), m_output->NumProfiles()));
 
     p_event.RequestMore();
   }
@@ -165,10 +163,7 @@ void gbtNashMonitorDialog::OnIdle(wxIdleEvent &p_event)
   }
 }
 
-void gbtNashMonitorDialog::OnTimer(wxTimerEvent &p_event)
-{
-  wxWakeUpIdle();
-}
+void gbtNashMonitorDialog::OnTimer(wxTimerEvent &p_event) { wxWakeUpIdle(); }
 
 void gbtNashMonitorDialog::OnEndProcess(wxProcessEvent &p_event)
 {
@@ -183,7 +178,8 @@ void gbtNashMonitorDialog::OnEndProcess(wxProcessEvent &p_event)
 
     if (!msg.empty()) {
       m_doc->DoAddOutput(*m_output, msg);
-      m_countText->SetLabel(wxString::Format(wxT("Number of equilibria found so far: %d"), m_output->NumProfiles()));
+      m_countText->SetLabel(
+          wxString::Format(wxT("Number of equilibria found so far: %d"), m_output->NumProfiles()));
     }
   }
 
@@ -210,5 +206,5 @@ void gbtNashMonitorDialog::OnStop(wxCommandEvent &p_event)
   wxProcess::Kill(m_pid, wxSIGKILL);
 #else
   wxProcess::Kill(m_pid, wxSIGTERM);
-#endif  // __WXMSW__
+#endif // __WXMSW__
 }

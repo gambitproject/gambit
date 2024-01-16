@@ -23,7 +23,7 @@
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
-#endif  // WX_PRECOMP
+#endif // WX_PRECOMP
 #include <wx/richmsgdlg.h>
 #include "wx/sheet/sheet.h"
 
@@ -32,7 +32,6 @@
 #include "renratio.h"
 
 using namespace Gambit;
-
 
 class gbtActionSheet : public wxSheet {
 private:
@@ -44,14 +43,13 @@ private:
 public:
   gbtActionSheet(wxWindow *p_parent, const GameInfoset &p_infoset);
 
-  int NumActions() const  { return GetNumberRows(); }
+  int NumActions() const { return GetNumberRows(); }
 
   wxString GetActionName(int p_act);
   Array<Number> GetActionProbs();
 };
 
-gbtActionSheet::gbtActionSheet(wxWindow *p_parent,
-                               const Gambit::GameInfoset &p_infoset)
+gbtActionSheet::gbtActionSheet(wxWindow *p_parent, const Gambit::GameInfoset &p_infoset)
   : wxSheet(p_parent, wxID_ANY), m_infoset(p_infoset)
 {
   CreateGrid(p_infoset->NumActions(), (p_infoset->IsChanceInfoset()) ? 2 : 1);
@@ -64,8 +62,7 @@ gbtActionSheet::gbtActionSheet(wxWindow *p_parent,
 
   for (int act = 1; act <= p_infoset->NumActions(); act++) {
     SetCellValue(wxSheetCoords(act - 1, 0),
-                 wxString(p_infoset->GetAction(act)->GetLabel().c_str(),
-                          *wxConvCurrent));
+                 wxString(p_infoset->GetAction(act)->GetLabel().c_str(), *wxConvCurrent));
     if (p_infoset->IsChanceInfoset()) {
       SetCellValue(wxSheetCoords(act - 1, 1),
                    wxString(static_cast<std::string>(p_infoset->GetActionProb(act)).c_str(),
@@ -105,9 +102,7 @@ Array<Number> gbtActionSheet::GetActionProbs()
   return probs;
 }
 
-
-wxSheetCellAttr
-gbtActionSheet::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
+wxSheetCellAttr gbtActionSheet::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
 {
   if (IsRowLabelCell(p_coords)) {
     wxSheetCellAttr attr(GetSheetRefData()->m_defaultRowLabelAttr);
@@ -145,40 +140,34 @@ gbtActionSheet::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
   return attr;
 }
 
-
 //======================================================================
 //                      class gbtEditMoveDialog
 //======================================================================
 
-wxBEGIN_EVENT_TABLE(gbtEditMoveDialog, wxDialog)
-  EVT_BUTTON(wxID_OK, gbtEditMoveDialog::OnOK)
-wxEND_EVENT_TABLE()
+wxBEGIN_EVENT_TABLE(gbtEditMoveDialog,
+                    wxDialog) EVT_BUTTON(wxID_OK, gbtEditMoveDialog::OnOK) wxEND_EVENT_TABLE()
 
-
-gbtEditMoveDialog::gbtEditMoveDialog(wxWindow *p_parent,
-				     const Gambit::GameInfoset &p_infoset)
-  : wxDialog(p_parent, wxID_ANY, _("Move properties"), wxDefaultPosition),
-    m_infoset(p_infoset)
+    gbtEditMoveDialog::gbtEditMoveDialog(wxWindow *p_parent, const Gambit::GameInfoset &p_infoset)
+  : wxDialog(p_parent, wxID_ANY, _("Move properties"), wxDefaultPosition), m_infoset(p_infoset)
 {
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
   auto *labelSizer = new wxBoxSizer(wxHORIZONTAL);
-  labelSizer->Add(new wxStaticText(this, wxID_STATIC,
-				   _("Information set label")),
-		  0, wxALL | wxALIGN_CENTER, 5);
-  m_infosetName = new wxTextCtrl(this, wxID_ANY,
-				 wxString(p_infoset->GetLabel().c_str(), *wxConvCurrent));
+  labelSizer->Add(new wxStaticText(this, wxID_STATIC, _("Information set label")), 0,
+                  wxALL | wxALIGN_CENTER, 5);
+  m_infosetName =
+      new wxTextCtrl(this, wxID_ANY, wxString(p_infoset->GetLabel().c_str(), *wxConvCurrent));
   labelSizer->Add(m_infosetName, 1, wxALL | wxEXPAND, 5);
   topSizer->Add(labelSizer, 0, wxALL | wxEXPAND, 0);
 
-  topSizer->Add(new wxStaticText(this, wxID_STATIC,
-				 wxString::Format(_("Number of members: %d"),
-						  p_infoset->NumMembers())),
-		0, wxALL | wxALIGN_CENTER, 5);
+  topSizer->Add(
+      new wxStaticText(this, wxID_STATIC,
+                       wxString::Format(_("Number of members: %d"), p_infoset->NumMembers())),
+      0, wxALL | wxALIGN_CENTER, 5);
 
   auto *playerSizer = new wxBoxSizer(wxHORIZONTAL);
-  playerSizer->Add(new wxStaticText(this, wxID_STATIC, _("Belongs to player")),
-		   0, wxALL | wxALIGN_CENTER, 5);
+  playerSizer->Add(new wxStaticText(this, wxID_STATIC, _("Belongs to player")), 0,
+                   wxALL | wxALIGN_CENTER, 5);
   m_player = new wxChoice(this, wxID_ANY);
   if (p_infoset->IsChanceInfoset()) {
     m_player->Append(_("Chance"));
@@ -186,8 +175,9 @@ gbtEditMoveDialog::gbtEditMoveDialog(wxWindow *p_parent,
   }
   else {
     for (int pl = 1; pl <= p_infoset->GetGame()->NumPlayers(); pl++) {
-      m_player->Append(wxString::Format(_T("%d: "), pl) +
-		       wxString(p_infoset->GetGame()->GetPlayer(pl)->GetLabel().c_str(), *wxConvCurrent));
+      m_player->Append(
+          wxString::Format(_T("%d: "), pl) +
+          wxString(p_infoset->GetGame()->GetPlayer(pl)->GetLabel().c_str(), *wxConvCurrent));
     }
     m_player->SetSelection(p_infoset->GetPlayer()->GetNumber() - 1);
   }
@@ -195,8 +185,7 @@ gbtEditMoveDialog::gbtEditMoveDialog(wxWindow *p_parent,
   topSizer->Add(playerSizer, 0, wxALL | wxEXPAND, 0);
 
   auto *actionBoxSizer =
-    new wxStaticBoxSizer(new wxStaticBox(this, wxID_STATIC, _("Actions")),
-			 wxHORIZONTAL);
+      new wxStaticBoxSizer(new wxStaticBox(this, wxID_STATIC, _("Actions")), wxHORIZONTAL);
   m_actionSheet = new gbtActionSheet(this, p_infoset);
   actionBoxSizer->Add(m_actionSheet, 1, wxALL | wxEXPAND, 5);
   topSizer->Add(actionBoxSizer, 0, wxALL | wxEXPAND, 5);
@@ -235,23 +224,17 @@ void gbtEditMoveDialog::OnOK(wxCommandEvent &p_event)
     p_event.Skip();
   }
   else {
-    wxRichMessageDialog(this,
-                    "Action probabilities must sum to exactly one", "Error",
-                    wxOK | wxCENTRE | wxICON_ERROR).ShowModal();
+    wxRichMessageDialog(this, "Action probabilities must sum to exactly one", "Error",
+                        wxOK | wxCENTRE | wxICON_ERROR)
+        .ShowModal();
   }
 }
 
-int gbtEditMoveDialog::NumActions() const
-{
-  return m_actionSheet->NumActions();
-}
+int gbtEditMoveDialog::NumActions() const { return m_actionSheet->NumActions(); }
 
 wxString gbtEditMoveDialog::GetActionName(int p_act) const
 {
   return m_actionSheet->GetActionName(p_act);
 }
 
-Array<Number> gbtEditMoveDialog::GetActionProbs() const
-{
-  return m_actionSheet->GetActionProbs();
-}
+Array<Number> gbtEditMoveDialog::GetActionProbs() const { return m_actionSheet->GetActionProbs(); }

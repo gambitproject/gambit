@@ -35,19 +35,17 @@ namespace Nash {
 ///
 class NashSimpdivStrategySolver : public StrategySolver<Rational> {
 public:
-  explicit NashSimpdivStrategySolver(int p_gridResize = 2, int p_leashLength = 0,
-                                     bool p_verbose = false,
-                                     std::shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = nullptr)
-    : StrategySolver<Rational>(p_onEquilibrium),
-      m_gridResize(p_gridResize),
-      m_leashLength((p_leashLength > 0) ? p_leashLength : 32000),
-      m_verbose(p_verbose)
-  { }
+  explicit NashSimpdivStrategySolver(
+      int p_gridResize = 2, int p_leashLength = 0, bool p_verbose = false,
+      std::shared_ptr<StrategyProfileRenderer<Rational>> p_onEquilibrium = nullptr)
+    : StrategySolver<Rational>(p_onEquilibrium), m_gridResize(p_gridResize),
+      m_leashLength((p_leashLength > 0) ? p_leashLength : 32000), m_verbose(p_verbose)
+  {
+  }
   ~NashSimpdivStrategySolver() override = default;
 
-  List<MixedStrategyProfile<Rational> > Solve(const MixedStrategyProfile<Rational> &p_start) const;
-  List<MixedStrategyProfile<Rational> > Solve(const Game &p_game) const override;
-
+  List<MixedStrategyProfile<Rational>> Solve(const MixedStrategyProfile<Rational> &p_start) const;
+  List<MixedStrategyProfile<Rational>> Solve(const Game &p_game) const override;
 
 private:
   int m_gridResize, m_leashLength;
@@ -57,24 +55,22 @@ private:
 
   Rational Simplex(MixedStrategyProfile<Rational> &, const Rational &d) const;
   void update(State &, RectArray<int> &, RectArray<int> &, PVector<Rational> &,
-	      const PVector<int> &, int j, int i) const;
-  void getY(State &, MixedStrategyProfile<Rational> &x, PVector<Rational> &,
-	    const PVector<int> &, const PVector<int> &,
-	    const PVector<Rational> &, const RectArray<int> &, int k) const;
-  void getnexty(State &,
-		MixedStrategyProfile<Rational> &x, const RectArray<int> &,
-		const PVector<int> &, int i) const;
+              const PVector<int> &, int j, int i) const;
+  void getY(State &, MixedStrategyProfile<Rational> &x, PVector<Rational> &, const PVector<int> &,
+            const PVector<int> &, const PVector<Rational> &, const RectArray<int> &, int k) const;
+  void getnexty(State &, MixedStrategyProfile<Rational> &x, const RectArray<int> &,
+                const PVector<int> &, int i) const;
   int get_c(int j, int h, int nstrats, const PVector<int> &) const;
   int get_b(int j, int h, int nstrats, const PVector<int> &) const;
 };
 
-inline List<MixedStrategyProfile<Rational> >
+inline List<MixedStrategyProfile<Rational>>
 SimpdivStrategySolve(const Game &p_game, int p_gridResize = 2, int p_leashLength = 0)
 {
   return NashSimpdivStrategySolver(p_gridResize, p_leashLength).Solve(p_game);
 }
 
-}  // end namespace Gambit::Nash
-}  // end namespace Gambit
+} // namespace Nash
+} // end namespace Gambit
 
-#endif  // GAMBIT_NASH_SIMPDIV_H
+#endif // GAMBIT_NASH_SIMPDIV_H

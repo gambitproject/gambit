@@ -26,9 +26,9 @@
 #include "gambit.h"
 #include <map>
 
-namespace Gambit  {
+namespace Gambit {
 
-namespace linalg  {
+namespace linalg {
 
 template <class T> class BFS {
 private:
@@ -37,32 +37,36 @@ private:
 
 public:
   // Lifecycle
-  BFS() : m_default(0) { }
+  BFS() : m_default(0) {}
   ~BFS() = default;
 
   // define two BFS's to be equal if their bases are equal
-  bool operator==(const BFS &M) const {
-    if (m_map.size() != M.m_map.size())  return false;
+  bool operator==(const BFS &M) const
+  {
+    if (m_map.size() != M.m_map.size()) {
+      return false;
+    }
 
-    for (auto iter = m_map.begin();
-	 iter != m_map.end(); iter++) {
+    for (auto iter = m_map.begin(); iter != m_map.end(); iter++) {
       if (M.m_map.count((*iter).first) == 0) {
-	return false;
+        return false;
       }
     }
     return true;
   }
-  bool operator!=(const BFS &M) const  { return !(*this == M); }
+  bool operator!=(const BFS &M) const { return !(*this == M); }
 
   // Provide map-like operations
   int count(int key) const { return (m_map.count(key) > 0); }
 
-  void insert(int key, const T &value) {
+  void insert(int key, const T &value)
+  {
     m_map.erase(key);
     m_map.insert(std::pair<int, T>(key, value));
   }
 
-  const T &operator[](int key) const {
+  const T &operator[](int key) const
+  {
     if (m_map.count(key) == 1) {
       return const_cast<std::map<int, T> &>(m_map)[key];
     }
@@ -72,8 +76,8 @@ public:
   }
 };
 
-}  // end namespace Gambit::linalg
+} // namespace linalg
 
-}  // end namespace Gambit
+} // end namespace Gambit
 
-#endif   // BFS_H
+#endif // BFS_H

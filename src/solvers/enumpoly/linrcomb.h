@@ -37,38 +37,32 @@ independent.
 #include "core/rational.h"
 #include "core/matrix.h"
 
-template <class T> class LinearCombination  {
-  private:
-    Gambit::Matrix<T> scrambled;
-    Gambit::Vector<T> weights;
-    bool       last_row_is_spanned;
+template <class T> class LinearCombination {
+private:
+  Gambit::Matrix<T> scrambled;
+  Gambit::Vector<T> weights;
+  bool last_row_is_spanned;
 
-    void AddMultipleOfRowiToRowj(const int& i,
-				 const int& j,
-				 const T& scalar);
-    void AddMultipleOfRowiToRowj(const int& i,
-				 const int& j,
-				 const T& scalar,
-				 Gambit::Matrix<T>& B);
+  void AddMultipleOfRowiToRowj(const int &i, const int &j, const T &scalar);
+  void AddMultipleOfRowiToRowj(const int &i, const int &j, const T &scalar, Gambit::Matrix<T> &B);
 
   // This function is left unimplemented to avoid copying
-    LinearCombination<T>& operator=(const LinearCombination<T> &);
+  LinearCombination<T> &operator=(const LinearCombination<T> &);
 
-  public:
-       // Constructors, Destructor, Constructive Operators
-    explicit LinearCombination(const Gambit::Matrix<T> &);
-    LinearCombination(const LinearCombination<T> &);
+public:
+  // Constructors, Destructor, Constructive Operators
+  explicit LinearCombination(const Gambit::Matrix<T> &);
+  LinearCombination(const LinearCombination<T> &);
 
-    virtual ~LinearCombination();
+  virtual ~LinearCombination();
 
+  // Comparison Operators
+  bool operator==(const LinearCombination<T> &) const;
+  bool operator!=(const LinearCombination<T> &) const;
 
-       // Comparison Operators
-    bool operator==(const LinearCombination<T> &) const;
-    bool operator!=(const LinearCombination<T> &) const;
-
-       // Information
-    bool       LastRowIsSpanned() const;
-    Gambit::Vector<T> LinearDependence() const;
+  // Information
+  bool LastRowIsSpanned() const;
+  Gambit::Vector<T> LinearDependence() const;
 };
 
-#endif     // LinearCombination_H
+#endif // LinearCombination_H

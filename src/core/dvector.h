@@ -27,7 +27,7 @@
 
 namespace Gambit {
 
-template <class T> class DVector : public PVector<T>  {
+template <class T> class DVector : public PVector<T> {
 private:
   void setindex();
 
@@ -45,7 +45,10 @@ public:
 
   DVector<T> &operator=(T c);
   DVector<T> &operator=(const Vector<T> &v)
-  { static_cast<Vector<T> &>(*this) = v; return *this; }
+  {
+    static_cast<Vector<T> &>(*this) = v;
+    return *this;
+  }
 };
 
 } // end namespace Gambit

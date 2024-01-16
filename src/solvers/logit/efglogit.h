@@ -26,40 +26,35 @@
 
 #include "path.h"
 
-namespace Gambit  {
+namespace Gambit {
 
 class LogitQREMixedBehaviorProfile {
 public:
-  explicit LogitQREMixedBehaviorProfile(const Game &p_game)
-    : m_profile(p_game), m_lambda(0.0)
-    { }
-  LogitQREMixedBehaviorProfile(const MixedBehaviorProfile<double> &p_profile,
-                               double p_lambda)
+  explicit LogitQREMixedBehaviorProfile(const Game &p_game) : m_profile(p_game), m_lambda(0.0) {}
+  LogitQREMixedBehaviorProfile(const MixedBehaviorProfile<double> &p_profile, double p_lambda)
     : m_profile(p_profile), m_lambda(p_lambda)
-    { }
+  {
+  }
   double GetLambda() const { return m_lambda; }
   const MixedBehaviorProfile<double> &GetProfile() const { return m_profile; }
 
-  Game GetGame() const              { return m_profile.GetGame(); }
+  Game GetGame() const { return m_profile.GetGame(); }
   size_t BehaviorProfileLength() const { return m_profile.BehaviorProfileLength(); }
-  double operator[](int i) const        { return m_profile[i]; }
+  double operator[](int i) const { return m_profile[i]; }
 
 private:
   const MixedBehaviorProfile<double> m_profile;
   double m_lambda;
 };
 
-
 class AgentQREPathTracer : public PathTracer {
 public:
-  AgentQREPathTracer() : m_fullGraph(true), m_decimals(6) { }
+  AgentQREPathTracer() : m_fullGraph(true), m_decimals(6) {}
   ~AgentQREPathTracer() override = default;
 
-  List<LogitQREMixedBehaviorProfile>
-  TraceAgentPath(const LogitQREMixedBehaviorProfile &p_start,
-		 std::ostream &p_stream,
-		 double p_maxLambda, double p_omega,
-		 double p_targetLambda=-1.0);
+  List<LogitQREMixedBehaviorProfile> TraceAgentPath(const LogitQREMixedBehaviorProfile &p_start,
+                                                    std::ostream &p_stream, double p_maxLambda,
+                                                    double p_omega, double p_targetLambda = -1.0);
 
   void SetFullGraph(bool p_fullGraph) { m_fullGraph = p_fullGraph; }
   bool GetFullGraph() const { return m_fullGraph; }
@@ -76,18 +71,18 @@ private:
   class LambdaCriterion;
 };
 
-inline List<MixedBehaviorProfile<double> > LogitBehaviorSolve(const Game &p_game)
+inline List<MixedBehaviorProfile<double>> LogitBehaviorSolve(const Game &p_game)
 {
   AgentQREPathTracer tracer;
   tracer.SetFullGraph(false);
   std::ostringstream ostream;
-  auto result = tracer.TraceAgentPath(LogitQREMixedBehaviorProfile(p_game),
-                                      ostream, 1000000.0, 1.0);
+  auto result =
+      tracer.TraceAgentPath(LogitQREMixedBehaviorProfile(p_game), ostream, 1000000.0, 1.0);
   auto ret = List<MixedBehaviorProfile<double>>();
   ret.push_back(result[1].GetProfile());
   return ret;
 }
 
-}  // end namespace Gambit
+} // end namespace Gambit
 
-#endif  // EFGLOGIT_H
+#endif // EFGLOGIT_H

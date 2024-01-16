@@ -26,7 +26,6 @@
 
 using namespace Gambit;
 
-
 template <class T> class NashLpBehavSolver<T>::GameData {
 public:
   int ns1, ns2, ni1, ni2;
@@ -35,24 +34,21 @@ public:
 
   explicit GameData(const Game &);
 
-  void FillTableau(Matrix<T> &A, const GameNode &n, const T &prob,
-                   int s1, int s2);
+  void FillTableau(Matrix<T> &A, const GameNode &n, const T &prob, int s1, int s2);
 
-  void GetBehavior(MixedBehaviorProfile<T> &v,
-                   const Array<T> &, const Array<T> &,
+  void GetBehavior(MixedBehaviorProfile<T> &v, const Array<T> &, const Array<T> &,
                    const GameNode &, int, int);
 };
 
-template <class T>
-NashLpBehavSolver<T>::GameData::GameData(const Game &p_game)
+template <class T> NashLpBehavSolver<T>::GameData::GameData(const Game &p_game)
 {
   ns1 = p_game->GetPlayer(1)->NumSequences();
   ns2 = p_game->GetPlayer(2)->NumSequences();
-  ni1 = p_game->GetPlayer(1)->NumInfosets()+1;
-  ni2 = p_game->GetPlayer(2)->NumInfosets()+1;
-  for (const auto& player : p_game->GetPlayers()) {
+  ni1 = p_game->GetPlayer(1)->NumInfosets() + 1;
+  ni2 = p_game->GetPlayer(2)->NumInfosets() + 1;
+  for (const auto &player : p_game->GetPlayers()) {
     int offset = 1;
-    for (const auto& infoset : player->GetInfosets()) {
+    for (const auto &infoset : player->GetInfosets()) {
       infosetOffset[infoset] = offset;
       offset += infoset->NumActions();
     }
@@ -63,11 +59,9 @@ NashLpBehavSolver<T>::GameData::GameData(const Game &p_game)
 //
 // Recursively fills the constraint matrix A for the subtree rooted at 'n'.
 //
-template <class T> void
-NashLpBehavSolver<T>::GameData::FillTableau(Matrix<T> &A,
-                                            const GameNode &n,
-                                            const T &prob,
-                                            int s1, int s2)
+template <class T>
+void NashLpBehavSolver<T>::GameData::FillTableau(Matrix<T> &A, const GameNode &n, const T &prob,
+                                                 int s1, int s2)
 {
   GameOutcome outcome = n->GetOutcome();
   if (outcome) {
@@ -78,9 +72,8 @@ NashLpBehavSolver<T>::GameData::FillTableau(Matrix<T> &A,
   }
   GameInfoset infoset = n->GetInfoset();
   if (n->GetPlayer()->IsChance()) {
-    for (const auto& action : infoset->GetActions()) {
-      FillTableau(A, n->GetChild(action),
-                  prob * static_cast<T>(infoset->GetActionProb(action)),
+    for (const auto &action : infoset->GetActions()) {
+      FillTableau(A, n->GetChild(action), prob * static_cast<T>(infoset->GetActionProb(action)),
                   s1, s2);
     }
   }
@@ -88,7 +81,7 @@ NashLpBehavSolver<T>::GameData::FillTableau(Matrix<T> &A,
     int col = ns2 + infoset->GetNumber() + 1;
     int snew = infosetOffset.at(infoset);
     A(s1, col) = static_cast<T>(1);
-    for (const auto& child : n->GetChildren()) {
+    for (const auto &child : n->GetChildren()) {
       A(++snew, col) = static_cast<T>(-1);
       FillTableau(A, child, prob, snew, s2);
     }
@@ -97,13 +90,12 @@ NashLpBehavSolver<T>::GameData::FillTableau(Matrix<T> &A,
     int row = ns1 + infoset->GetNumber() + 1;
     int snew = infosetOffset.at(infoset);
     A(row, s2) = static_cast<T>(-1);
-    for (const auto& child : n->GetChildren()) {
+    for (const auto &child : n->GetChildren()) {
       A(row, ++snew) = static_cast<T>(1);
       FillTableau(A, child, prob, s1, snew);
     }
   }
 }
-
 
 //
 // The routine to actually solve the LP
@@ -118,14 +110,12 @@ NashLpBehavSolver<T>::GameData::FillTableau(Matrix<T> &A,
 // To implement your own custom solver for this problem, simply
 // replace this function.
 //
-template <class T> bool
-NashLpBehavSolver<T>::SolveLP(const Matrix<T> &A,
-                              const Vector<T> &b, const Vector<T> &c,
-                              int nequals,
-                              Array<T> &p_primal, Array<T> &p_dual) const
+template <class T>
+bool NashLpBehavSolver<T>::SolveLP(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c,
+                                   int nequals, Array<T> &p_primal, Array<T> &p_dual) const
 {
   linalg::LPSolve<T> LP(A, b, c, nequals);
-  const auto& cbfs(LP.OptimumBFS());
+  const auto &cbfs(LP.OptimumBFS());
 
   for (int i = 1; i <= A.NumColumns(); i++) {
     p_primal[i] = (cbfs.count(i)) ? cbfs[i] : static_cast<T>(0);
@@ -144,47 +134,43 @@ NashLpBehavSolver<T>::SolveLP(const Matrix<T> &A,
 // Any information sets not reached with positive probability have
 // their action probabilities set to zero.
 //
-template<class T>
-void
-NashLpBehavSolver<T>::GameData::GetBehavior(MixedBehaviorProfile<T> &v,
-                                            const Array<T> &p_primal,
-                                            const Array<T> &p_dual,
-                                            const GameNode &n,
-                                            int s1, int s2)
+template <class T>
+void NashLpBehavSolver<T>::GameData::GetBehavior(MixedBehaviorProfile<T> &v,
+                                                 const Array<T> &p_primal, const Array<T> &p_dual,
+                                                 const GameNode &n, int s1, int s2)
 {
   if (n->IsTerminal()) {
     return;
   }
   if (n->GetPlayer()->IsChance()) {
-    for (const auto& child : n->GetChildren()) {
+    for (const auto &child : n->GetChildren()) {
       GetBehavior(v, p_primal, p_dual, child, s1, s2);
     }
   }
   else if (n->GetPlayer()->GetNumber() == 2) {
     int snew = infosetOffset.at(n->GetInfoset());
-    for (const auto& action : n->GetInfoset()->GetActions()) {
+    for (const auto &action : n->GetInfoset()->GetActions()) {
       snew++;
-      v(action) = (p_primal[s1] > (T) 0) ? p_primal[snew] / p_primal[s1] : (T) 0;
+      v(action) = (p_primal[s1] > (T)0) ? p_primal[snew] / p_primal[s1] : (T)0;
       GetBehavior(v, p_primal, p_dual, n->GetChild(action), snew, s2);
     }
   }
   else {
     int snew = infosetOffset.at(n->GetInfoset());
-    for (const auto& action : n->GetInfoset()->GetActions()) {
+    for (const auto &action : n->GetInfoset()->GetActions()) {
       snew++;
-      v(action) = (p_dual[s2] > (T) 0) ? p_dual[snew] / p_dual[s2] : (T) 0;
+      v(action) = (p_dual[s2] > (T)0) ? p_dual[snew] / p_dual[s2] : (T)0;
       GetBehavior(v, p_primal, p_dual, n->GetChild(action), s1, snew);
     }
   }
 }
 
-
 //
 // Compute and print one equilibrium by solving a linear program based
 // on the sequence form representation of the game.
 //
-template <class T> List<MixedBehaviorProfile<T> >
-NashLpBehavSolver<T>::Solve(const Game &p_game) const
+template <class T>
+List<MixedBehaviorProfile<T>> NashLpBehavSolver<T>::Solve(const Game &p_game) const
 {
   if (p_game->NumPlayers() != 2) {
     throw UndefinedException("Method only valid for two-player games.");
@@ -193,7 +179,8 @@ NashLpBehavSolver<T>::Solve(const Game &p_game) const
     throw UndefinedException("Method only valid for constant-sum games.");
   }
   if (!p_game->IsPerfectRecall()) {
-    throw UndefinedException("Computing equilibria of games with imperfect recall is not supported.");
+    throw UndefinedException(
+        "Computing equilibria of games with imperfect recall is not supported.");
   }
 
   Gambit::linalg::BFS<T> cbfs;
@@ -204,19 +191,19 @@ NashLpBehavSolver<T>::Solve(const Game &p_game) const
   Vector<T> b(1, data.ns1 + data.ni2);
   Vector<T> c(1, data.ns2 + data.ni1);
 
-  A = (T) 0;
-  b = (T) 0;
-  c = (T) 0;
+  A = (T)0;
+  b = (T)0;
+  c = (T)0;
 
-  data.FillTableau(A, p_game->GetRoot(), (T) 1, 1, 1);
-  A(1, data.ns2 + 1) = (T) -1;
-  A(data.ns1 + 1, 1) = (T) 1;
+  data.FillTableau(A, p_game->GetRoot(), (T)1, 1, 1);
+  A(1, data.ns2 + 1) = (T)-1;
+  A(data.ns1 + 1, 1) = (T)1;
 
-  b[data.ns1 + 1] = (T) 1;
-  c[data.ns2 + 1] = (T) -1;
+  b[data.ns1 + 1] = (T)1;
+  c[data.ns2 + 1] = (T)-1;
 
   Array<T> primal(A.NumColumns()), dual(A.NumRows());
-  List<MixedBehaviorProfile<T> > solution;
+  List<MixedBehaviorProfile<T>> solution;
   if (SolveLP(A, b, c, data.ni2, primal, dual)) {
     MixedBehaviorProfile<T> profile(p_game);
     data.GetBehavior(profile, primal, dual, p_game->GetRoot(), 1, 1);

@@ -29,8 +29,7 @@ using namespace Gambit::gametracer;
 namespace Gambit {
 namespace Nash {
 
-List<MixedStrategyProfile<double> >
-NashIPAStrategySolver::Solve(const Game &p_game) const
+List<MixedStrategyProfile<double>> NashIPAStrategySolver::Solve(const Game &p_game) const
 {
   Array<double> pert(p_game->MixedProfileLength());
   for (int i = 1; i <= pert.Length(); i++) {
@@ -39,16 +38,16 @@ NashIPAStrategySolver::Solve(const Game &p_game) const
   return Solve(p_game, pert);
 }
 
-List<MixedStrategyProfile<double> >
-NashIPAStrategySolver::Solve(const Game &p_game,
-			     const Array<double> &p_pert) const
+List<MixedStrategyProfile<double>> NashIPAStrategySolver::Solve(const Game &p_game,
+                                                                const Array<double> &p_pert) const
 {
   if (!p_game->IsPerfectRecall()) {
-    throw UndefinedException("Computing equilibria of games with imperfect recall is not supported.");
+    throw UndefinedException(
+        "Computing equilibria of games with imperfect recall is not supported.");
   }
 
   std::shared_ptr<gnmgame> A;
-  List<MixedStrategyProfile<double> > solutions;
+  List<MixedStrategyProfile<double>> solutions;
 
   if (p_game->IsAgg()) {
     A = std::make_shared<aggame>(dynamic_cast<GameAGGRep &>(*p_game));
@@ -57,7 +56,7 @@ NashIPAStrategySolver::Solve(const Game &p_game,
     std::vector<int> actions(p_game->NumPlayers());
     int veclength = p_game->NumPlayers();
     for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
-      actions[pl-1] = p_game->GetPlayer(pl)->NumStrategies();
+      actions[pl - 1] = p_game->GetPlayer(pl)->NumStrategies();
       veclength *= p_game->GetPlayer(pl)->NumStrategies();
     }
     cvector payoffs(veclength);
@@ -67,11 +66,11 @@ NashIPAStrategySolver::Solve(const Game &p_game,
     std::vector<int> profile(p_game->NumPlayers());
     for (StrategyProfileIterator iter(p_game); !iter.AtEnd(); iter++) {
       for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
-	profile[pl-1] = (*iter)->GetStrategy(pl)->GetNumber() - 1;
+        profile[pl - 1] = (*iter)->GetStrategy(pl)->GetNumber() - 1;
       }
 
       for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
-	A->setPurePayoff(pl-1, profile, (*iter)->GetPayoff(pl));
+        A->setPurePayoff(pl - 1, profile, (*iter)->GetPayoff(pl));
       }
     }
   }
@@ -80,26 +79,26 @@ NashIPAStrategySolver::Solve(const Game &p_game,
   int numEq;
 
   cvector ans(A->getNumActions());
-  cvector zh(A->getNumActions(),1.0);
+  cvector zh(A->getNumActions(), 1.0);
   do {
     const double ALPHA = 0.2;
     const double EQERR = 1e-6;
 
     for (int i = 0; i < A->getNumActions(); i++) {
-      g[i] = p_pert[i+1];
+      g[i] = p_pert[i + 1];
     }
     g /= g.norm(); // normalized
     numEq = IPA(*A, g, zh, ALPHA, EQERR, ans);
-  } while(numEq == 0);
+  } while (numEq == 0);
 
   MixedStrategyProfile<double> eqm = p_game->NewMixedStrategyProfile(0.0);
   for (size_t i = 1; i <= eqm.MixedProfileLength(); i++) {
-    eqm[i] = ans[i-1];
+    eqm[i] = ans[i - 1];
   }
   m_onEquilibrium->Render(eqm);
   solutions.push_back(eqm);
   return solutions;
 }
 
-}  // end namespace Gambit::Nash
-}  // end namespace Gambit
+} // namespace Nash
+} // end namespace Gambit

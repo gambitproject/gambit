@@ -23,7 +23,7 @@
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
-#endif  // WX_PRECOMP
+#endif // WX_PRECOMP
 #include "gambit.h"
 #include "dlinsertmove.h"
 
@@ -31,10 +31,8 @@
 //                   gbtInsertMoveDialog: Member functions
 //=========================================================================
 
-gbtInsertMoveDialog::gbtInsertMoveDialog(wxWindow *p_parent,
-					 gbtGameDocument *p_doc)
-  : wxDialog(p_parent, wxID_ANY, _("Insert Move"), wxDefaultPosition),
-    m_doc(p_doc)
+gbtInsertMoveDialog::gbtInsertMoveDialog(wxWindow *p_parent, gbtGameDocument *p_doc)
+  : wxDialog(p_parent, wxID_ANY, _("Insert Move"), wxDefaultPosition), m_doc(p_doc)
 {
   m_playerItem = new wxChoice(this, wxID_ANY);
   m_playerItem->Append(_("Insert move for the chance player"));
@@ -52,7 +50,7 @@ gbtInsertMoveDialog::gbtInsertMoveDialog(wxWindow *p_parent,
   m_playerItem->Append(_("Insert move for a new player"));
   m_playerItem->SetSelection(1);
   Connect(m_playerItem->GetId(), wxEVT_COMMAND_CHOICE_SELECTED,
-	  wxCommandEventHandler(gbtInsertMoveDialog::OnPlayer));
+          wxCommandEventHandler(gbtInsertMoveDialog::OnPlayer));
 
   m_infosetItem = new wxChoice(this, wxID_ANY);
   m_infosetItem->Append(_("at a new information set"));
@@ -83,18 +81,16 @@ gbtInsertMoveDialog::gbtInsertMoveDialog(wxWindow *p_parent,
   }
   m_infosetItem->SetSelection(0);
   Connect(m_infosetItem->GetId(), wxEVT_COMMAND_CHOICE_SELECTED,
-	  wxCommandEventHandler(gbtInsertMoveDialog::OnInfoset));
+          wxCommandEventHandler(gbtInsertMoveDialog::OnInfoset));
 
   auto *actionSizer = new wxBoxSizer(wxHORIZONTAL);
-  actionSizer->Add(new wxStaticText(this, wxID_STATIC, _("with")),
-		   0, wxALL | wxALIGN_CENTER, 5);
-  m_actions = new wxSpinCtrl(this, wxID_ANY, _T("2"),
-			     wxDefaultPosition, wxDefaultSize,
-			     wxSP_ARROW_KEYS, 1, 10000, 2);
+  actionSizer->Add(new wxStaticText(this, wxID_STATIC, _("with")), 0, wxALL | wxALIGN_CENTER, 5);
+  m_actions = new wxSpinCtrl(this, wxID_ANY, _T("2"), wxDefaultPosition, wxDefaultSize,
+                             wxSP_ARROW_KEYS, 1, 10000, 2);
   m_actions->Enable(m_infosetItem->GetSelection() == 0);
   actionSizer->Add(m_actions, 0, wxALL, 5);
-  actionSizer->Add(new wxStaticText(this, wxID_STATIC, _("actions")),
-		   0, wxALL | wxALIGN_CENTER, 5);
+  actionSizer->Add(new wxStaticText(this, wxID_STATIC, _("actions")), 0, wxALL | wxALIGN_CENTER,
+                   5);
 
   auto *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
   buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
@@ -120,10 +116,12 @@ void gbtInsertMoveDialog::OnPlayer(wxCommandEvent &)
   int playerNumber = m_playerItem->GetSelection();
 
   Gambit::GamePlayer player;
-  if (playerNumber == 0)
+  if (playerNumber == 0) {
     player = m_doc->GetGame()->GetChance();
-  else if (playerNumber <= m_doc->NumPlayers())
+  }
+  else if (playerNumber <= m_doc->NumPlayers()) {
     player = m_doc->GetGame()->GetPlayer(playerNumber);
+  }
 
   m_infosetItem->Clear();
   m_infosetItem->Append(_("at a new information set"));
@@ -170,10 +168,12 @@ void gbtInsertMoveDialog::OnInfoset(wxCommandEvent &)
   if (infosetNumber > 0) {
     int playerNumber = m_playerItem->GetSelection();
     Gambit::GameInfoset infoset;
-    if (playerNumber == 0)
+    if (playerNumber == 0) {
       infoset = m_doc->GetGame()->GetChance()->GetInfoset(infosetNumber);
-    else
+    }
+    else {
       infoset = m_doc->GetGame()->GetPlayer(playerNumber)->GetInfoset(infosetNumber);
+    }
     m_actions->Enable(false);
     m_actions->SetValue(infoset->NumActions());
   }

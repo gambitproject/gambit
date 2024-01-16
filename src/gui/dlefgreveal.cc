@@ -23,40 +23,32 @@
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
-#endif  // WX_PRECOMP
+#endif // WX_PRECOMP
 
 #include "gambit.h"
 #include "dlefgreveal.h"
-
 
 //=========================================================================
 //                  gbtRevealMoveDialog: Member functions
 //=========================================================================
 
-gbtRevealMoveDialog::gbtRevealMoveDialog(wxWindow *p_parent,
-					 gbtGameDocument *p_doc)
-  : wxDialog(p_parent, wxID_ANY, _("Reveal this move to players"),
-	     wxDefaultPosition),
-    m_doc(p_doc)
+gbtRevealMoveDialog::gbtRevealMoveDialog(wxWindow *p_parent, gbtGameDocument *p_doc)
+  : wxDialog(p_parent, wxID_ANY, _("Reveal this move to players"), wxDefaultPosition), m_doc(p_doc)
 {
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
-  auto *playerBox =
-    new wxStaticBoxSizer(wxHORIZONTAL, this,
-			 _("Reveal the move to players"));
+  auto *playerBox = new wxStaticBoxSizer(wxHORIZONTAL, this, _("Reveal the move to players"));
 
   auto *boxSizer = new wxBoxSizer(wxVERTICAL);
 
   for (int pl = 1; pl <= m_doc->NumPlayers(); pl++) {
     Gambit::GamePlayer player = m_doc->GetGame()->GetPlayer(pl);
     if (player->GetLabel().empty()) {
-      m_players.push_back(new wxCheckBox(this, wxID_ANY,
-                                         wxString(player->GetLabel().c_str(),
-                                                  *wxConvCurrent)));
+      m_players.push_back(
+          new wxCheckBox(this, wxID_ANY, wxString(player->GetLabel().c_str(), *wxConvCurrent)));
     }
     else {
-      m_players.push_back(new wxCheckBox(this, wxID_ANY,
-                                         wxString::Format(_T("Player %d"), pl)));
+      m_players.push_back(new wxCheckBox(this, wxID_ANY, wxString::Format(_T("Player %d"), pl)));
     }
     m_players[pl]->SetValue(true);
     m_players[pl]->SetForegroundColour(m_doc->GetStyle().GetPlayerColor(pl));

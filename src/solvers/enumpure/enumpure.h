@@ -34,20 +34,23 @@ namespace Nash {
 ///
 class EnumPureStrategySolver : public StrategySolver<Rational> {
 public:
-  explicit EnumPureStrategySolver(std::shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = nullptr)
-    : StrategySolver<Rational>(p_onEquilibrium) { }
+  explicit EnumPureStrategySolver(
+      std::shared_ptr<StrategyProfileRenderer<Rational>> p_onEquilibrium = nullptr)
+    : StrategySolver<Rational>(p_onEquilibrium)
+  {
+  }
   ~EnumPureStrategySolver() override = default;
 
-  List<MixedStrategyProfile<Rational> > Solve(const Game &p_game) const override;
+  List<MixedStrategyProfile<Rational>> Solve(const Game &p_game) const override;
 };
 
-inline List<MixedStrategyProfile<Rational> >
-EnumPureStrategySolver::Solve(const Game &p_game) const
+inline List<MixedStrategyProfile<Rational>> EnumPureStrategySolver::Solve(const Game &p_game) const
 {
   if (!p_game->IsPerfectRecall()) {
-    throw UndefinedException("Computing equilibria of games with imperfect recall is not supported.");
+    throw UndefinedException(
+        "Computing equilibria of games with imperfect recall is not supported.");
   }
-  List<MixedStrategyProfile<Rational> > solutions;
+  List<MixedStrategyProfile<Rational>> solutions;
   for (StrategyProfileIterator citer(p_game); !citer.AtEnd(); citer++) {
     if ((*citer)->IsNash()) {
       MixedStrategyProfile<Rational> profile = (*citer)->ToMixedStrategyProfile();
@@ -58,7 +61,7 @@ EnumPureStrategySolver::Solve(const Game &p_game) const
   return solutions;
 }
 
-inline List<MixedStrategyProfile<Rational> > EnumPureStrategySolve(const Game &p_game)
+inline List<MixedStrategyProfile<Rational>> EnumPureStrategySolve(const Game &p_game)
 {
   return EnumPureStrategySolver().Solve(p_game);
 }
@@ -72,17 +75,19 @@ inline List<MixedStrategyProfile<Rational> > EnumPureStrategySolve(const Game &p
 ///
 class EnumPureAgentSolver : public BehavSolver<Rational> {
 public:
-  explicit EnumPureAgentSolver(std::shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = nullptr)
-    : BehavSolver<Rational>(p_onEquilibrium) { }
+  explicit EnumPureAgentSolver(
+      std::shared_ptr<StrategyProfileRenderer<Rational>> p_onEquilibrium = nullptr)
+    : BehavSolver<Rational>(p_onEquilibrium)
+  {
+  }
   ~EnumPureAgentSolver() override = default;
 
-  List<MixedBehaviorProfile<Rational> > Solve(const Game &) const override;
+  List<MixedBehaviorProfile<Rational>> Solve(const Game &) const override;
 };
 
-inline List<MixedBehaviorProfile<Rational> >
-EnumPureAgentSolver::Solve(const Game &p_game) const
+inline List<MixedBehaviorProfile<Rational>> EnumPureAgentSolver::Solve(const Game &p_game) const
 {
-  List<MixedBehaviorProfile<Rational> > solutions;
+  List<MixedBehaviorProfile<Rational>> solutions;
   BehaviorSupportProfile support(p_game);
   for (BehaviorProfileIterator citer(p_game); !citer.AtEnd(); citer++) {
     if ((*citer).IsAgentNash()) {
@@ -94,12 +99,12 @@ EnumPureAgentSolver::Solve(const Game &p_game) const
   return solutions;
 }
 
-inline List<MixedBehaviorProfile<Rational> > EnumPureAgentSolve(const Game &p_game)
+inline List<MixedBehaviorProfile<Rational>> EnumPureAgentSolve(const Game &p_game)
 {
   return EnumPureAgentSolver().Solve(p_game);
 }
 
-}  // end namespace Nash
-}  // end namespace Gambit
+} // end namespace Nash
+} // end namespace Gambit
 
-#endif  // GAMBIT_NASH_ENUMPURE_H
+#endif // GAMBIT_NASH_ENUMPURE_H

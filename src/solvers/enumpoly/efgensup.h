@@ -22,7 +22,6 @@
 
 #include "gambit.h"
 
-
 class ActionCursorForSupport;
 
 // We build a series of functions of increasing complexity.  The
@@ -30,12 +29,11 @@ class ActionCursorForSupport;
 // We begin by simply enumerating all subsupports.
 
 void AllSubsupportsRECURSIVE(const Gambit::BehaviorSupportProfile &s,
-			     Gambit::BehaviorSupportProfile *sact,
-			     ActionCursorForSupport *c,
-			     Gambit::List<Gambit::BehaviorSupportProfile> &list);
+                             Gambit::BehaviorSupportProfile *sact, ActionCursorForSupport *c,
+                             Gambit::List<Gambit::BehaviorSupportProfile> &list);
 
-Gambit::List<Gambit::BehaviorSupportProfile> AllSubsupports(const Gambit::BehaviorSupportProfile &S);
-
+Gambit::List<Gambit::BehaviorSupportProfile>
+AllSubsupports(const Gambit::BehaviorSupportProfile &S);
 
 // Subsupports of a given support are _path equivalent_ if they
 // agree on every infoset that can be reached under either, hence both,
@@ -44,11 +42,12 @@ Gambit::List<Gambit::BehaviorSupportProfile> AllSubsupports(const Gambit::Behavi
 // actions at each unreached infoset.
 
 void AllInequivalentSubsupportsRECURSIVE(const Gambit::BehaviorSupportProfile &s,
-					 Gambit::BehaviorSupportProfile *sact,
-					 ActionCursorForSupport *c,
-					 Gambit::List<Gambit::BehaviorSupportProfile> &list);
+                                         Gambit::BehaviorSupportProfile *sact,
+                                         ActionCursorForSupport *c,
+                                         Gambit::List<Gambit::BehaviorSupportProfile> &list);
 
-Gambit::List<Gambit::BehaviorSupportProfile> AllInequivalentSubsupports(const Gambit::BehaviorSupportProfile &S);
+Gambit::List<Gambit::BehaviorSupportProfile>
+AllInequivalentSubsupports(const Gambit::BehaviorSupportProfile &S);
 
 // The following routines combine to return all supports that do not
 // exhibit particular type of domination.  This was a prototype for
@@ -60,13 +59,12 @@ Gambit::List<Gambit::BehaviorSupportProfile> AllInequivalentSubsupports(const Ga
 // dominated, and thus part of an allowed subsupport.
 
 void AllUndominatedSubsupportsRECURSIVE(const Gambit::BehaviorSupportProfile &s,
-					Gambit::BehaviorSupportProfile *sact,
-					ActionCursorForSupport *c,
-					bool strong, bool conditional,
-					Gambit::List<Gambit::BehaviorSupportProfile> &list);
+                                        Gambit::BehaviorSupportProfile *sact,
+                                        ActionCursorForSupport *c, bool strong, bool conditional,
+                                        Gambit::List<Gambit::BehaviorSupportProfile> &list);
 
-Gambit::List<Gambit::BehaviorSupportProfile> AllUndominatedSubsupports(const Gambit::BehaviorSupportProfile &S,
-					       bool strong, bool conditional);
+Gambit::List<Gambit::BehaviorSupportProfile>
+AllUndominatedSubsupports(const Gambit::BehaviorSupportProfile &S, bool strong, bool conditional);
 
 // The following two routines combine to produce all subsupports that could
 // host the path of a behavioral Nash equilibrium.  These are subsupports
@@ -80,33 +78,35 @@ Gambit::List<Gambit::BehaviorSupportProfile> AllUndominatedSubsupports(const Gam
 // infosets.
 
 void PossibleNashSubsupportsRECURSIVE(const Gambit::BehaviorSupportProfile &s,
-				      Gambit::BehaviorSupportProfile *sact,
-				      ActionCursorForSupport *c,
-				      Gambit::List<Gambit::BehaviorSupportProfile> &list);
+                                      Gambit::BehaviorSupportProfile *sact,
+                                      ActionCursorForSupport *c,
+                                      Gambit::List<Gambit::BehaviorSupportProfile> &list);
 
-Gambit::List<Gambit::BehaviorSupportProfile> SortSupportsBySize(Gambit::List<Gambit::BehaviorSupportProfile> &);
+Gambit::List<Gambit::BehaviorSupportProfile>
+SortSupportsBySize(Gambit::List<Gambit::BehaviorSupportProfile> &);
 
-Gambit::List<Gambit::BehaviorSupportProfile> PossibleNashSubsupports(const Gambit::BehaviorSupportProfile &S);
+Gambit::List<Gambit::BehaviorSupportProfile>
+PossibleNashSubsupports(const Gambit::BehaviorSupportProfile &S);
 
 ///////////////// Utility Cursor Class /////////////////////
 
 class ActionCursorForSupport {
 protected:
   Gambit::BehaviorSupportProfile support;
-        int pl;
-        int iset;
-        int act;
+  int pl;
+  int iset;
+  int act;
 
 public:
-  //Constructors and dtor
+  // Constructors and dtor
   explicit ActionCursorForSupport(const Gambit::BehaviorSupportProfile &S);
   ActionCursorForSupport(const ActionCursorForSupport &a);
   ~ActionCursorForSupport();
 
   // Operators
-  ActionCursorForSupport &operator =(const ActionCursorForSupport &);
-  bool                    operator==(const ActionCursorForSupport &) const;
-  bool                    operator!=(const ActionCursorForSupport &) const;
+  ActionCursorForSupport &operator=(const ActionCursorForSupport &);
+  bool operator==(const ActionCursorForSupport &) const;
+  bool operator!=(const ActionCursorForSupport &) const;
 
   // Manipulation
   bool GoToNext();
@@ -123,9 +123,8 @@ public:
   bool IsSubsequentTo(const Gambit::GameAction &) const;
 
   // Special
-  bool InfosetGuaranteedActiveByPriorCommitments(const
-						 Gambit::BehaviorSupportProfile *,
-						 const Gambit::GameInfoset &);
+  bool InfosetGuaranteedActiveByPriorCommitments(const Gambit::BehaviorSupportProfile *,
+                                                 const Gambit::GameInfoset &);
   bool DeletionsViolateActiveCommitments(const Gambit::BehaviorSupportProfile *,
-					 const Gambit::List<Gambit::GameInfoset> *);
+                                         const Gambit::List<Gambit::GameInfoset> *);
 };

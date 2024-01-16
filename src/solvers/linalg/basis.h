@@ -36,9 +36,9 @@ namespace linalg {
 class Basis {
 
 private:
-  Array<int> basis;        // current members of basis (neg for slacks)
-  Array<int> cols;         // location of col in basis (0 if not in basis)
-  Array<int> slacks;       // location of slacks in basis
+  Array<int> basis;  // current members of basis (neg for slacks)
+  Array<int> cols;   // location of col in basis (0 if not in basis)
+  Array<int> slacks; // location of slacks in basis
   Array<bool> colBlocked;
   Array<bool> rowBlocked;
   bool IsBasisIdent;
@@ -52,21 +52,21 @@ public:
   Basis(const Basis &);
   virtual ~Basis();
 
-  Basis& operator=(const Basis&);
+  Basis &operator=(const Basis &);
 
   //------------------------------
   // Public Members
   //------------------------------
 
-  int First() const;         // First basis index
-  int Last() const;          // Last  basis index
-  int MinCol() const;    // First Column label
-  int MaxCol() const;     // Last Column label
+  int First() const;  // First basis index
+  int Last() const;   // Last  basis index
+  int MinCol() const; // First Column label
+  int MaxCol() const; // Last Column label
 
-  bool IsRegColumn( int col ) const;
-  bool IsSlackColumn( int col ) const;
+  bool IsRegColumn(int col) const;
+  bool IsSlackColumn(int col) const;
 
-  //remove outindex, insert label, return outlabel
+  // remove outindex, insert label, return outlabel
   int Pivot(int outindex, int col);
 
   // return true iff label is a Basis member
@@ -89,12 +89,10 @@ public:
   virtual void CheckBasis();
   // returns whether the basis is the identity matrix
   bool IsIdent() const { return IsBasisIdent; }
-
-
 };
 
-}  // end namespace Gambit::linalg
+} // namespace linalg
 
-}  // end namespace Gambit
+} // end namespace Gambit
 
 #endif // BASIS_H

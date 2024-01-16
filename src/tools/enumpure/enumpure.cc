@@ -55,7 +55,6 @@ void PrintHelp(char *progname)
   exit(1);
 }
 
-
 int main(int argc, char *argv[])
 {
   opterr = 0;
@@ -64,15 +63,13 @@ int main(int argc, char *argv[])
 
   int long_opt_index = 0;
   struct option long_options[] = {
-    { "help", 0, nullptr, 'h'   },
-    { "version", 0, nullptr, 'v'  },
-    { nullptr,    0,    nullptr,    0   }
-  };
+      {"help", 0, nullptr, 'h'}, {"version", 0, nullptr, 'v'}, {nullptr, 0, nullptr, 0}};
   int c;
   while ((c = getopt_long(argc, argv, "DvhqASP", long_options, &long_opt_index)) != -1) {
     switch (c) {
     case 'v':
-      PrintBanner(std::cerr); exit(1);
+      PrintBanner(std::cerr);
+      exit(1);
     case 'D':
       printDetail = true;
       break;
@@ -93,10 +90,10 @@ int main(int argc, char *argv[])
       break;
     case '?':
       if (isprint(optopt)) {
-	std::cerr << argv[0] << ": Unknown option `-" << ((char) optopt) << "'.\n";
+        std::cerr << argv[0] << ": Unknown option `-" << ((char)optopt) << "'.\n";
       }
       else {
-	std::cerr << argv[0] << ": Unknown option character `\\x" << optopt << "`.\n";
+        std::cerr << argv[0] << ": Unknown option character `\\x" << optopt << "`.\n";
       }
       return 1;
     default:
@@ -108,7 +105,7 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  std::istream* input_stream = &std::cin;
+  std::istream *input_stream = &std::cin;
   std::ifstream file_stream;
   if (optind < argc) {
     file_stream.open(argv[optind]);
@@ -123,7 +120,7 @@ int main(int argc, char *argv[])
 
   try {
     Game game = ReadGame(*input_stream);
-    std::shared_ptr<StrategyProfileRenderer<Rational> > renderer;
+    std::shared_ptr<StrategyProfileRenderer<Rational>> renderer;
     if (reportStrategic || !game->IsTree()) {
       if (printDetail) {
         renderer = std::make_shared<MixedStrategyDetailRenderer<Rational>>(std::cout);
@@ -143,12 +140,12 @@ int main(int argc, char *argv[])
 
     if (game->IsTree()) {
       if (bySubgames) {
-        std::shared_ptr<BehavSolver<Rational> > stage;
+        std::shared_ptr<BehavSolver<Rational>> stage;
         if (solveAgent) {
           stage = std::make_shared<EnumPureAgentSolver>();
         }
         else {
-          std::shared_ptr<StrategySolver<Rational> > substage(new EnumPureStrategySolver());
+          std::shared_ptr<StrategySolver<Rational>> substage(new EnumPureStrategySolver());
           stage = std::make_shared<BehavViaStrategySolver<Rational>>(substage);
         }
         SubgameBehavSolver<Rational> algorithm(stage, renderer);

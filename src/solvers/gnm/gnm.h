@@ -31,34 +31,36 @@ namespace Nash {
 
 class NashGNMStrategySolver : public StrategySolver<double> {
 public:
-  explicit NashGNMStrategySolver(std::shared_ptr<StrategyProfileRenderer<double> > p_onEquilibrium = nullptr,
-			bool p_verbose=false)
-    : StrategySolver<double>(p_onEquilibrium),
-      m_verbose(p_verbose)
-  { }
+  explicit NashGNMStrategySolver(
+      std::shared_ptr<StrategyProfileRenderer<double>> p_onEquilibrium = nullptr,
+      bool p_verbose = false)
+    : StrategySolver<double>(p_onEquilibrium), m_verbose(p_verbose)
+  {
+  }
   ~NashGNMStrategySolver() override = default;
 
-  List<MixedStrategyProfile<double> > Solve(const Game &p_game) const override;
-  List<MixedStrategyProfile<double> > Solve(const Game &p_game,
-					    const MixedStrategyProfile<double> &p_pert) const;
+  List<MixedStrategyProfile<double>> Solve(const Game &p_game) const override;
+  List<MixedStrategyProfile<double>> Solve(const Game &p_game,
+                                           const MixedStrategyProfile<double> &p_pert) const;
 
 private:
   bool m_verbose;
 
-  List<MixedStrategyProfile<double> > Solve(const Game &p_game,
-					    const std::shared_ptr<gametracer::gnmgame> &A,
-					    const gametracer::cvector &p_pert) const;
+  List<MixedStrategyProfile<double>> Solve(const Game &p_game,
+                                           const std::shared_ptr<gametracer::gnmgame> &A,
+                                           const gametracer::cvector &p_pert) const;
   std::shared_ptr<gametracer::gnmgame> BuildRepresentation(const Game &p_game) const;
 
   static MixedStrategyProfile<double> ToProfile(const Game &p_game,
-						const gametracer::cvector &p_pert);
+                                                const gametracer::cvector &p_pert);
 };
 
-inline List<MixedStrategyProfile<double> > GNMStrategySolve(const Game &p_game) {
+inline List<MixedStrategyProfile<double>> GNMStrategySolve(const Game &p_game)
+{
   return NashGNMStrategySolver().Solve(p_game);
 }
 
-}  // end namespace Gambit::Nash
-}  // end namespace Gambit
+} // namespace Nash
+} // end namespace Gambit
 
-#endif  // GAMBIT_NASH_GNM_H
+#endif // GAMBIT_NASH_GNM_H

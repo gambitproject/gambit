@@ -46,8 +46,8 @@ template <class T> class LPSolve {
 private:
   bool well_formed, feasible, bounded;
   int flag, nvars, neqns, nequals;
-  T total_cost,eps1,eps2,eps3,tmin;
-  BFS<T> opt_bfs,dual_bfs;
+  T total_cost, eps1, eps2, eps3, tmin;
+  BFS<T> opt_bfs, dual_bfs;
   LPTableau<T> tab;
   Array<bool> *UB, *LB;
   Array<T> *ub, *lb;
@@ -62,23 +62,23 @@ private:
 
 public:
   LPSolve(const Matrix<T> &A, const Vector<T> &B, const Vector<T> &C,
-	  int nequals);   // nequals = number of equalities (last nequals rows)
+          int nequals); // nequals = number of equalities (last nequals rows)
   ~LPSolve();
 
   T OptimumCost() const { return total_cost; }
   const Vector<T> &OptimumVector() const { return (*xx); }
-  const List< BFS<T> > &GetAll();
+  const List<BFS<T>> &GetAll();
   const LPTableau<T> &GetTableau() const { return tab; }
   const BFS<T> &OptimumBFS() const { return opt_bfs; }
 
   bool IsWellFormed() const { return well_formed; }
   bool IsFeasible() const { return feasible; }
-  bool IsBounded() const  { return bounded; }
+  bool IsBounded() const { return bounded; }
   long NumPivots() const { return tab.NumPivots(); }
 };
 
-}  // end namespace Gambit::linalg
+} // namespace linalg
 
-}  // end namespace Gambit
+} // end namespace Gambit
 
-#endif   // LPSOLVE_H
+#endif // LPSOLVE_H

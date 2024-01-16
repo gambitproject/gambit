@@ -29,6 +29,6 @@ namespace linalg {
 template class LemkeTableau<double>;
 template class LemkeTableau<Rational>;
 
-}  // end namespace Gambit::linalg
+} // namespace linalg
 
-}  // end namespace Gambit
+} // end namespace Gambit

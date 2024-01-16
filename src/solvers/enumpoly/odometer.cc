@@ -23,7 +23,6 @@
 #include <cstdlib>
 #include "odometer.h"
 
-
 //---------------------------------------------------------------
 //                      gIndexOdometer
 //---------------------------------------------------------------
@@ -33,48 +32,54 @@
 //---------------------------
 
 gIndexOdometer::gIndexOdometer(const Gambit::Array<int> &IndexUpperBounds)
-: MinIndices(IndexUpperBounds.Length()),
-  MaxIndices(IndexUpperBounds),
-  CurIndices(IndexUpperBounds.Length())
+  : MinIndices(IndexUpperBounds.Length()), MaxIndices(IndexUpperBounds),
+    CurIndices(IndexUpperBounds.Length())
 {
   int i;
-  for (i = 1; i <= NoIndices(); i++) MinIndices[i] = 1;
+  for (i = 1; i <= NoIndices(); i++) {
+    MinIndices[i] = 1;
+  }
   CurIndices[1] = 0;
-  for (i = 2; i <= NoIndices(); i++) CurIndices[i] = 1;
+  for (i = 2; i <= NoIndices(); i++) {
+    CurIndices[i] = 1;
+  }
 }
 
 gIndexOdometer::gIndexOdometer(const Gambit::Array<int> &IndexLowerBounds,
                                const Gambit::Array<int> &IndexUpperBounds)
-: MinIndices(IndexLowerBounds),
-  MaxIndices(IndexUpperBounds),
-  CurIndices(IndexUpperBounds.Length())
+  : MinIndices(IndexLowerBounds), MaxIndices(IndexUpperBounds),
+    CurIndices(IndexUpperBounds.Length())
 {
   CurIndices[1] = MinIndices[1] - 1;
-  for (int i = 2; i <= NoIndices(); i++) CurIndices[i] = MinIndices[i];
+  for (int i = 2; i <= NoIndices(); i++) {
+    CurIndices[i] = MinIndices[i];
+  }
 }
 
 //----------------------------------
 //            Manipulate
 //----------------------------------
 
-void gIndexOdometer::SetIndex(const int& place, const int& newind)
-{
-  CurIndices[place] = newind;
-}
+void gIndexOdometer::SetIndex(const int &place, const int &newind) { CurIndices[place] = newind; }
 
 bool gIndexOdometer::Turn()
 {
-  if (CurIndices[1] == MinIndices[1]-1) {
+  if (CurIndices[1] == MinIndices[1] - 1) {
     CurIndices[1] = MinIndices[1];
     return true;
   }
 
   int turn_index = 1;
-  while (            turn_index <=  NoIndices() &&
-         CurIndices[turn_index] == MaxIndices[turn_index]) turn_index++;
-  if (turn_index > NoIndices()) return false;
+  while (turn_index <= NoIndices() && CurIndices[turn_index] == MaxIndices[turn_index]) {
+    turn_index++;
+  }
+  if (turn_index > NoIndices()) {
+    return false;
+  }
 
-  for (int j = 1; j < turn_index; j++) CurIndices[j] = MinIndices[j];
+  for (int j = 1; j < turn_index; j++) {
+    CurIndices[j] = MinIndices[j];
+  }
   CurIndices[turn_index]++;
   return true;
 }
@@ -83,10 +88,7 @@ bool gIndexOdometer::Turn()
 //           Information
 //----------------------------------
 
-int gIndexOdometer::NoIndices() const
-{
-  return MaxIndices.Length();
-}
+int gIndexOdometer::NoIndices() const { return MaxIndices.Length(); }
 
 int gIndexOdometer::LinearIndex() const
 {
@@ -94,33 +96,36 @@ int gIndexOdometer::LinearIndex() const
   int factor = 1;
 
   for (int i = 2; i <= NoIndices(); i++) {
-    factor *= MaxIndices[i-1] - MinIndices[i-1] + 1;
+    factor *= MaxIndices[i - 1] - MinIndices[i - 1] + 1;
     index += factor * (CurIndices[i] - 1);
   }
 
   return index;
 }
 
-Gambit::Array<int> gIndexOdometer::CurrentIndices() const
-{
-  return CurIndices;
-}
+Gambit::Array<int> gIndexOdometer::CurrentIndices() const { return CurIndices; }
 
-gIndexOdometer gIndexOdometer::AfterExcisionOf(int& to_be_zapped) const
+gIndexOdometer gIndexOdometer::AfterExcisionOf(int &to_be_zapped) const
 {
   Gambit::Array<int> NewMins, NewMaxs;
   int i;
-  for (i = 1;              i < to_be_zapped; i++)
-    { NewMins.push_back(MinIndices[i]); NewMaxs.push_back(MaxIndices[i]); }
-  for (i = to_be_zapped+1; i <= NoIndices(); i++)
-    { NewMins.push_back(MinIndices[i]); NewMaxs.push_back(MaxIndices[i]); }
+  for (i = 1; i < to_be_zapped; i++) {
+    NewMins.push_back(MinIndices[i]);
+    NewMaxs.push_back(MaxIndices[i]);
+  }
+  for (i = to_be_zapped + 1; i <= NoIndices(); i++) {
+    NewMins.push_back(MinIndices[i]);
+    NewMaxs.push_back(MaxIndices[i]);
+  }
 
-  gIndexOdometer NewOdo(NewMins,NewMaxs);
+  gIndexOdometer NewOdo(NewMins, NewMaxs);
 
-  for (i = 1;              i < to_be_zapped; i++)
-    NewOdo.SetIndex(i  ,CurIndices[i]);
-  for (i = to_be_zapped+1; i <= NoIndices(); i++)
-    NewOdo.SetIndex(i-1,CurIndices[i]);
+  for (i = 1; i < to_be_zapped; i++) {
+    NewOdo.SetIndex(i, CurIndices[i]);
+  }
+  for (i = to_be_zapped + 1; i <= NoIndices(); i++) {
+    NewOdo.SetIndex(i - 1, CurIndices[i]);
+  }
 
   return NewOdo;
 }
@@ -133,37 +138,41 @@ gIndexOdometer gIndexOdometer::AfterExcisionOf(int& to_be_zapped) const
 // Constructors / Destructors
 //---------------------------
 
-gPermutationOdometer::gPermutationOdometer(int given_n)
-: n(given_n), CurIndices(n), CurSign(0)
+gPermutationOdometer::gPermutationOdometer(int given_n) : n(given_n), CurIndices(n), CurSign(0)
 {
-  CurIndices[1] = 0;                   // Codes for virginity - see Turn() below
-  for (int i = 2; i <= n; i++) CurIndices[i] = i;
+  CurIndices[1] = 0; // Codes for virginity - see Turn() below
+  for (int i = 2; i <= n; i++) {
+    CurIndices[i] = i;
+  }
 }
 
 //----------------------------------
 //        Operators
 //----------------------------------
 
-bool gPermutationOdometer::operator==(const gPermutationOdometer & rhs) const
+bool gPermutationOdometer::operator==(const gPermutationOdometer &rhs) const
 {
-  if (n != rhs.n)                           return false;
-  for (int i = 1; i <= n; i++)
-    if (CurIndices[i] != rhs.CurIndices[i]) return false;
+  if (n != rhs.n) {
+    return false;
+  }
+  for (int i = 1; i <= n; i++) {
+    if (CurIndices[i] != rhs.CurIndices[i]) {
+      return false;
+    }
+  }
 
   if (CurSign != rhs.CurSign) {
-    //gout << "Error in gPermutationOdometer\n";
+    // gout << "Error in gPermutationOdometer\n";
     exit(1);
   }
 
   return true;
 }
 
-
-bool gPermutationOdometer::operator!=(const gPermutationOdometer & rhs) const
+bool gPermutationOdometer::operator!=(const gPermutationOdometer &rhs) const
 {
   return !(*this == rhs);
 }
-
 
 //----------------------------------
 //            Manipulate
@@ -177,28 +186,38 @@ bool gPermutationOdometer::Turn()
     return true;
   }
 
-  if (n ==1) return false;
+  if (n == 1) {
+    return false;
+  }
 
-  int cursor1 = n-1;
-  while (cursor1 >= 1 && CurIndices[cursor1] > CurIndices[cursor1 + 1]) cursor1--;
+  int cursor1 = n - 1;
+  while (cursor1 >= 1 && CurIndices[cursor1] > CurIndices[cursor1 + 1]) {
+    cursor1--;
+  }
 
-  if (cursor1 == 0) return false;
+  if (cursor1 == 0) {
+    return false;
+  }
 
   int cursor2 = cursor1 + 1;
-  while (cursor2 < n && CurIndices[cursor2 + 1] > CurIndices[cursor1]) cursor2++;
+  while (cursor2 < n && CurIndices[cursor2 + 1] > CurIndices[cursor1]) {
+    cursor2++;
+  }
 
   int tmp = CurIndices[cursor2];
   CurIndices[cursor2] = CurIndices[cursor1];
   CurIndices[cursor1] = tmp;
   CurSign *= -1;
 
-  cursor1++; cursor2 = n;
+  cursor1++;
+  cursor2 = n;
   while (cursor1 < cursor2) {
     tmp = CurIndices[cursor2];
     CurIndices[cursor2] = CurIndices[cursor1];
     CurIndices[cursor1] = tmp;
     CurSign *= -1;
-    cursor1++; cursor2--;
+    cursor1++;
+    cursor2--;
   }
 
   return true;

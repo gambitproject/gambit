@@ -65,5 +65,4 @@ typedef enum {
   GBT_MENU_TOOLS_QRE = 1802
 } gbtMenuItems;
 
-
 #endif // MENUCONST_H

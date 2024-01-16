@@ -25,7 +25,7 @@
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
-#endif  // WX_PRECOMP
+#endif // WX_PRECOMP
 #include <wx/image.h>
 #include <wx/splash.h>
 
@@ -34,9 +34,7 @@
 #include "app.h"
 #include "gameframe.h"
 
-gbtApplication::gbtApplication()
-  : m_fileHistory(10)
-{ }
+gbtApplication::gbtApplication() : m_fileHistory(10) {}
 
 bool gbtApplication::OnInit()
 {
@@ -47,36 +45,27 @@ bool gbtApplication::OnInit()
   // the "top level" of the config file when using the wxFileConfig
   // implementation (which seems to still be buggy).
   // m_fileHistory.Save(config);
-  wxConfigBase::Get()->Read(_T("/General/CurrentDirectory"), &m_currentDir,
-			    _T(""));
+  wxConfigBase::Get()->Read(_T("/General/CurrentDirectory"), &m_currentDir, _T(""));
 
   wxBitmap bitmap(gambitbig_xpm);
   /*wxSplashScreen *splash =*/
-    new wxSplashScreen(bitmap,
-		       wxSPLASH_CENTRE_ON_SCREEN | wxSPLASH_TIMEOUT,
-		       2000, nullptr, -1, wxDefaultPosition, wxDefaultSize,
-		       wxSIMPLE_BORDER | wxSTAY_ON_TOP);
+  new wxSplashScreen(bitmap, wxSPLASH_CENTRE_ON_SCREEN | wxSPLASH_TIMEOUT, 2000, nullptr, -1,
+                     wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER | wxSTAY_ON_TOP);
   wxYield();
 
   // Process command line arguments, if any.
   for (int i = 1; i < wxApp::argc; i++) {
     gbtAppLoadResult result = LoadFile(wxApp::argv[i]);
     if (result == GBT_APP_OPEN_FAILED) {
-      wxMessageDialog dialog(nullptr,
-			     wxT("Gambit could not open file '") +
-			     wxApp::argv[i] +
-			     wxT("' for reading."),
-			     wxT("Unable to open file"),
-			     wxOK | wxICON_ERROR);
+      wxMessageDialog dialog(
+          nullptr, wxT("Gambit could not open file '") + wxApp::argv[i] + wxT("' for reading."),
+          wxT("Unable to open file"), wxOK | wxICON_ERROR);
       dialog.ShowModal();
     }
     else if (result == GBT_APP_PARSE_FAILED) {
-      wxMessageDialog dialog(nullptr,
-			     wxT("File '") +
-			     wxApp::argv[i] +
-			     wxT("' is not in a format Gambit recognizes."),
-			     wxT("Unable to read file"),
-			     wxOK | wxICON_ERROR);
+      wxMessageDialog dialog(
+          nullptr, wxT("File '") + wxApp::argv[i] + wxT("' is not in a format Gambit recognizes."),
+          wxT("Unable to read file"), wxOK | wxICON_ERROR);
       dialog.ShowModal();
     }
   }
@@ -91,7 +80,7 @@ bool gbtApplication::OnInit()
     efg->SetTitle("Untitled Extensive Game");
 
     auto *game = new gbtGameDocument(efg);
-    (void) new gbtGameFrame(nullptr, game);
+    (void)new gbtGameFrame(nullptr, game);
   }
 
   // Set up the help system.
@@ -102,7 +91,7 @@ bool gbtApplication::OnInit()
 
 gbtAppLoadResult gbtApplication::LoadFile(const wxString &p_filename)
 {
-  std::ifstream infile((const char *) p_filename.mb_str());
+  std::ifstream infile((const char *)p_filename.mb_str());
   if (!infile.good()) {
     return GBT_APP_OPEN_FAILED;
   }
@@ -112,7 +101,7 @@ gbtAppLoadResult gbtApplication::LoadFile(const wxString &p_filename)
     doc->SetFilename(p_filename);
     m_fileHistory.AddFileToHistory(p_filename);
     m_fileHistory.Save(*wxConfigBase::Get());
-    (void) new gbtGameFrame(nullptr, doc);
+    (void)new gbtGameFrame(nullptr, doc);
     return GBT_APP_FILE_OK;
   }
   else {
@@ -126,7 +115,7 @@ gbtAppLoadResult gbtApplication::LoadFile(const wxString &p_filename)
     m_fileHistory.Save(*wxConfigBase::Get());
     doc = new gbtGameDocument(nfg);
     doc->SetFilename(wxT(""));
-    (void) new gbtGameFrame(nullptr, doc);
+    (void)new gbtGameFrame(nullptr, doc);
     return GBT_APP_FILE_OK;
   }
   catch (Gambit::InvalidFileException &) {
@@ -149,6 +138,5 @@ bool gbtApplication::AreDocumentsModified() const
   }
   return false;
 }
-
 
 IMPLEMENT_APP(gbtApplication)

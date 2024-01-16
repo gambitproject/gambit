@@ -40,54 +40,53 @@ private:
   Gambit::List<T> coeflist;
 
 public:
-    // constructors and destructor
-  explicit polynomial(int=-1);
+  // constructors and destructor
+  explicit polynomial(int = -1);
   polynomial(const polynomial<T> &);
   explicit polynomial(const Gambit::List<T> &);
   explicit polynomial(const Gambit::Vector<T> &);
-  polynomial(const T&, const int&);
+  polynomial(const T &, const int &);
   ~polynomial() = default;
 
-    // unary operators
-         polynomial<T>    operator -  () const;
-         polynomial<T>    Derivative  () const;
+  // unary operators
+  polynomial<T> operator-() const;
+  polynomial<T> Derivative() const;
 
-    // binary operators
-         polynomial<T>&     operator =  (const polynomial<T>& y);
-         bool               operator == (const polynomial<T>& y) const;
-         bool               operator != (const polynomial<T>& y) const;
-         const T&           operator [] (int index)        const;
-         polynomial<T>      operator +  (const polynomial<T>& y) const;
-         polynomial<T>      operator -  (const polynomial<T>& y) const;
-         polynomial<T>      operator *  (const polynomial<T>& y) const;
-         polynomial<T>      operator /  (const polynomial<T>& y) const;
-         polynomial<T>&     operator += (const polynomial<T>& y);
-         polynomial<T>&     operator -= (const polynomial<T>& y);
-         polynomial<T>&     operator *= (const polynomial<T>& y);
-         polynomial<T>&     operator /= (const polynomial<T>& y);
-         polynomial<T>      operator %  (const polynomial<T>& y) const;
+  // binary operators
+  polynomial<T> &operator=(const polynomial<T> &y);
+  bool operator==(const polynomial<T> &y) const;
+  bool operator!=(const polynomial<T> &y) const;
+  const T &operator[](int index) const;
+  polynomial<T> operator+(const polynomial<T> &y) const;
+  polynomial<T> operator-(const polynomial<T> &y) const;
+  polynomial<T> operator*(const polynomial<T> &y) const;
+  polynomial<T> operator/(const polynomial<T> &y) const;
+  polynomial<T> &operator+=(const polynomial<T> &y);
+  polynomial<T> &operator-=(const polynomial<T> &y);
+  polynomial<T> &operator*=(const polynomial<T> &y);
+  polynomial<T> &operator/=(const polynomial<T> &y);
+  polynomial<T> operator%(const polynomial<T> &y) const;
 
   // manipulation
-  void                   ToMonic()                                         ;
-//  polynomial<gDouble>    Togdouble()                                  const;
+  void ToMonic();
+  //  polynomial<gDouble>    Togdouble()                                  const;
 
-  polynomial<double>         TogDouble()                       const;
+  polynomial<double> TogDouble() const;
 
   // information
-  bool                   IsZero()                                     const;
-  T                      EvaluationAt(const T& arg)                   const;
-  int                    Degree()                                     const;
-  T                      LeadingCoefficient()                         const;
-  Gambit::List<T> CoefficientList()                            const;
-  polynomial<T>          GcdWith(const polynomial<T>&)                const;
-  bool                   IsQuadratfrei()                              const;
-  bool                   CannotHaveRootsIn(const gInterval<T>&)       const;
-  Gambit::List< gInterval<T> >  RootSubintervals(const gInterval<T>&)        const;
-  gInterval<T>           NeighborhoodOfRoot(const gInterval<T>&, T&)  const;
-  Gambit::List< gInterval<T> >  PreciseRootIntervals(const gInterval<T>&,T&) const;
-  Gambit::List<T>               PreciseRoots(const gInterval<T>&, T&)        const;
+  bool IsZero() const;
+  T EvaluationAt(const T &arg) const;
+  int Degree() const;
+  T LeadingCoefficient() const;
+  Gambit::List<T> CoefficientList() const;
+  polynomial<T> GcdWith(const polynomial<T> &) const;
+  bool IsQuadratfrei() const;
+  bool CannotHaveRootsIn(const gInterval<T> &) const;
+  Gambit::List<gInterval<T>> RootSubintervals(const gInterval<T> &) const;
+  gInterval<T> NeighborhoodOfRoot(const gInterval<T> &, T &) const;
+  Gambit::List<gInterval<T>> PreciseRootIntervals(const gInterval<T> &, T &) const;
+  Gambit::List<T> PreciseRoots(const gInterval<T> &, T &) const;
 };
-
 
 /*                       REMARKS
 
@@ -111,42 +110,41 @@ private:
   Gambit::List<gComplex> coeflist;
 
 public:
-    // constructors and destructor
-  explicit complexpoly(int=-1);
+  // constructors and destructor
+  explicit complexpoly(int = -1);
   complexpoly(const complexpoly &);
   explicit complexpoly(const Gambit::List<gComplex> &);
-  complexpoly(const gComplex&, const int&);
+  complexpoly(const gComplex &, const int &);
   ~complexpoly();
 
-    // unary operators
-  complexpoly   operator -  ()                               const;
-  complexpoly   Derivative  ()                               const;
+  // unary operators
+  complexpoly operator-() const;
+  complexpoly Derivative() const;
 
-    // binary operators
-  complexpoly&  operator =  (const complexpoly& y);
-  bool                    operator == (const complexpoly& y) const;
-  bool                    operator != (const complexpoly& y) const;
-  const gComplex&         operator [] (int index)      const;
-  complexpoly             operator +  (const complexpoly& y) const;
-  complexpoly             operator -  (const complexpoly& y) const;
-  complexpoly             operator *  (const complexpoly& y) const;
-  complexpoly             operator /  (const complexpoly& y) const;
-  complexpoly&            operator += (const complexpoly& y);
-  complexpoly&            operator -= (const complexpoly& y);
-  complexpoly&            operator *= (const complexpoly& y);
-  complexpoly&            operator /= (const complexpoly& y);
-  complexpoly             operator %  (const complexpoly& y) const;
+  // binary operators
+  complexpoly &operator=(const complexpoly &y);
+  bool operator==(const complexpoly &y) const;
+  bool operator!=(const complexpoly &y) const;
+  const gComplex &operator[](int index) const;
+  complexpoly operator+(const complexpoly &y) const;
+  complexpoly operator-(const complexpoly &y) const;
+  complexpoly operator*(const complexpoly &y) const;
+  complexpoly operator/(const complexpoly &y) const;
+  complexpoly &operator+=(const complexpoly &y);
+  complexpoly &operator-=(const complexpoly &y);
+  complexpoly &operator*=(const complexpoly &y);
+  complexpoly &operator/=(const complexpoly &y);
+  complexpoly operator%(const complexpoly &y) const;
 
   // manipulation
-  void                   ToMonic()                                         ;
+  void ToMonic();
 
   // information
-  bool                   IsZero()                                     const;
-  gComplex               EvaluationAt(const gComplex& arg)            const;
-  int                    Degree()                                     const;
-  gComplex               LeadingCoefficient()                         const;
-  complexpoly            GcdWith(const complexpoly&)                  const;
-  bool                   IsQuadratfrei()                              const;
-  Gambit::List<gComplex>        Roots()                                      const;
-
+  bool IsZero() const;
+  gComplex EvaluationAt(const gComplex &arg) const;
+  int Degree() const;
+  gComplex LeadingCoefficient() const;
+  complexpoly GcdWith(const complexpoly &) const;
+  bool IsQuadratfrei() const;
+  Gambit::List<gComplex> Roots() const;
 };

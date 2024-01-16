@@ -49,7 +49,7 @@ using namespace Gambit;
 /// realization probabilities are going to zero, so as to be able to
 /// get a good approximation to the limiting sequential equilibrium.
 ///
-template <class T> class LogBehavProfile : private DVector<T>  {
+template <class T> class LogBehavProfile : private DVector<T> {
 protected:
   BehaviorSupportProfile m_support;
   DVector<T> m_logProbs;
@@ -65,12 +65,13 @@ protected:
   mutable PVector<T> m_infosetValues;
 
   // structures for storing cached data: actions
-  mutable DVector<T> m_actionValues;   // aka conditional payoffs
+  mutable DVector<T> m_actionValues; // aka conditional payoffs
 
   const T &ActionValue(const GameAction &act) const
-    { return m_actionValues(act->GetInfoset()->GetPlayer()->GetNumber(),
-			    act->GetInfoset()->GetNumber(),
-			    act->GetNumber()); }
+  {
+    return m_actionValues(act->GetInfoset()->GetPlayer()->GetNumber(),
+                          act->GetInfoset()->GetNumber(), act->GetNumber());
+  }
 
   /// @name Auxiliary functions for computation of interesting values
   //@{
@@ -89,32 +90,39 @@ public:
 
   LogBehavProfile<T> &operator=(const LogBehavProfile<T> &) = delete;
   LogBehavProfile<T> &operator=(const Vector<T> &p)
-    { Invalidate(); Vector<T>::operator=(p); return *this;}
+  {
+    Invalidate();
+    Vector<T>::operator=(p);
+    return *this;
+  }
   LogBehavProfile<T> &operator=(const T &x)
-    { Invalidate(); DVector<T>::operator=(x); return *this; }
+  {
+    Invalidate();
+    DVector<T>::operator=(x);
+    return *this;
+  }
 
   //@}
 
   /// @name Operator overloading
   //@{
   bool operator==(const LogBehavProfile<T> &) const;
-  bool operator!=(const LogBehavProfile<T> &x) const
-  { return !(*this == x); }
+  bool operator!=(const LogBehavProfile<T> &x) const { return !(*this == x); }
 
   const T &GetProb(const GameAction &p_action) const
-    { return (*this)(p_action->GetInfoset()->GetPlayer()->GetNumber(),
-		     p_action->GetInfoset()->GetNumber(),
-		     m_support.GetIndex(p_action)); }
-  const T &GetLogProb(int a, int b, int c) const
-    { return m_logProbs(a, b, c); }
-  const T &GetProb(int a, int b, int c) const
-    { return DVector<T>::operator()(a, b, c); }
+  {
+    return (*this)(p_action->GetInfoset()->GetPlayer()->GetNumber(),
+                   p_action->GetInfoset()->GetNumber(), m_support.GetIndex(p_action));
+  }
+  const T &GetLogProb(int a, int b, int c) const { return m_logProbs(a, b, c); }
+  const T &GetProb(int a, int b, int c) const { return DVector<T>::operator()(a, b, c); }
 
   void SetLogProb(int a, const T &p_value)
-    { Invalidate();
-      m_logProbs[a] = p_value;
-      Array<T>::operator[](a) = exp(p_value);
-    }
+  {
+    Invalidate();
+    m_logProbs[a] = p_value;
+    Array<T>::operator[](a) = exp(p_value);
+  }
   //@}
 
   /// @name Initialization, validation
@@ -145,10 +153,9 @@ public:
   T GetLogActionProb(const GameAction &) const;
   const T &GetPayoff(const GameAction &act) const;
 
-  T DiffActionValue(const GameAction &action,
-		    const GameAction &oppAction) const;
+  T DiffActionValue(const GameAction &action, const GameAction &oppAction) const;
   T DiffNodeValue(const GameNode &node, const GamePlayer &player,
-		  const GameAction &oppAction) const;
+                  const GameAction &oppAction) const;
 
   //@}
 };

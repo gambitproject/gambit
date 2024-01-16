@@ -33,22 +33,16 @@ private:
   wxSheetCellAttr GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const override;
 
   // Overriding wxSheet members to disable selection behavior
-  bool SelectRow(int, bool = false, bool = false) override
-    { return false; }
-  bool SelectRows(int, int, bool = false, bool = false) override
-    { return false; }
-  bool SelectCol(int, bool = false, bool = false) override
-    { return false; }
-  bool SelectCols(int, int, bool = false, bool = false) override
-    { return false; }
-  bool SelectCell(const wxSheetCoords&, bool = false, bool = false) override
-    { return false; }
-  bool SelectBlock(const wxSheetBlock&, bool = false, bool = false) override
-    { return false; }
+  bool SelectRow(int, bool = false, bool = false) override { return false; }
+  bool SelectRows(int, int, bool = false, bool = false) override { return false; }
+  bool SelectCol(int, bool = false, bool = false) override { return false; }
+  bool SelectCols(int, int, bool = false, bool = false) override { return false; }
+  bool SelectCell(const wxSheetCoords &, bool = false, bool = false) override { return false; }
+  bool SelectBlock(const wxSheetBlock &, bool = false, bool = false) override { return false; }
   bool SelectAll(bool = false) override { return false; }
 
   // Overriding wxSheet member to suppress drawing of cursor
-  void DrawCursorCellHighlight(wxDC&, const wxSheetCellAttr &) override { }
+  void DrawCursorCellHighlight(wxDC &, const wxSheetCellAttr &) override {}
 
   // Event handlers
   void OnLabelClick(wxSheetEvent &);
@@ -62,4 +56,4 @@ public:
   ~gbtBehavProfileList() override;
 };
 
-#endif  // EFGPROFILE_H
+#endif // EFGPROFILE_H

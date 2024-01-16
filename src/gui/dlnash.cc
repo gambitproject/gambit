@@ -25,7 +25,7 @@
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
-#endif  // WX_PRECOMP
+#endif // WX_PRECOMP
 #include <wx/stdpaths.h>
 
 #include "dlnash.h"
@@ -42,62 +42,53 @@ static wxString s_liap(wxT("by minimizing the Lyapunov function"));
 static wxString s_logit(wxT("by tracing logit equilibria"));
 static wxString s_simpdiv(wxT("by simplicial subdivision"));
 
-gbtNashChoiceDialog::gbtNashChoiceDialog(wxWindow *p_parent,
-					 gbtGameDocument *p_doc)
-  : wxDialog(p_parent, wxID_ANY, wxT("Compute Nash equilibria"), wxDefaultPosition),
-    m_doc(p_doc)
+gbtNashChoiceDialog::gbtNashChoiceDialog(wxWindow *p_parent, gbtGameDocument *p_doc)
+  : wxDialog(p_parent, wxID_ANY, wxT("Compute Nash equilibria"), wxDefaultPosition), m_doc(p_doc)
 {
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
   if (m_doc->GetGame()->NumPlayers() == 2) {
-    wxString countChoices[] = { wxT("Compute one Nash equilibrium"),
-				wxT("Compute as many Nash equilibria as possible"),
-				wxT("Compute all Nash equilibria") };
-    m_countChoice = new wxChoice(this, wxID_ANY,
-				 wxDefaultPosition, wxDefaultSize,
-				 3, countChoices);
+    wxString countChoices[] = {wxT("Compute one Nash equilibrium"),
+                               wxT("Compute as many Nash equilibria as possible"),
+                               wxT("Compute all Nash equilibria")};
+    m_countChoice =
+        new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 3, countChoices);
   }
   else {
-    wxString countChoices[] = { wxT("Compute one Nash equilibrium"),
-				wxT("Compute as many Nash equilibria as possible") };
-    m_countChoice = new wxChoice(this, wxID_ANY,
-				 wxDefaultPosition, wxDefaultSize,
-				 2, countChoices);
+    wxString countChoices[] = {wxT("Compute one Nash equilibrium"),
+                               wxT("Compute as many Nash equilibria as possible")};
+    m_countChoice =
+        new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 2, countChoices);
   }
   m_countChoice->SetSelection(0);
 
   Connect(m_countChoice->GetId(), wxEVT_COMMAND_CHOICE_SELECTED,
-	  wxCommandEventHandler(gbtNashChoiceDialog::OnCount));
+          wxCommandEventHandler(gbtNashChoiceDialog::OnCount));
   topSizer->Add(m_countChoice, 0, wxALL | wxEXPAND, 5);
 
   if (p_doc->NumPlayers() == 2 && m_doc->IsConstSum()) {
-    wxString methodChoices[] = { s_recommended, s_lp, s_simpdiv, s_logit };
-    m_methodChoice = new wxChoice(this, wxID_ANY,
-				  wxDefaultPosition, wxDefaultSize,
-				  4, methodChoices);
+    wxString methodChoices[] = {s_recommended, s_lp, s_simpdiv, s_logit};
+    m_methodChoice =
+        new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 4, methodChoices);
   }
   else {
-    wxString methodChoices[] = { s_recommended, s_simpdiv, s_logit };
-    m_methodChoice = new wxChoice(this, wxID_ANY,
-				  wxDefaultPosition, wxDefaultSize,
-				  3, methodChoices);
+    wxString methodChoices[] = {s_recommended, s_simpdiv, s_logit};
+    m_methodChoice =
+        new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 3, methodChoices);
   }
   m_methodChoice->SetSelection(0);
   topSizer->Add(m_methodChoice, 0, wxALL | wxEXPAND, 5);
 
   if (m_doc->IsTree()) {
-    wxString repChoices[] = { wxT("using the extensive game"),
-			      wxT("using the strategic game") };
-    m_repChoice = new wxChoice(this, wxID_ANY,
-			       wxDefaultPosition, wxDefaultSize,
-			       2, repChoices);
+    wxString repChoices[] = {wxT("using the extensive game"), wxT("using the strategic game")};
+    m_repChoice = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 2, repChoices);
     m_repChoice->SetSelection(0);
     topSizer->Add(m_repChoice, 0, wxALL | wxEXPAND, 5);
 
     // We only need to respond to changes in method when we have an
     // extensive game
     Connect(m_methodChoice->GetId(), wxEVT_COMMAND_CHOICE_SELECTED,
-	    wxCommandEventHandler(gbtNashChoiceDialog::OnMethod));
+            wxCommandEventHandler(gbtNashChoiceDialog::OnMethod));
   }
   else {
     m_repChoice = nullptr;
@@ -151,8 +142,7 @@ void gbtNashChoiceDialog::OnMethod(wxCommandEvent &p_event)
 {
   wxString method = m_methodChoice->GetString(p_event.GetSelection());
 
-  if (method == s_simpdiv || method == s_enummixed ||
-      method == s_gnm || method == s_ipa) {
+  if (method == s_simpdiv || method == s_enummixed || method == s_gnm || method == s_ipa) {
     m_repChoice->SetSelection(1);
     m_repChoice->Enable(false);
   }
@@ -163,8 +153,7 @@ void gbtNashChoiceDialog::OnMethod(wxCommandEvent &p_event)
 
 bool gbtNashChoiceDialog::UseStrategic() const
 {
-  return (m_repChoice == nullptr ||
-	  m_repChoice->GetSelection() == 1);
+  return (m_repChoice == nullptr || m_repChoice->GetSelection() == 1);
 }
 
 gbtAnalysisOutput *gbtNashChoiceDialog::GetCommand() const
@@ -183,7 +172,7 @@ gbtAnalysisOutput *gbtNashChoiceDialog::GetCommand() const
   prefix = wxStandardPaths::Get().GetExecutablePath() + wxT("-");
 #else
   prefix = wxT("gambit-");
-#endif  // __WXMAC__
+#endif // __WXMAC__
 
   if (useEfg) {
     game = wxT("in extensive game");
@@ -208,8 +197,7 @@ gbtAnalysisOutput *gbtNashChoiceDialog::GetCommand() const
       if (m_doc->NumPlayers() == 2 && m_doc->IsConstSum()) {
         cmd = new gbtAnalysisProfileList<Rational>(m_doc, useEfg);
         cmd->SetCommand(prefix + wxT("lp") + options);
-        cmd->SetDescription(wxT("One equilibrium by solving a linear program ")
-                            + game);
+        cmd->SetDescription(wxT("One equilibrium by solving a linear program ") + game);
       }
       else {
         cmd = new gbtAnalysisProfileList<double>(m_doc, useEfg);
@@ -221,14 +209,13 @@ gbtAnalysisOutput *gbtNashChoiceDialog::GetCommand() const
       if (m_doc->NumPlayers() == 2) {
         cmd = new gbtAnalysisProfileList<Rational>(m_doc, useEfg);
         cmd->SetCommand(prefix + wxT("lcp") + options);
-        cmd->SetDescription(wxT("Some equilibria by solving a linear ")
-                            wxT("complementarity program ") + game);
+        cmd->SetDescription(
+            wxT("Some equilibria by solving a linear ") wxT("complementarity program ") + game);
       }
       else {
         cmd = new gbtAnalysisProfileList<double>(m_doc, useEfg);
         cmd->SetCommand(prefix + wxT("liap -d 10") + options);
-        cmd->SetDescription(wxT("Some equilibria by function minimization ") +
-                            game);
+        cmd->SetDescription(wxT("Some equilibria by function minimization ") + game);
       }
     }
     else {
@@ -236,13 +223,12 @@ gbtAnalysisOutput *gbtNashChoiceDialog::GetCommand() const
         cmd = new gbtAnalysisProfileList<Rational>(m_doc, false);
         cmd->SetCommand(prefix + wxT("enummixed"));
         cmd->SetDescription(wxT("All equilibria by enumeration of mixed ")
-                            wxT("strategies in strategic game"));
+                                wxT("strategies in strategic game"));
       }
       else {
         cmd = new gbtAnalysisProfileList<double>(m_doc, useEfg);
         cmd->SetCommand(prefix + wxT("enumpoly -d 10") + options);
-        cmd->SetDescription(wxT("All equilibria by solving polynomial ")
-                            wxT("systems ") + game);
+        cmd->SetDescription(wxT("All equilibria by solving polynomial ") wxT("systems ") + game);
       }
     }
   }
@@ -254,29 +240,27 @@ gbtAnalysisOutput *gbtNashChoiceDialog::GetCommand() const
   else if (method == s_enummixed) {
     cmd = new gbtAnalysisProfileList<Rational>(m_doc, false);
     cmd->SetCommand(prefix + wxT("enummixed") + options);
-    cmd->SetDescription(count +
-			wxT(" by enumeration of mixed strategies ")
-			    wxT("in strategic game"));
+    cmd->SetDescription(count + wxT(" by enumeration of mixed strategies ")
+                                    wxT("in strategic game"));
   }
   /*
   else if (method == s_enumpoly) {
     cmd = new gbtAnalysisProfileList<double>(m_doc, useEfg);
     cmd->SetCommand(prefix + wxT("enumpoly -d 10") + options);
     cmd->SetDescription(count + wxT(" by solving polynomial systems ") +
-		       game);
+                       game);
   }
   */
   else if (method == s_gnm) {
     cmd = new gbtAnalysisProfileList<double>(m_doc, false);
     cmd->SetCommand(prefix + wxT("gnm -d 10") + options);
-    cmd->SetDescription(count + wxT(" by global Newton tracing ")
-			wxT("in strategic game"));
+    cmd->SetDescription(count + wxT(" by global Newton tracing ") wxT("in strategic game"));
   }
   else if (method == s_ipa) {
     cmd = new gbtAnalysisProfileList<double>(m_doc, false);
     cmd->SetCommand(prefix + wxT("ipa -d 10") + options);
     cmd->SetDescription(count + wxT(" by iterated polymatrix approximation ")
-			wxT("in strategic game"));
+                                    wxT("in strategic game"));
   }
   else if (method == s_lp) {
     cmd = new gbtAnalysisProfileList<Rational>(m_doc, useEfg);
@@ -286,8 +270,8 @@ gbtAnalysisOutput *gbtNashChoiceDialog::GetCommand() const
   else if (method == s_lcp) {
     cmd = new gbtAnalysisProfileList<Rational>(m_doc, useEfg);
     cmd->SetCommand(prefix + wxT("lcp") + options);
-    cmd->SetDescription(count + wxT(" by solving a linear complementarity ")
-				   wxT("program ") + game);
+    cmd->SetDescription(count + wxT(" by solving a linear complementarity ") wxT("program ") +
+                        game);
   }
   else if (method == s_liap) {
     cmd = new gbtAnalysisProfileList<double>(m_doc, useEfg);
@@ -302,8 +286,7 @@ gbtAnalysisOutput *gbtNashChoiceDialog::GetCommand() const
   else if (method == s_simpdiv) {
     cmd = new gbtAnalysisProfileList<double>(m_doc, false);
     cmd->SetCommand(prefix + wxT("simpdiv") + options);
-    cmd->SetDescription(count + wxT(" by simplicial subdivision ")
-				    wxT("in strategic game"));
+    cmd->SetDescription(count + wxT(" by simplicial subdivision ") wxT("in strategic game"));
   }
   else {
     // Shouldn't happen!

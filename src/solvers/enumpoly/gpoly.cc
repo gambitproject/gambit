@@ -23,16 +23,20 @@
 #include "gpoly.imp"
 #include "gambit.h"
 
-template<> double gPoly<double>::String_Coeff(double nega)
+template <> double gPoly<double>::String_Coeff(double nega)
 {
   std::string Coeff;
-  while ((charc >= '0' && charc <= '9') || charc == '.'){
+  while ((charc >= '0' && charc <= '9') || charc == '.') {
     Coeff += charc;
     charnum++;
     GetChar();
   }
-  if (Coeff.empty()) return nega;
-  else return (nega * strtod(Coeff.c_str(), nullptr));
+  if (Coeff.empty()) {
+    return nega;
+  }
+  else {
+    return (nega * strtod(Coeff.c_str(), nullptr));
+  }
 }
 
 template class gPoly<double>;
@@ -40,7 +44,7 @@ template gPoly<double> operator+(const gPoly<double> &poly, const double &val);
 template gPoly<double> operator*(const double &val, const gPoly<double> &poly);
 template gPoly<double> operator*(const gPoly<double> &poly, const double &val);
 
-template gPoly<double> TogDouble(const gPoly<double>&);
-template gPoly<double> NormalizationOfPoly(const gPoly<double>&);
+template gPoly<double> TogDouble(const gPoly<double> &);
+template gPoly<double> NormalizationOfPoly(const gPoly<double> &);
 
 template std::string &operator<<(std::string &, const gPoly<double> &);

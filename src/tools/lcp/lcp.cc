@@ -61,7 +61,6 @@ void PrintHelp(char *progname)
   exit(1);
 }
 
-
 int main(int argc, char *argv[])
 {
   int c;
@@ -71,14 +70,12 @@ int main(int argc, char *argv[])
 
   int long_opt_index = 0;
   struct option long_options[] = {
-    { "help", 0, nullptr, 'h'   },
-    { "version", 0, nullptr, 'v'  },
-    { nullptr,    0,    nullptr,    0   }
-  };
+      {"help", 0, nullptr, 'h'}, {"version", 0, nullptr, 'v'}, {nullptr, 0, nullptr, 0}};
   while ((c = getopt_long(argc, argv, "d:DvhqSPe:r:", long_options, &long_opt_index)) != -1) {
     switch (c) {
     case 'v':
-      PrintBanner(std::cerr); exit(1);
+      PrintBanner(std::cerr);
+      exit(1);
     case 'd':
       useFloat = true;
       numDecimals = atoi(optarg);
@@ -106,10 +103,10 @@ int main(int argc, char *argv[])
       break;
     case '?':
       if (isprint(optopt)) {
-	std::cerr << argv[0] << ": Unknown option `-" << ((char) optopt) << "'.\n";
+        std::cerr << argv[0] << ": Unknown option `-" << ((char)optopt) << "'.\n";
       }
       else {
-	std::cerr << argv[0] << ": Unknown option character `\\x" << optopt << "`.\n";
+        std::cerr << argv[0] << ": Unknown option character `\\x" << optopt << "`.\n";
       }
       return 1;
     default:
@@ -121,7 +118,7 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  std::istream* input_stream = &std::cin;
+  std::istream *input_stream = &std::cin;
   std::ifstream file_stream;
   if (optind < argc) {
     file_stream.open(argv[optind]);
@@ -138,36 +135,35 @@ int main(int argc, char *argv[])
     Game game = ReadGame(*input_stream);
     if (!game->IsTree() || useStrategic) {
       if (useFloat) {
-        std::shared_ptr<StrategyProfileRenderer<double> > renderer;
+        std::shared_ptr<StrategyProfileRenderer<double>> renderer;
         if (printDetail) {
           renderer = std::make_shared<MixedStrategyDetailRenderer<double>>(std::cout, numDecimals);
         }
         else {
           renderer = std::make_shared<MixedStrategyCSVRenderer<double>>(std::cout, numDecimals);
         }
-        NashLcpStrategySolver<double> algorithm(stopAfter, maxDepth,
-                                                renderer);
+        NashLcpStrategySolver<double> algorithm(stopAfter, maxDepth, renderer);
         algorithm.Solve(game);
       }
       else {
-        std::shared_ptr<StrategyProfileRenderer<Rational> > renderer;
+        std::shared_ptr<StrategyProfileRenderer<Rational>> renderer;
         if (printDetail) {
           renderer = std::make_shared<MixedStrategyDetailRenderer<Rational>>(std::cout);
         }
         else {
           renderer = std::make_shared<MixedStrategyCSVRenderer<Rational>>(std::cout);
         }
-        NashLcpStrategySolver<Rational> algorithm(stopAfter, maxDepth,
-                                                  renderer);
+        NashLcpStrategySolver<Rational> algorithm(stopAfter, maxDepth, renderer);
         algorithm.Solve(game);
       }
     }
     else {
       if (!bySubgames) {
         if (useFloat) {
-          std::shared_ptr<StrategyProfileRenderer<double> > renderer;
+          std::shared_ptr<StrategyProfileRenderer<double>> renderer;
           if (printDetail) {
-            renderer = std::make_shared<BehavStrategyDetailRenderer<double>>(std::cout, numDecimals);
+            renderer =
+                std::make_shared<BehavStrategyDetailRenderer<double>>(std::cout, numDecimals);
           }
           else {
             renderer = std::make_shared<BehavStrategyCSVRenderer<double>>(std::cout, numDecimals);
@@ -176,7 +172,7 @@ int main(int argc, char *argv[])
           algorithm.Solve(game);
         }
         else {
-          std::shared_ptr<StrategyProfileRenderer<Rational> > renderer;
+          std::shared_ptr<StrategyProfileRenderer<Rational>> renderer;
           if (printDetail) {
             renderer = std::make_shared<BehavStrategyDetailRenderer<Rational>>(std::cout);
           }
@@ -189,12 +185,12 @@ int main(int argc, char *argv[])
       }
       else {
         if (useFloat) {
-          std::shared_ptr<BehavSolver<double> > stage(
-            new NashLcpBehaviorSolver<double>(stopAfter, maxDepth)
-          );
-          std::shared_ptr<StrategyProfileRenderer<double> > renderer;
+          std::shared_ptr<BehavSolver<double>> stage(
+              new NashLcpBehaviorSolver<double>(stopAfter, maxDepth));
+          std::shared_ptr<StrategyProfileRenderer<double>> renderer;
           if (printDetail) {
-            renderer = std::make_shared<BehavStrategyDetailRenderer<double>>(std::cout, numDecimals);
+            renderer =
+                std::make_shared<BehavStrategyDetailRenderer<double>>(std::cout, numDecimals);
           }
           else {
             renderer = std::make_shared<BehavStrategyCSVRenderer<double>>(std::cout, numDecimals);
@@ -203,15 +199,16 @@ int main(int argc, char *argv[])
           algorithm.Solve(game);
         }
         else {
-          std::shared_ptr<BehavSolver<Rational> > stage(
-            new NashLcpBehaviorSolver<Rational>(stopAfter, maxDepth)
-          );
-          std::shared_ptr<StrategyProfileRenderer<Rational> > renderer;
+          std::shared_ptr<BehavSolver<Rational>> stage(
+              new NashLcpBehaviorSolver<Rational>(stopAfter, maxDepth));
+          std::shared_ptr<StrategyProfileRenderer<Rational>> renderer;
           if (printDetail) {
-            renderer = std::make_shared<BehavStrategyDetailRenderer<Rational>>(std::cout, numDecimals);
+            renderer =
+                std::make_shared<BehavStrategyDetailRenderer<Rational>>(std::cout, numDecimals);
           }
           else {
-            renderer = std::make_shared<BehavStrategyCSVRenderer<Rational>>(std::cout, numDecimals);
+            renderer =
+                std::make_shared<BehavStrategyCSVRenderer<Rational>>(std::cout, numDecimals);
           }
           SubgameBehavSolver<Rational> algorithm(stage, renderer);
           algorithm.Solve(game);

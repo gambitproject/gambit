@@ -100,8 +100,7 @@ public:
   //!
   //! Returns 'false' if it is known that no further eliminations can be done
   //!
-  bool CanEliminate() const
-    { return (m_current < m_supports.Length() || !m_noFurther); }
+  bool CanEliminate() const { return (m_current < m_supports.Length() || !m_noFurther); }
 };
 
 //!
@@ -177,11 +176,8 @@ public:
   //!
   //! Returns 'false' if it is known that no further eliminations can be done
   //!
-  bool CanEliminate() const
-    { return (m_current < m_supports.Length() || !m_noFurther); }
-
+  bool CanEliminate() const { return (m_current < m_supports.Length() || !m_noFurther); }
 };
-
 
 //
 // These are passed to gbtGameDocument::UpdateViews() to indicate which
@@ -212,16 +208,19 @@ typedef enum {
 } gbtGameModificationType;
 
 class gbtGameDocument {
-friend class gbtGameView;
+  friend class gbtGameView;
+
 private:
   Gambit::Array<gbtGameView *> m_views;
 
-  void AddView(gbtGameView *p_view)  { m_views.push_back(p_view); }
+  void AddView(gbtGameView *p_view) { m_views.push_back(p_view); }
   void RemoveView(gbtGameView *p_view)
-    {
-      m_views.Remove(m_views.Find(p_view));
-      if (m_views.Length() == 0)  delete this;
+  {
+    m_views.Remove(m_views.Find(p_view));
+    if (m_views.Length() == 0) {
+      delete this;
     }
+  }
 
   Gambit::Game m_game;
   wxString m_filename;
@@ -237,7 +236,6 @@ private:
   int m_currentProfileList;
 
   std::list<std::string> m_undoList, m_redoList;
-
 
   void UpdateViews(gbtGameModificationType p_modifications);
 
@@ -271,7 +269,6 @@ public:
   bool IsConstSum() const { return m_game->IsConstSum(); }
   bool IsTree() const { return m_game->IsTree(); }
 
-
   //!
   //! @name Handling of undo/redo features
   //!
@@ -287,17 +284,17 @@ public:
   //! @name Handling of list of computed profiles
   //!
   //@{
-  const gbtAnalysisOutput &GetProfiles() const
-    { return *m_profiles[m_currentProfileList]; }
-  const gbtAnalysisOutput &GetProfiles(int p_index) const
-    { return *m_profiles[p_index]; }
+  const gbtAnalysisOutput &GetProfiles() const { return *m_profiles[m_currentProfileList]; }
+  const gbtAnalysisOutput &GetProfiles(int p_index) const { return *m_profiles[p_index]; }
   void AddProfileList(gbtAnalysisOutput *);
   void SetProfileList(int p_index);
   int NumProfileLists() const { return m_profiles.Length(); }
   int GetCurrentProfileList() const { return m_currentProfileList; }
 
   int GetCurrentProfile() const
-  { return (m_profiles.Length() == 0) ? 0 : GetProfiles().GetCurrent(); }
+  {
+    return (m_profiles.Length() == 0) ? 0 : GetProfiles().GetCurrent();
+  }
   void SetCurrentProfile(int p_profile);
   /*
   void AddProfiles(const Gambit::List<Gambit::MixedBehavProfile<double> > &);
@@ -312,7 +309,9 @@ public:
   //!
   //@{
   const Gambit::BehaviorSupportProfile &GetEfgSupport() const
-    { return m_behavSupports.GetCurrent(); }
+  {
+    return m_behavSupports.GetCurrent();
+  }
   void SetBehavElimStrength(bool p_strict);
   bool NextBehavElimLevel();
   void PreviousBehavElimLevel();
@@ -326,7 +325,9 @@ public:
   //!
   //@{
   const Gambit::StrategySupportProfile &GetNfgSupport() const
-    { return m_stratSupports.GetCurrent(); }
+  {
+    return m_stratSupports.GetCurrent();
+  }
   void SetStrategyElimStrength(bool p_strict);
   bool GetStrategyElimStrength() const;
   bool NextStrategyElimLevel();
@@ -374,8 +375,7 @@ public:
   void DoSetOutcome(GameNode p_node, GameOutcome p_outcome);
   void DoRemoveOutcome(GameNode p_node);
   void DoCopyOutcome(GameNode p_node, GameOutcome p_outcome);
-  void DoSetPayoff(GameOutcome p_outcome, int p_player,
-		   const wxString &p_value);
+  void DoSetPayoff(GameOutcome p_outcome, int p_player, const wxString &p_value);
 
   void DoAddOutput(gbtAnalysisOutput &p_list, const wxString &p_output);
 };
@@ -385,17 +385,15 @@ protected:
   gbtGameDocument *m_doc;
 
 public:
-  explicit gbtGameView(gbtGameDocument *p_doc)
-    : m_doc(p_doc) { m_doc->AddView(this); }
-  virtual ~gbtGameView()
-    { m_doc->RemoveView(this); }
+  explicit gbtGameView(gbtGameDocument *p_doc) : m_doc(p_doc) { m_doc->AddView(this); }
+  virtual ~gbtGameView() { m_doc->RemoveView(this); }
 
   virtual void OnUpdate() = 0;
 
   /// Post any pending changes in the viewer to the document
-  virtual void PostPendingChanges() { }
+  virtual void PostPendingChanges() {}
 
   gbtGameDocument *GetDocument() const { return m_doc; }
 };
 
-#endif  // GAMEDOC_H
+#endif // GAMEDOC_H

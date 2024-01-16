@@ -31,48 +31,47 @@ namespace Gambit {
 class LogitQREMixedStrategyProfile {
   friend class StrategicQREPathTracer;
   friend class StrategicQREEstimator;
+
 public:
   explicit LogitQREMixedStrategyProfile(const Game &p_game)
     : m_profile(p_game->NewMixedStrategyProfile(0.0)), m_lambda(0.0)
-	{ }
+  {
+  }
 
   double GetLambda() const { return m_lambda; }
   const MixedStrategyProfile<double> &GetProfile() const { return m_profile; }
   double GetLogLike() const { return m_logLike; }
 
-  Game GetGame() const           { return m_profile.GetGame(); }
+  Game GetGame() const { return m_profile.GetGame(); }
   int MixedProfileLength() const { return m_profile.MixedProfileLength(); }
-  double operator[](int i) const     { return m_profile[i]; }
+  double operator[](int i) const { return m_profile[i]; }
 
 private:
   // Construct a logit QRE with a given strategy profile and lambda value.
   // Access is restricted to classes in this module, which ensure that
   // objects so constructed are in fact QREs.
-  LogitQREMixedStrategyProfile(const MixedStrategyProfile<double> &p_profile,
-			       double p_lambda, double p_logLike)
+  LogitQREMixedStrategyProfile(const MixedStrategyProfile<double> &p_profile, double p_lambda,
+                               double p_logLike)
     : m_profile(p_profile), m_lambda(p_lambda), m_logLike(p_logLike)
-  { }
+  {
+  }
 
   const MixedStrategyProfile<double> m_profile;
   double m_lambda;
   double m_logLike;
 };
 
-
 class StrategicQREPathTracer : public PathTracer {
 public:
-  StrategicQREPathTracer() : m_fullGraph(true), m_decimals(6)
-    { }
+  StrategicQREPathTracer() : m_fullGraph(true), m_decimals(6) {}
   ~StrategicQREPathTracer() override = default;
 
   List<LogitQREMixedStrategyProfile>
-  TraceStrategicPath(const LogitQREMixedStrategyProfile &p_start,
-		     std::ostream &p_logStream,
-		     double p_maxLambda, double p_omega) const;
+  TraceStrategicPath(const LogitQREMixedStrategyProfile &p_start, std::ostream &p_logStream,
+                     double p_maxLambda, double p_omega) const;
   LogitQREMixedStrategyProfile SolveAtLambda(const LogitQREMixedStrategyProfile &p_start,
-					     std::ostream &p_logStream,
-					     double p_targetLambda,
-					     double p_omega) const;
+                                             std::ostream &p_logStream, double p_targetLambda,
+                                             double p_omega) const;
 
   void SetFullGraph(bool p_fullGraph) { m_fullGraph = p_fullGraph; }
   bool GetFullGraph() const { return m_fullGraph; }
@@ -89,36 +88,33 @@ protected:
   class CallbackFunction;
 };
 
-
 class StrategicQREEstimator : public StrategicQREPathTracer {
 public:
   StrategicQREEstimator() = default;
   ~StrategicQREEstimator() override = default;
 
-  LogitQREMixedStrategyProfile
-  Estimate(const LogitQREMixedStrategyProfile &p_start,
-           const MixedStrategyProfile<double> &p_frequencies,
-	   std::ostream &p_logStream,
-	   double p_maxLambda, double p_omega);
+  LogitQREMixedStrategyProfile Estimate(const LogitQREMixedStrategyProfile &p_start,
+                                        const MixedStrategyProfile<double> &p_frequencies,
+                                        std::ostream &p_logStream, double p_maxLambda,
+                                        double p_omega);
 
 protected:
   class CriterionFunction;
   class CallbackFunction;
 };
 
-inline List<MixedStrategyProfile<double> > LogitStrategySolve(const Game &p_game)
+inline List<MixedStrategyProfile<double>> LogitStrategySolve(const Game &p_game)
 {
   StrategicQREPathTracer tracer;
   tracer.SetFullGraph(false);
   std::ostringstream ostream;
-  auto result = tracer.TraceStrategicPath(LogitQREMixedStrategyProfile(p_game),
-                                          ostream, 1000000.0, 1.0);
+  auto result =
+      tracer.TraceStrategicPath(LogitQREMixedStrategyProfile(p_game), ostream, 1000000.0, 1.0);
   auto ret = List<MixedStrategyProfile<double>>();
   ret.push_back(result[1].GetProfile());
   return ret;
 }
 
-
-}  // end namespace Gambit
+} // end namespace Gambit
 
 #endif // NFGLOGIT_H

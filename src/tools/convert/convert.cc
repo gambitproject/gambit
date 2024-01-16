@@ -55,7 +55,6 @@ void PrintHelp(char *progname)
   exit(1);
 }
 
-
 int main(int argc, char *argv[])
 {
   int c;
@@ -82,10 +81,10 @@ int main(int argc, char *argv[])
       break;
     case '?':
       if (isprint(optopt)) {
-	std::cerr << argv[0] << ": Unknown option `-" << ((char) optopt) << "'.\n";
+        std::cerr << argv[0] << ": Unknown option `-" << ((char)optopt) << "'.\n";
       }
       else {
-	std::cerr << argv[0] << ": Unknown option character `\\x" << optopt << "`.\n";
+        std::cerr << argv[0] << ": Unknown option character `\\x" << optopt << "`.\n";
       }
       return 1;
     default:
@@ -111,7 +110,7 @@ int main(int argc, char *argv[])
     return 1;
   }
 
-  std::istream* input_stream = &std::cin;
+  std::istream *input_stream = &std::cin;
   std::ifstream file_stream;
   if (optind < argc) {
     file_stream.open(argv[optind]);

@@ -40,11 +40,9 @@ using namespace Gambit;
 // To implement your own custom solver for this problem, simply
 // replace this function.
 //
-template <class T> bool
-NashLpStrategySolver<T>::SolveLP(const Matrix<T> &A,
-				 const Vector<T> &b, const Vector<T> &c,
-				 int nequals,
-				 Array<T> &p_primal, Array<T> &p_dual) const
+template <class T>
+bool NashLpStrategySolver<T>::SolveLP(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c,
+                                      int nequals, Array<T> &p_primal, Array<T> &p_dual) const
 {
   Gambit::linalg::LPSolve<T> LP(A, b, c, nequals);
   const Gambit::linalg::BFS<T> &cbfs(LP.OptimumBFS());
@@ -54,7 +52,7 @@ NashLpStrategySolver<T>::SolveLP(const Matrix<T> &A,
       p_primal[i] = cbfs[i];
     }
     else {
-      p_primal[i] = (T) 0;
+      p_primal[i] = (T)0;
     }
   }
 
@@ -63,7 +61,7 @@ NashLpStrategySolver<T>::SolveLP(const Matrix<T> &A,
       p_dual[i] = cbfs[-i];
     }
     else {
-      p_dual[i] = (T) 0;
+      p_dual[i] = (T)0;
     }
   }
   return true;
@@ -73,8 +71,8 @@ NashLpStrategySolver<T>::SolveLP(const Matrix<T> &A,
 // Compute and print one equilibrium by solving a linear program based
 // on the strategic game representation.
 //
-template <class T> List<MixedStrategyProfile<T> >
-NashLpStrategySolver<T>::Solve(const Game &p_game) const
+template <class T>
+List<MixedStrategyProfile<T>> NashLpStrategySolver<T>::Solve(const Game &p_game) const
 {
   if (p_game->NumPlayers() != 2) {
     throw UndefinedException("Method only valid for two-player games.");
@@ -83,40 +81,41 @@ NashLpStrategySolver<T>::Solve(const Game &p_game) const
     throw UndefinedException("Method only valid for constant-sum games.");
   }
   if (!p_game->IsPerfectRecall()) {
-    throw UndefinedException("Computing equilibria of games with imperfect recall is not supported.");
+    throw UndefinedException(
+        "Computing equilibria of games with imperfect recall is not supported.");
   }
 
   int m = p_game->GetPlayer(1)->GetStrategies().size();
   int k = p_game->GetPlayer(2)->GetStrategies().size();
 
-  Matrix<T> A(1,k+1,1,m+1);
-  Vector<T> b(1,k+1);
-  Vector<T> c(1,m+1);
+  Matrix<T> A(1, k + 1, 1, m + 1);
+  Vector<T> b(1, k + 1);
+  Vector<T> c(1, m + 1);
   PureStrategyProfile profile = p_game->NewPureStrategyProfile();
 
   Rational minpay = p_game->GetMinPayoff() - Rational(1);
 
-  for (int i = 1; i <= k; i++)  {
+  for (int i = 1; i <= k; i++) {
     profile->SetStrategy(p_game->GetPlayer(2)->GetStrategies()[i]);
-    for (int j = 1; j <= m; j++)  {
+    for (int j = 1; j <= m; j++) {
       profile->SetStrategy(p_game->GetPlayer(1)->GetStrategies()[j]);
       A(i, j) = minpay - profile->GetPayoff(1);
     }
-    A(i,m+1) = (T) 1;
+    A(i, m + 1) = (T)1;
   }
   for (int j = 1; j <= m; j++) {
-    A(k+1,j) = (T) 1;
+    A(k + 1, j) = (T)1;
   }
-  A(k+1,m+1) = (T) 0;
+  A(k + 1, m + 1) = (T)0;
 
-  b = (T) 0;
-  b[k+1] = (T) 1;
-  c = (T) 0;
-  c[m+1] = (T) 1;
+  b = (T)0;
+  b[k + 1] = (T)1;
+  c = (T)0;
+  c[m + 1] = (T)1;
 
   Array<T> primal(A.NumColumns()), dual(A.NumRows());
   if (!SolveLP(A, b, c, 1, primal, dual)) {
-    return List<MixedStrategyProfile<T> >();
+    return List<MixedStrategyProfile<T>>();
   }
 
   MixedStrategyProfile<T> eqm(p_game->NewMixedStrategyProfile(static_cast<T>(0)));
@@ -127,7 +126,7 @@ NashLpStrategySolver<T>::Solve(const Game &p_game) const
     eqm[p_game->GetPlayer(2)->GetStrategies()[j]] = dual[j];
   }
   this->m_onEquilibrium->Render(eqm);
-  List<MixedStrategyProfile<T> > solution;
+  List<MixedStrategyProfile<T>> solution;
   solution.push_back(eqm);
   return solution;
 }

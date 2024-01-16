@@ -37,49 +37,48 @@ open (bounded) intervals can be effected, but less directly.
 
 template <class T> class gRectangle {
 private:
-    Gambit::List<gInterval<T> > sides;
+  Gambit::List<gInterval<T>> sides;
 
 public:
-    // constructors
-    gRectangle(const gRectangle<T>&);
-    explicit gRectangle(const Gambit::List<gInterval<T> >&);
-    gRectangle(const Gambit::Vector<T> &, const Gambit::Vector<T> &);
-    ~gRectangle();
+  // constructors
+  gRectangle(const gRectangle<T> &);
+  explicit gRectangle(const Gambit::List<gInterval<T>> &);
+  gRectangle(const Gambit::Vector<T> &, const Gambit::Vector<T> &);
+  ~gRectangle();
 
-    // operators
-    gRectangle<T>& operator =  (const gRectangle<T>& y);
-    bool          operator == (const gRectangle<T>& y) const;
-    bool          operator != (const gRectangle<T>& y) const;
+  // operators
+  gRectangle<T> &operator=(const gRectangle<T> &y);
+  bool operator==(const gRectangle<T> &y) const;
+  bool operator!=(const gRectangle<T> &y) const;
 
-    // information
-    const int                Dmnsn()                            const;
-    Gambit::Vector<T>         LowerBound()                       const;
-    Gambit::Vector<T>         UpperBound()                       const;
-    const T                  LowerBoundOfCoord(const int&)      const;
-    const T                  UpperBoundOfCoord(const int&)      const;
-    const T                  HeightInCoord(const int&)          const;
-    const gInterval<T>       CartesianFactor(const int&)        const;
-    const gRectangle<T>      SameCenterDoubleSideLengths()      const;
-    const gRectangle<T>      CubeContainingCrcmscrbngSphere()   const;
-    const gRectangle<T>      Orthant(const Gambit::Array<int>&)        const;
-    const Gambit::Vector<T>         SideLengths()                      const;
-    const T                  MaximalSideLength()                const;
-    bool                     Contains(const Gambit::Vector<T> &)       const;
-    bool                     Contains(const gRectangle<T> &)    const;
-    const T                  Volume()                           const;
-    const Gambit::Vector<T>         Center()                           const;
-    const gRectangle<T>      BoundingRectangle()                const;
-    const Gambit::List<Gambit::Vector<T> > VertexList()                       const;
-    const int                NumberOfCellsInSubdivision()       const;
-    const gRectangle<T>      SubdivisionCell(const int&)        const;
-    const T                  DiameterSquared()                  const;
-
+  // information
+  const int Dmnsn() const;
+  Gambit::Vector<T> LowerBound() const;
+  Gambit::Vector<T> UpperBound() const;
+  const T LowerBoundOfCoord(const int &) const;
+  const T UpperBoundOfCoord(const int &) const;
+  const T HeightInCoord(const int &) const;
+  const gInterval<T> CartesianFactor(const int &) const;
+  const gRectangle<T> SameCenterDoubleSideLengths() const;
+  const gRectangle<T> CubeContainingCrcmscrbngSphere() const;
+  const gRectangle<T> Orthant(const Gambit::Array<int> &) const;
+  const Gambit::Vector<T> SideLengths() const;
+  const T MaximalSideLength() const;
+  bool Contains(const Gambit::Vector<T> &) const;
+  bool Contains(const gRectangle<T> &) const;
+  const T Volume() const;
+  const Gambit::Vector<T> Center() const;
+  const gRectangle<T> BoundingRectangle() const;
+  const Gambit::List<Gambit::Vector<T>> VertexList() const;
+  const int NumberOfCellsInSubdivision() const;
+  const gRectangle<T> SubdivisionCell(const int &) const;
+  const T DiameterSquared() const;
 };
 
-  //-------------
-  // Conversion:
-  //-------------
+//-------------
+// Conversion:
+//-------------
 
-template <class T> gRectangle<double> TogDouble(const gRectangle<T>&);
+template <class T> gRectangle<double> TogDouble(const gRectangle<T> &);
 
 #endif // RECTANGL_H

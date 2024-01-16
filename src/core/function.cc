@@ -27,7 +27,6 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-
 #include <cmath>
 #include "gambit.h"
 #include "function.h"
@@ -44,19 +43,18 @@ using namespace Gambit;
 // vector perpendicular to the plane, then subtracting to compute the
 // component parallel to the plane.)
 //
-void FunctionOnSimplices::Project(Vector<double> &x,
-				  const Array<int> &lengths) const
+void FunctionOnSimplices::Project(Vector<double> &x, const Array<int> &lengths) const
 {
   int index = 1;
-  for (int part = 1; part <= lengths.Length(); part++)  {
+  for (int part = 1; part <= lengths.Length(); part++) {
     double avg = 0.0;
     int j;
-    for (j = 1; j <= lengths[part]; j++, index++)  {
+    for (j = 1; j <= lengths[part]; j++, index++) {
       avg += x[index];
     }
-    avg /= (double) lengths[part];
+    avg /= (double)lengths[part];
     index -= lengths[part];
-    for (j = 1; j <= lengths[part]; j++, index++)  {
+    for (j = 1; j <= lengths[part]; j++, index++) {
       x[index] -= avg;
     }
   }
@@ -70,9 +68,7 @@ void FunctionOnSimplices::Project(Vector<double> &x,
 // These routines are based on ones found in
 // multimin/conjugate_pr.c in the GSL 1.2 distribution
 
-void
-ConjugatePRMinimizer::AlphaXPlusY(double alpha,
-				  const Vector<double> &x, Vector<double> &y)
+void ConjugatePRMinimizer::AlphaXPlusY(double alpha, const Vector<double> &x, Vector<double> &y)
 {
   for (int i = 1; i <= y.Length(); i++) {
     y[i] += alpha * x[i];
@@ -82,10 +78,8 @@ ConjugatePRMinimizer::AlphaXPlusY(double alpha,
 // These routines are drawn from comparably-named ones in
 // multimin/directional_minimize.c in GSL.
 
-void
-ConjugatePRMinimizer::TakeStep(const Vector<double> &x, const Vector<double> &p,
-			       double step, double lambda,
-			       Vector<double> &x1, Vector<double> &dx)
+void ConjugatePRMinimizer::TakeStep(const Vector<double> &x, const Vector<double> &p, double step,
+                                    double lambda, Vector<double> &x1, Vector<double> &dx)
 {
   dx = 0.0;
   AlphaXPlusY(-step * lambda, p, dx);
@@ -93,22 +87,16 @@ ConjugatePRMinimizer::TakeStep(const Vector<double> &x, const Vector<double> &p,
   AlphaXPlusY(1.0, dx, x1);
 }
 
-void
-ConjugatePRMinimizer::IntermediatePoint(const Function &fdf,
-					const Vector<double> &x,
-					const Vector<double> &p,
-					double lambda,
-					double pg,
-					double stepa, double stepc,
-					double fa, double fc,
-					Vector<double> &x1, Vector<double> &dx,
-					Vector<double> &gradient,
-					double &step, double &f)
+void ConjugatePRMinimizer::IntermediatePoint(const Function &fdf, const Vector<double> &x,
+                                             const Vector<double> &p, double lambda, double pg,
+                                             double stepa, double stepc, double fa, double fc,
+                                             Vector<double> &x1, Vector<double> &dx,
+                                             Vector<double> &gradient, double &step, double &f)
 {
   double stepb, fb;
 
 trial:
-  double u = fabs (pg * lambda * stepc);
+  double u = fabs(pg * lambda * stepc);
   if ((fc - fa) + u == 0) {
     // TLT: Added this check 2002/08/31 due to floating point exceptions
     // under MSW.  Not really sure how to handle this correctly.
@@ -120,7 +108,7 @@ trial:
 
   fb = fdf.Value(x1);
 
-  if (fb >= fa  && stepb > 0.0) {
+  if (fb >= fa && stepb > 0.0) {
     /* downhill step failed, reduce step-size and try again */
     fc = fb;
     stepc = stepb;
@@ -132,16 +120,13 @@ trial:
   fdf.Gradient(x1, gradient);
 }
 
-void
-ConjugatePRMinimizer::Minimize(const Function &fdf,
-			       const Vector<double> &x, const Vector<double> &p,
-			       double lambda,
-			       double stepa, double stepb, double stepc,
-			       double fa, double fb, double fc, double tol,
-			       Vector<double> &x1, Vector<double> &dx1,
-			       Vector<double> &x2, Vector<double> &dx2,
-			       Vector<double> &gradient,
-			       double &step, double &f, double &gnorm)
+void ConjugatePRMinimizer::Minimize(const Function &fdf, const Vector<double> &x,
+                                    const Vector<double> &p, double lambda, double stepa,
+                                    double stepb, double stepc, double fa, double fb, double fc,
+                                    double tol, Vector<double> &x1, Vector<double> &dx1,
+                                    Vector<double> &x2, Vector<double> &dx2,
+                                    Vector<double> &gradient, double &step, double &f,
+                                    double &gnorm)
 {
   /* Starting at (x0, f0) move along the direction p to find a minimum
      f(x0 - lambda * p), returning the new point x1 = x0-lambda*p,
@@ -172,7 +157,7 @@ mid_trial:
   iter++;
 
   if (iter > 10) {
-    return;  /* MAX ITERATIONS */
+    return; /* MAX ITERATIONS */
   }
 
   double dw = w - u;
@@ -250,7 +235,7 @@ mid_trial:
       return;
     }
 
-    if (fabs (pg * lambda / gnorm1) < tol) {
+    if (fabs(pg * lambda / gnorm1) < tol) {
       return; /* SUCCESS */
     }
 
@@ -270,14 +255,10 @@ mid_trial:
   }
 }
 
-ConjugatePRMinimizer::ConjugatePRMinimizer(int n)
-  : x1(n), dx1(n), x2(n), p(n), g0(n)
-{ }
+ConjugatePRMinimizer::ConjugatePRMinimizer(int n) : x1(n), dx1(n), x2(n), p(n), g0(n) {}
 
-void ConjugatePRMinimizer::Set(const Function &fdf,
-			       const Vector<double> &x, double &f,
-			       Vector<double> &gradient, double step_size,
-			       double p_tol)
+void ConjugatePRMinimizer::Set(const Function &fdf, const Vector<double> &x, double &f,
+                               Vector<double> &gradient, double step_size, double p_tol)
 {
   iter = 0;
   step = step_size;
@@ -296,15 +277,10 @@ void ConjugatePRMinimizer::Set(const Function &fdf,
   g0norm = gnorm;
 }
 
-void ConjugatePRMinimizer::Restart()
-{
-  iter = 0;
-}
+void ConjugatePRMinimizer::Restart() { iter = 0; }
 
-bool ConjugatePRMinimizer::Iterate(const Function &fdf,
-				   Vector<double> &x, double &f,
-				   Vector<double> &gradient,
-				   Vector<double> &dx)
+bool ConjugatePRMinimizer::Iterate(const Function &fdf, Vector<double> &x, double &f,
+                                   Vector<double> &gradient, Vector<double> &dx)
 {
   double fa = f, fb, fc;
   double dir;
@@ -342,16 +318,15 @@ bool ConjugatePRMinimizer::Iterate(const Function &fdf,
   /* Do a line minimisation in the region (xa,fa) (xc,fc) to find an
      intermediate (xb,fb) satisifying fa > fb < fc.  Choose an initial
      xb based on parabolic interpolation */
-  IntermediatePoint(fdf, x, p, dir / pnorm, pg,
-		    stepa, stepc, fa, fc, x1, dx1, gradient, stepb, fb);
+  IntermediatePoint(fdf, x, p, dir / pnorm, pg, stepa, stepc, fa, fc, x1, dx1, gradient, stepb,
+                    fb);
 
   if (stepb == 0.0) {
     return false;
   }
 
-  Minimize(fdf, x, p, dir / pnorm,
-	   stepa, stepb, stepc, fa, fb, fc, tol,
-	   x1, dx1, x2, dx, gradient, step, f, g1norm);
+  Minimize(fdf, x, p, dir / pnorm, stepa, stepb, stepc, fa, fb, fc, tol, x1, dx1, x2, dx, gradient,
+           step, f, g1norm);
   x = x2;
 
   /* Choose a new conjugate direction for the next step */
@@ -364,9 +339,9 @@ bool ConjugatePRMinimizer::Iterate(const Function &fdf,
   else {
     /* p' = g1 - beta * p */
     double g0g1, beta;
-    AlphaXPlusY(-1.0, gradient, g0);   /* g0' = g0 - g1 */
-    g0g1 = g0 * gradient;              /* g1g0 = (g0-g1).g1 */
-    beta = g0g1 / (g0norm*g0norm);     /* beta = -((g1 - g0).g1)/(g0.g0) */
+    AlphaXPlusY(-1.0, gradient, g0); /* g0' = g0 - g1 */
+    g0g1 = g0 * gradient;            /* g1g0 = (g0-g1).g1 */
+    beta = g0g1 / (g0norm * g0norm); /* beta = -((g1 - g0).g1)/(g0.g0) */
 
     p *= -beta;
     AlphaXPlusY(1.0, gradient, p);

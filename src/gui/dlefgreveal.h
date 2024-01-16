@@ -38,4 +38,4 @@ public:
   Gambit::Array<Gambit::GamePlayer> GetPlayers() const;
 };
 
-#endif  // DLEFGREVEAL_H
+#endif // DLEFGREVEAL_H

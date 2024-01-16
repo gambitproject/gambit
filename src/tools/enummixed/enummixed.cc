@@ -31,14 +31,13 @@
 using namespace Gambit;
 using namespace Gambit::Nash;
 
-template <class T> void
-PrintCliques(const List<List<MixedStrategyProfile<T> > > &p_cliques,
-             std::shared_ptr<StrategyProfileRenderer<T> > p_renderer)
+template <class T>
+void PrintCliques(const List<List<MixedStrategyProfile<T>>> &p_cliques,
+                  std::shared_ptr<StrategyProfileRenderer<T>> p_renderer)
 {
   for (int cl = 1; cl <= p_cliques.size(); cl++) {
     for (int i = 1; i <= p_cliques[cl].size(); i++) {
-      p_renderer->Render(p_cliques[cl][i],
-			 "convex-" + lexical_cast<std::string>(cl));
+      p_renderer->Render(p_cliques[cl][i], "convex-" + lexical_cast<std::string>(cl));
     }
   }
 }
@@ -80,14 +79,12 @@ int main(int argc, char *argv[])
 
   int long_opt_index = 0;
   struct option long_options[] = {
-    { "help", 0, nullptr, 'h'   },
-    { "version", 0, nullptr, 'v'  },
-    { nullptr,    0,    nullptr,    0   }
-  };
+      {"help", 0, nullptr, 'h'}, {"version", 0, nullptr, 'v'}, {nullptr, 0, nullptr, 0}};
   while ((c = getopt_long(argc, argv, "d:DvhqcSL", long_options, &long_opt_index)) != -1) {
     switch (c) {
     case 'v':
-      PrintBanner(std::cerr); exit(1);
+      PrintBanner(std::cerr);
+      exit(1);
     case 'd':
       useFloat = true;
       numDecimals = atoi(optarg);
@@ -111,10 +108,10 @@ int main(int argc, char *argv[])
       break;
     case '?':
       if (isprint(optopt)) {
-	std::cerr << argv[0] << ": Unknown option `-" << ((char) optopt) << "'.\n";
+        std::cerr << argv[0] << ": Unknown option `-" << ((char)optopt) << "'.\n";
       }
       else {
-	std::cerr << argv[0] << ": Unknown option character `\\x" << optopt << "`.\n";
+        std::cerr << argv[0] << ": Unknown option character `\\x" << optopt << "`.\n";
       }
       return 1;
     default:
@@ -126,7 +123,7 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  std::istream* input_stream = &std::cin;
+  std::istream *input_stream = &std::cin;
   std::ifstream file_stream;
   if (optind < argc) {
     file_stream.open(argv[optind]);
@@ -142,32 +139,29 @@ int main(int argc, char *argv[])
   try {
     Game game = ReadGame(*input_stream);
     if (uselrs) {
-      std::shared_ptr<StrategyProfileRenderer<Rational> > renderer(new MixedStrategyCSVRenderer<Rational>(std::cout));
+      std::shared_ptr<StrategyProfileRenderer<Rational>> renderer(
+          new MixedStrategyCSVRenderer<Rational>(std::cout));
       EnumMixedLrsStrategySolver solver(renderer);
       solver.Solve(game);
     }
     else if (useFloat) {
-      std::shared_ptr<StrategyProfileRenderer<double> > renderer(
-        new MixedStrategyCSVRenderer<double>(std::cout, numDecimals)
-      );
+      std::shared_ptr<StrategyProfileRenderer<double>> renderer(
+          new MixedStrategyCSVRenderer<double>(std::cout, numDecimals));
       EnumMixedStrategySolver<double> solver(renderer);
-      std::shared_ptr<EnumMixedStrategySolution<double> > solution =
-	solver.SolveDetailed(game);
+      std::shared_ptr<EnumMixedStrategySolution<double>> solution = solver.SolveDetailed(game);
       if (showConnect) {
-	List<List<MixedStrategyProfile<double> > > cliques =
-	  solution->GetCliques();
-	PrintCliques(cliques, renderer);
+        List<List<MixedStrategyProfile<double>>> cliques = solution->GetCliques();
+        PrintCliques(cliques, renderer);
       }
     }
     else {
-      std::shared_ptr<StrategyProfileRenderer<Rational> > renderer(new MixedStrategyCSVRenderer<Rational>(std::cout));
+      std::shared_ptr<StrategyProfileRenderer<Rational>> renderer(
+          new MixedStrategyCSVRenderer<Rational>(std::cout));
       EnumMixedStrategySolver<Rational> solver(renderer);
-      std::shared_ptr<EnumMixedStrategySolution<Rational> > solution =
-	solver.SolveDetailed(game);
+      std::shared_ptr<EnumMixedStrategySolution<Rational>> solution = solver.SolveDetailed(game);
       if (showConnect) {
-	List<List<MixedStrategyProfile<Rational> > > cliques =
-	  solution->GetCliques();
-	PrintCliques(cliques, renderer);
+        List<List<MixedStrategyProfile<Rational>>> cliques = solution->GetCliques();
+        PrintCliques(cliques, renderer);
       }
     }
     return 0;

@@ -24,7 +24,7 @@
 
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
-#endif  // WX_PRECOMP
+#endif // WX_PRECOMP
 #include <wx/config.h>
 
 #include "style.h"
@@ -40,15 +40,8 @@ gbtStyle::gbtStyle()
 }
 
 static wxColour s_defaultColors[8] = {
-  wxColour(255, 0, 0),
-  wxColour(0, 0, 255),
-  wxColour(0, 128, 0),
-  wxColour(255, 128, 0),
-  wxColour(0, 0, 64),
-  wxColour(128, 0, 255),
-  wxColour(64, 0, 0),
-  wxColour(255, 128, 255)
-};
+    wxColour(255, 0, 0), wxColour(0, 0, 255),   wxColour(0, 128, 0), wxColour(255, 128, 0),
+    wxColour(0, 0, 64),  wxColour(128, 0, 255), wxColour(64, 0, 0),  wxColour(255, 128, 255)};
 
 //!
 //! Gets the player color assigned to player number 'pl'.
@@ -89,7 +82,7 @@ void gbtStyle::SetDefaults()
   m_chanceColor = wxColour(154, 205, 50);
   m_terminalColor = *wxBLACK;
   for (int pl = 1; pl <= m_playerColors.Length(); pl++) {
-    m_playerColors[pl] = s_defaultColors[(pl-1)%8];
+    m_playerColors[pl] = s_defaultColors[(pl - 1) % 8];
   }
 }
 
@@ -97,36 +90,35 @@ std::string gbtStyle::GetColorXML() const
 {
   std::ostringstream s;
 
-  s <<"<colors>\n";
-  s <<"<player id=\"-1\" ";
-  s <<"red=\"" << ((int) m_terminalColor.Red()) << "\" ";
-  s <<"green=\"" << ((int) m_terminalColor.Green()) << "\" ";
-  s <<"blue=\"" << ((int) m_terminalColor.Blue()) << "\" ";
-  s <<"/>\n";
+  s << "<colors>\n";
+  s << "<player id=\"-1\" ";
+  s << "red=\"" << ((int)m_terminalColor.Red()) << "\" ";
+  s << "green=\"" << ((int)m_terminalColor.Green()) << "\" ";
+  s << "blue=\"" << ((int)m_terminalColor.Blue()) << "\" ";
+  s << "/>\n";
 
-  s <<"<player id=\"0\" ";
-  s <<"red=\"" << ((int) m_chanceColor.Red()) << "\" ";
-  s <<"green=\"" << ((int) m_chanceColor.Green()) << "\" ";
-  s <<"blue=\"" << ((int) m_chanceColor.Blue()) << "\" ";
-  s <<"/>\n";
+  s << "<player id=\"0\" ";
+  s << "red=\"" << ((int)m_chanceColor.Red()) << "\" ";
+  s << "green=\"" << ((int)m_chanceColor.Green()) << "\" ";
+  s << "blue=\"" << ((int)m_chanceColor.Blue()) << "\" ";
+  s << "/>\n";
 
   for (int pl = 1; pl <= m_playerColors.Length(); pl++) {
-    s <<"<player id=\"" << pl << "\" ";
-    s <<"red=\"" << ((int) m_playerColors[pl].Red()) << "\" ";
-    s <<"green=\"" << ((int) m_playerColors[pl].Green()) << "\" ";
-    s <<"blue=\"" << ((int) m_playerColors[pl].Blue()) << "\" ";
-    s <<"/>\n";
+    s << "<player id=\"" << pl << "\" ";
+    s << "red=\"" << ((int)m_playerColors[pl].Red()) << "\" ";
+    s << "green=\"" << ((int)m_playerColors[pl].Green()) << "\" ";
+    s << "blue=\"" << ((int)m_playerColors[pl].Blue()) << "\" ";
+    s << "/>\n";
   }
 
-  s <<"</colors>\n";
+  s << "</colors>\n";
 
   return s.str();
 }
 
 void gbtStyle::SetColorXML(TiXmlNode *p_colors)
 {
-  for (TiXmlNode *node = p_colors->FirstChild(); node;
-       node = node->NextSiblingElement()) {
+  for (TiXmlNode *node = p_colors->FirstChild(); node; node = node->NextSiblingElement()) {
     int id = -2;
     node->ToElement()->QueryIntAttribute("id", &id);
 
@@ -152,11 +144,11 @@ std::string gbtStyle::GetFontXML() const
 {
   std::ostringstream s;
 
-  s << "<font size=\"" << (int) m_font.GetPointSize() << "\" ";
-  s << "family=\"" << (int) m_font.GetFamily() << "\" ";
-  s << "face=\"" << (const char *) m_font.GetFaceName().mb_str() << "\" ";
-  s << "style=\"" << (int) m_font.GetStyle() << "\" ";
-  s << "weight=\"" << (int) m_font.GetWeight() << "\" ";
+  s << "<font size=\"" << (int)m_font.GetPointSize() << "\" ";
+  s << "family=\"" << (int)m_font.GetFamily() << "\" ";
+  s << "face=\"" << (const char *)m_font.GetFaceName().mb_str() << "\" ";
+  s << "style=\"" << (int)m_font.GetStyle() << "\" ";
+  s << "weight=\"" << (int)m_font.GetWeight() << "\" ";
   s << "/>\n";
 
   return s.str();
@@ -173,8 +165,7 @@ void gbtStyle::SetFontXML(TiXmlNode *p_font)
   // parameters, at present we are not able to guarantee to keep these
   // in the style
   SetFont(wxFont(size, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false,
-		 wxString(p_font->ToElement()->Attribute("face"),
-			  *wxConvCurrent)));
+                 wxString(p_font->ToElement()->Attribute("face"), *wxConvCurrent)));
 }
 
 std::string gbtStyle::GetLayoutXML() const
@@ -183,20 +174,20 @@ std::string gbtStyle::GetLayoutXML() const
   s << "<autolayout>\n";
 
   s << "<nodes size=\"" << m_nodeSize << "\" spacing=\"" << m_terminalSpacing << "\" ";
-  std::string nodeTokens[] = { "line", "box", "circle", "diamond", "dot" };
+  std::string nodeTokens[] = {"line", "box", "circle", "diamond", "dot"};
   s << "chance=\"" << nodeTokens[m_chanceToken] << "\" ";
   s << "player=\"" << nodeTokens[m_playerToken] << "\" ";
   s << "terminal=\"" << nodeTokens[m_terminalToken] << "\"/>\n";
 
   s << "<branches size=\"" << m_branchLength << "\" tine=\"" << m_tineLength << "\" ";
-  std::string branchStyles[] = { "line", "forktine" };
+  std::string branchStyles[] = {"line", "forktine"};
   s << "branch=\"" << branchStyles[m_branchStyle] << "\" ";
-  std::string branchLabels[] = { "horizontal", "rotated" };
+  std::string branchLabels[] = {"horizontal", "rotated"};
   s << "labels=\"" << branchLabels[m_branchLabels] << "\"/>\n";
 
-  std::string infosetConnect[] = { "none", "same", "all" };
+  std::string infosetConnect[] = {"none", "same", "all"};
   s << "<infosets connect=\"" << infosetConnect[m_infosetConnect] << "\" ";
-  std::string infosetStyle[] = { "lines", "circles" };
+  std::string infosetStyle[] = {"lines", "circles"};
   s << "style=\"" << infosetStyle[m_infosetJoin] << "\"/>\n";
 
   s << "</autolayout>\n";
@@ -212,31 +203,61 @@ void gbtStyle::SetLayoutXML(TiXmlNode *p_node)
     const char *chance = nodes->ToElement()->Attribute("chance");
     if (chance) {
       std::string s = chance;
-      if (s == "line")           m_chanceToken = GBT_NODE_TOKEN_LINE;
-      else if (s == "box")       m_chanceToken = GBT_NODE_TOKEN_BOX;
-      else if (s == "circle")    m_chanceToken = GBT_NODE_TOKEN_CIRCLE;
-      else if (s == "diamond")   m_chanceToken = GBT_NODE_TOKEN_DIAMOND;
-      else if (s == "dot")       m_chanceToken = GBT_NODE_TOKEN_DOT;
+      if (s == "line") {
+        m_chanceToken = GBT_NODE_TOKEN_LINE;
+      }
+      else if (s == "box") {
+        m_chanceToken = GBT_NODE_TOKEN_BOX;
+      }
+      else if (s == "circle") {
+        m_chanceToken = GBT_NODE_TOKEN_CIRCLE;
+      }
+      else if (s == "diamond") {
+        m_chanceToken = GBT_NODE_TOKEN_DIAMOND;
+      }
+      else if (s == "dot") {
+        m_chanceToken = GBT_NODE_TOKEN_DOT;
+      }
     }
 
     const char *player = nodes->ToElement()->Attribute("player");
     if (player) {
       std::string s = player;
-      if (s == "line")           m_playerToken = GBT_NODE_TOKEN_LINE;
-      else if (s == "box")       m_playerToken = GBT_NODE_TOKEN_BOX;
-      else if (s == "circle")    m_playerToken = GBT_NODE_TOKEN_CIRCLE;
-      else if (s == "diamond")   m_playerToken = GBT_NODE_TOKEN_DIAMOND;
-      else if (s == "dot")       m_playerToken = GBT_NODE_TOKEN_DOT;
+      if (s == "line") {
+        m_playerToken = GBT_NODE_TOKEN_LINE;
+      }
+      else if (s == "box") {
+        m_playerToken = GBT_NODE_TOKEN_BOX;
+      }
+      else if (s == "circle") {
+        m_playerToken = GBT_NODE_TOKEN_CIRCLE;
+      }
+      else if (s == "diamond") {
+        m_playerToken = GBT_NODE_TOKEN_DIAMOND;
+      }
+      else if (s == "dot") {
+        m_playerToken = GBT_NODE_TOKEN_DOT;
+      }
     }
 
     const char *terminal = nodes->ToElement()->Attribute("terminal");
     if (terminal) {
       std::string s = terminal;
-      if (s == "line")           m_terminalToken = GBT_NODE_TOKEN_LINE;
-      else if (s == "box")       m_terminalToken = GBT_NODE_TOKEN_BOX;
-      else if (s == "circle")    m_terminalToken = GBT_NODE_TOKEN_CIRCLE;
-      else if (s == "diamond")   m_terminalToken = GBT_NODE_TOKEN_DIAMOND;
-      else if (s == "dot")       m_terminalToken = GBT_NODE_TOKEN_DOT;
+      if (s == "line") {
+        m_terminalToken = GBT_NODE_TOKEN_LINE;
+      }
+      else if (s == "box") {
+        m_terminalToken = GBT_NODE_TOKEN_BOX;
+      }
+      else if (s == "circle") {
+        m_terminalToken = GBT_NODE_TOKEN_CIRCLE;
+      }
+      else if (s == "diamond") {
+        m_terminalToken = GBT_NODE_TOKEN_DIAMOND;
+      }
+      else if (s == "dot") {
+        m_terminalToken = GBT_NODE_TOKEN_DOT;
+      }
     }
   }
 
@@ -248,15 +269,23 @@ void gbtStyle::SetLayoutXML(TiXmlNode *p_node)
     const char *branch = branches->ToElement()->Attribute("branch");
     if (branch) {
       std::string s = branch;
-      if (s == "line")           m_branchStyle = GBT_BRANCH_STYLE_LINE;
-      else if (s == "forktine")  m_branchStyle = GBT_BRANCH_STYLE_FORKTINE;
+      if (s == "line") {
+        m_branchStyle = GBT_BRANCH_STYLE_LINE;
+      }
+      else if (s == "forktine") {
+        m_branchStyle = GBT_BRANCH_STYLE_FORKTINE;
+      }
     }
 
     const char *labels = branches->ToElement()->Attribute("labels");
     if (labels) {
       std::string s = labels;
-      if (s == "horizontal")     m_branchLabels = GBT_BRANCH_LABEL_HORIZONTAL;
-      else if (s == "rotated")   m_branchLabels = GBT_BRANCH_LABEL_ROTATED;
+      if (s == "horizontal") {
+        m_branchLabels = GBT_BRANCH_LABEL_HORIZONTAL;
+      }
+      else if (s == "rotated") {
+        m_branchLabels = GBT_BRANCH_LABEL_ROTATED;
+      }
     }
   }
 
@@ -265,16 +294,26 @@ void gbtStyle::SetLayoutXML(TiXmlNode *p_node)
     const char *connect = infosets->ToElement()->Attribute("connect");
     if (connect) {
       std::string s = connect;
-      if (s == "none")      m_infosetConnect = GBT_INFOSET_CONNECT_NONE;
-      else if (s == "same") m_infosetConnect = GBT_INFOSET_CONNECT_SAMELEVEL;
-      else if (s == "all")  m_infosetConnect = GBT_INFOSET_CONNECT_ALL;
+      if (s == "none") {
+        m_infosetConnect = GBT_INFOSET_CONNECT_NONE;
+      }
+      else if (s == "same") {
+        m_infosetConnect = GBT_INFOSET_CONNECT_SAMELEVEL;
+      }
+      else if (s == "all") {
+        m_infosetConnect = GBT_INFOSET_CONNECT_ALL;
+      }
     }
 
     const char *style = infosets->ToElement()->Attribute("style");
     if (style) {
       std::string s = style;
-      if (s == "lines")         m_infosetJoin = GBT_INFOSET_JOIN_LINES;
-      else if (s == "circles")  m_infosetJoin = GBT_INFOSET_JOIN_CIRCLES;
+      if (s == "lines") {
+        m_infosetJoin = GBT_INFOSET_JOIN_LINES;
+      }
+      else if (s == "circles") {
+        m_infosetJoin = GBT_INFOSET_JOIN_CIRCLES;
+      }
     }
   }
 }
@@ -283,13 +322,12 @@ std::string gbtStyle::GetLabelXML() const
 {
   std::ostringstream s;
   s << "<labels ";
-  std::string nodeLabels[] = { "none", "label", "player",
-			       "isetlabel", "isetid",
-			       "realizprob", "beliefprob", "value" };
+  std::string nodeLabels[] = {"none",   "label",      "player",     "isetlabel",
+                              "isetid", "realizprob", "beliefprob", "value"};
   s << "abovenode=\"" << nodeLabels[m_nodeAboveLabel] << "\" ";
   s << "belownode=\"" << nodeLabels[m_nodeBelowLabel] << "\" ";
 
-  std::string branchLabels[] = { "none", "label", "probs", "value" };
+  std::string branchLabels[] = {"none", "label", "probs", "value"};
   s << "abovebranch=\"" << branchLabels[m_branchAboveLabel] << "\" ";
   s << "belowbranch=\"" << branchLabels[m_branchBelowLabel] << "\" ";
 
@@ -302,45 +340,92 @@ void gbtStyle::SetLabelXML(TiXmlNode *p_node)
   const char *abovenode = p_node->ToElement()->Attribute("abovenode");
   if (abovenode) {
     std::string s = abovenode;
-    if (s == "none")             m_nodeAboveLabel = GBT_NODE_LABEL_NOTHING;
-    else if (s == "label")       m_nodeAboveLabel = GBT_NODE_LABEL_LABEL;
-    else if (s == "player")      m_nodeAboveLabel = GBT_NODE_LABEL_PLAYER;
-    else if (s == "isetlabel")   m_nodeAboveLabel = GBT_NODE_LABEL_ISETLABEL;
-    else if (s == "isetid")      m_nodeAboveLabel = GBT_NODE_LABEL_ISETID;
-    else if (s == "realizprob")  m_nodeAboveLabel = GBT_NODE_LABEL_REALIZPROB;
-    else if (s == "beliefprob")  m_nodeAboveLabel = GBT_NODE_LABEL_BELIEFPROB;
-    else if (s == "value")       m_nodeAboveLabel = GBT_NODE_LABEL_VALUE;
+    if (s == "none") {
+      m_nodeAboveLabel = GBT_NODE_LABEL_NOTHING;
+    }
+    else if (s == "label") {
+      m_nodeAboveLabel = GBT_NODE_LABEL_LABEL;
+    }
+    else if (s == "player") {
+      m_nodeAboveLabel = GBT_NODE_LABEL_PLAYER;
+    }
+    else if (s == "isetlabel") {
+      m_nodeAboveLabel = GBT_NODE_LABEL_ISETLABEL;
+    }
+    else if (s == "isetid") {
+      m_nodeAboveLabel = GBT_NODE_LABEL_ISETID;
+    }
+    else if (s == "realizprob") {
+      m_nodeAboveLabel = GBT_NODE_LABEL_REALIZPROB;
+    }
+    else if (s == "beliefprob") {
+      m_nodeAboveLabel = GBT_NODE_LABEL_BELIEFPROB;
+    }
+    else if (s == "value") {
+      m_nodeAboveLabel = GBT_NODE_LABEL_VALUE;
+    }
   }
 
   const char *belownode = p_node->ToElement()->Attribute("belownode");
   if (belownode) {
     std::string s = belownode;
-    if (s == "none")             m_nodeBelowLabel = GBT_NODE_LABEL_NOTHING;
-    else if (s == "label")       m_nodeBelowLabel = GBT_NODE_LABEL_LABEL;
-    else if (s == "player")      m_nodeBelowLabel = GBT_NODE_LABEL_PLAYER;
-    else if (s == "isetlabel")   m_nodeBelowLabel = GBT_NODE_LABEL_ISETLABEL;
-    else if (s == "isetid")      m_nodeBelowLabel = GBT_NODE_LABEL_ISETID;
-    else if (s == "realizprob")  m_nodeBelowLabel = GBT_NODE_LABEL_REALIZPROB;
-    else if (s == "beliefprob")  m_nodeBelowLabel = GBT_NODE_LABEL_BELIEFPROB;
-    else if (s == "value")       m_nodeBelowLabel = GBT_NODE_LABEL_VALUE;
+    if (s == "none") {
+      m_nodeBelowLabel = GBT_NODE_LABEL_NOTHING;
+    }
+    else if (s == "label") {
+      m_nodeBelowLabel = GBT_NODE_LABEL_LABEL;
+    }
+    else if (s == "player") {
+      m_nodeBelowLabel = GBT_NODE_LABEL_PLAYER;
+    }
+    else if (s == "isetlabel") {
+      m_nodeBelowLabel = GBT_NODE_LABEL_ISETLABEL;
+    }
+    else if (s == "isetid") {
+      m_nodeBelowLabel = GBT_NODE_LABEL_ISETID;
+    }
+    else if (s == "realizprob") {
+      m_nodeBelowLabel = GBT_NODE_LABEL_REALIZPROB;
+    }
+    else if (s == "beliefprob") {
+      m_nodeBelowLabel = GBT_NODE_LABEL_BELIEFPROB;
+    }
+    else if (s == "value") {
+      m_nodeBelowLabel = GBT_NODE_LABEL_VALUE;
+    }
   }
 
   const char *abovebranch = p_node->ToElement()->Attribute("abovebranch");
   if (abovebranch) {
     std::string s = abovebranch;
-    if (s == "none")             m_branchAboveLabel = GBT_BRANCH_LABEL_NOTHING;
-    else if (s == "label")       m_branchAboveLabel = GBT_BRANCH_LABEL_LABEL;
-    else if (s == "probs")       m_branchAboveLabel = GBT_BRANCH_LABEL_PROBS;
-    else if (s == "value")       m_branchAboveLabel = GBT_BRANCH_LABEL_VALUE;
+    if (s == "none") {
+      m_branchAboveLabel = GBT_BRANCH_LABEL_NOTHING;
+    }
+    else if (s == "label") {
+      m_branchAboveLabel = GBT_BRANCH_LABEL_LABEL;
+    }
+    else if (s == "probs") {
+      m_branchAboveLabel = GBT_BRANCH_LABEL_PROBS;
+    }
+    else if (s == "value") {
+      m_branchAboveLabel = GBT_BRANCH_LABEL_VALUE;
+    }
   }
 
   const char *belowbranch = p_node->ToElement()->Attribute("belowbranch");
   if (belowbranch) {
     std::string s = belowbranch;
-    if (s == "none")             m_branchBelowLabel = GBT_BRANCH_LABEL_NOTHING;
-    else if (s == "label")       m_branchBelowLabel = GBT_BRANCH_LABEL_LABEL;
-    else if (s == "probs")       m_branchBelowLabel = GBT_BRANCH_LABEL_PROBS;
-    else if (s == "value")       m_branchBelowLabel = GBT_BRANCH_LABEL_VALUE;
+    if (s == "none") {
+      m_branchBelowLabel = GBT_BRANCH_LABEL_NOTHING;
+    }
+    else if (s == "label") {
+      m_branchBelowLabel = GBT_BRANCH_LABEL_LABEL;
+    }
+    else if (s == "probs") {
+      m_branchBelowLabel = GBT_BRANCH_LABEL_PROBS;
+    }
+    else if (s == "value") {
+      m_branchBelowLabel = GBT_BRANCH_LABEL_VALUE;
+    }
   }
-
 }

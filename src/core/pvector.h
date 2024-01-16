@@ -28,18 +28,17 @@
 namespace Gambit {
 
 template <class T> class PVector : public Vector<T> {
- private:
+private:
   int sum(const Array<int> &V) const;
   void setindex();
 
- protected:
+protected:
   T **svptr;
   Array<int> svlen;
 
   int Check(const PVector<T> &v) const;
 
- public:
-
+public:
   // constructors
 
   PVector();
@@ -48,10 +47,9 @@ template <class T> class PVector : public Vector<T> {
   PVector(const PVector<T> &v);
   ~PVector() override;
 
-
   // element access operators
-  T& operator()(int a, int b);
-  const T& operator()(int a, int b) const;
+  T &operator()(int a, int b);
+  const T &operator()(int a, int b) const;
 
   // extract a subvector
   Vector<T> GetRow(int row) const;
@@ -61,25 +59,25 @@ template <class T> class PVector : public Vector<T> {
 
   // more operators
 
-  PVector<T>& operator=(const PVector<T> &v);
-  PVector<T>& operator=(const Vector<T> &v);
-  PVector<T>& operator=(T c);
+  PVector<T> &operator=(const PVector<T> &v);
+  PVector<T> &operator=(const Vector<T> &v);
+  PVector<T> &operator=(T c);
 
   PVector<T> operator+(const PVector<T> &v) const;
-  PVector<T>& operator+=(const PVector<T> &v);
+  PVector<T> &operator+=(const PVector<T> &v);
   PVector<T> operator-() const;
   PVector<T> operator-(const PVector<T> &v) const;
-  PVector<T>& operator-=(const PVector<T> &v);
+  PVector<T> &operator-=(const PVector<T> &v);
   T operator*(const PVector<T> &v) const;
   PVector<T> operator*(const T &c) const;
-  PVector<T>& operator*=(const T &c);
+  PVector<T> &operator*=(const T &c);
   PVector<T> operator/(T c);
 
   bool operator==(const PVector<T> &v) const;
   bool operator!=(const PVector<T> &v) const;
 
   // parameter access functions
-  const Array<int>& Lengths() const;
+  const Array<int> &Lengths() const;
 };
 
 } // end namespace Gambit

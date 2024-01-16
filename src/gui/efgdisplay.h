@@ -74,7 +74,6 @@ private:
   void OnAcceptPayoffEdit(wxCommandEvent &);
   //@}
 
-
   /// @name Overriding gbtGameView members
   //@{
   void OnUpdate() override;
@@ -100,4 +99,4 @@ public:
   DECLARE_EVENT_TABLE()
 };
 
-#endif   // EFGDISPLAY_H
+#endif // EFGDISPLAY_H

@@ -35,49 +35,55 @@ Since boundary points can be identified, open and half
 open (bounded) intervals can be effected, but less directly.
 */
 
-
-
-template<class T> class gInterval {
+template <class T> class gInterval {
 private:
-    T lower_bd;
-    T upper_bd;
+  T lower_bd;
+  T upper_bd;
 
 public:
-    // constructors
-    gInterval(const gInterval<T> &p_interval)
-      : lower_bd(p_interval.lower_bd), upper_bd(p_interval.upper_bd) { }
-    gInterval(const T &p_low, const T &p_high) : lower_bd(p_low), upper_bd(p_high) { }
-    ~gInterval() = default;
+  // constructors
+  gInterval(const gInterval<T> &p_interval)
+    : lower_bd(p_interval.lower_bd), upper_bd(p_interval.upper_bd)
+  {
+  }
+  gInterval(const T &p_low, const T &p_high) : lower_bd(p_low), upper_bd(p_high) {}
+  ~gInterval() = default;
 
-    gInterval<T>& operator=(const gInterval<T> &y) = delete;
+  gInterval<T> &operator=(const gInterval<T> &y) = delete;
 
-    // operators
-    bool operator==(const gInterval<T> &p_rhs) const
-    {
-      return lower_bd == p_rhs.lower_bd && upper_bd == p_rhs.upper_bd;
-    }
-    bool operator!=(const gInterval<T> &p_rhs) const
-    {
-      return lower_bd != p_rhs.lower_bd || upper_bd != p_rhs.upper_bd;
-    }
+  // operators
+  bool operator==(const gInterval<T> &p_rhs) const
+  {
+    return lower_bd == p_rhs.lower_bd && upper_bd == p_rhs.upper_bd;
+  }
+  bool operator!=(const gInterval<T> &p_rhs) const
+  {
+    return lower_bd != p_rhs.lower_bd || upper_bd != p_rhs.upper_bd;
+  }
 
-    // information
-    const T &LowerBound() const { return lower_bd; }
-    const T &UpperBound() const { return upper_bd; }
-    bool Contains(const T &p_number) const { return lower_bd <= p_number && p_number <= upper_bd; }
-    bool Contains(const gInterval<T> &p_interval) const
-    { return (lower_bd <= p_interval.lower_bd && p_interval.upper_bd <= upper_bd); }
-    bool LiesBelow(const T &p_number) const { return upper_bd <= p_number; }
-    bool LiesAbove(const T &p_number) const { return p_number <= lower_bd; }
-    T Length() const { return upper_bd - lower_bd; }
-    T Midpoint() const { return (upper_bd + lower_bd)/(T)2; }
-    gInterval<T> LeftHalf() const { return gInterval<T>(LowerBound(), Midpoint()); }
-    gInterval<T> RightHalf() const { return gInterval<T>(Midpoint(), UpperBound()); }
+  // information
+  const T &LowerBound() const { return lower_bd; }
+  const T &UpperBound() const { return upper_bd; }
+  bool Contains(const T &p_number) const { return lower_bd <= p_number && p_number <= upper_bd; }
+  bool Contains(const gInterval<T> &p_interval) const
+  {
+    return (lower_bd <= p_interval.lower_bd && p_interval.upper_bd <= upper_bd);
+  }
+  bool LiesBelow(const T &p_number) const { return upper_bd <= p_number; }
+  bool LiesAbove(const T &p_number) const { return p_number <= lower_bd; }
+  T Length() const { return upper_bd - lower_bd; }
+  T Midpoint() const { return (upper_bd + lower_bd) / (T)2; }
+  gInterval<T> LeftHalf() const { return gInterval<T>(LowerBound(), Midpoint()); }
+  gInterval<T> RightHalf() const { return gInterval<T>(Midpoint(), UpperBound()); }
 
-    gInterval<T> SameCenterTwiceLength() const
-    { return gInterval<T>((T)2 * LowerBound() - Midpoint(), (T)2 * UpperBound() - Midpoint()); }
-    gInterval<T> SameCenterWithNewLength(const T &p_length) const
-    { return gInterval<T>(Midpoint() - p_length / (T) 2, Midpoint() + p_length / (T) 2); }
+  gInterval<T> SameCenterTwiceLength() const
+  {
+    return gInterval<T>((T)2 * LowerBound() - Midpoint(), (T)2 * UpperBound() - Midpoint());
+  }
+  gInterval<T> SameCenterWithNewLength(const T &p_length) const
+  {
+    return gInterval<T>(Midpoint() - p_length / (T)2, Midpoint() + p_length / (T)2);
+  }
 };
 
 #endif // INTERVAL_H

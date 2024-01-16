@@ -22,5 +22,5 @@
 
 #include "ineqsolv.imp"
 
-//template class IneqSolv<Gambit::Rational>;
+// template class IneqSolv<Gambit::Rational>;
 template class IneqSolv<double>;

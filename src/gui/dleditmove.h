@@ -49,4 +49,4 @@ public:
   wxDECLARE_EVENT_TABLE();
 };
 
-#endif   // DLEDITMOVE_H
+#endif // DLEDITMOVE_H

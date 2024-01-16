@@ -37,5 +37,4 @@ public:
   wxString GetComment() const { return m_comment->GetValue(); }
 };
 
-
-#endif  // DLGAMEPROP_H
+#endif // DLGAMEPROP_H

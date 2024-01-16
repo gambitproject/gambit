@@ -39,11 +39,9 @@ public:
   public:
     virtual ~EquationSystem() = default;
     // Compute the value of the system of equations at the specified point.
-    virtual void GetValue(const Vector<double> &p_point,
-			  Vector<double> &p_lhs) const = 0;
+    virtual void GetValue(const Vector<double> &p_point, Vector<double> &p_lhs) const = 0;
     // Compute the Jacobian matrix at the specified point.
-    virtual void GetJacobian(const Vector<double> &p_point,
-			     Matrix<double> &p_matrix) const = 0;
+    virtual void GetJacobian(const Vector<double> &p_point, Matrix<double> &p_matrix) const = 0;
   };
 
   //
@@ -53,7 +51,7 @@ public:
   public:
     virtual ~CriterionFunction() = default;
     virtual double operator()(const Vector<double> &p_point,
-			      const Vector<double> &p_tangent) const = 0;
+                              const Vector<double> &p_tangent) const = 0;
   };
 
   //
@@ -63,9 +61,10 @@ public:
   public:
     ~NullCriterionFunction() override = default;
     double operator()(const Vector<double> &, const Vector<double> &) const override
-    { return -1.0; }
+    {
+      return -1.0;
+    }
   };
-
 
   //
   // A function to call on each accepted step of the tracing process.
@@ -73,8 +72,7 @@ public:
   class CallbackFunction {
   public:
     virtual ~CallbackFunction() = default;
-    virtual void operator()(const Vector<double> &p_point,
-			    bool p_isTerminal) const = 0;
+    virtual void operator()(const Vector<double> &p_point, bool p_isTerminal) const = 0;
   };
 
   //
@@ -83,10 +81,8 @@ public:
   class NullCallbackFunction : public CallbackFunction {
   public:
     ~NullCallbackFunction() override = default;
-    void operator()(const Vector<double> &p_point,
-			    bool p_isTerminal) const override { }
+    void operator()(const Vector<double> &p_point, bool p_isTerminal) const override {}
   };
-
 
   void SetMaxDecel(double p_maxDecel) { m_maxDecel = p_maxDecel; }
   double GetMaxDecel() const { return m_maxDecel; }
@@ -95,19 +91,17 @@ public:
   double GetStepsize() const { return m_hStart; }
 
 protected:
-  PathTracer() : m_maxDecel(1.1), m_hStart(0.03)
-    { }
+  PathTracer() : m_maxDecel(1.1), m_hStart(0.03) {}
   virtual ~PathTracer() = default;
 
-  void TracePath(const EquationSystem &p_system,
-		 Vector<double> &p_x, double p_maxLambda, double &p_omega,
-		 const CallbackFunction &p_callback = NullCallbackFunction(),
-		 const CriterionFunction &p_criterion = NullCriterionFunction()) const;
+  void TracePath(const EquationSystem &p_system, Vector<double> &p_x, double p_maxLambda,
+                 double &p_omega, const CallbackFunction &p_callback = NullCallbackFunction(),
+                 const CriterionFunction &p_criterion = NullCriterionFunction()) const;
 
 private:
   double m_maxDecel, m_hStart;
 };
 
-}  // end namespace Gambit
+} // end namespace Gambit
 
-#endif  // PATH_H
+#endif // PATH_H

@@ -30,15 +30,15 @@ namespace linalg {
 
 template <class T> class LemkeTableau : public Tableau<T> {
 protected:
-//  T eps2;
+  //  T eps2;
 public:
-//   LTableau(void);
-  class BadPivot : public Exception  {
+  //   LTableau(void);
+  class BadPivot : public Exception {
   public:
     ~BadPivot() noexcept override = default;
     const char *what() const noexcept override { return "Bad Pivot in LTableau"; }
   };
-  class BadExitIndex : public Exception  {
+  class BadExitIndex : public Exception {
   public:
     ~BadExitIndex() noexcept override = default;
     const char *what() const noexcept override { return "Bad Exit Index in LTableau"; }
@@ -55,7 +55,7 @@ public:
   int LemkePath(int dup); // follow a path of ACBFS's from one CBFS to another
 };
 
-}  // end namespace Gambit::linalg
-}  // end namespace Gambit
+} // namespace linalg
+} // end namespace Gambit
 
-#endif     // GAMBIT_LINALG_LEMKETAB_H
+#endif // GAMBIT_LINALG_LEMKETAB_H

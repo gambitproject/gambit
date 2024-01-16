@@ -23,7 +23,7 @@
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
-#endif  // WX_PRECOMP
+#endif // WX_PRECOMP
 
 #include "edittext.h"
 
@@ -32,16 +32,15 @@
 //=========================================================================
 
 BEGIN_EVENT_TABLE(gbtStaticTextButton, wxStaticText)
-  EVT_LEFT_DOWN(gbtStaticTextButton::OnLeftClick)
+EVT_LEFT_DOWN(gbtStaticTextButton::OnLeftClick)
 END_EVENT_TABLE()
 
 gbtStaticTextButton::gbtStaticTextButton(wxWindow *p_parent, wxWindowID p_id,
-					 const wxString &p_label,
-					 const wxPoint &p_position,
-					 const wxSize &p_size,
-					 long p_style)
+                                         const wxString &p_label, const wxPoint &p_position,
+                                         const wxSize &p_size, long p_style)
   : wxStaticText(p_parent, p_id, p_label, p_position, p_size, p_style)
-{ }
+{
+}
 
 void gbtStaticTextButton::OnLeftClick(wxMouseEvent &p_event)
 {
@@ -56,22 +55,18 @@ void gbtStaticTextButton::OnLeftClick(wxMouseEvent &p_event)
 //                       class gbtEditableText
 //=========================================================================
 
-gbtEditableText::gbtEditableText(wxWindow *p_parent, int p_id,
-				 const wxString &p_value,
-				 const wxPoint &p_position,
-				 const wxSize &p_size)
+gbtEditableText::gbtEditableText(wxWindow *p_parent, int p_id, const wxString &p_value,
+                                 const wxPoint &p_position, const wxSize &p_size)
   : wxPanel(p_parent, p_id, p_position, p_size)
 {
-  m_staticText = new gbtStaticTextButton(this, wxID_ANY, p_value,
-					 wxPoint(0, 0), p_size,
-					 wxALIGN_LEFT);
+  m_staticText =
+      new gbtStaticTextButton(this, wxID_ANY, p_value, wxPoint(0, 0), p_size, wxALIGN_LEFT);
   Connect(m_staticText->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
-	  wxCommandEventHandler(gbtEditableText::OnClick));
+          wxCommandEventHandler(gbtEditableText::OnClick));
 
-  m_textCtrl = new wxTextCtrl(this, wxID_ANY, p_value, wxPoint(0, 0),
-			      p_size, wxTE_PROCESS_ENTER);
+  m_textCtrl = new wxTextCtrl(this, wxID_ANY, p_value, wxPoint(0, 0), p_size, wxTE_PROCESS_ENTER);
   Connect(m_textCtrl->GetId(), wxEVT_COMMAND_TEXT_ENTER,
-	  wxCommandEventHandler(gbtEditableText::OnAccept));
+          wxCommandEventHandler(gbtEditableText::OnAccept));
 
   auto *topSizer = new wxBoxSizer(wxHORIZONTAL);
   topSizer->Add(m_staticText, 1, wxALIGN_CENTER, 0);

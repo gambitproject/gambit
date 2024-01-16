@@ -42,5 +42,4 @@ public:
   bool UseStrategic() const;
 };
 
-
-#endif   // DLNFGNASH_H
+#endif // DLNFGNASH_H

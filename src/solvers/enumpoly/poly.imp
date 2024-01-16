@@ -31,39 +31,35 @@
 //                 constructors and a destructor
 //--------------------------------------------------------------------------
 
-template <class T> polynomial<T>::polynomial(const polynomial<T>& x)
-: coeflist(x.coeflist)
-{
-}
+template <class T> polynomial<T>::polynomial(const polynomial<T> &x) : coeflist(x.coeflist) {}
 
-template <class T> polynomial<T>::polynomial(const T& coeff, const int& deg)
+template <class T> polynomial<T>::polynomial(const T &coeff, const int &deg)
 {
   if (coeff != (T)0) {
-    for (int i = 0; i < deg; i++)
+    for (int i = 0; i < deg; i++) {
       coeflist.push_back((T)0);
+    }
     coeflist.push_back(coeff);
   }
 }
 
 template <class T>
-polynomial<T>::polynomial(const Gambit::List<T>& coefficientlist)
-: coeflist(coefficientlist)
+polynomial<T>::polynomial(const Gambit::List<T> &coefficientlist) : coeflist(coefficientlist)
 {
 }
 
 template <class T>
-polynomial<T>::polynomial(const Gambit::Vector<T>& coefficientvector)
-: coeflist()
+polynomial<T>::polynomial(const Gambit::Vector<T> &coefficientvector) : coeflist()
 {
-  for (int i = 1; i <= coefficientvector.Length(); i++)
+  for (int i = 1; i <= coefficientvector.Length(); i++) {
     coeflist.push_back(coefficientvector[i]);
+  }
 }
 
-template <class T> polynomial<T>::polynomial(int deg)
-: coeflist()
+template <class T> polynomial<T>::polynomial(int deg) : coeflist()
 {
   if (deg >= 0) {
-    //gout << "Error is polynomial int constructor.\n";
+    // gout << "Error is polynomial int constructor.\n";
     exit(1);
   }
 }
@@ -72,158 +68,174 @@ template <class T> polynomial<T>::polynomial(int deg)
 //                             operators
 //--------------------------------------------------------------------------
 
-template <class T> polynomial<T>&
-                   polynomial<T>::operator= (const polynomial<T>& y)
+template <class T> polynomial<T> &polynomial<T>::operator=(const polynomial<T> &y)
 {
-  if (this!=&y) coeflist = y.coeflist;
+  if (this != &y) {
+    coeflist = y.coeflist;
+  }
 
   return *this;
 }
 
-template <class T>
-bool polynomial<T>::operator== (const polynomial<T>& y) const
+template <class T> bool polynomial<T>::operator==(const polynomial<T> &y) const
 {
-  if (Degree() != y.Degree()) return false;
-  else
-    for (int i = 0; i <= Degree(); i++)
-      if (coeflist[i+1] != y.coeflist[i+1]) return false;
+  if (Degree() != y.Degree()) {
+    return false;
+  }
+  else {
+    for (int i = 0; i <= Degree(); i++) {
+      if (coeflist[i + 1] != y.coeflist[i + 1]) {
+        return false;
+      }
+    }
+  }
   return true;
 }
 
-template <class T>
-bool polynomial<T>::operator!= (const polynomial<T>& y) const
+template <class T> bool polynomial<T>::operator!=(const polynomial<T> &y) const
 {
   return !(*this == y);
 }
 
-template <class T> const T& polynomial<T>::operator[](const int index) const
+template <class T> const T &polynomial<T>::operator[](const int index) const
 {
-  return coeflist[index+1];
+  return coeflist[index + 1];
 }
 
-template <class T> polynomial<T>
-                   polynomial<T>::operator+(const polynomial<T>& y) const
+template <class T> polynomial<T> polynomial<T>::operator+(const polynomial<T> &y) const
 {
-  if      (  Degree() < 0) return polynomial<T>(y);
-  else if (y.Degree() < 0) return polynomial<T>(*this);
+  if (Degree() < 0) {
+    return polynomial<T>(y);
+  }
+  else if (y.Degree() < 0) {
+    return polynomial<T>(*this);
+  }
 
   int max_degree;
 
-  if (Degree() > y.Degree()) {max_degree =   Degree();}
-  else                       {max_degree = y.Degree();}
+  if (Degree() > y.Degree()) {
+    max_degree = Degree();
+  }
+  else {
+    max_degree = y.Degree();
+  }
 
   polynomial<T> sum;
   for (int i = 0; i <= max_degree; i++) {
     sum.coeflist.push_back((T)0);
-    if (i <=   Degree()) sum.coeflist[i+1] +=   coeflist[i+1];
-    if (i <= y.Degree()) sum.coeflist[i+1] += y.coeflist[i+1];
+    if (i <= Degree()) {
+      sum.coeflist[i + 1] += coeflist[i + 1];
+    }
+    if (i <= y.Degree()) {
+      sum.coeflist[i + 1] += y.coeflist[i + 1];
+    }
   }
 
-  while ( (sum.coeflist.Length() >= 1) &&
-          (sum.coeflist[sum.coeflist.Length()] == (T)0) )
+  while ((sum.coeflist.Length() >= 1) && (sum.coeflist[sum.coeflist.Length()] == (T)0)) {
     sum.coeflist.Remove(sum.coeflist.Length());
+  }
 
   return sum;
 }
 
-template <class T> polynomial<T>
-                   polynomial<T>::operator-(const polynomial<T>& y) const
+template <class T> polynomial<T> polynomial<T>::operator-(const polynomial<T> &y) const
 {
-  return polynomial<T>(*this+(-y));
+  return polynomial<T>(*this + (-y));
 }
 
-template <class T> polynomial<T>
-                   polynomial<T>::operator*(const polynomial<T> &y) const
+template <class T> polynomial<T> polynomial<T>::operator*(const polynomial<T> &y) const
 {
-  if      (Degree() == -1) return polynomial<T>(*this);
-  else if (y.Degree() == -1) return polynomial<T>(y);
+  if (Degree() == -1) {
+    return polynomial<T>(*this);
+  }
+  else if (y.Degree() == -1) {
+    return polynomial<T>(y);
+  }
 
   int tot_degree = Degree() + y.Degree();
 
   polynomial<T> product;
-  for (int t = 0; t <= tot_degree; t++)
+  for (int t = 0; t <= tot_degree; t++) {
     product.coeflist.push_back((T)0);
-  for (int i = 0; i <= Degree(); i++)
-    for (int j = 0; j <= y.Degree(); j++)
-      product.coeflist[i+j+1] += (*this)[i] * y[j];
+  }
+  for (int i = 0; i <= Degree(); i++) {
+    for (int j = 0; j <= y.Degree(); j++) {
+      product.coeflist[i + j + 1] += (*this)[i] * y[j];
+    }
+  }
 
   return product;
 }
 
-template <class T> polynomial<T>
-                   polynomial<T>::operator/(const polynomial<T> &q) const
+template <class T> polynomial<T> polynomial<T>::operator/(const polynomial<T> &q) const
 {
-  //assert(q.Degree() >= 0);
+  // assert(q.Degree() >= 0);
 
   polynomial<T> ans;
   polynomial<T> r = *this;
   while (r.Degree() >= q.Degree()) {
-    polynomial<T> x(r.LeadingCoefficient()/q.LeadingCoefficient(),
-		    r.Degree() - q.Degree());
+    polynomial<T> x(r.LeadingCoefficient() / q.LeadingCoefficient(), r.Degree() - q.Degree());
     ans += x;
-    r-=q*x;
+    r -= q * x;
   }
   return polynomial<T>(ans);
 }
 
-template <class T> polynomial<T>&
-                   polynomial<T>::operator+=(const polynomial<T>& y)
+template <class T> polynomial<T> &polynomial<T>::operator+=(const polynomial<T> &y)
 {
-  return ((*this)=(*this)+y);
+  return ((*this) = (*this) + y);
 }
 
-template <class T> polynomial<T>&
-                   polynomial<T>::operator-=(const polynomial<T>& y)
+template <class T> polynomial<T> &polynomial<T>::operator-=(const polynomial<T> &y)
 {
-  return ((*this)=(*this)-y);
+  return ((*this) = (*this) - y);
 }
 
-template <class T> polynomial<T>&
-                   polynomial<T>::operator*=(const polynomial<T>& y)
+template <class T> polynomial<T> &polynomial<T>::operator*=(const polynomial<T> &y)
 {
-  return ((*this)=(*this)*y);
+  return ((*this) = (*this) * y);
 }
 
-template <class T> polynomial<T>&
-                   polynomial<T>::operator/=(const polynomial<T>& y)
+template <class T> polynomial<T> &polynomial<T>::operator/=(const polynomial<T> &y)
 {
-  return ((*this)=(*this)/y);
+  return ((*this) = (*this) / y);
 }
 
-template <class T> polynomial<T>
-                   polynomial<T>::operator%(const polynomial<T> &q) const
+template <class T> polynomial<T> polynomial<T>::operator%(const polynomial<T> &q) const
 {
-  //assert (q.Degree() != -1);
+  // assert (q.Degree() != -1);
 
   polynomial<T> ans;
   polynomial<T> r = *this;
 
-  while (r.Degree() >= q.Degree())
-    {
-      polynomial<T> x(r.LeadingCoefficient()/q.LeadingCoefficient(),
-		      r.Degree() - q.Degree());
-      ans += x;
-      r-=q*x;
-    }
+  while (r.Degree() >= q.Degree()) {
+    polynomial<T> x(r.LeadingCoefficient() / q.LeadingCoefficient(), r.Degree() - q.Degree());
+    ans += x;
+    r -= q * x;
+  }
   return polynomial<T>(r);
 }
 
-template <class T> polynomial<T> polynomial<T>::operator- () const
+template <class T> polynomial<T> polynomial<T>::operator-() const
 {
   polynomial<T> negation;
-  for (int i = 0; i <= Degree(); i++)
-    negation.coeflist.push_back(-coeflist[i+1]);
+  for (int i = 0; i <= Degree(); i++) {
+    negation.coeflist.push_back(-coeflist[i + 1]);
+  }
 
   return negation;
 }
 
 template <class T> polynomial<T> polynomial<T>::Derivative() const
 {
-  if (Degree() <= 0) return polynomial<T>(-1);
+  if (Degree() <= 0) {
+    return polynomial<T>(-1);
+  }
 
   polynomial<T> derivative;
-  for (int i = 1; i <= Degree(); i++)
-    derivative.coeflist.push_back((T)i * coeflist[i+1]);
+  for (int i = 1; i <= Degree(); i++) {
+    derivative.coeflist.push_back((T)i * coeflist[i + 1]);
+  }
 
   return derivative;
 }
@@ -232,17 +244,17 @@ template <class T> polynomial<T> polynomial<T>::Derivative() const
 //                             manipulation
 //--------------------------------------------------------------------------
 
-template <class T>  void polynomial<T>::ToMonic()
+template <class T> void polynomial<T>::ToMonic()
 {
-  //assert (!IsZero());
+  // assert (!IsZero());
 
   T lc = LeadingCoefficient();
-  for (int i = 1; i <= coeflist.Length(); i++)
+  for (int i = 1; i <= coeflist.Length(); i++) {
     coeflist[i] /= lc;
+  }
 }
 
-template<class T>
-polynomial<double>  polynomial<T>::TogDouble() const
+template <class T> polynomial<double> polynomial<T>::TogDouble() const
 {
   Gambit::List<double> newcoefs;
   for (int i = 1; i <= coeflist.Length(); i++) {
@@ -255,17 +267,23 @@ polynomial<double>  polynomial<T>::TogDouble() const
 //                              information
 //--------------------------------------------------------------------------
 
-template <class T>  bool polynomial<T>::IsZero() const
+template <class T> bool polynomial<T>::IsZero() const
 {
-  if (coeflist.Length() == 0) return true;
-  else                        return false;
+  if (coeflist.Length() == 0) {
+    return true;
+  }
+  else {
+    return false;
+  }
 }
 
-template <class T>  T polynomial<T>::EvaluationAt(const T& arg) const
+template <class T> T polynomial<T>::EvaluationAt(const T &arg) const
 {
   T answer;
 
-  if (IsZero()) answer = (T)0;
+  if (IsZero()) {
+    answer = (T)0;
+  }
   else {
     answer = coeflist[Degree() + 1];
     for (int i = Degree(); i >= 1; i--) {
@@ -277,27 +295,26 @@ template <class T>  T polynomial<T>::EvaluationAt(const T& arg) const
   return answer;
 }
 
-template <class T> int polynomial<T>::Degree() const
-{
-  return coeflist.Length() - 1;
-}
+template <class T> int polynomial<T>::Degree() const { return coeflist.Length() - 1; }
 
 template <class T> T polynomial<T>::LeadingCoefficient() const
 {
-  if (Degree() < 0) return (T)0;
-  else              return coeflist[Degree() + 1];
+  if (Degree() < 0) {
+    return (T)0;
+  }
+  else {
+    return coeflist[Degree() + 1];
+  }
 }
 
-template <class T>
-__attribute__((unused)) Gambit::List<T> polynomial<T>::CoefficientList() const
+template <class T> __attribute__((unused)) Gambit::List<T> polynomial<T>::CoefficientList() const
 {
   return coeflist;
 }
 
-template <class T>
-polynomial<T> polynomial<T>::GcdWith(const polynomial<T>& that) const
+template <class T> polynomial<T> polynomial<T>::GcdWith(const polynomial<T> &that) const
 {
-  //assert( !this->IsZero() && !that.IsZero() );
+  // assert( !this->IsZero() && !that.IsZero() );
 
   polynomial<T> numerator(*this);
   numerator.ToMonic();
@@ -315,31 +332,45 @@ polynomial<T> polynomial<T>::GcdWith(const polynomial<T>& that) const
   return denominator;
 }
 
-template <class T>
-bool polynomial<T>::IsQuadratfrei() const
+template <class T> bool polynomial<T>::IsQuadratfrei() const
 {
   polynomial<T> Df(Derivative());
-  if (Df.Degree() <= 0)             return true;
-  if ( GcdWith(Df).Degree() <= 1 ) return true;
-  else                              return false;
+  if (Df.Degree() <= 0) {
+    return true;
+  }
+  if (GcdWith(Df).Degree() <= 1) {
+    return true;
+  }
+  else {
+    return false;
+  }
 }
 
-template <class T>
-bool polynomial<T>::CannotHaveRootsIn(const gInterval<T>& I) const
+template <class T> bool polynomial<T>::CannotHaveRootsIn(const gInterval<T> &I) const
 {
   // get rid of easy cases
-  if      (Degree() == -1) return false;
-  else if (Degree() ==  0) return true;
-  else if (EvaluationAt(I.LowerBound()) == (T)0) return false;
+  if (Degree() == -1) {
+    return false;
+  }
+  else if (Degree() == 0) {
+    return true;
+  }
+  else if (EvaluationAt(I.LowerBound()) == (T)0) {
+    return false;
+  }
 
   // generate list of derivatives
-  Gambit::List< polynomial<T> > derivs;
+  Gambit::List<polynomial<T>> derivs;
   derivs.push_back(Derivative());
   int i;
-  for (i = 2; i <= Degree(); i++) derivs.push_back(derivs[i-1].Derivative());
+  for (i = 2; i <= Degree(); i++) {
+    derivs.push_back(derivs[i - 1].Derivative());
+  }
 
   T val = EvaluationAt(I.LowerBound());
-  if (val < (T)0) val = -val;
+  if (val < (T)0) {
+    val = -val;
+  }
 
   // find max |c_0/Degree()*c_i|^(1/i)
   int max_index = 0;
@@ -348,103 +379,115 @@ bool polynomial<T>::CannotHaveRootsIn(const gInterval<T>& I) const
   for (i = 1; i <= Degree(); i++) {
     relevant_factorial *= (T)i;
     T ith_coeff = derivs[i].EvaluationAt(I.LowerBound()) / relevant_factorial;
-    if (ith_coeff < (T)0) ith_coeff = -ith_coeff;
-
-    if (ith_coeff != (T)0) {
-      T base = val/((T)Degree()*ith_coeff);
-
-      if (base_of_max_index == (T)0)
-	{ max_index = i; base_of_max_index = base; }
-      else if ( pow((T)base, max_index) < pow((T)base_of_max_index, i))
-	{ max_index = i; base_of_max_index = base; }
+    if (ith_coeff < (T)0) {
+      ith_coeff = -ith_coeff;
     }
 
-  }
-	//assert(base_of_max_index != (T)0);
+    if (ith_coeff != (T)0) {
+      T base = val / ((T)Degree() * ith_coeff);
 
-  if ( (T)pow((T)I.Length(), max_index) < (T)base_of_max_index )
+      if (base_of_max_index == (T)0) {
+        max_index = i;
+        base_of_max_index = base;
+      }
+      else if (pow((T)base, max_index) < pow((T)base_of_max_index, i)) {
+        max_index = i;
+        base_of_max_index = base;
+      }
+    }
+  }
+  // assert(base_of_max_index != (T)0);
+
+  if ((T)pow((T)I.Length(), max_index) < (T)base_of_max_index) {
     return true;
-  else
+  }
+  else {
     return false;
+  }
 }
 
-
-template <class T> Gambit::List< gInterval<T> >
-polynomial<T>::RootSubintervals(const gInterval<T>& I) const
-{ //assert ( Degree() >= 0 && IsQuadratfrei() );
+template <class T>
+Gambit::List<gInterval<T>> polynomial<T>::RootSubintervals(const gInterval<T> &I) const
+{ // assert ( Degree() >= 0 && IsQuadratfrei() );
 
   polynomial<T> Df = Derivative();
 
-  Gambit::List< gInterval<T> > answer;
+  Gambit::List<gInterval<T>> answer;
 
-  Gambit::List< gInterval<T> > to_be_processed; to_be_processed.push_back(I);
+  Gambit::List<gInterval<T>> to_be_processed;
+  to_be_processed.push_back(I);
   while (to_be_processed.Length() > 0) {
 
     gInterval<T> in_process = to_be_processed.Remove(to_be_processed.Length());
 
-    if      ( EvaluationAt(in_process.LowerBound()) == (T)0 ) {
+    if (EvaluationAt(in_process.LowerBound()) == (T)0) {
 
       if (Df.CannotHaveRootsIn(in_process)) {
-	answer.push_back(in_process);
+        answer.push_back(in_process);
       }
       else {
-	to_be_processed.push_back(in_process.RightHalf());
-	to_be_processed.push_back(in_process.LeftHalf());
+        to_be_processed.push_back(in_process.RightHalf());
+        to_be_processed.push_back(in_process.LeftHalf());
       }
     }
 
-    else if ( EvaluationAt(in_process.UpperBound()) == (T)0 ) {
-      if (Df.CannotHaveRootsIn(in_process))  {
-	if (in_process.UpperBound() == I.UpperBound()) {
-	  answer.push_back(in_process);
-	}
+    else if (EvaluationAt(in_process.UpperBound()) == (T)0) {
+      if (Df.CannotHaveRootsIn(in_process)) {
+        if (in_process.UpperBound() == I.UpperBound()) {
+          answer.push_back(in_process);
+        }
       }
       else {
-	to_be_processed.push_back(in_process.RightHalf());
-	to_be_processed.push_back(in_process.LeftHalf());
+        to_be_processed.push_back(in_process.RightHalf());
+        to_be_processed.push_back(in_process.LeftHalf());
       }
     }
 
     else if (!CannotHaveRootsIn(in_process)) {
       if (Df.CannotHaveRootsIn(in_process)) {
-	if ( (EvaluationAt(in_process.LowerBound()) < (T)0 &&
-	      EvaluationAt(in_process.UpperBound()) > (T)0) ||
-	     (EvaluationAt(in_process.LowerBound()) > (T)0 &&
-	      EvaluationAt(in_process.UpperBound()) < (T)0) ) {
-	  answer.push_back(in_process);
-	}
+        if ((EvaluationAt(in_process.LowerBound()) < (T)0 &&
+             EvaluationAt(in_process.UpperBound()) > (T)0) ||
+            (EvaluationAt(in_process.LowerBound()) > (T)0 &&
+             EvaluationAt(in_process.UpperBound()) < (T)0)) {
+          answer.push_back(in_process);
+        }
       }
       else {
-	to_be_processed.push_back(in_process.RightHalf());
-	to_be_processed.push_back(in_process.LeftHalf());
+        to_be_processed.push_back(in_process.RightHalf());
+        to_be_processed.push_back(in_process.LeftHalf());
       }
     }
-
   }
 
   return answer;
 }
 
-template <class T> gInterval<T>
-polynomial<T>::NeighborhoodOfRoot(const gInterval<T>& I, T& error) const
+template <class T>
+gInterval<T> polynomial<T>::NeighborhoodOfRoot(const gInterval<T> &I, T &error) const
 {
-  Gambit::List< gInterval<T> > intrvls; intrvls.push_back(I);
+  Gambit::List<gInterval<T>> intrvls;
+  intrvls.push_back(I);
   while (intrvls[intrvls.Length()].Length() >= error) {
-    if      (EvaluationAt(intrvls[intrvls.Length()].LowerBound()) == (T)0)
+    if (EvaluationAt(intrvls[intrvls.Length()].LowerBound()) == (T)0) {
       intrvls.push_back(gInterval<T>(intrvls[intrvls.Length()].LowerBound(),
-				  intrvls[intrvls.Length()].LowerBound()));
+                                     intrvls[intrvls.Length()].LowerBound()));
+    }
 
-    else if (EvaluationAt(intrvls[intrvls.Length()].UpperBound()) == (T)0)
+    else if (EvaluationAt(intrvls[intrvls.Length()].UpperBound()) == (T)0) {
       intrvls.push_back(gInterval<T>(intrvls[intrvls.Length()].UpperBound(),
-				  intrvls[intrvls.Length()].UpperBound()));
+                                     intrvls[intrvls.Length()].UpperBound()));
+    }
 
-    else if ( (EvaluationAt(intrvls[intrvls.Length()].LowerBound()) >= (T)0 &&
-	       EvaluationAt(intrvls[intrvls.Length()].Midpoint  ()) <= (T)0)   ||
-              (EvaluationAt(intrvls[intrvls.Length()].LowerBound()) <= (T)0 &&
-	       EvaluationAt(intrvls[intrvls.Length()].Midpoint  ()) >= (T)0) )
-         intrvls.push_back(intrvls[intrvls.Length()].LeftHalf());
+    else if ((EvaluationAt(intrvls[intrvls.Length()].LowerBound()) >= (T)0 &&
+              EvaluationAt(intrvls[intrvls.Length()].Midpoint()) <= (T)0) ||
+             (EvaluationAt(intrvls[intrvls.Length()].LowerBound()) <= (T)0 &&
+              EvaluationAt(intrvls[intrvls.Length()].Midpoint()) >= (T)0)) {
+      intrvls.push_back(intrvls[intrvls.Length()].LeftHalf());
+    }
 
-    else intrvls.push_back(intrvls[intrvls.Length()].RightHalf());
+    else {
+      intrvls.push_back(intrvls[intrvls.Length()].RightHalf());
+    }
   }
 
   return intrvls[intrvls.Length()];
@@ -453,45 +496,48 @@ polynomial<T>::NeighborhoodOfRoot(const gInterval<T>& I, T& error) const
   // by introducing Newton's method.
 }
 
-template <class T> Gambit::List< gInterval<T> >
-polynomial<T>::PreciseRootIntervals(const gInterval<T>& I, T& error) const
+template <class T>
+Gambit::List<gInterval<T>> polynomial<T>::PreciseRootIntervals(const gInterval<T> &I,
+                                                               T &error) const
 {
-  Gambit::List< gInterval<T> > coarse = RootSubintervals(I);
-  Gambit::List< gInterval<T> > fine;
+  Gambit::List<gInterval<T>> coarse = RootSubintervals(I);
+  Gambit::List<gInterval<T>> fine;
 
-  for (int i = 1; i <= coarse.Length(); i++)
-    fine.push_back(NeighborhoodOfRoot(coarse[i],error));
+  for (int i = 1; i <= coarse.Length(); i++) {
+    fine.push_back(NeighborhoodOfRoot(coarse[i], error));
+  }
 
   return fine;
 }
 
-template <class T> Gambit::List<T>
-polynomial<T>::PreciseRoots(const gInterval<T>& I, T& error) const
+template <class T>
+Gambit::List<T> polynomial<T>::PreciseRoots(const gInterval<T> &I, T &error) const
 {
   Gambit::List<T> roots;
 
   polynomial<T> p(*this), factor(*this);
 
-  while ( p.Degree() > 0 ) {
+  while (p.Degree() > 0) {
 
     int depth = 1;
     polynomial<T> probe(p.Derivative());
-    polynomial<T> current_gcd( p.GcdWith(probe) );
-    while ( current_gcd.Degree() > 0 ) {
+    polynomial<T> current_gcd(p.GcdWith(probe));
+    while (current_gcd.Degree() > 0) {
       depth++;
       factor = current_gcd;
       probe = probe.Derivative();
       current_gcd = current_gcd.GcdWith(probe);
     }
 
-    for (int i = 1; i <= depth; i++) p = p/factor;
-    Gambit::List< gInterval<T> > fine = factor.PreciseRootIntervals(I,error);
+    for (int i = 1; i <= depth; i++) {
+      p = p / factor;
+    }
+    Gambit::List<gInterval<T>> fine = factor.PreciseRootIntervals(I, error);
     for (int j = 1; j <= fine.Length(); j++) {
       T approx = fine[j].LowerBound();
       for (int h = 1; h <= 2; h++) {
-	approx -= factor.EvaluationAt(approx)
-                          /
-	  factor.Derivative().EvaluationAt(approx); // Newton's Method
+        approx -= factor.EvaluationAt(approx) /
+                  factor.Derivative().EvaluationAt(approx); // Newton's Method
       }
       roots.push_back(approx);
     }
@@ -501,7 +547,6 @@ polynomial<T>::PreciseRoots(const gInterval<T>& I, T& error) const
   return roots;
 }
 
-
 //--------------------------------------------------------------------------
 //                      class: complexpoly
 //--------------------------------------------------------------------------
@@ -510,181 +555,188 @@ polynomial<T>::PreciseRoots(const gInterval<T>& I, T& error) const
 //                 constructors and a destructor
 //--------------------------------------------------------------------------
 
-complexpoly::complexpoly(const complexpoly& x)
+complexpoly::complexpoly(const complexpoly &x)
 
-= default;
+    = default;
 
-complexpoly::complexpoly(const gComplex& coeff, const int& deg)
+complexpoly::complexpoly(const gComplex &coeff, const int &deg)
 {
   if (coeff != (gComplex)0) {
-    for (int i = 0; i < deg; i++)
+    for (int i = 0; i < deg; i++) {
       coeflist.push_back((gComplex)0);
+    }
     coeflist.push_back(coeff);
   }
 }
 
-
-complexpoly::complexpoly(const Gambit::List<gComplex>& coefficientlist)
-: coeflist(coefficientlist)
+complexpoly::complexpoly(const Gambit::List<gComplex> &coefficientlist) : coeflist(coefficientlist)
 {
 }
 
-complexpoly::complexpoly(const int deg)
-: coeflist()
+complexpoly::complexpoly(const int deg) : coeflist()
 {
   if (deg >= 0) {
-    //gout << "Error is complexpoly int constructor.\n";
+    // gout << "Error is complexpoly int constructor.\n";
     exit(1);
   }
 }
 
-complexpoly::~complexpoly()
-= default;
+complexpoly::~complexpoly() = default;
 
 //--------------------------------------------------------------------------
 //                             operators
 //--------------------------------------------------------------------------
 
-complexpoly& complexpoly::operator= (const complexpoly& y)
+complexpoly &complexpoly::operator=(const complexpoly &y)
 {
-  if (this!=&y) coeflist = y.coeflist;
+  if (this != &y) {
+    coeflist = y.coeflist;
+  }
 
   return *this;
 }
 
-bool complexpoly::operator== (const complexpoly& y) const
+bool complexpoly::operator==(const complexpoly &y) const
 {
-  if (Degree() != y.Degree()) return false;
-  else
-    for (int i = 0; i <= Degree(); i++)
-      if (coeflist[i+1] != y.coeflist[i+1]) return false;
+  if (Degree() != y.Degree()) {
+    return false;
+  }
+  else {
+    for (int i = 0; i <= Degree(); i++) {
+      if (coeflist[i + 1] != y.coeflist[i + 1]) {
+        return false;
+      }
+    }
+  }
   return true;
 }
 
-bool complexpoly::operator!= (const complexpoly& y) const
-{
-  return !(*this == y);
-}
+bool complexpoly::operator!=(const complexpoly &y) const { return !(*this == y); }
 
-const gComplex& complexpoly::operator[](const int index) const
-{
-  return coeflist[index+1];
-}
+const gComplex &complexpoly::operator[](const int index) const { return coeflist[index + 1]; }
 
-complexpoly complexpoly::operator+(const complexpoly& y) const
+complexpoly complexpoly::operator+(const complexpoly &y) const
 {
-  if      (  Degree() < 0) return { y };
-  else if (y.Degree() < 0) return { *this };
+  if (Degree() < 0) {
+    return {y};
+  }
+  else if (y.Degree() < 0) {
+    return {*this};
+  }
 
   int max_degree;
 
-  if (Degree() > y.Degree()) {max_degree =   Degree();}
-  else                       {max_degree = y.Degree();}
+  if (Degree() > y.Degree()) {
+    max_degree = Degree();
+  }
+  else {
+    max_degree = y.Degree();
+  }
 
   complexpoly sum;
   for (int i = 0; i <= max_degree; i++) {
     sum.coeflist.push_back((gComplex)0);
-    if (i <=   Degree()) sum.coeflist[i+1] +=   coeflist[i+1];
-    if (i <= y.Degree()) sum.coeflist[i+1] += y.coeflist[i+1];
+    if (i <= Degree()) {
+      sum.coeflist[i + 1] += coeflist[i + 1];
+    }
+    if (i <= y.Degree()) {
+      sum.coeflist[i + 1] += y.coeflist[i + 1];
+    }
   }
 
-  while ( (sum.coeflist.Length() >= 1) &&
-          (sum.coeflist[sum.coeflist.Length()] == (gComplex)0) )
+  while ((sum.coeflist.Length() >= 1) && (sum.coeflist[sum.coeflist.Length()] == (gComplex)0)) {
     sum.coeflist.Remove(sum.coeflist.Length());
+  }
 
   return sum;
 }
 
-complexpoly complexpoly::operator-(const complexpoly& y) const
+complexpoly complexpoly::operator-(const complexpoly &y) const
 {
-  return complexpoly(*this+(-y));
+  return complexpoly(*this + (-y));
 }
 
 complexpoly complexpoly::operator*(const complexpoly &y) const
 {
-  if      (Degree() == -1) return { *this };
-  else if (y.Degree() == -1) return { y };
+  if (Degree() == -1) {
+    return {*this};
+  }
+  else if (y.Degree() == -1) {
+    return {y};
+  }
 
   int tot_degree = Degree() + y.Degree();
 
   complexpoly product;
-  for (int t = 0; t <= tot_degree; t++)
+  for (int t = 0; t <= tot_degree; t++) {
     product.coeflist.push_back((gComplex)0);
-  for (int i = 0; i <= Degree(); i++)
-    for (int j = 0; j <= y.Degree(); j++)
-      product.coeflist[i+j+1] += (*this)[i] * y[j];
+  }
+  for (int i = 0; i <= Degree(); i++) {
+    for (int j = 0; j <= y.Degree(); j++) {
+      product.coeflist[i + j + 1] += (*this)[i] * y[j];
+    }
+  }
 
   return product;
 }
 
 complexpoly complexpoly::operator/(const complexpoly &q) const
 {
-  //assert(q.Degree() >= 0);
+  // assert(q.Degree() >= 0);
 
   complexpoly ans;
   complexpoly r = *this;
   while (r.Degree() >= q.Degree()) {
-    complexpoly x(r.LeadingCoefficient()/q.LeadingCoefficient(),
-		    r.Degree() - q.Degree());
+    complexpoly x(r.LeadingCoefficient() / q.LeadingCoefficient(), r.Degree() - q.Degree());
     ans += x;
-    r-=q*x;
+    r -= q * x;
   }
-  return { ans };
+  return {ans};
 }
 
-complexpoly& complexpoly::operator+=(const complexpoly& y)
-{
-  return ((*this)=(*this)+y);
-}
+complexpoly &complexpoly::operator+=(const complexpoly &y) { return ((*this) = (*this) + y); }
 
-complexpoly& complexpoly::operator-=(const complexpoly& y)
-{
-  return ((*this)=(*this)-y);
-}
+complexpoly &complexpoly::operator-=(const complexpoly &y) { return ((*this) = (*this) - y); }
 
-complexpoly& complexpoly::operator*=(const complexpoly& y)
-{
-  return ((*this)=(*this)*y);
-}
+complexpoly &complexpoly::operator*=(const complexpoly &y) { return ((*this) = (*this) * y); }
 
-complexpoly& complexpoly::operator/=(const complexpoly& y)
-{
-  return ((*this)=(*this)/y);
-}
+complexpoly &complexpoly::operator/=(const complexpoly &y) { return ((*this) = (*this) / y); }
 
 complexpoly complexpoly::operator%(const complexpoly &q) const
 {
-  //assert (q.Degree() != -1);
+  // assert (q.Degree() != -1);
 
   complexpoly ans;
   complexpoly r = *this;
 
-  while (r.Degree() >= q.Degree())
-    {
-      complexpoly x(r.LeadingCoefficient()/q.LeadingCoefficient(),
-		      r.Degree() - q.Degree());
-      ans += x;
-      r-=q*x;
-    }
-  return { r };
+  while (r.Degree() >= q.Degree()) {
+    complexpoly x(r.LeadingCoefficient() / q.LeadingCoefficient(), r.Degree() - q.Degree());
+    ans += x;
+    r -= q * x;
+  }
+  return {r};
 }
 
-complexpoly complexpoly::operator- () const
+complexpoly complexpoly::operator-() const
 {
   complexpoly negation;
-  for (int i = 0; i <= Degree(); i++)
-    negation.coeflist.push_back(-coeflist[i+1]);
+  for (int i = 0; i <= Degree(); i++) {
+    negation.coeflist.push_back(-coeflist[i + 1]);
+  }
 
   return negation;
 }
 
 complexpoly complexpoly::Derivative() const
 {
-  if (Degree() <= 0) return complexpoly(-1);
+  if (Degree() <= 0) {
+    return complexpoly(-1);
+  }
 
   complexpoly derivative;
-  for (int i = 1; i <= Degree(); i++)
-    derivative.coeflist.push_back((gComplex)i * coeflist[i+1]);
+  for (int i = 1; i <= Degree(); i++) {
+    derivative.coeflist.push_back((gComplex)i * coeflist[i + 1]);
+  }
 
   return derivative;
 }
@@ -695,13 +747,13 @@ complexpoly complexpoly::Derivative() const
 
 void complexpoly::ToMonic()
 {
-  //assert (!IsZero());
+  // assert (!IsZero());
 
   gComplex lc = LeadingCoefficient();
-  for (int i = 1; i <= coeflist.Length(); i++)
+  for (int i = 1; i <= coeflist.Length(); i++) {
     coeflist[i] /= lc;
+  }
 }
-
 
 //--------------------------------------------------------------------------
 //                              information
@@ -709,38 +761,44 @@ void complexpoly::ToMonic()
 
 bool complexpoly::IsZero() const
 {
-  if (coeflist.Length() == 0) return true;
-  else                        return false;
+  if (coeflist.Length() == 0) {
+    return true;
+  }
+  else {
+    return false;
+  }
 }
 
-gComplex complexpoly::EvaluationAt(const gComplex& arg) const
+gComplex complexpoly::EvaluationAt(const gComplex &arg) const
 {
   gComplex answer;
 
   for (int i = 0; i <= Degree(); i++) {
     auto monom_val = static_cast<gComplex>(1);
-    for (int j = 1; j <= i; j++) monom_val *= arg;
-    answer += coeflist[i+1] * monom_val;
+    for (int j = 1; j <= i; j++) {
+      monom_val *= arg;
+    }
+    answer += coeflist[i + 1] * monom_val;
   }
 
   return answer;
 }
 
-int complexpoly::Degree() const
-{
-  return coeflist.Length() - 1;
-}
+int complexpoly::Degree() const { return coeflist.Length() - 1; }
 
 gComplex complexpoly::LeadingCoefficient() const
 {
-  if (Degree() < 0) return (gComplex)0;
-  else              return coeflist[Degree() + 1];
+  if (Degree() < 0) {
+    return (gComplex)0;
+  }
+  else {
+    return coeflist[Degree() + 1];
+  }
 }
 
-
-complexpoly complexpoly::GcdWith(const complexpoly& that) const
+complexpoly complexpoly::GcdWith(const complexpoly &that) const
 {
-  //assert( !this->IsZero() && !that.IsZero() );
+  // assert( !this->IsZero() && !that.IsZero() );
 
   complexpoly numerator(*this);
   numerator.ToMonic();
@@ -758,41 +816,47 @@ complexpoly complexpoly::GcdWith(const complexpoly& that) const
   return denominator;
 }
 
-
 bool complexpoly::IsQuadratfrei() const
 {
   complexpoly Df(Derivative());
-  if (Df.Degree() <= 0)             return true;
-  if ( GcdWith(Df).Degree() <= 1 ) return true;
-  else                              return false;
+  if (Df.Degree() <= 0) {
+    return true;
+  }
+  if (GcdWith(Df).Degree() <= 1) {
+    return true;
+  }
+  else {
+    return false;
+  }
 }
-
 
 Gambit::List<gComplex> complexpoly::Roots() const
 {
-  //assert (!IsZero());
+  // assert (!IsZero());
 
   Gambit::List<gComplex> answer;
 
-  if (Degree() == 0)
+  if (Degree() == 0) {
     return answer;
+  }
 
   complexpoly deriv(Derivative());
 
-  gComplex guess(1.3,0.314159);
+  gComplex guess(1.3, 0.314159);
 
   while (fabs(EvaluationAt(guess)) > 0.00001) {
-    gComplex diff = EvaluationAt(guess)/deriv.EvaluationAt(guess);
+    gComplex diff = EvaluationAt(guess) / deriv.EvaluationAt(guess);
     int count = 0;
     bool done = false;
     while (!done) {
-	if ( count < 10 &&
-	    fabs(EvaluationAt(guess - diff)) >= fabs(EvaluationAt(guess)) ) {
-	  diff /= gComplex(4.0,0.0);
-	  count++;
-	}
-	else done = true;
+      if (count < 10 && fabs(EvaluationAt(guess - diff)) >= fabs(EvaluationAt(guess))) {
+        diff /= gComplex(4.0, 0.0);
+        count++;
       }
+      else {
+        done = true;
+      }
+    }
     if (count == 10) {
       //      gout << "Failure in complexpoly::Roots().\n";
       exit(1);
@@ -805,14 +869,14 @@ Gambit::List<gComplex> complexpoly::Roots() const
 
   Gambit::List<gComplex> lin_form_coeffs;
   lin_form_coeffs.push_back(guess);
-  lin_form_coeffs.push_back(gComplex(-1.0,0.0));
+  lin_form_coeffs.push_back(gComplex(-1.0, 0.0));
   complexpoly linear_form(lin_form_coeffs);
-  complexpoly quotient = *this/linear_form;
+  complexpoly quotient = *this / linear_form;
   answer += quotient.Roots();
 
   for (int i = 1; i <= answer.Length(); i++) { // "Polish" each root twice
-    answer[i] -= EvaluationAt(answer[i])/deriv.EvaluationAt(answer[i]);
-    answer[i] -= EvaluationAt(answer[i])/deriv.EvaluationAt(answer[i]);
+    answer[i] -= EvaluationAt(answer[i]) / deriv.EvaluationAt(answer[i]);
+    answer[i] -= EvaluationAt(answer[i]) / deriv.EvaluationAt(answer[i]);
   }
 
   return answer;

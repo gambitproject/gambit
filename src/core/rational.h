@@ -47,18 +47,18 @@ public:
   explicit Rational(long n);
   Rational(int n, int d);
   Rational(long n, long d);
-  explicit Rational(const Integer& n);
-  Rational(const Integer& n, const Integer& d);
-  Rational(const Rational&);
+  explicit Rational(const Integer &n);
+  Rational(const Integer &n, const Integer &d);
+  Rational(const Rational &);
   ~Rational();
 
-  Rational &operator =  (const Rational& y);
+  Rational &operator=(const Rational &y);
 
   bool operator==(const Rational &y) const;
   bool operator!=(const Rational &y) const;
-  bool operator< (const Rational &y) const;
+  bool operator<(const Rational &y) const;
   bool operator<=(const Rational &y) const;
-  bool operator> (const Rational &y) const;
+  bool operator>(const Rational &y) const;
   bool operator>=(const Rational &y) const;
 
   Rational operator+(const Rational &y) const;
@@ -66,57 +66,54 @@ public:
   Rational operator*(const Rational &y) const;
   Rational operator/(const Rational &y) const;
 
-  Rational &operator+=(const Rational& y);
-  Rational &operator-=(const Rational& y);
-  Rational &operator*=(const Rational& y);
-  Rational &operator/=(const Rational& y);
+  Rational &operator+=(const Rational &y);
+  Rational &operator-=(const Rational &y);
+  Rational &operator*=(const Rational &y);
+  Rational &operator/=(const Rational &y);
 
   Rational operator-() const;
 
-
   // builtin Rational functions
 
+  void negate(); // x = -x
+  void invert(); // x = 1/x
 
-  void             negate();                      // x = -x
-  void             invert();                      // x = 1/x
-
-  friend int       sign(const Rational& x);             // -1, 0, or +1
-  friend Rational  abs(const Rational& x);              // absolute value
-  friend Rational  sqr(const Rational& x);              // square
-  friend Rational  pow(const Rational& x, long y);
-  friend Rational  pow(const Rational& x, const Integer& y);
-  const Integer&   numerator() const;
-  const Integer&   denominator() const;
+  friend int sign(const Rational &x);     // -1, 0, or +1
+  friend Rational abs(const Rational &x); // absolute value
+  friend Rational sqr(const Rational &x); // square
+  friend Rational pow(const Rational &x, long y);
+  friend Rational pow(const Rational &x, const Integer &y);
+  const Integer &numerator() const;
+  const Integer &denominator() const;
 
   // coercion & conversion
 
   operator double() const;
-  friend Integer   floor(const Rational& x);
-  friend Integer   ceil(const Rational& x);
-  friend Integer   trunc(const Rational& x);
-  friend Integer   round(const Rational& x);
+  friend Integer floor(const Rational &x);
+  friend Integer ceil(const Rational &x);
+  friend Integer trunc(const Rational &x);
+  friend Integer round(const Rational &x);
 
-  friend std::istream &operator>>(std::istream &s, Rational& y);
-  friend std::ostream &operator<<(std::ostream &s, const Rational& y);
+  friend std::istream &operator>>(std::istream &s, Rational &y);
+  friend std::ostream &operator<<(std::ostream &s, const Rational &y);
 
-  int		   fits_in_float() const;
-  int		   fits_in_double() const;
+  int fits_in_float() const;
+  int fits_in_double() const;
 
   // procedural versions of operators
 
-  friend int       compare(const Rational& x, const Rational& y);
-  friend void      add(const Rational& x, const Rational& y, Rational& dest);
-  friend void      sub(const Rational& x, const Rational& y, Rational& dest);
-  friend void      mul(const Rational& x, const Rational& y, Rational& dest);
-  friend void      div(const Rational& x, const Rational& y, Rational& dest);
+  friend int compare(const Rational &x, const Rational &y);
+  friend void add(const Rational &x, const Rational &y, Rational &dest);
+  friend void sub(const Rational &x, const Rational &y, Rational &dest);
+  friend void mul(const Rational &x, const Rational &y, Rational &dest);
+  friend void div(const Rational &x, const Rational &y, Rational &dest);
 
   // error detection
   bool OK() const;
-
 };
 
 // Naming compatible with Boost's lexical_cast concept for potential future compatibility.
-template<> Rational lexical_cast(const std::string &);
+template <> Rational lexical_cast(const std::string &);
 
 } // end namespace Gambit
 

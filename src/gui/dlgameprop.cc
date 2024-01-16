@@ -23,7 +23,7 @@
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
-#endif  // WX_PRECOMP
+#endif // WX_PRECOMP
 
 #include "gamedoc.h"
 #include "dlgameprop.h"
@@ -32,70 +32,56 @@
 //                   class gbtGamePropertiesDialog
 //========================================================================
 
-gbtGamePropertiesDialog::gbtGamePropertiesDialog(wxWindow *p_parent,
-						 gbtGameDocument *p_doc)
-  : wxDialog(p_parent, wxID_ANY, _("Game properties"), wxDefaultPosition),
-    m_doc(p_doc)
+gbtGamePropertiesDialog::gbtGamePropertiesDialog(wxWindow *p_parent, gbtGameDocument *p_doc)
+  : wxDialog(p_parent, wxID_ANY, _("Game properties"), wxDefaultPosition), m_doc(p_doc)
 {
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
   auto *titleSizer = new wxBoxSizer(wxHORIZONTAL);
-  titleSizer->Add(new wxStaticText(this, wxID_STATIC, _("Title")),
-		  0, wxALL | wxALIGN_CENTER, 5);
+  titleSizer->Add(new wxStaticText(this, wxID_STATIC, _("Title")), 0, wxALL | wxALIGN_CENTER, 5);
   m_title = new wxTextCtrl(this, wxID_ANY,
-			   wxString(m_doc->GetGame()->GetTitle().c_str(),
-				    *wxConvCurrent),
-			   wxDefaultPosition, wxSize(400, -1));
+                           wxString(m_doc->GetGame()->GetTitle().c_str(), *wxConvCurrent),
+                           wxDefaultPosition, wxSize(400, -1));
 
   titleSizer->Add(m_title, 1, wxALL | wxALIGN_CENTER, 5);
   topSizer->Add(titleSizer, 0, wxALL | wxEXPAND, 0);
 
   auto *commentSizer = new wxBoxSizer(wxHORIZONTAL);
-  commentSizer->Add(new wxStaticText(this, wxID_STATIC, _("Comment")),
-		    0, wxALL | wxALIGN_CENTER, 5);
+  commentSizer->Add(new wxStaticText(this, wxID_STATIC, _("Comment")), 0, wxALL | wxALIGN_CENTER,
+                    5);
   m_comment = new wxTextCtrl(this, wxID_ANY,
-			     wxString(m_doc->GetGame()->GetComment().c_str(),
-				      *wxConvCurrent),
-			     wxDefaultPosition, wxSize(400, -1),
-			     wxTE_MULTILINE);
+                             wxString(m_doc->GetGame()->GetComment().c_str(), *wxConvCurrent),
+                             wxDefaultPosition, wxSize(400, -1), wxTE_MULTILINE);
   commentSizer->Add(m_comment, 1, wxALL | wxALIGN_CENTER, 5);
   topSizer->Add(commentSizer, 1, wxALL | wxEXPAND, 0);
 
-  auto *boxSizer =
-    new wxStaticBoxSizer(wxVERTICAL, this, _("Information about this game"));
+  auto *boxSizer = new wxStaticBoxSizer(wxVERTICAL, this, _("Information about this game"));
 
-  boxSizer->Add(new wxStaticText(this, wxID_STATIC,
-				 wxString(_("Filename: ")) +
-				 m_doc->GetFilename()),
-		0, wxALL, 5);
-
+  boxSizer->Add(
+      new wxStaticText(this, wxID_STATIC, wxString(_("Filename: ")) + m_doc->GetFilename()), 0,
+      wxALL, 5);
 
   Gambit::Game game = m_doc->GetGame();
   boxSizer->Add(new wxStaticText(this, wxID_STATIC,
-				 wxString::Format(_("Number of players: %d"),
-						  game->NumPlayers())),
-		0, wxALL, 5);
+                                 wxString::Format(_("Number of players: %d"), game->NumPlayers())),
+                0, wxALL, 5);
   if (game->IsConstSum()) {
-    boxSizer->Add(new wxStaticText(this, wxID_STATIC,
-				   _("This is a constant-sum game")),
-		  0, wxALL, 5);
+    boxSizer->Add(new wxStaticText(this, wxID_STATIC, _("This is a constant-sum game")), 0, wxALL,
+                  5);
   }
   else {
-    boxSizer->Add(new wxStaticText(this, wxID_STATIC,
-				   _("This is not a constant-sum game")),
-		  0, wxALL, 5);
+    boxSizer->Add(new wxStaticText(this, wxID_STATIC, _("This is not a constant-sum game")), 0,
+                  wxALL, 5);
   }
 
   if (m_doc->IsTree()) {
     if (game->IsPerfectRecall()) {
-      boxSizer->Add(new wxStaticText(this, wxID_STATIC,
-				     _("This is a game of perfect recall")),
-		    0, wxALL, 5);
+      boxSizer->Add(new wxStaticText(this, wxID_STATIC, _("This is a game of perfect recall")), 0,
+                    wxALL, 5);
     }
     else {
-      boxSizer->Add(new wxStaticText(this, wxID_STATIC,
-				     _("This is not a game of perfect recall")),
-		    0, wxALL, 5);
+      boxSizer->Add(new wxStaticText(this, wxID_STATIC, _("This is not a game of perfect recall")),
+                    0, wxALL, 5);
     }
   }
 

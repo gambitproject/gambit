@@ -35,22 +35,16 @@ private:
   wxSheetCellAttr GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const override;
 
   // Overriding wxSheet members to disable selection behavior
-  bool SelectRow(int, bool = false, bool = false) override
-    { return false; }
-  bool SelectRows(int, int, bool = false, bool = false) override
-    { return false; }
-  bool SelectCol(int, bool = false, bool = false) override
-    { return false; }
-  bool SelectCols(int, int, bool = false, bool = false) override
-    { return false; }
-  bool SelectCell(const wxSheetCoords&, bool = false, bool = false) override
-    { return false; }
-  bool SelectBlock(const wxSheetBlock&, bool = false, bool = false) override
-    { return false; }
+  bool SelectRow(int, bool = false, bool = false) override { return false; }
+  bool SelectRows(int, int, bool = false, bool = false) override { return false; }
+  bool SelectCol(int, bool = false, bool = false) override { return false; }
+  bool SelectCols(int, int, bool = false, bool = false) override { return false; }
+  bool SelectCell(const wxSheetCoords &, bool = false, bool = false) override { return false; }
+  bool SelectBlock(const wxSheetBlock &, bool = false, bool = false) override { return false; }
   bool SelectAll(bool = false) override { return false; }
 
   // Overriding wxSheet member to suppress drawing of cursor
-  void DrawCursorCellHighlight(wxDC&, const wxSheetCellAttr &) override { }
+  void DrawCursorCellHighlight(wxDC &, const wxSheetCellAttr &) override {}
 
   // Event handlers
   void OnLabelClick(wxSheetEvent &);
@@ -60,17 +54,13 @@ private:
   void OnUpdate() override;
 
   // Which profile index corresponds to a sheet row
-  int RowToProfile(int row) const
-  { return row / (m_showProbs + m_showPayoff) + 1; }
-  bool IsProbabilityRow(int row) const
-  { return (m_showPayoff == 0 || row % 2 == 0); }
-  bool IsPayoffRow(int row) const
-  { return (m_showProbs == 0 || row % 2 == 1); }
-
+  int RowToProfile(int row) const { return row / (m_showProbs + m_showPayoff) + 1; }
+  bool IsProbabilityRow(int row) const { return (m_showPayoff == 0 || row % 2 == 0); }
+  bool IsPayoffRow(int row) const { return (m_showProbs == 0 || row % 2 == 1); }
 
 public:
   gbtMixedProfileList(wxWindow *p_parent, gbtGameDocument *p_doc);
   ~gbtMixedProfileList() override;
 };
 
-#endif  // NFGPROFILE_H
+#endif // NFGPROFILE_H

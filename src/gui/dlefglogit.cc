@@ -25,14 +25,13 @@
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
-#endif  // WX_PRECOMP
+#endif // WX_PRECOMP
 #include <wx/stdpaths.h>
 #include <wx/txtstrm.h>
 #include <wx/tokenzr.h>
 
 #include "wx/sheet/sheet.h"
 #include "dlefglogit.h"
-
 
 using namespace Gambit;
 
@@ -47,22 +46,16 @@ private:
   wxSheetCellAttr GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const override;
 
   // Overriding wxSheet members to disable selection behavior
-  bool SelectRow(int, bool = false, bool = false) override
-    { return false; }
-  bool SelectRows(int, int, bool = false, bool = false) override
-    { return false; }
-  bool SelectCol(int, bool = false, bool = false) override
-    { return false; }
-  bool SelectCols(int, int, bool = false, bool = false) override
-    { return false; }
-  bool SelectCell(const wxSheetCoords&, bool = false, bool = false) override
-    { return false; }
-  bool SelectBlock(const wxSheetBlock&, bool = false, bool = false) override
-    { return false; }
+  bool SelectRow(int, bool = false, bool = false) override { return false; }
+  bool SelectRows(int, int, bool = false, bool = false) override { return false; }
+  bool SelectCol(int, bool = false, bool = false) override { return false; }
+  bool SelectCols(int, int, bool = false, bool = false) override { return false; }
+  bool SelectCell(const wxSheetCoords &, bool = false, bool = false) override { return false; }
+  bool SelectBlock(const wxSheetBlock &, bool = false, bool = false) override { return false; }
   bool SelectAll(bool = false) override { return false; }
 
   // Overriding wxSheet member to suppress drawing of cursor
-  void DrawCursorCellHighlight(wxDC&, const wxSheetCellAttr &) override { }
+  void DrawCursorCellHighlight(wxDC &, const wxSheetCellAttr &) override {}
 
 public:
   gbtLogitBehavList(wxWindow *p_parent, gbtGameDocument *p_doc);
@@ -71,8 +64,7 @@ public:
   void AddProfile(const wxString &p_text, bool p_forceShow);
 };
 
-gbtLogitBehavList::gbtLogitBehavList(wxWindow *p_parent,
-				     gbtGameDocument *p_doc)
+gbtLogitBehavList::gbtLogitBehavList(wxWindow *p_parent, gbtGameDocument *p_doc)
   : wxSheet(p_parent, wxID_ANY), m_doc(p_doc)
 {
   CreateGrid(0, 0);
@@ -80,8 +72,7 @@ gbtLogitBehavList::gbtLogitBehavList(wxWindow *p_parent,
   SetColLabelHeight(25);
 }
 
-gbtLogitBehavList::~gbtLogitBehavList()
-= default;
+gbtLogitBehavList::~gbtLogitBehavList() = default;
 
 wxString gbtLogitBehavList::GetCellValue(const wxSheetCoords &p_coords)
 {
@@ -94,39 +85,40 @@ wxString gbtLogitBehavList::GetCellValue(const wxSheetCoords &p_coords)
     }
     else {
       Gambit::GameAction action = m_doc->GetGame()->GetAction(p_coords.GetCol());
-      return (wxString::Format(wxT("%d: "),
-			       action->GetInfoset()->GetNumber())+
-	      wxString(action->GetLabel().c_str(), *wxConvCurrent));
+      return (wxString::Format(wxT("%d: "), action->GetInfoset()->GetNumber()) +
+              wxString(action->GetLabel().c_str(), *wxConvCurrent));
     }
   }
   else if (IsCornerLabelCell(p_coords)) {
     return wxT("#");
   }
 
-
   if (p_coords.GetCol() == 0) {
     return {Gambit::lexical_cast<std::string>(m_lambdas[p_coords.GetRow() + 1],
-                                              m_doc->GetStyle().NumDecimals()).c_str(),
+                                              m_doc->GetStyle().NumDecimals())
+                .c_str(),
             *wxConvCurrent};
   }
   else {
     auto profile = m_profiles[p_coords.GetRow() + 1];
     return {Gambit::lexical_cast<std::string>((*profile)[p_coords.GetCol()],
-                                              m_doc->GetStyle().NumDecimals()).c_str(),
+                                              m_doc->GetStyle().NumDecimals())
+                .c_str(),
             *wxConvCurrent};
   }
 }
 
 static wxColour GetPlayerColor(gbtGameDocument *p_doc, int p_index)
 {
-  if (p_index == 0)  return *wxBLACK;
+  if (p_index == 0) {
+    return *wxBLACK;
+  }
 
   Gambit::GameAction action = p_doc->GetGame()->GetAction(p_index);
   return p_doc->GetStyle().GetPlayerColor(action->GetInfoset()->GetPlayer()->GetNumber());
 }
 
-wxSheetCellAttr gbtLogitBehavList::GetAttr(const wxSheetCoords &p_coords,
-					   wxSheetAttr_Type) const
+wxSheetCellAttr gbtLogitBehavList::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
 {
   if (IsRowLabelCell(p_coords)) {
     wxSheetCellAttr attr(GetSheetRefData()->m_defaultRowLabelAttr);
@@ -155,7 +147,8 @@ wxSheetCellAttr gbtLogitBehavList::GetAttr(const wxSheetCoords &p_coords,
   attr.SetOrientation(wxHORIZONTAL);
   if (p_coords.GetCol() > 0) {
     Gambit::GameAction action = m_doc->GetGame()->GetAction(p_coords.GetCol());
-    attr.SetForegroundColour(m_doc->GetStyle().GetPlayerColor(action->GetInfoset()->GetPlayer()->GetNumber()));
+    attr.SetForegroundColour(
+        m_doc->GetStyle().GetPlayerColor(action->GetInfoset()->GetPlayer()->GetNumber()));
     if (action->GetInfoset()->GetNumber() % 2 == 0) {
       attr.SetBackgroundColour(wxColour(250, 250, 250));
     }
@@ -172,8 +165,7 @@ wxSheetCellAttr gbtLogitBehavList::GetAttr(const wxSheetCoords &p_coords,
   return attr;
 }
 
-void gbtLogitBehavList::AddProfile(const wxString &p_text,
-				   bool p_forceShow)
+void gbtLogitBehavList::AddProfile(const wxString &p_text, bool p_forceShow)
 {
   if (GetNumberCols() == 0) {
     AppendCols(m_doc->GetGame()->BehavProfileLength() + 1);
@@ -183,10 +175,12 @@ void gbtLogitBehavList::AddProfile(const wxString &p_text,
 
   wxStringTokenizer tok(p_text, wxT(","));
 
-  m_lambdas.push_back((double) Gambit::lexical_cast<Gambit::Rational>(std::string((const char *) tok.GetNextToken().mb_str())));
+  m_lambdas.push_back((double)Gambit::lexical_cast<Gambit::Rational>(
+      std::string((const char *)tok.GetNextToken().mb_str())));
 
   for (int i = 1; i <= profile->BehaviorProfileLength(); i++) {
-    (*profile)[i] = Gambit::lexical_cast<Gambit::Rational>(std::string((const char *) tok.GetNextToken().mb_str()));
+    (*profile)[i] = Gambit::lexical_cast<Gambit::Rational>(
+        std::string((const char *)tok.GetNextToken().mb_str()));
   }
 
   m_profiles.push_back(profile);
@@ -199,31 +193,28 @@ void gbtLogitBehavList::AddProfile(const wxString &p_text,
   AutoSizeCol(0);
 }
 
-
 const int GBT_ID_TIMER = 1000;
 const int GBT_ID_PROCESS = 1001;
 
 BEGIN_EVENT_TABLE(gbtLogitBehavDialog, wxDialog)
-  EVT_END_PROCESS(GBT_ID_PROCESS, gbtLogitBehavDialog::OnEndProcess)
-  EVT_IDLE(gbtLogitBehavDialog::OnIdle)
-  EVT_TIMER(GBT_ID_TIMER, gbtLogitBehavDialog::OnTimer)
-  EVT_BUTTON(wxID_SAVE, gbtLogitBehavDialog::OnSave)
+EVT_END_PROCESS(GBT_ID_PROCESS, gbtLogitBehavDialog::OnEndProcess)
+EVT_IDLE(gbtLogitBehavDialog::OnIdle)
+EVT_TIMER(GBT_ID_TIMER, gbtLogitBehavDialog::OnTimer)
+EVT_BUTTON(wxID_SAVE, gbtLogitBehavDialog::OnSave)
 END_EVENT_TABLE()
 
 #include "bitmaps/stop.xpm"
 
-gbtLogitBehavDialog::gbtLogitBehavDialog(wxWindow *p_parent,
-					 gbtGameDocument *p_doc)
-  : wxDialog(p_parent, wxID_ANY, wxT("Compute quantal response equilibria"),
-	     wxDefaultPosition),
+gbtLogitBehavDialog::gbtLogitBehavDialog(wxWindow *p_parent, gbtGameDocument *p_doc)
+  : wxDialog(p_parent, wxID_ANY, wxT("Compute quantal response equilibria"), wxDefaultPosition),
     m_doc(p_doc), m_process(nullptr), m_timer(this, GBT_ID_TIMER)
 {
   auto *sizer = new wxBoxSizer(wxVERTICAL);
 
   auto *startSizer = new wxBoxSizer(wxHORIZONTAL);
 
-  m_statusText = new wxStaticText(this, wxID_STATIC,
-				  wxT("The computation is currently in progress."));
+  m_statusText =
+      new wxStaticText(this, wxID_STATIC, wxT("The computation is currently in progress."));
   m_statusText->SetForegroundColour(*wxBLUE);
   startSizer->Add(m_statusText, 0, wxALL | wxALIGN_CENTER, 5);
 
@@ -231,7 +222,7 @@ gbtLogitBehavDialog::gbtLogitBehavDialog(wxWindow *p_parent,
   m_stopButton->SetToolTip(_("Stop the computation"));
   startSizer->Add(m_stopButton, 0, wxALL | wxALIGN_CENTER, 5);
   Connect(wxID_CANCEL, wxEVT_COMMAND_BUTTON_CLICKED,
-	  wxCommandEventHandler(gbtLogitBehavDialog::OnStop));
+          wxCommandEventHandler(gbtLogitBehavDialog::OnStop));
 
   sizer->Add(startSizer, 0, wxALL | wxALIGN_CENTER, 5);
 
@@ -240,8 +231,7 @@ gbtLogitBehavDialog::gbtLogitBehavDialog(wxWindow *p_parent,
   sizer->Add(m_behavList, 0, wxALL | wxALIGN_CENTER, 5);
 
   auto *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
-  m_saveButton = new wxButton(this, wxID_SAVE,
-			      wxT("Save correspondence to .csv file"));
+  m_saveButton = new wxButton(this, wxID_SAVE, wxT("Save correspondence to .csv file"));
   m_saveButton->Enable(false);
   buttonSizer->Add(m_saveButton, 0, wxALL | wxALIGN_CENTER, 5);
   m_okButton = new wxButton(this, wxID_OK, wxT("OK"));
@@ -264,8 +254,8 @@ void gbtLogitBehavDialog::Start()
   m_process->Redirect();
 
 #ifdef __WXMAC__
-  m_pid = wxExecute(wxStandardPaths::Get().GetExecutablePath() + wxT("-logit"),
-		    wxEXEC_ASYNC, m_process);
+  m_pid = wxExecute(wxStandardPaths::Get().GetExecutablePath() + wxT("-logit"), wxEXEC_ASYNC,
+                    m_process);
 #else
   m_pid = wxExecute(wxT("gambit-logit"), wxEXEC_ASYNC, m_process);
 #endif // __WXMAC__
@@ -299,7 +289,9 @@ void gbtLogitBehavDialog::Start()
 
 void gbtLogitBehavDialog::OnIdle(wxIdleEvent &p_event)
 {
-  if (!m_process)  return;
+  if (!m_process) {
+    return;
+  }
 
   if (m_process->IsInputAvailable()) {
     wxTextInputStream tis(*m_process->GetInputStream());
@@ -317,10 +309,7 @@ void gbtLogitBehavDialog::OnIdle(wxIdleEvent &p_event)
   }
 }
 
-void gbtLogitBehavDialog::OnTimer(wxTimerEvent &p_event)
-{
-  wxWakeUpIdle();
-}
+void gbtLogitBehavDialog::OnTimer(wxTimerEvent &p_event) { wxWakeUpIdle(); }
 
 void gbtLogitBehavDialog::OnEndProcess(wxProcessEvent &p_event)
 {
@@ -364,18 +353,17 @@ void gbtLogitBehavDialog::OnStop(wxCommandEvent &)
   wxProcess::Kill(m_pid, wxSIGKILL);
 #else
   wxProcess::Kill(m_pid, wxSIGTERM);
-#endif  // __WXMSW__
+#endif // __WXMSW__
 }
 
 void gbtLogitBehavDialog::OnSave(wxCommandEvent &)
 {
   wxFileDialog dialog(this, _("Choose file"), wxT(""), wxT(""),
-		      wxT("CSV files (*.csv)|*.csv|")
-			  wxT("All files (*.*)|*.*"),
-		      wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+                      wxT("CSV files (*.csv)|*.csv|") wxT("All files (*.*)|*.*"),
+                      wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
   if (dialog.ShowModal() == wxID_OK) {
-    std::ofstream file((const char *) dialog.GetPath().mb_str());
-    file << ((const char *) m_output.mb_str());
+    std::ofstream file((const char *)dialog.GetPath().mb_str());
+    file << ((const char *)m_output.mb_str());
   }
 }

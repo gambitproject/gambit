@@ -22,7 +22,6 @@
 
 #include "prepoly.h"
 
-
 // This file provides the template class
 //
 //              gMono
@@ -31,38 +30,37 @@
 // with coefficients of class T and nonnegative exponents.
 // This role of this class is to support the class gPoly.
 
-
-template<class T> class gMono {
+template <class T> class gMono {
 private:
-    T        coef;
-    exp_vect exps;
+  T coef;
+  exp_vect exps;
 
 public:
-    // constructors
-    gMono(const gSpace*, const T&);
-    gMono(const T&, const exp_vect&);
-    gMono(const gMono<T>&);
-    ~gMono();
+  // constructors
+  gMono(const gSpace *, const T &);
+  gMono(const T &, const exp_vect &);
+  gMono(const gMono<T> &);
+  ~gMono();
 
-    // operators
-          gMono<T>& operator =  (const gMono<T>&);
+  // operators
+  gMono<T> &operator=(const gMono<T> &);
 
-          bool      operator == (const gMono<T>&) const;
-          bool      operator != (const gMono<T>&) const;
-          gMono<T>  operator *  (const gMono<T>&) const;
-          gMono<T>  operator /  (const gMono<T>&) const;
-          gMono<T>  operator +  (const gMono<T>&) const; // assert exps ==
-          gMono<T>& operator += (const gMono<T>&);       // assert exps ==
-          gMono<T>& operator *= (const T&);
-          gMono<T>  operator -  ()                const;
+  bool operator==(const gMono<T> &) const;
+  bool operator!=(const gMono<T> &) const;
+  gMono<T> operator*(const gMono<T> &) const;
+  gMono<T> operator/(const gMono<T> &) const;
+  gMono<T> operator+(const gMono<T> &) const; // assert exps ==
+  gMono<T> &operator+=(const gMono<T> &);     // assert exps ==
+  gMono<T> &operator*=(const T &);
+  gMono<T> operator-() const;
 
-    // information
-    const T &       Coef()                      const;
-    int             Dmnsn()                     const;
-    int             TotalDegree()               const;
-    bool            IsConstant()                const;
-    bool            IsMultiaffine()             const;
-    const exp_vect& ExpV()                      const;
-    T               Evaluate(const Gambit::Array<T>&)  const;
-    T               Evaluate(const Gambit::Vector<T>&) const;
+  // information
+  const T &Coef() const;
+  int Dmnsn() const;
+  int TotalDegree() const;
+  bool IsConstant() const;
+  bool IsMultiaffine() const;
+  const exp_vect &ExpV() const;
+  T Evaluate(const Gambit::Array<T> &) const;
+  T Evaluate(const Gambit::Vector<T> &) const;
 };

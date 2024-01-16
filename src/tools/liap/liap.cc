@@ -56,20 +56,19 @@ void PrintHelp(char *progname)
   exit(1);
 }
 
-List<MixedStrategyProfile<double> >
-ReadStrategyProfiles(const Game &p_game, std::istream &p_stream)
+List<MixedStrategyProfile<double>> ReadStrategyProfiles(const Game &p_game, std::istream &p_stream)
 {
-  List<MixedStrategyProfile<double> > profiles;
+  List<MixedStrategyProfile<double>> profiles;
   while (!p_stream.eof() && !p_stream.bad()) {
     MixedStrategyProfile<double> p(p_game->NewMixedStrategyProfile(0.0));
     for (int i = 1; i <= p.MixedProfileLength(); i++) {
       if (p_stream.eof() || p_stream.bad()) {
-	break;
+        break;
       }
       p_stream >> p[i];
       if (i < p.MixedProfileLength()) {
-	char comma;
-	p_stream >> comma;
+        char comma;
+        p_stream >> comma;
       }
     }
     // Read in the rest of the line and discard
@@ -80,10 +79,9 @@ ReadStrategyProfiles(const Game &p_game, std::istream &p_stream)
   return profiles;
 }
 
-List<MixedStrategyProfile<double> >
-RandomStrategyProfiles(const Game &p_game, int p_count)
+List<MixedStrategyProfile<double>> RandomStrategyProfiles(const Game &p_game, int p_count)
 {
-  List<MixedStrategyProfile<double> > profiles;
+  List<MixedStrategyProfile<double>> profiles;
   for (int i = 1; i <= p_count; i++) {
     MixedStrategyProfile<double> p(p_game->NewMixedStrategyProfile(0.0));
     p.Randomize();
@@ -92,20 +90,19 @@ RandomStrategyProfiles(const Game &p_game, int p_count)
   return profiles;
 }
 
-List<MixedBehaviorProfile<double> >
-ReadBehaviorProfiles(const Game &p_game, std::istream &p_stream)
+List<MixedBehaviorProfile<double>> ReadBehaviorProfiles(const Game &p_game, std::istream &p_stream)
 {
-  List<MixedBehaviorProfile<double> > profiles;
+  List<MixedBehaviorProfile<double>> profiles;
   while (!p_stream.eof() && !p_stream.bad()) {
     MixedBehaviorProfile<double> p(p_game);
     for (int i = 1; i <= p.BehaviorProfileLength(); i++) {
       if (p_stream.eof() || p_stream.bad()) {
-	break;
+        break;
       }
       p_stream >> p[i];
       if (i < p.BehaviorProfileLength()) {
-	char comma;
-	p_stream >> comma;
+        char comma;
+        p_stream >> comma;
       }
     }
     // Read in the rest of the line and discard
@@ -116,10 +113,9 @@ ReadBehaviorProfiles(const Game &p_game, std::istream &p_stream)
   return profiles;
 }
 
-List<MixedBehaviorProfile<double> >
-RandomBehaviorProfiles(const Game &p_game, int p_count)
+List<MixedBehaviorProfile<double>> RandomBehaviorProfiles(const Game &p_game, int p_count)
 {
-  List<MixedBehaviorProfile<double> > profiles;
+  List<MixedBehaviorProfile<double>> profiles;
   for (int i = 1; i <= p_count; i++) {
     MixedBehaviorProfile<double> p(p_game);
     p.Randomize();
@@ -139,52 +135,50 @@ int main(int argc, char *argv[])
   std::string startFile;
 
   int long_opt_index = 0;
-  struct option long_options[] = {
-    { "help", 0, nullptr, 'h'   },
-    { "version", 0, nullptr, 'v'  },
-    { "verbose", 0, nullptr, 'V'  },
-    { nullptr,    0,    nullptr,    0   }
-  };
+  struct option long_options[] = {{"help", 0, nullptr, 'h'},
+                                  {"version", 0, nullptr, 'v'},
+                                  {"verbose", 0, nullptr, 'V'},
+                                  {nullptr, 0, nullptr, 0}};
   int c;
   while ((c = getopt_long(argc, argv, "d:n:i:s:hqVvS", long_options, &long_opt_index)) != -1) {
     switch (c) {
-      case 'v':
-        PrintBanner(std::cerr);
-        exit(1);
-      case 'd':
-        numDecimals = atoi(optarg);
-        break;
-      case 'n':
-        numTries = atoi(optarg);
-        break;
-      case 'i':
-        maxitsN = atoi(optarg);
-        break;
-      case 's':
-        startFile = optarg;
-        break;
-      case 'h':
-        PrintHelp(argv[0]);
-        break;
-      case 'S':
-        useStrategic = true;
-        break;
-      case 'q':
-        quiet = true;
-        break;
-      case 'V':
-        verbose = true;
-        break;
-      case '?':
-        if (isprint(optopt)) {
-          std::cerr << argv[0] << ": Unknown option `-" << ((char) optopt) << "'.\n";
-        }
-        else {
-          std::cerr << argv[0] << ": Unknown option character `\\x" << optopt << "`.\n";
-        }
-        return 1;
-      default:
-        abort();
+    case 'v':
+      PrintBanner(std::cerr);
+      exit(1);
+    case 'd':
+      numDecimals = atoi(optarg);
+      break;
+    case 'n':
+      numTries = atoi(optarg);
+      break;
+    case 'i':
+      maxitsN = atoi(optarg);
+      break;
+    case 's':
+      startFile = optarg;
+      break;
+    case 'h':
+      PrintHelp(argv[0]);
+      break;
+    case 'S':
+      useStrategic = true;
+      break;
+    case 'q':
+      quiet = true;
+      break;
+    case 'V':
+      verbose = true;
+      break;
+    case '?':
+      if (isprint(optopt)) {
+        std::cerr << argv[0] << ": Unknown option `-" << ((char)optopt) << "'.\n";
+      }
+      else {
+        std::cerr << argv[0] << ": Unknown option character `\\x" << optopt << "`.\n";
+      }
+      return 1;
+    default:
+      abort();
     }
   }
 
@@ -192,7 +186,7 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  std::istream* input_stream = &std::cin;
+  std::istream *input_stream = &std::cin;
   std::ifstream file_stream;
   if (optind < argc) {
     file_stream.open(argv[optind]);
@@ -208,41 +202,39 @@ int main(int argc, char *argv[])
   try {
     Game game = ReadGame(*input_stream);
     if (!game->IsTree() || useStrategic) {
-      List<MixedStrategyProfile<double> > starts;
+      List<MixedStrategyProfile<double>> starts;
       if (!startFile.empty()) {
-	std::ifstream startPoints(startFile.c_str());
-	starts = ReadStrategyProfiles(game, startPoints);
+        std::ifstream startPoints(startFile.c_str());
+        starts = ReadStrategyProfiles(game, startPoints);
       }
       else {
-	// Generate the desired number of points randomly
-	starts = RandomStrategyProfiles(game, numTries);
+        // Generate the desired number of points randomly
+        starts = RandomStrategyProfiles(game, numTries);
       }
 
       for (int i = 1; i <= starts.size(); i++) {
-	std::shared_ptr<StrategyProfileRenderer<double> > renderer(
-      new MixedStrategyCSVRenderer<double>(std::cout, numDecimals)
-    );
-	NashLiapStrategySolver algorithm(maxitsN, verbose, renderer);
-	algorithm.Solve(starts[i]);
+        std::shared_ptr<StrategyProfileRenderer<double>> renderer(
+            new MixedStrategyCSVRenderer<double>(std::cout, numDecimals));
+        NashLiapStrategySolver algorithm(maxitsN, verbose, renderer);
+        algorithm.Solve(starts[i]);
       }
     }
     else {
-      List<MixedBehaviorProfile<double> > starts;
+      List<MixedBehaviorProfile<double>> starts;
       if (!startFile.empty()) {
-	std::ifstream startPoints(startFile.c_str());
-	starts = ReadBehaviorProfiles(game, startPoints);
+        std::ifstream startPoints(startFile.c_str());
+        starts = ReadBehaviorProfiles(game, startPoints);
       }
       else {
-	// Generate the desired number of points randomly
-	starts = RandomBehaviorProfiles(game, numTries);
+        // Generate the desired number of points randomly
+        starts = RandomBehaviorProfiles(game, numTries);
       }
 
       for (int i = 1; i <= starts.size(); i++) {
-	std::shared_ptr<StrategyProfileRenderer<double> > renderer(
-      new BehavStrategyCSVRenderer<double>(std::cout, numDecimals)
-    );
-	NashLiapBehaviorSolver algorithm(maxitsN, verbose, renderer);
-	algorithm.Solve(starts[i]);
+        std::shared_ptr<StrategyProfileRenderer<double>> renderer(
+            new BehavStrategyCSVRenderer<double>(std::cout, numDecimals));
+        NashLiapBehaviorSolver algorithm(maxitsN, verbose, renderer);
+        algorithm.Solve(starts[i]);
       }
     }
     return 0;

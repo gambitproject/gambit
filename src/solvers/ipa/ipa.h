@@ -30,22 +30,23 @@ namespace Nash {
 
 class NashIPAStrategySolver : public StrategySolver<double> {
 public:
-  explicit NashIPAStrategySolver(std::shared_ptr<StrategyProfileRenderer<double> > p_onEquilibrium = nullptr)
+  explicit NashIPAStrategySolver(
+      std::shared_ptr<StrategyProfileRenderer<double>> p_onEquilibrium = nullptr)
     : StrategySolver<double>(p_onEquilibrium)
-  { }
+  {
+  }
   ~NashIPAStrategySolver() override = default;
 
-  List<MixedStrategyProfile<double> > Solve(const Game &p_game) const override;
-  List<MixedStrategyProfile<double> > Solve(const Game &p_game,
-					    const Array<double> &p_pert) const;
+  List<MixedStrategyProfile<double>> Solve(const Game &p_game) const override;
+  List<MixedStrategyProfile<double>> Solve(const Game &p_game, const Array<double> &p_pert) const;
 };
 
-inline List<MixedStrategyProfile<double> > IPAStrategySolve(const Game &p_game)
+inline List<MixedStrategyProfile<double>> IPAStrategySolve(const Game &p_game)
 {
   return NashIPAStrategySolver().Solve(p_game);
 }
 
-}  // end namespace Gambit::Nash
-}  // end namespace Gambit
+} // namespace Nash
+} // end namespace Gambit
 
-#endif  // GAMBIT_NASH_IPA_H
+#endif // GAMBIT_NASH_IPA_H

@@ -184,18 +184,17 @@
 namespace Gambit {
 namespace Nash {
 
-const int MAXM = 700;     // max. no of left nodes for incidence matrix
-const int MAXN = MAXM;    // max. no of right nodes for incidence matrix
+const int MAXM = 700;  // max. no of left nodes for incidence matrix
+const int MAXN = MAXM; // max. no of right nodes for incidence matrix
 
 // #define MAXINP1 5000        // max. no of left nodes in input
 // #define MAXINP2 MAXINP1  // max. no of right nodes in input
 // #define MAXEDGES   50000       // max. no of edges in input
 // #define MAXCO  MIN(MAXINP1, MAXINP2) + 1
-  // max. no of connected components;  on the smaller side,
-  // each node could be in different component
+// max. no of connected components;  on the smaller side,
+// each node could be in different component
 const int STKSIZE = (MAXM + 1) * (MAXN + 1);
-  // largest stack usage for full graph
-
+// largest stack usage for full graph
 
 class CliqueEnumerator {
 public:
@@ -206,85 +205,67 @@ public:
     int nextedge;
     Edge() = default;
     ~Edge() = default;
-    bool operator==(const Edge &y) const
-    { return (node1 == y.node1 && node2 == y.node2); }
-    bool operator!=(const Edge &y) const
-    { return !(*this == y); }
+    bool operator==(const Edge &y) const { return (node1 == y.node1 && node2 == y.node2); }
+    bool operator!=(const Edge &y) const { return !(*this == y); }
   };
 
   CliqueEnumerator(Array<Edge> &, int, int);
   ~CliqueEnumerator() = default;
 
-  const List<Array<int> > &GetCliques1() const { return m_cliques1; }
-  const List<Array<int> > &GetCliques2() const { return m_cliques2; }
+  const List<Array<int>> &GetCliques1() const { return m_cliques1; }
+  const List<Array<int>> &GetCliques2() const { return m_cliques2; }
 
 private:
   Array<int> firstedge;
-  int maxinp1,maxinp2;
-  List<Array<int> > m_cliques1, m_cliques2;
+  int maxinp1, maxinp2;
+  List<Array<int>> m_cliques1, m_cliques2;
 
-  void candtry1 (int stk[], // stack
-	 bool connected[MAXM][MAXN],
-	 int cand,  // the candidate from NODES1  to be added to CLIQUE
-	 int clique1[], int cliqsize1,  // CLIQUE so far in NODES1
-	 int clique2[], int cliqsize2,  // CLIQUE so far in NODES2
-	 int sn1, int *sc1, int ec1,   // start NOT1, start CAND1, end CAND1
-	 int sn2, int sc2, int ec2,   // start NOT2, start CAND2, end CAND2
-	 int tos,  // top of stack
-	 int orignode1[],
-	 int orignode2[]
-         );
-  void candtry2 (int stk[], // stack
-	 bool connected[MAXM][MAXN],
-	 int cand,  // the candidate from NODES2  to be added to CLIQUE
-	 int clique1[], int cliqsize1,  // CLIQUE so far in NODES1
-	 int clique2[], int cliqsize2,  // CLIQUE so far in NODES2
-	 int sn1, int sc1, int ec1,   // start NOT1, start CAND1, end CAND1
-	 int sn2, int *sc2, int ec2,   // start NOT2, start CAND2, end CAND2
-	 int tos,  // top of stack
-	 int orignode1[MAXM],
-	 int orignode2[MAXN]);
-  void extend (int stk[], // stack
-       bool connected[MAXM][MAXN],
-       int clique1[], int cliqsize1,  // CLIQUE so far in NODES1
-       int clique2[], int cliqsize2,  // CLIQUE so far in NODES2
-       int sn1, int sc1, int ec1,   // start NOT1, start CAND1, end CAND1
-       int sn2, int sc2, int ec2,   // start NOT2, start CAND2, end CAND2
-       int tos,   // top of stack,   tos >= ec1, ec2
-       int orignode1[MAXM],   // original node numbers as input
-       int orignode2[MAXN]);
+  void candtry1(int stk[], // stack
+                bool connected[MAXM][MAXN],
+                int cand,                     // the candidate from NODES1  to be added to CLIQUE
+                int clique1[], int cliqsize1, // CLIQUE so far in NODES1
+                int clique2[], int cliqsize2, // CLIQUE so far in NODES2
+                int sn1, int *sc1, int ec1,   // start NOT1, start CAND1, end CAND1
+                int sn2, int sc2, int ec2,    // start NOT2, start CAND2, end CAND2
+                int tos,                      // top of stack
+                int orignode1[], int orignode2[]);
+  void candtry2(int stk[], // stack
+                bool connected[MAXM][MAXN],
+                int cand,                     // the candidate from NODES2  to be added to CLIQUE
+                int clique1[], int cliqsize1, // CLIQUE so far in NODES1
+                int clique2[], int cliqsize2, // CLIQUE so far in NODES2
+                int sn1, int sc1, int ec1,    // start NOT1, start CAND1, end CAND1
+                int sn2, int *sc2, int ec2,   // start NOT2, start CAND2, end CAND2
+                int tos,                      // top of stack
+                int orignode1[MAXM], int orignode2[MAXN]);
+  void extend(int stk[],                                                // stack
+              bool connected[MAXM][MAXN], int clique1[], int cliqsize1, // CLIQUE so far in NODES1
+              int clique2[], int cliqsize2,                             // CLIQUE so far in NODES2
+              int sn1, int sc1, int ec1, // start NOT1, start CAND1, end CAND1
+              int sn2, int sc2, int ec2, // start NOT2, start CAND2, end CAND2
+              int tos,                   // top of stack,   tos >= ec1, ec2
+              int orignode1[MAXM],       // original node numbers as input
+              int orignode2[MAXN]);
   void findfixpoint(int stk[], // stack
-	    bool connected[MAXM][MAXN],
-	    int *savelist,      // position of savelist on the stack
-	    int *tmplist,       // position of tmplist on the stack
-	    int *minnod,        // currently lowest no. of disconnections
-	    int sninspect, int ecinspect,
-	    int scother, int ecother,
-	    bool binspect1,  // inspected nodes are in class1, o/w class2
-	    bool *bfound,  // a new lower no. of disconnections was found
-	    int *fixp,     // the new fixpoint, if *bfound = true
-	    int *posfix);    // position of fixpoint on the stack, if *bfound
+                    bool connected[MAXM][MAXN],
+                    int *savelist, // position of savelist on the stack
+                    int *tmplist,  // position of tmplist on the stack
+                    int *minnod,   // currently lowest no. of disconnections
+                    int sninspect, int ecinspect, int scother, int ecother,
+                    bool binspect1, // inspected nodes are in class1, o/w class2
+                    bool *bfound,   // a new lower no. of disconnections was found
+                    int *fixp,      // the new fixpoint, if *bfound = true
+                    int *posfix);   // position of fixpoint on the stack, if *bfound
 
-  void genincidence(int e,
-		    Array<Edge> &edgelist,
-		    int orignode1[MAXM],
-		    int orignode2[MAXN],
-		    bool connected[MAXM][MAXN],
-		    int *m,
-		    int *n);
-  int getconnco(Array<int> &firstedge,
-		Array<Edge> &edgelist);
-  void outCLIQUE(int clique1[], int cliqsize1,
-		 int clique2[], int cliqsize2,
-		 int orignode1[MAXM],
-		 int orignode2[MAXN]);
-  void workonco(int numco,
-		Array<int> &firstedge,
-		Array<Edge> &edgelist);
-
+  void genincidence(int e, Array<Edge> &edgelist, int orignode1[MAXM], int orignode2[MAXN],
+                    bool connected[MAXM][MAXN], int *m, int *n);
+  int getconnco(Array<int> &firstedge, Array<Edge> &edgelist);
+  void outCLIQUE(int clique1[], int cliqsize1, int clique2[], int cliqsize2, int orignode1[MAXM],
+                 int orignode2[MAXN]);
+  void workonco(int numco, Array<int> &firstedge, Array<Edge> &edgelist);
 };
 
-} // end namespace Gambit::Nash
+} // namespace Nash
 } // end namespace Gambit
 
 #endif // GAMBIT_ENUMMIXED_CLIQUE_H

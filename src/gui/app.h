@@ -24,8 +24,8 @@
 #define GAMBIT_H
 
 #include <wx/wx.h>
-#include <wx/config.h>    // for wxConfig
-#include <wx/docview.h>   // for wxFileHistory
+#include <wx/config.h>  // for wxConfig
+#include <wx/docview.h> // for wxFileHistory
 
 class gbtGameDocument;
 
@@ -47,29 +47,28 @@ public:
   gbtApplication();
   ~gbtApplication() override = default;
 
-  const wxString &GetCurrentDir()  { return m_currentDir; }
+  const wxString &GetCurrentDir() { return m_currentDir; }
   void SetCurrentDir(const wxString &p_dir);
 
-  wxString GetHistoryFile(int index) const
-    { return m_fileHistory.GetHistoryFile(index); }
+  wxString GetHistoryFile(int index) const { return m_fileHistory.GetHistoryFile(index); }
   void AddMenu(wxMenu *p_menu)
-    { m_fileHistory.UseMenu(p_menu); m_fileHistory.AddFilesToMenu(p_menu); }
-  void RemoveMenu(wxMenu *p_menu)  { m_fileHistory.RemoveMenu(p_menu); }
-
+  {
+    m_fileHistory.UseMenu(p_menu);
+    m_fileHistory.AddFilesToMenu(p_menu);
+  }
+  void RemoveMenu(wxMenu *p_menu) { m_fileHistory.RemoveMenu(p_menu); }
 
   gbtAppLoadResult LoadFile(const wxString &);
 #ifdef __WXMAC__
-  void MacOpenFile(const wxString &filename) override  { LoadFile(filename); }
-#endif  // __WXMAC__
+  void MacOpenFile(const wxString &filename) override { LoadFile(filename); }
+#endif // __WXMAC__
 
   //!
   //! These manage the list of open documents
   //!
   //@{
-  void AddDocument(gbtGameDocument *p_doc)
-    { m_documents.push_back(p_doc); }
-  void RemoveDocument(gbtGameDocument *p_doc)
-    { m_documents.Remove(m_documents.Find(p_doc)); }
+  void AddDocument(gbtGameDocument *p_doc) { m_documents.push_back(p_doc); }
+  void RemoveDocument(gbtGameDocument *p_doc) { m_documents.Remove(m_documents.Find(p_doc)); }
   bool AreDocumentsModified() const;
   //@}
 };

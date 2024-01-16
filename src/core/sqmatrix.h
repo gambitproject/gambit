@@ -25,17 +25,15 @@
 
 #include "matrix.h"
 
-
 namespace Gambit {
 
 class SingularMatrixException : public Exception {
 public:
   ~SingularMatrixException() noexcept override = default;
-  const char *what() const noexcept override
-  { return "Attempted to invert a singular matrix"; }
+  const char *what() const noexcept override { return "Attempted to invert a singular matrix"; }
 };
 
-template <class T> class SquareMatrix : public Matrix<T>   {
+template <class T> class SquareMatrix : public Matrix<T> {
 public:
   SquareMatrix() = default;
   explicit SquareMatrix(int size);
@@ -49,6 +47,6 @@ public:
   T Determinant() const;
 };
 
-}  // end namespace Gambit
+} // end namespace Gambit
 
-#endif   // LIBGAMBIT_SQMATRIX_H
+#endif // LIBGAMBIT_SQMATRIX_H

@@ -68,8 +68,7 @@ private:
   //@}
 
 public:
-  gbtTableWidget(gbtNfgPanel *p_parent, wxWindowID p_id,
-		 gbtGameDocument *p_doc);
+  gbtTableWidget(gbtNfgPanel *p_parent, wxWindowID p_id, gbtGameDocument *p_doc);
 
   /// @name Coordination of sheets
   //@{
@@ -142,4 +141,4 @@ public:
   //@}
 };
 
-#endif  // NFGTABLE_H
+#endif // NFGTABLE_H

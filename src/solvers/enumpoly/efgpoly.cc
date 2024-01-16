@@ -47,7 +47,7 @@ public:
   gSpace *Space;
   term_order *Lex;
   int nVars;
-  Array<Array<int> > var;
+  Array<Array<int>> var;
 
   explicit ProblemData(const BehaviorSupportProfile &p_support);
   ~ProblemData();
@@ -69,10 +69,10 @@ ProblemData::ProblemData(const BehaviorSupportProfile &p_support)
       int act = SF.ActionNumber(pl, seq);
       GameInfoset infoset = SF.GetInfoset(pl, seq);
       if (act < p_support.NumActions(infoset)) {
-	var[pl][seq] = ++tnv;
+        var[pl][seq] = ++tnv;
       }
       else {
-	var[pl][seq] = 0;
+        var[pl][seq] = 0;
       }
     }
   }
@@ -95,8 +95,8 @@ ProblemData::~ProblemData()
 // derivatives vanish, and that the sum of action probabilities at
 // each information set be less than one.
 
-gPoly<double> ProbOfSequence(const ProblemData &p_data,
-                             int p, int seq) {
+gPoly<double> ProbOfSequence(const ProblemData &p_data, int p, int seq)
+{
   gPoly<double> equation(p_data.Space, p_data.Lex);
   Vector<int> exps(p_data.nVars);
 
@@ -140,20 +140,20 @@ gPoly<double> GetPayoff(const ProblemData &p_data, int pl)
 
   gPoly<double> equation(p_data.Space, p_data.Lex);
   while (index.Turn()) {
-    pay=p_data.SF.Payoff(index.CurrentIndices(),pl);
-    if( pay != Rational(0)) {
-      gPoly<double> term(p_data.Space,(double) pay, p_data.Lex);
+    pay = p_data.SF.Payoff(index.CurrentIndices(), pl);
+    if (pay != Rational(0)) {
+      gPoly<double> term(p_data.Space, (double)pay, p_data.Lex);
       int k;
-      for(k=1;k<=p_data.support.GetGame()->NumPlayers();k++)
-	term*=ProbOfSequence(p_data, k,(index.CurrentIndices())[k]);
-      equation+=term;
+      for (k = 1; k <= p_data.support.GetGame()->NumPlayers(); k++) {
+        term *= ProbOfSequence(p_data, k, (index.CurrentIndices())[k]);
+      }
+      equation += term;
     }
   }
   return equation;
 }
 
-gPolyList<double>
-IndifferenceEquations(const ProblemData &p_data)
+gPolyList<double> IndifferenceEquations(const ProblemData &p_data)
 {
   gPolyList<double> equations(p_data.Space, p_data.Lex);
 
@@ -162,32 +162,32 @@ IndifferenceEquations(const ProblemData &p_data)
     gPoly<double> payoff = GetPayoff(p_data, pl);
     int n_vars = p_data.SF.NumSequences(pl) - p_data.SF.NumInfosets(pl) - 1;
     for (int j = 1; j <= n_vars; j++) {
-      equations += payoff.PartialDerivative(kk+j);
+      equations += payoff.PartialDerivative(kk + j);
     }
-    kk+=n_vars;
+    kk += n_vars;
   }
 
   return equations;
 }
 
-gPolyList<double>
-LastActionProbPositiveInequalities(const ProblemData &p_data)
+gPolyList<double> LastActionProbPositiveInequalities(const ProblemData &p_data)
 {
   gPolyList<double> equations(p_data.Space, p_data.Lex);
 
-  for (int i = 1; i <= p_data.SF.NumPlayers(); i++)
+  for (int i = 1; i <= p_data.SF.NumPlayers(); i++) {
     for (int j = 2; j <= p_data.SF.NumSequences(i); j++) {
-      int act_num = p_data.SF.ActionNumber(i,j);
+      int act_num = p_data.SF.ActionNumber(i, j);
       GameInfoset infoset = p_data.SF.GetInfoset(i, j);
-      if ( act_num == p_data.support.NumActions(infoset) && act_num > 1 )
-	equations += ProbOfSequence(p_data, i,j);
+      if (act_num == p_data.support.NumActions(infoset) && act_num > 1) {
+        equations += ProbOfSequence(p_data, i, j);
+      }
     }
+  }
 
   return equations;
 }
 
-gPolyList<double>
-NashOnSupportEquationsAndInequalities(const ProblemData &p_data)
+gPolyList<double> NashOnSupportEquationsAndInequalities(const ProblemData &p_data)
 {
   gPolyList<double> equations(p_data.Space, p_data.Lex);
 
@@ -201,12 +201,10 @@ NashOnSupportEquationsAndInequalities(const ProblemData &p_data)
 //               Mapping solution vectors to sequences
 //=======================================================================
 
-double
-NumProbOfSequence(const ProblemData &p_data, int p,
-		  int seq, const Vector<double> &x)
+double NumProbOfSequence(const ProblemData &p_data, int p, int seq, const Vector<double> &x)
 {
-  int isetrow = p_data.SF.InfosetRowNumber(p,seq);
-  int act  = p_data.SF.ActionNumber(p,seq);
+  int isetrow = p_data.SF.InfosetRowNumber(p, seq);
+  int act = p_data.SF.ActionNumber(p, seq);
   int varno = p_data.var[p][seq];
   GameInfoset infoset = p_data.SF.GetInfoset(p, seq);
 
@@ -219,26 +217,24 @@ NumProbOfSequence(const ProblemData &p_data, int p,
   else {
     double value = 0.0;
     for (int j = 1; j < seq; j++) {
-      if (p_data.SF.Constraints(p)(isetrow,j) == Rational(-1)) {
-	value -= NumProbOfSequence(p_data, p, j, x);
+      if (p_data.SF.Constraints(p)(isetrow, j) == Rational(-1)) {
+        value -= NumProbOfSequence(p_data, p, j, x);
       }
-      else if (p_data.SF.Constraints(p)(isetrow,j) == Rational(1)) {
-	value += NumProbOfSequence(p_data, p, j, x);
+      else if (p_data.SF.Constraints(p)(isetrow, j) == Rational(1)) {
+        value += NumProbOfSequence(p_data, p, j, x);
       }
     }
     return value;
   }
 }
 
-PVector<double>
-SeqFormVectorFromSolFormVector(const ProblemData &p_data,
-			       const Vector<double> &v)
+PVector<double> SeqFormVectorFromSolFormVector(const ProblemData &p_data, const Vector<double> &v)
 {
   PVector<double> x(p_data.SF.NumSequences());
 
   for (int i = 1; i <= p_data.support.GetGame()->NumPlayers(); i++) {
     for (int j = 1; j <= p_data.SF.NumSequences()[i]; j++) {
-      x(i,j) = NumProbOfSequence(p_data, i, j, v);
+      x(i, j) = NumProbOfSequence(p_data, i, j, v);
     }
   }
 
@@ -248,42 +244,40 @@ SeqFormVectorFromSolFormVector(const ProblemData &p_data,
 bool ExtendsToNash(const MixedBehaviorProfile<double> &bs)
 {
   algExtendsToNash algorithm;
-  return algorithm.ExtendsToNash(bs,
-				 BehaviorSupportProfile(bs.GetGame()),
-				 BehaviorSupportProfile(bs.GetGame()));
+  return algorithm.ExtendsToNash(bs, BehaviorSupportProfile(bs.GetGame()),
+                                 BehaviorSupportProfile(bs.GetGame()));
 }
 
-
-List<MixedBehaviorProfile<double> >
-SolveSupport(const BehaviorSupportProfile &p_support, bool &p_isSingular)
+List<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfile &p_support,
+                                                bool &p_isSingular)
 {
   ProblemData data(p_support);
   gPolyList<double> equations = NashOnSupportEquationsAndInequalities(data);
 
   // set up the rectangle of search
   Vector<double> bottoms(data.nVars), tops(data.nVars);
-  bottoms = (double) 0;
-  tops = (double) 1;
+  bottoms = (double)0;
+  tops = (double)1;
   gRectangle<double> Cube(bottoms, tops);
 
   QuikSolv<double> quickie(equations);
 #ifdef UNUSED
-  if(params.trace>0) {
-    (*params.tracefile) << "\nThe equilibrium equations are \n"
-      << quickie.UnderlyingEquations() ;
+  if (params.trace > 0) {
+    (*params.tracefile) << "\nThe equilibrium equations are \n" << quickie.UnderlyingEquations();
   }
-#endif  // UNUSED
+#endif // UNUSED
 
   // 2147483647 = 2^31-1 = MaxInt
 
   try {
-    if(quickie.FindCertainNumberOfRoots(Cube,2147483647,0)) {
+    if (quickie.FindCertainNumberOfRoots(Cube, 2147483647, 0)) {
 #ifdef UNUSED
-      if(params.trace>0) {
-	(*params.tracefile) << "\nThe system has the following roots in [0,1]^"
-			    << num_vars << " :\n" << quickie.RootList();
+      if (params.trace > 0) {
+        (*params.tracefile) << "\nThe system has the following roots in [0,1]^" << num_vars
+                            << " :\n"
+                            << quickie.RootList();
       }
-#endif  // UNUSED
+#endif // UNUSED
     }
   }
   catch (const Gambit::SingularMatrixException &) {
@@ -294,9 +288,9 @@ SolveSupport(const BehaviorSupportProfile &p_support, bool &p_isSingular)
     p_isSingular = true;
   }
 
-  List<Vector<double> > solutionlist = quickie.RootList();
+  List<Vector<double>> solutionlist = quickie.RootList();
 
-  List<MixedBehaviorProfile<double> > solutions;
+  List<MixedBehaviorProfile<double>> solutions;
   for (int k = 1; k <= solutionlist.Length(); k++) {
     PVector<double> y = SeqFormVectorFromSolFormVector(data, solutionlist[k]);
     MixedBehaviorProfile<double> sol(data.SF.ToBehav(y));
@@ -308,22 +302,21 @@ SolveSupport(const BehaviorSupportProfile &p_support, bool &p_isSingular)
   return solutions;
 }
 
-
-PVector<double>
-SeqFormProbsFromSolVars(const ProblemData &p_data, const Vector<double> &v)
+PVector<double> SeqFormProbsFromSolVars(const ProblemData &p_data, const Vector<double> &v)
 {
   PVector<double> x(p_data.SF.NumSequences());
 
-  for(int pl=1;pl<=p_data.support.GetGame()->NumPlayers();pl++)
-    for(int seq=1;seq<=p_data.SF.NumSequences()[pl];seq++)
-      x(pl,seq) = NumProbOfSequence(p_data, pl,seq,v);
+  for (int pl = 1; pl <= p_data.support.GetGame()->NumPlayers(); pl++) {
+    for (int seq = 1; seq <= p_data.SF.NumSequences()[pl]; seq++) {
+      x(pl, seq) = NumProbOfSequence(p_data, pl, seq, v);
+    }
+  }
 
   return x;
 }
 
-void PrintProfile(std::ostream &p_stream,
-		  const std::string &p_label,
-		  const MixedBehaviorProfile<double> &p_profile)
+void PrintProfile(std::ostream &p_stream, const std::string &p_label,
+                  const MixedBehaviorProfile<double> &p_profile)
 {
   p_stream << p_label;
   for (int i = 1; i <= p_profile.BehaviorProfileLength(); i++) {
@@ -348,9 +341,9 @@ MixedBehaviorProfile<double> ToFullSupport(const MixedBehaviorProfile<double> &p
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
       GameInfoset infoset = player->GetInfoset(iset);
       for (int act = 1; act <= infoset->NumActions(); act++) {
-	if (support.Contains(infoset->GetAction(act))) {
-	  fullProfile(pl, iset, act) = p_profile[index++];
-	}
+        if (support.Contains(infoset->GetAction(act))) {
+          fullProfile(pl, iset, act) = p_profile[index++];
+        }
       }
     }
   }
@@ -358,8 +351,8 @@ MixedBehaviorProfile<double> ToFullSupport(const MixedBehaviorProfile<double> &p
   return fullProfile;
 }
 
-void PrintSupport(std::ostream &p_stream,
-		  const std::string &p_label, const BehaviorSupportProfile &p_support)
+void PrintSupport(std::ostream &p_stream, const std::string &p_label,
+                  const BehaviorSupportProfile &p_support)
 {
   p_stream << p_label;
 
@@ -372,12 +365,12 @@ void PrintSupport(std::ostream &p_stream,
       p_stream << ",";
 
       for (int act = 1; act <= infoset->NumActions(); act++) {
-	if (p_support.Contains(infoset->GetAction(act))) {
-	  p_stream << "1";
-	}
-	else {
-	  p_stream << "0";
-	}
+        if (p_support.Contains(infoset->GetAction(act))) {
+          p_stream << "1";
+        }
+        else {
+          p_stream << "0";
+        }
       }
     }
   }
@@ -394,13 +387,12 @@ void EnumPolySolveExtensive(const Game &p_game)
     }
 
     bool isSingular = false;
-    List<MixedBehaviorProfile<double> > newsolns =
-      SolveSupport(supports[i], isSingular);
+    List<MixedBehaviorProfile<double>> newsolns = SolveSupport(supports[i], isSingular);
 
     for (int j = 1; j <= newsolns.Length(); j++) {
       MixedBehaviorProfile<double> fullProfile = ToFullSupport(newsolns[j]);
       if (fullProfile.GetLiapValue(true) < 1.0e-6) {
-	PrintProfile(std::cout, "NE", fullProfile);
+        PrintProfile(std::cout, "NE", fullProfile);
       }
     }
 

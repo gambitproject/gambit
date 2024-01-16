@@ -23,33 +23,32 @@
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
-#endif  // WX_PRECOMP
+#endif // WX_PRECOMP
 
 #include "nfgprofile.h"
-#include "renratio.h"        // for rational number rendering
+#include "renratio.h" // for rational number rendering
 
 //-------------------------------------------------------------------------
 //              class gbtMixedProfileList: Member functions
 //-------------------------------------------------------------------------
 
-gbtMixedProfileList::gbtMixedProfileList(wxWindow *p_parent,
-					 gbtGameDocument *p_doc)
-  : wxSheet(p_parent, wxID_ANY), gbtGameView(p_doc),
-    m_showProbs(1), m_showPayoff(0)
+gbtMixedProfileList::gbtMixedProfileList(wxWindow *p_parent, gbtGameDocument *p_doc)
+  : wxSheet(p_parent, wxID_ANY), gbtGameView(p_doc), m_showProbs(1), m_showPayoff(0)
 {
   CreateGrid(0, 0);
   SetRowLabelWidth(40);
   SetColLabelHeight(25);
 
   Connect(GetId(), wxEVT_SHEET_LABEL_LEFT_DOWN,
-	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtMixedProfileList::OnLabelClick))));
+          (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
+              wxSheetEventFunction, wxSheetEventFunction(&gbtMixedProfileList::OnLabelClick))));
 
   Connect(GetId(), wxEVT_SHEET_CELL_LEFT_DOWN,
-	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtMixedProfileList::OnCellClick))));
+          (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
+              wxSheetEventFunction, wxSheetEventFunction(&gbtMixedProfileList::OnCellClick))));
 }
 
-gbtMixedProfileList::~gbtMixedProfileList()
-= default;
+gbtMixedProfileList::~gbtMixedProfileList() = default;
 
 void gbtMixedProfileList::OnLabelClick(wxSheetEvent &p_event)
 {
@@ -71,7 +70,7 @@ static Gambit::GameStrategy GetStrategy(gbtGameDocument *p_doc, int p_index)
     Gambit::GamePlayer player = p_doc->GetGame()->GetPlayer(pl);
     for (int st = 1; st <= player->NumStrategies(); st++) {
       if (index++ == p_index) {
-	return player->GetStrategy(st);
+        return player->GetStrategy(st);
       }
     }
   }
@@ -89,11 +88,10 @@ wxString gbtMixedProfileList::GetCellValue(const wxSheetCoords &p_coords)
     for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
       Gambit::GamePlayer player = m_doc->GetGame()->GetPlayer(pl);
       for (int st = 1; st <= player->NumStrategies(); st++) {
-	if (index++ == p_coords.GetCol()) {
-	  return (wxString::Format(wxT("%d: "), pl) +
-		  wxString(player->GetStrategy(st)->GetLabel().c_str(),
-			   *wxConvCurrent));
-	}
+        if (index++ == p_coords.GetCol()) {
+          return (wxString::Format(wxT("%d: "), pl) +
+                  wxString(player->GetStrategy(st)->GetLabel().c_str(), *wxConvCurrent));
+        }
       }
     }
     return wxT("");
@@ -105,17 +103,14 @@ wxString gbtMixedProfileList::GetCellValue(const wxSheetCoords &p_coords)
   int profile = RowToProfile(p_coords.GetRow());
 
   if (IsProbabilityRow(p_coords.GetRow())) {
-    return {m_doc->GetProfiles().GetStrategyProb(p_coords.GetCol()+1,
-							 profile).c_str(),
-		    *wxConvCurrent};
+    return {m_doc->GetProfiles().GetStrategyProb(p_coords.GetCol() + 1, profile).c_str(),
+            *wxConvCurrent};
   }
   else {
-    return {m_doc->GetProfiles().GetStrategyValue(p_coords.GetCol()+1,
-							  profile).c_str(),
-		    *wxConvCurrent};
+    return {m_doc->GetProfiles().GetStrategyValue(p_coords.GetCol() + 1, profile).c_str(),
+            *wxConvCurrent};
   }
 }
-
 
 static wxColour GetPlayerColor(gbtGameDocument *p_doc, int p_index)
 {
@@ -124,15 +119,14 @@ static wxColour GetPlayerColor(gbtGameDocument *p_doc, int p_index)
     Gambit::GamePlayer player = p_doc->GetGame()->GetPlayer(pl);
     for (int st = 1; st <= player->NumStrategies(); st++) {
       if (index++ == p_index) {
-	return p_doc->GetStyle().GetPlayerColor(pl);
+        return p_doc->GetStyle().GetPlayerColor(pl);
       }
     }
   }
   return *wxBLACK;
 }
 
-wxSheetCellAttr gbtMixedProfileList::GetAttr(const wxSheetCoords &p_coords,
-					     wxSheetAttr_Type) const
+wxSheetCellAttr gbtMixedProfileList::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
 {
   int currentProfile = m_doc->GetCurrentProfile();
 
@@ -178,7 +172,6 @@ wxSheetCellAttr gbtMixedProfileList::GetAttr(const wxSheetCoords &p_coords,
   return attr;
 }
 
-
 void gbtMixedProfileList::OnUpdate()
 {
   if (m_doc->NumProfileLists() == 0) {
@@ -200,8 +193,7 @@ void gbtMixedProfileList::OnUpdate()
   InsertCols(0, newCols);
 
   for (int row = 0; row < GetNumberRows(); row += m_showProbs + m_showPayoff) {
-    SetCellSpan(wxSheetCoords(row, -1),
-		wxSheetCoords(m_showProbs + m_showPayoff, 1));
+    SetCellSpan(wxSheetCoords(row, -1), wxSheetCoords(m_showProbs + m_showPayoff, 1));
   }
 
   AutoSizeRows();
@@ -214,7 +206,8 @@ void gbtMixedProfileList::OnUpdate()
     }
   }
 
-  for (int col = 0; col < GetNumberCols(); SetColWidth(col++, colSize));
+  for (int col = 0; col < GetNumberCols(); SetColWidth(col++, colSize))
+    ;
 
   EndBatch();
 }

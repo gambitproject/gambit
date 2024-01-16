@@ -28,44 +28,47 @@ namespace Gambit {
 //     Vector<T>: Constructors, destructor, constructive operators
 //------------------------------------------------------------------------
 
-template <class T> Vector<T>& Vector<T>::operator=(const Vector<T>& V)
+template <class T> Vector<T> &Vector<T>::operator=(const Vector<T> &V)
 {
-  if (!Check(V))   throw DimensionException();
+  if (!Check(V)) {
+    throw DimensionException();
+  }
   Array<T>::operator=(V);
   return *this;
 }
-
 
 //------------------------------------------------------------------------
 // inline arithmetic operators
 //------------------------------------------------------------------------
 
-template <class T> bool Vector<T>::operator!=(T c) const
-{ return !(*this == c); }
-
+template <class T> bool Vector<T>::operator!=(T c) const { return !(*this == c); }
 
 //------------------------------------------------------------------------
 // inline internal functions
 //------------------------------------------------------------------------
 
 template <class T> bool Vector<T>::Check(const Vector<T> &v) const
-{ return (v.mindex == this->mindex && v.maxdex == this->maxdex ); }
-
+{
+  return (v.mindex == this->mindex && v.maxdex == this->maxdex);
+}
 
 //------------------------------------------------------------------------
 //	Vector: arithmetic operators
 //------------------------------------------------------------------------
 
-template<class T> Vector<T>& Vector<T>::operator=(T c)
+template <class T> Vector<T> &Vector<T>::operator=(T c)
 {
-  for(int i=this->mindex; i<=this->maxdex; i++)
-    (*this)[i]= c;
+  for (int i = this->mindex; i <= this->maxdex; i++) {
+    (*this)[i] = c;
+  }
   return (*this);
 }
 
 template <class T> bool Vector<T>::operator==(const Vector<T> &V) const
 {
-  if (!Check(V))   throw DimensionException();
+  if (!Check(V)) {
+    throw DimensionException();
+  }
 
   for (int i = this->mindex; i <= this->maxdex; i++) {
     if ((*this)[i] != V[i]) {
@@ -76,104 +79,120 @@ template <class T> bool Vector<T>::operator==(const Vector<T> &V) const
 }
 
 // arithmetic operators
-template <class T> Vector<T>
-Vector<T>::operator+(const Vector<T>& V) const
+template <class T> Vector<T> Vector<T>::operator+(const Vector<T> &V) const
 {
-  if (!Check(V))   throw DimensionException();
+  if (!Check(V)) {
+    throw DimensionException();
+  }
 
-  Vector<T> tmp(this->mindex,this->maxdex);
-  for(int i=this->mindex; i<=this->maxdex; i++)
-    tmp[i]= (*this)[i] + V[i];
+  Vector<T> tmp(this->mindex, this->maxdex);
+  for (int i = this->mindex; i <= this->maxdex; i++) {
+    tmp[i] = (*this)[i] + V[i];
+  }
   return tmp;
 }
 
-template <class T> Vector<T>
-Vector<T>::operator-(const Vector<T>& V) const
+template <class T> Vector<T> Vector<T>::operator-(const Vector<T> &V) const
 {
-  if (!Check(V))   throw DimensionException();
+  if (!Check(V)) {
+    throw DimensionException();
+  }
 
-  Vector<T> tmp(this->mindex,this->maxdex);
-  for(int i=this->mindex; i<=this->maxdex; i++)
-    tmp[i]= (*this)[i] - V[i];
+  Vector<T> tmp(this->mindex, this->maxdex);
+  for (int i = this->mindex; i <= this->maxdex; i++) {
+    tmp[i] = (*this)[i] - V[i];
+  }
   return tmp;
 }
 
-template <class T> Vector<T>&
-Vector<T>::operator+=(const Vector<T>& V)
+template <class T> Vector<T> &Vector<T>::operator+=(const Vector<T> &V)
 {
-  if (!Check(V))   throw DimensionException();
+  if (!Check(V)) {
+    throw DimensionException();
+  }
 
-  for(int i=this->mindex; i<=this->maxdex; i++)
+  for (int i = this->mindex; i <= this->maxdex; i++) {
     (*this)[i] += V[i];
+  }
   return (*this);
 }
 
-template <class T> Vector<T>&
-Vector<T>::operator-=(const Vector<T>& V)
+template <class T> Vector<T> &Vector<T>::operator-=(const Vector<T> &V)
 {
-  if (!Check(V))    throw DimensionException();
+  if (!Check(V)) {
+    throw DimensionException();
+  }
 
-  for(int i=this->mindex; i<=this->maxdex; i++)
+  for (int i = this->mindex; i <= this->maxdex; i++) {
     (*this)[i] -= V[i];
+  }
   return (*this);
 }
 
 template <class T> Vector<T> Vector<T>::operator-()
 {
-  Vector<T> tmp(this->mindex,this->maxdex);
-  for(int i=this->mindex; i<=this->maxdex; i++)
-    tmp[i]= -(*this)[i];
+  Vector<T> tmp(this->mindex, this->maxdex);
+  for (int i = this->mindex; i <= this->maxdex; i++) {
+    tmp[i] = -(*this)[i];
+  }
   return tmp;
 }
 
 template <class T> Vector<T> Vector<T>::operator*(T c) const
 {
-  Vector<T> tmp(this->mindex,this->maxdex);
-  for(int i=this->mindex; i<=this->maxdex; i++)
-    tmp[i]= (*this)[i]*c;
+  Vector<T> tmp(this->mindex, this->maxdex);
+  for (int i = this->mindex; i <= this->maxdex; i++) {
+    tmp[i] = (*this)[i] * c;
+  }
   return tmp;
 }
 
 template <class T> Vector<T> &Vector<T>::operator*=(T c)
 {
-  for(int i=this->mindex; i<=this->maxdex; i++)
+  for (int i = this->mindex; i <= this->maxdex; i++) {
     (*this)[i] *= c;
+  }
   return (*this);
 }
 
-template <class T> T Vector<T>::operator*(const Vector<T>& V) const
+template <class T> T Vector<T>::operator*(const Vector<T> &V) const
 {
-  if (!Check(V))   throw DimensionException();
+  if (!Check(V)) {
+    throw DimensionException();
+  }
 
-  T sum= (T)0;
-  for(int i=this->mindex; i<=this->maxdex; i++)
+  T sum = (T)0;
+  for (int i = this->mindex; i <= this->maxdex; i++) {
     sum += (*this)[i] * V[i];
+  }
   return sum;
 }
 
-
 template <class T> Vector<T> Vector<T>::operator/(T c) const
 {
-  Vector<T> tmp(this->mindex,this->maxdex);
-  for(int i=this->mindex; i<=this->maxdex; i++)
-    tmp[i]= (*this)[i]/c;
+  Vector<T> tmp(this->mindex, this->maxdex);
+  for (int i = this->mindex; i <= this->maxdex; i++) {
+    tmp[i] = (*this)[i] / c;
+  }
   return tmp;
 }
 
-
 template <class T> bool Vector<T>::operator==(T c) const
 {
-  for(int i=this->mindex; i<=this->maxdex; i++)
-    if( (*this)[i] != c )
+  for (int i = this->mindex; i <= this->maxdex; i++) {
+    if ((*this)[i] != c) {
       return false;
+    }
+  }
   return true;
 }
 
 template <class T> T Vector<T>::NormSquared() const
 {
   T answer = (T)0;
-  for (int i = 1; i <= this->Length(); i++)
+  for (int i = 1; i <= this->Length(); i++) {
     answer += (*this)[i] * (*this)[i];
+  }
   return answer;
 }
 

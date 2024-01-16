@@ -29,6 +29,6 @@ namespace linalg {
 template class LPTableau<double>;
 template class LPTableau<Rational>;
 
-}  // end namespace Gambit::linalg
+} // namespace linalg
 
-}  // end namespace Gambit
+} // end namespace Gambit

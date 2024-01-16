@@ -7,7 +7,7 @@ repos:
     - id: check-yaml
     - id: check-added-large-files
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.1.2
+  rev: v0.1.13
   hooks:
     - id: ruff
 - repo: https://github.com/MarcoGorelli/cython-lint
@@ -15,10 +15,12 @@ repos:
   hooks:
     - id: cython-lint
     - id: double-quote-cython-strings
-# - repo: https://github.com/pocc/pre-commit-hooks
-#  rev: master
-#  hooks:
-    # - id: clang-format
+- repo: https://github.com/pocc/pre-commit-hooks
+  rev: v1.3.5
+  hooks:
+    - id: clang-format
+      files: src\/(gambit|core|gui|solvers|tools)
+      args: ["-i"]
     # - id: clang-tidy
     #  args: ["--", "-I src", "-I", "src/labenski/include"]
     # - id: oclint

@@ -23,11 +23,11 @@
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
-#endif  // WX_PRECOMP
+#endif // WX_PRECOMP
 
 #include "renratio.h"
 
-#include "wx/sheet/sheet.h"     // the wxSheet widget
+#include "wx/sheet/sheet.h" // the wxSheet widget
 
 //----------------------------------------------------------------------------
 //                   class gbtRationalRendererRefData
@@ -35,11 +35,8 @@
 
 IMPLEMENT_DYNAMIC_CLASS(gbtRationalRendererRefData, wxSheetCellRendererRefData)
 
-void
-gbtRationalRendererRefData::SetTextColoursAndFont(wxSheet& grid,
-						  const wxSheetCellAttr& attr,
-						  wxDC& dc,
-						  bool isSelected)
+void gbtRationalRendererRefData::SetTextColoursAndFont(wxSheet &grid, const wxSheetCellAttr &attr,
+                                                       wxDC &dc, bool isSelected)
 {
   dc.SetBackgroundMode(wxTRANSPARENT);
 
@@ -67,10 +64,14 @@ static wxSize GetFractionExtent(wxDC &p_dc, const wxString &p_value)
 
   wxString num;
   int i = 0;
-  while (p_value[i] != '/')  num += p_value[i++];
+  while (p_value[i] != '/') {
+    num += p_value[i++];
+  }
   i++;
   wxString den;
-  while (p_value[i] != '\0') den += p_value[i++];
+  while (p_value[i] != '\0') {
+    den += p_value[i++];
+  }
 
   int numWidth, numHeight;
   p_dc.GetTextExtent(num, &numWidth, &numHeight);
@@ -83,17 +84,15 @@ static wxSize GetFractionExtent(wxDC &p_dc, const wxString &p_value)
   return {width + 4, numHeight + denHeight};
 }
 
-wxSize gbtRationalRendererRefData::DoGetBestSize(wxSheet& grid,
-						 const wxSheetCellAttr& attr,
-						 wxDC& dc,
-						 const wxString& text)
+wxSize gbtRationalRendererRefData::DoGetBestSize(wxSheet &grid, const wxSheetCellAttr &attr,
+                                                 wxDC &dc, const wxString &text)
 {
   if (text.Find('/') != -1) {
     return GetFractionExtent(dc, text);
   }
 
   wxArrayString lines;
-  long w=0, h=0;
+  long w = 0, h = 0;
   if (grid.StringToLines(text, lines) > 0) {
     dc.SetFont(attr.GetFont());
     grid.GetTextBoxSize(dc, lines, &w, &h);
@@ -102,21 +101,15 @@ wxSize gbtRationalRendererRefData::DoGetBestSize(wxSheet& grid,
   return {static_cast<int>(w), static_cast<int>(h)};
 }
 
-wxSize
-gbtRationalRendererRefData::GetBestSize(wxSheet& grid,
-					const wxSheetCellAttr& attr,
-					wxDC& dc,
-					const wxSheetCoords& coords)
+wxSize gbtRationalRendererRefData::GetBestSize(wxSheet &grid, const wxSheetCellAttr &attr,
+                                               wxDC &dc, const wxSheetCoords &coords)
 {
   return DoGetBestSize(grid, attr, dc, grid.GetCellValue(coords));
 }
 
-void gbtRationalRendererRefData::Draw(wxSheet& grid,
-				      const wxSheetCellAttr& attr,
-				      wxDC& dc,
-				      const wxRect& rectCell,
-				      const wxSheetCoords& coords,
-				      bool isSelected)
+void gbtRationalRendererRefData::Draw(wxSheet &grid, const wxSheetCellAttr &attr, wxDC &dc,
+                                      const wxRect &rectCell, const wxSheetCoords &coords,
+                                      bool isSelected)
 {
   wxRect rect = rectCell;
   rect.Inflate(-1);
@@ -132,10 +125,14 @@ static void DrawFraction(wxDC &p_dc, wxRect p_rect, const wxString &p_value)
 
   wxString num;
   int i = 0;
-  while (p_value[i] != '/')  num += p_value[i++];
+  while (p_value[i] != '/') {
+    num += p_value[i++];
+  }
   i++;
   wxString den;
-  while (p_value[i] != '\0') den += p_value[i++];
+  while (p_value[i] != '\0') {
+    den += p_value[i++];
+  }
 
   int numWidth, numHeight;
   p_dc.GetTextExtent(num, &numWidth, &numHeight);
@@ -145,25 +142,18 @@ static void DrawFraction(wxDC &p_dc, wxRect p_rect, const wxString &p_value)
 
   int width = ((numWidth > denWidth) ? numWidth : denWidth);
 
-  wxPoint point(p_rect.x, p_rect.y + p_rect.height/2);
+  wxPoint point(p_rect.x, p_rect.y + p_rect.height / 2);
 
   p_dc.SetPen(wxPen(p_dc.GetTextForeground(), 1, wxPENSTYLE_SOLID));
-  p_dc.DrawText(num,
-		point.x + (p_rect.width-numWidth)/2,
-		point.y - numHeight);
-  p_dc.DrawText(den,
-		point.x + (p_rect.width-denWidth)/2,
-		point.y);
-  p_dc.DrawLine(point.x + (p_rect.width-width)/2 - 2, point.y,
-		point.x + (p_rect.width-width)/2 + width + 2, point.y);
+  p_dc.DrawText(num, point.x + (p_rect.width - numWidth) / 2, point.y - numHeight);
+  p_dc.DrawText(den, point.x + (p_rect.width - denWidth) / 2, point.y);
+  p_dc.DrawLine(point.x + (p_rect.width - width) / 2 - 2, point.y,
+                point.x + (p_rect.width - width) / 2 + width + 2, point.y);
 }
 
-void gbtRationalRendererRefData::DoDraw(wxSheet& grid,
-					const wxSheetCellAttr& attr,
-					wxDC& dc,
-					const wxRect& rectCell,
-					const wxSheetCoords& coords,
-					bool isSelected)
+void gbtRationalRendererRefData::DoDraw(wxSheet &grid, const wxSheetCellAttr &attr, wxDC &dc,
+                                        const wxRect &rectCell, const wxSheetCoords &coords,
+                                        bool isSelected)
 {
   wxRect rect = rectCell;
   rect.Inflate(-1);
@@ -171,14 +161,14 @@ void gbtRationalRendererRefData::DoDraw(wxSheet& grid,
   int align = attr.GetAlignment();
 
   wxString value = grid.GetCellValue(coords);
-  //int best_width = DoGetBestSize(grid, attr, dc, value).GetWidth();
-  // wxSheetCoords cellSpan(grid.GetCellSpan(coords)); // shouldn't get here if <=0
-  //int cell_rows = cellSpan.m_row;
-  //int cell_cols = cellSpan.m_col;
+  // int best_width = DoGetBestSize(grid, attr, dc, value).GetWidth();
+  //  wxSheetCoords cellSpan(grid.GetCellSpan(coords)); // shouldn't get here if <=0
+  // int cell_rows = cellSpan.m_row;
+  // int cell_cols = cellSpan.m_col;
 
-  //bool is_grid_cell = wxSheet::IsGridCell(coords);
-  // no overflow for row/col/corner labels
-  //int num_cols = grid.GetNumberCols();
+  // bool is_grid_cell = wxSheet::IsGridCell(coords);
+  //  no overflow for row/col/corner labels
+  // int num_cols = grid.GetNumberCols();
 
   // Draw the text
   if (value.Find('/') != -1) {
@@ -199,10 +189,8 @@ IMPLEMENT_DYNAMIC_CLASS(gbtRationalEditorRefData, wxSheetCellTextEditorRefData)
 
 #include "valnumber.h"
 
-void gbtRationalEditorRefData::CreateEditor(wxWindow* parent,
-					    wxWindowID id,
-					    wxEvtHandler* evtHandler,
-					    wxSheet* sheet)
+void gbtRationalEditorRefData::CreateEditor(wxWindow *parent, wxWindowID id,
+                                            wxEvtHandler *evtHandler, wxSheet *sheet)
 {
   wxSheetCellTextEditorRefData::CreateEditor(parent, id, evtHandler, sheet);
   GetTextCtrl()->SetValidator(gbtNumberValidator(nullptr));
@@ -217,14 +205,14 @@ void gbtRationalEditorRefData::StartingKey(wxKeyEvent &event)
 {
   int keycode = event.GetKeyCode();
   char tmpbuf[2];
-  tmpbuf[0] = (char) keycode;
+  tmpbuf[0] = (char)keycode;
   tmpbuf[1] = '\0';
   wxString strbuf(tmpbuf, *wxConvCurrent);
 #if wxUSE_INTL
   bool is_decimal_point =
-    (strbuf == wxLocale::GetInfo(wxLOCALE_DECIMAL_POINT, wxLOCALE_CAT_NUMBER));
+      (strbuf == wxLocale::GetInfo(wxLOCALE_DECIMAL_POINT, wxLOCALE_CAT_NUMBER));
 #else
-  bool is_decimal_point = ( strbuf == _T(".") );
+  bool is_decimal_point = (strbuf == _T("."));
 #endif
   if (wxIsdigit(keycode) || keycode == '-' || is_decimal_point) {
     wxSheetCellTextEditorRefData::StartingKey(event);
@@ -239,20 +227,19 @@ bool gbtRationalEditorRefData::IsAcceptedKey(wxKeyEvent &p_event)
   if (wxSheetCellEditorRefData::IsAcceptedKey(p_event)) {
     int keycode = p_event.GetKeyCode();
     char tmpbuf[2];
-    tmpbuf[0] = (char) keycode;
+    tmpbuf[0] = (char)keycode;
     tmpbuf[1] = '\0';
     wxString strbuf(tmpbuf, *wxConvCurrent);
 #if wxUSE_INTL
     bool is_decimal_point =
-      (strbuf == wxLocale::GetInfo(wxLOCALE_DECIMAL_POINT,
-				    wxLOCALE_CAT_NUMBER));
+        (strbuf == wxLocale::GetInfo(wxLOCALE_DECIMAL_POINT, wxLOCALE_CAT_NUMBER));
 #else
-    bool is_decimal_point = ( strbuf == _T(".") );
+    bool is_decimal_point = (strbuf == _T("."));
 #endif
 
-    if ((keycode < 128) &&
-	(wxIsdigit(keycode) || is_decimal_point || keycode == '-') )
+    if ((keycode < 128) && (wxIsdigit(keycode) || is_decimal_point || keycode == '-')) {
       return true;
+    }
   }
 
   return false;

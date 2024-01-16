@@ -53,4 +53,4 @@ public:
   DECLARE_EVENT_TABLE()
 };
 
-#endif  // DLLOGIT_H
+#endif // DLLOGIT_H

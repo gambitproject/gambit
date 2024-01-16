@@ -32,6 +32,6 @@ template class LUdecomp<double>;
 template class EtaMatrix<Rational>;
 template class LUdecomp<Rational>;
 
-}  // end namespace Gambit::linalg
+} // namespace linalg
 
-}  // end namespace Gambit
+} // end namespace Gambit

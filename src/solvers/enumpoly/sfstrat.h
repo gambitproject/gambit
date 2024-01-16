@@ -26,8 +26,9 @@
 #include "gambit.h"
 
 struct Sequence {
-friend class Sfg;
-friend class SFSequenceSet;
+  friend class Sfg;
+  friend class SFSequenceSet;
+
 private:
   int number;
   std::string name;
@@ -36,24 +37,33 @@ private:
   const Sequence *parent;
 
   Sequence(const Gambit::GamePlayer &pl, const Gambit::GameAction &a, const Sequence *p, int n)
-    : number(n), player(pl), action(a), parent(p) { }
+    : number(n), player(pl), action(a), parent(p)
+  {
+  }
   ~Sequence() = default;
+
 public:
-  const std::string &GetName() const   { return name; }
-  void SetName(const std::string &s)       { name = s; }
+  const std::string &GetName() const { return name; }
+  void SetName(const std::string &s) { name = s; }
 
   Gambit::List<Gambit::GameAction> History() const;
-  int GetNumber() const        { return number; }
-  Gambit::GameAction GetAction() const  {return action; }
-  Gambit::GameInfoset GetInfoset() const   { if(action) return action->GetInfoset();return nullptr; }
-  Gambit::GamePlayer Player() const  { return player; }
-  const Sequence *Parent() const   { return parent; }
+  int GetNumber() const { return number; }
+  Gambit::GameAction GetAction() const { return action; }
+  Gambit::GameInfoset GetInfoset() const
+  {
+    if (action) {
+      return action->GetInfoset();
+    }
+    return nullptr;
+  }
+  Gambit::GamePlayer Player() const { return player; }
+  const Sequence *Parent() const { return parent; }
 };
 
 class SFSequenceSet {
 protected:
   Gambit::GamePlayer efp;
-  Gambit::Array <Sequence *> sequences;
+  Gambit::Array<Sequence *> sequences;
 
 public:
   SFSequenceSet(const SFSequenceSet &s);
@@ -69,8 +79,8 @@ public:
 
   // Removes a sequence pointer. Returns true if the sequence was successfully
   // removed, false otherwise.
-  bool RemoveSequence( Sequence *s );
-  Sequence * Find(int j);
+  bool RemoveSequence(Sequence *s);
+  Sequence *Find(int j);
 
   // Number of sequences in the SFSequenceSet
   int NumSequences() const;
@@ -79,13 +89,12 @@ public:
   const Gambit::Array<Sequence *> &GetSFSequenceSet() const;
 };
 
-
 class Sfg;
 
 class SFSupport {
 protected:
   const Sfg *bsfg;
-  Gambit::Array <SFSequenceSet *> sups;
+  Gambit::Array<SFSequenceSet *> sups;
 
 public:
   explicit SFSupport(const Sfg &);
@@ -96,7 +105,7 @@ public:
   bool operator==(const SFSupport &s) const;
   bool operator!=(const SFSupport &s) const;
 
-  const Sfg &Game() const   { return *bsfg; }
+  const Sfg &Game() const { return *bsfg; }
 
   const Gambit::Array<Sequence *> &Sequences(int pl) const;
 
@@ -114,8 +123,9 @@ public:
   int Find(Sequence *) const;
 };
 
-class SequenceProfile   {
+class SequenceProfile {
   friend class Sfg;
+
 private:
   long index;
   Gambit::Array<Sequence *> profile;
@@ -134,7 +144,7 @@ public:
 
   Sequence *const operator[](int p) const;
   Sequence *const Get(int p) const;
-  void Set(int p, Sequence  *const s);
+  void Set(int p, Sequence *const s);
 };
 
-#endif    // SFSTRAT_H
+#endif // SFSTRAT_H

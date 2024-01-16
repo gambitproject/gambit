@@ -28,33 +28,34 @@ namespace Gambit {
 template <class T> class Matrix;
 
 /// A mathematical vector: a list of numbers with the standard math operators
-template <class T> class Vector : public Array<T>   {
+template <class T> class Vector : public Array<T> {
   friend class Matrix<T>;
+
 public:
   /** Create a vector of length len, starting at 1 */
-  explicit Vector(unsigned int len = 0) : Array<T>(len) { }
+  explicit Vector(unsigned int len = 0) : Array<T>(len) {}
   /** Create a vector indexed from low to high */
-  Vector(int low, int high) : Array<T>(low, high) { }
+  Vector(int low, int high) : Array<T>(low, high) {}
   /** Copy constructor */
   Vector(const Vector<T> &) = default;
   /** Destructor */
   ~Vector() override = default;
 
   /** Assignment operator: requires vectors to be of same length */
-  Vector<T>& operator=(const Vector<T>& V);
+  Vector<T> &operator=(const Vector<T> &V);
   /** Assigns the value c to all components of the vector */
-  Vector<T>& operator=(T c);
+  Vector<T> &operator=(T c);
 
-  Vector<T> operator+(const Vector<T>& V) const;
-  Vector<T>& operator+=(const Vector<T>& V);
+  Vector<T> operator+(const Vector<T> &V) const;
+  Vector<T> &operator+=(const Vector<T> &V);
 
   Vector<T> operator-();
-  Vector<T> operator-(const Vector<T>& V) const;
-  Vector<T>& operator-=(const Vector<T>& V);
+  Vector<T> operator-(const Vector<T> &V) const;
+  Vector<T> &operator-=(const Vector<T> &V);
 
   Vector<T> operator*(T c) const;
-  Vector<T>& operator*=(T c);
-  T operator*(const Vector<T>& V) const;
+  Vector<T> &operator*=(T c);
+  T operator*(const Vector<T> &V) const;
 
   Vector<T> operator/(T c) const;
 

@@ -36,7 +36,7 @@ template <class T> Matrix<T> Make_A1(const Game &p_game)
 {
   int n1 = p_game->GetPlayer(1)->GetStrategies().size();
   int n2 = p_game->GetPlayer(2)->GetStrategies().size();
-  Matrix<T> A1(1, n1, n1+1, n1+n2);
+  Matrix<T> A1(1, n1, n1 + 1, n1 + n2);
 
   PureStrategyProfile profile = p_game->NewPureStrategyProfile();
 
@@ -53,9 +53,9 @@ template <class T> Matrix<T> Make_A1(const Game &p_game)
 
   Rational fac(1, max - min);
 
-  for (int i = 1; i <= n1; i++)  {
+  for (int i = 1; i <= n1; i++) {
     profile->SetStrategy(p_game->GetPlayer(1)->GetStrategies()[i]);
-    for (int j = 1; j <= n2; j++)  {
+    for (int j = 1; j <= n2; j++) {
       profile->SetStrategy(p_game->GetPlayer(2)->GetStrategies()[j]);
       A1(i, n1 + j) = fac * (profile->GetPayoff(1) - min);
     }
@@ -67,7 +67,7 @@ template <class T> Matrix<T> Make_A2(const Game &p_game)
 {
   int n1 = p_game->GetPlayer(1)->GetStrategies().size();
   int n2 = p_game->GetPlayer(2)->GetStrategies().size();
-  Matrix<T> A2(n1+1, n1+n2, 1, n1);
+  Matrix<T> A2(n1 + 1, n1 + n2, 1, n1);
 
   PureStrategyProfile profile = p_game->NewPureStrategyProfile();
 
@@ -84,9 +84,9 @@ template <class T> Matrix<T> Make_A2(const Game &p_game)
 
   Rational fac(1, max - min);
 
-  for (int i = 1; i <= n1; i++)  {
+  for (int i = 1; i <= n1; i++) {
     profile->SetStrategy(p_game->GetPlayer(1)->GetStrategies()[i]);
-    for (int j = 1; j <= n2; j++)  {
+    for (int j = 1; j <= n2; j++) {
       profile->SetStrategy(p_game->GetPlayer(2)->GetStrategies()[j]);
       A2(n1 + j, i) = fac * (profile->GetPayoff(2) - min);
     }
@@ -97,7 +97,7 @@ template <class T> Matrix<T> Make_A2(const Game &p_game)
 template <class T> Vector<T> Make_b1(const Game &p_game)
 {
   Vector<T> b1(1, p_game->GetPlayer(1)->GetStrategies().size());
-  b1 = -(T) 1;
+  b1 = -(T)1;
   return b1;
 }
 
@@ -105,24 +105,20 @@ template <class T> Vector<T> Make_b2(const Game &p_game)
 {
   Vector<T> b2(p_game->GetPlayer(1)->GetStrategies().size() + 1,
                p_game->GetPlayer(1)->GetStrategies().size() +
-               p_game->GetPlayer(2)->GetStrategies().size());
-  b2 = -(T) 1;
+                   p_game->GetPlayer(2)->GetStrategies().size());
+  b2 = -(T)1;
   return b2;
 }
 
-}  // end anonymous namespace
+} // end anonymous namespace
 
-
-template <class T>
-class NashLcpStrategySolver<T>::Solution {
+template <class T> class NashLcpStrategySolver<T>::Solution {
 public:
-  List<Gambit::linalg::BFS<T> > m_bfsList;
-  List<MixedStrategyProfile<T> > m_equilibria;
+  List<Gambit::linalg::BFS<T>> m_bfsList;
+  List<MixedStrategyProfile<T>> m_equilibria;
 
-  bool Contains(const Gambit::linalg::BFS<T> &p_bfs) const
-  { return m_bfsList.Contains(p_bfs); }
-  void push_back(const Gambit::linalg::BFS<T> &p_bfs)
-  { m_bfsList.push_back(p_bfs); }
+  bool Contains(const Gambit::linalg::BFS<T> &p_bfs) const { return m_bfsList.Contains(p_bfs); }
+  void push_back(const Gambit::linalg::BFS<T> &p_bfs) { m_bfsList.push_back(p_bfs); }
 
   int EquilibriumCount() const { return m_equilibria.size(); }
 };
@@ -134,10 +130,9 @@ public:
 // Returns 'true' if the CBFS is new; 'false' if it already appears in the
 // list.
 //
-template <class T> bool
-NashLcpStrategySolver<T>::OnBFS(const Game &p_game,
-				linalg::LHTableau<T> &p_tableau,
-				Solution &p_solution) const
+template <class T>
+bool NashLcpStrategySolver<T>::OnBFS(const Game &p_game, linalg::LHTableau<T> &p_tableau,
+                                     Solution &p_solution) const
 {
   Gambit::linalg::BFS<T> cbfs(p_tableau.GetBFS());
   if (p_solution.Contains(cbfs)) {
@@ -148,12 +143,14 @@ NashLcpStrategySolver<T>::OnBFS(const Game &p_game,
   MixedStrategyProfile<T> profile(p_game->NewMixedStrategyProfile(static_cast<T>(0.0)));
   int n1 = p_game->GetPlayer(1)->GetStrategies().size();
   int n2 = p_game->GetPlayer(2)->GetStrategies().size();
-  T sum = (T) 0;
+  T sum = (T)0;
 
   for (int j = 1; j <= n1; j++) {
-    if (cbfs.count(j))   sum += cbfs[j];
+    if (cbfs.count(j)) {
+      sum += cbfs[j];
+    }
   }
-  if (sum == (T) 0)  {
+  if (sum == (T)0) {
     // This is the trivial CBFS.
     return false;
   }
@@ -164,13 +161,15 @@ NashLcpStrategySolver<T>::OnBFS(const Game &p_game,
       profile[strategy] = cbfs[j] / sum;
     }
     else {
-      profile[strategy] = (T) 0;
+      profile[strategy] = (T)0;
     }
   }
 
-  sum = (T) 0;
+  sum = (T)0;
   for (int j = 1; j <= n2; j++) {
-    if (cbfs.count(n1 + j))  sum += cbfs[n1 + j];
+    if (cbfs.count(n1 + j)) {
+      sum += cbfs[n1 + j];
+    }
   }
 
   for (int j = 1; j <= n2; j++) {
@@ -179,7 +178,7 @@ NashLcpStrategySolver<T>::OnBFS(const Game &p_game,
       profile[strategy] = cbfs[n1 + j] / sum;
     }
     else {
-      profile[strategy] = (T) 0;
+      profile[strategy] = (T)0;
     }
   }
 
@@ -200,11 +199,9 @@ NashLcpStrategySolver<T>::OnBFS(const Game &p_game,
 // From each new accessible equilibrium, it follows
 // all possible paths, adding any new equilibria to the List.
 //
-template <class T> void
-NashLcpStrategySolver<T>::AllLemke(const Game &p_game,
-				   int j, linalg::LHTableau<T> &B,
-				   Solution &p_solution,
-				   int depth) const
+template <class T>
+void NashLcpStrategySolver<T>::AllLemke(const Game &p_game, int j, linalg::LHTableau<T> &B,
+                                        Solution &p_solution, int depth) const
 {
   if (m_maxDepth != 0 && depth > m_maxDepth) {
     return;
@@ -217,22 +214,23 @@ NashLcpStrategySolver<T>::AllLemke(const Game &p_game,
   }
 
   for (int i = B.MinCol(); i <= B.MaxCol(); i++) {
-    if (i != j)  {
+    if (i != j) {
       linalg::LHTableau<T> Bcopy(B);
       Bcopy.LemkePath(i);
-      AllLemke(p_game, i, Bcopy, p_solution, depth+1);
+      AllLemke(p_game, i, Bcopy, p_solution, depth + 1);
     }
   }
 }
 
-template <class T> List<MixedStrategyProfile<T> >
-NashLcpStrategySolver<T>::Solve(const Game &p_game) const
+template <class T>
+List<MixedStrategyProfile<T>> NashLcpStrategySolver<T>::Solve(const Game &p_game) const
 {
   if (p_game->NumPlayers() != 2) {
     throw UndefinedException("Method only valid for two-player games.");
   }
   if (!p_game->IsPerfectRecall()) {
-    throw UndefinedException("Computing equilibria of games with imperfect recall is not supported.");
+    throw UndefinedException(
+        "Computing equilibria of games with imperfect recall is not supported.");
   }
   Solution solution;
 
@@ -246,7 +244,7 @@ NashLcpStrategySolver<T>::Solve(const Game &p_game) const
     if (m_stopAfter != 1) {
       AllLemke(p_game, 0, B, solution, 0);
     }
-    else  {
+    else {
       B.LemkePath(1);
       OnBFS(p_game, B, solution);
     }
@@ -264,5 +262,5 @@ NashLcpStrategySolver<T>::Solve(const Game &p_game) const
 template class NashLcpStrategySolver<double>;
 template class NashLcpStrategySolver<Rational>;
 
-}  // end namespace Gambit::Nash
-}  // end namespace Gambit
+} // namespace Nash
+} // end namespace Gambit

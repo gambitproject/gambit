@@ -23,17 +23,16 @@
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
-#endif  // WX_PRECOMP
+#endif // WX_PRECOMP
 
 #include "efgprofile.h"
-#include "renratio.h"        // for rational number rendering
+#include "renratio.h" // for rational number rendering
 
 //-------------------------------------------------------------------------
 //              class gbtBehavProfileList: Member functions
 //-------------------------------------------------------------------------
 
-gbtBehavProfileList::gbtBehavProfileList(wxWindow *p_parent,
-					 gbtGameDocument *p_doc)
+gbtBehavProfileList::gbtBehavProfileList(wxWindow *p_parent, gbtGameDocument *p_doc)
   : wxSheet(p_parent, wxID_ANY), gbtGameView(p_doc)
 {
   CreateGrid(0, 0);
@@ -41,14 +40,15 @@ gbtBehavProfileList::gbtBehavProfileList(wxWindow *p_parent,
   SetColLabelHeight(25);
 
   Connect(GetId(), wxEVT_SHEET_LABEL_LEFT_DOWN,
-	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtBehavProfileList::OnLabelClick))));
+          (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
+              wxSheetEventFunction, wxSheetEventFunction(&gbtBehavProfileList::OnLabelClick))));
 
   Connect(GetId(), wxEVT_SHEET_CELL_LEFT_DOWN,
-	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtBehavProfileList::OnCellClick))));
+          (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
+              wxSheetEventFunction, wxSheetEventFunction(&gbtBehavProfileList::OnCellClick))));
 }
 
-gbtBehavProfileList::~gbtBehavProfileList()
-= default;
+gbtBehavProfileList::~gbtBehavProfileList() = default;
 
 void gbtBehavProfileList::OnLabelClick(wxSheetEvent &p_event)
 {
@@ -58,7 +58,7 @@ void gbtBehavProfileList::OnLabelClick(wxSheetEvent &p_event)
   else {
     // Clicking on an action column sets the selected node to the first
     // member of that information set.
-    Gambit::GameAction action = m_doc->GetGame()->GetAction(p_event.GetCol()+1);
+    Gambit::GameAction action = m_doc->GetGame()->GetAction(p_event.GetCol() + 1);
     m_doc->SetSelectNode(action->GetInfoset()->GetMember(1));
   }
 }
@@ -74,35 +74,31 @@ wxString gbtBehavProfileList::GetCellValue(const wxSheetCoords &p_coords)
     return wxString::Format(wxT("%d"), p_coords.GetRow() + 1);
   }
   else if (IsColLabelCell(p_coords)) {
-    Gambit::GameAction action = m_doc->GetGame()->GetAction(p_coords.GetCol()+1);
-    return (wxString::Format(wxT("%d: "),
-			     action->GetInfoset()->GetNumber()) +
-	    wxString(action->GetLabel().c_str(), *wxConvCurrent));
+    Gambit::GameAction action = m_doc->GetGame()->GetAction(p_coords.GetCol() + 1);
+    return (wxString::Format(wxT("%d: "), action->GetInfoset()->GetNumber()) +
+            wxString(action->GetLabel().c_str(), *wxConvCurrent));
   }
   else if (IsCornerLabelCell(p_coords)) {
     return wxT("#");
   }
 
-
-  return {m_doc->GetProfiles().GetActionProb(p_coords.GetCol()+1,
-						     p_coords.GetRow()+1).c_str(),
-		  *wxConvCurrent};
+  return {m_doc->GetProfiles().GetActionProb(p_coords.GetCol() + 1, p_coords.GetRow() + 1).c_str(),
+          *wxConvCurrent};
 }
 
 static wxColour GetPlayerColor(gbtGameDocument *p_doc, int p_index)
 {
-  Gambit::GameAction action = p_doc->GetGame()->GetAction(p_index+1);
+  Gambit::GameAction action = p_doc->GetGame()->GetAction(p_index + 1);
   return p_doc->GetStyle().GetPlayerColor(action->GetInfoset()->GetPlayer()->GetNumber());
 }
 
-wxSheetCellAttr gbtBehavProfileList::GetAttr(const wxSheetCoords &p_coords,
-					     wxSheetAttr_Type) const
+wxSheetCellAttr gbtBehavProfileList::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
 {
   int currentProfile = m_doc->GetCurrentProfile();
 
   if (IsRowLabelCell(p_coords)) {
     wxSheetCellAttr attr(GetSheetRefData()->m_defaultRowLabelAttr);
-    if (p_coords.GetRow()+1 == currentProfile) {
+    if (p_coords.GetRow() + 1 == currentProfile) {
       attr.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
     }
     else {
@@ -129,7 +125,7 @@ wxSheetCellAttr gbtBehavProfileList::GetAttr(const wxSheetCoords &p_coords,
   }
 
   wxSheetCellAttr attr(GetSheetRefData()->m_defaultGridCellAttr);
-  if (p_coords.GetRow()+1 == currentProfile) {
+  if (p_coords.GetRow() + 1 == currentProfile) {
     attr.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
   }
   else {
@@ -140,8 +136,9 @@ wxSheetCellAttr gbtBehavProfileList::GetAttr(const wxSheetCoords &p_coords,
   attr.SetRenderer(wxSheetCellRenderer(new gbtRationalRendererRefData()));
 
   try {
-    Gambit::GameAction action = m_doc->GetGame()->GetAction(p_coords.GetCol()+1);
-    attr.SetForegroundColour(m_doc->GetStyle().GetPlayerColor(action->GetInfoset()->GetPlayer()->GetNumber()));
+    Gambit::GameAction action = m_doc->GetGame()->GetAction(p_coords.GetCol() + 1);
+    attr.SetForegroundColour(
+        m_doc->GetStyle().GetPlayerColor(action->GetInfoset()->GetPlayer()->GetNumber()));
     if (action->GetInfoset()->GetNumber() % 2 == 0) {
       attr.SetBackgroundColour(wxColour(250, 250, 250));
     }

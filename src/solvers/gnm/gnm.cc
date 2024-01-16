@@ -29,21 +29,19 @@ using namespace Gambit::gametracer;
 namespace Gambit {
 namespace Nash {
 
-MixedStrategyProfile<double>
-NashGNMStrategySolver::ToProfile(const Game &p_game,
-				 const cvector &p_pert)
+MixedStrategyProfile<double> NashGNMStrategySolver::ToProfile(const Game &p_game,
+                                                              const cvector &p_pert)
 {
   MixedStrategyProfile<double> msp = p_game->NewMixedStrategyProfile(0.0);
   for (size_t i = 1; i <= msp.MixedProfileLength(); i++) {
-    msp[i] = p_pert[i-1];
+    msp[i] = p_pert[i - 1];
   }
   return msp;
 }
 
-List<MixedStrategyProfile<double> >
-NashGNMStrategySolver::Solve(const Game &p_game,
-			     const std::shared_ptr<gnmgame> &p_rep,
-			     const cvector &p_pert) const
+List<MixedStrategyProfile<double>>
+NashGNMStrategySolver::Solve(const Game &p_game, const std::shared_ptr<gnmgame> &p_rep,
+                             const cvector &p_pert) const
 {
   const int STEPS = 100;
   const double FUZZ = 1e-12;
@@ -53,7 +51,7 @@ NashGNMStrategySolver::Solve(const Game &p_game,
   const bool WOBBLE = false;
   const double THRESHOLD = 1e-2;
 
-  List<MixedStrategyProfile<double> > eqa;
+  List<MixedStrategyProfile<double>> eqa;
 
   if (m_verbose) {
     m_onEquilibrium->Render(ToProfile(p_game, p_pert), "pert");
@@ -61,18 +59,16 @@ NashGNMStrategySolver::Solve(const Game &p_game,
   cvector norm_pert = p_pert / p_pert.norm();
   std::list<cvector> answers;
   std::string return_message;
-  GNM(*p_rep, norm_pert, answers,
-      STEPS, FUZZ, LNMFREQ, LNMMAX, LAMBDAMIN, WOBBLE, THRESHOLD,
+  GNM(*p_rep, norm_pert, answers, STEPS, FUZZ, LNMFREQ, LNMMAX, LAMBDAMIN, WOBBLE, THRESHOLD,
       m_verbose, return_message);
-  for (auto answer: answers) {
+  for (auto answer : answers) {
     eqa.push_back(ToProfile(p_game, answer));
     m_onEquilibrium->Render(eqa.back());
   }
   return eqa;
 }
 
-std::shared_ptr<gnmgame>
-NashGNMStrategySolver::BuildRepresentation(const Game &p_game) const
+std::shared_ptr<gnmgame> NashGNMStrategySolver::BuildRepresentation(const Game &p_game) const
 {
   if (p_game->IsAgg()) {
     return std::shared_ptr<gnmgame>(new aggame(dynamic_cast<GameAGGRep &>(*p_game)));
@@ -85,7 +81,7 @@ NashGNMStrategySolver::BuildRepresentation(const Game &p_game) const
     std::vector<int> actions(p_game->NumPlayers());
     int veclength = p_game->NumPlayers();
     for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
-      actions[pl-1] = p_game->GetPlayer(pl)->NumStrategies();
+      actions[pl - 1] = p_game->GetPlayer(pl)->NumStrategies();
       veclength *= p_game->GetPlayer(pl)->NumStrategies();
     }
     cvector payoffs(veclength);
@@ -95,24 +91,22 @@ NashGNMStrategySolver::BuildRepresentation(const Game &p_game) const
     std::vector<int> profile(p_game->NumPlayers());
     for (StrategyProfileIterator iter(p_game); !iter.AtEnd(); iter++) {
       for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
-        profile[pl-1] = (*iter)->GetStrategy(pl)->GetNumber() - 1;
+        profile[pl - 1] = (*iter)->GetStrategy(pl)->GetNumber() - 1;
       }
 
       for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
-        A->setPurePayoff(pl-1, profile,
-		       (double) ((*iter)->GetPayoff(pl) - minPay) *
-		       scale);
+        A->setPurePayoff(pl - 1, profile, (double)((*iter)->GetPayoff(pl) - minPay) * scale);
       }
     }
     return A;
   }
 }
 
-List<MixedStrategyProfile<double> >
-NashGNMStrategySolver::Solve(const Game &p_game) const
+List<MixedStrategyProfile<double>> NashGNMStrategySolver::Solve(const Game &p_game) const
 {
   if (!p_game->IsPerfectRecall()) {
-    throw UndefinedException("Computing equilibria of games with imperfect recall is not supported.");
+    throw UndefinedException(
+        "Computing equilibria of games with imperfect recall is not supported.");
   }
 
   std::shared_ptr<gnmgame> A = BuildRepresentation(p_game);
@@ -124,23 +118,23 @@ NashGNMStrategySolver::Solve(const Game &p_game) const
   return Solve(p_game, A, g);
 }
 
-List<MixedStrategyProfile<double> >
-NashGNMStrategySolver::Solve(const Game &p_game,
-			     const MixedStrategyProfile<double> &p_pert) const
+List<MixedStrategyProfile<double>>
+NashGNMStrategySolver::Solve(const Game &p_game, const MixedStrategyProfile<double> &p_pert) const
 {
   if (!p_game->IsPerfectRecall()) {
-    throw UndefinedException("Computing equilibria of games with imperfect recall is not supported.");
+    throw UndefinedException(
+        "Computing equilibria of games with imperfect recall is not supported.");
   }
 
-  List<MixedStrategyProfile<double> > solutions;
+  List<MixedStrategyProfile<double>> solutions;
   std::shared_ptr<gnmgame> A = BuildRepresentation(p_game);
   cvector g(A->getNumActions());
   for (int i = 0; i < A->getNumActions(); i++) {
-    g[i] = p_pert[i+1];
+    g[i] = p_pert[i + 1];
   }
   g /= g.norm();
   return Solve(p_game, A, g);
 }
 
-}  // end namespace Gambit::Nash
-}  // end namespace Gambit
+} // namespace Nash
+} // end namespace Gambit

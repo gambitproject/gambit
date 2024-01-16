@@ -33,11 +33,9 @@ private:
   void OnLeftClick(wxMouseEvent &);
 
 public:
-  gbtStaticTextButton(wxWindow *p_parent, wxWindowID p_id,
-		      const wxString &,
-		      const wxPoint & = wxDefaultPosition,
-		      const wxSize & = wxDefaultSize,
-		      long = 0);
+  gbtStaticTextButton(wxWindow *p_parent, wxWindowID p_id, const wxString &,
+                      const wxPoint & = wxDefaultPosition, const wxSize & = wxDefaultSize,
+                      long = 0);
 
   DECLARE_EVENT_TABLE()
 };
@@ -60,10 +58,8 @@ private:
   //@}
 
 public:
-  gbtEditableText(wxWindow *p_parent, int p_id,
-		  const wxString &p_value,
-		  const wxPoint &p_position,
-		  const wxSize &p_size);
+  gbtEditableText(wxWindow *p_parent, int p_id, const wxString &p_value, const wxPoint &p_position,
+                  const wxSize &p_size);
 
   bool IsEditing() const { return GetSizer()->IsShown(m_textCtrl); }
   void BeginEdit();

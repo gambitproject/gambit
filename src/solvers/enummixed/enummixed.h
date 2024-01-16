@@ -36,61 +36,61 @@ template <class T> class EnumMixedStrategySolver;
 ///
 template <class T> class EnumMixedStrategySolution {
   friend class EnumMixedStrategySolver<T>;
+
 public:
-  explicit EnumMixedStrategySolution(const Game &p_game) : m_game(p_game) { }
+  explicit EnumMixedStrategySolution(const Game &p_game) : m_game(p_game) {}
   ~EnumMixedStrategySolution() = default;
 
   const Game &GetGame() const { return m_game; }
-  const List<MixedStrategyProfile<T> > &GetExtremeEquilibria() const
-  { return m_extremeEquilibria; }
+  const List<MixedStrategyProfile<T>> &GetExtremeEquilibria() const { return m_extremeEquilibria; }
 
-  List<List<MixedStrategyProfile<T> > > GetCliques() const;
+  List<List<MixedStrategyProfile<T>>> GetCliques() const;
 
 private:
   Game m_game;
-  List<MixedStrategyProfile<T> > m_extremeEquilibria;
+  List<MixedStrategyProfile<T>> m_extremeEquilibria;
 
   /// Representation of the graph connecting the extreme equilibria
   ///@{
-  List<Vector<T> > m_key1, m_key2;
+  List<Vector<T>> m_key1, m_key2;
   List<int> m_node1, m_node2; // IDs of each component of the extreme equilibria
   int m_v1, m_v2;
   ///@}
 
   /// Representation of the connectedness of the extreme equilibria
   /// These are generated only on demand
-  mutable List<Array<int> > m_cliques1, m_cliques2;
+  mutable List<Array<int>> m_cliques1, m_cliques2;
 };
-
 
 template <class T> class EnumMixedStrategySolver : public StrategySolver<T> {
 public:
-  explicit EnumMixedStrategySolver(std::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = nullptr)
-    : StrategySolver<T>(p_onEquilibrium) {}
+  explicit EnumMixedStrategySolver(
+      std::shared_ptr<StrategyProfileRenderer<T>> p_onEquilibrium = nullptr)
+    : StrategySolver<T>(p_onEquilibrium)
+  {
+  }
   ~EnumMixedStrategySolver() override = default;
 
-  std::shared_ptr<EnumMixedStrategySolution<T> > SolveDetailed(const Game &p_game) const;
-  List<MixedStrategyProfile<T> > Solve(const Game &p_game) const override
-  { return SolveDetailed(p_game)->GetExtremeEquilibria(); }
-
+  std::shared_ptr<EnumMixedStrategySolution<T>> SolveDetailed(const Game &p_game) const;
+  List<MixedStrategyProfile<T>> Solve(const Game &p_game) const override
+  {
+    return SolveDetailed(p_game)->GetExtremeEquilibria();
+  }
 
 private:
   /// Implement fuzzy equality for floating-point version when testing Nashness
   static bool EqZero(const T &x);
 };
 
-
-inline List<MixedStrategyProfile<double> > EnumMixedStrategySolveDouble(const Game &p_game)
+inline List<MixedStrategyProfile<double>> EnumMixedStrategySolveDouble(const Game &p_game)
 {
   return EnumMixedStrategySolver<double>().Solve(p_game);
 }
 
-inline List<MixedStrategyProfile<Rational> > EnumMixedStrategySolveRational(const Game &p_game)
+inline List<MixedStrategyProfile<Rational>> EnumMixedStrategySolveRational(const Game &p_game)
 {
   return EnumMixedStrategySolver<Rational>().Solve(p_game);
 }
-
-
 
 //
 // Enumerate all mixed-strategy Nash equilibria of a two-player game
@@ -98,19 +98,22 @@ inline List<MixedStrategyProfile<Rational> > EnumMixedStrategySolveRational(cons
 //
 class EnumMixedLrsStrategySolver : public StrategySolver<Rational> {
 public:
-  explicit EnumMixedLrsStrategySolver(std::shared_ptr<StrategyProfileRenderer<Rational> > p_onEquilibrium = nullptr)
-    : StrategySolver<Rational>(p_onEquilibrium) { }
+  explicit EnumMixedLrsStrategySolver(
+      std::shared_ptr<StrategyProfileRenderer<Rational>> p_onEquilibrium = nullptr)
+    : StrategySolver<Rational>(p_onEquilibrium)
+  {
+  }
   ~EnumMixedLrsStrategySolver() override = default;
 
-  List<MixedStrategyProfile<Rational> > Solve(const Game &p_game) const override;
+  List<MixedStrategyProfile<Rational>> Solve(const Game &p_game) const override;
 };
 
-inline List<MixedStrategyProfile<Rational> > EnumMixedStrategySolveLrs(const Game &p_game)
+inline List<MixedStrategyProfile<Rational>> EnumMixedStrategySolveLrs(const Game &p_game)
 {
   return EnumMixedLrsStrategySolver().Solve(p_game);
 }
 
-}  // end namespace Gambit::Nash
-}  // end namespace Gambit
+} // namespace Nash
+} // end namespace Gambit
 
-#endif  // GAMBIT_NASH_ENUMMIXED_H
+#endif // GAMBIT_NASH_ENUMMIXED_H

@@ -32,11 +32,10 @@ template <class T> class LHTableau : public BaseTableau<T> {
 public:
   /// @name Lifecycle
   //@{
-  LHTableau(const Matrix<T> &A1, const Matrix<T> &A2,
-	    const Vector<T> &b1, const Vector<T> &b2);
+  LHTableau(const Matrix<T> &A1, const Matrix<T> &A2, const Vector<T> &b1, const Vector<T> &b2);
   ~LHTableau() override = default;
 
-  LHTableau<T>& operator=(const LHTableau<T>&);
+  LHTableau<T> &operator=(const LHTableau<T> &);
   //@}
 
   /// @name General information
@@ -45,7 +44,7 @@ public:
   int MaxRow() const override { return T2.MaxRow(); }
   int MinCol() const override { return T2.MinCol(); }
   int MaxCol() const override { return T1.MaxCol(); }
-  T Epsilon() const   { return T1.Epsilon(); }
+  T Epsilon() const { return T1.Epsilon(); }
 
   bool Member(int i) const override { return T1.Member(i) || T2.Member(i); }
   /// Return variable in i'th position of Tableau
@@ -64,7 +63,11 @@ public:
 
   /// @name Raw Tableau functions
   //@{
-  void Refactor() override { T1.Refactor(); T2.Refactor(); }
+  void Refactor() override
+  {
+    T1.Refactor();
+    T2.Refactor();
+  }
   //@}
 
   /// @name Miscellaneous functions
@@ -83,7 +86,7 @@ protected:
   Vector<T> solution;
 };
 
-}  // end namespace Gambit::linalg
-}  // end namespace Gambit
+} // namespace linalg
+} // end namespace Gambit
 
-#endif  // GAMBIT_LINALG_LHTAB_H
+#endif // GAMBIT_LINALG_LHTAB_H

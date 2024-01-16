@@ -34,7 +34,8 @@ class StrategicLyapunovFunction : public FunctionOnSimplices {
 public:
   explicit StrategicLyapunovFunction(const MixedStrategyProfile<double> &p_start)
     : m_game(p_start.GetGame()), m_profile(p_start)
-  { }
+  {
+  }
   ~StrategicLyapunovFunction() override = default;
 
 private:
@@ -47,9 +48,8 @@ private:
   double LiapDerivValue(int, int, const MixedStrategyProfile<double> &) const;
 };
 
-double
-StrategicLyapunovFunction::LiapDerivValue(int i1, int j1,
-					  const MixedStrategyProfile<double> &p) const
+double StrategicLyapunovFunction::LiapDerivValue(int i1, int j1,
+                                                 const MixedStrategyProfile<double> &p) const
 {
   GameStrategy wrt_strategy = m_game->GetPlayer(i1)->GetStrategies()[j1];
   double x = 0.0;
@@ -61,12 +61,13 @@ StrategicLyapunovFunction::LiapDerivValue(int i1, int j1,
       psum += p[strategy];
       double x1 = p.GetPayoff(strategy) - p.GetPayoff(i);
       if (i1 == i) {
-        if (x1 > 0.0)
+        if (x1 > 0.0) {
           x -= x1 * p.GetPayoffDeriv(i, wrt_strategy);
+        }
       }
       else if (x1 > 0.0) {
-        x += x1 * (p.GetPayoffDeriv(i, strategy, wrt_strategy) -
-                   p.GetPayoffDeriv(i, wrt_strategy));
+        x +=
+            x1 * (p.GetPayoffDeriv(i, strategy, wrt_strategy) - p.GetPayoffDeriv(i, wrt_strategy));
       }
     }
     if (i == i1) {
@@ -79,8 +80,7 @@ StrategicLyapunovFunction::LiapDerivValue(int i1, int j1,
   return 2.0 * x;
 }
 
-bool
-StrategicLyapunovFunction::Gradient(const Vector<double> &v, Vector<double> &d) const
+bool StrategicLyapunovFunction::Gradient(const Vector<double> &v, Vector<double> &d) const
 {
   m_profile = v;
   for (int pl = 1, ii = 1; pl <= m_game->NumPlayers(); pl++) {
@@ -102,15 +102,16 @@ double StrategicLyapunovFunction::Value(const Vector<double> &v) const
 //                     class NashLiapStrategySolver
 //------------------------------------------------------------------------
 
-List<MixedStrategyProfile<double> >
+List<MixedStrategyProfile<double>>
 NashLiapStrategySolver::Solve(const MixedStrategyProfile<double> &p_start) const
 {
   if (!p_start.GetGame()->IsPerfectRecall()) {
-    throw UndefinedException("Computing equilibria of games with imperfect recall is not supported.");
+    throw UndefinedException(
+        "Computing equilibria of games with imperfect recall is not supported.");
   }
 
   static const double ALPHA = .00000001;
-  List<MixedStrategyProfile<double> > solutions;
+  List<MixedStrategyProfile<double>> solutions;
 
   MixedStrategyProfile<double> p(p_start);
   if (m_verbose) {
@@ -119,11 +120,12 @@ NashLiapStrategySolver::Solve(const MixedStrategyProfile<double> &p_start) const
 
   // if starting vector not interior, perturb it towards centroid
   size_t kk;
-  for (kk = 1; kk <= p.MixedProfileLength() && p[kk] > ALPHA; kk++);
+  for (kk = 1; kk <= p.MixedProfileLength() && p[kk] > ALPHA; kk++)
+    ;
   if (kk <= p.MixedProfileLength()) {
     MixedStrategyProfile<double> centroid(p.GetGame()->NewMixedStrategyProfile(0.0));
     for (size_t k = 1; k <= p.MixedProfileLength(); k++) {
-      p[k] = centroid[k] * ALPHA + p[k] * (1.0-ALPHA);
+      p[k] = centroid[k] * ALPHA + p[k] * (1.0 - ALPHA);
     }
   }
 
@@ -131,8 +133,7 @@ NashLiapStrategySolver::Solve(const MixedStrategyProfile<double> &p_start) const
   ConjugatePRMinimizer minimizer(p.MixedProfileLength());
   Vector<double> gradient(p.MixedProfileLength()), dx(p.MixedProfileLength());
   double fval;
-  minimizer.Set(F, static_cast<const Vector<double> &>(p),
-		fval, gradient, .01, .0001);
+  minimizer.Set(F, static_cast<const Vector<double> &>(p), fval, gradient, .01, .0001);
 
   for (int iter = 1; iter <= m_maxitsN; iter++) {
     Vector<double> point(p);

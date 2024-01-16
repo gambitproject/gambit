@@ -34,7 +34,7 @@
 
 using namespace Gambit;
 
-class HeuristicPolEnumModule  {
+class HeuristicPolEnumModule {
 private:
   int m_stopAfter;
   double eps;
@@ -45,25 +45,25 @@ private:
   int num_vars;
   long nevals;
   double time;
-  Gambit::List<MixedStrategyProfile<double> > solutions;
+  Gambit::List<MixedStrategyProfile<double>> solutions;
   bool is_singular;
 
   bool EqZero(double x) const;
 
   // p_i_j as a gPoly, with last prob in terms of previous probs
-  gPoly<double> Prob(int i,int j) const;
+  gPoly<double> Prob(int i, int j) const;
 
   // equation for when player i sets strat1 = strat2
   // with last probs for each player substituted out.
   gPoly<double> IndifferenceEquation(int i, int strat1, int strat2) const;
-  gPolyList<double>   IndifferenceEquations()                 const;
-  gPolyList<double>   LastActionProbPositiveInequalities()    const;
-  gPolyList<double>   NashOnSupportEquationsAndInequalities() const;
-  Gambit::List<Vector<double> >
-               NashOnSupportSolnVectors(const gPolyList<double> &equations,
-					const gRectangle<double> &Cube);
+  gPolyList<double> IndifferenceEquations() const;
+  gPolyList<double> LastActionProbPositiveInequalities() const;
+  gPolyList<double> NashOnSupportEquationsAndInequalities() const;
+  Gambit::List<Vector<double>> NashOnSupportSolnVectors(const gPolyList<double> &equations,
+                                                        const gRectangle<double> &Cube);
 
-  int SaveSolutions(const Gambit::List<Vector<double> > &list);
+  int SaveSolutions(const Gambit::List<Vector<double>> &list);
+
 public:
   HeuristicPolEnumModule(const StrategySupportProfile &, int p_stopAfter);
 
@@ -72,7 +72,7 @@ public:
   long NumEvals() const;
   double Time() const;
 
-  const Gambit::List<MixedStrategyProfile<double> > &GetSolutions() const;
+  const Gambit::List<MixedStrategyProfile<double>> &GetSolutions() const;
   Vector<double> SolVarsFromMixedStrategyProfile(const MixedStrategyProfile<double> &) const;
 
   int PolishKnownRoot(Vector<double> &) const;

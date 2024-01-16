@@ -44,44 +44,43 @@ the same.
 // ***********************
 
 template <class T> class gIdeal {
- private:
-   const gSpace*      Space;
-   const term_order*  order;
-         gPolyList<T> basis;
+private:
+  const gSpace *Space;
+  const term_order *order;
+  gPolyList<T> basis;
 
- public:
+public:
   gIdeal(const gSpace *, const term_order *); // Null gIdeal constructor
-  gIdeal(const gSpace *, const term_order *,
-	      const Gambit::List< gPoly<T> *> &);
+  gIdeal(const gSpace *, const term_order *, const Gambit::List<gPoly<T> *> &);
   gIdeal(const term_order *, const gPolyList<T> &);
   gIdeal(const gIdeal<T> &);
 
   ~gIdeal();
 
-   // Operators
-   gIdeal<T>& operator=(const gIdeal<T> &);
+  // Operators
+  gIdeal<T> &operator=(const gIdeal<T> &);
 
-   bool      operator==(const gIdeal<T> &) const;
-   bool      operator!=(const gIdeal<T> &) const;
-   gIdeal<T> operator+ (const gIdeal<T> &) const;
-   gIdeal<T> operator* (const gIdeal<T> &) const;
+  bool operator==(const gIdeal<T> &) const;
+  bool operator!=(const gIdeal<T> &) const;
+  gIdeal<T> operator+(const gIdeal<T> &) const;
+  gIdeal<T> operator*(const gIdeal<T> &) const;
 
-   // Information
-   inline int               Dmnsn()            const { return Space->Dmnsn(); }
-   inline const gSpace*     TheSpace()         const { return Space         ; }
-   inline int               NoBasisElements()  const { return basis.Length(); }
-   inline const term_order* Order()            const { return order; }
-   inline gPolyList<T>      CanonicalBasis()   const { return basis; }
-          gIdeal<T>         MonomialIdeal()    const;
-          Gambit::List<exp_vect>   MonomialBasis()    const;
-                // This returns a monomial basis of the ring of polynomial
-                // functions on the variety V(I), where I is the given ideal.
-                // It fails if the variety is not zero dimensional.
-          bool              IsRoot(const Gambit::Vector<T>&) const;
+  // Information
+  inline int Dmnsn() const { return Space->Dmnsn(); }
+  inline const gSpace *TheSpace() const { return Space; }
+  inline int NoBasisElements() const { return basis.Length(); }
+  inline const term_order *Order() const { return order; }
+  inline gPolyList<T> CanonicalBasis() const { return basis; }
+  gIdeal<T> MonomialIdeal() const;
+  Gambit::List<exp_vect> MonomialBasis() const;
+  // This returns a monomial basis of the ring of polynomial
+  // functions on the variety V(I), where I is the given ideal.
+  // It fails if the variety is not zero dimensional.
+  bool IsRoot(const Gambit::Vector<T> &) const;
 
-   bool ZeroDimensional()    const;
-   bool IsEntireRing()       const;
-   bool Contains(gPoly<T> &) const;
+  bool ZeroDimensional() const;
+  bool IsEntireRing() const;
+  bool Contains(gPoly<T> &) const;
 };
 
-#endif //# IDEAL_H
+#endif // # IDEAL_H

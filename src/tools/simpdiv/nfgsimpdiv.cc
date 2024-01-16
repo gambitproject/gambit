@@ -31,20 +31,19 @@
 using namespace Gambit;
 using namespace Gambit::Nash;
 
-List<MixedStrategyProfile<Rational> >
-ReadProfiles(const Game &p_game, std::istream &p_stream)
+List<MixedStrategyProfile<Rational>> ReadProfiles(const Game &p_game, std::istream &p_stream)
 {
-  List<MixedStrategyProfile<Rational> > profiles;
+  List<MixedStrategyProfile<Rational>> profiles;
   while (!p_stream.eof() && !p_stream.bad()) {
     MixedStrategyProfile<Rational> p(p_game->NewMixedStrategyProfile(Rational(0)));
     for (int i = 1; i <= p.MixedProfileLength(); i++) {
       if (p_stream.eof() || p_stream.bad()) {
-	break;
+        break;
       }
       p_stream >> p[i];
       if (i < p.MixedProfileLength()) {
-	char comma;
-	p_stream >> comma;
+        char comma;
+        p_stream >> comma;
       }
     }
     // Read in the rest of the line and discard
@@ -55,10 +54,10 @@ ReadProfiles(const Game &p_game, std::istream &p_stream)
   return profiles;
 }
 
-List<MixedStrategyProfile<Rational> >
-RandomProfiles(const Game &p_game, int p_count, const Rational &denom)
+List<MixedStrategyProfile<Rational>> RandomProfiles(const Game &p_game, int p_count,
+                                                    const Rational &denom)
 {
-  List<MixedStrategyProfile<Rational> > profiles;
+  List<MixedStrategyProfile<Rational>> profiles;
   for (int i = 1; i <= p_count; i++) {
     MixedStrategyProfile<Rational> p(p_game->NewMixedStrategyProfile(Rational(0)));
     p.Randomize(denom);
@@ -67,14 +66,12 @@ RandomProfiles(const Game &p_game, int p_count, const Rational &denom)
   return profiles;
 }
 
-
 void PrintBanner(std::ostream &p_stream)
 {
   p_stream << "Compute Nash equilibria using simplicial subdivision\n";
   p_stream << "Gambit version " VERSION ", Copyright (C) 1994-2024, The Gambit Project\n";
   p_stream << "This is free software, distributed under the GNU GPL\n\n";
 }
-
 
 void PrintHelp(char *progname)
 {
@@ -105,17 +102,16 @@ int main(int argc, char *argv[])
   bool verbose = false, quiet = false;
 
   int long_opt_index = 0;
-  struct option long_options[] = {
-    { "help", 0, nullptr, 'h'   },
-    { "version", 0, nullptr, 'v'  },
-    { "verbose", 0, nullptr, 'V'  },
-    { nullptr,    0,    nullptr,    0   }
-  };
+  struct option long_options[] = {{"help", 0, nullptr, 'h'},
+                                  {"version", 0, nullptr, 'v'},
+                                  {"verbose", 0, nullptr, 'V'},
+                                  {nullptr, 0, nullptr, 0}};
   int c;
   while ((c = getopt_long(argc, argv, "g:hVvn:r:s:qS", long_options, &long_opt_index)) != -1) {
     switch (c) {
     case 'v':
-      PrintBanner(std::cerr); exit(1);
+      PrintBanner(std::cerr);
+      exit(1);
     case 'g':
       gridResize = atoi(optarg);
       break;
@@ -142,10 +138,10 @@ int main(int argc, char *argv[])
       break;
     case '?':
       if (isprint(optopt)) {
-	std::cerr << argv[0] << ": Unknown option `-" << ((char) optopt) << "'.\n";
+        std::cerr << argv[0] << ": Unknown option `-" << ((char)optopt) << "'.\n";
       }
       else {
-	std::cerr << argv[0] << ": Unknown option character `\\x" << optopt << "`.\n";
+        std::cerr << argv[0] << ": Unknown option character `\\x" << optopt << "`.\n";
       }
       return 1;
     default:
@@ -157,7 +153,7 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
-  std::istream* input_stream = &std::cin;
+  std::istream *input_stream = &std::cin;
   std::ifstream file_stream;
   if (optind < argc) {
     file_stream.open(argv[optind]);
@@ -172,7 +168,7 @@ int main(int argc, char *argv[])
 
   try {
     Game game = ReadGame(*input_stream);
-    List<MixedStrategyProfile<Rational> > starts;
+    List<MixedStrategyProfile<Rational>> starts;
     if (!startFile.empty()) {
       std::ifstream startPoints(startFile.c_str());
       starts = ReadProfiles(game, startPoints);
@@ -188,11 +184,9 @@ int main(int argc, char *argv[])
       }
     }
     for (int i = 1; i <= starts.size(); i++) {
-      std::shared_ptr<StrategyProfileRenderer<Rational> > renderer(
-        new MixedStrategyCSVRenderer<Rational>(std::cout)
-      );
-      NashSimpdivStrategySolver algorithm(gridResize, 0, verbose,
-					  renderer);
+      std::shared_ptr<StrategyProfileRenderer<Rational>> renderer(
+          new MixedStrategyCSVRenderer<Rational>(std::cout));
+      NashSimpdivStrategySolver algorithm(gridResize, 0, verbose, renderer);
       algorithm.Solve(starts[i]);
     }
     return 0;

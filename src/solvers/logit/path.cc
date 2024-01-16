@@ -21,7 +21,7 @@
 //
 
 #include <cmath>
-#include <algorithm>   // for std::max
+#include <algorithm> // for std::max
 
 #include "gambit.h"
 #include "core/sqmatrix.h"
@@ -35,10 +35,9 @@ namespace Gambit {
 
 namespace {
 
-inline double sqr(double x) { return x*x; }
+inline double sqr(double x) { return x * x; }
 
-void Givens(Matrix<double> &b, Matrix<double> &q,
-            double &c1, double &c2, int l1, int l2, int l3)
+void Givens(Matrix<double> &b, Matrix<double> &q, double &c1, double &c2, int l1, int l2, int l3)
 {
   if (fabs(c1) + fabs(c2) == 0.0) {
     return;
@@ -46,13 +45,13 @@ void Givens(Matrix<double> &b, Matrix<double> &q,
 
   double sn;
   if (fabs(c2) >= fabs(c1)) {
-    sn = std::sqrt(1.0 + sqr(c1/c2)) * fabs(c2);
+    sn = std::sqrt(1.0 + sqr(c1 / c2)) * fabs(c2);
   }
   else {
-    sn = std::sqrt(1.0 + sqr(c2/c1)) * fabs(c1);
+    sn = std::sqrt(1.0 + sqr(c2 / c1)) * fabs(c1);
   }
-  double s1 = c1/sn;
-  double s2 = c2/sn;
+  double s1 = c1 / sn;
+  double s2 = c2 / sn;
 
   for (int k = 1; k <= q.NumColumns(); k++) {
     double sv1 = q(l1, k);
@@ -82,9 +81,8 @@ void QRDecomp(Matrix<double> &b, Matrix<double> &q)
   }
 }
 
-void NewtonStep(Matrix<double> &q, Matrix<double> &b,
-                Vector<double> &u, Vector<double> &y,
-		double &d)
+void NewtonStep(Matrix<double> &q, Matrix<double> &b, Vector<double> &u, Vector<double> &y,
+                double &d)
 {
   for (int k = 1; k <= b.NumColumns(); k++) {
     for (int l = 1; l <= k - 1; l++) {
@@ -105,30 +103,26 @@ void NewtonStep(Matrix<double> &q, Matrix<double> &b,
   d = std::sqrt(d);
 }
 
-}   // end anonymous namespace
-
+} // end anonymous namespace
 
 //----------------------------------------------------------------------------
 //             PathTracer: Implementation of path-following engine
 //----------------------------------------------------------------------------
 
-void
-PathTracer::TracePath(const EquationSystem &p_system,
-		      Vector<double> &x,
-		      double p_maxLambda, double &p_omega,
-		      const CallbackFunction &p_callback,
-		      const CriterionFunction &p_criterion) const
+void PathTracer::TracePath(const EquationSystem &p_system, Vector<double> &x, double p_maxLambda,
+                           double &p_omega, const CallbackFunction &p_callback,
+                           const CriterionFunction &p_criterion) const
 {
-  const double c_tol = 1.0e-4;     // tolerance for corrector iteration
-  const double c_maxDist = 0.4;    // maximal distance to curve
-  const double c_maxContr = 0.6;   // maximal contraction rate in corrector
-  const double c_eta = 0.1;        // perturbation to avoid cancellation
-                                   // in calculating contraction rate
-  double h = m_hStart;             // initial stepsize
-  const double c_hmin = 1.0e-8;    // minimal stepsize
-  const int c_maxIter = 100;       // maximum iterations in corrector
+  const double c_tol = 1.0e-4;   // tolerance for corrector iteration
+  const double c_maxDist = 0.4;  // maximal distance to curve
+  const double c_maxContr = 0.6; // maximal contraction rate in corrector
+  const double c_eta = 0.1;      // perturbation to avoid cancellation
+                                 // in calculating contraction rate
+  double h = m_hStart;           // initial stepsize
+  const double c_hmin = 1.0e-8;  // minimal stepsize
+  const int c_maxIter = 100;     // maximum iterations in corrector
 
-  bool newton = false;             // using Newton steplength (for zero-finding)
+  bool newton = false; // using Newton steplength (for zero-finding)
 
   Vector<double> u(x.Length()), restart(x.Length());
   // t is current tangent at x; newT is tangent at u, which is the next point.
@@ -147,8 +141,8 @@ PathTracer::TracePath(const EquationSystem &p_system,
 
     if (fabs(h) <= c_hmin) {
       if (newton) {
-	// Restore the place to restart if desired
-	x = restart;
+        // Restore the place to restart if desired
+        x = restart;
       }
       return;
     }
@@ -158,7 +152,7 @@ PathTracer::TracePath(const EquationSystem &p_system,
       u[k] = x[k] + h * p_omega * t[k];
     }
 
-    double decel = 1.0 / m_maxDecel;  // initialize deceleration factor
+    double decel = 1.0 / m_maxDecel; // initialize deceleration factor
     p_system.GetJacobian(u, b);
     QRDecomp(b, q);
 
@@ -171,45 +165,45 @@ PathTracer::TracePath(const EquationSystem &p_system,
       NewtonStep(q, b, u, y, dist);
 
       if (dist >= c_maxDist) {
-	accept = false;
-	break;
+        accept = false;
+        break;
       }
 
       decel = std::max(decel, std::sqrt(dist / c_maxDist) * m_maxDecel);
       if (iter >= 2) {
-	double contr = dist / (disto + c_tol * c_eta);
-	if (contr > c_maxContr) {
-	  accept = false;
-	  break;
-	}
-	decel = std::max(decel, std::sqrt(contr / c_maxContr) * m_maxDecel);
+        double contr = dist / (disto + c_tol * c_eta);
+        if (contr > c_maxContr) {
+          accept = false;
+          break;
+        }
+        decel = std::max(decel, std::sqrt(contr / c_maxContr) * m_maxDecel);
       }
 
       if (dist <= c_tol) {
-	// Success; break out of iteration
-	break;
+        // Success; break out of iteration
+        break;
       }
       disto = dist;
       iter++;
       if (iter > c_maxIter) {
-	p_callback(x, true);
-	if (newton) {
-	  // Restore the place to restart if desired
-	  x = restart;
-	}
-	return;
+        p_callback(x, true);
+        if (newton) {
+          // Restore the place to restart if desired
+          x = restart;
+        }
+        return;
       }
     }
 
     if (!accept) {
-      h /= m_maxDecel;   // PC not accepted; change stepsize and retry
+      h /= m_maxDecel; // PC not accepted; change stepsize and retry
       if (fabs(h) <= c_hmin) {
-	p_callback(x, true);
-	if (newton) {
-	  // Restore the place to restart if desired
-	  x = restart;
-	}
-	return;
+        p_callback(x, true);
+        if (newton) {
+          // Restore the place to restart if desired
+          x = restart;
+        }
+        return;
       }
 
       continue;
@@ -229,8 +223,7 @@ PathTracer::TracePath(const EquationSystem &p_system,
     // This ensures the criterion function is called with both the old and
     // new tangent oriented in the same sense.
     double omega_flip = (t * newT < 0.0) ? -1.0 : 1.0;
-    if (!newton &&
-	p_criterion(x, t) * p_criterion(u, newT*omega_flip) < 0.0) {
+    if (!newton && p_criterion(x, t) * p_criterion(u, newT * omega_flip) < 0.0) {
       newton = true;
       restart = u;
     }
@@ -263,4 +256,4 @@ PathTracer::TracePath(const EquationSystem &p_system,
   }
 }
 
-}  // end namespace Gambit
+} // end namespace Gambit

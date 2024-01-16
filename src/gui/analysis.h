@@ -46,7 +46,7 @@ public:
   /// @name Lifecycle
   //@{
   /// Construct a new output group
-  explicit gbtAnalysisOutput(gbtGameDocument *p_doc) : m_doc(p_doc) { }
+  explicit gbtAnalysisOutput(gbtGameDocument *p_doc) : m_doc(p_doc) {}
   /// Clean up an output group
   virtual ~gbtAnalysisOutput() = default;
   //@}
@@ -87,26 +87,17 @@ public:
 
   virtual std::string GetPayoff(int pl, int p_index = -1) const = 0;
 
-  virtual std::string GetRealizProb(const Gambit::GameNode &,
-				    int p_index = -1) const = 0;
-  virtual std::string GetBeliefProb(const Gambit::GameNode &,
-				    int p_index = -1) const = 0;
-  virtual std::string GetNodeValue(const Gambit::GameNode &, int pl,
-				   int p_index = -1) const = 0;
-  virtual std::string GetInfosetProb(const Gambit::GameNode &,
-				     int p_index = -1) const = 0;
-  virtual std::string GetInfosetValue(const Gambit::GameNode &,
-				      int p_index = -1) const = 0;
+  virtual std::string GetRealizProb(const Gambit::GameNode &, int p_index = -1) const = 0;
+  virtual std::string GetBeliefProb(const Gambit::GameNode &, int p_index = -1) const = 0;
+  virtual std::string GetNodeValue(const Gambit::GameNode &, int pl, int p_index = -1) const = 0;
+  virtual std::string GetInfosetProb(const Gambit::GameNode &, int p_index = -1) const = 0;
+  virtual std::string GetInfosetValue(const Gambit::GameNode &, int p_index = -1) const = 0;
   virtual std::string GetActionValue(const Gambit::GameNode &, int act,
-				     int p_index = -1) const = 0;
-  virtual std::string GetActionProb(const Gambit::GameNode &, int act,
-				    int p_index = -1) const = 0;
+                                     int p_index = -1) const = 0;
+  virtual std::string GetActionProb(const Gambit::GameNode &, int act, int p_index = -1) const = 0;
   virtual std::string GetActionProb(int p_action, int p_index = -1) const = 0;
-  virtual std::string GetStrategyProb(int p_strategy,
-				      int p_index = -1) const = 0;
-  virtual std::string GetStrategyValue(int p_strategy,
-				       int p_index = -1) const = 0;
-
+  virtual std::string GetStrategyProb(int p_strategy, int p_index = -1) const = 0;
+  virtual std::string GetStrategyValue(int p_strategy, int p_index = -1) const = 0;
 
   virtual void AddOutput(const wxString &) = 0;
 
@@ -137,7 +128,9 @@ public:
   //@{
   /// Construct a new profile list for the specified document
   gbtAnalysisProfileList(gbtGameDocument *p_doc, bool p_isBehav)
-    : gbtAnalysisOutput(p_doc), m_isBehav(p_isBehav), m_current(0) { }
+    : gbtAnalysisOutput(p_doc), m_isBehav(p_isBehav), m_current(0)
+  {
+  }
   /// Cleanup the profile list
   ~gbtAnalysisProfileList() override = default;
   //@}
@@ -157,20 +150,14 @@ public:
   /// profile.  (index == -1 for currently selected profile)
   std::string GetRealizProb(const Gambit::GameNode &, int p_index = -1) const override;
   std::string GetBeliefProb(const Gambit::GameNode &, int p_index = -1) const override;
-  std::string GetNodeValue(const Gambit::GameNode &, int pl,
-			   int p_index = -1) const override;
+  std::string GetNodeValue(const Gambit::GameNode &, int pl, int p_index = -1) const override;
   std::string GetInfosetProb(const Gambit::GameNode &, int p_index = -1) const override;
-  std::string GetInfosetValue(const Gambit::GameNode &,
-			      int p_index = -1) const override;
-  std::string GetActionValue(const Gambit::GameNode &, int act,
-			     int p_index = -1) const override;
-  std::string GetActionProb(const Gambit::GameNode &, int act,
-			    int p_index = -1) const override;
+  std::string GetInfosetValue(const Gambit::GameNode &, int p_index = -1) const override;
+  std::string GetActionValue(const Gambit::GameNode &, int act, int p_index = -1) const override;
+  std::string GetActionProb(const Gambit::GameNode &, int act, int p_index = -1) const override;
   std::string GetActionProb(int p_action, int p_index = -1) const override;
-  std::string GetStrategyProb(int p_strategy,
-			      int p_index = -1) const override;
-  std::string GetStrategyValue(int p_strategy,
-			       int p_index = -1) const override;
+  std::string GetStrategyProb(int p_strategy, int p_index = -1) const override;
+  std::string GetStrategyValue(int p_strategy, int p_index = -1) const override;
 
   /// Get the index of the currently selected profile
   int GetCurrent() const override { return m_current; }
@@ -203,4 +190,4 @@ public:
   //@}
 };
 
-#endif  // ANALYSIS_H
+#endif // ANALYSIS_H

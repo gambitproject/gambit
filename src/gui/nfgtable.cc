@@ -23,14 +23,14 @@
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
-#endif  // WX_PRECOMP
-#include <wx/dnd.h>      // for drag-and-drop support
-#include <wx/print.h>    // for printing support
-#include <wx/dcsvg.h>    // for SVG output
+#endif                // WX_PRECOMP
+#include <wx/dnd.h>   // for drag-and-drop support
+#include <wx/print.h> // for printing support
+#include <wx/dcsvg.h> // for SVG output
 
 #include "wx/sheet/sheet.h"
 
-#include "renratio.h"    // special renderer for rational numbers
+#include "renratio.h" // special renderer for rational numbers
 
 #include "gamedoc.h"
 #include "nfgpanel.h"
@@ -51,18 +51,12 @@ protected:
   //! @name Overriding wxSheet members to disable selection behavior
   //!
   //@{
-  bool SelectRow(int, bool = false, bool = false) override
-    { return false; }
-  bool SelectRows(int, int, bool = false, bool = false) override
-    { return false; }
-  bool SelectCol(int, bool = false, bool = false) override
-    { return false; }
-  bool SelectCols(int, int, bool = false, bool = false) override
-    { return false; }
-  bool SelectCell(const wxSheetCoords&, bool = false, bool = false) override
-    { return false; }
-  bool SelectBlock(const wxSheetBlock&, bool = false, bool = false) override
-    { return false; }
+  bool SelectRow(int, bool = false, bool = false) override { return false; }
+  bool SelectRows(int, int, bool = false, bool = false) override { return false; }
+  bool SelectCol(int, bool = false, bool = false) override { return false; }
+  bool SelectCols(int, int, bool = false, bool = false) override { return false; }
+  bool SelectCell(const wxSheetCoords &, bool = false, bool = false) override { return false; }
+  bool SelectBlock(const wxSheetBlock &, bool = false, bool = false) override { return false; }
   bool SelectAll(bool = false) override { return false; }
 
   bool HasSelection(bool = true) const override { return false; }
@@ -74,7 +68,7 @@ protected:
   //@}
 
   /// Overriding wxSheet member to suppress drawing of cursor
-  void DrawCursorCellHighlight(wxDC&, const wxSheetCellAttr &) override { }
+  void DrawCursorCellHighlight(wxDC &, const wxSheetCellAttr &) override {}
 
   /// Overriding wxSheet member to show editor on one click
   void OnCellLeftClick(wxSheetEvent &);
@@ -83,33 +77,30 @@ public:
   /// @name Lifecycle
   //@{
   /// Constructor
-  gbtTableWidgetBase(wxWindow *p_parent, wxWindowID p_id,
-		     const wxPoint &p_pos = wxDefaultPosition,
-		     const wxSize &p_size = wxDefaultSize,
-		     long p_style = wxWANTS_CHARS,
-		     const wxString &p_name = wxT("wxSheet"))
+  gbtTableWidgetBase(wxWindow *p_parent, wxWindowID p_id, const wxPoint &p_pos = wxDefaultPosition,
+                     const wxSize &p_size = wxDefaultSize, long p_style = wxWANTS_CHARS,
+                     const wxString &p_name = wxT("wxSheet"))
     : wxSheet(p_parent, p_id, p_pos, p_size, p_style, p_name)
   {
-    Connect(GetId(), wxEVT_SHEET_CELL_LEFT_DOWN,
-	    (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidgetBase::OnCellLeftClick))));
+    Connect(
+        GetId(), wxEVT_SHEET_CELL_LEFT_DOWN,
+        (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
+            wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidgetBase::OnCellLeftClick))));
   }
   //@}
 
   /// @name Drop target interaction
   //@{
   /// Called when the drop target receives text.
-  virtual bool DropText(int p_x, int p_y, const wxString &p_text)
-  { return false; }
+  virtual bool DropText(int p_x, int p_y, const wxString &p_text) { return false; }
   //@}
 
   /// @name Access to scrollbars from underlying wxSheet
   //@{
   /// Get the vertical scrollbar
-  wxScrollBar *GetVerticalScrollBar() const
-  { return m_vertScrollBar; }
+  wxScrollBar *GetVerticalScrollBar() const { return m_vertScrollBar; }
   /// Get the horizontal scrollbar
-  wxScrollBar *GetHorizontalScrollBar() const
-  { return m_horizScrollBar; }
+  wxScrollBar *GetHorizontalScrollBar() const { return m_horizScrollBar; }
   //@}
 };
 
@@ -133,12 +124,13 @@ private:
   gbtTableWidgetBase *m_owner;
 
 public:
-  explicit gbtTableWidgetDropTarget(gbtTableWidgetBase *p_owner) : m_owner(p_owner) { }
+  explicit gbtTableWidgetDropTarget(gbtTableWidgetBase *p_owner) : m_owner(p_owner) {}
 
   bool OnDropText(wxCoord x, wxCoord y, const wxString &p_text) override
-  { return m_owner->DropText(x, y, p_text); }
+  {
+    return m_owner->DropText(x, y, p_text);
+  }
 };
-
 
 //=========================================================================
 //                       class gbtRowPlayerWidget
@@ -156,8 +148,7 @@ private:
   /// Sets the value in the cell, by relabeling the strategy
   void SetCellValue(const wxSheetCoords &, const wxString &) override;
   /// Returns the attributes of the cell
-  wxSheetCellAttr GetAttr(const wxSheetCoords &p_coords,
-			  wxSheetAttr_Type) const override;
+  wxSheetCellAttr GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const override;
   //@}
 
   /// @name Overriding wxSheet members to customize drawing
@@ -187,8 +178,7 @@ public:
   //@}
 };
 
-gbtRowPlayerWidget::gbtRowPlayerWidget(gbtTableWidget *p_parent,
-				       gbtGameDocument *p_doc)
+gbtRowPlayerWidget::gbtRowPlayerWidget(gbtTableWidget *p_parent, gbtGameDocument *p_doc)
   : gbtTableWidgetBase(p_parent, wxID_ANY), m_doc(p_doc), m_table(p_parent)
 {
   CreateGrid(m_table->NumRowContingencies(), m_table->NumRowPlayers());
@@ -200,8 +190,8 @@ gbtRowPlayerWidget::gbtRowPlayerWidget(gbtTableWidget *p_parent,
   SetDropTarget(new gbtTableWidgetDropTarget(this));
 
   Connect(GetId(), wxEVT_SHEET_CELL_RIGHT_DOWN,
-	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtRowPlayerWidget::OnCellRightClick))));
-
+          (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
+              wxSheetEventFunction, wxSheetEventFunction(&gbtRowPlayerWidget::OnCellRightClick))));
 }
 
 void gbtRowPlayerWidget::OnCellRightClick(wxSheetEvent &p_event)
@@ -222,21 +212,23 @@ void gbtRowPlayerWidget::OnCellRightClick(wxSheetEvent &p_event)
 
 wxString gbtRowPlayerWidget::GetCellValue(const wxSheetCoords &p_coords)
 {
-  if (IsLabelCell(p_coords)) return wxT("");
+  if (IsLabelCell(p_coords)) {
+    return wxT("");
+  }
 
-  if (m_table->NumRowPlayers() == 0) return wxT("Payoffs");
+  if (m_table->NumRowPlayers() == 0) {
+    return wxT("Payoffs");
+  }
 
   const Gambit::StrategySupportProfile &support = m_doc->GetNfgSupport();
 
   int player = m_table->GetRowPlayer(p_coords.GetCol() + 1);
   int strat = m_table->RowToStrategy(p_coords.GetCol() + 1, p_coords.GetRow());
 
-  return {support.GetStrategy(player, strat)->GetLabel().c_str(),
-		  *wxConvCurrent};
+  return {support.GetStrategy(player, strat)->GetLabel().c_str(), *wxConvCurrent};
 }
 
-void gbtRowPlayerWidget::SetCellValue(const wxSheetCoords &p_coords,
-				      const wxString &p_value)
+void gbtRowPlayerWidget::SetCellValue(const wxSheetCoords &p_coords, const wxString &p_value)
 {
   const Gambit::StrategySupportProfile &support = m_doc->GetNfgSupport();
 
@@ -246,15 +238,15 @@ void gbtRowPlayerWidget::SetCellValue(const wxSheetCoords &p_coords,
   m_doc->DoSetStrategyLabel(support.GetStrategy(player, strat), p_value);
 }
 
-wxSheetCellAttr gbtRowPlayerWidget::GetAttr(const wxSheetCoords &p_coords,
-					    wxSheetAttr_Type) const
+wxSheetCellAttr gbtRowPlayerWidget::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
 {
   wxSheetCellAttr attr(GetSheetRefData()->m_defaultGridCellAttr);
   attr.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
   attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
   attr.SetOrientation(wxHORIZONTAL);
   if (m_table->NumRowPlayers() > 0) {
-    attr.SetForegroundColour(m_doc->GetStyle().GetPlayerColor(m_table->GetRowPlayer(p_coords.GetCol()+1)));
+    attr.SetForegroundColour(
+        m_doc->GetStyle().GetPlayerColor(m_table->GetRowPlayer(p_coords.GetCol() + 1)));
     attr.SetReadOnly(m_doc->IsTree());
   }
   else {
@@ -269,8 +261,9 @@ void gbtRowPlayerWidget::DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords)
 {
   gbtTableWidgetBase::DrawCell(p_dc, p_coords);
 
-  if (!m_table->ShowDominance() || IsLabelCell(p_coords) ||
-      m_table->NumRowPlayers() == 0)  return;
+  if (!m_table->ShowDominance() || IsLabelCell(p_coords) || m_table->NumRowPlayers() == 0) {
+    return;
+  }
 
   const Gambit::StrategySupportProfile &support = m_doc->GetNfgSupport();
   int player = m_table->GetRowPlayer(p_coords.GetCol() + 1);
@@ -280,35 +273,43 @@ void gbtRowPlayerWidget::DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords)
   if (support.IsDominated(strategy, false)) {
     wxRect rect = CellToRect(p_coords);
     if (support.IsDominated(strategy, true)) {
-      p_dc.SetPen(wxPen(m_doc->GetStyle().GetPlayerColor(player),
-			2, wxPENSTYLE_SOLID));
+      p_dc.SetPen(wxPen(m_doc->GetStyle().GetPlayerColor(player), 2, wxPENSTYLE_SOLID));
     }
     else {
-      p_dc.SetPen(wxPen(m_doc->GetStyle().GetPlayerColor(player),
-			1, wxPENSTYLE_SHORT_DASH));
+      p_dc.SetPen(wxPen(m_doc->GetStyle().GetPlayerColor(player), 1, wxPENSTYLE_SHORT_DASH));
     }
     p_dc.DrawLine(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
     p_dc.DrawLine(rect.x + rect.width, rect.y, rect.x, rect.y + rect.height);
   }
 }
 
-
 void gbtRowPlayerWidget::OnUpdate()
 {
   int newRows = m_table->NumRowContingencies();
-  if (newRows > GetNumberRows())  InsertRows(0, newRows - GetNumberRows());
-  if (newRows < GetNumberRows())  DeleteRows(0, GetNumberRows() - newRows);
+  if (newRows > GetNumberRows()) {
+    InsertRows(0, newRows - GetNumberRows());
+  }
+  if (newRows < GetNumberRows()) {
+    DeleteRows(0, GetNumberRows() - newRows);
+  }
 
   int newCols = m_table->NumRowPlayers();
-  if (newCols > GetNumberCols())  InsertCols(0, newCols - GetNumberCols());
-  if (newCols < GetNumberCols())  DeleteCols(0, GetNumberCols() - newCols);
-  if (newCols == 0)  InsertCols(0, 1);
+  if (newCols > GetNumberCols()) {
+    InsertCols(0, newCols - GetNumberCols());
+  }
+  if (newCols < GetNumberCols()) {
+    DeleteCols(0, GetNumberCols() - newCols);
+  }
+  if (newCols == 0) {
+    InsertCols(0, 1);
+  }
 
   for (int col = 0; col < GetNumberCols(); col++) {
     for (int row = 0; row < GetNumberRows();
-	 SetCellSpan(wxSheetCoords(row++, col), wxSheetCoords(1, 1)));
+         SetCellSpan(wxSheetCoords(row++, col), wxSheetCoords(1, 1)))
+      ;
 
-    int span = m_table->NumRowsSpanned(col+1);
+    int span = m_table->NumRowsSpanned(col + 1);
 
     int row = 0;
     while (row < GetNumberRows()) {
@@ -320,8 +321,7 @@ void gbtRowPlayerWidget::OnUpdate()
   Refresh();
 }
 
-bool gbtRowPlayerWidget::DropText(wxCoord p_x, wxCoord p_y,
-				  const wxString &p_text)
+bool gbtRowPlayerWidget::DropText(wxCoord p_x, wxCoord p_y, const wxString &p_text)
 {
   if (p_text[0] == 'P') {
     long pl;
@@ -335,13 +335,13 @@ bool gbtRowPlayerWidget::DropText(wxCoord p_x, wxCoord p_y,
     for (int col = 0; col < GetNumberCols(); col++) {
       wxRect rect = CellToRect(wxSheetCoords(0, col));
 
-      if (p_x >= rect.x && p_x < rect.x + rect.width/2) {
-	m_table->SetRowPlayer(col+1, pl);
-	return true;
+      if (p_x >= rect.x && p_x < rect.x + rect.width / 2) {
+        m_table->SetRowPlayer(col + 1, pl);
+        return true;
       }
-      else if (p_x >= rect.x + rect.width/2 && p_x < rect.x + rect.width) {
-	m_table->SetRowPlayer(col+2, pl);
-	return true;
+      else if (p_x >= rect.x + rect.width / 2 && p_x < rect.x + rect.width) {
+        m_table->SetRowPlayer(col + 2, pl);
+        return true;
       }
     }
   }
@@ -365,8 +365,7 @@ private:
   /// Sets the value in the cell, by relabeling the strategy
   void SetCellValue(const wxSheetCoords &, const wxString &) override;
   /// Returns the attributes of the cell
-  wxSheetCellAttr GetAttr(const wxSheetCoords &p_coords,
-			  wxSheetAttr_Type) const override;
+  wxSheetCellAttr GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const override;
   //@}
 
   /// @name Overriding wxSheet members to customize drawing
@@ -396,8 +395,7 @@ public:
   //@}
 };
 
-gbtColPlayerWidget::gbtColPlayerWidget(gbtTableWidget *p_parent,
-				       gbtGameDocument *p_doc)
+gbtColPlayerWidget::gbtColPlayerWidget(gbtTableWidget *p_parent, gbtGameDocument *p_doc)
   : gbtTableWidgetBase(p_parent, wxID_ANY), m_doc(p_doc), m_table(p_parent)
 {
   CreateGrid(m_table->NumColPlayers(), 0);
@@ -410,8 +408,8 @@ gbtColPlayerWidget::gbtColPlayerWidget(gbtTableWidget *p_parent,
   SetDropTarget(new gbtTableWidgetDropTarget(this));
 
   Connect(GetId(), wxEVT_SHEET_CELL_RIGHT_DOWN,
-	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtColPlayerWidget::OnCellRightClick))));
-
+          (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
+              wxSheetEventFunction, wxSheetEventFunction(&gbtColPlayerWidget::OnCellRightClick))));
 }
 
 void gbtColPlayerWidget::OnCellRightClick(wxSheetEvent &p_event)
@@ -433,19 +431,30 @@ void gbtColPlayerWidget::OnCellRightClick(wxSheetEvent &p_event)
 void gbtColPlayerWidget::OnUpdate()
 {
   int newCols = m_table->NumColContingencies() * m_doc->NumPlayers();
-  if (newCols > GetNumberCols())  InsertCols(0, newCols - GetNumberCols());
-  if (newCols < GetNumberCols())  DeleteCols(0, GetNumberCols() - newCols);
+  if (newCols > GetNumberCols()) {
+    InsertCols(0, newCols - GetNumberCols());
+  }
+  if (newCols < GetNumberCols()) {
+    DeleteCols(0, GetNumberCols() - newCols);
+  }
 
   int newRows = m_table->NumColPlayers();
-  if (newRows > GetNumberRows())  InsertRows(0, newRows - GetNumberRows());
-  if (newRows < GetNumberRows())  DeleteRows(0, GetNumberRows() - newRows);
-  if (newRows == 0)  InsertRows(0, 1);
+  if (newRows > GetNumberRows()) {
+    InsertRows(0, newRows - GetNumberRows());
+  }
+  if (newRows < GetNumberRows()) {
+    DeleteRows(0, GetNumberRows() - newRows);
+  }
+  if (newRows == 0) {
+    InsertRows(0, 1);
+  }
 
   for (int row = 0; row < GetNumberRows(); row++) {
     for (int col = 0; col < GetNumberCols();
-	 SetCellSpan(wxSheetCoords(row, col++), wxSheetCoords(1, 1)));
+         SetCellSpan(wxSheetCoords(row, col++), wxSheetCoords(1, 1)))
+      ;
 
-    int span = m_table->NumColsSpanned(row+1) * m_doc->NumPlayers();
+    int span = m_table->NumColsSpanned(row + 1) * m_doc->NumPlayers();
 
     int col = 0;
     while (col < GetNumberCols()) {
@@ -459,21 +468,23 @@ void gbtColPlayerWidget::OnUpdate()
 
 wxString gbtColPlayerWidget::GetCellValue(const wxSheetCoords &p_coords)
 {
-  if (IsLabelCell(p_coords)) return wxT("");
+  if (IsLabelCell(p_coords)) {
+    return wxT("");
+  }
 
-  if (m_table->NumColPlayers() == 0)  return wxT("Payoffs");
+  if (m_table->NumColPlayers() == 0) {
+    return wxT("Payoffs");
+  }
 
   const Gambit::StrategySupportProfile &support = m_doc->GetNfgSupport();
 
   int player = m_table->GetColPlayer(p_coords.GetRow() + 1);
   int strat = m_table->ColToStrategy(p_coords.GetRow() + 1, p_coords.GetCol());
 
-  return {support.GetStrategy(player, strat)->GetLabel().c_str(),
-		  *wxConvCurrent};
+  return {support.GetStrategy(player, strat)->GetLabel().c_str(), *wxConvCurrent};
 }
 
-void gbtColPlayerWidget::SetCellValue(const wxSheetCoords &p_coords,
-				      const wxString &p_value)
+void gbtColPlayerWidget::SetCellValue(const wxSheetCoords &p_coords, const wxString &p_value)
 {
   const Gambit::StrategySupportProfile &support = m_doc->GetNfgSupport();
 
@@ -483,15 +494,15 @@ void gbtColPlayerWidget::SetCellValue(const wxSheetCoords &p_coords,
   m_doc->DoSetStrategyLabel(support.GetStrategy(player, strat), p_value);
 }
 
-wxSheetCellAttr gbtColPlayerWidget::GetAttr(const wxSheetCoords &p_coords,
-					    wxSheetAttr_Type) const
+wxSheetCellAttr gbtColPlayerWidget::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
 {
   wxSheetCellAttr attr(GetSheetRefData()->m_defaultGridCellAttr);
   attr.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
   attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
   attr.SetOrientation(wxHORIZONTAL);
   if (m_table->NumColPlayers() > 0) {
-    attr.SetForegroundColour(m_doc->GetStyle().GetPlayerColor(m_table->GetColPlayer(p_coords.GetRow()+1)));
+    attr.SetForegroundColour(
+        m_doc->GetStyle().GetPlayerColor(m_table->GetColPlayer(p_coords.GetRow() + 1)));
     attr.SetReadOnly(m_doc->IsTree());
   }
   else {
@@ -506,8 +517,9 @@ void gbtColPlayerWidget::DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords)
 {
   gbtTableWidgetBase::DrawCell(p_dc, p_coords);
 
-  if (!m_table->ShowDominance() || IsLabelCell(p_coords) ||
-      m_table->NumColPlayers() == 0)  return;
+  if (!m_table->ShowDominance() || IsLabelCell(p_coords) || m_table->NumColPlayers() == 0) {
+    return;
+  }
 
   const Gambit::StrategySupportProfile &support = m_doc->GetNfgSupport();
   int player = m_table->GetColPlayer(p_coords.GetRow() + 1);
@@ -517,20 +529,17 @@ void gbtColPlayerWidget::DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords)
   if (support.IsDominated(strategy, false)) {
     wxRect rect = CellToRect(p_coords);
     if (support.IsDominated(strategy, true)) {
-      p_dc.SetPen(wxPen(m_doc->GetStyle().GetPlayerColor(player),
-			2, wxPENSTYLE_SOLID));
+      p_dc.SetPen(wxPen(m_doc->GetStyle().GetPlayerColor(player), 2, wxPENSTYLE_SOLID));
     }
     else {
-      p_dc.SetPen(wxPen(m_doc->GetStyle().GetPlayerColor(player),
-			1, wxPENSTYLE_SHORT_DASH));
+      p_dc.SetPen(wxPen(m_doc->GetStyle().GetPlayerColor(player), 1, wxPENSTYLE_SHORT_DASH));
     }
     p_dc.DrawLine(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
     p_dc.DrawLine(rect.x + rect.width, rect.y, rect.x, rect.y + rect.height);
   }
 }
 
-bool gbtColPlayerWidget::DropText(wxCoord p_x, wxCoord p_y,
-				  const wxString &p_text)
+bool gbtColPlayerWidget::DropText(wxCoord p_x, wxCoord p_y, const wxString &p_text)
 {
   if (p_text[0] == 'P') {
     long pl;
@@ -544,13 +553,13 @@ bool gbtColPlayerWidget::DropText(wxCoord p_x, wxCoord p_y,
     for (int col = 0; col < GetNumberCols(); col++) {
       wxRect rect = CellToRect(wxSheetCoords(col, 0));
 
-      if (p_y >= rect.y && p_y < rect.y + rect.height/2) {
-	m_table->SetColPlayer(col+1, pl);
-	return true;
+      if (p_y >= rect.y && p_y < rect.y + rect.height / 2) {
+        m_table->SetColPlayer(col + 1, pl);
+        return true;
       }
-      else if (p_y >= rect.y + rect.height/2 && p_y < rect.y + rect.height) {
-	m_table->SetColPlayer(col+2, pl);
-	return true;
+      else if (p_y >= rect.y + rect.height / 2 && p_y < rect.y + rect.height) {
+        m_table->SetColPlayer(col + 2, pl);
+        return true;
       }
     }
   }
@@ -574,8 +583,7 @@ private:
   /// Sets the value in the cell, by editing the outcome
   void SetCellValue(const wxSheetCoords &, const wxString &) override;
   /// Returns the attributes of the cell
-  wxSheetCellAttr GetAttr(const wxSheetCoords &p_coords,
-			  wxSheetAttr_Type) const override;
+  wxSheetCellAttr GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const override;
   //@}
 
   /// @name Overriding wxSheet members for drawing behavior
@@ -607,11 +615,10 @@ public:
 };
 
 BEGIN_EVENT_TABLE(gbtPayoffsWidget, gbtTableWidgetBase)
-  EVT_KEY_DOWN(gbtPayoffsWidget::OnKeyDown)
+EVT_KEY_DOWN(gbtPayoffsWidget::OnKeyDown)
 END_EVENT_TABLE()
 
-gbtPayoffsWidget::gbtPayoffsWidget(gbtTableWidget *p_parent,
-				   gbtGameDocument *p_doc)
+gbtPayoffsWidget::gbtPayoffsWidget(gbtTableWidget *p_parent, gbtGameDocument *p_doc)
   : gbtTableWidgetBase(p_parent, wxID_ANY), m_doc(p_doc), m_table(p_parent)
 {
   CreateGrid(0, 0);
@@ -637,27 +644,36 @@ int gbtPayoffsWidget::ColToPlayer(int p_col) const
 void gbtPayoffsWidget::OnUpdate()
 {
   int newCols = m_table->NumColContingencies() * m_doc->NumPlayers();
-  if (newCols > GetNumberCols())  InsertCols(0, newCols - GetNumberCols());
-  if (newCols < GetNumberCols())  DeleteCols(0, GetNumberCols() - newCols);
+  if (newCols > GetNumberCols()) {
+    InsertCols(0, newCols - GetNumberCols());
+  }
+  if (newCols < GetNumberCols()) {
+    DeleteCols(0, GetNumberCols() - newCols);
+  }
 
   int newRows = m_table->NumRowContingencies();
-  if (newRows > GetNumberRows())  InsertRows(0, newRows - GetNumberRows());
-  if (newRows < GetNumberRows())  DeleteRows(0, GetNumberRows() - newRows);
+  if (newRows > GetNumberRows()) {
+    InsertRows(0, newRows - GetNumberRows());
+  }
+  if (newRows < GetNumberRows()) {
+    DeleteRows(0, GetNumberRows() - newRows);
+  }
 
   Refresh();
 }
 
 wxString gbtPayoffsWidget::GetCellValue(const wxSheetCoords &p_coords)
 {
-  if (IsLabelCell(p_coords))  return wxT("");
+  if (IsLabelCell(p_coords)) {
+    return wxT("");
+  }
 
   Gambit::PureStrategyProfile profile = m_table->CellToProfile(p_coords);
   int player = ColToPlayer(p_coords.GetCol());
   return {Gambit::lexical_cast<std::string>(profile->GetPayoff(player)).c_str(), *wxConvCurrent};
 }
 
-void gbtPayoffsWidget::SetCellValue(const wxSheetCoords &p_coords,
-				    const wxString &p_value)
+void gbtPayoffsWidget::SetCellValue(const wxSheetCoords &p_coords, const wxString &p_value)
 {
   Gambit::PureStrategyProfile profile = m_table->CellToProfile(p_coords);
   Gambit::GameOutcome outcome = profile->GetOutcome();
@@ -680,8 +696,7 @@ void gbtPayoffsWidget::SetCellValue(const wxSheetCoords &p_coords,
   }
 }
 
-wxSheetCellAttr gbtPayoffsWidget::GetAttr(const wxSheetCoords &p_coords,
-					  wxSheetAttr_Type) const
+wxSheetCellAttr gbtPayoffsWidget::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
 {
   if (IsLabelCell(p_coords)) {
     wxSheetCellAttr attr(GetSheetRefData()->m_defaultColLabelAttr);
@@ -701,25 +716,24 @@ wxSheetCellAttr gbtPayoffsWidget::GetAttr(const wxSheetCoords &p_coords,
   return attr;
 }
 
-void gbtPayoffsWidget::DrawCellBorder(wxDC &p_dc,
-				      const wxSheetCoords &p_coords)
+void gbtPayoffsWidget::DrawCellBorder(wxDC &p_dc, const wxSheetCoords &p_coords)
 {
   gbtTableWidgetBase::DrawCellBorder(p_dc, p_coords);
 
   wxRect rect(CellToRect(p_coords));
-  if (rect.width < 1 || rect.height < 1)  return;
+  if (rect.width < 1 || rect.height < 1) {
+    return;
+  }
 
   p_dc.SetPen(wxPen(*wxBLACK, 1, wxPENSTYLE_SOLID));
 
   // Draw the dark border to the right of the last column of a contingency
   if ((p_coords.GetCol() + 1) % m_doc->GetGame()->NumPlayers() == 0) {
-    p_dc.DrawLine(rect.x + rect.width, rect.y,
-		  rect.x + rect.width, rect.y + rect.height + 1);
+    p_dc.DrawLine(rect.x + rect.width, rect.y, rect.x + rect.width, rect.y + rect.height + 1);
   }
 
   // Draw the bottom border -- currently always dark
-  p_dc.DrawLine(rect.x - 1,          rect.y + rect.height,
-		rect.x + rect.width, rect.y + rect.height);
+  p_dc.DrawLine(rect.x - 1, rect.y + rect.height, rect.x + rect.width, rect.y + rect.height);
 
   // Draw the top border for the first row
   if (p_coords.GetRow() == 0) {
@@ -731,7 +745,9 @@ void gbtPayoffsWidget::DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords)
 {
   gbtTableWidgetBase::DrawCell(p_dc, p_coords);
 
-  if (!m_table->ShowDominance() || IsLabelCell(p_coords)) return;
+  if (!m_table->ShowDominance() || IsLabelCell(p_coords)) {
+    return;
+  }
 
   Gambit::PureStrategyProfile profile = m_table->CellToProfile(p_coords);
   int player = ColToPlayer(p_coords.GetCol());
@@ -740,12 +756,10 @@ void gbtPayoffsWidget::DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords)
   if (support.IsDominated(profile->GetStrategy(player), false)) {
     wxRect rect = CellToRect(p_coords);
     if (support.IsDominated(profile->GetStrategy(player), true)) {
-      p_dc.SetPen(wxPen(m_doc->GetStyle().GetPlayerColor(player),
-			2, wxPENSTYLE_SOLID));
+      p_dc.SetPen(wxPen(m_doc->GetStyle().GetPlayerColor(player), 2, wxPENSTYLE_SOLID));
     }
     else {
-      p_dc.SetPen(wxPen(m_doc->GetStyle().GetPlayerColor(player),
-			1, wxPENSTYLE_SHORT_DASH));
+      p_dc.SetPen(wxPen(m_doc->GetStyle().GetPlayerColor(player), 1, wxPENSTYLE_SHORT_DASH));
     }
     p_dc.DrawLine(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
     p_dc.DrawLine(rect.x + rect.width, rect.y, rect.x, rect.y + rect.height);
@@ -765,33 +779,33 @@ void gbtPayoffsWidget::OnKeyDown(wxKeyEvent &p_event)
     switch (p_event.GetKeyCode()) {
     case WXK_TAB: {
       if (IsCellEditControlCreated()) {
-	DisableCellEditControl(true);
+        DisableCellEditControl(true);
 
-	int newRow = GetGridCursorRow(), newCol = GetGridCursorCol();
+        int newRow = GetGridCursorRow(), newCol = GetGridCursorCol();
 
-	if (p_event.ShiftDown()) {
-	  newCol--;
-	  if (newCol < 0) {
-	    newCol = GetNumberCols() - 1;
-	    newRow--;
-	    if (newRow < 0) {
-	      newRow = GetNumberRows() - 1;
-	    }
-	  }
-	}
-	else {
-	  newCol++;
-	  if (newCol >= GetNumberCols()) {
-	    newCol = 0;
-	    newRow++;
-	    if (newRow >= GetNumberRows()) {
-	      newRow = 0;
-	    }
-	  }
-	}
-	SetGridCursorCell(wxSheetCoords(newRow, newCol));
-	MakeCellVisible(GetGridCursorCell());
-	EnableCellEditControl(GetGridCursorCell());
+        if (p_event.ShiftDown()) {
+          newCol--;
+          if (newCol < 0) {
+            newCol = GetNumberCols() - 1;
+            newRow--;
+            if (newRow < 0) {
+              newRow = GetNumberRows() - 1;
+            }
+          }
+        }
+        else {
+          newCol++;
+          if (newCol >= GetNumberCols()) {
+            newCol = 0;
+            newRow++;
+            if (newRow >= GetNumberRows()) {
+              newRow = 0;
+            }
+          }
+        }
+        SetGridCursorCell(wxSheetCoords(newRow, newCol));
+        MakeCellVisible(GetGridCursorCell());
+        EnableCellEditControl(GetGridCursorCell());
       }
       break;
     }
@@ -805,8 +819,7 @@ void gbtPayoffsWidget::OnKeyDown(wxKeyEvent &p_event)
 //                       gbtTableWidget: Lifecycle
 //=========================================================================
 
-gbtTableWidget::gbtTableWidget(gbtNfgPanel *p_parent, wxWindowID p_id,
-			       gbtGameDocument *p_doc)
+gbtTableWidget::gbtTableWidget(gbtNfgPanel *p_parent, wxWindowID p_id, gbtGameDocument *p_doc)
   : wxPanel(p_parent, p_id), m_doc(p_doc), m_nfgPanel(p_parent)
 {
   m_rowPlayers.push_back(1);
@@ -829,38 +842,50 @@ gbtTableWidget::gbtTableWidget(gbtNfgPanel *p_parent, wxWindowID p_id,
   Layout();
 
   Connect(m_colSheet->GetId(), wxEVT_SHEET_VIEW_CHANGED,
-	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnRowSheetScroll))));
+          (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
+              wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnRowSheetScroll))));
 
   Connect(m_colSheet->GetId(), wxEVT_SHEET_VIEW_CHANGED,
-	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnColSheetScroll))));
+          (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
+              wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnColSheetScroll))));
 
   Connect(m_payoffSheet->GetId(), wxEVT_SHEET_VIEW_CHANGED,
-	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnPayoffScroll))));
+          (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
+              wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnPayoffScroll))));
 
   Connect(m_rowSheet->GetId(), wxEVT_SHEET_ROW_SIZE,
-	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnRowSheetRow))));
+          (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
+              wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnRowSheetRow))));
 
   Connect(m_payoffSheet->GetId(), wxEVT_SHEET_ROW_SIZE,
-	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnPayoffRow))));
+          (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
+              wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnPayoffRow))));
 
   Connect(m_colSheet->GetId(), wxEVT_SHEET_COL_SIZE,
-	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnColSheetColumn))));
+          (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
+              wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnColSheetColumn))));
 
   Connect(m_payoffSheet->GetId(), wxEVT_SHEET_COL_SIZE,
-	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnPayoffColumn))));
+          (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
+              wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnPayoffColumn))));
 
   Connect(m_rowSheet->GetId(), wxEVT_SHEET_COL_SIZE,
-	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnRowSheetColumn))));
+          (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
+              wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnRowSheetColumn))));
 
   Connect(m_colSheet->GetId(), wxEVT_SHEET_ROW_SIZE,
-	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnColSheetRow))));
+          (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
+              wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnColSheetRow))));
 
   Connect(m_rowSheet->GetId(), wxEVT_SHEET_EDITOR_ENABLED,
-	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnBeginEdit))));
+          (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
+              wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnBeginEdit))));
   Connect(m_colSheet->GetId(), wxEVT_SHEET_EDITOR_ENABLED,
-	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnBeginEdit))));
+          (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
+              wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnBeginEdit))));
   Connect(m_payoffSheet->GetId(), wxEVT_SHEET_EDITOR_ENABLED,
-	  (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnBeginEdit))));
+          (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
+              wxSheetEventFunction, wxSheetEventFunction(&gbtTableWidget::OnBeginEdit))));
 }
 
 //!
@@ -941,15 +966,13 @@ void gbtTableWidget::OnPayoffColumn(wxSheetEvent &p_event)
 //@{
 void gbtTableWidget::OnRowSheetColumn(wxSheetEvent &p_event)
 {
-  m_rowSheet->SetDefaultColWidth(m_rowSheet->GetColWidth(p_event.GetCol()),
-				 true);
+  m_rowSheet->SetDefaultColWidth(m_rowSheet->GetColWidth(p_event.GetCol()), true);
   GetSizer()->Layout();
 }
 
 void gbtTableWidget::OnColSheetRow(wxSheetEvent &p_event)
 {
-  m_colSheet->SetDefaultRowHeight(m_colSheet->GetRowHeight(p_event.GetRow()),
-				  true);
+  m_colSheet->SetDefaultRowHeight(m_colSheet->GetRowHeight(p_event.GetRow()), true);
   GetSizer()->Layout();
 }
 //@}
@@ -958,10 +981,7 @@ void gbtTableWidget::OnColSheetRow(wxSheetEvent &p_event)
 //! This alerts the document to have any other windows post their pending
 //! edits.
 //!
-void gbtTableWidget::OnBeginEdit(wxSheetEvent &)
-{
-  m_doc->PostPendingChanges();
-}
+void gbtTableWidget::OnBeginEdit(wxSheetEvent &) { m_doc->PostPendingChanges(); }
 
 void gbtTableWidget::OnUpdate()
 {
@@ -975,13 +995,13 @@ void gbtTableWidget::OnUpdate()
   else if (m_doc->NumPlayers() < m_rowPlayers.Length() + m_colPlayers.Length()) {
     for (int i = 1; i <= m_rowPlayers.Length(); i++) {
       if (m_rowPlayers[i] > m_doc->NumPlayers()) {
-	m_rowPlayers.Remove(i--);
+        m_rowPlayers.Remove(i--);
       }
     }
 
     for (int i = 1; i <= m_colPlayers.Length(); i++) {
       if (m_colPlayers[i] > m_doc->NumPlayers()) {
-	m_colPlayers.Remove(i--);
+        m_colPlayers.Remove(i--);
       }
     }
   }
@@ -990,8 +1010,15 @@ void gbtTableWidget::OnUpdate()
 
   // We add margins to the player labels to match the scrollbars,
   // so scrolling matches up
-  m_colSheet->SetMargins(dynamic_cast<gbtPayoffsWidget *>(m_payoffSheet)->GetVerticalScrollBar()->GetSize().GetWidth(), -1);
-  m_rowSheet->SetMargins(-1, dynamic_cast<gbtPayoffsWidget *>(m_payoffSheet)->GetHorizontalScrollBar()->GetSize().GetHeight());
+  m_colSheet->SetMargins(dynamic_cast<gbtPayoffsWidget *>(m_payoffSheet)
+                             ->GetVerticalScrollBar()
+                             ->GetSize()
+                             .GetWidth(),
+                         -1);
+  m_rowSheet->SetMargins(-1, dynamic_cast<gbtPayoffsWidget *>(m_payoffSheet)
+                                 ->GetHorizontalScrollBar()
+                                 ->GetSize()
+                                 .GetHeight());
 
   dynamic_cast<gbtRowPlayerWidget *>(m_rowSheet)->OnUpdate();
   dynamic_cast<gbtColPlayerWidget *>(m_colSheet)->OnUpdate();
@@ -1013,10 +1040,7 @@ void gbtTableWidget::PostPendingChanges()
   }
 }
 
-bool gbtTableWidget::ShowDominance() const
-{
-  return m_nfgPanel->IsDominanceShown();
-}
+bool gbtTableWidget::ShowDominance() const { return m_nfgPanel->IsDominanceShown(); }
 
 //=========================================================================
 //                      gbtTableWidget: View state
@@ -1028,7 +1052,7 @@ void gbtTableWidget::SetRowPlayer(int index, int pl)
     int oldIndex = m_rowPlayers.Find(pl);
     m_rowPlayers.Remove(oldIndex);
     if (index > oldIndex) {
-      m_rowPlayers.Insert(pl, index-1);
+      m_rowPlayers.Insert(pl, index - 1);
     }
     else {
       m_rowPlayers.Insert(pl, index);
@@ -1045,8 +1069,8 @@ int gbtTableWidget::NumRowContingencies() const
 {
   int ncont = 1;
   const Gambit::StrategySupportProfile &support = m_doc->GetNfgSupport();
-  for (int i = 1; i <= NumRowPlayers();
-       ncont *= support.NumStrategies(GetRowPlayer(i++)));
+  for (int i = 1; i <= NumRowPlayers(); ncont *= support.NumStrategies(GetRowPlayer(i++)))
+    ;
   return ncont;
 }
 
@@ -1054,8 +1078,8 @@ int gbtTableWidget::NumRowsSpanned(int index) const
 {
   int ncont = 1;
   const Gambit::StrategySupportProfile &support = m_doc->GetNfgSupport();
-  for (int i = index + 1; i <= NumRowPlayers();
-       ncont *= support.NumStrategies(GetRowPlayer(i++)));
+  for (int i = index + 1; i <= NumRowPlayers(); ncont *= support.NumStrategies(GetRowPlayer(i++)))
+    ;
   return ncont;
 }
 
@@ -1071,7 +1095,7 @@ void gbtTableWidget::SetColPlayer(int index, int pl)
     int oldIndex = m_colPlayers.Find(pl);
     m_colPlayers.Remove(oldIndex);
     if (index > oldIndex) {
-      m_colPlayers.Insert(pl, index-1);
+      m_colPlayers.Insert(pl, index - 1);
     }
     else {
       m_colPlayers.Insert(pl, index);
@@ -1088,8 +1112,8 @@ int gbtTableWidget::NumColContingencies() const
 {
   int ncont = 1;
   const Gambit::StrategySupportProfile &support = m_doc->GetNfgSupport();
-  for (int i = 1; i <= NumColPlayers();
-       ncont *= support.NumStrategies(GetColPlayer(i++)));
+  for (int i = 1; i <= NumColPlayers(); ncont *= support.NumStrategies(GetColPlayer(i++)))
+    ;
   return ncont;
 }
 
@@ -1097,8 +1121,8 @@ int gbtTableWidget::NumColsSpanned(int index) const
 {
   int ncont = 1;
   const Gambit::StrategySupportProfile &support = m_doc->GetNfgSupport();
-  for (int i = index + 1; i <= NumColPlayers();
-       ncont *= support.NumStrategies(GetColPlayer(i++)));
+  for (int i = index + 1; i <= NumColPlayers(); ncont *= support.NumStrategies(GetColPlayer(i++)))
+    ;
   return ncont;
 }
 
@@ -1108,22 +1132,19 @@ int gbtTableWidget::ColToStrategy(int player, int col) const
   return (strat % m_doc->GetNfgSupport().NumStrategies(GetColPlayer(player)) + 1);
 }
 
-Gambit::PureStrategyProfile
-gbtTableWidget::CellToProfile(const wxSheetCoords &p_coords) const
+Gambit::PureStrategyProfile gbtTableWidget::CellToProfile(const wxSheetCoords &p_coords) const
 {
   const Gambit::StrategySupportProfile &support = m_doc->GetNfgSupport();
 
   Gambit::PureStrategyProfile profile = m_doc->GetGame()->NewPureStrategyProfile();
   for (int i = 1; i <= NumRowPlayers(); i++) {
     int player = GetRowPlayer(i);
-    profile->SetStrategy(support.GetStrategy(player,
-					     RowToStrategy(i, p_coords.GetRow())));
+    profile->SetStrategy(support.GetStrategy(player, RowToStrategy(i, p_coords.GetRow())));
   }
 
   for (int i = 1; i <= NumColPlayers(); i++) {
     int player = GetColPlayer(i);
-    profile->SetStrategy(support.GetStrategy(player,
-					     ColToStrategy(i, p_coords.GetCol())));
+    profile->SetStrategy(support.GetStrategy(player, ColToStrategy(i, p_coords.GetCol())));
   }
 
   return profile;
@@ -1135,33 +1156,41 @@ private:
 
 public:
   gbtNfgPrintout(gbtTableWidget *p_table, const wxString &p_label)
-    : wxPrintout(p_label), m_table(p_table) { }
+    : wxPrintout(p_label), m_table(p_table)
+  {
+  }
   ~gbtNfgPrintout() override = default;
 
   bool OnPrintPage(int) override
-  { m_table->RenderGame(*GetDC(), 50, 50);  return true; }
+  {
+    m_table->RenderGame(*GetDC(), 50, 50);
+    return true;
+  }
   bool HasPage(int page) override { return (page <= 1); }
-  void GetPageInfo(int *minPage, int *maxPage,
-		   int *selPageFrom, int *selPageTo) override
-  { *minPage = 1; *maxPage = 1; *selPageFrom = 1; *selPageTo = 1; }
+  void GetPageInfo(int *minPage, int *maxPage, int *selPageFrom, int *selPageTo) override
+  {
+    *minPage = 1;
+    *maxPage = 1;
+    *selPageFrom = 1;
+    *selPageTo = 1;
+  }
 };
 
 wxPrintout *gbtTableWidget::GetPrintout()
 {
-  return new gbtNfgPrintout(this,
-			    wxString(m_doc->GetGame()->GetTitle().c_str(),
-				     *wxConvCurrent));
+  return new gbtNfgPrintout(this, wxString(m_doc->GetGame()->GetTitle().c_str(), *wxConvCurrent));
 }
 
-bool gbtTableWidget::GetBitmap(wxBitmap &p_bitmap,
-			       int p_marginX, int p_marginY)
+bool gbtTableWidget::GetBitmap(wxBitmap &p_bitmap, int p_marginX, int p_marginY)
 {
-  int width = (m_rowSheet->CellToRect(wxSheetCoords(0, m_rowSheet->GetNumberCols() - 1)).GetRight() +
-	       m_colSheet->CellToRect(wxSheetCoords(0, m_colSheet->GetNumberCols() - 1)).GetRight() +
-	       2 * p_marginX);
-  int height = (m_rowSheet->CellToRect(wxSheetCoords(m_rowSheet->GetNumberRows() - 1, 0)).GetBottom() +
-		m_colSheet->CellToRect(wxSheetCoords(m_colSheet->GetNumberRows() - 1, 0)).GetBottom() +
-		2 * p_marginY);
+  int width =
+      (m_rowSheet->CellToRect(wxSheetCoords(0, m_rowSheet->GetNumberCols() - 1)).GetRight() +
+       m_colSheet->CellToRect(wxSheetCoords(0, m_colSheet->GetNumberCols() - 1)).GetRight() +
+       2 * p_marginX);
+  int height =
+      (m_rowSheet->CellToRect(wxSheetCoords(m_rowSheet->GetNumberRows() - 1, 0)).GetBottom() +
+       m_colSheet->CellToRect(wxSheetCoords(m_colSheet->GetNumberRows() - 1, 0)).GetBottom() +
+       2 * p_marginY);
 
   if (width > 65000 || height > 65000) {
     // This is just too huge to export to graphics
@@ -1176,15 +1205,16 @@ bool gbtTableWidget::GetBitmap(wxBitmap &p_bitmap,
   return true;
 }
 
-void gbtTableWidget::GetSVG(const wxString &p_filename,
-			    int p_marginX, int p_marginY)
+void gbtTableWidget::GetSVG(const wxString &p_filename, int p_marginX, int p_marginY)
 {
-  int width = (m_rowSheet->CellToRect(wxSheetCoords(0, m_rowSheet->GetNumberCols() - 1)).GetRight() +
-	       m_colSheet->CellToRect(wxSheetCoords(0, m_colSheet->GetNumberCols() - 1)).GetRight() +
-	       2 * p_marginX);
-  int height = (m_rowSheet->CellToRect(wxSheetCoords(m_rowSheet->GetNumberRows() - 1, 0)).GetBottom() +
-		m_colSheet->CellToRect(wxSheetCoords(m_colSheet->GetNumberRows() - 1, 0)).GetBottom() +
-		2 * p_marginY);
+  int width =
+      (m_rowSheet->CellToRect(wxSheetCoords(0, m_rowSheet->GetNumberCols() - 1)).GetRight() +
+       m_colSheet->CellToRect(wxSheetCoords(0, m_colSheet->GetNumberCols() - 1)).GetRight() +
+       2 * p_marginX);
+  int height =
+      (m_rowSheet->CellToRect(wxSheetCoords(m_rowSheet->GetNumberRows() - 1, 0)).GetBottom() +
+       m_colSheet->CellToRect(wxSheetCoords(m_colSheet->GetNumberRows() - 1, 0)).GetBottom() +
+       2 * p_marginY);
 
   wxSVGFileDC dc(p_filename, width, height);
   // For some reason, this needs to be initialized
@@ -1195,46 +1225,46 @@ void gbtTableWidget::GetSVG(const wxString &p_filename,
 void gbtTableWidget::RenderGame(wxDC &p_dc, int p_marginX, int p_marginY)
 {
   // The size of the image to be drawn
-  int maxX = (m_rowSheet->CellToRect(wxSheetCoords(0, m_rowSheet->GetNumberCols() - 1)).GetRight() +
-	      m_colSheet->CellToRect(wxSheetCoords(0, m_colSheet->GetNumberCols() - 1)).GetRight());
-  int maxY = (m_rowSheet->CellToRect(wxSheetCoords(m_rowSheet->GetNumberRows() - 1, 0)).GetBottom() +
-	      m_colSheet->CellToRect(wxSheetCoords(m_colSheet->GetNumberRows() - 1, 0)).GetBottom());
+  int maxX =
+      (m_rowSheet->CellToRect(wxSheetCoords(0, m_rowSheet->GetNumberCols() - 1)).GetRight() +
+       m_colSheet->CellToRect(wxSheetCoords(0, m_colSheet->GetNumberCols() - 1)).GetRight());
+  int maxY =
+      (m_rowSheet->CellToRect(wxSheetCoords(m_rowSheet->GetNumberRows() - 1, 0)).GetBottom() +
+       m_colSheet->CellToRect(wxSheetCoords(m_colSheet->GetNumberRows() - 1, 0)).GetBottom());
 
   // Get the size of the DC in pixels
   wxCoord w, h;
   p_dc.GetSize(&w, &h);
 
   // Calculate a scaling factor
-  double scaleX = (double) w / (double) (maxX + 2*p_marginX);
-  double scaleY = (double) h / (double) (maxY + 2*p_marginY);
+  double scaleX = (double)w / (double)(maxX + 2 * p_marginX);
+  double scaleY = (double)h / (double)(maxY + 2 * p_marginY);
   double scale = (scaleX < scaleY) ? scaleX : scaleY;
   // Here, zooming in is often a good idea, since the number of pixels
   // on a page is generally quite large
   p_dc.SetUserScale(scale, scale);
 
   // Calculate the position on the DC to center the tree
-  auto posX = (double) ((w - (maxX * scale)) / 2.0);
-  auto posY = (double) ((h - (maxY * scale)) / 2.0);
+  auto posX = (double)((w - (maxX * scale)) / 2.0);
+  auto posY = (double)((h - (maxY * scale)) / 2.0);
 
   // The X and Y coordinates of the upper left of the payoff table
-  int payoffX = (int) (m_rowSheet->CellToRect(wxSheetCoords(0, m_rowSheet->GetNumberCols() - 1)).GetRight() * scale);
-  int payoffY = (int) (m_colSheet->CellToRect(wxSheetCoords(m_colSheet->GetNumberRows() - 1, 0)).GetBottom() * scale);
+  int payoffX =
+      (int)(m_rowSheet->CellToRect(wxSheetCoords(0, m_rowSheet->GetNumberCols() - 1)).GetRight() *
+            scale);
+  int payoffY =
+      (int)(m_colSheet->CellToRect(wxSheetCoords(m_colSheet->GetNumberRows() - 1, 0)).GetBottom() *
+            scale);
 
-  p_dc.SetDeviceOrigin((int) posX, payoffY + (int) posY);
-  m_rowSheet->DrawGridCells(p_dc,
-			    wxSheetBlock(0, 0,
-					 m_rowSheet->GetNumberRows(),
-					 m_rowSheet->GetNumberCols()));
+  p_dc.SetDeviceOrigin((int)posX, payoffY + (int)posY);
+  m_rowSheet->DrawGridCells(
+      p_dc, wxSheetBlock(0, 0, m_rowSheet->GetNumberRows(), m_rowSheet->GetNumberCols()));
 
-  p_dc.SetDeviceOrigin(payoffX + (int) posX, (int) posY);
-  m_colSheet->DrawGridCells(p_dc,
-			    wxSheetBlock(0, 0,
-					 m_colSheet->GetNumberRows(),
-					 m_colSheet->GetNumberCols()));
+  p_dc.SetDeviceOrigin(payoffX + (int)posX, (int)posY);
+  m_colSheet->DrawGridCells(
+      p_dc, wxSheetBlock(0, 0, m_colSheet->GetNumberRows(), m_colSheet->GetNumberCols()));
 
-  p_dc.SetDeviceOrigin(payoffX + (int) posX, payoffY + (int) posY);
-  m_payoffSheet->DrawGridCells(p_dc,
-			       wxSheetBlock(0, 0,
-					    m_payoffSheet->GetNumberRows(),
-					    m_payoffSheet->GetNumberCols()));
+  p_dc.SetDeviceOrigin(payoffX + (int)posX, payoffY + (int)posY);
+  m_payoffSheet->DrawGridCells(
+      p_dc, wxSheetBlock(0, 0, m_payoffSheet->GetNumberRows(), m_payoffSheet->GetNumberCols()));
 }

@@ -34,7 +34,8 @@ class AgentLyapunovFunction : public FunctionOnSimplices {
 public:
   explicit AgentLyapunovFunction(const MixedBehaviorProfile<double> &p_start)
     : m_game(p_start.GetGame()), m_profile(p_start)
-  { }
+  {
+  }
   ~AgentLyapunovFunction() override = default;
 
 private:
@@ -45,15 +46,13 @@ private:
   bool Gradient(const Vector<double> &, Vector<double> &) const override;
 };
 
-
 double AgentLyapunovFunction::Value(const Vector<double> &x) const
 {
   m_profile = x;
   return m_profile.GetLiapValue();
 }
 
-bool AgentLyapunovFunction::Gradient(const Vector<double> &x,
-                                     Vector<double> &grad) const
+bool AgentLyapunovFunction::Gradient(const Vector<double> &x, Vector<double> &grad) const
 {
   const double DELTA = .00001;
   m_profile = x;
@@ -73,15 +72,16 @@ bool AgentLyapunovFunction::Gradient(const Vector<double> &x,
 //                    class NashLiapBehaviorSolver
 //------------------------------------------------------------------------
 
-List<MixedBehaviorProfile<double> >
+List<MixedBehaviorProfile<double>>
 NashLiapBehaviorSolver::Solve(const MixedBehaviorProfile<double> &p_start) const
 {
   if (!p_start.GetGame()->IsPerfectRecall()) {
-    throw UndefinedException("Computing equilibria of games with imperfect recall is not supported.");
+    throw UndefinedException(
+        "Computing equilibria of games with imperfect recall is not supported.");
   }
 
   static const double ALPHA = .00000001;
-  List<MixedBehaviorProfile<double> > solutions;
+  List<MixedBehaviorProfile<double>> solutions;
 
   MixedBehaviorProfile<double> p(p_start);
   if (m_verbose) {
@@ -90,11 +90,12 @@ NashLiapBehaviorSolver::Solve(const MixedBehaviorProfile<double> &p_start) const
 
   // if starting vector not interior, perturb it towards centroid
   size_t kk = 1;
-  for (; kk <= p.BehaviorProfileLength() && p[kk] > ALPHA; kk++);
+  for (; kk <= p.BehaviorProfileLength() && p[kk] > ALPHA; kk++)
+    ;
   if (kk <= p.BehaviorProfileLength()) {
     MixedBehaviorProfile<double> c(p_start.GetGame());
     for (size_t k = 1; k <= p.BehaviorProfileLength(); k++) {
-      p[k] = c[k]*ALPHA + p[k]*(1.0-ALPHA);
+      p[k] = c[k] * ALPHA + p[k] * (1.0 - ALPHA);
     }
   }
 

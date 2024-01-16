@@ -29,25 +29,25 @@
 
 class gbtNodeEntry {
 private:
-  Gambit::GameNode m_node;        // the corresponding node in the game
-  gbtNodeEntry *m_parent; // parent node
-  int m_x, m_y;        // Cartesian coordinates of node
-  gbtNodeEntry *m_nextMember;  // entry of next information set member
-  bool m_inSupport;    // true if node reachable in current support
-  int m_size;         // horizontal size of the node
+  Gambit::GameNode m_node;    // the corresponding node in the game
+  gbtNodeEntry *m_parent;     // parent node
+  int m_x, m_y;               // Cartesian coordinates of node
+  gbtNodeEntry *m_nextMember; // entry of next information set member
+  bool m_inSupport;           // true if node reachable in current support
+  int m_size;                 // horizontal size of the node
   mutable wxRect m_outcomeRect;
   mutable Gambit::Array<wxRect> m_payoffRect;
   mutable wxRect m_branchAboveRect, m_branchBelowRect;
-  int m_token;        // token to draw for node
-  wxColour m_color;   // color of node
+  int m_token;      // token to draw for node
+  wxColour m_color; // color of node
 
   int m_branchStyle;  // lines or fork-tine
   int m_branchLabel;  // horizontal or rotated
   int m_branchLength; // length of branch (exclusive of tine, if present)
 
-  int m_level;        // depth of the node in tree
-  int m_sublevel;     // # of the infoset line on this level
-  double m_actionProb;  // probability incoming action is taken
+  int m_level;         // depth of the node in tree
+  int m_sublevel;      // # of the infoset line on this level
+  double m_actionProb; // probability incoming action is taken
 
   wxString m_nodeAboveLabel, m_nodeBelowLabel;
   wxString m_branchAboveLabel, m_branchBelowLabel;
@@ -103,22 +103,16 @@ public:
   void SetSublevel(int p_sublevel) { m_sublevel = p_sublevel; }
 
   const wxString &GetNodeAboveLabel() const { return m_nodeAboveLabel; }
-  void SetNodeAboveLabel(const wxString &p_label)
-    { m_nodeAboveLabel = p_label; }
+  void SetNodeAboveLabel(const wxString &p_label) { m_nodeAboveLabel = p_label; }
 
   const wxString &GetNodeBelowLabel() const { return m_nodeBelowLabel; }
-  void SetNodeBelowLabel(const wxString &p_label)
-    { m_nodeBelowLabel = p_label; }
+  void SetNodeBelowLabel(const wxString &p_label) { m_nodeBelowLabel = p_label; }
 
-  const wxString &GetBranchAboveLabel() const
-    { return m_branchAboveLabel; }
-  void SetBranchAboveLabel(const wxString &p_label)
-    { m_branchAboveLabel = p_label; }
+  const wxString &GetBranchAboveLabel() const { return m_branchAboveLabel; }
+  void SetBranchAboveLabel(const wxString &p_label) { m_branchAboveLabel = p_label; }
 
-  const wxString &GetBranchBelowLabel() const
-    { return m_branchBelowLabel; }
-  void SetBranchBelowLabel(const wxString &p_label)
-    { m_branchBelowLabel = p_label; }
+  const wxString &GetBranchBelowLabel() const { return m_branchBelowLabel; }
+  void SetBranchBelowLabel(const wxString &p_label) { m_branchBelowLabel = p_label; }
 
   const wxFont &GetNodeAboveFont() const { return m_nodeAboveFont; }
   void SetNodeAboveFont(const wxFont &p_font) { m_nodeAboveFont = p_font; }
@@ -138,12 +132,15 @@ public:
   void SetStyle(const gbtStyle *p_style) { m_style = p_style; }
 
   bool NodeHitTest(int p_x, int p_y) const;
-  bool OutcomeHitTest(int p_x, int p_y) const
-  { return (m_outcomeRect.Contains(p_x, p_y)); }
+  bool OutcomeHitTest(int p_x, int p_y) const { return (m_outcomeRect.Contains(p_x, p_y)); }
   bool BranchAboveHitTest(int p_x, int p_y) const
-  { return (m_branchAboveRect.Contains(p_x, p_y)); }
+  {
+    return (m_branchAboveRect.Contains(p_x, p_y));
+  }
   bool BranchBelowHitTest(int p_x, int p_y) const
-  { return (m_branchBelowRect.Contains(p_x, p_y)); }
+  {
+    return (m_branchBelowRect.Contains(p_x, p_y));
+  }
 
   const wxRect &GetOutcomeExtent() const { return m_outcomeRect; }
   const wxRect &GetPayoffExtent(int pl) const { return m_payoffRect[pl]; }
@@ -171,7 +168,8 @@ private:
 
   void BuildNodeList(const Gambit::GameNode &, const Gambit::BehaviorSupportProfile &, int);
 
-  int LayoutSubtree(const Gambit::GameNode &, const Gambit::BehaviorSupportProfile &, int &, int &, int &);
+  int LayoutSubtree(const Gambit::GameNode &, const Gambit::BehaviorSupportProfile &, int &, int &,
+                    int &);
   void FillInfosetTable(const Gambit::GameNode &, const Gambit::BehaviorSupportProfile &);
   void UpdateTableInfosets();
   void UpdateTableParents();
@@ -182,7 +180,7 @@ private:
   void RenderSubtree(wxDC &dc, bool p_noHints) const;
 
   // Overriding gbtGameView members
-  void OnUpdate() override { }
+  void OnUpdate() override {}
 
 public:
   gbtTreeLayout(gbtEfgDisplay *p_parent, gbtGameDocument *p_doc);
@@ -196,8 +194,7 @@ public:
   void GenerateLabels();
 
   // The following member functions are for temporary compatibility only
-  gbtNodeEntry *GetNodeEntry(const Gambit::GameNode &p_node) const
-    { return GetEntry(p_node); }
+  gbtNodeEntry *GetNodeEntry(const Gambit::GameNode &p_node) const { return GetEntry(p_node); }
   gbtNodeEntry *GetValidParent(const Gambit::GameNode &);
   gbtNodeEntry *GetValidChild(const Gambit::GameNode &);
 
@@ -213,4 +210,4 @@ public:
   void Render(wxDC &, bool p_noHints) const;
 };
 
-#endif  // EFGLAYOUT_H
+#endif // EFGLAYOUT_H

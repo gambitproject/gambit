@@ -33,48 +33,50 @@
 //                               operators
 //--------------------------------------------------------------------------
 
-void gComplex::operator /= (const gComplex& y)
+void gComplex::operator/=(const gComplex &y)
 {
-  if (y == (gComplex) 0)  {
+  if (y == (gComplex)0) {
     throw Gambit::ZeroDivideException();
   }
-  *this = gComplex((re*y.re + im*y.im)/(y.re*y.re + y.im*y.im),
-		   (- re*y.im + im*y.re)/(y.re*y.re + y.im*y.im));
+  *this = gComplex((re * y.re + im * y.im) / (y.re * y.re + y.im * y.im),
+                   (-re * y.im + im * y.re) / (y.re * y.re + y.im * y.im));
 }
 
-
-gComplex gComplex::operator / (const gComplex& y) const
+gComplex gComplex::operator/(const gComplex &y) const
 {
-  if (y == (gComplex)0)  {
+  if (y == (gComplex)0) {
     throw Gambit::ZeroDivideException();
   }
-  return { (re*y.re + im*y.im)/(y.re*y.re + y.im*y.im),
-		   (- re*y.im + im*y.re)/(y.re*y.re + y.im*y.im) };
+  return {(re * y.re + im * y.im) / (y.re * y.re + y.im * y.im),
+          (-re * y.im + im * y.re) / (y.re * y.re + y.im * y.im)};
 }
 
 // FUNCTIONS OUTSIDE THE CLASS
 
-gComplex pow(const gComplex& x, long y)
+gComplex pow(const gComplex &x, long y)
 {
   if (y < 0) {
-    if (x == (gComplex) 0) {
+    if (x == (gComplex)0) {
       throw Gambit::AssertionException("Raising 0^0.");
     }
-    gComplex x1((gComplex)1/x);
-    return pow(x1,-y);
+    gComplex x1((gComplex)1 / x);
+    return pow(x1, -y);
   }
-  else if (y == 0)
+  else if (y == 0) {
     return gComplex(1);
-  else if (y == 1)
+  }
+  else if (y == 1) {
     return x;
+  }
   else {
-    gComplex sqrt_of_answer = pow(x,y/2);
+    gComplex sqrt_of_answer = pow(x, y / 2);
     gComplex answer = sqrt_of_answer * sqrt_of_answer;
-    if (y % 2 == 1) answer *= x;
+    if (y % 2 == 1) {
+      answer *= x;
+    }
     return answer;
   }
 }
-
 
 #include "core/vector.imp"
 

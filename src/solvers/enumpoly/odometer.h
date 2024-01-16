@@ -40,70 +40,73 @@ significant index is the first ("leftmost").
 // *****************************
 
 class gIndexOdometer {
- private:
+private:
   Gambit::Array<int> MinIndices;
   Gambit::Array<int> MaxIndices;
   Gambit::Array<int> CurIndices;
 
- public:
-   explicit gIndexOdometer(const Gambit::Array<int> &);
-   gIndexOdometer(const Gambit::Array<int> &, const Gambit::Array<int> &);
-   gIndexOdometer(const gIndexOdometer &) = default;
-   ~gIndexOdometer() = default;
+public:
+  explicit gIndexOdometer(const Gambit::Array<int> &);
+  gIndexOdometer(const Gambit::Array<int> &, const Gambit::Array<int> &);
+  gIndexOdometer(const gIndexOdometer &) = default;
+  ~gIndexOdometer() = default;
 
   // Operators
-   gIndexOdometer& operator=(const gIndexOdometer &) = default;
+  gIndexOdometer &operator=(const gIndexOdometer &) = default;
 
-   bool operator==(const gIndexOdometer &p_rhs) const
-   { return (MinIndices == p_rhs.MinIndices) && (MaxIndices == p_rhs.MaxIndices) && (CurIndices == p_rhs.CurIndices); }
-   bool operator!=(const gIndexOdometer &p_rhs) const
-   { return (MinIndices != p_rhs.MinIndices) || (MaxIndices != p_rhs.MaxIndices) || (CurIndices != p_rhs.CurIndices); }
+  bool operator==(const gIndexOdometer &p_rhs) const
+  {
+    return (MinIndices == p_rhs.MinIndices) && (MaxIndices == p_rhs.MaxIndices) &&
+           (CurIndices == p_rhs.CurIndices);
+  }
+  bool operator!=(const gIndexOdometer &p_rhs) const
+  {
+    return (MinIndices != p_rhs.MinIndices) || (MaxIndices != p_rhs.MaxIndices) ||
+           (CurIndices != p_rhs.CurIndices);
+  }
 
-   int operator[](int place) const { return CurIndices[place]; }
+  int operator[](int place) const { return CurIndices[place]; }
 
   // Manipulate
-  void        SetIndex(const int&, const int&);
-  bool        Turn();
+  void SetIndex(const int &, const int &);
+  bool Turn();
 
-   // Information
-  int             NoIndices()           const;
-  int             LinearIndex()         const;
-  Gambit::Array<int>     CurrentIndices()      const;
-  gIndexOdometer  AfterExcisionOf(int&) const;
-
+  // Information
+  int NoIndices() const;
+  int LinearIndex() const;
+  Gambit::Array<int> CurrentIndices() const;
+  gIndexOdometer AfterExcisionOf(int &) const;
 };
-
 
 // *****************************
 //      class gPermutationOdometer
 // *****************************
 
 class gPermutationOdometer {
- private:
+private:
   int n;
   Gambit::Array<int> CurIndices;
   int CurSign;
 
- public:
-   explicit gPermutationOdometer(int);
-   gPermutationOdometer(const gPermutationOdometer &) = default;
-   ~gPermutationOdometer() = default;
-   gPermutationOdometer &operator=(const gPermutationOdometer &) = delete;
+public:
+  explicit gPermutationOdometer(int);
+  gPermutationOdometer(const gPermutationOdometer &) = default;
+  ~gPermutationOdometer() = default;
+  gPermutationOdometer &operator=(const gPermutationOdometer &) = delete;
 
-   // Operators
-   bool operator==(const gPermutationOdometer &) const;
-   bool operator!=(const gPermutationOdometer &) const;
+  // Operators
+  bool operator==(const gPermutationOdometer &) const;
+  bool operator!=(const gPermutationOdometer &) const;
 
-   int operator[](int place) const { return CurIndices[place]; }
+  int operator[](int place) const { return CurIndices[place]; }
 
   // Manipulate
-  bool        Turn();
+  bool Turn();
 
-   // Information
+  // Information
   int NoIndices() const { return n; }
   const Gambit::Array<int> &CurrentIndices() const { return CurIndices; }
   int CurrentSign() const { return CurSign; }
-
 };
 
 #endif // ODOMETER_H

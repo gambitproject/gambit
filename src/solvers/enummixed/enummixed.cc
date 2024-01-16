@@ -30,13 +30,15 @@ namespace Nash {
 
 using namespace Gambit::linalg;
 
-template <class T> List<List<MixedStrategyProfile<T> > >
-EnumMixedStrategySolution<T>::GetCliques() const
+template <class T>
+List<List<MixedStrategyProfile<T>>> EnumMixedStrategySolution<T>::GetCliques() const
 {
   if (m_cliques1.empty()) {
     // Cliques are generated on demand
     int n = m_node1.Length();
-    if (m_node2.Length() != n)  throw DimensionException();
+    if (m_node2.Length() != n) {
+      throw DimensionException();
+    }
 
     Array<CliqueEnumerator::Edge> edgelist(n);
     for (int i = 1; i <= n; i++) {
@@ -44,42 +46,43 @@ EnumMixedStrategySolution<T>::GetCliques() const
       edgelist[i].node2 = m_node2[i];
     }
 
-    CliqueEnumerator clique(edgelist, m_v2+1, m_v1+1);
+    CliqueEnumerator clique(edgelist, m_v2 + 1, m_v1 + 1);
     m_cliques1 = clique.GetCliques1();
     m_cliques2 = clique.GetCliques2();
   }
 
-  List<List<MixedStrategyProfile<T> > > solution;
+  List<List<MixedStrategyProfile<T>>> solution;
   for (int cl = 1; cl <= m_cliques1.Length(); cl++) {
-    solution.push_back(List<MixedStrategyProfile<T> >());
+    solution.push_back(List<MixedStrategyProfile<T>>());
     for (int i = 1; i <= m_cliques1[cl].Length(); i++) {
       for (int j = 1; j <= m_cliques2[cl].Length(); j++) {
-	MixedStrategyProfile<T> profile(m_game->NewMixedStrategyProfile(static_cast<T>(0)));
+        MixedStrategyProfile<T> profile(m_game->NewMixedStrategyProfile(static_cast<T>(0)));
 
-	for (int k = 1; k <= m_key1[m_cliques1[cl][i]].Length(); k++) {
-	  profile[k] = m_key1[m_cliques1[cl][i]][k];
-	}
-	for (int k = 1; k <= m_key2[m_cliques2[cl][j]].Length(); k++) {
-	  profile[k + m_key1[m_cliques1[cl][i]].Length()] =
-	    m_key2[m_cliques2[cl][j]][k];
-	}
-	solution[cl].push_back(profile);
+        for (int k = 1; k <= m_key1[m_cliques1[cl][i]].Length(); k++) {
+          profile[k] = m_key1[m_cliques1[cl][i]][k];
+        }
+        for (int k = 1; k <= m_key2[m_cliques2[cl][j]].Length(); k++) {
+          profile[k + m_key1[m_cliques1[cl][i]].Length()] = m_key2[m_cliques2[cl][j]][k];
+        }
+        solution[cl].push_back(profile);
       }
     }
   }
   return solution;
 }
 
-template <class T> std::shared_ptr<EnumMixedStrategySolution<T> >
+template <class T>
+std::shared_ptr<EnumMixedStrategySolution<T>>
 EnumMixedStrategySolver<T>::SolveDetailed(const Game &p_game) const
 {
   if (p_game->NumPlayers() != 2) {
     throw UndefinedException("Method only valid for two-player games.");
   }
   if (!p_game->IsPerfectRecall()) {
-    throw UndefinedException("Computing equilibria of games with imperfect recall is not supported.");
+    throw UndefinedException(
+        "Computing equilibria of games with imperfect recall is not supported.");
   }
-  std::shared_ptr<EnumMixedStrategySolution<T> > solution(new EnumMixedStrategySolution<T>(p_game));
+  std::shared_ptr<EnumMixedStrategySolution<T>> solution(new EnumMixedStrategySolution<T>(p_game));
 
   PureStrategyProfile profile = p_game->NewPureStrategyProfile();
 
@@ -97,10 +100,10 @@ EnumMixedStrategySolver<T>::SolveDetailed(const Game &p_game) const
   Rational fac(1, max - min);
 
   // Construct matrices A1, A2
-  Matrix<T> A1(1, p_game->GetPlayer(1)->GetStrategies().size(),
-	       1, p_game->GetPlayer(2)->GetStrategies().size());
-  Matrix<T> A2(1, p_game->GetPlayer(2)->GetStrategies().size(),
-	       1, p_game->GetPlayer(1)->GetStrategies().size());
+  Matrix<T> A1(1, p_game->GetPlayer(1)->GetStrategies().size(), 1,
+               p_game->GetPlayer(2)->GetStrategies().size());
+  Matrix<T> A2(1, p_game->GetPlayer(2)->GetStrategies().size(), 1,
+               p_game->GetPlayer(1)->GetStrategies().size());
 
   for (size_t i = 1; i <= p_game->GetPlayer(1)->GetStrategies().size(); i++) {
     profile->SetStrategy(p_game->GetPlayer(1)->GetStrategies()[i]);
@@ -114,22 +117,24 @@ EnumMixedStrategySolver<T>::SolveDetailed(const Game &p_game) const
   // Construct vectors b1, b2
   Vector<T> b1(1, p_game->GetPlayer(1)->GetStrategies().size());
   Vector<T> b2(1, p_game->GetPlayer(2)->GetStrategies().size());
-  b1 = (T) -1;
-  b2 = (T) -1;
+  b1 = (T)-1;
+  b2 = (T)-1;
 
   // enumerate vertices of A1 x + b1 <= 0 and A2 x + b2 <= 0
   VertexEnumerator<T> poly1(A1, b1);
   VertexEnumerator<T> poly2(A2, b2);
 
-  const List<BFS<T> > &verts1(poly1.VertexList());
-  const List<BFS<T> > &verts2(poly2.VertexList());
+  const List<BFS<T>> &verts1(poly1.VertexList());
+  const List<BFS<T>> &verts2(poly2.VertexList());
   solution->m_v1 = verts1.Length();
   solution->m_v2 = verts2.Length();
 
   Array<int> vert1id(solution->m_v1);
   Array<int> vert2id(solution->m_v2);
-  for (int i = 1; i <= vert1id.Length(); vert1id[i++] = 0);
-  for (int i = 1; i <= vert2id.Length(); vert2id[i++] = 0);
+  for (int i = 1; i <= vert1id.Length(); vert1id[i++] = 0)
+    ;
+  for (int i = 1; i <= vert2id.Length(); vert2id[i++] = 0)
+    ;
 
   int i = 0;
   int id1 = 0, id2 = 0;
@@ -193,17 +198,16 @@ EnumMixedStrategySolver<T>::SolveDetailed(const Game &p_game) const
   return solution;
 }
 
-template<> bool EnumMixedStrategySolver<double>::EqZero(const double &x)
+template <> bool EnumMixedStrategySolver<double>::EqZero(const double &x)
 {
   double eps = ::pow(10.0, -15.0);
   return (x <= eps && x >= -eps);
 }
 
-template<> bool EnumMixedStrategySolver<Rational>::EqZero(const Rational &x)
+template <> bool EnumMixedStrategySolver<Rational>::EqZero(const Rational &x)
 {
   return (x == Rational(0));
 }
-
 
 template class EnumMixedStrategySolver<double>;
 template class EnumMixedStrategySolver<Rational>;
@@ -211,5 +215,5 @@ template class EnumMixedStrategySolver<Rational>;
 template class EnumMixedStrategySolution<double>;
 template class EnumMixedStrategySolution<Rational>;
 
-} // end namespace Gambit::Nash
+} // namespace Nash
 } // end namespace Gambit

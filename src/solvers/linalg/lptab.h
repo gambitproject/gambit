@@ -34,54 +34,54 @@ private:
   Vector<T> dual;
   Array<T> unitcost;
   Array<T> cost;
-  Array<bool> UB,LB;  // does col have upper/lower bound?
-  Array<T> ub,lb;   // upper/lower bound
+  Array<bool> UB, LB; // does col have upper/lower bound?
+  Array<T> ub, lb;    // upper/lower bound
 
   void SolveDual();
+
 public:
-  class BadPivot : public Exception  {
+  class BadPivot : public Exception {
   public:
     ~BadPivot() noexcept override = default;
     const char *what() const noexcept override { return "Bad pivot in LPTableau."; }
   };
   LPTableau(const Matrix<T> &A, const Vector<T> &b);
   LPTableau(const Matrix<T> &A, const Array<int> &art, const Vector<T> &b);
-  LPTableau(const LPTableau<T>&);
+  LPTableau(const LPTableau<T> &);
   ~LPTableau() override = default;
 
-  LPTableau<T>& operator=(const LPTableau<T>&);
+  LPTableau<T> &operator=(const LPTableau<T> &);
 
-      // cost information
-  void SetCost(const Vector<T>& ); // unit column cost := 0
-  void SetCost(const Vector<T>&, const Vector<T>& );
+  // cost information
+  void SetCost(const Vector<T> &); // unit column cost := 0
+  void SetCost(const Vector<T> &, const Vector<T> &);
   Vector<T> GetCost() const;
   Vector<T> GetUnitCost() const;
-  T TotalCost(); // cost of current solution
+  T TotalCost();             // cost of current solution
   T RelativeCost(int) const; // negative index convention
   void RelativeCostVector(Vector<T> &, Vector<T> &);
   void DualVector(Vector<T> &) const; // column vector
-      // Redefined functions
+                                      // Redefined functions
   void Refactor() override;
   void Pivot(int outrow, int col) override;
-  void ReversePivots(List<Array<int> > &);
+  void ReversePivots(List<Array<int>> &);
   bool IsReversePivot(int i, int j);
-  void DualReversePivots(List<Array<int> > &);
+  void DualReversePivots(List<Array<int>> &);
   bool IsDualReversePivot(int i, int j);
   BFS<T> DualBFS() const;
 
   // returns the label of the index of the last artificial variable
-  int LastLabel( );
+  int LastLabel();
 
   // select Basis elements according to Tableau rows and cols
-  void BasisSelect(const Array<T>&rowv, Vector<T> &colv) const;
+  void BasisSelect(const Array<T> &rowv, Vector<T> &colv) const;
 
   // as above, but unit column elements nonzero
-  void BasisSelect(const Array<T>&unitv, const Array<T>&rowv,
-		   Vector<T>&colv) const;
+  void BasisSelect(const Array<T> &unitv, const Array<T> &rowv, Vector<T> &colv) const;
 };
 
-}  // end namespace Gambit::linalg
+} // namespace linalg
 
-}  // end namespace Gambit
+} // end namespace Gambit
 
-#endif     // LPTAB_H
+#endif // LPTAB_H

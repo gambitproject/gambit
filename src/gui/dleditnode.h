@@ -40,4 +40,4 @@ public:
   Gambit::GameInfoset GetInfoset() const;
 };
 
-#endif   // DLEDITNODE_H
+#endif // DLEDITNODE_H

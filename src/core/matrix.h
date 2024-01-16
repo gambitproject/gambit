@@ -28,11 +28,11 @@
 
 namespace Gambit {
 
-template <class T>
-Vector<T> operator*(const Vector<T> &, const Matrix<T> &);
+template <class T> Vector<T> operator*(const Vector<T> &, const Matrix<T> &);
 
 template <class T> class Matrix : public RectArray<T> {
-friend Vector<T> operator*<>(const Vector<T> &, const Matrix<T> &);
+  friend Vector<T> operator* <>(const Vector<T> &, const Matrix<T> &);
+
 public:
   /// @name Lifecycle
   //@{
@@ -71,7 +71,6 @@ public:
   Matrix<T> operator-();
   //@}
 
-
   /// @name Multiplicative operators
   //@{
   /// "in-place" column multiply
@@ -100,9 +99,8 @@ public:
   //@}
 };
 
-template <class T>
-Vector<T> operator*(const Vector<T> &, const Matrix<T> &);
+template <class T> Vector<T> operator*(const Vector<T> &, const Matrix<T> &);
 
 } // end namespace Gambit
 
-#endif  // LIBGAMBIT_MATRIX_H
+#endif // LIBGAMBIT_MATRIX_H

@@ -44,17 +44,17 @@ namespace linalg {
 //
 template <class T> class VertexEnumerator {
 private:
-  int mult_opt,depth;
-  int n;  // N is the number of columns, which is the # of dimensions.
-  int k;  // K is the number of inequalities given.
+  int mult_opt, depth;
+  int n; // N is the number of columns, which is the # of dimensions.
+  int k; // K is the number of inequalities given.
   const Matrix<T> &A;
   const Vector<T> &b;
-  Vector<T> btemp,c;
-  Gambit::List<BFS<T> > List;
-  Gambit::List<BFS<T> > DualList;
-  Gambit::List<Vector<T> > Verts;
+  Vector<T> btemp, c;
+  Gambit::List<BFS<T>> List;
+  Gambit::List<BFS<T>> DualList;
+  Gambit::List<Vector<T>> Verts;
   long npivots, nodes;
-  Gambit::List<long> visits,branches;
+  Gambit::List<long> visits, branches;
 
   void Enum();
   void Deeper();
@@ -67,15 +67,13 @@ public:
   explicit VertexEnumerator(LPTableau<T> &);
   ~VertexEnumerator() = default;
 
-  const Gambit::List<BFS<T> > &VertexList() const
-  { return List; }
-  const Gambit::List<BFS<T> > &DualVertexList() const
-  { return DualList; }
-  void Vertices(Gambit::List<Vector<T> > &verts) const;
+  const Gambit::List<BFS<T>> &VertexList() const { return List; }
+  const Gambit::List<BFS<T>> &DualVertexList() const { return DualList; }
+  void Vertices(Gambit::List<Vector<T>> &verts) const;
   long NumPivots() const { return npivots; }
 };
 
-}  // end namespace Gambit::linalg
-}  // end namespace Gambit
+} // namespace linalg
+} // end namespace Gambit
 
 #endif // GAMBIT_LINALG_VERTENUM_H

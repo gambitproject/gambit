@@ -42,4 +42,4 @@ public:
   void GetSettings(gbtStyle &);
 };
 
-#endif  // DLEFGLAYOUT_H
+#endif // DLEFGLAYOUT_H

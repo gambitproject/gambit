@@ -23,7 +23,7 @@
 #ifndef NFGPANEL_H
 #define NFGPANEL_H
 
-#include "wx/sheet/sheet.h"        // for wxSheet
+#include "wx/sheet/sheet.h" // for wxSheet
 
 class wxPrintout;
 class gbtTableWidget;
@@ -62,4 +62,4 @@ public:
   DECLARE_EVENT_TABLE()
 };
 
-#endif  // NFGPANEL_H
+#endif // NFGPANEL_H
