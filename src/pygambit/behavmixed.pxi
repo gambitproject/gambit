@@ -614,7 +614,7 @@ class MixedBehaviorProfile:
             The player to get the payoff for.  If a string is passed, the
             player is determined by finding the player with that label, if any.
         node : Node or str
-            The node to get the payoff att.  If a string is passed, the
+            The node to get the payoff at.  If a string is passed, the
             node is determined by finding the node with that label, if any.
 
         Raises
