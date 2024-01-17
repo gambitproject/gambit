@@ -127,13 +127,13 @@ void gbtNfgHs::Initialize(const Game &p_game)
 void gbtNfgHs::Cleanup(const Game &game) {}
 
 gbtNfgHs::gbtNfgHs(int p_stopAfter)
-  : m_iteratedRemoval(true), m_removalWhenUninstantiated(1), m_ordering("automatic")
+  : m_iteratedRemoval(true), m_removalWhenUninstantiated(1), m_ordering("automatic"),
+    m_stopAfter(p_stopAfter)
 #ifdef DEBUG
     ,
     m_logfile(std::cerr)
 #endif // DEBUG
 {
-  m_stopAfter = p_stopAfter;
 }
 
 void gbtNfgHs::SolveSizeDiff(const Game &game,

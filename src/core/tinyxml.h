@@ -1426,12 +1426,12 @@ protected:
 private:
   void CopyTo(TiXmlDocument *target) const;
 
-  bool error;
-  int errorId;
+  bool error{false};
+  int errorId{0};
   TIXML_STRING errorDesc;
-  int tabsize;
+  int tabsize{4};
   TiXmlCursor errorLocation;
-  bool useMicrosoftBOM; // the UTF-8 BOM were found when read. Note this, and try to write.
+  bool useMicrosoftBOM{false}; // the UTF-8 BOM were found when read. Note this, and try to write.
 };
 
 /**

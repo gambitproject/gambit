@@ -30,7 +30,7 @@
 class gbtNashMonitorDialog : public wxDialog {
 private:
   gbtGameDocument *m_doc;
-  int m_pid;
+  int m_pid{0};
   wxProcess *m_process;
   wxWindow *m_profileList;
   wxStaticText *m_statusText, *m_countText;

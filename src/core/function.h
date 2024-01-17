@@ -78,16 +78,16 @@ public:
                Vector<double> &dx) override;
 
 private:
-  int iter;
-  double step;
-  double max_step;
-  double m_tol;
+  int iter{0};
+  double step{0.0};
+  double max_step{0.0};
+  double m_tol{0.0};
   Vector<double> x1;
   Vector<double> dx1;
   Vector<double> x2;
-  double pnorm;
+  double pnorm{0.0};
   Vector<double> p;
-  double g0norm;
+  double g0norm{0.0};
   Vector<double> g0;
 
   void AlphaXPlusY(double alpha, const Vector<double> &x, Vector<double> &y);

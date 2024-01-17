@@ -660,11 +660,9 @@ GameInfoset GameTreeNodeRep::InsertMove(GameInfoset p_infoset)
 //------------------------------------------------------------------------
 
 GameTreeRep::GameTreeRep()
-  : m_computedValues(false), m_doCanon(true)
-{
-  m_chance = new GamePlayerRep(this, 0);
-  m_root = new GameTreeNodeRep(this, nullptr);
-}
+  : m_computedValues(false), m_doCanon(true),
+  m_chance(new GamePlayerRep(this, 0)), m_root(new GameTreeNodeRep(this, nullptr))
+{ }
 
 GameTreeRep::~GameTreeRep()
 {

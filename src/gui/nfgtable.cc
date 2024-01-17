@@ -820,15 +820,15 @@ void gbtPayoffsWidget::OnKeyDown(wxKeyEvent &p_event)
 //=========================================================================
 
 gbtTableWidget::gbtTableWidget(gbtNfgPanel *p_parent, wxWindowID p_id, gbtGameDocument *p_doc)
-  : wxPanel(p_parent, p_id), m_doc(p_doc), m_nfgPanel(p_parent)
+  : wxPanel(p_parent, p_id), m_doc(p_doc), m_nfgPanel(p_parent),
+    m_payoffSheet(new gbtPayoffsWidget(this, p_doc)),
+    m_rowSheet(new gbtRowPlayerWidget(this, p_doc)),
+    m_colSheet(new gbtColPlayerWidget(this, p_doc))
 {
   m_rowPlayers.push_back(1);
   m_colPlayers.push_back(2);
 
-  m_payoffSheet = new gbtPayoffsWidget(this, p_doc);
   m_payoffSheet->SetGridLineColour(*wxWHITE);
-  m_rowSheet = new gbtRowPlayerWidget(this, p_doc);
-  m_colSheet = new gbtColPlayerWidget(this, p_doc);
 
   auto *topSizer = new wxFlexGridSizer(2, 2, 0, 0);
   topSizer->AddGrowableRow(1);

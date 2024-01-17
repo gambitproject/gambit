@@ -207,7 +207,8 @@ END_EVENT_TABLE()
 
 gbtLogitBehavDialog::gbtLogitBehavDialog(wxWindow *p_parent, gbtGameDocument *p_doc)
   : wxDialog(p_parent, wxID_ANY, wxT("Compute quantal response equilibria"), wxDefaultPosition),
-    m_doc(p_doc), m_process(nullptr), m_timer(this, GBT_ID_TIMER)
+    m_doc(p_doc), m_process(nullptr), m_timer(this, GBT_ID_TIMER),
+    m_behavList(new gbtLogitBehavList(this, m_doc))
 {
   auto *sizer = new wxBoxSizer(wxVERTICAL);
 
@@ -226,7 +227,6 @@ gbtLogitBehavDialog::gbtLogitBehavDialog(wxWindow *p_parent, gbtGameDocument *p_
 
   sizer->Add(startSizer, 0, wxALL | wxALIGN_CENTER, 5);
 
-  m_behavList = new gbtLogitBehavList(this, m_doc);
   m_behavList->SetSizeHints(wxSize(600, 400));
   sizer->Add(m_behavList, 0, wxALL | wxALIGN_CENTER, 5);
 

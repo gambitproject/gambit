@@ -31,7 +31,7 @@ class gbtLogitBehavList;
 class gbtLogitBehavDialog : public wxDialog {
 private:
   gbtGameDocument *m_doc;
-  int m_pid;
+  int m_pid{0};
   wxProcess *m_process;
   gbtLogitBehavList *m_behavList;
   wxStaticText *m_statusText;

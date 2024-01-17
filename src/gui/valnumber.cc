@@ -84,6 +84,7 @@ gbtNumberValidator::gbtNumberValidator(wxString *p_value, const Gambit::Rational
 }
 
 gbtNumberValidator::gbtNumberValidator(const gbtNumberValidator &p_validator)
+  : m_stringValue(nullptr), m_hasMin(false), m_hasMax(true)
 {
   Copy(p_validator);
 }

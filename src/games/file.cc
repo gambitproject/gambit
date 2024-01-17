@@ -37,7 +37,7 @@ using namespace Gambit;
 
 using GameFileToken = enum {
   TOKEN_NUMBER = 0, TOKEN_TEXT = 1, TOKEN_SYMBOL = 2,
-  TOKEN_LBRACE = 3, TOKEN_RBRACE = 4, TOKEN_COMMA = 5, TOKEN_EOF = 6
+  TOKEN_LBRACE = 3, TOKEN_RBRACE = 4, TOKEN_COMMA = 5, TOKEN_EOF = 6, TOKEN_NONE = 7
 };
 
 //!
@@ -51,7 +51,7 @@ private:
 
   int m_currentLine {1};
   int m_currentColumn {1};
-  GameFileToken m_lastToken;
+  GameFileToken m_lastToken { TOKEN_NONE };
   std::string m_lastText;
 
   void ReadChar(char& c);

@@ -110,8 +110,8 @@ void TiXmlBase::PutString(const TIXML_STRING &str, TIXML_STRING *outString)
 
 // <-- Strange class for a bug fix. Search for STL_STRING_BUG
 TiXmlBase::StringToBuffer::StringToBuffer(const TIXML_STRING &str)
+  : buffer(new char[str.length() + 1])
 {
-  buffer = new char[str.length() + 1];
   if (buffer) {
     strcpy(buffer, str.c_str());
   }
@@ -120,14 +120,10 @@ TiXmlBase::StringToBuffer::StringToBuffer(const TIXML_STRING &str)
 TiXmlBase::StringToBuffer::~StringToBuffer() { delete[] buffer; }
 // End strange bug fix. -->
 
-TiXmlNode::TiXmlNode(NodeType _type) : TiXmlBase()
+TiXmlNode::TiXmlNode(NodeType _type)
+  : TiXmlBase(), parent(nullptr), type(_type), firstChild(nullptr), lastChild(nullptr),
+    prev(nullptr), next(nullptr)
 {
-  parent = nullptr;
-  type = _type;
-  firstChild = nullptr;
-  lastChild = nullptr;
-  prev = nullptr;
-  next = nullptr;
 }
 
 TiXmlNode::~TiXmlNode()
@@ -811,17 +807,10 @@ const char *TiXmlElement::GetText() const
   return nullptr;
 }
 
-TiXmlDocument::TiXmlDocument() : TiXmlNode(TiXmlNode::DOCUMENT)
-{
-  tabsize = 4;
-  useMicrosoftBOM = false;
-  ClearError();
-}
+TiXmlDocument::TiXmlDocument() : TiXmlNode(TiXmlNode::DOCUMENT) { ClearError(); }
 
 TiXmlDocument::TiXmlDocument(const char *documentName) : TiXmlNode(TiXmlNode::DOCUMENT)
 {
-  tabsize = 4;
-  useMicrosoftBOM = false;
   value = documentName;
   ClearError();
 }
@@ -829,8 +818,6 @@ TiXmlDocument::TiXmlDocument(const char *documentName) : TiXmlNode(TiXmlNode::DO
 #ifdef TIXML_USE_STL
 TiXmlDocument::TiXmlDocument(const std::string &documentName) : TiXmlNode(TiXmlNode::DOCUMENT)
 {
-  tabsize = 4;
-  useMicrosoftBOM = false;
   value = documentName;
   ClearError();
 }
@@ -1274,21 +1261,17 @@ TiXmlNode *TiXmlText::Clone() const
 
 TiXmlDeclaration::TiXmlDeclaration(const char *_version, const char *_encoding,
                                    const char *_standalone)
-  : TiXmlNode(TiXmlNode::DECLARATION)
+  : TiXmlNode(TiXmlNode::DECLARATION), version(_version), encoding(_encoding),
+    standalone(_standalone)
 {
-  version = _version;
-  encoding = _encoding;
-  standalone = _standalone;
 }
 
 #ifdef TIXML_USE_STL
 TiXmlDeclaration::TiXmlDeclaration(const std::string &_version, const std::string &_encoding,
                                    const std::string &_standalone)
-  : TiXmlNode(TiXmlNode::DECLARATION)
+  : TiXmlNode(TiXmlNode::DECLARATION), version(_version), encoding(_encoding),
+    standalone(_standalone)
 {
-  version = _version;
-  encoding = _encoding;
-  standalone = _standalone;
 }
 #endif
 

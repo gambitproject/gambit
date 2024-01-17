@@ -37,14 +37,14 @@ using namespace Gambit;
 class HeuristicPolEnumModule {
 private:
   int m_stopAfter;
-  double eps;
+  double eps{0.0};
   Game NF;
   const StrategySupportProfile &support;
   gSpace Space;
   term_order Lex;
   int num_vars;
   long nevals;
-  double time;
+  double time{0.0};
   Gambit::List<MixedStrategyProfile<double>> solutions;
   bool is_singular;
 

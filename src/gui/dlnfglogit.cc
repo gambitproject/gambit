@@ -230,9 +230,9 @@ public:
 
 LogitBranchDialog::LogitBranchDialog(wxWindow *p_parent, gbtGameDocument *p_doc,
                                      LogitMixedBranch &p_branch)
-  : wxDialog(p_parent, wxID_ANY, wxT("Logit equilibrium correspondence"), wxDefaultPosition)
+  : wxDialog(p_parent, wxID_ANY, wxT("Logit equilibrium correspondence"), wxDefaultPosition),
+    m_sheet(new LogitMixedSheet(this, p_doc, p_branch))
 {
-  m_sheet = new LogitMixedSheet(this, p_doc, p_branch);
   m_sheet->AutoSizeCol(0);
 
   auto *sizer = new wxBoxSizer(wxVERTICAL);
@@ -455,12 +455,12 @@ public:
 };
 
 LogitPlotPanel::LogitPlotPanel(wxWindow *p_parent, gbtGameDocument *p_doc)
-  : wxPanel(p_parent, wxID_ANY), m_doc(p_doc), m_branch(p_doc)
+  : wxPanel(p_parent, wxID_ANY), m_doc(p_doc), m_branch(p_doc),
+    m_plotCtrl(new gbtLogitPlotCtrl(this, p_doc)),
+    m_plotStrategies(new gbtLogitPlotStrategyList(this, p_doc))
 {
-  m_plotCtrl = new gbtLogitPlotCtrl(this, p_doc);
   m_plotCtrl->SetSizeHints(wxSize(600, 400));
 
-  m_plotStrategies = new gbtLogitPlotStrategyList(this, p_doc);
   auto *playerSizer = new wxStaticBoxSizer(wxHORIZONTAL, this, wxT("Show strategies"));
   playerSizer->Add(m_plotStrategies, 1, wxALL | wxEXPAND, 5);
 
@@ -554,7 +554,7 @@ public:
 class LogitMixedDialog : public wxDialog {
 private:
   gbtGameDocument *m_doc;
-  int m_pid;
+  int m_pid{0};
   wxProcess *m_process{nullptr};
   LogitPlotPanel *m_plot;
   wxSpinCtrlDbl *m_scaler;
@@ -605,7 +605,7 @@ END_EVENT_TABLE()
 
 LogitMixedDialog::LogitMixedDialog(wxWindow *p_parent, gbtGameDocument *p_doc)
   : wxDialog(p_parent, wxID_ANY, wxT("Compute quantal response equilibria"), wxDefaultPosition),
-    m_doc(p_doc), m_timer(this, GBT_ID_TIMER)
+    m_doc(p_doc), m_timer(this, GBT_ID_TIMER), m_plot(new LogitPlotPanel(this, m_doc))
 {
   auto *sizer = new wxBoxSizer(wxVERTICAL);
 
@@ -660,7 +660,6 @@ LogitMixedDialog::LogitMixedDialog(wxWindow *p_parent, gbtGameDocument *p_doc)
   sizer->Add(m_toolBar, 0, wxALL | wxEXPAND, 5);
 
   auto *midSizer = new wxBoxSizer(wxHORIZONTAL);
-  m_plot = new LogitPlotPanel(this, m_doc);
   midSizer->Add(m_plot, 0, wxALL | wxALIGN_CENTER, 5);
 
   sizer->Add(midSizer, 0, wxALL | wxALIGN_CENTER, 5);

@@ -22,7 +22,6 @@
 //
 
 #include <iostream>
-#include <sstream>
 #include <cassert>
 #include <algorithm>
 #include "games/agg/gray.h"
@@ -45,14 +44,13 @@ AGG::AGG(int numPlayers, std::vector<int> &_actions, int numANodes, int _numPNod
     actionSets(_actionSets), neighbors(neighb), projectionTypes(projTypes), payoffs(_payoffs),
     projection(proj), projectedStrat(projS), fullProjectedStrat(projS), projFunctions(projF),
     Porder(Po), Pr(P), isPure(numANodes, true), node2Action(numANodes, vector<int>(numPlayers)),
-    cache(numPlayers + 1), player2Class(numPlayers), kSymStrategyOffset(1, 0)
+    cache(numPlayers + 1), player2Class(numPlayers), kSymStrategyOffset(1, 0),
+    maxActions(0), totalActions(0)
 {
   // actions
   actions = std::vector<int>(numPlayers);
   strategyOffset = std::vector<int>(numPlayers + 1);
   strategyOffset[0] = 0;
-  maxActions = 0;
-  totalActions = 0;
 
   for (int i = 0; i < numPlayers; i++) {
     actions[i] = _actions[i];

@@ -64,20 +64,21 @@ class wxFont;
 class gbtStyle {
 private:
   // Node styling
-  int m_nodeSize, m_terminalSpacing;
-  int m_chanceToken, m_playerToken, m_terminalToken;
-  bool m_rootReachable;
+  int m_nodeSize{10}, m_terminalSpacing{50};
+  int m_chanceToken{GBT_NODE_TOKEN_DOT}, m_playerToken{GBT_NODE_TOKEN_DOT},
+      m_terminalToken{GBT_NODE_TOKEN_DOT};
+  bool m_rootReachable{false};
 
   // Branch styling
-  int m_branchLength, m_tineLength;
-  int m_branchStyle, m_branchLabels;
+  int m_branchLength{60}, m_tineLength{20};
+  int m_branchStyle{GBT_BRANCH_STYLE_FORKTINE}, m_branchLabels{GBT_BRANCH_LABEL_HORIZONTAL};
 
   // Information set styling
-  int m_infosetConnect, m_infosetJoin;
+  int m_infosetConnect{GBT_INFOSET_CONNECT_ALL}, m_infosetJoin{GBT_INFOSET_JOIN_CIRCLES};
 
   // Legend styling
-  int m_nodeAboveLabel, m_nodeBelowLabel;
-  int m_branchAboveLabel, m_branchBelowLabel;
+  int m_nodeAboveLabel{GBT_NODE_LABEL_LABEL}, m_nodeBelowLabel{GBT_NODE_LABEL_ISETID};
+  int m_branchAboveLabel{GBT_BRANCH_LABEL_LABEL}, m_branchBelowLabel{GBT_BRANCH_LABEL_PROBS};
 
   // Fonts for legends
   wxFont m_font;
@@ -87,7 +88,7 @@ private:
   mutable Gambit::Array<wxColour> m_playerColors;
 
   // Decimal places to display
-  int m_numDecimals;
+  int m_numDecimals{4};
 
 public:
   // Lifecycle

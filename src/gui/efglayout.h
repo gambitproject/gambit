@@ -45,7 +45,7 @@ private:
   int m_branchLabel;  // horizontal or rotated
   int m_branchLength; // length of branch (exclusive of tine, if present)
 
-  int m_level;         // depth of the node in tree
+  int m_level{0};      // depth of the node in tree
   int m_sublevel;      // # of the infoset line on this level
   double m_actionProb; // probability incoming action is taken
 
@@ -55,7 +55,7 @@ private:
   wxFont m_nodeAboveFont, m_nodeBelowFont;
   wxFont m_branchAboveFont, m_branchBelowFont;
 
-  const gbtStyle *m_style;
+  const gbtStyle *m_style{nullptr};
 
 public:
   explicit gbtNodeEntry(Gambit::GameNode p_parent);
@@ -156,7 +156,7 @@ class gbtTreeLayout : public gbtGameView {
 private:
   /* gbtEfgDisplay *m_parent; */
   Gambit::Array<gbtNodeEntry *> m_nodeList;
-  mutable int m_maxX, m_maxY, m_maxLevel;
+  mutable int m_maxX{0}, m_maxY{0}, m_maxLevel{0};
   int m_infosetSpacing;
 
   const int c_leftMargin, c_topMargin;

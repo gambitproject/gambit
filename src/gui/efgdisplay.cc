@@ -319,11 +319,11 @@ END_EVENT_TABLE()
 //----------------------------------------------------------------------
 
 gbtEfgDisplay::gbtEfgDisplay(wxWindow *p_parent, gbtGameDocument *p_doc)
-  : wxScrolledWindow(p_parent), gbtGameView(p_doc), m_layout(this, p_doc), m_zoom(100)
+  : wxScrolledWindow(p_parent), gbtGameView(p_doc), m_layout(this, p_doc), m_zoom(100),
+    m_payoffEditor(new gbtPayoffEditor(this))
 {
   SetBackgroundColour(wxColour(250, 250, 250));
 
-  m_payoffEditor = new gbtPayoffEditor(this);
   SetDropTarget(new gbtPlayerDropTarget(this));
   MakeMenus();
 

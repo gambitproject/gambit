@@ -28,9 +28,9 @@
 
 class gbtPayoffEditor : public wxTextCtrl {
 private:
-  gbtNodeEntry *m_entry;
+  gbtNodeEntry *m_entry{nullptr};
   Gambit::GameOutcome m_outcome;
-  int m_player;
+  int m_player{0};
 
   /// @name Event handlers
   //@{
@@ -56,7 +56,7 @@ class gbtEfgDisplay : public wxScrolledWindow, public gbtGameView {
 private:
   gbtTreeLayout m_layout;
   int m_zoom;
-  wxMenu *m_nodeMenu;
+  wxMenu *m_nodeMenu{nullptr};
   gbtPayoffEditor *m_payoffEditor;
 
   // Private Functions

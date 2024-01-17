@@ -139,10 +139,8 @@ int compare(const Rational &x, const Rational &y)
   return d;
 }
 
-Rational::Rational(double x)
+Rational::Rational(double x) : num(0), den(1)
 {
-  num = 0;
-  den = 1;
   if (x != 0.0) {
     int neg = x < 0;
     if (neg) {

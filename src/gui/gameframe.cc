@@ -131,7 +131,8 @@ public:
 };
 
 gbtAnalysisNotebook::gbtAnalysisNotebook(wxWindow *p_parent, gbtGameDocument *p_doc)
-  : wxPanel(p_parent, wxID_ANY), gbtGameView(p_doc)
+  : wxPanel(p_parent, wxID_ANY), gbtGameView(p_doc),
+    m_profiles(new gbtProfileListPanel(this, p_doc))
 {
   m_choices = new wxChoice(this, wxID_ANY);
   m_choices->Append(wxT("Profiles"));
@@ -141,8 +142,6 @@ gbtAnalysisNotebook::gbtAnalysisNotebook(wxWindow *p_parent, gbtGameDocument *p_
           wxCommandEventHandler(gbtAnalysisNotebook::OnChoice));
 
   m_description = new wxStaticText(this, wxID_STATIC, wxT(""));
-
-  m_profiles = new gbtProfileListPanel(this, p_doc);
 
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
 

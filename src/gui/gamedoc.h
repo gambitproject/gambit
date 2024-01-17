@@ -41,7 +41,7 @@ private:
   gbtGameDocument *m_doc;
   bool m_strict;
   Gambit::Array<Gambit::BehaviorSupportProfile *> m_supports;
-  int m_current;
+  int m_current{0};
   bool m_noFurther;
 
 public:
@@ -112,7 +112,7 @@ private:
   gbtGameDocument *m_doc;
   bool m_strict;
   Gambit::Array<Gambit::StrategySupportProfile *> m_supports;
-  int m_current;
+  int m_current{0};
   bool m_noFurther;
 
 public:

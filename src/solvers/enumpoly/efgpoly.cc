@@ -54,12 +54,10 @@ public:
 };
 
 ProblemData::ProblemData(const BehaviorSupportProfile &p_support)
-  : support(p_support), SF(p_support)
+  : support(p_support), SF(p_support),
+    nVars(SF.TotalNumSequences() - SF.NumPlayerInfosets() - SF.NumPlayers()),
+    Space(new gSpace(nVars)), Lex(new term_order(Space, lex))
 {
-  nVars = SF.TotalNumSequences() - SF.NumPlayerInfosets() - SF.NumPlayers();
-  Space = new gSpace(nVars);
-  Lex = new term_order(Space, lex);
-
   var = Array<Array<int>>(p_support.GetGame()->NumPlayers());
   int tnv = 0;
   for (int pl = 1; pl <= p_support.GetGame()->NumPlayers(); pl++) {

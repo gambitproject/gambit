@@ -70,7 +70,7 @@ protected:
   GamePlayerRep *m_player;
   Array<GameTreeActionRep *> m_actions;
   Array<GameTreeNodeRep *> m_members;
-  int flag, whichbranch;
+  int flag, whichbranch { 0 };
   Array<Number> m_probs;
 
   GameTreeInfosetRep(GameTreeRep *p_efg, int p_number, GamePlayerRep *p_player,
@@ -142,7 +142,7 @@ protected:
   GameTreeNodeRep *m_parent;
   GameOutcomeRep *outcome;
   Array<GameTreeNodeRep *> children;
-  GameTreeNodeRep *whichbranch, *ptr;
+  GameTreeNodeRep *whichbranch { nullptr }, *ptr { nullptr };
 
   GameTreeNodeRep(GameTreeRep *e, GameTreeNodeRep *p);
   ~GameTreeNodeRep() override;

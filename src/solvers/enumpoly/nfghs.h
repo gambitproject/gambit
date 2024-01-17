@@ -40,9 +40,9 @@ private:
   std::ostream m_logfile;
 #endif // DEBUG
 
-  int minActions;
-  int maxActions;
-  int numPlayers;
+  int minActions{0};
+  int maxActions{0};
+  int numPlayers{0};
 
   Gambit::Array<int> numActions;
 

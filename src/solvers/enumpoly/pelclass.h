@@ -38,7 +38,7 @@ private:
   Gambit::List<Gambit::Vector<gComplex>> complexroots;
   Gambit::List<Gambit::Vector<double>> realroots;
   int mixedvolume;
-  bool solutionsarecorrect;
+  bool solutionsarecorrect{false};
 
   // All private routines contribute to the constructor //
   void InitializePelicanMemory() const;

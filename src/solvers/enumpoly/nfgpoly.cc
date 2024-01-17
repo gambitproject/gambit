@@ -35,14 +35,14 @@ extern bool g_verbose;
 
 class PolEnumModule {
 private:
-  double eps;
+  double eps{0.0};
   Gambit::Game NF;
   const Gambit::StrategySupportProfile &support;
   gSpace Space;
   term_order Lex;
   int num_vars;
   long nevals{0};
-  double time;
+  double time{0.0};
   Gambit::List<Gambit::MixedStrategyProfile<double>> solutions;
   bool is_singular{false};
 
