@@ -79,6 +79,7 @@ StrategyReference = typing.Union[Strategy, str]
 InfosetReference = typing.Union[Infoset, str]
 ActionReference = typing.Union[Action, str]
 NodeReference = typing.Union[Node, str]
+NodeReferenceSet = typing.Iterable[NodeReference]
 
 ProfileDType = typing.Union[float, Rational]
 
