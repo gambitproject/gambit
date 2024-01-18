@@ -1062,6 +1062,25 @@ class Game:
             f"{funcname}(): {argname} must be Node or str, not {node.__class__.__name__}"
         )
 
+    def _resolve_nodes(self,
+                       nodes: typing.Any,
+                       funcname: str,
+                       argname: str = "nodes") -> typing.List[Node]:
+        """Resolve an attempt to reference a subset of the nodes of the game of the game.
+
+        See `_resolve_node` for details on functionality.
+        """
+        resolved_nodes = [
+            self._resolve_node(n, funcname, argname)
+            for n in (nodes if hasattr(nodes, "__iter__") and not isinstance(nodes, str)
+                      else [nodes])
+        ]
+        if not resolved_nodes:
+            raise ValueError(f"{funcname}(): `{argname}` must not be empty")
+        if len(resolved_nodes) != len(set(resolved_nodes)):
+            raise ValueError(f"{funcname}(): Each node must be referenced only once")
+        return resolved_nodes
+
     def _resolve_infoset(self,
                          infoset: typing.Any, funcname: str, argname: str = "infoset") -> Infoset:
         """Resolve an attempt to reference an information set of the game.
@@ -1144,47 +1163,57 @@ class Game:
             f"{funcname}(): {argname} must be Action or str, not {action.__class__.__name__}"
         )
 
-    def append_move(self, node: typing.Union[Node, str],
+    def append_move(self, nodes: typing.Union[NodeReference, NodeReferenceSet],
                     player: typing.Union[Player, str],
                     actions: typing.List[str]) -> None:
-        """Add a move for `player` at the terminal node `node`.  `node` becomes part of
+        """Add a move for `player` at terminal `nodes`.  All elements of `nodes` become part of
         a new information set, with actions labeled according to `actions`.
 
         Raises
         ------
         UndefinedOperationError
-            If `node` is not a terminal node, or `actions` is not a positive number.
+            If `nodes` are not all terminal, or `actions` is not a positive number.
         MismatchError
-            If `node` is a `Node` from a different game, or `player` is a `Player` from a
-            different game.
+            If an element from `nodes` is a `Node` from a different game,
+            or `player` is a `Player` from a different game.
+        ValueError
+            If `nodes` has duplicated elements, or is empty.
         """
-        resolved_node = cython.cast(Node, self._resolve_node(node, "append_move"))
         resolved_player = cython.cast(Player, self._resolve_player(player, "append_move"))
-        if len(resolved_node.children) > 0:
-            raise UndefinedOperationError("append_move(): `node` must be a terminal node")
-        if len(actions) == 0:
+        if not actions:
             raise UndefinedOperationError("append_move(): `actions` must be a nonempty list")
+        resolved_nodes = self._resolve_nodes(nodes, "append_move", "nodes")
+        if any(len(n.children) > 0 for n in resolved_nodes):
+            raise UndefinedOperationError("append_move(): `nodes` must be terminal nodes")
+
+        resolved_node = cython.cast(Node, resolved_nodes[0])
         resolved_node.node.deref().AppendMove(resolved_player.player, len(actions))
         for label, action in zip(actions, resolved_node.infoset.actions):
             action.label = label
+        resolved_infoset = cython.cast(Infoset, resolved_node.infoset)
+        for n in resolved_nodes[1:]:
+            cython.cast(Node, n).node.deref().AppendMove(resolved_infoset.infoset)
 
-    def append_infoset(self, node: typing.Union[Node, str],
+    def append_infoset(self, nodes: typing.Union[NodeReference, NodeReferenceSet],
                        infoset: typing.Union[Infoset, str]) -> None:
-        """Add a move in information set `infoset` at the terminal node `node`.
+        """Add a move in information set `infoset` at terminal `nodes`.
 
         Raises
         ------
         UndefinedOperationError
-            If `node` is not a terminal node.
+            If any element in `nodes` is not a terminal node.
         MismatchError
-            If `node` is a `Node` from a different game, or `infoset` is an `Infoset` from a
-            different game.
+            If an element in `nodes` is a `Node` from a different game,
+            or `infoset` is an `Infoset` from a different game.
+        ValueError
+            If `nodes` has duplicated elements, or is empty.
         """
-        resolved_node = cython.cast(Node, self._resolve_node(node, "append_infoset"))
         resolved_infoset = cython.cast(Infoset, self._resolve_infoset(infoset, "append_infoset"))
-        if len(resolved_node.children) > 0:
-            raise UndefinedOperationError("append_move(): `node` must be a terminal node")
-        resolved_node.node.deref().AppendMove(resolved_infoset.infoset)
+        resolved_nodes = self._resolve_nodes(nodes, "append_infoset", "nodes")
+        if any(len(n.children) > 0 for n in resolved_nodes):
+            raise UndefinedOperationError("append_infoset(): `nodes` must be terminal nodes")
+        for n in resolved_nodes:
+            cython.cast(Node, n).node.deref().AppendMove(resolved_infoset.infoset)
 
     def insert_move(self, node: typing.Union[Node, str],
                     player: typing.Union[Player, str], actions: int) -> None:

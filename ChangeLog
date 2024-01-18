@@ -17,6 +17,8 @@
 - `gnm_solve`/`gambit-gnm` now exposes several parameters which control the behavior of the
   path-following procedure
 - The MixedBehaviorProfile object can now be initialized on creation by a given distribution.
+- `append_move`/`append_infoset` now resolves either a singleton node reference or any
+  iterable set of node references
 
 ### Changed
 - Gambit now requires a compiler that supports C++17.
