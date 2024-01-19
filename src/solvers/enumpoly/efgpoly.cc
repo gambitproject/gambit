@@ -44,9 +44,9 @@ class ProblemData {
 public:
   const BehaviorSupportProfile &support;
   Sfg SF;
+  int nVars;
   gSpace *Space;
   term_order *Lex;
-  int nVars;
   Array<Array<int>> var;
 
   explicit ProblemData(const BehaviorSupportProfile &p_support);
@@ -56,9 +56,9 @@ public:
 ProblemData::ProblemData(const BehaviorSupportProfile &p_support)
   : support(p_support), SF(p_support),
     nVars(SF.TotalNumSequences() - SF.NumPlayerInfosets() - SF.NumPlayers()),
-    Space(new gSpace(nVars)), Lex(new term_order(Space, lex))
+    Space(new gSpace(nVars)), Lex(new term_order(Space, lex)),
+    var(p_support.GetGame()->NumPlayers())
 {
-  var = Array<Array<int>>(p_support.GetGame()->NumPlayers());
   int tnv = 0;
   for (int pl = 1; pl <= p_support.GetGame()->NumPlayers(); pl++) {
     var[pl] = Array<int>(SF.NumSequences(pl));

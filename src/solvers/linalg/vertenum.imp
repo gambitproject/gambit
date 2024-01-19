@@ -93,22 +93,6 @@ template <class T> void VertexEnumerator<T>::Enum()
   DualSearch(tab);
 }
 
-template <class T> void VertexEnumerator<T>::Report()
-{
-  int i = 1;
-  double x, estNodes;
-
-  estNodes = x = (double)1;
-
-  while (i <= visits.Length()) {
-    if (visits[i]) {
-      x *= (double)branches[i] / (double)visits[i];
-      estNodes += x;
-    }
-    i++;
-  }
-}
-
 template <class T> void VertexEnumerator<T>::Deeper()
 {
   depth++;
@@ -144,7 +128,7 @@ template <class T> void VertexEnumerator<T>::Search(LPTableau<T> &tab)
     }
   }
   else {
-    Report(); // Report progress at terminal leafs
+    // Report(); // Report progress at terminal leafs
   }
   depth--;
 }

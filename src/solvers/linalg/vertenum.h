@@ -58,7 +58,6 @@ private:
 
   void Enum();
   void Deeper();
-  void Report();
   void Search(LPTableau<T> &tab);
   void DualSearch(LPTableau<T> &tab);
 
