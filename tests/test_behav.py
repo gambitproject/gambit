@@ -10,7 +10,6 @@ TOL = 1e-13  # tolerance for floating point assertions
 ZERO = gbt.Rational(0)  # tolerance for rational assertions
 
 
-
 def _set_action_probs(profile: gbt.MixedBehaviorProfile, probs: list, rational_flag: bool):
     """Set the action probabilities in a behavior profile called ```profile``` according to a
     list with probabilities in the order of ```profile.game.actions```
@@ -192,7 +191,7 @@ def test_profile_indexing_by_invalid_action_label(game: gbt.Game, action_label: 
 
 @pytest.mark.parametrize(
     "rational_flag",
-    [True,False]
+    [True, False]
     )
 def test_profile_indexing_by_invalid_infoset_label(rational_flag: bool):
     """Create a duplicate infoset label and check we get a ValueError for this ambiguous label,
@@ -362,9 +361,9 @@ def test_profile_indexing_by_player_and_invalid_infoset_label(game: gbt.Game,
      ]
 )
 def test_profile_indexing_by_player_and_invalid_action_label(game: gbt.Game,
-                                                              player_label: str,
-                                                              action_label: str,
-                                                              rational_flag: bool):
+                                                             player_label: str,
+                                                             action_label: str,
+                                                             rational_flag: bool):
     """Test that we get a KeyError and that "player" appears in the error message"""
     with pytest.raises(KeyError, match="player"):
         game.mixed_behavior_profile(rational=rational_flag)[player_label][action_label]

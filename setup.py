@@ -33,7 +33,7 @@ lrslib = ("lrslib", {"sources": glob.glob("src/solvers/lrs/*.c")})
 cppgambit = (
     "cppgambit",
     {
-        "sources": (
+         "sources": (
             glob.glob("src/core/*.cc") +
             glob.glob("src/games/*.cc") +
             glob.glob("src/games/agg/*.cc") +

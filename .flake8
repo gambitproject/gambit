@@ -1,0 +1,13 @@
+[flake8]
+max-line-length = 99
+indent-width = 4
+include =
+  setup.py
+  src/pygambit
+  tests
+exclude =
+  .git
+  __pycache__
+  contrib
+  build
+  dist

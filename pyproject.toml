@@ -14,7 +14,7 @@ select = [
     "F", # pyflakes
     "UP", # pyupgrade
     "B", # flake8-bugbear
-    "SIM", # flake-simplify
+    "SIM", # flake8-simplify
     "I", # isort
     "Q", # prefer double quotes
 ]
