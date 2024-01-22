@@ -29,49 +29,6 @@
 using namespace Gambit;
 using namespace Gambit::gametracer;
 
-namespace {
-
-std::shared_ptr<gnmgame> BuildRepresentation(const Game &p_game)
-{
-  if (p_game->IsAgg()) {
-    return std::shared_ptr<gnmgame>(new aggame(dynamic_cast<GameAGGRep &>(*p_game)));
-  }
-  Rational maxPay = p_game->GetMaxPayoff();
-  Rational minPay = p_game->GetMinPayoff();
-  double scale = (maxPay > minPay) ? 1.0 / (maxPay - minPay) : 1.0;
-
-  auto players = p_game->GetPlayers();
-  std::vector<int> actions(players.size());
-  std::transform(players.cbegin(), players.cend(), actions.begin(),
-                 [](const GamePlayer &p) { return p->NumStrategies(); });
-  std::shared_ptr<gnmgame> A(new nfgame(actions));
-
-  std::vector<int> profile(players.size());
-  for (StrategyProfileIterator iter(p_game); !iter.AtEnd(); iter++) {
-    std::transform(players.cbegin(), players.cend(), profile.begin(), [iter](const GamePlayer &p) {
-      return (*iter)->GetStrategy(p)->GetNumber() - 1;
-    });
-    for (auto player : players) {
-      A->setPurePayoff(player->GetNumber() - 1, profile,
-                       scale * ((*iter)->GetPayoff(player) - minPay));
-    }
-  }
-  return A;
-}
-
-MixedStrategyProfile<double> ToProfile(const Game &p_game, const cvector &p_profile)
-{
-  MixedStrategyProfile<double> msp = p_game->NewMixedStrategyProfile(0.0);
-  auto value = p_profile.cbegin();
-  for (auto strategy : p_game->GetStrategies()) {
-    msp[strategy] = *value;
-    ++value;
-  }
-  return msp;
-}
-
-} // namespace
-
 namespace Gambit {
 namespace Nash {
 
@@ -114,7 +71,7 @@ List<MixedStrategyProfile<double>> NashGNMStrategySolver::Solve(const Game &p_ga
     throw UndefinedException(
         "Computing equilibria of games with imperfect recall is not supported.");
   }
-  std::shared_ptr<gnmgame> A = BuildRepresentation(p_game);
+  std::shared_ptr<gnmgame> A = BuildGame(p_game, true);
   cvector g(A->getNumActions());
   g = 0.0;
   *g.begin() = 1.0;
@@ -128,7 +85,7 @@ NashGNMStrategySolver::Solve(const MixedStrategyProfile<double> &p_pert) const
     throw UndefinedException(
         "Computing equilibria of games with imperfect recall is not supported.");
   }
-  std::shared_ptr<gnmgame> A = BuildRepresentation(p_pert.GetGame());
+  std::shared_ptr<gnmgame> A = BuildGame(p_pert.GetGame(), true);
   auto strategies = p_pert.GetGame()->GetStrategies();
   cvector g(strategies.size());
   std::transform(strategies.cbegin(), strategies.cend(), g.begin(),

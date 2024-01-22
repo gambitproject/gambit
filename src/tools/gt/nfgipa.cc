@@ -119,7 +119,12 @@ int main(int argc, char *argv[])
     std::shared_ptr<StrategyProfileRenderer<double>> renderer(
         new MixedStrategyCSVRenderer<double>(std::cout, numDecimals));
     NashIPAStrategySolver solver(renderer);
-    solver.Solve(game);
+    try {
+      solver.Solve(game);
+    }
+    catch (std::domain_error &e) {
+      std::cerr << "Error: " << e.what() << std::endl;
+    }
     return 0;
   }
   catch (std::runtime_error &e) {

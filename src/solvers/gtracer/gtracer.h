@@ -28,6 +28,7 @@
 #include "cmatrix.h"
 #include "nfgame.h"
 #include "aggame.h"
+#include "gambit.h"
 
 namespace Gambit {
 namespace gametracer {
@@ -36,8 +37,29 @@ int GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz, 
         int LNMMax, double LambdaMin, bool wobble, double threshold, bool verbose,
         std::string &returnMessage);
 
-int IPA(gnmgame &A, cvector &g, cvector &zh, double alpha, double fuzz, cvector &ans,
-        int maxiter = -1);
+/// @brief Execute the Govindan-Wilson Iterated Polymatrix algorithm for computing a
+///        Nash equilibrium
+/// @param A       the game
+/// @param g       the perturbation ray; a bonus to add to each strategy
+/// @param zh      initial approximation for z.  Can be set to vector of all 1's
+/// @param alpha   stepsize.  Must be a number between 0 and 1, to be interpreted
+///                as the fraction of a complete step to take.
+/// @param fuzz    the cutoff accuracy for an equilibrium after which the algorithm
+///                stops refining it
+/// @param ans     the vector in which the equilibrium will be stored
+/// @param maxiter the maximum number of iterations to attempt
+/// @param verbose whether to print intermediate information on the progress of the
+///                algorithm
+int IPA(const gnmgame &A, const cvector &g, cvector &zh, double alpha, double fuzz, cvector &ans,
+        unsigned int maxiter = 100, bool p_verbose = false);
+
+/// @brief Build a Gametracer representation based on a Gambit game
+/// @param p_game  The game to convert to Gametracer's representation
+/// @param p_scaled  Whether to rescale the payoffs to be on [0, 1]
+std::shared_ptr<gnmgame> BuildGame(const Game &p_game, bool p_scaled);
+
+/// @brief Convert a Gametracer vector to a mixed strategy profile on a Gambit game
+MixedStrategyProfile<double> ToProfile(const Game &p_game, const cvector &p_profile);
 
 } // namespace gametracer
 } // end namespace Gambit

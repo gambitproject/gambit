@@ -144,11 +144,10 @@ void gnmgame::retract(cvector &dest, const cvector &z, bool ksym) const
   }
 }
 
-void gnmgame::normalizeStrategy(cvector &s)
+void gnmgame::normalizeStrategy(cvector &s) const
 {
-  double sum;
   for (int n = 0; n < numPlayers; n++) {
-    sum = 0.0;
+    double sum = 0.0;
     for (int i = firstAction(n); i < lastAction(n); i++) {
       sum += s[i];
     }

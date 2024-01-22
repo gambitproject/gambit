@@ -38,7 +38,7 @@ public:
   ~NashIPAStrategySolver() override = default;
 
   List<MixedStrategyProfile<double>> Solve(const Game &p_game) const override;
-  List<MixedStrategyProfile<double>> Solve(const Game &p_game, const Array<double> &p_pert) const;
+  List<MixedStrategyProfile<double>> Solve(const MixedStrategyProfile<double> &p_pert) const;
 };
 
 inline List<MixedStrategyProfile<double>> IPAStrategySolve(const Game &p_game)

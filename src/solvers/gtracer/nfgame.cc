@@ -26,6 +26,7 @@
 #include <vector>
 #include "cmatrix.h"
 #include "nfgame.h"
+#include "gambit.h"
 
 namespace Gambit {
 namespace gametracer {

@@ -6,6 +6,8 @@
 - `gnm_solve`/`gambit-gnm` now correctly handles the degenerate case of a game where all
   payoffs are the same (#405), and checks that the perturbation vector specified has at least
   one non-zero component (#194)
+- `ipa_solve`/`gambit-ipa` ensures the use of a generic perturbation vector; this resolves a
+  problem where the method could return non-Nash output (#406)
 
 ### Added
 - MixedStrategyProfile and MixedBehaviorProfile objects in pygambit can now be iterated in

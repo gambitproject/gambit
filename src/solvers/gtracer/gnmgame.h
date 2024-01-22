@@ -92,8 +92,8 @@ public:
 
   void retract(cvector &dest, const cvector &z, bool ksym) const;
 
-  // This normalizes a strategy profile by scaling appropriately.
-  void normalizeStrategy(cvector &s);
+  // Normalize the strategy profile s by scaling to sum to one.
+  void normalizeStrategy(cvector &s) const;
 
   int getNumPlayers() const { return numPlayers; }
 

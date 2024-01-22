@@ -150,7 +150,12 @@ def _simpdiv_strategy_solve(
 
 
 def _ipa_strategy_solve(game: Game) -> typing.List[MixedStrategyProfileDouble]:
-    return _convert_mspd(IPAStrategySolve(game.game))
+    try:
+        return _convert_mspd(IPAStrategySolve(game.game))
+    except RuntimeError as e:
+        if "does not have unique maximizer" in str(e):
+            raise ValueError(str(e)) from None
+        raise
 
 
 def _gnm_strategy_solve(

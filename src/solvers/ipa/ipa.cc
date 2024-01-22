@@ -20,6 +20,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <algorithm>
 #include "gambit.h"
 #include "solvers/ipa/ipa.h"
 #include "solvers/gtracer/gtracer.h"
@@ -31,68 +32,44 @@ namespace Nash {
 
 List<MixedStrategyProfile<double>> NashIPAStrategySolver::Solve(const Game &p_game) const
 {
-  Array<double> pert(p_game->MixedProfileLength());
-  for (int i = 1; i <= pert.Length(); i++) {
-    pert[i] = 1.0;
+  MixedStrategyProfile<double> pert = p_game->NewMixedStrategyProfile(0.0);
+  for (auto strategy : p_game->GetStrategies()) {
+    pert[strategy] = 0.0;
   }
-  return Solve(p_game, pert);
+  for (auto player : p_game->GetPlayers()) {
+    pert[player->GetStrategies().front()] = 1.0;
+  }
+  return Solve(pert);
 }
 
-List<MixedStrategyProfile<double>> NashIPAStrategySolver::Solve(const Game &p_game,
-                                                                const Array<double> &p_pert) const
+List<MixedStrategyProfile<double>>
+NashIPAStrategySolver::Solve(const MixedStrategyProfile<double> &p_pert) const
 {
-  if (!p_game->IsPerfectRecall()) {
+  if (!p_pert.GetGame()->IsPerfectRecall()) {
     throw UndefinedException(
         "Computing equilibria of games with imperfect recall is not supported.");
   }
 
-  std::shared_ptr<gnmgame> A;
-  List<MixedStrategyProfile<double>> solutions;
-
-  if (p_game->IsAgg()) {
-    A = std::make_shared<aggame>(dynamic_cast<GameAGGRep &>(*p_game));
-  }
-  else {
-    std::vector<int> actions(p_game->NumPlayers());
-    for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
-      actions[pl - 1] = p_game->GetPlayer(pl)->NumStrategies();
-    }
-    A = std::make_shared<nfgame>(actions);
-
-    std::vector<int> profile(p_game->NumPlayers());
-    for (StrategyProfileIterator iter(p_game); !iter.AtEnd(); iter++) {
-      for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
-        profile[pl - 1] = (*iter)->GetStrategy(pl)->GetNumber() - 1;
-      }
-
-      for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
-        A->setPurePayoff(pl - 1, profile, (*iter)->GetPayoff(pl));
-      }
-    }
-  }
-
-  cvector g(A->getNumActions()); // perturbation ray
-  int numEq;
+  std::shared_ptr<gnmgame> A = BuildGame(p_pert.GetGame(), false);
+  auto strategies = p_pert.GetGame()->GetStrategies();
+  cvector g(strategies.size());
+  std::transform(strategies.cbegin(), strategies.cend(), g.begin(),
+                 [p_pert](const GameStrategy &s) { return p_pert[s]; });
+  g /= g.norm(); // normalized
 
   cvector ans(A->getNumActions());
   cvector zh(A->getNumActions(), 1.0);
-  do {
+  while (true) {
     const double ALPHA = 0.2;
     const double EQERR = 1e-6;
-
-    for (int i = 0; i < A->getNumActions(); i++) {
-      g[i] = p_pert[i + 1];
+    if (IPA(*A, g, zh, ALPHA, EQERR, ans)) {
+      break;
     }
-    g /= g.norm(); // normalized
-    numEq = IPA(*A, g, zh, ALPHA, EQERR, ans);
-  } while (numEq == 0);
-
-  MixedStrategyProfile<double> eqm = p_game->NewMixedStrategyProfile(0.0);
-  for (size_t i = 1; i <= eqm.MixedProfileLength(); i++) {
-    eqm[i] = ans[i - 1];
   }
-  m_onEquilibrium->Render(eqm);
-  solutions.push_back(eqm);
+
+  List<MixedStrategyProfile<double>> solutions;
+  solutions.push_back(ToProfile(p_pert.GetGame(), ans));
+  m_onEquilibrium->Render(solutions.back());
   return solutions;
 }
 

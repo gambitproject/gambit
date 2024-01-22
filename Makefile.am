@@ -367,6 +367,7 @@ gtracer_SOURCES = \
 	src/solvers/gtracer/aggame.h \
 	src/solvers/gtracer/aggame.cc \
 	src/solvers/gtracer/gtracer.h \
+	src/solvers/gtracer/gtracer.cc \
 	src/solvers/gtracer/gnm.cc \
 	src/solvers/gtracer/ipa.cc
 
