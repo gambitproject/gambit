@@ -484,6 +484,8 @@ public:
   virtual Array<int> NumStrategies() const = 0;
   /// Gets the i'th strategy in the game, numbered globally
   virtual GameStrategy GetStrategy(int p_index) const = 0;
+  /// Gets the set of strategies in the game
+  Array<GameStrategy> GetStrategies() const;
   /// Returns the number of strategy contingencies in the game
   virtual int NumStrategyContingencies() const = 0;
   /// Returns the total number of actions in the game

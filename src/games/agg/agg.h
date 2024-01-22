@@ -100,7 +100,7 @@ public:
   AggNumber getV(int player, int action, const StrategyProfile &s);
   AggNumber getJ(int player, int action, int player2, int action2, StrategyProfile &s);
 
-  AggNumber getPurePayoff(int player, std::vector<int> &s);
+  AggNumber getPurePayoff(int player, const std::vector<int> &s);
 
   bool isSymmetric() const
   {

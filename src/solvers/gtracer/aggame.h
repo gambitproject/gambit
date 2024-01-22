@@ -43,7 +43,7 @@ public:
   ~aggame() override = default;
   int getNumActionNodes() { return aggPtr->getNumActionNodes(); }
 
-  double getMixedPayoff(int player, cvector &s) const override
+  double getMixedPayoff(int player, const cvector &s) const override
   {
     std::vector<double> sp(s.values(), s.values() + s.getm());
     return (double)aggPtr->getMixedPayoff(player, sp);
@@ -55,11 +55,11 @@ public:
     return (double)aggPtr->getKSymMixedPayoff(cls, sp);
   }
 
-  void payoffMatrix(cmatrix &dest, cvector &s, double fuzz) const override;
+  void payoffMatrix(cmatrix &dest, const cvector &s, double fuzz) const override;
 
-  void KSymPayoffMatrix(cmatrix &dest, cvector &s, double fuzz) const;
+  void KSymPayoffMatrix(cmatrix &dest, const cvector &s, double fuzz) const;
 
-  void payoffMatrix(cmatrix &dest, cvector &s, double fuzz, bool ksym) const override
+  void payoffMatrix(cmatrix &dest, const cvector &s, double fuzz, bool ksym) const override
   {
     return (ksym) ? KSymPayoffMatrix(dest, s, fuzz) : payoffMatrix(dest, s, fuzz);
   }
@@ -72,12 +72,12 @@ public:
     aggPtr->getPayoffVector(d, player, sp);
     std::copy(d.begin(), d.end(), dest.values());
   }
-  double getPurePayoff(int player, std::vector<int> &s) override
+  double getPurePayoff(int player, const std::vector<int> &s) const override
   {
     return aggPtr->getPurePayoff(player, s);
   }
 
-  void setPurePayoff(int player, std::vector<int> &s, double value) override
+  void setPurePayoff(int player, const std::vector<int> &s, double value) override
   {
     throw Gambit::UndefinedException();
   }

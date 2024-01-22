@@ -351,28 +351,54 @@ def ipa_solve(
 
 
 def gnm_solve(
-        game: libgbt.Game
+        perturbation: typing.Union[libgbt.Game, libgbt.MixedStrategyProfileDouble]
 ) -> NashComputationResult:
     """Compute Nash equilibria of a game using :ref:`a global Newton
     method <gambit-gnm>`.
 
     Parameters
     ----------
-    game : Game
-        The game to compute equilibria in.
+    perturbation : Game or MixedStrategyProfileDouble
+        The perturbation vector to apply to the game.  If a ``Game`` is
+        passed, the perturbation vector is set to be 1 for the first
+        strategy and 0 for all other strategies.
+
+    Raises
+    ------
+    ValueError
+        If the perturbation vector does not have a nonnegative entry
 
     Returns
     -------
     res : NashComputationResult
         The result represented as a ``NashComputationResult`` object.
     """
-    return NashComputationResult(
-        game=game,
-        method="ipa",
-        rational=False,
-        use_strategic=True,
-        equilibria=libgbt._gnm_strategy_solve(game),
-    )
+    if isinstance(perturbation, libgbt.Game):
+        game = perturbation
+        perturbation = game.mixed_strategy_profile(rational=False)
+        for strategy in game.strategies:
+            perturbation[strategy] = 0.0
+        perturbation[game.strategies[0]] = 1.0
+    elif isinstance(perturbation, libgbt.MixedStrategyProfileDouble):
+        game = perturbation.game
+    else:
+        raise TypeError(
+            f"parameter must be Game or MixedStrategyProfileDouble, "
+            f"not {perturbation.__class__.__name__}"
+        )
+    try:
+        return NashComputationResult(
+            game=game,
+            method="gnm",
+            rational=False,
+            use_strategic=True,
+            parameters={"perturbation": perturbation},
+            equilibria=libgbt._gnm_strategy_solve(perturbation)
+        )
+    except RuntimeError as e:
+        if "at least one nonzero" in str(e):
+            raise ValueError(str(e)) from None
+        raise
 
 
 def logit_solve(

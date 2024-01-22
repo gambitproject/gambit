@@ -236,6 +236,21 @@ Array<GamePlayer> GameRep::GetPlayers() const
   return ret;
 }
 
+
+Array<GameStrategy> GameRep::GetStrategies() const
+{
+  Array<GameStrategy> ret(MixedProfileLength());
+  auto output = ret.begin();
+  for (auto player : GetPlayers()) {
+    for (auto strategy : player->GetStrategies()) {
+      *output = strategy;
+      ++output;
+    }
+  }
+  return ret;
+}
+
+
 //------------------------------------------------------------------------
 //                     GameRep: Writing data files
 //------------------------------------------------------------------------

@@ -35,39 +35,39 @@ class nfgame : public gnmgame {
 public:
   friend std::ostream &operator<<(std::ostream &s, nfgame &g);
 
-  nfgame(const std::vector<int> &actions, const cvector &payoffs);
+  nfgame(const std::vector<int> &actions);
 
   ~nfgame() override = default;
 
   // Input: s[i] has integer index of player i's pure strategy
   // s is of length numPlayers
-  double getPurePayoff(int player, std::vector<int> &s) override
+  double getPurePayoff(int player, const std::vector<int> &s) const override
   {
     return payoffs[findIndex(player, s)];
   }
 
-  void setPurePayoff(int player, std::vector<int> &s, double value) override
+  void setPurePayoff(int player, const std::vector<int> &s, double value) override
   {
     payoffs[findIndex(player, s)] = value;
   }
 
-  double getMixedPayoff(int player, cvector &s) const override;
+  double getMixedPayoff(int player, const cvector &s) const override;
 
-  void payoffMatrix(cmatrix &dest, cvector &s, double fuzz) const override;
+  void payoffMatrix(cmatrix &dest, const cvector &s, double fuzz) const override;
 
   void getPayoffVector(cvector &dest, int player, const cvector &s) const override;
 
 private:
-  int findIndex(int player, std::vector<int> &s) const;
+  int findIndex(int player, const std::vector<int> &s) const;
 
-  void localPayoffMatrix(double *dest, int player1, int player2, cvector &s, double *m,
+  void localPayoffMatrix(double *dest, int player1, int player2, const cvector &s, double *m,
                          int n) const;
 
-  void localPayoffVector(double *dest, int player, cvector &s, double *m, int n) const;
+  void localPayoffVector(double *dest, int player, const cvector &s, double *m, int n) const;
 
-  double localPayoff(cvector &s, double *m, int n) const;
+  double localPayoff(const cvector &s, double *m, int n) const;
 
-  double *scaleMatrix(cvector &s, double *m, int n) const;
+  double *scaleMatrix(const cvector &s, double *m, int n) const;
 
   cvector payoffs;
   std::vector<int> blockSize;

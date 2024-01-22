@@ -41,7 +41,7 @@ gnmgame::gnmgame(const std::vector<int> &p_actions)
   std::partial_sum(begin(p_actions), end(p_actions), std::next(begin(strategyOffset)));
 }
 
-void gnmgame::retractJac(cmatrix &dest, std::vector<int> &support) const
+void gnmgame::retractJac(cmatrix &dest, const std::vector<int> &support) const
 {
   int n, i, j;
   double totalk;
@@ -81,7 +81,7 @@ int compareDouble(const void *d1, const void *d2)
   }
 }
 
-void gnmgame::retract(cvector &dest, cvector &z) const
+void gnmgame::retract(cvector &dest, const cvector &z) const
 {
   int n, i;
   double v, sumz;
@@ -106,7 +106,7 @@ void gnmgame::retract(cvector &dest, cvector &z) const
   }
 }
 
-void gnmgame::retract(cvector &dest, cvector &z, bool ksym) const
+void gnmgame::retract(cvector &dest, const cvector &z, bool ksym) const
 {
   if (!ksym) {
     retract(dest, z);

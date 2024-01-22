@@ -447,7 +447,9 @@ cdef extern from "solvers/ipa/ipa.h":
     c_List[c_MixedStrategyProfileDouble] IPAStrategySolve(c_Game) except +RuntimeError
 
 cdef extern from "solvers/gnm/gnm.h":
-    c_List[c_MixedStrategyProfileDouble] GNMStrategySolve(c_Game) except +RuntimeError
+    c_List[c_MixedStrategyProfileDouble] GNMStrategySolve(
+            c_MixedStrategyProfileDouble
+    ) except +RuntimeError
 
 cdef extern from "solvers/logit/nfglogit.h":
     c_List[c_MixedStrategyProfileDouble] LogitStrategySolve(c_Game) except +RuntimeError

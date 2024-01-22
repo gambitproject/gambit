@@ -40,8 +40,7 @@ public:
   ~NashGNMStrategySolver() override = default;
 
   List<MixedStrategyProfile<double>> Solve(const Game &p_game) const override;
-  List<MixedStrategyProfile<double>> Solve(const Game &p_game,
-                                           const MixedStrategyProfile<double> &p_pert) const;
+  List<MixedStrategyProfile<double>> Solve(const MixedStrategyProfile<double> &p_pert) const;
 
 private:
   bool m_verbose;
@@ -49,15 +48,19 @@ private:
   List<MixedStrategyProfile<double>> Solve(const Game &p_game,
                                            const std::shared_ptr<gametracer::gnmgame> &A,
                                            const gametracer::cvector &p_pert) const;
-  std::shared_ptr<gametracer::gnmgame> BuildRepresentation(const Game &p_game) const;
-
-  static MixedStrategyProfile<double> ToProfile(const Game &p_game,
-                                                const gametracer::cvector &p_pert);
 };
 
 inline List<MixedStrategyProfile<double>> GNMStrategySolve(const Game &p_game)
 {
   return NashGNMStrategySolver().Solve(p_game);
+}
+
+/// @brief Compute the mixed strategy equilibria accessible via the initial ray determined
+///        by \p p_profile using the Global Newton method
+inline List<MixedStrategyProfile<double>>
+GNMStrategySolve(const MixedStrategyProfile<double> &p_profile)
+{
+  return NashGNMStrategySolver().Solve(p_profile);
 }
 
 } // namespace Nash

@@ -39,9 +39,9 @@ public:
 
   // Input: s[i] has integer index of player i's pure strategy
   // s is of length numPlayers
-  virtual double getPurePayoff(int player, std::vector<int> &s) = 0;
+  virtual double getPurePayoff(int player, const std::vector<int> &s) const = 0;
 
-  virtual void setPurePayoff(int player, std::vector<int> &, double value) = 0;
+  virtual void setPurePayoff(int player, const std::vector<int> &, double value) = 0;
 
   // The actions of all players are combined in one linear array of length
   // numActions; this gives the index of a player's first action in the array.
@@ -51,9 +51,9 @@ public:
 
   // s is the mixed strategy profile.  It is of length numActions, and
   // s[i] is the probability that the appropriate player takes action i.
-  virtual double getMixedPayoff(int player, cvector &s) const = 0;
+  virtual double getMixedPayoff(int player, const cvector &s) const = 0;
 
-  virtual double getSymMixedPayoff(cvector &s)
+  virtual double getSymMixedPayoff(const cvector &s)
   {
     cvector fulls(getNumActions());
     int nact = getNumActions(0);
@@ -68,9 +68,9 @@ public:
   // s is the mixed strategy profile, as above.  This function stores
   // the Jacobian of the payoff function G, where G(i) is the payoff to
   // the owner of action i if he deviates from s by choosing i instead.
-  virtual void payoffMatrix(cmatrix &dest, cvector &s, double fuzz) const = 0;
+  virtual void payoffMatrix(cmatrix &dest, const cvector &s, double fuzz) const = 0;
 
-  virtual void payoffMatrix(cmatrix &dest, cvector &s, double fuzz, bool ksym) const
+  virtual void payoffMatrix(cmatrix &dest, const cvector &s, double fuzz, bool ksym) const
   {
     if (ksym && s.getm() != getNumKSymActions()) {
       throw std::runtime_error(
@@ -84,13 +84,13 @@ public:
   virtual void getPayoffVector(cvector &dest, int player, const cvector &s) const = 0;
 
   // this stores the Jacobian of the retraction function in dest.
-  void retractJac(cmatrix &dest, std::vector<int> &support) const;
+  void retractJac(cmatrix &dest, const std::vector<int> &support) const;
 
   // This retracts z onto the nearest normalized strategy profile, according
   // to the Euclidean metric
-  void retract(cvector &dest, cvector &z) const;
+  void retract(cvector &dest, const cvector &z) const;
 
-  void retract(cvector &dest, cvector &z, bool ksym) const;
+  void retract(cvector &dest, const cvector &z, bool ksym) const;
 
   // This normalizes a strategy profile by scaling appropriately.
   void normalizeStrategy(cvector &s);

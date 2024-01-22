@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
       perts = RandomStrategyPerturbations(game, numVectors);
     }
     for (int i = 1; i <= perts.size(); i++) {
-      solver.Solve(game, perts[i]);
+      solver.Solve(perts[i]);
     }
     return 0;
   }

@@ -433,7 +433,7 @@ void AGG::doProjection(int Node, int i, AggNumber *s)
   }
 }
 
-AggNumber AGG::getPurePayoff(int player, std::vector<int> &s)
+AggNumber AGG::getPurePayoff(int player, const std::vector<int> &s)
 {
   assert(player >= 0 && player < numPlayers);
   int Node = actionSets[player][s[player]];

@@ -153,8 +153,10 @@ def _ipa_strategy_solve(game: Game) -> typing.List[MixedStrategyProfileDouble]:
     return _convert_mspd(IPAStrategySolve(game.game))
 
 
-def _gnm_strategy_solve(game: Game) -> typing.List[MixedStrategyProfileDouble]:
-    return _convert_mspd(GNMStrategySolve(game.game))
+def _gnm_strategy_solve(
+        pert: MixedStrategyProfileDouble
+) -> typing.List[MixedStrategyProfileDouble]:
+    return _convert_mspd(GNMStrategySolve(deref(pert.profile)))
 
 
 def _logit_strategy_solve(game: Game) -> typing.List[MixedStrategyProfileDouble]:

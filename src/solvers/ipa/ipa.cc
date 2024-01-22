@@ -54,14 +54,10 @@ List<MixedStrategyProfile<double>> NashIPAStrategySolver::Solve(const Game &p_ga
   }
   else {
     std::vector<int> actions(p_game->NumPlayers());
-    int veclength = p_game->NumPlayers();
     for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
       actions[pl - 1] = p_game->GetPlayer(pl)->NumStrategies();
-      veclength *= p_game->GetPlayer(pl)->NumStrategies();
     }
-    cvector payoffs(veclength);
-
-    A = std::make_shared<nfgame>(actions, payoffs);
+    A = std::make_shared<nfgame>(actions);
 
     std::vector<int> profile(p_game->NumPlayers());
     for (StrategyProfileIterator iter(p_game); !iter.AtEnd(); iter++) {

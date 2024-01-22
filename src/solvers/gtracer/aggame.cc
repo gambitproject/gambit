@@ -137,7 +137,7 @@ void aggame::computePartialP_bisect(int player1, int act1, std::vector<int>::ite
   }
 }
 
-void aggame::payoffMatrix(cmatrix &dest, cvector &s, agg::AggNumber fuzz) const
+void aggame::payoffMatrix(cmatrix &dest, const cvector &s, agg::AggNumber fuzz) const
 {
   // compute jacobian
   // s: mixed strat
@@ -401,11 +401,8 @@ void aggame::computePayoff(cmatrix &dest, int player1, int act1, int player2, in
   }
 }
 
-void aggame::KSymPayoffMatrix(cmatrix &dest, cvector &s, agg::AggNumber fuzz) const
+void aggame::KSymPayoffMatrix(cmatrix &dest, const cvector &s, agg::AggNumber fuzz) const
 {
-  // cerr<<"error: k-symmetric Jacobian not yet implemented";
-  // exit(1);
-
   std::vector<double> sp(s.values(), s.values() + s.getm());
   // simple implementation using expected payoffs:
   for (int rowcls = 0; rowcls < getNumPlayerClasses(); ++rowcls) {

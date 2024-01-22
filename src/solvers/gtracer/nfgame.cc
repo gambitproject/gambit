@@ -22,6 +22,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <numeric>
 #include <vector>
 #include "cmatrix.h"
 #include "nfgame.h"
@@ -29,8 +30,11 @@
 namespace Gambit {
 namespace gametracer {
 
-nfgame::nfgame(const std::vector<int> &actions, const cvector &payoffs)
-  : gnmgame(actions), payoffs(payoffs), blockSize(actions.size() + 1)
+nfgame::nfgame(const std::vector<int> &actions)
+  : gnmgame(actions),
+    payoffs(std::accumulate(actions.begin(), actions.end(), actions.size(),
+                            [](int ncont, int nstrat) { return ncont * nstrat; })),
+    blockSize(actions.size() + 1)
 {
   blockSize[0] = 1;
   for (int i = 1; i <= numPlayers; i++) {
@@ -38,7 +42,7 @@ nfgame::nfgame(const std::vector<int> &actions, const cvector &payoffs)
   }
 }
 
-int nfgame::findIndex(int player, std::vector<int> &s) const
+int nfgame::findIndex(int player, const std::vector<int> &s) const
 {
   int i, retIndex = player * blockSize[numPlayers];
   for (i = 0; i < numPlayers; i++) {
@@ -47,7 +51,7 @@ int nfgame::findIndex(int player, std::vector<int> &s) const
   return retIndex;
 }
 
-double nfgame::getMixedPayoff(int player, cvector &s) const
+double nfgame::getMixedPayoff(int player, const cvector &s) const
 {
   std::vector<double> m(blockSize[numPlayers]);
   memcpy(m.data(), payoffs.values() + player * blockSize[numPlayers],
@@ -63,7 +67,7 @@ void nfgame::getPayoffVector(cvector &dest, int player, const cvector &s) const
   localPayoffVector(dest.values(), player, const_cast<cvector &>(s), &(t[0]), numPlayers - 1);
 }
 
-void nfgame::payoffMatrix(cmatrix &dest, cvector &s, double fuzz) const
+void nfgame::payoffMatrix(cmatrix &dest, const cvector &s, double fuzz) const
 {
   int rown, coln, rowi, coli;
   double fuzzcount;
@@ -106,7 +110,7 @@ void nfgame::payoffMatrix(cmatrix &dest, cvector &s, double fuzz) const
 // blockSize[numPlayers]*sizeof(double)), player1 != player2 i.e. m points to payoff cmatrix for
 // the desired player
 
-void nfgame::localPayoffMatrix(double *dest, int player1, int player2, cvector &s, double *m,
+void nfgame::localPayoffMatrix(double *dest, int player1, int player2, const cvector &s, double *m,
                                int n) const
 {
   int i;
@@ -128,7 +132,7 @@ void nfgame::localPayoffMatrix(double *dest, int player1, int player2, cvector &
   }
 }
 
-double *nfgame::scaleMatrix(cvector &s, double *m, int n) const
+double *nfgame::scaleMatrix(const cvector &s, double *m, int n) const
 {
   int i, j, curbase, newbase = -1;
   double scale;
@@ -152,7 +156,7 @@ double *nfgame::scaleMatrix(cvector &s, double *m, int n) const
   return m + newbase;
 }
 
-void nfgame::localPayoffVector(double *dest, int player, cvector &s, double *m, int n) const
+void nfgame::localPayoffVector(double *dest, int player, const cvector &s, double *m, int n) const
 {
   if (player == n) {
     for (int i = 0; i < actions[player]; i++) {
@@ -165,7 +169,7 @@ void nfgame::localPayoffVector(double *dest, int player, cvector &s, double *m, 
   }
 }
 
-double nfgame::localPayoff(cvector &s, double *m, int n) const
+double nfgame::localPayoff(const cvector &s, double *m, int n) const
 {
   if (n < 0) {
     return *m;
