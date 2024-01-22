@@ -37,6 +37,60 @@ class cvector {
   friend class cmatrix;
 
 public:
+  class iterator {
+  private:
+    cvector *m_vector;
+    int m_index;
+
+  public:
+    using iterator_category = std::input_iterator_tag;
+    using difference_type = typename std::vector<double>::iterator::difference_type;
+    using value_type = double;
+    using pointer = value_type *;
+    using reference = value_type &;
+
+    iterator(cvector *p_vector, int p_index) : m_vector(p_vector), m_index(p_index) {}
+    reference operator*() { return (*m_vector)[m_index]; }
+    pointer operator->() { return &(*m_vector)[m_index]; }
+    iterator &operator++()
+    {
+      m_index++;
+      return *this;
+    }
+    bool operator==(const iterator &it) const
+    {
+      return (m_vector == it.m_vector) && (m_index == it.m_index);
+    }
+    bool operator!=(const iterator &it) const { return !(*this == it); }
+  };
+
+  class const_iterator {
+  private:
+    const cvector *m_vector;
+    int m_index;
+
+  public:
+    using iterator_category = std::input_iterator_tag;
+    using difference_type = typename std::vector<double>::iterator::difference_type;
+    using value_type = double;
+    using pointer = value_type *;
+    using reference = value_type &;
+
+    const_iterator(const cvector *p_vector, int p_index) : m_vector(p_vector), m_index(p_index) {}
+    double operator*() const { return (*m_vector)[m_index]; }
+    double operator->() const { return (*m_vector)[m_index]; }
+    const_iterator &operator++()
+    {
+      m_index++;
+      return *this;
+    }
+    bool operator==(const const_iterator &it) const
+    {
+      return (m_vector == it.m_vector) && (m_index == it.m_index);
+    }
+    bool operator!=(const const_iterator &it) const { return !(*this == it); }
+  };
+
   cvector() : m(1), x(new double[1]) {}
 
   explicit cvector(int m) : m(m), x(new double[m]) {}
@@ -95,9 +149,24 @@ public:
     return ret;
   }
 
+  size_t size() const { return m; }
+
   double operator[](int i) const { return x[i]; }
 
   double &operator[](int i) { return x[i]; }
+
+  /// Return a forward iterator starting at the beginning of the vector
+  iterator begin() { return iterator(this, 0); }
+  /// Return a forward iterator past the end of the vector
+  iterator end() { return iterator(this, m); }
+  /// Return a const forward iterator starting at the beginning of the vector
+  const_iterator begin() const { return const_iterator(this, 0); }
+  /// Return a const forward iterator past the end of the vector
+  const_iterator end() const { return const_iterator(this, m); }
+  /// Return a const forward iterator starting at the beginning of the vector
+  const_iterator cbegin() const { return const_iterator(this, 0); }
+  /// Return a const forward iterator past the end of the vector
+  const_iterator cend() const { return const_iterator(this, m); }
 
   cvector &operator+=(const cvector &v)
   {

@@ -20,6 +20,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <numeric>
 #include "gambit.h"
 #include "solvers/gnm/gnm.h"
 #include "solvers/gtracer/gtracer.h"
@@ -51,8 +52,13 @@ NashGNMStrategySolver::Solve(const Game &p_game, const std::shared_ptr<gnmgame> 
   const bool WOBBLE = false;
   const double THRESHOLD = 1e-2;
 
-  List<MixedStrategyProfile<double>> eqa;
+  bool nonzero = std::accumulate(p_pert.cbegin(), p_pert.cend(), false,
+                                 [](bool accum, double value) { return accum || value != 0.0; });
+  if (!nonzero) {
+    throw UndefinedException("Perturbation vector must have at least one nonzero component.");
+  }
 
+  List<MixedStrategyProfile<double>> eqa;
   if (m_verbose) {
     m_onEquilibrium->Render(ToProfile(p_game, p_pert), "pert");
   }
