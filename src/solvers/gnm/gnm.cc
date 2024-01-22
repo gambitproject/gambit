@@ -76,7 +76,7 @@ std::shared_ptr<gnmgame> NashGNMStrategySolver::BuildRepresentation(const Game &
   else {
     Rational maxPay = p_game->GetMaxPayoff();
     Rational minPay = p_game->GetMinPayoff();
-    double scale = 1.0 / (maxPay - minPay);
+    double scale = (maxPay > minPay) ? 1.0 / (maxPay - minPay) : 1.0;
 
     std::vector<int> actions(p_game->NumPlayers());
     int veclength = p_game->NumPlayers();

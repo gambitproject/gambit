@@ -2,6 +2,10 @@
 
 ## [16.2.0a1] - unreleased
 
+### Fixed
+- `gnm_solve`/`gambit-gnm` now correctly handles the degenerate case of a game where all
+  payoffs are the same (#405)
+
 ### Added
 - MixedStrategyProfile and MixedBehaviorProfile objects in pygambit can now be iterated in
   various dict-like ways
