@@ -6,9 +6,20 @@
 :program:`gambit-ipa` reads a game on standard input and computes Nash
 equilibria using an iterated polymatrix approximation approach
 developed by Govindan and Wilson [GovWil04]_.
-This program is a wrapper around the
+This program is based on the
 `Gametracer 0.2 <http://dags.stanford.edu/Games/gametracer.html>`_
 implementation by Ben Blum and Christian Shelton.
+
+The algorithm takes as a parameter a mixed strategy profile.  This profile is
+interpreted as defining a ray in the space of games.  The profile must have
+the property that, for each player, the most frequently played strategy must
+be unique.
+
+The algorithm finds at most one equilibrium starting from any given profile.
+Multiple starting profiles may be generated via the `-n` option or specified
+via the `-s` option; different starting profiles may result in different
+equilibria being found.
+
 
 .. program:: gambit-ipa
 
@@ -21,9 +32,20 @@ implementation by Ben Blum and Christian Shelton.
 
    Prints a help message listing the available options.
 
+.. cmdoption:: -n
+
+   Randomly generate the specified number of perturbation vectors.
+
 .. cmdoption:: -q
 
    Suppresses printing of the banner at program launch.
+
+.. cmdoption:: -s
+
+   Specifies a file containing a list of starting points
+   for the algorithm. The format of the file is comma-separated values,
+   one mixed strategy profile per line, in the same format used for
+   output of equilibria (excluding the initial NE tag).
 
 
 Computing an equilibrium of :download:`e02.nfg <../contrib/games/e02.nfg>`,
@@ -39,10 +61,6 @@ the reduced strategic form of the example in Figure 2 of Selten
    NE,1.000000,0.000000,0.000000,1.000000,0.000000
 
 
-
-.. note::
-
-   This is an experimental program and has not been extensively tested.
 
 .. seealso::
 

@@ -326,47 +326,27 @@ def simpdiv_solve(
 
 
 def ipa_solve(
-        game: libgbt.Game
+        perturbation: typing.Union[libgbt.Game, libgbt.MixedStrategyProfileDouble]
 ) -> NashComputationResult:
     """Compute Nash equilibria of a game using :ref:`iterated polymatrix
     approximation <gambit-ipa>`.
 
     Parameters
     ----------
-    game : Game
-        The game to compute equilibria in.
-
-    Returns
-    -------
-    res : NashComputationResult
-        The result represented as a ``NashComputationResult`` object.
-    """
-    return NashComputationResult(
-        game=game,
-        method="ipa",
-        rational=False,
-        use_strategic=True,
-        equilibria=libgbt._ipa_strategy_solve(game),
-    )
-
-
-def gnm_solve(
-        perturbation: typing.Union[libgbt.Game, libgbt.MixedStrategyProfileDouble]
-) -> NashComputationResult:
-    """Compute Nash equilibria of a game using :ref:`a global Newton
-    method <gambit-gnm>`.
-
-    Parameters
-    ----------
     perturbation : Game or MixedStrategyProfileDouble
         The perturbation vector to apply to the game.  If a ``Game`` is
         passed, the perturbation vector is set to be 1 for the first
-        strategy and 0 for all other strategies.
+        strategy for each player and 0 for all other strategies.
+
+        .. versionchanged:: 16.2.0
+
+           Allow selection of the perturbation vector
 
     Raises
     ------
     ValueError
-        If the perturbation vector does not have a nonnegative entry
+        If the perturbation vector does not have a unique maximizer for
+        each player
 
     Returns
     -------
@@ -378,7 +358,8 @@ def gnm_solve(
         perturbation = game.mixed_strategy_profile(rational=False)
         for strategy in game.strategies:
             perturbation[strategy] = 0.0
-        perturbation[game.strategies[0]] = 1.0
+        for player in game.players:
+            perturbation[player.strategies[0]] = 1.0
     elif isinstance(perturbation, libgbt.MixedStrategyProfileDouble):
         game = perturbation.game
     else:
@@ -386,14 +367,114 @@ def gnm_solve(
             f"parameter must be Game or MixedStrategyProfileDouble, "
             f"not {perturbation.__class__.__name__}"
         )
+    return NashComputationResult(
+        game=game,
+        method="ipa",
+        rational=False,
+        use_strategic=True,
+        parameters={"perturbation": perturbation},
+        equilibria=libgbt._ipa_strategy_solve(perturbation),
+    )
+
+
+def gnm_solve(
+        perturbation: typing.Union[libgbt.Game, libgbt.MixedStrategyProfileDouble],
+        end_lambda: float = -10.0,
+        steps: int = 100,
+        local_newton_interval: int = 3,
+        local_newton_maxits: int = 10,
+) -> NashComputationResult:
+    """Compute Nash equilibria of a game using :ref:`a global Newton
+    method <gambit-gnm>`.
+
+    Parameters
+    ----------
+    perturbation : Game or MixedStrategyProfileDouble
+        The perturbation vector to apply to the game.  If a ``Game`` is
+        passed, the perturbation vector is set to be 1 for the first
+        strategy for each player and 0 for all other strategies.
+
+        .. versionchanged:: 16.2.0
+
+           Allow selection of the perturbation vector
+
+    end_lambda : float, default -10.0
+        The value of the perturbation magnitude lambda at which to terminate
+        tracing.  This must be a negative number.  This sets the point at
+        which the algorithm assumes no further equilibria will be found along
+        this ray.
+
+        .. versionadded:: 16.2.0
+
+    steps : int, default 100
+        The number of steps to take within a support cell.  Lqrger values
+        trade off speed for security in tracing the path.
+
+        .. versionadded:: 16.2.0
+
+    local_newton_interval : int, default 3
+        The frequency to run a local Newton method step.  This is a
+        correction step that reduces accumulated errors in the path-following.
+
+        .. versionadded:: 16.2.0
+
+    local_newton_maxits : int, default 10
+        The maximum number of iterations in a local Newton method step.
+
+        .. versionadded:: 16.2.0
+
+    Raises
+    ------
+    ValueError
+        If the perturbation vector does not have a unique maximizer for
+        each player, or arguments controlling the behavior of the numerical
+        tracing are not valid.
+
+    Returns
+    -------
+    res : NashComputationResult
+        The result represented as a ``NashComputationResult`` object.
+    """
+    if isinstance(perturbation, libgbt.Game):
+        game = perturbation
+        perturbation = game.mixed_strategy_profile(rational=False)
+        for strategy in game.strategies:
+            perturbation[strategy] = 0.0
+        for player in game.players:
+            perturbation[player.strategies[0]] = 1.0
+    elif isinstance(perturbation, libgbt.MixedStrategyProfileDouble):
+        game = perturbation.game
+    else:
+        raise TypeError(
+            f"parameter must be Game or MixedStrategyProfileDouble, "
+            f"not {perturbation.__class__.__name__}"
+        )
+    if end_lambda >= 0.0:
+        raise ValueError(f"end_lambda must be a negative number; got {end_lambda}")
+    if steps <= 0:
+        raise ValueError(f"steps must be a positive integer; got {steps}")
+    if local_newton_interval <= 0:
+        raise ValueError(
+            f"local_newton_interval must be a positive integer; got {local_newton_interval}"
+        )
+    if local_newton_maxits <= 0:
+        raise ValueError(
+            f"local_newton_maxits must be a positive integer; got {local_newton_maxits}"
+        )
     try:
         return NashComputationResult(
             game=game,
             method="gnm",
             rational=False,
             use_strategic=True,
-            parameters={"perturbation": perturbation},
-            equilibria=libgbt._gnm_strategy_solve(perturbation)
+            parameters={"perturbation": perturbation,
+                        "end_lambda": end_lambda,
+                        "steps": steps,
+                        "local_newton_interval": local_newton_interval,
+                        "local_newton_maxits": local_newton_maxits},
+            equilibria=libgbt._gnm_strategy_solve(perturbation, end_lambda,
+                                                  steps,
+                                                  local_newton_interval, local_newton_maxits)
         )
     except RuntimeError as e:
         if "at least one nonzero" in str(e):

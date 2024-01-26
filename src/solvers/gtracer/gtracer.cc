@@ -57,6 +57,35 @@ std::shared_ptr<gnmgame> BuildGame(const Game &p_game, bool p_scaled)
   return A;
 }
 
+cvector ToPerturbation(const MixedStrategyProfile<double> &p_pert)
+{
+  auto strategies = p_pert.GetGame()->GetStrategies();
+  cvector g(strategies.size());
+  std::transform(strategies.cbegin(), strategies.cend(), g.begin(),
+                 [p_pert](const GameStrategy &s) { return p_pert[s]; });
+  for (auto player : p_pert.GetGame()->GetPlayers()) {
+    bool is_tie = false;
+    auto strategies = player->GetStrategies();
+    auto strategy = strategies.cbegin();
+    double maxval = p_pert[*strategy];
+    for (++strategy; strategy != strategies.cend(); ++strategy) {
+      if (p_pert[*strategy] > maxval) {
+        maxval = p_pert[*strategy];
+        is_tie = false;
+      }
+      else if (p_pert[*strategy] == maxval) {
+        is_tie = true;
+      }
+      if (is_tie) {
+        throw std::domain_error("Perturbation vector does not have unique maximizer for player " +
+                                std::to_string(player->GetNumber()));
+      }
+    }
+  }
+  g /= g.norm(); // normalized
+  return g;
+}
+
 MixedStrategyProfile<double> ToProfile(const Game &p_game, const cvector &p_profile)
 {
   MixedStrategyProfile<double> msp = p_game->NewMixedStrategyProfile(0.0);

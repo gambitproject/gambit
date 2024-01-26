@@ -530,6 +530,7 @@ gambit_gnm_SOURCES = \
 	${gtracer_SOURCES} \
 	src/solvers/gnm/gnm.cc \
 	src/solvers/gnm/gnm.h \
+	src/tools/gt/nfggt.cc \
 	src/tools/gt/nfggnm.cc
 
 gambit_ipa_SOURCES = \
@@ -537,6 +538,7 @@ gambit_ipa_SOURCES = \
 	${gtracer_SOURCES} \
 	src/solvers/ipa/ipa.cc \
 	src/solvers/ipa/ipa.h \
+	src/tools/gt/nfggt.cc \
 	src/tools/gt/nfgipa.cc
 
 gambit_lcp_SOURCES = \

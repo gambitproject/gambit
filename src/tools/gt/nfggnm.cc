@@ -30,40 +30,10 @@
 using namespace Gambit;
 using namespace Gambit::Nash;
 
-List<MixedStrategyProfile<double>> ReadStrategyPerturbations(const Game &p_game,
-                                                             std::istream &p_stream)
-{
-  List<MixedStrategyProfile<double>> profiles;
-  while (!p_stream.eof() && !p_stream.bad()) {
-    MixedStrategyProfile<double> p(p_game->NewMixedStrategyProfile(0.0));
-    for (int i = 1; i <= p.MixedProfileLength(); i++) {
-      if (p_stream.eof() || p_stream.bad()) {
-        break;
-      }
-      p_stream >> p[i];
-      if (i < p.MixedProfileLength()) {
-        char comma;
-        p_stream >> comma;
-      }
-    }
-    // Read in the rest of the line and discard
-    std::string foo;
-    std::getline(p_stream, foo);
-    profiles.push_back(p);
-  }
-  return profiles;
-}
-
-List<MixedStrategyProfile<double>> RandomStrategyPerturbations(const Game &p_game, int p_count)
-{
-  List<MixedStrategyProfile<double>> profiles;
-  for (int i = 1; i <= p_count; i++) {
-    MixedStrategyProfile<double> p(p_game->NewMixedStrategyProfile(0.0));
-    p.Randomize();
-    profiles.push_back(p);
-  }
-  return profiles;
-}
+extern List<MixedStrategyProfile<double>> ReadStrategyPerturbations(const Game &p_game,
+                                                                    std::istream &p_stream);
+extern List<MixedStrategyProfile<double>> RandomStrategyPerturbations(const Game &p_game,
+                                                                      int p_count);
 
 void PrintBanner(std::ostream &p_stream)
 {
@@ -84,10 +54,17 @@ void PrintHelp(char *progname)
   std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -n COUNT         number of perturbation vectors to generate\n";
   std::cerr << "  -s FILE          file containing perturbation vectors\n";
+  std::cerr << "  -m LAMBDA        lambda to end tracing (must be negative, default "
+            << std::to_string(GNM_LAMBDA_END_DEFAULT) << ")\n";
+  std::cerr << "  -f FREQ          frequency to run local Newton method (default "
+            << std::to_string(GNM_LOCAL_NEWTON_INTERVAL_DEFAULT) << ")\n";
+  std::cerr << "  -i MAXITS        maximum iterations in local Newton (default "
+            << std::to_string(GNM_LOCAL_NEWTON_MAXITS_DEFAULT) << ")\n";
+  std::cerr << "  -c STEPS         number of steps in each support cell (default "
+            << std::to_string(GNM_STEPS_DEFAULT) << ")\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
   std::cerr << "  -V, --verbose    verbose mode (shows intermediate output)\n";
   std::cerr << "  -v, --version    print version information\n";
-  std::cerr << "                   (default is to only show equilibria)\n";
   exit(1);
 }
 
@@ -96,6 +73,10 @@ int main(int argc, char *argv[])
   opterr = 0;
   bool quiet = false, verbose = false;
   int numDecimals = 6, numVectors = 1;
+  double lambdaEnd = GNM_LAMBDA_END_DEFAULT;
+  int localNewtonInterval = GNM_LOCAL_NEWTON_INTERVAL_DEFAULT;
+  int localNewtonMaxits = GNM_LOCAL_NEWTON_MAXITS_DEFAULT;
+  int steps = GNM_STEPS_DEFAULT;
   std::string startFile;
 
   int long_opt_index = 0;
@@ -104,7 +85,8 @@ int main(int argc, char *argv[])
                                   {"verbose", 0, nullptr, 'V'},
                                   {nullptr, 0, nullptr, 0}};
   int c;
-  while ((c = getopt_long(argc, argv, "d:n:s:qvVhS", long_options, &long_opt_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "d:n:s:m:f:i:c:qvVhS", long_options, &long_opt_index)) !=
+         -1) {
     switch (c) {
     case 'v':
       PrintBanner(std::cerr);
@@ -123,6 +105,18 @@ int main(int argc, char *argv[])
       break;
     case 's':
       startFile = optarg;
+      break;
+    case 'm':
+      lambdaEnd = atof(optarg);
+      break;
+    case 'f':
+      localNewtonInterval = atoi(optarg);
+      break;
+    case 'i':
+      localNewtonMaxits = atoi(optarg);
+      break;
+    case 'c':
+      steps = atoi(optarg);
       break;
     case 'S':
       break;
@@ -146,6 +140,23 @@ int main(int argc, char *argv[])
     PrintBanner(std::cerr);
   }
 
+  if (lambdaEnd >= 0.0) {
+    std::cerr << "Error: Value for -m (end lambda) must be negative\n";
+    return 1;
+  }
+  if (localNewtonInterval <= 0) {
+    std::cerr << "Error: Value for -f (local Newton frequency) must be at least 1\n";
+    return 1;
+  }
+  if (localNewtonMaxits <= 0) {
+    std::cerr << "Error: Value for -i (local Newton iterations) must be at least 1\n";
+    return 1;
+  }
+  if (steps <= 0) {
+    std::cerr << "Error: Value for -c (steps in support cell) must be at least 1\n";
+    return 1;
+  }
+
   std::istream *input_stream = &std::cin;
   std::ifstream file_stream;
   if (optind < argc) {
@@ -154,7 +165,7 @@ int main(int argc, char *argv[])
       std::ostringstream error_message;
       error_message << argv[0] << ": " << argv[optind];
       perror(error_message.str().c_str());
-      exit(1);
+      return 1;
     }
     input_stream = &file_stream;
   }
@@ -163,7 +174,6 @@ int main(int argc, char *argv[])
     Game game = ReadGame(*input_stream);
     std::shared_ptr<StrategyProfileRenderer<double>> renderer(
         new MixedStrategyCSVRenderer<double>(std::cout, numDecimals));
-    NashGNMStrategySolver solver(renderer, verbose);
 
     List<MixedStrategyProfile<double>> perts;
     if (!startFile.empty()) {
@@ -174,12 +184,18 @@ int main(int argc, char *argv[])
       // Generate the desired number of points randomly
       perts = RandomStrategyPerturbations(game, numVectors);
     }
-    for (int i = 1; i <= perts.size(); i++) {
-      solver.Solve(perts[i]);
+    for (auto pert : perts) {
+      GNMStrategySolve(pert, lambdaEnd, steps, localNewtonInterval, localNewtonMaxits,
+                       [renderer, verbose](const MixedStrategyProfile<double> &p_profile,
+                                           const std::string &p_label) {
+                         if (p_label == "NE" || verbose) {
+                           renderer->Render(p_profile, p_label);
+                         }
+                       });
     }
     return 0;
   }
-  catch (std::runtime_error &e) {
+  catch (std::exception &e) {
     std::cerr << "Error: " << e.what() << std::endl;
     return 1;
   }

@@ -12,6 +12,8 @@
 ### Added
 - MixedStrategyProfile and MixedBehaviorProfile objects in pygambit can now be iterated in
   various dict-like ways
+- `gnm_solve`/`gambit-gnm` now exposes several parameters which control the behavior of the
+  path-following procedure
 
 ### Changed
 - Functions to compute Nash equilibria now return a NashComputationResult object instead of a bare

@@ -149,9 +149,11 @@ def _simpdiv_strategy_solve(
     return _convert_mspr(SimpdivStrategySolve(game.game, gridstep, leash))
 
 
-def _ipa_strategy_solve(game: Game) -> typing.List[MixedStrategyProfileDouble]:
+def _ipa_strategy_solve(
+        pert: MixedStrategyProfileDouble
+) -> typing.List[MixedStrategyProfileDouble]:
     try:
-        return _convert_mspd(IPAStrategySolve(game.game))
+        return _convert_mspd(IPAStrategySolve(deref(pert.profile)))
     except RuntimeError as e:
         if "does not have unique maximizer" in str(e):
             raise ValueError(str(e)) from None
@@ -159,9 +161,19 @@ def _ipa_strategy_solve(game: Game) -> typing.List[MixedStrategyProfileDouble]:
 
 
 def _gnm_strategy_solve(
-        pert: MixedStrategyProfileDouble
+        pert: MixedStrategyProfileDouble,
+        end_lambda: float,
+        steps: int,
+        local_newton_interval: int,
+        local_newton_maxits: int,
 ) -> typing.List[MixedStrategyProfileDouble]:
-    return _convert_mspd(GNMStrategySolve(deref(pert.profile)))
+    try:
+        return _convert_mspd(GNMStrategySolve(deref(pert.profile), end_lambda,
+                                              steps, local_newton_interval, local_newton_maxits))
+    except RuntimeError as e:
+        if "does not have unique maximizer" in str(e):
+            raise ValueError(str(e)) from None
+        raise
 
 
 def _logit_strategy_solve(game: Game) -> typing.List[MixedStrategyProfileDouble]:

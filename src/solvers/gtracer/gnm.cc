@@ -28,17 +28,6 @@
 namespace Gambit {
 namespace gametracer {
 
-void PrintProfile(std::ostream &p_stream, const std::string &p_label, const cvector &p_profile)
-{
-  const int numDecimals = 6;
-  p_stream << p_label;
-  for (int i = 0; i < p_profile.getm(); i++) {
-    p_stream.setf(std::ios::fixed);
-    p_stream << ',' << std::setprecision(numDecimals) << p_profile[i];
-  }
-  p_stream << std::endl;
-}
-
 const double BIGFLOAT = 3.0e+28F;
 
 // LNM runs the local Newton method on z to attempt to bring it closer to
@@ -64,7 +53,6 @@ double LNM(const gnmgame &game, cvector &z, const cvector &g, double det, cmatri
       ee = std::max(del.max(), -del.min());
 
       if (ee < fuzz) {
-        e = ee;
         break;
       }
       else if (e < ee) { // we got worse
@@ -95,55 +83,54 @@ double LNM(const gnmgame &game, cvector &z, const cvector &g, double det, cmatri
   }
 }
 
-// gnm(A,g,Eq,steps,fuzz,LNMFreq,LNMMax,LambdaMin,wobble,threshold)
-// ----------------------------------------------------------------
-// This executes the GNM algorithm on game A.
-// Interpretation of parameters:
-// g: perturbation ray.
-// Eq: an array of equilibria will be stored here
-// steps: number of steps to take within a support cell; higher
-//        values of this parameter slow GNM down, but may help it
-//        avoid getting off the path.
-// fuzz: a small floating point cutoff for a variety of things.
-//       can probably be left at 1e-12.
-// LNMFreq: a Local Newton Method subroutine will be run every
-//          LNMFreq steps to decrease accumulated errors.  This
-//          executes fairly quickly, so LNMFreq can be around 3.
-// LNMMax: the maximum allowed iterations within the LNM algorithm.
-// LambdaMin: should always be negative.  Once the trajectory
-//            gets this far out, the algorithm terminates, assuming
-//            that there are no more equilibria on the path.
-// wobble: this is a boolean value indicating whether to use
-//         "wobbles" of the perturbation vector to remove
-//         accumulated errors.  This removes the theoretical guarantee
-//         of convergence, but in practice may help keep GNM on the path.
-// threshold: the equilibrium error threshold for doing a wobble.  If
-//            wobbles are disabled, GNM will terminate if the error
-//            reaches this threshold.
-
-int GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz, int LNMFreq,
-        int LNMMax, double LambdaMin, bool wobble, double threshold, bool verbose,
-        std::string &returnMessage)
+// Find the lone equilibrium of the perturbed game
+void FindUniquePerturbedEquilibrium(const gnmgame &A, const cvector &g, std::vector<int> &s,
+                                    std::vector<int> &B, cvector &G)
 {
-  int i, // utility variables
-      bestAction, k, j, n,
-      n_hat,          // player whose pure strategy next enters or leaves the support
+  for (int n = 0; n < A.getNumPlayers(); n++) {
+    double bestPayoff = g[A.firstAction(n)];
+    int bestAction = A.firstAction(n);
+    bool isTie = false;
+    for (int j = bestAction + 1; j < A.lastAction(n); j++) {
+      if (g[j] > bestPayoff) {
+        bestPayoff = g[j];
+        bestAction = j;
+        isTie = false;
+      }
+      else if (g[j] == bestPayoff) {
+        isTie = true;
+      }
+    }
+    if (isTie) {
+      throw std::domain_error("Perturbation vector does not have unique maximizer for player " +
+                              std::to_string(n + 1));
+    }
+    s[n] = bestAction;
+    B[bestAction] = 1;
+    G[n] = bestPayoff;
+  }
+}
+
+void GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz, int LNMFreq,
+         int LNMMax, double LambdaMin, bool wobble, double threshold,
+         std::function<void(const std::string &, const cvector &)> p_onStep,
+         std::string &returnMessage)
+{
+  int n_hat,          // player whose pure strategy next enters or leaves the support
       s_hat_old = -1, // the last pure strategy to enter or leave the support
       s_hat,          // the next pure strategy to enter or leave the support
       Index = 1,      // index of the equilibrium we're moving towards
-      numEq = 0,      // number of equilibria found so far
       stepsLeft;      // number of linear steps remaining until we hit the boundary
 
   int N = A.getNumPlayers(),
       M = A.getNumActions(); // the two most important cvector sizes, stored locally for brevity
-  double bestPayoff,
-      det,      // determinant of the jacobian
-      newV,     // utility variable
-      lambda,   // current position along the ray
-      dlambda,  // derivative of lambda w.r.t time
-      minBound, // distance to the closest change of support
-      bound,    // utility variable
-      del,      // amount of time required to reach the next support boundary,
+  double det,                // determinant of the jacobian
+      newV,                  // utility variable
+      lambda,                // current position along the ray
+      dlambda,               // derivative of lambda w.r.t time
+      minBound,              // distance to the closest change of support
+      bound,                 // utility variable
+      del,                   // amount of time required to reach the next support boundary,
       // assuming linear cvector field
       delta, // the actual amount of time we will step forward (smaller than del)
       ee,
@@ -151,9 +138,7 @@ int GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz, 
 
   std::vector<int> s(M); // current best responses
   std::vector<int> B(M); // current support
-
-  for (i = 0; i < M; B[i++] = 0) {
-  }
+  std::fill(B.begin(), B.end(), 0);
 
   cmatrix DG(M, M),     // jacobian of the payoff function
       R(M, M),          // jacobian of the retraction operator
@@ -177,30 +162,13 @@ int GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz, 
   // INITIALIZATION
   Eq.clear();
 
-  // Find the lone equilibrium of the perturbed game
-  for (n = 0; n < N; n++) {
-    bestPayoff = g[A.firstAction(n)];
-    bestAction = A.firstAction(n);
-    for (j = bestAction + 1; j < A.lastAction(n); j++) {
-      if (g[j] > bestPayoff) {
-        bestPayoff = g[j];
-        bestAction = j;
-      }
-    }
-    s[n] = bestAction;
-    B[bestAction] = 1;
-    G[n] = bestPayoff;
-  }
+  FindUniquePerturbedEquilibrium(A, g, s, B, G);
 
   // initialize sigma to be the pure strategy profile
   // that is the lone equilibrium of the perturbed game
-  for (i = 0; i < M; i++) {
-    sigma[i] = (double)B[i];
-  }
+  std::copy(B.cbegin(), B.cend(), sigma.begin());
 
-  if (verbose) {
-    PrintProfile(std::cout, "start", sigma);
-  }
+  p_onStep("start", sigma);
 
   A.payoffMatrix(DG, sigma, fuzz);
   DG.multiply(sigma, v);
@@ -212,9 +180,9 @@ int GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz, 
 
   V = 0;
 
-  for (n = 0; n < N; n++) {
+  for (int n = 0; n < N; n++) {
     yn1[n] = v[s[n]];
-    for (i = A.firstAction(n); i < A.lastAction(n); i++) {
+    for (int i = A.firstAction(n); i < A.lastAction(n); i++) {
       if (!B[i]) {
         if (G[n] - g[i] < threshold) {
           g[i] -= threshold;
@@ -246,7 +214,7 @@ int GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz, 
   // this outer while loop executes once for each support boundary
   // that the path crosses.
   while (true) {
-    k = 0; // iteration counter; when k reaches LNMFreq, run LNM
+    int k = 0; // iteration counter; when k reaches LNMFreq, run LNM
     // within a single boundary, support unchanged
 
     // take the specified number of steps within these support boundaries.
@@ -287,8 +255,8 @@ int GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz, 
       // indicates that the action's probability is either
       // becoming 0 or becoming positive.
       minBound = BIGFLOAT;
-      for (n = 0; n < N; n++) {
-        for (i = A.firstAction(n); i < A.lastAction(n); i++) {
+      for (int n = 0; n < N; n++) {
+        for (int i = A.firstAction(n); i < A.lastAction(n); i++) {
           // do not cross the same boundary we just crossed
           if (dz[i] != dv[s[n]] && s_hat_old != i) {
             bound = (z[i] - v[s[n]]) / (dv[s[n]] - dz[i]);
@@ -312,7 +280,7 @@ int GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz, 
       // handled differently.
       if (minBound == BIGFLOAT && Index * (lambda + dlambda * delta) > 0) {
         returnMessage = "path crosses no more support boundaries and no next equilibrium";
-        return numEq;
+        return;
       }
 
       // each step covers 1.0/steps of the distance to the boundary
@@ -351,7 +319,7 @@ int GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz, 
           for (int idx = 0; idx < M; idx++) {
             if (!std::isfinite(sigma[idx])) {
               returnMessage = "sigma is not finite";
-              return numEq;
+              return;
             }
           }
           if (ee < fuzz) { // only save high quality equilibria;
@@ -367,7 +335,6 @@ int GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz, 
       }
       if (del == BIGFLOAT) {
         returnMessage = "no next support boundary after this equilibrium";
-        return numEq;
       }
 
       backup = z;
@@ -383,7 +350,6 @@ int GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz, 
       // direction, we're probably not going back
       if (lambda < LambdaMin && Index == -1) {
         returnMessage = "too far out in the reverse direction";
-        return numEq;
       }
       A.retract(sigma, z);
       A.payoffMatrix(DG, sigma, fuzz);
@@ -417,7 +383,6 @@ int GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz, 
         }
         else {
           returnMessage = "too much error; error is " + std::to_string(ee);
-          return numEq;
         }
       }
 
@@ -433,7 +398,7 @@ int GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz, 
     // if a player's current best response is leaving the
     // support, we must find a new one for that player
     if (s[n_hat] == s_hat) {
-      for (i = A.firstAction(n_hat); i < A.lastAction(n_hat); i++) {
+      for (int i = A.firstAction(n_hat); i < A.lastAction(n_hat); i++) {
         if (B[i] && i != s_hat) {
           s[n_hat] = i;
           break;
@@ -449,9 +414,7 @@ int GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz, 
     sigma.unfuzz(fuzz);
     A.normalizeStrategy(sigma);
 
-    if (verbose) {
-      PrintProfile(std::cout, Gambit::lexical_cast<std::string>(lambda), sigma);
-    }
+    p_onStep(Gambit::lexical_cast<std::string>(lambda), sigma);
 
     z -= ym1;
     z += sigma;

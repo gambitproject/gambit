@@ -30,7 +30,7 @@ using namespace Gambit::gametracer;
 namespace Gambit {
 namespace Nash {
 
-List<MixedStrategyProfile<double>> NashIPAStrategySolver::Solve(const Game &p_game) const
+List<MixedStrategyProfile<double>> IPAStrategySolve(const Game &p_game, CallbackType p_callback)
 {
   MixedStrategyProfile<double> pert = p_game->NewMixedStrategyProfile(0.0);
   for (auto strategy : p_game->GetStrategies()) {
@@ -39,11 +39,11 @@ List<MixedStrategyProfile<double>> NashIPAStrategySolver::Solve(const Game &p_ga
   for (auto player : p_game->GetPlayers()) {
     pert[player->GetStrategies().front()] = 1.0;
   }
-  return Solve(pert);
+  return IPAStrategySolve(pert, p_callback);
 }
 
-List<MixedStrategyProfile<double>>
-NashIPAStrategySolver::Solve(const MixedStrategyProfile<double> &p_pert) const
+List<MixedStrategyProfile<double>> IPAStrategySolve(const MixedStrategyProfile<double> &p_pert,
+                                                    CallbackType p_callback)
 {
   if (!p_pert.GetGame()->IsPerfectRecall()) {
     throw UndefinedException(
@@ -51,12 +51,7 @@ NashIPAStrategySolver::Solve(const MixedStrategyProfile<double> &p_pert) const
   }
 
   std::shared_ptr<gnmgame> A = BuildGame(p_pert.GetGame(), false);
-  auto strategies = p_pert.GetGame()->GetStrategies();
-  cvector g(strategies.size());
-  std::transform(strategies.cbegin(), strategies.cend(), g.begin(),
-                 [p_pert](const GameStrategy &s) { return p_pert[s]; });
-  g /= g.norm(); // normalized
-
+  cvector g(ToPerturbation(p_pert));
   cvector ans(A->getNumActions());
   cvector zh(A->getNumActions(), 1.0);
   while (true) {
@@ -69,9 +64,9 @@ NashIPAStrategySolver::Solve(const MixedStrategyProfile<double> &p_pert) const
 
   List<MixedStrategyProfile<double>> solutions;
   solutions.push_back(ToProfile(p_pert.GetGame(), ans));
-  m_onEquilibrium->Render(solutions.back());
+  p_callback(solutions.back(), "NE");
   return solutions;
 }
 
 } // namespace Nash
-} // end namespace Gambit
+} // namespace Gambit

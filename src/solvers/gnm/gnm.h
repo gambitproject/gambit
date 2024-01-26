@@ -29,39 +29,23 @@
 namespace Gambit {
 namespace Nash {
 
-class NashGNMStrategySolver : public StrategySolver<double> {
-public:
-  explicit NashGNMStrategySolver(
-      std::shared_ptr<StrategyProfileRenderer<double>> p_onEquilibrium = nullptr,
-      bool p_verbose = false)
-    : StrategySolver<double>(p_onEquilibrium), m_verbose(p_verbose)
-  {
-  }
-  ~NashGNMStrategySolver() override = default;
+const double GNM_LAMBDA_END_DEFAULT = -10.0;
+const int GNM_LOCAL_NEWTON_INTERVAL_DEFAULT = 3;
+const int GNM_LOCAL_NEWTON_MAXITS_DEFAULT = 10;
+const int GNM_STEPS_DEFAULT = 100;
 
-  List<MixedStrategyProfile<double>> Solve(const Game &p_game) const override;
-  List<MixedStrategyProfile<double>> Solve(const MixedStrategyProfile<double> &p_pert) const;
-
-private:
-  bool m_verbose;
-
-  List<MixedStrategyProfile<double>> Solve(const Game &p_game,
-                                           const std::shared_ptr<gametracer::gnmgame> &A,
-                                           const gametracer::cvector &p_pert) const;
-};
-
-inline List<MixedStrategyProfile<double>> GNMStrategySolve(const Game &p_game)
-{
-  return NashGNMStrategySolver().Solve(p_game);
-}
+List<MixedStrategyProfile<double>> GNMStrategySolve(const Game &p_game, double p_lambdaEnd,
+                                                    int p_steps, int p_localNewtonInterval,
+                                                    int p_localNewtonMaxits,
+                                                    CallbackType p_callback = NullCallback);
 
 /// @brief Compute the mixed strategy equilibria accessible via the initial ray determined
 ///        by \p p_profile using the Global Newton method
-inline List<MixedStrategyProfile<double>>
-GNMStrategySolve(const MixedStrategyProfile<double> &p_profile)
-{
-  return NashGNMStrategySolver().Solve(p_profile);
-}
+List<MixedStrategyProfile<double>> GNMStrategySolve(const MixedStrategyProfile<double> &p_profile,
+                                                    double p_lambdaEnd, int p_steps,
+                                                    int p_localNewtonInterval,
+                                                    int p_localNewtonMaxits,
+                                                    CallbackType p_callback = NullCallback);
 
 } // namespace Nash
 } // end namespace Gambit

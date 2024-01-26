@@ -444,11 +444,14 @@ cdef extern from "solvers/simpdiv/simpdiv.h":
     ) except +RuntimeError
 
 cdef extern from "solvers/ipa/ipa.h":
-    c_List[c_MixedStrategyProfileDouble] IPAStrategySolve(c_Game) except +RuntimeError
+    c_List[c_MixedStrategyProfileDouble] IPAStrategySolve(
+            c_MixedStrategyProfileDouble
+    ) except +RuntimeError
 
 cdef extern from "solvers/gnm/gnm.h":
     c_List[c_MixedStrategyProfileDouble] GNMStrategySolve(
-            c_MixedStrategyProfileDouble
+            c_MixedStrategyProfileDouble, double p_endLambda, int p_steps,
+            int p_localNewtonInterval, int p_localNewtonMaxits
     ) except +RuntimeError
 
 cdef extern from "solvers/logit/nfglogit.h":

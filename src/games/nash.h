@@ -23,11 +23,18 @@
 #ifndef LIBGAMBIT_NASH_H
 #define LIBGAMBIT_NASH_H
 
+#include <functional>
 #include "gambit.h"
 
 namespace Gambit {
 
 namespace Nash {
+
+using CallbackType = std::function<void(const MixedStrategyProfile<double> &, const std::string &)>;
+
+/// @brief A fallback callback function that does nothing
+inline void NullCallback(const MixedStrategyProfile<double> &, const std::string &)
+{ }
 
 //========================================================================
 //                       Profile renderer classes

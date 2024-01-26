@@ -5,9 +5,20 @@
 
 :program:`gambit-gnm` reads a game on standard input and computes Nash
 equilibria using a global Newton method approach developed by Govindan
-and Wilson [GovWil03]_. This program is a wrapper around the
+and Wilson [GovWil03]_. This program is based on the
 `Gametracer 0.2 <http://dags.stanford.edu/Games/gametracer.html>`_
 implementation by Ben Blum and Christian Shelton.
+
+The algorithm takes as a parameter a mixed strategy profile.  This profile is
+interpreted as defining a ray in the space of games.  The profile must have
+the property that, for each player, the most frequently played strategy must
+be unique.
+
+The algorithm finds a subset of equilibria starting from any given profile.
+Multiple starting profiles may be generated via the `-n` option or specified
+via the `-s` option; different starting profiles may result in different
+subsets of equilibria being found.
+
 
 .. program:: gambit-gnm
 
@@ -35,6 +46,36 @@ implementation by Ben Blum and Christian Shelton.
    one mixed strategy profile per line, in the same format used for
    output of equilibria (excluding the initial NE tag).
 
+.. cmdoption:: -m LAMBDA
+
+    .. versionadded:: 16.2.0
+
+   Specifies the value of lambda at which to assume no more equilibria
+   are accessible via the specified ray, and terminate tracing.
+   Must be a negative number; default is -10.
+
+.. cmdoption:: -f FREQ
+
+    .. versionadded:: 16.2.0
+
+   Specifies the frequency to run a local Newton method step.  This is
+   a correction step that reduces accumulated errors in the path-following.
+   Default is 3.
+
+.. cmdoption:: -i MAXITS
+
+    .. versionadded:: 16.2.0
+
+   Specifies the maximum number of iterations in a local Newton method step.
+   Default is 10.
+
+.. cmdoption:: -c STEPS
+
+    .. versionadded:: 16.2.0
+
+   Specifies the number of steps to take within a support cell.  Larger values
+   trade off speed for security in tracing the path.  Default is 100.
+
 .. cmdoption:: -v
 
    Show intermediate output of the algorithm.  If this option is
@@ -52,10 +93,6 @@ the reduced strategic form of the example in Figure 2 of Selten
 
     NE,1,0,2.99905e-12,0.5,0.5
 
-
-.. note::
-
-   This is an experimental program and has not been extensively tested.
 
 .. seealso::
 
