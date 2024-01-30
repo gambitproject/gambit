@@ -37,42 +37,31 @@ protected:
   BehaviorSupportProfile m_support;
   unsigned int m_gameversion;
 
-  mutable bool m_cacheValid;
-
   // structures for storing cached data: nodes
-  mutable Vector<T> m_realizProbs, m_beliefs, m_nvals, m_bvals;
-  mutable Matrix<T> m_nodeValues;
+  mutable std::map<GameNode,T> map_realizProbs, map_beliefs;
+  mutable std::map<GameNode,std::map<GamePlayer, T>> map_nodeValues;
 
   // structures for storing cached data: information sets
-  mutable PVector<T> m_infosetValues;
+  mutable std::map<GameInfoset,T> map_infosetValues;
 
   // structures for storing cached data: actions
-  mutable DVector<T> m_actionValues;   // aka conditional payoffs
-  mutable DVector<T> m_regret;
-
-  const T &ActionValue(const GameAction &act) const
-    { return m_actionValues(act->GetInfoset()->GetPlayer()->GetNumber(),
-			    act->GetInfoset()->GetNumber(),
-			    act->GetNumber()); }
-  T &ActionValue(const GameAction &act)
-    { return m_actionValues(act->GetInfoset()->GetPlayer()->GetNumber(),
-			    act->GetInfoset()->GetNumber(),
-			    act->GetNumber()); }
+  mutable std::map<GameAction,T> map_actionValues; // aka conditional payoffs
+  mutable std::map<GameAction,T> map_regret;
 
   /// @name Auxiliary functions for computation of interesting values
   //@{
-  void GetPayoff(GameTreeNodeRep *, const T &, int, T &) const;
-
-  void ComputeSolutionDataPass2(const GameNode &node) const;
-  void ComputeSolutionDataPass1(const GameNode &node) const;
+  void GetPayoff(const GameNode &, const T &, const GamePlayer &, T &) const;
+  void ComputePass1_realizProbs(const GameNode &node) const;
+  void ComputePass2_beliefs_nodeValues_actionValues(const GameNode &node) const;
+  void ComputePass3_infosetValues_regret() const;
   void ComputeSolutionData() const;
   //@}
 
   /// @name Converting mixed strategies to behavior
   //@{
-  void BehaviorStrat(int, GameTreeNodeRep *);
-  void RealizationProbs(const MixedStrategyProfile<T> &,
-			int pl, const Array<int> &, GameTreeNodeRep *);
+  void BehaviorStrat(GamePlayer &, GameNode &, std::map<GameNode,T> &, std::map<GameNode,T> &);
+  void RealizationProbs(const MixedStrategyProfile<T> &, GamePlayer &, const Array<int> &,
+  		  				GameTreeNodeRep *, std::map<GameNode,T> &, std::map<GameNode,T> &);
   //@}
 
   /// Check underlying game has not changed; raise exception if it has
@@ -144,7 +133,19 @@ public:
   /// @name Initialization, validation
   //@{
   /// Force recomputation of stored quantities
-  void InvalidateCache() const { m_cacheValid = false; }
+  /// The validity of all caches is determined by the existence of the root node in the
+  /// primary cache (first to be computed) map_realizProbs
+  /// We also clear
+  /// map_nodeValues, map_actionValues
+  /// as otherwise we would need to reset them to 0 while populating them
+  void InvalidateCache() const {
+    map_realizProbs.clear();
+    map_nodeValues.clear();
+    map_actionValues.clear();
+  }
+  /// Reset certain cached values
+
+
   /// Set the profile to the centroid
   void SetCentroid();
   /// Set the behavior at any undefined information set to the centroid
@@ -178,7 +179,7 @@ public:
   T GetPayoff(const GamePlayer &p_player) const {
     return GetPayoff(p_player->GetNumber());
   }
-  T GetLiapValue(bool p_definedOnly = false) const;
+  T GetLiapValue() const;
 
   const T &GetRealizProb(const GameNode &node) const;
   T GetInfosetProb(const GameInfoset &iset) const;

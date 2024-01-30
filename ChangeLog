@@ -29,6 +29,7 @@
 - Improved __repr__ methods in pygambit for game-related classes
 - Further extension of test suite for mixed behavior profiles to cover new indexing and profile
   order consistency for payoff-related calculations
+- Overhaul of caching in MixedBehaviorProfile to use maps (std::map)
 
 ## [16.1.1] - 2024-01-10
 

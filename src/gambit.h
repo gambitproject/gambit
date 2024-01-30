@@ -28,6 +28,7 @@
 #include <sstream>
 #include <iomanip>
 #include <cmath>
+#include <map>
 
 namespace Gambit {
 
@@ -52,6 +53,12 @@ inline double abs(double x) { return std::fabs(x); }
 
 inline double sqr(double x) { return x * x; }
 
+template <class Key, class T>
+bool contains(const std::map<Key, T>& map, const Key& key)
+// TODO: remove when we move to C++20 which already includes a "contains" method
+{
+  return map.find(key) != map.end();
+}
 //========================================================================
 //                        Exception classes
 //========================================================================
