@@ -389,7 +389,7 @@ void EnumPolySolveExtensive(const Game &p_game)
 
     for (int j = 1; j <= newsolns.Length(); j++) {
       MixedBehaviorProfile<double> fullProfile = ToFullSupport(newsolns[j]);
-      if (fullProfile.GetLiapValue(true) < 1.0e-6) {
+      if (fullProfile.GetLiapValue() < 1.0e-6) {
         PrintProfile(std::cout, "NE", fullProfile);
       }
     }
