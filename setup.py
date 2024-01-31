@@ -41,7 +41,9 @@ cppgambit = (
          ),
          "include_dirs": ["src"],
          "cflags": (
-             ["-std=c++11"] if platform.system() == "Darwin" else []
+             ["-std=c++17"] if platform.system() == "Darwin"
+             else ["/std:c++17"] if platform.system() == "Windows"
+             else []
          )
     }
 )
@@ -53,7 +55,9 @@ libgambit = setuptools.Extension(
     language="c++",
     include_dirs=["src", "src/pygambit"],
     extra_compile_args=(
-        ["-std=c++11"] if platform.system() == "Darwin" else []
+        ["-std=c++17"] if platform.system() == "Darwin"
+        else ["/std:c++17"] if platform.system() == "Windows"
+        else []
     )
 )
 

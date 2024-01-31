@@ -33,7 +33,7 @@ namespace gametracer {
 
 gnmgame::gnmgame(const std::vector<int> &p_actions)
   : strategyOffset(p_actions.size() + 1), numPlayers(p_actions.size()),
-    numStrategies(std::accumulate(begin(p_actions), end(p_actions), 1, std::multiplies<int>())),
+    numStrategies(std::accumulate(begin(p_actions), end(p_actions), 1, std::multiplies<>())),
     numActions(std::accumulate(begin(p_actions), end(p_actions), 0)), actions(p_actions),
     maxActions(*std::max_element(begin(p_actions), end(p_actions)))
 {

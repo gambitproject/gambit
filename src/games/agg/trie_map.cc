@@ -24,11 +24,9 @@
 #include "agg.h"
 #include "trie_map.imp"
 
-namespace Gambit {
-namespace agg {
+namespace Gambit::agg {
 
 template class trie_map<AggNumber>;
 template std::ostream &operator<<(std::ostream &s, const trie_map<AggNumber> &t);
 
-} // namespace agg
-} // namespace Gambit
+} // namespace Gambit::agg

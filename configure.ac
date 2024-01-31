@@ -66,19 +66,8 @@ AM_CONDITIONAL(IS_WIN32, [test x$mingw_cv_win32_host = xyes])
 
 AC_CHECK_FUNCS(srand48 drand48)
 
-dnl Check for Apple LLVM; if so specify C++11, please!
-AC_MSG_CHECKING(whether we need -std=c++11)
-LLVM_CXXFLAGS=;
-if `$CXX -v 2>&1 | grep 'Apple LLVM version' >/dev/null 2>&1` ; then
-  LLVM_CXXFLAGS="-std=c++11"
-  AC_MSG_RESULT(using -std=c++11)
-elif `$CXX -v 2>&1 | grep 'Apple clang version' >/dev/null 2>&1` ; then
-  LLVM_CXXFLAGS="-std=c++11"
-  AC_MSG_RESULT(using -std=c++11)
-else
-  AC_MSG_RESULT(none required)
-fi
-AC_SUBST(LLVM_CXXFLAGS, $LLVM_CXXFLAGS)
+dnl Check for C++17 support
+AX_CXX_COMPILE_STDCXX(17)
 
 if test x$with_gui = xtrue; then
   dnl------------------------

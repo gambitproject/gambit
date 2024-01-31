@@ -8,9 +8,7 @@
 
 using namespace std;
 
-namespace Gambit {
-
-namespace agg {
+namespace Gambit::agg {
 
 BAGG::BAGG(int N, int S, vector<int> &numTypes, vector<ProbDist> &TDist,
            vector<vector<vector<int>>> &typeActionSets, vector<vector<vector<int>>> &ta2a,
@@ -347,6 +345,4 @@ ostream &operator<<(ostream &s, const BAGG &g)
   return s;
 }
 
-} // namespace agg
-
-} // end namespace Gambit
+} // namespace Gambit::agg

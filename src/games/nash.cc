@@ -22,9 +22,7 @@
 
 #include "nash.h"
 
-namespace Gambit {
-
-namespace Nash {
+namespace Gambit::Nash {
 
 template <class T> void
 MixedStrategyCSVRenderer<T>::Render(const MixedStrategyProfile<T> &p_profile,
@@ -419,6 +417,4 @@ template class BehavViaStrategySolver<Rational>;
 template class SubgameBehavSolver<double>;
 template class SubgameBehavSolver<Rational>;
 
-} // end namespace Gambit::Nash
-
-} // end namespace Gambit
+} // namespace Gambit::Nash

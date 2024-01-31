@@ -29,9 +29,7 @@
 
 using namespace std;
 
-namespace Gambit {
-
-namespace agg {
+namespace Gambit::agg {
 
 inline int select2nd(const pair<int, int> &x) { return x.second; }
 
@@ -901,6 +899,4 @@ AggNumber AGG::getMinPayoff() const
   return result;
 }
 
-} // namespace agg
-
-} // end namespace Gambit
+} // namespace Gambit::agg

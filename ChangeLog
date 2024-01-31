@@ -16,6 +16,7 @@
   path-following procedure
 
 ### Changed
+- Gambit now requires a compiler that supports C++17.
 - Functions to compute Nash equilibria now return a NashComputationResult object instead of a bare
   list of profiles (#190)
 - `liap_solve`/`gambit-liap` has been reimplemented to scale payoffs uniformly across games,
