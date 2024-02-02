@@ -1,4 +1,4 @@
-NFG 1 R "2-player 5x5 coordination game"
+NFG 1 R "2-player 4x4 coordination game (payoff version)"
 { "Player 1" "Player 2" } { 4 4 }
 
 1 1 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 1 1

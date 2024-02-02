@@ -1,0 +1,13 @@
+NFG 1 R "2-player 4x4 coordination game (outcome version)"
+{ "Player 1" "Player 2" }
+
+{
+{ "1-1" "1-2" "1-3" "1-4" }
+{ "2-1" "2-2" "2-3" "2-4" }
+}
+
+{
+{ "Coord" 1, 1 }
+{ "Miscoord" 0, 0 }
+}
+1 2 2 2 2 1 2 2 2 2 1 2 2 2 2 1

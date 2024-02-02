@@ -47,8 +47,6 @@ class Strategy:
 
     @label.setter
     def label(self, value: str) -> None:
-        if value in [i.label for i in self.player.strategies]:
-            warnings.warn("This player has another strategy with an identical label")
         self.strategy.deref().SetLabel(value.encode("ascii"))
 
     @property
