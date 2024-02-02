@@ -1,4 +1,4 @@
-EFG 2 R "Untitled Extensive Game" { "Player 1" "Player 2" "Player 3" "Player 4" "Player 5" }
+EFG 2 R "El Farol Bar Game" { "Player 1" "Player 2" "Player 3" "Player 4" "Player 5" }
 ""
 
 p "" 1 1 "" { "GO" "STAY" } 0
