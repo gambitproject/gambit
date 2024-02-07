@@ -30,8 +30,6 @@
 #include "gpoly.h"
 #include "gpolylst.h"
 #include "gpartltr.h"
-#include "pelican/pelqhull.h"
-#include "pelclass.h"
 
 /*
     The (optimistically named) class described in this file is a method
@@ -85,12 +83,6 @@ private:
   // Supporting routines for the constructors
 
   Gambit::RectArray<bool> Eq_i_Uses_j() const;
-
-  // Get Roots Using Pelican
-
-  bool AllRealRootsFromPelican(const gPolyList<double> &,
-                               Gambit::List<Gambit::Vector<double>> &) const;
-  bool PelicanRoots(const gRectangle<T> &, Gambit::List<Gambit::Vector<double>> &) const;
 
   // Check whether roots are impossible
 

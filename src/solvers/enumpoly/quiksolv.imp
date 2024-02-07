@@ -35,8 +35,8 @@ using namespace Gambit;
 template <class T>
 QuikSolv<T>::QuikSolv(const gPolyList<T> &given)
   : System(given), gDoubleSystem(given.AmbientSpace(), given.TermOrder(), given.NormalizedList()),
-    NoEquations(min(System.Dmnsn(), System.Length())),
-    NoInequalities(max(System.Length() - System.Dmnsn(), 0)), TreesOfPartials(gDoubleSystem),
+    NoEquations(std::min(System.Dmnsn(), System.Length())),
+    NoInequalities(std::max(System.Length() - System.Dmnsn(), 0)), TreesOfPartials(gDoubleSystem),
     HasBeenSolved(false), Roots(), isMultiaffine(System.IsMultiaffine()),
     Equation_i_uses_var_j(Eq_i_Uses_j())
 {
@@ -83,66 +83,6 @@ template <class T> Gambit::RectArray<bool> QuikSolv<T>::Eq_i_Uses_j() const
   return answer;
 }
 
-//---------------------------
-// Find Roots Using Pelican
-//---------------------------
-
-template <class T>
-bool QuikSolv<T>::AllRealRootsFromPelican(const gPolyList<double> &sys,
-                                          Gambit::List<Gambit::Vector<double>> &ans) const
-{
-  try {
-    PelView pel(sys);
-
-    if (!pel.FoundAllRoots()) {
-      return false;
-    }
-    ans = pel.RealRoots();
-  }
-  catch (...) {
-    return false;
-  }
-  /*
-  catch (ErrorInPelican) {
-    return false;
-  }
-  catch (ErrorInQhull) {
-    return false;
-  }
-  */
-
-  return true;
-}
-
-template <class T>
-bool QuikSolv<T>::PelicanRoots(const gRectangle<T> &r,
-                               Gambit::List<Gambit::Vector<double>> &answer) const
-{
-  Gambit::List<Gambit::Vector<double>> firstcut;
-  bool pelworked = AllRealRootsFromPelican(gDoubleSystem.InteriorSegment(1, Dmnsn()), firstcut);
-  if (!pelworked) {
-    return false;
-  }
-
-  for (int i = 1; i <= firstcut.Length(); i++) {
-    firstcut[i] = NewtonPolishOnce(firstcut[i]);
-    firstcut[i] = NewtonPolishOnce(firstcut[i]);
-    bool isokay(true);
-    if (!TogDouble(r).Contains(firstcut[i])) {
-      isokay = false;
-    }
-    for (int j = Dmnsn() + 1; isokay && j <= System.Length(); j++) {
-      if (gDoubleSystem[j].Evaluate(firstcut[i]) < (double)0) {
-        isokay = false;
-      }
-    }
-    if (isokay) {
-      answer.push_back(firstcut[i]);
-    }
-  }
-
-  return true;
-}
 
 //---------------------------
 // Is a root impossible?
@@ -560,16 +500,6 @@ bool QuikSolv<T>::FindCertainNumberOfRoots(const gRectangle<T> &r, const int &ma
     HasBeenSolved = true;
     return true;
   }
-
-  /* - Commmented out 7/11/00 because g3.nfg does not work
-  Gambit::List<Gambit::Vector<double> > answer;
-  bool done = PelicanRoots(r, answer);
-  if (done) {
-    Roots = answer;
-    HasBeenSolved = true;
-    return true;
-  }
-  */
 
   Gambit::Array<int> precedence(System.Length());
   // Orders search for nonvanishing poly

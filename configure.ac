@@ -37,16 +37,6 @@ AC_ARG_ENABLE(gui,
  esac], [with_gui=true])
 AM_CONDITIONAL(WITH_GUI, test x$with_gui = xtrue)
 
-dnl Disable building enumpoly by default -- considered experimental
-AC_ARG_ENABLE(enumpoly,
-[  --enable-enumpoly      build gambit-enumpoly (experimental!) ],
-[ case "${enableval}" in
-  yes) with_enumpoly=true ;;
-  no)  with_enumpoly=false ;;
-  *)  AC_MSG_ERROR(bad value ${enableval} for --enable-enumpoly) ;;
- esac], [with_enumpoly=false])
-AM_CONDITIONAL(WITH_ENUMPOLY, test x$with_enumpoly = xtrue)
-
 AC_DEFUN([MINGW_AC_WIN32_NATIVE_HOST],
 [AC_CACHE_CHECK([whether we are building for a Win32 host],
                 [mingw_cv_win32_host],
@@ -152,7 +142,6 @@ fi
 AC_SUBST(WX_LIBS)
 AC_SUBST(WX_LIBS_STATIC)
 AC_SUBST(WX_CXXFLAGS)
-AC_SUBST(ENUMPOLY_PROGS)
 
 
 REZFLAGS=`echo $CXXFLAGS $WX_CXXFLAGS | sed 's/-mthreads//g' | sed 's/-g//g' | sed 's/-O. / /g' | sed 's/-I/--include-dir /g'`

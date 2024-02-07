@@ -377,13 +377,8 @@ endif
 
 bin_PROGRAMS = \
 	gambit-convert \
-	gambit-enummixed
-
-if WITH_ENUMPOLY
-bin_PROGRAMS += gambit-enumpoly
-endif
-
-bin_PROGRAMS += \
+	gambit-enummixed \
+	gambit-enumpoly \
 	gambit-enumpure \
 	gambit-gnm \
 	gambit-ipa \
@@ -419,43 +414,8 @@ gambit_enummixed_SOURCES = \
 	src/solvers/enummixed/enummixed.h \
 	src/tools/enummixed/enummixed.cc
 
-
-# For enumpoly, sources starting in 'pel' are from Pelican;
-# sources from gpartltr to quiksolv were formerly in convenience lib libpoly.
 gambit_enumpoly_SOURCES = \
 	${core_SOURCES} ${game_SOURCES} \
-	src/solvers/enumpoly/pelican/pelclhpk.cc \
-	src/solvers/enumpoly/pelican/pelclhpk.h \
-	src/solvers/enumpoly/pelican/pelclqhl.cc \
-	src/solvers/enumpoly/pelican/pelclqhl.h \
-	src/solvers/enumpoly/pelican/pelclyal.cc \
-	src/solvers/enumpoly/pelican/pelclyal.h \
-	src/solvers/enumpoly/pelican/pelconv.cc \
-	src/solvers/enumpoly/pelican/pelconv.h \
-	src/solvers/enumpoly/pelican/peleval.cc \
-	src/solvers/enumpoly/pelican/peleval.h \
-	src/solvers/enumpoly/pelican/pelgennd.cc \
-	src/solvers/enumpoly/pelican/pelgennd.h \
-	src/solvers/enumpoly/pelican/pelgmatr.cc \
-	src/solvers/enumpoly/pelican/pelgmatr.h \
-	src/solvers/enumpoly/pelican/pelgntyp.h \
-	src/solvers/enumpoly/pelican/pelhomot.cc \
-	src/solvers/enumpoly/pelican/pelhomot.h \
-	src/solvers/enumpoly/pelican/pelpred.cc \
-	src/solvers/enumpoly/pelican/pelpred.h \
-	src/solvers/enumpoly/pelican/pelprgen.cc \
-	src/solvers/enumpoly/pelican/pelprgen.h \
-	src/solvers/enumpoly/pelican/pelproc.cc \
-	src/solvers/enumpoly/pelican/pelproc.h \
-	src/solvers/enumpoly/pelican/pelpscon.h \
-	src/solvers/enumpoly/pelican/pelpsys.cc \
-	src/solvers/enumpoly/pelican/pelpsys.h \
-	src/solvers/enumpoly/pelican/pelqhull.cc \
-	src/solvers/enumpoly/pelican/pelqhull.h \
-	src/solvers/enumpoly/pelican/pelsymbl.cc \
-	src/solvers/enumpoly/pelican/pelsymbl.h \
-	src/solvers/enumpoly/pelican/pelutils.cc \
-	src/solvers/enumpoly/pelican/pelutils.h \
 	src/solvers/enumpoly/gpartltr.cc \
 	src/solvers/enumpoly/gpartltr.h \
 	src/solvers/enumpoly/gpartltr.imp \
@@ -478,8 +438,6 @@ gambit_enumpoly_SOURCES = \
 	src/solvers/enumpoly/monomial.cc \
 	src/solvers/enumpoly/monomial.h \
 	src/solvers/enumpoly/monomial.imp \
-	src/solvers/enumpoly/pelclass.cc \
-	src/solvers/enumpoly/pelclass.h \
 	src/solvers/enumpoly/poly.cc \
 	src/solvers/enumpoly/poly.h \
 	src/solvers/enumpoly/poly.imp \

@@ -14,12 +14,6 @@ Other sources of code in this distribution:
 Gambit incorporates portions of other software packages in this distribution.
 These are acknowledged individually below.
 
-Pelican:
---------
-The code in sources/pelican is the Pelican system,
-copyright (C) 1995 by Birk Huber, modified only to work within the
-Gambit build system.
-
 Integer/Rational classes:
 -------------------------
 The files integer.(cc,h), rational.(cc,h), and gnulib.(cc,h) in
