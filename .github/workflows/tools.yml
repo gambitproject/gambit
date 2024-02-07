@@ -73,7 +73,7 @@ jobs:
       - run: aclocal
       - run: automake --add-missing
       - run: autoconf
-      - run: ./configure --disable-enumpoly --with-wx-config=wx-config-3.2
+      - run: ./configure --with-wx-config=wx-config-3.2
       - run: make -j 4
       # We execute the installer build explicitly to put in the explicit paths to
       # the WiX executables, rather than relying on the Makefile target

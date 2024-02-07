@@ -8,6 +8,8 @@
   one non-zero component (#194)
 - `ipa_solve`/`gambit-ipa` ensures the use of a generic perturbation vector; this resolves a
   problem where the method could return non-Nash output (#406)
+- `gambit-enumpoly` could get stuck in an infinite loop, and/or fail to report some equilibria,
+  due to floating-point rounding/tolerance issues; this has been fixed on known cases (#198)
 
 ### Added
 - MixedStrategyProfile and MixedBehaviorProfile objects in pygambit can now be iterated in

@@ -58,6 +58,14 @@ while remaining polynomials are interpreted as inequalities in the
 sense that the polynomial is required to be nonnegative.
 */
 
+/*
+ * The original implementation of this used a custom floating-point
+ * class as its parameter T, which implemented fuzzy comparisons.
+ * This has since been rewritten such that it uses regular floating
+ * point with explicit tolerances; this did introduce some subtle
+ * bugs originally and it is possible some still remain.
+ */
+
 // ***********************
 //      class QuikSolv
 // ***********************

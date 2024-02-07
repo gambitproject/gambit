@@ -64,7 +64,7 @@ public:
   const gRectangle<T> Orthant(const Gambit::Array<int> &) const;
   const Gambit::Vector<T> SideLengths() const;
   const T MaximalSideLength() const;
-  bool Contains(const Gambit::Vector<T> &) const;
+  bool Contains(const Gambit::Vector<T> &, const T &eps = T(0)) const;
   bool Contains(const gRectangle<T> &) const;
   const T Volume() const;
   const Gambit::Vector<T> Center() const;

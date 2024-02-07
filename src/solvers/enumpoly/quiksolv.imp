@@ -279,8 +279,7 @@ bool QuikSolv<T>::NewtonRootInRectangle(const gRectangle<double> &r,
     point = newpoint;
 
     Gambit::Vector<double> newevals = TreesOfPartials.ValuesOfRootPolys(point, NoEquations);
-
-    if (newevals * newevals > oldevals * oldevals) {
+    if (newevals * newevals >= oldevals * oldevals) {
       return false;
     }
     if (fuzzy_equals(newevals, zero)) {
@@ -296,6 +295,7 @@ bool QuikSolv<T>::NewtonRootInRectangle(const gRectangle<double> &r,
 
     oldevals = newevals;
   }
+  return false;
 }
 
 template <class T>
@@ -339,7 +339,11 @@ double QuikSolv<T>::MaxDistanceFromPointToVertexAfterTransformation(
     const gRectangle<double> &r, const Gambit::Vector<double> &p,
     const Gambit::SquareMatrix<double> &M) const
 {
-  if (!r.Contains(p)) {
+  // A very early implementation of this method used a type gDouble which
+  // implemented fuzzy comparisons.  Adding the epsilon parameter here is
+  // important for the case when a solution may be found on the boundary
+  // of the rectangle but be slightly outside due to numerical error.
+  if (!r.Contains(p, T(1.0e-8))) {
     throw Gambit::AssertionException(
         "Point not in rectangle in MaxDistanceFromPointToVertexAfterTransformation.");
   }
@@ -376,13 +380,9 @@ bool QuikSolv<T>::HasNoOtherRootsIn(const gRectangle<double> &r, const Gambit::V
                                     const Gambit::SquareMatrix<double> &M) const
 {
   // assert (NoEquations == System.Dmnsn());
-
   gPolyList<double> system1 = gDoubleSystem.TranslateOfSystem(p);
-
   gPolyList<double> system2 = system1.SystemInNewCoordinates(M);
-
   double radius = MaxDistanceFromPointToVertexAfterTransformation(r, p, M);
-
   auto max = (double)0;
   for (int i = 1; i <= Dmnsn(); i++) {
     max += system2[i].MaximalValueOfNonlinearPart(radius);

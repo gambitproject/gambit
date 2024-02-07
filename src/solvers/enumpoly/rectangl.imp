@@ -188,12 +188,12 @@ template <class T> const T gRectangle<T>::MaximalSideLength() const
   return answer;
 }
 
-template <class T> bool gRectangle<T>::Contains(const Gambit::Vector<T> &point) const
+template <class T> bool gRectangle<T>::Contains(const Gambit::Vector<T> &point, const T &eps) const
 {
   // assert (point.Length() == Dmnsn());
 
   for (int i = 1; i <= Dmnsn(); i++) {
-    if (point[i] < sides[i].LowerBound() || sides[i].UpperBound() < point[i]) {
+    if (point[i] + eps < sides[i].LowerBound() || sides[i].UpperBound() + eps < point[i]) {
       return false;
     }
   }
