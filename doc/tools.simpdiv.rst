@@ -61,6 +61,12 @@ options to specify additional starting points for the algorithm.
    one mixed strategy profile per line, in the same format used for
    output of equilibria (excluding the initial NE tag).
 
+.. cmdoption:: -m
+
+   .. versionadded:: 16.2.0
+
+   Specify the maximum regret criterion for acceptance as an approximate Nash equilibrium.
+
 .. cmdoption:: -v
 
    Sets verbose mode. In verbose mode, initial points, as well as

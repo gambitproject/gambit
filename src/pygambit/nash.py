@@ -306,6 +306,7 @@ def liap_solve(
 
 def simpdiv_solve(
         game: libgbt.Game,
+        maxregret: libgbt.Rational = None,
         refine: int = 2,
         leash: typing.Optional[int] = None
 ) -> NashComputationResult:
@@ -316,9 +317,18 @@ def simpdiv_solve(
     ----------
     game : Game
         The game to compute equilibria in.
+
+    maxregret : Rational, default 1/1000
+        The acceptance criterion for approximate Nash equilibrium; the maximum
+        regret of any player must be no more than `maxregret` times the
+        difference of the maximum and minimum payoffs of the game
+
+        .. versionadded: 16.2.0
+
     refine : int, default 2
         This controls the rate at which the triangulation of the space of mixed strategy
         profiles is made more fine at each iteration.
+
     leash : int, optional
         Simplicial subdivision is guaranteed to converge to an (approximate) Nash equilibrium.
         The method may take arbitrarily long paths through the space of mixed strategies in
@@ -335,14 +345,16 @@ def simpdiv_solve(
         raise ValueError("simpdiv_solve(): refine must be an integer no less than 2")
     if leash is not None and (not isinstance(leash, int) or leash <= 0):
         raise ValueError("simpdiv_solve(): leash must be a non-negative integer")
-    equilibria = libgbt._simpdiv_strategy_solve(game, refine, leash or 0)
+    if maxregret is None:
+        maxregret = libgbt.Rational(1, 1000)
+    equilibria = libgbt._simpdiv_strategy_solve(game, maxregret, refine, leash or 0)
     return NashComputationResult(
         game=game,
         method="simpdiv",
         rational=True,
         use_strategic=True,
         equilibria=equilibria,
-        parameters={"leash": leash}
+        parameters={"maxregret": maxregret, "refine": refine, "leash": leash}
     )
 
 

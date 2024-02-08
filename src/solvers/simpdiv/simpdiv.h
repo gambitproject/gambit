@@ -36,10 +36,12 @@ namespace Nash {
 class NashSimpdivStrategySolver : public StrategySolver<Rational> {
 public:
   explicit NashSimpdivStrategySolver(
-      int p_gridResize = 2, int p_leashLength = 0, bool p_verbose = false,
+      int p_gridResize = 2, int p_leashLength = 0,
+      const Rational &p_maxregret = Rational(1, 1000000), bool p_verbose = false,
       std::shared_ptr<StrategyProfileRenderer<Rational>> p_onEquilibrium = nullptr)
     : StrategySolver<Rational>(p_onEquilibrium), m_gridResize(p_gridResize),
-      m_leashLength((p_leashLength > 0) ? p_leashLength : 32000), m_verbose(p_verbose)
+      m_leashLength((p_leashLength > 0) ? p_leashLength : 32000), m_maxregret(p_maxregret),
+      m_verbose(p_verbose)
   {
   }
   ~NashSimpdivStrategySolver() override = default;
@@ -49,6 +51,7 @@ public:
 
 private:
   int m_gridResize, m_leashLength;
+  Rational m_maxregret;
   bool m_verbose;
 
   class State;
@@ -65,9 +68,10 @@ private:
 };
 
 inline List<MixedStrategyProfile<Rational>>
-SimpdivStrategySolve(const Game &p_game, int p_gridResize = 2, int p_leashLength = 0)
+SimpdivStrategySolve(const Game &p_game, const Rational &p_maxregret = Rational(1, 1000000),
+                     int p_gridResize = 2, int p_leashLength = 0)
 {
-  return NashSimpdivStrategySolver(p_gridResize, p_leashLength).Solve(p_game);
+  return NashSimpdivStrategySolver(p_gridResize, p_leashLength, p_maxregret).Solve(p_game);
 }
 
 } // namespace Nash

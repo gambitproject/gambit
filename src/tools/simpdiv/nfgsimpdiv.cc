@@ -86,6 +86,8 @@ void PrintHelp(char *progname)
   std::cerr << "  -r DENOM         generate random starting points with denominator DENOM\n";
   std::cerr << "  -n COUNT         number of starting points to generate (requires -r)\n";
   std::cerr << "  -s FILE          file containing starting points\n";
+  std::cerr << "  -m MAXREGRET     maximum regret acceptable as a proportion of range of\n";
+  std::cerr << "                   payoffs in the game\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
   std::cerr << "  -V, --verbose    verbose mode (shows intermediate output)\n";
   std::cerr << "  -v, --version    print version information\n";
@@ -100,6 +102,7 @@ int main(int argc, char *argv[])
   bool useRandom = false;
   int randDenom = 1, gridResize = 2, stopAfter = 1;
   bool verbose = false, quiet = false;
+  Rational maxregret(1, 1000000);
 
   int long_opt_index = 0;
   struct option long_options[] = {{"help", 0, nullptr, 'h'},
@@ -107,7 +110,8 @@ int main(int argc, char *argv[])
                                   {"verbose", 0, nullptr, 'V'},
                                   {nullptr, 0, nullptr, 0}};
   int c;
-  while ((c = getopt_long(argc, argv, "g:hVvn:r:s:qS", long_options, &long_opt_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "g:hVvn:r:s:m:qS", long_options, &long_opt_index)) != -1) {
+    std::cout << c << std::endl;
     switch (c) {
     case 'v':
       PrintBanner(std::cerr);
@@ -124,6 +128,9 @@ int main(int argc, char *argv[])
       break;
     case 'n':
       stopAfter = atoi(optarg);
+      break;
+    case 'm':
+      maxregret = lexical_cast<Rational>(std::string(optarg));
       break;
     case 's':
       startFile = optarg;
@@ -183,11 +190,11 @@ int main(int argc, char *argv[])
         starts[1][game->GetPlayer(pl)->GetStrategies()[1]] = Rational(1);
       }
     }
-    for (int i = 1; i <= starts.size(); i++) {
+    for (auto start : starts) {
       std::shared_ptr<StrategyProfileRenderer<Rational>> renderer(
           new MixedStrategyCSVRenderer<Rational>(std::cout));
-      NashSimpdivStrategySolver algorithm(gridResize, 0, verbose, renderer);
-      algorithm.Solve(starts[i]);
+      NashSimpdivStrategySolver algorithm(gridResize, 0, maxregret, verbose, renderer);
+      algorithm.Solve(start);
     }
     return 0;
   }

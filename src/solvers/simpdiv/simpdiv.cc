@@ -54,6 +54,8 @@ public:
   }
 };
 
+/// @brief Implementation of the piecewise path-following algorithm
+/// @returns The maximum regret of any player at the terminal profile
 Rational NashSimpdivStrategySolver::Simplex(MixedStrategyProfile<Rational> &y,
                                             const Rational &d) const
 {
@@ -463,6 +465,7 @@ NashSimpdivStrategySolver::Solve(const MixedStrategyProfile<Rational> &p_start) 
         "Computing equilibria of games with imperfect recall is not supported.");
   }
   Rational d(Integer(1), find_lcd((const Vector<Rational> &)p_start));
+  Rational scale = p_start.GetGame()->GetMaxPayoff() - p_start.GetGame()->GetMinPayoff();
 
   MixedStrategyProfile<Rational> y(p_start);
   if (m_verbose) {
@@ -470,14 +473,13 @@ NashSimpdivStrategySolver::Solve(const MixedStrategyProfile<Rational> &p_start) 
   }
 
   while (true) {
-    const double TOL = 1.0e-10;
     d /= Rational(m_gridResize);
-    Rational maxz = Simplex(y, d);
+    Rational regret = Simplex(y, d);
 
     if (m_verbose) {
-      this->m_onEquilibrium->Render(y, lexical_cast<std::string>(d));
+      this->m_onEquilibrium->Render(y, std::to_string(d));
     }
-    if (maxz < Rational(TOL)) {
+    if (regret <= m_maxregret * scale) {
       break;
     }
   }

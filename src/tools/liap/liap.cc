@@ -49,7 +49,7 @@ void PrintHelp(char *progname)
   std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -n COUNT         number of starting points to generate\n";
   std::cerr << "  -i MAXITER       maximum number of iterations per point (default is 1000)\n";
-  std::cerr << "  -r MAXREGRET     maximum regret acceptable as a proportion of range of\n";
+  std::cerr << "  -m MAXREGRET     maximum regret acceptable as a proportion of range of\n";
   std::cerr << "                   payoffs in the game\n";
   std::cerr << "  -s FILE          file containing starting points\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
