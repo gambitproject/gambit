@@ -309,7 +309,6 @@ game_SOURCES = \
 	src/games/behavpure.h \
 	src/games/behavmixed.cc \
 	src/games/behavmixed.h \
-	src/games/behavmixed.imp \
 	src/games/stratspt.cc \
 	src/games/stratspt.h \
 	src/games/stratpure.cc \
