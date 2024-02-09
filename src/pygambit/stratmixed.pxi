@@ -369,13 +369,17 @@ class MixedStrategyProfile:
         self._check_validity()
         return self._strategy_value(self.game._resolve_strategy(strategy, "strategy_value"))
 
-    def regret(self, strategy: StrategyReference) -> ProfileDType:
+    def strategy_regret(self, strategy: StrategyReference) -> ProfileDType:
         """Returns the regret to playing `strategy`, if all other
         players play according to the profile.
 
         The regret is defined as the difference between the payoff of the
         best-response strategy and the payoff of `strategy`.  By convention, the
         regret is always non-negative.
+
+        .. versionchanged:: 16.2.0
+
+            Changed from `regret()` to disambiguate from other regret concepts.
 
         Parameters
         ----------
@@ -389,9 +393,61 @@ class MixedStrategyProfile:
             If `strategy` is a `Strategy` from a different game.
         KeyError
             If `strategy` is a string and no strategy in the game has that label.
+
+        See Also
+        --------
+        player_regret
+        max_regret
         """
         self._check_validity()
-        return self._regret(self.game._resolve_strategy(strategy, "regret"))
+        return self._strategy_regret(self.game._resolve_strategy(strategy, "strategy_regret"))
+
+    def player_regret(self, player: PlayerReference) -> ProfileDType:
+        """Returns the regret of `player` for playing their mixed strategy, if all other
+        players play according to the profile.
+
+        The regret is defined as the difference between the payoff of the
+        best-response strategy and the payoff of the player's mixed strategy.
+        By convention, the regret is always non-negative.
+
+        .. versionadded:: 16.2.0
+
+        Parameters
+        ----------
+        player : Player or str
+            The player to get the regret for.  If a string is passed, the
+            player is determined by finding the player with that label, if any.
+
+        Raises
+        ------
+        MismatchError
+            If `player` is a `Player` from a different game.
+        KeyError
+            If `player` is a string and no player in the game has that label.
+
+        See Also
+        --------
+        strategy_regret
+        max_regret
+        """
+        self._check_validity()
+        return self._player_regret(self.game._resolve_player(player, "player_regret"))
+
+    def max_regret(self) -> ProfileDType:
+        """Returns the maximum regret of any player.
+
+        A profile is a Nash equilibrium if and only if `max_regret()` is 0.
+
+        .. versionadded:: 16.2.0
+
+        See Also
+        --------
+        strategy_regret
+        player_regret
+        liap_value
+        """
+        self._check_validity()
+        return self._max_regret()
 
     def strategy_value_deriv(self,
                              strategy: StrategyReference,
@@ -417,6 +473,10 @@ class MixedStrategyProfile:
 
         The Lyapunov value is a non-negative number which is zero exactly at
         Nash equilibria.
+
+        See Also
+        --------
+        max_regret
         """
         self._check_validity()
         return self._liap_value()
@@ -521,8 +581,14 @@ class MixedStrategyProfileDouble(MixedStrategyProfile):
     def _strategy_value(self, strategy: Strategy) -> float:
         return deref(self.profile).GetPayoff(strategy.strategy)
 
-    def _regret(self, strategy: Strategy) -> float:
+    def _strategy_regret(self, strategy: Strategy) -> float:
         return deref(self.profile).GetRegret(strategy.strategy)
+
+    def _player_regret(self, player: Player) -> float:
+        return deref(self.profile).GetRegret(player.player)
+
+    def _max_regret(self) -> float:
+        return deref(self.profile).GetMaxRegret()
 
     def _strategy_value_deriv(self, strategy: Strategy, other: Strategy) -> float:
         return deref(self.profile).GetPayoffDeriv(
@@ -595,8 +661,14 @@ class MixedStrategyProfileRational(MixedStrategyProfile):
     def _strategy_value(self, strategy: Strategy) -> Rational:
         return rat_to_py(deref(self.profile).GetPayoff(strategy.strategy))
 
-    def _regret(self, strategy: Strategy) -> Rational:
+    def _strategy_regret(self, strategy: Strategy) -> Rational:
         return rat_to_py(deref(self.profile).GetRegret(strategy.strategy))
+
+    def _player_regret(self, player: Player) -> Rational:
+        return rat_to_py(deref(self.profile).GetRegret(player.player))
+
+    def _max_regret(self) -> Rational:
+        return rat_to_py(deref(self.profile).GetMaxRegret())
 
     def _strategy_value_deriv(self, strategy: Strategy, other: Strategy) -> Rational:
         return rat_to_py(deref(self.profile).GetPayoffDeriv(

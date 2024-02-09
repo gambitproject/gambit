@@ -250,6 +250,8 @@ cdef extern from "games/stratmixed.h":
         double GetPayoff(c_GamePlayer) except +
         double GetPayoff(c_GameStrategy) except +
         double GetRegret(c_GameStrategy) except +
+        double GetRegret(c_GamePlayer) except +
+        double GetMaxRegret() except +
         double GetPayoffDeriv(int, c_GameStrategy, c_GameStrategy) except +
         double GetLiapValue() except +
         c_MixedStrategyProfileDouble ToFullSupport() except +
@@ -269,6 +271,8 @@ cdef extern from "games/stratmixed.h":
         c_Rational GetPayoff(c_GamePlayer) except +
         c_Rational GetPayoff(c_GameStrategy) except +
         c_Rational GetRegret(c_GameStrategy) except +
+        c_Rational GetRegret(c_GamePlayer) except +
+        c_Rational GetMaxRegret() except +
         c_Rational GetPayoffDeriv(int, c_GameStrategy, c_GameStrategy) except +
         c_Rational GetLiapValue() except +
         c_MixedStrategyProfileRational ToFullSupport() except +
@@ -295,6 +299,8 @@ cdef extern from "games/behavmixed.h":
         double GetPayoff(c_GamePlayer, c_GameNode) except +
         double GetPayoff(c_GameAction) except +
         double GetRegret(c_GameAction) except +
+        double GetRegret(c_GameInfoset) except +
+        double GetMaxRegret() except +
         double GetLiapValue() except +
         c_MixedStrategyProfileDouble ToMixedProfile()  # except + doesn't compile
         c_MixedBehaviorProfileDouble(c_MixedStrategyProfileDouble) except +NotImplementedError
@@ -321,6 +327,8 @@ cdef extern from "games/behavmixed.h":
         c_Rational GetPayoff(c_GamePlayer, c_GameNode) except +
         c_Rational GetPayoff(c_GameAction) except +
         c_Rational GetRegret(c_GameAction) except +
+        c_Rational GetRegret(c_GameInfoset) except +
+        c_Rational GetMaxRegret() except +
         c_Rational GetLiapValue() except +
         c_MixedStrategyProfileRational ToMixedProfile()  # except + doesn't compile
         c_MixedBehaviorProfileRational(c_MixedStrategyProfileRational) except +NotImplementedError

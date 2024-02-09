@@ -811,7 +811,7 @@ def test_regret_consistency(game: gbt.Game, rational_flag: bool):
         for infoset in player.infosets:
             for action in infoset.actions:
                 assert (
-                    profile.regret(action) ==
+                    profile.action_regret(action) ==
                     max(profile.action_value(a) for a in infoset.actions) -
                     profile.action_value(action)
                 )
@@ -870,7 +870,7 @@ def test_regret_reference(game: gbt.Game, player_idx: int, infoset_idx: int, act
     profile = game.mixed_behavior_profile(rational=rational_flag)
     if action_probs:
         _set_action_probs(profile, action_probs, rational_flag)
-    regret = profile.regret(action)
+    regret = profile.action_regret(action)
     value = gbt.Rational(value) if rational_flag else value
     assert abs(regret - value) <= tol
 
@@ -1129,13 +1129,13 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
      ######################################################################################
      # regret (for actions)
      (games.create_mixed_behav_game_efg(), PROBS_1A_doub, PROBS_2A_doub, False,
-      lambda x, y: x.regret(y), lambda x: x.actions),
+      lambda x, y: x.action_regret(y), lambda x: x.actions),
      (games.create_mixed_behav_game_efg(), PROBS_1A_rat, PROBS_2A_rat, True,
-      lambda x, y: x.regret(y), lambda x: x.actions),
+      lambda x, y: x.action_regret(y), lambda x: x.actions),
      (games.create_myerson_2_card_poker_efg(), PROBS_1B_doub, PROBS_2B_doub, False,
-      lambda x, y: x.regret(y), lambda x: x.actions),
+      lambda x, y: x.action_regret(y), lambda x: x.actions),
      (games.create_myerson_2_card_poker_efg(), PROBS_1A_rat, PROBS_2A_rat, True,
-      lambda x, y: x.regret(y), lambda x: x.actions),
+      lambda x, y: x.action_regret(y), lambda x: x.actions),
      ######################################################################################
      # node_value
      (games.create_mixed_behav_game_efg(), PROBS_1A_doub, PROBS_2A_doub, False,

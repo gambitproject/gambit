@@ -200,8 +200,10 @@ Probability distributions over strategies
    MixedStrategyProfile.__getitem__
    MixedStrategyProfile.__setitem__
    MixedStrategyProfile.payoff
-   MixedStrategyProfile.regret
    MixedStrategyProfile.strategy_value
+   MixedStrategyProfile.strategy_regret
+   MixedStrategyProfile.player_regret
+   MixedStrategyProfile.max_regret
    MixedStrategyProfile.strategy_value_deriv
    MixedStrategyProfile.liap_value
    MixedStrategyProfile.as_behavior
@@ -229,7 +231,7 @@ Probability distributions over behavior
    MixedBehaviorProfile.__getitem__
    MixedBehaviorProfile.__setitem__
    MixedBehaviorProfile.payoff
-   MixedBehaviorProfile.regret
+   MixedBehaviorProfile.action_regret
    MixedBehaviorProfile.action_value
    MixedBehaviorProfile.infoset_value
    MixedBehaviorProfile.node_value

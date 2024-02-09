@@ -723,7 +723,7 @@ class MixedBehaviorProfile:
         self._check_validity()
         return self._infoset_prob(self.game._resolve_infoset(infoset, "infoset_prob"))
 
-    def regret(self, action: ActionReference) -> ProfileDType:
+    def action_regret(self, action: ActionReference) -> ProfileDType:
         """Returns the regret to playing `action`, if all other
         players play according to the profile.
 
@@ -731,6 +731,10 @@ class MixedBehaviorProfile:
         best-response action and the payoff of `action`.  Payoffs are computed
         conditional on reaching the information set.  By convention, the
         regret is always non-negative.
+
+        .. versionchanged:: 16.2.0
+
+            Changed from `regret()` to disambiguate from other regret concepts.
 
         Parameters
         ----------
@@ -744,15 +748,73 @@ class MixedBehaviorProfile:
             If `action` is an ``Action`` from a different game.
         KeyError
             If `action` is a string and no action in the game has that label.
+
+        See Also
+        --------
+        infoset_regret
+        max_regret
         """
         self._check_validity()
-        return self._regret(self.game._resolve_action(action, "regret"))
+        return self._action_regret(self.game._resolve_action(action, "action_regret"))
+
+    def infoset_regret(self, infoset: InfosetReference) -> ProfileDType:
+        """Returns the regret to the player for playing their mixed action at
+        `infoset`, if all other players play according to the profile.
+
+        The regret is defined as the difference between the payoff of the
+        best-response action and the payoff of the player's mixed action.
+        Payoffs are computed conditional on reaching the information set.
+        By convention, the regret is always non-negative.
+
+        .. versionadded:: 16.2.0
+
+        Parameters
+        ----------
+        infoset : Infoset or str
+            The information set to get the regret at.  If a string is passed, the
+            information set is determined by finding the information set with that
+            label, if any.
+
+        Raises
+        ------
+        MismatchError
+            If `infoset` is an ``Infoset`` from a different game.
+        KeyError
+            If `infoset` is a string and no information set in the game has that label.
+
+        See Also
+        --------
+        action_regret
+        max_regret
+        """
+        self._check_validity()
+        return self._infoset_regret(self.game._resolve_infoset(infoset, "infoset_regret"))
+
+    def max_regret(self) -> ProfileDType:
+        """Returns the maximum regret of any player.
+
+        A profile is an agent Nash equilibrium if and only if `max_regret()` is 0.
+
+        .. versionadded:: 16.2.0
+
+        See Also
+        --------
+        action_regret
+        infoset_regret
+        liap_value
+        """
+        self._check_validity()
+        return self._max_regret()
 
     def liap_value(self) -> ProfileDType:
         """Returns the Lyapunov value (see [McK91]_) of the strategy profile.
 
         The Lyapunov value is a non-negative number which is zero exactly at
-        Nash equilibria.
+        agent Nash equilibria.
+
+        See Also
+        --------
+        max_regret
         """
         self._check_validity()
         return self._liap_value()
@@ -831,8 +893,14 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
     def _action_value(self, action: Action) -> float:
         return deref(self.profile).GetPayoff(action.action)
 
-    def _regret(self, action: Action) -> float:
+    def _action_regret(self, action: Action) -> float:
         return deref(self.profile).GetRegret(action.action)
+
+    def _infoset_regret(self, infoset: Infoset) -> float:
+        return deref(self.profile).GetRegret(infoset.infoset)
+
+    def _max_regret(self) -> float:
+        return deref(self.profile).GetMaxRegret()
 
     def __eq__(self, other: typing.Any) -> bool:
         return (
@@ -922,8 +990,14 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
     def _action_value(self, action: Action) -> Rational:
         return rat_to_py(deref(self.profile).GetPayoff(action.action))
 
-    def _regret(self, action: Action) -> Rational:
+    def _action_regret(self, action: Action) -> Rational:
         return rat_to_py(deref(self.profile).GetRegret(action.action))
+
+    def _infoset_regret(self, infoset: Infoset) -> Rational:
+        return rat_to_py(deref(self.profile).GetRegret(infoset.infoset))
+
+    def _max_regret(self) -> Rational:
+        return rat_to_py(deref(self.profile).GetMaxRegret())
 
     def __eq__(self, other: typing.Any) -> bool:
         return (

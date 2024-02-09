@@ -574,7 +574,7 @@ def test_strategy_regret_consistency(game: gbt.Game, rational_flag: bool):
     for player in game.players:
         for strategy in player.strategies:
             assert (
-                profile.regret(strategy) ==
+                profile.strategy_regret(strategy) ==
                 (
                     max(profile.strategy_value(s) for s in player.strategies)
                     - profile.strategy_value(strategy)
@@ -818,14 +818,14 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
      # regret (for strategies)
      # 4x4 coordination nfg
      (games.create_coord_4x4_nfg(), PROBS_1A_doub, PROBS_2A_doub, False,
-      lambda profile, strategy: profile.regret(strategy), lambda game: game.strategies),
+      lambda profile, strategy: profile.strategy_regret(strategy), lambda game: game.strategies),
      (games.create_coord_4x4_nfg(), PROBS_1A_rat, PROBS_2A_rat, True,
-      lambda profile, strategy: profile.regret(strategy), lambda game: game.strategies),
+      lambda profile, strategy: profile.strategy_regret(strategy), lambda game: game.strategies),
      # 2x2x2 nfg
      (games.create_2x2x2_nfg(), PROBS_1B_doub, PROBS_2B_doub, False,
-      lambda profile, strategy: profile.regret(strategy), lambda game: game.strategies),
+      lambda profile, strategy: profile.strategy_regret(strategy), lambda game: game.strategies),
      (games.create_2x2x2_nfg(), PROBS_1B_rat, PROBS_2B_rat, True,
-      lambda profile, strategy: profile.regret(strategy), lambda game: game.strategies),
+      lambda profile, strategy: profile.strategy_regret(strategy), lambda game: game.strategies),
      #################################################################################
      # strategy_value (for strategies)
      # 4x4 coordination nfg

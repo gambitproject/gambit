@@ -19,6 +19,8 @@
 - The MixedBehaviorProfile object can now be initialized on creation by a given distribution.
 - `append_move`/`append_infoset` now resolves either a singleton node reference or any
   iterable set of node references
+- Additional regret-related functions added to `MixedBehaviorProfile` and `MixedStrategyProfile`
+  in both C++ and Python.
 
 ### Changed
 - Gambit now requires a compiler that supports C++17.
