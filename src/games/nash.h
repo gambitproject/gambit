@@ -30,17 +30,17 @@ namespace Gambit {
 
 namespace Nash {
 
-using StrategyCallbackType = std::function<void(const MixedStrategyProfile<double> &, const std::string &)>;
+using StrategyCallbackType =
+    std::function<void(const MixedStrategyProfile<double> &, const std::string &)>;
 
 /// @brief A fallback callback function for mixed strategy profiles that does nothing
-inline void NullStrategyCallback(const MixedStrategyProfile<double> &, const std::string &)
-{ }
+inline void NullStrategyCallback(const MixedStrategyProfile<double> &, const std::string &) {}
 
-using BehaviorCallbackType = std::function<void(const MixedBehaviorProfile<double> &, const std::string &)>;
+using BehaviorCallbackType =
+    std::function<void(const MixedBehaviorProfile<double> &, const std::string &)>;
 
 /// @brief A fallback callback function for mixed behavior profiles that does nothing
-inline void NullBehaviorCallback(const MixedBehaviorProfile<double> &, const std::string &)
-{ }
+inline void NullBehaviorCallback(const MixedBehaviorProfile<double> &, const std::string &) {}
 
 //========================================================================
 //                       Profile renderer classes
@@ -50,9 +50,9 @@ template <class T> class StrategyProfileRenderer {
 public:
   virtual ~StrategyProfileRenderer() = default;
   virtual void Render(const MixedStrategyProfile<T> &p_profile,
-		      const std::string &p_label = "NE") const = 0;
+                      const std::string &p_label = "NE") const = 0;
   virtual void Render(const MixedBehaviorProfile<T> &p_profile,
-		      const std::string &p_label = "NE") const = 0;
+                      const std::string &p_label = "NE") const = 0;
 };
 
 //
@@ -64,42 +64,47 @@ template <class T> class MixedStrategyRenderer : public StrategyProfileRenderer<
 public:
   ~MixedStrategyRenderer() override = default;
   void Render(const MixedStrategyProfile<T> &p_profile,
-		      const std::string &p_label = "NE") const override = 0;
+              const std::string &p_label = "NE") const override = 0;
   void Render(const MixedBehaviorProfile<T> &p_profile,
-		      const std::string &p_label = "NE") const override
-  { Render(p_profile.ToMixedProfile(), p_label); }
+              const std::string &p_label = "NE") const override
+  {
+    Render(p_profile.ToMixedProfile(), p_label);
+  }
 };
 
-template <class T>
-class MixedStrategyNullRenderer : public MixedStrategyRenderer<T> {
+template <class T> class MixedStrategyNullRenderer : public MixedStrategyRenderer<T> {
 public:
   ~MixedStrategyNullRenderer() override = default;
   void Render(const MixedStrategyProfile<T> &p_profile,
-		      const std::string &p_label = "NE") const override { }
+              const std::string &p_label = "NE") const override
+  {
+  }
 };
 
-template <class T>
-class MixedStrategyCSVRenderer : public MixedStrategyRenderer<T> {
+template <class T> class MixedStrategyCSVRenderer : public MixedStrategyRenderer<T> {
 public:
   explicit MixedStrategyCSVRenderer(std::ostream &p_stream, int p_numDecimals = 6)
-    : m_stream(p_stream), m_numDecimals(p_numDecimals) { }
+    : m_stream(p_stream), m_numDecimals(p_numDecimals)
+  {
+  }
   ~MixedStrategyCSVRenderer() override = default;
   void Render(const MixedStrategyProfile<T> &p_profile,
-		      const std::string &p_label = "NE") const override;
+              const std::string &p_label = "NE") const override;
 
 private:
   std::ostream &m_stream;
   int m_numDecimals;
 };
 
-template <class T>
-class MixedStrategyDetailRenderer : public MixedStrategyRenderer<T> {
+template <class T> class MixedStrategyDetailRenderer : public MixedStrategyRenderer<T> {
 public:
   explicit MixedStrategyDetailRenderer(std::ostream &p_stream, int p_numDecimals = 6)
-    : m_stream(p_stream), m_numDecimals(p_numDecimals) { }
+    : m_stream(p_stream), m_numDecimals(p_numDecimals)
+  {
+  }
   ~MixedStrategyDetailRenderer() override = default;
   void Render(const MixedStrategyProfile<T> &p_profile,
-		      const std::string &p_label = "NE") const override;
+              const std::string &p_label = "NE") const override;
 
 private:
   std::ostream &m_stream;
@@ -113,42 +118,47 @@ template <class T> class BehavStrategyRenderer : public StrategyProfileRenderer<
 public:
   ~BehavStrategyRenderer() override = default;
   void Render(const MixedStrategyProfile<T> &p_profile,
-		      const std::string &p_label = "NE") const override
-  { Render(MixedBehaviorProfile<T>(p_profile), p_label); }
+              const std::string &p_label = "NE") const override
+  {
+    Render(MixedBehaviorProfile<T>(p_profile), p_label);
+  }
   void Render(const MixedBehaviorProfile<T> &p_profile,
-		      const std::string &p_label = "NE") const override = 0;
+              const std::string &p_label = "NE") const override = 0;
 };
 
-template <class T>
-class BehavStrategyNullRenderer : public BehavStrategyRenderer<T> {
+template <class T> class BehavStrategyNullRenderer : public BehavStrategyRenderer<T> {
 public:
   ~BehavStrategyNullRenderer() override = default;
   void Render(const MixedBehaviorProfile<T> &p_profile,
-		      const std::string &p_label = "NE") const override { }
+              const std::string &p_label = "NE") const override
+  {
+  }
 };
 
-template <class T>
-class BehavStrategyCSVRenderer : public BehavStrategyRenderer<T> {
+template <class T> class BehavStrategyCSVRenderer : public BehavStrategyRenderer<T> {
 public:
   explicit BehavStrategyCSVRenderer(std::ostream &p_stream, int p_numDecimals = 6)
-    : m_stream(p_stream), m_numDecimals(p_numDecimals) { }
+    : m_stream(p_stream), m_numDecimals(p_numDecimals)
+  {
+  }
   ~BehavStrategyCSVRenderer() override = default;
   void Render(const MixedBehaviorProfile<T> &p_profile,
-		      const std::string &p_label = "NE") const override;
+              const std::string &p_label = "NE") const override;
 
 private:
   std::ostream &m_stream;
   int m_numDecimals;
 };
 
-template <class T>
-class BehavStrategyDetailRenderer : public BehavStrategyRenderer<T> {
+template <class T> class BehavStrategyDetailRenderer : public BehavStrategyRenderer<T> {
 public:
   explicit BehavStrategyDetailRenderer(std::ostream &p_stream, int p_numDecimals = 6)
-    : m_stream(p_stream), m_numDecimals(p_numDecimals) { }
+    : m_stream(p_stream), m_numDecimals(p_numDecimals)
+  {
+  }
   ~BehavStrategyDetailRenderer() override = default;
   void Render(const MixedBehaviorProfile<T> &p_profile,
-		      const std::string &p_label = "NE") const override;
+              const std::string &p_label = "NE") const override;
 
 private:
   std::ostream &m_stream;
@@ -163,24 +173,24 @@ private:
 
 template <class T> class StrategySolver {
 public:
-  explicit StrategySolver(std::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = nullptr);
-  virtual ~StrategySolver()  = default;
+  explicit StrategySolver(std::shared_ptr<StrategyProfileRenderer<T>> p_onEquilibrium = nullptr);
+  virtual ~StrategySolver() = default;
 
-  virtual List<MixedStrategyProfile<T> > Solve(const Game &) const = 0;
+  virtual List<MixedStrategyProfile<T>> Solve(const Game &) const = 0;
 
 protected:
-  std::shared_ptr<StrategyProfileRenderer<T> > m_onEquilibrium;
+  std::shared_ptr<StrategyProfileRenderer<T>> m_onEquilibrium;
 };
 
 template <class T> class BehavSolver {
 public:
-  explicit BehavSolver(std::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = nullptr);
-  virtual ~BehavSolver()  = default;
+  explicit BehavSolver(std::shared_ptr<StrategyProfileRenderer<T>> p_onEquilibrium = nullptr);
+  virtual ~BehavSolver() = default;
 
-  virtual List<MixedBehaviorProfile<T> > Solve(const Game &) const = 0;
+  virtual List<MixedBehaviorProfile<T>> Solve(const Game &) const = 0;
 
 protected:
-  std::shared_ptr<StrategyProfileRenderer<T> > m_onEquilibrium;
+  std::shared_ptr<StrategyProfileRenderer<T>> m_onEquilibrium;
 };
 
 //
@@ -189,33 +199,31 @@ protected:
 //
 template <class T> class BehavViaStrategySolver : public BehavSolver<T> {
 public:
-  explicit BehavViaStrategySolver(std::shared_ptr<StrategySolver<T> > p_solver,
-			 std::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = 0);
+  explicit BehavViaStrategySolver(std::shared_ptr<StrategySolver<T>> p_solver,
+                                  std::shared_ptr<StrategyProfileRenderer<T>> p_onEquilibrium = 0);
   ~BehavViaStrategySolver() override = default;
 
-  List<MixedBehaviorProfile<T> > Solve(const Game &) const override;
+  List<MixedBehaviorProfile<T>> Solve(const Game &) const override;
 
 protected:
-  std::shared_ptr<StrategySolver<T> > m_solver;
+  std::shared_ptr<StrategySolver<T>> m_solver;
 };
 
 template <class T> class SubgameBehavSolver : public BehavSolver<T> {
 public:
-  explicit SubgameBehavSolver(std::shared_ptr<BehavSolver<T> > p_solver,
-		     std::shared_ptr<StrategyProfileRenderer<T> > p_onEquilibrium = nullptr);
-  ~SubgameBehavSolver()  override = default;
+  explicit SubgameBehavSolver(
+      std::shared_ptr<BehavSolver<T>> p_solver,
+      std::shared_ptr<StrategyProfileRenderer<T>> p_onEquilibrium = nullptr);
+  ~SubgameBehavSolver() override = default;
 
-  List<MixedBehaviorProfile<T> > Solve(const Game &) const override;
+  List<MixedBehaviorProfile<T>> Solve(const Game &) const override;
 
 protected:
-  std::shared_ptr<BehavSolver<T> > m_solver;
+  std::shared_ptr<BehavSolver<T>> m_solver;
 
 private:
-  void SolveSubgames(const Game &p_game,
-                     const DVector<T> &p_templateSolution,
-                     const GameNode &n,
-                     List<DVector<T> > &solns,
-                     List<GameOutcome> &values) const;
+  void SolveSubgames(const Game &p_game, const DVector<T> &p_templateSolution, const GameNode &n,
+                     List<DVector<T>> &solns, List<GameOutcome> &values) const;
 };
 
 //
@@ -229,9 +237,8 @@ public:
   const char *what() const noexcept override { return "Reached target number of equilibria"; }
 };
 
-}  // namespace Gambit::Nash
+} // namespace Nash
 
-}  // namespace Gambit
+} // namespace Gambit
 
-
-#endif  // LIBGAMBIT_NASH_H
+#endif // LIBGAMBIT_NASH_H

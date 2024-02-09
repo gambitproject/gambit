@@ -43,8 +43,7 @@ public:
   /// @name Lifecycle
   //@{
   /// Constructor; initializes reference count
-  GameObject() : m_refCount(0), m_valid(true)
-  {}
+  GameObject() : m_refCount(0), m_valid(true) {}
 
   /// Destructor
   virtual ~GameObject() = default;
@@ -53,30 +52,37 @@ public:
   /// @name Validation
   //@{
   /// Is the object still valid?
-  bool IsValid() const
-  { return m_valid; }
+  bool IsValid() const { return m_valid; }
 
   /// Invalidate the object; delete if not referenced elsewhere
   void Invalidate()
-  { if (!m_refCount) delete this; else m_valid = false; }
+  {
+    if (!m_refCount) {
+      delete this;
+    }
+    else {
+      m_valid = false;
+    }
+  }
   //@}
 
   /// @name Reference counting
   //@{
   /// Increment the reference count
-  void IncRef()
-  { m_refCount++; }
+  void IncRef() { m_refCount++; }
 
   /// Decrement the reference count; delete if reference count is zero.
   void DecRef()
-  { if (!--m_refCount && !m_valid) delete this; }
+  {
+    if (!--m_refCount && !m_valid) {
+      delete this;
+    }
+  }
 
   /// Returns the reference count
-  int RefCount() const
-  { return m_refCount; }
+  int RefCount() const { return m_refCount; }
   //@}
 };
-
 
 class BaseGameRep {
 protected:
@@ -86,8 +92,7 @@ public:
   /// @name Lifecycle
   //@{
   /// Constructor; initializes reference count
-  BaseGameRep() : m_refCount(0)
-  {}
+  BaseGameRep() : m_refCount(0) {}
 
   /// Destructor
   virtual ~BaseGameRep() = default;
@@ -96,27 +101,32 @@ public:
   /// @name Validation
   //@{
   /// Is the object still valid?
-  bool IsValid() const
-  { return true; }
+  bool IsValid() const { return true; }
 
   /// Invalidate the object; delete if not referenced elsewhere
   void Invalidate()
-  { if (!m_refCount) delete this; }
+  {
+    if (!m_refCount) {
+      delete this;
+    }
+  }
   //@}
 
   /// @name Reference counting
   //@{
   /// Increment the reference count
-  void IncRef()
-  { m_refCount++; }
+  void IncRef() { m_refCount++; }
 
   /// Decrement the reference count; delete if reference count is zero.
   void DecRef()
-  { if (!--m_refCount) delete this; }
+  {
+    if (!--m_refCount) {
+      delete this;
+    }
+  }
 
   /// Returns the reference count
-  int RefCount() const
-  { return m_refCount; }
+  int RefCount() const { return m_refCount; }
   //@}
 };
 
@@ -125,67 +135,78 @@ class InvalidObjectException : public Exception {
 public:
   ~InvalidObjectException() noexcept override = default;
 
-  const char *what() const noexcept override
-  { return "Dereferencing an invalidated object"; }
+  const char *what() const noexcept override { return "Dereferencing an invalidated object"; }
 };
-
 
 //
 // This is a handle class that is used by all calling code to refer to
 // member objects of games.  It takes care of all the reference-counting
 // considerations.
 //
-template<class T>
-class GameObjectPtr {
+template <class T> class GameObjectPtr {
 private:
   T *rep;
 
 public:
   GameObjectPtr(T *r = nullptr) : rep(r)
-  { if (rep) rep->IncRef(); }
+  {
+    if (rep) {
+      rep->IncRef();
+    }
+  }
 
   GameObjectPtr(const GameObjectPtr<T> &r) : rep(r.rep)
-  { if (rep) rep->IncRef(); }
+  {
+    if (rep) {
+      rep->IncRef();
+    }
+  }
 
   ~GameObjectPtr()
-  { if (rep) rep->DecRef(); }
+  {
+    if (rep) {
+      rep->DecRef();
+    }
+  }
 
   GameObjectPtr<T> &operator=(const GameObjectPtr<T> &r)
   {
     if (&r != this) {
-      if (rep) rep->DecRef();
+      if (rep) {
+        rep->DecRef();
+      }
       rep = r.rep;
-      if (rep) rep->IncRef();
+      if (rep) {
+        rep->IncRef();
+      }
     }
     return *this;
   }
 
   T *operator->() const
   {
-    if (!rep) throw NullException();
-    if (!rep->IsValid()) throw InvalidObjectException();
+    if (!rep) {
+      throw NullException();
+    }
+    if (!rep->IsValid()) {
+      throw InvalidObjectException();
+    }
     return rep;
   }
 
-  bool operator==(const GameObjectPtr<T> &r) const
-  { return (rep == r.rep); }
+  bool operator==(const GameObjectPtr<T> &r) const { return (rep == r.rep); }
 
-  bool operator==(T *r) const
-  { return (rep == r); }
+  bool operator==(T *r) const { return (rep == r); }
 
-  bool operator!=(const GameObjectPtr<T> &r) const
-  { return (rep != r.rep); }
+  bool operator!=(const GameObjectPtr<T> &r) const { return (rep != r.rep); }
 
-  bool operator!=(T *r) const
-  { return (rep != r); }
+  bool operator!=(T *r) const { return (rep != r); }
 
-  operator T *() const
-  { return rep; }
+  operator T *() const { return rep; }
 
-  bool operator!() const
-  { return !rep; }
+  bool operator!() const { return !rep; }
 };
 
-}  // end namespace Gambit
+} // end namespace Gambit
 
-#endif  // GAMBIT_GAMES_GAMEOBJECT_H
+#endif // GAMBIT_GAMES_GAMEOBJECT_H

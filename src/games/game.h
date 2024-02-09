@@ -20,7 +20,6 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-
 #ifndef LIBGAMBIT_GAME_H
 #define LIBGAMBIT_GAME_H
 
@@ -71,8 +70,8 @@ template <class T> class MixedBehaviorProfile;
 /// Exception thrown when an operation that is undefined is attempted
 class UndefinedException : public Exception {
 public:
-  UndefinedException() : Exception("Undefined operation on game") { }
-  explicit UndefinedException(const std::string &s) : Exception(s) { }
+  UndefinedException() : Exception("Undefined operation on game") {}
+  explicit UndefinedException(const std::string &s) : Exception(s) {}
   ~UndefinedException() noexcept override = default;
 };
 
@@ -81,7 +80,9 @@ class MismatchException : public Exception {
 public:
   ~MismatchException() noexcept override = default;
   const char *what() const noexcept override
-  { return "Operation between objects in different games"; }
+  {
+    return "Operation between objects in different games";
+  }
 };
 
 /// Exception thrown when comparing different versions of a game
@@ -89,14 +90,16 @@ class GameStructureChangedException : public Exception {
 public:
   ~GameStructureChangedException() noexcept override = default;
   const char *what() const noexcept override
-  { return "Game structure has changed since object was defined"; }
+  {
+    return "Game structure has changed since object was defined";
+  }
 };
 
 /// Exception thrown on a parse error when reading a game savefile
 class InvalidFileException : public Exception {
 public:
-  InvalidFileException() : Exception("File not in a recognized format") { }
-  explicit InvalidFileException(const std::string &s) : Exception(s) { }
+  InvalidFileException() : Exception("File not in a recognized format") {}
+  explicit InvalidFileException(const std::string &s) : Exception(s) {}
   ~InvalidFileException() noexcept override = default;
 };
 
@@ -106,7 +109,7 @@ public:
 
 /// This class represents an outcome in a game.  An outcome
 /// specifies a vector of payoffs to players.
-class GameOutcomeRep : public GameObject  {
+class GameOutcomeRep : public GameObject {
   friend class GameExplicitRep;
   friend class GameTreeRep;
   friend class GameTableRep;
@@ -164,7 +167,6 @@ public:
   virtual bool Precedes(const GameNode &) const = 0;
 
   virtual void DeleteAction() = 0;
-
 };
 
 /// An information set in an extensive game
@@ -217,7 +219,7 @@ public:
 /// strategies gives the index into the strategic game's table to
 /// find the outcome for that strategy profile, making payoff computation
 /// relatively efficient.
-class GameStrategyRep : public GameObject  {
+class GameStrategyRep : public GameObject {
   friend class GameExplicitRep;
   friend class GameTreeRep;
   friend class GameTableRep;
@@ -243,7 +245,9 @@ private:
   //@{
   /// Creates a new strategy for the given player.
   explicit GameStrategyRep(GamePlayerRep *p_player)
-    : m_number(0), m_id(0), m_player(p_player), m_offset(0L) { }
+    : m_number(0), m_id(0), m_player(p_player), m_offset(0L)
+  {
+  }
   //@}
 
 public:
@@ -293,8 +297,7 @@ private:
   Array<class GameTreeInfosetRep *> m_infosets;
   Array<GameStrategyRep *> m_strategies;
 
-  GamePlayerRep(GameRep *p_game, int p_id)
-    : m_game(p_game), m_number(p_id) { }
+  GamePlayerRep(GameRep *p_game, int p_id) : m_game(p_game), m_number(p_id) {}
   GamePlayerRep(GameRep *p_game, int p_id, int m_strats);
   ~GamePlayerRep() override;
 
@@ -387,7 +390,6 @@ public:
   virtual GameInfoset InsertMove(GameInfoset p_infoset) = 0;
 };
 
-
 /// This is the class for representing an arbitrary finite game.
 class GameRep : public BaseGameRep {
   friend class GameOutcomeRep;
@@ -406,14 +408,14 @@ protected:
   std::string m_title, m_comment;
   unsigned int m_version;
 
-  GameRep() : m_version(0) { }
+  GameRep() : m_version(0) {}
 
   /// @name Managing the representation
   //@{
   /// Mark that the content of the game has changed
   void IncrementVersion() { m_version++; }
   /// Build any computed values anew
-  virtual void BuildComputedValues() { }
+  virtual void BuildComputedValues() {}
 
 public:
   /// @name Lifecycle
@@ -458,18 +460,21 @@ public:
   virtual bool IsPerfectRecall(GameInfoset &, GameInfoset &) const = 0;
   /// Returns true if the game is perfect recall
   bool IsPerfectRecall() const
-  { GameInfoset s, t; return IsPerfectRecall(s, t); }
+  {
+    GameInfoset s, t;
+    return IsPerfectRecall(s, t);
+  }
   //@}
 
   /// @name Writing data files
   //@{
   /// Write the game to a savefile in the specified format.
-  virtual void Write(std::ostream &p_stream,
-		     const std::string &p_format="native") const
-  { throw UndefinedException(); }
+  virtual void Write(std::ostream &p_stream, const std::string &p_format = "native") const
+  {
+    throw UndefinedException();
+  }
   /// Write the game in .efg format to the specified stream
-  virtual void WriteEfgFile(std::ostream &) const
-  { throw UndefinedException(); }
+  virtual void WriteEfgFile(std::ostream &) const { throw UndefinedException(); }
   /// Write the game to a file in .nfg payoff format.
   virtual void WriteNfgFile(std::ostream &p_stream) const;
   //@}
@@ -497,8 +502,10 @@ public:
   virtual PureStrategyProfile NewPureStrategyProfile() const = 0;
   virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double) const = 0;
   virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &) const = 0;
-  virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double, const StrategySupportProfile&) const = 0;
-  virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &, const StrategySupportProfile&) const = 0;
+  virtual MixedStrategyProfile<double>
+  NewMixedStrategyProfile(double, const StrategySupportProfile &) const = 0;
+  virtual MixedStrategyProfile<Rational>
+  NewMixedStrategyProfile(const Rational &, const StrategySupportProfile &) const = 0;
 
   /// @name Players
   //@{
@@ -588,9 +595,15 @@ inline GamePlayer GameStrategyRep::GetPlayer() const { return m_player; }
 
 inline Game GamePlayerRep::GetGame() const { return m_game; }
 inline int GamePlayerRep::NumStrategies() const
-{ m_game->BuildComputedValues(); return m_strategies.size(); }
+{
+  m_game->BuildComputedValues();
+  return m_strategies.size();
+}
 inline GameStrategy GamePlayerRep::GetStrategy(int st) const
-{ m_game->BuildComputedValues(); return m_strategies[st]; }
+{
+  m_game->BuildComputedValues();
+  return m_strategies[st];
+}
 
 //=======================================================================
 
@@ -601,6 +614,6 @@ Game NewTable(const Array<int> &p_dim, bool p_sparseOutcomes = false);
 /// Reads a game in .efg or .nfg format from the input stream
 Game ReadGame(std::istream &);
 
-} // end namespace gambit
+} // namespace Gambit
 
-#endif   // LIBGAMBIT_GAME_H
+#endif // LIBGAMBIT_GAME_H

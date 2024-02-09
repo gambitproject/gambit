@@ -38,15 +38,15 @@ protected:
   unsigned int m_gameversion;
 
   // structures for storing cached data: nodes
-  mutable std::map<GameNode,T> map_realizProbs, map_beliefs;
-  mutable std::map<GameNode,std::map<GamePlayer, T>> map_nodeValues;
+  mutable std::map<GameNode, T> map_realizProbs, map_beliefs;
+  mutable std::map<GameNode, std::map<GamePlayer, T>> map_nodeValues;
 
   // structures for storing cached data: information sets
-  mutable std::map<GameInfoset,T> map_infosetValues;
+  mutable std::map<GameInfoset, T> map_infosetValues;
 
   // structures for storing cached data: actions
-  mutable std::map<GameAction,T> map_actionValues; // aka conditional payoffs
-  mutable std::map<GameAction,T> map_regret;
+  mutable std::map<GameAction, T> map_actionValues; // aka conditional payoffs
+  mutable std::map<GameAction, T> map_regret;
 
   /// @name Auxiliary functions for computation of interesting values
   //@{
@@ -59,9 +59,9 @@ protected:
 
   /// @name Converting mixed strategies to behavior
   //@{
-  void BehaviorStrat(GamePlayer &, GameNode &, std::map<GameNode,T> &, std::map<GameNode,T> &);
+  void BehaviorStrat(GamePlayer &, GameNode &, std::map<GameNode, T> &, std::map<GameNode, T> &);
   void RealizationProbs(const MixedStrategyProfile<T> &, GamePlayer &, const Array<int> &,
-  		  				GameTreeNodeRep *, std::map<GameNode,T> &, std::map<GameNode,T> &);
+                        GameTreeNodeRep *, std::map<GameNode, T> &, std::map<GameNode, T> &);
   //@}
 
   /// Check underlying game has not changed; raise exception if it has
@@ -83,49 +83,62 @@ public:
 
   MixedBehaviorProfile<T> &operator=(const MixedBehaviorProfile<T> &);
   MixedBehaviorProfile<T> &operator=(const Vector<T> &p)
-    { InvalidateCache(); m_probs = p; return *this;}
+  {
+    InvalidateCache();
+    m_probs = p;
+    return *this;
+  }
   MixedBehaviorProfile<T> &operator=(const T &x)
-    { InvalidateCache(); m_probs = x; return *this; }
+  {
+    InvalidateCache();
+    m_probs = x;
+    return *this;
+  }
 
   //@}
 
   /// @name Operator overloading
   //@{
   bool operator==(const MixedBehaviorProfile<T> &) const;
-  bool operator!=(const MixedBehaviorProfile<T> &x) const
-  { return !(*this == x); }
+  bool operator!=(const MixedBehaviorProfile<T> &x) const { return !(*this == x); }
 
-  bool operator==(const DVector<T> &x) const
-  { return m_probs == x; }
-  bool operator!=(const DVector<T> &x) const
-  { return m_probs != x; }
+  bool operator==(const DVector<T> &x) const { return m_probs == x; }
+  bool operator!=(const DVector<T> &x) const { return m_probs != x; }
 
   const T &operator[](const GameAction &p_action) const
-    { return (*this)(p_action->GetInfoset()->GetPlayer()->GetNumber(),
-		     p_action->GetInfoset()->GetNumber(),
-		     m_support.GetIndex(p_action)); }
+  {
+    return (*this)(p_action->GetInfoset()->GetPlayer()->GetNumber(),
+                   p_action->GetInfoset()->GetNumber(), m_support.GetIndex(p_action));
+  }
   T &operator[](const GameAction &p_action)
-    { return (*this)(p_action->GetInfoset()->GetPlayer()->GetNumber(),
-		     p_action->GetInfoset()->GetNumber(),
-		     m_support.GetIndex(p_action)); }
+  {
+    return (*this)(p_action->GetInfoset()->GetPlayer()->GetNumber(),
+                   p_action->GetInfoset()->GetNumber(), m_support.GetIndex(p_action));
+  }
 
   const T &operator()(const GameAction &p_action) const
-    { return (*this)(p_action->GetInfoset()->GetPlayer()->GetNumber(),
-		     p_action->GetInfoset()->GetNumber(),
-		     m_support.GetIndex(p_action)); }
+  {
+    return (*this)(p_action->GetInfoset()->GetPlayer()->GetNumber(),
+                   p_action->GetInfoset()->GetNumber(), m_support.GetIndex(p_action));
+  }
   T &operator()(const GameAction &p_action)
-    { return (*this)(p_action->GetInfoset()->GetPlayer()->GetNumber(),
-		     p_action->GetInfoset()->GetNumber(),
-		     m_support.GetIndex(p_action)); }
+  {
+    return (*this)(p_action->GetInfoset()->GetPlayer()->GetNumber(),
+                   p_action->GetInfoset()->GetNumber(), m_support.GetIndex(p_action));
+  }
 
-  const T &operator()(int a, int b, int c) const
-    { return m_probs(a, b, c); }
+  const T &operator()(int a, int b, int c) const { return m_probs(a, b, c); }
   T &operator()(int a, int b, int c)
-    { InvalidateCache();  return m_probs(a, b, c); }
-  const T &operator[](int a) const
-    { return m_probs[a]; }
+  {
+    InvalidateCache();
+    return m_probs(a, b, c);
+  }
+  const T &operator[](int a) const { return m_probs[a]; }
   T &operator[](int a)
-    { InvalidateCache();  return m_probs[a]; }
+  {
+    InvalidateCache();
+    return m_probs[a];
+  }
 
   operator const Vector<T> &() const { return m_probs; }
   //@}
@@ -138,13 +151,13 @@ public:
   /// We also clear
   /// map_nodeValues, map_actionValues
   /// as otherwise we would need to reset them to 0 while populating them
-  void InvalidateCache() const {
+  void InvalidateCache() const
+  {
     map_realizProbs.clear();
     map_nodeValues.clear();
     map_actionValues.clear();
   }
   /// Reset certain cached values
-
 
   /// Set the profile to the centroid
   void SetCentroid();
@@ -167,8 +180,7 @@ public:
   Game GetGame() const { return m_support.GetGame(); }
   const BehaviorSupportProfile &GetSupport() const { return m_support; }
   /// Returns whether the profile has been invalidated by a subsequent revision to the game
-  bool IsInvalidated() const
-  { return m_gameversion != m_support.GetGame()->GetVersion(); }
+  bool IsInvalidated() const { return m_gameversion != m_support.GetGame()->GetVersion(); }
 
   bool IsDefinedAt(GameInfoset p_infoset) const;
   //@}
@@ -176,9 +188,7 @@ public:
   /// @name Computation of interesting quantities
   //@{
   T GetPayoff(int p_player) const;
-  T GetPayoff(const GamePlayer &p_player) const {
-    return GetPayoff(p_player->GetNumber());
-  }
+  T GetPayoff(const GamePlayer &p_player) const { return GetPayoff(p_player->GetNumber()); }
   T GetLiapValue() const;
 
   const T &GetRealizProb(const GameNode &node) const;
@@ -216,12 +226,10 @@ public:
   ///     GetRegret(const GameAction &) const
   T GetMaxRegret() const;
 
-  T DiffActionValue(const GameAction &action,
-		    const GameAction &oppAction) const;
-  T DiffRealizProb(const GameNode &node,
-		   const GameAction &oppAction) const;
+  T DiffActionValue(const GameAction &action, const GameAction &oppAction) const;
+  T DiffRealizProb(const GameNode &node, const GameAction &oppAction) const;
   T DiffNodeValue(const GameNode &node, const GamePlayer &player,
-		  const GameAction &oppAction) const;
+                  const GameAction &oppAction) const;
 
   MixedStrategyProfile<T> ToMixedProfile() const;
 

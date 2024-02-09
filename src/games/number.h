@@ -45,21 +45,22 @@ private:
 
 public:
   /// Construct a new number with representation "0"
-  Number()
-    : m_text("0"), m_rational(0), m_double(0.0) { }
+  Number() : m_text("0"), m_rational(0), m_double(0.0) {}
 
   /// Construct a new number with representation p_text
   /// @param p_text The text representation of the number
   explicit Number(const std::string &p_text)
     : m_text(p_text), m_rational(lexical_cast<Rational>(p_text)),
       m_double(static_cast<double>(m_rational))
-  { }
+  {
+  }
   /// Construct a new number with rational representation p_rational
   /// @param p_rational The rational representation of the number
   explicit Number(const Rational &p_rational)
     : m_text(lexical_cast<std::string>(p_rational)), m_rational(p_rational),
       m_double(static_cast<double>(p_rational))
-  { }
+  {
+  }
   ~Number() = default;
 
   Number &operator=(const Number &p_number) = default;
@@ -85,6 +86,6 @@ public:
   explicit operator const std::string &() const { return m_text; }
 };
 
-}
+} // namespace Gambit
 
 #endif // LIBGAMBIT_NUMBER_H

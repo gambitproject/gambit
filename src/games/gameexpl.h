@@ -29,6 +29,7 @@ namespace Gambit {
 
 class GameExplicitRep : public GameRep {
   template <class T> friend class MixedStrategyProfile;
+
 protected:
   Array<GamePlayerRep *> m_players;
   Array<GameOutcomeRep *> m_outcomes;
@@ -79,11 +80,10 @@ public:
 
   /// @name Writing data files
   //@{
-  void Write(std::ostream &p_stream,
-		     const std::string &p_format="native") const override;
+  void Write(std::ostream &p_stream, const std::string &p_format = "native") const override;
   //@}
 };
 
-}
+} // namespace Gambit
 
-#endif  // GAMEEXPL_H
+#endif // GAMEEXPL_H

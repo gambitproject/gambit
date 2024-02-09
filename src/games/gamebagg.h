@@ -45,7 +45,8 @@ public:
   /// Create a game from a serialized file in BAGG format
   static Game ReadBaggFile(std::istream &);
   /// Destructor
-  ~GameBAGGRep() override {
+  ~GameBAGGRep() override
+  {
     for (auto player : m_players) {
       player->Invalidate();
     }
@@ -63,14 +64,11 @@ public:
   /// The number of strategies for each player
   Array<int> NumStrategies() const override;
   /// Gets the i'th strategy in the game, numbered globally
-  GameStrategy GetStrategy(int p_index) const override
-  { throw UndefinedException(); }
+  GameStrategy GetStrategy(int p_index) const override { throw UndefinedException(); }
   /// Returns the number of strategy contingencies in the game
-  int NumStrategyContingencies() const override
-  { throw UndefinedException(); }
+  int NumStrategyContingencies() const override { throw UndefinedException(); }
   /// Returns the total number of actions in the game
-  int BehavProfileLength() const override
-  { throw UndefinedException(); }
+  int BehavProfileLength() const override { throw UndefinedException(); }
   /// Returns the total number of strategies in the game
   int MixedProfileLength() const override;
   //@}
@@ -78,8 +76,10 @@ public:
   PureStrategyProfile NewPureStrategyProfile() const override;
   MixedStrategyProfile<double> NewMixedStrategyProfile(double) const override;
   MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &) const override;
-  MixedStrategyProfile<double> NewMixedStrategyProfile(double, const StrategySupportProfile&) const override;
-  MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &, const StrategySupportProfile&) const override;
+  MixedStrategyProfile<double>
+  NewMixedStrategyProfile(double, const StrategySupportProfile &) const override;
+  MixedStrategyProfile<Rational>
+  NewMixedStrategyProfile(const Rational &, const StrategySupportProfile &) const override;
 
   /// @name Players
   //@{
@@ -88,42 +88,33 @@ public:
   /// Returns the pl'th player in the game
   GamePlayer GetPlayer(int pl) const override { return m_players[pl]; }
   /// Returns the chance (nature) player
-  GamePlayer GetChance() const override
-  { throw UndefinedException(); }
+  GamePlayer GetChance() const override { throw UndefinedException(); }
   /// Creates a new player in the game, with no moves
-  GamePlayer NewPlayer() override
-  { throw UndefinedException(); }
+  GamePlayer NewPlayer() override { throw UndefinedException(); }
   //@}
 
   /// @name Information sets
   //@{
   /// Returns the iset'th information set in the game (numbered globally)
-  GameInfoset GetInfoset(int iset) const override
-  { throw UndefinedException(); }
+  GameInfoset GetInfoset(int iset) const override { throw UndefinedException(); }
   /// Returns the set of information sets in the game
-  Array<GameInfoset> GetInfosets() const override
-  { throw UndefinedException(); }
+  Array<GameInfoset> GetInfosets() const override { throw UndefinedException(); }
   /// Returns an array with the number of information sets per personal player
-  Array<int> NumInfosets() const override
-  { throw UndefinedException(); }
+  Array<int> NumInfosets() const override { throw UndefinedException(); }
   /// Returns the act'th action in the game (numbered globally)
-  GameAction GetAction(int act) const override
-  { throw UndefinedException(); }
+  GameAction GetAction(int act) const override { throw UndefinedException(); }
   //@}
-
 
   /// @name Outcomes
   //@{
   /// Returns the number of outcomes defined in the game
-  int NumOutcomes() const override   { throw UndefinedException(); }
+  int NumOutcomes() const override { throw UndefinedException(); }
   /// Returns the index'th outcome defined in the game
-  GameOutcome GetOutcome(int index) const override
-  { throw UndefinedException(); }
+  GameOutcome GetOutcome(int index) const override { throw UndefinedException(); }
   /// Creates a new outcome in the game
-  GameOutcome NewOutcome() override  { throw UndefinedException(); }
+  GameOutcome NewOutcome() override { throw UndefinedException(); }
   /// Deletes the specified outcome from the game
-  void DeleteOutcome(const GameOutcome &) override
-  { throw UndefinedException(); }
+  void DeleteOutcome(const GameOutcome &) override { throw UndefinedException(); }
   //@}
 
   /// @name Nodes
@@ -131,15 +122,14 @@ public:
   /// Returns the root node of the game
   GameNode GetRoot() const override { throw UndefinedException(); }
   /// Returns the number of nodes in the game
-  int NumNodes() const override     { throw UndefinedException(); }
+  int NumNodes() const override { throw UndefinedException(); }
   //@}
 
   /// @name General data access
   //@{
   bool IsTree() const override { return false; }
   virtual bool IsBagg() const { return true; }
-  bool IsPerfectRecall(GameInfoset &, GameInfoset &) const override
-  { return true; }
+  bool IsPerfectRecall(GameInfoset &, GameInfoset &) const override { return true; }
   bool IsConstSum() const override { throw UndefinedException(); }
   /// Returns the smallest payoff in any outcome of the game
   Rational GetMinPayoff(int) const override { return Rational(baggPtr->getMinPayoff()); }
@@ -150,19 +140,20 @@ public:
   /// @name Writing data files
   //@{
   /// Write the game to a savefile in the specified format.
-  void Write(std::ostream &p_stream,
-  		     const std::string &p_format="native") const override;
-  void WriteNfgFile(std::ostream &) const override
-  { throw UndefinedException(); }
+  void Write(std::ostream &p_stream, const std::string &p_format = "native") const override;
+  void WriteNfgFile(std::ostream &) const override { throw UndefinedException(); }
   virtual void WriteBaggFile(std::ostream &) const;
   //@}
 
   /// @name Modification
   //@{
-  Game SetChanceProbs(const GameInfoset &, const Array<Number> &) override { throw UndefinedException(); }
+  Game SetChanceProbs(const GameInfoset &, const Array<Number> &) override
+  {
+    throw UndefinedException();
+  }
   //@}
 };
 
 } // end namespace Gambit
 
-#endif  // GAMEBAGG_H
+#endif // GAMEBAGG_H

@@ -38,12 +38,12 @@ AGG::AGG(int numPlayers, std::vector<int> &_actions, int numANodes, int _numPNod
          vector<projtype> &projTypes, vector<vector<aggdistrib>> &projS,
          vector<vector<vector<config>>> &proj, vector<vector<projtype>> &projF,
          vector<vector<vector<int>>> &Po, vector<aggdistrib> &P, vector<aggpayoff> &_payoffs)
-  : numPlayers(numPlayers), totalActions(0), maxActions(0),
-    numActionNodes(numANodes), numPNodes(_numPNodes),
-    actionSets(_actionSets), neighbors(neighb), projectionTypes(projTypes), payoffs(_payoffs),
-    projection(proj), projectedStrat(projS), fullProjectedStrat(projS), projFunctions(projF),
-    Porder(Po), Pr(P), isPure(numANodes, true), node2Action(numANodes, vector<int>(numPlayers)),
-    cache(numPlayers + 1), player2Class(numPlayers), kSymStrategyOffset(1, 0)
+  : numPlayers(numPlayers), totalActions(0), maxActions(0), numActionNodes(numANodes),
+    numPNodes(_numPNodes), actionSets(_actionSets), neighbors(neighb), projectionTypes(projTypes),
+    payoffs(_payoffs), projection(proj), projectedStrat(projS), fullProjectedStrat(projS),
+    projFunctions(projF), Porder(Po), Pr(P), isPure(numANodes, true),
+    node2Action(numANodes, vector<int>(numPlayers)), cache(numPlayers + 1),
+    player2Class(numPlayers), kSymStrategyOffset(1, 0)
 
 {
   // actions

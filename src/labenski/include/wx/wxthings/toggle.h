@@ -77,174 +77,170 @@ class WXDLLEXPORT wxTimerEvent;
 // wxCustomButton styles
 //-----------------------------------------------------------------------------
 
-enum wxCustomButton_Style
-{
-    // Position of the label, use only one
-    wxCUSTBUT_LEFT           = 0x0001,
-    wxCUSTBUT_RIGHT          = 0x0002,
-    wxCUSTBUT_TOP            = 0x0004,
-    wxCUSTBUT_BOTTOM         = 0x0008,
-    // Button style, use only one
-    wxCUSTBUT_NOTOGGLE       = 0x0100,
-    wxCUSTBUT_BUTTON         = 0x0200,
-    wxCUSTBUT_TOGGLE         = 0x0400,
-    wxCUSTBUT_BUT_DCLICK_TOG = 0x0800,
-    wxCUSTBUT_TOG_DCLICK_BUT = 0x1000,
-    // drawing styles
-    wxCUSTBUT_FLAT           = 0x2000 // flat, mouseover raises if not depressed
+enum wxCustomButton_Style {
+  // Position of the label, use only one
+  wxCUSTBUT_LEFT = 0x0001,
+  wxCUSTBUT_RIGHT = 0x0002,
+  wxCUSTBUT_TOP = 0x0004,
+  wxCUSTBUT_BOTTOM = 0x0008,
+  // Button style, use only one
+  wxCUSTBUT_NOTOGGLE = 0x0100,
+  wxCUSTBUT_BUTTON = 0x0200,
+  wxCUSTBUT_TOGGLE = 0x0400,
+  wxCUSTBUT_BUT_DCLICK_TOG = 0x0800,
+  wxCUSTBUT_TOG_DCLICK_BUT = 0x1000,
+  // drawing styles
+  wxCUSTBUT_FLAT = 0x2000 // flat, mouseover raises if not depressed
 };
 
 //-----------------------------------------------------------------------------
 // wxCustomButton
 //-----------------------------------------------------------------------------
 
-class WXDLLIMPEXP_THINGS wxCustomButton : public wxControl
-{
+class WXDLLIMPEXP_THINGS wxCustomButton : public wxControl {
 public:
+  wxCustomButton() : wxControl() { Init(); }
 
-    wxCustomButton() : wxControl() { Init(); }
+  // wxToggleButton or wxButton compatible constructor (also wxTextCtrl)
+  wxCustomButton(wxWindow *parent, wxWindowID id, const wxString &label,
+                 const wxPoint &pos = wxDefaultPosition, const wxSize &size = wxDefaultSize,
+                 long style = wxCUSTBUT_TOGGLE, const wxValidator &val = wxDefaultValidator,
+                 const wxString &name = wxT("wxCustomButton"))
+    : wxControl()
+  {
+    Init();
+    Create(parent, id, label, wxNullBitmap, pos, size, style, val, name);
+  }
 
-    // wxToggleButton or wxButton compatible constructor (also wxTextCtrl)
-    wxCustomButton(wxWindow* parent, wxWindowID id,
-                   const wxString& label,
-                   const wxPoint& pos = wxDefaultPosition,
-                   const wxSize& size = wxDefaultSize,
-                   long style = wxCUSTBUT_TOGGLE,
-                   const wxValidator& val = wxDefaultValidator,
-                   const wxString& name = wxT("wxCustomButton"))
-                   : wxControl()
-    {
-        Init();
-        Create(parent,id,label,wxNullBitmap,pos,size,style,val,name);
-    }
+  // wxBitmapButton compatible constructor
+  wxCustomButton(wxWindow *parent, wxWindowID id, const wxBitmap &bitmap,
+                 const wxPoint &pos = wxDefaultPosition, const wxSize &size = wxDefaultSize,
+                 long style = wxCUSTBUT_TOGGLE, const wxValidator &val = wxDefaultValidator,
+                 const wxString &name = wxT("wxCustomButton"))
+    : wxControl()
+  {
+    Init();
+    Create(parent, id, wxEmptyString, bitmap, pos, size, style, val, name);
+  }
 
-    // wxBitmapButton compatible constructor
-    wxCustomButton(wxWindow *parent, wxWindowID id,
-                   const wxBitmap& bitmap,
-                   const wxPoint& pos = wxDefaultPosition,
-                   const wxSize& size = wxDefaultSize,
-                   long style = wxCUSTBUT_TOGGLE,
-                   const wxValidator& val = wxDefaultValidator,
-                   const wxString& name = wxT("wxCustomButton"))
-                   : wxControl()
-    {
-        Init();
-        Create(parent,id,wxEmptyString,bitmap,pos,size,style,val,name);
-    }
+  // Native constructor
+  wxCustomButton(wxWindow *parent, wxWindowID id, const wxString &label, const wxBitmap &bitmap,
+                 const wxPoint &pos = wxDefaultPosition, const wxSize &size = wxDefaultSize,
+                 long style = wxCUSTBUT_TOGGLE | wxCUSTBUT_BOTTOM,
+                 const wxValidator &val = wxDefaultValidator,
+                 const wxString &name = wxT("wxCustomButton"))
+    : wxControl()
+  {
+    Init();
+    Create(parent, id, label, bitmap, pos, size, style, val, name);
+  }
 
-    // Native constructor
-    wxCustomButton(wxWindow *parent, wxWindowID id,
-                   const wxString& label, const wxBitmap& bitmap,
-                   const wxPoint& pos = wxDefaultPosition,
-                   const wxSize& size = wxDefaultSize,
-                   long style = wxCUSTBUT_TOGGLE|wxCUSTBUT_BOTTOM,
-                   const wxValidator& val = wxDefaultValidator,
-                   const wxString& name = wxT("wxCustomButton"))
-                   : wxControl()
-    {
-        Init();
-        Create(parent,id,label,bitmap,pos,size,style,val,name);
-    }
+  virtual ~wxCustomButton();
 
-    virtual ~wxCustomButton();
+  bool Create(wxWindow *parent, wxWindowID id, const wxString &label, const wxBitmap &bitmap,
+              const wxPoint &pos = wxDefaultPosition, const wxSize &size = wxDefaultSize,
+              long style = 0, const wxValidator &val = wxDefaultValidator,
+              const wxString &name = wxT("wxCustomButton"));
 
-    bool Create(wxWindow* parent,
-                wxWindowID id,
-                const wxString& label,
-                const wxBitmap &bitmap,
-                const wxPoint& pos = wxDefaultPosition,
-                const wxSize& size = wxDefaultSize,
-                long style = 0,
-                const wxValidator& val = wxDefaultValidator,
-                const wxString& name = wxT("wxCustomButton"));
+  bool GetValue() const { return m_down % 2 != 0; }
+  void SetValue(bool depressed);
 
-    bool GetValue() const { return m_down%2 != 0; }
-    void SetValue( bool depressed );
+  // Use combinations of wxCustomButton_Style(s)
+  long GetButtonStyle() const { return m_button_style; }
+  bool SetButtonStyle(long style);
 
-    // Use combinations of wxCustomButton_Style(s)
-    long GetButtonStyle() const { return m_button_style; }
-    bool SetButtonStyle( long style );
+  // Set the text label, wxEmptyString for none
+  void SetLabel(const wxString &label);
 
-    // Set the text label, wxEmptyString for none
-    void SetLabel( const wxString &label );
+  // set the bitmaps, ONLY this Label bitmap is used for calculating control size
+  //   all bitmaps will be centered accordingly in any case
+  //   call SetSet(GetBestSize()) if you change their size and want the control to resize
+  //   appropriately
+  void SetBitmapLabel(const wxBitmap &bitmap);
+  void SetBitmapSelected(const wxBitmap &sel)
+  {
+    m_bmpSelected = sel;
+    CalcLayout(true);
+  };
+  void SetBitmapFocus(const wxBitmap &focus)
+  {
+    m_bmpFocus = focus;
+    CalcLayout(true);
+  };
+  void SetBitmapDisabled(const wxBitmap &disabled)
+  {
+    m_bmpDisabled = disabled;
+    CalcLayout(true);
+  };
+  // wxBitmapButton compatibility
+  void SetLabel(const wxBitmap &bitmap) { SetBitmapLabel(bitmap); }
 
-    // set the bitmaps, ONLY this Label bitmap is used for calculating control size
-    //   all bitmaps will be centered accordingly in any case
-    //   call SetSet(GetBestSize()) if you change their size and want the control to resize appropriately
-    void SetBitmapLabel(const wxBitmap& bitmap);
-    void SetBitmapSelected(const wxBitmap& sel)      { m_bmpSelected = sel; CalcLayout(true); };
-    void SetBitmapFocus(const wxBitmap& focus)       { m_bmpFocus = focus; CalcLayout(true); };
-    void SetBitmapDisabled(const wxBitmap& disabled) { m_bmpDisabled = disabled; CalcLayout(true); };
-    // wxBitmapButton compatibility
-    void SetLabel(const wxBitmap& bitmap)            { SetBitmapLabel(bitmap); }
+  // retrieve the bitmaps
+  const wxBitmap &GetBitmapLabel() const { return m_bmpLabel; }
+  const wxBitmap &GetBitmapSelected() const { return m_bmpSelected; }
+  const wxBitmap &GetBitmapFocus() const { return m_bmpFocus; }
+  const wxBitmap &GetBitmapDisabled() const { return m_bmpDisabled; }
 
-    // retrieve the bitmaps
-    const wxBitmap& GetBitmapLabel()    const { return m_bmpLabel;    }
-    const wxBitmap& GetBitmapSelected() const { return m_bmpSelected; }
-    const wxBitmap& GetBitmapFocus()    const { return m_bmpFocus;    }
-    const wxBitmap& GetBitmapDisabled() const { return m_bmpDisabled; }
+  // Creates a "disabled" bitmap by dithering it with the background colour
+  wxBitmap CreateBitmapDisabled(const wxBitmap &bitmap) const;
 
-    // Creates a "disabled" bitmap by dithering it with the background colour
-    wxBitmap CreateBitmapDisabled(const wxBitmap &bitmap) const;
+  // set/get the margins (in pixels) around the label and bitmap
+  //    if fit = true then resize the button to fit
+  void SetMargins(const wxSize &margin, bool fit = false);
 
-    // set/get the margins (in pixels) around the label and bitmap
-    //    if fit = true then resize the button to fit
-    void SetMargins(const wxSize &margin, bool fit = false);
+  // set/get the margins around the text label
+  //    the inter bitmap/label margin is the max of either margin, not the sum
+  void SetLabelMargin(const wxSize &margin, bool fit = false);
+  wxSize GetLabelMargin() const { return m_labelMargin; }
+  // set/get the margins around the bitmap
+  //    the inter bitmap/label margin is the max of either margin, not the sum
+  void SetBitmapMargin(const wxSize &margin, bool fit = false);
+  wxSize GetBitmapMargin() const { return m_bitmapMargin; }
 
-    // set/get the margins around the text label
-    //    the inter bitmap/label margin is the max of either margin, not the sum
-    void SetLabelMargin(const wxSize &margin, bool fit = false);
-    wxSize GetLabelMargin() const { return m_labelMargin; }
-    // set/get the margins around the bitmap
-    //    the inter bitmap/label margin is the max of either margin, not the sum
-    void SetBitmapMargin(const wxSize &margin, bool fit = false);
-    wxSize GetBitmapMargin() const { return m_bitmapMargin; }
-
-    // can be used to activate the focused behavior (see MenuButton)
-    void SetFocused(bool focused) { m_focused = focused; Refresh(false); }
-    bool GetFocused() const { return m_focused; }
+  // can be used to activate the focused behavior (see MenuButton)
+  void SetFocused(bool focused)
+  {
+    m_focused = focused;
+    Refresh(false);
+  }
+  bool GetFocused() const { return m_focused; }
 
 protected:
-    void OnPaint(wxPaintEvent &event);
-    void Redraw();
-    virtual void Paint( wxDC &dc );
+  void OnPaint(wxPaintEvent &event);
+  void Redraw();
+  virtual void Paint(wxDC &dc);
 
-    virtual wxSize DoGetBestSize() const;
+  virtual wxSize DoGetBestSize() const;
 
-    virtual void SendEvent();
+  virtual void SendEvent();
 
-    void OnMouseEvents(wxMouseEvent &event);
+  void OnMouseEvents(wxMouseEvent &event);
 
-    void OnTimer(wxTimerEvent &event);
-    void OnSize( wxSizeEvent &event );
+  void OnTimer(wxTimerEvent &event);
+  void OnSize(wxSizeEvent &event);
 
-    virtual void CalcLayout(bool refresh);
+  virtual void CalcLayout(bool refresh);
 
-    int m_down;         // toggle state if m_down%2 then depressed
-    bool m_focused;     // mouse in window
-    long m_button_style;
+  int m_down;     // toggle state if m_down%2 then depressed
+  bool m_focused; // mouse in window
+  long m_button_style;
 
-    // the bitmaps for various states
-    wxBitmap m_bmpLabel,
-             m_bmpSelected,
-             m_bmpFocus,
-             m_bmpDisabled;
+  // the bitmaps for various states
+  wxBitmap m_bmpLabel, m_bmpSelected, m_bmpFocus, m_bmpDisabled;
 
-    // the margins around the label/bitmap
-    wxSize m_labelMargin,
-           m_bitmapMargin;
+  // the margins around the label/bitmap
+  wxSize m_labelMargin, m_bitmapMargin;
 
-    wxPoint m_bitmapPos,
-            m_labelPos;
+  wxPoint m_bitmapPos, m_labelPos;
 
-    wxTimer *m_timer;
+  wxTimer *m_timer;
 
-    wxEventType m_eventType;     // store the mouse event type
+  wxEventType m_eventType; // store the mouse event type
 
 private:
-    void Init();
-    DECLARE_DYNAMIC_CLASS(wxCustomButton)
-    DECLARE_EVENT_TABLE()
+  void Init();
+  DECLARE_DYNAMIC_CLASS(wxCustomButton)
+  DECLARE_EVENT_TABLE()
 };
 
-#endif  // _WX_CUSTOMBUTTON_H_
+#endif // _WX_CUSTOMBUTTON_H_

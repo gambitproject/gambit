@@ -41,7 +41,7 @@ class PureStrategyProfileRep {
 
 protected:
   Game m_nfg;
-  Array <GameStrategy> m_profile;
+  Array<GameStrategy> m_profile;
 
   /// Construct a new strategy profile
   explicit PureStrategyProfileRep(const Game &p_game);
@@ -56,16 +56,16 @@ public:
   /// @name Data access and manipulation
   //@{
   /// Get the index uniquely identifying the strategy profile
-  virtual long GetIndex() const
-  { throw UndefinedException(); }
+  virtual long GetIndex() const { throw UndefinedException(); }
 
   /// Get the strategy played by player pl
-  const GameStrategy &GetStrategy(int pl) const
-  { return m_profile[pl]; }
+  const GameStrategy &GetStrategy(int pl) const { return m_profile[pl]; }
 
   /// Get the strategy played by the player
   const GameStrategy &GetStrategy(const GamePlayer &p_player) const
-  { return m_profile[p_player->GetNumber()]; }
+  {
+    return m_profile[p_player->GetNumber()];
+  }
 
   /// Set the strategy for a player
   virtual void SetStrategy(const GameStrategy &) = 0;
@@ -80,8 +80,7 @@ public:
   virtual Rational GetPayoff(int pl) const = 0;
 
   /// Get the payoff to the player resulting from the profile
-  Rational GetPayoff(const GamePlayer &p_player) const
-  { return GetPayoff(p_player->GetNumber()); }
+  Rational GetPayoff(const GamePlayer &p_player) const { return GetPayoff(p_player->GetNumber()); }
 
   /// Get the value of playing strategy against the profile
   virtual Rational GetStrategyValue(const GameStrategy &) const = 0;
@@ -96,10 +95,10 @@ public:
   bool IsBestResponse(const GamePlayer &p_player) const;
 
   /// Get the list of best response strategies for a player
-  List <GameStrategy> GetBestResponse(const GamePlayer &p_player) const;
+  List<GameStrategy> GetBestResponse(const GamePlayer &p_player) const;
 
   /// Convert to a mixed strategy representation
-  MixedStrategyProfile <Rational> ToMixedStrategyProfile() const;
+  MixedStrategyProfile<Rational> ToMixedStrategyProfile() const;
   //@}
 };
 
@@ -108,14 +107,11 @@ private:
   PureStrategyProfileRep *rep;
 
 public:
-  PureStrategyProfile(const PureStrategyProfile &r) : rep(r.rep->Copy())
-  {}
+  PureStrategyProfile(const PureStrategyProfile &r) : rep(r.rep->Copy()) {}
 
-  explicit PureStrategyProfile(PureStrategyProfileRep *p_rep) : rep(p_rep)
-  {}
+  explicit PureStrategyProfile(PureStrategyProfileRep *p_rep) : rep(p_rep) {}
 
-  ~PureStrategyProfile()
-  { delete rep; }
+  ~PureStrategyProfile() { delete rep; }
 
   PureStrategyProfile &operator=(const PureStrategyProfile &r)
   {
@@ -126,11 +122,9 @@ public:
     return *this;
   }
 
-  PureStrategyProfileRep *operator->() const
-  { return rep; }
+  PureStrategyProfileRep *operator->() const { return rep; }
 
-  explicit operator PureStrategyProfileRep *() const
-  { return rep; }
+  explicit operator PureStrategyProfileRep *() const { return rep; }
 };
 
 /// This class iterates through the contingencies in a strategic game.
@@ -141,6 +135,7 @@ public:
 class StrategyProfileIterator {
   friend class GameRep;
   friend class GameTableRep;
+
 private:
   bool m_atEnd;
   StrategySupportProfile m_support;
@@ -161,8 +156,7 @@ public:
   /// Construct a new iterator on the support, fixing the given strategy
   StrategyProfileIterator(const StrategySupportProfile &, const GameStrategy &);
   /// Construct a new iterator on the support, fixing two players' strategies
-  StrategyProfileIterator(const StrategySupportProfile &s,
-                          int pl1, int st1, int pl2, int st2);
+  StrategyProfileIterator(const StrategySupportProfile &s, int pl1, int st1, int pl2, int st2);
   //@}
 
   /// @name Iteration and data access
@@ -180,7 +174,6 @@ public:
   const PureStrategyProfile &operator*() const { return m_profile; }
   //@}
 };
-
 
 } // end namespace Gambit
 

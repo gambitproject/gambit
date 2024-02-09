@@ -34,6 +34,7 @@ class GameTableRep : public GameExplicitRep {
   friend class PureStrategyProfileRep;
   template <class T> friend class MixedStrategyProfile;
   template <class T> friend class TableMixedStrategyProfileRep;
+
 private:
   Array<GameOutcomeRep *> m_results;
 
@@ -56,21 +57,17 @@ public:
   //@{
   bool IsTree() const override { return false; }
   bool IsConstSum() const override;
-  bool IsPerfectRecall(GameInfoset &, GameInfoset &) const override
-  { return true; }
+  bool IsPerfectRecall(GameInfoset &, GameInfoset &) const override { return true; }
   //@}
 
   /// @name Dimensions of the game
   //@{
   /// The number of actions in each information set
-  PVector<int> NumActions() const override
-  { throw UndefinedException(); }
+  PVector<int> NumActions() const override { throw UndefinedException(); }
   /// The number of members in each information set
-  PVector<int> NumMembers() const override
-  { throw UndefinedException(); }
+  PVector<int> NumMembers() const override { throw UndefinedException(); }
   /// Returns the total number of actions in the game
-  int BehavProfileLength() const override
-  { throw UndefinedException(); }
+  int BehavProfileLength() const override { throw UndefinedException(); }
   //@}
 
   /// @name Players
@@ -84,17 +81,13 @@ public:
   /// @name Information sets
   //@{
   /// Returns the iset'th information set in the game (numbered globally)
-  GameInfoset GetInfoset(int iset) const override
-  { throw UndefinedException(); }
+  GameInfoset GetInfoset(int iset) const override { throw UndefinedException(); }
   /// Returns the set of information sets in the game
-  Array<GameInfoset> GetInfosets() const override
-  { throw UndefinedException(); }
+  Array<GameInfoset> GetInfosets() const override { throw UndefinedException(); }
   /// Returns an array with the number of information sets per personal player
-  Array<int> NumInfosets() const override
-  { throw UndefinedException(); }
+  Array<int> NumInfosets() const override { throw UndefinedException(); }
   /// Returns the act'th action in the game (numbered globally)
-  GameAction GetAction(int act) const override
-  { throw UndefinedException(); }
+  GameAction GetAction(int act) const override { throw UndefinedException(); }
   //@}
 
   /// @name Nodes
@@ -118,19 +111,21 @@ public:
 
   /// @name Modification
   //@{
-  Game SetChanceProbs(const GameInfoset &, const Array<Number> &) override { throw UndefinedException(); }
+  Game SetChanceProbs(const GameInfoset &, const Array<Number> &) override
+  {
+    throw UndefinedException();
+  }
   //@}
 
   PureStrategyProfile NewPureStrategyProfile() const override;
   MixedStrategyProfile<double> NewMixedStrategyProfile(double) const override;
   MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &) const override;
-  MixedStrategyProfile<double> NewMixedStrategyProfile(double, const StrategySupportProfile&) const override;
-  MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &, const StrategySupportProfile&) const override;
-
+  MixedStrategyProfile<double>
+  NewMixedStrategyProfile(double, const StrategySupportProfile &) const override;
+  MixedStrategyProfile<Rational>
+  NewMixedStrategyProfile(const Rational &, const StrategySupportProfile &) const override;
 };
 
-}
+} // namespace Gambit
 
-
-
-#endif  // GAMETABLE_H
+#endif // GAMETABLE_H

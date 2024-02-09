@@ -45,35 +45,32 @@ extern "C" {
 **           wasting memory.
 */
 
-int fft_double (
-    unsigned  NumSamples,          /* must be a power of 2 */
-    int       InverseTransform,    /* 0=forward FFT, 1=inverse FFT */
-    double   *RealIn,              /* array of input's real samples */
-    double   *ImaginaryIn,         /* array of input's imag samples */
-    double   *RealOut,             /* array of output's reals */
-    double   *ImaginaryOut );      /* array of output's imaginaries */
+int fft_double(unsigned NumSamples,   /* must be a power of 2 */
+               int InverseTransform,  /* 0=forward FFT, 1=inverse FFT */
+               double *RealIn,        /* array of input's real samples */
+               double *ImaginaryIn,   /* array of input's imag samples */
+               double *RealOut,       /* array of output's reals */
+               double *ImaginaryOut); /* array of output's imaginaries */
 
-
-int fft_float (
-    unsigned  NumSamples,          /* must be a power of 2 */
-    int       InverseTransform,    /* 0=forward FFT, 1=inverse FFT */
-    float    *RealIn,              /* array of input's real samples */
-    float    *ImaginaryIn,         /* array of input's imag samples */
-    float    *RealOut,             /* array of output's reals */
-    float    *ImaginaryOut );      /* array of output's imaginaries */
+int fft_float(unsigned NumSamples,  /* must be a power of 2 */
+              int InverseTransform, /* 0=forward FFT, 1=inverse FFT */
+              float *RealIn,        /* array of input's real samples */
+              float *ImaginaryIn,   /* array of input's imag samples */
+              float *RealOut,       /* array of output's reals */
+              float *ImaginaryOut); /* array of output's imaginaries */
 
 /* IsPowerOfTwo returns 1 if x is a power of two or 0 if not */
-int IsPowerOfTwo ( unsigned x );
+int IsPowerOfTwo(unsigned x);
 /* NumberOfBitsNeeded returns the number of bits to make the number, 2^n */
-unsigned NumberOfBitsNeeded ( unsigned PowerOfTwo );
-unsigned ReverseBits ( unsigned index, unsigned NumBits );
+unsigned NumberOfBitsNeeded(unsigned PowerOfTwo);
+unsigned ReverseBits(unsigned index, unsigned NumBits);
 
 /*
 **   The following function returns an "abstract frequency" of a
 **   given index into a buffer with a given number of frequency samples.
 **   Multiply return value by sampling rate to get frequency expressed in Hz.
 */
-double Index_to_frequency ( unsigned NumSamples, unsigned Index );
+double Index_to_frequency(unsigned NumSamples, unsigned Index);
 
 #ifdef __cplusplus
 }

@@ -28,10 +28,10 @@
     #define WXDLLIMPEXP_DATA_THINGS(type) WXIMPORT type
 #else // not making nor using DLL
 */
-    #define WXDLLIMPEXP_THINGS
-    #define WXDLLIMPEXP_DATA_THINGS(type) type
+#define WXDLLIMPEXP_THINGS
+#define WXDLLIMPEXP_DATA_THINGS(type) type
 /*
 #endif
 */
 
-#endif  // __WX_THINGDEF_H__
+#endif // __WX_THINGDEF_H__

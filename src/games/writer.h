@@ -30,7 +30,7 @@ namespace Gambit {
 ///
 /// Abstract base class for objects that write games to various formats
 ///
-class GameWriter  {
+class GameWriter {
 public:
   ///
   /// Convert the game to a string-based representation
@@ -47,8 +47,7 @@ public:
   /// Convert the game to HTML, with player 1 on the rows and player 2
   /// on the columns.
   ///
-  std::string Write(const Game &p_game) const override
-  { return Write(p_game, 1, 2); }
+  std::string Write(const Game &p_game) const override { return Write(p_game, 1, 2); }
 
   ///
   /// Convert the game to HTML, selecting the row and column player numbers.
@@ -65,8 +64,7 @@ public:
   /// Convert the game to LaTeX, with player 1 on the rows and player 2
   /// on the columns.
   ///
-  std::string Write(const Game &p_game) const override
-  { return Write(p_game, 1, 2); }
+  std::string Write(const Game &p_game) const override { return Write(p_game, 1, 2); }
 
   ///
   /// Convert the game to LaTeX, selecting the row and column player numbers.

@@ -28,8 +28,8 @@
     #define WXDLLIMPEXP_DATA_PLOTCTRL(type) WXIMPORT type
 #else // not making nor using DLL
 */
-    #define WXDLLIMPEXP_PLOTCTRL
-    #define WXDLLIMPEXP_DATA_PLOTCTRL(type) type
+#define WXDLLIMPEXP_PLOTCTRL
+#define WXDLLIMPEXP_DATA_PLOTCTRL(type) type
 /*
 #endif
 */
@@ -39,10 +39,10 @@
 // ----------------------------------------------------------------------------
 
 // Check if value is >= min_val and <= max_val
-#define wxPCHECK_MINMAX_RET(val, min_val, max_val, msg) \
-    wxCHECK_RET((int(val)>=int(min_val))&&(int(val)<=int(max_val)), msg)
+#define wxPCHECK_MINMAX_RET(val, min_val, max_val, msg)                                           \
+  wxCHECK_RET((int(val) >= int(min_val)) && (int(val) <= int(max_val)), msg)
 
-#define wxPCHECK_MINMAX_MSG(val, min_val, max_val, ret, msg) \
-    wxCHECK_MSG((int(val)>=int(min_val))&&(int(val)<=int(max_val)), ret, msg)
+#define wxPCHECK_MINMAX_MSG(val, min_val, max_val, ret, msg)                                      \
+  wxCHECK_MSG((int(val) >= int(min_val)) && (int(val) <= int(max_val)), ret, msg)
 
-#endif  // __WX_PLOTDEF_H__
+#endif // __WX_PLOTDEF_H__

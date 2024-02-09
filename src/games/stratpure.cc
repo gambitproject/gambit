@@ -74,8 +74,7 @@ bool PureStrategyProfileRep::IsBestResponse(const GamePlayer &p_player) const
   return true;
 }
 
-List <GameStrategy>
-PureStrategyProfileRep::GetBestResponse(const GamePlayer &p_player) const
+List<GameStrategy> PureStrategyProfileRep::GetBestResponse(const GamePlayer &p_player) const
 {
   auto strategy = p_player->GetStrategy(1);
   Rational max_payoff = GetStrategyValue(strategy);
@@ -94,8 +93,7 @@ PureStrategyProfileRep::GetBestResponse(const GamePlayer &p_player) const
   return br;
 }
 
-MixedStrategyProfile<Rational>
-PureStrategyProfileRep::ToMixedStrategyProfile() const
+MixedStrategyProfile<Rational> PureStrategyProfileRep::ToMixedStrategyProfile() const
 {
   MixedStrategyProfile<Rational> temp(m_nfg->NewMixedStrategyProfile(Rational(0)));
   temp = Rational(0);
@@ -114,20 +112,16 @@ PureStrategyProfileRep::ToMixedStrategyProfile() const
 //---------------------------------------------------------------------------
 
 StrategyProfileIterator::StrategyProfileIterator(const StrategySupportProfile &p_support)
-  : m_atEnd(false), m_support(p_support),
-    m_currentStrat(m_support.GetGame()->NumPlayers()),
-    m_profile(m_support.GetGame()->NewPureStrategyProfile()),
-    m_frozen1(0), m_frozen2(0)
+  : m_atEnd(false), m_support(p_support), m_currentStrat(m_support.GetGame()->NumPlayers()),
+    m_profile(m_support.GetGame()->NewPureStrategyProfile()), m_frozen1(0), m_frozen2(0)
 {
   First();
 }
 
-StrategyProfileIterator::StrategyProfileIterator(const StrategySupportProfile &p_support,
-                                                 int pl, int st)
-  : m_atEnd(false), m_support(p_support),
-    m_currentStrat(m_support.GetGame()->NumPlayers()),
-    m_profile(m_support.GetGame()->NewPureStrategyProfile()),
-    m_frozen1(pl), m_frozen2(0)
+StrategyProfileIterator::StrategyProfileIterator(const StrategySupportProfile &p_support, int pl,
+                                                 int st)
+  : m_atEnd(false), m_support(p_support), m_currentStrat(m_support.GetGame()->NumPlayers()),
+    m_profile(m_support.GetGame()->NewPureStrategyProfile()), m_frozen1(pl), m_frozen2(0)
 {
   m_currentStrat[pl] = st;
   m_profile->SetStrategy(m_support.GetStrategy(pl, st));
@@ -136,25 +130,19 @@ StrategyProfileIterator::StrategyProfileIterator(const StrategySupportProfile &p
 
 StrategyProfileIterator::StrategyProfileIterator(const StrategySupportProfile &p_support,
                                                  const GameStrategy &p_strategy)
-  : m_atEnd(false), m_support(p_support),
-    m_currentStrat(p_support.GetGame()->NumPlayers()),
+  : m_atEnd(false), m_support(p_support), m_currentStrat(p_support.GetGame()->NumPlayers()),
     m_profile(p_support.GetGame()->NewPureStrategyProfile()),
-    m_frozen1(p_strategy->GetPlayer()->GetNumber()),
-    m_frozen2(0)
+    m_frozen1(p_strategy->GetPlayer()->GetNumber()), m_frozen2(0)
 {
   m_currentStrat[m_frozen1] = p_strategy->GetNumber();
   m_profile->SetStrategy(p_strategy);
   First();
 }
 
-
-StrategyProfileIterator::StrategyProfileIterator(const StrategySupportProfile &p_support,
-                                                 int pl1, int st1,
-                                                 int pl2, int st2)
-  : m_atEnd(false), m_support(p_support),
-    m_currentStrat(m_support.GetGame()->NumPlayers()),
-    m_profile(m_support.GetGame()->NewPureStrategyProfile()),
-    m_frozen1(pl1), m_frozen2(pl2)
+StrategyProfileIterator::StrategyProfileIterator(const StrategySupportProfile &p_support, int pl1,
+                                                 int st1, int pl2, int st2)
+  : m_atEnd(false), m_support(p_support), m_currentStrat(m_support.GetGame()->NumPlayers()),
+    m_profile(m_support.GetGame()->NewPureStrategyProfile()), m_frozen1(pl1), m_frozen2(pl2)
 {
   m_currentStrat[pl1] = st1;
   m_profile->SetStrategy(m_support.GetStrategy(pl1, st1));
@@ -170,7 +158,9 @@ StrategyProfileIterator::StrategyProfileIterator(const StrategySupportProfile &p
 void StrategyProfileIterator::First()
 {
   for (int pl = 1; pl <= m_support.GetGame()->NumPlayers(); pl++) {
-    if (pl == m_frozen1 || pl == m_frozen2) continue;
+    if (pl == m_frozen1 || pl == m_frozen2) {
+      continue;
+    }
     m_profile->SetStrategy(m_support.GetStrategy(pl, 1));
     m_currentStrat[pl] = 1;
   }
@@ -180,7 +170,7 @@ void StrategyProfileIterator::operator++()
 {
   int pl = 1;
 
-  while (true)   {
+  while (true) {
     if (pl == m_frozen1 || pl == m_frozen2) {
       pl++;
       if (pl > m_support.GetGame()->NumPlayers()) {
@@ -204,4 +194,4 @@ void StrategyProfileIterator::operator++()
   }
 }
 
-}
+} // namespace Gambit

@@ -38,25 +38,23 @@ logit_estimate(std::shared_ptr<MixedStrategyProfile<double>> p_frequencies)
   StrategicQREEstimator alg;
   NullBuffer null_buffer;
   std::ostream null_stream(&null_buffer);
-  LogitQREMixedStrategyProfile result = alg.Estimate(start, *p_frequencies,
-						     null_stream, 1000000.0, 1.0);
+  LogitQREMixedStrategyProfile result =
+      alg.Estimate(start, *p_frequencies, null_stream, 1000000.0, 1.0);
   return make_shared<LogitQREMixedStrategyProfile>(result);
 }
 
-std::shared_ptr<LogitQREMixedStrategyProfile>
-logit_atlambda(const Game &p_game, double p_lambda)
+std::shared_ptr<LogitQREMixedStrategyProfile> logit_atlambda(const Game &p_game, double p_lambda)
 {
   LogitQREMixedStrategyProfile start(p_game);
   StrategicQREPathTracer alg;
   NullBuffer null_buffer;
   std::ostream null_stream(&null_buffer);
   return make_shared<LogitQREMixedStrategyProfile>(
-    alg.SolveAtLambda(start, null_stream, p_lambda, 1.0)
-  );
+      alg.SolveAtLambda(start, null_stream, p_lambda, 1.0));
 }
 
-List<LogitQREMixedStrategyProfile>
-logit_principal_branch(const Game &p_game, double p_maxLambda=1000000.0)
+List<LogitQREMixedStrategyProfile> logit_principal_branch(const Game &p_game,
+                                                          double p_maxLambda = 1000000.0)
 {
   LogitQREMixedStrategyProfile start(p_game);
   StrategicQREPathTracer alg;

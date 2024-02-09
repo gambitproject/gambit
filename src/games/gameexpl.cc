@@ -120,7 +120,7 @@ GameStrategy GameExplicitRep::GetStrategy(int p_index) const
   for (int pl = 1, i = 1; pl <= m_players.Length(); pl++) {
     for (int st = 1; st <= m_players[pl]->m_strategies.Length(); st++, i++) {
       if (p_index == i) {
-	return m_players[pl]->m_strategies[st];
+        return m_players[pl]->m_strategies[st];
       }
     }
   }
@@ -130,21 +130,17 @@ GameStrategy GameExplicitRep::GetStrategy(int p_index) const
 int GameExplicitRep::NumStrategyContingencies() const
 {
   const_cast<GameExplicitRep *>(this)->BuildComputedValues();
-  return std::accumulate(
-          m_players.begin(), m_players.end(), 1,
-          [](int ncont, GamePlayerRep *p) { return ncont * p->m_strategies.size(); }
-  );
+  return std::accumulate(m_players.begin(), m_players.end(), 1, [](int ncont, GamePlayerRep *p) {
+    return ncont * p->m_strategies.size();
+  });
 }
 
 int GameExplicitRep::MixedProfileLength() const
 {
   const_cast<GameExplicitRep *>(this)->BuildComputedValues();
-  return std::accumulate(
-          m_players.begin(), m_players.end(), 0,
-          [](int size, GamePlayerRep *p) { return size + p->m_strategies.size(); }
-  );
+  return std::accumulate(m_players.begin(), m_players.end(), 0,
+                         [](int size, GamePlayerRep *p) { return size + p->m_strategies.size(); });
 }
-
 
 //------------------------------------------------------------------------
 //                      GameExplicitRep: Outcomes
@@ -161,14 +157,12 @@ GameOutcome GameExplicitRep::NewOutcome()
 //------------------------------------------------------------------------
 
 void GameExplicitRep::Write(std::ostream &p_stream,
-			    const std::string &p_format /*="native"*/) const
+                            const std::string &p_format /*="native"*/) const
 {
-  if (p_format == "efg" ||
-      (p_format == "native" && IsTree())) {
+  if (p_format == "efg" || (p_format == "native" && IsTree())) {
     WriteEfgFile(p_stream);
   }
-  else if (p_format == "nfg" ||
-	   (p_format == "native" && !IsTree())) {
+  else if (p_format == "nfg" || (p_format == "native" && !IsTree())) {
     WriteNfgFile(p_stream);
   }
   else {
@@ -176,7 +170,4 @@ void GameExplicitRep::Write(std::ostream &p_stream,
   }
 }
 
-
-
-
-}  // end namespace Gambit
+} // end namespace Gambit

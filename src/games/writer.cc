@@ -25,26 +25,25 @@
 
 using namespace Gambit;
 
-std::string HTMLGameWriter::Write(const Game &p_game,
-				  int p_rowPlayer, int p_colPlayer) const
+std::string HTMLGameWriter::Write(const Game &p_game, int p_rowPlayer, int p_colPlayer) const
 {
   std::string theHtml;
   theHtml += "<center><h1>" + p_game->GetTitle() + "</h1></center>\n";
 
-  for (StrategyProfileIterator iter(p_game, p_rowPlayer, 1, p_colPlayer, 1);
-       !iter.AtEnd(); iter++) {
+  for (StrategyProfileIterator iter(p_game, p_rowPlayer, 1, p_colPlayer, 1); !iter.AtEnd();
+       iter++) {
     if (p_game->NumPlayers() > 2) {
       theHtml += "<center><b>Subtable with strategies:</b></center>";
       for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
-	if (pl == p_rowPlayer || pl == p_colPlayer) {
-	  continue;
-	}
+        if (pl == p_rowPlayer || pl == p_colPlayer) {
+          continue;
+        }
 
-	theHtml += "<center><b>Player ";
-	theHtml += lexical_cast<std::string>(pl);
-	theHtml += " Strategy ";
-	theHtml += lexical_cast<std::string>((*iter)->GetStrategy(pl)->GetNumber());
-	theHtml += "</b></center>";
+        theHtml += "<center><b>Player ";
+        theHtml += lexical_cast<std::string>(pl);
+        theHtml += " Strategy ";
+        theHtml += lexical_cast<std::string>((*iter)->GetStrategy(pl)->GetNumber());
+        theHtml += "</b></center>";
       }
     }
 
@@ -65,25 +64,25 @@ std::string HTMLGameWriter::Write(const Game &p_game,
       theHtml += p_game->GetPlayer(p_rowPlayer)->GetStrategy(st1)->GetLabel();
       theHtml += "</b></td>";
       for (int st2 = 1; st2 <= p_game->GetPlayer(p_colPlayer)->NumStrategies(); st2++) {
-	profile->SetStrategy(p_game->GetPlayer(p_colPlayer)->GetStrategy(st2));
-	theHtml += "<td align=center>";
-	for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
-	  try {
-	    if (profile->GetOutcome()) {
-	      theHtml += static_cast<std::string>(profile->GetOutcome()->GetPayoff(pl));
-	    }
-	    else {
-	      theHtml += "0";
-	    }
-	  }
-	  catch (UndefinedException &) {
-	    theHtml += lexical_cast<std::string>(profile->GetPayoff(pl));
-	  }
-	  if (pl < p_game->NumPlayers()) {
-	    theHtml += ",";
-	  }
-	}
-	theHtml += "</td>";
+        profile->SetStrategy(p_game->GetPlayer(p_colPlayer)->GetStrategy(st2));
+        theHtml += "<td align=center>";
+        for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
+          try {
+            if (profile->GetOutcome()) {
+              theHtml += static_cast<std::string>(profile->GetOutcome()->GetPayoff(pl));
+            }
+            else {
+              theHtml += "0";
+            }
+          }
+          catch (UndefinedException &) {
+            theHtml += lexical_cast<std::string>(profile->GetPayoff(pl));
+          }
+          if (pl < p_game->NumPlayers()) {
+            theHtml += ",";
+          }
+        }
+        theHtml += "</td>";
       }
       theHtml += "</tr>";
     }
@@ -94,13 +93,12 @@ std::string HTMLGameWriter::Write(const Game &p_game,
   return theHtml;
 }
 
-std::string LaTeXGameWriter::Write(const Game &p_game,
-			 	   int p_rowPlayer, int p_colPlayer) const
+std::string LaTeXGameWriter::Write(const Game &p_game, int p_rowPlayer, int p_colPlayer) const
 {
   std::string theHtml;
 
-  for (StrategyProfileIterator iter(p_game, p_rowPlayer, 1, p_colPlayer, 1);
-       !iter.AtEnd(); iter++) {
+  for (StrategyProfileIterator iter(p_game, p_rowPlayer, 1, p_colPlayer, 1); !iter.AtEnd();
+       iter++) {
     theHtml += "\\begin{game}{";
     theHtml += lexical_cast<std::string>(p_game->GetPlayer(p_rowPlayer)->NumStrategies());
     theHtml += "}{";
@@ -114,15 +112,15 @@ std::string LaTeXGameWriter::Write(const Game &p_game,
     if (p_game->NumPlayers() > 2) {
       theHtml += "[";
       for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
-	if (pl == p_rowPlayer || pl == p_colPlayer) {
-	  continue;
-	}
+        if (pl == p_rowPlayer || pl == p_colPlayer) {
+          continue;
+        }
 
-	theHtml += "Player ";
-	theHtml += lexical_cast<std::string>(pl);
-	theHtml += " Strategy ";
-	theHtml += lexical_cast<std::string>((*iter)->GetStrategy(pl)->GetNumber());
-	theHtml += " ";
+        theHtml += "Player ";
+        theHtml += lexical_cast<std::string>(pl);
+        theHtml += " Strategy ";
+        theHtml += lexical_cast<std::string>((*iter)->GetStrategy(pl)->GetNumber());
+        theHtml += " ";
       }
       theHtml += "]";
     }
@@ -132,7 +130,7 @@ std::string LaTeXGameWriter::Write(const Game &p_game,
     for (int st = 1; st <= p_game->GetPlayer(p_colPlayer)->NumStrategies(); st++) {
       theHtml += p_game->GetPlayer(p_colPlayer)->GetStrategy(st)->GetLabel();
       if (st < p_game->GetPlayer(p_colPlayer)->NumStrategies()) {
-	theHtml += " & ";
+        theHtml += " & ";
       }
     }
     theHtml += "\\\\\n";
@@ -143,31 +141,31 @@ std::string LaTeXGameWriter::Write(const Game &p_game,
       theHtml += p_game->GetPlayer(p_rowPlayer)->GetStrategy(st1)->GetLabel();
       theHtml += " & ";
       for (int st2 = 1; st2 <= p_game->GetPlayer(p_colPlayer)->NumStrategies(); st2++) {
-	profile->SetStrategy(p_game->GetPlayer(p_colPlayer)->GetStrategy(st2));
-	theHtml += " $";
-	for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
-	  try {
-	    if (profile->GetOutcome()) {
-	      theHtml += static_cast<std::string>(profile->GetOutcome()->GetPayoff(pl));
-	    }
-	    else {
-	      theHtml += "0";
-	    }
-	  }
-	  catch (UndefinedException &) {
-	    theHtml += lexical_cast<std::string>(profile->GetPayoff(pl));
-	  }
-	  if (pl < p_game->NumPlayers()) {
-	    theHtml += ",";
-	  }
-	}
-	theHtml += "$ ";
-	if (st2 < p_game->GetPlayer(p_colPlayer)->NumStrategies()) {
-	  theHtml += " & ";
-	}
+        profile->SetStrategy(p_game->GetPlayer(p_colPlayer)->GetStrategy(st2));
+        theHtml += " $";
+        for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
+          try {
+            if (profile->GetOutcome()) {
+              theHtml += static_cast<std::string>(profile->GetOutcome()->GetPayoff(pl));
+            }
+            else {
+              theHtml += "0";
+            }
+          }
+          catch (UndefinedException &) {
+            theHtml += lexical_cast<std::string>(profile->GetPayoff(pl));
+          }
+          if (pl < p_game->NumPlayers()) {
+            theHtml += ",";
+          }
+        }
+        theHtml += "$ ";
+        if (st2 < p_game->GetPlayer(p_colPlayer)->NumStrategies()) {
+          theHtml += " & ";
+        }
       }
       if (st1 < p_game->GetPlayer(p_rowPlayer)->NumStrategies()) {
-	theHtml += "\\\\\n";
+        theHtml += "\\\\\n";
       }
     }
 

@@ -39,7 +39,7 @@ namespace Gambit {
 class BehaviorSupportProfile {
 protected:
   Game m_efg;
-  Array<Array<Array<GameAction> > > m_actions;
+  Array<Array<Array<GameAction>>> m_actions;
 
   std::map<GameInfoset, bool> m_infosetReachable;
   std::map<GameNode, bool> m_nonterminalReachable;
@@ -62,8 +62,7 @@ public:
   //@{
   /// Test for the equality of two supports (same actions at all infosets)
   bool operator==(const BehaviorSupportProfile &) const;
-  bool operator!=(const BehaviorSupportProfile &p_support) const
-  { return !(*this == p_support); }
+  bool operator!=(const BehaviorSupportProfile &p_support) const { return !(*this == p_support); }
 
   /// @name General information
   //@{
@@ -72,9 +71,10 @@ public:
 
   /// Returns the number of actions in the information set
   int NumActions(const GameInfoset &p_infoset) const
-  { return m_actions[p_infoset->GetPlayer()->GetNumber()][p_infoset->GetNumber()].Length(); }
-  int NumActions(int pl, int iset) const
-  { return m_actions[pl][iset].Length(); }
+  {
+    return m_actions[p_infoset->GetPlayer()->GetNumber()][p_infoset->GetNumber()].Length();
+  }
+  int NumActions(int pl, int iset) const { return m_actions[pl][iset].Length(); }
 
   /// Returns the number of actions in the support for all information sets
   PVector<int> NumActions() const;
@@ -82,21 +82,23 @@ public:
   size_t BehaviorProfileLength() const;
 
   /// Returns the action at the specified position in the support
-  GameAction GetAction(int pl, int iset, int act) const
-  { return m_actions[pl][iset][act]; }
+  GameAction GetAction(int pl, int iset, int act) const { return m_actions[pl][iset][act]; }
   /// Returns the set of actions in the support at the information set
   const Array<GameAction> &GetActions(const GameInfoset &p_infoset) const
-  { return m_actions[p_infoset->GetPlayer()->GetNumber()][p_infoset->GetNumber()]; }
+  {
+    return m_actions[p_infoset->GetPlayer()->GetNumber()][p_infoset->GetNumber()];
+  }
   /// Does the information set have at least one active action?
   bool HasAction(const GameInfoset &p_infoset) const
-  { return !m_actions[p_infoset->GetPlayer()->GetNumber()][p_infoset->GetNumber()].empty(); }
+  {
+    return !m_actions[p_infoset->GetPlayer()->GetNumber()][p_infoset->GetNumber()].empty();
+  }
 
   /// Returns the position of the action in the support.
   int GetIndex(const GameAction &) const;
 
   /// Returns whether the action is in the support.
-  bool Contains(const GameAction &p_action) const
-  { return (GetIndex(p_action) != 0); }
+  bool Contains(const GameAction &p_action) const { return (GetIndex(p_action) != 0); }
   //@}
 
   /// @name Editing the support
@@ -113,8 +115,7 @@ public:
   /// @name Reachability of nodes and information sets
   //@{
   /// Can the information set be reached under this support?
-  bool IsReachable(const GameInfoset &p_infoset) const
-  { return m_infosetReachable.at(p_infoset); }
+  bool IsReachable(const GameInfoset &p_infoset) const { return m_infosetReachable.at(p_infoset); }
   /// Get the information sets for the player reachable under the support
   std::list<GameInfoset> GetInfosets(const GamePlayer &) const;
   /// Get the members of the information set reachable under the support
@@ -124,18 +125,16 @@ public:
   /// @name Identification of dominated actions
   //@{
   /// Returns true if action a is dominated by action b
-  bool Dominates(const GameAction &a, const GameAction &b,
-		 bool p_strict, bool p_conditional) const;
+  bool Dominates(const GameAction &a, const GameAction &b, bool p_strict,
+                 bool p_conditional) const;
   /// Returns true if the action is dominated by some other action
-  bool IsDominated(const GameAction &a,
-		   bool p_strict, bool p_conditional) const;
+  bool IsDominated(const GameAction &a, bool p_strict, bool p_conditional) const;
   /// Returns a copy of the support with dominated actions eliminated
-  BehaviorSupportProfile Undominated(bool p_strict, bool p_conditional,
-			   const Array<int> &players,
-			   std::ostream &) const;
+  BehaviorSupportProfile Undominated(bool p_strict, bool p_conditional, const Array<int> &players,
+                                     std::ostream &) const;
   //@}
 };
 
 } // end namespace Gambit
 
-#endif  // LIBGAMBIT_BEHAVSPT_H
+#endif // LIBGAMBIT_BEHAVSPT_H

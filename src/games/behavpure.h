@@ -33,7 +33,7 @@ namespace Gambit {
 class PureBehaviorProfile {
 private:
   Game m_efg;
-  Array<Array<GameAction> > m_profile;
+  Array<Array<GameAction>> m_profile;
 
 public:
   /// @name Lifecycle
@@ -53,7 +53,9 @@ public:
   template <class T> T GetPayoff(int pl) const;
   /// Get the payoff to the player that results from the profile
   template <class T> T GetPayoff(const GamePlayer &p_player) const
-  { return GetPayoff<T>(p_player->GetNumber()); }
+  {
+    return GetPayoff<T>(p_player->GetNumber());
+  }
   /// Get the payoff to player pl conditional on reaching a node
   template <class T> T GetPayoff(const GameNode &, int pl) const;
   /// Get the payoff to playing the action, conditional on the profile
@@ -67,15 +69,20 @@ public:
   //@}
 };
 
-template<> inline double PureBehaviorProfile::GetPayoff(int pl) const
-{ return GetPayoff<double>(m_efg->GetRoot(), pl); }
+template <> inline double PureBehaviorProfile::GetPayoff(int pl) const
+{
+  return GetPayoff<double>(m_efg->GetRoot(), pl);
+}
 
-template<> inline Rational PureBehaviorProfile::GetPayoff(int pl) const
-{ return GetPayoff<Rational>(m_efg->GetRoot(), pl); }
+template <> inline Rational PureBehaviorProfile::GetPayoff(int pl) const
+{
+  return GetPayoff<Rational>(m_efg->GetRoot(), pl);
+}
 
-template<> inline std::string PureBehaviorProfile::GetPayoff(int pl) const
-{ return lexical_cast<std::string>(GetPayoff<Rational>(m_efg->GetRoot(), pl)); }
-
+template <> inline std::string PureBehaviorProfile::GetPayoff(int pl) const
+{
+  return lexical_cast<std::string>(GetPayoff<Rational>(m_efg->GetRoot(), pl));
+}
 
 //
 // Currently, the contingency iterator only allows one information
@@ -90,7 +97,7 @@ private:
   PVector<int> m_currentBehav;
   PureBehaviorProfile m_profile;
   int m_frozenPlayer, m_frozenInfoset;
-  Array<Array<bool> > m_isActive;
+  Array<Array<bool>> m_isActive;
   Array<int> m_numActiveInfosets;
 
   /// Reset the iterator to the first contingency (this is called by ctors)

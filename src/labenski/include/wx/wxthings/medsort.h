@@ -38,7 +38,6 @@
     IMPLEMENT_WIRTHS_MEDIAN(int, arr, n, &median)
 */
 
-
 /*---------------------------------------------------------------------------
  *  This Quickselect routine is based on the algorithm described in
  *  "Numerical recipes in C", Second Edition,
@@ -56,58 +55,91 @@
 
 ---------------------------------------------------------------------------*/
 
-#define DECLARE_QUICK_SELECT( name, elem_type )                             \
-    elem_type name( elem_type *arr, int n, elem_type &median );
+#define DECLARE_QUICK_SELECT(name, elem_type)                                                     \
+  elem_type name(elem_type *arr, int n, elem_type &median);
 
-#define DEFINE_QUICK_SELECT( name, elem_type )                              \
-    elem_type name( elem_type *arr, int n, elem_type &median )              \
-    IMPLEMENT_QUICK_SELECT( elem_type, arr, n, median )
+#define DEFINE_QUICK_SELECT(name, elem_type)                                                      \
+  elem_type name(elem_type *arr, int n, elem_type &median)                                        \
+      IMPLEMENT_QUICK_SELECT(elem_type, arr, n, median)
 
-#define IMPLEMENT_QUICK_SELECT(elem_type, arr, n, median)                   \
-{                                                                           \
-    int low=0, high=n-1, half=(low+high)/2, middle, ll, hh;                 \
-                                                                            \
-    for (;;) {                                                              \
-        if (high <= low) /* One element only */                             \
-            break; /*return arr[half] ; */                                  \
-                                                                            \
-        if (high == low + 1) {  /* Two elements only */                     \
-            if (arr[low] > arr[high])                                       \
-                { register elem_type t=arr[low];arr[low]=arr[high];arr[high]=t; } \
-            break; /* return arr[half] ; */                                 \
-        }                                                                   \
-                                                                            \
-        /* Find median of low, middle and high items; swap into low */      \
-        middle = (low + high) / 2;                                          \
-        if (arr[middle] > arr[high]) { register elem_type t=arr[middle];arr[middle]=arr[high];arr[high]=t; } \
-        if (arr[low]    > arr[high]) { register elem_type t=arr[low];   arr[low]   =arr[high];arr[high]=t; } \
-        if (arr[middle] > arr[low] ) { register elem_type t=arr[middle];arr[middle]=arr[low]; arr[low] =t; } \
-                                                                            \
-        /* Swap low item (now in position middle) into position (low+1) */  \
-        { register elem_type t=arr[middle];arr[middle]=arr[low+1];arr[low+1]=t; } \
-                                                                            \
-        /* Nibble from ends towards middle, swapping items when stuck */    \
-        ll = low + 1;                                                       \
-        hh = high;                                                          \
-        for (;;) {                                                          \
-            do ll++; while (arr[low] > arr[ll] );                           \
-            do hh--; while (arr[hh]  > arr[low]);                           \
-                                                                            \
-            if (hh < ll) break;                                             \
-                                                                            \
-            { register elem_type t=arr[ll];arr[ll]=arr[hh];arr[hh]=t;}      \
-        }                                                                   \
-                                                                            \
-        /* Swap middle item (in position low) back into correct position */ \
-        { register elem_type t=arr[low];arr[low]=arr[hh];arr[hh]=t; }       \
-                                                                            \
-        /* Re-set active partition */                                       \
-        if (hh <= half) low = ll;                                           \
-        if (hh >= half) high = hh - 1;                                      \
-    }                                                                       \
-    median = arr[half];                                                     \
-}
-
+#define IMPLEMENT_QUICK_SELECT(elem_type, arr, n, median)                                         \
+  {                                                                                               \
+    int low = 0, high = n - 1, half = (low + high) / 2, middle, ll, hh;                           \
+                                                                                                  \
+    for (;;) {                                                                                    \
+      if (high <= low) /* One element only */                                                     \
+        break;         /*return arr[half] ; */                                                    \
+                                                                                                  \
+      if (high == low + 1) { /* Two elements only */                                              \
+        if (arr[low] > arr[high]) {                                                               \
+          register elem_type t = arr[low];                                                        \
+          arr[low] = arr[high];                                                                   \
+          arr[high] = t;                                                                          \
+        }                                                                                         \
+        break; /* return arr[half] ; */                                                           \
+      }                                                                                           \
+                                                                                                  \
+      /* Find median of low, middle and high items; swap into low */                              \
+      middle = (low + high) / 2;                                                                  \
+      if (arr[middle] > arr[high]) {                                                              \
+        register elem_type t = arr[middle];                                                       \
+        arr[middle] = arr[high];                                                                  \
+        arr[high] = t;                                                                            \
+      }                                                                                           \
+      if (arr[low] > arr[high]) {                                                                 \
+        register elem_type t = arr[low];                                                          \
+        arr[low] = arr[high];                                                                     \
+        arr[high] = t;                                                                            \
+      }                                                                                           \
+      if (arr[middle] > arr[low]) {                                                               \
+        register elem_type t = arr[middle];                                                       \
+        arr[middle] = arr[low];                                                                   \
+        arr[low] = t;                                                                             \
+      }                                                                                           \
+                                                                                                  \
+      /* Swap low item (now in position middle) into position (low+1) */                          \
+      {                                                                                           \
+        register elem_type t = arr[middle];                                                       \
+        arr[middle] = arr[low + 1];                                                               \
+        arr[low + 1] = t;                                                                         \
+      }                                                                                           \
+                                                                                                  \
+      /* Nibble from ends towards middle, swapping items when stuck */                            \
+      ll = low + 1;                                                                               \
+      hh = high;                                                                                  \
+      for (;;) {                                                                                  \
+        do                                                                                        \
+          ll++;                                                                                   \
+        while (arr[low] > arr[ll]);                                                               \
+        do                                                                                        \
+          hh--;                                                                                   \
+        while (arr[hh] > arr[low]);                                                               \
+                                                                                                  \
+        if (hh < ll)                                                                              \
+          break;                                                                                  \
+                                                                                                  \
+        {                                                                                         \
+          register elem_type t = arr[ll];                                                         \
+          arr[ll] = arr[hh];                                                                      \
+          arr[hh] = t;                                                                            \
+        }                                                                                         \
+      }                                                                                           \
+                                                                                                  \
+      /* Swap middle item (in position low) back into correct position */                         \
+      {                                                                                           \
+        register elem_type t = arr[low];                                                          \
+        arr[low] = arr[hh];                                                                       \
+        arr[hh] = t;                                                                              \
+      }                                                                                           \
+                                                                                                  \
+      /* Re-set active partition */                                                               \
+      if (hh <= half)                                                                             \
+        low = ll;                                                                                 \
+      if (hh >= half)                                                                             \
+        high = hh - 1;                                                                            \
+    }                                                                                             \
+    median = arr[half];                                                                           \
+  }
 
 /*---------------------------------------------------------------------------
    Function :   kth_smallest()
@@ -139,45 +171,54 @@
 
 ---------------------------------------------------------------------------*/
 
-#define DECLARE_WIRTHS_MEDIAN( name, elem_type )                \
-    elem_type name( elem_type *arr, int n, elem_type &median );
+#define DECLARE_WIRTHS_MEDIAN(name, elem_type)                                                    \
+  elem_type name(elem_type *arr, int n, elem_type &median);
 
-#define DEFINE_WIRTHS_MEDIAN( name, elem_type )                 \
-    elem_type name( elem_type *arr, int n, elem_type &median )  \
-    WIRTHS_MEDIAN( elem_type, arr, n, median )
+#define DEFINE_WIRTHS_MEDIAN(name, elem_type)                                                     \
+  elem_type name(elem_type *arr, int n, elem_type &median) WIRTHS_MEDIAN(elem_type, arr, n, median)
 
-#define IMPLEMENT_WIRTHS_MEDIAN(elem_type, arr, n, median)      \
-    IMPLEMENT_WIRTHS_KTH_SMALLEST(elem_type, arr, n, (((n)&1)?((n)/2):(((n)/2)-1)), median)
+#define IMPLEMENT_WIRTHS_MEDIAN(elem_type, arr, n, median)                                        \
+  IMPLEMENT_WIRTHS_KTH_SMALLEST(elem_type, arr, n, (((n) & 1) ? ((n) / 2) : (((n) / 2) - 1)),     \
+                                median)
 
+#define DECLARE_WIRTHS_KTH_SMALLEST(name, elem_type)                                              \
+  elem_type name(elem_type *arr, int n, elem_type &median);
 
-#define DECLARE_WIRTHS_KTH_SMALLEST( name, elem_type )          \
-    elem_type name( elem_type *arr, int n, elem_type &median );
+#define DEFINE_WIRTHS_KTH_SMALLEST(name, elem_type)                                               \
+  elem_type name(elem_type *arr, int n, elem_type &median)                                        \
+      IMPLEMENT_WIRTHS_MEDIAN(elem_type, arr, n, median)
 
-#define DEFINE_WIRTHS_KTH_SMALLEST( name, elem_type )           \
-    elem_type name( elem_type *arr, int n, elem_type &median )  \
-    IMPLEMENT_WIRTHS_MEDIAN( elem_type, arr, n, median )
-
-#define IMPLEMENT_WIRTHS_KTH_SMALLEST(elem_type, arr, n, k, ksmallest) \
-{                                                               \
-    register int i, j, l=0, m=n-1;                              \
-    register elem_type x;                                       \
-                                                                \
-    while (l<m) {                                               \
-        x=arr[k]; i=l; j=m;                                     \
-        do {                                                    \
-            while (arr[i]<x) i++;                               \
-            while (x<arr[j]) j--;                               \
-            if (i<=j) {                                         \
-                {   register elem_type t=arr[i];                \
-                    arr[i]=arr[j]; arr[j]=t; }                  \
-                i++; j--; }                                     \
-        } while (i<=j);                                         \
-        if (j<k) l=i;                                           \
-        if (k<i) m=j;                                           \
-    }                                                           \
-    ksmallest = arr[k];                                         \
-}
-
+#define IMPLEMENT_WIRTHS_KTH_SMALLEST(elem_type, arr, n, k, ksmallest)                            \
+  {                                                                                               \
+    register int i, j, l = 0, m = n - 1;                                                          \
+    register elem_type x;                                                                         \
+                                                                                                  \
+    while (l < m) {                                                                               \
+      x = arr[k];                                                                                 \
+      i = l;                                                                                      \
+      j = m;                                                                                      \
+      do {                                                                                        \
+        while (arr[i] < x)                                                                        \
+          i++;                                                                                    \
+        while (x < arr[j])                                                                        \
+          j--;                                                                                    \
+        if (i <= j) {                                                                             \
+          {                                                                                       \
+            register elem_type t = arr[i];                                                        \
+            arr[i] = arr[j];                                                                      \
+            arr[j] = t;                                                                           \
+          }                                                                                       \
+          i++;                                                                                    \
+          j--;                                                                                    \
+        }                                                                                         \
+      } while (i <= j);                                                                           \
+      if (j < k)                                                                                  \
+        l = i;                                                                                    \
+      if (k < i)                                                                                  \
+        m = j;                                                                                    \
+    }                                                                                             \
+    ksmallest = arr[k];                                                                           \
+  }
 
 /*---------------------------------------------------------------------------
  * The following code is public domain.
@@ -194,46 +235,61 @@
 
 ---------------------------------------------------------------------------*/
 
-#define DECLARE_TORBEN_MEDIAN( name, elem_type )                \
-    elem_type name( elem_type *arr, int n, elem_type &median );
+#define DECLARE_TORBEN_MEDIAN(name, elem_type)                                                    \
+  elem_type name(elem_type *arr, int n, elem_type &median);
 
-#define DEFINE_TORBEN_MEDIAN( name, elem_type )                 \
-    elem_type name( elem_type *arr, int n, elem_type &median )  \
-    IMPLEMENT_TORBEN_MEDIAN( elem_type, arr, n, median )
+#define DEFINE_TORBEN_MEDIAN(name, elem_type)                                                     \
+  elem_type name(elem_type *arr, int n, elem_type &median)                                        \
+      IMPLEMENT_TORBEN_MEDIAN(elem_type, arr, n, median)
 
-#define IMPLEMENT_TORBEN_MEDIAN( elem_type, arr, n )                      \
-{                                                               \
-    int i, less, greater, equal;                                \
-    elem_type  min, max, guess, maxltguess, mingtguess;         \
-                                                                \
-    min = max = arr[0];                                         \
-    for (i=1; i<n; i++) {                                       \
-        if (arr[i]<min) min=arr[i];                             \
-        if (arr[i]>max) max=arr[i];                             \
-    }                                                           \
-                                                                \
-    while (1) {                                                 \
-        guess = (min+max)/2;                                    \
-        less = 0; greater = 0; equal = 0;                       \
-        maxltguess = min;                                       \
-        mingtguess = max;                                       \
-        for (i=0; i<n; i++) {                                   \
-            if (arr[i]<guess) {                                 \
-                less++;                                         \
-                if (arr[i]>maxltguess) maxltguess = arr[i];     \
-            } else if (arr[i]>guess) {                          \
-                greater++;                                      \
-                if (arr[i]<mingtguess) mingtguess = arr[i];     \
-            } else equal++;                                     \
-        }                                                       \
-        if (less <= (n+1)/2 && greater <= (n+1)/2) break;       \
-        else if (less>greater) max = maxltguess;                \
-        else min = mingtguess;                                  \
-    }                                                           \
-    if (less >= (n+1)/2) median = maxltguess;                   \
-    else if (less+equal >= (n+1)/2) median = guess;             \
-    else median = mingtguess;                                   \
-}
+#define IMPLEMENT_TORBEN_MEDIAN(elem_type, arr, n)                                                \
+  {                                                                                               \
+    int i, less, greater, equal;                                                                  \
+    elem_type min, max, guess, maxltguess, mingtguess;                                            \
+                                                                                                  \
+    min = max = arr[0];                                                                           \
+    for (i = 1; i < n; i++) {                                                                     \
+      if (arr[i] < min)                                                                           \
+        min = arr[i];                                                                             \
+      if (arr[i] > max)                                                                           \
+        max = arr[i];                                                                             \
+    }                                                                                             \
+                                                                                                  \
+    while (1) {                                                                                   \
+      guess = (min + max) / 2;                                                                    \
+      less = 0;                                                                                   \
+      greater = 0;                                                                                \
+      equal = 0;                                                                                  \
+      maxltguess = min;                                                                           \
+      mingtguess = max;                                                                           \
+      for (i = 0; i < n; i++) {                                                                   \
+        if (arr[i] < guess) {                                                                     \
+          less++;                                                                                 \
+          if (arr[i] > maxltguess)                                                                \
+            maxltguess = arr[i];                                                                  \
+        }                                                                                         \
+        else if (arr[i] > guess) {                                                                \
+          greater++;                                                                              \
+          if (arr[i] < mingtguess)                                                                \
+            mingtguess = arr[i];                                                                  \
+        }                                                                                         \
+        else                                                                                      \
+          equal++;                                                                                \
+      }                                                                                           \
+      if (less <= (n + 1) / 2 && greater <= (n + 1) / 2)                                          \
+        break;                                                                                    \
+      else if (less > greater)                                                                    \
+        max = maxltguess;                                                                         \
+      else                                                                                        \
+        min = mingtguess;                                                                         \
+    }                                                                                             \
+    if (less >= (n + 1) / 2)                                                                      \
+      median = maxltguess;                                                                        \
+    else if (less + equal >= (n + 1) / 2)                                                         \
+      median = guess;                                                                             \
+    else                                                                                          \
+      median = mingtguess;                                                                        \
+  }
 
 /*----------------------------------------------------------------------------
     Function :   pixel_qsort()
@@ -252,73 +308,101 @@
 #define PIXEL_QSORT_STACK_SIZE 50
 #define PIXEL_QSORT_THRESHOLD 7
 
-#define DECLARE_PIXEL_QSORT( name, elem_type )                              \
-    void name( elem_type *arr, int n );
+#define DECLARE_PIXEL_QSORT(name, elem_type) void name(elem_type *arr, int n);
 
-#define DEFINE_PIXEL_QSORT( name, elem_type )                               \
-    void name( elem_type *arr, int n )                                      \
-    IMPLEMENT_PIXEL_QSORT( name, elem_type )
+#define DEFINE_PIXEL_QSORT(name, elem_type)                                                       \
+  void name(elem_type *arr, int n) IMPLEMENT_PIXEL_QSORT(name, elem_type)
 
-#define IMPLEMENT_PIXEL_QSORT( elem_type, arr, n )                          \
-{                                                                           \
-    int i, ir=n, j, k, l=1, j_stack=0;                                      \
-    int *i_stack ;                                                          \
-    elem_type  a ;                                                          \
-                                                                            \
-    i_stack = (int*)malloc(PIXEL_QSORT_STACK_SIZE * sizeof(elem_type));     \
-    for (;;) {                                                              \
-        if (ir-l < PIXEL_QSORT_THRESHOLD) {                                 \
-            for (j=l+1 ; j<=ir ; j++) {                                     \
-                a = arr[j-1];                                               \
-                for (i=j-1 ; i>=1 ; i--) {                                  \
-                    if (arr[i-1] <= a) break;                               \
-                    arr[i] = arr[i-1];                                      \
-                }                                                           \
-                arr[i] = a;                                                 \
-            }                                                               \
-            if (j_stack == 0) break;                                        \
-            ir = i_stack[j_stack-- -1];                                     \
-            l  = i_stack[j_stack-- -1];                                     \
-        } else {                                                            \
-            k = (l+ir) >> 1;                                                \
-            { elem_type t=arr[k-1];arr[k-1]=arr[l];arr[l]=t; }              \
-            if (arr[l] > arr[ir-1]) {                                       \
-                { elem_type t=arr[l];arr[l]=arr[ir-1];arr[ir-1]=t; }        \
-            }                                                               \
-            if (arr[l-1] > arr[ir-1]) {                                     \
-                { elem_type t=arr[l-1];arr[l-1]=arr[ir-1];arr[ir-1]=t; }    \
-            }                                                               \
-            if (arr[l] > arr[l-1]) {                                        \
-                { elem_type t=arr[l];arr[l]=arr[l-1];arr[l-1]=t; }          \
-            }                                                               \
-            i = l+1; j = ir; a = arr[l-1];                                  \
-            for (;;) {                                                      \
-                do i++; while (arr[i-1] < a);                               \
-                do j--; while (arr[j-1] > a);                               \
-                if (j < i) break;                                           \
-                { elem_type t=arr[i-1];arr[i-1]=arr[j-1];arr[j-1]=t; }      \
-            }                                                               \
-            arr[l-1] = arr[j-1];                                            \
-            arr[j-1] = a;                                                   \
-            j_stack += 2;                                                   \
-            wxASSERT(!(j_stack>PIXEL_QSORT_STACK_SIZE));                    \
-            /* if (j_stack > PIXEL_QSORT_STACK_SIZE) {  */                  \
-                /* printf("stack too small in pixel_qsort: aborting"); */   \
-                /* exit(-2001); } */                                        \
-            if (ir-i+1 >= j-l) {                                            \
-                i_stack[j_stack-1] = ir;                                    \
-                i_stack[j_stack-2] = i;                                     \
-                ir = j-1;                                                   \
-            } else {                                                        \
-                i_stack[j_stack-1] = j-1;                                   \
-                i_stack[j_stack-2] = l;                                     \
-                l = i;                                                      \
-            }                                                               \
-        }                                                                   \
-    }                                                                       \
-    free(i_stack);                                                          \
-}
-
+#define IMPLEMENT_PIXEL_QSORT(elem_type, arr, n)                                                  \
+  {                                                                                               \
+    int i, ir = n, j, k, l = 1, j_stack = 0;                                                      \
+    int *i_stack;                                                                                 \
+    elem_type a;                                                                                  \
+                                                                                                  \
+    i_stack = (int *)malloc(PIXEL_QSORT_STACK_SIZE * sizeof(elem_type));                          \
+    for (;;) {                                                                                    \
+      if (ir - l < PIXEL_QSORT_THRESHOLD) {                                                       \
+        for (j = l + 1; j <= ir; j++) {                                                           \
+          a = arr[j - 1];                                                                         \
+          for (i = j - 1; i >= 1; i--) {                                                          \
+            if (arr[i - 1] <= a)                                                                  \
+              break;                                                                              \
+            arr[i] = arr[i - 1];                                                                  \
+          }                                                                                       \
+          arr[i] = a;                                                                             \
+        }                                                                                         \
+        if (j_stack == 0)                                                                         \
+          break;                                                                                  \
+        ir = i_stack[j_stack-- - 1];                                                              \
+        l = i_stack[j_stack-- - 1];                                                               \
+      }                                                                                           \
+      else {                                                                                      \
+        k = (l + ir) >> 1;                                                                        \
+        {                                                                                         \
+          elem_type t = arr[k - 1];                                                               \
+          arr[k - 1] = arr[l];                                                                    \
+          arr[l] = t;                                                                             \
+        }                                                                                         \
+        if (arr[l] > arr[ir - 1]) {                                                               \
+          {                                                                                       \
+            elem_type t = arr[l];                                                                 \
+            arr[l] = arr[ir - 1];                                                                 \
+            arr[ir - 1] = t;                                                                      \
+          }                                                                                       \
+        }                                                                                         \
+        if (arr[l - 1] > arr[ir - 1]) {                                                           \
+          {                                                                                       \
+            elem_type t = arr[l - 1];                                                             \
+            arr[l - 1] = arr[ir - 1];                                                             \
+            arr[ir - 1] = t;                                                                      \
+          }                                                                                       \
+        }                                                                                         \
+        if (arr[l] > arr[l - 1]) {                                                                \
+          {                                                                                       \
+            elem_type t = arr[l];                                                                 \
+            arr[l] = arr[l - 1];                                                                  \
+            arr[l - 1] = t;                                                                       \
+          }                                                                                       \
+        }                                                                                         \
+        i = l + 1;                                                                                \
+        j = ir;                                                                                   \
+        a = arr[l - 1];                                                                           \
+        for (;;) {                                                                                \
+          do                                                                                      \
+            i++;                                                                                  \
+          while (arr[i - 1] < a);                                                                 \
+          do                                                                                      \
+            j--;                                                                                  \
+          while (arr[j - 1] > a);                                                                 \
+          if (j < i)                                                                              \
+            break;                                                                                \
+          {                                                                                       \
+            elem_type t = arr[i - 1];                                                             \
+            arr[i - 1] = arr[j - 1];                                                              \
+            arr[j - 1] = t;                                                                       \
+          }                                                                                       \
+        }                                                                                         \
+        arr[l - 1] = arr[j - 1];                                                                  \
+        arr[j - 1] = a;                                                                           \
+        j_stack += 2;                                                                             \
+        wxASSERT(!(j_stack > PIXEL_QSORT_STACK_SIZE));                                            \
+        /* if (j_stack > PIXEL_QSORT_STACK_SIZE) {  */                                            \
+        /* printf("stack too small in pixel_qsort: aborting"); */                                 \
+        /* exit(-2001); } */                                                                      \
+        if (ir - i + 1 >= j - l) {                                                                \
+          i_stack[j_stack - 1] = ir;                                                              \
+          i_stack[j_stack - 2] = i;                                                               \
+          ir = j - 1;                                                                             \
+        }                                                                                         \
+        else {                                                                                    \
+          i_stack[j_stack - 1] = j - 1;                                                           \
+          i_stack[j_stack - 2] = l;                                                               \
+          l = i;                                                                                  \
+        }                                                                                         \
+      }                                                                                           \
+    }                                                                                             \
+    free(i_stack);                                                                                \
+  }
 
 /*-------------------------------------------------------------------------
     Function :   pixel_qsort2()
@@ -338,75 +422,122 @@
 #define PIXEL_QSORT2_STACK_SIZE 50
 #define PIXEL_QSORT2_THRESHOLD 7
 
-#define DECLARE_PIXEL_QSORT2( name, elem_type )                             \
-    void name( elem_type *arr, elem_type *arr2, int n );
+#define DECLARE_PIXEL_QSORT2(name, elem_type) void name(elem_type *arr, elem_type *arr2, int n);
 
-#define DEFINE_PIXEL_QSORT2( name, elem_type )                              \
-    void name( elem_type *arr, elem_type *arr2, int n )                     \
-    IMPLEMENT_PIXEL_QSORT2( name, elem_type )
+#define DEFINE_PIXEL_QSORT2(name, elem_type)                                                      \
+  void name(elem_type *arr, elem_type *arr2, int n) IMPLEMENT_PIXEL_QSORT2(name, elem_type)
 
-#define IMPLEMENT_PIXEL_QSORT2( elem_type, arr, arr2, n )                   \
-{                                                                           \
-    int i, ir=n, j, k, l=1, j_stack=0;                                      \
-    int *i_stack ;                                                          \
-    elem_type  a, a2 ;                                                      \
-                                                                            \
-    i_stack = (int*)malloc(PIXEL_QSORT2_STACK_SIZE * sizeof(elem_type));    \
-    for (;;) {                                                              \
-        if (ir-l < PIXEL_QSORT2_THRESHOLD) {                                \
-            for (j=l+1 ; j<=ir ; j++) {                                     \
-                a = arr[j-1]; a2 = arr2[j-1];                               \
-                for (i=j-1 ; i>=1 ; i--) {                                  \
-                    if (arr[i-1] <= a) break;                               \
-                    arr[i] = arr[i-1];                                      \
-                    arr2[i] = arr2[i-1];                                    \
-                }                                                           \
-                arr[i] = a; arr2[i] = a2;                                   \
-            }                                                               \
-            if (j_stack == 0) break;                                        \
-            ir = i_stack[j_stack-- -1];                                     \
-            l  = i_stack[j_stack-- -1];                                     \
-        } else {                                                            \
-            k = (l+ir) >> 1;                                                \
-            { elem_type t=arr[k-1];arr[k-1]=arr[l];arr[l]=t;  t=arr2[k-1];arr2[k-1]=arr2[l];arr2[l]=t; } \
-            if (arr[l] > arr[ir-1]) {                                       \
-                { elem_type t=arr[l];arr[l]=arr[ir-1];arr[ir-1]=t; t=arr2[l];arr2[l]=arr2[ir-1];arr2[ir-1]=t;} \
-            }                                                               \
-            if (arr[l-1] > arr[ir-1]) {                                     \
-                { elem_type t=arr[l-1];arr[l-1]=arr[ir-1];arr[ir-1]=t; t=arr2[l-1];arr2[l-1]=arr2[ir-1];arr2[ir-1]=t;} \
-            }                                                               \
-            if (arr[l] > arr[l-1]) {                                        \
-                { elem_type t=arr[l];arr[l]=arr[l-1];arr[l-1]=t; t=arr2[l];arr2[l]=arr2[l-1];arr2[l-1]=t; } \
-            }                                                               \
-            i = l+1; j = ir; a = arr[l-1]; a2 = arr2[l-1];                  \
-            for (;;) {                                                      \
-                do i++; while (arr[i-1] < a);                               \
-                do j--; while (arr[j-1] > a);                               \
-                if (j < i) break;                                           \
-                { elem_type t=arr[i-1];arr[i-1]=arr[j-1];arr[j-1]=t; t=arr2[i-1];arr2[i-1]=arr2[j-1];arr2[j-1]=t;} \
-            }                                                               \
-            arr[l-1] = arr[j-1]; arr2[l-1] = arr2[j-1];                     \
-            arr[j-1] = a; arr2[j-1] = a2;                                   \
-            j_stack += 2;                                                   \
-            wxASSERT(!(j_stack>PIXEL_QSORT_STACK_SIZE));                    \
-            /* if (j_stack > PIXEL_QSORT_STACK_SIZE) {  */                  \
-                /* printf("stack too small in pixel_qsort: aborting"); */   \
-                /* exit(-2001); } */                                        \
-            if (ir-i+1 >= j-l) {                                            \
-                i_stack[j_stack-1] = ir;                                    \
-                i_stack[j_stack-2] = i;                                     \
-                ir = j-1;                                                   \
-            } else {                                                        \
-                i_stack[j_stack-1] = j-1;                                   \
-                i_stack[j_stack-2] = l;                                     \
-                l = i;                                                      \
-            }                                                               \
-        }                                                                   \
-    }                                                                       \
-    free(i_stack);                                                          \
-}
-
-
+#define IMPLEMENT_PIXEL_QSORT2(elem_type, arr, arr2, n)                                           \
+  {                                                                                               \
+    int i, ir = n, j, k, l = 1, j_stack = 0;                                                      \
+    int *i_stack;                                                                                 \
+    elem_type a, a2;                                                                              \
+                                                                                                  \
+    i_stack = (int *)malloc(PIXEL_QSORT2_STACK_SIZE * sizeof(elem_type));                         \
+    for (;;) {                                                                                    \
+      if (ir - l < PIXEL_QSORT2_THRESHOLD) {                                                      \
+        for (j = l + 1; j <= ir; j++) {                                                           \
+          a = arr[j - 1];                                                                         \
+          a2 = arr2[j - 1];                                                                       \
+          for (i = j - 1; i >= 1; i--) {                                                          \
+            if (arr[i - 1] <= a)                                                                  \
+              break;                                                                              \
+            arr[i] = arr[i - 1];                                                                  \
+            arr2[i] = arr2[i - 1];                                                                \
+          }                                                                                       \
+          arr[i] = a;                                                                             \
+          arr2[i] = a2;                                                                           \
+        }                                                                                         \
+        if (j_stack == 0)                                                                         \
+          break;                                                                                  \
+        ir = i_stack[j_stack-- - 1];                                                              \
+        l = i_stack[j_stack-- - 1];                                                               \
+      }                                                                                           \
+      else {                                                                                      \
+        k = (l + ir) >> 1;                                                                        \
+        {                                                                                         \
+          elem_type t = arr[k - 1];                                                               \
+          arr[k - 1] = arr[l];                                                                    \
+          arr[l] = t;                                                                             \
+          t = arr2[k - 1];                                                                        \
+          arr2[k - 1] = arr2[l];                                                                  \
+          arr2[l] = t;                                                                            \
+        }                                                                                         \
+        if (arr[l] > arr[ir - 1]) {                                                               \
+          {                                                                                       \
+            elem_type t = arr[l];                                                                 \
+            arr[l] = arr[ir - 1];                                                                 \
+            arr[ir - 1] = t;                                                                      \
+            t = arr2[l];                                                                          \
+            arr2[l] = arr2[ir - 1];                                                               \
+            arr2[ir - 1] = t;                                                                     \
+          }                                                                                       \
+        }                                                                                         \
+        if (arr[l - 1] > arr[ir - 1]) {                                                           \
+          {                                                                                       \
+            elem_type t = arr[l - 1];                                                             \
+            arr[l - 1] = arr[ir - 1];                                                             \
+            arr[ir - 1] = t;                                                                      \
+            t = arr2[l - 1];                                                                      \
+            arr2[l - 1] = arr2[ir - 1];                                                           \
+            arr2[ir - 1] = t;                                                                     \
+          }                                                                                       \
+        }                                                                                         \
+        if (arr[l] > arr[l - 1]) {                                                                \
+          {                                                                                       \
+            elem_type t = arr[l];                                                                 \
+            arr[l] = arr[l - 1];                                                                  \
+            arr[l - 1] = t;                                                                       \
+            t = arr2[l];                                                                          \
+            arr2[l] = arr2[l - 1];                                                                \
+            arr2[l - 1] = t;                                                                      \
+          }                                                                                       \
+        }                                                                                         \
+        i = l + 1;                                                                                \
+        j = ir;                                                                                   \
+        a = arr[l - 1];                                                                           \
+        a2 = arr2[l - 1];                                                                         \
+        for (;;) {                                                                                \
+          do                                                                                      \
+            i++;                                                                                  \
+          while (arr[i - 1] < a);                                                                 \
+          do                                                                                      \
+            j--;                                                                                  \
+          while (arr[j - 1] > a);                                                                 \
+          if (j < i)                                                                              \
+            break;                                                                                \
+          {                                                                                       \
+            elem_type t = arr[i - 1];                                                             \
+            arr[i - 1] = arr[j - 1];                                                              \
+            arr[j - 1] = t;                                                                       \
+            t = arr2[i - 1];                                                                      \
+            arr2[i - 1] = arr2[j - 1];                                                            \
+            arr2[j - 1] = t;                                                                      \
+          }                                                                                       \
+        }                                                                                         \
+        arr[l - 1] = arr[j - 1];                                                                  \
+        arr2[l - 1] = arr2[j - 1];                                                                \
+        arr[j - 1] = a;                                                                           \
+        arr2[j - 1] = a2;                                                                         \
+        j_stack += 2;                                                                             \
+        wxASSERT(!(j_stack > PIXEL_QSORT_STACK_SIZE));                                            \
+        /* if (j_stack > PIXEL_QSORT_STACK_SIZE) {  */                                            \
+        /* printf("stack too small in pixel_qsort: aborting"); */                                 \
+        /* exit(-2001); } */                                                                      \
+        if (ir - i + 1 >= j - l) {                                                                \
+          i_stack[j_stack - 1] = ir;                                                              \
+          i_stack[j_stack - 2] = i;                                                               \
+          ir = j - 1;                                                                             \
+        }                                                                                         \
+        else {                                                                                    \
+          i_stack[j_stack - 1] = j - 1;                                                           \
+          i_stack[j_stack - 2] = l;                                                               \
+          l = i;                                                                                  \
+        }                                                                                         \
+      }                                                                                           \
+    }                                                                                             \
+    free(i_stack);                                                                                \
+  }
 
 /*
 Abbreviated benchmark data from

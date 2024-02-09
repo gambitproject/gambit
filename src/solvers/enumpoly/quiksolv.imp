@@ -83,7 +83,6 @@ template <class T> Gambit::RectArray<bool> QuikSolv<T>::Eq_i_Uses_j() const
   return answer;
 }
 
-
 //---------------------------
 // Is a root impossible?
 //---------------------------

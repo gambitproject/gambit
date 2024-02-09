@@ -39,10 +39,11 @@ private:
   std::string m_label;
   GameTreeInfosetRep *m_infoset;
 
-  GameTreeActionRep(int p_number, const std::string &p_label,
-		    GameTreeInfosetRep *p_infoset)
-    : m_number(p_number), m_label(p_label), m_infoset(p_infoset) { }
-  ~GameTreeActionRep()   override = default;
+  GameTreeActionRep(int p_number, const std::string &p_label, GameTreeInfosetRep *p_infoset)
+    : m_number(p_number), m_label(p_label), m_infoset(p_infoset)
+  {
+  }
+  ~GameTreeActionRep() override = default;
 
 public:
   int GetNumber() const override { return m_number; }
@@ -70,11 +71,10 @@ protected:
   GamePlayerRep *m_player;
   Array<GameTreeActionRep *> m_actions;
   Array<GameTreeNodeRep *> m_members;
-  int flag, whichbranch { 0 };
+  int flag, whichbranch{0};
   Array<Number> m_probs;
 
-  GameTreeInfosetRep(GameTreeRep *p_efg, int p_number, GamePlayerRep *p_player,
-		 int p_actions);
+  GameTreeInfosetRep(GameTreeRep *p_efg, int p_number, GamePlayerRep *p_player, int p_actions);
   ~GameTreeInfosetRep() override;
 
   /// Adds the node to the information set
@@ -125,7 +125,6 @@ public:
   void Reveal(GamePlayer) override;
 };
 
-
 class GameTreeNodeRep : public GameNodeRep {
   friend class GameTreeRep;
   friend class GameTreeActionRep;
@@ -142,7 +141,7 @@ protected:
   GameTreeNodeRep *m_parent;
   GameOutcomeRep *outcome;
   Array<GameTreeNodeRep *> children;
-  GameTreeNodeRep *whichbranch { nullptr }, *ptr { nullptr };
+  GameTreeNodeRep *whichbranch{nullptr}, *ptr{nullptr};
 
   GameTreeNodeRep(GameTreeRep *e, GameTreeNodeRep *p);
   ~GameTreeNodeRep() override;
@@ -158,10 +157,12 @@ public:
 
   int GetNumber() const override { return number; }
   int NumberInInfoset() const override
-  { return infoset->m_members.Find(const_cast<GameTreeNodeRep *>(this)); }
+  {
+    return infoset->m_members.Find(const_cast<GameTreeNodeRep *>(this));
+  }
 
-  int NumChildren() const override    { return children.size(); }
-  GameNode GetChild(int i) const override    { return children[i]; }
+  int NumChildren() const override { return children.size(); }
+  GameNode GetChild(int i) const override { return children[i]; }
   GameNode GetChild(const GameAction &p_action) const override
   {
     if (p_action->GetInfoset() != infoset) {
@@ -171,15 +172,14 @@ public:
   }
   Array<GameNode> GetChildren() const override;
 
-  GameInfoset GetInfoset() const override   { return infoset; }
+  GameInfoset GetInfoset() const override { return infoset; }
   void SetInfoset(GameInfoset) override;
   GameInfoset LeaveInfoset() override;
 
   bool IsTerminal() const override { return children.empty(); }
-  GamePlayer GetPlayer() const override
-    { return (infoset) ? infoset->GetPlayer() : nullptr; }
+  GamePlayer GetPlayer() const override { return (infoset) ? infoset->GetPlayer() : nullptr; }
   GameAction GetPriorAction() const override; // returns null if root node
-  GameNode GetParent() const override    { return m_parent; }
+  GameNode GetParent() const override { return m_parent; }
   GameNode GetNextSibling() const override;
   GameNode GetPriorSibling() const override;
 
@@ -203,11 +203,11 @@ public:
   GameInfoset InsertMove(GameInfoset p_infoset) override;
 };
 
-
 class GameTreeRep : public GameExplicitRep {
   friend class GameTreeNodeRep;
   friend class GameTreeInfosetRep;
   friend class GameTreeActionRep;
+
 protected:
   mutable bool m_computedValues, m_doCanon;
   GameTreeNodeRep *m_root;
@@ -243,8 +243,12 @@ public:
   bool IsPerfectRecall(GameInfoset &, GameInfoset &) const override;
   /// Turn on or off automatic canonicalization of the game
   void SetCanonicalization(bool p_doCanon) const
-  { m_doCanon = p_doCanon;
-    if (m_doCanon) const_cast<GameTreeRep *>(this)->Canonicalize(); }
+  {
+    m_doCanon = p_doCanon;
+    if (m_doCanon) {
+      const_cast<GameTreeRep *>(this)->Canonicalize();
+    }
+  }
   //@}
 
   /// @name Players
@@ -302,17 +306,18 @@ public:
   PureStrategyProfile NewPureStrategyProfile() const override;
   MixedStrategyProfile<double> NewMixedStrategyProfile(double) const override;
   MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &) const override;
-  MixedStrategyProfile<double> NewMixedStrategyProfile(double, const StrategySupportProfile&) const override;
-  MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &, const StrategySupportProfile&) const override;
-
+  MixedStrategyProfile<double>
+  NewMixedStrategyProfile(double, const StrategySupportProfile &) const override;
+  MixedStrategyProfile<Rational>
+  NewMixedStrategyProfile(const Rational &, const StrategySupportProfile &) const override;
 };
 
-template <class T> class TreeMixedStrategyProfileRep
-  : public MixedStrategyProfileRep<T> {
+template <class T> class TreeMixedStrategyProfileRep : public MixedStrategyProfileRep<T> {
 public:
   explicit TreeMixedStrategyProfileRep(const StrategySupportProfile &p_support)
     : MixedStrategyProfileRep<T>(p_support)
-  { }
+  {
+  }
   explicit TreeMixedStrategyProfileRep(const MixedBehaviorProfile<T> &);
   ~TreeMixedStrategyProfileRep() override = default;
 
@@ -322,6 +327,6 @@ public:
   T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const override;
 };
 
-}
+} // namespace Gambit
 
-#endif  // GAMETREE_H
+#endif // GAMETREE_H

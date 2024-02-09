@@ -117,175 +117,230 @@
 //
 // ============================================================================
 
-#define DECLARE_PAIRED_DATA_ARRAYS_BASE(Tkey, TkeyArray, Tval, TvalArray, name, classexp) \
-\
-classexp name                                                                \
-{                                                                            \
-public:                                                                      \
-    name() {}                                                                \
-    name(const Tval& defaultVal) : m_defaultValue(defaultVal) {}             \
-    name(const name& other) { Copy(other); }                                 \
-    name(const Tkey& key, const Tval& val) { m_keys.Add(key); m_values.Add(val); } \
-    int GetCount() const { return m_keys.GetCount(); }                       \
-    int FindIndex(const Tkey& key) const;                                    \
-    size_t FindInsertIndex(const Tkey& pos) const;                           \
-    bool HasKey(const Tkey& key) const { return FindIndex(key) != wxNOT_FOUND; } \
-    const Tval& GetValue(const Tkey& key) const;                             \
-    Tval& GetValue(const Tkey& key);                                         \
-    Tval& GetOrCreateValue(const Tkey& key);                                 \
-    void SetValue(const Tkey& key, const Tval& value);                       \
-    bool RemoveValue(const Tkey& key);                                       \
-    void Clear() { m_keys.Clear(); m_values.Clear(); }                       \
-    const Tval& GetItemValue(size_t index) const { return m_values[index]; } \
-    const Tkey& GetItemKey(size_t index)   const { return m_keys[index]; }   \
-    Tval& GetItemValue(size_t index) { return m_values[index]; }             \
-    Tkey& GetItemKey(size_t index)   { return m_keys[index]; }               \
-    void RemoveAt(size_t index) { m_keys.RemoveAt(index); m_values.RemoveAt(index); } \
-    const TvalArray& GetValues() const { return m_values; }                  \
-    const TkeyArray& GetKeys()   const { return m_keys; }                    \
-    TvalArray& GetValues() { return m_values; }                              \
-    TkeyArray& GetKeys()   { return m_keys; }                                \
-    const Tval& GetDefaultValue() const { return m_defaultValue; }           \
-    void SetDefaultValue(const Tval& val) { m_defaultValue = val; }          \
-    void Copy(const name& other);                                            \
-    void Sort() { if (GetCount() > 1) q_sort(0, GetCount()-1); }             \
-    name& operator=(const name& other) { Copy(other); return *this; }        \
-protected :                                                                  \
-    void q_sort(int left, int right);                                        \
-    TkeyArray m_keys;                                                        \
-    TvalArray m_values;                                                      \
+#define DECLARE_PAIRED_DATA_ARRAYS_BASE(Tkey, TkeyArray, Tval, TvalArray, name, classexp)         \
+                                                                                                  \
+  classexp name                                                                                   \
+  {                                                                                               \
+  public:                                                                                         \
+    name() {}                                                                                     \
+    name(const Tval &defaultVal) : m_defaultValue(defaultVal) {}                                  \
+    name(const name &other) { Copy(other); }                                                      \
+    name(const Tkey &key, const Tval &val)                                                        \
+    {                                                                                             \
+      m_keys.Add(key);                                                                            \
+      m_values.Add(val);                                                                          \
+    }                                                                                             \
+    int GetCount() const { return m_keys.GetCount(); }                                            \
+    int FindIndex(const Tkey &key) const;                                                         \
+    size_t FindInsertIndex(const Tkey &pos) const;                                                \
+    bool HasKey(const Tkey &key) const { return FindIndex(key) != wxNOT_FOUND; }                  \
+    const Tval &GetValue(const Tkey &key) const;                                                  \
+    Tval &GetValue(const Tkey &key);                                                              \
+    Tval &GetOrCreateValue(const Tkey &key);                                                      \
+    void SetValue(const Tkey &key, const Tval &value);                                            \
+    bool RemoveValue(const Tkey &key);                                                            \
+    void Clear()                                                                                  \
+    {                                                                                             \
+      m_keys.Clear();                                                                             \
+      m_values.Clear();                                                                           \
+    }                                                                                             \
+    const Tval &GetItemValue(size_t index) const { return m_values[index]; }                      \
+    const Tkey &GetItemKey(size_t index) const { return m_keys[index]; }                          \
+    Tval &GetItemValue(size_t index) { return m_values[index]; }                                  \
+    Tkey &GetItemKey(size_t index) { return m_keys[index]; }                                      \
+    void RemoveAt(size_t index)                                                                   \
+    {                                                                                             \
+      m_keys.RemoveAt(index);                                                                     \
+      m_values.RemoveAt(index);                                                                   \
+    }                                                                                             \
+    const TvalArray &GetValues() const { return m_values; }                                       \
+    const TkeyArray &GetKeys() const { return m_keys; }                                           \
+    TvalArray &GetValues() { return m_values; }                                                   \
+    TkeyArray &GetKeys() { return m_keys; }                                                       \
+    const Tval &GetDefaultValue() const { return m_defaultValue; }                                \
+    void SetDefaultValue(const Tval &val) { m_defaultValue = val; }                               \
+    void Copy(const name &other);                                                                 \
+    void Sort()                                                                                   \
+    {                                                                                             \
+      if (GetCount() > 1)                                                                         \
+        q_sort(0, GetCount() - 1);                                                                \
+    }                                                                                             \
+    name &operator=(const name &other)                                                            \
+    {                                                                                             \
+      Copy(other);                                                                                \
+      return *this;                                                                               \
+    }                                                                                             \
+                                                                                                  \
+  protected:                                                                                      \
+    void q_sort(int left, int right);                                                             \
+    TkeyArray m_keys;                                                                             \
+    TvalArray m_values;                                                                           \
     Tval m_defaultValue;
 
 // ----------------------------------------------------------------------------
 // Note: The above macros is incomplete to allow you to extend the class.
 
-#define DECLARE_PAIRED_DATA_ARRAYS(Tkey, TkeyArray, Tval, TvalArray, name, classexp) \
-DECLARE_PAIRED_DATA_ARRAYS_BASE(Tkey, TkeyArray, Tval, TvalArray, name, classexp)    \
-};
+#define DECLARE_PAIRED_DATA_ARRAYS(Tkey, TkeyArray, Tval, TvalArray, name, classexp)              \
+  DECLARE_PAIRED_DATA_ARRAYS_BASE(Tkey, TkeyArray, Tval, TvalArray, name, classexp)               \
+  }                                                                                               \
+  ;
 
-#define DECLARE_PAIRED_INT_DATA_ARRAYS_BASE(Tval, TvalArray, name, classexp)      \
-DECLARE_PAIRED_DATA_ARRAYS_BASE(int, wxArrayInt, Tval, TvalArray, name, classexp) \
-public: \
-    bool UpdatePos( int pos, int numPos );
+#define DECLARE_PAIRED_INT_DATA_ARRAYS_BASE(Tval, TvalArray, name, classexp)                      \
+  DECLARE_PAIRED_DATA_ARRAYS_BASE(int, wxArrayInt, Tval, TvalArray, name, classexp)               \
+public:                                                                                           \
+  bool UpdatePos(int pos, int numPos);
 
-#define DECLARE_PAIRED_INT_DATA_ARRAYS(Tval, TvalArray, name, classexp) \
-DECLARE_PAIRED_INT_DATA_ARRAYS_BASE(Tval, TvalArray, name, classexp)    \
-};
+#define DECLARE_PAIRED_INT_DATA_ARRAYS(Tval, TvalArray, name, classexp)                           \
+  DECLARE_PAIRED_INT_DATA_ARRAYS_BASE(Tval, TvalArray, name, classexp)                            \
+  }                                                                                               \
+  ;
 
 // ============================================================================
-#define DEFINE_PAIRED_DATA_ARRAYS(Tkey, Tval, name) \
-\
-const Tval& name::GetValue(const Tkey& key) const \
-{ \
-    const int n = FindIndex(key); \
-    if (n != wxNOT_FOUND) return m_values[n]; \
-    return m_defaultValue; \
-} \
-Tval& name::GetValue(const Tkey& key) \
-{ \
-    const int n = FindIndex(key); \
-    if (n != wxNOT_FOUND) return m_values[n]; \
-    return m_defaultValue; \
-} \
-Tval& name::GetOrCreateValue(const Tkey& key) \
-{ \
-    const size_t n = FindInsertIndex(key); \
-    if (n == m_keys.GetCount())  \
-        { m_keys.Add(key); m_values.Add(Tval(m_defaultValue)); } \
-    else if (key != m_keys[n])  \
-        { m_keys.Insert(key, n); m_values.Insert(Tval(m_defaultValue), n); } \
-    return m_values[n]; \
-} \
-void name::SetValue(const Tkey& key, const Tval& value) \
-{ \
-    const size_t n = FindInsertIndex(key); \
-    if (n == m_keys.GetCount())  \
-        { m_keys.Add(key); m_values.Add(value); } \
-    else if (key == m_keys[n])  \
-        m_values[n] = value; \
-    else \
-        { m_keys.Insert(key, n); m_values.Insert(value, n); } \
-} \
-bool name::RemoveValue(const Tkey& key) \
-{ \
-    const int n = FindIndex(key); \
-    if (n != wxNOT_FOUND) { RemoveAt(n); return true; } \
-    return false; \
-} \
-int name::FindIndex(const Tkey& key) const \
-{ \
-    size_t n, lo = 0, hi = m_keys.GetCount(); \
-    while ( lo < hi ) \
-    { \
-        n = (lo + hi)/2;             \
-        const Tkey &tmp = m_keys[n]; \
-        if (tmp == key) return n;    \
-        if (tmp  > key) hi = n;      \
-        else            lo = n + 1;  \
-    } \
-    return wxNOT_FOUND; \
-} \
-size_t name::FindInsertIndex(const Tkey& key) const \
-{ \
-    size_t n, lo = 0, hi = m_keys.GetCount(); \
-    while ( lo < hi ) \
-    { \
-        n = (lo + hi)/2;             \
-        const Tkey &tmp = m_keys[n]; \
-        if (tmp == key) return n;    \
-        if (tmp  > key) hi = n;      \
-        else            lo = n + 1;  \
-    } \
-    return lo; \
-} \
-void name::Copy(const name& other) \
-{ \
-    m_keys = other.GetKeys();                 \
-    m_values = other.GetValues();             \
-    m_defaultValue = other.GetDefaultValue(); \
-} \
-void name::q_sort(int left, int right) \
-{ \
-    int l_hold = left, r_hold = right; \
-    Tkey pivot = m_keys[left]; Tval pivotVal = m_values[left]; \
-    while (left < right) \
-    { \
-        while ((m_keys[right] >= pivot) && (left < right)) right--;       \
-        if (left != right) { m_keys[left]   = m_keys[right];              \
-                             m_values[left] = m_values[right]; left++; }  \
-        while ((m_keys[left] <= pivot) && (left < right)) left++;         \
-        if (left != right) { m_keys[right]   = m_keys[left];              \
-                             m_values[right] = m_values[left]; right--; } \
-    } \
-    m_keys[left] = pivot; m_values[left] = pivotVal; \
-    if (l_hold < left) q_sort(l_hold, left-1); \
-    if (r_hold > left) q_sort(left+1, r_hold); \
-}
+#define DEFINE_PAIRED_DATA_ARRAYS(Tkey, Tval, name)                                               \
+                                                                                                  \
+  const Tval &name::GetValue(const Tkey &key) const                                               \
+  {                                                                                               \
+    const int n = FindIndex(key);                                                                 \
+    if (n != wxNOT_FOUND)                                                                         \
+      return m_values[n];                                                                         \
+    return m_defaultValue;                                                                        \
+  }                                                                                               \
+  Tval &name::GetValue(const Tkey &key)                                                           \
+  {                                                                                               \
+    const int n = FindIndex(key);                                                                 \
+    if (n != wxNOT_FOUND)                                                                         \
+      return m_values[n];                                                                         \
+    return m_defaultValue;                                                                        \
+  }                                                                                               \
+  Tval &name::GetOrCreateValue(const Tkey &key)                                                   \
+  {                                                                                               \
+    const size_t n = FindInsertIndex(key);                                                        \
+    if (n == m_keys.GetCount()) {                                                                 \
+      m_keys.Add(key);                                                                            \
+      m_values.Add(Tval(m_defaultValue));                                                         \
+    }                                                                                             \
+    else if (key != m_keys[n]) {                                                                  \
+      m_keys.Insert(key, n);                                                                      \
+      m_values.Insert(Tval(m_defaultValue), n);                                                   \
+    }                                                                                             \
+    return m_values[n];                                                                           \
+  }                                                                                               \
+  void name::SetValue(const Tkey &key, const Tval &value)                                         \
+  {                                                                                               \
+    const size_t n = FindInsertIndex(key);                                                        \
+    if (n == m_keys.GetCount()) {                                                                 \
+      m_keys.Add(key);                                                                            \
+      m_values.Add(value);                                                                        \
+    }                                                                                             \
+    else if (key == m_keys[n])                                                                    \
+      m_values[n] = value;                                                                        \
+    else {                                                                                        \
+      m_keys.Insert(key, n);                                                                      \
+      m_values.Insert(value, n);                                                                  \
+    }                                                                                             \
+  }                                                                                               \
+  bool name::RemoveValue(const Tkey &key)                                                         \
+  {                                                                                               \
+    const int n = FindIndex(key);                                                                 \
+    if (n != wxNOT_FOUND) {                                                                       \
+      RemoveAt(n);                                                                                \
+      return true;                                                                                \
+    }                                                                                             \
+    return false;                                                                                 \
+  }                                                                                               \
+  int name::FindIndex(const Tkey &key) const                                                      \
+  {                                                                                               \
+    size_t n, lo = 0, hi = m_keys.GetCount();                                                     \
+    while (lo < hi) {                                                                             \
+      n = (lo + hi) / 2;                                                                          \
+      const Tkey &tmp = m_keys[n];                                                                \
+      if (tmp == key)                                                                             \
+        return n;                                                                                 \
+      if (tmp > key)                                                                              \
+        hi = n;                                                                                   \
+      else                                                                                        \
+        lo = n + 1;                                                                               \
+    }                                                                                             \
+    return wxNOT_FOUND;                                                                           \
+  }                                                                                               \
+  size_t name::FindInsertIndex(const Tkey &key) const                                             \
+  {                                                                                               \
+    size_t n, lo = 0, hi = m_keys.GetCount();                                                     \
+    while (lo < hi) {                                                                             \
+      n = (lo + hi) / 2;                                                                          \
+      const Tkey &tmp = m_keys[n];                                                                \
+      if (tmp == key)                                                                             \
+        return n;                                                                                 \
+      if (tmp > key)                                                                              \
+        hi = n;                                                                                   \
+      else                                                                                        \
+        lo = n + 1;                                                                               \
+    }                                                                                             \
+    return lo;                                                                                    \
+  }                                                                                               \
+  void name::Copy(const name &other)                                                              \
+  {                                                                                               \
+    m_keys = other.GetKeys();                                                                     \
+    m_values = other.GetValues();                                                                 \
+    m_defaultValue = other.GetDefaultValue();                                                     \
+  }                                                                                               \
+  void name::q_sort(int left, int right)                                                          \
+  {                                                                                               \
+    int l_hold = left, r_hold = right;                                                            \
+    Tkey pivot = m_keys[left];                                                                    \
+    Tval pivotVal = m_values[left];                                                               \
+    while (left < right) {                                                                        \
+      while ((m_keys[right] >= pivot) && (left < right))                                          \
+        right--;                                                                                  \
+      if (left != right) {                                                                        \
+        m_keys[left] = m_keys[right];                                                             \
+        m_values[left] = m_values[right];                                                         \
+        left++;                                                                                   \
+      }                                                                                           \
+      while ((m_keys[left] <= pivot) && (left < right))                                           \
+        left++;                                                                                   \
+      if (left != right) {                                                                        \
+        m_keys[right] = m_keys[left];                                                             \
+        m_values[right] = m_values[left];                                                         \
+        right--;                                                                                  \
+      }                                                                                           \
+    }                                                                                             \
+    m_keys[left] = pivot;                                                                         \
+    m_values[left] = pivotVal;                                                                    \
+    if (l_hold < left)                                                                            \
+      q_sort(l_hold, left - 1);                                                                   \
+    if (r_hold > left)                                                                            \
+      q_sort(left + 1, r_hold);                                                                   \
+  }
 
 // ----------------------------------------------------------------------------
 
-#define DEFINE_PAIRED_INT_DATA_ARRAYS(Tval, name) \
-DEFINE_PAIRED_DATA_ARRAYS(int, Tval, name)  \
-bool name::UpdatePos( int pos, int numPos ) \
-{ \
-    int n, count = m_keys.GetCount(), start_pos = FindInsertIndex(pos); \
-    if ((numPos == 0) || (start_pos >= count)) return false; \
-    if ( numPos > 0 ) \
-    { \
-        for (n=start_pos; n<count; n++) \
-            m_keys[n] += numPos; \
-    } \
-    else if ( numPos < 0 ) \
-    { \
-        int pos_right = pos-numPos;     \
-        for (n=start_pos; n<count; n++) \
-        { \
-            int &k = m_keys[n];                               \
-            if (k < pos_right) { RemoveAt(n); n--; count--; } \
-            else if (k >= pos_right) { k += numPos; }         \
-        } \
-    } \
-    return true; \
-}
+#define DEFINE_PAIRED_INT_DATA_ARRAYS(Tval, name)                                                 \
+  DEFINE_PAIRED_DATA_ARRAYS(int, Tval, name)                                                      \
+  bool name::UpdatePos(int pos, int numPos)                                                       \
+  {                                                                                               \
+    int n, count = m_keys.GetCount(), start_pos = FindInsertIndex(pos);                           \
+    if ((numPos == 0) || (start_pos >= count))                                                    \
+      return false;                                                                               \
+    if (numPos > 0) {                                                                             \
+      for (n = start_pos; n < count; n++)                                                         \
+        m_keys[n] += numPos;                                                                      \
+    }                                                                                             \
+    else if (numPos < 0) {                                                                        \
+      int pos_right = pos - numPos;                                                               \
+      for (n = start_pos; n < count; n++) {                                                       \
+        int &k = m_keys[n];                                                                       \
+        if (k < pos_right) {                                                                      \
+          RemoveAt(n);                                                                            \
+          n--;                                                                                    \
+          count--;                                                                                \
+        }                                                                                         \
+        else if (k >= pos_right) {                                                                \
+          k += numPos;                                                                            \
+        }                                                                                         \
+      }                                                                                           \
+    }                                                                                             \
+    return true;                                                                                  \
+  }
 
-#endif  // __WX_PAIRARR_H__
+#endif // __WX_PAIRARR_H__
