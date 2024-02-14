@@ -454,12 +454,15 @@ MixedStrategyProfile<T>::MixedStrategyProfile(const MixedBehaviorProfile<T> &p_p
   Game game = p_profile.GetGame();
   auto *efg = dynamic_cast<GameTreeRep *>(game.operator->());
   for (int pl = 1; pl <= m_rep->m_support.GetGame()->NumPlayers(); pl++) {
-    for (int st = 1; st <= m_rep->m_support.GetGame()->GetPlayer(pl)->NumStrategies(); st++) {
+    GamePlayer player = m_rep->m_support.GetGame()->GetPlayer(pl);
+    for (int st = 1; st <= player->NumStrategies(); st++) {
       T prob = (T)1;
 
       for (int iset = 1; iset <= efg->GetPlayer(pl)->NumInfosets(); iset++) {
         if (efg->m_players[pl]->m_strategies[st]->m_behav[iset] > 0) {
-          prob *= p_profile(pl, iset, efg->m_players[pl]->m_strategies[st]->m_behav[iset]);
+          GameInfoset infoset = player->GetInfoset(iset);
+          prob *=
+              p_profile[infoset->GetAction(efg->m_players[pl]->m_strategies[st]->m_behav[iset])];
         }
       }
       (*this)[m_rep->m_support.GetGame()->GetPlayer(pl)->GetStrategy(st)] = prob;

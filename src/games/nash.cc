@@ -102,8 +102,7 @@ void BehavStrategyDetailRenderer<T>::Render(const MixedBehaviorProfile<T> &p_pro
           m_stream << std::setw(7) << action->GetNumber() << "   ";
         }
         m_stream << std::setw(11);
-        m_stream << lexical_cast<std::string>(p_profile(player->GetNumber(), iset, act),
-                                              m_numDecimals);
+        m_stream << lexical_cast<std::string>(p_profile[action], m_numDecimals);
         m_stream << "   ";
         m_stream << std::setw(11);
         m_stream << lexical_cast<std::string>(p_profile.GetPayoff(infoset->GetAction(act)),
@@ -341,7 +340,7 @@ void SubgameBehavSolver<T>::SolveSubgames(const Game &p_game, const DVector<T> &
               int id = atoi(subinfoset->GetLabel().c_str());
               for (int act = 1; act <= subsupport.NumActions(pl, iset); act++) {
                 int actno = subsupport.GetAction(pl, iset, act)->GetNumber();
-                solns[solns.Length()](pl, id, actno) = sol[solno](pl, iset, act);
+                solns[solns.Length()](pl, id, actno) = sol[solno][subinfoset->GetAction(act)];
               }
               break;
             }

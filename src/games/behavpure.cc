@@ -119,7 +119,7 @@ MixedBehaviorProfile<Rational> PureBehaviorProfile::ToMixedBehaviorProfile() con
   temp = Rational(0);
   for (auto player : m_efg->GetPlayers()) {
     for (auto infoset : player->GetInfosets()) {
-      temp(GetAction(infoset)) = Rational(1);
+      temp[GetAction(infoset)] = Rational(1);
     }
   }
   return temp;

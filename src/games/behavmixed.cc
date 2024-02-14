@@ -166,7 +166,7 @@ template <class T> void MixedBehaviorProfile<T>::SetCentroid()
     if (infoset->NumActions() > 0) {
       T center = (T(1) / T(infoset->NumActions()));
       for (auto act : infoset->GetActions()) {
-        (*this)(act) = center;
+        (*this)[act] = center;
       }
     }
   }
@@ -186,7 +186,7 @@ template <class T> void MixedBehaviorProfile<T>::UndefinedToCentroid()
                         [this](T total, GameAction act) { return total + GetActionProb(act); });
     if (total == T(0)) {
       for (auto act : infoset->GetActions()) {
-        (*this)(act) = T(1) / T(infoset->NumActions());
+        (*this)[act] = T(1) / T(infoset->NumActions());
       }
     }
   }
@@ -208,7 +208,7 @@ template <class T> MixedBehaviorProfile<T> MixedBehaviorProfile<T>::Normalize() 
       continue;
     }
     for (auto act : infoset->GetActions()) {
-      norm(act) /= total;
+      norm[act] /= total;
     }
   }
   return norm;
@@ -224,13 +224,13 @@ template <> void MixedBehaviorProfile<double>::Randomize()
   // renormalize at the end (this is a special case of the Dirichlet distribution).
   for (auto infoset : game->GetInfosets()) {
     for (auto act : infoset->GetActions()) {
-      (*this)(act) = -std::log(((double)std::rand()) / ((double)RAND_MAX));
+      (*this)[act] = -std::log(((double)std::rand()) / ((double)RAND_MAX));
     }
   }
   MixedBehaviorProfile<double> norm(Normalize());
   for (auto infoset : game->GetInfosets()) {
     for (auto act : infoset->GetActions()) {
-      (*this)(act) = norm(act);
+      (*this)[act] = norm[act];
     }
   }
 }
@@ -245,8 +245,9 @@ template <> void MixedBehaviorProfile<Rational>::Randomize()
 template <class T> void MixedBehaviorProfile<T>::Randomize(int p_denom)
 {
   CheckVersion();
+  InvalidateCache();
   Game game = m_support.GetGame();
-  *this = T(0);
+  m_probs = T(0);
 
   for (int pl = 1; pl <= game->NumPlayers(); pl++) {
     GamePlayer player = game->GetPlayer(pl);
@@ -261,10 +262,10 @@ template <class T> void MixedBehaviorProfile<T>::Randomize(int p_denom)
       cutoffs.push_back(p_denom);
       T sum = T(0);
       for (int act = 1; act < infoset->NumActions(); act++) {
-        (*this)(pl, iset, act) = T(cutoffs[act] - cutoffs[act - 1]) / T(p_denom);
-        sum += (*this)(pl, iset, act);
+        m_probs(pl, iset, act) = T(cutoffs[act] - cutoffs[act - 1]) / T(p_denom);
+        sum += m_probs(pl, iset, act);
       }
-      (*this)(pl, iset, infoset->NumActions()) = T(1) - sum;
+      m_probs(pl, iset, infoset->NumActions()) = T(1) - sum;
     }
   }
 }
@@ -353,7 +354,7 @@ template <class T> T MixedBehaviorProfile<T>::GetActionProb(const GameAction &ac
     return T(0);
   }
   else {
-    return (*this)(action->GetInfoset()->GetPlayer()->GetNumber(),
+    return m_probs(action->GetInfoset()->GetPlayer()->GetNumber(),
                    action->GetInfoset()->GetNumber(), m_support.GetIndex(action));
   }
 }

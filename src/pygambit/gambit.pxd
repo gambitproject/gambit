@@ -290,7 +290,7 @@ cdef extern from "games/behavmixed.h":
         void Randomize() except +TypeError
         void Randomize(int) except +
         double getitem "operator[]"(int) except +IndexError
-        double getaction "operator()"(c_GameAction) except +IndexError
+        double getaction "operator[]"(c_GameAction) except +IndexError
         double GetPayoff(int) except +
         double GetBeliefProb(c_GameNode) except +
         double GetRealizProb(c_GameNode) except +
@@ -318,7 +318,7 @@ cdef extern from "games/behavmixed.h":
         void Randomize() except +
         void Randomize(int) except +
         c_Rational getitem "operator[]"(int) except +IndexError
-        c_Rational getaction "operator()"(c_GameAction) except +IndexError
+        c_Rational getaction "operator[]"(c_GameAction) except +IndexError
         c_Rational GetPayoff(int) except +
         c_Rational GetBeliefProb(c_GameNode) except +
         c_Rational GetRealizProb(c_GameNode) except +

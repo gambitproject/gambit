@@ -277,7 +277,7 @@ Gambit::MixedBehaviorProfile<double> Sfg::ToBehav(const Gambit::PVector<double> 
         value = Gambit::Rational(0);
       }
 
-      b(i, sij->GetInfoset()->GetNumber(), efsupp.GetIndex(sij->GetAction())) = value;
+      b[sij->GetAction()] = value;
     }
   }
   return b;

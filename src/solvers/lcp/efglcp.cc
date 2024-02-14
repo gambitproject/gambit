@@ -285,13 +285,13 @@ void NashLcpBehaviorSolver<T>::GetProfile(const linalg::LemkeTableau<T> &tab,
     int snew = p_solution.infosetOffset.at(n->GetInfoset());
     for (const auto &action : n->GetInfoset()->GetActions()) {
       snew++;
-      v(action) = static_cast<T>(0);
+      v[action] = static_cast<T>(0);
       if (tab.Member(s1)) {
         int ind = tab.Find(s1);
         if (sol[ind] > p_solution.eps && tab.Member(snew)) {
           int ind2 = tab.Find(snew);
           if (sol[ind2] > p_solution.eps) {
-            v(action) = sol[ind2] / sol[ind];
+            v[action] = sol[ind2] / sol[ind];
           }
         }
       }
@@ -302,13 +302,13 @@ void NashLcpBehaviorSolver<T>::GetProfile(const linalg::LemkeTableau<T> &tab,
     int snew = p_solution.infosetOffset.at(n->GetInfoset());
     for (const auto &action : n->GetInfoset()->GetActions()) {
       snew++;
-      v(action) = static_cast<T>(0);
+      v[action] = static_cast<T>(0);
       if (tab.Member(ns1 + s2)) {
         int ind = tab.Find(ns1 + s2);
         if (sol[ind] > p_solution.eps && tab.Member(ns1 + snew)) {
           int ind2 = tab.Find(ns1 + snew);
           if (sol[ind2] > p_solution.eps) {
-            v(action) = sol[ind2] / sol[ind];
+            v[action] = sol[ind2] / sol[ind];
           }
         }
       }

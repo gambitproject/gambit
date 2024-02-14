@@ -340,7 +340,7 @@ MixedBehaviorProfile<double> ToFullSupport(const MixedBehaviorProfile<double> &p
       GameInfoset infoset = player->GetInfoset(iset);
       for (int act = 1; act <= infoset->NumActions(); act++) {
         if (support.Contains(infoset->GetAction(act))) {
-          fullProfile(pl, iset, act) = p_profile[index++];
+          fullProfile[infoset->GetAction(act)] = p_profile[index++];
         }
       }
     }

@@ -107,32 +107,16 @@ public:
 
   const T &operator[](const GameAction &p_action) const
   {
-    return (*this)(p_action->GetInfoset()->GetPlayer()->GetNumber(),
+    return m_probs(p_action->GetInfoset()->GetPlayer()->GetNumber(),
                    p_action->GetInfoset()->GetNumber(), m_support.GetIndex(p_action));
   }
   T &operator[](const GameAction &p_action)
   {
-    return (*this)(p_action->GetInfoset()->GetPlayer()->GetNumber(),
-                   p_action->GetInfoset()->GetNumber(), m_support.GetIndex(p_action));
-  }
-
-  const T &operator()(const GameAction &p_action) const
-  {
-    return (*this)(p_action->GetInfoset()->GetPlayer()->GetNumber(),
-                   p_action->GetInfoset()->GetNumber(), m_support.GetIndex(p_action));
-  }
-  T &operator()(const GameAction &p_action)
-  {
-    return (*this)(p_action->GetInfoset()->GetPlayer()->GetNumber(),
-                   p_action->GetInfoset()->GetNumber(), m_support.GetIndex(p_action));
-  }
-
-  const T &operator()(int a, int b, int c) const { return m_probs(a, b, c); }
-  T &operator()(int a, int b, int c)
-  {
     InvalidateCache();
-    return m_probs(a, b, c);
+    return m_probs(p_action->GetInfoset()->GetPlayer()->GetNumber(),
+                   p_action->GetInfoset()->GetNumber(), m_support.GetIndex(p_action));
   }
+
   const T &operator[](int a) const { return m_probs[a]; }
   T &operator[](int a)
   {

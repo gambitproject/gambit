@@ -151,7 +151,7 @@ void NashLpBehavSolver<T>::GameData::GetBehavior(MixedBehaviorProfile<T> &v,
     int snew = infosetOffset.at(n->GetInfoset());
     for (const auto &action : n->GetInfoset()->GetActions()) {
       snew++;
-      v(action) = (p_primal[s1] > (T)0) ? p_primal[snew] / p_primal[s1] : (T)0;
+      v[action] = (p_primal[s1] > (T)0) ? p_primal[snew] / p_primal[s1] : (T)0;
       GetBehavior(v, p_primal, p_dual, n->GetChild(action), snew, s2);
     }
   }
@@ -159,7 +159,7 @@ void NashLpBehavSolver<T>::GameData::GetBehavior(MixedBehaviorProfile<T> &v,
     int snew = infosetOffset.at(n->GetInfoset());
     for (const auto &action : n->GetInfoset()->GetActions()) {
       snew++;
-      v(action) = (p_dual[s2] > (T)0) ? p_dual[snew] / p_dual[s2] : (T)0;
+      v[action] = (p_dual[s2] > (T)0) ? p_dual[snew] / p_dual[s2] : (T)0;
       GetBehavior(v, p_primal, p_dual, n->GetChild(action), s1, snew);
     }
   }
