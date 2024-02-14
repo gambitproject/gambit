@@ -428,6 +428,7 @@ template <class T>
 MixedStrategyProfile<T>::MixedStrategyProfile(const MixedStrategyProfile<T> &p_profile)
   : m_rep(p_profile.m_rep->Copy())
 {
+  InvalidateCache();
 }
 
 template <class T>
@@ -435,6 +436,7 @@ MixedStrategyProfile<T> &
 MixedStrategyProfile<T>::operator=(const MixedStrategyProfile<T> &p_profile)
 {
   if (this != &p_profile) {
+    InvalidateCache();
     delete m_rep;
     m_rep = p_profile.m_rep->Copy();
   }
@@ -462,7 +464,7 @@ template <class T> Vector<T> MixedStrategyProfile<T>::operator[](const GamePlaye
 template <class T> MixedStrategyProfile<T> MixedStrategyProfile<T>::ToFullSupport() const
 {
   CheckVersion();
-  MixedStrategyProfile<T> full(m_rep->m_support.GetGame()->NewMixedStrategyProfile((T)0));
+  MixedStrategyProfile<T> full(m_rep->m_support.GetGame()->NewMixedStrategyProfile(T(0)));
 
   for (int pl = 1; pl <= m_rep->m_support.GetGame()->NumPlayers(); pl++) {
     GamePlayer player = m_rep->m_support.GetGame()->GetPlayer(pl);
@@ -482,41 +484,36 @@ template <class T> MixedStrategyProfile<T> MixedStrategyProfile<T>::ToFullSuppor
 //========================================================================
 //    MixedStrategyProfile<T>: Computation of interesting quantities
 //========================================================================
+template <class T> void MixedStrategyProfile<T>::ComputePayoffs() const
+{
+  if (!map_profile_payoffs.empty()) {
+    // caches (map_profile_payoffs and map_strategy_payoffs) are valid,
+    // so don't compute anything, simply return
+    return;
+  }
+  for (auto player : m_rep->m_support.GetPlayers()) {
+    map_profile_payoffs[player] = GetPayoff(player);
+    // values of the player's strategies
+    for (auto strategy : m_rep->m_support.GetStrategies(player)) {
+      map_strategy_payoffs[player][strategy] = GetPayoff(strategy);
+    }
+  }
+};
 
 template <class T> T MixedStrategyProfile<T>::GetLiapValue() const
 {
   CheckVersion();
-  static const T BIG1 = (T)100;
-  static const T BIG2 = (T)100;
+  ComputePayoffs();
 
-  T liapValue = (T)0;
-
+  T liapValue = T(0);
   for (auto player : m_rep->m_support.GetPlayers()) {
-    // values of the player's strategies
-    std::map<GameStrategy, T> values;
-
-    T avg = (T)0, sum = (T)0;
-    for (auto strategy : m_rep->m_support.GetStrategies(player)) {
-      const T &prob = (*this)[strategy];
-      values[strategy] = GetPayoff(strategy);
-      avg += prob * values.at(strategy);
-      sum += prob;
-      if (prob < (T)0) {
-        liapValue += BIG1 * prob * prob; // penalty for negative probabilities
-      }
-    }
-
-    for (auto v : values) {
-      T regret = v.second - avg;
-      if (regret > (T)0) {
+    for (auto v : map_strategy_payoffs[player]) {
+      T regret = v.second - map_profile_payoffs[player];
+      if (regret > T(0)) {
         liapValue += regret * regret; // penalty if not best response
       }
     }
-
-    // penalty if sum does not equal to one
-    liapValue += BIG2 * (sum - (T)1.0) * (sum - (T)1.0);
   }
-
   return liapValue;
 }
 

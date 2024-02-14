@@ -51,8 +51,16 @@ template <class T> MixedStrategyProfileRep<T> *TreeMixedStrategyProfileRep<T>::C
 
 template <class T> T TreeMixedStrategyProfileRep<T>::GetPayoff(int pl) const
 {
-  MixedStrategyProfile<T> profile(Copy());
-  return MixedBehaviorProfile<T>(profile).GetPayoff(pl);
+  if (mixed_behav_profile_sptr.get() == nullptr) {
+    MixedStrategyProfile<T> tmp(Copy());
+    mixed_behav_profile_sptr = std::make_shared<MixedBehaviorProfile<T>>(tmp);
+  }
+  return mixed_behav_profile_sptr->GetPayoff(pl);
+}
+
+template <class T> void TreeMixedStrategyProfileRep<T>::InvalidateCache() const
+{
+  mixed_behav_profile_sptr = nullptr;
 }
 
 template <class T>
@@ -73,19 +81,19 @@ T TreeMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &str
   GamePlayerRep *player1 = strategy1->GetPlayer();
   GamePlayerRep *player2 = strategy2->GetPlayer();
   if (player1 == player2) {
-    return (T)0;
+    return T(0);
   }
 
   MixedStrategyProfile<T> foo(Copy());
   for (auto strategy : this->m_support.GetStrategies(player1)) {
-    foo[strategy] = (T)0;
+    foo[strategy] = T(0);
   }
-  foo[strategy1] = (T)1;
+  foo[strategy1] = T(1);
 
   for (auto strategy : this->m_support.GetStrategies(player2)) {
-    foo[strategy] = (T)0;
+    foo[strategy] = T(0);
   }
-  foo[strategy2] = (T)1;
+  foo[strategy2] = T(1);
 
   return foo.GetPayoff(pl);
 }

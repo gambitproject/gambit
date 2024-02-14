@@ -65,6 +65,8 @@ public:
   T GetRegret(const GameStrategy &) const;
   T GetRegret(const GamePlayer &) const;
   T GetMaxRegret() const;
+
+  virtual void InvalidateCache() const {};
 };
 
 /// \brief A probability distribution over strategies in a game
@@ -102,11 +104,13 @@ public:
   MixedStrategyProfile<T> &operator=(const MixedStrategyProfile<T> &);
   MixedStrategyProfile<T> &operator=(const Vector<T> &v)
   {
+    InvalidateCache();
     m_rep->m_probs = v;
     return *this;
   }
   MixedStrategyProfile<T> &operator=(const T &c)
   {
+    InvalidateCache();
     m_rep->m_probs = c;
     return *this;
   }
@@ -137,6 +141,7 @@ public:
   T &operator[](int i)
   {
     CheckVersion();
+    InvalidateCache();
     return m_rep->m_probs[i];
   }
 
@@ -150,6 +155,7 @@ public:
   T &operator[](const GameStrategy &p_strategy)
   {
     CheckVersion();
+    InvalidateCache(); // NEW
     return m_rep->operator[](p_strategy);
   }
 
@@ -204,6 +210,18 @@ public:
 
   /// @name Computation of interesting quantities
   //@{
+  /// Used to read payoffs from cache or compute them and cache them if needed
+  void ComputePayoffs() const;
+  mutable std::map<GamePlayer, std::map<GameStrategy, T>> map_strategy_payoffs;
+  mutable std::map<GamePlayer, T> map_profile_payoffs;
+  /// Reset cache for payoffs and strategy values
+  virtual void InvalidateCache() const
+  {
+    map_strategy_payoffs.clear();
+    map_profile_payoffs.clear();
+    m_rep->InvalidateCache();
+  }
+
   /// Computes the payoff of the profile to player 'pl'
   T GetPayoff(int pl) const
   {
