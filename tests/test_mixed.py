@@ -788,10 +788,12 @@ def _get_and_check_answers(game: gbt.Game, action_probs1: tuple, action_probs2: 
     assert order1_answers == order2_answers
 
 
+# For 4x4 coord nfg:
 PROBS_1A_doub = (0.25, 0.25, 0.25, 0.25)
 PROBS_2A_doub = (0.5, 0, 0.5, 0)
 PROBS_1A_rat = ("1/4", "1/4", "1/4", "1/4")
 PROBS_2A_rat = ("1/2", "0", "1/2", "0")
+# For 2x2x2 nfg and Myserson 2-card poker efg (both have 6 strategies in total):
 PROBS_1B_doub = (0.5, 0.5, 0.5, 0.5, 0.5, 0.5)
 PROBS_2B_doub = (1.0, 0.0, 1.0, 0.0, 1.0, 0.0)
 PROBS_1B_rat = ("1/2", "1/2", "1/2", "1/2", "1/2", "1/2")
@@ -805,71 +807,130 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
      # payoffs (for players)
      #######################
      # 4x4 coordination nfg
-     (games.create_coord_4x4_nfg(), PROBS_1A_doub, PROBS_2A_doub, False,
-      lambda profile, player: profile.payoff(player), lambda game: game.players),
-     (games.create_coord_4x4_nfg(), PROBS_1A_rat, PROBS_2A_rat, True,
-      lambda profile, player: profile.payoff(player), lambda game: game.players),
+     pytest.param(games.create_coord_4x4_nfg(), PROBS_1A_doub, PROBS_2A_doub, False,
+                  lambda profile, player: profile.payoff(player), lambda game: game.players,
+                  id="payoffs_coord_doub"),
+     pytest.param(games.create_coord_4x4_nfg(), PROBS_1A_rat, PROBS_2A_rat, True,
+                  lambda profile, player: profile.payoff(player), lambda game: game.players,
+                  id="payoffs_coord_rat"),
      # 2x2x2 nfg
-     (games.create_2x2x2_nfg(), PROBS_1B_doub, PROBS_2B_doub, False,
-      lambda profile, player: profile.payoff(player), lambda game: game.players),
-     (games.create_2x2x2_nfg(), PROBS_1B_rat, PROBS_2B_rat, True,
-      lambda profile, player: profile.payoff(player), lambda game: game.players),
+     pytest.param(games.create_2x2x2_nfg(), PROBS_1B_doub, PROBS_2B_doub, False,
+                  lambda profile, player: profile.payoff(player), lambda game: game.players,
+                  id="payoffs_2x2x2_doub"),
+     pytest.param(games.create_2x2x2_nfg(), PROBS_1B_rat, PROBS_2B_rat, True,
+                  lambda profile, player: profile.payoff(player), lambda game: game.players,
+                  id="payoffs_2x2x2_rat"),
+     # Myerson 2-card poker efg
+     pytest.param(games.create_myerson_2_card_poker_efg(), PROBS_1B_doub, PROBS_2B_doub, False,
+                  lambda profile, player: profile.payoff(player), lambda game: game.players,
+                  id="payoffs_poker_doub"),
+     pytest.param(games.create_myerson_2_card_poker_efg(), PROBS_1B_rat, PROBS_2B_rat, True,
+                  lambda profile, player: profile.payoff(player), lambda game: game.players,
+                  id="payoffs_poker_rat"),
      #################################################################################
      # regret (for strategies)
      # 4x4 coordination nfg
-     (games.create_coord_4x4_nfg(), PROBS_1A_doub, PROBS_2A_doub, False,
-      lambda profile, strategy: profile.strategy_regret(strategy), lambda game: game.strategies),
-     (games.create_coord_4x4_nfg(), PROBS_1A_rat, PROBS_2A_rat, True,
-      lambda profile, strategy: profile.strategy_regret(strategy), lambda game: game.strategies),
+     pytest.param(games.create_coord_4x4_nfg(), PROBS_1A_doub, PROBS_2A_doub, False,
+                  lambda profile, strategy: profile.strategy_regret(strategy),
+                  lambda game: game.strategies, id="regret_coord_doub"),
+     pytest.param(games.create_coord_4x4_nfg(), PROBS_1A_rat, PROBS_2A_rat, True,
+                  lambda profile, strategy: profile.strategy_regret(strategy),
+                  lambda game: game.strategies, id="regret_coord_rat"),
      # 2x2x2 nfg
-     (games.create_2x2x2_nfg(), PROBS_1B_doub, PROBS_2B_doub, False,
-      lambda profile, strategy: profile.strategy_regret(strategy), lambda game: game.strategies),
-     (games.create_2x2x2_nfg(), PROBS_1B_rat, PROBS_2B_rat, True,
-      lambda profile, strategy: profile.strategy_regret(strategy), lambda game: game.strategies),
+     pytest.param(games.create_2x2x2_nfg(), PROBS_1B_doub, PROBS_2B_doub, False,
+                  lambda profile, strategy: profile.strategy_regret(strategy),
+                  lambda game: game.strategies, id="regret_2x2x2_doub"),
+     pytest.param(games.create_2x2x2_nfg(), PROBS_1B_rat, PROBS_2B_rat, True,
+                  lambda profile, strategy: profile.strategy_regret(strategy),
+                  lambda game: game.strategies, id="regret_2x2x2_rat"),
+     # Myerson 2-card poker efg
+     pytest.param(games.create_myerson_2_card_poker_efg(), PROBS_1B_doub, PROBS_2B_doub, False,
+                  lambda profile, strategy: profile.strategy_regret(strategy),
+                  lambda game: game.strategies, id="regret_poker_doub"),
+     pytest.param(games.create_myerson_2_card_poker_efg(), PROBS_1B_rat, PROBS_2B_rat, True,
+                  lambda profile, strategy: profile.strategy_regret(strategy),
+                  lambda game: game.strategies, id="regret_poker_rat"),
      #################################################################################
      # strategy_value (for strategies)
      # 4x4 coordination nfg
-     (games.create_coord_4x4_nfg(), PROBS_1A_doub, PROBS_2A_doub, False,
-      lambda profile, strategy: profile.strategy_value(strategy), lambda game: game.strategies),
-     (games.create_coord_4x4_nfg(), PROBS_1A_rat, PROBS_2A_rat, True,
-      lambda profile, strategy: profile.strategy_value(strategy), lambda game: game.strategies),
+     pytest.param(games.create_coord_4x4_nfg(), PROBS_1A_doub, PROBS_2A_doub, False,
+                  lambda profile, strategy: profile.strategy_value(strategy),
+                  lambda game: game.strategies, id="strat_value_coord_doub"),
+     pytest.param(games.create_coord_4x4_nfg(), PROBS_1A_rat, PROBS_2A_rat, True,
+                  lambda profile, strategy: profile.strategy_value(strategy),
+                  lambda game: game.strategies, id="strat_value_coord_rat"),
      # 2x2x2 nfg
-     (games.create_2x2x2_nfg(), PROBS_1B_doub, PROBS_2B_doub, False,
-      lambda profile, strategy: profile.strategy_value(strategy), lambda game: game.strategies),
-     (games.create_2x2x2_nfg(), PROBS_1B_rat, PROBS_2B_rat, True,
-      lambda profile, strategy: profile.strategy_value(strategy), lambda game: game.strategies),
+     pytest.param(games.create_2x2x2_nfg(), PROBS_1B_doub, PROBS_2B_doub, False,
+                  lambda profile, strategy: profile.strategy_value(strategy),
+                  lambda game: game.strategies, id="strat_value_2x2x2_doub"),
+     pytest.param(games.create_2x2x2_nfg(), PROBS_1B_rat, PROBS_2B_rat, True,
+                  lambda profile, strategy: profile.strategy_value(strategy),
+                  lambda game: game.strategies, id="strat_value_2x2x2_rat"),
+     # Myerson 2-card poker efg
+     pytest.param(games.create_myerson_2_card_poker_efg(), PROBS_1B_doub, PROBS_2B_doub, False,
+                  lambda profile, strategy: profile.strategy_value(strategy),
+                  lambda game: game.strategies, id="strat_value_poker_doub"),
+     pytest.param(games.create_myerson_2_card_poker_efg(), PROBS_1B_rat, PROBS_2B_rat, True,
+                  lambda profile, strategy: profile.strategy_value(strategy),
+                  lambda game: game.strategies, id="strat_value_poker_rat"),
      #################################################################################
      # strategy_value_deriv (for strategies * strategies)
      # 4x4 coordination nfg
-     (games.create_coord_4x4_nfg(), PROBS_1A_doub, PROBS_2A_doub, False,
-      lambda profile, strat_pair: profile.strategy_value_deriv(strategy=strat_pair[0],
-                                                               other=strat_pair[1]),
-      lambda game: list(product(game.strategies, game.strategies))),
-     (games.create_coord_4x4_nfg(), PROBS_1A_rat, PROBS_2A_rat, True,
-      lambda profile, strat_pair: profile.strategy_value_deriv(strategy=strat_pair[0],
-                                                               other=strat_pair[1]),
-      lambda game: list(product(game.strategies, game.strategies))),
+     pytest.param(games.create_coord_4x4_nfg(), PROBS_1A_doub, PROBS_2A_doub, False,
+                  lambda profile, strat_pair: profile.strategy_value_deriv(strategy=strat_pair[0],
+                  other=strat_pair[1]),
+                  lambda game: list(product(game.strategies, game.strategies)),
+                  id="strat_value_deriv_coord_doub"),
+     pytest.param(games.create_coord_4x4_nfg(), PROBS_1A_rat, PROBS_2A_rat, True,
+                  lambda profile, strat_pair: profile.strategy_value_deriv(strategy=strat_pair[0],
+                  other=strat_pair[1]),
+                  lambda game: list(product(game.strategies, game.strategies)),
+                  id="strat_value_deriv_coord_rat"),
      # 2x2x2 nfg
-     (games.create_2x2x2_nfg(), PROBS_1B_doub, PROBS_2B_doub, False,
-      lambda profile, strat_pair: profile.strategy_value_deriv(strategy=strat_pair[0],
-                                                               other=strat_pair[1]),
-      lambda game: list(product(game.strategies, game.strategies))),
-     (games.create_2x2x2_nfg(), PROBS_1B_rat, PROBS_2B_rat, True,
-      lambda profile, strat_pair: profile.strategy_value_deriv(strategy=strat_pair[0],
-                                                               other=strat_pair[1]),
-      lambda game: list(product(game.strategies, game.strategies))),
+     pytest.param(games.create_2x2x2_nfg(), PROBS_1B_doub, PROBS_2B_doub, False,
+                  lambda profile, strat_pair: profile.strategy_value_deriv(strategy=strat_pair[0],
+                  other=strat_pair[1]),
+                  lambda game: list(product(game.strategies, game.strategies)),
+                  id="strat_value_deriv_2x2x2_doub"),
+     pytest.param(games.create_2x2x2_nfg(), PROBS_1B_rat, PROBS_2B_rat, True,
+                  lambda profile, strat_pair: profile.strategy_value_deriv(strategy=strat_pair[0],
+                  other=strat_pair[1]),
+                  lambda game: list(product(game.strategies, game.strategies)),
+                  id="strat_value_deriv_2x2x2_rat"),
+     # Myerson 2-card poker efg
+     pytest.param(games.create_myerson_2_card_poker_efg(), PROBS_1B_doub, PROBS_2B_doub, False,
+                  lambda profile, strat_pair: profile.strategy_value_deriv(strategy=strat_pair[0],
+                  other=strat_pair[1]),
+                  lambda game: list(product(game.strategies, game.strategies)),
+                  id="strat_value_deriv_poker_doub"),
+     pytest.param(games.create_myerson_2_card_poker_efg(), PROBS_1B_rat, PROBS_2B_rat, True,
+                  lambda profile, strat_pair: profile.strategy_value_deriv(strategy=strat_pair[0],
+                  other=strat_pair[1]),
+                  lambda game: list(product(game.strategies, game.strategies)),
+                  id="strat_value_deriv_poker_rat"),
      #################################################################################
      # liap_value (of profile, hence [1] for objects_to_test, any singleton collection would do)
      # 4x4 coordination nfg
-     (games.create_coord_4x4_nfg(), PROBS_1A_doub, PROBS_2A_doub, False,
-      lambda profile, y: profile.liap_value(), lambda x: [1]),
-     (games.create_coord_4x4_nfg(), PROBS_1A_rat, PROBS_2A_rat, True,
-      lambda profile, y: profile.liap_value(), lambda x: [1]),
+     pytest.param(games.create_coord_4x4_nfg(), PROBS_1A_doub, PROBS_2A_doub, False,
+                  lambda profile, y: profile.liap_value(), lambda x: [1],
+                  id="liap_value_coord_doub"),
+     pytest.param(games.create_coord_4x4_nfg(), PROBS_1A_rat, PROBS_2A_rat, True,
+                  lambda profile, y: profile.liap_value(), lambda x: [1],
+                  id="liap_value_coord_rat"),
      # 2x2x2 nfg
-     (games.create_2x2x2_nfg(), PROBS_1B_doub, PROBS_2B_doub, False,
-      lambda profile, y: profile.liap_value(), lambda x: [1]),
-     (games.create_2x2x2_nfg(), PROBS_1B_rat, PROBS_2B_rat, True,
-      lambda profile, y: profile.liap_value(), lambda x: [1]),
+     pytest.param(games.create_2x2x2_nfg(), PROBS_1B_doub, PROBS_2B_doub, False,
+                  lambda profile, y: profile.liap_value(), lambda x: [1],
+                  id="liap_value_2x2x2_doub"),
+     pytest.param(games.create_2x2x2_nfg(), PROBS_1B_rat, PROBS_2B_rat, True,
+                  lambda profile, y: profile.liap_value(), lambda x: [1],
+                  id="liap_value_2x2x2_rat"),
+     # Myerson 2-card poker efg
+     pytest.param(games.create_myerson_2_card_poker_efg(), PROBS_1B_doub, PROBS_2B_doub, False,
+                  lambda profile, y: profile.liap_value(), lambda x: [1],
+                  id="liap_value_poker_doub"),
+     pytest.param(games.create_myerson_2_card_poker_efg(), PROBS_1B_rat, PROBS_2B_rat, True,
+                  lambda profile, y: profile.liap_value(), lambda x: [1],
+                  id="liap_value_poker_rat"),
      ]
 )
 def test_profile_order_consistency(game: gbt.Game,
