@@ -20,7 +20,8 @@
 - `append_move`/`append_infoset` now resolves either a singleton node reference or any
   iterable set of node references
 - Additional regret-related functions added to `MixedBehaviorProfile` and `MixedStrategyProfile`
-  in both C++ and Python.
+  in both C++ and Python
+- Some caching added to payoff/strategy value calculations in `MixedStrategyProfile`
 
 ### Changed
 - Gambit now requires a compiler that supports C++17.
@@ -37,7 +38,7 @@
 - Improved __repr__ methods in pygambit for game-related classes
 - Further extension of test suite for mixed behavior profiles to cover new indexing and profile
   order consistency for payoff-related calculations
-- Overhaul of caching in MixedBehaviorProfile to use maps (std::map)
+- Overhaul of caching in `MixedBehaviorProfile` to use maps (`std::map`)
 - Creation of random mixed profiles in pygambit is done with new `Game.random_strategy_profile` and
   `Game.random_behavior_profile` methods; these accept `numpy.random.Generator` objects for
   reproducible state.
