@@ -682,6 +682,24 @@ class Game:
                 raise TypeError("Must use a tuple of ints, strategy labels, or strategies")
         return self._get_contingency(*tuple(cont))
 
+    def _fill_strategy_profile(self,
+                               profile: MixedStrategyProfile,
+                               data: typing.Optional[list],
+                               typefunc: typing.Callable) -> MixedStrategyProfile:
+        """Utility function to fill a `MixedStrategyProfile` with the data from a nested list."""
+        if data is None:
+            return profile
+        if len(data) != len(self.players):
+            raise ValueError("Number of elements does not match number of players")
+        for (p, d) in zip(self.players, data):
+            if len(p.strategies) != len(d):
+                raise ValueError(
+                    f"Number of elements does not match number of strategies for {p}"
+                )
+            for (s, v) in zip(p.strategies, d):
+                profile[s] = typefunc(v)
+        return profile
+
     def mixed_strategy_profile(self, data=None, rational=False) -> MixedStrategyProfile:
         """Create a mixed strategy profile over the game.
 
@@ -700,52 +718,46 @@ class Game:
 
         rational
             If True, probabilities are represented using rational numbers;
-            otherwise double-precision floating point numbers are used.
+            otherwise floating point numbers are used.
         """
         if not self.is_perfect_recall:
             raise UndefinedOperationError(
                 "Mixed strategies not supported for games with imperfect recall."
             )
-        if not rational:
-            mspd = MixedStrategyProfileDouble()
-            mspd.profile = make_shared[c_MixedStrategyProfileDouble](
-                self.game.deref().NewMixedStrategyProfile(0.0)
-            )
-            if data is None:
-                return mspd
-            if len(data) != len(self.players):
-                raise ValueError(
-                    "Number of elements does not match number of players"
-                )
-            for (p, d) in zip(self.players, data):
-                if len(p.strategies) != len(d):
-                    raise ValueError(
-                        f"Number of elements does not match number of "
-                        f"strategies for {p}"
-                    )
-                for (s, v) in zip(p.strategies, d):
-                    mspd[s] = float(v)
-            return mspd
-        else:
+        if rational:
             mspr = MixedStrategyProfileRational()
             mspr.profile = make_shared[c_MixedStrategyProfileRational](
                 self.game.deref().NewMixedStrategyProfile(c_Rational())
             )
-            if data is None:
-                return mspr
-            if len(data) != len(self.players):
-                raise ValueError(
-                    "Number of elements does not match number of players"
-                )
-            for (p, d) in zip(self.players, data):
-                if len(p.strategies) != len(d):
+            return self._fill_strategy_profile(mspr, data, Rational)
+        else:
+            mspd = MixedStrategyProfileDouble()
+            mspd.profile = make_shared[c_MixedStrategyProfileDouble](
+                self.game.deref().NewMixedStrategyProfile(0.0)
+            )
+            return self._fill_strategy_profile(mspd, data, float)
+
+    def _fill_behavior_profile(self,
+                               profile: MixedBehaviorProfile,
+                               data: typing.Optional[list],
+                               typefunc: typing.Callable) -> MixedBehaviorProfile:
+        """Utility function to fill a `MixedBehaviorProfile` with the data from a nested list."""
+        if data is None:
+            return profile
+        if len(data) != len(self.players):
+            raise ValueError("Number of elements does not match number of players")
+        for (p, d) in zip(self.players, data):
+            if len(p.infosets) != len(d):
+                raise ValueError(f"Number of elements does not match number of infosets for {p}")
+            for (i, v) in zip(p.infosets, d):
+                if len(i.actions) != len(v):
                     raise ValueError(
                         f"Number of elements does not match number of "
-                        f"strategies for {p}"
+                        f"actions for infoset {i} for {p}"
                     )
-                for (s, v) in zip(p.strategies, d):
-                    mspr[s] = Rational(v)
-            return mspr
+                for (a, u) in zip(i.actions, v):
+                    profile[a] = typefunc(u)
+        return profile
 
     def mixed_behavior_profile(self, data=None, rational=False) -> MixedBehaviorProfile:
         """Create a mixed behavior profile over the game.
@@ -756,13 +768,12 @@ class Game:
         Parameters
         ----------
         data : array_like of array_like of array_like, optional
-            A nested list (or compatible type) with the
-            same dimension as the action set of the game,
-            specifying the probabilities of the actions.
+            A nested list (or compatible type) with the same dimension as the action set of the
+            game, specifying the probabilities of the actions.
 
         rational : bool, optional
-            If True, probabilities are represented using rational numbers; otherwise
-            double-precision floating point numbers are used.
+            If True, probabilities are represented using rational numbers;
+            otherwise floating point numbers are used.
 
         Raises
         ------
@@ -773,54 +784,14 @@ class Game:
             raise UndefinedOperationError(
                 "Game must have a tree representation to create a mixed behavior profile"
             )
-        if not rational:
-            mbpd = MixedBehaviorProfileDouble()
-            mbpd.profile = make_shared[c_MixedBehaviorProfileDouble](self.game)
-            if data is None:
-                return mbpd
-            if len(data) != len(self.players):
-                raise ValueError(
-                    "Number of elements does not match number of players"
-                )
-            for (p, d) in zip(self.players, data):
-                if len(p.infosets) != len(d):
-                    raise ValueError(
-                        f"Number of elements does not match number of "
-                        f"infosets for {p}"
-                    )
-                for (i, v) in zip(p.infosets, d):
-                    if len(i.actions) != len(v):
-                        raise ValueError(
-                            f"Number of elements does not match number of "
-                            f"actions for the infoset {i} for {p}"
-                        )
-                    for (a, u) in zip(i.actions, v):
-                        mbpd[a] = float(u)
-            return mbpd
-        else:
+        if rational:
             mbpr = MixedBehaviorProfileRational()
             mbpr.profile = make_shared[c_MixedBehaviorProfileRational](self.game)
-            if data is None:
-                return mbpr
-            if len(data) != len(self.players):
-                raise ValueError(
-                    "Number of elements does not match number of players"
-                )
-            for (p, d) in zip(self.players, data):
-                if len(p.infosets) != len(d):
-                    raise ValueError(
-                        f"Number of elements does not match number of "
-                        f"infosets for {p}"
-                    )
-                for (i, v) in zip(p.infosets, d):
-                    if len(i.actions) != len(v):
-                        raise ValueError(
-                            f"Number of elements does not match number of "
-                            f"actions for the infoset {i} for {p}"
-                        )
-                    for (a, u) in zip(i.actions, v):
-                        mbpr[a] = Rational(u)
-            return mbpr
+            return self._fill_behavior_profile(mbpr, data, Rational)
+        else:
+            mbpd = MixedBehaviorProfileDouble()
+            mbpd.profile = make_shared[c_MixedBehaviorProfileDouble](self.game)
+            return self._fill_behavior_profile(mbpd, data, float)
 
     def support_profile(self):
         return StrategySupportProfile(self)
