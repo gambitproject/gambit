@@ -826,19 +826,6 @@ class MixedBehaviorProfile:
         self._check_validity()
         return self._as_strategy()
 
-    def randomize(self, denom: typing.Optional[int] = None) -> None:
-        """Randomizes the probabilities in the profile.  These are
-        generated as uniform distributions over the actions at each
-        information set.  If
-        ``denom`` is specified, all probabilities are divisible by
-        ``denom``, that is, the distribution is uniform over a discrete
-        grid of mixed strategies.
-        """
-        self._check_validity()
-        if denom is not None and denom <= 0:
-            raise ValueError("randomize(): denominator must be a positive integer")
-        self._randomize(denom)
-
     def normalize(self) -> MixedBehaviorProfile:
         """Create a profile with the same action proportions as this
         one, but normalised so probabilities for each infoset sum to one.
@@ -930,12 +917,6 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
         )
         return profile
 
-    def _randomize(self, denom: typing.Optional[int] = None) -> None:
-        if denom is None:
-            deref(self.profile).Randomize()
-        else:
-            deref(self.profile).Randomize(denom)
-
     @property
     def _game(self) -> Game:
         g = Game()
@@ -1026,11 +1007,6 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
             make_shared[c_MixedBehaviorProfileRational](deref(self.profile).Normalize())
         )
         return profile
-
-    def _randomize(self, denom: typing.Optional[int] = None) -> None:
-        if denom is None:
-            raise ValueError("randomize() on rational-precision profiles requires a denominator")
-        deref(self.profile).Randomize(denom)
 
     @property
     def _game(self) -> Game:

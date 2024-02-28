@@ -84,11 +84,10 @@ List<MixedStrategyProfile<double>> ReadStrategyProfiles(const Game &p_game, std:
 
 List<MixedStrategyProfile<double>> RandomStrategyProfiles(const Game &p_game, int p_count)
 {
+  std::default_random_engine engine;
   List<MixedStrategyProfile<double>> profiles;
   for (int i = 1; i <= p_count; i++) {
-    MixedStrategyProfile<double> p(p_game->NewMixedStrategyProfile(0.0));
-    p.Randomize();
-    profiles.push_back(p);
+    profiles.push_back(p_game->NewRandomStrategyProfile(engine));
   }
   return profiles;
 }
@@ -118,11 +117,10 @@ List<MixedBehaviorProfile<double>> ReadBehaviorProfiles(const Game &p_game, std:
 
 List<MixedBehaviorProfile<double>> RandomBehaviorProfiles(const Game &p_game, int p_count)
 {
+  std::default_random_engine engine;
   List<MixedBehaviorProfile<double>> profiles;
   for (int i = 1; i <= p_count; i++) {
-    MixedBehaviorProfile<double> p(p_game);
-    p.Randomize();
-    profiles.push_back(p);
+    profiles.push_back(p_game->NewRandomBehaviorProfile(engine));
   }
   return profiles;
 }

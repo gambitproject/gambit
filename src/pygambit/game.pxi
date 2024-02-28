@@ -23,6 +23,7 @@ import itertools
 import pathlib
 
 import numpy as np
+import scipy.stats
 
 import pygambit.gte
 import pygambit.gameiter
@@ -719,6 +720,11 @@ class Game:
         rational
             If True, probabilities are represented using rational numbers;
             otherwise floating point numbers are used.
+
+        See Also
+        --------
+        random_strategy_profile :
+            Create a `MixedStrategyProfile` with randomly-drawn probabilities.
         """
         if not self.is_perfect_recall:
             raise UndefinedOperationError(
@@ -736,6 +742,61 @@ class Game:
                 self.game.deref().NewMixedStrategyProfile(0.0)
             )
             return self._fill_strategy_profile(mspd, data, float)
+
+    def random_strategy_profile(
+            self,
+            denom: int = None,
+            gen: typing.Optional[np.random.Generator] = None
+    ) -> MixedStrategyProfile:
+        """Create a `MixedStrategy` on the game, with probabilities drawn
+        from the uniform distribution over the set of mixed strategy profiles.
+
+        Parameters
+        ----------
+        denom : int, optional
+            If specified, the probabilities are generated on a grid with denominator
+            `denom`, and the resulting profile will be a `MixedStrategyProfileRational`.
+            If not specified, the probabilities will be floating point numbers, and
+            the resulting profile will be a `MixedStrategyProfileRational`.
+
+        gen : np.random.Generator, optional
+            If specified, uses the `numpy` random number generator `gen` to generate
+            uniform random samples.  Otherwise, uses the default generation method
+            in `numpy`.
+
+        .. versionadded:: 16.2.0
+           Replaces the functionality of `MixedStrategyProfile.randomize()`.
+
+        See Also
+        --------
+        mixed_strategy_profile : Create a `MixedStrategyProfile` with specified probabilities.
+        """
+        if denom is None:
+            profile = self.mixed_strategy_profile()
+            for player in self.players:
+                for strategy, prob in zip(
+                        player.strategies,
+                        scipy.stats.dirichlet(alpha=[1 for strategy in player.strategies],
+                                              seed=gen).rvs(size=1)[0]
+                ):
+                    profile[strategy] = prob
+            return profile
+        elif denom < 1:
+            raise ValueError("random_strategy_profile(): denom must be positive")
+        else:
+            profile = self.mixed_strategy_profile(rational=True)
+            for player in self.players:
+                k = len(player.strategies)
+                sample = (
+                    [0] +
+                    sorted(
+                        (gen or np.random).choice(np.arange(1, denom+k), size=k-1, replace=False)
+                    ) +
+                    [denom + k]
+                )
+                for strategy, (hi, lo) in zip(player.strategies, zip(sample[1:], sample[:-1])):
+                    profile[strategy] = Rational(hi - lo - 1, denom)
+            return profile
 
     def _fill_behavior_profile(self,
                                profile: MixedBehaviorProfile,
@@ -779,6 +840,11 @@ class Game:
         ------
         UndefinedOperationError
             If the game does not have a tree representation.
+
+        See Also
+        --------
+        random_behavior_profile :
+           Create a `MixedBehaviorProfile` with randomly-drawn probabilities.
         """
         if not self.is_tree:
             raise UndefinedOperationError(
@@ -792,6 +858,65 @@ class Game:
             mbpd = MixedBehaviorProfileDouble()
             mbpd.profile = make_shared[c_MixedBehaviorProfileDouble](self.game)
             return self._fill_behavior_profile(mbpd, data, float)
+
+    def random_behavior_profile(
+            self,
+            denom: int = None,
+            gen: typing.Optional[np.random.Generator] = None
+    ) -> MixedBehaviorProfile:
+        """Create a `MixedBehaviorProfile` on the game, with probabilities drawn
+        from the uniform distribution over the set of mixed behavior profiles.
+
+        Parameters
+        ----------
+        denom : int, optional
+            If specified, the probabilities are generated on a grid with denominator
+            `denom`, and the resulting profile will be a `MixedBehaviorProfileRational`.
+            If not specified, the probabilities will be floating point numbers, and
+            the resulting profile will be a `MixedBehaviorProfileRational`.
+
+        gen : np.random.Generator, optional
+            If specified, uses the `numpy` random number generator `gen` to generate
+            uniform random samples.  Otherwise, uses the default generation method
+            in `numpy`.
+
+        .. versionadded:: 16.2.0
+           Replaces the functionality of `MixedBehaviorProfile.randomize()`.
+
+        See Also
+        --------
+        mixed_behavior_profile : Create a `MixedBehaviorProfile` with specified probabilities.
+        """
+        if not self.is_tree:
+            raise UndefinedOperationError(
+                "Game must have a tree representation to create a mixed behavior profile"
+            )
+        if denom is None:
+            profile = self.mixed_behavior_profile()
+            for infoset in self.infosets:
+                for action, prob in zip(
+                        infoset.actions,
+                        scipy.stats.dirichlet(alpha=[1 for action in infoset.actions],
+                                              seed=gen).rvs(size=1)[0]
+                ):
+                    profile[action] = prob
+            return profile
+        elif denom < 1:
+            raise ValueError("random_behavior_profile(): denom must be positive")
+        else:
+            profile = self.mixed_behavior_profile(rational=True)
+            for infoset in self.infosets:
+                k = len(infoset.actions)
+                sample = (
+                    [0] +
+                    sorted(
+                        (gen or np.random).choice(np.arange(1, denom+k), size=k-1, replace=False)
+                    ) +
+                    [denom + k]
+                )
+                for action, (hi, lo) in zip(infoset.actions, zip(sample[1:], sample[:-1])):
+                    profile[action] = Rational(hi - lo - 1, denom)
+            return profile
 
     def support_profile(self):
         return StrategySupportProfile(self)

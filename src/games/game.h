@@ -24,6 +24,10 @@
 #define LIBGAMBIT_GAME_H
 
 #include <memory>
+#include <list>
+#include <set>
+#include <random>
+
 #include "core/dvector.h"
 #include "number.h"
 #include "gameobject.h"
@@ -502,11 +506,34 @@ public:
   virtual PureStrategyProfile NewPureStrategyProfile() const = 0;
   virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double) const = 0;
   virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &) const = 0;
+
+  /// @brief Generate a mixed strategy profile by drawing from the uniform distribution over the
+  /// set of
+  ///        mixed strategy profiles
+  template <class Generator>
+  MixedStrategyProfile<double> NewRandomStrategyProfile(Generator &generator) const;
+  /// @brief Generate a mixed strategy profile by drawing from the uniform distribution over the
+  /// set of
+  ///        mixed strategy profiles, restricted to rational probabilities with denominator
+  ///        `denom`.
+  template <class Generator>
+  MixedStrategyProfile<Rational> NewRandomStrategyProfile(int denom, Generator &generator) const;
   virtual MixedStrategyProfile<double>
   NewMixedStrategyProfile(double, const StrategySupportProfile &) const = 0;
   virtual MixedStrategyProfile<Rational>
   NewMixedStrategyProfile(const Rational &, const StrategySupportProfile &) const = 0;
 
+  /// @brief Generate a mixed behavior profile by drawing from the uniform distribution over the
+  /// set of
+  ///        mixed behavior profiles
+  template <class Generator>
+  MixedBehaviorProfile<double> NewRandomBehaviorProfile(Generator &generator) const;
+  /// @brief Generate a mixed behavior profile by drawing from the uniform distribution over the
+  /// set of
+  ///        mixed behavior profiles, restricted to rational probabilities with denominator
+  ///        `denom`.
+  template <class Generator>
+  MixedBehaviorProfile<Rational> NewRandomBehaviorProfile(int denom, Generator &generator) const;
   /// @name Players
   //@{
   /// Returns the number of players in the game
@@ -613,6 +640,26 @@ Game NewTree();
 Game NewTable(const Array<int> &p_dim, bool p_sparseOutcomes = false);
 /// Reads a game in .efg or .nfg format from the input stream
 Game ReadGame(std::istream &);
+
+/// @brief Generate a distribution over a simplex restricted to rational numbers of given
+/// denominator
+template <class Generator>
+std::list<Rational> UniformOnSimplex(int p_denom, size_t p_dim, Generator &generator)
+{
+  std::uniform_int_distribution dist(1, p_denom + int(p_dim) - 1);
+  std::set<int> cutoffs;
+  while (cutoffs.size() < p_dim - 1) {
+    cutoffs.insert(dist(generator));
+  }
+  cutoffs.insert(0);
+  cutoffs.insert(p_denom + p_dim);
+  // The cutoffs need to be sorted in ascending order; this is done automatically by C++ sets
+  std::list<Rational> output;
+  for (auto prob = cutoffs.cbegin(); std::next(prob) != cutoffs.cend(); prob++) {
+    output.emplace_back(*std::next(prob) - *prob - 1, p_denom);
+  }
+  return output;
+}
 
 } // namespace Gambit
 

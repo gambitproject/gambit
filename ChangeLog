@@ -1,6 +1,6 @@
 # Changelog
 
-## [16.2.0a1] - unreleased
+## [16.2.0] - unreleased
 
 ### Fixed
 - `gnm_solve`/`gambit-gnm` now correctly handles the degenerate case of a game where all
@@ -38,6 +38,13 @@
 - Further extension of test suite for mixed behavior profiles to cover new indexing and profile
   order consistency for payoff-related calculations
 - Overhaul of caching in MixedBehaviorProfile to use maps (std::map)
+- Creation of random mixed profiles in pygambit is done with new `Game.random_strategy_profile` and
+  `Game.random_behavior_profile` methods; these accept `numpy.random.Generator` objects for
+  reproducible state.
+  Creation of random mixed profiles in C++ is done with new `Game::NewRandomStrategyProfile` and
+  `Game::NewRandomBehaviorProfile` methods; these accept STL `Generator` objects for reproducible state.
+  The Python implementation is no longer just a wrapper around the C++ one.
+
 
 ## [16.1.1] - 2024-01-10
 

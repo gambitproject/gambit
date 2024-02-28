@@ -23,6 +23,7 @@
 #include <iostream>
 #include <algorithm>
 #include <numeric>
+#include <random>
 
 #include "gambit.h"
 
@@ -361,53 +362,6 @@ template <class T> MixedStrategyProfileRep<T> *MixedStrategyProfileRep<T>::Norma
     }
   }
   return norm;
-}
-
-template <> void MixedStrategyProfileRep<double>::Randomize()
-{
-  Game nfg = m_support.GetGame();
-  m_probs = 0.0;
-
-  // To generate a uniform distribution on the simplex correctly,
-  // take i.i.d. samples from an exponential distribution, and
-  // renormalize at the end (this is a special case of the Dirichlet distribution).
-  for (auto player : nfg->GetPlayers()) {
-    for (auto strategy : player->GetStrategies()) {
-      (*this)[strategy] = -std::log(((double)std::rand()) / ((double)RAND_MAX));
-    }
-  }
-  auto normed = Normalize();
-  (*this) = *normed;
-  delete normed;
-}
-
-template <> void MixedStrategyProfileRep<Rational>::Randomize()
-{
-  // This operation is not well-defined when using Rational numbers;
-  // use the version specifying the denominator grid instead.
-  throw ValueException();
-}
-
-template <class T> void MixedStrategyProfileRep<T>::Randomize(int p_denom)
-{
-  Game nfg = m_support.GetGame();
-  m_probs = T(0);
-
-  for (auto player : nfg->GetPlayers()) {
-    std::vector<int> cutoffs;
-    for (size_t st = 1; st < player->GetStrategies().size(); st++) {
-      // When we support C++11, we will be able to implement uniformity better here.
-      cutoffs.push_back(std::rand() % (p_denom + 1));
-    }
-    std::sort(cutoffs.begin(), cutoffs.end());
-    cutoffs.push_back(p_denom);
-    T sum = T(0);
-    for (size_t st = 1; st < player->GetStrategies().size(); st++) {
-      (*this)[player->GetStrategies()[st]] = T(cutoffs[st] - cutoffs[st - 1]) / T(p_denom);
-      sum += (*this)[player->GetStrategies()[st]];
-    }
-    (*this)[player->GetStrategies().back()] = T(1) - sum;
-  }
 }
 
 template <class T> T MixedStrategyProfileRep<T>::GetRegret(const GameStrategy &p_strategy) const

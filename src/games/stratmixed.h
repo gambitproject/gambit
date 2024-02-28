@@ -41,8 +41,6 @@ public:
 
   void SetCentroid();
   MixedStrategyProfileRep<T> *Normalize() const;
-  void Randomize();
-  void Randomize(int p_denom);
   /// Returns the probability the strategy is played
   const T &operator[](const GameStrategy &p_strategy) const
   {
@@ -197,21 +195,6 @@ public:
     return MixedStrategyProfile<T>(m_rep->Normalize());
   }
 
-  /// Generate a random mixed strategy profile according to the uniform distribution
-  void Randomize()
-  {
-    CheckVersion();
-    m_rep->Randomize();
-  }
-
-  /// Generate a random mixed strategy profile according to the uniform distribution
-  /// on a grid with spacing p_denom
-  void Randomize(int p_denom)
-  {
-    CheckVersion();
-    m_rep->Randomize(p_denom);
-  }
-
   /// Returns the total number of strategies in the profile
   size_t MixedProfileLength() const { return m_rep->m_probs.size(); }
 
@@ -308,6 +291,35 @@ public:
   T GetLiapValue() const;
   //@}
 };
+
+template <class Generator>
+MixedStrategyProfile<double> GameRep::NewRandomStrategyProfile(Generator &generator) const
+{
+  auto profile = NewMixedStrategyProfile(0.0);
+  std::exponential_distribution<> dist(1);
+  for (auto player : GetPlayers()) {
+    for (auto strategy : player->GetStrategies()) {
+      profile[strategy] = dist(generator);
+    }
+  }
+  return profile.Normalize();
+}
+
+template <class Generator>
+MixedStrategyProfile<Rational> GameRep::NewRandomStrategyProfile(int p_denom,
+                                                                 Generator &generator) const
+{
+  auto profile = NewMixedStrategyProfile(Rational(0));
+  for (auto player : GetPlayers()) {
+    std::list<Rational> dist = UniformOnSimplex(p_denom, player->NumStrategies(), generator);
+    auto prob = dist.cbegin();
+    for (auto strategy : player->GetStrategies()) {
+      profile[strategy] = *prob;
+      prob++;
+    }
+  }
+  return profile;
+}
 
 } // end namespace Gambit
 

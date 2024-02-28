@@ -214,62 +214,6 @@ template <class T> MixedBehaviorProfile<T> MixedBehaviorProfile<T>::Normalize() 
   return norm;
 }
 
-template <> void MixedBehaviorProfile<double>::Randomize()
-{
-  CheckVersion();
-  Game game = m_support.GetGame();
-  *this = 0.0;
-  // To generate a uniform distribution on the simplex correctly,
-  // take i.i.d. samples from an exponential distribution, and
-  // renormalize at the end (this is a special case of the Dirichlet distribution).
-  for (auto infoset : game->GetInfosets()) {
-    for (auto act : infoset->GetActions()) {
-      (*this)[act] = -std::log(((double)std::rand()) / ((double)RAND_MAX));
-    }
-  }
-  MixedBehaviorProfile<double> norm(Normalize());
-  for (auto infoset : game->GetInfosets()) {
-    for (auto act : infoset->GetActions()) {
-      (*this)[act] = norm[act];
-    }
-  }
-}
-
-template <> void MixedBehaviorProfile<Rational>::Randomize()
-{
-  // This operation is not well-defined when using Rational numbers;
-  // use the version specifying the denominator grid instead.
-  throw ValueException();
-}
-
-template <class T> void MixedBehaviorProfile<T>::Randomize(int p_denom)
-{
-  CheckVersion();
-  InvalidateCache();
-  Game game = m_support.GetGame();
-  m_probs = T(0);
-
-  for (int pl = 1; pl <= game->NumPlayers(); pl++) {
-    GamePlayer player = game->GetPlayer(pl);
-    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      GameInfoset infoset = player->GetInfoset(iset);
-      std::vector<int> cutoffs;
-      for (int act = 1; act < infoset->NumActions(); act++) {
-        // When we support C++11, we will be able to implement uniformity better
-        cutoffs.push_back(std::rand() % (p_denom + 1));
-      }
-      std::sort(cutoffs.begin(), cutoffs.end());
-      cutoffs.push_back(p_denom);
-      T sum = T(0);
-      for (int act = 1; act < infoset->NumActions(); act++) {
-        m_probs(pl, iset, act) = T(cutoffs[act] - cutoffs[act - 1]) / T(p_denom);
-        sum += m_probs(pl, iset, act);
-      }
-      m_probs(pl, iset, infoset->NumActions()) = T(1) - sum;
-    }
-  }
-}
-
 //========================================================================
 //              MixedBehaviorProfile<T>: Interesting quantities
 //========================================================================

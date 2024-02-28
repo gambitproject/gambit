@@ -177,7 +177,9 @@ Player behavior
    :toctree: api/
 
    Game.mixed_strategy_profile
+   Game.random_strategy_profile
    Game.mixed_behavior_profile
+   Game.random_behavior_profile
    Game.support_profile
 
 
@@ -207,7 +209,6 @@ Probability distributions over strategies
    MixedStrategyProfile.strategy_value_deriv
    MixedStrategyProfile.liap_value
    MixedStrategyProfile.as_behavior
-   MixedStrategyProfile.randomize
    MixedStrategyProfile.normalize
    MixedStrategyProfile.copy
 
@@ -241,7 +242,6 @@ Probability distributions over behavior
    MixedBehaviorProfile.is_defined_at
    MixedBehaviorProfile.liap_value
    MixedBehaviorProfile.as_strategy
-   MixedBehaviorProfile.randomize
    MixedBehaviorProfile.normalize
    MixedBehaviorProfile.copy
 

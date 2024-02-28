@@ -50,11 +50,10 @@ List<MixedStrategyProfile<double>> ReadStrategyPerturbations(const Game &p_game,
 
 List<MixedStrategyProfile<double>> RandomStrategyPerturbations(const Game &p_game, int p_count)
 {
+  std::default_random_engine engine;
   List<MixedStrategyProfile<double>> profiles;
   for (int i = 1; i <= p_count; i++) {
-    MixedStrategyProfile<double> p(p_game->NewMixedStrategyProfile(0.0));
-    p.Randomize();
-    profiles.push_back(p);
+    profiles.push_back(p_game->NewRandomStrategyProfile(engine));
   }
   return profiles;
 }

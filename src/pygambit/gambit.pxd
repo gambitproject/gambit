@@ -244,8 +244,6 @@ cdef extern from "games/stratmixed.h":
         int MixedProfileLength() except +
         c_StrategySupportProfile GetSupport() except +
         c_MixedStrategyProfileDouble Normalize()  # except + doesn't compile
-        void Randomize() except +TypeError
-        void Randomize(int) except +
         double getitem_strategy "operator[]"(c_GameStrategy) except +IndexError
         double GetPayoff(c_GamePlayer) except +
         double GetPayoff(c_GameStrategy) except +
@@ -265,8 +263,6 @@ cdef extern from "games/stratmixed.h":
         int MixedProfileLength() except +
         c_StrategySupportProfile GetSupport() except +
         c_MixedStrategyProfileRational Normalize()  # except + doesn't compile
-        void Randomize() except +
-        void Randomize(int) except +
         c_Rational getitem_strategy "operator[]"(c_GameStrategy) except +IndexError
         c_Rational GetPayoff(c_GamePlayer) except +
         c_Rational GetPayoff(c_GameStrategy) except +
@@ -287,8 +283,6 @@ cdef extern from "games/behavmixed.h":
         int BehaviorProfileLength() except +
         bool IsDefinedAt(c_GameInfoset) except +
         c_MixedBehaviorProfileDouble Normalize()  # except + doesn't compile
-        void Randomize() except +TypeError
-        void Randomize(int) except +
         double getitem "operator[]"(int) except +IndexError
         double getaction "operator[]"(c_GameAction) except +IndexError
         double GetPayoff(int) except +
@@ -315,8 +309,6 @@ cdef extern from "games/behavmixed.h":
         int BehaviorProfileLength() except +
         bool IsDefinedAt(c_GameInfoset) except +
         c_MixedBehaviorProfileRational Normalize()  # except + doesn't compile
-        void Randomize() except +
-        void Randomize(int) except +
         c_Rational getitem "operator[]"(int) except +IndexError
         c_Rational getaction "operator[]"(c_GameAction) except +IndexError
         c_Rational GetPayoff(int) except +

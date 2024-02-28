@@ -57,11 +57,11 @@ List<MixedStrategyProfile<Rational>> ReadProfiles(const Game &p_game, std::istre
 List<MixedStrategyProfile<Rational>> RandomProfiles(const Game &p_game, int p_count,
                                                     const Rational &denom)
 {
+  std::default_random_engine engine;
   List<MixedStrategyProfile<Rational>> profiles;
   for (int i = 1; i <= p_count; i++) {
-    MixedStrategyProfile<Rational> p(p_game->NewMixedStrategyProfile(Rational(0)));
-    p.Randomize(denom);
-    profiles.push_back(p);
+    std::cout << "profile " << i << std::endl;
+    profiles.push_back(p_game->NewRandomStrategyProfile(denom, engine));
   }
   return profiles;
 }

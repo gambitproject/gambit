@@ -151,11 +151,6 @@ public:
   /// in the same proportions, but with probabilities for each player
   /// summing to one.
   MixedBehaviorProfile<T> Normalize() const;
-  /// Generate a random behavior strategy profile according to the uniform distribution
-  void Randomize();
-  /// Generate a random behavior strategy profile according to the uniform distribution
-  /// on a grid with spacing p_denom
-  void Randomize(int p_denom);
   //@}
 
   /// @name General data access
@@ -219,6 +214,39 @@ public:
 
   //@}
 };
+
+template <class Generator>
+MixedBehaviorProfile<double> GameRep::NewRandomBehaviorProfile(Generator &generator) const
+{
+  auto profile = MixedBehaviorProfile<double>(Game(const_cast<GameRep *>(this)));
+  std::exponential_distribution<> dist(1);
+  for (auto player : GetPlayers()) {
+    for (auto infoset : player->GetInfosets()) {
+      for (auto action : infoset->GetActions()) {
+        profile[action] = dist(generator);
+      }
+    }
+  }
+  return profile.Normalize();
+}
+
+template <class Generator>
+MixedBehaviorProfile<Rational> GameRep::NewRandomBehaviorProfile(int p_denom,
+                                                                 Generator &generator) const
+{
+  auto profile = MixedBehaviorProfile<Rational>(Game(const_cast<GameRep *>(this)));
+  for (auto player : GetPlayers()) {
+    for (auto infoset : player->GetInfosets()) {
+      std::list<Rational> dist = UniformOnSimplex(p_denom, infoset->NumActions(), generator);
+      auto prob = dist.cbegin();
+      for (auto action : infoset->GetActions()) {
+        profile[action] = *prob;
+        prob++;
+      }
+    }
+  }
+  return profile;
+}
 
 } // end namespace Gambit
 
