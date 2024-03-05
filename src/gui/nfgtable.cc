@@ -820,14 +820,20 @@ void gbtPayoffsWidget::OnKeyDown(wxKeyEvent &p_event)
 //=========================================================================
 
 gbtTableWidget::gbtTableWidget(gbtNfgPanel *p_parent, wxWindowID p_id, gbtGameDocument *p_doc)
-  : wxPanel(p_parent, p_id), m_doc(p_doc), m_nfgPanel(p_parent),
-    m_payoffSheet(new gbtPayoffsWidget(this, p_doc)),
-    m_rowSheet(new gbtRowPlayerWidget(this, p_doc)),
-    m_colSheet(new gbtColPlayerWidget(this, p_doc))
+  : wxPanel(p_parent, p_id), m_doc(p_doc), m_nfgPanel(p_parent), m_payoffSheet(nullptr),
+    m_rowSheet(nullptr), m_colSheet(nullptr)
 {
   m_rowPlayers.push_back(1);
   m_colPlayers.push_back(2);
 
+  // These depend on the row and column player lists having been populated,
+  // which suggests some refactoring ought to be done as to where/how those
+  // row and column players are recorded
+  // NOLINTBEGIN(cppcoreguidelines-prefer-member-initializer)
+  m_payoffSheet = new gbtPayoffsWidget(this, p_doc);
+  m_rowSheet = new gbtRowPlayerWidget(this, p_doc);
+  m_colSheet = new gbtColPlayerWidget(this, p_doc);
+  // NOLINTEND(cppcoreguidelines-prefer-member-initializer)
   m_payoffSheet->SetGridLineColour(*wxWHITE);
 
   auto *topSizer = new wxFlexGridSizer(2, 2, 0, 0);
