@@ -75,14 +75,12 @@ jobs:
       - run: autoconf
       - run: ./configure --with-wx-config=wx-config-3.2
       - run: make -j 4
-      # We execute the installer build explicitly to put in the explicit paths to
-      # the WiX executables, rather than relying on the Makefile target
       - name: Build .msi installer
         run: |
           mkdir installer
           cp gambit* installer
-          "/c/Program Files (x86)/WiX Toolset v3.11/bin/candle" gambit.wxs
-          "/c/Program Files (x86)/WiX Toolset v3.11/bin/light" -ext WixUIExtension gambit.wixobj
+          "${WIX}bin/candle" gambit.wxs
+          "${WIX}bin/light" -ext WixUIExtension gambit.wixobj
       - uses: actions/upload-artifact@v3
         with:
           path: "*.msi"
