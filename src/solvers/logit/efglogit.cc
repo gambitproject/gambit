@@ -36,9 +36,12 @@ namespace Gambit {
 class AgentQREPathTracer::EquationSystem : public PathTracer::EquationSystem {
 public:
   explicit EquationSystem(const Game &p_game);
+
   ~EquationSystem() override;
+
   // Compute the value of the system of equations at the specified point.
   void GetValue(const Vector<double> &p_point, Vector<double> &p_lhs) const override;
+
   // Compute the Jacobian matrix at the specified point.
   void GetJacobian(const Vector<double> &p_point, Matrix<double> &p_matrix) const override;
 
@@ -49,7 +52,9 @@ private:
   class Equation {
   public:
     virtual ~Equation() = default;
+
     virtual double Value(const LogBehavProfile<double> &p_point, double p_lambda) const = 0;
+
     virtual void Gradient(const LogBehavProfile<double> &p_point, double p_lambda,
                           Vector<double> &p_gradient) const = 0;
   };
@@ -72,6 +77,7 @@ private:
     }
 
     double Value(const LogBehavProfile<double> &p_profile, double p_lambda) const override;
+
     void Gradient(const LogBehavProfile<double> &p_profile, double p_lambda,
                   Vector<double> &p_gradient) const override;
   };
@@ -95,6 +101,7 @@ private:
     }
 
     double Value(const LogBehavProfile<double> &p_profile, double p_lambda) const override;
+
     void Gradient(const LogBehavProfile<double> &p_profile, double p_lambda,
                   Vector<double> &p_gradient) const override;
   };
@@ -238,9 +245,11 @@ public:
     : m_stream(p_stream), m_game(p_game), m_fullGraph(p_fullGraph), m_decimals(p_decimals)
   {
   }
+
   ~CallbackFunction() override = default;
 
   void operator()(const Vector<double> &p_point, bool p_isTerminal) const override;
+
   const List<LogitQREMixedBehaviorProfile> &GetProfiles() const { return m_profiles; }
 
 private:
@@ -302,27 +311,62 @@ private:
 //              AgentQREPathTracer: Wrapper to the tracing engine
 //------------------------------------------------------------------------------
 
+namespace {
+
+bool RegretTerminationFunction(const Game &p_game, const Vector<double> &p_point, double p_regret)
+{
+  if (p_point.back() < 0.0) {
+    return false;
+  }
+  MixedBehaviorProfile<double> profile(p_game);
+  for (int i = 1; i < p_point.Length(); i++) {
+    profile[i] = exp(p_point[i]);
+  }
+  return profile.GetMaxRegret() < p_regret;
+}
+
+} // namespace
+
 List<LogitQREMixedBehaviorProfile>
 AgentQREPathTracer::TraceAgentPath(const LogitQREMixedBehaviorProfile &p_start,
-                                   std::ostream &p_stream, double p_maxLambda, double p_omega,
-                                   double p_targetLambda)
+                                   std::ostream &p_stream, double p_regret, double p_omega) const
 {
+  double scale = p_start.GetGame()->GetMaxPayoff() - p_start.GetGame()->GetMinPayoff();
+  if (scale != 0.0) {
+    p_regret *= scale;
+  }
+
   List<LogitQREMixedBehaviorProfile> ret;
   Vector<double> x(p_start.BehaviorProfileLength() + 1);
   for (size_t i = 1; i <= p_start.BehaviorProfileLength(); i++) {
     x[i] = log(p_start[i]);
   }
-  x[x.Length()] = p_start.GetLambda();
+  x.back() = p_start.GetLambda();
 
   CallbackFunction func(p_stream, p_start.GetGame(), m_fullGraph, m_decimals);
-  if (p_targetLambda > 0.0) {
-    TracePath(EquationSystem(p_start.GetGame()), x, p_maxLambda, p_omega, func,
-              LambdaCriterion(p_targetLambda));
-  }
-  else {
-    TracePath(EquationSystem(p_start.GetGame()), x, p_maxLambda, p_omega, func);
-  }
+  TracePath(
+      EquationSystem(p_start.GetGame()), x, p_omega,
+      [p_start, p_regret](const Vector<double> &p_point) {
+        return RegretTerminationFunction(p_start.GetGame(), p_point, p_regret);
+      },
+      func);
   return func.GetProfiles();
+}
+
+LogitQREMixedBehaviorProfile
+AgentQREPathTracer::SolveAtLambda(const LogitQREMixedBehaviorProfile &p_start,
+                                  std::ostream &p_stream, double p_targetLambda,
+                                  double p_omega) const
+{
+  Vector<double> x(p_start.BehaviorProfileLength() + 1);
+  for (int i = 1; i <= p_start.BehaviorProfileLength(); i++) {
+    x[i] = log(p_start[i]);
+  }
+  x.back() = p_start.GetLambda();
+  CallbackFunction func(p_stream, p_start.GetGame(), m_fullGraph, m_decimals);
+  TracePath(EquationSystem(p_start.GetGame()), x, p_omega, LambdaPositiveTerminationFunction, func,
+            LambdaCriterion(p_targetLambda));
+  return func.GetProfiles().back();
 }
 
 } // end namespace Gambit

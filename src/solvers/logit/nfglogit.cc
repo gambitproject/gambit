@@ -209,18 +209,44 @@ void StrategicQREPathTracer::CallbackFunction::operator()(const Vector<double> &
 //               StrategicQREPathTracer: Main driver routines
 //----------------------------------------------------------------------------
 
+namespace {
+
+bool RegretTerminationFunction(const Game &p_game, const Vector<double> &p_point, double p_regret)
+{
+  if (p_point.back() < 0.0) {
+    return false;
+  }
+  MixedStrategyProfile<double> profile(p_game->NewMixedStrategyProfile(0.0));
+  for (int i = 1; i < p_point.Length(); i++) {
+    profile[i] = exp(p_point[i]);
+  }
+  return profile.GetMaxRegret() < p_regret;
+}
+
+} // namespace
+
 List<LogitQREMixedStrategyProfile>
 StrategicQREPathTracer::TraceStrategicPath(const LogitQREMixedStrategyProfile &p_start,
-                                           std::ostream &p_stream, double p_maxLambda,
+                                           std::ostream &p_stream, double p_regret,
                                            double p_omega) const
 {
+  double scale = p_start.GetGame()->GetMaxPayoff() - p_start.GetGame()->GetMinPayoff();
+  if (scale != 0.0) {
+    p_regret *= scale;
+  }
+
   Vector<double> x(p_start.MixedProfileLength() + 1);
   for (int i = 1; i <= p_start.MixedProfileLength(); i++) {
     x[i] = log(p_start[i]);
   }
-  x[x.Length()] = p_start.GetLambda();
+  x.back() = p_start.GetLambda();
   CallbackFunction func(p_stream, p_start.GetGame(), m_fullGraph, m_decimals);
-  TracePath(EquationSystem(p_start.GetGame()), x, p_maxLambda, p_omega, func);
+  TracePath(
+      EquationSystem(p_start.GetGame()), x, p_omega,
+      [p_start, p_regret](const Vector<double> &p_point) {
+        return RegretTerminationFunction(p_start.GetGame(), p_point, p_regret);
+      },
+      func);
   return func.GetProfiles();
 }
 
@@ -233,10 +259,10 @@ StrategicQREPathTracer::SolveAtLambda(const LogitQREMixedStrategyProfile &p_star
   for (int i = 1; i <= p_start.MixedProfileLength(); i++) {
     x[i] = log(p_start[i]);
   }
-  x[x.Length()] = p_start.GetLambda();
+  x.back() = p_start.GetLambda();
   CallbackFunction func(p_stream, p_start.GetGame(), m_fullGraph, m_decimals);
-  TracePath(EquationSystem(p_start.GetGame()), x, std::max(1.0, 3.0 * p_targetLambda), p_omega,
-            func, LambdaCriterion(p_targetLambda));
+  TracePath(EquationSystem(p_start.GetGame()), x, p_omega, LambdaPositiveTerminationFunction, func,
+            LambdaCriterion(p_targetLambda));
   return func.GetProfiles().back();
 }
 
@@ -380,19 +406,18 @@ StrategicQREEstimator::Estimate(const LogitQREMixedStrategyProfile &p_start,
   for (int i = 1; i <= p_start.MixedProfileLength(); i++) {
     x[i] = log(p_start[i]);
   }
-  x[x.Length()] = p_start.GetLambda();
+  x.back() = p_start.GetLambda();
 
   CallbackFunction callback(p_stream, p_start.GetGame(),
                             static_cast<const Vector<double> &>(p_frequencies), m_fullGraph,
                             m_decimals);
-  while (x[x.Length()] < p_maxLambda) {
-    TracePath(EquationSystem(p_start.GetGame()), x, p_maxLambda, p_omega, callback,
-              CriterionFunction(static_cast<const Vector<double> &>(p_frequencies)));
-    if (x[x.Length()] < p_maxLambda) {
-      // Found an extremum of the likelihood function
-      // start iterating again from the same point in case of
-      // local optima.
-    }
+  while (x.back() < p_maxLambda) {
+    TracePath(
+        EquationSystem(p_start.GetGame()), x, p_omega,
+        [p_maxLambda](const Vector<double> &p_point) {
+          return LambdaRangeTerminationFunction(p_point, 0, p_maxLambda);
+        },
+        callback, CriterionFunction(static_cast<const Vector<double> &>(p_frequencies)));
   }
   callback.PrintMaximizer();
   return callback.GetMaximizer();

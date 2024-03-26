@@ -68,7 +68,7 @@ public:
 
   List<LogitQREMixedStrategyProfile>
   TraceStrategicPath(const LogitQREMixedStrategyProfile &p_start, std::ostream &p_logStream,
-                     double p_maxLambda, double p_omega) const;
+                     double p_maxregret, double p_omega) const;
   LogitQREMixedStrategyProfile SolveAtLambda(const LogitQREMixedStrategyProfile &p_start,
                                              std::ostream &p_logStream, double p_targetLambda,
                                              double p_omega) const;
@@ -103,13 +103,14 @@ protected:
   class CallbackFunction;
 };
 
-inline List<MixedStrategyProfile<double>> LogitStrategySolve(const Game &p_game)
+inline List<MixedStrategyProfile<double>> LogitStrategySolve(const Game &p_game,
+                                                             double p_regret = 0.0001)
 {
   StrategicQREPathTracer tracer;
   tracer.SetFullGraph(false);
   std::ostringstream ostream;
   auto result =
-      tracer.TraceStrategicPath(LogitQREMixedStrategyProfile(p_game), ostream, 1000000.0, 1.0);
+      tracer.TraceStrategicPath(LogitQREMixedStrategyProfile(p_game), ostream, p_regret, 1.0);
   auto ret = List<MixedStrategyProfile<double>>();
   ret.push_back(result[1].GetProfile());
   return ret;

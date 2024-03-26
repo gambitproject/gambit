@@ -49,7 +49,8 @@ void PrintHelp(char *progname)
   std::cerr << "  -d DECIMALS      show equilibria as floating point with DECIMALS digits\n";
   std::cerr << "  -s STEP          initial stepsize (default is .03)\n";
   std::cerr << "  -a ACCEL         maximum acceleration (default is 1.1)\n";
-  std::cerr << "  -m MAXLAMBDA     stop when reaching MAXLAMBDA (default is 1000000)\n";
+  std::cerr << "  -m MAXREGRET     maximum regret acceptable as a proportion of range of\n";
+  std::cerr << "                   payoffs in the game\n";
   std::cerr << "  -l LAMBDA        compute QRE at `lambda` accurately\n";
   std::cerr << "  -L FILE          compute maximum likelihood estimates;\n";
   std::cerr << "                   read strategy frequencies from FILE\n";
@@ -89,6 +90,7 @@ int main(int argc, char *argv[])
 
   bool quiet = false, useStrategic = false;
   double maxLambda = 1000000.0;
+  double maxregret = 0.0001;
   std::string mleFile;
   double maxDecel = 1.1;
   double hStart = 0.03;
@@ -119,7 +121,7 @@ int main(int argc, char *argv[])
       maxDecel = atof(optarg);
       break;
     case 'm':
-      maxLambda = atof(optarg);
+      maxregret = atof(optarg);
       break;
     case 'e':
       fullGraph = false;
@@ -199,7 +201,7 @@ int main(int argc, char *argv[])
         tracer.SolveAtLambda(start, std::cout, targetLambda, 1.0);
       }
       else {
-        tracer.TraceStrategicPath(start, std::cout, maxLambda, 1.0);
+        tracer.TraceStrategicPath(start, std::cout, maxregret, 1.0);
       }
     }
     else {
@@ -209,7 +211,12 @@ int main(int argc, char *argv[])
       tracer.SetStepsize(hStart);
       tracer.SetFullGraph(fullGraph);
       tracer.SetDecimals(decimals);
-      tracer.TraceAgentPath(start, std::cout, maxLambda, 1.0, targetLambda);
+      if (targetLambda > 0.0) {
+        tracer.SolveAtLambda(start, std::cout, targetLambda, 1.0);
+      }
+      else {
+        tracer.TraceAgentPath(start, std::cout, maxregret, 1.0);
+      }
     }
     return 0;
   }

@@ -33,6 +33,13 @@ if an information set is not reached due to being the successor of chance
 moves with zero probability.  In such games, the implementation treats
 the beliefs at such information sets as being uniform across all member nodes.
 
+.. versionchanged:: 16.2.0
+
+   The criterion for accepting whether a point is sufficiently close to a
+   Nash equilibrium to terminate the path-following is specified
+   in terms of the maximum regret.  This regret is interpreted as a fraction
+   of the difference between the maximum and minimum payoffs in the game.
+
 .. program:: gambit-logit
 
 .. cmdoption:: -d
@@ -61,14 +68,9 @@ the beliefs at such information sets as being uniform across all member nodes.
 
 .. cmdoption:: -m
 
-   Stop when reaching the specified value of the
-   parameter lambda. By default, the tracing stops when lambda reaches
-   1,000,000, which is usually suitable for computing a good
-   approximation to a Nash equilibrium. For applications, such as to
-   laboratory experiments, where the behavior of the correspondence for
-   small values of lambda is of interest and the asymptotic behavior is
-   not relevant, setting MAXLAMBDA to a much smaller value may be
-   indicated.
+   .. versionadded:: 16.2.0
+
+   Specify the maximum regret criterion for acceptance as an approximate Nash equilibrium.
 
 .. cmdoption:: -l
 

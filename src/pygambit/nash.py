@@ -516,7 +516,9 @@ def gnm_solve(
 
 
 def logit_solve(
-        game: libgbt.Game, use_strategic: bool = False
+        game: libgbt.Game,
+        use_strategic: bool = False,
+        maxregret: float = 0.0001,
 ) -> NashComputationResult:
     """Compute Nash equilibria of a game using :ref:`the logit quantal response
     equilibrium correspondence <gambit-logit>`.
@@ -528,19 +530,29 @@ def logit_solve(
     ----------
     game : Game
         The game to compute equilibria in.
+
     use_strategic : bool, default False
         Whether to use the strategic form.  If True, always uses the strategic
         representation even if the game's native representation is extensive.
+
+    maxregret : float, default 0.0001
+        The acceptance criterion for approximate Nash equilibrium; the maximum
+        regret of any player must be no more than `maxregret` times the
+        difference of the maximum and minimum payoffs of the game
+
+        .. versionadded: 16.2.0
 
     Returns
     -------
     res : NashComputationResult
         The result represented as a ``NashComputationResult`` object.
     """
+    if maxregret <= 0.0:
+        raise ValueError("logit_solve(): maxregret argument must be positive")
     if not game.is_tree or use_strategic:
-        equilibria = libgbt._logit_strategy_solve(game)
+        equilibria = libgbt._logit_strategy_solve(game, maxregret)
     else:
-        equilibria = libgbt._logit_behavior_solve(game)
+        equilibria = libgbt._logit_behavior_solve(game, maxregret)
     return NashComputationResult(
         game=game,
         method="logit",

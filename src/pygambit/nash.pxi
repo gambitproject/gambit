@@ -33,6 +33,7 @@ def _convert_mspd(
 ) -> typing.List[MixedStrategyProfileDouble]:
     ret = []
     for i in range(inlist.Length()):
+        print(i)
         p = MixedStrategyProfileDouble()
         p.profile = copyitem_list_mspd(inlist, i+1)
         ret.append(p)
@@ -182,12 +183,12 @@ def _gnm_strategy_solve(
         raise
 
 
-def _logit_strategy_solve(game: Game) -> typing.List[MixedStrategyProfileDouble]:
-    return _convert_mspd(LogitStrategySolve(game.game))
+def _logit_strategy_solve(game: Game, maxregret: float) -> typing.List[MixedStrategyProfileDouble]:
+    return _convert_mspd(LogitStrategySolve(game.game, maxregret))
 
 
-def _logit_behavior_solve(game: Game) -> typing.List[MixedBehaviorProfileDouble]:
-    return _convert_mbpd(LogitBehaviorSolve(game.game))
+def _logit_behavior_solve(game: Game, maxregret: float) -> typing.List[MixedBehaviorProfileDouble]:
+    return _convert_mbpd(LogitBehaviorSolve(game.game, maxregret))
 
 
 @cython.cclass
@@ -254,8 +255,8 @@ def logit_atlambda(game: Game, lam: float) -> LogitQREMixedStrategyProfile:
     return ret
 
 
-def logit_principal_branch(game: Game, maxlam: float = 100000.0):
-    solns = _logit_principal_branch(game.game, maxlam)
+def logit_principal_branch(game: Game):
+    solns = _logit_principal_branch(game.game, 1.0e-6)
     ret = []
     for i in range(solns.Length()):
         p = LogitQREMixedStrategyProfile()

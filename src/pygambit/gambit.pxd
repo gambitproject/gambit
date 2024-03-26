@@ -455,10 +455,10 @@ cdef extern from "solvers/gnm/gnm.h":
     ) except +RuntimeError
 
 cdef extern from "solvers/logit/nfglogit.h":
-    c_List[c_MixedStrategyProfileDouble] LogitStrategySolve(c_Game) except +RuntimeError
+    c_List[c_MixedStrategyProfileDouble] LogitStrategySolve(c_Game, double) except +RuntimeError
 
 cdef extern from "solvers/logit/efglogit.h":
-    c_List[c_MixedBehaviorProfileDouble] LogitBehaviorSolve(c_Game) except +RuntimeError
+    c_List[c_MixedBehaviorProfileDouble] LogitBehaviorSolve(c_Game, double) except +RuntimeError
 
 cdef extern from "solvers/logit/nfglogit.h":
     cdef cppclass c_LogitQREMixedStrategyProfile "LogitQREMixedStrategyProfile":

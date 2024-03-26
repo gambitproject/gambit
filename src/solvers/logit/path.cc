@@ -109,8 +109,8 @@ void NewtonStep(Matrix<double> &q, Matrix<double> &b, Vector<double> &u, Vector<
 //             PathTracer: Implementation of path-following engine
 //----------------------------------------------------------------------------
 
-void PathTracer::TracePath(const EquationSystem &p_system, Vector<double> &x, double p_maxLambda,
-                           double &p_omega, const CallbackFunction &p_callback,
+void PathTracer::TracePath(const EquationSystem &p_system, Vector<double> &x, double &p_omega,
+                           TerminationFunctionType p_terminate, const CallbackFunction &p_callback,
                            const CriterionFunction &p_criterion) const
 {
   const double c_tol = 1.0e-4;   // tolerance for corrector iteration
@@ -136,7 +136,7 @@ void PathTracer::TracePath(const EquationSystem &p_system, Vector<double> &x, do
   QRDecomp(b, q);
   q.GetRow(q.NumRows(), t);
 
-  while (x[x.Length()] >= 0.0 && x[x.Length()] < p_maxLambda) {
+  while (!p_terminate(x)) {
     bool accept = true;
 
     if (fabs(h) <= c_hmin) {
@@ -245,11 +245,13 @@ void PathTracer::TracePath(const EquationSystem &p_system, Vector<double> &x, do
       // Bifurcation detected; for now, just "jump over" and continue,
       // taking into account the change in orientation of the curve.
       // Someday, we need to do more here!
+      std::cout << "Flippin heck!\n";
       p_omega = -p_omega;
     }
     t = newT;
   }
 
+  // Cleanup after termination
   p_callback(x, true);
   if (newton) {
     x = restart;

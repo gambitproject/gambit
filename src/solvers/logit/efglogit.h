@@ -53,8 +53,11 @@ public:
   ~AgentQREPathTracer() override = default;
 
   List<LogitQREMixedBehaviorProfile> TraceAgentPath(const LogitQREMixedBehaviorProfile &p_start,
-                                                    std::ostream &p_stream, double p_maxLambda,
-                                                    double p_omega, double p_targetLambda = -1.0);
+                                                    std::ostream &p_stream, double p_regret,
+                                                    double p_omega) const;
+  LogitQREMixedBehaviorProfile SolveAtLambda(const LogitQREMixedBehaviorProfile &p_start,
+                                             std::ostream &p_logStream, double p_targetLambda,
+                                             double p_omega) const;
 
   void SetFullGraph(bool p_fullGraph) { m_fullGraph = p_fullGraph; }
   bool GetFullGraph() const { return m_fullGraph; }
@@ -71,13 +74,13 @@ private:
   class LambdaCriterion;
 };
 
-inline List<MixedBehaviorProfile<double>> LogitBehaviorSolve(const Game &p_game)
+inline List<MixedBehaviorProfile<double>> LogitBehaviorSolve(const Game &p_game, double p_epsilon)
 {
   AgentQREPathTracer tracer;
   tracer.SetFullGraph(false);
   std::ostringstream ostream;
   auto result =
-      tracer.TraceAgentPath(LogitQREMixedBehaviorProfile(p_game), ostream, 1000000.0, 1.0);
+      tracer.TraceAgentPath(LogitQREMixedBehaviorProfile(p_game), ostream, p_epsilon, 1.0);
   auto ret = List<MixedBehaviorProfile<double>>();
   ret.push_back(result[1].GetProfile());
   return ret;

@@ -23,7 +23,23 @@
 #ifndef PATH_H
 #define PATH_H
 
+#include <functional>
+
 namespace Gambit {
+
+// Function type used for determining whether to terminate the numerical continuation
+using TerminationFunctionType = std::function<bool(const Vector<double> &)>;
+
+inline bool LambdaPositiveTerminationFunction(const Vector<double> &p_point)
+{
+  return (p_point.back() < 0.0);
+}
+
+inline bool LambdaRangeTerminationFunction(const Vector<double> &p_point, double p_minLambda,
+                                           double p_maxLambda)
+{
+  return (p_point.back() < p_minLambda || p_point.back() > p_maxLambda);
+}
 
 //
 // This class implements a generic path-following algorithm for smooth curves.
@@ -94,8 +110,9 @@ protected:
   PathTracer() : m_maxDecel(1.1), m_hStart(0.03) {}
   virtual ~PathTracer() = default;
 
-  void TracePath(const EquationSystem &p_system, Vector<double> &p_x, double p_maxLambda,
-                 double &p_omega, const CallbackFunction &p_callback = NullCallbackFunction(),
+  void TracePath(const EquationSystem &p_system, Vector<double> &p_x, double &p_omega,
+                 TerminationFunctionType p_terminate,
+                 const CallbackFunction &p_callback = NullCallbackFunction(),
                  const CriterionFunction &p_criterion = NullCriterionFunction()) const;
 
 private:

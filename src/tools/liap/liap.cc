@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
                                   {"verbose", 0, nullptr, 'V'},
                                   {nullptr, 0, nullptr, 0}};
   int c;
-  while ((c = getopt_long(argc, argv, "d:n:i:s:hqVvS", long_options, &long_opt_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "d:n:i:s:m:hqVvS", long_options, &long_opt_index)) != -1) {
     switch (c) {
     case 'v':
       PrintBanner(std::cerr);
@@ -150,8 +150,8 @@ int main(int argc, char *argv[])
     case 'd':
       numDecimals = atoi(optarg);
       break;
-    case 'n':
-      numTries = atoi(optarg);
+    case 'm':
+      maxregret = atof(optarg);
       break;
     case 'i':
       maxitsN = atoi(optarg);

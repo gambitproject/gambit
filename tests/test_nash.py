@@ -141,6 +141,5 @@ def test_logit_zerochance():
     g.append_infoset(g.root.children[1], g.root.children[0].infoset)
     win = g.add_outcome([1])
     g.set_outcome(g.root.children[0].children[0], win)
-    result = gbt.nash.logit_solve(g, use_strategic=False)
-    assert result.equilibria[0][g.players["Alice"].infosets[0].actions[0]] == 1
-    assert result.equilibria[0][g.players["Alice"].infosets[0].actions[1]] == 0
+    result = gbt.nash.logit_solve(g, use_strategic=False, maxregret=0.0001)
+    assert result.equilibria[0].max_regret() < 0.0001
