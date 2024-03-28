@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
 
   bool quiet = false, useStrategic = false;
   double maxLambda = 1000000.0;
-  double maxregret = 0.0001;
+  double maxregret = 1.0e-8;
   std::string mleFile;
   double maxDecel = 1.1;
   double hStart = 0.03;

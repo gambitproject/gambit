@@ -249,7 +249,7 @@ def lp_solve(
 def liap_solve(
         start: typing.Union[libgbt.MixedStrategyProfileDouble,
                             libgbt.MixedBehaviorProfileDouble],
-        maxregret: float = 0.001,
+        maxregret: float = 1.0e-4,
         maxiter: int = 1000
 ) -> NashComputationResult:
     """Compute approximate Nash equilibria of a game using
@@ -266,7 +266,7 @@ def liap_solve(
     start : MixedStrategyProfileDouble or MixedBehaviorProfileDouble
         The starting point for function minimization.
 
-    maxregret : float, default 0.001
+    maxregret : float, default 1e-4
         The acceptance criterion for approximate Nash equilibrium; the maximum
         regret of any player must be no more than `maxregret` times the
         difference of the maximum and minimum payoffs of the game
@@ -283,6 +283,8 @@ def liap_solve(
     res : NashComputationResult
         The result represented as a ``NashComputationResult`` object.
     """
+    if maxregret <= 0.0:
+        raise ValueError("liap_solve(): maxregret argument must be positive")
     if isinstance(start, libgbt.MixedStrategyProfileDouble):
         equilibria = libgbt._liap_strategy_solve(start,
                                                  maxregret=maxregret, maxiter=maxiter)
@@ -318,7 +320,7 @@ def simpdiv_solve(
     game : Game
         The game to compute equilibria in.
 
-    maxregret : Rational, default 1/1000
+    maxregret : Rational, default 1e-8
         The acceptance criterion for approximate Nash equilibrium; the maximum
         regret of any player must be no more than `maxregret` times the
         difference of the maximum and minimum payoffs of the game
@@ -346,7 +348,9 @@ def simpdiv_solve(
     if leash is not None and (not isinstance(leash, int) or leash <= 0):
         raise ValueError("simpdiv_solve(): leash must be a non-negative integer")
     if maxregret is None:
-        maxregret = libgbt.Rational(1, 1000)
+        maxregret = libgbt.Rational(1, 10000000)
+    elif maxregret < libgbt.Rational(0):
+        raise ValueError("simpdiv_solve(): maxregret must be positive")
     equilibria = libgbt._simpdiv_strategy_solve(game, maxregret, refine, leash or 0)
     return NashComputationResult(
         game=game,
@@ -518,7 +522,7 @@ def gnm_solve(
 def logit_solve(
         game: libgbt.Game,
         use_strategic: bool = False,
-        maxregret: float = 0.0001,
+        maxregret: float = 1.0e-8,
 ) -> NashComputationResult:
     """Compute Nash equilibria of a game using :ref:`the logit quantal response
     equilibrium correspondence <gambit-logit>`.
@@ -535,7 +539,7 @@ def logit_solve(
         Whether to use the strategic form.  If True, always uses the strategic
         representation even if the game's native representation is extensive.
 
-    maxregret : float, default 0.0001
+    maxregret : float, default 1e-8
         The acceptance criterion for approximate Nash equilibrium; the maximum
         regret of any player must be no more than `maxregret` times the
         difference of the maximum and minimum payoffs of the game

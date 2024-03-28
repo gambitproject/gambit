@@ -47,7 +47,8 @@ not guaranteed to find all, or even any, Nash equilibria.
 
    .. versionadded:: 16.2.0
 
-   Specify the maximum regret criterion for acceptance as an approximate Nash equilibrium.
+   Specify the maximum regret criterion for acceptance as an approximate Nash equilibrium
+   (default is 1e-4).  See :ref:`pygambit-nash-maxregret` for interpretation and guidance.
 
 .. cmdoption:: -h
 

@@ -256,7 +256,7 @@ def logit_atlambda(game: Game, lam: float) -> LogitQREMixedStrategyProfile:
 
 
 def logit_principal_branch(game: Game):
-    solns = _logit_principal_branch(game.game, 1.0e-6)
+    solns = _logit_principal_branch(game.game, 1.0e-8)
     ret = []
     for i in range(solns.Length()):
         p = LogitQREMixedStrategyProfile()

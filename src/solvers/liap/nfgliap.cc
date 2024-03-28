@@ -165,7 +165,7 @@ List<MixedStrategyProfile<double>> LiapStrategySolve(const MixedStrategyProfile<
   ConjugatePRMinimizer minimizer(p.MixedProfileLength());
   Vector<double> gradient(p.MixedProfileLength()), dx(p.MixedProfileLength());
   double fval;
-  minimizer.Set(F, static_cast<const Vector<double> &>(p), fval, gradient, .01, .0001);
+  minimizer.Set(F, static_cast<const Vector<double> &>(p), fval, gradient, .001, .00001);
 
   for (int iter = 1; iter <= p_maxitsN; iter++) {
     Vector<double> point(p);

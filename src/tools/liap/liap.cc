@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
   int numTries = 10;
   int maxitsN = 1000;
   int numDecimals = 6;
-  double maxregret = 0.001;
+  double maxregret = 1.0e-4;
   double tolN = 1.0e-10;
   std::string startFile;
 

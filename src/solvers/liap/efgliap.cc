@@ -156,7 +156,7 @@ List<MixedBehaviorProfile<double>> LiapBehaviorSolve(const MixedBehaviorProfile<
   ConjugatePRMinimizer minimizer(p.BehaviorProfileLength());
   Vector<double> gradient(p.BehaviorProfileLength()), dx(p.BehaviorProfileLength());
   double fval;
-  minimizer.Set(F, static_cast<const Vector<double> &>(p), fval, gradient, .01, .0001);
+  minimizer.Set(F, static_cast<const Vector<double> &>(p), fval, gradient, .001, .00001);
 
   for (int iter = 1; iter <= p_maxitsN; iter++) {
     Vector<double> point(p);

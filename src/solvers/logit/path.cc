@@ -245,7 +245,7 @@ void PathTracer::TracePath(const EquationSystem &p_system, Vector<double> &x, do
       // Bifurcation detected; for now, just "jump over" and continue,
       // taking into account the change in orientation of the curve.
       // Someday, we need to do more here!
-      std::cout << "Flippin heck!\n";
+
       p_omega = -p_omega;
     }
     t = newT;

@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
   bool useRandom = false;
   int randDenom = 1, gridResize = 2, stopAfter = 1;
   bool verbose = false, quiet = false;
-  Rational maxregret(1, 1000000);
+  Rational maxregret(1, 10000000);
 
   int long_opt_index = 0;
   struct option long_options[] = {{"help", 0, nullptr, 'h'},
@@ -111,7 +111,6 @@ int main(int argc, char *argv[])
                                   {nullptr, 0, nullptr, 0}};
   int c;
   while ((c = getopt_long(argc, argv, "g:hVvn:r:s:m:qS", long_options, &long_opt_index)) != -1) {
-    std::cout << c << std::endl;
     switch (c) {
     case 'v':
       PrintBanner(std::cerr);

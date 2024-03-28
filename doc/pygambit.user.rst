@@ -516,6 +516,92 @@ using :py:meth:`.MixedStrategyProfile.as_behavior` and :py:meth:`.MixedBehaviorP
    eqm.as_behavior().as_strategy()
 
 
+.. _pygambit-nash-maxregret:
+
+Acceptance criteria for Nash equilibria
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Some methods for computing Nash equilibria operate using floating-point arithmetic and/or
+generate candidate equilibrium profiles using methods which involve some form of successive
+approximations.  The outputs of these methods therefore are in general
+:math:`\varepsilon`-equilibria, for some positive :math:`\varepsilon`.
+
+To provide a uniform interface across methods, where relevant Gambit provides a parameter
+`maxregret`, which specifies the acceptance criterion for labeling the output of the
+algorithm as an equilibrium.
+This parameter is interpreted *proportionally* to the range of payoffs in the game.
+Any profile returned as an equilibrium is guaranteed to be an
+:math:`\varepsilon`-equilibrium, for :math:`\varepsilon` no more than `maxregret`
+times the difference of the game's maximum and minimum payoffs.
+
+As an example, consider solving the standard one-card poker game using
+:py:func:`.logit_solve`.  The range of the payoffs in this game is 4 (from +2 to -2).
+
+.. ipython:: python
+
+   g = gbt.Game.read_game("poker.efg")
+   g.max_payoff, g.min_payoff
+
+:py:func:`.logit_solve` is a globally-convergent method, in that it computes a
+sequence of profiles which is guaranteed to have a subsequence that converges to a
+Nash equilibrium.  The default value of `maxregret` for this method is set at
+:math:`10^{-8}`:
+
+.. ipython:: python
+
+   result = gbt.nash.logit_solve(g, maxregret=1e-8)
+   result.equilibria
+   result.equilibria[0].max_regret()
+
+The value of :py:meth:`.MixedBehaviorProfile.max_regret` of the computed profile exceeds
+:math:`10^{-8}` measured in payoffs of the game.  However, when considered relative
+to the scale of the game's payoffs, we see it is less than :math:`10^{-8}` of
+the payoff range, as requested:
+
+.. ipython:: python
+
+   result.equilibria[0].max_regret() / (g.max_payoff - g.min_payoff)
+
+
+In general, for globally-convergent methods especially, there is a tradeoff between
+precision and running time.  Some methods may be slow to converge on some games, and
+it may be useful instead to get a more coarse approximation to an equilibrium.
+We could instead ask only for an :math:`\varepsilon`-equilibrium with a
+(scaled) :math:`\varepsilon` of no more than :math:`10^{-4}`:
+
+.. ipython:: python
+
+   result = gbt.nash.logit_solve(g, maxregret=1e-4)
+   result.equilibria[0]
+   result.equilibria[0].max_regret()
+   result.equilibria[0].max_regret() / (g.max_payoff - g.min_payoff)
+
+The convention of expressing `maxregret` scaled by the game's payoffs standardises the
+behavior of methods across games.  For example, consider solving the poker game instead
+using :py:meth:`.liap_solve`.
+
+.. ipython:: python
+
+   result = gbt.nash.liap_solve(g.mixed_behavior_profile(), maxregret=1.0e-4)
+   result.equilibria[0]
+   result.equilibria[0].max_regret()
+   result.equilibria[0].max_regret() / (g.max_payoff - g.min_payoff)
+
+If, instead, we double all payoffs, the output of the method is unchanged.
+
+.. ipython:: python
+
+   for outcome in g.outcomes:
+       outcome["Alice"] = outcome["Alice"] * 2
+       outcome["Bob"] = outcome["Bob"] * 2
+
+   result = gbt.nash.liap_solve(g.mixed_behavior_profile(), maxregret=1.0e-4)
+   result.equilibria[0]
+   result.equilibria[0].max_regret()
+   result.equilibria[0].max_regret() / (g.max_payoff - g.min_payoff)
+
+
+
 Estimating quantal response equilibria
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
