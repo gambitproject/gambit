@@ -49,14 +49,14 @@ gbtNashChoiceDialog::gbtNashChoiceDialog(wxWindow *p_parent, gbtGameDocument *p_
 
   if (m_doc->GetGame()->NumPlayers() == 2) {
     wxString countChoices[] = {wxT("Compute one Nash equilibrium"),
-                               wxT("Compute as many Nash equilibria as possible"),
+                               wxT("Compute some Nash equilibria"),
                                wxT("Compute all Nash equilibria")};
     m_countChoice =
         new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 3, countChoices);
   }
   else {
     wxString countChoices[] = {wxT("Compute one Nash equilibrium"),
-                               wxT("Compute as many Nash equilibria as possible")};
+                               wxT("Compute some Nash equilibria")};
     m_countChoice =
         new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 2, countChoices);
   }
@@ -213,9 +213,9 @@ gbtAnalysisOutput *gbtNashChoiceDialog::GetCommand() const
             wxT("Some equilibria by solving a linear ") wxT("complementarity program ") + game);
       }
       else {
-        cmd = new gbtAnalysisProfileList<double>(m_doc, useEfg);
-        cmd->SetCommand(prefix + wxT("liap -d 10") + options);
-        cmd->SetDescription(wxT("Some equilibria by function minimization ") + game);
+        cmd = new gbtAnalysisProfileList<double>(m_doc, false);
+        cmd->SetCommand(prefix + wxT("simpdiv -d 10 -n 20 -r 100") + options);
+        cmd->SetDescription(wxT("Some equilibria by simplicial subdivision ") + game);
       }
     }
     else {
@@ -285,7 +285,7 @@ gbtAnalysisOutput *gbtNashChoiceDialog::GetCommand() const
   }
   else if (method == s_simpdiv) {
     cmd = new gbtAnalysisProfileList<double>(m_doc, false);
-    cmd->SetCommand(prefix + wxT("simpdiv") + options);
+    cmd->SetCommand(prefix + wxT("simpdiv -d 10 -n 20 -r 100") + options);
     cmd->SetDescription(count + wxT(" by simplicial subdivision ") wxT("in strategic game"));
   }
   else {

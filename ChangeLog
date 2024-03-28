@@ -22,6 +22,8 @@
 - Additional regret-related functions added to `MixedBehaviorProfile` and `MixedStrategyProfile`
   in both C++ and Python
 - Some caching added to payoff/strategy value calculations in `MixedStrategyProfile`
+- `gambit-simpdiv` now supports expressing output as floating-point with a specified number of
+  digits (#296)
 
 ### Changed
 - Gambit now requires a compiler that supports C++17.
@@ -45,7 +47,8 @@
   Creation of random mixed profiles in C++ is done with new `Game::NewRandomStrategyProfile` and
   `Game::NewRandomBehaviorProfile` methods; these accept STL `Generator` objects for reproducible state.
   The Python implementation is no longer just a wrapper around the C++ one.
-
+- Graphical interface now uses simplicial subdivision as the recommended method for finding some
+  equilibria in games with more than two players, instead of Lyapunov function minimisation
 
 ## [16.1.1] - 2024-01-10
 

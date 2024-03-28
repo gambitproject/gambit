@@ -68,6 +68,17 @@ options to specify additional starting points for the algorithm.
    Specify the maximum regret criterion for acceptance as an approximate Nash equilibrium
    (default is 1e-8).  See :ref:`pygambit-nash-maxregret` for interpretation and guidance.
 
+.. cmdoption:: -d DECIMALS
+
+   .. versionadded:: 16.2.0
+
+   Simplicial subdivision operates on a triangulation grid in the set of mixed strategy profiles.
+   Therefore, it produces output in which all probabilities are expressed as rational numbers, and
+   by default the output reports these.  By specifying this option, instead probabilities are
+   expressed as floating-point numbers with the specified number of decimal places.  Specifying
+   this option sacrifices some precision in reporting the output of the method, in exchange for
+   probabilities which are more human-readable.
+
 .. cmdoption:: -v
 
    Sets verbose mode. In verbose mode, initial points, as well as

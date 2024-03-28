@@ -66,6 +66,31 @@ List<MixedStrategyProfile<Rational>> RandomProfiles(const Game &p_game, int p_co
   return profiles;
 }
 
+class MixedStrategyCSVAsFloatRenderer : public MixedStrategyRenderer<Rational> {
+public:
+  explicit MixedStrategyCSVAsFloatRenderer(std::ostream &p_stream, int p_numDecimals = 6)
+    : m_stream(p_stream), m_numDecimals(p_numDecimals)
+  {
+  }
+  ~MixedStrategyCSVAsFloatRenderer() override = default;
+  void Render(const MixedStrategyProfile<Rational> &p_profile,
+              const std::string &p_label = "NE") const override;
+
+private:
+  std::ostream &m_stream;
+  int m_numDecimals;
+};
+
+void MixedStrategyCSVAsFloatRenderer::Render(const MixedStrategyProfile<Rational> &p_profile,
+                                             const std::string &p_label) const
+{
+  m_stream << p_label;
+  for (size_t i = 1; i <= p_profile.MixedProfileLength(); i++) {
+    m_stream << "," << lexical_cast<std::string>(double(p_profile[i]), m_numDecimals);
+  }
+  m_stream << std::endl;
+}
+
 void PrintBanner(std::ostream &p_stream)
 {
   p_stream << "Compute Nash equilibria using simplicial subdivision\n";
@@ -86,6 +111,8 @@ void PrintHelp(char *progname)
   std::cerr << "  -r DENOM         generate random starting points with denominator DENOM\n";
   std::cerr << "  -n COUNT         number of starting points to generate (requires -r)\n";
   std::cerr << "  -s FILE          file containing starting points\n";
+  std::cerr << "  -d DECIMALS      show profiles as floating point with DECIMALS digits\n";
+  std::cerr << "                   (default is to display rational numbers)\n";
   std::cerr << "  -m MAXREGRET     maximum regret acceptable as a proportion of range of\n";
   std::cerr << "                   payoffs in the game\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
@@ -100,7 +127,7 @@ int main(int argc, char *argv[])
   opterr = 0;
   std::string startFile;
   bool useRandom = false;
-  int randDenom = 1, gridResize = 2, stopAfter = 1;
+  int randDenom = 1, gridResize = 2, stopAfter = 1, decimals = 0;
   bool verbose = false, quiet = false;
   Rational maxregret(1, 10000000);
 
@@ -110,7 +137,7 @@ int main(int argc, char *argv[])
                                   {"verbose", 0, nullptr, 'V'},
                                   {nullptr, 0, nullptr, 0}};
   int c;
-  while ((c = getopt_long(argc, argv, "g:hVvn:r:s:m:qS", long_options, &long_opt_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "g:hVvn:r:s:m:d:qS", long_options, &long_opt_index)) != -1) {
     switch (c) {
     case 'v':
       PrintBanner(std::cerr);
@@ -130,6 +157,9 @@ int main(int argc, char *argv[])
       break;
     case 'm':
       maxregret = lexical_cast<Rational>(std::string(optarg));
+      break;
+    case 'd':
+      decimals = atoi(optarg);
       break;
     case 's':
       startFile = optarg;
@@ -190,10 +220,16 @@ int main(int argc, char *argv[])
       }
     }
     for (auto start : starts) {
-      std::shared_ptr<StrategyProfileRenderer<Rational>> renderer(
-          new MixedStrategyCSVRenderer<Rational>(std::cout));
-      NashSimpdivStrategySolver algorithm(gridResize, 0, maxregret, verbose, renderer);
-      algorithm.Solve(start);
+      if (decimals > 0) {
+        auto renderer = std::make_shared<MixedStrategyCSVAsFloatRenderer>(std::cout, decimals);
+        NashSimpdivStrategySolver algorithm(gridResize, 0, maxregret, verbose, renderer);
+        algorithm.Solve(start);
+      }
+      else {
+        auto renderer = std::make_shared<MixedStrategyCSVRenderer<Rational>>(std::cout);
+        NashSimpdivStrategySolver algorithm(gridResize, 0, maxregret, verbose, renderer);
+        algorithm.Solve(start);
+      }
     }
     return 0;
   }
