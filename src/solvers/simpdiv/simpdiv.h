@@ -31,7 +31,7 @@ namespace Nash {
 ///
 /// This is a simplicial subdivision algorithm with restart, for finding
 /// mixed strategy solutions to general finite n-person games.  It is based on
-/// van Der Laan, Talman and van Der Heyden, Math in Oper Res, 1987.
+/// van Der Laan, Talman and van Der Heyden, Math of Oper Res, 1987.
 ///
 class NashSimpdivStrategySolver : public StrategySolver<Rational> {
 public:
@@ -68,10 +68,11 @@ private:
 };
 
 inline List<MixedStrategyProfile<Rational>>
-SimpdivStrategySolve(const Game &p_game, const Rational &p_maxregret = Rational(1, 1000000),
-                     int p_gridResize = 2, int p_leashLength = 0)
+SimpdivStrategySolve(const MixedStrategyProfile<Rational> &p_start,
+                     const Rational &p_maxregret = Rational(1, 1000000), int p_gridResize = 2,
+                     int p_leashLength = 0)
 {
-  return NashSimpdivStrategySolver(p_gridResize, p_leashLength, p_maxregret).Solve(p_game);
+  return NashSimpdivStrategySolver(p_gridResize, p_leashLength, p_maxregret).Solve(p_start);
 }
 
 } // namespace Nash

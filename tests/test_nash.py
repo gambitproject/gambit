@@ -108,7 +108,7 @@ class TestNash(unittest.TestCase):
 
     def test_simpdiv_strategy(self):
         """Test calls of simplicial subdivision for mixed strategy equilibria."""
-        result = gbt.nash.simpdiv_solve(self.poker)
+        result = gbt.nash.simpdiv_solve(self.poker.mixed_strategy_profile(rational=True))
         assert len(result.equilibria) == 1
 
     def test_ipa_strategy(self):

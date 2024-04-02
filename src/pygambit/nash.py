@@ -264,7 +264,9 @@ def liap_solve(
     Parameters
     ----------
     start : MixedStrategyProfileDouble or MixedBehaviorProfileDouble
-        The starting point for function minimization.
+        The starting profile for function minimization.  Up to one equilibrium will be found
+        from any starting profile, and the equilibrium found may (and generally will)
+        depend on the initial profile chosen.
 
     maxregret : float, default 1e-4
         The acceptance criterion for approximate Nash equilibrium; the maximum
@@ -307,7 +309,7 @@ def liap_solve(
 
 
 def simpdiv_solve(
-        game: libgbt.Game,
+        start: libgbt.MixedStrategyProfileRational,
         maxregret: libgbt.Rational = None,
         refine: int = 2,
         leash: typing.Optional[int] = None
@@ -315,10 +317,16 @@ def simpdiv_solve(
     """Compute Nash equilibria of a game using :ref:`simplicial
     subdivision <gambit-simpdiv>`.
 
+    .. versionchanged:: 16.2.0
+
+       Method now takes a starting point, as a mixed strategy profile, instead of a game.
+
     Parameters
     ----------
-    game : Game
-        The game to compute equilibria in.
+    start: MixedStrategyProfileRational
+        The starting profile for the algorithm.  Up to one equilibrium will be found
+        from any starting profile, and the equilibrium found may (and generally will)
+        depend on the initial profile chosen.
 
     maxregret : Rational, default 1e-8
         The acceptance criterion for approximate Nash equilibrium; the maximum
@@ -351,14 +359,14 @@ def simpdiv_solve(
         maxregret = libgbt.Rational(1, 10000000)
     elif maxregret < libgbt.Rational(0):
         raise ValueError("simpdiv_solve(): maxregret must be positive")
-    equilibria = libgbt._simpdiv_strategy_solve(game, maxregret, refine, leash or 0)
+    equilibria = libgbt._simpdiv_strategy_solve(start, maxregret, refine, leash or 0)
     return NashComputationResult(
-        game=game,
+        game=start.game,
         method="simpdiv",
         rational=True,
         use_strategic=True,
         equilibria=equilibria,
-        parameters={"maxregret": maxregret, "refine": refine, "leash": leash}
+        parameters={"start": start, "maxregret": maxregret, "refine": refine, "leash": leash}
     )
 
 

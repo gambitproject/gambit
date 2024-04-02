@@ -33,6 +33,7 @@
   to always take an explicit starting point (in `liap_solve`), and to specify a regret-based
   acceptance criterion (#330)
 - `simpdiv_solve`/`gambit-simpdiv` now accepts a regret-based acceptance criterion (#439)
+- `simpdiv_solve` now takes an explicit starting point (#445)
 - Converted test suite for mixed behavior profiles to pytest style; added parametrizations for
   test_realiz_prob; added test_martingale_property_of_node_value (#375)
 - Improved test suite for mixed strategy profiles (#374)
