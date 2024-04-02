@@ -149,9 +149,9 @@ def _liap_behavior_solve(start: MixedBehaviorProfileDouble,
 
 
 def _simpdiv_strategy_solve(
-        game: Game, maxregret: Rational, gridstep: int, leash: int
+        start: MixedStrategyProfileRational, maxregret: Rational, gridstep: int, leash: int
 ) -> typing.List[MixedStrategyProfileRational]:
-    return _convert_mspr(SimpdivStrategySolve(game.game,
+    return _convert_mspr(SimpdivStrategySolve(deref(start.profile),
                                               to_rational(str(maxregret).encode("ascii")),
                                               gridstep, leash))
 
