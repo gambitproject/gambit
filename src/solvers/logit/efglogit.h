@@ -74,9 +74,12 @@ private:
   class LambdaCriterion;
 };
 
-inline List<MixedBehaviorProfile<double>> LogitBehaviorSolve(const Game &p_game, double p_epsilon)
+inline List<MixedBehaviorProfile<double>> LogitBehaviorSolve(const Game &p_game, double p_epsilon,
+                                                             double p_firstStep, double p_maxAccel)
 {
   AgentQREPathTracer tracer;
+  tracer.SetMaxDecel(p_maxAccel);
+  tracer.SetStepsize(p_firstStep);
   tracer.SetFullGraph(false);
   std::ostringstream ostream;
   auto result =

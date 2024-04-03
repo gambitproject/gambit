@@ -28,6 +28,8 @@
 - Some caching added to payoff/strategy value calculations in `MixedStrategyProfile`
 - `gambit-simpdiv` now supports expressing output as floating-point with a specified number of
   digits (#296)
+- Parameters `first_step` and `max_accel` added to `gambit_logit` for finer control of
+  numerical continuation process
 
 ### Changed
 - Gambit now requires a compiler that supports C++17.

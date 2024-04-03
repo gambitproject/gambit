@@ -103,9 +103,12 @@ protected:
   class CallbackFunction;
 };
 
-inline List<MixedStrategyProfile<double>> LogitStrategySolve(const Game &p_game, double p_regret)
+inline List<MixedStrategyProfile<double>> LogitStrategySolve(const Game &p_game, double p_regret,
+                                                             double p_firstStep, double p_maxAccel)
 {
   StrategicQREPathTracer tracer;
+  tracer.SetMaxDecel(p_maxAccel);
+  tracer.SetStepsize(p_firstStep);
   tracer.SetFullGraph(false);
   std::ostringstream ostream;
   auto result =

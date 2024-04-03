@@ -531,6 +531,8 @@ def logit_solve(
         game: libgbt.Game,
         use_strategic: bool = False,
         maxregret: float = 1.0e-8,
+        first_step: float = .03,
+        max_accel: float = 1.1,
 ) -> NashComputationResult:
     """Compute Nash equilibria of a game using :ref:`the logit quantal response
     equilibrium correspondence <gambit-logit>`.
@@ -552,7 +554,17 @@ def logit_solve(
         regret of any player must be no more than `maxregret` times the
         difference of the maximum and minimum payoffs of the game
 
-        .. versionadded: 16.2.0
+        .. versionadded:: 16.2.0
+
+    first_step : float, default .03
+        The arclength of the initial step.
+
+        .. versionadded:: 16.2.0
+
+    max_accel : float, default 1.1
+        The maximum rate at which to lengthen the arclength step size.
+
+        .. versionadded:: 16.2.0
 
     Returns
     -------
@@ -562,15 +574,16 @@ def logit_solve(
     if maxregret <= 0.0:
         raise ValueError("logit_solve(): maxregret argument must be positive")
     if not game.is_tree or use_strategic:
-        equilibria = libgbt._logit_strategy_solve(game, maxregret)
+        equilibria = libgbt._logit_strategy_solve(game, maxregret, first_step, max_accel)
     else:
-        equilibria = libgbt._logit_behavior_solve(game, maxregret)
+        equilibria = libgbt._logit_behavior_solve(game, maxregret, first_step, max_accel)
     return NashComputationResult(
         game=game,
         method="logit",
         rational=False,
         use_strategic=not game.is_tree or use_strategic,
         equilibria=equilibria,
+        parameters={"first_step": first_step, "max_accel": max_accel},
     )
 
 

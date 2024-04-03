@@ -182,12 +182,16 @@ def _gnm_strategy_solve(
         raise
 
 
-def _logit_strategy_solve(game: Game, maxregret: float) -> typing.List[MixedStrategyProfileDouble]:
-    return _convert_mspd(LogitStrategySolve(game.game, maxregret))
+def _logit_strategy_solve(
+        game: Game, maxregret: float, first_step: float, max_accel: float,
+) -> typing.List[MixedStrategyProfileDouble]:
+    return _convert_mspd(LogitStrategySolve(game.game, maxregret, first_step, max_accel))
 
 
-def _logit_behavior_solve(game: Game, maxregret: float) -> typing.List[MixedBehaviorProfileDouble]:
-    return _convert_mbpd(LogitBehaviorSolve(game.game, maxregret))
+def _logit_behavior_solve(
+        game: Game, maxregret: float, first_step: float, max_accel: float,
+) -> typing.List[MixedBehaviorProfileDouble]:
+    return _convert_mbpd(LogitBehaviorSolve(game.game, maxregret, first_step, max_accel))
 
 
 @cython.cclass
@@ -236,26 +240,31 @@ class LogitQREMixedStrategyProfile:
         return profile
 
 
-def logit_estimate(profile: MixedStrategyProfileDouble) -> LogitQREMixedStrategyProfile:
+def logit_estimate(profile: MixedStrategyProfileDouble,
+                   first_step: float = .03,
+                   max_accel: float = 1.1) -> LogitQREMixedStrategyProfile:
     """Estimate QRE corresponding to mixed strategy profile using
     maximum likelihood along the principal branch.
     """
     ret = LogitQREMixedStrategyProfile()
-    ret.thisptr = _logit_estimate(profile.profile)
+    ret.thisptr = _logit_estimate(profile.profile, first_step, max_accel)
     return ret
 
 
-def logit_atlambda(game: Game, lam: float) -> LogitQREMixedStrategyProfile:
+def logit_atlambda(game: Game,
+                   lam: float,
+                   first_step: float = .03,
+                   max_accel: float = 1.1) -> LogitQREMixedStrategyProfile:
     """Compute the first QRE along the principal branch with the given
     lambda parameter.
     """
     ret = LogitQREMixedStrategyProfile()
-    ret.thisptr = _logit_atlambda(game.game, lam)
+    ret.thisptr = _logit_atlambda(game.game, lam, first_step, max_accel)
     return ret
 
 
-def logit_principal_branch(game: Game):
-    solns = _logit_principal_branch(game.game, 1.0e-8)
+def logit_principal_branch(game: Game, first_step: float = .03, max_accel: float = 1.1):
+    solns = _logit_principal_branch(game.game, 1.0e-8, first_step, max_accel)
     ret = []
     for i in range(solns.Length()):
         p = LogitQREMixedStrategyProfile()

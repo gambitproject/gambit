@@ -456,10 +456,16 @@ cdef extern from "solvers/gnm/gnm.h":
     ) except +RuntimeError
 
 cdef extern from "solvers/logit/nfglogit.h":
-    c_List[c_MixedStrategyProfileDouble] LogitStrategySolve(c_Game, double) except +RuntimeError
+    c_List[c_MixedStrategyProfileDouble] LogitStrategySolve(c_Game,
+                                                            double,
+                                                            double,
+                                                            double) except +RuntimeError
 
 cdef extern from "solvers/logit/efglogit.h":
-    c_List[c_MixedBehaviorProfileDouble] LogitBehaviorSolve(c_Game, double) except +RuntimeError
+    c_List[c_MixedBehaviorProfileDouble] LogitBehaviorSolve(c_Game,
+                                                            double,
+                                                            double,
+                                                            double) except +RuntimeError
 
 cdef extern from "solvers/logit/nfglogit.h":
     cdef cppclass c_LogitQREMixedStrategyProfile "LogitQREMixedStrategyProfile":
@@ -480,11 +486,11 @@ cdef extern from "solvers/logit/nfglogit.h":
 
 cdef extern from "nash.h":
     shared_ptr[c_LogitQREMixedStrategyProfile] _logit_estimate "logit_estimate"(
-            shared_ptr[c_MixedStrategyProfileDouble]
+            shared_ptr[c_MixedStrategyProfileDouble], double, double
     ) except +
     shared_ptr[c_LogitQREMixedStrategyProfile] _logit_atlambda "logit_atlambda"(
-            c_Game, double
+            c_Game, double, double, double
     ) except +
     c_List[c_LogitQREMixedStrategyProfile] _logit_principal_branch "logit_principal_branch"(
-            c_Game, double
+            c_Game, double, double, double
     ) except +
