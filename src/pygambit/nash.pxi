@@ -33,7 +33,6 @@ def _convert_mspd(
 ) -> typing.List[MixedStrategyProfileDouble]:
     ret = []
     for i in range(inlist.Length()):
-        print(i)
         p = MixedStrategyProfileDouble()
         p.profile = copyitem_list_mspd(inlist, i+1)
         ret.append(p)

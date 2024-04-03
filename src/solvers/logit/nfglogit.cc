@@ -214,7 +214,7 @@ namespace {
 bool RegretTerminationFunction(const Game &p_game, const Vector<double> &p_point, double p_regret)
 {
   if (p_point.back() < 0.0) {
-    return false;
+    return true;
   }
   MixedStrategyProfile<double> profile(p_game->NewMixedStrategyProfile(0.0));
   for (int i = 1; i < p_point.Length(); i++) {
@@ -247,6 +247,9 @@ StrategicQREPathTracer::TraceStrategicPath(const LogitQREMixedStrategyProfile &p
         return RegretTerminationFunction(p_start.GetGame(), p_point, p_regret);
       },
       func);
+  if (!m_fullGraph && func.GetProfiles().back().GetProfile().GetMaxRegret() >= p_regret) {
+    return {};
+  }
   return func.GetProfiles();
 }
 

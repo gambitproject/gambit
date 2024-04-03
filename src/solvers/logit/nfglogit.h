@@ -103,8 +103,7 @@ protected:
   class CallbackFunction;
 };
 
-inline List<MixedStrategyProfile<double>> LogitStrategySolve(const Game &p_game,
-                                                             double p_regret = 0.0001)
+inline List<MixedStrategyProfile<double>> LogitStrategySolve(const Game &p_game, double p_regret)
 {
   StrategicQREPathTracer tracer;
   tracer.SetFullGraph(false);
@@ -112,7 +111,9 @@ inline List<MixedStrategyProfile<double>> LogitStrategySolve(const Game &p_game,
   auto result =
       tracer.TraceStrategicPath(LogitQREMixedStrategyProfile(p_game), ostream, p_regret, 1.0);
   auto ret = List<MixedStrategyProfile<double>>();
-  ret.push_back(result[1].GetProfile());
+  if (!result.empty()) {
+    ret.push_back(result.back().GetProfile());
+  }
   return ret;
 }
 

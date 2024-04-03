@@ -109,6 +109,15 @@ void NewtonStep(Matrix<double> &q, Matrix<double> &b, Vector<double> &u, Vector<
 //             PathTracer: Implementation of path-following engine
 //----------------------------------------------------------------------------
 
+// To handle possible (simple) bifurcations in the graph, TracePath detects a
+// change in orientation of the curve, and, if one is found, implements a
+// perturbation on the first equation.  This perturbation is maintained only
+// long enough to traverse past the apparent bifurcation.
+// Preliminary experience suggests this works fairly well (when applied to QRE).
+// It is possible for the path-following to land sufficiently close to the
+// bifurcation point that the tracing gets stuck there as it is not possible
+// to find a small enough step size to avoid stepping over the bifurcation
+// point.
 void PathTracer::TracePath(const EquationSystem &p_system, Vector<double> &x, double &p_omega,
                            TerminationFunctionType p_terminate, const CallbackFunction &p_callback,
                            const CriterionFunction &p_criterion) const
@@ -122,7 +131,10 @@ void PathTracer::TracePath(const EquationSystem &p_system, Vector<double> &x, do
   const double c_hmin = 1.0e-8;  // minimal stepsize
   const int c_maxIter = 100;     // maximum iterations in corrector
 
-  bool newton = false; // using Newton steplength (for zero-finding)
+  bool newton = false;             // using Newton steplength (for zero-finding)
+  const double c_pert = 0.0000001; // The size of perturbation to apply to avoid bifurcation traps
+  double pert = 0.0;               // The current version of the perturbation being applied
+  double pert_countdown = 0.0;     // How much longer (in arclength) to apply perturbation
 
   Vector<double> u(x.Length()), restart(x.Length());
   // t is current tangent at x; newT is tangent at u, which is the next point.
@@ -162,6 +174,7 @@ void PathTracer::TracePath(const EquationSystem &p_system, Vector<double> &x, do
       double dist;
 
       p_system.GetValue(u, y);
+      y[1] += pert;
       NewtonStep(q, b, u, y, dist);
 
       if (dist >= c_maxDist) {
@@ -195,6 +208,21 @@ void PathTracer::TracePath(const EquationSystem &p_system, Vector<double> &x, do
       }
     }
 
+    // Obtain the tangent at the next step
+    q.GetRow(q.NumRows(), newT);
+    double omega_flip = (t * newT < 0.0) ? -1.0 : 1.0;
+
+    if (omega_flip == -1.0) {
+      // The orientation of the curve has changed, indicating a bifurcation.
+      // Switch on perturbation and attempt to continue following the branch that
+      // is oriented in the same direction as we were originally following
+      if (pert_countdown == 0.0) {
+        pert = c_pert;
+        pert_countdown = abs(2 * h);
+      }
+      accept = false;
+    }
+
     if (!accept) {
       h /= m_maxDecel; // PC not accepted; change stepsize and retry
       if (fabs(h) <= c_hmin) {
@@ -205,24 +233,17 @@ void PathTracer::TracePath(const EquationSystem &p_system, Vector<double> &x, do
         }
         return;
       }
-
       continue;
     }
 
     // Determine new stepsize
-    if (decel > m_maxDecel) {
-      decel = m_maxDecel;
-    }
-
-    // Obtain the tangent at the next step
-    q.GetRow(q.NumRows(), newT);
+    decel = std::min(decel, m_maxDecel);
 
     // If we are at a bifurcation point, the orientation of the tangent
     // will flip.  This will confuse many criterion functions, especially
     // those which are using derivatives to maximize or minimize an objective.
     // This ensures the criterion function is called with both the old and
     // new tangent oriented in the same sense.
-    double omega_flip = (t * newT < 0.0) ? -1.0 : 1.0;
     if (!newton && p_criterion(x, t) * p_criterion(u, newT * omega_flip) < 0.0) {
       newton = true;
       restart = u;
@@ -239,16 +260,18 @@ void PathTracer::TracePath(const EquationSystem &p_system, Vector<double> &x, do
 
     // PC step was successful; update and iterate
     x = u;
+    t = newT;
     p_callback(x, false);
 
-    if (t * newT < 0.0) {
-      // Bifurcation detected; for now, just "jump over" and continue,
-      // taking into account the change in orientation of the curve.
-      // Someday, we need to do more here!
-
-      p_omega = -p_omega;
+    if (pert_countdown > 0.0) {
+      // If we are currently perturbing in the neighborhood of a bifurcation, check to see
+      // whether we think we are likely past it, and switch off if we are.
+      pert_countdown -= abs(h);
+      if (pert_countdown < 0.0) {
+        pert = 0.0;
+        pert_countdown = 0.0;
+      }
     }
-    t = newT;
   }
 
   // Cleanup after termination

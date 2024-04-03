@@ -10,6 +10,10 @@
   problem where the method could return non-Nash output (#406)
 - `gambit-enumpoly` could get stuck in an infinite loop, and/or fail to report some equilibria,
   due to floating-point rounding/tolerance issues; this has been fixed on known cases (#198)
+- `gambit-logit` now uses perturbations to attempt to resolve correspondences that have
+  bifurcations, and instead tries always to follow a curve that has the same orientation.
+  This should eliminate cases in which tracing gets stuck in a loop or reverses itself
+  when encountering bifurcations (#3)
 
 ### Added
 - MixedStrategyProfile and MixedBehaviorProfile objects in pygambit can now be iterated in

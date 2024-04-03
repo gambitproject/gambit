@@ -82,7 +82,9 @@ inline List<MixedBehaviorProfile<double>> LogitBehaviorSolve(const Game &p_game,
   auto result =
       tracer.TraceAgentPath(LogitQREMixedBehaviorProfile(p_game), ostream, p_epsilon, 1.0);
   auto ret = List<MixedBehaviorProfile<double>>();
-  ret.push_back(result[1].GetProfile());
+  if (!result.empty()) {
+    ret.push_back(result.back().GetProfile());
+  }
   return ret;
 }
 
