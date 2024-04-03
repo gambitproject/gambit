@@ -601,6 +601,90 @@ If, instead, we double all payoffs, the output of the method is unchanged.
    result.equilibria[0].max_regret() / (g.max_payoff - g.min_payoff)
 
 
+Generating starting points for algorithms
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Some methods for computation of Nash equilibria take as an initial condition a
+:py:class:`.MixedStrategyProfile` or :py:class:`MixedBehaviorProfile` which is used
+as a starting point.  The equilibria found will depend on which starting point is
+selected.  To facilitate generating starting points, :py:class:`.Game` provides
+methods :py:meth:`.Game.random_strategy_profile` and :py:meth:`.Game.random_behavior_profile`,
+to generate profiles which are drawn from the uniform distribution on the product
+of simplices.
+
+As an example, we consider a three-player game from McKelvey and McLennan (1997),
+in which each player has two strategies.  This game has nine equilibria in total, and
+in particular has two totally mixed Nash equilibria, which is the maximum possible number
+of regular totally mixed equilbria in games of this size.
+
+We first consider finding Nash equilibria in this game using :py:func:`.liap_solve`.
+If we run this method starting from the centroid (uniform randomization across all
+strategies for each player), :py:func:`.liap_solve` finds one of the totally-mixed equilibria.
+
+.. ipython:: python
+
+   g = gbt.Game.read_game("2x2x2.nfg")
+   gbt.nash.liap_solve(g.mixed_strategy_profile())
+
+Which equilibrium is found depends on the starting point.  With a different starting point,
+we can find, for example, one of the pure-strategy equilibria.
+
+.. ipython:: python
+
+   gbt.nash.liap_solve(g.mixed_strategy_profile([[.9, .1], [.9, .1], [.9, .1]]))
+
+To search for more equilibria, we can instead generate strategy profiles at random.
+
+.. ipython:: python
+
+   gbt.nash.liap_solve(g.random_strategy_profile())
+
+Note that methods which take starting points do record the starting points used in the
+result object returned.  However, the random profiles which are generated will differ
+in different runs of a program.  To support making the generation of random strategy
+profiles reproducible, and for finer-grained control of the generation of these profiles
+if desired, :py:meth:`.Game.random_strategy_profile` and :py:meth:`.Game.random_behavior_profile`
+optionally take a :py:class:`numpy.random.Generator` object, which is used as the source
+of randomness for creating the profile.
+
+.. ipython:: python
+
+   import numpy as np
+   gen = np.random.default_rng(seed=1234567890)
+   p1 = g.random_strategy_profile(gen=gen)
+   p1
+   gen = np.random.default_rng(seed=1234567890)
+   p2 = g.random_strategy_profile(gen=gen)
+   p2
+   p1 == p2
+
+When creating profiles in which probabilities are represented as floating-point numbers,
+:py:meth:`.Game.random_strategy_profile` and :py:meth:`.Game.random_behavior_profile`
+internally use the Dirichlet distribution for each simplex to generate correctly uniform
+sampling over probabilities.  However, in some applications generation of random profiles
+with probabilities as rational numbers is desired.  For example, :py:func:`.simpdiv_solve`
+takes such a starting point, because it operates by successively refining a triangulation
+over the space of mixed strategy profiles.
+:py:meth:`.Game.random_strategy_profile` and :py:meth:`.Game.random_behavior_profile`
+both take an optional parameter `denom` which, if specified, generates a profile in which
+probabilities are generated uniformly from the grid in each simplex in which all probabilities
+have denominator `denom`.
+
+.. ipython:: python
+
+   gen = np.random.default_rng(seed=1234567890)
+   g.random_strategy_profile(denom=10, gen=gen)
+   g.random_strategy_profile(denom=10, gen=gen)
+
+These can then be used in conjunction with :py:func:`.simpdiv_solve` to search for equilibria
+from different starting points.
+
+.. ipython:: python
+
+   gbt.nash.simpdiv_solve(g.random_strategy_profile(denom=10, gen=gen))
+   gbt.nash.simpdiv_solve(g.random_strategy_profile(denom=10, gen=gen))
+   gbt.nash.simpdiv_solve(g.random_strategy_profile(denom=10, gen=gen))
+
 
 Estimating quantal response equilibria
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
