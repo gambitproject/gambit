@@ -29,4 +29,4 @@ from . import (  # noqa: F401
     supports,  # noqa: F401
 )
 
-__version__ = "16.1.1"
+__version__ = "16.2.0"
