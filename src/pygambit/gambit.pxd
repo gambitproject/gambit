@@ -455,13 +455,17 @@ cdef extern from "solvers/gnm/gnm.h":
             int p_localNewtonInterval, int p_localNewtonMaxits
     ) except +RuntimeError
 
-cdef extern from "solvers/logit/nfglogit.h":
-    c_List[c_MixedStrategyProfileDouble] LogitStrategySolve(c_Game,
-                                                            double,
-                                                            double,
-                                                            double) except +RuntimeError
-
 cdef extern from "solvers/logit/efglogit.h":
+    cdef cppclass c_LogitQREMixedBehaviorProfile "LogitQREMixedBehaviorProfile":
+        c_LogitQREMixedBehaviorProfile(c_Game) except +
+        c_LogitQREMixedBehaviorProfile(c_LogitQREMixedBehaviorProfile) except +
+        c_Game GetGame() except +
+        c_MixedBehaviorProfileDouble GetProfile()  # except + doesn't compile
+        double GetLambda() except +
+        double GetLogLike() except +
+        int BehaviorProfileLength() except +
+        double getitem "operator[]"(int) except +IndexError
+
     c_List[c_MixedBehaviorProfileDouble] LogitBehaviorSolve(c_Game,
                                                             double,
                                                             double,
@@ -484,11 +488,23 @@ cdef extern from "solvers/logit/nfglogit.h":
                                                 c_MixedStrategyProfileDouble,
                                                 double, double, double) except +RuntimeError
 
+    c_List[c_MixedStrategyProfileDouble] LogitStrategySolve(c_Game,
+                                                            double,
+                                                            double,
+                                                            double) except +RuntimeError
+
+
 cdef extern from "nash.h":
-    shared_ptr[c_LogitQREMixedStrategyProfile] _logit_estimate "logit_estimate"(
+    shared_ptr[c_LogitQREMixedBehaviorProfile] LogitBehaviorEstimateHelper(
+            shared_ptr[c_MixedBehaviorProfileDouble], double, double
+    ) except +
+    shared_ptr[c_LogitQREMixedBehaviorProfile] LogitBehaviorAtLambdaHelper(
+            c_Game, double, double, double
+    ) except +
+    shared_ptr[c_LogitQREMixedStrategyProfile] LogitStrategyEstimateHelper(
             shared_ptr[c_MixedStrategyProfileDouble], double, double
     ) except +
-    shared_ptr[c_LogitQREMixedStrategyProfile] _logit_atlambda "logit_atlambda"(
+    shared_ptr[c_LogitQREMixedStrategyProfile] LogitStrategyAtLambdaHelper(
             c_Game, double, double, double
     ) except +
     c_List[c_LogitQREMixedStrategyProfile] _logit_principal_branch "logit_principal_branch"(

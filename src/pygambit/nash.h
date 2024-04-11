@@ -21,6 +21,7 @@
 //
 
 #include "gambit.h"
+#include "solvers/logit/efglogit.h"
 #include "solvers/logit/nfglogit.h"
 
 using namespace std;
@@ -31,23 +32,41 @@ public:
   int overflow(int c) { return c; }
 };
 
-std::shared_ptr<LogitQREMixedStrategyProfile>
-logit_estimate(std::shared_ptr<MixedStrategyProfile<double>> p_frequencies, double p_firstStep,
-               double p_maxAccel)
+std::shared_ptr<LogitQREMixedBehaviorProfile>
+LogitBehaviorEstimateHelper(std::shared_ptr<MixedBehaviorProfile<double>> p_frequencies,
+                            double p_firstStep, double p_maxAccel)
 {
-  LogitQREMixedStrategyProfile start(p_frequencies->GetGame());
-  StrategicQREEstimator alg;
+  return make_shared<LogitQREMixedBehaviorProfile>(
+      LogitBehaviorEstimate(*p_frequencies, p_firstStep, p_maxAccel));
+}
+
+std::shared_ptr<LogitQREMixedBehaviorProfile> LogitBehaviorAtLambdaHelper(const Game &p_game,
+                                                                          double p_lambda,
+                                                                          double p_firstStep,
+                                                                          double p_maxAccel)
+{
+  LogitQREMixedBehaviorProfile start(p_game);
+  AgentQREPathTracer alg;
   alg.SetMaxDecel(p_maxAccel);
   alg.SetStepsize(p_firstStep);
   NullBuffer null_buffer;
   std::ostream null_stream(&null_buffer);
-  LogitQREMixedStrategyProfile result =
-      alg.Estimate(start, *p_frequencies, null_stream, 1000000.0, 1.0);
-  return make_shared<LogitQREMixedStrategyProfile>(result);
+  return make_shared<LogitQREMixedBehaviorProfile>(
+      alg.SolveAtLambda(start, null_stream, p_lambda, 1.0));
 }
 
-std::shared_ptr<LogitQREMixedStrategyProfile> logit_atlambda(const Game &p_game, double p_lambda,
-                                                             double p_firstStep, double p_maxAccel)
+std::shared_ptr<LogitQREMixedStrategyProfile>
+LogitStrategyEstimateHelper(std::shared_ptr<MixedStrategyProfile<double>> p_frequencies,
+                            double p_firstStep, double p_maxAccel)
+{
+  return make_shared<LogitQREMixedStrategyProfile>(
+      LogitStrategyEstimate(*p_frequencies, p_firstStep, p_maxAccel));
+}
+
+std::shared_ptr<LogitQREMixedStrategyProfile> LogitStrategyAtLambdaHelper(const Game &p_game,
+                                                                          double p_lambda,
+                                                                          double p_firstStep,
+                                                                          double p_maxAccel)
 {
   LogitQREMixedStrategyProfile start(p_game);
   StrategicQREPathTracer alg;

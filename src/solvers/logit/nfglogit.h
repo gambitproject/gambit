@@ -103,6 +103,18 @@ protected:
   class CallbackFunction;
 };
 
+inline LogitQREMixedStrategyProfile
+LogitStrategyEstimate(const MixedStrategyProfile<double> &p_frequencies, double p_firstStep,
+                      double p_maxAccel)
+{
+  LogitQREMixedStrategyProfile start(p_frequencies.GetGame());
+  StrategicQREEstimator alg;
+  alg.SetMaxDecel(p_maxAccel);
+  alg.SetStepsize(p_firstStep);
+  std::ostringstream ostream;
+  return alg.Estimate(start, p_frequencies, ostream, 1000000.0, 1.0);
+}
+
 inline List<MixedStrategyProfile<double>> LogitStrategySolve(const Game &p_game, double p_regret,
                                                              double p_firstStep, double p_maxAccel)
 {

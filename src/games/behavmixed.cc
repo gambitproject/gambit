@@ -136,12 +136,21 @@ template <class T>
 MixedBehaviorProfile<T> &
 MixedBehaviorProfile<T>::operator=(const MixedBehaviorProfile<T> &p_profile)
 {
-  if (this != &p_profile && m_support == p_profile.m_support) {
-    InvalidateCache();
-    m_probs = p_profile.m_probs;
-    m_support = p_profile.m_support;
-    m_gameversion = p_profile.m_gameversion;
+  if (this == &p_profile) {
+    return *this;
   }
+  if (m_support != p_profile.m_support) {
+    throw MismatchException();
+  }
+  InvalidateCache();
+  m_probs = p_profile.m_probs;
+  m_gameversion = p_profile.m_gameversion;
+  map_realizProbs = p_profile.map_realizProbs;
+  map_beliefs = p_profile.map_beliefs;
+  map_nodeValues = p_profile.map_nodeValues;
+  map_infosetValues = p_profile.map_infosetValues;
+  map_actionValues = p_profile.map_actionValues;
+  map_regret = p_profile.map_regret;
   return *this;
 }
 

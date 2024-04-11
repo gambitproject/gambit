@@ -28,7 +28,9 @@ import math
 import numpy
 import scipy.optimize
 
-from . import gambit, pctrace
+import pygambit.gambit as libgbt
+
+from . import pctrace
 from .profiles import Solution
 
 
@@ -299,8 +301,8 @@ class LogitQREMixedStrategyFitResult:
 
     See Also
     --------
-    fit_fixedpoint
-    fit_empirical
+    fit_strategy_fixedpoint
+    fit_strategy_empirical
     """
     def __init__(self, data, method, lam, profile, log_like):
         self._data = data
@@ -315,7 +317,7 @@ class LogitQREMixedStrategyFitResult:
         return self._method
 
     @property
-    def data(self) -> gambit.MixedStrategyProfileDouble:
+    def data(self) -> libgbt.MixedStrategyProfileDouble:
         """The empirical strategy frequencies used to estimate the QRE."""
         return self._data
 
@@ -325,7 +327,7 @@ class LogitQREMixedStrategyFitResult:
         return self._lam
 
     @property
-    def profile(self) -> gambit.MixedStrategyProfileDouble:
+    def profile(self) -> libgbt.MixedStrategyProfileDouble:
         """The mixed strategy profile corresponding to the QRE."""
         return self._profile
 
@@ -334,21 +336,23 @@ class LogitQREMixedStrategyFitResult:
         """The log-likelihood of the data at the estimated QRE."""
         return self._log_like
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"<LogitQREMixedStrategyFitResult(method={self.method},"
             f"lam={self.lam},profile={self.profile})>"
         )
 
 
-def fit_fixedpoint(
-        data: gambit.MixedStrategyProfileDouble
+def fit_strategy_fixedpoint(
+        data: libgbt.MixedStrategyProfileDouble
 ) -> LogitQREMixedStrategyFitResult:
     """Use maximum likelihood estimation to find the logit quantal
     response equilibrium on the principal branch for a strategic game
     which best fits empirical frequencies of play. [1]_
 
-    .. versionadded:: 16.1.0
+    .. versionchanged:: 16.2.0
+
+       Renamed from `fit_fixedpoint` to disambiguate from agent version
 
     Parameters
     ----------
@@ -366,8 +370,8 @@ def fit_fixedpoint(
 
     See Also
     --------
-    fit_empirical : Estimate QRE by approximation of the correspondence
-                    using independent decision problems.
+    fit_strategy_empirical : Estimate QRE by approximation of the correspondence
+                             using independent decision problems.
 
     References
     ----------
@@ -375,14 +379,14 @@ def fit_fixedpoint(
         as a structural model for estimation: The missing manual.
         SSRN working paper 4425515.
     """
-    res = gambit.logit_estimate(data)
+    res = libgbt._logit_strategy_estimate(data)
     return LogitQREMixedStrategyFitResult(
         data, "fixedpoint", res.lam, res.profile, res.log_like
     )
 
 
-def fit_empirical(
-        data: gambit.MixedStrategyProfileDouble
+def fit_strategy_empirical(
+        data: libgbt.MixedStrategyProfileDouble
 ) -> LogitQREMixedStrategyFitResult:
     """Use maximum likelihood estimation to estimate a quantal
     response equilibrium using the empirical payoff method.
@@ -390,7 +394,9 @@ def fit_empirical(
     considerations of the QRE and approximates instead by a collection
     of independent decision problems. [1]_
 
-    .. versionadded:: 16.1.0
+    .. versionchanged:: 16.2.0
+
+       Renamed from `fit_empirical` to disambiguate from agent version
 
     Returns
     -------
@@ -400,7 +406,7 @@ def fit_empirical(
 
     See Also
     --------
-    fit_fixedpoint : Estimate QRE precisely by computing the correspondence
+    fit_strategy_fixedpoint : Estimate QRE precisely by computing the correspondence
 
     References
     ----------
@@ -427,5 +433,143 @@ def fit_empirical(
     res = scipy.optimize.minimize(lambda x: -log_like(x[0]), (0.1,),
                                   bounds=((0.0, None),))
     return LogitQREMixedStrategyFitResult(
+        data, "empirical", res.x[0], do_logit(res.x[0]), -res.fun
+    )
+
+
+class LogitQREMixedBehaviorFitResult:
+    """The result of fitting a QRE to a given probability distribution
+    over actions.
+
+    See Also
+    --------
+    fit_behavior_fixedpoint
+    """
+    def __init__(self, data, method, lam, profile, log_like):
+        self._data = data
+        self._method = method
+        self._lam = lam
+        self._profile = profile
+        self._log_like = log_like
+
+    @property
+    def method(self) -> str:
+        """The method used to estimate the QRE; either "fixedpoint" or "empirical"."""
+        return self._method
+
+    @property
+    def data(self) -> libgbt.MixedBehaviorProfileDouble:
+        """The empirical actions frequencies used to estimate the QRE."""
+        return self._data
+
+    @property
+    def lam(self) -> float:
+        """The value of lambda corresponding to the QRE."""
+        return self._lam
+
+    @property
+    def profile(self) -> libgbt.MixedBehaviorProfileDouble:
+        """The mixed behavior profile corresponding to the QRE."""
+        return self._profile
+
+    @property
+    def log_like(self) -> float:
+        """The log-likelihood of the data at the estimated QRE."""
+        return self._log_like
+
+    def __repr__(self) -> str:
+        return (
+            f"<LogitQREMixedBehaviorFitResult(method={self.method},"
+            f"lam={self.lam},profile={self.profile})>"
+        )
+
+
+def fit_behavior_fixedpoint(
+        data: libgbt.MixedBehaviorProfileDouble
+) -> LogitQREMixedBehaviorFitResult:
+    """Use maximum likelihood estimation to find the logit quantal
+    response equilibrium on the principal branch for an extensive game
+    which best fits empirical frequencies of play. [1]_
+
+    .. versionadded:: 16.2.0
+
+    Parameters
+    ----------
+    data : MixedBehaviorProfileDouble
+        The empirical distribution of play to which to fit the QRE.
+        To obtain the correct resulting log-likelihood, these should
+        be expressed as total counts of observations of each action
+        rather than probabilities.
+
+    Returns
+    -------
+    LogitQREMixedBehaviorFitResult
+        The result of the estimation represented as a
+        ``LogitQREMixedBehaviorFitResult`` object.
+
+    See Also
+    --------
+    fit_strategy_fixedpoint : Estimate QRE using the strategic representation
+    fit_behavior_empirical : Estimate QRE by approximation of the correspondence
+                             using independent decision problems.
+
+    References
+    ----------
+    .. [1] Bland, J. R. and Turocy, T. L., 2023.  Quantal response equilibrium
+        as a structural model for estimation: The missing manual.
+        SSRN working paper 4425515.
+    """
+    res = libgbt._logit_behavior_estimate(data)
+    return LogitQREMixedBehaviorFitResult(
+        data, "fixedpoint", res.lam, res.profile, res.log_like
+    )
+
+
+def fit_behavior_empirical(
+        data: libgbt.MixedBehaviorProfileDouble
+) -> LogitQREMixedBehaviorFitResult:
+    """Use maximum likelihood estimation to estimate a quantal
+    response equilibrium using the empirical payoff method.
+    The empirical payoff method operates by ignoring the fixed-point
+    considerations of the QRE and approximates instead by a collection
+    of independent decision problems. [1]_
+
+    Returns
+    -------
+    LogitQREMixedBehaviorFitResult
+        The result of the estimation represented as a
+        ``LogitQREMixedBehaviorFitResult`` object.
+
+    See Also
+    --------
+    fit_behavior_fixedpoint : Estimate QRE precisely by computing the correspondence
+
+    References
+    ----------
+    .. [1] Bland, J. R. and Turocy, T. L., 2023.  Quantal response equilibrium
+        as a structural model for estimation: The missing manual.
+        SSRN working paper 4425515.
+    """
+    def do_logit(lam: float):
+        logit_probs = [[math.exp(lam*a) for a in infoset]
+                       for player in values for infoset in player]
+        sums = [sum(v) for v in logit_probs]
+        logit_probs = [[v/s for v in vv]
+                       for (vv, s) in zip(logit_probs, sums)]
+        logit_probs = [v for infoset in logit_probs for v in infoset]
+        return [max(v, 1.0e-293) for v in logit_probs]
+
+    def log_like(lam: float) -> float:
+        logit_probs = do_logit(lam)
+        return sum([f*math.log(p) for (f, p) in zip(list(flattened_data), logit_probs)])
+
+    flattened_data = [data[a] for p in data.game.players for s in p.infosets for a in s.actions]
+    normalized = data.normalize()
+    values = [[[normalized.action_value(a) for a in s.actions]
+               for s in p.infosets]
+              for p in data.game.players]
+    res = scipy.optimize.minimize(lambda x: -log_like(x[0]), (0.1,),
+                                  bounds=((0.0, None),))
+    return LogitQREMixedBehaviorFitResult(
         data, "empirical", res.x[0], do_logit(res.x[0]), -res.fun
     )

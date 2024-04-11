@@ -704,11 +704,11 @@ analysed in [McKPal95]_ using QRE.
    )
    data = g.mixed_strategy_profile([[128*0.527, 128*(1-0.527)], [128*0.366, 128*(1-0.366)]])
 
-Estimation of QRE is done using :py:func:`.fit_fixedpoint`.
+Estimation of QRE in the strategic form is done using :py:func:`.fit_strategy_fixedpoint`.
 
 .. ipython:: python
 
-   fit = gbt.qre.fit_fixedpoint(data)
+   fit = gbt.qre.fit_strategy_fixedpoint(data)
 
 The returned :py:class:`.LogitQREMixedStrategyFitResult` object contains the results of the
 estimation.

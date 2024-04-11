@@ -31,12 +31,14 @@ namespace Gambit {
 class LogitQREMixedBehaviorProfile {
 public:
   explicit LogitQREMixedBehaviorProfile(const Game &p_game) : m_profile(p_game), m_lambda(0.0) {}
-  LogitQREMixedBehaviorProfile(const MixedBehaviorProfile<double> &p_profile, double p_lambda)
-    : m_profile(p_profile), m_lambda(p_lambda)
+  LogitQREMixedBehaviorProfile(const MixedBehaviorProfile<double> &p_profile, double p_lambda,
+                               double p_logLike)
+    : m_profile(p_profile), m_lambda(p_lambda), m_logLike(p_logLike)
   {
   }
   double GetLambda() const { return m_lambda; }
   const MixedBehaviorProfile<double> &GetProfile() const { return m_profile; }
+  double GetLogLike() const { return m_logLike; }
 
   Game GetGame() const { return m_profile.GetGame(); }
   size_t BehaviorProfileLength() const { return m_profile.BehaviorProfileLength(); }
@@ -45,6 +47,7 @@ public:
 private:
   const MixedBehaviorProfile<double> m_profile;
   double m_lambda;
+  double m_logLike;
 };
 
 class AgentQREPathTracer : public PathTracer {
@@ -65,7 +68,7 @@ public:
   void SetDecimals(int p_decimals) { m_decimals = p_decimals; }
   int GetDecimals() const { return m_decimals; }
 
-private:
+protected:
   bool m_fullGraph;
   int m_decimals;
 
@@ -73,6 +76,33 @@ private:
   class CallbackFunction;
   class LambdaCriterion;
 };
+
+class AgentQREEstimator : public AgentQREPathTracer {
+public:
+  AgentQREEstimator() = default;
+  ~AgentQREEstimator() override = default;
+
+  LogitQREMixedBehaviorProfile Estimate(const LogitQREMixedBehaviorProfile &p_start,
+                                        const MixedBehaviorProfile<double> &p_frequencies,
+                                        std::ostream &p_logStream, double p_maxLambda,
+                                        double p_omega);
+
+protected:
+  class CriterionFunction;
+  class CallbackFunction;
+};
+
+inline LogitQREMixedBehaviorProfile
+LogitBehaviorEstimate(const MixedBehaviorProfile<double> &p_frequencies, double p_firstStep,
+                      double p_maxAccel)
+{
+  LogitQREMixedBehaviorProfile start(p_frequencies.GetGame());
+  AgentQREEstimator alg;
+  alg.SetMaxDecel(p_maxAccel);
+  alg.SetStepsize(p_firstStep);
+  std::ostringstream ostream;
+  return alg.Estimate(start, p_frequencies, ostream, 2.0, 1.0);
+}
 
 inline List<MixedBehaviorProfile<double>> LogitBehaviorSolve(const Game &p_game, double p_epsilon,
                                                              double p_firstStep, double p_maxAccel)

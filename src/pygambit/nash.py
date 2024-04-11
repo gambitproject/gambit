@@ -587,5 +587,6 @@ def logit_solve(
     )
 
 
-logit_atlambda = libgbt.logit_atlambda
+logit_behavior_atlambda = libgbt.logit_behavior_atlambda
+logit_strategy_atlambda = libgbt.logit_strategy_atlambda
 logit_principal_branch = libgbt.logit_principal_branch

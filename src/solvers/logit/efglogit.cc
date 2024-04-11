@@ -287,7 +287,7 @@ void AgentQREPathTracer::CallbackFunction::operator()(const Vector<double> &p_po
   for (int i = 1; i < p_point.Length(); i++) {
     profile[i] = exp(p_point[i]);
   }
-  m_profiles.push_back(LogitQREMixedBehaviorProfile(profile, p_point.back()));
+  m_profiles.push_back(LogitQREMixedBehaviorProfile(profile, p_point.back(), 0.0));
 }
 
 //------------------------------------------------------------------------------
@@ -300,7 +300,7 @@ public:
 
   double operator()(const Vector<double> &p_point, const Vector<double> &p_tangent) const override
   {
-    return p_point[p_point.Length()] - m_lambda;
+    return p_point.back() - m_lambda;
   }
 
 private:
@@ -370,6 +370,162 @@ AgentQREPathTracer::SolveAtLambda(const LogitQREMixedBehaviorProfile &p_start,
   TracePath(EquationSystem(p_start.GetGame()), x, p_omega, LambdaPositiveTerminationFunction, func,
             LambdaCriterion(p_targetLambda));
   return func.GetProfiles().back();
+}
+
+//----------------------------------------------------------------------------
+//                 AgentQREEstimator: Criterion function
+//----------------------------------------------------------------------------
+
+namespace {
+double LogLike(const Vector<double> &p_frequencies, const Vector<double> &p_point)
+{
+  double logL = 0.0;
+  for (int i = 1; i <= p_frequencies.Length(); i++) {
+    logL += p_frequencies[i] * log(p_point[i]);
+  }
+  return logL;
+}
+
+} // end anonymous namespace
+
+class AgentQREEstimator::CriterionFunction : public PathTracer::CriterionFunction {
+public:
+  explicit CriterionFunction(const Vector<double> &p_frequencies) : m_frequencies(p_frequencies) {}
+  ~CriterionFunction() override = default;
+
+  double operator()(const Vector<double> &p_point, const Vector<double> &p_tangent) const override
+  {
+    double diff_logL = 0.0;
+    for (int i = 1; i <= m_frequencies.Length(); i++) {
+      diff_logL += m_frequencies[i] * p_tangent[i];
+    }
+    return diff_logL;
+  }
+
+private:
+  Vector<double> m_frequencies;
+};
+
+//----------------------------------------------------------------------------
+//                AgentQREEstimator: Callback function
+//----------------------------------------------------------------------------
+
+class AgentQREEstimator::CallbackFunction : public PathTracer::CallbackFunction {
+public:
+  CallbackFunction(std::ostream &p_stream, const Game &p_game, const Vector<double> &p_frequencies,
+                   bool p_fullGraph, int p_decimals);
+  ~CallbackFunction() override = default;
+
+  void operator()(const Vector<double> &p_point, bool p_isTerminal) const override;
+
+  LogitQREMixedBehaviorProfile GetMaximizer() const
+  {
+    return {m_bestProfile, m_bestLambda, m_maxlogL};
+  }
+  void PrintMaximizer() const;
+
+private:
+  void PrintProfile(const MixedBehaviorProfile<double> &, double) const;
+
+  std::ostream &m_stream;
+  Game m_game;
+  const Vector<double> &m_frequencies;
+  bool m_fullGraph;
+  int m_decimals;
+  mutable MixedBehaviorProfile<double> m_bestProfile;
+  mutable double m_bestLambda{0.0};
+  mutable double m_maxlogL;
+};
+
+AgentQREEstimator::CallbackFunction::CallbackFunction(std::ostream &p_stream, const Game &p_game,
+                                                      const Vector<double> &p_frequencies,
+                                                      bool p_fullGraph, int p_decimals)
+  : m_stream(p_stream), m_game(p_game), m_frequencies(p_frequencies), m_fullGraph(p_fullGraph),
+    m_decimals(p_decimals), m_bestProfile(p_game),
+    m_maxlogL(LogLike(p_frequencies, static_cast<const Vector<double> &>(m_bestProfile)))
+{
+}
+
+void AgentQREEstimator::CallbackFunction::PrintProfile(
+    const MixedBehaviorProfile<double> &p_profile, double p_logL) const
+{
+  for (size_t i = 1; i <= p_profile.BehaviorProfileLength(); i++) {
+    m_stream << "," << std::setprecision(m_decimals) << p_profile[i];
+  }
+  m_stream.setf(std::ios::fixed);
+  m_stream << "," << std::setprecision(m_decimals);
+  m_stream << p_logL;
+  m_stream.unsetf(std::ios::fixed);
+}
+
+void AgentQREEstimator::CallbackFunction::PrintMaximizer() const
+{
+  m_stream.setf(std::ios::fixed);
+  // By convention, we output lambda first
+  m_stream << std::setprecision(m_decimals) << m_bestLambda;
+  m_stream.unsetf(std::ios::fixed);
+  PrintProfile(m_bestProfile, m_maxlogL);
+  m_stream << std::endl;
+}
+
+void AgentQREEstimator::CallbackFunction::operator()(const Vector<double> &x,
+                                                     bool p_isTerminal) const
+{
+  m_stream.setf(std::ios::fixed);
+  // By convention, we output lambda first
+  if (!p_isTerminal) {
+    m_stream << std::setprecision(m_decimals) << x[x.Length()];
+  }
+  else {
+    m_stream << "NE";
+  }
+  m_stream.unsetf(std::ios::fixed);
+  MixedBehaviorProfile<double> profile(m_game);
+  for (int i = 1; i < x.Length(); i++) {
+    profile[i] = exp(x[i]);
+  }
+  double logL = LogLike(m_frequencies, static_cast<const Vector<double> &>(profile));
+  PrintProfile(profile, logL);
+  m_stream << std::endl;
+  if (logL > m_maxlogL) {
+    m_maxlogL = logL;
+    m_bestLambda = x[x.Length()];
+    m_bestProfile = profile;
+  }
+}
+
+//----------------------------------------------------------------------------
+//               AgentQREEstimator: Main driver routine
+//----------------------------------------------------------------------------
+
+LogitQREMixedBehaviorProfile
+AgentQREEstimator::Estimate(const LogitQREMixedBehaviorProfile &p_start,
+                            const MixedBehaviorProfile<double> &p_frequencies,
+                            std::ostream &p_stream, double p_maxLambda, double p_omega)
+{
+  if (p_start.GetGame() != p_frequencies.GetGame()) {
+    throw MismatchException();
+  }
+
+  Vector<double> x(p_start.BehaviorProfileLength() + 1);
+  for (int i = 1; i <= p_start.BehaviorProfileLength(); i++) {
+    x[i] = log(p_start[i]);
+  }
+  x.back() = p_start.GetLambda();
+
+  CallbackFunction callback(p_stream, p_start.GetGame(),
+                            static_cast<const Vector<double> &>(p_frequencies), m_fullGraph,
+                            m_decimals);
+  while (x.back() < p_maxLambda) {
+    TracePath(
+        EquationSystem(p_start.GetGame()), x, p_omega,
+        [p_maxLambda](const Vector<double> &p_point) {
+          return LambdaRangeTerminationFunction(p_point, 0, p_maxLambda);
+        },
+        callback, CriterionFunction(static_cast<const Vector<double> &>(p_frequencies)));
+  }
+  callback.PrintMaximizer();
+  return callback.GetMaximizer();
 }
 
 } // end namespace Gambit
