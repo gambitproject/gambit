@@ -36,19 +36,32 @@ protected:
   Array<int> dvlen, dvidx;
 
 public:
-  explicit DVector(const PVector<int> &sig);
+  explicit DVector(const PVector<int> &shape);
   DVector(const DVector<T> &v);
   ~DVector() override;
 
   T &operator()(int a, int b, int c);
   const T &operator()(int a, int b, int c) const;
 
-  DVector<T> &operator=(T c);
+  DVector<T> &operator=(const DVector<T> &v)
+  {
+    if (this == &v) {
+      return *this;
+    }
+    if (dvlen != v.dvlen || dvidx != v.dvidx) {
+      throw DimensionException();
+    }
+    static_cast<Vector<T> &>(*this) = static_cast<const Vector<T> &>(v);
+    return *this;
+  }
+
   DVector<T> &operator=(const Vector<T> &v)
   {
     static_cast<Vector<T> &>(*this) = v;
     return *this;
   }
+
+  DVector<T> &operator=(const T &c);
 };
 
 } // end namespace Gambit

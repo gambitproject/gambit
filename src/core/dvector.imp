@@ -44,14 +44,15 @@ template <class T> void DVector<T>::setindex()
 //--------------------------------------------------------------------------
 
 template <class T>
-DVector<T>::DVector(const PVector<int> &sig)
-  : PVector<T>((Array<int>)sig), dvlen(sig.Lengths().Length()), dvidx(sig.Lengths().Length())
+DVector<T>::DVector(const PVector<int> &shape)
+  : PVector<T>(static_cast<const Array<int> &>(shape)),
+    dvlen(shape.Lengths().Length()), dvidx(shape.Lengths().Length())
 {
   dvptr = new T **[dvlen.Length()];
   dvptr -= 1;
 
   for (int i = 1; i <= dvlen.Length(); i++) {
-    dvlen[i] = sig.Lengths()[i];
+    dvlen[i] = shape.Lengths()[i];
   }
 
   setindex();
@@ -73,7 +74,7 @@ template <class T> DVector<T>::~DVector()
   }
 }
 
-template <class T> DVector<T> &DVector<T>::operator=(T c)
+template <class T> DVector<T> &DVector<T>::operator=(const T &c)
 {
   PVector<T>::operator=(c);
   return *this;
