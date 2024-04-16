@@ -45,8 +45,8 @@ template <class T> void DVector<T>::setindex()
 
 template <class T>
 DVector<T>::DVector(const PVector<int> &shape)
-  : PVector<T>(static_cast<const Array<int> &>(shape)),
-    dvlen(shape.Lengths().Length()), dvidx(shape.Lengths().Length())
+  : PVector<T>(static_cast<const Array<int> &>(shape)), dvlen(shape.Lengths().Length()),
+    dvidx(shape.Lengths().Length())
 {
   dvptr = new T **[dvlen.Length()];
   dvptr -= 1;
