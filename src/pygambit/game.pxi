@@ -336,6 +336,39 @@ class Game:
         g.title = title
         return g
 
+    def to_arrays(self) -> typing.List[np.array]:
+        """Reverse function to from_arrays:
+
+        To_arrays, for a given game, generates players’ payoff tables represented as numpy arrays.
+        The number of produced arrays is equal to the number of players.
+
+        Returns
+        -------
+        list of np.arrays
+
+        Raises
+        ------
+        UndefinedOperationError
+            If the game does not have a tree representation.
+        """
+        arrays = []
+
+        if self.is_tree:
+            raise UndefinedOperationError(
+                "Operation only defined for games with a strategic representation"
+                )
+
+        if len(self.players) == 0:
+            raise RuntimeError("There are no players in the game")
+
+        shape = tuple(len(player.strategies) for player in self.players)
+        for player in self.players:
+            array = np.zeros(shape=shape)
+            for profile in itertools.product(*(range(s) for s in shape)):
+                array[profile] = self[profile][player]
+            arrays.append(array)
+        return arrays
+
     @classmethod
     def from_dict(cls, payoffs, title: str = "Untitled strategic game") -> Game:
         """Create a new ``Game`` with a strategic representation.

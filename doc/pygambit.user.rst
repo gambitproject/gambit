@@ -183,6 +183,9 @@ the top level index is the choice of the first player, the second level index of
 and so on.  Therefore, to create a two-player symmetric game, as in this example, the payoff matrix
 for the second player is transposed before passing to :py:meth:`.Game.from_arrays`.
 
+There is a reverse function :py:meth:`.Game.to_arrays` that produces
+the players' payoff tables given a strategic game.  The output is the list of numpy arrays,
+where the number of produced arrays is equal to the number of players.
 
 .. _pygambit.user.numbers:
 
