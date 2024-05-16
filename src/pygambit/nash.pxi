@@ -185,13 +185,13 @@ def _gnm_strategy_solve(
 def _logit_strategy_solve(
         game: Game, maxregret: float, first_step: float, max_accel: float,
 ) -> typing.List[MixedStrategyProfileDouble]:
-    return _convert_mspd(LogitStrategySolve(game.game, maxregret, first_step, max_accel))
+    return _convert_mspd(LogitStrategySolveWrapper(game.game, maxregret, first_step, max_accel))
 
 
 def _logit_behavior_solve(
         game: Game, maxregret: float, first_step: float, max_accel: float,
 ) -> typing.List[MixedBehaviorProfileDouble]:
-    return _convert_mbpd(LogitBehaviorSolve(game.game, maxregret, first_step, max_accel))
+    return _convert_mbpd(LogitBehaviorSolveWrapper(game.game, maxregret, first_step, max_accel))
 
 
 @cython.cclass
@@ -208,7 +208,7 @@ class LogitQREMixedStrategyProfile:
         return "LogitQREMixedStrategyProfile(lam=%f,profile=%s)" % (self.lam, self.profile)
 
     def __len__(self):
-        return deref(self.thisptr).MixedProfileLength()
+        return deref(self.thisptr).size()
 
     def __getitem__(self, int i):
         return deref(self.thisptr).getitem(i+1)
@@ -241,13 +241,14 @@ class LogitQREMixedStrategyProfile:
 
 
 def _logit_strategy_estimate(profile: MixedStrategyProfileDouble,
+                             local_max: bool = False,
                              first_step: float = .03,
                              max_accel: float = 1.1) -> LogitQREMixedStrategyProfile:
     """Estimate QRE corresponding to mixed strategy profile using
     maximum likelihood along the principal branch.
     """
     ret = LogitQREMixedStrategyProfile(profile.game)
-    ret.thisptr = LogitStrategyEstimateHelper(profile.profile, first_step, max_accel)
+    ret.thisptr = LogitStrategyEstimateWrapper(profile.profile, local_max, first_step, max_accel)
     return ret
 
 
@@ -259,12 +260,12 @@ def logit_strategy_atlambda(game: Game,
     game corresponding to lambda value `lam`.
     """
     ret = LogitQREMixedStrategyProfile()
-    ret.thisptr = LogitStrategyAtLambdaHelper(game.game, lam, first_step, max_accel)
+    ret.thisptr = LogitStrategyAtLambdaWrapper(game.game, lam, first_step, max_accel)
     return ret
 
 
 def logit_principal_branch(game: Game, first_step: float = .03, max_accel: float = 1.1):
-    solns = _logit_principal_branch(game.game, 1.0e-8, first_step, max_accel)
+    solns = LogitStrategyPrincipalBranchWrapper(game.game, 1.0e-8, first_step, max_accel)
     ret = []
     for i in range(solns.Length()):
         p = LogitQREMixedStrategyProfile()
@@ -287,7 +288,7 @@ class LogitQREMixedBehaviorProfile:
         return f"LogitQREMixedBehaviorProfile(lam={self.lam},profile={self.profile})"
 
     def __len__(self):
-        return deref(self.thisptr).BehaviorProfileLength()
+        return deref(self.thisptr).size()
 
     def __getitem__(self, int i):
         return deref(self.thisptr).getitem(i+1)
@@ -320,13 +321,14 @@ class LogitQREMixedBehaviorProfile:
 
 
 def _logit_behavior_estimate(profile: MixedBehaviorProfileDouble,
+                             local_max: bool = False,
                              first_step: float = .03,
                              max_accel: float = 1.1) -> LogitQREMixedBehaviorProfile:
     """Estimate QRE corresponding to mixed behavior profile using
     maximum likelihood along the principal branch.
     """
     ret = LogitQREMixedBehaviorProfile(profile.game)
-    ret.thisptr = LogitBehaviorEstimateHelper(profile.profile, first_step, max_accel)
+    ret.thisptr = LogitBehaviorEstimateWrapper(profile.profile, local_max, first_step, max_accel)
     return ret
 
 
@@ -338,5 +340,5 @@ def logit_behavior_atlambda(game: Game,
     game corresponding to lambda value `lam`.
     """
     ret = LogitQREMixedBehaviorProfile()
-    ret.thisptr = LogitBehaviorAtLambdaHelper(game.game, lam, first_step, max_accel)
+    ret.thisptr = LogitBehaviorAtLambdaWrapper(game.game, lam, first_step, max_accel)
     return ret

@@ -41,6 +41,18 @@ inline bool LambdaRangeTerminationFunction(const Vector<double> &p_point, double
   return (p_point.back() < p_minLambda || p_point.back() > p_maxLambda);
 }
 
+using CriterionFunctionType =
+    std::function<double(const Vector<double> &, const Vector<double> &)>;
+
+inline double NullCriterionFunction(const Vector<double> &, const Vector<double> &)
+{
+  return -1.0;
+}
+
+using CallbackFunctionType = std::function<void(const Vector<double> &)>;
+
+inline void NullCallbackFunction(const Vector<double> &) {}
+
 //
 // This class implements a generic path-following algorithm for smooth curves.
 // It is based on the ideas and codes presented in Allgower and Georg's
@@ -48,57 +60,8 @@ inline bool LambdaRangeTerminationFunction(const Vector<double> &p_point, double
 //
 class PathTracer {
 public:
-  //
-  // Encapsulates the system of equations to be traversed.
-  //
-  class EquationSystem {
-  public:
-    virtual ~EquationSystem() = default;
-    // Compute the value of the system of equations at the specified point.
-    virtual void GetValue(const Vector<double> &p_point, Vector<double> &p_lhs) const = 0;
-    // Compute the Jacobian matrix at the specified point.
-    virtual void GetJacobian(const Vector<double> &p_point, Matrix<double> &p_matrix) const = 0;
-  };
-
-  //
-  // Encapsulates a function to find a zero of when tracing a path.
-  //
-  class CriterionFunction {
-  public:
-    virtual ~CriterionFunction() = default;
-    virtual double operator()(const Vector<double> &p_point,
-                              const Vector<double> &p_tangent) const = 0;
-  };
-
-  //
-  // A criterion function to pass when not finding a zero of a function.
-  //
-  class NullCriterionFunction : public CriterionFunction {
-  public:
-    ~NullCriterionFunction() override = default;
-    double operator()(const Vector<double> &, const Vector<double> &) const override
-    {
-      return -1.0;
-    }
-  };
-
-  //
-  // A function to call on each accepted step of the tracing process.
-  //
-  class CallbackFunction {
-  public:
-    virtual ~CallbackFunction() = default;
-    virtual void operator()(const Vector<double> &p_point, bool p_isTerminal) const = 0;
-  };
-
-  //
-  // A callback function to pass when no action required on each step.
-  //
-  class NullCallbackFunction : public CallbackFunction {
-  public:
-    ~NullCallbackFunction() override = default;
-    void operator()(const Vector<double> &p_point, bool p_isTerminal) const override {}
-  };
+  PathTracer() : m_maxDecel(1.1), m_hStart(0.03) {}
+  virtual ~PathTracer() = default;
 
   void SetMaxDecel(double p_maxDecel) { m_maxDecel = p_maxDecel; }
   double GetMaxDecel() const { return m_maxDecel; }
@@ -106,14 +69,11 @@ public:
   void SetStepsize(double p_hStart) { m_hStart = p_hStart; }
   double GetStepsize() const { return m_hStart; }
 
-protected:
-  PathTracer() : m_maxDecel(1.1), m_hStart(0.03) {}
-  virtual ~PathTracer() = default;
-
-  void TracePath(const EquationSystem &p_system, Vector<double> &p_x, double &p_omega,
-                 TerminationFunctionType p_terminate,
-                 const CallbackFunction &p_callback = NullCallbackFunction(),
-                 const CriterionFunction &p_criterion = NullCriterionFunction()) const;
+  void TracePath(std::function<void(const Vector<double> &, Vector<double> &)> p_function,
+                 std::function<void(const Vector<double> &, Matrix<double> &)> p_jacobian,
+                 Vector<double> &p_x, double &p_omega, TerminationFunctionType p_terminate,
+                 CallbackFunctionType p_callback = NullCallbackFunction,
+                 CriterionFunctionType p_criterion = NullCriterionFunction) const;
 
 private:
   double m_maxDecel, m_hStart;

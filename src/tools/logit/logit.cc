@@ -26,8 +26,7 @@
 #include <cstdlib>
 #include <getopt.h>
 #include "gambit.h"
-#include "solvers/logit/efglogit.h"
-#include "solvers/logit/nfglogit.h"
+#include "solvers/logit/logit.h"
 
 using namespace Gambit;
 
@@ -82,6 +81,28 @@ bool ReadProfile(std::istream &p_stream, MixedStrategyProfile<double> &p_profile
   std::string foo;
   std::getline(p_stream, foo);
   return true;
+}
+
+template <class T>
+void PrintProfile(std::ostream &p_stream, int p_decimals, const T &p_profile, bool p_nash = false)
+{
+  if (p_nash) {
+    p_stream << "NE";
+  }
+  else {
+    p_stream.setf(std::ios::fixed);
+    p_stream << std::setprecision(p_decimals) << p_profile.GetLambda();
+    p_stream.unsetf(std::ios::fixed);
+  }
+  for (size_t i = 1; i <= p_profile.size(); i++) {
+    p_stream << "," << std::setprecision(p_decimals) << p_profile[i];
+  }
+  if (p_profile.GetLogLike() <= 0.0) {
+    p_stream.setf(std::ios::fixed);
+    p_stream << "," << std::setprecision(p_decimals) << p_profile.GetLogLike();
+    p_stream.unsetf(std::ios::fixed);
+  }
+  p_stream << std::endl;
 }
 
 int main(int argc, char *argv[])
@@ -180,42 +201,49 @@ int main(int argc, char *argv[])
       std::ifstream mleData(mleFile.c_str());
       ReadProfile(mleData, frequencies);
 
-      LogitQREMixedStrategyProfile start(game);
-      StrategicQREEstimator tracer;
-      tracer.SetMaxDecel(maxDecel);
-      tracer.SetStepsize(hStart);
-      tracer.SetFullGraph(fullGraph);
-      tracer.SetDecimals(decimals);
-      tracer.Estimate(start, frequencies, std::cout, maxLambda, 1.0);
+      auto printer = [fullGraph, decimals](const LogitQREMixedStrategyProfile &p) {
+        if (fullGraph) {
+          PrintProfile(std::cout, decimals, p);
+        }
+      };
+      auto result =
+          LogitStrategyEstimate(frequencies, maxLambda, 1.0, false, hStart, maxDecel, printer);
+      PrintProfile(std::cout, decimals, result);
       return 0;
     }
 
     if (!game->IsTree() || useStrategic) {
+      auto printer = [fullGraph, decimals](const LogitQREMixedStrategyProfile &p) {
+        if (fullGraph) {
+          PrintProfile(std::cout, decimals, p);
+        }
+      };
       LogitQREMixedStrategyProfile start(game);
-      StrategicQREPathTracer tracer;
-      tracer.SetMaxDecel(maxDecel);
-      tracer.SetStepsize(hStart);
-      tracer.SetFullGraph(fullGraph);
-      tracer.SetDecimals(decimals);
       if (targetLambda > 0.0) {
-        tracer.SolveAtLambda(start, std::cout, targetLambda, 1.0);
+        auto result =
+            LogitStrategySolveLambda(start, targetLambda, 1.0, hStart, maxDecel, printer);
+        PrintProfile(std::cout, decimals, result);
       }
       else {
-        tracer.TraceStrategicPath(start, std::cout, maxregret, 1.0);
+        auto result = LogitStrategySolve(start, maxregret, 1.0, hStart, maxDecel, printer);
+        PrintProfile(std::cout, decimals, result.back(), true);
       }
     }
     else {
+      auto printer = [fullGraph, decimals](const LogitQREMixedBehaviorProfile &p) {
+        if (fullGraph) {
+          PrintProfile(std::cout, decimals, p);
+        }
+      };
       LogitQREMixedBehaviorProfile start(game);
-      AgentQREPathTracer tracer;
-      tracer.SetMaxDecel(maxDecel);
-      tracer.SetStepsize(hStart);
-      tracer.SetFullGraph(fullGraph);
-      tracer.SetDecimals(decimals);
       if (targetLambda > 0.0) {
-        tracer.SolveAtLambda(start, std::cout, targetLambda, 1.0);
+        auto result =
+            LogitBehaviorSolveLambda(start, targetLambda, 1.0, hStart, maxDecel, printer);
+        PrintProfile(std::cout, decimals, result);
       }
       else {
-        tracer.TraceAgentPath(start, std::cout, maxregret, 1.0);
+        auto result = LogitBehaviorSolve(start, maxregret, 1.0, hStart, maxDecel, printer);
+        PrintProfile(std::cout, decimals, result.back(), true);
       }
     }
     return 0;

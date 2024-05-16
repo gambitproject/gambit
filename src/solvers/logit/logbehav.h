@@ -49,34 +49,22 @@ using namespace Gambit;
 /// realization probabilities are going to zero, so as to be able to
 /// get a good approximation to the limiting sequential equilibrium.
 ///
-template <class T> class LogBehavProfile : private DVector<T> {
+template <class T> class LogBehavProfile {
 protected:
-  BehaviorSupportProfile m_support;
-  DVector<T> m_logProbs;
+  Game m_game;
+  DVector<T> m_probs, m_logProbs;
 
+  // structures for storing cached data
   mutable bool m_cacheValid;
+  mutable std::map<GameNode, T> m_logRealizProbs;
+  mutable std::map<GameNode, T> m_beliefs;
+  mutable std::map<GameNode, std::map<GamePlayer, T>> m_nodeValues;
+  mutable std::map<GameAction, T> m_actionValues;
 
-  // structures for storing cached data: nodes
-  mutable Vector<T> m_realizProbs, m_logRealizProbs;
-  mutable Vector<T> m_beliefs;
-  mutable Matrix<T> m_nodeValues;
-
-  // structures for storing cached data: information sets
-  mutable PVector<T> m_infosetValues;
-
-  // structures for storing cached data: actions
-  mutable DVector<T> m_actionValues; // aka conditional payoffs
-
-  const T &ActionValue(const GameAction &act) const
-  {
-    return m_actionValues(act->GetInfoset()->GetPlayer()->GetNumber(),
-                          act->GetInfoset()->GetNumber(), act->GetNumber());
-  }
+  const T &ActionValue(const GameAction &act) const { return m_actionValues[act]; }
 
   /// @name Auxiliary functions for computation of interesting values
   //@{
-  void GetPayoff(GameTreeNodeRep *, const T &, int, T &) const;
-
   void ComputeSolutionDataPass2(const GameNode &node) const;
   void ComputeSolutionDataPass1(const GameNode &node) const;
   void ComputeSolutionData() const;
@@ -85,22 +73,10 @@ protected:
 public:
   /// @name Lifecycle
   //@{
-  explicit LogBehavProfile(const BehaviorSupportProfile &);
-  ~LogBehavProfile() override = default;
+  explicit LogBehavProfile(const Game &);
+  ~LogBehavProfile() = default;
 
   LogBehavProfile<T> &operator=(const LogBehavProfile<T> &) = delete;
-  LogBehavProfile<T> &operator=(const Vector<T> &p)
-  {
-    Invalidate();
-    Vector<T>::operator=(p);
-    return *this;
-  }
-  LogBehavProfile<T> &operator=(const T &x)
-  {
-    Invalidate();
-    DVector<T>::operator=(x);
-    return *this;
-  }
 
   //@}
 
@@ -109,19 +85,31 @@ public:
   bool operator==(const LogBehavProfile<T> &) const;
   bool operator!=(const LogBehavProfile<T> &x) const { return !(*this == x); }
 
+  void SetProb(const GameAction &p_action, const T &p_value)
+  {
+    m_probs(p_action->GetInfoset()->GetPlayer()->GetNumber(), p_action->GetInfoset()->GetNumber(),
+            p_action->GetNumber()) = p_value;
+    m_logProbs(p_action->GetInfoset()->GetPlayer()->GetNumber(),
+               p_action->GetInfoset()->GetNumber(), p_action->GetNumber()) = log(p_value);
+  }
   const T &GetProb(const GameAction &p_action) const
   {
-    return (*this)(p_action->GetInfoset()->GetPlayer()->GetNumber(),
-                   p_action->GetInfoset()->GetNumber(), m_support.GetIndex(p_action));
+    return m_probs(p_action->GetInfoset()->GetPlayer()->GetNumber(),
+                   p_action->GetInfoset()->GetNumber(), p_action->GetNumber());
   }
   const T &GetLogProb(int a, int b, int c) const { return m_logProbs(a, b, c); }
-  const T &GetProb(int a, int b, int c) const { return DVector<T>::operator()(a, b, c); }
-
+  const T &GetProb(int a, int b, int c) const { return m_probs(a, b, c); }
+  void SetProb(int a, const T &p_value)
+  {
+    Invalidate();
+    m_logProbs[a] = log(p_value);
+    m_probs[a] = p_value;
+  }
   void SetLogProb(int a, const T &p_value)
   {
     Invalidate();
     m_logProbs[a] = p_value;
-    Array<T>::operator[](a) = exp(p_value);
+    m_probs[a] = exp(p_value);
   }
   //@}
 
@@ -129,26 +117,15 @@ public:
   //@{
   /// Force recomputation of stored quantities
   void Invalidate() const { m_cacheValid = false; }
-  /// Set the profile to the centroid
-  void SetCentroid();
   //@}
 
   /// @name General data access
   //@{
-  int Length() const { return Array<T>::Length(); }
-  Game GetGame() const { return m_support.GetGame(); }
-  const BehaviorSupportProfile &GetSupport() const { return m_support; }
+  size_t BehaviorProfileLength() const { return m_probs.Length(); }
   //@}
 
   /// @name Computation of interesting quantities
   //@{
-  T GetPayoff(int p_player) const;
-
-  const T &GetRealizProb(const GameNode &node) const;
-  const T &GetBeliefProb(const GameNode &node) const;
-  Vector<T> GetPayoff(const GameNode &node) const;
-  T GetInfosetProb(const GameInfoset &iset) const;
-  const T &GetPayoff(const GameInfoset &iset) const;
   T GetActionProb(const GameAction &act) const;
   T GetLogActionProb(const GameAction &) const;
   const T &GetPayoff(const GameAction &act) const;

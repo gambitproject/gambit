@@ -344,7 +344,8 @@ class LogitQREMixedStrategyFitResult:
 
 
 def fit_strategy_fixedpoint(
-        data: libgbt.MixedStrategyProfileDouble
+        data: libgbt.MixedStrategyProfileDouble,
+        local_max: bool = False
 ) -> LogitQREMixedStrategyFitResult:
     """Use maximum likelihood estimation to find the logit quantal
     response equilibrium on the principal branch for a strategic game
@@ -361,6 +362,13 @@ def fit_strategy_fixedpoint(
         To obtain the correct resulting log-likelihood, these should
         be expressed as total counts of observations of each strategy
         rather than probabilities.
+
+    local_max : bool, default False
+        The default behavior is to find the global maximiser along
+        the principal branch.  If this parameter is set to True,
+        tracing stops at the first interior local maximiser found.
+
+        .. versionadded:: 16.2.0
 
     Returns
     -------
@@ -379,7 +387,7 @@ def fit_strategy_fixedpoint(
         as a structural model for estimation: The missing manual.
         SSRN working paper 4425515.
     """
-    res = libgbt._logit_strategy_estimate(data)
+    res = libgbt._logit_strategy_estimate(data, local_max=local_max)
     return LogitQREMixedStrategyFitResult(
         data, "fixedpoint", res.lam, res.profile, res.log_like
     )
@@ -485,7 +493,8 @@ class LogitQREMixedBehaviorFitResult:
 
 
 def fit_behavior_fixedpoint(
-        data: libgbt.MixedBehaviorProfileDouble
+        data: libgbt.MixedBehaviorProfileDouble,
+        local_max: bool = False
 ) -> LogitQREMixedBehaviorFitResult:
     """Use maximum likelihood estimation to find the logit quantal
     response equilibrium on the principal branch for an extensive game
@@ -500,6 +509,11 @@ def fit_behavior_fixedpoint(
         To obtain the correct resulting log-likelihood, these should
         be expressed as total counts of observations of each action
         rather than probabilities.
+
+    local_max : bool, default False
+        The default behavior is to find the global maximiser along
+        the principal branch.  If this parameter is set to True,
+        tracing stops at the first interior local maximiser found.
 
     Returns
     -------
