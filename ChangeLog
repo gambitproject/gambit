@@ -6,10 +6,17 @@
 - Implemented maximum-likelihood estimation for agent logit QRE, to parallel existing support
   for strategic logit QRE.  Strategic logit QRE function names have been modified to provide
   parallel naming.  Estimation now supports an option to stop at the first interior local
-  maxmizer found (if one exists).
+  maximizer found (if one exists).
 
 
-## [16.2.0] - unreleased
+## [16.1.2] - unreleased
+
+### Fixed
+- Corrected an internal implementation error in `Game.reveal()` in resolving references to
+  information sets and players (#453)
+
+
+## [16.2.0] - 2024-04-05
 
 ### Fixed
 - `gnm_solve`/`gambit-gnm` now correctly handles the degenerate case of a game where all
