@@ -1,6 +1,13 @@
 # Changelog
 
-## [16.2.0] - unreleased
+## [16.1.2] - unreleased
+
+### Fixed
+- Corrected an internal implementation error in `Game.reveal()` in resolving references to
+  information sets and players (#453)
+
+
+## [16.2.0] - 2024-04-05
 
 ### Fixed
 - `gnm_solve`/`gambit-gnm` now correctly handles the degenerate case of a game where all

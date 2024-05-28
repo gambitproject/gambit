@@ -1547,7 +1547,7 @@ class Game:
         """
         resolved_infoset = cython.cast(Infoset, self._resolve_infoset(infoset, "reveal"))
         resolved_player = cython.cast(Player, self._resolve_player(player, "reveal"))
-        resolved_infoset.deref().Reveal(resolved_player)
+        resolved_infoset.infoset.deref().Reveal(resolved_player.player)
 
     def add_player(self, label: str = "") -> Player:
         """Add a new player to the game.
