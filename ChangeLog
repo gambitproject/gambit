@@ -1,5 +1,11 @@
 # Changelog
 
+## [16.1.2] - unreleased
+
+### Fixed
+- Corrected an internal implementation error in `Game.reveal()` in resolving references to
+  information sets and players (#453)
+
 ## [16.1.1] - 2024-01-10
 
 ### Fixed
