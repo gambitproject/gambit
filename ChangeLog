@@ -5,8 +5,11 @@
 ### Added
 - Implemented maximum-likelihood estimation for agent logit QRE, to parallel existing support
   for strategic logit QRE.  Strategic logit QRE function names have been modified to provide
-  parallel naming.  Estimation now supports an option to stop at the first interior local
-  maximizer found (if one exists).
+  parallel naming.  Estimation using the correspondence now supports an option to stop at the
+  first interior local maximizer found (if one exists).
+- Maximum-likelihood estimation for logit QRE using empirical payoffs has an improved internal
+  calculation of log-likelihood, and returns the estimated profile instead of just a list of
+  probabilities.
 
 
 ## [16.1.2] - unreleased

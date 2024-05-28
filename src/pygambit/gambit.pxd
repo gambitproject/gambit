@@ -395,6 +395,9 @@ cdef extern from "util.h":
     shared_ptr[c_LogitQREMixedStrategyProfile] copyitem_list_qrem "sharedcopyitem"(
             c_List[c_LogitQREMixedStrategyProfile], int
     ) except +
+    shared_ptr[c_LogitQREMixedBehaviorProfile] copyitem_list_qreb "sharedcopyitem"(
+            c_List[c_LogitQREMixedBehaviorProfile], int
+    ) except +
 
 
 cdef extern from "solvers/enumpure/enumpure.h":

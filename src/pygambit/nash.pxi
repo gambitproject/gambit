@@ -264,8 +264,11 @@ def logit_strategy_atlambda(game: Game,
     return ret
 
 
-def logit_principal_branch(game: Game, first_step: float = .03, max_accel: float = 1.1):
-    solns = LogitStrategyPrincipalBranchWrapper(game.game, 1.0e-8, first_step, max_accel)
+def _logit_strategy_branch(game: Game,
+                           maxregret: float,
+                           first_step: float,
+                           max_accel: float):
+    solns = LogitStrategyPrincipalBranchWrapper(game.game, maxregret, first_step, max_accel)
     ret = []
     for i in range(solns.Length()):
         p = LogitQREMixedStrategyProfile()
@@ -341,4 +344,17 @@ def logit_behavior_atlambda(game: Game,
     """
     ret = LogitQREMixedBehaviorProfile()
     ret.thisptr = LogitBehaviorAtLambdaWrapper(game.game, lam, first_step, max_accel)
+    return ret
+
+
+def _logit_behavior_branch(game: Game,
+                           maxregret: float,
+                           first_step: float,
+                           max_accel: float):
+    solns = LogitBehaviorPrincipalBranchWrapper(game.game, maxregret, first_step, max_accel)
+    ret = []
+    for i in range(solns.Length()):
+        p = LogitQREMixedBehaviorProfile()
+        p.thisptr = copyitem_list_qreb(solns, i+1)
+        ret.append(p)
     return ret
