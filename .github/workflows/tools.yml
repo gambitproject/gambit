@@ -56,6 +56,7 @@ jobs:
       - run: make osx-dmg
       - uses: actions/upload-artifact@v4
         with:
+          name: artifact-osx
           path: "*.dmg"
 
   windows:
@@ -83,4 +84,5 @@ jobs:
           "${WIX}bin/light" -ext WixUIExtension gambit.wixobj
       - uses: actions/upload-artifact@v4
         with:
+          name: artifact-msw
           path: "*.msi"
