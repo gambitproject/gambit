@@ -81,8 +81,8 @@ jobs:
         run: |
           mkdir installer
           cp gambit* installer
-          "/c/Program Files (x86)/WiX Toolset v3.11/bin/candle" gambit.wxs
-          "/c/Program Files (x86)/WiX Toolset v3.11/bin/light" -ext WixUIExtension gambit.wixobj
+          "${WIX}bin/candle" gambit.wxs
+          "${WIX}bin/light" -ext WixUIExtension gambit.wixobj
       - uses: actions/upload-artifact@v3
         with:
           path: "*.msi"
