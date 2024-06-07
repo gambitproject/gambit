@@ -49,6 +49,11 @@ inline double NullCriterionFunction(const Vector<double> &, const Vector<double>
   return -1.0;
 }
 
+using CriterionBracketFunctionType =
+    std::function<void(const Vector<double> &, const Vector<double> &)>;
+
+inline void NullCriterionBracketFunction(const Vector<double> &, const Vector<double> &) {}
+
 using CallbackFunctionType = std::function<void(const Vector<double> &)>;
 
 inline void NullCallbackFunction(const Vector<double> &) {}
@@ -69,11 +74,13 @@ public:
   void SetStepsize(double p_hStart) { m_hStart = p_hStart; }
   double GetStepsize() const { return m_hStart; }
 
-  void TracePath(std::function<void(const Vector<double> &, Vector<double> &)> p_function,
-                 std::function<void(const Vector<double> &, Matrix<double> &)> p_jacobian,
-                 Vector<double> &p_x, double &p_omega, TerminationFunctionType p_terminate,
-                 CallbackFunctionType p_callback = NullCallbackFunction,
-                 CriterionFunctionType p_criterion = NullCriterionFunction) const;
+  void
+  TracePath(std::function<void(const Vector<double> &, Vector<double> &)> p_function,
+            std::function<void(const Vector<double> &, Matrix<double> &)> p_jacobian,
+            Vector<double> &p_x, double &p_omega, TerminationFunctionType p_terminate,
+            CallbackFunctionType p_callback = NullCallbackFunction,
+            CriterionFunctionType p_criterion = NullCriterionFunction,
+            CriterionBracketFunctionType p_criterionBracker = NullCriterionBracketFunction) const;
 
 private:
   double m_maxDecel, m_hStart;

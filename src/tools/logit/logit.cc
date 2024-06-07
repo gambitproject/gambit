@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
   std::string mleFile;
   double maxDecel = 1.1;
   double hStart = 0.03;
-  double targetLambda = -1.0;
+  std::list<double> targetLambda;
   bool fullGraph = true;
   int decimals = 6;
 
@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
       mleFile = optarg;
       break;
     case 'l':
-      targetLambda = atof(optarg);
+      targetLambda.push_back(atof(optarg));
       break;
     case '?':
       if (isprint(optopt)) {
@@ -219,10 +219,12 @@ int main(int argc, char *argv[])
         }
       };
       LogitQREMixedStrategyProfile start(game);
-      if (targetLambda > 0.0) {
+      if (!targetLambda.empty()) {
         auto result =
             LogitStrategySolveLambda(start, targetLambda, 1.0, hStart, maxDecel, printer);
-        PrintProfile(std::cout, decimals, result);
+        for (auto &profile : result) {
+          PrintProfile(std::cout, decimals, profile);
+        }
       }
       else {
         auto result = LogitStrategySolve(start, maxregret, 1.0, hStart, maxDecel, printer);
@@ -236,10 +238,12 @@ int main(int argc, char *argv[])
         }
       };
       LogitQREMixedBehaviorProfile start(game);
-      if (targetLambda > 0.0) {
+      if (!targetLambda.empty()) {
         auto result =
             LogitBehaviorSolveLambda(start, targetLambda, 1.0, hStart, maxDecel, printer);
-        PrintProfile(std::cout, decimals, result);
+        for (auto &profile : result) {
+          PrintProfile(std::cout, decimals, profile);
+        }
       }
       else {
         auto result = LogitBehaviorSolve(start, maxregret, 1.0, hStart, maxDecel, printer);

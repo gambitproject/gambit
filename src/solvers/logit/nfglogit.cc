@@ -262,10 +262,11 @@ List<LogitQREMixedStrategyProfile> LogitStrategySolve(const LogitQREMixedStrateg
   return callback.GetProfiles();
 }
 
-LogitQREMixedStrategyProfile LogitStrategySolveLambda(const LogitQREMixedStrategyProfile &p_start,
-                                                      double p_targetLambda, double p_omega,
-                                                      double p_firstStep, double p_maxAccel,
-                                                      MixedStrategyObserverFunctionType p_observer)
+std::list<LogitQREMixedStrategyProfile>
+LogitStrategySolveLambda(const LogitQREMixedStrategyProfile &p_start,
+                         const std::list<double> &p_targetLambda, double p_omega,
+                         double p_firstStep, double p_maxAccel,
+                         MixedStrategyObserverFunctionType p_observer)
 {
   PathTracer tracer;
   tracer.SetMaxDecel(p_maxAccel);
@@ -273,19 +274,23 @@ LogitQREMixedStrategyProfile LogitStrategySolveLambda(const LogitQREMixedStrateg
 
   Vector<double> x(ProfileToPoint(p_start));
   TracingCallbackFunction callback(p_start.GetGame(), p_observer);
-  tracer.TracePath(
-      [&p_start](const Vector<double> &p_point, Vector<double> &p_lhs) {
-        GetValue(p_start.GetGame(), p_point, p_lhs);
-      },
-      [&p_start](const Vector<double> &p_point, Matrix<double> &p_jac) {
-        GetJacobian(p_start.GetGame(), p_point, p_jac);
-      },
-      x, p_omega, LambdaPositiveTerminationFunction,
-      [&callback](const Vector<double> &p_point) -> void { callback.AppendPoint(p_point); },
-      [p_targetLambda](const Vector<double> &x, const Vector<double> &) -> double {
-        return x.back() - p_targetLambda;
-      });
-  return callback.GetProfiles().back();
+  std::list<LogitQREMixedStrategyProfile> ret;
+  for (auto lam : p_targetLambda) {
+    tracer.TracePath(
+        [&p_start](const Vector<double> &p_point, Vector<double> &p_lhs) {
+          GetValue(p_start.GetGame(), p_point, p_lhs);
+        },
+        [&p_start](const Vector<double> &p_point, Matrix<double> &p_jac) {
+          GetJacobian(p_start.GetGame(), p_point, p_jac);
+        },
+        x, p_omega, LambdaPositiveTerminationFunction,
+        [&callback](const Vector<double> &p_point) -> void { callback.AppendPoint(p_point); },
+        [lam](const Vector<double> &x, const Vector<double> &) -> double {
+          return x.back() - lam;
+        });
+    ret.push_back(callback.GetProfiles().back());
+  }
+  return ret;
 }
 
 LogitQREMixedStrategyProfile
@@ -298,11 +303,11 @@ LogitStrategyEstimate(const MixedStrategyProfile<double> &p_frequencies, double 
   tracer.SetMaxDecel(p_maxAccel);
   tracer.SetStepsize(p_firstStep);
 
-  Vector<double> x(ProfileToPoint(start));
+  Vector<double> x(ProfileToPoint(start)), restart(x);
   Vector<double> freq_vector(static_cast<const Vector<double> &>(p_frequencies));
   EstimatorCallbackFunction callback(
       start.GetGame(), static_cast<const Vector<double> &>(p_frequencies), p_observer);
-  while (x.back() < p_maxLambda) {
+  while (true) {
     tracer.TracePath(
         [&start](const Vector<double> &p_point, Vector<double> &p_lhs) {
           GetValue(start.GetGame(), p_point, p_lhs);
@@ -317,10 +322,14 @@ LogitStrategyEstimate(const MixedStrategyProfile<double> &p_frequencies, double 
         [&callback](const Vector<double> &p_point) -> void { callback.EvaluatePoint(p_point); },
         [freq_vector](const Vector<double> &, const Vector<double> &p_tangent) -> double {
           return DiffLogLike(freq_vector, p_tangent);
+        },
+        [&restart](const Vector<double> &, const Vector<double> &p_restart) -> void {
+          restart = p_restart;
         });
-    if (p_stopAtLocal) {
+    if (p_stopAtLocal || x.back() >= p_maxLambda) {
       break;
     }
+    x = restart;
   }
   return callback.GetMaximizer();
 }

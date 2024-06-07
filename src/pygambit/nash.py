@@ -602,5 +602,14 @@ def logit_solve_branch(
         return libgbt._logit_behavior_branch(game, maxregret, first_step, max_accel)
 
 
-logit_behavior_atlambda = libgbt.logit_behavior_atlambda
-logit_strategy_atlambda = libgbt.logit_strategy_atlambda
+def logit_solve_lambda(
+        game: libgbt.Game,
+        lam: typing.Union[float, typing.List[float]],
+        use_strategic: bool = False,
+        first_step: float = .03,
+        max_accel: float = 1.1,
+):
+    if not game.is_tree or use_strategic:
+        return libgbt._logit_strategy_lambda(game, lam, first_step, max_accel)
+    else:
+        return libgbt._logit_behavior_lambda(game, lam, first_step, max_accel)

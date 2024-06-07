@@ -1,6 +1,7 @@
 from libcpp cimport bool
 from libcpp.string cimport string
 from libcpp.memory cimport shared_ptr
+from libcpp.list cimport list as clist
 
 
 cdef extern from "gambit.h":
@@ -487,8 +488,8 @@ cdef extern from "nash.h":
     c_List[c_LogitQREMixedBehaviorProfile] LogitBehaviorPrincipalBranchWrapper(
             c_Game, double, double, double
     ) except +
-    shared_ptr[c_LogitQREMixedBehaviorProfile] LogitBehaviorAtLambdaWrapper(
-            c_Game, double, double, double
+    clist[shared_ptr[c_LogitQREMixedBehaviorProfile]] LogitBehaviorAtLambdaWrapper(
+            c_Game, clist[double], double, double
     ) except +
     shared_ptr[c_LogitQREMixedBehaviorProfile] LogitBehaviorEstimateWrapper(
             shared_ptr[c_MixedBehaviorProfileDouble], bool, double, double
@@ -499,8 +500,8 @@ cdef extern from "nash.h":
     c_List[c_LogitQREMixedStrategyProfile] LogitStrategyPrincipalBranchWrapper(
             c_Game, double, double, double
     ) except +
-    shared_ptr[c_LogitQREMixedStrategyProfile] LogitStrategyAtLambdaWrapper(
-            c_Game, double, double, double
+    clist[shared_ptr[c_LogitQREMixedStrategyProfile]] LogitStrategyAtLambdaWrapper(
+            c_Game, clist[double], double, double
     ) except +
     shared_ptr[c_LogitQREMixedStrategyProfile] LogitStrategyEstimateWrapper(
             shared_ptr[c_MixedStrategyProfileDouble], bool, double, double

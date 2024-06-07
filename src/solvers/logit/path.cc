@@ -122,7 +122,7 @@ void PathTracer::TracePath(
     std::function<void(const Vector<double> &, Vector<double> &)> p_function,
     std::function<void(const Vector<double> &, Matrix<double> &)> p_jacobian, Vector<double> &x,
     double &p_omega, TerminationFunctionType p_terminate, CallbackFunctionType p_callback,
-    CriterionFunctionType p_criterion) const
+    CriterionFunctionType p_criterion, CriterionBracketFunctionType p_criterionBracket) const
 {
   const double c_tol = 1.0e-4;   // tolerance for corrector iteration
   const double c_maxDist = 0.4;  // maximal distance to curve
@@ -138,7 +138,7 @@ void PathTracer::TracePath(
   double pert = 0.0;               // The current version of the perturbation being applied
   double pert_countdown = 0.0;     // How much longer (in arclength) to apply perturbation
 
-  Vector<double> u(x.Length()), restart(x.Length());
+  Vector<double> u(x.Length());
   // t is current tangent at x; newT is tangent at u, which is the next point.
   Vector<double> t(x.Length()), newT(x.Length());
   Vector<double> y(x.Length() - 1);
@@ -154,10 +154,6 @@ void PathTracer::TracePath(
     bool accept = true;
 
     if (fabs(h) <= c_hmin) {
-      if (newton) {
-        // Restore the place to restart if desired
-        x = restart;
-      }
       return;
     }
 
@@ -201,10 +197,6 @@ void PathTracer::TracePath(
       disto = dist;
       iter++;
       if (iter > c_maxIter) {
-        if (newton) {
-          // Restore the place to restart if desired
-          x = restart;
-        }
         return;
       }
     }
@@ -227,10 +219,6 @@ void PathTracer::TracePath(
     if (!accept) {
       h /= m_maxDecel; // PC not accepted; change stepsize and retry
       if (fabs(h) <= c_hmin) {
-        if (newton) {
-          // Restore the place to restart if desired
-          x = restart;
-        }
         return;
       }
       continue;
@@ -246,7 +234,7 @@ void PathTracer::TracePath(
     // new tangent oriented in the same sense.
     if (!newton && p_criterion(x, t) * p_criterion(u, newT * omega_flip) < 0.0) {
       newton = true;
-      restart = u;
+      p_criterionBracket(x, u);
     }
 
     if (newton) {
@@ -272,11 +260,6 @@ void PathTracer::TracePath(
         pert_countdown = 0.0;
       }
     }
-  }
-
-  // Cleanup after termination
-  if (newton) {
-    x = restart;
   }
 }
 

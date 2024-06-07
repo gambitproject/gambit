@@ -252,15 +252,22 @@ def _logit_strategy_estimate(profile: MixedStrategyProfileDouble,
     return ret
 
 
-def logit_strategy_atlambda(game: Game,
-                            lam: float,
-                            first_step: float = .03,
-                            max_accel: float = 1.1) -> LogitQREMixedStrategyProfile:
+def _logit_strategy_lambda(game: Game,
+                           lam: typing.Union[float, typing.List[float]],
+                           first_step: float = .03,
+                           max_accel: float = 1.1) -> typing.List[LogitQREMixedStrategyProfile]:
     """Compute the first QRE encountered along the principal branch of the strategic
     game corresponding to lambda value `lam`.
     """
-    ret = LogitQREMixedStrategyProfile()
-    ret.thisptr = LogitStrategyAtLambdaWrapper(game.game, lam, first_step, max_accel)
+    try:
+        iter(lam)
+    except TypeError:
+        lam = [lam]
+    ret = []
+    for profile in LogitStrategyAtLambdaWrapper(game.game, lam, first_step, max_accel):
+        qre = LogitQREMixedStrategyProfile()
+        qre.thisptr = profile
+        ret.append(qre)
     return ret
 
 
@@ -335,15 +342,22 @@ def _logit_behavior_estimate(profile: MixedBehaviorProfileDouble,
     return ret
 
 
-def logit_behavior_atlambda(game: Game,
-                            lam: float,
-                            first_step: float = .03,
-                            max_accel: float = 1.1) -> LogitQREMixedBehaviorProfile:
+def _logit_behavior_lambda(game: Game,
+                           lam: typing.Union[float, typing.List[float]],
+                           first_step: float = .03,
+                           max_accel: float = 1.1) -> typing.List[LogitQREMixedBehaviorProfile]:
     """Compute the first QRE encountered along the principal branch of the extensive
     game corresponding to lambda value `lam`.
     """
-    ret = LogitQREMixedBehaviorProfile()
-    ret.thisptr = LogitBehaviorAtLambdaWrapper(game.game, lam, first_step, max_accel)
+    try:
+        iter(lam)
+    except TypeError:
+        lam = [lam]
+    ret = []
+    for profile in LogitBehaviorAtLambdaWrapper(game.game, lam, first_step, max_accel):
+        qre = LogitQREMixedBehaviorProfile()
+        qre.thisptr = profile
+        ret.append(qre)
     return ret
 
 
