@@ -38,4 +38,4 @@ separated by whitespaces. Lines with starting '#' are treated as comments and ar
 
 #. utility function for each action node: same as in `the AGG format`_.
 
-.. _the AGG format:  file-formats-agg_
+.. _the AGG format:  _file-formats-agg

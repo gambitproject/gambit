@@ -183,7 +183,7 @@ Downloading Gambit
 ==================
 
 Gambit source code and built binaries can be downloaded from the project
-`GitHub repository releases section`<https://github.com/gambitproject/gambit/releases>.
+`GitHub repository releases section <https://github.com/gambitproject/gambit/releases>`_.
 
 Older versions of Gambit can be downloaded from
 `http://sourceforge.net/projects/gambit/files

@@ -686,14 +686,13 @@ from different starting points.
    gbt.nash.simpdiv_solve(g.random_strategy_profile(denom=10, gen=gen))
 
 
-Estimating quantal response equilibria
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Quantal response equilibrium
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Alongside computing quantal response equilibria, Gambit can also perform maximum likelihood
-estimation, computing the QRE which best fits an empirical distribution of play.
-
-As an example we consider an asymmetric matching pennies game studied in [Och95]_,
-analysed in [McKPal95]_ using QRE.
+Gambit implements the idea of [McKPal95]_ and [McKPal98]_ to compute Nash equilibria
+via path-following a branch of the logit quantal response equilibrium (LQRE) correspondence
+using the function :py:func:`.logit_solve`.  As an example, we will consider an
+asymmetric matching pennies game from [Och95]_ as analyzed in [McKPal95]_.
 
 .. ipython:: python
 
@@ -702,13 +701,52 @@ analysed in [McKPal95]_ using QRE.
          [[0, 1.1141], [1.1141, 0]],
          title="Ochs (1995) asymmetric matching pennies as transformed in McKelvey-Palfrey (1995)"
    )
-   data = g.mixed_strategy_profile([[128*0.527, 128*(1-0.527)], [128*0.366, 128*(1-0.366)]])
+   gbt.nash.logit_solve(g)
 
-Estimation of QRE in the strategic form is done using :py:func:`.fit_strategy_fixedpoint`.
+
+:py:func:`.logit_solve` returns only the limiting (approximate) Nash equilibrium found.
+Profiles along the QRE correspondence are frequently of interest in their own right.
+Gambit offers several functions for more detailed examination of branches of the
+QRE correspondence.
+
+The function :py:func:`.logit_solve_branch` uses the same procedure as :py:func:`.logit_solve`,
+but returns a list of LQRE profiles computed along the branch instead of just the limiting
+approximate Nash equilibrium.
 
 .. ipython:: python
 
-   fit = gbt.qre.fit_strategy_fixedpoint(data)
+   qres = gbt.qre.logit_solve_branch(g)
+   len(qres)
+   qres[0]
+   qres[5]
+
+:py:func:`.logit_solve_branch` uses an adaptive step size heuristic to find points on
+the branch.   The parameters `first_step` and `max_accel` are used to adjust the initial
+step size and the maximum rate at which the step size changes adaptively.  The step size
+used is computed as the distance traveled along the path, and, importantly, not the
+distance as measured by changes in the precision parameter lambda.  As a result the
+lambda values for which profiles are computed cannot be controlled in advance.
+In some situations, the LQRE profiles at specified values of lambda are of interest.
+For this, Gambit provides :py:func:`.logit_solve_lambda`.  This function provides
+accurate values of strategy profiles at one or more specified values of lambda.
+
+.. ipython:: python
+
+   qres = gbt.qre.logit_solve_lambda(g, lam=[1, 2, 3])
+   qres[0]
+   qres[1]
+   qres[2]
+
+
+LQRE are frequently taken to data by using maximum likelihood estimation to find the
+LQRE profile that best fits an observed profile of play.  This is provided by
+the function :py:func:`.logit_estimate`.  We replicate the analysis of a block
+of the data from [Och95]_ for which [McKPal95]_ estimated an LQRE.
+
+.. ipython:: python
+
+   data = g.mixed_strategy_profile([[128*0.527, 128*(1-0.527)], [128*0.366, 128*(1-0.366)]])
+   fit = gbt.qre.logit_estimate(data)
 
 The returned :py:class:`.LogitQREMixedStrategyFitResult` object contains the results of the
 estimation.
@@ -722,6 +760,15 @@ log-likelihood is correct for use in likelihoood-ratio tests. [#f1]_
    print(fit.lam)
    print(fit.profile)
    print(fit.log_like)
+
+All of the functions above also support working with the agent LQRE of [McKPal98]_.
+Agent QRE are computed as the default behavior whenever the game has a extensive (tree)
+representation.  For :py:func:`.logit_solve`, :py:func:`.logit_solve_branch`, and
+:py:func:`.logit_solve_lambda`, this can be overriden by passing `use_strategic=True`;
+this will compute LQRE using the reduced strategy set of the game instead.
+Likewise, :py:func:`.logit_estimate` will perform estimation using agent LQRE if the
+data passed are a :py:class:`.MixedBehaviorProfile`, and will return a
+:py:class:`.LogitQREMixedBehaviorFitResult` object.
 
 .. rubric:: Footnotes
 

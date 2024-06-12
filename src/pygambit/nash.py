@@ -585,31 +585,3 @@ def logit_solve(
         equilibria=equilibria,
         parameters={"first_step": first_step, "max_accel": max_accel},
     )
-
-
-def logit_solve_branch(
-        game: libgbt.Game,
-        use_strategic: bool = False,
-        maxregret: float = 1.0e-8,
-        first_step: float = .03,
-        max_accel: float = 1.1,
-):
-    if maxregret <= 0.0:
-        raise ValueError("logit_solve(): maxregret argument must be positive")
-    if not game.is_tree or use_strategic:
-        return libgbt._logit_strategy_branch(game, maxregret, first_step, max_accel)
-    else:
-        return libgbt._logit_behavior_branch(game, maxregret, first_step, max_accel)
-
-
-def logit_solve_lambda(
-        game: libgbt.Game,
-        lam: typing.Union[float, typing.List[float]],
-        use_strategic: bool = False,
-        first_step: float = .03,
-        max_accel: float = 1.1,
-):
-    if not game.is_tree or use_strategic:
-        return libgbt._logit_strategy_lambda(game, lam, first_step, max_accel)
-    else:
-        return libgbt._logit_behavior_lambda(game, lam, first_step, max_accel)

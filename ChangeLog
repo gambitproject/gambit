@@ -10,6 +10,8 @@
 - Maximum-likelihood estimation for logit QRE using empirical payoffs has an improved internal
   calculation of log-likelihood, and returns the estimated profile instead of just a list of
   probabilities.
+- Reorganized naming conventions in pygambit for functions for computing QRE in both strategic
+  and agent versions, and added a corresponding section in the user guide.
 
 
 ## [16.1.2] - unreleased
