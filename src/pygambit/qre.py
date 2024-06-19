@@ -39,6 +39,10 @@ def logit_solve_branch(
 ):
     if maxregret <= 0.0:
         raise ValueError("logit_solve(): maxregret argument must be positive")
+    if first_step <= 0.0:
+        raise ValueError("logit_solve(): first_step argument must be positive")
+    if max_accel < 1.0:
+        raise ValueError("logit_solve(): max_accel argument must be at least 1.0")
     if not game.is_tree or use_strategic:
         return libgbt._logit_strategy_branch(game, maxregret, first_step, max_accel)
     else:
@@ -52,6 +56,10 @@ def logit_solve_lambda(
         first_step: float = .03,
         max_accel: float = 1.1,
 ):
+    if first_step <= 0.0:
+        raise ValueError("logit_solve(): first_step argument must be positive")
+    if max_accel < 1.0:
+        raise ValueError("logit_solve(): max_accel argument must be at least 1.0")
     if not game.is_tree or use_strategic:
         return libgbt._logit_strategy_lambda(game, lam, first_step, max_accel)
     else:
