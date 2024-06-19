@@ -573,6 +573,10 @@ def logit_solve(
     """
     if maxregret <= 0.0:
         raise ValueError("logit_solve(): maxregret argument must be positive")
+    if first_step <= 0.0:
+        raise ValueError("logit_solve(): first_step argument must be positive")
+    if max_accel < 1.0:
+        raise ValueError("logit_solve(): max_accel argument must be at least 1.0")
     if not game.is_tree or use_strategic:
         equilibria = libgbt._logit_strategy_solve(game, maxregret, first_step, max_accel)
     else:
