@@ -48,7 +48,23 @@ List<MixedStrategyProfile<double>> EnumPolyStrategySolve(
     EnumPolyMixedStrategyObserverFunctionType p_onEquilibrium = EnumPolyNullMixedStrategyObserver,
     EnumPolyStrategySupportObserverFunctionType p_onSupport = EnumPolyNullStrategySupportObserver);
 
-List<MixedBehaviorProfile<double>> EnumPolyBehaviorSolve(const Game &);
+using EnumPolyMixedBehaviorObserverFunctionType =
+    std::function<void(const MixedBehaviorProfile<double> &)>;
+
+inline void EnumPolyNullMixedBehaviorObserver(const MixedBehaviorProfile<double> &) {}
+
+using EnumPolyBehaviorSupportObserverFunctionType =
+    std::function<void(const std::string &, const BehaviorSupportProfile &)>;
+
+inline void EnumPolyNullBehaviorSupportObserver(const std::string &,
+                                                const BehaviorSupportProfile &)
+{
+}
+
+List<MixedBehaviorProfile<double>> EnumPolyBehaviorSolve(
+    const Game &,
+    EnumPolyMixedBehaviorObserverFunctionType p_onEquilibrium = EnumPolyNullMixedBehaviorObserver,
+    EnumPolyBehaviorSupportObserverFunctionType p_onSupport = EnumPolyNullBehaviorSupportObserver);
 
 } // namespace Nash
 } // namespace Gambit

@@ -83,7 +83,36 @@ void PrintSupport(std::ostream &p_stream, const std::string &p_label,
   for (auto player : p_support.GetGame()->GetPlayers()) {
     p_stream << ",";
     for (auto strategy : player->GetStrategies()) {
-      p_stream << ((p_support.Contains(strategy)) ? "1" : "0");
+      p_stream << ((p_support.Contains(strategy)) ? 1 : 0);
+    }
+  }
+  p_stream << std::endl;
+}
+
+void PrintProfile(std::ostream &p_stream, const std::string &p_label,
+                  const MixedBehaviorProfile<double> &p_profile)
+{
+  p_stream << p_label;
+  for (int i = 1; i <= p_profile.BehaviorProfileLength(); i++) {
+    p_stream.setf(std::ios::fixed);
+    p_stream << "," << std::setprecision(g_numDecimals) << p_profile[i];
+  }
+  p_stream << std::endl;
+}
+
+void PrintSupport(std::ostream &p_stream, const std::string &p_label,
+                  const BehaviorSupportProfile &p_support)
+{
+  if (!g_verbose) {
+    return;
+  }
+  p_stream << p_label;
+  for (auto player : p_support.GetGame()->GetPlayers()) {
+    for (auto infoset : player->GetInfosets()) {
+      p_stream << ",";
+      for (auto action : infoset->GetActions()) {
+        p_stream << ((p_support.Contains(action)) ? 1 : 0);
+      }
     }
   }
   p_stream << std::endl;
@@ -177,7 +206,12 @@ int main(int argc, char *argv[])
       }
     }
     else {
-      EnumPolyBehaviorSolve(game);
+      EnumPolyBehaviorSolve(
+          game,
+          [](const MixedBehaviorProfile<double> &eqm) { PrintProfile(std::cout, "NE", eqm); },
+          [](const std::string &label, const BehaviorSupportProfile &support) {
+            PrintSupport(std::cout, label, support);
+          });
     }
     return 0;
   }
