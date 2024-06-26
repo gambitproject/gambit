@@ -20,6 +20,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <limits>
+
 #include "enumpoly.h"
 #include "solvers/nashsupport/nashsupport.h"
 #include "sfg.h"
@@ -248,29 +250,13 @@ List<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfile &p_
 
   // set up the rectangle of search
   Vector<double> bottoms(data.nVars), tops(data.nVars);
-  bottoms = (double)0;
-  tops = (double)1;
+  bottoms = 0;
+  tops = 1;
   gRectangle<double> Cube(bottoms, tops);
 
   QuikSolv<double> quickie(equations);
-#ifdef UNUSED
-  if (params.trace > 0) {
-    (*params.tracefile) << "\nThe equilibrium equations are \n" << quickie.UnderlyingEquations();
-  }
-#endif // UNUSED
-
-  // 2147483647 = 2^31-1 = MaxInt
-
   try {
-    if (quickie.FindCertainNumberOfRoots(Cube, 2147483647, 0)) {
-#ifdef UNUSED
-      if (params.trace > 0) {
-        (*params.tracefile) << "\nThe system has the following roots in [0,1]^" << num_vars
-                            << " :\n"
-                            << quickie.RootList();
-      }
-#endif // UNUSED
-    }
+    quickie.FindCertainNumberOfRoots(Cube, std::numeric_limits<int>::max(), 0);
   }
   catch (const Gambit::SingularMatrixException &) {
     p_isSingular = true;
