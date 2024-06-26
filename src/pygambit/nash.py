@@ -548,6 +548,38 @@ def possible_nash_supports(game: libgbt.Game) -> typing.List[libgbt.StrategySupp
     return libgbt._nashsupport_strategy_solve(game)
 
 
+def enumpoly_solve(
+        game: libgbt.Game,
+        use_strategic: bool = False,
+) -> NashComputationResult:
+    """Compute Nash equilibria by solving systems of polynomial equations.
+
+    Parameters
+    ----------
+    game : Game
+        The game to compute equilibria in.
+    use_strategic : bool, default False
+        Whether to use the strategic form.  If `True`, always uses the strategic
+        representation even if the game's native representation is extensive.
+
+    Returns
+    -------
+    res : NashComputationResult
+        The result represented as a ``NashComputationResult`` object.
+    """
+    if not game.is_tree or use_strategic:
+        equilibria = libgbt._enumpoly_strategy_solve(game)
+    else:
+        equilibria = libgbt._enumpoly_behavior_solve(game)
+    return NashComputationResult(
+        game=game,
+        method="enumpoly",
+        rational=False,
+        use_strategic=not game.is_tree or use_strategic,
+        equilibria=equilibria,
+    )
+
+
 def logit_solve(
         game: libgbt.Game,
         use_strategic: bool = False,

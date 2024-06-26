@@ -477,6 +477,7 @@ gambit_enumpoly_SOURCES = \
 	src/solvers/enumpoly/nfghs.h \
 	src/solvers/enumpoly/efgpoly.cc \
 	src/solvers/enumpoly/nfgpoly.cc \
+	src/solvers/enumpoly/enumpoly.h \
 	src/tools/enumpoly/enumpoly.cc
 
 gambit_enumpure_SOURCES = \

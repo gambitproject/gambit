@@ -30,9 +30,6 @@
 #include "rectangl.h"
 #include "quiksolv.h"
 
-extern int g_numDecimals;
-extern bool g_verbose;
-
 class PolEnumModule {
 private:
   double eps{0.0};
@@ -421,10 +418,11 @@ PolEnumModule::ReturnPolishedSolution(const Gambit::Vector<double> &root) const
 void PrintProfile(std::ostream &p_stream, const std::string &p_label,
                   const Gambit::MixedStrategyProfile<double> &p_profile)
 {
+  int numDecimals = 6;
   p_stream << p_label;
   for (int i = 1; i <= p_profile.MixedProfileLength(); i++) {
     p_stream.setf(std::ios::fixed);
-    p_stream << ',' << std::setprecision(g_numDecimals) << p_profile[i];
+    p_stream << ',' << std::setprecision(numDecimals) << p_profile[i];
   }
 
   p_stream << std::endl;
@@ -474,31 +472,41 @@ void PrintSupport(std::ostream &p_stream, const std::string &p_label,
   p_stream << std::endl;
 }
 
-void EnumPolySolveStrategic(const Gambit::Game &p_nfg)
+namespace Gambit {
+namespace Nash {
+
+List<MixedStrategyProfile<double>> EnumPolyStrategySolve(const Game &p_nfg)
 {
+  bool verbose = true;
+  List<MixedStrategyProfile<double>> ret;
   auto possible_supports = PossibleNashStrategySupports(p_nfg);
 
   for (auto support : possible_supports->m_supports) {
     long newevals = 0;
     double newtime = 0.0;
-    Gambit::List<Gambit::MixedStrategyProfile<double>> newsolns;
+    List<MixedStrategyProfile<double>> newsolns;
     bool is_singular = false;
 
-    if (g_verbose) {
+    if (verbose) {
       PrintSupport(std::cout, "candidate", support);
     }
 
     PolEnum(support, newsolns, newevals, newtime, is_singular);
-      
+
     for (int j = 1; j <= newsolns.Length(); j++) {
       Gambit::MixedStrategyProfile<double> fullProfile = ToFullSupport(newsolns[j]);
       if (fullProfile.GetLiapValue() < 1.0e-6) {
         PrintProfile(std::cout, "NE", fullProfile);
+        ret.push_back(fullProfile);
       }
     }
 
-    if (is_singular && g_verbose) {
+    if (is_singular && verbose) {
       PrintSupport(std::cout, "singular", support);
     }
   }
+  return ret;
 }
+
+} // namespace Nash
+} // namespace Gambit

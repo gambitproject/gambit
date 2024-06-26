@@ -25,7 +25,10 @@
 #include <cstdlib>
 #include <getopt.h>
 #include "gambit.h"
+#include "solvers/enumpoly/enumpoly.h"
 #include "solvers/enumpoly/nfghs.h"
+
+using namespace Gambit::Nash;
 
 int g_numDecimals = 6;
 bool g_verbose = false;
@@ -57,9 +60,6 @@ void PrintHelp(char *progname)
   std::cerr << "                   (default is only to show equilibria)\n";
   exit(1);
 }
-
-extern void EnumPolySolveStrategic(const Gambit::Game &);
-extern void EnumPolySolveExtensive(const Gambit::Game &);
 
 int main(int argc, char *argv[])
 {
@@ -140,11 +140,11 @@ int main(int argc, char *argv[])
         algorithm.Solve(game);
       }
       else {
-        EnumPolySolveStrategic(game);
+        EnumPolyStrategySolve(game);
       }
     }
     else {
-      EnumPolySolveExtensive(game);
+      EnumPolyBehaviorSolve(game);
     }
     return 0;
   }

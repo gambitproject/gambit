@@ -34,9 +34,6 @@ using namespace Gambit;
 #include "quiksolv.h"
 #include "behavextend.h"
 
-extern int g_numDecimals;
-extern bool g_verbose;
-
 //
 // A class to organize the data needed to build the polynomials
 //
@@ -316,10 +313,12 @@ PVector<double> SeqFormProbsFromSolVars(const ProblemData &p_data, const Vector<
 void PrintProfile(std::ostream &p_stream, const std::string &p_label,
                   const MixedBehaviorProfile<double> &p_profile)
 {
+  int numDecimals = 6;
+
   p_stream << p_label;
   for (int i = 1; i <= p_profile.BehaviorProfileLength(); i++) {
     p_stream.setf(std::ios::fixed);
-    p_stream << "," << std::setprecision(g_numDecimals) << p_profile[i];
+    p_stream << "," << std::setprecision(numDecimals) << p_profile[i];
   }
 
   p_stream << std::endl;
@@ -375,12 +374,17 @@ void PrintSupport(std::ostream &p_stream, const std::string &p_label,
   p_stream << std::endl;
 }
 
-void EnumPolySolveExtensive(const Game &p_game)
+namespace Gambit {
+namespace Nash {
+
+List<MixedBehaviorProfile<double>> EnumPolyBehaviorSolve(const Game &p_game)
 {
+  bool verbose = true;
+  List<MixedBehaviorProfile<double>> ret;
   auto possible_supports = PossibleNashBehaviorSupports(p_game);
 
   for (auto support : possible_supports->m_supports) {
-    if (g_verbose) {
+    if (verbose) {
       PrintSupport(std::cout, "candidate", support);
     }
 
@@ -391,11 +395,16 @@ void EnumPolySolveExtensive(const Game &p_game)
       MixedBehaviorProfile<double> fullProfile = ToFullSupport(newsolns[j]);
       if (fullProfile.GetLiapValue() < 1.0e-6) {
         PrintProfile(std::cout, "NE", fullProfile);
+        ret.push_back(fullProfile);
       }
     }
 
-    if (isSingular && g_verbose) {
+    if (isSingular && verbose) {
       PrintSupport(std::cout, "singular", support);
     }
   }
+  return ret;
 }
+
+} // namespace Nash
+} // namespace Gambit

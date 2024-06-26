@@ -472,6 +472,14 @@ cdef extern from "solvers/nashsupport/nashsupport.h":
             c_Game
     ) except +RuntimeError
 
+cdef extern from "solvers/enumpoly/enumpoly.h":
+    c_List[c_MixedStrategyProfileDouble] EnumPolyStrategySolve(
+            c_Game
+    ) except +RuntimeError
+    c_List[c_MixedBehaviorProfileDouble] EnumPolyBehaviorSolve(
+            c_Game
+    ) except +RuntimeError
+
 cdef extern from "solvers/logit/logit.h":
     cdef cppclass c_LogitQREMixedBehaviorProfile "LogitQREMixedBehaviorProfile":
         c_LogitQREMixedBehaviorProfile(c_Game) except +
