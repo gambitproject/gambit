@@ -30,7 +30,23 @@
 namespace Gambit {
 namespace Nash {
 
-List<MixedStrategyProfile<double>> EnumPolyStrategySolve(const Game &);
+using EnumPolyMixedStrategyObserverFunctionType =
+    std::function<void(const MixedStrategyProfile<double> &)>;
+
+inline void EnumPolyNullMixedStrategyObserver(const MixedStrategyProfile<double> &) {}
+
+using EnumPolyStrategySupportObserverFunctionType =
+    std::function<void(const std::string &, const StrategySupportProfile &)>;
+
+inline void EnumPolyNullStrategySupportObserver(const std::string &,
+                                                const StrategySupportProfile &)
+{
+}
+
+List<MixedStrategyProfile<double>> EnumPolyStrategySolve(
+    const Game &,
+    EnumPolyMixedStrategyObserverFunctionType p_onEquilibrium = EnumPolyNullMixedStrategyObserver,
+    EnumPolyStrategySupportObserverFunctionType p_onSupport = EnumPolyNullStrategySupportObserver);
 
 List<MixedBehaviorProfile<double>> EnumPolyBehaviorSolve(const Game &);
 

@@ -28,6 +28,7 @@
 #include "solvers/enumpoly/enumpoly.h"
 #include "solvers/enumpoly/nfghs.h"
 
+using namespace Gambit;
 using namespace Gambit::Nash;
 
 int g_numDecimals = 6;
@@ -59,6 +60,33 @@ void PrintHelp(char *progname)
   std::cerr << "  -v, --version    print version information\n";
   std::cerr << "                   (default is only to show equilibria)\n";
   exit(1);
+}
+
+void PrintProfile(std::ostream &p_stream, const std::string &p_label,
+                  const MixedStrategyProfile<double> &p_profile)
+{
+  p_stream << p_label;
+  for (int i = 1; i <= p_profile.MixedProfileLength(); i++) {
+    p_stream.setf(std::ios::fixed);
+    p_stream << ',' << std::setprecision(g_numDecimals) << p_profile[i];
+  }
+  p_stream << std::endl;
+}
+
+void PrintSupport(std::ostream &p_stream, const std::string &p_label,
+                  const StrategySupportProfile &p_support)
+{
+  if (!g_verbose) {
+    return;
+  }
+  p_stream << p_label;
+  for (auto player : p_support.GetGame()->GetPlayers()) {
+    p_stream << ",";
+    for (auto strategy : player->GetStrategies()) {
+      p_stream << ((p_support.Contains(strategy)) ? "1" : "0");
+    }
+  }
+  p_stream << std::endl;
 }
 
 int main(int argc, char *argv[])
@@ -140,7 +168,12 @@ int main(int argc, char *argv[])
         algorithm.Solve(game);
       }
       else {
-        EnumPolyStrategySolve(game);
+        EnumPolyStrategySolve(
+            game,
+            [](const MixedStrategyProfile<double> &eqm) { PrintProfile(std::cout, "NE", eqm); },
+            [](const std::string &label, const StrategySupportProfile &support) {
+              PrintSupport(std::cout, label, support);
+            });
       }
     }
     else {

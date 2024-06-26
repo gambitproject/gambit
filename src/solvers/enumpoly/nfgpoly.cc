@@ -21,9 +21,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include <iostream>
-#include <iomanip>
-
+#include "enumpoly.h"
 #include "solvers/nashsupport/nashsupport.h"
 #include "gpoly.h"
 #include "gpolylst.h"
@@ -267,7 +265,7 @@ PolEnumModule::NashOnSupportSolnVectors(const gPolyList<double> &equations,
     is_singular = true;
   }
   catch (const Gambit::AssertionException &e) {
-    std::cerr << "Assertion warning: " << e.what() << std::endl;
+    // std::cerr << "Assertion warning: " << e.what() << std::endl;
     is_singular = true;
   }
 
@@ -415,19 +413,6 @@ PolEnumModule::ReturnPolishedSolution(const Gambit::Vector<double> &root) const
   return profile;
 }
 
-void PrintProfile(std::ostream &p_stream, const std::string &p_label,
-                  const Gambit::MixedStrategyProfile<double> &p_profile)
-{
-  int numDecimals = 6;
-  p_stream << p_label;
-  for (int i = 1; i <= p_profile.MixedProfileLength(); i++) {
-    p_stream.setf(std::ios::fixed);
-    p_stream << ',' << std::setprecision(numDecimals) << p_profile[i];
-  }
-
-  p_stream << std::endl;
-}
-
 Gambit::MixedStrategyProfile<double>
 ToFullSupport(const Gambit::MixedStrategyProfile<double> &p_profile)
 {
@@ -451,35 +436,16 @@ ToFullSupport(const Gambit::MixedStrategyProfile<double> &p_profile)
   return fullProfile;
 }
 
-void PrintSupport(std::ostream &p_stream, const std::string &p_label,
-                  const Gambit::StrategySupportProfile &p_support)
-{
-  p_stream << p_label;
-
-  for (int pl = 1; pl <= p_support.GetGame()->NumPlayers(); pl++) {
-    Gambit::GamePlayer player = p_support.GetGame()->GetPlayer(pl);
-
-    p_stream << ",";
-    for (int st = 1; st <= player->NumStrategies(); st++) {
-      if (p_support.Contains(player->GetStrategy(st))) {
-        p_stream << "1";
-      }
-      else {
-        p_stream << "0";
-      }
-    }
-  }
-  p_stream << std::endl;
-}
-
 namespace Gambit {
 namespace Nash {
 
-List<MixedStrategyProfile<double>> EnumPolyStrategySolve(const Game &p_nfg)
+List<MixedStrategyProfile<double>>
+EnumPolyStrategySolve(const Game &p_game,
+                      EnumPolyMixedStrategyObserverFunctionType p_onEquilibrium,
+                      EnumPolyStrategySupportObserverFunctionType p_onSupport)
 {
-  bool verbose = true;
   List<MixedStrategyProfile<double>> ret;
-  auto possible_supports = PossibleNashStrategySupports(p_nfg);
+  auto possible_supports = PossibleNashStrategySupports(p_game);
 
   for (auto support : possible_supports->m_supports) {
     long newevals = 0;
@@ -487,22 +453,19 @@ List<MixedStrategyProfile<double>> EnumPolyStrategySolve(const Game &p_nfg)
     List<MixedStrategyProfile<double>> newsolns;
     bool is_singular = false;
 
-    if (verbose) {
-      PrintSupport(std::cout, "candidate", support);
-    }
-
+    p_onSupport("candidate", support);
     PolEnum(support, newsolns, newevals, newtime, is_singular);
 
     for (int j = 1; j <= newsolns.Length(); j++) {
       Gambit::MixedStrategyProfile<double> fullProfile = ToFullSupport(newsolns[j]);
       if (fullProfile.GetLiapValue() < 1.0e-6) {
-        PrintProfile(std::cout, "NE", fullProfile);
+        p_onEquilibrium(fullProfile);
         ret.push_back(fullProfile);
       }
     }
 
-    if (is_singular && verbose) {
-      PrintSupport(std::cout, "singular", support);
+    if (is_singular) {
+      p_onSupport("singular", support);
     }
   }
   return ret;
