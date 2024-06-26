@@ -385,7 +385,7 @@ void EnumPolySolveExtensive(const Game &p_game)
     }
 
     bool isSingular = false;
-    List<MixedBehaviorProfile<double>> newsolns = SolveSupport(supports[i], isSingular);
+    List<MixedBehaviorProfile<double>> newsolns = SolveSupport(support, isSingular);
 
     for (int j = 1; j <= newsolns.Length(); j++) {
       MixedBehaviorProfile<double> fullProfile = ToFullSupport(newsolns[j]);

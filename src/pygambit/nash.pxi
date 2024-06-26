@@ -192,7 +192,6 @@ def _nashsupport_strategy_solve(game: Game) -> typing.List[StrategySupportProfil
     return ret
 
 
-
 def _logit_strategy_solve(
         game: Game, maxregret: float, first_step: float, max_accel: float,
 ) -> typing.List[MixedStrategyProfileDouble]:

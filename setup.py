@@ -88,6 +88,7 @@ cppgambit_liap = solver_library_config("cppgambit_liap", ["liap"])
 cppgambit_logit = solver_library_config("cppgambit_logit", ["logit"])
 cppgambit_gtracer = solver_library_config("cppgambit_gtracer", ["gtracer", "ipa", "gnm"])
 cppgambit_simpdiv = solver_library_config("cppgambit_simpdiv", ["simpdiv"])
+cppgambit_enumpoly = solver_library_config("cppgambit_enumpoly", ["nashsupport", "enumpoly"])
 
 
 libgambit = setuptools.Extension(
@@ -143,7 +144,7 @@ setuptools.setup(
         "deprecated",
     ],
     libraries=[cppgambit_bimatrix, cppgambit_liap, cppgambit_logit, cppgambit_simpdiv,
-               cppgambit_gtracer,
+               cppgambit_gtracer, cppgambit_enumpoly,
                cppgambit_games, cppgambit_core, lrslib],
     package_dir={"": "src"},
     packages=["pygambit"],
