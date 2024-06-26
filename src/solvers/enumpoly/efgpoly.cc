@@ -20,12 +20,9 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include <iostream>
-#include <iomanip>
-#include "gambit.h"
+#include <limits>
 
-using namespace Gambit;
-
+#include "enumpoly.h"
 #include "solvers/nashsupport/nashsupport.h"
 #include "sfg.h"
 #include "gpoly.h"
@@ -34,8 +31,7 @@ using namespace Gambit;
 #include "quiksolv.h"
 #include "behavextend.h"
 
-extern int g_numDecimals;
-extern bool g_verbose;
+using namespace Gambit;
 
 //
 // A class to organize the data needed to build the polynomials
@@ -254,35 +250,19 @@ List<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfile &p_
 
   // set up the rectangle of search
   Vector<double> bottoms(data.nVars), tops(data.nVars);
-  bottoms = (double)0;
-  tops = (double)1;
+  bottoms = 0;
+  tops = 1;
   gRectangle<double> Cube(bottoms, tops);
 
   QuikSolv<double> quickie(equations);
-#ifdef UNUSED
-  if (params.trace > 0) {
-    (*params.tracefile) << "\nThe equilibrium equations are \n" << quickie.UnderlyingEquations();
-  }
-#endif // UNUSED
-
-  // 2147483647 = 2^31-1 = MaxInt
-
   try {
-    if (quickie.FindCertainNumberOfRoots(Cube, 2147483647, 0)) {
-#ifdef UNUSED
-      if (params.trace > 0) {
-        (*params.tracefile) << "\nThe system has the following roots in [0,1]^" << num_vars
-                            << " :\n"
-                            << quickie.RootList();
-      }
-#endif // UNUSED
-    }
+    quickie.FindCertainNumberOfRoots(Cube, std::numeric_limits<int>::max(), 0);
   }
   catch (const Gambit::SingularMatrixException &) {
     p_isSingular = true;
   }
   catch (const Gambit::AssertionException &e) {
-    std::cerr << "Assertion warning: " << e.what() << std::endl;
+    // std::cerr << "Assertion warning: " << e.what() << std::endl;
     p_isSingular = true;
   }
 
@@ -298,31 +278,6 @@ List<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfile &p_
   }
 
   return solutions;
-}
-
-PVector<double> SeqFormProbsFromSolVars(const ProblemData &p_data, const Vector<double> &v)
-{
-  PVector<double> x(p_data.SF.NumSequences());
-
-  for (int pl = 1; pl <= p_data.support.GetGame()->NumPlayers(); pl++) {
-    for (int seq = 1; seq <= p_data.SF.NumSequences()[pl]; seq++) {
-      x(pl, seq) = NumProbOfSequence(p_data, pl, seq, v);
-    }
-  }
-
-  return x;
-}
-
-void PrintProfile(std::ostream &p_stream, const std::string &p_label,
-                  const MixedBehaviorProfile<double> &p_profile)
-{
-  p_stream << p_label;
-  for (int i = 1; i <= p_profile.BehaviorProfileLength(); i++) {
-    p_stream.setf(std::ios::fixed);
-    p_stream << "," << std::setprecision(g_numDecimals) << p_profile[i];
-  }
-
-  p_stream << std::endl;
 }
 
 MixedBehaviorProfile<double> ToFullSupport(const MixedBehaviorProfile<double> &p_profile)
@@ -349,40 +304,19 @@ MixedBehaviorProfile<double> ToFullSupport(const MixedBehaviorProfile<double> &p
   return fullProfile;
 }
 
-void PrintSupport(std::ostream &p_stream, const std::string &p_label,
-                  const BehaviorSupportProfile &p_support)
+namespace Gambit {
+namespace Nash {
+
+List<MixedBehaviorProfile<double>>
+EnumPolyBehaviorSolve(const Game &p_game,
+                      EnumPolyMixedBehaviorObserverFunctionType p_onEquilibrium,
+                      EnumPolyBehaviorSupportObserverFunctionType p_onSupport)
 {
-  p_stream << p_label;
-
-  for (int pl = 1; pl <= p_support.GetGame()->NumPlayers(); pl++) {
-    GamePlayer player = p_support.GetGame()->GetPlayer(pl);
-
-    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      GameInfoset infoset = player->GetInfoset(iset);
-
-      p_stream << ",";
-
-      for (int act = 1; act <= infoset->NumActions(); act++) {
-        if (p_support.Contains(infoset->GetAction(act))) {
-          p_stream << "1";
-        }
-        else {
-          p_stream << "0";
-        }
-      }
-    }
-  }
-  p_stream << std::endl;
-}
-
-void EnumPolySolveExtensive(const Game &p_game)
-{
+  List<MixedBehaviorProfile<double>> ret;
   auto possible_supports = PossibleNashBehaviorSupports(p_game);
 
   for (auto support : possible_supports->m_supports) {
-    if (g_verbose) {
-      PrintSupport(std::cout, "candidate", support);
-    }
+    p_onSupport("candidate", support);
 
     bool isSingular = false;
     List<MixedBehaviorProfile<double>> newsolns = SolveSupport(support, isSingular);
@@ -390,12 +324,17 @@ void EnumPolySolveExtensive(const Game &p_game)
     for (int j = 1; j <= newsolns.Length(); j++) {
       MixedBehaviorProfile<double> fullProfile = ToFullSupport(newsolns[j]);
       if (fullProfile.GetLiapValue() < 1.0e-6) {
-        PrintProfile(std::cout, "NE", fullProfile);
+        p_onEquilibrium(fullProfile);
+        ret.push_back(fullProfile);
       }
     }
 
-    if (isSingular && g_verbose) {
-      PrintSupport(std::cout, "singular", support);
+    if (isSingular) {
+      p_onSupport("singular", support);
     }
   }
+  return ret;
 }
+
+} // namespace Nash
+} // namespace Gambit

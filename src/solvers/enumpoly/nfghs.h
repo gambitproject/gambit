@@ -36,59 +36,48 @@ private:
   int m_removalWhenUninstantiated;
   std::string m_ordering;
 
-#ifdef DEBUG
-  std::ostream m_logfile;
-#endif // DEBUG
-
   int minActions{0};
   int maxActions{0};
   int numPlayers{0};
 
-  Gambit::Array<int> numActions;
+  Array<int> numActions;
 
   void Initialize(const Game &game);
   void Cleanup(const Game &game);
 
-  void SolveSizeDiff(const Game &game, Gambit::List<MixedStrategyProfile<double>> &solutions,
-                     int size, int diff);
+  void SolveSizeDiff(const Game &game, List<MixedStrategyProfile<double>> &solutions, int size,
+                     int diff);
 
-  bool SolveSupportSizeProfile(const Game &game,
-                               Gambit::List<MixedStrategyProfile<double>> &solutions,
-                               const Gambit::Array<int> &supportSizeProfile);
+  bool SolveSupportSizeProfile(const Game &game, List<MixedStrategyProfile<double>> &solutions,
+                               const Array<int> &supportSizeProfile);
 
   void GetSupport(const Game &game, int playerIdx, const Vector<int> &support,
-                  Gambit::Array<GameStrategy> &supportBlock);
+                  Array<GameStrategy> &supportBlock);
 
-  bool UpdatePlayerSupport(const Game &game, int playerIdx, Gambit::PVector<int> &playerSupport);
+  bool UpdatePlayerSupport(const Game &game, int playerIdx, PVector<int> &playerSupport);
 
-  bool RecursiveBacktracking(const Game &game,
-                             Gambit::List<MixedStrategyProfile<double>> &solutions,
-                             Gambit::Array<Gambit::Array<GameStrategy>> &uninstantiatedSupports,
-                             Gambit::Array<Gambit::Array<Gambit::Array<GameStrategy>>> &domains,
+  bool RecursiveBacktracking(const Game &game, List<MixedStrategyProfile<double>> &solutions,
+                             Array<Array<GameStrategy>> &uninstantiatedSupports,
+                             Array<Array<Array<GameStrategy>>> &domains,
                              int idxNextSupport2Instantiate);
 
-  bool IteratedRemovalStrictlyDominatedStrategies(
-      const Game &game, Gambit::Array<Gambit::Array<Gambit::Array<GameStrategy>>> &domains);
+  bool IteratedRemovalStrictlyDominatedStrategies(const Game &game,
+                                                  Array<Array<Array<GameStrategy>>> &domains);
 
-  void GetDomainStrategies(Gambit::Array<Gambit::Array<Gambit::Array<GameStrategy>>> &domains,
-                           Gambit::Array<Gambit::Array<GameStrategy>> &domainStrategies) const;
+  void GetDomainStrategies(Array<Array<Array<GameStrategy>>> &domains,
+                           Array<Array<GameStrategy>> &domainStrategies) const;
 
   bool IsConditionalDominatedBy(StrategySupportProfile &dominatedGame,
-                                Gambit::Array<Gambit::Array<GameStrategy>> &domainStrategies,
+                                Array<Array<GameStrategy>> &domainStrategies,
                                 const GameStrategy &strategy, const GameStrategy &checkStrategy,
                                 bool strict);
 
-  bool IsConditionalDominated(StrategySupportProfile &dominatedGame,
-                              Gambit::Array<Gambit::Array<GameStrategy>> &domainStrategies,
-                              const GameStrategy &strategy, bool strict);
-
-  bool RemoveFromDomain(Gambit::Array<Gambit::Array<Gambit::Array<GameStrategy>>> &domains,
-                        Gambit::Array<Gambit::Array<GameStrategy>> &domainStrategies, int player,
+  bool RemoveFromDomain(Array<Array<Array<GameStrategy>>> &domains,
+                        Array<Array<GameStrategy>> &domainStrategies, int player,
                         int removeStrategyIdx);
 
-  bool
-  FeasibilityProgram(const Game &game, Gambit::List<MixedStrategyProfile<double>> &solutions,
-                     Gambit::Array<Gambit::Array<GameStrategy>> &uninstantiatedSupports) const;
+  bool FeasibilityProgram(const Game &game, List<MixedStrategyProfile<double>> &solutions,
+                          Array<Array<GameStrategy>> &uninstantiatedSupports) const;
 
 public:
   gbtNfgHs(int = 1);

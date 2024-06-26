@@ -471,12 +471,11 @@ gambit_enumpoly_SOURCES = \
 	src/solvers/enumpoly/sfstrat.h \
 	src/solvers/enumpoly/odometer.cc \
 	src/solvers/enumpoly/odometer.h \
-	src/solvers/enumpoly/nfgcpoly.cc \
-	src/solvers/enumpoly/nfgcpoly.h \
 	src/solvers/enumpoly/nfghs.cc \
 	src/solvers/enumpoly/nfghs.h \
 	src/solvers/enumpoly/efgpoly.cc \
 	src/solvers/enumpoly/nfgpoly.cc \
+	src/solvers/enumpoly/enumpoly.h \
 	src/tools/enumpoly/enumpoly.cc
 
 gambit_enumpure_SOURCES = \

@@ -24,10 +24,10 @@
 
 #include <iostream>
 #include "gambit.h"
-#include "nfgcpoly.h"
 #include "nfghs.h"
+#include "enumpoly.h"
 
-extern MixedStrategyProfile<double> ToFullSupport(const MixedStrategyProfile<double> &p_profile);
+using namespace Nash;
 
 extern void PrintProfile(std::ostream &p_stream, const std::string &p_label,
                          const MixedStrategyProfile<double> &p_profile);
@@ -38,7 +38,6 @@ extern void PrintProfile(std::ostream &p_stream, const std::string &p_label,
 
 void gbtNfgHs::Solve(const Game &game)
 {
-
   int i;
   int size, diff, maxsize, maxdiff;
   bool preferBalance;
@@ -58,7 +57,7 @@ void gbtNfgHs::Solve(const Game &game)
     preferBalance = false;
   }
 
-  Gambit::List<MixedStrategyProfile<double>> solutions;
+  List<MixedStrategyProfile<double>> solutions;
 
   // Iterate over possible sizes and differences of the support size profile.
   // The order of iteration is determined by preferBalance.
@@ -105,7 +104,7 @@ void gbtNfgHs::Initialize(const Game &p_game)
 
   // remove strict dominated strategies
 
-  Gambit::Array<GameStrategy> strategies_list;
+  Array<GameStrategy> strategies_list;
 
   numPlayers = p_game->NumPlayers();
   numActions = p_game->NumStrategies();
@@ -129,27 +128,14 @@ void gbtNfgHs::Cleanup(const Game &game) {}
 gbtNfgHs::gbtNfgHs(int p_stopAfter)
   : m_iteratedRemoval(true), m_removalWhenUninstantiated(1), m_ordering("automatic"),
     m_stopAfter(p_stopAfter)
-#ifdef DEBUG
-    ,
-    m_logfile(std::cerr)
-#endif // DEBUG
 {
 }
 
-void gbtNfgHs::SolveSizeDiff(const Game &game,
-                             Gambit::List<MixedStrategyProfile<double>> &solutions, int size,
-                             int diff)
+void gbtNfgHs::SolveSizeDiff(const Game &game, List<MixedStrategyProfile<double>> &solutions,
+                             int size, int diff)
 {
-
-  //------------------------------------
-  // Logging
-#ifdef DEBUG
-  m_logfile << "Entering SolveSizeDiff with size = " << size << ", diff = " << diff << "\n";
-#endif
-  //------------------------------------
-
   int i, j;
-  Gambit::Array<int> supportSizeProfile(numPlayers);
+  Array<int> supportSizeProfile(numPlayers);
   for (i = 1; i <= numPlayers; i++) {
     supportSizeProfile[i] = 1;
   }
@@ -207,51 +193,24 @@ void gbtNfgHs::SolveSizeDiff(const Game &game,
       SolveSupportSizeProfile(game, solutions, supportSizeProfile);
     }
     if (m_stopAfter > 0 && solutions.Length() >= m_stopAfter) {
-      //------------------------------------
-      // Logging
-#ifdef DEBUG
-      m_logfile << "Exiting SolveSizeDiff1\n";
-#endif
-      //------------------------------------
       return;
     }
   }
-
-  //------------------------------------
-  // Logging
-#ifdef DEBUG
-  m_logfile << "Exiting SolveSizeDiff2\n";
-#endif
-  //------------------------------------
 }
 
 bool gbtNfgHs::SolveSupportSizeProfile(const Game &game,
-                                       Gambit::List<MixedStrategyProfile<double>> &solutions,
-                                       const Gambit::Array<int> &supportSizeProfile)
+                                       List<MixedStrategyProfile<double>> &solutions,
+                                       const Array<int> &supportSizeProfile)
 {
-
-  //------------------------------------
-  // Logging
-#ifdef DEBUG
-  m_logfile << "\n************\n";
-  m_logfile << "* Solving support size profile: ";
-  for (int i = 1; i <= numPlayers; i++) {
-    m_logfile << supportSizeProfile[i] << ' ';
-  }
-  m_logfile << "\n************\n";
-#endif
-  //------------------------------------
-
-  Gambit::Array<Gambit::Array<GameStrategy>> uninstantiatedSupports(numPlayers);
-  Gambit::Array<Gambit::Array<Gambit::Array<GameStrategy>>> domains(numPlayers);
-  Gambit::PVector<int> playerSupport(supportSizeProfile);
+  Array<Array<GameStrategy>> uninstantiatedSupports(numPlayers);
+  Array<Array<Array<GameStrategy>>> domains(numPlayers);
+  PVector<int> playerSupport(supportSizeProfile);
 
   for (int i = 1; i <= numPlayers; i++) {
-    uninstantiatedSupports[i] = Gambit::Array<GameStrategy>();
+    uninstantiatedSupports[i] = Array<GameStrategy>();
     int m = 1;
     for (int j = 1; j <= supportSizeProfile[i]; j++) {
       playerSupport(i, j) = m;
-      // m_logfile << "playerSupport: " << i << j << m << std::endl;
       m++;
     }
   }
@@ -259,7 +218,7 @@ bool gbtNfgHs::SolveSupportSizeProfile(const Game &game,
   for (int i = 1; i <= numPlayers; i++) {
     bool success = false;
     do {
-      Gambit::Array<GameStrategy> supportBlock;
+      Array<GameStrategy> supportBlock;
       GetSupport(game, i, playerSupport.GetRow(i), supportBlock);
       domains[i].push_back(supportBlock);
       success = UpdatePlayerSupport(game, i, playerSupport);
@@ -269,20 +228,8 @@ bool gbtNfgHs::SolveSupportSizeProfile(const Game &game,
 }
 
 void gbtNfgHs::GetSupport(const Game &game, int playerIdx, const Vector<int> &support,
-                          Gambit::Array<GameStrategy> &supportBlock)
+                          Array<GameStrategy> &supportBlock)
 {
-
-  //------------------------------------
-  // Logging
-#ifdef DEBUG
-  m_logfile << "* Enter GetSupport for player " << playerIdx << ", choose strategies: ";
-  for (int i = 1; i <= support.Length(); i++) {
-    m_logfile << support[i] << ' ';
-  }
-  m_logfile << "\n";
-#endif
-  //------------------------------------
-
   GamePlayer player = game->GetPlayer(playerIdx);
   for (int i = 1; i <= support.Length(); i++) {
     int strategyIdx = support[i];
@@ -290,22 +237,9 @@ void gbtNfgHs::GetSupport(const Game &game, int playerIdx, const Vector<int> &su
   }
 }
 
-bool gbtNfgHs::UpdatePlayerSupport(const Game &game, int playerIdx,
-                                   Gambit::PVector<int> &playerSupport)
+bool gbtNfgHs::UpdatePlayerSupport(const Game &game, int playerIdx, PVector<int> &playerSupport)
 {
-
   Vector<int> support = playerSupport.GetRow(playerIdx);
-
-  //------------------------------------
-  // Logging
-  // m_logfile << "\n****\n";
-  // m_logfile << "* Enter UpdatePlayerSupport for player " << playerIdx << ", current strategiess:
-  // "; for ( int i = 1; i <= support.Length(); i++ ) {
-  //  m_logfile << support[i] << ' ';
-  //}
-  // m_logfile << "\n****\n";
-  //------------------------------------
-
   int lastBit = support.Length();
   while (true) {
     playerSupport(playerIdx, lastBit) += 1;
@@ -323,9 +257,6 @@ bool gbtNfgHs::UpdatePlayerSupport(const Game &game, int playerIdx,
       idx--;
     }
     if (playerSupport(playerIdx, 1) == (numActions[playerIdx] + 1)) {
-#ifdef DEBUG
-      m_logfile << "Update finished, return false.\n";
-#endif
       return false;
     }
 
@@ -345,73 +276,22 @@ bool gbtNfgHs::UpdatePlayerSupport(const Game &game, int playerIdx,
   return true;
 }
 
-bool gbtNfgHs::RecursiveBacktracking(
-    const Game &game, Gambit::List<MixedStrategyProfile<double>> &solutions,
-    Gambit::Array<Gambit::Array<GameStrategy>> &uninstantiatedSupports,
-    Gambit::Array<Gambit::Array<Gambit::Array<GameStrategy>>> &domains,
-    int idxNextSupport2Instantiate)
+bool gbtNfgHs::RecursiveBacktracking(const Game &game,
+                                     List<MixedStrategyProfile<double>> &solutions,
+                                     Array<Array<GameStrategy>> &uninstantiatedSupports,
+                                     Array<Array<Array<GameStrategy>>> &domains,
+                                     int idxNextSupport2Instantiate)
 {
-
-  //------------------------------------
-  // Logging
-#ifdef DEBUG
-  m_logfile << "\n********\n";
-  m_logfile << "* Begin RecursiveBacktracking to instantiate player "
-            << idxNextSupport2Instantiate;
-  m_logfile << "\n********\n";
-#endif
-  //------------------------------------
-
   int idx = idxNextSupport2Instantiate;
   if (idx == numPlayers + 1) {
-    //------------------------------------
-    // Logging
-#ifdef DEBUG
-    m_logfile << "\n****************\n";
-    m_logfile << "* No more player. Instantiate finished. Now try to solve the restricted game:\n";
-    for (int i = 1; i <= uninstantiatedSupports.Length(); i++) {
-      m_logfile << "     Player " << i << ": ";
-      for (int j = 1; j <= uninstantiatedSupports[i].Length(); j++) {
-        m_logfile << uninstantiatedSupports[i][j]->GetNumber() << ' ';
-      }
-      m_logfile << "\n";
-    }
-#endif
-    //------------------------------------
-
-    bool success = FeasibilityProgram(game, solutions, uninstantiatedSupports);
-    //------------------------------------
-    // Logging
-#ifdef DEBUG
-    m_logfile << "* Whether solved : " << success << "\n";
-    m_logfile << "****************\n";
-#endif
-    //------------------------------------
-
-    if (success) {
-      return true;
-    }
-    else {
-      return false;
-    }
+    return FeasibilityProgram(game, solutions, uninstantiatedSupports);
   }
   else {
     // m_logfile << "Player " << idx << " domains length: " << domains[idx].Length() << " @@\n";
     int domainLength = domains[idx].Length();
     for (int k = 1; k <= domainLength; k++) {
       uninstantiatedSupports[idx] = domains[idx][k];
-      //------------------------------------
-      // Logging
-#ifdef DEBUG
-      m_logfile << "\nNow instantiate strategy for player " << idx << " :";
-      for (int i = 1; i <= uninstantiatedSupports[idx].Length(); i++) {
-        m_logfile << uninstantiatedSupports[idx][i]->GetNumber() << ' ';
-      }
-      m_logfile << "\n";
-#endif
-      //------------------------------------
-
-      Gambit::Array<Gambit::Array<Gambit::Array<GameStrategy>>> newDomains(numPlayers);
+      Array<Array<Array<GameStrategy>>> newDomains(numPlayers);
       for (int ii = 1; ii <= idx; ii++) {
         newDomains[ii].push_back(uninstantiatedSupports[ii]);
       }
@@ -423,11 +303,6 @@ bool gbtNfgHs::RecursiveBacktracking(
         success = IteratedRemovalStrictlyDominatedStrategies(game, newDomains);
       }
       if (success) {
-        // update domain
-        // for (int ii = idx + 1; ii <= numPlayers; ii++) {
-        //  domains[ii] = newDomains[ii];
-        //  }
-
         if (RecursiveBacktracking(game, solutions, uninstantiatedSupports, newDomains, idx + 1)) {
           if ((m_stopAfter > 0) && (solutions.Length() >= m_stopAfter)) {
             return true;
@@ -441,37 +316,10 @@ bool gbtNfgHs::RecursiveBacktracking(
 }
 
 bool gbtNfgHs::IteratedRemovalStrictlyDominatedStrategies(
-    const Game &game, Gambit::Array<Gambit::Array<Gambit::Array<GameStrategy>>> &domains)
+    const Game &game, Array<Array<Array<GameStrategy>>> &domains)
 {
-
-  //------------------------------------
-  // Logging
-#ifdef DEBUG
-  m_logfile << "\n********\n";
-  m_logfile << "* Begin IteratedRemovalStrictlyDominatedStrategies:\n";
-  m_logfile << "     Current domains:\n";
-  for (int i = 1; i <= numPlayers; i++) {
-    m_logfile << "     Player " << i << " [" << domains[i].Length() << "]: ";
-    for (int j = 1; j <= domains[i].Length(); j++) {
-      for (int k = 1; k <= domains[i][j].Length(); k++) {
-        m_logfile << domains[i][j][k]->GetNumber();
-        if (k != domains[i][j].Length()) {
-          m_logfile << ' ';
-        }
-      }
-      if (j != domains[i].Length()) {
-        m_logfile << " | ";
-      }
-    }
-    m_logfile << "\n";
-  }
-  m_logfile << "********\n";
-#endif
-  //------------------------------------
-
-  // Gambit::Array< Gambit::Array< Gambit::Array< gbtNfgStrategy > > > domains(numPlayers);
   bool changed = false;
-  Gambit::Array<Gambit::Array<GameStrategy>> domainStrategies(numPlayers);
+  Array<Array<GameStrategy>> domainStrategies(numPlayers);
 
   GetDomainStrategies(domains, domainStrategies);
 
@@ -481,7 +329,6 @@ bool gbtNfgHs::IteratedRemovalStrictlyDominatedStrategies(
       GamePlayer player = game->GetPlayer(i);
 
       // construct restrict game
-
       StrategySupportProfile dominatedGame(game);
 
       for (int pl = 1; pl <= numPlayers; pl++) {
@@ -502,18 +349,12 @@ bool gbtNfgHs::IteratedRemovalStrictlyDominatedStrategies(
         if (straIdx == 0) {
           continue;
         }
-        // bool dominated = IsConditionalDominated(dominatedGame, domainStrategies, stra, true);
-
         bool dominated = false;
         for (int aj = 1; aj <= numActions[i]; aj++) {
           if (aj != ai) {
             if (IsConditionalDominatedBy(dominatedGame, domainStrategies, stra,
                                          player->GetStrategy(aj), true)) {
               dominated = true;
-#ifdef DEBUG
-              m_logfile << "Strategy " << ai << " is dominated by strategy " << aj << " in player "
-                        << i << "\n";
-#endif
               break;
             }
           }
@@ -521,63 +362,24 @@ bool gbtNfgHs::IteratedRemovalStrictlyDominatedStrategies(
 
         if (dominated) {
           bool success = RemoveFromDomain(domains, domainStrategies, i, straIdx);
-#ifdef DEBUG
-          m_logfile << "* Now remove strategy " << ai << " in player " << i << " : ";
-          m_logfile << success << "\n";
-#endif
           changed = true;
           if (!success) {
-            //------------------------------------
-            // Logging
-#ifdef DEBUG
-            m_logfile << "\n********\n";
-            m_logfile << "* End IteratedRemovalStrictlyDominatedStrategies:\n";
-            m_logfile << "     After IRSDS, domains exhausted!\n";
-            m_logfile << "********\n";
-#endif
-            //------------------------------------
             return false;
           }
         }
       }
     }
-  } while (changed == true);
-
-  //------------------------------------
-  // Logging
-#ifdef DEBUG
-  m_logfile << "\n********\n";
-  m_logfile << "* End IteratedRemovalStrictlyDominatedStrategies:\n";
-  m_logfile << "     After IRSDS, domains:\n";
-  for (int i = 1; i <= numPlayers; i++) {
-    m_logfile << "     Player " << i << " [" << domains[i].Length() << "]: ";
-    for (int j = 1; j <= domains[i].Length(); j++) {
-      for (int k = 1; k <= domains[i][j].Length(); k++) {
-        m_logfile << domains[i][j][k]->GetNumber();
-        if (k != domains[i][j].Length()) {
-          m_logfile << ' ';
-        }
-      }
-      if (j != domains[i].Length()) {
-        m_logfile << " | ";
-      }
-    }
-    m_logfile << "\n";
-  }
-  m_logfile << "********\n";
-#endif
-  //------------------------------------
+  } while (changed);
 
   return true;
 }
 
-void gbtNfgHs::GetDomainStrategies(
-    Gambit::Array<Gambit::Array<Gambit::Array<GameStrategy>>> &domains,
-    Gambit::Array<Gambit::Array<GameStrategy>> &domainStrategies) const
+void gbtNfgHs::GetDomainStrategies(Array<Array<Array<GameStrategy>>> &domains,
+                                   Array<Array<GameStrategy>> &domainStrategies) const
 {
 
   for (int i = 1; i <= numPlayers; i++) {
-    domainStrategies[i] = Gambit::Array<GameStrategy>();
+    domainStrategies[i] = Array<GameStrategy>();
     for (int j = 1; j <= domains[i].Length(); j++) {
       for (int k = 1; k <= domains[i][j].Length(); k++) {
         if (domainStrategies[i].Find(domains[i][j][k]) == 0) { // no found
@@ -588,19 +390,11 @@ void gbtNfgHs::GetDomainStrategies(
   }
 }
 
-bool gbtNfgHs::IsConditionalDominatedBy(
-    StrategySupportProfile &dominatedGame,
-    Gambit::Array<Gambit::Array<GameStrategy>> &domainStrategies, const GameStrategy &strategy,
-    const GameStrategy &checkStrategy, bool strict)
+bool gbtNfgHs::IsConditionalDominatedBy(StrategySupportProfile &dominatedGame,
+                                        Array<Array<GameStrategy>> &domainStrategies,
+                                        const GameStrategy &strategy,
+                                        const GameStrategy &checkStrategy, bool strict)
 {
-
-  //------------------------------------
-  // Logging
-  // m_logfile << "\n********\n";
-  // m_logfile << "* Enter IsConditionalDominates:\n ";
-  // m_logfile << "\n********\n";
-  //------------------------------------
-
   GamePlayer player = strategy->GetPlayer();
   int playerIdx = player->GetNumber();
 
@@ -610,36 +404,12 @@ bool gbtNfgHs::IsConditionalDominatedBy(
   GameStrategy newStrategy = dominatedPlayer->GetStrategy(strategyIdx);
   GameStrategy newCheckStrategy = dominatedPlayer->GetStrategy(checkStrategyIdx);
 
-  // return newCheckStrategy->Dominates(newStrategy, strict);
   return dominatedGame.Dominates(newCheckStrategy, newStrategy, strict);
 }
 
-bool gbtNfgHs::IsConditionalDominated(StrategySupportProfile &dominatedGame,
-                                      Gambit::Array<Gambit::Array<GameStrategy>> &domainStrategies,
-                                      const GameStrategy &strategy, bool strict)
-{
-
-  //------------------------------------
-  // Logging
-  // m_logfile << "\n********\n";
-  // m_logfile << "* Enter IsConditionalDominated:\n ";
-  // m_logfile << "\n********\n";
-  //------------------------------------
-
-  GamePlayer player = strategy->GetPlayer();
-  int playerIdx = player->GetNumber();
-
-  int strategyIdx = strategy->GetNumber();
-  GamePlayer dominatedPlayer = dominatedGame.GetGame()->GetPlayer(playerIdx);
-  GameStrategy newStrategy = dominatedPlayer->GetStrategy(strategyIdx);
-
-  // return newStrategy->IsDominated(strict);
-  return dominatedGame.IsDominated(newStrategy, strict);
-}
-
-bool gbtNfgHs::RemoveFromDomain(Gambit::Array<Gambit::Array<Gambit::Array<GameStrategy>>> &domains,
-                                Gambit::Array<Gambit::Array<GameStrategy>> &domainStrategies,
-                                int player, int removeStrategyIdx)
+bool gbtNfgHs::RemoveFromDomain(Array<Array<Array<GameStrategy>>> &domains,
+                                Array<Array<GameStrategy>> &domainStrategies, int player,
+                                int removeStrategyIdx)
 {
 
   GameStrategy removeStrategy = domainStrategies[player][removeStrategyIdx];
@@ -651,17 +421,11 @@ bool gbtNfgHs::RemoveFromDomain(Gambit::Array<Gambit::Array<Gambit::Array<GameSt
     }
   }
   GetDomainStrategies(domains, domainStrategies);
-  if (domains[player].Length() != 0) {
-    return true;
-  }
-  else {
-    return false;
-  }
+  return (domains[player].Length() != 0);
 }
 
-bool gbtNfgHs::FeasibilityProgram(
-    const Game &game, Gambit::List<MixedStrategyProfile<double>> &solutions,
-    Gambit::Array<Gambit::Array<GameStrategy>> &uninstantiatedSupports) const
+bool gbtNfgHs::FeasibilityProgram(const Game &game, List<MixedStrategyProfile<double>> &solutions,
+                                  Array<Array<GameStrategy>> &uninstantiatedSupports) const
 {
   StrategySupportProfile restrictedGame(game);
   for (int pl = 1; pl <= numPlayers; pl++) {
@@ -672,14 +436,13 @@ bool gbtNfgHs::FeasibilityProgram(
     }
   }
 
-  Gambit::List<MixedStrategyProfile<double>> newSolutions;
-  HeuristicPolEnumModule module(restrictedGame, (m_stopAfter == 1) ? 1 : 0);
-  module.PolEnum();
-  newSolutions = module.GetSolutions();
+  bool is_singular;
+  auto newSolutions =
+      EnumPolyStrategySupportSolve(restrictedGame, is_singular, (m_stopAfter == 1) ? 1 : 0);
 
   bool gotSolutions = false;
-  for (int k = 1; k <= newSolutions.Length(); k++) {
-    MixedStrategyProfile<double> solutionToTest = ToFullSupport(newSolutions[k]);
+  for (auto soln : newSolutions) {
+    MixedStrategyProfile<double> solutionToTest = soln.ToFullSupport();
     if (solutionToTest.GetLiapValue() < .01) {
       gotSolutions = true;
       PrintProfile(std::cout, "NE", solutionToTest);
@@ -689,10 +452,5 @@ bool gbtNfgHs::FeasibilityProgram(
       }
     }
   }
-  if (gotSolutions) {
-    return true;
-  }
-  else {
-    return false;
-  }
+  return gotSolutions;
 }

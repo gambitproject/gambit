@@ -307,10 +307,7 @@ template <class T> T polynomial<T>::LeadingCoefficient() const
   }
 }
 
-template <class T> Gambit::List<T> polynomial<T>::CoefficientList() const
-{
-  return coeflist;
-}
+template <class T> Gambit::List<T> polynomial<T>::CoefficientList() const { return coeflist; }
 
 template <class T> polynomial<T> polynomial<T>::GcdWith(const polynomial<T> &that) const
 {

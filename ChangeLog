@@ -12,6 +12,8 @@
   probabilities.
 - Reorganized naming conventions in pygambit for functions for computing QRE in both strategic
   and agent versions, and added a corresponding section in the user guide.
+- `enumpoly_solve` has been returned to being fully supported from temporarily being experimental;
+  now available in `pygambit`.
 
 
 ## [16.1.2] - unreleased

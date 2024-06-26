@@ -279,6 +279,7 @@ Computation of Nash equilibria
    NashComputationResult
    enumpure_solve
    enummixed_solve
+   enumpoly_solve
    lp_solve
    lcp_solve
    liap_solve
