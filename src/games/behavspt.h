@@ -107,7 +107,7 @@ public:
   void AddAction(const GameAction &);
   /// Removes the action from the support; returns true if successful.
   bool RemoveAction(const GameAction &);
- //@}
+  //@}
 
   /// @name Reachability of nodes and information sets
   //@{

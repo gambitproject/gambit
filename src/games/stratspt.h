@@ -152,15 +152,19 @@ public:
   public:
     /// @name Lifecycle
     //@{
-    explicit const_iterator(const StrategySupportProfile &S, int p_pl = 1, int p_st = 1) :
-      support(S), pl(p_pl), strat(p_st) { }
+    explicit const_iterator(const StrategySupportProfile &S, int p_pl = 1, int p_st = 1)
+      : support(S), pl(p_pl), strat(p_st)
+    {
+    }
     ~const_iterator() = default;
     //@}
 
     /// @name Operator overloading
     //@{
     bool operator==(const const_iterator &other) const
-    { return (support == other.support && pl == other.pl && strat == other.strat); }
+    {
+      return (support == other.support && pl == other.pl && strat == other.strat);
+    }
     bool operator!=(const const_iterator &other) const { return !(*this == other); }
     //@}
 
@@ -169,14 +173,17 @@ public:
     /// Advance to next strategy; return False when advancing past last strategy.
     bool GoToNext();
     /// Advance to next strategy
-    const_iterator &operator++()  { GoToNext(); return *this; }
+    const_iterator &operator++()
+    {
+      GoToNext();
+      return *this;
+    }
     //@}
 
     /// @name Access to state information
     //@{
     GameStrategy operator*() const { return GetStrategy(); }
-    GameStrategy GetStrategy() const
-    { return support.GetStrategy(pl, strat); }
+    GameStrategy GetStrategy() const { return support.GetStrategy(pl, strat); }
     int StrategyIndex() const { return strat; }
     GamePlayer GetPlayer() const { return support.GetGame()->GetPlayer(pl); }
     int PlayerIndex() const { return pl; }
@@ -194,7 +201,7 @@ public:
   };
 
   const_iterator begin() const { return const_iterator(*this); }
-  const_iterator end() const   { return const_iterator(*this, m_nfg->NumPlayers() + 1); }
+  const_iterator end() const { return const_iterator(*this, m_nfg->NumPlayers() + 1); }
 };
 
 } // end namespace Gambit

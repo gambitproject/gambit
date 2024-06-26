@@ -397,7 +397,6 @@ bool StrategySupportProfile::Overwhelms(const GameStrategy &s, const GameStrateg
 //               class StrategySupportProfile::const_iterator
 //===========================================================================
 
-
 bool StrategySupportProfile::const_iterator::GoToNext()
 {
   if (strat != support.NumStrategies(pl)) {
@@ -417,8 +416,7 @@ bool StrategySupportProfile::const_iterator::GoToNext()
   }
 }
 
-bool 
-StrategySupportProfile::const_iterator::IsSubsequentTo(const GameStrategy &s) const
+bool StrategySupportProfile::const_iterator::IsSubsequentTo(const GameStrategy &s) const
 {
   if (pl > s->GetPlayer()->GetNumber()) {
     return true;

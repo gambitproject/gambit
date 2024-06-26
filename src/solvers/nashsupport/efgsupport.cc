@@ -29,7 +29,7 @@ using namespace Gambit;
 class ActionCursor {
 protected:
   BehaviorSupportProfile m_support;
-  int pl, iset, act;
+  int pl{1}, iset{1}, act{1};
 
 public:
   // Lifecycle
@@ -46,9 +46,7 @@ public:
   GameAction GetAction() const { return m_support.GetAction(pl, iset, act); }
 };
 
-
-ActionCursor::ActionCursor(const BehaviorSupportProfile &p_support)
-  : m_support(p_support), pl(1), iset(1), act(1)
+ActionCursor::ActionCursor(const BehaviorSupportProfile &p_support) : m_support(p_support)
 {
   Game efg = p_support.GetGame();
 
@@ -64,7 +62,6 @@ ActionCursor::ActionCursor(const BehaviorSupportProfile &p_support)
     }
   }
 }
-
 
 bool ActionCursor::GoToNext()
 {
@@ -104,11 +101,9 @@ bool HasActiveActionsAtActiveInfosetsAndNoOthers(const BehaviorSupportProfile &p
   return true;
 }
 
-
-void
-PossibleNashBehaviorSupports(const BehaviorSupportProfile &p_support,
-                             const ActionCursor &p_cursor,
-                             std::list<BehaviorSupportProfile> &p_list)
+void PossibleNashBehaviorSupports(const BehaviorSupportProfile &p_support,
+                                  const ActionCursor &p_cursor,
+                                  std::list<BehaviorSupportProfile> &p_list)
 {
   ActionCursor copy(p_cursor);
   if (!copy.GoToNext()) {
@@ -130,15 +125,15 @@ PossibleNashBehaviorSupports(const BehaviorSupportProfile &p_support,
   PossibleNashBehaviorSupports(copySupport, copy, p_list);
 }
 
-}
-
+} // namespace
 
 //
 // TODO: This is a naive implementation that does not take into account
 //       that removing actions from a support profile can (and often does) lead
 //       to information sets becoming unreachable.
 //
-std::shared_ptr<PossibleNashBehaviorSupportsResult> PossibleNashBehaviorSupports(const Game &p_game)
+std::shared_ptr<PossibleNashBehaviorSupportsResult>
+PossibleNashBehaviorSupports(const Game &p_game)
 {
   BehaviorSupportProfile support(p_game);
   ActionCursor cursor(support);
@@ -147,4 +142,3 @@ std::shared_ptr<PossibleNashBehaviorSupportsResult> PossibleNashBehaviorSupports
   PossibleNashBehaviorSupports(support, cursor, result->m_supports);
   return result;
 }
- 

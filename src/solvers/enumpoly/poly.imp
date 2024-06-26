@@ -307,7 +307,7 @@ template <class T> T polynomial<T>::LeadingCoefficient() const
   }
 }
 
-template <class T> __attribute__((unused)) Gambit::List<T> polynomial<T>::CoefficientList() const
+template <class T> Gambit::List<T> polynomial<T>::CoefficientList() const
 {
   return coeflist;
 }

@@ -43,8 +43,7 @@ bool AcceptCandidate(const StrategySupportProfile &p_support,
     for (int j = 1; j <= strat->GetPlayer()->NumStrategies(); j++) {
       GameStrategy other_strat = strat->GetPlayer()->GetStrategy(j);
       if (other_strat != strat) {
-        if (current.Contains(other_strat) &&
-            current.Dominates(other_strat, strat, false)) {
+        if (current.Contains(other_strat) && current.Dominates(other_strat, strat, false)) {
           return false;
         }
         current.AddStrategy(other_strat);
@@ -101,10 +100,10 @@ void PossibleNashSupports(const StrategySupportProfile &p_support,
   }
 }
 
-}  // end anonymous namespace
+} // end anonymous namespace
 
-
-std::shared_ptr<PossibleNashStrategySupportsResult> PossibleNashStrategySupports(const Game &p_game)
+std::shared_ptr<PossibleNashStrategySupportsResult>
+PossibleNashStrategySupports(const Game &p_game)
 {
   auto result = std::make_shared<PossibleNashStrategySupportsResult>();
   StrategySupportProfile support(p_game);
@@ -113,5 +112,3 @@ std::shared_ptr<PossibleNashStrategySupportsResult> PossibleNashStrategySupports
   PossibleNashSupports(support, sact, cursor, result->m_supports);
   return result;
 }
-
-
