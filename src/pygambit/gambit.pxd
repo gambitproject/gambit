@@ -1,6 +1,7 @@
 from libcpp cimport bool
 from libcpp.string cimport string
 from libcpp.memory cimport shared_ptr
+from libcpp.list cimport list as clist
 
 
 cdef extern from "gambit.h":
@@ -395,6 +396,9 @@ cdef extern from "util.h":
     shared_ptr[c_LogitQREMixedStrategyProfile] copyitem_list_qrem "sharedcopyitem"(
             c_List[c_LogitQREMixedStrategyProfile], int
     ) except +
+    shared_ptr[c_LogitQREMixedBehaviorProfile] copyitem_list_qreb "sharedcopyitem"(
+            c_List[c_LogitQREMixedBehaviorProfile], int
+    ) except +
 
 
 cdef extern from "solvers/enumpure/enumpure.h":
@@ -455,19 +459,17 @@ cdef extern from "solvers/gnm/gnm.h":
             int p_localNewtonInterval, int p_localNewtonMaxits
     ) except +RuntimeError
 
-cdef extern from "solvers/logit/nfglogit.h":
-    c_List[c_MixedStrategyProfileDouble] LogitStrategySolve(c_Game,
-                                                            double,
-                                                            double,
-                                                            double) except +RuntimeError
+cdef extern from "solvers/logit/logit.h":
+    cdef cppclass c_LogitQREMixedBehaviorProfile "LogitQREMixedBehaviorProfile":
+        c_LogitQREMixedBehaviorProfile(c_Game) except +
+        c_LogitQREMixedBehaviorProfile(c_LogitQREMixedBehaviorProfile) except +
+        c_Game GetGame() except +
+        c_MixedBehaviorProfileDouble GetProfile()  # except + doesn't compile
+        double GetLambda() except +
+        double GetLogLike() except +
+        int size() except +
+        double getitem "operator[]"(int) except +IndexError
 
-cdef extern from "solvers/logit/efglogit.h":
-    c_List[c_MixedBehaviorProfileDouble] LogitBehaviorSolve(c_Game,
-                                                            double,
-                                                            double,
-                                                            double) except +RuntimeError
-
-cdef extern from "solvers/logit/nfglogit.h":
     cdef cppclass c_LogitQREMixedStrategyProfile "LogitQREMixedStrategyProfile":
         c_LogitQREMixedStrategyProfile(c_Game) except +
         c_LogitQREMixedStrategyProfile(c_LogitQREMixedStrategyProfile) except +
@@ -475,22 +477,32 @@ cdef extern from "solvers/logit/nfglogit.h":
         c_MixedStrategyProfileDouble GetProfile()  # except + doesn't compile
         double GetLambda() except +
         double GetLogLike() except +
-        int MixedProfileLength() except +
+        int size() except +
         double getitem "operator[]"(int) except +IndexError
 
-    cdef cppclass c_StrategicQREEstimator "StrategicQREEstimator":
-        c_StrategicQREEstimator() except +
-        c_LogitQREMixedStrategyProfile Estimate(c_LogitQREMixedStrategyProfile,
-                                                c_MixedStrategyProfileDouble,
-                                                double, double, double) except +RuntimeError
 
 cdef extern from "nash.h":
-    shared_ptr[c_LogitQREMixedStrategyProfile] _logit_estimate "logit_estimate"(
-            shared_ptr[c_MixedStrategyProfileDouble], double, double
-    ) except +
-    shared_ptr[c_LogitQREMixedStrategyProfile] _logit_atlambda "logit_atlambda"(
+    c_List[c_MixedBehaviorProfileDouble] LogitBehaviorSolveWrapper(
             c_Game, double, double, double
     ) except +
-    c_List[c_LogitQREMixedStrategyProfile] _logit_principal_branch "logit_principal_branch"(
+    c_List[c_LogitQREMixedBehaviorProfile] LogitBehaviorPrincipalBranchWrapper(
             c_Game, double, double, double
+    ) except +
+    clist[shared_ptr[c_LogitQREMixedBehaviorProfile]] LogitBehaviorAtLambdaWrapper(
+            c_Game, clist[double], double, double
+    ) except +
+    shared_ptr[c_LogitQREMixedBehaviorProfile] LogitBehaviorEstimateWrapper(
+            shared_ptr[c_MixedBehaviorProfileDouble], bool, double, double
+    ) except +
+    c_List[c_MixedStrategyProfileDouble] LogitStrategySolveWrapper(
+            c_Game, double, double, double
+    ) except +
+    c_List[c_LogitQREMixedStrategyProfile] LogitStrategyPrincipalBranchWrapper(
+            c_Game, double, double, double
+    ) except +
+    clist[shared_ptr[c_LogitQREMixedStrategyProfile]] LogitStrategyAtLambdaWrapper(
+            c_Game, clist[double], double, double
+    ) except +
+    shared_ptr[c_LogitQREMixedStrategyProfile] LogitStrategyEstimateWrapper(
+            shared_ptr[c_MixedStrategyProfileDouble], bool, double, double
     ) except +

@@ -1,0 +1,15 @@
+{
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
+  "features": {
+    "ghcr.io/devcontainers/features/python:1": {
+      "installTools": true,
+      "version": "3.11"
+    },
+    "ghcr.io/devcontainers-contrib/features/gdbgui:2": {
+      "version": "latest"
+    },
+    "ghcr.io/rocker-org/devcontainer-features/apt-packages:1": {
+      "packages": "automake,autoconf,gdb"
+    }
+  }
+}

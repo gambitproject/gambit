@@ -585,7 +585,3 @@ def logit_solve(
         equilibria=equilibria,
         parameters={"first_step": first_step, "max_accel": max_accel},
     )
-
-
-logit_atlambda = libgbt.logit_atlambda
-logit_principal_branch = libgbt.logit_principal_branch

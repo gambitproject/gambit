@@ -21,52 +21,87 @@
 //
 
 #include "gambit.h"
-#include "solvers/logit/nfglogit.h"
+#include "solvers/logit/logit.h"
 
 using namespace std;
 using namespace Gambit;
 
-class NullBuffer : public std::streambuf {
-public:
-  int overflow(int c) { return c; }
-};
-
-std::shared_ptr<LogitQREMixedStrategyProfile>
-logit_estimate(std::shared_ptr<MixedStrategyProfile<double>> p_frequencies, double p_firstStep,
-               double p_maxAccel)
-{
-  LogitQREMixedStrategyProfile start(p_frequencies->GetGame());
-  StrategicQREEstimator alg;
-  alg.SetMaxDecel(p_maxAccel);
-  alg.SetStepsize(p_firstStep);
-  NullBuffer null_buffer;
-  std::ostream null_stream(&null_buffer);
-  LogitQREMixedStrategyProfile result =
-      alg.Estimate(start, *p_frequencies, null_stream, 1000000.0, 1.0);
-  return make_shared<LogitQREMixedStrategyProfile>(result);
-}
-
-std::shared_ptr<LogitQREMixedStrategyProfile> logit_atlambda(const Game &p_game, double p_lambda,
+List<MixedBehaviorProfile<double>> LogitBehaviorSolveWrapper(const Game &p_game, double p_regret,
                                                              double p_firstStep, double p_maxAccel)
 {
-  LogitQREMixedStrategyProfile start(p_game);
-  StrategicQREPathTracer alg;
-  alg.SetMaxDecel(p_maxAccel);
-  alg.SetStepsize(p_firstStep);
-  NullBuffer null_buffer;
-  std::ostream null_stream(&null_buffer);
-  return make_shared<LogitQREMixedStrategyProfile>(
-      alg.SolveAtLambda(start, null_stream, p_lambda, 1.0));
+  List<MixedBehaviorProfile<double>> ret;
+  ret.push_back(LogitBehaviorSolve(LogitQREMixedBehaviorProfile(p_game), p_regret, 1.0,
+                                   p_firstStep, p_maxAccel)
+                    .back()
+                    .GetProfile());
+  return ret;
 }
 
-List<LogitQREMixedStrategyProfile> logit_principal_branch(const Game &p_game, double p_maxregret,
-                                                          double p_firstStep, double p_maxAccel)
+inline List<LogitQREMixedBehaviorProfile> LogitBehaviorPrincipalBranchWrapper(const Game &p_game,
+                                                                              double p_regret,
+                                                                              double p_firstStep,
+                                                                              double p_maxAccel)
+{
+  return LogitBehaviorSolve(LogitQREMixedBehaviorProfile(p_game), p_regret, 1.0, p_firstStep,
+                            p_maxAccel);
+}
+
+std::shared_ptr<LogitQREMixedBehaviorProfile>
+LogitBehaviorEstimateWrapper(std::shared_ptr<MixedBehaviorProfile<double>> p_frequencies,
+                             bool p_stopAtLocal, double p_firstStep, double p_maxAccel)
+{
+  return make_shared<LogitQREMixedBehaviorProfile>(LogitBehaviorEstimate(
+      *p_frequencies, 1000000.0, 1.0, p_stopAtLocal, p_firstStep, p_maxAccel));
+}
+
+std::list<std::shared_ptr<LogitQREMixedBehaviorProfile>>
+LogitBehaviorAtLambdaWrapper(const Game &p_game, const std::list<double> &p_targetLambda,
+                             double p_firstStep, double p_maxAccel)
+{
+  LogitQREMixedBehaviorProfile start(p_game);
+  std::list<std::shared_ptr<LogitQREMixedBehaviorProfile>> ret;
+  for (auto &qre : LogitBehaviorSolveLambda(start, p_targetLambda, 1.0, p_firstStep, p_maxAccel)) {
+    ret.push_back(std::make_shared<LogitQREMixedBehaviorProfile>(qre));
+  }
+  return ret;
+}
+
+List<MixedStrategyProfile<double>> LogitStrategySolveWrapper(const Game &p_game, double p_regret,
+                                                             double p_firstStep, double p_maxAccel)
+{
+  List<MixedStrategyProfile<double>> ret;
+  ret.push_back(LogitStrategySolve(LogitQREMixedStrategyProfile(p_game), p_regret, 1.0,
+                                   p_firstStep, p_maxAccel)
+                    .back()
+                    .GetProfile());
+  return ret;
+}
+
+inline List<LogitQREMixedStrategyProfile> LogitStrategyPrincipalBranchWrapper(const Game &p_game,
+                                                                              double p_regret,
+                                                                              double p_firstStep,
+                                                                              double p_maxAccel)
+{
+  return LogitStrategySolve(LogitQREMixedStrategyProfile(p_game), p_regret, 1.0, p_firstStep,
+                            p_maxAccel);
+}
+
+std::list<std::shared_ptr<LogitQREMixedStrategyProfile>>
+LogitStrategyAtLambdaWrapper(const Game &p_game, const std::list<double> &p_targetLambda,
+                             double p_firstStep, double p_maxAccel)
 {
   LogitQREMixedStrategyProfile start(p_game);
-  StrategicQREPathTracer alg;
-  alg.SetMaxDecel(p_maxAccel);
-  alg.SetStepsize(p_firstStep);
-  NullBuffer null_buffer;
-  std::ostream null_stream(&null_buffer);
-  return alg.TraceStrategicPath(start, null_stream, p_maxregret, 1.0);
+  std::list<std::shared_ptr<LogitQREMixedStrategyProfile>> ret;
+  for (auto &qre : LogitStrategySolveLambda(start, p_targetLambda, 1.0, p_firstStep, p_maxAccel)) {
+    ret.push_back(std::make_shared<LogitQREMixedStrategyProfile>(qre));
+  }
+  return ret;
+}
+
+std::shared_ptr<LogitQREMixedStrategyProfile>
+LogitStrategyEstimateWrapper(std::shared_ptr<MixedStrategyProfile<double>> p_frequencies,
+                             bool p_stopAtLocal, double p_firstStep, double p_maxAccel)
+{
+  return make_shared<LogitQREMixedStrategyProfile>(LogitStrategyEstimate(
+      *p_frequencies, 1000000.0, 1.0, p_stopAtLocal, p_firstStep, p_maxAccel));
 }

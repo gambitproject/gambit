@@ -22,28 +22,75 @@
 //
 
 #include <cmath>
-#include <iostream>
+
 #include "gambit.h"
+#include "logit.h"
 #include "logbehav.imp"
-#include "efglogit.h"
+#include "path.h"
 
-namespace Gambit {
+namespace {
 
-//------------------------------------------------------------------------------
-//                        Classes representing equations
-//------------------------------------------------------------------------------
+double LogLike(const Vector<double> &p_frequencies, const Vector<double> &p_point)
+{
+  double logL = 0.0;
+  for (int i = 1; i <= p_frequencies.Length(); i++) {
+    logL += p_frequencies[i] * log(p_point[i]);
+  }
+  return logL;
+}
 
-class AgentQREPathTracer::EquationSystem : public PathTracer::EquationSystem {
+double DiffLogLike(const Vector<double> &p_frequencies, const Vector<double> &p_tangent)
+{
+  double diff_logL = 0.0;
+  for (int i = 1; i <= p_frequencies.Length(); i++) {
+    diff_logL += p_frequencies[i] * p_tangent[i];
+  }
+  return diff_logL;
+}
+
+MixedBehaviorProfile<double> PointToProfile(const Game &p_game, const Vector<double> &p_point)
+{
+  MixedBehaviorProfile<double> profile(p_game);
+  for (int i = 1; i < p_point.Length(); i++) {
+    profile[i] = exp(p_point[i]);
+  }
+  return profile;
+}
+
+LogBehavProfile<double> PointToLogProfile(const Game &p_game, const Vector<double> &p_point)
+{
+  LogBehavProfile<double> profile(p_game);
+  for (int i = 1; i <= profile.BehaviorProfileLength(); i++) {
+    profile.SetLogProb(i, p_point[i]);
+  }
+  return profile;
+}
+
+Vector<double> ProfileToPoint(const LogitQREMixedBehaviorProfile &p_profile)
+{
+  Vector<double> point(p_profile.size() + 1);
+  for (int i = 1; i <= p_profile.size(); i++) {
+    point[i] = log(p_profile[i]);
+  }
+  point.back() = p_profile.GetLambda();
+  return point;
+}
+
+bool RegretTerminationFunction(const Game &p_game, const Vector<double> &p_point, double p_regret)
+{
+  return (p_point.back() < 0.0 || PointToProfile(p_game, p_point).GetMaxRegret() < p_regret);
+}
+
+class EquationSystem {
 public:
   explicit EquationSystem(const Game &p_game);
-
-  ~EquationSystem() override;
+  ~EquationSystem();
 
   // Compute the value of the system of equations at the specified point.
-  void GetValue(const Vector<double> &p_point, Vector<double> &p_lhs) const override;
+  void GetValue(const Vector<double> &p_point, Vector<double> &p_lhs) const;
 
   // Compute the Jacobian matrix at the specified point.
-  void GetJacobian(const Vector<double> &p_point, Matrix<double> &p_matrix) const override;
+  void GetJacobian(const Vector<double> &p_point, Matrix<double> &p_matrix) const;
 
 private:
   //
@@ -110,7 +157,7 @@ private:
   const Game &m_game;
 };
 
-AgentQREPathTracer::EquationSystem::EquationSystem(const Game &p_game) : m_game(p_game)
+EquationSystem::EquationSystem(const Game &p_game) : m_game(p_game)
 {
   for (int pl = 1; pl <= m_game->NumPlayers(); pl++) {
     GamePlayer player = m_game->GetPlayer(pl);
@@ -123,15 +170,15 @@ AgentQREPathTracer::EquationSystem::EquationSystem(const Game &p_game) : m_game(
   }
 }
 
-AgentQREPathTracer::EquationSystem::~EquationSystem()
+EquationSystem::~EquationSystem()
 {
   for (int i = 1; i <= m_equations.Length(); i++) {
     delete m_equations[i];
   }
 }
 
-double AgentQREPathTracer::EquationSystem::SumToOneEquation::Value(
-    const LogBehavProfile<double> &p_profile, double p_lambda) const
+double EquationSystem::SumToOneEquation::Value(const LogBehavProfile<double> &p_profile,
+                                               double p_lambda) const
 {
   double value = -1.0;
   for (int act = 1; act <= m_infoset->NumActions(); act++) {
@@ -140,8 +187,8 @@ double AgentQREPathTracer::EquationSystem::SumToOneEquation::Value(
   return value;
 }
 
-void AgentQREPathTracer::EquationSystem::SumToOneEquation::Gradient(
-    const LogBehavProfile<double> &p_profile, double p_lambda, Vector<double> &p_gradient) const
+void EquationSystem::SumToOneEquation::Gradient(const LogBehavProfile<double> &p_profile,
+                                                double p_lambda, Vector<double> &p_gradient) const
 {
   int i = 1;
   for (int pl = 1; pl <= m_game->NumPlayers(); pl++) {
@@ -165,17 +212,16 @@ void AgentQREPathTracer::EquationSystem::SumToOneEquation::Gradient(
   p_gradient[i] = 0.0;
 }
 
-double
-AgentQREPathTracer::EquationSystem::RatioEquation::Value(const LogBehavProfile<double> &p_profile,
-                                                         double p_lambda) const
+double EquationSystem::RatioEquation::Value(const LogBehavProfile<double> &p_profile,
+                                            double p_lambda) const
 {
   return (p_profile.GetLogProb(m_pl, m_iset, m_act) - p_profile.GetLogProb(m_pl, m_iset, 1) -
           p_lambda * (p_profile.GetPayoff(m_infoset->GetAction(m_act)) -
                       p_profile.GetPayoff(m_infoset->GetAction(1))));
 }
 
-void AgentQREPathTracer::EquationSystem::RatioEquation::Gradient(
-    const LogBehavProfile<double> &p_profile, double p_lambda, Vector<double> &p_gradient) const
+void EquationSystem::RatioEquation::Gradient(const LogBehavProfile<double> &p_profile,
+                                             double p_lambda, Vector<double> &p_gradient) const
 {
   int i = 1;
   for (int pl = 1; pl <= m_game->NumPlayers(); pl++) {
@@ -208,29 +254,19 @@ void AgentQREPathTracer::EquationSystem::RatioEquation::Gradient(
                    p_profile.GetPayoff(m_infoset->GetAction(m_act)));
 }
 
-void AgentQREPathTracer::EquationSystem::GetValue(const Vector<double> &p_point,
-                                                  Vector<double> &p_lhs) const
+void EquationSystem::GetValue(const Vector<double> &p_point, Vector<double> &p_lhs) const
 {
-  LogBehavProfile<double> profile((BehaviorSupportProfile(m_game)));
-  for (int i = 1; i <= profile.Length(); i++) {
-    profile.SetLogProb(i, p_point[i]);
-  }
-
-  double lambda = p_point[p_point.Length()];
-
+  LogBehavProfile<double> profile(PointToLogProfile(m_game, p_point));
+  double lambda = p_point.back();
   for (int i = 1; i <= p_lhs.Length(); i++) {
     p_lhs[i] = m_equations[i]->Value(profile, lambda);
   }
 }
 
-void AgentQREPathTracer::EquationSystem::GetJacobian(const Vector<double> &p_point,
-                                                     Matrix<double> &p_matrix) const
+void EquationSystem::GetJacobian(const Vector<double> &p_point, Matrix<double> &p_matrix) const
 {
-  LogBehavProfile<double> profile((BehaviorSupportProfile(m_game)));
-  for (int i = 1; i <= profile.Length(); i++) {
-    profile.SetLogProb(i, p_point[i]);
-  }
-  double lambda = p_point[p_point.Length()];
+  LogBehavProfile<double> profile(PointToLogProfile(m_game, p_point));
+  double lambda = p_point.back();
 
   for (int i = 1; i <= m_equations.Length(); i++) {
     Vector<double> column(p_point.Length());
@@ -239,137 +275,178 @@ void AgentQREPathTracer::EquationSystem::GetJacobian(const Vector<double> &p_poi
   }
 }
 
-class AgentQREPathTracer::CallbackFunction : public PathTracer::CallbackFunction {
+class TracingCallbackFunction {
 public:
-  CallbackFunction(std::ostream &p_stream, const Game &p_game, bool p_fullGraph, int p_decimals)
-    : m_stream(p_stream), m_game(p_game), m_fullGraph(p_fullGraph), m_decimals(p_decimals)
+  TracingCallbackFunction(const Game &p_game, MixedBehaviorObserverFunctionType p_observer)
+    : m_game(p_game), m_observer(p_observer)
   {
   }
+  ~TracingCallbackFunction() = default;
 
-  ~CallbackFunction() override = default;
-
-  void operator()(const Vector<double> &p_point, bool p_isTerminal) const override;
-
+  void AppendPoint(const Vector<double> &p_point);
   const List<LogitQREMixedBehaviorProfile> &GetProfiles() const { return m_profiles; }
 
 private:
-  std::ostream &m_stream;
   Game m_game;
-  bool m_fullGraph;
-  int m_decimals;
-  mutable List<LogitQREMixedBehaviorProfile> m_profiles;
+  MixedBehaviorObserverFunctionType m_observer;
+  List<LogitQREMixedBehaviorProfile> m_profiles;
 };
 
-void AgentQREPathTracer::CallbackFunction::operator()(const Vector<double> &p_point,
-                                                      bool p_isTerminal) const
+void TracingCallbackFunction::AppendPoint(const Vector<double> &p_point)
 {
-  if ((!m_fullGraph || p_isTerminal) && (m_fullGraph || !p_isTerminal)) {
-    return;
-  }
-
-  m_stream.setf(std::ios::fixed);
-  // By convention, we output lambda first
-  if (!p_isTerminal) {
-    m_stream << std::setprecision(m_decimals) << p_point.back();
-  }
-  else {
-    m_stream << "NE";
-  }
-  m_stream.unsetf(std::ios::fixed);
-
-  for (int i = 1; i < p_point.Length(); i++) {
-    m_stream << "," << std::setprecision(m_decimals) << exp(p_point[i]);
-  }
-
-  m_stream << std::endl;
-
-  MixedBehaviorProfile<double> profile(m_game);
-  for (int i = 1; i < p_point.Length(); i++) {
-    profile[i] = exp(p_point[i]);
-  }
-  m_profiles.push_back(LogitQREMixedBehaviorProfile(profile, p_point.back()));
+  MixedBehaviorProfile<double> profile(PointToProfile(m_game, p_point));
+  m_profiles.push_back(LogitQREMixedBehaviorProfile(profile, p_point.back(), 1.0));
+  m_observer(m_profiles.back());
 }
 
-//------------------------------------------------------------------------------
-//                   AgentQREPathTracer: Criterion function
-//------------------------------------------------------------------------------
-
-class AgentQREPathTracer::LambdaCriterion : public PathTracer::CriterionFunction {
+class EstimatorCallbackFunction {
 public:
-  explicit LambdaCriterion(double p_lambda) : m_lambda(p_lambda) {}
+  EstimatorCallbackFunction(const Game &p_game, const Vector<double> &p_frequencies,
+                            MixedBehaviorObserverFunctionType p_observer);
+  ~EstimatorCallbackFunction() = default;
 
-  double operator()(const Vector<double> &p_point, const Vector<double> &p_tangent) const override
-  {
-    return p_point[p_point.Length()] - m_lambda;
-  }
+  void EvaluatePoint(const Vector<double> &p_point);
+  const LogitQREMixedBehaviorProfile &GetMaximizer() const { return m_bestProfile; }
 
 private:
-  double m_lambda;
+  Game m_game;
+  const Vector<double> &m_frequencies;
+  MixedBehaviorObserverFunctionType m_observer;
+  LogitQREMixedBehaviorProfile m_bestProfile;
 };
 
-//------------------------------------------------------------------------------
-//              AgentQREPathTracer: Wrapper to the tracing engine
-//------------------------------------------------------------------------------
-
-namespace {
-
-bool RegretTerminationFunction(const Game &p_game, const Vector<double> &p_point, double p_regret)
+EstimatorCallbackFunction::EstimatorCallbackFunction(const Game &p_game,
+                                                     const Vector<double> &p_frequencies,
+                                                     MixedBehaviorObserverFunctionType p_observer)
+  : m_game(p_game), m_frequencies(p_frequencies), m_observer(p_observer),
+    m_bestProfile(MixedBehaviorProfile<double>(p_game), 0.0,
+                  LogLike(p_frequencies, static_cast<const Vector<double> &>(
+                                             MixedBehaviorProfile<double>(p_game))))
 {
-  if (p_point.back() < 0.0) {
-    return true;
+}
+
+void EstimatorCallbackFunction::EvaluatePoint(const Vector<double> &p_point)
+{
+  MixedBehaviorProfile<double> profile(PointToProfile(m_game, p_point));
+  auto qre = LogitQREMixedBehaviorProfile(
+      profile, p_point.back(),
+      LogLike(m_frequencies, static_cast<const Vector<double> &>(profile)));
+  m_observer(qre);
+  if (qre.GetLogLike() > m_bestProfile.GetLogLike()) {
+    m_bestProfile = qre;
   }
-  MixedBehaviorProfile<double> profile(p_game);
-  for (int i = 1; i < p_point.Length(); i++) {
-    profile[i] = exp(p_point[i]);
-  }
-  return profile.GetMaxRegret() < p_regret;
 }
 
 } // namespace
 
-List<LogitQREMixedBehaviorProfile>
-AgentQREPathTracer::TraceAgentPath(const LogitQREMixedBehaviorProfile &p_start,
-                                   std::ostream &p_stream, double p_regret, double p_omega) const
+namespace Gambit {
+
+List<LogitQREMixedBehaviorProfile> LogitBehaviorSolve(const LogitQREMixedBehaviorProfile &p_start,
+                                                      double p_regret, double p_omega,
+                                                      double p_firstStep, double p_maxAccel,
+                                                      MixedBehaviorObserverFunctionType p_observer)
 {
+  PathTracer tracer;
+  tracer.SetMaxDecel(p_maxAccel);
+  tracer.SetStepsize(p_firstStep);
+
   double scale = p_start.GetGame()->GetMaxPayoff() - p_start.GetGame()->GetMinPayoff();
   if (scale != 0.0) {
     p_regret *= scale;
   }
 
-  List<LogitQREMixedBehaviorProfile> ret;
-  Vector<double> x(p_start.BehaviorProfileLength() + 1);
-  for (size_t i = 1; i <= p_start.BehaviorProfileLength(); i++) {
-    x[i] = log(p_start[i]);
-  }
-  x.back() = p_start.GetLambda();
-
-  CallbackFunction func(p_stream, p_start.GetGame(), m_fullGraph, m_decimals);
-  TracePath(
-      EquationSystem(p_start.GetGame()), x, p_omega,
-      [p_start, p_regret](const Vector<double> &p_point) {
-        return RegretTerminationFunction(p_start.GetGame(), p_point, p_regret);
+  Game game = p_start.GetGame();
+  Vector<double> x(ProfileToPoint(p_start));
+  TracingCallbackFunction callback(game, p_observer);
+  EquationSystem system(game);
+  tracer.TracePath(
+      [&system](const Vector<double> &p_point, Vector<double> &p_lhs) {
+        system.GetValue(p_point, p_lhs);
       },
-      func);
-  if (!m_fullGraph && func.GetProfiles().back().GetProfile().GetMaxRegret() >= p_regret) {
-    return {};
+      [&system](const Vector<double> &p_point, Matrix<double> &p_jac) {
+        system.GetJacobian(p_point, p_jac);
+      },
+      x, p_omega,
+      [game, p_regret](const Vector<double> &p_point) {
+        return RegretTerminationFunction(game, p_point, p_regret);
+      },
+      [&callback](const Vector<double> &p_point) -> void { callback.AppendPoint(p_point); });
+  return callback.GetProfiles();
+}
+
+std::list<LogitQREMixedBehaviorProfile>
+LogitBehaviorSolveLambda(const LogitQREMixedBehaviorProfile &p_start,
+                         const std::list<double> &p_targetLambda, double p_omega,
+                         double p_firstStep, double p_maxAccel,
+                         MixedBehaviorObserverFunctionType p_observer)
+{
+  PathTracer tracer;
+  tracer.SetMaxDecel(p_maxAccel);
+  tracer.SetStepsize(p_firstStep);
+
+  Game game = p_start.GetGame();
+  Vector<double> x(ProfileToPoint(p_start));
+  TracingCallbackFunction callback(game, p_observer);
+  EquationSystem system(game);
+  std::list<LogitQREMixedBehaviorProfile> ret;
+  for (auto lam : p_targetLambda) {
+    tracer.TracePath(
+        [&system](const Vector<double> &p_point, Vector<double> &p_lhs) {
+          system.GetValue(p_point, p_lhs);
+        },
+        [&system](const Vector<double> &p_point, Matrix<double> &p_jac) {
+          system.GetJacobian(p_point, p_jac);
+        },
+        x, p_omega, LambdaPositiveTerminationFunction,
+        [&callback](const Vector<double> &p_point) -> void { callback.AppendPoint(p_point); },
+        [lam](const Vector<double> &x, const Vector<double> &) -> double {
+          return x.back() - lam;
+        });
+    ret.push_back(callback.GetProfiles().back());
   }
-  return func.GetProfiles();
+  return ret;
 }
 
 LogitQREMixedBehaviorProfile
-AgentQREPathTracer::SolveAtLambda(const LogitQREMixedBehaviorProfile &p_start,
-                                  std::ostream &p_stream, double p_targetLambda,
-                                  double p_omega) const
+LogitBehaviorEstimate(const MixedBehaviorProfile<double> &p_frequencies, double p_maxLambda,
+                      double p_omega, double p_stopAtLocal, double p_firstStep, double p_maxAccel,
+                      MixedBehaviorObserverFunctionType p_observer)
 {
-  Vector<double> x(p_start.BehaviorProfileLength() + 1);
-  for (int i = 1; i <= p_start.BehaviorProfileLength(); i++) {
-    x[i] = log(p_start[i]);
+  LogitQREMixedBehaviorProfile start(p_frequencies.GetGame());
+  PathTracer tracer;
+  tracer.SetMaxDecel(p_maxAccel);
+  tracer.SetStepsize(p_firstStep);
+
+  Vector<double> x(ProfileToPoint(start)), restart(x);
+  Vector<double> freq_vector(static_cast<const Vector<double> &>(p_frequencies));
+  EstimatorCallbackFunction callback(
+      start.GetGame(), static_cast<const Vector<double> &>(p_frequencies), p_observer);
+  EquationSystem system(start.GetGame());
+  while (true) {
+    tracer.TracePath(
+        [&system](const Vector<double> &p_point, Vector<double> &p_lhs) {
+          system.GetValue(p_point, p_lhs);
+        },
+        [&system](const Vector<double> &p_point, Matrix<double> &p_jac) {
+          system.GetJacobian(p_point, p_jac);
+        },
+        x, p_omega,
+        [p_maxLambda](const Vector<double> &p_point) {
+          return LambdaRangeTerminationFunction(p_point, 0, p_maxLambda);
+        },
+        [&callback](const Vector<double> &p_point) -> void { callback.EvaluatePoint(p_point); },
+        [freq_vector](const Vector<double> &, const Vector<double> &p_tangent) -> double {
+          return DiffLogLike(freq_vector, p_tangent);
+        },
+        [&restart](const Vector<double> &, const Vector<double> &p_restart) -> void {
+          restart = p_restart;
+        });
+    if (p_stopAtLocal || x.back() >= p_maxLambda) {
+      break;
+    }
+    x = restart;
   }
-  x.back() = p_start.GetLambda();
-  CallbackFunction func(p_stream, p_start.GetGame(), m_fullGraph, m_decimals);
-  TracePath(EquationSystem(p_start.GetGame()), x, p_omega, LambdaPositiveTerminationFunction, func,
-            LambdaCriterion(p_targetLambda));
-  return func.GetProfiles().back();
+  return callback.GetMaximizer();
 }
 
 } // end namespace Gambit

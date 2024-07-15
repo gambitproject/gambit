@@ -519,9 +519,8 @@ gambit_logit_SOURCES = \
 	src/solvers/logit/logbehav.imp \
 	src/solvers/logit/path.cc \
 	src/solvers/logit/path.h \
-	src/solvers/logit/efglogit.h \
+    src/solvers/logit/logit.h \
 	src/solvers/logit/efglogit.cc \
-	src/solvers/logit/nfglogit.h \
 	src/solvers/logit/nfglogit.cc \
 	src/tools/logit/logit.cc
 

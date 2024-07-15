@@ -118,9 +118,11 @@ void NewtonStep(Matrix<double> &q, Matrix<double> &b, Vector<double> &u, Vector<
 // bifurcation point that the tracing gets stuck there as it is not possible
 // to find a small enough step size to avoid stepping over the bifurcation
 // point.
-void PathTracer::TracePath(const EquationSystem &p_system, Vector<double> &x, double &p_omega,
-                           TerminationFunctionType p_terminate, const CallbackFunction &p_callback,
-                           const CriterionFunction &p_criterion) const
+void PathTracer::TracePath(
+    std::function<void(const Vector<double> &, Vector<double> &)> p_function,
+    std::function<void(const Vector<double> &, Matrix<double> &)> p_jacobian, Vector<double> &x,
+    double &p_omega, TerminationFunctionType p_terminate, CallbackFunctionType p_callback,
+    CriterionFunctionType p_criterion, CriterionBracketFunctionType p_criterionBracket) const
 {
   const double c_tol = 1.0e-4;   // tolerance for corrector iteration
   const double c_maxDist = 0.4;  // maximal distance to curve
@@ -136,26 +138,22 @@ void PathTracer::TracePath(const EquationSystem &p_system, Vector<double> &x, do
   double pert = 0.0;               // The current version of the perturbation being applied
   double pert_countdown = 0.0;     // How much longer (in arclength) to apply perturbation
 
-  Vector<double> u(x.Length()), restart(x.Length());
+  Vector<double> u(x.Length());
   // t is current tangent at x; newT is tangent at u, which is the next point.
   Vector<double> t(x.Length()), newT(x.Length());
   Vector<double> y(x.Length() - 1);
   Matrix<double> b(x.Length(), x.Length() - 1);
   SquareMatrix<double> q(x.Length());
 
-  p_callback(x, false);
-  p_system.GetJacobian(x, b);
+  p_jacobian(x, b);
   QRDecomp(b, q);
   q.GetRow(q.NumRows(), t);
+  p_callback(x);
 
   while (!p_terminate(x)) {
     bool accept = true;
 
     if (fabs(h) <= c_hmin) {
-      if (newton) {
-        // Restore the place to restart if desired
-        x = restart;
-      }
       return;
     }
 
@@ -165,7 +163,7 @@ void PathTracer::TracePath(const EquationSystem &p_system, Vector<double> &x, do
     }
 
     double decel = 1.0 / m_maxDecel; // initialize deceleration factor
-    p_system.GetJacobian(u, b);
+    p_jacobian(u, b);
     QRDecomp(b, q);
 
     int iter = 1;
@@ -173,7 +171,7 @@ void PathTracer::TracePath(const EquationSystem &p_system, Vector<double> &x, do
     while (true) {
       double dist;
 
-      p_system.GetValue(u, y);
+      p_function(u, y);
       y[1] += pert;
       NewtonStep(q, b, u, y, dist);
 
@@ -199,11 +197,6 @@ void PathTracer::TracePath(const EquationSystem &p_system, Vector<double> &x, do
       disto = dist;
       iter++;
       if (iter > c_maxIter) {
-        p_callback(x, true);
-        if (newton) {
-          // Restore the place to restart if desired
-          x = restart;
-        }
         return;
       }
     }
@@ -226,11 +219,6 @@ void PathTracer::TracePath(const EquationSystem &p_system, Vector<double> &x, do
     if (!accept) {
       h /= m_maxDecel; // PC not accepted; change stepsize and retry
       if (fabs(h) <= c_hmin) {
-        p_callback(x, true);
-        if (newton) {
-          // Restore the place to restart if desired
-          x = restart;
-        }
         return;
       }
       continue;
@@ -246,7 +234,7 @@ void PathTracer::TracePath(const EquationSystem &p_system, Vector<double> &x, do
     // new tangent oriented in the same sense.
     if (!newton && p_criterion(x, t) * p_criterion(u, newT * omega_flip) < 0.0) {
       newton = true;
-      restart = u;
+      p_criterionBracket(x, u);
     }
 
     if (newton) {
@@ -261,7 +249,7 @@ void PathTracer::TracePath(const EquationSystem &p_system, Vector<double> &x, do
     // PC step was successful; update and iterate
     x = u;
     t = newT;
-    p_callback(x, false);
+    p_callback(x);
 
     if (pert_countdown > 0.0) {
       // If we are currently perturbing in the neighborhood of a bifurcation, check to see
@@ -272,12 +260,6 @@ void PathTracer::TracePath(const EquationSystem &p_system, Vector<double> &x, do
         pert_countdown = 0.0;
       }
     }
-  }
-
-  // Cleanup after termination
-  p_callback(x, true);
-  if (newton) {
-    x = restart;
   }
 }
 

@@ -76,7 +76,13 @@ the beliefs at such information sets as being uniform across all member nodes.
 .. cmdoption:: -l
 
    While tracing, compute the logit equilibrium points
-   with parameter LAMBDA accurately.
+   with parameter LAMBDA accurately.  This option may be specified multiple times,
+   in which case points are found for each successive lambda, in the order specified,
+   along the branch.
+
+   .. versionchanged:: 16.3.0
+
+      Added support for specifying multiple lambda values.
 
 .. cmdoption:: -S
 
