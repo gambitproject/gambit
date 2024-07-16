@@ -323,6 +323,7 @@ class Game:
         See Also
         --------
         from_dict : Create strategic game and set player labels
+        to_array: Generate the payoff tables for players represented as numpy arrays
         """
         g = cython.declare(Game)
         arrays = [np.array(a) for a in arrays]
@@ -336,36 +337,36 @@ class Game:
         g.title = title
         return g
 
-    def to_arrays(self) -> typing.List[np.array]:
-        """Reverse function to from_arrays:
+    def to_arrays(self, dtype: typing.Type = Rational) -> typing.List[np.array]:
+        """Generate the payoff tables for players represented as numpy arrays.
 
-        To_arrays, for a given game, generates players’ payoff tables represented as numpy arrays.
-        The number of produced arrays is equal to the number of players.
+        Parameters
+        ----------
+        dtype : type
+            The type to which payoff values will be converted and
+            the resulting arrays will be of that dtype
 
         Returns
         -------
-        list of np.arrays
+        list of np.array
 
-        Raises
-        ------
-        UndefinedOperationError
-            If the game does not have a tree representation.
+        See Also
+        --------
+        from_arrays : Create game from list-like of array-like
         """
         arrays = []
 
-        if self.is_tree:
-            raise UndefinedOperationError(
-                "Operation only defined for games with a strategic representation"
-                )
-
-        if len(self.players) == 0:
-            raise RuntimeError("There are no players in the game")
-
         shape = tuple(len(player.strategies) for player in self.players)
         for player in self.players:
-            array = np.zeros(shape=shape)
+            array = np.zeros(shape=shape, dtype=object)
             for profile in itertools.product(*(range(s) for s in shape)):
-                array[profile] = self[profile][player]
+                try:
+                    array[profile] = dtype(self[profile][player])
+                except (ValueError, TypeError, IndexError, KeyError):
+                    raise ValueError(
+                        f"Payoff '{self[profile][player]}' cannot be"
+                        f"converted to requested type '{dtype}'"
+                        ) from None
             arrays.append(array)
         return arrays
 

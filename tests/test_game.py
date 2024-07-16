@@ -13,12 +13,6 @@ def test_from_arrays():
     assert len(game.players[1].strategies) == 2
 
 
-def test_extensive_form_to_arrays():
-    game = gbt.Game.new_tree()
-    with pytest.raises(ValueError):
-        _ = game.to_arrays()
-
-
 def test_empty_array_to_arrays():
     game = gbt.Game.from_arrays([])
     a = game.to_arrays()
@@ -26,9 +20,24 @@ def test_empty_array_to_arrays():
     assert (a[0] == np.array([])).all()
 
 
-def test_different_num_representations_to_arrays():
+def test_to_arrays_wrong_type():
+    m = np.array([[8, 2], [10, 5]])
+    game = gbt.Game.from_arrays(m, m.transpose())
+    with pytest.raises(ValueError):
+        _ = game.to_arrays(dtype=dict)
+
+
+def test_different_num_representations_to_arrays_fraction():
     game = gbt.Game.from_arrays([1, 2 / 1, "6/2", 0.25, ".99"])
     A = game.to_arrays()[0]
+    correct_output = [gbt.Rational(1, 1), gbt.Rational(2, 1), gbt.Rational(3, 1),
+                      gbt.Rational(1, 4), gbt.Rational(99, 100)]
+    assert (correct_output == A).all()
+
+
+def test_different_num_representations_to_arrays_float():
+    game = gbt.Game.from_arrays([1, 2 / 1, "6/2", 0.25, ".99"])
+    A = game.to_arrays(dtype=float)[0]
     correct_output = [1.0, 2.0, 3.0, 0.25, 0.99]
     assert (correct_output == A).all()
 

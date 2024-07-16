@@ -184,8 +184,21 @@ and so on.  Therefore, to create a two-player symmetric game, as in this example
 for the second player is transposed before passing to :py:meth:`.Game.from_arrays`.
 
 There is a reverse function :py:meth:`.Game.to_arrays` that produces
-the players' payoff tables given a strategic game.  The output is the list of numpy arrays,
+the players' payoff tables given a strategic game. The output is the list of numpy arrays,
 where the number of produced arrays is equal to the number of players.
+
+.. ipython:: python
+
+   m, m_transposed = g.to_arrays()
+   m
+
+There is a parameter `dtype`` passed to :py:meth:`.Game.to_arrays` that configures the data type of
+payoffs in the generated arrays. Supported types are :py:class:`.Rational` (default) and float.
+
+.. ipython:: python
+
+   m, m_transposed = g.to_arrays(dtype=float)
+   m
 
 .. _pygambit.user.numbers:
 
