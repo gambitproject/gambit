@@ -163,9 +163,9 @@ template <class T> void MixedBehaviorProfile<T>::SetCentroid()
 {
   CheckVersion();
   for (auto infoset : m_support.GetGame()->GetInfosets()) {
-    if (infoset->NumActions() > 0) {
-      T center = (T(1) / T(infoset->NumActions()));
-      for (auto act : infoset->GetActions()) {
+    if (m_support.NumActions(infoset) > 0) {
+      T center = T(1) / T(m_support.NumActions(infoset));
+      for (auto act : m_support.GetActions(infoset)) {
         (*this)[act] = center;
       }
     }
@@ -180,13 +180,13 @@ template <class T> void MixedBehaviorProfile<T>::UndefinedToCentroid()
     if (GetInfosetProb(infoset) > T(0)) {
       continue;
     }
-    auto actions = infoset->GetActions();
+    auto actions = m_support.GetActions(infoset);
     T total =
         std::accumulate(actions.begin(), actions.end(), T(0),
                         [this](T total, GameAction act) { return total + GetActionProb(act); });
     if (total == T(0)) {
-      for (auto act : infoset->GetActions()) {
-        (*this)[act] = T(1) / T(infoset->NumActions());
+      for (auto act : actions) {
+        (*this)[act] = T(1) / T(m_support.NumActions(infoset));
       }
     }
   }
@@ -200,14 +200,14 @@ template <class T> MixedBehaviorProfile<T> MixedBehaviorProfile<T>::Normalize() 
     if (GetInfosetProb(infoset) == T(0)) {
       continue;
     }
-    auto actions = infoset->GetActions();
+    auto actions = m_support.GetActions(infoset);
     T total =
         std::accumulate(actions.begin(), actions.end(), T(0),
                         [this](T total, GameAction act) { return total + GetActionProb(act); });
     if (total == T(0)) {
       continue;
     }
-    for (auto act : infoset->GetActions()) {
+    for (auto act : actions) {
       norm[act] /= total;
     }
   }
@@ -226,7 +226,7 @@ template <class T> T MixedBehaviorProfile<T>::GetLiapValue() const
   auto value = T(0);
   for (auto player : m_support.GetGame()->GetPlayers()) {
     for (auto infoset : player->GetInfosets()) {
-      for (auto action : infoset->GetActions()) {
+      for (auto action : m_support.GetActions(infoset)) {
         value += sqr(std::max(GetPayoff(action) - GetPayoff(infoset), T(0)));
       }
     }
