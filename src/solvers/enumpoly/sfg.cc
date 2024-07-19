@@ -66,31 +66,6 @@ SequenceSet::~SequenceSet()
   }
 }
 
-SequenceSet &SequenceSet::operator=(const SequenceSet &s)
-{
-  if (this != &s) {
-    efp = s.efp;
-    sequences = s.sequences;
-  }
-  return *this;
-}
-
-bool SequenceSet::operator==(const SequenceSet &s)
-{
-  if (sequences.Length() != s.sequences.Length()) {
-    return (false);
-  }
-  int i;
-  for (i = 1; i <= sequences.Length() && sequences[i] == s.sequences[i]; i++)
-    ;
-  if (i > sequences.Length()) {
-    return (true);
-  }
-  else {
-    return (false);
-  }
-}
-
 //------------------------------------------
 // SequenceSet: Member functions
 //------------------------------------------
@@ -118,27 +93,18 @@ Sequence *SequenceSet::Find(int j)
   return nullptr;
 }
 
-// Number of Sequences in a SequenceSet
-int SequenceSet::NumSequences() const { return (sequences.Length()); }
-
-// Return the entire sequence set
-const Array<Sequence *> &SequenceSet::GetSequenceSet() const { return sequences; }
-
 //----------------------------------------------------
 // Sfg: Constructors, Destructors, Operators
 //----------------------------------------------------
 
 Sfg::Sfg(const BehaviorSupportProfile &S)
-  : EF(S.GetGame()), efsupp(S), seq(EF->NumPlayers()), isetFlag(S.GetGame()->NumInfosets()),
-    isetRow(S.GetGame()->NumInfosets()), infosets(EF->NumPlayers())
+  : support(S), seq(support.GetGame()->NumPlayers()), isetFlag(S.GetGame()->NumInfosets()),
+    isetRow(S.GetGame()->NumInfosets()), infosets(support.GetGame()->NumPlayers())
 {
-  int i;
-  Array<GameInfoset> zero(EF->NumPlayers());
-  Array<int> one(EF->NumPlayers());
+  Array<GameInfoset> zero(support.GetGame()->NumPlayers());
+  Array<int> one(support.GetGame()->NumPlayers());
 
-  BehaviorSupportProfile support(EF);
-
-  for (i = 1; i <= EF->NumPlayers(); i++) {
+  for (int i = 1; i <= support.GetGame()->NumPlayers(); i++) {
     seq[i] = 1;
     zero[i] = nullptr;
     one[i] = 1;
@@ -147,7 +113,7 @@ Sfg::Sfg(const BehaviorSupportProfile &S)
   isetFlag = 0;
   isetRow = 0;
 
-  GetSequenceDims(EF->GetRoot());
+  GetSequenceDims(support.GetGame()->GetRoot());
 
   isetFlag = 0;
 
@@ -155,14 +121,14 @@ Sfg::Sfg(const BehaviorSupportProfile &S)
 
   SF = new gNArray<Array<Rational> *>(seq);
   while (index.Turn()) {
-    (*SF)[index.CurrentIndices()] = new Array<Rational>(EF->NumPlayers());
-    for (i = 1; i <= EF->NumPlayers(); i++) {
+    (*SF)[index.CurrentIndices()] = new Array<Rational>(support.GetGame()->NumPlayers());
+    for (int i = 1; i <= support.GetGame()->NumPlayers(); i++) {
       (*(*SF)[index.CurrentIndices()])[i] = (Rational)0;
     }
   }
 
-  E = new Array<RectArray<Rational> *>(EF->NumPlayers());
-  for (i = 1; i <= EF->NumPlayers(); i++) {
+  E = new Array<RectArray<Rational> *>(support.GetGame()->NumPlayers());
+  for (int i = 1; i <= support.GetGame()->NumPlayers(); i++) {
     (*E)[i] = new RectArray<Rational>(infosets[i].Length() + 1, seq[i]);
     for (int j = (*(*E)[i]).MinRow(); j <= (*(*E)[i]).MaxRow(); j++) {
       for (int k = (*(*E)[i]).MinCol(); k <= (*(*E)[i]).MaxCol(); k++) {
@@ -172,17 +138,17 @@ Sfg::Sfg(const BehaviorSupportProfile &S)
     (*(*E)[i])(1, 1) = (Rational)1;
   }
 
-  sequences = new Array<SequenceSet *>(EF->NumPlayers());
-  for (i = 1; i <= EF->NumPlayers(); i++) {
-    (*sequences)[i] = new SequenceSet(EF->GetPlayer(i));
+  sequences = new Array<SequenceSet *>(support.GetGame()->NumPlayers());
+  for (int i = 1; i <= support.GetGame()->NumPlayers(); i++) {
+    (*sequences)[i] = new SequenceSet(support.GetGame()->GetPlayer(i));
   }
 
-  Array<Sequence *> parent(EF->NumPlayers());
-  for (i = 1; i <= EF->NumPlayers(); i++) {
+  Array<Sequence *> parent(support.GetGame()->NumPlayers());
+  for (int i = 1; i <= support.GetGame()->NumPlayers(); i++) {
     parent[i] = (((*sequences)[i])->GetSequenceSet())[1];
   }
 
-  MakeSequenceForm(EF->GetRoot(), (Rational)1, one, zero, parent);
+  MakeSequenceForm(support.GetGame()->GetRoot(), Rational(1), one, zero, parent);
 }
 
 Sfg::~Sfg()
@@ -194,14 +160,12 @@ Sfg::~Sfg()
   }
   delete SF;
 
-  int i;
-
-  for (i = 1; i <= EF->NumPlayers(); i++) {
+  for (int i = 1; i <= support.GetGame()->NumPlayers(); i++) {
     delete (*E)[i];
   }
   delete E;
 
-  for (i = 1; i <= EF->NumPlayers(); i++) {
+  for (int i = 1; i <= support.GetGame()->NumPlayers(); i++) {
     delete (*sequences)[i];
   }
   delete sequences;
@@ -210,16 +174,14 @@ Sfg::~Sfg()
 void Sfg::MakeSequenceForm(const GameNode &n, const Rational &prob, Array<int> seq,
                            Array<GameInfoset> iset, Array<Sequence *> parent)
 {
-  int i, pl;
-
   if (n->GetOutcome()) {
-    for (pl = 1; pl <= seq.Length(); pl++) {
+    for (int pl = 1; pl <= seq.Length(); pl++) {
       (*(*SF)[seq])[pl] += prob * static_cast<Rational>(n->GetOutcome()->GetPayoff(pl));
     }
   }
   if (n->GetInfoset()) {
     if (n->GetPlayer()->IsChance()) {
-      for (i = 1; i <= n->NumChildren(); i++) {
+      for (int i = 1; i <= n->NumChildren(); i++) {
         MakeSequenceForm(n->GetChild(i),
                          prob * static_cast<Rational>(n->GetInfoset()->GetActionProb(i)), seq,
                          iset, parent);
@@ -231,9 +193,9 @@ void Sfg::MakeSequenceForm(const GameNode &n, const Rational &prob, Array<int> s
       int isetnum = iset[pl]->GetNumber();
       Array<int> snew(seq);
       snew[pl] = 1;
-      for (i = 1; i < isetnum; i++) {
+      for (int i = 1; i < isetnum; i++) {
         if (isetRow(pl, i)) {
-          snew[pl] += efsupp.NumActions(pl, i);
+          snew[pl] += support.NumActions(pl, i);
         }
       }
 
@@ -245,8 +207,8 @@ void Sfg::MakeSequenceForm(const GameNode &n, const Rational &prob, Array<int> s
         isetFlag(pl, isetnum) = 1;
         flag = true;
       }
-      for (i = 1; i <= n->NumChildren(); i++) {
-        if (efsupp.Contains(n->GetInfoset()->GetAction(i))) {
+      for (int i = 1; i <= n->NumChildren(); i++) {
+        if (support.Contains(n->GetInfoset()->GetAction(i))) {
           snew[pl] += 1;
           if (flag) {
             Sequence *child;
@@ -286,7 +248,7 @@ void Sfg::GetSequenceDims(const GameNode &n)
         flag = true;
       }
       for (i = 1; i <= n->NumChildren(); i++) {
-        if (efsupp.Contains(n->GetInfoset()->GetAction(i))) {
+        if (support.Contains(n->GetInfoset()->GetAction(i))) {
           if (flag) {
             seq[pl]++;
           }
@@ -329,7 +291,7 @@ int Sfg::ActionNumber(int pl, int j) const
   if (j == 1) {
     return 0;
   }
-  return efsupp.GetIndex(GetAction(pl, j));
+  return support.GetIndex(GetAction(pl, j));
 }
 
 GameInfoset Sfg::GetInfoset(int pl, int j) const
@@ -350,7 +312,7 @@ GameAction Sfg::GetAction(int pl, int j) const
 
 MixedBehaviorProfile<double> Sfg::ToBehav(const PVector<double> &x) const
 {
-  MixedBehaviorProfile<double> b(efsupp);
+  MixedBehaviorProfile<double> b(support);
 
   b = (Rational)0;
 
@@ -359,7 +321,7 @@ MixedBehaviorProfile<double> Sfg::ToBehav(const PVector<double> &x) const
   Rational value;
 
   int i, j;
-  for (i = 1; i <= EF->NumPlayers(); i++) {
+  for (i = 1; i <= support.GetGame()->NumPlayers(); i++) {
     for (j = 2; j <= seq[i]; j++) {
       sij = ((*sequences)[i]->GetSequenceSet())[j];
       int sn = sij->GetNumber();

@@ -66,12 +66,10 @@ protected:
 
 public:
   explicit SequenceSet(const GamePlayer &p);
-  SequenceSet(const SequenceSet &) = default;
+  SequenceSet(const SequenceSet &) = delete;
   ~SequenceSet();
 
-  SequenceSet &operator=(const SequenceSet &s);
-
-  bool operator==(const SequenceSet &s);
+  SequenceSet &operator=(const SequenceSet &s) = delete;
 
   // Append a sequence to the SequenceSet
   void AddSequence(Sequence *s);
@@ -79,16 +77,15 @@ public:
   Sequence *Find(int j);
 
   // Number of sequences in the SequenceSet
-  int NumSequences() const;
+  int NumSequences() const { return sequences.Length(); }
 
   //  return the entire sequence set in a const Array
-  const Array<Sequence *> &GetSequenceSet() const;
+  const Array<Sequence *> &GetSequenceSet() const { return sequences; }
 };
 
 class Sfg {
 private:
-  Game EF;
-  const BehaviorSupportProfile &efsupp;
+  BehaviorSupportProfile support;
   Array<SequenceSet *> *sequences;
   gNArray<Array<Rational> *> *SF;  // sequence form
   Array<RectArray<Rational> *> *E; // constraint matrices for sequence form.
@@ -110,7 +107,7 @@ public:
   Array<int> NumSequences() const { return seq; }
   int TotalNumSequences() const;
   int NumPlayerInfosets() const;
-  int NumPlayers() const { return EF->NumPlayers(); }
+  int NumPlayers() const { return support.GetGame()->NumPlayers(); }
   Array<Rational> Payoffs(const Array<int> &index) const { return *((*SF)[index]); }
 
   Rational Payoff(const Array<int> &index, int pl) const;
@@ -121,7 +118,6 @@ public:
   int ActionNumber(int pl, int sequence) const;
   GameInfoset GetInfoset(int pl, int sequence) const;
   GameAction GetAction(int pl, int sequence) const;
-  const Game &GetEfg() const { return EF; }
 
   MixedBehaviorProfile<double> ToBehav(const PVector<double> &x) const;
 
