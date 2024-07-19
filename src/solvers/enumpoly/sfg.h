@@ -27,111 +27,107 @@
 #include "odometer.h"
 #include "gnarray.h"
 
+namespace Gambit {
+
 struct Sequence {
   friend class Sfg;
-  friend class SFSequenceSet;
+  friend class SequenceSet;
 
 private:
   int number;
   std::string name;
-  Gambit::GamePlayer player;
-  Gambit::GameAction action;
+  GamePlayer player;
+  GameAction action;
   const Sequence *parent;
 
-  Sequence(const Gambit::GamePlayer &pl, const Gambit::GameAction &a, const Sequence *p, int n)
+  Sequence(const GamePlayer &pl, const GameAction &a, const Sequence *p, int n)
     : number(n), player(pl), action(a), parent(p)
   {
   }
+
   ~Sequence() = default;
 
 public:
   const std::string &GetName() const { return name; }
   void SetName(const std::string &s) { name = s; }
 
-  Gambit::List<Gambit::GameAction> History() const;
+  List<GameAction> History() const;
   int GetNumber() const { return number; }
-  Gambit::GameAction GetAction() const { return action; }
-  Gambit::GameInfoset GetInfoset() const
-  {
-    if (action) {
-      return action->GetInfoset();
-    }
-    return nullptr;
-  }
-  Gambit::GamePlayer Player() const { return player; }
+  GameAction GetAction() const { return action; }
+  GameInfoset GetInfoset() const { return (action) ? action->GetInfoset() : nullptr; }
+  GamePlayer GetPlayer() const { return player; }
   const Sequence *Parent() const { return parent; }
 };
 
-class SFSequenceSet {
+class SequenceSet {
 protected:
-  Gambit::GamePlayer efp;
-  Gambit::Array<Sequence *> sequences;
+  GamePlayer efp;
+  Array<Sequence *> sequences;
 
 public:
-  SFSequenceSet(const SFSequenceSet &s);
-  explicit SFSequenceSet(const Gambit::GamePlayer &p);
+  explicit SequenceSet(const GamePlayer &p);
+  SequenceSet(const SequenceSet &) = default;
+  ~SequenceSet();
 
-  SFSequenceSet &operator=(const SFSequenceSet &s);
-  bool operator==(const SFSequenceSet &s);
+  SequenceSet &operator=(const SequenceSet &s);
 
-  virtual ~SFSequenceSet();
+  bool operator==(const SequenceSet &s);
 
-  // Append a sequence to the SFSequenceSet
+  // Append a sequence to the SequenceSet
   void AddSequence(Sequence *s);
 
-  // Removes a sequence pointer. Returns true if the sequence was successfully
-  // removed, false otherwise.
-  bool RemoveSequence(Sequence *s);
   Sequence *Find(int j);
 
-  // Number of sequences in the SFSequenceSet
+  // Number of sequences in the SequenceSet
   int NumSequences() const;
 
-  //  return the entire sequence set in a const Gambit::Array
-  const Gambit::Array<Sequence *> &GetSFSequenceSet() const;
+  //  return the entire sequence set in a const Array
+  const Array<Sequence *> &GetSequenceSet() const;
 };
 
 class Sfg {
 private:
-  Gambit::Game EF;
-  const Gambit::BehaviorSupportProfile &efsupp;
-  Gambit::Array<SFSequenceSet *> *sequences;
-  gNArray<Gambit::Array<Gambit::Rational> *> *SF; // sequence form
-  Gambit::Array<Gambit::RectArray<Gambit::Rational> *>
-      *E; // constraint matrices for sequence form.
-  Gambit::Array<int> seq;
-  Gambit::PVector<int> isetFlag, isetRow;
-  Gambit::Array<Gambit::List<Gambit::GameInfoset>> infosets;
+  Game EF;
+  const BehaviorSupportProfile &efsupp;
+  Array<SequenceSet *> *sequences;
+  gNArray<Array<Rational> *> *SF;  // sequence form
+  Array<RectArray<Rational> *> *E; // constraint matrices for sequence form.
+  Array<int> seq;
+  PVector<int> isetFlag, isetRow;
+  Array<List<GameInfoset>> infosets;
 
-  void MakeSequenceForm(const Gambit::GameNode &, const Gambit::Rational &, Gambit::Array<int>,
-                        Gambit::Array<Gambit::GameInfoset>, Gambit::Array<Sequence *>);
-  void GetSequenceDims(const Gambit::GameNode &);
+  void MakeSequenceForm(const GameNode &, const Rational &, Array<int>, Array<GameInfoset>,
+                        Array<Sequence *>);
+
+  void GetSequenceDims(const GameNode &);
 
 public:
-  explicit Sfg(const Gambit::BehaviorSupportProfile &);
+  explicit Sfg(const BehaviorSupportProfile &);
   virtual ~Sfg();
 
-  inline int NumSequences(int pl) const { return seq[pl]; }
-  inline int NumInfosets(int pl) const { return infosets[pl].Length(); }
-  inline Gambit::Array<int> NumSequences() const { return seq; }
+  int NumSequences(int pl) const { return seq[pl]; }
+  int NumInfosets(int pl) const { return infosets[pl].Length(); }
+  Array<int> NumSequences() const { return seq; }
   int TotalNumSequences() const;
   int NumPlayerInfosets() const;
-  inline int NumPlayers() const { return EF->NumPlayers(); }
+  int NumPlayers() const { return EF->NumPlayers(); }
+  Array<Rational> Payoffs(const Array<int> &index) const { return *((*SF)[index]); }
 
-  inline Gambit::Array<Gambit::Rational> Payoffs(const Gambit::Array<int> &index) const
-  {
-    return *((*SF)[index]);
-  }
-  Gambit::Rational Payoff(const Gambit::Array<int> &index, int pl) const;
+  Rational Payoff(const Array<int> &index, int pl) const;
 
-  Gambit::RectArray<Gambit::Rational> Constraints(int player) const { return *((*E)[player]); };
+  RectArray<Rational> Constraints(int player) const { return *((*E)[player]); };
+
   int InfosetRowNumber(int pl, int sequence) const;
   int ActionNumber(int pl, int sequence) const;
-  Gambit::GameInfoset GetInfoset(int pl, int sequence) const;
-  Gambit::GameAction GetAction(int pl, int sequence) const;
-  const Gambit::Game &GetEfg() const { return EF; }
-  Gambit::MixedBehaviorProfile<double> ToBehav(const Gambit::PVector<double> &x) const;
+  GameInfoset GetInfoset(int pl, int sequence) const;
+  GameAction GetAction(int pl, int sequence) const;
+  const Game &GetEfg() const { return EF; }
+
+  MixedBehaviorProfile<double> ToBehav(const PVector<double> &x) const;
+
   const Sequence *GetSequence(int pl, int seq) const { return ((*sequences)[pl])->Find(seq); }
 };
+
+} // end namespace Gambit
 
 #endif // SFG_H
