@@ -90,7 +90,7 @@ private:
   BehaviorSupportProfile support;
   std::map<int, SequenceSet> sequences;
   std::unique_ptr<gNArray<Array<Rational> *>> SF; // sequence form
-  Array<RectArray<Rational> *> E;                 // constraint matrices for sequence form.
+  std::map<int, RectArray<Rational>> E;           // constraint matrices for sequence form.
   Array<int> seq;
   PVector<int> isetRow;
   Array<List<GameInfoset>> infosets;
@@ -114,7 +114,7 @@ public:
   Array<Rational> GetPayoffs(const Array<int> &index) const { return *((*SF)[index]); }
   Rational GetPayoff(const Array<int> &index, int pl) const { return GetPayoffs(index)[pl]; }
 
-  const RectArray<Rational> &Constraints(int player) const { return *(E[player]); };
+  const RectArray<Rational> &Constraints(int player) const { return E.at(player); };
 
   int InfosetRowNumber(int pl, int sequence) const;
   int ActionNumber(int pl, int sequence) const;

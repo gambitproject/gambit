@@ -113,13 +113,13 @@ Sfg::Sfg(const BehaviorSupportProfile &S)
   }
 
   for (int i = 1; i <= support.GetGame()->NumPlayers(); i++) {
-    E.push_back(new RectArray<Rational>(infosets[i].Length() + 1, seq[i]));
-    for (int j = (*E[i]).MinRow(); j <= (*E[i]).MaxRow(); j++) {
-      for (int k = (*E[i]).MinCol(); k <= (*E[i]).MaxCol(); k++) {
-        (*E[i])(j, k) = (Rational)0;
+    E.try_emplace(i, infosets[i].Length() + 1, seq[i]);
+    for (int j = E.at(i).MinRow(); j <= E.at(i).MaxRow(); j++) {
+      for (int k = E.at(i).MinCol(); k <= E.at(i).MaxCol(); k++) {
+        E.at(i)(j, k) = Rational(0);
       }
     }
-    (*E[i])(1, 1) = (Rational)1;
+    E.at(i)(1, 1) = Rational(1);
   }
 
   for (int i = 1; i <= support.GetGame()->NumPlayers(); i++) {
@@ -140,10 +140,6 @@ Sfg::~Sfg()
 
   while (index.Turn()) {
     delete (*SF)[index.CurrentIndices()];
-  }
-
-  for (int i = 1; i <= support.GetGame()->NumPlayers(); i++) {
-    delete E[i];
   }
 }
 
@@ -176,7 +172,7 @@ void Sfg::MakeSequenceForm(const GameNode &n, const Rational &prob, Array<int> s
         }
       }
 
-      (*E[pl])(isetRow(pl, isetnum), seq[pl]) = (Rational)1;
+      E.at(pl)(isetRow(pl, isetnum), seq[pl]) = Rational(1);
       std::shared_ptr<SequenceRep> myparent(parent[pl]);
 
       bool flag = false;
@@ -194,7 +190,7 @@ void Sfg::MakeSequenceForm(const GameNode &n, const Rational &prob, Array<int> s
             sequences.at(pl).AddSequence(child);
           }
 
-          (*E[pl])(isetRow(pl, isetnum), snew[pl]) = -(Rational)1;
+          E.at(pl)(isetRow(pl, isetnum), snew[pl]) = Rational(-1);
           MakeSequenceForm(n->GetChild(i), prob, snew, iset, parent, isetFlag);
         }
       }
