@@ -2,6 +2,9 @@
 
 ## [16.3.0] - unreleased
 
+### General
+- Dropped support for Python 3.8.
+
 ### Added
 - Implemented maximum-likelihood estimation for agent logit QRE, to parallel existing support
   for strategic logit QRE.  Strategic logit QRE function names have been modified to provide

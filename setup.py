@@ -111,14 +111,13 @@ def readme():
 
 setuptools.setup(
     name="pygambit",
-    version="16.2.0",
+    version="16.3.0",
     description="The package for computation in game theory",
     long_description=readme(),
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Science/Research",
         "License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)",
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
@@ -136,7 +135,7 @@ setuptools.setup(
         "Source": "https://github.com/gambitproject/gambit",
         "Tracker": "https://github.com/gambitproject/gambit/issues",
     },
-    python_requires=">=3.8",
+    python_requires=">=3.9",
     install_requires=[
         "lxml",  # used for reading/writing GTE files
         "numpy",

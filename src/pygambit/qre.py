@@ -22,8 +22,9 @@
 """
 A set of utilities for computing and analyzing quantal response equilbria
 """
+from __future__ import annotations
+
 import math
-import typing
 
 import scipy.optimize
 
@@ -47,7 +48,7 @@ def logit_solve_branch(
 
 def logit_solve_lambda(
         game: libgbt.Game,
-        lam: typing.Union[float, typing.List[float]],
+        lam: float | list[float],
         use_strategic: bool = False,
         first_step: float = .03,
         max_accel: float = 1.1,
@@ -238,13 +239,12 @@ def _estimate_behavior_empirical(
 
 
 def logit_estimate(
-        data: typing.Union[libgbt.MixedStrategyProfile,
-                           libgbt.MixedBehaviorProfile],
+        data: libgbt.MixedStrategyProfile | libgbt.MixedBehaviorProfile,
         use_empirical: bool = False,
         local_max: bool = False,
         first_step: float = .03,
         max_accel: float = 1.1,
-) -> typing.Union[LogitQREMixedStrategyFitResult, LogitQREMixedBehaviorFitResult]:
+) -> LogitQREMixedStrategyFitResult | LogitQREMixedBehaviorFitResult:
     """Use maximum likelihood estimation to find the logit quantal
     response equilibrium which best fits empirical frequencies of play.
 

@@ -4,7 +4,7 @@ requires = ["setuptools", "wheel", "Cython"]
 [tool.ruff]
 line-length = 99
 indent-width = 4
-target-version = "py38"
+target-version = "py39"
 include = ["setup.py", "src/pygambit/**/*.py", "tests/**/*.py"]
 exclude = ["contrib/**.py"]
 

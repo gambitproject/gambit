@@ -23,13 +23,14 @@
 A set of utilities for computing Nash equilibria
 """
 
+from __future__ import annotations
+
 import dataclasses
-import typing
 
 import pygambit.gambit as libgbt
 
-MixedStrategyEquilibriumSet = typing.List[libgbt.MixedStrategyProfile]
-MixedBehaviorEquilibriumSet = typing.List[libgbt.MixedBehaviorProfile]
+MixedStrategyEquilibriumSet = list[libgbt.MixedStrategyProfile]
+MixedBehaviorEquilibriumSet = list[libgbt.MixedBehaviorProfile]
 
 
 @dataclasses.dataclass(frozen=True)
@@ -57,7 +58,7 @@ class NashComputationResult:
     method: str
     rational: bool
     use_strategic: bool
-    equilibria: typing.Union[MixedStrategyEquilibriumSet, MixedBehaviorEquilibriumSet]
+    equilibria: MixedStrategyEquilibriumSet | MixedBehaviorEquilibriumSet
     parameters: dict = dataclasses.field(default_factory=dict)
 
 
@@ -143,8 +144,8 @@ def lcp_solve(
         game: libgbt.Game,
         rational: bool = True,
         use_strategic: bool = False,
-        stop_after: typing.Optional[int] = None,
-        max_depth: typing.Optional[int] = None
+        stop_after: int | None = None,
+        max_depth: int | None = None
 ) -> NashComputationResult:
     """Compute Nash equilibria of a two-player game using :ref:`linear
     complementarity programming <gambit-lcp>`.
@@ -247,8 +248,7 @@ def lp_solve(
 
 
 def liap_solve(
-        start: typing.Union[libgbt.MixedStrategyProfileDouble,
-                            libgbt.MixedBehaviorProfileDouble],
+        start: libgbt.MixedStrategyProfileDouble | libgbt.MixedBehaviorProfileDouble,
         maxregret: float = 1.0e-4,
         maxiter: int = 1000
 ) -> NashComputationResult:
@@ -310,9 +310,9 @@ def liap_solve(
 
 def simpdiv_solve(
         start: libgbt.MixedStrategyProfileRational,
-        maxregret: libgbt.Rational = None,
+        maxregret: libgbt.Rational | None = None,
         refine: int = 2,
-        leash: typing.Optional[int] = None
+        leash: int | None = None
 ) -> NashComputationResult:
     """Compute Nash equilibria of a game using :ref:`simplicial
     subdivision <gambit-simpdiv>`.
@@ -371,7 +371,7 @@ def simpdiv_solve(
 
 
 def ipa_solve(
-        perturbation: typing.Union[libgbt.Game, libgbt.MixedStrategyProfileDouble]
+        perturbation: libgbt.Game | libgbt.MixedStrategyProfileDouble,
 ) -> NashComputationResult:
     """Compute Nash equilibria of a game using :ref:`iterated polymatrix
     approximation <gambit-ipa>`.
@@ -423,7 +423,7 @@ def ipa_solve(
 
 
 def gnm_solve(
-        perturbation: typing.Union[libgbt.Game, libgbt.MixedStrategyProfileDouble],
+        perturbation: libgbt.Game | libgbt.MixedStrategyProfileDouble,
         end_lambda: float = -10.0,
         steps: int = 100,
         local_newton_interval: int = 3,
@@ -527,7 +527,7 @@ def gnm_solve(
         raise
 
 
-def possible_nash_supports(game: libgbt.Game) -> typing.List[libgbt.StrategySupportProfile]:
+def possible_nash_supports(game: libgbt.Game) -> list[libgbt.StrategySupportProfile]:
     """Compute the set of support profiles which could possibly form the support
     of a totally-mixed Nash equilibrium.
 
