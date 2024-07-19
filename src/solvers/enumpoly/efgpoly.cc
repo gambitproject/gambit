@@ -57,11 +57,12 @@ ProblemData::ProblemData(const BehaviorSupportProfile &p_support)
 {
   int tnv = 0;
   for (int pl = 1; pl <= p_support.GetGame()->NumPlayers(); pl++) {
-    var[pl] = Array<int>(SF.NumSequences(pl));
+    GamePlayer player = p_support.GetGame()->GetPlayer(pl);
+    var[pl] = Array<int>(SF.NumSequences(player));
     var[pl][1] = 0;
-    for (int seq = 2; seq <= SF.NumSequences(pl); seq++) {
-      int act = SF.ActionNumber(pl, seq);
-      GameInfoset infoset = SF.GetInfoset(pl, seq);
+    for (int seq = 2; seq <= SF.NumSequences(player); seq++) {
+      int act = SF.ActionNumber(player, seq);
+      GameInfoset infoset = SF.GetInfoset(player, seq);
       if (act < p_support.NumActions(infoset)) {
         var[pl][seq] = ++tnv;
       }
@@ -89,15 +90,12 @@ ProblemData::~ProblemData()
 // derivatives vanish, and that the sum of action probabilities at
 // each information set be less than one.
 
-gPoly<double> ProbOfSequence(const ProblemData &p_data, int p, int seq)
+gPoly<double> ProbOfSequence(const ProblemData &p_data, const GamePlayer &p_player, int seq)
 {
   gPoly<double> equation(p_data.Space, p_data.Lex);
   Vector<int> exps(p_data.nVars);
 
-  int isetrow = p_data.SF.InfosetRowNumber(p, seq);
-  int act = p_data.SF.ActionNumber(p, seq);
-  int varno = p_data.var[p][seq];
-  GameInfoset infoset = p_data.SF.GetInfoset(p, seq);
+  GameInfoset infoset = p_data.SF.GetInfoset(p_player, seq);
 
   if (seq == 1) {
     exps = 0;
@@ -106,21 +104,22 @@ gPoly<double> ProbOfSequence(const ProblemData &p_data, int p, int seq)
     gPoly<double> new_term(p_data.Space, const_term, p_data.Lex);
     equation += new_term;
   }
-  else if (act < p_data.support.NumActions(infoset)) {
+  else if (p_data.SF.ActionNumber(p_player, seq) < p_data.support.NumActions(infoset)) {
     exps = 0;
-    exps[varno] = 1;
+    exps[p_data.var[p_player->GetNumber()][seq]] = 1;
     exp_vect const_exp(p_data.Space, exps);
     gMono<double> const_term(1.0, const_exp);
     gPoly<double> new_term(p_data.Space, const_term, p_data.Lex);
     equation += new_term;
   }
   else {
+    int isetrow = p_data.SF.InfosetRowNumber(p_player, seq);
     for (int j = 1; j < seq; j++) {
-      if (p_data.SF.Constraints(p)(isetrow, j) == Rational(-1)) {
-        equation -= ProbOfSequence(p_data, p, j);
+      if (p_data.SF.GetConstraintEntry(p_player, isetrow, j) == Rational(-1)) {
+        equation -= ProbOfSequence(p_data, p_player, j);
       }
-      else if (p_data.SF.Constraints(p)(isetrow, j) == Rational(1)) {
-        equation += ProbOfSequence(p_data, p, j);
+      else if (p_data.SF.GetConstraintEntry(p_player, isetrow, j) == Rational(1)) {
+        equation += ProbOfSequence(p_data, p_player, j);
       }
     }
   }
@@ -130,16 +129,15 @@ gPoly<double> ProbOfSequence(const ProblemData &p_data, int p, int seq)
 gPoly<double> GetPayoff(const ProblemData &p_data, int pl)
 {
   gIndexOdometer index(p_data.SF.NumSequences());
-  Rational pay;
 
   gPoly<double> equation(p_data.Space, p_data.Lex);
   while (index.Turn()) {
-    pay = p_data.SF.Payoff(index.CurrentIndices(), pl);
+    auto pay = p_data.SF.GetPayoff(index.CurrentIndices(), pl);
     if (pay != Rational(0)) {
-      gPoly<double> term(p_data.Space, (double)pay, p_data.Lex);
-      int k;
-      for (k = 1; k <= p_data.support.GetGame()->NumPlayers(); k++) {
-        term *= ProbOfSequence(p_data, k, (index.CurrentIndices())[k]);
+      gPoly<double> term(p_data.Space, double(pay), p_data.Lex);
+      for (int k = 1; k <= p_data.support.GetGame()->NumPlayers(); k++) {
+        term *= ProbOfSequence(p_data, p_data.support.GetGame()->GetPlayer(k),
+                               index.CurrentIndices()[k]);
       }
       equation += term;
     }
@@ -153,8 +151,9 @@ gPolyList<double> IndifferenceEquations(const ProblemData &p_data)
 
   int kk = 0;
   for (int pl = 1; pl <= p_data.SF.NumPlayers(); pl++) {
+    GamePlayer player = p_data.support.GetGame()->GetPlayer(pl);
     gPoly<double> payoff = GetPayoff(p_data, pl);
-    int n_vars = p_data.SF.NumSequences(pl) - p_data.SF.NumInfosets(pl) - 1;
+    int n_vars = p_data.SF.NumSequences(player) - p_data.SF.NumInfosets(player) - 1;
     for (int j = 1; j <= n_vars; j++) {
       equations += payoff.PartialDerivative(kk + j);
     }
@@ -169,11 +168,12 @@ gPolyList<double> LastActionProbPositiveInequalities(const ProblemData &p_data)
   gPolyList<double> equations(p_data.Space, p_data.Lex);
 
   for (int i = 1; i <= p_data.SF.NumPlayers(); i++) {
-    for (int j = 2; j <= p_data.SF.NumSequences(i); j++) {
-      int act_num = p_data.SF.ActionNumber(i, j);
-      GameInfoset infoset = p_data.SF.GetInfoset(i, j);
+    GamePlayer player = p_data.support.GetGame()->GetPlayer(i);
+    for (int j = 2; j <= p_data.SF.NumSequences(player); j++) {
+      int act_num = p_data.SF.ActionNumber(player, j);
+      GameInfoset infoset = p_data.SF.GetInfoset(player, j);
       if (act_num == p_data.support.NumActions(infoset) && act_num > 1) {
-        equations += ProbOfSequence(p_data, i, j);
+        equations += ProbOfSequence(p_data, player, j);
       }
     }
   }
@@ -195,27 +195,26 @@ gPolyList<double> NashOnSupportEquationsAndInequalities(const ProblemData &p_dat
 //               Mapping solution vectors to sequences
 //=======================================================================
 
-double NumProbOfSequence(const ProblemData &p_data, int p, int seq, const Vector<double> &x)
+double NumProbOfSequence(const ProblemData &p_data, const GamePlayer &p_player, int seq,
+                         const Vector<double> &x)
 {
-  int isetrow = p_data.SF.InfosetRowNumber(p, seq);
-  int act = p_data.SF.ActionNumber(p, seq);
-  int varno = p_data.var[p][seq];
-  GameInfoset infoset = p_data.SF.GetInfoset(p, seq);
+  GameInfoset infoset = p_data.SF.GetInfoset(p_player, seq);
 
   if (seq == 1) {
     return 1.0;
   }
-  else if (act < p_data.support.NumActions(infoset)) {
-    return x[varno];
+  else if (p_data.SF.ActionNumber(p_player, seq) < p_data.support.NumActions(infoset)) {
+    return x[p_data.var[p_player->GetNumber()][seq]];
   }
   else {
     double value = 0.0;
+    int isetrow = p_data.SF.InfosetRowNumber(p_player, seq);
     for (int j = 1; j < seq; j++) {
-      if (p_data.SF.Constraints(p)(isetrow, j) == Rational(-1)) {
-        value -= NumProbOfSequence(p_data, p, j, x);
+      if (p_data.SF.GetConstraintEntry(p_player, isetrow, j) == Rational(-1)) {
+        value -= NumProbOfSequence(p_data, p_player, j, x);
       }
-      else if (p_data.SF.Constraints(p)(isetrow, j) == Rational(1)) {
-        value += NumProbOfSequence(p_data, p, j, x);
+      else if (p_data.SF.GetConstraintEntry(p_player, isetrow, j) == Rational(1)) {
+        value += NumProbOfSequence(p_data, p_player, j, x);
       }
     }
     return value;
@@ -228,7 +227,7 @@ PVector<double> SeqFormVectorFromSolFormVector(const ProblemData &p_data, const 
 
   for (int i = 1; i <= p_data.support.GetGame()->NumPlayers(); i++) {
     for (int j = 1; j <= p_data.SF.NumSequences()[i]; j++) {
-      x(i, j) = NumProbOfSequence(p_data, i, j, v);
+      x(i, j) = NumProbOfSequence(p_data, p_data.support.GetGame()->GetPlayer(i), j, v);
     }
   }
 

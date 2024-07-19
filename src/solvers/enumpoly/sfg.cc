@@ -21,271 +21,133 @@
 //
 
 #include "sfg.h"
-#include "sfstrat.h"
-#include "gnarray.imp"
 #include "gambit.h"
 
-//----------------------------------------------------
-// Sfg: Constructors, Destructors, Operators
-//----------------------------------------------------
+using namespace Gambit;
 
-Sfg::Sfg(const Gambit::BehaviorSupportProfile &S)
-  : EF(S.GetGame()), efsupp(S), seq(EF->NumPlayers()), isetFlag(S.GetGame()->NumInfosets()),
-    isetRow(S.GetGame()->NumInfosets()), infosets(EF->NumPlayers())
+namespace Gambit {
+
+Sfg::Sfg(const BehaviorSupportProfile &S) : support(S)
 {
-  int i;
-  Gambit::Array<Gambit::GameInfoset> zero(EF->NumPlayers());
-  Gambit::Array<int> one(EF->NumPlayers());
-
-  Gambit::BehaviorSupportProfile support(EF);
-
-  for (i = 1; i <= EF->NumPlayers(); i++) {
-    seq[i] = 1;
-    zero[i] = nullptr;
-    one[i] = 1;
+  for (auto player : support.GetGame()->GetPlayers()) {
+    m_actionParents[player] = {};
   }
 
-  isetFlag = 0;
-  isetRow = 0;
+  PureSequenceProfile parent;
+  for (auto player : support.GetGame()->GetPlayers()) {
+    parent[player] = nullptr;
+  }
+  BuildSequences(support.GetGame()->GetRoot(), parent);
 
-  GetSequenceDims(EF->GetRoot());
+  Array<int> dim(support.GetGame()->NumPlayers());
+  for (int pl = 1; pl <= support.GetGame()->NumPlayers(); pl++) {
+    dim[pl] = m_actionParents[support.GetGame()->GetPlayer(pl)].size() + 1;
+  }
+  SF = NDArray<Rational>(dim, support.GetGame()->NumPlayers());
 
-  isetFlag = 0;
-
-  gIndexOdometer index(seq);
-
-  SF = new gNArray<Gambit::Array<Gambit::Rational> *>(seq);
-  while (index.Turn()) {
-    (*SF)[index.CurrentIndices()] = new Gambit::Array<Gambit::Rational>(EF->NumPlayers());
-    for (i = 1; i <= EF->NumPlayers(); i++) {
-      (*(*SF)[index.CurrentIndices()])[i] = (Gambit::Rational)0;
-    }
+  for (auto player : support.GetGame()->GetPlayers()) {
+    m_sequenceColumns[player] = {{nullptr, 1}};
+    E.try_emplace(player, infoset_row[player].size() + 1, m_actionParents[player].size() + 1);
+    E.at(player)(1, 1) = Rational(1);
+    parent[player] = nullptr;
   }
 
-  E = new Gambit::Array<Gambit::RectArray<Gambit::Rational> *>(EF->NumPlayers());
-  for (i = 1; i <= EF->NumPlayers(); i++) {
-    (*E)[i] = new Gambit::RectArray<Gambit::Rational>(infosets[i].Length() + 1, seq[i]);
-    for (int j = (*(*E)[i]).MinRow(); j <= (*(*E)[i]).MaxRow(); j++) {
-      for (int k = (*(*E)[i]).MinCol(); k <= (*(*E)[i]).MaxCol(); k++) {
-        (*(*E)[i])(j, k) = (Gambit::Rational)0;
-      }
-    }
-    (*(*E)[i])(1, 1) = (Gambit::Rational)1;
-  }
-
-  sequences = new Gambit::Array<SFSequenceSet *>(EF->NumPlayers());
-  for (i = 1; i <= EF->NumPlayers(); i++) {
-    (*sequences)[i] = new SFSequenceSet(EF->GetPlayer(i));
-  }
-
-  Gambit::Array<Sequence *> parent(EF->NumPlayers());
-  for (i = 1; i <= EF->NumPlayers(); i++) {
-    parent[i] = (((*sequences)[i])->GetSFSequenceSet())[1];
-  }
-
-  MakeSequenceForm(EF->GetRoot(), (Gambit::Rational)1, one, zero, parent);
+  FillTableau(support.GetGame()->GetRoot(), Rational(1), parent);
 }
 
-Sfg::~Sfg()
+Rational &Sfg::GetMatrixEntry(const PureSequenceProfile &profile, const GamePlayer &player)
 {
-  gIndexOdometer index(seq);
-
-  while (index.Turn()) {
-    delete (*SF)[index.CurrentIndices()];
+  Array<int> index(profile.size());
+  for (int pl = 1; pl <= support.GetGame()->NumPlayers(); pl++) {
+    index[pl] = m_sequenceColumns.at(support.GetGame()->GetPlayer(pl))
+                    .at(profile.at(support.GetGame()->GetPlayer(pl)));
   }
-  delete SF;
-
-  int i;
-
-  for (i = 1; i <= EF->NumPlayers(); i++) {
-    delete (*E)[i];
-  }
-  delete E;
-
-  for (i = 1; i <= EF->NumPlayers(); i++) {
-    delete (*sequences)[i];
-  }
-  delete sequences;
+  return SF.at(index, player->GetNumber());
 }
 
-void Sfg::MakeSequenceForm(const Gambit::GameNode &n, const Gambit::Rational &prob,
-                           Gambit::Array<int> seq, Gambit::Array<Gambit::GameInfoset> iset,
-                           Gambit::Array<Sequence *> parent)
+Rational &Sfg::GetConstraintEntry(const GameInfoset &infoset, const GameAction &action)
 {
-  int i, pl;
+  return E.at(infoset->GetPlayer())(infoset_row[infoset->GetPlayer()][infoset],
+                                    m_sequenceColumns[infoset->GetPlayer()][action]);
+}
 
+void Sfg::BuildSequences(const GameNode &n, PureSequenceProfile &p_previousActions)
+{
+  if (!n->GetInfoset()) {
+    return;
+  }
+  if (n->GetPlayer()->IsChance()) {
+    for (auto child : n->GetChildren()) {
+      BuildSequences(child, p_previousActions);
+    }
+  }
+  else {
+    auto &player_infoset_row = infoset_row[n->GetPlayer()];
+    if (player_infoset_row.find(n->GetInfoset()) == player_infoset_row.end()) {
+      player_infoset_row[n->GetInfoset()] = player_infoset_row.size() + 1;
+    }
+    for (auto action : support.GetActions(n->GetInfoset())) {
+      m_actionParents[n->GetPlayer()][action] = p_previousActions[n->GetPlayer()];
+      p_previousActions[n->GetPlayer()] = action;
+      BuildSequences(n->GetChild(action), p_previousActions);
+      p_previousActions[n->GetPlayer()] = m_actionParents[n->GetPlayer()][action];
+    }
+  }
+}
+
+void Sfg::FillTableau(const GameNode &n, const Rational &prob,
+                      PureSequenceProfile &previousActions)
+{
   if (n->GetOutcome()) {
-    for (pl = 1; pl <= seq.Length(); pl++) {
-      (*(*SF)[seq])[pl] += prob * static_cast<Gambit::Rational>(n->GetOutcome()->GetPayoff(pl));
+    for (auto player : support.GetGame()->GetPlayers()) {
+      GetMatrixEntry(previousActions, player) +=
+          prob * static_cast<Rational>(n->GetOutcome()->GetPayoff(player));
     }
   }
-  if (n->GetInfoset()) {
-    if (n->GetPlayer()->IsChance()) {
-      for (i = 1; i <= n->NumChildren(); i++) {
-        MakeSequenceForm(n->GetChild(i),
-                         prob * static_cast<Gambit::Rational>(n->GetInfoset()->GetActionProb(i)),
-                         seq, iset, parent);
-      }
+  if (!n->GetInfoset()) {
+    return;
+  }
+  if (n->GetPlayer()->IsChance()) {
+    for (auto action : n->GetInfoset()->GetActions()) {
+      FillTableau(n->GetChild(action),
+                  prob * static_cast<Rational>(n->GetInfoset()->GetActionProb(action)),
+                  previousActions);
     }
-    else {
-      int pl = n->GetPlayer()->GetNumber();
-      iset[pl] = n->GetInfoset();
-      int isetnum = iset[pl]->GetNumber();
-      Gambit::Array<int> snew(seq);
-      snew[pl] = 1;
-      for (i = 1; i < isetnum; i++) {
-        if (isetRow(pl, i)) {
-          snew[pl] += efsupp.NumActions(pl, i);
-        }
+  }
+  else {
+    GetConstraintEntry(n->GetInfoset(), previousActions.at(n->GetPlayer())) = Rational(1);
+    for (auto action : support.GetActions(n->GetInfoset())) {
+      if (m_sequenceColumns[n->GetPlayer()].find(action) ==
+          m_sequenceColumns[n->GetPlayer()].end()) {
+        m_sequenceColumns[n->GetPlayer()][action] = m_sequenceColumns[n->GetPlayer()].size() + 1;
       }
-
-      (*(*E)[pl])(isetRow(pl, isetnum), seq[pl]) = (Gambit::Rational)1;
-      Sequence *myparent(parent[pl]);
-
-      bool flag = false;
-      if (!isetFlag(pl, isetnum)) { // on first visit to iset, create new sequences
-        isetFlag(pl, isetnum) = 1;
-        flag = true;
-      }
-      for (i = 1; i <= n->NumChildren(); i++) {
-        if (efsupp.Contains(n->GetInfoset()->GetAction(i))) {
-          snew[pl] += 1;
-          if (flag) {
-            Sequence *child;
-            child =
-                new Sequence(n->GetPlayer(), n->GetInfoset()->GetAction(i), myparent, snew[pl]);
-            parent[pl] = child;
-            ((*sequences)[pl])->AddSequence(child);
-          }
-
-          (*(*E)[pl])(isetRow(pl, isetnum), snew[pl]) = -(Gambit::Rational)1;
-          MakeSequenceForm(n->GetChild(i), prob, snew, iset, parent);
-        }
-      }
+      previousActions[n->GetPlayer()] = action;
+      GetConstraintEntry(n->GetInfoset(), action) = Rational(-1);
+      FillTableau(n->GetChild(action), prob, previousActions);
+      previousActions[n->GetPlayer()] = m_actionParents[n->GetPlayer()][action];
     }
   }
 }
 
-void Sfg::GetSequenceDims(const Gambit::GameNode &n)
+MixedBehaviorProfile<double> Sfg::ToBehav(const PVector<double> &x) const
 {
-  int i;
+  MixedBehaviorProfile<double> b(support);
+  b = 0;
 
-  if (n->GetInfoset()) {
-    if (n->GetPlayer()->IsChance()) {
-      for (i = 1; i <= n->NumChildren(); i++) {
-        GetSequenceDims(n->GetChild(i));
+  for (int i = 1; i <= support.GetGame()->NumPlayers(); i++) {
+    GamePlayer player = support.GetGame()->GetPlayer(i);
+    for (auto action_entry : m_sequenceColumns.at(player)) {
+      if (action_entry.first == nullptr) {
+        continue;
       }
-    }
-    else {
-      int pl = n->GetPlayer()->GetNumber();
-      int isetnum = n->GetInfoset()->GetNumber();
-
-      bool flag = false;
-      if (!isetFlag(pl, isetnum)) { // on first visit to iset, create new sequences
-        infosets[pl].push_back(n->GetInfoset());
-        isetFlag(pl, isetnum) = 1;
-        isetRow(pl, isetnum) = infosets[pl].Length() + 1;
-        flag = true;
+      auto parent = m_actionParents.at(player).at(action_entry.first);
+      auto parent_prob = x(player->GetNumber(), m_sequenceColumns.at(player).at(parent));
+      if (parent_prob > 0) {
+        b[action_entry.first] = x(player->GetNumber(), action_entry.second) / parent_prob;
       }
-      for (i = 1; i <= n->NumChildren(); i++) {
-        if (efsupp.Contains(n->GetInfoset()->GetAction(i))) {
-          if (flag) {
-            seq[pl]++;
-          }
-          GetSequenceDims(n->GetChild(i));
-        }
-      }
-    }
-  }
-}
-
-int Sfg::TotalNumSequences() const
-{
-  int tot = 0;
-  for (int i = 1; i <= seq.Length(); i++) {
-    tot += seq[i];
-  }
-  return tot;
-}
-
-int Sfg::NumPlayerInfosets() const
-{
-  int tot = 0;
-  for (int i = 1; i <= infosets.Length(); i++) {
-    tot += infosets[i].Length();
-  }
-  return tot;
-}
-
-int Sfg::InfosetRowNumber(int pl, int j) const
-{
-  if (j == 1) {
-    return 0;
-  }
-  int isetnum = (*sequences)[pl]->Find(j)->GetInfoset()->GetNumber();
-  return isetRow(pl, isetnum);
-}
-
-int Sfg::ActionNumber(int pl, int j) const
-{
-  if (j == 1) {
-    return 0;
-  }
-  return efsupp.GetIndex(GetAction(pl, j));
-}
-
-Gambit::GameInfoset Sfg::GetInfoset(int pl, int j) const
-{
-  if (j == 1) {
-    return nullptr;
-  }
-  return (*sequences)[pl]->Find(j)->GetInfoset();
-}
-
-Gambit::GameAction Sfg::GetAction(int pl, int j) const
-{
-  if (j == 1) {
-    return nullptr;
-  }
-  return (*sequences)[pl]->Find(j)->GetAction();
-}
-
-Gambit::MixedBehaviorProfile<double> Sfg::ToBehav(const Gambit::PVector<double> &x) const
-{
-  Gambit::MixedBehaviorProfile<double> b(efsupp);
-
-  b = (Gambit::Rational)0;
-
-  Sequence *sij;
-  const Sequence *parent;
-  Gambit::Rational value;
-
-  int i, j;
-  for (i = 1; i <= EF->NumPlayers(); i++) {
-    for (j = 2; j <= seq[i]; j++) {
-      sij = ((*sequences)[i]->GetSFSequenceSet())[j];
-      int sn = sij->GetNumber();
-      parent = sij->Parent();
-
-      // gout << "\ni,j,sn,iset,act: " << i << " " << j << " " << sn << " ";
-      // gout << sij->GetInfoset()->GetNumber() << " " << sij->GetAction()->GetNumber();
-
-      if (x(i, parent->GetNumber()) > (double)0) {
-        value = Gambit::Rational(x(i, sn) / x(i, parent->GetNumber()));
-      }
-      else {
-        value = Gambit::Rational(0);
-      }
-
-      b[sij->GetAction()] = value;
     }
   }
   return b;
 }
 
-Gambit::Rational Sfg::Payoff(const Gambit::Array<int> &index, int pl) const
-{
-  return Payoffs(index)[pl];
-}
-
-template class gNArray<Gambit::Array<Gambit::Rational> *>;
+} // end namespace Gambit

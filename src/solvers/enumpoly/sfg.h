@@ -23,52 +23,111 @@
 #ifndef SFG_H
 #define SFG_H
 
+#include <memory>
+
 #include "gambit.h"
 #include "odometer.h"
-#include "gnarray.h"
-#include "sfstrat.h"
+#include "ndarray.h"
+
+namespace Gambit {
 
 class Sfg {
-private:
-  Gambit::Game EF;
-  const Gambit::BehaviorSupportProfile &efsupp;
-  Gambit::Array<SFSequenceSet *> *sequences;
-  gNArray<Gambit::Array<Gambit::Rational> *> *SF; // sequence form
-  Gambit::Array<Gambit::RectArray<Gambit::Rational> *>
-      *E; // constraint matrices for sequence form.
-  Gambit::Array<int> seq;
-  Gambit::PVector<int> isetFlag, isetRow;
-  Gambit::Array<Gambit::List<Gambit::GameInfoset>> infosets;
+  using PureSequenceProfile = std::map<GamePlayer, GameAction>;
 
-  void MakeSequenceForm(const Gambit::GameNode &, const Gambit::Rational &, Gambit::Array<int>,
-                        Gambit::Array<Gambit::GameInfoset>, Gambit::Array<Sequence *>);
-  void GetSequenceDims(const Gambit::GameNode &);
+private:
+  BehaviorSupportProfile support;
+  std::map<GamePlayer, std::map<GameAction, int>> m_sequenceColumns;
+  NDArray<Rational> SF;                        // sequence form
+  std::map<GamePlayer, RectArray<Rational>> E; // constraint matrices for sequence form.
+  std::map<GamePlayer, std::map<GameInfoset, int>> infoset_row;
+  std::map<GamePlayer, std::map<GameAction, GameAction>> m_actionParents;
+
+  void BuildSequences(const GameNode &, PureSequenceProfile &);
+  void FillTableau(const GameNode &, const Rational &, PureSequenceProfile &);
+
+  Rational &GetMatrixEntry(const PureSequenceProfile &, const GamePlayer &);
+  Rational &GetConstraintEntry(const GameInfoset &, const GameAction &);
 
 public:
-  explicit Sfg(const Gambit::BehaviorSupportProfile &);
-  virtual ~Sfg();
+  explicit Sfg(const BehaviorSupportProfile &);
 
-  inline int NumSequences(int pl) const { return seq[pl]; }
-  inline int NumInfosets(int pl) const { return infosets[pl].Length(); }
-  inline Gambit::Array<int> NumSequences() const { return seq; }
-  int TotalNumSequences() const;
-  int NumPlayerInfosets() const;
-  inline int NumPlayers() const { return EF->NumPlayers(); }
+  ~Sfg() = default;
 
-  inline Gambit::Array<Gambit::Rational> Payoffs(const Gambit::Array<int> &index) const
+  int NumSequences(const GamePlayer &p_player) const
   {
-    return *((*SF)[index]);
+    return m_sequenceColumns.at(p_player).size();
   }
-  Gambit::Rational Payoff(const Gambit::Array<int> &index, int pl) const;
 
-  Gambit::RectArray<Gambit::Rational> Constraints(int player) const { return *((*E)[player]); };
-  int InfosetRowNumber(int pl, int sequence) const;
-  int ActionNumber(int pl, int sequence) const;
-  Gambit::GameInfoset GetInfoset(int pl, int sequence) const;
-  Gambit::GameAction GetAction(int pl, int sequence) const;
-  const Gambit::Game &GetEfg() const { return EF; }
-  Gambit::MixedBehaviorProfile<double> ToBehav(const Gambit::PVector<double> &x) const;
-  const Sequence *GetSequence(int pl, int seq) const { return ((*sequences)[pl])->Find(seq); }
+  int NumInfosets(const GamePlayer &p_player) const { return infoset_row.at(p_player).size(); }
+
+  const Array<int> &NumSequences() const { return SF.GetIndexDimension(); }
+
+  int TotalNumSequences() const
+  {
+    auto &dim = SF.GetIndexDimension();
+    return std::accumulate(dim.cbegin(), dim.cend(), 0);
+  }
+
+  int NumPlayerInfosets() const
+  {
+    auto players = support.GetGame()->GetPlayers();
+    return std::accumulate(
+        players.cbegin(), players.cend(), 0,
+        [this](int accum, const GamePlayer &player) { return accum + NumInfosets(player); });
+  }
+
+  int NumPlayers() const { return support.GetGame()->NumPlayers(); }
+
+  const Rational &GetPayoff(const Array<int> &index, int pl) const { return SF.at(index, pl); }
+
+  const Rational &GetConstraintEntry(const GamePlayer &p_player, int infoset_row,
+                                     int seq_col) const
+  {
+    return E.at(p_player)(infoset_row, seq_col);
+  }
+
+  int InfosetRowNumber(const GamePlayer &p_player, int sequence) const
+  {
+    if (sequence == 1) {
+      return 0;
+    }
+    for (auto entry : m_sequenceColumns.at(p_player)) {
+      if (entry.second == sequence) {
+        return infoset_row.at(p_player).at(entry.first->GetInfoset());
+      }
+    }
+    return 0;
+  }
+
+  int ActionNumber(const GamePlayer &p_player, int sequence) const
+  {
+    if (sequence == 1) {
+      return 0;
+    }
+    for (auto entry : m_sequenceColumns.at(p_player)) {
+      if (entry.second == sequence) {
+        return support.GetIndex(entry.first);
+      }
+    }
+    return 0;
+  }
+
+  GameInfoset GetInfoset(const GamePlayer &p_player, int sequence) const
+  {
+    if (sequence == 1) {
+      return 0;
+    }
+    for (auto entry : m_sequenceColumns.at(p_player)) {
+      if (entry.second == sequence) {
+        return entry.first->GetInfoset();
+      }
+    }
+    return 0;
+  }
+
+  MixedBehaviorProfile<double> ToBehav(const PVector<double> &x) const;
 };
+
+} // end namespace Gambit
 
 #endif // SFG_H
