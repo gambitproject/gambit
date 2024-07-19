@@ -20,40 +20,53 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GNARRAY_H
-#define GNARRAY_H
+#ifndef NDARRAY_H
+#define NDARRAY_H
 
 #include "gambit.h"
 
+namespace Gambit {
 //
 // Basic n-dimensional array
 //
-template <class T> class gNArray {
+template <class T> class NDArray {
 protected:
-  long storage_size;
-  T *storage;
-  Gambit::Array<int> dim;
+  Array<int> dim;
+  std::vector<T> storage;
+
+  static size_t ComputeSize(const Array<int> &dim)
+  {
+    size_t size = 1;
+    for (auto element : dim) {
+      size *= element;
+    }
+    return size;
+  }
+
+  int ComputeOffset(const Array<int> &v) const
+  {
+    int location = 0;
+    for (int i = 1, offset = 1; i <= dim.Length(); i++) {
+      location += (v[i] - 1) * offset;
+      offset *= dim[i];
+    }
+    return location;
+  }
 
 public:
-  gNArray();
-  explicit gNArray(const Gambit::Array<int> &d);
-  gNArray(const gNArray<T> &a);
-  ~gNArray();
+  NDArray() = default;
+  explicit NDArray(const Array<int> &d) : dim(d), storage(ComputeSize(dim)) {}
+  NDArray(const NDArray<T> &a) = default;
+  ~NDArray() = default;
 
-  gNArray<T> &operator=(const gNArray<T> &);
+  NDArray<T> &operator=(const NDArray<T> &) = default;
 
-  /* not used for now
-  T operator[](const Gambit::Vector<int> &) const;
-  T &operator[](const Gambit::Vector<int> &);
-  */
+  const T &operator[](const Array<int> &v) const { return storage[ComputeOffset(v)]; }
+  T &operator[](const Array<int> &v) { return storage[ComputeOffset(v)]; }
 
-  T operator[](const Gambit::Array<int> &) const;
-  T &operator[](const Gambit::Array<int> &);
-
-  const T &operator[](long l) const;
-  T &operator[](long l);
-
-  const Gambit::Array<int> &Dimensionality() const;
+  const Array<int> &GetDimension() const { return dim; }
 };
 
-#endif // GNARRAY_H
+} // end namespace Gambit
+
+#endif // NDARRAY_H

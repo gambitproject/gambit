@@ -103,11 +103,11 @@ Sfg::Sfg(const BehaviorSupportProfile &S)
 
   gIndexOdometer index(seq);
 
-  SF = std::make_unique<NDArray<Array<Rational> *>>(seq);
+  SF = NDArray<Array<Rational> *>(seq);
   while (index.Turn()) {
-    (*SF)[index.CurrentIndices()] = new Array<Rational>(support.GetGame()->NumPlayers());
+    SF[index.CurrentIndices()] = new Array<Rational>(support.GetGame()->NumPlayers());
     for (int i = 1; i <= support.GetGame()->NumPlayers(); i++) {
-      (*(*SF)[index.CurrentIndices()])[i] = (Rational)0;
+      (*SF[index.CurrentIndices()])[i] = Rational(0);
     }
   }
 
@@ -138,7 +138,7 @@ Sfg::~Sfg()
   gIndexOdometer index(seq);
 
   while (index.Turn()) {
-    delete (*SF)[index.CurrentIndices()];
+    delete SF[index.CurrentIndices()];
   }
 }
 
@@ -148,7 +148,7 @@ void Sfg::MakeSequenceForm(const GameNode &n, const Rational &prob, Array<int> s
 {
   if (n->GetOutcome()) {
     for (int pl = 1; pl <= seq.Length(); pl++) {
-      (*(*SF)[seq])[pl] += prob * static_cast<Rational>(n->GetOutcome()->GetPayoff(pl));
+      (*SF[seq])[pl] += prob * static_cast<Rational>(n->GetOutcome()->GetPayoff(pl));
     }
   }
   if (n->GetInfoset()) {

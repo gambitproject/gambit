@@ -89,8 +89,8 @@ class Sfg {
 private:
   BehaviorSupportProfile support;
   std::map<int, SequenceSet> sequences;
-  std::unique_ptr<NDArray<Array<Rational> *>> SF; // sequence form
-  std::map<int, RectArray<Rational>> E;           // constraint matrices for sequence form.
+  NDArray<Array<Rational> *> SF;        // sequence form
+  std::map<int, RectArray<Rational>> E; // constraint matrices for sequence form.
   Array<int> seq;
   PVector<int> isetRow;
   Array<List<GameInfoset>> infosets;
@@ -111,7 +111,7 @@ public:
   int NumPlayerInfosets() const;
   int NumPlayers() const { return support.GetGame()->NumPlayers(); }
 
-  Array<Rational> GetPayoffs(const Array<int> &index) const { return *((*SF)[index]); }
+  Array<Rational> GetPayoffs(const Array<int> &index) const { return *(SF[index]); }
   Rational GetPayoff(const Array<int> &index, int pl) const { return GetPayoffs(index)[pl]; }
 
   const RectArray<Rational> &Constraints(int player) const { return E.at(player); };
