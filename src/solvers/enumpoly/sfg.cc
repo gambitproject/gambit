@@ -29,16 +29,16 @@ using namespace Gambit;
 namespace Gambit {
 
 //--------------------------------------
-// Sequence:  Member functions
+// SequenceRep: Member functions
 //--------------------------------------
 
-List<GameAction> Sequence::History() const
+std::list<GameAction> SequenceRep::GetHistory() const
 {
-  List<GameAction> h;
-  GameAction a = action;
-  const Sequence *s = (this);
+  std::list<GameAction> h;
+  auto a = action;
+  auto s = shared_from_this();
   while (a) {
-    h.push_back(a);
+    h.push_front(a);
     s = s->parent;
     a = s->GetAction();
   }
@@ -49,21 +49,9 @@ List<GameAction> Sequence::History() const
 // SequenceSet:  Member functions
 //--------------------------------------
 
-SequenceSet::SequenceSet(const GamePlayer &p) : efp(p), sequences()
+SequenceSet::SequenceSet(const GamePlayer &p) : efp(p)
 {
-  AddSequence(new Sequence(p, nullptr, nullptr, 1));
-}
-
-SequenceSet::~SequenceSet()
-{
-
-  // potential problem here?  It is not clear this is where this belongs.
-  // What if there are multiple SequenceSets pointing to
-  // the same sequences?
-
-  for (int i = 1; i <= sequences.Length(); i++) {
-    delete sequences[i];
-  }
+  AddSequence(std::make_shared<SequenceRep>(p, nullptr, nullptr, 1));
 }
 
 //------------------------------------------
@@ -71,7 +59,7 @@ SequenceSet::~SequenceSet()
 //------------------------------------------
 
 // Append a sequences to the SequenceSet
-void SequenceSet::AddSequence(Sequence *s)
+void SequenceSet::AddSequence(std::shared_ptr<SequenceRep> s)
 {
   if (efp != s->GetPlayer()) {
     throw MismatchException();
@@ -81,7 +69,7 @@ void SequenceSet::AddSequence(Sequence *s)
 
 // Finds the sequence pointer of sequence number j. Returns 0 if there
 // is no sequence with that number.
-Sequence *SequenceSet::Find(int j)
+std::shared_ptr<SequenceRep> SequenceSet::Find(int j)
 {
   int t = 1;
   while (t <= sequences.Length()) {
@@ -142,7 +130,7 @@ Sfg::Sfg(const BehaviorSupportProfile &S)
     sequences.push_back(new SequenceSet(support.GetGame()->GetPlayer(i)));
   }
 
-  Array<Sequence *> parent(support.GetGame()->NumPlayers());
+  Array<std::shared_ptr<SequenceRep>> parent(support.GetGame()->NumPlayers());
   for (int i = 1; i <= support.GetGame()->NumPlayers(); i++) {
     parent[i] = sequences[i]->GetSequenceSet()[1];
   }
@@ -168,7 +156,7 @@ Sfg::~Sfg()
 }
 
 void Sfg::MakeSequenceForm(const GameNode &n, const Rational &prob, Array<int> seq,
-                           Array<GameInfoset> iset, Array<Sequence *> parent,
+                           Array<GameInfoset> iset, Array<std::shared_ptr<SequenceRep>> parent,
                            PVector<int> &isetFlag)
 {
   if (n->GetOutcome()) {
@@ -197,7 +185,7 @@ void Sfg::MakeSequenceForm(const GameNode &n, const Rational &prob, Array<int> s
       }
 
       (*E[pl])(isetRow(pl, isetnum), seq[pl]) = (Rational)1;
-      Sequence *myparent(parent[pl]);
+      std::shared_ptr<SequenceRep> myparent(parent[pl]);
 
       bool flag = false;
       if (!isetFlag(pl, isetnum)) { // on first visit to iset, create new sequences
@@ -208,9 +196,8 @@ void Sfg::MakeSequenceForm(const GameNode &n, const Rational &prob, Array<int> s
         if (support.Contains(n->GetInfoset()->GetAction(i))) {
           snew[pl] += 1;
           if (flag) {
-            Sequence *child;
-            child =
-                new Sequence(n->GetPlayer(), n->GetInfoset()->GetAction(i), myparent, snew[pl]);
+            auto child = std::make_shared<SequenceRep>(
+                n->GetPlayer(), n->GetInfoset()->GetAction(i), myparent, snew[pl]);
             parent[pl] = child;
             sequences[pl]->AddSequence(child);
           }
@@ -225,11 +212,9 @@ void Sfg::MakeSequenceForm(const GameNode &n, const Rational &prob, Array<int> s
 
 void Sfg::GetSequenceDims(const GameNode &n, PVector<int> &isetFlag)
 {
-  int i;
-
   if (n->GetInfoset()) {
     if (n->GetPlayer()->IsChance()) {
-      for (i = 1; i <= n->NumChildren(); i++) {
+      for (int i = 1; i <= n->NumChildren(); i++) {
         GetSequenceDims(n->GetChild(i), isetFlag);
       }
     }
@@ -244,7 +229,7 @@ void Sfg::GetSequenceDims(const GameNode &n, PVector<int> &isetFlag)
         isetRow(pl, isetnum) = infosets[pl].Length() + 1;
         flag = true;
       }
-      for (i = 1; i <= n->NumChildren(); i++) {
+      for (int i = 1; i <= n->NumChildren(); i++) {
         if (support.Contains(n->GetInfoset()->GetAction(i))) {
           if (flag) {
             seq[pl]++;
@@ -307,28 +292,18 @@ MixedBehaviorProfile<double> Sfg::ToBehav(const PVector<double> &x) const
 
   b = (Rational)0;
 
-  Sequence *sij;
-  const Sequence *parent;
-  Rational value;
-
-  int i, j;
-  for (i = 1; i <= support.GetGame()->NumPlayers(); i++) {
-    for (j = 2; j <= seq[i]; j++) {
-      sij = sequences[i]->GetSequenceSet()[j];
+  for (int i = 1; i <= support.GetGame()->NumPlayers(); i++) {
+    for (int j = 2; j <= seq[i]; j++) {
+      auto sij = sequences[i]->GetSequenceSet()[j];
       int sn = sij->GetNumber();
-      parent = sij->Parent();
-
-      // gout << "\ni,j,sn,iset,act: " << i << " " << j << " " << sn << " ";
-      // gout << sij->GetInfoset()->GetNumber() << " " << sij->GetAction()->GetNumber();
+      auto parent = sij->GetParent();
 
       if (x(i, parent->GetNumber()) > (double)0) {
-        value = Rational(x(i, sn) / x(i, parent->GetNumber()));
+        b[sij->GetAction()] = Rational(x(i, sn) / x(i, parent->GetNumber()));
       }
       else {
-        value = Rational(0);
+        b[sij->GetAction()] = Rational(0);
       }
-
-      b[sij->GetAction()] = value;
     }
   }
   return b;

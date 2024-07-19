@@ -23,13 +23,15 @@
 #ifndef SFG_H
 #define SFG_H
 
+#include <memory>
+
 #include "gambit.h"
 #include "odometer.h"
 #include "gnarray.h"
 
 namespace Gambit {
 
-struct Sequence {
+class SequenceRep : public std::enable_shared_from_this<SequenceRep> {
   friend class Sfg;
   friend class SequenceSet;
 
@@ -38,49 +40,49 @@ private:
   std::string name;
   GamePlayer player;
   GameAction action;
-  const Sequence *parent;
+  std::shared_ptr<SequenceRep> parent;
 
-  Sequence(const GamePlayer &pl, const GameAction &a, const Sequence *p, int n)
+public:
+  SequenceRep(const GamePlayer &pl, const GameAction &a, std::shared_ptr<SequenceRep> p, int n)
     : number(n), player(pl), action(a), parent(p)
   {
   }
+  ~SequenceRep() = default;
 
-  ~Sequence() = default;
-
-public:
   const std::string &GetName() const { return name; }
   void SetName(const std::string &s) { name = s; }
 
-  List<GameAction> History() const;
+  // Return the history of actions corresponding to the sequence, starting from the root
+  std::list<GameAction> GetHistory() const;
   int GetNumber() const { return number; }
   GameAction GetAction() const { return action; }
   GameInfoset GetInfoset() const { return (action) ? action->GetInfoset() : nullptr; }
   GamePlayer GetPlayer() const { return player; }
-  const Sequence *Parent() const { return parent; }
+  std::shared_ptr<SequenceRep> GetParent() const { return parent; }
 };
 
 class SequenceSet {
 protected:
   GamePlayer efp;
-  Array<Sequence *> sequences;
+  Array<std::shared_ptr<SequenceRep>> sequences;
 
 public:
   explicit SequenceSet(const GamePlayer &p);
   SequenceSet(const SequenceSet &) = delete;
-  ~SequenceSet();
+  ~SequenceSet() = default;
 
   SequenceSet &operator=(const SequenceSet &s) = delete;
 
   // Append a sequence to the SequenceSet
-  void AddSequence(Sequence *s);
+  void AddSequence(std::shared_ptr<SequenceRep>);
 
-  Sequence *Find(int j);
+  std::shared_ptr<SequenceRep> Find(int j);
 
   // Number of sequences in the SequenceSet
   int NumSequences() const { return sequences.Length(); }
 
   //  return the entire sequence set in a const Array
-  const Array<Sequence *> &GetSequenceSet() const { return sequences; }
+  const Array<std::shared_ptr<SequenceRep>> &GetSequenceSet() const { return sequences; }
 };
 
 class Sfg {
@@ -94,7 +96,7 @@ private:
   Array<List<GameInfoset>> infosets;
 
   void MakeSequenceForm(const GameNode &, const Rational &, Array<int>, Array<GameInfoset>,
-                        Array<Sequence *>, PVector<int> &);
+                        Array<std::shared_ptr<SequenceRep>>, PVector<int> &);
 
   void GetSequenceDims(const GameNode &, PVector<int> &);
 
@@ -121,7 +123,10 @@ public:
 
   MixedBehaviorProfile<double> ToBehav(const PVector<double> &x) const;
 
-  const Sequence *GetSequence(int pl, int seq) const { return (sequences[pl])->Find(seq); }
+  std::shared_ptr<SequenceRep> GetSequence(int pl, int seq) const
+  {
+    return (sequences[pl])->Find(seq);
+  }
 };
 
 } // end namespace Gambit
