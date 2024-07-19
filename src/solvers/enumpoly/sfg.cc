@@ -21,7 +21,6 @@
 //
 
 #include "sfg.h"
-#include "gnarray.imp"
 #include "gambit.h"
 
 using namespace Gambit;
@@ -104,7 +103,7 @@ Sfg::Sfg(const BehaviorSupportProfile &S)
 
   gIndexOdometer index(seq);
 
-  SF = std::make_unique<gNArray<Array<Rational> *>>(seq);
+  SF = std::make_unique<NDArray<Array<Rational> *>>(seq);
   while (index.Turn()) {
     (*SF)[index.CurrentIndices()] = new Array<Rational>(support.GetGame()->NumPlayers());
     for (int i = 1; i <= support.GetGame()->NumPlayers(); i++) {
@@ -288,5 +287,3 @@ MixedBehaviorProfile<double> Sfg::ToBehav(const PVector<double> &x) const
 }
 
 } // end namespace Gambit
-
-template class gNArray<Array<Rational> *>;

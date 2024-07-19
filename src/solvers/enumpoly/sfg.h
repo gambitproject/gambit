@@ -27,7 +27,7 @@
 
 #include "gambit.h"
 #include "odometer.h"
-#include "gnarray.h"
+#include "ndarray.h"
 
 namespace Gambit {
 
@@ -89,7 +89,7 @@ class Sfg {
 private:
   BehaviorSupportProfile support;
   std::map<int, SequenceSet> sequences;
-  std::unique_ptr<gNArray<Array<Rational> *>> SF; // sequence form
+  std::unique_ptr<NDArray<Array<Rational> *>> SF; // sequence form
   std::map<int, RectArray<Rational>> E;           // constraint matrices for sequence form.
   Array<int> seq;
   PVector<int> isetRow;
