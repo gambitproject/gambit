@@ -68,15 +68,15 @@ protected:
 
 public:
   explicit SequenceSet(const GamePlayer &p);
-  SequenceSet(const SequenceSet &) = delete;
+  SequenceSet(const SequenceSet &) = default;
   ~SequenceSet() = default;
 
-  SequenceSet &operator=(const SequenceSet &s) = delete;
+  SequenceSet &operator=(const SequenceSet &s) = default;
 
   // Append a sequence to the SequenceSet
   void AddSequence(std::shared_ptr<SequenceRep>);
 
-  std::shared_ptr<SequenceRep> Find(int j);
+  std::shared_ptr<SequenceRep> Find(int j) const;
 
   // Number of sequences in the SequenceSet
   int NumSequences() const { return sequences.Length(); }
@@ -88,7 +88,7 @@ public:
 class Sfg {
 private:
   BehaviorSupportProfile support;
-  Array<SequenceSet *> sequences;
+  std::map<int, SequenceSet> sequences;
   std::unique_ptr<gNArray<Array<Rational> *>> SF; // sequence form
   Array<RectArray<Rational> *> E;                 // constraint matrices for sequence form.
   Array<int> seq;
@@ -110,9 +110,9 @@ public:
   int TotalNumSequences() const;
   int NumPlayerInfosets() const;
   int NumPlayers() const { return support.GetGame()->NumPlayers(); }
-  Array<Rational> Payoffs(const Array<int> &index) const { return *((*SF)[index]); }
 
-  Rational Payoff(const Array<int> &index, int pl) const;
+  Array<Rational> GetPayoffs(const Array<int> &index) const { return *((*SF)[index]); }
+  Rational GetPayoff(const Array<int> &index, int pl) const { return GetPayoffs(index)[pl]; }
 
   const RectArray<Rational> &Constraints(int player) const { return *(E[player]); };
 
@@ -125,7 +125,7 @@ public:
 
   std::shared_ptr<SequenceRep> GetSequence(int pl, int seq) const
   {
-    return (sequences[pl])->Find(seq);
+    return sequences.at(pl).Find(seq);
   }
 };
 

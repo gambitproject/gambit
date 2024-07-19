@@ -134,7 +134,7 @@ gPoly<double> GetPayoff(const ProblemData &p_data, int pl)
 
   gPoly<double> equation(p_data.Space, p_data.Lex);
   while (index.Turn()) {
-    pay = p_data.SF.Payoff(index.CurrentIndices(), pl);
+    pay = p_data.SF.GetPayoff(index.CurrentIndices(), pl);
     if (pay != Rational(0)) {
       gPoly<double> term(p_data.Space, (double)pay, p_data.Lex);
       int k;

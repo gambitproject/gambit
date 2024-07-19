@@ -54,11 +54,7 @@ SequenceSet::SequenceSet(const GamePlayer &p) : efp(p)
   AddSequence(std::make_shared<SequenceRep>(p, nullptr, nullptr, 1));
 }
 
-//------------------------------------------
-// SequenceSet: Member functions
-//------------------------------------------
-
-// Append a sequences to the SequenceSet
+// Add a sequences to the SequenceSet
 void SequenceSet::AddSequence(std::shared_ptr<SequenceRep> s)
 {
   if (efp != s->GetPlayer()) {
@@ -69,7 +65,7 @@ void SequenceSet::AddSequence(std::shared_ptr<SequenceRep> s)
 
 // Finds the sequence pointer of sequence number j. Returns 0 if there
 // is no sequence with that number.
-std::shared_ptr<SequenceRep> SequenceSet::Find(int j)
+std::shared_ptr<SequenceRep> SequenceSet::Find(int j) const
 {
   int t = 1;
   while (t <= sequences.Length()) {
@@ -127,12 +123,12 @@ Sfg::Sfg(const BehaviorSupportProfile &S)
   }
 
   for (int i = 1; i <= support.GetGame()->NumPlayers(); i++) {
-    sequences.push_back(new SequenceSet(support.GetGame()->GetPlayer(i)));
+    sequences.try_emplace(i, SequenceSet(support.GetGame()->GetPlayer(i)));
   }
 
   Array<std::shared_ptr<SequenceRep>> parent(support.GetGame()->NumPlayers());
   for (int i = 1; i <= support.GetGame()->NumPlayers(); i++) {
-    parent[i] = sequences[i]->GetSequenceSet()[1];
+    parent[i] = sequences.at(i).GetSequenceSet()[1];
   }
 
   MakeSequenceForm(support.GetGame()->GetRoot(), Rational(1), one, zero, parent, isetFlag);
@@ -148,10 +144,6 @@ Sfg::~Sfg()
 
   for (int i = 1; i <= support.GetGame()->NumPlayers(); i++) {
     delete E[i];
-  }
-
-  for (int i = 1; i <= support.GetGame()->NumPlayers(); i++) {
-    delete sequences[i];
   }
 }
 
@@ -199,7 +191,7 @@ void Sfg::MakeSequenceForm(const GameNode &n, const Rational &prob, Array<int> s
             auto child = std::make_shared<SequenceRep>(
                 n->GetPlayer(), n->GetInfoset()->GetAction(i), myparent, snew[pl]);
             parent[pl] = child;
-            sequences[pl]->AddSequence(child);
+            sequences.at(pl).AddSequence(child);
           }
 
           (*E[pl])(isetRow(pl, isetnum), snew[pl]) = -(Rational)1;
@@ -261,45 +253,35 @@ int Sfg::NumPlayerInfosets() const
 
 int Sfg::InfosetRowNumber(int pl, int j) const
 {
-  if (j == 1) {
-    return 0;
-  }
-  int isetnum = sequences[pl]->Find(j)->GetInfoset()->GetNumber();
-  return isetRow(pl, isetnum);
+  return (j == 1) ? 0 : isetRow(pl, sequences.at(pl).Find(j)->GetInfoset()->GetNumber());
 }
 
 int Sfg::ActionNumber(int pl, int j) const
 {
-  if (j == 1) {
-    return 0;
-  }
-  return support.GetIndex(GetAction(pl, j));
+  return (j == 1) ? 0 : support.GetIndex(GetAction(pl, j));
 }
 
 GameInfoset Sfg::GetInfoset(int pl, int j) const
 {
-  return (j == 1) ? nullptr : sequences[pl]->Find(j)->GetInfoset();
+  return (j == 1) ? nullptr : sequences.at(pl).Find(j)->GetInfoset();
 }
 
 GameAction Sfg::GetAction(int pl, int j) const
 {
-  return (j == 1) ? nullptr : sequences[pl]->Find(j)->GetAction();
+  return (j == 1) ? nullptr : sequences.at(pl).Find(j)->GetAction();
 }
 
 MixedBehaviorProfile<double> Sfg::ToBehav(const PVector<double> &x) const
 {
   MixedBehaviorProfile<double> b(support);
-
-  b = (Rational)0;
+  b = 0;
 
   for (int i = 1; i <= support.GetGame()->NumPlayers(); i++) {
     for (int j = 2; j <= seq[i]; j++) {
-      auto sij = sequences[i]->GetSequenceSet()[j];
-      int sn = sij->GetNumber();
-      auto parent = sij->GetParent();
-
-      if (x(i, parent->GetNumber()) > (double)0) {
-        b[sij->GetAction()] = Rational(x(i, sn) / x(i, parent->GetNumber()));
+      auto sij = sequences.at(i).GetSequenceSet()[j];
+      if (x(i, sij->GetParent()->GetNumber()) > 0) {
+        b[sij->GetAction()] =
+            Rational(x(i, sij->GetNumber()) / x(i, sij->GetParent()->GetNumber()));
       }
       else {
         b[sij->GetAction()] = Rational(0);
@@ -308,8 +290,6 @@ MixedBehaviorProfile<double> Sfg::ToBehav(const PVector<double> &x) const
   }
   return b;
 }
-
-Rational Sfg::Payoff(const Array<int> &index, int pl) const { return Payoffs(index)[pl]; }
 
 } // end namespace Gambit
 
