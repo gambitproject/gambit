@@ -119,7 +119,7 @@ Sfg::Sfg(const BehaviorSupportProfile &S)
 
   gIndexOdometer index(seq);
 
-  SF = new gNArray<Array<Rational> *>(seq);
+  SF = std::make_unique<gNArray<Array<Rational> *>>(seq);
   while (index.Turn()) {
     (*SF)[index.CurrentIndices()] = new Array<Rational>(support.GetGame()->NumPlayers());
     for (int i = 1; i <= support.GetGame()->NumPlayers(); i++) {
@@ -127,25 +127,23 @@ Sfg::Sfg(const BehaviorSupportProfile &S)
     }
   }
 
-  E = new Array<RectArray<Rational> *>(support.GetGame()->NumPlayers());
   for (int i = 1; i <= support.GetGame()->NumPlayers(); i++) {
-    (*E)[i] = new RectArray<Rational>(infosets[i].Length() + 1, seq[i]);
-    for (int j = (*(*E)[i]).MinRow(); j <= (*(*E)[i]).MaxRow(); j++) {
-      for (int k = (*(*E)[i]).MinCol(); k <= (*(*E)[i]).MaxCol(); k++) {
-        (*(*E)[i])(j, k) = (Rational)0;
+    E.push_back(new RectArray<Rational>(infosets[i].Length() + 1, seq[i]));
+    for (int j = (*E[i]).MinRow(); j <= (*E[i]).MaxRow(); j++) {
+      for (int k = (*E[i]).MinCol(); k <= (*E[i]).MaxCol(); k++) {
+        (*E[i])(j, k) = (Rational)0;
       }
     }
-    (*(*E)[i])(1, 1) = (Rational)1;
+    (*E[i])(1, 1) = (Rational)1;
   }
 
-  sequences = new Array<SequenceSet *>(support.GetGame()->NumPlayers());
   for (int i = 1; i <= support.GetGame()->NumPlayers(); i++) {
-    (*sequences)[i] = new SequenceSet(support.GetGame()->GetPlayer(i));
+    sequences.push_back(new SequenceSet(support.GetGame()->GetPlayer(i)));
   }
 
   Array<Sequence *> parent(support.GetGame()->NumPlayers());
   for (int i = 1; i <= support.GetGame()->NumPlayers(); i++) {
-    parent[i] = (((*sequences)[i])->GetSequenceSet())[1];
+    parent[i] = sequences[i]->GetSequenceSet()[1];
   }
 
   MakeSequenceForm(support.GetGame()->GetRoot(), Rational(1), one, zero, parent);
@@ -158,17 +156,14 @@ Sfg::~Sfg()
   while (index.Turn()) {
     delete (*SF)[index.CurrentIndices()];
   }
-  delete SF;
 
   for (int i = 1; i <= support.GetGame()->NumPlayers(); i++) {
-    delete (*E)[i];
+    delete E[i];
   }
-  delete E;
 
   for (int i = 1; i <= support.GetGame()->NumPlayers(); i++) {
-    delete (*sequences)[i];
+    delete sequences[i];
   }
-  delete sequences;
 }
 
 void Sfg::MakeSequenceForm(const GameNode &n, const Rational &prob, Array<int> seq,
@@ -199,7 +194,7 @@ void Sfg::MakeSequenceForm(const GameNode &n, const Rational &prob, Array<int> s
         }
       }
 
-      (*(*E)[pl])(isetRow(pl, isetnum), seq[pl]) = (Rational)1;
+      (*E[pl])(isetRow(pl, isetnum), seq[pl]) = (Rational)1;
       Sequence *myparent(parent[pl]);
 
       bool flag = false;
@@ -215,10 +210,10 @@ void Sfg::MakeSequenceForm(const GameNode &n, const Rational &prob, Array<int> s
             child =
                 new Sequence(n->GetPlayer(), n->GetInfoset()->GetAction(i), myparent, snew[pl]);
             parent[pl] = child;
-            ((*sequences)[pl])->AddSequence(child);
+            sequences[pl]->AddSequence(child);
           }
 
-          (*(*E)[pl])(isetRow(pl, isetnum), snew[pl]) = -(Rational)1;
+          (*E[pl])(isetRow(pl, isetnum), snew[pl]) = -(Rational)1;
           MakeSequenceForm(n->GetChild(i), prob, snew, iset, parent);
         }
       }
@@ -282,7 +277,7 @@ int Sfg::InfosetRowNumber(int pl, int j) const
   if (j == 1) {
     return 0;
   }
-  int isetnum = (*sequences)[pl]->Find(j)->GetInfoset()->GetNumber();
+  int isetnum = sequences[pl]->Find(j)->GetInfoset()->GetNumber();
   return isetRow(pl, isetnum);
 }
 
@@ -296,18 +291,12 @@ int Sfg::ActionNumber(int pl, int j) const
 
 GameInfoset Sfg::GetInfoset(int pl, int j) const
 {
-  if (j == 1) {
-    return nullptr;
-  }
-  return (*sequences)[pl]->Find(j)->GetInfoset();
+  return (j == 1) ? nullptr : sequences[pl]->Find(j)->GetInfoset();
 }
 
 GameAction Sfg::GetAction(int pl, int j) const
 {
-  if (j == 1) {
-    return nullptr;
-  }
-  return (*sequences)[pl]->Find(j)->GetAction();
+  return (j == 1) ? nullptr : sequences[pl]->Find(j)->GetAction();
 }
 
 MixedBehaviorProfile<double> Sfg::ToBehav(const PVector<double> &x) const
@@ -323,7 +312,7 @@ MixedBehaviorProfile<double> Sfg::ToBehav(const PVector<double> &x) const
   int i, j;
   for (i = 1; i <= support.GetGame()->NumPlayers(); i++) {
     for (j = 2; j <= seq[i]; j++) {
-      sij = ((*sequences)[i]->GetSequenceSet())[j];
+      sij = sequences[i]->GetSequenceSet()[j];
       int sn = sij->GetNumber();
       parent = sij->Parent();
 

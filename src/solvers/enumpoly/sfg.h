@@ -86,9 +86,9 @@ public:
 class Sfg {
 private:
   BehaviorSupportProfile support;
-  Array<SequenceSet *> *sequences;
-  gNArray<Array<Rational> *> *SF;  // sequence form
-  Array<RectArray<Rational> *> *E; // constraint matrices for sequence form.
+  Array<SequenceSet *> sequences;
+  std::unique_ptr<gNArray<Array<Rational> *>> SF; // sequence form
+  Array<RectArray<Rational> *> E;                 // constraint matrices for sequence form.
   Array<int> seq;
   PVector<int> isetFlag, isetRow;
   Array<List<GameInfoset>> infosets;
@@ -112,7 +112,7 @@ public:
 
   Rational Payoff(const Array<int> &index, int pl) const;
 
-  RectArray<Rational> Constraints(int player) const { return *((*E)[player]); };
+  const RectArray<Rational> &Constraints(int player) const { return *(E[player]); };
 
   int InfosetRowNumber(int pl, int sequence) const;
   int ActionNumber(int pl, int sequence) const;
@@ -121,7 +121,7 @@ public:
 
   MixedBehaviorProfile<double> ToBehav(const PVector<double> &x) const;
 
-  const Sequence *GetSequence(int pl, int seq) const { return ((*sequences)[pl])->Find(seq); }
+  const Sequence *GetSequence(int pl, int seq) const { return (sequences[pl])->Find(seq); }
 };
 
 } // end namespace Gambit
