@@ -90,13 +90,13 @@ private:
   std::unique_ptr<gNArray<Array<Rational> *>> SF; // sequence form
   Array<RectArray<Rational> *> E;                 // constraint matrices for sequence form.
   Array<int> seq;
-  PVector<int> isetFlag, isetRow;
+  PVector<int> isetRow;
   Array<List<GameInfoset>> infosets;
 
   void MakeSequenceForm(const GameNode &, const Rational &, Array<int>, Array<GameInfoset>,
-                        Array<Sequence *>);
+                        Array<Sequence *>, PVector<int> &);
 
-  void GetSequenceDims(const GameNode &);
+  void GetSequenceDims(const GameNode &, PVector<int> &);
 
 public:
   explicit Sfg(const BehaviorSupportProfile &);

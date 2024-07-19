@@ -98,8 +98,8 @@ Sequence *SequenceSet::Find(int j)
 //----------------------------------------------------
 
 Sfg::Sfg(const BehaviorSupportProfile &S)
-  : support(S), seq(support.GetGame()->NumPlayers()), isetFlag(S.GetGame()->NumInfosets()),
-    isetRow(S.GetGame()->NumInfosets()), infosets(support.GetGame()->NumPlayers())
+  : support(S), seq(support.GetGame()->NumPlayers()), isetRow(S.GetGame()->NumInfosets()),
+    infosets(support.GetGame()->NumPlayers())
 {
   Array<GameInfoset> zero(support.GetGame()->NumPlayers());
   Array<int> one(support.GetGame()->NumPlayers());
@@ -110,10 +110,11 @@ Sfg::Sfg(const BehaviorSupportProfile &S)
     one[i] = 1;
   }
 
+  PVector<int> isetFlag(S.GetGame()->NumInfosets());
   isetFlag = 0;
   isetRow = 0;
 
-  GetSequenceDims(support.GetGame()->GetRoot());
+  GetSequenceDims(support.GetGame()->GetRoot(), isetFlag);
 
   isetFlag = 0;
 
@@ -146,7 +147,7 @@ Sfg::Sfg(const BehaviorSupportProfile &S)
     parent[i] = sequences[i]->GetSequenceSet()[1];
   }
 
-  MakeSequenceForm(support.GetGame()->GetRoot(), Rational(1), one, zero, parent);
+  MakeSequenceForm(support.GetGame()->GetRoot(), Rational(1), one, zero, parent, isetFlag);
 }
 
 Sfg::~Sfg()
@@ -167,7 +168,8 @@ Sfg::~Sfg()
 }
 
 void Sfg::MakeSequenceForm(const GameNode &n, const Rational &prob, Array<int> seq,
-                           Array<GameInfoset> iset, Array<Sequence *> parent)
+                           Array<GameInfoset> iset, Array<Sequence *> parent,
+                           PVector<int> &isetFlag)
 {
   if (n->GetOutcome()) {
     for (int pl = 1; pl <= seq.Length(); pl++) {
@@ -179,7 +181,7 @@ void Sfg::MakeSequenceForm(const GameNode &n, const Rational &prob, Array<int> s
       for (int i = 1; i <= n->NumChildren(); i++) {
         MakeSequenceForm(n->GetChild(i),
                          prob * static_cast<Rational>(n->GetInfoset()->GetActionProb(i)), seq,
-                         iset, parent);
+                         iset, parent, isetFlag);
       }
     }
     else {
@@ -214,21 +216,21 @@ void Sfg::MakeSequenceForm(const GameNode &n, const Rational &prob, Array<int> s
           }
 
           (*E[pl])(isetRow(pl, isetnum), snew[pl]) = -(Rational)1;
-          MakeSequenceForm(n->GetChild(i), prob, snew, iset, parent);
+          MakeSequenceForm(n->GetChild(i), prob, snew, iset, parent, isetFlag);
         }
       }
     }
   }
 }
 
-void Sfg::GetSequenceDims(const GameNode &n)
+void Sfg::GetSequenceDims(const GameNode &n, PVector<int> &isetFlag)
 {
   int i;
 
   if (n->GetInfoset()) {
     if (n->GetPlayer()->IsChance()) {
       for (i = 1; i <= n->NumChildren(); i++) {
-        GetSequenceDims(n->GetChild(i));
+        GetSequenceDims(n->GetChild(i), isetFlag);
       }
     }
     else {
@@ -247,7 +249,7 @@ void Sfg::GetSequenceDims(const GameNode &n)
           if (flag) {
             seq[pl]++;
           }
-          GetSequenceDims(n->GetChild(i));
+          GetSequenceDims(n->GetChild(i), isetFlag);
         }
       }
     }
