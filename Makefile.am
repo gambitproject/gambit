@@ -467,8 +467,6 @@ gambit_enumpoly_SOURCES = \
 	src/solvers/enumpoly/gnarray.imp \
 	src/solvers/enumpoly/sfg.cc \
 	src/solvers/enumpoly/sfg.h \
-	src/solvers/enumpoly/sfstrat.cc \
-	src/solvers/enumpoly/sfstrat.h \
 	src/solvers/enumpoly/odometer.cc \
 	src/solvers/enumpoly/odometer.h \
 	src/solvers/enumpoly/nfghs.cc \

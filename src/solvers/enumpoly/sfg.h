@@ -26,7 +26,70 @@
 #include "gambit.h"
 #include "odometer.h"
 #include "gnarray.h"
-#include "sfstrat.h"
+
+struct Sequence {
+  friend class Sfg;
+  friend class SFSequenceSet;
+
+private:
+  int number;
+  std::string name;
+  Gambit::GamePlayer player;
+  Gambit::GameAction action;
+  const Sequence *parent;
+
+  Sequence(const Gambit::GamePlayer &pl, const Gambit::GameAction &a, const Sequence *p, int n)
+    : number(n), player(pl), action(a), parent(p)
+  {
+  }
+  ~Sequence() = default;
+
+public:
+  const std::string &GetName() const { return name; }
+  void SetName(const std::string &s) { name = s; }
+
+  Gambit::List<Gambit::GameAction> History() const;
+  int GetNumber() const { return number; }
+  Gambit::GameAction GetAction() const { return action; }
+  Gambit::GameInfoset GetInfoset() const
+  {
+    if (action) {
+      return action->GetInfoset();
+    }
+    return nullptr;
+  }
+  Gambit::GamePlayer Player() const { return player; }
+  const Sequence *Parent() const { return parent; }
+};
+
+class SFSequenceSet {
+protected:
+  Gambit::GamePlayer efp;
+  Gambit::Array<Sequence *> sequences;
+
+public:
+  SFSequenceSet(const SFSequenceSet &s);
+  explicit SFSequenceSet(const Gambit::GamePlayer &p);
+
+  SFSequenceSet &operator=(const SFSequenceSet &s);
+  bool operator==(const SFSequenceSet &s);
+
+  virtual ~SFSequenceSet();
+
+  // Append a sequence to the SFSequenceSet
+  void AddSequence(Sequence *s);
+
+  // Removes a sequence pointer. Returns true if the sequence was successfully
+  // removed, false otherwise.
+  bool RemoveSequence(Sequence *s);
+  Sequence *Find(int j);
+
+  // Number of sequences in the SFSequenceSet
+  int NumSequences() const;
+
+  //  return the entire sequence set in a const Gambit::Array
+  const Gambit::Array<Sequence *> &GetSFSequenceSet() const;
+};
 
 class Sfg {
 private:
