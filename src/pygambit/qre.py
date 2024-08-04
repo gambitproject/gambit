@@ -305,6 +305,20 @@ def logit_estimate(
         as a structural model for estimation: The missing manual.
         SSRN working paper 4425515.
     """
+    def convert_to_float_precision(profile):
+        """Convert a rational precision profile to float precision."""
+        if isinstance(profile, libgbt.MixedStrategyProfile):
+            return libgbt.MixedStrategyProfile(
+                {strategy: float(prob) for strategy, prob in profile.items()}
+            )
+        elif isinstance(profile, libgbt.MixedBehaviorProfile):
+            return libgbt.MixedBehaviorProfile(
+                {action: float(prob) for action, prob in profile.items()}
+            )
+        else:
+            raise TypeError("Unsupported profile type for conversion")
+    # Convert to float precision if necessary
+    data = convert_to_float_precision(data)
     if isinstance(data, libgbt.MixedStrategyProfile):
         if use_empirical:
             return _estimate_strategy_empirical(data)
