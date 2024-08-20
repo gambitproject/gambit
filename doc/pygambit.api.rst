@@ -31,6 +31,7 @@ Creating, reading, and writing games
    Game.new_tree
    Game.new_table
    Game.from_arrays
+   Game.to_arrays
    Game.from_dict
    Game.read_game
    Game.parse_game
