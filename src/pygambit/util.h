@@ -58,7 +58,7 @@ std::string WriteGame(const Game &p_game, const std::string &p_format)
   else if (p_format == "sgame") {
     return LaTeXGameWriter().Write(p_game);
   }
-  else if (p_format == "native") {
+  else if (p_format == "native" || p_format == "nfg" || p_format == "efg") {
     std::ostringstream f;
     p_game->Write(f, p_format);
     return f.str();
