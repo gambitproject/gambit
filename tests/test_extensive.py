@@ -1,7 +1,8 @@
 import typing
 
-import pygambit as gbt
 import pytest
+
+import pygambit as gbt
 
 from . import games
 

@@ -1,5 +1,6 @@
-import pygambit as gbt
 import pytest
+
+import pygambit as gbt
 
 
 @pytest.mark.parametrize(

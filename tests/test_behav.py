@@ -1,8 +1,9 @@
 import typing
 from itertools import product
 
-import pygambit as gbt
 import pytest
+
+import pygambit as gbt
 
 from . import games
 
