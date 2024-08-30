@@ -323,6 +323,7 @@ class Game:
         See Also
         --------
         from_dict : Create strategic game and set player labels
+        to_array: Generate the payoff tables for players represented as numpy arrays
         """
         g = cython.declare(Game)
         arrays = [np.array(a) for a in arrays]
@@ -335,6 +336,39 @@ class Game:
                 g[profile][player] = array[profile]
         g.title = title
         return g
+
+    def to_arrays(self, dtype: typing.Type = Rational) -> typing.List[np.array]:
+        """Generate the payoff tables for players represented as numpy arrays.
+
+        Parameters
+        ----------
+        dtype : type
+            The type to which payoff values will be converted and
+            the resulting arrays will be of that dtype
+
+        Returns
+        -------
+        list of np.array
+
+        See Also
+        --------
+        from_arrays : Create game from list-like of array-like
+        """
+        arrays = []
+
+        shape = tuple(len(player.strategies) for player in self.players)
+        for player in self.players:
+            array = np.zeros(shape=shape, dtype=object)
+            for profile in itertools.product(*(range(s) for s in shape)):
+                try:
+                    array[profile] = dtype(self[profile][player])
+                except (ValueError, TypeError, IndexError, KeyError):
+                    raise ValueError(
+                        f"Payoff '{self[profile][player]}' cannot be "
+                        f"converted to requested type '{dtype}'"
+                        ) from None
+            arrays.append(array)
+        return arrays
 
     @classmethod
     def from_dict(cls, payoffs, title: str = "Untitled strategic game") -> Game:

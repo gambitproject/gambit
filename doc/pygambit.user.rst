@@ -183,6 +183,29 @@ the top level index is the choice of the first player, the second level index of
 and so on.  Therefore, to create a two-player symmetric game, as in this example, the payoff matrix
 for the second player is transposed before passing to :py:meth:`.Game.from_arrays`.
 
+There is a reverse function :py:meth:`.Game.to_arrays` that produces
+the players' payoff tables given a strategic game. The output is the list of ``numpy`` arrays,
+where the number of produced arrays is equal to the number of players.
+
+.. ipython:: python
+
+   m, m_transposed = g.to_arrays()
+   m
+
+The optional parameter `dtype`` controls the data type of the payoffs in the generated arrays.
+
+.. ipython:: python
+
+   m, m_transposed = g.to_arrays(dtype=float)
+   m
+
+The function supports any type which can convert from Python's `fractions.Fraction` type.
+For example, to convert the payoffs to their string representations via `str`:
+
+.. ipython:: python
+
+   m, m_transposed = g.to_arrays(dtype=str)
+   m
 
 .. _pygambit.user.numbers:
 
