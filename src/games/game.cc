@@ -466,18 +466,11 @@ template <class T> MixedStrategyProfile<T> MixedStrategyProfile<T>::ToFullSuppor
   CheckVersion();
   MixedStrategyProfile<T> full(m_rep->m_support.GetGame()->NewMixedStrategyProfile(T(0)));
 
-  for (int pl = 1; pl <= m_rep->m_support.GetGame()->NumPlayers(); pl++) {
-    GamePlayer player = m_rep->m_support.GetGame()->GetPlayer(pl);
-    for (int st = 1; st <= player->NumStrategies(); st++) {
-      if (m_rep->m_support.Contains(player->GetStrategy(st))) {
-        full[player->GetStrategy(st)] = (*this)[player->GetStrategy(st)];
-      }
-      else {
-        full[player->GetStrategy(st)] = static_cast<T>(0);
-      }
+  for (auto player : m_rep->m_support.GetGame()->GetPlayers()) {
+    for (auto strategy : player->GetStrategies()) {
+      full[strategy] = (m_rep->m_support.Contains(strategy)) ? (*this)[strategy] : T(0);
     }
   }
-
   return full;
 }
 

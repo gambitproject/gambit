@@ -212,6 +212,8 @@ public:
 
   MixedStrategyProfile<T> ToMixedProfile() const;
 
+  /// @brief Converts the profile to one on the full support of the game
+  MixedBehaviorProfile<T> ToFullSupport() const;
   //@}
 };
 

@@ -223,6 +223,21 @@ template <class T> MixedBehaviorProfile<T> MixedBehaviorProfile<T>::Normalize() 
   return norm;
 }
 
+template <class T> MixedBehaviorProfile<T> MixedBehaviorProfile<T>::ToFullSupport() const
+{
+  CheckVersion();
+  MixedBehaviorProfile<T> full(GetGame());
+
+  for (auto player : m_support.GetGame()->GetPlayers()) {
+    for (auto infoset : player->GetInfosets()) {
+      for (auto action : infoset->GetActions()) {
+        full[action] = (m_support.Contains(action)) ? (*this)[action] : T(0);
+      }
+    }
+  }
+  return full;
+}
+
 //========================================================================
 //              MixedBehaviorProfile<T>: Interesting quantities
 //========================================================================

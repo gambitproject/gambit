@@ -421,6 +421,8 @@ gambit_nashsupport_SOURCES = \
 # For enumpoly, sources starting in 'pel' are from Pelican.
 gambit_enumpoly_SOURCES = \
 	${core_SOURCES} ${game_SOURCES} ${gambit_nashsupport_SOURCES} \
+	src/solvers/enumpoly/gameseq.cc \
+	src/solvers/enumpoly/gameseq.h \
 	src/solvers/enumpoly/gpartltr.cc \
 	src/solvers/enumpoly/gpartltr.h \
 	src/solvers/enumpoly/gpartltr.imp \
@@ -464,8 +466,6 @@ gambit_enumpoly_SOURCES = \
 	src/solvers/enumpoly/linrcomb.h \
 	src/solvers/enumpoly/linrcomb.imp \
 	src/solvers/enumpoly/ndarray.h \
-	src/solvers/enumpoly/sfg.cc \
-	src/solvers/enumpoly/sfg.h \
 	src/solvers/enumpoly/odometer.cc \
 	src/solvers/enumpoly/odometer.h \
 	src/solvers/enumpoly/nfghs.cc \
