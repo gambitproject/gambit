@@ -48,7 +48,7 @@ EnumPolyStrategySupportSolve(const StrategySupportProfile &support, bool &is_sin
                              int p_stopAfter = 0);
 
 List<MixedStrategyProfile<double>> EnumPolyStrategySolve(
-    const Game &,
+    const Game &, double p_maxregret,
     EnumPolyMixedStrategyObserverFunctionType p_onEquilibrium = EnumPolyNullMixedStrategyObserver,
     EnumPolyStrategySupportObserverFunctionType p_onSupport = EnumPolyNullStrategySupportObserver);
 
@@ -66,7 +66,7 @@ inline void EnumPolyNullBehaviorSupportObserver(const std::string &,
 }
 
 List<MixedBehaviorProfile<double>> EnumPolyBehaviorSolve(
-    const Game &,
+    const Game &, double p_maxregret,
     EnumPolyMixedBehaviorObserverFunctionType p_onEquilibrium = EnumPolyNullMixedBehaviorObserver,
     EnumPolyBehaviorSupportObserverFunctionType p_onSupport = EnumPolyNullBehaviorSupportObserver);
 

@@ -550,6 +550,7 @@ def possible_nash_supports(game: libgbt.Game) -> list[libgbt.StrategySupportProf
 
 def enumpoly_solve(
         game: libgbt.Game,
+        maxregret: float = 1.0e-4,
         use_strategic: bool = False,
 ) -> NashComputationResult:
     """Compute Nash equilibria by solving systems of polynomial equations.
@@ -558,6 +559,12 @@ def enumpoly_solve(
     ----------
     game : Game
         The game to compute equilibria in.
+
+    maxregret : float, default 1e-4
+        The acceptance criterion for approximate Nash equilibrium; the maximum
+        regret of any player must be no more than `maxregret` times the
+        difference of the maximum and minimum payoffs of the game
+
     use_strategic : bool, default False
         Whether to use the strategic form.  If `True`, always uses the strategic
         representation even if the game's native representation is extensive.
@@ -567,15 +574,18 @@ def enumpoly_solve(
     res : NashComputationResult
         The result represented as a ``NashComputationResult`` object.
     """
+    if maxregret <= 0.0:
+        raise ValueError(f"maxregret must be a positive number; got {maxregret}")
     if not game.is_tree or use_strategic:
-        equilibria = libgbt._enumpoly_strategy_solve(game)
+        equilibria = libgbt._enumpoly_strategy_solve(game, maxregret)
     else:
-        equilibria = libgbt._enumpoly_behavior_solve(game)
+        equilibria = libgbt._enumpoly_behavior_solve(game, maxregret)
     return NashComputationResult(
         game=game,
         method="enumpoly",
         rational=False,
         use_strategic=not game.is_tree or use_strategic,
+        parameters={"maxregret": maxregret},
         equilibria=equilibria,
     )
 

@@ -57,6 +57,13 @@ singular supports.
    strategies for extensive games. (This has no effect for strategic
    games, since a strategic game is its own reduced strategic game.)
 
+.. cmdoption:: -m
+
+   .. versionadded:: 16.3.0
+
+   Specify the maximum regret criterion for acceptance as an approximate Nash equilibrium
+   (default is 1e-4).  See :ref:`pygambit-nash-maxregret` for interpretation and guidance.
+
 .. cmdoption:: -q
 
    Suppresses printing of the banner at program launch.

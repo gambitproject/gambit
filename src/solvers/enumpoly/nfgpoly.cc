@@ -143,10 +143,14 @@ EnumPolyStrategySupportSolve(const StrategySupportProfile &support, bool &is_sin
 }
 
 List<MixedStrategyProfile<double>>
-EnumPolyStrategySolve(const Game &p_game,
+EnumPolyStrategySolve(const Game &p_game, double p_maxregret,
                       EnumPolyMixedStrategyObserverFunctionType p_onEquilibrium,
                       EnumPolyStrategySupportObserverFunctionType p_onSupport)
 {
+  if (double scale = p_game->GetMaxPayoff() - p_game->GetMinPayoff() != 0.0) {
+    p_maxregret *= scale;
+  }
+
   List<MixedStrategyProfile<double>> ret;
   auto possible_supports = PossibleNashStrategySupports(p_game);
 
@@ -155,7 +159,7 @@ EnumPolyStrategySolve(const Game &p_game,
     bool is_singular;
     for (auto solution : EnumPolyStrategySupportSolve(support, is_singular)) {
       MixedStrategyProfile<double> fullProfile = solution.ToFullSupport();
-      if (fullProfile.GetLiapValue() < 1.0e-6) {
+      if (fullProfile.GetMaxRegret() < p_maxregret) {
         p_onEquilibrium(fullProfile);
         ret.push_back(fullProfile);
       }

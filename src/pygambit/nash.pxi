@@ -193,15 +193,17 @@ def _nashsupport_strategy_solve(game: Game) -> typing.List[StrategySupportProfil
 
 
 def _enumpoly_strategy_solve(
-        game: Game
+        game: Game,
+        maxregret: float,
 ) -> typing.List[MixedStrategyProfileDouble]:
-    return _convert_mspd(EnumPolyStrategySolve(game.game))
+    return _convert_mspd(EnumPolyStrategySolve(game.game, maxregret))
 
 
 def _enumpoly_behavior_solve(
-        game: Game
+        game: Game,
+        maxregret: float,
 ) -> typing.List[MixedBehaviorProfileDouble]:
-    return _convert_mbpd(EnumPolyBehaviorSolve(game.game))
+    return _convert_mbpd(EnumPolyBehaviorSolve(game.game, maxregret))
 
 
 def _logit_strategy_solve(

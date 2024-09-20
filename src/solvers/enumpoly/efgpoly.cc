@@ -204,10 +204,14 @@ namespace Gambit {
 namespace Nash {
 
 List<MixedBehaviorProfile<double>>
-EnumPolyBehaviorSolve(const Game &p_game,
+EnumPolyBehaviorSolve(const Game &p_game, double p_maxregret,
                       EnumPolyMixedBehaviorObserverFunctionType p_onEquilibrium,
                       EnumPolyBehaviorSupportObserverFunctionType p_onSupport)
 {
+  if (double scale = p_game->GetMaxPayoff() - p_game->GetMinPayoff() != 0.0) {
+    p_maxregret *= scale;
+  }
+
   List<MixedBehaviorProfile<double>> ret;
   auto possible_supports = PossibleNashBehaviorSupports(p_game);
 
@@ -216,7 +220,7 @@ EnumPolyBehaviorSolve(const Game &p_game,
     bool isSingular = false;
     for (auto solution : SolveSupport(support, isSingular)) {
       MixedBehaviorProfile<double> fullProfile = solution.ToFullSupport();
-      if (fullProfile.GetLiapValue() < 1.0e-6) {
+      if (fullProfile.GetMaxRegret() < p_maxregret) {
         p_onEquilibrium(fullProfile);
         ret.push_back(fullProfile);
       }

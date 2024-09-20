@@ -474,10 +474,10 @@ cdef extern from "solvers/nashsupport/nashsupport.h":
 
 cdef extern from "solvers/enumpoly/enumpoly.h":
     c_List[c_MixedStrategyProfileDouble] EnumPolyStrategySolve(
-            c_Game
+            c_Game, float
     ) except +RuntimeError
     c_List[c_MixedBehaviorProfileDouble] EnumPolyBehaviorSolve(
-            c_Game
+            c_Game, float
     ) except +RuntimeError
 
 cdef extern from "solvers/logit/logit.h":
