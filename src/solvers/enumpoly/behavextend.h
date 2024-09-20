@@ -25,18 +25,29 @@
 
 #include "gambit.h"
 
-class algExtendsToNash {
-public:
-  bool ExtendsToNash(const Gambit::MixedBehaviorProfile<double> &p_solution,
-                     const Gambit::BehaviorSupportProfile &p_littleSupport,
-                     const Gambit::BehaviorSupportProfile &p_bigSupport);
-};
+namespace Gambit {
+namespace Nash {
 
-class algExtendsToAgentNash {
-public:
-  bool ExtendsToAgentNash(const Gambit::MixedBehaviorProfile<double> &p_solution,
-                          const Gambit::BehaviorSupportProfile &p_littleSupport,
-                          const Gambit::BehaviorSupportProfile &p_bigSupport);
-};
+// This asks whether there is a Nash extension of the MixedBehaviorProfile<double> to
+// all information sets at which the behavioral probabilities are not
+// specified.  The assumption is that the support has active actions
+// at infosets at which the behavioral probabilities are defined, and
+// no others.  Also, the BehavSol is assumed to be already a Nash
+// equilibrium for the truncated game obtained by eliminating stuff
+// outside little_supp.
+bool ExtendsToNash(const MixedBehaviorProfile<double> &p_solution,
+                   const BehaviorSupportProfile &p_littleSupport,
+                   const BehaviorSupportProfile &p_bigSupport);
+
+// This asks whether there is an ANF Nash extension of the MixedBehaviorProfile<double>
+// to all information sets at which the behavioral probabilities are not specified.  The
+// assumption is that the support has active actions at infosets at which the behavioral
+// probabilities are defined, and no others.
+bool ExtendsToAgentNash(const MixedBehaviorProfile<double> &p_solution,
+                        const BehaviorSupportProfile &p_littleSupport,
+                        const BehaviorSupportProfile &p_bigSupport);
+
+} // namespace Nash
+} // namespace Gambit
 
 #endif // BEHAVEXTEND_H

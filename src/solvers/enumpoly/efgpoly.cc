@@ -32,6 +32,7 @@
 #include "behavextend.h"
 
 using namespace Gambit;
+using namespace Gambit::Nash;
 
 namespace {
 
@@ -155,13 +156,6 @@ std::map<GameSequence, double> ToSequenceProbs(const ProblemData &p_data, const 
   return x;
 }
 
-bool ExtendsToNash(const MixedBehaviorProfile<double> &bs)
-{
-  algExtendsToNash algorithm;
-  return algorithm.ExtendsToNash(bs, BehaviorSupportProfile(bs.GetGame()),
-                                 BehaviorSupportProfile(bs.GetGame()));
-}
-
 std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfile &p_support,
                                                      bool &p_isSingular)
 {
@@ -191,7 +185,8 @@ std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfil
   std::list<MixedBehaviorProfile<double>> solutions;
   for (auto root : quickie.RootList()) {
     MixedBehaviorProfile<double> sol(data.sfg.ToMixedBehaviorProfile(ToSequenceProbs(data, root)));
-    if (ExtendsToNash(sol)) {
+    if (ExtendsToNash(sol, BehaviorSupportProfile(sol.GetGame()),
+                      BehaviorSupportProfile(sol.GetGame()))) {
       solutions.push_back(sol);
     }
   }
