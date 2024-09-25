@@ -26,7 +26,6 @@
 #include <getopt.h>
 #include "gambit.h"
 #include "solvers/enumpoly/enumpoly.h"
-#include "solvers/enumpoly/nfghs.h"
 
 using namespace Gambit;
 using namespace Gambit::Nash;
@@ -38,7 +37,6 @@ void PrintBanner(std::ostream &p_stream)
 {
   p_stream << "Compute Nash equilibria by solving polynomial systems\n";
   p_stream << "Gambit version " VERSION ", Copyright (C) 1994-2024, The Gambit Project\n";
-  p_stream << "Heuristic search implementation Copyright (C) 2006, Litao Wei\n";
   p_stream << "This is free software, distributed under the GNU GPL\n\n";
 }
 
@@ -53,8 +51,6 @@ void PrintHelp(char *progname)
   std::cerr << "  -d DECIMALS      show equilibrium probabilities with DECIMALS digits\n";
   std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -S               use strategic game\n";
-  std::cerr << "  -H               use heuristic search method to optimize time\n";
-  std::cerr << "                   to find first equilibrium (strategic games only)\n";
   std::cerr << "  -m MAXREGRET     maximum regret acceptable as a proportion of range of\n";
   std::cerr << "                   payoffs in the game\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
@@ -125,7 +121,7 @@ int main(int argc, char *argv[])
   opterr = 0;
 
   bool quiet = false;
-  bool useHeuristic = false, useStrategic = false;
+  bool useStrategic = false;
   double maxregret = 1.0e-4;
 
   int long_opt_index = 0;
@@ -134,7 +130,7 @@ int main(int argc, char *argv[])
                                   {"verbose", 0, nullptr, 'V'},
                                   {nullptr, 0, nullptr, 0}};
   int c;
-  while ((c = getopt_long(argc, argv, "d:hHSm:qvV", long_options, &long_opt_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "d:hSm:qvV", long_options, &long_opt_index)) != -1) {
     switch (c) {
     case 'v':
       PrintBanner(std::cerr);
@@ -144,9 +140,6 @@ int main(int argc, char *argv[])
       break;
     case 'h':
       PrintHelp(argv[0]);
-      break;
-    case 'H':
-      useHeuristic = true;
       break;
     case 'S':
       useStrategic = true;
@@ -198,18 +191,12 @@ int main(int argc, char *argv[])
     }
 
     if (!game->IsTree() || useStrategic) {
-      if (useHeuristic) {
-        gbtNfgHs algorithm(0);
-        algorithm.Solve(game);
-      }
-      else {
-        EnumPolyStrategySolve(
-            game, maxregret,
-            [](const MixedStrategyProfile<double> &eqm) { PrintProfile(std::cout, "NE", eqm); },
-            [](const std::string &label, const StrategySupportProfile &support) {
-              PrintSupport(std::cout, label, support);
-            });
-      }
+      EnumPolyStrategySolve(
+          game, maxregret,
+          [](const MixedStrategyProfile<double> &eqm) { PrintProfile(std::cout, "NE", eqm); },
+          [](const std::string &label, const StrategySupportProfile &support) {
+            PrintSupport(std::cout, label, support);
+          });
     }
     else {
       EnumPolyBehaviorSolve(

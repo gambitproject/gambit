@@ -67,8 +67,8 @@ public:
     int m_index;
 
   public:
-    using iterator_category = std::input_iterator_tag;
-    using difference_type = typename std::vector<T>::iterator::difference_type;
+    using iterator_category = std::forward_iterator_tag;
+    using difference_type = std::ptrdiff_t;
     using value_type = T;
     using pointer = value_type *;
     using reference = value_type &;
@@ -94,8 +94,8 @@ public:
     int m_index;
 
   public:
-    using iterator_category = std::input_iterator_tag;
-    using difference_type = typename std::vector<T>::iterator::difference_type;
+    using iterator_category = std::forward_iterator_tag;
+    using difference_type = std::ptrdiff_t;
     using value_type = T;
     using pointer = value_type *;
     using reference = value_type &;

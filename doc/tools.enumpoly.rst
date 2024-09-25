@@ -10,10 +10,15 @@ using a support enumeration approach. This approach computes all the
 supports which could, in principle, be the support of a Nash
 equilibrium, and then searches for a totally mixed equilibrium on that
 support by solving a system of polynomial equalities and inequalities
-formed by the Nash equilibrium conditions. The ordering of the
-supports is done in such a way as to maximize use of previously
-computed information, making it suited to the computation of all Nash
-equilibria.
+formed by the Nash equilibrium conditions.
+
+For strategic games, the program searches supports in the order proposed
+by Porter, Nudelman, and Shoham [PNS04]_.  For two-player games, this
+prioritises supports for which both players have the same number of
+strategies.  For games with three or more players, this prioritises
+supports which have the fewest strategies in total.  For many classes
+of games, this will tend to lower the average time until finding one equilibrium,
+as well as finding the second equilibrium (if one exists).
 
 When the verbose switch `-v` is used, the program outputs each support
 as it is considered. The supports are presented as a comma-separated
@@ -45,9 +50,7 @@ singular supports.
 
    By default, the program uses an enumeration method designed to
    visit as few supports as possible in searching for all equilibria.
-   With this switch, the program uses a heuristic search method based on
-   Porter, Nudelman, and Shoham [PNS04]_, which is designed to minimize the
-   time until the first equilibrium is found. This switch only has an
+   With this switch,  This switch only has an
    effect when solving strategic games.
 
 .. cmdoption:: -S
@@ -75,18 +78,17 @@ singular supports.
    singular supports are identified with the label "singular." By
    default, no information about supports is printed.
 
-Computing equilibria of the extensive game :download:`e01.efg
-<../contrib/games/e01.efg>`, the example in Figure 1 of Selten
+Computing equilibria of the strategic game :download:`e01.nfg
+<../contrib/games/n01.efg>`, the example in Figure 1 of Selten
 (International Journal of Game Theory, 1975) sometimes called
 "Selten's horse"::
 
-   $ gambit-enumpoly e01.efg
+   $ gambit-enumpoly e01.nfg
    Compute Nash equilibria by solving polynomial systems
    Gambit version 16.2.0, Copyright (C) 1994-2024, The Gambit Project
-   Heuristic search implementation Copyright (C) 2006, Litao Wei
    This is free software, distributed under the GNU GPL
 
+   NE,1.000000,0.000000,1.000000,0.000000,0.000000,1.000000
+   NE,0.000000,1.000000,1.000000,0.000000,1.000000,0.000000
    NE,0.000000,1.000000,0.333333,0.666667,1.000000,0.000000
    NE,1.000000,0.000000,1.000000,0.000000,0.250000,0.750000
-   NE,1.000000,0.000000,1.000000,0.000000,0.000000,0.000000
-   NE,0.000000,1.000000,0.000000,0.000000,1.000000,0.000000

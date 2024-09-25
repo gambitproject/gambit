@@ -468,8 +468,6 @@ gambit_enumpoly_SOURCES = \
 	src/solvers/enumpoly/ndarray.h \
 	src/solvers/enumpoly/odometer.cc \
 	src/solvers/enumpoly/odometer.h \
-	src/solvers/enumpoly/nfghs.cc \
-	src/solvers/enumpoly/nfghs.h \
 	src/solvers/enumpoly/efgpoly.cc \
 	src/solvers/enumpoly/nfgpoly.cc \
 	src/solvers/enumpoly/enumpoly.h \

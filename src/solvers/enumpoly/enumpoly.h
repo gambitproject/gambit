@@ -26,6 +26,7 @@
 #define GAMBIT_SOLVERS_ENUMPOLY_ENUMPOLY_H
 
 #include "games/nash.h"
+#include "solvers/nashsupport/nashsupport.h"
 
 namespace Gambit {
 namespace Nash {
@@ -48,7 +49,7 @@ EnumPolyStrategySupportSolve(const StrategySupportProfile &support, bool &is_sin
                              int p_stopAfter = 0);
 
 List<MixedStrategyProfile<double>> EnumPolyStrategySolve(
-    const Game &, double p_maxregret,
+    const Game &p_game, double p_maxregret,
     EnumPolyMixedStrategyObserverFunctionType p_onEquilibrium = EnumPolyNullMixedStrategyObserver,
     EnumPolyStrategySupportObserverFunctionType p_onSupport = EnumPolyNullStrategySupportObserver);
 

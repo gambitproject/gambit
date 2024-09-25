@@ -17,6 +17,8 @@
   and agent versions, and added a corresponding section in the user guide.
 - `enumpoly_solve` has been returned to being fully supported from temporarily being experimental;
   now available in `pygambit`.
+- `enumpoly_solve` for strategic games now uses the Porter, Nudelman, and Shoham (2004) ordering
+  of supports to search.
 - `to_arrays` converts a `Game` to a list of `numpy` arrays containing its reduced strategic form.
   (#461)
 

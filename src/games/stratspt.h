@@ -53,7 +53,7 @@ protected:
   /// The index into a strategy profile for a strategy (-1 if not in support)
   Array<int> m_profileIndex;
 
-  bool Undominated(StrategySupportProfile &newS, int p_player, bool p_strict,
+  bool Undominated(StrategySupportProfile &newS, const GamePlayer &, bool p_strict,
                    bool p_external = false) const;
 
 public:
@@ -138,70 +138,16 @@ public:
   bool Dominates(const GameStrategy &s, const GameStrategy &t, bool p_strict) const;
   bool IsDominated(const GameStrategy &s, bool p_strict, bool p_external = false) const;
 
-  /// Returns a copy of the support with dominated strategies eliminated
+  /// Returns a copy of the support with dominated strategies removed
   StrategySupportProfile Undominated(bool p_strict, bool p_external = false) const;
-  StrategySupportProfile Undominated(bool strong, const Array<int> &players) const;
+  /// Returns a copy of the support with dominated strategies of the specified player removed
+  StrategySupportProfile Undominated(bool p_strict, const GamePlayer &p_player) const;
   //@}
 
   /// @name Identification of overwhelmed strategies
   //@{
   bool Overwhelms(const GameStrategy &s, const GameStrategy &t, bool p_strict) const;
   //@}
-
-  class const_iterator {
-  public:
-    /// @name Lifecycle
-    //@{
-    explicit const_iterator(const StrategySupportProfile &S, int p_pl = 1, int p_st = 1)
-      : support(S), pl(p_pl), strat(p_st)
-    {
-    }
-    ~const_iterator() = default;
-    //@}
-
-    /// @name Operator overloading
-    //@{
-    bool operator==(const const_iterator &other) const
-    {
-      return (support == other.support && pl == other.pl && strat == other.strat);
-    }
-    bool operator!=(const const_iterator &other) const { return !(*this == other); }
-    //@}
-
-    /// @name Manipulation
-    //@{
-    /// Advance to next strategy; return False when advancing past last strategy.
-    bool GoToNext();
-    /// Advance to next strategy
-    const_iterator &operator++()
-    {
-      GoToNext();
-      return *this;
-    }
-    //@}
-
-    /// @name Access to state information
-    //@{
-    GameStrategy operator*() const { return GetStrategy(); }
-    GameStrategy GetStrategy() const { return support.GetStrategy(pl, strat); }
-    int StrategyIndex() const { return strat; }
-    GamePlayer GetPlayer() const { return support.GetGame()->GetPlayer(pl); }
-    int PlayerIndex() const { return pl; }
-
-    bool IsLast() const
-    {
-      return (pl == support.GetGame()->NumPlayers() && strat == support.NumStrategies(pl));
-    }
-    bool IsSubsequentTo(const GameStrategy &) const;
-    //@}
-
-  private:
-    const StrategySupportProfile &support;
-    int pl, strat;
-  };
-
-  const_iterator begin() const { return const_iterator(*this); }
-  const_iterator end() const { return const_iterator(*this, m_nfg->NumPlayers() + 1); }
 };
 
 } // end namespace Gambit

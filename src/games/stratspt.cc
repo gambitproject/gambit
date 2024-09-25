@@ -273,20 +273,20 @@ bool StrategySupportProfile::IsDominated(const GameStrategy &s, bool p_strict,
   }
 }
 
-bool StrategySupportProfile::Undominated(StrategySupportProfile &newS, int p_player, bool p_strict,
-                                         bool p_external) const
+bool StrategySupportProfile::Undominated(StrategySupportProfile &newS, const GamePlayer &p_player,
+                                         bool p_strict, bool p_external) const
 {
-  Array<GameStrategy> set((p_external) ? m_nfg->GetPlayer(p_player)->NumStrategies()
-                                       : NumStrategies(p_player));
+  Array<GameStrategy> set((p_external) ? p_player->NumStrategies()
+                                       : NumStrategies(p_player->GetNumber()));
 
   if (p_external) {
     for (int st = 1; st <= set.Length(); st++) {
-      set[st] = m_nfg->GetPlayer(p_player)->GetStrategy(st);
+      set[st] = p_player->GetStrategy(st);
     }
   }
   else {
     for (int st = 1; st <= set.Length(); st++) {
-      set[st] = GetStrategy(p_player, st);
+      set[st] = GetStrategy(p_player->GetNumber(), st);
     }
   }
 
@@ -306,13 +306,9 @@ bool StrategySupportProfile::Undominated(StrategySupportProfile &newS, int p_pla
 
       for (int inc = min + 1; inc <= dis;) {
         if (Dominates(set[min + 1], set[dis + 1], p_strict)) {
-          // p_tracefile << GetStrategy(p_player, set[dis+1])->GetNumber() << " dominated by " <<
-          // GetStrategy(p_player, set[min+1])->GetNumber() << '\n';
           dis--;
         }
         else if (Dominates(set[dis + 1], set[min + 1], p_strict)) {
-          // p_tracefile << GetStrategy(p_player, set[min+1])->GetNumber() << " dominated by " <<
-          // GetStrategy(p_player, set[dis+1])->GetNumber() << '\n';
           foo = set[dis + 1];
           set[dis + 1] = set[min + 1];
           set[min + 1] = foo;
@@ -333,7 +329,6 @@ bool StrategySupportProfile::Undominated(StrategySupportProfile &newS, int p_pla
     for (int i = min + 1; i <= set.Length(); i++) {
       newS.RemoveStrategy(set[i]);
     }
-
     return true;
   }
   else {
@@ -345,23 +340,18 @@ StrategySupportProfile StrategySupportProfile::Undominated(bool p_strict, bool p
 {
   StrategySupportProfile newS(*this);
 
-  for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
-    Undominated(newS, pl, p_strict, p_external);
+  for (auto player : m_nfg->GetPlayers()) {
+    Undominated(newS, player, p_strict, p_external);
   }
 
   return newS;
 }
 
 StrategySupportProfile StrategySupportProfile::Undominated(bool p_strict,
-                                                           const Array<int> &players) const
+                                                           const GamePlayer &p_player) const
 {
   StrategySupportProfile newS(*this);
-
-  for (int i = 1; i <= players.Length(); i++) {
-    // tracefile << "Dominated strategies for player " << pl << ":\n";
-    Undominated(newS, players[i], p_strict);
-  }
-
+  Undominated(newS, p_player, p_strict);
   return newS;
 }
 
@@ -391,45 +381,6 @@ bool StrategySupportProfile::Overwhelms(const GameStrategy &s, const GameStrateg
   }
 
   return true;
-}
-
-//===========================================================================
-//               class StrategySupportProfile::const_iterator
-//===========================================================================
-
-bool StrategySupportProfile::const_iterator::GoToNext()
-{
-  if (strat != support.NumStrategies(pl)) {
-    strat++;
-    return true;
-  }
-  else if (pl != support.GetGame()->NumPlayers()) {
-    pl++;
-    strat = 1;
-    return true;
-  }
-  else {
-    // The "at end" iterator points to (NumPlayers() + 1, 1)
-    pl++;
-    strat = 1;
-    return false;
-  }
-}
-
-bool StrategySupportProfile::const_iterator::IsSubsequentTo(const GameStrategy &s) const
-{
-  if (pl > s->GetPlayer()->GetNumber()) {
-    return true;
-  }
-  else if (pl < s->GetPlayer()->GetNumber()) {
-    return false;
-  }
-  else if (strat > s->GetNumber()) {
-    return true;
-  }
-  else {
-    return false;
-  }
 }
 
 } // end namespace Gambit

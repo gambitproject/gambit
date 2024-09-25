@@ -32,7 +32,8 @@ public:
   std::list<StrategySupportProfile> m_supports;
 };
 // Compute the set of strategy support profiles which can be the support of
-// a totally-mixed Nash equilibrium.
+// a totally-mixed Nash equilibrium, using the heuristic search method of
+// Porter, Nudelman & Shoham (2004).
 std::shared_ptr<PossibleNashStrategySupportsResult> PossibleNashStrategySupports(const Game &);
 
 class PossibleNashBehaviorSupportsResult {
