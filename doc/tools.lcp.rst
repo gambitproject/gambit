@@ -58,6 +58,12 @@ game.
    which are subgame perfect.  (This has no effect for strategic
    games, since there are no proper subgames of a strategic game.)
 
+.. cmdoption:: -e EQA
+
+   By default, the program will find all equilibria accessible from
+   the origin of the polytopes.  This switch instructs the program
+   to terminate when EQA equilibria have been found.
+
 .. cmdoption:: -h
 
    Prints a help message listing the available options.

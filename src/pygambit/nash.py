@@ -154,15 +154,19 @@ def lcp_solve(
     ----------
     game : Game
         The game to compute equilibria in.
+
     rational : bool, default True
         Compute using rational numbers.  If `False`, using floating-point
         arithmetic.  Using rationals is more precise, but slower.
+
     use_strategic : bool, default False
         Whether to use the strategic form.  If `True`, always uses the strategic
         representation even if the game's native representation is extensive.
+
     stop_after : int, optional
         Maximum number of equilibria to compute.  If not specified, computes all
         accessible equilibria.
+
     max_depth : int, optional
         Maximum depth of recursion.  If specified, will limit the recursive search,
         but may result in some accessible equilibria not being found.
@@ -179,6 +183,10 @@ def lcp_solve(
     """
     if stop_after is None:
         stop_after = 0
+    elif stop_after < 0:
+        raise ValueError(
+            f"lcp_solve(): stop_after argument must be a non-negative number; got {stop_after}"
+        )
     if max_depth is None:
         max_depth = 0
     if not game.is_tree or use_strategic:
@@ -212,9 +220,11 @@ def lp_solve(
     ----------
     game : Game
         The game to compute equilibria in.
+
     rational : bool, default True
         Compute using rational numbers.  If `False`, using floating-point
         arithmetic.  Using rationals is more precise, but slower.
+
     use_strategic : bool, default False
         Whether to use the strategic form.  If `True`, always uses the strategic
         representation even if the game's native representation is extensive.
@@ -550,42 +560,58 @@ def possible_nash_supports(game: libgbt.Game) -> list[libgbt.StrategySupportProf
 
 def enumpoly_solve(
         game: libgbt.Game,
-        maxregret: float = 1.0e-4,
         use_strategic: bool = False,
+        stop_after: int | None = None,
+        maxregret: float = 1.0e-4,
 ) -> NashComputationResult:
-    """Compute Nash equilibria by solving systems of polynomial equations.
+    """Compute Nash equilibria by enumerating all support profiles of strategies
+    or actions, and for each support finding all totally-mixed equilibria of
+    the game over that support.
 
     Parameters
     ----------
     game : Game
         The game to compute equilibria in.
 
+    use_strategic : bool, default False
+        Whether to use the strategic form.  If `True`, always uses the strategic
+        representation even if the game's native representation is extensive.
+
+    stop_after : int, optional
+        Maximum number of equilibria to compute.  If not specified, examines
+        all support profiles of the game.
+
     maxregret : float, default 1e-4
         The acceptance criterion for approximate Nash equilibrium; the maximum
         regret of any player must be no more than `maxregret` times the
         difference of the maximum and minimum payoffs of the game
-
-    use_strategic : bool, default False
-        Whether to use the strategic form.  If `True`, always uses the strategic
-        representation even if the game's native representation is extensive.
 
     Returns
     -------
     res : NashComputationResult
         The result represented as a ``NashComputationResult`` object.
     """
+    if stop_after is None:
+        stop_after = 0
+    elif stop_after < 0:
+        raise ValueError(
+            f"enumpoly_solve(): "
+            f"stop_after argument must be a non-negative number; got {stop_after}"
+        )
     if maxregret <= 0.0:
-        raise ValueError(f"maxregret must be a positive number; got {maxregret}")
+        raise ValueError(
+            f"enumpoly_solve(): maxregret must be a positive number; got {maxregret}"
+        )
     if not game.is_tree or use_strategic:
-        equilibria = libgbt._enumpoly_strategy_solve(game, maxregret)
+        equilibria = libgbt._enumpoly_strategy_solve(game, stop_after, maxregret)
     else:
-        equilibria = libgbt._enumpoly_behavior_solve(game, maxregret)
+        equilibria = libgbt._enumpoly_behavior_solve(game, stop_after, maxregret)
     return NashComputationResult(
         game=game,
         method="enumpoly",
         rational=False,
         use_strategic=not game.is_tree or use_strategic,
-        parameters={"maxregret": maxregret},
+        parameters={"stop_after": stop_after, "maxregret": maxregret},
         equilibria=equilibria,
     )
 

@@ -157,7 +157,7 @@ std::map<GameSequence, double> ToSequenceProbs(const ProblemData &p_data, const 
 }
 
 std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfile &p_support,
-                                                     bool &p_isSingular)
+                                                     bool &p_isSingular, int p_stopAfter)
 {
   ProblemData data(p_support);
   gPolyList<double> equations(&data.Space, &data.Lex);
@@ -169,10 +169,9 @@ std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfil
   bottoms = 0;
   tops = 1;
 
-  QuikSolv<double> quickie(equations);
+  QuikSolv<double> solver(equations);
   try {
-    quickie.FindCertainNumberOfRoots(gRectangle<double>(bottoms, tops),
-                                     std::numeric_limits<int>::max(), 0);
+    solver.FindCertainNumberOfRoots({bottoms, tops}, std::numeric_limits<int>::max(), p_stopAfter);
   }
   catch (const SingularMatrixException &) {
     p_isSingular = true;
@@ -183,7 +182,7 @@ std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfil
   }
 
   std::list<MixedBehaviorProfile<double>> solutions;
-  for (auto root : quickie.RootList()) {
+  for (auto root : solver.RootList()) {
     MixedBehaviorProfile<double> sol(data.sfg.ToMixedBehaviorProfile(ToSequenceProbs(data, root)));
     if (ExtendsToNash(sol, BehaviorSupportProfile(sol.GetGame()),
                       BehaviorSupportProfile(sol.GetGame()))) {
@@ -199,7 +198,7 @@ namespace Gambit {
 namespace Nash {
 
 List<MixedBehaviorProfile<double>>
-EnumPolyBehaviorSolve(const Game &p_game, double p_maxregret,
+EnumPolyBehaviorSolve(const Game &p_game, int p_stopAfter, double p_maxregret,
                       EnumPolyMixedBehaviorObserverFunctionType p_onEquilibrium,
                       EnumPolyBehaviorSupportObserverFunctionType p_onSupport)
 {
@@ -213,7 +212,8 @@ EnumPolyBehaviorSolve(const Game &p_game, double p_maxregret,
   for (auto support : possible_supports->m_supports) {
     p_onSupport("candidate", support);
     bool isSingular = false;
-    for (auto solution : SolveSupport(support, isSingular)) {
+    for (auto solution :
+         SolveSupport(support, isSingular, std::max(p_stopAfter - int(ret.size()), 0))) {
       MixedBehaviorProfile<double> fullProfile = solution.ToFullSupport();
       if (fullProfile.GetMaxRegret() < p_maxregret) {
         p_onEquilibrium(fullProfile);
@@ -222,6 +222,9 @@ EnumPolyBehaviorSolve(const Game &p_game, double p_maxregret,
     }
     if (isSingular) {
       p_onSupport("singular", support);
+    }
+    if (p_stopAfter > 0 && ret.size() >= p_stopAfter) {
+      break;
     }
   }
   return ret;

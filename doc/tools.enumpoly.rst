@@ -67,6 +67,13 @@ singular supports.
    Specify the maximum regret criterion for acceptance as an approximate Nash equilibrium
    (default is 1e-4).  See :ref:`pygambit-nash-maxregret` for interpretation and guidance.
 
+.. cmdoption:: -e EQA
+
+   .. versionadded:: 16.3.0
+
+   By default, the program will search all support profiles.
+   This switch instructs the program to terminate when EQA equilibria have been found.
+
 .. cmdoption:: -q
 
    Suppresses printing of the banner at program launch.

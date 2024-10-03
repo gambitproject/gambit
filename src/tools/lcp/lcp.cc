@@ -51,7 +51,7 @@ void PrintHelp(char *progname)
   std::cerr << "  -S               use strategic game\n";
   std::cerr << "  -P               find only subgame-perfect equilibria\n";
   std::cerr << "  -e EQA           terminate after finding EQA equilibria\n";
-  std::cerr << "                   (default is to find all accessible equilbria\n";
+  std::cerr << "                   (default is to find all accessible equilbria)\n";
   std::cerr << "  -r DEPTH         terminate recursion at DEPTH\n";
   std::cerr << "                   (only if number of equilibria sought is not 1)\n";
   std::cerr << "  -D               print detailed information about equilibria\n";

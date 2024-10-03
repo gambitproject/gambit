@@ -53,6 +53,8 @@ void PrintHelp(char *progname)
   std::cerr << "  -S               use strategic game\n";
   std::cerr << "  -m MAXREGRET     maximum regret acceptable as a proportion of range of\n";
   std::cerr << "                   payoffs in the game\n";
+  std::cerr << "  -e EQA           terminate after finding EQA equilibria\n";
+  std::cerr << "                   (default is to search in all supports)\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
   std::cerr << "  -V, --verbose    verbose mode (shows supports investigated)\n";
   std::cerr << "  -v, --version    print version information\n";
@@ -123,6 +125,7 @@ int main(int argc, char *argv[])
   bool quiet = false;
   bool useStrategic = false;
   double maxregret = 1.0e-4;
+  int stopAfter = 0;
 
   int long_opt_index = 0;
   struct option long_options[] = {{"help", 0, nullptr, 'h'},
@@ -130,7 +133,7 @@ int main(int argc, char *argv[])
                                   {"verbose", 0, nullptr, 'V'},
                                   {nullptr, 0, nullptr, 0}};
   int c;
-  while ((c = getopt_long(argc, argv, "d:hSm:qvV", long_options, &long_opt_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "d:hSm:e:qvV", long_options, &long_opt_index)) != -1) {
     switch (c) {
     case 'v':
       PrintBanner(std::cerr);
@@ -146,6 +149,9 @@ int main(int argc, char *argv[])
       break;
     case 'm':
       maxregret = atof(optarg);
+      break;
+    case 'e':
+      stopAfter = atoi(optarg);
       break;
     case 'q':
       quiet = true;
@@ -192,7 +198,7 @@ int main(int argc, char *argv[])
 
     if (!game->IsTree() || useStrategic) {
       EnumPolyStrategySolve(
-          game, maxregret,
+          game, stopAfter, maxregret,
           [](const MixedStrategyProfile<double> &eqm) { PrintProfile(std::cout, "NE", eqm); },
           [](const std::string &label, const StrategySupportProfile &support) {
             PrintSupport(std::cout, label, support);
@@ -200,7 +206,7 @@ int main(int argc, char *argv[])
     }
     else {
       EnumPolyBehaviorSolve(
-          game, maxregret,
+          game, stopAfter, maxregret,
           [](const MixedBehaviorProfile<double> &eqm) { PrintProfile(std::cout, "NE", eqm); },
           [](const std::string &label, const BehaviorSupportProfile &support) {
             PrintSupport(std::cout, label, support);

@@ -107,7 +107,7 @@ namespace Nash {
 
 std::list<MixedStrategyProfile<double>>
 EnumPolyStrategySupportSolve(const StrategySupportProfile &support, bool &is_singular,
-                             int p_stopAfter /* = 0 */)
+                             int p_stopAfter)
 {
   gSpace Space(support.MixedProfileLength() - support.GetGame()->NumPlayers());
   term_order Lex(&Space, lex);
@@ -118,11 +118,10 @@ EnumPolyStrategySupportSolve(const StrategySupportProfile &support, bool &is_sin
   Vector<double> bottoms(Space.Dmnsn()), tops(Space.Dmnsn());
   bottoms = 0;
   tops = 1;
-  gRectangle<double> cube(bottoms, tops);
   QuikSolv<double> solver(equations);
   is_singular = false;
   try {
-    solver.FindCertainNumberOfRoots(cube, std::numeric_limits<int>::max(), p_stopAfter);
+    solver.FindCertainNumberOfRoots({bottoms, tops}, std::numeric_limits<int>::max(), p_stopAfter);
   }
   catch (const SingularMatrixException &) {
     is_singular = true;
@@ -143,7 +142,7 @@ EnumPolyStrategySupportSolve(const StrategySupportProfile &support, bool &is_sin
 }
 
 List<MixedStrategyProfile<double>>
-EnumPolyStrategySolve(const Game &p_game, double p_maxregret,
+EnumPolyStrategySolve(const Game &p_game, int p_stopAfter, double p_maxregret,
                       EnumPolyMixedStrategyObserverFunctionType p_onEquilibrium,
                       EnumPolyStrategySupportObserverFunctionType p_onSupport)
 {
@@ -157,7 +156,8 @@ EnumPolyStrategySolve(const Game &p_game, double p_maxregret,
   for (auto support : possible_supports->m_supports) {
     p_onSupport("candidate", support);
     bool is_singular;
-    for (auto solution : EnumPolyStrategySupportSolve(support, is_singular)) {
+    for (auto solution : EnumPolyStrategySupportSolve(
+             support, is_singular, std::max(p_stopAfter - int(ret.size()), 0))) {
       MixedStrategyProfile<double> fullProfile = solution.ToFullSupport();
       if (fullProfile.GetMaxRegret() < p_maxregret) {
         p_onEquilibrium(fullProfile);
@@ -167,6 +167,9 @@ EnumPolyStrategySolve(const Game &p_game, double p_maxregret,
 
     if (is_singular) {
       p_onSupport("singular", support);
+    }
+    if (p_stopAfter > 0 && ret.size() >= p_stopAfter) {
+      break;
     }
   }
   return ret;
