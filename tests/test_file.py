@@ -16,7 +16,13 @@ class TestGambitEfgFile(unittest.TestCase):
             pygambit.Game.parse_game("")
         self.assertEqual(
             str(e.exception),
-            "Parse error in game file: line 1:2: Expecting file type"
+            "Parse error in game file: Empty file or string provided"
+        )
+
+    def test_parse_string_no_newline_end(self):
+        pygambit.Game.parse_game(
+            'NFG 1 R "prisoners dilemma"\n {"Player 1" "Player 2"} {2 2}\n'
+            ' -6 -6 -10 0 0 -10 -1 -1.0'
         )
 
     def test_parse_string_wrong_magic(self):

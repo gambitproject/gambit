@@ -23,6 +23,7 @@
 #include <cstdlib>
 #include <cctype>
 #include <iostream>
+#include <fstream>
 #include <map>
 
 #include "gambit.h"
@@ -82,14 +83,15 @@ void GameParserState::ReadChar(char &c)
 
 void GameParserState::UnreadChar()
 {
-  m_file.unget();
-  m_currentColumn--;
+  if (!m_file.eof()) {
+    m_file.unget();
+    m_currentColumn--;
+  }
 }
 
 void GameParserState::IncreaseLine()
 {
   m_currentLine++;
-  // Reset column
   m_currentColumn = 1;
 }
 
@@ -102,7 +104,7 @@ GameFileToken GameParserState::GetNextToken()
 
   while (isspace(c)) {
     ReadChar(c);
-    if (!m_file.good()) {
+    if (m_file.eof()) {
       return (m_lastToken = TOKEN_EOF);
     }
     else if (c == '\n') {
@@ -124,12 +126,12 @@ GameFileToken GameParserState::GetNextToken()
     buf += c;
     ReadChar(c);
 
-    while (!m_file.eof() && m_file.good() && isdigit(c)) {
+    while (!m_file.eof() && isdigit(c)) {
       buf += c;
       ReadChar(c);
     }
 
-    if (m_file.eof() || !m_file.good()) {
+    if (m_file.eof()) {
       m_lastText = buf;
       return (m_lastToken = TOKEN_NUMBER);
     }
@@ -137,7 +139,7 @@ GameFileToken GameParserState::GetNextToken()
     if (c == '.') {
       buf += c;
       ReadChar(c);
-      while (isdigit(c)) {
+      while (!m_file.eof() && isdigit(c)) {
         buf += c;
         ReadChar(c);
       }
@@ -150,7 +152,7 @@ GameFileToken GameParserState::GetNextToken()
         }
         buf += c;
         ReadChar(c);
-        while (isdigit(c)) {
+        while (!m_file.eof() && isdigit(c)) {
           buf += c;
           ReadChar(c);
         }
@@ -158,13 +160,12 @@ GameFileToken GameParserState::GetNextToken()
 
       UnreadChar();
       m_lastText = buf;
-
       return (m_lastToken = TOKEN_NUMBER);
     }
     else if (c == '/') {
       buf += c;
       ReadChar(c);
-      while (isdigit(c)) {
+      while (!m_file.eof() && isdigit(c)) {
         buf += c;
         ReadChar(c);
       }
@@ -180,7 +181,7 @@ GameFileToken GameParserState::GetNextToken()
       }
       buf += c;
       ReadChar(c);
-      while (isdigit(c)) {
+      while (!m_file.eof() && isdigit(c)) {
         buf += c;
         ReadChar(c);
       }
@@ -199,7 +200,7 @@ GameFileToken GameParserState::GetNextToken()
     buf += c;
     ReadChar(c);
 
-    while (isdigit(c)) {
+    while (!m_file.eof() && isdigit(c)) {
       buf += c;
       ReadChar(c);
     }
@@ -221,7 +222,7 @@ GameFileToken GameParserState::GetNextToken()
       if (a == '\n') {
         IncreaseLine();
       }
-    } while (isspace(a));
+    } while (!m_file.eof() && isspace(a));
 
     if (a == '\"') {
       bool lastslash = false;
@@ -251,7 +252,7 @@ GameFileToken GameParserState::GetNextToken()
       do {
         m_lastText += a;
         ReadChar(a);
-        if (m_file.eof() || !m_file.good()) {
+        if (m_file.eof()) {
           throw InvalidFileException(
               CreateLineMsg("End of file encountered when reading string label"));
         }
@@ -265,7 +266,7 @@ GameFileToken GameParserState::GetNextToken()
   }
 
   m_lastText = "";
-  while (!isspace(c) && !m_file.eof()) {
+  while (!m_file.eof() && !isspace(c)) {
     m_lastText += c;
     ReadChar(c);
   }
@@ -1014,6 +1015,9 @@ Game ReadGame(std::istream &p_file)
 {
   std::stringstream buffer;
   buffer << p_file.rdbuf();
+  if (buffer.str().empty()) {
+    throw InvalidFileException("Empty file or string provided");
+  }
   try {
     GameXMLSavefile doc(buffer.str());
     return doc.GetGame();
