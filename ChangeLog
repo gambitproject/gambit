@@ -34,6 +34,13 @@
   information sets and players (#453)
 
 
+## [16.2.1] - unreleased
+
+### Fixed
+- Reading .efg and .nfg game files which did not have whitespace at the end would lead to
+  an infinite loop (#457)
+
+
 ## [16.2.0] - 2024-04-05
 
 ### Fixed
