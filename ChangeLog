@@ -22,6 +22,10 @@
 - `to_arrays` converts a `Game` to a list of `numpy` arrays containing its reduced strategic form.
   (#461)
 
+### Fixed
+- When parsing .nfg files, check that the number of outcomes or payoffs is the expected number,
+  and raise an exception if not.  (#119)
+
 
 ## [16.1.2] - unreleased
 
