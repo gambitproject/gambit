@@ -570,7 +570,10 @@ void ParseOutcomeBody(GameParserState &p_parser, Game &p_nfg)
     if (p_parser.GetCurrentToken() != TOKEN_NUMBER) {
       throw InvalidFileException(p_parser.CreateLineMsg("Expecting outcome index"));
     }
-
+    else if (iter.AtEnd()) {
+      throw InvalidFileException(
+          p_parser.CreateLineMsg("More outcomes listed than entries in game table"));
+    }
     int outcomeId = atoi(p_parser.GetLastText().c_str());
     if (outcomeId > 0) {
       (*iter)->SetOutcome(p_nfg->GetOutcome(outcomeId));
@@ -581,6 +584,10 @@ void ParseOutcomeBody(GameParserState &p_parser, Game &p_nfg)
     p_parser.GetNextToken();
     iter++;
   }
+  if (!iter.AtEnd()) {
+    throw InvalidFileException(
+        p_parser.CreateLineMsg("Not enough outcomes listed to fill game table"));
+  }
 }
 
 void ParsePayoffBody(GameParserState &p_parser, Game &p_nfg)
@@ -590,11 +597,15 @@ void ParsePayoffBody(GameParserState &p_parser, Game &p_nfg)
   int pl = 1;
 
   while (p_parser.GetCurrentToken() != TOKEN_EOF) {
-    if (p_parser.GetCurrentToken() == TOKEN_NUMBER) {
-      (*iter)->GetOutcome()->SetPayoff(pl, Number(p_parser.GetLastText()));
+    if (p_parser.GetCurrentToken() != TOKEN_NUMBER) {
+      throw InvalidFileException(p_parser.CreateLineMsg("Expecting payoff"));
+    }
+    else if (iter.AtEnd()) {
+      throw InvalidFileException(
+          p_parser.CreateLineMsg("More payoffs listed than entries in game table"));
     }
     else {
-      throw InvalidFileException(p_parser.CreateLineMsg("Expecting payoff"));
+      (*iter)->GetOutcome()->SetPayoff(pl, Number(p_parser.GetLastText()));
     }
 
     if (++pl > p_nfg->NumPlayers()) {
@@ -602,6 +613,10 @@ void ParsePayoffBody(GameParserState &p_parser, Game &p_nfg)
       pl = 1;
     }
     p_parser.GetNextToken();
+  }
+  if (!iter.AtEnd()) {
+    throw InvalidFileException(
+        p_parser.CreateLineMsg("Not enough payoffs listed to fill game table"));
   }
 }
 

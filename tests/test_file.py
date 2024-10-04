@@ -1,5 +1,7 @@
 import unittest
 
+import pytest
+
 import pygambit
 
 
@@ -107,3 +109,63 @@ class TestGambitNfgFile(unittest.TestCase):
             "Parse error in game file: line 1:73: "
             "Not enough players for number of strategy entries"
         )
+
+
+def test_nfg_payoffs_not_enough():
+    data = """
+NFG 1 R "Selten (IJGT, 75), Figure 2, normal form" { "Player 1" "Player 2" } { 3 2 }
+1 1 0 2 0 2 1 1 0 3
+"""
+    with pytest.raises(ValueError, match="Not enough payoffs"):
+        pygambit.Game.parse_game(data)
+
+
+def test_nfg_payoffs_too_many():
+    data = """
+NFG 1 R "Selten (IJGT, 75), Figure 2, normal form" { "Player 1" "Player 2" } { 3 2 }
+1 1 0 2 0 2 1 1 0 3 2 0 5 1
+"""
+    with pytest.raises(ValueError, match="More payoffs listed"):
+        pygambit.Game.parse_game(data)
+
+
+def test_nfg_outcomes_not_enough():
+    data = """
+NFG 1 R "Two person 2 x 2 game with unique mixed equilibrium" { "Player 1" "Player 2" }
+
+{ { "1" "2" }
+{ "1" "2" }
+}
+""
+
+{
+{ "" 2, 0 }
+{ "" 0, 1 }
+{ "" 0, 1 }
+{ "" 1, 0 }
+}
+1 2 3
+"""
+    with pytest.raises(ValueError, match="Not enough outcomes"):
+        pygambit.Game.parse_game(data)
+
+
+def test_nfg_outcomes_too_many():
+    data = """
+NFG 1 R "Two person 2 x 2 game with unique mixed equilibrium" { "Player 1" "Player 2" }
+
+{ { "1" "2" }
+{ "1" "2" }
+}
+""
+
+{
+{ "" 2, 0 }
+{ "" 0, 1 }
+{ "" 0, 1 }
+{ "" 1, 0 }
+}
+1 2 3 4 2
+"""
+    with pytest.raises(ValueError, match="More outcomes listed"):
+        pygambit.Game.parse_game(data)
