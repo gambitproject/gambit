@@ -638,6 +638,15 @@ inline GameStrategy GamePlayerRep::GetStrategy(int st) const
 Game NewTree();
 /// Factory function to create new game table
 Game NewTable(const Array<int> &p_dim, bool p_sparseOutcomes = false);
+
+/// @brief Reads a game representation in .efg format
+///
+/// @param[in] p_stream An input stream, positioned at the start of the text in .efg format
+/// @return A handle to the game representation constructed
+/// @throw InvalidFileException If the stream does not contain a valid serialisation
+///                             of a game in .efg format.
+Game ReadEfgFile(std::istream &p_stream);
+
 /// Reads a game in .efg or .nfg format from the input stream
 Game ReadGame(std::istream &);
 

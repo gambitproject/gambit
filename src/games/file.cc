@@ -944,32 +944,6 @@ void ParseNode(GameParserState &p_state, Game p_game, GameNode p_node, TreeData 
   }
 }
 
-void ParseEfg(GameParserState &p_state, Game p_game, TreeData &p_treeData)
-{
-  if (p_state.GetNextToken() != TOKEN_NUMBER || p_state.GetLastText() != "2") {
-    throw InvalidFileException(p_state.CreateLineMsg("Accepting only EFG version 2"));
-  }
-
-  if (p_state.GetNextToken() != TOKEN_SYMBOL ||
-      (p_state.GetLastText() != "D" && p_state.GetLastText() != "R")) {
-    throw InvalidFileException(p_state.CreateLineMsg("Accepting only EFG R or D data type"));
-  }
-  if (p_state.GetNextToken() != TOKEN_TEXT) {
-    throw InvalidFileException(p_state.CreateLineMsg("Game title missing"));
-  }
-  p_game->SetTitle(p_state.GetLastText());
-
-  ReadPlayers(p_state, p_game, p_treeData);
-
-  if (p_state.GetNextToken() == TOKEN_TEXT) {
-    // Read optional comment
-    p_game->SetComment(p_state.GetLastText());
-    p_state.GetNextToken();
-  }
-
-  ParseNode(p_state, p_game, p_game->GetRoot(), p_treeData);
-}
-
 } // end of anonymous namespace
 
 #include "core/tinyxml.h"
@@ -1022,6 +996,39 @@ Game GameXMLSavefile::GetGame() const
   throw InvalidFileException("No game representation found in document");
 }
 
+Game ReadEfgFile(std::istream &p_stream)
+{
+  GameParserState parser(p_stream);
+
+  if (parser.GetNextToken() != TOKEN_SYMBOL || parser.GetLastText() != "EFG") {
+    throw InvalidFileException(parser.CreateLineMsg("Expecting EFG file type indicator"));
+  }
+  if (parser.GetNextToken() != TOKEN_NUMBER || parser.GetLastText() != "2") {
+    throw InvalidFileException(parser.CreateLineMsg("Accepting only EFG version 2"));
+  }
+  if (parser.GetNextToken() != TOKEN_SYMBOL ||
+      (parser.GetLastText() != "D" && parser.GetLastText() != "R")) {
+    throw InvalidFileException(parser.CreateLineMsg("Accepting only EFG R or D data type"));
+  }
+  if (parser.GetNextToken() != TOKEN_TEXT) {
+    throw InvalidFileException(parser.CreateLineMsg("Game title missing"));
+  }
+
+  TreeData treeData;
+  Game game = NewTree();
+  dynamic_cast<GameTreeRep &>(*game).SetCanonicalization(false);
+  game->SetTitle(parser.GetLastText());
+  ReadPlayers(parser, game, treeData);
+  if (parser.GetNextToken() == TOKEN_TEXT) {
+    // Read optional comment
+    game->SetComment(parser.GetLastText());
+    parser.GetNextToken();
+  }
+  ParseNode(parser, game, game->GetRoot(), treeData);
+  dynamic_cast<GameTreeRep &>(*game).SetCanonicalization(true);
+  return game;
+}
+
 //=========================================================================
 //    ReadGame: Global visible function to read an .efg or .nfg file
 //=========================================================================
@@ -1053,12 +1060,8 @@ Game ReadGame(std::istream &p_file)
       return BuildNfg(parser, data);
     }
     else if (parser.GetLastText() == "EFG") {
-      TreeData treeData;
-      Game game = NewTree();
-      dynamic_cast<GameTreeRep &>(*game).SetCanonicalization(false);
-      ParseEfg(parser, game, treeData);
-      dynamic_cast<GameTreeRep &>(*game).SetCanonicalization(true);
-      return game;
+      buffer.seekg(0, std::ios::beg);
+      return ReadEfgFile(buffer);
     }
     else if (parser.GetLastText() == "#AGG") {
       return GameAGGRep::ReadAggFile(buffer);
