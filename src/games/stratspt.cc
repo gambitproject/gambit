@@ -97,60 +97,31 @@ bool StrategySupportProfile::IsSubsetOf(const StrategySupportProfile &p_support)
   return true;
 }
 
-namespace {
-
-std::string EscapeQuotes(const std::string &s)
-{
-  std::string ret;
-
-  for (char c : s) {
-    if (c == '"') {
-      ret += '\\';
-    }
-    ret += c;
-  }
-
-  return ret;
-}
-
-} // end anonymous namespace
-
 void StrategySupportProfile::WriteNfgFile(std::ostream &p_file) const
 {
-  p_file << "NFG 1 R";
-  p_file << " \"" << EscapeQuotes(m_nfg->GetTitle()) << "\" { ";
-
-  for (auto player : m_nfg->GetPlayers()) {
-    p_file << '"' << EscapeQuotes(player->GetLabel()) << "\" ";
+  auto players = m_nfg->GetPlayers();
+  p_file << "NFG 1 R " << std::quoted(m_nfg->GetTitle()) << ' '
+         << FormatList(players, [](const GamePlayer &p) { return QuoteString(p->GetLabel()); })
+         << std::endl
+         << std::endl;
+  p_file << "{ ";
+  for (auto player : players) {
+    p_file << FormatList(GetStrategies(player), [](const GameStrategy &s) {
+      return QuoteString(s->GetLabel());
+    }) << std::endl;
   }
+  p_file << "}" << std::endl;
+  p_file << std::quoted(m_nfg->GetComment()) << std::endl << std::endl;
 
-  p_file << "}\n\n{ ";
-
-  for (auto player : m_nfg->GetPlayers()) {
-    p_file << "{ ";
-    for (auto strategy : GetStrategies(player)) {
-      p_file << '"' << EscapeQuotes(strategy->GetLabel()) << "\" ";
-    }
-    p_file << "}\n";
-  }
-
-  p_file << "}\n";
-
-  p_file << "\"" << EscapeQuotes(m_nfg->GetComment()) << "\"\n\n";
-
-  // For trees, we write the payoff version, since there need not be
-  // a one-to-one correspondence between outcomes and entries, when there
-  // are chance moves.
-  StrategyProfileIterator iter(*this);
-
-  for (; !iter.AtEnd(); iter++) {
-    for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
-      p_file << (*iter)->GetPayoff(pl) << " ";
-    }
-    p_file << "\n";
-  }
-
-  p_file << '\n';
+  for (StrategyProfileIterator iter(*this); !iter.AtEnd(); iter++) {
+    p_file << FormatList(
+                  players,
+                  [&iter](const GamePlayer &p) {
+                    return lexical_cast<std::string>((*iter)->GetPayoff(p));
+                  },
+                  false, false)
+           << std::endl;
+  };
 }
 
 //---------------------------------------------------------------------------

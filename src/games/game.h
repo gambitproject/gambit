@@ -478,7 +478,10 @@ public:
     throw UndefinedException();
   }
   /// Write the game in .efg format to the specified stream
-  virtual void WriteEfgFile(std::ostream &) const { throw UndefinedException(); }
+  virtual void WriteEfgFile(std::ostream &, const GameNode &subtree = 0) const
+  {
+    throw UndefinedException();
+  }
   /// Write the game to a file in .nfg payoff format.
   virtual void WriteNfgFile(std::ostream &p_stream) const;
   //@}
@@ -638,8 +641,36 @@ inline GameStrategy GamePlayerRep::GetStrategy(int st) const
 Game NewTree();
 /// Factory function to create new game table
 Game NewTable(const Array<int> &p_dim, bool p_sparseOutcomes = false);
-/// Reads a game in .efg or .nfg format from the input stream
-Game ReadGame(std::istream &);
+
+/// @brief Reads a game representation in .efg format
+///
+/// @param[in] p_stream An input stream, positioned at the start of the text in .efg format
+/// @return A handle to the game representation constructed
+/// @throw InvalidFileException If the stream does not contain a valid serialisation
+///                             of a game in .efg format.
+/// @sa Game::WriteEfgFile, ReadNfgFile, ReadAggFile, ReadBaggFile
+Game ReadEfgFile(std::istream &p_stream);
+
+/// @brief Reads a game representation in .nfg format
+/// @param[in] p_stream An input stream, positioned at the start of the text in .nfg format
+/// @return A handle to the game representation constructed
+/// @throw InvalidFileException If the stream does not contain a valid serialisation
+///                             of a game in .nfg format.
+/// @sa Game::WriteNfgFile, ReadEfgFile, ReadAggFile, ReadBaggFile
+Game ReadNfgFile(std::istream &p_stream);
+
+/// @brief Reads a game representation from a graphical interface XML saveflie
+/// @param[in] p_stream An input stream, positioned at the start of the text
+/// @return A handle to the game representation constructed
+/// @throw InvalidFileException If the stream does not contain a valid serialisation
+///                             of a game in an XML savefile
+/// @sa ReadEfgFile, ReadNfgFile, ReadAggFile, ReadBaggFile
+Game ReadGbtFile(std::istream &p_stream);
+
+/// @brief Reads a game from the input stream, attempting to autodetect file format
+/// @deprecated Deprecated in favour of the various ReadXXXGame functions.
+/// @sa ReadEfgFile, ReadNfgFile, ReadGbtFile, ReadAggFile, ReadBaggFile
+Game ReadGame(std::istream &p_stream);
 
 /// @brief Generate a distribution over a simplex restricted to rational numbers of given
 /// denominator

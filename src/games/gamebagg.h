@@ -36,14 +36,11 @@ private:
   Array<int> agent2baggPlayer;
   Array<GamePlayerRep *> m_players;
 
-  /// Constructor
-  explicit GameBAGGRep(std::shared_ptr<agg::BAGG> _baggPtr);
-
 public:
   /// @name Lifecycle
   //@{
-  /// Create a game from a serialized file in BAGG format
-  static Game ReadBaggFile(std::istream &);
+  /// Constructor
+  explicit GameBAGGRep(std::shared_ptr<agg::BAGG> _baggPtr);
   /// Destructor
   ~GameBAGGRep() override
   {
@@ -153,6 +150,21 @@ public:
   }
   //@}
 };
+
+/// @brief Reads a game representation in .bagg format
+/// @param[in] p_stream An input stream, positioned at the start of the text in .bagg format
+/// @return A handle to the game representation constructed
+/// @throw InvalidFileException If the stream does not contain a valid serialisation
+///                             of a game in .bagg format.
+inline Game ReadBaggFile(std::istream &in)
+{
+  try {
+    return new GameBAGGRep(agg::BAGG::makeBAGG(in));
+  }
+  catch (std::runtime_error &ex) {
+    throw InvalidFileException(ex.what());
+  }
+}
 
 } // end namespace Gambit
 

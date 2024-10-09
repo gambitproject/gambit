@@ -271,8 +271,7 @@ public:
 
   /// @name Writing data files
   //@{
-  void WriteEfgFile(std::ostream &) const override;
-  virtual void WriteEfgFile(std::ostream &, const GameNode &p_node) const;
+  void WriteEfgFile(std::ostream &, const GameNode &p_node = 0) const override;
   void WriteNfgFile(std::ostream &) const override;
   //@}
 

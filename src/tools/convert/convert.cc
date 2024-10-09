@@ -126,6 +126,9 @@ int main(int argc, char *argv[])
   try {
     Gambit::Game game = Gambit::ReadGame(*input_stream);
 
+    game->WriteNfgFile(std::cout);
+    exit(0);
+
     if (rowPlayer < 1 || rowPlayer > game->NumPlayers()) {
       std::cerr << argv[0] << ": Player " << rowPlayer << " does not exist.\n";
       return 1;

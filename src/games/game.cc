@@ -26,6 +26,7 @@
 #include <random>
 
 #include "gambit.h"
+#include "writer.h"
 
 // The references to the table and tree representations violate the logic
 // of separating implementation types.  This will be fixed when we move
@@ -265,24 +266,6 @@ Array<GameStrategy> GameRep::GetStrategies() const
 //                     GameRep: Writing data files
 //------------------------------------------------------------------------
 
-namespace {
-
-std::string EscapeQuotes(const std::string &s)
-{
-  std::string ret;
-
-  for (char c : s) {
-    if (c == '"') {
-      ret += '\\';
-    }
-    ret += c;
-  }
-
-  return ret;
-}
-
-} // end anonymous namespace
-
 ///
 /// Write the game to a savefile in .nfg payoff format.
 ///
@@ -297,31 +280,29 @@ std::string EscapeQuotes(const std::string &s)
 void GameRep::WriteNfgFile(std::ostream &p_file) const
 {
   auto players = GetPlayers();
-  p_file << "NFG 1 R";
-  p_file << " \"" << EscapeQuotes(GetTitle()) << "\" { ";
+  p_file << "NFG 1 R " << std::quoted(GetTitle()) << ' '
+         << FormatList(players, [](const GamePlayer &p) { return QuoteString(p->GetLabel()); })
+         << std::endl
+         << std::endl;
+  p_file << "{ ";
   for (auto player : players) {
-    p_file << '"' << EscapeQuotes(player->GetLabel()) << "\" ";
+    p_file << FormatList(player->GetStrategies(), [](const GameStrategy &s) {
+      return QuoteString(s->GetLabel());
+    }) << std::endl;
   }
-  p_file << "}\n\n{ ";
-
-  for (auto player : players) {
-    p_file << "{ ";
-    for (auto strategy : player->GetStrategies()) {
-      p_file << '"' << EscapeQuotes(strategy->GetLabel()) << "\" ";
-    }
-    p_file << "}\n";
-  }
-  p_file << "}\n";
-  p_file << "\"" << EscapeQuotes(m_comment) << "\"\n\n";
+  p_file << "}" << std::endl;
+  p_file << std::quoted(GetComment()) << std::endl << std::endl;
 
   for (StrategyProfileIterator iter(StrategySupportProfile(Game(const_cast<GameRep *>(this))));
        !iter.AtEnd(); iter++) {
-    for (auto player : players) {
-      p_file << (*iter)->GetPayoff(player) << " ";
-    }
-    p_file << "\n";
-  }
-  p_file << '\n';
+    p_file << FormatList(
+                  players,
+                  [&iter](const GamePlayer &p) {
+                    return lexical_cast<std::string>((*iter)->GetPayoff(p));
+                  },
+                  false, false)
+           << std::endl;
+  };
 }
 
 //========================================================================

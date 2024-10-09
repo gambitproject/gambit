@@ -26,6 +26,7 @@
 
 #include "gambit.h"
 #include "gametree.h"
+#include "writer.h"
 
 namespace Gambit {
 
@@ -921,121 +922,59 @@ void GameTreeRep::BuildComputedValues()
 
 namespace {
 
-std::string EscapeQuotes(const std::string &s)
+void WriteEfgFile(std::ostream &f, const GameNode &n)
 {
-  std::string ret;
-
-  for (char c : s) {
-    if (c == '"') {
-      ret += '\\';
-    }
-    ret += c;
+  if (n->IsTerminal()) {
+    f << "t ";
   }
-
-  return ret;
-}
-
-void PrintActions(std::ostream &p_stream, GameTreeInfosetRep *p_infoset)
-{
-  p_stream << "{ ";
-  for (int act = 1; act <= p_infoset->NumActions(); act++) {
-    p_stream << '"' << EscapeQuotes(p_infoset->GetAction(act)->GetLabel()) << "\" ";
-    if (p_infoset->IsChanceInfoset()) {
-      p_stream << static_cast<std::string>(p_infoset->GetActionProb(act)) << ' ';
-    }
+  else if (n->GetInfoset()->IsChanceInfoset()) {
+    f << "c ";
   }
-  p_stream << "}";
-}
-
-void WriteEfgFile(std::ostream &f, GameTreeNodeRep *n)
-{
-  if (n->NumChildren() == 0) {
-    f << "t \"" << EscapeQuotes(n->GetLabel()) << "\" ";
-    if (n->GetOutcome()) {
-      f << n->GetOutcome()->GetNumber() << " \"" << EscapeQuotes(n->GetOutcome()->GetLabel())
-        << "\" ";
-      f << "{ ";
-      for (int pl = 1; pl <= n->GetGame()->NumPlayers(); pl++) {
-        f << static_cast<std::string>(n->GetOutcome()->GetPayoff(pl));
-
-        if (pl < n->GetGame()->NumPlayers()) {
-          f << ", ";
-        }
-        else {
-          f << " }\n";
-        }
-      }
+  else {
+    f << "p ";
+  }
+  f << QuoteString(n->GetLabel()) << ' ';
+  if (!n->IsTerminal()) {
+    if (!n->GetInfoset()->IsChanceInfoset()) {
+      f << n->GetInfoset()->GetPlayer()->GetNumber() << ' ';
+    }
+    f << n->GetInfoset()->GetNumber() << " " << QuoteString(n->GetInfoset()->GetLabel()) << ' ';
+    if (n->GetInfoset()->IsChanceInfoset()) {
+      f << FormatList(n->GetInfoset()->GetActions(), [n](const GameAction &a) {
+        return QuoteString(a->GetLabel()) + " " + std::string(a->GetInfoset()->GetActionProb(a));
+      });
     }
     else {
-      f << "0\n";
+      f << FormatList(n->GetInfoset()->GetActions(),
+                      [n](const GameAction &a) { return QuoteString(a->GetLabel()); });
     }
-    return;
+    f << ' ';
   }
-
-  if (n->GetInfoset()->IsChanceInfoset()) {
-    f << "c \"";
-  }
-  else {
-    f << "p \"";
-  }
-
-  f << EscapeQuotes(n->GetLabel()) << "\" ";
-  if (!n->GetInfoset()->IsChanceInfoset()) {
-    f << n->GetInfoset()->GetPlayer()->GetNumber() << ' ';
-  }
-  f << n->GetInfoset()->GetNumber() << " \"" << EscapeQuotes(n->GetInfoset()->GetLabel()) << "\" ";
-  PrintActions(f, dynamic_cast<GameTreeInfosetRep *>(n->GetInfoset().operator->()));
-  f << " ";
   if (n->GetOutcome()) {
-    f << n->GetOutcome()->GetNumber() << " \"" << EscapeQuotes(n->GetOutcome()->GetLabel())
-      << "\" ";
-    f << "{ ";
-    for (int pl = 1; pl <= n->GetGame()->NumPlayers(); pl++) {
-      f << static_cast<std::string>(n->GetOutcome()->GetPayoff(pl));
-
-      if (pl < n->GetGame()->NumPlayers()) {
-        f << ", ";
-      }
-      else {
-        f << " }\n";
-      }
-    }
+    f << n->GetOutcome()->GetNumber() << " " << QuoteString(n->GetOutcome()->GetLabel()) << ' '
+      << FormatList(
+             n->GetGame()->GetPlayers(),
+             [n](const GamePlayer &p) { return std::string(n->GetOutcome()->GetPayoff(p)); }, true)
+      << std::endl;
   }
   else {
-    f << "0\n";
+    f << "0" << std::endl;
   }
-
-  for (int i = 1; i <= n->NumChildren();
-       WriteEfgFile(f, dynamic_cast<GameTreeNodeRep *>(n->GetChild(i++).operator->())))
-    ;
+  for (auto child : n->GetChildren()) {
+    WriteEfgFile(f, child);
+  }
 }
 
 } // end anonymous namespace
 
-void GameTreeRep::WriteEfgFile(std::ostream &p_file) const
+void GameTreeRep::WriteEfgFile(std::ostream &p_file, const GameNode &p_subtree /* =0 */) const
 {
-  p_file << "EFG 2 R";
-  p_file << " \"" << EscapeQuotes(GetTitle()) << "\" { ";
-  for (int i = 1; i <= m_players.Length(); i++) {
-    p_file << '"' << EscapeQuotes(m_players[i]->m_label) << "\" ";
-  }
-  p_file << "}\n";
-  p_file << "\"" << EscapeQuotes(GetComment()) << "\"\n\n";
-
-  Gambit::WriteEfgFile(p_file, m_root);
-}
-
-void GameTreeRep::WriteEfgFile(std::ostream &p_file, const GameNode &p_root) const
-{
-  p_file << "EFG 2 R";
-  p_file << " \"" << EscapeQuotes(GetTitle()) << "\" { ";
-  for (int i = 1; i <= m_players.Length(); i++) {
-    p_file << '"' << EscapeQuotes(m_players[i]->m_label) << "\" ";
-  }
-  p_file << "}\n";
-  p_file << "\"" << EscapeQuotes(GetComment()) << "\"\n\n";
-
-  Gambit::WriteEfgFile(p_file, dynamic_cast<GameTreeNodeRep *>(p_root.operator->()));
+  p_file << "EFG 2 R " << std::quoted(GetTitle()) << ' '
+         << FormatList(GetPlayers(),
+                       [](const GamePlayer &p) { return QuoteString(p->GetLabel()); })
+         << std::endl;
+  p_file << std::quoted(GetComment()) << std::endl << std::endl;
+  Gambit::WriteEfgFile(p_file, (p_subtree) ? p_subtree : GetRoot());
 }
 
 void GameTreeRep::WriteNfgFile(std::ostream &p_file) const

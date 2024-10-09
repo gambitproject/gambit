@@ -24,6 +24,7 @@
 
 #include "gambit.h"
 #include "gametable.h"
+#include "writer.h"
 
 namespace Gambit {
 
@@ -343,24 +344,6 @@ bool GameTableRep::IsConstSum() const
 //                   GameTableRep: Writing data files
 //------------------------------------------------------------------------
 
-namespace {
-
-std::string EscapeQuotes(const std::string &s)
-{
-  std::string ret;
-
-  for (char c : s) {
-    if (c == '"') {
-      ret += '\\';
-    }
-    ret += c;
-  }
-
-  return ret;
-}
-
-} // end anonymous namespace
-
 ///
 /// Write the game to a savefile in .nfg outcome format.
 ///
@@ -372,58 +355,35 @@ std::string EscapeQuotes(const std::string &s)
 ///
 void GameTableRep::WriteNfgFile(std::ostream &p_file) const
 {
-  p_file << "NFG 1 R";
-  p_file << " \"" << EscapeQuotes(GetTitle()) << "\" { ";
-
-  for (int i = 1; i <= NumPlayers(); i++) {
-    p_file << '"' << EscapeQuotes(GetPlayer(i)->GetLabel()) << "\" ";
+  auto players = GetPlayers();
+  p_file << "NFG 1 R " << std::quoted(GetTitle()) << ' '
+         << FormatList(players, [](const GamePlayer &p) { return QuoteString(p->GetLabel()); })
+         << std::endl
+         << std::endl;
+  p_file << "{ ";
+  for (auto player : players) {
+    p_file << FormatList(player->GetStrategies(), [](const GameStrategy &s) {
+      return QuoteString(s->GetLabel());
+    }) << std::endl;
   }
+  p_file << "}" << std::endl;
+  p_file << std::quoted(GetComment()) << std::endl << std::endl;
 
-  p_file << "}\n\n{ ";
-
-  for (int i = 1; i <= NumPlayers(); i++) {
-    GamePlayerRep *player = GetPlayer(i);
-    p_file << "{ ";
-    for (int j = 1; j <= player->NumStrategies(); j++) {
-      p_file << '"' << EscapeQuotes(player->GetStrategy(j)->GetLabel()) << "\" ";
-    }
-    p_file << "}\n";
-  }
-
-  p_file << "}\n";
-
-  p_file << "\"" << EscapeQuotes(m_comment) << "\"\n\n";
-
-  int ncont = 1;
-  for (int i = 1; i <= NumPlayers(); i++) {
-    ncont *= m_players[i]->m_strategies.Length();
-  }
-
-  p_file << "{\n";
+  p_file << "{" << std::endl;
   for (auto outcome : m_outcomes) {
-    p_file << "{ \"" << EscapeQuotes(outcome->m_label) << "\" ";
-    for (int pl = 1; pl <= m_players.Length(); pl++) {
-      p_file << (const std::string &)outcome->m_payoffs[pl];
-      if (pl < m_players.Length()) {
-        p_file << ", ";
-      }
-      else {
-        p_file << " }\n";
-      }
-    }
+    p_file << "{ " + QuoteString(outcome->GetLabel()) << ' '
+           << FormatList(
+                  players,
+                  [outcome](const GamePlayer &p) { return std::string(outcome->GetPayoff(p)); },
+                  true, false)
+           << " }" << std::endl;
   }
-  p_file << "}\n";
+  p_file << "}" << std::endl;
 
-  for (int cont = 1; cont <= ncont; cont++) {
-    if (m_results[cont] != 0) {
-      p_file << m_results[cont]->m_number << ' ';
-    }
-    else {
-      p_file << "0 ";
-    }
+  for (auto result : m_results) {
+    p_file << ((result) ? result->m_number : 0) << ' ';
   }
-
-  p_file << '\n';
+  p_file << std::endl;
 }
 
 //------------------------------------------------------------------------

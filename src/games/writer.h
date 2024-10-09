@@ -27,6 +27,46 @@
 
 namespace Gambit {
 
+/// @brief Render text as an explicit double-quoted string, escaping any double-quotes
+///        in the text with a backslash
+inline std::string QuoteString(const std::string &s)
+{
+  std::ostringstream ss;
+  ss << std::quoted(s);
+  return ss.str();
+}
+
+/// @brief Render a list of objects as a space-separated list of elements, delimited
+///        by curly braces on either side
+/// @param[in] p_container  The container over which to iterate
+/// @param[in] p_renderer   A callable which returns a string representing each item
+/// @param[in] p_commas     Use comma as delimiter between items (default is no)
+/// @param[in] p_braces     Whether to include curly braces on either side of the list
+/// @returns  The formatted list as a string following the conventions of Gambit savefiles.
+template <class C, class T>
+std::string FormatList(const C &p_container, T p_renderer, bool p_commas = false,
+                       bool p_braces = true)
+{
+  std::string s, delim;
+  if (p_braces) {
+    s = "{";
+    delim = " ";
+  }
+  for (auto element : p_container) {
+    s += delim + p_renderer(element);
+    if (p_commas) {
+      delim = ", ";
+    }
+    else {
+      delim = " ";
+    }
+  }
+  if (p_braces) {
+    s += " }";
+  }
+  return s;
+}
+
 ///
 /// Abstract base class for objects that write games to various formats
 ///

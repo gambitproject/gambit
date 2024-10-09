@@ -25,6 +25,7 @@
 #include <iostream>
 #include <fstream>
 #include <map>
+#include <algorithm>
 
 #include "gambit.h"
 // for explicit access to turning off canonicalization
@@ -46,12 +47,8 @@ using GameFileToken = enum {
   TOKEN_NONE = 7
 };
 
-//!
-//! This parser class implements the semantics of Gambit savefiles,
-//! including the nonsignificance of whitespace and the possibility of
-//! escaped-quotes within text labels.
-//!
-class GameParserState {
+/// @brief Class implementing conversion of classic Gambit savefiles into lexical tokens.
+class GameFileLexer {
 private:
   std::istream &m_file;
 
@@ -65,23 +62,47 @@ private:
   void IncreaseLine();
 
 public:
-  explicit GameParserState(std::istream &p_file) : m_file(p_file) {}
+  explicit GameFileLexer(std::istream &p_file) : m_file(p_file) {}
 
   GameFileToken GetNextToken();
   GameFileToken GetCurrentToken() const { return m_lastToken; }
-  int GetCurrentLine() const { return m_currentLine; }
-  int GetCurrentColumn() const { return m_currentColumn; }
-  std::string CreateLineMsg(const std::string &msg) const;
+  /// Throw an InvalidFileException with the specified message
+  void OnParseError(const std::string &p_message) const;
   const std::string &GetLastText() const { return m_lastText; }
+
+  void ExpectCurrentToken(GameFileToken p_tokenType, const std::string &p_message)
+  {
+    if (GetCurrentToken() != p_tokenType) {
+      OnParseError("Expected " + p_message);
+    }
+  }
+  void ExpectNextToken(GameFileToken p_tokenType, const std::string &p_message)
+  {
+    if (GetNextToken() != p_tokenType) {
+      OnParseError("Expected " + p_message);
+    }
+  }
+  void AcceptNextToken(GameFileToken p_tokenType)
+  {
+    if (GetNextToken() == p_tokenType) {
+      GetNextToken();
+    }
+  }
 };
 
-void GameParserState::ReadChar(char &c)
+void GameFileLexer::OnParseError(const std::string &p_message) const
+{
+  throw InvalidFileException("line " + std::to_string(m_currentLine) + ":" +
+                             std::to_string(m_currentColumn) + ": " + p_message);
+}
+
+void GameFileLexer::ReadChar(char &c)
 {
   m_file.get(c);
   m_currentColumn++;
 }
 
-void GameParserState::UnreadChar()
+void GameFileLexer::UnreadChar()
 {
   if (!m_file.eof()) {
     m_file.unget();
@@ -89,13 +110,13 @@ void GameParserState::UnreadChar()
   }
 }
 
-void GameParserState::IncreaseLine()
+void GameFileLexer::IncreaseLine()
 {
   m_currentLine++;
   m_currentColumn = 1;
 }
 
-GameFileToken GameParserState::GetNextToken()
+GameFileToken GameFileLexer::GetNextToken()
 {
   char c = ' ';
   if (m_file.eof()) {
@@ -148,7 +169,7 @@ GameFileToken GameParserState::GetNextToken()
         buf += c;
         ReadChar(c);
         if (c != '+' && c != '-' && !isdigit(c)) {
-          throw InvalidFileException(CreateLineMsg("Invalid Token +/-"));
+          OnParseError("Invalid Token +/-");
         }
         buf += c;
         ReadChar(c);
@@ -177,7 +198,7 @@ GameFileToken GameParserState::GetNextToken()
       buf += c;
       ReadChar(c);
       if (c != '+' && c != '-' && !isdigit(c)) {
-        throw InvalidFileException(CreateLineMsg("Invalid Token +/-"));
+        OnParseError("Invalid Token +/-");
       }
       buf += c;
       ReadChar(c);
@@ -230,8 +251,7 @@ GameFileToken GameParserState::GetNextToken()
       ReadChar(a);
       while (a != '\"' || lastslash) {
         if (m_file.eof() || !m_file.good()) {
-          throw InvalidFileException(
-              CreateLineMsg("End of file encountered when reading string label"));
+          OnParseError("End of file encountered when reading string label");
         }
         if (lastslash && a == '"') {
           m_lastText += '"';
@@ -253,8 +273,7 @@ GameFileToken GameParserState::GetNextToken()
         m_lastText += a;
         ReadChar(a);
         if (m_file.eof()) {
-          throw InvalidFileException(
-              CreateLineMsg("End of file encountered when reading string label"));
+          OnParseError("End of file encountered when reading string label");
         }
         if (a == '\n') {
           IncreaseLine();
@@ -273,219 +292,88 @@ GameFileToken GameParserState::GetNextToken()
   return (m_lastToken = TOKEN_SYMBOL);
 }
 
-std::string GameParserState::CreateLineMsg(const std::string &msg) const
-{
-  std::stringstream stream;
-  stream << "line " << m_currentLine << ":" << m_currentColumn << ": " << msg;
-  return stream.str();
-}
-
 class TableFilePlayer {
 public:
   std::string m_name;
   Array<std::string> m_strategies;
-  TableFilePlayer *m_next{nullptr};
 
-  TableFilePlayer() = default;
+  TableFilePlayer(const std::string &p_name) : m_name(p_name) {}
 };
 
 class TableFileGame {
 public:
   std::string m_title, m_comment;
-  TableFilePlayer *m_firstPlayer{nullptr}, *m_lastPlayer{nullptr};
-  int m_numPlayers{0};
+  std::vector<TableFilePlayer> m_players;
 
-  TableFileGame() = default;
-  ~TableFileGame();
+  size_t NumPlayers() const { return m_players.size(); }
+  Array<int> NumStrategies() const
+  {
+    Array<int> ret(m_players.size());
+    std::transform(m_players.begin(), m_players.end(), ret.begin(),
+                   [](const TableFilePlayer &player) { return player.m_strategies.size(); });
+    return ret;
+  }
 
-  void AddPlayer(const std::string &);
-  int NumPlayers() const { return m_numPlayers; }
-  int NumStrategies(int p_player) const;
-  std::string GetPlayer(int p_player) const;
-  std::string GetStrategy(int p_player, int p_strategy) const;
+  std::string GetPlayer(int p_player) const { return m_players[p_player - 1].m_name; }
+  std::string GetStrategy(int p_player, int p_strategy) const
+  {
+    return m_players[p_player - 1].m_strategies[p_strategy];
+  }
 };
 
-TableFileGame::~TableFileGame()
+void ReadPlayers(GameFileLexer &p_state, TableFileGame &p_data)
 {
-  if (m_firstPlayer) {
-    TableFilePlayer *player = m_firstPlayer;
-    while (player) {
-      TableFilePlayer *nextPlayer = player->m_next;
-      delete player;
-      player = nextPlayer;
-    }
-  }
-}
-
-void TableFileGame::AddPlayer(const std::string &p_name)
-{
-  auto *player = new TableFilePlayer;
-  player->m_name = p_name;
-
-  if (m_firstPlayer) {
-    m_lastPlayer->m_next = player;
-    m_lastPlayer = player;
-  }
-  else {
-    m_firstPlayer = player;
-    m_lastPlayer = player;
-  }
-  m_numPlayers++;
-}
-
-int TableFileGame::NumStrategies(int p_player) const
-{
-  TableFilePlayer *player = m_firstPlayer;
-  int pl = 1;
-
-  while (player && pl < p_player) {
-    player = player->m_next;
-    pl++;
-  }
-
-  if (!player) {
-    return 0;
-  }
-  else {
-    return player->m_strategies.Length();
-  }
-}
-
-std::string TableFileGame::GetPlayer(int p_player) const
-{
-  TableFilePlayer *player = m_firstPlayer;
-  int pl = 1;
-
-  while (player && pl < p_player) {
-    player = player->m_next;
-    pl++;
-  }
-
-  if (!player) {
-    return "";
-  }
-  else {
-    return player->m_name;
-  }
-}
-
-std::string TableFileGame::GetStrategy(int p_player, int p_strategy) const
-{
-  TableFilePlayer *player = m_firstPlayer;
-  int pl = 1;
-
-  while (player && pl < p_player) {
-    player = player->m_next;
-    pl++;
-  }
-
-  if (!player) {
-    return "";
-  }
-  else {
-    return player->m_strategies[p_strategy];
-  }
-}
-
-void ReadPlayers(GameParserState &p_state, TableFileGame &p_data)
-{
-  if (p_state.GetNextToken() != TOKEN_LBRACE) {
-    throw InvalidFileException(p_state.CreateLineMsg("Expecting '{' before players"));
-  }
-
+  p_state.ExpectNextToken(TOKEN_LBRACE, "'{'");
   while (p_state.GetNextToken() == TOKEN_TEXT) {
-    p_data.AddPlayer(p_state.GetLastText());
+    p_data.m_players.emplace_back(p_state.GetLastText());
   }
-
-  if (p_state.GetCurrentToken() != TOKEN_RBRACE) {
-    throw InvalidFileException(p_state.CreateLineMsg("Expecting '}' after players"));
-  }
-
-  p_state.GetNextToken();
+  p_state.ExpectCurrentToken(TOKEN_RBRACE, "'}'");
 }
 
-void ReadStrategies(GameParserState &p_state, TableFileGame &p_data)
+void ReadStrategies(GameFileLexer &p_state, TableFileGame &p_data)
 {
-  if (p_state.GetCurrentToken() != TOKEN_LBRACE) {
-    throw InvalidFileException(p_state.CreateLineMsg("Expecting '{' before strategies"));
-  }
-  p_state.GetNextToken();
+  p_state.ExpectNextToken(TOKEN_LBRACE, "'{'");
+  auto token = p_state.GetNextToken();
 
-  if (p_state.GetCurrentToken() == TOKEN_LBRACE) {
-    TableFilePlayer *player = p_data.m_firstPlayer;
-
-    while (p_state.GetCurrentToken() == TOKEN_LBRACE) {
-      if (!player) {
-        throw InvalidFileException(
-            p_state.CreateLineMsg("Not enough players for number of strategy entries"));
-      }
-
+  if (token == TOKEN_LBRACE) {
+    // Nested list of strategy labels
+    for (auto &player : p_data.m_players) {
+      p_state.ExpectCurrentToken(TOKEN_LBRACE, "'{'");
       while (p_state.GetNextToken() == TOKEN_TEXT) {
-        player->m_strategies.push_back(p_state.GetLastText());
+        player.m_strategies.push_back(p_state.GetLastText());
       }
-
-      if (p_state.GetCurrentToken() != TOKEN_RBRACE) {
-        throw InvalidFileException(p_state.CreateLineMsg("Expecting '}' after player strategy"));
-      }
-
+      p_state.ExpectCurrentToken(TOKEN_RBRACE, "'}'");
       p_state.GetNextToken();
-      player = player->m_next;
     }
-
-    if (player) {
-      throw InvalidFileException(p_state.CreateLineMsg("Players with undefined strategies"));
-    }
-
-    if (p_state.GetCurrentToken() != TOKEN_RBRACE) {
-      throw InvalidFileException(p_state.CreateLineMsg("Expecting '}' after strategies"));
-    }
-
-    p_state.GetNextToken();
-  }
-  else if (p_state.GetCurrentToken() == TOKEN_NUMBER) {
-    TableFilePlayer *player = p_data.m_firstPlayer;
-
-    while (p_state.GetCurrentToken() == TOKEN_NUMBER) {
-      if (!player) {
-        throw InvalidFileException(
-            p_state.CreateLineMsg("Not enough players for number of strategy entries"));
-      }
-
-      for (int st = 1; st <= atoi(p_state.GetLastText().c_str()); st++) {
-        player->m_strategies.push_back(lexical_cast<std::string>(st));
-      }
-
-      p_state.GetNextToken();
-      player = player->m_next;
-    }
-
-    if (p_state.GetCurrentToken() != TOKEN_RBRACE) {
-      throw InvalidFileException(p_state.CreateLineMsg("Expecting '}' after strategies"));
-    }
-
-    if (player) {
-      throw InvalidFileException(p_state.CreateLineMsg("Players with strategies undefined"));
-    }
-
-    p_state.GetNextToken();
   }
   else {
-    throw InvalidFileException(p_state.CreateLineMsg("Unrecognizable strategies format"));
+    // List of number of strategies for each player, no labels
+    for (auto &player : p_data.m_players) {
+      p_state.ExpectCurrentToken(TOKEN_NUMBER, "number");
+      for (int st = 1; st <= std::stoi(p_state.GetLastText()); st++) {
+        player.m_strategies.push_back(std::to_string(st));
+      }
+      p_state.GetNextToken();
+    }
   }
+  p_state.ExpectCurrentToken(TOKEN_RBRACE, "'}'");
+  p_state.GetNextToken();
 }
 
-void ParseNfgHeader(GameParserState &p_state, TableFileGame &p_data)
+void ParseNfgHeader(GameFileLexer &p_state, TableFileGame &p_data)
 {
-  if (p_state.GetNextToken() != TOKEN_NUMBER || p_state.GetLastText() != "1") {
-    throw InvalidFileException(p_state.CreateLineMsg("Accepting only NFG version 1"));
+  if (p_state.GetNextToken() != TOKEN_SYMBOL || p_state.GetLastText() != "NFG") {
+    p_state.OnParseError("Expecting NFG file type indicator");
   }
-
+  if (p_state.GetNextToken() != TOKEN_NUMBER || p_state.GetLastText() != "1") {
+    p_state.OnParseError("Accepting only NFG version 1");
+  }
   if (p_state.GetNextToken() != TOKEN_SYMBOL ||
       (p_state.GetLastText() != "D" && p_state.GetLastText() != "R")) {
-    throw InvalidFileException(p_state.CreateLineMsg("Accepting only NFG D or R data type"));
+    p_state.OnParseError("Accepting only NFG D or R data type");
   }
   if (p_state.GetNextToken() != TOKEN_TEXT) {
-    throw InvalidFileException(p_state.CreateLineMsg("Game title missing"));
+    p_state.OnParseError("Game title missing");
   }
   p_data.m_title = p_state.GetLastText();
 
@@ -499,156 +387,80 @@ void ParseNfgHeader(GameParserState &p_state, TableFileGame &p_data)
   }
 }
 
-void ReadOutcomeList(GameParserState &p_parser, Game &p_nfg)
+void ReadOutcomeList(GameFileLexer &p_parser, Game &p_nfg)
 {
-  if (p_parser.GetNextToken() == TOKEN_RBRACE) {
-    // Special case: empty outcome list
-    p_parser.GetNextToken();
-    return;
-  }
-
-  if (p_parser.GetCurrentToken() != TOKEN_LBRACE) {
-    throw InvalidFileException(p_parser.CreateLineMsg("Expecting '{' before outcome"));
-  }
-
-  int nOutcomes = 0;
+  auto players = p_nfg->GetPlayers();
+  p_parser.GetNextToken();
 
   while (p_parser.GetCurrentToken() == TOKEN_LBRACE) {
-    nOutcomes++;
-    int pl = 1;
-
-    if (p_parser.GetNextToken() != TOKEN_TEXT) {
-      throw InvalidFileException(p_parser.CreateLineMsg("Expecting string for outcome"));
-    }
-
-    GameOutcome outcome;
-    try {
-      outcome = p_nfg->GetOutcome(nOutcomes);
-    }
-    catch (IndexException &) {
-      // It might happen that the file contains more outcomes than
-      // contingencies.  If so, just create them on the fly.
-      outcome = p_nfg->NewOutcome();
-    }
+    p_parser.ExpectNextToken(TOKEN_TEXT, "outcome name");
+    auto outcome = p_nfg->NewOutcome();
     outcome->SetLabel(p_parser.GetLastText());
     p_parser.GetNextToken();
 
-    try {
-      while (p_parser.GetCurrentToken() == TOKEN_NUMBER) {
-        outcome->SetPayoff(pl++, Number(p_parser.GetLastText()));
-        if (p_parser.GetNextToken() == TOKEN_COMMA) {
-          p_parser.GetNextToken();
-        }
-      }
+    for (auto player : players) {
+      p_parser.ExpectCurrentToken(TOKEN_NUMBER, "numerical payoff");
+      outcome->SetPayoff(player, Number(p_parser.GetLastText()));
+      p_parser.AcceptNextToken(TOKEN_COMMA);
     }
-    catch (IndexException &) {
-      // This would be triggered by too many payoffs
-      throw InvalidFileException(p_parser.CreateLineMsg("Exceeded number of players in outcome"));
-    }
-
-    if (pl <= p_nfg->NumPlayers() || p_parser.GetCurrentToken() != TOKEN_RBRACE) {
-      throw InvalidFileException(
-          p_parser.CreateLineMsg("Insufficient number of players in outcome"));
-    }
-
+    p_parser.ExpectCurrentToken(TOKEN_RBRACE, "'}'");
     p_parser.GetNextToken();
   }
 
-  if (p_parser.GetCurrentToken() != TOKEN_RBRACE) {
-    throw InvalidFileException(p_parser.CreateLineMsg("Expecting '}' after outcome"));
-  }
+  p_parser.ExpectCurrentToken(TOKEN_RBRACE, "'}'");
   p_parser.GetNextToken();
 }
 
-void ParseOutcomeBody(GameParserState &p_parser, Game &p_nfg)
+void ParseOutcomeBody(GameFileLexer &p_parser, Game &p_nfg)
 {
   ReadOutcomeList(p_parser, p_nfg);
-
   StrategySupportProfile profile(p_nfg);
-  StrategyProfileIterator iter(profile);
-
-  while (p_parser.GetCurrentToken() != TOKEN_EOF) {
-    if (p_parser.GetCurrentToken() != TOKEN_NUMBER) {
-      throw InvalidFileException(p_parser.CreateLineMsg("Expecting outcome index"));
-    }
-    else if (iter.AtEnd()) {
-      throw InvalidFileException(
-          p_parser.CreateLineMsg("More outcomes listed than entries in game table"));
-    }
-    int outcomeId = atoi(p_parser.GetLastText().c_str());
-    if (outcomeId > 0) {
+  for (StrategyProfileIterator iter(profile); !iter.AtEnd(); iter++) {
+    p_parser.ExpectCurrentToken(TOKEN_NUMBER, "outcome index");
+    if (int outcomeId = std::stoi(p_parser.GetLastText())) {
       (*iter)->SetOutcome(p_nfg->GetOutcome(outcomeId));
     }
-    else {
-      (*iter)->SetOutcome(nullptr);
-    }
     p_parser.GetNextToken();
-    iter++;
-  }
-  if (!iter.AtEnd()) {
-    throw InvalidFileException(
-        p_parser.CreateLineMsg("Not enough outcomes listed to fill game table"));
   }
 }
 
-void ParsePayoffBody(GameParserState &p_parser, Game &p_nfg)
+void ParsePayoffBody(GameFileLexer &p_parser, Game &p_nfg)
 {
   StrategySupportProfile profile(p_nfg);
-  StrategyProfileIterator iter(profile);
-  int pl = 1;
-
-  while (p_parser.GetCurrentToken() != TOKEN_EOF) {
-    if (p_parser.GetCurrentToken() != TOKEN_NUMBER) {
-      throw InvalidFileException(p_parser.CreateLineMsg("Expecting payoff"));
+  for (StrategyProfileIterator iter(profile); !iter.AtEnd(); iter++) {
+    for (auto player : p_nfg->GetPlayers()) {
+      p_parser.ExpectCurrentToken(TOKEN_NUMBER, "numerical payoff");
+      (*iter)->GetOutcome()->SetPayoff(player, Number(p_parser.GetLastText()));
+      p_parser.GetNextToken();
     }
-    else if (iter.AtEnd()) {
-      throw InvalidFileException(
-          p_parser.CreateLineMsg("More payoffs listed than entries in game table"));
-    }
-    else {
-      (*iter)->GetOutcome()->SetPayoff(pl, Number(p_parser.GetLastText()));
-    }
-
-    if (++pl > p_nfg->NumPlayers()) {
-      iter++;
-      pl = 1;
-    }
-    p_parser.GetNextToken();
-  }
-  if (!iter.AtEnd()) {
-    throw InvalidFileException(
-        p_parser.CreateLineMsg("Not enough payoffs listed to fill game table"));
   }
 }
 
-Game BuildNfg(GameParserState &p_parser, TableFileGame &p_data)
+Game BuildNfg(GameFileLexer &p_parser, TableFileGame &p_data)
 {
-  Array<int> dim(p_data.NumPlayers());
-  for (int pl = 1; pl <= dim.Length(); pl++) {
-    dim[pl] = p_data.NumStrategies(pl);
+  if (p_parser.GetCurrentToken() != TOKEN_LBRACE && p_parser.GetCurrentToken() != TOKEN_NUMBER) {
+    p_parser.OnParseError("Expecting outcome or payoff");
   }
 
-  Game nfg = NewTable(dim);
+  // If this looks lke an outcome-based format, then don't create outcomes in advance
+  Game nfg = NewTable(p_data.NumStrategies(), p_parser.GetCurrentToken() == TOKEN_LBRACE);
   nfg->SetTitle(p_data.m_title);
   nfg->SetComment(p_data.m_comment);
 
-  for (int pl = 1; pl <= dim.Length(); pl++) {
-    nfg->GetPlayer(pl)->SetLabel(p_data.GetPlayer(pl));
-    for (int st = 1; st <= dim[pl]; st++) {
-      nfg->GetPlayer(pl)->GetStrategy(st)->SetLabel(p_data.GetStrategy(pl, st));
+  for (auto player : nfg->GetPlayers()) {
+    player->SetLabel(p_data.GetPlayer(player->GetNumber()));
+    for (auto strategy : player->GetStrategies()) {
+      strategy->SetLabel(p_data.GetStrategy(player->GetNumber(), strategy->GetNumber()));
     }
   }
 
   if (p_parser.GetCurrentToken() == TOKEN_LBRACE) {
     ParseOutcomeBody(p_parser, nfg);
   }
-  else if (p_parser.GetCurrentToken() == TOKEN_NUMBER) {
+  else {
     ParsePayoffBody(p_parser, nfg);
   }
-  else {
-    throw InvalidFileException(p_parser.CreateLineMsg("Expecting outcome or payoff"));
-  }
-
+  p_parser.ExpectCurrentToken(TOKEN_EOF, "end-of-file");
   return nfg;
 }
 
@@ -659,169 +471,100 @@ Game BuildNfg(GameParserState &p_parser, TableFileGame &p_data)
 class TreeData {
 public:
   std::map<int, GameOutcome> m_outcomeMap;
-  std::map<int, GameInfoset> m_chanceInfosetMap;
-  List<std::map<int, GameInfoset>> m_infosetMap;
-
-  TreeData() = default;
-  ~TreeData() = default;
+  std::map<int, std::map<int, GameInfoset>> m_infosetMap;
 };
 
-void ReadPlayers(GameParserState &p_state, Game &p_game, TreeData &p_treeData)
+void ReadPlayers(GameFileLexer &p_state, Game &p_game, TreeData &p_treeData)
 {
-  if (p_state.GetNextToken() != TOKEN_LBRACE) {
-    throw InvalidFileException(p_state.CreateLineMsg("Expecting '{' before players"));
-  }
-
+  p_state.ExpectNextToken(TOKEN_LBRACE, "'{'");
   while (p_state.GetNextToken() == TOKEN_TEXT) {
     p_game->NewPlayer()->SetLabel(p_state.GetLastText());
-    p_treeData.m_infosetMap.push_back(std::map<int, GameInfoset>());
   }
-
-  if (p_state.GetCurrentToken() != TOKEN_RBRACE) {
-    throw InvalidFileException(p_state.CreateLineMsg("Expecting '}' after players"));
-  }
+  p_state.ExpectCurrentToken(TOKEN_RBRACE, "'}'");
 }
 
-//
-// Precondition: Parser state should be expecting the integer index
-//               of the outcome in a node entry
-//
-// Postcondition: Parser state is past the outcome entry and should be
-//                pointing to the 'c', 'p', or 't' token starting the
-//                next node declaration.
-//
-void ParseOutcome(GameParserState &p_state, Game &p_game, TreeData &p_treeData, GameNode &p_node)
+void ParseOutcome(GameFileLexer &p_state, Game &p_game, TreeData &p_treeData, GameNode &p_node)
 {
-  if (p_state.GetCurrentToken() != TOKEN_NUMBER) {
-    throw InvalidFileException(p_state.CreateLineMsg("Expecting index of outcome"));
-  }
-
-  int outcomeId = atoi(p_state.GetLastText().c_str());
+  p_state.ExpectCurrentToken(TOKEN_NUMBER, "index of outcome");
+  int outcomeId = std::stoi(p_state.GetLastText());
   p_state.GetNextToken();
 
   if (p_state.GetCurrentToken() == TOKEN_TEXT) {
     // This node entry contains information about the outcome
     GameOutcome outcome;
-    if (p_treeData.m_outcomeMap.count(outcomeId)) {
-      outcome = p_treeData.m_outcomeMap[outcomeId];
+    try {
+      outcome = p_treeData.m_outcomeMap.at(outcomeId);
     }
-    else {
+    catch (std::out_of_range &) {
       outcome = p_game->NewOutcome();
       p_treeData.m_outcomeMap[outcomeId] = outcome;
     }
-
     outcome->SetLabel(p_state.GetLastText());
     p_node->SetOutcome(outcome);
 
-    if (p_state.GetNextToken() != TOKEN_LBRACE) {
-      throw InvalidFileException(p_state.CreateLineMsg("Expecting '{' before outcome"));
-    }
+    p_state.ExpectNextToken(TOKEN_LBRACE, "'{'");
     p_state.GetNextToken();
-
-    for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
-      if (p_state.GetCurrentToken() == TOKEN_NUMBER) {
-        outcome->SetPayoff(pl, Number(p_state.GetLastText()));
-      }
-      else {
-        throw InvalidFileException(p_state.CreateLineMsg("Payoffs should be numbers"));
-      }
-
-      // Commas are optional between payoffs
-      if (p_state.GetNextToken() == TOKEN_COMMA) {
-        p_state.GetNextToken();
-      }
+    for (auto player : p_game->GetPlayers()) {
+      p_state.ExpectCurrentToken(TOKEN_NUMBER, "numerical payoff");
+      outcome->SetPayoff(player, Number(p_state.GetLastText()));
+      p_state.AcceptNextToken(TOKEN_COMMA);
     }
-
-    if (p_state.GetCurrentToken() != TOKEN_RBRACE) {
-      throw InvalidFileException(p_state.CreateLineMsg("Expecting '}' after outcome"));
-    }
+    p_state.ExpectCurrentToken(TOKEN_RBRACE, "'}'");
     p_state.GetNextToken();
   }
   else if (outcomeId != 0) {
     // The node entry does not contain information about the outcome.
-    // This means the outcome better have been defined already;
-    // if not, raise an error.
-    if (p_treeData.m_outcomeMap.count(outcomeId)) {
-      p_node->SetOutcome(p_treeData.m_outcomeMap[outcomeId]);
+    // This means the outcome should have been defined already.
+    try {
+      p_node->SetOutcome(p_treeData.m_outcomeMap.at(outcomeId));
     }
-    else {
-      throw InvalidFileException(p_state.CreateLineMsg("Outcome not defined"));
+    catch (std::out_of_range) {
+      p_state.OnParseError("Outcome not defined");
     }
   }
 }
 
-void ParseNode(GameParserState &p_state, Game p_game, GameNode p_node, TreeData &p_treeData);
+void ParseNode(GameFileLexer &p_state, Game p_game, GameNode p_node, TreeData &p_treeData);
 
-//
-// Precondition: parser state is expecting the node label
-//
-// Postcondition: parser state is pointing at the 'c', 'p', or 't'
-//                beginning the next node entry
-//
-void ParseChanceNode(GameParserState &p_state, Game &p_game, GameNode &p_node,
-                     TreeData &p_treeData)
+void ParseChanceNode(GameFileLexer &p_state, Game &p_game, GameNode &p_node, TreeData &p_treeData)
 {
-  if (p_state.GetNextToken() != TOKEN_TEXT) {
-    throw InvalidFileException(p_state.CreateLineMsg("Expecting label"));
-  }
+  p_state.ExpectNextToken(TOKEN_TEXT, "node label");
   p_node->SetLabel(p_state.GetLastText());
 
-  if (p_state.GetNextToken() != TOKEN_NUMBER) {
-    throw InvalidFileException(p_state.CreateLineMsg("Expecting infoset id"));
-  }
-
+  p_state.ExpectNextToken(TOKEN_NUMBER, "infoset id");
   int infosetId = atoi(p_state.GetLastText().c_str());
-  GameInfoset infoset;
-  if (p_treeData.m_chanceInfosetMap.count(infosetId)) {
-    infoset = p_treeData.m_chanceInfosetMap[infosetId];
-  }
+  GameInfoset infoset = p_treeData.m_infosetMap[0][infosetId];
 
-  p_state.GetNextToken();
-
-  if (p_state.GetCurrentToken() == TOKEN_TEXT) {
+  if (p_state.GetNextToken() == TOKEN_TEXT) {
     // Information set data is specified
-    List<std::string> actions, probs;
-    std::string label = p_state.GetLastText();
+    std::list<std::string> action_labels;
+    Array<Number> probs;
 
-    if (p_state.GetNextToken() != TOKEN_LBRACE) {
-      throw InvalidFileException(
-          p_state.CreateLineMsg("Expecting '{' before information set data"));
-    }
+    std::string label = p_state.GetLastText();
+    p_state.ExpectNextToken(TOKEN_LBRACE, "'{'");
     p_state.GetNextToken();
     do {
-      if (p_state.GetCurrentToken() != TOKEN_TEXT) {
-        throw InvalidFileException(p_state.CreateLineMsg("Expecting action"));
-      }
-      actions.push_back(p_state.GetLastText());
-
-      p_state.GetNextToken();
-
-      if (p_state.GetCurrentToken() == TOKEN_NUMBER) {
-        probs.push_back(p_state.GetLastText());
-      }
-      else {
-        throw InvalidFileException(p_state.CreateLineMsg("Expecting probability"));
-      }
-
+      p_state.ExpectCurrentToken(TOKEN_TEXT, "action label");
+      action_labels.push_back(p_state.GetLastText());
+      p_state.ExpectNextToken(TOKEN_NUMBER, "action probability");
+      probs.push_back(Number(p_state.GetLastText()));
       p_state.GetNextToken();
     } while (p_state.GetCurrentToken() != TOKEN_RBRACE);
     p_state.GetNextToken();
 
     if (!infoset) {
-      infoset = p_node->AppendMove(p_game->GetChance(), actions.Length());
-      p_treeData.m_chanceInfosetMap[infosetId] = infoset;
+      infoset = p_node->AppendMove(p_game->GetChance(), action_labels.size());
+      p_treeData.m_infosetMap[0][infosetId] = infoset;
       infoset->SetLabel(label);
-      for (int act = 1; act <= actions.Length(); act++) {
-        infoset->GetAction(act)->SetLabel(actions[act]);
+      auto action_label = action_labels.begin();
+      for (auto action : infoset->GetActions()) {
+        action->SetLabel(*action_label);
+        ++action_label;
       }
-      Array<Number> prob_numbers(probs.size());
-      for (int act = 1; act <= actions.Length(); act++) {
-        prob_numbers[act] = Number(probs[act]);
-      }
-      p_game->SetChanceProbs(infoset, prob_numbers);
+      p_game->SetChanceProbs(infoset, probs);
     }
     else {
-      // TODO: Verify actions match up to previous specifications
+      // TODO: Verify actions match up to any previous specifications
       p_node->AppendMove(infoset);
     }
   }
@@ -829,70 +572,50 @@ void ParseChanceNode(GameParserState &p_state, Game &p_game, GameNode &p_node,
     p_node->AppendMove(infoset);
   }
   else {
-    // Referencing an undefined infoset is an error
-    throw InvalidFileException(p_state.CreateLineMsg("Referencing an undefined infoset"));
+    p_state.OnParseError("Referencing an undefined infoset");
   }
 
   ParseOutcome(p_state, p_game, p_treeData, p_node);
-
-  for (int i = 1; i <= p_node->NumChildren(); i++) {
-    ParseNode(p_state, p_game, p_node->GetChild(i), p_treeData);
+  for (auto child : p_node->GetChildren()) {
+    ParseNode(p_state, p_game, child, p_treeData);
   }
 }
 
-void ParsePersonalNode(GameParserState &p_state, Game p_game, GameNode p_node,
-                       TreeData &p_treeData)
+void ParsePersonalNode(GameFileLexer &p_state, Game p_game, GameNode p_node, TreeData &p_treeData)
 {
-  if (p_state.GetNextToken() != TOKEN_TEXT) {
-    throw InvalidFileException(p_state.CreateLineMsg("Expecting label"));
-  }
+  p_state.ExpectNextToken(TOKEN_TEXT, "node label");
   p_node->SetLabel(p_state.GetLastText());
 
-  if (p_state.GetNextToken() != TOKEN_NUMBER) {
-    throw InvalidFileException(p_state.CreateLineMsg("Expecting player id"));
-  }
-  int playerId = atoi(p_state.GetLastText().c_str());
-  // This will throw an exception if the player ID is not valid
+  p_state.ExpectNextToken(TOKEN_NUMBER, "player id");
+  int playerId = std::stoi(p_state.GetLastText());
   GamePlayer player = p_game->GetPlayer(playerId);
-  std::map<int, GameInfoset> &infosetMap = p_treeData.m_infosetMap[playerId];
 
-  if (p_state.GetNextToken() != TOKEN_NUMBER) {
-    throw InvalidFileException(p_state.CreateLineMsg("Expecting infoset id"));
-  }
-  int infosetId = atoi(p_state.GetLastText().c_str());
-  GameInfoset infoset;
-  if (infosetMap.count(infosetId)) {
-    infoset = infosetMap[infosetId];
-  }
+  p_state.ExpectNextToken(TOKEN_NUMBER, "infoset id");
+  int infosetId = std::stoi(p_state.GetLastText());
+  GameInfoset infoset = p_treeData.m_infosetMap[playerId][infosetId];
 
-  p_state.GetNextToken();
-
-  if (p_state.GetCurrentToken() == TOKEN_TEXT) {
+  if (p_state.GetNextToken() == TOKEN_TEXT) {
     // Information set data is specified
-    List<std::string> actions;
+    std::list<std::string> action_labels;
     std::string label = p_state.GetLastText();
 
-    if (p_state.GetNextToken() != TOKEN_LBRACE) {
-      throw InvalidFileException(
-          p_state.CreateLineMsg("Expecting '{' before information set data"));
-    }
+    p_state.ExpectNextToken(TOKEN_LBRACE, "'{'");
     p_state.GetNextToken();
     do {
-      if (p_state.GetCurrentToken() != TOKEN_TEXT) {
-        throw InvalidFileException(p_state.CreateLineMsg("Expecting action"));
-      }
-      actions.push_back(p_state.GetLastText());
-
+      p_state.ExpectCurrentToken(TOKEN_TEXT, "action label");
+      action_labels.push_back(p_state.GetLastText());
       p_state.GetNextToken();
     } while (p_state.GetCurrentToken() != TOKEN_RBRACE);
     p_state.GetNextToken();
 
     if (!infoset) {
-      infoset = p_node->AppendMove(player, actions.Length());
-      infosetMap[infosetId] = infoset;
+      infoset = p_node->AppendMove(player, action_labels.size());
+      p_treeData.m_infosetMap[playerId][infosetId] = infoset;
       infoset->SetLabel(label);
-      for (int act = 1; act <= actions.Length(); act++) {
-        infoset->GetAction(act)->SetLabel(actions[act]);
+      auto action_label = action_labels.begin();
+      for (auto action : infoset->GetActions()) {
+        action->SetLabel(*action_label);
+        ++action_label;
       }
     }
     else {
@@ -904,31 +627,24 @@ void ParsePersonalNode(GameParserState &p_state, Game p_game, GameNode p_node,
     p_node->AppendMove(infoset);
   }
   else {
-    // Referencing an undefined infoset is an error
-    throw InvalidFileException(p_state.CreateLineMsg("Referencing an undefined infoset"));
+    p_state.OnParseError("Referencing an undefined infoset");
   }
 
   ParseOutcome(p_state, p_game, p_treeData, p_node);
-
-  for (int i = 1; i <= p_node->NumChildren(); i++) {
-    ParseNode(p_state, p_game, p_node->GetChild(i), p_treeData);
+  for (auto child : p_node->GetChildren()) {
+    ParseNode(p_state, p_game, child, p_treeData);
   }
 }
 
-void ParseTerminalNode(GameParserState &p_state, Game p_game, GameNode p_node,
-                       TreeData &p_treeData)
+void ParseTerminalNode(GameFileLexer &p_state, Game p_game, GameNode p_node, TreeData &p_treeData)
 {
-  if (p_state.GetNextToken() != TOKEN_TEXT) {
-    throw InvalidFileException(p_state.CreateLineMsg("Expecting label"));
-  }
-
+  p_state.ExpectNextToken(TOKEN_TEXT, "node label");
   p_node->SetLabel(p_state.GetLastText());
-
   p_state.GetNextToken();
   ParseOutcome(p_state, p_game, p_treeData, p_node);
 }
 
-void ParseNode(GameParserState &p_state, Game p_game, GameNode p_node, TreeData &p_treeData)
+void ParseNode(GameFileLexer &p_state, Game p_game, GameNode p_node, TreeData &p_treeData)
 {
   if (p_state.GetLastText() == "c") {
     ParseChanceNode(p_state, p_game, p_node, p_treeData);
@@ -940,34 +656,8 @@ void ParseNode(GameParserState &p_state, Game p_game, GameNode p_node, TreeData 
     ParseTerminalNode(p_state, p_game, p_node, p_treeData);
   }
   else {
-    throw InvalidFileException(p_state.CreateLineMsg("Invalid type of node"));
+    p_state.OnParseError("Invalid type of node");
   }
-}
-
-void ParseEfg(GameParserState &p_state, Game p_game, TreeData &p_treeData)
-{
-  if (p_state.GetNextToken() != TOKEN_NUMBER || p_state.GetLastText() != "2") {
-    throw InvalidFileException(p_state.CreateLineMsg("Accepting only EFG version 2"));
-  }
-
-  if (p_state.GetNextToken() != TOKEN_SYMBOL ||
-      (p_state.GetLastText() != "D" && p_state.GetLastText() != "R")) {
-    throw InvalidFileException(p_state.CreateLineMsg("Accepting only EFG R or D data type"));
-  }
-  if (p_state.GetNextToken() != TOKEN_TEXT) {
-    throw InvalidFileException(p_state.CreateLineMsg("Game title missing"));
-  }
-  p_game->SetTitle(p_state.GetLastText());
-
-  ReadPlayers(p_state, p_game, p_treeData);
-
-  if (p_state.GetNextToken() == TOKEN_TEXT) {
-    // Read optional comment
-    p_game->SetComment(p_state.GetLastText());
-    p_state.GetNextToken();
-  }
-
-  ParseNode(p_state, p_game, p_game->GetRoot(), p_treeData);
 }
 
 } // end of anonymous namespace
@@ -1022,9 +712,53 @@ Game GameXMLSavefile::GetGame() const
   throw InvalidFileException("No game representation found in document");
 }
 
-//=========================================================================
-//    ReadGame: Global visible function to read an .efg or .nfg file
-//=========================================================================
+Game ReadEfgFile(std::istream &p_stream)
+{
+  GameFileLexer parser(p_stream);
+
+  if (parser.GetNextToken() != TOKEN_SYMBOL || parser.GetLastText() != "EFG") {
+    parser.OnParseError("Expecting EFG file type indicator");
+  }
+  if (parser.GetNextToken() != TOKEN_NUMBER || parser.GetLastText() != "2") {
+    parser.OnParseError("Accepting only EFG version 2");
+  }
+  if (parser.GetNextToken() != TOKEN_SYMBOL ||
+      (parser.GetLastText() != "D" && parser.GetLastText() != "R")) {
+    parser.OnParseError("Accepting only EFG R or D data type");
+  }
+  if (parser.GetNextToken() != TOKEN_TEXT) {
+    parser.OnParseError("Game title missing");
+  }
+
+  TreeData treeData;
+  Game game = NewTree();
+  dynamic_cast<GameTreeRep &>(*game).SetCanonicalization(false);
+  game->SetTitle(parser.GetLastText());
+  ReadPlayers(parser, game, treeData);
+  if (parser.GetNextToken() == TOKEN_TEXT) {
+    // Read optional comment
+    game->SetComment(parser.GetLastText());
+    parser.GetNextToken();
+  }
+  ParseNode(parser, game, game->GetRoot(), treeData);
+  dynamic_cast<GameTreeRep &>(*game).SetCanonicalization(true);
+  return game;
+}
+
+Game ReadNfgFile(std::istream &p_stream)
+{
+  GameFileLexer parser(p_stream);
+  TableFileGame data;
+  ParseNfgHeader(parser, data);
+  return BuildNfg(parser, data);
+}
+
+Game ReadGbtFile(std::istream &p_stream)
+{
+  std::stringstream buffer;
+  buffer << p_stream.rdbuf();
+  return GameXMLSavefile(buffer.str()).GetGame();
+}
 
 Game ReadGame(std::istream &p_file)
 {
@@ -1034,41 +768,32 @@ Game ReadGame(std::istream &p_file)
     throw InvalidFileException("Empty file or string provided");
   }
   try {
-    GameXMLSavefile doc(buffer.str());
-    return doc.GetGame();
+    return ReadGbtFile(buffer);
   }
   catch (InvalidFileException &) {
     buffer.seekg(0, std::ios::beg);
   }
 
-  GameParserState parser(buffer);
+  GameFileLexer parser(buffer);
   try {
     if (parser.GetNextToken() != TOKEN_SYMBOL) {
-      throw InvalidFileException(parser.CreateLineMsg("Expecting file type"));
+      parser.OnParseError("Expecting file type");
     }
-
+    buffer.seekg(0, std::ios::beg);
     if (parser.GetLastText() == "NFG") {
-      TableFileGame data;
-      ParseNfgHeader(parser, data);
-      return BuildNfg(parser, data);
+      return ReadNfgFile(buffer);
     }
     else if (parser.GetLastText() == "EFG") {
-      TreeData treeData;
-      Game game = NewTree();
-      dynamic_cast<GameTreeRep &>(*game).SetCanonicalization(false);
-      ParseEfg(parser, game, treeData);
-      dynamic_cast<GameTreeRep &>(*game).SetCanonicalization(true);
-      return game;
+      return ReadEfgFile(buffer);
     }
     else if (parser.GetLastText() == "#AGG") {
-      return GameAGGRep::ReadAggFile(buffer);
+      return ReadAggFile(buffer);
     }
     else if (parser.GetLastText() == "#BAGG") {
-      return GameBAGGRep::ReadBaggFile(buffer);
+      return ReadBaggFile(buffer);
     }
     else {
-      throw InvalidFileException(
-          "Tokens 'EFG' or 'NFG' or '#AGG' or '#BAGG' expected at start of file");
+      throw InvalidFileException("Unrecognized file format");
     }
   }
   catch (std::exception &ex) {

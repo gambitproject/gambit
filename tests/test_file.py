@@ -70,7 +70,7 @@ class TestGambitEfgFile(unittest.TestCase):
             pygambit.Game.parse_game(ft)
         self.assertEqual(
             str(e.exception),
-            "Parse error in game file: line 5:26: Expecting '}' after outcome"
+            "Parse error in game file: line 5:26: Expected '}'"
         )
 
     def test_parse_string_extra_payoff(self):
@@ -79,7 +79,7 @@ class TestGambitEfgFile(unittest.TestCase):
             pygambit.Game.parse_game(ft)
         self.assertEqual(
             str(e.exception),
-            "Parse error in game file: line 5:29: Expecting '}' after outcome"
+            "Parse error in game file: line 5:29: Expected '}'"
         )
 
     def test_write_game_gte_sanity(self):
@@ -112,8 +112,7 @@ class TestGambitNfgFile(unittest.TestCase):
             pygambit.Game.parse_game(ft)
         self.assertEqual(
             str(e.exception),
-            "Parse error in game file: line 1:73: "
-            "Not enough players for number of strategy entries"
+            "Parse error in game file: line 1:73: Expected '}'"
         )
 
 
@@ -122,7 +121,7 @@ def test_nfg_payoffs_not_enough():
 NFG 1 R "Selten (IJGT, 75), Figure 2, normal form" { "Player 1" "Player 2" } { 3 2 }
 1 1 0 2 0 2 1 1 0 3
 """
-    with pytest.raises(ValueError, match="Not enough payoffs"):
+    with pytest.raises(ValueError, match="Expected numerical payoff"):
         pygambit.Game.parse_game(data)
 
 
@@ -131,7 +130,7 @@ def test_nfg_payoffs_too_many():
 NFG 1 R "Selten (IJGT, 75), Figure 2, normal form" { "Player 1" "Player 2" } { 3 2 }
 1 1 0 2 0 2 1 1 0 3 2 0 5 1
 """
-    with pytest.raises(ValueError, match="More payoffs listed"):
+    with pytest.raises(ValueError, match="end-of-file"):
         pygambit.Game.parse_game(data)
 
 
@@ -152,7 +151,7 @@ NFG 1 R "Two person 2 x 2 game with unique mixed equilibrium" { "Player 1" "Play
 }
 1 2 3
 """
-    with pytest.raises(ValueError, match="Not enough outcomes"):
+    with pytest.raises(ValueError, match="Expected outcome index"):
         pygambit.Game.parse_game(data)
 
 
@@ -173,5 +172,5 @@ NFG 1 R "Two person 2 x 2 game with unique mixed equilibrium" { "Player 1" "Play
 }
 1 2 3 4 2
 """
-    with pytest.raises(ValueError, match="More outcomes listed"):
+    with pytest.raises(ValueError, match="end-of-file"):
         pygambit.Game.parse_game(data)
