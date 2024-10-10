@@ -419,15 +419,15 @@ void ReadOutcomeList(GameParserState &p_parser, Game &p_nfg)
   }
 
   int nOutcomes = 0;
+  auto players = p_nfg->GetPlayers();
 
   while (p_parser.GetCurrentToken() == TOKEN_LBRACE) {
     nOutcomes++;
-    int pl = 1;
+    auto player = players.begin();
 
     if (p_parser.GetNextToken() != TOKEN_TEXT) {
       throw InvalidFileException(p_parser.CreateLineMsg("Expecting string for outcome"));
     }
-
     GameOutcome outcome;
     try {
       outcome = p_nfg->GetOutcome(nOutcomes);
@@ -440,24 +440,21 @@ void ReadOutcomeList(GameParserState &p_parser, Game &p_nfg)
     outcome->SetLabel(p_parser.GetLastText());
     p_parser.GetNextToken();
 
-    try {
-      while (p_parser.GetCurrentToken() == TOKEN_NUMBER) {
-        outcome->SetPayoff(pl++, Number(p_parser.GetLastText()));
-        if (p_parser.GetNextToken() == TOKEN_COMMA) {
-          p_parser.GetNextToken();
-        }
+    while (p_parser.GetCurrentToken() == TOKEN_NUMBER) {
+      if (player == players.end()) {
+        throw InvalidFileException(
+            p_parser.CreateLineMsg("Exceeded number of players in outcome"));
+      }
+      outcome->SetPayoff(*player, Number(p_parser.GetLastText()));
+      ++player;
+      if (p_parser.GetNextToken() == TOKEN_COMMA) {
+        p_parser.GetNextToken();
       }
     }
-    catch (IndexException &) {
-      // This would be triggered by too many payoffs
-      throw InvalidFileException(p_parser.CreateLineMsg("Exceeded number of players in outcome"));
-    }
-
-    if (pl <= p_nfg->NumPlayers() || p_parser.GetCurrentToken() != TOKEN_RBRACE) {
+    if (player != players.end()) {
       throw InvalidFileException(
-          p_parser.CreateLineMsg("Insufficient number of players in outcome"));
+          p_parser.CreateLineMsg("Insufficient number of player payoffs in outcome"));
     }
-
     p_parser.GetNextToken();
   }
 
