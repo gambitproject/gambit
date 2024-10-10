@@ -121,7 +121,7 @@ def test_nfg_payoffs_not_enough():
 NFG 1 R "Selten (IJGT, 75), Figure 2, normal form" { "Player 1" "Player 2" } { 3 2 }
 1 1 0 2 0 2 1 1 0 3
 """
-    with pytest.raises(ValueError, match="Not enough payoffs"):
+    with pytest.raises(ValueError, match="Expected numerical payoff"):
         pygambit.Game.parse_game(data)
 
 
@@ -130,7 +130,7 @@ def test_nfg_payoffs_too_many():
 NFG 1 R "Selten (IJGT, 75), Figure 2, normal form" { "Player 1" "Player 2" } { 3 2 }
 1 1 0 2 0 2 1 1 0 3 2 0 5 1
 """
-    with pytest.raises(ValueError, match="More payoffs listed"):
+    with pytest.raises(ValueError, match="end-of-file"):
         pygambit.Game.parse_game(data)
 
 

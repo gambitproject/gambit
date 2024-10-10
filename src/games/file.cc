@@ -422,27 +422,12 @@ void ParseOutcomeBody(GameParserState &p_parser, Game &p_nfg)
 
 void ParsePayoffBody(GameParserState &p_parser, Game &p_nfg)
 {
-  StrategySupportProfile profile(p_nfg);
-  StrategyProfileIterator iter(profile);
-  int pl = 1;
-
-  while (p_parser.GetCurrentToken() != TOKEN_EOF) {
-    p_parser.ExpectCurrentToken(TOKEN_NUMBER, "numerical payoff");
-    if (iter.AtEnd()) {
-      p_parser.OnParseError("More payoffs listed than entries in game table");
+  for (StrategyProfileIterator iter({p_nfg}); !iter.AtEnd(); iter++) {
+    for (auto player : p_nfg->GetPlayers()) {
+      p_parser.ExpectCurrentToken(TOKEN_NUMBER, "numerical payoff");
+      (*iter)->GetOutcome()->SetPayoff(player, Number(p_parser.GetLastText()));
+      p_parser.GetNextToken();
     }
-    else {
-      (*iter)->GetOutcome()->SetPayoff(pl, Number(p_parser.GetLastText()));
-    }
-
-    if (++pl > p_nfg->NumPlayers()) {
-      iter++;
-      pl = 1;
-    }
-    p_parser.GetNextToken();
-  }
-  if (!iter.AtEnd()) {
-    p_parser.OnParseError("Not enough payoffs listed to fill game table");
   }
 }
 
