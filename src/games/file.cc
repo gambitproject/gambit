@@ -1041,9 +1041,12 @@ Game ReadNfgFile(std::istream &p_stream)
   return BuildNfg(parser, data);
 }
 
-//=========================================================================
-//    ReadGame: Global visible function to read an .efg or .nfg file
-//=========================================================================
+Game ReadGbtFile(std::istream &p_stream)
+{
+  std::stringstream buffer;
+  buffer << p_stream.rdbuf();
+  return GameXMLSavefile(buffer.str()).GetGame();
+}
 
 Game ReadGame(std::istream &p_file)
 {
@@ -1053,8 +1056,7 @@ Game ReadGame(std::istream &p_file)
     throw InvalidFileException("Empty file or string provided");
   }
   try {
-    GameXMLSavefile doc(buffer.str());
-    return doc.GetGame();
+    return ReadGbtFile(buffer);
   }
   catch (InvalidFileException &) {
     buffer.seekg(0, std::ios::beg);
