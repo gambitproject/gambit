@@ -476,6 +476,10 @@ void ReadStrategies(GameParserState &p_state, TableFileGame &p_data)
 
 void ParseNfgHeader(GameParserState &p_state, TableFileGame &p_data)
 {
+  if (p_state.GetNextToken() != TOKEN_SYMBOL || p_state.GetLastText() != "NFG") {
+    throw InvalidFileException(p_state.CreateLineMsg("Expecting NFG file type indicator"));
+  }
+
   if (p_state.GetNextToken() != TOKEN_NUMBER || p_state.GetLastText() != "1") {
     throw InvalidFileException(p_state.CreateLineMsg("Accepting only NFG version 1"));
   }
@@ -1029,6 +1033,14 @@ Game ReadEfgFile(std::istream &p_stream)
   return game;
 }
 
+Game ReadNfgFile(std::istream &p_stream)
+{
+  GameParserState parser(p_stream);
+  TableFileGame data;
+  ParseNfgHeader(parser, data);
+  return BuildNfg(parser, data);
+}
+
 //=========================================================================
 //    ReadGame: Global visible function to read an .efg or .nfg file
 //=========================================================================
@@ -1055,9 +1067,8 @@ Game ReadGame(std::istream &p_file)
     }
 
     if (parser.GetLastText() == "NFG") {
-      TableFileGame data;
-      ParseNfgHeader(parser, data);
-      return BuildNfg(parser, data);
+      buffer.seekg(0, std::ios::beg);
+      return ReadNfgFile(buffer);
     }
     else if (parser.GetLastText() == "EFG") {
       buffer.seekg(0, std::ios::beg);
