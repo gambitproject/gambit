@@ -70,7 +70,7 @@ class TestGambitEfgFile(unittest.TestCase):
             pygambit.Game.parse_game(ft)
         self.assertEqual(
             str(e.exception),
-            "Parse error in game file: line 5:26: Expecting '}' after outcome"
+            "Parse error in game file: line 5:26: Expected '}'"
         )
 
     def test_parse_string_extra_payoff(self):
@@ -79,7 +79,7 @@ class TestGambitEfgFile(unittest.TestCase):
             pygambit.Game.parse_game(ft)
         self.assertEqual(
             str(e.exception),
-            "Parse error in game file: line 5:29: Expecting '}' after outcome"
+            "Parse error in game file: line 5:29: Expected '}'"
         )
 
     def test_write_game_gte_sanity(self):

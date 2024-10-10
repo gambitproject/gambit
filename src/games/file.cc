@@ -72,6 +72,25 @@ public:
   /// Throw an InvalidFileException with the specified message
   void OnParseError(const std::string &p_message) const;
   const std::string &GetLastText() const { return m_lastText; }
+
+  void ExpectCurrentToken(GameFileToken p_tokenType, const std::string &p_message)
+  {
+    if (GetCurrentToken() != p_tokenType) {
+      OnParseError("Expected " + p_message);
+    }
+  }
+  void ExpectNextToken(GameFileToken p_tokenType, const std::string &p_message)
+  {
+    if (GetNextToken() != p_tokenType) {
+      OnParseError("Expected " + p_message);
+    }
+  }
+  void AcceptNextToken(GameFileToken p_tokenType)
+  {
+    if (GetNextToken() == p_tokenType) {
+      GetNextToken();
+    }
+  }
 };
 
 void GameParserState::OnParseError(const std::string &p_message) const
@@ -304,23 +323,17 @@ public:
 
 void ReadPlayers(GameParserState &p_state, TableFileGame &p_data)
 {
-  if (p_state.GetNextToken() != TOKEN_LBRACE) {
-    p_state.OnParseError("Expecting '{' before players");
-  }
+  p_state.ExpectNextToken(TOKEN_LBRACE, "'{'");
   while (p_state.GetNextToken() == TOKEN_TEXT) {
     p_data.AddPlayer(p_state.GetLastText());
   }
-  if (p_state.GetCurrentToken() != TOKEN_RBRACE) {
-    p_state.OnParseError("Expecting '}' after players");
-  }
+  p_state.ExpectCurrentToken(TOKEN_RBRACE, "'}'");
   p_state.GetNextToken();
 }
 
 void ReadStrategies(GameParserState &p_state, TableFileGame &p_data)
 {
-  if (p_state.GetCurrentToken() != TOKEN_LBRACE) {
-    p_state.OnParseError("Expecting '{' before strategies");
-  }
+  p_state.ExpectCurrentToken(TOKEN_LBRACE, "'{'");
   p_state.GetNextToken();
 
   if (p_state.GetCurrentToken() == TOKEN_LBRACE) {
@@ -333,15 +346,11 @@ void ReadStrategies(GameParserState &p_state, TableFileGame &p_data)
       while (p_state.GetNextToken() == TOKEN_TEXT) {
         player->m_strategies.push_back(p_state.GetLastText());
       }
-      if (p_state.GetCurrentToken() != TOKEN_RBRACE) {
-        p_state.OnParseError("Expecting '}' after player strategy");
-      }
+      p_state.ExpectCurrentToken(TOKEN_RBRACE, "'}'");
       p_state.GetNextToken();
       player++;
     }
-    if (p_state.GetCurrentToken() != TOKEN_RBRACE) {
-      p_state.OnParseError("Expecting '}' after strategies");
-    }
+    p_state.ExpectCurrentToken(TOKEN_RBRACE, "'}'");
     if (player != p_data.m_players.end()) {
       p_state.OnParseError("Players with undefined strategies");
     }
@@ -359,13 +368,10 @@ void ReadStrategies(GameParserState &p_state, TableFileGame &p_data)
       p_state.GetNextToken();
       player++;
     }
-    if (p_state.GetCurrentToken() != TOKEN_RBRACE) {
-      p_state.OnParseError("Expecting '}' after strategies");
-    }
+    p_state.ExpectCurrentToken(TOKEN_RBRACE, "'}'");
     if (player != p_data.m_players.end()) {
       p_state.OnParseError("Players with strategies undefined");
     }
-
     p_state.GetNextToken();
   }
   else {
@@ -406,31 +412,21 @@ void ReadOutcomeList(GameParserState &p_parser, Game &p_nfg)
   p_parser.GetNextToken();
 
   while (p_parser.GetCurrentToken() == TOKEN_LBRACE) {
-    if (p_parser.GetNextToken() != TOKEN_TEXT) {
-      p_parser.OnParseError("Expecting outcome name");
-    }
+    p_parser.ExpectNextToken(TOKEN_TEXT, "outcome name");
     auto outcome = p_nfg->NewOutcome();
     outcome->SetLabel(p_parser.GetLastText());
     p_parser.GetNextToken();
 
     for (auto player : players) {
-      if (p_parser.GetCurrentToken() != TOKEN_NUMBER) {
-        p_parser.OnParseError("Expected numerical payoff for player");
-      }
+      p_parser.ExpectCurrentToken(TOKEN_NUMBER, "numerical payoff");
       outcome->SetPayoff(player, Number(p_parser.GetLastText()));
-      if (p_parser.GetNextToken() == TOKEN_COMMA) {
-        p_parser.GetNextToken();
-      }
+      p_parser.AcceptNextToken(TOKEN_COMMA);
     }
-    if (p_parser.GetCurrentToken() != TOKEN_RBRACE) {
-      p_parser.OnParseError("More payoffs specified for outcome than players in game");
-    }
+    p_parser.ExpectCurrentToken(TOKEN_RBRACE, "'}'");
     p_parser.GetNextToken();
   }
 
-  if (p_parser.GetCurrentToken() != TOKEN_RBRACE) {
-    p_parser.OnParseError("Expecting '}' after outcomes");
-  }
+  p_parser.ExpectCurrentToken(TOKEN_RBRACE, "'}'");
   p_parser.GetNextToken();
 }
 
@@ -442,10 +438,8 @@ void ParseOutcomeBody(GameParserState &p_parser, Game &p_nfg)
   StrategyProfileIterator iter(profile);
 
   while (p_parser.GetCurrentToken() != TOKEN_EOF) {
-    if (p_parser.GetCurrentToken() != TOKEN_NUMBER) {
-      p_parser.OnParseError("Expecting outcome index");
-    }
-    else if (iter.AtEnd()) {
+    p_parser.ExpectCurrentToken(TOKEN_NUMBER, "outcome index");
+    if (iter.AtEnd()) {
       p_parser.OnParseError("More outcomes listed than entries in game table");
     }
     int outcomeId = atoi(p_parser.GetLastText().c_str());
@@ -470,10 +464,8 @@ void ParsePayoffBody(GameParserState &p_parser, Game &p_nfg)
   int pl = 1;
 
   while (p_parser.GetCurrentToken() != TOKEN_EOF) {
-    if (p_parser.GetCurrentToken() != TOKEN_NUMBER) {
-      p_parser.OnParseError("Expecting payoff");
-    }
-    else if (iter.AtEnd()) {
+    p_parser.ExpectCurrentToken(TOKEN_NUMBER, "numerical payoff");
+    if (iter.AtEnd()) {
       p_parser.OnParseError("More payoffs listed than entries in game table");
     }
     else {
@@ -539,18 +531,12 @@ public:
 
 void ReadPlayers(GameParserState &p_state, Game &p_game, TreeData &p_treeData)
 {
-  if (p_state.GetNextToken() != TOKEN_LBRACE) {
-    p_state.OnParseError("Expecting '{' before players");
-  }
-
+  p_state.ExpectNextToken(TOKEN_LBRACE, "'{'");
   while (p_state.GetNextToken() == TOKEN_TEXT) {
     p_game->NewPlayer()->SetLabel(p_state.GetLastText());
     p_treeData.m_infosetMap.push_back(std::map<int, GameInfoset>());
   }
-
-  if (p_state.GetCurrentToken() != TOKEN_RBRACE) {
-    p_state.OnParseError("Expecting '}' after players");
-  }
+  p_state.ExpectCurrentToken(TOKEN_RBRACE, "'}'");
 }
 
 //
@@ -563,9 +549,7 @@ void ReadPlayers(GameParserState &p_state, Game &p_game, TreeData &p_treeData)
 //
 void ParseOutcome(GameParserState &p_state, Game &p_game, TreeData &p_treeData, GameNode &p_node)
 {
-  if (p_state.GetCurrentToken() != TOKEN_NUMBER) {
-    p_state.OnParseError("Expecting index of outcome");
-  }
+  p_state.ExpectCurrentToken(TOKEN_NUMBER, "index of outcome");
 
   int outcomeId = atoi(p_state.GetLastText().c_str());
   p_state.GetNextToken();
@@ -584,11 +568,9 @@ void ParseOutcome(GameParserState &p_state, Game &p_game, TreeData &p_treeData, 
     outcome->SetLabel(p_state.GetLastText());
     p_node->SetOutcome(outcome);
 
-    if (p_state.GetNextToken() != TOKEN_LBRACE) {
-      p_state.OnParseError("Expecting '{' before outcome");
-    }
-    p_state.GetNextToken();
+    p_state.ExpectNextToken(TOKEN_LBRACE, "'{'");
 
+    p_state.GetNextToken();
     for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
       if (p_state.GetCurrentToken() == TOKEN_NUMBER) {
         outcome->SetPayoff(pl, Number(p_state.GetLastText()));
@@ -596,16 +578,10 @@ void ParseOutcome(GameParserState &p_state, Game &p_game, TreeData &p_treeData, 
       else {
         p_state.OnParseError("Payoffs should be numbers");
       }
-
-      // Commas are optional between payoffs
-      if (p_state.GetNextToken() == TOKEN_COMMA) {
-        p_state.GetNextToken();
-      }
+      p_state.AcceptNextToken(TOKEN_COMMA);
     }
 
-    if (p_state.GetCurrentToken() != TOKEN_RBRACE) {
-      p_state.OnParseError("Expecting '}' after outcome");
-    }
+    p_state.ExpectCurrentToken(TOKEN_RBRACE, "'}'");
     p_state.GetNextToken();
   }
   else if (outcomeId != 0) {
@@ -632,15 +608,10 @@ void ParseNode(GameParserState &p_state, Game p_game, GameNode p_node, TreeData 
 void ParseChanceNode(GameParserState &p_state, Game &p_game, GameNode &p_node,
                      TreeData &p_treeData)
 {
-  if (p_state.GetNextToken() != TOKEN_TEXT) {
-    p_state.OnParseError("Expecting label");
-  }
+  p_state.ExpectNextToken(TOKEN_TEXT, "node label");
   p_node->SetLabel(p_state.GetLastText());
 
-  if (p_state.GetNextToken() != TOKEN_NUMBER) {
-    p_state.OnParseError("Expecting infoset id");
-  }
-
+  p_state.ExpectNextToken(TOKEN_NUMBER, "infoset id");
   int infosetId = atoi(p_state.GetLastText().c_str());
   GameInfoset infoset;
   if (p_treeData.m_chanceInfosetMap.count(infosetId)) {
@@ -659,20 +630,10 @@ void ParseChanceNode(GameParserState &p_state, Game &p_game, GameNode &p_node,
     }
     p_state.GetNextToken();
     do {
-      if (p_state.GetCurrentToken() != TOKEN_TEXT) {
-        p_state.OnParseError("Expecting action");
-      }
+      p_state.ExpectCurrentToken(TOKEN_TEXT, "action label");
       actions.push_back(p_state.GetLastText());
-
-      p_state.GetNextToken();
-
-      if (p_state.GetCurrentToken() == TOKEN_NUMBER) {
-        probs.push_back(p_state.GetLastText());
-      }
-      else {
-        p_state.OnParseError("Expecting probability");
-      }
-
+      p_state.ExpectNextToken(TOKEN_NUMBER, "action probability");
+      probs.push_back(p_state.GetLastText());
       p_state.GetNextToken();
     } while (p_state.GetCurrentToken() != TOKEN_RBRACE);
     p_state.GetNextToken();
@@ -713,22 +674,16 @@ void ParseChanceNode(GameParserState &p_state, Game &p_game, GameNode &p_node,
 void ParsePersonalNode(GameParserState &p_state, Game p_game, GameNode p_node,
                        TreeData &p_treeData)
 {
-  if (p_state.GetNextToken() != TOKEN_TEXT) {
-    p_state.OnParseError("Expecting label");
-  }
+  p_state.ExpectNextToken(TOKEN_TEXT, "node label");
   p_node->SetLabel(p_state.GetLastText());
 
-  if (p_state.GetNextToken() != TOKEN_NUMBER) {
-    p_state.OnParseError("Expecting player id");
-  }
+  p_state.ExpectNextToken(TOKEN_NUMBER, "player id");
   int playerId = atoi(p_state.GetLastText().c_str());
   // This will throw an exception if the player ID is not valid
   GamePlayer player = p_game->GetPlayer(playerId);
   std::map<int, GameInfoset> &infosetMap = p_treeData.m_infosetMap[playerId];
 
-  if (p_state.GetNextToken() != TOKEN_NUMBER) {
-    p_state.OnParseError("Expecting infoset id");
-  }
+  p_state.ExpectNextToken(TOKEN_NUMBER, "infoset id");
   int infosetId = atoi(p_state.GetLastText().c_str());
   GameInfoset infoset;
   if (infosetMap.count(infosetId)) {
@@ -736,22 +691,16 @@ void ParsePersonalNode(GameParserState &p_state, Game p_game, GameNode p_node,
   }
 
   p_state.GetNextToken();
-
   if (p_state.GetCurrentToken() == TOKEN_TEXT) {
     // Information set data is specified
     List<std::string> actions;
     std::string label = p_state.GetLastText();
 
-    if (p_state.GetNextToken() != TOKEN_LBRACE) {
-      p_state.OnParseError("Expecting '{' before information set data");
-    }
+    p_state.ExpectNextToken(TOKEN_LBRACE, "'{'");
     p_state.GetNextToken();
     do {
-      if (p_state.GetCurrentToken() != TOKEN_TEXT) {
-        p_state.OnParseError("Expecting action");
-      }
+      p_state.ExpectCurrentToken(TOKEN_TEXT, "action label");
       actions.push_back(p_state.GetLastText());
-
       p_state.GetNextToken();
     } while (p_state.GetCurrentToken() != TOKEN_RBRACE);
     p_state.GetNextToken();
@@ -787,11 +736,8 @@ void ParsePersonalNode(GameParserState &p_state, Game p_game, GameNode p_node,
 void ParseTerminalNode(GameParserState &p_state, Game p_game, GameNode p_node,
                        TreeData &p_treeData)
 {
-  if (p_state.GetNextToken() != TOKEN_TEXT) {
-    p_state.OnParseError("Expecting label");
-  }
+  p_state.ExpectNextToken(TOKEN_TEXT, "node label");
   p_node->SetLabel(p_state.GetLastText());
-
   p_state.GetNextToken();
   ParseOutcome(p_state, p_game, p_treeData, p_node);
 }
