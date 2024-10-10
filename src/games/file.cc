@@ -321,7 +321,7 @@ void ReadPlayers(GameParserState &p_state, TableFileGame &p_data)
 {
   p_state.ExpectNextToken(TOKEN_LBRACE, "'{'");
   while (p_state.GetNextToken() == TOKEN_TEXT) {
-    p_data.m_players.push_back({p_state.GetLastText()});
+    p_data.m_players.push_back(p_state.GetLastText());
   }
   p_state.ExpectCurrentToken(TOKEN_RBRACE, "'}'");
 }
@@ -333,36 +333,27 @@ void ReadStrategies(GameParserState &p_state, TableFileGame &p_data)
 
   if (token == TOKEN_LBRACE) {
     // Nested list of strategy labels
-    auto player = p_data.m_players.begin();
-
-    while (p_state.GetCurrentToken() == TOKEN_LBRACE) {
-      if (player == p_data.m_players.end()) {
-        p_state.OnParseError("Not enough players for number of strategy entries");
-      }
+    for (auto &player : p_data.m_players) {
+      p_state.ExpectCurrentToken(TOKEN_LBRACE, "'{'");
       while (p_state.GetNextToken() == TOKEN_TEXT) {
-        player->m_strategies.push_back(p_state.GetLastText());
+        player.m_strategies.push_back(p_state.GetLastText());
       }
       p_state.ExpectCurrentToken(TOKEN_RBRACE, "'}'");
       p_state.GetNextToken();
-      player++;
     }
-    p_state.ExpectCurrentToken(TOKEN_RBRACE, "'}'");
-    if (player != p_data.m_players.end()) {
-      p_state.OnParseError("Players with undefined strategies");
-    }
-    p_state.GetNextToken();
   }
   else {
     // List of number of strategies for each player, no labels
-    for (auto player : p_data.m_players) {
+    for (auto &player : p_data.m_players) {
       p_state.ExpectCurrentToken(TOKEN_NUMBER, "number");
       for (int st = 1; st <= std::stoi(p_state.GetLastText()); st++) {
         player.m_strategies.push_back(std::to_string(st));
       }
       p_state.GetNextToken();
     }
-    p_state.ExpectCurrentToken(TOKEN_RBRACE, "'}'");
   }
+  p_state.ExpectCurrentToken(TOKEN_RBRACE, "'}'");
+  p_state.GetNextToken();
 }
 
 void ParseNfgHeader(GameParserState &p_state, TableFileGame &p_data)

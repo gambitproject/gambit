@@ -112,8 +112,7 @@ class TestGambitNfgFile(unittest.TestCase):
             pygambit.Game.parse_game(ft)
         self.assertEqual(
             str(e.exception),
-            "Parse error in game file: line 1:73: "
-            "Not enough players for number of strategy entries"
+            "Parse error in game file: line 1:73: Expected '}'"
         )
 
 
