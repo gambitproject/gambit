@@ -408,38 +408,18 @@ void ParseNfgHeader(GameParserState &p_state, TableFileGame &p_data)
 
 void ReadOutcomeList(GameParserState &p_parser, Game &p_nfg)
 {
-  if (p_parser.GetNextToken() == TOKEN_RBRACE) {
-    // Special case: empty outcome list
-    p_parser.GetNextToken();
-    return;
-  }
-
-  if (p_parser.GetCurrentToken() != TOKEN_LBRACE) {
-    throw InvalidFileException(p_parser.CreateLineMsg("Expecting '{' before outcome"));
-  }
-
-  int nOutcomes = 0;
   auto players = p_nfg->GetPlayers();
+  p_parser.GetNextToken();
 
   while (p_parser.GetCurrentToken() == TOKEN_LBRACE) {
-    nOutcomes++;
-    auto player = players.begin();
-
     if (p_parser.GetNextToken() != TOKEN_TEXT) {
-      throw InvalidFileException(p_parser.CreateLineMsg("Expecting string for outcome"));
+      throw InvalidFileException(p_parser.CreateLineMsg("Expecting outcome name"));
     }
-    GameOutcome outcome;
-    try {
-      outcome = p_nfg->GetOutcome(nOutcomes);
-    }
-    catch (IndexException &) {
-      // It might happen that the file contains more outcomes than
-      // contingencies.  If so, just create them on the fly.
-      outcome = p_nfg->NewOutcome();
-    }
+    auto outcome = p_nfg->NewOutcome();
     outcome->SetLabel(p_parser.GetLastText());
     p_parser.GetNextToken();
 
+    auto player = players.begin();
     while (p_parser.GetCurrentToken() == TOKEN_NUMBER) {
       if (player == players.end()) {
         throw InvalidFileException(
@@ -459,7 +439,7 @@ void ReadOutcomeList(GameParserState &p_parser, Game &p_nfg)
   }
 
   if (p_parser.GetCurrentToken() != TOKEN_RBRACE) {
-    throw InvalidFileException(p_parser.CreateLineMsg("Expecting '}' after outcome"));
+    throw InvalidFileException(p_parser.CreateLineMsg("Expecting '}' after outcomes"));
   }
   p_parser.GetNextToken();
 }
@@ -527,12 +507,17 @@ void ParsePayoffBody(GameParserState &p_parser, Game &p_nfg)
 
 Game BuildNfg(GameParserState &p_parser, TableFileGame &p_data)
 {
+  if (p_parser.GetCurrentToken() != TOKEN_LBRACE && p_parser.GetCurrentToken() != TOKEN_NUMBER) {
+    throw InvalidFileException(p_parser.CreateLineMsg("Expecting outcome or payoff"));
+  }
+
   Array<int> dim(p_data.NumPlayers());
   for (int pl = 1; pl <= dim.Length(); pl++) {
     dim[pl] = p_data.NumStrategies(pl);
   }
 
-  Game nfg = NewTable(dim);
+  // If this looks lke an outcome-based format, then don't create outcomes in advance
+  Game nfg = NewTable(dim, p_parser.GetCurrentToken() == TOKEN_LBRACE);
   nfg->SetTitle(p_data.m_title);
   nfg->SetComment(p_data.m_comment);
 
@@ -546,13 +531,9 @@ Game BuildNfg(GameParserState &p_parser, TableFileGame &p_data)
   if (p_parser.GetCurrentToken() == TOKEN_LBRACE) {
     ParseOutcomeBody(p_parser, nfg);
   }
-  else if (p_parser.GetCurrentToken() == TOKEN_NUMBER) {
+  else {
     ParsePayoffBody(p_parser, nfg);
   }
-  else {
-    throw InvalidFileException(p_parser.CreateLineMsg("Expecting outcome or payoff"));
-  }
-
   return nfg;
 }
 
