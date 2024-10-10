@@ -331,6 +331,4 @@ void GameAGGRep::WriteAggFile(std::ostream &s) const
   }
 }
 
-Game GameAGGRep::ReadAggFile(std::istream &in) { return new GameAGGRep(agg::AGG::makeAGG(in)); }
-
 } // end namespace Gambit

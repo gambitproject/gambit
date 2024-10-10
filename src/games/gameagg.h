@@ -35,14 +35,11 @@ private:
   std::shared_ptr<agg::AGG> aggPtr;
   Array<GamePlayerRep *> m_players;
 
-  /// Constructor
-  explicit GameAGGRep(std::shared_ptr<agg::AGG>);
-
 public:
   /// @name Lifecycle
   //@{
-  /// Create a game from a serialized file in AGG format
-  static Game ReadAggFile(std::istream &);
+  /// Constructor
+  explicit GameAGGRep(std::shared_ptr<agg::AGG>);
   /// Destructor
   ~GameAGGRep() override
   {
@@ -149,9 +146,24 @@ public:
   //@{
   /// Write the game to a savefile in the specified format.
   void Write(std::ostream &p_stream, const std::string &p_format = "native") const override;
-  virtual void WriteAggFile(std::ostream &) const;
+  void WriteAggFile(std::ostream &) const;
   //@}
 };
+
+/// @brief Reads a game representation in .agg format
+/// @param[in] p_stream An input stream, positioned at the start of the text in .agg format
+/// @return A handle to the game representation constructed
+/// @throw InvalidFileException If the stream does not contain a valid serialisation
+///                             of a game in .agg format.
+inline Game ReadAggFile(std::istream &in)
+{
+  try {
+    return new GameAGGRep(agg::AGG::makeAGG(in));
+  }
+  catch (std::runtime_error &ex) {
+    throw InvalidFileException(ex.what());
+  }
+}
 
 } // namespace Gambit
 

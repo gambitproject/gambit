@@ -307,9 +307,4 @@ void GameBAGGRep::Write(std::ostream &p_stream, const std::string &p_format /*="
 
 void GameBAGGRep::WriteBaggFile(std::ostream &s) const { s << (*baggPtr); }
 
-Game GameBAGGRep::ReadBaggFile(std::istream &in)
-{
-  return new GameBAGGRep(agg::BAGG::makeBAGG(in));
-}
-
 } // end namespace Gambit

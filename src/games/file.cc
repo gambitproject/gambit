@@ -1065,24 +1065,21 @@ Game ReadGame(std::istream &p_file)
     if (parser.GetNextToken() != TOKEN_SYMBOL) {
       throw InvalidFileException(parser.CreateLineMsg("Expecting file type"));
     }
-
+    buffer.seekg(0, std::ios::beg);
     if (parser.GetLastText() == "NFG") {
-      buffer.seekg(0, std::ios::beg);
       return ReadNfgFile(buffer);
     }
     else if (parser.GetLastText() == "EFG") {
-      buffer.seekg(0, std::ios::beg);
       return ReadEfgFile(buffer);
     }
     else if (parser.GetLastText() == "#AGG") {
-      return GameAGGRep::ReadAggFile(buffer);
+      return ReadAggFile(buffer);
     }
     else if (parser.GetLastText() == "#BAGG") {
-      return GameBAGGRep::ReadBaggFile(buffer);
+      return ReadBaggFile(buffer);
     }
     else {
-      throw InvalidFileException(
-          "Tokens 'EFG' or 'NFG' or '#AGG' or '#BAGG' expected at start of file");
+      throw InvalidFileException("Unrecognized file format");
     }
   }
   catch (std::exception &ex) {
