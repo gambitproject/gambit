@@ -284,123 +284,39 @@ class TableFilePlayer {
 public:
   std::string m_name;
   Array<std::string> m_strategies;
-  TableFilePlayer *m_next{nullptr};
 
-  TableFilePlayer() = default;
+  TableFilePlayer(const std::string &p_name) : m_name(p_name) {}
 };
 
 class TableFileGame {
 public:
   std::string m_title, m_comment;
-  TableFilePlayer *m_firstPlayer{nullptr}, *m_lastPlayer{nullptr};
-  int m_numPlayers{0};
+  std::vector<TableFilePlayer> m_players;
 
   TableFileGame() = default;
-  ~TableFileGame();
+  ~TableFileGame() = default;
 
-  void AddPlayer(const std::string &);
-  int NumPlayers() const { return m_numPlayers; }
-  int NumStrategies(int p_player) const;
-  std::string GetPlayer(int p_player) const;
-  std::string GetStrategy(int p_player, int p_strategy) const;
+  void AddPlayer(const std::string &p_name) { m_players.push_back({p_name}); }
+  size_t NumPlayers() const { return m_players.size(); }
+  size_t NumStrategies(int p_player) const { return m_players[p_player - 1].m_strategies.size(); }
+  std::string GetPlayer(int p_player) const { return m_players[p_player - 1].m_name; }
+  std::string GetStrategy(int p_player, int p_strategy) const
+  {
+    return m_players[p_player - 1].m_strategies[p_strategy];
+  }
 };
-
-TableFileGame::~TableFileGame()
-{
-  if (m_firstPlayer) {
-    TableFilePlayer *player = m_firstPlayer;
-    while (player) {
-      TableFilePlayer *nextPlayer = player->m_next;
-      delete player;
-      player = nextPlayer;
-    }
-  }
-}
-
-void TableFileGame::AddPlayer(const std::string &p_name)
-{
-  auto *player = new TableFilePlayer;
-  player->m_name = p_name;
-
-  if (m_firstPlayer) {
-    m_lastPlayer->m_next = player;
-    m_lastPlayer = player;
-  }
-  else {
-    m_firstPlayer = player;
-    m_lastPlayer = player;
-  }
-  m_numPlayers++;
-}
-
-int TableFileGame::NumStrategies(int p_player) const
-{
-  TableFilePlayer *player = m_firstPlayer;
-  int pl = 1;
-
-  while (player && pl < p_player) {
-    player = player->m_next;
-    pl++;
-  }
-
-  if (!player) {
-    return 0;
-  }
-  else {
-    return player->m_strategies.Length();
-  }
-}
-
-std::string TableFileGame::GetPlayer(int p_player) const
-{
-  TableFilePlayer *player = m_firstPlayer;
-  int pl = 1;
-
-  while (player && pl < p_player) {
-    player = player->m_next;
-    pl++;
-  }
-
-  if (!player) {
-    return "";
-  }
-  else {
-    return player->m_name;
-  }
-}
-
-std::string TableFileGame::GetStrategy(int p_player, int p_strategy) const
-{
-  TableFilePlayer *player = m_firstPlayer;
-  int pl = 1;
-
-  while (player && pl < p_player) {
-    player = player->m_next;
-    pl++;
-  }
-
-  if (!player) {
-    return "";
-  }
-  else {
-    return player->m_strategies[p_strategy];
-  }
-}
 
 void ReadPlayers(GameParserState &p_state, TableFileGame &p_data)
 {
   if (p_state.GetNextToken() != TOKEN_LBRACE) {
     throw InvalidFileException(p_state.CreateLineMsg("Expecting '{' before players"));
   }
-
   while (p_state.GetNextToken() == TOKEN_TEXT) {
     p_data.AddPlayer(p_state.GetLastText());
   }
-
   if (p_state.GetCurrentToken() != TOKEN_RBRACE) {
     throw InvalidFileException(p_state.CreateLineMsg("Expecting '}' after players"));
   }
-
   p_state.GetNextToken();
 }
 
@@ -412,58 +328,47 @@ void ReadStrategies(GameParserState &p_state, TableFileGame &p_data)
   p_state.GetNextToken();
 
   if (p_state.GetCurrentToken() == TOKEN_LBRACE) {
-    TableFilePlayer *player = p_data.m_firstPlayer;
+    auto player = p_data.m_players.begin();
 
     while (p_state.GetCurrentToken() == TOKEN_LBRACE) {
-      if (!player) {
+      if (player == p_data.m_players.end()) {
         throw InvalidFileException(
             p_state.CreateLineMsg("Not enough players for number of strategy entries"));
       }
-
       while (p_state.GetNextToken() == TOKEN_TEXT) {
         player->m_strategies.push_back(p_state.GetLastText());
       }
-
       if (p_state.GetCurrentToken() != TOKEN_RBRACE) {
         throw InvalidFileException(p_state.CreateLineMsg("Expecting '}' after player strategy"));
       }
-
       p_state.GetNextToken();
-      player = player->m_next;
+      player++;
     }
-
-    if (player) {
-      throw InvalidFileException(p_state.CreateLineMsg("Players with undefined strategies"));
-    }
-
     if (p_state.GetCurrentToken() != TOKEN_RBRACE) {
       throw InvalidFileException(p_state.CreateLineMsg("Expecting '}' after strategies"));
     }
-
+    if (player != p_data.m_players.end()) {
+      throw InvalidFileException(p_state.CreateLineMsg("Players with undefined strategies"));
+    }
     p_state.GetNextToken();
   }
   else if (p_state.GetCurrentToken() == TOKEN_NUMBER) {
-    TableFilePlayer *player = p_data.m_firstPlayer;
-
+    auto player = p_data.m_players.begin();
     while (p_state.GetCurrentToken() == TOKEN_NUMBER) {
-      if (!player) {
+      if (player == p_data.m_players.end()) {
         throw InvalidFileException(
             p_state.CreateLineMsg("Not enough players for number of strategy entries"));
       }
-
       for (int st = 1; st <= atoi(p_state.GetLastText().c_str()); st++) {
         player->m_strategies.push_back(lexical_cast<std::string>(st));
       }
-
       p_state.GetNextToken();
-      player = player->m_next;
+      player++;
     }
-
     if (p_state.GetCurrentToken() != TOKEN_RBRACE) {
       throw InvalidFileException(p_state.CreateLineMsg("Expecting '}' after strategies"));
     }
-
-    if (player) {
+    if (player != p_data.m_players.end()) {
       throw InvalidFileException(p_state.CreateLineMsg("Players with strategies undefined"));
     }
 
@@ -479,11 +384,9 @@ void ParseNfgHeader(GameParserState &p_state, TableFileGame &p_data)
   if (p_state.GetNextToken() != TOKEN_SYMBOL || p_state.GetLastText() != "NFG") {
     throw InvalidFileException(p_state.CreateLineMsg("Expecting NFG file type indicator"));
   }
-
   if (p_state.GetNextToken() != TOKEN_NUMBER || p_state.GetLastText() != "1") {
     throw InvalidFileException(p_state.CreateLineMsg("Accepting only NFG version 1"));
   }
-
   if (p_state.GetNextToken() != TOKEN_SYMBOL ||
       (p_state.GetLastText() != "D" && p_state.GetLastText() != "R")) {
     throw InvalidFileException(p_state.CreateLineMsg("Accepting only NFG D or R data type"));
