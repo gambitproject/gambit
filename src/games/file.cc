@@ -411,26 +411,12 @@ void ParseOutcomeBody(GameParserState &p_parser, Game &p_nfg)
 {
   ReadOutcomeList(p_parser, p_nfg);
 
-  StrategySupportProfile profile(p_nfg);
-  StrategyProfileIterator iter(profile);
-
-  while (p_parser.GetCurrentToken() != TOKEN_EOF) {
+  for (StrategyProfileIterator iter({p_nfg}); !iter.AtEnd(); iter++) {
     p_parser.ExpectCurrentToken(TOKEN_NUMBER, "outcome index");
-    if (iter.AtEnd()) {
-      p_parser.OnParseError("More outcomes listed than entries in game table");
-    }
-    int outcomeId = atoi(p_parser.GetLastText().c_str());
-    if (outcomeId > 0) {
+    if (int outcomeId = std::stoi(p_parser.GetLastText())) {
       (*iter)->SetOutcome(p_nfg->GetOutcome(outcomeId));
     }
-    else {
-      (*iter)->SetOutcome(nullptr);
-    }
     p_parser.GetNextToken();
-    iter++;
-  }
-  if (!iter.AtEnd()) {
-    p_parser.OnParseError("Not enough outcomes listed to fill game table");
   }
 }
 
@@ -489,6 +475,7 @@ Game BuildNfg(GameParserState &p_parser, TableFileGame &p_data)
   else {
     ParsePayoffBody(p_parser, nfg);
   }
+  p_parser.ExpectCurrentToken(TOKEN_EOF, "end-of-file");
   return nfg;
 }
 

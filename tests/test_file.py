@@ -151,7 +151,7 @@ NFG 1 R "Two person 2 x 2 game with unique mixed equilibrium" { "Player 1" "Play
 }
 1 2 3
 """
-    with pytest.raises(ValueError, match="Not enough outcomes"):
+    with pytest.raises(ValueError, match="Expected outcome index"):
         pygambit.Game.parse_game(data)
 
 
@@ -172,5 +172,5 @@ NFG 1 R "Two person 2 x 2 game with unique mixed equilibrium" { "Player 1" "Play
 }
 1 2 3 4 2
 """
-    with pytest.raises(ValueError, match="More outcomes listed"):
+    with pytest.raises(ValueError, match="end-of-file"):
         pygambit.Game.parse_game(data)
