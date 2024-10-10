@@ -419,21 +419,18 @@ void ReadOutcomeList(GameParserState &p_parser, Game &p_nfg)
     outcome->SetLabel(p_parser.GetLastText());
     p_parser.GetNextToken();
 
-    auto player = players.begin();
-    while (p_parser.GetCurrentToken() == TOKEN_NUMBER) {
-      if (player == players.end()) {
-        throw InvalidFileException(
-            p_parser.CreateLineMsg("Exceeded number of players in outcome"));
+    for (auto player : players) {
+      if (p_parser.GetCurrentToken() != TOKEN_NUMBER) {
+        throw InvalidFileException(p_parser.CreateLineMsg("Expected numerical payoff for player"));
       }
-      outcome->SetPayoff(*player, Number(p_parser.GetLastText()));
-      ++player;
+      outcome->SetPayoff(player, Number(p_parser.GetLastText()));
       if (p_parser.GetNextToken() == TOKEN_COMMA) {
         p_parser.GetNextToken();
       }
     }
-    if (player != players.end()) {
+    if (p_parser.GetCurrentToken() != TOKEN_RBRACE) {
       throw InvalidFileException(
-          p_parser.CreateLineMsg("Insufficient number of player payoffs in outcome"));
+          p_parser.CreateLineMsg("More payoffs specified for outcome than players in game"));
     }
     p_parser.GetNextToken();
   }
