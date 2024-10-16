@@ -145,8 +145,5 @@ AC_SUBST(WX_CXXFLAGS)
 REZFLAGS=`echo $CXXFLAGS $WX_CXXFLAGS | sed 's/-mthreads//g' | sed 's/-g//g' | sed 's/-O. / /g' | sed 's/-I/--include-dir /g'`
 AC_SUBST(REZFLAGS)
 
-AC_CONFIG_FILES([Makefile
-        contrib/Makefile
-        contrib/scripts/Makefile
-	contrib/scripts/enumpoly/Makefile])
+AC_CONFIG_FILES([Makefile])
 AC_OUTPUT

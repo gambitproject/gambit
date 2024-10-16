@@ -21,6 +21,9 @@
   of supports to search.
 - `to_arrays` converts a `Game` to a list of `numpy` arrays containing its reduced strategic form.
   (#461)
+- Integrated support (in Python) for using `PHCpack` to solve systems of polynomial equations in
+  `enumpoly_solve` based on an implementation formerly in the `contrib` section of the
+  repository. (#165)
 
 ### Fixed
 - When parsing .nfg files, check that the number of outcomes or payoffs is the expected number,

@@ -253,6 +253,9 @@ class StrategySupportProfile:
         """
         return Game.parse_game(WriteGame(deref(self.support)).decode("ascii"))
 
+    def is_dominated(self, strategy: Strategy, strict: bool, external: bool = False) -> bool:
+        return deref(self.support).IsDominated(strategy.strategy, strict, external)
+
 
 def _undominated_strategies_solve(
         profile: StrategySupportProfile, strict: bool, external: bool

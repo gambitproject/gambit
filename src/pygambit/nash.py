@@ -26,8 +26,11 @@ A set of utilities for computing Nash equilibria
 from __future__ import annotations
 
 import dataclasses
+import pathlib
 
 import pygambit.gambit as libgbt
+
+from . import nashphc
 
 MixedStrategyEquilibriumSet = list[libgbt.MixedStrategyProfile]
 MixedBehaviorEquilibriumSet = list[libgbt.MixedBehaviorProfile]
@@ -563,6 +566,7 @@ def enumpoly_solve(
         use_strategic: bool = False,
         stop_after: int | None = None,
         maxregret: float = 1.0e-4,
+        phcpack_path: pathlib.Path | str | None = None,
 ) -> NashComputationResult:
     """Compute Nash equilibria by enumerating all support profiles of strategies
     or actions, and for each support finding all totally-mixed equilibria of
@@ -586,10 +590,17 @@ def enumpoly_solve(
         regret of any player must be no more than `maxregret` times the
         difference of the maximum and minimum payoffs of the game
 
+    phcpack_path : str or pathlib.Path, optional
+        If specified, use PHCpack [1]_ to solve the systems of equations.
+        This argument specifies the path to the PHCpack executable.
+        With this method, only enumeration on the strategic game is supported.
+
     Returns
     -------
     res : NashComputationResult
         The result represented as a ``NashComputationResult`` object.
+
+    .. [1] https://homepages.math.uic.edu/~jan/PHCpack/phcpack.html
     """
     if stop_after is None:
         stop_after = 0
@@ -602,6 +613,23 @@ def enumpoly_solve(
         raise ValueError(
             f"enumpoly_solve(): maxregret must be a positive number; got {maxregret}"
         )
+    if phcpack_path is not None:
+        if game.is_tree and not use_strategic:
+            raise ValueError(
+                "enumpoly_solve(): only solving on the strategic representation is "
+                "supported by the PHCpack implementation"
+            )
+        equilibria = nashphc.phcpack_solve(game, phcpack_path, maxregret)
+        return NashComputationResult(
+            game=game,
+            method="enumpoly",
+            rational=False,
+            use_strategic=False,
+            parameters={"stop_after": stop_after, "maxregret": maxregret,
+                        "phcpack_path": phcpack_path},
+            equilibria=equilibria,
+        )
+
     if not game.is_tree or use_strategic:
         equilibria = libgbt._enumpoly_strategy_solve(game, stop_after, maxregret)
     else:

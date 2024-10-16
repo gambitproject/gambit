@@ -344,6 +344,7 @@ cdef extern from "games/stratspt.h":
         bool RemoveStrategy(c_GameStrategy) except +
         c_GameStrategy GetStrategy(int, int) except +IndexError
         bool Contains(c_GameStrategy) except +
+        bool IsDominated(c_GameStrategy, bool, bool) except +
         c_StrategySupportProfile Undominated(bool, bool)  # except + doesn't compile
         c_MixedStrategyProfileDouble NewMixedStrategyProfileDouble \
             "NewMixedStrategyProfile<double>"() except +

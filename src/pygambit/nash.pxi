@@ -186,7 +186,7 @@ def _nashsupport_strategy_solve(game: Game) -> typing.List[StrategySupportProfil
     ret = []
     result = PossibleNashStrategySupports(game.game)
     for c_support in make_list_of_pointer(deref(result).m_supports):
-        support = StrategySupportProfile(list(game.strategies), game)
+        support = StrategySupportProfile(game, list(game.strategies))
         support.support.reset(c_support)
         ret.append(support)
     return ret
