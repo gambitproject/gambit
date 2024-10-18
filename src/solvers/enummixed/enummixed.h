@@ -92,27 +92,6 @@ inline List<MixedStrategyProfile<Rational>> EnumMixedStrategySolveRational(const
   return EnumMixedStrategySolver<Rational>().Solve(p_game);
 }
 
-//
-// Enumerate all mixed-strategy Nash equilibria of a two-player game
-// using the lrslib backend.
-//
-class EnumMixedLrsStrategySolver : public StrategySolver<Rational> {
-public:
-  explicit EnumMixedLrsStrategySolver(
-      std::shared_ptr<StrategyProfileRenderer<Rational>> p_onEquilibrium = nullptr)
-    : StrategySolver<Rational>(p_onEquilibrium)
-  {
-  }
-  ~EnumMixedLrsStrategySolver() override = default;
-
-  List<MixedStrategyProfile<Rational>> Solve(const Game &p_game) const override;
-};
-
-inline List<MixedStrategyProfile<Rational>> EnumMixedStrategySolveLrs(const Game &p_game)
-{
-  return EnumMixedLrsStrategySolver().Solve(p_game);
-}
-
 } // namespace Nash
 } // end namespace Gambit
 

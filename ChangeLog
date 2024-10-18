@@ -25,6 +25,11 @@
   `enumpoly_solve` based on an implementation formerly in the `contrib` section of the
   repository. (#165)
 
+### Changed
+- The built-in implementation of lrslib (dating from 2016) has been removed.  Instead, access to
+  lrsnash is provided as an external tool via the `enummixed_solve` function, in parallel to
+  PHCpack for `enumpoly_solve`.
+
 ### Fixed
 - When parsing .nfg files, check that the number of outcomes or payoffs is the expected number,
   and raise an exception if not.  (#119)

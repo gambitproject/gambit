@@ -1,16 +1,18 @@
 """Enumerate Nash equilibria by solving systems of polynomial equations using PHCpack.
 """
 
+from __future__ import annotations
+
 import contextlib
 import itertools
 import pathlib
 import string
 import subprocess
 import sys
-import tempfile
 import typing
 
 import pygambit as gbt
+import pygambit.util as util
 
 
 def _process_phc_output(output: str) -> list[dict]:
@@ -71,27 +73,7 @@ def _process_phc_output(output: str) -> list[dict]:
     return solutions
 
 
-@contextlib.contextmanager
-def _make_temporary(content: typing.Optional[str] = None) -> pathlib.Path:
-    """Context manager to create a temporary file containing `content', and
-    provide the path to the temporary file.
-
-    If `content' is none, the temporary file is created and then deleted, while
-    returning the filename, for another process then to write to that file
-    (under the assumption that it is extremely unlikely that another program
-    will try to write to that same tempfile name).
-    """
-    with tempfile.NamedTemporaryFile("w", delete=(content is None)) as f:
-        if content:
-            f.write(content)
-        filepath = pathlib.Path(f.name)
-    try:
-        yield filepath
-    finally:
-        filepath.unlink(missing_ok=True)
-
-
-def _run_phc(phcpack_path: typing.Union[pathlib.Path, str], equations: list[str]) -> list[dict]:
+def _run_phc(phcpack_path: pathlib.Path | str, equations: list[str]) -> list[dict]:
     """Call PHCpack via an external binary to solve a set of equations, and return
     the details on solutions found.
 
@@ -123,8 +105,9 @@ def _run_phc(phcpack_path: typing.Union[pathlib.Path, str], equations: list[str]
         - `res'
     """
     with (
-            _make_temporary(f"{len(equations)}\n" + ";\n".join(equations) + ";\n\n\n") as infn,
-            _make_temporary() as outfn
+            util.make_temporary(f"{len(equations)}\n" +
+                                ";\n".join(equations) + ";\n\n\n") as infn,
+            util.make_temporary() as outfn
     ):
         result = subprocess.run([phcpack_path, "-b", infn, outfn])
         if result.returncode != 0:
@@ -230,7 +213,7 @@ def _profile_from_support(support: gbt.StrategySupportProfile) -> gbt.MixedStrat
 
 
 def _solve_support(support: gbt.StrategySupportProfile,
-                   phcpack_path: typing.Union[pathlib.Path, str],
+                   phcpack_path: pathlib.Path | str,
                    maxregret: float,
                    negtol: float,
                    onsupport=lambda x, label: None,
@@ -259,7 +242,7 @@ def _solve_support(support: gbt.StrategySupportProfile,
     return profiles
 
 
-def phcpack_solve(game: gbt.Game, phcpack_path: typing.Union[pathlib.Path, str],
+def phcpack_solve(game: gbt.Game, phcpack_path: pathlib.Path | str,
                   maxregret: float) -> list[gbt.MixedStrategyProfileDouble]:
     negtol = 1.0e-6
     return [

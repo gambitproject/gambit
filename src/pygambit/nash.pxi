@@ -91,10 +91,6 @@ def _enummixed_strategy_solve_rational(game: Game) -> typing.List[MixedStrategyP
     return _convert_mspr(EnumMixedStrategySolveRational(game.game))
 
 
-def _enummixed_strategy_solve_lrs(game: Game) -> typing.List[MixedStrategyProfileRational]:
-    return _convert_mspr(EnumMixedStrategySolveLrs(game.game))
-
-
 def _lcp_behavior_solve_double(
         game: Game, stop_after: int, max_depth: int
 ) -> typing.List[MixedBehaviorProfileDouble]:

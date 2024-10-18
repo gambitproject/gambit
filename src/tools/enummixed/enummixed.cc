@@ -46,8 +46,6 @@ void PrintBanner(std::ostream &p_stream)
 {
   p_stream << "Compute Nash equilibria by enumerating extreme points\n";
   p_stream << "Gambit version " VERSION ", Copyright (C) 1994-2024, The Gambit Project\n";
-  p_stream << "Enumeration code based on lrslib 6.2,\n";
-  p_stream << "Copyright (C) 1995-2016 by David Avis (avis@cs.mcgill.ca)\n";
   p_stream << "This is free software, distributed under the GNU GPL\n\n";
 }
 
@@ -62,7 +60,6 @@ void PrintHelp(char *progname)
   std::cerr << "  -d DECIMALS      compute using floating-point arithmetic;\n";
   std::cerr << "                   display results with DECIMALS digits\n";
   std::cerr << "  -D               don't eliminate dominated strategies first\n";
-  std::cerr << "  -L               use lrslib for enumeration (experimental!)\n";
   std::cerr << "  -c               output connectedness information\n";
   std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
@@ -80,7 +77,7 @@ int main(int argc, char *argv[])
   int long_opt_index = 0;
   struct option long_options[] = {
       {"help", 0, nullptr, 'h'}, {"version", 0, nullptr, 'v'}, {nullptr, 0, nullptr, 0}};
-  while ((c = getopt_long(argc, argv, "d:DvhqcSL", long_options, &long_opt_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "d:DvhqcS", long_options, &long_opt_index)) != -1) {
     switch (c) {
     case 'v':
       PrintBanner(std::cerr);
@@ -91,9 +88,6 @@ int main(int argc, char *argv[])
       break;
     case 'D':
       eliminate = false;
-      break;
-    case 'L':
-      uselrs = true;
       break;
     case 'h':
       PrintHelp(argv[0]);
@@ -138,13 +132,7 @@ int main(int argc, char *argv[])
 
   try {
     Game game = ReadGame(*input_stream);
-    if (uselrs) {
-      std::shared_ptr<StrategyProfileRenderer<Rational>> renderer(
-          new MixedStrategyCSVRenderer<Rational>(std::cout));
-      EnumMixedLrsStrategySolver solver(renderer);
-      solver.Solve(game);
-    }
-    else if (useFloat) {
+    if (useFloat) {
       std::shared_ptr<StrategyProfileRenderer<double>> renderer(
           new MixedStrategyCSVRenderer<double>(std::cout, numDecimals));
       EnumMixedStrategySolver<double> solver(renderer);

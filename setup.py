@@ -26,10 +26,6 @@ import platform
 import Cython.Build
 import setuptools
 
-# By compiling this separately as a C library, we avoid problems
-# with passing C++-specific flags when building the extension
-lrslib = ("lrslib", {"sources": glob.glob("src/solvers/lrs/*.c")})
-
 cppgambit_include_dirs = ["src"]
 cppgambit_cflags = (
     ["-std=c++17"] if platform.system() == "Darwin"
@@ -144,7 +140,7 @@ setuptools.setup(
     ],
     libraries=[cppgambit_bimatrix, cppgambit_liap, cppgambit_logit, cppgambit_simpdiv,
                cppgambit_gtracer, cppgambit_enumpoly,
-               cppgambit_games, cppgambit_core, lrslib],
+               cppgambit_games, cppgambit_core],
     package_dir={"": "src"},
     packages=["pygambit"],
     ext_modules=Cython.Build.cythonize(libgambit,

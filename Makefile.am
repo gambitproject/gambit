@@ -346,14 +346,6 @@ linalg_SOURCES = \
 	src/solvers/linalg/vertenum.h \
 	src/solvers/linalg/vertenum.imp
 
-lrslib_SOURCES = \
-	src/solvers/lrs/lrslib.h \
-	src/solvers/lrs/lrslib.c \
-	src/solvers/lrs/lrsmp.h \
-	src/solvers/lrs/lrsmp.c \
-	src/solvers/lrs/lrsnashlib.h \
-	src/solvers/lrs/lrsnashlib.c
-
 gtracer_SOURCES = \
 	src/solvers/gtracer/cmatrix.h \
 	src/solvers/gtracer/cmatrix.cc \
@@ -403,10 +395,8 @@ gambit_convert_SOURCES = \
 gambit_enummixed_SOURCES = \
 	${core_SOURCES} ${game_SOURCES} \
 	${linalg_SOURCES} \
-	${lrslib_SOURCES} \
 	src/solvers/enummixed/clique.cc \
 	src/solvers/enummixed/clique.h \
-	src/solvers/enummixed/lrsenum.cc \
 	src/solvers/enummixed/enummixed.cc \
 	src/solvers/enummixed/enummixed.h \
 	src/tools/enummixed/enummixed.cc
@@ -416,7 +406,6 @@ gambit_nashsupport_SOURCES = \
 	src/solvers/nashsupport/nfgsupport.cc \
 	src/solvers/nashsupport/nashsupport.h
 
-# For enumpoly, sources starting in 'pel' are from Pelican.
 gambit_enumpoly_SOURCES = \
 	${core_SOURCES} ${game_SOURCES} ${gambit_nashsupport_SOURCES} \
 	src/solvers/enumpoly/gameseq.cc \

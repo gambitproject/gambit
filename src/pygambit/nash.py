@@ -30,7 +30,7 @@ import pathlib
 
 import pygambit.gambit as libgbt
 
-from . import nashphc
+from . import nashlrs, nashphc
 
 MixedStrategyEquilibriumSet = list[libgbt.MixedStrategyProfile]
 MixedBehaviorEquilibriumSet = list[libgbt.MixedBehaviorProfile]
@@ -103,7 +103,7 @@ def enumpure_solve(game: libgbt.Game, use_strategic: bool = True) -> NashComputa
 def enummixed_solve(
         game: libgbt.Game,
         rational: bool = True,
-        use_lrs: bool = False
+        lrsnash_path: pathlib.Path | str | None = None,
 ) -> NashComputationResult:
     """Compute all :ref:`mixed-strategy Nash equilibria <gambit-enummixed>`
     of a two-player game using the strategic representation.
@@ -112,11 +112,16 @@ def enummixed_solve(
     ----------
     game : Game
         The game to compute equilibria in.
+
     rational : bool, default True
         Compute using rational numbers.  If `False`, using floating-point
         arithmetic.  Using rationals is more precise, but slower.
-    use_lrs : bool, default False
-        If `True`, use the implementation based on ``lrslib``.  This is experimental.
+
+    lrsnash_path : pathlib.Path | str | None = None,
+        If specified, use lrsnash to solve the systems of equations.
+        This argument specifies the path to the lrsnash executable.
+
+        .. versionadded:: 16.3.0
 
     Returns
     -------
@@ -127,17 +132,29 @@ def enummixed_solve(
     ------
     RuntimeError
         If game has more than two players.
+
+    Notes
+    -----
+    `lrsnash` is part of `lrslib`, available at http://cgm.cs.mcgill.ca/~avis/C/lrs.html
     """
-    if use_lrs:
-        equilibria = libgbt._enummixed_strategy_solve_lrs(game)
-    elif rational:
+    if lrsnash_path is not None:
+        equilibria = nashlrs.lrsnash_solve(game, lrsnash_path=lrsnash_path)
+        return NashComputationResult(
+            game=game,
+            method="enummixed",
+            rational=True,
+            use_strategic=True,
+            parameters={"lrsnash_path": lrsnash_path},
+            equilibria=equilibria,
+        )
+    if rational:
         equilibria = libgbt._enummixed_strategy_solve_rational(game)
     else:
         equilibria = libgbt._enummixed_strategy_solve_double(game)
     return NashComputationResult(
         game=game,
         method="enummixed",
-        rational=use_lrs or rational,
+        rational=rational,
         use_strategic=True,
         equilibria=equilibria
     )
@@ -566,7 +583,7 @@ def enumpoly_solve(
         use_strategic: bool = False,
         stop_after: int | None = None,
         maxregret: float = 1.0e-4,
-        phcpack_path: pathlib.Path | str | None = None,
+        phcpack_path: pathlib.Path | str | None = None
 ) -> NashComputationResult:
     """Compute Nash equilibria by enumerating all support profiles of strategies
     or actions, and for each support finding all totally-mixed equilibria of
@@ -591,7 +608,7 @@ def enumpoly_solve(
         difference of the maximum and minimum payoffs of the game
 
     phcpack_path : str or pathlib.Path, optional
-        If specified, use PHCpack [1]_ to solve the systems of equations.
+        If specified, use PHCpack to solve the systems of equations.
         This argument specifies the path to the PHCpack executable.
         With this method, only enumeration on the strategic game is supported.
 
@@ -600,7 +617,9 @@ def enumpoly_solve(
     res : NashComputationResult
         The result represented as a ``NashComputationResult`` object.
 
-    .. [1] https://homepages.math.uic.edu/~jan/PHCpack/phcpack.html
+    Notes
+    -----
+    PHCpack is available at https://homepages.math.uic.edu/~jan/PHCpack/phcpack.html
     """
     if stop_after is None:
         stop_after = 0
