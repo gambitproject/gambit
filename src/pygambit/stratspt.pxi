@@ -3,7 +3,7 @@
 # Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
 #
 # FILE: src/pygambit/stratspt.pxi
-# Cython wrapper for strategy supports
+# Cython wrapper for strategy support profiles
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -22,6 +22,28 @@
 import cython
 from cython.operator cimport dereference as deref
 from libcpp.memory cimport unique_ptr
+
+
+@cython.cclass
+class StrategySupport:
+    """A set of strategies for a specified player in a `StrategySupportProfile`.
+    """
+    _profile = cython.declare(StrategySupportProfile)
+    _player = cython.declare(Player)
+
+    def __init__(self, profile: StrategySupportProfile, player: Player) -> None:
+        self._profile = profile
+        self._player = player
+
+    @property
+    def player(self) -> Player:
+        return self._player
+
+    def __iter__(self) -> typing.Generator[Strategy, None, None]:
+        for strat in deref(self._profile.support).GetStrategies(self._player.player):
+            s = Strategy()
+            s.strategy = strat
+            yield s
 
 
 @cython.cclass
@@ -86,6 +108,12 @@ class StrategySupportProfile:
                 s = Strategy()
                 s.strategy = strat
                 yield s
+
+    def __getitem__(self, player: PlayerReference) -> StrategySupport:
+        return StrategySupport(
+            self,
+            cython.cast(Player, self.game._resolve_player(player, "__getitem__"))
+        )
 
     def __and__(self, other: StrategySupportProfile) -> StrategySupportProfile:
         return self.intersection(other)
