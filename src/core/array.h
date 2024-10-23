@@ -73,7 +73,7 @@ public:
     using pointer = value_type *;
     using reference = value_type &;
 
-    iterator(Array *p_array, int p_index) : m_array(p_array), m_index(p_index) {}
+    iterator(Array *p_array = 0, int p_index = 0) : m_array(p_array), m_index(p_index) {}
     reference operator*() { return (*m_array)[m_index]; }
     pointer operator->() { return &(*m_array)[m_index]; }
     iterator &operator++()

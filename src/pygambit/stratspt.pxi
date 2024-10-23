@@ -73,15 +73,6 @@ class StrategySupportProfile:
     def __ge__(self, other: StrategySupportProfile) -> bool:
         return self.issuperset(other)
 
-    def __getitem__(self, index: int) -> Strategy:
-        for pl in range(len(self.game.players)):
-            if index < deref(self.support).NumStrategiesPlayer(pl+1):
-                s = Strategy()
-                s.strategy = deref(self.support).GetStrategy(pl+1, index+1)
-                return s
-            index = index - deref(self.support).NumStrategiesPlayer(pl+1)
-        raise IndexError("StrategySupportProfile index out of range")
-
     def __contains__(self, strategy: Strategy) -> bool:
         if strategy not in self.game.strategies:
             raise MismatchError(
