@@ -18,7 +18,7 @@ def test_difference():
     game = games.read_from_file("mixed_strategy.nfg")
     support_profile = game.strategy_support_profile()
     strat_list = [list(support_profile)[0], list(support_profile)[4]]
-    dif_profile = gbt.StrategySupportProfile(game, strat_list)
+    dif_profile = game.strategy_support_profile(lambda x: x in strat_list)
     new_profile = support_profile - dif_profile
     assert len(new_profile) == 3
     for strategy in strat_list:
@@ -29,7 +29,7 @@ def test_difference_error():
     game = games.read_from_file("mixed_strategy.nfg")
     support_profile = game.strategy_support_profile()
     strat_list = [list(support_profile)[0], list(support_profile)[4]]
-    dif_profile = gbt.StrategySupportProfile(game, strat_list)
+    dif_profile = game.strategy_support_profile(lambda x: x in strat_list)
     with pytest.raises(ValueError):
         dif_profile - support_profile
 
@@ -39,7 +39,7 @@ def test_intersection():
     support_profile = game.strategy_support_profile()
     strat_list = [list(support_profile)[0], list(support_profile)[2],
                   list(support_profile)[4]]
-    fir_profile = gbt.StrategySupportProfile(game, strat_list)
+    fir_profile = game.strategy_support_profile(lambda x: x in strat_list)
     sec_profile = support_profile.remove(list(support_profile)[2])
     new_profile = fir_profile & sec_profile
     assert len(new_profile) == 2
@@ -52,7 +52,7 @@ def test_intersection_error():
     support_profile = game.strategy_support_profile()
     strat_list = [list(support_profile)[0], list(support_profile)[2],
                   list(support_profile)[4]]
-    fir_profile = gbt.StrategySupportProfile(game, strat_list)
+    fir_profile = game.strategy_support_profile(lambda x: x in strat_list)
     sec_profile = support_profile.remove(list(support_profile)[4])
     with pytest.raises(ValueError):
         fir_profile & sec_profile
@@ -63,7 +63,7 @@ def test_union():
     support_profile = game.strategy_support_profile()
     strat_list = [list(support_profile)[0], list(support_profile)[2],
                   list(support_profile)[4]]
-    fir_profile = gbt.StrategySupportProfile(game, strat_list)
+    fir_profile = game.strategy_support_profile(lambda x: x in strat_list)
     sec_profile = support_profile.remove(list(support_profile)[4])
     new_profile = fir_profile | sec_profile
     assert new_profile == support_profile
@@ -78,8 +78,8 @@ def test_undominated():
         new_profile = loop_profile
         loop_profile = gbt.supports.undominated_strategies_solve(new_profile)
     assert len(loop_profile) == 2
-    assert loop_profile == gbt.StrategySupportProfile(
-            game, [list(support_profile)[0], list(support_profile)[3]]
+    assert loop_profile == game.strategy_support_profile(
+            lambda x: x in [list(support_profile)[0], list(support_profile)[3]]
     )
 
 

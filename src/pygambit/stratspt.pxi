@@ -54,20 +54,8 @@ class StrategySupportProfile:
     """
     support = cython.declare(unique_ptr[c_StrategySupportProfile])
 
-    def __init__(self,
-                 game: Game,
-                 strategies: typing.Optional[typing.Iterable[Strategy]] = None):
-        if (strategies is not None and
-                len(set([strat.player.number for strat in strategies])) != len(game.players)):
-            raise ValueError(
-               "A StrategySupportProfile must have at least one strategy for each player"
-            )
-        # There's at least one strategy for each player, so this forms a valid support profile
+    def __init__(self, game: Game) -> None:
         self.support.reset(new c_StrategySupportProfile(game.game))
-        if strategies is not None:
-            for strategy in game.strategies:
-                if strategy not in strategies:
-                    deref(self.support).RemoveStrategy(cython.cast(Strategy, strategy).strategy)
 
     @property
     def game(self) -> Game:
@@ -178,7 +166,7 @@ class StrategySupportProfile:
             )
         strategies = list(self)
         strategies.remove(strategy)
-        return StrategySupportProfile(self.game, strategies)
+        return self.game.strategy_support_profile(lambda x: x in strategies)
 
     def difference(self, other: StrategySupportProfile) -> StrategySupportProfile:
         """Create a support profile which contains all strategies in this profile that
@@ -201,7 +189,7 @@ class StrategySupportProfile:
         """
         if self.game != other.game:
             raise MismatchError("difference(): support profiles are defined on different games")
-        return StrategySupportProfile(self.game, set(self) - set(other))
+        return self.game.strategy_support_profile(lambda x: x in set(self) - set(other))
 
     def intersection(self, other: StrategySupportProfile) -> StrategySupportProfile:
         """Create a support profile which contains all strategies that are in both this and
@@ -224,7 +212,7 @@ class StrategySupportProfile:
         """
         if self.game != other.game:
             raise MismatchError("intersection(): support profiles are defined on different games")
-        return StrategySupportProfile(self.game, set(self) & set(other))
+        return self.game.strategy_support_profile(lambda x: x in set(self) & set(other))
 
     def union(self, other: StrategySupportProfile) -> StrategySupportProfile:
         """Create a support profile which contains all strategies that are in either this or
@@ -247,7 +235,7 @@ class StrategySupportProfile:
         """
         if self.game != other.game:
             raise MismatchError("union(): support profiles are defined on different games")
-        return StrategySupportProfile(self.game, set(self) | set(other))
+        return self.game.strategy_support_profile(lambda x: x in set(self) | set(other))
 
     def issubset(self, other: StrategySupportProfile) -> bool:
         """Test for whether this support is contained in another.
