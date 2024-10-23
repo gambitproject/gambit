@@ -136,17 +136,13 @@ def _contingencies(
         yield list(profile)
 
 
-def _get_strategies(support: gbt.StrategySupportProfile, player: gbt.Player) -> list[gbt.Strategy]:
-    return [s for s in player.strategies if s in support]
-
-
 def _equilibrium_equations(support: gbt.StrategySupportProfile, player: gbt.Player) -> list:
     """Generate the equations that the strategy of `player` must satisfy in any
     totally-mixed equilibrium on `support`.
     """
     payoffs = {strategy: [] for strategy in player.strategies if strategy in support}
 
-    strategies = _get_strategies(support, player)
+    strategies = list(support[player])
     for profile in _contingencies(support, player):
         contingency = "*".join(f"{_playerletters[strat.player.number]}{strat.number}"
                                for strat in profile if strat is not None)
@@ -207,8 +203,7 @@ def _profile_from_support(support: gbt.StrategySupportProfile) -> gbt.MixedStrat
     profile = support.game.mixed_strategy_profile()
     for player in support.game.players:
         for strategy in player.strategies:
-            profile[strategy] = 0.0
-        profile[_get_strategies(support, player)[0]] = 1.0
+            profile[strategy] = 1.0 if strategy in support else 0.0
     return profile
 
 
@@ -254,7 +249,7 @@ def phcpack_solve(game: gbt.Game, phcpack_path: pathlib.Path | str,
 
 def main():
     game = gbt.Game.parse_game(sys.stdin.read())
-    phcpack_solve(game, maxregret=1.0e-6)
+    phcpack_solve(game, "./phc", maxregret=1.0e-6)
 
 
 if __name__ == "__main__":
