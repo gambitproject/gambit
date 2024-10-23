@@ -84,11 +84,6 @@ public:
   iterator end() { return {m_sizes, true}; }
 };
 
-template <class C, class T> bool contains(const C &p_container, const T &p_value)
-{
-  return std::find(p_container.cbegin(), p_container.cend(), p_value) != p_container.cend();
-}
-
 StrategySupportProfile RestrictedGame(const Game &game, const GamePlayer &player,
                                       std::map<GamePlayer, StrategySupport> &domainStrategies)
 {

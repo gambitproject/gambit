@@ -137,26 +137,19 @@ class StrategyProfileIterator {
   friend class GameTableRep;
 
 private:
-  bool m_atEnd;
+  bool m_atEnd{false};
   StrategySupportProfile m_support;
-  Array<int> m_currentStrat;
+  std::map<GamePlayer, StrategySupportProfile::Support::const_iterator> m_currentStrat;
   PureStrategyProfile m_profile;
-  int m_frozen1, m_frozen2;
-
-  /// Reset the iterator to the first contingency (this is called by ctors)
-  void First();
+  std::vector<GamePlayer> m_unfrozen;
+  std::vector<GameStrategy> m_frozen;
 
 public:
   /// @name Lifecycle
   //@{
-  /// Construct a new iterator on the support, with no strategies held fixed
-  explicit StrategyProfileIterator(const StrategySupportProfile &);
-  /// Construct a new iterator on the support, fixing player pl's strategy
-  StrategyProfileIterator(const StrategySupportProfile &s, int pl, int st);
-  /// Construct a new iterator on the support, fixing the given strategy
-  StrategyProfileIterator(const StrategySupportProfile &, const GameStrategy &);
-  /// Construct a new iterator on the support, fixing two players' strategies
-  StrategyProfileIterator(const StrategySupportProfile &s, int pl1, int st1, int pl2, int st2);
+  /// Construct a new iterator on the support
+  explicit StrategyProfileIterator(const StrategySupportProfile &,
+                                   const std::vector<GameStrategy> &p_frozen = {});
   //@}
 
   /// @name Iteration and data access

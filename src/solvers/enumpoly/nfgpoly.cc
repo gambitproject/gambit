@@ -67,7 +67,7 @@ gPoly<double> IndifferenceEquation(const gSpace &space, const term_order &lex,
 {
   gPoly<double> equation(&space, &lex);
 
-  for (StrategyProfileIterator A(support, s1), B(support, s2); !A.AtEnd(); A++, B++) {
+  for (StrategyProfileIterator A(support, {s1}), B(support, {s2}); !A.AtEnd(); A++, B++) {
     gPoly<double> term(&space, 1, &lex);
     for (auto player : support.GetGame()->GetPlayers()) {
       if (player != s1->GetPlayer()) {

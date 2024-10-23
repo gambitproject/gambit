@@ -30,8 +30,10 @@ std::string HTMLGameWriter::Write(const Game &p_game, int p_rowPlayer, int p_col
   std::string theHtml;
   theHtml += "<center><h1>" + p_game->GetTitle() + "</h1></center>\n";
 
-  for (StrategyProfileIterator iter(p_game, p_rowPlayer, 1, p_colPlayer, 1); !iter.AtEnd();
-       iter++) {
+  for (StrategyProfileIterator iter(p_game,
+                                    {p_game->GetPlayer(p_rowPlayer)->GetStrategies().front(),
+                                     p_game->GetPlayer(p_colPlayer)->GetStrategies().front()});
+       !iter.AtEnd(); iter++) {
     if (p_game->NumPlayers() > 2) {
       theHtml += "<center><b>Subtable with strategies:</b></center>";
       for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
@@ -97,8 +99,10 @@ std::string LaTeXGameWriter::Write(const Game &p_game, int p_rowPlayer, int p_co
 {
   std::string theHtml;
 
-  for (StrategyProfileIterator iter(p_game, p_rowPlayer, 1, p_colPlayer, 1); !iter.AtEnd();
-       iter++) {
+  for (StrategyProfileIterator iter(p_game,
+                                    {p_game->GetPlayer(p_rowPlayer)->GetStrategies().front(),
+                                     p_game->GetPlayer(p_colPlayer)->GetStrategies().front()});
+       !iter.AtEnd(); iter++) {
     theHtml += "\\begin{game}{";
     theHtml += lexical_cast<std::string>(p_game->GetPlayer(p_rowPlayer)->NumStrategies());
     theHtml += "}{";

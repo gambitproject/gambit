@@ -28,6 +28,7 @@
 #include <sstream>
 #include <iomanip>
 #include <cmath>
+#include <algorithm>
 #include <map>
 
 namespace Gambit {
@@ -52,6 +53,11 @@ template <class D, class S> D lexical_cast(const S &p_value, int p_prec)
 inline double abs(double x) { return std::fabs(x); }
 
 inline double sqr(double x) { return x * x; }
+
+template <class C, class T> bool contains(const C &p_container, const T &p_value)
+{
+  return std::find(p_container.cbegin(), p_container.cend(), p_value) != p_container.cend();
+}
 
 template <class Key, class T> bool contains(const std::map<Key, T> &map, const Key &key)
 // TODO: remove when we move to C++20 which already includes a "contains" method

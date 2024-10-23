@@ -33,6 +33,8 @@ template <class T> class MixedStrategyProfileRep {
 public:
   Vector<T> m_probs;
   StrategySupportProfile m_support;
+  /// The index into the strategy profile for a strategy (-1 if not in support)
+  Array<int> m_profileIndex;
   unsigned int m_gameversion;
 
   explicit MixedStrategyProfileRep(const StrategySupportProfile &);
@@ -44,12 +46,12 @@ public:
   /// Returns the probability the strategy is played
   const T &operator[](const GameStrategy &p_strategy) const
   {
-    return m_probs[m_support.m_profileIndex[p_strategy->GetId()]];
+    return m_probs[m_profileIndex[p_strategy->GetId()]];
   }
   /// Returns the probability the strategy is played
   T &operator[](const GameStrategy &p_strategy)
   {
-    return m_probs[m_support.m_profileIndex[p_strategy->GetId()]];
+    return m_probs[m_profileIndex[p_strategy->GetId()]];
   }
 
   virtual T GetPayoff(int pl) const = 0;

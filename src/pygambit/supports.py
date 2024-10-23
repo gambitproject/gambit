@@ -20,12 +20,14 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 
+from __future__ import annotations
+
 import pygambit as gbt
 import pygambit.gambit as libgbt
 
 
 def undominated_strategies_solve(
-        profile: gbt.StrategySupportProfile,
+        profile: gbt.Game | gbt.StrategySupportProfile,
         strict: bool = False,
         external: bool = False
 ) -> gbt.StrategySupportProfile:
@@ -36,8 +38,9 @@ def undominated_strategies_solve(
 
     Parameters
     ----------
-    profile: StrategySupportProfile
-        The initial profile of strategies
+    profile : Game or StrategySupportProfile
+        The initial profile of strategies.  If a `Game` is passed, elimination begins with
+        the full set of strategies on the game.
 
     strict : bool, default False
         If specified `True`, eliminate only strategies which are strictly dominated.
@@ -53,4 +56,6 @@ def undominated_strategies_solve(
     StrategySupportProfile
         A new support profile containing only the strategies which are not dominated.
     """
+    if isinstance(profile, gbt.Game):
+        profile = profile.strategy_support_profile()
     return libgbt._undominated_strategies_solve(profile, strict, external)

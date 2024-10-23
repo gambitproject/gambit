@@ -3,7 +3,7 @@
 # Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
 #
 # FILE: src/pygambit/stratspt.pxi
-# Cython wrapper for strategy supports
+# Cython wrapper for strategy support profiles
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,6 +25,28 @@ from libcpp.memory cimport unique_ptr
 
 
 @cython.cclass
+class StrategySupport:
+    """A set of strategies for a specified player in a `StrategySupportProfile`.
+    """
+    _profile = cython.declare(StrategySupportProfile)
+    _player = cython.declare(Player)
+
+    def __init__(self, profile: StrategySupportProfile, player: Player) -> None:
+        self._profile = profile
+        self._player = player
+
+    @property
+    def player(self) -> Player:
+        return self._player
+
+    def __iter__(self) -> typing.Generator[Strategy, None, None]:
+        for strat in deref(self._profile.support).GetStrategies(self._player.player):
+            s = Strategy()
+            s.strategy = strat
+            yield s
+
+
+@cython.cclass
 class StrategySupportProfile:
     """A set-like object representing a subset of the strategies in game.
     A StrategySupportProfile always contains at least one strategy for each player
@@ -32,20 +54,8 @@ class StrategySupportProfile:
     """
     support = cython.declare(unique_ptr[c_StrategySupportProfile])
 
-    def __init__(self,
-                 game: Game,
-                 strategies: typing.Optional[typing.Iterable[Strategy]] = None):
-        if (strategies is not None and
-                len(set([strat.player.number for strat in strategies])) != len(game.players)):
-            raise ValueError(
-               "A StrategySupportProfile must have at least one strategy for each player"
-            )
-        # There's at least one strategy for each player, so this forms a valid support profile
+    def __init__(self, game: Game) -> None:
         self.support.reset(new c_StrategySupportProfile(game.game))
-        if strategies is not None:
-            for strategy in game.strategies:
-                if strategy not in strategies:
-                    deref(self.support).RemoveStrategy(cython.cast(Strategy, strategy).strategy)
 
     @property
     def game(self) -> Game:
@@ -73,15 +83,6 @@ class StrategySupportProfile:
     def __ge__(self, other: StrategySupportProfile) -> bool:
         return self.issuperset(other)
 
-    def __getitem__(self, index: int) -> Strategy:
-        for pl in range(len(self.game.players)):
-            if index < deref(self.support).NumStrategiesPlayer(pl+1):
-                s = Strategy()
-                s.strategy = deref(self.support).GetStrategy(pl+1, index+1)
-                return s
-            index = index - deref(self.support).NumStrategiesPlayer(pl+1)
-        raise IndexError("StrategySupportProfile index out of range")
-
     def __contains__(self, strategy: Strategy) -> bool:
         if strategy not in self.game.strategies:
             raise MismatchError(
@@ -90,19 +91,56 @@ class StrategySupportProfile:
         return deref(self.support).Contains(strategy.strategy)
 
     def __iter__(self) -> typing.Generator[Strategy, None, None]:
-        for pl in range(len(self.game.players)):
-            for st in range(deref(self.support).NumStrategiesPlayer(pl+1)):
+        for player in deref(self.support).GetGame().deref().GetPlayers():
+            for strat in deref(self.support).GetStrategies(player):
                 s = Strategy()
-                s.strategy = deref(self.support).GetStrategy(pl+1, st+1)
+                s.strategy = strat
                 yield s
 
+    def __getitem__(self, player: PlayerReference) -> StrategySupport:
+        """Return a `StrategySupport` representing the strategies in the support
+        belonging to `player`.
+
+        Parameters
+        ----------
+        player : Player
+            The player to extract the support for
+
+        Raises
+        ------
+        MismatchError
+            If `player` is a `Player` from a different game.
+        """
+        return StrategySupport(
+            self,
+            cython.cast(Player, self.game._resolve_player(player, "__getitem__"))
+        )
+
     def __and__(self, other: StrategySupportProfile) -> StrategySupportProfile:
+        """Operator version of set intersection on support profiles.
+
+        See also
+        --------
+        intersection
+        """
         return self.intersection(other)
 
     def __or__(self, other: StrategySupportProfile) -> StrategySupportProfile:
+        """Operator version of set union on support profiles.
+
+        See also
+        --------
+        union
+        """
         return self.union(other)
 
     def __sub__(self, other: StrategySupportProfile) -> StrategySupportProfile:
+        """Operator version of set difference on support profiles.
+
+        See also
+        --------
+        difference
+        """
         return self.difference(other)
 
     def remove(self, strategy: Strategy) -> StrategySupportProfile:
@@ -122,13 +160,15 @@ class StrategySupportProfile:
             raise MismatchError(
                 "remove(): strategy is not part of the game on which the profile is defined."
             )
-        if deref(self.support).NumStrategiesPlayer(strategy.player.number + 1) == 1:
+        if deref(self.support).GetStrategies(
+                cython.cast(Player, strategy.player).player
+        ).size() == 1:
             raise UndefinedOperationError(
                 "remove(): cannot remove last strategy of a player"
             )
         strategies = list(self)
         strategies.remove(strategy)
-        return StrategySupportProfile(self.game, strategies)
+        return self.game.strategy_support_profile(lambda x: x in strategies)
 
     def difference(self, other: StrategySupportProfile) -> StrategySupportProfile:
         """Create a support profile which contains all strategies in this profile that
@@ -151,7 +191,7 @@ class StrategySupportProfile:
         """
         if self.game != other.game:
             raise MismatchError("difference(): support profiles are defined on different games")
-        return StrategySupportProfile(self.game, set(self) - set(other))
+        return self.game.strategy_support_profile(lambda x: x in set(self) - set(other))
 
     def intersection(self, other: StrategySupportProfile) -> StrategySupportProfile:
         """Create a support profile which contains all strategies that are in both this and
@@ -174,7 +214,7 @@ class StrategySupportProfile:
         """
         if self.game != other.game:
             raise MismatchError("intersection(): support profiles are defined on different games")
-        return StrategySupportProfile(self.game, set(self) & set(other))
+        return self.game.strategy_support_profile(lambda x: x in set(self) & set(other))
 
     def union(self, other: StrategySupportProfile) -> StrategySupportProfile:
         """Create a support profile which contains all strategies that are in either this or
@@ -197,7 +237,7 @@ class StrategySupportProfile:
         """
         if self.game != other.game:
             raise MismatchError("union(): support profiles are defined on different games")
-        return StrategySupportProfile(self.game, set(self) | set(other))
+        return self.game.strategy_support_profile(lambda x: x in set(self) | set(other))
 
     def issubset(self, other: StrategySupportProfile) -> bool:
         """Test for whether this support is contained in another.

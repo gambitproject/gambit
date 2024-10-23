@@ -27,9 +27,7 @@
 
 namespace Gambit {
 
-class StrategySupportProfile;
-
-/// \brief A support on a strategic game
+/// @brief A support on a strategic game
 ///
 /// This class represents a subset of the strategies in strategic game.
 /// It is enforced that each player has at least one strategy; thus,
@@ -41,22 +39,33 @@ class StrategySupportProfile;
 /// Within the support, strategies are maintained in the same order
 /// in which they appear in the underlying game.
 class StrategySupportProfile {
-  template <class T> friend class MixedStrategyProfile;
-  template <class T> friend class MixedStrategyProfileRep;
-  template <class T> friend class AGGMixedStrategyProfileRep;
-  template <class T> friend class BAGGMixedStrategyProfileRep;
-
 protected:
   Game m_nfg;
-  Array<Array<GameStrategy>> m_support;
-
-  /// The index into a strategy profile for a strategy (-1 if not in support)
-  Array<int> m_profileIndex;
-
-  bool Undominated(StrategySupportProfile &newS, const GamePlayer &, bool p_strict,
-                   bool p_external = false) const;
+  std::map<GamePlayer, std::vector<GameStrategy>> m_support;
 
 public:
+  class Support {
+  private:
+    const StrategySupportProfile *m_profile;
+    GamePlayer m_player;
+
+  public:
+    using const_iterator = std::vector<GameStrategy>::const_iterator;
+
+    Support() : m_profile(0), m_player(0) {}
+    Support(const StrategySupportProfile *p_profile, GamePlayer p_player)
+      : m_profile(p_profile), m_player(p_player)
+    {
+    }
+
+    size_t size() const { return m_profile->m_support.at(m_player).size(); }
+    GameStrategy front() const { return m_profile->m_support.at(m_player).front(); }
+    GameStrategy back() const { return m_profile->m_support.at(m_player).back(); }
+
+    const_iterator begin() const { return m_profile->m_support.at(m_player).begin(); }
+    const_iterator end() const { return m_profile->m_support.at(m_player).end(); }
+  };
+
   /// @name Lifecycle
   //@{
   /// Constructor.  By default, a support contains all strategies.
@@ -82,9 +91,6 @@ public:
   /// Returns the game on which the support is defined.
   Game GetGame() const { return m_nfg; }
 
-  /// Returns the number of strategies in the support for player pl.
-  int NumStrategies(int pl) const { return m_support[pl].size(); }
-
   /// Returns the number of strategies in the support for all players.
   Array<int> NumStrategies() const;
 
@@ -93,21 +99,15 @@ public:
 
   template <class T> MixedStrategyProfile<T> NewMixedStrategyProfile() const;
 
-  /// Returns the strategy in the st'th position for player pl.
-  GameStrategy GetStrategy(int pl, int st) const { return m_support[pl][st]; }
-
   /// Returns the number of players in the game
   int NumPlayers() const { return m_nfg->NumPlayers(); }
   /// Returns the set of players in the game
   Array<GamePlayer> GetPlayers() const { return m_nfg->GetPlayers(); }
   /// Returns the set of strategies in the support for a player
-  const Array<GameStrategy> &GetStrategies(const GamePlayer &p_player) const
-  {
-    return m_support[p_player->GetNumber()];
-  }
+  Support GetStrategies(const GamePlayer &p_player) const { return Support(this, p_player); }
 
   /// Returns true exactly when the strategy is in the support.
-  bool Contains(const GameStrategy &s) const { return m_profileIndex[s->GetId()] >= 0; }
+  bool Contains(const GameStrategy &s) const { return contains(m_support.at(s->GetPlayer()), s); }
 
   /// Returns true iff this support is a (weak) subset of the specified support
   bool IsSubsetOf(const StrategySupportProfile &) const;
@@ -124,7 +124,7 @@ public:
   /// Add a strategy to the support.
   void AddStrategy(const GameStrategy &);
 
-  /// \brief Removes a strategy from the support
+  /// @brief Removes a strategy from the support
   ///
   /// Removes a strategy from the support.  If the strategy is
   /// not present, or if the strategy is the only strategy for that
@@ -140,8 +140,6 @@ public:
 
   /// Returns a copy of the support with dominated strategies removed
   StrategySupportProfile Undominated(bool p_strict, bool p_external = false) const;
-  /// Returns a copy of the support with dominated strategies of the specified player removed
-  StrategySupportProfile Undominated(bool p_strict, const GamePlayer &p_player) const;
   //@}
 
   /// @name Identification of overwhelmed strategies

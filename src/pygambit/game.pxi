@@ -952,8 +952,30 @@ class Game:
                     profile[action] = Rational(hi - lo - 1, denom)
             return profile
 
-    def support_profile(self):
-        return StrategySupportProfile(self)
+    def strategy_support_profile(
+            self, strategies: typing.Callable | None = None
+    ) -> StrategySupportProfile:
+        """Create a new `StrategySupportProfile` on the game.
+
+        Parameters
+        ----------
+        strategies : function, optional
+            By default the support profile contains all strategies for all players.
+            If specified, only strategies for which the supplied function returns `True`
+            are included.
+
+        Returns
+        -------
+        StrategySupportProfile
+        """
+        profile = StrategySupportProfile(self)
+        if strategies is not None:
+            for strategy in self.strategies:
+                if not strategies(strategy):
+                    if not (deref(profile.support)
+                            .RemoveStrategy(cython.cast(Strategy, strategy).strategy)):
+                        raise ValueError("attempted to remove the last strategy for player")
+        return profile
 
     def nodes(
             self,

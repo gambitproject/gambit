@@ -401,6 +401,8 @@ Rational::Rational(long n) : num(n), den(&OneRep) {}
 
 Rational::Rational(int n) : num(n), den(&OneRep) {}
 
+Rational::Rational(size_t n) : num(int(n)), den(&OneRep) {}
+
 Rational::Rational(long n, long d) : num(n), den(d)
 {
   if (d == 0) {

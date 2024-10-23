@@ -44,6 +44,7 @@ public:
   Rational();
   explicit Rational(double);
   explicit Rational(int);
+  explicit Rational(size_t);
   explicit Rational(long n);
   Rational(int n, int d);
   Rational(long n, long d);

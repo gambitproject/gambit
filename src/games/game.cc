@@ -312,15 +312,27 @@ void GameRep::WriteNfgFile(std::ostream &p_file) const
 template <class T>
 MixedStrategyProfileRep<T>::MixedStrategyProfileRep(const StrategySupportProfile &p_support)
   : m_probs(p_support.MixedProfileLength()), m_support(p_support),
+    m_profileIndex(p_support.GetGame()->MixedProfileLength()),
     m_gameversion(p_support.GetGame()->GetVersion())
 {
+  int index = 1, stnum = 1;
+  for (auto player : p_support.GetGame()->GetPlayers()) {
+    for (auto strategy : player->GetStrategies()) {
+      if (p_support.Contains(strategy)) {
+        m_profileIndex[stnum++] = index++;
+      }
+      else {
+        m_profileIndex[stnum++] = -1;
+      }
+    }
+  }
   SetCentroid();
 }
 
 template <class T> void MixedStrategyProfileRep<T>::SetCentroid()
 {
   for (auto player : m_support.GetGame()->GetPlayers()) {
-    T center = ((T)1) / ((T)m_support.NumStrategies(player->GetNumber()));
+    T center = T(1) / T(m_support.GetStrategies(player).size());
     for (auto strategy : m_support.GetStrategies(player)) {
       (*this)[strategy] = center;
     }

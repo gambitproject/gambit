@@ -20,51 +20,42 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <algorithm>
+#include <numeric>
+
 #include "gambit.h"
 #include "gametable.h"
 
 namespace Gambit {
 
 //===========================================================================
-//                          class StrategySupportProfile
+//                        class StrategySupportProfile
 //===========================================================================
 
-//---------------------------------------------------------------------------
-//                               Lifecycle
-//---------------------------------------------------------------------------
-
-StrategySupportProfile::StrategySupportProfile(const Game &p_nfg)
-  : m_nfg(p_nfg), m_profileIndex(p_nfg->MixedProfileLength())
+StrategySupportProfile::StrategySupportProfile(const Game &p_nfg) : m_nfg(p_nfg)
 {
-  for (int pl = 1, index = 1; pl <= p_nfg->NumPlayers(); pl++) {
-    m_support.push_back(Array<GameStrategy>());
-    for (int st = 1; st <= p_nfg->GetPlayer(pl)->NumStrategies(); st++, index++) {
-      m_support[pl].push_back(p_nfg->GetPlayer(pl)->GetStrategy(st));
-      m_profileIndex[index] = index;
+  for (auto player : m_nfg->GetPlayers()) {
+    for (auto strategy : player->GetStrategies()) {
+      m_support[player].push_back(strategy);
     }
   }
 }
 
-//---------------------------------------------------------------------------
-//                          General information
-//---------------------------------------------------------------------------
-
 Array<int> StrategySupportProfile::NumStrategies() const
 {
-  Array<int> a(m_support.Length());
-
-  for (int pl = 1; pl <= a.Length(); pl++) {
-    a[pl] = m_support[pl].Length();
-  }
-  return a;
+  Array<int> dim(m_support.size());
+  std::transform(
+      m_support.cbegin(), m_support.cend(), dim.begin(),
+      [](std::pair<GamePlayer, std::vector<GameStrategy>> a) { return a.second.size(); });
+  return dim;
 }
 
 int StrategySupportProfile::MixedProfileLength() const
 {
-  int total = 0;
-  for (int pl = 1; pl <= m_nfg->NumPlayers(); total += m_support[pl++].Length())
-    ;
-  return total;
+  return std::accumulate(m_support.cbegin(), m_support.cend(), 0,
+                         [](size_t tot, std::pair<GamePlayer, std::vector<GameStrategy>> a) {
+                           return tot + a.second.size();
+                         });
 }
 
 template <> MixedStrategyProfile<double> StrategySupportProfile::NewMixedStrategyProfile() const
@@ -79,19 +70,14 @@ template <> MixedStrategyProfile<Rational> StrategySupportProfile::NewMixedStrat
 
 bool StrategySupportProfile::IsSubsetOf(const StrategySupportProfile &p_support) const
 {
-  if (m_nfg != p_support.m_nfg) {
-    return false;
-  }
-  for (int pl = 1; pl <= m_support.Length(); pl++) {
-    if (m_support[pl].Length() > p_support.m_support[pl].Length()) {
+  for (auto player : m_nfg->GetPlayers()) {
+    if (!std::includes(p_support.m_support.at(player).begin(),
+                       p_support.m_support.at(player).end(), m_support.at(player).begin(),
+                       m_support.at(player).end(),
+                       [](const GameStrategy &s, const GameStrategy &t) {
+                         return s->GetNumber() < t->GetNumber();
+                       })) {
       return false;
-    }
-    else {
-      for (int st = 1; st <= m_support[pl].Length(); st++) {
-        if (!p_support.m_support[pl].Contains(m_support[pl][st])) {
-          return false;
-        }
-      }
     }
   }
   return true;
@@ -124,72 +110,29 @@ void StrategySupportProfile::WriteNfgFile(std::ostream &p_file) const
   };
 }
 
-//---------------------------------------------------------------------------
-//                        Modifying the support
-//---------------------------------------------------------------------------
-
 void StrategySupportProfile::AddStrategy(const GameStrategy &p_strategy)
 {
-  // Get the null-pointer checking out of the way once and for all
-  GameStrategyRep *strategy = p_strategy;
-  Array<GameStrategy> &support = m_support[strategy->GetPlayer()->GetNumber()];
-
-  for (int i = 1; i <= support.Length(); i++) {
-    GameStrategyRep *s = support[i];
-    if (s->GetNumber() == strategy->GetNumber()) {
-      // Strategy already in support; no change
-      return;
-    }
-    if (s->GetNumber() > strategy->GetNumber()) {
-      // Shift all higher-id strategies by one in the profile
-      m_profileIndex[strategy->GetId()] = m_profileIndex[s->GetId()];
-      for (int id = s->GetId(); id <= m_profileIndex.Length(); id++) {
-        if (m_profileIndex[id] >= 0) {
-          m_profileIndex[id]++;
-        }
-      }
-      // Insert here
-      support.Insert(strategy, i);
-      return;
-    }
+  auto &support = m_support[p_strategy->GetPlayer()];
+  auto pos = std::find_if(support.begin(), support.end(), [p_strategy](const GameStrategy &s) {
+    return s->GetNumber() >= p_strategy->GetNumber();
+  });
+  if (pos == support.end() || *pos != p_strategy) {
+    // Strategy is not in the support for the player; add at this location to keep sorted by number
+    support.insert(pos, p_strategy);
   }
-
-  // If we get here, p_strategy has a higher number than anything in the
-  // support for this player; append.
-  GameStrategyRep *last = support[support.Last()];
-  m_profileIndex[strategy->GetId()] = m_profileIndex[last->GetId()] + 1;
-  for (int id = strategy->GetId() + 1; id <= m_profileIndex.Length(); id++) {
-    if (m_profileIndex[id] >= 0) {
-      m_profileIndex[id]++;
-    }
-  }
-  support.push_back(strategy);
 }
 
 bool StrategySupportProfile::RemoveStrategy(const GameStrategy &p_strategy)
 {
-  GameStrategyRep *strategy = p_strategy;
-  Array<GameStrategy> &support = m_support[strategy->GetPlayer()->GetNumber()];
-
-  if (support.Length() == 1) {
+  auto &support = m_support[p_strategy->GetPlayer()];
+  if (support.size() == 1) {
     return false;
   }
-
-  for (int i = 1; i <= support.Length(); i++) {
-    GameStrategyRep *s = support[i];
-    if (s == strategy) {
-      support.Remove(i);
-      m_profileIndex[strategy->GetId()] = -1;
-      // Shift strategies left in the profile
-      for (int id = strategy->GetId() + 1; id <= m_profileIndex.Length(); id++) {
-        if (m_profileIndex[id] >= 0) {
-          m_profileIndex[id]--;
-        }
-      }
-      return true;
-    }
+  auto pos = std::find(support.begin(), support.end(), p_strategy);
+  if (pos != support.end()) {
+    support.erase(pos);
+    return true;
   }
-
   return false;
 }
 
@@ -225,18 +168,16 @@ bool StrategySupportProfile::IsDominated(const GameStrategy &s, bool p_strict,
                                          bool p_external) const
 {
   if (p_external) {
-    GamePlayer player = s->GetPlayer();
-    for (int st = 1; st <= player->NumStrategies(); st++) {
-      if (player->GetStrategy(st) != s && Dominates(player->GetStrategy(st), s, p_strict)) {
+    for (auto strategy : s->GetPlayer()->GetStrategies()) {
+      if (strategy != s && Dominates(strategy, s, p_strict)) {
         return true;
       }
     }
     return false;
   }
   else {
-    for (int i = 1; i <= NumStrategies(s->GetPlayer()->GetNumber()); i++) {
-      if (GetStrategy(s->GetPlayer()->GetNumber(), i) != s &&
-          Dominates(GetStrategy(s->GetPlayer()->GetNumber(), i), s, p_strict)) {
+    for (auto strategy : GetStrategies(s->GetPlayer())) {
+      if (strategy != s && Dominates(strategy, s, p_strict)) {
         return true;
       }
     }
@@ -244,86 +185,88 @@ bool StrategySupportProfile::IsDominated(const GameStrategy &s, bool p_strict,
   }
 }
 
-bool StrategySupportProfile::Undominated(StrategySupportProfile &newS, const GamePlayer &p_player,
-                                         bool p_strict, bool p_external) const
+namespace {
+
+/// @brief Sort a range by a partial ordering and indicate minimal elements
+///
+/// Sorts the range bracketed by `first` and `last` according to a partial ordering.
+/// The partial ordering is specified by `greater`, which should be a binary
+/// operation which returns `true` if the first argument is greater than the
+/// second argument in the partial ordering.
+///
+/// On termination, the range between `first` and `last` is sorted in decreasing
+/// order by the partial ordering, in the sense that, if x > y according to the
+/// partial ordering, then x will come before y in the sorted output.
+///
+/// By this convention the set of **minimal elements** will all appear at the end
+/// of the sorted output.  The function returns an iterator pointing to the first
+/// minimal element in the sorted range.
+template <class Iterator, class Comparator>
+Iterator find_minimal_elements(Iterator first, Iterator last, Comparator greater)
 {
-  Array<GameStrategy> set((p_external) ? p_player->NumStrategies()
-                                       : NumStrategies(p_player->GetNumber()));
-
-  if (p_external) {
-    for (int st = 1; st <= set.Length(); st++) {
-      set[st] = p_player->GetStrategy(st);
-    }
-  }
-  else {
-    for (int st = 1; st <= set.Length(); st++) {
-      set[st] = GetStrategy(p_player->GetNumber(), st);
-    }
-  }
-
-  int min = 0, dis = set.Length() - 1;
-
+  auto min = first, dis = std::prev(last);
   while (min <= dis) {
-    int pp;
-    for (pp = 0; pp < min && !Dominates(set[pp + 1], set[dis + 1], p_strict); pp++)
-      ;
+    auto pp = std::adjacent_find(first, last, greater);
     if (pp < min) {
       dis--;
     }
     else {
-      GameStrategy foo = set[dis + 1];
-      set[dis + 1] = set[min + 1];
-      set[min + 1] = foo;
-
-      for (int inc = min + 1; inc <= dis;) {
-        if (Dominates(set[min + 1], set[dis + 1], p_strict)) {
+      std::iter_swap(dis, min);
+      auto inc = std::next(min);
+      while (inc <= dis) {
+        if (greater(*min, *dis)) {
           dis--;
         }
-        else if (Dominates(set[dis + 1], set[min + 1], p_strict)) {
-          foo = set[dis + 1];
-          set[dis + 1] = set[min + 1];
-          set[min + 1] = foo;
+        else if (greater(*dis, *min)) {
+          std::iter_swap(dis, min);
           dis--;
         }
         else {
-          foo = set[dis + 1];
-          set[dis + 1] = set[inc + 1];
-          set[inc + 1] = foo;
+          std::iter_swap(dis, inc);
           inc++;
         }
       }
       min++;
     }
   }
+  return min;
+}
 
-  if (min + 1 <= set.Length()) {
-    for (int i = min + 1; i <= set.Length(); i++) {
-      newS.RemoveStrategy(set[i]);
-    }
-    return true;
+} // end anonymous namespace
+
+bool UndominatedForPlayer(const StrategySupportProfile &p_support,
+                          StrategySupportProfile &p_newSupport, const GamePlayer &p_player,
+                          bool p_strict, bool p_external)
+{
+  std::vector<GameStrategy> set((p_external) ? p_player->NumStrategies()
+                                             : p_support.GetStrategies(p_player).size());
+  if (p_external) {
+    auto strategies = p_player->GetStrategies();
+    std::copy(strategies.begin(), strategies.end(), set.begin());
   }
   else {
-    return false;
+    auto strategies = p_support.GetStrategies(p_player);
+    std::copy(strategies.begin(), strategies.end(), set.begin());
   }
+  auto min =
+      find_minimal_elements(set.begin(), set.end(),
+                            [&p_support, p_strict](const GameStrategy &s, const GameStrategy &t) {
+                              return p_support.Dominates(s, t, p_strict);
+                            });
+
+  for (auto s = min; s != set.end(); s++) {
+    p_newSupport.RemoveStrategy(*s);
+  }
+  return min != set.end();
 }
 
 StrategySupportProfile StrategySupportProfile::Undominated(bool p_strict, bool p_external) const
 {
-  StrategySupportProfile newS(*this);
-
+  StrategySupportProfile newSupport(*this);
   for (auto player : m_nfg->GetPlayers()) {
-    Undominated(newS, player, p_strict, p_external);
+    UndominatedForPlayer(*this, newSupport, player, p_strict, p_external);
   }
-
-  return newS;
-}
-
-StrategySupportProfile StrategySupportProfile::Undominated(bool p_strict,
-                                                           const GamePlayer &p_player) const
-{
-  StrategySupportProfile newS(*this);
-  Undominated(newS, p_player, p_strict);
-  return newS;
+  return newSupport;
 }
 
 //---------------------------------------------------------------------------
