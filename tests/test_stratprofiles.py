@@ -63,15 +63,13 @@ def test_union():
 
 def test_undominated():
     game = games.read_from_file("mixed_strategy.nfg")
-    support_profile = game.strategy_support_profile()
-    loop_profile = gbt.supports.undominated_strategies_solve(support_profile)
+    profile = gbt.supports.undominated_strategies_solve(game)
     while True:
-        new_profile = loop_profile
-        loop_profile = gbt.supports.undominated_strategies_solve(new_profile)
-        if new_profile == loop_profile:
+        new_profile = gbt.supports.undominated_strategies_solve(profile)
+        if new_profile == profile:
             break
-    assert len(loop_profile) == 2
-    assert loop_profile == game.strategy_support_profile(lambda x: x.label == "1")
+        profile = new_profile
+    assert profile == game.strategy_support_profile(lambda x: x.label == "1")
 
 
 def test_remove_error():
