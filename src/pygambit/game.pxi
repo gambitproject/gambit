@@ -952,7 +952,14 @@ class Game:
                     profile[action] = Rational(hi - lo - 1, denom)
             return profile
 
-    def support_profile(self):
+    def strategy_support_profile(self) -> StrategySupportProfile:
+        """Create a new `StrategySupportProfile` on the game, consisting of
+        all strategies for all players.
+
+        Returns
+        -------
+        StrategySupportProfile
+        """
         return StrategySupportProfile(self)
 
     def nodes(
