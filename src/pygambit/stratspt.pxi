@@ -110,18 +110,49 @@ class StrategySupportProfile:
                 yield s
 
     def __getitem__(self, player: PlayerReference) -> StrategySupport:
+        """Return a `StrategySupport` representing the strategies in the support
+        belonging to `player`.
+
+        Parameters
+        ----------
+        player : Player
+            The player to extract the support for
+
+        Raises
+        ------
+        MismatchError
+            If `player` is a `Player` from a different game.
+        """
         return StrategySupport(
             self,
             cython.cast(Player, self.game._resolve_player(player, "__getitem__"))
         )
 
     def __and__(self, other: StrategySupportProfile) -> StrategySupportProfile:
+        """Operator version of set intersection on support profiles.
+
+        See also
+        --------
+        intersection
+        """
         return self.intersection(other)
 
     def __or__(self, other: StrategySupportProfile) -> StrategySupportProfile:
+        """Operator version of set union on support profiles.
+
+        See also
+        --------
+        union
+        """
         return self.union(other)
 
     def __sub__(self, other: StrategySupportProfile) -> StrategySupportProfile:
+        """Operator version of set difference on support profiles.
+
+        See also
+        --------
+        difference
+        """
         return self.difference(other)
 
     def remove(self, strategy: Strategy) -> StrategySupportProfile:
