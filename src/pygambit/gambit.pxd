@@ -26,10 +26,18 @@ cdef extern from "games/number.h":
 
 cdef extern from "core/array.h":
     cdef cppclass Array[T]:
+        cppclass iterator:
+            T operator*()
+            iterator operator++()
+            bint operator==(iterator)
+            bint operator!=(iterator)
         T getitem "operator[]"(int) except +
         int Length() except +
         Array() except +
         Array(int) except +
+        iterator begin() except +
+        iterator end() except +
+
 
 cdef extern from "core/list.h":
     cdef cppclass c_List "List"[T]:
@@ -188,6 +196,7 @@ cdef extern from "games/game.h":
 
         int NumPlayers() except +
         c_GamePlayer GetPlayer(int) except +IndexError
+        Array[c_GamePlayer] GetPlayers() except +
         c_GamePlayer GetChance() except +
         c_GamePlayer NewPlayer() except +
 
@@ -343,6 +352,7 @@ cdef extern from "games/stratspt.h":
         bool IsSubsetOf(c_StrategySupportProfile) except +
         bool RemoveStrategy(c_GameStrategy) except +
         c_GameStrategy GetStrategy(int, int) except +IndexError
+        Array[c_GameStrategy] GetStrategies(c_GamePlayer) except +
         bool Contains(c_GameStrategy) except +
         bool IsDominated(c_GameStrategy, bool, bool) except +
         c_StrategySupportProfile Undominated(bool, bool)  # except + doesn't compile

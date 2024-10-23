@@ -90,10 +90,10 @@ class StrategySupportProfile:
         return deref(self.support).Contains(strategy.strategy)
 
     def __iter__(self) -> typing.Generator[Strategy, None, None]:
-        for pl in range(len(self.game.players)):
-            for st in range(deref(self.support).NumStrategiesPlayer(pl+1)):
+        for player in deref(self.support).GetGame().deref().GetPlayers():
+            for strat in deref(self.support).GetStrategies(player):
                 s = Strategy()
-                s.strategy = deref(self.support).GetStrategy(pl+1, st+1)
+                s.strategy = strat
                 yield s
 
     def __and__(self, other: StrategySupportProfile) -> StrategySupportProfile:
