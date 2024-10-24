@@ -203,31 +203,33 @@ bool StrategySupportProfile::IsDominated(const GameStrategy &s, bool p_strict,
   }
 }
 
-int find_minimal_elements(std::vector<GameStrategy> &set,
-                          std::function<bool(const GameStrategy &, const GameStrategy &)> greater)
+std::vector<GameStrategy>::iterator
+find_minimal_elements(std::vector<GameStrategy> &set,
+                      std::function<bool(const GameStrategy &, const GameStrategy &)> greater)
 {
-  int min = 0, dis = set.size() - 1;
+  auto min = set.begin(), dis = std::prev(set.end());
 
   while (min <= dis) {
-    int pp;
-    for (pp = 0; pp < min && !greater(set[pp], set[dis]); pp++)
-      ;
+    auto pp = set.begin();
+    while (pp != set.end() && !greater(*pp, *dis)) {
+      pp++;
+    }
     if (pp < min) {
       dis--;
     }
     else {
-      std::swap(set[dis], set[min]);
+      std::iter_swap(dis, min);
 
-      for (int inc = min + 1; inc <= dis;) {
-        if (greater(set[min], set[dis])) {
+      for (auto inc = std::next(min); inc <= dis;) {
+        if (greater(*min, *dis)) {
           dis--;
         }
-        else if (greater(set[dis], set[min])) {
-          std::swap(set[dis], set[min]);
+        else if (greater(*dis, *min)) {
+          std::iter_swap(dis, min);
           dis--;
         }
         else {
-          std::swap(set[dis], set[inc]);
+          std::iter_swap(dis, inc);
           inc++;
         }
       }
@@ -250,20 +252,24 @@ bool StrategySupportProfile::Undominated(StrategySupportProfile &newS, const Gam
     auto strategies = GetStrategies(p_player);
     std::copy(strategies.begin(), strategies.end(), set.begin());
   }
-  int min =
+  auto min =
       find_minimal_elements(set, [this, p_strict](const GameStrategy &s, const GameStrategy &t) {
         return Dominates(s, t, p_strict);
       });
 
-  if (min < set.size()) {
-    for (int i = min; i < set.size(); i++) {
-      newS.RemoveStrategy(set[i]);
-    }
-    return true;
+  for (auto s = min; s != set.end(); s++) {
+    newS.RemoveStrategy(*s);
   }
-  else {
-    return false;
-  }
+  // if (min < set.size()) {
+  //  for (int i = min; i < set.size(); i++) {
+  //    newS.RemoveStrategy(set[i]);
+  //  }
+  //  return true;
+  //}
+  // else {
+  //  return false;
+  //}
+  return min != set.end();
 }
 
 StrategySupportProfile StrategySupportProfile::Undominated(bool p_strict, bool p_external) const
