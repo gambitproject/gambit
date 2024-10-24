@@ -203,15 +203,27 @@ bool StrategySupportProfile::IsDominated(const GameStrategy &s, bool p_strict,
   }
 }
 
-std::vector<GameStrategy>::iterator
-find_minimal_elements(std::vector<GameStrategy> &set,
-                      std::function<bool(const GameStrategy &, const GameStrategy &)> greater)
+/// @brief Sort a range by a partial ordering and indicate minimal elements
+///
+/// Sorts the range bracketed by `first` and `last` according to a partial ordering.
+/// The partial ordering is specified by `greater`, which should be a binary
+/// operation which returns `true` if the first argument is greater than the
+/// second argument in the partial ordering.
+///
+/// On termination, the range between `first` and `last` is sorted in decreasing
+/// order by the partial ordering, in the sense that, if x > y according to the
+/// partial ordering, then x will come before y in the sorted output.
+///
+/// By this convention the set of **minimal elements** will all appear at the end
+/// of the sorted output.  The function returns an iterator pointing to the first
+/// minimal element in the sorted range.
+template <class Iterator, class Comparator>
+Iterator find_minimal_elements(Iterator first, Iterator last, Comparator greater)
 {
-  auto min = set.begin(), dis = std::prev(set.end());
-
+  auto min = first, dis = std::prev(last);
   while (min <= dis) {
-    auto pp = set.begin();
-    while (pp != set.end() && !greater(*pp, *dis)) {
+    auto pp = first;
+    while (pp != last && !greater(*pp, *dis)) {
       pp++;
     }
     if (pp < min) {
@@ -219,8 +231,8 @@ find_minimal_elements(std::vector<GameStrategy> &set,
     }
     else {
       std::iter_swap(dis, min);
-
-      for (auto inc = std::next(min); inc <= dis;) {
+      auto inc = std::next(min);
+      while (inc <= dis) {
         if (greater(*min, *dis)) {
           dis--;
         }
@@ -252,23 +264,14 @@ bool StrategySupportProfile::Undominated(StrategySupportProfile &newS, const Gam
     auto strategies = GetStrategies(p_player);
     std::copy(strategies.begin(), strategies.end(), set.begin());
   }
-  auto min =
-      find_minimal_elements(set, [this, p_strict](const GameStrategy &s, const GameStrategy &t) {
-        return Dominates(s, t, p_strict);
-      });
+  auto min = find_minimal_elements(set.begin(), set.end(),
+                                   [this, p_strict](const GameStrategy &s, const GameStrategy &t) {
+                                     return Dominates(s, t, p_strict);
+                                   });
 
   for (auto s = min; s != set.end(); s++) {
     newS.RemoveStrategy(*s);
   }
-  // if (min < set.size()) {
-  //  for (int i = min; i < set.size(); i++) {
-  //    newS.RemoveStrategy(set[i]);
-  //  }
-  //  return true;
-  //}
-  // else {
-  //  return false;
-  //}
   return min != set.end();
 }
 
