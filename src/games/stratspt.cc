@@ -203,23 +203,9 @@ bool StrategySupportProfile::IsDominated(const GameStrategy &s, bool p_strict,
   }
 }
 
-bool StrategySupportProfile::Undominated(StrategySupportProfile &newS, const GamePlayer &p_player,
-                                         bool p_strict, bool p_external) const
+int find_minimal_elements(std::vector<GameStrategy> &set,
+                          std::function<bool(const GameStrategy &, const GameStrategy &)> greater)
 {
-  std::vector<GameStrategy> set((p_external) ? p_player->NumStrategies()
-                                             : NumStrategies(p_player->GetNumber()));
-  if (p_external) {
-    auto strategies = p_player->GetStrategies();
-    std::copy(strategies.begin(), strategies.end(), set.begin());
-  }
-  else {
-    auto strategies = GetStrategies(p_player);
-    std::copy(strategies.begin(), strategies.end(), set.begin());
-  }
-
-  auto greater = [this, p_strict](const GameStrategy &s, const GameStrategy &t) {
-    return Dominates(s, t, p_strict);
-  };
   int min = 0, dis = set.size() - 1;
 
   while (min <= dis) {
@@ -248,6 +234,26 @@ bool StrategySupportProfile::Undominated(StrategySupportProfile &newS, const Gam
       min++;
     }
   }
+  return min;
+}
+
+bool StrategySupportProfile::Undominated(StrategySupportProfile &newS, const GamePlayer &p_player,
+                                         bool p_strict, bool p_external) const
+{
+  std::vector<GameStrategy> set((p_external) ? p_player->NumStrategies()
+                                             : NumStrategies(p_player->GetNumber()));
+  if (p_external) {
+    auto strategies = p_player->GetStrategies();
+    std::copy(strategies.begin(), strategies.end(), set.begin());
+  }
+  else {
+    auto strategies = GetStrategies(p_player);
+    std::copy(strategies.begin(), strategies.end(), set.begin());
+  }
+  int min =
+      find_minimal_elements(set, [this, p_strict](const GameStrategy &s, const GameStrategy &t) {
+        return Dominates(s, t, p_strict);
+      });
 
   if (min < set.size()) {
     for (int i = min; i < set.size(); i++) {
