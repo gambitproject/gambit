@@ -46,12 +46,12 @@ public:
   /// Returns the probability the strategy is played
   const T &operator[](const GameStrategy &p_strategy) const
   {
-    return m_probs[m_support.m_profileIndex[p_strategy->GetId()]];
+    return m_probs[m_profileIndex[p_strategy->GetId()]];
   }
   /// Returns the probability the strategy is played
   T &operator[](const GameStrategy &p_strategy)
   {
-    return m_probs[m_support.m_profileIndex[p_strategy->GetId()]];
+    return m_probs[m_profileIndex[p_strategy->GetId()]];
   }
 
   virtual T GetPayoff(int pl) const = 0;

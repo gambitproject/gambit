@@ -50,9 +50,6 @@ protected:
   Game m_nfg;
   Array<Array<GameStrategy>> m_support;
 
-  /// The index into a strategy profile for a strategy (-1 if not in support)
-  Array<int> m_profileIndex;
-
   bool Undominated(StrategySupportProfile &newS, const GamePlayer &, bool p_strict,
                    bool p_external = false) const;
 
@@ -107,7 +104,10 @@ public:
   }
 
   /// Returns true exactly when the strategy is in the support.
-  bool Contains(const GameStrategy &s) const { return m_profileIndex[s->GetId()] >= 0; }
+  bool Contains(const GameStrategy &s) const
+  {
+    return m_support[s->GetPlayer()->GetNumber()].Contains(s);
+  }
 
   /// Returns true iff this support is a (weak) subset of the specified support
   bool IsSubsetOf(const StrategySupportProfile &) const;

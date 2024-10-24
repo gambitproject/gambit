@@ -33,14 +33,12 @@ namespace Gambit {
 //                               Lifecycle
 //---------------------------------------------------------------------------
 
-StrategySupportProfile::StrategySupportProfile(const Game &p_nfg)
-  : m_nfg(p_nfg), m_profileIndex(p_nfg->MixedProfileLength())
+StrategySupportProfile::StrategySupportProfile(const Game &p_nfg) : m_nfg(p_nfg)
 {
   for (int pl = 1, index = 1; pl <= p_nfg->NumPlayers(); pl++) {
     m_support.push_back(Array<GameStrategy>());
     for (int st = 1; st <= p_nfg->GetPlayer(pl)->NumStrategies(); st++, index++) {
       m_support[pl].push_back(p_nfg->GetPlayer(pl)->GetStrategy(st));
-      m_profileIndex[index] = index;
     }
   }
 }
@@ -141,13 +139,6 @@ void StrategySupportProfile::AddStrategy(const GameStrategy &p_strategy)
       return;
     }
     if (s->GetNumber() > strategy->GetNumber()) {
-      // Shift all higher-id strategies by one in the profile
-      m_profileIndex[strategy->GetId()] = m_profileIndex[s->GetId()];
-      for (int id = s->GetId(); id <= m_profileIndex.Length(); id++) {
-        if (m_profileIndex[id] >= 0) {
-          m_profileIndex[id]++;
-        }
-      }
       // Insert here
       support.Insert(strategy, i);
       return;
@@ -156,13 +147,6 @@ void StrategySupportProfile::AddStrategy(const GameStrategy &p_strategy)
 
   // If we get here, p_strategy has a higher number than anything in the
   // support for this player; append.
-  GameStrategyRep *last = support[support.Last()];
-  m_profileIndex[strategy->GetId()] = m_profileIndex[last->GetId()] + 1;
-  for (int id = strategy->GetId() + 1; id <= m_profileIndex.Length(); id++) {
-    if (m_profileIndex[id] >= 0) {
-      m_profileIndex[id]++;
-    }
-  }
   support.push_back(strategy);
 }
 
@@ -179,13 +163,6 @@ bool StrategySupportProfile::RemoveStrategy(const GameStrategy &p_strategy)
     GameStrategyRep *s = support[i];
     if (s == strategy) {
       support.Remove(i);
-      m_profileIndex[strategy->GetId()] = -1;
-      // Shift strategies left in the profile
-      for (int id = strategy->GetId() + 1; id <= m_profileIndex.Length(); id++) {
-        if (m_profileIndex[id] >= 0) {
-          m_profileIndex[id]--;
-        }
-      }
       return true;
     }
   }
