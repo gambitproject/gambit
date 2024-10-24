@@ -85,9 +85,6 @@ public:
 
   template <class T> MixedStrategyProfile<T> NewMixedStrategyProfile() const;
 
-  /// Returns the strategy in the st'th position for player pl.
-  GameStrategy GetStrategy(int pl, int st) const { return m_support[pl][st]; }
-
   /// Returns the number of players in the game
   int NumPlayers() const { return m_nfg->NumPlayers(); }
   /// Returns the set of players in the game

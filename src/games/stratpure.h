@@ -151,12 +151,11 @@ public:
   //@{
   /// Construct a new iterator on the support, with no strategies held fixed
   explicit StrategyProfileIterator(const StrategySupportProfile &);
-  /// Construct a new iterator on the support, fixing player pl's strategy
-  StrategyProfileIterator(const StrategySupportProfile &s, int pl, int st);
   /// Construct a new iterator on the support, fixing the given strategy
   StrategyProfileIterator(const StrategySupportProfile &, const GameStrategy &);
   /// Construct a new iterator on the support, fixing two players' strategies
-  StrategyProfileIterator(const StrategySupportProfile &s, int pl1, int st1, int pl2, int st2);
+  StrategyProfileIterator(const StrategySupportProfile &, const GameStrategy &,
+                          const GameStrategy &);
   //@}
 
   /// @name Iteration and data access
