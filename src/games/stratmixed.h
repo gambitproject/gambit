@@ -33,6 +33,8 @@ template <class T> class MixedStrategyProfileRep {
 public:
   Vector<T> m_probs;
   StrategySupportProfile m_support;
+  /// The index into the strategy profile for a strategy (-1 if not in support)
+  Array<int> m_profileIndex;
   unsigned int m_gameversion;
 
   explicit MixedStrategyProfileRep(const StrategySupportProfile &);
