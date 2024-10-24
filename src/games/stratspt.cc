@@ -222,10 +222,7 @@ Iterator find_minimal_elements(Iterator first, Iterator last, Comparator greater
 {
   auto min = first, dis = std::prev(last);
   while (min <= dis) {
-    auto pp = first;
-    while (pp != last && !greater(*pp, *dis)) {
-      pp++;
-    }
+    auto pp = std::adjacent_find(first, last, greater);
     if (pp < min) {
       dis--;
     }
