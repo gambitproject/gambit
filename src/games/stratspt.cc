@@ -217,11 +217,14 @@ bool StrategySupportProfile::Undominated(StrategySupportProfile &newS, const Gam
     std::copy(strategies.begin(), strategies.end(), set.begin());
   }
 
+  auto greater = [this, p_strict](const GameStrategy &s, const GameStrategy &t) {
+    return Dominates(s, t, p_strict);
+  };
   int min = 0, dis = set.size() - 1;
 
   while (min <= dis) {
     int pp;
-    for (pp = 0; pp < min && !Dominates(set[pp], set[dis], p_strict); pp++)
+    for (pp = 0; pp < min && !greater(set[pp], set[dis]); pp++)
       ;
     if (pp < min) {
       dis--;
@@ -230,10 +233,10 @@ bool StrategySupportProfile::Undominated(StrategySupportProfile &newS, const Gam
       std::swap(set[dis], set[min]);
 
       for (int inc = min + 1; inc <= dis;) {
-        if (Dominates(set[min], set[dis], p_strict)) {
+        if (greater(set[min], set[dis])) {
           dis--;
         }
-        else if (Dominates(set[dis], set[min], p_strict)) {
+        else if (greater(set[dis], set[min])) {
           std::swap(set[dis], set[min]);
           dis--;
         }
