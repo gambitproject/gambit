@@ -73,18 +73,10 @@ template <> MixedStrategyProfile<Rational> StrategySupportProfile::NewMixedStrat
 
 bool StrategySupportProfile::IsSubsetOf(const StrategySupportProfile &p_support) const
 {
-  if (m_nfg != p_support.m_nfg) {
-    return false;
-  }
-  for (int pl = 1; pl <= m_support.Length(); pl++) {
-    if (m_support[pl].Length() > p_support.m_support[pl].Length()) {
-      return false;
-    }
-    else {
-      for (int st = 1; st <= m_support[pl].Length(); st++) {
-        if (!p_support.m_support[pl].Contains(m_support[pl][st])) {
-          return false;
-        }
+  for (auto player_strats : m_support) {
+    for (auto strat : player_strats) {
+      if (!p_support.Contains(strat)) {
+        return false;
       }
     }
   }
