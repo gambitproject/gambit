@@ -41,11 +41,6 @@ class StrategySupportProfile;
 /// Within the support, strategies are maintained in the same order
 /// in which they appear in the underlying game.
 class StrategySupportProfile {
-  template <class T> friend class MixedStrategyProfile;
-  template <class T> friend class MixedStrategyProfileRep;
-  template <class T> friend class AGGMixedStrategyProfileRep;
-  template <class T> friend class BAGGMixedStrategyProfileRep;
-
 protected:
   Game m_nfg;
   Array<Array<GameStrategy>> m_support;
