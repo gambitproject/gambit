@@ -203,6 +203,13 @@ bool StrategySupportProfile::IsDominated(const GameStrategy &s, bool p_strict,
   }
 }
 
+template <class T> void swap(Array<T> &p_container, int index1, int index2)
+{
+  T foo = p_container[index1 + 1];
+  p_container[index1 + 1] = p_container[index2 + 1];
+  p_container[index2 + 1] = foo;
+}
+
 bool StrategySupportProfile::Undominated(StrategySupportProfile &newS, const GamePlayer &p_player,
                                          bool p_strict, bool p_external) const
 {
@@ -218,24 +225,18 @@ bool StrategySupportProfile::Undominated(StrategySupportProfile &newS, const Gam
       dis--;
     }
     else {
-      GameStrategy foo = set[dis + 1];
-      set[dis + 1] = set[min + 1];
-      set[min + 1] = foo;
+      swap(set, dis, min);
 
       for (int inc = min + 1; inc <= dis;) {
         if (Dominates(set[min + 1], set[dis + 1], p_strict)) {
           dis--;
         }
         else if (Dominates(set[dis + 1], set[min + 1], p_strict)) {
-          foo = set[dis + 1];
-          set[dis + 1] = set[min + 1];
-          set[min + 1] = foo;
+          swap(set, dis, min);
           dis--;
         }
         else {
-          foo = set[dis + 1];
-          set[dis + 1] = set[inc + 1];
-          set[inc + 1] = foo;
+          swap(set, dis, inc);
           inc++;
         }
       }
