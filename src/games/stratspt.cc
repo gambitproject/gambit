@@ -35,10 +35,10 @@ namespace Gambit {
 
 StrategySupportProfile::StrategySupportProfile(const Game &p_nfg) : m_nfg(p_nfg)
 {
-  for (int pl = 1, index = 1; pl <= p_nfg->NumPlayers(); pl++) {
+  for (auto player : m_nfg->GetPlayers()) {
     m_support.push_back(Array<GameStrategy>());
-    for (int st = 1; st <= p_nfg->GetPlayer(pl)->NumStrategies(); st++, index++) {
-      m_support[pl].push_back(p_nfg->GetPlayer(pl)->GetStrategy(st));
+    for (auto strategy : player->GetStrategies()) {
+      m_support[player->GetNumber()].push_back(strategy);
     }
   }
 }
@@ -49,20 +49,16 @@ StrategySupportProfile::StrategySupportProfile(const Game &p_nfg) : m_nfg(p_nfg)
 
 Array<int> StrategySupportProfile::NumStrategies() const
 {
-  Array<int> a(m_support.Length());
-
-  for (int pl = 1; pl <= a.Length(); pl++) {
-    a[pl] = m_support[pl].Length();
-  }
-  return a;
+  Array<int> dim(m_support.size());
+  std::transform(m_support.cbegin(), m_support.cend(), dim.begin(),
+                 [](const Array<GameStrategy> &a) { return a.size(); });
+  return dim;
 }
 
 int StrategySupportProfile::MixedProfileLength() const
 {
-  int total = 0;
-  for (int pl = 1; pl <= m_nfg->NumPlayers(); total += m_support[pl++].Length())
-    ;
-  return total;
+  return std::accumulate(m_support.cbegin(), m_support.cend(), 0,
+                         [](size_t tot, const Array<GameStrategy> &a) { return tot + a.size(); });
 }
 
 template <> MixedStrategyProfile<double> StrategySupportProfile::NewMixedStrategyProfile() const
@@ -128,45 +124,33 @@ void StrategySupportProfile::WriteNfgFile(std::ostream &p_file) const
 
 void StrategySupportProfile::AddStrategy(const GameStrategy &p_strategy)
 {
-  // Get the null-pointer checking out of the way once and for all
-  GameStrategyRep *strategy = p_strategy;
-  Array<GameStrategy> &support = m_support[strategy->GetPlayer()->GetNumber()];
-
-  for (int i = 1; i <= support.Length(); i++) {
-    GameStrategyRep *s = support[i];
-    if (s->GetNumber() == strategy->GetNumber()) {
+  auto &support = m_support[p_strategy->GetPlayer()->GetNumber()];
+  for (int i = 1; i <= support.size(); i++) {
+    if (support[i] == p_strategy) {
       // Strategy already in support; no change
       return;
     }
-    if (s->GetNumber() > strategy->GetNumber()) {
+    if (support[i]->GetNumber() > p_strategy->GetNumber()) {
       // Insert here
-      support.Insert(strategy, i);
+      support.Insert(p_strategy, i);
       return;
     }
   }
-
-  // If we get here, p_strategy has a higher number than anything in the
-  // support for this player; append.
-  support.push_back(strategy);
+  support.push_back(p_strategy);
 }
 
 bool StrategySupportProfile::RemoveStrategy(const GameStrategy &p_strategy)
 {
-  GameStrategyRep *strategy = p_strategy;
-  Array<GameStrategy> &support = m_support[strategy->GetPlayer()->GetNumber()];
-
-  if (support.Length() == 1) {
+  auto &support = m_support[p_strategy->GetPlayer()->GetNumber()];
+  if (support.size() == 1) {
     return false;
   }
-
-  for (int i = 1; i <= support.Length(); i++) {
-    GameStrategyRep *s = support[i];
-    if (s == strategy) {
+  for (int i = 1; i <= support.size(); i++) {
+    if (support[i] == p_strategy) {
       support.Remove(i);
       return true;
     }
   }
-
   return false;
 }
 
@@ -202,18 +186,16 @@ bool StrategySupportProfile::IsDominated(const GameStrategy &s, bool p_strict,
                                          bool p_external) const
 {
   if (p_external) {
-    GamePlayer player = s->GetPlayer();
-    for (int st = 1; st <= player->NumStrategies(); st++) {
-      if (player->GetStrategy(st) != s && Dominates(player->GetStrategy(st), s, p_strict)) {
+    for (auto strategy : s->GetPlayer()->GetStrategies()) {
+      if (strategy != s && Dominates(strategy, s, p_strict)) {
         return true;
       }
     }
     return false;
   }
   else {
-    for (int i = 1; i <= NumStrategies(s->GetPlayer()->GetNumber()); i++) {
-      if (GetStrategy(s->GetPlayer()->GetNumber(), i) != s &&
-          Dominates(GetStrategy(s->GetPlayer()->GetNumber(), i), s, p_strict)) {
+    for (auto strategy : GetStrategies(s->GetPlayer())) {
+      if (strategy != s && Dominates(strategy, s, p_strict)) {
         return true;
       }
     }
@@ -224,21 +206,9 @@ bool StrategySupportProfile::IsDominated(const GameStrategy &s, bool p_strict,
 bool StrategySupportProfile::Undominated(StrategySupportProfile &newS, const GamePlayer &p_player,
                                          bool p_strict, bool p_external) const
 {
-  Array<GameStrategy> set((p_external) ? p_player->NumStrategies()
-                                       : NumStrategies(p_player->GetNumber()));
+  Array<GameStrategy> set((p_external) ? p_player->GetStrategies() : GetStrategies(p_player));
 
-  if (p_external) {
-    for (int st = 1; st <= set.Length(); st++) {
-      set[st] = p_player->GetStrategy(st);
-    }
-  }
-  else {
-    for (int st = 1; st <= set.Length(); st++) {
-      set[st] = GetStrategy(p_player->GetNumber(), st);
-    }
-  }
-
-  int min = 0, dis = set.Length() - 1;
+  int min = 0, dis = set.size() - 1;
 
   while (min <= dis) {
     int pp;

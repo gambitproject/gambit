@@ -28,8 +28,7 @@
 #include <sstream>
 #include <iomanip>
 #include <cmath>
-#include <vector>
-#include <list>
+#include <algorithm>
 #include <map>
 
 namespace Gambit {
@@ -55,14 +54,9 @@ inline double abs(double x) { return std::fabs(x); }
 
 inline double sqr(double x) { return x * x; }
 
-template <class T> bool contains(const std::vector<T> &vector, const T &value)
+template <class C, class T> bool contains(const C &p_container, const T &p_value)
 {
-  return vector.find(value) != vector.end();
-}
-
-template <class T> bool contains(const std::list<T> &list, const T &value)
-{
-  return list.find(value) != list.end();
+  return std::find(p_container.cbegin(), p_container.cend(), p_value) != p_container.cend();
 }
 
 template <class Key, class T> bool contains(const std::map<Key, T> &map, const Key &key)
