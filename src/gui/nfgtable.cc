@@ -1076,11 +1076,16 @@ void gbtTableWidget::SetRowPlayer(int index, int pl)
   OnUpdate();
 }
 
+int NumStrategies(const StrategySupportProfile &p_profile, int p_player)
+{
+  return p_profile.NumStrategies(p_profile.GetGame()->GetPlayer(p_player));
+}
+
 int gbtTableWidget::NumRowContingencies() const
 {
   int ncont = 1;
   const Gambit::StrategySupportProfile &support = m_doc->GetNfgSupport();
-  for (int i = 1; i <= NumRowPlayers(); ncont *= support.NumStrategies(GetRowPlayer(i++)))
+  for (int i = 1; i <= NumRowPlayers(); ncont *= NumStrategies(support, GetRowPlayer(i++)))
     ;
   return ncont;
 }
@@ -1089,7 +1094,7 @@ int gbtTableWidget::NumRowsSpanned(int index) const
 {
   int ncont = 1;
   const Gambit::StrategySupportProfile &support = m_doc->GetNfgSupport();
-  for (int i = index + 1; i <= NumRowPlayers(); ncont *= support.NumStrategies(GetRowPlayer(i++)))
+  for (int i = index + 1; i <= NumRowPlayers(); ncont *= NumStrategies(support, GetRowPlayer(i++)))
     ;
   return ncont;
 }
@@ -1097,7 +1102,7 @@ int gbtTableWidget::NumRowsSpanned(int index) const
 int gbtTableWidget::RowToStrategy(int player, int row) const
 {
   int strat = row / NumRowsSpanned(player);
-  return (strat % m_doc->GetNfgSupport().NumStrategies(GetRowPlayer(player)) + 1);
+  return (strat % NumStrategies(m_doc->GetNfgSupport(), GetRowPlayer(player)) + 1);
 }
 
 void gbtTableWidget::SetColPlayer(int index, int pl)
@@ -1123,7 +1128,7 @@ int gbtTableWidget::NumColContingencies() const
 {
   int ncont = 1;
   const Gambit::StrategySupportProfile &support = m_doc->GetNfgSupport();
-  for (int i = 1; i <= NumColPlayers(); ncont *= support.NumStrategies(GetColPlayer(i++)))
+  for (int i = 1; i <= NumColPlayers(); ncont *= NumStrategies(support, GetColPlayer(i++)))
     ;
   return ncont;
 }
@@ -1132,7 +1137,7 @@ int gbtTableWidget::NumColsSpanned(int index) const
 {
   int ncont = 1;
   const Gambit::StrategySupportProfile &support = m_doc->GetNfgSupport();
-  for (int i = index + 1; i <= NumColPlayers(); ncont *= support.NumStrategies(GetColPlayer(i++)))
+  for (int i = index + 1; i <= NumColPlayers(); ncont *= NumStrategies(support, GetColPlayer(i++)))
     ;
   return ncont;
 }
@@ -1140,7 +1145,7 @@ int gbtTableWidget::NumColsSpanned(int index) const
 int gbtTableWidget::ColToStrategy(int player, int col) const
 {
   int strat = col / m_doc->NumPlayers() / NumColsSpanned(player);
-  return (strat % m_doc->GetNfgSupport().NumStrategies(GetColPlayer(player)) + 1);
+  return (strat % NumStrategies(m_doc->GetNfgSupport(), GetColPlayer(player)) + 1);
 }
 
 Gambit::PureStrategyProfile gbtTableWidget::CellToProfile(const wxSheetCoords &p_coords) const

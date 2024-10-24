@@ -244,7 +244,7 @@ bool StrategySupportProfile::Undominated(StrategySupportProfile &newS, const Gam
                                          bool p_strict, bool p_external) const
 {
   std::vector<GameStrategy> set((p_external) ? p_player->NumStrategies()
-                                             : NumStrategies(p_player->GetNumber()));
+                                             : NumStrategies(p_player));
   if (p_external) {
     auto strategies = p_player->GetStrategies();
     std::copy(strategies.begin(), strategies.end(), set.begin());

@@ -348,10 +348,9 @@ cdef extern from "games/stratspt.h":
         Array[int] NumStrategies() except +
         int MixedProfileLength() except +
         int GetIndex(c_GameStrategy) except +
-        int NumStrategiesPlayer "NumStrategies"(int) except +IndexError
+        int NumStrategiesPlayer "NumStrategies"(c_GamePlayer) except +IndexError
         bool IsSubsetOf(c_StrategySupportProfile) except +
         bool RemoveStrategy(c_GameStrategy) except +
-        c_GameStrategy GetStrategy(int, int) except +IndexError
         Array[c_GameStrategy] GetStrategies(c_GamePlayer) except +
         bool Contains(c_GameStrategy) except +
         bool IsDominated(c_GameStrategy, bool, bool) except +

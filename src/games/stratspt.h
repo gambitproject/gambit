@@ -74,8 +74,11 @@ public:
   /// Returns the game on which the support is defined.
   Game GetGame() const { return m_nfg; }
 
-  /// Returns the number of strategies in the support for player pl.
-  int NumStrategies(int pl) const { return m_support[pl].size(); }
+  /// Returns the number of strategies in the support for the player
+  int NumStrategies(const GamePlayer &p_player) const
+  {
+    return m_support[p_player->GetNumber()].size();
+  }
 
   /// Returns the number of strategies in the support for all players.
   Array<int> NumStrategies() const;

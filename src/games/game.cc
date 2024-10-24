@@ -332,7 +332,7 @@ MixedStrategyProfileRep<T>::MixedStrategyProfileRep(const StrategySupportProfile
 template <class T> void MixedStrategyProfileRep<T>::SetCentroid()
 {
   for (auto player : m_support.GetGame()->GetPlayers()) {
-    T center = ((T)1) / ((T)m_support.NumStrategies(player->GetNumber()));
+    T center = T(1) / T(m_support.NumStrategies(player));
     for (auto strategy : m_support.GetStrategies(player)) {
       (*this)[strategy] = center;
     }

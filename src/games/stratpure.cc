@@ -175,7 +175,7 @@ void StrategyProfileIterator::operator++()
     }
 
     auto player = m_support.GetGame()->GetPlayer(pl);
-    if (m_currentStrat[pl] < m_support.NumStrategies(pl)) {
+    if (m_currentStrat[pl] < m_support.NumStrategies(player)) {
       m_profile->SetStrategy(m_support.GetStrategies(player)[++(m_currentStrat[pl])]);
       return;
     }

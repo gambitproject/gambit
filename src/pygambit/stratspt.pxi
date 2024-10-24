@@ -160,7 +160,9 @@ class StrategySupportProfile:
             raise MismatchError(
                 "remove(): strategy is not part of the game on which the profile is defined."
             )
-        if deref(self.support).NumStrategiesPlayer(strategy.player.number + 1) == 1:
+        if deref(self.support).NumStrategiesPlayer(
+                cython.cast(Player, strategy.player).player
+        ) == 1:
             raise UndefinedOperationError(
                 "remove(): cannot remove last strategy of a player"
             )
