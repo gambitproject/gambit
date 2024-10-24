@@ -203,23 +203,32 @@ bool StrategySupportProfile::IsDominated(const GameStrategy &s, bool p_strict,
   }
 }
 
-template <class T> void swap(Array<T> &p_container, int index1, int index2)
+template <class T> void swap(std::vector<T> &p_container, int index1, int index2)
 {
-  T foo = p_container[index1 + 1];
-  p_container[index1 + 1] = p_container[index2 + 1];
-  p_container[index2 + 1] = foo;
+  T foo = p_container[index1];
+  p_container[index1] = p_container[index2];
+  p_container[index2] = foo;
 }
 
 bool StrategySupportProfile::Undominated(StrategySupportProfile &newS, const GamePlayer &p_player,
                                          bool p_strict, bool p_external) const
 {
-  Array<GameStrategy> set((p_external) ? p_player->GetStrategies() : GetStrategies(p_player));
+  std::vector<GameStrategy> set((p_external) ? p_player->NumStrategies()
+                                             : NumStrategies(p_player->GetNumber()));
+  if (p_external) {
+    auto strategies = p_player->GetStrategies();
+    std::copy(strategies.begin(), strategies.end(), set.begin());
+  }
+  else {
+    auto strategies = GetStrategies(p_player);
+    std::copy(strategies.begin(), strategies.end(), set.begin());
+  }
 
   int min = 0, dis = set.size() - 1;
 
   while (min <= dis) {
     int pp;
-    for (pp = 0; pp < min && !Dominates(set[pp + 1], set[dis + 1], p_strict); pp++)
+    for (pp = 0; pp < min && !Dominates(set[pp], set[dis], p_strict); pp++)
       ;
     if (pp < min) {
       dis--;
@@ -228,10 +237,10 @@ bool StrategySupportProfile::Undominated(StrategySupportProfile &newS, const Gam
       swap(set, dis, min);
 
       for (int inc = min + 1; inc <= dis;) {
-        if (Dominates(set[min + 1], set[dis + 1], p_strict)) {
+        if (Dominates(set[min], set[dis], p_strict)) {
           dis--;
         }
-        else if (Dominates(set[dis + 1], set[min + 1], p_strict)) {
+        else if (Dominates(set[dis], set[min], p_strict)) {
           swap(set, dis, min);
           dis--;
         }
@@ -244,8 +253,8 @@ bool StrategySupportProfile::Undominated(StrategySupportProfile &newS, const Gam
     }
   }
 
-  if (min + 1 <= set.Length()) {
-    for (int i = min + 1; i <= set.Length(); i++) {
+  if (min < set.size()) {
+    for (int i = min; i < set.size(); i++) {
       newS.RemoveStrategy(set[i]);
     }
     return true;
