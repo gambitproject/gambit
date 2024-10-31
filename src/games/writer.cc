@@ -23,28 +23,27 @@
 #include "gambit.h"
 #include "writer.h"
 
-using namespace Gambit;
+namespace Gambit {
 
-std::string HTMLGameWriter::Write(const Game &p_game, int p_rowPlayer, int p_colPlayer) const
+std::string WriteHTMLFile(const Game &p_game, const GamePlayer &p_rowPlayer,
+                          const GamePlayer &p_colPlayer)
 {
   std::string theHtml;
   theHtml += "<center><h1>" + p_game->GetTitle() + "</h1></center>\n";
 
-  for (StrategyProfileIterator iter(p_game,
-                                    {p_game->GetPlayer(p_rowPlayer)->GetStrategies().front(),
-                                     p_game->GetPlayer(p_colPlayer)->GetStrategies().front()});
-       !iter.AtEnd(); iter++) {
+  for (auto iter : StrategyContingencies(
+           p_game, {p_rowPlayer->GetStrategies().front(), p_colPlayer->GetStrategies().front()})) {
     if (p_game->NumPlayers() > 2) {
       theHtml += "<center><b>Subtable with strategies:</b></center>";
-      for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
-        if (pl == p_rowPlayer || pl == p_colPlayer) {
+      for (auto player : p_game->GetPlayers()) {
+        if (player == p_rowPlayer || player == p_colPlayer) {
           continue;
         }
 
         theHtml += "<center><b>Player ";
-        theHtml += lexical_cast<std::string>(pl);
+        theHtml += std::to_string(player->GetNumber());
         theHtml += " Strategy ";
-        theHtml += lexical_cast<std::string>((*iter)->GetStrategy(pl)->GetNumber());
+        theHtml += std::to_string(iter->GetStrategy(player)->GetNumber());
         theHtml += "</b></center>";
       }
     }
@@ -52,21 +51,21 @@ std::string HTMLGameWriter::Write(const Game &p_game, int p_rowPlayer, int p_col
     theHtml += "<table>";
     theHtml += "<tr>";
     theHtml += "<td></td>";
-    for (int st = 1; st <= p_game->GetPlayer(p_colPlayer)->NumStrategies(); st++) {
+    for (int st = 1; st <= p_colPlayer->NumStrategies(); st++) {
       theHtml += "<td align=center><b>";
-      theHtml += p_game->GetPlayer(p_colPlayer)->GetStrategy(st)->GetLabel();
+      theHtml += p_colPlayer->GetStrategy(st)->GetLabel();
       theHtml += "</b></td>";
     }
     theHtml += "</tr>";
-    for (int st1 = 1; st1 <= p_game->GetPlayer(p_rowPlayer)->NumStrategies(); st1++) {
-      PureStrategyProfile profile = *iter;
-      profile->SetStrategy(p_game->GetPlayer(p_rowPlayer)->GetStrategy(st1));
+    for (int st1 = 1; st1 <= p_rowPlayer->NumStrategies(); st1++) {
+      PureStrategyProfile profile = iter;
+      profile->SetStrategy(p_rowPlayer->GetStrategy(st1));
       theHtml += "<tr>";
       theHtml += "<td align=center><b>";
-      theHtml += p_game->GetPlayer(p_rowPlayer)->GetStrategy(st1)->GetLabel();
+      theHtml += p_rowPlayer->GetStrategy(st1)->GetLabel();
       theHtml += "</b></td>";
-      for (int st2 = 1; st2 <= p_game->GetPlayer(p_colPlayer)->NumStrategies(); st2++) {
-        profile->SetStrategy(p_game->GetPlayer(p_colPlayer)->GetStrategy(st2));
+      for (int st2 = 1; st2 <= p_colPlayer->NumStrategies(); st2++) {
+        profile->SetStrategy(p_colPlayer->GetStrategy(st2));
         theHtml += "<td align=center>";
         for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
           try {
@@ -95,35 +94,34 @@ std::string HTMLGameWriter::Write(const Game &p_game, int p_rowPlayer, int p_col
   return theHtml;
 }
 
-std::string LaTeXGameWriter::Write(const Game &p_game, int p_rowPlayer, int p_colPlayer) const
+std::string WriteLaTeXFile(const Game &p_game, const GamePlayer &p_rowPlayer,
+                           const GamePlayer &p_colPlayer)
 {
   std::string theHtml;
 
-  for (StrategyProfileIterator iter(p_game,
-                                    {p_game->GetPlayer(p_rowPlayer)->GetStrategies().front(),
-                                     p_game->GetPlayer(p_colPlayer)->GetStrategies().front()});
-       !iter.AtEnd(); iter++) {
+  for (auto iter : StrategyContingencies(
+           p_game, {p_rowPlayer->GetStrategies().front(), p_colPlayer->GetStrategies().front()})) {
     theHtml += "\\begin{game}{";
-    theHtml += lexical_cast<std::string>(p_game->GetPlayer(p_rowPlayer)->NumStrategies());
+    theHtml += lexical_cast<std::string>(p_rowPlayer->NumStrategies());
     theHtml += "}{";
-    theHtml += lexical_cast<std::string>(p_game->GetPlayer(p_colPlayer)->NumStrategies());
+    theHtml += lexical_cast<std::string>(p_colPlayer->NumStrategies());
     theHtml += "}[";
-    theHtml += p_game->GetPlayer(p_rowPlayer)->GetLabel();
+    theHtml += p_rowPlayer->GetLabel();
     theHtml += "][";
-    theHtml += p_game->GetPlayer(p_colPlayer)->GetLabel();
+    theHtml += p_colPlayer->GetLabel();
     theHtml += "]";
 
     if (p_game->NumPlayers() > 2) {
       theHtml += "[";
-      for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
-        if (pl == p_rowPlayer || pl == p_colPlayer) {
+      for (auto player : p_game->GetPlayers()) {
+        if (player == p_rowPlayer || player == p_colPlayer) {
           continue;
         }
 
         theHtml += "Player ";
-        theHtml += lexical_cast<std::string>(pl);
+        theHtml += lexical_cast<std::string>(player->GetNumber());
         theHtml += " Strategy ";
-        theHtml += lexical_cast<std::string>((*iter)->GetStrategy(pl)->GetNumber());
+        theHtml += lexical_cast<std::string>(iter->GetStrategy(player)->GetNumber());
         theHtml += " ";
       }
       theHtml += "]";
@@ -131,21 +129,21 @@ std::string LaTeXGameWriter::Write(const Game &p_game, int p_rowPlayer, int p_co
 
     theHtml += "\n&";
 
-    for (int st = 1; st <= p_game->GetPlayer(p_colPlayer)->NumStrategies(); st++) {
-      theHtml += p_game->GetPlayer(p_colPlayer)->GetStrategy(st)->GetLabel();
-      if (st < p_game->GetPlayer(p_colPlayer)->NumStrategies()) {
+    for (int st = 1; st <= p_colPlayer->NumStrategies(); st++) {
+      theHtml += p_colPlayer->GetStrategy(st)->GetLabel();
+      if (st < p_colPlayer->NumStrategies()) {
         theHtml += " & ";
       }
     }
     theHtml += "\\\\\n";
 
-    for (int st1 = 1; st1 <= p_game->GetPlayer(p_rowPlayer)->NumStrategies(); st1++) {
-      PureStrategyProfile profile = *iter;
-      profile->SetStrategy(p_game->GetPlayer(p_rowPlayer)->GetStrategy(st1));
-      theHtml += p_game->GetPlayer(p_rowPlayer)->GetStrategy(st1)->GetLabel();
+    for (int st1 = 1; st1 <= p_rowPlayer->NumStrategies(); st1++) {
+      PureStrategyProfile profile = iter;
+      profile->SetStrategy(p_rowPlayer->GetStrategy(st1));
+      theHtml += p_rowPlayer->GetStrategy(st1)->GetLabel();
       theHtml += " & ";
-      for (int st2 = 1; st2 <= p_game->GetPlayer(p_colPlayer)->NumStrategies(); st2++) {
-        profile->SetStrategy(p_game->GetPlayer(p_colPlayer)->GetStrategy(st2));
+      for (int st2 = 1; st2 <= p_colPlayer->NumStrategies(); st2++) {
+        profile->SetStrategy(p_colPlayer->GetStrategy(st2));
         theHtml += " $";
         for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
           try {
@@ -164,11 +162,11 @@ std::string LaTeXGameWriter::Write(const Game &p_game, int p_rowPlayer, int p_co
           }
         }
         theHtml += "$ ";
-        if (st2 < p_game->GetPlayer(p_colPlayer)->NumStrategies()) {
+        if (st2 < p_colPlayer->NumStrategies()) {
           theHtml += " & ";
         }
       }
-      if (st1 < p_game->GetPlayer(p_rowPlayer)->NumStrategies()) {
+      if (st1 < p_colPlayer->NumStrategies()) {
         theHtml += "\\\\\n";
       }
     }
@@ -178,3 +176,5 @@ std::string LaTeXGameWriter::Write(const Game &p_game, int p_rowPlayer, int p_co
   theHtml += "\n";
   return theHtml;
 }
+
+} // end namespace Gambit

@@ -28,8 +28,6 @@
 #include "gambit.h"
 #include "games/writer.h"
 
-void WriteOsborneFile(std::ostream &, const Gambit::Game &, int, int);
-
 void PrintBanner(std::ostream &p_stream)
 {
   p_stream << "Convert games among various file formats\n";
@@ -126,9 +124,6 @@ int main(int argc, char *argv[])
   try {
     Gambit::Game game = Gambit::ReadGame(*input_stream);
 
-    game->WriteNfgFile(std::cout);
-    exit(0);
-
     if (rowPlayer < 1 || rowPlayer > game->NumPlayers()) {
       std::cerr << argv[0] << ": Player " << rowPlayer << " does not exist.\n";
       return 1;
@@ -139,12 +134,10 @@ int main(int argc, char *argv[])
     }
 
     if (format == "html") {
-      Gambit::HTMLGameWriter writer;
-      std::cout << writer.Write(game, rowPlayer, colPlayer);
+      std::cout << WriteHTMLFile(game, game->GetPlayer(rowPlayer), game->GetPlayer(colPlayer));
     }
     else {
-      Gambit::LaTeXGameWriter writer;
-      std::cout << writer.Write(game, rowPlayer, colPlayer);
+      std::cout << WriteLaTeXFile(game, game->GetPlayer(rowPlayer), game->GetPlayer(colPlayer));
     }
     return 0;
   }

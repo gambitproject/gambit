@@ -318,25 +318,21 @@ Game GameTableRep::Copy() const
 
 bool GameTableRep::IsConstSum() const
 {
-  TablePureStrategyProfileRep profile(const_cast<GameTableRep *>(this));
-
+  auto profile = NewPureStrategyProfile();
   Rational sum(0);
   for (int pl = 1; pl <= m_players.Length(); pl++) {
-    sum += profile.GetPayoff(pl);
+    sum += profile->GetPayoff(pl);
   }
 
-  for (StrategyProfileIterator iter(StrategySupportProfile(const_cast<GameTableRep *>(this)));
-       !iter.AtEnd(); iter++) {
+  for (auto iter : StrategyContingencies(Game(this))) {
     Rational newsum(0);
     for (int pl = 1; pl <= m_players.Length(); pl++) {
-      newsum += (*iter)->GetPayoff(pl);
+      newsum += iter->GetPayoff(pl);
     }
-
     if (newsum != sum) {
       return false;
     }
   }
-
   return true;
 }
 
@@ -466,22 +462,22 @@ void GameTableRep::RebuildTable()
   for (int i = 1; i <= newResults.Length(); newResults[i++] = 0)
     ;
 
-  for (StrategyProfileIterator iter(StrategySupportProfile(const_cast<GameTableRep *>(this)));
-       !iter.AtEnd(); iter++) {
+  for (auto iter :
+       StrategyContingencies(StrategySupportProfile(const_cast<GameTableRep *>(this)))) {
     long newindex = 1L;
     for (int pl = 1; pl <= m_players.Length(); pl++) {
-      if (iter.m_profile->GetStrategy(pl)->m_offset < 0) {
+      if (iter->GetStrategy(pl)->m_offset < 0) {
         // This is a contingency involving a new strategy... skip
         newindex = -1L;
         break;
       }
       else {
-        newindex += (iter.m_profile->GetStrategy(pl)->m_number - 1) * offsets[pl];
+        newindex += (iter->GetStrategy(pl)->m_number - 1) * offsets[pl];
       }
     }
 
     if (newindex >= 1) {
-      newResults[newindex] = m_results[iter.m_profile->GetIndex()];
+      newResults[newindex] = m_results[iter->GetIndex()];
     }
   }
 

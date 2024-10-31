@@ -99,11 +99,11 @@ void StrategySupportProfile::WriteNfgFile(std::ostream &p_file) const
   p_file << "}" << std::endl;
   p_file << std::quoted(m_nfg->GetComment()) << std::endl << std::endl;
 
-  for (StrategyProfileIterator iter(*this); !iter.AtEnd(); iter++) {
+  for (auto iter : StrategyContingencies(*this)) {
     p_file << FormatList(
                   players,
                   [&iter](const GamePlayer &p) {
-                    return lexical_cast<std::string>((*iter)->GetPayoff(p));
+                    return lexical_cast<std::string>(iter->GetPayoff(p));
                   },
                   false, false)
            << std::endl;
@@ -145,9 +145,9 @@ bool StrategySupportProfile::Dominates(const GameStrategy &s, const GameStrategy
 {
   bool equal = true;
 
-  for (StrategyProfileIterator iter(*this); !iter.AtEnd(); iter++) {
-    Rational ap = (*iter)->GetStrategyValue(s);
-    Rational bp = (*iter)->GetStrategyValue(t);
+  for (auto iter : StrategyContingencies(*this)) {
+    Rational ap = iter->GetStrategyValue(s);
+    Rational bp = iter->GetStrategyValue(t);
     if (p_strict && ap <= bp) {
       return false;
     }
@@ -276,11 +276,12 @@ StrategySupportProfile StrategySupportProfile::Undominated(bool p_strict, bool p
 bool StrategySupportProfile::Overwhelms(const GameStrategy &s, const GameStrategy &t,
                                         bool p_strict) const
 {
-  StrategyProfileIterator iter(*this);
+  auto cont = StrategyContingencies(*this);
+  auto iter = cont.begin();
   Rational sMin = (*iter)->GetStrategyValue(s);
   Rational tMax = (*iter)->GetStrategyValue(t);
 
-  for (; !iter.AtEnd(); iter++) {
+  while (iter != cont.end()) {
     if ((*iter)->GetStrategyValue(s) < sMin) {
       sMin = (*iter)->GetStrategyValue(s);
     }

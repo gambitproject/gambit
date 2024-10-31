@@ -79,38 +79,16 @@ public:
 };
 
 ///
-/// Format the strategic representation of a game to HTML tables.
+/// Convert the game to HTML, selecting the row and column player.
 ///
-class HTMLGameWriter : public GameWriter {
-public:
-  ///
-  /// Convert the game to HTML, with player 1 on the rows and player 2
-  /// on the columns.
-  ///
-  std::string Write(const Game &p_game) const override { return Write(p_game, 1, 2); }
-
-  ///
-  /// Convert the game to HTML, selecting the row and column player numbers.
-  ///
-  std::string Write(const Game &p_game, int p_rowPlayer, int p_colPlayer) const;
-};
+std::string WriteHTMLFile(const Game &p_game, const GamePlayer &p_rowPlayer,
+                          const GamePlayer &p_colPlayer);
 
 ///
 /// Format the strategic representation of a game to LaTeX sgame style
 ///
-class LaTeXGameWriter : public GameWriter {
-public:
-  ///
-  /// Convert the game to LaTeX, with player 1 on the rows and player 2
-  /// on the columns.
-  ///
-  std::string Write(const Game &p_game) const override { return Write(p_game, 1, 2); }
-
-  ///
-  /// Convert the game to LaTeX, selecting the row and column player numbers.
-  ///
-  std::string Write(const Game &p_game, int p_rowPlayer, int p_colPlayer) const;
-};
+std::string WriteLaTeXFile(const Game &p_game, const GamePlayer &p_rowPlayer,
+                           const GamePlayer &p_colPlayer);
 
 } // end namespace Gambit
 

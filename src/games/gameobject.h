@@ -148,7 +148,7 @@ private:
   T *rep;
 
 public:
-  GameObjectPtr(T *r = nullptr) : rep(r)
+  GameObjectPtr(const T *r = nullptr) : rep(const_cast<T *>(r))
   {
     if (rep) {
       rep->IncRef();

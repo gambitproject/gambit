@@ -293,12 +293,12 @@ void GameRep::WriteNfgFile(std::ostream &p_file) const
   p_file << "}" << std::endl;
   p_file << std::quoted(GetComment()) << std::endl << std::endl;
 
-  for (StrategyProfileIterator iter(StrategySupportProfile(Game(const_cast<GameRep *>(this))));
-       !iter.AtEnd(); iter++) {
+  for (auto iter :
+       StrategyContingencies(StrategySupportProfile(Game(const_cast<GameRep *>(this))))) {
     p_file << FormatList(
                   players,
                   [&iter](const GamePlayer &p) {
-                    return lexical_cast<std::string>((*iter)->GetPayoff(p));
+                    return lexical_cast<std::string>(iter->GetPayoff(p));
                   },
                   false, false)
            << std::endl;

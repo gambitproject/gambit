@@ -127,45 +127,45 @@ public:
   explicit operator PureStrategyProfileRep *() const { return rep; }
 };
 
-/// This class iterates through the contingencies in a strategic game.
-/// It visits each strategy profile in turn, advancing one contingency
-/// on each call of NextContingency().  Optionally, the strategy of
-/// one player may be held fixed during the iteration (by the use of the
-/// second constructor).
-class StrategyProfileIterator {
-  friend class GameRep;
-  friend class GameTableRep;
-
+class StrategyContingencies {
 private:
-  bool m_atEnd{false};
   StrategySupportProfile m_support;
-  std::map<GamePlayer, StrategySupportProfile::Support::const_iterator> m_currentStrat;
-  PureStrategyProfile m_profile;
   std::vector<GamePlayer> m_unfrozen;
   std::vector<GameStrategy> m_frozen;
 
 public:
-  /// @name Lifecycle
-  //@{
-  /// Construct a new iterator on the support
-  explicit StrategyProfileIterator(const StrategySupportProfile &,
-                                   const std::vector<GameStrategy> &p_frozen = {});
-  //@}
+  class iterator {
+  private:
+    StrategyContingencies *m_cont;
+    bool m_atEnd;
+    std::map<GamePlayer, StrategySupportProfile::Support::const_iterator> m_currentStrat;
+    PureStrategyProfile m_profile;
 
-  /// @name Iteration and data access
-  //@{
-  /// Advance to the next contingency (prefix version)
-  void operator++();
-  /// Advance to the next contingency (postfix version)
-  void operator++(int) { ++(*this); }
-  /// Has iterator gone past the end?
-  bool AtEnd() const { return m_atEnd; }
+  public:
+    iterator(StrategyContingencies *, bool p_end);
 
-  /// Get the current strategy profile
-  PureStrategyProfile &operator*() { return m_profile; }
-  /// Get the current strategy profile
-  const PureStrategyProfile &operator*() const { return m_profile; }
-  //@}
+    iterator &operator++();
+
+    bool operator==(const iterator &p_other) const
+    {
+      if (m_atEnd && p_other.m_atEnd && m_cont == p_other.m_cont) {
+        return true;
+      }
+      if (m_atEnd != p_other.m_atEnd || m_cont != p_other.m_cont) {
+        return false;
+      }
+      return (m_profile.operator->() == p_other.m_profile.operator->());
+    }
+    bool operator!=(const iterator &p_other) const { return !(*this == p_other); }
+
+    PureStrategyProfile &operator*() { return m_profile; }
+    const PureStrategyProfile &operator*() const { return m_profile; }
+  };
+
+  explicit StrategyContingencies(const StrategySupportProfile &,
+                                 const std::vector<GameStrategy> &p_frozen = {});
+  iterator begin() { return {this, false}; }
+  iterator end() { return {this, true}; }
 };
 
 } // end namespace Gambit

@@ -264,18 +264,16 @@ GameAGGRep::NewMixedStrategyProfile(const Rational &, const StrategySupportProfi
 
 bool GameAGGRep::IsConstSum() const
 {
-  AGGPureStrategyProfileRep profile(const_cast<GameAGGRep *>(this));
-
+  auto profile = NewPureStrategyProfile();
   Rational sum(0);
   for (int pl = 1; pl <= m_players.Length(); pl++) {
-    sum += profile.GetPayoff(pl);
+    sum += profile->GetPayoff(pl);
   }
 
-  for (StrategyProfileIterator iter(StrategySupportProfile(const_cast<GameAGGRep *>(this)));
-       !iter.AtEnd(); iter++) {
+  for (auto iter : StrategyContingencies(Game(this))) {
     Rational newsum(0);
     for (int pl = 1; pl <= m_players.Length(); pl++) {
-      newsum += (*iter)->GetPayoff(pl);
+      newsum += iter->GetPayoff(pl);
     }
     if (newsum != sum) {
       return false;

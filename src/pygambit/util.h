@@ -53,10 +53,10 @@ Game ParseGame(char *s)
 std::string WriteGame(const Game &p_game, const std::string &p_format)
 {
   if (p_format == "html") {
-    return HTMLGameWriter().Write(p_game);
+    return WriteHTMLFile(p_game, p_game->GetPlayer(1), p_game->GetPlayer(2));
   }
   else if (p_format == "sgame") {
-    return LaTeXGameWriter().Write(p_game);
+    return WriteLaTeXFile(p_game, p_game->GetPlayer(1), p_game->GetPlayer(2));
   }
   else if (p_format == "native" || p_format == "nfg" || p_format == "efg") {
     std::ostringstream f;

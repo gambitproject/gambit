@@ -415,10 +415,10 @@ void ParseOutcomeBody(GameFileLexer &p_parser, Game &p_nfg)
 {
   ReadOutcomeList(p_parser, p_nfg);
   StrategySupportProfile profile(p_nfg);
-  for (StrategyProfileIterator iter(profile); !iter.AtEnd(); iter++) {
+  for (auto iter : StrategyContingencies(profile)) {
     p_parser.ExpectCurrentToken(TOKEN_NUMBER, "outcome index");
     if (int outcomeId = std::stoi(p_parser.GetLastText())) {
-      (*iter)->SetOutcome(p_nfg->GetOutcome(outcomeId));
+      iter->SetOutcome(p_nfg->GetOutcome(outcomeId));
     }
     p_parser.GetNextToken();
   }
@@ -427,10 +427,10 @@ void ParseOutcomeBody(GameFileLexer &p_parser, Game &p_nfg)
 void ParsePayoffBody(GameFileLexer &p_parser, Game &p_nfg)
 {
   StrategySupportProfile profile(p_nfg);
-  for (StrategyProfileIterator iter(profile); !iter.AtEnd(); iter++) {
+  for (auto iter : StrategyContingencies(profile)) {
     for (auto player : p_nfg->GetPlayers()) {
       p_parser.ExpectCurrentToken(TOKEN_NUMBER, "numerical payoff");
-      (*iter)->GetOutcome()->SetPayoff(player, Number(p_parser.GetLastText()));
+      iter->GetOutcome()->SetPayoff(player, Number(p_parser.GetLastText()));
       p_parser.GetNextToken();
     }
   }

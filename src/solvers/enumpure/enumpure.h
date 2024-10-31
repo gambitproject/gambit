@@ -51,9 +51,9 @@ inline List<MixedStrategyProfile<Rational>> EnumPureStrategySolver::Solve(const 
         "Computing equilibria of games with imperfect recall is not supported.");
   }
   List<MixedStrategyProfile<Rational>> solutions;
-  for (StrategyProfileIterator citer(p_game); !citer.AtEnd(); citer++) {
-    if ((*citer)->IsNash()) {
-      MixedStrategyProfile<Rational> profile = (*citer)->ToMixedStrategyProfile();
+  for (auto citer : StrategyContingencies(p_game)) {
+    if (citer->IsNash()) {
+      MixedStrategyProfile<Rational> profile = citer->ToMixedStrategyProfile();
       m_onEquilibrium->Render(profile);
       solutions.push_back(profile);
     }

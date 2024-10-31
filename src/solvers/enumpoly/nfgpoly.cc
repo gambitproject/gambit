@@ -67,14 +67,14 @@ gPoly<double> IndifferenceEquation(const gSpace &space, const term_order &lex,
 {
   gPoly<double> equation(&space, &lex);
 
-  for (StrategyProfileIterator A(support, {s1}), B(support, {s2}); !A.AtEnd(); A++, B++) {
+  for (auto iter : StrategyContingencies(support, {s1})) {
     gPoly<double> term(&space, 1, &lex);
     for (auto player : support.GetGame()->GetPlayers()) {
       if (player != s1->GetPlayer()) {
-        term *= strategy_poly.at((*A)->GetStrategy(player));
+        term *= strategy_poly.at(iter->GetStrategy(player));
       }
     }
-    term *= (*A)->GetPayoff(s1->GetPlayer()) - (*B)->GetPayoff(s1->GetPlayer());
+    term *= iter->GetStrategyValue(s1) - iter->GetStrategyValue(s2);
     equation += term;
   }
   return equation;
