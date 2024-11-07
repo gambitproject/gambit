@@ -32,14 +32,10 @@ namespace Gambit {
 //                     PureBehaviorProfile: Lifecycle
 //------------------------------------------------------------------------
 
-PureBehaviorProfile::PureBehaviorProfile(Game p_efg) : m_efg(p_efg), m_profile(m_efg->NumPlayers())
+PureBehaviorProfile::PureBehaviorProfile(const Game &p_efg) : m_efg(p_efg)
 {
-  for (int pl = 1; pl <= m_efg->NumPlayers(); pl++) {
-    GamePlayerRep *player = m_efg->GetPlayer(pl);
-    m_profile[pl] = Array<GameAction>(player->NumInfosets());
-    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      m_profile[pl][iset] = player->GetInfoset(iset)->GetAction(1);
-    }
+  for (const auto &infoset : m_efg->GetInfosets()) {
+    m_profile[infoset] = infoset->GetActions().front();
   }
 }
 
@@ -47,36 +43,24 @@ PureBehaviorProfile::PureBehaviorProfile(Game p_efg) : m_efg(p_efg), m_profile(m
 //              PureBehaviorProfile: Data access and manipulation
 //------------------------------------------------------------------------
 
-GameAction PureBehaviorProfile::GetAction(const GameInfoset &infoset) const
-{
-  return m_profile[infoset->GetPlayer()->GetNumber()][infoset->GetNumber()];
-}
-
-void PureBehaviorProfile::SetAction(const GameAction &action)
-{
-  m_profile[action->GetInfoset()->GetPlayer()->GetNumber()][action->GetInfoset()->GetNumber()] =
-      action;
-}
-
-template <class T> T PureBehaviorProfile::GetPayoff(const GameNode &p_node, int pl) const
+template <class T>
+T PureBehaviorProfile::GetPayoff(const GameNode &p_node, const GamePlayer &p_player) const
 {
   T payoff(0);
 
   if (p_node->GetOutcome()) {
-    payoff += static_cast<T>(p_node->GetOutcome()->GetPayoff(pl));
+    payoff += static_cast<T>(p_node->GetOutcome()->GetPayoff(p_player));
   }
 
   if (!p_node->IsTerminal()) {
     if (p_node->GetInfoset()->IsChanceInfoset()) {
-      for (int i = 1; i <= p_node->NumChildren(); i++) {
-        payoff += (static_cast<T>(p_node->GetInfoset()->GetActionProb(i)) *
-                   GetPayoff<T>(p_node->GetChild(i), pl));
+      for (const auto &action : p_node->GetInfoset()->GetActions()) {
+        payoff += (static_cast<T>(p_node->GetInfoset()->GetActionProb(action)) *
+                   GetPayoff<T>(p_node->GetChild(action), p_player));
       }
     }
     else {
-      int player = p_node->GetPlayer()->GetNumber();
-      int iset = p_node->GetInfoset()->GetNumber();
-      payoff += GetPayoff<T>(p_node->GetChild(m_profile[player][iset]->GetNumber()), pl);
+      payoff += GetPayoff<T>(p_node->GetChild(m_profile.at(p_node->GetInfoset())), p_player);
     }
   }
 
@@ -84,14 +68,14 @@ template <class T> T PureBehaviorProfile::GetPayoff(const GameNode &p_node, int 
 }
 
 // Explicit instantiations
-template double PureBehaviorProfile::GetPayoff(const GameNode &, int pl) const;
-template Rational PureBehaviorProfile::GetPayoff(const GameNode &, int pl) const;
+template double PureBehaviorProfile::GetPayoff(const GameNode &, const GamePlayer &) const;
+template Rational PureBehaviorProfile::GetPayoff(const GameNode &, const GamePlayer &) const;
 
 template <class T> T PureBehaviorProfile::GetPayoff(const GameAction &p_action) const
 {
   PureBehaviorProfile copy(*this);
   copy.SetAction(p_action);
-  return copy.GetPayoff<T>(p_action->GetInfoset()->GetPlayer()->GetNumber());
+  return copy.GetPayoff<T>(p_action->GetInfoset()->GetPlayer());
 }
 
 // Explicit instantiations
@@ -100,10 +84,10 @@ template Rational PureBehaviorProfile::GetPayoff(const GameAction &) const;
 
 bool PureBehaviorProfile::IsAgentNash() const
 {
-  for (auto player : m_efg->GetPlayers()) {
+  for (const auto &player : m_efg->GetPlayers()) {
     auto current = GetPayoff<Rational>(player);
-    for (auto infoset : player->GetInfosets()) {
-      for (auto action : infoset->GetActions()) {
+    for (const auto &infoset : player->GetInfosets()) {
+      for (const auto &action : infoset->GetActions()) {
         if (GetPayoff<Rational>(action) > current) {
           return false;
         }
@@ -117,110 +101,75 @@ MixedBehaviorProfile<Rational> PureBehaviorProfile::ToMixedBehaviorProfile() con
 {
   MixedBehaviorProfile<Rational> temp(m_efg);
   temp = Rational(0);
-  for (auto player : m_efg->GetPlayers()) {
-    for (auto infoset : player->GetInfosets()) {
-      temp[GetAction(infoset)] = Rational(1);
+  for (const auto &player : m_efg->GetPlayers()) {
+    for (const auto &infoset : player->GetInfosets()) {
+      temp[m_profile.at(infoset)] = Rational(1);
     }
   }
   return temp;
 }
 
 //========================================================================
-//                    class BehaviorProfileIterator
+//                    class BehaviorContingencies
 //========================================================================
 
-BehaviorProfileIterator::BehaviorProfileIterator(const Game &p_game)
-  : m_atEnd(false), m_support(p_game), m_currentBehav(p_game->NumInfosets()), m_profile(p_game),
-    m_frozenPlayer(0), m_frozenInfoset(0), m_numActiveInfosets(p_game->NumPlayers())
+BehaviorContingencies::BehaviorContingencies(const BehaviorSupportProfile &p_support,
+                                             const std::set<GameInfoset> &p_reachable,
+                                             const std::vector<GameAction> &p_frozen)
+  : m_support(p_support), m_frozen(p_frozen)
 {
-  for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
-    GamePlayer player = p_game->GetPlayer(pl);
-    m_numActiveInfosets[pl] = player->NumInfosets();
-    Array<bool> activeForPl(player->NumInfosets());
-    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      activeForPl[iset] = true;
+  if (!p_reachable.empty()) {
+    for (const auto &infoset : p_reachable) {
+      m_activeInfosets.push_back(infoset);
     }
-    m_isActive.push_back(activeForPl);
   }
-  First();
-}
-
-BehaviorProfileIterator::BehaviorProfileIterator(const BehaviorSupportProfile &p_support,
-                                                 const GameAction &p_action)
-  : m_atEnd(false), m_support(p_support), m_currentBehav(p_support.GetGame()->NumInfosets()),
-    m_profile(p_support.GetGame()),
-    m_frozenPlayer(p_action->GetInfoset()->GetPlayer()->GetNumber()),
-    m_frozenInfoset(p_action->GetInfoset()->GetNumber()),
-    m_numActiveInfosets(m_support.GetGame()->NumPlayers())
-{
-  for (int pl = 1; pl <= m_support.GetGame()->NumPlayers(); pl++) {
-    GamePlayer player = m_support.GetGame()->GetPlayer(pl);
-    m_numActiveInfosets[pl] = 0;
-    Array<bool> activeForPl(player->NumInfosets());
-    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      activeForPl[iset] = p_support.IsReachable(player->GetInfoset(iset));
-      m_numActiveInfosets[pl]++;
-    }
-    m_isActive.push_back(activeForPl);
-  }
-
-  m_currentBehav(m_frozenPlayer, m_frozenInfoset) = p_support.GetIndex(p_action);
-  m_profile.SetAction(p_action);
-  First();
-}
-
-void BehaviorProfileIterator::First()
-{
-  for (int pl = 1; pl <= m_support.GetGame()->NumPlayers(); pl++) {
-    for (int iset = 1; iset <= m_support.GetGame()->GetPlayer(pl)->NumInfosets(); iset++) {
-      if (pl != m_frozenPlayer && iset != m_frozenInfoset) {
-        m_currentBehav(pl, iset) = 1;
-        if (m_isActive[pl][iset]) {
-          m_profile.SetAction(m_support.GetAction(pl, iset, 1));
+  else {
+    for (const auto &player : m_support.GetGame()->GetPlayers()) {
+      for (const auto &infoset : player->GetInfosets()) {
+        if (p_support.IsReachable(infoset)) {
+          m_activeInfosets.push_back(infoset);
         }
       }
     }
   }
+  for (const auto &action : m_frozen) {
+    m_activeInfosets.erase(std::find_if(
+        m_activeInfosets.begin(), m_activeInfosets.end(),
+        [action](const GameInfoset &infoset) { return infoset == action->GetInfoset(); }));
+  }
 }
 
-void BehaviorProfileIterator::operator++()
+BehaviorContingencies::iterator::iterator(BehaviorContingencies *p_cont, bool p_end)
+  : m_cont(p_cont), m_atEnd(p_end), m_profile(p_cont->m_support.GetGame())
 {
-  int pl = m_support.GetGame()->NumPlayers();
-  while (pl > 0 && m_numActiveInfosets[pl] == 0) {
-    --pl;
-  }
-  if (pl == 0) {
-    m_atEnd = true;
+  if (m_atEnd) {
     return;
   }
-
-  int iset = m_support.GetGame()->GetPlayer(pl)->NumInfosets();
-
-  while (true) {
-    if (m_isActive[pl][iset] && (pl != m_frozenPlayer || iset != m_frozenInfoset)) {
-      if (m_currentBehav(pl, iset) < m_support.NumActions(pl, iset)) {
-        m_profile.SetAction(m_support.GetAction(pl, iset, ++m_currentBehav(pl, iset)));
-        return;
-      }
-      else {
-        m_currentBehav(pl, iset) = 1;
-        m_profile.SetAction(m_support.GetAction(pl, iset, 1));
-      }
-    }
-
-    iset--;
-    if (iset == 0) {
-      do {
-        --pl;
-      } while (pl > 0 && m_numActiveInfosets[pl] == 0);
-
-      if (pl == 0) {
-        m_atEnd = true;
-        return;
-      }
-      iset = m_support.GetGame()->GetPlayer(pl)->NumInfosets();
+  for (const auto &player : m_cont->m_support.GetGame()->GetPlayers()) {
+    for (const auto &infoset : player->GetInfosets()) {
+      m_currentBehav[infoset] = m_cont->m_support.GetActions(infoset).begin();
+      m_profile.SetAction(*m_currentBehav[infoset]);
     }
   }
+  for (const auto &action : m_cont->m_frozen) {
+    m_profile.SetAction(action);
+  }
+}
+
+BehaviorContingencies::iterator &BehaviorContingencies::iterator::operator++()
+{
+  for (auto infoset = m_cont->m_activeInfosets.crbegin();
+       infoset != m_cont->m_activeInfosets.crend(); ++infoset) {
+    ++m_currentBehav[*infoset];
+    if (m_currentBehav.at(*infoset) != m_cont->m_support.GetActions(*infoset).end()) {
+      m_profile.SetAction(*m_currentBehav[*infoset]);
+      return *this;
+    }
+    m_currentBehav[*infoset] = m_cont->m_support.GetActions(*infoset).begin();
+    m_profile.SetAction(*m_currentBehav[*infoset]);
+  }
+  m_atEnd = true;
+  return *this;
 }
 
 } // end namespace Gambit

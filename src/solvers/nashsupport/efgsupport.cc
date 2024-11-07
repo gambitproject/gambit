@@ -26,70 +26,7 @@ namespace { // to keep the recursive function private
 
 using namespace Gambit;
 
-class ActionCursor {
-protected:
-  BehaviorSupportProfile m_support;
-  int pl{1}, iset{1}, act{1};
-
-public:
-  // Lifecycle
-  explicit ActionCursor(const BehaviorSupportProfile &S);
-  ~ActionCursor() = default;
-
-  // Operators
-  ActionCursor &operator=(const ActionCursor &) = default;
-
-  // Manipulation
-  bool GoToNext();
-
-  // State
-  GameAction GetAction() const { return m_support.GetAction(pl, iset, act); }
-};
-
-ActionCursor::ActionCursor(const BehaviorSupportProfile &p_support) : m_support(p_support)
-{
-  Game efg = p_support.GetGame();
-
-  // Make sure that (pl, iset) points to a valid information set.
-  // It is permitted to have a game where a player has no information sets.
-  for (; pl <= efg->NumPlayers(); pl++) {
-    if (efg->GetPlayer(pl)->NumInfosets() > 0) {
-      for (iset = 1; iset <= efg->GetPlayer(pl)->NumInfosets(); iset++) {
-        if (m_support.NumActions(pl, iset) > 0) {
-          return;
-        }
-      }
-    }
-  }
-}
-
-bool ActionCursor::GoToNext()
-{
-  if (act != m_support.NumActions(pl, iset)) {
-    act++;
-    return true;
-  }
-
-  int temppl = pl, tempiset = iset + 1;
-  while (temppl <= m_support.GetGame()->NumPlayers()) {
-    while (tempiset <= m_support.GetGame()->GetPlayer(temppl)->NumInfosets()) {
-      if (m_support.NumActions(temppl, tempiset) > 0) {
-        pl = temppl;
-        iset = tempiset;
-        act = 1;
-        return true;
-      }
-      else {
-        tempiset++;
-      }
-    }
-    tempiset = 1;
-    temppl++;
-  }
-  return false;
-}
-
-bool HasActiveActionsAtActiveInfosetsAndNoOthers(const BehaviorSupportProfile &p_support)
+bool AllActionsReachable(const BehaviorSupportProfile &p_support)
 {
   for (auto player : p_support.GetGame()->GetPlayers()) {
     for (auto infoset : player->GetInfosets()) {
@@ -102,27 +39,29 @@ bool HasActiveActionsAtActiveInfosetsAndNoOthers(const BehaviorSupportProfile &p
 }
 
 void PossibleNashBehaviorSupports(const BehaviorSupportProfile &p_support,
-                                  const ActionCursor &p_cursor,
+                                  const std::list<GameAction>::iterator &p_cursor,
+                                  const std::list<GameAction>::iterator &p_end,
                                   std::list<BehaviorSupportProfile> &p_list)
 {
-  ActionCursor copy(p_cursor);
-  if (!copy.GoToNext()) {
-    if (HasActiveActionsAtActiveInfosetsAndNoOthers(p_support)) {
+  auto copy = std::next(p_cursor);
+  if (copy == p_end) {
+    if (AllActionsReachable(p_support)) {
       p_list.push_back(p_support);
     }
 
     BehaviorSupportProfile copySupport(p_support);
-    copySupport.RemoveAction(p_cursor.GetAction());
-    if (HasActiveActionsAtActiveInfosetsAndNoOthers(copySupport)) {
+    copySupport.RemoveAction(*p_cursor);
+    if (AllActionsReachable(copySupport)) {
       p_list.push_back(copySupport);
     }
-    return;
   }
-  PossibleNashBehaviorSupports(p_support, copy, p_list);
+  else {
+    PossibleNashBehaviorSupports(p_support, copy, p_end, p_list);
 
-  BehaviorSupportProfile copySupport(p_support);
-  copySupport.RemoveAction(p_cursor.GetAction());
-  PossibleNashBehaviorSupports(copySupport, copy, p_list);
+    BehaviorSupportProfile copySupport(p_support);
+    copySupport.RemoveAction(*p_cursor);
+    PossibleNashBehaviorSupports(copySupport, copy, p_end, p_list);
+  }
 }
 
 } // namespace
@@ -136,9 +75,17 @@ std::shared_ptr<PossibleNashBehaviorSupportsResult>
 PossibleNashBehaviorSupports(const Game &p_game)
 {
   BehaviorSupportProfile support(p_game);
-  ActionCursor cursor(support);
   auto result = std::make_shared<PossibleNashBehaviorSupportsResult>();
 
-  PossibleNashBehaviorSupports(support, cursor, result->m_supports);
+  std::list<GameAction> actions;
+  for (const auto &player : p_game->GetPlayers()) {
+    for (const auto &infoset : player->GetInfosets()) {
+      for (const auto &action : infoset->GetActions()) {
+        actions.push_back(action);
+      }
+    }
+  }
+
+  PossibleNashBehaviorSupports(support, actions.begin(), actions.end(), result->m_supports);
   return result;
 }

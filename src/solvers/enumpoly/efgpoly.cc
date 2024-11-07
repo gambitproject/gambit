@@ -67,8 +67,7 @@ gPoly<double> BuildSequenceVariable(ProblemData &p_data, const GameSequence &p_s
   if (!p_sequence->action) {
     return {&p_data.Space, 1, &p_data.Lex};
   }
-  if (p_data.sfg.GetSupport().GetIndex(p_sequence->action) <
-      p_data.sfg.GetSupport().NumActions(p_sequence->GetInfoset())) {
+  if (p_sequence->action != p_data.sfg.GetSupport().GetActions(p_sequence->GetInfoset()).back()) {
     return {&p_data.Space, var.at(p_sequence), 1, &p_data.Lex};
   }
 
@@ -92,7 +91,7 @@ ProblemData::ProblemData(const BehaviorSupportProfile &p_support)
 {
   for (auto sequence : sfg.GetSequences()) {
     if (sequence->action &&
-        (p_support.GetIndex(sequence->action) < p_support.NumActions(sequence->GetInfoset()))) {
+        (sequence->action != p_support.GetActions(sequence->GetInfoset()).back())) {
       var[sequence] = var.size() + 1;
     }
   }
@@ -138,10 +137,11 @@ void IndifferenceEquations(ProblemData &p_data, gPolyList<double> &p_equations)
 void LastActionProbPositiveInequalities(ProblemData &p_data, gPolyList<double> &p_equations)
 {
   for (auto sequence : p_data.sfg.GetSequences()) {
-    int action_number =
-        (sequence->action) ? p_data.sfg.GetSupport().GetIndex(sequence->action) : 0;
-    if (action_number > 1 &&
-        action_number == p_data.sfg.GetSupport().NumActions(sequence->action->GetInfoset())) {
+    if (!sequence->action) {
+      continue;
+    }
+    const auto &actions = p_data.sfg.GetSupport().GetActions(sequence->action->GetInfoset());
+    if (actions.size() > 1 && sequence->action == actions.back()) {
       p_equations += p_data.variables.at(sequence);
     }
   }

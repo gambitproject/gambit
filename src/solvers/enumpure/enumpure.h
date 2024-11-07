@@ -89,9 +89,9 @@ inline List<MixedBehaviorProfile<Rational>> EnumPureAgentSolver::Solve(const Gam
 {
   List<MixedBehaviorProfile<Rational>> solutions;
   BehaviorSupportProfile support(p_game);
-  for (BehaviorProfileIterator citer(p_game); !citer.AtEnd(); citer++) {
-    if ((*citer).IsAgentNash()) {
-      MixedBehaviorProfile<Rational> profile = (*citer).ToMixedBehaviorProfile();
+  for (auto citer : BehaviorContingencies(BehaviorSupportProfile(p_game))) {
+    if (citer.IsAgentNash()) {
+      MixedBehaviorProfile<Rational> profile = citer.ToMixedBehaviorProfile();
       m_onEquilibrium->Render(profile);
       solutions.push_back(profile);
     }

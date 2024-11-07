@@ -35,6 +35,8 @@ template <class T> class MixedBehaviorProfile {
 protected:
   DVector<T> m_probs;
   BehaviorSupportProfile m_support;
+  /// The index into the action profile for a action (-1 if not in support)
+  std::map<GameAction, int> m_profileIndex;
   unsigned int m_gameversion;
 
   // structures for storing cached data: nodes
@@ -107,14 +109,12 @@ public:
 
   const T &operator[](const GameAction &p_action) const
   {
-    return m_probs(p_action->GetInfoset()->GetPlayer()->GetNumber(),
-                   p_action->GetInfoset()->GetNumber(), m_support.GetIndex(p_action));
+    return m_probs[m_profileIndex.at(p_action)];
   }
   T &operator[](const GameAction &p_action)
   {
     InvalidateCache();
-    return m_probs(p_action->GetInfoset()->GetPlayer()->GetNumber(),
-                   p_action->GetInfoset()->GetNumber(), m_support.GetIndex(p_action));
+    return m_probs[m_profileIndex.at(p_action)];
   }
 
   const T &operator[](int a) const { return m_probs[a]; }

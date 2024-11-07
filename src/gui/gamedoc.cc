@@ -79,14 +79,7 @@ bool gbtBehavDominanceStack::NextLevel()
     return false;
   }
 
-  Gambit::Array<int> players;
-  for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
-    players.push_back(pl);
-  }
-
-  std::ostringstream gnull;
-  Gambit::BehaviorSupportProfile newSupport =
-      m_supports[m_current]->Undominated(m_strict, true, players, gnull);
+  Gambit::BehaviorSupportProfile newSupport = m_supports[m_current]->Undominated(m_strict);
 
   if (newSupport != *m_supports[m_current]) {
     m_supports.push_back(new Gambit::BehaviorSupportProfile(newSupport));

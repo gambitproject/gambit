@@ -1290,7 +1290,7 @@ Rational TreePureStrategyProfileRep::GetPayoff(int pl) const
       }
     }
   }
-  return behav.GetPayoff<Rational>(pl);
+  return behav.GetPayoff<Rational>(m_nfg->GetPlayer(pl));
 }
 
 Rational TreePureStrategyProfileRep::GetStrategyValue(const GameStrategy &p_strategy) const

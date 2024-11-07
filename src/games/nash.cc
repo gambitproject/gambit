@@ -338,9 +338,8 @@ void SubgameBehavSolver<T>::SolveSubgames(const Game &p_game, const DVector<T> &
           for (int j = 1; j <= player->NumInfosets(); j++) {
             if (subinfoset->GetLabel() == player->GetInfoset(j)->GetLabel()) {
               int id = atoi(subinfoset->GetLabel().c_str());
-              for (int act = 1; act <= subsupport.NumActions(pl, iset); act++) {
-                int actno = subsupport.GetAction(pl, iset, act)->GetNumber();
-                solns[solns.Length()](pl, id, actno) = sol[solno][subinfoset->GetAction(act)];
+              for (const auto &action : subsupport.GetActions(subinfoset)) {
+                solns.back()(pl, id, action->GetNumber()) = sol[solno][action];
               }
               break;
             }

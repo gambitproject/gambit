@@ -52,7 +52,7 @@ public:
   public:
     using const_iterator = std::vector<GameStrategy>::const_iterator;
 
-    Support() : m_profile(0), m_player(0) {}
+    Support() : m_profile(nullptr), m_player(nullptr) {}
     Support(const StrategySupportProfile *p_profile, GamePlayer p_player)
       : m_profile(p_profile), m_player(p_player)
     {

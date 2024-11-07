@@ -439,8 +439,6 @@ bool Rational::operator>(const Rational &y) const { return compare(*this, y) > 0
 
 bool Rational::operator>=(const Rational &y) const { return compare(*this, y) >= 0; }
 
-int sign(const Rational &x) { return sign(x.num); }
-
 void Rational::negate() { num.negate(); }
 
 Rational &Rational::operator+=(const Rational &y)

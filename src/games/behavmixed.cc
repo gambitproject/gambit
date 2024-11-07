@@ -38,6 +38,14 @@ MixedBehaviorProfile<T>::MixedBehaviorProfile(const Game &p_game)
   : m_probs(p_game->NumActions()), m_support(BehaviorSupportProfile(p_game)),
     m_gameversion(p_game->GetVersion())
 {
+  int index = 1;
+  for (const auto &player : p_game->GetPlayers()) {
+    for (const auto &infoset : player->GetInfosets()) {
+      for (const auto &action : infoset->GetActions()) {
+        m_profileIndex[action] = index++;
+      }
+    }
+  }
   SetCentroid();
 }
 
@@ -46,6 +54,19 @@ MixedBehaviorProfile<T>::MixedBehaviorProfile(const BehaviorSupportProfile &p_su
   : m_probs(p_support.NumActions()), m_support(p_support),
     m_gameversion(p_support.GetGame()->GetVersion())
 {
+  int index = 1;
+  for (const auto &player : p_support.GetGame()->GetPlayers()) {
+    for (const auto &infoset : player->GetInfosets()) {
+      for (const auto &action : infoset->GetActions()) {
+        if (p_support.Contains(action)) {
+          m_profileIndex[action] = index++;
+        }
+        else {
+          m_profileIndex[action] = -1;
+        }
+      }
+    }
+  }
   SetCentroid();
 }
 
@@ -84,7 +105,7 @@ void MixedBehaviorProfile<T>::RealizationProbs(const MixedStrategyProfile<T> &mp
         }
       }
       else if (GetSupport().Contains(node->GetInfoset()->GetAction(i))) {
-        int num_actions = GetSupport().NumActions(node->GetInfoset());
+        int num_actions = GetSupport().GetActions(node->GetInfoset()).size();
         prob = T(1) / T(num_actions);
       }
       else {
@@ -109,6 +130,15 @@ MixedBehaviorProfile<T>::MixedBehaviorProfile(const MixedStrategyProfile<T> &p_p
   : m_probs(p_profile.GetGame()->NumActions()), m_support(p_profile.GetGame()),
     m_gameversion(p_profile.GetGame()->GetVersion())
 {
+  int index = 1;
+  for (const auto &player : p_profile.GetGame()->GetPlayers()) {
+    for (const auto &infoset : player->GetInfosets()) {
+      for (const auto &action : infoset->GetActions()) {
+        m_profileIndex[action] = index++;
+      }
+    }
+  }
+
   static_cast<Vector<T> &>(m_probs) = T(0);
 
   GameTreeNodeRep *root =
@@ -172,8 +202,8 @@ template <class T> void MixedBehaviorProfile<T>::SetCentroid()
 {
   CheckVersion();
   for (auto infoset : m_support.GetGame()->GetInfosets()) {
-    if (m_support.NumActions(infoset) > 0) {
-      T center = T(1) / T(m_support.NumActions(infoset));
+    if (!m_support.GetActions(infoset).empty()) {
+      T center = T(1) / T(m_support.GetActions(infoset).size());
       for (auto act : m_support.GetActions(infoset)) {
         (*this)[act] = center;
       }
@@ -195,7 +225,7 @@ template <class T> void MixedBehaviorProfile<T>::UndefinedToCentroid()
                         [this](T total, GameAction act) { return total + GetActionProb(act); });
     if (total == T(0)) {
       for (auto act : actions) {
-        (*this)[act] = T(1) / T(m_support.NumActions(infoset));
+        (*this)[act] = T(1) / T(m_support.GetActions(infoset).size());
       }
     }
   }
@@ -322,8 +352,7 @@ template <class T> T MixedBehaviorProfile<T>::GetActionProb(const GameAction &ac
     return T(0);
   }
   else {
-    return m_probs(action->GetInfoset()->GetPlayer()->GetNumber(),
-                   action->GetInfoset()->GetNumber(), m_support.GetIndex(action));
+    return m_probs[m_profileIndex.at(action)];
   }
 }
 

@@ -39,17 +39,39 @@ namespace Gambit {
 class BehaviorSupportProfile {
 protected:
   Game m_efg;
-  Array<Array<Array<GameAction>>> m_actions;
+  std::map<GameInfoset, std::vector<GameAction>> m_actions;
 
   std::map<GameInfoset, bool> m_infosetReachable;
   std::map<GameNode, bool> m_nonterminalReachable;
 
-  bool HasActiveMembers(int pl, int iset) const;
+  bool HasReachableMembers(const GameInfoset &) const;
   void ActivateSubtree(const GameNode &);
   void DeactivateSubtree(const GameNode &);
-  void DeactivateSubtree(const GameNode &, List<GameInfoset> &);
 
 public:
+  class Support {
+  private:
+    const BehaviorSupportProfile *m_profile;
+    GameInfoset m_infoset;
+
+  public:
+    using const_iterator = std::vector<GameAction>::const_iterator;
+
+    Support() : m_profile(nullptr), m_infoset(nullptr) {}
+    Support(const BehaviorSupportProfile *p_profile, const GameInfoset &p_infoset)
+      : m_profile(p_profile), m_infoset(p_infoset)
+    {
+    }
+
+    size_t size() const { return m_profile->m_actions.at(m_infoset).size(); }
+    bool empty() const { return m_profile->m_actions.at(m_infoset).empty(); }
+    GameAction front() const { return m_profile->m_actions.at(m_infoset).front(); }
+    GameAction back() const { return m_profile->m_actions.at(m_infoset).back(); }
+
+    const_iterator begin() const { return m_profile->m_actions.at(m_infoset).begin(); }
+    const_iterator end() const { return m_profile->m_actions.at(m_infoset).end(); }
+  };
+
   /// @name Lifecycle
   //@{
   /// Constructor.  By default, a support contains all strategies.
@@ -61,44 +83,35 @@ public:
   /// @name Operator overloading
   //@{
   /// Test for the equality of two supports (same actions at all infosets)
-  bool operator==(const BehaviorSupportProfile &) const;
-  bool operator!=(const BehaviorSupportProfile &p_support) const { return !(*this == p_support); }
+  bool operator==(const BehaviorSupportProfile &p_support) const
+  {
+    return m_actions == p_support.m_actions;
+  }
+  bool operator!=(const BehaviorSupportProfile &p_support) const
+  {
+    return m_actions != p_support.m_actions;
+  }
 
   /// @name General information
   //@{
   /// Returns the game on which the support is defined.
   Game GetGame() const { return m_efg; }
 
-  /// Returns the number of actions in the information set
-  int NumActions(const GameInfoset &p_infoset) const
-  {
-    return m_actions[p_infoset->GetPlayer()->GetNumber()][p_infoset->GetNumber()].Length();
-  }
-  int NumActions(int pl, int iset) const { return m_actions[pl][iset].Length(); }
-
   /// Returns the number of actions in the support for all information sets
   PVector<int> NumActions() const;
   /// Returns the total number of actions in the support
   size_t BehaviorProfileLength() const;
 
-  /// Returns the action at the specified position in the support
-  GameAction GetAction(int pl, int iset, int act) const { return m_actions[pl][iset][act]; }
   /// Returns the set of actions in the support at the information set
-  const Array<GameAction> &GetActions(const GameInfoset &p_infoset) const
-  {
-    return m_actions[p_infoset->GetPlayer()->GetNumber()][p_infoset->GetNumber()];
-  }
+  Support GetActions(const GameInfoset &p_infoset) const { return {this, p_infoset}; }
   /// Does the information set have at least one active action?
-  bool HasAction(const GameInfoset &p_infoset) const
-  {
-    return !m_actions[p_infoset->GetPlayer()->GetNumber()][p_infoset->GetNumber()].empty();
-  }
-
-  /// Returns the position of the action in the support.
-  int GetIndex(const GameAction &) const;
+  bool HasAction(const GameInfoset &p_infoset) const { return !m_actions.at(p_infoset).empty(); }
 
   /// Returns whether the action is in the support.
-  bool Contains(const GameAction &p_action) const { return (GetIndex(p_action) != 0); }
+  bool Contains(const GameAction &p_action) const
+  {
+    return contains(m_actions.at(p_action->GetInfoset()), p_action);
+  }
   //@}
 
   /// @name Editing the support
@@ -121,14 +134,12 @@ public:
 
   /// @name Identification of dominated actions
   //@{
-  /// Returns true if action a is dominated by action b
-  bool Dominates(const GameAction &a, const GameAction &b, bool p_strict,
-                 bool p_conditional) const;
+  /// Returns true if action 'a' is dominated by action 'b'
+  bool Dominates(const GameAction &a, const GameAction &b, bool p_strict) const;
   /// Returns true if the action is dominated by some other action
-  bool IsDominated(const GameAction &a, bool p_strict, bool p_conditional) const;
+  bool IsDominated(const GameAction &a, bool p_strict) const;
   /// Returns a copy of the support with dominated actions eliminated
-  BehaviorSupportProfile Undominated(bool p_strict, bool p_conditional, const Array<int> &players,
-                                     std::ostream &) const;
+  BehaviorSupportProfile Undominated(bool p_strict) const;
   //@}
 };
 

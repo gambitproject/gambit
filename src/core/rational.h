@@ -116,6 +116,8 @@ public:
 // Naming compatible with Boost's lexical_cast concept for potential future compatibility.
 template <> Rational lexical_cast(const std::string &);
 
+inline int sign(const Rational &x) { return sign(x.num); }
+
 } // end namespace Gambit
 
 #endif // LIBGAMBIT_RATIONAL_H
