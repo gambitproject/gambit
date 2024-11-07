@@ -498,13 +498,6 @@ void GameTableRep::IndexStrategies()
     }
     offset *= player->m_strategies.size();
   }
-
-  int id = 1;
-  for (auto player : m_players) {
-    for (auto strategy : player->m_strategies) {
-      strategy->m_id = id++;
-    }
-  }
 }
 
 } // end namespace Gambit

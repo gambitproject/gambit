@@ -907,12 +907,6 @@ void GameTreeRep::BuildComputedValues()
     m_players[pl]->MakeReducedStrats(m_root, nullptr);
   }
 
-  for (int pl = 1, id = 1; pl <= m_players.Length(); pl++) {
-    for (int st = 1; st <= m_players[pl]->m_strategies.Length();
-         m_players[pl]->m_strategies[st++]->m_id = id++)
-      ;
-  }
-
   m_computedValues = true;
 }
 

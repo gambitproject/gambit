@@ -34,7 +34,7 @@ public:
   Vector<T> m_probs;
   StrategySupportProfile m_support;
   /// The index into the strategy profile for a strategy (-1 if not in support)
-  Array<int> m_profileIndex;
+  std::map<GameStrategy, int> m_profileIndex;
   unsigned int m_gameversion;
 
   explicit MixedStrategyProfileRep(const StrategySupportProfile &);
@@ -46,13 +46,10 @@ public:
   /// Returns the probability the strategy is played
   const T &operator[](const GameStrategy &p_strategy) const
   {
-    return m_probs[m_profileIndex[p_strategy->GetId()]];
+    return m_probs[m_profileIndex.at(p_strategy)];
   }
   /// Returns the probability the strategy is played
-  T &operator[](const GameStrategy &p_strategy)
-  {
-    return m_probs[m_profileIndex[p_strategy->GetId()]];
-  }
+  T &operator[](const GameStrategy &p_strategy) { return m_probs[m_profileIndex.at(p_strategy)]; }
 
   virtual T GetPayoff(int pl) const = 0;
   virtual T GetPayoffDeriv(int pl, const GameStrategy &) const = 0;

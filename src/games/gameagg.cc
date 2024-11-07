@@ -103,7 +103,7 @@ template <class T> T AGGMixedStrategyProfileRep<T>::GetPayoff(int pl) const
   for (int i = 0; i < g.aggPtr->getNumPlayers(); ++i) {
     for (int j = 0; j < g.aggPtr->getNumActions(i); ++j) {
       GameStrategy strategy = this->m_support.GetGame()->GetPlayer(i + 1)->GetStrategy(j + 1);
-      int ind = this->m_profileIndex[strategy->GetId()];
+      int ind = this->m_profileIndex.at(strategy);
       s[g.aggPtr->firstAction(i) + j] = (ind == -1) ? (T)0 : this->m_probs[ind];
     }
   }
@@ -125,7 +125,7 @@ T AGGMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &ps) 
     else {
       for (int j = 0; j < g.aggPtr->getNumActions(i); ++j) {
         GameStrategy strategy = this->m_support.GetGame()->GetPlayer(i + 1)->GetStrategy(j + 1);
-        const int &ind = this->m_profileIndex[strategy->GetId()];
+        const int &ind = this->m_profileIndex.at(strategy);
         s[g.aggPtr->firstAction(i) + j] = (ind == -1) ? (T)0 : this->m_probs[ind];
       }
     }
@@ -161,7 +161,7 @@ T AGGMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &ps1,
     else {
       for (int j = 0; j < g.aggPtr->getNumActions(i); ++j) {
         GameStrategy strategy = this->m_support.GetGame()->GetPlayer(i + 1)->GetStrategy(j + 1);
-        const int &ind = this->m_profileIndex[strategy->GetId()];
+        int ind = this->m_profileIndex.at(strategy);
         s[g.aggPtr->firstAction(i) + j] = (ind == -1) ? (T)0 : this->m_probs[ind];
       }
     }
@@ -184,11 +184,6 @@ GameAGGRep::GameAGGRep(std::shared_ptr<agg::AGG> p_aggPtr) : aggPtr(p_aggPtr)
     for (int st = 1; st <= m_players[pl]->NumStrategies(); st++) {
       m_players[pl]->m_strategies[st]->SetLabel(lexical_cast<std::string>(st));
     }
-  }
-  for (int pl = 1, id = 1; pl <= m_players.Length(); pl++) {
-    for (int st = 1; st <= m_players[pl]->m_strategies.Length();
-         m_players[pl]->m_strategies[st++]->m_id = id++)
-      ;
   }
 }
 

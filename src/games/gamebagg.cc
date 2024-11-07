@@ -115,7 +115,7 @@ template <class T> T BAGGMixedStrategyProfileRep<T>::GetPayoff(int pl) const
         GameStrategy strategy = this->m_support.GetGame()
                                     ->GetPlayer(g.baggPtr->typeOffset[i] + tp + 1)
                                     ->GetStrategy(j + 1);
-        int ind = this->m_profileIndex[strategy->GetId()];
+        int ind = this->m_profileIndex.at(strategy);
         s.at(offs) = (ind == -1) ? (T)0 : this->m_probs[ind];
       }
     }
@@ -146,7 +146,7 @@ T BAGGMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &ps)
           GameStrategy strategy = this->m_support.GetGame()
                                       ->GetPlayer(g.baggPtr->typeOffset[i] + tp + 1)
                                       ->GetStrategy(j + 1);
-          int ind = this->m_profileIndex[strategy->GetId()];
+          int ind = this->m_profileIndex.at(strategy);
           s.at(g.baggPtr->firstAction(i, tp) + j) = (ind == -1) ? Rational(0) : this->m_probs[ind];
         }
       }
@@ -192,7 +192,7 @@ T BAGGMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &ps1
           GameStrategy strategy = this->m_support.GetGame()
                                       ->GetPlayer(g.baggPtr->typeOffset[i] + tp + 1)
                                       ->GetStrategy(j + 1);
-          int ind = this->m_profileIndex[strategy->GetId()];
+          int ind = this->m_profileIndex.at(strategy);
           s.at(g.baggPtr->firstAction(i, tp) + j) =
               static_cast<T>((ind == -1) ? T(0) : this->m_probs[ind]);
         }
@@ -222,11 +222,6 @@ GameBAGGRep::GameBAGGRep(std::shared_ptr<agg::BAGG> _baggPtr)
         m_players[k]->m_strategies[st]->SetLabel(lexical_cast<std::string>(st));
       }
     }
-  }
-  for (int pl = 1, id = 1; pl <= m_players.Length(); pl++) {
-    for (int st = 1; st <= m_players[pl]->m_strategies.Length();
-         m_players[pl]->m_strategies[st++]->m_id = id++)
-      ;
   }
 }
 

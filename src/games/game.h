@@ -239,7 +239,7 @@ class GameStrategyRep : public GameObject {
   template <class T> friend class MixedBehaviorProfile;
 
 private:
-  int m_number, m_id;
+  int m_number;
   GamePlayerRep *m_player;
   long m_offset;
   std::string m_label;
@@ -248,8 +248,7 @@ private:
   /// @name Lifecycle
   //@{
   /// Creates a new strategy for the given player.
-  explicit GameStrategyRep(GamePlayerRep *p_player)
-    : m_number(0), m_id(0), m_player(p_player), m_offset(0L)
+  explicit GameStrategyRep(GamePlayerRep *p_player) : m_number(0), m_player(p_player), m_offset(0L)
   {
   }
   //@}
@@ -266,8 +265,6 @@ public:
   GamePlayer GetPlayer() const;
   /// Returns the index of the strategy for its player
   int GetNumber() const { return m_number; }
-  /// Returns the global number of the strategy in the game
-  int GetId() const { return m_id; }
 
   /// Remove this strategy from the game
   void DeleteStrategy();
