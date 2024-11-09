@@ -28,6 +28,11 @@ Creating, reading, and writing games
 .. autosummary::
    :toctree: api/
 
+   read_gbt
+   read_efg
+   read_nfg
+   read_agg
+
    Game.new_tree
    Game.new_table
    Game.from_arrays
@@ -36,6 +41,10 @@ Creating, reading, and writing games
    Game.read_game
    Game.parse_game
    Game.write
+   Game.to_efg
+   Game.to_nfg
+   Game.to_html
+   Game.to_latex
 
 
 Transforming game trees
@@ -181,7 +190,7 @@ Player behavior
    Game.random_strategy_profile
    Game.mixed_behavior_profile
    Game.random_behavior_profile
-   Game.support_profile
+   Game.strategy_support_profile
 
 
 Representation of strategic behavior

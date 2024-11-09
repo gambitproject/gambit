@@ -379,8 +379,17 @@ cdef extern from "games/behavspt.h":
 cdef extern from "util.h":
     c_Game ReadGame(char *) except +IOError
     c_Game ParseGame(char *) except +IOError
+    c_Game ParseGbtGame(string) except +IOError
+    c_Game ParseEfgGame(string) except +IOError
+    c_Game ParseNfgGame(string) except +IOError
+    c_Game ParseAggGame(string) except +IOError
     string WriteGame(c_Game, string) except +IOError
     string WriteGame(c_StrategySupportProfile) except +IOError
+    string WriteEfgFile(c_Game)
+    string WriteNfgFile(c_Game)
+    string WriteLaTeXFile(c_Game)
+    string WriteHTMLFile(c_Game)
+    # string WriteGbtFile(c_Game)
 
     c_Rational to_rational(char *) except +
 
