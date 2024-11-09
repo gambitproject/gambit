@@ -24,6 +24,9 @@
 - Integrated support (in Python) for using `PHCpack` to solve systems of polynomial equations in
   `enumpoly_solve` based on an implementation formerly in the `contrib` section of the
   repository. (#165)
+- New format-specific functions `pygambit.read_*` and `pygambit.Game.to_*` functions have been
+  added to (de-)serialise games.  The existing `Game.read_game` and `Game.write` functions have
+  been deprecated and will be removed in 16.4. (#357)
 
 ### Changed
 - The built-in implementation of lrslib (dating from 2016) has been removed.  Instead, access to
