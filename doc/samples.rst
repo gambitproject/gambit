@@ -60,10 +60,15 @@ Sample games
   to let you switch doors, should you?
 
 :download:`nim.efg <../contrib/games/nim.efg>`
+  This is a Nim-like game, which is a useful example of the value
+  of backward induction.
+  This version starts with one pile of five stones, and allows the
+  two players to alternately take 1 or 2 stones.
+  The player to take the last stone wins.
   The classic game of
-  `Nim <http://en.wikipedia.org/wiki/Nim>`_, which is a useful example
-  of the value of backward induction. This version starts with five
-  stones.  An interesting experimental study of this class of games is
+  `Nim <http://en.wikipedia.org/wiki/Nim>`_ allows multiple piles,
+  and allows a player to remove any number of stones from a pile.
+  An interesting experimental study of Nim games is
   `McKinney, C. Nicholas and Van Huyck, John B. (2013) Eureka
   learning: Heuristics and response time in perfect information
   games. Games and Economic Behavior 79:

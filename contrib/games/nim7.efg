@@ -1,4 +1,4 @@
-EFG 2 R "Nim, starting with Seven Stones." { "Player 1" "Player 2" }
+EFG 2 R "Nim-like game. One pile of 7 stones. Players alternately take 1 or 2 stones. Player to take last stone wins." { "Player 1" "Player 2" }
 
 p "7 left" 2 1 "(2,4)" { "take 2" "take 1" } 0
 p "5 left" 1 1 "(1,1)" { "take_2" "take_1" } 0
