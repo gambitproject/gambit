@@ -224,15 +224,16 @@ namespace {
 /// Returns a list of the root nodes of all the immediate proper subgames
 /// in the subtree rooted at 'p_node'.
 ///
-void ChildSubgames(const GameNode &p_node, List<GameNode> &p_list)
+std::list<GameNode> ChildSubgames(const GameNode &p_node, const bool p_root = true)
 {
-  if (p_node->IsSubgameRoot()) {
-    p_list.push_back(p_node);
+  if (!p_root && p_node->IsSubgameRoot()) {
+    return {p_node};
   }
-  else {
-    for (int i = 1; i <= p_node->NumChildren(); ChildSubgames(p_node->GetChild(i++), p_list))
-      ;
+  std::list<GameNode> ret;
+  for (const auto &child : p_node->GetChildren()) {
+    ret.splice(ret.end(), ChildSubgames(child, false));
   }
+  return ret;
 }
 
 } // namespace
@@ -246,128 +247,113 @@ void ChildSubgames(const GameNode &p_node, List<GameNode> &p_list)
 //   set to unique IDs.  These are used to match up information
 //   sets in the subgames (which are themselves copies) to the
 //   original game.
-// * We only carry around DVectors instead of full MixedBehaviorProfiles,
-//   because MixedBehaviorProfiles allocate space several times the
-//   size of the tree to carry around useful quantities.  These
-//   quantities are irrelevant for this calculation, so we only
-//   store the probabilities, and convert to MixedBehaviorProfiles
-//   at the end of the computation
 //
 
-template <class T>
-void SubgameBehavSolver<T>::SolveSubgames(const Game &p_game, const DVector<T> &p_templateSolution,
-                                          const GameNode &n, List<DVector<T>> &solns,
-                                          List<GameOutcome> &values) const
-{
-  List<DVector<T>> thissolns;
-  thissolns.push_back(p_templateSolution);
-  ((Vector<T> &)thissolns[1]).operator=(T(0));
+template <class T> class SubgameSolution {
+private:
+  std::map<GameAction, T> profile;
+  std::map<GameNode, GameOutcome> node_values;
 
-  List<GameNode> subroots;
-  for (int i = 1; i <= n->NumChildren(); i++) {
-    ChildSubgames(n->GetChild(i), subroots);
+public:
+  SubgameSolution(const std::map<GameAction, T> &p_profile,
+                  const std::map<GameNode, GameOutcome> &p_nodeValues)
+    : profile(p_profile), node_values(p_nodeValues)
+  {
   }
 
-  List<Array<GameOutcome>> subrootvalues;
-  subrootvalues.push_back(Array<GameOutcome>(subroots.Length()));
+  const std::map<GameAction, T> &GetProfile() const { return profile; }
+  const std::map<GameNode, GameOutcome> &GetNodeValues() const { return node_values; }
 
-  for (int i = 1; i <= subroots.Length(); i++) {
-    // printf("Looking at subgame %d of %d\n", i, subroots.Length());
-    List<DVector<T>> subsolns;
-    List<GameOutcome> subvalues;
+  SubgameSolution<T> Combine(const SubgameSolution<T> &other) const
+  {
+    auto combined = *this;
+    combined.profile.insert(other.profile.cbegin(), other.profile.cend());
+    combined.node_values.insert(other.node_values.cbegin(), other.node_values.cend());
+    return combined;
+  }
 
-    SolveSubgames(p_game, p_templateSolution, subroots[i], subsolns, subvalues);
+  SubgameSolution<T> Update(const GameNode &p_subroot, const MixedBehaviorProfile<T> &p_profile,
+                            const std::map<std::string, GameInfoset> &p_infosetMap)
+  {
+    SubgameSolution<T> solution = {profile, {{p_subroot, p_subroot->GetGame()->NewOutcome()}}};
 
-    if (subsolns.empty()) {
-      solns = List<DVector<T>>();
-      return;
-    }
-
-    List<DVector<T>> newsolns;
-    List<Array<GameOutcome>> newsubrootvalues;
-
-    for (int soln = 1; soln <= thissolns.Length(); soln++) {
-      for (int subsoln = 1; subsoln <= subsolns.Length(); subsoln++) {
-        DVector<T> bp(thissolns[soln]);
-        DVector<T> tmp(subsolns[subsoln]);
-        for (int j = 1; j <= bp.Length(); j++) {
-          bp[j] += tmp[j];
+    for (const auto &subplayer : p_profile.GetGame()->GetPlayers()) {
+      for (const auto &subinfoset : subplayer->GetInfosets()) {
+        GameInfoset infoset = p_infosetMap.at(subinfoset->GetLabel());
+        const auto &subactions = subinfoset->GetActions();
+        auto subaction = subactions.begin();
+        for (const auto &action : infoset->GetActions()) {
+          solution.profile[action] = p_profile[*subaction];
+          ++subaction;
         }
-        newsolns.push_back(bp);
-
-        newsubrootvalues.push_back(subrootvalues[soln]);
-        newsubrootvalues[newsubrootvalues.Length()][i] = subvalues[subsoln];
       }
     }
 
-    thissolns = newsolns;
-    subrootvalues = newsubrootvalues;
-    // printf("Finished solving subgame %d\n", i);
+    GameOutcome outcome = p_subroot->GetOutcome();
+    const auto &subplayers = p_profile.GetGame()->GetPlayers();
+    auto subplayer = subplayers.begin();
+    for (const auto &player : p_subroot->GetGame()->GetPlayers()) {
+      T value = p_profile.GetPayoff(*subplayer);
+      if (outcome) {
+        value += static_cast<T>(outcome->GetPayoff(*subplayer));
+      }
+      solution.node_values[p_subroot]->SetPayoff(player, Number(static_cast<Rational>(value)));
+      ++subplayer;
+    }
+    return solution;
+  }
+};
+
+template <class T>
+std::list<SubgameSolution<T>>
+SubgameBehavSolver<T>::SolveSubgames(const GameNode &p_root,
+                                     const std::map<std::string, GameInfoset> &p_infosetMap) const
+{
+  std::list<SubgameSolution<T>> subsolutions = {{{}, {}}};
+  for (const auto &subroot : ChildSubgames(p_root)) {
+    std::list<SubgameSolution<T>> combined_solutions;
+    for (const auto &solution : SolveSubgames(subroot, p_infosetMap)) {
+      for (const auto &subsolution : subsolutions) {
+        combined_solutions.push_back(subsolution.Combine(solution));
+      }
+    }
+    if (combined_solutions.empty()) {
+      return {};
+    }
+    subsolutions = combined_solutions;
   }
 
-  for (int soln = 1; soln <= thissolns.Length(); soln++) {
-    // printf("Analyzing scenario %d of %d\n", soln, thissolns.Length());
-    for (int i = 1; i <= subroots.Length(); i++) {
-      subroots[i]->SetOutcome(subrootvalues[soln][i]);
+  std::list<SubgameSolution<T>> solutions;
+  for (auto subsolution : subsolutions) {
+    for (auto [subroot, outcome] : subsolution.GetNodeValues()) {
+      subroot->SetOutcome(outcome);
     }
-
-    Game subgame = n->CopySubgame();
-    // this prevents double-counting of outcomes at roots of subgames
-    // by convention, we will just put the payoffs in the parent subgame
+    // This prevents double-counting of outcomes at roots of subgames.
+    // By convention, we will just put the payoffs in the parent subgame.
+    Game subgame = p_root->CopySubgame();
     subgame->GetRoot()->SetOutcome(nullptr);
 
-    BehaviorSupportProfile subsupport(subgame);
-    List<MixedBehaviorProfile<T>> sol = m_solver->Solve(p_game);
-
-    if (sol.empty()) {
-      solns = List<DVector<T>>();
-      return;
+    for (const auto &solution : m_solver->Solve(subgame)) {
+      solutions.push_back(subsolution.Update(p_root, solution, p_infosetMap));
     }
-
-    // Put behavior profile in "total" solution here...
-    for (int solno = 1; solno <= sol.Length(); solno++) {
-      solns.push_back(thissolns[soln]);
-
-      for (int pl = 1; pl <= subgame->NumPlayers(); pl++) {
-        GamePlayer subplayer = subgame->GetPlayer(pl);
-        GamePlayer player = p_game->GetPlayer(pl);
-
-        for (int iset = 1; iset <= subplayer->NumInfosets(); iset++) {
-          GameInfoset subinfoset = subplayer->GetInfoset(iset);
-
-          for (int j = 1; j <= player->NumInfosets(); j++) {
-            if (subinfoset->GetLabel() == player->GetInfoset(j)->GetLabel()) {
-              int id = atoi(subinfoset->GetLabel().c_str());
-              for (const auto &action : subsupport.GetActions(subinfoset)) {
-                solns.back()(pl, id, action->GetNumber()) = sol[solno][action];
-              }
-              break;
-            }
-          }
-        }
-      }
-
-      Vector<T> subval(subgame->NumPlayers());
-      GameOutcome outcome = n->GetOutcome();
-      for (int pl = 1; pl <= subgame->NumPlayers(); pl++) {
-        subval[pl] = sol[solno].GetPayoff(pl);
-        if (outcome) {
-          subval[pl] += static_cast<T>(outcome->GetPayoff(pl));
-        }
-      }
-
-      GameOutcome ov = p_game->NewOutcome();
-      for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
-        ov->SetPayoff(pl, Number(static_cast<Rational>(subval[pl])));
-      }
-
-      values.push_back(ov);
-    }
-    // printf("Finished with scenario %d of %d; total solutions so far = %d\n",
-    // soln, thissolns.Length(), solns.Length());
   }
 
-  n->DeleteTree();
+  p_root->DeleteTree();
+  return solutions;
+}
+
+template <class T>
+MixedBehaviorProfile<T> BuildProfile(const Game &p_game, const SubgameSolution<T> &p_solution)
+{
+  MixedBehaviorProfile<T> profile(p_game);
+  for (const auto &player : p_game->GetPlayers()) {
+    for (const auto &infoset : player->GetInfosets()) {
+      for (const auto &action : infoset->GetActions()) {
+        profile[action] = p_solution.GetProfile().at(action);
+      }
+    }
+  }
+  return profile;
 }
 
 template <class T>
@@ -375,25 +361,25 @@ List<MixedBehaviorProfile<T>> SubgameBehavSolver<T>::Solve(const Game &p_game) c
 {
   Game efg = p_game->GetRoot()->CopySubgame();
 
-  for (int pl = 1; pl <= efg->NumPlayers(); pl++) {
-    for (int iset = 1; iset <= efg->GetPlayer(pl)->NumInfosets(); iset++) {
-      efg->GetPlayer(pl)->GetInfoset(iset)->SetLabel(lexical_cast<std::string>(iset));
+  int index = 1;
+  std::map<std::string, GameInfoset> infoset_map;
+  for (const auto &player : p_game->GetPlayers()) {
+    for (const auto &infoset : player->GetInfosets()) {
+      infoset_map[std::to_string(index++)] = infoset;
+    }
+  }
+  index = 1;
+  for (const auto &player : efg->GetPlayers()) {
+    for (const auto &infoset : player->GetInfosets()) {
+      infoset->SetLabel(std::to_string(index++));
     }
   }
 
-  List<DVector<T>> vectors;
-  List<GameOutcome> values;
-  SolveSubgames(efg, DVector<T>(efg->NumActions()), efg->GetRoot(), vectors, values);
-
+  auto results = SolveSubgames(efg->GetRoot(), infoset_map);
   List<MixedBehaviorProfile<T>> solutions;
-  for (int i = 1; i <= vectors.Length(); i++) {
-    solutions.push_back(MixedBehaviorProfile<T>(p_game));
-    for (int j = 1; j <= vectors[i].Length(); j++) {
-      solutions[i][j] = vectors[i][j];
-    }
-  }
-  for (int i = 1; i <= solutions.Length(); i++) {
-    this->m_onEquilibrium->Render(solutions[i]);
+  for (const auto &result : results) {
+    solutions.push_back(BuildProfile(p_game, result));
+    this->m_onEquilibrium->Render(solutions.back());
   }
   return solutions;
 }

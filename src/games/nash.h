@@ -209,6 +209,8 @@ protected:
   std::shared_ptr<StrategySolver<T>> m_solver;
 };
 
+template <class T> class SubgameSolution;
+
 template <class T> class SubgameBehavSolver : public BehavSolver<T> {
 public:
   explicit SubgameBehavSolver(
@@ -222,8 +224,8 @@ protected:
   std::shared_ptr<BehavSolver<T>> m_solver;
 
 private:
-  void SolveSubgames(const Game &p_game, const DVector<T> &p_templateSolution, const GameNode &n,
-                     List<DVector<T>> &solns, List<GameOutcome> &values) const;
+  std::list<SubgameSolution<T>> SolveSubgames(const GameNode &,
+                                              const std::map<std::string, GameInfoset> &) const;
 };
 
 //
