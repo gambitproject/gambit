@@ -28,7 +28,7 @@
 #include <set>
 #include <random>
 
-#include "core/dvector.h"
+#include "core/pvector.h"
 #include "number.h"
 #include "gameobject.h"
 
@@ -485,10 +485,6 @@ public:
 
   /// @name Dimensions of the game
   //@{
-  /// The number of actions in each information set
-  virtual PVector<int> NumActions() const = 0;
-  /// The number of members in each information set
-  virtual PVector<int> NumMembers() const = 0;
   /// The number of strategies for each player
   virtual Array<int> NumStrategies() const = 0;
   /// Gets the i'th strategy in the game, numbered globally

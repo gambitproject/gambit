@@ -45,6 +45,12 @@ public:
     else {
       m_scale = 1.0 / m_scale;
     }
+
+    for (const auto &player : m_game->GetPlayers()) {
+      for (const auto &infoset : player->GetInfosets()) {
+        m_shape.push_back(infoset->NumActions());
+      }
+    }
   }
 
   ~AgentLyapunovFunction() override = default;
@@ -54,6 +60,7 @@ public:
 private:
   Game m_game;
   mutable MixedBehaviorProfile<double> m_profile;
+  Array<int> m_shape;
   double m_scale, m_penalty{100.0};
 
   double Value(const Vector<double> &x) const override;
@@ -116,7 +123,7 @@ bool AgentLyapunovFunction::Gradient(const Vector<double> &x, Vector<double> &gr
     m_profile[i] += DELTA;
     grad[i] = value / (2.0 * DELTA);
   }
-  Project(grad, static_cast<const Array<int> &>(m_game->NumActions()));
+  Project(grad, m_shape);
   return true;
 }
 

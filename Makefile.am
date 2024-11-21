@@ -251,8 +251,6 @@ core_SOURCES = \
 	src/core/vector.imp \
 	src/core/pvector.h \
 	src/core/pvector.imp \
-	src/core/dvector.h \
-	src/core/dvector.imp \
 	src/core/recarray.h \
 	src/core/matrix.h \
 	src/core/matrix.imp \
@@ -264,7 +262,6 @@ core_SOURCES = \
 	src/core/rational.h \
 	src/core/vector.cc \
 	src/core/pvector.cc \
-	src/core/dvector.cc \
 	src/core/matrix.cc \
 	src/core/sqmatrix.cc \
 	src/core/function.cc \

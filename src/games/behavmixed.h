@@ -33,7 +33,7 @@ namespace Gambit {
 ///
 template <class T> class MixedBehaviorProfile {
 protected:
-  DVector<T> m_probs;
+  Vector<T> m_probs;
   BehaviorSupportProfile m_support;
   /// The index into the action profile for a action (-1 if not in support)
   std::map<GameAction, int> m_profileIndex;
@@ -101,11 +101,14 @@ public:
 
   /// @name Operator overloading
   //@{
-  bool operator==(const MixedBehaviorProfile<T> &) const;
-  bool operator!=(const MixedBehaviorProfile<T> &x) const { return !(*this == x); }
-
-  bool operator==(const DVector<T> &x) const { return m_probs == x; }
-  bool operator!=(const DVector<T> &x) const { return m_probs != x; }
+  bool operator==(const MixedBehaviorProfile<T> &p_profile) const
+  {
+    return (m_support == p_profile.m_support && m_probs == p_profile.m_probs);
+  }
+  bool operator!=(const MixedBehaviorProfile<T> &p_profile) const
+  {
+    return (m_support != p_profile.m_support || m_probs != p_profile.m_probs);
+  }
 
   const T &operator[](const GameAction &p_action) const
   {

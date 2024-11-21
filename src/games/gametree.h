@@ -277,10 +277,6 @@ public:
 
   /// @name Dimensions of the game
   //@{
-  /// The number of actions in each information set
-  PVector<int> NumActions() const override;
-  /// The number of members in each information set
-  PVector<int> NumMembers() const override;
   /// Returns the total number of actions in the game
   int BehavProfileLength() const override;
   //@}

@@ -35,7 +35,7 @@ namespace Gambit {
 
 template <class T>
 MixedBehaviorProfile<T>::MixedBehaviorProfile(const Game &p_game)
-  : m_probs(p_game->NumActions()), m_support(BehaviorSupportProfile(p_game)),
+  : m_probs(p_game->BehavProfileLength()), m_support(BehaviorSupportProfile(p_game)),
     m_gameversion(p_game->GetVersion())
 {
   int index = 1;
@@ -51,7 +51,7 @@ MixedBehaviorProfile<T>::MixedBehaviorProfile(const Game &p_game)
 
 template <class T>
 MixedBehaviorProfile<T>::MixedBehaviorProfile(const BehaviorSupportProfile &p_support)
-  : m_probs(p_support.NumActions()), m_support(p_support),
+  : m_probs(p_support.BehaviorProfileLength()), m_support(p_support),
     m_gameversion(p_support.GetGame()->GetVersion())
 {
   int index = 1;
@@ -127,19 +127,18 @@ void MixedBehaviorProfile<T>::RealizationProbs(const MixedStrategyProfile<T> &mp
 
 template <class T>
 MixedBehaviorProfile<T>::MixedBehaviorProfile(const MixedStrategyProfile<T> &p_profile)
-  : m_probs(p_profile.GetGame()->NumActions()), m_support(p_profile.GetGame()),
+  : m_probs(p_profile.GetGame()->BehavProfileLength()), m_support(p_profile.GetGame()),
     m_gameversion(p_profile.GetGame()->GetVersion())
 {
   int index = 1;
   for (const auto &player : p_profile.GetGame()->GetPlayers()) {
     for (const auto &infoset : player->GetInfosets()) {
       for (const auto &action : infoset->GetActions()) {
-        m_profileIndex[action] = index++;
+        m_profileIndex[action] = index;
+        m_probs[index++] = static_cast<T>(0);
       }
     }
   }
-
-  static_cast<Vector<T> &>(m_probs) = T(0);
 
   GameTreeNodeRep *root =
       dynamic_cast<GameTreeNodeRep *>(m_support.GetGame()->GetRoot().operator->());
@@ -182,16 +181,6 @@ MixedBehaviorProfile<T>::operator=(const MixedBehaviorProfile<T> &p_profile)
   map_actionValues = p_profile.map_actionValues;
   map_regret = p_profile.map_regret;
   return *this;
-}
-
-//========================================================================
-//               MixedBehaviorProfile<T>: Operator overloading
-//========================================================================
-
-template <class T>
-bool MixedBehaviorProfile<T>::operator==(const MixedBehaviorProfile<T> &p_profile) const
-{
-  return (m_support == p_profile.m_support && (DVector<T> &)*this == (DVector<T> &)p_profile);
 }
 
 //========================================================================

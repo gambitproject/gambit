@@ -97,8 +97,6 @@ public:
   /// Returns the game on which the support is defined.
   Game GetGame() const { return m_efg; }
 
-  /// Returns the number of actions in the support for all information sets
-  PVector<int> NumActions() const;
   /// Returns the total number of actions in the support
   size_t BehaviorProfileLength() const;
 

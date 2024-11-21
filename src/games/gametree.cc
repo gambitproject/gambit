@@ -982,42 +982,6 @@ void GameTreeRep::WriteNfgFile(std::ostream &p_file) const
 //                 GameTreeRep: Dimensions of the game
 //------------------------------------------------------------------------
 
-PVector<int> GameTreeRep::NumActions() const
-{
-  Array<int> foo(m_players.Length());
-  int i;
-  for (i = 1; i <= m_players.Length(); i++) {
-    foo[i] = m_players[i]->m_infosets.Length();
-  }
-
-  PVector<int> bar(foo);
-  for (i = 1; i <= m_players.Length(); i++) {
-    for (int j = 1; j <= m_players[i]->m_infosets.Length(); j++) {
-      bar(i, j) = m_players[i]->m_infosets[j]->NumActions();
-    }
-  }
-
-  return bar;
-}
-
-PVector<int> GameTreeRep::NumMembers() const
-{
-  Array<int> foo(m_players.Length());
-
-  for (int i = 1; i <= m_players.Length(); i++) {
-    foo[i] = m_players[i]->NumInfosets();
-  }
-
-  PVector<int> bar(foo);
-  for (int i = 1; i <= m_players.Length(); i++) {
-    for (int j = 1; j <= m_players[i]->NumInfosets(); j++) {
-      bar(i, j) = m_players[i]->m_infosets[j]->NumMembers();
-    }
-  }
-
-  return bar;
-}
-
 int GameTreeRep::BehavProfileLength() const
 {
   int sum = 0;

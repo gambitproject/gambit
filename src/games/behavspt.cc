@@ -54,19 +54,6 @@ BehaviorSupportProfile::BehaviorSupportProfile(const Game &p_efg) : m_efg(p_efg)
 //                 BehaviorSupportProfile: General information
 //========================================================================
 
-PVector<int> BehaviorSupportProfile::NumActions() const
-{
-  PVector<int> answer(m_efg->NumInfosets());
-  for (const auto &player : m_efg->GetPlayers()) {
-    for (const auto &infoset : player->GetInfosets()) {
-      answer(player->GetNumber(), infoset->GetNumber()) =
-          static_cast<int>(m_actions.at(infoset).size());
-    }
-  }
-
-  return answer;
-}
-
 size_t BehaviorSupportProfile::BehaviorProfileLength() const
 {
   size_t answer = 0;

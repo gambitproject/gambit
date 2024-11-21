@@ -54,10 +54,6 @@ public:
   std::shared_ptr<agg::AGG> GetUnderlyingAGG() const { return aggPtr; }
   /// @name Dimensions of the game
   //@{
-  /// The number of actions in each information set
-  PVector<int> NumActions() const override { throw UndefinedException(); }
-  /// The number of members in each information set
-  PVector<int> NumMembers() const override { throw UndefinedException(); }
   /// The number of strategies for each player
   Array<int> NumStrategies() const override;
   /// Gets the i'th strategy in the game, numbered globally
