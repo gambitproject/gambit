@@ -52,7 +52,8 @@ using namespace Gambit;
 template <class T> class LogBehavProfile {
 protected:
   Game m_game;
-  DVector<T> m_probs, m_logProbs;
+  Vector<T> m_probs, m_logProbs;
+  std::map<GameAction, int> m_profileIndex;
 
   // structures for storing cached data
   mutable bool m_cacheValid;
@@ -60,8 +61,6 @@ protected:
   mutable std::map<GameNode, T> m_beliefs;
   mutable std::map<GameNode, std::map<GamePlayer, T>> m_nodeValues;
   mutable std::map<GameAction, T> m_actionValues;
-
-  const T &ActionValue(const GameAction &act) const { return m_actionValues[act]; }
 
   /// @name Auxiliary functions for computation of interesting values
   //@{
@@ -87,24 +86,20 @@ public:
 
   void SetProb(const GameAction &p_action, const T &p_value)
   {
-    m_probs(p_action->GetInfoset()->GetPlayer()->GetNumber(), p_action->GetInfoset()->GetNumber(),
-            p_action->GetNumber()) = p_value;
-    m_logProbs(p_action->GetInfoset()->GetPlayer()->GetNumber(),
-               p_action->GetInfoset()->GetNumber(), p_action->GetNumber()) = log(p_value);
+    m_probs[m_profileIndex.at(p_action)] = p_value;
+    m_logProbs[m_profileIndex.at(p_action)] = log(p_value);
   }
+
   const T &GetProb(const GameAction &p_action) const
   {
-    return m_probs(p_action->GetInfoset()->GetPlayer()->GetNumber(),
-                   p_action->GetInfoset()->GetNumber(), p_action->GetNumber());
+    return m_probs[m_profileIndex.at(p_action)];
   }
-  const T &GetLogProb(int a, int b, int c) const { return m_logProbs(a, b, c); }
-  const T &GetProb(int a, int b, int c) const { return m_probs(a, b, c); }
-  void SetProb(int a, const T &p_value)
+
+  const T &GetLogProb(const GameAction &p_action) const
   {
-    Invalidate();
-    m_logProbs[a] = log(p_value);
-    m_probs[a] = p_value;
+    return m_logProbs[m_profileIndex.at(p_action)];
   }
+
   void SetLogProb(int a, const T &p_value)
   {
     Invalidate();
@@ -121,7 +116,7 @@ public:
 
   /// @name General data access
   //@{
-  size_t BehaviorProfileLength() const { return m_probs.Length(); }
+  size_t BehaviorProfileLength() const { return m_probs.size(); }
   //@}
 
   /// @name Computation of interesting quantities

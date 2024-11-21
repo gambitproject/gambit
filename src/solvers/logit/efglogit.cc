@@ -84,7 +84,7 @@ bool RegretTerminationFunction(const Game &p_game, const Vector<double> &p_point
 class EquationSystem {
 public:
   explicit EquationSystem(const Game &p_game);
-  ~EquationSystem();
+  ~EquationSystem() = default;
 
   // Compute the value of the system of equations at the specified point.
   void GetValue(const Vector<double> &p_point, Vector<double> &p_lhs) const;
@@ -113,13 +113,11 @@ private:
   class SumToOneEquation : public Equation {
   private:
     Game m_game;
-    int m_pl, m_iset;
     GameInfoset m_infoset;
 
   public:
-    SumToOneEquation(const Game &p_game, int p_player, int p_infoset)
-      : m_game(p_game), m_pl(p_player), m_iset(p_infoset),
-        m_infoset(p_game->GetPlayer(p_player)->GetInfoset(p_infoset))
+    SumToOneEquation(const Game &p_game, const GameInfoset &p_infoset)
+      : m_game(p_game), m_infoset(p_infoset)
     {
     }
 
@@ -131,19 +129,18 @@ private:
 
   //
   // This class represents the equation relating the probability of
-  // playing action (pl,iset,act) to the probability of playing action
-  // (pl,iset,1)
+  // playing the action to the probability of playing the reference action.
   //
   class RatioEquation : public Equation {
   private:
     Game m_game;
-    int m_pl, m_iset, m_act;
     GameInfoset m_infoset;
+    GameAction m_action, m_refAction;
 
   public:
-    RatioEquation(const Game &p_game, int p_player, int p_infoset, int p_action)
-      : m_game(p_game), m_pl(p_player), m_iset(p_infoset), m_act(p_action),
-        m_infoset(p_game->GetPlayer(p_player)->GetInfoset(p_infoset))
+    RatioEquation(const Game &p_game, const GameAction &p_action, const GameAction &p_refAction)
+      : m_game(p_game), m_infoset(p_action->GetInfoset()), m_action(p_action),
+        m_refAction(p_refAction)
     {
     }
 
@@ -153,27 +150,20 @@ private:
                   Vector<double> &p_gradient) const override;
   };
 
-  Array<Equation *> m_equations;
+  Array<std::shared_ptr<Equation>> m_equations;
   const Game &m_game;
 };
 
 EquationSystem::EquationSystem(const Game &p_game) : m_game(p_game)
 {
-  for (int pl = 1; pl <= m_game->NumPlayers(); pl++) {
-    GamePlayer player = m_game->GetPlayer(pl);
-    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      m_equations.push_back(new SumToOneEquation(m_game, pl, iset));
-      for (int act = 2; act <= player->GetInfoset(iset)->NumActions(); act++) {
-        m_equations.push_back(new RatioEquation(m_game, pl, iset, act));
+  for (const auto &player : m_game->GetPlayers()) {
+    for (const auto &infoset : player->GetInfosets()) {
+      m_equations.push_back(std::make_shared<SumToOneEquation>(m_game, infoset));
+      const auto &actions = infoset->GetActions();
+      for (auto action = std::next(actions.begin()); action != actions.end(); ++action) {
+        m_equations.push_back(std::make_shared<RatioEquation>(m_game, *action, actions.front()));
       }
     }
-  }
-}
-
-EquationSystem::~EquationSystem()
-{
-  for (int i = 1; i <= m_equations.Length(); i++) {
-    delete m_equations[i];
   }
 }
 
@@ -181,8 +171,8 @@ double EquationSystem::SumToOneEquation::Value(const LogBehavProfile<double> &p_
                                                double p_lambda) const
 {
   double value = -1.0;
-  for (int act = 1; act <= m_infoset->NumActions(); act++) {
-    value += p_profile.GetProb(m_pl, m_iset, act);
+  for (const auto &action : m_infoset->GetActions()) {
+    value += p_profile.GetProb(action);
   }
   return value;
 }
@@ -191,23 +181,13 @@ void EquationSystem::SumToOneEquation::Gradient(const LogBehavProfile<double> &p
                                                 double p_lambda, Vector<double> &p_gradient) const
 {
   int i = 1;
-  for (int pl = 1; pl <= m_game->NumPlayers(); pl++) {
-    GamePlayer player = m_game->GetPlayer(pl);
-
-    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      GameInfoset infoset = player->GetInfoset(iset);
-
-      for (int act = 1; act <= infoset->NumActions(); act++, i++) {
-        if (pl == m_pl && iset == m_iset) {
-          p_gradient[i] = p_profile.GetProb(pl, iset, act);
-        }
-        else {
-          p_gradient[i] = 0.0;
-        }
+  for (const auto &player : m_game->GetPlayers()) {
+    for (const auto &infoset : player->GetInfosets()) {
+      for (const auto &action : infoset->GetActions()) {
+        p_gradient[i++] = (infoset == m_infoset) ? p_profile.GetProb(action) : 0.0;
       }
     }
   }
-
   // Derivative wrt lambda is zero
   p_gradient[i] = 0.0;
 }
@@ -215,43 +195,36 @@ void EquationSystem::SumToOneEquation::Gradient(const LogBehavProfile<double> &p
 double EquationSystem::RatioEquation::Value(const LogBehavProfile<double> &p_profile,
                                             double p_lambda) const
 {
-  return (p_profile.GetLogProb(m_pl, m_iset, m_act) - p_profile.GetLogProb(m_pl, m_iset, 1) -
-          p_lambda * (p_profile.GetPayoff(m_infoset->GetAction(m_act)) -
-                      p_profile.GetPayoff(m_infoset->GetAction(1))));
+  return (p_profile.GetLogProb(m_action) - p_profile.GetLogProb(m_refAction) -
+          p_lambda * (p_profile.GetPayoff(m_action) - p_profile.GetPayoff(m_refAction)));
 }
 
 void EquationSystem::RatioEquation::Gradient(const LogBehavProfile<double> &p_profile,
                                              double p_lambda, Vector<double> &p_gradient) const
 {
   int i = 1;
-  for (int pl = 1; pl <= m_game->NumPlayers(); pl++) {
-    GamePlayer player = m_game->GetPlayer(pl);
-    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      GameInfoset infoset = player->GetInfoset(iset);
-      for (int act = 1; act <= infoset->NumActions(); act++, i++) {
-        if (infoset == m_infoset) {
-          if (act == 1) {
-            p_gradient[i] = -1.0;
-          }
-          else if (act == m_act) {
-            p_gradient[i] = 1.0;
-          }
-          else {
-            p_gradient[i] = 0.0;
-          }
+  for (const auto &player : m_game->GetPlayers()) {
+    for (const auto &infoset : player->GetInfosets()) {
+      for (const auto &action : infoset->GetActions()) {
+        if (action == m_refAction) {
+          p_gradient[i] = -1.0;
         }
-        else { // infoset1 != infoset2
-          p_gradient[i] =
-              -p_lambda *
-              (p_profile.DiffActionValue(m_infoset->GetAction(m_act), infoset->GetAction(act)) -
-               p_profile.DiffActionValue(m_infoset->GetAction(1), infoset->GetAction(act)));
+        else if (action == m_action) {
+          p_gradient[i] = 1.0;
         }
+        else if (infoset == m_infoset) {
+          p_gradient[i] = 0.0;
+        }
+        else {
+          p_gradient[i] = -p_lambda * (p_profile.DiffActionValue(m_action, action) -
+                                       p_profile.DiffActionValue(m_refAction, action));
+        }
+        i++;
       }
     }
   }
 
-  p_gradient[i] = (p_profile.GetPayoff(m_infoset->GetAction(1)) -
-                   p_profile.GetPayoff(m_infoset->GetAction(m_act)));
+  p_gradient[i] = (p_profile.GetPayoff(m_refAction) - p_profile.GetPayoff(m_action));
 }
 
 void EquationSystem::GetValue(const Vector<double> &p_point, Vector<double> &p_lhs) const

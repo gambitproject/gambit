@@ -30,10 +30,19 @@
 
 template <class T>
 LogBehavProfile<T>::LogBehavProfile(const Game &p_game)
-  : m_game(p_game), m_probs(m_game->NumActions()), m_logProbs(m_game->NumActions()),
+  : m_game(p_game), m_probs(m_game->BehavProfileLength()), m_logProbs(m_game->BehavProfileLength()),
     m_cacheValid(false)
 {
-  for (auto infoset : m_game->GetInfosets()) {
+  int index = 1;
+  for (const auto &player : p_game->GetPlayers()) {
+    for (const auto &infoset: player->GetInfosets()) {
+      for (const auto &action: infoset->GetActions()) {
+        m_profileIndex[action] = index++;
+      }
+    }
+  }
+
+    for (auto infoset : m_game->GetInfosets()) {
     if (infoset->NumActions() > 0) {
       T center = (T(1) / T(infoset->NumActions()));
       for (auto act : infoset->GetActions()) {
@@ -64,8 +73,7 @@ template <class T> T LogBehavProfile<T>::GetActionProb(const GameAction &action)
     return static_cast<T>(infoset->GetActionProb(action->GetNumber()));
   }
   else {
-    return GetProb(action->GetInfoset()->GetPlayer()->GetNumber(),
-                   action->GetInfoset()->GetNumber(), action->GetNumber());
+    return GetProb(action);
   }
 }
 
@@ -77,8 +85,7 @@ template <class T> T LogBehavProfile<T>::GetLogActionProb(const GameAction &acti
     return log(static_cast<T>(infoset->GetActionProb(action->GetNumber())));
   }
   else {
-    return m_logProbs(action->GetInfoset()->GetPlayer()->GetNumber(),
-                      action->GetInfoset()->GetNumber(), action->GetNumber());
+    return m_logProbs[m_profileIndex.at(action)];
   }
 }
 
