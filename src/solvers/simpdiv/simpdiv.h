@@ -25,9 +25,9 @@
 
 #include "games/nash.h"
 
-namespace Gambit {
-namespace Nash {
+namespace Gambit::Nash {
 
+template <class T> class PVector;
 ///
 /// This is a simplicial subdivision algorithm with restart, for finding
 /// mixed strategy solutions to general finite n-person games.  It is based on
@@ -57,14 +57,15 @@ private:
   class State;
 
   Rational Simplex(MixedStrategyProfile<Rational> &, const Rational &d) const;
-  void update(State &, RectArray<int> &, RectArray<int> &, PVector<Rational> &,
-              const PVector<int> &, int j, int i) const;
-  void getY(State &, MixedStrategyProfile<Rational> &x, PVector<Rational> &, const PVector<int> &,
-            const PVector<int> &, const PVector<Rational> &, const RectArray<int> &, int k) const;
-  void getnexty(State &, MixedStrategyProfile<Rational> &x, const RectArray<int> &,
-                const PVector<int> &, int i) const;
-  int get_c(int j, int h, int nstrats, const PVector<int> &) const;
-  int get_b(int j, int h, int nstrats, const PVector<int> &) const;
+  static void update(State &, RectArray<int> &, RectArray<int> &, PVector<Rational> &,
+                     const PVector<int> &, int j, int i);
+  static void getY(const State &, MixedStrategyProfile<Rational> &x, PVector<Rational> &,
+                   const PVector<int> &, const PVector<int> &, const PVector<Rational> &,
+                   const RectArray<int> &, int k);
+  static void getnexty(const State &, MixedStrategyProfile<Rational> &x, const RectArray<int> &,
+                       const PVector<int> &, int i);
+  static int get_c(int j, int h, int nstrats, const PVector<int> &);
+  static int get_b(int j, int h, int nstrats, const PVector<int> &);
 };
 
 inline List<MixedStrategyProfile<Rational>>
@@ -75,7 +76,6 @@ SimpdivStrategySolve(const MixedStrategyProfile<Rational> &p_start,
   return NashSimpdivStrategySolver(p_gridResize, p_leashLength, p_maxregret).Solve(p_start);
 }
 
-} // namespace Nash
-} // end namespace Gambit
+} // end namespace Gambit::Nash
 
 #endif // GAMBIT_NASH_SIMPDIV_H

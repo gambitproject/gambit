@@ -28,7 +28,6 @@
 #include <set>
 #include <random>
 
-#include "core/pvector.h"
 #include "number.h"
 #include "gameobject.h"
 
