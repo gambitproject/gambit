@@ -26,56 +26,30 @@
 #include "gambit.h"
 #include "basis.h"
 
-namespace Gambit {
-
-namespace linalg {
+namespace Gambit::linalg {
 
 template <class T> class Tableau;
 
-// ---------------------------------------------------------------------------
-// Class EtaMatrix
-// ---------------------------------------------------------------------------
-
-template <class T> class EtaMatrix {
-public:
-  int col;
-  Vector<T> etadata;
-
-  EtaMatrix(int c, Vector<T> &v) : col(c), etadata(v) {}
-
-  // required for list class
-  bool operator==(const EtaMatrix<T> &) const;
-  bool operator!=(const EtaMatrix<T> &) const;
-};
-
-// ---------------------------------------------------------------------------
-// Class LUdecomp
-// ---------------------------------------------------------------------------
-
-template <class T> class LUdecomp {
+template <class T> class LUDecomposition {
 private:
+  struct EtaMatrix {
+    int col;
+    Vector<T> etadata;
+  };
+
   Tableau<T> &tab;
   Basis &basis;
 
-  List<EtaMatrix<T>> L;
-  List<EtaMatrix<T>> U;
-  List<EtaMatrix<T>> E;
-  List<int> P;
-
-  Vector<T> scratch1; // scratch vectors so we don't reallocate them
-  Vector<T> scratch2; // everytime we do something.
+  std::list<EtaMatrix> U;
+  std::list<EtaMatrix> E;
+  std::vector<std::pair<int, EtaMatrix>> L;
 
   int refactor_number;
   int iterations;
   int total_operations;
 
-  const LUdecomp<T> *parent;
-  int copycount;
-
-  // don't use this copy constructor
-  LUdecomp(const LUdecomp<T> &a);
-  // don't use the equals operator, use the Copy function instead
-  LUdecomp<T> &operator=(const LUdecomp<T> &);
+  const LUDecomposition<T> *parent;
+  mutable int copycount;
 
 public:
   class BadPivot : public Exception {
@@ -93,24 +67,29 @@ public:
   // Constructors, Destructor
   // ------------------------
 
+  LUDecomposition(const LUDecomposition<T> &) = delete;
+
   // copy constructor
   // note:  Copying will fail an assertion if you try to update or delete
   //        the original before the copy has been deleted, refactored
   //        Or set to something else.
-  LUdecomp(const LUdecomp<T> &, Tableau<T> &);
+  LUDecomposition(const LUDecomposition<T> &, Tableau<T> &);
 
   // Decompose given matrix
-  explicit LUdecomp(Tableau<T> &, int rfac = 0);
+  explicit LUDecomposition(Tableau<T> &, int rfac = 0);
 
   // Destructor
-  ~LUdecomp();
+  ~LUDecomposition();
+
+  // don't use the equals operator, use the Copy function instead
+  LUDecomposition<T> &operator=(const LUDecomposition<T> &) = delete;
 
   // --------------------
   // Public Members
   // --------------------
 
   // copies the LUdecomp given (expect for the basis &).
-  void Copy(const LUdecomp<T> &, Tableau<T> &);
+  void Copy(const LUDecomposition<T> &, Tableau<T> &);
 
   // replace (update) the column given with the vector given.
   void update(int, int matcol); // matcol is the column number in the matrix
@@ -126,19 +105,14 @@ public:
 
   // set number of etamatrices added before refactoring;
   // if number is set to zero, refactoring is done automatically.
-  // if number is < 0, no refactoring is done;
-  void SetRefactor(int);
-
-  //-------------------
-  // Private Members
-  //-------------------
+  // if number is < 0, no refactoring is done
+  void SetRefactor(int a) { refactor_number = a; }
 
 private:
   void FactorBasis();
 
   void GaussElem(Matrix<T> &, int, int);
 
-  bool CheckBasis();
   bool RefactorCheck();
 
   void BTransE(Vector<T> &) const;
@@ -148,9 +122,8 @@ private:
   void LPd_Trans(Vector<T> &) const;
   void yLP_Trans(Vector<T> &) const;
 
-  void VectorEtaSolve(const Vector<T> &v, const EtaMatrix<T> &, Vector<T> &y) const;
-
-  void EtaVectorSolve(const Vector<T> &v, const EtaMatrix<T> &, Vector<T> &d) const;
+  void VectorEtaSolve(const EtaMatrix &, Vector<T> &y) const;
+  void EtaVectorSolve(const EtaMatrix &, Vector<T> &d) const;
 
   void yLP_mult(const Vector<T> &y, int j, Vector<T> &) const;
 
@@ -158,8 +131,6 @@ private:
 
 }; // end of class LUdecomp
 
-} // namespace linalg
-
-} // end namespace Gambit
+} // end namespace Gambit::linalg
 
 #endif // LUDECOMP_H

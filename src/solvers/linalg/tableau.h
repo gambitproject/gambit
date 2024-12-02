@@ -69,7 +69,7 @@ public:
 
 private:
   // The LU decomposition of the tableau
-  LUdecomp<double> B;
+  LUDecomposition<double> B;
   // A temporary column vector, to avoid frequent allocation
   mutable Vector<double> tmpcol;
 };
