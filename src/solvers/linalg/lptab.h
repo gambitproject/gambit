@@ -55,8 +55,6 @@ public:
   void Refactor() override;
   void Pivot(int outrow, int col) override;
   std::list<Array<int>> ReversePivots();
-  bool IsReversePivot(int i, int j);
-  void DualReversePivots(List<Array<int>> &);
   bool IsDualReversePivot(int i, int j);
   BFS<T> DualBFS() const;
 
