@@ -153,15 +153,6 @@ template <> Rational LPTableau<Rational>::TotalCost() const
   return tmpcol * sol;
 }
 
-template <> void LPTableau<double>::DualVector(Vector<double> &L) const { L = dual; }
-
-template <> void LPTableau<Rational>::DualVector(Vector<Rational> &out) const
-{
-  out = dual;
-  //  for(int i=out.First();i<=out.Last();i++)
-  //  if(Label(i)>=0) out[i]*=TotDenom();
-}
-
 template <class T> T LPTableau<T>::RelativeCost(int col) const
 {
   Vector<T> tmpcol(this->MinRow(), this->MaxRow());
@@ -173,21 +164,6 @@ template <class T> T LPTableau<T>::RelativeCost(int col) const
     return cost[col] - dual * tmpcol;
   }
 }
-
-/*
-
-template <class T>
-void LPTableau<T>::RelativeCostVector(Vector<T> &relunitcost,
-                                      Vector<T> &relcost) const
-{
-
-  if(!A->CheckColumn(relunitcost)) throw DimensionException();
-  if(!A->CheckRow(relcost)) throw DimensionException();
-
-  relunitcost= unitcost - dual;
-  relcost= cost - dual*A;  // pre multiplication not defined?
-}
-*/
 
 template <class T> void LPTableau<T>::SolveDual()
 {
@@ -352,9 +328,6 @@ template <class T> std::list<Array<int>> LPTableau<T>::ReversePivots()
 template <class T> bool LPTableau<T>::IsDualReversePivot(int i, int j)
 {
   // first check that pivot preserves dual feasibility
-
-  // gout << "\nin IsDualReversePivot, i= " << i << " j = "<< j;
-
   int k;
 
   Vector<T> tmpcol(this->MinRow(), this->MaxRow());
@@ -363,27 +336,15 @@ template <class T> bool LPTableau<T>::IsDualReversePivot(int i, int j)
   tmpcol[i] = (T)1;
   this->SolveT(tmpcol, tmpdual);
 
-  Vector<T> solution(tmpcol);  //$$
-  this->BasisVector(solution); //$$
-
-  // gout << "\ncurrentPivCol = " << tmpcol;
-  // gout << "\ncurrentSolCol = " << solution;
+  Vector<T> solution(tmpcol);
+  this->BasisVector(solution);
 
   T a_ij, a_ik, c_j, c_k, ratio;
-
-  /*  if( j<0 )
-      { tmpcol=(T)0; tmpcol[-j]=(T)1; }
-    else
-      A->GetColumn(j,tmpcol);
-    */
-
   this->GetColumn(j, tmpcol);
 
   a_ij = tmpdual * tmpcol;
   c_j = RelativeCost(j);
   if (this->GeZero(a_ij)) {
-    // gout << "\nPrior tableau not dual feasible: ";
-    // gout << "a_ij>=0";
     return false;
   }
   ratio = c_j / a_ij;
@@ -394,15 +355,12 @@ template <class T> bool LPTableau<T>::IsDualReversePivot(int i, int j)
         a_ik = tmpdual[-k];
       }
       else {
-        //      A->GetColumn(k,tmpcol);
         this->GetColumn(k, tmpcol);
         a_ik = tmpdual * tmpcol;
       }
       c_k = RelativeCost(k);
 
       if (this->LtZero(a_ik) && this->GtZero(c_k / a_ik - ratio)) {
-        // gout << "\nPrior tableau not dual feasible: ";
-        // gout << "\nhigher ratio for k = " << k;
         return false;
       }
     }
@@ -411,13 +369,10 @@ template <class T> bool LPTableau<T>::IsDualReversePivot(int i, int j)
   // check that i would be the column to enter in prior tableau
 
   int enter = this->Label(i);
-  // gout << "\nenter = " << enter;
-
   if (enter < 0) {
     a_ik = tmpdual[-enter];
   }
   else {
-    //    A->GetColumn(enter,tmpcol);
     this->GetColumn(enter, tmpcol);
     a_ik = tmpdual * tmpcol;
   }
@@ -426,8 +381,6 @@ template <class T> bool LPTableau<T>::IsDualReversePivot(int i, int j)
   c_k -= a_ik * c_j;
 
   if (this->GeZero(a_ik)) {
-    // gout << "\ni not col to enter in prior tableau: ";
-    // gout << "a_ik>=0";
     return false;
   }
   ratio = c_k / a_ik;
@@ -438,7 +391,6 @@ template <class T> bool LPTableau<T>::IsDualReversePivot(int i, int j)
         a_ik = tmpdual[-k];
       }
       else {
-        //    A->GetColumn(k,tmpcol);
         this->GetColumn(k, tmpcol);
         a_ik = tmpdual * tmpcol;
       }
@@ -447,29 +399,20 @@ template <class T> bool LPTableau<T>::IsDualReversePivot(int i, int j)
       c_k -= a_ik * c_j;
 
       if (this->LtZero(a_ik) && this->GtZero(c_k / a_ik - ratio)) {
-        // gout << "\ni not col to enter in prior tableau: ";
-        // gout << "\nhigher ratio for k = " << k;
         return false;
       }
       if (k < enter && this->LtZero(a_ik) && this->EqZero(c_k / a_ik - ratio)) {
-        // gout << "\ni not col to enter in prior tableau: ";
-        // gout << "\nsame ratio and lower lex for k = " << k;
         return false;
       }
     }
   }
 
   // check that j would be the row to exit in prior tableau
-
   this->SolveColumn(j, tmpcol);
-  // gout << "\ncurrentPivCol = " << tmpcol;
-  // gout << "\ncurrentSolCol = " << solution;
 
   T b_k, b_i;
   b_i = solution[i] / tmpcol[i];
   if (this->LeZero(b_i)) {
-    // gout << "\nj not row to exit in prior tableau: ";
-    // gout << "b_i<=0";
     return false;
   }
 
@@ -477,51 +420,31 @@ template <class T> bool LPTableau<T>::IsDualReversePivot(int i, int j)
     if (k != i) {
       b_k = solution[k] - b_i * tmpcol[k];
       if (this->GtZero(b_k) && this->Label(k) < j) {
-        // gout << "\nj not row to exit in prior tableau: ";
-        // gout << "same ratio,lower lex at k= " << k;
         return false;
       }
     }
   }
-  // gout << "\nValid Reverse pivot at i = " << i << " j =  " << j;
   return true;
 }
 
-/*
-template <class T>
-BFS<T> LPTableau<T>::DualBFS() const
-{
-  BFS<T> cbfs((T) 0);
-  for(int i=MinRow();i<=MaxRow();i++) {
-    if(!Member(-i))
-      cbfs.Define(-i,dual[i]);
-  }
-  return cbfs;
-}
-*/
 
 template <class T> BFS<T> LPTableau<T>::DualBFS() const
 {
   BFS<T> cbfs;
-  Vector<T> d(this->MinRow(), this->MaxRow());
-  DualVector(d);
 
   for (int i = this->MinRow(); i <= this->MaxRow(); i++) {
     if (!this->Member(-i)) {
-      cbfs.insert(-i, d[i]);
+      cbfs.insert(-i, dual[i]);
     }
   }
-  // gout << "\ndual: " << d;
   return cbfs;
 }
-
-template <class T> int LPTableau<T>::LastLabel() { return this->artificial.Last(); }
 
 template <class T> void LPTableau<T>::BasisSelect(const Array<T> &rowv, Vector<T> &colv) const
 {
   for (int i = this->basis.First(); i <= this->basis.Last(); i++) {
     if (this->basis.Label(i) < 0) {
-      colv[i] = (T)0;
+      colv[i] = static_cast<T>(0);
     }
     else {
       colv[i] = rowv[this->basis.Label(i)];

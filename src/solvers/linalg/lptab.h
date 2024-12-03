@@ -48,9 +48,9 @@ public:
   void SetCost(const Vector<T> &, const Vector<T> &);
   const Vector<T> &GetCost() const { return cost; }
   const Vector<T> &GetUnitCost() const { return unitcost; }
-  T TotalCost() const;                // cost of current solution
-  T RelativeCost(int) const;          // negative index convention
-  void DualVector(Vector<T> &) const; // column vector
+  T TotalCost() const;       // cost of current solution
+  T RelativeCost(int) const; // negative index convention
+  const Vector<T> &GetDualVector() const { return dual; }
 
   void Refactor() override;
   void Pivot(int outrow, int col) override;
@@ -59,7 +59,7 @@ public:
   BFS<T> DualBFS() const;
 
   // returns the label of the index of the last artificial variable
-  int LastLabel();
+  int GetLastLabel() { return this->artificial.Last(); }
 
   // select Basis elements according to Tableau rows and cols
   void BasisSelect(const Array<T> &rowv, Vector<T> &colv) const;
