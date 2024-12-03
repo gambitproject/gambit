@@ -32,8 +32,6 @@ private:
   Vector<T> dual;
   Array<T> unitcost;
   Array<T> cost;
-  Array<bool> UB, LB; // does col have upper/lower bound?
-  Array<T> ub, lb;    // upper/lower bound
 
   void SolveDual();
 
