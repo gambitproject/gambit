@@ -131,25 +131,6 @@ template <class T> void LPTableau<T>::SetCost(const Vector<T> &uc, const Vector<
   SolveDual();
 }
 
-template <class T> Vector<T> LPTableau<T>::GetCost() const
-{
-  Vector<T> x(cost.First(), cost.Last());
-  for (int i = x.First(); i <= x.Last(); i++) {
-    x[i] = cost[i];
-  }
-  return x;
-  //  return cost;
-}
-
-template <class T> Vector<T> LPTableau<T>::GetUnitCost() const
-{
-  Vector<T> x(unitcost.First(), unitcost.Last());
-  for (int i = x.First(); i <= x.Last(); i++) {
-    x[i] = unitcost[i];
-  }
-  return x;
-}
-
 template <> double LPTableau<double>::TotalCost()
 {
   Vector<double> tmpcol(MinRow(), MaxRow());

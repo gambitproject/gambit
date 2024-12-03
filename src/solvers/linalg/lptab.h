@@ -30,8 +30,8 @@ namespace Gambit::linalg {
 template <class T> class LPTableau : public Tableau<T> {
 private:
   Vector<T> dual;
-  Array<T> unitcost;
-  Array<T> cost;
+  Vector<T> unitcost;
+  Vector<T> cost;
 
   void SolveDual();
 
@@ -51,8 +51,8 @@ public:
   // cost information
   void SetCost(const Vector<T> &); // unit column cost := 0
   void SetCost(const Vector<T> &, const Vector<T> &);
-  Vector<T> GetCost() const;
-  Vector<T> GetUnitCost() const;
+  const Vector<T> &GetCost() const { return cost; }
+  const Vector<T> &GetUnitCost() const { return unitcost; }
   T TotalCost();             // cost of current solution
   T RelativeCost(int) const; // negative index convention
   void RelativeCostVector(Vector<T> &, Vector<T> &);
