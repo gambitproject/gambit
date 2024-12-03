@@ -172,11 +172,8 @@ template <class T> void LPTableau<T>::SolveDual()
   this->SolveT(tmpcol1, dual);
 }
 
-// Redefined functions
-
 template <class T> void LPTableau<T>::Refactor()
 {
-  // gout << "\nIn LPTableau<T>::Refactor()";
   Tableau<T>::Refactor();
   SolveDual();
 }
@@ -193,67 +190,65 @@ template <class T> std::list<Array<int>> LPTableau<T>::ReversePivots()
 
   Vector<T> tmpcol(this->MinRow(), this->MaxRow());
   bool flag;
-  int i, j, k, enter;
+  int k, enter;
   T ratio, a_ij, a_ik, b_i, b_k, c_j, c_k, c_jo, x;
-  List<int> BestSet;
-  Array<int> pivot(2);
   Vector<T> tmpdual(this->MinRow(), this->MaxRow());
 
   Vector<T> solution(tmpcol);
   this->BasisVector(solution);
 
-  for (j = -this->MaxRow(); j <= this->MaxCol(); j++) {
+  for (int j = -this->MaxRow(); j <= this->MaxCol(); j++) {
     if (j && !this->Member(j) && !this->IsBlocked(j)) {
       this->SolveColumn(j, tmpcol);
       // find all i where prior tableau is primal feasible
-      BestSet = List<int>();
-      for (i = this->MinRow(); i <= this->MaxRow(); i++) {
+      Array<int> best_set;
+      for (int i = this->MinRow(); i <= this->MaxRow(); i++) {
         if (this->GtZero(tmpcol[i])) {
-          BestSet.push_back(i);
+          best_set.push_back(i);
         }
       }
-      if (BestSet.Length() > 0) {
-        ratio = solution[BestSet[1]] / tmpcol[BestSet[1]];
+      if (!best_set.empty()) {
+        ratio = solution[best_set[1]] / tmpcol[best_set[1]];
         // find max ratio
-        for (i = 2; i <= BestSet.Length(); i++) {
-          x = solution[BestSet[i]] / tmpcol[BestSet[i]];
+        for (int i = 2; i <= best_set.size(); i++) {
+          x = solution[best_set[i]] / tmpcol[best_set[i]];
           if (this->GtZero(x - ratio)) {
             ratio = x;
           }
         }
         // eliminate nonmaximizers
-        for (i = BestSet.Length(); i >= 1; i--) {
-          x = solution[BestSet[i]] / tmpcol[BestSet[i]];
+        for (int i = best_set.size(); i >= 1; i--) {
+          x = solution[best_set[i]] / tmpcol[best_set[i]];
           if (this->LtZero(x - ratio)) {
-            BestSet.Remove(i);
+            best_set.Remove(i);
           }
         }
 
         // check that j would be the row to exit in prior tableau
 
         // first check that prior pivot entry > 0
-        for (i = BestSet.Length(); i >= 1; i--) {
-          a_ij = (T)1 / tmpcol[BestSet[i]];
+        for (int i = best_set.size(); i >= 1; i--) {
+          a_ij = static_cast<T>(1) / tmpcol[best_set[i]];
           if (this->LeZero(a_ij)) {
-            BestSet.Remove(i);
+            best_set.Remove(i);
           }
           else {
             // next check that prior pivot entry attains max ratio
-            b_i = solution[BestSet[i]] / tmpcol[BestSet[i]];
+            b_i = solution[best_set[i]] / tmpcol[best_set[i]];
             ratio = b_i / a_ij;
 
             flag = false;
             for (k = tmpcol.First(); k <= tmpcol.Last() && !flag; k++) {
-              if (k != BestSet[i]) {
+              if (k != best_set[i]) {
                 a_ik = -a_ij * tmpcol[k];
                 b_k = solution[k] - b_i * tmpcol[k];
                 if (this->GtZero(a_ik) && this->GtZero(b_k / a_ik - ratio)) {
-                  BestSet.Remove(i);
+                  best_set.Remove(i);
                   flag = true;
                 }
                 else if (this->GtZero(a_ik) && this->EqZero(b_k / a_ik - ratio) &&
                          this->Label(k) < j) {
-                  BestSet.Remove(i);
+                  best_set.Remove(i);
                   flag = true;
                 }
               }
@@ -263,16 +258,16 @@ template <class T> std::list<Array<int>> LPTableau<T>::ReversePivots()
       }
 
       // check that i would be the column to enter in prior tableau
-      for (i = BestSet.Length(); i >= 1; i--) {
-        enter = this->Label(BestSet[i]);
-        tmpcol = (T)0;
-        tmpcol[BestSet[i]] = (T)1;
+      for (int i = best_set.size(); i >= 1; i--) {
+        enter = this->Label(best_set[i]);
+        tmpcol = static_cast<T>(0);
+        tmpcol[best_set[i]] = static_cast<T>(1);
         this->SolveT(tmpcol, tmpdual);
         this->GetColumn(j, tmpcol);
         a_ij = tmpdual * tmpcol;
         c_j = RelativeCost(j);
         if (this->EqZero(a_ij)) {
-          BestSet.Remove(i);
+          best_set.Remove(i);
         }
         else {
           ratio = c_j / a_ij;
@@ -286,7 +281,7 @@ template <class T> std::list<Array<int>> LPTableau<T>::ReversePivots()
           c_k = RelativeCost(enter);
           c_jo = c_k - a_ik * ratio;
           if (this->GeZero(c_jo)) {
-            BestSet.Remove(i);
+            best_set.Remove(i);
           }
           else {
             flag = false;
@@ -303,7 +298,7 @@ template <class T> std::list<Array<int>> LPTableau<T>::ReversePivots()
                 c_jo = c_k - a_ik * ratio;
 
                 if (this->LtZero(c_jo)) {
-                  BestSet.Remove(i);
+                  best_set.Remove(i);
                   flag = true;
                 }
               }
@@ -312,12 +307,11 @@ template <class T> std::list<Array<int>> LPTableau<T>::ReversePivots()
         }
       }
 
-      if (!BestSet.empty()) {
-        for (i = 1; i <= BestSet.Length(); i++) {
-          pivot[1] = BestSet[i];
+        for (const auto &idx : best_set) {
+          Array<int> pivot(2);
+          pivot[1] = idx;
           pivot[2] = j;
           pivot_list.push_back(pivot);
-        }
       }
     }
   }
@@ -328,12 +322,10 @@ template <class T> std::list<Array<int>> LPTableau<T>::ReversePivots()
 template <class T> bool LPTableau<T>::IsDualReversePivot(int i, int j)
 {
   // first check that pivot preserves dual feasibility
-  int k;
-
   Vector<T> tmpcol(this->MinRow(), this->MaxRow());
   Vector<T> tmpdual(this->MinRow(), this->MaxRow());
-  tmpcol = (T)0;
-  tmpcol[i] = (T)1;
+  tmpcol = static_cast<T>(0);
+  tmpcol[i] = static_cast<T>(1);
   this->SolveT(tmpcol, tmpdual);
 
   Vector<T> solution(tmpcol);
@@ -349,7 +341,7 @@ template <class T> bool LPTableau<T>::IsDualReversePivot(int i, int j)
   }
   ratio = c_j / a_ij;
 
-  for (k = -this->b->Last(); k <= cost.Last(); k++) {
+  for (int k = -this->b->Last(); k <= cost.Last(); k++) {
     if (k != 0) {
       if (k < 0) {
         a_ik = tmpdual[-k];
@@ -385,7 +377,7 @@ template <class T> bool LPTableau<T>::IsDualReversePivot(int i, int j)
   }
   ratio = c_k / a_ik;
 
-  for (k = -this->b->Last(); k <= cost.Last(); k++) {
+  for (int k = -this->b->Last(); k <= cost.Last(); k++) {
     if (k != 0) {
       if (k < 0) {
         a_ik = tmpdual[-k];
@@ -416,7 +408,7 @@ template <class T> bool LPTableau<T>::IsDualReversePivot(int i, int j)
     return false;
   }
 
-  for (k = this->b->First(); k <= this->b->Last(); k++) {
+  for (int k = this->b->First(); k <= this->b->Last(); k++) {
     if (k != i) {
       b_k = solution[k] - b_i * tmpcol[k];
       if (this->GtZero(b_k) && this->Label(k) < j) {

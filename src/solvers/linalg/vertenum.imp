@@ -55,7 +55,6 @@ template <class T> void VertexEnumerator<T>::Search(LPTableau<T> &tab)
     m_list.push_back(tab.GetBFS1());
     m_duallist.push_back(tab.DualBFS());
   }
-  std::cout << "getting pivots\n";
   auto pivot_list = tab.ReversePivots();
   if (!pivot_list.empty()) {
     branches[depth] += pivot_list.size();
