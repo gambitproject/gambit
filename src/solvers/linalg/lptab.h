@@ -25,9 +25,7 @@
 
 #include "tableau.h"
 
-namespace Gambit {
-
-namespace linalg {
+namespace Gambit::linalg {
 
 template <class T> class LPTableau : public Tableau<T> {
 private:
@@ -47,10 +45,10 @@ public:
   };
   LPTableau(const Matrix<T> &A, const Vector<T> &b);
   LPTableau(const Matrix<T> &A, const Array<int> &art, const Vector<T> &b);
-  LPTableau(const LPTableau<T> &);
+  LPTableau(const LPTableau<T> &) = default;
   ~LPTableau() override = default;
 
-  LPTableau<T> &operator=(const LPTableau<T> &);
+  LPTableau<T> &operator=(const LPTableau<T> &) = default;
 
   // cost information
   void SetCost(const Vector<T> &); // unit column cost := 0
@@ -80,8 +78,6 @@ public:
   void BasisSelect(const Array<T> &unitv, const Array<T> &rowv, Vector<T> &colv) const;
 };
 
-} // namespace linalg
-
-} // end namespace Gambit
+} // end namespace Gambit::linalg
 
 #endif // LPTAB_H

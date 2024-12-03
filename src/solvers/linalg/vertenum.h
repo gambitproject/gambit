@@ -43,16 +43,16 @@ namespace Gambit::linalg {
 //
 template <class T> class VertexEnumerator {
 private:
-  int mult_opt, depth;
+  bool mult_opt;
+  int depth{0};
   int n; // N is the number of columns, which is the # of dimensions.
   int k; // K is the number of inequalities given.
   const Matrix<T> &A;
   const Vector<T> &b;
-  Vector<T> btemp, c;
+  Vector<T> btemp;
   Array<BFS<T>> m_list, m_duallist;
   Array<long> visits, branches;
 
-  void Enum();
   void Deeper();
   void Search(LPTableau<T> &tab);
   void DualSearch(LPTableau<T> &tab);

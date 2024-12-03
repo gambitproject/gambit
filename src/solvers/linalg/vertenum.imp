@@ -26,28 +26,13 @@ namespace Gambit::linalg {
 
 template <class T>
 VertexEnumerator<T>::VertexEnumerator(const Matrix<T> &A, const Vector<T> &b)
-  : mult_opt(0), depth(0), A(A), b(b), btemp(b), c(A.MinCol(), A.MaxCol())
+  : mult_opt(std::any_of(b.begin(), b.end(), [](const T &v) { return v == static_cast<T>(0); })),
+    A(A), b(b), btemp(b)
 {
-  Enum();
-}
-
-template <class T> void VertexEnumerator<T>::Enum()
-{
-  if (A.NumRows() != b.Length() || A.NumColumns() != c.Length()) {
-    throw DimensionException();
-  }
-
-  // Initialize the tableau
-  for (int i = b.First(); i <= b.Last(); i++) {
-    if (b[i] == static_cast<T>(0)) {
-      mult_opt = 1;
-    }
-  }
-
   btemp = static_cast<T>(-1);
-  c = static_cast<T>(1);
-
   LPTableau<T> tab(A, b);
+  Vector<T> c(A.MinCol(), A.MaxCol());
+  c = static_cast<T>(1);
   tab.SetCost(c);
 
   DualSearch(tab);
@@ -94,7 +79,7 @@ template <class T> void VertexEnumerator<T>::DualSearch(LPTableau<T> &tab)
     LPTableau<T> tab2(tab);
     for (int i = b.First(); i <= b.Last(); i++) {
       if (b[i] == static_cast<T>(0)) {
-        for (int j = -b.Last(); j <= c.Last(); j++) {
+        for (int j = -b.Last(); j <= A.MaxCol(); j++) {
           if (j && !tab.Member(j) && !tab.IsBlocked(j)) {
             if (tab.IsDualReversePivot(i, j)) {
               branches[depth] += 1;

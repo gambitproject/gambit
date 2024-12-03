@@ -22,9 +22,7 @@
 
 #include "lptab.h"
 
-namespace Gambit {
-
-namespace linalg {
+namespace Gambit::linalg {
 
 // ---------------------------------------------------------------------------
 //                   LPTableau member definitions
@@ -44,22 +42,6 @@ LPTableau<T>::LPTableau(const Matrix<T> &A, const Array<int> &art, const Vector<
 {
 }
 
-template <class T>
-LPTableau<T>::LPTableau(const LPTableau<T> &orig)
-  : Tableau<T>(orig), dual(orig.dual), unitcost(orig.unitcost), cost(orig.cost)
-{
-}
-
-template <class T> LPTableau<T> &LPTableau<T>::operator=(const LPTableau<T> &orig)
-{
-  Tableau<T>::operator=(orig);
-  if (this != &orig) {
-    dual = orig.dual;
-    unitcost = orig.unitcost;
-    cost = orig.cost;
-  }
-  return *this;
-}
 
 // cost-based functions
 
@@ -752,6 +734,4 @@ void LPTableau<T>::BasisSelect(const Array<T> &unitv, const Array<T> &rowv, Vect
   }
 }
 
-} // namespace linalg
-
-} // end namespace Gambit
+} // end namespace Gambit::linalg
