@@ -239,16 +239,16 @@ template <class T> int LPSolve<T>::Enter()
       rc = tab.RelativeCost(lab);
       if (rc > test + eps1) {
         if (!(*UB)[i] || ((*UB)[i] && (*xx)[i] - (*ub)[i] < -eps1)) {
-            test = rc;
-            in = lab;
-            flag = -1;
+          test = rc;
+          in = lab;
+          flag = -1;
         }
       }
       if (-rc > test + eps1) {
         if (!(*LB)[i] || ((*LB)[i] && (*xx)[i] - (*lb)[i] > eps1)) {
-            test = -rc;
-            in = lab;
-            flag = 1;
+          test = -rc;
+          in = lab;
+          flag = 1;
         }
       }
     }

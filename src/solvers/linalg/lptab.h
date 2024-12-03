@@ -45,7 +45,6 @@ public:
 
   // cost information
   void SetCost(const Vector<T> &); // unit column cost := 0
-  void SetCost(const Vector<T> &, const Vector<T> &);
   const Vector<T> &GetCost() const { return cost; }
   const Vector<T> &GetUnitCost() const { return unitcost; }
   T TotalCost() const;       // cost of current solution

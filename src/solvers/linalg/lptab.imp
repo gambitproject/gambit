@@ -42,53 +42,35 @@ LPTableau<T>::LPTableau(const Matrix<T> &A, const Array<int> &art, const Vector<
 {
 }
 
-
 // cost-based functions
 
 template <> void LPTableau<Rational>::SetCost(const Vector<Rational> &c)
 {
-  int i;
   if (cost.First() == c.First() && cost.Last() == c.Last()) {
-    for (i = cost.First(); i <= cost.Last(); i++) {
-      cost[i] = c[i] * (Rational)Tableau<Rational>::TotDenom();
-    }
-    for (i = unitcost.First(); i <= unitcost.Last(); i++) {
-      unitcost[i] = (Rational)0;
+    cost = c;
+    cost *= Rational(Tableau<Rational>::TotDenom());
+    for (int i = unitcost.First(); i <= unitcost.Last(); i++) {
+      unitcost[i] = Rational(0);
     }
     Refactor();
     SolveDual();
     return;
   }
-  if (c.First() != cost.First()) {
-    throw DimensionException();
+  for (int i = c.First(); i <= cost.Last(); i++) {
+    cost[i] = c[i] * Rational(Tableau<Rational>::TotDenom());
   }
-  if (c.Last() != (cost.Last() + unitcost.Length())) {
-    throw DimensionException();
+  for (int i = unitcost.First(); i <= unitcost.Last(); i++) {
+    unitcost[i] = c[cost.size() + i - unitcost.First() + 1];
   }
-  for (i = c.First(); i <= cost.Last(); i++) {
-    cost[i] = c[i] * (Rational)Tableau<Rational>::TotDenom();
-  }
-  for (i = unitcost.First(); i <= unitcost.Last(); i++) {
-    unitcost[i] = c[cost.Length() + i - unitcost.First() + 1];
-  }
-  // gout << "\nc: " << c.First() << " " << c.Last() << " " << c;
-  // gout << "\ncost: " << cost.First() << " " << cost.Last() << " " << cost;
-  // gout << "\nunit: " << unitcost.First() << " " << unitcost.Last() << " " << unitcost;
-  //** added for Rational
   Refactor();
   SolveDual();
 }
 
 template <> void LPTableau<double>::SetCost(const Vector<double> &c)
 {
-  int i;
   if (cost.First() == c.First() && cost.Last() == c.Last()) {
-    for (i = cost.First(); i <= cost.Last(); i++) {
-      cost[i] = c[i];
-    }
-    for (i = unitcost.First(); i <= unitcost.Last(); i++) {
-      unitcost[i] = (double)0;
-    }
+    cost = c;
+    unitcost = 0.0;
     Refactor();
     SolveDual();
     return;
@@ -99,35 +81,13 @@ template <> void LPTableau<double>::SetCost(const Vector<double> &c)
   if (c.Last() != (cost.Last() + unitcost.Length())) {
     throw DimensionException();
   }
-  for (i = c.First(); i <= cost.Last(); i++) {
+  for (int i = c.First(); i <= cost.Last(); i++) {
     cost[i] = c[i];
   }
-  for (i = unitcost.First(); i <= unitcost.Last(); i++) {
-    unitcost[i] = c[cost.Length() + i - unitcost.First() + 1];
+  for (int i = unitcost.First(); i <= unitcost.Last(); i++) {
+    unitcost[i] = c[cost.size() + i - unitcost.First() + 1];
   }
-  // gout << "\nc: " << c.First() << " " << c.Last() << " " << c;
-  // gout << "\ncost: " << cost.First() << " " << cost.Last() << " " << cost;
-  // gout << "\nunit: " << unitcost.First() << " " << unitcost.Last() << " " << unitcost;
-  //** added for Rational
   Refactor();
-  SolveDual();
-}
-
-template <class T> void LPTableau<T>::SetCost(const Vector<T> &uc, const Vector<T> &c)
-{
-  if (cost.First() != c.First() || cost.Last() != c.Last()) {
-    throw DimensionException();
-  }
-  if (unitcost.First() != uc.First() || unitcost.Last() != uc.Last()) {
-    throw DimensionException();
-  }
-  int i;
-  for (i = cost.First(); i <= cost.Last(); i++) {
-    cost[i] = c[i];
-  }
-  for (i = unitcost.First(); i <= unitcost.Last(); i++) {
-    unitcost[i] = uc[i];
-  }
   SolveDual();
 }
 
@@ -307,17 +267,16 @@ template <class T> std::list<Array<int>> LPTableau<T>::ReversePivots()
         }
       }
 
-        for (const auto &idx : best_set) {
-          Array<int> pivot(2);
-          pivot[1] = idx;
-          pivot[2] = j;
-          pivot_list.push_back(pivot);
+      for (const auto &idx : best_set) {
+        Array<int> pivot(2);
+        pivot[1] = idx;
+        pivot[2] = j;
+        pivot_list.push_back(pivot);
       }
     }
   }
   return pivot_list;
 }
-
 
 template <class T> bool LPTableau<T>::IsDualReversePivot(int i, int j)
 {
@@ -418,7 +377,6 @@ template <class T> bool LPTableau<T>::IsDualReversePivot(int i, int j)
   }
   return true;
 }
-
 
 template <class T> BFS<T> LPTableau<T>::DualBFS() const
 {
