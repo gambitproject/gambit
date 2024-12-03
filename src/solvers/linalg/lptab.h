@@ -25,53 +25,40 @@
 
 #include "tableau.h"
 
-namespace Gambit {
-
-namespace linalg {
+namespace Gambit::linalg {
 
 template <class T> class LPTableau : public Tableau<T> {
 private:
   Vector<T> dual;
-  Array<T> unitcost;
-  Array<T> cost;
-  Array<bool> UB, LB; // does col have upper/lower bound?
-  Array<T> ub, lb;    // upper/lower bound
+  Vector<T> unitcost;
+  Vector<T> cost;
 
   void SolveDual();
 
 public:
-  class BadPivot : public Exception {
-  public:
-    ~BadPivot() noexcept override = default;
-    const char *what() const noexcept override { return "Bad pivot in LPTableau."; }
-  };
   LPTableau(const Matrix<T> &A, const Vector<T> &b);
   LPTableau(const Matrix<T> &A, const Array<int> &art, const Vector<T> &b);
-  LPTableau(const LPTableau<T> &);
+  LPTableau(const LPTableau<T> &) = default;
   ~LPTableau() override = default;
 
-  LPTableau<T> &operator=(const LPTableau<T> &);
+  LPTableau<T> &operator=(const LPTableau<T> &) = default;
 
   // cost information
   void SetCost(const Vector<T> &); // unit column cost := 0
-  void SetCost(const Vector<T> &, const Vector<T> &);
-  Vector<T> GetCost() const;
-  Vector<T> GetUnitCost() const;
-  T TotalCost();             // cost of current solution
+  const Vector<T> &GetCost() const { return cost; }
+  const Vector<T> &GetUnitCost() const { return unitcost; }
+  T TotalCost() const;       // cost of current solution
   T RelativeCost(int) const; // negative index convention
-  void RelativeCostVector(Vector<T> &, Vector<T> &);
-  void DualVector(Vector<T> &) const; // column vector
-                                      // Redefined functions
+  const Vector<T> &GetDualVector() const { return dual; }
+
   void Refactor() override;
   void Pivot(int outrow, int col) override;
-  void ReversePivots(List<Array<int>> &);
-  bool IsReversePivot(int i, int j);
-  void DualReversePivots(List<Array<int>> &);
+  std::list<Array<int>> ReversePivots();
   bool IsDualReversePivot(int i, int j);
   BFS<T> DualBFS() const;
 
   // returns the label of the index of the last artificial variable
-  int LastLabel();
+  int GetLastLabel() { return this->artificial.Last(); }
 
   // select Basis elements according to Tableau rows and cols
   void BasisSelect(const Array<T> &rowv, Vector<T> &colv) const;
@@ -80,8 +67,6 @@ public:
   void BasisSelect(const Array<T> &unitv, const Array<T> &rowv, Vector<T> &colv) const;
 };
 
-} // namespace linalg
-
-} // end namespace Gambit
+} // end namespace Gambit::linalg
 
 #endif // LPTAB_H

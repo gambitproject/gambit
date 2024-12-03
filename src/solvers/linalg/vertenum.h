@@ -27,8 +27,7 @@
 #include "lptab.h"
 #include "bfs.h"
 
-namespace Gambit {
-namespace linalg {
+namespace Gambit::linalg {
 
 //
 // This class enumerates the vertices of the convex polyhedron
@@ -44,35 +43,30 @@ namespace linalg {
 //
 template <class T> class VertexEnumerator {
 private:
-  int mult_opt, depth;
+  bool mult_opt;
+  int depth{0};
   int n; // N is the number of columns, which is the # of dimensions.
   int k; // K is the number of inequalities given.
   const Matrix<T> &A;
   const Vector<T> &b;
-  Vector<T> btemp, c;
-  Gambit::List<BFS<T>> List;
-  Gambit::List<BFS<T>> DualList;
-  Gambit::List<Vector<T>> Verts;
-  long npivots, nodes;
-  Gambit::List<long> visits, branches;
+  Vector<T> btemp;
+  Array<BFS<T>> m_list, m_duallist;
+  Array<long> visits, branches;
 
-  void Enum();
   void Deeper();
   void Search(LPTableau<T> &tab);
   void DualSearch(LPTableau<T> &tab);
 
 public:
   VertexEnumerator(const Matrix<T> &, const Vector<T> &);
-  explicit VertexEnumerator(LPTableau<T> &);
+  // explicit VertexEnumerator(LPTableau<T> &);
   ~VertexEnumerator() = default;
 
-  const Gambit::List<BFS<T>> &VertexList() const { return List; }
-  const Gambit::List<BFS<T>> &DualVertexList() const { return DualList; }
-  void Vertices(Gambit::List<Vector<T>> &verts) const;
-  long NumPivots() const { return npivots; }
+  const Array<BFS<T>> &VertexList() const { return m_list; }
+  const Array<BFS<T>> &DualVertexList() const { return m_duallist; }
+  std::list<Vector<T>> GetVertices() const;
 };
 
-} // namespace linalg
-} // end namespace Gambit
+} // namespace Gambit::linalg
 
 #endif // GAMBIT_LINALG_VERTENUM_H

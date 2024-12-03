@@ -22,72 +22,17 @@
 
 #include "vertenum.h"
 
-namespace Gambit {
-namespace linalg {
+namespace Gambit::linalg {
 
 template <class T>
 VertexEnumerator<T>::VertexEnumerator(const Matrix<T> &A, const Vector<T> &b)
-  : mult_opt(0), depth(0), A(A), b(b), btemp(b), c(A.MinCol(), A.MaxCol()), npivots(0), nodes(0)
+  : mult_opt(std::any_of(b.begin(), b.end(), [](const T &v) { return v == static_cast<T>(0); })),
+    A(A), b(b), btemp(b)
 {
-  Enum();
-}
-
-template <class T>
-VertexEnumerator<T>::VertexEnumerator(LPTableau<T> &tab)
-  : mult_opt(0), depth(0), A(tab.Get_A()), b(tab.Get_b()), btemp(tab.Get_b()), c(tab.GetCost()),
-    npivots(0), nodes(0)
-{
-  int i;
-  for (i = b.First(); i <= b.Last(); i++) {
-    if (b[i] == (T)0) {
-      mult_opt = 1;
-    }
-  }
-
-  // Is this stuff right?
-  btemp = -(T)1;
-
-  Vector<T> uc(tab.MinRow(), tab.MaxRow());
-  c = (T)1;
-  uc = (T)1;
-
-  for (i = -tab.MaxRow(); i <= -tab.MinRow(); i++) {
-    if (tab.Member(i)) {
-      uc[-i] = (T)0;
-    }
-  }
-
-  for (i = tab.MinCol(); i <= tab.MaxCol(); i++) {
-    if (tab.Member(i)) {
-      c[i] = (T)0;
-    }
-  }
-
-  tab.SetCost(uc, c);
-  DualSearch(tab);
-}
-
-template <class T> void VertexEnumerator<T>::Enum()
-{
-  // Check dimensions
-  if (A.NumRows() != b.Length() || A.NumColumns() != c.Length()) {
-    throw DimensionException();
-  }
-  //  assert(A.NumRows() == b.Length() && A.NumColumns() == c.Length());
-
-  // Initialize the tableau
-  int i;
-
-  for (i = b.First(); i <= b.Last(); i++) {
-    if (b[i] == (T)0) {
-      mult_opt = 1;
-    }
-  }
-
-  btemp = -(T)1;
-  c = (T)1;
-
+  btemp = static_cast<T>(-1);
   LPTableau<T> tab(A, b);
+  Vector<T> c(A.MinCol(), A.MaxCol());
+  c = static_cast<T>(1);
   tab.SetCost(c);
 
   DualSearch(tab);
@@ -96,59 +41,47 @@ template <class T> void VertexEnumerator<T>::Enum()
 template <class T> void VertexEnumerator<T>::Deeper()
 {
   depth++;
-  if (visits.Length() < depth) {
+  if (visits.size() < depth) {
     visits.push_back(0);
     branches.push_back(0);
   }
   visits[depth] += 1;
-  nodes++;
 }
 
 template <class T> void VertexEnumerator<T>::Search(LPTableau<T> &tab)
 {
   Deeper();
-  Gambit::List<Array<int>> PivotList;
   if (tab.IsLexMin()) {
-    List.push_back(tab.GetBFS1());
-    DualList.push_back(tab.DualBFS());
+    m_list.push_back(tab.GetBFS1());
+    m_duallist.push_back(tab.DualBFS());
   }
-  if (PivotList.Length() != 0) {
-    throw DimensionException();
-  }
-  //  assert(PivotList.Length()==0);
-  tab.ReversePivots(PivotList); // get list of reverse pivots
-  if (PivotList.Length()) {
-    branches[depth] += PivotList.Length();
+  auto pivot_list = tab.ReversePivots();
+  if (!pivot_list.empty()) {
+    branches[depth] += pivot_list.size();
     LPTableau<T> tab2(tab);
-    for (auto pivot : PivotList) {
-      npivots++;
+    for (auto pivot : pivot_list) {
       tab2 = tab;
       tab2.Pivot(pivot[1], pivot[2]);
       Search(tab2);
     }
-  }
-  else {
-    // Report(); // Report progress at terminal leafs
   }
   depth--;
 }
 
 template <class T> void VertexEnumerator<T>::DualSearch(LPTableau<T> &tab)
 {
-  int i, j;
   Deeper();
   branches[depth] += 1;
 
   if (mult_opt) {
-    tab.SetConst(btemp); // install artifical constraint vector
+    tab.SetConst(btemp); // install artificial constraint vector
     LPTableau<T> tab2(tab);
-    for (i = b.First(); i <= b.Last(); i++) {
-      if (b[i] == (T)0) {
-        for (j = -b.Last(); j <= c.Last(); j++) {
+    for (int i = b.First(); i <= b.Last(); i++) {
+      if (b[i] == static_cast<T>(0)) {
+        for (int j = -b.Last(); j <= A.MaxCol(); j++) {
           if (j && !tab.Member(j) && !tab.IsBlocked(j)) {
             if (tab.IsDualReversePivot(i, j)) {
               branches[depth] += 1;
-              npivots++;
               tab2 = tab;
               tab2.Pivot(i, j);
               DualSearch(tab2);
@@ -163,19 +96,20 @@ template <class T> void VertexEnumerator<T>::DualSearch(LPTableau<T> &tab)
   depth--;
 }
 
-template <class T> void VertexEnumerator<T>::Vertices(Gambit::List<Vector<T>> &verts) const
+template <class T> std::list<Vector<T>> VertexEnumerator<T>::GetVertices() const
 {
-  for (int i = 1; i <= List.Length(); i++) {
+  std::list<Vector<T>> verts;
+  for (int i = 1; i <= m_list.size(); i++) {
     Vector<T> vert(A.NumColumns());
-    vert = (T)0;
-    for (int j = 1; j <= vert.Length(); j++) {
-      if (List[i].IsDefined(j)) {
-        vert[j] = -List[i](j);
+    vert = static_cast<T>(0);
+    for (int j = 1; j <= vert.size(); j++) {
+      if (m_list[i].IsDefined(j)) {
+        vert[j] = -m_list[i](j);
       }
     }
-    verts.Append(vert);
+    verts.push_back(vert);
   }
+  return verts;
 }
 
-} // namespace linalg
-} // end namespace Gambit
+} // end namespace Gambit::linalg
