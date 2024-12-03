@@ -36,11 +36,6 @@ private:
   void SolveDual();
 
 public:
-  class BadPivot : public Exception {
-  public:
-    ~BadPivot() noexcept override = default;
-    const char *what() const noexcept override { return "Bad pivot in LPTableau."; }
-  };
   LPTableau(const Matrix<T> &A, const Vector<T> &b);
   LPTableau(const Matrix<T> &A, const Array<int> &art, const Vector<T> &b);
   LPTableau(const LPTableau<T> &) = default;
@@ -53,11 +48,10 @@ public:
   void SetCost(const Vector<T> &, const Vector<T> &);
   const Vector<T> &GetCost() const { return cost; }
   const Vector<T> &GetUnitCost() const { return unitcost; }
-  T TotalCost();             // cost of current solution
-  T RelativeCost(int) const; // negative index convention
-  void RelativeCostVector(Vector<T> &, Vector<T> &);
+  T TotalCost() const;                // cost of current solution
+  T RelativeCost(int) const;          // negative index convention
   void DualVector(Vector<T> &) const; // column vector
-                                      // Redefined functions
+
   void Refactor() override;
   void Pivot(int outrow, int col) override;
   void ReversePivots(List<Array<int>> &);

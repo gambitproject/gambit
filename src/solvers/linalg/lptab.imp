@@ -131,14 +131,14 @@ template <class T> void LPTableau<T>::SetCost(const Vector<T> &uc, const Vector<
   SolveDual();
 }
 
-template <> double LPTableau<double>::TotalCost()
+template <> double LPTableau<double>::TotalCost() const
 {
   Vector<double> tmpcol(MinRow(), MaxRow());
   BasisSelect(unitcost, cost, tmpcol);
   return tmpcol * solution;
 }
 
-template <> Rational LPTableau<Rational>::TotalCost()
+template <> Rational LPTableau<Rational>::TotalCost() const
 {
   Vector<Rational> tmpcol(MinRow(), MaxRow());
   Vector<Rational> sol(MinRow(), MaxRow());
