@@ -34,10 +34,18 @@ class GameOutcomes:
     """Represents the set of outcomes in a game."""
     game = cython.declare(c_Game)
 
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create GameOutcomes outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(game: c_Game) -> GameOutcomes:
+        obj: GameOutcomes = GameOutcomes.__new__(GameOutcomes)
+        obj.game = game
+        return obj
+
     def __repr__(self) -> str:
-        game = Game()
-        game.game = self.game
-        return f"GameOutcomes(game={game})"
+        return f"GameOutcomes(game={Game.wrap(self.game)})"
 
     def __len__(self) -> int:
         """The number of outcomes in the game."""
@@ -45,9 +53,7 @@ class GameOutcomes:
 
     def __iter__(self) -> typing.Iterator[Outcome]:
         for i in range(self.game.deref().NumOutcomes()):
-            c = Outcome()
-            c.outcome = self.game.deref().GetOutcome(i + 1)
-            yield c
+            yield Outcome.wrap(self.game.deref().GetOutcome(i + 1))
 
     def __getitem__(self, index: typing.Union[int, str]) -> Outcome:
         if isinstance(index, str):
@@ -60,9 +66,7 @@ class GameOutcomes:
                 raise ValueError(f"Game has multiple outcomes with label '{index}'")
             return matches[0]
         if isinstance(index, int):
-            c = Outcome()
-            c.outcome = self.game.deref().GetOutcome(index + 1)
-            return c
+            return Outcome.wrap(self.game.deref().GetOutcome(index + 1))
         raise TypeError(f"Outcome index must be int or str, not {index.__class__.__name__}")
 
 
@@ -71,10 +75,18 @@ class GamePlayers:
     """Represents a collection of players in a game."""
     game = cython.declare(c_Game)
 
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create GamePlayers outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(game: c_Game) -> GamePlayers:
+        obj: GamePlayers = GamePlayers.__new__(GamePlayers)
+        obj.game = game
+        return obj
+
     def __repr__(self) -> str:
-        game = Game()
-        game.game = self.game
-        return f"GamePlayers(game={game})"
+        return f"GamePlayers(game={Game.wrap(self.game)})"
 
     def __len__(self) -> int:
         """Returns the number of players in the game."""
@@ -82,9 +94,7 @@ class GamePlayers:
 
     def __iter__(self) -> typing.Iterator[Player]:
         for i in range(self.game.deref().NumPlayers()):
-            p = Player()
-            p.player = self.game.deref().GetPlayer(i + 1)
-            yield p
+            yield Player.wrap(self.game.deref().GetPlayer(i + 1))
 
     def __getitem__(self, index: typing.Union[int, str]) -> Player:
         if isinstance(index, str):
@@ -97,17 +107,13 @@ class GamePlayers:
                 raise ValueError(f"Game has multiple players with label '{index}'")
             return matches[0]
         if isinstance(index, int):
-            p = Player()
-            p.player = self.game.deref().GetPlayer(index + 1)
-            return p
+            return Player.wrap(self.game.deref().GetPlayer(index + 1))
         raise TypeError(f"Player index must be int or str, not {index.__class__.__name__}")
 
     @property
     def chance(self) -> Player:
         """Returns the chance player associated with the game."""
-        p = Player()
-        p.player = self.game.deref().GetChance()
-        return p
+        return Player.wrap(self.game.deref().GetChance())
 
 
 @cython.cclass
@@ -115,8 +121,15 @@ class GameActions:
     """Represents the set of all actions in a game."""
     game = cython.declare(Game)
 
-    def __init__(self, game: Game) -> None:
-        self.game = game
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create GameActions outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(game: Game) -> GameActions:
+        obj: GameActions = GameActions.__new__(GameActions)
+        obj.game = game
+        return obj
 
     def __repr__(self) -> str:
         return f"GameActions(game={self.game})"
@@ -152,8 +165,15 @@ class GameInfosets:
     """Represents the set of all infosets in a game."""
     game = cython.declare(Game)
 
-    def __init__(self, game: Game) -> None:
-        self.game = game
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create GameInfosets outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(game: Game) -> GameInfosets:
+        obj: GameInfosets = GameInfosets.__new__(GameInfosets)
+        obj.game = game
+        return obj
 
     def __repr__(self) -> str:
         return f"GameInfosets(game={self.game})"
@@ -189,8 +209,15 @@ class GameStrategies:
     """Represents the set of all strategies in the game."""
     game = cython.declare(Game)
 
-    def __init__(self, game: Game) -> None:
-        self.game = game
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create GameStrategies outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(game: Game) -> GameStrategies:
+        obj: GameStrategies = GameStrategies.__new__(GameStrategies)
+        obj.game = game
+        return obj
 
     def __repr__(self) -> str:
         return f"GameOutcomes(game={self.game})"
@@ -229,6 +256,16 @@ class Game:
     """
     game = cython.declare(c_Game)
 
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Use Game.new_tree() or Game.new_table() to create a new game")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(game: c_Game) -> Game:
+        obj: Game = Game.__new__(Game)
+        obj.game = game
+        return obj
+
     @classmethod
     def new_tree(cls,
                  players: typing.Optional[typing.List[str]] = None,
@@ -254,14 +291,10 @@ class Game:
         Game
             The newly-created extensive game.
         """
-        g = cython.declare(Game)
-        g = cls()
-        g.game = NewTree()
+        g = Game.wrap(NewTree())
         g.title = title
         for player in (players or []):
-            p = Player()
-            p.player = g.game.deref().NewPlayer()
-            p.label = str(player)
+            Player.wrap(g.game.deref().NewPlayer()).label = str(player)
         return g
 
     @classmethod
@@ -284,14 +317,14 @@ class Game:
         Game
             The newly-created strategic game.
         """
-        g = cython.declare(Game)
         cdef Array[int] *d
         d = new Array[int](len(dim))
-        for i in range(1, len(dim)+1):
-            setitem_array_int(d, i, dim[i-1])
-        g = cls()
-        g.game = NewTable(d)
-        del d
+        try:
+            for i in range(1, len(dim)+1):
+                setitem_array_int(d, i, dim[i-1])
+            g = Game.wrap(NewTable(d))
+        finally:
+            del d
         g.title = title
         return g
 
@@ -324,7 +357,6 @@ class Game:
         --------
         from_dict : Create strategic game and set player labels
         """
-        g = cython.declare(Game)
         arrays = [np.array(a) for a in arrays]
         if len(set(a.shape for a in arrays)) > 1:
             raise ValueError("All specified arrays must have the same shape")
@@ -363,7 +395,6 @@ class Game:
         --------
         from_arrays : Create game from list-like of array-like
         """
-        g = cython.declare(Game)
         payoffs = {k: np.array(v) for k, v in payoffs.items()}
         if len(set(a.shape for a in payoffs.values())) > 1:
             raise ValueError("All specified arrays must have the same shape")
@@ -403,15 +434,12 @@ class Game:
         --------
         parse_game : Constructs a game from a text string.
         """
-        g = cython.declare(Game)
-        g = cls()
         with open(filepath, "rb") as f:
             data = f.read()
         try:
-            g.game = ParseGame(data)
+            return Game.wrap(ParseGame(data))
         except Exception as exc:
             raise ValueError(f"Parse error in game file: {exc}") from None
-        return g
 
     @classmethod
     def parse_game(cls, text: str) -> Game:
@@ -436,13 +464,10 @@ class Game:
         --------
         read_game : Constructs a game from a representation in a file.
         """
-        g = cython.declare(Game)
-        g = cls()
         try:
-            g.game = ParseGame(text.encode("ascii"))
+            return Game.wrap(ParseGame(text.encode("ascii")))
         except Exception as exc:
             raise ValueError(f"Parse error in game file: {exc}") from None
-        return g
 
     def __repr__(self) -> str:
         if self.title:
@@ -509,7 +534,7 @@ class Game:
             raise UndefinedOperationError(
                 "Operation only defined for games with a tree representation"
             )
-        return GameActions(self)
+        return GameActions.wrap(self)
 
     @property
     def infosets(self) -> GameInfosets:
@@ -524,26 +549,22 @@ class Game:
             raise UndefinedOperationError(
                 "Operation only defined for games with a tree representation"
             )
-        return GameInfosets(self)
+        return GameInfosets.wrap(self)
 
     @property
     def players(self) -> GamePlayers:
         """The set of players in the game."""
-        p = GamePlayers()
-        p.game = self.game
-        return p
+        return GamePlayers.wrap(self.game)
 
     @property
     def strategies(self) -> GameStrategies:
         """The set of strategies in the game."""
-        return GameStrategies(self)
+        return GameStrategies.wrap(self)
 
     @property
     def outcomes(self) -> GameOutcomes:
         """The set of outcomes in the game."""
-        c = GameOutcomes()
-        c.game = self.game
-        return c
+        return GameOutcomes.wrap(self.game)
 
     @property
     def contingencies(self) -> pygambit.gameiter.Contingencies:
@@ -563,9 +584,7 @@ class Game:
             raise UndefinedOperationError(
                 "root: only games with a tree representation have a root node"
             )
-        n = Node()
-        n.node = self.game.deref().GetRoot()
-        return n
+        return Node.wrap(self.game.deref().GetRoot())
 
     @property
     def is_const_sum(self) -> bool:
@@ -634,8 +653,9 @@ class Game:
             ) from None
 
     def _get_contingency(self, *args):
-        psp = cython.declare(shared_ptr[c_PureStrategyProfile])
-        psp = make_shared[c_PureStrategyProfile](self.game.deref().NewPureStrategyProfile())
+        psp: shared_ptr[c_PureStrategyProfile] = make_shared[c_PureStrategyProfile](
+            self.game.deref().NewPureStrategyProfile()
+        )
 
         for (pl, st) in enumerate(args):
             deref(psp).deref().SetStrategy(
@@ -643,13 +663,9 @@ class Game:
             )
 
         if self.is_tree:
-            tree_outcome = TreeGameOutcome()
-            tree_outcome.psp = psp
-            tree_outcome.c_game = self.game
-            return tree_outcome
+            return TreeGameOutcome.wrap(self.game, psp)
         else:
-            outcome = Outcome()
-            outcome.outcome = deref(psp).deref().GetOutcome()
+            outcome = Outcome.wrap(deref(psp).deref().GetOutcome())
             if outcome.outcome != cython.cast(c_GameOutcome, NULL):
                 return outcome
             else:
@@ -731,16 +747,14 @@ class Game:
                 "Mixed strategies not supported for games with imperfect recall."
             )
         if rational:
-            mspr = MixedStrategyProfileRational()
-            mspr.profile = make_shared[c_MixedStrategyProfileRational](
+            mspr = MixedStrategyProfileRational.wrap(make_shared[c_MixedStrategyProfileRational](
                 self.game.deref().NewMixedStrategyProfile(c_Rational())
-            )
+            ))
             return self._fill_strategy_profile(mspr, data, Rational)
         else:
-            mspd = MixedStrategyProfileDouble()
-            mspd.profile = make_shared[c_MixedStrategyProfileDouble](
+            mspd = MixedStrategyProfileDouble.wrap(make_shared[c_MixedStrategyProfileDouble](
                 self.game.deref().NewMixedStrategyProfile(0.0)
-            )
+            ))
             return self._fill_strategy_profile(mspd, data, float)
 
     def random_strategy_profile(
@@ -851,12 +865,14 @@ class Game:
                 "Game must have a tree representation to create a mixed behavior profile"
             )
         if rational:
-            mbpr = MixedBehaviorProfileRational()
-            mbpr.profile = make_shared[c_MixedBehaviorProfileRational](self.game)
+            mbpr = MixedBehaviorProfileRational.wrap(
+                make_shared[c_MixedBehaviorProfileRational](self.game)
+            )
             return self._fill_behavior_profile(mbpr, data, Rational)
         else:
-            mbpd = MixedBehaviorProfileDouble()
-            mbpd.profile = make_shared[c_MixedBehaviorProfileDouble](self.game)
+            mbpd = MixedBehaviorProfileDouble.wrap(
+                make_shared[c_MixedBehaviorProfileDouble](self.game)
+            )
             return self._fill_behavior_profile(mbpd, data, float)
 
     def random_behavior_profile(
@@ -919,7 +935,7 @@ class Game:
             return profile
 
     def support_profile(self):
-        return StrategySupportProfile(self)
+        return StrategySupportProfile.wrap(self)
 
     def nodes(
             self,
@@ -1562,8 +1578,7 @@ class Game:
         Player
             A reference to the newly-created player.
         """
-        p = Player()
-        p.player = self.game.deref().NewPlayer()
+        p = Player.wrap(self.game.deref().NewPlayer())
         if str(label) != "":
             p.label = str(label)
         return p
@@ -1617,8 +1632,7 @@ class Game:
                 raise ValueError("add_outcome(): number of payoffs must equal number of players")
         else:
             payoffs = [0 for _ in self.players]
-        c = Outcome()
-        c.outcome = self.game.deref().NewOutcome()
+        c = Outcome.wrap(self.game.deref().NewOutcome())
         if str(label) != "":
             c.label = str(label)
         for player, payoff in zip(self.players, payoffs):
@@ -1699,8 +1713,7 @@ class Game:
             )
         resolved_player = cython.cast(Player,
                                       self._resolve_player(player, "add_strategy"))
-        s = Strategy()
-        s.strategy = resolved_player.player.deref().NewStrategy()
+        s = Strategy.wrap(resolved_player.player.deref().NewStrategy())
         if label is not None:
             s.label = str(label)
         return s

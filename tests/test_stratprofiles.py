@@ -15,57 +15,49 @@ def test_remove_strategy():
 
 
 def test_difference():
-    game = games.read_from_file("mixed_strategy.nfg")
-    support_profile = game.support_profile()
-    strat_list = [support_profile[0], support_profile[4]]
-    dif_profile = gbt.StrategySupportProfile(game, strat_list)
-    new_profile = support_profile - dif_profile
-    assert len(new_profile) == 3
-    for strategy in strat_list:
-        assert strategy not in new_profile
+    game = gbt.Game.new_table([2, 2])
+    dif_profile = (
+        game.support_profile()
+        .remove(game.players[0].strategies[1])
+        .remove(game.players[1].strategies[1])
+    )
+    new_profile = game.support_profile() - dif_profile
+    assert len(new_profile) == 2
+    for player in game.players:
+        assert player.strategies[0] not in new_profile
 
 
 def test_difference_error():
-    game = games.read_from_file("mixed_strategy.nfg")
+    game = gbt.Game.new_table([3, 2])
     support_profile = game.support_profile()
-    strat_list = [support_profile[0], support_profile[4]]
-    dif_profile = gbt.StrategySupportProfile(game, strat_list)
+    dif_profile = game.support_profile().remove(game.players[1].strategies[0])
     with pytest.raises(ValueError):
-        dif_profile - support_profile
+        _ = dif_profile - support_profile
 
 
 def test_intersection():
-    game = games.read_from_file("mixed_strategy.nfg")
-    support_profile = game.support_profile()
-    strat_list = [support_profile[0], support_profile[2],
-                  support_profile[4]]
-    fir_profile = gbt.StrategySupportProfile(game, strat_list)
-    sec_profile = support_profile.remove(support_profile[2])
+    game = gbt.Game.new_table([3, 2])
+    fir_profile = game.support_profile().remove(game.players[1].strategies[0])
+    sec_profile = game.support_profile().remove(game.players[0].strategies[2])
     new_profile = fir_profile & sec_profile
-    assert len(new_profile) == 2
+    assert len(new_profile) == 3
     assert new_profile <= sec_profile
     assert new_profile <= fir_profile
 
 
 def test_intersection_error():
-    game = games.read_from_file("mixed_strategy.nfg")
-    support_profile = game.support_profile()
-    strat_list = [support_profile[0], support_profile[2],
-                  support_profile[4]]
-    fir_profile = gbt.StrategySupportProfile(game, strat_list)
-    sec_profile = support_profile.remove(support_profile[4])
+    game = gbt.Game.new_table([3, 2])
+    fir_profile = game.support_profile().remove(game.players[1].strategies[0])
+    sec_profile = game.support_profile().remove(game.players[1].strategies[1])
     with pytest.raises(ValueError):
-        fir_profile & sec_profile
+        _ = fir_profile & sec_profile
 
 
 def test_union():
     game = games.read_from_file("mixed_strategy.nfg")
     support_profile = game.support_profile()
-    strat_list = [support_profile[0], support_profile[2],
-                  support_profile[4]]
-    fir_profile = gbt.StrategySupportProfile(game, strat_list)
     sec_profile = support_profile.remove(support_profile[4])
-    new_profile = fir_profile | sec_profile
+    new_profile = support_profile | sec_profile
     assert new_profile == support_profile
 
 
@@ -78,9 +70,7 @@ def test_undominated():
         new_profile = loop_profile
         loop_profile = gbt.supports.undominated_strategies_solve(new_profile)
     assert len(loop_profile) == 2
-    assert loop_profile == gbt.StrategySupportProfile(
-            game, [support_profile[0], support_profile[3]]
-    )
+    assert list(loop_profile) == [support_profile[0], support_profile[3]]
 
 
 def test_remove_error():

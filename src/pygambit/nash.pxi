@@ -31,48 +31,32 @@ import typing
 def _convert_mspd(
         inlist: c_List[c_MixedStrategyProfileDouble]
 ) -> typing.List[MixedStrategyProfileDouble]:
-    ret = []
-    for i in range(inlist.Length()):
-        p = MixedStrategyProfileDouble()
-        p.profile = copyitem_list_mspd(inlist, i+1)
-        ret.append(p)
-    return ret
+    return [MixedStrategyProfileDouble.wrap(copyitem_list_mspd(inlist, i+1))
+            for i in range(inlist.Length())]
 
 
 @cython.cfunc
 def _convert_mspr(
         inlist: c_List[c_MixedStrategyProfileRational]
 ) -> typing.List[MixedStrategyProfileRational]:
-    ret = []
-    for i in range(inlist.Length()):
-        p = MixedStrategyProfileRational()
-        p.profile = copyitem_list_mspr(inlist, i+1)
-        ret.append(p)
-    return ret
+    return [MixedStrategyProfileRational.wrap(copyitem_list_mspr(inlist, i+1))
+            for i in range(inlist.Length())]
 
 
 @cython.cfunc
 def _convert_mbpd(
         inlist: c_List[c_MixedBehaviorProfileDouble]
 ) -> typing.List[MixedBehaviorProfileDouble]:
-    ret = []
-    for i in range(inlist.Length()):
-        p = MixedBehaviorProfileDouble()
-        p.profile = copyitem_list_mbpd(inlist, i+1)
-        ret.append(p)
-    return ret
+    return [MixedBehaviorProfileDouble.wrap(copyitem_list_mbpd(inlist, i+1))
+            for i in range(inlist.Length())]
 
 
 @cython.cfunc
 def _convert_mbpr(
         inlist: c_List[c_MixedBehaviorProfileRational]
 ) -> typing.List[MixedBehaviorProfileRational]:
-    ret = []
-    for i in range(inlist.Length()):
-        p = MixedBehaviorProfileRational()
-        p.profile = copyitem_list_mbpr(inlist, i+1)
-        ret.append(p)
-    return ret
+    return [MixedBehaviorProfileRational.wrap(copyitem_list_mbpr(inlist, i+1))
+            for i in range(inlist.Length())]
 
 
 def _enumpure_strategy_solve(game: Game) -> typing.List[MixedStrategyProfileRational]:
@@ -198,11 +182,17 @@ def _logit_behavior_solve(
 class LogitQREMixedStrategyProfile:
     thisptr = cython.declare(shared_ptr[c_LogitQREMixedStrategyProfile])
 
-    def __init__(self, game=None):
-        if game is not None:
-            self.thisptr = make_shared[c_LogitQREMixedStrategyProfile](
-                cython.cast(Game, game).game
-            )
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create a LogitQREMixedStrategyProfile outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(profile: shared_ptr[c_LogitQREMixedStrategyProfile]) -> LogitQREMixedStrategyProfile:
+        obj: LogitQREMixedStrategyProfile = (
+            LogitQREMixedStrategyProfile.__new__(LogitQREMixedStrategyProfile)
+        )
+        obj.thisptr = profile
+        return obj
 
     def __repr__(self):
         return "LogitQREMixedStrategyProfile(lam=%f,profile=%s)" % (self.lam, self.profile)
@@ -216,9 +206,7 @@ class LogitQREMixedStrategyProfile:
     @property
     def game(self) -> Game:
         """The game on which this mixed strategy profile is defined."""
-        g = Game()
-        g.game = deref(self.thisptr).GetGame()
-        return g
+        return Game.wrap(deref(self.thisptr).GetGame())
 
     @property
     def lam(self) -> double:
@@ -233,11 +221,9 @@ class LogitQREMixedStrategyProfile:
     @property
     def profile(self) -> MixedStrategyProfileDouble:
         """The mixed strategy profile."""
-        profile = MixedStrategyProfileDouble()
-        profile.profile = (
+        return MixedStrategyProfileDouble.wrap(
             make_shared[c_MixedStrategyProfileDouble](deref(self.thisptr).GetProfile())
         )
-        return profile
 
 
 def logit_estimate(profile: MixedStrategyProfileDouble,
@@ -246,9 +232,9 @@ def logit_estimate(profile: MixedStrategyProfileDouble,
     """Estimate QRE corresponding to mixed strategy profile using
     maximum likelihood along the principal branch.
     """
-    ret = LogitQREMixedStrategyProfile()
-    ret.thisptr = _logit_estimate(profile.profile, first_step, max_accel)
-    return ret
+    return LogitQREMixedStrategyProfile.wrap(
+        _logit_estimate(profile.profile, first_step, max_accel)
+    )
 
 
 def logit_atlambda(game: Game,
@@ -258,16 +244,12 @@ def logit_atlambda(game: Game,
     """Compute the first QRE along the principal branch with the given
     lambda parameter.
     """
-    ret = LogitQREMixedStrategyProfile()
-    ret.thisptr = _logit_atlambda(game.game, lam, first_step, max_accel)
-    return ret
+    return LogitQREMixedStrategyProfile.wrap(
+        _logit_atlambda(game.game, lam, first_step, max_accel)
+    )
 
 
 def logit_principal_branch(game: Game, first_step: float = .03, max_accel: float = 1.1):
     solns = _logit_principal_branch(game.game, 1.0e-8, first_step, max_accel)
-    ret = []
-    for i in range(solns.Length()):
-        p = LogitQREMixedStrategyProfile()
-        p.thisptr = copyitem_list_qrem(solns, i+1)
-        ret.append(p)
-    return ret
+    return [LogitQREMixedStrategyProfile.wrap(copyitem_list_qrem(solns, i+1))
+            for i in range(solns.Length())]

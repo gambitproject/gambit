@@ -32,27 +32,33 @@ class StrategySupportProfile:
     """
     support = cython.declare(unique_ptr[c_StrategySupportProfile])
 
-    def __init__(self,
-                 game: Game,
-                 strategies: typing.Optional[typing.Iterable[Strategy]] = None):
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create a StrategySupportProfile outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(
+        game: Game,
+        strategies: typing.Optional[typing.Iterable[Strategy]] = None
+    ) -> StrategySupportProfile:
         if (strategies is not None and
                 len(set([strat.player.number for strat in strategies])) != len(game.players)):
             raise ValueError(
                "A StrategySupportProfile must have at least one strategy for each player"
             )
+        obj: StrategySupportProfile = StrategySupportProfile.__new__(StrategySupportProfile)
         # There's at least one strategy for each player, so this forms a valid support profile
-        self.support.reset(new c_StrategySupportProfile(game.game))
+        obj.support.reset(new c_StrategySupportProfile(game.game))
         if strategies is not None:
             for strategy in game.strategies:
                 if strategy not in strategies:
-                    deref(self.support).RemoveStrategy(cython.cast(Strategy, strategy).strategy)
+                    deref(obj.support).RemoveStrategy(cython.cast(Strategy, strategy).strategy)
+        return obj
 
     @property
     def game(self) -> Game:
         """The `Game` on which the support profile is defined."""
-        g = Game()
-        g.game = deref(self.support).GetGame()
-        return g
+        return Game.wrap(deref(self.support).GetGame())
 
     def __repr__(self) -> str:
         return f"StrategySupportProfile(game={self.game})"
@@ -76,9 +82,7 @@ class StrategySupportProfile:
     def __getitem__(self, index: int) -> Strategy:
         for pl in range(len(self.game.players)):
             if index < deref(self.support).NumStrategiesPlayer(pl+1):
-                s = Strategy()
-                s.strategy = deref(self.support).GetStrategy(pl+1, index+1)
-                return s
+                return Strategy.wrap(deref(self.support).GetStrategy(pl+1, index+1))
             index = index - deref(self.support).NumStrategiesPlayer(pl+1)
         raise IndexError("StrategySupportProfile index out of range")
 
@@ -92,9 +96,7 @@ class StrategySupportProfile:
     def __iter__(self) -> typing.Generator[Strategy, None, None]:
         for pl in range(len(self.game.players)):
             for st in range(deref(self.support).NumStrategiesPlayer(pl+1)):
-                s = Strategy()
-                s.strategy = deref(self.support).GetStrategy(pl+1, st+1)
-                yield s
+                yield Strategy.wrap(deref(self.support).GetStrategy(pl+1, st+1))
 
     def __and__(self, other: StrategySupportProfile) -> StrategySupportProfile:
         return self.intersection(other)
@@ -128,7 +130,7 @@ class StrategySupportProfile:
             )
         strategies = list(self)
         strategies.remove(strategy)
-        return StrategySupportProfile(self.game, strategies)
+        return StrategySupportProfile.wrap(self.game, strategies)
 
     def difference(self, other: StrategySupportProfile) -> StrategySupportProfile:
         """Create a support profile which contains all strategies in this profile that
@@ -151,7 +153,7 @@ class StrategySupportProfile:
         """
         if self.game != other.game:
             raise MismatchError("difference(): support profiles are defined on different games")
-        return StrategySupportProfile(self.game, set(self) - set(other))
+        return StrategySupportProfile.wrap(self.game, set(self) - set(other))
 
     def intersection(self, other: StrategySupportProfile) -> StrategySupportProfile:
         """Create a support profile which contains all strategies that are in both this and
@@ -174,7 +176,7 @@ class StrategySupportProfile:
         """
         if self.game != other.game:
             raise MismatchError("intersection(): support profiles are defined on different games")
-        return StrategySupportProfile(self.game, set(self) & set(other))
+        return StrategySupportProfile.wrap(self.game, set(self) & set(other))
 
     def union(self, other: StrategySupportProfile) -> StrategySupportProfile:
         """Create a support profile which contains all strategies that are in either this or
@@ -197,7 +199,7 @@ class StrategySupportProfile:
         """
         if self.game != other.game:
             raise MismatchError("union(): support profiles are defined on different games")
-        return StrategySupportProfile(self.game, set(self) | set(other))
+        return StrategySupportProfile.wrap(self.game, set(self) | set(other))
 
     def issubset(self, other: StrategySupportProfile) -> bool:
         """Test for whether this support is contained in another.
@@ -257,7 +259,7 @@ class StrategySupportProfile:
 def _undominated_strategies_solve(
         profile: StrategySupportProfile, strict: bool, external: bool
 ) -> StrategySupportProfile:
-    result = StrategySupportProfile(profile.game)
+    result = StrategySupportProfile.wrap(profile.game)
     result.support.reset(
         new c_StrategySupportProfile(deref(profile.support).Undominated(strict, external))
     )

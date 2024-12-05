@@ -25,6 +25,16 @@ class Action:
     """A choice available at an ``Infoset`` in a ``Game``."""
     action = cython.declare(c_GameAction)
 
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create an Action outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(action: c_GameAction) -> Action:
+        obj: Action = Action.__new__(Action)
+        obj.action = action
+        return obj
+
     def __repr__(self) -> str:
         if self.label:
             return f"Action(infoset={self.infoset}, label='{self.label}')"
@@ -72,9 +82,7 @@ class Action:
     @property
     def infoset(self) -> Infoset:
         """Get the information set to which the action belongs."""
-        i = Infoset()
-        i.infoset = self.action.deref().GetInfoset()
-        return i
+        return Infoset.wrap(self.action.deref().GetInfoset())
 
     @property
     def prob(self) -> typing.Union[decimal.Decimal, Rational]:

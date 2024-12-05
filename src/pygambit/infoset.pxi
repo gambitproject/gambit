@@ -25,22 +25,25 @@ class InfosetMembers:
     """The set of nodes which are members of an information set."""
     infoset = cython.declare(c_GameInfoset)
 
-    def __init__(self, infoset: Infoset):
-        self.infoset = infoset.infoset
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create InfosetMembers outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(infoset: c_GameInfoset) -> InfosetMembers:
+        obj: InfosetMembers = InfosetMembers.__new__(InfosetMembers)
+        obj.infoset = infoset
+        return obj
 
     def __repr__(self) -> str:
-        infoset = Infoset()
-        infoset.infoset = self.infoset
-        return f"InfosetMembers(infoset={infoset})"
+        return f"InfosetMembers(infoset={Infoset.wrap(self.infoset)})"
 
     def __len__(self) -> int:
         return self.infoset.deref().NumMembers()
 
     def __iter__(self) -> typing.Iterator[Node]:
         for i in range(self.infoset.deref().NumMembers()):
-            m = Node()
-            m.node = self.infoset.deref().GetMember(i + 1)
-            yield m
+            yield Node.wrap(self.infoset.deref().GetMember(i + 1))
 
     def __getitem__(self, index: typing.Union[int, str]) -> Node:
         if isinstance(index, str):
@@ -53,9 +56,7 @@ class InfosetMembers:
                 raise ValueError(f"Infoset has multiple members with label '{index}'")
             return matches[0]
         if isinstance(index, int):
-            m = Node()
-            m.node = self.infoset.deref().GetMember(index + 1)
-            return m
+            return Node.wrap(self.infoset.deref().GetMember(index + 1))
         raise TypeError(f"Member index must be int or str, not {index.__class__.__name__}")
 
 
@@ -64,10 +65,18 @@ class InfosetActions:
     """The set of actions which are available at an information set."""
     infoset = cython.declare(c_GameInfoset)
 
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create InfosetActions outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(infoset: c_GameInfoset) -> InfosetActions:
+        obj: InfosetActions = InfosetActions.__new__(InfosetActions)
+        obj.infoset = infoset
+        return obj
+
     def __repr__(self) -> str:
-        infoset = Infoset()
-        infoset.infoset = self.infoset
-        return f"InfosetActions(infoset={infoset})"
+        return f"InfosetActions(infoset={Infoset.wrap(self.infoset)})"
 
     def __len__(self):
         """The number of actions at the information set."""
@@ -75,9 +84,7 @@ class InfosetActions:
 
     def __iter__(self) -> typing.Iterator[Action]:
         for i in range(self.infoset.deref().NumActions()):
-            a = Action()
-            a.action = self.infoset.deref().GetAction(i + 1)
-            yield a
+            yield Action.wrap(self.infoset.deref().GetAction(i + 1))
 
     def __getitem__(self, index: typing.Union[int, str]) -> Action:
         if isinstance(index, str):
@@ -90,9 +97,7 @@ class InfosetActions:
                 raise ValueError(f"Infoset has multiple actions with label '{index}'")
             return matches[0]
         if isinstance(index, int):
-            a = Action()
-            a.action = self.infoset.deref().GetAction(index + 1)
-            return a
+            return Action.wrap(self.infoset.deref().GetAction(index + 1))
         raise TypeError(f"Action index must be int or str, not {index.__class__.__name__}")
 
 
@@ -100,6 +105,16 @@ class InfosetActions:
 class Infoset:
     """An information set in a ``Game``."""
     infoset = cython.declare(c_GameInfoset)
+
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create an Infoset outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(infoset: c_GameInfoset) -> Infoset:
+        obj: Infoset = Infoset.__new__(Infoset)
+        obj.infoset = infoset
+        return obj
 
     def __repr__(self) -> str:
         if self.label:
@@ -123,9 +138,7 @@ class Infoset:
     @property
     def game(self) -> Game:
         """The ``Game`` to which the information set belongs."""
-        g = Game()
-        g.game = self.infoset.deref().GetGame()
-        return g
+        return Game.wrap(self.infoset.deref().GetGame())
 
     @property
     def label(self) -> str:
@@ -151,18 +164,14 @@ class Infoset:
     @property
     def actions(self) -> InfosetActions:
         """The set of actions at the information set."""
-        a = InfosetActions()
-        a.infoset = self.infoset
-        return a
+        return InfosetActions.wrap(self.infoset)
 
     @property
     def members(self) -> InfosetMembers:
         """The set of nodes which are members of the information set."""
-        return InfosetMembers(self)
+        return InfosetMembers.wrap(self.infoset)
 
     @property
     def player(self) -> Player:
         """The player who has the move at this information set."""
-        p = Player()
-        p.player = self.infoset.deref().GetPlayer()
-        return p
+        return Player.wrap(self.infoset.deref().GetPlayer())

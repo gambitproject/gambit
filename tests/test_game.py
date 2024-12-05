@@ -6,6 +6,11 @@ import pygambit as gbt
 from . import games
 
 
+def test_constructor_fail():
+    with pytest.raises(ValueError):
+        gbt.Game()
+
+
 def test_from_arrays():
     m = np.array([[8, 2], [10, 5]])
     game = gbt.Game.from_arrays(m, m.transpose())
