@@ -19,6 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
+import io
 import itertools
 import pathlib
 
@@ -26,6 +27,119 @@ import numpy as np
 import scipy.stats
 
 import pygambit.gameiter
+
+ctypedef string (*GameWriter)(const c_Game &) except +IOError
+ctypedef c_Game (*GameParser)(const string &) except +IOError
+
+
+@cython.cfunc
+def read_game(filepath_or_buffer: typing.Union[str, pathlib.Path, io.BufferedReader],
+              parser: GameParser):
+
+    g = cython.declare(Game)
+    g = Game()
+    if isinstance(filepath_or_buffer, io.BufferedReader):
+        data = filepath_or_buffer.read()
+    else:
+        with open(filepath_or_buffer, "rb") as f:
+            data = f.read()
+    try:
+        g.game = parser(data)
+    except Exception as exc:
+        raise ValueError(f"Parse error in game file: {exc}") from None
+    return g
+
+
+def read_gbt(filepath_or_buffer: typing.Union[str, pathlib.Path, io.BufferedReader]) -> Game:
+    """Construct a game from its serialised representation in a GBT file.
+
+    Parameters
+    ----------
+    filepath : str or path object
+        The path to the file containing the game representation.
+
+    Returns
+    -------
+    Game
+        A game constructed from the representation in the file.
+
+    Raises
+    ------
+    IOError
+        If the file cannot be opened or read
+    ValueError
+        If the contents of the file are not a valid game representation.
+    """
+    return read_game(filepath_or_buffer, parser=ParseGbtGame)
+
+
+def read_efg(filepath_or_buffer: typing.Union[str, pathlib.Path, io.BufferedReader]) -> Game:
+    """Construct a game from its serialised representation in a EFG file.
+
+    Parameters
+    ----------
+    filepath : str or path object
+        The path to the file containing the game representation.
+
+    Returns
+    -------
+    Game
+        A game constructed from the representation in the file.
+
+    Raises
+    ------
+    IOError
+        If the file cannot be opened or read
+    ValueError
+        If the contents of the file are not a valid game representation.
+    """
+    return read_game(filepath_or_buffer, parser=ParseEfgGame)
+
+
+def read_nfg(filepath_or_buffer: typing.Union[str, pathlib.Path, io.BufferedReader]) -> Game:
+    """Construct a game from its serialised representation in a NFG file.
+
+    Parameters
+    ----------
+    filepath : str or path object
+        The path to the file containing the game representation.
+
+    Returns
+    -------
+    Game
+        A game constructed from the representation in the file.
+
+    Raises
+    ------
+    IOError
+        If the file cannot be opened or read
+    ValueError
+        If the contents of the file are not a valid game representation.
+    """
+    return read_game(filepath_or_buffer, parser=ParseNfgGame)
+
+
+def read_agg(filepath_or_buffer: typing.Union[str, pathlib.Path, io.BufferedReader]) -> Game:
+    """Construct a game from its serialised representation in a AGG file.
+
+    Parameters
+    ----------
+    filepath : str or path object
+        The path to the file containing the game representation.
+
+    Returns
+    -------
+    Game
+        A game constructed from the representation in the file.
+
+    Raises
+    ------
+    IOError
+        If the file cannot be opened or read
+    ValueError
+        If the contents of the file are not a valid game representation.
+    """
+    return read_game(filepath_or_buffer, parser=ParseAggGame)
 
 
 @cython.cclass
@@ -1024,7 +1138,9 @@ class Game:
         )
 
     def write(self, format="native") -> str:
-        """Produce a serialization of the game.
+        """Deprecated in favour of to_xxx methods.
+
+        Produce a serialization of the game.
 
         Several output formats are
         supported, depending on the representation of the game.
@@ -1062,6 +1178,108 @@ class Game:
            is no longer supported by recent versions of GTE.
         """
         return WriteGame(self.game, format.encode("ascii")).decode("ascii")
+
+    @cython.cfunc
+    def _to_format(
+        self,
+        writer: GameWriter,
+        filepath_or_buffer: typing.Union[str, pathlib.Path, io.BufferedWriter, None] = None
+    ):
+        serialized_game = writer(self.game)
+        if filepath_or_buffer is None:
+            return serialized_game.decode()
+        if isinstance(filepath_or_buffer, io.BufferedWriter):
+            filepath_or_buffer.write(serialized_game)
+        else:
+            with open(filepath_or_buffer, "wb") as f:
+                f.write(serialized_game)
+
+    def to_efg(self,
+               filepath_or_buffer: typing.Union[str, pathlib.Path, io.BufferedWriter, None] = None
+               ) -> typing.Union[str, None]:
+        """Save the game to an .efg file or return its serialized representation
+
+        Parameters
+        ----------
+        filepath_or_buffer : str or Path or BufferedWriter or None, default None
+            String, path object, or file-like object implementing a write() function.
+            If None, the result is returned as a string.
+
+        Return
+        ------
+        String representation of the game or None if the game is saved to a file
+        """
+        return self._to_format(WriteEfgFile, filepath_or_buffer)
+
+    def to_nfg(self,
+               filepath_or_buffer: typing.Union[str, pathlib.Path, io.BufferedWriter, None] = None
+               ) -> typing.Union[str, None]:
+        """Save the game to a .nfg file or return its serialized representation
+
+        Parameters
+        ----------
+        filepath_or_buffer : str or Path or BufferedWriter or None, default None
+            String, path object, or file-like object implementing a write() function.
+            If None, the result is returned as a string.
+
+        Return
+        ------
+        String representation of the game or None if the game is saved to a file
+        """
+        return self._to_format(WriteNfgFile, filepath_or_buffer)
+
+    # def to_gbt(
+    #     self,
+    #     filepath_or_buffer: typing.Union[str, pathlib.Path, io.BufferedWriter, None] = None
+    # ) -> typing.Union[str, None]:
+    #     """Save the game to a .gbt file or return its serialized representation
+
+    #     Parameters
+    #     ----------
+    #     filepath_or_buffer : str or Path or BufferedWriter or None, default None
+    #         String, path object, or file-like object implementing a write() function.
+    #         If None, the result is returned as a string.
+
+    #     Return
+    #     ------
+    #     String representation of the game or None if the game is saved to a file
+    #     """
+    #     return self._to_format(WriteGbtFile, filepath_or_buffer)
+
+    def to_html(self,
+                filepath_or_buffer: typing.Union[str, pathlib.Path, io.BufferedWriter, None] = None
+                ) -> typing.Union[str, None]:
+        """Export the game to an .html file or return its serialized representation
+
+        Parameters
+        ----------
+        filepath_or_buffer : str or Path or BufferedWriter or None, default None
+            String, path object, or file-like object implementing a write() function.
+            If None, the result is returned as a string.
+
+        Return
+        ------
+        String representation of the game or None if the game is exported to a file
+        """
+        return self._to_format(WriteHTMLFile, filepath_or_buffer)
+
+    def to_latex(
+            self,
+            filepath_or_buffer: typing.Union[str, pathlib.Path, io.BufferedWriter, None] = None
+            ) -> typing.Union[str, None]:
+        """Export the game to a .tex file or return its serialized representation
+
+        Parameters
+        ----------
+        filepath_or_buffer : str or Path or BufferedWriter or None, default None
+            String, path object, or file-like object implementing a write() function.
+            If None, the result is returned as a string.
+
+        Return
+        ------
+        String representation of the game or None if the game is exported to a file
+        """
+        return self._to_format(WriteLaTeXFile, filepath_or_buffer)
 
     def _resolve_player(self,
                         player: typing.Any, funcname: str, argname: str = "player") -> Player:
