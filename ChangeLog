@@ -34,6 +34,10 @@
 - When parsing .nfg files, check that the number of outcomes or payoffs is the expected number,
   and raise an exception if not.  (#119)
 
+### Removed
+- `Game.write()` no longer supports generation of the XML-format files for Game Theory
+  Explorer, as GTE no longer reads files in this format.
+
 
 ## [16.1.2] - unreleased
 

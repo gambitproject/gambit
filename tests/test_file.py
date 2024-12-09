@@ -82,10 +82,6 @@ class TestGambitEfgFile(unittest.TestCase):
             "Parse error in game file: line 5:29: Expected '}'"
         )
 
-    def test_write_game_gte_sanity(self):
-        g = pygambit.Game.parse_game(self.file_text)
-        g.write("gte")
-
 
 class TestGambitNfgFile(unittest.TestCase):
     def setUp(self):

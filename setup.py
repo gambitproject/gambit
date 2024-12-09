@@ -133,7 +133,6 @@ setuptools.setup(
     },
     python_requires=">=3.9",
     install_requires=[
-        "lxml",  # used for reading/writing GTE files
         "numpy",
         "scipy",
         "deprecated",

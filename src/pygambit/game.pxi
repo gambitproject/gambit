@@ -25,7 +25,6 @@ import pathlib
 import numpy as np
 import scipy.stats
 
-import pygambit.gte
 import pygambit.gameiter
 
 
@@ -1037,8 +1036,6 @@ class Game:
           :ref:`the .nfg strategic game file format <file-formats-nfg>`.
           For an extensive game, this uses the reduced strategic form
           representation.
-        * `gte`: The XML representation used by the Game Theory Explorer
-          tool.   Only available for extensive games.
         * `native`: The format most appropriate to the
           underlying representation of the game, i.e., `efg` or `nfg`.
 
@@ -1059,11 +1056,12 @@ class Game:
           chooser; the second player the column chooser.  For games with
           more than two players, a collection of tables is generated,
           one for each possible strategy combination of players 3 and higher.
+
+        .. versionchanged:: 16.3.0
+           Removed support for writing Game Theory Explorer format as the XML format
+           is no longer supported by recent versions of GTE.
         """
-        if format == "gte":
-            return pygambit.gte.write_game(self)
-        else:
-            return WriteGame(self.game, format.encode("ascii")).decode("ascii")
+        return WriteGame(self.game, format.encode("ascii")).decode("ascii")
 
     def _resolve_player(self,
                         player: typing.Any, funcname: str, argname: str = "player") -> Player:
