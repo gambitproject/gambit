@@ -19,6 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
+import cython
 from cython.operator cimport dereference as deref
 from libcpp.memory cimport shared_ptr
 
@@ -29,6 +30,16 @@ import typing
 class Outcome:
     """An outcome in a ``Game``."""
     outcome = cython.declare(c_GameOutcome)
+
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create an Outcome outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(outcome: c_GameOutcome) -> Outcome:
+        obj: Outcome = Outcome.__new__(Outcome)
+        obj.outcome = outcome
+        return obj
 
     def __repr__(self) -> str:
         if self.label:
@@ -48,9 +59,7 @@ class Outcome:
     @property
     def game(self) -> Game:
         """Returns the game with which this outcome is associated."""
-        g = Game()
-        g.game = self.outcome.deref().GetGame()
-        return g
+        return Game.wrap(self.outcome.deref().GetGame())
 
     @property
     def label(self) -> str:
@@ -111,15 +120,24 @@ class Outcome:
 @cython.cclass
 class TreeGameOutcome:
     """Represents an outcome in a strategic game derived from an extensive game."""
-    psp = cython.declare(shared_ptr[c_PureStrategyProfile])
     c_game = cython.declare(c_Game)
+    psp = cython.declare(shared_ptr[c_PureStrategyProfile])
+
+    def __init__(self):
+        raise ValueError("Cannot create an Outcome outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(game: c_Game, psp: shared_ptr[c_PureStrategyProfile]) -> TreeGameOutcome:
+        obj: TreeGameOutcome = TreeGameOutcome.__new__(TreeGameOutcome)
+        obj.c_game = game
+        obj.psp = psp
+        return obj
 
     @property
     def game(self) -> Game:
         """Returns the game with which this outcome is associated."""
-        g = Game()
-        g.game = self.c_game
-        return g
+        return Game.wrap(self.c_game)
 
     def __repr__(self):
         return f"<Outcome '{self.label}' in game '{self.game.title}'>"

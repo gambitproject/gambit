@@ -54,15 +54,20 @@ class StrategySupportProfile:
     """
     support = cython.declare(unique_ptr[c_StrategySupportProfile])
 
-    def __init__(self, game: Game) -> None:
-        self.support.reset(new c_StrategySupportProfile(game.game))
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create a StrategySupportProfile outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(game: Game) -> StrategySupportProfile:
+        obj: StrategySupportProfile = StrategySupportProfile.__new__(StrategySupportProfile)
+        obj.support.reset(new c_StrategySupportProfile(game.game))
+        return obj
 
     @property
     def game(self) -> Game:
         """The `Game` on which the support profile is defined."""
-        g = Game()
-        g.game = deref(self.support).GetGame()
-        return g
+        return Game.wrap(deref(self.support).GetGame())
 
     def __repr__(self) -> str:
         return f"StrategySupportProfile(game={self.game})"
@@ -93,9 +98,7 @@ class StrategySupportProfile:
     def __iter__(self) -> typing.Generator[Strategy, None, None]:
         for player in deref(self.support).GetGame().deref().GetPlayers():
             for strat in deref(self.support).GetStrategies(player):
-                s = Strategy()
-                s.strategy = strat
-                yield s
+                yield Strategy.wrap(strat)
 
     def __getitem__(self, player: PlayerReference) -> StrategySupport:
         """Return a `StrategySupport` representing the strategies in the support
@@ -300,7 +303,7 @@ class StrategySupportProfile:
 def _undominated_strategies_solve(
         profile: StrategySupportProfile, strict: bool, external: bool
 ) -> StrategySupportProfile:
-    result = StrategySupportProfile(profile.game)
+    result = StrategySupportProfile.wrap(profile.game)
     result.support.reset(
         new c_StrategySupportProfile(deref(profile.support).Undominated(strict, external))
     )

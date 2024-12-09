@@ -49,7 +49,7 @@ def test_intersection_error():
         lambda x: x.player.label == "Player 1" or x.label == "1"
     )
     with pytest.raises(ValueError):
-        first_profile & second_profile
+        _ = first_profile & second_profile
 
 
 def test_union():

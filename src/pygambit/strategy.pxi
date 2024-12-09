@@ -25,6 +25,16 @@ class Strategy:
     """A plan of action for a ``Player`` in a ``Game``."""
     strategy = cython.declare(c_GameStrategy)
 
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create a Strategy outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(strategy: c_GameStrategy) -> Strategy:
+        obj: Strategy = Strategy.__new__(Strategy)
+        obj.strategy = strategy
+        return obj
+
     def __repr__(self) -> str:
         if self.label:
             return f"Strategy(player={self.player}, label='{self.label}')"
@@ -52,16 +62,12 @@ class Strategy:
     @property
     def game(self) -> Game:
         """The game to which the strategy belongs."""
-        g = Game()
-        g.game = self.strategy.deref().GetPlayer().deref().GetGame()
-        return g
+        return Game.wrap(self.strategy.deref().GetPlayer().deref().GetGame())
 
     @property
     def player(self) -> Player:
         """The player to which the strategy belongs."""
-        p = Player()
-        p.player = self.strategy.deref().GetPlayer()
-        return p
+        return Player.wrap(self.strategy.deref().GetPlayer())
 
     @property
     def number(self) -> int:

@@ -25,19 +25,25 @@ class NodeChildren:
     """The set of nodes which are direct descendants of a node."""
     parent = cython.declare(c_GameNode)
 
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create NodeChildren outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(parent: c_GameNode) -> NodeChildren:
+        obj: NodeChildren = NodeChildren.__new__(NodeChildren)
+        obj.parent = parent
+        return obj
+
     def __len__(self) -> int:
         return self.parent.deref().NumChildren()
 
     def __repr__(self) -> str:
-        node = Node()
-        node.node = self.parent
-        return f"NodeChildren(parent={node})"
+        return f"NodeChildren(parent={Node.wrap(self.parent)})"
 
     def __iter__(self) -> typing.Iterator[Node]:
         for i in range(self.parent.deref().NumChildren()):
-            c = Node()
-            c.node = self.parent.deref().GetChild(i + 1)
-            yield c
+            yield Node.wrap(self.parent.deref().GetChild(i + 1))
 
     def __getitem__(self, index: typing.Union[int, str]) -> Node:
         if isinstance(index, str):
@@ -50,9 +56,7 @@ class NodeChildren:
                 raise ValueError(f"Node has multiple children with label '{index}'")
             return matches[0]
         if isinstance(index, int):
-            c = Node()
-            c.node = self.parent.deref().GetChild(index + 1)
-            return c
+            return Node.wrap(self.parent.deref().GetChild(index + 1))
         raise TypeError(f"Child index must be int or str, not {index.__class__.__name__}")
 
 
@@ -60,6 +64,16 @@ class NodeChildren:
 class Node:
     """A node in a ``Game``."""
     node = cython.declare(c_GameNode)
+
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create a Node outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(node: c_GameNode) -> Node:
+        obj: Node = Node.__new__(Node)
+        obj.node = node
+        return obj
 
     def __repr__(self) -> str:
         if self.label:
@@ -96,16 +110,12 @@ class Node:
     @property
     def children(self) -> NodeChildren:
         """The set of children of this node."""
-        c = NodeChildren()
-        c.parent = self.node
-        return c
+        return NodeChildren.wrap(self.node)
 
     @property
     def game(self) -> Game:
         """Gets the ``Game`` to which the node belongs."""
-        g = Game()
-        g.game = self.node.deref().GetGame()
-        return g
+        return Game.wrap(self.node.deref().GetGame())
 
     @property
     def infoset(self) -> typing.Optional[Infoset]:
@@ -115,9 +125,7 @@ class Node:
         None is returned.
         """
         if self.node.deref().GetInfoset() != cython.cast(c_GameInfoset, NULL):
-            i = Infoset()
-            i.infoset = self.node.deref().GetInfoset()
-            return i
+            return Infoset.wrap(self.node.deref().GetInfoset())
         return None
 
     @property
@@ -127,9 +135,7 @@ class Node:
         If this is a terminal node, None is returned.
         """
         if self.node.deref().GetPlayer() != cython.cast(c_GamePlayer, NULL):
-            p = Player()
-            p.player = self.node.deref().GetPlayer()
-            return p
+            return Player.wrap(self.node.deref().GetPlayer())
         return None
 
     @property
@@ -139,9 +145,7 @@ class Node:
         If this is the root node, None is returned.
         """
         if self.node.deref().GetParent() != cython.cast(c_GameNode, NULL):
-            n = Node()
-            n.node = self.node.deref().GetParent()
-            return n
+            return Node.wrap(self.node.deref().GetParent())
         return None
 
     @property
@@ -151,9 +155,7 @@ class Node:
         If this is the root node, None is returned.
         """
         if self.node.deref().GetPriorAction() != cython.cast(c_GameAction, NULL):
-            a = Action()
-            a.action = self.node.deref().GetPriorAction()
-            return a
+            return Action.wrap(self.node.deref().GetPriorAction())
         return None
 
     @property
@@ -164,9 +166,7 @@ class Node:
         None is returned.
         """
         if self.node.deref().GetPriorSibling() != cython.cast(c_GameNode, NULL):
-            n = Node()
-            n.node = self.node.deref().GetPriorSibling()
-            return n
+            return Node.wrap(self.node.deref().GetPriorSibling())
         return None
 
     @property
@@ -177,9 +177,7 @@ class Node:
         None is returned.
         """
         if self.node.deref().GetNextSibling() != cython.cast(c_GameNode, NULL):
-            n = Node()
-            n.node = self.node.deref().GetNextSibling()
-            return n
+            return Node.wrap(self.node.deref().GetNextSibling())
         return None
 
     @property
@@ -204,6 +202,4 @@ class Node:
         """
         if self.node.deref().GetOutcome() == cython.cast(c_GameOutcome, NULL):
             return None
-        o = Outcome()
-        o.outcome = self.node.deref().GetOutcome()
-        return o
+        return Outcome.wrap(self.node.deref().GetOutcome())

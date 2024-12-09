@@ -47,6 +47,8 @@
 ### Fixed
 - Reading .efg and .nfg game files which did not have whitespace at the end would lead to
   an infinite loop (#457)
+- Attempting to call the default constructor on Game objects (rather than one of the factory
+  functions) now raises a more informative excepition (#463)
 
 
 ## [16.2.0] - 2024-04-05

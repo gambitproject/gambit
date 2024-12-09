@@ -22,6 +22,7 @@
 from cython.operator cimport dereference as deref
 
 
+@cython.cclass
 class MixedStrategy:
     """A probability distribution over a player's strategies.
 
@@ -30,9 +31,19 @@ class MixedStrategy:
     attribute, and the player for whom the  ``MixedStrategy`` applies is accessible
     via `player`.
     """
-    def __init__(self, profile: MixedStrategyProfile, player: Player) -> None:
-        self._profile = profile
-        self._player = player
+    _profile = cython.declare(MixedStrategyProfile)
+    _player = cython.declare(Player)
+
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create a MixedStrategy outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(profile: MixedStrategyProfile, player: Player) -> MixedStrategy:
+        obj: MixedStrategy = MixedStrategy.__new__(MixedStrategy)
+        obj._profile = profile
+        obj._player = player
+        return obj
 
     @property
     def profile(self) -> MixedStrategyProfile:
@@ -178,6 +189,9 @@ class MixedStrategyProfile:
         Represents a mixed behavior profile over a ``Game`` with an extensive
         representation.
     """
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create a MixedStrategyProfile outside a Game.")
+
     def __repr__(self) -> str:
         return str([self[player] for player in self.game.players])
 
@@ -254,10 +268,10 @@ class MixedStrategyProfile:
         if isinstance(index, Player):
             if index.game != self.game:
                 raise MismatchError("player must belong to this game")
-            return MixedStrategy(self, index)
+            return MixedStrategy.wrap(self, index)
         if isinstance(index, str):
             try:
-                return MixedStrategy(self, self.game._resolve_player(index, "__getitem__"))
+                return MixedStrategy.wrap(self, self.game._resolve_player(index, "__getitem__"))
             except KeyError:
                 pass
             try:
@@ -550,6 +564,15 @@ class MixedStrategyProfile:
 class MixedStrategyProfileDouble(MixedStrategyProfile):
     profile = cython.declare(shared_ptr[c_MixedStrategyProfileDouble])
 
+    @staticmethod
+    @cython.cfunc
+    def wrap(profile: shared_ptr[c_MixedStrategyProfileDouble]) -> MixedStrategyProfileDouble:
+        obj: MixedStrategyProfileDouble = (
+            MixedStrategyProfileDouble.__new__(MixedStrategyProfileDouble)
+        )
+        obj.profile = profile
+        return obj
+
     def _check_validity(self) -> None:
         if deref(self.profile).IsInvalidated():
             raise GameStructureChangedError()
@@ -593,32 +616,37 @@ class MixedStrategyProfileDouble(MixedStrategyProfile):
         return deref(self.profile).GetLiapValue()
 
     def _copy(self) -> MixedStrategyProfileDouble:
-        mixed = MixedStrategyProfileDouble()
-        mixed.profile = make_shared[c_MixedStrategyProfileDouble](deref(self.profile))
-        return mixed
+        return MixedStrategyProfileDouble.wrap(
+            make_shared[c_MixedStrategyProfileDouble](deref(self.profile))
+        )
 
     def _as_behavior(self) -> MixedBehaviorProfileDouble:
-        behav = MixedBehaviorProfileDouble()
-        behav.profile = make_shared[c_MixedBehaviorProfileDouble](deref(self.profile))
-        return behav
+        return MixedBehaviorProfileDouble.wrap(
+            make_shared[c_MixedBehaviorProfileDouble](deref(self.profile))
+        )
 
     def _normalize(self) -> MixedStrategyProfileDouble:
-        profile = MixedStrategyProfileDouble()
-        profile.profile = (
+        return MixedStrategyProfileDouble.wrap(
             make_shared[c_MixedStrategyProfileDouble](deref(self.profile).Normalize())
         )
-        return profile
 
     @property
     def _game(self) -> Game:
-        g = Game()
-        g.game = deref(self.profile).GetGame()
-        return g
+        return Game.wrap(deref(self.profile).GetGame())
 
 
 @cython.cclass
 class MixedStrategyProfileRational(MixedStrategyProfile):
     profile = cython.declare(shared_ptr[c_MixedStrategyProfileRational])
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(profile: shared_ptr[c_MixedStrategyProfileRational]) -> MixedStrategyProfileRational:
+        obj: MixedStrategyProfileRational = (
+            MixedStrategyProfileRational.__new__(MixedStrategyProfileRational)
+        )
+        obj.profile = profile
+        return obj
 
     def _check_validity(self) -> None:
         if deref(self.profile).IsInvalidated():
@@ -667,24 +695,20 @@ class MixedStrategyProfileRational(MixedStrategyProfile):
         return rat_to_py(deref(self.profile).GetLiapValue())
 
     def _copy(self) -> MixedStrategyProfileRational:
-        mixed = MixedStrategyProfileRational()
-        mixed.profile = make_shared[c_MixedStrategyProfileRational](deref(self.profile))
-        return mixed
+        return MixedStrategyProfileRational.wrap(
+            make_shared[c_MixedStrategyProfileRational](deref(self.profile))
+        )
 
     def _as_behavior(self) -> MixedBehaviorProfileRational:
-        behav = MixedBehaviorProfileRational()
-        behav.profile = make_shared[c_MixedBehaviorProfileRational](deref(self.profile))
-        return behav
+        return MixedBehaviorProfileRational.wrap(
+            make_shared[c_MixedBehaviorProfileRational](deref(self.profile))
+        )
 
     def _normalize(self) -> MixedStrategyProfileRational:
-        profile = MixedStrategyProfileRational()
-        profile.profile = (
+        return MixedStrategyProfileRational.wrap(
             make_shared[c_MixedStrategyProfileRational](deref(self.profile).Normalize())
         )
-        return profile
 
     @property
     def _game(self) -> Game:
-        g = Game()
-        g.game = deref(self.profile).GetGame()
-        return g
+        return Game.wrap(deref(self.profile).GetGame())
