@@ -5,8 +5,6 @@ expected results on a very simple game.  This is not intended to be a
 rigorous test suite for the algorithms across all games.
 """
 
-import unittest
-
 import pytest
 
 import pygambit as gbt
@@ -14,138 +12,166 @@ import pygambit as gbt
 from . import games
 
 
-class TestNash(unittest.TestCase):
-    """Test calls to Nash algorithms using Myerson poker - a game to which all algorithms apply."""
-    def setUp(self):
-        self.poker = games.read_from_file("poker.efg")
-        self.mixed_rat = self.poker.mixed_strategy_profile(
-            rational=True,
-            data=[[gbt.Rational(1, 3), gbt.Rational(2, 3), gbt.Rational(0), gbt.Rational(0)],
-                  [gbt.Rational(2, 3), gbt.Rational(1, 3)]]
-        )
-        self.behav_rat = self.poker.mixed_behavior_profile(rational=True)
-        for action, prob in zip(self.poker.actions,
-                                [1, 0, gbt.Rational(1, 3), gbt.Rational(2, 3),
-                                 gbt.Rational(2, 3), gbt.Rational(1, 3)]):
-            self.behav_rat[action] = prob
-
-    def tearDown(self):
-        del self.poker
-
-    def test_enumpure_strategy(self):
-        """Test calls of enumeration of pure strategies."""
-        assert len(gbt.nash.enumpure_solve(self.poker, use_strategic=True).equilibria) == 0
-
-    def test_enumpure_agent(self):
-        """Test calls of enumeration of pure agent strategies."""
-        assert len(gbt.nash.enumpure_solve(self.poker, use_strategic=False).equilibria) == 0
-
-    def test_enummixed_strategy_double(self):
-        """Test calls of enumeration of mixed strategy equilibria, floating-point."""
-        result = gbt.nash.enummixed_solve(self.poker, rational=False)
-        assert len(result.equilibria) == 1
-        # For floating-point results are not exact, so we skip testing exact values for now
-
-    def test_enummixed_strategy_rational(self):
-        """Test calls of enumeration of mixed strategy equilibria, rational precision."""
-        result = gbt.nash.enummixed_solve(self.poker, rational=True)
-        assert len(result.equilibria) == 1
-        assert result.equilibria[0] == self.mixed_rat
-
-    def test_lcp_strategy_double(self):
-        """Test calls of LCP for mixed strategy equilibria, floating-point."""
-        result = gbt.nash.lcp_solve(self.poker, use_strategic=True, rational=False)
-        assert len(result.equilibria) == 1
-        # For floating-point results are not exact, so we skip testing exact values for now
-
-    def test_lcp_strategy_rational(self):
-        """Test calls of LCP for mixed strategy equilibria, rational precision."""
-        result = gbt.nash.lcp_solve(self.poker, use_strategic=True, rational=True)
-        assert len(result.equilibria) == 1
-        assert result.equilibria[0] == self.mixed_rat
-
-    def test_lcp_behavior_double(self):
-        """Test calls of LCP for mixed behavior equilibria, floating-point."""
-        result = gbt.nash.lcp_solve(self.poker, use_strategic=False, rational=False)
-        assert len(result.equilibria) == 1
-        # For floating-point results are not exact, so we skip testing exact values for now
-
-    def test_lcp_behavior_rational(self):
-        """Test calls of LCP for mixed behavior equilibria, rational precision."""
-        result = gbt.nash.lcp_solve(self.poker, use_strategic=False, rational=True)
-        assert len(result.equilibria) == 1
-        assert result.equilibria[0] == self.behav_rat
-
-    def test_lp_strategy_double(self):
-        """Test calls of LP for mixed strategy equilibria, floating-point."""
-        result = gbt.nash.lp_solve(self.poker, use_strategic=True, rational=False)
-        assert len(result.equilibria) == 1
-        # For floating-point results are not exact, so we skip testing exact values for now
-
-    def test_lp_strategy_rational(self):
-        """Test calls of LP for mixed strategy equilibria, rational precision."""
-        result = gbt.nash.lp_solve(self.poker, use_strategic=True, rational=True)
-        assert len(result.equilibria) == 1
-        assert result.equilibria[0] == self.mixed_rat
-
-    def test_lp_behavior_double(self):
-        """Test calls of LP for mixed behavior equilibria, floating-point."""
-        result = gbt.nash.lp_solve(self.poker, use_strategic=False, rational=False)
-        assert len(result.equilibria) == 1
-        # For floating-point results are not exact, so we skip testing exact values for now
-
-    def test_lp_behavior_rational(self):
-        """Test calls of LP for mixed behavior equilibria, rational precision."""
-        result = gbt.nash.lp_solve(self.poker, use_strategic=False, rational=True)
-        assert len(result.equilibria) == 1
-        assert result.equilibria[0] == self.behav_rat
-
-    def test_liap_strategy(self):
-        """Test calls of liap for mixed strategy equilibria."""
-        _ = gbt.nash.liap_solve(self.poker.mixed_strategy_profile())
-
-    def test_liap_behavior(self):
-        """Test calls of liap for mixed behavior equilibria."""
-        _ = gbt.nash.liap_solve(self.poker.mixed_behavior_profile())
-
-    def test_simpdiv_strategy(self):
-        """Test calls of simplicial subdivision for mixed strategy equilibria."""
-        result = gbt.nash.simpdiv_solve(self.poker.mixed_strategy_profile(rational=True))
-        assert len(result.equilibria) == 1
-
-    def test_ipa_strategy(self):
-        """Test calls of IPA for mixed strategy equilibria."""
-        result = gbt.nash.ipa_solve(self.poker)
-        assert len(result.equilibria) == 1
-
-    def test_gnm_strategy(self):
-        """Test calls of GNM for mixed strategy equilibria."""
-        result = gbt.nash.gnm_solve(self.poker)
-        assert len(result.equilibria) == 1
-
-    def test_logit_strategy(self):
-        """Test calls of logit for mixed strategy equilibria."""
-        result = gbt.nash.logit_solve(self.poker, use_strategic=True)
-        assert len(result.equilibria) == 1
-
-    def test_logit_behavior(self):
-        """Test calls of logit for mixed behavior equilibria."""
-        result = gbt.nash.logit_solve(self.poker, use_strategic=False)
-        assert len(result.equilibria) == 1
-        # gbt.nash.logit_behavior_atlambda(self.poker, 1.0)
+def test_enumpure_strategy():
+    """Test calls of enumeration of pure strategies."""
+    game = games.read_from_file("poker.efg")
+    assert len(gbt.nash.enumpure_solve(game, use_strategic=True).equilibria) == 0
 
 
-# def test_logit_zerochance():
-#   """Test handling zero-probability information sets when computing QRE."""
-#   g = gbt.Game.new_tree(["Alice"])
-#   g.append_move(g.root, g.players.chance, ["A", "B", "C"])
-#   g.set_chance_probs(g.players.chance.infosets[0], [0, 0, 1])
-#   g.append_move(g.root.children[0], "Alice", ["A", "B"])
-#   g.append_infoset(g.root.children[1], g.root.children[0].infoset)
-#   win = g.add_outcome([1])
-#   g.set_outcome(g.root.children[0].children[0], win)
-#   result = gbt.nash.logit_solve(g, use_strategic=False, maxregret=0.0001)
-#   assert result.equilibria[0].max_regret() < 0.0001
+def test_enumpure_agent():
+    """Test calls of enumeration of pure agent strategies."""
+    game = games.read_from_file("poker.efg")
+    assert len(gbt.nash.enumpure_solve(game, use_strategic=False).equilibria) == 0
+
+
+def test_enummixed_strategy_double():
+    """Test calls of enumeration of mixed strategy equilibria, floating-point."""
+    game = games.read_from_file("poker.efg")
+    result = gbt.nash.enummixed_solve(game, rational=False)
+    assert len(result.equilibria) == 1
+    # For floating-point results are not exact, so we skip testing exact values for now
+
+
+def test_enummixed_strategy_rational():
+    """Test calls of enumeration of mixed strategy equilibria, rational precision."""
+    game = games.read_from_file("poker.efg")
+    result = gbt.nash.enummixed_solve(game, rational=True)
+    assert len(result.equilibria) == 1
+    expected = game.mixed_strategy_profile(
+        rational=True,
+        data=[[gbt.Rational(1, 3), gbt.Rational(2, 3), gbt.Rational(0), gbt.Rational(0)],
+              [gbt.Rational(2, 3), gbt.Rational(1, 3)]]
+    )
+    assert result.equilibria[0] == expected
+
+
+def test_lcp_strategy_double():
+    """Test calls of LCP for mixed strategy equilibria, floating-point."""
+    game = games.read_from_file("poker.efg")
+    result = gbt.nash.lcp_solve(game, use_strategic=True, rational=False)
+    assert len(result.equilibria) == 1
+    # For floating-point results are not exact, so we skip testing exact values for now
+
+
+def test_lcp_strategy_rational():
+    """Test calls of LCP for mixed strategy equilibria, rational precision."""
+    game = games.read_from_file("poker.efg")
+    result = gbt.nash.lcp_solve(game, use_strategic=True, rational=True)
+    assert len(result.equilibria) == 1
+    expected = game.mixed_strategy_profile(
+        rational=True,
+        data=[[gbt.Rational(1, 3), gbt.Rational(2, 3), gbt.Rational(0), gbt.Rational(0)],
+              [gbt.Rational(2, 3), gbt.Rational(1, 3)]]
+    )
+    assert result.equilibria[0] == expected
+
+
+def test_lcp_behavior_double():
+    """Test calls of LCP for mixed behavior equilibria, floating-point."""
+    game = games.read_from_file("poker.efg")
+    result = gbt.nash.lcp_solve(game, use_strategic=False, rational=False)
+    assert len(result.equilibria) == 1
+    # For floating-point results are not exact, so we skip testing exact values for now
+
+
+def test_lcp_behavior_rational():
+    """Test calls of LCP for mixed behavior equilibria, rational precision."""
+    game = games.read_from_file("poker.efg")
+    result = gbt.nash.lcp_solve(game, use_strategic=False, rational=True)
+    assert len(result.equilibria) == 1
+    expected = game.mixed_behavior_profile(rational=True,
+                                           data=[[[1, 0],
+                                                  [gbt.Rational("1/3"), gbt.Rational("2/3")]],
+                                                 [[gbt.Rational("2/3"), gbt.Rational("1/3")]]])
+    assert result.equilibria[0] == expected
+
+
+def test_lp_strategy_double():
+    """Test calls of LP for mixed strategy equilibria, floating-point."""
+    game = games.read_from_file("poker.efg")
+    result = gbt.nash.lp_solve(game, use_strategic=True, rational=False)
+    assert len(result.equilibria) == 1
+    # For floating-point results are not exact, so we skip testing exact values for now
+
+
+def test_lp_strategy_rational():
+    """Test calls of LP for mixed strategy equilibria, rational precision."""
+    game = games.read_from_file("poker.efg")
+    result = gbt.nash.lp_solve(game, use_strategic=True, rational=True)
+    assert len(result.equilibria) == 1
+    expected = game.mixed_strategy_profile(
+        rational=True,
+        data=[[gbt.Rational(1, 3), gbt.Rational(2, 3), gbt.Rational(0), gbt.Rational(0)],
+              [gbt.Rational(2, 3), gbt.Rational(1, 3)]]
+    )
+    assert result.equilibria[0] == expected
+
+
+def test_lp_behavior_double():
+    """Test calls of LP for mixed behavior equilibria, floating-point."""
+    game = games.read_from_file("poker.efg")
+    result = gbt.nash.lp_solve(game, use_strategic=False, rational=False)
+    assert len(result.equilibria) == 1
+    # For floating-point results are not exact, so we skip testing exact values for now
+
+
+def test_lp_behavior_rational():
+    """Test calls of LP for mixed behavior equilibria, rational precision."""
+    game = games.read_from_file("poker.efg")
+    result = gbt.nash.lp_solve(game, use_strategic=False, rational=True)
+    assert len(result.equilibria) == 1
+    expected = game.mixed_behavior_profile(rational=True,
+                                           data=[[[1, 0],
+                                                  [gbt.Rational("1/3"), gbt.Rational("2/3")]],
+                                                 [[gbt.Rational("2/3"), gbt.Rational("1/3")]]])
+    assert result.equilibria[0] == expected
+
+
+def test_liap_strategy():
+    """Test calls of liap for mixed strategy equilibria."""
+    game = games.read_from_file("poker.efg")
+    _ = gbt.nash.liap_solve(game.mixed_strategy_profile())
+
+
+def test_liap_behavior():
+    """Test calls of liap for mixed behavior equilibria."""
+    game = games.read_from_file("poker.efg")
+    _ = gbt.nash.liap_solve(game.mixed_behavior_profile())
+
+
+def test_simpdiv_strategy():
+    """Test calls of simplicial subdivision for mixed strategy equilibria."""
+    game = games.read_from_file("poker.efg")
+    result = gbt.nash.simpdiv_solve(game.mixed_strategy_profile(rational=True))
+    assert len(result.equilibria) == 1
+
+
+def test_ipa_strategy():
+    """Test calls of IPA for mixed strategy equilibria."""
+    game = games.read_from_file("poker.efg")
+    result = gbt.nash.ipa_solve(game)
+    assert len(result.equilibria) == 1
+
+
+def test_gnm_strategy():
+    """Test calls of GNM for mixed strategy equilibria."""
+    game = games.read_from_file("poker.efg")
+    result = gbt.nash.gnm_solve(game)
+    assert len(result.equilibria) == 1
+
+
+def test_logit_strategy():
+    """Test calls of logit for mixed strategy equilibria."""
+    game = games.read_from_file("poker.efg")
+    result = gbt.nash.logit_solve(game, use_strategic=True)
+    assert len(result.equilibria) == 1
+
+
+def test_logit_behavior():
+    """Test calls of logit for mixed behavior equilibria."""
+    game = games.read_from_file("poker.efg")
+    result = gbt.nash.logit_solve(game, use_strategic=False)
+    assert len(result.equilibria) == 1
 
 
 def test_logit_solve_branch_error_with_invalid_maxregret():
