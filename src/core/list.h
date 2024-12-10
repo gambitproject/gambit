@@ -3,7 +3,7 @@
 // Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/libgambit/list.h
-// A generic (doubly) linked-list container class
+// A generic linked-list container class
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -23,432 +23,108 @@
 #ifndef LIBGAMBIT_LIST_H
 #define LIBGAMBIT_LIST_H
 
+#include <list>
+
 namespace Gambit {
 
-/// A doubly-linked list container.
+/// @brief A linked-list container
 ///
-/// This implements a doubly-linked list.  A special feature of this
-/// class is that it caches the last item accessed by indexing via
-/// operator[], meaning that, if accesses are done in sequential order,
-/// indexing time is constant.
+/// This is a lightweight wrapper around std::list.  It exists as a transitional
+/// class between Gambit's legacy linked-list implementation Gambit::List and
+/// STL's list.
 ///
-/// This index-cacheing feature was implemented very early in the development
-/// of Gambit, before STL-like concepts of iterators had been fully
-/// developed.  An iterator approach is a better and more robust solution
-/// to iterating lists, both in terms of performance and encapsulation.
-/// Therefore, it is recommended to avoid operator[] and use the provided
-/// iterator classes in new code, and to upgrade existing code to the
-/// iterator idiom as practical.
+/// Gambit's List container supported the index operator [], which is not defined
+/// on STL lists.  Therefore this class provides such an operator by wrapping
+/// an appropriate iterator-based operation.  This is very inefficient!  However,
+/// the [] operator and indexing is tightly embedded in the remaining uses of this
+/// class, so this operator provides a refactoring path while the remaining uses
+/// are rewritten.
+///
+/// Note importantly that the index operator [] is **1-based** - that is, the first
+/// element of the list is 1, not 0.
 template <class T> class List {
-protected:
-  class Node {
-  public:
-    T m_data;
-    Node *m_prev, *m_next;
-
-    // CONSTRUCTOR
-    Node(const T &p_data, Node *p_prev, Node *p_next);
-  };
-
-  int m_length;
-  Node *m_head, *m_tail;
-
-  int m_currentIndex;
-  Node *m_currentNode;
-
-  int InsertAt(const T &t, int where);
+private:
+  std::list<T> m_list;
 
 public:
-  class iterator {
-  private:
-    List &m_list;
-    Node *m_node;
+  using iterator = typename std::list<T>::iterator;
+  using const_iterator = typename std::list<T>::const_iterator;
+  using size_type = typename std::list<T>::size_type;
 
-  public:
-    iterator(List &p_list, Node *p_node) : m_list(p_list), m_node(p_node) {}
-    T &operator*() { return m_node->m_data; }
-    iterator &operator++()
-    {
-      m_node = m_node->m_next;
-      return *this;
+  List() = default;
+  List(const List<T> &) = default;
+  ~List() = default;
+
+  List<T> &operator=(const List<T> &) = default;
+
+  const T &operator[](size_type p_index) const
+  {
+    if (p_index < 1 || p_index > m_list.size()) {
+      throw IndexException();
     }
-    bool operator==(const iterator &it) const { return (m_node == it.m_node); }
-    bool operator!=(const iterator &it) const { return (m_node != it.m_node); }
-  };
+    return *std::next(m_list.cbegin(), p_index - 1);
+  }
 
-  class const_iterator {
-  private:
-    const List &m_list;
-    Node *m_node;
-
-  public:
-    const_iterator(const List &p_list, Node *p_node) : m_list(p_list), m_node(p_node) {}
-    const T &operator*() const { return m_node->m_data; }
-    const_iterator &operator++()
-    {
-      m_node = m_node->m_next;
-      return *this;
+  T &operator[](size_type p_index)
+  {
+    if (p_index < 1 || p_index > m_list.size()) {
+      throw IndexException();
     }
-    bool operator==(const const_iterator &it) const { return (m_node == it.m_node); }
-    bool operator!=(const const_iterator &it) const { return (m_node != it.m_node); }
-  };
-
-  List();
-  List(const List<T> &);
-  virtual ~List();
-
-  List<T> &operator=(const List<T> &);
-
-  bool operator==(const List<T> &b) const;
-  bool operator!=(const List<T> &b) const;
-
-  /// Return a forward iterator starting at the beginning of the list
-  iterator begin() { return iterator(*this, m_head); }
-  /// Return a forward iterator past the end of the list
-  iterator end() { return iterator(*this, nullptr); }
-  /// Return a const forward iterator starting at the beginning of the list
-  const_iterator begin() const { return const_iterator(*this, m_head); }
-  /// Return a const forward iterator past the end of the list
-  const_iterator end() const { return const_iterator(*this, nullptr); }
-  /// Return a const forward iterator starting at the beginning of the list
-  const_iterator cbegin() const { return const_iterator(*this, m_head); }
-  /// Return a const forward iterator past the end of the list
-  const_iterator cend() const { return const_iterator(*this, nullptr); }
-
-  const T &operator[](int) const;
-  T &operator[](int);
-
-  List<T> operator+(const List<T> &b) const;
-  List<T> &operator+=(const List<T> &b);
-
-  int Insert(const T &, int);
-  T Remove(int);
-
-  int Find(const T &) const;
-  bool Contains(const T &t) const;
-  int Length() const { return m_length; }
+    return *std::next(m_list.begin(), p_index - 1);
+  }
 
   /// @name STL-style interface
   ///
-  /// These operations are a partial implementation of operations on
-  /// STL-style list containers.  It is suggested that future code be
-  /// written to use these, and existing code ported to use them as
-  /// possible.
+  /// These operations forward STL-type operations to the underlying list.
+  /// This does not provide all operations on std::list, only ones used in
+  /// existing code.  Rather than adding new functions here, existing code
+  /// should be rewritten to use std::list directly.
   ///@{
   /// Return whether the list container is empty (has size 0).
-  bool empty() const { return (m_length == 0); }
+  bool empty() const { return m_list.empty(); }
   /// Return the number of elements in the list container.
-  size_t size() const { return m_length; }
+  size_type size() const { return m_list.size(); }
+  /// Adds a new element at the beginning of the list container
+  void push_front(const T &val) { m_list.push_front(val); }
   /// Adds a new element at the end of the list container, after its
   /// current last element.
-  void push_back(const T &val);
+  void push_back(const T &val) { m_list.push_back(val); }
+  /// Removes the last element
+  void pop_back() { m_list.pop_back(); }
+  /// Inserts the value at the specified position
+  void insert(iterator pos, const T &value) { m_list.insert(pos, value); }
+  /// Erases the element at the specified position
+  void erase(iterator pos) { m_list.erase(pos); }
+
   /// Removes all elements from the list container (which are destroyed),
   /// leaving the container with a size of 0.
-  void clear();
-  /// Returns a reference to the first elemnet in the list container.
-  T &front() { return m_head->m_data; }
+  void clear() { m_list.clear(); }
   /// Returns a reference to the first element in the list container.
-  const T &front() const { return m_head->m_data; }
+  T &front() { return m_list.front(); }
+  /// Returns a reference to the first element in the list container.
+  const T &front() const { return m_list.front(); }
   /// Returns a reference to the last element in the list container.
-  T &back() { return m_tail->m_data; }
+  T &back() { return m_list.back(); }
   /// Returns a reference to the last element in the list container.
-  const T &back() const { return m_tail->m_data; }
+  const T &back() const { return m_list.back(); }
+
+  bool operator==(const List<T> &b) const { return m_list == b.m_list; }
+  bool operator!=(const List<T> &b) const { return m_list != b.m_list; }
+
+  /// Return a forward iterator starting at the beginning of the list
+  iterator begin() { return m_list.begin(); }
+  /// Return a forward iterator past the end of the list
+  iterator end() { return m_list.end(); }
+  /// Return a const forward iterator starting at the beginning of the list
+  const_iterator begin() const { return m_list.begin(); }
+  /// Return a const forward iterator past the end of the list
+  const_iterator end() const { return m_list.end(); }
+  /// Return a const forward iterator starting at the beginning of the list
+  const_iterator cbegin() const { return m_list.cbegin(); }
+  /// Return a const forward iterator past the end of the list
+  const_iterator cend() const { return m_list.cend(); }
   ///@}
 };
-
-//--------------------------------------------------------------------------
-//                 Node: Member function implementations
-//--------------------------------------------------------------------------
-
-template <class T>
-List<T>::Node::Node(const T &p_data, typename List<T>::Node *p_prev,
-                    typename List<T>::Node *p_next)
-  : m_data(p_data), m_prev(p_prev), m_next(p_next)
-{
-}
-
-//--------------------------------------------------------------------------
-//                 List<T>: Member function implementations
-//--------------------------------------------------------------------------
-
-template <class T>
-List<T>::List()
-  : m_length(0), m_head(nullptr), m_tail(nullptr), m_currentIndex(0), m_currentNode(nullptr)
-{
-}
-
-template <class T> List<T>::List(const List<T> &b) : m_length(b.m_length)
-{
-  if (m_length) {
-    Node *n = b.m_head;
-    m_head = new Node(n->m_data, nullptr, nullptr);
-    n = n->m_next;
-    m_tail = m_head;
-    while (n) {
-      m_tail->m_next = new Node(n->m_data, m_tail, nullptr);
-      n = n->m_next;
-      m_tail = m_tail->m_next;
-    }
-    m_currentIndex = 1;
-    m_currentNode = m_head;
-  }
-  else {
-    m_head = m_tail = nullptr;
-    m_currentIndex = 0;
-    m_currentNode = nullptr;
-  }
-}
-
-template <class T> List<T>::~List()
-{
-  Node *n = m_head;
-  while (n) {
-    Node *m_next = n->m_next;
-    delete n;
-    n = m_next;
-  }
-}
-
-template <class T> int List<T>::InsertAt(const T &t, int num)
-{
-  if (num < 1 || num > m_length + 1) {
-    throw IndexException();
-  }
-
-  if (!m_length) {
-    m_head = m_tail = new Node(t, nullptr, nullptr);
-    m_length = 1;
-    m_currentIndex = 1;
-    m_currentNode = m_head;
-    return m_length;
-  }
-
-  Node *n;
-  int i;
-
-  if (num <= 1) {
-    n = new Node(t, nullptr, m_head);
-    m_head->m_prev = n;
-    m_currentNode = m_head = n;
-    m_currentIndex = 1;
-  }
-  else if (num >= m_length + 1) {
-    n = new Node(t, m_tail, nullptr);
-    m_tail->m_next = n;
-    m_currentNode = m_tail = n;
-    m_currentIndex = m_length + 1;
-  }
-  else {
-    if (num < m_currentIndex) {
-      for (i = m_currentIndex, n = m_currentNode; i > num; i--, n = n->m_prev)
-        ;
-    }
-    else {
-      for (i = m_currentIndex, n = m_currentNode; i < num; i++, n = n->m_next)
-        ;
-    }
-    n = new Node(t, n->m_prev, n);
-    m_currentNode = n->m_prev->m_next = n->m_next->m_prev = n;
-    m_currentIndex = num;
-  }
-
-  m_length++;
-  return num;
-}
-
-//--------------------- visible functions ------------------------
-
-template <class T> List<T> &List<T>::operator=(const List<T> &b)
-{
-  if (this != &b) {
-    Node *n = m_head;
-    while (n) {
-      Node *m_next = n->m_next;
-      delete n;
-      n = m_next;
-    }
-
-    m_length = b.m_length;
-    m_currentIndex = b.m_currentIndex;
-    if (m_length) {
-      Node *n = b.m_head;
-      m_head = new Node(n->m_data, nullptr, nullptr);
-      if (b.m_currentNode == n) {
-        m_currentNode = m_head;
-      }
-      n = n->m_next;
-      m_tail = m_head;
-      while (n) {
-        m_tail->m_next = new Node(n->m_data, m_tail, nullptr);
-        if (b.m_currentNode == n) {
-          m_currentNode = m_tail->m_next;
-        }
-        n = n->m_next;
-        m_tail = m_tail->m_next;
-      }
-    }
-    else {
-      m_head = m_tail = nullptr;
-    }
-  }
-  return *this;
-}
-
-template <class T> bool List<T>::operator==(const List<T> &b) const
-{
-  if (m_length != b.m_length) {
-    return false;
-  }
-  for (Node *m = m_head, *n = b.m_head; m; m = m->m_next, n = n->m_next) {
-    if (m->m_data != n->m_data) {
-      return false;
-    }
-  }
-  return true;
-}
-
-template <class T> bool List<T>::operator!=(const List<T> &b) const { return !(*this == b); }
-
-template <class T> const T &List<T>::operator[](int num) const
-{
-  if (num < 1 || num > m_length) {
-    throw IndexException();
-  }
-
-  int i;
-  Node *n;
-  if (num < m_currentIndex) {
-    for (i = m_currentIndex, n = m_currentNode; i > num; i--, n = n->m_prev)
-      ;
-  }
-  else {
-    for (i = m_currentIndex, n = m_currentNode; i < num; i++, n = n->m_next)
-      ;
-  }
-  return n->m_data;
-}
-
-template <class T> T &List<T>::operator[](int num)
-{
-  if (num < 1 || num > m_length) {
-    throw IndexException();
-  }
-  Node *n;
-  int i;
-  if (num < m_currentIndex) {
-    for (i = m_currentIndex, n = m_currentNode; i > num; i--, n = n->m_prev)
-      ;
-  }
-  else {
-    for (i = m_currentIndex, n = m_currentNode; i < num; i++, n = n->m_next)
-      ;
-  }
-  m_currentIndex = i;
-  m_currentNode = n;
-  return n->m_data;
-}
-
-template <class T> List<T> List<T>::operator+(const List<T> &b) const
-{
-  List<T> result(*this);
-  Node *n = b.m_head;
-  while (n) {
-    result.Append(n->data);
-    n = n->m_next;
-  }
-  return result;
-}
-
-template <class T> List<T> &List<T>::operator+=(const List<T> &b)
-{
-  Node *n = b.m_head;
-
-  while (n) {
-    push_back(n->m_data);
-    n = n->m_next;
-  }
-  return *this;
-}
-
-template <class T> int List<T>::Insert(const T &t, int n)
-{
-  return InsertAt(t, (n < 1) ? 1 : ((n > m_length + 1) ? m_length + 1 : n));
-}
-
-template <class T> T List<T>::Remove(int num)
-{
-  if (num < 1 || num > m_length) {
-    throw IndexException();
-  }
-  Node *n;
-  int i;
-
-  if (num < m_currentIndex) {
-    for (i = m_currentIndex, n = m_currentNode; i > num; i--, n = n->m_prev)
-      ;
-  }
-  else {
-    for (i = m_currentIndex, n = m_currentNode; i < num; i++, n = n->m_next)
-      ;
-  }
-
-  if (n->m_prev) {
-    n->m_prev->m_next = n->m_next;
-  }
-  else {
-    m_head = n->m_next;
-  }
-  if (n->m_next) {
-    n->m_next->m_prev = n->m_prev;
-  }
-  else {
-    m_tail = n->m_prev;
-  }
-
-  m_length--;
-  m_currentIndex = i;
-  m_currentNode = n->m_next;
-  if (m_currentIndex > m_length) {
-    m_currentIndex = m_length;
-    m_currentNode = m_tail;
-  }
-  T ret = n->m_data;
-  delete n;
-  return ret;
-}
-
-template <class T> int List<T>::Find(const T &t) const
-{
-  if (m_length == 0) {
-    return 0;
-  }
-  Node *n = m_head;
-  for (int i = 1; n; i++, n = n->m_next) {
-    if (n->m_data == t) {
-      return i;
-    }
-  }
-  return 0;
-}
-
-template <class T> bool List<T>::Contains(const T &t) const { return (Find(t) != 0); }
-
-template <class T> void List<T>::push_back(const T &val) { InsertAt(val, m_length + 1); }
-
-template <class T> void List<T>::clear()
-{
-  Node *n = m_head;
-  while (n) {
-    Node *m_next = n->m_next;
-    delete n;
-    n = m_next;
-  }
-  m_length = 0;
-  m_head = nullptr;
-  m_tail = nullptr;
-  m_currentIndex = 0;
-  m_currentNode = nullptr;
-}
 
 } // namespace Gambit
 

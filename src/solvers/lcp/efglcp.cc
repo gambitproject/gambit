@@ -73,7 +73,7 @@ bool NashLcpBehaviorSolver<T>::Solution::AddBFS(const linalg::LemkeTableau<T> &t
     }
   }
 
-  if (!m_list.Contains(cbfs)) {
+  if (!contains(m_list, cbfs)) {
     m_list.push_back(cbfs);
     return true;
   }

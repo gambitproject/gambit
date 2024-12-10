@@ -131,8 +131,8 @@ template <class T> polynomial<T> polynomial<T>::operator+(const polynomial<T> &y
     }
   }
 
-  while ((sum.coeflist.Length() >= 1) && (sum.coeflist[sum.coeflist.Length()] == (T)0)) {
-    sum.coeflist.Remove(sum.coeflist.Length());
+  while (!sum.coeflist.empty() && sum.coeflist.back() == (T)0) {
+    sum.coeflist.pop_back();
   }
 
   return sum;
@@ -249,7 +249,7 @@ template <class T> void polynomial<T>::ToMonic()
   // assert (!IsZero());
 
   T lc = LeadingCoefficient();
-  for (int i = 1; i <= coeflist.Length(); i++) {
+  for (int i = 1; i <= coeflist.size(); i++) {
     coeflist[i] /= lc;
   }
 }
@@ -257,8 +257,8 @@ template <class T> void polynomial<T>::ToMonic()
 template <class T> polynomial<double> polynomial<T>::TogDouble() const
 {
   Gambit::List<double> newcoefs;
-  for (int i = 1; i <= coeflist.Length(); i++) {
-    newcoefs.push_back((double)coeflist[i]);
+  for (const auto &coef : coeflist) {
+    newcoefs.push_back((double)coef);
   }
   return polynomial<double>(newcoefs);
 }
@@ -267,15 +267,7 @@ template <class T> polynomial<double> polynomial<T>::TogDouble() const
 //                              information
 //--------------------------------------------------------------------------
 
-template <class T> bool polynomial<T>::IsZero() const
-{
-  if (coeflist.Length() == 0) {
-    return true;
-  }
-  else {
-    return false;
-  }
-}
+template <class T> bool polynomial<T>::IsZero() const { return coeflist.empty(); }
 
 template <class T> T polynomial<T>::EvaluationAt(const T &arg) const
 {
@@ -295,7 +287,7 @@ template <class T> T polynomial<T>::EvaluationAt(const T &arg) const
   return answer;
 }
 
-template <class T> int polynomial<T>::Degree() const { return coeflist.Length() - 1; }
+template <class T> int polynomial<T>::Degree() const { return coeflist.size() - 1; }
 
 template <class T> T polynomial<T>::LeadingCoefficient() const
 {
@@ -413,12 +405,11 @@ Gambit::List<gInterval<T>> polynomial<T>::RootSubintervals(const gInterval<T> &I
 
   Gambit::List<gInterval<T>> to_be_processed;
   to_be_processed.push_back(I);
-  while (to_be_processed.Length() > 0) {
-
-    gInterval<T> in_process = to_be_processed.Remove(to_be_processed.Length());
+  while (!to_be_processed.empty()) {
+    gInterval<T> in_process = to_be_processed.back();
+    to_be_processed.pop_back();
 
     if (EvaluationAt(in_process.LowerBound()) == (T)0) {
-
       if (Df.CannotHaveRootsIn(in_process)) {
         answer.push_back(in_process);
       }
@@ -427,7 +418,6 @@ Gambit::List<gInterval<T>> polynomial<T>::RootSubintervals(const gInterval<T> &I
         to_be_processed.push_back(in_process.LeftHalf());
       }
     }
-
     else if (EvaluationAt(in_process.UpperBound()) == (T)0) {
       if (Df.CannotHaveRootsIn(in_process)) {
         if (in_process.UpperBound() == I.UpperBound()) {
@@ -464,30 +454,28 @@ gInterval<T> polynomial<T>::NeighborhoodOfRoot(const gInterval<T> &I, T &error) 
 {
   Gambit::List<gInterval<T>> intrvls;
   intrvls.push_back(I);
-  while (intrvls[intrvls.Length()].Length() >= error) {
-    if (EvaluationAt(intrvls[intrvls.Length()].LowerBound()) == (T)0) {
-      intrvls.push_back(gInterval<T>(intrvls[intrvls.Length()].LowerBound(),
-                                     intrvls[intrvls.Length()].LowerBound()));
+  while (intrvls.back().Length() >= error) {
+    if (EvaluationAt(intrvls.back().LowerBound()) == (T)0) {
+      intrvls.push_back(gInterval<T>(intrvls.back().LowerBound(), intrvls.back().LowerBound()));
     }
 
-    else if (EvaluationAt(intrvls[intrvls.Length()].UpperBound()) == (T)0) {
-      intrvls.push_back(gInterval<T>(intrvls[intrvls.Length()].UpperBound(),
-                                     intrvls[intrvls.Length()].UpperBound()));
+    else if (EvaluationAt(intrvls.back().UpperBound()) == (T)0) {
+      intrvls.push_back(gInterval<T>(intrvls.back().UpperBound(), intrvls.back().UpperBound()));
     }
 
-    else if ((EvaluationAt(intrvls[intrvls.Length()].LowerBound()) >= (T)0 &&
-              EvaluationAt(intrvls[intrvls.Length()].Midpoint()) <= (T)0) ||
-             (EvaluationAt(intrvls[intrvls.Length()].LowerBound()) <= (T)0 &&
-              EvaluationAt(intrvls[intrvls.Length()].Midpoint()) >= (T)0)) {
-      intrvls.push_back(intrvls[intrvls.Length()].LeftHalf());
+    else if ((EvaluationAt(intrvls.back().LowerBound()) >= (T)0 &&
+              EvaluationAt(intrvls.back().Midpoint()) <= (T)0) ||
+             (EvaluationAt(intrvls.back().LowerBound()) <= (T)0 &&
+              EvaluationAt(intrvls.back().Midpoint()) >= (T)0)) {
+      intrvls.push_back(intrvls.back().LeftHalf());
     }
 
     else {
-      intrvls.push_back(intrvls[intrvls.Length()].RightHalf());
+      intrvls.push_back(intrvls.back().RightHalf());
     }
   }
 
-  return intrvls[intrvls.Length()];
+  return intrvls.back();
 
   // It is, perhaps, possible to speed this up, at least for double's
   // by introducing Newton's method.
@@ -500,7 +488,7 @@ Gambit::List<gInterval<T>> polynomial<T>::PreciseRootIntervals(const gInterval<T
   Gambit::List<gInterval<T>> coarse = RootSubintervals(I);
   Gambit::List<gInterval<T>> fine;
 
-  for (int i = 1; i <= coarse.Length(); i++) {
+  for (int i = 1; i <= coarse.size(); i++) {
     fine.push_back(NeighborhoodOfRoot(coarse[i], error));
   }
 
@@ -530,7 +518,7 @@ Gambit::List<T> polynomial<T>::PreciseRoots(const gInterval<T> &I, T &error) con
       p = p / factor;
     }
     Gambit::List<gInterval<T>> fine = factor.PreciseRootIntervals(I, error);
-    for (int j = 1; j <= fine.Length(); j++) {
+    for (int j = 1; j <= fine.size(); j++) {
       T approx = fine[j].LowerBound();
       for (int h = 1; h <= 2; h++) {
         approx -= factor.EvaluationAt(approx) /
@@ -641,8 +629,8 @@ complexpoly complexpoly::operator+(const complexpoly &y) const
     }
   }
 
-  while ((sum.coeflist.Length() >= 1) && (sum.coeflist[sum.coeflist.Length()] == (gComplex)0)) {
-    sum.coeflist.Remove(sum.coeflist.Length());
+  while (!sum.coeflist.empty() && sum.coeflist.back() == (gComplex)0) {
+    sum.coeflist.pop_back();
   }
 
   return sum;
@@ -747,7 +735,7 @@ void complexpoly::ToMonic()
   // assert (!IsZero());
 
   gComplex lc = LeadingCoefficient();
-  for (int i = 1; i <= coeflist.Length(); i++) {
+  for (int i = 1; i <= coeflist.size(); i++) {
     coeflist[i] /= lc;
   }
 }
@@ -756,15 +744,7 @@ void complexpoly::ToMonic()
 //                              information
 //--------------------------------------------------------------------------
 
-bool complexpoly::IsZero() const
-{
-  if (coeflist.Length() == 0) {
-    return true;
-  }
-  else {
-    return false;
-  }
-}
+bool complexpoly::IsZero() const { return coeflist.empty(); }
 
 gComplex complexpoly::EvaluationAt(const gComplex &arg) const
 {
@@ -781,7 +761,7 @@ gComplex complexpoly::EvaluationAt(const gComplex &arg) const
   return answer;
 }
 
-int complexpoly::Degree() const { return coeflist.Length() - 1; }
+int complexpoly::Degree() const { return coeflist.size() - 1; }
 
 gComplex complexpoly::LeadingCoefficient() const
 {
@@ -869,9 +849,11 @@ Gambit::List<gComplex> complexpoly::Roots() const
   lin_form_coeffs.push_back(gComplex(-1.0, 0.0));
   complexpoly linear_form(lin_form_coeffs);
   complexpoly quotient = *this / linear_form;
-  answer += quotient.Roots();
+  for (const auto &root : quotient.Roots()) {
+    answer.push_back(root);
+  }
 
-  for (int i = 1; i <= answer.Length(); i++) { // "Polish" each root twice
+  for (int i = 1; i <= answer.size(); i++) { // "Polish" each root twice
     answer[i] -= EvaluationAt(answer[i]) / deriv.EvaluationAt(answer[i]);
     answer[i] -= EvaluationAt(answer[i]) / deriv.EvaluationAt(answer[i]);
   }

@@ -78,7 +78,7 @@ template <class T> bool gRectangle<T>::operator!=(const gRectangle<T> &rhs) cons
 //                             interval -- information
 //--------------------------------------------------------------------------
 
-template <class T> const int gRectangle<T>::Dmnsn() const { return sides.Length(); }
+template <class T> const int gRectangle<T>::Dmnsn() const { return sides.size(); }
 
 template <class T> Gambit::Vector<T> gRectangle<T>::LowerBound() const
 {

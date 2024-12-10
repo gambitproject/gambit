@@ -79,7 +79,7 @@ gSolver<T>::ContinuationSolutions(const Gambit::List<gPoly<double>> &list, const
     // DEBUG
     // gout << "Just left PreciseRoots ... \n";
 
-    for (int i = 1; i <= rootlist.Length(); i++) {
+    for (int i = 1; i <= rootlist.size(); i++) {
       Gambit::Vector<double> newvec(knownvals);
       newvec[curvar] = rootlist[i];
       if (curvar == dmnsn) {
@@ -87,20 +87,24 @@ gSolver<T>::ContinuationSolutions(const Gambit::List<gPoly<double>> &list, const
       }
       else {
         Gambit::List<gPoly<double>> newlist;
-        for (int j = 2; j <= list.Length(); j++) {
+        for (int j = 2; j <= list.size(); j++) {
           newlist.push_back(list[j].EvaluateOneVar(curvar, rootlist[i]));
         }
-        answer += ContinuationSolutions(newlist, dmnsn, curvar + 1, newvec);
+        for (const auto &soln : ContinuationSolutions(newlist, dmnsn, curvar + 1, newvec)) {
+          answer.push_back(soln);
+        }
       }
     }
   }
 
   else { // (list[1].IsZero())
     Gambit::List<gPoly<double>> newlist;
-    for (int j = 2; j <= list.Length(); j++) {
+    for (int j = 2; j <= list.size(); j++) {
       newlist.push_back(list[j]);
     }
-    answer += ContinuationSolutions(newlist, dmnsn, curvar, knownvals);
+    for (const auto &soln : ContinuationSolutions(newlist, dmnsn, curvar, knownvals)) {
+      answer.push_back(soln);
+    }
   }
 
   return answer;
@@ -137,14 +141,14 @@ template <class T> Gambit::List<Gambit::Vector<double>> gSolver<T>::Roots()
   Gambit::List<polynomial<T>> UnivariateRootEquations;
   int i;
   for (i = 1; i <= TheIdeal.Dmnsn(); i++) {
-    Gambit::Matrix<T> CoefficientMatrix(mon_bss.Length() + 1, mon_bss.Length());
+    Gambit::Matrix<T> CoefficientMatrix(mon_bss.size() + 1, mon_bss.size());
     int j = 0;
     bool done = false;
     while (!done) {
       exp_vect x_i_to_j(InputList.AmbientSpace(), i, j);
       gPoly<T> power(InputList.AmbientSpace(), x_i_to_j, (T)1, TheIdeal.Order());
       gPoly<T> reduced_power = TheIdeal.CanonicalBasis().ReductionOf(power, *(TheIdeal.Order()));
-      for (int k = 1; k <= mon_bss.Length(); k++) {
+      for (int k = 1; k <= mon_bss.size(); k++) {
         CoefficientMatrix(j + 1, k) = reduced_power.GetCoef(mon_bss[k]);
       }
 
@@ -152,9 +156,9 @@ template <class T> Gambit::List<Gambit::Vector<double>> gSolver<T>::Roots()
       // gout << "After updating, j = " << j
       //   << "and CoefficientMatrix is\n" << CoefficientMatrix << "\n";
 
-      Gambit::Matrix<T> SubMatrix(j + 1, mon_bss.Length());
+      Gambit::Matrix<T> SubMatrix(j + 1, mon_bss.size());
       for (int m = 1; m <= j + 1; m++) {
-        for (int n = 1; n <= mon_bss.Length(); n++) {
+        for (int n = 1; n <= mon_bss.size(); n++) {
           SubMatrix(m, n) = CoefficientMatrix(m, n);
         }
       }
@@ -174,8 +178,8 @@ template <class T> Gambit::List<Gambit::Vector<double>> gSolver<T>::Roots()
   }
 
   Gambit::List<polynomial<double>> ConvertedUnivariateRootEquations;
-  for (i = 1; i <= UnivariateRootEquations.Length(); i++) {
-    ConvertedUnivariateRootEquations.push_back(UnivariateRootEquations[i].TogDouble());
+  for (const auto &eqn : UnivariateRootEquations) {
+    ConvertedUnivariateRootEquations.push_back(eqn.TogDouble());
   }
 
   Gambit::List<Gambit::Vector<double>> original;
@@ -189,8 +193,8 @@ template <class T> Gambit::List<Gambit::Vector<double>> gSolver<T>::Roots()
   for (i = 1; i <= TheIdeal.Dmnsn(); i++) {
     Gambit::List<double> roots_of_eqn_i =
         ConvertedUnivariateRootEquations[i].PreciseRoots(root_interval, error);
-    for (int j = 1; j <= original.Length(); j++) {
-      for (int k = 1; k <= roots_of_eqn_i.Length(); k++) {
+    for (int j = 1; j <= original.size(); j++) {
+      for (int k = 1; k <= roots_of_eqn_i.size(); k++) {
         Gambit::Vector<double> new_vec = original[j];
         new_vec[i] = roots_of_eqn_i[k];
         revised.push_back(new_vec);
@@ -203,9 +207,9 @@ template <class T> Gambit::List<Gambit::Vector<double>> gSolver<T>::Roots()
   Gambit::List<Gambit::Vector<double>> finished;
   Gambit::List<gPoly<double>> gDoublePolys = InputList.ListTogDouble();
   gPolyList<double> InputListTogDouble(TheIdeal.TheSpace(), TheIdeal.Order(), gDoublePolys);
-  for (i = 1; i <= original.Length(); i++) {
-    if (InputListTogDouble.IsRoot(original[i])) {
-      finished.push_back(original[i]);
+  for (const auto &v : original) {
+    if (InputListTogDouble.IsRoot(v)) {
+      finished.push_back(v);
     }
   }
   return finished;

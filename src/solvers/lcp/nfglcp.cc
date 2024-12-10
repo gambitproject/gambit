@@ -117,7 +117,7 @@ public:
   List<Gambit::linalg::BFS<T>> m_bfsList;
   List<MixedStrategyProfile<T>> m_equilibria;
 
-  bool Contains(const Gambit::linalg::BFS<T> &p_bfs) const { return m_bfsList.Contains(p_bfs); }
+  bool Contains(const Gambit::linalg::BFS<T> &p_bfs) const { return contains(m_bfsList, p_bfs); }
   void push_back(const Gambit::linalg::BFS<T> &p_bfs) { m_bfsList.push_back(p_bfs); }
 
   int EquilibriumCount() const { return m_equilibria.size(); }

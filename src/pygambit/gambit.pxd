@@ -32,7 +32,7 @@ cdef extern from "core/array.h":
             bint operator==(iterator)
             bint operator!=(iterator)
         T getitem "operator[]"(int) except +
-        int Length() except +
+        int size() except +
         Array() except +
         Array(int) except +
         iterator begin() except +
@@ -42,7 +42,7 @@ cdef extern from "core/array.h":
 cdef extern from "core/list.h":
     cdef cppclass c_List "List"[T]:
         T & getitem "operator[]"(int) except +
-        int Length() except +
+        int size() except +
         void push_back(T) except +
 
 cdef extern from "games/game.h":

@@ -103,7 +103,7 @@ public:
   const TreeOfPartials<T> &operator[](int i) const { return PartialTreeList[i]; }
 
   // Information
-  int Length() const { return PartialTreeList.Length(); }
+  int Length() const { return PartialTreeList.size(); }
   int Dmnsn() const { return PartialTreeList.front().Dmnsn(); }
   Gambit::Matrix<T> DerivativeMatrix(const Gambit::Vector<T> &) const;
   Gambit::Matrix<T> DerivativeMatrix(const Gambit::Vector<T> &, const int &) const;

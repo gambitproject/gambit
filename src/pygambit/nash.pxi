@@ -32,7 +32,7 @@ def _convert_mspd(
         inlist: c_List[c_MixedStrategyProfileDouble]
 ) -> typing.List[MixedStrategyProfileDouble]:
     return [MixedStrategyProfileDouble.wrap(copyitem_list_mspd(inlist, i+1))
-            for i in range(inlist.Length())]
+            for i in range(inlist.size())]
 
 
 @cython.cfunc
@@ -40,7 +40,7 @@ def _convert_mspr(
         inlist: c_List[c_MixedStrategyProfileRational]
 ) -> typing.List[MixedStrategyProfileRational]:
     return [MixedStrategyProfileRational.wrap(copyitem_list_mspr(inlist, i+1))
-            for i in range(inlist.Length())]
+            for i in range(inlist.size())]
 
 
 @cython.cfunc
@@ -48,7 +48,7 @@ def _convert_mbpd(
         inlist: c_List[c_MixedBehaviorProfileDouble]
 ) -> typing.List[MixedBehaviorProfileDouble]:
     return [MixedBehaviorProfileDouble.wrap(copyitem_list_mbpd(inlist, i+1))
-            for i in range(inlist.Length())]
+            for i in range(inlist.size())]
 
 
 @cython.cfunc
@@ -56,7 +56,7 @@ def _convert_mbpr(
         inlist: c_List[c_MixedBehaviorProfileRational]
 ) -> typing.List[MixedBehaviorProfileRational]:
     return [MixedBehaviorProfileRational.wrap(copyitem_list_mbpr(inlist, i+1))
-            for i in range(inlist.Length())]
+            for i in range(inlist.size())]
 
 
 def _enumpure_strategy_solve(game: Game) -> typing.List[MixedStrategyProfileRational]:
@@ -281,7 +281,7 @@ def _logit_strategy_branch(game: Game,
                            max_accel: float):
     solns = LogitStrategyPrincipalBranchWrapper(game.game, maxregret, first_step, max_accel)
     return [LogitQREMixedStrategyProfile.wrap(copyitem_list_qrem(solns, i+1))
-            for i in range(solns.Length())]
+            for i in range(solns.size())]
 
 
 @cython.cclass
@@ -367,7 +367,7 @@ def _logit_behavior_branch(game: Game,
                            max_accel: float):
     solns = LogitBehaviorPrincipalBranchWrapper(game.game, maxregret, first_step, max_accel)
     ret = []
-    for i in range(solns.Length()):
+    for i in range(solns.size()):
         p = LogitQREMixedBehaviorProfile()
         p.thisptr = copyitem_list_qreb(solns, i+1)
         ret.append(p)

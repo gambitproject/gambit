@@ -576,7 +576,7 @@ QuikSolv<T>::FindRootsRecursion(Gambit::List<Gambit::Vector<double>> *rootlistpt
     }
 
     bool already_found = false;
-    for (i = 1; i <= rootlistptr->Length(); i++) {
+    for (i = 1; i <= rootlistptr->size(); i++) {
       if (fuzzy_equals(point, (*rootlistptr)[i])) {
         already_found = true;
       }

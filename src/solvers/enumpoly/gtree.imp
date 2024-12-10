@@ -74,13 +74,12 @@ template <class T> void gTree<T>::InsertAt(const T &t, gTreeNode<T> *n)
 
 template <class T> void gTree<T>::RecursiveCopy(gTreeNode<T> *copyn, const gTreeNode<T> *orign)
 {
-  Gambit::List<gTreeNode<T> *> oldchildren = Children(orign);
-  int i;
-  for (i = 1; i <= oldchildren.Length(); i++) {
+  auto oldchildren = Children(orign);
+  for (int i = 1; i <= oldchildren.size(); i++) {
     InsertAt(oldchildren[i]->data, copyn);
   }
-  Gambit::List<gTreeNode<T> *> newchildren = Children(copyn);
-  for (i = 1; i <= newchildren.Length(); i++) {
+  auto newchildren = Children(copyn);
+  for (int i = 1; i <= newchildren.size(); i++) {
     RecursiveCopy(newchildren[i], oldchildren[i]);
   }
 }
@@ -156,12 +155,12 @@ bool gTree<T>::SubtreesAreIsomorphic(const gTreeNode<T> *lhs, const gTreeNode<T>
   if (lhs->data != rhs->data) {
     return false;
   }
-  Gambit::List<gTreeNode<T> *> lchildren = Children(lhs);
-  Gambit::List<gTreeNode<T> *> rchildren = Children(rhs);
-  if (lchildren.Length() != rchildren.Length()) {
+  auto lchildren = Children(lhs);
+  auto rchildren = Children(rhs);
+  if (lchildren.size() != rchildren.size()) {
     return false;
   }
-  for (int i = 1; i <= lchildren.Length(); i++) {
+  for (int i = 1; i <= lchildren.size(); i++) {
     if (!SubtreesAreIsomorphic(lchildren[i], rchildren[i])) {
       return false;
     }
@@ -171,9 +170,9 @@ bool gTree<T>::SubtreesAreIsomorphic(const gTreeNode<T> *lhs, const gTreeNode<T>
 
 template <class T> void gTree<T>::RecursiveFlush(const gTreeNode<T> *n)
 {
-  Gambit::List<gTreeNode<T> *> children = Children(n);
-  for (int i = 1; i <= children.Length(); i++) {
-    RecursiveFlush(children[i]);
+  auto children = Children(n);
+  for (const auto &child : children) {
+    RecursiveFlush(child);
   }
   delete n;
 }

@@ -35,8 +35,8 @@ List<List<MixedStrategyProfile<T>>> EnumMixedStrategySolution<T>::GetCliques() c
 {
   if (m_cliques1.empty()) {
     // Cliques are generated on demand
-    int n = m_node1.Length();
-    if (m_node2.Length() != n) {
+    int n = m_node1.size();
+    if (m_node2.size() != n) {
       throw DimensionException();
     }
 
@@ -52,7 +52,7 @@ List<List<MixedStrategyProfile<T>>> EnumMixedStrategySolution<T>::GetCliques() c
   }
 
   List<List<MixedStrategyProfile<T>>> solution;
-  for (int cl = 1; cl <= m_cliques1.Length(); cl++) {
+  for (int cl = 1; cl <= m_cliques1.size(); cl++) {
     solution.push_back(List<MixedStrategyProfile<T>>());
     for (int i = 1; i <= m_cliques1[cl].Length(); i++) {
       for (int j = 1; j <= m_cliques2[cl].Length(); j++) {
