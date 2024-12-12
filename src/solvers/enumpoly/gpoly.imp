@@ -621,17 +621,6 @@ void gPoly<T>::ReduceByRepeatedDivision(const term_order &order, const gPoly<T> 
 }
 
 template <class T>
-gPoly<T> gPoly<T>::S_Polynomial(const term_order &order, const gPoly<T> &arg2) const
-{
-  exp_vect exp_lcm = (LeadingPowerProduct(order)).LCM(arg2.LeadingPowerProduct(order));
-  gPoly<T> lcm = gPoly<T>(Space, exp_lcm, (T)1, Order);
-  gPoly<T> L1 = lcm / LeadingTerm(order);
-  gPoly<T> L2 = lcm / arg2.LeadingTerm(order);
-
-  return L1 * (*this) - L2 * arg2;
-}
-
-template <class T>
 gPoly<T> gPoly<T>::TranslateOfMono(const gMono<T> &m, const Gambit::Vector<T> &new_origin) const
 {
   gPoly<T> answer(GetSpace(), (T)1, GetOrder());

@@ -145,7 +145,6 @@ public:
   void ToMonic(const term_order &);
   void ReduceByDivisionAtExpV(const term_order &, const gPoly<T> &, const exp_vect &);
   void ReduceByRepeatedDivision(const term_order &, const gPoly<T> &);
-  gPoly<T> S_Polynomial(const term_order &, const gPoly<T> &) const;
 };
 
 //-------------
