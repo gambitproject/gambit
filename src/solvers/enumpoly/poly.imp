@@ -53,21 +53,6 @@ polynomial<T>::polynomial(const Vector<T> &coefficientvector)
 //                             operators
 //--------------------------------------------------------------------------
 
-template <class T> bool polynomial<T>::operator==(const polynomial<T> &y) const
-{
-  if (Degree() != y.Degree()) {
-    return false;
-  }
-  else {
-    for (int i = 0; i <= Degree(); i++) {
-      if (coeflist[i + 1] != y.coeflist[i + 1]) {
-        return false;
-      }
-    }
-  }
-  return true;
-}
-
 template <class T> polynomial<T> polynomial<T>::operator+(const polynomial<T> &y) const
 {
   if (Degree() < 0) {

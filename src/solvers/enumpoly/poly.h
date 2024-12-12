@@ -51,7 +51,7 @@ public:
 
   // binary operators
   polynomial<T> &operator=(const polynomial<T> &y) = default;
-  bool operator==(const polynomial<T> &y) const;
+  bool operator==(const polynomial<T> &y) const { return coeflist == y.coeflist; }
   bool operator!=(const polynomial<T> &y) const { return !(*this == y); }
   const T &operator[](int index) const { return coeflist[index + 1]; }
 
