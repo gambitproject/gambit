@@ -33,7 +33,6 @@ using namespace Gambit;
 //
 // Internally this is implemented as a list; there is no attempt to maintain sparseness.
 template <class T> class polynomial {
-
 private:
   List<T> coeflist;
 
@@ -42,8 +41,7 @@ public:
   explicit polynomial() = default;
   polynomial(const polynomial<T> &) = default;
   explicit polynomial(const List<T> &p_coefs) : coeflist(p_coefs) {}
-  explicit polynomial(const Vector<T> &);
-  polynomial(const T &, const int &);
+  polynomial(const T &value, const int exp);
   ~polynomial() = default;
 
   // unary operators

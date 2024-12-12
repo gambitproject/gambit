@@ -31,21 +31,13 @@
 //                 constructors and a destructor
 //--------------------------------------------------------------------------
 
-template <class T> polynomial<T>::polynomial(const T &coeff, const int &deg)
+template <class T> polynomial<T>::polynomial(const T &coeff, const int deg)
 {
-  if (coeff != (T)0) {
+  if (coeff != static_cast<T>(0)) {
     for (int i = 0; i < deg; i++) {
-      coeflist.push_back((T)0);
+      coeflist.push_back(static_cast<T>(0));
     }
     coeflist.push_back(coeff);
-  }
-}
-
-template <class T>
-polynomial<T>::polynomial(const Vector<T> &coefficientvector)
-{
-  for (int i = 1; i <= coefficientvector.Length(); i++) {
-    coeflist.push_back(coefficientvector[i]);
   }
 }
 
