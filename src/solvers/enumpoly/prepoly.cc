@@ -60,31 +60,6 @@ exp_vect::exp_vect(const gSpace *p, Gambit::Array<int> exponents)
 //        Operators
 //-------------------------
 
-exp_vect &exp_vect::operator=(const exp_vect &RHS)
-{
-  if (this == &RHS) {
-    return *this;
-  }
-
-  Space = RHS.Space;
-  components = RHS.components;
-  return *this;
-}
-
-int exp_vect::operator[](int index) const { return components[index]; }
-
-bool exp_vect::operator==(const exp_vect &RHS) const
-{
-  if (components == RHS.components) {
-    return true;
-  }
-  else {
-    return false;
-  }
-}
-
-bool exp_vect::operator!=(const exp_vect &RHS) const { return !(*this == RHS); }
-
 bool exp_vect::operator<=(const exp_vect &RHS) const
 {
   for (int i = 1; i <= Dmnsn(); i++) {
@@ -202,8 +177,6 @@ exp_vect exp_vect::AfterDecrementingExpOfVariable(int &varnumber) const
 //--------------------------
 //        Information
 //--------------------------
-
-int exp_vect::Dmnsn() const { return Space->Dmnsn(); }
 
 bool exp_vect::IsConstant() const
 {

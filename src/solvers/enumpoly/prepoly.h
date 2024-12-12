@@ -90,12 +90,18 @@ public:
   ~exp_vect() = default;
 
   // Operators
-  exp_vect &operator=(const exp_vect &RHS);
+  exp_vect &operator=(const exp_vect &) = default;
 
-  int operator[](int index) const;
+  int operator[](int index) const { return components[index]; }
 
-  bool operator==(const exp_vect &RHS) const;
-  bool operator!=(const exp_vect &RHS) const;
+  bool operator==(const exp_vect &RHS) const
+  {
+    return Space == RHS.Space && components == RHS.components;
+  }
+  bool operator!=(const exp_vect &RHS) const
+  {
+    return Space != RHS.Space || components != RHS.components;
+  }
   bool operator<=(const exp_vect &RHS) const;
   bool operator>=(const exp_vect &RHS) const;
   bool operator<(const exp_vect &RHS) const;
@@ -113,7 +119,7 @@ public:
   exp_vect AfterDecrementingExpOfVariable(int &) const;
 
   // Information
-  int Dmnsn() const;
+  int Dmnsn() const { return Space->Dmnsn(); }
   bool IsConstant() const;
   bool IsMultiaffine() const;
   int TotalDegree() const;
