@@ -25,7 +25,6 @@
 
 #include "gambit.h"
 #include "odometer.h"
-#include "gsolver.h"
 #include "rectangl.h"
 #include "gpoly.h"
 #include "gpolylst.h"
@@ -91,7 +90,6 @@ private:
   // Ask whether Newton's method leads to a root
 
   bool NewtonRootInRectangle(const gRectangle<double> &, Gambit::Vector<double> &) const;
-  bool NewtonRootNearRectangle(const gRectangle<double> &, Gambit::Vector<double> &) const;
 
   // Ask whether we can prove that there is no root other than
   // the one produced by the last step
@@ -114,22 +112,10 @@ private:
                           const int &, Gambit::Array<int> &, int &iterations, int depth,
                           const int &, int *) const;
 
-  bool ARootExistsRecursion(const gRectangle<double> &, Gambit::Vector<double> &,
-                            const gRectangle<double> &, Gambit::Array<int> &) const;
-
 public:
-  class NewtonError : public Gambit::Exception {
-  public:
-    ~NewtonError() noexcept override = default;
-    const char *what() const noexcept override
-    {
-      return "Newton method failed to polish approximate root";
-    }
-  };
   explicit QuikSolv(const gPolyList<T> &);
-  QuikSolv(const gPolyList<T> &, const int &);
   QuikSolv(const QuikSolv<T> &);
-  ~QuikSolv();
+  ~QuikSolv() = default;
 
   // Operators
   QuikSolv<T> &operator=(const QuikSolv<T> &);
@@ -148,15 +134,9 @@ public:
   // Refines the accuracy of roots obtained from other algorithms
   Gambit::Vector<double> NewtonPolishOnce(const Gambit::Vector<double> &) const;
   Gambit::Vector<double> SlowNewtonPolishOnce(const Gambit::Vector<double> &) const;
-  Gambit::Vector<double> NewtonPolishedRoot(const Gambit::Vector<double> &) const;
-
-  // Checks for complex singular roots
-  bool MightHaveSingularRoots() const;
 
   // The grand calculation - returns true if successful
   bool FindCertainNumberOfRoots(const gRectangle<T> &, const int &, const int &);
-  bool FindRoots(const gRectangle<T> &, const int &);
-  bool ARootExists(const gRectangle<T> &, Gambit::Vector<double> &) const;
 };
 
 #endif // QUIKSOLV_H

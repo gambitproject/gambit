@@ -69,12 +69,6 @@ public:
   // information
   int Dmnsn() const;
   Variable *VariableWithNumber(int) const;
-  const std::string &GetVariableName(int) const;
-  gSpace WithVariableAppended() const;
-
-  // manipulation
-  void SetVariableName(int, const std::string &);
-  void CreateVariables(int nvars = 1);
 };
 
 // ***********************
@@ -122,24 +116,16 @@ public:
 
   // Other operations
   exp_vect LCM(const exp_vect &) const;
-  exp_vect WithVariableAppended(const gSpace *) const;
   exp_vect AfterZeroingOutExpOfVariable(int &) const;
   exp_vect AfterDecrementingExpOfVariable(int &) const;
 
   // Information
   int Dmnsn() const;
-  bool IsPositive() const;
-  bool IsNonnegative() const;
   bool IsConstant() const;
   bool IsMultiaffine() const;
-  bool IsUnivariate() const;
-  int SoleActiveVariable() const;
   int TotalDegree() const;
-  bool Divides(const exp_vect &) const;
-  bool UsesDifferentVariablesThan(const exp_vect &) const;
 
   // Manipulation
-  void SetExp(int varno, int pow);
   void ToZero();
 };
 
@@ -191,9 +177,6 @@ public:
   bool LessOrEqual(const exp_vect &, const exp_vect &) const;
   bool Greater(const exp_vect &, const exp_vect &) const;
   bool GreaterOrEqual(const exp_vect &, const exp_vect &) const;
-
-  // Manipulation and Information
-  term_order WithVariableAppended(const gSpace *) const;
 };
 
 #endif // PREPOLY_H

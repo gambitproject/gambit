@@ -26,8 +26,6 @@ lexicographically, there is a relation between such a relation,
 and the numerical indexing derived from the lexicographical
 ordering, that is similar to an odometer.  Here the least
 significant index is the first ("leftmost").
-
-   The second class provides a utility for cycling through the integers 1..n.
 */
 
 #ifndef ODOMETER_H
@@ -68,45 +66,10 @@ public:
   int operator[](int place) const { return CurIndices[place]; }
 
   // Manipulate
-  void SetIndex(const int &, const int &);
   bool Turn();
 
   // Information
-  int NoIndices() const;
-  int LinearIndex() const;
-  Gambit::Array<int> CurrentIndices() const;
-  gIndexOdometer AfterExcisionOf(int &) const;
-};
-
-// *****************************
-//      class gPermutationOdometer
-// *****************************
-
-class gPermutationOdometer {
-private:
-  int n;
-  Gambit::Array<int> CurIndices;
-  int CurSign;
-
-public:
-  explicit gPermutationOdometer(int);
-  gPermutationOdometer(const gPermutationOdometer &) = default;
-  ~gPermutationOdometer() = default;
-  gPermutationOdometer &operator=(const gPermutationOdometer &) = delete;
-
-  // Operators
-  bool operator==(const gPermutationOdometer &) const;
-  bool operator!=(const gPermutationOdometer &) const;
-
-  int operator[](int place) const { return CurIndices[place]; }
-
-  // Manipulate
-  bool Turn();
-
-  // Information
-  int NoIndices() const { return n; }
-  const Gambit::Array<int> &CurrentIndices() const { return CurIndices; }
-  int CurrentSign() const { return CurSign; }
+  int NoIndices() const { return MaxIndices.Length(); }
 };
 
 #endif // ODOMETER_H

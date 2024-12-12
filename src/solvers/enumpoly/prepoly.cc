@@ -35,8 +35,6 @@
 gSpace::gSpace(int nvars) : Variables()
 {
   Variable *newvar;
-  // assert (nvars >= 0);
-
   for (int i = 1; i <= nvars; i++) {
     newvar = new Variable;
     newvar->Name = 'n';
@@ -70,8 +68,6 @@ gSpace::~gSpace()
 
 gSpace &gSpace::operator=(const gSpace &rhs)
 {
-  // gout<<"IF OK, ZAP ME:prepoly.cc7\n";//**
-
   if (*this == rhs) {
     return *this;
   }
@@ -84,45 +80,10 @@ int gSpace::Dmnsn() const { return Variables.Length(); }
 
 Variable *gSpace::VariableWithNumber(int i) const { return Variables[i]; }
 
-const std::string &gSpace::GetVariableName(int i) const
-{
-  // gout<<"IF OK, ZAP ME:prepoly.cc10\n";//**
-
-  return ((Variables[i])->Name);
-}
-
-void gSpace::SetVariableName(int i, const std::string &s) { (Variables[i])->Name = s; }
-
-void gSpace::CreateVariables(int nvars)
-{
-  // gout<<"IF OK, ZAP ME:prepoly.cc12\n";//**
-
-  Variable *var;
-  int n = Variables.Length();
-  for (int i = 1; i <= nvars; i++) {
-    // gout<<"IF OK, ZAP ME:prepoly.cc13\n";//**
-
-    var = new Variable;
-    var->Name = 'n';
-    var->Name += Gambit::lexical_cast<std::string>(n + i);
-    Variables.push_back(var);
-  }
-}
-
-gSpace gSpace::WithVariableAppended() const
-{
-  // gout<<"IF OK, ZAP ME:prepoly.cc14\n";//**
-  gSpace enlarged(*this);
-  enlarged.CreateVariables(1);
-  return enlarged;
-}
-
 Variable *gSpace::operator[](int i) const { return VariableWithNumber(i); }
 
 bool gSpace::operator==(const gSpace &rhs) const
 {
-  // gout<<"IF OK, ZAP ME:prepoly.cc15\n";//**
-
   if (Variables.Length() == rhs.Variables.Length() && Variables == rhs.Variables) {
     return true;
   }
@@ -131,28 +92,7 @@ bool gSpace::operator==(const gSpace &rhs) const
   }
 }
 
-bool gSpace::operator!=(const gSpace &rhs) const
-{
-  // gout<<"IF OK, ZAP ME:prepoly.cc16\n";//**
-
-  return !(*this == rhs);
-}
-
-// - RESTORE WHEN NEEDED
-// gSpace gSpace::NewFamilyWithoutVariable(int var)
-// {gout<<"IF OK, ZAP ME:prepoly.cc17\n";//**
-
-//   gSpace result(NoOfVars - 1);
-//   for (int i = 1; i <= NoOfVars; i++)
-//     {gout<<"IF OK, ZAP ME:prepoly.cc18\n";//**
-
-//       if (i < var)
-// 	result.SetVariableName(i,GetVariableName(i));
-//       else if (i > var)
-// 	 result.SetVariableName(i,GetVariableName(i+1));
-//     }
-//   return result;
-// }
+bool gSpace::operator!=(const gSpace &rhs) const { return !(*this == rhs); }
 
 //------------------------------------------------------
 //                      exp_vect
@@ -220,8 +160,6 @@ int exp_vect::operator[](int index) const { return components[index]; }
 
 bool exp_vect::operator==(const exp_vect &RHS) const
 {
-  // assert (Space == RHS.Space);
-
   if (components == RHS.components) {
     return true;
   }
@@ -234,8 +172,6 @@ bool exp_vect::operator!=(const exp_vect &RHS) const { return !(*this == RHS); }
 
 bool exp_vect::operator<=(const exp_vect &RHS) const
 {
-  // assert (Space == RHS.Space);
-
   for (int i = 1; i <= Dmnsn(); i++) {
     if (components[i] > RHS.components[i]) {
       return false;
@@ -247,8 +183,6 @@ bool exp_vect::operator<=(const exp_vect &RHS) const
 
 bool exp_vect::operator>=(const exp_vect &RHS) const
 {
-  // assert (Space == RHS.Space);
-
   for (int i = 1; i <= Dmnsn(); i++) {
     if (components[i] < RHS.components[i]) {
       return false;
@@ -336,18 +270,6 @@ exp_vect exp_vect::LCM(const exp_vect &arg2) const
   return tmp;
 }
 
-exp_vect exp_vect::WithVariableAppended(const gSpace *EnlargedSpace) const
-{
-  exp_vect tmp(EnlargedSpace);
-
-  for (int i = 1; i <= Dmnsn(); i++) {
-    tmp.components[i] = components[i];
-  }
-  tmp.components[Dmnsn() + 1] = 0;
-
-  return tmp;
-}
-
 exp_vect exp_vect::AfterZeroingOutExpOfVariable(int &varnumber) const
 {
   exp_vect tmp(*this);
@@ -367,32 +289,6 @@ exp_vect exp_vect::AfterDecrementingExpOfVariable(int &varnumber) const
 //--------------------------
 
 int exp_vect::Dmnsn() const { return Space->Dmnsn(); }
-
-bool exp_vect::IsPositive() const
-{
-  // gout<<"IF OK, ZAP ME:prepoly.cc40\n";//**
-
-  for (int i = 1; i <= Dmnsn(); i++) {
-    if (components[i] <= 0) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-bool exp_vect::IsNonnegative() const
-{
-  // gout<<"IF OK, ZAP ME:prepoly.cc41\n";//**
-
-  for (int i = 1; i <= Dmnsn(); i++) {
-    if (components[i] < 0) {
-      return false;
-    }
-  }
-
-  return true;
-}
 
 bool exp_vect::IsConstant() const
 {
@@ -414,39 +310,6 @@ bool exp_vect::IsMultiaffine() const
   return true;
 }
 
-bool exp_vect::IsUnivariate() const
-{
-  int no_active_variables = 0;
-
-  for (int i = 1; i <= Dmnsn(); i++) {
-    if ((*this)[i] > 0) {
-      no_active_variables++;
-    }
-  }
-
-  if (no_active_variables == 1) {
-    return true;
-  }
-  else {
-    return false;
-  }
-}
-
-int exp_vect::SoleActiveVariable() const
-{
-  int sole_active_variable = 0;
-
-  for (int i = 1; i <= Dmnsn(); i++) {
-    if ((*this)[i] > 0) {
-      // assert(sole_active_variable == 0);
-      sole_active_variable = i;
-    }
-  }
-
-  // assert (sole_active_variable > 0);
-  return sole_active_variable;
-}
-
 int exp_vect::TotalDegree() const
 {
   int exp_sum = 0;
@@ -456,36 +319,9 @@ int exp_vect::TotalDegree() const
   return exp_sum;
 }
 
-bool exp_vect::Divides(const exp_vect &n) const
-{
-  for (int i = 1; i <= Dmnsn(); i++) {
-    if ((*this)[i] > n[i]) {
-      return false;
-    }
-  }
-  return true;
-}
-
-bool exp_vect::UsesDifferentVariablesThan(const exp_vect &n) const
-{
-  for (int i = 1; i <= Dmnsn(); i++) {
-    if (((*this)[i] > 0) && (n[i] > 0)) {
-      return false;
-    }
-  }
-  return true;
-}
-
 //--------------------------
 //        Manipulation
 //--------------------------
-
-void exp_vect::SetExp(int varno, int pow)
-{
-  // assert (1 <= varno && varno <= Dmnsn() && 0 <= pow);
-
-  components[varno] = pow;
-}
 
 void exp_vect::ToZero()
 {
@@ -620,8 +456,6 @@ term_order::term_order(const gSpace *p, ORD_PTR act_ord) : Space(p), actual_orde
 
 term_order &term_order::operator=(const term_order &RHS)
 {
-  // gout<<"IF OK, ZAP ME:prepoly.cc50\n";//**
-
   if (this == &RHS) {
     return *this;
   }
@@ -636,12 +470,7 @@ bool term_order::operator==(const term_order &RHS) const
   return (Space == RHS.Space && actual_order == RHS.actual_order);
 }
 
-bool term_order::operator!=(const term_order &RHS) const
-{
-  // gout<<"IF OK, ZAP ME:prepoly.cc52\n";//**
-
-  return !(*this == RHS);
-}
+bool term_order::operator!=(const term_order &RHS) const { return !(*this == RHS); }
 
 //-------------------------
 //        Comparisons
@@ -664,16 +493,5 @@ bool term_order::Greater(const exp_vect &LHS, const exp_vect &RHS) const
 
 bool term_order::GreaterOrEqual(const exp_vect &LHS, const exp_vect &RHS) const
 {
-  // gout<<"IF OK, ZAP ME:prepoly.cc56\n";//**
-
   return !(Less(LHS, RHS));
-}
-
-//-------------------------------------------
-//        Manipulation and Information
-//-------------------------------------------
-
-term_order term_order::WithVariableAppended(const gSpace *ExtendedSpace) const
-{
-  return {ExtendedSpace, actual_order};
 }

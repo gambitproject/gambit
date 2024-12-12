@@ -43,15 +43,6 @@ QuikSolv<T>::QuikSolv(const gPolyList<T> &given)
 }
 
 template <class T>
-QuikSolv<T>::QuikSolv(const gPolyList<T> &given, const int &no_eqs)
-  : System(given), gDoubleSystem(given.AmbientSpace(), given.TermOrder(), given.NormalizedList()),
-    NoEquations(no_eqs), NoInequalities(System.Length() - no_eqs), TreesOfPartials(gDoubleSystem),
-    HasBeenSolved(false), Roots(), isMultiaffine(System.IsMultiaffine()),
-    Equation_i_uses_var_j(Eq_i_Uses_j())
-{
-}
-
-template <class T>
 QuikSolv<T>::QuikSolv(const QuikSolv &qs)
   : System(qs.System), gDoubleSystem(qs.gDoubleSystem), NoEquations(qs.NoEquations),
     NoInequalities(qs.NoEquations), TreesOfPartials(qs.TreesOfPartials),
@@ -60,8 +51,6 @@ QuikSolv<T>::QuikSolv(const QuikSolv &qs)
 
 {
 }
-
-template <class T> QuikSolv<T>::~QuikSolv() = default;
 
 //-------------------------------------------------------
 //      Supporting Calculations for the Constructors
@@ -237,37 +226,6 @@ bool QuikSolv<T>::NewtonRootInRectangle(const gRectangle<double> &r,
   return false;
 }
 
-template <class T>
-bool QuikSolv<T>::NewtonRootNearRectangle(const gRectangle<double> &r,
-                                          Gambit::Vector<double> &point) const
-{
-  Gambit::Vector<double> zero(NoEquations);
-  for (int i = 1; i <= NoEquations; i++) {
-    zero[i] = (double)0;
-  }
-
-  Gambit::Vector<double> oldevals = TreesOfPartials.ValuesOfRootPolys(point, NoEquations);
-
-  gRectangle<double> bigr = r.CubeContainingCrcmscrbngSphere();
-
-  if (fuzzy_equals(oldevals, zero)) {
-    return bigr.Contains(point);
-  }
-
-  while (true) {
-    Gambit::Vector<double> newpoint = SlowNewtonPolishOnce(point);
-    if (!bigr.Contains(newpoint)) {
-      return false;
-    }
-    point = newpoint;
-    Gambit::Vector<double> newevals = TreesOfPartials.ValuesOfRootPolys(point, NoEquations);
-    if (fuzzy_equals(newevals, zero)) {
-      return r.Contains(point);
-    }
-
-    oldevals = newevals;
-  }
-}
 
 //------------------------------------
 // Is the Newton root the only root?
@@ -430,66 +388,15 @@ Gambit::Vector<double> QuikSolv<T>::SlowNewtonPolishOnce(const Gambit::Vector<do
   return point + Del;
 }
 
-template <class T>
-Gambit::Vector<double> QuikSolv<T>::NewtonPolishedRoot(const Gambit::Vector<double> &initial) const
-{
-  Gambit::List<gInterval<double>> interval_list;
-  for (int i = 1; i <= Dmnsn(); i++) {
-    interval_list.push_back(gInterval<double>(initial[i] - (double)1, initial[i] + (double)1));
-  }
-  gRectangle<double> box(interval_list);
-  Gambit::Vector<double> point(initial);
-  if (!NewtonRootInRectangle(box, point)) {
-    throw NewtonError();
-  }
-  point = SlowNewtonPolishOnce(point);
-  point = SlowNewtonPolishOnce(point);
-  return point;
-}
-
-//-------------------------------------------
-//          Check for Singularity
-//-------------------------------------------
-
-template <class T> bool QuikSolv<T>::MightHaveSingularRoots() const
-{
-  // assert (NoEquations == System.Dmnsn());
-
-  gPoly<double> newpoly = gDoubleSystem.ReductionOf(gDoubleSystem.DetOfDerivativeMatrix(),
-                                                    *(gDoubleSystem.TermOrder()));
-
-  if (newpoly.IsZero()) {
-    return true;
-  }
-
-  Gambit::List<gPoly<double>> newlist(gDoubleSystem.UnderlyingList());
-
-  newlist.push_back(newpoly);
-  gPolyList<double> larger_system(gDoubleSystem.AmbientSpace(), gDoubleSystem.TermOrder(),
-                                  newlist);
-  gIdeal<double> test_ideal(gDoubleSystem.TermOrder(), larger_system);
-
-  return !(test_ideal.IsEntireRing());
-}
 
 //-------------------------------------------
 //           The Central Calculation
 //-------------------------------------------
 
-template <class T> bool QuikSolv<T>::FindRoots(const gRectangle<T> &r, const int &max_iterations)
-{
-  // assert (NoEquations == System.Dmnsn());
-
-  int zero = 0;
-  return FindCertainNumberOfRoots(r, max_iterations, zero);
-}
-
 template <class T>
 bool QuikSolv<T>::FindCertainNumberOfRoots(const gRectangle<T> &r, const int &max_iterations,
                                            const int &max_no_roots)
 {
-  // assert (NoEquations == System.Dmnsn());
-
   auto *rootlistptr = new Gambit::List<Gambit::Vector<double>>();
 
   if (NoEquations == 0) {
@@ -519,47 +426,26 @@ bool QuikSolv<T>::FindCertainNumberOfRoots(const gRectangle<T> &r, const int &ma
   }
 
   return false;
-
-  /* - This is code that was once used to call the Grobner basis solver
-       It will not work with T = gDouble or double, due to numerical instability
-    gSolver<T> bigsolver(System.TermOrder(), System);
-
-    if ( !bigsolver.IsZeroDimensional() ) return false;
-    else {
-      Gambit::List<Gambit::Vector<gDouble> > rootlist;
-      rootlist = bigsolver.Roots();
-      Gambit::List<Gambit::Vector<gDouble> > roots;
-      for (int j = 1; j <= rootlist.Length(); j++)
-        if (TogDouble(r).Contains(rootlist[j])) roots += rootlist[j];
-      Roots = roots;
-    }
-    return true;
-  */
 }
 
-//
-// TLT: In some cases, this recursive process apparently goes into an
-// infinite regress.  I'm not able to identify just why this occurs,
-// but as at least a temporary safeguard, we will limit the maximum depth
-// of this recursive search.
-//
-// This limit has been chosen only because it doesn't look like any
-// "serious" search (i.e., one that actually terminates with a result)
-// will take more than a depth of 32.
-//
-#define MAX_DEPTH 32
 
-template <class T>
-void // Gambit::List<Gambit::Vector<double> >
+template <class T> void
 QuikSolv<T>::FindRootsRecursion(Gambit::List<Gambit::Vector<double>> *rootlistptr,
                                 const gRectangle<double> &r, const int &max_iterations,
                                 Gambit::Array<int> &precedence, int &iterations, int depth,
                                 const int &max_no_roots, int *roots_found) const
 {
-  // assert (NoEquations == System.Dmnsn());
-
-  // Check for user interrupt
-  //  m_status.SetProgress(50.0);
+  //
+  // TLT: In some cases, this recursive process apparently goes into an
+  // infinite regress.  I'm not able to identify just why this occurs,
+  // but as at least a temporary safeguard, we will limit the maximum depth
+  // of this recursive search.
+  //
+  // This limit has been chosen only because it doesn't look like any
+  // "serious" search (i.e., one that actually terminates with a result)
+  // will take more than a depth of 32.
+  //
+  const int MAX_DEPTH = 32;
 
   if (SystemHasNoRootsIn(r, precedence)) {
     return;
@@ -601,65 +487,4 @@ QuikSolv<T>::FindRootsRecursion(Gambit::List<Gambit::Vector<double>> *rootlistpt
       }
     }
   }
-}
-
-template <class T>
-bool QuikSolv<T>::ARootExistsRecursion(const gRectangle<double> &r, Gambit::Vector<double> &sample,
-                                       const gRectangle<double> &smallrect,
-                                       Gambit::Array<int> &precedence) const
-{
-  if (fuzzy_equals(smallrect.MaximalSideLength(), (double)0.0)) {
-    sample = smallrect.Center();
-    return true;
-  }
-
-  if (SystemHasNoRootsIn(smallrect, precedence)) {
-    return false;
-  }
-
-  Gambit::Vector<double> point = smallrect.Center();
-  if (NewtonRootNearRectangle(smallrect, point)) {
-    if (r.Contains(point)) {
-      bool satisfies_inequalities(true);
-      for (int i = NoEquations + 1; i <= System.Length(); i++) {
-        if (satisfies_inequalities) {
-          if (TreesOfPartials[i].ValueOfRootPoly(point) < (double)0) {
-            satisfies_inequalities = false;
-          }
-        }
-      }
-      if (satisfies_inequalities) {
-        sample = point;
-        return true;
-      }
-    }
-  }
-
-  int N = smallrect.NumberOfCellsInSubdivision();
-  for (int i = 1; i <= N; i++) {
-    if (ARootExistsRecursion(r, sample, smallrect.SubdivisionCell(i), precedence)) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-template <class T>
-bool QuikSolv<T>::ARootExists(const gRectangle<T> &r, Gambit::Vector<double> &sample) const
-{
-  if (NoEquations == 0) {
-    Gambit::Vector<double> answer(0);
-    sample = answer;
-    return true;
-  }
-
-  gRectangle<double> r_double(TogDouble(r));
-  Gambit::Array<int> precedence(System.Length());
-  // Orders search for nonvanishing poly
-  for (int i = 1; i <= System.Length(); i++) {
-    precedence[i] = i;
-  }
-
-  return ARootExistsRecursion(r_double, sample, r_double, precedence);
 }
