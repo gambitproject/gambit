@@ -83,9 +83,14 @@ private:
   Vector<int> components;
 
 public:
-  explicit exp_vect(const gSpace *);
-  exp_vect(const gSpace *, const int &, const int &); // x_i^j
-  exp_vect(const gSpace *, Gambit::Array<int>);
+  explicit exp_vect(const gSpace *p) : Space(p), components(p->Dmnsn()) { components = 0; }
+  // Construct x_i^j
+  exp_vect(const gSpace *p, const int i, const int j) : Space(p), components(p->Dmnsn())
+  {
+    components = 0;
+    components[i] = j;
+  }
+  exp_vect(const gSpace *space, const Vector<int> &exps) : Space(space), components(exps) {}
   exp_vect(const exp_vect &) = default;
   ~exp_vect() = default;
 
@@ -107,7 +112,6 @@ public:
   bool operator<(const exp_vect &RHS) const;
   bool operator>(const exp_vect &RHS) const;
 
-  exp_vect operator-() const;
   exp_vect operator+(const exp_vect &v) const
   {
     exp_vect tmp(*this);

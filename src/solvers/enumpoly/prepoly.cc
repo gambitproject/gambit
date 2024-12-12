@@ -29,34 +29,6 @@
 //------------------------------------------------------
 
 //-------------------------
-// Constructors/Destructors
-//-------------------------
-
-exp_vect::exp_vect(const gSpace *p) : Space(p), components(p->Dmnsn())
-{
-  for (int i = 1; i <= p->Dmnsn(); i++) {
-    components[i] = 0;
-  }
-}
-
-exp_vect::exp_vect(const gSpace *p, const int &var, const int &exp)
-  : Space(p), components(p->Dmnsn())
-{
-  for (int i = 1; i <= Dmnsn(); i++) {
-    components[i] = 0;
-  }
-  components[var] = exp;
-}
-
-exp_vect::exp_vect(const gSpace *p, Gambit::Array<int> exponents)
-  : Space(p), components(p->Dmnsn())
-{
-  for (int i = 1; i <= Dmnsn(); i++) {
-    components[i] = exponents[i];
-  }
-}
-
-//-------------------------
 //        Operators
 //-------------------------
 
@@ -85,16 +57,6 @@ bool exp_vect::operator>=(const exp_vect &RHS) const
 bool exp_vect::operator<(const exp_vect &RHS) const { return !(*this >= RHS); }
 
 bool exp_vect::operator>(const exp_vect &RHS) const { return !(*this <= RHS); }
-
-exp_vect exp_vect::operator-() const
-{
-  exp_vect tmp(Space);
-  for (int i = 1; i <= Dmnsn(); i++) {
-    tmp.components[i] = -components[i];
-  }
-
-  return tmp;
-}
 
 //------------------------------------------------------
 //                      term_order

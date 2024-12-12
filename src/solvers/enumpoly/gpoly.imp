@@ -212,7 +212,7 @@ template <class T> int gPoly<T>::Degree() const
   return max;
 }
 
-template <class T> T gPoly<T>::GetCoef(const Gambit::Array<int> &Powers) const
+template <class T> T gPoly<T>::GetCoef(const Gambit::Vector<int> &Powers) const
 {
   return GetCoef(exp_vect(Space, Powers));
 }

@@ -157,7 +157,7 @@ public:
   int Dmnsn() const;
   int DegreeOfVar(int var_no) const;
   int Degree() const;
-  T GetCoef(const Gambit::Array<int> &Powers) const;
+  T GetCoef(const Gambit::Vector<int> &Powers) const;
   T GetCoef(const exp_vect &Powers) const;
   gPoly<T> LeadingCoefficient(int varnumber) const;
   T NumLeadCoeff() const; // deg == 0
