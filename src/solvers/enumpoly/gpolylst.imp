@@ -324,16 +324,16 @@ template <class T> void gPolyList<T>::Grobnerize(const term_order &order)
   while (!uncomputed.empty()) {
     int mindex = 1;
     for (ii = 2; ii <= uncomputed.size(); ii++) {
-      if (order.Less(List[uncomputed[ii][1]]->LeadingPowerProduct(order).LCM(
-                         List[uncomputed[ii][2]]->LeadingPowerProduct(order)),
-                     List[uncomputed[mindex][1]]->LeadingPowerProduct(order).LCM(
-                         List[uncomputed[mindex][2]]->LeadingPowerProduct(order)))) {
+      if (order.Less(List[uncomputed[ii].first]->LeadingPowerProduct(order).LCM(
+                         List[uncomputed[ii].second]->LeadingPowerProduct(order)),
+                     List[uncomputed[mindex].first]->LeadingPowerProduct(order).LCM(
+                         List[uncomputed[mindex].second]->LeadingPowerProduct(order)))) {
         mindex = ii;
       }
     }
     computed.push_back(uncomputed[mindex]);
-    int ii = uncomputed[mindex][1];
-    int j = uncomputed[mindex][2];
+    int ii = uncomputed[mindex].first;
+    int j = uncomputed[mindex].second;
     uncomputed.erase(std::next(uncomputed.begin(), mindex - 1));
     if (!List[ii]->LeadingPowerProduct(order).UsesDifferentVariablesThan(
             List[j]->LeadingPowerProduct(order))) {

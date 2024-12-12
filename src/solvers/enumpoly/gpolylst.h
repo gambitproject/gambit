@@ -27,35 +27,9 @@
 #include "core/sqmatrix.h"
 #include "gpoly.h"
 
-//!
-//! Simple class for compact reference to pairs of indices
-//!
-class index_pair {
-private:
-  const int m_first, m_second;
+template <class T> class gPolyList {
+  using index_pair = std::pair<int, int>;
 
-public:
-  index_pair(int p_first, int p_second) : m_first(p_first), m_second(p_second) {}
-
-  bool operator==(const index_pair &p_other) const
-  {
-    return (m_first == p_other.m_first && m_second == p_other.m_second);
-  }
-  bool operator!=(const index_pair &p_other) const
-  {
-    return (m_first != p_other.m_first || m_second != p_other.m_second);
-  }
-  int operator[](int p_index) const { return (p_index == 1) ? m_first : m_second; }
-};
-
-// ***********************
-//      class gPolyList
-// ***********************
-
-template <class T>
-class gPolyList
-//  : private Counted<gPolyList<T> >
-{
 private:
   const gSpace *Space;
   const term_order *Order;
