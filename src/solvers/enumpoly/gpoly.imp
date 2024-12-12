@@ -608,19 +608,6 @@ void gPoly<T>::ReduceByDivisionAtExpV(const term_order &order, const gPoly<T> &d
 }
 
 template <class T>
-void gPoly<T>::ReduceByRepeatedDivision(const term_order &order, const gPoly<T> &divisor)
-{
-  exp_vect zero_exp_vec(Space);
-
-  exp_vect exps = OrderMaxMonomialDivisibleBy(order, divisor.LeadingPowerProduct(order));
-
-  while (exps != zero_exp_vec) {
-    ReduceByDivisionAtExpV(order, divisor, exps);
-    exps = OrderMaxMonomialDivisibleBy(order, divisor.LeadingPowerProduct(order));
-  }
-}
-
-template <class T>
 gPoly<T> gPoly<T>::TranslateOfMono(const gMono<T> &m, const Gambit::Vector<T> &new_origin) const
 {
   gPoly<T> answer(GetSpace(), (T)1, GetOrder());
