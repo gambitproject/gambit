@@ -108,8 +108,12 @@ public:
   bool operator>(const exp_vect &RHS) const;
 
   exp_vect operator-() const;
-  exp_vect operator+(const exp_vect &) const;
-  exp_vect operator-(const exp_vect &) const;
+  exp_vect operator+(const exp_vect &v) const
+  {
+    exp_vect tmp(*this);
+    tmp.components += v.components;
+    return tmp;
+  }
 
   // Other operations
   exp_vect AfterZeroingOutExpOfVariable(const int varnumber) const

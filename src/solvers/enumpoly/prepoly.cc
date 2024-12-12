@@ -96,30 +96,6 @@ exp_vect exp_vect::operator-() const
   return tmp;
 }
 
-exp_vect exp_vect::operator+(const exp_vect &credit) const
-{
-  // assert (Space == credit.Space);
-
-  exp_vect tmp(Space);
-  for (int i = 1; i <= Dmnsn(); i++) {
-    tmp.components[i] = components[i] + credit.components[i];
-  }
-
-  return tmp;
-}
-
-exp_vect exp_vect::operator-(const exp_vect &debit) const
-{
-  // assert (Space == debit.Space);
-
-  exp_vect tmp(Space);
-  for (int i = 1; i <= Dmnsn(); i++) {
-    tmp.components[i] = components[i] - debit.components[i];
-  }
-
-  return tmp;
-}
-
 //------------------------------------------------------
 //                      term_order
 //------------------------------------------------------
