@@ -420,9 +420,6 @@ gambit_enumpoly_SOURCES = \
 	src/solvers/enumpoly/monomial.cc \
 	src/solvers/enumpoly/monomial.h \
 	src/solvers/enumpoly/monomial.imp \
-	src/solvers/enumpoly/poly.cc \
-	src/solvers/enumpoly/poly.h \
-	src/solvers/enumpoly/poly.imp \
 	src/solvers/enumpoly/prepoly.cc \
 	src/solvers/enumpoly/prepoly.h \
 	src/solvers/enumpoly/quiksolv.cc \

@@ -26,7 +26,6 @@
 #include "gambit.h"
 #include "core/sqmatrix.h"
 #include "monomial.h"
-#include "poly.h"
 
 // These classes are used to store and mathematically manipulate polynomials.
 
