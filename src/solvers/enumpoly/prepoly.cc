@@ -24,44 +24,6 @@
 
 #include "prepoly.h"
 
-//-----------------------------------------------------------
-//                      gSpace
-//-----------------------------------------------------------
-
-//-------------------------
-// Constructors/Destructors
-//-------------------------
-
-gSpace::gSpace(int nvars) : Variables()
-{
-  Variable *newvar;
-  for (int i = 1; i <= nvars; i++) {
-    newvar = new Variable;
-    newvar->Name = 'n';
-    newvar->Name += Gambit::lexical_cast<std::string>(i);
-    newvar->number = i;
-    Variables.push_back(newvar);
-  }
-}
-
-gSpace::gSpace(const gSpace &p) : Variables()
-{
-  Variable *newvar;
-  for (int i = 1; i <= p.Variables.Length(); i++) {
-    newvar = new Variable;
-    newvar->Name = p.Variables[i]->Name;
-    newvar->number = i;
-    Variables.push_back(newvar);
-  }
-}
-
-gSpace::~gSpace()
-{
-  for (int i = 1; i <= Variables.Length(); i++) {
-    delete Variables[i];
-  }
-}
-
 //------------------------------------------------------
 //                      exp_vect
 //------------------------------------------------------

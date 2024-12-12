@@ -26,6 +26,8 @@
 #include <cmath>
 #include "gambit.h"
 
+using namespace Gambit;
+
 /*
    The classes in this file are prior to the notion of a
 multivariate polynomial.  First of all, one needs a space which the
@@ -41,10 +43,6 @@ implemented through a class that delivers a full menu of services
 built on top of a pointer to a function for computing an order.
 */
 
-// *************************
-// gSpace declaration
-// *************************
-
 class gSpace {
 public:
   struct Variable {
@@ -53,19 +51,22 @@ public:
   };
 
 private:
-  Gambit::Array<Variable *> Variables;
+  Array<Variable> Variables;
 
 public:
-  explicit gSpace(int nvars = 0);
-  gSpace(const gSpace &);
-  ~gSpace();
+  explicit gSpace(size_t nvars)
+  {
+    for (size_t i = 1; i <= nvars; i++) {
+      Variables.push_back({"n" + std::to_string(i), static_cast<int>(i)});
+    }
+  }
+  gSpace(const gSpace &) = delete;
+  ~gSpace() = default;
 
   // operators
   gSpace &operator=(const gSpace &) = delete;
 
-  Variable *operator[](const int index) const { return Variables[index]; }
-  bool operator==(const gSpace &rhs) const { return Variables == rhs.Variables; }
-  bool operator!=(const gSpace &rhs) const { return Variables != rhs.Variables; }
+  const Variable &operator[](const int index) const { return Variables[index]; }
 
   // information
   int Dmnsn() const { return Variables.size(); }
@@ -85,7 +86,7 @@ class exp_vect {
 
 private:
   const gSpace *Space;
-  Gambit::Vector<int> components;
+  Vector<int> components;
 
 public:
   explicit exp_vect(const gSpace *);

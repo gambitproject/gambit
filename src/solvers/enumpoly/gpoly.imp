@@ -306,7 +306,7 @@ template <class T> void gPoly<T>::String_VarAndPow(Gambit::Array<int> &PowArray)
   else {
     pow = 1;
   }
-  for (varname = 1; varname <= Dmnsn() && VarName != ((*Space)[varname])->Name;
+  for (varname = 1; varname <= Dmnsn() && VarName != ((*Space)[varname]).Name;
        varname++)
     ;
   if (varname <= Dmnsn()) {
@@ -991,7 +991,7 @@ template <class T> void gPoly<T>::Output(std::string &t) const
           int exp = Terms[j].ExpV()[k];
           if (exp > 0) {
             s += " ";
-            s += (*Space)[k]->Name;
+            s += (*Space)[k].Name;
             if (exp != 1) {
               s += '^';
               s += Gambit::lexical_cast<std::string>(exp);
