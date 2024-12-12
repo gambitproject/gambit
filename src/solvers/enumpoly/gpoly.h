@@ -30,15 +30,6 @@
 
 // These classes are used to store and mathematically manipulate polynomials.
 
-//  **NOTE**
-//  Every type T to be used needs a procedure to convert a gText coefficient
-//  to the type T for the gText SOP input form and a procedure to convert
-//  the coefficient into a gText for the SOP output form.
-
-// *******************
-//  gPoly declaration
-// *******************
-
 template <class T> class gPoly {
 
 private:
