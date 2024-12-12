@@ -85,7 +85,6 @@ private:
 public:
   explicit exp_vect(const gSpace *);
   exp_vect(const gSpace *, const int &, const int &); // x_i^j
-  exp_vect(const gSpace *, int *);
   exp_vect(const gSpace *, Gambit::Vector<int>);
   exp_vect(const gSpace *, Gambit::Array<int>);
   exp_vect(const exp_vect &) = default;
