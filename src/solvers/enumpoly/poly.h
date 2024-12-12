@@ -37,7 +37,7 @@ private:
 
 public:
   // constructors and destructor
-  explicit polynomial(int = -1);
+  explicit polynomial() = default;
   polynomial(const polynomial<T> &) = default;
   explicit polynomial(const Gambit::List<T> &p_coefs) : coeflist(p_coefs) {}
   explicit polynomial(const Gambit::Vector<T> &);

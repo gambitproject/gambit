@@ -49,14 +49,6 @@ polynomial<T>::polynomial(const Gambit::Vector<T> &coefficientvector)
   }
 }
 
-template <class T> polynomial<T>::polynomial(int deg)
-{
-  if (deg >= 0) {
-    // gout << "Error is polynomial int constructor.\n";
-    exit(1);
-  }
-}
-
 //--------------------------------------------------------------------------
 //                             operators
 //--------------------------------------------------------------------------
