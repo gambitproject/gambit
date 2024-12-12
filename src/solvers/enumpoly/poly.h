@@ -38,8 +38,8 @@ private:
 public:
   // constructors and destructor
   explicit polynomial(int = -1);
-  polynomial(const polynomial<T> &);
-  explicit polynomial(const Gambit::List<T> &);
+  polynomial(const polynomial<T> &) = default;
+  explicit polynomial(const Gambit::List<T> &p_coefs) : coeflist(p_coefs) {}
   explicit polynomial(const Gambit::Vector<T> &);
   polynomial(const T &, const int &);
   ~polynomial() = default;
@@ -48,19 +48,21 @@ public:
   polynomial<T> operator-() const;
 
   // binary operators
-  polynomial<T> &operator=(const polynomial<T> &y);
+  polynomial<T> &operator=(const polynomial<T> &y) = default;
   bool operator==(const polynomial<T> &y) const;
-  bool operator!=(const polynomial<T> &y) const;
+  bool operator!=(const polynomial<T> &y) const { return !(*this == y); }
   const T &operator[](int index) const { return coeflist[index + 1]; }
 
   polynomial<T> operator+(const polynomial<T> &y) const;
-  polynomial<T> operator-(const polynomial<T> &y) const;
+  polynomial<T> operator-(const polynomial<T> &y) const { return polynomial<T>(*this + (-y)); }
   polynomial<T> operator*(const polynomial<T> &y) const;
   polynomial<T> operator/(const polynomial<T> &y) const;
-  polynomial<T> &operator+=(const polynomial<T> &y);
-  polynomial<T> &operator-=(const polynomial<T> &y);
-  polynomial<T> &operator*=(const polynomial<T> &y);
-  polynomial<T> &operator/=(const polynomial<T> &y);
+  polynomial<T> &operator+=(const polynomial<T> &y) { return ((*this) = (*this) + y); }
+
+  polynomial<T> &operator-=(const polynomial<T> &y) { return ((*this) = (*this) - y); }
+  polynomial<T> &operator*=(const polynomial<T> &y) { return ((*this) = (*this) * y); }
+
+  polynomial<T> &operator/=(const polynomial<T> &y) { return ((*this) = (*this) / y); }
   polynomial<T> operator%(const polynomial<T> &y) const;
 
   // information

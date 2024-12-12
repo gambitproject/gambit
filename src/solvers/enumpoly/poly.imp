@@ -31,8 +31,6 @@
 //                 constructors and a destructor
 //--------------------------------------------------------------------------
 
-template <class T> polynomial<T>::polynomial(const polynomial<T> &x) : coeflist(x.coeflist) {}
-
 template <class T> polynomial<T>::polynomial(const T &coeff, const int &deg)
 {
   if (coeff != (T)0) {
@@ -44,19 +42,14 @@ template <class T> polynomial<T>::polynomial(const T &coeff, const int &deg)
 }
 
 template <class T>
-polynomial<T>::polynomial(const Gambit::List<T> &coefficientlist) : coeflist(coefficientlist)
-{
-}
-
-template <class T>
-polynomial<T>::polynomial(const Gambit::Vector<T> &coefficientvector) : coeflist()
+polynomial<T>::polynomial(const Gambit::Vector<T> &coefficientvector)
 {
   for (int i = 1; i <= coefficientvector.Length(); i++) {
     coeflist.push_back(coefficientvector[i]);
   }
 }
 
-template <class T> polynomial<T>::polynomial(int deg) : coeflist()
+template <class T> polynomial<T>::polynomial(int deg)
 {
   if (deg >= 0) {
     // gout << "Error is polynomial int constructor.\n";
@@ -67,15 +60,6 @@ template <class T> polynomial<T>::polynomial(int deg) : coeflist()
 //--------------------------------------------------------------------------
 //                             operators
 //--------------------------------------------------------------------------
-
-template <class T> polynomial<T> &polynomial<T>::operator=(const polynomial<T> &y)
-{
-  if (this != &y) {
-    coeflist = y.coeflist;
-  }
-
-  return *this;
-}
 
 template <class T> bool polynomial<T>::operator==(const polynomial<T> &y) const
 {
@@ -90,11 +74,6 @@ template <class T> bool polynomial<T>::operator==(const polynomial<T> &y) const
     }
   }
   return true;
-}
-
-template <class T> bool polynomial<T>::operator!=(const polynomial<T> &y) const
-{
-  return !(*this == y);
 }
 
 template <class T> polynomial<T> polynomial<T>::operator+(const polynomial<T> &y) const
@@ -133,11 +112,6 @@ template <class T> polynomial<T> polynomial<T>::operator+(const polynomial<T> &y
   return sum;
 }
 
-template <class T> polynomial<T> polynomial<T>::operator-(const polynomial<T> &y) const
-{
-  return polynomial<T>(*this + (-y));
-}
-
 template <class T> polynomial<T> polynomial<T>::operator*(const polynomial<T> &y) const
 {
   if (Degree() == -1) {
@@ -174,30 +148,9 @@ template <class T> polynomial<T> polynomial<T>::operator/(const polynomial<T> &q
   return polynomial<T>(ans);
 }
 
-template <class T> polynomial<T> &polynomial<T>::operator+=(const polynomial<T> &y)
-{
-  return ((*this) = (*this) + y);
-}
-
-template <class T> polynomial<T> &polynomial<T>::operator-=(const polynomial<T> &y)
-{
-  return ((*this) = (*this) - y);
-}
-
-template <class T> polynomial<T> &polynomial<T>::operator*=(const polynomial<T> &y)
-{
-  return ((*this) = (*this) * y);
-}
-
-template <class T> polynomial<T> &polynomial<T>::operator/=(const polynomial<T> &y)
-{
-  return ((*this) = (*this) / y);
-}
 
 template <class T> polynomial<T> polynomial<T>::operator%(const polynomial<T> &q) const
 {
-  // assert (q.Degree() != -1);
-
   polynomial<T> ans;
   polynomial<T> r = *this;
 
