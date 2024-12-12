@@ -201,8 +201,6 @@ template <class T> int gPoly<T>::DegreeOfVar(int var_no) const
   return max;
 }
 
-template <class T> bool gPoly<T>::IsZero() const { return Terms.empty(); }
-
 template <class T> int gPoly<T>::Degree() const
 {
   int max = 0;
@@ -266,15 +264,6 @@ template <class T> T gPoly<T>::Evaluate(const Gambit::Array<T> &values) const
     answer += term.Evaluate(values);
   }
   return answer;
-}
-
-template <class T> Gambit::List<exp_vect> gPoly<T>::ExponentVectors() const
-{
-  Gambit::List<exp_vect> result;
-  for (const auto &v : Terms) {
-    result.push_back(exp_vect(v.ExpV()));
-  }
-  return result;
 }
 
 template <class T> Gambit::List<gMono<T>> gPoly<T>::MonomialList() const { return Terms; }
@@ -398,8 +387,6 @@ template <class T> gPoly<T> gPoly<T>::DivideByPolynomial(const gPoly<T> &den) co
   if (den == zero) {
     throw Gambit::ZeroDivideException();
   }
-  // assert(*this == zero || den.Degree() <= Degree());
-
   // assumes exact divisibility!
 
   gPoly<T> result = zero;
@@ -467,44 +454,6 @@ template <class T> gPoly<T> gPoly<T>::LeadingCoefficient(int varnumber) const
   }
 
   return (newPoly);
-}
-
-//--------------------
-// Term Order Concepts
-//--------------------
-
-template <class T> exp_vect gPoly<T>::LeadingPowerProduct(const term_order &order) const
-{
-  // assert (Terms.Length() > 0);
-
-  if (*Order == order) { // worth a try ...
-    return Terms.back().ExpV();
-  }
-  else {
-    int max = 1;
-    for (int j = 2; j <= Terms.size(); j++) {
-      if (order.Less(Terms[max].ExpV(), Terms[j].ExpV())) {
-        max = j;
-      }
-    }
-    return Terms[max].ExpV();
-  }
-}
-
-template <class T> T gPoly<T>::LeadingCoefficient(const term_order &order) const
-{
-  if (*Order == order) { // worth a try ...
-    return Terms.back().Coef();
-  }
-  else {
-    int max = 1;
-    for (int j = 2; j <= Terms.size(); j++) {
-      if (order.Less(Terms[max].ExpV(), Terms[j].ExpV())) {
-        max = j;
-      }
-    }
-    return Terms[max].Coef();
-  }
 }
 
 template <class T>
@@ -669,7 +618,7 @@ template <class T> std::string &operator<<(std::string &p_text, const gPoly<T> &
 //           Conversion
 //----------------------------------
 
-template <class T> gPoly<double> TogDouble(const gPoly<T> &given)
+template <class T> gPoly<double> ToDouble(const gPoly<T> &given)
 {
   gPoly<double> answer(given.GetSpace(), given.GetOrder());
   Gambit::List<gMono<T>> list = given.MonomialList();
@@ -691,7 +640,7 @@ template <class T> gPoly<double> NormalizationOfPoly(const gPoly<T> &given)
   }
 
   if (maxcoeff < 0.000000001) {
-    return TogDouble(given);
+    return ToDouble(given);
   }
 
   gPoly<double> answer(given.GetSpace(), given.GetOrder());

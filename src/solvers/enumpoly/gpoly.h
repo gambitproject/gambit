@@ -109,7 +109,6 @@ public:
   const gSpace *GetSpace() const;
   const term_order *GetOrder() const;
   int Dmnsn() const;
-  bool IsZero() const;
   int DegreeOfVar(int var_no) const;
   int Degree() const;
   T GetCoef(const Gambit::Array<int> &Powers) const;
@@ -121,26 +120,18 @@ public:
   // assumes UniqueActiveVariable() is true
   T Evaluate(const Gambit::Array<T> &values) const;
   gPoly<T> PartialDerivative(int varnumber) const;
-  Gambit::List<exp_vect> ExponentVectors() const;
   Gambit::List<gMono<T>> MonomialList() const;
 
   gPoly<T> TranslateOfPoly(const Gambit::Vector<T> &) const;
   gPoly<T> PolyInNewCoordinates(const Gambit::SquareMatrix<T> &) const;
   T MaximalValueOfNonlinearPart(const T &) const;
-
-  //--------------------
-  // Term Order Concepts
-  //--------------------
-
-  exp_vect LeadingPowerProduct(const term_order &) const;
-  T LeadingCoefficient(const term_order &) const;
 };
 
 //-------------
 // Conversion:
 //-------------
 
-template <class T> gPoly<double> TogDouble(const gPoly<T> &);
+template <class T> gPoly<double> ToDouble(const gPoly<T> &);
 template <class T> gPoly<double> NormalizationOfPoly(const gPoly<T> &);
 
 // global multiply by scalar operators
@@ -150,7 +141,5 @@ template <class T> gPoly<T> operator*(const gPoly<T> &poly, const T &val);
 // global add to scalar operators
 template <class T> gPoly<T> operator+(const T &val, const gPoly<T> &poly);
 template <class T> gPoly<T> operator+(const gPoly<T> &poly, const T &val);
-
-template <class T> std::string ToText(const gPoly<T> &p);
 
 #endif // # GPOLY_H

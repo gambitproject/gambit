@@ -28,5 +28,5 @@ template gPoly<double> operator+(const gPoly<double> &poly, const double &val);
 template gPoly<double> operator*(const double &val, const gPoly<double> &poly);
 template gPoly<double> operator*(const gPoly<double> &poly, const double &val);
 
-template gPoly<double> TogDouble(const gPoly<double> &);
+template gPoly<double> ToDouble(const gPoly<double> &);
 template gPoly<double> NormalizationOfPoly(const gPoly<double> &);
