@@ -120,25 +120,6 @@ exp_vect exp_vect::operator-(const exp_vect &debit) const
   return tmp;
 }
 
-void exp_vect::operator+=(const exp_vect &credit)
-{
-
-  // assert (Space == credit.Space);
-
-  for (int i = 1; i <= Dmnsn(); i++) {
-    components[i] += credit.components[i];
-  }
-}
-
-void exp_vect::operator-=(const exp_vect &debit)
-{
-  // assert (Space == debit.Space);
-
-  for (int i = 1; i <= Dmnsn(); i++) {
-    components[i] -= debit.components[i];
-  }
-}
-
 //------------------------------------------------------
 //                      term_order
 //------------------------------------------------------

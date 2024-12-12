@@ -110,8 +110,6 @@ public:
   exp_vect operator-() const;
   exp_vect operator+(const exp_vect &) const;
   exp_vect operator-(const exp_vect &) const;
-  void operator+=(const exp_vect &);
-  void operator-=(const exp_vect &);
 
   // Other operations
   exp_vect AfterZeroingOutExpOfVariable(const int varnumber) const
