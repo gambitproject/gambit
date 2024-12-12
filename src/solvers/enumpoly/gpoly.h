@@ -25,10 +25,66 @@
 
 #include "gambit.h"
 #include "core/sqmatrix.h"
-#include "monomial.h"
+#include "prepoly.h"
+
+/// A monomial of multiple variables with non-negative exponents
+template <class T> class gMono {
+private:
+  T coef;
+  exp_vect exps;
+
+public:
+  // constructors
+  gMono(const gSpace *p, const T &x) : coef(x), exps(p) {}
+  gMono(const T &x, const exp_vect &e) : coef(x), exps(e)
+  {
+    if (x == static_cast<T>(0)) {
+      exps.ToZero();
+    }
+  }
+  gMono(const gMono<T> &) = default;
+  ~gMono() = default;
+
+  // operators
+  gMono<T> &operator=(const gMono<T> &) = default;
+
+  bool operator==(const gMono<T> &y) const { return (coef == y.coef && exps == y.exps); }
+  bool operator!=(const gMono<T> &y) const { return (coef != y.coef || exps != y.exps); }
+  gMono<T> operator*(const gMono<T> &y) const { return {coef * y.coef, exps + y.exps}; }
+  gMono<T> operator/(const gMono<T> &y) const { return {coef / y.coef, exps - y.exps}; }
+  gMono<T> operator+(const gMono<T> &y) const { return {coef + y.coef, exps}; }
+  gMono<T> &operator+=(const gMono<T> &y)
+  {
+    coef += y.coef;
+    return *this;
+  }
+  gMono<T> &operator*=(const T &v)
+  {
+    coef *= v;
+    return *this;
+  }
+  gMono<T> operator-() const { return {-coef, exps}; }
+
+  // information
+  const T &Coef() const { return coef; }
+  int Dmnsn() const { return exps.Dmnsn(); }
+  int TotalDegree() const { return exps.TotalDegree(); }
+  bool IsConstant() const { return exps.IsConstant(); }
+  bool IsMultiaffine() const { return exps.IsMultiaffine(); }
+  const exp_vect &ExpV() const { return exps; }
+  T Evaluate(const Vector<T> &vals) const
+  {
+    T answer = coef;
+    for (int i = 1; i <= exps.Dmnsn(); i++) {
+      for (int j = 1; j <= exps[i]; j++) {
+        answer *= vals[i];
+      }
+    }
+    return answer;
+  }
+};
 
 // These classes are used to store and mathematically manipulate polynomials.
-
 template <class T> class gPoly {
 
 private:
