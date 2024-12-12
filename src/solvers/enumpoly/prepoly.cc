@@ -48,14 +48,6 @@ exp_vect::exp_vect(const gSpace *p, const int &var, const int &exp)
   components[var] = exp;
 }
 
-exp_vect::exp_vect(const gSpace *p, Gambit::Vector<int> exponents)
-  : Space(p), components(p->Dmnsn())
-{
-  for (int i = 1; i <= Dmnsn(); i++) {
-    components[i] = exponents[i];
-  }
-}
-
 exp_vect::exp_vect(const gSpace *p, Gambit::Array<int> exponents)
   : Space(p), components(p->Dmnsn())
 {
