@@ -27,20 +27,22 @@
 #ifndef POLY_H
 #define POLY_H
 
+using namespace Gambit;
+
 // @brief A univariate polynomial with coefficients of type T.
 //
 // Internally this is implemented as a list; there is no attempt to maintain sparseness.
 template <class T> class polynomial {
 
 private:
-  Gambit::List<T> coeflist;
+  List<T> coeflist;
 
 public:
   // constructors and destructor
   explicit polynomial() = default;
   polynomial(const polynomial<T> &) = default;
-  explicit polynomial(const Gambit::List<T> &p_coefs) : coeflist(p_coefs) {}
-  explicit polynomial(const Gambit::Vector<T> &);
+  explicit polynomial(const List<T> &p_coefs) : coeflist(p_coefs) {}
+  explicit polynomial(const Vector<T> &);
   polynomial(const T &, const int &);
   ~polynomial() = default;
 

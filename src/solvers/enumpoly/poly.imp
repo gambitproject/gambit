@@ -42,7 +42,7 @@ template <class T> polynomial<T>::polynomial(const T &coeff, const int &deg)
 }
 
 template <class T>
-polynomial<T>::polynomial(const Gambit::Vector<T> &coefficientvector)
+polynomial<T>::polynomial(const Vector<T> &coefficientvector)
 {
   for (int i = 1; i <= coefficientvector.Length(); i++) {
     coeflist.push_back(coefficientvector[i]);
