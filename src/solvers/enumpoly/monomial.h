@@ -37,30 +37,43 @@ private:
 
 public:
   // constructors
-  gMono(const gSpace *, const T &);
-  gMono(const T &, const exp_vect &);
-  gMono(const gMono<T> &);
-  ~gMono();
+  gMono(const gSpace *p, const T &x) : coef(x), exps(p) {}
+  gMono(const T &x, const exp_vect &e) : coef(x), exps(e)
+  {
+    if (x == static_cast<T>(0)) {
+      exps.ToZero();
+    }
+  }
+  gMono(const gMono<T> &) = default;
+  ~gMono() = default;
 
   // operators
-  gMono<T> &operator=(const gMono<T> &);
+  gMono<T> &operator=(const gMono<T> &) = default;
 
-  bool operator==(const gMono<T> &) const;
-  bool operator!=(const gMono<T> &) const;
-  gMono<T> operator*(const gMono<T> &) const;
-  gMono<T> operator/(const gMono<T> &) const;
-  gMono<T> operator+(const gMono<T> &) const; // assert exps ==
-  gMono<T> &operator+=(const gMono<T> &);     // assert exps ==
-  gMono<T> &operator*=(const T &);
-  gMono<T> operator-() const;
+  bool operator==(const gMono<T> &y) const { return (coef == y.coef && exps == y.exps); }
+  bool operator!=(const gMono<T> &y) const { return (coef != y.coef || exps != y.exps); }
+  gMono<T> operator*(const gMono<T> &y) const { return {coef * y.coef, exps + y.exps}; }
+  gMono<T> operator/(const gMono<T> &y) const { return {coef / y.coef, exps - y.exps}; }
+  gMono<T> operator+(const gMono<T> &y) const { return {coef + y.coef, exps}; }
+  gMono<T> &operator+=(const gMono<T> &y)
+  {
+    coef += y.coef;
+    return *this;
+  }
+  gMono<T> &operator*=(const T &v)
+  {
+    coef *= v;
+    return *this;
+  }
+  gMono<T> operator-() const { return {-coef, exps}; }
 
   // information
-  const T &Coef() const;
-  int Dmnsn() const;
-  int TotalDegree() const;
-  bool IsConstant() const;
-  bool IsMultiaffine() const;
-  const exp_vect &ExpV() const;
+  const T &Coef() const { return coef; }
+  int Dmnsn() const { return exps.Dmnsn(); }
+  int TotalDegree() const { return exps.TotalDegree(); }
+  bool IsConstant() const { return exps.IsConstant(); }
+  bool IsMultiaffine() const { return exps.IsMultiaffine(); }
+  const exp_vect &ExpV() const { return exps; }
   T Evaluate(const Gambit::Array<T> &) const;
   T Evaluate(const Gambit::Vector<T> &) const;
 };
