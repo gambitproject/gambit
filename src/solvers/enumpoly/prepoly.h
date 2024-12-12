@@ -45,12 +45,13 @@ built on top of a pointer to a function for computing an order.
 // gSpace declaration
 // *************************
 
-struct Variable {
-  std::string Name;
-  int number;
-};
-
 class gSpace {
+public:
+  struct Variable {
+    std::string Name;
+    int number;
+  };
+
 private:
   Gambit::Array<Variable *> Variables;
 
@@ -62,13 +63,12 @@ public:
   // operators
   gSpace &operator=(const gSpace &rhs);
 
-  Variable *operator[](int) const;
-  bool operator==(const gSpace &rhs) const;
-  bool operator!=(const gSpace &rhs) const;
+  Variable *operator[](const int index) const { return Variables[index]; }
+  bool operator==(const gSpace &rhs) const { return Variables == rhs.Variables; }
+  bool operator!=(const gSpace &rhs) const { return Variables != rhs.Variables; }
 
   // information
-  int Dmnsn() const;
-  Variable *VariableWithNumber(int) const;
+  int Dmnsn() const { return Variables.size(); }
 };
 
 // ***********************

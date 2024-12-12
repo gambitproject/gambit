@@ -306,7 +306,7 @@ template <class T> void gPoly<T>::String_VarAndPow(Gambit::Array<int> &PowArray)
   else {
     pow = 1;
   }
-  for (varname = 1; varname <= Dmnsn() && VarName != (Space->VariableWithNumber(varname))->Name;
+  for (varname = 1; varname <= Dmnsn() && VarName != ((*Space)[varname])->Name;
        varname++)
     ;
   if (varname <= Dmnsn()) {

@@ -76,24 +76,6 @@ gSpace &gSpace::operator=(const gSpace &rhs)
   return *this;
 }
 
-int gSpace::Dmnsn() const { return Variables.Length(); }
-
-Variable *gSpace::VariableWithNumber(int i) const { return Variables[i]; }
-
-Variable *gSpace::operator[](int i) const { return VariableWithNumber(i); }
-
-bool gSpace::operator==(const gSpace &rhs) const
-{
-  if (Variables.Length() == rhs.Variables.Length() && Variables == rhs.Variables) {
-    return true;
-  }
-  else {
-    return false;
-  }
-}
-
-bool gSpace::operator!=(const gSpace &rhs) const { return !(*this == rhs); }
-
 //------------------------------------------------------
 //                      exp_vect
 //------------------------------------------------------
