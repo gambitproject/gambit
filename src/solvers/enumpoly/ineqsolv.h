@@ -75,8 +75,7 @@ public:
   bool operator!=(const IneqSolv<T> &) const;
 
   // Information
-  const gSpace *AmbientSpace() const { return System.AmbientSpace(); }
-  const term_order *TermOrder() const { return System.TermOrder(); }
+  const VariableSpace *AmbientSpace() const { return System.AmbientSpace(); }
   int Dmnsn() const { return System.Dmnsn(); }
   const gPolyList<T> &UnderlyingEquations() const { return System; }
   T ErrorTolerance() const { return Epsilon; }

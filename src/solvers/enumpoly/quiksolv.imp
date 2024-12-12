@@ -34,7 +34,7 @@ using namespace Gambit;
 
 template <class T>
 QuikSolv<T>::QuikSolv(const gPolyList<T> &given)
-  : System(given), gDoubleSystem(given.AmbientSpace(), given.TermOrder(), given.NormalizedList()),
+  : System(given), gDoubleSystem(given.AmbientSpace(), given.NormalizedList()),
     NoEquations(std::min(System.Dmnsn(), System.Length())),
     NoInequalities(std::max(System.Length() - System.Dmnsn(), 0)), TreesOfPartials(gDoubleSystem),
     HasBeenSolved(false), Roots(), isMultiaffine(System.IsMultiaffine()),
@@ -226,7 +226,6 @@ bool QuikSolv<T>::NewtonRootInRectangle(const gRectangle<double> &r,
   return false;
 }
 
-
 //------------------------------------
 // Is the Newton root the only root?
 //------------------------------------
@@ -388,7 +387,6 @@ Gambit::Vector<double> QuikSolv<T>::SlowNewtonPolishOnce(const Gambit::Vector<do
   return point + Del;
 }
 
-
 //-------------------------------------------
 //           The Central Calculation
 //-------------------------------------------
@@ -428,12 +426,11 @@ bool QuikSolv<T>::FindCertainNumberOfRoots(const gRectangle<T> &r, const int &ma
   return false;
 }
 
-
-template <class T> void
-QuikSolv<T>::FindRootsRecursion(Gambit::List<Gambit::Vector<double>> *rootlistptr,
-                                const gRectangle<double> &r, const int &max_iterations,
-                                Gambit::Array<int> &precedence, int &iterations, int depth,
-                                const int &max_no_roots, int *roots_found) const
+template <class T>
+void QuikSolv<T>::FindRootsRecursion(Gambit::List<Gambit::Vector<double>> *rootlistptr,
+                                     const gRectangle<double> &r, const int &max_iterations,
+                                     Gambit::Array<int> &precedence, int &iterations, int depth,
+                                     const int &max_no_roots, int *roots_found) const
 {
   //
   // TLT: In some cases, this recursive process apparently goes into an

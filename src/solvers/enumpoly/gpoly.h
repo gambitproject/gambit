@@ -25,38 +25,215 @@
 
 #include "gambit.h"
 #include "core/sqmatrix.h"
-#include "monomial.h"
-#include "poly.h"
+
+using namespace Gambit;
+
+class VariableSpace {
+public:
+  struct Variable {
+    std::string name;
+    int number;
+  };
+
+  explicit VariableSpace(size_t nvars)
+  {
+    for (size_t i = 1; i <= nvars; i++) {
+      m_variables.push_back({"n" + std::to_string(i), static_cast<int>(i)});
+    }
+  }
+  VariableSpace(const VariableSpace &) = delete;
+  ~VariableSpace() = default;
+  VariableSpace &operator=(const VariableSpace &) = delete;
+  const Variable &operator[](const int index) const { return m_variables[index]; }
+  int Dmnsn() const { return m_variables.size(); }
+
+private:
+  Array<Variable> m_variables;
+};
+
+// An exponent vector is a vector of integers representing the exponents on variables in
+// a space in a monomial.
+//
+// Exponent vectors are ordered lexicographically.
+class ExponentVector {
+private:
+  const VariableSpace *m_space;
+  Vector<int> m_components;
+
+public:
+  explicit ExponentVector(const VariableSpace *p) : m_space(p), m_components(p->Dmnsn())
+  {
+    m_components = 0;
+  }
+  // Construct x_i^j
+  ExponentVector(const VariableSpace *p, const int i, const int j)
+    : m_space(p), m_components(p->Dmnsn())
+  {
+    m_components = 0;
+    m_components[i] = j;
+  }
+  ExponentVector(const VariableSpace *space, const Vector<int> &exps)
+    : m_space(space), m_components(exps)
+  {
+  }
+  ExponentVector(const ExponentVector &) = default;
+  ~ExponentVector() = default;
+
+  // Operators
+  ExponentVector &operator=(const ExponentVector &) = default;
+
+  int operator[](int index) const { return m_components[index]; }
+
+  bool operator==(const ExponentVector &y) const
+  {
+    return m_space == y.m_space && m_components == y.m_components;
+  }
+  bool operator!=(const ExponentVector &y) const
+  {
+    return m_space != y.m_space || m_components != y.m_components;
+  }
+  ExponentVector operator+(const ExponentVector &v) const
+  {
+    ExponentVector tmp(*this);
+    tmp.m_components += v.m_components;
+    return tmp;
+  }
+
+  // Other operations
+  ExponentVector WithZeroExponent(const int varnumber) const
+  {
+    ExponentVector tmp(*this);
+    tmp.m_components[varnumber] = 0;
+    return tmp;
+  }
+  ExponentVector WithDecrementedExponent(const int varnumber) const
+  {
+    ExponentVector tmp(*this);
+    tmp.m_components[varnumber]--;
+    return tmp;
+  }
+
+  // Information
+  int Dmnsn() const { return m_space->Dmnsn(); }
+  bool IsConstant() const
+  {
+    for (int i = 1; i <= Dmnsn(); i++) {
+      if ((*this)[i] > 0) {
+        return false;
+      }
+    }
+    return true;
+  }
+  bool IsMultiaffine() const
+  {
+    for (int i = 1; i <= Dmnsn(); i++) {
+      if ((*this)[i] > 1) {
+        return false;
+      }
+    }
+    return true;
+  }
+  int TotalDegree() const
+  {
+    int exp_sum = 0;
+    for (int i = 1; i <= Dmnsn(); i++) {
+      exp_sum += (*this)[i];
+    }
+    return exp_sum;
+  }
+
+  // Manipulation
+  void ToZero()
+  {
+    for (int i = 1; i <= Dmnsn(); i++) {
+      m_components[i] = 0;
+    }
+  }
+
+  bool operator<(const ExponentVector &y) const
+  {
+    for (int i = 1; i <= Dmnsn(); i++) {
+      if (m_components[i] < y.m_components[i]) {
+        return true;
+      }
+      if (m_components[i] > y.m_components[i]) {
+        return false;
+      }
+    }
+    return false;
+  }
+  bool operator<=(const ExponentVector &y) const { return *this < y || *this == y; }
+  bool operator>(const ExponentVector &y) const { return !(*this <= y); }
+  bool operator>=(const ExponentVector &y) const { return !(*this < y); }
+};
+
+/// A monomial of multiple variables with non-negative exponents
+template <class T> class gMono {
+private:
+  T coef;
+  ExponentVector exps;
+
+public:
+  // constructors
+  gMono(const VariableSpace *p, const T &x) : coef(x), exps(p) {}
+  gMono(const T &x, const ExponentVector &e) : coef(x), exps(e)
+  {
+    if (x == static_cast<T>(0)) {
+      exps.ToZero();
+    }
+  }
+  gMono(const gMono<T> &) = default;
+  ~gMono() = default;
+
+  // operators
+  gMono<T> &operator=(const gMono<T> &) = default;
+
+  bool operator==(const gMono<T> &y) const { return (coef == y.coef && exps == y.exps); }
+  bool operator!=(const gMono<T> &y) const { return (coef != y.coef || exps != y.exps); }
+  gMono<T> operator*(const gMono<T> &y) const { return {coef * y.coef, exps + y.exps}; }
+  gMono<T> operator+(const gMono<T> &y) const { return {coef + y.coef, exps}; }
+  gMono<T> &operator+=(const gMono<T> &y)
+  {
+    coef += y.coef;
+    return *this;
+  }
+  gMono<T> &operator*=(const T &v)
+  {
+    coef *= v;
+    return *this;
+  }
+  gMono<T> operator-() const { return {-coef, exps}; }
+
+  // information
+  const T &Coef() const { return coef; }
+  int Dmnsn() const { return exps.Dmnsn(); }
+  int TotalDegree() const { return exps.TotalDegree(); }
+  bool IsConstant() const { return exps.IsConstant(); }
+  bool IsMultiaffine() const { return exps.IsMultiaffine(); }
+  const ExponentVector &ExpV() const { return exps; }
+  T Evaluate(const Vector<T> &vals) const
+  {
+    T answer = coef;
+    for (int i = 1; i <= exps.Dmnsn(); i++) {
+      for (int j = 1; j <= exps[i]; j++) {
+        answer *= vals[i];
+      }
+    }
+    return answer;
+  }
+};
 
 // These classes are used to store and mathematically manipulate polynomials.
-
-//  **NOTE**
-//  Every type T to be used needs a procedure to convert a gText coefficient
-//  to the type T for the gText SOP input form and a procedure to convert
-//  the coefficient into a gText for the SOP output form.
-
-// *******************
-//  gPoly declaration
-// *******************
-
 template <class T> class gPoly {
 
 private:
-  const gSpace *Space; // pointer to variable Space of space
-  const term_order *Order;
+  const VariableSpace *Space;   // pointer to variable Space of space
   Gambit::List<gMono<T>> Terms; // alternative implementation
-
-  // used for gText parsing;
-  unsigned int charnum;
-  char charc;
-  std::string TheString;
 
   //----------------------
   // some private members
   //----------------------
 
-  // Information
-  exp_vect OrderMaxMonomialDivisibleBy(const term_order &order, const exp_vect &expv);
   // Arithmetic
   Gambit::List<gMono<T>> Adder(const Gambit::List<gMono<T>> &,
                                const Gambit::List<gMono<T>> &) const;
@@ -68,45 +245,23 @@ private:
   gPoly<T> TranslateOfMono(const gMono<T> &, const Gambit::Vector<T> &) const;
   gPoly<T> MonoInNewCoordinates(const gMono<T> &, const Gambit::SquareMatrix<T> &) const;
 
-  //-----------------------------------------------
-  // Going back and forth from std::strings to gPoly's
-  //-----------------------------------------------
-
-  // std::string input parser functions
-  void String_Term(T nega);
-  T String_Coeff(T nega);
-  int String_GetPow();
-  void String_VarAndPow(Gambit::Array<int> &PowArray);
-  void GetChar();
-  // Is the string a valid polynomial?
-  bool Check_String(const std::string &Hold);
-
-  //----------------------
-  //   private friends
-  //----------------------
-
-  //  friend gPoly<T> operator*<>(const gPoly<T> &poly, const T val);
-  //  friend gPoly<T> operator*(const T val, const gPoly<T> &poly);
-
 public:
   //---------------------------
   // Construction, destruction:
   //---------------------------
 
   // Null gPoly constructor
-  gPoly(const gSpace *, const term_order *);
-  // Constructs a gPoly equal to the SOP representation in the std::string
-  gPoly(const gSpace *, const std::string &, const term_order *);
+  gPoly(const VariableSpace *);
   // Constructs a constant gPoly
-  gPoly(const gSpace *, const T &, const term_order *);
+  gPoly(const VariableSpace *, const T &);
   // Constructs a gPoly equal to another;
   gPoly(const gPoly<T> &);
   // Constructs a gPoly that is x_{var_no}^exp;
-  gPoly(const gSpace *p, int var_no, int exp, const term_order *);
+  gPoly(const VariableSpace *p, int var_no, int exp);
   // Constructs a gPoly that is the monomial coeff*vars^exps;
-  gPoly(const gSpace *p, exp_vect exps, T coeff, const term_order *);
+  gPoly(const VariableSpace *p, ExponentVector exps, T coeff);
   // Constructs a gPoly with single monomial
-  gPoly(const gSpace *p, const gMono<T> &, const term_order *);
+  gPoly(const VariableSpace *p, const gMono<T> &);
 
   ~gPoly() = default;
 
@@ -115,7 +270,6 @@ public:
   //----------
 
   gPoly<T> &operator=(const gPoly<T> &);
-  gPoly<T> &operator=(const std::string &);
   // Set polynomial equal to the SOP form in the string
   gPoly<T> operator-() const;
   gPoly<T> operator-(const gPoly<T> &) const;
@@ -136,60 +290,31 @@ public:
   // Information:
   //-------------
 
-  const gSpace *GetSpace() const;
-  const term_order *GetOrder() const;
+  const VariableSpace *GetSpace() const;
   int Dmnsn() const;
-  bool IsZero() const;
   int DegreeOfVar(int var_no) const;
   int Degree() const;
-  T GetCoef(const Gambit::Array<int> &Powers) const;
-  T GetCoef(const exp_vect &Powers) const;
+  T GetCoef(const Gambit::Vector<int> &Powers) const;
+  T GetCoef(const ExponentVector &Powers) const;
   gPoly<T> LeadingCoefficient(int varnumber) const;
   T NumLeadCoeff() const; // deg == 0
   bool IsConstant() const;
   bool IsMultiaffine() const;
-  int UniqueActiveVariable() const;
-  // returns 0 if constant, -1 if truly multivariate
-  polynomial<T> UnivariateEquivalent(int activar) const;
   // assumes UniqueActiveVariable() is true
-  T Evaluate(const Gambit::Array<T> &values) const;
-  gPoly<T> EvaluateOneVar(int varnumber, T val) const;
+  T Evaluate(const Gambit::Vector<T> &values) const;
   gPoly<T> PartialDerivative(int varnumber) const;
-  int No_Monomials() const;
-  Gambit::List<exp_vect> ExponentVectors() const;
   Gambit::List<gMono<T>> MonomialList() const;
 
   gPoly<T> TranslateOfPoly(const Gambit::Vector<T> &) const;
   gPoly<T> PolyInNewCoordinates(const Gambit::SquareMatrix<T> &) const;
   T MaximalValueOfNonlinearPart(const T &) const;
-
-  //--------------------
-  // Term Order Concepts
-  //--------------------
-
-  exp_vect LeadingPowerProduct(const term_order &) const;
-  T LeadingCoefficient(const term_order &) const;
-  gPoly<T> LeadingTerm(const term_order &) const;
-  void ToMonic(const term_order &);
-  void ReduceByDivisionAtExpV(const term_order &, const gPoly<T> &, const exp_vect &);
-  void ReduceByRepeatedDivision(const term_order &, const gPoly<T> &);
-  gPoly<T> S_Polynomial(const term_order &, const gPoly<T> &) const;
-
-  //---------------
-  // Printing Stuff
-  //---------------
-
-  // Print polynomial in SOP form
-  void Output(std::string &) const;
 };
-
-template <class T> std::string &operator<<(std::string &, const gPoly<T> &);
 
 //-------------
 // Conversion:
 //-------------
 
-template <class T> gPoly<double> TogDouble(const gPoly<T> &);
+template <class T> gPoly<double> ToDouble(const gPoly<T> &);
 template <class T> gPoly<double> NormalizationOfPoly(const gPoly<T> &);
 
 // global multiply by scalar operators
@@ -199,7 +324,5 @@ template <class T> gPoly<T> operator*(const gPoly<T> &poly, const T &val);
 // global add to scalar operators
 template <class T> gPoly<T> operator+(const T &val, const gPoly<T> &poly);
 template <class T> gPoly<T> operator+(const gPoly<T> &poly, const T &val);
-
-template <class T> std::string ToText(const gPoly<T> &p);
 
 #endif // # GPOLY_H

@@ -123,8 +123,7 @@ public:
   bool operator!=(const QuikSolv<T> &) const;
 
   // Information
-  inline const gSpace *AmbientSpace() const { return System.AmbientSpace(); }
-  inline const term_order *TermOrder() const { return System.TermOrder(); }
+  inline const VariableSpace *AmbientSpace() const { return System.AmbientSpace(); }
   inline int Dmnsn() const { return System.Dmnsn(); }
   inline const gPolyList<T> &UnderlyingEquations() const { return System; }
   inline bool WasSolved() const { return HasBeenSolved; }

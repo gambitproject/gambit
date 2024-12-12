@@ -53,8 +53,7 @@ namespace {
 class ProblemData {
 public:
   GameSequenceForm sfg;
-  gSpace Space;
-  term_order Lex;
+  VariableSpace Space;
   std::map<GameSequence, int> var;
   std::map<GameSequence, gPoly<double>> variables;
 
@@ -65,13 +64,13 @@ gPoly<double> BuildSequenceVariable(ProblemData &p_data, const GameSequence &p_s
                                     const std::map<GameSequence, int> &var)
 {
   if (!p_sequence->action) {
-    return {&p_data.Space, 1, &p_data.Lex};
+    return {&p_data.Space, 1};
   }
   if (p_sequence->action != p_data.sfg.GetSupport().GetActions(p_sequence->GetInfoset()).back()) {
-    return {&p_data.Space, var.at(p_sequence), 1, &p_data.Lex};
+    return {&p_data.Space, var.at(p_sequence), 1};
   }
 
-  gPoly<double> equation(&p_data.Space, &p_data.Lex);
+  gPoly<double> equation(&p_data.Space);
   for (auto seq : p_data.sfg.GetSequences(p_sequence->player)) {
     if (seq == p_sequence) {
       continue;
@@ -86,8 +85,7 @@ gPoly<double> BuildSequenceVariable(ProblemData &p_data, const GameSequence &p_s
 
 ProblemData::ProblemData(const BehaviorSupportProfile &p_support)
   : sfg(p_support),
-    Space(sfg.GetSequences().size() - sfg.GetInfosets().size() - sfg.GetPlayers().size()),
-    Lex(&Space, lex)
+    Space(sfg.GetSequences().size() - sfg.GetInfosets().size() - sfg.GetPlayers().size())
 {
   for (auto sequence : sfg.GetSequences()) {
     if (sequence->action &&
@@ -103,12 +101,12 @@ ProblemData::ProblemData(const BehaviorSupportProfile &p_support)
 
 gPoly<double> GetPayoff(ProblemData &p_data, const GamePlayer &p_player)
 {
-  gPoly<double> equation(&p_data.Space, &p_data.Lex);
+  gPoly<double> equation(&p_data.Space);
 
   for (auto profile : p_data.sfg.GetContingencies()) {
     auto pay = p_data.sfg.GetPayoff(profile, p_player);
     if (pay != Rational(0)) {
-      gPoly<double> term(&p_data.Space, double(pay), &p_data.Lex);
+      gPoly<double> term(&p_data.Space, double(pay));
       for (auto player : p_data.sfg.GetPlayers()) {
         term *= p_data.variables.at(profile[player]);
       }
@@ -160,7 +158,7 @@ std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfil
                                                      bool &p_isSingular, int p_stopAfter)
 {
   ProblemData data(p_support);
-  gPolyList<double> equations(&data.Space, &data.Lex);
+  gPolyList<double> equations(&data.Space);
   IndifferenceEquations(data, equations);
   LastActionProbPositiveInequalities(data, equations);
 

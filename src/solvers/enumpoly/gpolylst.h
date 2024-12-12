@@ -29,15 +29,14 @@
 
 template <class T> class gPolyList {
 private:
-  const gSpace *Space;
-  const term_order *Order;
+  const VariableSpace *Space;
   Gambit::List<gPoly<T> *> List;
 
 public:
-  gPolyList(const gSpace *sp, const term_order *to) : Space(sp), Order(to) {}
+  gPolyList(const VariableSpace *sp) : Space(sp) {}
 
-  gPolyList(const gSpace *, const term_order *, const Gambit::List<gPoly<T> *> &);
-  gPolyList(const gSpace *, const term_order *, const Gambit::List<gPoly<T>> &);
+  gPolyList(const VariableSpace *, const Gambit::List<gPoly<T> *> &);
+  gPolyList(const VariableSpace *, const Gambit::List<gPoly<T>> &);
   gPolyList(const gPolyList<T> &);
 
   ~gPolyList(); // Deletes all pointees
@@ -60,8 +59,7 @@ public:
   gPolyList<T> SystemInNewCoordinates(const Gambit::SquareMatrix<T> &) const;
 
   // Information
-  const gSpace *AmbientSpace() const { return Space; }
-  const term_order *TermOrder() const { return Order; }
+  const VariableSpace *AmbientSpace() const { return Space; }
   int Length() const { return List.size(); }
   int Dmnsn() const { return Space->Dmnsn(); }
   bool IsMultiaffine() const;

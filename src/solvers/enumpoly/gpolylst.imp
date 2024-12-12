@@ -42,11 +42,8 @@ Gambit::List<T> InteriorSegment(const Gambit::List<T> &p_list, int first, int la
 // Constructors / Destructors
 //---------------------------
 
-
 template <class T>
-gPolyList<T>::gPolyList(const gSpace *sp, const term_order *to,
-                        const Gambit::List<gPoly<T> *> &plist)
-  : Space(sp), Order(to), List()
+gPolyList<T>::gPolyList(const VariableSpace *sp, const Gambit::List<gPoly<T> *> &plist) : Space(sp)
 {
   for (int ii = 1; ii <= plist.size(); ii++) {
     auto *temp = new gPoly<T>(*plist[ii]);
@@ -55,8 +52,7 @@ gPolyList<T>::gPolyList(const gSpace *sp, const term_order *to,
 }
 
 template <class T>
-gPolyList<T>::gPolyList(const gSpace *sp, const term_order *to, const Gambit::List<gPoly<T>> &list)
-  : Space(sp), Order(to), List()
+gPolyList<T>::gPolyList(const VariableSpace *sp, const Gambit::List<gPoly<T>> &list) : Space(sp)
 {
   for (int ii = 1; ii <= list.size(); ii++) {
     auto *temp = new gPoly<T>(list[ii]);
@@ -64,8 +60,7 @@ gPolyList<T>::gPolyList(const gSpace *sp, const term_order *to, const Gambit::Li
   }
 }
 
-template <class T>
-gPolyList<T>::gPolyList(const gPolyList<T> &lst) : Space(lst.Space), Order(lst.Order), List()
+template <class T> gPolyList<T>::gPolyList(const gPolyList<T> &lst) : Space(lst.Space)
 {
   for (int ii = 1; ii <= lst.List.size(); ii++) {
     auto *temp = new gPoly<T>(*(lst.List[ii]));
@@ -102,7 +97,7 @@ template <class T> gPolyList<T> &gPolyList<T>::operator=(const gPolyList<T> &rhs
 
 template <class T> bool gPolyList<T>::operator==(const gPolyList<T> &rhs) const
 {
-  if (Space != rhs.Space || Order != rhs.Order) {
+  if (Space != rhs.Space) {
     return false;
   }
   if (List.size() != rhs.List.size()) {
@@ -129,8 +124,6 @@ template <class T> void gPolyList<T>::operator+=(const gPolyList<T> &new_list)
   }
 }
 
-
-
 //------------------------------------------
 //           New Coordinate Systems
 //------------------------------------------
@@ -142,7 +135,7 @@ gPolyList<T> gPolyList<T>::TranslateOfSystem(const Gambit::Vector<T> &new_origin
   for (int i = 1; i <= Length(); i++) {
     new_polys.push_back((*this)[i].TranslateOfPoly(new_origin));
   }
-  return gPolyList<T>(AmbientSpace(), TermOrder(), new_polys);
+  return gPolyList<T>(AmbientSpace(), new_polys);
 }
 
 template <class T>
@@ -152,7 +145,7 @@ gPolyList<T> gPolyList<T>::SystemInNewCoordinates(const Gambit::SquareMatrix<T> 
   for (int i = 1; i <= Length(); i++) {
     new_polys.push_back((*this)[i].PolyInNewCoordinates(M));
   }
-  return gPolyList<T>(AmbientSpace(), TermOrder(), new_polys);
+  return gPolyList<T>(AmbientSpace(), new_polys);
 }
 
 //----------------------------------
