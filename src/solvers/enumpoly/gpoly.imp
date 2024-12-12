@@ -20,7 +20,6 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include <cstdlib>   // for abs()
 #include <algorithm> // for std::max()
 #include "gpoly.h"
 #include "gambit.h"
@@ -280,46 +279,6 @@ template <class T> Gambit::List<exp_vect> gPoly<T>::ExponentVectors() const
 
 template <class T> Gambit::List<gMono<T>> gPoly<T>::MonomialList() const { return Terms; }
 
-template <class T> int gPoly<T>::No_Monomials() const { return Terms.size(); }
-
-template <class T> int gPoly<T>::UniqueActiveVariable() const
-{
-  Gambit::List<exp_vect> ExpVecs = ExponentVectors();
-  int activar = 0;
-  for (int i = 1; i <= ExpVecs.size(); i++) {
-    for (int j = 1; j <= Dmnsn(); j++) {
-      if (ExpVecs[i][j] > 0) {
-        if (activar > 0 && activar != j) {
-          return -1; // multivariate!
-        }
-        else {
-          activar = j;
-        }
-      }
-    }
-  }
-  return activar;
-}
-
-template <class T> polynomial<T> gPoly<T>::UnivariateEquivalent(int activar) const
-{
-  // assert(UniqueActiveVariable() >= 0);
-
-  Gambit::List<T> coefs;
-
-  if (!IsZero()) {
-    for (int h = 0; h <= DegreeOfVar(activar); h++) {
-      coefs.push_back((T)0);
-    }
-
-    for (int i = 1; i <= Terms.size(); i++) {
-      coefs[Terms[i].ExpV()[activar] + 1] = Terms[i].Coef();
-    }
-  }
-
-  return polynomial<T>(coefs);
-}
-
 //-------------------------------------------------------------
 //           Private Versions of Arithmetic Operators
 //-------------------------------------------------------------
@@ -471,32 +430,6 @@ template <class T> gPoly<T> gPoly<T>::DivideByPolynomial(const gPoly<T> &den) co
   return result;
 }
 
-template <class T> gPoly<T> gPoly<T>::EvaluateOneVar(int varnumber, T val) const
-{
-  gPoly<T> answer(Space, (T)0, Order);
-
-  for (int i = 1; i <= Terms.size(); i++) {
-    answer +=
-        gPoly<T>(Space, Terms[i].ExpV().AfterZeroingOutExpOfVariable(varnumber),
-                 ((T)Terms[i].Coef()) * ((T)pow(val, (double)Terms[i].ExpV()[varnumber])), Order);
-  }
-  return answer;
-}
-
-template <class T>
-exp_vect gPoly<T>::OrderMaxMonomialDivisibleBy(const term_order &order, const exp_vect & /*expv*/)
-{
-  //  gout << "You have just tested OrderMaxMonomialDivisibleBy.\n";
-
-  exp_vect answer(Space); // constructs [0,..,0]
-  for (int i = 1; i <= Terms.size(); i++) {
-    if (order.Less(answer, Terms[i].ExpV()) && answer < Terms[i].ExpV()) {
-      answer = Terms[i].ExpV();
-    }
-  }
-  return answer;
-}
-
 template <class T> gPoly<T> gPoly<T>::PartialDerivative(int varnumber) const
 {
   gPoly<T> newPoly(*this);
@@ -572,39 +505,6 @@ template <class T> T gPoly<T>::LeadingCoefficient(const term_order &order) const
     }
     return Terms[max].Coef();
   }
-}
-
-template <class T> gPoly<T> gPoly<T>::LeadingTerm(const term_order &order) const
-{
-  if (*Order == order) { // worth a try ...
-    return gPoly<T>(Space, Terms.back(), Order);
-  }
-  else {
-    int max = 1;
-    for (int j = 2; j <= Terms.size(); j++) {
-      if (order.Less(Terms[max].ExpV(), Terms[j].ExpV())) {
-        max = j;
-      }
-    }
-    return gPoly<T>(Space, Terms[max], Order);
-  }
-}
-
-template <class T> void gPoly<T>::ToMonic(const term_order &order)
-{
-  *this = *this / LeadingCoefficient(order);
-}
-
-template <class T>
-void gPoly<T>::ReduceByDivisionAtExpV(const term_order &order, const gPoly<T> &divisor,
-                                      const exp_vect &expv)
-{
-  // assert(expv >= divisor.LeadingPowerProduct(order));
-  // assert(divisor.LeadingCoefficient(order) != (T)0);
-
-  gPoly<T> factor(Space, expv - divisor.LeadingPowerProduct(order), (T)1, Order);
-
-  *this -= (GetCoef(expv) / divisor.LeadingCoefficient(order)) * factor * divisor;
 }
 
 template <class T>

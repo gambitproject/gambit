@@ -50,8 +50,6 @@ private:
   // some private members
   //----------------------
 
-  // Information
-  exp_vect OrderMaxMonomialDivisibleBy(const term_order &order, const exp_vect &expv);
   // Arithmetic
   Gambit::List<gMono<T>> Adder(const Gambit::List<gMono<T>> &,
                                const Gambit::List<gMono<T>> &) const;
@@ -120,14 +118,9 @@ public:
   T NumLeadCoeff() const; // deg == 0
   bool IsConstant() const;
   bool IsMultiaffine() const;
-  int UniqueActiveVariable() const;
-  // returns 0 if constant, -1 if truly multivariate
-  polynomial<T> UnivariateEquivalent(int activar) const;
   // assumes UniqueActiveVariable() is true
   T Evaluate(const Gambit::Array<T> &values) const;
-  gPoly<T> EvaluateOneVar(int varnumber, T val) const;
   gPoly<T> PartialDerivative(int varnumber) const;
-  int No_Monomials() const;
   Gambit::List<exp_vect> ExponentVectors() const;
   Gambit::List<gMono<T>> MonomialList() const;
 
@@ -141,9 +134,6 @@ public:
 
   exp_vect LeadingPowerProduct(const term_order &) const;
   T LeadingCoefficient(const term_order &) const;
-  gPoly<T> LeadingTerm(const term_order &) const;
-  void ToMonic(const term_order &);
-  void ReduceByDivisionAtExpV(const term_order &, const gPoly<T> &, const exp_vect &);
 };
 
 //-------------
