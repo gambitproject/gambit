@@ -61,7 +61,7 @@ public:
   ~gSpace();
 
   // operators
-  gSpace &operator=(const gSpace &rhs);
+  gSpace &operator=(const gSpace &) = delete;
 
   Variable *operator[](const int index) const { return Variables[index]; }
   bool operator==(const gSpace &rhs) const { return Variables == rhs.Variables; }

@@ -62,20 +62,6 @@ gSpace::~gSpace()
   }
 }
 
-//-----------------
-// Member Functions
-//-----------------
-
-gSpace &gSpace::operator=(const gSpace &rhs)
-{
-  if (*this == rhs) {
-    return *this;
-  }
-
-  Variables = rhs.Variables;
-  return *this;
-}
-
 //------------------------------------------------------
 //                      exp_vect
 //------------------------------------------------------
