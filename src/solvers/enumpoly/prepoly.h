@@ -114,18 +114,55 @@ public:
   void operator-=(const exp_vect &);
 
   // Other operations
-  exp_vect LCM(const exp_vect &) const;
-  exp_vect AfterZeroingOutExpOfVariable(int &) const;
-  exp_vect AfterDecrementingExpOfVariable(int &) const;
+  exp_vect AfterZeroingOutExpOfVariable(const int varnumber) const
+  {
+    exp_vect tmp(*this);
+    tmp.components[varnumber] = 0;
+    return tmp;
+  }
+  exp_vect AfterDecrementingExpOfVariable(const int varnumber) const
+  {
+    exp_vect tmp(*this);
+    tmp.components[varnumber]--;
+    return tmp;
+  }
 
   // Information
   int Dmnsn() const { return Space->Dmnsn(); }
-  bool IsConstant() const;
-  bool IsMultiaffine() const;
-  int TotalDegree() const;
+  bool IsConstant() const
+  {
+    for (int i = 1; i <= Dmnsn(); i++) {
+      if ((*this)[i] > 0) {
+        return false;
+      }
+    }
+    return true;
+  }
+  bool IsMultiaffine() const
+  {
+    for (int i = 1; i <= Dmnsn(); i++) {
+      if ((*this)[i] > 1) {
+        return false;
+      }
+    }
+    return true;
+  }
+  int TotalDegree() const
+  {
+    int exp_sum = 0;
+    for (int i = 1; i <= Dmnsn(); i++) {
+      exp_sum += (*this)[i];
+    }
+    return exp_sum;
+  }
 
   // Manipulation
-  void ToZero();
+  void ToZero()
+  {
+    for (int i = 1; i <= Dmnsn(); i++) {
+      components[i] = 0;
+    }
+  }
 };
 
 // ***********************
