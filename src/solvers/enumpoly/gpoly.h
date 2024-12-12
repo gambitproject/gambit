@@ -46,11 +46,6 @@ private:
   const term_order *Order;
   Gambit::List<gMono<T>> Terms; // alternative implementation
 
-  // used for gText parsing;
-  unsigned int charnum;
-  char charc;
-  std::string TheString;
-
   //----------------------
   // some private members
   //----------------------
@@ -68,26 +63,6 @@ private:
   gPoly<T> TranslateOfMono(const gMono<T> &, const Gambit::Vector<T> &) const;
   gPoly<T> MonoInNewCoordinates(const gMono<T> &, const Gambit::SquareMatrix<T> &) const;
 
-  //-----------------------------------------------
-  // Going back and forth from std::strings to gPoly's
-  //-----------------------------------------------
-
-  // std::string input parser functions
-  void String_Term(T nega);
-  T String_Coeff(T nega);
-  int String_GetPow();
-  void String_VarAndPow(Gambit::Array<int> &PowArray);
-  void GetChar();
-  // Is the string a valid polynomial?
-  bool Check_String(const std::string &Hold);
-
-  //----------------------
-  //   private friends
-  //----------------------
-
-  //  friend gPoly<T> operator*<>(const gPoly<T> &poly, const T val);
-  //  friend gPoly<T> operator*(const T val, const gPoly<T> &poly);
-
 public:
   //---------------------------
   // Construction, destruction:
@@ -95,8 +70,6 @@ public:
 
   // Null gPoly constructor
   gPoly(const gSpace *, const term_order *);
-  // Constructs a gPoly equal to the SOP representation in the std::string
-  gPoly(const gSpace *, const std::string &, const term_order *);
   // Constructs a constant gPoly
   gPoly(const gSpace *, const T &, const term_order *);
   // Constructs a gPoly equal to another;
@@ -115,7 +88,6 @@ public:
   //----------
 
   gPoly<T> &operator=(const gPoly<T> &);
-  gPoly<T> &operator=(const std::string &);
   // Set polynomial equal to the SOP form in the string
   gPoly<T> operator-() const;
   gPoly<T> operator-(const gPoly<T> &) const;
@@ -174,16 +146,7 @@ public:
   void ReduceByDivisionAtExpV(const term_order &, const gPoly<T> &, const exp_vect &);
   void ReduceByRepeatedDivision(const term_order &, const gPoly<T> &);
   gPoly<T> S_Polynomial(const term_order &, const gPoly<T> &) const;
-
-  //---------------
-  // Printing Stuff
-  //---------------
-
-  // Print polynomial in SOP form
-  void Output(std::string &) const;
 };
-
-template <class T> std::string &operator<<(std::string &, const gPoly<T> &);
 
 //-------------
 // Conversion:

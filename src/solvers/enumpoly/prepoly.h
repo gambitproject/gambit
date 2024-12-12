@@ -46,30 +46,24 @@ built on top of a pointer to a function for computing an order.
 class gSpace {
 public:
   struct Variable {
-    std::string Name;
+    std::string name;
     int number;
   };
 
-private:
-  Array<Variable> Variables;
-
-public:
   explicit gSpace(size_t nvars)
   {
     for (size_t i = 1; i <= nvars; i++) {
-      Variables.push_back({"n" + std::to_string(i), static_cast<int>(i)});
+      m_variables.push_back({"n" + std::to_string(i), static_cast<int>(i)});
     }
   }
   gSpace(const gSpace &) = delete;
   ~gSpace() = default;
-
-  // operators
   gSpace &operator=(const gSpace &) = delete;
+  const Variable &operator[](const int index) const { return m_variables[index]; }
+  int Dmnsn() const { return m_variables.size(); }
 
-  const Variable &operator[](const int index) const { return Variables[index]; }
-
-  // information
-  int Dmnsn() const { return Variables.size(); }
+private:
+  Array<Variable> m_variables;
 };
 
 // ***********************
