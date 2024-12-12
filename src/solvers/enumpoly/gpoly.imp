@@ -257,7 +257,7 @@ template <class T> bool gPoly<T>::IsMultiaffine() const
   return true;
 }
 
-template <class T> T gPoly<T>::Evaluate(const Gambit::Array<T> &values) const
+template <class T> T gPoly<T>::Evaluate(const Gambit::Vector<T> &values) const
 {
   T answer = 0;
   for (const auto &term : Terms) {

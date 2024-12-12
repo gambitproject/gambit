@@ -108,7 +108,7 @@ public:
   bool IsConstant() const;
   bool IsMultiaffine() const;
   // assumes UniqueActiveVariable() is true
-  T Evaluate(const Gambit::Array<T> &values) const;
+  T Evaluate(const Gambit::Vector<T> &values) const;
   gPoly<T> PartialDerivative(int varnumber) const;
   Gambit::List<gMono<T>> MonomialList() const;
 

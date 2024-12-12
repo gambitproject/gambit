@@ -74,6 +74,14 @@ public:
   bool IsConstant() const { return exps.IsConstant(); }
   bool IsMultiaffine() const { return exps.IsMultiaffine(); }
   const exp_vect &ExpV() const { return exps; }
-  T Evaluate(const Gambit::Array<T> &) const;
-  T Evaluate(const Gambit::Vector<T> &) const;
+  T Evaluate(const Gambit::Vector<T> &vals) const
+  {
+    T answer = Coef();
+    for (int i = 1; i <= Dmnsn(); i++) {
+      for (int j = 1; j <= exps[i]; j++) {
+        answer *= vals[i];
+      }
+    }
+    return answer;
+  }
 };
