@@ -107,11 +107,6 @@ public:
   {
     return Space != RHS.Space || components != RHS.components;
   }
-  bool operator<=(const exp_vect &RHS) const;
-  bool operator>=(const exp_vect &RHS) const;
-  bool operator<(const exp_vect &RHS) const;
-  bool operator>(const exp_vect &RHS) const;
-
   exp_vect operator+(const exp_vect &v) const
   {
     exp_vect tmp(*this);

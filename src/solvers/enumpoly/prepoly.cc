@@ -25,40 +25,6 @@
 #include "prepoly.h"
 
 //------------------------------------------------------
-//                      exp_vect
-//------------------------------------------------------
-
-//-------------------------
-//        Operators
-//-------------------------
-
-bool exp_vect::operator<=(const exp_vect &RHS) const
-{
-  for (int i = 1; i <= Dmnsn(); i++) {
-    if (components[i] > RHS.components[i]) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-bool exp_vect::operator>=(const exp_vect &RHS) const
-{
-  for (int i = 1; i <= Dmnsn(); i++) {
-    if (components[i] < RHS.components[i]) {
-      return false;
-    }
-  }
-
-  return true;
-}
-
-bool exp_vect::operator<(const exp_vect &RHS) const { return !(*this >= RHS); }
-
-bool exp_vect::operator>(const exp_vect &RHS) const { return !(*this <= RHS); }
-
-//------------------------------------------------------
 //                      term_order
 //------------------------------------------------------
 
