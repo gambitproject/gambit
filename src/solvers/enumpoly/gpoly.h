@@ -23,6 +23,7 @@
 #ifndef GPOLY_H
 #define GPOLY_H
 
+#include <numeric>
 #include "gambit.h"
 #include "core/sqmatrix.h"
 
@@ -223,106 +224,153 @@ public:
   }
 };
 
-// These classes are used to store and mathematically manipulate polynomials.
+// A multivariate polynomial
 template <class T> class gPoly {
-
 private:
-  const VariableSpace *Space;   // pointer to variable Space of space
-  Gambit::List<gMono<T>> Terms; // alternative implementation
-
-  //----------------------
-  // some private members
-  //----------------------
+  const VariableSpace *Space;
+  List<gMono<T>> Terms;
 
   // Arithmetic
-  Gambit::List<gMono<T>> Adder(const Gambit::List<gMono<T>> &,
-                               const Gambit::List<gMono<T>> &) const;
-  Gambit::List<gMono<T>> Mult(const Gambit::List<gMono<T>> &,
-                              const Gambit::List<gMono<T>> &) const;
+  List<gMono<T>> Adder(const List<gMono<T>> &, const List<gMono<T>> &) const;
+  List<gMono<T>> Mult(const List<gMono<T>> &, const List<gMono<T>> &) const;
   gPoly<T> DivideByPolynomial(const gPoly<T> &den) const;
 
-  // The following is used to construct the translate of *this.
-  gPoly<T> TranslateOfMono(const gMono<T> &, const Gambit::Vector<T> &) const;
-  gPoly<T> MonoInNewCoordinates(const gMono<T> &, const Gambit::SquareMatrix<T> &) const;
+  gPoly<T> TranslateOfMono(const gMono<T> &, const Vector<T> &) const;
+  gPoly<T> MonoInNewCoordinates(const gMono<T> &, const SquareMatrix<T> &) const;
 
 public:
-  //---------------------------
-  // Construction, destruction:
-  //---------------------------
-
-  // Null gPoly constructor
-  gPoly(const VariableSpace *);
+  gPoly(const VariableSpace *p) : Space(p) {}
   // Constructs a constant gPoly
-  gPoly(const VariableSpace *, const T &);
-  // Constructs a gPoly equal to another;
-  gPoly(const gPoly<T> &);
+  gPoly(const VariableSpace *p, const T &constant) : Space(p)
+  {
+    if (constant != static_cast<T>(0)) {
+      Terms.push_back(gMono<T>(p, constant));
+    }
+  }
+  gPoly(const gPoly<T> &) = default;
   // Constructs a gPoly that is x_{var_no}^exp;
-  gPoly(const VariableSpace *p, int var_no, int exp);
+  gPoly(const VariableSpace *p, const int var_no, const int exp) : Space(p)
+  {
+    Terms.push_back(gMono<T>(static_cast<T>(1), ExponentVector(p, var_no, exp)));
+  }
   // Constructs a gPoly that is the monomial coeff*vars^exps;
-  gPoly(const VariableSpace *p, ExponentVector exps, T coeff);
+  gPoly(const VariableSpace *p, const ExponentVector &exps, const T &coeff) : Space(p)
+  {
+    Terms.push_back(gMono<T>(coeff, exps));
+  }
   // Constructs a gPoly with single monomial
-  gPoly(const VariableSpace *p, const gMono<T> &);
-
+  gPoly(const VariableSpace *p, const gMono<T> &mono) : Space(p) { Terms.push_back(mono); }
   ~gPoly() = default;
 
   //----------
   // Operators:
   //----------
 
-  gPoly<T> &operator=(const gPoly<T> &);
-  // Set polynomial equal to the SOP form in the string
-  gPoly<T> operator-() const;
-  gPoly<T> operator-(const gPoly<T> &) const;
-  void operator-=(const gPoly<T> &);
-  gPoly<T> operator+(const gPoly<T> &) const;
-  void operator+=(const gPoly<T> &);
-  void operator+=(const T &);
-  gPoly<T> operator*(const gPoly<T> &) const;
-  void operator*=(const gPoly<T> &);
-  void operator*=(const T &);
-  gPoly<T> operator/(const T &val) const;     // division by a constant
-  gPoly<T> operator/(const gPoly<T> &) const; // division by a polynomial
+  gPoly<T> &operator=(const gPoly<T> &) = default;
+  gPoly<T> operator-() const
+  {
+    gPoly<T> neg(*this);
+    for (int j = 1; j <= Terms.size(); j++) {
+      neg.Terms[j] = -Terms[j];
+    }
+    return neg;
+  }
+  gPoly<T> operator-(const gPoly<T> &p) const
+  {
+    gPoly<T> dif(*this);
+    dif -= p;
+    return dif;
+  }
+  void operator-=(const gPoly<T> &p)
+  {
+    gPoly<T> neg = p;
+    for (int i = 1; i <= neg.Terms.size(); i++) {
+      neg.Terms[i] = -neg.Terms[i];
+    }
+    Terms = Adder(Terms, neg.Terms);
+  }
+  gPoly<T> operator+(const gPoly<T> &p) const
+  {
+    gPoly<T> sum(*this);
+    sum += p;
+    return sum;
+  }
+  gPoly<T> operator+(const T &v) const
+  {
+    gPoly<T> result(*this);
+    result += v;
+    return result;
+  }
+  void operator+=(const gPoly<T> &p) { Terms = Adder(Terms, p.Terms); }
+  void operator+=(const T &val) { *this += gPoly<T>(Space, val); }
+  gPoly<T> operator*(const gPoly<T> &p) const
+  {
+    gPoly<T> prod(*this);
+    prod *= p;
+    return prod;
+  }
+  gPoly<T> operator*(const T &v) const
+  {
+    gPoly<T> result(*this);
+    result *= v;
+    return result;
+  }
+  void operator*=(const gPoly<T> &p) { Terms = Mult(Terms, p.Terms); }
+  void operator*=(const T &val)
+  {
+    for (int j = 1; j <= Terms.size(); j++) {
+      Terms[j] *= val;
+    }
+  }
+  gPoly<T> operator/(const T &val) const
+  {
+    if (val == static_cast<T>(0)) {
+      throw ZeroDivideException();
+    }
+    return (*this) * (static_cast<T>(1) / val);
+  }
+  gPoly<T> operator/(const gPoly<T> &den) const { return DivideByPolynomial(den); }
 
-  bool operator==(const gPoly<T> &p) const;
-  bool operator!=(const gPoly<T> &p) const;
+  bool operator==(const gPoly<T> &p) const { return Space == p.Space && Terms == p.Terms; }
+  bool operator!=(const gPoly<T> &p) const { return Space != p.Space || Terms != p.Terms; }
 
   //-------------
-  // Information:
+  // Information
   //-------------
 
-  const VariableSpace *GetSpace() const;
-  int Dmnsn() const;
-  int DegreeOfVar(int var_no) const;
-  int Degree() const;
-  T GetCoef(const Gambit::Vector<int> &Powers) const;
-  T GetCoef(const ExponentVector &Powers) const;
+  const VariableSpace *GetSpace() const { return Space; }
+  int Dmnsn() const { return Space->Dmnsn(); }
+  int DegreeOfVar(int var_no) const
+  {
+    return std::accumulate(Terms.begin(), Terms.end(), 0, [&var_no](int v, const gMono<T> &m) {
+      return std::max(v, m.ExpV()[var_no]);
+    });
+  }
+  int Degree() const
+  {
+    return std::accumulate(Terms.begin(), Terms.end(), 0,
+                           [](int v, const gMono<T> &m) { return std::max(v, m.TotalDegree()); });
+  }
   gPoly<T> LeadingCoefficient(int varnumber) const;
-  T NumLeadCoeff() const; // deg == 0
-  bool IsConstant() const;
-  bool IsMultiaffine() const;
-  // assumes UniqueActiveVariable() is true
-  T Evaluate(const Gambit::Vector<T> &values) const;
+  T NumLeadCoeff() const { return (Terms.size() == 1) ? Terms.front().Coef() : static_cast<T>(0); }
+  bool IsMultiaffine() const
+  {
+    return std::all_of(Terms.begin(), Terms.end(),
+                       [](const gMono<T> &t) { return t.IsMultiaffine(); });
+  }
+  T Evaluate(const Vector<T> &values) const
+  {
+    return std::accumulate(
+        Terms.begin(), Terms.end(), static_cast<T>(0),
+        [&values](const T &v, const gMono<T> &m) { return v + m.Evaluate(values); });
+  }
   gPoly<T> PartialDerivative(int varnumber) const;
-  Gambit::List<gMono<T>> MonomialList() const;
+  const List<gMono<T>> &MonomialList() const { return Terms; }
 
-  gPoly<T> TranslateOfPoly(const Gambit::Vector<T> &) const;
-  gPoly<T> PolyInNewCoordinates(const Gambit::SquareMatrix<T> &) const;
+  gPoly<T> TranslateOfPoly(const Vector<T> &) const;
+  gPoly<T> PolyInNewCoordinates(const SquareMatrix<T> &) const;
   T MaximalValueOfNonlinearPart(const T &) const;
+  gPoly<T> Normalize() const;
 };
-
-//-------------
-// Conversion:
-//-------------
-
-template <class T> gPoly<double> ToDouble(const gPoly<T> &);
-template <class T> gPoly<double> NormalizationOfPoly(const gPoly<T> &);
-
-// global multiply by scalar operators
-template <class T> gPoly<T> operator*(const T &val, const gPoly<T> &poly);
-template <class T> gPoly<T> operator*(const gPoly<T> &poly, const T &val);
-
-// global add to scalar operators
-template <class T> gPoly<T> operator+(const T &val, const gPoly<T> &poly);
-template <class T> gPoly<T> operator+(const gPoly<T> &poly, const T &val);
 
 #endif // # GPOLY_H

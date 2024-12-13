@@ -77,7 +77,7 @@ gPoly<double> BuildSequenceVariable(ProblemData &p_data, const GameSequence &p_s
     }
     if (int constraint_coef =
             p_data.sfg.GetConstraintEntry(p_sequence->GetInfoset(), seq->action)) {
-      equation += double(constraint_coef) * BuildSequenceVariable(p_data, seq, var);
+      equation += BuildSequenceVariable(p_data, seq, var) * double(constraint_coef);
     }
   }
   return equation;

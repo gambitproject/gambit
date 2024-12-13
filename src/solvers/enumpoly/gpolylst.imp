@@ -176,7 +176,7 @@ template <class T> Gambit::List<gPoly<double>> gPolyList<T>::NormalizedList() co
 {
   Gambit::List<gPoly<double>> newlist;
   for (const auto &v : List) {
-    newlist.push_back(gPoly<double>(NormalizationOfPoly(*v)));
+    newlist.push_back(v->Normalize());
   }
   return newlist;
 }
