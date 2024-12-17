@@ -62,12 +62,14 @@ protected:
 
 public:
   class iterator {
+    friend class Array;
+
   private:
     Array *m_array;
     int m_index;
 
   public:
-    using iterator_category = std::forward_iterator_tag;
+    using iterator_category = std::bidirectional_iterator_tag;
     using difference_type = std::ptrdiff_t;
     using value_type = T;
     using pointer = value_type *;
@@ -79,6 +81,11 @@ public:
     iterator &operator++()
     {
       m_index++;
+      return *this;
+    }
+    iterator &operator--()
+    {
+      m_index--;
       return *this;
     }
     iterator operator++(int)
@@ -100,7 +107,7 @@ public:
     int m_index;
 
   public:
-    using iterator_category = std::forward_iterator_tag;
+    using iterator_category = std::bidirectional_iterator_tag;
     using difference_type = std::ptrdiff_t;
     using value_type = T;
     using pointer = value_type *;
@@ -112,6 +119,11 @@ public:
     const_iterator &operator++()
     {
       m_index++;
+      return *this;
+    }
+    const_iterator &operator--()
+    {
+      m_index--;
       return *this;
     }
     const_iterator operator++(int)
@@ -257,9 +269,6 @@ public:
       ;
     return (i <= this->maxdex) ? i : (mindex - 1);
   }
-
-  /// Return true if the element is currently residing in the array
-  bool Contains(const T &t) const { return Find(t) != mindex - 1; }
   //@}
 
   /// @name Modifying the contents of the array
@@ -275,6 +284,8 @@ public:
     return InsertAt(t, (n < this->mindex) ? this->mindex
                                           : ((n > this->maxdex + 1) ? this->maxdex + 1 : n));
   }
+
+  void erase(iterator pos) { Remove(pos.m_index); }
 
   /// \brief Remove an element from the array.
   ///
@@ -333,9 +344,11 @@ public:
   /// leaving the container with a size of 0.
   void clear()
   {
-    delete[] (this->data + this->mindex);
-    this->data = 0;
-    this->maxdex = this->mindex - 1;
+    if (maxdex >= mindex) {
+      delete[] (data + mindex);
+    }
+    data = nullptr;
+    maxdex = mindex - 1;
   }
   ///@}
 };

@@ -156,11 +156,6 @@ public:
   void SetLabel(const std::string &p_label) override { m_label = p_label; }
 
   int GetNumber() const override { return number; }
-  int NumberInInfoset() const override
-  {
-    return infoset->m_members.Find(const_cast<GameTreeNodeRep *>(this));
-  }
-
   int NumChildren() const override { return children.size(); }
   GameNode GetChild(int i) const override { return children[i]; }
   GameNode GetChild(const GameAction &p_action) const override

@@ -60,7 +60,8 @@ void GameStrategyRep::DeleteStrategy()
   }
 
   m_player->GetGame()->IncrementVersion();
-  m_player->m_strategies.Remove(m_player->m_strategies.Find(this));
+  m_player->m_strategies.erase(
+      std::find(m_player->m_strategies.begin(), m_player->m_strategies.end(), this));
   for (int st = 1; st <= m_player->m_strategies.Length(); st++) {
     m_player->m_strategies[st]->m_number = st;
   }

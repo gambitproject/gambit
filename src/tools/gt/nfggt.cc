@@ -30,7 +30,7 @@ List<MixedStrategyProfile<double>> ReadStrategyPerturbations(const Game &p_game,
   List<MixedStrategyProfile<double>> profiles;
   while (!p_stream.eof() && !p_stream.bad()) {
     MixedStrategyProfile<double> p(p_game->NewMixedStrategyProfile(0.0));
-    for (int i = 1; i <= p.MixedProfileLength(); i++) {
+    for (size_t i = 1; i <= p.MixedProfileLength(); i++) {
       if (p_stream.eof() || p_stream.bad()) {
         break;
       }

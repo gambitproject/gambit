@@ -35,8 +35,8 @@ template <class T>
 void PrintCliques(const List<List<MixedStrategyProfile<T>>> &p_cliques,
                   std::shared_ptr<StrategyProfileRenderer<T>> p_renderer)
 {
-  for (int cl = 1; cl <= p_cliques.size(); cl++) {
-    for (int i = 1; i <= p_cliques[cl].size(); i++) {
+  for (size_t cl = 1; cl <= p_cliques.size(); cl++) {
+    for (size_t i = 1; i <= p_cliques[cl].size(); i++) {
       p_renderer->Render(p_cliques[cl][i], "convex-" + lexical_cast<std::string>(cl));
     }
   }

@@ -622,8 +622,8 @@ END_EVENT_TABLE()
 
 gbtEfgPanel::gbtEfgPanel(wxWindow *p_parent, gbtGameDocument *p_doc)
   : wxPanel(p_parent, wxID_ANY), gbtGameView(p_doc), m_treeWindow(new gbtEfgDisplay(this, m_doc)),
-    m_playerToolbar(new gbtTreePlayerToolbar(this, m_doc)),
-    m_dominanceToolbar(new gbtBehavDominanceToolbar(this, m_doc))
+    m_dominanceToolbar(new gbtBehavDominanceToolbar(this, m_doc)),
+    m_playerToolbar(new gbtTreePlayerToolbar(this, m_doc))
 {
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
   topSizer->Add(m_dominanceToolbar, 0, wxEXPAND, 0);

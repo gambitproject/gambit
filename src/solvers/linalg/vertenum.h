@@ -44,7 +44,7 @@ namespace Gambit::linalg {
 template <class T> class VertexEnumerator {
 private:
   bool mult_opt;
-  int depth{0};
+  size_t depth{0};
   int n; // N is the number of columns, which is the # of dimensions.
   int k; // K is the number of inequalities given.
   const Matrix<T> &A;

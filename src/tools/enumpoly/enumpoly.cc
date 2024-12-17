@@ -66,7 +66,7 @@ void PrintProfile(std::ostream &p_stream, const std::string &p_label,
                   const MixedStrategyProfile<double> &p_profile)
 {
   p_stream << p_label;
-  for (int i = 1; i <= p_profile.MixedProfileLength(); i++) {
+  for (size_t i = 1; i <= p_profile.MixedProfileLength(); i++) {
     p_stream.setf(std::ios::fixed);
     p_stream << ',' << std::setprecision(g_numDecimals) << p_profile[i];
   }
@@ -93,7 +93,7 @@ void PrintProfile(std::ostream &p_stream, const std::string &p_label,
                   const MixedBehaviorProfile<double> &p_profile)
 {
   p_stream << p_label;
-  for (int i = 1; i <= p_profile.BehaviorProfileLength(); i++) {
+  for (size_t i = 1; i <= p_profile.BehaviorProfileLength(); i++) {
     p_stream.setf(std::ios::fixed);
     p_stream << "," << std::setprecision(g_numDecimals) << p_profile[i];
   }

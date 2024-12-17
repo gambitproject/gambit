@@ -325,9 +325,9 @@ gbtTreeLayout::gbtTreeLayout(gbtEfgDisplay *p_parent, gbtGameDocument *p_doc)
 
 Gambit::GameNode gbtTreeLayout::NodeHitTest(int p_x, int p_y) const
 {
-  for (int i = 1; i <= m_nodeList.Length(); i++) {
-    if (m_nodeList[i]->NodeHitTest(p_x, p_y)) {
-      return m_nodeList[i]->GetNode();
+  for (const auto &entry : m_nodeList) {
+    if (entry->NodeHitTest(p_x, p_y)) {
+      return entry->GetNode();
     }
   }
   return nullptr;
@@ -335,9 +335,9 @@ Gambit::GameNode gbtTreeLayout::NodeHitTest(int p_x, int p_y) const
 
 Gambit::GameNode gbtTreeLayout::OutcomeHitTest(int p_x, int p_y) const
 {
-  for (int i = 1; i <= m_nodeList.Length(); i++) {
-    if (m_nodeList[i]->OutcomeHitTest(p_x, p_y)) {
-      return m_nodeList[i]->GetNode();
+  for (const auto &entry : m_nodeList) {
+    if (entry->OutcomeHitTest(p_x, p_y)) {
+      return entry->GetNode();
     }
   }
   return nullptr;
@@ -345,9 +345,9 @@ Gambit::GameNode gbtTreeLayout::OutcomeHitTest(int p_x, int p_y) const
 
 Gambit::GameNode gbtTreeLayout::BranchAboveHitTest(int p_x, int p_y) const
 {
-  for (int i = 1; i <= m_nodeList.Length(); i++) {
-    if (m_nodeList[i]->BranchAboveHitTest(p_x, p_y)) {
-      return m_nodeList[i]->GetNode()->GetParent();
+  for (const auto &entry : m_nodeList) {
+    if (entry->BranchAboveHitTest(p_x, p_y)) {
+      return entry->GetNode()->GetParent();
     }
   }
   return nullptr;
@@ -355,9 +355,9 @@ Gambit::GameNode gbtTreeLayout::BranchAboveHitTest(int p_x, int p_y) const
 
 Gambit::GameNode gbtTreeLayout::BranchBelowHitTest(int p_x, int p_y) const
 {
-  for (int i = 1; i <= m_nodeList.Length(); i++) {
-    if (m_nodeList[i]->BranchAboveHitTest(p_x, p_y)) {
-      return m_nodeList[i]->GetNode()->GetParent();
+  for (const auto &entry : m_nodeList) {
+    if (entry->BranchAboveHitTest(p_x, p_y)) {
+      return entry->GetNode()->GetParent();
     }
   }
   return nullptr;
@@ -365,8 +365,7 @@ Gambit::GameNode gbtTreeLayout::BranchBelowHitTest(int p_x, int p_y) const
 
 Gambit::GameNode gbtTreeLayout::InfosetHitTest(int p_x, int p_y) const
 {
-  for (int i = 1; i <= m_nodeList.Length(); i++) {
-    gbtNodeEntry *entry = m_nodeList[i];
+  for (const auto &entry : m_nodeList) {
     if (entry->GetNextMember() && entry->GetNode()->GetInfoset()) {
       if (p_x > entry->X() + entry->GetSublevel() * m_infosetSpacing - 2 &&
           p_x < entry->X() + entry->GetSublevel() * m_infosetSpacing + 2) {
@@ -514,9 +513,9 @@ gbtNodeEntry *gbtTreeLayout::GetValidChild(const Gambit::GameNode &e)
 
 gbtNodeEntry *gbtTreeLayout::GetEntry(const Gambit::GameNode &p_node) const
 {
-  for (int i = 1; i <= m_nodeList.Length(); i++) {
-    if (m_nodeList[i]->GetNode() == p_node) {
-      return m_nodeList[i];
+  for (const auto &entry : m_nodeList) {
+    if (entry->GetNode() == p_node) {
+      return entry;
     }
   }
   return nullptr;
@@ -526,9 +525,10 @@ Gambit::GameNode gbtTreeLayout::PriorSameLevel(const Gambit::GameNode &p_node) c
 {
   gbtNodeEntry *entry = GetEntry(p_node);
   if (entry) {
-    for (int i = m_nodeList.Find(entry) - 1; i >= 1; i--) {
-      if (m_nodeList[i]->GetLevel() == entry->GetLevel()) {
-        return m_nodeList[i]->GetNode();
+    auto e = std::next(std::find(m_nodeList.rbegin(), m_nodeList.rend(), entry));
+    while (e != m_nodeList.rend()) {
+      if ((*e)->GetLevel() == entry->GetLevel()) {
+        return (*e)->GetNode();
       }
     }
   }
@@ -539,10 +539,12 @@ Gambit::GameNode gbtTreeLayout::NextSameLevel(const Gambit::GameNode &p_node) co
 {
   gbtNodeEntry *entry = GetEntry(p_node);
   if (entry) {
-    for (int i = m_nodeList.Find(entry) + 1; i <= m_nodeList.Length(); i++) {
-      if (m_nodeList[i]->GetLevel() == entry->GetLevel()) {
-        return m_nodeList[i]->GetNode();
+    auto e = std::next(std::find(m_nodeList.begin(), m_nodeList.end(), entry));
+    while (e != m_nodeList.end()) {
+      if ((*e)->GetLevel() == entry->GetLevel()) {
+        return (*e)->GetNode();
       }
+      ++e;
     }
   }
   return nullptr;
@@ -578,7 +580,9 @@ int gbtTreeLayout::LayoutSubtree(const Gambit::GameNode &p_node,
 
         if (!p_node->GetPlayer()->IsChance() &&
             !p_support.Contains(p_node->GetInfoset()->GetAction(i))) {
-          m_nodeList[p_node->GetChild(i)->GetNumber()]->SetInSupport(false);
+          (*std::find_if(m_nodeList.begin(), m_nodeList.end(), [&](const gbtNodeEntry *e) {
+            return e->GetNode() == p_node->GetChild(i);
+          }))->SetInSupport(false);
         }
       }
       entry->SetY((y1 + yn) / 2);
@@ -632,8 +636,9 @@ gbtNodeEntry *gbtTreeLayout::NextInfoset(gbtNodeEntry *e)
 {
   const gbtStyle &draw_settings = m_doc->GetStyle();
 
-  for (int pos = m_nodeList.Find(e) + 1; pos <= m_nodeList.Length(); pos++) {
-    gbtNodeEntry *e1 = m_nodeList[pos];
+  auto entry = std::next(std::find(m_nodeList.begin(), m_nodeList.end(), e));
+  while (entry != m_nodeList.end()) {
+    gbtNodeEntry *e1 = *entry;
     // infosets are the same and the nodes are on the same level
     if (e->GetNode()->GetInfoset() == e1->GetNode()->GetInfoset()) {
       if (draw_settings.InfosetConnect() == GBT_INFOSET_CONNECT_ALL) {
@@ -643,6 +648,7 @@ gbtNodeEntry *gbtTreeLayout::NextInfoset(gbtNodeEntry *e)
         return e1;
       }
     }
+    ++entry;
   }
   return nullptr;
 }
@@ -655,14 +661,12 @@ gbtNodeEntry *gbtTreeLayout::NextInfoset(gbtNodeEntry *e)
 //
 void gbtTreeLayout::CheckInfosetEntry(gbtNodeEntry *e)
 {
-  int pos;
-  gbtNodeEntry *infoset_entry, *e1;
+  gbtNodeEntry *infoset_entry;
   // Check if the infoset this entry belongs to (on this level) has already
   // been processed.  If so, make this entry->num the same as the one already
   // processed and return
   infoset_entry = NextInfoset(e);
-  for (pos = 1; pos <= m_nodeList.Length(); pos++) {
-    e1 = m_nodeList[pos];
+  for (const auto &e1 : m_nodeList) {
     // if the infosets are the same and they are on the same level and e1 has been processed
     if (e->GetNode()->GetInfoset() == e1->GetNode()->GetInfoset() &&
         e->GetLevel() == e1->GetLevel() && e1->GetSublevel() > 0) {
@@ -684,8 +688,7 @@ void gbtTreeLayout::CheckInfosetEntry(gbtNodeEntry *e)
   // find the entry on the same level with the maximum num.
   // This entry will have num = num+1.
   int num = 0;
-  for (pos = 1; pos <= m_nodeList.Length(); pos++) {
-    e1 = m_nodeList[pos];
+  for (const auto &e1 : m_nodeList) {
     // Find the max num for this level
     if (e->GetLevel() == e1->GetLevel()) {
       num = std::max(e1->GetSublevel(), num);
@@ -728,8 +731,7 @@ void gbtTreeLayout::UpdateTableInfosets()
   for (int i = 0; i <= m_maxLevel + 1; nums[i++] = 0)
     ;
   // find the max e->num for each level
-  for (int pos = 1; pos <= m_nodeList.Length(); pos++) {
-    gbtNodeEntry *entry = m_nodeList[pos];
+  for (const auto &entry : m_nodeList) {
     nums[entry->GetLevel()] = std::max(entry->GetSublevel() + 1, nums[entry->GetLevel()]);
   }
 
@@ -739,8 +741,7 @@ void gbtTreeLayout::UpdateTableInfosets()
 
   // now add the needed length to each level, and set maxX accordingly
   m_maxX = 0;
-  for (int pos = 1; pos <= m_nodeList.Length(); pos++) {
-    gbtNodeEntry *entry = m_nodeList[pos];
+  for (const auto &entry : m_nodeList) {
     if (entry->GetLevel() != 0) {
       entry->SetX(entry->X() +
                   (nums[entry->GetLevel() - 1] + entry->GetSublevel()) * m_infosetSpacing);
@@ -751,8 +752,7 @@ void gbtTreeLayout::UpdateTableInfosets()
 
 void gbtTreeLayout::UpdateTableParents()
 {
-  for (int pos = 1; pos <= m_nodeList.Length(); pos++) {
-    gbtNodeEntry *e = m_nodeList[pos];
+  for (const auto &e : m_nodeList) {
     e->SetParent((e->GetNode() == m_doc->GetGame()->GetRoot()) ? e : GetValidParent(e->GetNode()));
   }
 }
@@ -762,7 +762,7 @@ void gbtTreeLayout::Layout(const Gambit::BehaviorSupportProfile &p_support)
   // Kinda kludgey; probably should query draw settings whenever needed.
   m_infosetSpacing = (m_doc->GetStyle().InfosetJoin() == GBT_INFOSET_JOIN_LINES) ? 10 : 40;
 
-  if (m_nodeList.Length() != m_doc->GetGame()->NumNodes()) {
+  if (m_nodeList.size() != m_doc->GetGame()->NumNodes()) {
     // A rebuild is in order; force it
     BuildNodeList(p_support);
   }
@@ -815,10 +815,10 @@ void gbtTreeLayout::BuildNodeList(const Gambit::GameNode &p_node,
 
 void gbtTreeLayout::BuildNodeList(const Gambit::BehaviorSupportProfile &p_support)
 {
-  while (m_nodeList.Length() > 0) {
-    delete m_nodeList.Remove(1);
+  for (auto entry : m_nodeList) {
+    delete entry;
   }
-
+  m_nodeList.clear();
   m_maxLevel = 0;
   BuildNodeList(m_doc->GetGame()->GetRoot(), p_support, 0);
 }
@@ -826,8 +826,7 @@ void gbtTreeLayout::BuildNodeList(const Gambit::BehaviorSupportProfile &p_suppor
 void gbtTreeLayout::GenerateLabels()
 {
   const gbtStyle &settings = m_doc->GetStyle();
-  for (int i = 1; i <= m_nodeList.Length(); i++) {
-    gbtNodeEntry *entry = m_nodeList[i];
+  for (const auto &entry : m_nodeList) {
     entry->SetNodeAboveLabel(CreateNodeLabel(entry, settings.NodeAboveLabel()));
     entry->SetNodeAboveFont(settings.GetFont());
     entry->SetNodeBelowLabel(CreateNodeLabel(entry, settings.NodeBelowLabel()));
@@ -877,8 +876,7 @@ void gbtTreeLayout::RenderSubtree(wxDC &p_dc, bool p_noHints) const
 {
   const gbtStyle &settings = m_doc->GetStyle();
 
-  for (int pos = 1; pos <= m_nodeList.Length(); pos++) {
-    gbtNodeEntry *entry = m_nodeList[pos];
+  for (const auto &entry : m_nodeList) {
     gbtNodeEntry *parentEntry = entry->GetParent();
 
     if (entry->GetChildNumber() == 1) {

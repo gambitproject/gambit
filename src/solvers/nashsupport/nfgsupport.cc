@@ -63,7 +63,7 @@ public:
 
     iterator &operator++()
     {
-      for (int i = 1; i <= m_sizes.size(); i++) {
+      for (size_t i = 1; i <= m_sizes.size(); i++) {
         if (++m_indices[i] <= m_sizes[i]) {
           return *this;
         }

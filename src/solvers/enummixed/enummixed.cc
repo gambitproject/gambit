@@ -35,13 +35,13 @@ List<List<MixedStrategyProfile<T>>> EnumMixedStrategySolution<T>::GetCliques() c
 {
   if (m_cliques1.empty()) {
     // Cliques are generated on demand
-    int n = m_node1.size();
+    auto n = m_node1.size();
     if (m_node2.size() != n) {
       throw DimensionException();
     }
 
     Array<CliqueEnumerator::Edge> edgelist(n);
-    for (int i = 1; i <= n; i++) {
+    for (size_t i = 1; i <= n; i++) {
       edgelist[i].node1 = m_node1[i];
       edgelist[i].node2 = m_node2[i];
     }
@@ -52,7 +52,7 @@ List<List<MixedStrategyProfile<T>>> EnumMixedStrategySolution<T>::GetCliques() c
   }
 
   List<List<MixedStrategyProfile<T>>> solution;
-  for (int cl = 1; cl <= m_cliques1.size(); cl++) {
+  for (size_t cl = 1; cl <= m_cliques1.size(); cl++) {
     solution.push_back(List<MixedStrategyProfile<T>>());
     for (int i = 1; i <= m_cliques1[cl].Length(); i++) {
       for (int j = 1; j <= m_cliques2[cl].Length(); j++) {
@@ -131,9 +131,9 @@ EnumMixedStrategySolver<T>::SolveDetailed(const Game &p_game) const
 
   Array<int> vert1id(solution->m_v1);
   Array<int> vert2id(solution->m_v2);
-  for (int i = 1; i <= vert1id.size(); vert1id[i++] = 0)
+  for (size_t i = 1; i <= vert1id.size(); vert1id[i++] = 0)
     ;
-  for (int i = 1; i <= vert2id.size(); vert2id[i++] = 0)
+  for (size_t i = 1; i <= vert2id.size(); vert2id[i++] = 0)
     ;
 
   int i = 0;

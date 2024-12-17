@@ -45,7 +45,7 @@ Gambit::List<T> InteriorSegment(const Gambit::List<T> &p_list, int first, int la
 template <class T>
 gPolyList<T>::gPolyList(const VariableSpace *sp, const Gambit::List<gPoly<T> *> &plist) : Space(sp)
 {
-  for (int ii = 1; ii <= plist.size(); ii++) {
+  for (size_t ii = 1; ii <= plist.size(); ii++) {
     auto *temp = new gPoly<T>(*plist[ii]);
     List.push_back(temp);
   }
@@ -54,7 +54,7 @@ gPolyList<T>::gPolyList(const VariableSpace *sp, const Gambit::List<gPoly<T> *> 
 template <class T>
 gPolyList<T>::gPolyList(const VariableSpace *sp, const Gambit::List<gPoly<T>> &list) : Space(sp)
 {
-  for (int ii = 1; ii <= list.size(); ii++) {
+  for (size_t ii = 1; ii <= list.size(); ii++) {
     auto *temp = new gPoly<T>(list[ii]);
     List.push_back(temp);
   }
@@ -62,7 +62,7 @@ gPolyList<T>::gPolyList(const VariableSpace *sp, const Gambit::List<gPoly<T>> &l
 
 template <class T> gPolyList<T>::gPolyList(const gPolyList<T> &lst) : Space(lst.Space)
 {
-  for (int ii = 1; ii <= lst.List.size(); ii++) {
+  for (size_t ii = 1; ii <= lst.List.size(); ii++) {
     auto *temp = new gPoly<T>(*(lst.List[ii]));
     List.push_back(temp);
   }
@@ -70,7 +70,7 @@ template <class T> gPolyList<T>::gPolyList(const gPolyList<T> &lst) : Space(lst.
 
 template <class T> gPolyList<T>::~gPolyList()
 {
-  for (int ii = 1; ii <= List.size(); ii++) {
+  for (size_t ii = 1; ii <= List.size(); ii++) {
     delete List[ii];
   }
 }
@@ -82,12 +82,12 @@ template <class T> gPolyList<T>::~gPolyList()
 template <class T> gPolyList<T> &gPolyList<T>::operator=(const gPolyList<T> &rhs)
 {
   if (*this != rhs) {
-    for (int ii = List.size(); ii >= 1; ii--) {
+    for (size_t ii = List.size(); ii >= 1; ii--) {
       delete List[ii];
       List.erase(std::next(List.begin(), ii - 1));
     }
 
-    for (int ii = 1; ii <= rhs.List.size(); ii++) {
+    for (size_t ii = 1; ii <= rhs.List.size(); ii++) {
       auto *temp = new gPoly<T>(*(rhs.List[ii]));
       List.push_back(temp);
     }
@@ -103,7 +103,7 @@ template <class T> bool gPolyList<T>::operator==(const gPolyList<T> &rhs) const
   if (List.size() != rhs.List.size()) {
     return false;
   }
-  for (int j = 1; j <= List.size(); j++) {
+  for (size_t j = 1; j <= List.size(); j++) {
     if (*List[j] != *(rhs.List[j])) {
       return false;
     }
@@ -165,7 +165,7 @@ template <class T> bool gPolyList<T>::IsMultiaffine() const
 template <class T> Gambit::Vector<T> gPolyList<T>::Evaluate(const Gambit::Vector<T> &v) const
 {
   Gambit::Vector<T> answer(Length());
-  for (int ii = 1; ii <= List.size(); ii++) {
+  for (size_t ii = 1; ii <= List.size(); ii++) {
     answer[ii] = List[ii]->Evaluate(v);
   }
 

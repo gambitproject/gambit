@@ -36,7 +36,7 @@ List<MixedStrategyProfile<Rational>> ReadProfiles(const Game &p_game, std::istre
   List<MixedStrategyProfile<Rational>> profiles;
   while (!p_stream.eof() && !p_stream.bad()) {
     MixedStrategyProfile<Rational> p(p_game->NewMixedStrategyProfile(Rational(0)));
-    for (int i = 1; i <= p.MixedProfileLength(); i++) {
+    for (size_t i = 1; i <= p.MixedProfileLength(); i++) {
       if (p_stream.eof() || p_stream.bad()) {
         break;
       }

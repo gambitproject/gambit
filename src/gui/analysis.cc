@@ -59,7 +59,7 @@ MixedStrategyProfile<T> OutputToMixedProfile(gbtGameDocument *p_doc, const wxStr
 
   if (tok.GetNextToken() == wxT("NE")) {
     if (tok.CountTokens() == (unsigned int)profile.MixedProfileLength()) {
-      for (int i = 1; i <= profile.MixedProfileLength(); i++) {
+      for (size_t i = 1; i <= profile.MixedProfileLength(); i++) {
         profile[i] =
             lexical_cast<Rational>(std::string((const char *)tok.GetNextToken().mb_str()));
       }
@@ -79,7 +79,7 @@ MixedBehaviorProfile<T> OutputToBehavProfile(gbtGameDocument *p_doc, const wxStr
 
   if (tok.GetNextToken() == wxT("NE")) {
     if (tok.CountTokens() == (unsigned int)profile.BehaviorProfileLength()) {
-      for (int i = 1; i <= profile.BehaviorProfileLength(); i++) {
+      for (size_t i = 1; i <= profile.BehaviorProfileLength(); i++) {
         profile[i] =
             lexical_cast<Rational>(std::string((const char *)tok.GetNextToken().mb_str()));
       }
@@ -156,7 +156,7 @@ MixedStrategyProfile<T> TextToMixedProfile(gbtGameDocument *p_doc, const wxStrin
 
   wxStringTokenizer tok(p_text, wxT(","));
 
-  for (int i = 1; i <= profile.MixedProfileLength(); i++) {
+  for (size_t i = 1; i <= profile.MixedProfileLength(); i++) {
     profile[i] = lexical_cast<Rational>(std::string((const char *)tok.GetNextToken().mb_str()));
   }
 
@@ -169,7 +169,7 @@ MixedBehaviorProfile<T> TextToBehavProfile(gbtGameDocument *p_doc, const wxStrin
   MixedBehaviorProfile<T> profile(p_doc->GetGame());
 
   wxStringTokenizer tok(p_text, wxT(","));
-  for (int i = 1; i <= profile.BehaviorProfileLength(); i++) {
+  for (size_t i = 1; i <= profile.BehaviorProfileLength(); i++) {
     profile[i] = lexical_cast<Rational>(std::string((const char *)tok.GetNextToken().mb_str()));
   }
 
@@ -441,7 +441,7 @@ template <class T> void gbtAnalysisProfileList<T>::Save(std::ostream &p_file) co
     for (int j = 1; j <= NumProfiles(); j++) {
       const MixedBehaviorProfile<T> &behav = *m_behavProfiles[j];
       p_file << "<profile type=\"behav\">\n";
-      for (int k = 1; k <= behav.BehaviorProfileLength(); k++) {
+      for (size_t k = 1; k <= behav.BehaviorProfileLength(); k++) {
         p_file << behav[k];
         if (k < behav.BehaviorProfileLength()) {
           p_file << ",";
@@ -457,7 +457,7 @@ template <class T> void gbtAnalysisProfileList<T>::Save(std::ostream &p_file) co
     for (int j = 1; j <= NumProfiles(); j++) {
       const MixedStrategyProfile<T> &mixed = *m_mixedProfiles[j];
       p_file << "<profile type=\"mixed\">\n";
-      for (int k = 1; k <= mixed.MixedProfileLength(); k++) {
+      for (size_t k = 1; k <= mixed.MixedProfileLength(); k++) {
         p_file << mixed[k];
         if (k < mixed.MixedProfileLength()) {
           p_file << ",";

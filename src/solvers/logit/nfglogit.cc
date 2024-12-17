@@ -43,7 +43,7 @@ MixedStrategyProfile<double> PointToProfile(const Game &p_game, const Vector<dou
 Vector<double> ProfileToPoint(const LogitQREMixedStrategyProfile &p_profile)
 {
   Vector<double> point(p_profile.size() + 1);
-  for (int i = 1; i <= p_profile.size(); i++) {
+  for (size_t i = 1; i <= p_profile.size(); i++) {
     point[i] = log(p_profile[i]);
   }
   point.back() = p_profile.GetLambda();

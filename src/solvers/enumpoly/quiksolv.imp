@@ -451,15 +451,14 @@ void QuikSolv<T>::FindRootsRecursion(Gambit::List<Gambit::Vector<double>> *rootl
   Gambit::Vector<double> point = r.Center();
 
   if (NewtonRootIsOnlyInRct(r, point)) {
-    int i;
-    for (i = NoEquations + 1; i <= System.Length(); i++) {
+    for (int i = NoEquations + 1; i <= System.Length(); i++) {
       if (TreesOfPartials[i].ValueOfRootPoly(point) < (double)0) {
         return;
       }
     }
 
     bool already_found = false;
-    for (i = 1; i <= rootlistptr->size(); i++) {
+    for (size_t i = 1; i <= rootlistptr->size(); i++) {
       if (fuzzy_equals(point, (*rootlistptr)[i])) {
         already_found = true;
       }

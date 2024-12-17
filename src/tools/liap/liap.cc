@@ -64,7 +64,7 @@ List<MixedStrategyProfile<double>> ReadStrategyProfiles(const Game &p_game, std:
   List<MixedStrategyProfile<double>> profiles;
   while (!p_stream.eof() && !p_stream.bad()) {
     MixedStrategyProfile<double> p(p_game->NewMixedStrategyProfile(0.0));
-    for (int i = 1; i <= p.MixedProfileLength(); i++) {
+    for (size_t i = 1; i <= p.MixedProfileLength(); i++) {
       if (p_stream.eof() || p_stream.bad()) {
         break;
       }
@@ -97,7 +97,7 @@ List<MixedBehaviorProfile<double>> ReadBehaviorProfiles(const Game &p_game, std:
   List<MixedBehaviorProfile<double>> profiles;
   while (!p_stream.eof() && !p_stream.bad()) {
     MixedBehaviorProfile<double> p(p_game);
-    for (int i = 1; i <= p.BehaviorProfileLength(); i++) {
+    for (size_t i = 1; i <= p.BehaviorProfileLength(); i++) {
       if (p_stream.eof() || p_stream.bad()) {
         break;
       }
@@ -214,7 +214,7 @@ int main(int argc, char *argv[])
         starts = RandomStrategyProfiles(game, numTries);
       }
 
-      for (int i = 1; i <= starts.size(); i++) {
+      for (size_t i = 1; i <= starts.size(); i++) {
         std::shared_ptr<StrategyProfileRenderer<double>> renderer(
             new MixedStrategyCSVRenderer<double>(std::cout, numDecimals));
 
@@ -238,7 +238,7 @@ int main(int argc, char *argv[])
         starts = RandomBehaviorProfiles(game, numTries);
       }
 
-      for (int i = 1; i <= starts.size(); i++) {
+      for (size_t i = 1; i <= starts.size(); i++) {
         std::shared_ptr<StrategyProfileRenderer<double>> renderer(
             new BehavStrategyCSVRenderer<double>(std::cout, numDecimals));
         LiapBehaviorSolve(starts[i], maxregret, maxitsN,

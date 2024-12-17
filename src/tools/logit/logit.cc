@@ -66,7 +66,7 @@ void PrintHelp(char *progname)
 //
 bool ReadProfile(std::istream &p_stream, MixedStrategyProfile<double> &p_profile)
 {
-  for (int i = 1; i <= p_profile.MixedProfileLength(); i++) {
+  for (size_t i = 1; i <= p_profile.MixedProfileLength(); i++) {
     if (p_stream.eof() || p_stream.bad()) {
       return false;
     }

@@ -216,8 +216,8 @@ private:
   void AddView(gbtGameView *p_view) { m_views.push_back(p_view); }
   void RemoveView(gbtGameView *p_view)
   {
-    m_views.Remove(m_views.Find(p_view));
-    if (m_views.Length() == 0) {
+    m_views.erase(std::find(m_views.begin(), m_views.end(), p_view));
+    if (m_views.empty()) {
       delete this;
     }
   }

@@ -32,7 +32,7 @@ namespace Gambit {
 PureStrategyProfileRep::PureStrategyProfileRep(const Game &p_game)
   : m_nfg(p_game), m_profile(p_game->NumPlayers())
 {
-  for (size_t pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
+  for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
     m_profile[pl] = m_nfg->GetPlayer(pl)->GetStrategy(1);
   }
 }

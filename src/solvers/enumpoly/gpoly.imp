@@ -44,8 +44,8 @@ List<gMono<T>> gPoly<T>::Adder(const List<gMono<T>> &One, const List<gMono<T>> &
 
   List<gMono<T>> answer;
 
-  int i = 1;
-  int j = 1;
+  size_t i = 1;
+  size_t j = 1;
   while (i <= One.size() || j <= Two.size()) {
     if (i > One.size()) {
       answer.push_back(Two[j]);
@@ -86,8 +86,8 @@ List<gMono<T>> gPoly<T>::Mult(const List<gMono<T>> &One, const List<gMono<T>> &T
     return answer;
   }
 
-  for (int i = 1; i <= One.size(); i++) {
-    for (int j = 1; j <= Two.size(); j++) {
+  for (size_t i = 1; i <= One.size(); i++) {
+    for (size_t j = 1; j <= Two.size(); j++) {
       gMono<T> next = One[i] * Two[j];
 
       if (answer.empty()) {
@@ -177,12 +177,12 @@ template <class T> gPoly<T> gPoly<T>::PartialDerivative(int varnumber) const
 {
   gPoly<T> newPoly(*this);
 
-  for (int i = 1; i <= newPoly.Terms.size(); i++) {
+  for (size_t i = 1; i <= newPoly.Terms.size(); i++) {
     newPoly.Terms[i] = gMono<T>(newPoly.Terms[i].Coef() * (T)newPoly.Terms[i].ExpV()[varnumber],
                                 newPoly.Terms[i].ExpV().WithZeroExponent(varnumber));
   }
 
-  int j = 1;
+  size_t j = 1;
   while (j <= newPoly.Terms.size()) {
     if (newPoly.Terms[j].Coef() == static_cast<T>(0)) {
       newPoly.Terms.erase(std::next(newPoly.Terms.begin(), j - 1));
@@ -200,7 +200,7 @@ template <class T> gPoly<T> gPoly<T>::LeadingCoefficient(int varnumber) const
   gPoly<T> newPoly(*this);
   int degree = DegreeOfVar(varnumber);
   newPoly.Terms = List<gMono<T>>();
-  for (int j = 1; j <= Terms.size(); j++) {
+  for (size_t j = 1; j <= Terms.size(); j++) {
     if (Terms[j].ExpV()[varnumber] == degree) {
       newPoly.Terms.push_back(
           gMono<T>(Terms[j].Coef(), Terms[j].ExpV().WithZeroExponent(varnumber)));
@@ -229,7 +229,7 @@ gPoly<T> gPoly<T>::TranslateOfMono(const gMono<T> &m, const Vector<T> &new_origi
 template <class T> gPoly<T> gPoly<T>::TranslateOfPoly(const Vector<T> &new_origin) const
 {
   gPoly<T> answer(GetSpace());
-  for (int i = 1; i <= this->MonomialList().size(); i++) {
+  for (size_t i = 1; i <= this->MonomialList().size(); i++) {
     answer += TranslateOfMono(this->MonomialList()[i], new_origin);
   }
   return answer;

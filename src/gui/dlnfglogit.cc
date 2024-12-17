@@ -77,7 +77,7 @@ void LogitMixedBranch::AddProfile(const wxString &p_text)
   m_lambdas.push_back(
       (double)lexical_cast<Rational>(std::string((const char *)tok.GetNextToken().mb_str())));
 
-  for (int i = 1; i <= profile->MixedProfileLength(); i++) {
+  for (size_t i = 1; i <= profile->MixedProfileLength(); i++) {
     (*profile)[i] = lexical_cast<Rational>(std::string((const char *)tok.GetNextToken().mb_str()));
   }
 
@@ -456,8 +456,8 @@ public:
 
 LogitPlotPanel::LogitPlotPanel(wxWindow *p_parent, gbtGameDocument *p_doc)
   : wxPanel(p_parent, wxID_ANY), m_doc(p_doc), m_branch(p_doc),
-    m_plotCtrl(new gbtLogitPlotCtrl(this, p_doc)),
-    m_plotStrategies(new gbtLogitPlotStrategyList(this, p_doc))
+    m_plotStrategies(new gbtLogitPlotStrategyList(this, p_doc)),
+    m_plotCtrl(new gbtLogitPlotCtrl(this, p_doc))
 {
   m_plotCtrl->SetSizeHints(wxSize(600, 400));
 
@@ -605,7 +605,7 @@ END_EVENT_TABLE()
 
 LogitMixedDialog::LogitMixedDialog(wxWindow *p_parent, gbtGameDocument *p_doc)
   : wxDialog(p_parent, wxID_ANY, wxT("Compute quantal response equilibria"), wxDefaultPosition),
-    m_doc(p_doc), m_timer(this, GBT_ID_TIMER), m_plot(new LogitPlotPanel(this, m_doc))
+    m_doc(p_doc), m_plot(new LogitPlotPanel(this, m_doc)), m_timer(this, GBT_ID_TIMER)
 {
   auto *sizer = new wxBoxSizer(wxVERTICAL);
 

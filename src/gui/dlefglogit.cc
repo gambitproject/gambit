@@ -178,7 +178,7 @@ void gbtLogitBehavList::AddProfile(const wxString &p_text, bool p_forceShow)
   m_lambdas.push_back((double)Gambit::lexical_cast<Gambit::Rational>(
       std::string((const char *)tok.GetNextToken().mb_str())));
 
-  for (int i = 1; i <= profile->BehaviorProfileLength(); i++) {
+  for (size_t i = 1; i <= profile->BehaviorProfileLength(); i++) {
     (*profile)[i] = Gambit::lexical_cast<Gambit::Rational>(
         std::string((const char *)tok.GetNextToken().mb_str()));
   }
@@ -207,8 +207,8 @@ END_EVENT_TABLE()
 
 gbtLogitBehavDialog::gbtLogitBehavDialog(wxWindow *p_parent, gbtGameDocument *p_doc)
   : wxDialog(p_parent, wxID_ANY, wxT("Compute quantal response equilibria"), wxDefaultPosition),
-    m_doc(p_doc), m_process(nullptr), m_timer(this, GBT_ID_TIMER),
-    m_behavList(new gbtLogitBehavList(this, m_doc))
+    m_doc(p_doc), m_process(nullptr), m_behavList(new gbtLogitBehavList(this, m_doc)),
+    m_timer(this, GBT_ID_TIMER)
 {
   auto *sizer = new wxBoxSizer(wxVERTICAL);
 

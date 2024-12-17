@@ -68,7 +68,10 @@ public:
   //!
   //@{
   void AddDocument(gbtGameDocument *p_doc) { m_documents.push_back(p_doc); }
-  void RemoveDocument(gbtGameDocument *p_doc) { m_documents.Remove(m_documents.Find(p_doc)); }
+  void RemoveDocument(gbtGameDocument *p_doc)
+  {
+    m_documents.erase(std::find(m_documents.begin(), m_documents.end(), p_doc));
+  }
   bool AreDocumentsModified() const;
   //@}
 };
