@@ -257,9 +257,6 @@ public:
       ;
     return (i <= this->maxdex) ? i : (mindex - 1);
   }
-
-  /// Return true if the element is currently residing in the array
-  bool Contains(const T &t) const { return Find(t) != mindex - 1; }
   //@}
 
   /// @name Modifying the contents of the array

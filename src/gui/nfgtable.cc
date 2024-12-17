@@ -999,7 +999,7 @@ void gbtTableWidget::OnUpdate()
 {
   if (m_doc->NumPlayers() > m_rowPlayers.Length() + m_colPlayers.Length()) {
     for (int pl = 1; pl <= m_doc->NumPlayers(); pl++) {
-      if (!m_rowPlayers.Contains(pl) && !m_colPlayers.Contains(pl)) {
+      if (!contains(m_rowPlayers, pl) && !contains(m_colPlayers, pl)) {
         m_rowPlayers.push_back(pl);
       }
     }
@@ -1060,7 +1060,7 @@ bool gbtTableWidget::ShowDominance() const { return m_nfgPanel->IsDominanceShown
 
 void gbtTableWidget::SetRowPlayer(int index, int pl)
 {
-  if (m_rowPlayers.Contains(pl)) {
+  if (contains(m_rowPlayers, pl)) {
     int oldIndex = m_rowPlayers.Find(pl);
     m_rowPlayers.Remove(oldIndex);
     if (index > oldIndex) {
@@ -1108,7 +1108,7 @@ int gbtTableWidget::RowToStrategy(int player, int row) const
 
 void gbtTableWidget::SetColPlayer(int index, int pl)
 {
-  if (m_colPlayers.Contains(pl)) {
+  if (contains(m_colPlayers, pl)) {
     int oldIndex = m_colPlayers.Find(pl);
     m_colPlayers.Remove(oldIndex);
     if (index > oldIndex) {
