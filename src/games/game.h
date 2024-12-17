@@ -351,7 +351,6 @@ public:
   virtual void SetLabel(const std::string &p_label) = 0;
 
   virtual int GetNumber() const = 0;
-  virtual int NumberInInfoset() const = 0;
 
   virtual int NumChildren() const = 0;
   virtual GameNode GetChild(int i) const = 0;
