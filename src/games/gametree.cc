@@ -359,7 +359,7 @@ GameNode GameTreeNodeRep::GetPriorSibling() const
   if (!m_parent || m_parent->children.front() == this) {
     return nullptr;
   }
-  return m_parent->children[m_parent->children.Find(const_cast<GameTreeNodeRep *>(this)) - 1];
+  return *std::prev(std::find(m_parent->children.begin(), m_parent->children.end(), this));
 }
 
 GameAction GameTreeNodeRep::GetPriorAction() const

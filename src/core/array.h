@@ -69,7 +69,7 @@ public:
     int m_index;
 
   public:
-    using iterator_category = std::forward_iterator_tag;
+    using iterator_category = std::bidirectional_iterator_tag;
     using difference_type = std::ptrdiff_t;
     using value_type = T;
     using pointer = value_type *;
@@ -81,6 +81,11 @@ public:
     iterator &operator++()
     {
       m_index++;
+      return *this;
+    }
+    iterator &operator--()
+    {
+      m_index--;
       return *this;
     }
     iterator operator++(int)
@@ -102,7 +107,7 @@ public:
     int m_index;
 
   public:
-    using iterator_category = std::forward_iterator_tag;
+    using iterator_category = std::bidirectional_iterator_tag;
     using difference_type = std::ptrdiff_t;
     using value_type = T;
     using pointer = value_type *;
@@ -114,6 +119,11 @@ public:
     const_iterator &operator++()
     {
       m_index++;
+      return *this;
+    }
+    const_iterator &operator--()
+    {
+      m_index--;
       return *this;
     }
     const_iterator operator++(int)
