@@ -75,11 +75,11 @@ template <class T> void gTree<T>::InsertAt(const T &t, gTreeNode<T> *n)
 template <class T> void gTree<T>::RecursiveCopy(gTreeNode<T> *copyn, const gTreeNode<T> *orign)
 {
   auto oldchildren = Children(orign);
-  for (int i = 1; i <= oldchildren.size(); i++) {
+  for (size_t i = 1; i <= oldchildren.size(); i++) {
     InsertAt(oldchildren[i]->data, copyn);
   }
   auto newchildren = Children(copyn);
-  for (int i = 1; i <= newchildren.size(); i++) {
+  for (size_t i = 1; i <= newchildren.size(); i++) {
     RecursiveCopy(newchildren[i], oldchildren[i]);
   }
 }
@@ -160,7 +160,7 @@ bool gTree<T>::SubtreesAreIsomorphic(const gTreeNode<T> *lhs, const gTreeNode<T>
   if (lchildren.size() != rchildren.size()) {
     return false;
   }
-  for (int i = 1; i <= lchildren.size(); i++) {
+  for (size_t i = 1; i <= lchildren.size(); i++) {
     if (!SubtreesAreIsomorphic(lchildren[i], rchildren[i])) {
       return false;
     }

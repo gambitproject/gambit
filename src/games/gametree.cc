@@ -1110,7 +1110,7 @@ Game GameTreeRep::SetChanceProbs(const GameInfoset &p_infoset, const Array<Numbe
     throw UndefinedException(
         "Action probabilities can only be specified for chance information sets");
   }
-  if (p_infoset->NumActions() != p_probs.size()) {
+  if (p_infoset->NumActions() != static_cast<int>(p_probs.size())) {
     throw DimensionException("The number of probabilities given must match the number of actions");
   }
   IncrementVersion();

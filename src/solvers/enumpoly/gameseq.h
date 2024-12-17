@@ -202,7 +202,7 @@ public:
     private:
       const GameSequenceForm *m_sfg;
       bool m_end{false};
-      std::map<GamePlayer, int> m_indices;
+      std::map<GamePlayer, size_t> m_indices;
 
     public:
       using iterator_category = std::input_iterator_tag;

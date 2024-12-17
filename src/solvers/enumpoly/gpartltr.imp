@@ -94,7 +94,7 @@ T TreeOfPartials<T>::MaximalNonconstantContributionRECURSIVE(
 
   if (n->GetEldest() != nullptr) {
     Gambit::List<gTreeNode<gPoly<T>> *> children = PartialTree.Children(n);
-    for (int i = 1; i <= children.size(); i++) {
+    for (size_t i = 1; i <= children.size(); i++) {
       wrtos[i]++;
 
       T increment = children[i]->GetData().Evaluate(p);
@@ -130,7 +130,7 @@ T TreeOfPartials<T>::MaximalNonconstantDifferenceRECURSIVE(
   if (n1->GetEldest() != nullptr && n2->GetEldest() != nullptr) {
     Gambit::List<gTreeNode<gPoly<T>> *> children1 = PartialTree.Children(n1);
     Gambit::List<gTreeNode<gPoly<T>> *> children2 = PartialTree.Children(n2);
-    for (int i = 1; i <= children1.size(); i++) {
+    for (size_t i = 1; i <= children1.size(); i++) {
       wrtos[i]++;
 
       T increment = children1[i]->GetData().Evaluate(p) - children2[i]->GetData().Evaluate(p);
@@ -156,7 +156,7 @@ T TreeOfPartials<T>::MaximalNonconstantDifferenceRECURSIVE(
 
   else if (n1->GetEldest() != nullptr && n2->GetEldest() == nullptr) {
     auto children1 = PartialTree.Children(n1);
-    for (int i = 1; i <= children1.size(); i++) {
+    for (size_t i = 1; i <= children1.size(); i++) {
       wrtos[i]++;
 
       T increment = children1[i]->GetData().Evaluate(p);
@@ -181,7 +181,7 @@ T TreeOfPartials<T>::MaximalNonconstantDifferenceRECURSIVE(
 
   else if (n1->GetEldest() == nullptr && n2->GetEldest() != nullptr) {
     auto children2 = PartialTree.Children(n2);
-    for (int i = 1; i <= children2.size(); i++) {
+    for (size_t i = 1; i <= children2.size(); i++) {
       wrtos[i]++;
 
       T increment = children2[i]->GetData().Evaluate(p);

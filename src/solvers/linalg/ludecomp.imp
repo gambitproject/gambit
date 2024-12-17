@@ -320,7 +320,7 @@ void LUDecomposition<T>::yLP_mult(const Vector<T> &y, int j, Vector<T> &ans) con
 template <class T> void LUDecomposition<T>::LPd_Trans(Vector<T> &d) const
 {
   Vector<T> scratch(basis.First(), basis.Last());
-  for (int j = 0; j < L.size(); j++) {
+  for (size_t j = 0; j < L.size(); j++) {
     LPd_mult(d, j, scratch);
     d = scratch;
   }

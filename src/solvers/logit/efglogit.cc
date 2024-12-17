@@ -60,7 +60,7 @@ MixedBehaviorProfile<double> PointToProfile(const Game &p_game, const Vector<dou
 LogBehavProfile<double> PointToLogProfile(const Game &p_game, const Vector<double> &p_point)
 {
   LogBehavProfile<double> profile(p_game);
-  for (int i = 1; i <= profile.BehaviorProfileLength(); i++) {
+  for (size_t i = 1; i <= profile.BehaviorProfileLength(); i++) {
     profile.SetLogProb(i, p_point[i]);
   }
   return profile;
@@ -69,7 +69,7 @@ LogBehavProfile<double> PointToLogProfile(const Game &p_game, const Vector<doubl
 Vector<double> ProfileToPoint(const LogitQREMixedBehaviorProfile &p_profile)
 {
   Vector<double> point(p_profile.size() + 1);
-  for (int i = 1; i <= p_profile.size(); i++) {
+  for (size_t i = 1; i <= p_profile.size(); i++) {
     point[i] = log(p_profile[i]);
   }
   point.back() = p_profile.GetLambda();

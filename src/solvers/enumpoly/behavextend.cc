@@ -58,7 +58,7 @@ void DeviationInfosets(List<GameInfoset> &answer, const BehaviorSupportProfile &
   }
   GameInfoset iset = child->GetInfoset();
   if (iset->GetPlayer() == pl) {
-    int insert = 0;
+    size_t insert = 0;
     bool done = false;
     while (!done) {
       insert++;
@@ -118,14 +118,14 @@ std::list<BehaviorSupportProfile> DeviationSupports(const BehaviorSupportProfile
 
   BehaviorSupportProfile new_supp(big_supp);
 
-  for (int i = 1; i <= isetlist.size(); i++) {
+  for (size_t i = 1; i <= isetlist.size(); i++) {
     for (int j = 1; j < isetlist[i]->NumActions(); j++) {
       new_supp.RemoveAction(isetlist[i]->GetAction(j));
     }
     new_supp.AddAction(isetlist[i]->GetAction(1));
 
     active_act_no[i] = 1;
-    for (int k = 1; k < i; k++) {
+    for (size_t k = 1; k < i; k++) {
       if (isetlist[k]->Precedes(isetlist[i]->GetMember(1))) {
         if (isetlist[k]->GetAction(1)->Precedes(isetlist[i]->GetMember(1))) {
           new_supp.RemoveAction(isetlist[i]->GetAction(1));
@@ -146,11 +146,11 @@ std::list<BehaviorSupportProfile> DeviationSupports(const BehaviorSupportProfile
       new_supp.RemoveAction(isetlist[iset_cursor]->GetAction(active_act_no[iset_cursor]));
       active_act_no[iset_cursor]++;
       new_supp.AddAction(isetlist[iset_cursor]->GetAction(active_act_no[iset_cursor]));
-      for (int k = iset_cursor + 1; k <= isetlist.size(); k++) {
+      for (size_t k = iset_cursor + 1; k <= isetlist.size(); k++) {
         if (active_act_no[k] > 0) {
           new_supp.RemoveAction(isetlist[k]->GetAction(1));
         }
-        int h = 1;
+        size_t h = 1;
         bool active = true;
         while (active && h < k) {
           if (isetlist[h]->Precedes(isetlist[k]->GetMember(1))) {

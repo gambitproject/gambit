@@ -434,8 +434,8 @@ END_EVENT_TABLE()
 gbtNfgPanel::gbtNfgPanel(wxWindow *p_parent, gbtGameDocument *p_doc)
   : wxPanel(p_parent, wxID_ANY), gbtGameView(p_doc),
     m_dominanceToolbar(new gbtStrategyDominanceToolbar(this, m_doc)),
-    m_tableWidget(new gbtTableWidget(this, wxID_ANY, m_doc)),
-    m_playerToolbar(new gbtTablePlayerToolbar(this, m_doc))
+    m_playerToolbar(new gbtTablePlayerToolbar(this, m_doc)),
+    m_tableWidget(new gbtTableWidget(this, wxID_ANY, m_doc))
 {
   auto *playerSizer = new wxBoxSizer(wxHORIZONTAL);
   playerSizer->Add(m_playerToolbar, 0, wxEXPAND, 0);

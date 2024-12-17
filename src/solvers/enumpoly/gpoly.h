@@ -270,7 +270,7 @@ public:
   gPoly<T> operator-() const
   {
     gPoly<T> neg(*this);
-    for (int j = 1; j <= Terms.size(); j++) {
+    for (size_t j = 1; j <= Terms.size(); j++) {
       neg.Terms[j] = -Terms[j];
     }
     return neg;
@@ -284,7 +284,7 @@ public:
   void operator-=(const gPoly<T> &p)
   {
     gPoly<T> neg = p;
-    for (int i = 1; i <= neg.Terms.size(); i++) {
+    for (size_t i = 1; i <= neg.Terms.size(); i++) {
       neg.Terms[i] = -neg.Terms[i];
     }
     Terms = Adder(Terms, neg.Terms);
@@ -318,7 +318,7 @@ public:
   void operator*=(const gPoly<T> &p) { Terms = Mult(Terms, p.Terms); }
   void operator*=(const T &val)
   {
-    for (int j = 1; j <= Terms.size(); j++) {
+    for (size_t j = 1; j <= Terms.size(); j++) {
       Terms[j] *= val;
     }
   }

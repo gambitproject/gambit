@@ -37,7 +37,7 @@ public:
     : m_values(std::accumulate(p_shape.begin(), p_shape.end(), 0)), m_offsets(p_shape.size()),
       m_shape(p_shape)
   {
-    for (int index = 0, i = 1; i <= m_shape.size(); i++) {
+    for (size_t index = 0, i = 1; i <= m_shape.size(); i++) {
       m_offsets[i] = index;
       index += m_shape[i];
     }
@@ -107,7 +107,7 @@ Rational NashSimpdivStrategySolver::Simplex(MixedStrategyProfile<Rational> &y,
   RectArray<int> labels(y.MixedProfileLength(), 2), pi(y.MixedProfileLength(), 2);
   PVector<int> U(nstrats), TT(nstrats);
   PVector<Rational> ab(nstrats), besty(nstrats), v(nstrats);
-  for (int i = 1; i <= v.size(); i++) {
+  for (size_t i = 1; i <= v.size(); i++) {
     v[i] = y[i];
   }
   besty = static_cast<const Vector<Rational> &>(y);
@@ -399,7 +399,7 @@ void NashSimpdivStrategySolver::getY(const State &state, MixedStrategyProfile<Ra
                                      const RectArray<int> &pi, int k)
 {
   x = static_cast<const Vector<Rational> &>(v);
-  for (size_t j = 1; j <= x.GetGame()->NumPlayers(); j++) {
+  for (int j = 1; j <= x.GetGame()->NumPlayers(); j++) {
     GamePlayer player = x.GetGame()->GetPlayer(j);
     for (size_t h = 1; h <= player->GetStrategies().size(); h++) {
       if (TT(j, h) == 1 || U(j, h) == 1) {

@@ -170,7 +170,7 @@ template <class T> std::list<Array<int>> LPTableau<T>::ReversePivots()
       if (!best_set.empty()) {
         ratio = solution[best_set[1]] / tmpcol[best_set[1]];
         // find max ratio
-        for (int i = 2; i <= best_set.size(); i++) {
+        for (size_t i = 2; i <= best_set.size(); i++) {
           x = solution[best_set[i]] / tmpcol[best_set[i]];
           if (this->GtZero(x - ratio)) {
             ratio = x;
