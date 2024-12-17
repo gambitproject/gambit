@@ -409,7 +409,8 @@ void GameTableRep::DeleteOutcome(const GameOutcome &p_outcome)
       m_results[i] = 0;
     }
   }
-  m_outcomes.Remove(m_outcomes.Find(p_outcome))->Invalidate();
+  p_outcome->Invalidate();
+  m_outcomes.erase(std::find(m_outcomes.begin(), m_outcomes.end(), p_outcome));
   for (int outc = 1; outc <= m_outcomes.Length(); outc++) {
     m_outcomes[outc]->m_number = outc;
   }
