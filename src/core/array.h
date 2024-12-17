@@ -62,6 +62,8 @@ protected:
 
 public:
   class iterator {
+    friend class Array;
+
   private:
     Array *m_array;
     int m_index;
@@ -273,6 +275,8 @@ public:
                                           : ((n > this->maxdex + 1) ? this->maxdex + 1 : n));
   }
 
+  void erase(iterator pos) { Remove(pos.m_index); }
+
   /// \brief Remove an element from the array.
   ///
   /// Remove the element at a given index from the array.  Returns the value
@@ -330,9 +334,11 @@ public:
   /// leaving the container with a size of 0.
   void clear()
   {
-    delete[] (this->data + this->mindex);
-    this->data = 0;
-    this->maxdex = this->mindex - 1;
+    if (maxdex >= mindex) {
+      delete[] (data + mindex);
+    }
+    data = nullptr;
+    maxdex = mindex - 1;
   }
   ///@}
 };

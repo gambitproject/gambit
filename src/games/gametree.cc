@@ -886,12 +886,12 @@ void GameTreeRep::Canonicalize()
 
 void GameTreeRep::ClearComputedValues() const
 {
-  for (int pl = 1; pl <= m_players.Length(); pl++) {
-    while (m_players[pl]->m_strategies.Length() > 0) {
-      m_players[pl]->m_strategies.Remove(1)->Invalidate();
+  for (auto player : m_players) {
+    for (auto strategy : player->m_strategies) {
+      strategy->Invalidate();
     }
+    player->m_strategies.clear();
   }
-
   m_computedValues = false;
 }
 
@@ -900,13 +900,10 @@ void GameTreeRep::BuildComputedValues()
   if (m_computedValues) {
     return;
   }
-
   Canonicalize();
-
-  for (int pl = 1; pl <= m_players.Length(); pl++) {
-    m_players[pl]->MakeReducedStrats(m_root, nullptr);
+  for (const auto &player : m_players) {
+    player->MakeReducedStrats(m_root, nullptr);
   }
-
   m_computedValues = true;
 }
 
