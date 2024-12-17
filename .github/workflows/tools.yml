@@ -78,30 +78,30 @@ jobs:
           name: artifact-osx-14
           path: "*.dmg"
 
-  windows:
-    runs-on: windows-latest
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
-    defaults:
-      run:
-        shell: msys2 {0}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: msys2/setup-msys2@v2
-        with:
-          install: mingw-w64-x86_64-toolchain make automake autoconf
-      - run: pacman -S --noconfirm mingw-w64-x86_64-wxmsw3.2
-      - run: aclocal
-      - run: automake --add-missing
-      - run: autoconf
-      - run: ./configure --with-wx-config=wx-config-3.2
-      - run: make -j 4
-      - name: Build .msi installer
-        run: |
-          mkdir installer
-          cp gambit* installer
-          "${WIX}bin/candle" gambit.wxs
-          "${WIX}bin/light" -ext WixUIExtension gambit.wixobj
-      - uses: actions/upload-artifact@v4
-        with:
-          name: artifact-msw
-          path: "*.msi"
+  # windows:
+  #   runs-on: windows-latest
+  #   if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
+  #   defaults:
+  #     run:
+  #       shell: msys2 {0}
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: msys2/setup-msys2@v2
+  #       with:
+  #         install: mingw-w64-x86_64-toolchain make automake autoconf
+  #     - run: pacman -S --noconfirm mingw-w64-x86_64-wxmsw3.2
+  #     - run: aclocal
+  #     - run: automake --add-missing
+  #     - run: autoconf
+  #     - run: ./configure --with-wx-config=wx-config-3.2
+  #     - run: make -j 4
+  #     - name: Build .msi installer
+  #       run: |
+  #         mkdir installer
+  #         cp gambit* installer
+  #         "${WIX}bin/candle" gambit.wxs
+  #         "${WIX}bin/light" -ext WixUIExtension gambit.wixobj
+  #     - uses: actions/upload-artifact@v4
+  #       with:
+  #         name: artifact-msw
+  #         path: "*.msi"
