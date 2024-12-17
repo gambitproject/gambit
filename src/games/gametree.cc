@@ -348,28 +348,18 @@ Array<GameNode> GameTreeNodeRep::GetChildren() const
 
 GameNode GameTreeNodeRep::GetNextSibling() const
 {
-  if (!m_parent) {
+  if (!m_parent || m_parent->children.back() == this) {
     return nullptr;
   }
-  if (m_parent->children.back() == this) {
-    return nullptr;
-  }
-  else {
-    return m_parent->children[m_parent->children.Find(const_cast<GameTreeNodeRep *>(this)) + 1];
-  }
+  return *std::next(std::find(m_parent->children.begin(), m_parent->children.end(), this));
 }
 
 GameNode GameTreeNodeRep::GetPriorSibling() const
 {
-  if (!m_parent) {
+  if (!m_parent || m_parent->children.front() == this) {
     return nullptr;
   }
-  if (m_parent->children.front() == this) {
-    return nullptr;
-  }
-  else {
-    return m_parent->children[m_parent->children.Find(const_cast<GameTreeNodeRep *>(this)) - 1];
-  }
+  return m_parent->children[m_parent->children.Find(const_cast<GameTreeNodeRep *>(this)) - 1];
 }
 
 GameAction GameTreeNodeRep::GetPriorAction() const
