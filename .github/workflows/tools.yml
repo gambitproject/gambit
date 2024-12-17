@@ -16,13 +16,7 @@ jobs:
           sudo apt-add-repository 'deb https://repos.codelite.org/wx3.1.5/ubuntu/ focal universe'
           sudo apt-get update
           sudo apt-get install -y automake autoconf
-          sudo apt-get install -y libwxbase3.1-0-unofficial \
-                libwxbase3.1unofficial-dev \
-                libwxgtk3.1-0-unofficial \
-                libwxgtk3.1unofficial-dev \
-                wx3.1-headers \
-                wx-common \
-                libnotify-dev
+          sudo apt-get install -y libwxgtk3.2-dev
       - name: Configure build with autotools
         run: |
           aclocal
