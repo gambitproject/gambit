@@ -526,6 +526,7 @@ Gambit::GameNode gbtTreeLayout::PriorSameLevel(const Gambit::GameNode &p_node) c
 {
   gbtNodeEntry *entry = GetEntry(p_node);
   if (entry) {
+    auto e = std::next(std::find(m_nodeList.begin(), m_nodeList.end(), entry));
     for (int i = m_nodeList.Find(entry) - 1; i >= 1; i--) {
       if (m_nodeList[i]->GetLevel() == entry->GetLevel()) {
         return m_nodeList[i]->GetNode();
@@ -539,10 +540,12 @@ Gambit::GameNode gbtTreeLayout::NextSameLevel(const Gambit::GameNode &p_node) co
 {
   gbtNodeEntry *entry = GetEntry(p_node);
   if (entry) {
-    for (int i = m_nodeList.Find(entry) + 1; i <= m_nodeList.Length(); i++) {
-      if (m_nodeList[i]->GetLevel() == entry->GetLevel()) {
-        return m_nodeList[i]->GetNode();
+    auto e = std::next(std::find(m_nodeList.begin(), m_nodeList.end(), entry));
+    while (e != m_nodeList.end()) {
+      if ((*e)->GetLevel() == entry->GetLevel()) {
+        return (*e)->GetNode();
       }
+      ++e;
     }
   }
   return nullptr;
@@ -632,8 +635,9 @@ gbtNodeEntry *gbtTreeLayout::NextInfoset(gbtNodeEntry *e)
 {
   const gbtStyle &draw_settings = m_doc->GetStyle();
 
-  for (int pos = m_nodeList.Find(e) + 1; pos <= m_nodeList.Length(); pos++) {
-    gbtNodeEntry *e1 = m_nodeList[pos];
+  auto entry = std::next(std::find(m_nodeList.begin(), m_nodeList.end(), e));
+  while (entry != m_nodeList.end()) {
+    gbtNodeEntry *e1 = *entry;
     // infosets are the same and the nodes are on the same level
     if (e->GetNode()->GetInfoset() == e1->GetNode()->GetInfoset()) {
       if (draw_settings.InfosetConnect() == GBT_INFOSET_CONNECT_ALL) {
@@ -643,6 +647,7 @@ gbtNodeEntry *gbtTreeLayout::NextInfoset(gbtNodeEntry *e)
         return e1;
       }
     }
+    ++entry;
   }
   return nullptr;
 }
