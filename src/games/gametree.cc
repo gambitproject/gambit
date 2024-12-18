@@ -444,11 +444,12 @@ void GameTreeNodeRep::DeleteParent()
   m_efg->IncrementVersion();
   GameTreeNodeRep *oldParent = m_parent;
 
-  oldParent->children.Remove(oldParent->children.Find(this));
+  oldParent->children.erase(
+      std::find(oldParent->children.begin(), oldParent->children.end(), this));
   oldParent->DeleteTree();
   m_parent = oldParent->m_parent;
   if (m_parent) {
-    m_parent->children[m_parent->children.Find(oldParent)] = this;
+    std::replace(m_parent->children.begin(), m_parent->children.end(), oldParent, this);
   }
   else {
     m_efg->m_root = this;
