@@ -140,7 +140,7 @@ EnumPolyStrategySupportSolve(const StrategySupportProfile &support, bool &is_sin
 }
 
 List<MixedStrategyProfile<double>>
-EnumPolyStrategySolve(const Game &p_game, size_t p_stopAfter, double p_maxregret,
+EnumPolyStrategySolve(const Game &p_game, int p_stopAfter, double p_maxregret,
                       EnumPolyMixedStrategyObserverFunctionType p_onEquilibrium,
                       EnumPolyStrategySupportObserverFunctionType p_onSupport)
 {
@@ -155,7 +155,7 @@ EnumPolyStrategySolve(const Game &p_game, size_t p_stopAfter, double p_maxregret
     p_onSupport("candidate", support);
     bool is_singular;
     for (auto solution : EnumPolyStrategySupportSolve(
-             support, is_singular, std::max(p_stopAfter - ret.size(), size_t(0)))) {
+             support, is_singular, std::max(p_stopAfter - int(ret.size()), 0))) {
       MixedStrategyProfile<double> fullProfile = solution.ToFullSupport();
       if (fullProfile.GetMaxRegret() < p_maxregret) {
         p_onEquilibrium(fullProfile);
