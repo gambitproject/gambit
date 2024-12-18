@@ -1060,9 +1060,11 @@ void GameTreeRep::DeleteOutcome(const GameOutcome &p_outcome)
 {
   IncrementVersion();
   m_root->DeleteOutcome(p_outcome);
-  m_outcomes.Remove(m_outcomes.Find(p_outcome))->Invalidate();
-  for (int outc = 1; outc <= m_outcomes.Length(); outc++) {
-    m_outcomes[outc]->m_number = outc;
+  m_outcomes.erase(std::find(m_outcomes.begin(), m_outcomes.end(), p_outcome));
+  p_outcome->Invalidate();
+  int outc = 1;
+  for (auto &outcome : m_outcomes) {
+    outcome->m_number = outc++;
   }
   ClearComputedValues();
 }
