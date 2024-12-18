@@ -200,7 +200,8 @@ void GameTreeInfosetRep::SetPlayer(GamePlayer p_player)
   }
 
   m_efg->IncrementVersion();
-  m_player->m_infosets.Remove(m_player->m_infosets.Find(this));
+  m_player->m_infosets.erase(
+      std::find(m_player->m_infosets.begin(), m_player->m_infosets.end(), this));
   m_player = p_player;
   p_player->m_infosets.push_back(this);
 
@@ -269,13 +270,15 @@ void GameTreeInfosetRep::RemoveAction(int which)
 void GameTreeInfosetRep::RemoveMember(GameTreeNodeRep *p_node)
 {
   m_efg->IncrementVersion();
-  m_members.Remove(m_members.Find(p_node));
-  if (m_members.Length() == 0) {
-    m_player->m_infosets.Remove(m_player->m_infosets.Find(this));
-    for (int i = 1; i <= m_player->m_infosets.Length(); i++) {
-      m_player->m_infosets[i]->m_number = i;
-    }
+  m_members.erase(std::find(m_members.begin(), m_members.end(), p_node));
+  if (m_members.empty()) {
+    m_player->m_infosets.erase(
+        std::find(m_player->m_infosets.begin(), m_player->m_infosets.end(), this));
     Invalidate();
+    int iset = 1;
+    for (auto &infoset : m_player->m_infosets) {
+      infoset->m_number = iset++;
+    }
   }
 }
 
