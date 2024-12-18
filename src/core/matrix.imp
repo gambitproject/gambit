@@ -169,7 +169,7 @@ template <class T> void Matrix<T>::CMultiply(const Vector<T> &in, Vector<T> &out
     T sum = (T)0;
 
     T *src1 = this->data[i] + this->mincol;
-    T *src2 = in.data + this->mincol;
+    auto src2 = in.begin();
     int j = this->maxcol - this->mincol + 1;
     while (j--) {
       sum += *(src1++) * *(src2++);
@@ -217,7 +217,7 @@ template <class T> void Matrix<T>::RMultiply(const Vector<T> &in, Vector<T> &out
     T k = in[i];
 
     T *src = this->data[i] + this->mincol;
-    T *dst = out.data + this->mincol;
+    auto dst = out.begin();
     int j = this->maxcol - this->mincol + 1;
     while (j--) {
       *(dst++) += *(src++) * k;

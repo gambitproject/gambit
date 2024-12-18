@@ -77,7 +77,3 @@ gComplex pow(const gComplex &x, long y)
     return answer;
   }
 }
-
-#include "core/vector.imp"
-
-template class Gambit::Vector<gComplex>;

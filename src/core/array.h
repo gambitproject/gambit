@@ -81,6 +81,12 @@ public:
       m_index++;
       return *this;
     }
+    iterator operator++(int)
+    {
+      auto ret = *this;
+      m_index++;
+      return ret;
+    }
     bool operator==(const iterator &it) const
     {
       return (m_array == it.m_array) && (m_index == it.m_index);
@@ -107,6 +113,12 @@ public:
     {
       m_index++;
       return *this;
+    }
+    const_iterator operator++(int)
+    {
+      auto ret = *this;
+      m_index++;
+      return ret;
     }
     bool operator==(const const_iterator &it) const
     {
