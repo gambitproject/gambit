@@ -532,21 +532,9 @@ void GameTreeNodeRep::MoveTree(GameNode p_src)
   }
   m_efg->IncrementVersion();
   auto *src = dynamic_cast<GameTreeNodeRep *>(p_src.operator->());
-
-  if (src->m_parent == m_parent) {
-    int srcChild = src->m_parent->children.Find(src);
-    int destChild = src->m_parent->children.Find(this);
-    src->m_parent->children[srcChild] = this;
-    src->m_parent->children[destChild] = src;
-  }
-  else {
-    GameTreeNodeRep *parent = src->m_parent;
-    parent->children[parent->children.Find(src)] = this;
-    m_parent->children[m_parent->children.Find(this)] = src;
-    src->m_parent = m_parent;
-    m_parent = parent;
-  }
-
+  std::iter_swap(std::find(src->m_parent->children.begin(), src->m_parent->children.end(), src),
+                 std::find(m_parent->children.begin(), m_parent->children.end(), this));
+  std::swap(src->m_parent, m_parent);
   m_label = "";
   outcome = nullptr;
 
