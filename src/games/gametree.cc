@@ -669,7 +669,7 @@ GameInfoset GameTreeNodeRep::InsertMove(GameInfoset p_infoset)
   dynamic_cast<GameTreeInfosetRep *>(p_infoset.operator->())->AddMember(newNode);
 
   if (m_parent) {
-    m_parent->children[m_parent->children.Find(this)] = newNode;
+    std::replace(m_parent->children.begin(), m_parent->children.end(), this, newNode);
   }
   else {
     m_efg->m_root = newNode;
