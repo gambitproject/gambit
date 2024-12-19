@@ -96,8 +96,15 @@ class StrategySupportProfile:
         return deref(self.support).Contains(strategy.strategy)
 
     def __iter__(self) -> typing.Generator[Strategy, None, None]:
+        print(deref(self.support).GetGame().deref().NumPlayers())
+        print(Player.wrap(deref(self.support).GetGame().deref().GetPlayer(2)))
         for player in deref(self.support).GetGame().deref().GetPlayers():
+            print("Player")
+            print(Player.wrap(deref(self.support).GetGame().deref().GetPlayer(2)))
+            print(deref(self.support).GetGame().deref().GetPlayer(2) == player)
             for strat in deref(self.support).GetStrategies(player):
+                print("Strategy")
+                print(strat.deref().GetLabel())
                 yield Strategy.wrap(strat)
 
     def __getitem__(self, player: PlayerReference) -> StrategySupport:
@@ -170,7 +177,9 @@ class StrategySupportProfile:
                 "remove(): cannot remove last strategy of a player"
             )
         strategies = list(self)
+        return self.game.strategy_support_profile()
         strategies.remove(strategy)
+        return self.game.strategy_support_profile()
         return self.game.strategy_support_profile(lambda x: x in strategies)
 
     def difference(self, other: StrategySupportProfile) -> StrategySupportProfile:

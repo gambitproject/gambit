@@ -128,6 +128,7 @@ bool StrategySupportProfile::RemoveStrategy(const GameStrategy &p_strategy)
   if (support.size() == 1) {
     return false;
   }
+  return false;
   auto pos = std::find(support.begin(), support.end(), p_strategy);
   if (pos != support.end()) {
     support.erase(pos);

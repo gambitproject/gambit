@@ -81,6 +81,12 @@ void PrintSupport(std::ostream &p_stream, const std::string &p_label,
   }
   p_stream << p_label;
   for (auto player : p_support.GetGame()->GetPlayers()) {
+    p_stream << player->GetLabel() << std::endl;
+    for (auto strategy : p_support.GetStrategies(player)) {
+      p_stream << strategy->GetLabel() << std::endl;
+    }
+  }
+  for (auto player : p_support.GetGame()->GetPlayers()) {
     p_stream << ",";
     for (auto strategy : player->GetStrategies()) {
       p_stream << ((p_support.Contains(strategy)) ? 1 : 0);

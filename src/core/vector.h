@@ -35,7 +35,7 @@ private:
   // check vector for identical boundaries
   bool Check(const Vector<T> &v) const
   {
-    return (v.mindex == this->mindex && v.maxdex == this->maxdex);
+    return (v.m_offset == this->m_offset && v.m_data.size() == this->m_data.size());
   }
 
 public:
@@ -69,7 +69,7 @@ public:
     if (!Check(V)) {
       throw DimensionException();
     }
-    Vector<T> tmp(this->mindex, this->maxdex);
+    Vector<T> tmp(this->First(), this->Last());
     std::transform(this->cbegin(), this->cend(), V.cbegin(), tmp.begin(), std::plus<>());
     return tmp;
   }
@@ -85,7 +85,7 @@ public:
 
   Vector<T> operator-() const
   {
-    Vector<T> tmp(this->mindex, this->maxdex);
+    Vector<T> tmp(this->First(), this->Last());
     std::transform(tmp.cbegin(), tmp.cend(), tmp.begin(), std::negate<>());
     return tmp;
   }
@@ -95,7 +95,7 @@ public:
     if (!Check(V)) {
       throw DimensionException();
     }
-    Vector<T> tmp(this->mindex, this->maxdex);
+    Vector<T> tmp(this->First(), this->Last());
     std::transform(this->cbegin(), this->cend(), V.cbegin(), tmp.begin(), std::minus<>());
     return tmp;
   }
@@ -111,7 +111,7 @@ public:
 
   Vector<T> operator*(const T &c) const
   {
-    Vector<T> tmp(this->mindex, this->maxdex);
+    Vector<T> tmp(this->First(), this->Last());
     std::transform(this->cbegin(), this->cend(), tmp.begin(), [&](const T &v) { return v * c; });
     return tmp;
   }
@@ -132,7 +132,7 @@ public:
 
   Vector<T> operator/(const T &c) const
   {
-    Vector<T> tmp(this->mindex, this->maxdex);
+    Vector<T> tmp(this->First(), this->Last());
     std::transform(this->cbegin(), this->cend(), tmp.begin(), [&](const T &v) { return v / c; });
     return tmp;
   }
