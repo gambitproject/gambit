@@ -101,7 +101,6 @@ class StrategySupportProfile:
         for player in deref(self.support).GetGame().deref().GetPlayers():
             print("Player")
             print(Player.wrap(deref(self.support).GetGame().deref().GetPlayer(2)))
-            print(deref(self.support).GetGame().deref().GetPlayer(2) == player)
             for strat in deref(self.support).GetStrategies(player):
                 print("Strategy")
                 print(strat.deref().GetLabel())
