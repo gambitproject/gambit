@@ -27,7 +27,7 @@
 #include "gameseq.h"
 #include "gpoly.h"
 #include "gpolylst.h"
-#include "rectangl.h"
+#include "rectangle.h"
 #include "quiksolv.h"
 #include "behavextend.h"
 

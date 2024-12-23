@@ -25,7 +25,7 @@
 
 #include "gambit.h"
 #include "odometer.h"
-#include "rectangl.h"
+#include "rectangle.h"
 #include "gpoly.h"
 #include "gpolylst.h"
 #include "gpartltr.h"
@@ -85,30 +85,30 @@ private:
 
   // Check whether roots are impossible
 
-  bool SystemHasNoRootsIn(const gRectangle<double> &r, Gambit::Array<int> &) const;
+  bool SystemHasNoRootsIn(const Rectangle<double> &r, Gambit::Array<int> &) const;
 
   // Ask whether Newton's method leads to a root
 
-  bool NewtonRootInRectangle(const gRectangle<double> &, Gambit::Vector<double> &) const;
+  bool NewtonRootInRectangle(const Rectangle<double> &, Gambit::Vector<double> &) const;
 
   // Ask whether we can prove that there is no root other than
   // the one produced by the last step
 
   double
-  MaxDistanceFromPointToVertexAfterTransformation(const gRectangle<double> &,
+  MaxDistanceFromPointToVertexAfterTransformation(const Rectangle<double> &,
                                                   const Gambit::Vector<double> &,
                                                   const Gambit::SquareMatrix<double> &) const;
 
-  bool HasNoOtherRootsIn(const gRectangle<double> &, const Gambit::Vector<double> &,
+  bool HasNoOtherRootsIn(const Rectangle<double> &, const Gambit::Vector<double> &,
                          const Gambit::SquareMatrix<double> &) const;
 
   // Combine the last two steps into a single query
 
-  bool NewtonRootIsOnlyInRct(const gRectangle<double> &, Gambit::Vector<double> &) const;
+  bool NewtonRootIsOnlyInRct(const Rectangle<double> &, Gambit::Vector<double> &) const;
 
   // Recursive parts of recursive methods
 
-  void FindRootsRecursion(Gambit::List<Gambit::Vector<double>> *, const gRectangle<double> &,
+  void FindRootsRecursion(Gambit::List<Gambit::Vector<double>> *, const Rectangle<double> &,
                           const int &, Gambit::Array<int> &, int &iterations, int depth,
                           const int &, int *) const;
 
@@ -135,7 +135,7 @@ public:
   Gambit::Vector<double> SlowNewtonPolishOnce(const Gambit::Vector<double> &) const;
 
   // The grand calculation - returns true if successful
-  bool FindCertainNumberOfRoots(const gRectangle<T> &, const int &, const int &);
+  bool FindCertainNumberOfRoots(const Rectangle<T> &, const int &, const int &);
 };
 
 #endif // QUIKSOLV_H

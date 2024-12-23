@@ -97,7 +97,7 @@ template <class T> bool IneqSolv<T>::IsASolution(const Gambit::Vector<T> &v) con
 }
 
 template <class T>
-bool IneqSolv<T>::SystemHasNoSolutionIn(const gRectangle<T> &r,
+bool IneqSolv<T>::SystemHasNoSolutionIn(const Rectangle<T> &r,
                                         Gambit::Array<int> &precedence) const
 {
   for (int i = 1; i <= System.Length(); i++) {
@@ -127,7 +127,7 @@ bool IneqSolv<T>::SystemHasNoSolutionIn(const gRectangle<T> &r,
 }
 
 template <class T>
-bool IneqSolv<T>::ASolutionExistsRecursion(const gRectangle<T> &r, Gambit::Vector<T> &sample,
+bool IneqSolv<T>::ASolutionExistsRecursion(const Rectangle<T> &r, Gambit::Vector<T> &sample,
                                            Gambit::Array<int> &precedence) const
 {
   /*
@@ -148,9 +148,8 @@ bool IneqSolv<T>::ASolutionExistsRecursion(const gRectangle<T> &r, Gambit::Vecto
     return false;
   }
 
-  int N = r.NumberOfCellsInSubdivision();
-  for (int i = 1; i <= N; i++) {
-    if (ASolutionExistsRecursion(r.SubdivisionCell(i), sample, precedence)) {
+  for (const auto &cell : r.Orthants()) {
+    if (ASolutionExistsRecursion(cell, sample, precedence)) {
       return true;
     }
   }
@@ -158,7 +157,7 @@ bool IneqSolv<T>::ASolutionExistsRecursion(const gRectangle<T> &r, Gambit::Vecto
 }
 
 template <class T>
-bool IneqSolv<T>::ASolutionExists(const gRectangle<T> &r, Gambit::Vector<T> &sample)
+bool IneqSolv<T>::ASolutionExists(const Rectangle<T> &r, Gambit::Vector<T> &sample)
 {
   // precedence orders search for everywhere negative poly
   Gambit::Array<int> precedence(System.Length());

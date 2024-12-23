@@ -49,6 +49,7 @@ private:
 public:
   using iterator = typename std::list<T>::iterator;
   using const_iterator = typename std::list<T>::const_iterator;
+  using value_type = typename std::list<T>::value_type;
   using size_type = typename std::list<T>::size_type;
 
   List() = default;

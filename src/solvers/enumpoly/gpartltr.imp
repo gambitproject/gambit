@@ -243,7 +243,7 @@ template <class T> T TreeOfPartials<T>::ValueOfRootPoly(const Gambit::Vector<T> 
   return RootPoly().Evaluate(point);
 }
 
-template <class T> bool TreeOfPartials<T>::PolyHasNoRootsIn(const gRectangle<T> &r) const
+template <class T> bool TreeOfPartials<T>::PolyHasNoRootsIn(const Rectangle<T> &r) const
 {
   if (this->RootNode()->GetData().IsMultiaffine()) {
     return MultiaffinePolyHasNoRootsIn(r);
@@ -272,8 +272,7 @@ template <class T> bool TreeOfPartials<T>::PolyHasNoRootsIn(const gRectangle<T> 
   }
 }
 
-template <class T>
-bool TreeOfPartials<T>::MultiaffinePolyHasNoRootsIn(const gRectangle<T> &r) const
+template <class T> bool TreeOfPartials<T>::MultiaffinePolyHasNoRootsIn(const Rectangle<T> &r) const
 {
   int sign;
   if (this->RootNode()->GetData().Evaluate(r.Center()) > (T)0) {
@@ -301,10 +300,10 @@ bool TreeOfPartials<T>::MultiaffinePolyHasNoRootsIn(const gRectangle<T> &r) cons
     Gambit::Vector<T> point(Dmnsn());
     for (int i = 1; i <= Dmnsn(); i++) {
       if (topbottoms[i] == 0) {
-        point[i] = r.LowerBoundOfCoord(i);
+        point[i] = r.Side(i).LowerBound();
       }
       else {
-        point[i] = r.UpperBoundOfCoord(i);
+        point[i] = r.Side(i).UpperBound();
       }
     }
     if ((T)sign * this->RootNode()->GetData().Evaluate(point) <= (T)0) {
@@ -316,7 +315,7 @@ bool TreeOfPartials<T>::MultiaffinePolyHasNoRootsIn(const gRectangle<T> &r) cons
 }
 
 template <class T>
-bool TreeOfPartials<T>::MultiaffinePolyEverywhereNegativeIn(const gRectangle<T> &r) const
+bool TreeOfPartials<T>::MultiaffinePolyEverywhereNegativeIn(const Rectangle<T> &r) const
 {
   if (Dmnsn() == 0) {
     Gambit::Vector<T> point(Dmnsn());
@@ -345,10 +344,10 @@ bool TreeOfPartials<T>::MultiaffinePolyEverywhereNegativeIn(const gRectangle<T> 
     Gambit::Vector<T> point(Dmnsn());
     for (int i = 1; i <= Dmnsn(); i++) {
       if (topbottoms[i] == 0) {
-        point[i] = r.LowerBoundOfCoord(i);
+        point[i] = r.Side(i).LowerBound();
       }
       else {
-        point[i] = r.UpperBoundOfCoord(i);
+        point[i] = r.Side(i).UpperBound();
       }
     }
     if (this->RootNode()->GetData().Evaluate(point) >= (T)0) {
@@ -359,7 +358,7 @@ bool TreeOfPartials<T>::MultiaffinePolyEverywhereNegativeIn(const gRectangle<T> 
   return true;
 }
 
-template <class T> bool TreeOfPartials<T>::PolyEverywhereNegativeIn(const gRectangle<T> &r) const
+template <class T> bool TreeOfPartials<T>::PolyEverywhereNegativeIn(const Rectangle<T> &r) const
 {
   if (this->RootNode()->GetData().IsMultiaffine()) {
     return MultiaffinePolyEverywhereNegativeIn(r);

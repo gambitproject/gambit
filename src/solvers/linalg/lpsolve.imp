@@ -30,8 +30,7 @@ template <class T>
 LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c, int nequals)
   : well_formed(true), feasible(true), bounded(true), nvars(c.size()), neqns(b.size()),
     nequals(nequals), total_cost(0), tmin(0), tab(A, Artificials(b), b), UB(nullptr), LB(nullptr),
-    ub(nullptr), lb(nullptr), xx(nullptr), cost(nullptr), y(b.size()), x(b.size()),
-    d(b.size())
+    ub(nullptr), lb(nullptr), xx(nullptr), cost(nullptr), y(b.size()), x(b.size()), d(b.size())
 {
   // These are the values recommended by Murtagh (1981) for 15 digit
   // accuracy in LP problems

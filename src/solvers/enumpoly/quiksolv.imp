@@ -77,7 +77,7 @@ template <class T> Gambit::RectArray<bool> QuikSolv<T>::Eq_i_Uses_j() const
 //---------------------------
 
 template <class T>
-bool QuikSolv<T>::SystemHasNoRootsIn(const gRectangle<double> &r,
+bool QuikSolv<T>::SystemHasNoRootsIn(const Rectangle<double> &r,
                                      Gambit::Array<int> &precedence) const
 {
   for (int i = 1; i <= System.Length(); i++) {
@@ -144,7 +144,7 @@ static bool fuzzy_equals(const Gambit::Vector<double> &x, const Gambit::Vector<d
 }
 
 template <class T>
-bool QuikSolv<T>::NewtonRootInRectangle(const gRectangle<double> &r,
+bool QuikSolv<T>::NewtonRootInRectangle(const Rectangle<double> &r,
                                         Gambit::Vector<double> &point) const
 {
   // assert (NoEquations == System.Dmnsn());
@@ -160,7 +160,7 @@ bool QuikSolv<T>::NewtonRootInRectangle(const gRectangle<double> &r,
     return r.Contains(point);
   }
 
-  gRectangle<double> bigr = r.SameCenterDoubleSideLengths();
+  Rectangle<double> bigr = r.SameCenterDoubleLengths();
 
   Gambit::Vector<double> newpoint(Dmnsn());
 
@@ -173,11 +173,11 @@ bool QuikSolv<T>::NewtonRootInRectangle(const gRectangle<double> &r,
       int direction = 1;
       while (direction < Dmnsn() && !nonsingular) {
         Gambit::Vector<double> perturbed_point(point);
-        if (r.UpperBoundOfCoord(direction) > point[direction]) {
-          perturbed_point[direction] += (r.UpperBoundOfCoord(direction) - point[direction]) / 10;
+        if (r.Side(direction).UpperBound() > point[direction]) {
+          perturbed_point[direction] += (r.Side(direction).UpperBound() - point[direction]) / 10;
         }
         else {
-          perturbed_point[direction] += (r.LowerBoundOfCoord(direction) - point[direction]) / 10;
+          perturbed_point[direction] += (r.Side(direction).LowerBound() - point[direction]) / 10;
         }
         nonsingular = true;
 
@@ -191,11 +191,11 @@ bool QuikSolv<T>::NewtonRootInRectangle(const gRectangle<double> &r,
       }
       if (!nonsingular) {
         Gambit::Vector<double> perturbed_point(point);
-        if (r.UpperBoundOfCoord(direction) > point[direction]) {
-          perturbed_point[direction] += (r.UpperBoundOfCoord(direction) - point[direction]) / 10;
+        if (r.Side(direction).UpperBound() > point[direction]) {
+          perturbed_point[direction] += (r.Side(direction).UpperBound() - point[direction]) / 10;
         }
         else {
-          perturbed_point[direction] += (r.LowerBoundOfCoord(direction) - point[direction]) / 10;
+          perturbed_point[direction] += (r.Side(direction).LowerBound() - point[direction]) / 10;
         }
         newpoint = point + (NewtonPolishOnce(perturbed_point) - perturbed_point);
       }
@@ -232,7 +232,7 @@ bool QuikSolv<T>::NewtonRootInRectangle(const gRectangle<double> &r,
 
 template <class T>
 double QuikSolv<T>::MaxDistanceFromPointToVertexAfterTransformation(
-    const gRectangle<double> &r, const Gambit::Vector<double> &p,
+    const Rectangle<double> &r, const Gambit::Vector<double> &p,
     const Gambit::SquareMatrix<double> &M) const
 {
   // A very early implementation of this method used a type gDouble which
@@ -255,10 +255,10 @@ double QuikSolv<T>::MaxDistanceFromPointToVertexAfterTransformation(
     Gambit::Vector<double> diffs(Dmnsn());
     for (int i = 1; i <= Dmnsn(); i++) {
       if (ListOfTopBottoms[i] == 2) {
-        diffs[i] = r.CartesianFactor(i).UpperBound() - p[i];
+        diffs[i] = r.Side(i).UpperBound() - p[i];
       }
       else {
-        diffs[i] = p[i] - r.CartesianFactor(i).LowerBound();
+        diffs[i] = p[i] - r.Side(i).LowerBound();
       }
     }
     Gambit::Vector<double> new_diffs = M * diffs;
@@ -272,7 +272,7 @@ double QuikSolv<T>::MaxDistanceFromPointToVertexAfterTransformation(
 }
 
 template <class T>
-bool QuikSolv<T>::HasNoOtherRootsIn(const gRectangle<double> &r, const Gambit::Vector<double> &p,
+bool QuikSolv<T>::HasNoOtherRootsIn(const Rectangle<double> &r, const Gambit::Vector<double> &p,
                                     const Gambit::SquareMatrix<double> &M) const
 {
   // assert (NoEquations == System.Dmnsn());
@@ -297,7 +297,7 @@ bool QuikSolv<T>::HasNoOtherRootsIn(const gRectangle<double> &r, const Gambit::V
 //--------------------------------------------
 
 template <class T>
-bool QuikSolv<T>::NewtonRootIsOnlyInRct(const gRectangle<double> &r,
+bool QuikSolv<T>::NewtonRootIsOnlyInRct(const Rectangle<double> &r,
                                         Gambit::Vector<double> &point) const
 {
   // assert (NoEquations == System.Dmnsn());
@@ -392,7 +392,7 @@ Gambit::Vector<double> QuikSolv<T>::SlowNewtonPolishOnce(const Gambit::Vector<do
 //-------------------------------------------
 
 template <class T>
-bool QuikSolv<T>::FindCertainNumberOfRoots(const gRectangle<T> &r, const int &max_iterations,
+bool QuikSolv<T>::FindCertainNumberOfRoots(const Rectangle<T> &r, const int &max_iterations,
                                            const int &max_no_roots)
 {
   auto *rootlistptr = new Gambit::List<Gambit::Vector<double>>();
@@ -414,8 +414,8 @@ bool QuikSolv<T>::FindCertainNumberOfRoots(const gRectangle<T> &r, const int &ma
   int iterations = 0;
 
   int *no_found = new int(0);
-  FindRootsRecursion(rootlistptr, TogDouble(r), max_iterations, precedence, iterations, 1,
-                     max_no_roots, no_found);
+  FindRootsRecursion(rootlistptr, r, max_iterations, precedence, iterations, 1, max_no_roots,
+                     no_found);
 
   if (iterations < max_iterations) {
     Roots = *rootlistptr;
@@ -428,7 +428,7 @@ bool QuikSolv<T>::FindCertainNumberOfRoots(const gRectangle<T> &r, const int &ma
 
 template <class T>
 void QuikSolv<T>::FindRootsRecursion(Gambit::List<Gambit::Vector<double>> *rootlistptr,
-                                     const gRectangle<double> &r, const int &max_iterations,
+                                     const Rectangle<double> &r, const int &max_iterations,
                                      Gambit::Array<int> &precedence, int &iterations, int depth,
                                      const int &max_no_roots, int *roots_found) const
 {
@@ -470,17 +470,14 @@ void QuikSolv<T>::FindRootsRecursion(Gambit::List<Gambit::Vector<double>> *rootl
     return;
   }
 
-  int N = r.NumberOfCellsInSubdivision();
-  for (int i = 1; i <= N; i++) {
+  for (const auto &cell : r.Orthants()) {
     if (max_no_roots == 0 || *roots_found < max_no_roots) {
       if (iterations >= max_iterations || depth == MAX_DEPTH) {
         return;
       }
-      else {
-        iterations++;
-        FindRootsRecursion(rootlistptr, r.SubdivisionCell(i), max_iterations, precedence,
-                           iterations, depth + 1, max_no_roots, roots_found);
-      }
+      iterations++;
+      FindRootsRecursion(rootlistptr, cell, max_iterations, precedence, iterations, depth + 1,
+                         max_no_roots, roots_found);
     }
   }
 }
