@@ -165,19 +165,19 @@ gbtLayoutBranchesPanel::gbtLayoutBranchesPanel(wxWindow *p_parent, const gbtStyl
   styleBoxSizer->Add(styleSizer, 1, wxALL | wxEXPAND, 5);
   topSizer->Add(styleBoxSizer, 0, wxALL | wxALIGN_CENTER, 5);
 
-  auto *lengthSizer = new wxStaticBoxSizer(wxHORIZONTAL, this, _T("Length of branches"));
+  auto *lengthSizer = new wxStaticBoxSizer(wxHORIZONTAL, this, _T("size of branches"));
 
   auto *gridSizer = new wxFlexGridSizer(2);
   gridSizer->AddGrowableCol(1);
 
-  gridSizer->Add(new wxStaticText(this, wxID_ANY, _("Length of branch fork")), 0,
+  gridSizer->Add(new wxStaticText(this, wxID_ANY, _("size of branch fork")), 0,
                  wxALIGN_CENTER_VERTICAL | wxALL, 5);
   m_branchLength = new wxSpinCtrl(
       this, wxID_ANY, wxString::Format(_T("%d"), p_settings.BranchLength()), wxDefaultPosition,
       wxDefaultSize, wxSP_ARROW_KEYS, BRANCH_LENGTH_MIN, BRANCH_LENGTH_MAX);
   gridSizer->Add(m_branchLength, 1, wxALL | wxEXPAND, 5);
 
-  gridSizer->Add(new wxStaticText(this, wxID_ANY, _("Length of branch tine")), 1,
+  gridSizer->Add(new wxStaticText(this, wxID_ANY, _("size of branch tine")), 1,
                  wxALIGN_CENTER_VERTICAL | wxALL, 5);
   m_tineLength = new wxSpinCtrl(
       this, wxID_ANY, wxString::Format(_T("%d"), p_settings.TineLength()), wxDefaultPosition,

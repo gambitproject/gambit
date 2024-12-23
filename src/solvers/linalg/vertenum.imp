@@ -76,9 +76,9 @@ template <class T> void VertexEnumerator<T>::DualSearch(LPTableau<T> &tab)
   if (mult_opt) {
     tab.SetConst(btemp); // install artificial constraint vector
     LPTableau<T> tab2(tab);
-    for (int i = b.First(); i <= b.Last(); i++) {
+    for (int i = b.first_index(); i <= b.last_index(); i++) {
       if (b[i] == static_cast<T>(0)) {
-        for (int j = -b.Last(); j <= A.MaxCol(); j++) {
+        for (int j = -b.last_index(); j <= A.MaxCol(); j++) {
           if (j && !tab.Member(j) && !tab.IsBlocked(j)) {
             if (tab.IsDualReversePivot(i, j)) {
               branches[depth] += 1;

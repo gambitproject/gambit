@@ -33,13 +33,13 @@ namespace linalg {
 // Constructors and Destructor
 
 Tableau<double>::Tableau(const Matrix<double> &A, const Vector<double> &b)
-  : TableauInterface<double>(A, b), B(*this), tmpcol(b.First(), b.Last())
+  : TableauInterface<double>(A, b), B(*this), tmpcol(b.first_index(), b.last_index())
 {
   Solve(b, solution);
 }
 
 Tableau<double>::Tableau(const Matrix<double> &A, const Array<int> &art, const Vector<double> &b)
-  : TableauInterface<double>(A, art, b), B(*this), tmpcol(b.First(), b.Last())
+  : TableauInterface<double>(A, art, b), B(*this), tmpcol(b.first_index(), b.last_index())
 {
   Solve(b, solution);
 }
@@ -119,7 +119,7 @@ void Tableau<double>::SetRefactor(int n) { B.SetRefactor(n); }
 
 void Tableau<double>::SetConst(const Vector<double> &bnew)
 {
-  if (bnew.First() != b->First() || bnew.Last() != b->Last()) {
+  if (bnew.first_index() != b->first_index() || bnew.last_index() != b->last_index()) {
     throw DimensionException();
   }
   b = &bnew;
@@ -147,7 +147,7 @@ bool Tableau<double>::IsFeasible()
 {
   //** is it really necessary to solve first here?
   Solve(*b, solution);
-  for (int i = solution.First(); i <= solution.Last(); i++) {
+  for (int i = solution.first_index(); i <= solution.last_index(); i++) {
     if (solution[i] >= eps2) {
       return false;
     }
@@ -191,7 +191,7 @@ Integer find_lcd(const Matrix<Rational> &mat)
 Integer find_lcd(const Vector<Rational> &vec)
 {
   Integer lcd(1);
-  for (int i = vec.First(); i <= vec.Last(); i++) {
+  for (int i = vec.first_index(); i <= vec.last_index(); i++) {
     lcd = lcm(vec[i].denominator(), lcd);
   }
   return lcd;
@@ -201,7 +201,7 @@ Integer find_lcd(const Vector<Rational> &vec)
 
 Tableau<Rational>::Tableau(const Matrix<Rational> &A, const Vector<Rational> &b)
   : TableauInterface<Rational>(A, b), Tabdat(A.MinRow(), A.MaxRow(), A.MinCol(), A.MaxCol()),
-    Coeff(b.First(), b.Last()), denom(1), tmpcol(b.First(), b.Last()),
+    Coeff(b.first_index(), b.last_index()), denom(1), tmpcol(b.first_index(), b.last_index()),
     nonbasic(A.MinCol(), A.MaxCol())
 {
   for (int j = MinCol(); j <= MaxCol(); j++) {
@@ -213,7 +213,7 @@ Tableau<Rational>::Tableau(const Matrix<Rational> &A, const Vector<Rational> &b)
     throw BadDenom();
   }
 
-  for (int i = b.First(); i <= b.Last(); i++) {
+  for (int i = b.first_index(); i <= b.last_index(); i++) {
     Rational x = b[i] * (Rational)totdenom;
     if (x.denominator() != 1) {
       throw BadDenom();
@@ -229,7 +229,7 @@ Tableau<Rational>::Tableau(const Matrix<Rational> &A, const Vector<Rational> &b)
       Tabdat(i, j) = x.numerator();
     }
   }
-  for (int i = b.First(); i <= b.Last(); i++) {
+  for (int i = b.first_index(); i <= b.last_index(); i++) {
     solution[i] = (Rational)Coeff[i];
   }
 }
@@ -237,9 +237,9 @@ Tableau<Rational>::Tableau(const Matrix<Rational> &A, const Vector<Rational> &b)
 Tableau<Rational>::Tableau(const Matrix<Rational> &A, const Array<int> &art,
                            const Vector<Rational> &b)
   : TableauInterface<Rational>(A, art, b),
-    Tabdat(A.MinRow(), A.MaxRow(), A.MinCol(), A.MaxCol() + art.Length()),
-    Coeff(b.First(), b.Last()), denom(1), tmpcol(b.First(), b.Last()),
-    nonbasic(A.MinCol(), A.MaxCol() + art.Length())
+    Tabdat(A.MinRow(), A.MaxRow(), A.MinCol(), A.MaxCol() + art.size()),
+    Coeff(b.first_index(), b.last_index()), denom(1), tmpcol(b.first_index(), b.last_index()),
+    nonbasic(A.MinCol(), A.MaxCol() + art.size())
 {
   for (int j = MinCol(); j <= MaxCol(); j++) {
     nonbasic[j] = j;
@@ -250,7 +250,7 @@ Tableau<Rational>::Tableau(const Matrix<Rational> &A, const Array<int> &art,
     throw BadDenom();
   }
 
-  for (int i = b.First(); i <= b.Last(); i++) {
+  for (int i = b.first_index(); i <= b.last_index(); i++) {
     Rational x = b[i] * (Rational)totdenom;
     if (x.denominator() != 1) {
       throw BadDenom();
@@ -269,7 +269,7 @@ Tableau<Rational>::Tableau(const Matrix<Rational> &A, const Array<int> &art,
       Tabdat(artificial[j], j) = totdenom;
     }
   }
-  for (int i = b.First(); i <= b.Last(); i++) {
+  for (int i = b.first_index(); i <= b.last_index(); i++) {
     solution[i] = (Rational)Coeff[i];
   }
 }
@@ -298,11 +298,11 @@ Tableau<Rational> &Tableau<Rational>::operator=(const Tableau<Rational> &orig)
 
 int Tableau<Rational>::remap(int col_index) const
 {
-  int i = nonbasic.First();
-  while (i <= nonbasic.Last() && nonbasic[i] != col_index) {
+  int i = nonbasic.first_index();
+  while (i <= nonbasic.last_index() && nonbasic[i] != col_index) {
     i++;
   }
-  if (i > nonbasic.Last()) {
+  if (i > nonbasic.last_index()) {
     throw DimensionException();
   }
   return i;
@@ -310,7 +310,7 @@ int Tableau<Rational>::remap(int col_index) const
 
 Matrix<Rational> Tableau<Rational>::GetInverse()
 {
-  Vector<Rational> mytmpcol(tmpcol.First(), tmpcol.Last());
+  Vector<Rational> mytmpcol(tmpcol.first_index(), tmpcol.last_index());
   Matrix<Rational> inv(MinRow(), MaxRow(), MinRow(), MaxRow());
   for (int i = inv.MinCol(); i <= inv.MaxCol(); i++) {
     MySolveColumn(-i, mytmpcol);
@@ -401,7 +401,7 @@ void Tableau<Rational>::Pivot(int outrow, int in_col)
   basis.Pivot(outrow, in_col);
   nonbasic[col] = outlabel;
 
-  for (i = solution.First(); i <= solution.Last(); i++) {
+  for (i = solution.first_index(); i <= solution.last_index(); i++) {
     //** solution[i] = (Rational)(Coeff[i])/(Rational)(denom*totdenom);
     solution[i] = Rational(Coeff[i] * sign(denom * totdenom));
   }
@@ -417,7 +417,7 @@ void Tableau<Rational>::Pivot(int outrow, int in_col)
 
 void Tableau<Rational>::SolveColumn(int in_col, Vector<Rational> &out)
 {
-  Vector<Integer> tempcol(tmpcol.First(), tmpcol.Last());
+  Vector<Integer> tempcol(tmpcol.first_index(), tmpcol.last_index());
   if (Member(in_col)) {
     out = (Rational)0;
     out[Find(in_col)] = Rational(abs(denom));
@@ -425,7 +425,7 @@ void Tableau<Rational>::SolveColumn(int in_col, Vector<Rational> &out)
   else {
     int col = remap(in_col);
     Tabdat.GetColumn(col, tempcol);
-    for (int i = tempcol.First(); i <= tempcol.Last(); i++) {
+    for (int i = tempcol.first_index(); i <= tempcol.last_index(); i++) {
       out[i] = (Rational)(tempcol[i]) * (Rational)(sign(denom * totdenom));
     }
   }
@@ -433,7 +433,7 @@ void Tableau<Rational>::SolveColumn(int in_col, Vector<Rational> &out)
   if (in_col < 0) {
     out *= Rational(totdenom);
   }
-  for (int i = out.First(); i <= out.Last(); i++) {
+  for (int i = out.first_index(); i <= out.last_index(); i++) {
     if (Label(i) < 0) {
       out[i] = (Rational)out[i] / (Rational)totdenom;
     }
@@ -442,7 +442,7 @@ void Tableau<Rational>::SolveColumn(int in_col, Vector<Rational> &out)
 
 void Tableau<Rational>::MySolveColumn(int in_col, Vector<Rational> &out)
 {
-  Vector<Integer> tempcol(tmpcol.First(), tmpcol.Last());
+  Vector<Integer> tempcol(tmpcol.first_index(), tmpcol.last_index());
   if (Member(in_col)) {
     out = (Rational)0;
     out[Find(in_col)] = Rational(abs(denom));
@@ -450,7 +450,7 @@ void Tableau<Rational>::MySolveColumn(int in_col, Vector<Rational> &out)
   else {
     int col = remap(in_col);
     Tabdat.GetColumn(col, tempcol);
-    for (int i = tempcol.First(); i <= tempcol.Last(); i++) {
+    for (int i = tempcol.first_index(); i <= tempcol.last_index(); i++) {
       out[i] = (Rational)(tempcol[i]) * (Rational)(sign(denom * totdenom));
     }
   }
@@ -479,7 +479,7 @@ void Tableau<Rational>::Refactor()
   int i, j;
   Matrix<Rational> inv(GetInverse());
   Matrix<Rational> Tabnew(Tabdat.MinRow(), Tabdat.MaxRow(), Tabdat.MinCol(), Tabdat.MaxCol());
-  for (i = nonbasic.First(); i <= nonbasic.Last(); i++) {
+  for (i = nonbasic.first_index(); i <= nonbasic.last_index(); i++) {
     GetColumn(nonbasic[i], mytmpcol);
     //    if(nonbasic[i]>=0) mytmpcol*=Rational(totdenom);
     Tabnew.SetColumn(i, inv * mytmpcol * (Rational)sign(denom * totdenom));
@@ -490,7 +490,7 @@ void Tableau<Rational>::Refactor()
   // gout << "\nTabdat:\n" << Tabdat;
   // gout << "\nTabnew:\n" << Tabnew;
 
-  Vector<Rational> Coeffnew(Coeff.First(), Coeff.Last());
+  Vector<Rational> Coeffnew(Coeff.first_index(), Coeff.last_index());
   Coeffnew = inv * (*b) * Rational(totdenom) * Rational(sign(denom * totdenom));
 
   // gout << "\nCoeff:\n" << Coeff;
@@ -544,7 +544,7 @@ void Tableau<Rational>::SolveT(const Vector<Rational> &c, Vector<Rational> &y)
 
 bool Tableau<Rational>::IsFeasible()
 {
-  for (int i = solution.First(); i <= solution.Last(); i++) {
+  for (int i = solution.first_index(); i <= solution.last_index(); i++) {
     if (solution[i] >= eps2) {
       return false;
     }
@@ -574,7 +574,7 @@ void Tableau<Rational>::BasisVector(Vector<Rational> &out) const
 {
   out = solution;
   out = out / (Rational)abs(denom);
-  for (int i = out.First(); i <= out.Last(); i++) {
+  for (int i = out.first_index(); i <= out.last_index(); i++) {
     if (Label(i) < 0) {
       out[i] = out[i] / (Rational)totdenom;
     }

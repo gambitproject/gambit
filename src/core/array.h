@@ -28,36 +28,61 @@
 
 namespace Gambit {
 
-/// A basic bounds-checked array
+/// \brief An extension of std::vector to have arbitrary offset index
+///
+/// This is a variation on std::vector, which allows for the index of the first
+/// element to be something other than zero.
 template <class T> class Array {
 protected:
-  int mindex, maxdex;
-  T *data;
+  int m_offset, m_length;
+  T *m_data;
 
-  /// Private helper function that accomplishes the insertion of an object
   int InsertAt(const T &t, int n)
   {
-    if (this->mindex > n || n > this->maxdex + 1) {
+    if (this->m_offset > n || n > this->last_index() + 1) {
       throw IndexException();
     }
 
-    T *new_data = new T[++this->maxdex - this->mindex + 1] - this->mindex;
+    T *new_data = new T[++this->m_length] - this->m_offset;
 
     int i;
-    for (i = this->mindex; i <= n - 1; i++) {
-      new_data[i] = this->data[i];
+    for (i = this->m_offset; i <= n - 1; i++) {
+      new_data[i] = this->m_data[i];
     }
     new_data[i++] = t;
-    for (; i <= this->maxdex; i++) {
-      new_data[i] = this->data[i - 1];
+    for (; i <= this->last_index(); i++) {
+      new_data[i] = this->m_data[i - 1];
     }
 
-    if (this->data) {
-      delete[] (this->data + this->mindex);
+    if (this->m_data) {
+      delete[] (this->m_data + this->m_offset);
     }
-    this->data = new_data;
+    this->m_data = new_data;
 
     return n;
+  }
+
+  T Remove(int n)
+  {
+    if (n < this->m_offset || n > this->last_index()) {
+      throw IndexException();
+    }
+
+    T ret(this->m_data[n]);
+    T *new_data = (--this->m_length > 0) ? new T[this->m_length] - this->m_offset : nullptr;
+
+    int i;
+    for (i = this->m_offset; i < n; i++) {
+      new_data[i] = this->m_data[i];
+    }
+    for (; i <= this->last_index(); i++) {
+      new_data[i] = this->m_data[i + 1];
+    }
+
+    delete[] (this->m_data + this->m_offset);
+    this->m_data = new_data;
+
+    return ret;
   }
 
 public:
@@ -102,6 +127,8 @@ public:
   };
 
   class const_iterator {
+    friend class Array;
+
   private:
     const Array *m_array;
     int m_index;
@@ -139,75 +166,59 @@ public:
     bool operator!=(const const_iterator &it) const { return !(*this == it); }
   };
 
-  /// @name Lifecycle
-  //@{
-  /// Constructs an array of length 'len', starting at '1'
   explicit Array(unsigned int len = 0)
-    : mindex(1), maxdex(len), data((len) ? new T[len] - 1 : nullptr)
+    : m_offset(1), m_length(len), m_data((len) ? new T[len] - 1 : nullptr)
   {
   }
-  /// Constructs an array starting at lo and ending at hi
-  Array(int lo, int hi) : mindex(lo), maxdex(hi)
+  Array(int lo, int hi) : m_offset(lo), m_length(hi - lo + 1)
   {
-    if (maxdex + 1 < mindex) {
+    if (m_length < 0) {
       throw RangeException();
     }
-    data = (maxdex >= mindex) ? new T[maxdex - mindex + 1] - mindex : nullptr;
+    m_data = (m_length > 0) ? new T[m_length] - m_offset : nullptr;
   }
-  /// Copy the contents of another array
   Array(const Array<T> &a)
-    : mindex(a.mindex), maxdex(a.maxdex),
-      data((maxdex >= mindex) ? new T[maxdex - mindex + 1] - mindex : nullptr)
+    : m_offset(a.m_offset), m_length(a.m_length),
+      m_data((m_length > 0) ? new T[m_length] - m_offset : nullptr)
   {
-    for (int i = mindex; i <= maxdex; i++) {
-      data[i] = a.data[i];
+    for (int i = m_offset; i <= last_index(); i++) {
+      m_data[i] = a.m_data[i];
     }
   }
-  /// Destruct and deallocates the array
   virtual ~Array()
   {
-    if (maxdex >= mindex) {
-      delete[] (data + mindex);
+    if (m_length > 0) {
+      delete[] (m_data + m_offset);
     }
   }
 
-  /// Copy the contents of another array
   Array<T> &operator=(const Array<T> &a)
   {
     if (this != &a) {
-      // We only reallocate if necessary.  This should be somewhat faster
-      // if many objects are of the same length.  Furthermore, it is
-      // _essential_ for the correctness of the PVector and DVector
-      // assignment operator, since it assumes the value of data does
-      // not change.
-      if (!data || (data && (mindex != a.mindex || maxdex != a.maxdex))) {
-        if (data) {
-          delete[] (data + mindex);
+      // We only reallocate if necessary.
+      if (!m_data || (m_data && (m_offset != a.m_offset || m_length == a.m_length))) {
+        if (m_data) {
+          delete[] (m_data + m_offset);
         }
-        mindex = a.mindex;
-        maxdex = a.maxdex;
-        data = (maxdex >= mindex) ? new T[maxdex - mindex + 1] - mindex : nullptr;
+        m_offset = a.m_offset;
+        m_length = a.m_length;
+        m_data = (m_length > 0) ? new T[m_length] - m_offset : nullptr;
       }
 
-      for (int i = mindex; i <= maxdex; i++) {
-        data[i] = a.data[i];
+      for (int i = m_offset; i <= last_index(); i++) {
+        m_data[i] = a.m_data[i];
       }
     }
 
     return *this;
   }
 
-  //@}
-
-  /// @name Operator overloading
-  //@{
-  /// Test the equality of two arrays
   bool operator==(const Array<T> &a) const
   {
-    if (mindex != a.mindex || maxdex != a.maxdex) {
+    if (m_offset != a.m_offset || m_length != a.m_length) {
       return false;
     }
-    for (int i = mindex; i <= maxdex; i++) {
+    for (int i = m_offset; i <= last_index(); i++) {
       if ((*this)[i] != a[i]) {
         return false;
       }
@@ -215,143 +226,59 @@ public:
     return true;
   }
 
-  /// Test the inequality of two arrays
   bool operator!=(const Array<T> &a) const { return !(*this == a); }
-  //@}
 
-  /// @name General data access
-  //@{
-  /// Return the length of the array
-  int Length() const { return maxdex - mindex + 1; }
-
-  /// Return the first index
-  int First() const { return mindex; }
-
-  /// Return the last index
-  int Last() const { return maxdex; }
-
-  /// Return a forward iterator starting at the beginning of the array
-  iterator begin() { return iterator(this, mindex); }
-  /// Return a forward iterator past the end of the array
-  iterator end() { return iterator(this, maxdex + 1); }
-  /// Return a const forward iterator starting at the beginning of the array
-  const_iterator begin() const { return const_iterator(this, mindex); }
-  /// Return a const forward iterator past the end of the array
-  const_iterator end() const { return const_iterator(this, maxdex + 1); }
-  /// Return a const forward iterator starting at the beginning of the array
-  const_iterator cbegin() const { return const_iterator(this, mindex); }
-  /// Return a const forward iterator past the end of the array
-  const_iterator cend() const { return const_iterator(this, maxdex + 1); }
-
-  /// Access the index'th entry in the array
   const T &operator[](int index) const
   {
-    if (index < mindex || index > maxdex) {
+    if (index < m_offset || index > last_index()) {
       throw IndexException();
     }
-    return data[index];
+    return m_data[index];
   }
 
-  /// Access the index'th entry in the array
   T &operator[](int index)
   {
-    if (index < mindex || index > maxdex) {
+    if (index < m_offset || index > last_index()) {
       throw IndexException();
     }
-    return data[index];
+    return m_data[index];
   }
+  const T &front() const { return m_data[m_offset]; }
+  T &front() { return m_data[m_offset]; }
+  const T &back() const { return m_data[last_index()]; }
+  T &back() { return m_data[last_index()]; }
 
-  /// Return the index at which a given element resides in the array.
-  int Find(const T &t) const
-  {
-    int i;
-    for (i = this->mindex; i <= this->maxdex && this->data[i] != t; i++)
-      ;
-    return (i <= this->maxdex) ? i : (mindex - 1);
-  }
-  //@}
+  iterator begin() { return {this, m_offset}; }
+  const_iterator begin() const { return {this, m_offset}; }
+  iterator end() { return {this, m_offset + m_length}; }
+  const_iterator end() const { return {this, m_offset + m_length}; }
+  const_iterator cbegin() const { return {this, m_offset}; }
+  const_iterator cend() const { return {this, m_offset + m_length}; }
 
-  /// @name Modifying the contents of the array
-  //@{
-  /// \brief Insert a new element into the array at a given index.
-  ///
-  /// Insert a new element into the array at a given index.  If the index is
-  /// less than the lowest index, the element is inserted at the beginning;
-  /// if the index is greater than the highest index, the element is appended.
-  /// Returns the index at which the element actually is placed.
-  int Insert(const T &t, int n)
-  {
-    return InsertAt(t, (n < this->mindex) ? this->mindex
-                                          : ((n > this->maxdex + 1) ? this->maxdex + 1 : n));
-  }
+  bool empty() const { return this->m_length == 0; }
+  size_t size() const { return m_length; }
+  int first_index() const { return m_offset; }
+  int last_index() const { return m_offset + m_length - 1; }
 
-  void erase(iterator pos) { Remove(pos.m_index); }
-
-  /// \brief Remove an element from the array.
-  ///
-  /// Remove the element at a given index from the array.  Returns the value
-  /// of the element removed.
-  T Remove(int n)
-  {
-    if (n < this->mindex || n > this->maxdex) {
-      throw IndexException();
-    }
-
-    T ret(this->data[n]);
-    T *new_data = (--this->maxdex >= this->mindex)
-                      ? new T[this->maxdex - this->mindex + 1] - this->mindex
-                      : nullptr;
-
-    int i;
-    for (i = this->mindex; i < n; i++) {
-      new_data[i] = this->data[i];
-    }
-    for (; i <= this->maxdex; i++) {
-      new_data[i] = this->data[i + 1];
-    }
-
-    delete[] (this->data + this->mindex);
-    this->data = new_data;
-
-    return ret;
-  }
-  //@}
-
-  /// @name STL-style interface
-  ///
-  /// These operations are a partial implementation of operations on
-  /// STL-style list containers.  It is suggested that future code be
-  /// written to use these, and existing code ported to use them as
-  /// possible.
-  ///@{
-  /// Return whether the array container is empty (has size 0).
-  bool empty() const { return (this->maxdex < this->mindex); }
-  /// Return the number of elements in the array container.
-  size_t size() const { return maxdex - mindex + 1; }
-  /// Access first element.
-  const T &front() const { return data[mindex]; }
-  /// Access first element.
-  T &front() { return data[mindex]; }
-  /// Access last element.
-  const T &back() const { return data[maxdex]; }
-  /// Access last element.
-  T &back() { return data[maxdex]; }
-
-  /// Adds a new element at the end of the array container, after its
-  /// current last element.
-  void push_back(const T &val) { InsertAt(val, this->maxdex + 1); }
-  /// Removes all elements from the array container (which are destroyed),
-  /// leaving the container with a size of 0.
   void clear()
   {
-    if (maxdex >= mindex) {
-      delete[] (data + mindex);
+    if (m_length > 0) {
+      delete[] (m_data + m_offset);
     }
-    data = nullptr;
-    maxdex = mindex - 1;
+    m_data = nullptr;
+    m_length = 0;
   }
-  ///@}
+  void insert(const_iterator pos, const T &value) { InsertAt(value, pos.m_index); }
+  void erase(iterator pos) { Remove(pos.m_index); }
+  void push_back(const T &val) { InsertAt(val, this->last_index() + 1); }
+  void pop_back() { Remove(last_index()); }
 };
+
+/// Convenience function to erase the element at `p_index`
+template <class T> void erase_atindex(Array<T> &p_array, int p_index)
+{
+  p_array.erase(std::next(p_array.begin(), p_index - p_array.first_index()));
+}
 
 } // end namespace Gambit
 

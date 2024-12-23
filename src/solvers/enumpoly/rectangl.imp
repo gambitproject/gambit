@@ -40,7 +40,7 @@ gRectangle<T>::gRectangle(const Gambit::Vector<T> &lower_bd, const Gambit::Vecto
   : sides()
 {
   // assert (lower_bd.Check(upper_bd));
-  for (int i = 1; i <= upper_bd.Length(); i++) {
+  for (int i = 1; i <= upper_bd.size(); i++) {
     gInterval<T> side(lower_bd[i], upper_bd[i]);
     sides.push_back(side);
   }

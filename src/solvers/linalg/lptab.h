@@ -58,7 +58,7 @@ public:
   BFS<T> DualBFS() const;
 
   // returns the label of the index of the last artificial variable
-  int GetLastLabel() { return this->artificial.Last(); }
+  int GetLastLabel() { return this->artificial.last_index(); }
 
   // select Basis elements according to Tableau rows and cols
   void BasisSelect(const Array<T> &rowv, Vector<T> &colv) const;

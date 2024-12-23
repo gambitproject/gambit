@@ -38,7 +38,7 @@ LPTableau<T>::LPTableau(const Matrix<T> &A, const Vector<T> &b)
 template <class T>
 LPTableau<T>::LPTableau(const Matrix<T> &A, const Array<int> &art, const Vector<T> &b)
   : Tableau<T>(A, art, b), dual(A.MinRow(), A.MaxRow()), unitcost(A.MinRow(), A.MaxRow()),
-    cost(A.MinCol(), A.MaxCol() + art.Length())
+    cost(A.MinCol(), A.MaxCol() + art.size())
 {
 }
 
@@ -46,21 +46,21 @@ LPTableau<T>::LPTableau(const Matrix<T> &A, const Array<int> &art, const Vector<
 
 template <> void LPTableau<Rational>::SetCost(const Vector<Rational> &c)
 {
-  if (cost.First() == c.First() && cost.Last() == c.Last()) {
+  if (cost.first_index() == c.first_index() && cost.last_index() == c.last_index()) {
     cost = c;
     cost *= Rational(Tableau<Rational>::TotDenom());
-    for (int i = unitcost.First(); i <= unitcost.Last(); i++) {
+    for (int i = unitcost.first_index(); i <= unitcost.last_index(); i++) {
       unitcost[i] = Rational(0);
     }
     Refactor();
     SolveDual();
     return;
   }
-  for (int i = c.First(); i <= cost.Last(); i++) {
+  for (int i = c.first_index(); i <= cost.last_index(); i++) {
     cost[i] = c[i] * Rational(Tableau<Rational>::TotDenom());
   }
-  for (int i = unitcost.First(); i <= unitcost.Last(); i++) {
-    unitcost[i] = c[cost.size() + i - unitcost.First() + 1];
+  for (int i = unitcost.first_index(); i <= unitcost.last_index(); i++) {
+    unitcost[i] = c[cost.size() + i - unitcost.first_index() + 1];
   }
   Refactor();
   SolveDual();
@@ -68,24 +68,24 @@ template <> void LPTableau<Rational>::SetCost(const Vector<Rational> &c)
 
 template <> void LPTableau<double>::SetCost(const Vector<double> &c)
 {
-  if (cost.First() == c.First() && cost.Last() == c.Last()) {
+  if (cost.first_index() == c.first_index() && cost.last_index() == c.last_index()) {
     cost = c;
     unitcost = 0.0;
     Refactor();
     SolveDual();
     return;
   }
-  if (c.First() != cost.First()) {
+  if (c.first_index() != cost.first_index()) {
     throw DimensionException();
   }
-  if (c.Last() != (cost.Last() + unitcost.Length())) {
+  if (c.last_index() != (cost.last_index() + unitcost.size())) {
     throw DimensionException();
   }
-  for (int i = c.First(); i <= cost.Last(); i++) {
+  for (int i = c.first_index(); i <= cost.last_index(); i++) {
     cost[i] = c[i];
   }
-  for (int i = unitcost.First(); i <= unitcost.Last(); i++) {
-    unitcost[i] = c[cost.size() + i - unitcost.First() + 1];
+  for (int i = unitcost.first_index(); i <= unitcost.last_index(); i++) {
+    unitcost[i] = c[cost.size() + i - unitcost.first_index() + 1];
   }
   Refactor();
   SolveDual();
@@ -104,7 +104,7 @@ template <> Rational LPTableau<Rational>::TotalCost() const
   Vector<Rational> sol(MinRow(), MaxRow());
   BasisSelect(unitcost, cost, tmpcol);
   BasisVector(sol);
-  for (int i = tmpcol.First(); i <= tmpcol.Last(); i++) {
+  for (int i = tmpcol.first_index(); i <= tmpcol.last_index(); i++) {
     if (Label(i) > 0) {
       tmpcol[i] /= (Rational)Tableau<Rational>::TotDenom();
     }
@@ -180,7 +180,7 @@ template <class T> std::list<Array<int>> LPTableau<T>::ReversePivots()
         for (int i = best_set.size(); i >= 1; i--) {
           x = solution[best_set[i]] / tmpcol[best_set[i]];
           if (this->LtZero(x - ratio)) {
-            best_set.Remove(i);
+            erase_atindex(best_set, i);
           }
         }
 
@@ -190,7 +190,7 @@ template <class T> std::list<Array<int>> LPTableau<T>::ReversePivots()
         for (int i = best_set.size(); i >= 1; i--) {
           a_ij = static_cast<T>(1) / tmpcol[best_set[i]];
           if (this->LeZero(a_ij)) {
-            best_set.Remove(i);
+            erase_atindex(best_set, i);
           }
           else {
             // next check that prior pivot entry attains max ratio
@@ -198,17 +198,17 @@ template <class T> std::list<Array<int>> LPTableau<T>::ReversePivots()
             ratio = b_i / a_ij;
 
             flag = false;
-            for (k = tmpcol.First(); k <= tmpcol.Last() && !flag; k++) {
+            for (k = tmpcol.first_index(); k <= tmpcol.last_index() && !flag; k++) {
               if (k != best_set[i]) {
                 a_ik = -a_ij * tmpcol[k];
                 b_k = solution[k] - b_i * tmpcol[k];
                 if (this->GtZero(a_ik) && this->GtZero(b_k / a_ik - ratio)) {
-                  best_set.Remove(i);
+                  erase_atindex(best_set, i);
                   flag = true;
                 }
                 else if (this->GtZero(a_ik) && this->EqZero(b_k / a_ik - ratio) &&
                          this->Label(k) < j) {
-                  best_set.Remove(i);
+                  erase_atindex(best_set, i);
                   flag = true;
                 }
               }
@@ -227,7 +227,7 @@ template <class T> std::list<Array<int>> LPTableau<T>::ReversePivots()
         a_ij = tmpdual * tmpcol;
         c_j = RelativeCost(j);
         if (this->EqZero(a_ij)) {
-          best_set.Remove(i);
+          erase_atindex(best_set, i);
         }
         else {
           ratio = c_j / a_ij;
@@ -241,11 +241,11 @@ template <class T> std::list<Array<int>> LPTableau<T>::ReversePivots()
           c_k = RelativeCost(enter);
           c_jo = c_k - a_ik * ratio;
           if (this->GeZero(c_jo)) {
-            best_set.Remove(i);
+            erase_atindex(best_set, i);
           }
           else {
             flag = false;
-            for (k = -this->b->Last(); k < enter && !flag; k++) {
+            for (k = -this->b->last_index(); k < enter && !flag; k++) {
               if (k != 0) {
                 if (k < 0) {
                   a_ik = tmpdual[-k];
@@ -258,7 +258,7 @@ template <class T> std::list<Array<int>> LPTableau<T>::ReversePivots()
                 c_jo = c_k - a_ik * ratio;
 
                 if (this->LtZero(c_jo)) {
-                  best_set.Remove(i);
+                  erase_atindex(best_set, i);
                   flag = true;
                 }
               }
@@ -300,7 +300,7 @@ template <class T> bool LPTableau<T>::IsDualReversePivot(int i, int j)
   }
   ratio = c_j / a_ij;
 
-  for (int k = -this->b->Last(); k <= cost.Last(); k++) {
+  for (int k = -this->b->last_index(); k <= cost.last_index(); k++) {
     if (k != 0) {
       if (k < 0) {
         a_ik = tmpdual[-k];
@@ -336,7 +336,7 @@ template <class T> bool LPTableau<T>::IsDualReversePivot(int i, int j)
   }
   ratio = c_k / a_ik;
 
-  for (int k = -this->b->Last(); k <= cost.Last(); k++) {
+  for (int k = -this->b->last_index(); k <= cost.last_index(); k++) {
     if (k != 0) {
       if (k < 0) {
         a_ik = tmpdual[-k];
@@ -367,7 +367,7 @@ template <class T> bool LPTableau<T>::IsDualReversePivot(int i, int j)
     return false;
   }
 
-  for (int k = this->b->First(); k <= this->b->Last(); k++) {
+  for (int k = this->b->first_index(); k <= this->b->last_index(); k++) {
     if (k != i) {
       b_k = solution[k] - b_i * tmpcol[k];
       if (this->GtZero(b_k) && this->Label(k) < j) {

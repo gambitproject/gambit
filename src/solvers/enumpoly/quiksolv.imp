@@ -135,7 +135,7 @@ static bool fuzzy_equals(double x, double y)
 
 static bool fuzzy_equals(const Gambit::Vector<double> &x, const Gambit::Vector<double> &y)
 {
-  for (int i = x.First(); i <= x.Last(); i++) {
+  for (int i = x.first_index(); i <= x.last_index(); i++) {
     if (!fuzzy_equals(x[i], y[i])) {
       return false;
     }
@@ -378,7 +378,7 @@ Gambit::Vector<double> QuikSolv<T>::SlowNewtonPolishOnce(const Gambit::Vector<do
       done = true;
     }
     else {
-      for (int i = 1; i <= Del.Length(); i++) {
+      for (int i = 1; i <= Del.size(); i++) {
         Del[i] /= 2;
       }
     }

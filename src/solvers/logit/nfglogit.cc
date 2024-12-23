@@ -34,7 +34,7 @@ namespace {
 MixedStrategyProfile<double> PointToProfile(const Game &p_game, const Vector<double> &p_point)
 {
   MixedStrategyProfile<double> profile(p_game->NewMixedStrategyProfile(0.0));
-  for (int i = 1; i < p_point.Length(); i++) {
+  for (int i = 1; i < p_point.size(); i++) {
     profile[i] = exp(p_point[i]);
   }
   return profile;
@@ -53,7 +53,7 @@ Vector<double> ProfileToPoint(const LogitQREMixedStrategyProfile &p_profile)
 double LogLike(const Vector<double> &p_frequencies, const Vector<double> &p_point)
 {
   double logL = 0.0;
-  for (int i = 1; i <= p_frequencies.Length(); i++) {
+  for (int i = 1; i <= p_frequencies.size(); i++) {
     logL += p_frequencies[i] * log(p_point[i]);
   }
   return logL;
@@ -62,7 +62,7 @@ double LogLike(const Vector<double> &p_frequencies, const Vector<double> &p_poin
 double DiffLogLike(const Vector<double> &p_frequencies, const Vector<double> &p_tangent)
 {
   double diff_logL = 0.0;
-  for (int i = 1; i <= p_frequencies.Length(); i++) {
+  for (int i = 1; i <= p_frequencies.size(); i++) {
     diff_logL += p_frequencies[i] * p_tangent[i];
   }
   return diff_logL;

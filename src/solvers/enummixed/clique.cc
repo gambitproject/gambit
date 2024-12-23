@@ -429,7 +429,7 @@ int CliqueEnumerator::getconnco(Array<int> &firstedge, Array<Edge> &edgelist)
   }
 
   numco = 0;
-  for (newedge = 1; newedge <= edgelist.Length(); newedge++) {
+  for (newedge = 1; newedge <= edgelist.size(); newedge++) {
     i = edgelist[newedge].node1;
     j = edgelist[newedge].node2;
 

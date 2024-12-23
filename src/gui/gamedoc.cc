@@ -44,7 +44,7 @@ gbtBehavDominanceStack::gbtBehavDominanceStack(gbtGameDocument *p_doc, bool p_st
 
 gbtBehavDominanceStack::~gbtBehavDominanceStack()
 {
-  for (int i = 1; i <= m_supports.Length(); delete m_supports[i++])
+  for (int i = 1; i <= m_supports.size(); delete m_supports[i++])
     ;
 }
 
@@ -58,7 +58,7 @@ void gbtBehavDominanceStack::SetStrict(bool p_strict)
 
 void gbtBehavDominanceStack::Reset()
 {
-  for (int i = 1; i <= m_supports.Length(); delete m_supports[i++])
+  for (int i = 1; i <= m_supports.size(); delete m_supports[i++])
     ;
   m_supports = Gambit::Array<Gambit::BehaviorSupportProfile *>();
   if (m_doc->IsTree()) {
@@ -70,7 +70,7 @@ void gbtBehavDominanceStack::Reset()
 
 bool gbtBehavDominanceStack::NextLevel()
 {
-  if (m_current < m_supports.Length()) {
+  if (m_current < m_supports.size()) {
     m_current++;
     return true;
   }
@@ -115,7 +115,7 @@ gbtStrategyDominanceStack::gbtStrategyDominanceStack(gbtGameDocument *p_doc, boo
 
 gbtStrategyDominanceStack::~gbtStrategyDominanceStack()
 {
-  for (int i = 1; i <= m_supports.Length(); delete m_supports[i++])
+  for (int i = 1; i <= m_supports.size(); delete m_supports[i++])
     ;
 }
 
@@ -129,7 +129,7 @@ void gbtStrategyDominanceStack::SetStrict(bool p_strict)
 
 void gbtStrategyDominanceStack::Reset()
 {
-  for (int i = 1; i <= m_supports.Length(); delete m_supports[i++])
+  for (int i = 1; i <= m_supports.size(); delete m_supports[i++])
     ;
   m_supports = Gambit::Array<Gambit::StrategySupportProfile *>();
   m_supports.push_back(new Gambit::StrategySupportProfile(m_doc->GetGame()));
@@ -139,7 +139,7 @@ void gbtStrategyDominanceStack::Reset()
 
 bool gbtStrategyDominanceStack::NextLevel()
 {
-  if (m_current < m_supports.Length()) {
+  if (m_current < m_supports.size()) {
     m_current++;
     return true;
   }
@@ -272,7 +272,7 @@ bool gbtGameDocument::LoadDocument(const wxString &p_filename, bool p_saveUndo)
     }
   }
 
-  m_currentProfileList = m_profiles.Length();
+  m_currentProfileList = m_profiles.size();
 
   TiXmlNode *colors = docroot->FirstChild("colors");
   if (colors) {
@@ -335,7 +335,7 @@ void gbtGameDocument::SaveDocument(std::ostream &p_file) const
     p_file << "</nfgfile>\n";
   }
 
-  for (int i = 1; i <= m_profiles.Length(); i++) {
+  for (int i = 1; i <= m_profiles.size(); i++) {
     m_profiles[i]->Save(p_file);
   }
 
@@ -363,19 +363,20 @@ void gbtGameDocument::UpdateViews(gbtGameModificationType p_modifications)
     // computed profiles invalid for the edited game, it does mean
     // that, in general, they won't be Nash.  For now, to avoid confusion,
     // we will wipe them out.
-    while (m_profiles.Length() > 0) {
-      delete m_profiles.Remove(1);
+    while (!m_profiles.empty()) {
+      delete m_profiles.back();
+      m_profiles.pop_back();
     }
     m_currentProfileList = 0;
   }
 
-  for (int i = 1; i <= m_views.Length(); m_views[i++]->OnUpdate())
+  for (int i = 1; i <= m_views.size(); m_views[i++]->OnUpdate())
     ;
 }
 
 void gbtGameDocument::PostPendingChanges()
 {
-  for (int i = 1; i <= m_views.Length(); m_views[i++]->PostPendingChanges())
+  for (int i = 1; i <= m_views.size(); m_views[i++]->PostPendingChanges())
     ;
 }
 
@@ -383,7 +384,7 @@ void gbtGameDocument::BuildNfg()
 {
   if (m_game->IsTree()) {
     m_stratSupports.Reset();
-    for (int i = 1; i <= m_profiles.Length(); m_profiles[i++]->BuildNfg())
+    for (int i = 1; i <= m_profiles.size(); m_profiles[i++]->BuildNfg())
       ;
   }
 }
@@ -410,8 +411,9 @@ void gbtGameDocument::Undo()
 
   m_game = nullptr;
 
-  while (m_profiles.Length() > 0) {
-    delete m_profiles.Remove(1);
+  while (!m_profiles.empty()) {
+    delete m_profiles.back();
+    m_profiles.pop_back();
   }
   m_currentProfileList = 0;
 
@@ -423,7 +425,7 @@ void gbtGameDocument::Undo()
   LoadDocument(tempfile, false);
   wxRemoveFile(tempfile);
 
-  for (int i = 1; i <= m_views.Length(); m_views[i++]->OnUpdate())
+  for (int i = 1; i <= m_views.size(); m_views[i++]->OnUpdate())
     ;
 }
 
@@ -434,8 +436,9 @@ void gbtGameDocument::Redo()
 
   m_game = nullptr;
 
-  while (m_profiles.Length() > 0) {
-    delete m_profiles.Remove(1);
+  while (!m_profiles.empty()) {
+    delete m_profiles.back();
+    m_profiles.pop_back();
   }
   m_currentProfileList = 0;
 
@@ -447,7 +450,7 @@ void gbtGameDocument::Redo()
   LoadDocument(tempfile, false);
   wxRemoveFile(tempfile);
 
-  for (int i = 1; i <= m_views.Length(); m_views[i++]->OnUpdate())
+  for (int i = 1; i <= m_views.size(); m_views[i++]->OnUpdate())
     ;
 }
 
@@ -460,7 +463,7 @@ void gbtGameDocument::SetCurrentProfile(int p_profile)
 void gbtGameDocument::AddProfileList(gbtAnalysisOutput *p_profs)
 {
   m_profiles.push_back(p_profs);
-  m_currentProfileList = m_profiles.Length();
+  m_currentProfileList = m_profiles.size();
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 

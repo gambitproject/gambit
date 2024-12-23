@@ -32,8 +32,8 @@
 //---------------------------
 
 gIndexOdometer::gIndexOdometer(const Gambit::Array<int> &IndexUpperBounds)
-  : MinIndices(IndexUpperBounds.Length()), MaxIndices(IndexUpperBounds),
-    CurIndices(IndexUpperBounds.Length())
+  : MinIndices(IndexUpperBounds.size()), MaxIndices(IndexUpperBounds),
+    CurIndices(IndexUpperBounds.size())
 {
   int i;
   for (i = 1; i <= NoIndices(); i++) {
@@ -47,8 +47,7 @@ gIndexOdometer::gIndexOdometer(const Gambit::Array<int> &IndexUpperBounds)
 
 gIndexOdometer::gIndexOdometer(const Gambit::Array<int> &IndexLowerBounds,
                                const Gambit::Array<int> &IndexUpperBounds)
-  : MinIndices(IndexLowerBounds), MaxIndices(IndexUpperBounds),
-    CurIndices(IndexUpperBounds.Length())
+  : MinIndices(IndexLowerBounds), MaxIndices(IndexUpperBounds), CurIndices(IndexUpperBounds.size())
 {
   CurIndices[1] = MinIndices[1] - 1;
   for (int i = 2; i <= NoIndices(); i++) {

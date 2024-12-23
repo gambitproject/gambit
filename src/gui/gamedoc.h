@@ -51,7 +51,7 @@ public:
   //!
   //! Returns the number of supports in the stack
   //!
-  int NumSupports() const { return m_supports.Length(); }
+  int NumSupports() const { return m_supports.size(); }
 
   //!
   //! Get the i'th support in the stack
@@ -100,7 +100,7 @@ public:
   //!
   //! Returns 'false' if it is known that no further eliminations can be done
   //!
-  bool CanEliminate() const { return (m_current < m_supports.Length() || !m_noFurther); }
+  bool CanEliminate() const { return (m_current < m_supports.size() || !m_noFurther); }
 };
 
 //!
@@ -122,7 +122,7 @@ public:
   //!
   //! Returns the number of supports in the stack
   //!
-  int NumSupports() const { return m_supports.Length(); }
+  int NumSupports() const { return m_supports.size(); }
 
   //!
   //! Get the i'th support in the stack
@@ -176,7 +176,7 @@ public:
   //!
   //! Returns 'false' if it is known that no further eliminations can be done
   //!
-  bool CanEliminate() const { return (m_current < m_supports.Length() || !m_noFurther); }
+  bool CanEliminate() const { return (m_current < m_supports.size() || !m_noFurther); }
 };
 
 //
@@ -288,12 +288,12 @@ public:
   const gbtAnalysisOutput &GetProfiles(int p_index) const { return *m_profiles[p_index]; }
   void AddProfileList(gbtAnalysisOutput *);
   void SetProfileList(int p_index);
-  int NumProfileLists() const { return m_profiles.Length(); }
+  int NumProfileLists() const { return m_profiles.size(); }
   int GetCurrentProfileList() const { return m_currentProfileList; }
 
   int GetCurrentProfile() const
   {
-    return (m_profiles.Length() == 0) ? 0 : GetProfiles().GetCurrent();
+    return (m_profiles.size() == 0) ? 0 : GetProfiles().GetCurrent();
   }
   void SetCurrentProfile(int p_profile);
   /*

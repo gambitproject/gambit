@@ -101,7 +101,7 @@ template <class T> void gbtAnalysisProfileList<T>::AddOutput(const wxString &p_o
       m_behavProfiles.push_back(profile);
       m_mixedProfiles.push_back(
           std::make_shared<MixedStrategyProfile<T>>(profile->ToMixedProfile()));
-      m_current = m_behavProfiles.Length();
+      m_current = m_behavProfiles.size();
     }
     else {
       auto profile =
@@ -110,7 +110,7 @@ template <class T> void gbtAnalysisProfileList<T>::AddOutput(const wxString &p_o
       if (m_doc->IsTree()) {
         m_behavProfiles.push_back(std::make_shared<MixedBehaviorProfile<T>>(*profile));
       }
-      m_current = m_mixedProfiles.Length();
+      m_current = m_mixedProfiles.size();
     }
   }
   catch (gbtNotNashException &) {
@@ -128,10 +128,10 @@ template <class T> void gbtAnalysisProfileList<T>::BuildNfg()
 template <class T> int gbtAnalysisProfileList<T>::NumProfiles() const
 {
   if (m_doc->IsTree()) {
-    return m_behavProfiles.Length();
+    return m_behavProfiles.size();
   }
   else {
-    return m_mixedProfiles.Length();
+    return m_mixedProfiles.size();
   }
 }
 
@@ -199,14 +199,14 @@ template <class T> void gbtAnalysisProfileList<T>::Load(TiXmlNode *p_analysis)
           TextToBehavProfile<T>(m_doc, wxString(node->FirstChild()->Value(), *wxConvCurrent));
       m_behavProfiles.push_back(std::make_shared<MixedBehaviorProfile<T>>(profile));
       m_isBehav = true;
-      m_current = m_behavProfiles.Length();
+      m_current = m_behavProfiles.size();
     }
     else {
       MixedStrategyProfile<T> profile =
           TextToMixedProfile<T>(m_doc, wxString(node->FirstChild()->Value(), *wxConvCurrent));
       m_mixedProfiles.push_back(std::make_shared<MixedStrategyProfile<T>>(profile));
       m_isBehav = false;
-      m_current = m_mixedProfiles.Length();
+      m_current = m_mixedProfiles.size();
     }
   }
 }

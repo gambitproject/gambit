@@ -1009,7 +1009,7 @@ void gbtGameFrame::OnEditReveal(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     try {
-      for (int pl = 1; pl <= dialog.GetPlayers().Length(); pl++) {
+      for (int pl = 1; pl <= dialog.GetPlayers().size(); pl++) {
         m_doc->DoRevealAction(m_doc->GetSelectNode()->GetInfoset(), dialog.GetPlayers()[pl]);
       }
     }

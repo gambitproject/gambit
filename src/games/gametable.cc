@@ -282,7 +282,7 @@ int Product(const Array<int> &dim)
 GameTableRep::GameTableRep(const Array<int> &dim, bool p_sparseOutcomes /* = false */)
 {
   m_results = Array<GameOutcomeRep *>(Product(dim));
-  for (int pl = 1; pl <= dim.Length(); pl++) {
+  for (int pl = 1; pl <= dim.size(); pl++) {
     m_players.push_back(new GamePlayerRep(this, pl, dim[pl]));
     m_players[pl]->m_label = lexical_cast<std::string>(pl);
     for (int st = 1; st <= m_players[pl]->NumStrategies(); st++) {
@@ -292,12 +292,12 @@ GameTableRep::GameTableRep(const Array<int> &dim, bool p_sparseOutcomes /* = fal
   IndexStrategies();
 
   if (p_sparseOutcomes) {
-    for (int cont = 1; cont <= m_results.Length(); m_results[cont++] = 0)
+    for (int cont = 1; cont <= m_results.size(); m_results[cont++] = 0)
       ;
   }
   else {
-    m_outcomes = Array<GameOutcomeRep *>(m_results.Length());
-    for (int i = 1; i <= m_outcomes.Length(); i++) {
+    m_outcomes = Array<GameOutcomeRep *>(m_results.size());
+    for (int i = 1; i <= m_outcomes.size(); i++) {
       m_outcomes[i] = new GameOutcomeRep(this, i);
     }
     m_results = m_outcomes;
@@ -320,13 +320,13 @@ bool GameTableRep::IsConstSum() const
 {
   auto profile = NewPureStrategyProfile();
   Rational sum(0);
-  for (int pl = 1; pl <= m_players.Length(); pl++) {
+  for (int pl = 1; pl <= m_players.size(); pl++) {
     sum += profile->GetPayoff(pl);
   }
 
   for (auto iter : StrategyContingencies(Game(this))) {
     Rational newsum(0);
-    for (int pl = 1; pl <= m_players.Length(); pl++) {
+    for (int pl = 1; pl <= m_players.size(); pl++) {
       newsum += iter->GetPayoff(pl);
     }
     if (newsum != sum) {
@@ -404,14 +404,14 @@ GamePlayer GameTableRep::NewPlayer()
 void GameTableRep::DeleteOutcome(const GameOutcome &p_outcome)
 {
   IncrementVersion();
-  for (int i = 1; i <= m_results.Length(); i++) {
+  for (int i = 1; i <= m_results.size(); i++) {
     if (m_results[i] == p_outcome) {
       m_results[i] = 0;
     }
   }
   p_outcome->Invalidate();
   m_outcomes.erase(std::find(m_outcomes.begin(), m_outcomes.end(), p_outcome));
-  for (int outc = 1; outc <= m_outcomes.Length(); outc++) {
+  for (int outc = 1; outc <= m_outcomes.size(); outc++) {
     m_outcomes[outc]->m_number = outc;
   }
 }
@@ -453,20 +453,20 @@ GameTableRep::NewMixedStrategyProfile(const Rational &, const StrategySupportPro
 void GameTableRep::RebuildTable()
 {
   long size = 1L;
-  Array<long> offsets(m_players.Length());
-  for (int pl = 1; pl <= m_players.Length(); pl++) {
+  Array<long> offsets(m_players.size());
+  for (int pl = 1; pl <= m_players.size(); pl++) {
     offsets[pl] = size;
     size *= m_players[pl]->NumStrategies();
   }
 
   Array<GameOutcomeRep *> newResults(size);
-  for (int i = 1; i <= newResults.Length(); newResults[i++] = 0)
+  for (int i = 1; i <= newResults.size(); newResults[i++] = 0)
     ;
 
   for (auto iter :
        StrategyContingencies(StrategySupportProfile(const_cast<GameTableRep *>(this)))) {
     long newindex = 1L;
-    for (int pl = 1; pl <= m_players.Length(); pl++) {
+    for (int pl = 1; pl <= m_players.size(); pl++) {
       if (iter->GetStrategy(pl)->m_offset < 0) {
         // This is a contingency involving a new strategy... skip
         newindex = -1L;

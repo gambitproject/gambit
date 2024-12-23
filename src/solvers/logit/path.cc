@@ -138,12 +138,12 @@ void PathTracer::TracePath(
   double pert = 0.0;               // The current version of the perturbation being applied
   double pert_countdown = 0.0;     // How much longer (in arclength) to apply perturbation
 
-  Vector<double> u(x.Length());
+  Vector<double> u(x.size());
   // t is current tangent at x; newT is tangent at u, which is the next point.
-  Vector<double> t(x.Length()), newT(x.Length());
-  Vector<double> y(x.Length() - 1);
-  Matrix<double> b(x.Length(), x.Length() - 1);
-  SquareMatrix<double> q(x.Length());
+  Vector<double> t(x.size()), newT(x.size());
+  Vector<double> y(x.size() - 1);
+  Matrix<double> b(x.size(), x.size() - 1);
+  SquareMatrix<double> q(x.size());
 
   p_jacobian(x, b);
   QRDecomp(b, q);
@@ -158,7 +158,7 @@ void PathTracer::TracePath(
     }
 
     // Predictor step
-    for (int k = 1; k <= x.Length(); k++) {
+    for (int k = 1; k <= x.size(); k++) {
       u[k] = x[k] + h * p_omega * t[k];
     }
 

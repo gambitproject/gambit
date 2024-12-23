@@ -997,23 +997,23 @@ void gbtTableWidget::OnBeginEdit(wxSheetEvent &) { m_doc->PostPendingChanges(); 
 
 void gbtTableWidget::OnUpdate()
 {
-  if (m_doc->NumPlayers() > m_rowPlayers.Length() + m_colPlayers.Length()) {
+  if (m_doc->NumPlayers() > m_rowPlayers.size() + m_colPlayers.size()) {
     for (int pl = 1; pl <= m_doc->NumPlayers(); pl++) {
       if (!contains(m_rowPlayers, pl) && !contains(m_colPlayers, pl)) {
         m_rowPlayers.push_back(pl);
       }
     }
   }
-  else if (m_doc->NumPlayers() < m_rowPlayers.Length() + m_colPlayers.Length()) {
-    for (int i = 1; i <= m_rowPlayers.Length(); i++) {
+  else if (m_doc->NumPlayers() < m_rowPlayers.size() + m_colPlayers.size()) {
+    for (int i = 1; i <= m_rowPlayers.size(); i++) {
       if (m_rowPlayers[i] > m_doc->NumPlayers()) {
-        m_rowPlayers.Remove(i--);
+        erase_atindex(m_rowPlayers, i--);
       }
     }
 
-    for (int i = 1; i <= m_colPlayers.Length(); i++) {
+    for (int i = 1; i <= m_colPlayers.size(); i++) {
       if (m_colPlayers[i] > m_doc->NumPlayers()) {
-        m_colPlayers.Remove(i--);
+        erase_atindex(m_colPlayers, i--);
       }
     }
   }
@@ -1060,20 +1060,19 @@ bool gbtTableWidget::ShowDominance() const { return m_nfgPanel->IsDominanceShown
 
 void gbtTableWidget::SetRowPlayer(int index, int pl)
 {
-  if (contains(m_rowPlayers, pl)) {
-    int oldIndex = m_rowPlayers.Find(pl);
-    m_rowPlayers.Remove(oldIndex);
-    if (index > oldIndex) {
-      m_rowPlayers.Insert(pl, index - 1);
+  if (contains(m_colPlayers, pl)) {
+    m_colPlayers.erase(std::find(m_colPlayers.begin(), m_colPlayers.end(), pl));
+  }
+  Array<int> newPlayers;
+  for (const auto &player : m_rowPlayers) {
+    if (newPlayers.size() == index - 1) {
+      newPlayers.push_back(pl);
     }
-    else {
-      m_rowPlayers.Insert(pl, index);
+    else if (player != pl) {
+      newPlayers.push_back(player);
     }
   }
-  else {
-    m_colPlayers.Remove(m_colPlayers.Find(pl));
-    m_rowPlayers.Insert(pl, index);
-  }
+  m_rowPlayers = newPlayers;
   OnUpdate();
 }
 
@@ -1108,20 +1107,19 @@ int gbtTableWidget::RowToStrategy(int player, int row) const
 
 void gbtTableWidget::SetColPlayer(int index, int pl)
 {
-  if (contains(m_colPlayers, pl)) {
-    int oldIndex = m_colPlayers.Find(pl);
-    m_colPlayers.Remove(oldIndex);
-    if (index > oldIndex) {
-      m_colPlayers.Insert(pl, index - 1);
+  if (contains(m_rowPlayers, pl)) {
+    m_rowPlayers.erase(std::find(m_rowPlayers.begin(), m_rowPlayers.end(), pl));
+  }
+  Array<int> newPlayers;
+  for (const auto &player : m_colPlayers) {
+    if (newPlayers.size() == index - 1) {
+      newPlayers.push_back(pl);
     }
-    else {
-      m_colPlayers.Insert(pl, index);
+    else if (player != pl) {
+      newPlayers.push_back(player);
     }
   }
-  else {
-    m_rowPlayers.Remove(m_rowPlayers.Find(pl));
-    m_colPlayers.Insert(pl, index);
-  }
+  m_colPlayers = newPlayers;
   OnUpdate();
 }
 

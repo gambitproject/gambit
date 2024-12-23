@@ -50,8 +50,8 @@ static wxColour s_defaultColors[8] = {
 //!
 const wxColour &gbtStyle::GetPlayerColor(int pl) const
 {
-  while (pl > m_playerColors.Length()) {
-    m_playerColors.push_back(s_defaultColors[m_playerColors.Length() % 8]);
+  while (pl > m_playerColors.size()) {
+    m_playerColors.push_back(s_defaultColors[m_playerColors.size() % 8]);
   }
 
   return m_playerColors[pl];
@@ -81,7 +81,7 @@ void gbtStyle::SetDefaults()
 
   m_chanceColor = wxColour(154, 205, 50);
   m_terminalColor = *wxBLACK;
-  for (int pl = 1; pl <= m_playerColors.Length(); pl++) {
+  for (int pl = 1; pl <= m_playerColors.size(); pl++) {
     m_playerColors[pl] = s_defaultColors[(pl - 1) % 8];
   }
 }
@@ -103,7 +103,7 @@ std::string gbtStyle::GetColorXML() const
   s << "blue=\"" << ((int)m_chanceColor.Blue()) << "\" ";
   s << "/>\n";
 
-  for (int pl = 1; pl <= m_playerColors.Length(); pl++) {
+  for (int pl = 1; pl <= m_playerColors.size(); pl++) {
     s << "<player id=\"" << pl << "\" ";
     s << "red=\"" << ((int)m_playerColors[pl].Red()) << "\" ";
     s << "green=\"" << ((int)m_playerColors[pl].Green()) << "\" ";

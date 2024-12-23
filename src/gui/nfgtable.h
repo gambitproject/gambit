@@ -88,7 +88,7 @@ public:
   /// @name View state
   //@{
   /// Returns the number of players assigned to the rows
-  int NumRowPlayers() const { return m_rowPlayers.Length(); }
+  int NumRowPlayers() const { return m_rowPlayers.size(); }
 
   /// Returns the index'th player assigned to the rows (1=slowest incrementing)
   int GetRowPlayer(int index) const { return m_rowPlayers[index]; }
@@ -106,7 +106,7 @@ public:
   int RowToStrategy(int player, int row) const;
 
   /// Returns the number of players assigned to the columns
-  int NumColPlayers() const { return m_colPlayers.Length(); }
+  int NumColPlayers() const { return m_colPlayers.size(); }
 
   /// Returns the index'th player assigned to the columns (1=slowest)
   int GetColPlayer(int index) const { return m_colPlayers[index]; }

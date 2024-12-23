@@ -820,10 +820,10 @@ bool wxPlotData::LoadFile(const wxString &filename, int x_col, int y_col, int op
 
         wxMessageBox(
             wxString::Format(
-                wxT("Loading cols (%d,%d) aborted after %d points\n\n")
-                    wxT("First 100 characters of offending line number: %d\n") wxT("\"%s\"\n\n")
-                        wxT("# for comments, blank lines Ok, comma, tab, space for separators\n")
-                            wxT("7   4\n33  2.5e-2\n...\n"),
+                wxT("Loading cols (%d,%d) aborted after %d points\n\n") wxT(
+                    "first_index 100 characters of offending line number: %d\n") wxT("\"%s\"\n\n")
+                    wxT("# for comments, blank lines Ok, comma, tab, space for separators\n")
+                        wxT("7   4\n33  2.5e-2\n...\n"),
                 x_col, y_col, points, line_number, wxstr.Left(100).c_str()),
             wxT("Error loading ") + filename, wxOK | wxICON_ERROR);
         stop_load = true;

@@ -158,7 +158,7 @@ public:
 
   /// @name General data access
   //@{
-  size_t BehaviorProfileLength() const { return m_probs.Length(); }
+  size_t BehaviorProfileLength() const { return m_probs.size(); }
   Game GetGame() const { return m_support.GetGame(); }
   const BehaviorSupportProfile &GetSupport() const { return m_support; }
   /// Returns whether the profile has been invalidated by a subsequent revision to the game

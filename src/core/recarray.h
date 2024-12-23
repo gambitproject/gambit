@@ -112,7 +112,7 @@ template <class T> bool RectArray<T>::CheckRow(int row) const
 
 template <class T> bool RectArray<T>::CheckRow(const Array<T> &v) const
 {
-  return (v.First() == mincol && v.Last() == maxcol);
+  return (v.first_index() == mincol && v.last_index() == maxcol);
 }
 
 template <class T> bool RectArray<T>::CheckColumn(int col) const
@@ -122,7 +122,7 @@ template <class T> bool RectArray<T>::CheckColumn(int col) const
 
 template <class T> bool RectArray<T>::CheckColumn(const Array<T> &v) const
 {
-  return (v.First() == minrow && v.Last() == maxrow);
+  return (v.first_index() == minrow && v.last_index() == maxrow);
 }
 
 template <class T> bool RectArray<T>::Check(int row, int col) const

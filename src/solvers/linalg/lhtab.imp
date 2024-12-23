@@ -33,8 +33,9 @@ namespace linalg {
 template <class T>
 LHTableau<T>::LHTableau(const Matrix<T> &A1, const Matrix<T> &A2, const Vector<T> &b1,
                         const Vector<T> &b2)
-  : T1(A1, b1), T2(A2, b2), tmp1(b1.First(), b1.Last()), tmp2(b2.First(), b2.Last()),
-    solution(b1.First(), b2.Last())
+  : T1(A1, b1), T2(A2, b2), tmp1(b1.first_index(), b1.last_index()), tmp2(b2.first_index(),
+                                                                          b2.last_index()),
+    solution(b1.first_index(), b2.last_index())
 {
 }
 
@@ -107,10 +108,10 @@ template <class T> Gambit::linalg::BFS<T> LHTableau<T>::GetBFS()
 {
   T1.BasisVector(tmp1);
   T2.BasisVector(tmp2);
-  for (int i = tmp1.First(); i <= tmp1.Last(); i++) {
+  for (int i = tmp1.first_index(); i <= tmp1.last_index(); i++) {
     solution[i] = tmp1[i];
   }
-  for (int i = tmp2.First(); i <= tmp2.Last(); i++) {
+  for (int i = tmp2.first_index(); i <= tmp2.last_index(); i++) {
     solution[i] = tmp2[i];
   }
   Gambit::linalg::BFS<T> cbfs;

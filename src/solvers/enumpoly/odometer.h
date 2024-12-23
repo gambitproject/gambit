@@ -69,7 +69,7 @@ public:
   bool Turn();
 
   // Information
-  int NoIndices() const { return MaxIndices.Length(); }
+  int NoIndices() const { return MaxIndices.size(); }
 };
 
 #endif // ODOMETER_H

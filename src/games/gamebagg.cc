@@ -241,7 +241,7 @@ Array<int> GameBAGGRep::NumStrategies() const
 {
   Array<int> ns;
   for (int pl = 1; pl <= NumPlayers(); pl++) {
-    ns.push_back(m_players[pl]->m_strategies.Length());
+    ns.push_back(m_players[pl]->m_strategies.size());
   }
   return ns;
 }
@@ -250,7 +250,7 @@ int GameBAGGRep::MixedProfileLength() const
 {
   int res = 0;
   for (int pl = 1; pl <= NumPlayers(); pl++) {
-    res += m_players[pl]->m_strategies.Length();
+    res += m_players[pl]->m_strategies.size();
   }
   return res;
 }

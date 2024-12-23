@@ -184,8 +184,8 @@ void gbtLogitBehavList::AddProfile(const wxString &p_text, bool p_forceShow)
   }
 
   m_profiles.push_back(profile);
-  if (p_forceShow || m_profiles.Length() - GetNumberRows() > 20) {
-    AppendRows(m_profiles.Length() - GetNumberRows());
+  if (p_forceShow || m_profiles.size() - GetNumberRows() > 20) {
+    AppendRows(m_profiles.size() - GetNumberRows());
     MakeCellVisible(wxSheetCoords(GetNumberRows() - 1, 0));
   }
 

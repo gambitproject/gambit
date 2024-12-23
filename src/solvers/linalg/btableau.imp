@@ -73,14 +73,14 @@ TableauInterface<T>::TableauInterface(const Gambit::Matrix<T> &A, const Gambit::
 template <class T>
 TableauInterface<T>::TableauInterface(const Gambit::Matrix<T> &A, const Gambit::Array<int> &art,
                                       const Gambit::Vector<T> &b)
-  : A(&A), b(&b), basis(A.MinRow(), A.MaxRow(), A.MinCol(), A.MaxCol() + art.Length()),
+  : A(&A), b(&b), basis(A.MinRow(), A.MaxRow(), A.MinCol(), A.MaxCol() + art.size()),
     solution(A.MinRow(), A.MaxRow()), npivots(0),
-    artificial(A.MaxCol() + 1, A.MaxCol() + art.Length())
+    artificial(A.MaxCol() + 1, A.MaxCol() + art.size())
 {
   Gambit::linalg::epsilon(eps1, 5);
   Gambit::linalg::epsilon(eps2);
-  for (int i = 0; i < art.Length(); i++) {
-    artificial[A.MaxCol() + 1 + i] = art[art.First() + i];
+  for (int i = 0; i < art.size(); i++) {
+    artificial[A.MaxCol() + 1 + i] = art[art.first_index() + i];
   }
 }
 
@@ -203,7 +203,7 @@ template <class T> T TableauInterface<T>::Epsilon(int i) const
 
 template <class T> bool TableauInterface<T>::IsArtifColumn(int col) const
 {
-  return (col >= artificial.First() && col <= artificial.Last());
+  return (col >= artificial.first_index() && col <= artificial.last_index());
 }
 
 } // namespace linalg

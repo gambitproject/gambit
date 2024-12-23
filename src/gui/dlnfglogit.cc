@@ -61,7 +61,7 @@ public:
 
   void AddProfile(const wxString &p_text);
 
-  int NumPoints() const { return m_lambdas.Length(); }
+  int NumPoints() const { return m_lambdas.size(); }
   double GetLambda(int p_index) const { return m_lambdas[p_index]; }
   const Array<double> &GetLambdas() const { return m_lambdas; }
   const MixedStrategyProfile<double> &GetProfile(int p_index) { return *m_profiles[p_index]; }

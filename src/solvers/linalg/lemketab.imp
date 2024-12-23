@@ -87,7 +87,7 @@ template <class T> int LemkeTableau<T>::SF_ExitIndex(int inlabel)
       BestSet.push_back(i);
     }
   }
-  if (BestSet.Length() == 0) {
+  if (BestSet.size() == 0) {
     //* gout << "\nBestSet.Length() == 0, Find(0): " << Find(0);
     return 0;
   }
@@ -97,7 +97,7 @@ template <class T> int LemkeTableau<T>::SF_ExitIndex(int inlabel)
        && incol[Find(0)]<=eps2 && incol[Find(0)] >= (-eps2) )
       return Find(0);
   */
-  if (BestSet.Length() <= 0) {
+  if (BestSet.size() <= 0) {
     throw BadExitIndex();
   }
 
@@ -109,7 +109,7 @@ template <class T> int LemkeTableau<T>::SF_ExitIndex(int inlabel)
   this->BasisVector(col);
   // gout << "\nLength = " <<  BestSet.Length();
   //* gout << "\n x =     " << col << "\n";
-  while (BestSet.Length() > 1) {
+  while (BestSet.size() > 1) {
     if (c > this->MaxRow()) {
       throw BadExitIndex();
     }
@@ -120,7 +120,7 @@ template <class T> int LemkeTableau<T>::SF_ExitIndex(int inlabel)
     // Initialize tempmax.
     tempmax = col[BestSet[1]] / incol[BestSet[1]];
     // Find the maximum ratio.
-    for (i = 2; i <= BestSet.Length(); i++) {
+    for (i = 2; i <= BestSet.size(); i++) {
       ratio = col[BestSet[i]] / incol[BestSet[i]];
       //*      if (ratio > tempmax)  tempmax = ratio;
       if (ratio < tempmax) {
@@ -130,11 +130,11 @@ template <class T> int LemkeTableau<T>::SF_ExitIndex(int inlabel)
     //    if (tempmax <= (T 2)*eps1) throw BadExitIndex();
 
     // Remove nonmaximizers from the list of candidate columns.
-    for (i = BestSet.Length(); i >= 1; i--) {
+    for (i = BestSet.size(); i >= 1; i--) {
       ratio = col[BestSet[i]] / incol[BestSet[i]];
       //*      if (ratio < tempmax -eps1)
       if (ratio > tempmax + this->eps2) {
-        BestSet.Remove(i);
+        erase_atindex(BestSet, i);
       }
     }
     //    else  {
@@ -143,10 +143,10 @@ template <class T> int LemkeTableau<T>::SF_ExitIndex(int inlabel)
     //    }
     c++;
   }
-  if (BestSet.Length() <= 0) {
+  if (BestSet.empty()) {
     throw BadExitIndex();
   }
-  return BestSet[1];
+  return BestSet.front();
 }
 
 //
@@ -173,14 +173,14 @@ template <class T> int LemkeTableau<T>::ExitIndex(int inlabel)
     }
   }
   // Is this really needed?
-  if (BestSet.Length() == 0) {
+  if (BestSet.size() == 0) {
     //   gout << "\nBestSet.Length() == 0, Find(0):\n" << Find(0);
-    if (BestSet.Length() == 0 && incol[this->Find(0)] <= this->eps2 &&
+    if (BestSet.size() == 0 && incol[this->Find(0)] <= this->eps2 &&
         incol[this->Find(0)] >= (-this->eps2)) {
       return this->Find(0);
     }
   }
-  if (BestSet.Length() <= 0) {
+  if (BestSet.size() <= 0) {
     throw BadExitIndex();
   }
 
@@ -192,7 +192,7 @@ template <class T> int LemkeTableau<T>::ExitIndex(int inlabel)
   this->BasisVector(col);
   // gout << "\nLength = " <<  BestSet.Length();
   //   gout << "\n x =     " << col << "\n";
-  while (BestSet.Length() > 1) {
+  while (BestSet.size() > 1) {
     // this is where ITEM 001 is failing
     if (c > this->MaxRow()) {
       throw BadExitIndex();
@@ -204,7 +204,7 @@ template <class T> int LemkeTableau<T>::ExitIndex(int inlabel)
     // Initialize tempmax.
     tempmax = col[BestSet[1]] / incol[BestSet[1]];
     // Find the maximum ratio.
-    for (i = 2; i <= BestSet.Length(); i++) {
+    for (i = 2; i <= BestSet.size(); i++) {
       ratio = col[BestSet[i]] / incol[BestSet[i]];
       if (ratio > tempmax) {
         tempmax = ratio;
@@ -213,10 +213,10 @@ template <class T> int LemkeTableau<T>::ExitIndex(int inlabel)
     //    if(tempmax <= (T 2)*eps1) throw BadExitIndex();
 
     // Remove nonmaximizers from the list of candidate columns.
-    for (i = BestSet.Length(); i >= 1; i--) {
+    for (i = BestSet.size(); i >= 1; i--) {
       ratio = col[BestSet[i]] / incol[BestSet[i]];
       if (ratio < tempmax - this->eps1) {
-        BestSet.Remove(i);
+        erase_atindex(BestSet, i);
       }
     }
     //    else  {
@@ -225,10 +225,10 @@ template <class T> int LemkeTableau<T>::ExitIndex(int inlabel)
     //    }
     c++;
   }
-  if (BestSet.Length() <= 0) {
+  if (BestSet.empty()) {
     throw BadExitIndex();
   }
-  return BestSet[1];
+  return BestSet.front();
 }
 
 //

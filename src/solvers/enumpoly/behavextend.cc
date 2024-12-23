@@ -112,7 +112,7 @@ std::list<BehaviorSupportProfile> DeviationSupports(const BehaviorSupportProfile
   std::list<BehaviorSupportProfile> answer;
 
   Array<int> active_act_no(isetlist.size());
-  for (int k = 1; k <= active_act_no.Length(); k++) {
+  for (int k = 1; k <= active_act_no.size(); k++) {
     active_act_no[k] = 0;
   }
 

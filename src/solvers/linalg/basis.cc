@@ -38,12 +38,12 @@ Basis::Basis(int first, int last, int firstlabel, int lastlabel)
     colBlocked(firstlabel, lastlabel), rowBlocked(first, last)
 {
   int i;
-  for (i = cols.First(); i <= cols.Last(); i++) {
+  for (i = cols.first_index(); i <= cols.last_index(); i++) {
     cols[i] = 0;
     colBlocked[i] = false;
   }
 
-  for (i = basis.First(); i <= basis.Last(); i++) {
+  for (i = basis.first_index(); i <= basis.last_index(); i++) {
     basis[i] = -i;
     slacks[i] = i;
     rowBlocked[i] = false;
@@ -74,17 +74,23 @@ Basis &Basis::operator=(const Basis &orig)
 // Public Members
 // -------------------------
 
-int Basis::First() const { return basis.First(); }
+int Basis::First() const { return basis.first_index(); }
 
-int Basis::Last() const { return basis.Last(); }
+int Basis::Last() const { return basis.last_index(); }
 
-int Basis::MinCol() const { return cols.First(); }
+int Basis::MinCol() const { return cols.first_index(); }
 
-int Basis::MaxCol() const { return cols.Last(); }
+int Basis::MaxCol() const { return cols.last_index(); }
 
-bool Basis::IsRegColumn(int col) const { return col >= cols.First() && col <= cols.Last(); }
+bool Basis::IsRegColumn(int col) const
+{
+  return col >= cols.first_index() && col <= cols.last_index();
+}
 
-bool Basis::IsSlackColumn(int col) const { return -col >= basis.First() && -col <= basis.Last(); }
+bool Basis::IsSlackColumn(int col) const
+{
+  return -col >= basis.first_index() && -col <= basis.last_index();
+}
 
 int Basis::Pivot(int outindex, int col)
 {
@@ -188,7 +194,7 @@ void Basis::CheckBasis()
 {
   bool check = true;
 
-  for (int i = basis.First(); i <= basis.Last() && check; i++) {
+  for (int i = basis.first_index(); i <= basis.last_index() && check; i++) {
     if (basis[i] != -i) {
       check = false;
     }

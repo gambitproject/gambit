@@ -28,10 +28,10 @@ namespace linalg {
 
 template <class T>
 LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c, int nequals)
-  : well_formed(true), feasible(true), bounded(true), nvars(c.Length()), neqns(b.Length()),
+  : well_formed(true), feasible(true), bounded(true), nvars(c.size()), neqns(b.size()),
     nequals(nequals), total_cost(0), tmin(0), tab(A, Artificials(b), b), UB(nullptr), LB(nullptr),
-    ub(nullptr), lb(nullptr), xx(nullptr), cost(nullptr), y(b.Length()), x(b.Length()),
-    d(b.Length())
+    ub(nullptr), lb(nullptr), xx(nullptr), cost(nullptr), y(b.size()), x(b.size()),
+    d(b.size())
 {
   // These are the values recommended by Murtagh (1981) for 15 digit
   // accuracy in LP problems
@@ -40,7 +40,7 @@ LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c, 
   Gambit::linalg::epsilon(eps3, 6);
 
   // Check dimensions
-  if (A.NumRows() != b.Length() || A.NumColumns() != c.Length()) {
+  if (A.NumRows() != b.size() || A.NumColumns() != c.size()) {
     well_formed = false;
     return;
   }
@@ -49,7 +49,7 @@ LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c, 
   int i, j, num_inequals, xlab, num_artific;
 
   num_inequals = A.NumRows() - nequals;
-  num_artific = Artificials(b).Length();
+  num_artific = Artificials(b).size();
   nvars += num_artific;
 
   UB = new Array<bool>(nvars + neqns);
@@ -59,7 +59,7 @@ LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c, 
   xx = new Vector<T>(nvars + neqns);
   cost = new Vector<T>(nvars + neqns);
 
-  for (j = (*UB).First(); j <= (*UB).Last(); j++) {
+  for (j = (*UB).first_index(); j <= (*UB).last_index(); j++) {
     (*UB)[j] = false;
     (*LB)[j] = false;
     (*ub)[j] = (T)0;
@@ -97,7 +97,7 @@ LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c, 
   tab.SetCost(*cost);
 
   // set xx to be initial feasible solution to phase II
-  for (i = 1; i <= (*xx).Length(); i++) {
+  for (i = 1; i <= (*xx).size(); i++) {
     if ((*LB)[i]) {
       (*xx)[i] = (*lb)[i];
     }
@@ -109,7 +109,7 @@ LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c, 
     }
   }
   tab.BasisVector(x);
-  for (i = 1; i <= x.Length(); i++) {
+  for (i = 1; i <= x.size(); i++) {
     xlab = tab.Label(i);
     if (xlab < 0) {
       xlab = nvars - xlab;
@@ -140,10 +140,10 @@ LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c, 
 
   // install Phase II unit cost vector
 
-  for (i = c.First(); i <= c.Last(); i++) {
+  for (i = c.first_index(); i <= c.last_index(); i++) {
     (*cost)[i] = c[i];
   }
-  for (i = c.Last() + 1; i <= nvars + neqns; i++) {
+  for (i = c.last_index() + 1; i <= nvars + neqns; i++) {
     (*cost)[i] = (T)0;
   }
 
@@ -165,7 +165,7 @@ LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c, 
 template <class T> Array<int> LPSolve<T>::Artificials(const Vector<T> &b)
 {
   Array<int> ret;
-  for (int i = b.First(); i <= b.Last(); i++) {
+  for (int i = b.first_index(); i <= b.last_index(); i++) {
     if (b[i] < (T)0) {
       ret.push_back(i);
     }
@@ -198,7 +198,7 @@ template <class T> void LPSolve<T>::Solve(int phase)
           outlab = tab.Label(out);
         }
         // update xx
-        for (i = 1; i <= x.Length(); i++) {
+        for (i = 1; i <= x.size(); i++) {
           xlab = tab.Label(i);
           if (xlab < 0) {
             xlab = nvars - xlab;

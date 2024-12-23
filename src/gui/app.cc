@@ -70,7 +70,7 @@ bool gbtApplication::OnInit()
     }
   }
 
-  if (m_documents.Length() == 0) {
+  if (m_documents.size() == 0) {
     // If we don't have any game files -- whether because none were
     // specified on the command line, or because those specified couldn't
     // be read -- create a default document.
@@ -131,7 +131,7 @@ void gbtApplication::SetCurrentDir(const wxString &p_dir)
 
 bool gbtApplication::AreDocumentsModified() const
 {
-  for (int i = 1; i <= m_documents.Length(); i++) {
+  for (int i = 1; i <= m_documents.size(); i++) {
     if (m_documents[i]->IsModified()) {
       return true;
     }

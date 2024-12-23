@@ -488,7 +488,7 @@ Rational NashSimpdivStrategySolver::State::getlabel(MixedStrategyProfile<Rationa
 inline Integer find_lcd(const Vector<Rational> &vec)
 {
   Integer lcd(1);
-  for (int i = vec.First(); i <= vec.Last(); i++) {
+  for (int i = vec.first_index(); i <= vec.last_index(); i++) {
     lcd = lcm(vec[i].denominator(), lcd);
   }
   return lcd;

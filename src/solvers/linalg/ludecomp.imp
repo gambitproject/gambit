@@ -124,10 +124,10 @@ template <class T> void LUDecomposition<T>::refactor()
 
 template <class T> void LUDecomposition<T>::solveT(const Vector<T> &c, Vector<T> &y) const
 {
-  if (c.First() != y.First() || c.Last() != y.Last()) {
+  if (c.first_index() != y.first_index() || c.last_index() != y.last_index()) {
     throw DimensionException();
   }
-  if (c.First() != basis.First() || c.Last() != basis.Last()) {
+  if (c.first_index() != basis.First() || c.last_index() != basis.Last()) {
     throw DimensionException();
   }
 
@@ -146,10 +146,10 @@ template <class T> void LUDecomposition<T>::solveT(const Vector<T> &c, Vector<T>
 
 template <class T> void LUDecomposition<T>::solve(const Vector<T> &a, Vector<T> &d) const
 {
-  if (a.First() != d.First() || a.Last() != d.Last()) {
+  if (a.first_index() != d.first_index() || a.last_index() != d.last_index()) {
     throw DimensionException();
   }
-  if (a.First() != basis.First() || a.Last() != basis.Last()) {
+  if (a.first_index() != basis.First() || a.last_index() != basis.Last()) {
     throw DimensionException();
   }
 
@@ -245,9 +245,9 @@ template <class T>
 void LUDecomposition<T>::VectorEtaSolve(const EtaMatrix &eta, Vector<T> &y) const
 {
   Vector<T> v = y;
-  for (int i = v.First(); i <= v.Last(); i++) {
+  for (int i = v.first_index(); i <= v.last_index(); i++) {
     if (i == eta.col) {
-      for (int j = v.First(); j <= v.Last(); j++) {
+      for (int j = v.first_index(); j <= v.last_index(); j++) {
         if (j != eta.col) {
           y[i] -= v[j] * eta.etadata[j];
         }
@@ -278,7 +278,7 @@ void LUDecomposition<T>::EtaVectorSolve(const EtaMatrix &eta, Vector<T> &d) cons
   Vector<T> v = d;
   T temp = v[eta.col] / eta.etadata[eta.col];
 
-  for (int i = v.First(); i <= v.Last(); i++) {
+  for (int i = v.first_index(); i <= v.last_index(); i++) {
     if (i == eta.col) {
       d[i] = temp;
     }
@@ -300,15 +300,15 @@ template <class T> void LUDecomposition<T>::yLP_Trans(Vector<T> &y) const
 template <class T>
 void LUDecomposition<T>::yLP_mult(const Vector<T> &y, int j, Vector<T> &ans) const
 {
-  int ell = j + y.First();
+  int ell = j + y.first_index();
 
-  for (int i = y.First(); i <= y.Last(); i++) {
+  for (int i = y.first_index(); i <= y.last_index(); i++) {
     if (i != L[j].second.col) {
       ans[i] = y[i];
     }
     else {
       T temp = static_cast<T>(0);
-      for (int k = ans.First(); k <= ans.Last(); k++) {
+      for (int k = ans.first_index(); k <= ans.last_index(); k++) {
         temp += y[k] * L[j].second.etadata[k];
       }
       ans[i] = temp;
@@ -328,9 +328,9 @@ template <class T> void LUDecomposition<T>::LPd_Trans(Vector<T> &d) const
 
 template <class T> void LUDecomposition<T>::LPd_mult(Vector<T> &d, int j, Vector<T> &ans) const
 {
-  int k = j + d.First();
+  int k = j + d.first_index();
   std::swap(d[k], d[L[j].first]);
-  for (int i = d.First(); i <= d.Last(); i++) {
+  for (int i = d.first_index(); i <= d.last_index(); i++) {
     if (i == L[j].second.col) {
       ans[i] = d[i] * L[j].second.etadata[i];
     }

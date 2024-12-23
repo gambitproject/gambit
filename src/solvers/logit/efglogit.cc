@@ -33,7 +33,7 @@ namespace {
 double LogLike(const Vector<double> &p_frequencies, const Vector<double> &p_point)
 {
   double logL = 0.0;
-  for (int i = 1; i <= p_frequencies.Length(); i++) {
+  for (int i = 1; i <= p_frequencies.size(); i++) {
     logL += p_frequencies[i] * log(p_point[i]);
   }
   return logL;
@@ -42,7 +42,7 @@ double LogLike(const Vector<double> &p_frequencies, const Vector<double> &p_poin
 double DiffLogLike(const Vector<double> &p_frequencies, const Vector<double> &p_tangent)
 {
   double diff_logL = 0.0;
-  for (int i = 1; i <= p_frequencies.Length(); i++) {
+  for (int i = 1; i <= p_frequencies.size(); i++) {
     diff_logL += p_frequencies[i] * p_tangent[i];
   }
   return diff_logL;
@@ -51,7 +51,7 @@ double DiffLogLike(const Vector<double> &p_frequencies, const Vector<double> &p_
 MixedBehaviorProfile<double> PointToProfile(const Game &p_game, const Vector<double> &p_point)
 {
   MixedBehaviorProfile<double> profile(p_game);
-  for (int i = 1; i < p_point.Length(); i++) {
+  for (int i = 1; i < p_point.size(); i++) {
     profile[i] = exp(p_point[i]);
   }
   return profile;
@@ -231,7 +231,7 @@ void EquationSystem::GetValue(const Vector<double> &p_point, Vector<double> &p_l
 {
   LogBehavProfile<double> profile(PointToLogProfile(m_game, p_point));
   double lambda = p_point.back();
-  for (int i = 1; i <= p_lhs.Length(); i++) {
+  for (int i = 1; i <= p_lhs.size(); i++) {
     p_lhs[i] = m_equations[i]->Value(profile, lambda);
   }
 }
@@ -241,8 +241,8 @@ void EquationSystem::GetJacobian(const Vector<double> &p_point, Matrix<double> &
   LogBehavProfile<double> profile(PointToLogProfile(m_game, p_point));
   double lambda = p_point.back();
 
-  for (int i = 1; i <= m_equations.Length(); i++) {
-    Vector<double> column(p_point.Length());
+  for (int i = 1; i <= m_equations.size(); i++) {
+    Vector<double> column(p_point.size());
     m_equations[i]->Gradient(profile, lambda, column);
     p_matrix.SetColumn(i, column);
   }

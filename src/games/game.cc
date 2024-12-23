@@ -62,7 +62,7 @@ void GameStrategyRep::DeleteStrategy()
   m_player->GetGame()->IncrementVersion();
   m_player->m_strategies.erase(
       std::find(m_player->m_strategies.begin(), m_player->m_strategies.end(), this));
-  for (int st = 1; st <= m_player->m_strategies.Length(); st++) {
+  for (int st = 1; st <= m_player->m_strategies.size(); st++) {
     m_player->m_strategies[st]->m_number = st;
   }
   // m_player->m_game->RebuildTable();
@@ -131,13 +131,13 @@ void GamePlayerRep::MakeStrategy()
 
   auto *strategy = new GameStrategyRep(this);
   m_strategies.push_back(strategy);
-  strategy->m_number = m_strategies.Length();
+  strategy->m_number = m_strategies.size();
   strategy->m_behav = c;
   strategy->m_label = "";
 
   // We generate a default labeling -- probably should be changed in future
   if (!strategy->m_behav.empty()) {
-    for (int iset = 1; iset <= strategy->m_behav.Length(); iset++) {
+    for (int iset = 1; iset <= strategy->m_behav.size(); iset++) {
       if (strategy->m_behav[iset] > 0) {
         strategy->m_label += lexical_cast<std::string>(strategy->m_behav[iset]);
       }

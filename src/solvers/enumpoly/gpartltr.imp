@@ -102,7 +102,7 @@ T TreeOfPartials<T>::MaximalNonconstantContributionRECURSIVE(
         increment = -increment;
       }
 
-      for (int j = 1; j <= p.Length(); j++) {
+      for (int j = 1; j <= p.size(); j++) {
         for (int k = 1; k <= wrtos[j]; k++) {
           increment *= halvesoflengths[j];
           increment /= (T)k;
@@ -138,7 +138,7 @@ T TreeOfPartials<T>::MaximalNonconstantDifferenceRECURSIVE(
         increment = -increment;
       }
 
-      for (int j = 1; j <= p.Length(); j++) {
+      for (int j = 1; j <= p.size(); j++) {
         for (int k = 1; k <= wrtos[j]; k++) {
           increment *= halvesoflengths[j];
           increment /= (T)k;
@@ -164,7 +164,7 @@ T TreeOfPartials<T>::MaximalNonconstantDifferenceRECURSIVE(
         increment = -increment;
       }
 
-      for (int j = 1; j <= p.Length(); j++) {
+      for (int j = 1; j <= p.size(); j++) {
         for (int k = 1; k <= wrtos[j]; k++) {
           increment *= halvesoflengths[j];
           increment /= (T)k;
@@ -189,7 +189,7 @@ T TreeOfPartials<T>::MaximalNonconstantDifferenceRECURSIVE(
         increment = -increment;
       }
 
-      for (int j = 1; j <= p.Length(); j++) {
+      for (int j = 1; j <= p.size(); j++) {
         for (int k = 1; k <= wrtos[j]; k++) {
           increment *= halvesoflengths[j];
           increment /= (T)k;
@@ -211,8 +211,8 @@ template <class T>
 T TreeOfPartials<T>::MaximalNonconstantContribution(const Gambit::Vector<T> &p,
                                                     const Gambit::Vector<T> &halvesoflengths) const
 {
-  Gambit::Vector<int> WithRespectTos(p.Length());
-  for (int i = 1; i <= p.Length(); i++) {
+  Gambit::Vector<int> WithRespectTos(p.size());
+  for (int i = 1; i <= p.size(); i++) {
     WithRespectTos[i] = 0;
   }
 
@@ -224,8 +224,8 @@ T TreeOfPartials<T>::MaximalNonconstantDifference(const TreeOfPartials<T> &other
                                                   const Gambit::Vector<T> &p,
                                                   const Gambit::Vector<T> &halvesoflengths) const
 {
-  Gambit::Vector<int> WithRespectTos(p.Length());
-  for (int i = 1; i <= p.Length(); i++) {
+  Gambit::Vector<int> WithRespectTos(p.size());
+  for (int i = 1; i <= p.size(); i++) {
     WithRespectTos[i] = 0;
   }
 

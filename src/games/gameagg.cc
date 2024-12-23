@@ -261,13 +261,13 @@ bool GameAGGRep::IsConstSum() const
 {
   auto profile = NewPureStrategyProfile();
   Rational sum(0);
-  for (int pl = 1; pl <= m_players.Length(); pl++) {
+  for (int pl = 1; pl <= m_players.size(); pl++) {
     sum += profile->GetPayoff(pl);
   }
 
   for (auto iter : StrategyContingencies(Game(this))) {
     Rational newsum(0);
-    for (int pl = 1; pl <= m_players.Length(); pl++) {
+    for (int pl = 1; pl <= m_players.size(); pl++) {
       newsum += iter->GetPayoff(pl);
     }
     if (newsum != sum) {
