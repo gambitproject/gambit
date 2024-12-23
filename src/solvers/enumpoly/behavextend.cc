@@ -23,7 +23,7 @@
 #include "behavextend.h"
 #include "gpoly.h"
 #include "gpolylst.h"
-#include "rectangl.h"
+#include "rectangle.h"
 #include "ineqsolv.h"
 
 using namespace Gambit;
@@ -317,7 +317,7 @@ bool ExtendsToNash(const MixedBehaviorProfile<double> &p_solution,
 
   // Set up the test and do it
   Vector<double> sample(num_vars);
-  return IneqSolv<double>(inequalities).ASolutionExists(gRectangle<double>(bottoms, tops), sample);
+  return IneqSolv<double>(inequalities).ASolutionExists(Rectangle<double>(bottoms, tops), sample);
 }
 
 } // namespace Nash
@@ -458,7 +458,7 @@ bool ExtendsToAgentNash(const MixedBehaviorProfile<double> &p_solution,
 
   // Set up the test and do it
   Vector<double> sample(num_vars);
-  return IneqSolv<double>(inequalities).ASolutionExists(gRectangle<double>(bottoms, tops), sample);
+  return IneqSolv<double>(inequalities).ASolutionExists(Rectangle<double>(bottoms, tops), sample);
 }
 
 } // namespace Nash

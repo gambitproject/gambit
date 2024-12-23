@@ -26,7 +26,7 @@
 #include "gambit.h"
 
 #include "odometer.h"
-#include "rectangl.h"
+#include "rectangle.h"
 #include "gpoly.h"
 #include "gpolylst.h"
 #include "gpartltr.h"
@@ -59,9 +59,9 @@ private:
   // Routines Doing the Actual Work
   bool IsASolution(const Gambit::Vector<T> &) const;
 
-  bool SystemHasNoSolutionIn(const gRectangle<T> &r, Gambit::Array<int> &) const;
+  bool SystemHasNoSolutionIn(const Rectangle<T> &r, Gambit::Array<int> &) const;
 
-  bool ASolutionExistsRecursion(const gRectangle<T> &, Gambit::Vector<T> &,
+  bool ASolutionExistsRecursion(const Rectangle<T> &, Gambit::Vector<T> &,
                                 Gambit::Array<int> &) const;
 
 public:
@@ -81,7 +81,7 @@ public:
   T ErrorTolerance() const { return Epsilon; }
 
   // The function that does everything
-  bool ASolutionExists(const gRectangle<T> &, Gambit::Vector<T> &sample);
+  bool ASolutionExists(const Rectangle<T> &, Gambit::Vector<T> &sample);
 };
 
 #endif // INEQSOLV_H

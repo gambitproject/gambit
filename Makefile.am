@@ -414,13 +414,10 @@ gambit_enumpoly_SOURCES = \
 	src/solvers/enumpoly/ineqsolv.cc \
 	src/solvers/enumpoly/ineqsolv.h \
 	src/solvers/enumpoly/ineqsolv.imp \
-	src/solvers/enumpoly/interval.h \
 	src/solvers/enumpoly/quiksolv.cc \
 	src/solvers/enumpoly/quiksolv.h \
 	src/solvers/enumpoly/quiksolv.imp \
-	src/solvers/enumpoly/rectangl.cc \
-	src/solvers/enumpoly/rectangl.h \
-	src/solvers/enumpoly/rectangl.imp \
+	src/solvers/enumpoly/rectangle.h \
 	src/solvers/enumpoly/behavextend.cc \
 	src/solvers/enumpoly/behavextend.h \
 	src/solvers/enumpoly/gcomplex.cc \

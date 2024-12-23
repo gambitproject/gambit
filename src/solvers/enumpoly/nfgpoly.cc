@@ -28,7 +28,7 @@
 #include "solvers/nashsupport/nashsupport.h"
 #include "gpoly.h"
 #include "gpolylst.h"
-#include "rectangl.h"
+#include "rectangle.h"
 #include "quiksolv.h"
 
 using namespace Gambit;
