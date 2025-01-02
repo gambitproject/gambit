@@ -167,9 +167,9 @@ std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfil
   bottoms = 0;
   tops = 1;
 
-  QuikSolv<double> solver(equations);
+  QuickSolver<double> solver(equations);
   try {
-    solver.FindCertainNumberOfRoots({bottoms, tops}, std::numeric_limits<int>::max(), p_stopAfter);
+    solver.FindRoots({bottoms, tops}, p_stopAfter);
   }
   catch (const SingularMatrixException &) {
     p_isSingular = true;

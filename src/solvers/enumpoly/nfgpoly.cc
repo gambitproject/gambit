@@ -116,10 +116,10 @@ EnumPolyStrategySupportSolve(const StrategySupportProfile &support, bool &is_sin
   Vector<double> bottoms(Space.Dmnsn()), tops(Space.Dmnsn());
   bottoms = 0;
   tops = 1;
-  QuikSolv<double> solver(equations);
+  QuickSolver<double> solver(equations);
   is_singular = false;
   try {
-    solver.FindCertainNumberOfRoots({bottoms, tops}, std::numeric_limits<int>::max(), p_stopAfter);
+    solver.FindRoots({bottoms, tops}, p_stopAfter);
   }
   catch (const SingularMatrixException &) {
     is_singular = true;

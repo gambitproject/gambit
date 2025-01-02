@@ -22,4 +22,4 @@
 
 #include "quiksolv.imp"
 
-template class QuikSolv<double>;
+template class QuickSolver<double>;

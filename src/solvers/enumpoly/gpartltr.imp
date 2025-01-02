@@ -28,8 +28,6 @@ using namespace Gambit;
 //                   class: TreeOfPartials
 //---------------------------------------------------------------
 
-
-
 /// Recursive generation of all partial derivatives of the root polynomial
 template <class T>
 void TreeOfPartials<T>::TreeOfPartialsRECURSIVE(gTree<gPoly<T>> &t, gTreeNode<gPoly<T>> *n) const
@@ -60,9 +58,10 @@ T TreeOfPartials<T>::ValueOfPartialOfRootPoly(const int coord, const Vector<T> &
 }
 
 template <class T>
-T TreeOfPartials<T>::MaximalNonconstantContributionRECURSIVE(
-    const gTreeNode<gPoly<T>> *n, const Vector<T> &p,
-    const Vector<T> &halvesoflengths, Vector<int> &wrtos) const
+T TreeOfPartials<T>::MaximalNonconstantContributionRECURSIVE(const gTreeNode<gPoly<T>> *n,
+                                                             const Vector<T> &p,
+                                                             const Vector<T> &halvesoflengths,
+                                                             Vector<int> &wrtos) const
 {
   T answer = static_cast<T>(0);
 
@@ -109,7 +108,9 @@ template <class T> bool TreeOfPartials<T>::PolyHasNoRootsIn(const Rectangle<T> &
 
 template <class T> bool TreeOfPartials<T>::MultiaffinePolyHasNoRootsIn(const Rectangle<T> &r) const
 {
-  T sign = (this->RootNode()->GetData().Evaluate(r.Center()) > static_cast<T>(0)) ? static_cast<T>(1) : static_cast<T>(-1);
+  T sign = (this->RootNode()->GetData().Evaluate(r.Center()) > static_cast<T>(0))
+               ? static_cast<T>(1)
+               : static_cast<T>(-1);
 
   Array<int> zeros(Dmnsn());
   std::fill(zeros.begin(), zeros.end(), 0);
@@ -167,15 +168,15 @@ template <class T> bool TreeOfPartials<T>::PolyEverywhereNegativeIn(const Rectan
   auto center = r.Center();
   T constant = this->RootNode()->GetData().Evaluate(center);
   if (constant >= static_cast<T>(0)) {
-      return false;
+    return false;
   }
   auto HalvesOfSideLengths = r.SideLengths() / 2;
-  return (this->MaximalNonconstantContribution(center, HalvesOfSideLengths) + constant < static_cast<T>(0));
+  return (this->MaximalNonconstantContribution(center, HalvesOfSideLengths) + constant <
+          static_cast<T>(0));
 }
 
 template <class T>
-Matrix<T> ListOfPartialTrees<T>::DerivativeMatrix(const Vector<T> &p,
-                                                  const int NoEquations) const
+Matrix<T> ListOfPartialTrees<T>::DerivativeMatrix(const Vector<T> &p, const int NoEquations) const
 {
   Matrix<T> answer(NoEquations, Dmnsn());
   for (int i = 1; i <= NoEquations; i++) {
@@ -186,8 +187,8 @@ Matrix<T> ListOfPartialTrees<T>::DerivativeMatrix(const Vector<T> &p,
   return answer;
 }
 
-template <class T> SquareMatrix<T>
-ListOfPartialTrees<T>::SquareDerivativeMatrix(const Vector<T> &p) const
+template <class T>
+SquareMatrix<T> ListOfPartialTrees<T>::SquareDerivativeMatrix(const Vector<T> &p) const
 {
   SquareMatrix<T> answer(Dmnsn());
   for (int i = 1; i <= Dmnsn(); i++) {

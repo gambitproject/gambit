@@ -32,12 +32,11 @@
 
 using namespace Gambit;
 
-
 //-------------------------------------------------------
 //      Supporting Calculations for the Constructors
 //-------------------------------------------------------
 
-template <class T> RectArray<bool> QuikSolv<T>::Eq_i_Uses_j() const
+template <class T> RectArray<bool> QuickSolver<T>::Eq_i_Uses_j() const
 {
   RectArray<bool> answer(m_system.Length(), Dmnsn());
   for (int i = 1; i <= m_system.Length(); i++) {
@@ -58,8 +57,7 @@ template <class T> RectArray<bool> QuikSolv<T>::Eq_i_Uses_j() const
 //---------------------------
 
 template <class T>
-bool QuikSolv<T>::SystemHasNoRootsIn(const Rectangle<double> &r,
-                                     Array<int> &precedence) const
+bool QuickSolver<T>::SystemHasNoRootsIn(const Rectangle<double> &r, Array<int> &precedence) const
 {
   for (int i = 1; i <= m_system.Length(); i++) {
 
@@ -125,8 +123,7 @@ static bool fuzzy_equals(const Vector<double> &x, const Vector<double> &y)
 }
 
 template <class T>
-bool QuikSolv<T>::NewtonRootInRectangle(const Rectangle<double> &r,
-                                        Vector<double> &point) const
+bool QuickSolver<T>::NewtonRootInRectangle(const Rectangle<double> &r, Vector<double> &point) const
 {
   Vector<double> zero(Dmnsn());
   zero = 0;
@@ -203,9 +200,8 @@ bool QuikSolv<T>::NewtonRootInRectangle(const Rectangle<double> &r,
 //------------------------------------
 
 template <class T>
-double QuikSolv<T>::MaxDistanceFromPointToVertexAfterTransformation(
-    const Rectangle<double> &r, const Vector<double> &p,
-    const SquareMatrix<double> &M) const
+double QuickSolver<T>::MaxDistanceFromPointToVertexAfterTransformation(
+    const Rectangle<double> &r, const Vector<double> &p, const SquareMatrix<double> &M) const
 {
   // A very early implementation of this method used a type gDouble which
   // implemented fuzzy comparisons.  Adding the epsilon parameter here is
@@ -242,8 +238,8 @@ double QuikSolv<T>::MaxDistanceFromPointToVertexAfterTransformation(
 }
 
 template <class T>
-bool QuikSolv<T>::HasNoOtherRootsIn(const Rectangle<double> &r, const Vector<double> &p,
-                                    const SquareMatrix<double> &M) const
+bool QuickSolver<T>::HasNoOtherRootsIn(const Rectangle<double> &r, const Vector<double> &p,
+                                       const SquareMatrix<double> &M) const
 {
   // assert (NoEquations == System.Dmnsn());
   gPolyList<double> system1 = m_normalizedSystem.TranslateOfSystem(p);
@@ -256,11 +252,9 @@ bool QuikSolv<T>::HasNoOtherRootsIn(const Rectangle<double> &r, const Vector<dou
   return max < radius;
 }
 
-
 /// Does Newton's method yield a unique root?
 template <class T>
-bool QuikSolv<T>::NewtonRootIsOnlyInRct(const Rectangle<double> &r,
-                                        Vector<double> &point) const
+bool QuickSolver<T>::NewtonRootIsOnlyInRct(const Rectangle<double> &r, Vector<double> &point) const
 {
   if (NewtonRootInRectangle(r, point)) {
     SquareMatrix<double> Df = TreesOfPartials.SquareDerivativeMatrix(point);
@@ -269,12 +263,8 @@ bool QuikSolv<T>::NewtonRootIsOnlyInRct(const Rectangle<double> &r,
   return false;
 }
 
-//-------------------------------------------
-//          Improve Accuracy of Root
-//-------------------------------------------
-
 template <class T>
-Vector<double> QuikSolv<T>::NewtonPolishOnce(const Vector<double> &point) const
+Vector<double> QuickSolver<T>::NewtonPolishOnce(const Vector<double> &point) const
 {
   Vector<double> oldevals = TreesOfPartials.ValuesOfRootPolys(point, NoEquations);
   Matrix<double> Df = TreesOfPartials.DerivativeMatrix(point, NoEquations);
@@ -284,7 +274,7 @@ Vector<double> QuikSolv<T>::NewtonPolishOnce(const Vector<double> &point) const
 }
 
 template <class T>
-Vector<double> QuikSolv<T>::SlowNewtonPolishOnce(const Vector<double> &point) const
+Vector<double> QuickSolver<T>::SlowNewtonPolishOnce(const Vector<double> &point) const
 {
   Vector<double> oldevals = TreesOfPartials.ValuesOfRootPolys(point, NoEquations);
   Matrix<double> Df = TreesOfPartials.DerivativeMatrix(point, NoEquations);
@@ -300,50 +290,30 @@ Vector<double> QuikSolv<T>::SlowNewtonPolishOnce(const Vector<double> &point) co
   }
 }
 
-//-------------------------------------------
-//           The Central Calculation
-//-------------------------------------------
-
-template <class T>
-bool QuikSolv<T>::FindCertainNumberOfRoots(const Rectangle<T> &r, const int &max_iterations,
-                                           const int &max_no_roots)
+template <class T> bool QuickSolver<T>::FindRoots(const Rectangle<T> &r, const int max_roots)
 {
-  auto *rootlistptr = new List<Vector<double>>();
+  const int max_iterations = 100000;
+  Roots = List<Vector<double>>();
 
   if (NoEquations == 0) {
     Vector<double> answer(0);
-    rootlistptr->push_back(answer);
-    Roots = *rootlistptr;
-    HasBeenSolved = true;
+    Roots.push_back(answer);
     return true;
   }
 
   Array<int> precedence(m_system.Length());
   // Orders search for nonvanishing poly
-  for (int i = 1; i <= m_system.Length(); i++) {
-    precedence[i] = i;
-  }
+  std::iota(precedence.begin(), precedence.end(), 1);
 
   int iterations = 0;
-
-  int *no_found = new int(0);
-  FindRootsRecursion(rootlistptr, r, max_iterations, precedence, iterations, 1, max_no_roots,
-                     no_found);
-
-  if (iterations < max_iterations) {
-    Roots = *rootlistptr;
-    HasBeenSolved = true;
-    return true;
-  }
-
-  return false;
+  FindRoots(Roots, r, max_iterations, precedence, iterations, 1, max_roots);
+  return iterations < max_iterations;
 }
 
 template <class T>
-void QuikSolv<T>::FindRootsRecursion(List<Vector<double>> *rootlistptr,
-                                     const Rectangle<double> &r, const int &max_iterations,
-                                     Array<int> &precedence, int &iterations, int depth,
-                                     const int &max_no_roots, int *roots_found) const
+void QuickSolver<T>::FindRoots(List<Vector<double>> &rootlist, const Rectangle<double> &r,
+                               const int &max_iterations, Array<int> &precedence, int &iterations,
+                               int depth, const int &max_no_roots) const
 {
   //
   // TLT: In some cases, this recursive process apparently goes into an
@@ -371,26 +341,24 @@ void QuikSolv<T>::FindRootsRecursion(List<Vector<double>> *rootlistptr,
     }
 
     bool already_found = false;
-    for (size_t i = 1; i <= rootlistptr->size(); i++) {
-      if (fuzzy_equals(point, (*rootlistptr)[i])) {
+    for (size_t i = 1; i <= rootlist.size(); i++) {
+      if (fuzzy_equals(point, rootlist[i])) {
         already_found = true;
       }
     }
     if (!already_found) {
-      rootlistptr->push_back(point);
-      (*roots_found)++;
+      rootlist.push_back(point);
     }
     return;
   }
 
   for (const auto &cell : r.Orthants()) {
-    if (max_no_roots == 0 || *roots_found < max_no_roots) {
+    if (max_no_roots == 0 || rootlist.size() < max_no_roots) {
       if (iterations >= max_iterations || depth == MAX_DEPTH) {
         return;
       }
       iterations++;
-      FindRootsRecursion(rootlistptr, cell, max_iterations, precedence, iterations, depth + 1,
-                         max_no_roots, roots_found);
+      FindRoots(rootlist, cell, max_iterations, precedence, iterations, depth + 1, max_no_roots);
     }
   }
 }
