@@ -3,7 +3,7 @@
 // Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/tools/enumpoly/quiksolv.cc
-// Instantiations of quick-solver classes
+// Implementation of quick-solver class
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,6 +20,323 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "quiksolv.imp"
+#include "quiksolv.h"
 
-template class QuickSolver<double>;
+using namespace Gambit;
+
+RectArray<bool> QuickSolver::Eq_i_Uses_j() const
+{
+  RectArray<bool> answer(m_system.Length(), Dmnsn());
+  for (int i = 1; i <= m_system.Length(); i++) {
+    for (int j = 1; j <= Dmnsn(); j++) {
+      if (m_system[i].DegreeOfVar(j) > 0) {
+        answer(i, j) = true;
+      }
+      else {
+        answer(i, j) = false;
+      }
+    }
+  }
+  return answer;
+}
+
+//---------------------------
+// Is a root impossible?
+//---------------------------
+
+bool QuickSolver::SystemHasNoRootsIn(const Rectangle<double> &r, Array<int> &precedence) const
+{
+  for (int i = 1; i <= m_system.Length(); i++) {
+    if ((precedence[i] <= NoEquations && TreesOfPartials[precedence[i]].PolyHasNoRootsIn(r)) ||
+        (precedence[i] > NoEquations &&
+         TreesOfPartials[precedence[i]].PolyEverywhereNegativeIn(r))) {
+      if (i != 1) { // We have found a new "most likely to never vanish"
+        int tmp = precedence[i];
+        for (int j = 1; j <= i - 1; j++) {
+          precedence[i - j + 1] = precedence[i - j];
+        }
+        precedence[1] = tmp;
+      }
+      return true;
+    }
+  }
+  return false;
+}
+
+//--------------------------------------
+// Does Newton's method lead to a root?
+//--------------------------------------
+
+//
+// In NewtonRootInRectangle(), problems with infinite looping will occur
+// due to roundoff in trying to compare to the zero vector.
+// The fuzzy_equals() functions below alleviate this by introducing
+// an epsilon fudge-factor.  This fudge-factor, and indeed the entire
+// implementation, is largely ad-hoc, but appears to work for most
+// applications.
+//
+// The fuzzy_equals() function used to be implemented as operator==
+// for the type gDouble in previous versions; indeed, it was the
+// raison d'etre for that class' existence.  As such, it is possible
+// that this technique may be useful elsewhere where gDouble used to
+// be used.
+//
+
+static bool fuzzy_equals(double x, double y)
+{
+  const double epsilon = 0.000000001;
+
+  if (x == 0) {
+    return (fabs(y) < epsilon);
+  }
+  else if (y == 0) {
+    return (fabs(x) < epsilon);
+  }
+  else {
+    return ((fabs(x - y) / (fabs(x) + fabs(y)) < epsilon) ||
+            (fabs(x) < epsilon && fabs(y) < epsilon));
+  }
+}
+
+static bool fuzzy_equals(const Vector<double> &x, const Vector<double> &y)
+{
+  for (int i = x.first_index(); i <= x.last_index(); i++) {
+    if (!fuzzy_equals(x[i], y[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool QuickSolver::NewtonRootInRectangle(const Rectangle<double> &r, Vector<double> &point) const
+{
+  Vector<double> zero(Dmnsn());
+  zero = 0;
+
+  Vector<double> oldevals = TreesOfPartials.ValuesOfRootPolys(point, NoEquations);
+  if (fuzzy_equals(oldevals, zero)) {
+    return r.Contains(point);
+  }
+
+  Rectangle<double> bigr = r.SameCenterDoubleLengths();
+
+  Vector<double> newpoint(Dmnsn());
+
+  while (true) {
+    try {
+      newpoint = NewtonPolishOnce(point);
+    }
+    catch (SingularMatrixException &) {
+      bool nonsingular = false;
+      int direction = 1;
+      while (direction < Dmnsn() && !nonsingular) {
+        Vector<double> perturbed_point(point);
+        if (r.Side(direction).UpperBound() > point[direction]) {
+          perturbed_point[direction] += (r.Side(direction).UpperBound() - point[direction]) / 10;
+        }
+        else {
+          perturbed_point[direction] += (r.Side(direction).LowerBound() - point[direction]) / 10;
+        }
+        nonsingular = true;
+
+        try {
+          newpoint = point + (NewtonPolishOnce(perturbed_point) - perturbed_point);
+        }
+        catch (SingularMatrixException &) {
+          nonsingular = false;
+        }
+        direction++;
+      }
+      if (!nonsingular) {
+        Vector<double> perturbed_point(point);
+        if (r.Side(direction).UpperBound() > point[direction]) {
+          perturbed_point[direction] += (r.Side(direction).UpperBound() - point[direction]) / 10;
+        }
+        else {
+          perturbed_point[direction] += (r.Side(direction).LowerBound() - point[direction]) / 10;
+        }
+        newpoint = point + (NewtonPolishOnce(perturbed_point) - perturbed_point);
+      }
+    }
+
+    if (!bigr.Contains(newpoint)) {
+      return false;
+    }
+    point = newpoint;
+
+    Vector<double> newevals = TreesOfPartials.ValuesOfRootPolys(point, NoEquations);
+    if (newevals * newevals >= oldevals * oldevals) {
+      return false;
+    }
+    if (fuzzy_equals(newevals, zero)) {
+      if (r.Contains(point)) {
+        point = SlowNewtonPolishOnce(point);
+        point = SlowNewtonPolishOnce(point);
+        return true;
+      }
+      return false;
+    }
+    oldevals = newevals;
+  }
+}
+
+//------------------------------------
+// Is the Newton root the only root?
+//------------------------------------
+
+double QuickSolver::MaxDistanceFromPointToVertexAfterTransformation(
+    const Rectangle<double> &r, const Vector<double> &p, const SquareMatrix<double> &M) const
+{
+  // A very early implementation of this method used a type gDouble which
+  // implemented fuzzy comparisons.  Adding the epsilon parameter here is
+  // important for the case when a solution may be found on the boundary
+  // of the rectangle but be slightly outside due to numerical error.
+  if (!r.Contains(p, 1.0e-8)) {
+    throw AssertionException(
+        "Point not in rectangle in MaxDistanceFromPointToVertexAfterTransformation.");
+  }
+  auto max = (double)0;
+
+  Array<int> bottom(Dmnsn()), top(Dmnsn());
+  std::fill(bottom.begin(), bottom.end(), 1);
+  std::fill(top.begin(), top.end(), 2);
+  CartesianIndexIterator ListOfTopBottoms(bottom, top);
+  while (ListOfTopBottoms.Turn()) {
+    Vector<double> diffs(Dmnsn());
+    for (int i = 1; i <= Dmnsn(); i++) {
+      if (ListOfTopBottoms[i] == 2) {
+        diffs[i] = r.Side(i).UpperBound() - p[i];
+      }
+      else {
+        diffs[i] = p[i] - r.Side(i).LowerBound();
+      }
+    }
+    Vector<double> new_diffs = M * diffs;
+    double squared_length = new_diffs * new_diffs;
+    if (max < squared_length) {
+      max = squared_length;
+    }
+  }
+
+  return sqrt((double)max);
+}
+
+bool QuickSolver::HasNoOtherRootsIn(const Rectangle<double> &r, const Vector<double> &p,
+                                    const SquareMatrix<double> &M) const
+{
+  gPolyList<double> system1 = m_normalizedSystem.TranslateOfSystem(p);
+  gPolyList<double> system2 = system1.SystemInNewCoordinates(M);
+  double radius = MaxDistanceFromPointToVertexAfterTransformation(r, p, M);
+  auto max = (double)0;
+  for (int i = 1; i <= Dmnsn(); i++) {
+    max += system2[i].MaximalValueOfNonlinearPart(radius);
+  }
+  return max < radius;
+}
+
+/// Does Newton's method yield a unique root?
+bool QuickSolver::NewtonRootIsOnlyInRct(const Rectangle<double> &r, Vector<double> &point) const
+{
+  if (NewtonRootInRectangle(r, point)) {
+    SquareMatrix<double> Df = TreesOfPartials.SquareDerivativeMatrix(point);
+    return HasNoOtherRootsIn(r, point, Df.Inverse());
+  }
+  return false;
+}
+
+Vector<double> QuickSolver::NewtonPolishOnce(const Vector<double> &point) const
+{
+  Vector<double> oldevals = TreesOfPartials.ValuesOfRootPolys(point, NoEquations);
+  Matrix<double> Df = TreesOfPartials.DerivativeMatrix(point, NoEquations);
+  SquareMatrix<double> M(Df * Df.Transpose());
+  Vector<double> Del = -(Df.Transpose() * M.Inverse()) * oldevals;
+  return point + Del;
+}
+
+Vector<double> QuickSolver::SlowNewtonPolishOnce(const Vector<double> &point) const
+{
+  Vector<double> oldevals = TreesOfPartials.ValuesOfRootPolys(point, NoEquations);
+  Matrix<double> Df = TreesOfPartials.DerivativeMatrix(point, NoEquations);
+  SquareMatrix<double> M(Df * Df.Transpose());
+  Vector<double> Del = -(Df.Transpose() * M.Inverse()) * oldevals;
+
+  while (true) {
+    Vector<double> newevals(TreesOfPartials.ValuesOfRootPolys(point + Del, NoEquations));
+    if (newevals * newevals <= oldevals * oldevals) {
+      return point + Del;
+    }
+    Del /= 2;
+  }
+}
+
+bool QuickSolver::FindRoots(const Rectangle<double> &r, const int max_roots)
+{
+  const int max_iterations = 100000;
+  Roots = List<Vector<double>>();
+
+  if (NoEquations == 0) {
+    Vector<double> answer(0);
+    Roots.push_back(answer);
+    return true;
+  }
+
+  Array<int> precedence(m_system.Length());
+  // Orders search for nonvanishing poly
+  std::iota(precedence.begin(), precedence.end(), 1);
+
+  int iterations = 0;
+  FindRoots(Roots, r, max_iterations, precedence, iterations, 1, max_roots);
+  return iterations < max_iterations;
+}
+
+void QuickSolver::FindRoots(List<Vector<double>> &rootlist, const Rectangle<double> &r,
+                            const int &max_iterations, Array<int> &precedence, int &iterations,
+                            int depth, const int &max_no_roots) const
+{
+  //
+  // TLT: In some cases, this recursive process apparently goes into an
+  // infinite regress.  I'm not able to identify just why this occurs,
+  // but as at least a temporary safeguard, we will limit the maximum depth
+  // of this recursive search.
+  //
+  // This limit has been chosen only because it doesn't look like any
+  // "serious" search (i.e., one that actually terminates with a result)
+  // will take more than a depth of 32.
+  //
+  const int MAX_DEPTH = 32;
+
+  if (SystemHasNoRootsIn(r, precedence)) {
+    return;
+  }
+
+  Vector<double> point = r.Center();
+
+  if (NewtonRootIsOnlyInRct(r, point)) {
+    for (int i = NoEquations + 1; i <= m_system.Length(); i++) {
+      if (TreesOfPartials[i].ValueOfRootPoly(point) < (double)0) {
+        return;
+      }
+    }
+
+    bool already_found = false;
+    for (size_t i = 1; i <= rootlist.size(); i++) {
+      if (fuzzy_equals(point, rootlist[i])) {
+        already_found = true;
+      }
+    }
+    if (!already_found) {
+      rootlist.push_back(point);
+    }
+    return;
+  }
+
+  for (const auto &cell : r.Orthants()) {
+    if (max_no_roots == 0 || rootlist.size() < max_no_roots) {
+      if (iterations >= max_iterations || depth == MAX_DEPTH) {
+        return;
+      }
+      iterations++;
+      FindRoots(rootlist, cell, max_iterations, precedence, iterations, depth + 1, max_no_roots);
+    }
+  }
+}

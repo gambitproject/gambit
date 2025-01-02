@@ -116,7 +116,7 @@ EnumPolyStrategySupportSolve(const StrategySupportProfile &support, bool &is_sin
   Vector<double> bottoms(Space.Dmnsn()), tops(Space.Dmnsn());
   bottoms = 0;
   tops = 1;
-  QuickSolver<double> solver(equations);
+  QuickSolver solver(equations);
   is_singular = false;
   try {
     solver.FindRoots({bottoms, tops}, p_stopAfter);

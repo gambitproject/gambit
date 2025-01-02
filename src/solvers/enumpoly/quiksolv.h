@@ -53,9 +53,9 @@ using namespace Gambit;
 /// system.  The first Dmnsn() polynomials are interpreted as equations,
 /// while remaining polynomials are interpreted as inequalities in the
 /// sense that the polynomial is required to be non-negative.
-template <class T> class QuickSolver {
+class QuickSolver {
 private:
-  gPolyList<T> m_system, m_normalizedSystem;
+  gPolyList<double> m_system, m_normalizedSystem;
   int NoEquations;
   int NoInequalities;
   ListOfPartialTrees<double> TreesOfPartials;
@@ -91,17 +91,17 @@ private:
                  int &iterations, int depth, const int &) const;
 
 public:
-  explicit QuickSolver(const gPolyList<T> &p_system)
+  explicit QuickSolver(const gPolyList<double> &p_system)
     : m_system(p_system), m_normalizedSystem(p_system.AmbientSpace(), p_system.NormalizedList()),
       NoEquations(std::min(m_system.Dmnsn(), m_system.Length())),
       NoInequalities(std::max(m_system.Length() - m_system.Dmnsn(), 0)),
       TreesOfPartials(m_normalizedSystem), Equation_i_uses_var_j(Eq_i_Uses_j())
   {
   }
-  QuickSolver(const QuickSolver<T> &) = delete;
+  QuickSolver(const QuickSolver &) = delete;
   ~QuickSolver() = default;
 
-  QuickSolver<T> &operator=(const QuickSolver<T> &) = delete;
+  QuickSolver &operator=(const QuickSolver &) = delete;
 
   // Information
   int Dmnsn() const { return m_system.Dmnsn(); }
@@ -113,7 +113,7 @@ public:
   Vector<double> SlowNewtonPolishOnce(const Vector<double> &) const;
 
   // Find up to `max_roots` roots inside rectangle `r`
-  bool FindRoots(const Rectangle<T> &r, int max_roots);
+  bool FindRoots(const Rectangle<double> &r, int max_roots);
 };
 
 #endif // QUIKSOLV_H

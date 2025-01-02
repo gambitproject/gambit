@@ -416,7 +416,6 @@ gambit_enumpoly_SOURCES = \
 	src/solvers/enumpoly/ineqsolv.imp \
 	src/solvers/enumpoly/quiksolv.cc \
 	src/solvers/enumpoly/quiksolv.h \
-	src/solvers/enumpoly/quiksolv.imp \
 	src/solvers/enumpoly/rectangle.h \
 	src/solvers/enumpoly/behavextend.cc \
 	src/solvers/enumpoly/behavextend.h \

@@ -167,7 +167,7 @@ std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfil
   bottoms = 0;
   tops = 1;
 
-  QuickSolver<double> solver(equations);
+  QuickSolver solver(equations);
   try {
     solver.FindRoots({bottoms, tops}, p_stopAfter);
   }
