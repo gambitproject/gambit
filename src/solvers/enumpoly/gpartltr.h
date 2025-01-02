@@ -29,90 +29,69 @@
 #include "gpoly.h"
 #include "gpolylst.h"
 
-// ****************************
-//      class TreeOfPartials
-// ****************************
+using namespace Gambit;
 
 template <class T> class TreeOfPartials {
 private:
   gTree<gPoly<T>> PartialTree;
 
-  /// Recursive Constructions and Computations ///
-
   void TreeOfPartialsRECURSIVE(gTree<gPoly<T>> &, gTreeNode<gPoly<T>> *) const;
 
-  T MaximalNonconstantContributionRECURSIVE(const gTreeNode<gPoly<T>> *, const Gambit::Vector<T> &,
-                                            const Gambit::Vector<T> &,
-                                            Gambit::Vector<int> &) const;
-
-  T MaximalNonconstantDifferenceRECURSIVE(const gTreeNode<gPoly<T>> *, const gTreeNode<gPoly<T>> *,
-                                          const Gambit::Vector<T> &, const Gambit::Vector<T> &,
-                                          Gambit::Vector<int> &) const;
+  T MaximalNonconstantContributionRECURSIVE(const gTreeNode<gPoly<T>> *, const Vector<T> &,
+                                            const Vector<T> &, Vector<int> &) const;
 
 public:
   explicit TreeOfPartials(const gPoly<T> &);
-  TreeOfPartials(const TreeOfPartials<T> &);
-  ~TreeOfPartials();
+  TreeOfPartials(const TreeOfPartials<T> &) = default;
+  ~TreeOfPartials() = default;
 
-  inline bool operator==(const TreeOfPartials<T> &rhs) const
-  {
-    return (PartialTree == rhs.PartialTree);
-  }
-  inline bool operator!=(const TreeOfPartials<T> &rhs) const { return !(*this == rhs); }
-  inline int Dmnsn() const { return RootNode()->GetData().Dmnsn(); }
-  T EvaluateRootPoly(const Gambit::Vector<T> &point) const;
+  bool operator==(const TreeOfPartials<T> &rhs) const { return PartialTree == rhs.PartialTree; }
+  bool operator!=(const TreeOfPartials<T> &rhs) const { return PartialTree != rhs.PartialTree; }
+  int Dmnsn() const { return RootNode()->GetData().Dmnsn(); }
 
-  T MaximalNonconstantContribution(const Gambit::Vector<T> &, const Gambit::Vector<T> &) const;
-  T MaximalNonconstantDifference(const TreeOfPartials<T> &, const Gambit::Vector<T> &,
-                                 const Gambit::Vector<T> &) const;
+  T MaximalNonconstantContribution(const Vector<T> &, const Vector<T> &) const;
 
-  inline gTreeNode<gPoly<T>> *RootNode() const { return PartialTree.RootNode(); }
-  inline gPoly<T> RootPoly() const { return RootNode()->GetData(); }
-  T ValueOfRootPoly(const Gambit::Vector<T> &point) const;
-  T ValueOfPartialOfRootPoly(const int &, const Gambit::Vector<T> &) const;
-  Gambit::Vector<T> VectorOfPartials(const Gambit::Vector<T> &) const;
+  gTreeNode<gPoly<T>> *RootNode() const { return PartialTree.RootNode(); }
+  gPoly<T> RootPoly() const { return RootNode()->GetData(); }
+  T ValueOfRootPoly(const Vector<T> &point) const { return RootPoly().Evaluate(point); }
+  T ValueOfPartialOfRootPoly(const int &, const Vector<T> &) const;
   bool PolyHasNoRootsIn(const Rectangle<T> &) const;
   bool MultiaffinePolyHasNoRootsIn(const Rectangle<T> &) const;
   bool PolyEverywhereNegativeIn(const Rectangle<T> &) const;
   bool MultiaffinePolyEverywhereNegativeIn(const Rectangle<T> &) const;
-
-  // friend gOutput& operator << (gOutput& output, const TreeOfPartials<T>& x);
 };
-
-// *********************************
-//      class ListOfPartialTrees
-// *********************************
 
 template <class T> class ListOfPartialTrees {
 private:
-  Gambit::List<TreeOfPartials<T>> PartialTreeList;
-
-  // Disabling this operator -- we don't want it called
-  ListOfPartialTrees<T> &operator=(const ListOfPartialTrees<T> &);
+  List<TreeOfPartials<T>> PartialTreeList;
 
 public:
-  explicit ListOfPartialTrees(const Gambit::List<gPoly<T>> &);
-  explicit ListOfPartialTrees(const gPolyList<T> &);
-  ListOfPartialTrees(const ListOfPartialTrees<T> &);
-  ~ListOfPartialTrees();
+  explicit ListOfPartialTrees(const List<gPoly<T>> &given)
+  {
+    for (const auto &poly : given) {
+      PartialTreeList.push_back(TreeOfPartials<T>(poly));
+    }
+  }
+  explicit ListOfPartialTrees(const gPolyList<T> &given)
+  {
+    for (int i = 1; i <= given.Length(); i++) {
+      PartialTreeList.push_back(TreeOfPartials<T>(given[i]));
+    }
+  }
+  ListOfPartialTrees(const ListOfPartialTrees<T> &) = default;
+  ~ListOfPartialTrees() = default;
+  ListOfPartialTrees<T> &operator=(const ListOfPartialTrees<T> &) = delete;
 
-  // operators
   bool operator==(const ListOfPartialTrees &) const;
   bool operator!=(const ListOfPartialTrees &) const;
 
   const TreeOfPartials<T> &operator[](int i) const { return PartialTreeList[i]; }
 
-  // Information
   int Length() const { return PartialTreeList.size(); }
   int Dmnsn() const { return PartialTreeList.front().Dmnsn(); }
-  Gambit::Matrix<T> DerivativeMatrix(const Gambit::Vector<T> &) const;
-  Gambit::Matrix<T> DerivativeMatrix(const Gambit::Vector<T> &, const int &) const;
-  Gambit::SquareMatrix<T> SquareDerivativeMatrix(const Gambit::Vector<T> &) const;
-  Gambit::Vector<T> ValuesOfRootPolys(const Gambit::Vector<T> &, const int &) const;
-  T MaximalNonconstantDifference(const int &, const int &, const Gambit::Vector<T> &,
-                                 const Gambit::Vector<T> &) const;
-
-  // friend gOutput& operator << (gOutput& output, const ListOfPartialTrees<T>& x);
+  Matrix<T> DerivativeMatrix(const Vector<T> &, int) const;
+  SquareMatrix<T> SquareDerivativeMatrix(const Vector<T> &) const;
+  Vector<T> ValuesOfRootPolys(const Vector<T> &, int) const;
 };
 
 #endif // GPARTLTR_H

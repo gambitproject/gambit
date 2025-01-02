@@ -22,6 +22,8 @@
 
 #include "gpartltr.h"
 
+using namespace Gambit;
+
 //---------------------------------------------------------------
 //                   class: TreeOfPartials
 //---------------------------------------------------------------
@@ -51,14 +53,7 @@ void TreeOfPartials<T>::TreeOfPartialsRECURSIVE(gTree<gPoly<T>> &t, gTreeNode<gP
 }
 
 template <class T>
-TreeOfPartials<T>::TreeOfPartials(const TreeOfPartials &qs) : PartialTree(qs.PartialTree)
-{
-}
-
-template <class T> TreeOfPartials<T>::~TreeOfPartials() = default;
-
-template <class T>
-T TreeOfPartials<T>::ValueOfPartialOfRootPoly(const int &coord, const Gambit::Vector<T> &p) const
+T TreeOfPartials<T>::ValueOfPartialOfRootPoly(const int &coord, const Vector<T> &p) const
 {
   if (RootPoly().Degree() <= 0) {
     return (T)0;
@@ -76,24 +71,14 @@ T TreeOfPartials<T>::ValueOfPartialOfRootPoly(const int &coord, const Gambit::Ve
 }
 
 template <class T>
-Gambit::Vector<T> TreeOfPartials<T>::VectorOfPartials(const Gambit::Vector<T> &point) const
-{
-  Gambit::Vector<T> answer(Dmnsn());
-  for (int i = 1; i <= Dmnsn(); i++) {
-    answer[i] = ValueOfPartialOfRootPoly(i, point);
-  }
-  return answer;
-}
-
-template <class T>
 T TreeOfPartials<T>::MaximalNonconstantContributionRECURSIVE(
-    const gTreeNode<gPoly<T>> *n, const Gambit::Vector<T> &p,
-    const Gambit::Vector<T> &halvesoflengths, Gambit::Vector<int> &wrtos) const
+    const gTreeNode<gPoly<T>> *n, const Vector<T> &p,
+    const Vector<T> &halvesoflengths, Vector<int> &wrtos) const
 {
   T answer = (T)0;
 
   if (n->GetEldest() != nullptr) {
-    Gambit::List<gTreeNode<gPoly<T>> *> children = PartialTree.Children(n);
+    List<gTreeNode<gPoly<T>> *> children = PartialTree.Children(n);
     for (size_t i = 1; i <= children.size(); i++) {
       wrtos[i]++;
 
@@ -121,126 +106,15 @@ T TreeOfPartials<T>::MaximalNonconstantContributionRECURSIVE(
 }
 
 template <class T>
-T TreeOfPartials<T>::MaximalNonconstantDifferenceRECURSIVE(
-    const gTreeNode<gPoly<T>> *n1, const gTreeNode<gPoly<T>> *n2, const Gambit::Vector<T> &p,
-    const Gambit::Vector<T> &halvesoflengths, Gambit::Vector<int> &wrtos) const
+T TreeOfPartials<T>::MaximalNonconstantContribution(const Vector<T> &p,
+                                                    const Vector<T> &halvesoflengths) const
 {
-  T answer = (T)0;
-
-  if (n1->GetEldest() != nullptr && n2->GetEldest() != nullptr) {
-    Gambit::List<gTreeNode<gPoly<T>> *> children1 = PartialTree.Children(n1);
-    Gambit::List<gTreeNode<gPoly<T>> *> children2 = PartialTree.Children(n2);
-    for (size_t i = 1; i <= children1.size(); i++) {
-      wrtos[i]++;
-
-      T increment = children1[i]->GetData().Evaluate(p) - children2[i]->GetData().Evaluate(p);
-      if (increment < (T)0) {
-        increment = -increment;
-      }
-
-      for (int j = 1; j <= p.size(); j++) {
-        for (int k = 1; k <= wrtos[j]; k++) {
-          increment *= halvesoflengths[j];
-          increment /= (T)k;
-        }
-      }
-
-      answer += increment;
-
-      answer += MaximalNonconstantDifferenceRECURSIVE(children1[i], children2[i], p,
-                                                      halvesoflengths, wrtos);
-
-      wrtos[i]--;
-    }
-  }
-
-  else if (n1->GetEldest() != nullptr && n2->GetEldest() == nullptr) {
-    auto children1 = PartialTree.Children(n1);
-    for (size_t i = 1; i <= children1.size(); i++) {
-      wrtos[i]++;
-
-      T increment = children1[i]->GetData().Evaluate(p);
-      if (increment < (T)0) {
-        increment = -increment;
-      }
-
-      for (int j = 1; j <= p.size(); j++) {
-        for (int k = 1; k <= wrtos[j]; k++) {
-          increment *= halvesoflengths[j];
-          increment /= (T)k;
-        }
-      }
-
-      answer += increment;
-
-      answer += MaximalNonconstantContributionRECURSIVE(children1[i], p, halvesoflengths, wrtos);
-
-      wrtos[i]--;
-    }
-  }
-
-  else if (n1->GetEldest() == nullptr && n2->GetEldest() != nullptr) {
-    auto children2 = PartialTree.Children(n2);
-    for (size_t i = 1; i <= children2.size(); i++) {
-      wrtos[i]++;
-
-      T increment = children2[i]->GetData().Evaluate(p);
-      if (increment < (T)0) {
-        increment = -increment;
-      }
-
-      for (int j = 1; j <= p.size(); j++) {
-        for (int k = 1; k <= wrtos[j]; k++) {
-          increment *= halvesoflengths[j];
-          increment /= (T)k;
-        }
-      }
-
-      answer += increment;
-
-      answer += MaximalNonconstantContributionRECURSIVE(children2[i], p, halvesoflengths, wrtos);
-
-      wrtos[i]--;
-    }
-  }
-
-  return answer;
-}
-
-template <class T>
-T TreeOfPartials<T>::MaximalNonconstantContribution(const Gambit::Vector<T> &p,
-                                                    const Gambit::Vector<T> &halvesoflengths) const
-{
-  Gambit::Vector<int> WithRespectTos(p.size());
+  Vector<int> WithRespectTos(p.size());
   for (int i = 1; i <= p.size(); i++) {
     WithRespectTos[i] = 0;
   }
 
   return MaximalNonconstantContributionRECURSIVE(RootNode(), p, halvesoflengths, WithRespectTos);
-}
-
-template <class T>
-T TreeOfPartials<T>::MaximalNonconstantDifference(const TreeOfPartials<T> &other,
-                                                  const Gambit::Vector<T> &p,
-                                                  const Gambit::Vector<T> &halvesoflengths) const
-{
-  Gambit::Vector<int> WithRespectTos(p.size());
-  for (int i = 1; i <= p.size(); i++) {
-    WithRespectTos[i] = 0;
-  }
-
-  return MaximalNonconstantDifferenceRECURSIVE(other.RootNode(), RootNode(), p, halvesoflengths,
-                                               WithRespectTos);
-}
-
-template <class T> T TreeOfPartials<T>::EvaluateRootPoly(const Gambit::Vector<T> &point) const
-{
-  return RootNode()->GetData().Evaluate(point);
-}
-
-template <class T> T TreeOfPartials<T>::ValueOfRootPoly(const Gambit::Vector<T> &point) const
-{
-  return RootPoly().Evaluate(point);
 }
 
 template <class T> bool TreeOfPartials<T>::PolyHasNoRootsIn(const Rectangle<T> &r) const
@@ -249,14 +123,14 @@ template <class T> bool TreeOfPartials<T>::PolyHasNoRootsIn(const Rectangle<T> &
     return MultiaffinePolyHasNoRootsIn(r);
   }
   else {
-    Gambit::Vector<T> center = r.Center();
+    Vector<T> center = r.Center();
 
     T constant = this->RootNode()->GetData().Evaluate(center);
     if (constant < (T)0) {
       constant = -constant;
     }
 
-    Gambit::Vector<T> HalvesOfSideLengths = r.SideLengths();
+    Vector<T> HalvesOfSideLengths = r.SideLengths();
     for (int k = 1; k <= Dmnsn(); k++) {
       HalvesOfSideLengths[k] /= (T)2;
     }
@@ -282,8 +156,8 @@ template <class T> bool TreeOfPartials<T>::MultiaffinePolyHasNoRootsIn(const Rec
     sign = -1;
   }
 
-  Gambit::Array<int> zeros(Dmnsn());
-  Gambit::Array<int> ones(Dmnsn());
+  Array<int> zeros(Dmnsn());
+  Array<int> ones(Dmnsn());
   for (int j = 1; j <= Dmnsn(); j++) {
     zeros[j] = 0;
     if (this->RootNode()->GetData().DegreeOfVar(j) > 0) {
@@ -297,7 +171,7 @@ template <class T> bool TreeOfPartials<T>::MultiaffinePolyHasNoRootsIn(const Rec
   CartesianIndexIterator topbottoms(zeros, ones);
 
   while (topbottoms.Turn()) {
-    Gambit::Vector<T> point(Dmnsn());
+    Vector<T> point(Dmnsn());
     for (int i = 1; i <= Dmnsn(); i++) {
       if (topbottoms[i] == 0) {
         point[i] = r.Side(i).LowerBound();
@@ -318,7 +192,7 @@ template <class T>
 bool TreeOfPartials<T>::MultiaffinePolyEverywhereNegativeIn(const Rectangle<T> &r) const
 {
   if (Dmnsn() == 0) {
-    Gambit::Vector<T> point(Dmnsn());
+    Vector<T> point(Dmnsn());
     if (this->RootNode()->GetData().Evaluate(point) >= (T)0) {
       return false;
     }
@@ -327,8 +201,8 @@ bool TreeOfPartials<T>::MultiaffinePolyEverywhereNegativeIn(const Rectangle<T> &
     }
   }
 
-  Gambit::Array<int> zeros(Dmnsn());
-  Gambit::Array<int> ones(Dmnsn());
+  Array<int> zeros(Dmnsn());
+  Array<int> ones(Dmnsn());
   for (int j = 1; j <= Dmnsn(); j++) {
     zeros[j] = 0;
     if (this->RootNode()->GetData().DegreeOfVar(j) > 0) {
@@ -341,7 +215,7 @@ bool TreeOfPartials<T>::MultiaffinePolyEverywhereNegativeIn(const Rectangle<T> &
 
   CartesianIndexIterator topbottoms(zeros, ones);
   while (topbottoms.Turn()) {
-    Gambit::Vector<T> point(Dmnsn());
+    Vector<T> point(Dmnsn());
     for (int i = 1; i <= Dmnsn(); i++) {
       if (topbottoms[i] == 0) {
         point[i] = r.Side(i).LowerBound();
@@ -364,14 +238,14 @@ template <class T> bool TreeOfPartials<T>::PolyEverywhereNegativeIn(const Rectan
     return MultiaffinePolyEverywhereNegativeIn(r);
   }
   else {
-    Gambit::Vector<T> center = r.Center();
+    Vector<T> center = r.Center();
 
     T constant = this->RootNode()->GetData().Evaluate(center);
     if (constant >= (T)0) {
       return false;
     }
 
-    Gambit::Vector<T> HalvesOfSideLengths = r.SideLengths();
+    Vector<T> HalvesOfSideLengths = r.SideLengths();
     for (int k = 1; k <= Dmnsn(); k++) {
       HalvesOfSideLengths[k] /= (T)2;
     }
@@ -395,28 +269,6 @@ template <class T> bool TreeOfPartials<T>::PolyEverywhereNegativeIn(const Rectan
 // Constructors / Destructors
 //---------------------------
 
-template <class T> ListOfPartialTrees<T>::ListOfPartialTrees(const Gambit::List<gPoly<T>> &given)
-{
-  for (const auto &poly : given) {
-    PartialTreeList.push_back(TreeOfPartials<T>(poly));
-  }
-}
-
-template <class T> ListOfPartialTrees<T>::ListOfPartialTrees(const gPolyList<T> &given)
-{
-  for (int i = 1; i <= given.Length(); i++) {
-    PartialTreeList.push_back(TreeOfPartials<T>(given[i]));
-  }
-}
-
-template <class T>
-ListOfPartialTrees<T>::ListOfPartialTrees(const ListOfPartialTrees &qs)
-  : PartialTreeList(qs.PartialTreeList)
-{
-}
-
-template <class T> ListOfPartialTrees<T>::~ListOfPartialTrees() = default;
-
 template <class T> bool ListOfPartialTrees<T>::operator==(const ListOfPartialTrees<T> &rhs) const
 {
   if (Length() != rhs.Length()) {
@@ -436,24 +288,10 @@ template <class T> bool ListOfPartialTrees<T>::operator!=(const ListOfPartialTre
 }
 
 template <class T>
-Gambit::Matrix<T> ListOfPartialTrees<T>::DerivativeMatrix(const Gambit::Vector<T> &p) const
+Matrix<T> ListOfPartialTrees<T>::DerivativeMatrix(const Vector<T> &p,
+                                                          const int NoEquations) const
 {
-  Gambit::Matrix<T> answer(Length(), Dmnsn());
-  int i;
-  for (i = 1; i <= Length(); i++) {
-    for (int j = 1; j <= Dmnsn(); j++) {
-      answer(i, j) = (*this)[i].ValueOfPartialOfRootPoly(j, p);
-    }
-  }
-
-  return answer;
-}
-
-template <class T>
-Gambit::Matrix<T> ListOfPartialTrees<T>::DerivativeMatrix(const Gambit::Vector<T> &p,
-                                                          const int &NoEquations) const
-{
-  Gambit::Matrix<T> answer(NoEquations, Dmnsn());
+  Matrix<T> answer(NoEquations, Dmnsn());
   int i;
   for (i = 1; i <= NoEquations; i++) {
     for (int j = 1; j <= Dmnsn(); j++) {
@@ -465,11 +303,11 @@ Gambit::Matrix<T> ListOfPartialTrees<T>::DerivativeMatrix(const Gambit::Vector<T
 }
 
 template <class T>
-Gambit::SquareMatrix<T>
-ListOfPartialTrees<T>::SquareDerivativeMatrix(const Gambit::Vector<T> &p) const
+SquareMatrix<T>
+ListOfPartialTrees<T>::SquareDerivativeMatrix(const Vector<T> &p) const
 {
   // assert (Length() >= Dmnsn());
-  Gambit::SquareMatrix<T> answer(Dmnsn());
+  SquareMatrix<T> answer(Dmnsn());
   int i;
   for (i = 1; i <= Dmnsn(); i++) {
     for (int j = 1; j <= Dmnsn(); j++) {
@@ -481,22 +319,13 @@ ListOfPartialTrees<T>::SquareDerivativeMatrix(const Gambit::Vector<T> &p) const
 }
 
 template <class T>
-Gambit::Vector<T> ListOfPartialTrees<T>::ValuesOfRootPolys(const Gambit::Vector<T> &point,
-                                                           const int &NoEquations) const
+Vector<T> ListOfPartialTrees<T>::ValuesOfRootPolys(const Vector<T> &point,
+                                                           const int NoEquations) const
 {
-  Gambit::Vector<T> answer(NoEquations);
+  Vector<T> answer(NoEquations);
   for (int i = 1; i <= NoEquations; i++) {
-    answer[i] = PartialTreeList[i].EvaluateRootPoly(point);
+    answer[i] = PartialTreeList[i].ValueOfRootPoly(point);
   }
 
   return answer;
-}
-
-template <class T>
-T ListOfPartialTrees<T>::MaximalNonconstantDifference(
-    const int &i, const int &j, const Gambit::Vector<T> &point,
-    const Gambit::Vector<T> &halvesoflengths) const
-{
-  return PartialTreeList[i].MaximalNonconstantDifference(PartialTreeList[j], point,
-                                                         halvesoflengths);
 }

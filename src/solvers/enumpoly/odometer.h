@@ -46,7 +46,9 @@ public:
   {
     m_current.front() = m_lower.front() - 1;
   }
+
   CartesianIndexIterator(const CartesianIndexIterator &) = default;
+
   ~CartesianIndexIterator() = default;
 
   // Operators
@@ -73,7 +75,9 @@ public:
     std::copy(m_current.begin(), cur, m_lower.begin());
     (*cur)++;
     return true;
-  };
-}
+  }
+};
+
+} // namespace Gambit
 
 #endif // ODOMETER_H
