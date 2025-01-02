@@ -89,12 +89,12 @@ gPolyList<double> ConstructEquations(const VariableSpace &space,
     auto strategies = support.GetStrategies(player);
     for (auto s1 = strategies.begin(), s2 = std::next(strategies.begin()); s2 != strategies.end();
          ++s1, ++s2) {
-      equations += IndifferenceEquation(space, support, strategy_poly, *s1, *s2);
+      equations.push_back(IndifferenceEquation(space, support, strategy_poly, *s1, *s2));
     }
   }
   // Inequalities for last probability for each player
   for (auto player : support.GetPlayers()) {
-    equations += strategy_poly.at(support.GetStrategies(player).back());
+    equations.push_back(strategy_poly.at(support.GetStrategies(player).back()));
   }
   return equations;
 }

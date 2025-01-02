@@ -99,7 +99,7 @@ gPolyList<double> ActionProbsSumToOneIneqs(const MixedBehaviorProfile<double> &p
         for (int k = 1; k < infoset->NumActions(); k++) {
           factor -= gPoly<double>(&BehavStratSpace, index_base + k, 1);
         }
-        answer += factor;
+        answer.push_back(factor);
       }
     }
   }
@@ -261,7 +261,7 @@ gPolyList<double> NashExpectedPayoffDiffPolys(const MixedBehaviorProfile<double>
               next_poly += node_prob;
             }
           }
-          answer += -next_poly + p_solution.GetPayoff(player);
+          answer.push_back(-next_poly + p_solution.GetPayoff(player));
         }
       }
     }
@@ -404,7 +404,7 @@ gPolyList<double> ANFExpectedPayoffDiffPolys(const MixedBehaviorProfile<double> 
             next_poly += node_prob;
           }
         }
-        answer += -next_poly + p_solution.GetPayoff(player);
+        answer.push_back(-next_poly + p_solution.GetPayoff(player));
       }
     }
   }

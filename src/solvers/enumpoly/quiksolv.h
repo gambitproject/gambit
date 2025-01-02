@@ -90,7 +90,7 @@ private:
 
 public:
   explicit QuickSolver(const gPolyList<double> &p_system)
-    : m_system(p_system), m_normalizedSystem(p_system.AmbientSpace(), p_system.NormalizedList()),
+    : m_system(p_system), m_normalizedSystem(p_system.Normalize()),
       TreesOfPartials(m_normalizedSystem), Equation_i_uses_var_j(Eq_i_Uses_j())
   {
   }

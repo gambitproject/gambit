@@ -202,7 +202,7 @@ double QuickSolver::MaxDistanceFromPointToVertexAfterTransformation(
 bool QuickSolver::HasNoOtherRootsIn(const Rectangle<double> &r, const Vector<double> &p,
                                     const SquareMatrix<double> &M) const
 {
-  auto system2 = m_normalizedSystem.TranslateOfSystem(p).SystemInNewCoordinates(M);
+  auto system2 = m_normalizedSystem.Translate(p).TransformCoords(M);
   double radius = MaxDistanceFromPointToVertexAfterTransformation(r, p, M);
   auto max = 0.0;
   for (int i = 1; i <= Dmnsn(); i++) {

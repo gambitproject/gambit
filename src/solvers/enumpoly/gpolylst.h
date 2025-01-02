@@ -27,44 +27,86 @@
 #include "core/sqmatrix.h"
 #include "gpoly.h"
 
+using namespace Gambit;
+
 template <class T> class gPolyList {
 private:
-  const VariableSpace *Space;
-  Gambit::List<gPoly<T> *> List;
+  const VariableSpace *m_space;
+  List<gPoly<T>> m_list;
 
 public:
-  gPolyList(const VariableSpace *sp) : Space(sp) {}
-  gPolyList(const VariableSpace *, const Gambit::List<gPoly<T>> &);
-  gPolyList(const gPolyList<T> &);
+  gPolyList(const VariableSpace *p_space) : m_space(p_space) {}
+  gPolyList(const VariableSpace *p_space, const List<gPoly<T>> &p_list)
+    : m_space(p_space), m_list(p_list)
+  {
+  }
+  gPolyList(const gPolyList<T> &) = default;
 
-  ~gPolyList(); // Deletes all pointees
+  ~gPolyList() = default;
 
   // Operators
-  gPolyList<T> &operator=(const gPolyList<T> &);
+  gPolyList<T> &operator=(const gPolyList<T> &) = default;
 
-  bool operator==(const gPolyList<T> &) const;
-  bool operator!=(const gPolyList<T> &x) const { return !(*this == x); }
-  void operator+=(const gPoly<T> &);
-  void operator+=(const gPolyList<T> &);
+  bool operator==(const gPolyList<T> &rhs) const
+  {
+    return m_space == rhs.m_space && m_list == rhs.m_list;
+  }
+  bool operator!=(const gPolyList<T> &rhs) const
+  {
+    return m_space != rhs.m_space || m_list != rhs.m_list;
+  }
+  void push_back(const gPoly<T> &x) { m_list.push_back(x); }
+  void operator+=(const gPolyList<T> &x)
+  {
+    for (const auto &v : x.m_list) {
+      m_list.push_back(v);
+    }
+  }
 
-  // Takes ownership of pointer
-  void operator+=(gPoly<T> *poly) { List.push_back(poly); }
+  const gPoly<T> &operator[](const int index) const { return m_list[index]; }
 
-  const gPoly<T> &operator[](const int index) const { return *(List[index]); }
+  const VariableSpace *AmbientSpace() const { return m_space; }
+  int Length() const { return m_list.size(); }
+  int Dmnsn() const { return m_space->Dmnsn(); }
+  bool IsMultiaffine() const
+  {
+    return std::all_of(m_list.begin(), m_list.end(),
+                       [](const gPoly<T> &v) { return v.IsMultiaffine(); });
+  }
+  Vector<T> Evaluate(const Vector<T> &v) const
+  {
+    Vector<T> answer(m_list.size());
+    std::transform(m_list.begin(), m_list.end(), answer.begin(),
+                   [&](const gPoly<T> &p) { return p.Evaluate(v); });
+    return answer;
+  }
 
-  // New Coordinate Systems
-  gPolyList<T> TranslateOfSystem(const Gambit::Vector<T> &) const;
-  gPolyList<T> SystemInNewCoordinates(const Gambit::SquareMatrix<T> &) const;
-
-  // Information
-  const VariableSpace *AmbientSpace() const { return Space; }
-  int Length() const { return List.size(); }
-  int Dmnsn() const { return Space->Dmnsn(); }
-  bool IsMultiaffine() const;
-  Gambit::Vector<T> Evaluate(const Gambit::Vector<T> &) const;
-
-  // Conversion
-  Gambit::List<gPoly<double>> NormalizedList() const;
+  /// Translate system to new origin
+  gPolyList<T> Translate(const Vector<T> &new_origin) const
+  {
+    gPolyList<T> ret(m_space);
+    for (const auto &v : m_list) {
+      ret.m_list.push_back(v.TranslateOfPoly(new_origin));
+    }
+    return ret;
+  }
+  /// Transform system to new coordinates
+  gPolyList<T> TransformCoords(const SquareMatrix<T> &M) const
+  {
+    gPolyList<T> ret(m_space);
+    for (const auto &v : m_list) {
+      ret.m_list.push_back(v.PolyInNewCoordinates(M));
+    }
+    return ret;
+  }
+  gPolyList<T> Normalize() const
+  {
+    gPolyList<T> ret(m_space);
+    for (const auto &v : m_list) {
+      ret.m_list.push_back(v.Normalize());
+    }
+    return ret;
+  }
 };
 
 #endif // GPOLYLST_H

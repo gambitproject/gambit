@@ -122,7 +122,7 @@ void IndifferenceEquations(ProblemData &p_data, gPolyList<double> &p_equations)
     gPoly<double> payoff = GetPayoff(p_data, player);
     for (auto sequence : p_data.sfg.GetSequences(player)) {
       try {
-        p_equations += payoff.PartialDerivative(p_data.var.at(sequence));
+        p_equations.push_back(payoff.PartialDerivative(p_data.var.at(sequence)));
       }
       catch (std::out_of_range) {
         // This sequence's variable was already substituted out in terms of
@@ -140,7 +140,7 @@ void LastActionProbPositiveInequalities(ProblemData &p_data, gPolyList<double> &
     }
     const auto &actions = p_data.sfg.GetSupport().GetActions(sequence->action->GetInfoset());
     if (actions.size() > 1 && sequence->action == actions.back()) {
-      p_equations += p_data.variables.at(sequence);
+      p_equations.push_back(p_data.variables.at(sequence));
     }
   }
 }
