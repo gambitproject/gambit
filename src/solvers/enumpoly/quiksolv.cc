@@ -47,8 +47,8 @@ RectArray<bool> QuickSolver::Eq_i_Uses_j() const
 bool QuickSolver::SystemHasNoRootsIn(const Rectangle<double> &r, Array<int> &precedence) const
 {
   for (int i = 1; i <= m_system.Length(); i++) {
-    if ((precedence[i] <= NoEquations && TreesOfPartials[precedence[i]].PolyHasNoRootsIn(r)) ||
-        (precedence[i] > NoEquations &&
+    if ((precedence[i] <= NumEquations() && TreesOfPartials[precedence[i]].PolyHasNoRootsIn(r)) ||
+        (precedence[i] > NumEquations() &&
          TreesOfPartials[precedence[i]].PolyEverywhereNegativeIn(r))) {
       if (i != 1) { // We have found a new "most likely to never vanish"
         int tmp = precedence[i];
@@ -75,46 +75,32 @@ bool QuickSolver::SystemHasNoRootsIn(const Rectangle<double> &r, Array<int> &pre
 // implementation, is largely ad-hoc, but appears to work for most
 // applications.
 //
-// The fuzzy_equals() function used to be implemented as operator==
-// for the type gDouble in previous versions; indeed, it was the
-// raison d'etre for that class' existence.  As such, it is possible
-// that this technique may be useful elsewhere where gDouble used to
-// be used.
-//
+
+namespace {
 
 static bool fuzzy_equals(double x, double y)
 {
   const double epsilon = 0.000000001;
 
-  if (x == 0) {
-    return (fabs(y) < epsilon);
+  if (x == 0.0) {
+    return fabs(y) < epsilon;
   }
-  else if (y == 0) {
-    return (fabs(x) < epsilon);
+  if (y == 0.0) {
+    return fabs(x) < epsilon;
   }
-  else {
-    return ((fabs(x - y) / (fabs(x) + fabs(y)) < epsilon) ||
-            (fabs(x) < epsilon && fabs(y) < epsilon));
-  }
+  return ((fabs(x - y) / (fabs(x) + fabs(y)) < epsilon) ||
+          (fabs(x) < epsilon && fabs(y) < epsilon));
 }
 
-static bool fuzzy_equals(const Vector<double> &x, const Vector<double> &y)
-{
-  for (int i = x.first_index(); i <= x.last_index(); i++) {
-    if (!fuzzy_equals(x[i], y[i])) {
-      return false;
-    }
-  }
-  return true;
-}
+} // end anonymous namespace
 
 bool QuickSolver::NewtonRootInRectangle(const Rectangle<double> &r, Vector<double> &point) const
 {
   Vector<double> zero(Dmnsn());
   zero = 0;
 
-  Vector<double> oldevals = TreesOfPartials.ValuesOfRootPolys(point, NoEquations);
-  if (fuzzy_equals(oldevals, zero)) {
+  Vector<double> oldevals = TreesOfPartials.ValuesOfRootPolys(point, NumEquations());
+  if (std::equal(oldevals.begin(), oldevals.end(), zero.begin(), fuzzy_equals)) {
     return r.Contains(point);
   }
 
@@ -164,11 +150,11 @@ bool QuickSolver::NewtonRootInRectangle(const Rectangle<double> &r, Vector<doubl
     }
     point = newpoint;
 
-    Vector<double> newevals = TreesOfPartials.ValuesOfRootPolys(point, NoEquations);
+    Vector<double> newevals = TreesOfPartials.ValuesOfRootPolys(point, NumEquations());
     if (newevals * newevals >= oldevals * oldevals) {
       return false;
     }
-    if (fuzzy_equals(newevals, zero)) {
+    if (std::equal(newevals.begin(), newevals.end(), zero.begin(), fuzzy_equals)) {
       if (r.Contains(point)) {
         point = SlowNewtonPolishOnce(point);
         point = SlowNewtonPolishOnce(point);
@@ -179,10 +165,6 @@ bool QuickSolver::NewtonRootInRectangle(const Rectangle<double> &r, Vector<doubl
     oldevals = newevals;
   }
 }
-
-//------------------------------------
-// Is the Newton root the only root?
-//------------------------------------
 
 double QuickSolver::MaxDistanceFromPointToVertexAfterTransformation(
     const Rectangle<double> &r, const Vector<double> &p, const SquareMatrix<double> &M) const
@@ -195,7 +177,7 @@ double QuickSolver::MaxDistanceFromPointToVertexAfterTransformation(
     throw AssertionException(
         "Point not in rectangle in MaxDistanceFromPointToVertexAfterTransformation.");
   }
-  auto max = (double)0;
+  double max = 0.0;
 
   Array<int> bottom(Dmnsn()), top(Dmnsn());
   std::fill(bottom.begin(), bottom.end(), 1);
@@ -218,7 +200,7 @@ double QuickSolver::MaxDistanceFromPointToVertexAfterTransformation(
     }
   }
 
-  return sqrt((double)max);
+  return sqrt(max);
 }
 
 bool QuickSolver::HasNoOtherRootsIn(const Rectangle<double> &r, const Vector<double> &p,
@@ -246,8 +228,8 @@ bool QuickSolver::NewtonRootIsOnlyInRct(const Rectangle<double> &r, Vector<doubl
 
 Vector<double> QuickSolver::NewtonPolishOnce(const Vector<double> &point) const
 {
-  Vector<double> oldevals = TreesOfPartials.ValuesOfRootPolys(point, NoEquations);
-  Matrix<double> Df = TreesOfPartials.DerivativeMatrix(point, NoEquations);
+  Vector<double> oldevals = TreesOfPartials.ValuesOfRootPolys(point, NumEquations());
+  Matrix<double> Df = TreesOfPartials.DerivativeMatrix(point, NumEquations());
   SquareMatrix<double> M(Df * Df.Transpose());
   Vector<double> Del = -(Df.Transpose() * M.Inverse()) * oldevals;
   return point + Del;
@@ -255,13 +237,13 @@ Vector<double> QuickSolver::NewtonPolishOnce(const Vector<double> &point) const
 
 Vector<double> QuickSolver::SlowNewtonPolishOnce(const Vector<double> &point) const
 {
-  Vector<double> oldevals = TreesOfPartials.ValuesOfRootPolys(point, NoEquations);
-  Matrix<double> Df = TreesOfPartials.DerivativeMatrix(point, NoEquations);
+  Vector<double> oldevals = TreesOfPartials.ValuesOfRootPolys(point, NumEquations());
+  Matrix<double> Df = TreesOfPartials.DerivativeMatrix(point, NumEquations());
   SquareMatrix<double> M(Df * Df.Transpose());
   Vector<double> Del = -(Df.Transpose() * M.Inverse()) * oldevals;
 
   while (true) {
-    Vector<double> newevals(TreesOfPartials.ValuesOfRootPolys(point + Del, NoEquations));
+    Vector<double> newevals(TreesOfPartials.ValuesOfRootPolys(point + Del, NumEquations()));
     if (newevals * newevals <= oldevals * oldevals) {
       return point + Del;
     }
@@ -271,12 +253,11 @@ Vector<double> QuickSolver::SlowNewtonPolishOnce(const Vector<double> &point) co
 
 bool QuickSolver::FindRoots(const Rectangle<double> &r, const int max_roots)
 {
-  const int max_iterations = 100000;
+  const int MAX_ITER = 100000;
   Roots = List<Vector<double>>();
 
-  if (NoEquations == 0) {
-    Vector<double> answer(0);
-    Roots.push_back(answer);
+  if (NumEquations() == 0) {
+    Roots.push_back(Vector<double>(0));
     return true;
   }
 
@@ -285,13 +266,13 @@ bool QuickSolver::FindRoots(const Rectangle<double> &r, const int max_roots)
   std::iota(precedence.begin(), precedence.end(), 1);
 
   int iterations = 0;
-  FindRoots(Roots, r, max_iterations, precedence, iterations, 1, max_roots);
-  return iterations < max_iterations;
+  FindRoots(Roots, r, MAX_ITER, precedence, iterations, 1, max_roots);
+  return iterations < MAX_ITER;
 }
 
 void QuickSolver::FindRoots(List<Vector<double>> &rootlist, const Rectangle<double> &r,
-                            const int &max_iterations, Array<int> &precedence, int &iterations,
-                            int depth, const int &max_no_roots) const
+                            int max_iterations, Array<int> &precedence, int &iterations, int depth,
+                            int max_roots) const
 {
   //
   // TLT: In some cases, this recursive process apparently goes into an
@@ -310,17 +291,16 @@ void QuickSolver::FindRoots(List<Vector<double>> &rootlist, const Rectangle<doub
   }
 
   Vector<double> point = r.Center();
-
   if (NewtonRootIsOnlyInRct(r, point)) {
-    for (int i = NoEquations + 1; i <= m_system.Length(); i++) {
-      if (TreesOfPartials[i].ValueOfRootPoly(point) < (double)0) {
+    for (int i = NumEquations() + 1; i <= m_system.Length(); i++) {
+      if (TreesOfPartials[i].ValueOfRootPoly(point) < 0.0) {
         return;
       }
     }
 
     bool already_found = false;
     for (size_t i = 1; i <= rootlist.size(); i++) {
-      if (fuzzy_equals(point, rootlist[i])) {
+      if (std::equal(point.begin(), point.end(), rootlist[i].begin(), fuzzy_equals)) {
         already_found = true;
       }
     }
@@ -331,12 +311,12 @@ void QuickSolver::FindRoots(List<Vector<double>> &rootlist, const Rectangle<doub
   }
 
   for (const auto &cell : r.Orthants()) {
-    if (max_no_roots == 0 || rootlist.size() < max_no_roots) {
+    if (max_roots == 0 || rootlist.size() < max_roots) {
       if (iterations >= max_iterations || depth == MAX_DEPTH) {
         return;
       }
       iterations++;
-      FindRoots(rootlist, cell, max_iterations, precedence, iterations, depth + 1, max_no_roots);
+      FindRoots(rootlist, cell, max_iterations, precedence, iterations, depth + 1, max_roots);
     }
   }
 }

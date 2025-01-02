@@ -56,8 +56,6 @@ using namespace Gambit;
 class QuickSolver {
 private:
   gPolyList<double> m_system, m_normalizedSystem;
-  int NoEquations;
-  int NoInequalities;
   ListOfPartialTrees<double> TreesOfPartials;
   List<Vector<double>> Roots;
   RectArray<bool> Equation_i_uses_var_j;
@@ -87,14 +85,12 @@ private:
   // Combine the last two steps into a single query
   bool NewtonRootIsOnlyInRct(const Rectangle<double> &, Vector<double> &) const;
 
-  void FindRoots(List<Vector<double>> &, const Rectangle<double> &, const int &, Array<int> &,
-                 int &iterations, int depth, const int &) const;
+  void FindRoots(List<Vector<double>> &, const Rectangle<double> &, int, Array<int> &,
+                 int &iterations, int depth, int) const;
 
 public:
   explicit QuickSolver(const gPolyList<double> &p_system)
     : m_system(p_system), m_normalizedSystem(p_system.AmbientSpace(), p_system.NormalizedList()),
-      NoEquations(std::min(m_system.Dmnsn(), m_system.Length())),
-      NoInequalities(std::max(m_system.Length() - m_system.Dmnsn(), 0)),
       TreesOfPartials(m_normalizedSystem), Equation_i_uses_var_j(Eq_i_Uses_j())
   {
   }
@@ -105,6 +101,7 @@ public:
 
   // Information
   int Dmnsn() const { return m_system.Dmnsn(); }
+  int NumEquations() const { return std::min(m_system.Dmnsn(), m_system.Length()); }
   const List<Vector<double>> &RootList() const { return Roots; }
   bool IsMultiaffine() const { return m_system.IsMultiaffine(); }
 
