@@ -32,7 +32,7 @@ using namespace Gambit;
 template <class T> class gPolyList {
 private:
   const VariableSpace *m_space;
-  List<gPoly<T>> m_list;
+  std::list<gPoly<T>> m_list;
 
 public:
   using iterator = typename List<gPoly<T>>::iterator;
@@ -41,8 +41,6 @@ public:
   gPolyList(const VariableSpace *p_space) : m_space(p_space) {}
   gPolyList(const gPolyList<T> &) = default;
   ~gPolyList() = default;
-
-  // Operators
   gPolyList<T> &operator=(const gPolyList<T> &) = default;
 
   iterator begin() { return m_list.begin(); }
@@ -61,14 +59,17 @@ public:
     return m_space != rhs.m_space || m_list != rhs.m_list;
   }
   void push_back(const gPoly<T> &x) { m_list.push_back(x); }
-  void operator+=(const gPolyList<T> &x)
+  void push_back(const gPolyList<T> &x)
   {
-    for (const auto &v : x.m_list) {
-      m_list.push_back(v);
+    for (const auto &p : x.m_list) {
+      m_list.push_back(p);
     }
   }
 
-  const gPoly<T> &operator[](const int index) const { return m_list[index]; }
+  const gPoly<T> &operator[](const int index) const
+  {
+    return *std::next(m_list.begin(), index - 1);
+  }
 
   const VariableSpace *AmbientSpace() const { return m_space; }
   int size() const { return m_list.size(); }
@@ -78,6 +79,7 @@ public:
     return std::all_of(m_list.begin(), m_list.end(),
                        [](const gPoly<T> &v) { return v.IsMultiaffine(); });
   }
+  /// Evaluate system at a point
   Vector<T> Evaluate(const Vector<T> &v) const
   {
     Vector<T> answer(m_list.size());
@@ -85,7 +87,6 @@ public:
                    [&](const gPoly<T> &p) { return p.Evaluate(v); });
     return answer;
   }
-
   /// Translate system to new origin
   gPolyList<T> Translate(const Vector<T> &new_origin) const
   {
@@ -104,6 +105,7 @@ public:
     }
     return ret;
   }
+  /// Normalize system
   gPolyList<T> Normalize() const
   {
     gPolyList<T> ret(m_space);

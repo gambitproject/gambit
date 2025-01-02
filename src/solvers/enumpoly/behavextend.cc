@@ -276,9 +276,9 @@ gPolyList<double> ExtendsToNashIneqs(const MixedBehaviorProfile<double> &p_solut
                                      const std::map<GameInfoset, int> &var_index)
 {
   gPolyList<double> answer(&BehavStratSpace);
-  answer += ActionProbsSumToOneIneqs(p_solution, BehavStratSpace, big_supp, var_index);
-  answer +=
-      NashExpectedPayoffDiffPolys(p_solution, BehavStratSpace, little_supp, big_supp, var_index);
+  answer.push_back(ActionProbsSumToOneIneqs(p_solution, BehavStratSpace, big_supp, var_index));
+  answer.push_back(
+      NashExpectedPayoffDiffPolys(p_solution, BehavStratSpace, little_supp, big_supp, var_index));
   return answer;
 }
 
@@ -418,9 +418,9 @@ gPolyList<double> ExtendsToANFNashIneqs(const MixedBehaviorProfile<double> &p_so
                                         const std::map<GameInfoset, int> &var_index)
 {
   gPolyList<double> answer(&BehavStratSpace);
-  answer += ActionProbsSumToOneIneqs(p_solution, BehavStratSpace, big_supp, var_index);
-  answer +=
-      ANFExpectedPayoffDiffPolys(p_solution, BehavStratSpace, little_supp, big_supp, var_index);
+  answer.push_back(ActionProbsSumToOneIneqs(p_solution, BehavStratSpace, big_supp, var_index));
+  answer.push_back(
+      ANFExpectedPayoffDiffPolys(p_solution, BehavStratSpace, little_supp, big_supp, var_index));
   return answer;
 }
 
