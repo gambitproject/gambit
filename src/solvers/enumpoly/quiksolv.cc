@@ -202,10 +202,9 @@ double QuickSolver::MaxDistanceFromPointToVertexAfterTransformation(
 bool QuickSolver::HasNoOtherRootsIn(const Rectangle<double> &r, const Vector<double> &p,
                                     const SquareMatrix<double> &M) const
 {
-  gPolyList<double> system1 = m_normalizedSystem.TranslateOfSystem(p);
-  gPolyList<double> system2 = system1.SystemInNewCoordinates(M);
+  auto system2 = m_normalizedSystem.TranslateOfSystem(p).SystemInNewCoordinates(M);
   double radius = MaxDistanceFromPointToVertexAfterTransformation(r, p, M);
-  auto max = (double)0;
+  auto max = 0.0;
   for (int i = 1; i <= Dmnsn(); i++) {
     max += system2[i].MaximalValueOfNonlinearPart(radius);
   }
