@@ -42,18 +42,18 @@ using namespace Gambit;
 /// The constructor for this takes a list of polynomials, interpreted as
 /// inequalities in the sense that, at a solution, all the polynomials
 /// are required to be non-negative.
-template <class T> class IneqSolv {
+class IneqSolv {
 private:
-  gPolyList<T> m_system;
-  ListOfPartialTrees<T> TreesOfPartials;
-  T m_epsilon;
+  gPolyList<double> m_system;
+  ListOfPartialTrees<double> TreesOfPartials;
+  double m_epsilon;
 
-  bool IsASolution(const Vector<T> &v) const
+  bool IsASolution(const Vector<double> &v) const
   {
     return std::all_of(m_system.begin(), m_system.end(),
-                       [&](const gPoly<T> &p) { return p.Evaluate(v) > -m_epsilon; });
+                       [&](const gPoly<double> &p) { return p.Evaluate(v) > -m_epsilon; });
   }
-  bool SystemHasNoSolutionIn(const Rectangle<T> &r, Array<int> &precedence) const
+  bool SystemHasNoSolutionIn(const Rectangle<double> &r, Array<int> &precedence) const
   {
     for (int i = 1; i <= m_system.size(); i++) {
       if (TreesOfPartials[precedence[i]].PolyEverywhereNegativeIn(r)) {
@@ -70,7 +70,7 @@ private:
     return false;
   }
 
-  bool SolutionExists(const Rectangle<T> &r, Array<int> &precedence) const
+  bool SolutionExists(const Rectangle<double> &r, Array<int> &precedence) const
   {
     if (IsASolution(r.Center())) {
       return true;
@@ -87,18 +87,18 @@ private:
   }
 
 public:
-  explicit IneqSolv(const gPolyList<T> &given)
-    : m_system(given), TreesOfPartials(given), m_epsilon((T)1 / (T)1000000)
+  explicit IneqSolv(const gPolyList<double> &given)
+    : m_system(given), TreesOfPartials(given), m_epsilon(1.0e-6)
   {
   }
-  IneqSolv(const IneqSolv<T> &) = delete;
+  IneqSolv(const IneqSolv &) = delete;
   ~IneqSolv() = default;
-  IneqSolv<T> &operator=(const IneqSolv<T> &) = delete;
+  IneqSolv &operator=(const IneqSolv &) = delete;
 
   int Dmnsn() const { return m_system.Dmnsn(); }
 
   /// Does a solution exist in the specified rectangle?
-  bool HasSolution(const Rectangle<T> &r)
+  bool HasSolution(const Rectangle<double> &r)
   {
     Array<int> precedence(m_system.size());
     std::iota(precedence.begin(), precedence.end(), 1);
