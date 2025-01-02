@@ -48,7 +48,7 @@ public:
   inline void SetEldest(gTreeNode<T> *neweldest) { eldest = neweldest; }
   inline void SetYoungest(gTreeNode<T> *newyoungest) { youngest = newyoungest; }
 
-  inline T GetData() const { return data; }
+  inline const T &GetData() const { return data; }
   inline gTreeNode<T> *GetParent() const { return parent; }
   inline gTreeNode<T> *GetPrev() const { return prev; }
   inline gTreeNode<T> *GetNext() const { return next; }

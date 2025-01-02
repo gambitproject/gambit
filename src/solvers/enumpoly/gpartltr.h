@@ -41,7 +41,10 @@ private:
                                             const Vector<T> &, Vector<int> &) const;
 
 public:
-  explicit TreeOfPartials(const gPoly<T> &);
+  explicit TreeOfPartials(const gPoly<T> &given) : PartialTree(given)
+  {
+    TreeOfPartialsRECURSIVE(PartialTree, PartialTree.RootNode());
+  }
   TreeOfPartials(const TreeOfPartials<T> &) = default;
   ~TreeOfPartials() = default;
 
@@ -52,9 +55,9 @@ public:
   T MaximalNonconstantContribution(const Vector<T> &, const Vector<T> &) const;
 
   gTreeNode<gPoly<T>> *RootNode() const { return PartialTree.RootNode(); }
-  gPoly<T> RootPoly() const { return RootNode()->GetData(); }
+  const gPoly<T> &RootPoly() const { return RootNode()->GetData(); }
   T ValueOfRootPoly(const Vector<T> &point) const { return RootPoly().Evaluate(point); }
-  T ValueOfPartialOfRootPoly(const int &, const Vector<T> &) const;
+  T ValueOfPartialOfRootPoly(int, const Vector<T> &) const;
   bool PolyHasNoRootsIn(const Rectangle<T> &) const;
   bool MultiaffinePolyHasNoRootsIn(const Rectangle<T> &) const;
   bool PolyEverywhereNegativeIn(const Rectangle<T> &) const;
@@ -82,8 +85,14 @@ public:
   ~ListOfPartialTrees() = default;
   ListOfPartialTrees<T> &operator=(const ListOfPartialTrees<T> &) = delete;
 
-  bool operator==(const ListOfPartialTrees &) const;
-  bool operator!=(const ListOfPartialTrees &) const;
+  bool operator==(const ListOfPartialTrees &other) const
+  {
+    return PartialTreeList == other.PartialTreeList;
+  }
+  bool operator!=(const ListOfPartialTrees &other) const
+  {
+    return PartialTreeList != other.PartialTreeList;
+  }
 
   const TreeOfPartials<T> &operator[](int i) const { return PartialTreeList[i]; }
 
