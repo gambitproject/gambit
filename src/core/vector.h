@@ -130,6 +130,12 @@ public:
     return tmp;
   }
 
+  Vector<T> &operator/=(const T &c)
+  {
+    std::transform(this->cbegin(), this->cend(), this->begin(), [&](const T &v) { return v / c; });
+    return *this;
+  }
+
   bool operator==(const Vector<T> &V) const
   {
     if (!Check(V)) {

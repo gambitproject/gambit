@@ -32,36 +32,17 @@
 
 using namespace Gambit;
 
-template <class T>
-QuikSolv<T>::QuikSolv(const gPolyList<T> &given)
-  : System(given), gDoubleSystem(given.AmbientSpace(), given.NormalizedList()),
-    NoEquations(std::min(System.Dmnsn(), System.Length())),
-    NoInequalities(std::max(System.Length() - System.Dmnsn(), 0)), TreesOfPartials(gDoubleSystem),
-    HasBeenSolved(false), Roots(), isMultiaffine(System.IsMultiaffine()),
-    Equation_i_uses_var_j(Eq_i_Uses_j())
-{
-}
-
-template <class T>
-QuikSolv<T>::QuikSolv(const QuikSolv &qs)
-  : System(qs.System), gDoubleSystem(qs.gDoubleSystem), NoEquations(qs.NoEquations),
-    NoInequalities(qs.NoEquations), TreesOfPartials(qs.TreesOfPartials),
-    HasBeenSolved(qs.HasBeenSolved), Roots(qs.Roots), isMultiaffine(qs.isMultiaffine),
-    Equation_i_uses_var_j(qs.Equation_i_uses_var_j)
-
-{
-}
 
 //-------------------------------------------------------
 //      Supporting Calculations for the Constructors
 //-------------------------------------------------------
 
-template <class T> Gambit::RectArray<bool> QuikSolv<T>::Eq_i_Uses_j() const
+template <class T> RectArray<bool> QuikSolv<T>::Eq_i_Uses_j() const
 {
-  Gambit::RectArray<bool> answer(System.Length(), Dmnsn());
-  for (int i = 1; i <= System.Length(); i++) {
+  RectArray<bool> answer(m_system.Length(), Dmnsn());
+  for (int i = 1; i <= m_system.Length(); i++) {
     for (int j = 1; j <= Dmnsn(); j++) {
-      if (System[i].DegreeOfVar(j) > 0) {
+      if (m_system[i].DegreeOfVar(j) > 0) {
         answer(i, j) = true;
       }
       else {
@@ -78,9 +59,9 @@ template <class T> Gambit::RectArray<bool> QuikSolv<T>::Eq_i_Uses_j() const
 
 template <class T>
 bool QuikSolv<T>::SystemHasNoRootsIn(const Rectangle<double> &r,
-                                     Gambit::Array<int> &precedence) const
+                                     Array<int> &precedence) const
 {
-  for (int i = 1; i <= System.Length(); i++) {
+  for (int i = 1; i <= m_system.Length(); i++) {
 
     if ((precedence[i] <= NoEquations && TreesOfPartials[precedence[i]].PolyHasNoRootsIn(r)) ||
         (precedence[i] > NoEquations &&
@@ -133,7 +114,7 @@ static bool fuzzy_equals(double x, double y)
   }
 }
 
-static bool fuzzy_equals(const Gambit::Vector<double> &x, const Gambit::Vector<double> &y)
+static bool fuzzy_equals(const Vector<double> &x, const Vector<double> &y)
 {
   for (int i = x.first_index(); i <= x.last_index(); i++) {
     if (!fuzzy_equals(x[i], y[i])) {
@@ -145,34 +126,29 @@ static bool fuzzy_equals(const Gambit::Vector<double> &x, const Gambit::Vector<d
 
 template <class T>
 bool QuikSolv<T>::NewtonRootInRectangle(const Rectangle<double> &r,
-                                        Gambit::Vector<double> &point) const
+                                        Vector<double> &point) const
 {
-  // assert (NoEquations == System.Dmnsn());
+  Vector<double> zero(Dmnsn());
+  zero = 0;
 
-  Gambit::Vector<double> zero(Dmnsn());
-  for (int i = 1; i <= Dmnsn(); i++) {
-    zero[i] = (double)0;
-  }
-
-  Gambit::Vector<double> oldevals = TreesOfPartials.ValuesOfRootPolys(point, NoEquations);
-
+  Vector<double> oldevals = TreesOfPartials.ValuesOfRootPolys(point, NoEquations);
   if (fuzzy_equals(oldevals, zero)) {
     return r.Contains(point);
   }
 
   Rectangle<double> bigr = r.SameCenterDoubleLengths();
 
-  Gambit::Vector<double> newpoint(Dmnsn());
+  Vector<double> newpoint(Dmnsn());
 
   while (true) {
     try {
       newpoint = NewtonPolishOnce(point);
     }
-    catch (Gambit::SingularMatrixException &) {
+    catch (SingularMatrixException &) {
       bool nonsingular = false;
       int direction = 1;
       while (direction < Dmnsn() && !nonsingular) {
-        Gambit::Vector<double> perturbed_point(point);
+        Vector<double> perturbed_point(point);
         if (r.Side(direction).UpperBound() > point[direction]) {
           perturbed_point[direction] += (r.Side(direction).UpperBound() - point[direction]) / 10;
         }
@@ -184,13 +160,13 @@ bool QuikSolv<T>::NewtonRootInRectangle(const Rectangle<double> &r,
         try {
           newpoint = point + (NewtonPolishOnce(perturbed_point) - perturbed_point);
         }
-        catch (Gambit::SingularMatrixException &) {
+        catch (SingularMatrixException &) {
           nonsingular = false;
         }
         direction++;
       }
       if (!nonsingular) {
-        Gambit::Vector<double> perturbed_point(point);
+        Vector<double> perturbed_point(point);
         if (r.Side(direction).UpperBound() > point[direction]) {
           perturbed_point[direction] += (r.Side(direction).UpperBound() - point[direction]) / 10;
         }
@@ -206,7 +182,7 @@ bool QuikSolv<T>::NewtonRootInRectangle(const Rectangle<double> &r,
     }
     point = newpoint;
 
-    Gambit::Vector<double> newevals = TreesOfPartials.ValuesOfRootPolys(point, NoEquations);
+    Vector<double> newevals = TreesOfPartials.ValuesOfRootPolys(point, NoEquations);
     if (newevals * newevals >= oldevals * oldevals) {
       return false;
     }
@@ -216,14 +192,10 @@ bool QuikSolv<T>::NewtonRootInRectangle(const Rectangle<double> &r,
         point = SlowNewtonPolishOnce(point);
         return true;
       }
-      else {
-        return false;
-      }
+      return false;
     }
-
     oldevals = newevals;
   }
-  return false;
 }
 
 //------------------------------------
@@ -232,25 +204,25 @@ bool QuikSolv<T>::NewtonRootInRectangle(const Rectangle<double> &r,
 
 template <class T>
 double QuikSolv<T>::MaxDistanceFromPointToVertexAfterTransformation(
-    const Rectangle<double> &r, const Gambit::Vector<double> &p,
-    const Gambit::SquareMatrix<double> &M) const
+    const Rectangle<double> &r, const Vector<double> &p,
+    const SquareMatrix<double> &M) const
 {
   // A very early implementation of this method used a type gDouble which
   // implemented fuzzy comparisons.  Adding the epsilon parameter here is
   // important for the case when a solution may be found on the boundary
   // of the rectangle but be slightly outside due to numerical error.
   if (!r.Contains(p, T(1.0e-8))) {
-    throw Gambit::AssertionException(
+    throw AssertionException(
         "Point not in rectangle in MaxDistanceFromPointToVertexAfterTransformation.");
   }
   auto max = (double)0;
 
-  Gambit::Array<int> bottom(Dmnsn()), top(Dmnsn());
+  Array<int> bottom(Dmnsn()), top(Dmnsn());
   std::fill(bottom.begin(), bottom.end(), 1);
   std::fill(top.begin(), top.end(), 2);
   CartesianIndexIterator ListOfTopBottoms(bottom, top);
   while (ListOfTopBottoms.Turn()) {
-    Gambit::Vector<double> diffs(Dmnsn());
+    Vector<double> diffs(Dmnsn());
     for (int i = 1; i <= Dmnsn(); i++) {
       if (ListOfTopBottoms[i] == 2) {
         diffs[i] = r.Side(i).UpperBound() - p[i];
@@ -259,7 +231,7 @@ double QuikSolv<T>::MaxDistanceFromPointToVertexAfterTransformation(
         diffs[i] = p[i] - r.Side(i).LowerBound();
       }
     }
-    Gambit::Vector<double> new_diffs = M * diffs;
+    Vector<double> new_diffs = M * diffs;
     double squared_length = new_diffs * new_diffs;
     if (max < squared_length) {
       max = squared_length;
@@ -270,78 +242,31 @@ double QuikSolv<T>::MaxDistanceFromPointToVertexAfterTransformation(
 }
 
 template <class T>
-bool QuikSolv<T>::HasNoOtherRootsIn(const Rectangle<double> &r, const Gambit::Vector<double> &p,
-                                    const Gambit::SquareMatrix<double> &M) const
+bool QuikSolv<T>::HasNoOtherRootsIn(const Rectangle<double> &r, const Vector<double> &p,
+                                    const SquareMatrix<double> &M) const
 {
   // assert (NoEquations == System.Dmnsn());
-  gPolyList<double> system1 = gDoubleSystem.TranslateOfSystem(p);
+  gPolyList<double> system1 = m_normalizedSystem.TranslateOfSystem(p);
   gPolyList<double> system2 = system1.SystemInNewCoordinates(M);
   double radius = MaxDistanceFromPointToVertexAfterTransformation(r, p, M);
   auto max = (double)0;
   for (int i = 1; i <= Dmnsn(); i++) {
     max += system2[i].MaximalValueOfNonlinearPart(radius);
   }
-
-  if (max >= radius) {
-    return false;
-  }
-  else {
-    return true;
-  }
+  return max < radius;
 }
 
-//--------------------------------------------
-// Does Newton's method yield a unique root?
-//--------------------------------------------
 
+/// Does Newton's method yield a unique root?
 template <class T>
 bool QuikSolv<T>::NewtonRootIsOnlyInRct(const Rectangle<double> &r,
-                                        Gambit::Vector<double> &point) const
+                                        Vector<double> &point) const
 {
-  // assert (NoEquations == System.Dmnsn());
-
   if (NewtonRootInRectangle(r, point)) {
-    Gambit::SquareMatrix<double> Df = TreesOfPartials.SquareDerivativeMatrix(point);
-    if (HasNoOtherRootsIn(r, point, Df.Inverse())) {
-      return true;
-    }
-    else {
-      return false;
-    }
+    SquareMatrix<double> Df = TreesOfPartials.SquareDerivativeMatrix(point);
+    return HasNoOtherRootsIn(r, point, Df.Inverse());
   }
-  else {
-    return false;
-  }
-}
-
-//----------------------------------
-//        Operators
-//----------------------------------
-
-template <class T> QuikSolv<T> &QuikSolv<T>::operator=(const QuikSolv<T> &rhs)
-{
-  // assert (System == rhs.System);
-
-  if (*this != rhs) {
-    HasBeenSolved = rhs.HasBeenSolved;
-    Roots = rhs.Roots;
-  }
-  return *this;
-}
-
-template <class T> bool QuikSolv<T>::operator==(const QuikSolv<T> &rhs) const
-{
-  if (System != rhs.System || HasBeenSolved != rhs.HasBeenSolved || Roots != rhs.Roots) {
-    return false;
-  }
-  else {
-    return true;
-  }
-}
-
-template <class T> bool QuikSolv<T>::operator!=(const QuikSolv<T> &rhs) const
-{
-  return !(*this == rhs);
+  return false;
 }
 
 //-------------------------------------------
@@ -349,40 +274,30 @@ template <class T> bool QuikSolv<T>::operator!=(const QuikSolv<T> &rhs) const
 //-------------------------------------------
 
 template <class T>
-Gambit::Vector<double> QuikSolv<T>::NewtonPolishOnce(const Gambit::Vector<double> &point) const
+Vector<double> QuikSolv<T>::NewtonPolishOnce(const Vector<double> &point) const
 {
-  Gambit::Vector<double> oldevals = TreesOfPartials.ValuesOfRootPolys(point, NoEquations);
-  Gambit::Matrix<double> Df = TreesOfPartials.DerivativeMatrix(point, NoEquations);
-  Gambit::SquareMatrix<double> M(Df * Df.Transpose());
-
-  Gambit::Vector<double> Del = -(Df.Transpose() * M.Inverse()) * oldevals;
-
+  Vector<double> oldevals = TreesOfPartials.ValuesOfRootPolys(point, NoEquations);
+  Matrix<double> Df = TreesOfPartials.DerivativeMatrix(point, NoEquations);
+  SquareMatrix<double> M(Df * Df.Transpose());
+  Vector<double> Del = -(Df.Transpose() * M.Inverse()) * oldevals;
   return point + Del;
 }
 
 template <class T>
-Gambit::Vector<double> QuikSolv<T>::SlowNewtonPolishOnce(const Gambit::Vector<double> &point) const
+Vector<double> QuikSolv<T>::SlowNewtonPolishOnce(const Vector<double> &point) const
 {
-  Gambit::Vector<double> oldevals = TreesOfPartials.ValuesOfRootPolys(point, NoEquations);
-  Gambit::Matrix<double> Df = TreesOfPartials.DerivativeMatrix(point, NoEquations);
-  Gambit::SquareMatrix<double> M(Df * Df.Transpose());
+  Vector<double> oldevals = TreesOfPartials.ValuesOfRootPolys(point, NoEquations);
+  Matrix<double> Df = TreesOfPartials.DerivativeMatrix(point, NoEquations);
+  SquareMatrix<double> M(Df * Df.Transpose());
+  Vector<double> Del = -(Df.Transpose() * M.Inverse()) * oldevals;
 
-  Gambit::Vector<double> Del = -(Df.Transpose() * M.Inverse()) * oldevals;
-
-  bool done = false;
-  while (!done) {
-    Gambit::Vector<double> newevals(TreesOfPartials.ValuesOfRootPolys(point + Del, NoEquations));
+  while (true) {
+    Vector<double> newevals(TreesOfPartials.ValuesOfRootPolys(point + Del, NoEquations));
     if (newevals * newevals <= oldevals * oldevals) {
-      done = true;
+      return point + Del;
     }
-    else {
-      for (int i = 1; i <= Del.size(); i++) {
-        Del[i] /= 2;
-      }
-    }
+    Del /= 2;
   }
-
-  return point + Del;
 }
 
 //-------------------------------------------
@@ -393,19 +308,19 @@ template <class T>
 bool QuikSolv<T>::FindCertainNumberOfRoots(const Rectangle<T> &r, const int &max_iterations,
                                            const int &max_no_roots)
 {
-  auto *rootlistptr = new Gambit::List<Gambit::Vector<double>>();
+  auto *rootlistptr = new List<Vector<double>>();
 
   if (NoEquations == 0) {
-    Gambit::Vector<double> answer(0);
+    Vector<double> answer(0);
     rootlistptr->push_back(answer);
     Roots = *rootlistptr;
     HasBeenSolved = true;
     return true;
   }
 
-  Gambit::Array<int> precedence(System.Length());
+  Array<int> precedence(m_system.Length());
   // Orders search for nonvanishing poly
-  for (int i = 1; i <= System.Length(); i++) {
+  for (int i = 1; i <= m_system.Length(); i++) {
     precedence[i] = i;
   }
 
@@ -425,9 +340,9 @@ bool QuikSolv<T>::FindCertainNumberOfRoots(const Rectangle<T> &r, const int &max
 }
 
 template <class T>
-void QuikSolv<T>::FindRootsRecursion(Gambit::List<Gambit::Vector<double>> *rootlistptr,
+void QuikSolv<T>::FindRootsRecursion(List<Vector<double>> *rootlistptr,
                                      const Rectangle<double> &r, const int &max_iterations,
-                                     Gambit::Array<int> &precedence, int &iterations, int depth,
+                                     Array<int> &precedence, int &iterations, int depth,
                                      const int &max_no_roots, int *roots_found) const
 {
   //
@@ -446,10 +361,10 @@ void QuikSolv<T>::FindRootsRecursion(Gambit::List<Gambit::Vector<double>> *rootl
     return;
   }
 
-  Gambit::Vector<double> point = r.Center();
+  Vector<double> point = r.Center();
 
   if (NewtonRootIsOnlyInRct(r, point)) {
-    for (int i = NoEquations + 1; i <= System.Length(); i++) {
+    for (int i = NoEquations + 1; i <= m_system.Length(); i++) {
       if (TreesOfPartials[i].ValueOfRootPoly(point) < (double)0) {
         return;
       }
