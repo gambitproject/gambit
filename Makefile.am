@@ -426,7 +426,6 @@ gambit_enumpoly_SOURCES = \
 	src/solvers/enumpoly/linrcomb.h \
 	src/solvers/enumpoly/linrcomb.imp \
 	src/solvers/enumpoly/ndarray.h \
-	src/solvers/enumpoly/odometer.cc \
 	src/solvers/enumpoly/odometer.h \
 	src/solvers/enumpoly/efgpoly.cc \
 	src/solvers/enumpoly/nfgpoly.cc \

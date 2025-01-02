@@ -245,12 +245,10 @@ double QuikSolv<T>::MaxDistanceFromPointToVertexAfterTransformation(
   }
   auto max = (double)0;
 
-  Gambit::Array<int> ListOfTwos(Dmnsn());
-  for (int i = 1; i <= Dmnsn(); i++) {
-    ListOfTwos[i] = 2;
-  }
-  gIndexOdometer ListOfTopBottoms(ListOfTwos);
-
+  Gambit::Array<int> bottom(Dmnsn()), top(Dmnsn());
+  std::fill(bottom.begin(), bottom.end(), 1);
+  std::fill(top.begin(), top.end(), 2);
+  CartesianIndexIterator ListOfTopBottoms(bottom, top);
   while (ListOfTopBottoms.Turn()) {
     Gambit::Vector<double> diffs(Dmnsn());
     for (int i = 1; i <= Dmnsn(); i++) {

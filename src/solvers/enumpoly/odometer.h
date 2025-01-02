@@ -33,43 +33,47 @@ significant index is the first ("leftmost").
 
 #include "gambit.h"
 
-// *****************************
-//      class gIndexOdometer
-// *****************************
+namespace Gambit {
 
-class gIndexOdometer {
+// An iterator over the cartesian product of sets
+class CartesianIndexIterator {
 private:
-  Gambit::Array<int> MinIndices;
-  Gambit::Array<int> MaxIndices;
-  Gambit::Array<int> CurIndices;
+  Array<int> m_lower, m_upper, m_current;
 
 public:
-  explicit gIndexOdometer(const Gambit::Array<int> &);
-  gIndexOdometer(const Gambit::Array<int> &, const Gambit::Array<int> &);
-  gIndexOdometer(const gIndexOdometer &) = default;
-  ~gIndexOdometer() = default;
+  CartesianIndexIterator(const Array<int> &p_lower, const Array<int> &p_upper)
+    : m_lower(p_lower), m_upper(p_upper), m_current(p_lower)
+  {
+    m_current.front() = m_lower.front() - 1;
+  }
+  CartesianIndexIterator(const CartesianIndexIterator &) = default;
+  ~CartesianIndexIterator() = default;
 
   // Operators
-  gIndexOdometer &operator=(const gIndexOdometer &) = default;
+  CartesianIndexIterator &operator=(const CartesianIndexIterator &) = default;
 
-  bool operator==(const gIndexOdometer &p_rhs) const
+  bool operator==(const CartesianIndexIterator &p_rhs) const
   {
-    return (MinIndices == p_rhs.MinIndices) && (MaxIndices == p_rhs.MaxIndices) &&
-           (CurIndices == p_rhs.CurIndices);
-  }
-  bool operator!=(const gIndexOdometer &p_rhs) const
-  {
-    return (MinIndices != p_rhs.MinIndices) || (MaxIndices != p_rhs.MaxIndices) ||
-           (CurIndices != p_rhs.CurIndices);
+    return m_lower == p_rhs.m_lower && m_upper == p_rhs.m_upper && m_current == p_rhs.m_current;
   }
 
-  int operator[](int place) const { return CurIndices[place]; }
+  bool operator!=(const CartesianIndexIterator &p_rhs) const
+  {
+    return m_lower != p_rhs.m_lower || m_upper != p_rhs.m_upper || m_current != p_rhs.m_current;
+  }
 
-  // Manipulate
-  bool Turn();
+  int operator[](int place) const { return m_current[place]; }
 
-  // Information
-  int NoIndices() const { return MaxIndices.size(); }
-};
+  bool Turn()
+  {
+    auto [cur, up] = std::mismatch(m_current.begin(), m_current.end(), m_upper.begin());
+    if (cur == m_current.end()) {
+      return false;
+    }
+    std::copy(m_current.begin(), cur, m_lower.begin());
+    (*cur)++;
+    return true;
+  };
+}
 
 #endif // ODOMETER_H

@@ -294,7 +294,7 @@ template <class T> bool TreeOfPartials<T>::MultiaffinePolyHasNoRootsIn(const Rec
       ones[j] = 0;
     }
   }
-  gIndexOdometer topbottoms(zeros, ones);
+  CartesianIndexIterator topbottoms(zeros, ones);
 
   while (topbottoms.Turn()) {
     Gambit::Vector<T> point(Dmnsn());
@@ -338,8 +338,8 @@ bool TreeOfPartials<T>::MultiaffinePolyEverywhereNegativeIn(const Rectangle<T> &
       ones[j] = 0;
     }
   }
-  gIndexOdometer topbottoms(zeros, ones);
 
+  CartesianIndexIterator topbottoms(zeros, ones);
   while (topbottoms.Turn()) {
     Gambit::Vector<T> point(Dmnsn());
     for (int i = 1; i <= Dmnsn(); i++) {
