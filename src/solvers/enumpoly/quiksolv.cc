@@ -177,7 +177,7 @@ double QuickSolver::MaxDistanceFromPointToVertexAfterTransformation(
     throw AssertionException(
         "Point not in rectangle in MaxDistanceFromPointToVertexAfterTransformation.");
   }
-  double max = 0.0;
+  double max_length = 0.0;
 
   Array<int> bottom(Dmnsn()), top(Dmnsn());
   std::fill(bottom.begin(), bottom.end(), 1);
@@ -194,13 +194,9 @@ double QuickSolver::MaxDistanceFromPointToVertexAfterTransformation(
       }
     }
     Vector<double> new_diffs = M * diffs;
-    double squared_length = new_diffs * new_diffs;
-    if (max < squared_length) {
-      max = squared_length;
-    }
+    max_length = std::max(max_length, new_diffs * new_diffs);
   }
-
-  return sqrt(max);
+  return sqrt(max_length);
 }
 
 bool QuickSolver::HasNoOtherRootsIn(const Rectangle<double> &r, const Vector<double> &p,
