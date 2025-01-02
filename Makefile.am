@@ -420,8 +420,6 @@ gambit_enumpoly_SOURCES = \
 	src/solvers/enumpoly/rectangle.h \
 	src/solvers/enumpoly/behavextend.cc \
 	src/solvers/enumpoly/behavextend.h \
-	src/solvers/enumpoly/gcomplex.cc \
-	src/solvers/enumpoly/gcomplex.h \
 	src/solvers/enumpoly/gtree.h \
 	src/solvers/enumpoly/gtree.imp \
 	src/solvers/enumpoly/linrcomb.cc \
