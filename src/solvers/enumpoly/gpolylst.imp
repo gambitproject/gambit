@@ -22,18 +22,6 @@
 
 #include "gpolylst.h"
 
-template <class T>
-Gambit::List<T> InteriorSegment(const Gambit::List<T> &p_list, int first, int last)
-{
-  Gambit::List<T> answer;
-
-  for (int i = first; i <= last; i++) {
-    answer.push_back(p_list[i]);
-  }
-
-  return answer;
-}
-
 //---------------------------------------------------------------
 //                      gPolyList
 //---------------------------------------------------------------
@@ -41,15 +29,6 @@ Gambit::List<T> InteriorSegment(const Gambit::List<T> &p_list, int first, int la
 //---------------------------
 // Constructors / Destructors
 //---------------------------
-
-template <class T>
-gPolyList<T>::gPolyList(const VariableSpace *sp, const Gambit::List<gPoly<T> *> &plist) : Space(sp)
-{
-  for (size_t ii = 1; ii <= plist.size(); ii++) {
-    auto *temp = new gPoly<T>(*plist[ii]);
-    List.push_back(temp);
-  }
-}
 
 template <class T>
 gPolyList<T>::gPolyList(const VariableSpace *sp, const Gambit::List<gPoly<T>> &list) : Space(sp)

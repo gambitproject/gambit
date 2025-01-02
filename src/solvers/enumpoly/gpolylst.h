@@ -34,8 +34,6 @@ private:
 
 public:
   gPolyList(const VariableSpace *sp) : Space(sp) {}
-
-  gPolyList(const VariableSpace *, const Gambit::List<gPoly<T> *> &);
   gPolyList(const VariableSpace *, const Gambit::List<gPoly<T>> &);
   gPolyList(const gPolyList<T> &);
 
