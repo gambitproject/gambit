@@ -35,17 +35,22 @@ private:
   List<gPoly<T>> m_list;
 
 public:
-  gPolyList(const VariableSpace *p_space) : m_space(p_space) {}
-  gPolyList(const VariableSpace *p_space, const List<gPoly<T>> &p_list)
-    : m_space(p_space), m_list(p_list)
-  {
-  }
-  gPolyList(const gPolyList<T> &) = default;
+  using iterator = typename List<gPoly<T>>::iterator;
+  using const_iterator = typename List<gPoly<T>>::const_iterator;
 
+  gPolyList(const VariableSpace *p_space) : m_space(p_space) {}
+  gPolyList(const gPolyList<T> &) = default;
   ~gPolyList() = default;
 
   // Operators
   gPolyList<T> &operator=(const gPolyList<T> &) = default;
+
+  iterator begin() { return m_list.begin(); }
+  const_iterator begin() const { return m_list.begin(); }
+  iterator end() { return m_list.end(); }
+  const_iterator end() const { return m_list.end(); }
+  const_iterator cbegin() const { return m_list.cbegin(); }
+  const_iterator cend() const { return m_list.cend(); }
 
   bool operator==(const gPolyList<T> &rhs) const
   {
@@ -66,7 +71,7 @@ public:
   const gPoly<T> &operator[](const int index) const { return m_list[index]; }
 
   const VariableSpace *AmbientSpace() const { return m_space; }
-  int Length() const { return m_list.size(); }
+  int size() const { return m_list.size(); }
   int Dmnsn() const { return m_space->Dmnsn(); }
   bool IsMultiaffine() const
   {

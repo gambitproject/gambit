@@ -26,8 +26,8 @@ using namespace Gambit;
 
 RectArray<bool> QuickSolver::Eq_i_Uses_j() const
 {
-  RectArray<bool> answer(m_system.Length(), Dmnsn());
-  for (int i = 1; i <= m_system.Length(); i++) {
+  RectArray<bool> answer(m_system.size(), Dmnsn());
+  for (int i = 1; i <= m_system.size(); i++) {
     for (int j = 1; j <= Dmnsn(); j++) {
       if (m_system[i].DegreeOfVar(j) > 0) {
         answer(i, j) = true;
@@ -46,7 +46,7 @@ RectArray<bool> QuickSolver::Eq_i_Uses_j() const
 
 bool QuickSolver::SystemHasNoRootsIn(const Rectangle<double> &r, Array<int> &precedence) const
 {
-  for (int i = 1; i <= m_system.Length(); i++) {
+  for (int i = 1; i <= m_system.size(); i++) {
     if ((precedence[i] <= NumEquations() && TreesOfPartials[precedence[i]].PolyHasNoRootsIn(r)) ||
         (precedence[i] > NumEquations() &&
          TreesOfPartials[precedence[i]].PolyEverywhereNegativeIn(r))) {
@@ -256,7 +256,7 @@ bool QuickSolver::FindRoots(const Rectangle<double> &r, const int max_roots)
     return true;
   }
 
-  Array<int> precedence(m_system.Length());
+  Array<int> precedence(m_system.size());
   // Orders search for nonvanishing poly
   std::iota(precedence.begin(), precedence.end(), 1);
 
@@ -287,7 +287,7 @@ void QuickSolver::FindRoots(List<Vector<double>> &rootlist, const Rectangle<doub
 
   Vector<double> point = r.Center();
   if (NewtonRootIsOnlyInRct(r, point)) {
-    for (int i = NumEquations() + 1; i <= m_system.Length(); i++) {
+    for (int i = NumEquations() + 1; i <= m_system.size(); i++) {
       if (TreesOfPartials[i].ValueOfRootPoly(point) < 0.0) {
         return;
       }

@@ -101,7 +101,7 @@ public:
 
   // Information
   int Dmnsn() const { return m_system.Dmnsn(); }
-  int NumEquations() const { return std::min(m_system.Dmnsn(), m_system.Length()); }
+  int NumEquations() const { return std::min(m_system.Dmnsn(), m_system.size()); }
   const List<Vector<double>> &RootList() const { return Roots; }
   bool IsMultiaffine() const { return m_system.IsMultiaffine(); }
 

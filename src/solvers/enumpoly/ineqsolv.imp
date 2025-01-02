@@ -87,21 +87,19 @@ template <class T> bool IneqSolv<T>::operator!=(const IneqSolv<T> &rhs) const
 
 template <class T> bool IneqSolv<T>::IsASolution(const Gambit::Vector<T> &v) const
 {
-  bool answer(true);
-  for (int i = 1; i <= System.Length() && answer; i++) {
-    if (System[i].Evaluate(v) < -Epsilon) {
-      answer = false;
+  for (const auto &p : System) {
+    if (p.Evaluate(v) < -Epsilon) {
+      return false;
     }
   }
-  return answer;
+  return true;
 }
 
 template <class T>
 bool IneqSolv<T>::SystemHasNoSolutionIn(const Rectangle<T> &r,
                                         Gambit::Array<int> &precedence) const
 {
-  for (int i = 1; i <= System.Length(); i++) {
-
+  for (int i = 1; i <= System.size(); i++) {
     if (TreesOfPartials[precedence[i]].PolyEverywhereNegativeIn(r)) {
 
       /*
@@ -160,8 +158,8 @@ template <class T>
 bool IneqSolv<T>::ASolutionExists(const Rectangle<T> &r, Gambit::Vector<T> &sample)
 {
   // precedence orders search for everywhere negative poly
-  Gambit::Array<int> precedence(System.Length());
-  for (int i = 1; i <= System.Length(); i++) {
+  Gambit::Array<int> precedence(System.size());
+  for (int i = 1; i <= System.size(); i++) {
     precedence[i] = i;
   }
 

@@ -77,8 +77,8 @@ public:
   }
   explicit ListOfPartialTrees(const gPolyList<T> &given)
   {
-    for (int i = 1; i <= given.Length(); i++) {
-      PartialTreeList.push_back(TreeOfPartials<T>(given[i]));
+    for (const auto &p : given) {
+      PartialTreeList.push_back(TreeOfPartials<T>(p));
     }
   }
   ListOfPartialTrees(const ListOfPartialTrees<T> &) = default;
