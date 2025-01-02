@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: src/tools/enumpoly/sfg.cc
+// FILE: src/solvers/enumpoly/sfg.cc
 // Implementation of sequence form classes
 //
 // This program is free software; you can redistribute it and/or modify

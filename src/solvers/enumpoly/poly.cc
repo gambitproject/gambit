@@ -2,8 +2,8 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: src/tools/enumpoly/ineqsolv.cc
-// Instantiation of IneqSolv classes
+// FILE: src/solvers/enumpoly/poly.cc
+// Instantiation of polynomial classes
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,7 +20,13 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "ineqsolv.imp"
+#include "poly.imp"
+#include "polypartial.imp"
 
-// template class IneqSolv<Gambit::Rational>;
-template class IneqSolv<double>;
+namespace Gambit {
+
+template class Polynomial<double>;
+template class PolynomialDerivatives<double>;
+template class PolynomialSystemDerivatives<double>;
+
+} // end namespace Gambit

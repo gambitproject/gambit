@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: src/tools/enumpoly/efgpoly.cc
+// FILE: src/solvers/enumpoly/efgpoly.cc
 // Enumerates all Nash equilibria of a game, via polynomial equations
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,15 +20,11 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include <limits>
-
 #include "enumpoly.h"
 #include "solvers/nashsupport/nashsupport.h"
 #include "gameseq.h"
-#include "gpoly.h"
-#include "gpolylst.h"
-#include "rectangle.h"
-#include "quiksolv.h"
+#include "polysystem.h"
+#include "polysolver.h"
 #include "behavextend.h"
 
 using namespace Gambit;
@@ -53,24 +49,24 @@ namespace {
 class ProblemData {
 public:
   GameSequenceForm sfg;
-  VariableSpace Space;
+  std::shared_ptr<VariableSpace> space;
   std::map<GameSequence, int> var;
-  std::map<GameSequence, gPoly<double>> variables;
+  std::map<GameSequence, Polynomial<double>> variables;
 
   explicit ProblemData(const BehaviorSupportProfile &p_support);
 };
 
-gPoly<double> BuildSequenceVariable(ProblemData &p_data, const GameSequence &p_sequence,
-                                    const std::map<GameSequence, int> &var)
+Polynomial<double> BuildSequenceVariable(ProblemData &p_data, const GameSequence &p_sequence,
+                                         const std::map<GameSequence, int> &var)
 {
   if (!p_sequence->action) {
-    return {&p_data.Space, 1};
+    return {p_data.space, 1};
   }
   if (p_sequence->action != p_data.sfg.GetSupport().GetActions(p_sequence->GetInfoset()).back()) {
-    return {&p_data.Space, var.at(p_sequence), 1};
+    return {p_data.space, var.at(p_sequence), 1};
   }
 
-  gPoly<double> equation(&p_data.Space);
+  Polynomial<double> equation(p_data.space);
   for (auto seq : p_data.sfg.GetSequences(p_sequence->player)) {
     if (seq == p_sequence) {
       continue;
@@ -85,7 +81,8 @@ gPoly<double> BuildSequenceVariable(ProblemData &p_data, const GameSequence &p_s
 
 ProblemData::ProblemData(const BehaviorSupportProfile &p_support)
   : sfg(p_support),
-    Space(sfg.GetSequences().size() - sfg.GetInfosets().size() - sfg.GetPlayers().size())
+    space(std::make_shared<VariableSpace>(sfg.GetSequences().size() - sfg.GetInfosets().size() -
+                                          sfg.GetPlayers().size()))
 {
   for (auto sequence : sfg.GetSequences()) {
     if (sequence->action &&
@@ -99,14 +96,14 @@ ProblemData::ProblemData(const BehaviorSupportProfile &p_support)
   }
 }
 
-gPoly<double> GetPayoff(ProblemData &p_data, const GamePlayer &p_player)
+Polynomial<double> GetPayoff(ProblemData &p_data, const GamePlayer &p_player)
 {
-  gPoly<double> equation(&p_data.Space);
+  Polynomial<double> equation(p_data.space);
 
   for (auto profile : p_data.sfg.GetContingencies()) {
     auto pay = p_data.sfg.GetPayoff(profile, p_player);
     if (pay != Rational(0)) {
-      gPoly<double> term(&p_data.Space, double(pay));
+      Polynomial<double> term(p_data.space, double(pay));
       for (auto player : p_data.sfg.GetPlayers()) {
         term *= p_data.variables.at(profile[player]);
       }
@@ -116,15 +113,15 @@ gPoly<double> GetPayoff(ProblemData &p_data, const GamePlayer &p_player)
   return equation;
 }
 
-void IndifferenceEquations(ProblemData &p_data, gPolyList<double> &p_equations)
+void IndifferenceEquations(ProblemData &p_data, PolynomialSystem<double> &p_equations)
 {
   for (auto player : p_data.sfg.GetPlayers()) {
-    gPoly<double> payoff = GetPayoff(p_data, player);
+    Polynomial<double> payoff = GetPayoff(p_data, player);
     for (auto sequence : p_data.sfg.GetSequences(player)) {
       try {
-        p_equations += payoff.PartialDerivative(p_data.var.at(sequence));
+        p_equations.push_back(payoff.PartialDerivative(p_data.var.at(sequence)));
       }
-      catch (std::out_of_range) {
+      catch (std::out_of_range &) {
         // This sequence's variable was already substituted out in terms of
         // the probabilities of other sequences
       }
@@ -132,7 +129,7 @@ void IndifferenceEquations(ProblemData &p_data, gPolyList<double> &p_equations)
   }
 }
 
-void LastActionProbPositiveInequalities(ProblemData &p_data, gPolyList<double> &p_equations)
+void LastActionProbPositiveInequalities(ProblemData &p_data, PolynomialSystem<double> &p_equations)
 {
   for (auto sequence : p_data.sfg.GetSequences()) {
     if (!sequence->action) {
@@ -140,7 +137,7 @@ void LastActionProbPositiveInequalities(ProblemData &p_data, gPolyList<double> &
     }
     const auto &actions = p_data.sfg.GetSupport().GetActions(sequence->action->GetInfoset());
     if (actions.size() > 1 && sequence->action == actions.back()) {
-      p_equations += p_data.variables.at(sequence);
+      p_equations.push_back(p_data.variables.at(sequence));
     }
   }
 }
@@ -158,18 +155,18 @@ std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfil
                                                      bool &p_isSingular, int p_stopAfter)
 {
   ProblemData data(p_support);
-  gPolyList<double> equations(&data.Space);
+  PolynomialSystem<double> equations(data.space);
   IndifferenceEquations(data, equations);
   LastActionProbPositiveInequalities(data, equations);
 
   // set up the rectangle of search
-  Vector<double> bottoms(data.Space.Dmnsn()), tops(data.Space.Dmnsn());
+  Vector<double> bottoms(data.space->GetDimension()), tops(data.space->GetDimension());
   bottoms = 0;
   tops = 1;
 
-  QuikSolv<double> solver(equations);
+  PolynomialSystemSolver solver(equations);
   try {
-    solver.FindCertainNumberOfRoots({bottoms, tops}, std::numeric_limits<int>::max(), p_stopAfter);
+    solver.FindRoots({bottoms, tops}, p_stopAfter);
   }
   catch (const SingularMatrixException &) {
     p_isSingular = true;

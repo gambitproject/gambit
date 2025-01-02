@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: src/tools/enumpoly/nfgpoly.cc
+// FILE: src/solvers/enumpoly/nfgpoly.cc
 // Enumerates all Nash equilibria in a normal form game, via solving
 // systems of polynomial equations
 //
@@ -21,15 +21,12 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include <limits>
 #include <numeric>
 
 #include "enumpoly.h"
 #include "solvers/nashsupport/nashsupport.h"
-#include "gpoly.h"
-#include "gpolylst.h"
-#include "rectangle.h"
-#include "quiksolv.h"
+#include "polysystem.h"
+#include "polysolver.h"
 
 using namespace Gambit;
 
@@ -37,17 +34,17 @@ namespace {
 
 // The polynomial representation of each strategy probability, substituting in
 // the sum-to-one equation for the probability of the last strategy for each player
-std::map<GameStrategy, gPoly<double>> BuildStrategyVariables(const VariableSpace &space,
-                                                             const StrategySupportProfile &support)
+std::map<GameStrategy, Polynomial<double>>
+BuildStrategyVariables(std::shared_ptr<VariableSpace> space, const StrategySupportProfile &support)
 {
   int index = 1;
-  std::map<GameStrategy, gPoly<double>> strategy_poly;
+  std::map<GameStrategy, Polynomial<double>> strategy_poly;
   for (auto player : support.GetGame()->GetPlayers()) {
     auto strategies = support.GetStrategies(player);
-    gPoly<double> residual(&space, 1);
+    Polynomial<double> residual(space, 1);
     for (auto strategy : strategies) {
       if (strategy != strategies.back()) {
-        strategy_poly.try_emplace(strategy, &space, index, 1);
+        strategy_poly.try_emplace(strategy, space, index, 1);
         residual -= strategy_poly.at(strategy);
         index++;
       }
@@ -59,15 +56,15 @@ std::map<GameStrategy, gPoly<double>> BuildStrategyVariables(const VariableSpace
   return strategy_poly;
 }
 
-gPoly<double> IndifferenceEquation(const VariableSpace &space,
-                                   const StrategySupportProfile &support,
-                                   const std::map<GameStrategy, gPoly<double>> &strategy_poly,
-                                   const GameStrategy &s1, const GameStrategy &s2)
+Polynomial<double>
+IndifferenceEquation(std::shared_ptr<VariableSpace> space, const StrategySupportProfile &support,
+                     const std::map<GameStrategy, Polynomial<double>> &strategy_poly,
+                     const GameStrategy &s1, const GameStrategy &s2)
 {
-  gPoly<double> equation(&space);
+  Polynomial<double> equation(space);
 
   for (auto iter : StrategyContingencies(support, {s1})) {
-    gPoly<double> term(&space, 1);
+    Polynomial<double> term(space, 1);
     for (auto player : support.GetGame()->GetPlayers()) {
       if (player != s1->GetPlayer()) {
         term *= strategy_poly.at(iter->GetStrategy(player));
@@ -79,22 +76,22 @@ gPoly<double> IndifferenceEquation(const VariableSpace &space,
   return equation;
 }
 
-gPolyList<double> ConstructEquations(const VariableSpace &space,
-                                     const StrategySupportProfile &support,
-                                     const std::map<GameStrategy, gPoly<double>> &strategy_poly)
+PolynomialSystem<double>
+ConstructEquations(std::shared_ptr<VariableSpace> space, const StrategySupportProfile &support,
+                   const std::map<GameStrategy, Polynomial<double>> &strategy_poly)
 {
-  gPolyList<double> equations(&space);
+  PolynomialSystem<double> equations(space);
   // Indifference equations between pairs of strategies for each player
   for (auto player : support.GetPlayers()) {
     auto strategies = support.GetStrategies(player);
     for (auto s1 = strategies.begin(), s2 = std::next(strategies.begin()); s2 != strategies.end();
          ++s1, ++s2) {
-      equations += IndifferenceEquation(space, support, strategy_poly, *s1, *s2);
+      equations.push_back(IndifferenceEquation(space, support, strategy_poly, *s1, *s2));
     }
   }
   // Inequalities for last probability for each player
   for (auto player : support.GetPlayers()) {
-    equations += strategy_poly.at(support.GetStrategies(player).back());
+    equations.push_back(strategy_poly.at(support.GetStrategies(player).back()));
   }
   return equations;
 }
@@ -108,18 +105,19 @@ std::list<MixedStrategyProfile<double>>
 EnumPolyStrategySupportSolve(const StrategySupportProfile &support, bool &is_singular,
                              int p_stopAfter)
 {
-  VariableSpace Space(support.MixedProfileLength() - support.GetGame()->NumPlayers());
+  auto space = std::make_shared<VariableSpace>(support.MixedProfileLength() -
+                                               support.GetGame()->NumPlayers());
 
-  auto strategy_poly = BuildStrategyVariables(Space, support);
-  gPolyList<double> equations = ConstructEquations(Space, support, strategy_poly);
+  auto strategy_poly = BuildStrategyVariables(space, support);
+  PolynomialSystem<double> equations = ConstructEquations(space, support, strategy_poly);
 
-  Vector<double> bottoms(Space.Dmnsn()), tops(Space.Dmnsn());
+  Vector<double> bottoms(space->GetDimension()), tops(space->GetDimension());
   bottoms = 0;
   tops = 1;
-  QuikSolv<double> solver(equations);
+  PolynomialSystemSolver solver(equations);
   is_singular = false;
   try {
-    solver.FindCertainNumberOfRoots({bottoms, tops}, std::numeric_limits<int>::max(), p_stopAfter);
+    solver.FindRoots({bottoms, tops}, p_stopAfter);
   }
   catch (const SingularMatrixException &) {
     is_singular = true;

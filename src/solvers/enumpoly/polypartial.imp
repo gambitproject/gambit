@@ -1,0 +1,199 @@
+//
+// This file is part of Gambit
+// Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
+//
+// FILE: src/solver/enumpoly/polypartial.imp
+// Implementation of partial derivatives of polynomials
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+//
+
+#include "polypartial.h"
+#include "indexproduct.h"
+
+namespace Gambit {
+
+/// Recursive generation of all partial derivatives of the root polynomial
+template <class T> void PolynomialDerivatives<T>::BuildTree(Node &n)
+{
+  if (n.data.Degree() >= 1) {
+    for (int i = 1; i <= n.data.GetDimension(); i++) {
+      n.children.push_back(n.data.PartialDerivative(i));
+      BuildTree(n.children.back());
+    }
+  }
+}
+
+template <class T>
+T PolynomialDerivatives<T>::ValueOfPartialOfRootPoly(const int coord, const Vector<T> &p) const
+{
+  if (m_treeroot.data.Degree() <= 0) {
+    return static_cast<T>(0);
+  }
+  return std::next(m_treeroot.children.begin(), coord - 1)->data.Evaluate(p);
+}
+
+template <class T>
+T PolynomialDerivatives<T>::MaximalNonconstantContribution(const Node &n, const Vector<T> &p,
+                                                           const Vector<T> &halvesoflengths,
+                                                           Vector<int> &wrtos) const
+{
+  T answer = static_cast<T>(0);
+  int i = 1;
+  for (const auto child : n.children) {
+    wrtos[i]++;
+
+    T increment = Gambit::abs(child.data.Evaluate(p));
+    for (int j = 1; j <= p.size(); j++) {
+      for (int k = 1; k <= wrtos[j]; k++) {
+        increment *= halvesoflengths[j];
+        increment /= static_cast<T>(k);
+      }
+    }
+    answer += increment;
+    answer += MaximalNonconstantContribution(child, p, halvesoflengths, wrtos);
+    wrtos[i]--;
+    i++;
+  }
+  return answer;
+}
+
+template <class T>
+T PolynomialDerivatives<T>::MaximalNonconstantContribution(const Vector<T> &p,
+                                                           const Vector<T> &halvesoflengths) const
+{
+  Vector<int> WithRespectTos(p.size());
+  std::fill(WithRespectTos.begin(), WithRespectTos.end(), 0);
+  return MaximalNonconstantContribution(m_treeroot, p, halvesoflengths, WithRespectTos);
+}
+
+template <class T> bool PolynomialDerivatives<T>::PolyHasNoRootsIn(const Rectangle<T> &r) const
+{
+  if (m_treeroot.data.IsMultiaffine()) {
+    return MultiaffinePolyHasNoRootsIn(r);
+  }
+  Vector<T> center = r.Center();
+  T constant = Gambit::abs(m_treeroot.data.Evaluate(center));
+  Vector<T> HalvesOfSideLengths = r.SideLengths() / 2;
+  return MaximalNonconstantContribution(center, HalvesOfSideLengths) < constant;
+}
+
+template <class T>
+bool PolynomialDerivatives<T>::MultiaffinePolyHasNoRootsIn(const Rectangle<T> &r) const
+{
+  T sign = (m_treeroot.data.Evaluate(r.Center()) > static_cast<T>(0)) ? static_cast<T>(1)
+                                                                      : static_cast<T>(-1);
+
+  Array<int> zeros(GetDimension());
+  std::fill(zeros.begin(), zeros.end(), 0);
+  Array<int> ones(GetDimension());
+  for (int j = 1; j <= GetDimension(); j++) {
+    ones[j] = (m_treeroot.data.DegreeOfVar(j) > 0) ? 1 : 0;
+  }
+
+  for (const auto &topbottoms : CartesianIndexProduct(zeros, ones)) {
+    Vector<T> point(GetDimension());
+    for (int i = 1; i <= GetDimension(); i++) {
+      point[i] = (topbottoms[i] == 0) ? r.Side(i).LowerBound() : r.Side(i).UpperBound();
+    }
+    if (sign * m_treeroot.data.Evaluate(point) <= static_cast<T>(0)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+template <class T>
+bool PolynomialDerivatives<T>::MultiaffinePolyEverywhereNegativeIn(const Rectangle<T> &r) const
+{
+  if (GetDimension() == 0) {
+    Vector<T> point(GetDimension());
+    return m_treeroot.data.Evaluate(point) < static_cast<T>(0);
+  }
+
+  Array<int> zeros(GetDimension());
+  std::fill(zeros.begin(), zeros.end(), 0);
+  Array<int> ones(GetDimension());
+  for (int j = 1; j <= GetDimension(); j++) {
+    ones[j] = (m_treeroot.data.DegreeOfVar(j) > 0) ? 1 : 0;
+  }
+
+  for (const auto &topbottoms : CartesianIndexProduct(zeros, ones)) {
+    Vector<T> point(GetDimension());
+    for (int i = 1; i <= GetDimension(); i++) {
+      point[i] = (topbottoms[i] == 0) ? r.Side(i).LowerBound() : r.Side(i).UpperBound();
+    }
+    if (m_treeroot.data.Evaluate(point) >= static_cast<T>(0)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+template <class T>
+bool PolynomialDerivatives<T>::PolyEverywhereNegativeIn(const Rectangle<T> &r) const
+{
+  if (m_treeroot.data.IsMultiaffine()) {
+    return MultiaffinePolyEverywhereNegativeIn(r);
+  }
+  auto center = r.Center();
+  T constant = m_treeroot.data.Evaluate(center);
+  if (constant >= static_cast<T>(0)) {
+    return false;
+  }
+  return (MaximalNonconstantContribution(center, r.SideLengths() / 2) + constant <
+          static_cast<T>(0));
+}
+
+template <class T>
+Matrix<T> PolynomialSystemDerivatives<T>::DerivativeMatrix(const Vector<T> &p,
+                                                           const int p_howmany) const
+{
+  Matrix<T> answer(p_howmany, GetDimension());
+  auto poly = m_system.begin();
+  for (int i = 1; i <= p_howmany; i++, poly++) {
+    for (int j = 1; j <= GetDimension(); j++) {
+      answer(i, j) = poly->ValueOfPartialOfRootPoly(j, p);
+    }
+  }
+  return answer;
+}
+
+template <class T>
+SquareMatrix<T> PolynomialSystemDerivatives<T>::SquareDerivativeMatrix(const Vector<T> &p) const
+{
+  SquareMatrix<T> answer(GetDimension());
+  auto poly = m_system.begin();
+  for (int i = 1; i <= GetDimension(); i++, poly++) {
+    for (int j = 1; j <= GetDimension(); j++) {
+      answer(i, j) = poly->ValueOfPartialOfRootPoly(j, p);
+    }
+  }
+  return answer;
+}
+
+template <class T>
+Vector<T> PolynomialSystemDerivatives<T>::ValuesOfRootPolys(const Vector<T> &point,
+                                                            const int p_howmany) const
+{
+  Vector<T> answer(p_howmany);
+  auto poly = m_system.begin();
+  for (int i = 1; i <= p_howmany; i++, poly++) {
+    answer[i] = poly->ValueOfRootPoly(point);
+  }
+  return answer;
+}
+
+} // end namespace Gambit

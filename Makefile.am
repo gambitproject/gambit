@@ -400,36 +400,22 @@ gambit_nashsupport_SOURCES = \
 
 gambit_enumpoly_SOURCES = \
 	${core_SOURCES} ${game_SOURCES} ${gambit_nashsupport_SOURCES} \
+	src/solvers/enumpoly/ndarray.h \
 	src/solvers/enumpoly/gameseq.cc \
 	src/solvers/enumpoly/gameseq.h \
-	src/solvers/enumpoly/gpartltr.cc \
-	src/solvers/enumpoly/gpartltr.h \
-	src/solvers/enumpoly/gpartltr.imp \
-	src/solvers/enumpoly/gpoly.cc \
-	src/solvers/enumpoly/gpoly.h \
-	src/solvers/enumpoly/gpoly.imp \
-	src/solvers/enumpoly/gpolylst.cc \
-	src/solvers/enumpoly/gpolylst.h \
-	src/solvers/enumpoly/gpolylst.imp \
-	src/solvers/enumpoly/ineqsolv.cc \
-	src/solvers/enumpoly/ineqsolv.h \
-	src/solvers/enumpoly/ineqsolv.imp \
-	src/solvers/enumpoly/quiksolv.cc \
-	src/solvers/enumpoly/quiksolv.h \
-	src/solvers/enumpoly/quiksolv.imp \
+	src/solvers/enumpoly/indexproduct.h \
 	src/solvers/enumpoly/rectangle.h \
+	src/solvers/enumpoly/poly.cc \
+	src/solvers/enumpoly/poly.h \
+	src/solvers/enumpoly/poly.imp \
+	src/solvers/enumpoly/polysystem.h \
+    src/solvers/enumpoly/polypartial.h \
+    src/solvers/enumpoly/polypartial.imp \
+	src/solvers/enumpoly/polysolver.cc \
+	src/solvers/enumpoly/polysolver.h \
+	src/solvers/enumpoly/polyfeasible.h \
 	src/solvers/enumpoly/behavextend.cc \
 	src/solvers/enumpoly/behavextend.h \
-	src/solvers/enumpoly/gcomplex.cc \
-	src/solvers/enumpoly/gcomplex.h \
-	src/solvers/enumpoly/gtree.h \
-	src/solvers/enumpoly/gtree.imp \
-	src/solvers/enumpoly/linrcomb.cc \
-	src/solvers/enumpoly/linrcomb.h \
-	src/solvers/enumpoly/linrcomb.imp \
-	src/solvers/enumpoly/ndarray.h \
-	src/solvers/enumpoly/odometer.cc \
-	src/solvers/enumpoly/odometer.h \
 	src/solvers/enumpoly/efgpoly.cc \
 	src/solvers/enumpoly/nfgpoly.cc \
 	src/solvers/enumpoly/enumpoly.h \

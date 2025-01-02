@@ -2,8 +2,8 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: src/tools/enumpoly/rectangle.h
-// Declaration of rectangle class
+// FILE: src/solvers/enumpoly/rectangle.h
+// A utility class representing a (generalised) rectangle in N-dimensional space
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 
 #include "gambit.h"
 
-using namespace Gambit;
+namespace Gambit {
 
 /// A nonempty compact interval
 template <class T> class Interval {
@@ -176,5 +176,7 @@ public:
     return answer;
   }
 };
+
+} // end namespace Gambit
 
 #endif // RECTANGLE_H

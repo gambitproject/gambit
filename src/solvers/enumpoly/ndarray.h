@@ -2,8 +2,8 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: src/tools/enumpoly/gnarray.h
-// Interface declaration for N-dimensional arrays
+// FILE: src/solvers/enumpoly/ndarray.h
+// A simple N-dimensional array class
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

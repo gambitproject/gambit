@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: src/tools/enumpoly/behavextend.h
+// FILE: src/solvers/enumpoly/behavextend.h
 // Algorithms for extending behavior profiles to Nash equilibria
 //
 // This program is free software; you can redistribute it and/or modify

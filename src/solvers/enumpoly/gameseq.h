@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
 //
-// FILE: src/tools/enumpoly/sfg.h
+// FILE: src/solvers/enumpoly/gameseq.h
 // Interface to sequence form classes
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,13 +20,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef SFG_H
-#define SFG_H
-
-#include <memory>
+#ifndef GAMESEQ_H
+#define GAMESEQ_H
 
 #include "gambit.h"
-#include "odometer.h"
 #include "ndarray.h"
 
 namespace Gambit {
@@ -290,7 +287,7 @@ public:
     try {
       return m_constraints.at({p_infoset, p_action});
     }
-    catch (std::out_of_range) {
+    catch (std::out_of_range &) {
       return 0;
     }
   }
@@ -301,4 +298,4 @@ public:
 
 } // end namespace Gambit
 
-#endif // SFG_H
+#endif // GAMESEQ_H
