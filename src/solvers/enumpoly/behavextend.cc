@@ -314,10 +314,7 @@ bool ExtendsToNash(const MixedBehaviorProfile<double> &p_solution,
   Vector<double> bottoms(num_vars), tops(num_vars);
   bottoms = 0;
   tops = 1;
-
-  // Set up the test and do it
-  Vector<double> sample(num_vars);
-  return IneqSolv<double>(inequalities).ASolutionExists(Rectangle<double>(bottoms, tops), sample);
+  return IneqSolv<double>(inequalities).HasSolution(Rectangle<double>(bottoms, tops));
 }
 
 } // namespace Nash
@@ -456,9 +453,7 @@ bool ExtendsToAgentNash(const MixedBehaviorProfile<double> &p_solution,
   bottoms = 0;
   tops = 1;
 
-  // Set up the test and do it
-  Vector<double> sample(num_vars);
-  return IneqSolv<double>(inequalities).ASolutionExists(Rectangle<double>(bottoms, tops), sample);
+  return IneqSolv<double>(inequalities).HasSolution(Rectangle<double>(bottoms, tops));
 }
 
 } // namespace Nash

@@ -31,57 +31,79 @@
 #include "gpolylst.h"
 #include "gpartltr.h"
 
-/*
-    The class described in this file is a method of determining whether a
-system of weak inequalities has a solution (a point where all are satisfied)
-in a given rectangle.  Ir is modeled on QuikSolv, but simpler.  There is
-no Newton search, only repeated subdivision, queries at the center, and
-tests against whether one of the inequalities is provably everywhere
-negative in the rectangle.
-*/
+using namespace Gambit;
 
-/*
-   The main constructor for this takes a gPolyList<T>, interpreted as
-inequalities in the sense that, at a solution, all the polynomials
-are required to be nonnegative.
-*/
-
-// ***********************
-//      class IneqSolv
-// ***********************
-
+/// Determine whether a
+/// system of weak inequalities has a solution (a point where all are satisfied)
+/// in a given rectangle.  Ir is modeled on QuikSolv, but simpler.  There is
+/// no Newton search, only repeated subdivision, queries at the center, and
+/// tests against whether one of the inequalities is provably everywhere
+/// negative in the rectangle.
+/// The constructor for this takes a list of polynomials, interpreted as
+/// inequalities in the sense that, at a solution, all the polynomials
+/// are required to be non-negative.
 template <class T> class IneqSolv {
 private:
-  gPolyList<T> System;
+  gPolyList<T> m_system;
   ListOfPartialTrees<T> TreesOfPartials;
-  T Epsilon;
+  T m_epsilon;
 
-  // Routines Doing the Actual Work
-  bool IsASolution(const Gambit::Vector<T> &) const;
+  bool IsASolution(const Vector<T> &v) const
+  {
+    return std::all_of(m_system.begin(), m_system.end(),
+                       [&](const gPoly<T> &p) { return p.Evaluate(v) > -m_epsilon; });
+  }
+  bool SystemHasNoSolutionIn(const Rectangle<T> &r, Array<int> &precedence) const
+  {
+    for (int i = 1; i <= m_system.size(); i++) {
+      if (TreesOfPartials[precedence[i]].PolyEverywhereNegativeIn(r)) {
+        if (i != 1) { // We have found a new "most likely to never be positive"
+          int tmp = precedence[i];
+          for (int j = 1; j <= i - 1; j++) {
+            precedence[i - j + 1] = precedence[i - j];
+          }
+          precedence[1] = tmp;
+        }
+        return true;
+      }
+    }
+    return false;
+  }
 
-  bool SystemHasNoSolutionIn(const Rectangle<T> &r, Gambit::Array<int> &) const;
-
-  bool ASolutionExistsRecursion(const Rectangle<T> &, Gambit::Vector<T> &,
-                                Gambit::Array<int> &) const;
+  bool SolutionExists(const Rectangle<T> &r, Array<int> &precedence) const
+  {
+    if (IsASolution(r.Center())) {
+      return true;
+    }
+    if (SystemHasNoSolutionIn(r, precedence)) {
+      return false;
+    }
+    for (const auto &cell : r.Orthants()) {
+      if (SolutionExists(cell, precedence)) {
+        return true;
+      }
+    }
+    return false;
+  }
 
 public:
-  explicit IneqSolv(const gPolyList<T> &);
-  IneqSolv(const IneqSolv<T> &);
-  ~IneqSolv();
+  explicit IneqSolv(const gPolyList<T> &given)
+    : m_system(given), TreesOfPartials(given), m_epsilon((T)1 / (T)1000000)
+  {
+  }
+  IneqSolv(const IneqSolv<T> &) = delete;
+  ~IneqSolv() = default;
+  IneqSolv<T> &operator=(const IneqSolv<T> &) = delete;
 
-  // Operators
-  IneqSolv<T> &operator=(const IneqSolv<T> &);
-  bool operator==(const IneqSolv<T> &) const;
-  bool operator!=(const IneqSolv<T> &) const;
+  int Dmnsn() const { return m_system.Dmnsn(); }
 
-  // Information
-  const VariableSpace *AmbientSpace() const { return System.AmbientSpace(); }
-  int Dmnsn() const { return System.Dmnsn(); }
-  const gPolyList<T> &UnderlyingEquations() const { return System; }
-  T ErrorTolerance() const { return Epsilon; }
-
-  // The function that does everything
-  bool ASolutionExists(const Rectangle<T> &, Gambit::Vector<T> &sample);
+  /// Does a solution exist in the specified rectangle?
+  bool HasSolution(const Rectangle<T> &r)
+  {
+    Array<int> precedence(m_system.size());
+    std::iota(precedence.begin(), precedence.end(), 1);
+    return SolutionExists(r, precedence);
+  }
 };
 
 #endif // INEQSOLV_H

@@ -409,9 +409,7 @@ gambit_enumpoly_SOURCES = \
 	src/solvers/enumpoly/gpoly.h \
 	src/solvers/enumpoly/gpoly.imp \
 	src/solvers/enumpoly/gpolylst.h \
-	src/solvers/enumpoly/ineqsolv.cc \
 	src/solvers/enumpoly/ineqsolv.h \
-	src/solvers/enumpoly/ineqsolv.imp \
 	src/solvers/enumpoly/quiksolv.cc \
 	src/solvers/enumpoly/quiksolv.h \
 	src/solvers/enumpoly/rectangle.h \
