@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/gui/dlabout.cc
 // Implementation of "about" dialog
@@ -56,7 +56,7 @@ gbtAboutDialog::gbtAboutDialog(wxWindow *p_parent)
   topSizer->Add(new wxStaticText(this, wxID_STATIC, _T("Version " VERSION)), 0, wxALIGN_CENTER, 5);
 
   topSizer->Add(
-      FormattedText(this, _T("http://www.gambit-project.org"),
+      FormattedText(this, _T("https://www.gambit-project.org"),
                     wxFont(12, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL)),
       0, wxTOP | wxALIGN_CENTER, 10);
 
@@ -70,7 +70,7 @@ gbtAboutDialog::gbtAboutDialog(wxWindow *p_parent)
       0, wxALIGN_CENTER, 5);
 
   topSizer->Add(
-      FormattedText(this, _T("Copyright (C) 1994-2024, The Gambit Project"),
+      FormattedText(this, _T("Copyright (C) 1994-2025, The Gambit Project"),
                     wxFont(12, wxFONTFAMILY_ROMAN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL)),
       0, wxTOP | wxALIGN_CENTER, 20);
   topSizer->Add(

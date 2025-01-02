@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/tools/lp/lp.cc
 // Implementation of algorithm to compute mixed strategy equilibria
@@ -35,7 +35,7 @@ using namespace Gambit;
 void PrintBanner(std::ostream &p_stream)
 {
   p_stream << "Compute Nash equilibria by solving a linear program\n";
-  p_stream << "Gambit version " VERSION ", Copyright (C) 1994-2024, The Gambit Project\n";
+  p_stream << "Gambit version " VERSION ", Copyright (C) 1994-2025, The Gambit Project\n";
   p_stream << "This is free software, distributed under the GNU GPL\n\n";
 }
 

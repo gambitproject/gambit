@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2024, Litao Wei The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2025, Litao Wei The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/tools/enumpoly/nfghs.cc
 // Compute Nash equilibria via heuristic search on game supports
