@@ -164,12 +164,13 @@ template <class T> bool TreeOfPartials<T>::PolyEverywhereNegativeIn(const Rectan
 }
 
 template <class T>
-Matrix<T> ListOfPartialTrees<T>::DerivativeMatrix(const Vector<T> &p, const int NoEquations) const
+Matrix<T> ListOfPartialTrees<T>::DerivativeMatrix(const Vector<T> &p, const int p_howmany) const
 {
-  Matrix<T> answer(NoEquations, Dmnsn());
-  for (int i = 1; i <= NoEquations; i++) {
+  Matrix<T> answer(p_howmany, Dmnsn());
+  auto poly = m_list.begin();
+  for (int i = 1; i <= p_howmany; i++, poly++) {
     for (int j = 1; j <= Dmnsn(); j++) {
-      answer(i, j) = (*this)[i].ValueOfPartialOfRootPoly(j, p);
+      answer(i, j) = poly->ValueOfPartialOfRootPoly(j, p);
     }
   }
   return answer;
@@ -179,9 +180,10 @@ template <class T>
 SquareMatrix<T> ListOfPartialTrees<T>::SquareDerivativeMatrix(const Vector<T> &p) const
 {
   SquareMatrix<T> answer(Dmnsn());
-  for (int i = 1; i <= Dmnsn(); i++) {
+  auto poly = m_list.begin();
+  for (int i = 1; i <= Dmnsn(); i++, poly++) {
     for (int j = 1; j <= Dmnsn(); j++) {
-      answer(i, j) = (*this)[i].ValueOfPartialOfRootPoly(j, p);
+      answer(i, j) = poly->ValueOfPartialOfRootPoly(j, p);
     }
   }
   return answer;
@@ -189,11 +191,12 @@ SquareMatrix<T> ListOfPartialTrees<T>::SquareDerivativeMatrix(const Vector<T> &p
 
 template <class T>
 Vector<T> ListOfPartialTrees<T>::ValuesOfRootPolys(const Vector<T> &point,
-                                                   const int NoEquations) const
+                                                   const int p_howmany) const
 {
-  Vector<T> answer(NoEquations);
-  for (int i = 1; i <= NoEquations; i++) {
-    answer[i] = m_list[i].ValueOfRootPoly(point);
+  Vector<T> answer(p_howmany);
+  auto poly = m_list.begin();
+  for (int i = 1; i <= p_howmany; i++, poly++) {
+    answer[i] = poly->ValueOfRootPoly(point);
   }
   return answer;
 }

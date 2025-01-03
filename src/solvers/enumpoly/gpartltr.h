@@ -71,7 +71,7 @@ public:
 
 template <class T> class ListOfPartialTrees {
 private:
-  List<TreeOfPartials<T>> m_list;
+  std::list<TreeOfPartials<T>> m_list;
 
 public:
   explicit ListOfPartialTrees(const gPolyList<T> &given)
@@ -84,8 +84,10 @@ public:
   ~ListOfPartialTrees() = default;
   ListOfPartialTrees<T> &operator=(const ListOfPartialTrees<T> &) = delete;
 
-  const TreeOfPartials<T> &operator[](int i) const { return m_list[i]; }
-
+  const TreeOfPartials<T> &operator[](const int index) const
+  {
+    return *std::next(m_list.begin(), index - 1);
+  }
   int Dmnsn() const { return m_list.front().Dmnsn(); }
   Matrix<T> DerivativeMatrix(const Vector<T> &, int) const;
   SquareMatrix<T> SquareDerivativeMatrix(const Vector<T> &) const;
