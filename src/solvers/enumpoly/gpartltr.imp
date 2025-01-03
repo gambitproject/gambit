@@ -30,7 +30,7 @@ using namespace Gambit;
 
 /// Recursive generation of all partial derivatives of the root polynomial
 template <class T>
-void TreeOfPartials<T>::TreeOfPartialsRECURSIVE(gTree<gPoly<T>> &t, gTreeNode<gPoly<T>> &n)
+void TreeOfPartials<T>::TreeOfPartialsRECURSIVE(gTree<gPoly<T>> &t, typename gTree<gPoly<T>>::Node &n)
 {
   if (n.GetData().Degree() >= 1) {
     for (int i = 1; i <= n.GetData().Dmnsn(); i++) {
@@ -58,7 +58,7 @@ T TreeOfPartials<T>::ValueOfPartialOfRootPoly(const int coord, const Vector<T> &
 }
 
 template <class T>
-T TreeOfPartials<T>::MaximalNonconstantContributionRECURSIVE(const gTreeNode<gPoly<T>> &n,
+T TreeOfPartials<T>::MaximalNonconstantContributionRECURSIVE(const typename gTree<gPoly<T>>::Node &n,
                                                              const Vector<T> &p,
                                                              const Vector<T> &halvesoflengths,
                                                              Vector<int> &wrtos) const

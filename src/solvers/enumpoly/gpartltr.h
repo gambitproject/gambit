@@ -35,9 +35,10 @@ template <class T> class TreeOfPartials {
 private:
   gTree<gPoly<T>> PartialTree;
 
-  void TreeOfPartialsRECURSIVE(gTree<gPoly<T>> &, gTreeNode<gPoly<T>> &);
-  T MaximalNonconstantContributionRECURSIVE(const gTreeNode<gPoly<T>> &, const Vector<T> &,
-                                            const Vector<T> &, Vector<int> &) const;
+  void TreeOfPartialsRECURSIVE(gTree<gPoly<T>> &, typename gTree<gPoly<T>>::Node &);
+  T MaximalNonconstantContributionRECURSIVE(const typename gTree<gPoly<T>>::Node &,
+                                            const Vector<T> &, const Vector<T> &,
+                                            Vector<int> &) const;
 
 public:
   explicit TreeOfPartials(const gPoly<T> &given) : PartialTree(given)
