@@ -29,8 +29,7 @@ using namespace Gambit;
 //---------------------------------------------------------------
 
 /// Recursive generation of all partial derivatives of the root polynomial
-template <class T>
-void TreeOfPartials<T>::BuildTree(Node &n)
+template <class T> void TreeOfPartials<T>::BuildTree(Node &n)
 {
   if (n.data.Degree() >= 1) {
     for (int i = 1; i <= n.data.GetDimension(); i++) {
@@ -50,10 +49,9 @@ T TreeOfPartials<T>::ValueOfPartialOfRootPoly(const int coord, const Vector<T> &
 }
 
 template <class T>
-T TreeOfPartials<T>::MaximalNonconstantContribution(const Node &n,
-                                                             const Vector<T> &p,
-                                                             const Vector<T> &halvesoflengths,
-                                                             Vector<int> &wrtos) const
+T TreeOfPartials<T>::MaximalNonconstantContribution(const Node &n, const Vector<T> &p,
+                                                    const Vector<T> &halvesoflengths,
+                                                    Vector<int> &wrtos) const
 {
   T answer = static_cast<T>(0);
   int i = 1;
@@ -97,9 +95,8 @@ template <class T> bool TreeOfPartials<T>::PolyHasNoRootsIn(const Rectangle<T> &
 
 template <class T> bool TreeOfPartials<T>::MultiaffinePolyHasNoRootsIn(const Rectangle<T> &r) const
 {
-  T sign = (m_treeroot.data.Evaluate(r.Center()) > static_cast<T>(0))
-               ? static_cast<T>(1)
-               : static_cast<T>(-1);
+  T sign = (m_treeroot.data.Evaluate(r.Center()) > static_cast<T>(0)) ? static_cast<T>(1)
+                                                                      : static_cast<T>(-1);
 
   Array<int> zeros(GetDimension());
   std::fill(zeros.begin(), zeros.end(), 0);

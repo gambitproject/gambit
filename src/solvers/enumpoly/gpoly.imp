@@ -33,7 +33,8 @@
 //-------------------------------------------------------------
 
 template <class T>
-List<Monomial<T>> Polynomial<T>::Adder(const List<Monomial<T>> &One, const List<Monomial<T>> &Two) const
+List<Monomial<T>> Polynomial<T>::Adder(const List<Monomial<T>> &One,
+                                       const List<Monomial<T>> &Two) const
 {
   if (One.empty()) {
     return Two;
@@ -78,7 +79,8 @@ List<Monomial<T>> Polynomial<T>::Adder(const List<Monomial<T>> &One, const List<
 }
 
 template <class T>
-List<Monomial<T>> Polynomial<T>::Mult(const List<Monomial<T>> &One, const List<Monomial<T>> &Two) const
+List<Monomial<T>> Polynomial<T>::Mult(const List<Monomial<T>> &One,
+                                      const List<Monomial<T>> &Two) const
 {
   List<Monomial<T>> answer;
 
@@ -165,7 +167,8 @@ template <class T> Polynomial<T> Polynomial<T>::DivideByPolynomial(const Polynom
 
     while (remainder != zero) {
       Polynomial<T> quot = remainder.LeadingCoefficient(last) / den.LeadingCoefficient(last);
-      Polynomial<T> power_of_last(Space, last, remainder.DegreeOfVar(last) - den.DegreeOfVar(last));
+      Polynomial<T> power_of_last(Space, last,
+                                  remainder.DegreeOfVar(last) - den.DegreeOfVar(last));
       result += quot * power_of_last;
       remainder -= quot * power_of_last * den;
     }
@@ -203,14 +206,15 @@ template <class T> Polynomial<T> Polynomial<T>::LeadingCoefficient(int varnumber
   for (size_t j = 1; j <= Terms.size(); j++) {
     if (Terms[j].ExpV()[varnumber] == degree) {
       newPoly.Terms.push_back(
-        Monomial<T>(Terms[j].Coef(), Terms[j].ExpV().WithZeroExponent(varnumber)));
+          Monomial<T>(Terms[j].Coef(), Terms[j].ExpV().WithZeroExponent(varnumber)));
     }
   }
   return newPoly;
 }
 
 template <class T>
-Polynomial<T> Polynomial<T>::TranslateOfMono(const Monomial<T> &m, const Vector<T> &new_origin) const
+Polynomial<T> Polynomial<T>::TranslateOfMono(const Monomial<T> &m,
+                                             const Vector<T> &new_origin) const
 {
   Polynomial<T> answer(GetSpace(), static_cast<T>(1));
   for (int i = 1; i <= GetDimension(); i++) {
@@ -236,7 +240,8 @@ template <class T> Polynomial<T> Polynomial<T>::TranslateOfPoly(const Vector<T> 
 }
 
 template <class T>
-Polynomial<T> Polynomial<T>::MonoInNewCoordinates(const Monomial<T> &m, const SquareMatrix<T> &M) const
+Polynomial<T> Polynomial<T>::MonoInNewCoordinates(const Monomial<T> &m,
+                                                  const SquareMatrix<T> &M) const
 {
   Polynomial<T> answer(Space, static_cast<T>(1));
 
@@ -256,7 +261,8 @@ Polynomial<T> Polynomial<T>::MonoInNewCoordinates(const Monomial<T> &m, const Sq
   return answer;
 }
 
-template <class T> Polynomial<T> Polynomial<T>::PolyInNewCoordinates(const SquareMatrix<T> &M) const
+template <class T>
+Polynomial<T> Polynomial<T>::PolyInNewCoordinates(const SquareMatrix<T> &M) const
 {
   Polynomial<T> answer(Space);
   for (const auto &term : Terms) {
@@ -279,8 +285,9 @@ template <class T> T Polynomial<T>::MaximalValueOfNonlinearPart(const T &radius)
 template <class T> Polynomial<T> Polynomial<T>::Normalize() const
 {
   auto maxcoeff =
-      std::max_element(Terms.begin(), Terms.end(),
-                       [](const Monomial<T> &a, const Monomial<T> &b) { return a.Coef() < b.Coef(); });
+      std::max_element(Terms.begin(), Terms.end(), [](const Monomial<T> &a, const Monomial<T> &b) {
+        return a.Coef() < b.Coef();
+      });
   if (maxcoeff->Coef() < static_cast<T>(0.000000001)) {
     return *this;
   }
