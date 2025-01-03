@@ -39,7 +39,6 @@ public:
   ~gTreeNode() = default;
 
   const T &GetData() const { return data; }
-  gTreeNode<T> *GetParent() const { return parent; }
   gTreeNode<T> *GetNext() const { return next; }
   gTreeNode<T> *GetEldest() const { return eldest; }
   gTreeNode<T> *GetYoungest() const { return youngest; }
