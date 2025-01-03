@@ -35,9 +35,8 @@ private:
   gTreeNode<T> *parent, *prev, *next, *eldest, *youngest;
 
 public:
-  gTreeNode(const T &_data, gTreeNode<T> *_parent, gTreeNode<T> *_prev, gTreeNode<T> *_next,
-            gTreeNode<T> *_eldest, gTreeNode<T> *_youngest)
-    : data(_data), parent(_parent), prev(_prev), next(_next), eldest(_eldest), youngest(_youngest)
+  gTreeNode(const T &_data, gTreeNode<T> *_parent, gTreeNode<T> *_prev)
+    : data(_data), parent(_parent), prev(_prev), next(nullptr), eldest(nullptr), youngest(nullptr)
   {
   }
   ~gTreeNode() = default;
@@ -58,14 +57,11 @@ protected:
 
 public:
   gTree() : root(nullptr) {}
-  explicit gTree(const T &root_value)
-    : root(new gTreeNode<T>(root_value, nullptr, nullptr, nullptr, nullptr, nullptr))
-  {
-  }
+  explicit gTree(const T &root_value) : root(new gTreeNode<T>(root_value, nullptr, nullptr)) {}
   gTree(const gTree<T> &b) : root(nullptr)
   {
     if (b.root != nullptr) {
-      root = new gTreeNode<T>(b.root->data, nullptr, nullptr, nullptr, nullptr, nullptr);
+      root = new gTreeNode<T>(b.root->data, nullptr, nullptr);
       RecursiveCopy(root, b.root);
     }
   }
