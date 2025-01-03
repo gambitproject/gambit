@@ -42,9 +42,6 @@ public:
   }
   ~gTreeNode() = default;
 
-  void SetEldest(gTreeNode<T> *neweldest) { eldest = neweldest; }
-  void SetYoungest(gTreeNode<T> *newyoungest) { youngest = newyoungest; }
-
   const T &GetData() const { return data; }
   gTreeNode<T> *GetParent() const { return parent; }
   gTreeNode<T> *GetNext() const { return next; }

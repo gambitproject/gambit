@@ -30,13 +30,13 @@ template <class T> void gTree<T>::InsertAt(const T &t, gTreeNode<T> *n)
 {
   if (n->eldest == nullptr) {
     auto *newn = new gTreeNode<T>(t, n, nullptr, nullptr, nullptr, nullptr);
-    n->SetEldest(newn);
-    n->SetYoungest(newn);
+    n->eldest = newn;
+    n->youngest = newn;
   }
   else {
     auto *newn = new gTreeNode<T>(t, n, n->youngest, nullptr, nullptr, nullptr);
     n->youngest->next = newn;
-    n->SetYoungest(newn);
+    n->youngest = newn;
   }
 }
 
