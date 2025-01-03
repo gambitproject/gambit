@@ -30,12 +30,12 @@ using namespace Gambit;
 
 /// Recursive generation of all partial derivatives of the root polynomial
 template <class T>
-void TreeOfPartials<T>::TreeOfPartialsRECURSIVE(gTree<gPoly<T>> &t, typename gTree<gPoly<T>>::Node &n)
+void TreeOfPartials<T>::TreeOfPartialsRECURSIVE(Node &n)
 {
-  if (n.GetData().Degree() >= 1) {
-    for (int i = 1; i <= n.GetData().Dmnsn(); i++) {
-      n.GetChildren().push_back(n.GetData().PartialDerivative(i));
-      TreeOfPartialsRECURSIVE(t, n.GetChildren().back());
+  if (n.data.Degree() >= 1) {
+    for (int i = 1; i <= n.data.Dmnsn(); i++) {
+      n.children.push_back(n.data.PartialDerivative(i));
+      TreeOfPartialsRECURSIVE(n.children.back());
     }
   }
 }
@@ -47,31 +47,26 @@ T TreeOfPartials<T>::ValueOfPartialOfRootPoly(const int coord, const Vector<T> &
     return static_cast<T>(0);
   }
   else {
-    int i = 1;
-    auto node = PartialTree.RootNode().GetChildren().begin();
-    while (i < coord) {
-      i++;
-      node++;
-    }
-    return node->GetData().Evaluate(p);
+    auto node = std::next(m_treeroot.children.begin(), coord - 1);
+    return node->data.Evaluate(p);
   }
 }
 
 template <class T>
-T TreeOfPartials<T>::MaximalNonconstantContributionRECURSIVE(const typename gTree<gPoly<T>>::Node &n,
+T TreeOfPartials<T>::MaximalNonconstantContributionRECURSIVE(const Node &n,
                                                              const Vector<T> &p,
                                                              const Vector<T> &halvesoflengths,
                                                              Vector<int> &wrtos) const
 {
   T answer = static_cast<T>(0);
 
-  if (!n.GetChildren().empty()) {
-    const auto &children = n.GetChildren();
+  if (!n.children.empty()) {
+    const auto &children = n.children;
     for (size_t i = 1; i <= children.size(); i++) {
       auto child = *std::next(children.begin(), i - 1);
       wrtos[i]++;
 
-      T increment = Gambit::abs(child.GetData().Evaluate(p));
+      T increment = Gambit::abs(child.data.Evaluate(p));
       for (int j = 1; j <= p.size(); j++) {
         for (int k = 1; k <= wrtos[j]; k++) {
           increment *= halvesoflengths[j];
@@ -93,23 +88,23 @@ T TreeOfPartials<T>::MaximalNonconstantContribution(const Vector<T> &p,
 {
   Vector<int> WithRespectTos(p.size());
   std::fill(WithRespectTos.begin(), WithRespectTos.end(), 0);
-  return MaximalNonconstantContributionRECURSIVE(PartialTree.RootNode(), p, halvesoflengths, WithRespectTos);
+  return MaximalNonconstantContributionRECURSIVE(m_treeroot, p, halvesoflengths, WithRespectTos);
 }
 
 template <class T> bool TreeOfPartials<T>::PolyHasNoRootsIn(const Rectangle<T> &r) const
 {
-  if (PartialTree.RootNode().GetData().IsMultiaffine()) {
+  if (m_treeroot.data.IsMultiaffine()) {
     return MultiaffinePolyHasNoRootsIn(r);
   }
   Vector<T> center = r.Center();
-  T constant = Gambit::abs(PartialTree.RootNode().GetData().Evaluate(center));
+  T constant = Gambit::abs(m_treeroot.data.Evaluate(center));
   Vector<T> HalvesOfSideLengths = r.SideLengths() / 2;
   return this->MaximalNonconstantContribution(center, HalvesOfSideLengths) < constant;
 }
 
 template <class T> bool TreeOfPartials<T>::MultiaffinePolyHasNoRootsIn(const Rectangle<T> &r) const
 {
-  T sign = (PartialTree.RootNode().GetData().Evaluate(r.Center()) > static_cast<T>(0))
+  T sign = (m_treeroot.data.Evaluate(r.Center()) > static_cast<T>(0))
                ? static_cast<T>(1)
                : static_cast<T>(-1);
 
@@ -117,7 +112,7 @@ template <class T> bool TreeOfPartials<T>::MultiaffinePolyHasNoRootsIn(const Rec
   std::fill(zeros.begin(), zeros.end(), 0);
   Array<int> ones(Dmnsn());
   for (int j = 1; j <= Dmnsn(); j++) {
-    ones[j] = (PartialTree.RootNode().GetData().DegreeOfVar(j) > 0) ? 1 : 0;
+    ones[j] = (m_treeroot.data.DegreeOfVar(j) > 0) ? 1 : 0;
   }
   CartesianIndexIterator topbottoms(zeros, ones);
 
@@ -126,7 +121,7 @@ template <class T> bool TreeOfPartials<T>::MultiaffinePolyHasNoRootsIn(const Rec
     for (int i = 1; i <= Dmnsn(); i++) {
       point[i] = (topbottoms[i] == 0) ? r.Side(i).LowerBound() : r.Side(i).UpperBound();
     }
-    if (sign * PartialTree.RootNode().GetData().Evaluate(point) <= static_cast<T>(0)) {
+    if (sign * m_treeroot.data.Evaluate(point) <= static_cast<T>(0)) {
       return false;
     }
   }
@@ -138,14 +133,14 @@ bool TreeOfPartials<T>::MultiaffinePolyEverywhereNegativeIn(const Rectangle<T> &
 {
   if (Dmnsn() == 0) {
     Vector<T> point(Dmnsn());
-    return PartialTree.RootNode().GetData().Evaluate(point) < static_cast<T>(0);
+    return m_treeroot.data.Evaluate(point) < static_cast<T>(0);
   }
 
   Array<int> zeros(Dmnsn());
   std::fill(zeros.begin(), zeros.end(), 0);
   Array<int> ones(Dmnsn());
   for (int j = 1; j <= Dmnsn(); j++) {
-    ones[j] = (PartialTree.RootNode().GetData().DegreeOfVar(j) > 0) ? 1 : 0;
+    ones[j] = (m_treeroot.data.DegreeOfVar(j) > 0) ? 1 : 0;
   }
 
   CartesianIndexIterator topbottoms(zeros, ones);
@@ -154,7 +149,7 @@ bool TreeOfPartials<T>::MultiaffinePolyEverywhereNegativeIn(const Rectangle<T> &
     for (int i = 1; i <= Dmnsn(); i++) {
       point[i] = (topbottoms[i] == 0) ? r.Side(i).LowerBound() : r.Side(i).UpperBound();
     }
-    if (PartialTree.RootNode().GetData().Evaluate(point) >= static_cast<T>(0)) {
+    if (m_treeroot.data.Evaluate(point) >= static_cast<T>(0)) {
       return false;
     }
   }
@@ -163,11 +158,11 @@ bool TreeOfPartials<T>::MultiaffinePolyEverywhereNegativeIn(const Rectangle<T> &
 
 template <class T> bool TreeOfPartials<T>::PolyEverywhereNegativeIn(const Rectangle<T> &r) const
 {
-  if (PartialTree.RootNode().GetData().IsMultiaffine()) {
+  if (m_treeroot.data.IsMultiaffine()) {
     return MultiaffinePolyEverywhereNegativeIn(r);
   }
   auto center = r.Center();
-  T constant = PartialTree.RootNode().GetData().Evaluate(center);
+  T constant = m_treeroot.data.Evaluate(center);
   if (constant >= static_cast<T>(0)) {
     return false;
   }
