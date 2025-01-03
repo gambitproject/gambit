@@ -107,12 +107,6 @@ public:
     tmp.m_components[varnumber] = 0;
     return tmp;
   }
-  ExponentVector WithDecrementedExponent(const int varnumber) const
-  {
-    ExponentVector tmp(*this);
-    tmp.m_components[varnumber]--;
-    return tmp;
-  }
 
   // Information
   int Dmnsn() const { return m_space->Dmnsn(); }
@@ -209,7 +203,6 @@ public:
   const T &Coef() const { return coef; }
   int Dmnsn() const { return exps.Dmnsn(); }
   int TotalDegree() const { return exps.TotalDegree(); }
-  bool IsConstant() const { return exps.IsConstant(); }
   bool IsMultiaffine() const { return exps.IsMultiaffine(); }
   const ExponentVector &ExpV() const { return exps; }
   T Evaluate(const Vector<T> &vals) const
