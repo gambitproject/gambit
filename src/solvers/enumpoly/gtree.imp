@@ -28,14 +28,14 @@
 
 template <class T> void gTree<T>::InsertAt(const T &t, gTreeNode<T> *n)
 {
-  n->children.push_back(new gTreeNode<T>(t, n));
+  n->children.push_back(new gTreeNode<T>(t));
 }
 
 template <class T> void gTree<T>::RecursiveCopy(gTreeNode<T> *copyn, const gTreeNode<T> *orign)
 {
   const auto &oldchildren = orign->GetChildren();
   for (const auto &child : oldchildren) {
-    copyn->children.push_back(new gTreeNode<T>(child->data, copyn));
+    copyn->children.push_back(new gTreeNode<T>(child->data));
     RecursiveCopy(copyn->children.back(), child);
   }
 }
