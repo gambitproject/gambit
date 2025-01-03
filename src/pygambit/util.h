@@ -50,6 +50,55 @@ Game ParseGame(char *s)
   return ReadGame(f);
 }
 
+Game ParseGbtGame(std::string const &s)
+{
+  std::istringstream f(s);
+  return ReadGbtFile(f);
+}
+
+Game ParseEfgGame(std::string const &s)
+{
+  std::istringstream f(s);
+  return ReadEfgFile(f);
+}
+
+Game ParseNfgGame(std::string const &s)
+{
+  std::istringstream f(s);
+  return ReadNfgFile(f);
+}
+
+Game ParseAggGame(std::string const &s)
+{
+  std::istringstream f(s);
+  return ReadAggFile(f);
+}
+
+std::string WriteEfgFile(const Game &p_game)
+{
+  std::ostringstream f;
+  p_game->Write(f, "efg");
+  return f.str();
+}
+
+std::string WriteNfgFile(const Game &p_game)
+{
+  std::ostringstream f;
+  p_game->Write(f, "nfg");
+  return f.str();
+}
+
+std::string WriteHTMLFile(const Game &p_game)
+{
+  return WriteHTMLFile(p_game, p_game->GetPlayer(1), p_game->GetPlayer(2));
+}
+
+std::string WriteLaTeXFile(const Game &p_game)
+{
+  return WriteLaTeXFile(p_game, p_game->GetPlayer(1), p_game->GetPlayer(2));
+}
+
+/// @deprecated Deprecated in favour of WriteXXXFile
 std::string WriteGame(const Game &p_game, const std::string &p_format)
 {
   if (p_format == "html") {
