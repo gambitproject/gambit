@@ -71,23 +71,22 @@ public:
 
 template <class T> class ListOfPartialTrees {
 private:
-  List<TreeOfPartials<T>> PartialTreeList;
+  List<TreeOfPartials<T>> m_list;
 
 public:
   explicit ListOfPartialTrees(const gPolyList<T> &given)
   {
     for (const auto &p : given) {
-      PartialTreeList.push_back(TreeOfPartials<T>(p));
+      m_list.push_back(TreeOfPartials<T>(p));
     }
   }
   ListOfPartialTrees(const ListOfPartialTrees<T> &) = default;
   ~ListOfPartialTrees() = default;
   ListOfPartialTrees<T> &operator=(const ListOfPartialTrees<T> &) = delete;
 
-  const TreeOfPartials<T> &operator[](int i) const { return PartialTreeList[i]; }
+  const TreeOfPartials<T> &operator[](int i) const { return m_list[i]; }
 
-  int Length() const { return PartialTreeList.size(); }
-  int Dmnsn() const { return PartialTreeList.front().Dmnsn(); }
+  int Dmnsn() const { return m_list.front().Dmnsn(); }
   Matrix<T> DerivativeMatrix(const Vector<T> &, int) const;
   SquareMatrix<T> SquareDerivativeMatrix(const Vector<T> &) const;
   Vector<T> ValuesOfRootPolys(const Vector<T> &, int) const;

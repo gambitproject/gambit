@@ -193,7 +193,7 @@ Vector<T> ListOfPartialTrees<T>::ValuesOfRootPolys(const Vector<T> &point,
 {
   Vector<T> answer(NoEquations);
   for (int i = 1; i <= NoEquations; i++) {
-    answer[i] = PartialTreeList[i].ValueOfRootPoly(point);
+    answer[i] = m_list[i].ValueOfRootPoly(point);
   }
   return answer;
 }
