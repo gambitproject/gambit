@@ -35,7 +35,7 @@ void TreeOfPartials<T>::TreeOfPartialsRECURSIVE(gTree<gPoly<T>> &t, gTreeNode<gP
   if (n->GetData().Degree() >= 1) {
     for (int i = 1; i <= n->GetData().Dmnsn(); i++) {
       t.InsertAt(n->GetData().PartialDerivative(i), n);
-      TreeOfPartialsRECURSIVE(t, n->GetYoungest());
+      TreeOfPartialsRECURSIVE(t, n->GetChildren().back());
     }
   }
 }
@@ -48,12 +48,12 @@ T TreeOfPartials<T>::ValueOfPartialOfRootPoly(const int coord, const Vector<T> &
   }
   else {
     int i = 1;
-    gTreeNode<gPoly<T>> *node = RootNode()->GetEldest();
+    auto node = RootNode()->GetChildren().begin();
     while (i < coord) {
       i++;
-      node = node->GetNext();
+      node++;
     }
-    return node->GetData().Evaluate(p);
+    return (*node)->GetData().Evaluate(p);
   }
 }
 
@@ -65,12 +65,13 @@ T TreeOfPartials<T>::MaximalNonconstantContributionRECURSIVE(const gTreeNode<gPo
 {
   T answer = static_cast<T>(0);
 
-  if (n->GetEldest() != nullptr) {
-    List<gTreeNode<gPoly<T>> *> children = PartialTree.Children(n);
+  if (!n->GetChildren().empty()) {
+    const auto &children = n->GetChildren();
     for (size_t i = 1; i <= children.size(); i++) {
+      auto child = *std::next(children.begin(), i - 1);
       wrtos[i]++;
 
-      T increment = Gambit::abs(children[i]->GetData().Evaluate(p));
+      T increment = Gambit::abs(child->GetData().Evaluate(p));
       for (int j = 1; j <= p.size(); j++) {
         for (int k = 1; k <= wrtos[j]; k++) {
           increment *= halvesoflengths[j];
@@ -78,7 +79,7 @@ T TreeOfPartials<T>::MaximalNonconstantContributionRECURSIVE(const gTreeNode<gPo
         }
       }
       answer += increment;
-      answer += MaximalNonconstantContributionRECURSIVE(children[i], p, halvesoflengths, wrtos);
+      answer += MaximalNonconstantContributionRECURSIVE(child, p, halvesoflengths, wrtos);
       wrtos[i]--;
     }
   }

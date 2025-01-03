@@ -28,32 +28,21 @@
 
 template <class T> void gTree<T>::InsertAt(const T &t, gTreeNode<T> *n)
 {
-  if (n->eldest == nullptr) {
-    auto *newn = new gTreeNode<T>(t, n);
-    n->eldest = newn;
-    n->youngest = newn;
-  }
-  else {
-    auto *newn = new gTreeNode<T>(t, n);
-    n->youngest->next = newn;
-    n->youngest = newn;
-  }
+  n->children.push_back(new gTreeNode<T>(t, n));
 }
 
 template <class T> void gTree<T>::RecursiveCopy(gTreeNode<T> *copyn, const gTreeNode<T> *orign)
 {
-  auto oldchildren = Children(orign);
-  for (size_t i = 1; i <= oldchildren.size(); i++) {
-    InsertAt(oldchildren[i]->data, copyn);
-  }
-  auto newchildren = Children(copyn);
-  for (size_t i = 1; i <= newchildren.size(); i++) {
-    RecursiveCopy(newchildren[i], oldchildren[i]);
+  const auto &oldchildren = orign->GetChildren();
+  for (const auto &child : oldchildren) {
+    copyn->children.push_back(new gTreeNode<T>(child->data, copyn));
+    RecursiveCopy(copyn->children.back(), child);
   }
 }
 
 //--------------------- operators ------------------------
 
+/*
 template <class T> Gambit::List<gTreeNode<T> *> gTree<T>::Children(const gTreeNode<T> *n) const
 {
   Gambit::List<gTreeNode<T> *> answer;
@@ -62,11 +51,11 @@ template <class T> Gambit::List<gTreeNode<T> *> gTree<T>::Children(const gTreeNo
   }
   return answer;
 }
+*/
 
 template <class T> void gTree<T>::RecursiveFlush(const gTreeNode<T> *n)
 {
-  auto children = Children(n);
-  for (const auto &child : children) {
+  for (const auto &child : n->GetChildren()) {
     RecursiveFlush(child);
   }
   delete n;

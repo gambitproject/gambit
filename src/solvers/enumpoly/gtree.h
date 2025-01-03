@@ -32,16 +32,15 @@ template <class T> class gTreeNode {
 
 private:
   T data;
-  gTreeNode<T> *parent, *next{nullptr}, *eldest{nullptr}, *youngest{nullptr};
+  gTreeNode<T> *parent;
+  std::list<gTreeNode<T> *> children;
 
 public:
   gTreeNode(const T &_data, gTreeNode<T> *_parent) : data(_data), parent(_parent) {}
   ~gTreeNode() = default;
 
   const T &GetData() const { return data; }
-  gTreeNode<T> *GetNext() const { return next; }
-  gTreeNode<T> *GetEldest() const { return eldest; }
-  gTreeNode<T> *GetYoungest() const { return youngest; }
+  const std::list<gTreeNode<T> *> &GetChildren() const { return children; }
 };
 
 template <class T> class gTree {
@@ -67,7 +66,6 @@ public:
 
   void InsertAt(const T &, gTreeNode<T> *);
 
-  Gambit::List<gTreeNode<T> *> Children(const gTreeNode<T> *) const;
   gTreeNode<T> *RootNode() const { return root; }
 };
 
