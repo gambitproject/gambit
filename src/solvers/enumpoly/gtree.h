@@ -32,52 +32,33 @@ template <class T> class gTreeNode {
 
 private:
   T data;
-  std::list<gTreeNode<T> *> children;
+  std::list<gTreeNode<T>> children;
 
 public:
   gTreeNode(const T &_data) : data(_data) {}
+  gTreeNode(const gTreeNode<T> &) = default;
   ~gTreeNode() = default;
 
   const T &GetData() const { return data; }
-  const std::list<gTreeNode<T> *> &GetChildren() const { return children; }
+  std::list<gTreeNode<T>> &GetChildren() { return children; }
+  const std::list<gTreeNode<T>> &GetChildren() const { return children; }
 };
 
 template <class T> class gTree {
 protected:
-  gTreeNode<T> *root;
-
-  void RecursiveCopy(gTreeNode<T> *copyn, const gTreeNode<T> *orign)
-  {
-    const auto &oldchildren = orign->GetChildren();
-    for (const auto &child : oldchildren) {
-      copyn->children.push_back(new gTreeNode<T>(child->data));
-      RecursiveCopy(copyn->children.back(), child);
-    }
-  }
-  void RecursiveFlush(const gTreeNode<T> *n)
-  {
-    for (const auto &child : n->GetChildren()) {
-      RecursiveFlush(child);
-    }
-    delete n;
-  }
+  gTreeNode<T> root;
 
 public:
-  explicit gTree(const T &root_value) : root(new gTreeNode<T>(root_value)) {}
-  gTree(const gTree<T> &b) : root(nullptr)
-  {
-    if (b.root != nullptr) {
-      root = new gTreeNode<T>(b.root->data);
-      RecursiveCopy(root, b.root);
-    }
-  }
-  ~gTree() { RecursiveFlush(root); }
+  explicit gTree(const T &root_value) : root(gTreeNode<T>(root_value)) {}
+  gTree(const gTree<T> &) = default;
+  ~gTree() = default;
 
   gTree<T> &operator=(const gTree<T> &) = delete;
 
-  void InsertAt(const T &t, gTreeNode<T> *n) { n->children.push_back(new gTreeNode<T>(t)); }
+  void InsertAt(const T &t, gTreeNode<T> &n) { n.children.push_back(gTreeNode<T>(t)); }
 
-  gTreeNode<T> *RootNode() const { return root; }
+  const gTreeNode<T> &RootNode() const { return root; }
+  gTreeNode<T> &RootNode() { return root; }
 };
 
 #endif // GTREE_H

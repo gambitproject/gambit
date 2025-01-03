@@ -35,9 +35,8 @@ template <class T> class TreeOfPartials {
 private:
   gTree<gPoly<T>> PartialTree;
 
-  void TreeOfPartialsRECURSIVE(gTree<gPoly<T>> &, gTreeNode<gPoly<T>> *) const;
-
-  T MaximalNonconstantContributionRECURSIVE(const gTreeNode<gPoly<T>> *, const Vector<T> &,
+  void TreeOfPartialsRECURSIVE(gTree<gPoly<T>> &, gTreeNode<gPoly<T>> &);
+  T MaximalNonconstantContributionRECURSIVE(const gTreeNode<gPoly<T>> &, const Vector<T> &,
                                             const Vector<T> &, Vector<int> &) const;
 
 public:
@@ -48,12 +47,11 @@ public:
   TreeOfPartials(const TreeOfPartials<T> &) = default;
   ~TreeOfPartials() = default;
 
-  int Dmnsn() const { return RootNode()->GetData().Dmnsn(); }
+  int Dmnsn() const { return PartialTree.RootNode().GetData().Dmnsn(); }
 
   T MaximalNonconstantContribution(const Vector<T> &, const Vector<T> &) const;
 
-  gTreeNode<gPoly<T>> *RootNode() const { return PartialTree.RootNode(); }
-  const gPoly<T> &RootPoly() const { return RootNode()->GetData(); }
+  const gPoly<T> &RootPoly() const { return PartialTree.RootNode().GetData(); }
   T ValueOfRootPoly(const Vector<T> &point) const { return RootPoly().Evaluate(point); }
   T ValueOfPartialOfRootPoly(int, const Vector<T> &) const;
   bool PolyHasNoRootsIn(const Rectangle<T> &) const;
