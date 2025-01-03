@@ -46,11 +46,23 @@ template <class T> class gTree {
 protected:
   gTreeNode<T> *root;
 
-  void RecursiveCopy(gTreeNode<T> *, const gTreeNode<T> *);
-  void RecursiveFlush(const gTreeNode<T> *);
+  void RecursiveCopy(gTreeNode<T> *copyn, const gTreeNode<T> *orign)
+  {
+    const auto &oldchildren = orign->GetChildren();
+    for (const auto &child : oldchildren) {
+      copyn->children.push_back(new gTreeNode<T>(child->data));
+      RecursiveCopy(copyn->children.back(), child);
+    }
+  }
+  void RecursiveFlush(const gTreeNode<T> *n)
+  {
+    for (const auto &child : n->GetChildren()) {
+      RecursiveFlush(child);
+    }
+    delete n;
+  }
 
 public:
-  gTree() : root(nullptr) {}
   explicit gTree(const T &root_value) : root(new gTreeNode<T>(root_value)) {}
   gTree(const gTree<T> &b) : root(nullptr)
   {
@@ -63,7 +75,7 @@ public:
 
   gTree<T> &operator=(const gTree<T> &) = delete;
 
-  void InsertAt(const T &, gTreeNode<T> *);
+  void InsertAt(const T &t, gTreeNode<T> *n) { n->children.push_back(new gTreeNode<T>(t)); }
 
   gTreeNode<T> *RootNode() const { return root; }
 };
