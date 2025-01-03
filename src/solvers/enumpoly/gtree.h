@@ -32,13 +32,10 @@ template <class T> class gTreeNode {
 
 private:
   T data;
-  gTreeNode<T> *parent, *prev, *next, *eldest, *youngest;
+  gTreeNode<T> *parent, *next{nullptr}, *eldest{nullptr}, *youngest{nullptr};
 
 public:
-  gTreeNode(const T &_data, gTreeNode<T> *_parent, gTreeNode<T> *_prev)
-    : data(_data), parent(_parent), prev(_prev), next(nullptr), eldest(nullptr), youngest(nullptr)
-  {
-  }
+  gTreeNode(const T &_data, gTreeNode<T> *_parent) : data(_data), parent(_parent) {}
   ~gTreeNode() = default;
 
   const T &GetData() const { return data; }
@@ -57,11 +54,11 @@ protected:
 
 public:
   gTree() : root(nullptr) {}
-  explicit gTree(const T &root_value) : root(new gTreeNode<T>(root_value, nullptr, nullptr)) {}
+  explicit gTree(const T &root_value) : root(new gTreeNode<T>(root_value, nullptr)) {}
   gTree(const gTree<T> &b) : root(nullptr)
   {
     if (b.root != nullptr) {
-      root = new gTreeNode<T>(b.root->data, nullptr, nullptr);
+      root = new gTreeNode<T>(b.root->data, nullptr);
       RecursiveCopy(root, b.root);
     }
   }
