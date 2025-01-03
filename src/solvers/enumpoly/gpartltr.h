@@ -74,12 +74,6 @@ private:
   List<TreeOfPartials<T>> PartialTreeList;
 
 public:
-  explicit ListOfPartialTrees(const List<gPoly<T>> &given)
-  {
-    for (const auto &poly : given) {
-      PartialTreeList.push_back(TreeOfPartials<T>(poly));
-    }
-  }
   explicit ListOfPartialTrees(const gPolyList<T> &given)
   {
     for (const auto &p : given) {
