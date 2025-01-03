@@ -47,7 +47,6 @@ public:
 
   const T &GetData() const { return data; }
   gTreeNode<T> *GetParent() const { return parent; }
-  gTreeNode<T> *GetPrev() const { return prev; }
   gTreeNode<T> *GetNext() const { return next; }
   gTreeNode<T> *GetEldest() const { return eldest; }
   gTreeNode<T> *GetYoungest() const { return youngest; }
@@ -59,7 +58,6 @@ protected:
 
   void RecursiveCopy(gTreeNode<T> *, const gTreeNode<T> *);
   void RecursiveFlush(const gTreeNode<T> *);
-  void Flush();
 
 public:
   gTree() : root(nullptr) {}
@@ -67,8 +65,14 @@ public:
     : root(new gTreeNode<T>(root_value, nullptr, nullptr, nullptr, nullptr, nullptr))
   {
   }
-  gTree(const gTree<T> &);
-  ~gTree() { Flush(); }
+  gTree(const gTree<T> &b) : root(nullptr)
+  {
+    if (b.root != nullptr) {
+      root = new gTreeNode<T>(b.root->data, nullptr, nullptr, nullptr, nullptr, nullptr);
+      RecursiveCopy(root, b.root);
+    }
+  }
+  ~gTree() { RecursiveFlush(root); }
 
   gTree<T> &operator=(const gTree<T> &) = delete;
 
