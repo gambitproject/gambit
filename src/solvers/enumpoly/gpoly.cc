@@ -23,4 +23,4 @@
 #include "gpoly.imp"
 #include "gambit.h"
 
-template class gPoly<double>;
+template class Polynomial<double>;

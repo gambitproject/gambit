@@ -95,9 +95,9 @@ gPolyList<double> ActionProbsSumToOneIneqs(const MixedBehaviorProfile<double> &p
     for (auto infoset : player->GetInfosets()) {
       if (!big_supp.HasAction(infoset)) {
         int index_base = var_index.at(infoset);
-        gPoly<double> factor(&BehavStratSpace, 1.0);
+        Polynomial<double> factor(&BehavStratSpace, 1.0);
         for (int k = 1; k < infoset->NumActions(); k++) {
-          factor -= gPoly<double>(&BehavStratSpace, index_base + k, 1);
+          factor -= Polynomial<double>(&BehavStratSpace, index_base + k, 1);
         }
         answer.push_back(factor);
       }
@@ -177,7 +177,7 @@ std::list<BehaviorSupportProfile> DeviationSupports(const BehaviorSupportProfile
 }
 
 bool NashNodeProbabilityPoly(const MixedBehaviorProfile<double> &p_solution,
-                             gPoly<double> &node_prob, const VariableSpace &BehavStratSpace,
+                             Polynomial<double> &node_prob, const VariableSpace &BehavStratSpace,
                              const BehaviorSupportProfile &dsupp,
                              const std::map<GameInfoset, int> &var_index, GameNode tempnode,
                              const GameInfoset &iset, const GameAction &act)
@@ -209,12 +209,12 @@ bool NashNodeProbabilityPoly(const MixedBehaviorProfile<double> &p_solution,
       int initial_var_no = var_index.at(last_infoset);
       if (last_action->GetNumber() < last_infoset->NumActions()) {
         int varno = initial_var_no + last_action->GetNumber();
-        node_prob *= gPoly<double>(&BehavStratSpace, varno, 1);
+        node_prob *= Polynomial<double>(&BehavStratSpace, varno, 1);
       }
       else {
-        gPoly<double> factor(&BehavStratSpace, 1.0);
+        Polynomial<double> factor(&BehavStratSpace, 1.0);
         for (int k = 1; k < last_infoset->NumActions(); k++) {
-          factor -= gPoly<double>(&BehavStratSpace, initial_var_no + k, 1);
+          factor -= Polynomial<double>(&BehavStratSpace, initial_var_no + k, 1);
         }
         node_prob *= factor;
       }
@@ -249,10 +249,10 @@ gPolyList<double> NashExpectedPayoffDiffPolys(const MixedBehaviorProfile<double>
           // The utility difference between the
           // payoff resulting from the profile and deviation to
           // the strategy for pl specified by dsupp[k]
-          gPoly<double> next_poly(&BehavStratSpace);
+          Polynomial<double> next_poly(&BehavStratSpace);
 
           for (auto node : terminal_nodes) {
-            gPoly<double> node_prob(&BehavStratSpace, 1.0);
+            Polynomial<double> node_prob(&BehavStratSpace, 1.0);
             if (NashNodeProbabilityPoly(p_solution, node_prob, BehavStratSpace, support, var_index,
                                         node, infoset, action)) {
               if (node->GetOutcome()) {
@@ -323,7 +323,7 @@ bool ExtendsToNash(const MixedBehaviorProfile<double> &p_solution,
 namespace {
 
 bool ANFNodeProbabilityPoly(const MixedBehaviorProfile<double> &p_solution,
-                            gPoly<double> &node_prob, const VariableSpace &BehavStratSpace,
+                            Polynomial<double> &node_prob, const VariableSpace &BehavStratSpace,
                             const BehaviorSupportProfile &big_supp,
                             const std::map<GameInfoset, int> &var_index, GameNode tempnode, int pl,
                             int i, int j)
@@ -352,12 +352,12 @@ bool ANFNodeProbabilityPoly(const MixedBehaviorProfile<double> &p_solution,
       int initial_var_no = var_index.at(last_infoset);
       if (last_action->GetNumber() < last_infoset->NumActions()) {
         int varno = initial_var_no + last_action->GetNumber();
-        node_prob *= gPoly<double>(&BehavStratSpace, varno, 1);
+        node_prob *= Polynomial<double>(&BehavStratSpace, varno, 1);
       }
       else {
-        gPoly<double> factor(&BehavStratSpace, 1.0);
+        Polynomial<double> factor(&BehavStratSpace, 1.0);
         for (int k = 1; k < last_infoset->NumActions(); k++) {
-          factor -= gPoly<double>(&BehavStratSpace, initial_var_no + k, 1);
+          factor -= Polynomial<double>(&BehavStratSpace, initial_var_no + k, 1);
         }
         node_prob *= factor;
       }
@@ -389,9 +389,9 @@ gPolyList<double> ANFExpectedPayoffDiffPolys(const MixedBehaviorProfile<double> 
         // This will be the utility difference between the
         // payoff resulting from the profile and deviation to
         // action j
-        gPoly<double> next_poly(&BehavStratSpace);
+        Polynomial<double> next_poly(&BehavStratSpace);
         for (auto terminal : terminal_nodes) {
-          gPoly<double> node_prob(&BehavStratSpace, 1.0);
+          Polynomial<double> node_prob(&BehavStratSpace, 1.0);
           if (ANFNodeProbabilityPoly(p_solution, node_prob, BehavStratSpace, big_supp, var_index,
                                      terminal, player->GetNumber(), infoset->GetNumber(),
                                      action->GetNumber())) {
@@ -444,7 +444,7 @@ bool ExtendsToAgentNash(const MixedBehaviorProfile<double> &p_solution,
 
   // We establish the space
   VariableSpace BehavStratSpace(num_vars);
-  num_vars = BehavStratSpace.Dmnsn();
+  num_vars = BehavStratSpace.GetDimension();
   gPolyList<double> inequalities =
       ExtendsToANFNashIneqs(p_solution, BehavStratSpace, little_supp, big_supp, var_index);
 

@@ -55,13 +55,13 @@ public:
   GameSequenceForm sfg;
   VariableSpace Space;
   std::map<GameSequence, int> var;
-  std::map<GameSequence, gPoly<double>> variables;
+  std::map<GameSequence, Polynomial<double>> variables;
 
   explicit ProblemData(const BehaviorSupportProfile &p_support);
 };
 
-gPoly<double> BuildSequenceVariable(ProblemData &p_data, const GameSequence &p_sequence,
-                                    const std::map<GameSequence, int> &var)
+Polynomial<double> BuildSequenceVariable(ProblemData &p_data, const GameSequence &p_sequence,
+                                         const std::map<GameSequence, int> &var)
 {
   if (!p_sequence->action) {
     return {&p_data.Space, 1};
@@ -70,7 +70,7 @@ gPoly<double> BuildSequenceVariable(ProblemData &p_data, const GameSequence &p_s
     return {&p_data.Space, var.at(p_sequence), 1};
   }
 
-  gPoly<double> equation(&p_data.Space);
+  Polynomial<double> equation(&p_data.Space);
   for (auto seq : p_data.sfg.GetSequences(p_sequence->player)) {
     if (seq == p_sequence) {
       continue;
@@ -99,14 +99,14 @@ ProblemData::ProblemData(const BehaviorSupportProfile &p_support)
   }
 }
 
-gPoly<double> GetPayoff(ProblemData &p_data, const GamePlayer &p_player)
+Polynomial<double> GetPayoff(ProblemData &p_data, const GamePlayer &p_player)
 {
-  gPoly<double> equation(&p_data.Space);
+  Polynomial<double> equation(&p_data.Space);
 
   for (auto profile : p_data.sfg.GetContingencies()) {
     auto pay = p_data.sfg.GetPayoff(profile, p_player);
     if (pay != Rational(0)) {
-      gPoly<double> term(&p_data.Space, double(pay));
+      Polynomial<double> term(&p_data.Space, double(pay));
       for (auto player : p_data.sfg.GetPlayers()) {
         term *= p_data.variables.at(profile[player]);
       }
@@ -119,7 +119,7 @@ gPoly<double> GetPayoff(ProblemData &p_data, const GamePlayer &p_player)
 void IndifferenceEquations(ProblemData &p_data, gPolyList<double> &p_equations)
 {
   for (auto player : p_data.sfg.GetPlayers()) {
-    gPoly<double> payoff = GetPayoff(p_data, player);
+    Polynomial<double> payoff = GetPayoff(p_data, player);
     for (auto sequence : p_data.sfg.GetSequences(player)) {
       try {
         p_equations.push_back(payoff.PartialDerivative(p_data.var.at(sequence)));
@@ -163,7 +163,7 @@ std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfil
   LastActionProbPositiveInequalities(data, equations);
 
   // set up the rectangle of search
-  Vector<double> bottoms(data.Space.Dmnsn()), tops(data.Space.Dmnsn());
+  Vector<double> bottoms(data.Space.GetDimension()), tops(data.Space.GetDimension());
   bottoms = 0;
   tops = 1;
 

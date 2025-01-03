@@ -33,7 +33,7 @@ template <class T>
 void TreeOfPartials<T>::BuildTree(Node &n)
 {
   if (n.data.Degree() >= 1) {
-    for (int i = 1; i <= n.data.Dmnsn(); i++) {
+    for (int i = 1; i <= n.data.GetDimension(); i++) {
       n.children.push_back(n.data.PartialDerivative(i));
       BuildTree(n.children.back());
     }

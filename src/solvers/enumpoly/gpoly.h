@@ -46,7 +46,7 @@ public:
   ~VariableSpace() = default;
   VariableSpace &operator=(const VariableSpace &) = delete;
   const Variable &operator[](const int index) const { return m_variables[index]; }
-  int Dmnsn() const { return m_variables.size(); }
+  int GetDimension() const { return m_variables.size(); }
 
 private:
   Array<Variable> m_variables;
@@ -62,13 +62,13 @@ private:
   Vector<int> m_components;
 
 public:
-  explicit ExponentVector(const VariableSpace *p) : m_space(p), m_components(p->Dmnsn())
+  explicit ExponentVector(const VariableSpace *p) : m_space(p), m_components(p->GetDimension())
   {
     m_components = 0;
   }
   // Construct x_i^j
   ExponentVector(const VariableSpace *p, const int i, const int j)
-    : m_space(p), m_components(p->Dmnsn())
+    : m_space(p), m_components(p->GetDimension())
   {
     m_components = 0;
     m_components[i] = j;
@@ -109,10 +109,10 @@ public:
   }
 
   // Information
-  int Dmnsn() const { return m_space->Dmnsn(); }
+  int GetDimension() const { return m_space->GetDimension(); }
   bool IsConstant() const
   {
-    for (int i = 1; i <= Dmnsn(); i++) {
+    for (int i = 1; i <= GetDimension(); i++) {
       if ((*this)[i] > 0) {
         return false;
       }
@@ -121,7 +121,7 @@ public:
   }
   bool IsMultiaffine() const
   {
-    for (int i = 1; i <= Dmnsn(); i++) {
+    for (int i = 1; i <= GetDimension(); i++) {
       if ((*this)[i] > 1) {
         return false;
       }
@@ -131,7 +131,7 @@ public:
   int TotalDegree() const
   {
     int exp_sum = 0;
-    for (int i = 1; i <= Dmnsn(); i++) {
+    for (int i = 1; i <= GetDimension(); i++) {
       exp_sum += (*this)[i];
     }
     return exp_sum;
@@ -140,14 +140,14 @@ public:
   // Manipulation
   void ToZero()
   {
-    for (int i = 1; i <= Dmnsn(); i++) {
+    for (int i = 1; i <= GetDimension(); i++) {
       m_components[i] = 0;
     }
   }
 
   bool operator<(const ExponentVector &y) const
   {
-    for (int i = 1; i <= Dmnsn(); i++) {
+    for (int i = 1; i <= GetDimension(); i++) {
       if (m_components[i] < y.m_components[i]) {
         return true;
       }
@@ -163,52 +163,51 @@ public:
 };
 
 /// A monomial of multiple variables with non-negative exponents
-template <class T> class gMono {
+template <class T> class Monomial {
 private:
   T coef;
   ExponentVector exps;
 
 public:
   // constructors
-  gMono(const VariableSpace *p, const T &x) : coef(x), exps(p) {}
-  gMono(const T &x, const ExponentVector &e) : coef(x), exps(e)
+  Monomial(const VariableSpace *p, const T &x) : coef(x), exps(p) {}
+  Monomial(const T &x, const ExponentVector &e) : coef(x), exps(e)
   {
     if (x == static_cast<T>(0)) {
       exps.ToZero();
     }
   }
-  gMono(const gMono<T> &) = default;
-  ~gMono() = default;
+  Monomial(const Monomial<T> &) = default;
+  ~Monomial() = default;
 
   // operators
-  gMono<T> &operator=(const gMono<T> &) = default;
+  Monomial<T> &operator=(const Monomial<T> &) = default;
 
-  bool operator==(const gMono<T> &y) const { return (coef == y.coef && exps == y.exps); }
-  bool operator!=(const gMono<T> &y) const { return (coef != y.coef || exps != y.exps); }
-  gMono<T> operator*(const gMono<T> &y) const { return {coef * y.coef, exps + y.exps}; }
-  gMono<T> operator+(const gMono<T> &y) const { return {coef + y.coef, exps}; }
-  gMono<T> &operator+=(const gMono<T> &y)
+  bool operator==(const Monomial<T> &y) const { return (coef == y.coef && exps == y.exps); }
+  bool operator!=(const Monomial<T> &y) const { return (coef != y.coef || exps != y.exps); }
+  Monomial<T> operator*(const Monomial<T> &y) const { return {coef * y.coef, exps + y.exps}; }
+  Monomial<T> operator+(const Monomial<T> &y) const { return {coef + y.coef, exps}; }
+  Monomial<T> &operator+=(const Monomial<T> &y)
   {
     coef += y.coef;
     return *this;
   }
-  gMono<T> &operator*=(const T &v)
+  Monomial<T> &operator*=(const T &v)
   {
     coef *= v;
     return *this;
   }
-  gMono<T> operator-() const { return {-coef, exps}; }
+  Monomial<T> operator-() const { return {-coef, exps}; }
 
   // information
   const T &Coef() const { return coef; }
-  int Dmnsn() const { return exps.Dmnsn(); }
   int TotalDegree() const { return exps.TotalDegree(); }
   bool IsMultiaffine() const { return exps.IsMultiaffine(); }
   const ExponentVector &ExpV() const { return exps; }
   T Evaluate(const Vector<T> &vals) const
   {
     T answer = coef;
-    for (int i = 1; i <= exps.Dmnsn(); i++) {
+    for (int i = 1; i <= exps.GetDimension(); i++) {
       for (int j = 1; j <= exps[i]; j++) {
         answer *= vals[i];
       }
@@ -218,152 +217,153 @@ public:
 };
 
 // A multivariate polynomial
-template <class T> class gPoly {
+template <class T> class Polynomial {
 private:
   const VariableSpace *Space;
-  List<gMono<T>> Terms;
+  List<Monomial<T>> Terms;
 
   // Arithmetic
-  List<gMono<T>> Adder(const List<gMono<T>> &, const List<gMono<T>> &) const;
-  List<gMono<T>> Mult(const List<gMono<T>> &, const List<gMono<T>> &) const;
-  gPoly<T> DivideByPolynomial(const gPoly<T> &den) const;
+  List<Monomial<T>> Adder(const List<Monomial<T>> &, const List<Monomial<T>> &) const;
+  List<Monomial<T>> Mult(const List<Monomial<T>> &, const List<Monomial<T>> &) const;
+  Polynomial<T> DivideByPolynomial(const Polynomial<T> &den) const;
 
-  gPoly<T> TranslateOfMono(const gMono<T> &, const Vector<T> &) const;
-  gPoly<T> MonoInNewCoordinates(const gMono<T> &, const SquareMatrix<T> &) const;
+  Polynomial<T> TranslateOfMono(const Monomial<T> &, const Vector<T> &) const;
+  Polynomial<T> MonoInNewCoordinates(const Monomial<T> &, const SquareMatrix<T> &) const;
 
 public:
-  gPoly(const VariableSpace *p) : Space(p) {}
-  // Constructs a constant gPoly
-  gPoly(const VariableSpace *p, const T &constant) : Space(p)
+  Polynomial(const VariableSpace *p) : Space(p) {}
+  // A constant polynomial
+  Polynomial(const VariableSpace *p, const T &constant) : Space(p)
   {
     if (constant != static_cast<T>(0)) {
-      Terms.push_back(gMono<T>(p, constant));
+      Terms.push_back(Monomial<T>(p, constant));
     }
   }
-  gPoly(const gPoly<T> &) = default;
+  Polynomial(const Polynomial<T> &) = default;
   // Constructs a gPoly that is x_{var_no}^exp;
-  gPoly(const VariableSpace *p, const int var_no, const int exp) : Space(p)
+  Polynomial(const VariableSpace *p, const int var_no, const int exp) : Space(p)
   {
-    Terms.push_back(gMono<T>(static_cast<T>(1), ExponentVector(p, var_no, exp)));
+    Terms.push_back(Monomial<T>(static_cast<T>(1), ExponentVector(p, var_no, exp)));
   }
   // Constructs a gPoly that is the monomial coeff*vars^exps;
-  gPoly(const VariableSpace *p, const ExponentVector &exps, const T &coeff) : Space(p)
+  Polynomial(const VariableSpace *p, const ExponentVector &exps, const T &coeff) : Space(p)
   {
-    Terms.push_back(gMono<T>(coeff, exps));
+    Terms.push_back(Monomial<T>(coeff, exps));
   }
   // Constructs a gPoly with single monomial
-  gPoly(const VariableSpace *p, const gMono<T> &mono) : Space(p) { Terms.push_back(mono); }
-  ~gPoly() = default;
+  Polynomial(const VariableSpace *p, const Monomial<T> &mono) : Space(p) { Terms.push_back(mono); }
+  ~Polynomial() = default;
 
   //----------
   // Operators:
   //----------
 
-  gPoly<T> &operator=(const gPoly<T> &) = default;
-  gPoly<T> operator-() const
+  Polynomial<T> &operator=(const Polynomial<T> &) = default;
+  Polynomial<T> operator-() const
   {
-    gPoly<T> neg(*this);
+    Polynomial<T> neg(*this);
     for (size_t j = 1; j <= Terms.size(); j++) {
       neg.Terms[j] = -Terms[j];
     }
     return neg;
   }
-  gPoly<T> operator-(const gPoly<T> &p) const
+  Polynomial<T> operator-(const Polynomial<T> &p) const
   {
-    gPoly<T> dif(*this);
+    Polynomial<T> dif(*this);
     dif -= p;
     return dif;
   }
-  void operator-=(const gPoly<T> &p)
+  void operator-=(const Polynomial<T> &p)
   {
-    gPoly<T> neg = p;
+    Polynomial<T> neg = p;
     for (size_t i = 1; i <= neg.Terms.size(); i++) {
       neg.Terms[i] = -neg.Terms[i];
     }
     Terms = Adder(Terms, neg.Terms);
   }
-  gPoly<T> operator+(const gPoly<T> &p) const
+  Polynomial<T> operator+(const Polynomial<T> &p) const
   {
-    gPoly<T> sum(*this);
+    Polynomial<T> sum(*this);
     sum += p;
     return sum;
   }
-  gPoly<T> operator+(const T &v) const
+  Polynomial<T> operator+(const T &v) const
   {
-    gPoly<T> result(*this);
+    Polynomial<T> result(*this);
     result += v;
     return result;
   }
-  void operator+=(const gPoly<T> &p) { Terms = Adder(Terms, p.Terms); }
-  void operator+=(const T &val) { *this += gPoly<T>(Space, val); }
-  gPoly<T> operator*(const gPoly<T> &p) const
+  void operator+=(const Polynomial<T> &p) { Terms = Adder(Terms, p.Terms); }
+  void operator+=(const T &val) { *this += Polynomial<T>(Space, val); }
+  Polynomial<T> operator*(const Polynomial<T> &p) const
   {
-    gPoly<T> prod(*this);
+    Polynomial<T> prod(*this);
     prod *= p;
     return prod;
   }
-  gPoly<T> operator*(const T &v) const
+  Polynomial<T> operator*(const T &v) const
   {
-    gPoly<T> result(*this);
+    Polynomial<T> result(*this);
     result *= v;
     return result;
   }
-  void operator*=(const gPoly<T> &p) { Terms = Mult(Terms, p.Terms); }
+  void operator*=(const Polynomial<T> &p) { Terms = Mult(Terms, p.Terms); }
   void operator*=(const T &val)
   {
     for (size_t j = 1; j <= Terms.size(); j++) {
       Terms[j] *= val;
     }
   }
-  gPoly<T> operator/(const T &val) const
+  Polynomial<T> operator/(const T &val) const
   {
     if (val == static_cast<T>(0)) {
       throw ZeroDivideException();
     }
     return (*this) * (static_cast<T>(1) / val);
   }
-  gPoly<T> operator/(const gPoly<T> &den) const { return DivideByPolynomial(den); }
+  Polynomial<T> operator/(const Polynomial<T> &den) const { return DivideByPolynomial(den); }
 
-  bool operator==(const gPoly<T> &p) const { return Space == p.Space && Terms == p.Terms; }
-  bool operator!=(const gPoly<T> &p) const { return Space != p.Space || Terms != p.Terms; }
+  bool operator==(const Polynomial<T> &p) const { return Space == p.Space && Terms == p.Terms; }
+  bool operator!=(const Polynomial<T> &p) const { return Space != p.Space || Terms != p.Terms; }
 
   //-------------
   // Information
   //-------------
 
   const VariableSpace *GetSpace() const { return Space; }
-  int Dmnsn() const { return Space->Dmnsn(); }
+  int GetDimension() const { return Space->GetDimension(); }
   int DegreeOfVar(int var_no) const
   {
-    return std::accumulate(Terms.begin(), Terms.end(), 0, [&var_no](int v, const gMono<T> &m) {
+    return std::accumulate(Terms.begin(), Terms.end(), 0, [&var_no](int v, const Monomial<T> &m) {
       return std::max(v, m.ExpV()[var_no]);
     });
   }
   int Degree() const
   {
-    return std::accumulate(Terms.begin(), Terms.end(), 0,
-                           [](int v, const gMono<T> &m) { return std::max(v, m.TotalDegree()); });
+    return std::accumulate(Terms.begin(), Terms.end(), 0, [](int v, const Monomial<T> &m) {
+      return std::max(v, m.TotalDegree());
+    });
   }
-  gPoly<T> LeadingCoefficient(int varnumber) const;
+  Polynomial<T> LeadingCoefficient(int varnumber) const;
   T NumLeadCoeff() const { return (Terms.size() == 1) ? Terms.front().Coef() : static_cast<T>(0); }
   bool IsMultiaffine() const
   {
     return std::all_of(Terms.begin(), Terms.end(),
-                       [](const gMono<T> &t) { return t.IsMultiaffine(); });
+                       [](const Monomial<T> &t) { return t.IsMultiaffine(); });
   }
   T Evaluate(const Vector<T> &values) const
   {
     return std::accumulate(
         Terms.begin(), Terms.end(), static_cast<T>(0),
-        [&values](const T &v, const gMono<T> &m) { return v + m.Evaluate(values); });
+        [&values](const T &v, const Monomial<T> &m) { return v + m.Evaluate(values); });
   }
-  gPoly<T> PartialDerivative(int varnumber) const;
-  const List<gMono<T>> &MonomialList() const { return Terms; }
+  Polynomial<T> PartialDerivative(int varnumber) const;
+  const List<Monomial<T>> &MonomialList() const { return Terms; }
 
-  gPoly<T> TranslateOfPoly(const Vector<T> &) const;
-  gPoly<T> PolyInNewCoordinates(const SquareMatrix<T> &) const;
+  Polynomial<T> TranslateOfPoly(const Vector<T> &) const;
+  Polynomial<T> PolyInNewCoordinates(const SquareMatrix<T> &) const;
   T MaximalValueOfNonlinearPart(const T &) const;
-  gPoly<T> Normalize() const;
+  Polynomial<T> Normalize() const;
 };
 
 #endif // # GPOLY_H

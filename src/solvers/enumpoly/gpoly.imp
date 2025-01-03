@@ -33,7 +33,7 @@
 //-------------------------------------------------------------
 
 template <class T>
-List<gMono<T>> gPoly<T>::Adder(const List<gMono<T>> &One, const List<gMono<T>> &Two) const
+List<Monomial<T>> Polynomial<T>::Adder(const List<Monomial<T>> &One, const List<Monomial<T>> &Two) const
 {
   if (One.empty()) {
     return Two;
@@ -42,7 +42,7 @@ List<gMono<T>> gPoly<T>::Adder(const List<gMono<T>> &One, const List<gMono<T>> &
     return One;
   }
 
-  List<gMono<T>> answer;
+  List<Monomial<T>> answer;
 
   size_t i = 1;
   size_t j = 1;
@@ -78,9 +78,9 @@ List<gMono<T>> gPoly<T>::Adder(const List<gMono<T>> &One, const List<gMono<T>> &
 }
 
 template <class T>
-List<gMono<T>> gPoly<T>::Mult(const List<gMono<T>> &One, const List<gMono<T>> &Two) const
+List<Monomial<T>> Polynomial<T>::Mult(const List<Monomial<T>> &One, const List<Monomial<T>> &Two) const
 {
-  List<gMono<T>> answer;
+  List<Monomial<T>> answer;
 
   if (One.empty() || Two.empty()) {
     return answer;
@@ -88,7 +88,7 @@ List<gMono<T>> gPoly<T>::Mult(const List<gMono<T>> &One, const List<gMono<T>> &T
 
   for (size_t i = 1; i <= One.size(); i++) {
     for (size_t j = 1; j <= Two.size(); j++) {
-      gMono<T> next = One[i] * Two[j];
+      Monomial<T> next = One[i] * Two[j];
 
       if (answer.empty()) {
         answer.push_back(next);
@@ -137,16 +137,16 @@ List<gMono<T>> gPoly<T>::Mult(const List<gMono<T>> &One, const List<gMono<T>> &T
   return answer;
 }
 
-template <class T> gPoly<T> gPoly<T>::DivideByPolynomial(const gPoly<T> &den) const
+template <class T> Polynomial<T> Polynomial<T>::DivideByPolynomial(const Polynomial<T> &den) const
 {
-  gPoly<T> zero(Space, static_cast<T>(0));
+  Polynomial<T> zero(Space, static_cast<T>(0));
 
   if (den == zero) {
     throw ZeroDivideException();
   }
   // assumes exact divisibility!
 
-  gPoly<T> result = zero;
+  Polynomial<T> result = zero;
 
   if (*this == zero) {
     return result;
@@ -156,16 +156,16 @@ template <class T> gPoly<T> gPoly<T>::DivideByPolynomial(const gPoly<T> &den) co
     return result;
   }
   else {
-    int last = Dmnsn();
+    int last = GetDimension();
     while (den.DegreeOfVar(last) == 0) {
       last--;
     }
 
-    gPoly<T> remainder = *this;
+    Polynomial<T> remainder = *this;
 
     while (remainder != zero) {
-      gPoly<T> quot = remainder.LeadingCoefficient(last) / den.LeadingCoefficient(last);
-      gPoly<T> power_of_last(Space, last, remainder.DegreeOfVar(last) - den.DegreeOfVar(last));
+      Polynomial<T> quot = remainder.LeadingCoefficient(last) / den.LeadingCoefficient(last);
+      Polynomial<T> power_of_last(Space, last, remainder.DegreeOfVar(last) - den.DegreeOfVar(last));
       result += quot * power_of_last;
       remainder -= quot * power_of_last * den;
     }
@@ -173,13 +173,13 @@ template <class T> gPoly<T> gPoly<T>::DivideByPolynomial(const gPoly<T> &den) co
   return result;
 }
 
-template <class T> gPoly<T> gPoly<T>::PartialDerivative(int varnumber) const
+template <class T> Polynomial<T> Polynomial<T>::PartialDerivative(int varnumber) const
 {
-  gPoly<T> newPoly(*this);
+  Polynomial<T> newPoly(*this);
 
   for (size_t i = 1; i <= newPoly.Terms.size(); i++) {
-    newPoly.Terms[i] = gMono<T>(newPoly.Terms[i].Coef() * (T)newPoly.Terms[i].ExpV()[varnumber],
-                                newPoly.Terms[i].ExpV().WithZeroExponent(varnumber));
+    newPoly.Terms[i] = Monomial<T>(newPoly.Terms[i].Coef() * (T)newPoly.Terms[i].ExpV()[varnumber],
+                                   newPoly.Terms[i].ExpV().WithZeroExponent(varnumber));
   }
 
   size_t j = 1;
@@ -195,28 +195,28 @@ template <class T> gPoly<T> gPoly<T>::PartialDerivative(int varnumber) const
   return newPoly;
 }
 
-template <class T> gPoly<T> gPoly<T>::LeadingCoefficient(int varnumber) const
+template <class T> Polynomial<T> Polynomial<T>::LeadingCoefficient(int varnumber) const
 {
-  gPoly<T> newPoly(*this);
+  Polynomial<T> newPoly(*this);
   int degree = DegreeOfVar(varnumber);
-  newPoly.Terms = List<gMono<T>>();
+  newPoly.Terms = List<Monomial<T>>();
   for (size_t j = 1; j <= Terms.size(); j++) {
     if (Terms[j].ExpV()[varnumber] == degree) {
       newPoly.Terms.push_back(
-          gMono<T>(Terms[j].Coef(), Terms[j].ExpV().WithZeroExponent(varnumber)));
+        Monomial<T>(Terms[j].Coef(), Terms[j].ExpV().WithZeroExponent(varnumber)));
     }
   }
   return newPoly;
 }
 
 template <class T>
-gPoly<T> gPoly<T>::TranslateOfMono(const gMono<T> &m, const Vector<T> &new_origin) const
+Polynomial<T> Polynomial<T>::TranslateOfMono(const Monomial<T> &m, const Vector<T> &new_origin) const
 {
-  gPoly<T> answer(GetSpace(), static_cast<T>(1));
-  for (int i = 1; i <= Dmnsn(); i++) {
+  Polynomial<T> answer(GetSpace(), static_cast<T>(1));
+  for (int i = 1; i <= GetDimension(); i++) {
     if (m.ExpV()[i] > 0) {
-      gPoly<T> lt(GetSpace(), i, 1);
-      lt += gPoly<T>(GetSpace(), new_origin[i]);
+      Polynomial<T> lt(GetSpace(), i, 1);
+      lt += Polynomial<T>(GetSpace(), new_origin[i]);
       for (int j = 1; j <= m.ExpV()[i]; j++) {
         answer *= lt;
       }
@@ -226,9 +226,9 @@ gPoly<T> gPoly<T>::TranslateOfMono(const gMono<T> &m, const Vector<T> &new_origi
   return answer;
 }
 
-template <class T> gPoly<T> gPoly<T>::TranslateOfPoly(const Vector<T> &new_origin) const
+template <class T> Polynomial<T> Polynomial<T>::TranslateOfPoly(const Vector<T> &new_origin) const
 {
-  gPoly<T> answer(GetSpace());
+  Polynomial<T> answer(GetSpace());
   for (size_t i = 1; i <= this->MonomialList().size(); i++) {
     answer += TranslateOfMono(this->MonomialList()[i], new_origin);
   }
@@ -236,16 +236,16 @@ template <class T> gPoly<T> gPoly<T>::TranslateOfPoly(const Vector<T> &new_origi
 }
 
 template <class T>
-gPoly<T> gPoly<T>::MonoInNewCoordinates(const gMono<T> &m, const SquareMatrix<T> &M) const
+Polynomial<T> Polynomial<T>::MonoInNewCoordinates(const Monomial<T> &m, const SquareMatrix<T> &M) const
 {
-  gPoly<T> answer(Space, static_cast<T>(1));
+  Polynomial<T> answer(Space, static_cast<T>(1));
 
-  for (int i = 1; i <= Dmnsn(); i++) {
+  for (int i = 1; i <= GetDimension(); i++) {
     if (m.ExpV()[i] > 0) {
-      gPoly<T> linearform(Space, static_cast<T>(0));
-      for (int j = 1; j <= Dmnsn(); j++) {
+      Polynomial<T> linearform(Space, static_cast<T>(0));
+      for (int j = 1; j <= GetDimension(); j++) {
         ExponentVector exps(GetSpace(), j, 1);
-        linearform += gPoly<T>(GetSpace(), exps, M(i, j));
+        linearform += Polynomial<T>(GetSpace(), exps, M(i, j));
       }
       for (int k = 1; k <= m.ExpV()[i]; k++) {
         answer *= linearform;
@@ -256,16 +256,16 @@ gPoly<T> gPoly<T>::MonoInNewCoordinates(const gMono<T> &m, const SquareMatrix<T>
   return answer;
 }
 
-template <class T> gPoly<T> gPoly<T>::PolyInNewCoordinates(const SquareMatrix<T> &M) const
+template <class T> Polynomial<T> Polynomial<T>::PolyInNewCoordinates(const SquareMatrix<T> &M) const
 {
-  gPoly<T> answer(Space);
+  Polynomial<T> answer(Space);
   for (const auto &term : Terms) {
     answer += MonoInNewCoordinates(term, M);
   }
   return answer;
 }
 
-template <class T> T gPoly<T>::MaximalValueOfNonlinearPart(const T &radius) const
+template <class T> T Polynomial<T>::MaximalValueOfNonlinearPart(const T &radius) const
 {
   T maxcon = static_cast<T>(0);
   for (const auto &term : Terms) {
@@ -276,11 +276,11 @@ template <class T> T gPoly<T>::MaximalValueOfNonlinearPart(const T &radius) cons
   return maxcon;
 }
 
-template <class T> gPoly<T> gPoly<T>::Normalize() const
+template <class T> Polynomial<T> Polynomial<T>::Normalize() const
 {
   auto maxcoeff =
       std::max_element(Terms.begin(), Terms.end(),
-                       [](const gMono<T> &a, const gMono<T> &b) { return a.Coef() < b.Coef(); });
+                       [](const Monomial<T> &a, const Monomial<T> &b) { return a.Coef() < b.Coef(); });
   if (maxcoeff->Coef() < static_cast<T>(0.000000001)) {
     return *this;
   }

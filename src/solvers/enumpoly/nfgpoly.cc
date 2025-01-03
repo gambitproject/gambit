@@ -37,14 +37,14 @@ namespace {
 
 // The polynomial representation of each strategy probability, substituting in
 // the sum-to-one equation for the probability of the last strategy for each player
-std::map<GameStrategy, gPoly<double>> BuildStrategyVariables(const VariableSpace &space,
-                                                             const StrategySupportProfile &support)
+std::map<GameStrategy, Polynomial<double>>
+BuildStrategyVariables(const VariableSpace &space, const StrategySupportProfile &support)
 {
   int index = 1;
-  std::map<GameStrategy, gPoly<double>> strategy_poly;
+  std::map<GameStrategy, Polynomial<double>> strategy_poly;
   for (auto player : support.GetGame()->GetPlayers()) {
     auto strategies = support.GetStrategies(player);
-    gPoly<double> residual(&space, 1);
+    Polynomial<double> residual(&space, 1);
     for (auto strategy : strategies) {
       if (strategy != strategies.back()) {
         strategy_poly.try_emplace(strategy, &space, index, 1);
@@ -59,15 +59,15 @@ std::map<GameStrategy, gPoly<double>> BuildStrategyVariables(const VariableSpace
   return strategy_poly;
 }
 
-gPoly<double> IndifferenceEquation(const VariableSpace &space,
-                                   const StrategySupportProfile &support,
-                                   const std::map<GameStrategy, gPoly<double>> &strategy_poly,
-                                   const GameStrategy &s1, const GameStrategy &s2)
+Polynomial<double>
+IndifferenceEquation(const VariableSpace &space, const StrategySupportProfile &support,
+                     const std::map<GameStrategy, Polynomial<double>> &strategy_poly,
+                     const GameStrategy &s1, const GameStrategy &s2)
 {
-  gPoly<double> equation(&space);
+  Polynomial<double> equation(&space);
 
   for (auto iter : StrategyContingencies(support, {s1})) {
-    gPoly<double> term(&space, 1);
+    Polynomial<double> term(&space, 1);
     for (auto player : support.GetGame()->GetPlayers()) {
       if (player != s1->GetPlayer()) {
         term *= strategy_poly.at(iter->GetStrategy(player));
@@ -79,9 +79,9 @@ gPoly<double> IndifferenceEquation(const VariableSpace &space,
   return equation;
 }
 
-gPolyList<double> ConstructEquations(const VariableSpace &space,
-                                     const StrategySupportProfile &support,
-                                     const std::map<GameStrategy, gPoly<double>> &strategy_poly)
+gPolyList<double>
+ConstructEquations(const VariableSpace &space, const StrategySupportProfile &support,
+                   const std::map<GameStrategy, Polynomial<double>> &strategy_poly)
 {
   gPolyList<double> equations(&space);
   // Indifference equations between pairs of strategies for each player
@@ -113,7 +113,7 @@ EnumPolyStrategySupportSolve(const StrategySupportProfile &support, bool &is_sin
   auto strategy_poly = BuildStrategyVariables(Space, support);
   gPolyList<double> equations = ConstructEquations(Space, support, strategy_poly);
 
-  Vector<double> bottoms(Space.Dmnsn()), tops(Space.Dmnsn());
+  Vector<double> bottoms(Space.GetDimension()), tops(Space.GetDimension());
   bottoms = 0;
   tops = 1;
   QuickSolver solver(equations);

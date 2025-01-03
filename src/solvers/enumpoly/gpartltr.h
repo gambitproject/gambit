@@ -34,10 +34,10 @@ template <class T> class TreeOfPartials {
 private:
   struct Node {
   public:
-    gPoly<T> data;
+    Polynomial<T> data;
     std::list<Node> children;
 
-    Node(const gPoly<T> &p_data) : data(p_data) {}
+    Node(const Polynomial<T> &p_data) : data(p_data) {}
     Node(const Node &) = default;
     ~Node() = default;
   };
@@ -49,11 +49,14 @@ private:
                                    Vector<int> &) const;
 
 public:
-  explicit TreeOfPartials(const gPoly<T> &given) : m_treeroot(given) { BuildTree(m_treeroot); }
+  explicit TreeOfPartials(const Polynomial<T> &given) : m_treeroot(given)
+  {
+    BuildTree(m_treeroot);
+  }
   TreeOfPartials(const TreeOfPartials<T> &) = default;
   ~TreeOfPartials() = default;
 
-  int GetDimension() const { return m_treeroot.data.Dmnsn(); }
+  int GetDimension() const { return m_treeroot.data.GetDimension(); }
 
   T MaximalNonconstantContribution(const Vector<T> &, const Vector<T> &) const;
 

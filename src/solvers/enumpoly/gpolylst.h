@@ -32,11 +32,11 @@ using namespace Gambit;
 template <class T> class gPolyList {
 private:
   const VariableSpace *m_space;
-  std::list<gPoly<T>> m_list;
+  std::list<Polynomial<T>> m_list;
 
 public:
-  using iterator = typename List<gPoly<T>>::iterator;
-  using const_iterator = typename List<gPoly<T>>::const_iterator;
+  using iterator = typename List<Polynomial<T>>::iterator;
+  using const_iterator = typename List<Polynomial<T>>::const_iterator;
 
   gPolyList(const VariableSpace *p_space) : m_space(p_space) {}
   gPolyList(const gPolyList<T> &) = default;
@@ -58,7 +58,7 @@ public:
   {
     return m_space != rhs.m_space || m_list != rhs.m_list;
   }
-  void push_back(const gPoly<T> &x) { m_list.push_back(x); }
+  void push_back(const Polynomial<T> &x) { m_list.push_back(x); }
   void push_back(const gPolyList<T> &x)
   {
     for (const auto &p : x.m_list) {
@@ -66,25 +66,25 @@ public:
     }
   }
 
-  const gPoly<T> &operator[](const int index) const
+  const Polynomial<T> &operator[](const int index) const
   {
     return *std::next(m_list.begin(), index - 1);
   }
 
   const VariableSpace *AmbientSpace() const { return m_space; }
   int size() const { return m_list.size(); }
-  int Dmnsn() const { return m_space->Dmnsn(); }
+  int Dmnsn() const { return m_space->GetDimension(); }
   bool IsMultiaffine() const
   {
     return std::all_of(m_list.begin(), m_list.end(),
-                       [](const gPoly<T> &v) { return v.IsMultiaffine(); });
+                       [](const Polynomial<T> &v) { return v.IsMultiaffine(); });
   }
   /// Evaluate system at a point
   Vector<T> Evaluate(const Vector<T> &v) const
   {
     Vector<T> answer(m_list.size());
     std::transform(m_list.begin(), m_list.end(), answer.begin(),
-                   [&](const gPoly<T> &p) { return p.Evaluate(v); });
+                   [&](const Polynomial<T> &p) { return p.Evaluate(v); });
     return answer;
   }
   /// Translate system to new origin

@@ -51,7 +51,7 @@ private:
   bool IsASolution(const Vector<double> &v) const
   {
     return std::all_of(m_system.begin(), m_system.end(),
-                       [&](const gPoly<double> &p) { return p.Evaluate(v) > -m_epsilon; });
+                       [&](const Polynomial<double> &p) { return p.Evaluate(v) > -m_epsilon; });
   }
   bool SystemHasNoSolutionIn(const Rectangle<double> &r, Array<int> &precedence) const
   {
