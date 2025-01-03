@@ -71,29 +71,6 @@ template <class T> Gambit::List<gTreeNode<T> *> gTree<T>::Children(const gTreeNo
   return answer;
 }
 
-template <class T> gTreeNode<T> *gTree<T>::RecursiveFind(const T &t, gTreeNode<T> *n) const
-{
-  gTreeNode<T> *answer = nullptr;
-  if (n->data == t) {
-    answer = n;
-  }
-  else {
-    gTreeNode<T> *probe = n->eldest;
-    while (answer == nullptr && probe != nullptr) {
-      answer = RecursiveFind(t, probe);
-      probe = probe->next;
-    }
-  }
-  return answer;
-}
-
-template <class T> gTreeNode<T> *gTree<T>::Find(const T &t) const
-{
-  return RecursiveFind(t, root);
-}
-
-template <class T> bool gTree<T>::Contains(const T &t) const { return (Find(t) != nullptr); }
-
 template <class T> void gTree<T>::RecursiveFlush(const gTreeNode<T> *n)
 {
   auto children = Children(n);

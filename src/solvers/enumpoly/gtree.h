@@ -57,7 +57,6 @@ template <class T> class gTree {
 protected:
   gTreeNode<T> *root;
 
-  gTreeNode<T> *RecursiveFind(const T &, gTreeNode<T> *) const;
   void RecursiveCopy(gTreeNode<T> *, const gTreeNode<T> *);
   void RecursiveFlush(const gTreeNode<T> *);
   void Flush();
@@ -77,8 +76,6 @@ public:
 
   Gambit::List<gTreeNode<T> *> Children(const gTreeNode<T> *) const;
   gTreeNode<T> *RootNode() const { return root; }
-  gTreeNode<T> *Find(const T &) const;
-  bool Contains(const T &t) const;
 };
 
 #endif // GTREE_H
