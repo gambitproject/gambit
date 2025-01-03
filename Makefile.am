@@ -417,9 +417,6 @@ gambit_enumpoly_SOURCES = \
 	src/solvers/enumpoly/behavextend.h \
 	src/solvers/enumpoly/gtree.h \
 	src/solvers/enumpoly/gtree.imp \
-	src/solvers/enumpoly/linrcomb.cc \
-	src/solvers/enumpoly/linrcomb.h \
-	src/solvers/enumpoly/linrcomb.imp \
 	src/solvers/enumpoly/ndarray.h \
 	src/solvers/enumpoly/odometer.h \
 	src/solvers/enumpoly/efgpoly.cc \
