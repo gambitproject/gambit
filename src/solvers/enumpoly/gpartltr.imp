@@ -43,13 +43,10 @@ void TreeOfPartials<T>::TreeOfPartialsRECURSIVE(Node &n)
 template <class T>
 T TreeOfPartials<T>::ValueOfPartialOfRootPoly(const int coord, const Vector<T> &p) const
 {
-  if (RootPoly().Degree() <= 0) {
+  if (m_treeroot.data.Degree() <= 0) {
     return static_cast<T>(0);
   }
-  else {
-    auto node = std::next(m_treeroot.children.begin(), coord - 1);
-    return node->data.Evaluate(p);
-  }
+  return std::next(m_treeroot.children.begin(), coord - 1)->data.Evaluate(p);
 }
 
 template <class T>
@@ -59,26 +56,22 @@ T TreeOfPartials<T>::MaximalNonconstantContributionRECURSIVE(const Node &n,
                                                              Vector<int> &wrtos) const
 {
   T answer = static_cast<T>(0);
+  const auto &children = n.children;
+  for (size_t i = 1; i <= children.size(); i++) {
+    auto child = *std::next(children.begin(), i - 1);
+    wrtos[i]++;
 
-  if (!n.children.empty()) {
-    const auto &children = n.children;
-    for (size_t i = 1; i <= children.size(); i++) {
-      auto child = *std::next(children.begin(), i - 1);
-      wrtos[i]++;
-
-      T increment = Gambit::abs(child.data.Evaluate(p));
-      for (int j = 1; j <= p.size(); j++) {
-        for (int k = 1; k <= wrtos[j]; k++) {
-          increment *= halvesoflengths[j];
-          increment /= static_cast<T>(k);
-        }
+    T increment = Gambit::abs(child.data.Evaluate(p));
+    for (int j = 1; j <= p.size(); j++) {
+      for (int k = 1; k <= wrtos[j]; k++) {
+        increment *= halvesoflengths[j];
+        increment /= static_cast<T>(k);
       }
-      answer += increment;
-      answer += MaximalNonconstantContributionRECURSIVE(child, p, halvesoflengths, wrtos);
-      wrtos[i]--;
     }
+    answer += increment;
+    answer += MaximalNonconstantContributionRECURSIVE(child, p, halvesoflengths, wrtos);
+    wrtos[i]--;
   }
-
   return answer;
 }
 
@@ -99,7 +92,7 @@ template <class T> bool TreeOfPartials<T>::PolyHasNoRootsIn(const Rectangle<T> &
   Vector<T> center = r.Center();
   T constant = Gambit::abs(m_treeroot.data.Evaluate(center));
   Vector<T> HalvesOfSideLengths = r.SideLengths() / 2;
-  return this->MaximalNonconstantContribution(center, HalvesOfSideLengths) < constant;
+  return MaximalNonconstantContribution(center, HalvesOfSideLengths) < constant;
 }
 
 template <class T> bool TreeOfPartials<T>::MultiaffinePolyHasNoRootsIn(const Rectangle<T> &r) const
@@ -166,8 +159,7 @@ template <class T> bool TreeOfPartials<T>::PolyEverywhereNegativeIn(const Rectan
   if (constant >= static_cast<T>(0)) {
     return false;
   }
-  auto HalvesOfSideLengths = r.SideLengths() / 2;
-  return (this->MaximalNonconstantContribution(center, HalvesOfSideLengths) + constant <
+  return (MaximalNonconstantContribution(center, r.SideLengths() / 2) + constant <
           static_cast<T>(0));
 }
 
@@ -203,6 +195,5 @@ Vector<T> ListOfPartialTrees<T>::ValuesOfRootPolys(const Vector<T> &point,
   for (int i = 1; i <= NoEquations; i++) {
     answer[i] = PartialTreeList[i].ValueOfRootPoly(point);
   }
-
   return answer;
 }
