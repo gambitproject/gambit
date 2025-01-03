@@ -106,21 +106,9 @@ public:
   int GetDimension() const { return m_space->GetDimension(); }
   bool IsMultiaffine() const
   {
-    for (int i = 1; i <= GetDimension(); i++) {
-      if ((*this)[i] > 1) {
-        return false;
-      }
-    }
-    return true;
+    return std::all_of(m_components.begin(), m_components.end(), [](int x) { return x <= 1; });
   }
-  int TotalDegree() const
-  {
-    int exp_sum = 0;
-    for (int i = 1; i <= GetDimension(); i++) {
-      exp_sum += (*this)[i];
-    }
-    return exp_sum;
-  }
+  int TotalDegree() const { return std::accumulate(m_components.begin(), m_components.end(), 0); }
 
   void ToZero() { m_components = 0; }
 
