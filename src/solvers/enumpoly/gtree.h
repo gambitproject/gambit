@@ -35,25 +35,22 @@ private:
   gTreeNode<T> *parent, *prev, *next, *eldest, *youngest;
 
 public:
-  // Constructor
   gTreeNode(const T &_data, gTreeNode<T> *_parent, gTreeNode<T> *_prev, gTreeNode<T> *_next,
-            gTreeNode<T> *_eldest, gTreeNode<T> *_youngest);
+            gTreeNode<T> *_eldest, gTreeNode<T> *_youngest)
+    : data(_data), parent(_parent), prev(_prev), next(_next), eldest(_eldest), youngest(_youngest)
+  {
+  }
+  ~gTreeNode() = default;
 
-  ~gTreeNode();
+  void SetEldest(gTreeNode<T> *neweldest) { eldest = neweldest; }
+  void SetYoungest(gTreeNode<T> *newyoungest) { youngest = newyoungest; }
 
-  inline void SetData(const T &newdata) { data = newdata; }
-  inline void SetParent(gTreeNode<T> *newparent) { parent = newparent; }
-  inline void SetPrev(gTreeNode<T> *newprev) { prev = newprev; }
-  inline void SetNext(gTreeNode<T> *newnext) { next = newnext; }
-  inline void SetEldest(gTreeNode<T> *neweldest) { eldest = neweldest; }
-  inline void SetYoungest(gTreeNode<T> *newyoungest) { youngest = newyoungest; }
-
-  inline const T &GetData() const { return data; }
-  inline gTreeNode<T> *GetParent() const { return parent; }
-  inline gTreeNode<T> *GetPrev() const { return prev; }
-  inline gTreeNode<T> *GetNext() const { return next; }
-  inline gTreeNode<T> *GetEldest() const { return eldest; }
-  inline gTreeNode<T> *GetYoungest() const { return youngest; }
+  const T &GetData() const { return data; }
+  gTreeNode<T> *GetParent() const { return parent; }
+  gTreeNode<T> *GetPrev() const { return prev; }
+  gTreeNode<T> *GetNext() const { return next; }
+  gTreeNode<T> *GetEldest() const { return eldest; }
+  gTreeNode<T> *GetYoungest() const { return youngest; }
 };
 
 template <class T> class gTree {
@@ -66,25 +63,22 @@ protected:
   void Flush();
 
 public:
-  gTree();
-  explicit gTree(const T &);
+  gTree() : root(nullptr) {}
+  explicit gTree(const T &root_value)
+    : root(new gTreeNode<T>(root_value, nullptr, nullptr, nullptr, nullptr, nullptr))
+  {
+  }
   gTree(const gTree<T> &);
-  virtual ~gTree();
+  ~gTree() { Flush(); }
 
   gTree<T> &operator=(const gTree<T> &);
 
-  bool operator==(const gTree<T> &b) const;
-  bool operator!=(const gTree<T> &b) const;
-
-  // Constructive Manipulation
   void InsertAt(const T &, gTreeNode<T> *);
 
-  // Information
   Gambit::List<gTreeNode<T> *> Children(const gTreeNode<T> *) const;
-  gTreeNode<T> *RootNode() const;
+  gTreeNode<T> *RootNode() const { return root; }
   gTreeNode<T> *Find(const T &) const;
   bool Contains(const T &t) const;
-  bool SubtreesAreIsomorphic(const gTreeNode<T> *, const gTreeNode<T> *) const;
 };
 
 #endif // GTREE_H

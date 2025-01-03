@@ -48,8 +48,6 @@ public:
   TreeOfPartials(const TreeOfPartials<T> &) = default;
   ~TreeOfPartials() = default;
 
-  bool operator==(const TreeOfPartials<T> &rhs) const { return PartialTree == rhs.PartialTree; }
-  bool operator!=(const TreeOfPartials<T> &rhs) const { return PartialTree != rhs.PartialTree; }
   int Dmnsn() const { return RootNode()->GetData().Dmnsn(); }
 
   T MaximalNonconstantContribution(const Vector<T> &, const Vector<T> &) const;
@@ -84,15 +82,6 @@ public:
   ListOfPartialTrees(const ListOfPartialTrees<T> &) = default;
   ~ListOfPartialTrees() = default;
   ListOfPartialTrees<T> &operator=(const ListOfPartialTrees<T> &) = delete;
-
-  bool operator==(const ListOfPartialTrees &other) const
-  {
-    return PartialTreeList == other.PartialTreeList;
-  }
-  bool operator!=(const ListOfPartialTrees &other) const
-  {
-    return PartialTreeList != other.PartialTreeList;
-  }
 
   const TreeOfPartials<T> &operator[](int i) const { return PartialTreeList[i]; }
 

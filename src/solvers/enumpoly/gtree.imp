@@ -23,28 +23,8 @@
 #include "gtree.h"
 
 //--------------------------------------------------------------------------
-//                 gTreeNode<T>: Member function implementations
-//--------------------------------------------------------------------------
-
-template <class T>
-gTreeNode<T>::gTreeNode(const T &_data, gTreeNode<T> *_parent, gTreeNode<T> *_prev,
-                        gTreeNode<T> *_next, gTreeNode<T> *_eldest, gTreeNode<T> *_youngest)
-  : data(_data), parent(_parent), prev(_prev), next(_next), eldest(_eldest), youngest(_youngest)
-{
-}
-
-template <class T> gTreeNode<T>::~gTreeNode() = default;
-
-//--------------------------------------------------------------------------
 //                 gTree<T>: Member function implementations
 //--------------------------------------------------------------------------
-
-template <class T> gTree<T>::gTree() : root(nullptr) {}
-
-template <class T> gTree<T>::gTree(const T &rootdatum) : root(nullptr)
-{
-  root = new gTreeNode<T>(rootdatum, nullptr, nullptr, nullptr, nullptr, nullptr);
-}
 
 template <class T> gTree<T>::gTree(const gTree<T> &b) : root(nullptr)
 {
@@ -54,12 +34,8 @@ template <class T> gTree<T>::gTree(const gTree<T> &b) : root(nullptr)
   }
 }
 
-template <class T> gTree<T>::~gTree() { Flush(); }
-
 template <class T> void gTree<T>::InsertAt(const T &t, gTreeNode<T> *n)
 {
-  //  assert (n != NULL);
-
   if (n->eldest == nullptr) {
     auto *newn = new gTreeNode<T>(t, n, nullptr, nullptr, nullptr, nullptr);
     n->SetEldest(newn);
@@ -67,7 +43,7 @@ template <class T> void gTree<T>::InsertAt(const T &t, gTreeNode<T> *n)
   }
   else {
     auto *newn = new gTreeNode<T>(t, n, n->youngest, nullptr, nullptr, nullptr);
-    n->youngest->SetNext(newn);
+    n->youngest->next = newn;
     n->SetYoungest(newn);
   }
 }
@@ -101,30 +77,14 @@ template <class T> gTree<T> &gTree<T>::operator=(const gTree<T> &b)
   return *this;
 }
 
-template <class T> bool gTree<T>::operator==(const gTree<T> &b) const
-{
-  if (root == nullptr && b.root == nullptr) {
-    return true;
-  }
-  if (root == nullptr || b.root == nullptr) {
-    return false;
-  }
-  return SubtreesAreIsomorphic(root, b.root);
-}
-
-template <class T> bool gTree<T>::operator!=(const gTree<T> &b) const { return !(*this == b); }
-
 template <class T> Gambit::List<gTreeNode<T> *> gTree<T>::Children(const gTreeNode<T> *n) const
 {
-  // assert(n != NULL);
   Gambit::List<gTreeNode<T> *> answer;
   for (gTreeNode<T> *child = n->eldest; child != nullptr; child = child->next) {
     answer.push_back(child);
   }
   return answer;
 }
-
-template <class T> gTreeNode<T> *gTree<T>::RootNode() const { return root; }
 
 template <class T> gTreeNode<T> *gTree<T>::RecursiveFind(const T &t, gTreeNode<T> *n) const
 {
@@ -148,25 +108,6 @@ template <class T> gTreeNode<T> *gTree<T>::Find(const T &t) const
 }
 
 template <class T> bool gTree<T>::Contains(const T &t) const { return (Find(t) != nullptr); }
-
-template <class T>
-bool gTree<T>::SubtreesAreIsomorphic(const gTreeNode<T> *lhs, const gTreeNode<T> *rhs) const
-{
-  if (lhs->data != rhs->data) {
-    return false;
-  }
-  auto lchildren = Children(lhs);
-  auto rchildren = Children(rhs);
-  if (lchildren.size() != rchildren.size()) {
-    return false;
-  }
-  for (size_t i = 1; i <= lchildren.size(); i++) {
-    if (!SubtreesAreIsomorphic(lchildren[i], rchildren[i])) {
-      return false;
-    }
-  }
-  return true;
-}
 
 template <class T> void gTree<T>::RecursiveFlush(const gTreeNode<T> *n)
 {
