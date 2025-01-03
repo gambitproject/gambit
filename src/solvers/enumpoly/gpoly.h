@@ -73,10 +73,6 @@ public:
     m_components = 0;
     m_components[i] = j;
   }
-  ExponentVector(const VariableSpace *space, const Vector<int> &exps)
-    : m_space(space), m_components(exps)
-  {
-  }
   ExponentVector(const ExponentVector &) = default;
   ~ExponentVector() = default;
 
@@ -100,7 +96,6 @@ public:
     return tmp;
   }
 
-  // Other operations
   ExponentVector WithZeroExponent(const int varnumber) const
   {
     ExponentVector tmp(*this);
@@ -108,17 +103,7 @@ public:
     return tmp;
   }
 
-  // Information
   int GetDimension() const { return m_space->GetDimension(); }
-  bool IsConstant() const
-  {
-    for (int i = 1; i <= GetDimension(); i++) {
-      if ((*this)[i] > 0) {
-        return false;
-      }
-    }
-    return true;
-  }
   bool IsMultiaffine() const
   {
     for (int i = 1; i <= GetDimension(); i++) {
@@ -137,13 +122,7 @@ public:
     return exp_sum;
   }
 
-  // Manipulation
-  void ToZero()
-  {
-    for (int i = 1; i <= GetDimension(); i++) {
-      m_components[i] = 0;
-    }
-  }
+  void ToZero() { m_components = 0; }
 
   bool operator<(const ExponentVector &y) const
   {
