@@ -45,8 +45,6 @@ public:
 };
 
 template <class T> class gTree {
-protected:
-  gTreeNode<T> root;
 
 public:
   explicit gTree(const T &root_value) : root(gTreeNode<T>(root_value)) {}
@@ -55,10 +53,11 @@ public:
 
   gTree<T> &operator=(const gTree<T> &) = delete;
 
-  void InsertAt(const T &t, gTreeNode<T> &n) { n.children.push_back(gTreeNode<T>(t)); }
-
   const gTreeNode<T> &RootNode() const { return root; }
   gTreeNode<T> &RootNode() { return root; }
+
+private:
+  gTreeNode<T> root;
 };
 
 #endif // GTREE_H

@@ -34,7 +34,7 @@ void TreeOfPartials<T>::TreeOfPartialsRECURSIVE(gTree<gPoly<T>> &t, gTreeNode<gP
 {
   if (n.GetData().Degree() >= 1) {
     for (int i = 1; i <= n.GetData().Dmnsn(); i++) {
-      t.InsertAt(n.GetData().PartialDerivative(i), n);
+      n.GetChildren().push_back(n.GetData().PartialDerivative(i));
       TreeOfPartialsRECURSIVE(t, n.GetChildren().back());
     }
   }
