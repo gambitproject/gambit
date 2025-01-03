@@ -44,23 +44,19 @@ private:
 
   Node m_treeroot;
 
-  void TreeOfPartialsRECURSIVE(Node &);
-  T MaximalNonconstantContributionRECURSIVE(const Node &, const Vector<T> &, const Vector<T> &,
-                                            Vector<int> &) const;
+  void BuildTree(Node &);
+  T MaximalNonconstantContribution(const Node &, const Vector<T> &, const Vector<T> &,
+                                   Vector<int> &) const;
 
 public:
-  explicit TreeOfPartials(const gPoly<T> &given) : m_treeroot(given)
-  {
-    TreeOfPartialsRECURSIVE(m_treeroot);
-  }
+  explicit TreeOfPartials(const gPoly<T> &given) : m_treeroot(given) { BuildTree(m_treeroot); }
   TreeOfPartials(const TreeOfPartials<T> &) = default;
   ~TreeOfPartials() = default;
 
-  int Dmnsn() const { return m_treeroot.data.Dmnsn(); }
+  int GetDimension() const { return m_treeroot.data.Dmnsn(); }
 
   T MaximalNonconstantContribution(const Vector<T> &, const Vector<T> &) const;
 
-  const gPoly<T> &RootPoly() const { return m_treeroot.data; }
   T ValueOfRootPoly(const Vector<T> &point) const { return m_treeroot.data.Evaluate(point); }
   T ValueOfPartialOfRootPoly(int, const Vector<T> &) const;
   bool PolyHasNoRootsIn(const Rectangle<T> &) const;
@@ -88,7 +84,7 @@ public:
   {
     return *std::next(m_list.begin(), index - 1);
   }
-  int Dmnsn() const { return m_list.front().Dmnsn(); }
+  int GetDimension() const { return m_list.front().GetDimension(); }
   Matrix<T> DerivativeMatrix(const Vector<T> &, int) const;
   SquareMatrix<T> SquareDerivativeMatrix(const Vector<T> &) const;
   Vector<T> ValuesOfRootPolys(const Vector<T> &, int) const;

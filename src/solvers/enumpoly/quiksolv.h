@@ -49,8 +49,8 @@ using namespace Gambit;
 /// singular roots.
 
 /// The list of polynomials must
-/// be at least as long as the dimension Dmnsn() of the space of the
-/// system.  The first Dmnsn() polynomials are interpreted as equations,
+/// be at least as long as the dimension GetDimension() of the space of the
+/// system.  The first GetDimension() polynomials are interpreted as equations,
 /// while remaining polynomials are interpreted as inequalities in the
 /// sense that the polynomial is required to be non-negative.
 class QuickSolver {
