@@ -71,7 +71,7 @@ public:
   gTree(const gTree<T> &);
   ~gTree() { Flush(); }
 
-  gTree<T> &operator=(const gTree<T> &);
+  gTree<T> &operator=(const gTree<T> &) = delete;
 
   void InsertAt(const T &, gTreeNode<T> *);
 

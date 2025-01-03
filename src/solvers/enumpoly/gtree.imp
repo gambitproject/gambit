@@ -62,21 +62,6 @@ template <class T> void gTree<T>::RecursiveCopy(gTreeNode<T> *copyn, const gTree
 
 //--------------------- operators ------------------------
 
-template <class T> gTree<T> &gTree<T>::operator=(const gTree<T> &b)
-{
-  if (this != &b) {
-    Flush();
-    if (root != nullptr) {
-      root = new gTreeNode<T>(b.root->data, nullptr, nullptr, nullptr, nullptr, nullptr);
-      RecursiveCopy(root, b.root);
-    }
-    else {
-      root = nullptr;
-    }
-  }
-  return *this;
-}
-
 template <class T> Gambit::List<gTreeNode<T> *> gTree<T>::Children(const gTreeNode<T> *n) const
 {
   Gambit::List<gTreeNode<T> *> answer;
