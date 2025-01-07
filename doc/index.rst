@@ -21,7 +21,7 @@ Key features of Gambit include:
 
 
 Gambit is Free/Open Source software, released under the terms of the
-`GNU General Public License <http://www.gnu.org/copyleft/gpl.html‎>`_,
+`GNU General Public License <https://www.gnu.org/copyleft/gpl.html>`_,
 Version 2.
 
 We hope you will find Gambit useful for both teaching and research
@@ -32,9 +32,9 @@ made.
 
 If you are citing Gambit in a paper, we suggest a citation of the form:
 
-  Savani, Rahul and Turocy, Theodore L. (2024)
-  Gambit: The package for computation in game theory, Version 16.2.0.
-  http://www.gambit-project.org.
+  Savani, Rahul and Turocy, Theodore L. (2025)
+  Gambit: The package for computation in game theory, Version 16.2.1.
+  https://www.gambit-project.org.
 
 Replace the version number and year as appropriate if you use a
 different release.

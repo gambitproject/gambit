@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-    <Product Id="8EE11AE3-2B91-4870-895B-44C46D648BD6" Name="Gambit 16" Language="1033" Version="16.2.0" Manufacturer="The Gambit Project" UpgradeCode="135FFB28-DA7C-427C-A3DA-783B805BCC22">
+    <Product Id="8EE11AE3-2B91-4870-895B-44C46D648BD6" Name="Gambit 16" Language="1033" Version="16.2.1" Manufacturer="The Gambit Project" UpgradeCode="135FFB28-DA7C-427C-A3DA-783B805BCC22">
         <Package Description="Gambit" Comments="Software Tools for Game Theory" InstallerVersion="200" Compressed="yes" />
         <Media Id="1" Cabinet="gambit.cab" EmbedCab="yes" />
 

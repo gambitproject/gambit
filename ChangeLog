@@ -39,20 +39,15 @@
   Explorer, as GTE no longer reads files in this format.
 
 
-## [16.1.2] - unreleased
+## [16.2.1] - 2025-01-06
 
 ### Fixed
 - Corrected an internal implementation error in `Game.reveal()` in resolving references to
   information sets and players (#453)
-
-
-## [16.2.1] - unreleased
-
-### Fixed
 - Reading .efg and .nfg game files which did not have whitespace at the end would lead to
   an infinite loop (#457)
 - Attempting to call the default constructor on Game objects (rather than one of the factory
-  functions) now raises a more informative excepition (#463)
+  functions) now raises a more informative exception (#463)
 
 
 ## [16.2.0] - 2024-04-05

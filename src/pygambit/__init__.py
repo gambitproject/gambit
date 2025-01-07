@@ -1,6 +1,6 @@
 #
 # This file is part of Gambit
-# Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
+# Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
 #
 # FILE: src/python/gambit/__init__.py
 # Top-level module file for gambit
@@ -28,4 +28,4 @@ from . import (  # noqa: F401
     supports,  # noqa: F401
 )
 
-__version__ = "16.2.0"
+__version__ = "16.2.1"

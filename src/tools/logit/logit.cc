@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/tools/logit/logit.cc
 // Command-line driver program for quantal response equilibrium tracing and
@@ -34,7 +34,7 @@ void PrintBanner(std::ostream &p_stream)
 {
   p_stream << "Compute a branch of the logit equilibrium correspondence\n";
   p_stream << "Gambit version " VERSION ", ";
-  p_stream << "Copyright (C) 1994-2024, The Gambit Project\n";
+  p_stream << "Copyright (C) 1994-2025, The Gambit Project\n";
   p_stream << "This is free software, distributed under the GNU GPL\n\n";
 }
 
