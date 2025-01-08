@@ -48,8 +48,9 @@ jobs:
       - run: make
       - run: sudo make install
       - run: make osx-dmg
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
+          name: artifact-macos
           path: "*.dmg"
 
   windows:
@@ -75,6 +76,7 @@ jobs:
           cp gambit* installer
           "${WIX}bin/candle" gambit.wxs
           "${WIX}bin/light" -ext WixUIExtension gambit.wixobj
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
+          name: artifact-msw
           path: "*.msi"
