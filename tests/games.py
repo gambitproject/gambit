@@ -5,7 +5,12 @@ import pygambit as gbt
 
 
 def read_from_file(fn: str) -> gbt.Game:
-    return gbt.Game.read_game(pathlib.Path("tests/test_games")/fn)
+    if fn.endswith(".efg"):
+        return gbt.read_efg(pathlib.Path("tests/test_games")/fn)
+    elif fn.endswith(".nfg"):
+        return gbt.read_nfg(pathlib.Path("tests/test_games")/fn)
+    else:
+        raise ValueError(f"Unknown file extension in {fn}")
 
 
 ################################################################################################
