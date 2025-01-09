@@ -335,8 +335,8 @@ void gbtGameDocument::SaveDocument(std::ostream &p_file) const
     p_file << "</nfgfile>\n";
   }
 
-  for (int i = 1; i <= m_profiles.size(); i++) {
-    m_profiles[i]->Save(p_file);
+  for (const auto &profile : m_profiles) {
+    profile->Save(p_file);
   }
 
   p_file << "</game>\n";
@@ -367,22 +367,25 @@ void gbtGameDocument::UpdateViews(gbtGameModificationType p_modifications)
     m_currentProfileList = 0;
   }
 
-  for (int i = 1; i <= m_views.size(); m_views[i++]->OnUpdate())
-    ;
+  for (auto &view : m_views) {
+    view->OnUpdate();
+  }
 }
 
 void gbtGameDocument::PostPendingChanges()
 {
-  for (int i = 1; i <= m_views.size(); m_views[i++]->PostPendingChanges())
-    ;
+  for (auto &view : m_views) {
+    view->PostPendingChanges();
+  }
 }
 
 void gbtGameDocument::BuildNfg()
 {
   if (m_game->IsTree()) {
     m_stratSupports.Reset();
-    for (int i = 1; i <= m_profiles.size(); m_profiles[i++]->BuildNfg())
-      ;
+    for (auto &profile : m_profiles) {
+      profile->BuildNfg();
+    }
   }
 }
 
@@ -418,8 +421,9 @@ void gbtGameDocument::Undo()
   LoadDocument(tempfile, false);
   wxRemoveFile(tempfile);
 
-  for (int i = 1; i <= m_views.size(); m_views[i++]->OnUpdate())
-    ;
+  for (auto &view : m_views) {
+    view->OnUpdate();
+  }
 }
 
 void gbtGameDocument::Redo()
@@ -462,44 +466,6 @@ void gbtGameDocument::SetProfileList(int p_index)
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-/*
-void gbtGameDocument::AddProfiles(const Gambit::List<Gambit::MixedBehavProfile<double> >
-&p_profiles)
-{
-  for (int i = 1; i <= p_profiles.Length(); i++) {
-    m_profiles[m_currentProfileList].Append(p_profiles[i]);
-  }
-
-  m_profiles[m_currentProfileList].SetCurrent(m_profiles[m_currentProfileList].NumProfiles());
-  UpdateViews(GBT_DOC_MODIFIED_VIEWS);
-}
-
-void gbtGameDocument::AddProfile(const Gambit::MixedBehavProfile<double> &p_profile)
-{
-  m_profiles[m_currentProfileList].Append(p_profile);
-  m_profiles[m_currentProfileList].SetCurrent(m_profiles[m_currentProfileList].NumProfiles());
-  UpdateViews(GBT_DOC_MODIFIED_VIEWS);
-}
-
-void gbtGameDocument::AddProfiles(const Gambit::List<Gambit::MixedStrategyProfile<double> >
-&p_profiles)
-{
-  for (int i = 1; i <= p_profiles.Length(); i++) {
-    m_profiles[m_currentProfileList].Append(p_profiles[i]);
-  }
-
-  m_profiles[m_currentProfileList].SetCurrent(m_profiles[m_currentProfileList].NumProfiles());
-  UpdateViews(GBT_DOC_MODIFIED_VIEWS);
-}
-
-void gbtGameDocument::AddProfile(const Gambit::MixedStrategyProfile<double> &p_profile)
-{
-  m_profiles[m_currentProfileList].Append(p_profile);
-  m_profiles[m_currentProfileList].SetCurrent(m_profiles[m_currentProfileList].NumProfiles());
-  UpdateViews(GBT_DOC_MODIFIED_VIEWS);
-}
-*/
-
 void gbtGameDocument::SetBehavElimStrength(bool p_strict)
 {
   m_behavSupports.SetStrict(p_strict);
@@ -534,8 +500,6 @@ void gbtGameDocument::SetStrategyElimStrength(bool p_strict)
   m_stratSupports.SetStrict(p_strict);
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
-
-bool gbtGameDocument::GetStrategyElimStrength() const { return m_stratSupports.GetStrict(); }
 
 bool gbtGameDocument::NextStrategyElimLevel()
 {

@@ -40,7 +40,7 @@ class gbtBehavDominanceStack {
 private:
   gbtGameDocument *m_doc;
   bool m_strict;
-  Gambit::Array<Gambit::BehaviorSupportProfile *> m_supports;
+  Array<BehaviorSupportProfile *> m_supports;
   int m_current{0};
   bool m_noFurther;
 
@@ -57,12 +57,12 @@ public:
   //! Get the i'th support in the stack
   //! (where i=1 is always the "full" support)
   //!
-  const Gambit::BehaviorSupportProfile &GetSupport(int i) const { return *m_supports[i]; }
+  const BehaviorSupportProfile &GetSupport(int i) const { return *m_supports[i]; }
 
   //!
   //! Get the current support
   //!
-  const Gambit::BehaviorSupportProfile &GetCurrent() const { return *m_supports[m_current]; }
+  const BehaviorSupportProfile &GetCurrent() const { return *m_supports[m_current]; }
 
   //!
   //! Get the level of iteration (1 = no iteration)
@@ -111,7 +111,7 @@ class gbtStrategyDominanceStack {
 private:
   gbtGameDocument *m_doc;
   bool m_strict;
-  Gambit::Array<Gambit::StrategySupportProfile *> m_supports;
+  Array<StrategySupportProfile *> m_supports;
   int m_current{0};
   bool m_noFurther;
 
@@ -128,12 +128,12 @@ public:
   //! Get the i'th support in the stack
   //! (where i=1 is always the "full" support)
   //!
-  const Gambit::StrategySupportProfile &GetSupport(int i) const { return *m_supports[i]; }
+  const StrategySupportProfile &GetSupport(int i) const { return *m_supports[i]; }
 
   //!
   //! Get the current support
   //!
-  const Gambit::StrategySupportProfile &GetCurrent() const { return *m_supports[m_current]; }
+  const StrategySupportProfile &GetCurrent() const { return *m_supports[m_current]; }
 
   //!
   //! Get the level of iteration (1 = no iteration)
@@ -211,7 +211,7 @@ class gbtGameDocument {
   friend class gbtGameView;
 
 private:
-  Gambit::Array<gbtGameView *> m_views;
+  Array<gbtGameView *> m_views;
 
   void AddView(gbtGameView *p_view) { m_views.push_back(p_view); }
   void RemoveView(gbtGameView *p_view)
@@ -222,17 +222,17 @@ private:
     }
   }
 
-  Gambit::Game m_game;
+  Game m_game;
   wxString m_filename;
 
   gbtStyle m_style;
-  Gambit::GameNode m_selectNode;
+  GameNode m_selectNode;
   bool m_modified;
 
   gbtBehavDominanceStack m_behavSupports;
   gbtStrategyDominanceStack m_stratSupports;
 
-  Gambit::Array<std::shared_ptr<gbtAnalysisOutput>> m_profiles;
+  Array<std::shared_ptr<gbtAnalysisOutput>> m_profiles;
   int m_currentProfileList;
 
   std::list<std::string> m_undoList, m_redoList;
@@ -240,7 +240,7 @@ private:
   void UpdateViews(gbtGameModificationType p_modifications);
 
 public:
-  explicit gbtGameDocument(Gambit::Game p_game);
+  explicit gbtGameDocument(Game p_game);
   ~gbtGameDocument();
 
   //!
@@ -253,7 +253,7 @@ public:
   void SaveDocument(std::ostream &) const;
   //@}
 
-  Gambit::Game GetGame() const { return m_game; }
+  Game GetGame() const { return m_game; }
   void BuildNfg();
 
   const wxString &GetFilename() const { return m_filename; }
@@ -285,16 +285,12 @@ public:
   //!
   //@{
   const gbtAnalysisOutput &GetProfiles() const { return *m_profiles[m_currentProfileList]; }
-  const gbtAnalysisOutput &GetProfiles(int p_index) const { return *m_profiles[p_index]; }
   void AddProfileList(std::shared_ptr<gbtAnalysisOutput>);
   void SetProfileList(int p_index);
   int NumProfileLists() const { return m_profiles.size(); }
   int GetCurrentProfileList() const { return m_currentProfileList; }
 
-  int GetCurrentProfile() const
-  {
-    return (m_profiles.size() == 0) ? 0 : GetProfiles().GetCurrent();
-  }
+  int GetCurrentProfile() const { return (m_profiles.empty()) ? 0 : GetProfiles().GetCurrent(); }
   void SetCurrentProfile(int p_profile);
   //@}
 
@@ -302,10 +298,7 @@ public:
   //! @name Handling of behavior supports
   //!
   //@{
-  const Gambit::BehaviorSupportProfile &GetEfgSupport() const
-  {
-    return m_behavSupports.GetCurrent();
-  }
+  const BehaviorSupportProfile &GetEfgSupport() const { return m_behavSupports.GetCurrent(); }
   void SetBehavElimStrength(bool p_strict);
   bool NextBehavElimLevel();
   void PreviousBehavElimLevel();
@@ -318,12 +311,8 @@ public:
   //! @name Handling of strategy supports
   //!
   //@{
-  const Gambit::StrategySupportProfile &GetNfgSupport() const
-  {
-    return m_stratSupports.GetCurrent();
-  }
+  const StrategySupportProfile &GetNfgSupport() const { return m_stratSupports.GetCurrent(); }
   void SetStrategyElimStrength(bool p_strict);
-  bool GetStrategyElimStrength() const;
   bool NextStrategyElimLevel();
   void PreviousStrategyElimLevel();
   void TopStrategyElimLevel();
@@ -331,8 +320,8 @@ public:
   int GetStrategyElimLevel() const;
   //@}
 
-  Gambit::GameNode GetSelectNode() const { return m_selectNode; }
-  void SetSelectNode(Gambit::GameNode);
+  GameNode GetSelectNode() const { return m_selectNode; }
+  void SetSelectNode(GameNode);
 
   /// Call to ask viewers to post any pending changes
   void PostPendingChanges();
