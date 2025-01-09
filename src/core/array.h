@@ -196,7 +196,7 @@ public:
   {
     if (this != &a) {
       // We only reallocate if necessary.
-      if (!m_data || (m_data && (m_offset != a.m_offset || m_length == a.m_length))) {
+      if (!m_data || (m_data && (m_offset != a.m_offset || m_length != a.m_length))) {
         if (m_data) {
           delete[] (m_data + m_offset);
         }
