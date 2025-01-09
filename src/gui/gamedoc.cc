@@ -42,12 +42,6 @@ gbtBehavDominanceStack::gbtBehavDominanceStack(gbtGameDocument *p_doc, bool p_st
   Reset();
 }
 
-gbtBehavDominanceStack::~gbtBehavDominanceStack()
-{
-  for (int i = 1; i <= m_supports.size(); delete m_supports[i++])
-    ;
-}
-
 void gbtBehavDominanceStack::SetStrict(bool p_strict)
 {
   if (m_strict != p_strict) {
@@ -58,11 +52,9 @@ void gbtBehavDominanceStack::SetStrict(bool p_strict)
 
 void gbtBehavDominanceStack::Reset()
 {
-  for (int i = 1; i <= m_supports.size(); delete m_supports[i++])
-    ;
-  m_supports = Gambit::Array<Gambit::BehaviorSupportProfile *>();
+  m_supports.clear();
   if (m_doc->IsTree()) {
-    m_supports.push_back(new Gambit::BehaviorSupportProfile(m_doc->GetGame()));
+    m_supports.push_back(BehaviorSupportProfile(m_doc->GetGame()));
     m_current = 1;
   }
   m_noFurther = false;
@@ -79,10 +71,9 @@ bool gbtBehavDominanceStack::NextLevel()
     return false;
   }
 
-  Gambit::BehaviorSupportProfile newSupport = m_supports[m_current]->Undominated(m_strict);
-
-  if (newSupport != *m_supports[m_current]) {
-    m_supports.push_back(new Gambit::BehaviorSupportProfile(newSupport));
+  auto newSupport = m_supports.back().Undominated(m_strict);
+  if (newSupport != m_supports.back()) {
+    m_supports.push_back(newSupport);
     m_current++;
     return true;
   }
@@ -113,12 +104,6 @@ gbtStrategyDominanceStack::gbtStrategyDominanceStack(gbtGameDocument *p_doc, boo
   Reset();
 }
 
-gbtStrategyDominanceStack::~gbtStrategyDominanceStack()
-{
-  for (int i = 1; i <= m_supports.size(); delete m_supports[i++])
-    ;
-}
-
 void gbtStrategyDominanceStack::SetStrict(bool p_strict)
 {
   if (m_strict != p_strict) {
@@ -129,10 +114,8 @@ void gbtStrategyDominanceStack::SetStrict(bool p_strict)
 
 void gbtStrategyDominanceStack::Reset()
 {
-  for (int i = 1; i <= m_supports.size(); delete m_supports[i++])
-    ;
-  m_supports = Gambit::Array<Gambit::StrategySupportProfile *>();
-  m_supports.push_back(new Gambit::StrategySupportProfile(m_doc->GetGame()));
+  m_supports.clear();
+  m_supports.push_back(StrategySupportProfile(m_doc->GetGame()));
   m_current = 1;
   m_noFurther = false;
 }
@@ -148,10 +131,10 @@ bool gbtStrategyDominanceStack::NextLevel()
     return false;
   }
 
-  Gambit::StrategySupportProfile newSupport = m_supports[m_current]->Undominated(m_strict);
+  auto newSupport = m_supports.back().Undominated(m_strict);
 
-  if (newSupport != *m_supports[m_current]) {
-    m_supports.push_back(new Gambit::StrategySupportProfile(newSupport));
+  if (newSupport != m_supports.back()) {
+    m_supports.push_back(newSupport);
     m_current++;
     return true;
   }

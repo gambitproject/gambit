@@ -40,66 +40,38 @@ class gbtBehavDominanceStack {
 private:
   gbtGameDocument *m_doc;
   bool m_strict;
-  Array<BehaviorSupportProfile *> m_supports;
+  List<BehaviorSupportProfile> m_supports;
   int m_current{0};
   bool m_noFurther;
 
 public:
   gbtBehavDominanceStack(gbtGameDocument *p_doc, bool p_strict);
-  ~gbtBehavDominanceStack();
+  ~gbtBehavDominanceStack() = default;
 
-  //!
-  //! Returns the number of supports in the stack
-  //!
-  int NumSupports() const { return m_supports.size(); }
+  /// Get the current support
+  const BehaviorSupportProfile &GetCurrent() const { return m_supports[m_current]; }
 
-  //!
-  //! Get the i'th support in the stack
-  //! (where i=1 is always the "full" support)
-  //!
-  const BehaviorSupportProfile &GetSupport(int i) const { return *m_supports[i]; }
-
-  //!
-  //! Get the current support
-  //!
-  const BehaviorSupportProfile &GetCurrent() const { return *m_supports[m_current]; }
-
-  //!
-  //! Get the level of iteration (1 = no iteration)
-  //!
+  /// Get the level of iteration (1 = no iteration)
   int GetLevel() const { return m_current; }
 
-  //!
-  //! Sets whether elimination is strict or weak.  If this changes the
-  //! internal setting, a Reset() is done
-  //!
+  /// Sets whether elimination is strict.  Stored data are cleared if this changes the setting.
   void SetStrict(bool p_strict);
 
-  //!
-  //! Reset the stack by clearing out all supports
-  //!
+  /// Reset the stack by clearing out all supports
   void Reset();
 
-  //!
-  //! Go to the next level of iteration.  Returns 'true' if successful,
-  //! 'false' if no effect (i.e., no further actions could be eliminated)
-  //!
+  /// Go to the next level of iteration.  Returns 'true' if successful,
+  /// 'false' if no effect (i.e., no further actions could be eliminated)
   bool NextLevel();
 
-  //!
-  //! Go to the previous level of iteration.  Returns 'true' if successful,
-  //! 'false' if no effect (i.e., already at the full support)
-  //!
+  /// Go to the previous level of iteration.  Returns 'true' if successful,
+  /// 'false' if no effect (i.e., already at the full support)
   bool PreviousLevel();
 
-  //!
-  //! Go to the top level (the full support)
-  //!
+  /// Go to the top level (the full support)
   void TopLevel() { m_current = 1; }
 
-  //!
-  //! Returns 'false' if it is known that no further eliminations can be done
-  //!
+  /// Returns 'false' if it is known that no further eliminations can be done
   bool CanEliminate() const { return (m_current < m_supports.size() || !m_noFurther); }
 };
 
@@ -111,71 +83,39 @@ class gbtStrategyDominanceStack {
 private:
   gbtGameDocument *m_doc;
   bool m_strict;
-  Array<StrategySupportProfile *> m_supports;
+  List<StrategySupportProfile> m_supports;
   int m_current{0};
   bool m_noFurther;
 
 public:
   gbtStrategyDominanceStack(gbtGameDocument *p_doc, bool p_strict);
-  ~gbtStrategyDominanceStack();
+  ~gbtStrategyDominanceStack() = default;
 
-  //!
-  //! Returns the number of supports in the stack
-  //!
-  int NumSupports() const { return m_supports.size(); }
+  /// Get the current support
+  const StrategySupportProfile &GetCurrent() const { return m_supports[m_current]; }
 
-  //!
-  //! Get the i'th support in the stack
-  //! (where i=1 is always the "full" support)
-  //!
-  const StrategySupportProfile &GetSupport(int i) const { return *m_supports[i]; }
-
-  //!
-  //! Get the current support
-  //!
-  const StrategySupportProfile &GetCurrent() const { return *m_supports[m_current]; }
-
-  //!
-  //! Get the level of iteration (1 = no iteration)
-  //!
+  /// Get the level of iteration (1 = no iteration)
   int GetLevel() const { return m_current; }
 
-  //!
-  //! Sets whether elimination is strict or weak.  If this changes the
-  //! internal setting, a Reset() is done
-  //!
+  /// Sets whether elimination is strict or weak.  If this changes the
+  /// internal setting, a Reset() is done
   void SetStrict(bool p_strict);
 
-  //!
-  //! Gets whether elimination is strict or weak.
-  //!
-  bool GetStrict() const { return m_strict; }
-
-  //!
-  //! Reset the stack by clearing out all supports
-  //!
+  /// Reset the stack by clearing out all supports
   void Reset();
 
-  //!
-  //! Go to the next level of iteration.  Returns 'true' if successful,
-  //! 'false' if no effect (i.e., no further actions could be eliminated)
-  //!
+  /// Go to the next level of iteration.  Returns 'true' if successful,
+  /// 'false' if no effect (i.e., no further actions could be eliminated)
   bool NextLevel();
 
-  //!
-  //! Go to the previous level of iteration.  Returns 'true' if successful,
-  //! 'false' if no effect (i.e., already at the full support)
-  //!
+  /// Go to the previous level of iteration.  Returns 'true' if successful,
+  /// 'false' if no effect (i.e., already at the full support)
   bool PreviousLevel();
 
-  //!
-  //! Go to the top level (the full support)
-  //!
+  /// Go to the top level (the full support)
   void TopLevel() { m_current = 1; }
 
-  //!
-  //! Returns 'false' if it is known that no further eliminations can be done
-  //!
+  /// Returns 'false' if it is known that no further eliminations can be done
   bool CanEliminate() const { return (m_current < m_supports.size() || !m_noFurther); }
 };
 
@@ -243,9 +183,7 @@ public:
   explicit gbtGameDocument(Game p_game);
   ~gbtGameDocument();
 
-  //!
-  //! @name Reading and writing .gbt savefiles
-  //!
+  /// @name Reading and writing .gbt savefiles
   //@{
   /// Load document from the specified file (which should be a .gbt file)
   /// Returns true if successful, false if error
