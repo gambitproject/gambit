@@ -240,7 +240,7 @@ bool gbtGameDocument::LoadDocument(const wxString &p_filename, bool p_saveUndo)
   m_behavSupports.Reset();
   m_stratSupports.Reset();
 
-  m_profiles = Gambit::Array<gbtAnalysisOutput *>();
+  m_profiles.clear();
 
   for (TiXmlNode *analysis = game->FirstChild("analysis"); analysis;
        analysis = analysis->NextSibling()) {
@@ -260,12 +260,12 @@ bool gbtGameDocument::LoadDocument(const wxString &p_filename, bool p_saveUndo)
       }
 
       if (isFloat) {
-        auto *plist = new gbtAnalysisProfileList<double>(this, false);
+        auto plist = std::make_shared<gbtAnalysisProfileList<double>>(this, false);
         plist->Load(analysis);
         m_profiles.push_back(plist);
       }
       else {
-        auto *plist = new gbtAnalysisProfileList<Rational>(this, false);
+        auto plist = std::make_shared<gbtAnalysisProfileList<Rational>>(this, false);
         plist->Load(analysis);
         m_profiles.push_back(plist);
       }
@@ -363,10 +363,7 @@ void gbtGameDocument::UpdateViews(gbtGameModificationType p_modifications)
     // computed profiles invalid for the edited game, it does mean
     // that, in general, they won't be Nash.  For now, to avoid confusion,
     // we will wipe them out.
-    while (!m_profiles.empty()) {
-      delete m_profiles.back();
-      m_profiles.pop_back();
-    }
+    m_profiles.clear();
     m_currentProfileList = 0;
   }
 
@@ -410,11 +407,7 @@ void gbtGameDocument::Undo()
   m_undoList.pop_back();
 
   m_game = nullptr;
-
-  while (!m_profiles.empty()) {
-    delete m_profiles.back();
-    m_profiles.pop_back();
-  }
+  m_profiles.clear();
   m_currentProfileList = 0;
 
   wxString tempfile = wxFileName::CreateTempFileName(wxT("gambit"));
@@ -435,11 +428,7 @@ void gbtGameDocument::Redo()
   m_redoList.pop_back();
 
   m_game = nullptr;
-
-  while (!m_profiles.empty()) {
-    delete m_profiles.back();
-    m_profiles.pop_back();
-  }
+  m_profiles.clear();
   m_currentProfileList = 0;
 
   wxString tempfile = wxFileName::CreateTempFileName(wxT("gambit"));
@@ -460,7 +449,7 @@ void gbtGameDocument::SetCurrentProfile(int p_profile)
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-void gbtGameDocument::AddProfileList(gbtAnalysisOutput *p_profs)
+void gbtGameDocument::AddProfileList(std::shared_ptr<gbtAnalysisOutput> p_profs)
 {
   m_profiles.push_back(p_profs);
   m_currentProfileList = m_profiles.size();

@@ -232,7 +232,7 @@ private:
   gbtBehavDominanceStack m_behavSupports;
   gbtStrategyDominanceStack m_stratSupports;
 
-  Gambit::Array<gbtAnalysisOutput *> m_profiles;
+  Gambit::Array<std::shared_ptr<gbtAnalysisOutput>> m_profiles;
   int m_currentProfileList;
 
   std::list<std::string> m_undoList, m_redoList;
@@ -286,7 +286,7 @@ public:
   //@{
   const gbtAnalysisOutput &GetProfiles() const { return *m_profiles[m_currentProfileList]; }
   const gbtAnalysisOutput &GetProfiles(int p_index) const { return *m_profiles[p_index]; }
-  void AddProfileList(gbtAnalysisOutput *);
+  void AddProfileList(std::shared_ptr<gbtAnalysisOutput>);
   void SetProfileList(int p_index);
   int NumProfileLists() const { return m_profiles.size(); }
   int GetCurrentProfileList() const { return m_currentProfileList; }
@@ -296,12 +296,6 @@ public:
     return (m_profiles.size() == 0) ? 0 : GetProfiles().GetCurrent();
   }
   void SetCurrentProfile(int p_profile);
-  /*
-  void AddProfiles(const Gambit::List<Gambit::MixedBehavProfile<double> > &);
-  void AddProfile(const Gambit::MixedBehavProfile<double> &);
-  void AddProfiles(const Gambit::List<Gambit::MixedStrategyProfile<double> > &);
-  void AddProfile(const Gambit::MixedStrategyProfile<double> &);
-  */
   //@}
 
   //!

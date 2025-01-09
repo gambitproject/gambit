@@ -1283,8 +1283,7 @@ void gbtGameFrame::OnToolsEquilibrium(wxCommandEvent &)
       }
     }
 
-    gbtAnalysisOutput *command = dialog.GetCommand();
-
+    auto command = dialog.GetCommand();
     gbtNashMonitorDialog dialog(this, m_doc, command);
 
     dialog.ShowModal();
