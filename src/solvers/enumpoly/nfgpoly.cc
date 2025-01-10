@@ -116,8 +116,10 @@ EnumPolyStrategySupportSolve(const StrategySupportProfile &support, bool &is_sin
   tops = 1;
   PolynomialSystemSolver solver(equations);
   is_singular = false;
+  std::list<Vector<double>> roots;
   try {
-    solver.FindRoots({bottoms, tops}, p_stopAfter);
+    roots = solver.FindRoots({bottoms, tops},
+                             (p_stopAfter > 0) ? p_stopAfter : std::numeric_limits<int>::max());
   }
   catch (const SingularMatrixException &) {
     is_singular = true;
@@ -128,7 +130,7 @@ EnumPolyStrategySupportSolve(const StrategySupportProfile &support, bool &is_sin
   }
 
   std::list<MixedStrategyProfile<double>> solutions;
-  for (auto soln : solver.RootList()) {
+  for (auto soln : roots) {
     solutions.emplace(solutions.end(), support.NewMixedStrategyProfile<double>());
     for (auto mapping : strategy_poly) {
       solutions.back()[mapping.first] = mapping.second.Evaluate(soln);

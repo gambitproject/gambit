@@ -72,6 +72,9 @@ private:
   std::list<PolynomialDerivatives<T>> m_system;
 
 public:
+  using iterator = typename std::list<PolynomialDerivatives<T>>::iterator;
+  using const_iterator = typename std::list<PolynomialDerivatives<T>>::const_iterator;
+
   explicit PolynomialSystemDerivatives(const PolynomialSystem<T> &given)
   {
     for (const auto &p : given) {
@@ -81,6 +84,13 @@ public:
   PolynomialSystemDerivatives(const PolynomialSystemDerivatives<T> &) = default;
   ~PolynomialSystemDerivatives() = default;
   PolynomialSystemDerivatives<T> &operator=(const PolynomialSystemDerivatives<T> &) = delete;
+
+  iterator begin() { return m_system.begin(); }
+  const_iterator begin() const { return m_system.begin(); }
+  iterator end() { return m_system.end(); }
+  const_iterator end() const { return m_system.end(); }
+  const_iterator cbegin() const { return m_system.cbegin(); }
+  const_iterator cend() const { return m_system.cend(); }
 
   const PolynomialDerivatives<T> &operator[](const int index) const
   {

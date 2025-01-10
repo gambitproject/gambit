@@ -165,8 +165,10 @@ std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfil
   tops = 1;
 
   PolynomialSystemSolver solver(equations);
+  std::list<Vector<double>> roots;
   try {
-    solver.FindRoots({bottoms, tops}, p_stopAfter);
+    roots = solver.FindRoots({bottoms, tops},
+                             (p_stopAfter > 0) ? p_stopAfter : std::numeric_limits<int>::max());
   }
   catch (const SingularMatrixException &) {
     p_isSingular = true;
@@ -177,7 +179,7 @@ std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfil
   }
 
   std::list<MixedBehaviorProfile<double>> solutions;
-  for (auto root : solver.RootList()) {
+  for (auto root : roots) {
     MixedBehaviorProfile<double> sol(data.sfg.ToMixedBehaviorProfile(ToSequenceProbs(data, root)));
     if (ExtendsToNash(sol, BehaviorSupportProfile(sol.GetGame()),
                       BehaviorSupportProfile(sol.GetGame()))) {

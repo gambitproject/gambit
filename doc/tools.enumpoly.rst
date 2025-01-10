@@ -8,9 +8,13 @@ and inequalities.
 This program searches for all Nash equilibria in a strategic game
 using a support enumeration approach. This approach computes all the
 supports which could, in principle, be the support of a Nash
-equilibrium, and then searches for a totally mixed equilibrium on that
-support by solving a system of polynomial equalities and inequalities
-formed by the Nash equilibrium conditions.
+equilibrium.  For each candidate support, it attempts to compute
+totally mixed equilibria on that support by successively subdividing
+the space of mixed strategy profiles or mixed behavior profiles (as appropriate).
+By using the fact that the equilibrium conditions imply a collection
+of equations and inequalities which can be expressed as multilinear
+polynomials, the subdivision constructed is such that each cell
+contains either no equilibria or exactly one equilibrium.
 
 For strategic games, the program searches supports in the order proposed
 by Porter, Nudelman, and Shoham [PNS04]_.  For two-player games, this
@@ -27,13 +31,15 @@ digit 1 represents a strategy which is present in the support, and the
 digit 0 represents a strategy which is not present. Each candidate
 support is printed with the label "candidate,".
 
-Note that the subroutine to compute a solution to the system of
-polynomial equations and inequalities will fail in degenerate cases.
+The approach of subdividing the space of totally mixed profiles assumes
+solutions to the system of equations and inequalities are isolated
+points.  In the case of degeneracies in the resulting system,
 When the verbose switch `-v` is used, these supports are identified on
-standard output with the label "singular,". It is possible that there
-exist equilibria, often a connected component of equilibria, on these
-singular supports.
-
+standard output with the label "singular,".   This will occur
+if there is a positive-dimensional set of equilibria which all
+share the listed support.  However, the converse is not true:
+not all supports labeled as "singular" will necessarily be the
+support of some set of equilibria.
 
 .. program:: gambit-enumpoly
 

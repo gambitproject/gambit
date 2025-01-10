@@ -158,8 +158,7 @@ public:
   // square of length
   T NormSquared() const
   {
-    return std::accumulate(this->begin(), this->end(), static_cast<T>(0),
-                           [](const T &t, const T &v) { return t + v * v; });
+    return std::inner_product(this->begin(), this->end(), this->begin(), static_cast<T>(0));
   }
 };
 

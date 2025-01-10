@@ -161,6 +161,12 @@ public:
                    [](const Interval<T> &x) { return x.Length(); });
     return answer;
   }
+  T MaxSideLength() const
+  {
+    return std::accumulate(
+        sides.begin(), sides.end(), static_cast<T>(0),
+        [](const T &v, const Interval<T> &side) { return std::max(v, side.Length()); });
+  }
   bool Contains(const Vector<T> &point, const T &eps = static_cast<T>(0)) const
   {
     return std::equal(sides.begin(), sides.end(), point.begin(),

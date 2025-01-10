@@ -55,41 +55,27 @@ class PolynomialSystemSolver {
 private:
   PolynomialSystem<double> m_system, m_normalizedSystem;
   PolynomialSystemDerivatives<double> m_derivatives;
-  List<Vector<double>> m_roots;
-  RectArray<bool> eq_i_uses_j;
-
-  // Supporting routines for the constructors
-
-  RectArray<bool> BuildEquationVariableMatrix() const;
 
   // Check whether roots are impossible
-
-  bool SystemHasNoRootsIn(const Rectangle<double> &r, Array<int> &) const;
+  bool SystemHasNoRootsIn(const Rectangle<double> &r) const;
 
   // Ask whether Newton's method leads to a root
-
   bool NewtonRootInRectangle(const Rectangle<double> &, Vector<double> &) const;
 
   // Ask whether we can prove that there is no root other than
   // the one produced by the last step
-
   double MaxDistanceFromPointToVertexAfterTransformation(const Rectangle<double> &,
                                                          const Vector<double> &,
                                                          const SquareMatrix<double> &) const;
 
-  bool HasNoOtherRootsIn(const Rectangle<double> &, const Vector<double> &,
-                         const SquareMatrix<double> &) const;
+  bool HasNoOtherRootsIn(const Rectangle<double> &, const Vector<double> &) const;
 
-  // Combine the last two steps into a single query
-  bool NewtonRootIsOnlyInRct(const Rectangle<double> &, Vector<double> &) const;
-
-  void FindRoots(List<Vector<double>> &, const Rectangle<double> &, int, Array<int> &,
-                 int &iterations, int depth, int) const;
+  void FindRoots(std::list<Vector<double>> &, const Rectangle<double> &, int) const;
 
 public:
   explicit PolynomialSystemSolver(const PolynomialSystem<double> &p_system)
     : m_system(p_system), m_normalizedSystem(p_system.Normalize()),
-      m_derivatives(m_normalizedSystem), eq_i_uses_j(BuildEquationVariableMatrix())
+      m_derivatives(m_normalizedSystem)
   {
   }
   PolynomialSystemSolver(const PolynomialSystemSolver &) = delete;
@@ -100,14 +86,16 @@ public:
   // Information
   int GetDimension() const { return m_system.GetDimension(); }
   int NumEquations() const { return std::min(m_system.GetDimension(), m_system.size()); }
-  const List<Vector<double>> &RootList() const { return m_roots; }
 
-  // Refines the accuracy of roots obtained from other algorithms
-  Vector<double> NewtonPolishOnce(const Vector<double> &) const;
-  Vector<double> SlowNewtonPolishOnce(const Vector<double> &) const;
+  /// Take a single Newton step, irrespective of whether the norm of the function at the
+  /// resulting point is smaller than at the original point
+  Vector<double> NewtonStep(const Vector<double> &) const;
+  /// Take a Newton step, sized such that the norm of the function at the resulting point
+  /// is smaller than at the original point
+  Vector<double> ImprovingNewtonStep(const Vector<double> &) const;
 
   // Find up to `max_roots` roots inside rectangle `r`
-  bool FindRoots(const Rectangle<double> &r, int max_roots);
+  std::list<Vector<double>> FindRoots(const Rectangle<double> &r, int max_roots);
 };
 
 } // end namespace Gambit
