@@ -315,7 +315,7 @@ the values are recorded as intended.
 Reading a game from a file
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Games stored in existing Gambit savefiles can be loaded using :meth:`.Game.read_game`:
+Games stored in existing Gambit savefiles can be loaded using :meth:`.read_efg` or :meth:`.read_nfg`:
 
 .. ipython:: python
    :suppress:
@@ -325,7 +325,7 @@ Games stored in existing Gambit savefiles can be loaded using :meth:`.Game.read_
 
 .. ipython:: python
 
-   g = gbt.Game.read_game("e02.nfg")
+   g = gbt.read_nfg("e02.nfg")
    g
 
 .. ipython:: python
@@ -363,7 +363,7 @@ the extensive representation.  Assuming that ``g`` refers to the game
 .. ipython:: python
    :suppress:
 
-   g = gbt.Game.read_game("poker.efg")
+   g = gbt.read_efg("poker.efg")
 
 .. ipython:: python
 
@@ -562,7 +562,7 @@ As an example, consider solving the standard one-card poker game using
 
 .. ipython:: python
 
-   g = gbt.Game.read_game("poker.efg")
+   g = gbt.read_efg("poker.efg")
    g.max_payoff, g.min_payoff
 
 :py:func:`.logit_solve` is a globally-convergent method, in that it computes a
@@ -646,7 +646,7 @@ strategies for each player), :py:func:`.liap_solve` finds one of the totally-mix
 
 .. ipython:: python
 
-   g = gbt.Game.read_game("2x2x2.nfg")
+   g = gbt.read_nfg("2x2x2.nfg")
    gbt.nash.liap_solve(g.mixed_strategy_profile())
 
 Which equilibrium is found depends on the starting point.  With a different starting point,

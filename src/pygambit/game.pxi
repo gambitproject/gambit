@@ -651,7 +651,7 @@ class Game:
         if self.is_tree:
             return repr(self)
         else:
-            return self.write("html")
+            return self.to_html()
 
     def __eq__(self, other: typing.Any) -> bool:
         return (

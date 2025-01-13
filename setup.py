@@ -1,6 +1,6 @@
 #
 # This file is part of Gambit
-# Copyright (c) 1994-2023, The Gambit Project (http://www.gambit-project.org)
+# Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
 #
 # FILE: src/python/setup.py
 # Setuptools configuration file for Gambit Python extension
@@ -125,7 +125,7 @@ setuptools.setup(
     license="GPL2+",
     author="Theodore Turocy",
     author_email="ted.turocy@gmail.com",
-    url="http://www.gambit-project.org",
+    url="https://www.gambit-project.org",
     project_urls={
         "Documentation": "https://gambitproject.readthedocs.io/",
         "Source": "https://github.com/gambitproject/gambit",

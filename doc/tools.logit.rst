@@ -108,7 +108,7 @@ in Figure 2 of Selten (International Journal of Game Theory,
 
    $ gambit-logit e02.nfg
    Compute a branch of the logit equilibrium correspondence
-   Gambit version 16.2.0, Copyright (C) 1994-2024, The Gambit Project
+   Gambit version 16.3.0, Copyright (C) 1994-2025, The Gambit Project
    This is free software, distributed under the GNU GPL
 
    0.000000,0.333333,0.333333,0.333333,0.5,0.5

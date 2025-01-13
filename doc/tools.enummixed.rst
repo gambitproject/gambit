@@ -70,9 +70,7 @@ in Figure 2 of Selten (International Journal of Game Theory,
 
    $ gambit-enummixed e02.nfg
    Compute Nash equilibria by enumerating extreme points
-   Gambit version 16.2.0, Copyright (C) 1994-2024, The Gambit Project
-   Enumeration code based on lrslib 4.2b,
-   Copyright (C) 1995-2005 by David Avis (avis@cs.mcgill.ca)
+   Gambit version 16.3.0, Copyright (C) 1994-2025, The Gambit Project
    This is free software, distributed under the GNU GPL
 
    NE,1,0,0,1,0
@@ -84,9 +82,7 @@ information using the `-c` switch::
 
    $ gambit-enummixed -c e02.nfg
    Compute Nash equilibria by enumerating extreme points
-   Gambit version 16.2.0, Copyright (C) 1994-2024, The Gambit Project
-   Enumeration code based on lrslib 4.2b,
-   Copyright (C) 1995-2005 by David Avis (avis@cs.mcgill.ca)
+   Gambit version 16.3.0, Copyright (C) 1994-2025, The Gambit Project
    This is free software, distributed under the GNU GPL
 
    NE,1,0,0,1,0
