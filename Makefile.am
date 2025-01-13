@@ -599,13 +599,14 @@ gambit_SOURCES = \
 	src/gui/valnumber.cc \
 	src/gui/valnumber.h
 
+gambit_LDADD = $(RC_OBJECT_PATH) $(WX_LIBS)
 
 if IS_WIN32
-gambit_LDADD = $(RC_OBJECT_PATH) $(WX_LIBS_STATIC) -ldeflate -lzstd -llerc -lWebP
-else
-gambit_LDADD = $(RC_OBJECT_PATH) $(WX_LIBS)
+  gambit_LDADD += $(WX_LIBS_STATIC) -ldeflate -lzstd -llerc -lWebP
 endif
-
+if IS_MAC
+  gambit_LDADD += $(WX_LIBS_STATIC)
+endif
 
 osx-bundle:
 	make all
