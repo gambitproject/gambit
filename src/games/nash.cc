@@ -180,42 +180,6 @@ StrategySolver<T>::StrategySolver(
   }
 }
 
-template <class T>
-BehavSolver<T>::BehavSolver(std::shared_ptr<StrategyProfileRenderer<T>> p_onEquilibrium /* = 0 */)
-  : m_onEquilibrium(p_onEquilibrium)
-{
-  if (m_onEquilibrium.get() == nullptr) {
-    m_onEquilibrium.reset(new BehavStrategyNullRenderer<T>());
-  }
-}
-
-template <class T>
-BehavViaStrategySolver<T>::BehavViaStrategySolver(
-    std::shared_ptr<StrategySolver<T>> p_solver,
-    std::shared_ptr<StrategyProfileRenderer<T>> p_onEquilibrium /* = 0 */)
-  : BehavSolver<T>(p_onEquilibrium), m_solver(p_solver)
-{
-}
-
-template <class T>
-List<MixedBehaviorProfile<T>> BehavViaStrategySolver<T>::Solve(const Game &p_game) const
-{
-  List<MixedStrategyProfile<T>> output = m_solver->Solve(p_game);
-  List<MixedBehaviorProfile<T>> solutions;
-  for (const auto &profile : output) {
-    solutions.push_back(MixedBehaviorProfile<T>(profile));
-  }
-  return solutions;
-}
-
-template <class T>
-SubgameBehavSolver<T>::SubgameBehavSolver(
-    std::shared_ptr<BehavSolver<T>> p_solver,
-    std::shared_ptr<StrategyProfileRenderer<T>> p_onEquilibrium /* = 0 */)
-  : BehavSolver<T>(p_onEquilibrium), m_solver(p_solver)
-{
-}
-
 // A nested anonymous namespace to privatize these functions
 
 namespace {

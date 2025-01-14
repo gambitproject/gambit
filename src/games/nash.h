@@ -184,7 +184,13 @@ protected:
 
 template <class T> class BehavSolver {
 public:
-  explicit BehavSolver(std::shared_ptr<StrategyProfileRenderer<T>> p_onEquilibrium = nullptr);
+  explicit BehavSolver(std::shared_ptr<StrategyProfileRenderer<T>> p_onEquilibrium = nullptr)
+    : m_onEquilibrium(p_onEquilibrium)
+  {
+    if (m_onEquilibrium.get() == nullptr) {
+      m_onEquilibrium.reset(new BehavStrategyNullRenderer<T>());
+    }
+  }
   virtual ~BehavSolver() = default;
 
   virtual List<MixedBehaviorProfile<T>> Solve(const Game &) const = 0;
@@ -199,11 +205,23 @@ protected:
 //
 template <class T> class BehavViaStrategySolver : public BehavSolver<T> {
 public:
-  explicit BehavViaStrategySolver(std::shared_ptr<StrategySolver<T>> p_solver,
-                                  std::shared_ptr<StrategyProfileRenderer<T>> p_onEquilibrium = 0);
+  explicit BehavViaStrategySolver(
+      std::shared_ptr<StrategySolver<T>> p_solver,
+      std::shared_ptr<StrategyProfileRenderer<T>> p_onEquilibrium = nullptr)
+    : BehavSolver<T>(p_onEquilibrium), m_solver(p_solver)
+  {
+  }
   ~BehavViaStrategySolver() override = default;
 
-  List<MixedBehaviorProfile<T>> Solve(const Game &) const override;
+  List<MixedBehaviorProfile<T>> Solve(const Game &p_game) const override
+  {
+    List<MixedStrategyProfile<T>> output = m_solver->Solve(p_game);
+    List<MixedBehaviorProfile<T>> solutions;
+    for (const auto &profile : output) {
+      solutions.push_back(MixedBehaviorProfile<T>(profile));
+    }
+    return solutions;
+  }
 
 protected:
   std::shared_ptr<StrategySolver<T>> m_solver;
@@ -215,10 +233,13 @@ template <class T> class SubgameBehavSolver : public BehavSolver<T> {
 public:
   explicit SubgameBehavSolver(
       std::shared_ptr<BehavSolver<T>> p_solver,
-      std::shared_ptr<StrategyProfileRenderer<T>> p_onEquilibrium = nullptr);
+      std::shared_ptr<StrategyProfileRenderer<T>> p_onEquilibrium = nullptr)
+    : BehavSolver<T>(p_onEquilibrium), m_solver(p_solver)
+  {
+  }
   ~SubgameBehavSolver() override = default;
 
-  List<MixedBehaviorProfile<T>> Solve(const Game &) const override;
+  List<MixedBehaviorProfile<T>> Solve(const Game &p_game) const override;
 
 protected:
   std::shared_ptr<BehavSolver<T>> m_solver;
