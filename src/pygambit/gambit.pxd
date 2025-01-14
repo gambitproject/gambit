@@ -13,8 +13,8 @@ cdef extern from "gambit.h":
 cdef extern from "core/rational.h":
     cdef cppclass c_Rational "Rational":
         c_Rational() except +
-    string rat_str "lexical_cast<std::string>"(c_Rational) except +
-    c_Rational str_rat "lexical_cast<Rational>"(string) except +
+    string to_string "lexical_cast<std::string>"(c_Rational) except +
+    c_Rational to_rational "lexical_cast<Rational>"(string) except +
 
 
 cdef extern from "games/number.h":
@@ -35,6 +35,7 @@ cdef extern from "core/array.h":
         int size() except +
         Array() except +
         Array(int) except +
+        void push_back(T) except +
         iterator begin() except +
         iterator end() except +
 
@@ -225,13 +226,10 @@ cdef extern from "games/game.h":
         c_Game SetChanceProbs(c_GameInfoset, Array[c_Number]) except +
 
         c_PureStrategyProfile NewPureStrategyProfile()  # except + doesn't compile
-        c_MixedStrategyProfileDouble NewMixedStrategyProfile(double)  # except + doesn't compile
-        c_MixedStrategyProfileRational NewMixedStrategyProfile(
-                c_Rational
-        )  # except + doesn't compile
+        c_MixedStrategyProfile[T] NewMixedStrategyProfile[T](T)  # except + doesn't compile
 
     c_Game NewTree() except +
-    c_Game NewTable(Array[int] *) except +
+    c_Game NewTable(Array[int]) except +
 
 
 cdef extern from "games/stratpure.h":
@@ -245,98 +243,52 @@ cdef extern from "games/stratpure.h":
         c_Rational GetPayoff(c_GamePlayer) except +
 
 
-cdef extern from "games/stratmixed.h":
-    cdef cppclass c_MixedStrategyProfileDouble "MixedStrategyProfile<double>":
-        bool operator==(c_MixedStrategyProfileDouble) except +
-        bool operator!=(c_MixedStrategyProfileDouble) except +
+cdef extern from "games/stratmixed.h" namespace "Gambit":
+    cdef cppclass c_MixedStrategyProfile "MixedStrategyProfile"[T]:
+        bool operator==(c_MixedStrategyProfile[T]) except +
+        bool operator!=(c_MixedStrategyProfile[T]) except +
         c_Game GetGame() except +
         bool IsInvalidated()
         int MixedProfileLength() except +
         c_StrategySupportProfile GetSupport() except +
-        c_MixedStrategyProfileDouble Normalize()  # except + doesn't compile
-        double getitem_strategy "operator[]"(c_GameStrategy) except +IndexError
-        double GetPayoff(c_GamePlayer) except +
-        double GetPayoff(c_GameStrategy) except +
-        double GetRegret(c_GameStrategy) except +
-        double GetRegret(c_GamePlayer) except +
-        double GetMaxRegret() except +
-        double GetPayoffDeriv(int, c_GameStrategy, c_GameStrategy) except +
-        double GetLiapValue() except +
-        c_MixedStrategyProfileDouble ToFullSupport() except +
-        c_MixedStrategyProfileDouble(c_MixedStrategyProfileDouble) except +
+        c_MixedStrategyProfile[T] Normalize()  # except + doesn't compile
+        T getitem_strategy "operator[]"(c_GameStrategy) except +IndexError
+        T GetPayoff(c_GamePlayer) except +
+        T GetPayoff(c_GameStrategy) except +
+        T GetRegret(c_GameStrategy) except +
+        T GetRegret(c_GamePlayer) except +
+        T GetMaxRegret() except +
+        T GetPayoffDeriv(int, c_GameStrategy, c_GameStrategy) except +
+        T GetLiapValue() except +
+        c_MixedStrategyProfile[T] ToFullSupport() except +
+        c_MixedStrategyProfile(c_MixedStrategyProfile[T]) except +
 
-    cdef cppclass c_MixedStrategyProfileRational "MixedStrategyProfile<Rational>":
-        bool operator==(c_MixedStrategyProfileRational) except +
-        bool operator!=(c_MixedStrategyProfileRational) except +
-        c_Game GetGame() except +
-        bool IsInvalidated()
-        int MixedProfileLength() except +
-        c_StrategySupportProfile GetSupport() except +
-        c_MixedStrategyProfileRational Normalize()  # except + doesn't compile
-        c_Rational getitem_strategy "operator[]"(c_GameStrategy) except +IndexError
-        c_Rational GetPayoff(c_GamePlayer) except +
-        c_Rational GetPayoff(c_GameStrategy) except +
-        c_Rational GetRegret(c_GameStrategy) except +
-        c_Rational GetRegret(c_GamePlayer) except +
-        c_Rational GetMaxRegret() except +
-        c_Rational GetPayoffDeriv(int, c_GameStrategy, c_GameStrategy) except +
-        c_Rational GetLiapValue() except +
-        c_MixedStrategyProfileRational ToFullSupport() except +
-        c_MixedStrategyProfileRational(c_MixedStrategyProfileRational) except +
-
-cdef extern from "games/behavmixed.h":
-    cdef cppclass c_MixedBehaviorProfileDouble "MixedBehaviorProfile<double>":
-        bool operator==(c_MixedBehaviorProfileDouble) except +
-        bool operator!=(c_MixedBehaviorProfileDouble) except +
+cdef extern from "games/behavmixed.h" namespace "Gambit":
+    cdef cppclass c_MixedBehaviorProfile "MixedBehaviorProfile"[T]:
+        bool operator==(c_MixedBehaviorProfile[T]) except +
+        bool operator!=(c_MixedBehaviorProfile[T]) except +
         c_Game GetGame() except +
         bool IsInvalidated()
         int BehaviorProfileLength() except +
         bool IsDefinedAt(c_GameInfoset) except +
-        c_MixedBehaviorProfileDouble Normalize()  # except + doesn't compile
-        double getitem "operator[]"(int) except +IndexError
-        double getaction "operator[]"(c_GameAction) except +IndexError
-        double GetPayoff(int) except +
-        double GetBeliefProb(c_GameNode) except +
-        double GetRealizProb(c_GameNode) except +
-        double GetInfosetProb(c_GameInfoset) except +
-        double GetPayoff(c_GameInfoset) except +
-        double GetPayoff(c_GamePlayer, c_GameNode) except +
-        double GetPayoff(c_GameAction) except +
-        double GetRegret(c_GameAction) except +
-        double GetRegret(c_GameInfoset) except +
-        double GetMaxRegret() except +
-        double GetLiapValue() except +
-        c_MixedStrategyProfileDouble ToMixedProfile()  # except + doesn't compile
-        c_MixedBehaviorProfileDouble(c_MixedStrategyProfileDouble) except +NotImplementedError
-        c_MixedBehaviorProfileDouble(c_Game) except +
-        c_MixedBehaviorProfileDouble(c_MixedBehaviorProfileDouble) except +
-
-    cdef cppclass c_MixedBehaviorProfileRational "MixedBehaviorProfile<Rational>":
-        bool operator==(c_MixedBehaviorProfileRational) except +
-        bool operator!=(c_MixedBehaviorProfileRational) except +
-        c_Game GetGame() except +
-        bool IsInvalidated()
-        int BehaviorProfileLength() except +
-        bool IsDefinedAt(c_GameInfoset) except +
-        c_MixedBehaviorProfileRational Normalize()  # except + doesn't compile
-        c_Rational getitem "operator[]"(int) except +IndexError
-        c_Rational getaction "operator[]"(c_GameAction) except +IndexError
-        c_Rational GetPayoff(int) except +
-        c_Rational GetBeliefProb(c_GameNode) except +
-        c_Rational GetRealizProb(c_GameNode) except +
-        c_Rational GetInfosetProb(c_GameInfoset) except +
-        c_Rational GetPayoff(c_GameInfoset) except +
-        c_Rational GetPayoff(c_GamePlayer, c_GameNode) except +
-        c_Rational GetPayoff(c_GameAction) except +
-        c_Rational GetRegret(c_GameAction) except +
-        c_Rational GetRegret(c_GameInfoset) except +
-        c_Rational GetMaxRegret() except +
-        c_Rational GetLiapValue() except +
-        c_MixedStrategyProfileRational ToMixedProfile()  # except + doesn't compile
-        c_MixedBehaviorProfileRational(c_MixedStrategyProfileRational) except +NotImplementedError
-        c_MixedBehaviorProfileRational(c_Game) except +
-        c_MixedBehaviorProfileRational(c_MixedBehaviorProfileRational) except +
-
+        c_MixedBehaviorProfile[T] Normalize()  # except + doesn't compile
+        T getitem "operator[]"(int) except +IndexError
+        T getaction "operator[]"(c_GameAction) except +IndexError
+        T GetPayoff(int) except +
+        T GetBeliefProb(c_GameNode) except +
+        T GetRealizProb(c_GameNode) except +
+        T GetInfosetProb(c_GameInfoset) except +
+        T GetPayoff(c_GameInfoset) except +
+        T GetPayoff(c_GamePlayer, c_GameNode) except +
+        T GetPayoff(c_GameAction) except +
+        T GetRegret(c_GameAction) except +
+        T GetRegret(c_GameInfoset) except +
+        T GetMaxRegret() except +
+        T GetLiapValue() except +
+        c_MixedStrategyProfile[T] ToMixedProfile()  # except + doesn't compile
+        c_MixedBehaviorProfile(c_MixedStrategyProfile[T]) except +NotImplementedError
+        c_MixedBehaviorProfile(c_Game) except +
+        c_MixedBehaviorProfile(c_MixedBehaviorProfile[T]) except +
 
 cdef extern from "games/stratspt.h":
     cdef cppclass c_StrategySupportProfile "StrategySupportProfile":
@@ -365,9 +317,9 @@ cdef extern from "games/stratspt.h":
         bool Contains(c_GameStrategy) except +
         bool IsDominated(c_GameStrategy, bool, bool) except +
         c_StrategySupportProfile Undominated(bool, bool)  # except + doesn't compile
-        c_MixedStrategyProfileDouble NewMixedStrategyProfileDouble \
+        c_MixedStrategyProfile[double] NewMixedStrategyProfileDouble \
             "NewMixedStrategyProfile<double>"() except +
-        c_MixedStrategyProfileRational NewMixedStrategyProfileRational \
+        c_MixedStrategyProfile[c_Rational] NewMixedStrategyProfileRational \
             "NewMixedStrategyProfile<Rational>"() except +
 
 
@@ -389,44 +341,39 @@ cdef extern from "util.h":
     string WriteNfgFile(c_Game)
     string WriteLaTeXFile(c_Game)
     string WriteHTMLFile(c_Game)
-    # string WriteGbtFile(c_Game)
 
-    c_Rational to_rational(char *) except +
-
-    stdlist[c_StrategySupportProfile *] make_list_of_pointer(
-            stdlist[c_StrategySupportProfile]
-    ) except +
+    stdlist[shared_ptr[T]] make_list_of_pointer[T](stdlist[T]) except +
 
     void setitem_array_int "setitem"(Array[int] *, int, int) except +
     void setitem_array_number "setitem"(Array[c_Number], int, c_Number) except +
     void setitem_array_int "setitem"(Array[int] *, int, int) except +
     void setitem_array_number "setitem"(Array[c_Number], int, c_Number) except +
 
-    void setitem_mspd_int "setitem"(c_MixedStrategyProfileDouble, int, double) except +
-    void setitem_mspd_strategy "setitem"(c_MixedStrategyProfileDouble,
+    void setitem_mspd_int "setitem"(c_MixedStrategyProfile[double], int, double) except +
+    void setitem_mspd_strategy "setitem"(c_MixedStrategyProfile[double],
                                          c_GameStrategy, double) except +
-    void setitem_mspr_int "setitem"(c_MixedStrategyProfileRational, int, c_Rational) except +
-    void setitem_mspr_strategy "setitem"(c_MixedStrategyProfileRational,
+    void setitem_mspr_int "setitem"(c_MixedStrategyProfile[c_Rational], int, c_Rational) except +
+    void setitem_mspr_strategy "setitem"(c_MixedStrategyProfile[c_Rational],
                                          c_GameStrategy, c_Rational) except +
 
-    void setitem_mbpd_int "setitem"(c_MixedBehaviorProfileDouble, int, double) except +
-    void setitem_mbpd_action "setitem"(c_MixedBehaviorProfileDouble,
+    void setitem_mbpd_int "setitem"(c_MixedBehaviorProfile[double], int, double) except +
+    void setitem_mbpd_action "setitem"(c_MixedBehaviorProfile[double],
                                        c_GameAction, double) except +
-    void setitem_mbpr_int "setitem"(c_MixedBehaviorProfileRational, int, c_Rational) except +
-    void setitem_mbpr_action "setitem"(c_MixedBehaviorProfileRational,
+    void setitem_mbpr_int "setitem"(c_MixedBehaviorProfile[c_Rational], int, c_Rational) except +
+    void setitem_mbpr_action "setitem"(c_MixedBehaviorProfile[c_Rational],
                                        c_GameAction, c_Rational) except +
 
-    shared_ptr[c_MixedStrategyProfileDouble] copyitem_list_mspd "sharedcopyitem"(
-            c_List[c_MixedStrategyProfileDouble], int
+    shared_ptr[c_MixedStrategyProfile[double]] copyitem_list_mspd "sharedcopyitem"(
+            c_List[c_MixedStrategyProfile[double]], int
     ) except +
-    shared_ptr[c_MixedStrategyProfileRational] copyitem_list_mspr "sharedcopyitem"(
-            c_List[c_MixedStrategyProfileRational], int
+    shared_ptr[c_MixedStrategyProfile[c_Rational]] copyitem_list_mspr "sharedcopyitem"(
+            c_List[c_MixedStrategyProfile[c_Rational]], int
     ) except +
-    shared_ptr[c_MixedBehaviorProfileDouble] copyitem_list_mbpd "sharedcopyitem"(
-            c_List[c_MixedBehaviorProfileDouble], int
+    shared_ptr[c_MixedBehaviorProfile[double]] copyitem_list_mbpd "sharedcopyitem"(
+            c_List[c_MixedBehaviorProfile[double]], int
     ) except +
-    shared_ptr[c_MixedBehaviorProfileRational] copyitem_list_mbpr "sharedcopyitem"(
-            c_List[c_MixedBehaviorProfileRational], int
+    shared_ptr[c_MixedBehaviorProfile[c_Rational]] copyitem_list_mbpr "sharedcopyitem"(
+            c_List[c_MixedBehaviorProfile[c_Rational]], int
     ) except +
     shared_ptr[c_LogitQREMixedStrategyProfile] copyitem_list_qrem "sharedcopyitem"(
             c_List[c_LogitQREMixedStrategyProfile], int
@@ -437,60 +384,64 @@ cdef extern from "util.h":
 
 
 cdef extern from "solvers/enumpure/enumpure.h":
-    c_List[c_MixedStrategyProfileRational] EnumPureStrategySolve(c_Game) except +RuntimeError
-    c_List[c_MixedBehaviorProfileRational] EnumPureAgentSolve(c_Game) except +RuntimeError
+    c_List[c_MixedStrategyProfile[c_Rational]] EnumPureStrategySolve(c_Game) except +RuntimeError
+    c_List[c_MixedBehaviorProfile[c_Rational]] EnumPureAgentSolve(c_Game) except +RuntimeError
 
 cdef extern from "solvers/enummixed/enummixed.h":
-    c_List[c_MixedStrategyProfileDouble] EnumMixedStrategySolveDouble(c_Game) except +RuntimeError
-    c_List[c_MixedStrategyProfileRational] EnumMixedStrategySolveRational(
+    c_List[c_MixedStrategyProfile[double]] EnumMixedStrategySolveDouble(
             c_Game
     ) except +RuntimeError
-    c_List[c_MixedStrategyProfileRational] EnumMixedStrategySolveLrs(c_Game) except +RuntimeError
+    c_List[c_MixedStrategyProfile[c_Rational]] EnumMixedStrategySolveRational(
+            c_Game
+    ) except +RuntimeError
+    c_List[c_MixedStrategyProfile[c_Rational]] EnumMixedStrategySolveLrs(
+            c_Game
+    ) except +RuntimeError
 
 cdef extern from "solvers/lcp/lcp.h":
-    c_List[c_MixedStrategyProfileDouble] LcpStrategySolveDouble(
+    c_List[c_MixedStrategyProfile[double]] LcpStrategySolveDouble(
             c_Game, int p_stopAfter, int p_maxDepth
     ) except +RuntimeError
-    c_List[c_MixedStrategyProfileRational] LcpStrategySolveRational(
+    c_List[c_MixedStrategyProfile[c_Rational]] LcpStrategySolveRational(
             c_Game, int p_stopAfter, int p_maxDepth
     ) except +RuntimeError
-    c_List[c_MixedBehaviorProfileDouble] LcpBehaviorSolveDouble(
+    c_List[c_MixedBehaviorProfile[double]] LcpBehaviorSolveDouble(
             c_Game, int p_stopAfter, int p_maxDepth
     ) except +RuntimeError
-    c_List[c_MixedBehaviorProfileRational] LcpBehaviorSolveRational(
+    c_List[c_MixedBehaviorProfile[c_Rational]] LcpBehaviorSolveRational(
             c_Game, int p_stopAfter, int p_maxDepth
     ) except +RuntimeError
 
 cdef extern from "solvers/lp/nfglp.h":
-    c_List[c_MixedStrategyProfileDouble] LpStrategySolveDouble(c_Game) except +RuntimeError
-    c_List[c_MixedStrategyProfileRational] LpStrategySolveRational(c_Game) except +RuntimeError
+    c_List[c_MixedStrategyProfile[double]] LpStrategySolveDouble(c_Game) except +RuntimeError
+    c_List[c_MixedStrategyProfile[c_Rational]] LpStrategySolveRational(c_Game) except +RuntimeError
 
 cdef extern from "solvers/lp/efglp.h":
-    c_List[c_MixedBehaviorProfileDouble] LpBehaviorSolveDouble(c_Game) except +RuntimeError
-    c_List[c_MixedBehaviorProfileRational] LpBehaviorSolveRational(c_Game) except +RuntimeError
+    c_List[c_MixedBehaviorProfile[double]] LpBehaviorSolveDouble(c_Game) except +RuntimeError
+    c_List[c_MixedBehaviorProfile[c_Rational]] LpBehaviorSolveRational(c_Game) except +RuntimeError
 
 cdef extern from "solvers/liap/liap.h":
-    c_List[c_MixedStrategyProfileDouble] LiapStrategySolve(
-            c_MixedStrategyProfileDouble, double p_maxregret, int p_maxitsN
+    c_List[c_MixedStrategyProfile[double]] LiapStrategySolve(
+            c_MixedStrategyProfile[double], double p_maxregret, int p_maxitsN
     ) except +RuntimeError
-    c_List[c_MixedBehaviorProfileDouble] LiapBehaviorSolve(
-            c_MixedBehaviorProfileDouble, double p_maxregret, int p_maxitsN
+    c_List[c_MixedBehaviorProfile[double]] LiapBehaviorSolve(
+            c_MixedBehaviorProfile[double], double p_maxregret, int p_maxitsN
     ) except +RuntimeError
 
 cdef extern from "solvers/simpdiv/simpdiv.h":
-    c_List[c_MixedStrategyProfileRational] SimpdivStrategySolve(
-            c_MixedStrategyProfileRational start, c_Rational p_maxregret, int p_gridResize,
+    c_List[c_MixedStrategyProfile[c_Rational]] SimpdivStrategySolve(
+            c_MixedStrategyProfile[c_Rational] start, c_Rational p_maxregret, int p_gridResize,
             int p_leashLength
     ) except +RuntimeError
 
 cdef extern from "solvers/ipa/ipa.h":
-    c_List[c_MixedStrategyProfileDouble] IPAStrategySolve(
-            c_MixedStrategyProfileDouble
+    c_List[c_MixedStrategyProfile[double]] IPAStrategySolve(
+            c_MixedStrategyProfile[double]
     ) except +RuntimeError
 
 cdef extern from "solvers/gnm/gnm.h":
-    c_List[c_MixedStrategyProfileDouble] GNMStrategySolve(
-            c_MixedStrategyProfileDouble, double p_endLambda, int p_steps,
+    c_List[c_MixedStrategyProfile[double]] GNMStrategySolve(
+            c_MixedStrategyProfile[double], double p_endLambda, int p_steps,
             int p_localNewtonInterval, int p_localNewtonMaxits
     ) except +RuntimeError
 
@@ -502,10 +453,10 @@ cdef extern from "solvers/nashsupport/nashsupport.h":
     ) except +RuntimeError
 
 cdef extern from "solvers/enumpoly/enumpoly.h":
-    c_List[c_MixedStrategyProfileDouble] EnumPolyStrategySolve(
+    c_List[c_MixedStrategyProfile[double]] EnumPolyStrategySolve(
             c_Game, int, float
     ) except +RuntimeError
-    c_List[c_MixedBehaviorProfileDouble] EnumPolyBehaviorSolve(
+    c_List[c_MixedBehaviorProfile[double]] EnumPolyBehaviorSolve(
             c_Game, int, float
     ) except +RuntimeError
 
@@ -514,7 +465,7 @@ cdef extern from "solvers/logit/logit.h":
         c_LogitQREMixedBehaviorProfile(c_Game) except +
         c_LogitQREMixedBehaviorProfile(c_LogitQREMixedBehaviorProfile) except +
         c_Game GetGame() except +
-        c_MixedBehaviorProfileDouble GetProfile()  # except + doesn't compile
+        c_MixedBehaviorProfile[double] GetProfile()  # except + doesn't compile
         double GetLambda() except +
         double GetLogLike() except +
         int size() except +
@@ -524,7 +475,7 @@ cdef extern from "solvers/logit/logit.h":
         c_LogitQREMixedStrategyProfile(c_Game) except +
         c_LogitQREMixedStrategyProfile(c_LogitQREMixedStrategyProfile) except +
         c_Game GetGame() except +
-        c_MixedStrategyProfileDouble GetProfile()  # except + doesn't compile
+        c_MixedStrategyProfile[double] GetProfile()  # except + doesn't compile
         double GetLambda() except +
         double GetLogLike() except +
         int size() except +
@@ -532,7 +483,7 @@ cdef extern from "solvers/logit/logit.h":
 
 
 cdef extern from "nash.h":
-    c_List[c_MixedBehaviorProfileDouble] LogitBehaviorSolveWrapper(
+    c_List[c_MixedBehaviorProfile[double]] LogitBehaviorSolveWrapper(
             c_Game, double, double, double
     ) except +
     c_List[c_LogitQREMixedBehaviorProfile] LogitBehaviorPrincipalBranchWrapper(
@@ -542,9 +493,9 @@ cdef extern from "nash.h":
             c_Game, stdlist[double], double, double
     ) except +
     shared_ptr[c_LogitQREMixedBehaviorProfile] LogitBehaviorEstimateWrapper(
-            shared_ptr[c_MixedBehaviorProfileDouble], bool, double, double
+            shared_ptr[c_MixedBehaviorProfile[double]], bool, double, double
     ) except +
-    c_List[c_MixedStrategyProfileDouble] LogitStrategySolveWrapper(
+    c_List[c_MixedStrategyProfile[double]] LogitStrategySolveWrapper(
             c_Game, double, double, double
     ) except +
     c_List[c_LogitQREMixedStrategyProfile] LogitStrategyPrincipalBranchWrapper(
@@ -554,5 +505,5 @@ cdef extern from "nash.h":
             c_Game, stdlist[double], double, double
     ) except +
     shared_ptr[c_LogitQREMixedStrategyProfile] LogitStrategyEstimateWrapper(
-            shared_ptr[c_MixedStrategyProfileDouble], bool, double, double
+            shared_ptr[c_MixedStrategyProfile[double]], bool, double, double
     ) except +

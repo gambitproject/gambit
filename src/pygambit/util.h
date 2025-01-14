@@ -36,8 +36,6 @@ using namespace std;
 using namespace Gambit;
 using namespace Gambit::Nash;
 
-inline Game NewTable(Array<int> *dim) { return NewTable(*dim); }
-
 Game ReadGame(char *fn)
 {
   std::ifstream f(fn);
@@ -124,14 +122,6 @@ std::string WriteGame(const StrategySupportProfile &p_support)
   return f.str();
 }
 
-// Create a copy on the heap (via new) of the element at index p_index of
-// container p_container.
-template <template <class> class C, class T, class X>
-T *copyitem(const C<T> &p_container, const X &p_index)
-{
-  return new T(p_container[p_index]);
-}
-
 template <template <class> class C, class T, class X>
 std::shared_ptr<T> sharedcopyitem(const C<T> &p_container, const X &p_index)
 {
@@ -151,17 +141,11 @@ void setitem(C &p_container, const X &p_index, const T &p_value)
   p_container[p_index] = p_value;
 }
 
-// Convert the (C-style) string p_value to a Rational
-inline Rational to_rational(const char *p_value)
+template <class T> std::list<std::shared_ptr<T>> make_list_of_pointer(const std::list<T> &p_list)
 {
-  return lexical_cast<Rational>(std::string(p_value));
-}
-
-template <class T> std::list<T *> make_list_of_pointer(const std::list<T> &p_list)
-{
-  std::list<T *> result;
-  for (auto element : p_list) {
-    result.push_back(new T(element));
+  std::list<std::shared_ptr<T>> result;
+  for (const auto &element : p_list) {
+    result.push_back(std::make_shared<T>(element));
   }
   return result;
 }

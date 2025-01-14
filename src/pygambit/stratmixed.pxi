@@ -562,11 +562,11 @@ class MixedStrategyProfile:
 
 @cython.cclass
 class MixedStrategyProfileDouble(MixedStrategyProfile):
-    profile = cython.declare(shared_ptr[c_MixedStrategyProfileDouble])
+    profile = cython.declare(shared_ptr[c_MixedStrategyProfile[double]])
 
     @staticmethod
     @cython.cfunc
-    def wrap(profile: shared_ptr[c_MixedStrategyProfileDouble]) -> MixedStrategyProfileDouble:
+    def wrap(profile: shared_ptr[c_MixedStrategyProfile[float]]) -> MixedStrategyProfileDouble:
         obj: MixedStrategyProfileDouble = (
             MixedStrategyProfileDouble.__new__(MixedStrategyProfileDouble)
         )
@@ -617,17 +617,17 @@ class MixedStrategyProfileDouble(MixedStrategyProfile):
 
     def _copy(self) -> MixedStrategyProfileDouble:
         return MixedStrategyProfileDouble.wrap(
-            make_shared[c_MixedStrategyProfileDouble](deref(self.profile))
+            make_shared[c_MixedStrategyProfile[double]](deref(self.profile))
         )
 
     def _as_behavior(self) -> MixedBehaviorProfileDouble:
         return MixedBehaviorProfileDouble.wrap(
-            make_shared[c_MixedBehaviorProfileDouble](deref(self.profile))
+            make_shared[c_MixedBehaviorProfile[double]](deref(self.profile))
         )
 
     def _normalize(self) -> MixedStrategyProfileDouble:
         return MixedStrategyProfileDouble.wrap(
-            make_shared[c_MixedStrategyProfileDouble](deref(self.profile).Normalize())
+            make_shared[c_MixedStrategyProfile[double]](deref(self.profile).Normalize())
         )
 
     @property
@@ -637,11 +637,13 @@ class MixedStrategyProfileDouble(MixedStrategyProfile):
 
 @cython.cclass
 class MixedStrategyProfileRational(MixedStrategyProfile):
-    profile = cython.declare(shared_ptr[c_MixedStrategyProfileRational])
+    profile = cython.declare(shared_ptr[c_MixedStrategyProfile[c_Rational]])
 
     @staticmethod
     @cython.cfunc
-    def wrap(profile: shared_ptr[c_MixedStrategyProfileRational]) -> MixedStrategyProfileRational:
+    def wrap(
+        profile: shared_ptr[c_MixedStrategyProfile[c_Rational]]
+    ) -> MixedStrategyProfileRational:
         obj: MixedStrategyProfileRational = (
             MixedStrategyProfileRational.__new__(MixedStrategyProfileRational)
         )
@@ -696,17 +698,17 @@ class MixedStrategyProfileRational(MixedStrategyProfile):
 
     def _copy(self) -> MixedStrategyProfileRational:
         return MixedStrategyProfileRational.wrap(
-            make_shared[c_MixedStrategyProfileRational](deref(self.profile))
+            make_shared[c_MixedStrategyProfile[c_Rational]](deref(self.profile))
         )
 
     def _as_behavior(self) -> MixedBehaviorProfileRational:
         return MixedBehaviorProfileRational.wrap(
-            make_shared[c_MixedBehaviorProfileRational](deref(self.profile))
+            make_shared[c_MixedBehaviorProfile[c_Rational]](deref(self.profile))
         )
 
     def _normalize(self) -> MixedStrategyProfileRational:
         return MixedStrategyProfileRational.wrap(
-            make_shared[c_MixedStrategyProfileRational](deref(self.profile).Normalize())
+            make_shared[c_MixedStrategyProfile[c_Rational]](deref(self.profile).Normalize())
         )
 
     @property

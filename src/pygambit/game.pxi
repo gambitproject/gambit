@@ -446,14 +446,10 @@ class Game:
         Game
             The newly-created strategic game.
         """
-        cdef Array[int] *d
-        d = new Array[int](len(dim))
-        try:
-            for i in range(1, len(dim)+1):
-                setitem_array_int(d, i, dim[i-1])
-            g = Game.wrap(NewTable(d))
-        finally:
-            del d
+        cdef Array[int] d
+        for v in dim:
+            d.push_back(v)
+        g = Game.wrap(NewTable(d))
         g.title = title
         return g
 
@@ -919,12 +915,14 @@ class Game:
                 "Mixed strategies not supported for games with imperfect recall."
             )
         if rational:
-            mspr = MixedStrategyProfileRational.wrap(make_shared[c_MixedStrategyProfileRational](
-                self.game.deref().NewMixedStrategyProfile(c_Rational())
-            ))
+            mspr = MixedStrategyProfileRational.wrap(
+                make_shared[c_MixedStrategyProfile[c_Rational]](
+                    self.game.deref().NewMixedStrategyProfile(c_Rational())
+                )
+            )
             return self._fill_strategy_profile(mspr, data, Rational)
         else:
-            mspd = MixedStrategyProfileDouble.wrap(make_shared[c_MixedStrategyProfileDouble](
+            mspd = MixedStrategyProfileDouble.wrap(make_shared[c_MixedStrategyProfile[double]](
                 self.game.deref().NewMixedStrategyProfile(0.0)
             ))
             return self._fill_strategy_profile(mspd, data, float)
@@ -1038,12 +1036,12 @@ class Game:
             )
         if rational:
             mbpr = MixedBehaviorProfileRational.wrap(
-                make_shared[c_MixedBehaviorProfileRational](self.game)
+                make_shared[c_MixedBehaviorProfile[c_Rational]](self.game)
             )
             return self._fill_behavior_profile(mbpr, data, Rational)
         else:
             mbpd = MixedBehaviorProfileDouble.wrap(
-                make_shared[c_MixedBehaviorProfileDouble](self.game)
+                make_shared[c_MixedBehaviorProfile[double]](self.game)
             )
             return self._fill_behavior_profile(mbpd, data, float)
 
@@ -1122,11 +1120,11 @@ class Game:
         -------
         StrategySupportProfile
         """
-        profile = StrategySupportProfile.wrap(self)
+        profile = StrategySupportProfile.wrap(make_shared[c_StrategySupportProfile](self.game))
         if strategies is not None:
             for strategy in self.strategies:
                 if not strategies(strategy):
-                    if not (deref(profile.support)
+                    if not (deref(profile.profile)
                             .RemoveStrategy(cython.cast(Strategy, strategy).strategy)):
                         raise ValueError("attempted to remove the last strategy for player")
         return profile
