@@ -227,27 +227,10 @@ protected:
   std::shared_ptr<StrategySolver<T>> m_solver;
 };
 
-template <class T> class SubgameSolution;
-
-template <class T> class SubgameBehavSolver : public BehavSolver<T> {
-public:
-  explicit SubgameBehavSolver(
-      std::shared_ptr<BehavSolver<T>> p_solver,
-      std::shared_ptr<StrategyProfileRenderer<T>> p_onEquilibrium = nullptr)
-    : BehavSolver<T>(p_onEquilibrium), m_solver(p_solver)
-  {
-  }
-  ~SubgameBehavSolver() override = default;
-
-  List<MixedBehaviorProfile<T>> Solve(const Game &p_game) const override;
-
-protected:
-  std::shared_ptr<BehavSolver<T>> m_solver;
-
-private:
-  std::list<SubgameSolution<T>> SolveSubgames(const GameNode &,
-                                              const std::map<std::string, GameInfoset> &) const;
-};
+template <class T>
+List<MixedBehaviorProfile<T>>
+SolveBySubgames(const Game &, std::shared_ptr<BehavSolver<T>> p_solver,
+                std::shared_ptr<StrategyProfileRenderer<T>> p_onEquilibrium = nullptr);
 
 //
 // Exception raised when maximum number of equilibria to compute

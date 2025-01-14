@@ -195,8 +195,7 @@ int main(int argc, char *argv[])
           else {
             renderer = std::make_shared<BehavStrategyCSVRenderer<double>>(std::cout, numDecimals);
           }
-          SubgameBehavSolver<double> algorithm(stage, renderer);
-          algorithm.Solve(game);
+          SolveBySubgames(game, stage, renderer);
         }
         else {
           std::shared_ptr<BehavSolver<Rational>> stage(
@@ -210,8 +209,7 @@ int main(int argc, char *argv[])
             renderer =
                 std::make_shared<BehavStrategyCSVRenderer<Rational>>(std::cout, numDecimals);
           }
-          SubgameBehavSolver<Rational> algorithm(stage, renderer);
-          algorithm.Solve(game);
+          SolveBySubgames(game, stage, renderer);
         }
       }
     }

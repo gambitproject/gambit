@@ -270,13 +270,14 @@ public:
 
 template <class T>
 std::list<SubgameSolution<T>>
-SubgameBehavSolver<T>::SolveSubgames(const GameNode &p_root,
-                                     const std::map<std::string, GameInfoset> &p_infosetMap) const
+SolveSubgames(const GameNode &p_root, const std::map<std::string, GameInfoset> &p_infosetMap,
+              std::shared_ptr<BehavSolver<T>> p_solver,
+              std::shared_ptr<StrategyProfileRenderer<T>> p_onEquilibrium)
 {
   std::list<SubgameSolution<T>> subsolutions = {{{}, {}}};
   for (const auto &subroot : ChildSubgames(p_root)) {
     std::list<SubgameSolution<T>> combined_solutions;
-    for (const auto &solution : SolveSubgames(subroot, p_infosetMap)) {
+    for (const auto &solution : SolveSubgames(subroot, p_infosetMap, p_solver, p_onEquilibrium)) {
       for (const auto &subsolution : subsolutions) {
         combined_solutions.push_back(subsolution.Combine(solution));
       }
@@ -297,7 +298,7 @@ SubgameBehavSolver<T>::SolveSubgames(const GameNode &p_root,
     Game subgame = p_root->CopySubgame();
     subgame->GetRoot()->SetOutcome(nullptr);
 
-    for (const auto &solution : m_solver->Solve(subgame)) {
+    for (const auto &solution : p_solver->Solve(subgame)) {
       solutions.push_back(subsolution.Update(p_root, solution, p_infosetMap));
     }
   }
@@ -321,7 +322,9 @@ MixedBehaviorProfile<T> BuildProfile(const Game &p_game, const SubgameSolution<T
 }
 
 template <class T>
-List<MixedBehaviorProfile<T>> SubgameBehavSolver<T>::Solve(const Game &p_game) const
+List<MixedBehaviorProfile<T>>
+SolveBySubgames(const Game &p_game, std::shared_ptr<BehavSolver<T>> p_solver,
+                std::shared_ptr<StrategyProfileRenderer<T>> p_onEquilibrium /* = nullptr */)
 {
   Game efg = p_game->GetRoot()->CopySubgame();
 
@@ -339,11 +342,11 @@ List<MixedBehaviorProfile<T>> SubgameBehavSolver<T>::Solve(const Game &p_game) c
     }
   }
 
-  auto results = SolveSubgames(efg->GetRoot(), infoset_map);
+  auto results = SolveSubgames(efg->GetRoot(), infoset_map, p_solver, p_onEquilibrium);
   List<MixedBehaviorProfile<T>> solutions;
   for (const auto &result : results) {
     solutions.push_back(BuildProfile(p_game, result));
-    this->m_onEquilibrium->Render(solutions.back());
+    p_onEquilibrium->Render(solutions.back());
   }
   return solutions;
 }
@@ -357,7 +360,11 @@ template class BehavSolver<Rational>;
 template class BehavViaStrategySolver<double>;
 template class BehavViaStrategySolver<Rational>;
 
-template class SubgameBehavSolver<double>;
-template class SubgameBehavSolver<Rational>;
+template List<MixedBehaviorProfile<double>>
+SolveBySubgames(const Game &p_game, std::shared_ptr<BehavSolver<double>> p_solver,
+                std::shared_ptr<StrategyProfileRenderer<double>> p_onEquilibrium);
+template List<MixedBehaviorProfile<Rational>>
+SolveBySubgames(const Game &p_game, std::shared_ptr<BehavSolver<Rational>> p_solver,
+                std::shared_ptr<StrategyProfileRenderer<Rational>> p_onEquilibrium);
 
 } // namespace Gambit::Nash
