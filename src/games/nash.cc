@@ -271,7 +271,7 @@ public:
 template <class T>
 std::list<SubgameSolution<T>>
 SolveSubgames(const GameNode &p_root, const std::map<std::string, GameInfoset> &p_infosetMap,
-              std::shared_ptr<BehavSolver<T>> p_solver,
+              BehaviorSolverType<T> p_solver,
               std::shared_ptr<StrategyProfileRenderer<T>> p_onEquilibrium)
 {
   std::list<SubgameSolution<T>> subsolutions = {{{}, {}}};
@@ -298,7 +298,7 @@ SolveSubgames(const GameNode &p_root, const std::map<std::string, GameInfoset> &
     Game subgame = p_root->CopySubgame();
     subgame->GetRoot()->SetOutcome(nullptr);
 
-    for (const auto &solution : p_solver->Solve(subgame)) {
+    for (const auto &solution : p_solver(subgame)) {
       solutions.push_back(subsolution.Update(p_root, solution, p_infosetMap));
     }
   }
@@ -323,7 +323,7 @@ MixedBehaviorProfile<T> BuildProfile(const Game &p_game, const SubgameSolution<T
 
 template <class T>
 List<MixedBehaviorProfile<T>>
-SolveBySubgames(const Game &p_game, std::shared_ptr<BehavSolver<T>> p_solver,
+SolveBySubgames(const Game &p_game, BehaviorSolverType<T> p_solver,
                 std::shared_ptr<StrategyProfileRenderer<T>> p_onEquilibrium /* = nullptr */)
 {
   Game efg = p_game->GetRoot()->CopySubgame();
@@ -361,10 +361,10 @@ template class BehavViaStrategySolver<double>;
 template class BehavViaStrategySolver<Rational>;
 
 template List<MixedBehaviorProfile<double>>
-SolveBySubgames(const Game &p_game, std::shared_ptr<BehavSolver<double>> p_solver,
+SolveBySubgames(const Game &p_game, BehaviorSolverType<double> p_solver,
                 std::shared_ptr<StrategyProfileRenderer<double>> p_onEquilibrium);
 template List<MixedBehaviorProfile<Rational>>
-SolveBySubgames(const Game &p_game, std::shared_ptr<BehavSolver<Rational>> p_solver,
+SolveBySubgames(const Game &p_game, BehaviorSolverType<Rational> p_solver,
                 std::shared_ptr<StrategyProfileRenderer<Rational>> p_onEquilibrium);
 
 } // namespace Gambit::Nash

@@ -184,7 +184,8 @@ int main(int argc, char *argv[])
           else {
             renderer = std::make_shared<BehavStrategyCSVRenderer<double>>(std::cout, numDecimals);
           }
-          SolveBySubgames(game, stage, renderer);
+          BehaviorSolverType<double> func = [&](const Game &g) { return stage->Solve(g); };
+          SolveBySubgames(game, func, renderer);
         }
         else {
           std::shared_ptr<BehavSolver<Rational>> stage(new NashLpBehavSolver<Rational>());
@@ -197,7 +198,8 @@ int main(int argc, char *argv[])
             renderer =
                 std::make_shared<BehavStrategyCSVRenderer<Rational>>(std::cout, numDecimals);
           }
-          SolveBySubgames(game, stage, renderer);
+          BehaviorSolverType<Rational> func = [&](const Game &g) { return stage->Solve(g); };
+          SolveBySubgames(game, func, renderer);
         }
       }
     }

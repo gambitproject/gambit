@@ -228,8 +228,11 @@ protected:
 };
 
 template <class T>
+using BehaviorSolverType = std::function<List<MixedBehaviorProfile<T>>(const Game &)>;
+
+template <class T>
 List<MixedBehaviorProfile<T>>
-SolveBySubgames(const Game &, std::shared_ptr<BehavSolver<T>> p_solver,
+SolveBySubgames(const Game &, BehaviorSolverType<T> p_solver,
                 std::shared_ptr<StrategyProfileRenderer<T>> p_onEquilibrium = nullptr);
 
 //

@@ -148,7 +148,8 @@ int main(int argc, char *argv[])
           std::shared_ptr<StrategySolver<Rational>> substage(new EnumPureStrategySolver());
           stage = std::make_shared<BehavViaStrategySolver<Rational>>(substage);
         }
-        SolveBySubgames(game, stage, renderer);
+        BehaviorSolverType<Rational> func = [&](const Game &g) { return stage->Solve(g); };
+        SolveBySubgames(game, func, renderer);
       }
       else {
         if (solveAgent) {
