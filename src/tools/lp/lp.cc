@@ -27,10 +27,11 @@
 #include <memory>
 #include <getopt.h>
 #include "gambit.h"
-#include "solvers/lp/efglp.h"
-#include "solvers/lp/nfglp.h"
+#include "tools/util.h"
+#include "solvers/lp/lp.h"
 
 using namespace Gambit;
+using namespace Gambit::Nash;
 
 void PrintBanner(std::ostream &p_stream)
 {
@@ -132,8 +133,9 @@ int main(int argc, char *argv[])
         else {
           renderer = std::make_shared<MixedStrategyCSVRenderer<double>>(std::cout, numDecimals);
         }
-        NashLpStrategySolver<double> algorithm(renderer);
-        algorithm.Solve(game);
+        LpStrategySolve<double>(game,
+                                [&](const MixedStrategyProfile<double> &p,
+                                    const std::string &label) { renderer->Render(p, label); });
       }
       else {
         std::shared_ptr<StrategyProfileRenderer<Rational>> renderer;
@@ -143,8 +145,9 @@ int main(int argc, char *argv[])
         else {
           renderer = std::make_shared<MixedStrategyCSVRenderer<Rational>>(std::cout);
         }
-        NashLpStrategySolver<Rational> algorithm(renderer);
-        algorithm.Solve(game);
+        LpStrategySolve<Rational>(game,
+                                  [&](const MixedStrategyProfile<Rational> &p,
+                                      const std::string &label) { renderer->Render(p, label); });
       }
     }
     else {
@@ -158,8 +161,9 @@ int main(int argc, char *argv[])
           else {
             renderer = std::make_shared<BehavStrategyCSVRenderer<double>>(std::cout, numDecimals);
           }
-          NashLpBehavSolver<double> algorithm(renderer);
-          algorithm.Solve(game);
+          LpBehaviorSolve<double>(game,
+                                  [&](const MixedBehaviorProfile<double> &p,
+                                      const std::string &label) { renderer->Render(p, label); });
         }
         else {
           std::shared_ptr<StrategyProfileRenderer<Rational>> renderer;
@@ -169,13 +173,13 @@ int main(int argc, char *argv[])
           else {
             renderer = std::make_shared<BehavStrategyCSVRenderer<Rational>>(std::cout);
           }
-          NashLpBehavSolver<Rational> algorithm(renderer);
-          algorithm.Solve(game);
+          LpBehaviorSolve<Rational>(game,
+                                    [&](const MixedBehaviorProfile<Rational> &p,
+                                        const std::string &label) { renderer->Render(p, label); });
         }
       }
       else {
         if (useFloat) {
-          std::shared_ptr<BehavSolver<double>> stage(new NashLpBehavSolver<double>());
           std::shared_ptr<StrategyProfileRenderer<double>> renderer;
           if (printDetail) {
             renderer =
@@ -184,11 +188,17 @@ int main(int argc, char *argv[])
           else {
             renderer = std::make_shared<BehavStrategyCSVRenderer<double>>(std::cout, numDecimals);
           }
-          SubgameBehavSolver<double> algorithm(stage, renderer);
-          algorithm.Solve(game);
+          BehaviorSolverType<double> func = [&](const Game &g) {
+            return LpBehaviorSolve<double>(
+                g, [&](const MixedBehaviorProfile<double> &p, const std::string &label) {
+                  renderer->Render(p, label);
+                });
+          };
+          SolveBySubgames<double>(game, func,
+                                  [&](const MixedBehaviorProfile<double> &p,
+                                      const std::string &label) { renderer->Render(p, label); });
         }
         else {
-          std::shared_ptr<BehavSolver<Rational>> stage(new NashLpBehavSolver<Rational>());
           std::shared_ptr<StrategyProfileRenderer<Rational>> renderer;
           if (printDetail) {
             renderer =
@@ -198,8 +208,15 @@ int main(int argc, char *argv[])
             renderer =
                 std::make_shared<BehavStrategyCSVRenderer<Rational>>(std::cout, numDecimals);
           }
-          SubgameBehavSolver<Rational> algorithm(stage, renderer);
-          algorithm.Solve(game);
+          BehaviorSolverType<Rational> func = [&](const Game &g) {
+            return LpBehaviorSolve<Rational>(
+                g, [&](const MixedBehaviorProfile<Rational> &p, const std::string &label) {
+                  renderer->Render(p, label);
+                });
+          };
+          SolveBySubgames<Rational>(game, func,
+                                    [&](const MixedBehaviorProfile<Rational> &p,
+                                        const std::string &label) { renderer->Render(p, label); });
         }
       }
     }

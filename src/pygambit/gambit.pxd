@@ -385,37 +385,19 @@ cdef extern from "solvers/enumpure/enumpure.h":
     c_List[c_MixedBehaviorProfile[c_Rational]] EnumPureAgentSolve(c_Game) except +RuntimeError
 
 cdef extern from "solvers/enummixed/enummixed.h":
-    c_List[c_MixedStrategyProfile[double]] EnumMixedStrategySolveDouble(
-            c_Game
-    ) except +RuntimeError
-    c_List[c_MixedStrategyProfile[c_Rational]] EnumMixedStrategySolveRational(
-            c_Game
-    ) except +RuntimeError
-    c_List[c_MixedStrategyProfile[c_Rational]] EnumMixedStrategySolveLrs(
-            c_Game
-    ) except +RuntimeError
+    c_List[c_MixedStrategyProfile[T]] EnumMixedStrategySolve[T](c_Game) except +RuntimeError
 
 cdef extern from "solvers/lcp/lcp.h":
-    c_List[c_MixedStrategyProfile[double]] LcpStrategySolveDouble(
+    c_List[c_MixedStrategyProfile[T]] LcpStrategySolve[T](
             c_Game, int p_stopAfter, int p_maxDepth
     ) except +RuntimeError
-    c_List[c_MixedStrategyProfile[c_Rational]] LcpStrategySolveRational(
-            c_Game, int p_stopAfter, int p_maxDepth
-    ) except +RuntimeError
-    c_List[c_MixedBehaviorProfile[double]] LcpBehaviorSolveDouble(
-            c_Game, int p_stopAfter, int p_maxDepth
-    ) except +RuntimeError
-    c_List[c_MixedBehaviorProfile[c_Rational]] LcpBehaviorSolveRational(
+    c_List[c_MixedBehaviorProfile[T]] LcpBehaviorSolve[T](
             c_Game, int p_stopAfter, int p_maxDepth
     ) except +RuntimeError
 
-cdef extern from "solvers/lp/nfglp.h":
-    c_List[c_MixedStrategyProfile[double]] LpStrategySolveDouble(c_Game) except +RuntimeError
-    c_List[c_MixedStrategyProfile[c_Rational]] LpStrategySolveRational(c_Game) except +RuntimeError
-
-cdef extern from "solvers/lp/efglp.h":
-    c_List[c_MixedBehaviorProfile[double]] LpBehaviorSolveDouble(c_Game) except +RuntimeError
-    c_List[c_MixedBehaviorProfile[c_Rational]] LpBehaviorSolveRational(c_Game) except +RuntimeError
+cdef extern from "solvers/lp/lp.h":
+    c_List[c_MixedStrategyProfile[T]] LpStrategySolve[T](c_Game) except +RuntimeError
+    c_List[c_MixedBehaviorProfile[T]] LpBehaviorSolve[T](c_Game) except +RuntimeError
 
 cdef extern from "solvers/liap/liap.h":
     c_List[c_MixedStrategyProfile[double]] LiapStrategySolve(

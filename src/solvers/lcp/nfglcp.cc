@@ -112,6 +112,27 @@ template <class T> Vector<T> Make_b2(const Game &p_game)
 
 } // end anonymous namespace
 
+template <class T> class NashLcpStrategySolver {
+public:
+  NashLcpStrategySolver(int p_stopAfter, int p_maxDepth,
+                        StrategyCallbackType<T> p_onEquilibrium = NullStrategyCallback<T>)
+    : m_onEquilibrium(p_onEquilibrium), m_stopAfter(p_stopAfter), m_maxDepth(p_maxDepth)
+  {
+  }
+  ~NashLcpStrategySolver() = default;
+
+  List<MixedStrategyProfile<T>> Solve(const Game &) const;
+
+private:
+  StrategyCallbackType<T> m_onEquilibrium;
+  int m_stopAfter, m_maxDepth;
+
+  class Solution;
+
+  bool OnBFS(const Game &, linalg::LHTableau<T> &, Solution &) const;
+  void AllLemke(const Game &, int j, linalg::LHTableau<T> &, Solution &, int) const;
+};
+
 template <class T> class NashLcpStrategySolver<T>::Solution {
 public:
   List<Gambit::linalg::BFS<T>> m_bfsList;
@@ -182,7 +203,7 @@ bool NashLcpStrategySolver<T>::OnBFS(const Game &p_game, linalg::LHTableau<T> &p
     }
   }
 
-  this->m_onEquilibrium->Render(profile);
+  m_onEquilibrium(profile, "NE");
   p_solution.m_equilibria.push_back(profile);
 
   if (m_stopAfter > 0 && p_solution.EquilibriumCount() >= m_stopAfter) {
@@ -259,8 +280,17 @@ List<MixedStrategyProfile<T>> NashLcpStrategySolver<T>::Solve(const Game &p_game
   return solution.m_equilibria;
 }
 
-template class NashLcpStrategySolver<double>;
-template class NashLcpStrategySolver<Rational>;
+template <class T>
+List<MixedStrategyProfile<T>> LcpStrategySolve(const Game &p_game, int p_stopAfter, int p_maxDepth,
+                                               StrategyCallbackType<T> p_onEquilibrium)
+{
+  return NashLcpStrategySolver<T>(p_stopAfter, p_maxDepth, p_onEquilibrium).Solve(p_game);
+}
+
+template List<MixedStrategyProfile<double>> LcpStrategySolve(const Game &, int, int,
+                                                             StrategyCallbackType<double>);
+template List<MixedStrategyProfile<Rational>> LcpStrategySolve(const Game &, int, int,
+                                                               StrategyCallbackType<Rational>);
 
 } // namespace Nash
 } // end namespace Gambit

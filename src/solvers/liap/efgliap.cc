@@ -146,7 +146,7 @@ MixedBehaviorProfile<double> EnforceNonnegativity(const MixedBehaviorProfile<dou
 
 List<MixedBehaviorProfile<double>> LiapBehaviorSolve(const MixedBehaviorProfile<double> &p_start,
                                                      double p_maxregret, int p_maxitsN,
-                                                     BehaviorCallbackType p_callback)
+                                                     BehaviorCallbackType<double> p_callback)
 {
   if (!p_start.GetGame()->IsPerfectRecall()) {
     throw UndefinedException(

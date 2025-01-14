@@ -30,6 +30,14 @@ namespace Nash {
 
 using namespace Gambit::linalg;
 
+bool EqZero(const double &x)
+{
+  double eps = ::pow(10.0, -15.0);
+  return (x <= eps && x >= -eps);
+}
+
+bool EqZero(const Rational &x) { return x == Rational(0); }
+
 template <class T>
 List<List<MixedStrategyProfile<T>>> EnumMixedStrategySolution<T>::GetCliques() const
 {
@@ -73,7 +81,7 @@ List<List<MixedStrategyProfile<T>>> EnumMixedStrategySolution<T>::GetCliques() c
 
 template <class T>
 std::shared_ptr<EnumMixedStrategySolution<T>>
-EnumMixedStrategySolver<T>::SolveDetailed(const Game &p_game) const
+EnumMixedStrategySolveDetailed(const Game &p_game, StrategyCallbackType<T> p_onEquilibrium)
 {
   if (p_game->NumPlayers() != 2) {
     throw UndefinedException("Method only valid for two-player games.");
@@ -174,7 +182,7 @@ EnumMixedStrategySolver<T>::SolveDetailed(const Game &p_game) const
         }
         eqm = eqm.Normalize();
         solution->m_extremeEquilibria.push_back(eqm);
-        this->m_onEquilibrium->Render(eqm);
+        p_onEquilibrium(eqm, "NE");
 
         // note: The keys give the mixed strategy associated with each node.
         //       The keys should also keep track of the basis
@@ -198,22 +206,13 @@ EnumMixedStrategySolver<T>::SolveDetailed(const Game &p_game) const
   return solution;
 }
 
-template <> bool EnumMixedStrategySolver<double>::EqZero(const double &x)
-{
-  double eps = ::pow(10.0, -15.0);
-  return (x <= eps && x >= -eps);
-}
-
-template <> bool EnumMixedStrategySolver<Rational>::EqZero(const Rational &x)
-{
-  return (x == Rational(0));
-}
-
-template class EnumMixedStrategySolver<double>;
-template class EnumMixedStrategySolver<Rational>;
-
 template class EnumMixedStrategySolution<double>;
 template class EnumMixedStrategySolution<Rational>;
+
+template std::shared_ptr<EnumMixedStrategySolution<double>>
+EnumMixedStrategySolveDetailed(const Game &p_game, StrategyCallbackType<double> p_onEquilibrium);
+template std::shared_ptr<EnumMixedStrategySolution<Rational>>
+EnumMixedStrategySolveDetailed(const Game &p_game, StrategyCallbackType<Rational> p_onEquilibrium);
 
 } // namespace Nash
 } // end namespace Gambit

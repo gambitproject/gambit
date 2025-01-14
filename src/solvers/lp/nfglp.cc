@@ -22,10 +22,26 @@
 //
 
 #include "gambit.h"
+#include "solvers/lp/lp.h"
 #include "solvers/linalg/lpsolve.h"
-#include "nfglp.h"
 
-using namespace Gambit;
+namespace Gambit::Nash {
+
+template <class T> class NashLpStrategySolver {
+public:
+  NashLpStrategySolver(StrategyCallbackType<T> p_onEquilibrium) : m_onEquilibrium(p_onEquilibrium)
+  {
+  }
+  ~NashLpStrategySolver() = default;
+
+  List<MixedStrategyProfile<T>> Solve(const Game &) const;
+
+private:
+  StrategyCallbackType<T> m_onEquilibrium;
+
+  bool SolveLP(const Matrix<T> &, const Vector<T> &, const Vector<T> &, int, Array<T> &,
+               Array<T> &) const;
+};
 
 //
 // The routine to actually solve the LP
@@ -125,11 +141,22 @@ List<MixedStrategyProfile<T>> NashLpStrategySolver<T>::Solve(const Game &p_game)
   for (int j = 1; j <= k; j++) {
     eqm[p_game->GetPlayer(2)->GetStrategies()[j]] = dual[j];
   }
-  this->m_onEquilibrium->Render(eqm);
+  m_onEquilibrium(eqm, "NE");
   List<MixedStrategyProfile<T>> solution;
   solution.push_back(eqm);
   return solution;
 }
 
-template class NashLpStrategySolver<double>;
-template class NashLpStrategySolver<Rational>;
+template <class T>
+List<MixedStrategyProfile<T>> LpStrategySolve(const Game &p_game,
+                                              StrategyCallbackType<T> p_onEquilibrium)
+{
+  return NashLpStrategySolver<T>(p_onEquilibrium).Solve(p_game);
+}
+
+template List<MixedStrategyProfile<double>> LpStrategySolve(const Game &,
+                                                            StrategyCallbackType<double>);
+template List<MixedStrategyProfile<Rational>> LpStrategySolve(const Game &,
+                                                              StrategyCallbackType<Rational>);
+
+} // end namespace Gambit::Nash

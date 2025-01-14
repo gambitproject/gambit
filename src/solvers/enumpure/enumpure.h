@@ -32,19 +32,9 @@ namespace Nash {
 /// Enumerate pure-strategy Nash equilibria of a game.  By definition,
 /// pure-strategy equilibrium uses the strategic representation of a game.
 ///
-class EnumPureStrategySolver : public StrategySolver<Rational> {
-public:
-  explicit EnumPureStrategySolver(
-      std::shared_ptr<StrategyProfileRenderer<Rational>> p_onEquilibrium = nullptr)
-    : StrategySolver<Rational>(p_onEquilibrium)
-  {
-  }
-  ~EnumPureStrategySolver() override = default;
-
-  List<MixedStrategyProfile<Rational>> Solve(const Game &p_game) const override;
-};
-
-inline List<MixedStrategyProfile<Rational>> EnumPureStrategySolver::Solve(const Game &p_game) const
+inline List<MixedStrategyProfile<Rational>> EnumPureStrategySolve(
+    const Game &p_game,
+    StrategyCallbackType<Rational> p_onEquilibrium = NullStrategyCallback<Rational>)
 {
   if (!p_game->IsPerfectRecall()) {
     throw UndefinedException(
@@ -53,17 +43,11 @@ inline List<MixedStrategyProfile<Rational>> EnumPureStrategySolver::Solve(const 
   List<MixedStrategyProfile<Rational>> solutions;
   for (auto citer : StrategyContingencies(p_game)) {
     if (citer->IsNash()) {
-      MixedStrategyProfile<Rational> profile = citer->ToMixedStrategyProfile();
-      m_onEquilibrium->Render(profile);
-      solutions.push_back(profile);
+      solutions.push_back(citer->ToMixedStrategyProfile());
+      p_onEquilibrium(solutions.back(), "NE");
     }
   }
   return solutions;
-}
-
-inline List<MixedStrategyProfile<Rational>> EnumPureStrategySolve(const Game &p_game)
-{
-  return EnumPureStrategySolver().Solve(p_game);
 }
 
 ///
@@ -73,35 +57,19 @@ inline List<MixedStrategyProfile<Rational>> EnumPureStrategySolve(const Game &p_
 /// set (rather than possible deviations by the same player at multiple
 /// information sets.
 ///
-class EnumPureAgentSolver : public BehavSolver<Rational> {
-public:
-  explicit EnumPureAgentSolver(
-      std::shared_ptr<StrategyProfileRenderer<Rational>> p_onEquilibrium = nullptr)
-    : BehavSolver<Rational>(p_onEquilibrium)
-  {
-  }
-  ~EnumPureAgentSolver() override = default;
-
-  List<MixedBehaviorProfile<Rational>> Solve(const Game &) const override;
-};
-
-inline List<MixedBehaviorProfile<Rational>> EnumPureAgentSolver::Solve(const Game &p_game) const
+inline List<MixedBehaviorProfile<Rational>>
+EnumPureAgentSolve(const Game &p_game,
+                   BehaviorCallbackType<Rational> p_onEquilibrium = NullBehaviorCallback<Rational>)
 {
   List<MixedBehaviorProfile<Rational>> solutions;
   BehaviorSupportProfile support(p_game);
   for (auto citer : BehaviorContingencies(BehaviorSupportProfile(p_game))) {
     if (citer.IsAgentNash()) {
-      MixedBehaviorProfile<Rational> profile = citer.ToMixedBehaviorProfile();
-      m_onEquilibrium->Render(profile);
-      solutions.push_back(profile);
+      solutions.push_back(citer.ToMixedBehaviorProfile());
+      p_onEquilibrium(solutions.back(), "NE");
     }
   }
   return solutions;
-}
-
-inline List<MixedBehaviorProfile<Rational>> EnumPureAgentSolve(const Game &p_game)
-{
-  return EnumPureAgentSolver().Solve(p_game);
 }
 
 } // end namespace Nash

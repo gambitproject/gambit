@@ -391,6 +391,7 @@ gambit_enummixed_SOURCES = \
 	src/solvers/enummixed/clique.h \
 	src/solvers/enummixed/enummixed.cc \
 	src/solvers/enummixed/enummixed.h \
+	src/tools/util.h \
 	src/tools/enummixed/enummixed.cc
 
 gambit_nashsupport_SOURCES = \
@@ -419,11 +420,13 @@ gambit_enumpoly_SOURCES = \
 	src/solvers/enumpoly/efgpoly.cc \
 	src/solvers/enumpoly/nfgpoly.cc \
 	src/solvers/enumpoly/enumpoly.h \
+	src/tools/util.h \
 	src/tools/enumpoly/enumpoly.cc
 
 gambit_enumpure_SOURCES = \
 	${core_SOURCES} ${game_SOURCES} \
 	src/solvers/enumpure/enumpure.h \
+	src/tools/util.h \
 	src/tools/enumpure/enumpure.cc
 
 gambit_gnm_SOURCES = \
@@ -440,6 +443,7 @@ gambit_ipa_SOURCES = \
 	src/solvers/ipa/ipa.cc \
 	src/solvers/ipa/ipa.h \
 	src/tools/gt/nfggt.cc \
+	src/tools/util.h \
 	src/tools/gt/nfgipa.cc
 
 gambit_lcp_SOURCES = \
@@ -448,6 +452,7 @@ gambit_lcp_SOURCES = \
 	src/solvers/lcp/efglcp.cc \
 	src/solvers/lcp/nfglcp.cc \
 	src/solvers/lcp/lcp.h \
+	src/tools/util.h \
 	src/tools/lcp/lcp.cc
 
 gambit_liap_SOURCES = \
@@ -455,6 +460,7 @@ gambit_liap_SOURCES = \
 	src/solvers/liap/efgliap.cc \
 	src/solvers/liap/nfgliap.cc \
 	src/solvers/liap/liap.h \
+	src/tools/util.h \
 	src/tools/liap/liap.cc
 
 gambit_logit_SOURCES = \
@@ -466,21 +472,23 @@ gambit_logit_SOURCES = \
     src/solvers/logit/logit.h \
 	src/solvers/logit/efglogit.cc \
 	src/solvers/logit/nfglogit.cc \
+	src/tools/util.h \
 	src/tools/logit/logit.cc
 
 gambit_lp_SOURCES = \
 	${core_SOURCES} ${game_SOURCES} \
 	${linalg_SOURCES} \
 	src/solvers/lp/efglp.cc \
-	src/solvers/lp/efglp.h \
 	src/solvers/lp/nfglp.cc \
-	src/solvers/lp/nfglp.h \
+	src/solvers/lp/lp.h \
+	src/tools/util.h \
 	src/tools/lp/lp.cc
 
 gambit_simpdiv_SOURCES = \
 	${core_SOURCES} ${game_SOURCES} \
 	src/solvers/simpdiv/simpdiv.cc \
 	src/solvers/simpdiv/simpdiv.h \
+	src/tools/util.h \
 	src/tools/simpdiv/nfgsimpdiv.cc
 
 gambit_SOURCES = \

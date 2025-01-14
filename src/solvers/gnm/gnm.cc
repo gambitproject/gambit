@@ -72,7 +72,7 @@ namespace Nash {
 List<MixedStrategyProfile<double>> GNMStrategySolve(const Game &p_game, double p_lambdaEnd,
                                                     int p_steps, int p_localNewtonInterval,
                                                     int p_localNewtonMaxits,
-                                                    StrategyCallbackType p_callback)
+                                                    StrategyCallbackType<double> p_callback)
 {
   if (!p_game->IsPerfectRecall()) {
     throw UndefinedException(
@@ -94,7 +94,7 @@ List<MixedStrategyProfile<double>> GNMStrategySolve(const MixedStrategyProfile<d
                                                     double p_lambdaEnd, int p_steps,
                                                     int p_localNewtonInterval,
                                                     int p_localNewtonMaxits,
-                                                    StrategyCallbackType p_callback)
+                                                    StrategyCallbackType<double> p_callback)
 {
   if (!p_pert.GetGame()->IsPerfectRecall()) {
     throw UndefinedException(

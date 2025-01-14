@@ -26,6 +26,7 @@
 #include <fstream>
 
 #include "gambit.h"
+#include "tools/util.h"
 #include "solvers/enummixed/enummixed.h"
 
 using namespace Gambit;
@@ -133,23 +134,25 @@ int main(int argc, char *argv[])
   try {
     Game game = ReadGame(*input_stream);
     if (useFloat) {
-      std::shared_ptr<StrategyProfileRenderer<double>> renderer(
-          new MixedStrategyCSVRenderer<double>(std::cout, numDecimals));
-      EnumMixedStrategySolver<double> solver(renderer);
-      std::shared_ptr<EnumMixedStrategySolution<double>> solution = solver.SolveDetailed(game);
+      std::shared_ptr<StrategyProfileRenderer<double>> renderer =
+          std::make_shared<MixedStrategyCSVRenderer<double>>(std::cout, numDecimals);
+      auto solution = EnumMixedStrategySolveDetailed<double>(
+          game, [&](const MixedStrategyProfile<double> &p, const std::string &label) {
+            renderer->Render(p, label);
+          });
       if (showConnect) {
-        List<List<MixedStrategyProfile<double>>> cliques = solution->GetCliques();
-        PrintCliques(cliques, renderer);
+        PrintCliques(solution->GetCliques(), renderer);
       }
     }
     else {
       std::shared_ptr<StrategyProfileRenderer<Rational>> renderer(
           new MixedStrategyCSVRenderer<Rational>(std::cout));
-      EnumMixedStrategySolver<Rational> solver(renderer);
-      std::shared_ptr<EnumMixedStrategySolution<Rational>> solution = solver.SolveDetailed(game);
+      auto solution = EnumMixedStrategySolveDetailed<Rational>(
+          game, [&](const MixedStrategyProfile<Rational> &p, const std::string &label) {
+            renderer->Render(p, label);
+          });
       if (showConnect) {
-        List<List<MixedStrategyProfile<Rational>>> cliques = solution->GetCliques();
-        PrintCliques(cliques, renderer);
+        PrintCliques(solution->GetCliques(), renderer);
       }
     }
     return 0;

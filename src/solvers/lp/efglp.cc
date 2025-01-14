@@ -21,10 +21,30 @@
 //
 
 #include "gambit.h"
+#include "solvers/lp/lp.h"
 #include "solvers/linalg/lpsolve.h"
-#include "efglp.h"
 
-using namespace Gambit;
+namespace Gambit::Nash {
+
+template <class T> class NashLpBehavSolver {
+public:
+  explicit NashLpBehavSolver(BehaviorCallbackType<T> p_onEquilibrium = NullBehaviorCallback<T>)
+    : m_onEquilibrium(p_onEquilibrium)
+  {
+  }
+
+  ~NashLpBehavSolver() = default;
+
+  List<MixedBehaviorProfile<T>> Solve(const Game &) const;
+
+private:
+  BehaviorCallbackType<T> m_onEquilibrium;
+
+  class GameData;
+
+  virtual bool SolveLP(const Matrix<T> &, const Vector<T> &, const Vector<T> &, int, Array<T> &,
+                       Array<T> &) const;
+};
 
 template <class T> class NashLpBehavSolver<T>::GameData {
 public:
@@ -208,11 +228,22 @@ List<MixedBehaviorProfile<T>> NashLpBehavSolver<T>::Solve(const Game &p_game) co
     MixedBehaviorProfile<T> profile(p_game);
     data.GetBehavior(profile, primal, dual, p_game->GetRoot(), 1, 1);
     profile.UndefinedToCentroid();
-    this->m_onEquilibrium->Render(profile);
+    m_onEquilibrium(profile, "NE");
     solution.push_back(profile);
   }
   return solution;
 }
 
-template class NashLpBehavSolver<double>;
-template class NashLpBehavSolver<Rational>;
+template <class T>
+List<MixedBehaviorProfile<T>> LpBehaviorSolve(const Game &p_game,
+                                              BehaviorCallbackType<T> p_onEquilibrium)
+{
+  return NashLpBehavSolver<T>(p_onEquilibrium).Solve(p_game);
+}
+
+template List<MixedBehaviorProfile<double>> LpBehaviorSolve(const Game &,
+                                                            BehaviorCallbackType<double>);
+template List<MixedBehaviorProfile<Rational>> LpBehaviorSolve(const Game &,
+                                                              BehaviorCallbackType<Rational>);
+
+} // end namespace Gambit::Nash

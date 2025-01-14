@@ -29,6 +29,30 @@
 namespace Gambit {
 namespace Nash {
 
+template <class T> class NashLcpBehaviorSolver {
+public:
+  NashLcpBehaviorSolver(int p_stopAfter, int p_maxDepth,
+                        BehaviorCallbackType<T> p_onEquilibrium = NullBehaviorCallback<T>)
+    : m_onEquilibrium(p_onEquilibrium), m_stopAfter(p_stopAfter), m_maxDepth(p_maxDepth)
+  {
+  }
+  ~NashLcpBehaviorSolver() = default;
+
+  List<MixedBehaviorProfile<T>> Solve(const Game &) const;
+
+private:
+  BehaviorCallbackType<T> m_onEquilibrium;
+  int m_stopAfter, m_maxDepth;
+
+  class Solution;
+
+  void FillTableau(Matrix<T> &, const GameNode &, T, int, int, Solution &) const;
+  void AllLemke(const Game &, int dup, linalg::LemkeTableau<T> &B, int depth, Matrix<T> &,
+                Solution &) const;
+  void GetProfile(const linalg::LemkeTableau<T> &tab, MixedBehaviorProfile<T> &, const Vector<T> &,
+                  const GameNode &n, int, int, Solution &) const;
+};
+
 template <class T> class NashLcpBehaviorSolver<T>::Solution {
 public:
   int ns1, ns2, ni1, ni2;
@@ -139,7 +163,7 @@ List<MixedBehaviorProfile<T>> NashLcpBehaviorSolver<T>::Solve(const Game &p_game
       GetProfile(tab, profile, sol, p_game->GetRoot(), 1, 1, solution);
       profile.UndefinedToCentroid();
       solution.m_equilibria.push_back(profile);
-      this->m_onEquilibrium->Render(profile);
+      this->m_onEquilibrium(profile, "NE");
     }
   }
   catch (std::runtime_error &e) {
@@ -194,7 +218,7 @@ void NashLcpBehaviorSolver<T>::AllLemke(const Game &p_game, int j, linalg::Lemke
       GetProfile(BCopy, profile, sol, p_game->GetRoot(), 1, 1, p_solution);
       profile.UndefinedToCentroid();
       if (newsol) {
-        this->m_onEquilibrium->Render(profile);
+        m_onEquilibrium(profile, "NE");
         p_solution.m_equilibria.push_back(profile);
         if (m_stopAfter > 0 && p_solution.EquilibriumCount() >= m_stopAfter) {
           throw EquilibriumLimitReached();
@@ -317,8 +341,17 @@ void NashLcpBehaviorSolver<T>::GetProfile(const linalg::LemkeTableau<T> &tab,
   }
 }
 
-template class NashLcpBehaviorSolver<double>;
-template class NashLcpBehaviorSolver<Rational>;
+template <class T>
+List<MixedBehaviorProfile<T>> LcpBehaviorSolve(const Game &p_game, int p_stopAfter, int p_maxDepth,
+                                               BehaviorCallbackType<T> p_onEquilibrium)
+{
+  return NashLcpBehaviorSolver<T>(p_stopAfter, p_maxDepth, p_onEquilibrium).Solve(p_game);
+}
+
+template List<MixedBehaviorProfile<double>> LcpBehaviorSolve(const Game &, int, int,
+                                                             BehaviorCallbackType<double>);
+template List<MixedBehaviorProfile<Rational>> LcpBehaviorSolve(const Game &, int, int,
+                                                               BehaviorCallbackType<Rational>);
 
 } // namespace Nash
 } // end namespace Gambit

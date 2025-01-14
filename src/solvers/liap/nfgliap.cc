@@ -149,7 +149,7 @@ MixedStrategyProfile<double> EnforceNonnegativity(const MixedStrategyProfile<dou
 
 List<MixedStrategyProfile<double>> LiapStrategySolve(const MixedStrategyProfile<double> &p_start,
                                                      double p_maxregret, int p_maxitsN,
-                                                     StrategyCallbackType p_callback)
+                                                     StrategyCallbackType<double> p_callback)
 {
   if (!p_start.GetGame()->IsPerfectRecall()) {
     throw UndefinedException(

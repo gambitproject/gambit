@@ -24,6 +24,7 @@
 #include <iostream>
 #include <fstream>
 #include "gambit.h"
+#include "tools/util.h"
 #include "solvers/ipa/ipa.h"
 
 using namespace Gambit;

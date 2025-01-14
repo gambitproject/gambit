@@ -25,6 +25,7 @@
 #include <iostream>
 #include <fstream>
 #include "gambit.h"
+#include "tools/util.h"
 #include "solvers/gnm/gnm.h"
 
 using namespace Gambit;

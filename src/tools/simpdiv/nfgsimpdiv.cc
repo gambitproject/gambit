@@ -25,7 +25,7 @@
 #include <iostream>
 #include <fstream>
 #include "gambit.h"
-#include "games/nash.h"
+#include "tools/util.h"
 #include "solvers/simpdiv/simpdiv.h"
 
 using namespace Gambit;
@@ -222,13 +222,23 @@ int main(int argc, char *argv[])
     for (auto start : starts) {
       if (decimals > 0) {
         auto renderer = std::make_shared<MixedStrategyCSVAsFloatRenderer>(std::cout, decimals);
-        NashSimpdivStrategySolver algorithm(gridResize, 0, maxregret, verbose, renderer);
-        algorithm.Solve(start);
+        SimpdivStrategySolve(
+            start, maxregret, gridResize, 0,
+            [&](const MixedStrategyProfile<Rational> &p, const std::string &label) {
+              if (label == "NE" || verbose) {
+                renderer->Render(p, label);
+              }
+            });
       }
       else {
         auto renderer = std::make_shared<MixedStrategyCSVRenderer<Rational>>(std::cout);
-        NashSimpdivStrategySolver algorithm(gridResize, 0, maxregret, verbose, renderer);
-        algorithm.Solve(start);
+        SimpdivStrategySolve(
+            start, maxregret, gridResize, 0,
+            [&](const MixedStrategyProfile<Rational> &p, const std::string &label) {
+              if (label == "NE" || verbose) {
+                renderer->Render(p, label);
+              }
+            });
       }
     }
     return 0;
