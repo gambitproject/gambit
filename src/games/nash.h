@@ -199,33 +199,15 @@ protected:
   std::shared_ptr<StrategyProfileRenderer<T>> m_onEquilibrium;
 };
 
-//
-// This is an adaptor class which allows a client expecting behavior profiles
-// to call a solver which works in terms of strategy profiles
-//
-template <class T> class BehavViaStrategySolver : public BehavSolver<T> {
-public:
-  explicit BehavViaStrategySolver(
-      std::shared_ptr<StrategySolver<T>> p_solver,
-      std::shared_ptr<StrategyProfileRenderer<T>> p_onEquilibrium = nullptr)
-    : BehavSolver<T>(p_onEquilibrium), m_solver(p_solver)
-  {
+template <class T>
+List<MixedBehaviorProfile<T>> ToMixedBehaviorProfile(const List<MixedStrategyProfile<T>> &p_list)
+{
+  List<MixedBehaviorProfile<T>> ret;
+  for (const auto &profile : p_list) {
+    ret.push_back(MixedBehaviorProfile<T>(profile));
   }
-  ~BehavViaStrategySolver() override = default;
-
-  List<MixedBehaviorProfile<T>> Solve(const Game &p_game) const override
-  {
-    List<MixedStrategyProfile<T>> output = m_solver->Solve(p_game);
-    List<MixedBehaviorProfile<T>> solutions;
-    for (const auto &profile : output) {
-      solutions.push_back(MixedBehaviorProfile<T>(profile));
-    }
-    return solutions;
-  }
-
-protected:
-  std::shared_ptr<StrategySolver<T>> m_solver;
-};
+  return ret;
+}
 
 template <class T>
 using BehaviorSolverType = std::function<List<MixedBehaviorProfile<T>>(const Game &)>;

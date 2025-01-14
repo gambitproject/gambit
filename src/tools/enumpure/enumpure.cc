@@ -141,14 +141,17 @@ int main(int argc, char *argv[])
     if (game->IsTree()) {
       if (bySubgames) {
         std::shared_ptr<BehavSolver<Rational>> stage;
+        BehaviorSolverType<Rational> func;
         if (solveAgent) {
           stage = std::make_shared<EnumPureAgentSolver>();
+          func = [&](const Game &g) { return stage->Solve(g); };
         }
         else {
           std::shared_ptr<StrategySolver<Rational>> substage(new EnumPureStrategySolver());
-          stage = std::make_shared<BehavViaStrategySolver<Rational>>(substage);
+          func = [&](const Game &g) {
+            return ToMixedBehaviorProfile<Rational>(substage->Solve(g));
+          };
         }
-        BehaviorSolverType<Rational> func = [&](const Game &g) { return stage->Solve(g); };
         SolveBySubgames(game, func, renderer);
       }
       else {
