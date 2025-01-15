@@ -142,8 +142,7 @@ int main(int argc, char *argv[])
       if (bySubgames) {
         BehaviorSolverType<Rational> func;
         if (solveAgent) {
-          auto stage = std::make_shared<EnumPureAgentSolver>();
-          func = [&](const Game &g) { return stage->Solve(g); };
+          func = [&](const Game &g) { return EnumPureAgentSolve(g); };
         }
         else {
           func = [&](const Game &g) {
@@ -154,8 +153,8 @@ int main(int argc, char *argv[])
       }
       else {
         if (solveAgent) {
-          EnumPureAgentSolver algorithm(renderer);
-          algorithm.Solve(game);
+          EnumPureAgentSolve(game, [&](const MixedBehaviorProfile<Rational> &p,
+                                       const std::string &label) { renderer->Render(p, label); });
         }
         else {
           EnumPureStrategySolve(game,

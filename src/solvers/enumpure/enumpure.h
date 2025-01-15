@@ -57,38 +57,19 @@ inline List<MixedStrategyProfile<Rational>> EnumPureStrategySolve(
 /// set (rather than possible deviations by the same player at multiple
 /// information sets.
 ///
-class EnumPureAgentSolver {
-public:
-  explicit EnumPureAgentSolver(std::shared_ptr<StrategyProfileRenderer<Rational>> p_onEquilibrium =
-                                   std::make_shared<MixedStrategyNullRenderer<Rational>>())
-    : m_onEquilibrium(p_onEquilibrium)
-  {
-  }
-  ~EnumPureAgentSolver() = default;
-
-  List<MixedBehaviorProfile<Rational>> Solve(const Game &) const;
-
-private:
-  std::shared_ptr<StrategyProfileRenderer<Rational>> m_onEquilibrium;
-};
-
-inline List<MixedBehaviorProfile<Rational>> EnumPureAgentSolver::Solve(const Game &p_game) const
+inline List<MixedBehaviorProfile<Rational>>
+EnumPureAgentSolve(const Game &p_game,
+                   BehaviorCallbackType<Rational> p_onEquilibrium = NullBehaviorCallback<Rational>)
 {
   List<MixedBehaviorProfile<Rational>> solutions;
   BehaviorSupportProfile support(p_game);
   for (auto citer : BehaviorContingencies(BehaviorSupportProfile(p_game))) {
     if (citer.IsAgentNash()) {
-      MixedBehaviorProfile<Rational> profile = citer.ToMixedBehaviorProfile();
-      m_onEquilibrium->Render(profile);
-      solutions.push_back(profile);
+      solutions.push_back(citer.ToMixedBehaviorProfile());
+      p_onEquilibrium(solutions.back(), "NE");
     }
   }
   return solutions;
-}
-
-inline List<MixedBehaviorProfile<Rational>> EnumPureAgentSolve(const Game &p_game)
-{
-  return EnumPureAgentSolver().Solve(p_game);
 }
 
 } // end namespace Nash
