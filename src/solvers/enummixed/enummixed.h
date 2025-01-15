@@ -35,8 +35,6 @@ template <class T> class EnumMixedStrategySolver;
 /// mixed strategies.
 ///
 template <class T> class EnumMixedStrategySolution {
-  friend class EnumMixedStrategySolver<T>;
-
 public:
   explicit EnumMixedStrategySolution(const Game &p_game) : m_game(p_game) {}
   ~EnumMixedStrategySolution() = default;
@@ -46,7 +44,6 @@ public:
 
   List<List<MixedStrategyProfile<T>>> GetCliques() const;
 
-private:
   Game m_game;
   List<MixedStrategyProfile<T>> m_extremeEquilibria;
 
@@ -62,34 +59,17 @@ private:
   mutable List<Array<int>> m_cliques1, m_cliques2;
 };
 
-template <class T> class EnumMixedStrategySolver : public StrategySolver<T> {
-public:
-  explicit EnumMixedStrategySolver(
-      std::shared_ptr<StrategyProfileRenderer<T>> p_onEquilibrium = nullptr)
-    : StrategySolver<T>(p_onEquilibrium)
-  {
-  }
-  ~EnumMixedStrategySolver() override = default;
+template <class T>
+std::shared_ptr<EnumMixedStrategySolution<T>>
+EnumMixedStrategySolveDetailed(const Game &p_game,
+                               StrategyCallbackType<T> p_onEquilibrium = NullStrategyCallback<T>);
 
-  std::shared_ptr<EnumMixedStrategySolution<T>> SolveDetailed(const Game &p_game) const;
-  List<MixedStrategyProfile<T>> Solve(const Game &p_game) const override
-  {
-    return SolveDetailed(p_game)->GetExtremeEquilibria();
-  }
-
-private:
-  /// Implement fuzzy equality for floating-point version when testing Nashness
-  static bool EqZero(const T &x);
-};
-
-inline List<MixedStrategyProfile<double>> EnumMixedStrategySolveDouble(const Game &p_game)
+template <class T>
+List<MixedStrategyProfile<T>>
+EnumMixedStrategySolve(const Game &p_game,
+                       StrategyCallbackType<T> p_onEquilibrium = NullStrategyCallback<T>)
 {
-  return EnumMixedStrategySolver<double>().Solve(p_game);
-}
-
-inline List<MixedStrategyProfile<Rational>> EnumMixedStrategySolveRational(const Game &p_game)
-{
-  return EnumMixedStrategySolver<Rational>().Solve(p_game);
+  return EnumMixedStrategySolveDetailed<T>(p_game, p_onEquilibrium)->m_extremeEquilibria;
 }
 
 } // namespace Nash

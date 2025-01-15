@@ -385,15 +385,7 @@ cdef extern from "solvers/enumpure/enumpure.h":
     c_List[c_MixedBehaviorProfile[c_Rational]] EnumPureAgentSolve(c_Game) except +RuntimeError
 
 cdef extern from "solvers/enummixed/enummixed.h":
-    c_List[c_MixedStrategyProfile[double]] EnumMixedStrategySolveDouble(
-            c_Game
-    ) except +RuntimeError
-    c_List[c_MixedStrategyProfile[c_Rational]] EnumMixedStrategySolveRational(
-            c_Game
-    ) except +RuntimeError
-    c_List[c_MixedStrategyProfile[c_Rational]] EnumMixedStrategySolveLrs(
-            c_Game
-    ) except +RuntimeError
+    c_List[c_MixedStrategyProfile[T]] EnumMixedStrategySolve[T](c_Game) except +RuntimeError
 
 cdef extern from "solvers/lcp/lcp.h":
     c_List[c_MixedStrategyProfile[double]] LcpStrategySolveDouble(

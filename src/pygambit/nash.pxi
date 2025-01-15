@@ -68,11 +68,11 @@ def _enumpure_agent_solve(game: Game) -> typing.List[MixedBehaviorProfileRationa
 
 
 def _enummixed_strategy_solve_double(game: Game) -> typing.List[MixedStrategyProfileDouble]:
-    return _convert_mspd(EnumMixedStrategySolveDouble(game.game))
+    return _convert_mspd(EnumMixedStrategySolve[double](game.game))
 
 
 def _enummixed_strategy_solve_rational(game: Game) -> typing.List[MixedStrategyProfileRational]:
-    return _convert_mspr(EnumMixedStrategySolveRational(game.game))
+    return _convert_mspr(EnumMixedStrategySolve[c_Rational](game.game))
 
 
 def _lcp_behavior_solve_double(
