@@ -40,7 +40,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install dependencies
-        run: brew install automake autoconf wxwidgets
+        run: |
+            brew install automake autoconf 
+            curl -L -O https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.6/wxWidgets-3.2.6.tar.bz2
+            tar xjf wxWidgets-3.2.6.tar.bz2
+            cd wxWidgets-3.2.6
+            mkdir build-release
+            cd build-release
+            ../configure --disable-shared --disable-sys-libs
+            make -j4
+            sudo make install
       - run: aclocal
       - run: automake --add-missing
       - run: autoconf
@@ -59,7 +68,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install dependencies
-        run: brew install automake autoconf wxwidgets
+        run: |
+            brew install automake autoconf 
+            curl -L -O https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.6/wxWidgets-3.2.6.tar.bz2
+            tar xjf wxWidgets-3.2.6.tar.bz2
+            cd wxWidgets-3.2.6
+            mkdir build-release
+            cd build-release
+            ../configure --disable-shared --disable-sys-libs
+            make -j4
+            sudo make install
       - run: aclocal
       - run: automake --add-missing
       - run: autoconf

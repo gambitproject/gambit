@@ -53,6 +53,7 @@ dnl LT_INIT
 AM_PROG_CC_C_O
 MINGW_AC_WIN32_NATIVE_HOST
 AM_CONDITIONAL(IS_WIN32, [test x$mingw_cv_win32_host = xyes])
+AM_CONDITIONAL(IS_MAC, [test x$(uname) = xDarwin])
 
 dnl Check for C++17 support
 AX_CXX_COMPILE_STDCXX(17)
