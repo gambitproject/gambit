@@ -247,8 +247,17 @@ def phcpack_solve(game: gbt.Game, phcpack_path: pathlib.Path | str,
     ]
 
 
+def _read_game(fn: str) -> gbt.Game:
+    for reader in [gbt.read_efg, gbt.read_nfg, gbt.read_agg]:
+        try:
+            return reader(fn)
+        except Exception:
+            pass
+    raise OSError(f"Unable to read or parse {fn}")
+
+
 def main():
-    game = gbt.Game.parse_game(sys.stdin.read())
+    game = _read_game(sys.argv[1])
     phcpack_solve(game, "./phc", maxregret=1.0e-6)
 
 

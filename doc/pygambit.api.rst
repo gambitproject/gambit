@@ -38,9 +38,6 @@ Creating, reading, and writing games
    Game.from_arrays
    Game.to_arrays
    Game.from_dict
-   Game.read_game
-   Game.parse_game
-   Game.write
    Game.to_efg
    Game.to_nfg
    Game.to_html

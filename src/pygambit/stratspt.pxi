@@ -19,6 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
+import io
 import cython
 from cython.operator cimport dereference as deref
 from libcpp.memory cimport unique_ptr
@@ -292,7 +293,8 @@ class StrategySupportProfile:
             In 16.0.x, this returned a `StrategicRestriction` object.  Strategic restrictions
             have been removed in favor of using deep copies of games.
         """
-        return Game.parse_game(WriteGame(deref(self.profile)).decode("ascii"))
+        with io.StringIO(WriteNfgFileSupport(deref(self.profile)).decode()) as f:
+            return read_nfg(f)
 
     def is_dominated(self, strategy: Strategy, strict: bool, external: bool = False) -> bool:
         return deref(self.profile).IsDominated(strategy.strategy, strict, external)

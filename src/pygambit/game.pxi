@@ -34,11 +34,13 @@ ctypedef c_Game (*GameParser)(const string &) except +IOError
 
 
 @cython.cfunc
-def read_game(filepath_or_buffer: typing.Union[str, pathlib.Path, io.BytesIO],
+def read_game(filepath_or_buffer: typing.Union[str, pathlib.Path, io.IOBase],
               parser: GameParser):
 
     g = cython.declare(Game)
-    if isinstance(filepath_or_buffer, io.BytesIO):
+    if isinstance(filepath_or_buffer, io.TextIOBase):
+        data = filepath_or_buffer.read().encode("utf-8")
+    elif isinstance(filepath_or_buffer, io.IOBase):
         data = filepath_or_buffer.read()
     else:
         with open(filepath_or_buffer, "rb") as f:
@@ -50,12 +52,12 @@ def read_game(filepath_or_buffer: typing.Union[str, pathlib.Path, io.BytesIO],
     return g
 
 
-def read_gbt(filepath_or_buffer: typing.Union[str, pathlib.Path, io.BytesIO]) -> Game:
+def read_gbt(filepath_or_buffer: typing.Union[str, pathlib.Path, io.IOBase]) -> Game:
     """Construct a game from its serialised representation in a GBT file.
 
     Parameters
     ----------
-    filepath_or_buffer : str, Path or BytesIO
+    filepath_or_buffer : str, pathlib.Path or io.IOBase
         The path to the file containing the game representation or file-like object
 
     Returns
@@ -77,12 +79,12 @@ def read_gbt(filepath_or_buffer: typing.Union[str, pathlib.Path, io.BytesIO]) ->
     return read_game(filepath_or_buffer, parser=ParseGbtGame)
 
 
-def read_efg(filepath_or_buffer: typing.Union[str, pathlib.Path, io.BytesIO]) -> Game:
+def read_efg(filepath_or_buffer: typing.Union[str, pathlib.Path, io.IOBase]) -> Game:
     """Construct a game from its serialised representation in an EFG file.
 
     Parameters
     ----------
-    filepath_or_buffer : str, Path or BytesIO
+    filepath_or_buffer : str, pathlib.Path or io.IOBase
         The path to the file containing the game representation or file-like object
 
     Returns
@@ -104,12 +106,12 @@ def read_efg(filepath_or_buffer: typing.Union[str, pathlib.Path, io.BytesIO]) ->
     return read_game(filepath_or_buffer, parser=ParseEfgGame)
 
 
-def read_nfg(filepath_or_buffer: typing.Union[str, pathlib.Path, io.BytesIO]) -> Game:
+def read_nfg(filepath_or_buffer: typing.Union[str, pathlib.Path, io.IOBase]) -> Game:
     """Construct a game from its serialised representation in a NFG file.
 
     Parameters
     ----------
-    filepath_or_buffer : str, Path or BytesIO
+    filepath_or_buffer : str, pathlib.Path or io.IOBase
         The path to the file containing the game representation or file-like object
 
     Returns
@@ -131,12 +133,12 @@ def read_nfg(filepath_or_buffer: typing.Union[str, pathlib.Path, io.BytesIO]) ->
     return read_game(filepath_or_buffer, parser=ParseNfgGame)
 
 
-def read_agg(filepath_or_buffer: typing.Union[str, pathlib.Path, io.BytesIO]) -> Game:
+def read_agg(filepath_or_buffer: typing.Union[str, pathlib.Path, io.IOBase]) -> Game:
     """Construct a game from its serialised representation in an AGG file.
 
     Parameters
     ----------
-    filepath_or_buffer : str, Path or BytesIO
+    filepath_or_buffer : str, pathlib.Path or io.IOBase
         The path to the file containing the game representation or file-like object
 
     Returns
@@ -567,75 +569,6 @@ class Game:
                 g[profile][player] = array[profile]
         g.title = title
         return g
-
-    @classmethod
-    def read_game(cls, filepath: typing.Union[str, pathlib.Path]) -> Game:
-        """Construct a game from its serialised representation in a file.
-
-        .. deprecated:: 16.3.0
-            Method `Game.read_game` is deprecated, use one of the respective functions instead:
-            ``read_gbt``, ``read_efg``, ``read_nfg``, ``read_agg``
-
-        Parameters
-        ----------
-        filepath : str or path object
-            The path to the file containing the game representation.
-
-        Returns
-        -------
-        Game
-            A game constructed from the representation in the file.
-
-        Raises
-        ------
-        IOError
-            If the file cannot be opened or read
-        ValueError
-            If the contents of the file are not a valid game representation.
-
-        See Also
-        --------
-        parse_game : Constructs a game from a text string.
-        """
-        warnings.warn(
-            "Game.read_game() is deprecated and will be removed in 16.4. "
-            "Use the appropriate module-level .read_*() function instead.",
-            FutureWarning
-        )
-        with open(filepath, "rb") as f:
-            data = f.read()
-        try:
-            return Game.wrap(ParseGame(data))
-        except Exception as exc:
-            raise ValueError(f"Parse error in game file: {exc}") from None
-
-    @classmethod
-    def parse_game(cls, text: str) -> Game:
-        """Construct a game from its serialised representation in a string
-
-        Parameters
-        ----------
-        text : str
-            A string containing the game representation.
-
-        Returns
-        -------
-        Game
-            A game constructed from the representation in the string.
-
-        Raises
-        ------
-        ValueError
-            If the contents of the file are not a valid game representation.
-
-        See Also
-        --------
-        read_game : Constructs a game from a representation in a file.
-        """
-        try:
-            return Game.wrap(ParseGame(text.encode("ascii")))
-        except Exception as exc:
-            raise ValueError(f"Parse error in game file: {exc}") from None
 
     def __repr__(self) -> str:
         if self.title:
@@ -1160,78 +1093,32 @@ class Game:
             [n for child in resolved_node.children for n in self.nodes(child)]
         )
 
-    def write(self, format="native") -> str:
-        """Produce a serialization of the game.
-
-        Several output formats are
-        supported, depending on the representation of the game.
-
-        * `efg`: A representation of the game in
-          :ref:`the .efg extensive game file format <file-formats-efg>`.
-          Not available for games in strategic representation.
-        * `nfg`: A representation of the game in
-          :ref:`the .nfg strategic game file format <file-formats-nfg>`.
-          For an extensive game, this uses the reduced strategic form
-          representation.
-        * `native`: The format most appropriate to the
-          underlying representation of the game, i.e., `efg` or `nfg`.
-
-        This method also supports exporting to other output formats
-        (which cannot be used directly to re-load the game later, but
-        are suitable for human consumption, inclusion in papers, and so
-        on).
-
-        * `html`: A rendering of the strategic form of the game as a
-          collection of HTML tables.  The first player is the row
-          chooser; the second player the column chooser.  For games with
-          more than two players, a collection of tables is generated,
-          one for each possible strategy combination of players 3 and higher.
-        * `sgame`: A rendering of the strategic form of the game in
-          LaTeX, suitable for use with `Martin Osborne's sgame style
-          <https://www.economics.utoronto.ca/osborne/latex/>`_.
-          The first player is the row
-          chooser; the second player the column chooser.  For games with
-          more than two players, a collection of tables is generated,
-          one for each possible strategy combination of players 3 and higher.
-
-        .. versionchanged:: 16.3.0
-           Removed support for writing Game Theory Explorer format as the XML format
-           is no longer supported by recent versions of GTE.
-
-        .. deprecated:: 16.3.0
-            Method Game.write is deprecated, use one of the respective methods instead:
-            ``Game.to_efg``, ``Game.to_nfg``, ``Game.to_html``, ``Game.to_latex``
-        """
-        warnings.warn(
-            "Game.write() is deprecated and will be removed in 16.4. "
-            "Use the appropriate Game.to_*() function instead.",
-            FutureWarning
-        )
-        return WriteGame(self.game, format.encode("ascii")).decode("ascii")
-
     @cython.cfunc
     def _to_format(
         self,
         writer: GameWriter,
-        filepath_or_buffer: typing.Union[str, pathlib.Path, io.BufferedWriter, None] = None
+        filepath_or_buffer: typing.Union[str, pathlib.Path, io.IOBase, None] = None
     ):
         serialized_game = writer(self.game)
         if filepath_or_buffer is None:
             return serialized_game.decode()
-        if isinstance(filepath_or_buffer, io.BufferedWriter):
+        if isinstance(filepath_or_buffer, io.TextIOBase):
+            filepath_or_buffer.write(serialized_game.decode())
+        elif isinstance(filepath_or_buffer, io.IOBase):
             filepath_or_buffer.write(serialized_game)
         else:
-            with open(filepath_or_buffer, "wb") as f:
+            with open(filepath_or_buffer, "w") as f:
                 f.write(serialized_game)
 
-    def to_efg(self,
-               filepath_or_buffer: typing.Union[str, pathlib.Path, io.BufferedWriter, None] = None
-               ) -> typing.Union[str, None]:
+    def to_efg(
+        self,
+        filepath_or_buffer: typing.Union[str, pathlib.Path, io.IOBase, None] = None
+    ) -> typing.Union[str, None]:
         """Save the game to an .efg file or return its serialized representation
 
         Parameters
         ----------
-        filepath_or_buffer : str or Path or BufferedWriter or None, default None
+        filepath_or_buffer : str or Path or io.IOBase or None, default None
             String, path object, or file-like object implementing a write() function.
             If None, the result is returned as a string.
 
@@ -1245,9 +1132,10 @@ class Game:
         """
         return self._to_format(WriteEfgFile, filepath_or_buffer)
 
-    def to_nfg(self,
-               filepath_or_buffer: typing.Union[str, pathlib.Path, io.BufferedWriter, None] = None
-               ) -> typing.Union[str, None]:
+    def to_nfg(
+        self,
+        filepath_or_buffer: typing.Union[str, pathlib.Path, io.IOBase, None] = None
+    ) -> typing.Union[str, None]:
         """Save the game to a .nfg file or return its serialized representation
 
         Parameters
@@ -1266,10 +1154,17 @@ class Game:
         """
         return self._to_format(WriteNfgFile, filepath_or_buffer)
 
-    def to_html(self,
-                filepath_or_buffer: typing.Union[str, pathlib.Path, io.BufferedWriter, None] = None
-                ) -> typing.Union[str, None]:
-        """Export the game to an .html file or return its serialized representation
+    def to_html(
+        self,
+        filepath_or_buffer: typing.Union[str, pathlib.Path, io.IOBase, None] = None
+    ) -> typing.Union[str, None]:
+        """Export the game to HTML format.
+
+        Generates a rendering of the strategic form of the game as a
+        collection of HTML tables.  The first player is the row
+        chooser; the second player the column chooser.  For games with
+        more than two players, a collection of tables is generated,
+        one for each possible strategy combination of players 3 and higher.
 
         Parameters
         ----------
@@ -1288,10 +1183,18 @@ class Game:
         return self._to_format(WriteHTMLFile, filepath_or_buffer)
 
     def to_latex(
-            self,
-            filepath_or_buffer: typing.Union[str, pathlib.Path, io.BufferedWriter, None] = None
-            ) -> typing.Union[str, None]:
-        """Export the game to a .tex file or return its serialized representation
+        self,
+        filepath_or_buffer: typing.Union[str, pathlib.Path, io.IOBase, None] = None
+    ) -> typing.Union[str, None]:
+        """Export the game to LaTeX format.
+
+        Generates a rendering of the strategic form of the game in
+        LaTeX, suitable for use with `Martin Osborne's sgame style
+        <https://www.economics.utoronto.ca/osborne/latex/>`_.
+        The first player is the row
+        chooser; the second player the column chooser.  For games with
+        more than two players, a collection of tables is generated,
+        one for each possible strategy combination of players 3 and higher.
 
         Parameters
         ----------

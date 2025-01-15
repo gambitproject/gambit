@@ -36,18 +36,6 @@ using namespace std;
 using namespace Gambit;
 using namespace Gambit::Nash;
 
-Game ReadGame(char *fn)
-{
-  std::ifstream f(fn);
-  return ReadGame(f);
-}
-
-Game ParseGame(char *s)
-{
-  std::istringstream f(s);
-  return ReadGame(f);
-}
-
 Game ParseGbtGame(std::string const &s)
 {
   std::istringstream f(s);
@@ -75,14 +63,14 @@ Game ParseAggGame(std::string const &s)
 std::string WriteEfgFile(const Game &p_game)
 {
   std::ostringstream f;
-  p_game->Write(f, "efg");
+  p_game->WriteEfgFile(f);
   return f.str();
 }
 
 std::string WriteNfgFile(const Game &p_game)
 {
   std::ostringstream f;
-  p_game->Write(f, "nfg");
+  p_game->WriteNfgFile(f);
   return f.str();
 }
 
@@ -96,26 +84,7 @@ std::string WriteLaTeXFile(const Game &p_game)
   return WriteLaTeXFile(p_game, p_game->GetPlayer(1), p_game->GetPlayer(2));
 }
 
-/// @deprecated Deprecated in favour of WriteXXXFile
-std::string WriteGame(const Game &p_game, const std::string &p_format)
-{
-  if (p_format == "html") {
-    return WriteHTMLFile(p_game, p_game->GetPlayer(1), p_game->GetPlayer(2));
-  }
-  else if (p_format == "sgame") {
-    return WriteLaTeXFile(p_game, p_game->GetPlayer(1), p_game->GetPlayer(2));
-  }
-  else if (p_format == "native" || p_format == "nfg" || p_format == "efg") {
-    std::ostringstream f;
-    p_game->Write(f, p_format);
-    return f.str();
-  }
-  else {
-    throw ValueException("Unknown game save file format '" + p_format + "'");
-  }
-}
-
-std::string WriteGame(const StrategySupportProfile &p_support)
+std::string WriteNfgFileSupport(const StrategySupportProfile &p_support)
 {
   std::ostringstream f;
   p_support.WriteNfgFile(f);

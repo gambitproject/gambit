@@ -1,5 +1,13 @@
 # Changelog
 
+## [16.4.0] - unreleased
+
+### Removed
+
+- The deprecated functions `Game.read_game`, `Game.parse_game` and `Game.write` functions have
+  been removed as planned. (#357)
+
+
 ## [16.3.0] - 2025-01-13
 
 ### General
