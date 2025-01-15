@@ -30,17 +30,23 @@ namespace Gambit {
 
 namespace Nash {
 
+template <class T>
 using StrategyCallbackType =
-    std::function<void(const MixedStrategyProfile<double> &, const std::string &)>;
+    std::function<void(const MixedStrategyProfile<T> &, const std::string &)>;
 
 /// @brief A fallback callback function for mixed strategy profiles that does nothing
-inline void NullStrategyCallback(const MixedStrategyProfile<double> &, const std::string &) {}
+template <class T> void NullStrategyCallback(const MixedStrategyProfile<T> &, const std::string &)
+{
+}
 
+template <class T>
 using BehaviorCallbackType =
-    std::function<void(const MixedBehaviorProfile<double> &, const std::string &)>;
+    std::function<void(const MixedBehaviorProfile<T> &, const std::string &)>;
 
 /// @brief A fallback callback function for mixed behavior profiles that does nothing
-inline void NullBehaviorCallback(const MixedBehaviorProfile<double> &, const std::string &) {}
+template <class T> void NullBehaviorCallback(const MixedBehaviorProfile<T> &, const std::string &)
+{
+}
 
 //========================================================================
 //                       Profile renderer classes

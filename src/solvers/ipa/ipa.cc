@@ -31,7 +31,7 @@ namespace Gambit {
 namespace Nash {
 
 List<MixedStrategyProfile<double>> IPAStrategySolve(const Game &p_game,
-                                                    StrategyCallbackType p_callback)
+                                                    StrategyCallbackType<double> p_callback)
 {
   MixedStrategyProfile<double> pert = p_game->NewMixedStrategyProfile(0.0);
   for (auto strategy : p_game->GetStrategies()) {
@@ -44,7 +44,7 @@ List<MixedStrategyProfile<double>> IPAStrategySolve(const Game &p_game,
 }
 
 List<MixedStrategyProfile<double>> IPAStrategySolve(const MixedStrategyProfile<double> &p_pert,
-                                                    StrategyCallbackType p_callback)
+                                                    StrategyCallbackType<double> p_callback)
 {
   if (!p_pert.GetGame()->IsPerfectRecall()) {
     throw UndefinedException(

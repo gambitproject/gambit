@@ -146,9 +146,8 @@ int main(int argc, char *argv[])
           func = [&](const Game &g) { return stage->Solve(g); };
         }
         else {
-          auto substage = std::make_shared<EnumPureStrategySolver>();
           func = [&](const Game &g) {
-            return ToMixedBehaviorProfile<Rational>(substage->Solve(g));
+            return ToMixedBehaviorProfile<Rational>(EnumPureStrategySolve(g));
           };
         }
         SolveBySubgames(game, func, renderer);
@@ -159,14 +158,15 @@ int main(int argc, char *argv[])
           algorithm.Solve(game);
         }
         else {
-          EnumPureStrategySolver algorithm(renderer);
-          algorithm.Solve(game);
+          EnumPureStrategySolve(game,
+                                [&](const MixedStrategyProfile<Rational> &p,
+                                    const std::string &label) { renderer->Render(p, label); });
         }
       }
     }
     else {
-      EnumPureStrategySolver algorithm(renderer);
-      algorithm.Solve(game);
+      EnumPureStrategySolve(game, [&](const MixedStrategyProfile<Rational> &p,
+                                      const std::string &label) { renderer->Render(p, label); });
     }
     return 0;
   }
