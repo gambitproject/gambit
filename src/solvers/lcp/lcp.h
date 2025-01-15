@@ -66,18 +66,20 @@ LcpStrategySolveRational(const Game &p_game, int p_stopAfter, int p_maxDepth)
   return NashLcpStrategySolver<Rational>(p_stopAfter, p_maxDepth).Solve(p_game);
 }
 
-template <class T> class NashLcpBehaviorSolver : public BehavSolver<T> {
+template <class T> class NashLcpBehaviorSolver {
 public:
   NashLcpBehaviorSolver(int p_stopAfter, int p_maxDepth,
-                        std::shared_ptr<StrategyProfileRenderer<T>> p_onEquilibrium = nullptr)
-    : BehavSolver<T>(p_onEquilibrium), m_stopAfter(p_stopAfter), m_maxDepth(p_maxDepth)
+                        std::shared_ptr<StrategyProfileRenderer<T>> p_onEquilibrium =
+                            std::make_shared<BehavStrategyNullRenderer<T>>())
+    : m_onEquilibrium(p_onEquilibrium), m_stopAfter(p_stopAfter), m_maxDepth(p_maxDepth)
   {
   }
-  ~NashLcpBehaviorSolver() override = default;
+  ~NashLcpBehaviorSolver() = default;
 
-  List<MixedBehaviorProfile<T>> Solve(const Game &) const override;
+  List<MixedBehaviorProfile<T>> Solve(const Game &) const;
 
 private:
+  std::shared_ptr<StrategyProfileRenderer<T>> m_onEquilibrium;
   int m_stopAfter, m_maxDepth;
 
   class Solution;

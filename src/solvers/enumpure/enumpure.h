@@ -73,16 +73,19 @@ inline List<MixedStrategyProfile<Rational>> EnumPureStrategySolve(const Game &p_
 /// set (rather than possible deviations by the same player at multiple
 /// information sets.
 ///
-class EnumPureAgentSolver : public BehavSolver<Rational> {
+class EnumPureAgentSolver {
 public:
-  explicit EnumPureAgentSolver(
-      std::shared_ptr<StrategyProfileRenderer<Rational>> p_onEquilibrium = nullptr)
-    : BehavSolver<Rational>(p_onEquilibrium)
+  explicit EnumPureAgentSolver(std::shared_ptr<StrategyProfileRenderer<Rational>> p_onEquilibrium =
+                                   std::make_shared<MixedStrategyNullRenderer<Rational>>())
+    : m_onEquilibrium(p_onEquilibrium)
   {
   }
-  ~EnumPureAgentSolver() override = default;
+  ~EnumPureAgentSolver() = default;
 
-  List<MixedBehaviorProfile<Rational>> Solve(const Game &) const override;
+  List<MixedBehaviorProfile<Rational>> Solve(const Game &) const;
+
+private:
+  std::shared_ptr<StrategyProfileRenderer<Rational>> m_onEquilibrium;
 };
 
 inline List<MixedBehaviorProfile<Rational>> EnumPureAgentSolver::Solve(const Game &p_game) const

@@ -354,9 +354,6 @@ SolveBySubgames(const Game &p_game, BehaviorSolverType<T> p_solver,
 template class StrategySolver<double>;
 template class StrategySolver<Rational>;
 
-template class BehavSolver<double>;
-template class BehavSolver<Rational>;
-
 template List<MixedBehaviorProfile<double>>
 SolveBySubgames(const Game &p_game, BehaviorSolverType<double> p_solver,
                 std::shared_ptr<StrategyProfileRenderer<double>> p_onEquilibrium);

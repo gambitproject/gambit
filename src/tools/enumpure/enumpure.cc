@@ -140,14 +140,13 @@ int main(int argc, char *argv[])
 
     if (game->IsTree()) {
       if (bySubgames) {
-        std::shared_ptr<BehavSolver<Rational>> stage;
         BehaviorSolverType<Rational> func;
         if (solveAgent) {
-          stage = std::make_shared<EnumPureAgentSolver>();
+          auto stage = std::make_shared<EnumPureAgentSolver>();
           func = [&](const Game &g) { return stage->Solve(g); };
         }
         else {
-          std::shared_ptr<StrategySolver<Rational>> substage(new EnumPureStrategySolver());
+          auto substage = std::make_shared<EnumPureStrategySolver>();
           func = [&](const Game &g) {
             return ToMixedBehaviorProfile<Rational>(substage->Solve(g));
           };

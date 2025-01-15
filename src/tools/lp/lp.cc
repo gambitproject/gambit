@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
       }
       else {
         if (useFloat) {
-          std::shared_ptr<BehavSolver<double>> stage(new NashLpBehavSolver<double>());
+          auto stage = std::make_shared<NashLpBehavSolver<double>>();
           std::shared_ptr<StrategyProfileRenderer<double>> renderer;
           if (printDetail) {
             renderer =
@@ -188,7 +188,7 @@ int main(int argc, char *argv[])
           SolveBySubgames(game, func, renderer);
         }
         else {
-          std::shared_ptr<BehavSolver<Rational>> stage(new NashLpBehavSolver<Rational>());
+          auto stage = std::make_shared<NashLpBehavSolver<Rational>>();
           std::shared_ptr<StrategyProfileRenderer<Rational>> renderer;
           if (printDetail) {
             renderer =

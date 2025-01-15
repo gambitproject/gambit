@@ -28,17 +28,19 @@
 using namespace Gambit;
 using namespace Gambit::Nash;
 
-template <class T> class NashLpBehavSolver : public BehavSolver<T> {
+template <class T> class NashLpBehavSolver {
 public:
-  explicit NashLpBehavSolver(std::shared_ptr<StrategyProfileRenderer<T>> p_onEquilibrium = nullptr)
-    : BehavSolver<T>(p_onEquilibrium)
+  explicit NashLpBehavSolver(std::shared_ptr<StrategyProfileRenderer<T>> p_onEquilibrium =
+                                 std::make_shared<BehavStrategyNullRenderer<T>>())
+    : m_onEquilibrium(p_onEquilibrium)
   {
   }
-  ~NashLpBehavSolver() override = default;
+  ~NashLpBehavSolver() = default;
 
-  List<MixedBehaviorProfile<T>> Solve(const Game &) const override;
+  List<MixedBehaviorProfile<T>> Solve(const Game &) const;
 
 private:
+  std::shared_ptr<StrategyProfileRenderer<T>> m_onEquilibrium;
   class GameData;
 
   virtual bool SolveLP(const Matrix<T> &, const Vector<T> &, const Vector<T> &, int, Array<T> &,

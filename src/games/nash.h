@@ -182,23 +182,6 @@ protected:
   std::shared_ptr<StrategyProfileRenderer<T>> m_onEquilibrium;
 };
 
-template <class T> class BehavSolver {
-public:
-  explicit BehavSolver(std::shared_ptr<StrategyProfileRenderer<T>> p_onEquilibrium = nullptr)
-    : m_onEquilibrium(p_onEquilibrium)
-  {
-    if (m_onEquilibrium.get() == nullptr) {
-      m_onEquilibrium.reset(new BehavStrategyNullRenderer<T>());
-    }
-  }
-  virtual ~BehavSolver() = default;
-
-  virtual List<MixedBehaviorProfile<T>> Solve(const Game &) const = 0;
-
-protected:
-  std::shared_ptr<StrategyProfileRenderer<T>> m_onEquilibrium;
-};
-
 template <class T>
 List<MixedBehaviorProfile<T>> ToMixedBehaviorProfile(const List<MixedStrategyProfile<T>> &p_list)
 {

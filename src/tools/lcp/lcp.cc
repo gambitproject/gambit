@@ -185,8 +185,7 @@ int main(int argc, char *argv[])
       }
       else {
         if (useFloat) {
-          std::shared_ptr<BehavSolver<double>> stage(
-              new NashLcpBehaviorSolver<double>(stopAfter, maxDepth));
+          auto stage = std::make_shared<NashLcpBehaviorSolver<double>>(stopAfter, maxDepth);
           std::shared_ptr<StrategyProfileRenderer<double>> renderer;
           if (printDetail) {
             renderer =
@@ -199,8 +198,7 @@ int main(int argc, char *argv[])
           SolveBySubgames(game, func, renderer);
         }
         else {
-          std::shared_ptr<BehavSolver<Rational>> stage(
-              new NashLcpBehaviorSolver<Rational>(stopAfter, maxDepth));
+          auto stage = std::make_shared<NashLcpBehaviorSolver<Rational>>(stopAfter, maxDepth);
           std::shared_ptr<StrategyProfileRenderer<Rational>> renderer;
           if (printDetail) {
             renderer =
