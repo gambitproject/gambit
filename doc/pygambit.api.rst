@@ -178,6 +178,7 @@ Information about the game
    Strategy.game
    Strategy.player
    Strategy.number
+   Strategy.action
 
 
 Player behavior

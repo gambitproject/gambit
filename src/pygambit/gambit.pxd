@@ -73,6 +73,7 @@ cdef extern from "games/game.h":
         c_GameNodeRep *deref "operator->"() except +RuntimeError
 
     cdef cppclass c_GameAction "GameObjectPtr<GameActionRep>":
+        bool operator !() except +
         bool operator !=(c_GameAction) except +
         c_GameActionRep *deref "operator->"() except +RuntimeError
 
@@ -97,6 +98,7 @@ cdef extern from "games/game.h":
         c_GamePlayer GetPlayer() except +
         string GetLabel() except +
         void SetLabel(string) except +
+        c_GameAction GetAction(c_GameInfoset) except +
 
     cdef cppclass c_GameActionRep "GameActionRep":
         int GetNumber() except +
