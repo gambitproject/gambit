@@ -265,6 +265,9 @@ public:
   /// Returns the index of the strategy for its player
   int GetNumber() const { return m_number; }
 
+  /// Returns the action specified by the strategy at the information set
+  GameAction GetAction(const GameInfoset &) const;
+
   /// Remove this strategy from the game
   void DeleteStrategy();
   //@}
