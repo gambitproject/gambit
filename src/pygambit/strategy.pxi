@@ -73,3 +73,46 @@ class Strategy:
     def number(self) -> int:
         """The number of the strategy."""
         return self.strategy.deref().GetNumber() - 1
+
+    def action(self, infoset: typing.Union[Infoset, str]) -> typing.Optional[Action]:
+        """Get the action prescribed by a strategy for a given information set.
+
+        .. versionadded:: 16.4.0
+
+        Parameters
+        ----------
+        infoset
+            The information set for which to find the prescribed action.
+            Can be an Infoset object or its string label.
+
+        Returns
+        -------
+        Action or None
+            The prescribed action or None if the strategy is not defined for this
+            information set, that is, the information set is unreachable under this strategy.
+
+        Raises
+        ------
+        UndefinedOperationError
+            If the game is not an extensive-form (tree) game.
+        ValueError
+            If the information set belongs to a different player than the strategy.
+        """
+        if not self.game.is_tree:
+            raise UndefinedOperationError(
+                "Strategy.action is only defined for strategies in extensive-form games."
+            )
+
+        resolved_infoset: Infoset = self.game._resolve_infoset(infoset, "Strategy.action")
+
+        if resolved_infoset.player != self.player:
+            raise ValueError(
+                f"Information set {resolved_infoset} belongs to player "
+                f"'{resolved_infoset.player.label}', but this strategy "
+                f"belongs to player '{self.player.label}'."
+            )
+
+        action: c_GameAction = self.strategy.deref().GetAction(resolved_infoset.infoset)
+        if not action:
+            return None
+        return Action.wrap(action)
