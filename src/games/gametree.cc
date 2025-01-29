@@ -1191,14 +1191,16 @@ GameTreeRep::NewMixedStrategyProfile(const Rational &, const StrategySupportProf
 
 class TreePureStrategyProfileRep : public PureStrategyProfileRep {
 protected:
-  PureStrategyProfileRep *Copy() const override;
+  std::shared_ptr<PureStrategyProfileRep> Copy() const override
+  {
+    return std::make_shared<TreePureStrategyProfileRep>(*this);
+  }
 
 public:
   TreePureStrategyProfileRep(const Game &p_game) : PureStrategyProfileRep(p_game) {}
-  void SetStrategy(const GameStrategy &) override;
   GameOutcome GetOutcome() const override { throw UndefinedException(); }
   void SetOutcome(GameOutcome p_outcome) override { throw UndefinedException(); }
-  Rational GetPayoff(int pl) const override;
+  Rational GetPayoff(const GamePlayer &) const override;
   Rational GetStrategyValue(const GameStrategy &) const override;
 };
 
@@ -1206,45 +1208,35 @@ public:
 //              TreePureStrategyProfileRep: Lifecycle
 //------------------------------------------------------------------------
 
-PureStrategyProfileRep *TreePureStrategyProfileRep::Copy() const
-{
-  return new TreePureStrategyProfileRep(*this);
-}
-
 PureStrategyProfile GameTreeRep::NewPureStrategyProfile() const
 {
-  return PureStrategyProfile(new TreePureStrategyProfileRep(const_cast<GameTreeRep *>(this)));
+  return PureStrategyProfile(
+      std::make_shared<TreePureStrategyProfileRep>(const_cast<GameTreeRep *>(this)));
 }
 
 //------------------------------------------------------------------------
 //       TreePureStrategyProfileRep: Data access and manipulation
 //------------------------------------------------------------------------
 
-void TreePureStrategyProfileRep::SetStrategy(const GameStrategy &s)
-{
-  m_profile[s->GetPlayer()->GetNumber()] = s;
-}
-
-Rational TreePureStrategyProfileRep::GetPayoff(int pl) const
+Rational TreePureStrategyProfileRep::GetPayoff(const GamePlayer &p_player) const
 {
   PureBehaviorProfile behav(m_nfg);
-  for (int i = 1; i <= m_nfg->NumPlayers(); i++) {
-    GamePlayer player = m_nfg->GetPlayer(i);
+  for (const auto &player : m_nfg->GetPlayers()) {
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      int act = m_profile[i]->m_behav[iset];
+      int act = m_profile.at(player)->m_behav[iset];
       if (act) {
         behav.SetAction(player->GetInfoset(iset)->GetAction(act));
       }
     }
   }
-  return behav.GetPayoff<Rational>(m_nfg->GetPlayer(pl));
+  return behav.GetPayoff<Rational>(p_player);
 }
 
 Rational TreePureStrategyProfileRep::GetStrategyValue(const GameStrategy &p_strategy) const
 {
   PureStrategyProfile copy(Copy());
   copy->SetStrategy(p_strategy);
-  return copy->GetPayoff(p_strategy->GetPlayer()->GetNumber());
+  return copy->GetPayoff(p_strategy->GetPlayer());
 }
 
 } // end namespace Gambit

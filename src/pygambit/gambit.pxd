@@ -83,7 +83,7 @@ cdef extern from "games/game.h":
         c_GameStrategyRep *deref "operator->"() except +RuntimeError
 
     cdef cppclass c_PureStrategyProfile "PureStrategyProfile":
-        c_PureStrategyProfileRep *deref "operator->"() except +
+        shared_ptr[c_PureStrategyProfileRep] deref "operator->"() except +
         c_PureStrategyProfile(c_PureStrategyProfile) except +
 
     cdef cppclass c_PureBehaviorProfile "PureBehaviorProfile":

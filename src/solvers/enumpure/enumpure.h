@@ -25,8 +25,20 @@
 
 #include "games/nash.h"
 
-namespace Gambit {
-namespace Nash {
+namespace Gambit::Nash {
+
+inline bool IsNash(const PureStrategyProfile &p_profile)
+{
+  for (const auto &player : p_profile->GetGame()->GetPlayers()) {
+    Rational current = p_profile->GetPayoff(player);
+    for (auto strategy : player->GetStrategies()) {
+      if (p_profile->GetStrategyValue(strategy) > current) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
 
 ///
 /// Enumerate pure-strategy Nash equilibria of a game.  By definition,
@@ -42,12 +54,27 @@ inline List<MixedStrategyProfile<Rational>> EnumPureStrategySolve(
   }
   List<MixedStrategyProfile<Rational>> solutions;
   for (auto citer : StrategyContingencies(p_game)) {
-    if (citer->IsNash()) {
+    if (IsNash(citer)) {
       solutions.push_back(citer->ToMixedStrategyProfile());
       p_onEquilibrium(solutions.back(), "NE");
     }
   }
   return solutions;
+}
+
+inline bool IsAgentNash(const PureBehaviorProfile &p_profile)
+{
+  for (const auto &player : p_profile.GetGame()->GetPlayers()) {
+    auto current = p_profile.GetPayoff<Rational>(player);
+    for (const auto &infoset : player->GetInfosets()) {
+      for (const auto &action : infoset->GetActions()) {
+        if (p_profile.GetPayoff<Rational>(action) > current) {
+          return false;
+        }
+      }
+    }
+  }
+  return true;
 }
 
 ///
@@ -64,7 +91,7 @@ EnumPureAgentSolve(const Game &p_game,
   List<MixedBehaviorProfile<Rational>> solutions;
   BehaviorSupportProfile support(p_game);
   for (auto citer : BehaviorContingencies(BehaviorSupportProfile(p_game))) {
-    if (citer.IsAgentNash()) {
+    if (IsAgentNash(citer)) {
       solutions.push_back(citer.ToMixedBehaviorProfile());
       p_onEquilibrium(solutions.back(), "NE");
     }
@@ -72,7 +99,6 @@ EnumPureAgentSolve(const Game &p_game,
   return solutions;
 }
 
-} // end namespace Nash
-} // end namespace Gambit
+} // end namespace Gambit::Nash
 
 #endif // GAMBIT_NASH_ENUMPURE_H

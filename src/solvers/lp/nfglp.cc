@@ -115,7 +115,7 @@ List<MixedStrategyProfile<T>> NashLpStrategySolver<T>::Solve(const Game &p_game)
     profile->SetStrategy(p_game->GetPlayer(2)->GetStrategies()[i]);
     for (int j = 1; j <= m; j++) {
       profile->SetStrategy(p_game->GetPlayer(1)->GetStrategies()[j]);
-      A(i, j) = minpay - profile->GetPayoff(1);
+      A(i, j) = minpay - profile->GetPayoff(p_game->GetPlayer(1));
     }
     A(i, m + 1) = (T)1;
   }

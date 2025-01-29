@@ -82,21 +82,6 @@ template <class T> T PureBehaviorProfile::GetPayoff(const GameAction &p_action) 
 template double PureBehaviorProfile::GetPayoff(const GameAction &) const;
 template Rational PureBehaviorProfile::GetPayoff(const GameAction &) const;
 
-bool PureBehaviorProfile::IsAgentNash() const
-{
-  for (const auto &player : m_efg->GetPlayers()) {
-    auto current = GetPayoff<Rational>(player);
-    for (const auto &infoset : player->GetInfosets()) {
-      for (const auto &action : infoset->GetActions()) {
-        if (GetPayoff<Rational>(action) > current) {
-          return false;
-        }
-      }
-    }
-  }
-  return true;
-}
-
 MixedBehaviorProfile<Rational> PureBehaviorProfile::ToMixedBehaviorProfile() const
 {
   MixedBehaviorProfile<Rational> temp(m_efg);

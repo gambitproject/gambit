@@ -57,7 +57,7 @@ template <class T> Matrix<T> Make_A1(const Game &p_game)
     profile->SetStrategy(p_game->GetPlayer(1)->GetStrategies()[i]);
     for (int j = 1; j <= n2; j++) {
       profile->SetStrategy(p_game->GetPlayer(2)->GetStrategies()[j]);
-      A1(i, n1 + j) = fac * (profile->GetPayoff(1) - min);
+      A1(i, n1 + j) = fac * (profile->GetPayoff(p_game->GetPlayer(1)) - min);
     }
   }
   return A1;
@@ -88,7 +88,7 @@ template <class T> Matrix<T> Make_A2(const Game &p_game)
     profile->SetStrategy(p_game->GetPlayer(1)->GetStrategies()[i]);
     for (int j = 1; j <= n2; j++) {
       profile->SetStrategy(p_game->GetPlayer(2)->GetStrategies()[j]);
-      A2(n1 + j, i) = fac * (profile->GetPayoff(2) - min);
+      A2(n1 + j, i) = fac * (profile->GetPayoff(p_game->GetPlayer(2)) - min);
     }
   }
   return A2;

@@ -67,19 +67,19 @@ std::string WriteHTMLFile(const Game &p_game, const GamePlayer &p_rowPlayer,
       for (int st2 = 1; st2 <= p_colPlayer->NumStrategies(); st2++) {
         profile->SetStrategy(p_colPlayer->GetStrategy(st2));
         theHtml += "<td align=center>";
-        for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
+        for (const auto &player : p_game->GetPlayers()) {
           try {
             if (profile->GetOutcome()) {
-              theHtml += static_cast<std::string>(profile->GetOutcome()->GetPayoff(pl));
+              theHtml += static_cast<std::string>(profile->GetOutcome()->GetPayoff(player));
             }
             else {
               theHtml += "0";
             }
           }
           catch (UndefinedException &) {
-            theHtml += lexical_cast<std::string>(profile->GetPayoff(pl));
+            theHtml += lexical_cast<std::string>(profile->GetPayoff(player));
           }
-          if (pl < p_game->NumPlayers()) {
+          if (player->GetNumber() < p_game->NumPlayers()) {
             theHtml += ",";
           }
         }
@@ -145,19 +145,19 @@ std::string WriteLaTeXFile(const Game &p_game, const GamePlayer &p_rowPlayer,
       for (int st2 = 1; st2 <= p_colPlayer->NumStrategies(); st2++) {
         profile->SetStrategy(p_colPlayer->GetStrategy(st2));
         theHtml += " $";
-        for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
+        for (const auto &player : p_game->GetPlayers()) {
           try {
             if (profile->GetOutcome()) {
-              theHtml += static_cast<std::string>(profile->GetOutcome()->GetPayoff(pl));
+              theHtml += static_cast<std::string>(profile->GetOutcome()->GetPayoff(player));
             }
             else {
               theHtml += "0";
             }
           }
           catch (UndefinedException &) {
-            theHtml += lexical_cast<std::string>(profile->GetPayoff(pl));
+            theHtml += lexical_cast<std::string>(profile->GetPayoff(player));
           }
-          if (pl < p_game->NumPlayers()) {
+          if (player->GetNumber() < p_game->NumPlayers()) {
             theHtml += ",";
           }
         }

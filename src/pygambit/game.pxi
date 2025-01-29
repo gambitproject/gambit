@@ -759,14 +759,14 @@ class Game:
         )
 
         for (pl, st) in enumerate(args):
-            deref(psp).deref().SetStrategy(
+            deref(deref(psp).deref()).SetStrategy(
                 self.game.deref().GetPlayer(pl+1).deref().GetStrategy(st+1)
             )
 
         if self.is_tree:
             return TreeGameOutcome.wrap(self.game, psp)
         else:
-            outcome = Outcome.wrap(deref(psp).deref().GetOutcome())
+            outcome = Outcome.wrap(deref(deref(psp).deref()).GetOutcome())
             if outcome.outcome != cython.cast(c_GameOutcome, NULL):
                 return outcome
             else:

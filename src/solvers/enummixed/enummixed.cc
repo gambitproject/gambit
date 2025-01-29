@@ -117,8 +117,8 @@ EnumMixedStrategySolveDetailed(const Game &p_game, StrategyCallbackType<T> p_onE
     profile->SetStrategy(p_game->GetPlayer(1)->GetStrategies()[i]);
     for (size_t j = 1; j <= p_game->GetPlayer(2)->GetStrategies().size(); j++) {
       profile->SetStrategy(p_game->GetPlayer(2)->GetStrategies()[j]);
-      A1(i, j) = fac * (profile->GetPayoff(1) - min);
-      A2(j, i) = fac * (profile->GetPayoff(2) - min);
+      A1(i, j) = fac * (profile->GetPayoff(p_game->GetPlayer(1)) - min);
+      A2(j, i) = fac * (profile->GetPayoff(p_game->GetPlayer(2)) - min);
     }
   }
 

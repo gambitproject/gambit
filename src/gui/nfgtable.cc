@@ -675,7 +675,7 @@ wxString gbtPayoffsWidget::GetCellValue(const wxSheetCoords &p_coords)
   }
 
   Gambit::PureStrategyProfile profile = m_table->CellToProfile(p_coords);
-  int player = ColToPlayer(p_coords.GetCol());
+  auto player = m_doc->GetGame()->GetPlayer(ColToPlayer(p_coords.GetCol()));
   return {Gambit::lexical_cast<std::string>(profile->GetPayoff(player)).c_str(), *wxConvCurrent};
 }
 
@@ -756,16 +756,18 @@ void gbtPayoffsWidget::DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords)
   }
 
   Gambit::PureStrategyProfile profile = m_table->CellToProfile(p_coords);
-  int player = ColToPlayer(p_coords.GetCol());
+  auto player = m_doc->GetGame()->GetPlayer(ColToPlayer(p_coords.GetCol()));
   const Gambit::StrategySupportProfile &support = m_doc->GetNfgSupport();
 
   if (support.IsDominated(profile->GetStrategy(player), false)) {
     wxRect rect = CellToRect(p_coords);
     if (support.IsDominated(profile->GetStrategy(player), true)) {
-      p_dc.SetPen(wxPen(m_doc->GetStyle().GetPlayerColor(player), 2, wxPENSTYLE_SOLID));
+      p_dc.SetPen(
+          wxPen(m_doc->GetStyle().GetPlayerColor(player->GetNumber()), 2, wxPENSTYLE_SOLID));
     }
     else {
-      p_dc.SetPen(wxPen(m_doc->GetStyle().GetPlayerColor(player), 1, wxPENSTYLE_SHORT_DASH));
+      p_dc.SetPen(
+          wxPen(m_doc->GetStyle().GetPlayerColor(player->GetNumber()), 1, wxPENSTYLE_SHORT_DASH));
     }
     p_dc.DrawLine(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
     p_dc.DrawLine(rect.x + rect.width, rect.y, rect.x, rect.y + rect.height);

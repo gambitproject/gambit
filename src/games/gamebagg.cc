@@ -34,11 +34,13 @@ namespace Gambit {
 class BAGGPureStrategyProfileRep : public PureStrategyProfileRep {
 public:
   explicit BAGGPureStrategyProfileRep(const Game &p_game) : PureStrategyProfileRep(p_game) {}
-  PureStrategyProfileRep *Copy() const override { return new BAGGPureStrategyProfileRep(*this); }
-  void SetStrategy(const GameStrategy &) override;
+  std::shared_ptr<PureStrategyProfileRep> Copy() const override
+  {
+    return std::make_shared<BAGGPureStrategyProfileRep>(*this);
+  }
   GameOutcome GetOutcome() const override { throw UndefinedException(); }
   void SetOutcome(GameOutcome p_outcome) override { throw UndefinedException(); }
-  Rational GetPayoff(int pl) const override;
+  Rational GetPayoff(const GamePlayer &) const override;
   Rational GetStrategyValue(const GameStrategy &) const override;
 };
 
@@ -46,20 +48,15 @@ public:
 //       BAGGPureStrategyProfileRep: Data access and manipulation
 //------------------------------------------------------------------------
 
-void BAGGPureStrategyProfileRep::SetStrategy(const GameStrategy &s)
-{
-  m_profile[s->GetPlayer()->GetNumber()] = s;
-}
-
-Rational BAGGPureStrategyProfileRep::GetPayoff(int pl) const
+Rational BAGGPureStrategyProfileRep::GetPayoff(const GamePlayer &p_player) const
 {
   std::shared_ptr<agg::BAGG> baggPtr = dynamic_cast<GameBAGGRep &>(*m_nfg).baggPtr;
   std::vector<int> s(m_nfg->NumPlayers());
   for (int i = 1; i <= m_nfg->NumPlayers(); i++) {
-    s[i - 1] = m_profile[i]->GetNumber() - 1;
+    s[i - 1] = m_profile.at(m_nfg->GetPlayer(i))->GetNumber() - 1;
   }
-  int bp = dynamic_cast<GameBAGGRep &>(*m_nfg).agent2baggPlayer[pl];
-  int tp = pl - 1 - baggPtr->typeOffset[bp - 1];
+  int bp = dynamic_cast<GameBAGGRep &>(*m_nfg).agent2baggPlayer[p_player->GetNumber()];
+  int tp = p_player->GetNumber() - 1 - baggPtr->typeOffset[bp - 1];
   return Rational(baggPtr->getPurePayoff(bp - 1, tp, s));
 }
 
@@ -69,7 +66,7 @@ Rational BAGGPureStrategyProfileRep::GetStrategyValue(const GameStrategy &p_stra
   std::shared_ptr<agg::BAGG> baggPtr = dynamic_cast<GameBAGGRep &>(*m_nfg).baggPtr;
   std::vector<int> s(m_nfg->NumPlayers());
   for (int i = 1; i <= m_nfg->NumPlayers(); i++) {
-    s[i - 1] = m_profile[i]->GetNumber() - 1;
+    s[i - 1] = m_profile.at(m_nfg->GetPlayer(i))->GetNumber() - 1;
   }
   s[player - 1] = p_strategy->GetNumber() - 1;
   int bp = dynamic_cast<GameBAGGRep &>(*m_nfg).agent2baggPlayer[player];
@@ -257,7 +254,8 @@ int GameBAGGRep::MixedProfileLength() const
 
 PureStrategyProfile GameBAGGRep::NewPureStrategyProfile() const
 {
-  return PureStrategyProfile(new BAGGPureStrategyProfileRep(const_cast<GameBAGGRep *>(this)));
+  return PureStrategyProfile(
+      std::make_shared<BAGGPureStrategyProfileRep>(const_cast<GameBAGGRep *>(this)));
 }
 
 MixedStrategyProfile<double> GameBAGGRep::NewMixedStrategyProfile(double) const

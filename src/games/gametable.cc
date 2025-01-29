@@ -36,15 +36,14 @@ class TablePureStrategyProfileRep : public PureStrategyProfileRep {
 protected:
   long m_index{1L};
 
-  PureStrategyProfileRep *Copy() const override;
+  std::shared_ptr<PureStrategyProfileRep> Copy() const override;
 
 public:
   explicit TablePureStrategyProfileRep(const Game &p_game);
-  long GetIndex() const override { return m_index; }
   void SetStrategy(const GameStrategy &) override;
   GameOutcome GetOutcome() const override;
   void SetOutcome(GameOutcome p_outcome) override;
-  Rational GetPayoff(int pl) const override;
+  Rational GetPayoff(const GamePlayer &) const override;
   Rational GetStrategyValue(const GameStrategy &) const override;
 };
 
@@ -55,14 +54,14 @@ public:
 TablePureStrategyProfileRep::TablePureStrategyProfileRep(const Game &p_nfg)
   : PureStrategyProfileRep(p_nfg)
 {
-  for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
-    m_index += m_profile[pl]->m_offset;
+  for (auto [player, strategy] : m_profile) {
+    m_index += strategy->m_offset;
   }
 }
 
-PureStrategyProfileRep *TablePureStrategyProfileRep::Copy() const
+std::shared_ptr<PureStrategyProfileRep> TablePureStrategyProfileRep::Copy() const
 {
-  return new TablePureStrategyProfileRep(*this);
+  return std::make_shared<TablePureStrategyProfileRep>(*this);
 }
 
 Game NewTable(const Array<int> &p_dim, bool p_sparseOutcomes /*= false*/)
@@ -76,8 +75,8 @@ Game NewTable(const Array<int> &p_dim, bool p_sparseOutcomes /*= false*/)
 
 void TablePureStrategyProfileRep::SetStrategy(const GameStrategy &s)
 {
-  m_index += s->m_offset - m_profile[s->GetPlayer()->GetNumber()]->m_offset;
-  m_profile[s->GetPlayer()->GetNumber()] = s;
+  m_index += s->m_offset - m_profile.at(s->GetPlayer())->m_offset;
+  m_profile[s->GetPlayer()] = s;
 }
 
 GameOutcome TablePureStrategyProfileRep::GetOutcome() const
@@ -90,11 +89,11 @@ void TablePureStrategyProfileRep::SetOutcome(GameOutcome p_outcome)
   dynamic_cast<GameTableRep &>(*m_nfg).m_results[m_index] = p_outcome;
 }
 
-Rational TablePureStrategyProfileRep::GetPayoff(int pl) const
+Rational TablePureStrategyProfileRep::GetPayoff(const GamePlayer &p_player) const
 {
   GameOutcomeRep *outcome = dynamic_cast<GameTableRep &>(*m_nfg).m_results[m_index];
   if (outcome) {
-    return static_cast<Rational>(outcome->GetPayoff(pl));
+    return static_cast<Rational>(outcome->GetPayoff(p_player));
   }
   else {
     return Rational(0);
@@ -106,7 +105,8 @@ Rational TablePureStrategyProfileRep::GetStrategyValue(const GameStrategy &p_str
   int player = p_strategy->GetPlayer()->GetNumber();
   GameOutcomeRep *outcome =
       dynamic_cast<GameTableRep &>(*m_nfg)
-          .m_results[m_index - m_profile[player]->m_offset + p_strategy->m_offset];
+          .m_results[m_index - m_profile.at(p_strategy->GetPlayer())->m_offset +
+                     p_strategy->m_offset];
   if (outcome) {
     return static_cast<Rational>(outcome->GetPayoff(player));
   }
@@ -117,7 +117,8 @@ Rational TablePureStrategyProfileRep::GetStrategyValue(const GameStrategy &p_str
 
 PureStrategyProfile GameTableRep::NewPureStrategyProfile() const
 {
-  return PureStrategyProfile(new TablePureStrategyProfileRep(const_cast<GameTableRep *>(this)));
+  return PureStrategyProfile(
+      std::make_shared<TablePureStrategyProfileRep>(const_cast<GameTableRep *>(this)));
 }
 
 //========================================================================
@@ -320,14 +321,14 @@ bool GameTableRep::IsConstSum() const
 {
   auto profile = NewPureStrategyProfile();
   Rational sum(0);
-  for (int pl = 1; pl <= m_players.size(); pl++) {
-    sum += profile->GetPayoff(pl);
+  for (const auto &player : m_players) {
+    sum += profile->GetPayoff(player);
   }
 
   for (auto iter : StrategyContingencies(Game(this))) {
     Rational newsum(0);
-    for (int pl = 1; pl <= m_players.size(); pl++) {
-      newsum += iter->GetPayoff(pl);
+    for (const auto &player : m_players) {
+      newsum += iter->GetPayoff(player);
     }
     if (newsum != sum) {
       return false;
@@ -460,25 +461,24 @@ void GameTableRep::RebuildTable()
   }
 
   Array<GameOutcomeRep *> newResults(size);
-  for (int i = 1; i <= newResults.size(); newResults[i++] = 0)
-    ;
+  std::fill(newResults.begin(), newResults.end(), nullptr);
 
   for (auto iter :
        StrategyContingencies(StrategySupportProfile(const_cast<GameTableRep *>(this)))) {
     long newindex = 1L;
-    for (int pl = 1; pl <= m_players.size(); pl++) {
-      if (iter->GetStrategy(pl)->m_offset < 0) {
+    for (const auto &player : m_players) {
+      if (iter->GetStrategy(player)->m_offset < 0) {
         // This is a contingency involving a new strategy... skip
         newindex = -1L;
         break;
       }
       else {
-        newindex += (iter->GetStrategy(pl)->m_number - 1) * offsets[pl];
+        newindex += (iter->GetStrategy(player)->m_number - 1) * offsets[player->GetNumber()];
       }
     }
 
     if (newindex >= 1) {
-      newResults[newindex] = m_results[iter->GetIndex()];
+      newResults[newindex] = iter->GetOutcome();
     }
   }
 
