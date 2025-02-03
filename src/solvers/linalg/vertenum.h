@@ -25,7 +25,6 @@
 
 #include "gambit.h"
 #include "lptab.h"
-#include "bfs.h"
 
 namespace Gambit::linalg {
 

@@ -24,7 +24,7 @@
 #define LUDECOMP_H
 
 #include "gambit.h"
-#include "basis.h"
+#include "btableau.h"
 
 namespace Gambit::linalg {
 

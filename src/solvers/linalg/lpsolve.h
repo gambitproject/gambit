@@ -25,11 +25,8 @@
 
 #include "gambit.h"
 #include "lptab.h"
-#include "bfs.h"
 
-namespace Gambit {
-
-namespace linalg {
+namespace Gambit::linalg {
 
 ///
 /// This class implements a LP solver.  Its constructor takes as input a
@@ -49,36 +46,30 @@ private:
   T total_cost, eps1, eps2, eps3, tmin;
   BFS<T> opt_bfs, dual_bfs;
   LPTableau<T> tab;
-  Array<bool> *UB, *LB;
-  Array<T> *ub, *lb;
-  Vector<T> *xx, *cost;
+  Array<bool> UB, LB;
+  Array<T> ub, lb;
+  Vector<T> xx, cost;
   Vector<T> y, x, d;
 
   void Solve(int phase = 0);
   int Enter();
   int Exit(int);
 
-  static Array<int> Artificials(const Vector<T> &);
-
 public:
   LPSolve(const Matrix<T> &A, const Vector<T> &B, const Vector<T> &C,
           int nequals); // nequals = number of equalities (last nequals rows)
-  ~LPSolve();
+  ~LPSolve() = default;
 
   T OptimumCost() const { return total_cost; }
-  const Vector<T> &OptimumVector() const { return (*xx); }
-  const List<BFS<T>> &GetAll();
+  const Vector<T> &OptimumVector() const { return xx; }
   const LPTableau<T> &GetTableau() const { return tab; }
   const BFS<T> &OptimumBFS() const { return opt_bfs; }
 
   bool IsWellFormed() const { return well_formed; }
   bool IsFeasible() const { return feasible; }
   bool IsBounded() const { return bounded; }
-  long NumPivots() const { return tab.NumPivots(); }
 };
 
-} // namespace linalg
-
-} // end namespace Gambit
+} // end namespace Gambit::linalg
 
 #endif // LPSOLVE_H

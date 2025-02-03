@@ -79,7 +79,7 @@ template <class T> void VertexEnumerator<T>::DualSearch(LPTableau<T> &tab)
     for (int i = b.first_index(); i <= b.last_index(); i++) {
       if (b[i] == static_cast<T>(0)) {
         for (int j = -b.last_index(); j <= A.MaxCol(); j++) {
-          if (j && !tab.Member(j) && !tab.IsBlocked(j)) {
+          if (j && !tab.Member(j)) {
             if (tab.IsDualReversePivot(i, j)) {
               branches[depth] += 1;
               tab2 = tab;

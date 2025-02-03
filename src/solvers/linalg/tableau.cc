@@ -22,9 +22,7 @@
 
 #include "tableau.h"
 
-namespace Gambit {
-
-namespace linalg {
+namespace Gambit::linalg {
 
 // ---------------------------------------------------------------------------
 //                   Tableau<double> method definitions
@@ -49,8 +47,6 @@ Tableau<double>::Tableau(const Tableau<double> &orig)
 {
 }
 
-Tableau<double>::~Tableau() = default;
-
 Tableau<double> &Tableau<double>::operator=(const Tableau<double> &orig)
 {
   TableauInterface<double>::operator=(orig);
@@ -65,38 +61,19 @@ Tableau<double> &Tableau<double>::operator=(const Tableau<double> &orig)
 // pivoting operations
 //
 
-bool Tableau<double>::CanPivot(int outlabel, int col) const
-{
-  const_cast<Tableau<double> *>(this)->SolveColumn(col, tmpcol);
-  double val = tmpcol[basis.Find(outlabel)];
-  if (val <= eps2 && val >= -eps2) {
-    return false;
-  }
-  return true;
-}
-
 void Tableau<double>::Pivot(int outrow, int col)
 {
   if (!RowIndex(outrow) || !ValidIndex(col)) {
     throw BadPivot();
   }
-
-  // int outlabel = Label(outrow);
-  // gout << "\noutrow:" << outrow;
-  // gout << " outlabel: " << outlabel;
-  // gout << " inlabel: " << col;
-  // BigDump(gout);
   basis.Pivot(outrow, col);
 
   B.update(outrow, col);
-  Solve(*b, solution);
-  npivots++;
-  // BigDump(gout);
+  Solve(b, solution);
 }
 
 void Tableau<double>::SolveColumn(int col, Vector<double> &out)
 {
-  //** can we use tmpcol here, instead of allocating new vector?
   Vector<double> tmpcol2(MinRow(), MaxRow());
   GetColumn(col, tmpcol2);
   Solve(tmpcol2, out);
@@ -112,55 +89,27 @@ void Tableau<double>::Refactor()
 {
   B.refactor();
   //** is re-solve necessary here?
-  Solve(*b, solution);
+  Solve(b, solution);
 }
-
-void Tableau<double>::SetRefactor(int n) { B.SetRefactor(n); }
 
 void Tableau<double>::SetConst(const Vector<double> &bnew)
 {
-  if (bnew.first_index() != b->first_index() || bnew.last_index() != b->last_index()) {
+  if (bnew.first_index() != b.first_index() || bnew.last_index() != b.last_index()) {
     throw DimensionException();
   }
-  b = &bnew;
-  Solve(*b, solution);
-}
-
-//** this function is not currently used.  Drop it?
-void Tableau<double>::SetBasis(const Basis &in)
-{
-  basis = in;
-  B.refactor();
-  Solve(*b, solution);
+  b = bnew;
+  Solve(b, solution);
 }
 
 void Tableau<double>::Solve(const Vector<double> &b, Vector<double> &x) { B.solve(b, x); }
 
-void Tableau<double>::SolveT(const Vector<double> &c, Vector<double> &y)
-{
-  B.solveT(c, y);
-  //** gout << "\nTableau<double>::SolveT(), y: " << y;
-  //   gout << "\nc: " << c;
-}
-
-bool Tableau<double>::IsFeasible()
-{
-  //** is it really necessary to solve first here?
-  Solve(*b, solution);
-  for (int i = solution.first_index(); i <= solution.last_index(); i++) {
-    if (solution[i] >= eps2) {
-      return false;
-    }
-  }
-  return true;
-}
+void Tableau<double>::SolveT(const Vector<double> &c, Vector<double> &y) { B.solveT(c, y); }
 
 bool Tableau<double>::IsLexMin()
 {
-  int i, j;
-  for (i = MinRow(); i <= MaxRow(); i++) {
+  for (int i = MinRow(); i <= MaxRow(); i++) {
     if (EqZero(solution[i])) {
-      for (j = -MaxRow(); j < Label(i); j++) {
+      for (int j = -MaxRow(); j < Label(i); j++) {
         if (j != 0) {
           SolveColumn(j, tmpcol);
           if (LtZero(tmpcol[i])) {
@@ -274,12 +223,6 @@ Tableau<Rational>::Tableau(const Matrix<Rational> &A, const Array<int> &art,
   }
 }
 
-Tableau<Rational>::Tableau(const Tableau<Rational> &orig)
-
-    = default;
-
-Tableau<Rational>::~Tableau() = default;
-
 Tableau<Rational> &Tableau<Rational>::operator=(const Tableau<Rational> &orig)
 {
   TableauInterface<Rational>::operator=(orig);
@@ -320,37 +263,12 @@ Matrix<Rational> Tableau<Rational>::GetInverse()
 }
 
 // pivoting operations
-
-bool Tableau<Rational>::CanPivot(int outlabel, int col) const
-{
-  const_cast<Tableau<Rational> *>(this)->MySolveColumn(col, tmpcol);
-  Rational val = tmpcol[basis.Find(outlabel)];
-  if (val == (Rational)0) {
-    return false;
-  }
-  //   if(val <=eps2 && val >= -eps2) return 0;
-  return true;
-}
-
 void Tableau<Rational>::Pivot(int outrow, int in_col)
 {
-  // gout << "\nIn Tableau<Rational>::Pivot() ";
-  // gout << " outrow:" << outrow;
-  // gout << " inlabel: " << in_col;
   if (!RowIndex(outrow) || !ValidIndex(in_col)) {
     throw BadPivot();
   }
   int outlabel = Label(outrow);
-
-  // gout << "\noutrow:" << outrow;
-  // gout << " outlabel: " << outlabel;
-  // gout << " inlabel: " << in_col;
-
-  // BigDump(gout);
-  // gout << "\ndenom: " << denom << " totdenom: " << totdenom;
-  // gout << " product: " << denom*totdenom;
-  // gout << "\nTabdat: loc 1\n " << Tabdat;
-  // gout << "\nInverse: loc 1\n " << GetInverse();
 
   int col;
   int row(outrow);
@@ -395,24 +313,13 @@ void Tableau<Rational>::Pivot(int outrow, int in_col)
   Integer old_denom = denom;
   denom = Tabdat(row, col);
   Tabdat(row, col) = old_denom;
-  // BigDump(gout);
-  npivots++;
 
   basis.Pivot(outrow, in_col);
   nonbasic[col] = outlabel;
 
   for (i = solution.first_index(); i <= solution.last_index(); i++) {
-    //** solution[i] = (Rational)(Coeff[i])/(Rational)(denom*totdenom);
     solution[i] = Rational(Coeff[i] * sign(denom * totdenom));
   }
-
-  // gout << "Bottom \n" << Tabdat << '\n';
-  //  BigDump(gout);
-  //  gout << "\ndenom: " << denom << " totdenom: " << totdenom;
-  //  gout << "\nTabdat: loc 2\n " << Tabdat;
-  //  gout << "\nInverse: loc 2\n " << GetInverse();
-
-  // Refactor();
 }
 
 void Tableau<Rational>::SolveColumn(int in_col, Vector<Rational> &out)
@@ -467,35 +374,20 @@ void Tableau<Rational>::GetColumn(int col, Vector<Rational> &out) const
 void Tableau<Rational>::Refactor()
 {
   Vector<Rational> mytmpcol(tmpcol);
-  // BigDump(gout);
-  //** Note -- we may need to recompute totdenom here, if A and b have changed.
-  // gout << "\ndenom: " << denom << " totdenom: " << totdenom;
-  totdenom = lcm(find_lcd(*A), find_lcd(*b));
+  totdenom = lcm(find_lcd(A), find_lcd(b));
   if (totdenom <= 0) {
     throw BadDenom();
   }
-  // gout << "\ndenom: " << denom << " totdenom: " << totdenom;
-
   int i, j;
   Matrix<Rational> inv(GetInverse());
   Matrix<Rational> Tabnew(Tabdat.MinRow(), Tabdat.MaxRow(), Tabdat.MinCol(), Tabdat.MaxCol());
   for (i = nonbasic.first_index(); i <= nonbasic.last_index(); i++) {
     GetColumn(nonbasic[i], mytmpcol);
-    //    if(nonbasic[i]>=0) mytmpcol*=Rational(totdenom);
     Tabnew.SetColumn(i, inv * mytmpcol * (Rational)sign(denom * totdenom));
-    // gout << "\nMyTmpCol \n" << mytmpcol;
   }
 
-  // gout << "\nInv: \n" << inv;
-  // gout << "\nTabdat:\n" << Tabdat;
-  // gout << "\nTabnew:\n" << Tabnew;
-
   Vector<Rational> Coeffnew(Coeff.first_index(), Coeff.last_index());
-  Coeffnew = inv * (*b) * Rational(totdenom) * Rational(sign(denom * totdenom));
-
-  // gout << "\nCoeff:\n" << Coeff;
-  // gout << "\nCoeffew:\n" << Coeffnew;
-
+  Coeffnew = inv * b * Rational(totdenom) * Rational(sign(denom * totdenom));
   for (i = Tabdat.MinRow(); i <= Tabdat.MaxRow(); i++) {
     if (Coeffnew[i].denominator() != 1) {
       throw BadDenom();
@@ -511,21 +403,10 @@ void Tableau<Rational>::Refactor()
   // BigDump(gout);
 }
 
-void Tableau<Rational>::SetRefactor(int) {}
-
 void Tableau<Rational>::SetConst(const Vector<Rational> &bnew)
 {
-  b = &bnew;
+  b = bnew;
   Refactor();
-}
-
-//** this function is not currently used.  Drop it?
-void Tableau<Rational>::SetBasis(const Basis &in)
-{
-  basis = in;
-  //** this has to be changed -- Need to start over and pivot to new basis.
-  // B.refactor();
-  // B.solve(*b, solution);
 }
 
 // solve M x = b
@@ -542,22 +423,11 @@ void Tableau<Rational>::SolveT(const Vector<Rational> &c, Vector<Rational> &y)
   y = (c * GetInverse()) / (Rational)abs(denom);
 }
 
-bool Tableau<Rational>::IsFeasible()
-{
-  for (int i = solution.first_index(); i <= solution.last_index(); i++) {
-    if (solution[i] >= eps2) {
-      return false;
-    }
-  }
-  return true;
-}
-
 bool Tableau<Rational>::IsLexMin()
 {
-  int i, j;
-  for (i = MinRow(); i <= MaxRow(); i++) {
+  for (int i = MinRow(); i <= MaxRow(); i++) {
     if (EqZero(solution[i])) {
-      for (j = -MaxRow(); j < Label(i); j++) {
+      for (int j = -MaxRow(); j < Label(i); j++) {
         if (j != 0) {
           SolveColumn(j, tmpcol);
           if (LtZero(tmpcol[i])) {
@@ -581,8 +451,4 @@ void Tableau<Rational>::BasisVector(Vector<Rational> &out) const
   }
 }
 
-Integer Tableau<Rational>::TotDenom() const { return totdenom; }
-
-} // namespace linalg
-
-} // end namespace Gambit
+} // end namespace Gambit::linalg

@@ -312,12 +312,7 @@ game_SOURCES = \
 	src/games/nash.h
 
 linalg_SOURCES = \
-	src/solvers/linalg/basis.cc \
-	src/solvers/linalg/basis.h \
-	src/solvers/linalg/bfs.h \
-	src/solvers/linalg/btableau.cc \
 	src/solvers/linalg/btableau.h \
-	src/solvers/linalg/btableau.imp \
 	src/solvers/linalg/lpsolve.cc \
 	src/solvers/linalg/lpsolve.h \
 	src/solvers/linalg/lpsolve.imp \
@@ -478,8 +473,7 @@ gambit_logit_SOURCES = \
 gambit_lp_SOURCES = \
 	${core_SOURCES} ${game_SOURCES} \
 	${linalg_SOURCES} \
-	src/solvers/lp/efglp.cc \
-	src/solvers/lp/nfglp.cc \
+	src/solvers/lp/lp.cc \
 	src/solvers/lp/lp.h \
 	src/tools/util.h \
 	src/tools/lp/lp.cc

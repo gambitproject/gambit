@@ -26,17 +26,7 @@
 #include "btableau.h"
 #include "ludecomp.h"
 
-namespace Gambit {
-
-namespace linalg {
-
-template <class T> class Tableau;
-template <class T> class LPTableau;
-
-// ---------------------------------------------------------------------------
-// We have different implementations of Tableau for double and gbtRational,
-// but with the same interface
-// ---------------------------------------------------------------------------
+namespace Gambit::linalg {
 
 template <> class Tableau<double> : public TableauInterface<double> {
 public:
@@ -44,27 +34,22 @@ public:
   Tableau(const Matrix<double> &A, const Vector<double> &b);
   Tableau(const Matrix<double> &A, const Array<int> &art, const Vector<double> &b);
   Tableau(const Tableau<double> &);
-  ~Tableau() override;
+  ~Tableau() override = default;
 
   Tableau<double> &operator=(const Tableau<double> &);
 
   // pivoting
-  bool CanPivot(int outgoing, int incoming) const override;
   void Pivot(int outrow, int col) override; // pivot -- outgoing is row, incoming is column
-  void BasisVector(Vector<double> &x) const override;               // solve M x = (*b)
-  void SolveColumn(int, Vector<double> &) override;                 // column in new basis
-  void Solve(const Vector<double> &b, Vector<double> &x) override;  // solve M x = b
-  void SolveT(const Vector<double> &c, Vector<double> &y) override; // solve y M = c
+  void BasisVector(Vector<double> &x) const override; // solve M x = (*b)
+  void SolveColumn(int, Vector<double> &) override;   // column in new basis
+  // solve M x = b
+  void Solve(const Vector<double> &b, Vector<double> &x);
+  // solve y M = c
+  void SolveT(const Vector<double> &c, Vector<double> &y);
 
   // raw Tableau functions
-
-  void Refactor() override;
-  void SetRefactor(int) override;
-
+  virtual void Refactor();
   void SetConst(const Vector<double> &bnew);
-  void SetBasis(const Basis &); // set new Tableau
-
-  bool IsFeasible();
   bool IsLexMin();
 
 private:
@@ -91,44 +76,37 @@ private:
 protected:
   Array<int> nonbasic; //** nonbasic variables -- should be moved to Basis
 
+  Integer TotDenom() const { return totdenom; }
+
 public:
   class BadDenom : public Exception {
   public:
     ~BadDenom() noexcept override = default;
     const char *what() const noexcept override { return "Bad denominator in Tableau"; }
   };
-  // constructors and destructors
+
   Tableau(const Matrix<Rational> &A, const Vector<Rational> &b);
   Tableau(const Matrix<Rational> &A, const Array<int> &art, const Vector<Rational> &b);
-  Tableau(const Tableau<Rational> &);
-  ~Tableau() override;
+  Tableau(const Tableau<Rational> &) = default;
+  ~Tableau() override = default;
 
   Tableau<Rational> &operator=(const Tableau<Rational> &);
 
   // pivoting
-  bool CanPivot(int outgoing, int incoming) const override;
   void Pivot(int outrow, int col) override; // pivot -- outgoing is row, incoming is column
-  void SolveColumn(int, Vector<Rational> &) override; // column in new basis
-  void GetColumn(int, Vector<Rational> &) const;      // column in new basis
+  void SolveColumn(int, Vector<Rational> &) override;     // column in new basis
+  void GetColumn(int, Vector<Rational> &) const override; // column in new basis
 
   // raw Tableau functions
-
-  void Refactor() override;
-  void SetRefactor(int) override;
-
+  virtual void Refactor();
   void SetConst(const Vector<Rational> &bnew);
-  void SetBasis(const Basis &);                                         // set new Tableau
-  void Solve(const Vector<Rational> &b, Vector<Rational> &x) override;  // solve M x = b
-  void SolveT(const Vector<Rational> &c, Vector<Rational> &y) override; // solve y M = c
+  void Solve(const Vector<Rational> &b, Vector<Rational> &x);  // solve M x = b
+  void SolveT(const Vector<Rational> &c, Vector<Rational> &y); // solve y M = c
 
-  bool IsFeasible();
   bool IsLexMin();
   void BasisVector(Vector<Rational> &out) const override;
-  Integer TotDenom() const;
 };
 
-} // namespace linalg
-
-} // end namespace Gambit
+} // end namespace Gambit::linalg
 
 #endif // TABLEAU_H
