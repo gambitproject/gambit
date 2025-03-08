@@ -106,3 +106,8 @@ class Action:
             return decimal.Decimal(py_string.decode("ascii"))
         else:
             return Rational(py_string.decode("ascii"))
+
+    @property
+    def members(self) -> set[Node]:
+        """Get the set of nodes resulting from taking this action."""
+        return {node.children[self.number] for node in self.infoset.members}
