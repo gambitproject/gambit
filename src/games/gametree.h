@@ -217,7 +217,6 @@ protected:
 
   /// @name Managing the representation
   //@{
-  void Canonicalize();
   void BuildComputedValues() override;
   void ClearComputedValues() const;
   //@}
@@ -241,7 +240,7 @@ public:
   {
     m_doCanon = p_doCanon;
     if (m_doCanon) {
-      const_cast<GameTreeRep *>(this)->Canonicalize();
+      const_cast<GameTreeRep *>(this)->SortInfosets();
     }
   }
   //@}
@@ -286,6 +285,8 @@ public:
   Array<int> NumInfosets() const override;
   /// Returns the act'th action in the game (numbered globally)
   GameAction GetAction(int act) const override;
+  /// Sort the information sets for each player in a canonical order
+  void SortInfosets() override;
   //@}
 
   /// @name Modification

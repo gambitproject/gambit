@@ -552,6 +552,8 @@ public:
   virtual Array<int> NumInfosets() const = 0;
   /// Returns the act'th action in the game (numbered globally)
   virtual GameAction GetAction(int act) const = 0;
+  /// Sort the information sets for each player in a canonical order
+  virtual void SortInfosets() {}
   //@}
 
   /// @name Outcomes
