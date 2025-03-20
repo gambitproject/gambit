@@ -144,7 +144,6 @@ void GameTreeActionRep::DeleteAction()
     m_infoset->m_efg->NormalizeChanceProbs(m_infoset);
   }
   m_infoset->m_efg->ClearComputedValues();
-  m_infoset->m_efg->SortInfosets();
 }
 
 GameInfoset GameTreeActionRep::GetInfoset() const { return m_infoset; }
@@ -207,7 +206,6 @@ void GameTreeInfosetRep::SetPlayer(GamePlayer p_player)
   p_player->m_infosets.push_back(this);
 
   m_efg->ClearComputedValues();
-  m_efg->SortInfosets();
 }
 
 bool GameTreeInfosetRep::Precedes(GameNode p_node) const
@@ -253,7 +251,6 @@ GameAction GameTreeInfosetRep::InsertAction(GameAction p_action /* =0 */)
   }
 
   m_efg->ClearComputedValues();
-  m_efg->SortInfosets();
   return action;
 }
 
@@ -311,7 +308,6 @@ void GameTreeInfosetRep::Reveal(GamePlayer p_player)
   }
 
   m_efg->ClearComputedValues();
-  m_efg->SortInfosets();
 }
 
 GameNode GameTreeInfosetRep::GetMember(int p_index) const { return m_members[p_index]; }
@@ -460,7 +456,6 @@ void GameTreeNodeRep::DeleteParent()
 
   oldParent->Invalidate();
   m_efg->ClearComputedValues();
-  m_efg->SortInfosets();
 }
 
 void GameTreeNodeRep::DeleteTree()
@@ -480,7 +475,6 @@ void GameTreeNodeRep::DeleteTree()
   m_label = "";
 
   m_efg->ClearComputedValues();
-  m_efg->SortInfosets();
 }
 
 void GameTreeNodeRep::CopySubtree(GameTreeNodeRep *src, GameTreeNodeRep *stop)
@@ -521,7 +515,6 @@ void GameTreeNodeRep::CopyTree(GameNode p_src)
     }
 
     m_efg->ClearComputedValues();
-    m_efg->SortInfosets();
   }
 }
 
@@ -542,7 +535,6 @@ void GameTreeNodeRep::MoveTree(GameNode p_src)
   outcome = nullptr;
 
   m_efg->ClearComputedValues();
-  m_efg->SortInfosets();
 }
 
 Game GameTreeNodeRep::CopySubgame() const
@@ -570,7 +562,6 @@ void GameTreeNodeRep::SetInfoset(GameInfoset p_infoset)
   infoset = dynamic_cast<GameTreeInfosetRep *>(p_infoset.operator->());
 
   m_efg->ClearComputedValues();
-  m_efg->SortInfosets();
 }
 
 GameInfoset GameTreeNodeRep::LeaveInfoset()
@@ -594,7 +585,6 @@ GameInfoset GameTreeNodeRep::LeaveInfoset()
   }
 
   m_efg->ClearComputedValues();
-  m_efg->SortInfosets();
   return infoset;
 }
 
@@ -629,7 +619,6 @@ GameInfoset GameTreeNodeRep::AppendMove(GameInfoset p_infoset)
   }
 
   m_efg->ClearComputedValues();
-  m_efg->SortInfosets();
   return infoset;
 }
 
@@ -673,7 +662,6 @@ GameInfoset GameTreeNodeRep::InsertMove(GameInfoset p_infoset)
   }
 
   m_efg->ClearComputedValues();
-  m_efg->SortInfosets();
   return p_infoset;
 }
 
@@ -686,7 +674,7 @@ GameInfoset GameTreeNodeRep::InsertMove(GameInfoset p_infoset)
 //------------------------------------------------------------------------
 
 GameTreeRep::GameTreeRep()
-  : m_computedValues(false), m_doCanon(true), m_root(new GameTreeNodeRep(this, nullptr)),
+  : m_computedValues(false), m_root(new GameTreeNodeRep(this, nullptr)),
     m_chance(new GamePlayerRep(this, 0))
 {
 }
@@ -816,9 +804,6 @@ void GameTreeRep::NumberNodes(GameTreeNodeRep *n, int &index)
 
 void GameTreeRep::SortInfosets()
 {
-  if (!m_doCanon) {
-    return;
-  }
   int nodeindex = 1;
   NumberNodes(m_root, nodeindex);
 
@@ -884,7 +869,6 @@ void GameTreeRep::BuildComputedValues()
   if (m_computedValues) {
     return;
   }
-  SortInfosets();
   for (const auto &player : m_players) {
     player->MakeReducedStrats(m_root, nullptr);
   }

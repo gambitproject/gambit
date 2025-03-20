@@ -668,18 +668,21 @@ void gbtGameDocument::DoSetActionProbs(GameInfoset p_infoset, const Array<Number
 void gbtGameDocument::DoSetInfoset(GameNode p_node, GameInfoset p_infoset)
 {
   p_node->SetInfoset(p_infoset);
+  m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
 void gbtGameDocument::DoLeaveInfoset(GameNode p_node)
 {
   p_node->LeaveInfoset();
+  m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
 void gbtGameDocument::DoRevealAction(GameInfoset p_infoset, GamePlayer p_player)
 {
   p_infoset->Reveal(p_player);
+  m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
@@ -690,6 +693,7 @@ void gbtGameDocument::DoInsertAction(GameNode p_node)
   }
   GameAction action = p_node->GetInfoset()->InsertAction();
   action->SetLabel(lexical_cast<std::string>(action->GetNumber()));
+  m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
@@ -702,6 +706,7 @@ void gbtGameDocument::DoSetNodeLabel(GameNode p_node, const wxString &p_label)
 void gbtGameDocument::DoAppendMove(GameNode p_node, GameInfoset p_infoset)
 {
   p_node->AppendMove(p_infoset);
+  m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
@@ -711,24 +716,28 @@ void gbtGameDocument::DoInsertMove(GameNode p_node, GamePlayer p_player, unsigne
   for (int act = 1; act <= infoset->NumActions(); act++) {
     infoset->GetAction(act)->SetLabel(lexical_cast<std::string>(act));
   }
+  m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
 void gbtGameDocument::DoInsertMove(GameNode p_node, GameInfoset p_infoset)
 {
   p_node->InsertMove(p_infoset);
+  m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
 void gbtGameDocument::DoCopyTree(GameNode p_destNode, GameNode p_srcNode)
 {
   p_destNode->CopyTree(p_srcNode);
+  m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
 void gbtGameDocument::DoMoveTree(GameNode p_destNode, GameNode p_srcNode)
 {
   p_destNode->MoveTree(p_srcNode);
+  m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
@@ -738,12 +747,14 @@ void gbtGameDocument::DoDeleteParent(GameNode p_node)
     return;
   }
   p_node->DeleteParent();
+  m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
 void gbtGameDocument::DoDeleteTree(GameNode p_node)
 {
   p_node->DeleteTree();
+  m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
@@ -752,6 +763,7 @@ void gbtGameDocument::DoSetPlayer(GameInfoset p_infoset, GamePlayer p_player)
   if (!p_player->IsChance() && !p_infoset->GetPlayer()->IsChance()) {
     // Currently don't support switching nodes to/from chance player
     p_infoset->SetPlayer(p_player);
+    m_game->SortInfosets();
     UpdateViews(GBT_DOC_MODIFIED_GAME);
   }
 }
@@ -761,6 +773,7 @@ void gbtGameDocument::DoSetPlayer(GameNode p_node, GamePlayer p_player)
   if (!p_player->IsChance() && !p_node->GetPlayer()->IsChance()) {
     // Currently don't support switching nodes to/from chance player
     p_node->GetInfoset()->SetPlayer(p_player);
+    m_game->SortInfosets();
     UpdateViews(GBT_DOC_MODIFIED_GAME);
   }
 }

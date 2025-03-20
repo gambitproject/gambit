@@ -28,8 +28,6 @@
 #include <algorithm>
 
 #include "gambit.h"
-// for explicit access to turning off canonicalization
-#include "gametree.h"
 
 namespace {
 // This anonymous namespace encapsulates the file-parsing code
@@ -732,7 +730,6 @@ Game ReadEfgFile(std::istream &p_stream)
 
   TreeData treeData;
   Game game = NewTree();
-  dynamic_cast<GameTreeRep &>(*game).SetCanonicalization(false);
   game->SetTitle(parser.GetLastText());
   ReadPlayers(parser, game, treeData);
   if (parser.GetNextToken() == TOKEN_TEXT) {
@@ -741,7 +738,7 @@ Game ReadEfgFile(std::istream &p_stream)
     parser.GetNextToken();
   }
   ParseNode(parser, game, game->GetRoot(), treeData);
-  dynamic_cast<GameTreeRep &>(*game).SetCanonicalization(true);
+  game->SortInfosets();
   return game;
 }
 

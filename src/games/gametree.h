@@ -204,7 +204,7 @@ class GameTreeRep : public GameExplicitRep {
   friend class GameTreeActionRep;
 
 protected:
-  mutable bool m_computedValues, m_doCanon;
+  mutable bool m_computedValues;
   GameTreeNodeRep *m_root;
   GamePlayerRep *m_chance;
 
@@ -235,14 +235,6 @@ public:
   bool IsConstSum() const override;
   using GameRep::IsPerfectRecall;
   bool IsPerfectRecall(GameInfoset &, GameInfoset &) const override;
-  /// Turn on or off automatic canonicalization of the game
-  void SetCanonicalization(bool p_doCanon) const
-  {
-    m_doCanon = p_doCanon;
-    if (m_doCanon) {
-      const_cast<GameTreeRep *>(this)->SortInfosets();
-    }
-  }
   //@}
 
   /// @name Players
