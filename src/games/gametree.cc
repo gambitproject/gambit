@@ -145,7 +145,6 @@ void GameTreeRep::DeleteAction(GameAction p_action)
     member->m_children.erase(it);
   }
   ClearComputedValues();
-  Canonicalize();
 }
 
 GameInfoset GameActionRep::GetInfoset() const { return m_infoset->shared_from_this(); }
@@ -193,7 +192,6 @@ void GameTreeRep::SetPlayer(GameInfoset p_infoset, GamePlayer p_player)
   p_player->m_infosets.push_back(p_infoset);
 
   ClearComputedValues();
-  Canonicalize();
 }
 
 bool GameInfosetRep::Precedes(GameNode p_node) const
@@ -237,7 +235,6 @@ GameAction GameTreeRep::InsertAction(GameInfoset p_infoset, GameAction p_action 
   m_numNodes += p_infoset->m_members.size();
   // m_numNonterminalNodes stays unchanged when an action is appended to an information set
   ClearComputedValues();
-  Canonicalize();
   return action;
 }
 
@@ -251,10 +248,7 @@ void GameTreeRep::RemoveMember(GameInfosetRep *p_infoset, GameNodeRep *p_node)
     p_infoset->Invalidate();
     p_infoset->m_player->m_infosets.erase(std::find(
         player->m_infosets.begin(), player->m_infosets.end(), p_infoset->shared_from_this()));
-    int iset = 1;
-    for (auto &infoset : player->m_infosets) {
-      infoset->m_number = iset++;
-    }
+    RenumberInfosets(player);
   }
 }
 
@@ -284,7 +278,6 @@ void GameTreeRep::Reveal(GameInfoset p_atInfoset, GamePlayer p_player)
   }
 
   ClearComputedValues();
-  Canonicalize();
 }
 
 //========================================================================
@@ -422,7 +415,6 @@ void GameTreeRep::DeleteParent(GameNode p_node)
 
   oldParent->Invalidate();
   ClearComputedValues();
-  Canonicalize();
 }
 
 void GameTreeRep::DeleteTree(GameNode p_node)
@@ -449,7 +441,6 @@ void GameTreeRep::DeleteTree(GameNode p_node)
   node->m_label = "";
 
   ClearComputedValues();
-  Canonicalize();
 }
 
 void GameTreeRep::CopySubtree(GameNodeRep *dest, GameNodeRep *src, GameNodeRep *stop)
@@ -491,7 +482,6 @@ void GameTreeRep::CopyTree(GameNode p_dest, GameNode p_src)
       CopySubtree(dest_child->get(), src_child->get(), dest);
     }
     ClearComputedValues();
-    Canonicalize();
   }
 }
 
@@ -515,7 +505,6 @@ void GameTreeRep::MoveTree(GameNode p_dest, GameNode p_src)
   dest->m_outcome = nullptr;
 
   ClearComputedValues();
-  Canonicalize();
 }
 
 Game GameTreeRep::CopySubgame(GameNode p_root) const
@@ -547,7 +536,6 @@ void GameTreeRep::SetInfoset(GameNode p_node, GameInfoset p_infoset)
   node->m_infoset = p_infoset.get();
 
   ClearComputedValues();
-  Canonicalize();
 }
 
 GameInfoset GameTreeRep::LeaveInfoset(GameNode p_node)
@@ -578,7 +566,6 @@ GameInfoset GameTreeRep::LeaveInfoset(GameNode p_node)
     (*new_act)->SetLabel((*old_act)->GetLabel());
   }
   ClearComputedValues();
-  Canonicalize();
   return node->m_infoset->shared_from_this();
 }
 
@@ -619,7 +606,6 @@ GameInfoset GameTreeRep::AppendMove(GameNode p_node, GameInfoset p_infoset)
                 });
   m_numNonterminalNodes++;
   ClearComputedValues();
-  Canonicalize();
   return node->m_infoset->shared_from_this();
 }
 
@@ -671,7 +657,6 @@ GameInfoset GameTreeRep::InsertMove(GameNode p_node, GameInfoset p_infoset)
   m_numNodes += newNode->m_infoset->m_actions.size();
   m_numNonterminalNodes++;
   ClearComputedValues();
-  Canonicalize();
   return p_infoset;
 }
 
@@ -769,64 +754,39 @@ bool GameTreeRep::IsPerfectRecall() const
 //               GameTreeRep: Managing the representation
 //------------------------------------------------------------------------
 
-void GameTreeRep::NumberNodes(GameNodeRep *n, int &index)
+void GameTreeRep::SortInfosets(GamePlayerRep *p_player)
 {
-  n->m_number = index++;
-  for (auto &child : n->m_children) {
-    NumberNodes(child.get(), index);
+  // Sort nodes within information sets according to ID.
+  for (auto &infoset : p_player->m_infosets) {
+    std::sort(infoset->m_members.begin(), infoset->m_members.end(),
+              [](const std::shared_ptr<GameNodeRep> &a, const std::shared_ptr<GameNodeRep> &b) {
+                return a->m_number < b->m_number;
+              });
   }
+  // Sort information sets by the smallest ID among their members
+  std::sort(
+      p_player->m_infosets.begin(), p_player->m_infosets.end(),
+      [](const std::shared_ptr<GameInfosetRep> &a, const std::shared_ptr<GameInfosetRep> &b) {
+        return a->m_members.front()->m_number < b->m_members.front()->m_number;
+      });
+  RenumberInfosets(p_player);
+}
+void GameTreeRep::RenumberInfosets(GamePlayerRep *p_player)
+{
+  std::for_each(
+      p_player->m_infosets.begin(), p_player->m_infosets.end(),
+      [iset = 1](const std::shared_ptr<GameInfosetRep> &s) mutable { s->m_number = iset++; });
 }
 
-void GameTreeRep::Canonicalize()
+void GameTreeRep::SortInfosets()
 {
-  if (!m_doCanon) {
-    return;
-  }
   int nodeindex = 1;
-  NumberNodes(m_root.get(), nodeindex);
-
-  for (size_t pl = 0; pl <= m_players.size(); pl++) {
-    auto player = (pl) ? m_players[pl - 1].get() : m_chance.get();
-
-    // Sort nodes within information sets according to ID.
-    // Coded using a bubble sort for simplicity; large games might
-    // find a quicksort worthwhile.
-    for (auto &infoset : player->m_infosets) {
-      for (size_t i = 1; i < infoset->m_members.size(); i++) {
-        for (size_t j = 1; j < infoset->m_members.size() - i; j++) {
-          if (infoset->m_members[j]->m_number < infoset->m_members[j - 1]->m_number) {
-            auto tmp = infoset->m_members[j - 1];
-            infoset->m_members[j - 1] = infoset->m_members[j];
-            infoset->m_members[j] = tmp;
-          }
-        }
-      }
-    }
-
-    // Sort information sets by the smallest ID among their members
-    // Coded using a bubble sort for simplicity; large games might
-    // find a quicksort worthwhile.
-    for (size_t i = 1; i < player->m_infosets.size(); i++) {
-      for (size_t j = 1; j < player->m_infosets.size() - i; j++) {
-        const int a = ((player->m_infosets[j]->m_members.size())
-                           ? player->m_infosets[j]->m_members[0]->m_number
-                           : 0);
-        const int b = ((player->m_infosets[j - 1]->m_members.size())
-                           ? player->m_infosets[j - 1]->m_members[0]->m_number
-                           : 0);
-
-        if (a < b || b == 0) {
-          auto tmp = player->m_infosets[j - 1];
-          player->m_infosets[j - 1] = player->m_infosets[j];
-          player->m_infosets[j] = tmp;
-        }
-      }
-    }
-
-    // Reassign information set IDs
-    std::for_each(
-        player->m_infosets.begin(), player->m_infosets.end(),
-        [iset = 1](const std::shared_ptr<GameInfosetRep> &s) mutable { s->m_number = iset++; });
+  for (const auto &node : GetNodes()) {
+    node->m_number = nodeindex++;
+  }
+  SortInfosets(m_chance.get());
+  for (auto player : m_players) {
+    SortInfosets(player.get());
   }
 }
 
@@ -848,7 +808,7 @@ void GameTreeRep::BuildComputedValues() const
   if (m_computedValues) {
     return;
   }
-  const_cast<GameTreeRep *>(this)->Canonicalize();
+  const_cast<GameTreeRep *>(this)->SortInfosets();
   for (const auto &player : m_players) {
     std::map<GameInfosetRep *, int> behav;
     std::map<GameNodeRep *, GameNodeRep *> ptr, whichbranch;

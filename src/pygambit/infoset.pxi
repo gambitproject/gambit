@@ -168,7 +168,22 @@ class Infoset:
 
     @property
     def members(self) -> InfosetMembers:
-        """The set of nodes which are members of the information set."""
+        """The set of nodes which are members of the information set.
+
+        The order in which members are iterated is dependent on the order of
+        operations used to define the game.  A standard ordering, in which members
+        are iterated in the order encountered in a depth-first traversal of the tree,
+        can be obtained by calling `Game.sort_infosets` on the game after construction.
+
+        .. versionchanged:: 16.4.0
+           The ordering of members is now dependent on the order of operations;
+           previously, members sets were (expensively) re-sorted after every change
+           to the game tree.
+
+        See also
+        --------
+        Game.sort_infosets
+        """
         return InfosetMembers.wrap(self.infoset)
 
     @property

@@ -33,7 +33,7 @@ class GameTreeRep : public GameExplicitRep {
   friend class GameActionRep;
 
 protected:
-  mutable bool m_computedValues{false}, m_doCanon{true};
+  mutable bool m_computedValues{false};
   std::shared_ptr<GameNodeRep> m_root;
   std::shared_ptr<GamePlayerRep> m_chance;
   std::size_t m_numNodes = 1;
@@ -43,14 +43,14 @@ protected:
 
   /// @name Private auxiliary functions
   //@{
-  void NumberNodes(GameNodeRep *, int &);
+  void SortInfosets(GamePlayerRep *);
+  static void RenumberInfosets(GamePlayerRep *);
   /// Normalize the probability distribution of actions at a chance node
   Game NormalizeChanceProbs(GameInfosetRep *);
   //@}
 
   /// @name Managing the representation
   //@{
-  void Canonicalize();
   void BuildComputedValues() const override;
   void BuildConsistentPlays();
   void ClearComputedValues() const;
@@ -74,14 +74,6 @@ public:
   bool IsTree() const override { return true; }
   bool IsConstSum() const override;
   bool IsPerfectRecall() const override;
-  /// Turn on or off automatic canonicalization of the game
-  void SetCanonicalization(bool p_doCanon) const
-  {
-    m_doCanon = p_doCanon;
-    if (m_doCanon) {
-      const_cast<GameTreeRep *>(this)->Canonicalize();
-    }
-  }
   //@}
 
   /// @name Players
@@ -122,6 +114,8 @@ public:
   GameInfoset GetInfoset(int iset) const override;
   /// Returns the set of information sets in the game
   std::vector<GameInfoset> GetInfosets() const override;
+  /// Sort the information sets for each player in a canonical order
+  void SortInfosets() override;
   //@}
 
   /// @name Modification

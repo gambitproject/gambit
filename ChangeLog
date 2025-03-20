@@ -22,6 +22,10 @@
 
 ### Changed
 - Internally in C++ `std::shared_ptr` are now used to manage memory allocated for game objects.  (#518)
+- The iteration order of a player's information sets, and of the members of an information set, now may
+  depend on the order of operations to build a game tree.  The previous behaviour - ensuring sorting
+  by the order encountered in a depth-first traversal of the tree - can now be obtained by calling
+  `SortInfosets` (C++) or `sort_infosets` (Python) on the game.  (#483)
 
 ## [16.3.1] - unreleased
 

@@ -69,8 +69,9 @@ Transforming game information structure
    Game.set_player
    Game.set_infoset
    Game.leave_infoset
-   Game.reveal
    Game.set_chance_probs
+   Game.reveal
+   Game.sort_infosets
 
 
 Transforming game components

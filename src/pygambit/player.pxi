@@ -216,7 +216,22 @@ class Player:
 
     @property
     def infosets(self) -> PlayerInfosets:
-        """Returns the set of information sets at which the player has the decision."""
+        """Returns the set of information sets at which the player has the decision.
+
+        The order in which information sets are iterated is dependent on the order of
+        operations used to define the game.  A standard ordering, in which information
+        sets are iterated in the order encountered in a depth-first traversal of the tree,
+        can be obtained by calling `Game.sort_infosets` on the game after construction.
+
+        .. versionchanged:: 16.4.0
+           The ordering of information sets is now dependent on the order of operations;
+           previously, information sets were (expensively) re-sorted after every change
+           to the game tree.
+
+        See also
+        --------
+        Game.sort_infosets
+        """
         return PlayerInfosets.wrap(self.player)
 
     @property

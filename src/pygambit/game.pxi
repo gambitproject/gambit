@@ -1832,6 +1832,25 @@ class Game:
         resolved_player = cython.cast(Player, self._resolve_player(player, "reveal"))
         self.game.deref().Reveal(resolved_infoset.infoset, resolved_player.player)
 
+    def sort_infosets(self) -> None:
+        """Sort information sets into a standard order.
+
+        When iterating the information sets of a player, the order in which information
+        sets are visited may be dependent on the order of the operations used to build
+        the extensive game.  This function sorts each player's information sets into
+        a standard order, namely, the order in which they are encountered in a depth-first
+        traversal of the tree, and likewise sorts the members of each information set
+        by the order in which they are encountered in a depth-first traversal.
+
+        .. versionadded:: 16.4.0
+
+        See also
+        --------
+        Player.infosets
+        Infoset.members
+        """
+        self.game.deref().SortInfosets()
+
     def add_player(self, label: str = "") -> Player:
         """Add a new player to the game.
 

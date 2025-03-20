@@ -862,6 +862,8 @@ public:
   virtual GameInfoset GetInfoset(int iset) const { throw UndefinedException(); }
   /// Returns the set of information sets in the game
   virtual std::vector<GameInfoset> GetInfosets() const { throw UndefinedException(); }
+  /// Sort the information sets for each player in a canonical order
+  virtual void SortInfosets() {}
   //@}
 
   /// @name Outcomes

@@ -282,6 +282,7 @@ cdef extern from "games/game.h":
 
         c_GameInfoset GetInfoset(int) except +IndexError
         Array[int] NumInfosets() except +
+        void SortInfosets() except +
 
         c_GameAction GetAction(int) except +IndexError
         int BehavProfileLength() except +
