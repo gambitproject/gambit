@@ -161,21 +161,21 @@ void GamePlayerRep::MakeReducedStrats(GameTreeNodeRep *n, GameTreeNodeRep *nn)
   }
 
   if (n->NumChildren() > 0) {
-    if (n->infoset->m_player == this) {
-      if (n->infoset->flag == 0) {
+    if (n->m_infoset->m_player == this) {
+      if (n->m_infoset->flag == 0) {
         // we haven't visited this infoset before
-        n->infoset->flag = 1;
+        n->m_infoset->flag = 1;
         for (i = 1; i <= n->NumChildren(); i++) {
-          GameTreeNodeRep *m = n->children[i];
+          GameTreeNodeRep *m = n->m_children[i];
           n->whichbranch = m;
-          n->infoset->whichbranch = i;
+          n->m_infoset->whichbranch = i;
           MakeReducedStrats(m, nn);
         }
-        n->infoset->flag = 0;
+        n->m_infoset->flag = 0;
       }
       else {
         // we have visited this infoset, take same action
-        MakeReducedStrats(n->children[n->infoset->whichbranch], nn);
+        MakeReducedStrats(n->m_children[n->m_infoset->whichbranch], nn);
       }
     }
     else {
@@ -183,11 +183,11 @@ void GamePlayerRep::MakeReducedStrats(GameTreeNodeRep *n, GameTreeNodeRep *nn)
       if (nn != nullptr) {
         n->ptr = nn->m_parent;
       }
-      n->whichbranch = n->children[1];
-      if (n->infoset) {
-        n->infoset->whichbranch = 0;
+      n->whichbranch = n->m_children[1];
+      if (n->m_infoset) {
+        n->m_infoset->whichbranch = 0;
       }
-      MakeReducedStrats(n->children[1], n->children[1]);
+      MakeReducedStrats(n->m_children[1], n->m_children[1]);
     }
   }
   else if (nn) {

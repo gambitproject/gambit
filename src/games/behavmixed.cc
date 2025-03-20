@@ -94,7 +94,7 @@ void MixedBehaviorProfile<T>::RealizationProbs(const MixedStrategyProfile<T> &mp
 {
   T prob;
 
-  for (int i = 1; i <= node->children.size(); i++) {
+  for (int i = 1; i <= node->m_children.size(); i++) {
     if (node->GetPlayer() && !node->GetPlayer()->IsChance()) {
       if (node->GetPlayer() == player) {
         if (actions[node->GetInfoset()->GetNumber()] == i) {
@@ -113,10 +113,10 @@ void MixedBehaviorProfile<T>::RealizationProbs(const MixedStrategyProfile<T> &mp
       }
     }
     else { // n.GetPlayer() == 0
-      prob = T(node->infoset->GetActionProb(i));
+      prob = T(node->m_infoset->GetActionProb(i));
     }
 
-    GameTreeNodeRep *child = node->children[i];
+    GameTreeNodeRep *child = node->m_children[i];
 
     map_bvals[child] = prob * map_bvals[node];
     map_nvals[child] += map_bvals[child];
