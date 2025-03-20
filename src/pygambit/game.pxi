@@ -1108,7 +1108,7 @@ class Game:
             filepath_or_buffer.write(serialized_game)
         else:
             with open(filepath_or_buffer, "w") as f:
-                f.write(serialized_game)
+                f.write(serialized_game, serialized_game.decode())
 
     def to_efg(
         self,
