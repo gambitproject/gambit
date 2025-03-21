@@ -121,7 +121,6 @@ public:
 
   bool Precedes(GameNode) const override;
 
-  const Number &GetActionProb(int i) const override { return m_probs[i]; }
   const Number &GetActionProb(const GameAction &p_action) const override
   {
     if (p_action->GetInfoset() != GameInfoset(const_cast<GameTreeInfosetRep *>(this))) {

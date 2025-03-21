@@ -333,7 +333,7 @@ std::string gbtAnalysisProfileList<T>::GetActionProb(const GameNode &p_node, int
 
   if (p_node->GetPlayer() && p_node->GetPlayer()->IsChance()) {
     GameInfoset infoset = p_node->GetInfoset();
-    return static_cast<std::string>(infoset->GetActionProb(p_act));
+    return static_cast<std::string>(infoset->GetActionProb(infoset->GetAction(p_act)));
   }
 
   if (!p_node->GetPlayer()) {

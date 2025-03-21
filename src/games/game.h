@@ -208,7 +208,6 @@ public:
 
   virtual bool Precedes(GameNode) const = 0;
 
-  virtual const Number &GetActionProb(int i) const = 0;
   virtual const Number &GetActionProb(const GameAction &) const = 0;
   virtual void Reveal(GamePlayer) = 0;
 };

@@ -455,7 +455,8 @@ wxString gbtTreeLayout::CreateBranchLabel(const gbtNodeEntry *p_entry, int p_whi
     case GBT_BRANCH_LABEL_PROBS:
       if (parent->GetPlayer() && parent->GetPlayer()->IsChance()) {
         return {static_cast<std::string>(
-                    parent->GetInfoset()->GetActionProb(p_entry->GetChildNumber()))
+                    parent->GetInfoset()->GetActionProb(
+                        parent->GetInfoset()->GetAction(p_entry->GetChildNumber())))
                     .c_str(),
                 *wxConvCurrent};
       }
@@ -839,8 +840,8 @@ void gbtTreeLayout::GenerateLabels()
 
       Gambit::GameNode parent = entry->GetNode()->GetParent();
       if (parent->GetPlayer()->IsChance()) {
-        entry->SetActionProb(
-            static_cast<double>(parent->GetInfoset()->GetActionProb(entry->GetChildNumber())));
+        entry->SetActionProb(static_cast<double>(parent->GetInfoset()->GetActionProb(
+            parent->GetInfoset()->GetAction(entry->GetChildNumber()))));
       }
       else {
         int profile = m_doc->GetCurrentProfile();
