@@ -119,8 +119,7 @@ cdef extern from "games/game.h":
         c_GameAction GetAction(int) except +IndexError
         c_GameAction InsertAction(c_GameAction) except +ValueError
 
-        c_Number GetActionProb(int) except +IndexError
-        void SetActionProb(int, c_Number) except +IndexError
+        c_Number GetActionProb(c_GameAction) except +IndexError
 
         int NumMembers() except +
         c_GameNode GetMember(int) except +IndexError

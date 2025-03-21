@@ -23,6 +23,7 @@
 #ifndef GAMETREE_H
 #define GAMETREE_H
 
+#include <algorithm>
 #include "gameexpl.h"
 
 namespace Gambit {
@@ -84,6 +85,12 @@ protected:
 
   void RemoveAction(int which);
 
+  void RenumberActions()
+  {
+    std::for_each(m_actions.begin(), m_actions.end(),
+                  [act = 1](GameTreeActionRep *a) mutable { a->m_number = act++; });
+  }
+
 public:
   Game GetGame() const override;
   int GetNumber() const override { return m_number; }
@@ -114,7 +121,6 @@ public:
 
   bool Precedes(GameNode) const override;
 
-  const Number &GetActionProb(int i) const override { return m_probs[i]; }
   const Number &GetActionProb(const GameAction &p_action) const override
   {
     if (p_action->GetInfoset() != GameInfoset(const_cast<GameTreeInfosetRep *>(this))) {
@@ -134,13 +140,13 @@ class GameTreeNodeRep : public GameNodeRep {
   template <class T> friend class MixedBehaviorProfile;
 
 protected:
-  int number;
+  int m_number;
   GameTreeRep *m_efg;
   std::string m_label;
-  GameTreeInfosetRep *infoset;
+  GameTreeInfosetRep *m_infoset;
   GameTreeNodeRep *m_parent;
-  GameOutcomeRep *outcome;
-  Array<GameTreeNodeRep *> children;
+  GameOutcomeRep *m_outcome;
+  Array<GameTreeNodeRep *> m_children;
   GameTreeNodeRep *whichbranch{nullptr}, *ptr{nullptr};
 
   GameTreeNodeRep(GameTreeRep *e, GameTreeNodeRep *p);
@@ -155,30 +161,30 @@ public:
   const std::string &GetLabel() const override { return m_label; }
   void SetLabel(const std::string &p_label) override { m_label = p_label; }
 
-  int GetNumber() const override { return number; }
-  int NumChildren() const override { return children.size(); }
-  GameNode GetChild(int i) const override { return children[i]; }
+  int GetNumber() const override { return m_number; }
+  int NumChildren() const override { return m_children.size(); }
+  GameNode GetChild(int i) const override { return m_children[i]; }
   GameNode GetChild(const GameAction &p_action) const override
   {
-    if (p_action->GetInfoset() != infoset) {
+    if (p_action->GetInfoset() != m_infoset) {
       throw MismatchException();
     }
-    return children[p_action->GetNumber()];
+    return m_children[p_action->GetNumber()];
   }
   Array<GameNode> GetChildren() const override;
 
-  GameInfoset GetInfoset() const override { return infoset; }
+  GameInfoset GetInfoset() const override { return m_infoset; }
   void SetInfoset(GameInfoset) override;
   GameInfoset LeaveInfoset() override;
 
-  bool IsTerminal() const override { return children.empty(); }
-  GamePlayer GetPlayer() const override { return (infoset) ? infoset->GetPlayer() : nullptr; }
+  bool IsTerminal() const override { return m_children.empty(); }
+  GamePlayer GetPlayer() const override { return (m_infoset) ? m_infoset->GetPlayer() : nullptr; }
   GameAction GetPriorAction() const override; // returns null if root node
   GameNode GetParent() const override { return m_parent; }
   GameNode GetNextSibling() const override;
   GameNode GetPriorSibling() const override;
 
-  GameOutcome GetOutcome() const override { return outcome; }
+  GameOutcome GetOutcome() const override { return m_outcome; }
   void SetOutcome(const GameOutcome &p_outcome) override;
 
   bool IsSuccessorOf(GameNode from) const override;
@@ -275,8 +281,6 @@ public:
   Array<GameInfoset> GetInfosets() const override;
   /// Returns an array with the number of information sets per personal player
   Array<int> NumInfosets() const override;
-  /// Returns the act'th action in the game (numbered globally)
-  GameAction GetAction(int act) const override;
   /// Sort the information sets for each player in a canonical order
   void SortInfosets() override;
   //@}

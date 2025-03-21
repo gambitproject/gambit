@@ -64,9 +64,11 @@ gbtActionSheet::gbtActionSheet(wxWindow *p_parent, const Gambit::GameInfoset &p_
     SetCellValue(wxSheetCoords(act - 1, 0),
                  wxString(p_infoset->GetAction(act)->GetLabel().c_str(), *wxConvCurrent));
     if (p_infoset->IsChanceInfoset()) {
-      SetCellValue(wxSheetCoords(act - 1, 1),
-                   wxString(static_cast<std::string>(p_infoset->GetActionProb(act)).c_str(),
-                            *wxConvCurrent));
+      SetCellValue(
+          wxSheetCoords(act - 1, 1),
+          wxString(static_cast<std::string>(p_infoset->GetActionProb(p_infoset->GetAction(act)))
+                       .c_str(),
+                   *wxConvCurrent));
     }
   }
   SetDefaultColWidth(150);

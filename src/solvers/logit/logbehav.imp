@@ -70,7 +70,7 @@ template <class T> T LogBehavProfile<T>::GetActionProb(const GameAction &action)
   if (action->GetInfoset()->GetPlayer()->IsChance()) {
     GameTreeInfosetRep *infoset =
         dynamic_cast<GameTreeInfosetRep *>(action->GetInfoset().operator->());
-    return static_cast<T>(infoset->GetActionProb(action->GetNumber()));
+    return static_cast<T>(infoset->GetActionProb(action));
   }
   else {
     return GetProb(action);
@@ -82,7 +82,7 @@ template <class T> T LogBehavProfile<T>::GetLogActionProb(const GameAction &acti
   if (action->GetInfoset()->GetPlayer()->IsChance()) {
     GameTreeInfosetRep *infoset =
         dynamic_cast<GameTreeInfosetRep *>(action->GetInfoset().operator->());
-    return log(static_cast<T>(infoset->GetActionProb(action->GetNumber())));
+    return log(static_cast<T>(infoset->GetActionProb(action)));
   }
   else {
     return m_logProbs[m_profileIndex.at(action)];

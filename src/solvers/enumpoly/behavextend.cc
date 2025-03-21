@@ -188,7 +188,7 @@ bool NashNodeProbabilityPoly(const MixedBehaviorProfile<double> &p_solution,
     GameInfoset last_infoset = last_action->GetInfoset();
 
     if (last_infoset->IsChanceInfoset()) {
-      node_prob *= static_cast<double>(last_infoset->GetActionProb(last_action->GetNumber()));
+      node_prob *= static_cast<double>(last_infoset->GetActionProb(last_action));
     }
     else if (dsupp.HasAction(last_infoset)) {
       if (last_infoset == iset) {
@@ -334,7 +334,7 @@ bool ANFNodeProbabilityPoly(const MixedBehaviorProfile<double> &p_solution,
     GameInfoset last_infoset = last_action->GetInfoset();
 
     if (last_infoset->IsChanceInfoset()) {
-      node_prob *= static_cast<double>(last_infoset->GetActionProb(last_action->GetNumber()));
+      node_prob *= static_cast<double>(last_infoset->GetActionProb(last_action));
     }
     else if (big_supp.HasAction(last_infoset)) {
       if (last_infoset == p_solution.GetGame()->GetPlayer(pl)->GetInfoset(i)) {
