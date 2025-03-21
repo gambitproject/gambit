@@ -73,3 +73,6 @@ class Strategy:
     def number(self) -> int:
         """The number of the strategy."""
         return self.strategy.deref().GetNumber() - 1
+
+    def action(self, infoset: Infoset) -> Action:
+        return Action.wrap(self.strategy.deref().GetAction(infoset.infoset))
