@@ -82,8 +82,6 @@ public:
   Array<GameInfoset> GetInfosets() const override { throw UndefinedException(); }
   /// Returns an array with the number of information sets per personal player
   Array<int> NumInfosets() const override { throw UndefinedException(); }
-  /// Returns the act'th action in the game (numbered globally)
-  GameAction GetAction(int act) const override { throw UndefinedException(); }
   //@}
 
   /// @name Nodes

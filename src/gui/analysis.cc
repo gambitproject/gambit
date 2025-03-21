@@ -363,7 +363,7 @@ std::string gbtAnalysisProfileList<T>::GetActionProb(int p_action, int p_index) 
   try {
     const MixedBehaviorProfile<T> &profile = *m_behavProfiles[index];
 
-    if (!profile.IsDefinedAt(profile.GetGame()->GetAction(p_action)->GetInfoset())) {
+    if (!profile.IsDefinedAt(m_doc->GetAction(p_action)->GetInfoset())) {
       return "*";
     }
 

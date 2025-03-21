@@ -389,6 +389,21 @@ void gbtGameDocument::BuildNfg()
   }
 }
 
+GameAction gbtGameDocument::GetAction(int p_index) const
+{
+  int index = 1;
+  for (auto player : m_game->GetPlayers()) {
+    for (auto infoset : player->GetInfosets()) {
+      for (auto action : infoset->GetActions()) {
+        if (index++ == p_index) {
+          return action;
+        }
+      }
+    }
+  }
+  throw IndexException();
+}
+
 void gbtGameDocument::SetStyle(const gbtStyle &p_style)
 {
   m_style = p_style;

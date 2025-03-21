@@ -291,8 +291,6 @@ public:
   Array<GameInfoset> GetInfosets() const override;
   /// Returns an array with the number of information sets per personal player
   Array<int> NumInfosets() const override;
-  /// Returns the act'th action in the game (numbered globally)
-  GameAction GetAction(int act) const override;
   //@}
 
   /// @name Modification

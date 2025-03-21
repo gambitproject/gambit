@@ -84,7 +84,7 @@ wxString gbtLogitBehavList::GetCellValue(const wxSheetCoords &p_coords)
       return wxT("Lambda");
     }
     else {
-      Gambit::GameAction action = m_doc->GetGame()->GetAction(p_coords.GetCol());
+      Gambit::GameAction action = m_doc->GetAction(p_coords.GetCol());
       return (wxString::Format(wxT("%d: "), action->GetInfoset()->GetNumber()) +
               wxString(action->GetLabel().c_str(), *wxConvCurrent));
     }
@@ -114,7 +114,7 @@ static wxColour GetPlayerColor(gbtGameDocument *p_doc, int p_index)
     return *wxBLACK;
   }
 
-  Gambit::GameAction action = p_doc->GetGame()->GetAction(p_index);
+  Gambit::GameAction action = p_doc->GetAction(p_index);
   return p_doc->GetStyle().GetPlayerColor(action->GetInfoset()->GetPlayer()->GetNumber());
 }
 
@@ -146,7 +146,7 @@ wxSheetCellAttr gbtLogitBehavList::GetAttr(const wxSheetCoords &p_coords, wxShee
   attr.SetAlignment(wxALIGN_RIGHT, wxALIGN_CENTER);
   attr.SetOrientation(wxHORIZONTAL);
   if (p_coords.GetCol() > 0) {
-    Gambit::GameAction action = m_doc->GetGame()->GetAction(p_coords.GetCol());
+    Gambit::GameAction action = m_doc->GetAction(p_coords.GetCol());
     attr.SetForegroundColour(
         m_doc->GetStyle().GetPlayerColor(action->GetInfoset()->GetPlayer()->GetNumber()));
     if (action->GetInfoset()->GetNumber() % 2 == 0) {

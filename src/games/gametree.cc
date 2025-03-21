@@ -1015,21 +1015,6 @@ Array<int> GameTreeRep::NumInfosets() const
   return foo;
 }
 
-GameAction GameTreeRep::GetAction(int p_index) const
-{
-  int index = 1;
-  for (auto player : m_players) {
-    for (auto infoset : player->m_infosets) {
-      for (auto action : infoset->m_actions) {
-        if (index++ == p_index) {
-          return action;
-        }
-      }
-    }
-  }
-  throw IndexException();
-}
-
 //------------------------------------------------------------------------
 //                        GameTreeRep: Outcomes
 //------------------------------------------------------------------------

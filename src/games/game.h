@@ -550,8 +550,6 @@ public:
   virtual Array<GameInfoset> GetInfosets() const = 0;
   /// Returns an array with the number of information sets per personal player
   virtual Array<int> NumInfosets() const = 0;
-  /// Returns the act'th action in the game (numbered globally)
-  virtual GameAction GetAction(int act) const = 0;
   //@}
 
   /// @name Outcomes
