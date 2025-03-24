@@ -150,7 +150,7 @@ cdef extern from "games/game.h":
         string GetLabel() except +
         void SetLabel(string) except +
 
-        c_Number GetPayoff(c_GamePlayer) except +IndexError
+        T GetPayoff[T](c_GamePlayer) except +IndexError
         void SetPayoff(c_GamePlayer, c_Number) except +IndexError
 
     cdef cppclass c_GameNodeRep "GameNodeRep":

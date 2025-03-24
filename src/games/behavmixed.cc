@@ -381,7 +381,7 @@ void MixedBehaviorProfile<T>::GetPayoff(const GameNode &node, const T &prob,
                                         const GamePlayer &player, T &value) const
 {
   if (node->GetOutcome()) {
-    value += prob * static_cast<T>(node->GetOutcome()->GetPayoff(player));
+    value += prob * node->GetOutcome()->GetPayoff<T>(player);
   }
 
   if (!node->IsTerminal()) {
@@ -520,7 +520,7 @@ void MixedBehaviorProfile<T>::ComputePass2_beliefs_nodeValues_actionValues(
   if (node->GetOutcome()) {
     GameOutcome outcome = node->GetOutcome();
     for (auto player : m_support.GetGame()->GetPlayers()) {
-      map_nodeValues[node][player] += static_cast<T>(outcome->GetPayoff(player));
+      map_nodeValues[node][player] += outcome->GetPayoff<T>(player);
     }
   }
 

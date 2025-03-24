@@ -71,7 +71,7 @@ void GameSequenceForm::FillTableau(const GameNode &n, const Rational &prob,
   if (n->GetOutcome()) {
     for (auto player : m_support.GetGame()->GetPlayers()) {
       GetPayoffEntry(p_currentSequences, player) +=
-          prob * static_cast<Rational>(n->GetOutcome()->GetPayoff(player));
+          prob * n->GetOutcome()->GetPayoff<Rational>(player);
     }
   }
   if (!n->GetInfoset()) {

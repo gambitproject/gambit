@@ -61,7 +61,8 @@ void GameData<T>::FillTableau(Matrix<T> &A, const GameNode &n, const T &prob, in
 {
   GameOutcome outcome = n->GetOutcome();
   if (outcome) {
-    A(s1, s2) += Rational(prob) * (static_cast<Rational>(outcome->GetPayoff(1)) - minpay);
+    A(s1, s2) +=
+        Rational(prob) * (outcome->GetPayoff<Rational>(n->GetGame()->GetPlayer(1)) - minpay);
   }
   if (n->IsTerminal()) {
     return;

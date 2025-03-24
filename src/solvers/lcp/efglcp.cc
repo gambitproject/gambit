@@ -247,10 +247,10 @@ void NashLcpBehaviorSolver<T>::FillTableau(Matrix<T> &A, const GameNode &n, T pr
 
   GameOutcome outcome = n->GetOutcome();
   if (outcome) {
-    A(s1, ns1 + s2) +=
-        Rational(prob) * (static_cast<Rational>(outcome->GetPayoff(1)) - p_solution.maxpay);
-    A(ns1 + s2, s1) +=
-        Rational(prob) * (static_cast<Rational>(outcome->GetPayoff(2)) - p_solution.maxpay);
+    A(s1, ns1 + s2) += Rational(prob) * (outcome->GetPayoff<Rational>(n->GetGame()->GetPlayer(1)) -
+                                         p_solution.maxpay);
+    A(ns1 + s2, s1) += Rational(prob) * (outcome->GetPayoff<Rational>(n->GetGame()->GetPlayer(2)) -
+                                         p_solution.maxpay);
   }
   if (n->IsTerminal()) {
     return;

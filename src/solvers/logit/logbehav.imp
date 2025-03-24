@@ -183,7 +183,7 @@ template <class T> void LogBehavProfile<T>::ComputeSolutionDataPass2(const GameN
   if (node->GetOutcome()) {
     GameOutcome outcome = node->GetOutcome();
     for (auto player : m_game->GetPlayers()) {
-      m_nodeValues[node][player] += static_cast<T>(outcome->GetPayoff(player));
+      m_nodeValues[node][player] += outcome->GetPayoff<T>(player);
     }
   }
 

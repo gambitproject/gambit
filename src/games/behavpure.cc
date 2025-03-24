@@ -49,7 +49,7 @@ T PureBehaviorProfile::GetPayoff(const GameNode &p_node, const GamePlayer &p_pla
   T payoff(0);
 
   if (p_node->GetOutcome()) {
-    payoff += static_cast<T>(p_node->GetOutcome()->GetPayoff(p_player));
+    payoff += p_node->GetOutcome()->GetPayoff<T>(p_player);
   }
 
   if (!p_node->IsTerminal()) {

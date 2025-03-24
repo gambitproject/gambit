@@ -271,12 +271,12 @@ void gbtNodeEntry::DrawOutcome(wxDC &p_dc, bool p_noHints) const
     Gambit::GamePlayer player = m_node->GetGame()->GetPlayer(pl);
     p_dc.SetTextForeground(m_style->GetPlayerColor(pl));
 
-    std::string payoff = static_cast<std::string>(outcome->GetPayoff(pl));
+    const auto &payoff = outcome->GetPayoff<std::string>(player);
 
     if (payoff.find('/') != std::string::npos) {
       p_dc.SetPen(wxPen(m_style->GetPlayerColor(pl), 1, wxPENSTYLE_SOLID));
       int oldX = point.x;
-      point = DrawFraction(p_dc, point, static_cast<Gambit::Rational>(outcome->GetPayoff(pl)));
+      point = DrawFraction(p_dc, point, outcome->GetPayoff<Rational>(player));
       m_payoffRect.push_back(wxRect(oldX - 5, point.y - height / 2, point.x - oldX + 10, height));
     }
     else {

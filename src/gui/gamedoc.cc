@@ -811,8 +811,8 @@ void gbtGameDocument::DoCopyOutcome(GameNode p_node, GameOutcome p_outcome)
 {
   GameOutcome outcome = m_game->NewOutcome();
   outcome->SetLabel("Outcome" + lexical_cast<std::string>(outcome->GetNumber()));
-  for (int pl = 1; pl <= m_game->NumPlayers(); pl++) {
-    outcome->SetPayoff(pl, p_outcome->GetPayoff(pl));
+  for (const auto &player : m_game->GetPlayers()) {
+    outcome->SetPayoff(player, p_outcome->GetPayoff<Number>(player));
   }
   p_node->SetOutcome(outcome);
   UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
@@ -820,7 +820,7 @@ void gbtGameDocument::DoCopyOutcome(GameNode p_node, GameOutcome p_outcome)
 
 void gbtGameDocument::DoSetPayoff(GameOutcome p_outcome, int p_player, const wxString &p_value)
 {
-  p_outcome->SetPayoff(p_player, Number(p_value.ToStdString()));
+  p_outcome->SetPayoff(m_game->GetPlayer(p_player), Number(p_value.ToStdString()));
   UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
 }
 

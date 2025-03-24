@@ -66,10 +66,10 @@ Rational GameExplicitRep::GetMinPayoff(int player) const
     p2 = NumPlayers();
   }
 
-  Rational minpay = static_cast<Rational>(m_outcomes.front()->GetPayoff(p1));
+  Rational minpay = m_outcomes.front()->GetPayoff<Rational>(GetPlayer(p1));
   for (auto outcome : m_outcomes) {
     for (int p = p1; p <= p2; p++) {
-      minpay = std::min(minpay, static_cast<Rational>(outcome->GetPayoff(p)));
+      minpay = std::min(minpay, outcome->GetPayoff<Rational>(GetPlayer(p)));
     }
   }
   return minpay;
@@ -91,10 +91,10 @@ Rational GameExplicitRep::GetMaxPayoff(int player) const
     p2 = NumPlayers();
   }
 
-  Rational maxpay = static_cast<Rational>(m_outcomes.front()->GetPayoff(p1));
+  Rational maxpay = m_outcomes.front()->GetPayoff<Rational>(GetPlayer(p1));
   for (auto outcome : m_outcomes) {
     for (int p = p1; p <= p2; p++) {
-      maxpay = std::max(maxpay, static_cast<Rational>(outcome->GetPayoff(p)));
+      maxpay = std::max(maxpay, outcome->GetPayoff<Rational>(GetPlayer(p)));
     }
   }
   return maxpay;

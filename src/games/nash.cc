@@ -103,7 +103,7 @@ public:
     for (const auto &player : p_subroot->GetGame()->GetPlayers()) {
       T value = p_profile.GetPayoff(*subplayer);
       if (outcome) {
-        value += static_cast<T>(outcome->GetPayoff(*subplayer));
+        value += outcome->GetPayoff<T>(*subplayer);
       }
       solution.node_values[p_subroot]->SetPayoff(player, Number(static_cast<Rational>(value)));
       ++subplayer;
