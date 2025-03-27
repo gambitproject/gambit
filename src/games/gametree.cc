@@ -139,7 +139,6 @@ void GameTreeActionRep::DeleteAction()
     member->children[where]->Invalidate();
     erase_atindex(member->children, where);
   }
-
   if (m_infoset->IsChanceInfoset()) {
     m_infoset->m_efg->NormalizeChanceProbs(m_infoset);
   }
@@ -277,11 +276,11 @@ void GameTreeInfosetRep::RemoveMember(GameTreeNodeRep *p_node)
   if (m_members.empty()) {
     m_player->m_infosets.erase(
         std::find(m_player->m_infosets.begin(), m_player->m_infosets.end(), this));
-    Invalidate();
     int iset = 1;
     for (auto &infoset : m_player->m_infosets) {
       infoset->m_number = iset++;
     }
+    Invalidate();
   }
 }
 
