@@ -8,6 +8,13 @@
   been removed as planned. (#357)
 
 
+## [16.3.1] - unreleased
+
+### Fixed
+- Corrected a regression in which information sets were prematurely invalidated (and therefore
+  `delete this` called on them) when removing the last node from an information set.
+
+
 ## [16.3.0] - 2025-01-13
 
 ### General

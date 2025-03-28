@@ -32,6 +32,52 @@ jobs:
       - name: Run tests
         run: pytest
 
+  macos-13:
+    runs-on: macos-13
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
+    strategy:
+      matrix:
+        python-version: ['3.12']
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Set up dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install cython pytest wheel lxml numpy scipy
+      - name: Build extension
+        run: |
+          python -m pip install -v .
+      - name: Run tests
+        run: pytest
+
+  macos-14:
+    runs-on: macos-14
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
+    strategy:
+      matrix:
+        python-version: ['3.12']
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Set up dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install cython pytest wheel lxml numpy scipy
+      - name: Build extension
+        run: |
+          python -m pip install -v .
+      - name: Run tests
+        run: pytest
+
   windows:
     runs-on: windows-latest
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name

@@ -139,7 +139,6 @@ void GameTreeActionRep::DeleteAction()
     member->m_children[where]->Invalidate();
     erase_atindex(member->m_children, where);
   }
-
   if (m_infoset->IsChanceInfoset()) {
     m_infoset->m_efg->NormalizeChanceProbs(m_infoset);
   }
@@ -260,11 +259,11 @@ void GameTreeInfosetRep::RemoveMember(GameTreeNodeRep *p_node)
   if (m_members.empty()) {
     m_player->m_infosets.erase(
         std::find(m_player->m_infosets.begin(), m_player->m_infosets.end(), this));
-    Invalidate();
     int iset = 1;
     for (auto &infoset : m_player->m_infosets) {
       infoset->m_number = iset++;
     }
+    Invalidate();
   }
 }
 
@@ -708,8 +707,8 @@ Rational SubtreeSum(const GameNode &p_node)
   }
 
   if (p_node->GetOutcome()) {
-    for (int pl = 1; pl <= p_node->GetGame()->NumPlayers(); pl++) {
-      sum += static_cast<Rational>(p_node->GetOutcome()->GetPayoff(pl));
+    for (const auto &player : p_node->GetGame()->GetPlayers()) {
+      sum += p_node->GetOutcome()->GetPayoff<Rational>(player);
     }
   }
   return sum;
@@ -900,7 +899,7 @@ void WriteEfgFile(std::ostream &f, const GameNode &n)
     f << n->GetOutcome()->GetNumber() << " " << QuoteString(n->GetOutcome()->GetLabel()) << ' '
       << FormatList(
              n->GetGame()->GetPlayers(),
-             [n](const GamePlayer &p) { return std::string(n->GetOutcome()->GetPayoff(p)); }, true)
+             [n](const GamePlayer &p) { return n->GetOutcome()->GetPayoff<std::string>(p); }, true)
       << std::endl;
   }
   else {
@@ -952,11 +951,10 @@ int GameTreeRep::BehavProfileLength() const
 GamePlayer GameTreeRep::NewPlayer()
 {
   IncrementVersion();
-  GamePlayerRep *player = nullptr;
-  player = new GamePlayerRep(this, m_players.size() + 1);
+  auto player = new GamePlayerRep(this, m_players.size() + 1);
   m_players.push_back(player);
   for (auto &outcome : m_outcomes) {
-    outcome->m_payoffs.push_back(Number());
+    outcome->m_payoffs[player] = Number();
   }
   ClearComputedValues();
   return player;

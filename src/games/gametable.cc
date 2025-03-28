@@ -93,7 +93,7 @@ Rational TablePureStrategyProfileRep::GetPayoff(const GamePlayer &p_player) cons
 {
   GameOutcomeRep *outcome = dynamic_cast<GameTableRep &>(*m_nfg).m_results[m_index];
   if (outcome) {
-    return static_cast<Rational>(outcome->GetPayoff(p_player));
+    return outcome->GetPayoff<Rational>(p_player);
   }
   else {
     return Rational(0);
@@ -102,13 +102,12 @@ Rational TablePureStrategyProfileRep::GetPayoff(const GamePlayer &p_player) cons
 
 Rational TablePureStrategyProfileRep::GetStrategyValue(const GameStrategy &p_strategy) const
 {
-  int player = p_strategy->GetPlayer()->GetNumber();
+  const auto &player = p_strategy->GetPlayer();
   GameOutcomeRep *outcome =
       dynamic_cast<GameTableRep &>(*m_nfg)
-          .m_results[m_index - m_profile.at(p_strategy->GetPlayer())->m_offset +
-                     p_strategy->m_offset];
+          .m_results[m_index - m_profile.at(player)->m_offset + p_strategy->m_offset];
   if (outcome) {
-    return static_cast<Rational>(outcome->GetPayoff(player));
+    return outcome->GetPayoff<Rational>(player);
   }
   else {
     return Rational(0);
@@ -164,7 +163,7 @@ T TableMixedStrategyProfileRep<T>::GetPayoff(int pl, int index, int current) con
     auto &g = dynamic_cast<GameTableRep &>(*game);
     GameOutcomeRep *outcome = g.m_results[index];
     if (outcome) {
-      return static_cast<T>(outcome->GetPayoff(pl));
+      return outcome->GetPayoff<T>(this->m_support.GetGame()->GetPlayer(pl));
     }
     else {
       return T(0);
@@ -197,7 +196,7 @@ void TableMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, int const_pl, int c
     auto &g = dynamic_cast<GameTableRep &>(*game);
     GameOutcomeRep *outcome = g.m_results[index];
     if (outcome) {
-      value += prob * static_cast<T>(outcome->GetPayoff(pl));
+      value += prob * outcome->GetPayoff<T>(this->m_support.GetGame()->GetPlayer(pl));
     }
   }
   else {
@@ -230,7 +229,7 @@ void TableMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, int const_pl1, int 
     auto &g = dynamic_cast<GameTableRep &>(*game);
     GameOutcomeRep *outcome = g.m_results[index];
     if (outcome) {
-      value += prob * static_cast<T>(outcome->GetPayoff(pl));
+      value += prob * outcome->GetPayoff<T>(this->m_support.GetGame()->GetPlayer(pl));
     }
   }
   else {
@@ -371,7 +370,7 @@ void GameTableRep::WriteNfgFile(std::ostream &p_file) const
     p_file << "{ " + QuoteString(outcome->GetLabel()) << ' '
            << FormatList(
                   players,
-                  [outcome](const GamePlayer &p) { return std::string(outcome->GetPayoff(p)); },
+                  [outcome](const GamePlayer &p) { return outcome->GetPayoff<std::string>(p); },
                   true, false)
            << " }" << std::endl;
   }
@@ -393,7 +392,7 @@ GamePlayer GameTableRep::NewPlayer()
   auto player = new GamePlayerRep(this, m_players.size() + 1, 1);
   m_players.push_back(player);
   for (auto outcome : m_outcomes) {
-    outcome->m_payoffs.push_back(Number());
+    outcome->m_payoffs[player] = Number();
   }
   return player;
 }

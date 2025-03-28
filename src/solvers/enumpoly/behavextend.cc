@@ -256,7 +256,7 @@ PolynomialSystem<double> NashExpectedPayoffDiffPolys(
             if (NashNodeProbabilityPoly(p_solution, node_prob, BehavStratSpace, support, var_index,
                                         node, infoset, action)) {
               if (node->GetOutcome()) {
-                node_prob *= static_cast<double>(node->GetOutcome()->GetPayoff(player));
+                node_prob *= node->GetOutcome()->GetPayoff<double>(player);
               }
               next_poly += node_prob;
             }
@@ -397,7 +397,7 @@ PolynomialSystem<double> ANFExpectedPayoffDiffPolys(const MixedBehaviorProfile<d
                                      terminal, player->GetNumber(), infoset->GetNumber(),
                                      action->GetNumber())) {
             if (terminal->GetOutcome()) {
-              node_prob *= static_cast<double>(terminal->GetOutcome()->GetPayoff(player));
+              node_prob *= terminal->GetOutcome()->GetPayoff<double>(player);
             }
             next_poly += node_prob;
           }

@@ -41,9 +41,11 @@ namespace Gambit {
 //                       class GameOutcomeRep
 //========================================================================
 
-GameOutcomeRep::GameOutcomeRep(GameRep *p_game, int p_number)
-  : m_game(p_game), m_number(p_number), m_payoffs(m_game->NumPlayers())
+GameOutcomeRep::GameOutcomeRep(GameRep *p_game, int p_number) : m_game(p_game), m_number(p_number)
 {
+  for (const auto &player : p_game->GetPlayers()) {
+    m_payoffs[player] = Number();
+  }
 }
 
 //========================================================================
