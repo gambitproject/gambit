@@ -744,9 +744,9 @@ bool GameTreeRep::IsPerfectRecall(GameInfoset &s1, GameInfoset &s2) const
 {
   for (auto player : m_players) {
     for (int i = 1; i <= player->NumInfosets(); i++) {
-      GameTreeInfosetRep *iset1 = player->m_infosets[i];
+      GameTreeInfosetRep *iset1 = player->m_infosets[i - 1];
       for (int j = 1; j <= player->NumInfosets(); j++) {
-        GameTreeInfosetRep *iset2 = player->m_infosets[j];
+        GameTreeInfosetRep *iset2 = player->m_infosets[j - 1];
 
         bool precedes = false;
         int action = 0;
@@ -816,7 +816,7 @@ void GameTreeRep::Canonicalize()
     // Coded using a bubble sort for simplicity; large games might
     // find a quicksort worthwhile.
     for (int iset = 1; iset <= player->m_infosets.size(); iset++) {
-      GameTreeInfosetRep *infoset = player->m_infosets[iset];
+      GameTreeInfosetRep *infoset = player->m_infosets[iset - 1];
       for (int i = 1; i < infoset->m_members.size(); i++) {
         for (int j = 1; j < infoset->m_members.size() - i; j++) {
           if (infoset->m_members[j + 1]->m_number < infoset->m_members[j]->m_number) {
@@ -833,24 +833,24 @@ void GameTreeRep::Canonicalize()
     // find a quicksort worthwhile.
     for (int i = 1; i < player->m_infosets.size(); i++) {
       for (int j = 1; j < player->m_infosets.size() - i; j++) {
-        int a = ((player->m_infosets[j + 1]->m_members.size())
-                     ? player->m_infosets[j + 1]->m_members[1]->m_number
-                     : 0);
-        int b = ((player->m_infosets[j]->m_members.size())
+        int a = ((player->m_infosets[j]->m_members.size())
                      ? player->m_infosets[j]->m_members[1]->m_number
+                     : 0);
+        int b = ((player->m_infosets[j - 1]->m_members.size())
+                     ? player->m_infosets[j - 1]->m_members[1]->m_number
                      : 0);
 
         if (a < b || b == 0) {
-          GameTreeInfosetRep *tmp = player->m_infosets[j];
-          player->m_infosets[j] = player->m_infosets[j + 1];
-          player->m_infosets[j + 1] = tmp;
+          GameTreeInfosetRep *tmp = player->m_infosets[j - 1];
+          player->m_infosets[j - 1] = player->m_infosets[j];
+          player->m_infosets[j] = tmp;
         }
       }
     }
 
     // Reassign information set IDs
     for (int iset = 1; iset <= player->m_infosets.size(); iset++) {
-      player->m_infosets[iset]->m_number = iset;
+      player->m_infosets[iset - 1]->m_number = iset;
     }
   }
 }
