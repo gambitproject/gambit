@@ -289,7 +289,7 @@ private:
   GameRep *m_game;
   int m_number;
   std::string m_label;
-  Array<class GameTreeInfosetRep *> m_infosets;
+  std::vector<class GameTreeInfosetRep *> m_infosets;
   Array<GameStrategyRep *> m_strategies;
 
   GamePlayerRep(GameRep *p_game, int p_id) : m_game(p_game), m_number(p_id) {}

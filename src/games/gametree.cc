@@ -50,13 +50,12 @@ template <class T> MixedStrategyProfileRep<T> *TreeMixedStrategyProfileRep<T>::C
   return new TreeMixedStrategyProfileRep(*this);
 }
 
-template <class T> T TreeMixedStrategyProfileRep<T>::GetPayoff(int pl) const
+template <class T> void TreeMixedStrategyProfileRep<T>::MakeBehavior() const
 {
   if (mixed_behav_profile_sptr.get() == nullptr) {
     MixedStrategyProfile<T> tmp(Copy());
     mixed_behav_profile_sptr = std::make_shared<MixedBehaviorProfile<T>>(tmp);
   }
-  return mixed_behav_profile_sptr->GetPayoff(pl);
 }
 
 template <class T> void TreeMixedStrategyProfileRep<T>::InvalidateCache() const
@@ -64,39 +63,31 @@ template <class T> void TreeMixedStrategyProfileRep<T>::InvalidateCache() const
   mixed_behav_profile_sptr = nullptr;
 }
 
+template <class T> T TreeMixedStrategyProfileRep<T>::GetPayoff(int pl) const
+{
+  MakeBehavior();
+  return mixed_behav_profile_sptr->GetPayoff(pl);
+}
+
 template <class T>
 T TreeMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &strategy) const
 {
-  MixedStrategyProfile<T> foo(Copy());
-  for (auto s : this->m_support.GetStrategies(this->m_support.GetGame()->GetPlayer(pl))) {
-    foo[s] = static_cast<T>(0);
-  }
-  foo[strategy] = static_cast<T>(1);
-  return foo.GetPayoff(pl);
+  TreeMixedStrategyProfileRep tmp(*this);
+  tmp.SetStrategy(strategy);
+  return tmp.GetPayoff(pl);
 }
 
 template <class T>
 T TreeMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &strategy1,
                                                  const GameStrategy &strategy2) const
 {
-  GamePlayerRep *player1 = strategy1->GetPlayer();
-  GamePlayerRep *player2 = strategy2->GetPlayer();
-  if (player1 == player2) {
-    return T(0);
+  if (strategy1->GetPlayer() == strategy2->GetPlayer()) {
+    return static_cast<T>(0);
   }
-
-  MixedStrategyProfile<T> foo(Copy());
-  for (auto strategy : this->m_support.GetStrategies(player1)) {
-    foo[strategy] = T(0);
-  }
-  foo[strategy1] = T(1);
-
-  for (auto strategy : this->m_support.GetStrategies(player2)) {
-    foo[strategy] = T(0);
-  }
-  foo[strategy2] = T(1);
-
-  return foo.GetPayoff(pl);
+  TreeMixedStrategyProfileRep tmp(*this);
+  tmp.SetStrategy(strategy1);
+  tmp.SetStrategy(strategy2);
+  return tmp.GetPayoff(pl);
 }
 
 template class TreeMixedStrategyProfileRep<double>;
@@ -731,9 +722,9 @@ bool GameTreeRep::IsPerfectRecall(GameInfoset &s1, GameInfoset &s2) const
 {
   for (auto player : m_players) {
     for (int i = 1; i <= player->NumInfosets(); i++) {
-      GameTreeInfosetRep *iset1 = player->m_infosets[i];
+      GameTreeInfosetRep *iset1 = player->m_infosets[i - 1];
       for (int j = 1; j <= player->NumInfosets(); j++) {
-        GameTreeInfosetRep *iset2 = player->m_infosets[j];
+        GameTreeInfosetRep *iset2 = player->m_infosets[j - 1];
 
         bool precedes = false;
         int action = 0;
@@ -800,7 +791,7 @@ void GameTreeRep::SortInfosets()
     // Coded using a bubble sort for simplicity; large games might
     // find a quicksort worthwhile.
     for (int iset = 1; iset <= player->m_infosets.size(); iset++) {
-      GameTreeInfosetRep *infoset = player->m_infosets[iset];
+      GameTreeInfosetRep *infoset = player->m_infosets[iset - 1];
       for (int i = 1; i < infoset->m_members.size(); i++) {
         for (int j = 1; j < infoset->m_members.size() - i; j++) {
           if (infoset->m_members[j + 1]->m_number < infoset->m_members[j]->m_number) {
@@ -817,24 +808,24 @@ void GameTreeRep::SortInfosets()
     // find a quicksort worthwhile.
     for (int i = 1; i < player->m_infosets.size(); i++) {
       for (int j = 1; j < player->m_infosets.size() - i; j++) {
-        int a = ((player->m_infosets[j + 1]->m_members.size())
-                     ? player->m_infosets[j + 1]->m_members[1]->m_number
-                     : 0);
-        int b = ((player->m_infosets[j]->m_members.size())
+        int a = ((player->m_infosets[j]->m_members.size())
                      ? player->m_infosets[j]->m_members[1]->m_number
+                     : 0);
+        int b = ((player->m_infosets[j - 1]->m_members.size())
+                     ? player->m_infosets[j - 1]->m_members[1]->m_number
                      : 0);
 
         if (a < b || b == 0) {
-          GameTreeInfosetRep *tmp = player->m_infosets[j];
-          player->m_infosets[j] = player->m_infosets[j + 1];
-          player->m_infosets[j + 1] = tmp;
+          GameTreeInfosetRep *tmp = player->m_infosets[j - 1];
+          player->m_infosets[j - 1] = player->m_infosets[j];
+          player->m_infosets[j] = tmp;
         }
       }
     }
 
     // Reassign information set IDs
     for (int iset = 1; iset <= player->m_infosets.size(); iset++) {
-      player->m_infosets[iset]->m_number = iset;
+      player->m_infosets[iset - 1]->m_number = iset;
     }
   }
 }
