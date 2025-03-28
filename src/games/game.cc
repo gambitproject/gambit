@@ -447,10 +447,8 @@ template <class T> Vector<T> MixedStrategyProfile<T>::operator[](const GamePlaye
   CheckVersion();
   auto strategies = m_rep->m_support.GetStrategies(p_player);
   Vector<T> probs(strategies.size());
-  int st = 1;
-  for (auto strategy : strategies) {
-    probs[st] = (*this)[strategy];
-  }
+  std::transform(strategies.begin(), strategies.end(), probs.begin(),
+                 [this](const GameStrategy &s) { return (*m_rep)[s]; });
   return probs;
 }
 
