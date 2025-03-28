@@ -123,8 +123,8 @@ void GamePlayerRep::MakeStrategy()
   Array<int> c(NumInfosets());
 
   for (int i = 1; i <= NumInfosets(); i++) {
-    if (m_infosets[i]->flag == 1) {
-      c[i] = m_infosets[i]->whichbranch;
+    if (m_infosets[i - 1]->flag == 1) {
+      c[i] = m_infosets[i - 1]->whichbranch;
     }
     else {
       c[i] = 0;
@@ -219,7 +219,7 @@ void GamePlayerRep::MakeReducedStrats(GameTreeNodeRep *n, GameTreeNodeRep *nn)
   }
 }
 
-GameInfoset GamePlayerRep::GetInfoset(int p_index) const { return m_infosets[p_index]; }
+GameInfoset GamePlayerRep::GetInfoset(int p_index) const { return m_infosets[p_index - 1]; }
 
 Array<GameInfoset> GamePlayerRep::GetInfosets() const
 {
