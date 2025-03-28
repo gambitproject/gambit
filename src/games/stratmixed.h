@@ -50,6 +50,14 @@ public:
   }
   /// Returns the probability the strategy is played
   T &operator[](const GameStrategy &p_strategy) { return m_probs[m_profileIndex.at(p_strategy)]; }
+  /// Set the strategy of the corresponding player to a pure strategy
+  void SetStrategy(const GameStrategy &p_strategy)
+  {
+    for (const auto &s : m_support.GetStrategies(p_strategy->GetPlayer())) {
+      (*this)[s] = static_cast<T>(0);
+    }
+    (*this)[p_strategy] = static_cast<T>(1);
+  }
 
   virtual T GetPayoff(int pl) const = 0;
   virtual T GetPayoffDeriv(int pl, const GameStrategy &) const = 0;
@@ -65,7 +73,7 @@ public:
   T GetRegret(const GamePlayer &) const;
   T GetMaxRegret() const;
 
-  virtual void InvalidateCache() const {};
+  virtual void InvalidateCache() const {}
 };
 
 /// \brief A probability distribution over strategies in a game
@@ -75,14 +83,9 @@ public:
 /// probabilities.
 template <class T> class MixedStrategyProfile {
 private:
-  MixedStrategyProfileRep<T> *m_rep;
-
-public:
-  /// @name Lifecycle
-  //@{
-  explicit MixedStrategyProfile(MixedStrategyProfileRep<T> *p_rep) : m_rep(p_rep) {}
-  /// Convert a behavior strategy profile to a mixed strategy profile
-  explicit MixedStrategyProfile(const MixedBehaviorProfile<T> &);
+  std::unique_ptr<MixedStrategyProfileRep<T>> m_rep;
+  mutable std::map<GamePlayer, std::map<GameStrategy, T>> map_strategy_payoffs;
+  mutable std::map<GamePlayer, T> map_profile_payoffs;
 
   /// Check underlying game has not changed; raise exception if it has
   void CheckVersion() const
@@ -91,14 +94,29 @@ public:
       throw GameStructureChangedException();
     }
   }
+  /// Used to read payoffs from cache or compute them and cache them if needed
+  void ComputePayoffs() const;
+
+  /// Reset cache for payoffs and strategy values
+  void InvalidateCache() const
+  {
+    map_strategy_payoffs.clear();
+    map_profile_payoffs.clear();
+    m_rep->InvalidateCache();
+  }
 
 public:
   /// @name Lifecycle
   //@{
+  explicit MixedStrategyProfile(MixedStrategyProfileRep<T> *p_rep) : m_rep(p_rep) {}
+  /// Convert a behavior strategy profile to a mixed strategy profile
+  explicit MixedStrategyProfile(const MixedBehaviorProfile<T> &);
   /// Make a copy of the mixed strategy profile
-  MixedStrategyProfile(const MixedStrategyProfile<T> &);
+  MixedStrategyProfile(const MixedStrategyProfile<T> &p_profile) : m_rep(p_profile.m_rep->Copy())
+  {
+  }
   /// Destructor
-  virtual ~MixedStrategyProfile();
+  ~MixedStrategyProfile() = default;
 
   MixedStrategyProfile<T> &operator=(const MixedStrategyProfile<T> &);
   MixedStrategyProfile<T> &operator=(const Vector<T> &v)
@@ -209,17 +227,6 @@ public:
 
   /// @name Computation of interesting quantities
   //@{
-  /// Used to read payoffs from cache or compute them and cache them if needed
-  void ComputePayoffs() const;
-  mutable std::map<GamePlayer, std::map<GameStrategy, T>> map_strategy_payoffs;
-  mutable std::map<GamePlayer, T> map_profile_payoffs;
-  /// Reset cache for payoffs and strategy values
-  virtual void InvalidateCache() const
-  {
-    map_strategy_payoffs.clear();
-    map_profile_payoffs.clear();
-    m_rep->InvalidateCache();
-  }
 
   /// Computes the payoff of the profile to player 'pl'
   T GetPayoff(int pl) const

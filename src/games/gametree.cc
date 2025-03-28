@@ -50,13 +50,12 @@ template <class T> MixedStrategyProfileRep<T> *TreeMixedStrategyProfileRep<T>::C
   return new TreeMixedStrategyProfileRep(*this);
 }
 
-template <class T> T TreeMixedStrategyProfileRep<T>::GetPayoff(int pl) const
+template <class T> void TreeMixedStrategyProfileRep<T>::MakeBehavior() const
 {
   if (mixed_behav_profile_sptr.get() == nullptr) {
     MixedStrategyProfile<T> tmp(Copy());
     mixed_behav_profile_sptr = std::make_shared<MixedBehaviorProfile<T>>(tmp);
   }
-  return mixed_behav_profile_sptr->GetPayoff(pl);
 }
 
 template <class T> void TreeMixedStrategyProfileRep<T>::InvalidateCache() const
@@ -64,39 +63,31 @@ template <class T> void TreeMixedStrategyProfileRep<T>::InvalidateCache() const
   mixed_behav_profile_sptr = nullptr;
 }
 
+template <class T> T TreeMixedStrategyProfileRep<T>::GetPayoff(int pl) const
+{
+  MakeBehavior();
+  return mixed_behav_profile_sptr->GetPayoff(pl);
+}
+
 template <class T>
 T TreeMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &strategy) const
 {
-  MixedStrategyProfile<T> foo(Copy());
-  for (auto s : this->m_support.GetStrategies(this->m_support.GetGame()->GetPlayer(pl))) {
-    foo[s] = static_cast<T>(0);
-  }
-  foo[strategy] = static_cast<T>(1);
-  return foo.GetPayoff(pl);
+  TreeMixedStrategyProfileRep tmp(*this);
+  tmp.SetStrategy(strategy);
+  return tmp.GetPayoff(pl);
 }
 
 template <class T>
 T TreeMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &strategy1,
                                                  const GameStrategy &strategy2) const
 {
-  GamePlayerRep *player1 = strategy1->GetPlayer();
-  GamePlayerRep *player2 = strategy2->GetPlayer();
-  if (player1 == player2) {
-    return T(0);
+  if (strategy1->GetPlayer() == strategy2->GetPlayer()) {
+    return static_cast<T>(0);
   }
-
-  MixedStrategyProfile<T> foo(Copy());
-  for (auto strategy : this->m_support.GetStrategies(player1)) {
-    foo[strategy] = T(0);
-  }
-  foo[strategy1] = T(1);
-
-  for (auto strategy : this->m_support.GetStrategies(player2)) {
-    foo[strategy] = T(0);
-  }
-  foo[strategy2] = T(1);
-
-  return foo.GetPayoff(pl);
+  TreeMixedStrategyProfileRep tmp(*this);
+  tmp.SetStrategy(strategy1);
+  tmp.SetStrategy(strategy2);
+  return tmp.GetPayoff(pl);
 }
 
 template class TreeMixedStrategyProfileRep<double>;
