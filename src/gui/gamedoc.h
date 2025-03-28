@@ -268,6 +268,7 @@ public:
   int NumPlayers() const { return m_game->NumPlayers(); }
   bool IsConstSum() const { return m_game->IsConstSum(); }
   bool IsTree() const { return m_game->IsTree(); }
+  GameAction GetAction(int p_index) const;
 
   //!
   //! @name Handling of undo/redo features

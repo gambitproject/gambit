@@ -94,7 +94,7 @@ void MixedBehaviorProfile<T>::RealizationProbs(const MixedStrategyProfile<T> &mp
 {
   T prob;
 
-  for (int i = 1; i <= node->children.size(); i++) {
+  for (int i = 1; i <= node->m_children.size(); i++) {
     if (node->GetPlayer() && !node->GetPlayer()->IsChance()) {
       if (node->GetPlayer() == player) {
         if (actions[node->GetInfoset()->GetNumber()] == i) {
@@ -113,10 +113,10 @@ void MixedBehaviorProfile<T>::RealizationProbs(const MixedStrategyProfile<T> &mp
       }
     }
     else { // n.GetPlayer() == 0
-      prob = T(node->infoset->GetActionProb(i));
+      prob = T(node->m_infoset->GetActionProb(node->m_infoset->GetAction(i)));
     }
 
-    GameTreeNodeRep *child = node->children[i];
+    GameTreeNodeRep *child = node->m_children[i];
 
     map_bvals[child] = prob * map_bvals[node];
     map_nvals[child] += map_bvals[child];
@@ -335,7 +335,7 @@ template <class T> T MixedBehaviorProfile<T>::GetActionProb(const GameAction &ac
   if (action->GetInfoset()->GetPlayer()->IsChance()) {
     GameTreeInfosetRep *infoset =
         dynamic_cast<GameTreeInfosetRep *>(action->GetInfoset().operator->());
-    return static_cast<T>(infoset->GetActionProb(action->GetNumber()));
+    return static_cast<T>(infoset->GetActionProb(action));
   }
   else if (!m_support.Contains(action)) {
     return T(0);
@@ -381,7 +381,7 @@ void MixedBehaviorProfile<T>::GetPayoff(const GameNode &node, const T &prob,
                                         const GamePlayer &player, T &value) const
 {
   if (node->GetOutcome()) {
-    value += prob * static_cast<T>(node->GetOutcome()->GetPayoff(player));
+    value += prob * node->GetOutcome()->GetPayoff<T>(player);
   }
 
   if (!node->IsTerminal()) {
@@ -520,7 +520,7 @@ void MixedBehaviorProfile<T>::ComputePass2_beliefs_nodeValues_actionValues(
   if (node->GetOutcome()) {
     GameOutcome outcome = node->GetOutcome();
     for (auto player : m_support.GetGame()->GetPlayers()) {
-      map_nodeValues[node][player] += static_cast<T>(outcome->GetPayoff(player));
+      map_nodeValues[node][player] += outcome->GetPayoff<T>(player);
     }
   }
 

@@ -188,7 +188,7 @@ bool NashNodeProbabilityPoly(const MixedBehaviorProfile<double> &p_solution,
     GameInfoset last_infoset = last_action->GetInfoset();
 
     if (last_infoset->IsChanceInfoset()) {
-      node_prob *= static_cast<double>(last_infoset->GetActionProb(last_action->GetNumber()));
+      node_prob *= static_cast<double>(last_infoset->GetActionProb(last_action));
     }
     else if (dsupp.HasAction(last_infoset)) {
       if (last_infoset == iset) {
@@ -256,7 +256,7 @@ PolynomialSystem<double> NashExpectedPayoffDiffPolys(
             if (NashNodeProbabilityPoly(p_solution, node_prob, BehavStratSpace, support, var_index,
                                         node, infoset, action)) {
               if (node->GetOutcome()) {
-                node_prob *= static_cast<double>(node->GetOutcome()->GetPayoff(player));
+                node_prob *= node->GetOutcome()->GetPayoff<double>(player);
               }
               next_poly += node_prob;
             }
@@ -334,7 +334,7 @@ bool ANFNodeProbabilityPoly(const MixedBehaviorProfile<double> &p_solution,
     GameInfoset last_infoset = last_action->GetInfoset();
 
     if (last_infoset->IsChanceInfoset()) {
-      node_prob *= static_cast<double>(last_infoset->GetActionProb(last_action->GetNumber()));
+      node_prob *= static_cast<double>(last_infoset->GetActionProb(last_action));
     }
     else if (big_supp.HasAction(last_infoset)) {
       if (last_infoset == p_solution.GetGame()->GetPlayer(pl)->GetInfoset(i)) {
@@ -397,7 +397,7 @@ PolynomialSystem<double> ANFExpectedPayoffDiffPolys(const MixedBehaviorProfile<d
                                      terminal, player->GetNumber(), infoset->GetNumber(),
                                      action->GetNumber())) {
             if (terminal->GetOutcome()) {
-              node_prob *= static_cast<double>(terminal->GetOutcome()->GetPayoff(player));
+              node_prob *= terminal->GetOutcome()->GetPayoff<double>(player);
             }
             next_poly += node_prob;
           }

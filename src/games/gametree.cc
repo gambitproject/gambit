@@ -50,13 +50,12 @@ template <class T> MixedStrategyProfileRep<T> *TreeMixedStrategyProfileRep<T>::C
   return new TreeMixedStrategyProfileRep(*this);
 }
 
-template <class T> T TreeMixedStrategyProfileRep<T>::GetPayoff(int pl) const
+template <class T> void TreeMixedStrategyProfileRep<T>::MakeBehavior() const
 {
   if (mixed_behav_profile_sptr.get() == nullptr) {
     MixedStrategyProfile<T> tmp(Copy());
     mixed_behav_profile_sptr = std::make_shared<MixedBehaviorProfile<T>>(tmp);
   }
-  return mixed_behav_profile_sptr->GetPayoff(pl);
 }
 
 template <class T> void TreeMixedStrategyProfileRep<T>::InvalidateCache() const
@@ -64,39 +63,31 @@ template <class T> void TreeMixedStrategyProfileRep<T>::InvalidateCache() const
   mixed_behav_profile_sptr = nullptr;
 }
 
+template <class T> T TreeMixedStrategyProfileRep<T>::GetPayoff(int pl) const
+{
+  MakeBehavior();
+  return mixed_behav_profile_sptr->GetPayoff(pl);
+}
+
 template <class T>
 T TreeMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &strategy) const
 {
-  MixedStrategyProfile<T> foo(Copy());
-  for (auto s : this->m_support.GetStrategies(this->m_support.GetGame()->GetPlayer(pl))) {
-    foo[s] = static_cast<T>(0);
-  }
-  foo[strategy] = static_cast<T>(1);
-  return foo.GetPayoff(pl);
+  TreeMixedStrategyProfileRep tmp(*this);
+  tmp.SetStrategy(strategy);
+  return tmp.GetPayoff(pl);
 }
 
 template <class T>
 T TreeMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &strategy1,
                                                  const GameStrategy &strategy2) const
 {
-  GamePlayerRep *player1 = strategy1->GetPlayer();
-  GamePlayerRep *player2 = strategy2->GetPlayer();
-  if (player1 == player2) {
-    return T(0);
+  if (strategy1->GetPlayer() == strategy2->GetPlayer()) {
+    return static_cast<T>(0);
   }
-
-  MixedStrategyProfile<T> foo(Copy());
-  for (auto strategy : this->m_support.GetStrategies(player1)) {
-    foo[strategy] = T(0);
-  }
-  foo[strategy1] = T(1);
-
-  for (auto strategy : this->m_support.GetStrategies(player2)) {
-    foo[strategy] = T(0);
-  }
-  foo[strategy2] = T(1);
-
-  return foo.GetPayoff(pl);
+  TreeMixedStrategyProfileRep tmp(*this);
+  tmp.SetStrategy(strategy1);
+  tmp.SetStrategy(strategy2);
+  return tmp.GetPayoff(pl);
 }
 
 template class TreeMixedStrategyProfileRep<double>;
@@ -135,11 +126,10 @@ void GameTreeActionRep::DeleteAction()
 
   m_infoset->RemoveAction(where);
   for (auto member : m_infoset->m_members) {
-    member->children[where]->DeleteTree();
-    member->children[where]->Invalidate();
-    erase_atindex(member->children, where);
+    member->m_children[where]->DeleteTree();
+    member->m_children[where]->Invalidate();
+    erase_atindex(member->m_children, where);
   }
-
   if (m_infoset->IsChanceInfoset()) {
     m_infoset->m_efg->NormalizeChanceProbs(m_infoset);
   }
@@ -156,20 +146,13 @@ GameTreeInfosetRep::GameTreeInfosetRep(GameTreeRep *p_efg, int p_number, GamePla
                                        int p_actions)
   : m_efg(p_efg), m_number(p_number), m_player(p_player), m_actions(p_actions), flag(0)
 {
-  while (p_actions) {
-    m_actions[p_actions] = new GameTreeActionRep(p_actions, "", this);
-    p_actions--;
-  }
-
-  m_player->m_infosets.push_back(this);
-
+  std::generate(m_actions.begin(), m_actions.end(),
+                [this, i = 1]() mutable { return new GameTreeActionRep(i++, "", this); });
   if (p_player->IsChance()) {
     m_probs = Array<Number>(m_actions.size());
-    auto prob = lexical_cast<std::string>(Rational(1, m_actions.size()));
-    for (int act = 1; act <= m_actions.size(); act++) {
-      m_probs[act] = prob;
-    }
+    std::fill(m_probs.begin(), m_probs.end(), Rational(1, m_actions.size()));
   }
+  m_player->m_infosets.push_back(this);
 }
 
 GameTreeInfosetRep::~GameTreeInfosetRep()
@@ -182,8 +165,7 @@ Game GameTreeInfosetRep::GetGame() const { return m_efg; }
 Array<GameAction> GameTreeInfosetRep::GetActions() const
 {
   Array<GameAction> ret(m_actions.size());
-  std::transform(m_actions.cbegin(), m_actions.end(), ret.begin(),
-                 [](GameActionRep *a) -> GameAction { return a; });
+  std::copy(m_actions.cbegin(), m_actions.cend(), ret.begin());
   return ret;
 }
 
@@ -212,7 +194,7 @@ bool GameTreeInfosetRep::Precedes(GameNode p_node) const
 {
   auto *node = dynamic_cast<GameTreeNodeRep *>(p_node.operator->());
   while (node->m_parent) {
-    if (node->infoset == this) {
+    if (node->m_infoset == this) {
       return true;
     }
     else {
@@ -238,16 +220,12 @@ GameAction GameTreeInfosetRep::InsertAction(GameAction p_action /* =0 */)
   auto *action = new GameTreeActionRep(where, "", this);
   m_actions.insert(std::next(m_actions.cbegin(), where - 1), action);
   if (m_player->IsChance()) {
-    m_probs.insert(std::next(m_probs.cbegin(), where - 1), Number("0"));
+    m_probs.insert(std::next(m_probs.cbegin(), where - 1), Number());
   }
-
-  for (int act = 1; act <= m_actions.size(); act++) {
-    m_actions[act]->m_number = act;
-  }
-
+  RenumberActions();
   for (int i = 1; i <= m_members.size(); i++) {
-    m_members[i]->children.insert(std::next(m_members[i]->children.cbegin(), where - 1),
-                                  new GameTreeNodeRep(m_efg, m_members[i]));
+    m_members[i]->m_children.insert(std::next(m_members[i]->m_children.cbegin(), where - 1),
+                                    new GameTreeNodeRep(m_efg, m_members[i]));
   }
 
   m_efg->ClearComputedValues();
@@ -262,9 +240,7 @@ void GameTreeInfosetRep::RemoveAction(int which)
   if (m_player->IsChance()) {
     erase_atindex(m_probs, which);
   }
-  for (; which <= m_actions.size(); which++) {
-    m_actions[which]->m_number = which;
-  }
+  RenumberActions();
 }
 
 void GameTreeInfosetRep::RemoveMember(GameTreeNodeRep *p_node)
@@ -274,11 +250,11 @@ void GameTreeInfosetRep::RemoveMember(GameTreeNodeRep *p_node)
   if (m_members.empty()) {
     m_player->m_infosets.erase(
         std::find(m_player->m_infosets.begin(), m_player->m_infosets.end(), this));
-    Invalidate();
     int iset = 1;
     for (auto &infoset : m_player->m_infosets) {
       infoset->m_number = iset++;
     }
+    Invalidate();
   }
 }
 
@@ -329,39 +305,39 @@ bool GameTreeInfosetRep::IsChanceInfoset() const { return m_player->IsChance(); 
 //========================================================================
 
 GameTreeNodeRep::GameTreeNodeRep(GameTreeRep *e, GameTreeNodeRep *p)
-  : number(0), m_efg(e), infoset(nullptr), m_parent(p), outcome(nullptr)
+  : m_number(0), m_efg(e), m_infoset(nullptr), m_parent(p), m_outcome(nullptr)
 {
 }
 
 GameTreeNodeRep::~GameTreeNodeRep()
 {
-  std::for_each(children.begin(), children.end(), [](GameNodeRep *n) { n->Invalidate(); });
+  std::for_each(m_children.begin(), m_children.end(), [](GameNodeRep *n) { n->Invalidate(); });
 }
 
 Game GameTreeNodeRep::GetGame() const { return m_efg; }
 
 Array<GameNode> GameTreeNodeRep::GetChildren() const
 {
-  Array<GameNode> ret(children.size());
-  std::transform(children.cbegin(), children.cend(), ret.begin(),
+  Array<GameNode> ret(m_children.size());
+  std::transform(m_children.cbegin(), m_children.cend(), ret.begin(),
                  [](GameTreeNodeRep *n) -> GameNode { return n; });
   return ret;
 }
 
 GameNode GameTreeNodeRep::GetNextSibling() const
 {
-  if (!m_parent || m_parent->children.back() == this) {
+  if (!m_parent || m_parent->m_children.back() == this) {
     return nullptr;
   }
-  return *std::next(std::find(m_parent->children.begin(), m_parent->children.end(), this));
+  return *std::next(std::find(m_parent->m_children.begin(), m_parent->m_children.end(), this));
 }
 
 GameNode GameTreeNodeRep::GetPriorSibling() const
 {
-  if (!m_parent || m_parent->children.front() == this) {
+  if (!m_parent || m_parent->m_children.front() == this) {
     return nullptr;
   }
-  return *std::prev(std::find(m_parent->children.begin(), m_parent->children.end(), this));
+  return *std::prev(std::find(m_parent->m_children.begin(), m_parent->m_children.end(), this));
 }
 
 GameAction GameTreeNodeRep::GetPriorAction() const
@@ -369,7 +345,7 @@ GameAction GameTreeNodeRep::GetPriorAction() const
   if (!m_parent) {
     return nullptr;
   }
-  GameTreeInfosetRep *infoset = m_parent->infoset;
+  GameTreeInfosetRep *infoset = m_parent->m_infoset;
   for (int i = 1; i <= infoset->NumActions(); i++) {
     if (GameNode(const_cast<GameTreeNodeRep *>(this)) == GetParent()->GetChild(i)) {
       return infoset->GetAction(i);
@@ -381,10 +357,10 @@ GameAction GameTreeNodeRep::GetPriorAction() const
 void GameTreeNodeRep::DeleteOutcome(GameOutcomeRep *outc)
 {
   m_efg->IncrementVersion();
-  if (outc == outcome) {
-    outcome = nullptr;
+  if (outc == m_outcome) {
+    m_outcome = nullptr;
   }
-  for (auto child : children) {
+  for (auto child : m_children) {
     child->DeleteOutcome(outc);
   }
 }
@@ -392,8 +368,8 @@ void GameTreeNodeRep::DeleteOutcome(GameOutcomeRep *outc)
 void GameTreeNodeRep::SetOutcome(const GameOutcome &p_outcome)
 {
   m_efg->IncrementVersion();
-  if (p_outcome != outcome) {
-    outcome = p_outcome;
+  if (p_outcome != m_outcome) {
+    m_outcome = p_outcome;
     m_efg->ClearComputedValues();
   }
 }
@@ -410,7 +386,7 @@ bool GameTreeNodeRep::IsSuccessorOf(GameNode p_node) const
 bool GameTreeNodeRep::IsSubgameRoot() const
 {
   // First take care of a couple easy cases
-  if (children.empty() || infoset->NumMembers() > 1) {
+  if (m_children.empty() || m_infoset->NumMembers() > 1) {
     return false;
   }
   if (!m_parent) {
@@ -443,12 +419,12 @@ void GameTreeNodeRep::DeleteParent()
   m_efg->IncrementVersion();
   GameTreeNodeRep *oldParent = m_parent;
 
-  oldParent->children.erase(
-      std::find(oldParent->children.begin(), oldParent->children.end(), this));
+  oldParent->m_children.erase(
+      std::find(oldParent->m_children.begin(), oldParent->m_children.end(), this));
   oldParent->DeleteTree();
   m_parent = oldParent->m_parent;
   if (m_parent) {
-    std::replace(m_parent->children.begin(), m_parent->children.end(), oldParent, this);
+    std::replace(m_parent->m_children.begin(), m_parent->m_children.end(), oldParent, this);
   }
   else {
     m_efg->m_root = this;
@@ -461,17 +437,17 @@ void GameTreeNodeRep::DeleteParent()
 void GameTreeNodeRep::DeleteTree()
 {
   m_efg->IncrementVersion();
-  while (!children.empty()) {
-    children.front()->DeleteTree();
-    children.front()->Invalidate();
-    erase_atindex(children, 1);
+  while (!m_children.empty()) {
+    m_children.front()->DeleteTree();
+    m_children.front()->Invalidate();
+    erase_atindex(m_children, 1);
   }
-  if (infoset) {
-    infoset->RemoveMember(this);
-    infoset = nullptr;
+  if (m_infoset) {
+    m_infoset->RemoveMember(this);
+    m_infoset = nullptr;
   }
 
-  outcome = nullptr;
+  m_outcome = nullptr;
   m_label = "";
 
   m_efg->ClearComputedValues();
@@ -481,19 +457,19 @@ void GameTreeNodeRep::CopySubtree(GameTreeNodeRep *src, GameTreeNodeRep *stop)
 {
   m_efg->IncrementVersion();
   if (src == stop) {
-    outcome = src->outcome;
+    m_outcome = src->m_outcome;
     return;
   }
 
-  if (src->children.size()) {
-    AppendMove(src->infoset);
-    for (int i = 1; i <= src->children.size(); i++) {
-      children[i]->CopySubtree(src->children[i], stop);
+  if (src->m_children.size()) {
+    AppendMove(src->m_infoset);
+    for (int i = 1; i <= src->m_children.size(); i++) {
+      m_children[i]->CopySubtree(src->m_children[i], stop);
     }
   }
 
   m_label = src->m_label;
-  outcome = src->outcome;
+  m_outcome = src->m_outcome;
 }
 
 void GameTreeNodeRep::CopyTree(GameNode p_src)
@@ -501,17 +477,17 @@ void GameTreeNodeRep::CopyTree(GameNode p_src)
   if (p_src->GetGame() != m_efg) {
     throw MismatchException();
   }
-  if (p_src == this || !children.empty()) {
+  if (p_src == this || !m_children.empty()) {
     return;
   }
 
   m_efg->IncrementVersion();
   auto *src = dynamic_cast<GameTreeNodeRep *>(p_src.operator->());
 
-  if (!src->children.empty()) {
-    AppendMove(src->infoset);
-    for (int i = 1; i <= src->children.size(); i++) {
-      children[i]->CopySubtree(src->children[i], this);
+  if (!src->m_children.empty()) {
+    AppendMove(src->m_infoset);
+    for (int i = 1; i <= src->m_children.size(); i++) {
+      m_children[i]->CopySubtree(src->m_children[i], this);
     }
 
     m_efg->ClearComputedValues();
@@ -523,16 +499,17 @@ void GameTreeNodeRep::MoveTree(GameNode p_src)
   if (p_src->GetGame() != m_efg) {
     throw MismatchException();
   }
-  if (p_src == this || !children.empty() || IsSuccessorOf(p_src)) {
+  if (p_src == this || !m_children.empty() || IsSuccessorOf(p_src)) {
     return;
   }
   m_efg->IncrementVersion();
   auto *src = dynamic_cast<GameTreeNodeRep *>(p_src.operator->());
-  std::iter_swap(std::find(src->m_parent->children.begin(), src->m_parent->children.end(), src),
-                 std::find(m_parent->children.begin(), m_parent->children.end(), this));
+  std::iter_swap(
+      std::find(src->m_parent->m_children.begin(), src->m_parent->m_children.end(), src),
+      std::find(m_parent->m_children.begin(), m_parent->m_children.end(), this));
   std::swap(src->m_parent, m_parent);
   m_label = "";
-  outcome = nullptr;
+  m_outcome = nullptr;
 
   m_efg->ClearComputedValues();
 }
@@ -550,47 +527,48 @@ void GameTreeNodeRep::SetInfoset(GameInfoset p_infoset)
   if (p_infoset->GetGame() != m_efg) {
     throw MismatchException();
   }
-  if (!infoset || infoset == p_infoset) {
+  if (!m_infoset || m_infoset == p_infoset) {
     return;
   }
-  if (p_infoset->NumActions() != children.size()) {
+  if (p_infoset->NumActions() != m_children.size()) {
     throw DimensionException();
   }
   m_efg->IncrementVersion();
-  infoset->RemoveMember(this);
+  m_infoset->RemoveMember(this);
   dynamic_cast<GameTreeInfosetRep *>(p_infoset.operator->())->AddMember(this);
-  infoset = dynamic_cast<GameTreeInfosetRep *>(p_infoset.operator->());
+  m_infoset = dynamic_cast<GameTreeInfosetRep *>(p_infoset.operator->());
 
   m_efg->ClearComputedValues();
 }
 
 GameInfoset GameTreeNodeRep::LeaveInfoset()
 {
-  if (!infoset) {
+  if (!m_infoset) {
     return nullptr;
   }
 
   m_efg->IncrementVersion();
-  GameTreeInfosetRep *oldInfoset = infoset;
+  GameTreeInfosetRep *oldInfoset = m_infoset;
   if (oldInfoset->m_members.size() == 1) {
     return oldInfoset;
   }
 
   GamePlayerRep *player = oldInfoset->m_player;
   oldInfoset->RemoveMember(this);
-  infoset = new GameTreeInfosetRep(m_efg, player->m_infosets.size() + 1, player, children.size());
-  infoset->AddMember(this);
+  m_infoset =
+      new GameTreeInfosetRep(m_efg, player->m_infosets.size() + 1, player, m_children.size());
+  m_infoset->AddMember(this);
   for (int i = 1; i <= oldInfoset->m_actions.size(); i++) {
-    infoset->m_actions[i]->SetLabel(oldInfoset->m_actions[i]->GetLabel());
+    m_infoset->m_actions[i]->SetLabel(oldInfoset->m_actions[i]->GetLabel());
   }
 
   m_efg->ClearComputedValues();
-  return infoset;
+  return m_infoset;
 }
 
 GameInfoset GameTreeNodeRep::AppendMove(GamePlayer p_player, int p_actions)
 {
-  if (p_actions <= 0 || !children.empty()) {
+  if (p_actions <= 0 || !m_children.empty()) {
     throw UndefinedException();
   }
   if (p_player->GetGame() != m_efg) {
@@ -604,7 +582,7 @@ GameInfoset GameTreeNodeRep::AppendMove(GamePlayer p_player, int p_actions)
 
 GameInfoset GameTreeNodeRep::AppendMove(GameInfoset p_infoset)
 {
-  if (!children.empty()) {
+  if (!m_children.empty()) {
     throw UndefinedException();
   }
   if (p_infoset->GetGame() != m_efg) {
@@ -612,14 +590,13 @@ GameInfoset GameTreeNodeRep::AppendMove(GameInfoset p_infoset)
   }
 
   m_efg->IncrementVersion();
-  infoset = dynamic_cast<GameTreeInfosetRep *>(p_infoset.operator->());
-  infoset->AddMember(this);
-  for (int i = 1; i <= p_infoset->NumActions(); i++) {
-    children.push_back(new GameTreeNodeRep(m_efg, this));
+  m_infoset = dynamic_cast<GameTreeInfosetRep *>(p_infoset.operator->());
+  m_infoset->AddMember(this);
+  for (const auto &_ : m_infoset->m_actions) {
+    m_children.push_back(new GameTreeNodeRep(m_efg, this));
   }
-
   m_efg->ClearComputedValues();
-  return infoset;
+  return m_infoset;
 }
 
 GameInfoset GameTreeNodeRep::InsertMove(GamePlayer p_player, int p_actions)
@@ -644,22 +621,22 @@ GameInfoset GameTreeNodeRep::InsertMove(GameInfoset p_infoset)
 
   m_efg->IncrementVersion();
   auto *newNode = new GameTreeNodeRep(m_efg, m_parent);
-  newNode->infoset = dynamic_cast<GameTreeInfosetRep *>(p_infoset.operator->());
+  newNode->m_infoset = dynamic_cast<GameTreeInfosetRep *>(p_infoset.operator->());
   dynamic_cast<GameTreeInfosetRep *>(p_infoset.operator->())->AddMember(newNode);
 
   if (m_parent) {
-    std::replace(m_parent->children.begin(), m_parent->children.end(), this, newNode);
+    std::replace(m_parent->m_children.begin(), m_parent->m_children.end(), this, newNode);
   }
   else {
     m_efg->m_root = newNode;
   }
 
-  newNode->children.push_back(this);
   m_parent = newNode;
-
-  for (int i = 1; i < p_infoset->NumActions(); i++) {
-    newNode->children.push_back(new GameTreeNodeRep(m_efg, newNode));
-  }
+  newNode->m_children.push_back(this);
+  std::for_each(std::next(newNode->m_infoset->m_actions.begin()),
+                newNode->m_infoset->m_actions.end(), [this, newNode](const GameActionRep *) {
+                  newNode->m_children.push_back(new GameTreeNodeRep(m_efg, newNode));
+                });
 
   m_efg->ClearComputedValues();
   return p_infoset;
@@ -721,8 +698,8 @@ Rational SubtreeSum(const GameNode &p_node)
   }
 
   if (p_node->GetOutcome()) {
-    for (int pl = 1; pl <= p_node->GetGame()->NumPlayers(); pl++) {
-      sum += static_cast<Rational>(p_node->GetOutcome()->GetPayoff(pl));
+    for (const auto &player : p_node->GetGame()->GetPlayers()) {
+      sum += p_node->GetOutcome()->GetPayoff<Rational>(player);
     }
   }
   return sum;
@@ -745,9 +722,9 @@ bool GameTreeRep::IsPerfectRecall(GameInfoset &s1, GameInfoset &s2) const
 {
   for (auto player : m_players) {
     for (int i = 1; i <= player->NumInfosets(); i++) {
-      GameTreeInfosetRep *iset1 = player->m_infosets[i];
+      GameTreeInfosetRep *iset1 = player->m_infosets[i - 1];
       for (int j = 1; j <= player->NumInfosets(); j++) {
-        GameTreeInfosetRep *iset2 = player->m_infosets[j];
+        GameTreeInfosetRep *iset2 = player->m_infosets[j - 1];
 
         bool precedes = false;
         int action = 0;
@@ -797,8 +774,8 @@ bool GameTreeRep::IsPerfectRecall(GameInfoset &s1, GameInfoset &s2) const
 
 void GameTreeRep::NumberNodes(GameTreeNodeRep *n, int &index)
 {
-  n->number = index++;
-  for (int child = 1; child <= n->children.size(); NumberNodes(n->children[child++], index))
+  n->m_number = index++;
+  for (int child = 1; child <= n->m_children.size(); NumberNodes(n->m_children[child++], index))
     ;
 }
 
@@ -814,10 +791,10 @@ void GameTreeRep::SortInfosets()
     // Coded using a bubble sort for simplicity; large games might
     // find a quicksort worthwhile.
     for (int iset = 1; iset <= player->m_infosets.size(); iset++) {
-      GameTreeInfosetRep *infoset = player->m_infosets[iset];
+      GameTreeInfosetRep *infoset = player->m_infosets[iset - 1];
       for (int i = 1; i < infoset->m_members.size(); i++) {
         for (int j = 1; j < infoset->m_members.size() - i; j++) {
-          if (infoset->m_members[j + 1]->number < infoset->m_members[j]->number) {
+          if (infoset->m_members[j + 1]->m_number < infoset->m_members[j]->m_number) {
             GameTreeNodeRep *tmp = infoset->m_members[j];
             infoset->m_members[j] = infoset->m_members[j + 1];
             infoset->m_members[j + 1] = tmp;
@@ -831,24 +808,24 @@ void GameTreeRep::SortInfosets()
     // find a quicksort worthwhile.
     for (int i = 1; i < player->m_infosets.size(); i++) {
       for (int j = 1; j < player->m_infosets.size() - i; j++) {
-        int a = ((player->m_infosets[j + 1]->m_members.size())
-                     ? player->m_infosets[j + 1]->m_members[1]->number
+        int a = ((player->m_infosets[j]->m_members.size())
+                     ? player->m_infosets[j]->m_members[1]->m_number
                      : 0);
-        int b = ((player->m_infosets[j]->m_members.size())
-                     ? player->m_infosets[j]->m_members[1]->number
+        int b = ((player->m_infosets[j - 1]->m_members.size())
+                     ? player->m_infosets[j - 1]->m_members[1]->m_number
                      : 0);
 
         if (a < b || b == 0) {
-          GameTreeInfosetRep *tmp = player->m_infosets[j];
-          player->m_infosets[j] = player->m_infosets[j + 1];
-          player->m_infosets[j + 1] = tmp;
+          GameTreeInfosetRep *tmp = player->m_infosets[j - 1];
+          player->m_infosets[j - 1] = player->m_infosets[j];
+          player->m_infosets[j] = tmp;
         }
       }
     }
 
     // Reassign information set IDs
     for (int iset = 1; iset <= player->m_infosets.size(); iset++) {
-      player->m_infosets[iset]->m_number = iset;
+      player->m_infosets[iset - 1]->m_number = iset;
     }
   }
 }
@@ -913,7 +890,7 @@ void WriteEfgFile(std::ostream &f, const GameNode &n)
     f << n->GetOutcome()->GetNumber() << " " << QuoteString(n->GetOutcome()->GetLabel()) << ' '
       << FormatList(
              n->GetGame()->GetPlayers(),
-             [n](const GamePlayer &p) { return std::string(n->GetOutcome()->GetPayoff(p)); }, true)
+             [n](const GamePlayer &p) { return n->GetOutcome()->GetPayoff<std::string>(p); }, true)
       << std::endl;
   }
   else {
@@ -965,11 +942,10 @@ int GameTreeRep::BehavProfileLength() const
 GamePlayer GameTreeRep::NewPlayer()
 {
   IncrementVersion();
-  GamePlayerRep *player = nullptr;
-  player = new GamePlayerRep(this, m_players.size() + 1);
+  auto player = new GamePlayerRep(this, m_players.size() + 1);
   m_players.push_back(player);
-  for (int outc = 1; outc <= m_outcomes.last_index(); outc++) {
-    m_outcomes[outc]->m_payoffs.push_back(Number());
+  for (auto &outcome : m_outcomes) {
+    outcome->m_payoffs[player] = Number();
   }
   ClearComputedValues();
   return player;
@@ -994,13 +970,10 @@ GameInfoset GameTreeRep::GetInfoset(int p_index) const
 
 Array<GameInfoset> GameTreeRep::GetInfosets() const
 {
-  auto infosets = Array<GameInfoset>(
-      std::accumulate(m_players.begin(), m_players.end(), 0,
-                      [](int ct, GamePlayerRep *player) { return ct + player->NumInfosets(); }));
-  int i = 1;
+  Array<GameInfoset> infosets;
   for (auto player : m_players) {
     for (auto infoset : player->m_infosets) {
-      infosets[i++] = infoset;
+      infosets.push_back(infoset);
     }
   }
   return infosets;
@@ -1008,26 +981,11 @@ Array<GameInfoset> GameTreeRep::GetInfosets() const
 
 Array<int> GameTreeRep::NumInfosets() const
 {
-  Array<int> foo(m_players.size());
-  for (int i = 1; i <= foo.size(); i++) {
-    foo[i] = m_players[i]->NumInfosets();
+  Array<int> foo;
+  for (const auto &player : m_players) {
+    foo.push_back(player->NumInfosets());
   }
   return foo;
-}
-
-GameAction GameTreeRep::GetAction(int p_index) const
-{
-  int index = 1;
-  for (auto player : m_players) {
-    for (auto infoset : player->m_infosets) {
-      for (auto action : infoset->m_actions) {
-        if (index++ == p_index) {
-          return action;
-        }
-      }
-    }
-  }
-  throw IndexException();
 }
 
 //------------------------------------------------------------------------
@@ -1040,10 +998,8 @@ void GameTreeRep::DeleteOutcome(const GameOutcome &p_outcome)
   m_root->DeleteOutcome(p_outcome);
   m_outcomes.erase(std::find(m_outcomes.begin(), m_outcomes.end(), p_outcome));
   p_outcome->Invalidate();
-  int outc = 1;
-  for (auto &outcome : m_outcomes) {
-    outcome->m_number = outc++;
-  }
+  std::for_each(m_outcomes.begin(), m_outcomes.end(),
+                [outc = 1](GameOutcomeRep *c) mutable { c->m_number = outc++; });
   ClearComputedValues();
 }
 
@@ -1081,52 +1037,44 @@ Game GameTreeRep::SetChanceProbs(const GameInfoset &p_infoset, const Array<Numbe
     throw DimensionException("The number of probabilities given must match the number of actions");
   }
   IncrementVersion();
-  Rational sum(0);
-  for (auto prob : p_probs) {
-    if (static_cast<Rational>(prob) < Rational(0)) {
-      throw ValueException("Probabilities must be non-negative numbers");
-    }
-    sum += static_cast<Rational>(prob);
+  if (std::any_of(p_probs.begin(), p_probs.end(),
+                  [](const Number &x) { return static_cast<Rational>(x) < Rational(0); })) {
+    throw ValueException("Probabilities must be non-negative numbers");
   }
+  auto sum = std::accumulate(
+      p_probs.begin(), p_probs.end(), Rational(0),
+      [](const Rational &r, const Number &n) { return r + static_cast<Rational>(n); });
   if (sum != Rational(1)) {
     throw ValueException("Probabilities must sum to exactly one");
   }
-  for (int act = 1; act <= p_infoset->NumActions(); act++) {
-    dynamic_cast<GameTreeInfosetRep &>(*p_infoset).m_probs[act] = p_probs[act];
-  }
+  std::copy(p_probs.begin(), p_probs.end(),
+            dynamic_cast<GameTreeInfosetRep &>(*p_infoset).m_probs.begin());
   ClearComputedValues();
   return this;
 }
 
-Game GameTreeRep::NormalizeChanceProbs(const GameInfoset &m_infoset)
+Game GameTreeRep::NormalizeChanceProbs(const GameInfoset &p_infoset)
 {
-  if (m_infoset->GetGame() != this) {
+  if (p_infoset->GetGame() != this) {
     throw MismatchException();
   }
-  if (!m_infoset->IsChanceInfoset()) {
+  if (!p_infoset->IsChanceInfoset()) {
     throw UndefinedException(
         "Action probabilities can only be normalized for chance information sets");
   }
   IncrementVersion();
-  Rational sum(0);
-  for (int act = 1; act <= m_infoset->NumActions(); act++) {
-    Rational action_prob(m_infoset->GetActionProb(act));
-    sum += action_prob;
-  }
-  Array<Number> m_probs(m_infoset->NumActions());
+  auto &probs = dynamic_cast<GameTreeInfosetRep &>(*p_infoset).m_probs;
+  auto sum = std::accumulate(
+      probs.begin(), probs.end(), Rational(0),
+      [](const Rational &s, const Number &n) { return s + static_cast<Rational>(n); });
   if (sum == Rational(0)) {
     // all remaining moves have prob zero; split prob 1 equally among them
-    for (int act = 1; act <= m_infoset->NumActions(); act++) {
-      m_probs[act] = Rational(1, m_infoset->NumActions());
-    }
+    std::fill(probs.begin(), probs.end(), Rational(1, probs.size()));
   }
   else {
-    for (int act = 1; act <= m_infoset->NumActions(); act++) {
-      Rational prob(m_infoset->GetActionProb(act));
-      m_probs[act] = prob / sum;
-    }
+    std::transform(probs.begin(), probs.end(), probs.begin(),
+                   [&sum](const Number &n) { return static_cast<Rational>(n) / sum; });
   }
-  m_infoset->GetGame()->SetChanceProbs(m_infoset, m_probs);
   return this;
 }
 

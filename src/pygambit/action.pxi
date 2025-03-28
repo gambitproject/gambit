@@ -100,7 +100,7 @@ class Action:
             )
         py_string = cython.cast(
             string,
-            self.action.deref().GetInfoset().deref().GetActionProb(self.action.deref().GetNumber())
+            self.action.deref().GetInfoset().deref().GetActionProb(self.action)
         )
         if "." in py_string.decode("ascii"):
             return decimal.Decimal(py_string.decode("ascii"))

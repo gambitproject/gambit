@@ -271,12 +271,12 @@ void gbtNodeEntry::DrawOutcome(wxDC &p_dc, bool p_noHints) const
     Gambit::GamePlayer player = m_node->GetGame()->GetPlayer(pl);
     p_dc.SetTextForeground(m_style->GetPlayerColor(pl));
 
-    std::string payoff = static_cast<std::string>(outcome->GetPayoff(pl));
+    const auto &payoff = outcome->GetPayoff<std::string>(player);
 
     if (payoff.find('/') != std::string::npos) {
       p_dc.SetPen(wxPen(m_style->GetPlayerColor(pl), 1, wxPENSTYLE_SOLID));
       int oldX = point.x;
-      point = DrawFraction(p_dc, point, static_cast<Gambit::Rational>(outcome->GetPayoff(pl)));
+      point = DrawFraction(p_dc, point, outcome->GetPayoff<Rational>(player));
       m_payoffRect.push_back(wxRect(oldX - 5, point.y - height / 2, point.x - oldX + 10, height));
     }
     else {
@@ -455,7 +455,8 @@ wxString gbtTreeLayout::CreateBranchLabel(const gbtNodeEntry *p_entry, int p_whi
     case GBT_BRANCH_LABEL_PROBS:
       if (parent->GetPlayer() && parent->GetPlayer()->IsChance()) {
         return {static_cast<std::string>(
-                    parent->GetInfoset()->GetActionProb(p_entry->GetChildNumber()))
+                    parent->GetInfoset()->GetActionProb(
+                        parent->GetInfoset()->GetAction(p_entry->GetChildNumber())))
                     .c_str(),
                 *wxConvCurrent};
       }
@@ -839,8 +840,8 @@ void gbtTreeLayout::GenerateLabels()
 
       Gambit::GameNode parent = entry->GetNode()->GetParent();
       if (parent->GetPlayer()->IsChance()) {
-        entry->SetActionProb(
-            static_cast<double>(parent->GetInfoset()->GetActionProb(entry->GetChildNumber())));
+        entry->SetActionProb(static_cast<double>(parent->GetInfoset()->GetActionProb(
+            parent->GetInfoset()->GetAction(entry->GetChildNumber()))));
       }
       else {
         int profile = m_doc->GetCurrentProfile();

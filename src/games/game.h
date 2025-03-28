@@ -121,7 +121,7 @@ private:
   GameRep *m_game;
   int m_number;
   std::string m_label;
-  Array<Number> m_payoffs;
+  std::map<GamePlayerRep *, Number> m_payoffs;
 
   /// @name Lifecycle
   //@{
@@ -143,12 +143,8 @@ public:
   /// Sets the text label associated with the outcome
   void SetLabel(const std::string &p_label) { m_label = p_label; }
 
-  /// Gets the payoff associated with the outcome to player 'pl'
-  const Number &GetPayoff(int pl) const { return m_payoffs[pl]; }
   /// Gets the payoff associated with the outcome to the player
-  const Number &GetPayoff(const GamePlayer &p_player) const;
-  /// Sets the payoff to player 'pl'
-  void SetPayoff(int pl, const Number &p_value);
+  template <class T> const T &GetPayoff(const GamePlayer &p_player) const;
   /// Sets the payoff to the player
   void SetPayoff(const GamePlayer &p_player, const Number &p_value);
   //@}
@@ -208,7 +204,6 @@ public:
 
   virtual bool Precedes(GameNode) const = 0;
 
-  virtual const Number &GetActionProb(int i) const = 0;
   virtual const Number &GetActionProb(const GameAction &) const = 0;
   virtual void Reveal(GamePlayer) = 0;
 };
@@ -294,7 +289,7 @@ private:
   GameRep *m_game;
   int m_number;
   std::string m_label;
-  Array<class GameTreeInfosetRep *> m_infosets;
+  std::vector<class GameTreeInfosetRep *> m_infosets;
   Array<GameStrategyRep *> m_strategies;
 
   GamePlayerRep(GameRep *p_game, int p_id) : m_game(p_game), m_number(p_id) {}
@@ -550,8 +545,6 @@ public:
   virtual Array<GameInfoset> GetInfosets() const = 0;
   /// Returns an array with the number of information sets per personal player
   virtual Array<int> NumInfosets() const = 0;
-  /// Returns the act'th action in the game (numbered globally)
-  virtual GameAction GetAction(int act) const = 0;
   /// Sort the information sets for each player in a canonical order
   virtual void SortInfosets() {}
   //@}
@@ -591,18 +584,25 @@ public:
 // all classes to be defined.
 
 inline Game GameOutcomeRep::GetGame() const { return m_game; }
-inline const Number &GameOutcomeRep::GetPayoff(const GamePlayer &p_player) const
+
+template <class T> const T &GameOutcomeRep::GetPayoff(const GamePlayer &p_player) const
 {
-  if (p_player->GetGame() != GetGame()) {
+  try {
+    return static_cast<const T &>(m_payoffs.at(p_player));
+  }
+  catch (const std::out_of_range &) {
     throw MismatchException();
   }
-  return m_payoffs[p_player->GetNumber()];
 }
 
-inline void GameOutcomeRep::SetPayoff(int pl, const Number &p_value)
+template <> inline const Number &GameOutcomeRep::GetPayoff(const GamePlayer &p_player) const
 {
-  m_game->IncrementVersion();
-  m_payoffs[pl] = p_value;
+  try {
+    return m_payoffs.at(p_player);
+  }
+  catch (const std::out_of_range &) {
+    throw MismatchException();
+  }
 }
 
 inline void GameOutcomeRep::SetPayoff(const GamePlayer &p_player, const Number &p_value)
@@ -610,8 +610,8 @@ inline void GameOutcomeRep::SetPayoff(const GamePlayer &p_player, const Number &
   if (p_player->GetGame() != GetGame()) {
     throw MismatchException();
   }
+  m_payoffs[p_player] = p_value;
   m_game->IncrementVersion();
-  m_payoffs[p_player->GetNumber()] = p_value;
 }
 
 inline GamePlayer GameStrategyRep::GetPlayer() const { return m_player; }

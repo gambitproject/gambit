@@ -119,8 +119,7 @@ cdef extern from "games/game.h":
         c_GameAction GetAction(int) except +IndexError
         c_GameAction InsertAction(c_GameAction) except +ValueError
 
-        c_Number GetActionProb(int) except +IndexError
-        void SetActionProb(int, c_Number) except +IndexError
+        c_Number GetActionProb(c_GameAction) except +IndexError
 
         int NumMembers() except +
         c_GameNode GetMember(int) except +IndexError
@@ -151,7 +150,7 @@ cdef extern from "games/game.h":
         string GetLabel() except +
         void SetLabel(string) except +
 
-        c_Number GetPayoff(c_GamePlayer) except +IndexError
+        T GetPayoff[T](c_GamePlayer) except +IndexError
         void SetPayoff(c_GamePlayer, c_Number) except +IndexError
 
     cdef cppclass c_GameNodeRep "GameNodeRep":

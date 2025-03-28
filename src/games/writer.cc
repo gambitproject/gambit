@@ -70,7 +70,7 @@ std::string WriteHTMLFile(const Game &p_game, const GamePlayer &p_rowPlayer,
         for (const auto &player : p_game->GetPlayers()) {
           try {
             if (profile->GetOutcome()) {
-              theHtml += static_cast<std::string>(profile->GetOutcome()->GetPayoff(player));
+              theHtml += profile->GetOutcome()->GetPayoff<std::string>(player);
             }
             else {
               theHtml += "0";
@@ -148,7 +148,7 @@ std::string WriteLaTeXFile(const Game &p_game, const GamePlayer &p_rowPlayer,
         for (const auto &player : p_game->GetPlayers()) {
           try {
             if (profile->GetOutcome()) {
-              theHtml += static_cast<std::string>(profile->GetOutcome()->GetPayoff(player));
+              theHtml += profile->GetOutcome()->GetPayoff<std::string>(player);
             }
             else {
               theHtml += "0";
