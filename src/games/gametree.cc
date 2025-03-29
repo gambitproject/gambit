@@ -226,8 +226,9 @@ GameAction GameTreeInfosetRep::InsertAction(GameAction p_action /* =0 */)
   }
   RenumberActions();
   for (int i = 1; i <= m_members.size(); i++) {
-    m_members[i]->m_children.insert(std::next(m_members[i]->m_children.cbegin(), where - 1),
-                                    new GameTreeNodeRep(m_efg, m_members[i]));
+    m_members[i - 1]->m_children.insert(
+        std::next(m_members[i - 1]->m_children.cbegin(), where - 1),
+        new GameTreeNodeRep(m_efg, m_members[i - 1]));
   }
 
   m_efg->ClearComputedValues();
@@ -290,7 +291,7 @@ void GameTreeInfosetRep::Reveal(GamePlayer p_player)
   m_efg->Canonicalize();
 }
 
-GameNode GameTreeInfosetRep::GetMember(int p_index) const { return m_members[p_index]; }
+GameNode GameTreeInfosetRep::GetMember(int p_index) const { return m_members[p_index - 1]; }
 
 Array<GameNode> GameTreeInfosetRep::GetMembers() const
 {
@@ -809,10 +810,10 @@ void GameTreeRep::Canonicalize()
       GameTreeInfosetRep *infoset = player->m_infosets[iset - 1];
       for (int i = 1; i < infoset->m_members.size(); i++) {
         for (int j = 1; j < infoset->m_members.size() - i; j++) {
-          if (infoset->m_members[j + 1]->m_number < infoset->m_members[j]->m_number) {
-            GameTreeNodeRep *tmp = infoset->m_members[j];
-            infoset->m_members[j] = infoset->m_members[j + 1];
-            infoset->m_members[j + 1] = tmp;
+          if (infoset->m_members[j]->m_number < infoset->m_members[j - 1]->m_number) {
+            GameTreeNodeRep *tmp = infoset->m_members[j - 1];
+            infoset->m_members[j - 1] = infoset->m_members[j];
+            infoset->m_members[j] = tmp;
           }
         }
       }
@@ -824,10 +825,10 @@ void GameTreeRep::Canonicalize()
     for (int i = 1; i < player->m_infosets.size(); i++) {
       for (int j = 1; j < player->m_infosets.size() - i; j++) {
         int a = ((player->m_infosets[j]->m_members.size())
-                     ? player->m_infosets[j]->m_members[1]->m_number
+                     ? player->m_infosets[j]->m_members[0]->m_number
                      : 0);
         int b = ((player->m_infosets[j - 1]->m_members.size())
-                     ? player->m_infosets[j - 1]->m_members[1]->m_number
+                     ? player->m_infosets[j - 1]->m_members[0]->m_number
                      : 0);
 
         if (a < b || b == 0) {

@@ -71,7 +71,7 @@ protected:
   std::string m_label;
   GamePlayerRep *m_player;
   Array<GameTreeActionRep *> m_actions;
-  Array<GameTreeNodeRep *> m_members;
+  std::vector<GameTreeNodeRep *> m_members;
   int flag, whichbranch{0};
   Array<Number> m_probs;
 
