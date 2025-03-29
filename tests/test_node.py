@@ -200,8 +200,9 @@ def _subtrees_equal(
 def test_copy_tree_onto_nondescendent_terminal_node():
     """Test copying a subtree to a non-descendent node."""
     g = games.read_from_file("e01.efg")
-    src_node = g.nodes()[3]   # path=[1, 0]
-    dest_node = g.nodes()[2]  # path=[0, 0]
+    list_nodes = list(g.nodes)
+    src_node = list_nodes[3]   # path=[1, 0]
+    dest_node = list_nodes[2]  # path=[0, 0]
 
     g.copy_tree(src_node, dest_node)
 
@@ -211,8 +212,9 @@ def test_copy_tree_onto_nondescendent_terminal_node():
 def test_copy_tree_onto_descendent_terminal_node():
     """Test copying a subtree to a node that's a descendent of the original."""
     g = games.read_from_file("e01.efg")
-    src_node = g.nodes()[1]   # path=[0]
-    dest_node = g.nodes()[4]  # path=[0, 1, 0]
+    list_nodes = list(g.nodes)
+    src_node = list_nodes[1]   # path=[0]
+    dest_node = list_nodes[4]  # path=[0, 1, 0]
 
     g.copy_tree(src_node, dest_node)
 
@@ -404,3 +406,184 @@ def test_append_infoset_node_list_is_empty():
     game.append_move(game.root.children[0].children[0], "Player 3", ["B", "F"])
     with pytest.raises(ValueError):
         game.append_infoset([], game.root.children[0].children[0].infoset)
+
+
+def _get_members(action: gbt.Action) -> set[gbt.Node]:
+    """Calculates the set of nodes resulting from taking a specific action
+    at all nodes within its information set.
+    """
+    infoset = action.infoset
+    action_index = action.number
+
+    return [member_node.children[action_index] for member_node in infoset.members]
+
+
+def _count_subtree_nodes(start_node: gbt.Node) -> int:
+    """Counts nodes in the subtree rooted at start_node (including start_node)."""
+    count = 1
+    for child in start_node.children:
+        count += _count_subtree_nodes(child)
+    return count
+
+
+def test_len_matches_sum_children_plus_one():
+    """Verify `len(game.nodes)` matches (sum of children counts + 1)
+    """
+    game = games.read_from_file("e01.efg")
+    expected_node_count = 9
+
+    direct_len = len(game.nodes)
+    assert direct_len == expected_node_count
+
+    assert direct_len == _count_subtree_nodes(game.root)
+
+
+def test_len_after_delete_tree():
+    """Verify `len(game.nodes)` is correct after `delete_tree`.
+    """
+    game = games.read_from_file("e01.efg")
+    initial_number_of_nodes = len(game.nodes)
+    list_nodes = list(game.nodes)
+
+    root_of_the_deleted_subtree = list_nodes[3]
+    number_of_deleted_nodes = _count_subtree_nodes(root_of_the_deleted_subtree)
+
+    game.delete_tree(root_of_the_deleted_subtree)
+
+    assert len(game.nodes) == initial_number_of_nodes - number_of_deleted_nodes
+
+
+def test_len_after_delete_parent():
+    """Verify `len(game.nodes)` is correct after `delete_parent`.
+    """
+    game = games.read_from_file("e02.efg")
+    initial_number_of_nodes = len(game.nodes)
+    list_nodes = list(game.nodes)
+
+    node_parent_to_delete = list_nodes[4]
+
+    number_of_node_ancestors = _count_subtree_nodes(node_parent_to_delete)
+    number_of_parent_ancestors = _count_subtree_nodes(node_parent_to_delete.parent)
+    diff = number_of_parent_ancestors - number_of_node_ancestors
+
+    game.delete_parent(node_parent_to_delete)
+
+    assert len(game.nodes) == initial_number_of_nodes - diff
+
+
+def test_len_after_append_move():
+    """Verify `len(game.nodes)` is correct after `append_move`.
+    """
+    game = games.read_from_file("e01.efg")
+    initial_number_of_nodes = len(game.nodes)
+    list_nodes = list(game.nodes)
+
+    terminal_node = list_nodes[5]         # path=[1, 1, 0]
+    player = game.players[0]
+    actions_to_add = ["T", "M", "B"]
+
+    game.append_move(terminal_node, player, actions_to_add)
+
+    assert len(game.nodes) == initial_number_of_nodes + len(actions_to_add)
+
+
+def test_len_after_append_infoset():
+    """Verify `len(game.nodes)` is correct after `append_infoset`.
+    """
+    game = games.read_from_file("e02.efg")
+    initial_number_of_nodes = len(game.nodes)
+    list_nodes = list(game.nodes)
+
+    member_node = list_nodes[2]           # path=[1]
+    infoset_to_modify = member_node.infoset
+    number_of_infoset_actions = len(infoset_to_modify.actions)
+    terminal_node_to_add = list_nodes[6]  # path=[1, 1, 1]
+
+    game.append_infoset(terminal_node_to_add, infoset_to_modify)
+
+    assert len(game.nodes) == initial_number_of_nodes + number_of_infoset_actions
+
+
+def test_len_after_add_action():
+    """Verify `len(game.nodes)` is correct after `add_action`.
+    """
+    game = games.read_from_file("e01.efg")
+    initial_number_of_nodes = len(game.nodes)
+
+    infoset_to_modify = game.infosets[1]
+
+    num_nodes_in_infoset = len(infoset_to_modify.members)
+
+    game.add_action(infoset_to_modify)
+
+    assert len(game.nodes) == initial_number_of_nodes + num_nodes_in_infoset
+
+
+def test_len_after_delete_action():
+    """Verify `len(game.nodes)` is correct after `delete_action`.
+    """
+    game = games.read_from_file("e02.efg")
+    initial_number_of_nodes = len(game.nodes)
+
+    action_to_delete = game.infosets[0].actions[1]
+
+    # Calculate the total number of nodes within all subtrees
+    # that begin immediately after taking the specified action.
+    nodes_to_delete = 0
+    action_nodes = _get_members(action_to_delete)
+
+    for subtree_root in action_nodes:
+        nodes_to_delete += _count_subtree_nodes(subtree_root)
+
+    game.delete_action(action_to_delete)
+
+    assert len(game.nodes) == initial_number_of_nodes - nodes_to_delete
+
+
+def test_len_after_insert_move():
+    """Verify `len(game.nodes)` is correct after `insert_move`.
+    """
+    game = games.read_from_file("e01.efg")
+    initial_number_of_nodes = len(game.nodes)
+    list_nodes = list(game.nodes)
+
+    node_to_insert_above = list_nodes[3]
+
+    player = game.players[1]
+    num_actions_to_add = 3
+
+    game.insert_move(node_to_insert_above, player, num_actions_to_add)
+
+    assert len(game.nodes) == initial_number_of_nodes + num_actions_to_add
+
+
+def test_len_after_insert_infoset():
+    """Verify `len(game.nodes)` is correct after `insert_infoset`.
+    """
+    game = games.read_from_file("e01.efg")
+    initial_number_of_nodes = len(game.nodes)
+    list_nodes = list(game.nodes)
+
+    member_node = list_nodes[6]           # path=[1]
+    infoset_to_modify = member_node.infoset
+    node_to_insert_above = list_nodes[7]  # path=[0, 1]
+    number_of_infoset_actions = len(infoset_to_modify.actions)
+
+    game.insert_infoset(node_to_insert_above, infoset_to_modify)
+
+    assert len(game.nodes) == initial_number_of_nodes + number_of_infoset_actions
+
+
+def test_len_after_copy_tree():
+    """Verify `len(game.nodes)` is correct after `copy_tree`.
+    """
+    game = games.read_from_file("e01.efg")
+    initial_number_of_nodes = len(game.nodes)
+    list_nodes = list(game.nodes)
+    src_node = list_nodes[3]   # path=[1, 0]
+    dest_node = list_nodes[2]  # path=[0, 0]
+    number_of_src_ancestors = _count_subtree_nodes(src_node)
+
+    game.copy_tree(src_node, dest_node)
+
+    assert len(game.nodes) == initial_number_of_nodes + number_of_src_ancestors - 1
