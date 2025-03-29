@@ -213,6 +213,7 @@ protected:
   mutable bool m_computedValues{false}, m_doCanon{true};
   GameTreeNodeRep *m_root;
   GamePlayerRep *m_chance;
+  std::size_t m_numNodes;
 
   /// @name Private auxiliary functions
   //@{
@@ -265,7 +266,7 @@ public:
   /// Returns the root node of the game
   GameNode GetRoot() const override { return m_root; }
   /// Returns the number of nodes in the game
-  size_t NumNodes() const override;
+  size_t NumNodes() const override { return m_numNodes; }
   //@}
 
   void DeleteOutcome(const GameOutcome &) override;
