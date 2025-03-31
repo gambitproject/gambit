@@ -50,54 +50,42 @@ GameExplicitRep::~GameExplicitRep()
 //                  GameExplicitRep: General data access
 //------------------------------------------------------------------------
 
-Rational GameExplicitRep::GetMinPayoff(int player) const
+Rational GameExplicitRep::GetMinPayoff() const
 {
-  int p1, p2;
-
-  if (m_outcomes.empty()) {
-    return Rational(0);
-  }
-
-  if (player) {
-    p1 = p2 = player;
-  }
-  else {
-    p1 = 1;
-    p2 = NumPlayers();
-  }
-
-  Rational minpay = m_outcomes.front()->GetPayoff<Rational>(GetPlayer(p1));
-  for (auto outcome : m_outcomes) {
-    for (int p = p1; p <= p2; p++) {
-      minpay = std::min(minpay, outcome->GetPayoff<Rational>(GetPlayer(p)));
-    }
-  }
-  return minpay;
+  return std::accumulate(
+      std::next(m_players.begin()), m_players.end(), GetMinPayoff(m_players.front()),
+      [this](const Rational &r, const GamePlayer &p) { return std::min(r, GetMinPayoff(p)); });
 }
 
-Rational GameExplicitRep::GetMaxPayoff(int player) const
+Rational GameExplicitRep::GetMinPayoff(const GamePlayer &p_player) const
 {
-  int p1, p2;
-
   if (m_outcomes.empty()) {
     return Rational(0);
   }
+  return std::accumulate(std::next(m_outcomes.begin()), m_outcomes.end(),
+                         m_outcomes.front()->GetPayoff<Rational>(p_player),
+                         [&p_player](const Rational &r, const GameOutcomeRep *c) {
+                           return std::min(r, c->GetPayoff<Rational>(p_player));
+                         });
+}
 
-  if (player) {
-    p1 = p2 = player;
-  }
-  else {
-    p1 = 1;
-    p2 = NumPlayers();
-  }
+Rational GameExplicitRep::GetMaxPayoff() const
+{
+  return std::accumulate(
+      std::next(m_players.begin()), m_players.end(), GetMaxPayoff(m_players.front()),
+      [this](const Rational &r, const GamePlayer &p) { return std::max(r, GetMaxPayoff(p)); });
+}
 
-  Rational maxpay = m_outcomes.front()->GetPayoff<Rational>(GetPlayer(p1));
-  for (auto outcome : m_outcomes) {
-    for (int p = p1; p <= p2; p++) {
-      maxpay = std::max(maxpay, outcome->GetPayoff<Rational>(GetPlayer(p)));
-    }
+Rational GameExplicitRep::GetMaxPayoff(const GamePlayer &p_player) const
+{
+  if (m_outcomes.empty()) {
+    return Rational(0);
   }
-  return maxpay;
+  return std::accumulate(std::next(m_outcomes.begin()), m_outcomes.end(),
+                         m_outcomes.front()->GetPayoff<Rational>(p_player),
+                         [&p_player](const Rational &r, const GameOutcomeRep *c) {
+                           return std::max(r, c->GetPayoff<Rational>(p_player));
+                         });
 }
 
 //------------------------------------------------------------------------

@@ -227,9 +227,9 @@ class Player:
     @property
     def min_payoff(self) -> Rational:
         """Returns the smallest payoff for the player in any outcome of the game."""
-        return rat_to_py(self.player.deref().GetGame().deref().GetMinPayoff(self.number + 1))
+        return rat_to_py(self.player.deref().GetGame().deref().GetMinPayoff(self.player))
 
     @property
     def max_payoff(self) -> Rational:
         """Returns the largest payoff for the player in any outcome of the game."""
-        return rat_to_py(self.player.deref().GetGame().deref().GetMaxPayoff(self.number + 1))
+        return rat_to_py(self.player.deref().GetGame().deref().GetMaxPayoff(self.player))

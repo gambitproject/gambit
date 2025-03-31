@@ -704,12 +704,12 @@ class Game:
     @property
     def min_payoff(self) -> typing.Union[decimal.Decimal, Rational]:
         """The minimum payoff in the game."""
-        return rat_to_py(self.game.deref().GetMinPayoff(0))
+        return rat_to_py(self.game.deref().GetMinPayoff())
 
     @property
     def max_payoff(self) -> typing.Union[decimal.Decimal, Rational]:
         """The maximum payoff in the game."""
-        return rat_to_py(self.game.deref().GetMaxPayoff(0))
+        return rat_to_py(self.game.deref().GetMaxPayoff())
 
     def set_chance_probs(self, infoset: typing.Union[Infoset, str], probs: typing.Sequence):
         """Set the action probabilities at chance information set `infoset`.

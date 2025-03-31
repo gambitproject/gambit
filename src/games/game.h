@@ -444,10 +444,14 @@ public:
 
   /// Returns true if the game is constant-sum
   virtual bool IsConstSum() const = 0;
-  /// Returns the smallest payoff in any outcome of the game
-  virtual Rational GetMinPayoff(int pl = 0) const = 0;
-  /// Returns the largest payoff in any outcome of the game
-  virtual Rational GetMaxPayoff(int pl = 0) const = 0;
+  /// Returns the smallest payoff to any player in any outcome of the game
+  virtual Rational GetMinPayoff() const = 0;
+  /// Returns the smallest payoff to the player in any outcome of the game
+  virtual Rational GetMinPayoff(const GamePlayer &p_player) const = 0;
+  /// Returns the largest payoff to any player in any outcome of the game
+  virtual Rational GetMaxPayoff() const = 0;
+  /// Returns the largest payoff to the player in any outcome of the game
+  virtual Rational GetMaxPayoff(const GamePlayer &p_player) const = 0;
 
   /// Returns true if the game is perfect recall.  If not,
   /// a pair of violating information sets is returned in the parameters.

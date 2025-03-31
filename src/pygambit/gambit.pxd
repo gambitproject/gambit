@@ -218,8 +218,10 @@ cdef extern from "games/game.h":
         int BehavProfileLength() except +
 
         bool IsConstSum() except +
-        c_Rational GetMinPayoff(int) except +
-        c_Rational GetMaxPayoff(int) except +
+        c_Rational GetMinPayoff() except +
+        c_Rational GetMinPayoff(c_GamePlayer) except +
+        c_Rational GetMaxPayoff() except +
+        c_Rational GetMaxPayoff(c_GamePlayer) except +
         bool IsPerfectRecall() except +
 
         c_Game SetChanceProbs(c_GameInfoset, Array[c_Number]) except +

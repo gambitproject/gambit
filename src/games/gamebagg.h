@@ -122,10 +122,14 @@ public:
   virtual bool IsBagg() const { return true; }
   bool IsPerfectRecall(GameInfoset &, GameInfoset &) const override { return true; }
   bool IsConstSum() const override { throw UndefinedException(); }
-  /// Returns the smallest payoff in any outcome of the game
-  Rational GetMinPayoff(int) const override { return Rational(baggPtr->getMinPayoff()); }
-  /// Returns the largest payoff in any outcome of the game
-  Rational GetMaxPayoff(int) const override { return Rational(baggPtr->getMaxPayoff()); }
+  /// Returns the smallest payoff to any player in any outcome of the game
+  Rational GetMinPayoff() const override { return Rational(baggPtr->getMinPayoff()); }
+  /// Returns the smallest payoff to the player in any outcome of the game
+  Rational GetMinPayoff(const GamePlayer &) const override { throw UndefinedException(); }
+  /// Returns the largest payoff to any player in any outcome of the game
+  Rational GetMaxPayoff() const override { return Rational(baggPtr->getMaxPayoff()); }
+  /// Returns the largest payoff to the player in any outcome of the game
+  Rational GetMaxPayoff(const GamePlayer &) const override { throw UndefinedException(); }
   //@}
 
   /// @name Writing data files
