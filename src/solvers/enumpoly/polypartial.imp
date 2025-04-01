@@ -84,9 +84,9 @@ template <class T> bool PolynomialDerivatives<T>::PolyHasNoRootsIn(const Rectang
   if (m_treeroot.data.IsMultiaffine()) {
     return MultiaffinePolyHasNoRootsIn(r);
   }
-  Vector<T> center = r.Center();
+  const Vector<T> center = r.Center();
   T constant = Gambit::abs(m_treeroot.data.Evaluate(center));
-  Vector<T> HalvesOfSideLengths = r.SideLengths() / 2;
+  const Vector<T> HalvesOfSideLengths = r.SideLengths() / 2;
   return MaximalNonconstantContribution(center, HalvesOfSideLengths) < constant;
 }
 
@@ -119,7 +119,7 @@ template <class T>
 bool PolynomialDerivatives<T>::MultiaffinePolyEverywhereNegativeIn(const Rectangle<T> &r) const
 {
   if (GetDimension() == 0) {
-    Vector<T> point(GetDimension());
+    const Vector<T> point(GetDimension());
     return m_treeroot.data.Evaluate(point) < static_cast<T>(0);
   }
 

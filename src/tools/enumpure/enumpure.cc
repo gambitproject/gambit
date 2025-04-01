@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
   }
 
   try {
-    Game game = ReadGame(*input_stream);
+    const Game game = ReadGame(*input_stream);
     std::shared_ptr<StrategyProfileRenderer<Rational>> renderer;
     if (reportStrategic || !game->IsTree()) {
       if (printDetail) {

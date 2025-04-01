@@ -27,8 +27,7 @@
 
 using namespace Gambit::gametracer;
 
-namespace Gambit {
-namespace Nash {
+namespace Gambit::Nash {
 
 List<MixedStrategyProfile<double>> IPAStrategySolve(const Game &p_game,
                                                     StrategyCallbackType<double> p_callback)
@@ -51,8 +50,8 @@ List<MixedStrategyProfile<double>> IPAStrategySolve(const MixedStrategyProfile<d
         "Computing equilibria of games with imperfect recall is not supported.");
   }
 
-  std::shared_ptr<gnmgame> A = BuildGame(p_pert.GetGame(), false);
-  cvector g(ToPerturbation(p_pert));
+  const std::shared_ptr<gnmgame> A = BuildGame(p_pert.GetGame(), false);
+  const cvector g(ToPerturbation(p_pert));
   cvector ans(A->getNumActions());
   cvector zh(A->getNumActions(), 1.0);
   while (true) {
@@ -69,5 +68,4 @@ List<MixedStrategyProfile<double>> IPAStrategySolve(const MixedStrategyProfile<d
   return solutions;
 }
 
-} // namespace Nash
-} // namespace Gambit
+} // namespace Gambit::Nash

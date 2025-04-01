@@ -104,7 +104,7 @@ public:
   /// Returns the set of players in the game
   Array<GamePlayer> GetPlayers() const { return m_nfg->GetPlayers(); }
   /// Returns the set of strategies in the support for a player
-  Support GetStrategies(const GamePlayer &p_player) const { return Support(this, p_player); }
+  Support GetStrategies(const GamePlayer &p_player) const { return {this, p_player}; }
 
   /// Returns true exactly when the strategy is in the support.
   bool Contains(const GameStrategy &s) const { return contains(m_support.at(s->GetPlayer()), s); }

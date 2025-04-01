@@ -36,14 +36,14 @@ namespace Gambit {
 /// operations on it.
 class GameObject {
 protected:
-  int m_refCount;
-  bool m_valid;
+  int m_refCount{0};
+  bool m_valid{true};
 
 public:
   /// @name Lifecycle
   //@{
   /// Constructor; initializes reference count
-  GameObject() : m_refCount(0), m_valid(true) {}
+  GameObject() = default;
 
   /// Destructor
   virtual ~GameObject() = default;
@@ -86,13 +86,13 @@ public:
 
 class BaseGameRep {
 protected:
-  int m_refCount;
+  int m_refCount{0};
 
 public:
   /// @name Lifecycle
   //@{
-  /// Constructor; initializes reference count
-  BaseGameRep() : m_refCount(0) {}
+  /// Constructor
+  BaseGameRep() = default;
 
   /// Destructor
   virtual ~BaseGameRep() = default;

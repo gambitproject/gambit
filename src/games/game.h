@@ -233,18 +233,16 @@ class GameStrategyRep : public GameObject {
   template <class T> friend class MixedBehaviorProfile;
 
 private:
-  int m_number;
+  int m_number{0};
   GamePlayerRep *m_player;
-  long m_offset;
+  long m_offset{0L};
   std::string m_label;
   Array<int> m_behav;
 
   /// @name Lifecycle
   //@{
   /// Creates a new strategy for the given player.
-  explicit GameStrategyRep(GamePlayerRep *p_player) : m_number(0), m_player(p_player), m_offset(0L)
-  {
-  }
+  explicit GameStrategyRep(GamePlayerRep *p_player) : m_player(p_player) {}
   //@}
 
 public:
@@ -400,9 +398,9 @@ class GameRep : public BaseGameRep {
 
 protected:
   std::string m_title, m_comment;
-  unsigned int m_version;
+  unsigned int m_version{0};
 
-  GameRep() : m_version(0) {}
+  GameRep() = default;
 
   /// @name Managing the representation
   //@{
@@ -472,7 +470,7 @@ public:
     throw UndefinedException();
   }
   /// Write the game in .efg format to the specified stream
-  virtual void WriteEfgFile(std::ostream &, const GameNode &subtree = 0) const
+  virtual void WriteEfgFile(std::ostream &, const GameNode &subtree = nullptr) const
   {
     throw UndefinedException();
   }
@@ -672,7 +670,9 @@ Game ReadGame(std::istream &p_stream);
 template <class Generator>
 std::list<Rational> UniformOnSimplex(int p_denom, size_t p_dim, Generator &generator)
 {
+  // NOLINTBEGIN(misc-const-correctness)
   std::uniform_int_distribution dist(1, p_denom + int(p_dim) - 1);
+  // NOLINTEND(misc-const-correctness)
   std::set<int> cutoffs;
   while (cutoffs.size() < p_dim - 1) {
     cutoffs.insert(dist(generator));

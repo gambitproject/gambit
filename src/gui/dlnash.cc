@@ -140,7 +140,7 @@ void gbtNashChoiceDialog::OnCount(wxCommandEvent &p_event)
 
 void gbtNashChoiceDialog::OnMethod(wxCommandEvent &p_event)
 {
-  wxString method = m_methodChoice->GetString(p_event.GetSelection());
+  const wxString method = m_methodChoice->GetString(p_event.GetSelection());
 
   if (method == s_simpdiv || method == s_enummixed || method == s_gnm || method == s_ipa) {
     m_repChoice->SetSelection(1);
@@ -158,10 +158,10 @@ bool gbtNashChoiceDialog::UseStrategic() const
 
 gbtAnalysisOutput *gbtNashChoiceDialog::GetCommand() const
 {
-  bool useEfg = m_repChoice && m_repChoice->GetSelection() == 0;
+  const bool useEfg = m_repChoice && m_repChoice->GetSelection() == 0;
   gbtAnalysisOutput *cmd = nullptr;
 
-  wxString method = m_methodChoice->GetStringSelection();
+  const wxString method = m_methodChoice->GetStringSelection();
 
   wxString prefix, options, game, count;
 #ifdef __WXMAC__

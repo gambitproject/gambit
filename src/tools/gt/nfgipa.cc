@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
   opterr = 0;
   bool quiet = false, verbose = false;
   int numDecimals = 6, numVectors = 1;
-  std::string startFile;
+  const std::string startFile;
 
   int long_opt_index = 0;
   struct option long_options[] = {{"help", 0, nullptr, 'h'},
@@ -127,8 +127,8 @@ int main(int argc, char *argv[])
   }
 
   try {
-    Game game = ReadGame(*input_stream);
-    std::shared_ptr<StrategyProfileRenderer<double>> renderer(
+    const Game game = ReadGame(*input_stream);
+    const std::shared_ptr<StrategyProfileRenderer<double>> renderer(
         new MixedStrategyCSVRenderer<double>(std::cout, numDecimals));
 
     List<MixedStrategyProfile<double>> perts;

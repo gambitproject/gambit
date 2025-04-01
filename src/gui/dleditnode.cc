@@ -52,7 +52,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, const Gambit::GameNode &p_nod
     if (p_node->GetInfoset()->IsChanceInfoset()) {
       int selection = 0;
       for (int iset = 1; iset <= p_node->GetGame()->GetChance()->NumInfosets(); iset++) {
-        Gambit::GameInfoset infoset = p_node->GetGame()->GetChance()->GetInfoset(iset);
+        const Gambit::GameInfoset infoset = p_node->GetGame()->GetChance()->GetInfoset(iset);
         if (infoset->NumActions() == p_node->NumChildren()) {
           m_infosetList.push_back(infoset);
           m_infoset->Append(wxString::Format(_("Chance infoset %d"), infoset->GetNumber()));
@@ -66,9 +66,9 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, const Gambit::GameNode &p_nod
     else {
       int selection = 0;
       for (int pl = 1; pl <= p_node->GetGame()->NumPlayers(); pl++) {
-        Gambit::GamePlayer player = p_node->GetGame()->GetPlayer(pl);
+        const Gambit::GamePlayer player = p_node->GetGame()->GetPlayer(pl);
         for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-          Gambit::GameInfoset infoset = player->GetInfoset(iset);
+          const Gambit::GameInfoset infoset = player->GetInfoset(iset);
           if (infoset->NumActions() == p_node->NumChildren()) {
             m_infosetList.push_back(infoset);
             m_infoset->Append(wxString::Format(_("Player %d, Infoset %d"), pl, iset));
@@ -106,9 +106,9 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, const Gambit::GameNode &p_nod
   m_outcome = new wxChoice(this, wxID_ANY);
   m_outcome->Append(_("(null)"));
   m_outcome->SetSelection(0);
-  Gambit::Game efg = p_node->GetGame();
+  const Gambit::Game efg = p_node->GetGame();
   for (int outc = 1; outc <= efg->NumOutcomes(); outc++) {
-    Gambit::GameOutcome outcome = efg->GetOutcome(outc);
+    const Gambit::GameOutcome outcome = efg->GetOutcome(outc);
     std::string item = Gambit::lexical_cast<std::string>(outc) + ": " + outcome->GetLabel();
     if (item.empty()) {
       item = "Outcome" + Gambit::lexical_cast<std::string>(outc);

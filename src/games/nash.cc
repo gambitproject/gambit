@@ -87,7 +87,7 @@ public:
 
     for (const auto &subplayer : p_profile.GetGame()->GetPlayers()) {
       for (const auto &subinfoset : subplayer->GetInfosets()) {
-        GameInfoset infoset = p_infosetMap.at(subinfoset->GetLabel());
+        const GameInfoset infoset = p_infosetMap.at(subinfoset->GetLabel());
         const auto &subactions = subinfoset->GetActions();
         auto subaction = subactions.begin();
         for (const auto &action : infoset->GetActions()) {
@@ -97,7 +97,7 @@ public:
       }
     }
 
-    GameOutcome outcome = p_subroot->GetOutcome();
+    const GameOutcome outcome = p_subroot->GetOutcome();
     const auto &subplayers = p_profile.GetGame()->GetPlayers();
     auto subplayer = subplayers.begin();
     for (const auto &player : p_subroot->GetGame()->GetPlayers()) {
@@ -138,7 +138,7 @@ std::list<SubgameSolution<T>> SolveSubgames(const GameNode &p_root,
     }
     // This prevents double-counting of outcomes at roots of subgames.
     // By convention, we will just put the payoffs in the parent subgame.
-    Game subgame = p_root->CopySubgame();
+    const Game subgame = p_root->CopySubgame();
     subgame->GetRoot()->SetOutcome(nullptr);
 
     for (const auto &solution : p_solver(subgame)) {
@@ -168,7 +168,7 @@ template <class T>
 List<MixedBehaviorProfile<T>> SolveBySubgames(const Game &p_game, BehaviorSolverType<T> p_solver,
                                               BehaviorCallbackType<T> p_onEquilibrium)
 {
-  Game efg = p_game->GetRoot()->CopySubgame();
+  const Game efg = p_game->GetRoot()->CopySubgame();
 
   int index = 1;
   std::map<std::string, GameInfoset> infoset_map;

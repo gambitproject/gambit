@@ -30,8 +30,7 @@
 #include "gambit.h"
 #include "games/gameagg.h"
 
-namespace Gambit {
-namespace gametracer {
+namespace Gambit::gametracer {
 
 class aggame : public gnmgame {
 public:
@@ -67,7 +66,7 @@ public:
   void getPayoffVector(cvector &dest, int player, const cvector &s) const override
   {
     auto ss = const_cast<cvector &>(s);
-    std::vector<double> sp(ss.values(), ss.values() + ss.getm());
+    const std::vector<double> sp(ss.values(), ss.values() + ss.getm());
     std::vector<double> d(aggPtr->getNumActions(player));
     aggPtr->getPayoffVector(d, player, sp);
     std::copy(d.begin(), d.end(), dest.values());
@@ -105,7 +104,6 @@ private:
                                 int act1, int player2) const;
 };
 
-} // namespace gametracer
-} // end namespace Gambit
+} // end namespace Gambit::gametracer
 
 #endif // GAMBIT_GTRACER_AGGAME_H

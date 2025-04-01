@@ -361,7 +361,7 @@ template <class T> MixedStrategyProfileRep<T> *MixedStrategyProfileRep<T>::Norma
 
 template <class T> T MixedStrategyProfileRep<T>::GetRegret(const GameStrategy &p_strategy) const
 {
-  GamePlayer player = p_strategy->GetPlayer();
+  const GamePlayer player = p_strategy->GetPlayer();
   T payoff = GetPayoffDeriv(player->GetNumber(), p_strategy);
   T brpayoff = payoff;
   for (auto strategy : player->GetStrategies()) {

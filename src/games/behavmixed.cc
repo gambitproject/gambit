@@ -105,7 +105,7 @@ void MixedBehaviorProfile<T>::RealizationProbs(const MixedStrategyProfile<T> &mp
         }
       }
       else if (GetSupport().Contains(node->GetInfoset()->GetAction(i))) {
-        int num_actions = GetSupport().GetActions(node->GetInfoset()).size();
+        const int num_actions = GetSupport().GetActions(node->GetInfoset()).size();
         prob = T(1) / T(num_actions);
       }
       else {
@@ -203,7 +203,7 @@ template <class T> void MixedBehaviorProfile<T>::SetCentroid()
 template <class T> void MixedBehaviorProfile<T>::UndefinedToCentroid()
 {
   CheckVersion();
-  Game efg = m_support.GetGame();
+  const Game efg = m_support.GetGame();
   for (auto infoset : efg->GetInfosets()) {
     if (GetInfosetProb(infoset) > T(0)) {
       continue;
@@ -289,8 +289,8 @@ template <class T> T MixedBehaviorProfile<T>::GetInfosetProb(const GameInfoset &
   CheckVersion();
   ComputeSolutionData();
   T prob = T(0);
-  for (auto iset : iset->GetMembers()) {
-    prob += map_realizProbs[iset];
+  for (auto member : iset->GetMembers()) {
+    prob += map_realizProbs[member];
   }
   return prob;
 }
@@ -426,11 +426,11 @@ T MixedBehaviorProfile<T>::DiffActionValue(const GameAction &p_action,
   CheckVersion();
   ComputeSolutionData();
   T deriv = T(0);
-  GameInfoset infoset = p_action->GetInfoset();
-  GamePlayer player = p_action->GetInfoset()->GetPlayer();
+  const GameInfoset infoset = p_action->GetInfoset();
+  const GamePlayer player = p_action->GetInfoset()->GetPlayer();
 
   for (auto member : infoset->GetMembers()) {
-    GameNode child = member->GetChild(p_action);
+    const GameNode child = member->GetChild(p_action);
 
     deriv += DiffRealizProb(member, p_oppAction) *
              (map_nodeValues[child][player] - map_actionValues[p_action]);
@@ -451,7 +451,7 @@ T MixedBehaviorProfile<T>::DiffRealizProb(const GameNode &p_node,
   bool isPrec = false;
   GameNode node = p_node;
   while (node->GetParent()) {
-    GameAction prevAction = node->GetPriorAction();
+    const GameAction prevAction = node->GetPriorAction();
     if (prevAction != p_oppAction) {
       deriv *= GetActionProb(prevAction);
     }
@@ -472,7 +472,7 @@ T MixedBehaviorProfile<T>::DiffNodeValue(const GameNode &p_node, const GamePlaye
   ComputeSolutionData();
 
   if (p_node->NumChildren() > 0) {
-    GameInfoset infoset = p_node->GetInfoset();
+    const GameInfoset infoset = p_node->GetInfoset();
 
     if (infoset == p_oppAction->GetInfoset()) {
       // We've encountered the action; since we assume perfect recall,
@@ -518,7 +518,7 @@ void MixedBehaviorProfile<T>::ComputePass2_beliefs_nodeValues_actionValues(
     const GameNode &node) const
 {
   if (node->GetOutcome()) {
-    GameOutcome outcome = node->GetOutcome();
+    const GameOutcome outcome = node->GetOutcome();
     for (auto player : m_support.GetGame()->GetPlayers()) {
       map_nodeValues[node][player] += outcome->GetPayoff<T>(player);
     }
@@ -528,7 +528,7 @@ void MixedBehaviorProfile<T>::ComputePass2_beliefs_nodeValues_actionValues(
     return;
   }
 
-  GameInfoset iset = node->GetInfoset();
+  const GameInfoset iset = node->GetInfoset();
   auto nodes = iset->GetMembers();
   T infosetProb =
       std::accumulate(nodes.begin(), nodes.end(), T(0),
@@ -550,7 +550,7 @@ void MixedBehaviorProfile<T>::ComputePass2_beliefs_nodeValues_actionValues(
   for (auto child : node->GetChildren()) {
     ComputePass2_beliefs_nodeValues_actionValues(child);
 
-    GameAction act = child->GetPriorAction();
+    const GameAction act = child->GetPriorAction();
 
     for (auto player : m_support.GetGame()->GetPlayers()) {
       map_nodeValues[node][player] += GetActionProb(act) * map_nodeValues[child][player];

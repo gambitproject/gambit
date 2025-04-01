@@ -72,7 +72,7 @@ protected:
   GamePlayerRep *m_player;
   Array<GameTreeActionRep *> m_actions;
   std::vector<GameTreeNodeRep *> m_members;
-  int flag, whichbranch{0};
+  int flag{0}, whichbranch{0};
   Array<Number> m_probs;
 
   GameTreeInfosetRep(GameTreeRep *p_efg, int p_number, GamePlayerRep *p_player, int p_actions);
@@ -140,12 +140,12 @@ class GameTreeNodeRep : public GameNodeRep {
   template <class T> friend class MixedBehaviorProfile;
 
 protected:
-  int m_number;
+  int m_number{0};
   GameTreeRep *m_efg;
   std::string m_label;
-  GameTreeInfosetRep *m_infoset;
+  GameTreeInfosetRep *m_infoset{nullptr};
   GameTreeNodeRep *m_parent;
-  GameOutcomeRep *m_outcome;
+  GameOutcomeRep *m_outcome{nullptr};
   Array<GameTreeNodeRep *> m_children;
   GameTreeNodeRep *whichbranch{nullptr}, *ptr{nullptr};
 
@@ -210,7 +210,7 @@ class GameTreeRep : public GameExplicitRep {
   friend class GameTreeActionRep;
 
 protected:
-  mutable bool m_computedValues, m_doCanon;
+  mutable bool m_computedValues{false}, m_doCanon{true};
   GameTreeNodeRep *m_root;
   GamePlayerRep *m_chance;
 
@@ -272,7 +272,7 @@ public:
 
   /// @name Writing data files
   //@{
-  void WriteEfgFile(std::ostream &, const GameNode &p_node = 0) const override;
+  void WriteEfgFile(std::ostream &, const GameNode &p_node = nullptr) const override;
   void WriteNfgFile(std::ostream &) const override;
   //@}
 

@@ -96,7 +96,7 @@ void ConjugatePRMinimizer::IntermediatePoint(const Function &fdf, const Vector<d
   double stepb, fb;
 
 trial:
-  double u = fabs(pg * lambda * stepc);
+  const double u = fabs(pg * lambda * stepc);
   if ((fc - fa) + u == 0) {
     // TLT: Added this check 2002/08/31 due to floating point exceptions
     // under MSW.  Not really sure how to handle this correctly.
@@ -160,12 +160,12 @@ mid_trial:
     return; /* MAX ITERATIONS */
   }
 
-  double dw = w - u;
-  double dv = v - u;
+  const double dw = w - u;
+  const double dv = v - u;
   double du = 0.0;
 
-  double e1 = ((fv - fu) * dw * dw + (fu - fw) * dv * dv);
-  double e2 = 2.0 * ((fv - fu) * dw + (fu - fw) * dv);
+  const double e1 = ((fv - fu) * dw * dw + (fu - fw) * dv * dv);
+  const double e2 = 2.0 * ((fv - fu) * dw + (fu - fw) * dv);
 
   if (e2 != 0.0) {
     du = e1 / e2;
@@ -272,7 +272,7 @@ void ConjugatePRMinimizer::Set(const Function &fdf, const Vector<double> &x, dou
   p = gradient;
   g0 = gradient;
 
-  double gnorm = std::sqrt(gradient.NormSquared());
+  const double gnorm = std::sqrt(gradient.NormSquared());
   pnorm = gnorm;
   g0norm = gnorm;
 }
@@ -282,9 +282,12 @@ void ConjugatePRMinimizer::Restart() { iter = 0; }
 bool ConjugatePRMinimizer::Iterate(const Function &fdf, Vector<double> &x, double &f,
                                    Vector<double> &gradient, Vector<double> &dx)
 {
-  double fa = f, fb, fc;
+  const double fa = f;
+  double fb, fc;
   double dir;
-  double stepa = 0.0, stepb, stepc = step, tol = m_tol;
+  const double stepa = 0.0;
+  double stepb;
+  const double stepc = step, tol = m_tol;
 
   double g1norm;
   double pg;

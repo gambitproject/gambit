@@ -26,8 +26,7 @@
 #include "core/function.h"
 #include "liap.h"
 
-namespace Gambit {
-namespace Nash {
+namespace Gambit::Nash {
 
 //------------------------------------------------------------------------
 //                      class AgentLyapunovFunction
@@ -158,8 +157,8 @@ List<MixedBehaviorProfile<double>> LiapBehaviorSolve(const MixedBehaviorProfile<
   MixedBehaviorProfile<double> p(p_start);
   p_callback(p, "start");
 
-  AgentLyapunovFunction F(p);
-  Matrix<double> xi(p.BehaviorProfileLength(), p.BehaviorProfileLength());
+  const AgentLyapunovFunction F(p);
+  const Matrix<double> xi(p.BehaviorProfileLength(), p.BehaviorProfileLength());
   ConjugatePRMinimizer minimizer(p.BehaviorProfileLength());
   Vector<double> gradient(p.BehaviorProfileLength()), dx(p.BehaviorProfileLength());
   double fval;
@@ -187,5 +186,4 @@ List<MixedBehaviorProfile<double>> LiapBehaviorSolve(const MixedBehaviorProfile<
   return solutions;
 }
 
-} // namespace Nash
-} // namespace Gambit
+} // namespace Gambit::Nash

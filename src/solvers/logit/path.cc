@@ -50,19 +50,19 @@ void Givens(Matrix<double> &b, Matrix<double> &q, double &c1, double &c2, int l1
   else {
     sn = std::sqrt(1.0 + sqr(c2 / c1)) * fabs(c1);
   }
-  double s1 = c1 / sn;
-  double s2 = c2 / sn;
+  const double s1 = c1 / sn;
+  const double s2 = c2 / sn;
 
   for (int k = 1; k <= q.NumColumns(); k++) {
-    double sv1 = q(l1, k);
-    double sv2 = q(l2, k);
+    const double sv1 = q(l1, k);
+    const double sv2 = q(l2, k);
     q(l1, k) = s1 * sv1 + s2 * sv2;
     q(l2, k) = -s2 * sv1 + s1 * sv2;
   }
 
   for (int k = l3; k <= b.NumColumns(); k++) {
-    double sv1 = b(l1, k);
-    double sv2 = b(l2, k);
+    const double sv1 = b(l1, k);
+    const double sv2 = b(l2, k);
     b(l1, k) = s1 * sv1 + s2 * sv2;
     b(l2, k) = -s2 * sv1 + s1 * sv2;
   }
@@ -182,7 +182,7 @@ void PathTracer::TracePath(
 
       decel = std::max(decel, std::sqrt(dist / c_maxDist) * m_maxDecel);
       if (iter >= 2) {
-        double contr = dist / (disto + c_tol * c_eta);
+        const double contr = dist / (disto + c_tol * c_eta);
         if (contr > c_maxContr) {
           accept = false;
           break;
@@ -203,7 +203,7 @@ void PathTracer::TracePath(
 
     // Obtain the tangent at the next step
     q.GetRow(q.NumRows(), newT);
-    double omega_flip = (t * newT < 0.0) ? -1.0 : 1.0;
+    const double omega_flip = (t * newT < 0.0) ? -1.0 : 1.0;
 
     if (omega_flip == -1.0) {
       // The orientation of the curve has changed, indicating a bifurcation.

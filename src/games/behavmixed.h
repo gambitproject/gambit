@@ -224,7 +224,7 @@ template <class Generator>
 MixedBehaviorProfile<double> GameRep::NewRandomBehaviorProfile(Generator &generator) const
 {
   auto profile = MixedBehaviorProfile<double>(Game(const_cast<GameRep *>(this)));
-  std::exponential_distribution<> dist(1);
+  std::exponential_distribution<> dist(1); // NOLINT(misc-const-correctness)
   for (auto player : GetPlayers()) {
     for (auto infoset : player->GetInfosets()) {
       for (auto action : infoset->GetActions()) {

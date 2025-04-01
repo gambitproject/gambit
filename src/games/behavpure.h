@@ -43,7 +43,7 @@ public:
   explicit PureBehaviorProfile(const Game &);
   //@}
 
-  Game GetGame(void) const { return m_efg; }
+  Game GetGame() const { return m_efg; }
 
   bool operator==(const PureBehaviorProfile &p_other) const
   {

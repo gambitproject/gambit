@@ -66,10 +66,10 @@ gbtTablePlayerIcon::gbtTablePlayerIcon(wxWindow *p_parent, int p_player)
 
 void gbtTablePlayerIcon::OnLeftClick(wxMouseEvent &)
 {
-  wxBitmap bitmap(person_xpm);
+  const wxBitmap bitmap(person_xpm);
 
 #if defined(__WXMSW__) or defined(__WXMAC__)
-  wxImage image = bitmap.ConvertToImage();
+  const wxImage image = bitmap.ConvertToImage();
 #else
   wxIcon image;
   image.CopyFromBitmap(bitmap);
@@ -170,7 +170,7 @@ gbtTablePlayerPanel::gbtTablePlayerPanel(wxWindow *p_parent, gbtNfgPanel *p_nfgP
 
 void gbtTablePlayerPanel::OnUpdate()
 {
-  wxColour color = m_doc->GetStyle().GetPlayerColor(m_player);
+  const wxColour color = m_doc->GetStyle().GetPlayerColor(m_player);
 
   m_playerLabel->SetForegroundColour(color);
   m_playerLabel->SetValue(
@@ -179,7 +179,7 @@ void gbtTablePlayerPanel::OnUpdate()
   if (m_doc->GetCurrentProfile() > 0) {
     m_payoff->SetForegroundColour(color);
 
-    std::string pay = m_doc->GetProfiles().GetPayoff(m_player);
+    const std::string pay = m_doc->GetProfiles().GetPayoff(m_player);
     m_payoff->SetLabel(wxT("Payoff: ") + wxString(pay.c_str(), *wxConvCurrent));
     GetSizer()->Show(m_payoff, true);
   }
@@ -216,7 +216,7 @@ void gbtTablePlayerPanel::OnSetColor(wxCommandEvent &)
   dialog.SetTitle(wxString::Format(_("Choose color for player %d"), m_player));
 
   if (dialog.ShowModal() == wxID_OK) {
-    wxColour color = dialog.GetColourData().GetColour();
+    const wxColour color = dialog.GetColourData().GetColour();
     gbtStyle style = m_doc->GetStyle();
     style.SetPlayerColor(m_player, color);
     m_doc->SetStyle(style);

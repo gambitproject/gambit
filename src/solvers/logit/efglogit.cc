@@ -229,8 +229,8 @@ void EquationSystem::RatioEquation::Gradient(const LogBehavProfile<double> &p_pr
 
 void EquationSystem::GetValue(const Vector<double> &p_point, Vector<double> &p_lhs) const
 {
-  LogBehavProfile<double> profile(PointToLogProfile(m_game, p_point));
-  double lambda = p_point.back();
+  const LogBehavProfile<double> profile(PointToLogProfile(m_game, p_point));
+  const double lambda = p_point.back();
   for (int i = 1; i <= p_lhs.size(); i++) {
     p_lhs[i] = m_equations[i]->Value(profile, lambda);
   }
@@ -238,8 +238,8 @@ void EquationSystem::GetValue(const Vector<double> &p_point, Vector<double> &p_l
 
 void EquationSystem::GetJacobian(const Vector<double> &p_point, Matrix<double> &p_matrix) const
 {
-  LogBehavProfile<double> profile(PointToLogProfile(m_game, p_point));
-  double lambda = p_point.back();
+  const LogBehavProfile<double> profile(PointToLogProfile(m_game, p_point));
+  const double lambda = p_point.back();
 
   for (int i = 1; i <= m_equations.size(); i++) {
     Vector<double> column(p_point.size());
@@ -267,7 +267,7 @@ private:
 
 void TracingCallbackFunction::AppendPoint(const Vector<double> &p_point)
 {
-  MixedBehaviorProfile<double> profile(PointToProfile(m_game, p_point));
+  const MixedBehaviorProfile<double> profile(PointToProfile(m_game, p_point));
   m_profiles.push_back(LogitQREMixedBehaviorProfile(profile, p_point.back(), 1.0));
   m_observer(m_profiles.back());
 }
@@ -300,7 +300,7 @@ EstimatorCallbackFunction::EstimatorCallbackFunction(const Game &p_game,
 
 void EstimatorCallbackFunction::EvaluatePoint(const Vector<double> &p_point)
 {
-  MixedBehaviorProfile<double> profile(PointToProfile(m_game, p_point));
+  const MixedBehaviorProfile<double> profile(PointToProfile(m_game, p_point));
   auto qre = LogitQREMixedBehaviorProfile(
       profile, p_point.back(),
       LogLike(m_frequencies, static_cast<const Vector<double> &>(profile)));
@@ -323,12 +323,12 @@ List<LogitQREMixedBehaviorProfile> LogitBehaviorSolve(const LogitQREMixedBehavio
   tracer.SetMaxDecel(p_maxAccel);
   tracer.SetStepsize(p_firstStep);
 
-  double scale = p_start.GetGame()->GetMaxPayoff() - p_start.GetGame()->GetMinPayoff();
+  const double scale = p_start.GetGame()->GetMaxPayoff() - p_start.GetGame()->GetMinPayoff();
   if (scale != 0.0) {
     p_regret *= scale;
   }
 
-  Game game = p_start.GetGame();
+  const Game game = p_start.GetGame();
   Vector<double> x(ProfileToPoint(p_start));
   TracingCallbackFunction callback(game, p_observer);
   EquationSystem system(game);
@@ -357,7 +357,7 @@ LogitBehaviorSolveLambda(const LogitQREMixedBehaviorProfile &p_start,
   tracer.SetMaxDecel(p_maxAccel);
   tracer.SetStepsize(p_firstStep);
 
-  Game game = p_start.GetGame();
+  const Game game = p_start.GetGame();
   Vector<double> x(ProfileToPoint(p_start));
   TracingCallbackFunction callback(game, p_observer);
   EquationSystem system(game);
@@ -385,13 +385,13 @@ LogitBehaviorEstimate(const MixedBehaviorProfile<double> &p_frequencies, double 
                       double p_omega, double p_stopAtLocal, double p_firstStep, double p_maxAccel,
                       MixedBehaviorObserverFunctionType p_observer)
 {
-  LogitQREMixedBehaviorProfile start(p_frequencies.GetGame());
+  const LogitQREMixedBehaviorProfile start(p_frequencies.GetGame());
   PathTracer tracer;
   tracer.SetMaxDecel(p_maxAccel);
   tracer.SetStepsize(p_firstStep);
 
   Vector<double> x(ProfileToPoint(start)), restart(x);
-  Vector<double> freq_vector(static_cast<const Vector<double> &>(p_frequencies));
+  const Vector<double> freq_vector(static_cast<const Vector<double> &>(p_frequencies));
   EstimatorCallbackFunction callback(
       start.GetGame(), static_cast<const Vector<double> &>(p_frequencies), p_observer);
   EquationSystem system(start.GetGame());

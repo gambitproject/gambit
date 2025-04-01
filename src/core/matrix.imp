@@ -86,7 +86,7 @@ template <class T> Matrix<T> Matrix<T>::operator+(const Matrix<T> &M) const
     throw DimensionException();
   }
 
-  Matrix<T> tmp(this->minrow, this->maxrow, this->mincol, this->maxcol);
+  const Matrix<T> tmp(this->minrow, this->maxrow, this->mincol, this->maxcol);
   for (int i = this->minrow; i <= this->maxrow; i++) {
     T *src1 = this->data[i] + this->mincol;
     T *src2 = M.data[i] + this->mincol;
@@ -106,7 +106,7 @@ template <class T> Matrix<T> Matrix<T>::operator-(const Matrix<T> &M) const
     throw DimensionException();
   }
 
-  Matrix<T> tmp(this->minrow, this->maxrow, this->mincol, this->maxcol);
+  const Matrix<T> tmp(this->minrow, this->maxrow, this->mincol, this->maxcol);
   for (int i = this->minrow; i <= this->maxrow; i++) {
     T *src1 = this->data[i] + this->mincol;
     T *src2 = M.data[i] + this->mincol;
@@ -240,7 +240,7 @@ template <class T> Vector<T> operator*(const Vector<T> &v, const Matrix<T> &M)
 
 template <class T> Matrix<T> Matrix<T>::operator*(const T &s) const
 {
-  Matrix<T> tmp(this->minrow, this->maxrow, this->mincol, this->maxcol);
+  const Matrix<T> tmp(this->minrow, this->maxrow, this->mincol, this->maxcol);
   for (int i = this->minrow; i <= this->maxrow; i++) {
     T *src = this->data[i] + this->mincol;
     T *dst = tmp.data[i] + this->mincol;
@@ -292,7 +292,7 @@ template <class T> Matrix<T> Matrix<T>::operator/(const T &s) const
     throw ZeroDivideException();
   }
 
-  Matrix<T> tmp(this->minrow, this->maxrow, this->mincol, this->maxcol);
+  const Matrix<T> tmp(this->minrow, this->maxrow, this->mincol, this->maxcol);
   for (int i = this->minrow; i <= this->maxrow; i++) {
     T *src = this->data[i] + this->mincol;
     T *dst = tmp.data[i] + this->mincol;

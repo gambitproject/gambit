@@ -71,7 +71,7 @@ void PrintHelp(char *progname)
 int main(int argc, char *argv[])
 {
   int c;
-  bool useFloat = false, uselrs = false, quiet = false, eliminate = true;
+  bool useFloat = false, quiet = false, eliminate = true;
   bool showConnect = false;
   int numDecimals = 6;
 
@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
   }
 
   try {
-    Game game = ReadGame(*input_stream);
+    const Game game = ReadGame(*input_stream);
     if (useFloat) {
       std::shared_ptr<StrategyProfileRenderer<double>> renderer =
           std::make_shared<MixedStrategyCSVRenderer<double>>(std::cout, numDecimals);

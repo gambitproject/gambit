@@ -25,8 +25,7 @@
 
 #include "gambit.h"
 
-namespace Gambit {
-namespace Nash {
+namespace Gambit::Nash {
 
 // This asks whether there is a Nash extension of the MixedBehaviorProfile<double> to
 // all information sets at which the behavioral probabilities are not
@@ -47,7 +46,6 @@ bool ExtendsToAgentNash(const MixedBehaviorProfile<double> &p_solution,
                         const BehaviorSupportProfile &p_littleSupport,
                         const BehaviorSupportProfile &p_bigSupport);
 
-} // namespace Nash
-} // namespace Gambit
+} // namespace Gambit::Nash
 
 #endif // BEHAVEXTEND_H

@@ -29,7 +29,7 @@ VertexEnumerator<T>::VertexEnumerator(const Matrix<T> &A, const Vector<T> &b)
   : mult_opt(std::any_of(b.begin(), b.end(), [](const T &v) { return v == static_cast<T>(0); })),
     A(A), b(b), btemp(b)
 {
-  btemp = static_cast<T>(-1);
+  btemp = static_cast<T>(-1); // NOLINT(cppcoreguidelines-prefer-member-initializer)
   LPTableau<T> tab(A, b);
   Vector<T> c(A.MinCol(), A.MaxCol());
   c = static_cast<T>(1);

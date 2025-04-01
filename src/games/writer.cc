@@ -58,7 +58,7 @@ std::string WriteHTMLFile(const Game &p_game, const GamePlayer &p_rowPlayer,
     }
     theHtml += "</tr>";
     for (int st1 = 1; st1 <= p_rowPlayer->NumStrategies(); st1++) {
-      PureStrategyProfile profile = iter;
+      const PureStrategyProfile profile = iter;
       profile->SetStrategy(p_rowPlayer->GetStrategy(st1));
       theHtml += "<tr>";
       theHtml += "<td align=center><b>";
@@ -138,7 +138,7 @@ std::string WriteLaTeXFile(const Game &p_game, const GamePlayer &p_rowPlayer,
     theHtml += "\\\\\n";
 
     for (int st1 = 1; st1 <= p_rowPlayer->NumStrategies(); st1++) {
-      PureStrategyProfile profile = iter;
+      const PureStrategyProfile profile = iter;
       profile->SetStrategy(p_rowPlayer->GetStrategy(st1));
       theHtml += p_rowPlayer->GetStrategy(st1)->GetLabel();
       theHtml += " & ";

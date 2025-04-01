@@ -44,13 +44,13 @@ public:
   /// @name General data access
   //@{
   /// Returns the smallest payoff to any player in any outcome of the game
-  virtual Rational GetMinPayoff() const override;
+  Rational GetMinPayoff() const override;
   /// Returns the smallest payoff to the player in any outcome of the game
-  virtual Rational GetMinPayoff(const GamePlayer &) const override;
+  Rational GetMinPayoff(const GamePlayer &) const override;
   /// Returns the largest payoff to any player in any outcome of the game
-  virtual Rational GetMaxPayoff() const override;
+  Rational GetMaxPayoff() const override;
   /// Returns the largest payoff to the player in any outcome of the game
-  virtual Rational GetMaxPayoff(const GamePlayer &) const override;
+  Rational GetMaxPayoff(const GamePlayer &) const override;
   //@}
 
   /// @name Dimensions of the game

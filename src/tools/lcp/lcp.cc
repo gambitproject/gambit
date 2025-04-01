@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
   }
 
   try {
-    Game game = ReadGame(*input_stream);
+    const Game game = ReadGame(*input_stream);
     if (!game->IsTree() || useStrategic) {
       if (useFloat) {
         std::shared_ptr<StrategyProfileRenderer<double>> renderer;
@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
           else {
             renderer = std::make_shared<BehavStrategyCSVRenderer<double>>(std::cout, numDecimals);
           }
-          BehaviorSolverType<double> func = [&](const Game &g) {
+          const BehaviorSolverType<double> func = [&](const Game &g) {
             return LcpBehaviorSolve<double>(
                 g, stopAfter, maxDepth,
                 [&](const MixedBehaviorProfile<double> &p, const std::string &label) {
@@ -221,7 +221,7 @@ int main(int argc, char *argv[])
             renderer =
                 std::make_shared<BehavStrategyCSVRenderer<Rational>>(std::cout, numDecimals);
           }
-          BehaviorSolverType<Rational> func = [&](const Game &g) {
+          const BehaviorSolverType<Rational> func = [&](const Game &g) {
             return LcpBehaviorSolve<Rational>(
                 g, stopAfter, maxDepth,
                 [&](const MixedBehaviorProfile<Rational> &p, const std::string &label) {

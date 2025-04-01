@@ -41,7 +41,7 @@ public:
   {
   }
 
-  GameInfoset GetInfoset(void) const { return (action) ? action->GetInfoset() : nullptr; }
+  GameInfoset GetInfoset() const { return (action) ? action->GetInfoset() : nullptr; }
 
   bool operator<(const GameSequenceRep &other) const
   {
@@ -161,8 +161,8 @@ public:
           });
     }
 
-    iterator begin() const { return iterator(m_sfg, false); }
-    iterator end() const { return iterator(m_sfg, true); }
+    iterator begin() const { return {m_sfg, false}; }
+    iterator end() const { return {m_sfg, true}; }
   };
 
   class PlayerSequences {
@@ -249,8 +249,8 @@ public:
       bool operator!=(const iterator &it) const { return !(*this == it); }
     };
 
-    iterator begin() { return iterator(m_sfg); }
-    iterator end() { return iterator(m_sfg, true); }
+    iterator begin() { return {m_sfg}; }
+    iterator end() { return {m_sfg, true}; }
   };
 
   explicit GameSequenceForm(const BehaviorSupportProfile &p_support) : m_support(p_support)
@@ -263,18 +263,15 @@ public:
 
   const BehaviorSupportProfile &GetSupport() const { return m_support; }
 
-  Sequences GetSequences() const { return Sequences(this); }
+  Sequences GetSequences() const { return {this}; }
 
-  PlayerSequences GetSequences(const GamePlayer &p_player) const
-  {
-    return PlayerSequences(this, p_player);
-  }
+  PlayerSequences GetSequences(const GamePlayer &p_player) const { return {this, p_player}; }
 
-  Contingencies GetContingencies() const { return Contingencies(this); }
+  Contingencies GetContingencies() const { return {this}; }
 
   Array<GamePlayer> GetPlayers() const { return m_support.GetGame()->GetPlayers(); }
 
-  Infosets GetInfosets() const { return Infosets(this); }
+  Infosets GetInfosets() const { return {this}; }
 
   const Rational &GetPayoff(const std::map<GamePlayer, GameSequence> &p_profile,
                             const GamePlayer &p_player) const

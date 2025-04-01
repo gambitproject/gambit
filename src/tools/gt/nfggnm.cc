@@ -172,8 +172,8 @@ int main(int argc, char *argv[])
   }
 
   try {
-    Game game = ReadGame(*input_stream);
-    std::shared_ptr<StrategyProfileRenderer<double>> renderer(
+    const Game game = ReadGame(*input_stream);
+    const std::shared_ptr<StrategyProfileRenderer<double>> renderer(
         new MixedStrategyCSVRenderer<double>(std::cout, numDecimals));
 
     List<MixedStrategyProfile<double>> perts;

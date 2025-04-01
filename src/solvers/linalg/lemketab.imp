@@ -30,11 +30,11 @@ namespace Gambit::linalg {
 
 template <class T> int LemkeTableau<T>::SF_PivotIn(int inlabel)
 {
-  int outindex = SF_ExitIndex(inlabel);
+  const int outindex = SF_ExitIndex(inlabel);
   if (outindex == 0) {
     return inlabel;
   }
-  int outlabel = this->Label(outindex);
+  const int outlabel = this->Label(outindex);
   this->Pivot(outindex, inlabel);
   return outlabel;
 }

@@ -23,13 +23,12 @@
 #include "clique.h"
 #include "gambit.h"
 
-namespace Gambit {
-namespace Nash {
+namespace Gambit::Nash {
 
 CliqueEnumerator::CliqueEnumerator(Array<Edge> &edgelist, int maxinp1, int maxinp2)
   : firstedge(std::min(maxinp1, maxinp2) + 1), maxinp1(maxinp1), maxinp2(maxinp2)
 {
-  int numco = getconnco(firstedge, edgelist);
+  const int numco = getconnco(firstedge, edgelist);
   workonco(numco, firstedge, edgelist);
 }
 
@@ -305,7 +304,7 @@ void CliqueEnumerator::findfixpoint(int stk[], // stack
        building up stk[tmplist+count] containing the
        disconnected points */
     for (j = scother; (j < ecother) && (count < *minnod); j++) {
-      int k = stk[j];
+      const int k = stk[j];
       if (!(binspect1 ? connected[p][k] : connected[k][p])) {
         stk[(*tmplist) + count] = k;
         count++;
@@ -596,5 +595,4 @@ void CliqueEnumerator::workonco(int numco, Array<int> &firstedge, Array<Edge> &e
   }
 }
 
-} // namespace Nash
-} // end namespace Gambit
+} // end namespace Gambit::Nash

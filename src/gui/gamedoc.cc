@@ -79,7 +79,7 @@ bool gbtBehavDominanceStack::NextLevel()
     return false;
   }
 
-  Gambit::BehaviorSupportProfile newSupport = m_supports[m_current]->Undominated(m_strict);
+  const Gambit::BehaviorSupportProfile newSupport = m_supports[m_current]->Undominated(m_strict);
 
   if (newSupport != *m_supports[m_current]) {
     m_supports.push_back(new Gambit::BehaviorSupportProfile(newSupport));
@@ -148,7 +148,7 @@ bool gbtStrategyDominanceStack::NextLevel()
     return false;
   }
 
-  Gambit::StrategySupportProfile newSupport = m_supports[m_current]->Undominated(m_strict);
+  const Gambit::StrategySupportProfile newSupport = m_supports[m_current]->Undominated(m_strict);
 
   if (newSupport != *m_supports[m_current]) {
     m_supports.push_back(new Gambit::StrategySupportProfile(newSupport));
@@ -432,7 +432,7 @@ void gbtGameDocument::Undo()
   }
   m_currentProfileList = 0;
 
-  wxString tempfile = wxFileName::CreateTempFileName(wxT("gambit"));
+  const wxString tempfile = wxFileName::CreateTempFileName(wxT("gambit"));
   std::ofstream f((const char *)tempfile.mb_str());
   f << m_undoList.back() << std::endl;
   f.close();
@@ -457,7 +457,7 @@ void gbtGameDocument::Redo()
   }
   m_currentProfileList = 0;
 
-  wxString tempfile = wxFileName::CreateTempFileName(wxT("gambit"));
+  const wxString tempfile = wxFileName::CreateTempFileName(wxT("gambit"));
   std::ofstream f((const char *)tempfile.mb_str());
   f << m_undoList.back() << std::endl;
   f.close();
@@ -534,7 +534,7 @@ void gbtGameDocument::SetBehavElimStrength(bool p_strict)
 
 bool gbtGameDocument::NextBehavElimLevel()
 {
-  bool ret = m_behavSupports.NextLevel();
+  const bool ret = m_behavSupports.NextLevel();
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
   return ret;
 }
@@ -565,7 +565,7 @@ bool gbtGameDocument::GetStrategyElimStrength() const { return m_stratSupports.G
 
 bool gbtGameDocument::NextStrategyElimLevel()
 {
-  bool ret = m_stratSupports.NextLevel();
+  const bool ret = m_stratSupports.NextLevel();
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
   return ret;
 }
@@ -629,7 +629,7 @@ void gbtGameDocument::DoSetTitle(const wxString &p_title, const wxString &p_comm
 
 void gbtGameDocument::DoNewPlayer()
 {
-  GamePlayer player = m_game->NewPlayer();
+  const GamePlayer player = m_game->NewPlayer();
   player->SetLabel("Player " + lexical_cast<std::string>(player->GetNumber()));
   if (!m_game->IsTree()) {
     player->GetStrategy(1)->SetLabel("1");
@@ -645,7 +645,7 @@ void gbtGameDocument::DoSetPlayerLabel(GamePlayer p_player, const wxString &p_la
 
 void gbtGameDocument::DoNewStrategy(GamePlayer p_player)
 {
-  GameStrategy strategy = p_player->NewStrategy();
+  const GameStrategy strategy = p_player->NewStrategy();
   strategy->SetLabel(lexical_cast<std::string>(strategy->GetNumber()));
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
@@ -703,7 +703,7 @@ void gbtGameDocument::DoInsertAction(GameNode p_node)
   if (!p_node || !p_node->GetInfoset()) {
     return;
   }
-  GameAction action = p_node->GetInfoset()->InsertAction();
+  const GameAction action = p_node->GetInfoset()->InsertAction();
   action->SetLabel(lexical_cast<std::string>(action->GetNumber()));
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
@@ -722,7 +722,7 @@ void gbtGameDocument::DoAppendMove(GameNode p_node, GameInfoset p_infoset)
 
 void gbtGameDocument::DoInsertMove(GameNode p_node, GamePlayer p_player, unsigned int p_actions)
 {
-  GameInfoset infoset = p_node->InsertMove(p_player, p_actions);
+  const GameInfoset infoset = p_node->InsertMove(p_player, p_actions);
   for (int act = 1; act <= infoset->NumActions(); act++) {
     infoset->GetAction(act)->SetLabel(lexical_cast<std::string>(act));
   }
@@ -809,7 +809,7 @@ void gbtGameDocument::DoRemoveOutcome(GameNode p_node)
 
 void gbtGameDocument::DoCopyOutcome(GameNode p_node, GameOutcome p_outcome)
 {
-  GameOutcome outcome = m_game->NewOutcome();
+  const GameOutcome outcome = m_game->NewOutcome();
   outcome->SetLabel("Outcome" + lexical_cast<std::string>(outcome->GetNumber()));
   for (const auto &player : m_game->GetPlayers()) {
     outcome->SetPayoff(player, p_outcome->GetPayoff<Number>(player));

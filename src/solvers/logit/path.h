@@ -65,7 +65,7 @@ inline void NullCallbackFunction(const Vector<double> &) {}
 //
 class PathTracer {
 public:
-  PathTracer() : m_maxDecel(1.1), m_hStart(0.03) {}
+  PathTracer() = default;
   virtual ~PathTracer() = default;
 
   void SetMaxDecel(double p_maxDecel) { m_maxDecel = p_maxDecel; }
@@ -83,7 +83,7 @@ public:
             CriterionBracketFunctionType p_criterionBracker = NullCriterionBracketFunction) const;
 
 private:
-  double m_maxDecel, m_hStart;
+  double m_maxDecel{1.1}, m_hStart{0.03};
 };
 
 } // end namespace Gambit

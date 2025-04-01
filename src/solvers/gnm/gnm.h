@@ -26,8 +26,7 @@
 #include "games/nash.h"
 #include "solvers/gtracer/gtracer.h"
 
-namespace Gambit {
-namespace Nash {
+namespace Gambit::Nash {
 
 const double GNM_LAMBDA_END_DEFAULT = -10.0;
 const int GNM_LOCAL_NEWTON_INTERVAL_DEFAULT = 3;
@@ -46,7 +45,6 @@ GNMStrategySolve(const MixedStrategyProfile<double> &p_profile, double p_lambdaE
                  int p_localNewtonInterval, int p_localNewtonMaxits,
                  StrategyCallbackType<double> p_callback = NullStrategyCallback<double>);
 
-} // namespace Nash
-} // end namespace Gambit
+} // end namespace Gambit::Nash
 
 #endif // GAMBIT_NASH_GNM_H

@@ -61,7 +61,7 @@ gbtGamePropertiesDialog::gbtGamePropertiesDialog(wxWindow *p_parent, gbtGameDocu
       new wxStaticText(this, wxID_STATIC, wxString(_("Filename: ")) + m_doc->GetFilename()), 0,
       wxALL, 5);
 
-  Gambit::Game game = m_doc->GetGame();
+  const Gambit::Game game = m_doc->GetGame();
   boxSizer->Add(new wxStaticText(this, wxID_STATIC,
                                  wxString::Format(_("Number of players: %d"), game->NumPlayers())),
                 0, wxALL, 5);

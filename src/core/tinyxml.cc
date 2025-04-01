@@ -120,12 +120,6 @@ TiXmlBase::StringToBuffer::StringToBuffer(const TIXML_STRING &str)
 TiXmlBase::StringToBuffer::~StringToBuffer() { delete[] buffer; }
 // End strange bug fix. -->
 
-TiXmlNode::TiXmlNode(NodeType _type)
-  : TiXmlBase(), parent(nullptr), type(_type), firstChild(nullptr), lastChild(nullptr),
-    prev(nullptr), next(nullptr)
-{
-}
-
 TiXmlNode::~TiXmlNode()
 {
   TiXmlNode *node = firstChild;
@@ -837,7 +831,7 @@ void TiXmlDocument::operator=(const TiXmlDocument &copy)
 bool TiXmlDocument::LoadFile(TiXmlEncoding encoding)
 {
   // See STL_STRING_BUG below.
-  StringToBuffer buf(value);
+  const StringToBuffer buf(value);
 
   if (buf.buffer && LoadFile(buf.buffer, encoding)) {
     return true;
@@ -849,13 +843,8 @@ bool TiXmlDocument::LoadFile(TiXmlEncoding encoding)
 bool TiXmlDocument::SaveFile() const
 {
   // See STL_STRING_BUG below.
-  StringToBuffer buf(value);
-
-  if (buf.buffer && SaveFile(buf.buffer)) {
-    return true;
-  }
-
-  return false;
+  const StringToBuffer buf(value);
+  return (buf.buffer && SaveFile(buf.buffer));
 }
 
 bool TiXmlDocument::LoadFile(const char *filename, TiXmlEncoding encoding)

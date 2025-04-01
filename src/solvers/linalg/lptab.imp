@@ -319,7 +319,7 @@ template <class T> bool LPTableau<T>::IsDualReversePivot(int i, int j)
 
   // check that i would be the column to enter in prior tableau
 
-  int enter = this->Label(i);
+  const int enter = this->Label(i);
   if (enter < 0) {
     a_ik = tmpdual[-enter];
   }

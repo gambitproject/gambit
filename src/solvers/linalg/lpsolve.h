@@ -41,8 +41,8 @@ namespace Gambit::linalg {
 ///
 template <class T> class LPSolve {
 private:
-  bool well_formed, feasible, bounded;
-  int flag, nvars, neqns, nequals;
+  bool well_formed{true}, feasible{true}, bounded{true};
+  int flag{0}, nvars, neqns, nequals;
   T total_cost, eps1, eps2, eps3, tmin;
   BFS<T> opt_bfs, dual_bfs;
   LPTableau<T> tab;

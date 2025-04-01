@@ -146,18 +146,18 @@ RectArray<T>::RectArray() : minrow(1), maxrow(0), mincol(1), maxcol(0), data(nul
 
 template <class T>
 RectArray<T>::RectArray(unsigned int rows, unsigned int cols)
-  : minrow(1), maxrow(rows), mincol(1), maxcol(cols)
+  : minrow(1), maxrow(rows), mincol(1), maxcol(cols),
+    data((rows > 0) ? new T *[maxrow] - 1 : nullptr)
 {
-  data = (rows > 0) ? new T *[maxrow] - 1 : nullptr;
   for (int i = 1; i <= maxrow; data[i++] = (cols > 0) ? new T[maxcol] - 1 : nullptr)
     ;
 }
 
 template <class T>
 RectArray<T>::RectArray(int minr, int maxr, int minc, int maxc)
-  : minrow(minr), maxrow(maxr), mincol(minc), maxcol(maxc)
+  : minrow(minr), maxrow(maxr), mincol(minc), maxcol(maxc),
+    data((maxrow >= minrow) ? new T *[maxrow - minrow + 1] - minrow : nullptr)
 {
-  data = (maxrow >= minrow) ? new T *[maxrow - minrow + 1] - minrow : nullptr;
   for (int i = minrow; i <= maxrow;
        data[i++] = (maxcol - mincol + 1) ? new T[maxcol - mincol + 1] - mincol : nullptr)
     ;
@@ -165,9 +165,9 @@ RectArray<T>::RectArray(int minr, int maxr, int minc, int maxc)
 
 template <class T>
 RectArray<T>::RectArray(const RectArray<T> &a)
-  : minrow(a.minrow), maxrow(a.maxrow), mincol(a.mincol), maxcol(a.maxcol)
+  : minrow(a.minrow), maxrow(a.maxrow), mincol(a.mincol), maxcol(a.maxcol),
+    data((maxrow >= minrow) ? new T *[maxrow - minrow + 1] - minrow : nullptr)
 {
-  data = (maxrow >= minrow) ? new T *[maxrow - minrow + 1] - minrow : nullptr;
   for (int i = minrow; i <= maxrow; i++) {
     data[i] = (maxcol >= mincol) ? new T[maxcol - mincol + 1] - mincol : nullptr;
     for (int j = mincol; j <= maxcol; j++) {

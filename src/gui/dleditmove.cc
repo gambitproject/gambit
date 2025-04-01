@@ -123,7 +123,7 @@ wxSheetCellAttr gbtActionSheet::GetAttr(const wxSheetCoords &p_coords, wxSheetAt
     return attr;
   }
   else if (IsCornerLabelCell(p_coords)) {
-    wxSheetCellAttr attr(GetSheetRefData()->m_defaultCornerLabelAttr);
+    const wxSheetCellAttr attr(GetSheetRefData()->m_defaultCornerLabelAttr);
     return attr;
   }
 

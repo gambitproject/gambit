@@ -195,14 +195,14 @@ template <class T> void gbtAnalysisProfileList<T>::Load(TiXmlNode *p_analysis)
        node = node->NextSiblingElement()) {
     const char *type = node->ToElement()->Attribute("type");
     if (!strcmp(type, "behav")) {
-      MixedBehaviorProfile<T> profile =
+      const MixedBehaviorProfile<T> profile =
           TextToBehavProfile<T>(m_doc, wxString(node->FirstChild()->Value(), *wxConvCurrent));
       m_behavProfiles.push_back(std::make_shared<MixedBehaviorProfile<T>>(profile));
       m_isBehav = true;
       m_current = m_behavProfiles.size();
     }
     else {
-      MixedStrategyProfile<T> profile =
+      const MixedStrategyProfile<T> profile =
           TextToMixedProfile<T>(m_doc, wxString(node->FirstChild()->Value(), *wxConvCurrent));
       m_mixedProfiles.push_back(std::make_shared<MixedStrategyProfile<T>>(profile));
       m_isBehav = false;
@@ -213,7 +213,7 @@ template <class T> void gbtAnalysisProfileList<T>::Load(TiXmlNode *p_analysis)
 
 template <class T> std::string gbtAnalysisProfileList<T>::GetPayoff(int pl, int p_index) const
 {
-  int index = (p_index == -1) ? m_current : p_index;
+  const int index = (p_index == -1) ? m_current : p_index;
 
   try {
     if (m_doc->IsTree()) {
@@ -233,7 +233,7 @@ template <class T> std::string gbtAnalysisProfileList<T>::GetPayoff(int pl, int 
 template <class T>
 std::string gbtAnalysisProfileList<T>::GetRealizProb(const GameNode &p_node, int p_index) const
 {
-  int index = (p_index == -1) ? m_current : p_index;
+  const int index = (p_index == -1) ? m_current : p_index;
 
   try {
     return lexical_cast<std::string>(m_behavProfiles[index]->GetRealizProb(p_node),
@@ -247,7 +247,7 @@ std::string gbtAnalysisProfileList<T>::GetRealizProb(const GameNode &p_node, int
 template <class T>
 std::string gbtAnalysisProfileList<T>::GetBeliefProb(const GameNode &p_node, int p_index) const
 {
-  int index = (p_index == -1) ? m_current : p_index;
+  const int index = (p_index == -1) ? m_current : p_index;
 
   if (!p_node->GetPlayer()) {
     return "";
@@ -272,7 +272,7 @@ template <class T>
 std::string gbtAnalysisProfileList<T>::GetNodeValue(const GameNode &p_node, int p_player,
                                                     int p_index) const
 {
-  int index = (p_index == -1) ? m_current : p_index;
+  const int index = (p_index == -1) ? m_current : p_index;
 
   try {
     return lexical_cast<std::string>(m_behavProfiles[index]->GetPayoff(p_node)[p_player],
@@ -286,7 +286,7 @@ std::string gbtAnalysisProfileList<T>::GetNodeValue(const GameNode &p_node, int 
 template <class T>
 std::string gbtAnalysisProfileList<T>::GetInfosetProb(const GameNode &p_node, int p_index) const
 {
-  int index = (p_index == -1) ? m_current : p_index;
+  const int index = (p_index == -1) ? m_current : p_index;
 
   if (!p_node->GetPlayer()) {
     return "";
@@ -304,7 +304,7 @@ std::string gbtAnalysisProfileList<T>::GetInfosetProb(const GameNode &p_node, in
 template <class T>
 std::string gbtAnalysisProfileList<T>::GetInfosetValue(const GameNode &p_node, int p_index) const
 {
-  int index = (p_index == -1) ? m_current : p_index;
+  const int index = (p_index == -1) ? m_current : p_index;
 
   if (!p_node->GetPlayer() || p_node->GetPlayer()->IsChance()) {
     return "";
@@ -329,10 +329,10 @@ template <class T>
 std::string gbtAnalysisProfileList<T>::GetActionProb(const GameNode &p_node, int p_act,
                                                      int p_index) const
 {
-  int index = (p_index == -1) ? m_current : p_index;
+  const int index = (p_index == -1) ? m_current : p_index;
 
   if (p_node->GetPlayer() && p_node->GetPlayer()->IsChance()) {
-    GameInfoset infoset = p_node->GetInfoset();
+    const GameInfoset infoset = p_node->GetInfoset();
     return static_cast<std::string>(infoset->GetActionProb(infoset->GetAction(p_act)));
   }
 
@@ -358,7 +358,7 @@ std::string gbtAnalysisProfileList<T>::GetActionProb(const GameNode &p_node, int
 template <class T>
 std::string gbtAnalysisProfileList<T>::GetActionProb(int p_action, int p_index) const
 {
-  int index = (p_index == -1) ? m_current : p_index;
+  const int index = (p_index == -1) ? m_current : p_index;
 
   try {
     const MixedBehaviorProfile<T> &profile = *m_behavProfiles[index];
@@ -378,7 +378,7 @@ template <class T>
 std::string gbtAnalysisProfileList<T>::GetActionValue(const GameNode &p_node, int p_act,
                                                       int p_index) const
 {
-  int index = (p_index == -1) ? m_current : p_index;
+  const int index = (p_index == -1) ? m_current : p_index;
 
   if (!p_node->GetPlayer() || p_node->GetPlayer()->IsChance()) {
     return "";
@@ -403,7 +403,7 @@ std::string gbtAnalysisProfileList<T>::GetActionValue(const GameNode &p_node, in
 template <class T>
 std::string gbtAnalysisProfileList<T>::GetStrategyProb(int p_strategy, int p_index) const
 {
-  int index = (p_index == -1) ? m_current : p_index;
+  const int index = (p_index == -1) ? m_current : p_index;
 
   try {
     const MixedStrategyProfile<T> &profile = *m_mixedProfiles[index];
@@ -417,11 +417,11 @@ std::string gbtAnalysisProfileList<T>::GetStrategyProb(int p_strategy, int p_ind
 template <class T>
 std::string gbtAnalysisProfileList<T>::GetStrategyValue(int p_strategy, int p_index) const
 {
-  int index = (p_index == -1) ? m_current : p_index;
+  const int index = (p_index == -1) ? m_current : p_index;
 
   try {
     const MixedStrategyProfile<T> &profile = *m_mixedProfiles[index];
-    GameStrategy strategy = profile.GetGame()->GetStrategy(p_strategy);
+    const GameStrategy strategy = profile.GetGame()->GetStrategy(p_strategy);
     return lexical_cast<std::string>(profile.GetPayoff(strategy), m_doc->GetStyle().NumDecimals());
   }
   catch (IndexException &) {

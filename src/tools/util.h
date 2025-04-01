@@ -188,10 +188,10 @@ void BehavStrategyDetailRenderer<T>::Render(const MixedBehaviorProfile<T> &p_pro
     m_stream << "-------    -------    -----------   -----------\n";
 
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      GameInfoset infoset = player->GetInfoset(iset);
+      const GameInfoset infoset = player->GetInfoset(iset);
 
       for (int act = 1; act <= infoset->NumActions(); act++) {
-        GameAction action = infoset->GetAction(act);
+        const GameAction action = infoset->GetAction(act);
 
         if (!infoset->GetLabel().empty()) {
           m_stream << std::setw(7) << infoset->GetLabel() << "    ";
@@ -220,10 +220,10 @@ void BehavStrategyDetailRenderer<T>::Render(const MixedBehaviorProfile<T> &p_pro
     m_stream << "-------    -------    -----------   -----------\n";
 
     for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      GameInfoset infoset = player->GetInfoset(iset);
+      const GameInfoset infoset = player->GetInfoset(iset);
 
       for (int n = 1; n <= infoset->NumMembers(); n++) {
-        GameNode node = infoset->GetMember(n);
+        const GameNode node = infoset->GetMember(n);
         if (!infoset->GetLabel().empty()) {
           m_stream << std::setw(7) << infoset->GetLabel() << "    ";
         }

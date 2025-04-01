@@ -159,7 +159,7 @@ template <class T>
 T TableMixedStrategyProfileRep<T>::GetPayoff(int pl, int index, int current) const
 {
   if (current > this->m_support.GetGame()->NumPlayers()) {
-    Game game = this->m_support.GetGame();
+    const Game game = this->m_support.GetGame();
     auto &g = dynamic_cast<GameTableRep &>(*game);
     GameOutcomeRep *outcome = g.m_results[index];
     if (outcome) {
@@ -192,7 +192,7 @@ void TableMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, int const_pl, int c
     cur_pl++;
   }
   if (cur_pl > this->m_support.GetGame()->NumPlayers()) {
-    Game game = this->m_support.GetGame();
+    const Game game = this->m_support.GetGame();
     auto &g = dynamic_cast<GameTableRep &>(*game);
     GameOutcomeRep *outcome = g.m_results[index];
     if (outcome) {
@@ -225,7 +225,7 @@ void TableMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, int const_pl1, int 
     cur_pl++;
   }
   if (cur_pl > this->m_support.GetGame()->NumPlayers()) {
-    Game game = this->m_support.GetGame();
+    const Game game = this->m_support.GetGame();
     auto &g = dynamic_cast<GameTableRep &>(*game);
     GameOutcomeRep *outcome = g.m_results[index];
     if (outcome) {

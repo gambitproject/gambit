@@ -26,19 +26,13 @@
 
 #include <vector>
 
-namespace Gambit {
-
-namespace agg {
+namespace Gambit::agg {
 
 class GrayComposition {
   friend class AGG;
 
 public:
-  GrayComposition(int _n, int _k)
-    : n(_n), k(_k), p(0), i(-1), d(-1), finished(false), current(k, 0)
-  {
-    current.at(0) = n;
-  }
+  GrayComposition(int _n, int _k) : n(_n), k(_k), current(k, 0) { current.at(0) = n; }
 
   bool eof() const { return finished; }
 
@@ -110,14 +104,12 @@ public:
 
 private:
   int n, k;
-  int p; // idx to first positive
-  int i, d;
-  bool finished;
+  int p{0}; // idx to first positive
+  int i{-1}, d{-1};
+  bool finished{false};
   std::vector<int> current;
 };
 
-} // namespace agg
-
-} // end namespace Gambit
+} // end namespace Gambit::agg
 
 #endif // GAMBIT_AGG_GRAY_H

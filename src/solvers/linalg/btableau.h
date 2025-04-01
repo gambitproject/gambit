@@ -108,7 +108,7 @@ public:
   // remove outindex, insert label, return outlabel
   int Pivot(int outindex, int col)
   {
-    int outlabel = basis[outindex];
+    const int outlabel = basis[outindex];
 
     if (IsSlackColumn(col)) {
       slacks[-col] = outindex;

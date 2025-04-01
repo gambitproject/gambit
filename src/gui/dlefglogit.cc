@@ -84,7 +84,7 @@ wxString gbtLogitBehavList::GetCellValue(const wxSheetCoords &p_coords)
       return wxT("Lambda");
     }
     else {
-      Gambit::GameAction action = m_doc->GetAction(p_coords.GetCol());
+      const Gambit::GameAction action = m_doc->GetAction(p_coords.GetCol());
       return (wxString::Format(wxT("%d: "), action->GetInfoset()->GetNumber()) +
               wxString(action->GetLabel().c_str(), *wxConvCurrent));
     }
@@ -114,7 +114,7 @@ static wxColour GetPlayerColor(gbtGameDocument *p_doc, int p_index)
     return *wxBLACK;
   }
 
-  Gambit::GameAction action = p_doc->GetAction(p_index);
+  const Gambit::GameAction action = p_doc->GetAction(p_index);
   return p_doc->GetStyle().GetPlayerColor(action->GetInfoset()->GetPlayer()->GetNumber());
 }
 
@@ -146,7 +146,7 @@ wxSheetCellAttr gbtLogitBehavList::GetAttr(const wxSheetCoords &p_coords, wxShee
   attr.SetAlignment(wxALIGN_RIGHT, wxALIGN_CENTER);
   attr.SetOrientation(wxHORIZONTAL);
   if (p_coords.GetCol() > 0) {
-    Gambit::GameAction action = m_doc->GetAction(p_coords.GetCol());
+    const Gambit::GameAction action = m_doc->GetAction(p_coords.GetCol());
     attr.SetForegroundColour(
         m_doc->GetStyle().GetPlayerColor(action->GetInfoset()->GetPlayer()->GetNumber()));
     if (action->GetInfoset()->GetNumber() % 2 == 0) {
@@ -265,7 +265,7 @@ void gbtLogitBehavDialog::Start()
   wxString str(wxString(s.str().c_str(), *wxConvCurrent));
 
   // It is possible that the whole string won't write on one go, so
-  // we should take this possibility into account.  If the write doesn't
+  // we should take this possibility into account.  If writing doesn't
   // complete the whole way, we take a 100-millisecond siesta and try
   // again.  (This seems to primarily be an issue with -- you guessed it --
   // Windows!)
@@ -309,7 +309,7 @@ void gbtLogitBehavDialog::OnIdle(wxIdleEvent &p_event)
   }
 }
 
-void gbtLogitBehavDialog::OnTimer(wxTimerEvent &p_event) { wxWakeUpIdle(); }
+void gbtLogitBehavDialog::OnTimer(wxTimerEvent &) { wxWakeUpIdle(); }
 
 void gbtLogitBehavDialog::OnEndProcess(wxProcessEvent &p_event)
 {

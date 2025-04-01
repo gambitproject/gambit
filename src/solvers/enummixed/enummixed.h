@@ -50,7 +50,7 @@ public:
   ///@{
   List<Vector<T>> m_key1, m_key2;
   List<int> m_node1, m_node2; // IDs of each component of the extreme equilibria
-  int m_v1, m_v2;
+  int m_v1{0}, m_v2{0};
   ///@}
 
   /// Representation of the connectedness of the extreme equilibria

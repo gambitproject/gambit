@@ -320,7 +320,7 @@ template <class Generator>
 MixedStrategyProfile<double> GameRep::NewRandomStrategyProfile(Generator &generator) const
 {
   auto profile = NewMixedStrategyProfile(0.0);
-  std::exponential_distribution<> dist(1);
+  std::exponential_distribution<> dist(1); // NOLINT(misc-const-correctness)
   for (auto player : GetPlayers()) {
     for (auto strategy : player->GetStrategies()) {
       profile[strategy] = dist(generator);
@@ -335,7 +335,7 @@ MixedStrategyProfile<Rational> GameRep::NewRandomStrategyProfile(int p_denom,
 {
   auto profile = NewMixedStrategyProfile(Rational(0));
   for (auto player : GetPlayers()) {
-    std::list<Rational> dist = UniformOnSimplex(p_denom, player->NumStrategies(), generator);
+    const std::list<Rational> dist = UniformOnSimplex(p_denom, player->NumStrategies(), generator);
     auto prob = dist.cbegin();
     for (auto strategy : player->GetStrategies()) {
       profile[strategy] = *prob;

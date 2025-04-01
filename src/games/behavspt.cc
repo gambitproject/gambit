@@ -112,7 +112,7 @@ void ReachableInfosets(const BehaviorSupportProfile &p_support, const GameNode &
     return;
   }
 
-  GameInfoset infoset = p_node->GetInfoset();
+  const GameInfoset infoset = p_node->GetInfoset();
   if (!infoset->GetPlayer()->IsChance()) {
     p_reached.insert(infoset);
     for (const auto &action : p_support.GetActions(infoset)) {
@@ -131,7 +131,7 @@ void ReachableInfosets(const BehaviorSupportProfile &p_support, const GameNode &
 bool BehaviorSupportProfile::Dominates(const GameAction &a, const GameAction &b,
                                        bool p_strict) const
 {
-  GameInfoset infoset = a->GetInfoset();
+  const GameInfoset infoset = a->GetInfoset();
   if (infoset != b->GetInfoset()) {
     throw UndefinedException();
   }

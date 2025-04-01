@@ -31,13 +31,11 @@
 #include <cstdlib>
 #include <memory>
 
-namespace Gambit {
-
-namespace agg {
+namespace Gambit::agg {
 
 // types of contribution-independent function:
 // sum, existence, highest, lowest and their extended versions
-typedef enum {
+using TypeEnum = enum {
   P_SUM = 0,
   P_EXIST = 1,
   P_HIGH = 2,
@@ -46,7 +44,7 @@ typedef enum {
   P_EXIST2 = 11,
   P_HIGH2 = 12,
   P_LOW2 = 13
-} TypeEnum;
+};
 
 // proj_func: contribution-independent function
 struct proj_func {
@@ -58,7 +56,7 @@ struct proj_func {
 
   proj_func(TypeEnum tp, int def) : Type(tp), Default(def) {}
 
-  proj_func(TypeEnum tp, std::istream &in, int S) : Type(tp)
+  proj_func(TypeEnum tp, std::istream &in, int S) : Type(tp), Default(0)
   {
     in >> Default;
     if (in.eof() || in.bad()) {
@@ -126,7 +124,7 @@ struct proj_func_SUM2 : public proj_func {
   int operator()(std::multiset<int> &s) const override
   {
     int res = Default;
-    for (int it : s) {
+    for (const int it : s) {
       res += weights.at(it);
     }
     return res;
@@ -149,7 +147,7 @@ struct proj_func_EXIST2 : public proj_func {
     if (Default < 0) {
       throw std::runtime_error("proj_func_EXIST2() error: default value should be nonnegative");
     }
-    for (int weight : weights) {
+    for (const int weight : weights) {
       if (weight < 0) {
         throw std::runtime_error("proj_func_EXIST2() error: weights should be nonnegative");
       }
@@ -300,8 +298,6 @@ inline projtype make_proj_func(TypeEnum type, std::istream &in, int S, int P)
   }
 }
 
-} // namespace agg
-
-} // end namespace Gambit
+} // end namespace Gambit::agg
 
 #endif // GAMBIT_AGG_PROJFUNC_H

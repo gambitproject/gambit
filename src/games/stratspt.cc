@@ -146,8 +146,8 @@ bool StrategySupportProfile::Dominates(const GameStrategy &s, const GameStrategy
   bool equal = true;
 
   for (auto iter : StrategyContingencies(*this)) {
-    Rational ap = iter->GetStrategyValue(s);
-    Rational bp = iter->GetStrategyValue(t);
+    const Rational ap = iter->GetStrategyValue(s);
+    const Rational bp = iter->GetStrategyValue(t);
     if (p_strict && ap <= bp) {
       return false;
     }
