@@ -31,7 +31,6 @@ class GameExplicitRep : public GameRep {
   template <class T> friend class MixedStrategyProfile;
 
 protected:
-  Array<GamePlayerRep *> m_players;
   Array<GameOutcomeRep *> m_outcomes;
 
 public:
@@ -69,8 +68,6 @@ public:
   //@{
   /// Returns the number of players in the game
   size_t NumPlayers() const override { return m_players.size(); }
-  /// Returns the pl'th player in the game
-  GamePlayer GetPlayer(int pl) const override { return m_players[pl]; }
   //@}
 
   /// @name Outcomes

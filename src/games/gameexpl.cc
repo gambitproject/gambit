@@ -95,9 +95,9 @@ Rational GameExplicitRep::GetMaxPayoff(const GamePlayer &p_player) const
 Array<int> GameExplicitRep::NumStrategies() const
 {
   const_cast<GameExplicitRep *>(this)->BuildComputedValues();
-  Array<int> dim(m_players.size());
-  for (size_t pl = 1; pl <= m_players.size(); pl++) {
-    dim[pl] = m_players[pl]->m_strategies.size();
+  Array<int> dim;
+  for (const auto &player : m_players) {
+    dim.push_back(player->m_strategies.size());
   }
   return dim;
 }

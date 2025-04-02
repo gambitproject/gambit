@@ -200,6 +200,8 @@ size_t GamePlayerRep::NumSequences() const
 //                            class GameRep
 //========================================================================
 
+GamePlayer GameRep::GetPlayer(int pl) const { return m_players.at(pl - 1); }
+
 Array<GamePlayer> GameRep::GetPlayers() const
 {
   Array<GamePlayer> ret(NumPlayers());

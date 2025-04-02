@@ -34,7 +34,6 @@ class GameBAGGRep : public GameRep {
 private:
   std::shared_ptr<agg::BAGG> baggPtr;
   Array<int> agent2baggPlayer;
-  Array<GamePlayerRep *> m_players;
 
 public:
   /// @name Lifecycle
@@ -78,8 +77,6 @@ public:
   //@{
   /// Returns the number of players in the game
   size_t NumPlayers() const override { return m_players.size(); }
-  /// Returns the pl'th player in the game
-  GamePlayer GetPlayer(int pl) const override { return m_players[pl]; }
   /// Returns the chance (nature) player
   GamePlayer GetChance() const override { throw UndefinedException(); }
   /// Creates a new player in the game, with no moves

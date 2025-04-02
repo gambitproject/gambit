@@ -33,7 +33,6 @@ class GameAGGRep : public GameRep {
 
 private:
   std::shared_ptr<agg::AGG> aggPtr;
-  Array<GamePlayerRep *> m_players;
 
 public:
   /// @name Lifecycle
@@ -77,8 +76,6 @@ public:
   //@{
   /// Returns the number of players in the game
   size_t NumPlayers() const override { return aggPtr->getNumPlayers(); }
-  /// Returns the pl'th player in the game
-  GamePlayer GetPlayer(int pl) const override { return m_players[pl]; }
   /// Returns the chance (nature) player
   GamePlayer GetChance() const override { throw UndefinedException(); }
   /// Creates a new player in the game, with no moves
