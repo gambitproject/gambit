@@ -395,6 +395,7 @@ class GameRep : public BaseGameRep {
   template <class T> friend class TableMixedStrategyProfileRep;
 
 protected:
+  std::vector<GamePlayerRep *> m_players;
   std::string m_title, m_comment;
   unsigned int m_version{0};
 
@@ -533,11 +534,11 @@ public:
   /// @name Players
   //@{
   /// Returns the number of players in the game
-  virtual size_t NumPlayers() const = 0;
+  size_t NumPlayers() const { return m_players.size(); }
   /// Returns the pl'th player in the game
-  virtual GamePlayer GetPlayer(int pl) const = 0;
+  GamePlayer GetPlayer(int pl) const { return m_players.at(pl - 1); }
   /// Returns the set of players in the game
-  virtual Array<GamePlayer> GetPlayers() const;
+  Array<GamePlayer> GetPlayers() const;
   /// Returns the chance (nature) player
   virtual GamePlayer GetChance() const = 0;
   /// Creates a new player in the game, with no moves

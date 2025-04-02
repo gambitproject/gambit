@@ -201,20 +201,20 @@ Game GameAGGRep::Copy() const
 Array<int> GameAGGRep::NumStrategies() const
 {
   Array<int> ns;
-  for (int pl = 1; pl <= aggPtr->getNumPlayers(); pl++) {
-    ns.push_back(m_players[pl]->NumStrategies());
+  for (const auto &player : m_players) {
+    ns.push_back(player->NumStrategies());
   }
   return ns;
 }
 
 GameStrategy GameAGGRep::GetStrategy(int p_index) const
 {
-  for (int pl = 1; pl <= aggPtr->getNumPlayers(); pl++) {
-    if (static_cast<int>(m_players[pl]->NumStrategies()) >= p_index) {
-      return m_players[pl]->GetStrategy(p_index);
+  for (const auto &player : m_players) {
+    if (static_cast<int>(player->NumStrategies()) >= p_index) {
+      return player->GetStrategy(p_index);
     }
     else {
-      p_index -= m_players[pl]->NumStrategies();
+      p_index -= player->NumStrategies();
     }
   }
   throw IndexException();

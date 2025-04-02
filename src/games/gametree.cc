@@ -808,7 +808,7 @@ void GameTreeRep::Canonicalize()
   NumberNodes(m_root, nodeindex);
 
   for (size_t pl = 0; pl <= m_players.size(); pl++) {
-    GamePlayerRep *player = (pl) ? m_players[pl] : m_chance;
+    GamePlayerRep *player = (pl) ? m_players[pl - 1] : m_chance;
 
     // Sort nodes within information sets according to ID.
     // Coded using a bubble sort for simplicity; large games might
