@@ -171,6 +171,21 @@ def test_node_copy_across_games():
         game1.copy_tree(game2.root, game1.root)
 
 
+def test_copy_tree():
+    def subtrees_equal(n1: gbt.Node, n2: gbt.Node) -> bool:
+        if n1.outcome != n2.outcome or n1.infoset != n2.infoset:
+            return False
+        return all(subtrees_equal(c1, c2) for (c1, c2) in zip(n1.children, n2.children))
+
+    g = games.read_from_file("e02.efg")
+    dest_node = g.nodes()[1]
+    src_node = g.nodes()[4]
+
+    g.copy_tree(src_node, dest_node)
+
+    assert subtrees_equal(src_node, dest_node)
+
+
 def test_node_move_nonterminal():
     """Test on moving to a nonterminal node."""
     game = games.read_from_file("basic_extensive_game.efg")
