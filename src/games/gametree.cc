@@ -499,6 +499,7 @@ void GameTreeNodeRep::CopyTree(GameNode p_src)
 
     m_efg->ClearComputedValues();
     m_efg->Canonicalize();
+    DeleteOutcome(GetOutcome());
   }
 }
 
