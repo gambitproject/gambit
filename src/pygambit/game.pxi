@@ -1362,7 +1362,16 @@ class Game:
         resolved_node.node.deref().InsertMove(resolved_infoset.infoset)
 
     def copy_tree(self, src: typing.Union[Node, str], dest: typing.Union[Node, str]) -> None:
-        """Copy the subtree rooted at 'src' to 'dest'.
+        """Copy the subtree rooted at the node `src` to the node `dest`.
+
+        Each node in the subtree copied to follow `dest` is placed in the same information set
+        as the corresponding node in the original subtree under `src`.
+
+        It is permitted for `dest` to be a descendant of `src`.
+        The operation uses the subtree rooted at `src` as it is at the time the function is called,
+        so no infinite recursion is triggered.
+
+        The outcome associated with `dest` is not changed by this operation.
 
         Parameters
         ----------
