@@ -1,5 +1,42 @@
 [build-system]
 requires = ["setuptools", "wheel", "Cython"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pygambit"
+version = "16.3.0"
+description = "The package for computation in game theory"
+readme = "src/README.rst"
+requires-python = ">=3.9"
+license = "GPL-2.0-or-later"
+authors = [
+    {name = "Theodore Turocy", email = "ted.turocy@gmail.com"},
+    {name = "Rahul Savani", email = "rahul.savani@liverpool.ac.uk"}
+]
+keywords = ["game theory", "Nash equilibrium"]
+classifiers=[
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Scientific/Engineering :: Mathematics"
+]
+dependencies = [
+    "numpy",
+    "scipy",
+]
+
+[project.urls]
+Homepage = "https://www.gambit-project.org"
+Documentation = "https://gambitproject.readthedocs.io"
+Repository = "https://github.com/gambitproject/gambit.git"
+Issues = "https://github.com/gambitproject/gambit/issues"
+Changelog = "https://github.com/gambitproject/gambit/blob/master/ChangeLog"
+
 
 [tool.ruff]
 line-length = 99
@@ -33,3 +70,16 @@ indent-style = "space"
 
 [tool.cython-lint]
 max-line-length = 99
+
+
+[tool.pytest.ini_options]
+addopts = "--strict-markers"
+markers = [
+    "nash_enummixed_strategy: tests of enummixed_solve in strategies",
+    "nash_lcp_strategy: tests of lcp_solve in strategies",
+    "nash_lcp_behavior: tests of lcp_solve in behaviors",
+    "nash_lp_strategy: tests of lp_solve in strategies",
+    "nash_lp_behavior: tests of lp_solve in behaviors",
+    "nash: all tests of Nash equilibrium solvers",
+    "slow: all time-consuming tests",
+]

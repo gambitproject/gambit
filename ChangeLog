@@ -2,8 +2,10 @@
 
 ## [16.4.0] - unreleased
 
-### Removed
+### General
+- Officially added support for Python 3.13.
 
+### Removed
 - The deprecated functions `Game.read_game`, `Game.parse_game` and `Game.write` functions have
   been removed as planned. (#357)
 
