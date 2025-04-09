@@ -1,3 +1,5 @@
+import typing
+
 import pytest
 
 import pygambit as gbt
@@ -169,6 +171,52 @@ def test_node_copy_across_games():
         game1.copy_tree(game1.root, game2.root)
     with pytest.raises(gbt.MismatchError):
         game1.copy_tree(game2.root, game1.root)
+
+
+def _subtrees_equal(
+        n1: gbt.Node,
+        n2: gbt.Node,
+        recursion_stop_node: typing.Union[gbt.Node, None] = None
+) -> bool:
+    if n1 == recursion_stop_node:
+        return n2.is_terminal
+    if n1.is_terminal and n2.is_terminal:
+        return n1.outcome == n2.outcome
+    if n1.is_terminal is not n2.is_terminal:
+        return False
+    # now, both n1 and n2 are non-terminal
+    # check that they are in the same infosets
+    if n1.infoset != n2.infoset:
+        return False
+    # check that they have the same number of children
+    if len(n1.children) != len(n2.children):
+        return False
+
+    return all(
+        _subtrees_equal(c1, c2, recursion_stop_node) for (c1, c2) in zip(n1.children, n2.children)
+    )
+
+
+def test_copy_tree_onto_nondescendent_terminal_node():
+    """Test copying a subtree to a non-descendent node."""
+    g = games.read_from_file("e01.efg")
+    src_node = g.nodes()[3]   # path=[1, 0]
+    dest_node = g.nodes()[2]  # path=[0, 0]
+
+    g.copy_tree(src_node, dest_node)
+
+    assert _subtrees_equal(src_node, dest_node)
+
+
+def test_copy_tree_onto_descendent_terminal_node():
+    """Test copying a subtree to a node that's a descendent of the original."""
+    g = games.read_from_file("e01.efg")
+    src_node = g.nodes()[1]   # path=[0]
+    dest_node = g.nodes()[4]  # path=[0, 1, 0]
+
+    g.copy_tree(src_node, dest_node)
+
+    assert _subtrees_equal(src_node, dest_node, dest_node)
 
 
 def test_node_move_nonterminal():
