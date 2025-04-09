@@ -191,14 +191,14 @@ public:
   /// @name Actions
   //@{
   /// Returns the number of actions available at the information set
-  virtual int NumActions() const = 0;
+  virtual size_t NumActions() const = 0;
   /// Returns the p_index'th action at the information set
   virtual GameAction GetAction(int p_index) const = 0;
   /// Returns the actions available at the information set
   virtual Array<GameAction> GetActions() const = 0;
   //@}
 
-  virtual int NumMembers() const = 0;
+  virtual size_t NumMembers() const = 0;
   virtual GameNode GetMember(int p_index) const = 0;
   virtual Array<GameNode> GetMembers() const = 0;
 
@@ -306,7 +306,7 @@ public:
   /// @name Information sets
   //@{
   /// Returns the number of information sets at which the player makes a choice
-  int NumInfosets() const { return m_infosets.size(); }
+  size_t NumInfosets() const { return m_infosets.size(); }
   /// Returns the p_index'th information set
   GameInfoset GetInfoset(int p_index) const;
   /// Returns the information sets for the players
@@ -315,7 +315,7 @@ public:
   /// @name Strategies
   //@{
   /// Returns the number of strategies available to the player
-  int NumStrategies() const;
+  size_t NumStrategies() const;
   /// Returns the st'th strategy for the player
   GameStrategy GetStrategy(int st) const;
   /// Returns the array of strategies available to the player
@@ -327,7 +327,7 @@ public:
   /// @name Sequences
   //@{
   /// Returns the number of sequences available to the player
-  int NumSequences() const;
+  size_t NumSequences() const;
   //@}
 };
 
@@ -345,7 +345,7 @@ public:
 
   virtual int GetNumber() const = 0;
 
-  virtual int NumChildren() const = 0;
+  virtual size_t NumChildren() const = 0;
   virtual GameNode GetChild(int i) const = 0;
   virtual GameNode GetChild(const GameAction &) const = 0;
   virtual Array<GameNode> GetChildren() const = 0;
@@ -528,7 +528,7 @@ public:
   /// @name Players
   //@{
   /// Returns the number of players in the game
-  virtual int NumPlayers() const = 0;
+  virtual size_t NumPlayers() const = 0;
   /// Returns the pl'th player in the game
   virtual GamePlayer GetPlayer(int pl) const = 0;
   /// Returns the set of players in the game
@@ -552,7 +552,7 @@ public:
   /// @name Outcomes
   //@{
   /// Returns the number of outcomes defined in the game
-  virtual int NumOutcomes() const = 0;
+  virtual size_t NumOutcomes() const = 0;
   /// Returns the index'th outcome defined in the game
   virtual GameOutcome GetOutcome(int index) const = 0;
   /// Creates a new outcome in the game
@@ -566,7 +566,7 @@ public:
   /// Returns the root node of the game
   virtual GameNode GetRoot() const = 0;
   /// Returns the number of nodes in the game
-  virtual int NumNodes() const = 0;
+  virtual size_t NumNodes() const = 0;
   //@}
 
   /// @name Modification
@@ -617,7 +617,7 @@ inline void GameOutcomeRep::SetPayoff(const GamePlayer &p_player, const Number &
 inline GamePlayer GameStrategyRep::GetPlayer() const { return m_player; }
 
 inline Game GamePlayerRep::GetGame() const { return m_game; }
-inline int GamePlayerRep::NumStrategies() const
+inline size_t GamePlayerRep::NumStrategies() const
 {
   m_game->BuildComputedValues();
   return m_strategies.size();

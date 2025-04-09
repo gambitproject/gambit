@@ -571,7 +571,7 @@ gbtTreePlayerToolbar::gbtTreePlayerToolbar(wxWindow *p_parent, gbtGameDocument *
 
   topSizer->Add(m_chancePanel, 0, wxALL | wxEXPAND, 5);
 
-  for (int pl = 1; pl <= m_doc->NumPlayers(); pl++) {
+  for (size_t pl = 1; pl <= m_doc->NumPlayers(); pl++) {
     m_playerPanels.push_back(new gbtTreePlayerPanel(this, m_doc, pl));
     topSizer->Add(m_playerPanels[pl], 0, wxALL | wxEXPAND, 5);
   }
@@ -595,18 +595,15 @@ void gbtTreePlayerToolbar::OnUpdate()
     m_playerPanels.pop_back();
   }
 
-  for (int pl = 1; pl <= m_playerPanels.size(); pl++) {
-    m_playerPanels[pl]->OnUpdate();
-  }
-
+  std::for_each(m_playerPanels.begin(), m_playerPanels.end(),
+                std::mem_fn(&gbtTreePlayerPanel::OnUpdate));
   GetSizer()->Layout();
 }
 
 void gbtTreePlayerToolbar::PostPendingChanges()
 {
-  for (int pl = 1; pl <= m_playerPanels.size(); pl++) {
-    m_playerPanels[pl]->PostPendingChanges();
-  }
+  std::for_each(m_playerPanels.begin(), m_playerPanels.end(),
+                std::mem_fn(&gbtTreePlayerPanel::PostPendingChanges));
 }
 
 //=====================================================================

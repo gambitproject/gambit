@@ -180,10 +180,9 @@ GameAGGRep::GameAGGRep(std::shared_ptr<agg::AGG> p_aggPtr) : aggPtr(p_aggPtr)
 {
   for (int pl = 1; pl <= aggPtr->getNumPlayers(); pl++) {
     m_players.push_back(new GamePlayerRep(this, pl, aggPtr->getNumActions(pl - 1)));
-    m_players[pl]->m_label = lexical_cast<std::string>(pl);
-    for (int st = 1; st <= m_players[pl]->NumStrategies(); st++) {
-      m_players[pl]->m_strategies[st]->SetLabel(lexical_cast<std::string>(st));
-    }
+    m_players.back()->m_label = lexical_cast<std::string>(pl);
+    std::for_each(m_players.back()->m_strategies.begin(), m_players.back()->m_strategies.end(),
+                  [st = 1](GameStrategyRep *s) mutable { s->SetLabel(std::to_string(st++)); });
   }
 }
 
@@ -211,7 +210,7 @@ Array<int> GameAGGRep::NumStrategies() const
 GameStrategy GameAGGRep::GetStrategy(int p_index) const
 {
   for (int pl = 1; pl <= aggPtr->getNumPlayers(); pl++) {
-    if (m_players[pl]->NumStrategies() >= p_index) {
+    if (static_cast<int>(m_players[pl]->NumStrategies()) >= p_index) {
       return m_players[pl]->GetStrategy(p_index);
     }
     else {

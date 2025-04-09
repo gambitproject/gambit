@@ -212,7 +212,7 @@ public:
   {
     linalg::epsilon(eps1, 5);
     linalg::epsilon(eps2);
-    for (int i = 0; i < art.size(); i++) {
+    for (size_t i = 0; i < art.size(); i++) {
       artificial[A.MaxCol() + 1 + i] = art[art.first_index() + i];
     }
   }

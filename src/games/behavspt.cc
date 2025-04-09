@@ -39,7 +39,7 @@ BehaviorSupportProfile::BehaviorSupportProfile(const Game &p_efg) : m_efg(p_efg)
   }
 
   // Initialize the list of reachable information sets and nodes
-  for (int pl = 0; pl <= GetGame()->NumPlayers(); pl++) {
+  for (size_t pl = 0; pl <= GetGame()->NumPlayers(); pl++) {
     const GamePlayer player = (pl == 0) ? GetGame()->GetChance() : GetGame()->GetPlayer(pl);
     for (const auto &infoset : player->GetInfosets()) {
       m_infosetReachable[infoset] = true;

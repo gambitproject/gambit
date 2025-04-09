@@ -34,8 +34,8 @@ namespace {
 MixedStrategyProfile<double> PointToProfile(const Game &p_game, const Vector<double> &p_point)
 {
   MixedStrategyProfile<double> profile(p_game->NewMixedStrategyProfile(0.0));
-  for (int i = 1; i < p_point.size(); i++) {
-    profile[i] = exp(p_point[i]);
+  for (size_t i = 1; i < p_point.size(); i++) {
+    profile[i] = std::exp(p_point[i]);
   }
   return profile;
 }
@@ -44,7 +44,7 @@ Vector<double> ProfileToPoint(const LogitQREMixedStrategyProfile &p_profile)
 {
   Vector<double> point(p_profile.size() + 1);
   for (size_t i = 1; i <= p_profile.size(); i++) {
-    point[i] = log(p_profile[i]);
+    point[i] = std::log(p_profile[i]);
   }
   point.back() = p_profile.GetLambda();
   return point;
@@ -52,20 +52,14 @@ Vector<double> ProfileToPoint(const LogitQREMixedStrategyProfile &p_profile)
 
 double LogLike(const Vector<double> &p_frequencies, const Vector<double> &p_point)
 {
-  double logL = 0.0;
-  for (int i = 1; i <= p_frequencies.size(); i++) {
-    logL += p_frequencies[i] * log(p_point[i]);
-  }
-  return logL;
+  return std::inner_product(p_frequencies.begin(), p_frequencies.end(), p_point.begin(), 0.0,
+                            std::plus<>(),
+                            [](double freq, double prob) { return freq * std::log(prob); });
 }
 
 double DiffLogLike(const Vector<double> &p_frequencies, const Vector<double> &p_tangent)
 {
-  double diff_logL = 0.0;
-  for (int i = 1; i <= p_frequencies.size(); i++) {
-    diff_logL += p_frequencies[i] * p_tangent[i];
-  }
-  return diff_logL;
+  return std::inner_product(p_frequencies.begin(), p_frequencies.end(), p_tangent.begin(), 0.0);
 }
 
 bool RegretTerminationFunction(const Game &p_game, const Vector<double> &p_point, double p_regret)
@@ -85,7 +79,7 @@ void GetValue(const Game &p_game, const Vector<double> &p_point, Vector<double> 
   }
   const double lambda = p_point.back();
   p_lhs = 0.0;
-  for (int rowno = 0, pl = 1; pl <= p_game->NumPlayers(); pl++) {
+  for (size_t rowno = 0, pl = 1; pl <= p_game->NumPlayers(); pl++) {
     const GamePlayer player = p_game->GetPlayer(pl);
     for (size_t st = 1; st <= player->GetStrategies().size(); st++) {
       rowno++;
@@ -117,13 +111,13 @@ void GetJacobian(const Game &p_game, const Vector<double> &p_point, Matrix<doubl
 
   p_matrix = 0.0;
 
-  for (int rowno = 0, i = 1; i <= p_game->NumPlayers(); i++) {
+  for (size_t rowno = 0, i = 1; i <= p_game->NumPlayers(); i++) {
     const GamePlayer player = p_game->GetPlayer(i);
     for (size_t j = 1; j <= player->GetStrategies().size(); j++) {
       rowno++;
       if (j == 1) {
         // This is a sum-to-one equation
-        for (int colno = 0, ell = 1; ell <= p_game->NumPlayers(); ell++) {
+        for (size_t colno = 0, ell = 1; ell <= p_game->NumPlayers(); ell++) {
           const GamePlayer player2 = p_game->GetPlayer(ell);
           for (size_t m = 1; m <= player2->GetStrategies().size(); m++) {
             colno++;
@@ -137,7 +131,7 @@ void GetJacobian(const Game &p_game, const Vector<double> &p_point, Matrix<doubl
       }
       else {
         // This is a ratio equation
-        for (int colno = 0, ell = 1; ell <= p_game->NumPlayers(); ell++) {
+        for (size_t colno = 0, ell = 1; ell <= p_game->NumPlayers(); ell++) {
           const GamePlayer player2 = p_game->GetPlayer(ell);
           for (size_t m = 1; m <= player2->GetStrategies().size(); m++) {
             colno++;

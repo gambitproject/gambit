@@ -153,10 +153,10 @@ void SolveLP(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c, int neq
   const linalg::LPSolve<T> LP(A, b, c, nequals);
   const auto &cbfs = LP.OptimumBFS();
 
-  for (int i = 1; i <= A.NumColumns(); i++) {
+  for (size_t i = 1; i <= A.NumColumns(); i++) {
     p_primal[i] = (cbfs.count(i)) ? cbfs[i] : static_cast<T>(0);
   }
-  for (int i = 1; i <= A.NumRows(); i++) {
+  for (size_t i = 1; i <= A.NumRows(); i++) {
     p_dual[i] = (cbfs.count(-i)) ? cbfs[-i] : static_cast<T>(0);
   }
 }

@@ -64,10 +64,8 @@ void GameStrategyRep::DeleteStrategy()
   m_player->GetGame()->IncrementVersion();
   m_player->m_strategies.erase(
       std::find(m_player->m_strategies.begin(), m_player->m_strategies.end(), this));
-  for (int st = 1; st <= m_player->m_strategies.size(); st++) {
-    m_player->m_strategies[st]->m_number = st;
-  }
-  // m_player->m_game->RebuildTable();
+  std::for_each(m_player->m_strategies.begin(), m_player->m_strategies.end(),
+                [st = 1](GameStrategyRep *s) mutable { s->m_number = st++; });
   this->Invalidate();
 }
 
@@ -122,7 +120,7 @@ void GamePlayerRep::MakeStrategy()
 {
   Array<int> c(NumInfosets());
 
-  for (int i = 1; i <= NumInfosets(); i++) {
+  for (size_t i = 1; i <= NumInfosets(); i++) {
     if (m_infosets[i - 1]->flag == 1) {
       c[i] = m_infosets[i - 1]->whichbranch;
     }
@@ -139,7 +137,7 @@ void GamePlayerRep::MakeStrategy()
 
   // We generate a default labeling -- probably should be changed in future
   if (!strategy->m_behav.empty()) {
-    for (int iset = 1; iset <= strategy->m_behav.size(); iset++) {
+    for (size_t iset = 1; iset <= strategy->m_behav.size(); iset++) {
       if (strategy->m_behav[iset] > 0) {
         strategy->m_label += lexical_cast<std::string>(strategy->m_behav[iset]);
       }
@@ -155,7 +153,6 @@ void GamePlayerRep::MakeStrategy()
 
 void GamePlayerRep::MakeReducedStrats(GameTreeNodeRep *n, GameTreeNodeRep *nn)
 {
-  int i;
   GameTreeNodeRep *m, *mm;
 
   if (!n->GetParent()) {
@@ -167,7 +164,7 @@ void GamePlayerRep::MakeReducedStrats(GameTreeNodeRep *n, GameTreeNodeRep *nn)
       if (n->m_infoset->flag == 0) {
         // we haven't visited this infoset before
         n->m_infoset->flag = 1;
-        for (i = 1; i <= n->NumChildren(); i++) {
+        for (size_t i = 1; i <= n->NumChildren(); i++) {
           GameTreeNodeRep *m = n->m_children[i];
           n->whichbranch = m;
           n->m_infoset->whichbranch = i;
@@ -229,7 +226,7 @@ Array<GameInfoset> GamePlayerRep::GetInfosets() const
   return ret;
 }
 
-int GamePlayerRep::NumSequences() const
+size_t GamePlayerRep::NumSequences() const
 {
   if (!m_game->IsTree()) {
     throw UndefinedException();
@@ -246,7 +243,7 @@ int GamePlayerRep::NumSequences() const
 Array<GamePlayer> GameRep::GetPlayers() const
 {
   Array<GamePlayer> ret(NumPlayers());
-  for (int pl = 1; pl <= NumPlayers(); pl++) {
+  for (size_t pl = 1; pl <= NumPlayers(); pl++) {
     ret[pl] = GetPlayer(pl);
   }
   return ret;

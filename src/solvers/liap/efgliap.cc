@@ -114,7 +114,7 @@ bool AgentLyapunovFunction::Gradient(const Vector<double> &x, Vector<double> &gr
 {
   const double DELTA = .00001;
   m_profile = x;
-  for (int i = 1; i <= x.size(); i++) {
+  for (size_t i = 1; i <= x.size(); i++) {
     m_profile[i] += DELTA;
     double value = PenalizedLiapValue(m_profile);
     m_profile[i] -= 2.0 * DELTA;

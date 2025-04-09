@@ -56,7 +56,7 @@ T PolynomialDerivatives<T>::MaximalNonconstantContribution(const Node &n, const 
     wrtos[i]++;
 
     T increment = Gambit::abs(child.data.Evaluate(p));
-    for (int j = 1; j <= p.size(); j++) {
+    for (size_t j = 1; j <= p.size(); j++) {
       for (int k = 1; k <= wrtos[j]; k++) {
         increment *= halvesoflengths[j];
         increment /= static_cast<T>(k);

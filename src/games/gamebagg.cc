@@ -52,7 +52,7 @@ Rational BAGGPureStrategyProfileRep::GetPayoff(const GamePlayer &p_player) const
 {
   const std::shared_ptr<agg::BAGG> baggPtr = dynamic_cast<GameBAGGRep &>(*m_nfg).baggPtr;
   std::vector<int> s(m_nfg->NumPlayers());
-  for (int i = 1; i <= m_nfg->NumPlayers(); i++) {
+  for (size_t i = 1; i <= m_nfg->NumPlayers(); i++) {
     s[i - 1] = m_profile.at(m_nfg->GetPlayer(i))->GetNumber() - 1;
   }
   const int bp = dynamic_cast<GameBAGGRep &>(*m_nfg).agent2baggPlayer[p_player->GetNumber()];
@@ -65,7 +65,7 @@ Rational BAGGPureStrategyProfileRep::GetStrategyValue(const GameStrategy &p_stra
   const int player = p_strategy->GetPlayer()->GetNumber();
   const std::shared_ptr<agg::BAGG> baggPtr = dynamic_cast<GameBAGGRep &>(*m_nfg).baggPtr;
   std::vector<int> s(m_nfg->NumPlayers());
-  for (int i = 1; i <= m_nfg->NumPlayers(); i++) {
+  for (size_t i = 1; i <= m_nfg->NumPlayers(); i++) {
     s[i - 1] = m_profile.at(m_nfg->GetPlayer(i))->GetNumber() - 1;
   }
   s[player - 1] = p_strategy->GetNumber() - 1;
@@ -215,9 +215,8 @@ GameBAGGRep::GameBAGGRep(std::shared_ptr<agg::BAGG> _baggPtr)
       m_players.push_back(new GamePlayerRep(this, k, baggPtr->getNumActions(pl - 1, j)));
       m_players[k]->m_label = lexical_cast<std::string>(k);
       agent2baggPlayer[k] = pl;
-      for (int st = 1; st <= m_players[k]->NumStrategies(); st++) {
-        m_players[k]->m_strategies[st]->SetLabel(lexical_cast<std::string>(st));
-      }
+      std::for_each(m_players.back()->m_strategies.begin(), m_players.back()->m_strategies.end(),
+                    [st = 1](GameStrategyRep *s) mutable { s->SetLabel(std::to_string(st++)); });
     }
   }
 }
@@ -237,7 +236,7 @@ Game GameBAGGRep::Copy() const
 Array<int> GameBAGGRep::NumStrategies() const
 {
   Array<int> ns;
-  for (int pl = 1; pl <= NumPlayers(); pl++) {
+  for (size_t pl = 1; pl <= NumPlayers(); pl++) {
     ns.push_back(m_players[pl]->m_strategies.size());
   }
   return ns;
@@ -246,7 +245,7 @@ Array<int> GameBAGGRep::NumStrategies() const
 int GameBAGGRep::MixedProfileLength() const
 {
   int res = 0;
-  for (int pl = 1; pl <= NumPlayers(); pl++) {
+  for (size_t pl = 1; pl <= NumPlayers(); pl++) {
     res += m_players[pl]->m_strategies.size();
   }
   return res;

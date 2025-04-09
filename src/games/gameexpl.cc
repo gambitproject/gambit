@@ -105,10 +105,11 @@ Array<int> GameExplicitRep::NumStrategies() const
 GameStrategy GameExplicitRep::GetStrategy(int p_index) const
 {
   const_cast<GameExplicitRep *>(this)->BuildComputedValues();
-  for (int pl = 1, i = 1; pl <= m_players.size(); pl++) {
-    for (int st = 1; st <= m_players[pl]->m_strategies.size(); st++, i++) {
-      if (p_index == i) {
-        return m_players[pl]->m_strategies[st];
+  int i = 1;
+  for (const auto &player : m_players) {
+    for (const auto &strategy : player->m_strategies) {
+      if (p_index == i++) {
+        return strategy;
       }
     }
   }

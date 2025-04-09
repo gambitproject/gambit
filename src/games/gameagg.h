@@ -76,7 +76,7 @@ public:
   /// @name Players
   //@{
   /// Returns the number of players in the game
-  int NumPlayers() const override { return aggPtr->getNumPlayers(); }
+  size_t NumPlayers() const override { return aggPtr->getNumPlayers(); }
   /// Returns the pl'th player in the game
   GamePlayer GetPlayer(int pl) const override { return m_players[pl]; }
   /// Returns the chance (nature) player
@@ -98,7 +98,7 @@ public:
   /// @name Outcomes
   //@{
   /// Returns the number of outcomes defined in the game
-  int NumOutcomes() const override { throw UndefinedException(); }
+  size_t NumOutcomes() const override { throw UndefinedException(); }
   /// Returns the index'th outcome defined in the game
   GameOutcome GetOutcome(int index) const override { throw UndefinedException(); }
   /// Creates a new outcome in the game
@@ -112,7 +112,7 @@ public:
   /// Returns the root node of the game
   GameNode GetRoot() const override { throw UndefinedException(); }
   /// Returns the number of nodes in the game
-  int NumNodes() const override { throw UndefinedException(); }
+  size_t NumNodes() const override { throw UndefinedException(); }
   //@}
 
   /// @name General data access

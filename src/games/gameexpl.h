@@ -68,7 +68,7 @@ public:
   /// @name Players
   //@{
   /// Returns the number of players in the game
-  int NumPlayers() const override { return m_players.size(); }
+  size_t NumPlayers() const override { return m_players.size(); }
   /// Returns the pl'th player in the game
   GamePlayer GetPlayer(int pl) const override { return m_players[pl]; }
   //@}
@@ -76,7 +76,7 @@ public:
   /// @name Outcomes
   //@{
   /// Returns the number of outcomes defined in the game
-  int NumOutcomes() const override { return m_outcomes.size(); }
+  size_t NumOutcomes() const override { return m_outcomes.size(); }
   /// Returns the index'th outcome defined in the game
   GameOutcome GetOutcome(int index) const override { return m_outcomes[index]; }
   /// Creates a new outcome in the game

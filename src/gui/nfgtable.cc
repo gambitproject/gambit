@@ -1000,21 +1000,21 @@ void gbtTableWidget::OnBeginEdit(wxSheetEvent &) { m_doc->PostPendingChanges(); 
 void gbtTableWidget::OnUpdate()
 {
   if (m_doc->NumPlayers() > m_rowPlayers.size() + m_colPlayers.size()) {
-    for (int pl = 1; pl <= m_doc->NumPlayers(); pl++) {
+    for (size_t pl = 1; pl <= m_doc->NumPlayers(); pl++) {
       if (!contains(m_rowPlayers, pl) && !contains(m_colPlayers, pl)) {
         m_rowPlayers.push_back(pl);
       }
     }
   }
   else if (m_doc->NumPlayers() < m_rowPlayers.size() + m_colPlayers.size()) {
-    for (int i = 1; i <= m_rowPlayers.size(); i++) {
-      if (m_rowPlayers[i] > m_doc->NumPlayers()) {
+    for (size_t i = 1; i <= m_rowPlayers.size(); i++) {
+      if (m_rowPlayers[i] > static_cast<int>(m_doc->NumPlayers())) {
         erase_atindex(m_rowPlayers, i--);
       }
     }
 
-    for (int i = 1; i <= m_colPlayers.size(); i++) {
-      if (m_colPlayers[i] > m_doc->NumPlayers()) {
+    for (size_t i = 1; i <= m_colPlayers.size(); i++) {
+      if (m_colPlayers[i] > static_cast<int>(m_doc->NumPlayers())) {
         erase_atindex(m_colPlayers, i--);
       }
     }
@@ -1067,7 +1067,7 @@ void gbtTableWidget::SetRowPlayer(int index, int pl)
   }
   Array<int> newPlayers;
   for (const auto &player : m_rowPlayers) {
-    if (newPlayers.size() == index - 1) {
+    if (static_cast<int>(newPlayers.size()) == index - 1) {
       newPlayers.push_back(pl);
     }
     else if (player != pl) {
@@ -1114,7 +1114,7 @@ void gbtTableWidget::SetColPlayer(int index, int pl)
   }
   Array<int> newPlayers;
   for (const auto &player : m_colPlayers) {
-    if (newPlayers.size() == index - 1) {
+    if (static_cast<int>(newPlayers.size()) == index - 1) {
       newPlayers.push_back(pl);
     }
     else if (player != pl) {

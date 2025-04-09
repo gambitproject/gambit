@@ -415,7 +415,7 @@ int CliqueEnumerator::getconnco(Array<int> &firstedge, Array<Edge> &edgelist)
    zero if  e  is index to the last edge
 */
 {
-  int numco, newedge;
+  int numco;
   Array<int> co1(0, maxinp1 - 1), co2(0, maxinp2 - 1); // components of node1,2
   int i, j;                                            // indices to left and right nodes
 
@@ -428,7 +428,7 @@ int CliqueEnumerator::getconnco(Array<int> &firstedge, Array<Edge> &edgelist)
   }
 
   numco = 0;
-  for (newedge = 1; newedge <= edgelist.size(); newedge++) {
+  for (size_t newedge = 1; newedge <= edgelist.size(); newedge++) {
     i = edgelist[newedge].node1;
     j = edgelist[newedge].node2;
 

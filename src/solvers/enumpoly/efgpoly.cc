@@ -221,7 +221,7 @@ EnumPolyBehaviorSolve(const Game &p_game, int p_stopAfter, double p_maxregret,
     if (isSingular) {
       p_onSupport("singular", support);
     }
-    if (p_stopAfter > 0 && ret.size() >= p_stopAfter) {
+    if (p_stopAfter > 0 && static_cast<int>(ret.size()) >= p_stopAfter) {
       break;
     }
   }

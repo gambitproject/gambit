@@ -94,7 +94,7 @@ LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c, 
   tab.SetCost(cost);
 
   // set xx to be initial feasible solution to phase II
-  for (int i = 1; i <= xx.size(); i++) {
+  for (size_t i = 1; i <= xx.size(); i++) {
     if (LB[i]) {
       xx[i] = lb[i];
     }
@@ -106,7 +106,7 @@ LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c, 
     }
   }
   tab.BasisVector(x);
-  for (int i = 1; i <= x.size(); i++) {
+  for (size_t i = 1; i <= x.size(); i++) {
     xlab = tab.Label(i);
     if (xlab < 0) {
       xlab = nvars - xlab;
@@ -179,7 +179,7 @@ template <class T> void LPSolve<T>::Solve(int phase)
           outlab = tab.Label(out);
         }
         // update xx
-        for (int i = 1; i <= x.size(); i++) {
+        for (size_t i = 1; i <= x.size(); i++) {
           xlab = tab.Label(i);
           if (xlab < 0) {
             xlab = nvars - xlab;

@@ -108,14 +108,14 @@ public:
   /// @name Actions
   //@{
   /// Returns the number of actions available at the information set
-  int NumActions() const override { return m_actions.size(); }
+  size_t NumActions() const override { return m_actions.size(); }
   /// Returns the p_index'th action at the information set
   GameAction GetAction(int p_index) const override { return m_actions[p_index]; }
   /// Returns the actions available at the information set
   Array<GameAction> GetActions() const override;
   //@}
 
-  int NumMembers() const override { return m_members.size(); }
+  size_t NumMembers() const override { return m_members.size(); }
   GameNode GetMember(int p_index) const override;
   Array<GameNode> GetMembers() const override;
 
@@ -162,7 +162,7 @@ public:
   void SetLabel(const std::string &p_label) override { m_label = p_label; }
 
   int GetNumber() const override { return m_number; }
-  int NumChildren() const override { return m_children.size(); }
+  size_t NumChildren() const override { return m_children.size(); }
   GameNode GetChild(int i) const override { return m_children[i]; }
   GameNode GetChild(const GameAction &p_action) const override
   {
@@ -265,7 +265,7 @@ public:
   /// Returns the root node of the game
   GameNode GetRoot() const override { return m_root; }
   /// Returns the number of nodes in the game
-  int NumNodes() const override;
+  size_t NumNodes() const override;
   //@}
 
   void DeleteOutcome(const GameOutcome &) override;

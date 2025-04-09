@@ -35,6 +35,8 @@
 #include "menuconst.h"
 #include "dlexcept.h"
 
+using namespace Gambit;
+
 //--------------------------------------------------------------------------
 //                         class gbtPayoffEditor
 //--------------------------------------------------------------------------
@@ -110,13 +112,13 @@ private:
   gbtEfgDisplay *m_owner;
   gbtGameDocument *m_model;
 
-  bool OnDropPlayer(const Gambit::GameNode &p_node, const wxString &p_text);
-  bool OnDropCopyNode(const Gambit::GameNode &p_node, const wxString &p_text);
-  bool OnDropMoveNode(const Gambit::GameNode &p_node, const wxString &p_text);
-  bool OnDropInfoset(const Gambit::GameNode &p_node, const wxString &p_text);
-  bool OnDropSetOutcome(const Gambit::GameNode &p_node, const wxString &p_text);
-  bool OnDropMoveOutcome(const Gambit::GameNode &p_node, const wxString &p_text);
-  bool OnDropCopyOutcome(const Gambit::GameNode &p_node, const wxString &p_text);
+  bool OnDropPlayer(const GameNode &p_node, const wxString &p_text);
+  bool OnDropCopyNode(const GameNode &p_node, const wxString &p_text);
+  bool OnDropMoveNode(const GameNode &p_node, const wxString &p_text);
+  bool OnDropInfoset(const GameNode &p_node, const wxString &p_text);
+  bool OnDropSetOutcome(const GameNode &p_node, const wxString &p_text);
+  bool OnDropMoveOutcome(const GameNode &p_node, const wxString &p_text);
+  bool OnDropCopyOutcome(const GameNode &p_node, const wxString &p_text);
 
 public:
   explicit gbtPlayerDropTarget(gbtEfgDisplay *p_owner)
@@ -131,7 +133,7 @@ public:
 // This recurses the subtree starting at 'p_node' looking for a node
 // with the ID 'p_id'.
 //
-static Gambit::GameNode GetNode(const Gambit::GameNode &p_node, int p_id)
+static GameNode GetNode(const GameNode &p_node, int p_id)
 {
   if (p_node->GetNumber() == p_id) {
     return p_node;
@@ -140,8 +142,8 @@ static Gambit::GameNode GetNode(const Gambit::GameNode &p_node, int p_id)
     return nullptr;
   }
   else {
-    for (int i = 1; i <= p_node->NumChildren(); i++) {
-      const Gambit::GameNode node = GetNode(p_node->GetChild(i), p_id);
+    for (const auto &child : p_node->GetChildren()) {
+      const auto node = GetNode(child, p_id);
       if (node) {
         return node;
       }
@@ -150,12 +152,12 @@ static Gambit::GameNode GetNode(const Gambit::GameNode &p_node, int p_id)
   }
 }
 
-bool gbtPlayerDropTarget::OnDropPlayer(const Gambit::GameNode &p_node, const wxString &p_text)
+bool gbtPlayerDropTarget::OnDropPlayer(const GameNode &p_node, const wxString &p_text)
 {
   long pl;
   p_text.Right(p_text.Length() - 1).ToLong(&pl);
-  const Gambit::Game efg = m_model->GetGame();
-  const Gambit::GamePlayer player = ((pl == 0) ? efg->GetChance() : efg->GetPlayer(pl));
+  const Game efg = m_model->GetGame();
+  const GamePlayer player = ((pl == 0) ? efg->GetChance() : efg->GetPlayer(pl));
   if (p_node->NumChildren() == 0) {
     m_model->DoInsertMove(p_node, player, 2);
   }
@@ -168,11 +170,11 @@ bool gbtPlayerDropTarget::OnDropPlayer(const Gambit::GameNode &p_node, const wxS
   return true;
 }
 
-bool gbtPlayerDropTarget::OnDropCopyNode(const Gambit::GameNode &p_node, const wxString &p_text)
+bool gbtPlayerDropTarget::OnDropCopyNode(const GameNode &p_node, const wxString &p_text)
 {
   long n;
   p_text.Right(p_text.Length() - 1).ToLong(&n);
-  const Gambit::GameNode srcNode = GetNode(m_model->GetGame()->GetRoot(), n);
+  const GameNode srcNode = GetNode(m_model->GetGame()->GetRoot(), n);
   if (!srcNode) {
     return false;
   }
@@ -183,11 +185,11 @@ bool gbtPlayerDropTarget::OnDropCopyNode(const Gambit::GameNode &p_node, const w
   return false;
 }
 
-bool gbtPlayerDropTarget::OnDropMoveNode(const Gambit::GameNode &p_node, const wxString &p_text)
+bool gbtPlayerDropTarget::OnDropMoveNode(const GameNode &p_node, const wxString &p_text)
 {
   long n;
   p_text.Right(p_text.Length() - 1).ToLong(&n);
-  const Gambit::GameNode srcNode = GetNode(m_model->GetGame()->GetRoot(), n);
+  const GameNode srcNode = GetNode(m_model->GetGame()->GetRoot(), n);
   if (!srcNode) {
     return false;
   }
@@ -198,11 +200,11 @@ bool gbtPlayerDropTarget::OnDropMoveNode(const Gambit::GameNode &p_node, const w
   return false;
 }
 
-bool gbtPlayerDropTarget::OnDropInfoset(const Gambit::GameNode &p_node, const wxString &p_text)
+bool gbtPlayerDropTarget::OnDropInfoset(const GameNode &p_node, const wxString &p_text)
 {
   long n;
   p_text.Right(p_text.Length() - 1).ToLong(&n);
-  const Gambit::GameNode srcNode = GetNode(m_model->GetGame()->GetRoot(), n);
+  const GameNode srcNode = GetNode(m_model->GetGame()->GetRoot(), n);
   if (!srcNode) {
     return false;
   }
@@ -217,11 +219,11 @@ bool gbtPlayerDropTarget::OnDropInfoset(const Gambit::GameNode &p_node, const wx
   return false;
 }
 
-bool gbtPlayerDropTarget::OnDropSetOutcome(const Gambit::GameNode &p_node, const wxString &p_text)
+bool gbtPlayerDropTarget::OnDropSetOutcome(const GameNode &p_node, const wxString &p_text)
 {
   long n;
   p_text.Right(p_text.Length() - 1).ToLong(&n);
-  const Gambit::GameNode srcNode = GetNode(m_model->GetGame()->GetRoot(), n);
+  const GameNode srcNode = GetNode(m_model->GetGame()->GetRoot(), n);
   if (!srcNode || p_node == srcNode) {
     return false;
   }
@@ -229,11 +231,11 @@ bool gbtPlayerDropTarget::OnDropSetOutcome(const Gambit::GameNode &p_node, const
   return true;
 }
 
-bool gbtPlayerDropTarget::OnDropMoveOutcome(const Gambit::GameNode &p_node, const wxString &p_text)
+bool gbtPlayerDropTarget::OnDropMoveOutcome(const GameNode &p_node, const wxString &p_text)
 {
   long n;
   p_text.Right(p_text.Length() - 1).ToLong(&n);
-  const Gambit::GameNode srcNode = GetNode(m_model->GetGame()->GetRoot(), n);
+  const GameNode srcNode = GetNode(m_model->GetGame()->GetRoot(), n);
   if (!srcNode || p_node == srcNode) {
     return false;
   }
@@ -242,11 +244,11 @@ bool gbtPlayerDropTarget::OnDropMoveOutcome(const Gambit::GameNode &p_node, cons
   return true;
 }
 
-bool gbtPlayerDropTarget::OnDropCopyOutcome(const Gambit::GameNode &p_node, const wxString &p_text)
+bool gbtPlayerDropTarget::OnDropCopyOutcome(const GameNode &p_node, const wxString &p_text)
 {
   long n;
   p_text.Right(p_text.Length() - 1).ToLong(&n);
-  const Gambit::GameNode srcNode = GetNode(m_model->GetGame()->GetRoot(), n);
+  const GameNode srcNode = GetNode(m_model->GetGame()->GetRoot(), n);
   if (!srcNode || p_node == srcNode) {
     return false;
   }
@@ -256,7 +258,7 @@ bool gbtPlayerDropTarget::OnDropCopyOutcome(const Gambit::GameNode &p_node, cons
 
 bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y, const wxString &p_text)
 {
-  const Gambit::Game efg = m_owner->GetDocument()->GetGame();
+  const Game efg = m_owner->GetDocument()->GetGame();
 
   int x, y;
 #if defined(__WXMSW__)
@@ -273,7 +275,7 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y, const wxString &p
   x = (int)((float)x / (.01 * m_owner->GetZoom()));
   y = (int)((float)y / (.01 * m_owner->GetZoom()));
 
-  const Gambit::GameNode node = m_owner->GetLayout().NodeHitTest(x, y);
+  const GameNode node = m_owner->GetLayout().NodeHitTest(x, y);
   if (!node) {
     return false;
   }
@@ -367,13 +369,13 @@ void gbtEfgDisplay::MakeMenus()
 //                  gbtEfgDisplay: Event-hook members
 //---------------------------------------------------------------------
 
-static Gambit::GameNode PriorSameIset(const Gambit::GameNode &n)
+static GameNode PriorSameIset(const GameNode &n)
 {
-  const Gambit::GameInfoset iset = n->GetInfoset();
+  const GameInfoset iset = n->GetInfoset();
   if (!iset) {
     return nullptr;
   }
-  for (int i = 1; i <= iset->NumMembers(); i++) {
+  for (size_t i = 1; i <= iset->NumMembers(); i++) {
     if (iset->GetMember(i) == n) {
       if (i > 1) {
         return iset->GetMember(i - 1);
@@ -386,13 +388,13 @@ static Gambit::GameNode PriorSameIset(const Gambit::GameNode &n)
   return nullptr;
 }
 
-static Gambit::GameNode NextSameIset(const Gambit::GameNode &n)
+static GameNode NextSameIset(const GameNode &n)
 {
-  const Gambit::GameInfoset iset = n->GetInfoset();
+  const GameInfoset iset = n->GetInfoset();
   if (!iset) {
     return nullptr;
   }
-  for (int i = 1; i <= iset->NumMembers(); i++) {
+  for (size_t i = 1; i <= iset->NumMembers(); i++) {
     if (iset->GetMember(i) == n) {
       if (i < iset->NumMembers()) {
         return iset->GetMember(i + 1);
@@ -425,7 +427,7 @@ static Gambit::GameNode NextSameIset(const Gambit::GameNode &n)
 //
 void gbtEfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
 {
-  const Gambit::GameNode selectNode = m_doc->GetSelectNode();
+  const GameNode selectNode = m_doc->GetSelectNode();
 
   if (p_event.GetKeyCode() == 'R' || p_event.GetKeyCode() == 'r') {
     m_doc->SetSelectNode(m_doc->GetGame()->GetRoot());
@@ -441,9 +443,9 @@ void gbtEfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
     else if (p_event.GetKeyCode() == WXK_TAB) {
       m_payoffEditor->EndEdit();
 
-      const Gambit::GameOutcome outcome = m_payoffEditor->GetOutcome();
+      const GameOutcome outcome = m_payoffEditor->GetOutcome();
       const int player = m_payoffEditor->GetPlayer();
-      const Gambit::GameNode node = m_payoffEditor->GetNodeEntry()->GetNode();
+      const GameNode node = m_payoffEditor->GetNodeEntry()->GetNode();
       try {
         m_doc->DoSetPayoff(outcome, player, m_payoffEditor->GetValue());
       }
@@ -464,7 +466,7 @@ void gbtEfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
       PrepareDC(dc);
       OnDraw(dc);
 
-      if (player < m_doc->NumPlayers()) {
+      if (player < static_cast<int>(m_doc->NumPlayers())) {
         gbtNodeEntry *entry = m_layout.GetNodeEntry(node);
         const wxRect rect = entry->GetPayoffExtent(player + 1);
         int xx, yy;
@@ -513,7 +515,7 @@ void gbtEfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
     }
     return;
   case WXK_UP: {
-    const Gambit::GameNode prior =
+    const GameNode prior =
         ((!p_event.AltDown()) ? m_layout.PriorSameLevel(selectNode) : PriorSameIset(selectNode));
     if (prior) {
       m_doc->SetSelectNode(prior);
@@ -522,7 +524,7 @@ void gbtEfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
     return;
   }
   case WXK_DOWN: {
-    const Gambit::GameNode next =
+    const GameNode next =
         ((!p_event.AltDown()) ? m_layout.NextSameLevel(selectNode) : NextSameIset(selectNode));
     if (next) {
       m_doc->SetSelectNode(next);
@@ -552,7 +554,7 @@ void gbtEfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
 void gbtEfgDisplay::OnAcceptPayoffEdit(wxCommandEvent &)
 {
   m_payoffEditor->EndEdit();
-  const Gambit::GameOutcome outcome = m_payoffEditor->GetOutcome();
+  const GameOutcome outcome = m_payoffEditor->GetOutcome();
   const int player = m_payoffEditor->GetPlayer();
   try {
     m_doc->DoSetPayoff(outcome, player, m_payoffEditor->GetValue());
@@ -590,7 +592,7 @@ void gbtEfgDisplay::OnUpdate()
   // Force a rebuild on every change for now.
   RefreshTree();
 
-  const Gambit::GameNode selectNode = m_doc->GetSelectNode();
+  const GameNode selectNode = m_doc->GetSelectNode();
 
   m_nodeMenu->Enable(wxID_UNDO, m_doc->CanUndo());
   m_nodeMenu->Enable(wxID_REDO, m_doc->CanRedo());
@@ -688,7 +690,7 @@ void gbtEfgDisplay::OnDraw(wxDC &p_dc, double p_zoom)
   m_zoom = saveZoom;
 }
 
-void gbtEfgDisplay::EnsureNodeVisible(const Gambit::GameNode &p_node)
+void gbtEfgDisplay::EnsureNodeVisible(const GameNode &p_node)
 {
   if (!p_node) {
     return;
@@ -752,7 +754,7 @@ void gbtEfgDisplay::OnLeftClick(wxMouseEvent &p_event)
   x = (int)((float)x / (.01 * m_zoom));
   y = (int)((float)y / (.01 * m_zoom));
 
-  const Gambit::GameNode node = m_layout.NodeHitTest(x, y);
+  const GameNode node = m_layout.NodeHitTest(x, y);
   if (node != m_doc->GetSelectNode()) {
     m_doc->SetSelectNode(node);
   }
@@ -769,7 +771,7 @@ void gbtEfgDisplay::OnLeftDoubleClick(wxMouseEvent &p_event)
   x = (int)((float)x / (.01 * m_zoom));
   y = (int)((float)y / (.01 * m_zoom));
 
-  Gambit::GameNode node = m_layout.NodeHitTest(x, y);
+  GameNode node = m_layout.NodeHitTest(x, y);
   if (node) {
     m_doc->SetSelectNode(node);
     const wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED, GBT_MENU_EDIT_NODE);
@@ -803,7 +805,7 @@ void gbtEfgDisplay::OnLeftDoubleClick(wxMouseEvent &p_event)
 
     // Editing an existing outcome
     gbtNodeEntry *entry = m_layout.GetNodeEntry(node);
-    for (int pl = 1; pl <= m_doc->NumPlayers(); pl++) {
+    for (size_t pl = 1; pl <= m_doc->NumPlayers(); pl++) {
       const wxRect rect = entry->GetPayoffExtent(pl);
       if (rect.Contains(x, y)) {
         int xx, yy;
@@ -852,10 +854,10 @@ void gbtEfgDisplay::OnMouseMotion(wxMouseEvent &p_event)
     x = (int)((float)x / (.01 * GetZoom()));
     y = (int)((float)y / (.01 * GetZoom()));
 
-    Gambit::GameNode node = m_layout.NodeHitTest(x, y);
+    GameNode node = m_layout.NodeHitTest(x, y);
 
     if (node && node->NumChildren() > 0) {
-      const Gambit::GamePlayer player = node->GetPlayer();
+      const GamePlayer player = node->GetPlayer();
       if (p_event.ControlDown()) {
         // Copy subtree
         const wxBitmap bitmap(tree_xpm);
@@ -945,7 +947,7 @@ void gbtEfgDisplay::OnRightClick(wxMouseEvent &p_event)
   x = (int)((float)x / (.01 * m_zoom));
   y = (int)((float)y / (.01 * m_zoom));
 
-  const Gambit::GameNode node = m_layout.NodeHitTest(x, y);
+  const GameNode node = m_layout.NodeHitTest(x, y);
   if (node != m_doc->GetSelectNode()) {
     m_doc->SetSelectNode(node);
   }

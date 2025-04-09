@@ -46,7 +46,7 @@ using namespace Gambit;
 void FunctionOnSimplices::Project(Vector<double> &x, const Array<int> &lengths) const
 {
   int index = 1;
-  for (int part = 1; part <= lengths.size(); part++) {
+  for (size_t part = 1; part <= lengths.size(); part++) {
     double avg = 0.0;
     int j;
     for (j = 1; j <= lengths[part]; j++, index++) {
@@ -70,7 +70,7 @@ void FunctionOnSimplices::Project(Vector<double> &x, const Array<int> &lengths) 
 
 void ConjugatePRMinimizer::AlphaXPlusY(double alpha, const Vector<double> &x, Vector<double> &y)
 {
-  for (int i = 1; i <= y.size(); i++) {
+  for (size_t i = 1; i <= y.size(); i++) {
     y[i] += alpha * x[i];
   }
 }

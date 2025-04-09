@@ -140,12 +140,11 @@ wxString LogitMixedSheet::GetCellValue(const wxSheetCoords &p_coords)
     }
     else {
       int index = 1;
-      for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
-        const GamePlayer player = m_doc->GetGame()->GetPlayer(pl);
-        for (int st = 1; st <= player->NumStrategies(); st++) {
+      for (const auto &player : m_doc->GetGame()->GetPlayers()) {
+        for (const auto &strategy : player->GetStrategies()) {
           if (index++ == p_coords.GetCol()) {
-            return (wxString::Format(wxT("%d: "), pl) +
-                    wxString(player->GetStrategy(st)->GetLabel().c_str(), *wxConvCurrent));
+            return (wxString::Format(wxT("%d: "), player->GetNumber()) +
+                    wxString(strategy->GetLabel().c_str(), *wxConvCurrent));
           }
         }
       }
@@ -177,11 +176,10 @@ static wxColour GetPlayerColor(gbtGameDocument *p_doc, int p_index)
   }
 
   int index = 1;
-  for (int pl = 1; pl <= p_doc->GetGame()->NumPlayers(); pl++) {
-    const GamePlayer player = p_doc->GetGame()->GetPlayer(pl);
-    for (int st = 1; st <= player->NumStrategies(); st++) {
+  for (const auto &player : p_doc->GetGame()->GetPlayers()) {
+    for (const auto &strategy : player->GetStrategies()) {
       if (index++ == p_index) {
-        return p_doc->GetStyle().GetPlayerColor(pl);
+        return p_doc->GetStyle().GetPlayerColor(player->GetNumber());
       }
     }
   }

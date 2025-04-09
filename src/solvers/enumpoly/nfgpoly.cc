@@ -155,7 +155,7 @@ EnumPolyStrategySolve(const Game &p_game, int p_stopAfter, double p_maxregret,
     p_onSupport("candidate", support);
     bool is_singular;
     for (auto solution : EnumPolyStrategySupportSolve(
-             support, is_singular, std::max(p_stopAfter - int(ret.size()), 0))) {
+             support, is_singular, std::max(p_stopAfter - static_cast<int>(ret.size()), 0))) {
       const MixedStrategyProfile<double> fullProfile = solution.ToFullSupport();
       if (fullProfile.GetMaxRegret() < p_maxregret) {
         p_onEquilibrium(fullProfile);
@@ -166,7 +166,7 @@ EnumPolyStrategySolve(const Game &p_game, int p_stopAfter, double p_maxregret,
     if (is_singular) {
       p_onSupport("singular", support);
     }
-    if (p_stopAfter > 0 && ret.size() >= p_stopAfter) {
+    if (p_stopAfter > 0 && static_cast<int>(ret.size()) >= p_stopAfter) {
       break;
     }
   }

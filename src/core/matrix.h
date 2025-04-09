@@ -80,14 +80,10 @@ public:
   Matrix<T> operator*(const Matrix<T> &) const;
   Vector<T> operator*(const Vector<T> &) const;
   Matrix<T> operator*(const T &) const;
-  Matrix<T> &operator*=(const Matrix<T> &);
   Matrix<T> &operator*=(const T &);
 
   Matrix<T> operator/(const T &) const;
   Matrix<T> &operator/=(const T &);
-
-  /// Kronecker product
-  Matrix<T> operator&(const Matrix<T> &) const;
   //@
 
   /// @name Other operations

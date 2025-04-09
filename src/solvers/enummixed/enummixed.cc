@@ -61,14 +61,14 @@ List<List<MixedStrategyProfile<T>>> EnumMixedStrategySolution<T>::GetCliques() c
   List<List<MixedStrategyProfile<T>>> solution;
   for (size_t cl = 1; cl <= m_cliques1.size(); cl++) {
     solution.push_back(List<MixedStrategyProfile<T>>());
-    for (int i = 1; i <= m_cliques1[cl].size(); i++) {
-      for (int j = 1; j <= m_cliques2[cl].size(); j++) {
+    for (size_t i = 1; i <= m_cliques1[cl].size(); i++) {
+      for (size_t j = 1; j <= m_cliques2[cl].size(); j++) {
         MixedStrategyProfile<T> profile(m_game->NewMixedStrategyProfile(static_cast<T>(0)));
 
-        for (int k = 1; k <= m_key1[m_cliques1[cl][i]].size(); k++) {
+        for (size_t k = 1; k <= m_key1[m_cliques1[cl][i]].size(); k++) {
           profile[k] = m_key1[m_cliques1[cl][i]][k];
         }
-        for (int k = 1; k <= m_key2[m_cliques2[cl][j]].size(); k++) {
+        for (size_t k = 1; k <= m_key2[m_cliques2[cl][j]].size(); k++) {
           profile[k + m_key1[m_cliques1[cl][i]].size()] = m_key2[m_cliques2[cl][j]][k];
         }
         solution[cl].push_back(profile);

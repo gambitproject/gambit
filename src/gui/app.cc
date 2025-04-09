@@ -131,12 +131,8 @@ void gbtApplication::SetCurrentDir(const wxString &p_dir)
 
 bool gbtApplication::AreDocumentsModified() const
 {
-  for (int i = 1; i <= m_documents.size(); i++) {
-    if (m_documents[i]->IsModified()) {
-      return true;
-    }
-  }
-  return false;
+  return std::any_of(m_documents.begin(), m_documents.end(),
+                     std::mem_fn(&gbtGameDocument::IsModified));
 }
 
 IMPLEMENT_APP(gbtApplication)

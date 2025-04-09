@@ -191,7 +191,7 @@ std::list<Vector<double>> PolynomialSystemSolver::FindRoots(const Rectangle<doub
 }
 
 void PolynomialSystemSolver::FindRoots(std::list<Vector<double>> &rootlist,
-                                       const Rectangle<double> &r, const int max_roots) const
+                                       const Rectangle<double> &r, const size_t max_roots) const
 {
   if (SystemHasNoRootsIn(r)) {
     return;

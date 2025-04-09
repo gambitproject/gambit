@@ -1009,8 +1009,8 @@ void gbtGameFrame::OnEditReveal(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     try {
-      for (int pl = 1; pl <= dialog.GetPlayers().size(); pl++) {
-        m_doc->DoRevealAction(m_doc->GetSelectNode()->GetInfoset(), dialog.GetPlayers()[pl]);
+      for (const auto &player : dialog.GetPlayers()) {
+        m_doc->DoRevealAction(m_doc->GetSelectNode()->GetInfoset(), player);
       }
     }
     catch (std::exception &ex) {
@@ -1065,7 +1065,7 @@ void gbtGameFrame::OnEditMove(wxCommandEvent &)
         m_doc->DoSetPlayer(infoset, m_doc->GetGame()->GetPlayer(dialog.GetPlayer()));
       }
 
-      for (int act = 1; act <= infoset->NumActions(); act++) {
+      for (size_t act = 1; act <= infoset->NumActions(); act++) {
         m_doc->DoSetActionLabel(infoset->GetAction(act), dialog.GetActionName(act));
       }
       if (infoset->IsChanceInfoset()) {
@@ -1283,7 +1283,7 @@ void gbtGameFrame::OnToolsEquilibrium(wxCommandEvent &)
       }
     }
 
-    gbtAnalysisOutput *command = dialog.GetCommand();
+    auto command = dialog.GetCommand();
 
     gbtNashMonitorDialog monitordialog(this, m_doc, command);
     monitordialog.ShowModal();
