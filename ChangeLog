@@ -57,6 +57,12 @@
   Explorer, as GTE no longer reads files in this format.
 
 
+## [16.2.2] - unreleased
+
+### Fixed
+- `Game.copy_tree` and `Game.move_tree` implementations reversed the roles of the
+  `src` and `dest` nodes (#499)
+
 ## [16.2.1] - 2025-01-06
 
 ### Fixed
@@ -66,7 +72,6 @@
   an infinite loop (#457)
 - Attempting to call the default constructor on Game objects (rather than one of the factory
   functions) now raises a more informative exception (#463)
-
 
 ## [16.2.0] - 2024-04-05
 

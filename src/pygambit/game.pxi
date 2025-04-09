@@ -1565,7 +1565,16 @@ class Game:
         resolved_node.node.deref().InsertMove(resolved_infoset.infoset)
 
     def copy_tree(self, src: typing.Union[Node, str], dest: typing.Union[Node, str]) -> None:
-        """Copy the subtree rooted at 'src' to 'dest'.
+        """Copy the subtree rooted at the node `src` to the node `dest`.
+
+        Each node in the subtree copied to follow `dest` is placed in the same information set
+        as the corresponding node in the original subtree under `src`.
+
+        It is permitted for `dest` to be a descendant of `src`.
+        The operation uses the subtree rooted at `src` as it is at the time the function is called,
+        so no infinite recursion is triggered.
+
+        The outcome associated with `dest` is not changed by this operation.
 
         Parameters
         ----------
@@ -1585,7 +1594,7 @@ class Game:
         resolved_dest = cython.cast(Node, self._resolve_node(dest, "copy_tree", "dest"))
         if not resolved_dest.is_terminal:
             raise UndefinedOperationError("copy_tree(): `dest` must be a terminal node.")
-        resolved_src.node.deref().CopyTree(resolved_dest.node)
+        resolved_dest.node.deref().CopyTree(resolved_src.node)
 
     def move_tree(self, src: typing.Union[Node, str], dest: typing.Union[Node, str]) -> None:
         """Move the subtree rooted at 'src' to 'dest'.
@@ -1610,7 +1619,7 @@ class Game:
             raise UndefinedOperationError("move_tree(): `dest` must be a terminal node.")
         if resolved_dest.is_successor_of(resolved_src):
             raise UndefinedOperationError("move_tree(): `dest` cannot be a successor of `src`.")
-        resolved_src.node.deref().MoveTree(resolved_dest.node)
+        resolved_dest.node.deref().MoveTree(resolved_src.node)
 
     def delete_parent(self, node: typing.Union[Node, str]) -> None:
         """Delete the parent node of `node`.  `node` replaces its parent in the tree.  All other
