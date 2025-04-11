@@ -25,7 +25,7 @@ def test_strategic_game_root():
 
 def test_strategic_game_nodes():
     game = gbt.Game.new_table([2, 2])
-    assert game.nodes() == []
+    assert list(game.nodes) == []
 
 
 def test_game_behav_profile_error():

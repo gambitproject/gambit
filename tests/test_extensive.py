@@ -57,7 +57,7 @@ def test_game_add_players_nolabel():
 
 def test_game_num_nodes():
     game = games.read_from_file("basic_extensive_game.efg")
-    assert len(game.nodes()) == 15
+    assert len(game.nodes) == 15
 
 
 def test_game_is_perfect_recall():
