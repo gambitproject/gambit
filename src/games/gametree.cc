@@ -605,12 +605,11 @@ GameInfoset GameTreeNodeRep::AppendMove(GameInfoset p_infoset)
   m_efg->IncrementVersion();
   m_infoset = dynamic_cast<GameTreeInfosetRep *>(p_infoset.operator->());
   m_infoset->AddMember(this);
-  std::for_each(
-      m_infoset->m_actions.begin(), m_infoset->m_actions.end(),
-      [this](const GameActionRep *) {
-      m_children.push_back(new GameTreeNodeRep(m_efg, this));
-      m_efg->m_numNodes++;
-      });
+  std::for_each(m_infoset->m_actions.begin(), m_infoset->m_actions.end(),
+                [this](const GameActionRep *) {
+                  m_children.push_back(new GameTreeNodeRep(m_efg, this));
+                  m_efg->m_numNodes++;
+                });
   m_efg->ClearComputedValues();
   m_efg->Canonicalize();
   return m_infoset;
