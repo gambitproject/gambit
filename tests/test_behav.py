@@ -584,64 +584,64 @@ def test_set_probabilities_player_by_label(game: gbt.Game, player_label: str, be
 
 @pytest.mark.parametrize(
     "game,node_idx,realiz_prob,rational_flag",
-    [(games.create_mixed_behav_game_efg(), 0, "1/8", True),
-     (games.create_mixed_behav_game_efg(), 1, "1/8", True),
+    [(games.create_mixed_behav_game_efg(), 0, "1", True),
+     (games.create_mixed_behav_game_efg(), 1, "1/2", True),
      (games.create_mixed_behav_game_efg(), 2, "1/4", True),
      (games.create_mixed_behav_game_efg(), 3, "1/8", True),
      (games.create_mixed_behav_game_efg(), 4, "1/8", True),
      (games.create_mixed_behav_game_efg(), 5, "1/4", True),
-     (games.create_mixed_behav_game_efg(), 6, "1/2", True),
+     (games.create_mixed_behav_game_efg(), 6, "1/8", True),
      (games.create_mixed_behav_game_efg(), 7, "1/8", True),
-     (games.create_mixed_behav_game_efg(), 8, "1/8", True),
+     (games.create_mixed_behav_game_efg(), 8, "1/2", True),
      (games.create_mixed_behav_game_efg(), 9, "1/4", True),
      (games.create_mixed_behav_game_efg(), 10, "1/8", True),
      (games.create_mixed_behav_game_efg(), 11, "1/8", True),
      (games.create_mixed_behav_game_efg(), 12, "1/4", True),
-     (games.create_mixed_behav_game_efg(), 13, "1/2", True),
-     (games.create_mixed_behav_game_efg(), 14, "1", True),
-     (games.create_mixed_behav_game_efg(), 0, 0.125, False),
-     (games.create_mixed_behav_game_efg(), 1, 0.125, False),
+     (games.create_mixed_behav_game_efg(), 13, "1/8", True),
+     (games.create_mixed_behav_game_efg(), 14, "1/8", True),
+     (games.create_mixed_behav_game_efg(), 0, 1.0, False),
+     (games.create_mixed_behav_game_efg(), 1, 0.5, False),
      (games.create_mixed_behav_game_efg(), 2, 0.25, False),
      (games.create_mixed_behav_game_efg(), 3, 0.125, False),
      (games.create_mixed_behav_game_efg(), 4, 0.125, False),
      (games.create_mixed_behav_game_efg(), 5, 0.25, False),
-     (games.create_mixed_behav_game_efg(), 6, 0.5, False),
+     (games.create_mixed_behav_game_efg(), 6, 0.125, False),
      (games.create_mixed_behav_game_efg(), 7, 0.125, False),
-     (games.create_mixed_behav_game_efg(), 8, 0.125, False),
+     (games.create_mixed_behav_game_efg(), 8, 0.5, False),
      (games.create_mixed_behav_game_efg(), 9, 0.25, False),
      (games.create_mixed_behav_game_efg(), 10, 0.125, False),
      (games.create_mixed_behav_game_efg(), 11, 0.125, False),
      (games.create_mixed_behav_game_efg(), 12, 0.25, False),
-     (games.create_mixed_behav_game_efg(), 13, 0.5, False),
-     (games.create_mixed_behav_game_efg(), 14, 1, False),
-     (games.create_myerson_2_card_poker_efg(), 0, "1/8", True),
-     (games.create_myerson_2_card_poker_efg(), 1, "1/8", True),
+     (games.create_mixed_behav_game_efg(), 13, 0.125, False),
+     (games.create_mixed_behav_game_efg(), 14, 0.125, False),
+     (games.create_myerson_2_card_poker_efg(), 0, "1", True),
+     (games.create_myerson_2_card_poker_efg(), 1, "1/2", True),
      (games.create_myerson_2_card_poker_efg(), 2, "1/4", True),
-     (games.create_myerson_2_card_poker_efg(), 3, "1/4", True),
-     (games.create_myerson_2_card_poker_efg(), 4, "1/2", True),
-     (games.create_myerson_2_card_poker_efg(), 5, "1/8", True),
-     (games.create_myerson_2_card_poker_efg(), 6, "1/8", True),
+     (games.create_myerson_2_card_poker_efg(), 3, "1/8", True),
+     (games.create_myerson_2_card_poker_efg(), 4, "1/8", True),
+     (games.create_myerson_2_card_poker_efg(), 5, "1/4", True),
+     (games.create_myerson_2_card_poker_efg(), 6, "1/2", True),
      (games.create_myerson_2_card_poker_efg(), 7, "1/4", True),
-     (games.create_myerson_2_card_poker_efg(), 8, "1/4", True),
-     (games.create_myerson_2_card_poker_efg(), 9, "1/2", True),
-     (games.create_myerson_2_card_poker_efg(), 10, "1", True),
-     (games.create_myerson_2_card_poker_efg(), 0, 0.125, False),
-     (games.create_myerson_2_card_poker_efg(), 1, 0.125, False),
+     (games.create_myerson_2_card_poker_efg(), 8, "1/8", True),
+     (games.create_myerson_2_card_poker_efg(), 9, "1/8", True),
+     (games.create_myerson_2_card_poker_efg(), 10, "1/4", True),
+     (games.create_myerson_2_card_poker_efg(), 0, 1.0, False),
+     (games.create_myerson_2_card_poker_efg(), 1, 0.5, False),
      (games.create_myerson_2_card_poker_efg(), 2, 0.25, False),
-     (games.create_myerson_2_card_poker_efg(), 3, 0.25, False),
-     (games.create_myerson_2_card_poker_efg(), 4, 0.5, False),
-     (games.create_myerson_2_card_poker_efg(), 5, 0.125, False),
-     (games.create_myerson_2_card_poker_efg(), 6, 0.125, False),
+     (games.create_myerson_2_card_poker_efg(), 3, 0.125, False),
+     (games.create_myerson_2_card_poker_efg(), 4, 0.125, False),
+     (games.create_myerson_2_card_poker_efg(), 5, 0.25, False),
+     (games.create_myerson_2_card_poker_efg(), 6, 0.5, False),
      (games.create_myerson_2_card_poker_efg(), 7, 0.25, False),
-     (games.create_myerson_2_card_poker_efg(), 8, 0.25, False),
-     (games.create_myerson_2_card_poker_efg(), 9, 0.5, False),
-     (games.create_myerson_2_card_poker_efg(), 10, 1, False)]
+     (games.create_myerson_2_card_poker_efg(), 8, 0.125, False),
+     (games.create_myerson_2_card_poker_efg(), 9, 0.125, False),
+     (games.create_myerson_2_card_poker_efg(), 10, 0.25, False)]
 )
 def test_realiz_prob_nodes_reference(game: gbt.Game, node_idx: int,
                                      realiz_prob: typing.Union[str, float], rational_flag: bool):
     profile = game.mixed_behavior_profile(rational=rational_flag)
     realiz_prob = (gbt.Rational(realiz_prob) if rational_flag else realiz_prob)
-    node = list(game.nodes)[node_idx]
+    node = game.nodes()[node_idx]
     assert profile.realiz_prob(node) == realiz_prob
 
 
@@ -890,7 +890,7 @@ def test_martingale_property_of_node_value(game: gbt.Game, rational_flag: bool):
     realization probabilities of those children
     """
     profile = game.mixed_behavior_profile(rational=rational_flag)
-    for node in game.nodes:
+    for node in game.nodes():
         if node.is_terminal or node.player.is_chance:
             continue
         expected_val = 0
@@ -1080,23 +1080,23 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
      ######################################################################################
      # belief (at nodes)
      (games.create_mixed_behav_game_efg(), PROBS_1A_doub, PROBS_2A_doub, False,
-      lambda x, y: x.belief(y), lambda x: x.nodes),
+      lambda x, y: x.belief(y), lambda x: x.nodes()),
      (games.create_mixed_behav_game_efg(), PROBS_1A_rat, PROBS_2A_rat, True,
-      lambda x, y: x.belief(y), lambda x: x.nodes),
+      lambda x, y: x.belief(y), lambda x: x.nodes()),
      (games.create_myerson_2_card_poker_efg(), PROBS_1B_doub, PROBS_2B_doub, False,
-      lambda x, y: x.belief(y), lambda x: x.nodes),
+      lambda x, y: x.belief(y), lambda x: x.nodes()),
      (games.create_myerson_2_card_poker_efg(), PROBS_1A_rat, PROBS_2A_rat, True,
-      lambda x, y: x.belief(y), lambda x: x.nodes),
+      lambda x, y: x.belief(y), lambda x: x.nodes()),
      ######################################################################################
      # realiz_prob (at nodes)
      (games.create_mixed_behav_game_efg(), PROBS_1A_doub, PROBS_2A_doub, False,
-      lambda x, y: x.realiz_prob(y), lambda x: x.nodes),
+      lambda x, y: x.realiz_prob(y), lambda x: x.nodes()),
      (games.create_mixed_behav_game_efg(), PROBS_1A_rat, PROBS_2A_rat, True,
-      lambda x, y: x.realiz_prob(y), lambda x: x.nodes),
+      lambda x, y: x.realiz_prob(y), lambda x: x.nodes()),
      (games.create_myerson_2_card_poker_efg(), PROBS_1B_doub, PROBS_2B_doub, False,
-      lambda x, y: x.realiz_prob(y), lambda x: x.nodes),
+      lambda x, y: x.realiz_prob(y), lambda x: x.nodes()),
      (games.create_myerson_2_card_poker_efg(), PROBS_1A_rat, PROBS_2A_rat, True,
-      lambda x, y: x.realiz_prob(y), lambda x: x.nodes),
+      lambda x, y: x.realiz_prob(y), lambda x: x.nodes()),
      ######################################################################################
      # infoset_prob
      (games.create_mixed_behav_game_efg(), PROBS_1A_doub, PROBS_2A_doub, False,
@@ -1141,16 +1141,16 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
      # node_value
      (games.create_mixed_behav_game_efg(), PROBS_1A_doub, PROBS_2A_doub, False,
       lambda x, y: x.node_value(player=y[0], node=y[1]),
-      lambda x: list(product(x.players, x.nodes))),
+      lambda x: list(product(x.players, x.nodes()))),
      (games.create_mixed_behav_game_efg(), PROBS_1A_rat, PROBS_2A_rat, True,
       lambda x, y: x.node_value(player=y[0], node=y[1]),
-      lambda x: list(product(x.players, x.nodes))),
+      lambda x: list(product(x.players, x.nodes()))),
      (games.create_myerson_2_card_poker_efg(), PROBS_1B_doub, PROBS_2B_doub, False,
       lambda x, y: x.node_value(player=y[0], node=y[1]),
-      lambda x: list(product(x.players, x.nodes))),
+      lambda x: list(product(x.players, x.nodes()))),
      (games.create_myerson_2_card_poker_efg(), PROBS_1A_rat, PROBS_2A_rat, True,
       lambda x, y: x.node_value(player=y[0], node=y[1]),
-      lambda x: list(product(x.players, x.nodes))),
+      lambda x: list(product(x.players, x.nodes()))),
      ######################################################################################
      # liap_value (of profile, hence [1] for objects_to_test, any singleton collection would do)
      (games.create_mixed_behav_game_efg(), PROBS_1A_doub, PROBS_2A_doub, False,
