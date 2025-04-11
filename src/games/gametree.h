@@ -213,7 +213,7 @@ protected:
   mutable bool m_computedValues{false}, m_doCanon{true};
   GameTreeNodeRep *m_root;
   GamePlayerRep *m_chance;
-  std::size_t m_numNodes;
+  std::size_t m_numNodes = 1;
 
   /// @name Private auxiliary functions
   //@{
