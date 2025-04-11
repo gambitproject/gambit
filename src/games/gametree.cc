@@ -230,6 +230,8 @@ GameAction GameTreeInfosetRep::InsertAction(GameAction p_action /* =0 */)
                               new GameTreeNodeRep(m_efg, member));
   }
 
+  m_efg->m_numNodes += m_members.size();
+
   m_efg->ClearComputedValues();
   m_efg->Canonicalize();
   return action;
@@ -444,6 +446,9 @@ void GameTreeNodeRep::DeleteTree()
     m_children.front()->Invalidate();
     erase_atindex(m_children, 1);
   }
+
+  m_efg->m_numNodes--;
+
   if (m_infoset) {
     m_infoset->RemoveMember(this);
     m_infoset = nullptr;
@@ -600,9 +605,11 @@ GameInfoset GameTreeNodeRep::AppendMove(GameInfoset p_infoset)
   m_efg->IncrementVersion();
   m_infoset = dynamic_cast<GameTreeInfosetRep *>(p_infoset.operator->());
   m_infoset->AddMember(this);
-  std::for_each(
-      m_infoset->m_actions.begin(), m_infoset->m_actions.end(),
-      [this](const GameActionRep *) { m_children.push_back(new GameTreeNodeRep(m_efg, this)); });
+  std::for_each(m_infoset->m_actions.begin(), m_infoset->m_actions.end(),
+                [this](const GameActionRep *) {
+                  m_children.push_back(new GameTreeNodeRep(m_efg, this));
+                  m_efg->m_numNodes++;
+                });
   m_efg->ClearComputedValues();
   m_efg->Canonicalize();
   return m_infoset;
@@ -646,6 +653,9 @@ GameInfoset GameTreeNodeRep::InsertMove(GameInfoset p_infoset)
                 newNode->m_infoset->m_actions.end(), [this, newNode](const GameActionRep *) {
                   newNode->m_children.push_back(new GameTreeNodeRep(m_efg, newNode));
                 });
+
+  // Total nodes added = 1 (newNode) + (NumActions - 1) (new children of newNode) = NumActions
+  m_efg->m_numNodes += newNode->m_infoset->m_actions.size();
 
   m_efg->ClearComputedValues();
   m_efg->Canonicalize();
@@ -1014,23 +1024,6 @@ void GameTreeRep::DeleteOutcome(const GameOutcome &p_outcome)
                 [outc = 1](GameOutcomeRep *c) mutable { c->m_number = outc++; });
   ClearComputedValues();
 }
-
-//------------------------------------------------------------------------
-//                         GameTreeRep: Nodes
-//------------------------------------------------------------------------
-
-namespace {
-size_t CountNodes(GameNode p_node)
-{
-  size_t num = 1;
-  for (size_t i = 1; i <= p_node->NumChildren(); num += CountNodes(p_node->GetChild(i++)))
-    ;
-  return num;
-}
-
-} // end anonymous namespace
-
-size_t GameTreeRep::NumNodes() const { return CountNodes(m_root); }
 
 //------------------------------------------------------------------------
 //                       GameTreeRep: Modification
