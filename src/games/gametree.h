@@ -55,8 +55,6 @@ protected:
   /// Removes the node from the information set, invalidating if emptied
   void RemoveMember(GameTreeNodeRep *);
 
-  void RemoveAction(int which);
-
   void RenumberActions()
   {
     std::for_each(m_actions.begin(), m_actions.end(),

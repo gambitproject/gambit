@@ -128,15 +128,18 @@ void GameTreeRep::DeleteAction(GameAction p_action)
   for (where = 1; where <= infoset->m_actions.size() && infoset->m_actions[where] != action;
        where++)
     ;
+  infoset->m_actions[where]->Invalidate();
+  erase_atindex(infoset->m_actions, where);
+  if (infoset->m_player->IsChance()) {
+    erase_atindex(infoset->m_probs, where);
+    NormalizeChanceProbs(infoset);
+  }
+  infoset->RenumberActions();
 
-  infoset->RemoveAction(where);
   for (auto member : infoset->m_members) {
     member->m_children[where]->DeleteTree();
     member->m_children[where]->Invalidate();
     erase_atindex(member->m_children, where);
-  }
-  if (infoset->IsChanceInfoset()) {
-    NormalizeChanceProbs(infoset);
   }
   ClearComputedValues();
   Canonicalize();
@@ -240,17 +243,6 @@ GameAction GameTreeInfosetRep::InsertAction(GameAction p_action /* =0 */)
   m_efg->ClearComputedValues();
   m_efg->Canonicalize();
   return action;
-}
-
-void GameTreeInfosetRep::RemoveAction(int which)
-{
-  m_efg->IncrementVersion();
-  m_actions[which]->Invalidate();
-  erase_atindex(m_actions, which);
-  if (m_player->IsChance()) {
-    erase_atindex(m_probs, which);
-  }
-  RenumberActions();
 }
 
 void GameTreeInfosetRep::RemoveMember(GameTreeNodeRep *p_node)
