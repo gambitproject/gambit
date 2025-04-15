@@ -22,7 +22,7 @@ must not be misrepresented as being the original software.
 distribution.
 */
 
-#include "core/tinyxml.h"
+#include "tinyxml.h"
 
 #ifdef TIXML_USE_STL
 #include <sstream>

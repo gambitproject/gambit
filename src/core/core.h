@@ -2,8 +2,8 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/core/sqmatrix.cc
-// Instantiation of common square matrix types
+// FILE: src/core/core.h
+// Core (game theory-independent) declarations and utilities for Gambit
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,8 +20,15 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "sqmatrix.imp"
+#ifndef GAMBIT_CORE_CORE_H
+#define GAMBIT_CORE_CORE_H
+
+#include "util.h"
+#include "array.h"
+#include "list.h"
+#include "recarray.h"
+#include "vector.h"
+#include "matrix.h"
 #include "rational.h"
 
-template class Gambit::SquareMatrix<double>;
-template class Gambit::SquareMatrix<Gambit::Rational>;
+#endif // GAMBIT_CORE_CORE_H

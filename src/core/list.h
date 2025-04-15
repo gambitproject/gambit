@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/list.h
+// FILE: src/core/list.h
 // A generic linked-list container class
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,8 +20,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef LIBGAMBIT_LIST_H
-#define LIBGAMBIT_LIST_H
+#ifndef GAMBIT_CORE_LIST_H
+#define GAMBIT_CORE_LIST_H
 
 #include <list>
 
@@ -129,4 +129,4 @@ public:
 
 } // namespace Gambit
 
-#endif // LIBGAMBIT_LIST_H
+#endif // GAMBIT_CORE_LIST_H

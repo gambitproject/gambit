@@ -20,8 +20,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMBIT_H
-#define GAMBIT_H
+#ifndef GAMBIT_APP_H
+#define GAMBIT_APP_H
 
 #include <wx/wx.h>
 #include <wx/config.h>  // for wxConfig
@@ -78,4 +78,4 @@ public:
 
 DECLARE_APP(gbtApplication)
 
-#endif // GAMBIT_H
+#endif // GAMBIT_APP_H

@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/rational.h
+// FILE: src/core/rational.h
 // Interface to a rational number class
 //
 // The original copyright and license are included below.
@@ -25,11 +25,12 @@ License along with this library; if not, write to the Free Software
 Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef LIBGAMBIT_RATIONAL_H
-#define LIBGAMBIT_RATIONAL_H
+#ifndef GAMBIT_CORE_RATIONAL_H
+#define GAMBIT_CORE_RATIONAL_H
+
+#include <cmath>
 
 #include "integer.h"
-#include <cmath>
 
 namespace Gambit {
 
@@ -120,4 +121,4 @@ inline int sign(const Rational &x) { return sign(x.num); }
 
 } // end namespace Gambit
 
-#endif // LIBGAMBIT_RATIONAL_H
+#endif // GAMBIT_CORE_RATIONAL_H

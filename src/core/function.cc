@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/function.cc
+// FILE: src/core/function.cc
 // Implementation of function and function minimization routines
 //
 // These routines derive from the N-dimensional function minimization
@@ -28,7 +28,7 @@
 //
 
 #include <cmath>
-#include "gambit.h"
+
 #include "function.h"
 
 using namespace Gambit;

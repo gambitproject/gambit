@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/matrix.cc
+// FILE: src/core/matrix.cc
 // Instantiation of common matrix types
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,7 +20,7 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "gambit.h"
+#include "core.h"
 #include "matrix.imp"
 
 namespace Gambit {

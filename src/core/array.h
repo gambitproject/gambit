@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/array.h
+// FILE: src/core/array.h
 // A basic bounds-checked array type
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,11 +20,13 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef LIBGAMBIT_ARRAY_H
-#define LIBGAMBIT_ARRAY_H
+#ifndef GAMBIT_CORE_ARRAY_H
+#define GAMBIT_CORE_ARRAY_H
 
 #include <vector>
 #include <iterator>
+
+#include "util.h"
 
 namespace Gambit {
 
@@ -282,4 +284,4 @@ template <class T> void erase_atindex(Array<T> &p_array, int p_index)
 
 } // end namespace Gambit
 
-#endif // LIBGAMBIT_ARRAY_H
+#endif // GAMBIT_CORE_ARRAY_H
