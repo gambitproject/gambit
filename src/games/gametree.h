@@ -30,37 +30,9 @@ namespace Gambit {
 
 class GameTreeRep;
 
-class GameTreeActionRep : public GameActionRep {
-  friend class GameTreeRep;
-  friend class GameTreeInfosetRep;
-  template <class T> friend class MixedBehaviorProfile;
-
-private:
-  int m_number;
-  std::string m_label;
-  GameTreeInfosetRep *m_infoset;
-
-  GameTreeActionRep(int p_number, const std::string &p_label, GameTreeInfosetRep *p_infoset)
-    : m_number(p_number), m_label(p_label), m_infoset(p_infoset)
-  {
-  }
-  ~GameTreeActionRep() override = default;
-
-public:
-  int GetNumber() const override { return m_number; }
-  GameInfoset GetInfoset() const override;
-
-  const std::string &GetLabel() const override { return m_label; }
-  void SetLabel(const std::string &p_label) override { m_label = p_label; }
-
-  bool Precedes(const GameNode &) const override;
-
-  void DeleteAction() override;
-};
-
 class GameTreeInfosetRep : public GameInfosetRep {
   friend class GameTreeRep;
-  friend class GameTreeActionRep;
+  friend class GameActionRep;
   friend class GamePlayerRep;
   friend class GameTreeNodeRep;
   template <class T> friend class MixedBehaviorProfile;
@@ -70,7 +42,7 @@ protected:
   int m_number;
   std::string m_label;
   GamePlayerRep *m_player;
-  Array<GameTreeActionRep *> m_actions;
+  Array<GameActionRep *> m_actions;
   std::vector<GameTreeNodeRep *> m_members;
   int flag{0}, whichbranch{0};
   Array<Number> m_probs;
@@ -88,7 +60,7 @@ protected:
   void RenumberActions()
   {
     std::for_each(m_actions.begin(), m_actions.end(),
-                  [act = 1](GameTreeActionRep *a) mutable { a->m_number = act++; });
+                  [act = 1](GameActionRep *a) mutable { a->m_number = act++; });
   }
 
 public:
@@ -131,7 +103,7 @@ public:
 
 class GameTreeNodeRep : public GameNodeRep {
   friend class GameTreeRep;
-  friend class GameTreeActionRep;
+  friend class GameActionRep;
   friend class GameTreeInfosetRep;
   friend class GamePlayerRep;
   friend class PureBehaviorProfile;
@@ -205,7 +177,7 @@ public:
 class GameTreeRep : public GameExplicitRep {
   friend class GameTreeNodeRep;
   friend class GameTreeInfosetRep;
-  friend class GameTreeActionRep;
+  friend class GameActionRep;
 
 protected:
   mutable bool m_computedValues{false}, m_doCanon{true};

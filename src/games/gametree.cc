@@ -94,15 +94,15 @@ template class TreeMixedStrategyProfileRep<double>;
 template class TreeMixedStrategyProfileRep<Rational>;
 
 //========================================================================
-//                     class GameTreeActionRep
+//                     class GameActionRep
 //========================================================================
 
-bool GameTreeActionRep::Precedes(const GameNode &n) const
+bool GameActionRep::Precedes(const GameNode &n) const
 {
   GameNode node = n;
 
   while (node != node->GetGame()->GetRoot()) {
-    if (node->GetPriorAction() == GameAction(const_cast<GameTreeActionRep *>(this))) {
+    if (node->GetPriorAction() == GameAction(const_cast<GameActionRep *>(this))) {
       return true;
     }
     else {
@@ -112,7 +112,7 @@ bool GameTreeActionRep::Precedes(const GameNode &n) const
   return false;
 }
 
-void GameTreeActionRep::DeleteAction()
+void GameActionRep::DeleteAction()
 {
   if (m_infoset->NumActions() == 1) {
     throw UndefinedException();
@@ -137,7 +137,7 @@ void GameTreeActionRep::DeleteAction()
   m_infoset->m_efg->Canonicalize();
 }
 
-GameInfoset GameTreeActionRep::GetInfoset() const { return m_infoset; }
+GameInfoset GameActionRep::GetInfoset() const { return m_infoset; }
 
 //========================================================================
 //                       class GameTreeInfosetRep
@@ -148,7 +148,7 @@ GameTreeInfosetRep::GameTreeInfosetRep(GameTreeRep *p_efg, int p_number, GamePla
   : m_efg(p_efg), m_number(p_number), m_player(p_player), m_actions(p_actions)
 {
   std::generate(m_actions.begin(), m_actions.end(),
-                [this, i = 1]() mutable { return new GameTreeActionRep(i++, "", this); });
+                [this, i = 1]() mutable { return new GameActionRep(i++, "", this); });
   if (p_player->IsChance()) {
     m_probs = Array<Number>(m_actions.size());
     std::fill(m_probs.begin(), m_probs.end(), Rational(1, m_actions.size()));
@@ -221,7 +221,7 @@ GameAction GameTreeInfosetRep::InsertAction(GameAction p_action /* =0 */)
       ;
   }
 
-  auto *action = new GameTreeActionRep(where, "", this);
+  auto *action = new GameActionRep(where, "", this);
   m_actions.insert(std::next(m_actions.cbegin(), where - 1), action);
   if (m_player->IsChance()) {
     m_probs.insert(std::next(m_probs.cbegin(), where - 1), Number());

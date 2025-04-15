@@ -151,21 +151,34 @@ public:
 };
 
 /// An action at an information set in an extensive game
+class GameTreeInfosetRep;
+
 class GameActionRep : public GameObject {
-protected:
-  GameActionRep() = default;
-  ~GameActionRep() override = default;
+  friend class GameTreeRep;
+  friend class GameTreeInfosetRep;
+  template <class T> friend class MixedBehaviorProfile;
+
+private:
+  int m_number;
+  std::string m_label;
+  GameTreeInfosetRep *m_infoset;
+
+  GameActionRep(int p_number, const std::string &p_label, GameTreeInfosetRep *p_infoset)
+    : m_number(p_number), m_label(p_label), m_infoset(p_infoset)
+  {
+  }
+  ~GameActionRep() = default;
 
 public:
-  virtual int GetNumber() const = 0;
-  virtual GameInfoset GetInfoset() const = 0;
+  int GetNumber() const { return m_number; }
+  GameInfoset GetInfoset() const;
 
-  virtual const std::string &GetLabel() const = 0;
-  virtual void SetLabel(const std::string &p_label) = 0;
+  const std::string &GetLabel() const { return m_label; }
+  void SetLabel(const std::string &p_label) { m_label = p_label; }
 
-  virtual bool Precedes(const GameNode &) const = 0;
+  bool Precedes(const GameNode &) const;
 
-  virtual void DeleteAction() = 0;
+  void DeleteAction();
 };
 
 /// An information set in an extensive game
@@ -382,7 +395,7 @@ public:
 class GameRep : public BaseGameRep {
   friend class GameOutcomeRep;
   friend class GameTreeInfosetRep;
-  friend class GameTreeActionRep;
+  friend class GameActionRep;
   friend class GameStrategyRep;
   friend class GamePlayerRep;
   friend class GameTreeNodeRep;
