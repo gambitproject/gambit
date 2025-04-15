@@ -734,7 +734,7 @@ void gbtGameDocument::DoSetPlayer(GameInfoset p_infoset, GamePlayer p_player)
 {
   if (!p_player->IsChance() && !p_infoset->GetPlayer()->IsChance()) {
     // Currently don't support switching nodes to/from chance player
-    p_infoset->SetPlayer(p_player);
+    m_game->SetPlayer(p_infoset, p_player);
     UpdateViews(GBT_DOC_MODIFIED_GAME);
   }
 }
@@ -743,7 +743,7 @@ void gbtGameDocument::DoSetPlayer(GameNode p_node, GamePlayer p_player)
 {
   if (!p_player->IsChance() && !p_node->GetPlayer()->IsChance()) {
     // Currently don't support switching nodes to/from chance player
-    p_node->GetInfoset()->SetPlayer(p_player);
+    m_game->SetPlayer(p_node->GetInfoset(), p_player);
     UpdateViews(GBT_DOC_MODIFIED_GAME);
   }
 }

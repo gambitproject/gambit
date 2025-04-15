@@ -1814,7 +1814,7 @@ class Game:
         """
         resolved_player = cython.cast(Player, self._resolve_player(player, "set_player"))
         resolved_infoset = cython.cast(Infoset, self._resolve_infoset(infoset, "set_player"))
-        resolved_infoset.infoset.deref().SetPlayer(resolved_player.player)
+        self.game.deref().SetPlayer(resolved_infoset.infoset, resolved_player.player)
 
     def add_outcome(self,
                     payoffs: typing.Optional[typing.List] = None,

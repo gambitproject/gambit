@@ -179,7 +179,6 @@ public:
   virtual int GetNumber() const = 0;
 
   virtual GamePlayer GetPlayer() const = 0;
-  virtual void SetPlayer(GamePlayer p) = 0;
 
   virtual bool IsChanceInfoset() const = 0;
 
@@ -475,6 +474,11 @@ public:
   /// Write the game to a file in .nfg payoff format.
   virtual void WriteNfgFile(std::ostream &p_stream) const;
   //@}
+
+  virtual void SetPlayer(GameInfoset p_infoset, GamePlayer p_player)
+  {
+    throw UndefinedException();
+  }
 
   /// @name Dimensions of the game
   //@{

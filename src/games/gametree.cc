@@ -170,26 +170,28 @@ Array<GameAction> GameTreeInfosetRep::GetActions() const
   return ret;
 }
 
-void GameTreeInfosetRep::SetPlayer(GamePlayer p_player)
+void GameTreeRep::SetPlayer(GameInfoset p_infoset, GamePlayer p_player)
 {
-  if (p_player->GetGame() != m_efg) {
+  if (p_infoset->GetGame() != this || p_player->GetGame() != this) {
     throw MismatchException();
   }
-  if (m_player->IsChance() || p_player->IsChance()) {
+  if (p_infoset->GetPlayer()->IsChance() || p_player->IsChance()) {
     throw UndefinedException();
   }
-  if (m_player == p_player) {
+  if (p_infoset->GetPlayer() == p_player) {
     return;
   }
 
-  m_efg->IncrementVersion();
-  m_player->m_infosets.erase(
-      std::find(m_player->m_infosets.begin(), m_player->m_infosets.end(), this));
-  m_player = p_player;
-  p_player->m_infosets.push_back(this);
+  GamePlayerRep *oldPlayer = p_infoset->GetPlayer();
+  auto *infoset = dynamic_cast<GameTreeInfosetRep *>(p_infoset.operator->());
+  IncrementVersion();
+  oldPlayer->m_infosets.erase(
+      std::find(oldPlayer->m_infosets.begin(), oldPlayer->m_infosets.end(), p_infoset));
+  infoset->m_player = p_player;
+  p_player->m_infosets.push_back(infoset);
 
-  m_efg->ClearComputedValues();
-  m_efg->Canonicalize();
+  ClearComputedValues();
+  Canonicalize();
 }
 
 bool GameTreeInfosetRep::Precedes(GameNode p_node) const

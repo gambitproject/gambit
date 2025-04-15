@@ -109,7 +109,6 @@ cdef extern from "games/game.h":
         int GetNumber() except +
         c_Game GetGame() except +
         c_GamePlayer GetPlayer() except +
-        void SetPlayer(c_GamePlayer) except +
 
         string GetLabel() except +
         void SetLabel(string) except +
@@ -223,6 +222,8 @@ cdef extern from "games/game.h":
         c_Rational GetMaxPayoff() except +
         c_Rational GetMaxPayoff(c_GamePlayer) except +
         bool IsPerfectRecall() except +
+
+        void SetPlayer(c_GameInfoset, c_GamePlayer) except +
 
         c_Game SetChanceProbs(c_GameInfoset, Array[c_Number]) except +
 

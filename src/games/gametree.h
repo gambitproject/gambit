@@ -96,7 +96,6 @@ public:
   int GetNumber() const override { return m_number; }
 
   GamePlayer GetPlayer() const override;
-  void SetPlayer(GamePlayer p) override;
 
   bool IsChanceInfoset() const override;
 
@@ -294,6 +293,7 @@ public:
 
   /// @name Modification
   //@{
+  void SetPlayer(GameInfoset, GamePlayer) override;
   Game SetChanceProbs(const GameInfoset &, const Array<Number> &) override;
   //@}
 
