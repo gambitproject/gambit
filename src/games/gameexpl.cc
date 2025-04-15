@@ -119,16 +119,17 @@ GameStrategy GameExplicitRep::GetStrategy(int p_index) const
 int GameExplicitRep::NumStrategyContingencies() const
 {
   const_cast<GameExplicitRep *>(this)->BuildComputedValues();
-  return std::accumulate(m_players.begin(), m_players.end(), 1, [](int ncont, GamePlayerRep *p) {
-    return ncont * p->m_strategies.size();
-  });
+  return std::accumulate(
+      m_players.begin(), m_players.end(), 1,
+      [](int ncont, const GamePlayerRep *p) { return ncont * p->m_strategies.size(); });
 }
 
 int GameExplicitRep::MixedProfileLength() const
 {
   const_cast<GameExplicitRep *>(this)->BuildComputedValues();
-  return std::accumulate(m_players.begin(), m_players.end(), 0,
-                         [](int size, GamePlayerRep *p) { return size + p->m_strategies.size(); });
+  return std::accumulate(
+      m_players.begin(), m_players.end(), 0,
+      [](int size, const GamePlayerRep *p) { return size + p->m_strategies.size(); });
 }
 
 //------------------------------------------------------------------------

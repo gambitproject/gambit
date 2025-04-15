@@ -88,8 +88,7 @@ void MixedBehaviorProfile<T>::BehaviorStrat(GamePlayer &player, GameNode &p_node
 template <class T>
 void MixedBehaviorProfile<T>::RealizationProbs(const MixedStrategyProfile<T> &mp,
                                                GamePlayer &player, const Array<int> &actions,
-                                               GameTreeNodeRep *node,
-                                               std::map<GameNode, T> &map_nvals,
+                                               GameNodeRep *node, std::map<GameNode, T> &map_nvals,
                                                std::map<GameNode, T> &map_bvals)
 {
   T prob;
@@ -116,7 +115,7 @@ void MixedBehaviorProfile<T>::RealizationProbs(const MixedStrategyProfile<T> &mp
       prob = T(node->m_infoset->GetActionProb(node->m_infoset->GetAction(i)));
     }
 
-    GameTreeNodeRep *child = node->m_children[i];
+    GameNodeRep *child = node->m_children[i];
 
     map_bvals[child] = prob * map_bvals[node];
     map_nvals[child] += map_bvals[child];
@@ -140,8 +139,7 @@ MixedBehaviorProfile<T>::MixedBehaviorProfile(const MixedStrategyProfile<T> &p_p
     }
   }
 
-  GameTreeNodeRep *root =
-      dynamic_cast<GameTreeNodeRep *>(m_support.GetGame()->GetRoot().operator->());
+  GameNodeRep *root = m_support.GetGame()->GetRoot();
 
   const StrategySupportProfile &support = p_profile.GetSupport();
   GameRep *game = m_support.GetGame();
@@ -333,16 +331,12 @@ template <class T> T MixedBehaviorProfile<T>::GetActionProb(const GameAction &ac
 {
   CheckVersion();
   if (action->GetInfoset()->GetPlayer()->IsChance()) {
-    GameTreeInfosetRep *infoset =
-        dynamic_cast<GameTreeInfosetRep *>(action->GetInfoset().operator->());
-    return static_cast<T>(infoset->GetActionProb(action));
+    return static_cast<T>(action->GetInfoset()->GetActionProb(action));
   }
-  else if (!m_support.Contains(action)) {
+  if (!m_support.Contains(action)) {
     return T(0);
   }
-  else {
-    return m_probs[m_profileIndex.at(action)];
-  }
+  return m_probs[m_profileIndex.at(action)];
 }
 
 template <class T> const T &MixedBehaviorProfile<T>::GetPayoff(const GameAction &act) const

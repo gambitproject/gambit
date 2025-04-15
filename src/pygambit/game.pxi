@@ -1517,12 +1517,12 @@ class Game:
             raise UndefinedOperationError("append_move(): `nodes` must be terminal nodes")
 
         resolved_node = cython.cast(Node, resolved_nodes[0])
-        resolved_node.node.deref().AppendMove(resolved_player.player, len(actions))
+        self.game.deref().AppendMove(resolved_node.node, resolved_player.player, len(actions))
         for label, action in zip(actions, resolved_node.infoset.actions):
             action.label = label
         resolved_infoset = cython.cast(Infoset, resolved_node.infoset)
         for n in resolved_nodes[1:]:
-            cython.cast(Node, n).node.deref().AppendMove(resolved_infoset.infoset)
+            self.game.deref().AppendMove(cython.cast(Node, n).node, resolved_infoset.infoset)
 
     def append_infoset(self, nodes: typing.Union[NodeReference, NodeReferenceSet],
                        infoset: typing.Union[Infoset, str]) -> None:
@@ -1543,7 +1543,7 @@ class Game:
         if any(len(n.children) > 0 for n in resolved_nodes):
             raise UndefinedOperationError("append_infoset(): `nodes` must be terminal nodes")
         for n in resolved_nodes:
-            cython.cast(Node, n).node.deref().AppendMove(resolved_infoset.infoset)
+            self.game.deref().AppendMove(cython.cast(Node, n).node, resolved_infoset.infoset)
 
     def insert_move(self, node: typing.Union[Node, str],
                     player: typing.Union[Player, str], actions: int) -> None:
@@ -1562,7 +1562,7 @@ class Game:
         resolved_player = cython.cast(Player, self._resolve_player(player, "insert_move"))
         if actions < 1:
             raise UndefinedOperationError("insert_move(): `actions` must be a positive number")
-        resolved_node.node.deref().InsertMove(resolved_player.player, actions)
+        self.game.deref().InsertMove(resolved_node.node, resolved_player.player, actions)
 
     def insert_infoset(self, node: typing.Union[Node, str],
                        infoset: typing.Union[Infoset, str]) -> None:
@@ -1577,7 +1577,7 @@ class Game:
         """
         resolved_node = cython.cast(Node, self._resolve_node(node, "insert_infoset"))
         resolved_infoset = cython.cast(Infoset, self._resolve_infoset(infoset, "insert_infoset"))
-        resolved_node.node.deref().InsertMove(resolved_infoset.infoset)
+        self.game.deref().InsertMove(resolved_node.node, resolved_infoset.infoset)
 
     def copy_tree(self, src: typing.Union[Node, str], dest: typing.Union[Node, str]) -> None:
         """Copy the subtree rooted at the node `src` to the node `dest`.
@@ -1609,7 +1609,7 @@ class Game:
         resolved_dest = cython.cast(Node, self._resolve_node(dest, "copy_tree", "dest"))
         if not resolved_dest.is_terminal:
             raise UndefinedOperationError("copy_tree(): `dest` must be a terminal node.")
-        resolved_dest.node.deref().CopyTree(resolved_src.node)
+        self.game.deref().CopyTree(resolved_dest.node, resolved_src.node)
 
     def move_tree(self, src: typing.Union[Node, str], dest: typing.Union[Node, str]) -> None:
         """Move the subtree rooted at 'src' to 'dest'.
@@ -1634,7 +1634,7 @@ class Game:
             raise UndefinedOperationError("move_tree(): `dest` must be a terminal node.")
         if resolved_dest.is_successor_of(resolved_src):
             raise UndefinedOperationError("move_tree(): `dest` cannot be a successor of `src`.")
-        resolved_dest.node.deref().MoveTree(resolved_src.node)
+        self.game.deref().MoveTree(resolved_dest.node, resolved_src.node)
 
     def delete_parent(self, node: typing.Union[Node, str]) -> None:
         """Delete the parent node of `node`.  `node` replaces its parent in the tree.  All other
@@ -1653,7 +1653,7 @@ class Game:
             If `node` is a `Node` from a different game.
         """
         resolved_node = cython.cast(Node, self._resolve_node(node, "delete_parent"))
-        resolved_node.node.deref().DeleteParent()
+        self.game.deref().DeleteParent(resolved_node.node)
 
     def delete_tree(self, node: typing.Union[Node, str]) -> None:
         """Truncate the game tree at `node`, deleting the subtree beneath it.
@@ -1670,7 +1670,7 @@ class Game:
             If `node` is a `Node` from a different game.
         """
         resolved_node = cython.cast(Node, self._resolve_node(node, "delete_tree"))
-        resolved_node.node.deref().DeleteTree()
+        self.game.deref().DeleteTree(resolved_node.node)
 
     def add_action(self,
                    infoset: typing.Union[typing.Infoset, str],
@@ -1694,14 +1694,15 @@ class Game:
         """
         resolved_infoset = cython.cast(Infoset, self._resolve_infoset(infoset, "add_action"))
         if before is None:
-            resolved_infoset.infoset.deref().InsertAction(cython.cast(c_GameAction, NULL))
+            self.game.deref().InsertAction(resolved_infoset.infoset,
+                                           cython.cast(c_GameAction, NULL))
         else:
             resolved_action = cython.cast(
                 Action, self._resolve_action(before, "add_action", "before")
             )
             if resolved_infoset != resolved_action.infoset:
                 raise MismatchError("add_action(): must specify an action from the same infoset")
-            resolved_infoset.infoset.deref().InsertAction(resolved_action.action)
+            self.game.deref().InsertAction(resolved_infoset.infoset, resolved_action.action)
 
     def delete_action(self, action: typing.Union[Action, str]) -> None:
         """Deletes `action` from its information set.  The subtrees which
@@ -1722,7 +1723,7 @@ class Game:
             raise UndefinedOperationError(
                 "delete_action(): cannot delete the only action at an information set"
             )
-        resolved_action.action.deref().DeleteAction()
+        self.game.deref().DeleteAction(resolved_action.action)
 
     def leave_infoset(self, node: typing.Union[Node, str]):
         """Remove this node from its information set. If this node is the only node
@@ -1734,7 +1735,7 @@ class Game:
             The node to move to a new singleton information set.
         """
         resolved_node = cython.cast(Node, self._resolve_node(node, "leave_infoset"))
-        resolved_node.node.deref().LeaveInfoset()
+        self.game.deref().LeaveInfoset(resolved_node.node)
 
     def set_infoset(self,
                     node: typing.Union[Node, str],
@@ -1761,7 +1762,7 @@ class Game:
             raise ValueError(
                 "set_infoset(): `infoset` must have same number of actions as `node` has children."
             )
-        resolved_node.node.deref().SetInfoset(resolved_infoset.infoset)
+        self.game.deref().SetInfoset(resolved_node.node, resolved_infoset.infoset)
 
     def reveal(self,
                infoset: typing.Union[Infoset, str],
@@ -1790,7 +1791,7 @@ class Game:
         """
         resolved_infoset = cython.cast(Infoset, self._resolve_infoset(infoset, "reveal"))
         resolved_player = cython.cast(Player, self._resolve_player(player, "reveal"))
-        resolved_infoset.infoset.deref().Reveal(resolved_player.player)
+        self.game.deref().Reveal(resolved_infoset.infoset, resolved_player.player)
 
     def add_player(self, label: str = "") -> Player:
         """Add a new player to the game.
@@ -1829,7 +1830,7 @@ class Game:
         """
         resolved_player = cython.cast(Player, self._resolve_player(player, "set_player"))
         resolved_infoset = cython.cast(Infoset, self._resolve_infoset(infoset, "set_player"))
-        resolved_infoset.infoset.deref().SetPlayer(resolved_player.player)
+        self.game.deref().SetPlayer(resolved_infoset.infoset, resolved_player.player)
 
     def add_outcome(self,
                     payoffs: typing.Optional[typing.List] = None,
@@ -1907,10 +1908,10 @@ class Game:
         """
         resolved_node = cython.cast(Node, self._resolve_node(node, "set_outcome"))
         if outcome is None:
-            resolved_node.node.deref().SetOutcome(cython.cast(c_GameOutcome, NULL))
+            self.game.deref().SetOutcome(resolved_node.node, cython.cast(c_GameOutcome, NULL))
             return
         resolved_outcome = cython.cast(Outcome, self._resolve_outcome(outcome, "set_outcome"))
-        resolved_node.node.deref().SetOutcome(resolved_outcome.outcome)
+        self.game.deref().SetOutcome(resolved_node.node, resolved_outcome.outcome)
 
     def add_strategy(self, player: typing.Union[Player, str], label: str = None) -> Strategy:
         """Add a new strategy to the set of strategies for `player`.

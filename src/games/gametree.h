@@ -23,201 +23,24 @@
 #ifndef GAMETREE_H
 #define GAMETREE_H
 
-#include <algorithm>
 #include "gameexpl.h"
 
 namespace Gambit {
 
-class GameTreeRep;
-
-class GameTreeActionRep : public GameActionRep {
-  friend class GameTreeRep;
-  friend class GameTreeInfosetRep;
-  template <class T> friend class MixedBehaviorProfile;
-
-private:
-  int m_number;
-  std::string m_label;
-  GameTreeInfosetRep *m_infoset;
-
-  GameTreeActionRep(int p_number, const std::string &p_label, GameTreeInfosetRep *p_infoset)
-    : m_number(p_number), m_label(p_label), m_infoset(p_infoset)
-  {
-  }
-  ~GameTreeActionRep() override = default;
-
-public:
-  int GetNumber() const override { return m_number; }
-  GameInfoset GetInfoset() const override;
-
-  const std::string &GetLabel() const override { return m_label; }
-  void SetLabel(const std::string &p_label) override { m_label = p_label; }
-
-  bool Precedes(const GameNode &) const override;
-
-  void DeleteAction() override;
-};
-
-class GameTreeInfosetRep : public GameInfosetRep {
-  friend class GameTreeRep;
-  friend class GameTreeActionRep;
-  friend class GamePlayerRep;
-  friend class GameTreeNodeRep;
-  template <class T> friend class MixedBehaviorProfile;
-
-protected:
-  GameTreeRep *m_efg;
-  int m_number;
-  std::string m_label;
-  GamePlayerRep *m_player;
-  Array<GameTreeActionRep *> m_actions;
-  std::vector<GameTreeNodeRep *> m_members;
-  int flag{0}, whichbranch{0};
-  Array<Number> m_probs;
-
-  GameTreeInfosetRep(GameTreeRep *p_efg, int p_number, GamePlayerRep *p_player, int p_actions);
-  ~GameTreeInfosetRep() override;
-
-  /// Adds the node to the information set
-  void AddMember(GameTreeNodeRep *p_node) { m_members.push_back(p_node); }
-  /// Removes the node from the information set, invalidating if emptied
-  void RemoveMember(GameTreeNodeRep *);
-
-  void RemoveAction(int which);
-
-  void RenumberActions()
-  {
-    std::for_each(m_actions.begin(), m_actions.end(),
-                  [act = 1](GameTreeActionRep *a) mutable { a->m_number = act++; });
-  }
-
-public:
-  Game GetGame() const override;
-  int GetNumber() const override { return m_number; }
-
-  GamePlayer GetPlayer() const override;
-  void SetPlayer(GamePlayer p) override;
-
-  bool IsChanceInfoset() const override;
-
-  void SetLabel(const std::string &p_label) override { m_label = p_label; }
-  const std::string &GetLabel() const override { return m_label; }
-
-  GameAction InsertAction(GameAction p_where = nullptr) override;
-
-  /// @name Actions
-  //@{
-  /// Returns the number of actions available at the information set
-  size_t NumActions() const override { return m_actions.size(); }
-  /// Returns the p_index'th action at the information set
-  GameAction GetAction(int p_index) const override { return m_actions[p_index]; }
-  /// Returns the actions available at the information set
-  Array<GameAction> GetActions() const override;
-  //@}
-
-  size_t NumMembers() const override { return m_members.size(); }
-  GameNode GetMember(int p_index) const override;
-  Array<GameNode> GetMembers() const override;
-
-  bool Precedes(GameNode) const override;
-
-  const Number &GetActionProb(const GameAction &p_action) const override
-  {
-    if (p_action->GetInfoset() != GameInfoset(const_cast<GameTreeInfosetRep *>(this))) {
-      throw MismatchException();
-    }
-    return m_probs[p_action->GetNumber()];
-  }
-  void Reveal(GamePlayer) override;
-};
-
-class GameTreeNodeRep : public GameNodeRep {
-  friend class GameTreeRep;
-  friend class GameTreeActionRep;
-  friend class GameTreeInfosetRep;
-  friend class GamePlayerRep;
-  friend class PureBehaviorProfile;
-  template <class T> friend class MixedBehaviorProfile;
-
-protected:
-  int m_number{0};
-  GameTreeRep *m_efg;
-  std::string m_label;
-  GameTreeInfosetRep *m_infoset{nullptr};
-  GameTreeNodeRep *m_parent;
-  GameOutcomeRep *m_outcome{nullptr};
-  Array<GameTreeNodeRep *> m_children;
-  GameTreeNodeRep *whichbranch{nullptr}, *ptr{nullptr};
-
-  GameTreeNodeRep(GameTreeRep *e, GameTreeNodeRep *p);
-  ~GameTreeNodeRep() override;
-
-  void DeleteOutcome(GameOutcomeRep *outc);
-  void CopySubtree(GameTreeNodeRep *, GameTreeNodeRep *);
-
-public:
-  Game GetGame() const override;
-
-  const std::string &GetLabel() const override { return m_label; }
-  void SetLabel(const std::string &p_label) override { m_label = p_label; }
-
-  int GetNumber() const override { return m_number; }
-  size_t NumChildren() const override { return m_children.size(); }
-  GameNode GetChild(int i) const override { return m_children[i]; }
-  GameNode GetChild(const GameAction &p_action) const override
-  {
-    if (p_action->GetInfoset() != m_infoset) {
-      throw MismatchException();
-    }
-    return m_children[p_action->GetNumber()];
-  }
-  Array<GameNode> GetChildren() const override;
-
-  GameInfoset GetInfoset() const override { return m_infoset; }
-  void SetInfoset(GameInfoset) override;
-  GameInfoset LeaveInfoset() override;
-
-  bool IsTerminal() const override { return m_children.empty(); }
-  GamePlayer GetPlayer() const override { return (m_infoset) ? m_infoset->GetPlayer() : nullptr; }
-  GameAction GetPriorAction() const override; // returns null if root node
-  GameNode GetParent() const override { return m_parent; }
-  GameNode GetNextSibling() const override;
-  GameNode GetPriorSibling() const override;
-
-  GameOutcome GetOutcome() const override { return m_outcome; }
-  void SetOutcome(const GameOutcome &p_outcome) override;
-
-  bool IsSuccessorOf(GameNode from) const override;
-  bool IsSubgameRoot() const override;
-
-  void DeleteParent() override;
-  void DeleteTree() override;
-
-  void CopyTree(GameNode src) override;
-  void MoveTree(GameNode src) override;
-
-  Game CopySubgame() const override;
-
-  GameInfoset AppendMove(GamePlayer p_player, int p_actions) override;
-  GameInfoset AppendMove(GameInfoset p_infoset) override;
-  GameInfoset InsertMove(GamePlayer p_player, int p_actions) override;
-  GameInfoset InsertMove(GameInfoset p_infoset) override;
-};
-
 class GameTreeRep : public GameExplicitRep {
-  friend class GameTreeNodeRep;
-  friend class GameTreeInfosetRep;
-  friend class GameTreeActionRep;
+  friend class GameNodeRep;
+  friend class GameInfosetRep;
+  friend class GameActionRep;
 
 protected:
   mutable bool m_computedValues{false}, m_doCanon{true};
-  GameTreeNodeRep *m_root;
+  GameNodeRep *m_root;
   GamePlayerRep *m_chance;
   std::size_t m_numNodes = 1;
 
   /// @name Private auxiliary functions
   //@{
-  void NumberNodes(GameTreeNodeRep *, int &);
+  void NumberNodes(GameNodeRep *, int &);
   /// Normalize the probability distribution of actions at a chance node
   Game NormalizeChanceProbs(const GameInfoset &);
   //@}
@@ -227,6 +50,11 @@ protected:
   void Canonicalize();
   void BuildComputedValues() override;
   void ClearComputedValues() const;
+
+  /// Removes the node from the information set, invalidating if emptied
+  void RemoveMember(GameInfosetRep *, GameNodeRep *);
+
+  void CopySubtree(GameNodeRep *, GameNodeRep *, GameNodeRep *);
   //@}
 
 public:
@@ -295,7 +123,24 @@ public:
 
   /// @name Modification
   //@{
+  GameInfoset AppendMove(GameNode p_node, GamePlayer p_player, int p_actions) override;
+  GameInfoset AppendMove(GameNode p_node, GameInfoset p_infoset) override;
+  GameInfoset InsertMove(GameNode p_node, GamePlayer p_player, int p_actions) override;
+  GameInfoset InsertMove(GameNode p_node, GameInfoset p_infoset) override;
+  void CopyTree(GameNode dest, GameNode src) override;
+  void MoveTree(GameNode dest, GameNode src) override;
+  void DeleteParent(GameNode) override;
+  void DeleteTree(GameNode) override;
+  void SetPlayer(GameInfoset, GamePlayer) override;
+  void Reveal(GameInfoset, GamePlayer) override;
+  void SetInfoset(GameNode, GameInfoset) override;
+  GameInfoset LeaveInfoset(GameNode) override;
   Game SetChanceProbs(const GameInfoset &, const Array<Number> &) override;
+  GameAction InsertAction(GameInfoset, GameAction p_where = nullptr) override;
+  void DeleteAction(GameAction) override;
+  void SetOutcome(GameNode, const GameOutcome &p_outcome) override;
+
+  Game CopySubgame(GameNode) const override;
   //@}
 
   PureStrategyProfile NewPureStrategyProfile() const override;

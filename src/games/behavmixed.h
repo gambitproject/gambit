@@ -23,6 +23,8 @@
 #ifndef LIBGAMBIT_BEHAV_H
 #define LIBGAMBIT_BEHAV_H
 
+#include <random>
+
 #include "game.h"
 
 namespace Gambit {
@@ -63,7 +65,7 @@ protected:
   //@{
   void BehaviorStrat(GamePlayer &, GameNode &, std::map<GameNode, T> &, std::map<GameNode, T> &);
   void RealizationProbs(const MixedStrategyProfile<T> &, GamePlayer &, const Array<int> &,
-                        GameTreeNodeRep *, std::map<GameNode, T> &, std::map<GameNode, T> &);
+                        GameNodeRep *, std::map<GameNode, T> &, std::map<GameNode, T> &);
   //@}
 
   /// Check underlying game has not changed; raise exception if it has

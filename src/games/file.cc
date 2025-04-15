@@ -500,7 +500,7 @@ void ParseOutcome(GameFileLexer &p_state, Game &p_game, TreeData &p_treeData, Ga
       p_treeData.m_outcomeMap[outcomeId] = outcome;
     }
     outcome->SetLabel(p_state.GetLastText());
-    p_node->SetOutcome(outcome);
+    p_game->SetOutcome(p_node, outcome);
 
     p_state.ExpectNextToken(TOKEN_LBRACE, "'{'");
     p_state.GetNextToken();
@@ -516,7 +516,7 @@ void ParseOutcome(GameFileLexer &p_state, Game &p_game, TreeData &p_treeData, Ga
     // The node entry does not contain information about the outcome.
     // This means the outcome should have been defined already.
     try {
-      p_node->SetOutcome(p_treeData.m_outcomeMap.at(outcomeId));
+      p_game->SetOutcome(p_node, p_treeData.m_outcomeMap.at(outcomeId));
     }
     catch (std::out_of_range) {
       p_state.OnParseError("Outcome not defined");
@@ -553,7 +553,7 @@ void ParseChanceNode(GameFileLexer &p_state, Game &p_game, GameNode &p_node, Tre
     p_state.GetNextToken();
 
     if (!infoset) {
-      infoset = p_node->AppendMove(p_game->GetChance(), action_labels.size());
+      infoset = p_game->AppendMove(p_node, p_game->GetChance(), action_labels.size());
       p_treeData.m_infosetMap[0][infosetId] = infoset;
       infoset->SetLabel(label);
       auto action_label = action_labels.begin();
@@ -565,11 +565,11 @@ void ParseChanceNode(GameFileLexer &p_state, Game &p_game, GameNode &p_node, Tre
     }
     else {
       // TODO: Verify actions match up to any previous specifications
-      p_node->AppendMove(infoset);
+      p_game->AppendMove(p_node, infoset);
     }
   }
   else if (infoset) {
-    p_node->AppendMove(infoset);
+    p_game->AppendMove(p_node, infoset);
   }
   else {
     p_state.OnParseError("Referencing an undefined infoset");
@@ -609,7 +609,7 @@ void ParsePersonalNode(GameFileLexer &p_state, Game p_game, GameNode p_node, Tre
     p_state.GetNextToken();
 
     if (!infoset) {
-      infoset = p_node->AppendMove(player, action_labels.size());
+      infoset = p_game->AppendMove(p_node, player, action_labels.size());
       p_treeData.m_infosetMap[playerId][infosetId] = infoset;
       infoset->SetLabel(label);
       auto action_label = action_labels.begin();
@@ -620,11 +620,11 @@ void ParsePersonalNode(GameFileLexer &p_state, Game p_game, GameNode p_node, Tre
     }
     else {
       // TODO: Verify actions match up to previous specifications
-      p_node->AppendMove(infoset);
+      p_game->AppendMove(p_node, infoset);
     }
   }
   else if (infoset) {
-    p_node->AppendMove(infoset);
+    p_game->AppendMove(p_node, infoset);
   }
   else {
     p_state.OnParseError("Referencing an undefined infoset");

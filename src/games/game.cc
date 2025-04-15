@@ -21,7 +21,6 @@
 //
 
 #include <iostream>
-#include <algorithm>
 #include <numeric>
 #include <random>
 
@@ -74,7 +73,7 @@ Array<GameStrategy> GamePlayerRep::GetStrategies() const
   m_game->BuildComputedValues();
   Array<GameStrategy> ret(m_strategies.size());
   std::transform(m_strategies.cbegin(), m_strategies.cend(), ret.begin(),
-                 [](GameStrategyRep *s) -> GameStrategy { return s; });
+                 [](const GameStrategyRep *s) -> GameStrategy { return s; });
   return ret;
 }
 
@@ -111,9 +110,9 @@ void GamePlayerRep::MakeStrategy()
   m_strategies.push_back(strategy);
 }
 
-void GamePlayerRep::MakeReducedStrats(GameTreeNodeRep *n, GameTreeNodeRep *nn)
+void GamePlayerRep::MakeReducedStrats(GameNodeRep *n, GameNodeRep *nn)
 {
-  GameTreeNodeRep *m, *mm;
+  GameNodeRep *m;
 
   if (!n->GetParent()) {
     n->ptr = nullptr;
@@ -125,7 +124,7 @@ void GamePlayerRep::MakeReducedStrats(GameTreeNodeRep *n, GameTreeNodeRep *nn)
         // we haven't visited this infoset before
         n->m_infoset->flag = 1;
         for (size_t i = 1; i <= n->NumChildren(); i++) {
-          GameTreeNodeRep *m = n->m_children[i];
+          GameNodeRep *m = n->m_children[i];
           n->whichbranch = m;
           n->m_infoset->whichbranch = i;
           MakeReducedStrats(m, nn);
@@ -155,14 +154,14 @@ void GamePlayerRep::MakeReducedStrats(GameTreeNodeRep *n, GameTreeNodeRep *nn)
         m = nullptr;
       }
       else {
-        m = dynamic_cast<GameTreeNodeRep *>(nn->GetNextSibling().operator->());
+        m = nn->GetNextSibling();
       }
       if (m || nn->m_parent->ptr == nullptr) {
         break;
       }
     }
     if (m) {
-      mm = m->m_parent->whichbranch;
+      GameNodeRep *mm = m->m_parent->whichbranch;
       m->m_parent->whichbranch = m;
       MakeReducedStrats(m, m);
       m->m_parent->whichbranch = mm;
@@ -182,7 +181,7 @@ Array<GameInfoset> GamePlayerRep::GetInfosets() const
 {
   Array<GameInfoset> ret(m_infosets.size());
   std::transform(m_infosets.cbegin(), m_infosets.cend(), ret.begin(),
-                 [](GameTreeInfosetRep *s) -> GameInfoset { return s; });
+                 [](const GameInfosetRep *s) -> GameInfoset { return s; });
   return ret;
 }
 
@@ -193,7 +192,7 @@ size_t GamePlayerRep::NumSequences() const
   }
   return std::accumulate(
       m_infosets.cbegin(), m_infosets.cend(), 1,
-      [](int ct, GameTreeInfosetRep *s) -> int { return ct + s->m_actions.size(); });
+      [](int ct, const GameInfosetRep *s) -> int { return ct + s->m_actions.size(); });
 }
 
 //========================================================================
@@ -302,11 +301,11 @@ template <class T> MixedStrategyProfileRep<T> *MixedStrategyProfileRep<T>::Norma
 {
   auto norm = Copy();
   for (auto player : m_support.GetGame()->GetPlayers()) {
-    T sum = (T)0;
+    T sum = static_cast<T>(0);
     for (auto strategy : m_support.GetStrategies(player)) {
       sum += (*this)[strategy];
     }
-    if (sum == (T)0) {
+    if (sum == static_cast<T>(0)) {
       continue;
     }
     for (auto strategy : m_support.GetStrategies(player)) {

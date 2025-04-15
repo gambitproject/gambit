@@ -67,25 +67,17 @@ template <class T> bool LogBehavProfile<T>::operator==(const LogBehavProfile<T> 
 template <class T> T LogBehavProfile<T>::GetActionProb(const GameAction &action) const
 {
   if (action->GetInfoset()->GetPlayer()->IsChance()) {
-    GameTreeInfosetRep *infoset =
-        dynamic_cast<GameTreeInfosetRep *>(action->GetInfoset().operator->());
-    return static_cast<T>(infoset->GetActionProb(action));
+    return static_cast<T>(action->GetInfoset()->GetActionProb(action));
   }
-  else {
-    return GetProb(action);
-  }
+  return GetProb(action);
 }
 
 template <class T> T LogBehavProfile<T>::GetLogActionProb(const GameAction &action) const
 {
   if (action->GetInfoset()->GetPlayer()->IsChance()) {
-    GameTreeInfosetRep *infoset =
-        dynamic_cast<GameTreeInfosetRep *>(action->GetInfoset().operator->());
-    return log(static_cast<T>(infoset->GetActionProb(action)));
+    return log(static_cast<T>(action->GetInfoset()->GetActionProb(action)));
   }
-  else {
-    return m_logProbs[m_profileIndex.at(action)];
-  }
+  return m_logProbs[m_profileIndex.at(action)];
 }
 
 template <class T> const T &LogBehavProfile<T>::GetPayoff(const GameAction &act) const
