@@ -112,29 +112,34 @@ bool GameActionRep::Precedes(const GameNode &n) const
   return false;
 }
 
-void GameActionRep::DeleteAction()
+void GameTreeRep::DeleteAction(GameAction p_action)
 {
-  if (m_infoset->NumActions() == 1) {
+  GameActionRep *action = p_action;
+  GameTreeInfosetRep *infoset = action->m_infoset;
+  if (infoset->m_efg != this) {
+    throw MismatchException();
+  }
+  if (infoset->NumActions() == 1) {
     throw UndefinedException();
   }
 
-  m_infoset->GetGame()->IncrementVersion();
+  IncrementVersion();
   size_t where;
-  for (where = 1; where <= m_infoset->m_actions.size() && m_infoset->m_actions[where] != this;
+  for (where = 1; where <= infoset->m_actions.size() && infoset->m_actions[where] != action;
        where++)
     ;
 
-  m_infoset->RemoveAction(where);
-  for (auto member : m_infoset->m_members) {
+  infoset->RemoveAction(where);
+  for (auto member : infoset->m_members) {
     member->m_children[where]->DeleteTree();
     member->m_children[where]->Invalidate();
     erase_atindex(member->m_children, where);
   }
-  if (m_infoset->IsChanceInfoset()) {
-    m_infoset->m_efg->NormalizeChanceProbs(m_infoset);
+  if (infoset->IsChanceInfoset()) {
+    NormalizeChanceProbs(infoset);
   }
-  m_infoset->m_efg->ClearComputedValues();
-  m_infoset->m_efg->Canonicalize();
+  ClearComputedValues();
+  Canonicalize();
 }
 
 GameInfoset GameActionRep::GetInfoset() const { return m_infoset; }

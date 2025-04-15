@@ -1707,7 +1707,7 @@ class Game:
             raise UndefinedOperationError(
                 "delete_action(): cannot delete the only action at an information set"
             )
-        resolved_action.action.deref().DeleteAction()
+        self.game.deref().DeleteAction(resolved_action.action)
 
     def leave_infoset(self, node: typing.Union[Node, str]):
         """Remove this node from its information set. If this node is the only node

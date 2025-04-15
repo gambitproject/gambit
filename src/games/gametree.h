@@ -267,6 +267,7 @@ public:
   void SetPlayer(GameInfoset, GamePlayer) override;
   void Reveal(GameInfoset, GamePlayer) override;
   Game SetChanceProbs(const GameInfoset &, const Array<Number> &) override;
+  void DeleteAction(GameAction) override;
   //@}
 
   PureStrategyProfile NewPureStrategyProfile() const override;

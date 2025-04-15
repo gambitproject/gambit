@@ -177,8 +177,6 @@ public:
   void SetLabel(const std::string &p_label) { m_label = p_label; }
 
   bool Precedes(const GameNode &) const;
-
-  void DeleteAction();
 };
 
 /// An information set in an extensive game
@@ -492,6 +490,7 @@ public:
     throw UndefinedException();
   }
   virtual void Reveal(GameInfoset, GamePlayer) { throw UndefinedException(); }
+  virtual void DeleteAction(GameAction) { throw UndefinedException(); }
 
   /// @name Dimensions of the game
   //@{

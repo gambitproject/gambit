@@ -100,7 +100,6 @@ cdef extern from "games/game.h":
         int GetNumber() except +
         c_GameInfoset GetInfoset() except +
         bint Precedes(c_GameNode) except +
-        void DeleteAction() except +ValueError
 
         string GetLabel() except +
         void SetLabel(string) except +
@@ -224,7 +223,7 @@ cdef extern from "games/game.h":
 
         void SetPlayer(c_GameInfoset, c_GamePlayer) except +
         void Reveal(c_GameInfoset, c_GamePlayer) except +
-
+        void DeleteAction(c_GameAction) except +ValueError
         c_Game SetChanceProbs(c_GameInfoset, Array[c_Number]) except +
 
         c_PureStrategyProfile NewPureStrategyProfile()  # except + doesn't compile
