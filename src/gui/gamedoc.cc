@@ -662,7 +662,7 @@ void gbtGameDocument::DoLeaveInfoset(GameNode p_node)
 
 void gbtGameDocument::DoRevealAction(GameInfoset p_infoset, GamePlayer p_player)
 {
-  p_infoset->Reveal(p_player);
+  m_game->Reveal(p_infoset, p_player);
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 

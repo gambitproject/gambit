@@ -204,7 +204,6 @@ public:
   virtual bool Precedes(GameNode) const = 0;
 
   virtual const Number &GetActionProb(const GameAction &) const = 0;
-  virtual void Reveal(GamePlayer) = 0;
 };
 
 /// \brief A strategy in a game.
@@ -479,6 +478,7 @@ public:
   {
     throw UndefinedException();
   }
+  virtual void Reveal(GameInfoset, GamePlayer) { throw UndefinedException(); }
 
   /// @name Dimensions of the game
   //@{

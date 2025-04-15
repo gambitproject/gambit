@@ -127,7 +127,6 @@ public:
     }
     return m_probs[p_action->GetNumber()];
   }
-  void Reveal(GamePlayer) override;
 };
 
 class GameTreeNodeRep : public GameNodeRep {
@@ -294,6 +293,7 @@ public:
   /// @name Modification
   //@{
   void SetPlayer(GameInfoset, GamePlayer) override;
+  void Reveal(GameInfoset, GamePlayer) override;
   Game SetChanceProbs(const GameInfoset &, const Array<Number> &) override;
   //@}
 

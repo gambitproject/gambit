@@ -122,7 +122,6 @@ cdef extern from "games/game.h":
         int NumMembers() except +
         c_GameNode GetMember(int) except +IndexError
 
-        void Reveal(c_GamePlayer) except +
         bint IsChanceInfoset() except +
         bint Precedes(c_GameNode) except +
 
@@ -224,6 +223,7 @@ cdef extern from "games/game.h":
         bool IsPerfectRecall() except +
 
         void SetPlayer(c_GameInfoset, c_GamePlayer) except +
+        void Reveal(c_GameInfoset, c_GamePlayer) except +
 
         c_Game SetChanceProbs(c_GameInfoset, Array[c_Number]) except +
 

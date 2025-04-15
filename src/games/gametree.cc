@@ -263,10 +263,10 @@ void GameTreeInfosetRep::RemoveMember(GameTreeNodeRep *p_node)
   }
 }
 
-void GameTreeInfosetRep::Reveal(GamePlayer p_player)
+void GameTreeRep::Reveal(GameInfoset p_atInfoset, GamePlayer p_player)
 {
-  m_efg->IncrementVersion();
-  for (auto action : m_actions) {
+  IncrementVersion();
+  for (auto action : p_atInfoset->GetActions()) {
     for (auto infoset : p_player->m_infosets) {
       // make copy of members to iterate correctly
       // (since the information set may be changed in the process)
@@ -288,8 +288,8 @@ void GameTreeInfosetRep::Reveal(GamePlayer p_player)
     }
   }
 
-  m_efg->ClearComputedValues();
-  m_efg->Canonicalize();
+  ClearComputedValues();
+  Canonicalize();
 }
 
 GameNode GameTreeInfosetRep::GetMember(int p_index) const { return m_members[p_index - 1]; }
