@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/recarray.h
+// FILE: src/core/recarray.h
 // Rectangular array base class
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,12 +20,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef LIBGAMBIT_RECARRAY_H
-#define LIBGAMBIT_RECARRAY_H
+#ifndef GAMBIT_CORE_RECARRAY_H
+#define GAMBIT_CORE_RECARRAY_H
 
-#include <iostream>
-
-#include "gambit.h"
+#include "array.h"
 
 namespace Gambit {
 
@@ -280,4 +278,4 @@ template <class T> void RectArray<T>::SetColumn(int col, const Array<T> &v)
 
 } // end namespace Gambit
 
-#endif // LIBGAMBIT_RECARRAY_H
+#endif // GAMBIT_CORE_RECARRAY_H

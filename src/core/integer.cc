@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/integer.cc
+// FILE: src/core/integer.cc
 // Implementation of an arbitrary-length integer class
 //
 // The original copyright and license are included below.
@@ -35,14 +35,14 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 #include <iostream>
-
-#include "integer.h"
 #include <cctype>
 #include <cfloat>
 #include <climits>
 #include <cmath>
 #include <cstring>
-#include "gambit.h"
+
+#include "integer.h"
+#include "util.h"
 
 namespace Gambit {
 

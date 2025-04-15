@@ -2,7 +2,7 @@
 // This file is part of Gambit Copyright (c) 1994-2025, The Gambit
 // Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/rational.cc
+// FILE: src/core/rational.cc
 // Implementation of a rational number class
 //
 //
@@ -26,12 +26,12 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 #include <iostream>
-
-#include "gambit.h"
-#include "rational.h"
 #include <cmath>
 #include <cfloat>
 #include <cctype>
+
+#include "util.h"
+#include "rational.h"
 
 namespace Gambit {
 
