@@ -233,16 +233,19 @@ class GameStrategyRep : public GameObject {
   template <class T> friend class MixedBehaviorProfile;
 
 private:
-  int m_number{0};
   GamePlayerRep *m_player;
-  long m_offset{0L};
+  int m_number;
+  long m_offset{-1L};
   std::string m_label;
   Array<int> m_behav;
 
   /// @name Lifecycle
   //@{
   /// Creates a new strategy for the given player.
-  explicit GameStrategyRep(GamePlayerRep *p_player) : m_player(p_player) {}
+  explicit GameStrategyRep(GamePlayerRep *p_player, int p_number, const std::string &p_label)
+    : m_player(p_player), m_number(p_number), m_label(p_label)
+  {
+  }
   //@}
 
 public:
@@ -257,9 +260,6 @@ public:
   GamePlayer GetPlayer() const;
   /// Returns the index of the strategy for its player
   int GetNumber() const { return m_number; }
-
-  /// Remove this strategy from the game
-  void DeleteStrategy();
   //@}
 };
 
@@ -320,8 +320,6 @@ public:
   GameStrategy GetStrategy(int st) const;
   /// Returns the array of strategies available to the player
   Array<GameStrategy> GetStrategies() const;
-  /// Creates a new strategy for the player
-  GameStrategy NewStrategy();
   //@}
 
   /// @name Sequences
@@ -486,6 +484,13 @@ public:
   virtual GameStrategy GetStrategy(int p_index) const = 0;
   /// Gets the set of strategies in the game
   Array<GameStrategy> GetStrategies() const;
+  /// Creates a new strategy for the player
+  virtual GameStrategy NewStrategy(const GamePlayer &p_player, const std::string &p_label)
+  {
+    throw UndefinedException();
+  }
+  /// Remove the strategy from the game
+  virtual void DeleteStrategy(const GameStrategy &p_strategy) { throw UndefinedException(); }
   /// Returns the number of strategy contingencies in the game
   virtual int NumStrategyContingencies() const = 0;
   /// Returns the total number of actions in the game

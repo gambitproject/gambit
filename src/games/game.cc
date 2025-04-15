@@ -28,11 +28,10 @@
 #include "gambit.h"
 #include "writer.h"
 
-// The references to the table and tree representations violate the logic
+// The references to the tree representations violate the logic
 // of separating implementation types.  This will be fixed when we move
 // editing operations into the game itself instead of in the member-object
 // classes.
-#include "gametable.h"
 #include "gametree.h"
 
 namespace Gambit {
@@ -49,36 +48,14 @@ GameOutcomeRep::GameOutcomeRep(GameRep *p_game, int p_number) : m_game(p_game), 
 }
 
 //========================================================================
-//                      class GameStrategyRep
-//========================================================================
-
-void GameStrategyRep::DeleteStrategy()
-{
-  if (m_player->GetGame()->IsTree()) {
-    throw UndefinedException();
-  }
-  if (m_player->NumStrategies() == 1) {
-    return;
-  }
-
-  m_player->GetGame()->IncrementVersion();
-  m_player->m_strategies.erase(
-      std::find(m_player->m_strategies.begin(), m_player->m_strategies.end(), this));
-  std::for_each(m_player->m_strategies.begin(), m_player->m_strategies.end(),
-                [st = 1](GameStrategyRep *s) mutable { s->m_number = st++; });
-  this->Invalidate();
-}
-
-//========================================================================
 //                       class GamePlayerRep
 //========================================================================
 
 GamePlayerRep::GamePlayerRep(GameRep *p_game, int p_id, int p_strats)
-  : m_game(p_game), m_number(p_id), m_strategies(p_strats)
+  : m_game(p_game), m_number(p_id)
 {
   for (int j = 1; j <= p_strats; j++) {
-    m_strategies[j] = new GameStrategyRep(this);
-    m_strategies[j]->m_number = j;
+    m_strategies.push_back(new GameStrategyRep(this, j, ""));
   }
 }
 
@@ -101,21 +78,6 @@ Array<GameStrategy> GamePlayerRep::GetStrategies() const
   return ret;
 }
 
-GameStrategy GamePlayerRep::NewStrategy()
-{
-  if (m_game->IsTree()) {
-    throw UndefinedException();
-  }
-
-  m_game->IncrementVersion();
-  auto *strategy = new GameStrategyRep(this);
-  m_strategies.push_back(strategy);
-  strategy->m_number = m_strategies.size();
-  strategy->m_offset = -1; // this flags this action as new
-  dynamic_cast<GameTableRep *>(m_game)->RebuildTable();
-  return strategy;
-}
-
 void GamePlayerRep::MakeStrategy()
 {
   Array<int> c(NumInfosets());
@@ -129,11 +91,8 @@ void GamePlayerRep::MakeStrategy()
     }
   }
 
-  auto *strategy = new GameStrategyRep(this);
-  m_strategies.push_back(strategy);
-  strategy->m_number = m_strategies.size();
+  auto *strategy = new GameStrategyRep(this, m_strategies.size() + 1, "");
   strategy->m_behav = c;
-  strategy->m_label = "";
 
   // We generate a default labeling -- probably should be changed in future
   if (!strategy->m_behav.empty()) {
@@ -149,6 +108,7 @@ void GamePlayerRep::MakeStrategy()
   else {
     strategy->m_label = "*";
   }
+  m_strategies.push_back(strategy);
 }
 
 void GamePlayerRep::MakeReducedStrats(GameTreeNodeRep *n, GameTreeNodeRep *nn)

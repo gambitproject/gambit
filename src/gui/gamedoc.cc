@@ -608,38 +608,37 @@ void gbtGameDocument::DoNewPlayer()
 
 void gbtGameDocument::DoSetPlayerLabel(GamePlayer p_player, const wxString &p_label)
 {
-  p_player->SetLabel(static_cast<const char *>(p_label.mb_str()));
+  p_player->SetLabel(p_label.ToStdString());
   UpdateViews(GBT_DOC_MODIFIED_LABELS);
 }
 
 void gbtGameDocument::DoNewStrategy(GamePlayer p_player)
 {
-  const GameStrategy strategy = p_player->NewStrategy();
-  strategy->SetLabel(lexical_cast<std::string>(strategy->GetNumber()));
+  m_game->NewStrategy(p_player, std::to_string(p_player->NumStrategies() + 1));
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
 void gbtGameDocument::DoDeleteStrategy(GameStrategy p_strategy)
 {
-  p_strategy->DeleteStrategy();
+  m_game->DeleteStrategy(p_strategy);
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
 void gbtGameDocument::DoSetStrategyLabel(GameStrategy p_strategy, const wxString &p_label)
 {
-  p_strategy->SetLabel(static_cast<const char *>(p_label.mb_str()));
+  p_strategy->SetLabel(p_label.ToStdString());
   UpdateViews(GBT_DOC_MODIFIED_LABELS);
 }
 
 void gbtGameDocument::DoSetInfosetLabel(GameInfoset p_infoset, const wxString &p_label)
 {
-  p_infoset->SetLabel(static_cast<const char *>(p_label.mb_str()));
+  p_infoset->SetLabel(p_label.ToStdString());
   UpdateViews(GBT_DOC_MODIFIED_LABELS);
 }
 
 void gbtGameDocument::DoSetActionLabel(GameAction p_action, const wxString &p_label)
 {
-  p_action->SetLabel(static_cast<const char *>(p_label.mb_str()));
+  p_action->SetLabel(p_label.ToStdString());
   UpdateViews(GBT_DOC_MODIFIED_LABELS);
 }
 
@@ -679,7 +678,7 @@ void gbtGameDocument::DoInsertAction(GameNode p_node)
 
 void gbtGameDocument::DoSetNodeLabel(GameNode p_node, const wxString &p_label)
 {
-  p_node->SetLabel(static_cast<const char *>(p_label.mb_str()));
+  p_node->SetLabel(p_label.ToStdString());
   UpdateViews(GBT_DOC_MODIFIED_LABELS);
 }
 

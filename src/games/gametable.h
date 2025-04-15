@@ -98,6 +98,12 @@ public:
   void DeleteOutcome(const GameOutcome &) override;
   //@}
 
+  /// @name Strategies
+  //@{
+  GameStrategy NewStrategy(const GamePlayer &, const std::string &) override;
+  void DeleteStrategy(const GameStrategy &p_strategy) override;
+  //@}
+
   /// @name Writing data files
   //@{
   /// Write the game to a file in .nfg outcome format

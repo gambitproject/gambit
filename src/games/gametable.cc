@@ -410,6 +410,42 @@ void GameTableRep::DeleteOutcome(const GameOutcome &p_outcome)
 }
 
 //------------------------------------------------------------------------
+//                        GameTableRep: Strategies
+//------------------------------------------------------------------------
+
+GameStrategy GameTableRep::NewStrategy(const GamePlayer &p_player, const std::string &p_label)
+{
+  if (p_player->GetGame() != this) {
+    throw MismatchException();
+  }
+  IncrementVersion();
+  p_player->m_strategies.push_back(
+      new GameStrategyRep(p_player, p_player->m_strategies.size(), p_label));
+  RebuildTable();
+  return p_player->m_strategies.back();
+}
+
+void GameTableRep::DeleteStrategy(const GameStrategy &p_strategy)
+{
+  GamePlayerRep *player = p_strategy->GetPlayer();
+  if (player->m_game != this) {
+    throw MismatchException();
+  }
+  if (player->NumStrategies() == 1) {
+    return;
+  }
+
+  IncrementVersion();
+  player->m_strategies.erase(
+      std::find(player->m_strategies.begin(), player->m_strategies.end(), p_strategy));
+  std::for_each(player->m_strategies.begin(), player->m_strategies.end(),
+                [st = 1](GameStrategyRep *s) mutable { s->m_number = st++; });
+  // Note that we do not reindex strategies, and so we do not need to re-build the
+  // table of outcomes.
+  p_strategy->Invalidate();
+}
+
+//------------------------------------------------------------------------
 //                   GameTableRep: Factory functions
 //------------------------------------------------------------------------
 

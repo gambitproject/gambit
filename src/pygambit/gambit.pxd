@@ -95,7 +95,6 @@ cdef extern from "games/game.h":
         c_GamePlayer GetPlayer() except +
         string GetLabel() except +
         void SetLabel(string) except +
-        void DeleteStrategy() except +
 
     cdef cppclass c_GameActionRep "GameActionRep":
         int GetNumber() except +
@@ -141,7 +140,6 @@ cdef extern from "games/game.h":
 
         int NumInfosets() except +
         c_GameInfoset GetInfoset(int) except +IndexError
-        c_GameStrategy NewStrategy() except +
 
     cdef cppclass c_GameOutcomeRep "GameOutcomeRep":
         c_Game GetGame() except +
@@ -209,6 +207,8 @@ cdef extern from "games/game.h":
         c_GameNode GetRoot() except +
 
         c_GameStrategy GetStrategy(int) except +IndexError
+        c_GameStrategy NewStrategy(c_GamePlayer, string) except +
+        void DeleteStrategy(c_GameStrategy) except +
         int MixedProfileLength() except +
 
         c_GameInfoset GetInfoset(int) except +IndexError

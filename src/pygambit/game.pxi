@@ -1925,10 +1925,10 @@ class Game:
             )
         resolved_player = cython.cast(Player,
                                       self._resolve_player(player, "add_strategy"))
-        s = Strategy.wrap(resolved_player.player.deref().NewStrategy())
-        if label is not None:
-            s.label = str(label)
-        return s
+        return Strategy.wrap(
+            self.game.deref().NewStrategy(resolved_player.player,
+                                          (str(label) if label is not None else "").encode())
+        )
 
     def delete_strategy(self, strategy: typing.Union[Strategy, str]) -> None:
         """Delete `strategy` from the game.
@@ -1955,4 +1955,4 @@ class Game:
         )
         if len(resolved_strategy.player.strategies) == 1:
             raise UndefinedOperationError("Cannot delete the only strategy for a player")
-        resolved_strategy.strategy.deref().DeleteStrategy()
+        self.game.deref().DeleteStrategy(resolved_strategy.strategy)
