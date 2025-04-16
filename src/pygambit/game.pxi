@@ -186,9 +186,9 @@ class GameNodes:
 
     def __iter__(self) -> typing.Iterator[Node]:
         def dfs(node):
+            yield node
             for child in node.children:
                 yield from dfs(child)
-            yield node
         if not self.game.deref().IsTree():
             return
         yield from dfs(Node.wrap(self.game.deref().GetRoot()))
@@ -703,7 +703,14 @@ class Game:
 
     @property
     def nodes(self) -> GameNodes:
-        """The set of nodes in the game."""
+        """The set of nodes in the game.
+
+        Iteration over this property yields the nodes in the order of depth-first search.
+
+        .. versionchanged:: 16.4
+        Changed from a method ``nodes()`` to a property. Access as
+        ``game.nodes`` instead of ``game.nodes()``.
+        """
         return GameNodes.wrap(self.game)
 
     @property

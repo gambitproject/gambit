@@ -202,7 +202,7 @@ def test_copy_tree_onto_nondescendent_terminal_node():
     g = games.read_from_file("e01.efg")
     list_nodes = list(g.nodes)
     src_node = list_nodes[3]   # path=[1, 0]
-    dest_node = list_nodes[0]  # path=[0, 0]
+    dest_node = list_nodes[2]  # path=[0, 0]
 
     g.copy_tree(src_node, dest_node)
 
@@ -213,8 +213,8 @@ def test_copy_tree_onto_descendent_terminal_node():
     """Test copying a subtree to a node that's a descendent of the original."""
     g = games.read_from_file("e01.efg")
     list_nodes = list(g.nodes)
-    src_node = list_nodes[4]   # path=[0]
-    dest_node = list_nodes[1]  # path=[0, 1, 0]
+    src_node = list_nodes[1]   # path=[0]
+    dest_node = list_nodes[4]  # path=[0, 1, 0]
 
     g.copy_tree(src_node, dest_node)
 
@@ -478,7 +478,7 @@ def test_len_after_append_move():
     initial_number_of_nodes = len(game.nodes)
     list_nodes = list(game.nodes)
 
-    terminal_node = list_nodes[1]
+    terminal_node = list_nodes[5]         # path=[1, 1, 0]
     player = game.players[0]
     actions_to_add = ["T", "M", "B"]
 
@@ -494,10 +494,10 @@ def test_len_after_append_infoset():
     initial_number_of_nodes = len(game.nodes)
     list_nodes = list(game.nodes)
 
-    member_node = list_nodes[5]           # path=[1]
+    member_node = list_nodes[2]           # path=[1]
     infoset_to_modify = member_node.infoset
     number_of_infoset_actions = len(infoset_to_modify.actions)
-    terminal_node_to_add = list_nodes[3]  # path=[1, 1, 1]
+    terminal_node_to_add = list_nodes[6]  # path=[1, 1, 1]
 
     game.append_infoset(terminal_node_to_add, infoset_to_modify)
 
@@ -564,9 +564,9 @@ def test_len_after_insert_infoset():
     initial_number_of_nodes = len(game.nodes)
     list_nodes = list(game.nodes)
 
-    member_node = list_nodes[4]           # path=[1, 1]
+    member_node = list_nodes[6]           # path=[1]
     infoset_to_modify = member_node.infoset
-    node_to_insert_above = list_nodes[1]  # path=[0, 1]
+    node_to_insert_above = list_nodes[7]  # path=[0, 1]
     number_of_infoset_actions = len(infoset_to_modify.actions)
 
     game.insert_infoset(node_to_insert_above, infoset_to_modify)
@@ -581,7 +581,7 @@ def test_len_after_copy_tree():
     initial_number_of_nodes = len(game.nodes)
     list_nodes = list(game.nodes)
     src_node = list_nodes[3]   # path=[1, 0]
-    dest_node = list_nodes[0]  # path=[0, 0]
+    dest_node = list_nodes[2]  # path=[0, 0]
     number_of_src_ancestors = _count_subtree_nodes(src_node)
 
     game.copy_tree(src_node, dest_node)
