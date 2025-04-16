@@ -540,7 +540,7 @@ void GameTreeNodeRep::SetInfoset(GameInfoset p_infoset)
   }
   m_efg->IncrementVersion();
   m_infoset->RemoveMember(this);
-  dynamic_cast<GameTreeInfosetRep *>(p_infoset.operator->())->AddMember(this);
+  dynamic_cast<GameTreeInfosetRep *>(p_infoset.operator->())->m_members.push_back(this);
   m_infoset = dynamic_cast<GameTreeInfosetRep *>(p_infoset.operator->());
 
   m_efg->ClearComputedValues();
@@ -567,7 +567,7 @@ GameInfoset GameTreeRep::LeaveInfoset(GameNode p_node)
   oldInfoset->RemoveMember(node);
   node->m_infoset =
       new GameTreeInfosetRep(this, player->m_infosets.size() + 1, player, node->m_children.size());
-  node->m_infoset->AddMember(node);
+  node->m_infoset->m_members.push_back(node);
   for (auto old_act = oldInfoset->m_actions.begin(), new_act = node->m_infoset->m_actions.begin();
        old_act != oldInfoset->m_actions.end(); ++old_act, ++new_act) {
     (*new_act)->SetLabel((*old_act)->GetLabel());
@@ -604,7 +604,7 @@ GameInfoset GameTreeRep::AppendMove(GameNode p_node, GameInfoset p_infoset)
 
   IncrementVersion();
   node->m_infoset = dynamic_cast<GameTreeInfosetRep *>(p_infoset.operator->());
-  node->m_infoset->AddMember(node);
+  node->m_infoset->m_members.push_back(node);
   std::for_each(node->m_infoset->m_actions.begin(), node->m_infoset->m_actions.end(),
                 [this, node](const GameActionRep *) {
                   node->m_children.push_back(new GameTreeNodeRep(this, node));
@@ -637,7 +637,7 @@ GameInfoset GameTreeNodeRep::InsertMove(GameInfoset p_infoset)
   m_efg->IncrementVersion();
   auto *newNode = new GameTreeNodeRep(m_efg, m_parent);
   newNode->m_infoset = dynamic_cast<GameTreeInfosetRep *>(p_infoset.operator->());
-  dynamic_cast<GameTreeInfosetRep *>(p_infoset.operator->())->AddMember(newNode);
+  dynamic_cast<GameTreeInfosetRep *>(p_infoset.operator->())->m_members.push_back(newNode);
 
   if (m_parent) {
     std::replace(m_parent->m_children.begin(), m_parent->m_children.end(), this, newNode);
