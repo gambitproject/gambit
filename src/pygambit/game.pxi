@@ -1719,7 +1719,7 @@ class Game:
             The node to move to a new singleton information set.
         """
         resolved_node = cython.cast(Node, self._resolve_node(node, "leave_infoset"))
-        resolved_node.node.deref().LeaveInfoset()
+        self.game.deref().LeaveInfoset(resolved_node.node)
 
     def set_infoset(self,
                     node: typing.Union[Node, str],

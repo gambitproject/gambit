@@ -157,7 +157,6 @@ cdef extern from "games/game.h":
 
         c_GameInfoset GetInfoset() except +
         void SetInfoset(c_GameInfoset) except +ValueError
-        c_GameInfoset LeaveInfoset() except +
         c_GamePlayer GetPlayer() except +
         c_GameNode GetParent() except +
         int NumChildren() except +
@@ -223,6 +222,7 @@ cdef extern from "games/game.h":
 
         void SetPlayer(c_GameInfoset, c_GamePlayer) except +
         void Reveal(c_GameInfoset, c_GamePlayer) except +
+        c_GameInfoset LeaveInfoset(c_GameNode) except +
         void DeleteAction(c_GameAction) except +ValueError
         c_Game SetChanceProbs(c_GameInfoset, Array[c_Number]) except +
 

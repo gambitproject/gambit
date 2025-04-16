@@ -359,7 +359,6 @@ public:
 
   virtual GameInfoset GetInfoset() const = 0;
   virtual void SetInfoset(GameInfoset) = 0;
-  virtual GameInfoset LeaveInfoset() = 0;
 
   virtual bool IsTerminal() const = 0;
   virtual GamePlayer GetPlayer() const = 0;
@@ -490,6 +489,7 @@ public:
     throw UndefinedException();
   }
   virtual void Reveal(GameInfoset, GamePlayer) { throw UndefinedException(); }
+  virtual GameInfoset LeaveInfoset(GameNode) { throw UndefinedException(); }
   virtual void DeleteAction(GameAction) { throw UndefinedException(); }
 
   /// @name Dimensions of the game

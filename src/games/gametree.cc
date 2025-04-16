@@ -275,7 +275,7 @@ void GameTreeRep::Reveal(GameInfoset p_atInfoset, GamePlayer p_player)
       for (auto &member : members) {
         if (action->Precedes(member)) {
           if (!newiset) {
-            newiset = member->LeaveInfoset();
+            newiset = LeaveInfoset(member);
           }
           else {
             member->SetInfoset(newiset);
@@ -547,30 +547,34 @@ void GameTreeNodeRep::SetInfoset(GameInfoset p_infoset)
   m_efg->Canonicalize();
 }
 
-GameInfoset GameTreeNodeRep::LeaveInfoset()
+GameInfoset GameTreeRep::LeaveInfoset(GameNode p_node)
 {
-  if (!m_infoset) {
+  auto *node = dynamic_cast<GameTreeNodeRep *>(p_node.operator->());
+  if (node->m_efg != this) {
+    throw MismatchException();
+  }
+  if (!node->m_infoset) {
     return nullptr;
   }
 
-  m_efg->IncrementVersion();
-  GameTreeInfosetRep *oldInfoset = m_infoset;
+  IncrementVersion();
+  GameTreeInfosetRep *oldInfoset = node->m_infoset;
   if (oldInfoset->m_members.size() == 1) {
     return oldInfoset;
   }
 
   GamePlayerRep *player = oldInfoset->m_player;
-  oldInfoset->RemoveMember(this);
-  m_infoset =
-      new GameTreeInfosetRep(m_efg, player->m_infosets.size() + 1, player, m_children.size());
-  m_infoset->AddMember(this);
-  for (auto old_act = oldInfoset->m_actions.begin(), new_act = m_infoset->m_actions.begin();
+  oldInfoset->RemoveMember(node);
+  node->m_infoset =
+      new GameTreeInfosetRep(this, player->m_infosets.size() + 1, player, node->m_children.size());
+  node->m_infoset->AddMember(node);
+  for (auto old_act = oldInfoset->m_actions.begin(), new_act = node->m_infoset->m_actions.begin();
        old_act != oldInfoset->m_actions.end(); ++old_act, ++new_act) {
     (*new_act)->SetLabel((*old_act)->GetLabel());
   }
-  m_efg->ClearComputedValues();
-  m_efg->Canonicalize();
-  return m_infoset;
+  ClearComputedValues();
+  Canonicalize();
+  return node->m_infoset;
 }
 
 GameInfoset GameTreeNodeRep::AppendMove(GamePlayer p_player, int p_actions)

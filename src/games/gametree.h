@@ -143,7 +143,6 @@ public:
 
   GameInfoset GetInfoset() const override { return m_infoset; }
   void SetInfoset(GameInfoset) override;
-  GameInfoset LeaveInfoset() override;
 
   bool IsTerminal() const override { return m_children.empty(); }
   GamePlayer GetPlayer() const override { return (m_infoset) ? m_infoset->GetPlayer() : nullptr; }
@@ -264,6 +263,7 @@ public:
   //@{
   void SetPlayer(GameInfoset, GamePlayer) override;
   void Reveal(GameInfoset, GamePlayer) override;
+  GameInfoset LeaveInfoset(GameNode) override;
   Game SetChanceProbs(const GameInfoset &, const Array<Number> &) override;
   void DeleteAction(GameAction) override;
   //@}

@@ -656,7 +656,7 @@ void gbtGameDocument::DoSetInfoset(GameNode p_node, GameInfoset p_infoset)
 
 void gbtGameDocument::DoLeaveInfoset(GameNode p_node)
 {
-  p_node->LeaveInfoset();
+  m_game->LeaveInfoset(p_node);
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
@@ -672,7 +672,7 @@ void gbtGameDocument::DoInsertAction(GameNode p_node)
     return;
   }
   const GameAction action = p_node->GetInfoset()->InsertAction();
-  action->SetLabel(lexical_cast<std::string>(action->GetNumber()));
+  action->SetLabel(std::to_string(action->GetNumber()));
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
