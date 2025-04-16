@@ -170,8 +170,6 @@ cdef extern from "games/game.h":
         bint IsSubgameRoot() except +
         c_GameAction GetPriorAction() except +
 
-        c_GameInfoset AppendMove(c_GamePlayer, int) except +ValueError
-        c_GameInfoset AppendMove(c_GameInfoset) except +ValueError
         c_GameInfoset InsertMove(c_GamePlayer, int) except +ValueError
         c_GameInfoset InsertMove(c_GameInfoset) except +ValueError
         void DeleteParent() except +
@@ -220,6 +218,8 @@ cdef extern from "games/game.h":
         c_Rational GetMaxPayoff(c_GamePlayer) except +
         bool IsPerfectRecall() except +
 
+        c_GameInfoset AppendMove(c_GameNode, c_GamePlayer, int) except +ValueError
+        c_GameInfoset AppendMove(c_GameNode, c_GameInfoset) except +ValueError
         void SetPlayer(c_GameInfoset, c_GamePlayer) except +
         void Reveal(c_GameInfoset, c_GamePlayer) except +
         c_GameInfoset LeaveInfoset(c_GameNode) except +

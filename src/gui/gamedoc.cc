@@ -684,7 +684,7 @@ void gbtGameDocument::DoSetNodeLabel(GameNode p_node, const wxString &p_label)
 
 void gbtGameDocument::DoAppendMove(GameNode p_node, GameInfoset p_infoset)
 {
-  p_node->AppendMove(p_infoset);
+  m_game->AppendMove(p_node, p_infoset);
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 

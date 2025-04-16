@@ -1502,12 +1502,12 @@ class Game:
             raise UndefinedOperationError("append_move(): `nodes` must be terminal nodes")
 
         resolved_node = cython.cast(Node, resolved_nodes[0])
-        resolved_node.node.deref().AppendMove(resolved_player.player, len(actions))
+        self.game.deref().AppendMove(resolved_node.node, resolved_player.player, len(actions))
         for label, action in zip(actions, resolved_node.infoset.actions):
             action.label = label
         resolved_infoset = cython.cast(Infoset, resolved_node.infoset)
         for n in resolved_nodes[1:]:
-            cython.cast(Node, n).node.deref().AppendMove(resolved_infoset.infoset)
+            self.game.deref().AppendMove(cython.cast(Node, n).node, resolved_infoset.infoset)
 
     def append_infoset(self, nodes: typing.Union[NodeReference, NodeReferenceSet],
                        infoset: typing.Union[Infoset, str]) -> None:
@@ -1528,7 +1528,7 @@ class Game:
         if any(len(n.children) > 0 for n in resolved_nodes):
             raise UndefinedOperationError("append_infoset(): `nodes` must be terminal nodes")
         for n in resolved_nodes:
-            cython.cast(Node, n).node.deref().AppendMove(resolved_infoset.infoset)
+            self.game.deref().AppendMove(cython.cast(Node, n).node, resolved_infoset.infoset)
 
     def insert_move(self, node: typing.Union[Node, str],
                     player: typing.Union[Player, str], actions: int) -> None:

@@ -165,8 +165,6 @@ public:
 
   Game CopySubgame() const override;
 
-  GameInfoset AppendMove(GamePlayer p_player, int p_actions) override;
-  GameInfoset AppendMove(GameInfoset p_infoset) override;
   GameInfoset InsertMove(GamePlayer p_player, int p_actions) override;
   GameInfoset InsertMove(GameInfoset p_infoset) override;
 };
@@ -261,6 +259,8 @@ public:
 
   /// @name Modification
   //@{
+  GameInfoset AppendMove(GameNode p_node, GamePlayer p_player, int p_actions) override;
+  GameInfoset AppendMove(GameNode p_node, GameInfoset p_infoset) override;
   void SetPlayer(GameInfoset, GamePlayer) override;
   void Reveal(GameInfoset, GamePlayer) override;
   GameInfoset LeaveInfoset(GameNode) override;

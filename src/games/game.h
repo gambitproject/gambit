@@ -382,8 +382,6 @@ public:
   /// Create a separate Game object containing the subgame rooted at the node
   virtual Game CopySubgame() const = 0;
 
-  virtual GameInfoset AppendMove(GamePlayer p_player, int p_actions) = 0;
-  virtual GameInfoset AppendMove(GameInfoset p_infoset) = 0;
   virtual GameInfoset InsertMove(GamePlayer p_player, int p_actions) = 0;
   virtual GameInfoset InsertMove(GameInfoset p_infoset) = 0;
 };
@@ -485,6 +483,14 @@ public:
   //@}
 
   virtual void SetPlayer(GameInfoset p_infoset, GamePlayer p_player)
+  {
+    throw UndefinedException();
+  }
+  virtual GameInfoset AppendMove(GameNode p_node, GamePlayer p_player, int p_actions)
+  {
+    throw UndefinedException();
+  }
+  virtual GameInfoset AppendMove(GameNode p_node, GameInfoset p_infoset)
   {
     throw UndefinedException();
   }
