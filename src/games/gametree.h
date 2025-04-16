@@ -50,9 +50,6 @@ protected:
   GameTreeInfosetRep(GameTreeRep *p_efg, int p_number, GamePlayerRep *p_player, int p_actions);
   ~GameTreeInfosetRep() override;
 
-  /// Removes the node from the information set, invalidating if emptied
-  void RemoveMember(GameTreeNodeRep *);
-
   void RenumberActions()
   {
     std::for_each(m_actions.begin(), m_actions.end(),
@@ -189,6 +186,9 @@ protected:
   void Canonicalize();
   void BuildComputedValues() override;
   void ClearComputedValues() const;
+
+  /// Removes the node from the information set, invalidating if emptied
+  void RemoveMember(GameTreeInfosetRep *, GameTreeNodeRep *);
   //@}
 
 public:

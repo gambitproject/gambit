@@ -245,18 +245,20 @@ GameAction GameTreeInfosetRep::InsertAction(GameAction p_action /* =0 */)
   return action;
 }
 
-void GameTreeInfosetRep::RemoveMember(GameTreeNodeRep *p_node)
+void GameTreeRep::RemoveMember(GameTreeInfosetRep *p_infoset, GameTreeNodeRep *p_node)
 {
-  m_efg->IncrementVersion();
-  m_members.erase(std::find(m_members.begin(), m_members.end(), p_node));
-  if (m_members.empty()) {
-    m_player->m_infosets.erase(
-        std::find(m_player->m_infosets.begin(), m_player->m_infosets.end(), this));
+  IncrementVersion();
+  p_infoset->m_members.erase(
+      std::find(p_infoset->m_members.begin(), p_infoset->m_members.end(), p_node));
+  if (p_infoset->m_members.empty()) {
+    p_infoset->m_player->m_infosets.erase(std::find(p_infoset->m_player->m_infosets.begin(),
+                                                    p_infoset->m_player->m_infosets.end(),
+                                                    p_infoset));
     int iset = 1;
-    for (auto &infoset : m_player->m_infosets) {
+    for (auto &infoset : p_infoset->m_player->m_infosets) {
       infoset->m_number = iset++;
     }
-    Invalidate();
+    p_infoset->Invalidate();
   }
 }
 
@@ -444,7 +446,7 @@ void GameTreeNodeRep::DeleteTree()
     erase_atindex(m_children, 1);
   }
   if (m_infoset) {
-    m_infoset->RemoveMember(this);
+    m_efg->RemoveMember(m_infoset, this);
     m_infoset = nullptr;
   }
 
@@ -539,7 +541,7 @@ void GameTreeNodeRep::SetInfoset(GameInfoset p_infoset)
     throw DimensionException();
   }
   m_efg->IncrementVersion();
-  m_infoset->RemoveMember(this);
+  m_efg->RemoveMember(m_infoset, this);
   dynamic_cast<GameTreeInfosetRep *>(p_infoset.operator->())->m_members.push_back(this);
   m_infoset = dynamic_cast<GameTreeInfosetRep *>(p_infoset.operator->());
 
@@ -564,7 +566,7 @@ GameInfoset GameTreeRep::LeaveInfoset(GameNode p_node)
   }
 
   GamePlayerRep *player = oldInfoset->m_player;
-  oldInfoset->RemoveMember(node);
+  RemoveMember(oldInfoset, node);
   node->m_infoset =
       new GameTreeInfosetRep(this, player->m_infosets.size() + 1, player, node->m_children.size());
   node->m_infoset->m_members.push_back(node);
