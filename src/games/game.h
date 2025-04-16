@@ -167,7 +167,7 @@ private:
     : m_number(p_number), m_label(p_label), m_infoset(p_infoset)
   {
   }
-  ~GameActionRep() = default;
+  ~GameActionRep() override = default;
 
 public:
   int GetNumber() const { return m_number; }
