@@ -30,8 +30,7 @@
 #include <cstring>
 #include <vector>
 
-namespace Gambit {
-namespace gametracer {
+namespace Gambit::gametracer {
 
 class cvector {
   friend class cmatrix;
@@ -108,7 +107,7 @@ public:
 
   cvector operator-() const
   {
-    cvector ret(m);
+    cvector const ret(m);
     for (int i = 0; i < m; i++) {
       ret.x[i] = -x[i];
     }
@@ -156,17 +155,17 @@ public:
   double &operator[](int i) { return x[i]; }
 
   /// Return a forward iterator starting at the beginning of the vector
-  iterator begin() { return iterator(this, 0); }
+  iterator begin() { return {this, 0}; }
   /// Return a forward iterator past the end of the vector
-  iterator end() { return iterator(this, m); }
+  iterator end() { return {this, m}; }
   /// Return a const forward iterator starting at the beginning of the vector
-  const_iterator begin() const { return const_iterator(this, 0); }
+  const_iterator begin() const { return {this, 0}; }
   /// Return a const forward iterator past the end of the vector
-  const_iterator end() const { return const_iterator(this, m); }
+  const_iterator end() const { return {this, m}; }
   /// Return a const forward iterator starting at the beginning of the vector
-  const_iterator cbegin() const { return const_iterator(this, 0); }
+  const_iterator cbegin() const { return {this, 0}; }
   /// Return a const forward iterator past the end of the vector
-  const_iterator cend() const { return const_iterator(this, m); }
+  const_iterator cend() const { return {this, m}; }
 
   cvector &operator+=(const cvector &v)
   {
@@ -380,47 +379,31 @@ inline std::ostream &operator<<(std::ostream &s, const cvector &v)
 
 class cmatrix {
 public:
-  explicit cmatrix(int m = 1, int n = 1)
-  {
-    this->m = m;
-    this->n = n;
-    s = m * n;
-    x = new double[s];
-  }
+  explicit cmatrix(int m = 1, int n = 1) : m(m), n(n), s(m * n), x(new double[s]) {}
 
   ~cmatrix() { delete[] x; }
 
   cmatrix(const cmatrix &ma, bool transpose = false)
+    : m((transpose) ? ma.n : ma.m), n((transpose) ? ma.m : ma.n), s(m * n), x(new double[s])
   {
-    s = ma.m * ma.n;
-    x = new double[s];
     if (transpose) {
-      int i, j, c;
-      n = ma.m;
-      m = ma.n;
-      c = 0;
-      for (i = 0; i < m; i++) {
-        for (j = 0; j < n; j++, c++) {
+      int c = 0;
+      for (int i = 0; i < m; i++) {
+        for (int j = 0; j < n; j++, c++) {
           x[c] = ma.x[i + j * m];
         }
       }
     }
     else {
-      n = ma.n;
-      m = ma.m;
-      int i;
-      for (i = 0; i < s; i++) {
+      for (int i = 0; i < s; i++) {
         x[i] = ma.x[i];
       }
     }
   }
 
   cmatrix(int m, int n, const double &a, bool diaonly = false)
+    : m(m), n(n), s(m * n), x(new double[s])
   {
-    this->m = m;
-    this->n = n;
-    s = m * n;
-    x = new double[s];
     if (diaonly) {
       int i;
       // for(i=0;i<s;i++) x[i] = 0;
@@ -450,12 +433,8 @@ public:
   }
 
   // put v on the diagonal
-  cmatrix(int m, int n, const cvector &v)
+  cmatrix(int m, int n, const cvector &v) : m(m), n(n), s(m * n), x(new double[s])
   {
-    this->m = m;
-    this->n = n;
-    s = m * n;
-    x = new double[s];
     // for(int i=0;i<s;i++) x[i] = 0;
     memset(x, 0, s * sizeof(double));
     int l = m;
@@ -470,12 +449,8 @@ public:
     }
   }
 
-  explicit cmatrix(const cvector &v)
+  explicit cmatrix(const cvector &v) : m(v.m), n(1), s(m), x(new double[s])
   {
-    m = v.m;
-    n = 1;
-    s = m;
-    x = new double[s];
     // for(int i=0;i<s;i++) x[i] = v.x[i];
     memcpy(x, v.x, s * sizeof(double));
   }
@@ -510,15 +485,11 @@ public:
     }
   }
 
-  cmatrix(const cvector &v1, const cvector &v2)
+  cmatrix(const cvector &v1, const cvector &v2) : m(v1.m), n(v2.m), s(m * n), x(new double[s])
   {
-    n = v2.m;
-    m = v1.m;
-    s = n * m;
-    x = new double[s];
-    int i, j, c = 0;
-    for (i = 0; i < m; i++) {
-      for (j = 0; j < n; j++, c++) {
+    int c = 0;
+    for (int i = 0; i < m; i++) {
+      for (int j = 0; j < n; j++, c++) {
         x[c] = v1.x[i] * v2.x[j];
       }
     }
@@ -526,7 +497,7 @@ public:
 
   cmatrix operator-() const
   {
-    cmatrix ret(m, n);
+    cmatrix const ret(m, n);
     for (int i = 0; i < s; i++) {
       ret.x[i] = -x[i];
     }
@@ -568,7 +539,7 @@ public:
     if (n != ma.m) {
       throw std::out_of_range("invalid cmatrix multiply");
     }
-    cmatrix ret(m, ma.n);
+    cmatrix const ret(m, ma.n);
     int c = 0;
     for (int i = 0; i < m; i++) {
       for (int j = 0; j < ma.n; j++, c++) {
@@ -586,7 +557,7 @@ public:
     if (n != v.m) {
       throw std::out_of_range("invalid cvector-cmatrix multiply");
     }
-    cvector ret(m);
+    cvector const ret(m);
     int c = 0;
     for (int i = 0; i < m; i++, c += n) {
       ret.x[i] = 0;
@@ -830,7 +801,6 @@ inline std::ostream &operator<<(std::ostream &s, const cmatrix &ma)
   return s;
 }
 
-} // namespace gametracer
-} // end namespace Gambit
+} // end namespace Gambit::gametracer
 
 #endif // GAMBIT_GTRACER_CMATRIX_H

@@ -158,8 +158,8 @@ template <class T> MixedStrategyProfileRep<T> *TableMixedStrategyProfileRep<T>::
 template <class T>
 T TableMixedStrategyProfileRep<T>::GetPayoff(int pl, int index, int current) const
 {
-  if (current > this->m_support.GetGame()->NumPlayers()) {
-    Game game = this->m_support.GetGame();
+  if (current > static_cast<int>(this->m_support.GetGame()->NumPlayers())) {
+    const Game game = this->m_support.GetGame();
     auto &g = dynamic_cast<GameTableRep &>(*game);
     GameOutcomeRep *outcome = g.m_results[index];
     if (outcome) {
@@ -191,8 +191,8 @@ void TableMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, int const_pl, int c
   if (cur_pl == const_pl) {
     cur_pl++;
   }
-  if (cur_pl > this->m_support.GetGame()->NumPlayers()) {
-    Game game = this->m_support.GetGame();
+  if (cur_pl > static_cast<int>(this->m_support.GetGame()->NumPlayers())) {
+    const Game game = this->m_support.GetGame();
     auto &g = dynamic_cast<GameTableRep &>(*game);
     GameOutcomeRep *outcome = g.m_results[index];
     if (outcome) {
@@ -224,8 +224,8 @@ void TableMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, int const_pl1, int 
   while (cur_pl == const_pl1 || cur_pl == const_pl2) {
     cur_pl++;
   }
-  if (cur_pl > this->m_support.GetGame()->NumPlayers()) {
-    Game game = this->m_support.GetGame();
+  if (cur_pl > static_cast<int>(this->m_support.GetGame()->NumPlayers())) {
+    const Game game = this->m_support.GetGame();
     auto &g = dynamic_cast<GameTableRep &>(*game);
     GameOutcomeRep *outcome = g.m_results[index];
     if (outcome) {
@@ -282,24 +282,22 @@ int Product(const Array<int> &dim)
 GameTableRep::GameTableRep(const Array<int> &dim, bool p_sparseOutcomes /* = false */)
 {
   m_results = Array<GameOutcomeRep *>(Product(dim));
-  for (int pl = 1; pl <= dim.size(); pl++) {
+  for (size_t pl = 1; pl <= dim.size(); pl++) {
     m_players.push_back(new GamePlayerRep(this, pl, dim[pl]));
-    m_players[pl]->m_label = lexical_cast<std::string>(pl);
-    for (int st = 1; st <= m_players[pl]->NumStrategies(); st++) {
-      m_players[pl]->m_strategies[st]->SetLabel(lexical_cast<std::string>(st));
-    }
+    m_players.back()->m_label = lexical_cast<std::string>(pl);
+    std::for_each(
+        m_players.back()->m_strategies.begin(), m_players.back()->m_strategies.end(),
+        [st = 1](GameStrategyRep *s) mutable { s->SetLabel(lexical_cast<std::string>(st++)); });
   }
   IndexStrategies();
 
   if (p_sparseOutcomes) {
-    for (int cont = 1; cont <= m_results.size(); m_results[cont++] = 0)
-      ;
+    std::fill(m_results.begin(), m_results.end(), nullptr);
   }
   else {
     m_outcomes = Array<GameOutcomeRep *>(m_results.size());
-    for (int i = 1; i <= m_outcomes.size(); i++) {
-      m_outcomes[i] = new GameOutcomeRep(this, i);
-    }
+    std::generate(m_outcomes.begin(), m_outcomes.end(),
+                  [this, outc = 1]() mutable { return new GameOutcomeRep(this, outc++); });
     m_results = m_outcomes;
   }
 }
@@ -404,16 +402,47 @@ GamePlayer GameTableRep::NewPlayer()
 void GameTableRep::DeleteOutcome(const GameOutcome &p_outcome)
 {
   IncrementVersion();
-  for (int i = 1; i <= m_results.size(); i++) {
-    if (m_results[i] == p_outcome) {
-      m_results[i] = 0;
-    }
-  }
-  p_outcome->Invalidate();
+  std::replace(m_results.begin(), m_results.end(), p_outcome, GameOutcome(nullptr));
   m_outcomes.erase(std::find(m_outcomes.begin(), m_outcomes.end(), p_outcome));
-  for (int outc = 1; outc <= m_outcomes.size(); outc++) {
-    m_outcomes[outc]->m_number = outc;
+  p_outcome->Invalidate();
+  std::for_each(m_outcomes.begin(), m_outcomes.end(),
+                [outc = 1](GameOutcomeRep *c) mutable { c->m_number = outc++; });
+}
+
+//------------------------------------------------------------------------
+//                        GameTableRep: Strategies
+//------------------------------------------------------------------------
+
+GameStrategy GameTableRep::NewStrategy(const GamePlayer &p_player, const std::string &p_label)
+{
+  if (p_player->GetGame() != this) {
+    throw MismatchException();
   }
+  IncrementVersion();
+  p_player->m_strategies.push_back(
+      new GameStrategyRep(p_player, p_player->m_strategies.size(), p_label));
+  RebuildTable();
+  return p_player->m_strategies.back();
+}
+
+void GameTableRep::DeleteStrategy(const GameStrategy &p_strategy)
+{
+  GamePlayerRep *player = p_strategy->GetPlayer();
+  if (player->m_game != this) {
+    throw MismatchException();
+  }
+  if (player->NumStrategies() == 1) {
+    return;
+  }
+
+  IncrementVersion();
+  player->m_strategies.erase(
+      std::find(player->m_strategies.begin(), player->m_strategies.end(), p_strategy));
+  std::for_each(player->m_strategies.begin(), player->m_strategies.end(),
+                [st = 1](GameStrategyRep *s) mutable { s->m_number = st++; });
+  // Note that we do not reindex strategies, and so we do not need to re-build the
+  // table of outcomes.
+  p_strategy->Invalidate();
 }
 
 //------------------------------------------------------------------------
@@ -453,10 +482,10 @@ GameTableRep::NewMixedStrategyProfile(const Rational &, const StrategySupportPro
 void GameTableRep::RebuildTable()
 {
   long size = 1L;
-  Array<long> offsets(m_players.size());
-  for (int pl = 1; pl <= m_players.size(); pl++) {
-    offsets[pl] = size;
-    size *= m_players[pl]->NumStrategies();
+  Array<long> offsets;
+  for (const auto &player : m_players) {
+    offsets.push_back(size);
+    size *= player->m_strategies.size();
   }
 
   Array<GameOutcomeRep *> newResults(size);

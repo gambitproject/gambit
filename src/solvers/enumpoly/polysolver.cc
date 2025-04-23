@@ -149,8 +149,8 @@ bool PolynomialSystemSolver::HasNoOtherRootsIn(const Rectangle<double> &r,
 
 Vector<double> PolynomialSystemSolver::NewtonStep(const Vector<double> &point) const
 {
-  Vector<double> evals = m_derivatives.ValuesOfRootPolys(point, NumEquations());
-  Matrix<double> deriv = m_derivatives.DerivativeMatrix(point, NumEquations());
+  const Vector<double> evals = m_derivatives.ValuesOfRootPolys(point, NumEquations());
+  const Matrix<double> deriv = m_derivatives.DerivativeMatrix(point, NumEquations());
   auto transpose = deriv.Transpose();
   auto sqmat = SquareMatrix<double>(deriv * transpose);
   if (std::abs(sqmat.Determinant()) <= 1.0e-9) {
@@ -161,8 +161,8 @@ Vector<double> PolynomialSystemSolver::NewtonStep(const Vector<double> &point) c
 
 Vector<double> PolynomialSystemSolver::ImprovingNewtonStep(const Vector<double> &point) const
 {
-  Vector<double> evals = m_derivatives.ValuesOfRootPolys(point, NumEquations());
-  Matrix<double> deriv = m_derivatives.DerivativeMatrix(point, NumEquations());
+  const Vector<double> evals = m_derivatives.ValuesOfRootPolys(point, NumEquations());
+  const Matrix<double> deriv = m_derivatives.DerivativeMatrix(point, NumEquations());
   auto transpose = deriv.Transpose();
   auto sqmat = SquareMatrix<double>(deriv * transpose);
   if (std::abs(sqmat.Determinant()) <= 1.0e-9) {
@@ -182,7 +182,7 @@ std::list<Vector<double>> PolynomialSystemSolver::FindRoots(const Rectangle<doub
 {
   std::list<Vector<double>> roots;
   if (NumEquations() == 0) {
-    roots.push_back(Vector<double>());
+    roots.emplace_back();
   }
   else {
     FindRoots(roots, r, max_roots);
@@ -191,7 +191,7 @@ std::list<Vector<double>> PolynomialSystemSolver::FindRoots(const Rectangle<doub
 }
 
 void PolynomialSystemSolver::FindRoots(std::list<Vector<double>> &rootlist,
-                                       const Rectangle<double> &r, const int max_roots) const
+                                       const Rectangle<double> &r, const size_t max_roots) const
 {
   if (SystemHasNoRootsIn(r)) {
     return;
@@ -199,7 +199,7 @@ void PolynomialSystemSolver::FindRoots(std::list<Vector<double>> &rootlist,
 
   Vector<double> point = r.Center();
   if (NewtonRootInRectangle(r, point) && HasNoOtherRootsIn(r, point)) {
-    // If all inequalities are satisfied and we haven't found the point before, add to the
+    // If all inequalities are satisfied, and we haven't found the point before, add to the
     // list of roots
     if (std::all_of(std::next(m_derivatives.begin(), NumEquations()), m_derivatives.end(),
                     [&point](const PolynomialDerivatives<double> &d) {

@@ -54,9 +54,7 @@ void PrintHelp(char *progname)
   std::cerr << "  -d DECIMALS      show equilibria as floating point with DECIMALS digits\n";
   std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -n COUNT         number of perturbation vectors to generate\n";
-  std::cerr << "  -s FILE          file containing perturbation vectors\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
-  std::cerr << "  -V, --verbose    verbose mode (shows intermediate output)\n";
   std::cerr << "  -v, --version    print version information\n";
   exit(1);
 }
@@ -64,17 +62,15 @@ void PrintHelp(char *progname)
 int main(int argc, char *argv[])
 {
   opterr = 0;
-  bool quiet = false, verbose = false;
+  bool quiet = false;
   int numDecimals = 6, numVectors = 1;
-  std::string startFile;
+  const std::string startFile;
 
   int long_opt_index = 0;
-  struct option long_options[] = {{"help", 0, nullptr, 'h'},
-                                  {"version", 0, nullptr, 'v'},
-                                  {"verbose", 0, nullptr, 'V'},
-                                  {nullptr, 0, nullptr, 0}};
+  struct option long_options[] = {
+      {"help", 0, nullptr, 'h'}, {"version", 0, nullptr, 'v'}, {nullptr, 0, nullptr, 0}};
   int c;
-  while ((c = getopt_long(argc, argv, "d:n:s:vVqhS", long_options, &long_opt_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "d:n:vqh", long_options, &long_opt_index)) != -1) {
     switch (c) {
     case 'v':
       PrintBanner(std::cerr);
@@ -82,16 +78,11 @@ int main(int argc, char *argv[])
     case 'q':
       quiet = true;
       break;
-    case 'V':
-      verbose = true;
-      break;
     case 'd':
       numDecimals = atoi(optarg);
       break;
     case 'n':
       numVectors = atoi(optarg);
-      break;
-    case 'S':
       break;
     case 'h':
       PrintHelp(argv[0]);
@@ -127,8 +118,8 @@ int main(int argc, char *argv[])
   }
 
   try {
-    Game game = ReadGame(*input_stream);
-    std::shared_ptr<StrategyProfileRenderer<double>> renderer(
+    const Game game = ReadGame(*input_stream);
+    const std::shared_ptr<StrategyProfileRenderer<double>> renderer(
         new MixedStrategyCSVRenderer<double>(std::cout, numDecimals));
 
     List<MixedStrategyProfile<double>> perts;
@@ -142,9 +133,9 @@ int main(int argc, char *argv[])
     }
 
     for (auto pert : perts) {
-      IPAStrategySolve(pert, [renderer, verbose](const MixedStrategyProfile<double> &p_profile,
-                                                 const std::string &p_label) {
-        if (p_label == "NE" || verbose) {
+      IPAStrategySolve(pert, [renderer](const MixedStrategyProfile<double> &p_profile,
+                                        const std::string &p_label) {
+        if (p_label == "NE") {
           renderer->Render(p_profile, p_label);
         }
       });

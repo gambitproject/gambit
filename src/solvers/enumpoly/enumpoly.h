@@ -27,8 +27,7 @@
 #include "games/nash.h"
 #include "solvers/nashsupport/nashsupport.h"
 
-namespace Gambit {
-namespace Nash {
+namespace Gambit::Nash {
 
 using EnumPolyMixedStrategyObserverFunctionType =
     std::function<void(const MixedStrategyProfile<double> &)>;
@@ -66,7 +65,6 @@ List<MixedBehaviorProfile<double>> EnumPolyBehaviorSolve(
     EnumPolyMixedBehaviorObserverFunctionType p_onEquilibrium = EnumPolyNullMixedBehaviorObserver,
     EnumPolyBehaviorSupportObserverFunctionType p_onSupport = EnumPolyNullBehaviorSupportObserver);
 
-} // namespace Nash
-} // namespace Gambit
+} // namespace Gambit::Nash
 
 #endif // GAMBIT_SOLVERS_ENUMPOLY_ENUMPOLY_H

@@ -27,8 +27,7 @@
 #include "core/matrix.h"
 #include "cmatrix.h"
 
-namespace Gambit {
-namespace gametracer {
+namespace Gambit::gametracer {
 
 int cmatrix::LUdecomp(cmatrix &LU, std::vector<int> &ix) const
 {
@@ -258,5 +257,4 @@ double cmatrix::trace() const
   return sum;
 }
 
-} // namespace gametracer
-} // end namespace Gambit
+} // end namespace Gambit::gametracer

@@ -30,11 +30,11 @@ namespace Gambit::linalg {
 
 template <class T> int LemkeTableau<T>::SF_PivotIn(int inlabel)
 {
-  int outindex = SF_ExitIndex(inlabel);
+  const int outindex = SF_ExitIndex(inlabel);
   if (outindex == 0) {
     return inlabel;
   }
-  int outlabel = this->Label(outindex);
+  const int outlabel = this->Label(outindex);
   this->Pivot(outindex, inlabel);
   return outlabel;
 }
@@ -77,7 +77,7 @@ template <class T> int LemkeTableau<T>::SF_ExitIndex(int inlabel)
     // Initialize tempmax.
     tempmax = col[BestSet[1]] / incol[BestSet[1]];
     // Find the maximum ratio.
-    for (int i = 2; i <= BestSet.size(); i++) {
+    for (size_t i = 2; i <= BestSet.size(); i++) {
       ratio = col[BestSet[i]] / incol[BestSet[i]];
       if (ratio < tempmax) {
         tempmax = ratio;
@@ -85,7 +85,7 @@ template <class T> int LemkeTableau<T>::SF_ExitIndex(int inlabel)
     }
 
     // Remove nonmaximizers from the list of candidate columns.
-    for (int i = BestSet.size(); i >= 1; i--) {
+    for (size_t i = BestSet.size(); i >= 1; i--) {
       ratio = col[BestSet[i]] / incol[BestSet[i]];
       if (ratio > tempmax + this->eps2) {
         erase_atindex(BestSet, i);
@@ -148,18 +148,18 @@ template <class T> int LemkeTableau<T>::ExitIndex(int inlabel)
     // Initialize tempmax.
     tempmax = col[BestSet[1]] / incol[BestSet[1]];
     // Find the maximum ratio.
-    for (i = 2; i <= BestSet.size(); i++) {
-      ratio = col[BestSet[i]] / incol[BestSet[i]];
+    for (size_t j = 2; j <= BestSet.size(); j++) {
+      ratio = col[BestSet[j]] / incol[BestSet[j]];
       if (ratio > tempmax) {
         tempmax = ratio;
       }
     }
 
     // Remove nonmaximizers from the list of candidate columns.
-    for (i = BestSet.size(); i >= 1; i--) {
-      ratio = col[BestSet[i]] / incol[BestSet[i]];
+    for (size_t j = BestSet.size(); j >= 1; j--) {
+      ratio = col[BestSet[j]] / incol[BestSet[j]];
       if (ratio < tempmax - this->eps1) {
-        erase_atindex(BestSet, i);
+        erase_atindex(BestSet, j);
       }
     }
     c++;

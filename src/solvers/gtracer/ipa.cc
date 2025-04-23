@@ -24,8 +24,7 @@
 
 #include "gtracer.h"
 
-namespace Gambit {
-namespace gametracer {
+namespace Gambit::gametracer {
 
 int indexOf(const std::vector<int> &list, int target)
 {
@@ -40,8 +39,9 @@ int indexOf(const std::vector<int> &list, int target)
 int Pivot(cmatrix &T, int pr, int pc, std::vector<int> &row, std::vector<int> &col, double &D,
           int numActions, int numPlayers)
 {
-  double pivot = T(pr, pc);
-  int i0, j0, p, sgn = pivot < 0 ? -1 : 1;
+  const double pivot = T(pr, pc);
+  int i0, j0, p;
+  const int sgn = pivot < 0 ? -1 : 1;
 
   for (i0 = 0; i0 < numActions + numPlayers; i0++) {
     if (i0 != pr) {
@@ -79,10 +79,10 @@ int Pivot(cmatrix &T, int pr, int pc, std::vector<int> &row, std::vector<int> &c
 void LemkeHowson(const gnmgame &game, cvector &dest, cmatrix &T, std::vector<int> &Im)
 {
   const double BIGFLOAT = 3.0e+28F;
-  int numActions = game.getNumActions(), numPlayers = game.getNumPlayers();
+  const int numActions = game.getNumActions(), numPlayers = game.getNumPlayers();
   double D = 1;
-  int cg = numActions + numPlayers;
-  int K = cg + 1;
+  const int cg = numActions + numPlayers;
+  const int K = cg + 1;
   int pc, pr, p;
   double m;
   std::vector<int> col(numActions + numPlayers + 2);
@@ -144,7 +144,7 @@ void LemkeHowson(const gnmgame &game, cvector &dest, cmatrix &T, std::vector<int
 // Initialize the Lemke-Howson tableau
 void InitialiseLHTableau(cmatrix &T, const gnmgame &game, const cmatrix &DG, const cvector &g)
 {
-  int N = game.getNumPlayers(), M = game.getNumActions();
+  const int N = game.getNumPlayers(), M = game.getNumActions();
 
   for (int n = 0; n < N; n++) {
     for (int i = 0; i < M + N; i++) {
@@ -212,9 +212,9 @@ void FindPerturbedBR(const gnmgame &A, const cvector &g, std::vector<int> &Im)
 int IPA(const gnmgame &A, const cvector &g, cvector &zh, double alpha, double fuzz, cvector &ans,
         unsigned int maxiter, bool p_verbose)
 {
-  int N = A.getNumPlayers(),
-      M = A.getNumActions(); // For easy reference
-  std::vector<int> Im(N);    // best actions in perturbed game
+  const int N = A.getNumPlayers(),
+            M = A.getNumActions(); // For easy reference
+  std::vector<int> Im(N);          // best actions in perturbed game
 
   cmatrix DG(M, M), O(N, N, 0), // matrix of zeroes
       S(N, M, 0),               //
@@ -301,7 +301,7 @@ int IPA(const gnmgame &A, const cvector &g, cvector &zh, double alpha, double fu
 
     ym1 = z;
     ym1 -= sh;
-    double ell = (ym1 * u) / u.norm2(); // dot product
+    const double ell = (ym1 * u) / u.norm2(); // dot product
     if (ell <= 0.0 || B) {
       zh = u;
       zh *= ell;
@@ -371,5 +371,4 @@ int IPA(const gnmgame &A, const cvector &g, cvector &zh, double alpha, double fu
   return 0;
 }
 
-} // namespace gametracer
-} // end namespace Gambit
+} // end namespace Gambit::gametracer

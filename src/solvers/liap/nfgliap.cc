@@ -26,8 +26,7 @@
 #include "core/function.h"
 #include "liap.h"
 
-namespace Gambit {
-namespace Nash {
+namespace Gambit::Nash {
 
 //------------------------------------------------------------------------
 //                    class StrategicLyapunovFunction
@@ -101,7 +100,8 @@ double StrategicLyapunovFunction::LiapDerivValue(const MixedStrategyProfile<doub
   double deriv = 0.0;
   for (auto player : m_game->GetPlayers()) {
     for (auto strategy : player->GetStrategies()) {
-      double loss = sqr(m_scale) * (p_profile.GetPayoff(strategy) - p_profile.GetPayoff(player));
+      const double loss =
+          sqr(m_scale) * (p_profile.GetPayoff(strategy) - p_profile.GetPayoff(player));
       if (loss <= 0.0) {
         continue;
       }
@@ -161,7 +161,7 @@ List<MixedStrategyProfile<double>> LiapStrategySolve(const MixedStrategyProfile<
   MixedStrategyProfile<double> p(p_start);
   p_callback(p, "start");
 
-  StrategicLyapunovFunction F(p);
+  const StrategicLyapunovFunction F(p);
   ConjugatePRMinimizer minimizer(p.MixedProfileLength());
   Vector<double> gradient(p.MixedProfileLength()), dx(p.MixedProfileLength());
   double fval;
@@ -190,5 +190,4 @@ List<MixedStrategyProfile<double>> LiapStrategySolve(const MixedStrategyProfile<
   return solutions;
 }
 
-} // namespace Nash
-} // namespace Gambit
+} // namespace Gambit::Nash

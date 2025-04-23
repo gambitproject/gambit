@@ -71,7 +71,7 @@ Polynomial<double> BuildSequenceVariable(ProblemData &p_data, const GameSequence
     if (seq == p_sequence) {
       continue;
     }
-    if (int constraint_coef =
+    if (const int constraint_coef =
             p_data.sfg.GetConstraintEntry(p_sequence->GetInfoset(), seq->action)) {
       equation += BuildSequenceVariable(p_data, seq, var) * double(constraint_coef);
     }
@@ -116,7 +116,7 @@ Polynomial<double> GetPayoff(ProblemData &p_data, const GamePlayer &p_player)
 void IndifferenceEquations(ProblemData &p_data, PolynomialSystem<double> &p_equations)
 {
   for (auto player : p_data.sfg.GetPlayers()) {
-    Polynomial<double> payoff = GetPayoff(p_data, player);
+    const Polynomial<double> payoff = GetPayoff(p_data, player);
     for (auto sequence : p_data.sfg.GetSequences(player)) {
       try {
         p_equations.push_back(payoff.PartialDerivative(p_data.var.at(sequence)));
@@ -180,7 +180,8 @@ std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfil
 
   std::list<MixedBehaviorProfile<double>> solutions;
   for (auto root : roots) {
-    MixedBehaviorProfile<double> sol(data.sfg.ToMixedBehaviorProfile(ToSequenceProbs(data, root)));
+    const MixedBehaviorProfile<double> sol(
+        data.sfg.ToMixedBehaviorProfile(ToSequenceProbs(data, root)));
     if (ExtendsToNash(sol, BehaviorSupportProfile(sol.GetGame()),
                       BehaviorSupportProfile(sol.GetGame()))) {
       solutions.push_back(sol);
@@ -191,15 +192,15 @@ std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfil
 
 } // end anonymous namespace
 
-namespace Gambit {
-namespace Nash {
+namespace Gambit::Nash {
 
 List<MixedBehaviorProfile<double>>
 EnumPolyBehaviorSolve(const Game &p_game, int p_stopAfter, double p_maxregret,
                       EnumPolyMixedBehaviorObserverFunctionType p_onEquilibrium,
                       EnumPolyBehaviorSupportObserverFunctionType p_onSupport)
 {
-  if (double scale = p_game->GetMaxPayoff() - p_game->GetMinPayoff() != 0.0) {
+  const double scale = p_game->GetMaxPayoff() - p_game->GetMinPayoff();
+  if (scale != 0.0) {
     p_maxregret *= scale;
   }
 
@@ -211,7 +212,7 @@ EnumPolyBehaviorSolve(const Game &p_game, int p_stopAfter, double p_maxregret,
     bool isSingular = false;
     for (auto solution :
          SolveSupport(support, isSingular, std::max(p_stopAfter - int(ret.size()), 0))) {
-      MixedBehaviorProfile<double> fullProfile = solution.ToFullSupport();
+      const MixedBehaviorProfile<double> fullProfile = solution.ToFullSupport();
       if (fullProfile.GetMaxRegret() < p_maxregret) {
         p_onEquilibrium(fullProfile);
         ret.push_back(fullProfile);
@@ -220,12 +221,11 @@ EnumPolyBehaviorSolve(const Game &p_game, int p_stopAfter, double p_maxregret,
     if (isSingular) {
       p_onSupport("singular", support);
     }
-    if (p_stopAfter > 0 && ret.size() >= p_stopAfter) {
+    if (p_stopAfter > 0 && static_cast<int>(ret.size()) >= p_stopAfter) {
       break;
     }
   }
   return ret;
 }
 
-} // namespace Nash
-} // namespace Gambit
+} // namespace Gambit::Nash

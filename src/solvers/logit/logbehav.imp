@@ -30,8 +30,7 @@
 
 template <class T>
 LogBehavProfile<T>::LogBehavProfile(const Game &p_game)
-  : m_game(p_game), m_probs(m_game->BehavProfileLength()),
-    m_logProbs(m_game->BehavProfileLength()), m_cacheValid(false)
+  : m_game(p_game), m_probs(m_game->BehavProfileLength()), m_logProbs(m_game->BehavProfileLength())
 {
   int index = 1;
   for (const auto &player : p_game->GetPlayers()) {
@@ -68,25 +67,17 @@ template <class T> bool LogBehavProfile<T>::operator==(const LogBehavProfile<T> 
 template <class T> T LogBehavProfile<T>::GetActionProb(const GameAction &action) const
 {
   if (action->GetInfoset()->GetPlayer()->IsChance()) {
-    GameTreeInfosetRep *infoset =
-        dynamic_cast<GameTreeInfosetRep *>(action->GetInfoset().operator->());
-    return static_cast<T>(infoset->GetActionProb(action));
+    return static_cast<T>(action->GetInfoset()->GetActionProb(action));
   }
-  else {
-    return GetProb(action);
-  }
+  return GetProb(action);
 }
 
 template <class T> T LogBehavProfile<T>::GetLogActionProb(const GameAction &action) const
 {
   if (action->GetInfoset()->GetPlayer()->IsChance()) {
-    GameTreeInfosetRep *infoset =
-        dynamic_cast<GameTreeInfosetRep *>(action->GetInfoset().operator->());
-    return log(static_cast<T>(infoset->GetActionProb(action)));
+    return log(static_cast<T>(action->GetInfoset()->GetActionProb(action)));
   }
-  else {
-    return m_logProbs[m_profileIndex.at(action)];
-  }
+  return m_logProbs[m_profileIndex.at(action)];
 }
 
 template <class T> const T &LogBehavProfile<T>::GetPayoff(const GameAction &act) const
@@ -107,7 +98,7 @@ GameAction GetPrecedingAction(const GameNode &p_node, const GameInfoset &p_infos
 {
   GameNode node = p_node;
   while (node->GetParent()) {
-    GameAction prevAction = node->GetPriorAction();
+    const GameAction prevAction = node->GetPriorAction();
     if (prevAction->GetInfoset() == p_infoset) {
       return prevAction;
     }
@@ -122,21 +113,21 @@ T LogBehavProfile<T>::DiffActionValue(const GameAction &p_action,
 {
   ComputeSolutionData();
 
-  GameInfoset infoset = p_action->GetInfoset();
-  GamePlayer player = p_action->GetInfoset()->GetPlayer();
+  const GameInfoset infoset = p_action->GetInfoset();
+  const GamePlayer player = p_action->GetInfoset()->GetPlayer();
 
   // derivs stores the ratio of the derivative of the realization probability
   // for each node, divided by the realization probability of the infoset,
   // times the probability with which p_oppAction is played
   std::map<GameNode, T> derivs;
   for (auto member : infoset->GetMembers()) {
-    GameAction act = GetPrecedingAction(member, p_oppAction->GetInfoset());
-    derivs[member] = (act == p_oppAction) ? m_beliefs[member] : T(0);
+    const GameAction act = GetPrecedingAction(member, p_oppAction->GetInfoset());
+    derivs[member] = (act == p_oppAction) ? m_beliefs[member] : static_cast<T>(0);
   }
 
-  T deriv = T(0);
+  T deriv = static_cast<T>(0);
   for (auto member : infoset->GetMembers()) {
-    GameNode child = member->GetChild(p_action);
+    const GameNode child = member->GetChild(p_action);
     deriv += derivs[member] * m_nodeValues[child][player];
     deriv -= derivs[member] * GetPayoff(p_action);
     deriv += GetProb(p_oppAction) * m_beliefs[member] * DiffNodeValue(child, player, p_oppAction);
@@ -154,10 +145,10 @@ T LogBehavProfile<T>::DiffNodeValue(const GameNode &p_node, const GamePlayer &p_
   if (p_node->NumChildren() == 0) {
     // If we reach a terminal node and haven't encountered p_oppAction,
     // derivative wrt this path is zero.
-    return (T)0;
+    return static_cast<T>(0);
   }
 
-  GameInfoset infoset = p_node->GetInfoset();
+  const GameInfoset infoset = p_node->GetInfoset();
   if (infoset == p_oppAction->GetInfoset()) {
     // We've encountered the action; since we assume perfect recall,
     // we won't encounter it again, and the downtree value must
@@ -181,13 +172,13 @@ T LogBehavProfile<T>::DiffNodeValue(const GameNode &p_node, const GamePlayer &p_
 template <class T> void LogBehavProfile<T>::ComputeSolutionDataPass2(const GameNode &node) const
 {
   if (node->GetOutcome()) {
-    GameOutcome outcome = node->GetOutcome();
+    const GameOutcome outcome = node->GetOutcome();
     for (auto player : m_game->GetPlayers()) {
       m_nodeValues[node][player] += outcome->GetPayoff<T>(player);
     }
   }
 
-  GameInfoset infoset = node->GetInfoset();
+  const GameInfoset infoset = node->GetInfoset();
   if (!infoset) {
     return;
   }
@@ -203,7 +194,7 @@ template <class T> void LogBehavProfile<T>::ComputeSolutionDataPass2(const GameN
 
   for (auto child : node->GetChildren()) {
     ComputeSolutionDataPass2(child);
-    GameAction action = child->GetPriorAction();
+    const GameAction action = child->GetPriorAction();
     for (auto player : m_game->GetPlayers()) {
       m_nodeValues[node][player] += GetActionProb(action) * m_nodeValues[child][player];
     }

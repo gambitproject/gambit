@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/vector.h
+// FILE: src/core/vector.h
 // A vector class
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,10 +20,12 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef LIBGAMBIT_VECTOR_H
-#define LIBGAMBIT_VECTOR_H
+#ifndef GAMBIT_CORE_VECTOR_H
+#define GAMBIT_CORE_VECTOR_H
 
 #include <numeric>
+
+#include "array.h"
 
 namespace Gambit {
 
@@ -164,4 +166,4 @@ public:
 
 } // end namespace Gambit
 
-#endif // LIBGAMBIT_VECTOR_H
+#endif // GAMBIT_CORE_VECTOR_H

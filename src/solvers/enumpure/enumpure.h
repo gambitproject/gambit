@@ -30,7 +30,7 @@ namespace Gambit::Nash {
 inline bool IsNash(const PureStrategyProfile &p_profile)
 {
   for (const auto &player : p_profile->GetGame()->GetPlayers()) {
-    Rational current = p_profile->GetPayoff(player);
+    const Rational current = p_profile->GetPayoff(player);
     for (auto strategy : player->GetStrategies()) {
       if (p_profile->GetStrategyValue(strategy) > current) {
         return false;
@@ -89,7 +89,7 @@ EnumPureAgentSolve(const Game &p_game,
                    BehaviorCallbackType<Rational> p_onEquilibrium = NullBehaviorCallback<Rational>)
 {
   List<MixedBehaviorProfile<Rational>> solutions;
-  BehaviorSupportProfile support(p_game);
+  const BehaviorSupportProfile support(p_game);
   for (auto citer : BehaviorContingencies(BehaviorSupportProfile(p_game))) {
     if (IsAgentNash(citer)) {
       solutions.push_back(citer.ToMixedBehaviorProfile());

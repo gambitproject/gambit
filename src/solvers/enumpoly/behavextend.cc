@@ -51,11 +51,11 @@ void DeviationInfosets(List<GameInfoset> &answer, const BehaviorSupportProfile &
                        const GamePlayer &p_player, const GameNode &p_node,
                        const GameAction &p_action)
 {
-  GameNode child = p_node->GetChild(p_action);
+  const GameNode child = p_node->GetChild(p_action);
   if (child->IsTerminal()) {
     return;
   }
-  GameInfoset iset = child->GetInfoset();
+  const GameInfoset iset = child->GetInfoset();
   if (iset->GetPlayer() == p_player) {
     size_t insert = 0;
     bool done = false;
@@ -94,9 +94,9 @@ PolynomialSystem<double> ActionProbsSumToOneIneqs(const MixedBehaviorProfile<dou
   for (auto player : p_solution.GetGame()->GetPlayers()) {
     for (auto infoset : player->GetInfosets()) {
       if (!big_supp.HasAction(infoset)) {
-        int index_base = var_index.at(infoset);
+        const int index_base = var_index.at(infoset);
         Polynomial<double> factor(BehavStratSpace, 1.0);
-        for (int k = 1; k < infoset->NumActions(); k++) {
+        for (size_t k = 1; k < infoset->NumActions(); k++) {
           factor -= Polynomial<double>(BehavStratSpace, index_base + k, 1);
         }
         answer.push_back(factor);
@@ -112,14 +112,12 @@ std::list<BehaviorSupportProfile> DeviationSupports(const BehaviorSupportProfile
   std::list<BehaviorSupportProfile> answer;
 
   Array<int> active_act_no(isetlist.size());
-  for (int k = 1; k <= active_act_no.size(); k++) {
-    active_act_no[k] = 0;
-  }
+  std::fill(active_act_no.begin(), active_act_no.end(), 0);
 
   BehaviorSupportProfile new_supp(big_supp);
 
   for (size_t i = 1; i <= isetlist.size(); i++) {
-    for (int j = 1; j < isetlist[i]->NumActions(); j++) {
+    for (size_t j = 1; j < isetlist[i]->NumActions(); j++) {
       new_supp.RemoveAction(isetlist[i]->GetAction(j));
     }
     new_supp.AddAction(isetlist[i]->GetAction(1));
@@ -136,10 +134,10 @@ std::list<BehaviorSupportProfile> DeviationSupports(const BehaviorSupportProfile
   }
   answer.push_back(new_supp);
 
-  int iset_cursor = isetlist.size();
+  size_t iset_cursor = isetlist.size();
   while (iset_cursor > 0) {
     if (active_act_no[iset_cursor] == 0 ||
-        active_act_no[iset_cursor] == isetlist[iset_cursor]->NumActions()) {
+        active_act_no[iset_cursor] == static_cast<int>(isetlist[iset_cursor]->NumActions())) {
       iset_cursor--;
     }
     else {
@@ -184,8 +182,8 @@ bool NashNodeProbabilityPoly(const MixedBehaviorProfile<double> &p_solution,
                              const GameInfoset &iset, const GameAction &act)
 {
   while (tempnode != p_solution.GetGame()->GetRoot()) {
-    GameAction last_action = tempnode->GetPriorAction();
-    GameInfoset last_infoset = last_action->GetInfoset();
+    const GameAction last_action = tempnode->GetPriorAction();
+    const GameInfoset last_infoset = last_action->GetInfoset();
 
     if (last_infoset->IsChanceInfoset()) {
       node_prob *= static_cast<double>(last_infoset->GetActionProb(last_action));
@@ -207,14 +205,14 @@ bool NashNodeProbabilityPoly(const MixedBehaviorProfile<double> &p_solution,
       }
     }
     else {
-      int initial_var_no = var_index.at(last_infoset);
-      if (last_action->GetNumber() < last_infoset->NumActions()) {
-        int varno = initial_var_no + last_action->GetNumber();
+      const int initial_var_no = var_index.at(last_infoset);
+      if (last_action->GetNumber() < static_cast<int>(last_infoset->NumActions())) {
+        const int varno = initial_var_no + last_action->GetNumber();
         node_prob *= Polynomial<double>(BehavStratSpace, varno, 1);
       }
       else {
         Polynomial<double> factor(BehavStratSpace, 1.0);
-        for (int k = 1; k < last_infoset->NumActions(); k++) {
+        for (size_t k = 1; k < last_infoset->NumActions(); k++) {
           factor -= Polynomial<double>(BehavStratSpace, initial_var_no + k, 1);
         }
         node_prob *= factor;
@@ -284,8 +282,7 @@ PolynomialSystem<double> ExtendsToNashIneqs(const MixedBehaviorProfile<double> &
 
 } // end anonymous namespace
 
-namespace Gambit {
-namespace Nash {
+namespace Gambit::Nash {
 
 bool ExtendsToNash(const MixedBehaviorProfile<double> &p_solution,
                    const BehaviorSupportProfile &little_supp,
@@ -296,7 +293,6 @@ bool ExtendsToNash(const MixedBehaviorProfile<double> &p_solution,
   int num_vars = 0;
   std::map<GameInfoset, int> var_index;
   for (auto player : p_solution.GetGame()->GetPlayers()) {
-    List<int> list_for_pl;
     for (auto infoset : player->GetInfosets()) {
       var_index[infoset] = num_vars;
       if (!big_supp.HasAction(infoset)) {
@@ -308,7 +304,7 @@ bool ExtendsToNash(const MixedBehaviorProfile<double> &p_solution,
   // We establish the space
   auto BehavStratSpace = std::make_shared<VariableSpace>(num_vars);
 
-  PolynomialSystem<double> inequalities =
+  const PolynomialSystem<double> inequalities =
       ExtendsToNashIneqs(p_solution, BehavStratSpace, little_supp, big_supp, var_index);
   // set up the rectangle of search
   Vector<double> bottoms(num_vars), tops(num_vars);
@@ -317,8 +313,7 @@ bool ExtendsToNash(const MixedBehaviorProfile<double> &p_solution,
   return PolynomialFeasibilitySolver(inequalities).HasSolution(Rectangle<double>(bottoms, tops));
 }
 
-} // namespace Nash
-} // end namespace Gambit
+} // end namespace Gambit::Nash
 
 namespace {
 
@@ -330,8 +325,8 @@ bool ANFNodeProbabilityPoly(const MixedBehaviorProfile<double> &p_solution,
                             int i, int j)
 {
   while (tempnode != p_solution.GetGame()->GetRoot()) {
-    GameAction last_action = tempnode->GetPriorAction();
-    GameInfoset last_infoset = last_action->GetInfoset();
+    const GameAction last_action = tempnode->GetPriorAction();
+    const GameInfoset last_infoset = last_action->GetInfoset();
 
     if (last_infoset->IsChanceInfoset()) {
       node_prob *= static_cast<double>(last_infoset->GetActionProb(last_action));
@@ -350,14 +345,14 @@ bool ANFNodeProbabilityPoly(const MixedBehaviorProfile<double> &p_solution,
       }
     }
     else {
-      int initial_var_no = var_index.at(last_infoset);
-      if (last_action->GetNumber() < last_infoset->NumActions()) {
-        int varno = initial_var_no + last_action->GetNumber();
+      const int initial_var_no = var_index.at(last_infoset);
+      if (last_action->GetNumber() < static_cast<int>(last_infoset->NumActions())) {
+        const int varno = initial_var_no + last_action->GetNumber();
         node_prob *= Polynomial<double>(BehavStratSpace, varno, 1);
       }
       else {
         Polynomial<double> factor(BehavStratSpace, 1.0);
-        for (int k = 1; k < last_infoset->NumActions(); k++) {
+        for (size_t k = 1; k < last_infoset->NumActions(); k++) {
           factor -= Polynomial<double>(BehavStratSpace, initial_var_no + k, 1);
         }
         node_prob *= factor;
@@ -424,8 +419,7 @@ PolynomialSystem<double> ExtendsToANFNashIneqs(const MixedBehaviorProfile<double
 
 } // end anonymous namespace
 
-namespace Gambit {
-namespace Nash {
+namespace Gambit::Nash {
 
 bool ExtendsToAgentNash(const MixedBehaviorProfile<double> &p_solution,
                         const BehaviorSupportProfile &little_supp,
@@ -445,7 +439,7 @@ bool ExtendsToAgentNash(const MixedBehaviorProfile<double> &p_solution,
 
   // We establish the space
   auto BehavStratSpace = std::make_shared<VariableSpace>(num_vars);
-  PolynomialSystem<double> inequalities =
+  const PolynomialSystem<double> inequalities =
       ExtendsToANFNashIneqs(p_solution, BehavStratSpace, little_supp, big_supp, var_index);
 
   // set up the rectangle of search
@@ -456,5 +450,4 @@ bool ExtendsToAgentNash(const MixedBehaviorProfile<double> &p_solution,
   return PolynomialFeasibilitySolver(inequalities).HasSolution(Rectangle<double>(bottoms, tops));
 }
 
-} // namespace Nash
-} // end namespace Gambit
+} // end namespace Gambit::Nash

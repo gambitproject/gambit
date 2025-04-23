@@ -25,8 +25,7 @@
 #include "gambit.h"
 #include "gtracer.h"
 
-namespace Gambit {
-namespace gametracer {
+namespace Gambit::gametracer {
 
 const double BIGFLOAT = 3.0e+28F;
 
@@ -122,7 +121,8 @@ void GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz,
       Index = 1,      // index of the equilibrium we're moving towards
       stepsLeft;      // number of linear steps remaining until we hit the boundary
 
-  int N = A.getNumPlayers(),
+  const int
+      N = A.getNumPlayers(),
       M = A.getNumActions(); // the two most important cvector sizes, stored locally for brevity
   double det,                // determinant of the jacobian
       newV,                  // utility variable
@@ -156,7 +156,8 @@ void GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz,
       err(M), backup(M);
 
   // utility variables for use as intermediate values in computations
-  cmatrix Y1(M, M), Y2(M, M), Y3(M, M);
+  const cmatrix Y1(M, M);
+  const cmatrix Y2(M, M), Y3(M, M);
   cvector G(N), yn1(N), ym1(M), ym2(M), ym3(M);
 
   // INITIALIZATION
@@ -434,5 +435,4 @@ void GNM(gnmgame &A, cvector &g, std::list<cvector> &Eq, int steps, double fuzz,
   }
 }
 
-} // namespace gametracer
-} // end namespace Gambit
+} // end namespace Gambit::gametracer

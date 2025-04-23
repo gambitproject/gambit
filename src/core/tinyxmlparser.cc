@@ -22,9 +22,10 @@ must not be misrepresented as being the original software.
 distribution.
 */
 
-#include "core/tinyxml.h"
 #include <cctype>
 #include <cstddef>
+
+#include "tinyxml.h"
 
 // #define DEBUG_PARSER
 
@@ -366,7 +367,7 @@ const char *TiXmlBase::SkipWhiteSpace(const char *p, TiXmlEncoding encoding)
       return false;
     }
 
-    int c = in->peek();
+    const int c = in->peek();
     // At this scope, we can't get to a document. So fail silently.
     if (!IsWhiteSpace(c) || c <= 0) {
       return true;
@@ -380,7 +381,7 @@ const char *TiXmlBase::SkipWhiteSpace(const char *p, TiXmlEncoding encoding)
 {
   // assert( character > 0 && character < 128 );	// else it won't work in utf-8
   while (in->good()) {
-    int c = in->peek();
+    const int c = in->peek();
     if (c == character) {
       return true;
     }
@@ -422,7 +423,7 @@ const char *TiXmlBase::ReadName(const char *p, TIXML_STRING *name, TiXmlEncoding
 const char *TiXmlBase::GetEntity(const char *p, char *value, int *length, TiXmlEncoding encoding)
 {
   // Presume an entity, and pull it out.
-  TIXML_STRING ent;
+  const TIXML_STRING ent;
   int i;
   *length = 0;
 
@@ -620,9 +621,9 @@ void TiXmlDocument::StreamIn(TIXML_ISTREAM *in, TIXML_STRING *tag)
   }
 
   while (in->good()) {
-    int tagIndex = (int)tag->length();
+    const int tagIndex = (int)tag->length();
     while (in->good() && in->peek() != '>') {
-      int c = in->get();
+      const int c = in->get();
       if (c <= 0) {
         SetError(TIXML_ERROR_EMBEDDED_NULL, nullptr, nullptr, TIXML_ENCODING_UNKNOWN);
         break;
@@ -638,7 +639,7 @@ void TiXmlDocument::StreamIn(TIXML_ISTREAM *in, TIXML_STRING *tag)
 
       if (node) {
         node->StreamIn(in, tag);
-        bool isElement = node->ToElement() != nullptr;
+        const bool isElement = node->ToElement() != nullptr;
         delete node;
         node = nullptr;
 
@@ -852,7 +853,7 @@ void TiXmlElement::StreamIn(TIXML_ISTREAM *in, TIXML_STRING *tag)
   // We're called with some amount of pre-parsing. That is, some of "this"
   // element is in "tag". Go ahead and stream to the closing ">"
   while (in->good()) {
-    int c = in->get();
+    const int c = in->get();
     if (c <= 0) {
       TiXmlDocument *document = GetDocument();
       if (document) {
@@ -903,7 +904,7 @@ void TiXmlElement::StreamIn(TIXML_ISTREAM *in, TIXML_STRING *tag)
         return;
       }
       assert(in->peek() == '<');
-      int tagIndex = (int)tag->length();
+      const int tagIndex = (int)tag->length();
 
       bool closingTag = false;
       bool firstCharFound = false;
@@ -913,7 +914,7 @@ void TiXmlElement::StreamIn(TIXML_ISTREAM *in, TIXML_STRING *tag)
           return;
         }
 
-        int c = in->peek();
+        const int c = in->peek();
         if (c <= 0) {
           TiXmlDocument *document = GetDocument();
           if (document) {
@@ -944,7 +945,7 @@ void TiXmlElement::StreamIn(TIXML_ISTREAM *in, TIXML_STRING *tag)
           return;
         }
 
-        int c = in->get();
+        const int c = in->get();
         if (c <= 0) {
           TiXmlDocument *document = GetDocument();
           if (document) {
@@ -1170,7 +1171,7 @@ const char *TiXmlElement::ReadValue(const char *p, TiXmlParsingData *data, TiXml
 void TiXmlUnknown::StreamIn(TIXML_ISTREAM *in, TIXML_STRING *tag)
 {
   while (in->good()) {
-    int c = in->get();
+    const int c = in->get();
     if (c <= 0) {
       TiXmlDocument *document = GetDocument();
       if (document) {
@@ -1226,7 +1227,7 @@ const char *TiXmlUnknown::Parse(const char *p, TiXmlParsingData *data, TiXmlEnco
 void TiXmlComment::StreamIn(TIXML_ISTREAM *in, TIXML_STRING *tag)
 {
   while (in->good()) {
-    int c = in->get();
+    const int c = in->get();
     if (c <= 0) {
       TiXmlDocument *document = GetDocument();
       if (document) {
@@ -1342,7 +1343,7 @@ const char *TiXmlAttribute::Parse(const char *p, TiXmlParsingData *data, TiXmlEn
 void TiXmlText::StreamIn(TIXML_ISTREAM *in, TIXML_STRING *tag)
 {
   if (cdata) {
-    int c = in->get();
+    const int c = in->get();
     if (c <= 0) {
       TiXmlDocument *document = GetDocument();
       if (document) {
@@ -1360,7 +1361,7 @@ void TiXmlText::StreamIn(TIXML_ISTREAM *in, TIXML_STRING *tag)
   }
   else {
     while (in->good()) {
-      int c = in->peek();
+      const int c = in->peek();
       if (c == '<') {
         return;
       }
@@ -1412,7 +1413,7 @@ const char *TiXmlText::Parse(const char *p, TiXmlParsingData *data, TiXmlEncodin
     return p;
   }
   else {
-    bool ignoreWhite = true;
+    const bool ignoreWhite = true;
 
     const char *end = "<";
     p = ReadText(p, &value, ignoreWhite, end, false, encoding);
@@ -1427,7 +1428,7 @@ const char *TiXmlText::Parse(const char *p, TiXmlParsingData *data, TiXmlEncodin
 void TiXmlDeclaration::StreamIn(TIXML_ISTREAM *in, TIXML_STRING *tag)
 {
   while (in->good()) {
-    int c = in->get();
+    const int c = in->get();
     if (c <= 0) {
       TiXmlDocument *document = GetDocument();
       if (document) {
@@ -1501,7 +1502,7 @@ const char *TiXmlDeclaration::Parse(const char *p, TiXmlParsingData *data, TiXml
 
 bool TiXmlText::Blank() const
 {
-  for (char c : value) {
+  for (const char c : value) {
     if (!IsWhiteSpace(c)) {
       return false;
     }

@@ -23,6 +23,8 @@
 #ifndef GAMBIT_GAMES_STRATPURE_H
 #define GAMBIT_GAMES_STRATPURE_H
 
+#include <memory>
+
 #include "game.h"
 
 namespace Gambit {

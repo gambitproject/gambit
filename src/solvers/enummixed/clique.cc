@@ -23,13 +23,12 @@
 #include "clique.h"
 #include "gambit.h"
 
-namespace Gambit {
-namespace Nash {
+namespace Gambit::Nash {
 
 CliqueEnumerator::CliqueEnumerator(Array<Edge> &edgelist, int maxinp1, int maxinp2)
   : firstedge(std::min(maxinp1, maxinp2) + 1), maxinp1(maxinp1), maxinp2(maxinp2)
 {
-  int numco = getconnco(firstedge, edgelist);
+  const int numco = getconnco(firstedge, edgelist);
   workonco(numco, firstedge, edgelist);
 }
 
@@ -305,7 +304,7 @@ void CliqueEnumerator::findfixpoint(int stk[], // stack
        building up stk[tmplist+count] containing the
        disconnected points */
     for (j = scother; (j < ecother) && (count < *minnod); j++) {
-      int k = stk[j];
+      const int k = stk[j];
       if (!(binspect1 ? connected[p][k] : connected[k][p])) {
         stk[(*tmplist) + count] = k;
         count++;
@@ -416,7 +415,7 @@ int CliqueEnumerator::getconnco(Array<int> &firstedge, Array<Edge> &edgelist)
    zero if  e  is index to the last edge
 */
 {
-  int numco, newedge;
+  int numco;
   Array<int> co1(0, maxinp1 - 1), co2(0, maxinp2 - 1); // components of node1,2
   int i, j;                                            // indices to left and right nodes
 
@@ -429,7 +428,7 @@ int CliqueEnumerator::getconnco(Array<int> &firstedge, Array<Edge> &edgelist)
   }
 
   numco = 0;
-  for (newedge = 1; newedge <= edgelist.size(); newedge++) {
+  for (size_t newedge = 1; newedge <= edgelist.size(); newedge++) {
     i = edgelist[newedge].node1;
     j = edgelist[newedge].node2;
 
@@ -596,5 +595,4 @@ void CliqueEnumerator::workonco(int numco, Array<int> &firstedge, Array<Edge> &e
   }
 }
 
-} // namespace Nash
-} // end namespace Gambit
+} // end namespace Gambit::Nash

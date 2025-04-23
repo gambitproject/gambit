@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/matrix.imp
+// FILE: src/core/matrix.imp
 // Implementation of matrix method functions
 //
 // This program is free software; you can redistribute it and/or modify
@@ -86,7 +86,7 @@ template <class T> Matrix<T> Matrix<T>::operator+(const Matrix<T> &M) const
     throw DimensionException();
   }
 
-  Matrix<T> tmp(this->minrow, this->maxrow, this->mincol, this->maxcol);
+  const Matrix<T> tmp(this->minrow, this->maxrow, this->mincol, this->maxcol);
   for (int i = this->minrow; i <= this->maxrow; i++) {
     T *src1 = this->data[i] + this->mincol;
     T *src2 = M.data[i] + this->mincol;
@@ -106,7 +106,7 @@ template <class T> Matrix<T> Matrix<T>::operator-(const Matrix<T> &M) const
     throw DimensionException();
   }
 
-  Matrix<T> tmp(this->minrow, this->maxrow, this->mincol, this->maxcol);
+  const Matrix<T> tmp(this->minrow, this->maxrow, this->mincol, this->maxcol);
   for (int i = this->minrow; i <= this->maxrow; i++) {
     T *src1 = this->data[i] + this->mincol;
     T *src2 = M.data[i] + this->mincol;
@@ -240,7 +240,7 @@ template <class T> Vector<T> operator*(const Vector<T> &v, const Matrix<T> &M)
 
 template <class T> Matrix<T> Matrix<T>::operator*(const T &s) const
 {
-  Matrix<T> tmp(this->minrow, this->maxrow, this->mincol, this->maxcol);
+  const Matrix<T> tmp(this->minrow, this->maxrow, this->mincol, this->maxcol);
   for (int i = this->minrow; i <= this->maxrow; i++) {
     T *src = this->data[i] + this->mincol;
     T *dst = tmp.data[i] + this->mincol;
@@ -253,26 +253,6 @@ template <class T> Matrix<T> Matrix<T>::operator*(const T &s) const
   return tmp;
 }
 
-// in-place multiplication by square matrix
-template <class T> Matrix<T> &Matrix<T>::operator*=(const Matrix<T> &M)
-{
-  if (this->mincol != M.minrow || this->maxcol != M.maxrow) {
-    throw DimensionException();
-  }
-  if (M.minrow != M.mincol || M.maxrow != M.maxcol) {
-    throw DimensionException();
-  }
-
-  Vector<T> row(this->mincol, this->maxcol);
-  Vector<T> result(this->mincol, this->maxcol);
-  for (int i = this->minrow; i <= this->maxrow; i++) {
-    this->GetRow(i, row);
-    M.RMultiply(row, result);
-    this->SetRow(i, result);
-  }
-  return (*this);
-}
-
 template <class T> Matrix<T> &Matrix<T>::operator*=(const T &s)
 {
   for (int i = this->minrow; i <= this->maxrow; i++) {
@@ -281,7 +261,6 @@ template <class T> Matrix<T> &Matrix<T>::operator*=(const T &s)
     while (j--) {
       *(dst++) *= s;
     }
-    // assert((dst - 1) == this->data[i] + this->maxcol);
   }
   return (*this);
 }
@@ -292,7 +271,7 @@ template <class T> Matrix<T> Matrix<T>::operator/(const T &s) const
     throw ZeroDivideException();
   }
 
-  Matrix<T> tmp(this->minrow, this->maxrow, this->mincol, this->maxcol);
+  const Matrix<T> tmp(this->minrow, this->maxrow, this->mincol, this->maxcol);
   for (int i = this->minrow; i <= this->maxrow; i++) {
     T *src = this->data[i] + this->mincol;
     T *dst = tmp.data[i] + this->mincol;
@@ -300,7 +279,6 @@ template <class T> Matrix<T> Matrix<T>::operator/(const T &s) const
     while (j--) {
       *(dst++) = *(src++) / s;
     }
-    // assert((src - 1) == this->data[i] + this->maxcol);
   }
   return tmp;
 }
@@ -317,33 +295,8 @@ template <class T> Matrix<T> &Matrix<T>::operator/=(const T &s)
     while (j--) {
       *(dst++) /= s;
     }
-    // assert((dst - 1) == this->data[i] + this->maxcol);
   }
   return (*this);
-}
-
-//-------------------------------------------------------------------------
-//                  Matrix<T>: Kronecker Product
-//-------------------------------------------------------------------------
-
-template <class T> Matrix<T> Matrix<T>::operator&(const Matrix<T> &M) const
-{
-  Matrix<T> tmp(1, (this->maxrow - this->minrow + 1) * (M.maxrow - M.minrow + 1), 1,
-                (this->maxcol - this->mincol + 1) * (M.maxcol - M.mincol + 1));
-
-  for (int i = 0; i <= this->maxrow - this->minrow; i++) {
-    for (int j = 1; j <= M.maxrow - M.minrow + 1; j++) {
-      for (int k = 0; k <= this->maxcol - this->mincol; k++) {
-        for (int l = 1; l <= M.maxcol - M.mincol + 1; l++) {
-
-          tmp((M.maxrow - M.minrow + 1) * i + j, (M.maxcol - M.mincol + 1) * k + l) =
-              (*this)(i + this->minrow, k + this->mincol) * M(j + M.minrow - 1, l + M.mincol - 1);
-        }
-      }
-    }
-  }
-
-  return tmp;
 }
 
 //-------------------------------------------------------------------------

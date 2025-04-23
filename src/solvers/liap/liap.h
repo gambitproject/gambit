@@ -25,8 +25,7 @@
 
 #include "games/nash.h"
 
-namespace Gambit {
-namespace Nash {
+namespace Gambit::Nash {
 
 List<MixedBehaviorProfile<double>>
 LiapBehaviorSolve(const MixedBehaviorProfile<double> &p_start, double p_maxregret, int p_maxitsN,
@@ -36,7 +35,6 @@ List<MixedStrategyProfile<double>>
 LiapStrategySolve(const MixedStrategyProfile<double> &p_start, double p_maxregret, int p_maxitsN,
                   StrategyCallbackType<double> p_callback = NullStrategyCallback<double>);
 
-} // namespace Nash
-} // namespace Gambit
+} // namespace Gambit::Nash
 
 #endif // GAMBIT_NASH_LIAP_H

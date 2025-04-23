@@ -190,7 +190,7 @@ int main(int argc, char *argv[])
   }
 
   try {
-    Gambit::Game game = Gambit::ReadGame(*input_stream);
+    const Gambit::Game game = Gambit::ReadGame(*input_stream);
     if (!game->IsPerfectRecall()) {
       throw Gambit::UndefinedException(
           "Computing equilibria of games with imperfect recall is not supported.");

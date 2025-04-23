@@ -25,8 +25,7 @@
 
 #include "games/nash.h"
 
-namespace Gambit {
-namespace Nash {
+namespace Gambit::Nash {
 
 List<MixedStrategyProfile<double>>
 IPAStrategySolve(const Game &p_game,
@@ -36,7 +35,6 @@ List<MixedStrategyProfile<double>>
 IPAStrategySolve(const MixedStrategyProfile<double> &p_pert,
                  StrategyCallbackType<double> p_callback = NullStrategyCallback<double>);
 
-} // namespace Nash
-} // namespace Gambit
+} // namespace Gambit::Nash
 
 #endif // GAMBIT_NASH_IPA_H

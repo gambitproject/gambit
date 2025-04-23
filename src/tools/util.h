@@ -187,12 +187,8 @@ void BehavStrategyDetailRenderer<T>::Render(const MixedBehaviorProfile<T> &p_pro
     m_stream << "Infoset    Action     Prob          Value\n";
     m_stream << "-------    -------    -----------   -----------\n";
 
-    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      GameInfoset infoset = player->GetInfoset(iset);
-
-      for (int act = 1; act <= infoset->NumActions(); act++) {
-        GameAction action = infoset->GetAction(act);
-
+    for (const auto &infoset : player->GetInfosets()) {
+      for (const auto &action : infoset->GetActions()) {
         if (!infoset->GetLabel().empty()) {
           m_stream << std::setw(7) << infoset->GetLabel() << "    ";
         }
@@ -209,8 +205,7 @@ void BehavStrategyDetailRenderer<T>::Render(const MixedBehaviorProfile<T> &p_pro
         m_stream << lexical_cast<std::string>(p_profile[action], m_numDecimals);
         m_stream << "   ";
         m_stream << std::setw(11);
-        m_stream << lexical_cast<std::string>(p_profile.GetPayoff(infoset->GetAction(act)),
-                                              m_numDecimals);
+        m_stream << lexical_cast<std::string>(p_profile.GetPayoff(action), m_numDecimals);
         m_stream << std::endl;
       }
     }
@@ -219,11 +214,8 @@ void BehavStrategyDetailRenderer<T>::Render(const MixedBehaviorProfile<T> &p_pro
     m_stream << "Infoset    Node       Belief        Prob\n";
     m_stream << "-------    -------    -----------   -----------\n";
 
-    for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-      GameInfoset infoset = player->GetInfoset(iset);
-
-      for (int n = 1; n <= infoset->NumMembers(); n++) {
-        GameNode node = infoset->GetMember(n);
+    for (const auto &infoset : player->GetInfosets()) {
+      for (const auto &node : infoset->GetMembers()) {
         if (!infoset->GetLabel().empty()) {
           m_stream << std::setw(7) << infoset->GetLabel() << "    ";
         }
@@ -237,12 +229,10 @@ void BehavStrategyDetailRenderer<T>::Render(const MixedBehaviorProfile<T> &p_pro
           m_stream << std::setw(7) << node->GetNumber() << "   ";
         }
         m_stream << std::setw(11);
-        m_stream << lexical_cast<std::string>(p_profile.GetBeliefProb(infoset->GetMember(n)),
-                                              m_numDecimals);
+        m_stream << lexical_cast<std::string>(p_profile.GetBeliefProb(node), m_numDecimals);
         m_stream << "   ";
         m_stream << std::setw(11);
-        m_stream << lexical_cast<std::string>(p_profile.GetRealizProb(infoset->GetMember(n)),
-                                              m_numDecimals);
+        m_stream << lexical_cast<std::string>(p_profile.GetRealizProb(node), m_numDecimals);
         m_stream << std::endl;
       }
     }

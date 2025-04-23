@@ -203,7 +203,7 @@ int main(int argc, char *argv[])
   }
 
   try {
-    Game game = ReadGame(*input_stream);
+    const Game game = ReadGame(*input_stream);
     List<MixedStrategyProfile<Rational>> starts;
     if (!startFile.empty()) {
       std::ifstream startPoints(startFile.c_str());
@@ -214,9 +214,9 @@ int main(int argc, char *argv[])
     }
     else {
       starts.push_back(game->NewMixedStrategyProfile(Rational(0)));
-      starts[1] = Rational(0);
-      for (int pl = 1; pl <= game->NumPlayers(); pl++) {
-        starts[1][game->GetPlayer(pl)->GetStrategies()[1]] = Rational(1);
+      starts.back() = Rational(0);
+      for (const auto &player : game->GetPlayers()) {
+        starts.back()[player->GetStrategies().back()] = Rational(1);
       }
     }
     for (auto start : starts) {

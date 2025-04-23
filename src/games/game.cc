@@ -21,18 +21,16 @@
 //
 
 #include <iostream>
-#include <algorithm>
 #include <numeric>
 #include <random>
 
 #include "gambit.h"
 #include "writer.h"
 
-// The references to the table and tree representations violate the logic
+// The references to the tree representations violate the logic
 // of separating implementation types.  This will be fixed when we move
 // editing operations into the game itself instead of in the member-object
 // classes.
-#include "gametable.h"
 #include "gametree.h"
 
 namespace Gambit {
@@ -49,38 +47,14 @@ GameOutcomeRep::GameOutcomeRep(GameRep *p_game, int p_number) : m_game(p_game), 
 }
 
 //========================================================================
-//                      class GameStrategyRep
-//========================================================================
-
-void GameStrategyRep::DeleteStrategy()
-{
-  if (m_player->GetGame()->IsTree()) {
-    throw UndefinedException();
-  }
-  if (m_player->NumStrategies() == 1) {
-    return;
-  }
-
-  m_player->GetGame()->IncrementVersion();
-  m_player->m_strategies.erase(
-      std::find(m_player->m_strategies.begin(), m_player->m_strategies.end(), this));
-  for (int st = 1; st <= m_player->m_strategies.size(); st++) {
-    m_player->m_strategies[st]->m_number = st;
-  }
-  // m_player->m_game->RebuildTable();
-  this->Invalidate();
-}
-
-//========================================================================
 //                       class GamePlayerRep
 //========================================================================
 
 GamePlayerRep::GamePlayerRep(GameRep *p_game, int p_id, int p_strats)
-  : m_game(p_game), m_number(p_id), m_strategies(p_strats)
+  : m_game(p_game), m_number(p_id)
 {
   for (int j = 1; j <= p_strats; j++) {
-    m_strategies[j] = new GameStrategyRep(this);
-    m_strategies[j]->m_number = j;
+    m_strategies.push_back(new GameStrategyRep(this, j, ""));
   }
 }
 
@@ -99,30 +73,15 @@ Array<GameStrategy> GamePlayerRep::GetStrategies() const
   m_game->BuildComputedValues();
   Array<GameStrategy> ret(m_strategies.size());
   std::transform(m_strategies.cbegin(), m_strategies.cend(), ret.begin(),
-                 [](GameStrategyRep *s) -> GameStrategy { return s; });
+                 [](const GameStrategyRep *s) -> GameStrategy { return s; });
   return ret;
-}
-
-GameStrategy GamePlayerRep::NewStrategy()
-{
-  if (m_game->IsTree()) {
-    throw UndefinedException();
-  }
-
-  m_game->IncrementVersion();
-  auto *strategy = new GameStrategyRep(this);
-  m_strategies.push_back(strategy);
-  strategy->m_number = m_strategies.size();
-  strategy->m_offset = -1; // this flags this action as new
-  dynamic_cast<GameTableRep *>(m_game)->RebuildTable();
-  return strategy;
 }
 
 void GamePlayerRep::MakeStrategy()
 {
   Array<int> c(NumInfosets());
 
-  for (int i = 1; i <= NumInfosets(); i++) {
+  for (size_t i = 1; i <= NumInfosets(); i++) {
     if (m_infosets[i - 1]->flag == 1) {
       c[i] = m_infosets[i - 1]->whichbranch;
     }
@@ -131,15 +90,12 @@ void GamePlayerRep::MakeStrategy()
     }
   }
 
-  auto *strategy = new GameStrategyRep(this);
-  m_strategies.push_back(strategy);
-  strategy->m_number = m_strategies.size();
+  auto *strategy = new GameStrategyRep(this, m_strategies.size() + 1, "");
   strategy->m_behav = c;
-  strategy->m_label = "";
 
   // We generate a default labeling -- probably should be changed in future
   if (!strategy->m_behav.empty()) {
-    for (int iset = 1; iset <= strategy->m_behav.size(); iset++) {
+    for (size_t iset = 1; iset <= strategy->m_behav.size(); iset++) {
       if (strategy->m_behav[iset] > 0) {
         strategy->m_label += lexical_cast<std::string>(strategy->m_behav[iset]);
       }
@@ -151,12 +107,12 @@ void GamePlayerRep::MakeStrategy()
   else {
     strategy->m_label = "*";
   }
+  m_strategies.push_back(strategy);
 }
 
-void GamePlayerRep::MakeReducedStrats(GameTreeNodeRep *n, GameTreeNodeRep *nn)
+void GamePlayerRep::MakeReducedStrats(GameNodeRep *n, GameNodeRep *nn)
 {
-  int i;
-  GameTreeNodeRep *m, *mm;
+  GameNodeRep *m;
 
   if (!n->GetParent()) {
     n->ptr = nullptr;
@@ -167,8 +123,8 @@ void GamePlayerRep::MakeReducedStrats(GameTreeNodeRep *n, GameTreeNodeRep *nn)
       if (n->m_infoset->flag == 0) {
         // we haven't visited this infoset before
         n->m_infoset->flag = 1;
-        for (i = 1; i <= n->NumChildren(); i++) {
-          GameTreeNodeRep *m = n->m_children[i];
+        for (size_t i = 1; i <= n->NumChildren(); i++) {
+          GameNodeRep *m = n->m_children[i];
           n->whichbranch = m;
           n->m_infoset->whichbranch = i;
           MakeReducedStrats(m, nn);
@@ -198,14 +154,14 @@ void GamePlayerRep::MakeReducedStrats(GameTreeNodeRep *n, GameTreeNodeRep *nn)
         m = nullptr;
       }
       else {
-        m = dynamic_cast<GameTreeNodeRep *>(nn->GetNextSibling().operator->());
+        m = nn->GetNextSibling();
       }
       if (m || nn->m_parent->ptr == nullptr) {
         break;
       }
     }
     if (m) {
-      mm = m->m_parent->whichbranch;
+      GameNodeRep *mm = m->m_parent->whichbranch;
       m->m_parent->whichbranch = m;
       MakeReducedStrats(m, m);
       m->m_parent->whichbranch = mm;
@@ -225,18 +181,18 @@ Array<GameInfoset> GamePlayerRep::GetInfosets() const
 {
   Array<GameInfoset> ret(m_infosets.size());
   std::transform(m_infosets.cbegin(), m_infosets.cend(), ret.begin(),
-                 [](GameTreeInfosetRep *s) -> GameInfoset { return s; });
+                 [](const GameInfosetRep *s) -> GameInfoset { return s; });
   return ret;
 }
 
-int GamePlayerRep::NumSequences() const
+size_t GamePlayerRep::NumSequences() const
 {
   if (!m_game->IsTree()) {
     throw UndefinedException();
   }
   return std::accumulate(
       m_infosets.cbegin(), m_infosets.cend(), 1,
-      [](int ct, GameTreeInfosetRep *s) -> int { return ct + s->m_actions.size(); });
+      [](int ct, const GameInfosetRep *s) -> int { return ct + s->m_actions.size(); });
 }
 
 //========================================================================
@@ -246,7 +202,7 @@ int GamePlayerRep::NumSequences() const
 Array<GamePlayer> GameRep::GetPlayers() const
 {
   Array<GamePlayer> ret(NumPlayers());
-  for (int pl = 1; pl <= NumPlayers(); pl++) {
+  for (size_t pl = 1; pl <= NumPlayers(); pl++) {
     ret[pl] = GetPlayer(pl);
   }
   return ret;
@@ -345,11 +301,11 @@ template <class T> MixedStrategyProfileRep<T> *MixedStrategyProfileRep<T>::Norma
 {
   auto norm = Copy();
   for (auto player : m_support.GetGame()->GetPlayers()) {
-    T sum = (T)0;
+    T sum = static_cast<T>(0);
     for (auto strategy : m_support.GetStrategies(player)) {
       sum += (*this)[strategy];
     }
-    if (sum == (T)0) {
+    if (sum == static_cast<T>(0)) {
       continue;
     }
     for (auto strategy : m_support.GetStrategies(player)) {
@@ -361,7 +317,7 @@ template <class T> MixedStrategyProfileRep<T> *MixedStrategyProfileRep<T>::Norma
 
 template <class T> T MixedStrategyProfileRep<T>::GetRegret(const GameStrategy &p_strategy) const
 {
-  GamePlayer player = p_strategy->GetPlayer();
+  const GamePlayer player = p_strategy->GetPlayer();
   T payoff = GetPayoffDeriv(player->GetNumber(), p_strategy);
   T brpayoff = payoff;
   for (auto strategy : player->GetStrategies()) {

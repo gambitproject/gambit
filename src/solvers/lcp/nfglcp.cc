@@ -20,25 +20,22 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include <iostream>
-
 #include "gambit.h"
 #include "solvers/linalg/lhtab.h"
 #include "solvers/lcp/lcp.h"
 
-namespace Gambit {
-namespace Nash {
+namespace Gambit::Nash {
 
 // Anonymous namespace to encapsulate local utility functions
 
 namespace {
 template <class T> Matrix<T> Make_A1(const Game &p_game)
 {
-  int n1 = p_game->GetPlayer(1)->GetStrategies().size();
-  int n2 = p_game->GetPlayer(2)->GetStrategies().size();
+  const int n1 = p_game->GetPlayer(1)->GetStrategies().size();
+  const int n2 = p_game->GetPlayer(2)->GetStrategies().size();
   Matrix<T> A1(1, n1, n1 + 1, n1 + n2);
 
-  PureStrategyProfile profile = p_game->NewPureStrategyProfile();
+  const PureStrategyProfile profile = p_game->NewPureStrategyProfile();
 
   Rational min = p_game->GetMinPayoff();
   if (min > Rational(0)) {
@@ -51,7 +48,7 @@ template <class T> Matrix<T> Make_A1(const Game &p_game)
     max = Rational(0);
   }
 
-  Rational fac(1, max - min);
+  const Rational fac(1, max - min);
 
   for (int i = 1; i <= n1; i++) {
     profile->SetStrategy(p_game->GetPlayer(1)->GetStrategies()[i]);
@@ -65,11 +62,11 @@ template <class T> Matrix<T> Make_A1(const Game &p_game)
 
 template <class T> Matrix<T> Make_A2(const Game &p_game)
 {
-  int n1 = p_game->GetPlayer(1)->GetStrategies().size();
-  int n2 = p_game->GetPlayer(2)->GetStrategies().size();
+  const int n1 = p_game->GetPlayer(1)->GetStrategies().size();
+  const int n2 = p_game->GetPlayer(2)->GetStrategies().size();
   Matrix<T> A2(n1 + 1, n1 + n2, 1, n1);
 
-  PureStrategyProfile profile = p_game->NewPureStrategyProfile();
+  const PureStrategyProfile profile = p_game->NewPureStrategyProfile();
 
   Rational min = p_game->GetMinPayoff();
   if (min > Rational(0)) {
@@ -82,7 +79,7 @@ template <class T> Matrix<T> Make_A2(const Game &p_game)
     max = Rational(0);
   }
 
-  Rational fac(1, max - min);
+  const Rational fac(1, max - min);
 
   for (int i = 1; i <= n1; i++) {
     profile->SetStrategy(p_game->GetPlayer(1)->GetStrategies()[i]);
@@ -155,15 +152,15 @@ template <class T>
 bool NashLcpStrategySolver<T>::OnBFS(const Game &p_game, linalg::LHTableau<T> &p_tableau,
                                      Solution &p_solution) const
 {
-  Gambit::linalg::BFS<T> cbfs(p_tableau.GetBFS());
+  const Gambit::linalg::BFS<T> cbfs(p_tableau.GetBFS());
   if (p_solution.Contains(cbfs)) {
     return false;
   }
   p_solution.push_back(cbfs);
 
   MixedStrategyProfile<T> profile(p_game->NewMixedStrategyProfile(static_cast<T>(0.0)));
-  int n1 = p_game->GetPlayer(1)->GetStrategies().size();
-  int n2 = p_game->GetPlayer(2)->GetStrategies().size();
+  const int n1 = p_game->GetPlayer(1)->GetStrategies().size();
+  const int n2 = p_game->GetPlayer(2)->GetStrategies().size();
   T sum = (T)0;
 
   for (int j = 1; j <= n1; j++) {
@@ -177,7 +174,7 @@ bool NashLcpStrategySolver<T>::OnBFS(const Game &p_game, linalg::LHTableau<T> &p
   }
 
   for (int j = 1; j <= n1; j++) {
-    GameStrategy strategy = p_game->GetPlayer(1)->GetStrategies()[j];
+    const GameStrategy strategy = p_game->GetPlayer(1)->GetStrategies()[j];
     if (cbfs.count(j)) {
       profile[strategy] = cbfs[j] / sum;
     }
@@ -194,7 +191,7 @@ bool NashLcpStrategySolver<T>::OnBFS(const Game &p_game, linalg::LHTableau<T> &p
   }
 
   for (int j = 1; j <= n2; j++) {
-    GameStrategy strategy = p_game->GetPlayer(2)->GetStrategies()[j];
+    const GameStrategy strategy = p_game->GetPlayer(2)->GetStrategies()[j];
     if (cbfs.count(n1 + j)) {
       profile[strategy] = cbfs[n1 + j] / sum;
     }
@@ -256,10 +253,10 @@ List<MixedStrategyProfile<T>> NashLcpStrategySolver<T>::Solve(const Game &p_game
   Solution solution;
 
   try {
-    Matrix<T> A1 = Make_A1<T>(p_game);
-    Vector<T> b1 = Make_b1<T>(p_game);
-    Matrix<T> A2 = Make_A2<T>(p_game);
-    Vector<T> b2 = Make_b2<T>(p_game);
+    const Matrix<T> A1 = Make_A1<T>(p_game);
+    const Vector<T> b1 = Make_b1<T>(p_game);
+    const Matrix<T> A2 = Make_A2<T>(p_game);
+    const Vector<T> b2 = Make_b2<T>(p_game);
     linalg::LHTableau<T> B(A1, A2, b1, b2);
 
     if (m_stopAfter != 1) {
@@ -292,5 +289,4 @@ template List<MixedStrategyProfile<double>> LcpStrategySolve(const Game &, int, 
 template List<MixedStrategyProfile<Rational>> LcpStrategySolve(const Game &, int, int,
                                                                StrategyCallbackType<Rational>);
 
-} // namespace Nash
-} // end namespace Gambit
+} // end namespace Gambit::Nash

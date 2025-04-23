@@ -89,13 +89,19 @@ public:
   /// Returns the root node of the game
   GameNode GetRoot() const override { throw UndefinedException(); }
   /// Returns the number of nodes in the game
-  int NumNodes() const override { throw UndefinedException(); }
+  size_t NumNodes() const override { throw UndefinedException(); }
   //@}
 
   /// @name Outcomes
   //@{
   /// Deletes the specified outcome from the game
   void DeleteOutcome(const GameOutcome &) override;
+  //@}
+
+  /// @name Strategies
+  //@{
+  GameStrategy NewStrategy(const GamePlayer &, const std::string &) override;
+  void DeleteStrategy(const GameStrategy &p_strategy) override;
   //@}
 
   /// @name Writing data files

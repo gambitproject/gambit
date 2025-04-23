@@ -51,8 +51,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, const Gambit::GameNode &p_nod
     m_infoset->Append(_("New information set"));
     if (p_node->GetInfoset()->IsChanceInfoset()) {
       int selection = 0;
-      for (int iset = 1; iset <= p_node->GetGame()->GetChance()->NumInfosets(); iset++) {
-        Gambit::GameInfoset infoset = p_node->GetGame()->GetChance()->GetInfoset(iset);
+      for (const auto &infoset : p_node->GetGame()->GetChance()->GetInfosets()) {
         if (infoset->NumActions() == p_node->NumChildren()) {
           m_infosetList.push_back(infoset);
           m_infoset->Append(wxString::Format(_("Chance infoset %d"), infoset->GetNumber()));
@@ -65,13 +64,12 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, const Gambit::GameNode &p_nod
     }
     else {
       int selection = 0;
-      for (int pl = 1; pl <= p_node->GetGame()->NumPlayers(); pl++) {
-        Gambit::GamePlayer player = p_node->GetGame()->GetPlayer(pl);
-        for (int iset = 1; iset <= player->NumInfosets(); iset++) {
-          Gambit::GameInfoset infoset = player->GetInfoset(iset);
+      for (const auto &player : p_node->GetGame()->GetPlayers()) {
+        for (const auto &infoset : player->GetInfosets()) {
           if (infoset->NumActions() == p_node->NumChildren()) {
             m_infosetList.push_back(infoset);
-            m_infoset->Append(wxString::Format(_("Player %d, Infoset %d"), pl, iset));
+            m_infoset->Append(wxString::Format(_("Player %d, Infoset %d"), player->GetNumber(),
+                                               infoset->GetNumber()));
             if (infoset == p_node->GetInfoset()) {
               selection = m_infosetList.size();
             }
@@ -106,9 +104,9 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, const Gambit::GameNode &p_nod
   m_outcome = new wxChoice(this, wxID_ANY);
   m_outcome->Append(_("(null)"));
   m_outcome->SetSelection(0);
-  Gambit::Game efg = p_node->GetGame();
-  for (int outc = 1; outc <= efg->NumOutcomes(); outc++) {
-    Gambit::GameOutcome outcome = efg->GetOutcome(outc);
+  const Gambit::Game efg = p_node->GetGame();
+  for (size_t outc = 1; outc <= efg->NumOutcomes(); outc++) {
+    const Gambit::GameOutcome outcome = efg->GetOutcome(outc);
     std::string item = Gambit::lexical_cast<std::string>(outc) + ": " + outcome->GetLabel();
     if (item.empty()) {
       item = "Outcome" + Gambit::lexical_cast<std::string>(outc);

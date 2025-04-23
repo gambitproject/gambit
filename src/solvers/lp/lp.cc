@@ -59,7 +59,7 @@ template <class T> GameData<T>::GameData(const Game &p_game) : minpay(p_game->Ge
 template <class T>
 void GameData<T>::FillTableau(Matrix<T> &A, const GameNode &n, const T &prob, int s1, int s2)
 {
-  GameOutcome outcome = n->GetOutcome();
+  const GameOutcome outcome = n->GetOutcome();
   if (outcome) {
     A(s1, s2) +=
         Rational(prob) * (outcome->GetPayoff<Rational>(n->GetGame()->GetPlayer(1)) - minpay);
@@ -67,7 +67,7 @@ void GameData<T>::FillTableau(Matrix<T> &A, const GameNode &n, const T &prob, in
   if (n->IsTerminal()) {
     return;
   }
-  GameInfoset infoset = n->GetInfoset();
+  const GameInfoset infoset = n->GetInfoset();
   if (n->GetPlayer()->IsChance()) {
     for (const auto &action : infoset->GetActions()) {
       FillTableau(A, n->GetChild(action), prob * static_cast<T>(infoset->GetActionProb(action)),
@@ -75,7 +75,7 @@ void GameData<T>::FillTableau(Matrix<T> &A, const GameNode &n, const T &prob, in
     }
   }
   else if (n->GetPlayer()->GetNumber() == 1) {
-    int col = ns2 + infoset->GetNumber() + 1;
+    const int col = ns2 + infoset->GetNumber() + 1;
     int snew = infosetOffset.at(infoset);
     A(s1, col) = static_cast<T>(1);
     for (const auto &child : n->GetChildren()) {
@@ -84,7 +84,7 @@ void GameData<T>::FillTableau(Matrix<T> &A, const GameNode &n, const T &prob, in
     }
   }
   else {
-    int row = ns1 + infoset->GetNumber() + 1;
+    const int row = ns1 + infoset->GetNumber() + 1;
     int snew = infosetOffset.at(infoset);
     A(row, s2) = static_cast<T>(-1);
     for (const auto &child : n->GetChildren()) {
@@ -150,13 +150,13 @@ template <class T>
 void SolveLP(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c, int nequals,
              Array<T> &p_primal, Array<T> &p_dual)
 {
-  linalg::LPSolve<T> LP(A, b, c, nequals);
+  const linalg::LPSolve<T> LP(A, b, c, nequals);
   const auto &cbfs = LP.OptimumBFS();
 
-  for (int i = 1; i <= A.NumColumns(); i++) {
+  for (size_t i = 1; i <= A.NumColumns(); i++) {
     p_primal[i] = (cbfs.count(i)) ? cbfs[i] : static_cast<T>(0);
   }
-  for (int i = 1; i <= A.NumRows(); i++) {
+  for (size_t i = 1; i <= A.NumRows(); i++) {
     p_dual[i] = (cbfs.count(-i)) ? cbfs[-i] : static_cast<T>(0);
   }
 }
@@ -225,15 +225,15 @@ List<MixedStrategyProfile<T>> LpStrategySolve(const Game &p_game,
         "Computing equilibria of games with imperfect recall is not supported.");
   }
 
-  int m = p_game->GetPlayer(1)->GetStrategies().size();
-  int k = p_game->GetPlayer(2)->GetStrategies().size();
+  const int m = p_game->GetPlayer(1)->GetStrategies().size();
+  const int k = p_game->GetPlayer(2)->GetStrategies().size();
 
   Matrix<T> A(1, k + 1, 1, m + 1);
   Vector<T> b(1, k + 1);
   Vector<T> c(1, m + 1);
-  PureStrategyProfile profile = p_game->NewPureStrategyProfile();
+  const PureStrategyProfile profile = p_game->NewPureStrategyProfile();
 
-  Rational minpay = p_game->GetMinPayoff() - Rational(1);
+  const Rational minpay = p_game->GetMinPayoff() - Rational(1);
 
   for (int i = 1; i <= k; i++) {
     profile->SetStrategy(p_game->GetPlayer(2)->GetStrategies()[i]);

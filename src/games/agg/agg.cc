@@ -38,12 +38,11 @@ AGG::AGG(int numPlayers, std::vector<int> &_actions, int numANodes, int _numPNod
          vector<projtype> &projTypes, vector<vector<aggdistrib>> &projS,
          vector<vector<vector<config>>> &proj, vector<vector<projtype>> &projF,
          vector<vector<vector<int>>> &Po, vector<aggdistrib> &P, vector<aggpayoff> &_payoffs)
-  : numPlayers(numPlayers), totalActions(0), maxActions(0), numActionNodes(numANodes),
-    numPNodes(_numPNodes), actionSets(_actionSets), neighbors(neighb), projectionTypes(projTypes),
-    payoffs(_payoffs), projection(proj), projectedStrat(projS), fullProjectedStrat(projS),
-    projFunctions(projF), Porder(Po), Pr(P), isPure(numANodes, true),
-    node2Action(numANodes, vector<int>(numPlayers)), cache(numPlayers + 1),
-    player2Class(numPlayers), kSymStrategyOffset(1, 0)
+  : numPlayers(numPlayers), numActionNodes(numANodes), numPNodes(_numPNodes),
+    actionSets(_actionSets), neighbors(neighb), projectionTypes(projTypes), payoffs(_payoffs),
+    projection(proj), projectedStrat(projS), fullProjectedStrat(projS), projFunctions(projF),
+    Porder(Po), Pr(P), isPure(numANodes, true), node2Action(numANodes, vector<int>(numPlayers)),
+    cache(numPlayers + 1), player2Class(numPlayers), kSymStrategyOffset(1, 0)
 
 {
   // actions
@@ -97,7 +96,7 @@ AGG::AGG(int numPlayers, std::vector<int> &_actions, int numANodes, int _numPNod
   // set isPure
   for (int i = 0; i < numANodes; i++) {
     if (neighb.at(i).size() > 0) {
-      int maxNode = *(max_element(neighb.at(i).begin(), neighb.at(i).end()));
+      const int maxNode = *(max_element(neighb.at(i).begin(), neighb.at(i).end()));
       isPure[i] = (maxNode < numANodes);
     }
   }
@@ -120,7 +119,7 @@ namespace {
 void stripComment(istream &in)
 {
   in >> ws;
-  char c = in.peek();
+  const char c = in.peek();
   stringbuf discard(ios_base::out);
   if (c == AGG::COMMENT_CHAR) {
     in.get(discard);
@@ -225,7 +224,7 @@ std::shared_ptr<AGG> AGG::makeAGG(istream &in)
   for (i = 0; i < S; i++) {
     neighb_size = neighb[i].size();
     for (j = 0; j < neighb_size; j++) {
-      projtype t =
+      const projtype t =
           (neighb[i][j] < S) ? std::make_shared<proj_func_SUM>() : projTypes[neighb[i][j] - S];
       projF[i].push_back(t);
     }
@@ -323,9 +322,9 @@ void AGG::setProjections(vector<vector<aggdistrib>> &projS, vector<vector<vector
             // break;
           }
           else if (neighb[Node][k] >= S) {
-            projtype f = projTypes[neighb[Node][k] - S];
+            const projtype f = projTypes[neighb[Node][k] - S];
             assert(f);
-            pair<multiset<int>::iterator, multiset<int>::iterator> p =
+            const pair<multiset<int>::iterator, multiset<int>::iterator> p =
                 an[neighb[Node][k] - S].equal_range(AS[i][j]);
             multiset<int> blah(p.first, p.second);
             proj[Node][i][j][k] = (*f)(blah);
@@ -348,13 +347,13 @@ void AGG::getAn(multiset<int> &dest, vector<vector<int>> &neighb, vector<projtyp
     return;
   }
   // cycle check
-  for (int &p : path) {
+  for (const int &p : path) {
     if (Node == p) {
       throw std::runtime_error("ERROR: cycle of projected nodes at " + std::to_string(Node));
     }
   }
 
-  int numNei = neighb[Node].size();
+  const int numNei = neighb[Node].size();
   path.push_back(Node);
   for (int i = 0; i < numNei; ++i) {
     // check consistency of proj. signatures
@@ -391,7 +390,7 @@ void AGG::computeP(int player, int act, int player2, int act2)
   Pr[0].reset();
   Pr[0].insert(make_pair(projection[actionSets[player][act]][player][act], 1.0));
 
-  int numNei = neighbors[actionSets[player][act]].size();
+  const int numNei = neighbors[actionSets[player][act]].size();
   // apply others' strat
   for (int k = 1; k < numPlayers; k++) {
     Pr[k].reset();
@@ -434,8 +433,8 @@ void AGG::doProjection(int Node, int i, AggNumber *s)
 AggNumber AGG::getPurePayoff(int player, const std::vector<int> &s)
 {
   assert(player >= 0 && player < numPlayers);
-  int Node = actionSets[player][s[player]];
-  int keylen = neighbors[Node].size();
+  const int Node = actionSets[player][s[player]];
+  const int keylen = neighbors[Node].size();
   config pureprofile(projection[Node][0][s[0]]);
   for (int i = 1; i < numPlayers; i++) {
     for (int j = 0; j < keylen; j++) {
@@ -521,7 +520,7 @@ void AGG::getSymPayoffVector(AggNumberVector &dest, StrategyProfile &s)
 
 AggNumber AGG::getSymMixedPayoff(int node, StrategyProfile &s)
 {
-  int numNei = neighbors[node].size();
+  const int numNei = neighbors[node].size();
 
   if (!isPure[node]) { // then compute EU using trie_map::power()
     doProjection(node, 0, s);
@@ -578,8 +577,10 @@ AggNumber AGG::getSymMixedPayoff(int node, StrategyProfile &s)
       break;
     }
     // update prob
-    AggNumber i_prob = (support.at(gc.i) != -1) ? s[neighbors[node][support[gc.i]]] : null_prob;
-    AggNumber d_prob = (support.at(gc.d) != -1) ? s[neighbors[node][support[gc.d]]] : null_prob;
+    const AggNumber i_prob =
+        (support.at(gc.i) != -1) ? s[neighbors[node][support[gc.i]]] : null_prob;
+    const AggNumber d_prob =
+        (support.at(gc.d) != -1) ? s[neighbors[node][support[gc.d]]] : null_prob;
     assert(i_prob > (AggNumber)0 && d_prob > (AggNumber)0);
     prob *=
         ((AggNumber)(gc.get().at(gc.d) + 1)) * i_prob / (AggNumber)(gc.get().at(gc.i)) / d_prob;
@@ -596,7 +597,7 @@ AggNumber AGG::getSymMixedPayoff(int node, StrategyProfile &s)
 void AGG::getSymConfigProb(int plClass, StrategyProfile &s, int ownPlClass, int act,
                            aggdistrib &dest, int plClass2, int act2)
 {
-  int node = uniqueActionSets.at(ownPlClass).at(act);
+  const int node = uniqueActionSets.at(ownPlClass).at(act);
   int numPl = playerClasses.at(plClass).size();
   assert(numPl > 0);
 
@@ -607,10 +608,10 @@ void AGG::getSymConfigProb(int plClass, StrategyProfile &s, int ownPlClass, int 
     numPl--;
   }
   dest.reset();
-  int numNei = neighbors.at(node).size();
+  const int numNei = neighbors.at(node).size();
 
   if (!isPure[node]) {
-    int player = playerClasses[plClass].at(0);
+    const int player = playerClasses[plClass].at(0);
     projectedStrat[node][player].reset();
     if (numPl > 0) {
       for (int j = 0; j < actions[player]; j++) {
@@ -651,7 +652,7 @@ void AGG::getSymConfigProb(int plClass, StrategyProfile &s, int ownPlClass, int 
   // do projection  & get support
   int self = -1; // index of self in the neighbor list
   int ind2 = -1; // index of act2 in the neighbor list
-  int p = playerClasses[plClass][0];
+  const int p = playerClasses[plClass][0];
   for (int i = 0; i < numNei; ++i) {
     if (neighbors[node][i] == node) {
       self = i;
@@ -660,7 +661,7 @@ void AGG::getSymConfigProb(int plClass, StrategyProfile &s, int ownPlClass, int 
       ind2 = i;
     }
 
-    int a = node2Action.at(neighbors[node][i]).at(p);
+    const int a = node2Action.at(neighbors[node][i]).at(p);
     if (a >= 0 && s[a] > (AggNumber)0) {
       support.push_back(i);
       null_prob -= s[a];
@@ -673,7 +674,7 @@ void AGG::getSymConfigProb(int plClass, StrategyProfile &s, int ownPlClass, int 
   // gray code
   GrayComposition gc(numPl, support.size());
 
-  AggNumber prob0 =
+  const AggNumber prob0 =
       (support.at(0) >= 0) ? s[node2Action[neighbors[node].at(support[0])][p]] : null_prob;
   AggNumber prob = pow(prob0, numPl);
 
@@ -703,9 +704,9 @@ void AGG::getSymConfigProb(int plClass, StrategyProfile &s, int ownPlClass, int 
       break;
     }
     // update prob
-    AggNumber i_prob =
+    const AggNumber i_prob =
         (support.at(gc.i) != -1) ? s[node2Action[neighbors[node][support[gc.i]]][p]] : null_prob;
-    AggNumber d_prob =
+    const AggNumber d_prob =
         (support.at(gc.d) != -1) ? s[node2Action[neighbors[node][support[gc.d]]][p]] : null_prob;
     assert(i_prob > (AggNumber)0 && d_prob > (AggNumber)0);
     prob *=
@@ -750,9 +751,9 @@ void AGG::getKSymPayoffVector(AggNumberVector &dest, int playerClass, StrategyPr
 AggNumber AGG::getKSymMixedPayoff(int playerClass, int act, vector<StrategyProfile> &s)
 {
 
-  int numPC = playerClasses.size();
+  const int numPC = playerClasses.size();
 
-  int numNei = neighbors[uniqueActionSets[playerClass][act]].size();
+  const int numNei = neighbors[uniqueActionSets[playerClass][act]].size();
 
   static aggdistrib d, temp;
   d.reset();
@@ -768,8 +769,8 @@ AggNumber AGG::getKSymMixedPayoff(int playerClass, int act, vector<StrategyProfi
 AggNumber AGG::getKSymMixedPayoff(const StrategyProfile &s, int pClass1, int act1, int pClass2,
                                   int act2)
 {
-  int numPC = playerClasses.size();
-  int numNei = neighbors[uniqueActionSets[pClass1][act1]].size();
+  const int numPC = playerClasses.size();
+  const int numNei = neighbors[uniqueActionSets[pClass1][act1]].size();
   static aggdistrib d, temp;
   if (pClass2 >= 0 && pClass1 == pClass2 && playerClasses.at(pClass1).size() <= 1) {
     return 0;
@@ -854,7 +855,7 @@ void AGG::makeMAPPINGpayoff(std::istream &in, aggpayoff &pay, int numNei)
     }
 
     // insert
-    pair<trie_map<AggNumber>::iterator, bool> r = pay.insert(make_pair(key, u));
+    const pair<trie_map<AggNumber>::iterator, bool> r = pay.insert(make_pair(key, u));
     if (!r.second) {
       std::stringstream str;
       str << "ERROR: overwriting utility at [";

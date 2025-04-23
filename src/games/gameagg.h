@@ -33,7 +33,6 @@ class GameAGGRep : public GameRep {
 
 private:
   std::shared_ptr<agg::AGG> aggPtr;
-  Array<GamePlayerRep *> m_players;
 
 public:
   /// @name Lifecycle
@@ -75,10 +74,6 @@ public:
 
   /// @name Players
   //@{
-  /// Returns the number of players in the game
-  int NumPlayers() const override { return aggPtr->getNumPlayers(); }
-  /// Returns the pl'th player in the game
-  GamePlayer GetPlayer(int pl) const override { return m_players[pl]; }
   /// Returns the chance (nature) player
   GamePlayer GetChance() const override { throw UndefinedException(); }
   /// Creates a new player in the game, with no moves
@@ -98,7 +93,7 @@ public:
   /// @name Outcomes
   //@{
   /// Returns the number of outcomes defined in the game
-  int NumOutcomes() const override { throw UndefinedException(); }
+  size_t NumOutcomes() const override { throw UndefinedException(); }
   /// Returns the index'th outcome defined in the game
   GameOutcome GetOutcome(int index) const override { throw UndefinedException(); }
   /// Creates a new outcome in the game
@@ -112,7 +107,7 @@ public:
   /// Returns the root node of the game
   GameNode GetRoot() const override { throw UndefinedException(); }
   /// Returns the number of nodes in the game
-  int NumNodes() const override { throw UndefinedException(); }
+  size_t NumNodes() const override { throw UndefinedException(); }
   //@}
 
   /// @name General data access
@@ -121,11 +116,14 @@ public:
   bool IsAgg() const override { return true; }
   bool IsPerfectRecall(GameInfoset &, GameInfoset &) const override { return true; }
   bool IsConstSum() const override;
-  /// Returns the smallest payoff in any outcome of the game
-  Rational GetMinPayoff(int) const override { return Rational(aggPtr->getMinPayoff()); }
-  /// Returns the largest payoff in any outcome of the game
-  Rational GetMaxPayoff(int) const override { return Rational(aggPtr->getMaxPayoff()); }
-
+  /// Returns the smallest payoff to any player in any outcome of the game
+  Rational GetMinPayoff() const override { return Rational(aggPtr->getMinPayoff()); }
+  /// Returns the smallest payoff to the player in any outcome of the game
+  Rational GetMinPayoff(const GamePlayer &) const override { throw UndefinedException(); }
+  /// Returns the largest payoff to any player in any outcome of the game
+  Rational GetMaxPayoff() const override { return Rational(aggPtr->getMaxPayoff()); }
+  /// Returns the largest payoff to the player in any outcome of the game
+  Rational GetMaxPayoff(const GamePlayer &) const override { throw UndefinedException(); }
   //@}
 
   /// @name Modification
@@ -149,10 +147,10 @@ public:
 /// @return A handle to the game representation constructed
 /// @throw InvalidFileException If the stream does not contain a valid serialisation
 ///                             of a game in .agg format.
-inline Game ReadAggFile(std::istream &in)
+inline Game ReadAggFile(std::istream &p_stream)
 {
   try {
-    return new GameAGGRep(agg::AGG::makeAGG(in));
+    return new GameAGGRep(agg::AGG::makeAGG(p_stream));
   }
   catch (std::runtime_error &ex) {
     throw InvalidFileException(ex.what());

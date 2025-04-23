@@ -112,7 +112,7 @@ bool gbtNumberValidator::Validate(wxWindow *p_parent)
     return true;
   }
 
-  wxString value(control->GetValue());
+  const wxString value(control->GetValue());
 
   if (!IsNumeric(value)) {
     wxMessageBox(_T("The value ") + value + _T(" in ") + m_validatorWindow->GetName() +
@@ -168,7 +168,7 @@ bool gbtNumberValidator::TransferFromWindow()
 void gbtNumberValidator::OnChar(wxKeyEvent &p_event)
 {
   if (m_validatorWindow) {
-    int keyCode = (int)p_event.GetKeyCode();
+    const int keyCode = (int)p_event.GetKeyCode();
 
     // we don't filter special keys and Delete
     if (!(keyCode < WXK_SPACE || keyCode == WXK_DELETE || keyCode > WXK_START) &&
@@ -181,7 +181,7 @@ void gbtNumberValidator::OnChar(wxKeyEvent &p_event)
     }
 
     auto *control = dynamic_cast<wxTextCtrl *>(m_validatorWindow);
-    wxString value = control->GetValue();
+    const wxString value = control->GetValue();
 
     if ((keyCode == '.' || keyCode == '/') && (value.Find('.') != -1 || value.Find('/') != -1)) {
       // At most one slash or decimal point is allowed

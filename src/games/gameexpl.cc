@@ -50,54 +50,42 @@ GameExplicitRep::~GameExplicitRep()
 //                  GameExplicitRep: General data access
 //------------------------------------------------------------------------
 
-Rational GameExplicitRep::GetMinPayoff(int player) const
+Rational GameExplicitRep::GetMinPayoff() const
 {
-  int p1, p2;
-
-  if (m_outcomes.empty()) {
-    return Rational(0);
-  }
-
-  if (player) {
-    p1 = p2 = player;
-  }
-  else {
-    p1 = 1;
-    p2 = NumPlayers();
-  }
-
-  Rational minpay = m_outcomes.front()->GetPayoff<Rational>(GetPlayer(p1));
-  for (auto outcome : m_outcomes) {
-    for (int p = p1; p <= p2; p++) {
-      minpay = std::min(minpay, outcome->GetPayoff<Rational>(GetPlayer(p)));
-    }
-  }
-  return minpay;
+  return std::accumulate(
+      std::next(m_players.begin()), m_players.end(), GetMinPayoff(m_players.front()),
+      [this](const Rational &r, const GamePlayer &p) { return std::min(r, GetMinPayoff(p)); });
 }
 
-Rational GameExplicitRep::GetMaxPayoff(int player) const
+Rational GameExplicitRep::GetMinPayoff(const GamePlayer &p_player) const
 {
-  int p1, p2;
-
   if (m_outcomes.empty()) {
     return Rational(0);
   }
+  return std::accumulate(std::next(m_outcomes.begin()), m_outcomes.end(),
+                         m_outcomes.front()->GetPayoff<Rational>(p_player),
+                         [&p_player](const Rational &r, const GameOutcomeRep *c) {
+                           return std::min(r, c->GetPayoff<Rational>(p_player));
+                         });
+}
 
-  if (player) {
-    p1 = p2 = player;
-  }
-  else {
-    p1 = 1;
-    p2 = NumPlayers();
-  }
+Rational GameExplicitRep::GetMaxPayoff() const
+{
+  return std::accumulate(
+      std::next(m_players.begin()), m_players.end(), GetMaxPayoff(m_players.front()),
+      [this](const Rational &r, const GamePlayer &p) { return std::max(r, GetMaxPayoff(p)); });
+}
 
-  Rational maxpay = m_outcomes.front()->GetPayoff<Rational>(GetPlayer(p1));
-  for (auto outcome : m_outcomes) {
-    for (int p = p1; p <= p2; p++) {
-      maxpay = std::max(maxpay, outcome->GetPayoff<Rational>(GetPlayer(p)));
-    }
+Rational GameExplicitRep::GetMaxPayoff(const GamePlayer &p_player) const
+{
+  if (m_outcomes.empty()) {
+    return Rational(0);
   }
-  return maxpay;
+  return std::accumulate(std::next(m_outcomes.begin()), m_outcomes.end(),
+                         m_outcomes.front()->GetPayoff<Rational>(p_player),
+                         [&p_player](const Rational &r, const GameOutcomeRep *c) {
+                           return std::max(r, c->GetPayoff<Rational>(p_player));
+                         });
 }
 
 //------------------------------------------------------------------------
@@ -106,21 +94,22 @@ Rational GameExplicitRep::GetMaxPayoff(int player) const
 
 Array<int> GameExplicitRep::NumStrategies() const
 {
-  const_cast<GameExplicitRep *>(this)->BuildComputedValues();
-  Array<int> dim(m_players.size());
-  for (size_t pl = 1; pl <= m_players.size(); pl++) {
-    dim[pl] = m_players[pl]->m_strategies.size();
+  BuildComputedValues();
+  Array<int> dim;
+  for (const auto &player : m_players) {
+    dim.push_back(player->m_strategies.size());
   }
   return dim;
 }
 
 GameStrategy GameExplicitRep::GetStrategy(int p_index) const
 {
-  const_cast<GameExplicitRep *>(this)->BuildComputedValues();
-  for (int pl = 1, i = 1; pl <= m_players.size(); pl++) {
-    for (int st = 1; st <= m_players[pl]->m_strategies.size(); st++, i++) {
-      if (p_index == i) {
-        return m_players[pl]->m_strategies[st];
+  BuildComputedValues();
+  int i = 1;
+  for (const auto &player : m_players) {
+    for (const auto &strategy : player->m_strategies) {
+      if (p_index == i++) {
+        return strategy;
       }
     }
   }
@@ -129,17 +118,18 @@ GameStrategy GameExplicitRep::GetStrategy(int p_index) const
 
 int GameExplicitRep::NumStrategyContingencies() const
 {
-  const_cast<GameExplicitRep *>(this)->BuildComputedValues();
-  return std::accumulate(m_players.begin(), m_players.end(), 1, [](int ncont, GamePlayerRep *p) {
-    return ncont * p->m_strategies.size();
-  });
+  BuildComputedValues();
+  return std::accumulate(
+      m_players.begin(), m_players.end(), 1,
+      [](int ncont, const GamePlayerRep *p) { return ncont * p->m_strategies.size(); });
 }
 
 int GameExplicitRep::MixedProfileLength() const
 {
-  const_cast<GameExplicitRep *>(this)->BuildComputedValues();
-  return std::accumulate(m_players.begin(), m_players.end(), 0,
-                         [](int size, GamePlayerRep *p) { return size + p->m_strategies.size(); });
+  BuildComputedValues();
+  return std::accumulate(
+      m_players.begin(), m_players.end(), 0,
+      [](int size, const GamePlayerRep *p) { return size + p->m_strategies.size(); });
 }
 
 //------------------------------------------------------------------------

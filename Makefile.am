@@ -245,6 +245,8 @@ EXTRA_DIST = \
 	src/README.rst
 
 core_SOURCES = \
+    src/core/core.h \
+    src/core/util.h \
 	src/core/array.h \
 	src/core/list.h \
 	src/core/vector.h \
@@ -636,8 +638,7 @@ msw-msi:
 	light -ext WixUIExtension gambit.wixobj
 
 clang-tidy:
-	clang-tidy ${top_srcdir}/src/core/*.cc -- --std=c++17 -I ${top_srcdir}/src -I ${top_srcdir}/src/labenski/include -DVERSION="" ${WX_CXXFLAGS}
-	clang-tidy ${top_srcdir}/src/games/*.cc ${top_srcdir}/src/games/*/*.cc -- --std=c++17 -I ${top_srcdir}/src -I ${top_srcdir}/src/labenski/include -DVERSION="" ${WX_CXXFLAGS}
-	clang-tidy ${top_srcdir}/src/solvers/*/*.cc -- --std=c++17 -I ${top_srcdir}/src -I ${top_srcdir}/src/labenski/include -DVERSION="" ${WX_CXXFLAGS}
-	clang-tidy ${top_srcdir}/src/tools/*/*.cc -- --std=c++17 -I ${top_srcdir}/src -I ${top_srcdir}/src/labenski/include -DVERSION="" ${WX_CXXFLAGS}
-	clang-tidy ${top_srcdir}/src/gui/*.cc -- --std=c++17 -I ${top_srcdir}/src -I ${top_srcdir}/src/labenski/include -DVERSION="" ${WX_CXXFLAGS}
+	clang-tidy ${top_srcdir}/src/core/*.cc -- --std=c++17 -I ${top_srcdir}/src -DVERSION=""
+	clang-tidy ${top_srcdir}/src/games/*.cc ${top_srcdir}/src/games/*/*.cc -- --std=c++17 -I ${top_srcdir}/src -DVERSION=""
+	clang-tidy ${top_srcdir}/src/solvers/*/*.cc -- --std=c++17 -I ${top_srcdir}/src -DVERSION=""
+	clang-tidy ${top_srcdir}/src/tools/*/*.cc -- --std=c++17 -I ${top_srcdir}/src -DVERSION=""

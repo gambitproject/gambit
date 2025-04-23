@@ -55,9 +55,9 @@ using payofftype = enum { COMPLETE, MAPPING, ADDITIVE };
 class AGG {
 
 public:
-  typedef std::vector<int> config;
-  typedef std::vector<int> ActionSet;
-  typedef std::vector<int> PlayerSet;
+  using config = std::vector<int>;
+  using ActionSet = std::vector<int>;
+  using PlayerSet = std::vector<int>;
 
   static const char COMMENT_CHAR = '#';
   static const char LBRACKET = '[';
@@ -170,8 +170,8 @@ private:
   int numPlayers;
   std::vector<int> actions;
   std::vector<int> strategyOffset;
-  int totalActions;
-  int maxActions;
+  int totalActions{0};
+  int maxActions{0};
 
   int numActionNodes; // |S|
   int numPNodes;      // |P|

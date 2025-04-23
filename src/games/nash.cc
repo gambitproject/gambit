@@ -87,7 +87,7 @@ public:
 
     for (const auto &subplayer : p_profile.GetGame()->GetPlayers()) {
       for (const auto &subinfoset : subplayer->GetInfosets()) {
-        GameInfoset infoset = p_infosetMap.at(subinfoset->GetLabel());
+        const GameInfoset infoset = p_infosetMap.at(subinfoset->GetLabel());
         const auto &subactions = subinfoset->GetActions();
         auto subaction = subactions.begin();
         for (const auto &action : infoset->GetActions()) {
@@ -97,7 +97,7 @@ public:
       }
     }
 
-    GameOutcome outcome = p_subroot->GetOutcome();
+    const GameOutcome outcome = p_subroot->GetOutcome();
     const auto &subplayers = p_profile.GetGame()->GetPlayers();
     auto subplayer = subplayers.begin();
     for (const auto &player : p_subroot->GetGame()->GetPlayers()) {
@@ -134,19 +134,19 @@ std::list<SubgameSolution<T>> SolveSubgames(const GameNode &p_root,
   std::list<SubgameSolution<T>> solutions;
   for (auto subsolution : subsolutions) {
     for (auto [subroot, outcome] : subsolution.GetNodeValues()) {
-      subroot->SetOutcome(outcome);
+      subroot->GetGame()->SetOutcome(subroot, outcome);
     }
     // This prevents double-counting of outcomes at roots of subgames.
     // By convention, we will just put the payoffs in the parent subgame.
-    Game subgame = p_root->CopySubgame();
-    subgame->GetRoot()->SetOutcome(nullptr);
+    const Game subgame = p_root->GetGame()->CopySubgame(p_root);
+    subgame->SetOutcome(subgame->GetRoot(), nullptr);
 
     for (const auto &solution : p_solver(subgame)) {
       solutions.push_back(subsolution.Update(p_root, solution, p_infosetMap));
     }
   }
 
-  p_root->DeleteTree();
+  p_root->GetGame()->DeleteTree(p_root);
   return solutions;
 }
 
@@ -168,7 +168,7 @@ template <class T>
 List<MixedBehaviorProfile<T>> SolveBySubgames(const Game &p_game, BehaviorSolverType<T> p_solver,
                                               BehaviorCallbackType<T> p_onEquilibrium)
 {
-  Game efg = p_game->GetRoot()->CopySubgame();
+  const Game efg = p_game->CopySubgame(p_game->GetRoot());
 
   int index = 1;
   std::map<std::string, GameInfoset> infoset_map;
