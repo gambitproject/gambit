@@ -102,7 +102,7 @@ bool GameActionRep::Precedes(const GameNode &n) const
   GameNode node = n;
 
   while (node != node->GetGame()->GetRoot()) {
-    if (node->GetPriorAction() == GameAction(const_cast<GameActionRep *>(this))) {
+    if (node->GetPriorAction() == shared_from_this()) {
       return true;
     }
     else {
@@ -114,7 +114,7 @@ bool GameActionRep::Precedes(const GameNode &n) const
 
 void GameTreeRep::DeleteAction(GameAction p_action)
 {
-  GameActionRep *action = p_action;
+  const std::shared_ptr<GameActionRep> action = p_action;
   auto *infoset = action->m_infoset;
   if (infoset->m_game != this) {
     throw MismatchException();
@@ -156,8 +156,9 @@ GameInfosetRep::GameInfosetRep(GameRep *p_efg, int p_number, GamePlayerRep *p_pl
                                int p_actions)
   : m_game(p_efg), m_number(p_number), m_player(p_player), m_actions(p_actions)
 {
-  std::generate(m_actions.begin(), m_actions.end(),
-                [this, i = 1]() mutable { return new GameActionRep(i++, "", this); });
+  std::generate(m_actions.begin(), m_actions.end(), [this, i = 1]() mutable {
+    return std::make_shared<GameActionRep>(i++, "", this);
+  });
   if (p_player->IsChance()) {
     m_probs = Array<Number>(m_actions.size());
     std::fill(m_probs.begin(), m_probs.end(), Rational(1, m_actions.size()));
@@ -167,7 +168,8 @@ GameInfosetRep::GameInfosetRep(GameRep *p_efg, int p_number, GamePlayerRep *p_pl
 
 GameInfosetRep::~GameInfosetRep()
 {
-  std::for_each(m_actions.begin(), m_actions.end(), [](GameActionRep *a) { a->Invalidate(); });
+  std::for_each(m_actions.begin(), m_actions.end(),
+                [](std::shared_ptr<GameActionRep> a) { a->Invalidate(); });
 }
 
 Game GameInfosetRep::GetGame() const { return m_game; }
@@ -226,11 +228,11 @@ GameAction GameTreeRep::InsertAction(GameInfoset p_infoset, GameAction p_action 
   IncrementVersion();
   int where = p_infoset->m_actions.size() + 1;
   if (p_action) {
-    for (where = 1; p_infoset->m_actions[where] != p_action; where++)
+    for (where = 1; p_action != p_infoset->m_actions[where]; where++)
       ;
   }
 
-  auto *action = new GameActionRep(where, "", p_infoset);
+  auto action = std::make_shared<GameActionRep>(where, "", p_infoset);
   p_infoset->m_actions.insert(std::next(p_infoset->m_actions.cbegin(), where - 1), action);
   if (p_infoset->m_player->IsChance()) {
     p_infoset->m_probs.insert(std::next(p_infoset->m_probs.cbegin(), where - 1), Number());
@@ -633,7 +635,7 @@ GameInfoset GameTreeRep::AppendMove(GameNode p_node, GameInfoset p_infoset)
   node->m_infoset = p_infoset;
   node->m_infoset->m_members.push_back(node);
   std::for_each(node->m_infoset->m_actions.begin(), node->m_infoset->m_actions.end(),
-                [this, node](const GameActionRep *) {
+                [this, node](std::shared_ptr<GameActionRep>) {
                   node->m_children.push_back(new GameNodeRep(this, node));
                   m_numNodes++;
                 });
@@ -680,7 +682,8 @@ GameInfoset GameTreeRep::InsertMove(GameNode p_node, GameInfoset p_infoset)
   node->m_parent = newNode;
   newNode->m_children.push_back(node);
   std::for_each(std::next(newNode->m_infoset->m_actions.begin()),
-                newNode->m_infoset->m_actions.end(), [this, newNode](const GameActionRep *) {
+                newNode->m_infoset->m_actions.end(),
+                [this, newNode](std::shared_ptr<GameActionRep>) {
                   newNode->m_children.push_back(new GameNodeRep(this, newNode));
                 });
 

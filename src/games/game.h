@@ -23,6 +23,7 @@
 #ifndef LIBGAMBIT_GAME_H
 #define LIBGAMBIT_GAME_H
 
+#include <iostream>
 #include <list>
 #include <set>
 
@@ -38,7 +39,7 @@ class GameOutcomeRep;
 using GameOutcome = GameObjectPtr<GameOutcomeRep>;
 
 class GameActionRep;
-using GameAction = GameObjectPtr<GameActionRep>;
+using GameAction = GameObjectSharedPtr<GameActionRep>;
 
 class GameInfosetRep;
 using GameInfoset = GameObjectPtr<GameInfosetRep>;
@@ -148,7 +149,7 @@ public:
 };
 
 /// An action at an information set in an extensive game
-class GameActionRep : public GameObject {
+class GameActionRep : public GameValidObject, public std::enable_shared_from_this<GameActionRep> {
   friend class GameTreeRep;
   friend class GameInfosetRep;
   template <class T> friend class MixedBehaviorProfile;
@@ -157,13 +158,13 @@ class GameActionRep : public GameObject {
   std::string m_label;
   GameInfosetRep *m_infoset;
 
+public:
   GameActionRep(int p_number, const std::string &p_label, GameInfosetRep *p_infoset)
     : m_number(p_number), m_label(p_label), m_infoset(p_infoset)
   {
   }
-  ~GameActionRep() override = default;
+  ~GameActionRep() = default;
 
-public:
   int GetNumber() const { return m_number; }
   GameInfoset GetInfoset() const;
 
@@ -184,7 +185,7 @@ class GameInfosetRep : public GameObject {
   int m_number;
   std::string m_label;
   GamePlayerRep *m_player;
-  Array<GameActionRep *> m_actions;
+  Array<std::shared_ptr<GameActionRep>> m_actions;
   std::vector<GameNodeRep *> m_members;
   int flag{0}, whichbranch{0};
   Array<Number> m_probs;
@@ -195,7 +196,7 @@ class GameInfosetRep : public GameObject {
   void RenumberActions()
   {
     std::for_each(m_actions.begin(), m_actions.end(),
-                  [act = 1](GameActionRep *a) mutable { a->m_number = act++; });
+                  [act = 1](std::shared_ptr<GameActionRep> a) mutable { a->m_number = act++; });
   }
 
 public:
