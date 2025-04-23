@@ -48,7 +48,7 @@ protected:
   /// @name Managing the representation
   //@{
   void Canonicalize();
-  void BuildComputedValues() override;
+  void BuildComputedValues() const override;
   void ClearComputedValues() const;
 
   /// Removes the node from the information set, invalidating if emptied

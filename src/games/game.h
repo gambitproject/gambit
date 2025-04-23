@@ -641,7 +641,7 @@ public:
   //@}
 
   /// Build any computed values anew
-  virtual void BuildComputedValues() {}
+  virtual void BuildComputedValues() const {}
 };
 
 //=======================================================================

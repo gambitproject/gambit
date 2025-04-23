@@ -884,12 +884,12 @@ void GameTreeRep::ClearComputedValues() const
   m_computedValues = false;
 }
 
-void GameTreeRep::BuildComputedValues()
+void GameTreeRep::BuildComputedValues() const
 {
   if (m_computedValues) {
     return;
   }
-  Canonicalize();
+  const_cast<GameTreeRep *>(this)->Canonicalize();
   for (const auto &player : m_players) {
     player->MakeReducedStrats(m_root, nullptr);
   }
@@ -959,8 +959,7 @@ void GameTreeRep::WriteEfgFile(std::ostream &p_file, const GameNode &p_subtree /
 
 void GameTreeRep::WriteNfgFile(std::ostream &p_file) const
 {
-  // FIXME: Building computed values is logically const.
-  const_cast<GameTreeRep *>(this)->BuildComputedValues();
+  BuildComputedValues();
   GameRep::WriteNfgFile(p_file);
 }
 

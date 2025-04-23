@@ -94,7 +94,7 @@ Rational GameExplicitRep::GetMaxPayoff(const GamePlayer &p_player) const
 
 Array<int> GameExplicitRep::NumStrategies() const
 {
-  const_cast<GameExplicitRep *>(this)->BuildComputedValues();
+  BuildComputedValues();
   Array<int> dim;
   for (const auto &player : m_players) {
     dim.push_back(player->m_strategies.size());
@@ -104,7 +104,7 @@ Array<int> GameExplicitRep::NumStrategies() const
 
 GameStrategy GameExplicitRep::GetStrategy(int p_index) const
 {
-  const_cast<GameExplicitRep *>(this)->BuildComputedValues();
+  BuildComputedValues();
   int i = 1;
   for (const auto &player : m_players) {
     for (const auto &strategy : player->m_strategies) {
@@ -118,7 +118,7 @@ GameStrategy GameExplicitRep::GetStrategy(int p_index) const
 
 int GameExplicitRep::NumStrategyContingencies() const
 {
-  const_cast<GameExplicitRep *>(this)->BuildComputedValues();
+  BuildComputedValues();
   return std::accumulate(
       m_players.begin(), m_players.end(), 1,
       [](int ncont, const GamePlayerRep *p) { return ncont * p->m_strategies.size(); });
@@ -126,7 +126,7 @@ int GameExplicitRep::NumStrategyContingencies() const
 
 int GameExplicitRep::MixedProfileLength() const
 {
-  const_cast<GameExplicitRep *>(this)->BuildComputedValues();
+  BuildComputedValues();
   return std::accumulate(
       m_players.begin(), m_players.end(), 0,
       [](int size, const GamePlayerRep *p) { return size + p->m_strategies.size(); });
