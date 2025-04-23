@@ -243,17 +243,17 @@ PossibleNashStrategySupports(const Game &p_game)
   auto result = std::make_shared<PossibleNashStrategySupportsResult>();
   auto numActions = p_game->NumStrategies();
 
-  int maxsize =
+  const int maxsize =
       std::accumulate(numActions.begin(), numActions.end(), 0) - p_game->NumPlayers() + 1;
-  int maxdiff = *std::max_element(numActions.cbegin(), numActions.cend());
+  const int maxdiff = *std::max_element(numActions.cbegin(), numActions.cend());
 
-  bool preferBalance = p_game->NumPlayers() == 2;
+  const bool preferBalance = p_game->NumPlayers() == 2;
   Array<int> dim(2);
   dim[1] = (preferBalance) ? maxsize : maxdiff;
   dim[2] = (preferBalance) ? maxdiff : maxsize;
 
   CartesianRange range(dim);
-  std::list<MixedStrategyProfile<double>> solutions;
+  const std::list<MixedStrategyProfile<double>> solutions;
   for (auto x : range) {
     GenerateSizeDiff(p_game, ((preferBalance) ? x[1] : x[2]) + p_game->NumPlayers() - 1,
                      ((preferBalance) ? x[2] : x[1]) - 1,

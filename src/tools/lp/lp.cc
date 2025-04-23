@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
   }
 
   try {
-    Gambit::Game game = Gambit::ReadGame(*input_stream);
+    const Gambit::Game game = Gambit::ReadGame(*input_stream);
     if (!game->IsTree() || useStrategic) {
       if (useFloat) {
         std::shared_ptr<StrategyProfileRenderer<double>> renderer;
@@ -188,7 +188,7 @@ int main(int argc, char *argv[])
           else {
             renderer = std::make_shared<BehavStrategyCSVRenderer<double>>(std::cout, numDecimals);
           }
-          BehaviorSolverType<double> func = [&](const Game &g) {
+          const BehaviorSolverType<double> func = [&](const Game &g) {
             return LpBehaviorSolve<double>(
                 g, [&](const MixedBehaviorProfile<double> &p, const std::string &label) {
                   renderer->Render(p, label);
@@ -208,7 +208,7 @@ int main(int argc, char *argv[])
             renderer =
                 std::make_shared<BehavStrategyCSVRenderer<Rational>>(std::cout, numDecimals);
           }
-          BehaviorSolverType<Rational> func = [&](const Game &g) {
+          const BehaviorSolverType<Rational> func = [&](const Game &g) {
             return LpBehaviorSolve<Rational>(
                 g, [&](const MixedBehaviorProfile<Rational> &p, const std::string &label) {
                   renderer->Render(p, label);

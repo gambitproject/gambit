@@ -79,7 +79,7 @@ static wxSize GetFractionExtent(wxDC &p_dc, const wxString &p_value)
   int denWidth, denHeight;
   p_dc.GetTextExtent(den, &denWidth, &denHeight);
 
-  int width = ((numWidth > denWidth) ? numWidth : denWidth);
+  const int width = ((numWidth > denWidth) ? numWidth : denWidth);
 
   return {width + 4, numHeight + denHeight};
 }
@@ -140,9 +140,9 @@ static void DrawFraction(wxDC &p_dc, wxRect p_rect, const wxString &p_value)
   int denWidth, denHeight;
   p_dc.GetTextExtent(den, &denWidth, &denHeight);
 
-  int width = ((numWidth > denWidth) ? numWidth : denWidth);
+  const int width = ((numWidth > denWidth) ? numWidth : denWidth);
 
-  wxPoint point(p_rect.x, p_rect.y + p_rect.height / 2);
+  const wxPoint point(p_rect.x, p_rect.y + p_rect.height / 2);
 
   p_dc.SetPen(wxPen(p_dc.GetTextForeground(), 1, wxPENSTYLE_SOLID));
   p_dc.DrawText(num, point.x + (p_rect.width - numWidth) / 2, point.y - numHeight);
@@ -158,9 +158,9 @@ void gbtRationalRendererRefData::DoDraw(wxSheet &grid, const wxSheetCellAttr &at
   wxRect rect = rectCell;
   rect.Inflate(-1);
 
-  int align = attr.GetAlignment();
+  const int align = attr.GetAlignment();
 
-  wxString value = grid.GetCellValue(coords);
+  const wxString value = grid.GetCellValue(coords);
   // int best_width = DoGetBestSize(grid, attr, dc, value).GetWidth();
   //  wxSheetCoords cellSpan(grid.GetCellSpan(coords)); // shouldn't get here if <=0
   // int cell_rows = cellSpan.m_row;
@@ -203,13 +203,13 @@ bool gbtRationalEditorRefData::Copy(const gbtRationalEditorRefData &p_other)
 
 void gbtRationalEditorRefData::StartingKey(wxKeyEvent &event)
 {
-  int keycode = event.GetKeyCode();
+  const int keycode = event.GetKeyCode();
   char tmpbuf[2];
   tmpbuf[0] = (char)keycode;
   tmpbuf[1] = '\0';
-  wxString strbuf(tmpbuf, *wxConvCurrent);
+  const wxString strbuf(tmpbuf, *wxConvCurrent);
 #if wxUSE_INTL
-  bool is_decimal_point =
+  const bool is_decimal_point =
       (strbuf == wxLocale::GetInfo(wxLOCALE_DECIMAL_POINT, wxLOCALE_CAT_NUMBER));
 #else
   bool is_decimal_point = (strbuf == _T("."));
@@ -225,13 +225,13 @@ void gbtRationalEditorRefData::StartingKey(wxKeyEvent &event)
 bool gbtRationalEditorRefData::IsAcceptedKey(wxKeyEvent &p_event)
 {
   if (wxSheetCellEditorRefData::IsAcceptedKey(p_event)) {
-    int keycode = p_event.GetKeyCode();
+    const int keycode = p_event.GetKeyCode();
     char tmpbuf[2];
     tmpbuf[0] = (char)keycode;
     tmpbuf[1] = '\0';
-    wxString strbuf(tmpbuf, *wxConvCurrent);
+    const wxString strbuf(tmpbuf, *wxConvCurrent);
 #if wxUSE_INTL
-    bool is_decimal_point =
+    const bool is_decimal_point =
         (strbuf == wxLocale::GetInfo(wxLOCALE_DECIMAL_POINT, wxLOCALE_CAT_NUMBER));
 #else
     bool is_decimal_point = (strbuf == _T("."));

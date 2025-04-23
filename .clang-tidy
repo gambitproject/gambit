@@ -7,15 +7,12 @@ Checks: |
   -modernize-avoid-c-arrays,
   -modernize-pass-by-value,
   -modernize-use-nodiscard,
-  -modernize-concat-nested-namespaces,
   cppcoreguidelines-pro-type-cstyle-cast,
   cppcoreguidelines-pro-type-member-init,
   cppcoreguidelines-prefer-member-initializer,
   misc-const-correctness
 WarningsAsErrors: '*'
-# Don't bother with wxWidgets headers
-HeaderFilterRegex: '^((?!labenski).)*$'
-AnalyzeTemporaryDtors: false
+HeaderFilterRegex: '.*'
 FormatStyle:     none
 User:            arbiter
 CheckOptions:

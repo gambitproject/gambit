@@ -23,11 +23,9 @@
 #include "lpsolve.imp"
 #include "core/rational.h"
 
-namespace Gambit {
-namespace linalg {
+namespace Gambit::linalg {
 
 template class LPSolve<double>;
 template class LPSolve<Rational>;
 
-} // namespace linalg
-} // end namespace Gambit
+} // end namespace Gambit::linalg

@@ -122,13 +122,13 @@ int main(int argc, char *argv[])
   }
 
   try {
-    Gambit::Game game = Gambit::ReadGame(*input_stream);
+    const Gambit::Game game = Gambit::ReadGame(*input_stream);
 
-    if (rowPlayer < 1 || rowPlayer > game->NumPlayers()) {
+    if (rowPlayer < 1 || rowPlayer > static_cast<int>(game->NumPlayers())) {
       std::cerr << argv[0] << ": Player " << rowPlayer << " does not exist.\n";
       return 1;
     }
-    if (colPlayer < 1 || colPlayer > game->NumPlayers()) {
+    if (colPlayer < 1 || colPlayer > static_cast<int>(game->NumPlayers())) {
       std::cerr << argv[0] << ": Player " << colPlayer << " does not exist.\n";
       return 1;
     }

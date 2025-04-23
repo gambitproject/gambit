@@ -140,12 +140,11 @@ wxString LogitMixedSheet::GetCellValue(const wxSheetCoords &p_coords)
     }
     else {
       int index = 1;
-      for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
-        GamePlayer player = m_doc->GetGame()->GetPlayer(pl);
-        for (int st = 1; st <= player->NumStrategies(); st++) {
+      for (const auto &player : m_doc->GetGame()->GetPlayers()) {
+        for (const auto &strategy : player->GetStrategies()) {
           if (index++ == p_coords.GetCol()) {
-            return (wxString::Format(wxT("%d: "), pl) +
-                    wxString(player->GetStrategy(st)->GetLabel().c_str(), *wxConvCurrent));
+            return (wxString::Format(wxT("%d: "), player->GetNumber()) +
+                    wxString(strategy->GetLabel().c_str(), *wxConvCurrent));
           }
         }
       }
@@ -177,11 +176,10 @@ static wxColour GetPlayerColor(gbtGameDocument *p_doc, int p_index)
   }
 
   int index = 1;
-  for (int pl = 1; pl <= p_doc->GetGame()->NumPlayers(); pl++) {
-    GamePlayer player = p_doc->GetGame()->GetPlayer(pl);
-    for (int st = 1; st <= player->NumStrategies(); st++) {
+  for (const auto &player : p_doc->GetGame()->GetPlayers()) {
+    for (const auto &strategy : player->GetStrategies()) {
       if (index++ == p_index) {
-        return p_doc->GetStyle().GetPlayerColor(pl);
+        return p_doc->GetStyle().GetPlayerColor(player->GetNumber());
       }
     }
   }
@@ -274,13 +272,13 @@ gbtLogitPlotCtrl::gbtLogitPlotCtrl(wxWindow *p_parent, gbtGameDocument *p_doc)
   : wxPlotCtrl(p_parent) /* m_doc(p_doc), */
 {
   SetAxisLabelColour(*wxBLUE);
-  wxFont labelFont(8, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD);
+  const wxFont labelFont(8, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD);
   SetAxisLabelFont(labelFont);
   SetAxisColour(*wxBLUE);
   SetAxisFont(labelFont);
   SetDrawSymbols(false);
 
-  // SetAxisFont resets the width of the y axis labels, assuming
+  // SetAxisFont resets the width of the y-axis labels, assuming
   // a fairly long label.
   int x = 6, y = 12, descent = 0, leading = 0;
   GetTextExtent(wxT("0.88"), &x, &y, &descent, &leading, &labelFont);
@@ -306,7 +304,8 @@ void gbtLogitPlotCtrl::CalcXAxisTickPositions()
   double current = ceil(m_viewRect.GetLeft() / m_xAxisTick_step) * m_xAxisTick_step;
   m_xAxisTicks.Clear();
   m_xAxisTickLabels.Clear();
-  int i, x, windowWidth = GetPlotAreaRect().width;
+  int i, x;
+  const int windowWidth = GetPlotAreaRect().width;
   for (i = 0; i < m_xAxisTick_count; i++) {
     if (!IsFinite(current, wxT("axis label is not finite"))) {
       return;
@@ -378,9 +377,9 @@ gbtLogitPlotStrategyList::gbtLogitPlotStrategyList(wxWindow *p_parent, gbtGameDo
   SetGridLineColour(*wxWHITE);
 
   for (int st = 1; st <= m_doc->GetGame()->MixedProfileLength(); st++) {
-    GameStrategy strategy = m_doc->GetGame()->GetStrategy(st);
-    GamePlayer player = strategy->GetPlayer();
-    wxColour color = m_doc->GetStyle().GetPlayerColor(player->GetNumber());
+    const GameStrategy strategy = m_doc->GetGame()->GetStrategy(st);
+    const GamePlayer player = strategy->GetPlayer();
+    const wxColour color = m_doc->GetStyle().GetPlayerColor(player->GetNumber());
 
     if (strategy->GetNumber() == 1) {
       SetCellSpan(wxSheetCoords(st - 1, 0), wxSheetCoords(player->NumStrategies(), 1));
@@ -491,8 +490,8 @@ void LogitPlotPanel::Plot()
 
     auto *curve = new wxPlotData(m_branch.NumPoints());
 
-    GameStrategy strategy = m_doc->GetGame()->GetStrategy(st);
-    GamePlayer player = strategy->GetPlayer();
+    const GameStrategy strategy = m_doc->GetGame()->GetStrategy(st);
+    const GamePlayer player = strategy->GetPlayer();
 
     curve->SetFilename(wxString(player->GetLabel().c_str(), *wxConvCurrent) + wxT(":") +
                        wxString(strategy->GetLabel().c_str(), *wxConvCurrent));
@@ -533,7 +532,7 @@ public:
 
   bool OnPrintPage(int) override
   {
-    wxSize size = GetDC()->GetSize();
+    const wxSize size = GetDC()->GetSize();
     m_plot->DrawWholePlot(GetDC(), wxRect(50, 50, size.GetWidth() - 100, size.GetHeight() - 100));
     return true;
   }
@@ -698,7 +697,7 @@ void LogitMixedDialog::Start()
   wxString str(wxString(s.str().c_str(), *wxConvCurrent));
 
   // It is possible that the whole string won't write on one go, so
-  // we should take this possibility into account.  If the write doesn't
+  // we should take this possibility into account.  If writing doesn't
   // complete the whole way, we take a 100-millisecond siesta and try
   // again.  (This seems to primarily be an issue with -- you guessed it --
   // Windows!)

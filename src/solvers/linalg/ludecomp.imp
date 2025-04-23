@@ -83,7 +83,7 @@ template <class T> void LUDecomposition<T>::update(int col, int matcol)
   if (copycount != 0) {
     throw BadCount();
   }
-  int m = basis.Last() - basis.First() + 1;
+  const int m = basis.Last() - basis.First() + 1;
 
   iterations++;
   if ((refactor_number > 0 && iterations >= refactor_number) ||
@@ -114,7 +114,7 @@ template <class T> void LUDecomposition<T>::refactor()
   }
 
   iterations = 0;
-  int m = basis.Last() - basis.First() + 1;
+  const int m = basis.Last() - basis.First() + 1;
   total_operations = (m - 1) * m * (2 * m - 1) / 6;
   if (parent != nullptr) {
     parent->copycount--;
@@ -300,7 +300,7 @@ template <class T> void LUDecomposition<T>::yLP_Trans(Vector<T> &y) const
 template <class T>
 void LUDecomposition<T>::yLP_mult(const Vector<T> &y, int j, Vector<T> &ans) const
 {
-  int ell = j + y.first_index();
+  const int ell = j + y.first_index();
 
   for (int i = y.first_index(); i <= y.last_index(); i++) {
     if (i != L[j].second.col) {
@@ -328,7 +328,7 @@ template <class T> void LUDecomposition<T>::LPd_Trans(Vector<T> &d) const
 
 template <class T> void LUDecomposition<T>::LPd_mult(Vector<T> &d, int j, Vector<T> &ans) const
 {
-  int k = j + d.first_index();
+  const int k = j + d.first_index();
   std::swap(d[k], d[L[j].first]);
   for (int i = d.first_index(); i <= d.last_index(); i++) {
     if (i == L[j].second.col) {
@@ -343,9 +343,9 @@ template <class T> void LUDecomposition<T>::LPd_mult(Vector<T> &d, int j, Vector
 
 template <class T> bool LUDecomposition<T>::RefactorCheck()
 {
-  int m = basis.Last() - basis.First() + 1;
-  int i = iterations * (iterations * m + 2 * m * m);
-  int k = total_operations + iterations * m + 2 * m * m;
+  const int m = basis.Last() - basis.First() + 1;
+  const int i = iterations * (iterations * m + 2 * m * m);
+  const int k = total_operations + iterations * m + 2 * m * m;
   return i > k;
 }
 

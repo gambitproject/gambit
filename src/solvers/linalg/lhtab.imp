@@ -93,8 +93,8 @@ template <class T> Gambit::linalg::BFS<T> LHTableau<T>::GetBFS()
 
 template <class T> int LHTableau<T>::PivotIn(int inlabel)
 {
-  int outindex = ExitIndex(inlabel);
-  int outlabel = Label(outindex);
+  const int outindex = ExitIndex(inlabel);
+  const int outlabel = Label(outindex);
   if (outlabel == 0) {
     return 0;
   }

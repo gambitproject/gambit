@@ -28,8 +28,7 @@
 #include "nfgame.h"
 #include "gambit.h"
 
-namespace Gambit {
-namespace gametracer {
+namespace Gambit::gametracer {
 
 nfgame::nfgame(const std::vector<int> &actions)
   : gnmgame(actions),
@@ -181,5 +180,4 @@ double nfgame::localPayoff(const cvector &s, double *m, int n) const
   }
 }
 
-} // namespace gametracer
-} // end namespace Gambit
+} // end namespace Gambit::gametracer

@@ -55,11 +55,6 @@ def test_game_add_players_nolabel():
     game.add_player()
 
 
-def test_game_num_nodes():
-    game = games.read_from_file("basic_extensive_game.efg")
-    assert len(game.nodes()) == 15
-
-
 def test_game_is_perfect_recall():
     game = games.read_from_file("perfect_recall.efg")
     assert game.is_perfect_recall

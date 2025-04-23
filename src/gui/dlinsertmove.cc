@@ -36,14 +36,13 @@ gbtInsertMoveDialog::gbtInsertMoveDialog(wxWindow *p_parent, gbtGameDocument *p_
 {
   m_playerItem = new wxChoice(this, wxID_ANY);
   m_playerItem->Append(_("Insert move for the chance player"));
-  for (int pl = 1; pl <= m_doc->NumPlayers(); pl++) {
+  for (const auto &player : m_doc->GetGame()->GetPlayers()) {
     wxString s = _("Insert move for ");
-    Gambit::GamePlayer player = m_doc->GetGame()->GetPlayer(pl);
     if (player->GetLabel() != "") {
       s += wxString(player->GetLabel().c_str(), *wxConvCurrent);
     }
     else {
-      s += wxString::Format(_("player %d"), pl);
+      s += wxString::Format(_("player %d"), player->GetNumber());
     }
     m_playerItem->Append(s);
   }
@@ -54,15 +53,14 @@ gbtInsertMoveDialog::gbtInsertMoveDialog(wxWindow *p_parent, gbtGameDocument *p_
 
   m_infosetItem = new wxChoice(this, wxID_ANY);
   m_infosetItem->Append(_("at a new information set"));
-  Gambit::GamePlayer player = m_doc->GetGame()->GetPlayer(1);
-  for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+  const Gambit::GamePlayer player = m_doc->GetGame()->GetPlayer(1);
+  for (const auto &infoset : player->GetInfosets()) {
     wxString s = _("at information set ");
-    Gambit::GameInfoset infoset = player->GetInfoset(iset);
     if (infoset->GetLabel() != "") {
       s += wxString(infoset->GetLabel().c_str(), *wxConvCurrent);
     }
     else {
-      s += wxString::Format(wxT("%d"), iset);
+      s += wxString::Format(wxT("%d"), infoset->GetNumber());
     }
 
     s += wxString::Format(wxT(" (%d action"), infoset->NumActions());
@@ -113,13 +111,13 @@ gbtInsertMoveDialog::gbtInsertMoveDialog(wxWindow *p_parent, gbtGameDocument *p_
 
 void gbtInsertMoveDialog::OnPlayer(wxCommandEvent &)
 {
-  int playerNumber = m_playerItem->GetSelection();
+  const int playerNumber = m_playerItem->GetSelection();
 
   Gambit::GamePlayer player;
   if (playerNumber == 0) {
     player = m_doc->GetGame()->GetChance();
   }
-  else if (playerNumber <= m_doc->NumPlayers()) {
+  else if (playerNumber <= static_cast<int>(m_doc->NumPlayers())) {
     player = m_doc->GetGame()->GetPlayer(playerNumber);
   }
 
@@ -132,14 +130,13 @@ void gbtInsertMoveDialog::OnPlayer(wxCommandEvent &)
     return;
   }
 
-  for (int iset = 1; iset <= player->NumInfosets(); iset++) {
+  for (const auto &infoset : player->GetInfosets()) {
     wxString s = _("at information set ");
-    Gambit::GameInfoset infoset = player->GetInfoset(iset);
     if (infoset->GetLabel() != "") {
       s += wxString(infoset->GetLabel().c_str(), *wxConvCurrent);
     }
     else {
-      s += wxString::Format(wxT("%d"), iset);
+      s += wxString::Format(wxT("%d"), infoset->GetNumber());
     }
 
     s += wxString::Format(wxT(" (%d action"), infoset->NumActions());
@@ -163,10 +160,10 @@ void gbtInsertMoveDialog::OnPlayer(wxCommandEvent &)
 
 void gbtInsertMoveDialog::OnInfoset(wxCommandEvent &)
 {
-  int infosetNumber = m_infosetItem->GetSelection();
+  const int infosetNumber = m_infosetItem->GetSelection();
 
   if (infosetNumber > 0) {
-    int playerNumber = m_playerItem->GetSelection();
+    const int playerNumber = m_playerItem->GetSelection();
     Gambit::GameInfoset infoset;
     if (playerNumber == 0) {
       infoset = m_doc->GetGame()->GetChance()->GetInfoset(infosetNumber);
@@ -184,16 +181,16 @@ void gbtInsertMoveDialog::OnInfoset(wxCommandEvent &)
 
 Gambit::GamePlayer gbtInsertMoveDialog::GetPlayer() const
 {
-  int playerNumber = m_playerItem->GetSelection();
+  const int playerNumber = m_playerItem->GetSelection();
 
   if (playerNumber == 0) {
     return m_doc->GetGame()->GetChance();
   }
-  else if (playerNumber <= m_doc->NumPlayers()) {
+  else if (playerNumber <= static_cast<int>(m_doc->NumPlayers())) {
     return m_doc->GetGame()->GetPlayer(playerNumber);
   }
   else {
-    Gambit::GamePlayer player = m_doc->GetGame()->NewPlayer();
+    const Gambit::GamePlayer player = m_doc->GetGame()->NewPlayer();
     player->SetLabel("Player " + Gambit::lexical_cast<std::string>(m_doc->NumPlayers()));
     return player;
   }
@@ -201,9 +198,9 @@ Gambit::GamePlayer gbtInsertMoveDialog::GetPlayer() const
 
 Gambit::GameInfoset gbtInsertMoveDialog::GetInfoset() const
 {
-  if (m_playerItem->GetSelection() <= m_doc->NumPlayers()) {
-    Gambit::GamePlayer player = GetPlayer();
-    int infosetNumber = m_infosetItem->GetSelection();
+  if (m_playerItem->GetSelection() <= static_cast<int>(m_doc->NumPlayers())) {
+    const Gambit::GamePlayer player = GetPlayer();
+    const int infosetNumber = m_infosetItem->GetSelection();
 
     if (player && infosetNumber > 0) {
       return player->GetInfoset(infosetNumber);

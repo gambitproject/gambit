@@ -259,7 +259,7 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
   // entries[9].Set(wxACCEL_NORMAL, WXK_BACK, GBT_MENU_EDIT_DELETE_PARENT);
   entries[8].Set(wxACCEL_CTRL, (int)'+', GBT_MENU_VIEW_ZOOMIN);
   entries[9].Set(wxACCEL_CTRL, (int)'-', GBT_MENU_VIEW_ZOOMOUT);
-  wxAcceleratorTable accel(10, entries);
+  const wxAcceleratorTable accel(10, entries);
   SetAcceleratorTable(accel);
 
   m_splitter = new wxSplitterWindow(this, wxID_ANY);
@@ -320,7 +320,7 @@ void gbtGameFrame::OnUpdate()
     SetTitle(GetTitle() + wxT(" (unsaved changes)"));
   }
 
-  Gambit::GameNode selectNode = m_doc->GetSelectNode();
+  const Gambit::GameNode selectNode = m_doc->GetSelectNode();
   wxMenuBar *menuBar = GetMenuBar();
 
   menuBar->Enable(GBT_MENU_FILE_EXPORT_EFG, m_doc->IsTree());
@@ -626,7 +626,7 @@ void gbtGameFrame::MakeToolbar()
 
 void gbtGameFrame::OnFileNewEfg(wxCommandEvent &)
 {
-  Gambit::Game efg = Gambit::NewTree();
+  const Gambit::Game efg = Gambit::NewTree();
   efg->SetTitle("Untitled Extensive Game");
   efg->NewPlayer()->SetLabel("Player 1");
   efg->NewPlayer()->SetLabel("Player 2");
@@ -639,7 +639,7 @@ void gbtGameFrame::OnFileNewNfg(wxCommandEvent &)
   Gambit::Array<int> dim(2);
   dim[1] = 2;
   dim[2] = 2;
-  Gambit::Game nfg = Gambit::NewTable(dim);
+  const Gambit::Game nfg = Gambit::NewTable(dim);
   nfg->SetTitle("Untitled Strategic Game");
   nfg->GetPlayer(1)->SetLabel("Player 1");
   nfg->GetPlayer(2)->SetLabel("Player 2");
@@ -655,21 +655,21 @@ void gbtGameFrame::OnFileOpen(wxCommandEvent &)
           wxT("Gambit strategic games (*.nfg)|*.nfg|") wxT("All files (*.*)|*.*"));
 
   if (dialog.ShowModal() == wxID_OK) {
-    wxString filename = dialog.GetPath();
+    const wxString filename = dialog.GetPath();
     wxGetApp().SetCurrentDir(wxPathOnly(filename));
 
-    gbtAppLoadResult result = wxGetApp().LoadFile(filename);
+    const gbtAppLoadResult result = wxGetApp().LoadFile(filename);
     if (result == GBT_APP_OPEN_FAILED) {
-      wxMessageDialog dialog(
+      wxMessageDialog msgdialog(
           this, wxT("Gambit could not open file '") + filename + wxT("' for reading."),
           wxT("Unable to open file"), wxOK | wxICON_ERROR);
-      dialog.ShowModal();
+      msgdialog.ShowModal();
     }
     else if (result == GBT_APP_PARSE_FAILED) {
-      wxMessageDialog dialog(
+      wxMessageDialog msgdialog(
           this, wxT("File '") + filename + wxT("' is not in a format Gambit recognizes."),
           wxT("Unable to read file"), wxOK | wxICON_ERROR);
-      dialog.ShowModal();
+      msgdialog.ShowModal();
     }
   }
 }
@@ -910,8 +910,8 @@ void gbtGameFrame::OnFileExit(wxCommandEvent &p_event)
 
 void gbtGameFrame::OnFileMRUFile(wxCommandEvent &p_event)
 {
-  wxString filename = wxGetApp().GetHistoryFile(p_event.GetId() - wxID_FILE1);
-  gbtAppLoadResult result = wxGetApp().LoadFile(filename);
+  const wxString filename = wxGetApp().GetHistoryFile(p_event.GetId() - wxID_FILE1);
+  const gbtAppLoadResult result = wxGetApp().LoadFile(filename);
 
   if (result == GBT_APP_OPEN_FAILED) {
     wxMessageDialog dialog(this,
@@ -1009,8 +1009,8 @@ void gbtGameFrame::OnEditReveal(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     try {
-      for (int pl = 1; pl <= dialog.GetPlayers().size(); pl++) {
-        m_doc->DoRevealAction(m_doc->GetSelectNode()->GetInfoset(), dialog.GetPlayers()[pl]);
+      for (const auto &player : dialog.GetPlayers()) {
+        m_doc->DoRevealAction(m_doc->GetSelectNode()->GetInfoset(), player);
       }
     }
     catch (std::exception &ex) {
@@ -1051,7 +1051,7 @@ void gbtGameFrame::OnEditNode(wxCommandEvent &)
 
 void gbtGameFrame::OnEditMove(wxCommandEvent &)
 {
-  Gambit::GameInfoset infoset = m_doc->GetSelectNode()->GetInfoset();
+  const Gambit::GameInfoset infoset = m_doc->GetSelectNode()->GetInfoset();
   if (!infoset) {
     return;
   }
@@ -1065,7 +1065,7 @@ void gbtGameFrame::OnEditMove(wxCommandEvent &)
         m_doc->DoSetPlayer(infoset, m_doc->GetGame()->GetPlayer(dialog.GetPlayer()));
       }
 
-      for (int act = 1; act <= infoset->NumActions(); act++) {
+      for (size_t act = 1; act <= infoset->NumActions(); act++) {
         m_doc->DoSetActionLabel(infoset->GetAction(act), dialog.GetActionName(act));
       }
       if (infoset->IsChanceInfoset()) {
@@ -1136,7 +1136,7 @@ void gbtGameFrame::OnViewStrategic(wxCommandEvent &p_event)
       return;
     }
 
-    int ncont = m_doc->GetGame()->NumStrategyContingencies();
+    const int ncont = m_doc->GetGame()->NumStrategyContingencies();
     if (!m_nfgPanel && ncont >= 50000) {
       if (wxMessageBox(
               wxString::Format(wxT("This game has %d contingencies in strategic form.\n"), ncont) +
@@ -1269,7 +1269,7 @@ void gbtGameFrame::OnToolsEquilibrium(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     if (dialog.UseStrategic()) {
-      int ncont = m_doc->GetGame()->NumStrategyContingencies();
+      const int ncont = m_doc->GetGame()->NumStrategyContingencies();
       if (ncont >= 50000) {
         if (wxMessageBox(wxString::Format(
                              wxT("This game has %d contingencies in strategic form.\n"), ncont) +
@@ -1283,11 +1283,10 @@ void gbtGameFrame::OnToolsEquilibrium(wxCommandEvent &)
       }
     }
 
-    gbtAnalysisOutput *command = dialog.GetCommand();
+    auto command = dialog.GetCommand();
 
-    gbtNashMonitorDialog dialog(this, m_doc, command);
-
-    dialog.ShowModal();
+    gbtNashMonitorDialog monitordialog(this, m_doc, command);
+    monitordialog.ShowModal();
 
     if (!m_splitter->IsSplit()) {
       if (m_efgPanel && m_efgPanel->IsShown()) {

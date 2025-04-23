@@ -25,14 +25,13 @@
 #include "solvers/enummixed/enummixed.h"
 #include "clique.h"
 
-namespace Gambit {
-namespace Nash {
+namespace Gambit::Nash {
 
 using namespace Gambit::linalg;
 
 bool EqZero(const double &x)
 {
-  double eps = ::pow(10.0, -15.0);
+  const double eps = ::pow(10.0, -15.0);
   return (x <= eps && x >= -eps);
 }
 
@@ -54,7 +53,7 @@ List<List<MixedStrategyProfile<T>>> EnumMixedStrategySolution<T>::GetCliques() c
       edgelist[i].node2 = m_node2[i];
     }
 
-    CliqueEnumerator clique(edgelist, m_v2 + 1, m_v1 + 1);
+    const CliqueEnumerator clique(edgelist, m_v2 + 1, m_v1 + 1);
     m_cliques1 = clique.GetCliques1();
     m_cliques2 = clique.GetCliques2();
   }
@@ -62,14 +61,14 @@ List<List<MixedStrategyProfile<T>>> EnumMixedStrategySolution<T>::GetCliques() c
   List<List<MixedStrategyProfile<T>>> solution;
   for (size_t cl = 1; cl <= m_cliques1.size(); cl++) {
     solution.push_back(List<MixedStrategyProfile<T>>());
-    for (int i = 1; i <= m_cliques1[cl].size(); i++) {
-      for (int j = 1; j <= m_cliques2[cl].size(); j++) {
+    for (size_t i = 1; i <= m_cliques1[cl].size(); i++) {
+      for (size_t j = 1; j <= m_cliques2[cl].size(); j++) {
         MixedStrategyProfile<T> profile(m_game->NewMixedStrategyProfile(static_cast<T>(0)));
 
-        for (int k = 1; k <= m_key1[m_cliques1[cl][i]].size(); k++) {
+        for (size_t k = 1; k <= m_key1[m_cliques1[cl][i]].size(); k++) {
           profile[k] = m_key1[m_cliques1[cl][i]][k];
         }
-        for (int k = 1; k <= m_key2[m_cliques2[cl][j]].size(); k++) {
+        for (size_t k = 1; k <= m_key2[m_cliques2[cl][j]].size(); k++) {
           profile[k + m_key1[m_cliques1[cl][i]].size()] = m_key2[m_cliques2[cl][j]][k];
         }
         solution[cl].push_back(profile);
@@ -92,7 +91,7 @@ EnumMixedStrategySolveDetailed(const Game &p_game, StrategyCallbackType<T> p_onE
   }
   std::shared_ptr<EnumMixedStrategySolution<T>> solution(new EnumMixedStrategySolution<T>(p_game));
 
-  PureStrategyProfile profile = p_game->NewPureStrategyProfile();
+  const PureStrategyProfile profile = p_game->NewPureStrategyProfile();
 
   Rational min = p_game->GetMinPayoff();
   if (min > Rational(0)) {
@@ -105,7 +104,7 @@ EnumMixedStrategySolveDetailed(const Game &p_game, StrategyCallbackType<T> p_onE
     max = Rational(0);
   }
 
-  Rational fac(1, max - min);
+  const Rational fac(1, max - min);
 
   // Construct matrices A1, A2
   Matrix<T> A1(1, p_game->GetPlayer(1)->GetStrategies().size(), 1,
@@ -129,8 +128,8 @@ EnumMixedStrategySolveDetailed(const Game &p_game, StrategyCallbackType<T> p_onE
   b2 = (T)-1;
 
   // enumerate vertices of A1 x + b1 <= 0 and A2 x + b2 <= 0
-  VertexEnumerator<T> poly1(A1, b1);
-  VertexEnumerator<T> poly2(A2, b2);
+  const VertexEnumerator<T> poly1(A1, b1);
+  const VertexEnumerator<T> poly2(A2, b2);
 
   const auto &verts1(poly1.VertexList());
   const auto &verts2(poly2.VertexList());
@@ -214,5 +213,4 @@ EnumMixedStrategySolveDetailed(const Game &p_game, StrategyCallbackType<double> 
 template std::shared_ptr<EnumMixedStrategySolution<Rational>>
 EnumMixedStrategySolveDetailed(const Game &p_game, StrategyCallbackType<Rational> p_onEquilibrium);
 
-} // namespace Nash
-} // end namespace Gambit
+} // end namespace Gambit::Nash

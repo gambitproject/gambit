@@ -78,7 +78,7 @@ template <> void LPTableau<double>::SetCost(const Vector<double> &c)
   if (c.first_index() != cost.first_index()) {
     throw DimensionException();
   }
-  if (c.last_index() != (cost.last_index() + unitcost.size())) {
+  if (c.last_index() != static_cast<int>(cost.last_index() + unitcost.size())) {
     throw DimensionException();
   }
   for (int i = c.first_index(); i <= cost.last_index(); i++) {
@@ -319,7 +319,7 @@ template <class T> bool LPTableau<T>::IsDualReversePivot(int i, int j)
 
   // check that i would be the column to enter in prior tableau
 
-  int enter = this->Label(i);
+  const int enter = this->Label(i);
   if (enter < 0) {
     a_ik = tmpdual[-enter];
   }

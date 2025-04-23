@@ -27,8 +27,7 @@
 
 #include "cmatrix.h"
 
-namespace Gambit {
-namespace gametracer {
+namespace Gambit::gametracer {
 
 class gnmgame {
 public:
@@ -56,7 +55,7 @@ public:
   virtual double getSymMixedPayoff(const cvector &s)
   {
     cvector fulls(getNumActions());
-    int nact = getNumActions(0);
+    const int nact = getNumActions(0);
     for (int i = 0; i < getNumPlayers(); ++i) {
       for (int j = 0; j < nact; ++j) {
         fulls[j + firstAction(i)] = s[j];
@@ -118,7 +117,6 @@ protected:
   int maxActions;
 };
 
-} // namespace gametracer
-} // end namespace Gambit
+} // end namespace Gambit::gametracer
 
 #endif // GAMBIT_GTRACER_GNMGAME_H

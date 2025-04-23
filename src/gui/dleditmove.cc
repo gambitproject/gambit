@@ -60,7 +60,7 @@ gbtActionSheet::gbtActionSheet(wxWindow *p_parent, const Gambit::GameInfoset &p_
     SetColLabelValue(1, wxT("Probability"));
   }
 
-  for (int act = 1; act <= p_infoset->NumActions(); act++) {
+  for (size_t act = 1; act <= p_infoset->NumActions(); act++) {
     SetCellValue(wxSheetCoords(act - 1, 0),
                  wxString(p_infoset->GetAction(act)->GetLabel().c_str(), *wxConvCurrent));
     if (p_infoset->IsChanceInfoset()) {
@@ -123,7 +123,7 @@ wxSheetCellAttr gbtActionSheet::GetAttr(const wxSheetCoords &p_coords, wxSheetAt
     return attr;
   }
   else if (IsCornerLabelCell(p_coords)) {
-    wxSheetCellAttr attr(GetSheetRefData()->m_defaultCornerLabelAttr);
+    const wxSheetCellAttr attr(GetSheetRefData()->m_defaultCornerLabelAttr);
     return attr;
   }
 
@@ -176,10 +176,9 @@ wxBEGIN_EVENT_TABLE(gbtEditMoveDialog,
     m_player->SetSelection(0);
   }
   else {
-    for (int pl = 1; pl <= p_infoset->GetGame()->NumPlayers(); pl++) {
-      m_player->Append(
-          wxString::Format(_T("%d: "), pl) +
-          wxString(p_infoset->GetGame()->GetPlayer(pl)->GetLabel().c_str(), *wxConvCurrent));
+    for (const auto &player : p_infoset->GetGame()->GetPlayers()) {
+      m_player->Append(wxString::Format(_T("%d: "), player->GetNumber()) +
+                       wxString(player->GetLabel().c_str(), *wxConvCurrent));
     }
     m_player->SetSelection(p_infoset->GetPlayer()->GetNumber() - 1);
   }
@@ -214,7 +213,7 @@ void gbtEditMoveDialog::OnOK(wxCommandEvent &p_event)
   }
   Array<Number> probs = m_actionSheet->GetActionProbs();
   Rational sum(0);
-  for (int act = 1; act <= m_infoset->NumActions(); act++) {
+  for (size_t act = 1; act <= m_infoset->NumActions(); act++) {
     auto prob = static_cast<Rational>(probs[act]);
     if (prob < Gambit::Rational(0)) {
       wxMessageBox("Action probabilities must be nonnegative numbers.", "Error");

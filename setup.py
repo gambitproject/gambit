@@ -99,44 +99,7 @@ libgambit = setuptools.Extension(
     )
 )
 
-
-def readme():
-    with open("src/README.rst") as f:
-        return f.read()
-
-
 setuptools.setup(
-    name="pygambit",
-    version="16.3.0",
-    description="The package for computation in game theory",
-    long_description=readme(),
-    classifiers=[
-        "Development Status :: 5 - Production/Stable",
-        "Intended Audience :: Science/Research",
-        "License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
-        "Programming Language :: Python :: 3.12",
-        "Programming Language :: Python :: Implementation :: CPython",
-        "Topic :: Scientific/Engineering :: Mathematics"
-    ],
-    keywords="game theory Nash equilibrium",
-    license="GPL2+",
-    author="Theodore Turocy",
-    author_email="ted.turocy@gmail.com",
-    url="https://www.gambit-project.org",
-    project_urls={
-        "Documentation": "https://gambitproject.readthedocs.io/",
-        "Source": "https://github.com/gambitproject/gambit",
-        "Tracker": "https://github.com/gambitproject/gambit/issues",
-    },
-    python_requires=">=3.9",
-    install_requires=[
-        "numpy",
-        "scipy",
-        "deprecated",
-    ],
     libraries=[cppgambit_bimatrix, cppgambit_liap, cppgambit_logit, cppgambit_simpdiv,
                cppgambit_gtracer, cppgambit_enumpoly,
                cppgambit_games, cppgambit_core],

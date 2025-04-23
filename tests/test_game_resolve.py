@@ -106,7 +106,7 @@ def test_resolve_strategy_invalid(
     ]
 )
 def test_resolve_node(game: gbt.Game) -> None:
-    _test_valid_resolutions(game.nodes(),
+    _test_valid_resolutions(game.nodes,
                             lambda label, fn: game._resolve_node(label, fn))
 
 

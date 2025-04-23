@@ -58,7 +58,7 @@ void gbtBehavProfileList::OnLabelClick(wxSheetEvent &p_event)
   else {
     // Clicking on an action column sets the selected node to the first
     // member of that information set.
-    Gambit::GameAction action = m_doc->GetAction(p_event.GetCol() + 1);
+    const Gambit::GameAction action = m_doc->GetAction(p_event.GetCol() + 1);
     m_doc->SetSelectNode(action->GetInfoset()->GetMember(1));
   }
 }
@@ -74,7 +74,7 @@ wxString gbtBehavProfileList::GetCellValue(const wxSheetCoords &p_coords)
     return wxString::Format(wxT("%d"), p_coords.GetRow() + 1);
   }
   else if (IsColLabelCell(p_coords)) {
-    Gambit::GameAction action = m_doc->GetAction(p_coords.GetCol() + 1);
+    const Gambit::GameAction action = m_doc->GetAction(p_coords.GetCol() + 1);
     return (wxString::Format(wxT("%d: "), action->GetInfoset()->GetNumber()) +
             wxString(action->GetLabel().c_str(), *wxConvCurrent));
   }
@@ -88,13 +88,13 @@ wxString gbtBehavProfileList::GetCellValue(const wxSheetCoords &p_coords)
 
 static wxColour GetPlayerColor(gbtGameDocument *p_doc, int p_index)
 {
-  Gambit::GameAction action = p_doc->GetAction(p_index + 1);
+  const Gambit::GameAction action = p_doc->GetAction(p_index + 1);
   return p_doc->GetStyle().GetPlayerColor(action->GetInfoset()->GetPlayer()->GetNumber());
 }
 
 wxSheetCellAttr gbtBehavProfileList::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
 {
-  int currentProfile = m_doc->GetCurrentProfile();
+  const int currentProfile = m_doc->GetCurrentProfile();
 
   if (IsRowLabelCell(p_coords)) {
     wxSheetCellAttr attr(GetSheetRefData()->m_defaultRowLabelAttr);
@@ -136,7 +136,7 @@ wxSheetCellAttr gbtBehavProfileList::GetAttr(const wxSheetCoords &p_coords, wxSh
   attr.SetRenderer(wxSheetCellRenderer(new gbtRationalRendererRefData()));
 
   try {
-    Gambit::GameAction action = m_doc->GetAction(p_coords.GetCol() + 1);
+    const Gambit::GameAction action = m_doc->GetAction(p_coords.GetCol() + 1);
     attr.SetForegroundColour(
         m_doc->GetStyle().GetPlayerColor(action->GetInfoset()->GetPlayer()->GetNumber()));
     if (action->GetInfoset()->GetNumber() % 2 == 0) {
@@ -162,7 +162,7 @@ void gbtBehavProfileList::OnUpdate()
   }
 
   const gbtAnalysisOutput &profiles = m_doc->GetProfiles();
-  int profileLength = m_doc->GetGame()->BehavProfileLength();
+  const int profileLength = m_doc->GetGame()->BehavProfileLength();
 
   BeginBatch();
   if (GetNumberRows() > profiles.NumProfiles()) {

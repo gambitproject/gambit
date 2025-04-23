@@ -70,7 +70,8 @@ private:
 
   bool HasNoOtherRootsIn(const Rectangle<double> &, const Vector<double> &) const;
 
-  void FindRoots(std::list<Vector<double>> &, const Rectangle<double> &, int) const;
+  void FindRoots(std::list<Vector<double>> &rootlist, const Rectangle<double> &r,
+                 const size_t max_roots) const;
 
 public:
   explicit PolynomialSystemSolver(const PolynomialSystem<double> &p_system)

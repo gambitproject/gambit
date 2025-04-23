@@ -34,9 +34,7 @@
 #include <sstream>
 #include "proj_func.h"
 
-namespace Gambit {
-
-namespace agg {
+namespace Gambit::agg {
 
 // forward declarations
 
@@ -125,7 +123,7 @@ public:
   // insert or add
   trie_map<V> &operator+=(const value_type &x)
   {
-    std::pair<typename trie_map<V>::iterator, bool> r = insert(x);
+    const std::pair<typename trie_map<V>::iterator, bool> r = insert(x);
     if (!r.second) {
       (*r.first).second += x.second;
     }
@@ -222,7 +220,8 @@ private:
     if (n == nullptr) {
       return;
     }
-    size_type i, s = n->children.size();
+    size_type i;
+    const size_type s = n->children.size();
     bool is_leaf = true;
     for (i = 0; i < s; ++i) {
       if (n->children[i]) {
@@ -276,8 +275,6 @@ template <class V> const double trie_map<V>::THRESH = 1e-12;
 
 template <class V> std::ostream &operator<<(std::ostream &s, const trie_map<V> &t);
 
-} // namespace agg
-
-} // end namespace Gambit
+} // end namespace Gambit::agg
 
 #endif // GAMBIT_AGG_TRIEMAP_H

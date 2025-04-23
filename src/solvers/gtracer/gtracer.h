@@ -31,8 +31,7 @@
 #include "aggame.h"
 #include "gambit.h"
 
-namespace Gambit {
-namespace gametracer {
+namespace Gambit::gametracer {
 
 /// @brief Executes the GNM algorithm on a game
 /// @param g     perturbation ray
@@ -93,7 +92,6 @@ cvector ToPerturbation(const MixedStrategyProfile<double> &p_profile);
 /// @brief Convert a Gametracer vector to a mixed strategy profile on a Gambit game
 MixedStrategyProfile<double> ToProfile(const Game &p_game, const cvector &p_profile);
 
-} // namespace gametracer
-} // end namespace Gambit
+} // end namespace Gambit::gametracer
 
 #endif // GAMBIT_GTRACER_GTRACER_H

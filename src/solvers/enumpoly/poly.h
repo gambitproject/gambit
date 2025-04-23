@@ -32,7 +32,7 @@ class VariableSpace {
 public:
   struct Variable {
     std::string name;
-    int number;
+    int number{0};
   };
 
   explicit VariableSpace(size_t nvars)

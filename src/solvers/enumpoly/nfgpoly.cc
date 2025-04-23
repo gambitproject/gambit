@@ -98,8 +98,7 @@ ConstructEquations(std::shared_ptr<VariableSpace> space, const StrategySupportPr
 
 } // end anonymous namespace
 
-namespace Gambit {
-namespace Nash {
+namespace Gambit::Nash {
 
 std::list<MixedStrategyProfile<double>>
 EnumPolyStrategySupportSolve(const StrategySupportProfile &support, bool &is_singular,
@@ -109,7 +108,7 @@ EnumPolyStrategySupportSolve(const StrategySupportProfile &support, bool &is_sin
                                                support.GetGame()->NumPlayers());
 
   auto strategy_poly = BuildStrategyVariables(space, support);
-  PolynomialSystem<double> equations = ConstructEquations(space, support, strategy_poly);
+  const PolynomialSystem<double> equations = ConstructEquations(space, support, strategy_poly);
 
   Vector<double> bottoms(space->GetDimension()), tops(space->GetDimension());
   bottoms = 0;
@@ -144,7 +143,8 @@ EnumPolyStrategySolve(const Game &p_game, int p_stopAfter, double p_maxregret,
                       EnumPolyMixedStrategyObserverFunctionType p_onEquilibrium,
                       EnumPolyStrategySupportObserverFunctionType p_onSupport)
 {
-  if (double scale = p_game->GetMaxPayoff() - p_game->GetMinPayoff() != 0.0) {
+  const double scale = p_game->GetMaxPayoff() - p_game->GetMinPayoff();
+  if (scale != 0.0) {
     p_maxregret *= scale;
   }
 
@@ -155,8 +155,8 @@ EnumPolyStrategySolve(const Game &p_game, int p_stopAfter, double p_maxregret,
     p_onSupport("candidate", support);
     bool is_singular;
     for (auto solution : EnumPolyStrategySupportSolve(
-             support, is_singular, std::max(p_stopAfter - int(ret.size()), 0))) {
-      MixedStrategyProfile<double> fullProfile = solution.ToFullSupport();
+             support, is_singular, std::max(p_stopAfter - static_cast<int>(ret.size()), 0))) {
+      const MixedStrategyProfile<double> fullProfile = solution.ToFullSupport();
       if (fullProfile.GetMaxRegret() < p_maxregret) {
         p_onEquilibrium(fullProfile);
         ret.push_back(fullProfile);
@@ -166,12 +166,11 @@ EnumPolyStrategySolve(const Game &p_game, int p_stopAfter, double p_maxregret,
     if (is_singular) {
       p_onSupport("singular", support);
     }
-    if (p_stopAfter > 0 && ret.size() >= p_stopAfter) {
+    if (p_stopAfter > 0 && static_cast<int>(ret.size()) >= p_stopAfter) {
       break;
     }
   }
   return ret;
 }
 
-} // namespace Nash
-} // namespace Gambit
+} // namespace Gambit::Nash

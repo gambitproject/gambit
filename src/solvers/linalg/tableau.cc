@@ -163,7 +163,7 @@ Tableau<Rational>::Tableau(const Matrix<Rational> &A, const Vector<Rational> &b)
   }
 
   for (int i = b.first_index(); i <= b.last_index(); i++) {
-    Rational x = b[i] * (Rational)totdenom;
+    const Rational x = b[i] * (Rational)totdenom;
     if (x.denominator() != 1) {
       throw BadDenom();
     }
@@ -171,7 +171,7 @@ Tableau<Rational>::Tableau(const Matrix<Rational> &A, const Vector<Rational> &b)
   }
   for (int i = MinRow(); i <= MaxRow(); i++) {
     for (int j = MinCol(); j <= MaxCol(); j++) {
-      Rational x = A(i, j) * (Rational)totdenom;
+      const Rational x = A(i, j) * (Rational)totdenom;
       if (x.denominator() != 1) {
         throw BadDenom();
       }
@@ -200,7 +200,7 @@ Tableau<Rational>::Tableau(const Matrix<Rational> &A, const Array<int> &art,
   }
 
   for (int i = b.first_index(); i <= b.last_index(); i++) {
-    Rational x = b[i] * (Rational)totdenom;
+    const Rational x = b[i] * (Rational)totdenom;
     if (x.denominator() != 1) {
       throw BadDenom();
     }
@@ -208,7 +208,7 @@ Tableau<Rational>::Tableau(const Matrix<Rational> &A, const Array<int> &art,
   }
   for (int i = MinRow(); i <= MaxRow(); i++) {
     for (int j = MinCol(); j <= A.MaxCol(); j++) {
-      Rational x = A(i, j) * (Rational)totdenom;
+      const Rational x = A(i, j) * (Rational)totdenom;
       if (x.denominator() != 1) {
         throw BadDenom();
       }
@@ -268,10 +268,10 @@ void Tableau<Rational>::Pivot(int outrow, int in_col)
   if (!RowIndex(outrow) || !ValidIndex(in_col)) {
     throw BadPivot();
   }
-  int outlabel = Label(outrow);
+  const int outlabel = Label(outrow);
 
   int col;
-  int row(outrow);
+  const int row(outrow);
   int i, j; // loop-control variables
 
   col = remap(in_col);
@@ -310,7 +310,7 @@ void Tableau<Rational>::Pivot(int outrow, int in_col)
     }
   }
   // Step 4
-  Integer old_denom = denom;
+  const Integer old_denom = denom;
   denom = Tabdat(row, col);
   Tabdat(row, col) = old_denom;
 
@@ -330,7 +330,7 @@ void Tableau<Rational>::SolveColumn(int in_col, Vector<Rational> &out)
     out[Find(in_col)] = Rational(abs(denom));
   }
   else {
-    int col = remap(in_col);
+    const int col = remap(in_col);
     Tabdat.GetColumn(col, tempcol);
     for (int i = tempcol.first_index(); i <= tempcol.last_index(); i++) {
       out[i] = (Rational)(tempcol[i]) * (Rational)(sign(denom * totdenom));
@@ -355,7 +355,7 @@ void Tableau<Rational>::MySolveColumn(int in_col, Vector<Rational> &out)
     out[Find(in_col)] = Rational(abs(denom));
   }
   else {
-    int col = remap(in_col);
+    const int col = remap(in_col);
     Tabdat.GetColumn(col, tempcol);
     for (int i = tempcol.first_index(); i <= tempcol.last_index(); i++) {
       out[i] = (Rational)(tempcol[i]) * (Rational)(sign(denom * totdenom));
@@ -379,7 +379,7 @@ void Tableau<Rational>::Refactor()
     throw BadDenom();
   }
   int i, j;
-  Matrix<Rational> inv(GetInverse());
+  const Matrix<Rational> inv(GetInverse());
   Matrix<Rational> Tabnew(Tabdat.MinRow(), Tabdat.MaxRow(), Tabdat.MinCol(), Tabdat.MaxCol());
   for (i = nonbasic.first_index(); i <= nonbasic.last_index(); i++) {
     GetColumn(nonbasic[i], mytmpcol);

@@ -37,10 +37,10 @@ template <class T> Array<int> MakeArtificials(const Vector<T> &b)
 
 template <class T>
 LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c, int nequals)
-  : well_formed(true), feasible(true), bounded(true), nvars(c.size()), neqns(b.size()),
-    nequals(nequals), total_cost(0), tmin(0), tab(A, MakeArtificials(b), b), UB(nvars + neqns),
-    LB(nvars + neqns), ub(nvars + neqns), lb(nvars + neqns), xx(nvars + neqns),
-    cost(nvars + neqns), y(b.size()), x(b.size()), d(b.size())
+  : nvars(c.size()), neqns(b.size()), nequals(nequals), total_cost(0), tmin(0),
+    tab(A, MakeArtificials(b), b), UB(nvars + neqns), LB(nvars + neqns), ub(nvars + neqns),
+    lb(nvars + neqns), xx(nvars + neqns), cost(nvars + neqns), y(b.size()), x(b.size()),
+    d(b.size())
 {
   // These are the values recommended by Murtagh (1981) for 15 digit
   // accuracy in LP problems
@@ -56,8 +56,8 @@ LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c, 
 
   // initialize data
   int xlab;
-  int num_inequals = A.NumRows() - nequals;
-  int num_artific = MakeArtificials(b).size();
+  const int num_inequals = A.NumRows() - nequals;
+  const int num_artific = MakeArtificials(b).size();
   nvars += num_artific;
 
   std::fill(UB.begin(), UB.end(), false);
@@ -94,7 +94,7 @@ LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c, 
   tab.SetCost(cost);
 
   // set xx to be initial feasible solution to phase II
-  for (int i = 1; i <= xx.size(); i++) {
+  for (size_t i = 1; i <= xx.size(); i++) {
     if (LB[i]) {
       xx[i] = lb[i];
     }
@@ -106,7 +106,7 @@ LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c, 
     }
   }
   tab.BasisVector(x);
-  for (int i = 1; i <= x.size(); i++) {
+  for (size_t i = 1; i <= x.size(); i++) {
     xlab = tab.Label(i);
     if (xlab < 0) {
       xlab = nvars - xlab;
@@ -159,7 +159,7 @@ template <class T> void LPSolve<T>::Solve(int phase)
   int in, xlab;
   int outlab = 0;
   int out = 0;
-  Vector<T> a(neqns);
+  const Vector<T> a(neqns);
 
   do {
     // step 1: Solve y B = c_B
@@ -179,7 +179,7 @@ template <class T> void LPSolve<T>::Solve(int phase)
           outlab = tab.Label(out);
         }
         // update xx
-        for (int i = 1; i <= x.size(); i++) {
+        for (size_t i = 1; i <= x.size(); i++) {
           xlab = tab.Label(i);
           if (xlab < 0) {
             xlab = nvars - xlab;
