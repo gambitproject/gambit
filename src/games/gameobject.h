@@ -23,6 +23,8 @@
 #ifndef GAMBIT_GAMES_GAMEOBJECT_H
 #define GAMBIT_GAMES_GAMEOBJECT_H
 
+#include <memory>
+
 namespace Gambit {
 
 /// This is a base class for all game-related objects.  Primary among
@@ -205,6 +207,44 @@ public:
   operator T *() const { return rep; }
 
   bool operator!() const { return !rep; }
+};
+
+template <class T> class GameObjectSharedPtr {
+private:
+  std::shared_ptr<T> m_rep;
+
+public:
+  GameObjectSharedPtr() = default;
+  GameObjectSharedPtr(std::nullptr_t r) : m_rep(r) {}
+  GameObjectSharedPtr(std::shared_ptr<T> r) : m_rep(r) {}
+  GameObjectSharedPtr(const GameObjectSharedPtr<T> &) = default;
+  ~GameObjectSharedPtr() = default;
+
+  GameObjectSharedPtr<T> &operator=(const GameObjectSharedPtr<T> &) = default;
+
+  std::shared_ptr<T> operator->() const
+  {
+    if (!m_rep) {
+      throw NullException();
+    }
+    if (!m_rep->IsValid()) {
+      throw InvalidObjectException();
+    }
+    return m_rep;
+  }
+
+  bool operator==(const GameObjectSharedPtr<T> &r) const { return (m_rep == r.m_rep); }
+  bool operator==(const std::shared_ptr<T> r) const { return (m_rep == r); }
+  bool operator==(const std::shared_ptr<const T> r) const { return (m_rep == r); }
+  bool operator==(const std::nullptr_t) const { return !bool(m_rep); }
+  bool operator!=(const GameObjectSharedPtr<T> &r) const { return (m_rep != r.m_rep); }
+  bool operator!=(const std::shared_ptr<T> r) const { return (m_rep != r); }
+  bool operator!=(const std::shared_ptr<const T> r) const { return (m_rep != r); }
+  bool operator!=(const std::nullptr_t) const { return bool(m_rep); }
+  bool operator<(const GameObjectSharedPtr<T> &r) const { return (m_rep < r.m_rep); }
+
+  operator bool() const noexcept { return bool(m_rep); }
+  operator std::shared_ptr<T>() const { return m_rep; }
 };
 
 } // end namespace Gambit

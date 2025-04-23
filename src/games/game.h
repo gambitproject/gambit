@@ -23,6 +23,7 @@
 #ifndef LIBGAMBIT_GAME_H
 #define LIBGAMBIT_GAME_H
 
+#include <iostream>
 #include <list>
 #include <set>
 
@@ -38,7 +39,7 @@ class GameOutcomeRep;
 using GameOutcome = GameObjectPtr<GameOutcomeRep>;
 
 class GameActionRep;
-using GameAction = GameObjectPtr<GameActionRep>;
+using GameAction = GameObjectSharedPtr<GameActionRep>;
 
 class GameInfosetRep;
 using GameInfoset = GameObjectPtr<GameInfosetRep>;
@@ -121,6 +122,81 @@ public:
   size_t size() const { return m_container->size(); }
   GameObjectPtr<T> front() const { return m_container->front(); }
   GameObjectPtr<T> back() const { return m_container->back(); }
+
+  iterator begin() const { return {m_owner, m_container, 0}; }
+  iterator end() const { return {m_owner, m_container, (m_owner) ? m_container->size() : 0}; }
+  iterator cbegin() const { return {m_owner, m_container, 0}; }
+  iterator cend() const { return {m_owner, m_container, (m_owner) ? m_container->size() : 0}; }
+};
+
+template <class P, class T> class SmartElementCollection {
+  P m_owner{nullptr};
+  const std::vector<std::shared_ptr<T>> *m_container{nullptr};
+
+public:
+  class iterator {
+    P m_owner{nullptr};
+    const std::vector<std::shared_ptr<T>> *m_container{nullptr};
+    size_t m_index{0};
+
+  public:
+    using iterator_category = std::bidirectional_iterator_tag;
+    using difference_type = std::ptrdiff_t;
+    using value_type = GameObjectSharedPtr<T>;
+    using pointer = value_type *;
+    using reference = value_type &;
+
+    iterator() = default;
+    iterator(const P &p_owner, const std::vector<std::shared_ptr<T>> *p_container,
+             size_t p_index = 0)
+      : m_owner(p_owner), m_container(p_container), m_index(p_index)
+    {
+    }
+    iterator(const iterator &) = default;
+    ~iterator() = default;
+    iterator &operator=(const iterator &) = default;
+
+    bool operator==(const iterator &p_iter) const
+    {
+      return m_owner == p_iter.m_owner && m_container == p_iter.m_container &&
+             m_index == p_iter.m_index;
+    }
+    bool operator!=(const iterator &p_iter) const
+    {
+      return m_owner != p_iter.m_owner || m_container != p_iter.m_container ||
+             m_index != p_iter.m_index;
+    }
+
+    iterator &operator++()
+    {
+      m_index++;
+      return *this;
+    }
+    iterator &operator--()
+    {
+      m_index--;
+      return *this;
+    }
+    value_type operator*() const { return m_container->at(m_index); }
+  };
+
+  SmartElementCollection() = default;
+  explicit SmartElementCollection(const P &p_owner,
+                                  const std::vector<std::shared_ptr<T>> *p_container)
+    : m_owner(p_owner), m_container(p_container)
+  {
+  }
+  SmartElementCollection(const SmartElementCollection<P, T> &) = default;
+  ~SmartElementCollection() = default;
+  SmartElementCollection &operator=(const SmartElementCollection<P, T> &) = default;
+
+  bool operator==(const SmartElementCollection<P, T> &p_other) const
+  {
+    return m_owner == p_other.m_owner && m_container == p_other.m_container;
+  }
+  size_t size() const { return m_container->size(); }
+  GameObjectSharedPtr<T> front() const { return m_container->front(); }
+  GameObjectSharedPtr<T> back() const { return m_container->back(); }
 
   iterator begin() const { return {m_owner, m_container, 0}; }
   iterator end() const { return {m_owner, m_container, (m_owner) ? m_container->size() : 0}; }
@@ -221,22 +297,29 @@ public:
 };
 
 /// An action at an information set in an extensive game
-class GameActionRep : public GameObject {
+class GameActionRep : public std::enable_shared_from_this<GameActionRep> {
   friend class GameTreeRep;
   friend class GameInfosetRep;
   template <class T> friend class MixedBehaviorProfile;
 
+  bool m_valid{true};
   int m_number;
   std::string m_label;
   GameInfosetRep *m_infoset;
 
+public:
   GameActionRep(int p_number, const std::string &p_label, GameInfosetRep *p_infoset)
     : m_number(p_number), m_label(p_label), m_infoset(p_infoset)
   {
   }
-  ~GameActionRep() override = default;
+  ~GameActionRep() = default;
 
-public:
+  /// @name Validity management
+  //@{
+  bool IsValid() const { return m_valid; }
+  void Invalidate() { m_valid = false; }
+  //@}
+
   int GetNumber() const { return m_number; }
   GameInfoset GetInfoset() const;
 
@@ -257,7 +340,7 @@ class GameInfosetRep : public GameObject {
   int m_number;
   std::string m_label;
   GamePlayerRep *m_player;
-  std::vector<GameActionRep *> m_actions;
+  std::vector<std::shared_ptr<GameActionRep>> m_actions;
   std::vector<GameNodeRep *> m_members;
   int flag{0}, whichbranch{0};
   std::vector<Number> m_probs;
@@ -268,11 +351,11 @@ class GameInfosetRep : public GameObject {
   void RenumberActions()
   {
     std::for_each(m_actions.begin(), m_actions.end(),
-                  [act = 1](GameActionRep *a) mutable { a->m_number = act++; });
+                  [act = 1](std::shared_ptr<GameActionRep> a) mutable { a->m_number = act++; });
   }
 
 public:
-  using Actions = ElementCollection<GameInfoset, GameActionRep>;
+  using Actions = SmartElementCollection<GameInfoset, GameActionRep>;
   using Members = ElementCollection<GameInfoset, GameNodeRep>;
 
   Game GetGame() const;

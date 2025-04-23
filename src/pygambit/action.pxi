@@ -19,6 +19,9 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
+import cython
+from cython.operator cimport dereference
+
 
 @cython.cclass
 class Action:
@@ -48,14 +51,14 @@ class Action:
         )
 
     def __hash__(self) -> int:
-        return cython.cast(cython.long, self.action.deref())
+        return cython.cast(cython.long, self.action.deref().get())
 
     @property
     def number(self) -> int:
         """Returns the number of the action at its information set.
         Actions are numbered starting with 0.
         """
-        return self.action.deref().GetNumber() - 1
+        return dereference(self.action.deref()).GetNumber() - 1
 
     def precedes(self, node: Node) -> bool:
         """Returns whether `node` precedes this action in the
@@ -68,21 +71,21 @@ class Action:
         """
         if self.infoset.game != node.game:
             raise MismatchError("precedes() requires a node from the same game as the action")
-        return self.action.deref().Precedes(cython.cast(Node, node).node)
+        return dereference(self.action.deref()).Precedes(cython.cast(Node, node).node)
 
     @property
     def label(self) -> str:
         """Get or set the text label of the action."""
-        return self.action.deref().GetLabel().decode("ascii")
+        return dereference(self.action.deref()).GetLabel().decode("ascii")
 
     @label.setter
     def label(self, value: str) -> None:
-        self.action.deref().SetLabel(value.encode("ascii"))
+        dereference(self.action.deref()).SetLabel(value.encode("ascii"))
 
     @property
     def infoset(self) -> Infoset:
         """Get the information set to which the action belongs."""
-        return Infoset.wrap(self.action.deref().GetInfoset())
+        return Infoset.wrap(dereference(self.action.deref()).GetInfoset())
 
     @property
     def prob(self) -> typing.Union[decimal.Decimal, Rational]:
@@ -100,7 +103,7 @@ class Action:
             )
         py_string = cython.cast(
             string,
-            self.action.deref().GetInfoset().deref().GetActionProb(self.action)
+            dereference(self.action.deref()).GetInfoset().deref().GetActionProb(self.action)
         )
         if "." in py_string.decode("ascii"):
             return decimal.Decimal(py_string.decode("ascii"))
