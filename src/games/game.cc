@@ -221,6 +221,16 @@ Array<GameStrategy> GameRep::GetStrategies() const
   return ret;
 }
 
+GameRep::~GameRep()
+{
+  for (auto player : m_players) {
+    player->Invalidate();
+  }
+  for (auto outcome : m_outcomes) {
+    outcome->Invalidate();
+  }
+}
+
 //------------------------------------------------------------------------
 //                     GameRep: Writing data files
 //------------------------------------------------------------------------

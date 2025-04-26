@@ -39,13 +39,6 @@ public:
   //@{
   /// Constructor
   explicit GameAGGRep(std::shared_ptr<agg::AGG>);
-  /// Destructor
-  ~GameAGGRep() override
-  {
-    for (auto player : m_players) {
-      player->Invalidate();
-    }
-  }
   /// Create a copy of the game, as a new game
   Game Copy() const override;
   //@}
