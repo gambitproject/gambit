@@ -30,16 +30,7 @@ namespace Gambit {
 class GameExplicitRep : public GameRep {
   template <class T> friend class MixedStrategyProfile;
 
-protected:
-  Array<GameOutcomeRep *> m_outcomes;
-
 public:
-  /// @name Lifecycle
-  //@{
-  /// Destructor
-  ~GameExplicitRep() override;
-  //@}
-
   /// @name General data access
   //@{
   /// Returns the smallest payoff to any player in any outcome of the game
@@ -69,7 +60,7 @@ public:
   /// Returns the number of outcomes defined in the game
   size_t NumOutcomes() const override { return m_outcomes.size(); }
   /// Returns the index'th outcome defined in the game
-  GameOutcome GetOutcome(int index) const override { return m_outcomes[index]; }
+  GameOutcome GetOutcome(int index) const override { return m_outcomes.at(index - 1); }
   /// Creates a new outcome in the game
   GameOutcome NewOutcome() override;
 

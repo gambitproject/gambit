@@ -295,10 +295,10 @@ GameTableRep::GameTableRep(const Array<int> &dim, bool p_sparseOutcomes /* = fal
     std::fill(m_results.begin(), m_results.end(), nullptr);
   }
   else {
-    m_outcomes = Array<GameOutcomeRep *>(m_results.size());
+    m_outcomes = std::vector<GameOutcomeRep *>(m_results.size());
     std::generate(m_outcomes.begin(), m_outcomes.end(),
                   [this, outc = 1]() mutable { return new GameOutcomeRep(this, outc++); });
-    m_results = m_outcomes;
+    std::copy(m_outcomes.begin(), m_outcomes.end(), m_results.begin());
   }
 }
 

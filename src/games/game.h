@@ -420,6 +420,7 @@ class GameRep : public BaseGameRep {
 
 protected:
   std::vector<GamePlayerRep *> m_players;
+  std::vector<GameOutcomeRep *> m_outcomes;
   std::string m_title, m_comment;
   unsigned int m_version{0};
 
@@ -435,7 +436,8 @@ public:
   /// @name Lifecycle
   //@{
   /// Clean up the game
-  ~GameRep() override = default;
+  ~GameRep() override;
+
   /// Create a copy of the game, as a new game
   virtual Game Copy() const = 0;
   //@}
