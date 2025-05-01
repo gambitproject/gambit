@@ -41,7 +41,7 @@ namespace Gambit {
 
 GameOutcomeRep::GameOutcomeRep(GameRep *p_game, int p_number) : m_game(p_game), m_number(p_number)
 {
-  for (const auto &player : p_game->GetPlayers()) {
+  for (const auto &player : m_game->m_players) {
     m_payoffs[player] = Number();
   }
 }
@@ -198,15 +198,6 @@ size_t GamePlayerRep::NumSequences() const
 //========================================================================
 //                            class GameRep
 //========================================================================
-
-Array<GamePlayer> GameRep::GetPlayers() const
-{
-  Array<GamePlayer> ret(NumPlayers());
-  for (size_t pl = 1; pl <= NumPlayers(); pl++) {
-    ret[pl] = GetPlayer(pl);
-  }
-  return ret;
-}
 
 Array<GameStrategy> GameRep::GetStrategies() const
 {

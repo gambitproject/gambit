@@ -432,6 +432,63 @@ protected:
   //@}
 
 public:
+  class Players {
+    Game m_game{nullptr};
+
+  public:
+    class iterator {
+      Game m_game{nullptr};
+      size_t m_index{0};
+
+    public:
+      using iterator_category = std::bidirectional_iterator_tag;
+      using difference_type = std::ptrdiff_t;
+      using value_type = GamePlayer;
+      using pointer = value_type *;
+      using reference = value_type &;
+
+      iterator() = default;
+      iterator(const Game &p_game, size_t p_index = 0) : m_game(p_game), m_index(p_index) {}
+      iterator(const iterator &) = default;
+      ~iterator() = default;
+      iterator &operator=(const iterator &) = default;
+
+      bool operator==(const iterator &p_iter) const
+      {
+        return m_game == p_iter.m_game && m_index == p_iter.m_index;
+      }
+      bool operator!=(const iterator &p_iter) const
+      {
+        return m_game != p_iter.m_game || m_index != p_iter.m_index;
+      }
+
+      iterator &operator++()
+      {
+        m_index++;
+        return *this;
+      }
+      iterator &operator--()
+      {
+        m_index--;
+        return *this;
+      }
+      GamePlayer operator*() const { return m_game->m_players.at(m_index); }
+    };
+
+    Players() = default;
+    explicit Players(const Game &p_game) : m_game(p_game) {}
+    Players(const Players &) = default;
+    ~Players() = default;
+    Players &operator=(const Players &) = default;
+
+    size_t size() const { return m_game->m_players.size(); }
+
+    iterator begin() const { return {m_game, 0}; }
+    iterator end() const { return {m_game, (m_game) ? m_game->m_players.size() : 0}; }
+    iterator cbegin() const { return {m_game, 0}; }
+    iterator cend() const { return {m_game, (m_game) ? m_game->m_players.size() : 0}; }
+  };
+
   /// @name Lifecycle
   //@{
   /// Clean up the game
@@ -598,7 +655,7 @@ public:
   /// Returns the pl'th player in the game
   GamePlayer GetPlayer(int pl) const { return m_players.at(pl - 1); }
   /// Returns the set of players in the game
-  Array<GamePlayer> GetPlayers() const;
+  Players GetPlayers() const { return Players(this); }
   /// Returns the chance (nature) player
   virtual GamePlayer GetChance() const = 0;
   /// Creates a new player in the game, with no moves

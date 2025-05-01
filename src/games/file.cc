@@ -428,7 +428,7 @@ void ParsePayoffBody(GameFileLexer &p_parser, Game &p_nfg)
 {
   const StrategySupportProfile profile(p_nfg);
   for (auto iter : StrategyContingencies(profile)) {
-    for (auto player : p_nfg->GetPlayers()) {
+    for (const auto &player : p_nfg->GetPlayers()) {
       p_parser.ExpectCurrentToken(TOKEN_NUMBER, "numerical payoff");
       iter->GetOutcome()->SetPayoff(player, Number(p_parser.GetLastText()));
       p_parser.GetNextToken();

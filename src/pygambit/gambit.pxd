@@ -169,6 +169,16 @@ cdef extern from "games/game.h":
         c_GameAction GetPriorAction() except +
 
     cdef cppclass c_GameRep "GameRep":
+        cppclass Players:
+            cppclass iterator:
+                c_GamePlayer operator *()
+                iterator operator++()
+                bint operator ==(iterator)
+                bint operator !=(iterator)
+            int size() except +
+            iterator begin() except +
+            iterator end() except +
+
         int IsTree() except +
 
         string GetTitle() except +
@@ -179,7 +189,7 @@ cdef extern from "games/game.h":
 
         int NumPlayers() except +
         c_GamePlayer GetPlayer(int) except +IndexError
-        Array[c_GamePlayer] GetPlayers() except +
+        Players GetPlayers() except +
         c_GamePlayer GetChance() except +
         c_GamePlayer NewPlayer() except +
 
