@@ -70,14 +70,15 @@ public:
 template <class T>
 NashLcpBehaviorSolver<T>::Solution::Solution(const Game &p_game)
   : ns1(p_game->GetPlayer(1)->NumSequences()), ns2(p_game->GetPlayer(2)->NumSequences()),
-    ni1(p_game->GetPlayer(1)->NumInfosets() + 1), ni2(p_game->GetPlayer(2)->NumInfosets() + 1),
+    ni1(p_game->GetPlayer(1)->GetInfosets().size() + 1),
+    ni2(p_game->GetPlayer(2)->GetInfosets().size() + 1),
     maxpay(p_game->GetMaxPayoff() + Rational(1))
 {
   for (const auto &player : p_game->GetPlayers()) {
     int offset = 1;
     for (const auto &infoset : player->GetInfosets()) {
       infosetOffset[infoset] = offset;
-      offset += infoset->NumActions();
+      offset += infoset->GetActions().size();
     }
   }
 }

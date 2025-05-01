@@ -41,7 +41,7 @@ namespace Gambit {
 
 GameOutcomeRep::GameOutcomeRep(GameRep *p_game, int p_number) : m_game(p_game), m_number(p_number)
 {
-  for (const auto &player : p_game->GetPlayers()) {
+  for (const auto &player : m_game->m_players) {
     m_payoffs[player] = Number();
   }
 }
@@ -68,20 +68,11 @@ GamePlayerRep::~GamePlayerRep()
   }
 }
 
-Array<GameStrategy> GamePlayerRep::GetStrategies() const
-{
-  m_game->BuildComputedValues();
-  Array<GameStrategy> ret(m_strategies.size());
-  std::transform(m_strategies.cbegin(), m_strategies.cend(), ret.begin(),
-                 [](const GameStrategyRep *s) -> GameStrategy { return s; });
-  return ret;
-}
-
 void GamePlayerRep::MakeStrategy()
 {
-  Array<int> c(NumInfosets());
+  Array<int> c(m_infosets.size());
 
-  for (size_t i = 1; i <= NumInfosets(); i++) {
+  for (size_t i = 1; i <= m_infosets.size(); i++) {
     if (m_infosets[i - 1]->flag == 1) {
       c[i] = m_infosets[i - 1]->whichbranch;
     }
@@ -118,12 +109,12 @@ void GamePlayerRep::MakeReducedStrats(GameNodeRep *n, GameNodeRep *nn)
     n->ptr = nullptr;
   }
 
-  if (n->NumChildren() > 0) {
+  if (!n->IsTerminal()) {
     if (n->m_infoset->m_player == this) {
       if (n->m_infoset->flag == 0) {
         // we haven't visited this infoset before
         n->m_infoset->flag = 1;
-        for (size_t i = 1; i <= n->NumChildren(); i++) {
+        for (size_t i = 1; i <= n->m_children.size(); i++) {
           GameNodeRep *m = n->m_children[i - 1];
           n->whichbranch = m;
           n->m_infoset->whichbranch = i;
@@ -175,51 +166,18 @@ void GamePlayerRep::MakeReducedStrats(GameNodeRep *n, GameNodeRep *nn)
   }
 }
 
-GameInfoset GamePlayerRep::GetInfoset(int p_index) const { return m_infosets[p_index - 1]; }
-
-Array<GameInfoset> GamePlayerRep::GetInfosets() const
-{
-  Array<GameInfoset> ret(m_infosets.size());
-  std::transform(m_infosets.cbegin(), m_infosets.cend(), ret.begin(),
-                 [](const GameInfosetRep *s) -> GameInfoset { return s; });
-  return ret;
-}
-
 size_t GamePlayerRep::NumSequences() const
 {
   if (!m_game->IsTree()) {
     throw UndefinedException();
   }
-  return std::accumulate(
-      m_infosets.cbegin(), m_infosets.cend(), 1,
-      [](int ct, const GameInfosetRep *s) -> int { return ct + s->m_actions.size(); });
+  return std::transform_reduce(m_infosets.cbegin(), m_infosets.cend(), 1, std::plus<>(),
+                               [](const GameInfosetRep *s) { return s->m_actions.size(); });
 }
 
 //========================================================================
 //                            class GameRep
 //========================================================================
-
-Array<GamePlayer> GameRep::GetPlayers() const
-{
-  Array<GamePlayer> ret(NumPlayers());
-  for (size_t pl = 1; pl <= NumPlayers(); pl++) {
-    ret[pl] = GetPlayer(pl);
-  }
-  return ret;
-}
-
-Array<GameStrategy> GameRep::GetStrategies() const
-{
-  Array<GameStrategy> ret(MixedProfileLength());
-  auto output = ret.begin();
-  for (auto player : GetPlayers()) {
-    for (auto strategy : player->GetStrategies()) {
-      *output = strategy;
-      ++output;
-    }
-  }
-  return ret;
-}
 
 GameRep::~GameRep()
 {

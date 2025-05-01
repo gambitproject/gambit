@@ -96,7 +96,7 @@ PolynomialSystem<double> ActionProbsSumToOneIneqs(const MixedBehaviorProfile<dou
       if (!big_supp.HasAction(infoset)) {
         const int index_base = var_index.at(infoset);
         Polynomial<double> factor(BehavStratSpace, 1.0);
-        for (size_t k = 1; k < infoset->NumActions(); k++) {
+        for (size_t k = 1; k < infoset->GetActions().size(); k++) {
           factor -= Polynomial<double>(BehavStratSpace, index_base + k, 1);
         }
         answer.push_back(factor);
@@ -117,7 +117,7 @@ std::list<BehaviorSupportProfile> DeviationSupports(const BehaviorSupportProfile
   BehaviorSupportProfile new_supp(big_supp);
 
   for (size_t i = 1; i <= isetlist.size(); i++) {
-    for (size_t j = 1; j < isetlist[i]->NumActions(); j++) {
+    for (size_t j = 1; j < isetlist[i]->GetActions().size(); j++) {
       new_supp.RemoveAction(isetlist[i]->GetAction(j));
     }
     new_supp.AddAction(isetlist[i]->GetAction(1));
@@ -137,7 +137,8 @@ std::list<BehaviorSupportProfile> DeviationSupports(const BehaviorSupportProfile
   size_t iset_cursor = isetlist.size();
   while (iset_cursor > 0) {
     if (active_act_no[iset_cursor] == 0 ||
-        active_act_no[iset_cursor] == static_cast<int>(isetlist[iset_cursor]->NumActions())) {
+        active_act_no[iset_cursor] ==
+            static_cast<int>(isetlist[iset_cursor]->GetActions().size())) {
       iset_cursor--;
     }
     else {
@@ -206,13 +207,13 @@ bool NashNodeProbabilityPoly(const MixedBehaviorProfile<double> &p_solution,
     }
     else {
       const int initial_var_no = var_index.at(last_infoset);
-      if (last_action->GetNumber() < static_cast<int>(last_infoset->NumActions())) {
+      if (last_action != last_infoset->GetActions().back()) {
         const int varno = initial_var_no + last_action->GetNumber();
         node_prob *= Polynomial<double>(BehavStratSpace, varno, 1);
       }
       else {
         Polynomial<double> factor(BehavStratSpace, 1.0);
-        for (size_t k = 1; k < last_infoset->NumActions(); k++) {
+        for (size_t k = 1; k < last_infoset->GetActions().size(); k++) {
           factor -= Polynomial<double>(BehavStratSpace, initial_var_no + k, 1);
         }
         node_prob *= factor;
@@ -296,7 +297,7 @@ bool ExtendsToNash(const MixedBehaviorProfile<double> &p_solution,
     for (auto infoset : player->GetInfosets()) {
       var_index[infoset] = num_vars;
       if (!big_supp.HasAction(infoset)) {
-        num_vars += infoset->NumActions() - 1;
+        num_vars += infoset->GetActions().size() - 1;
       }
     }
   }
@@ -346,13 +347,13 @@ bool ANFNodeProbabilityPoly(const MixedBehaviorProfile<double> &p_solution,
     }
     else {
       const int initial_var_no = var_index.at(last_infoset);
-      if (last_action->GetNumber() < static_cast<int>(last_infoset->NumActions())) {
+      if (last_action != last_infoset->GetActions().back()) {
         const int varno = initial_var_no + last_action->GetNumber();
         node_prob *= Polynomial<double>(BehavStratSpace, varno, 1);
       }
       else {
         Polynomial<double> factor(BehavStratSpace, 1.0);
-        for (size_t k = 1; k < last_infoset->NumActions(); k++) {
+        for (size_t k = 1; k < last_infoset->GetActions().size(); k++) {
           factor -= Polynomial<double>(BehavStratSpace, initial_var_no + k, 1);
         }
         node_prob *= factor;
@@ -432,7 +433,7 @@ bool ExtendsToAgentNash(const MixedBehaviorProfile<double> &p_solution,
     for (auto infoset : player->GetInfosets()) {
       var_index[infoset] = num_vars;
       if (!big_supp.HasAction(infoset)) {
-        num_vars += infoset->NumActions() - 1;
+        num_vars += infoset->GetActions().size() - 1;
       }
     }
   }

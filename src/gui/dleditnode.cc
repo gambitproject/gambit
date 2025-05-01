@@ -27,11 +27,13 @@
 #include "gambit.h"
 #include "dleditnode.h"
 
+using namespace Gambit;
+
 //======================================================================
 //                      class dialogEditNode
 //======================================================================
 
-dialogEditNode::dialogEditNode(wxWindow *p_parent, const Gambit::GameNode &p_node)
+dialogEditNode::dialogEditNode(wxWindow *p_parent, const GameNode &p_node)
   : wxDialog(p_parent, wxID_ANY, _("Node properties"), wxDefaultPosition), m_node(p_node)
 {
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
@@ -47,12 +49,12 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, const Gambit::GameNode &p_nod
   infosetSizer->Add(new wxStaticText(this, wxID_STATIC, _("Information set")), 0, wxALL | wxCENTER,
                     5);
   m_infoset = new wxChoice(this, wxID_ANY);
-  if (p_node->NumChildren() > 0) {
+  if (!p_node->IsTerminal()) {
     m_infoset->Append(_("New information set"));
     if (p_node->GetInfoset()->IsChanceInfoset()) {
       int selection = 0;
       for (const auto &infoset : p_node->GetGame()->GetChance()->GetInfosets()) {
-        if (infoset->NumActions() == p_node->NumChildren()) {
+        if (infoset->GetActions().size() == p_node->GetChildren().size()) {
           m_infosetList.push_back(infoset);
           m_infoset->Append(wxString::Format(_("Chance infoset %d"), infoset->GetNumber()));
           if (infoset == p_node->GetInfoset()) {
@@ -66,7 +68,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, const Gambit::GameNode &p_nod
       int selection = 0;
       for (const auto &player : p_node->GetGame()->GetPlayers()) {
         for (const auto &infoset : player->GetInfosets()) {
-          if (infoset->NumActions() == p_node->NumChildren()) {
+          if (infoset->GetActions().size() == p_node->GetChildren().size()) {
             m_infosetList.push_back(infoset);
             m_infoset->Append(wxString::Format(_("Player %d, Infoset %d"), player->GetNumber(),
                                                infoset->GetNumber()));
@@ -104,12 +106,12 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, const Gambit::GameNode &p_nod
   m_outcome = new wxChoice(this, wxID_ANY);
   m_outcome->Append(_("(null)"));
   m_outcome->SetSelection(0);
-  const Gambit::Game efg = p_node->GetGame();
-  for (size_t outc = 1; outc <= efg->NumOutcomes(); outc++) {
-    const Gambit::GameOutcome outcome = efg->GetOutcome(outc);
-    std::string item = Gambit::lexical_cast<std::string>(outc) + ": " + outcome->GetLabel();
+  const Game efg = p_node->GetGame();
+  for (const auto &outcome : efg->GetOutcomes()) {
+    std::string item =
+        lexical_cast<std::string>(outcome->GetNumber()) + ": " + outcome->GetLabel();
     if (item.empty()) {
-      item = "Outcome" + Gambit::lexical_cast<std::string>(outc);
+      item = "Outcome" + lexical_cast<std::string>(outcome->GetNumber());
     }
 
     item += (" (" + outcome->GetPayoff<std::string>(efg->GetPlayer(1)) + ", " +
@@ -129,7 +131,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, const Gambit::GameNode &p_nod
 
     m_outcome->Append(wxString(item.c_str(), *wxConvCurrent));
     if (m_node->GetOutcome() == outcome) {
-      m_outcome->SetSelection(outc);
+      m_outcome->SetSelection(outcome->GetNumber());
     }
   }
   outcomeSizer->Add(m_outcome, 1, wxALL | wxEXPAND, 5);
@@ -150,7 +152,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, const Gambit::GameNode &p_nod
   CenterOnParent();
 }
 
-Gambit::GameInfoset dialogEditNode::GetInfoset() const
+GameInfoset dialogEditNode::GetInfoset() const
 {
   if (m_infoset->GetSelection() == 0) {
     return nullptr;

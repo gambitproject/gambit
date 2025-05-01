@@ -382,7 +382,7 @@ gbtLogitPlotStrategyList::gbtLogitPlotStrategyList(wxWindow *p_parent, gbtGameDo
     const wxColour color = m_doc->GetStyle().GetPlayerColor(player->GetNumber());
 
     if (strategy->GetNumber() == 1) {
-      SetCellSpan(wxSheetCoords(st - 1, 0), wxSheetCoords(player->NumStrategies(), 1));
+      SetCellSpan(wxSheetCoords(st - 1, 0), wxSheetCoords(player->GetStrategies().size(), 1));
       SetCellValue(wxSheetCoords(st - 1, 0), wxString(player->GetLabel().c_str(), *wxConvCurrent));
       SetAttrForegroundColour(wxSheetCoords(st - 1, 0), color);
       SetAttrAlignment(wxSheetCoords(st - 1, 0), wxALIGN_CENTER | wxALIGN_CENTER_VERTICAL);

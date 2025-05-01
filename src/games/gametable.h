@@ -74,16 +74,6 @@ public:
   GamePlayer NewPlayer() override;
   //@}
 
-  /// @name Information sets
-  //@{
-  /// Returns the iset'th information set in the game (numbered globally)
-  GameInfoset GetInfoset(int iset) const override { throw UndefinedException(); }
-  /// Returns the set of information sets in the game
-  Array<GameInfoset> GetInfosets() const override { throw UndefinedException(); }
-  /// Returns an array with the number of information sets per personal player
-  Array<int> NumInfosets() const override { throw UndefinedException(); }
-  //@}
-
   /// @name Nodes
   //@{
   /// Returns the root node of the game

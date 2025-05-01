@@ -77,28 +77,6 @@ public:
   GamePlayer NewPlayer() override { throw UndefinedException(); }
   //@}
 
-  /// @name Information sets
-  //@{
-  /// Returns the iset'th information set in the game (numbered globally)
-  GameInfoset GetInfoset(int iset) const override { throw UndefinedException(); }
-  /// Returns the set of information sets in the game
-  Array<GameInfoset> GetInfosets() const override { throw UndefinedException(); }
-  /// Returns an array with the number of information sets per personal player
-  Array<int> NumInfosets() const override { throw UndefinedException(); }
-  //@}
-
-  /// @name Outcomes
-  //@{
-  /// Returns the number of outcomes defined in the game
-  size_t NumOutcomes() const override { throw UndefinedException(); }
-  /// Returns the index'th outcome defined in the game
-  GameOutcome GetOutcome(int index) const override { throw UndefinedException(); }
-  /// Creates a new outcome in the game
-  GameOutcome NewOutcome() override { throw UndefinedException(); }
-  /// Deletes the specified outcome from the game
-  void DeleteOutcome(const GameOutcome &) override { throw UndefinedException(); }
-  //@}
-
   /// @name Nodes
   //@{
   /// Returns the root node of the game

@@ -41,12 +41,10 @@ LogBehavProfile<T>::LogBehavProfile(const Game &p_game)
     }
   }
 
-  for (auto infoset : m_game->GetInfosets()) {
-    if (infoset->NumActions() > 0) {
-      T center = (T(1) / T(infoset->NumActions()));
-      for (auto act : infoset->GetActions()) {
-        SetProb(act, center);
-      }
+  for (const auto &infoset : m_game->GetInfosets()) {
+    T center = T(1) / T(infoset->GetActions().size());
+    for (const auto &act : infoset->GetActions()) {
+      SetProb(act, center);
     }
   }
 }
@@ -142,7 +140,7 @@ T LogBehavProfile<T>::DiffNodeValue(const GameNode &p_node, const GamePlayer &p_
 {
   ComputeSolutionData();
 
-  if (p_node->NumChildren() == 0) {
+  if (p_node->IsTerminal()) {
     // If we reach a terminal node and haven't encountered p_oppAction,
     // derivative wrt this path is zero.
     return static_cast<T>(0);
@@ -236,7 +234,7 @@ template <class T> void LogBehavProfile<T>::ComputeSolutionData() const
       }
       if (infosetProb == T(0)) {
         for (auto member : infoset->GetMembers()) {
-          m_beliefs[member] = 1.0 / T(infoset->NumMembers());
+          m_beliefs[member] = 1.0 / T(infoset->GetMembers().size());
         }
         continue;
       }

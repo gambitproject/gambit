@@ -119,9 +119,7 @@ public:
   /// Returns the iset'th information set in the game (numbered globally)
   GameInfoset GetInfoset(int iset) const override;
   /// Returns the set of information sets in the game
-  Array<GameInfoset> GetInfosets() const override;
-  /// Returns an array with the number of information sets per personal player
-  Array<int> NumInfosets() const override;
+  std::vector<GameInfoset> GetInfosets() const override;
   //@}
 
   /// @name Modification

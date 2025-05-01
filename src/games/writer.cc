@@ -79,7 +79,7 @@ std::string WriteHTMLFile(const Game &p_game, const GamePlayer &p_rowPlayer,
           catch (UndefinedException &) {
             theHtml += lexical_cast<std::string>(profile->GetPayoff(player));
           }
-          if (player->GetNumber() < static_cast<int>(p_game->NumPlayers())) {
+          if (player != p_game->GetPlayers().back()) {
             theHtml += ",";
           }
         }
@@ -102,9 +102,9 @@ std::string WriteLaTeXFile(const Game &p_game, const GamePlayer &p_rowPlayer,
   for (auto iter : StrategyContingencies(
            p_game, {p_rowPlayer->GetStrategies().front(), p_colPlayer->GetStrategies().front()})) {
     theHtml += "\\begin{game}{";
-    theHtml += lexical_cast<std::string>(p_rowPlayer->NumStrategies());
+    theHtml += std::to_string(p_rowPlayer->GetStrategies().size());
     theHtml += "}{";
-    theHtml += lexical_cast<std::string>(p_colPlayer->NumStrategies());
+    theHtml += std::to_string(p_colPlayer->GetStrategies().size());
     theHtml += "}[";
     theHtml += p_rowPlayer->GetLabel();
     theHtml += "][";
@@ -131,7 +131,7 @@ std::string WriteLaTeXFile(const Game &p_game, const GamePlayer &p_rowPlayer,
 
     for (const auto &strategy : p_colPlayer->GetStrategies()) {
       theHtml += strategy->GetLabel();
-      if (strategy->GetNumber() < static_cast<int>(p_colPlayer->NumStrategies())) {
+      if (strategy != p_colPlayer->GetStrategies().back()) {
         theHtml += " & ";
       }
     }
@@ -157,16 +157,16 @@ std::string WriteLaTeXFile(const Game &p_game, const GamePlayer &p_rowPlayer,
           catch (UndefinedException &) {
             theHtml += lexical_cast<std::string>(profile->GetPayoff(player));
           }
-          if (player->GetNumber() < static_cast<int>(p_game->NumPlayers())) {
+          if (player != p_game->GetPlayers().back()) {
             theHtml += ",";
           }
         }
         theHtml += "$ ";
-        if (col_strategy->GetNumber() < static_cast<int>(p_colPlayer->NumStrategies())) {
+        if (col_strategy != p_colPlayer->GetStrategies().back()) {
           theHtml += " & ";
         }
       }
-      if (row_strategy->GetNumber() < static_cast<int>(p_colPlayer->NumStrategies())) {
+      if (row_strategy != p_rowPlayer->GetStrategies().back()) {
         theHtml += "\\\\\n";
       }
     }

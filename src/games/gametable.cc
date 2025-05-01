@@ -417,7 +417,7 @@ void GameTableRep::DeleteStrategy(const GameStrategy &p_strategy)
   if (player->m_game != this) {
     throw MismatchException();
   }
-  if (player->NumStrategies() == 1) {
+  if (player->GetStrategies().size() == 1) {
     return;
   }
 

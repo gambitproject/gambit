@@ -36,19 +36,14 @@ class NodeChildren:
         return obj
 
     def __len__(self) -> int:
-        return self.parent.deref().NumChildren()
+        return self.parent.deref().GetChildren().size()
 
     def __repr__(self) -> str:
         return f"NodeChildren(parent={Node.wrap(self.parent)})"
 
     def __iter__(self) -> typing.Iterator[Node]:
-        if self.parent.deref().GetInfoset() != cython.cast(c_GameInfoset, NULL):
-            for i in range(self.parent.deref().GetInfoset().deref().NumActions()):
-                yield Node.wrap(
-                    self.parent.deref().GetChild(
-                        self.parent.deref().GetInfoset().deref().GetAction(i + 1)
-                    )
-                )
+        for child in self.parent.deref().GetChildren():
+            yield Node.wrap(child)
 
     def __getitem__(self, index: typing.Union[int, str]) -> Node:
         if isinstance(index, str):

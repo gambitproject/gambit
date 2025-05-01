@@ -113,9 +113,9 @@ EnumMixedStrategySolveDetailed(const Game &p_game, StrategyCallbackType<T> p_onE
                p_game->GetPlayer(1)->GetStrategies().size());
 
   for (size_t i = 1; i <= p_game->GetPlayer(1)->GetStrategies().size(); i++) {
-    profile->SetStrategy(p_game->GetPlayer(1)->GetStrategies()[i]);
+    profile->SetStrategy(p_game->GetPlayer(1)->GetStrategy(i));
     for (size_t j = 1; j <= p_game->GetPlayer(2)->GetStrategies().size(); j++) {
-      profile->SetStrategy(p_game->GetPlayer(2)->GetStrategies()[j]);
+      profile->SetStrategy(p_game->GetPlayer(2)->GetStrategy(j));
       A1(i, j) = fac * (profile->GetPayoff(p_game->GetPlayer(1)) - min);
       A2(j, i) = fac * (profile->GetPayoff(p_game->GetPlayer(2)) - min);
     }
@@ -171,12 +171,12 @@ EnumMixedStrategySolveDetailed(const Game &p_game, StrategyCallbackType<T> p_onE
         eqm = static_cast<T>(0);
         for (size_t k = 1; k <= p_game->GetPlayer(1)->GetStrategies().size(); k++) {
           if (bfs1.count(k)) {
-            eqm[p_game->GetPlayer(1)->GetStrategies()[k]] = -bfs1[k];
+            eqm[p_game->GetPlayer(1)->GetStrategy(k)] = -bfs1[k];
           }
         }
         for (size_t k = 1; k <= p_game->GetPlayer(2)->GetStrategies().size(); k++) {
           if (bfs2.count(k)) {
-            eqm[p_game->GetPlayer(2)->GetStrategies()[k]] = -bfs2[k];
+            eqm[p_game->GetPlayer(2)->GetStrategy(k)] = -bfs2[k];
           }
         }
         eqm = eqm.Normalize();

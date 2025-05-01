@@ -335,7 +335,8 @@ MixedStrategyProfile<Rational> GameRep::NewRandomStrategyProfile(int p_denom,
 {
   auto profile = NewMixedStrategyProfile(Rational(0));
   for (auto player : GetPlayers()) {
-    const std::list<Rational> dist = UniformOnSimplex(p_denom, player->NumStrategies(), generator);
+    const std::list<Rational> dist =
+        UniformOnSimplex(p_denom, player->GetStrategies().size(), generator);
     auto prob = dist.cbegin();
     for (auto strategy : player->GetStrategies()) {
       profile[strategy] = *prob;

@@ -47,7 +47,7 @@ public:
 
     for (const auto &player : m_game->GetPlayers()) {
       for (const auto &infoset : player->GetInfosets()) {
-        m_shape.push_back(infoset->NumActions());
+        m_shape.push_back(infoset->GetActions().size());
       }
     }
   }

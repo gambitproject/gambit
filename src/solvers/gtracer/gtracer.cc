@@ -40,7 +40,7 @@ std::shared_ptr<gnmgame> BuildGame(const Game &p_game, bool p_scaled)
   auto players = p_game->GetPlayers();
   std::vector<int> actions(players.size());
   std::transform(players.cbegin(), players.cend(), actions.begin(),
-                 [](const GamePlayer &p) { return p->NumStrategies(); });
+                 [](const GamePlayer &p) { return p->GetStrategies().size(); });
   std::shared_ptr<gnmgame> A(new nfgame(actions));
 
   std::vector<int> profile(players.size());
@@ -57,7 +57,12 @@ std::shared_ptr<gnmgame> BuildGame(const Game &p_game, bool p_scaled)
 
 cvector ToPerturbation(const MixedStrategyProfile<double> &p_pert)
 {
-  auto all_strategies = p_pert.GetGame()->GetStrategies();
+  std::vector<GameStrategy> all_strategies;
+  for (const auto &player : p_pert.GetGame()->GetPlayers()) {
+    for (const auto &strategy : player->GetStrategies()) {
+      all_strategies.push_back(strategy);
+    }
+  }
   cvector g(all_strategies.size());
   std::transform(all_strategies.cbegin(), all_strategies.cend(), g.begin(),
                  [p_pert](const GameStrategy &s) { return p_pert[s]; });
@@ -88,9 +93,11 @@ MixedStrategyProfile<double> ToProfile(const Game &p_game, const cvector &p_prof
 {
   MixedStrategyProfile<double> msp = p_game->NewMixedStrategyProfile(0.0);
   auto value = p_profile.cbegin();
-  for (auto strategy : p_game->GetStrategies()) {
-    msp[strategy] = *value;
-    ++value;
+  for (const auto &player : p_game->GetPlayers()) {
+    for (const auto &strategy : player->GetStrategies()) {
+      msp[strategy] = *value;
+      ++value;
+    }
   }
   return msp;
 }

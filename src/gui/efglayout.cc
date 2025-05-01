@@ -573,7 +573,7 @@ int gbtTreeLayout::LayoutSubtree(const GameNode &p_node, const BehaviorSupportPr
     entry->SetY((y1 + yn) / 2);
   }
   else {
-    if (p_node->NumChildren() > 0) {
+    if (!p_node->IsTerminal()) {
       for (const auto &action : p_node->GetInfoset()->GetActions()) {
         yn = LayoutSubtree(p_node->GetChild(action), p_support, p_maxy, p_miny, p_ycoord);
         if (y1 == -1) {
@@ -704,7 +704,7 @@ void gbtTreeLayout::FillInfosetTable(const GameNode &n, const BehaviorSupportPro
 {
   const gbtStyle &draw_settings = m_doc->GetStyle();
   gbtNodeEntry *entry = GetNodeEntry(n);
-  if (n->NumChildren() > 0) {
+  if (!n->IsTerminal()) {
     for (const auto &action : n->GetInfoset()->GetActions()) {
       const bool in_sup = n->GetPlayer()->IsChance() || cur_sup.Contains(action);
       if (in_sup || !draw_settings.RootReachable()) {
@@ -936,7 +936,7 @@ void gbtTreeLayout::RenderSubtree(wxDC &p_dc, bool p_noHints) const
       }
     }
 
-    if (entry->GetNode()->NumChildren() == 0) {
+    if (entry->GetNode()->IsTerminal()) {
       entry->Draw(p_dc, m_doc->GetSelectNode(), p_noHints);
     }
 
