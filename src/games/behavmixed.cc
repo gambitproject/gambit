@@ -115,7 +115,7 @@ void MixedBehaviorProfile<T>::RealizationProbs(const MixedStrategyProfile<T> &mp
       prob = T(node->m_infoset->GetActionProb(node->m_infoset->GetAction(i)));
     }
 
-    GameNodeRep *child = node->m_children[i];
+    GameNodeRep *child = node->m_children[i - 1];
 
     map_bvals[child] = prob * map_bvals[node];
     map_nvals[child] += map_bvals[child];
@@ -428,8 +428,8 @@ T MixedBehaviorProfile<T>::DiffActionValue(const GameAction &p_action,
 
     deriv += DiffRealizProb(member, p_oppAction) *
              (map_nodeValues[child][player] - map_actionValues[p_action]);
-    deriv += map_realizProbs[member] *
-             DiffNodeValue(member->GetChild(p_action->GetNumber()), player, p_oppAction);
+    deriv +=
+        map_realizProbs[member] * DiffNodeValue(member->GetChild(p_action), player, p_oppAction);
   }
 
   return deriv / GetInfosetProb(p_action->GetInfoset());

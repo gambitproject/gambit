@@ -574,16 +574,15 @@ int gbtTreeLayout::LayoutSubtree(const GameNode &p_node, const BehaviorSupportPr
   }
   else {
     if (p_node->NumChildren() > 0) {
-      for (size_t i = 1; i <= p_node->NumChildren(); i++) {
-        yn = LayoutSubtree(p_node->GetChild(i), p_support, p_maxy, p_miny, p_ycoord);
+      for (const auto &action : p_node->GetInfoset()->GetActions()) {
+        yn = LayoutSubtree(p_node->GetChild(action), p_support, p_maxy, p_miny, p_ycoord);
         if (y1 == -1) {
           y1 = yn;
         }
 
-        if (!p_node->GetPlayer()->IsChance() &&
-            !p_support.Contains(p_node->GetInfoset()->GetAction(i))) {
+        if (!p_node->GetPlayer()->IsChance() && !p_support.Contains(action)) {
           (*std::find_if(m_nodeList.begin(), m_nodeList.end(), [&](const gbtNodeEntry *e) {
-            return e->GetNode() == p_node->GetChild(i);
+            return e->GetNode() == p_node->GetChild(action);
           }))->SetInSupport(false);
         }
       }

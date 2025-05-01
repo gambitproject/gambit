@@ -367,7 +367,7 @@ class GameNodeRep : public GameObject {
   GameInfosetRep *m_infoset{nullptr};
   GameNodeRep *m_parent;
   GameOutcomeRep *m_outcome{nullptr};
-  Array<GameNodeRep *> m_children;
+  std::vector<GameNodeRep *> m_children;
   GameNodeRep *whichbranch{nullptr}, *ptr{nullptr};
 
   GameNodeRep(GameRep *e, GameNodeRep *p);
@@ -383,13 +383,12 @@ public:
 
   int GetNumber() const { return m_number; }
   size_t NumChildren() const { return m_children.size(); }
-  GameNode GetChild(int i) const { return m_children[i]; }
   GameNode GetChild(const GameAction &p_action)
   {
     if (p_action->GetInfoset() != m_infoset) {
       throw MismatchException();
     }
-    return m_children[p_action->GetNumber()];
+    return m_children.at(p_action->GetNumber() - 1);
   }
   Array<GameNode> GetChildren() const;
 

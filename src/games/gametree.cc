@@ -137,10 +137,10 @@ void GameTreeRep::DeleteAction(GameAction p_action)
   infoset->RenumberActions();
 
   for (auto member : infoset->m_members) {
-    DeleteTree(member->m_children[where]);
+    DeleteTree(member->m_children[where - 1]);
     m_numNodes--;
-    member->m_children[where]->Invalidate();
-    erase_atindex(member->m_children, where);
+    member->m_children[where - 1]->Invalidate();
+    member->m_children.erase(std::next(member->m_children.begin(), where - 1));
   }
   ClearComputedValues();
   Canonicalize();
@@ -461,10 +461,10 @@ void GameTreeRep::DeleteTree(GameNode p_node)
   }
   IncrementVersion();
   while (!node->m_children.empty()) {
-    DeleteTree(node->m_children.front());
+    DeleteTree(node->m_children.back());
     m_numNodes--;
-    node->m_children.front()->Invalidate();
-    erase_atindex(node->m_children, 1);
+    node->m_children.back()->Invalidate();
+    node->m_children.pop_back();
   }
   if (node->m_infoset) {
     RemoveMember(node->m_infoset, node);
@@ -738,9 +738,10 @@ Rational SubtreeSum(const GameNode &p_node)
   Rational sum(0);
 
   if (p_node->NumChildren() > 0) {
-    sum = SubtreeSum(p_node->GetChild(1));
-    for (size_t i = 2; i <= p_node->NumChildren(); i++) {
-      if (SubtreeSum(p_node->GetChild(i)) != sum) {
+    auto children = p_node->GetChildren();
+    sum = SubtreeSum(children.front());
+    for (auto child = std::next(children.begin()); child != children.end(); child++) {
+      if (SubtreeSum(*child) != sum) {
         throw NotZeroSumException();
       }
     }
@@ -776,7 +777,7 @@ bool GameTreeRep::IsPerfectRecall(GameInfoset &s1, GameInfoset &s2) const
         auto *iset2 = player->m_infosets[j - 1];
 
         bool precedes = false;
-        size_t action = 0;
+        GameAction action = nullptr;
 
         for (size_t m = 1; m <= iset2->NumMembers(); m++) {
           size_t n;
@@ -784,9 +785,9 @@ bool GameTreeRep::IsPerfectRecall(GameInfoset &s1, GameInfoset &s2) const
             if (iset2->GetMember(m)->IsSuccessorOf(iset1->GetMember(n)) &&
                 iset1->GetMember(n) != iset2->GetMember(m)) {
               precedes = true;
-              for (size_t act = 1; act <= iset1->NumActions(); act++) {
+              for (const auto &act : iset1->GetActions()) {
                 if (iset2->GetMember(m)->IsSuccessorOf(iset1->GetMember(n)->GetChild(act))) {
-                  if (action != 0 && action != act) {
+                  if (action != nullptr && action != act) {
                     s1 = iset1;
                     s2 = iset2;
                     return false;
