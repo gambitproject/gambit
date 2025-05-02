@@ -446,7 +446,7 @@ def test_len_after_delete_tree():
     list_nodes = list(game.nodes)
 
     root_of_the_deleted_subtree = list_nodes[3]
-    number_of_deleted_nodes = _count_subtree_nodes(root_of_the_deleted_subtree)
+    number_of_deleted_nodes = _count_subtree_nodes(root_of_the_deleted_subtree) - 1
 
     game.delete_tree(root_of_the_deleted_subtree)
 
