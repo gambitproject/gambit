@@ -37,6 +37,7 @@ protected:
   GameNodeRep *m_root;
   GamePlayerRep *m_chance;
   std::size_t m_numNodes = 1;
+  std::size_t m_numNonterminalNodes = 0;
 
   /// @name Private auxiliary functions
   //@{
@@ -95,6 +96,8 @@ public:
   GameNode GetRoot() const override { return m_root; }
   /// Returns the number of nodes in the game
   size_t NumNodes() const override { return m_numNodes; }
+  /// Returns the number of non-terminal nodes in the game
+  size_t NumNonterminalNodes() const override { return m_numNonterminalNodes; }
   //@}
 
   void DeleteOutcome(const GameOutcome &) override;

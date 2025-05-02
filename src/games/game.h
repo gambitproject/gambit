@@ -634,6 +634,8 @@ public:
   virtual GameNode GetRoot() const = 0;
   /// Returns the number of nodes in the game
   virtual size_t NumNodes() const = 0;
+  /// Returns the number of non-terminal nodes in the game
+  virtual size_t NumNonterminalNodes() const = 0;
   //@}
 
   /// @name Modification

@@ -242,6 +242,7 @@ GameAction GameTreeRep::InsertAction(GameInfoset p_infoset, GameAction p_action 
   }
 
   m_numNodes += p_infoset->m_members.size();
+  // m_numNonterminalNodes stays unchanged when an action is appended to an information set
   ClearComputedValues();
   Canonicalize();
   return action;
@@ -455,6 +456,9 @@ void GameTreeRep::DeleteTree(GameNode p_node)
     throw MismatchException();
   }
   GameNodeRep *node = p_node;
+  if (!node->IsTerminal()) {
+    m_numNonterminalNodes--;
+  }
   IncrementVersion();
   while (!node->m_children.empty()) {
     DeleteTree(node->m_children.front());
@@ -633,6 +637,7 @@ GameInfoset GameTreeRep::AppendMove(GameNode p_node, GameInfoset p_infoset)
                   node->m_children.push_back(new GameNodeRep(this, node));
                   m_numNodes++;
                 });
+  m_numNonterminalNodes++;
   ClearComputedValues();
   Canonicalize();
   return node->m_infoset;
@@ -681,6 +686,7 @@ GameInfoset GameTreeRep::InsertMove(GameNode p_node, GameInfoset p_infoset)
 
   // Total nodes added = 1 (newNode) + (NumActions - 1) (new children of newNode) = NumActions
   m_numNodes += newNode->m_infoset->m_actions.size();
+  m_numNonterminalNodes++;
   ClearComputedValues();
   Canonicalize();
   return p_infoset;
