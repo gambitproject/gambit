@@ -138,6 +138,7 @@ void GameTreeRep::DeleteAction(GameAction p_action)
 
   for (auto member : infoset->m_members) {
     DeleteTree(member->m_children[where]);
+    m_numNodes--;
     member->m_children[where]->Invalidate();
     erase_atindex(member->m_children, where);
   }
@@ -434,6 +435,7 @@ void GameTreeRep::DeleteParent(GameNode p_node)
       std::find(oldParent->m_children.begin(), oldParent->m_children.end(), node));
   DeleteTree(oldParent);
   node->m_parent = oldParent->m_parent;
+  m_numNodes--;
   if (node->m_parent) {
     std::replace(node->m_parent->m_children.begin(), node->m_parent->m_children.end(), oldParent,
                  node);
@@ -456,6 +458,7 @@ void GameTreeRep::DeleteTree(GameNode p_node)
   IncrementVersion();
   while (!node->m_children.empty()) {
     DeleteTree(node->m_children.front());
+    m_numNodes--;
     node->m_children.front()->Invalidate();
     erase_atindex(node->m_children, 1);
   }
@@ -463,7 +466,6 @@ void GameTreeRep::DeleteTree(GameNode p_node)
     RemoveMember(node->m_infoset, node);
     node->m_infoset = nullptr;
   }
-  m_numNodes--;
   node->m_outcome = nullptr;
   node->m_label = "";
 
