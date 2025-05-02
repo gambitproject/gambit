@@ -187,6 +187,7 @@ cdef extern from "games/game.h":
         void DeleteOutcome(c_GameOutcome) except +
 
         int NumNodes() except +
+        int NumNonterminalNodes() except +
         c_GameNode GetRoot() except +
 
         c_GameStrategy GetStrategy(int) except +IndexError

@@ -109,6 +109,8 @@ public:
   GameNode GetRoot() const override { throw UndefinedException(); }
   /// Returns the number of nodes in the game
   size_t NumNodes() const override { throw UndefinedException(); }
+  /// Returns the number of non-terminal nodes in the game
+  size_t NumNonterminalNodes() const override { throw UndefinedException(); }
   //@}
 
   /// @name General data access
