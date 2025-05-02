@@ -184,7 +184,7 @@ class GameInfosetRep : public GameObject {
   int m_number;
   std::string m_label;
   GamePlayerRep *m_player;
-  Array<GameActionRep *> m_actions;
+  std::vector<GameActionRep *> m_actions;
   std::vector<GameNodeRep *> m_members;
   int flag{0}, whichbranch{0};
   Array<Number> m_probs;
@@ -214,7 +214,7 @@ public:
   /// Returns the number of actions available at the information set
   size_t NumActions() const { return m_actions.size(); }
   /// Returns the p_index'th action at the information set
-  GameAction GetAction(int p_index) const { return m_actions[p_index]; }
+  GameAction GetAction(int p_index) const { return m_actions.at(p_index - 1); }
   /// Returns the actions available at the information set
   Array<GameAction> GetActions() const;
   //@}

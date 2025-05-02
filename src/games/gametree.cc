@@ -124,23 +124,22 @@ void GameTreeRep::DeleteAction(GameAction p_action)
   }
 
   IncrementVersion();
-  size_t where;
-  for (where = 1; where <= infoset->m_actions.size() && infoset->m_actions[where] != action;
-       where++)
-    ;
-  infoset->m_actions[where]->Invalidate();
-  erase_atindex(infoset->m_actions, where);
+  auto where = std::find(infoset->m_actions.begin(), infoset->m_actions.end(), action);
+  auto offset = where - infoset->m_actions.begin();
+  (*where)->Invalidate();
+  infoset->m_actions.erase(where);
   if (infoset->m_player->IsChance()) {
-    erase_atindex(infoset->m_probs, where);
+    infoset->m_probs.erase(std::next(infoset->m_probs.begin(), offset));
     NormalizeChanceProbs(infoset);
   }
   infoset->RenumberActions();
 
   for (auto member : infoset->m_members) {
-    DeleteTree(member->m_children[where - 1]);
+    auto it = std::next(member->m_children.begin(), offset);
+    DeleteTree(*it);
     m_numNodes--;
-    member->m_children[where - 1]->Invalidate();
-    member->m_children.erase(std::next(member->m_children.begin(), where - 1));
+    (*it)->Invalidate();
+    member->m_children.erase(it);
   }
   ClearComputedValues();
   Canonicalize();
@@ -224,20 +223,17 @@ GameAction GameTreeRep::InsertAction(GameInfoset p_infoset, GameAction p_action 
   }
 
   IncrementVersion();
-  int where = p_infoset->m_actions.size() + 1;
-  if (p_action) {
-    for (where = 1; p_infoset->m_actions[where] != p_action; where++)
-      ;
-  }
+  auto where = std::find(p_infoset->m_actions.begin(), p_infoset->m_actions.end(), p_action);
+  auto offset = where - p_infoset->m_actions.begin();
 
-  auto *action = new GameActionRep(where, "", p_infoset);
-  p_infoset->m_actions.insert(std::next(p_infoset->m_actions.cbegin(), where - 1), action);
+  auto *action = new GameActionRep(offset + 1, "", p_infoset);
+  p_infoset->m_actions.insert(where, action);
   if (p_infoset->m_player->IsChance()) {
-    p_infoset->m_probs.insert(std::next(p_infoset->m_probs.cbegin(), where - 1), Number());
+    p_infoset->m_probs.insert(std::next(p_infoset->m_probs.cbegin(), offset), Number());
   }
   p_infoset->RenumberActions();
   for (const auto &member : p_infoset->m_members) {
-    member->m_children.insert(std::next(member->m_children.cbegin(), where - 1),
+    member->m_children.insert(std::next(member->m_children.cbegin(), offset),
                               new GameNodeRep(this, member));
   }
 
