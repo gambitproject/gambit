@@ -86,18 +86,6 @@ public:
   //@}
 };
 
-class GameValidObject {
-protected:
-  bool m_valid{true};
-
-public:
-  GameValidObject() = default;
-  ~GameValidObject() = default;
-
-  bool IsValid() const { return m_valid; }
-  void Invalidate() { m_valid = false; }
-};
-
 class BaseGameRep {
 protected:
   int m_refCount{0};
@@ -252,6 +240,7 @@ public:
   bool operator!=(const GameObjectSharedPtr<T> &r) const { return (m_rep != r.m_rep); }
   bool operator!=(const std::shared_ptr<T> r) const { return (m_rep != r); }
   bool operator!=(const std::shared_ptr<const T> r) const { return (m_rep != r); }
+  bool operator!=(const std::nullptr_t) const { return bool(m_rep); }
   bool operator<(const GameObjectSharedPtr<T> &r) const { return (m_rep < r.m_rep); }
 
   operator bool() const noexcept { return bool(m_rep); }

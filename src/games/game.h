@@ -149,11 +149,12 @@ public:
 };
 
 /// An action at an information set in an extensive game
-class GameActionRep : public GameValidObject, public std::enable_shared_from_this<GameActionRep> {
+class GameActionRep : public std::enable_shared_from_this<GameActionRep> {
   friend class GameTreeRep;
   friend class GameInfosetRep;
   template <class T> friend class MixedBehaviorProfile;
 
+  bool m_valid{true};
   int m_number;
   std::string m_label;
   GameInfosetRep *m_infoset;
@@ -164,6 +165,12 @@ public:
   {
   }
   ~GameActionRep() = default;
+
+  /// @name Validity management
+  //@{
+  bool IsValid() const { return m_valid; }
+  void Invalidate() { m_valid = false; }
+  //@}
 
   int GetNumber() const { return m_number; }
   GameInfoset GetInfoset() const;
