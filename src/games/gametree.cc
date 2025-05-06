@@ -158,7 +158,7 @@ GameInfosetRep::GameInfosetRep(GameRep *p_efg, int p_number, GamePlayerRep *p_pl
   std::generate(m_actions.begin(), m_actions.end(),
                 [this, i = 1]() mutable { return new GameActionRep(i++, "", this); });
   if (p_player->IsChance()) {
-    m_probs = Array<Number>(m_actions.size());
+    m_probs = std::vector<Number>(m_actions.size());
     std::fill(m_probs.begin(), m_probs.end(), Rational(1, m_actions.size()));
   }
   m_player->m_infosets.push_back(this);
