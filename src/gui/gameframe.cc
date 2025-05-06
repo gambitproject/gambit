@@ -636,9 +636,9 @@ void gbtGameFrame::OnFileNewEfg(wxCommandEvent &)
 
 void gbtGameFrame::OnFileNewNfg(wxCommandEvent &)
 {
-  Gambit::Array<int> dim(2);
+  std::vector<int> dim(2);
+  dim[0] = 2;
   dim[1] = 2;
-  dim[2] = 2;
   const Gambit::Game nfg = Gambit::NewTable(dim);
   nfg->SetTitle("Untitled Strategic Game");
   nfg->GetPlayer(1)->SetLabel("Player 1");

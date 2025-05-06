@@ -517,10 +517,7 @@ class Game:
         Game
             The newly-created strategic game.
         """
-        cdef Array[int] d
-        for v in dim:
-            d.push_back(v)
-        g = Game.wrap(NewTable(d))
+        g = Game.wrap(NewTable(list(dim)))
         g.title = title
         return g
 

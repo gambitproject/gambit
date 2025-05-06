@@ -704,7 +704,7 @@ inline GameStrategy GamePlayerRep::GetStrategy(int st) const
 /// Factory function to create new game tree
 Game NewTree();
 /// Factory function to create new game table
-Game NewTable(const Array<int> &p_dim, bool p_sparseOutcomes = false);
+Game NewTable(const std::vector<int> &p_dim, bool p_sparseOutcomes = false);
 
 /// @brief Reads a game representation in .efg format
 ///

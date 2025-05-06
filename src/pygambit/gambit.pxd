@@ -2,6 +2,7 @@ from libcpp cimport bool
 from libcpp.string cimport string
 from libcpp.memory cimport shared_ptr, unique_ptr
 from libcpp.list cimport list as stdlist
+from libcpp.vector cimport vector as stdvector
 
 
 cdef extern from "gambit.h":
@@ -230,7 +231,7 @@ cdef extern from "games/game.h":
         c_MixedStrategyProfile[T] NewMixedStrategyProfile[T](T)  # except + doesn't compile
 
     c_Game NewTree() except +
-    c_Game NewTable(Array[int]) except +
+    c_Game NewTable(stdvector[int]) except +
 
 
 cdef extern from "games/stratpure.h":

@@ -64,7 +64,7 @@ std::shared_ptr<PureStrategyProfileRep> TablePureStrategyProfileRep::Copy() cons
   return std::make_shared<TablePureStrategyProfileRep>(*this);
 }
 
-Game NewTable(const Array<int> &p_dim, bool p_sparseOutcomes /*= false*/)
+Game NewTable(const std::vector<int> &p_dim, bool p_sparseOutcomes /*= false*/)
 {
   return new GameTableRep(p_dim, p_sparseOutcomes);
 }
@@ -265,12 +265,12 @@ template class TableMixedStrategyProfileRep<Rational>;
 //                     GameTableRep: Lifecycle
 //------------------------------------------------------------------------
 
-GameTableRep::GameTableRep(const Array<int> &dim, bool p_sparseOutcomes /* = false */)
+GameTableRep::GameTableRep(const std::vector<int> &dim, bool p_sparseOutcomes /* = false */)
   : m_results(std::accumulate(dim.begin(), dim.end(), 1, std::multiplies<>()))
 {
-  for (size_t pl = 1; pl <= dim.size(); pl++) {
-    m_players.push_back(new GamePlayerRep(this, pl, dim[pl]));
-    m_players.back()->m_label = lexical_cast<std::string>(pl);
+  for (const auto &nstrat : dim) {
+    m_players.push_back(new GamePlayerRep(this, m_players.size() + 1, nstrat));
+    m_players.back()->m_label = lexical_cast<std::string>(m_players.size());
     std::for_each(
         m_players.back()->m_strategies.begin(), m_players.back()->m_strategies.end(),
         [st = 1](GameStrategyRep *s) mutable { s->SetLabel(lexical_cast<std::string>(st++)); });

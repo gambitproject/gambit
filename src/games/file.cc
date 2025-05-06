@@ -306,9 +306,9 @@ public:
   std::vector<TableFilePlayer> m_players;
 
   size_t NumPlayers() const { return m_players.size(); }
-  Array<int> NumStrategies() const
+  std::vector<int> NumStrategies() const
   {
-    Array<int> ret(m_players.size());
+    std::vector<int> ret(m_players.size());
     std::transform(m_players.begin(), m_players.end(), ret.begin(),
                    [](const TableFilePlayer &player) { return player.m_strategies.size(); });
     return ret;

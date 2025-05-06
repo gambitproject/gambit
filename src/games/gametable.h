@@ -49,7 +49,7 @@ public:
   //@{
   /// Construct a new table game with the given dimension
   /// If p_sparseOutcomes = true, outcomes for all contingencies are left null
-  explicit GameTableRep(const Array<int> &p_dim, bool p_sparseOutcomes = false);
+  explicit GameTableRep(const std::vector<int> &p_dim, bool p_sparseOutcomes = false);
   Game Copy() const override;
   //@}
 
