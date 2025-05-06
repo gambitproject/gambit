@@ -187,7 +187,7 @@ class GameInfosetRep : public GameObject {
   std::vector<GameActionRep *> m_actions;
   std::vector<GameNodeRep *> m_members;
   int flag{0}, whichbranch{0};
-  Array<Number> m_probs;
+  std::vector<Number> m_probs;
 
   GameInfosetRep(GameRep *p_efg, int p_number, GamePlayerRep *p_player, int p_actions);
   ~GameInfosetRep() override;
@@ -230,7 +230,7 @@ public:
     if (p_action->GetInfoset() != GameInfoset(const_cast<GameInfosetRep *>(this))) {
       throw MismatchException();
     }
-    return m_probs[p_action->GetNumber()];
+    return m_probs.at(p_action->GetNumber() - 1);
   }
 };
 
