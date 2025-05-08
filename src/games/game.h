@@ -441,7 +441,6 @@ public:
   void SetLabel(const std::string &p_label) { m_label = p_label; }
 
   int GetNumber() const { return m_number; }
-  size_t NumChildren() const { return m_children.size(); }
   GameNode GetChild(const GameAction &p_action)
   {
     if (p_action->GetInfoset() != m_infoset) {

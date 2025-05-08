@@ -168,7 +168,6 @@ cdef extern from "games/game.h":
         c_GameInfoset GetInfoset() except +
         c_GamePlayer GetPlayer() except +
         c_GameNode GetParent() except +
-        int NumChildren() except +
         Children GetChildren() except +
         c_GameNode GetChild(c_GameAction) except +IndexError
         c_GameOutcome GetOutcome() except +

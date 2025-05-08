@@ -465,28 +465,24 @@ T MixedBehaviorProfile<T>::DiffNodeValue(const GameNode &p_node, const GamePlaye
   CheckVersion();
   ComputeSolutionData();
 
-  if (p_node->NumChildren() > 0) {
-    const GameInfoset infoset = p_node->GetInfoset();
-
-    if (infoset == p_oppAction->GetInfoset()) {
-      // We've encountered the action; since we assume perfect recall,
-      // we won't encounter it again, and the downtree value must
-      // be the same.
-      return map_nodeValues[p_node->GetChild(p_oppAction)][p_player];
-    }
-    else {
-      T deriv = T(0);
-      for (auto action : infoset->GetActions()) {
-        deriv += (DiffNodeValue(p_node->GetChild(action), p_player, p_oppAction) *
-                  GetActionProb(action));
-      }
-      return deriv;
-    }
-  }
-  else {
+  if (p_node->IsTerminal()) {
     // If we reach a terminal node and haven't encountered p_oppAction,
     // derivative wrt this path is zero.
     return T(0);
+  }
+  if (p_node->GetInfoset() == p_oppAction->GetInfoset()) {
+    // We've encountered the action; since we assume perfect recall,
+    // we won't encounter it again, and the downtree value must
+    // be the same.
+    return map_nodeValues[p_node->GetChild(p_oppAction)][p_player];
+  }
+  else {
+    T deriv = T(0);
+    for (auto action : p_node->GetInfoset()->GetActions()) {
+      deriv +=
+          (DiffNodeValue(p_node->GetChild(action), p_player, p_oppAction) * GetActionProb(action));
+    }
+    return deriv;
   }
 }
 

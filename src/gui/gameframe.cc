@@ -332,7 +332,7 @@ void gbtGameFrame::OnUpdate()
   menuBar->Enable(GBT_MENU_EDIT_INSERT_MOVE, selectNode != nullptr);
   menuBar->Enable(GBT_MENU_EDIT_INSERT_ACTION, selectNode && selectNode->GetInfoset());
   menuBar->Enable(GBT_MENU_EDIT_REVEAL, selectNode && selectNode->GetInfoset());
-  menuBar->Enable(GBT_MENU_EDIT_DELETE_TREE, selectNode && selectNode->NumChildren() > 0);
+  menuBar->Enable(GBT_MENU_EDIT_DELETE_TREE, selectNode && !selectNode->IsTerminal());
   menuBar->Enable(GBT_MENU_EDIT_DELETE_PARENT, selectNode && selectNode->GetParent());
   menuBar->Enable(GBT_MENU_EDIT_REMOVE_OUTCOME, selectNode && selectNode->GetOutcome());
   menuBar->Enable(GBT_MENU_EDIT_NODE, selectNode != nullptr);
@@ -1033,7 +1033,7 @@ void gbtGameFrame::OnEditNode(wxCommandEvent &)
         m_doc->DoSetOutcome(m_doc->GetSelectNode(), nullptr);
       }
 
-      if (m_doc->GetSelectNode()->NumChildren() > 0 &&
+      if (!m_doc->GetSelectNode()->IsTerminal() &&
           dialog.GetInfoset() != m_doc->GetSelectNode()->GetInfoset()) {
         if (dialog.GetInfoset() == nullptr) {
           m_doc->DoLeaveInfoset(m_doc->GetSelectNode());

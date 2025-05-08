@@ -36,7 +36,7 @@ class NodeChildren:
         return obj
 
     def __len__(self) -> int:
-        return self.parent.deref().NumChildren()
+        return self.parent.deref().GetChildren().size()
 
     def __repr__(self) -> str:
         return f"NodeChildren(parent={Node.wrap(self.parent)})"

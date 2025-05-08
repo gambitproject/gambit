@@ -142,7 +142,7 @@ T LogBehavProfile<T>::DiffNodeValue(const GameNode &p_node, const GamePlayer &p_
 {
   ComputeSolutionData();
 
-  if (p_node->NumChildren() == 0) {
+  if (p_node->IsTerminal()) {
     // If we reach a terminal node and haven't encountered p_oppAction,
     // derivative wrt this path is zero.
     return static_cast<T>(0);

@@ -118,12 +118,12 @@ void GamePlayerRep::MakeReducedStrats(GameNodeRep *n, GameNodeRep *nn)
     n->ptr = nullptr;
   }
 
-  if (n->NumChildren() > 0) {
+  if (!n->IsTerminal()) {
     if (n->m_infoset->m_player == this) {
       if (n->m_infoset->flag == 0) {
         // we haven't visited this infoset before
         n->m_infoset->flag = 1;
-        for (size_t i = 1; i <= n->NumChildren(); i++) {
+        for (size_t i = 1; i <= n->m_children.size(); i++) {
           GameNodeRep *m = n->m_children[i - 1];
           n->whichbranch = m;
           n->m_infoset->whichbranch = i;

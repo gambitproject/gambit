@@ -723,7 +723,7 @@ Rational SubtreeSum(GameNode p_node)
 {
   Rational sum(0);
 
-  if (p_node->NumChildren() > 0) {
+  if (!p_node->IsTerminal()) {
     auto children = p_node->GetChildren();
     sum = SubtreeSum(children.front());
     if (std::any_of(std::next(children.begin()), children.end(),

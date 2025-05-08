@@ -49,12 +49,12 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, const GameNode &p_node)
   infosetSizer->Add(new wxStaticText(this, wxID_STATIC, _("Information set")), 0, wxALL | wxCENTER,
                     5);
   m_infoset = new wxChoice(this, wxID_ANY);
-  if (p_node->NumChildren() > 0) {
+  if (!p_node->IsTerminal()) {
     m_infoset->Append(_("New information set"));
     if (p_node->GetInfoset()->IsChanceInfoset()) {
       int selection = 0;
       for (const auto &infoset : p_node->GetGame()->GetChance()->GetInfosets()) {
-        if (infoset->NumActions() == p_node->NumChildren()) {
+        if (infoset->NumActions() == p_node->GetChildren().size()) {
           m_infosetList.push_back(infoset);
           m_infoset->Append(wxString::Format(_("Chance infoset %d"), infoset->GetNumber()));
           if (infoset == p_node->GetInfoset()) {
@@ -68,7 +68,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, const GameNode &p_node)
       int selection = 0;
       for (const auto &player : p_node->GetGame()->GetPlayers()) {
         for (const auto &infoset : player->GetInfosets()) {
-          if (infoset->NumActions() == p_node->NumChildren()) {
+          if (infoset->NumActions() == p_node->GetChildren().size()) {
             m_infosetList.push_back(infoset);
             m_infoset->Append(wxString::Format(_("Player %d, Infoset %d"), player->GetNumber(),
                                                infoset->GetNumber()));
