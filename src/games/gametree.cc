@@ -119,7 +119,7 @@ void GameTreeRep::DeleteAction(GameAction p_action)
   if (infoset->m_game != this) {
     throw MismatchException();
   }
-  if (infoset->NumActions() == 1) {
+  if (infoset->m_actions.size() == 1) {
     throw UndefinedException();
   }
 
@@ -167,15 +167,6 @@ GameInfosetRep::GameInfosetRep(GameRep *p_efg, int p_number, GamePlayerRep *p_pl
 GameInfosetRep::~GameInfosetRep()
 {
   std::for_each(m_actions.begin(), m_actions.end(), [](GameActionRep *a) { a->Invalidate(); });
-}
-
-Game GameInfosetRep::GetGame() const { return m_game; }
-
-Array<GameAction> GameInfosetRep::GetActions() const
-{
-  Array<GameAction> ret(m_actions.size());
-  std::copy(m_actions.cbegin(), m_actions.cend(), ret.begin());
-  return ret;
 }
 
 void GameTreeRep::SetPlayer(GameInfoset p_infoset, GamePlayer p_player)
@@ -548,7 +539,7 @@ void GameTreeRep::SetInfoset(GameNode p_node, GameInfoset p_infoset)
   if (!node->m_infoset || node->m_infoset == p_infoset) {
     return;
   }
-  if (p_infoset->NumActions() != node->m_children.size()) {
+  if (p_infoset->m_actions.size() != node->m_children.size()) {
     throw DimensionException();
   }
   IncrementVersion();
@@ -1053,7 +1044,7 @@ Game GameTreeRep::SetChanceProbs(const GameInfoset &p_infoset, const Array<Numbe
     throw UndefinedException(
         "Action probabilities can only be specified for chance information sets");
   }
-  if (p_infoset->NumActions() != p_probs.size()) {
+  if (p_infoset->m_actions.size() != p_probs.size()) {
     throw DimensionException("The number of probabilities given must match the number of actions");
   }
   IncrementVersion();

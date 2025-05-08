@@ -1065,8 +1065,8 @@ void gbtGameFrame::OnEditMove(wxCommandEvent &)
         m_doc->DoSetPlayer(infoset, m_doc->GetGame()->GetPlayer(dialog.GetPlayer()));
       }
 
-      for (size_t act = 1; act <= infoset->NumActions(); act++) {
-        m_doc->DoSetActionLabel(infoset->GetAction(act), dialog.GetActionName(act));
+      for (const auto &action : infoset->GetActions()) {
+        m_doc->DoSetActionLabel(action, dialog.GetActionName(action->GetNumber()));
       }
       if (infoset->IsChanceInfoset()) {
         m_doc->DoSetActionProbs(infoset, dialog.GetActionProbs());

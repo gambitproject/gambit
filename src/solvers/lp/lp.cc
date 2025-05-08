@@ -48,7 +48,7 @@ template <class T> GameData<T>::GameData(const Game &p_game) : minpay(p_game->Ge
     int offset = 1;
     for (const auto &infoset : player->GetInfosets()) {
       infosetOffset[infoset] = offset;
-      offset += infoset->NumActions();
+      offset += infoset->GetActions().size();
     }
   }
 }

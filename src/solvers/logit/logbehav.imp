@@ -41,12 +41,10 @@ LogBehavProfile<T>::LogBehavProfile(const Game &p_game)
     }
   }
 
-  for (auto infoset : m_game->GetInfosets()) {
-    if (infoset->NumActions() > 0) {
-      T center = (T(1) / T(infoset->NumActions()));
-      for (auto act : infoset->GetActions()) {
-        SetProb(act, center);
-      }
+  for (const auto &infoset : m_game->GetInfosets()) {
+    T center = T(1) / T(infoset->GetActions().size());
+    for (const auto &act : infoset->GetActions()) {
+      SetProb(act, center);
     }
   }
 }

@@ -107,6 +107,16 @@ cdef extern from "games/game.h":
         void SetLabel(string) except +
 
     cdef cppclass c_GameInfosetRep "GameInfosetRep":
+        cppclass Actions:
+            cppclass iterator:
+                c_GameAction operator *()
+                iterator operator++()
+                bint operator ==(iterator)
+                bint operator !=(iterator)
+            int size() except +
+            iterator begin() except +
+            iterator end() except +
+
         int GetNumber() except +
         c_Game GetGame() except +
         c_GamePlayer GetPlayer() except +
@@ -114,8 +124,8 @@ cdef extern from "games/game.h":
         string GetLabel() except +
         void SetLabel(string) except +
 
-        int NumActions() except +
         c_GameAction GetAction(int) except +IndexError
+        Actions GetActions() except +
         c_Number GetActionProb(c_GameAction) except +IndexError
 
         int NumMembers() except +

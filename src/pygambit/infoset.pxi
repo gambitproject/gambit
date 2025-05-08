@@ -80,11 +80,11 @@ class InfosetActions:
 
     def __len__(self):
         """The number of actions at the information set."""
-        return self.infoset.deref().NumActions()
+        return self.infoset.deref().GetActions().size()
 
     def __iter__(self) -> typing.Iterator[Action]:
-        for i in range(self.infoset.deref().NumActions()):
-            yield Action.wrap(self.infoset.deref().GetAction(i + 1))
+        for action in self.infoset.deref().GetActions():
+            yield Action.wrap(action)
 
     def __getitem__(self, index: typing.Union[int, str]) -> Action:
         if isinstance(index, str):

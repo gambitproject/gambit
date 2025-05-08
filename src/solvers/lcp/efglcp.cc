@@ -77,7 +77,7 @@ NashLcpBehaviorSolver<T>::Solution::Solution(const Game &p_game)
     int offset = 1;
     for (const auto &infoset : player->GetInfosets()) {
       infosetOffset[infoset] = offset;
-      offset += infoset->NumActions();
+      offset += infoset->GetActions().size();
     }
   }
 }

@@ -54,7 +54,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, const GameNode &p_node)
     if (p_node->GetInfoset()->IsChanceInfoset()) {
       int selection = 0;
       for (const auto &infoset : p_node->GetGame()->GetChance()->GetInfosets()) {
-        if (infoset->NumActions() == p_node->GetChildren().size()) {
+        if (infoset->GetActions().size() == p_node->GetChildren().size()) {
           m_infosetList.push_back(infoset);
           m_infoset->Append(wxString::Format(_("Chance infoset %d"), infoset->GetNumber()));
           if (infoset == p_node->GetInfoset()) {
@@ -68,7 +68,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, const GameNode &p_node)
       int selection = 0;
       for (const auto &player : p_node->GetGame()->GetPlayers()) {
         for (const auto &infoset : player->GetInfosets()) {
-          if (infoset->NumActions() == p_node->GetChildren().size()) {
+          if (infoset->GetActions().size() == p_node->GetChildren().size()) {
             m_infosetList.push_back(infoset);
             m_infoset->Append(wxString::Format(_("Player %d, Infoset %d"), player->GetNumber(),
                                                infoset->GetNumber()));

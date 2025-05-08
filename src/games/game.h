@@ -199,6 +199,68 @@ class GameInfosetRep : public GameObject {
   }
 
 public:
+  class Actions {
+    GameInfoset m_infoset{nullptr};
+
+  public:
+    class iterator {
+      GameInfoset m_infoset{nullptr};
+      size_t m_index{0};
+
+    public:
+      using iterator_category = std::bidirectional_iterator_tag;
+      using difference_type = std::ptrdiff_t;
+      using value_type = GameInfoset;
+      using pointer = value_type *;
+      using reference = value_type &;
+
+      iterator() = default;
+      iterator(const GameInfoset &p_infoset, size_t p_index = 0)
+        : m_infoset(p_infoset), m_index(p_index)
+      {
+      }
+      iterator(const iterator &) = default;
+      ~iterator() = default;
+      iterator &operator=(const iterator &) = default;
+
+      bool operator==(const iterator &p_iter) const
+      {
+        return m_infoset == p_iter.m_infoset && m_index == p_iter.m_index;
+      }
+      bool operator!=(const iterator &p_iter) const
+      {
+        return m_infoset != p_iter.m_infoset || m_index != p_iter.m_index;
+      }
+
+      iterator &operator++()
+      {
+        m_index++;
+        return *this;
+      }
+      iterator &operator--()
+      {
+        m_index--;
+        return *this;
+      }
+      GameAction operator*() const { return m_infoset->m_actions.at(m_index); }
+    };
+
+    Actions() = default;
+    explicit Actions(const GameInfoset &p_infoset) : m_infoset(p_infoset) {}
+    Actions(const Actions &) = default;
+    ~Actions() = default;
+    Actions &operator=(const Actions &) = default;
+
+    size_t size() const { return m_infoset->m_actions.size(); }
+    GameAction front() const { return m_infoset->m_actions.front(); }
+    GameAction back() const { return m_infoset->m_actions.back(); }
+
+    iterator begin() const { return {m_infoset, 0}; }
+    iterator end() const { return {m_infoset, (m_infoset) ? m_infoset->m_actions.size() : 0}; }
+    iterator cbegin() const { return {m_infoset, 0}; }
+    iterator cend() const { return {m_infoset, (m_infoset) ? m_infoset->m_actions.size() : 0}; }
+  };
+
   Game GetGame() const;
   int GetNumber() const { return m_number; }
 
@@ -211,12 +273,10 @@ public:
 
   /// @name Actions
   //@{
-  /// Returns the number of actions available at the information set
-  size_t NumActions() const { return m_actions.size(); }
   /// Returns the p_index'th action at the information set
   GameAction GetAction(int p_index) const { return m_actions.at(p_index - 1); }
   /// Returns the actions available at the information set
-  Array<GameAction> GetActions() const;
+  Actions GetActions() const { return Actions(this); }
   //@}
 
   size_t NumMembers() const { return m_members.size(); }
@@ -860,6 +920,8 @@ inline void GameOutcomeRep::SetPayoff(const GamePlayer &p_player, const Number &
 }
 
 inline GamePlayer GameStrategyRep::GetPlayer() const { return m_player; }
+
+inline Game GameInfosetRep::GetGame() const { return m_game; }
 
 inline Game GamePlayerRep::GetGame() const { return m_game; }
 inline size_t GamePlayerRep::NumStrategies() const
