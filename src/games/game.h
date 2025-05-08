@@ -289,7 +289,6 @@ public:
   Actions GetActions() const { return Actions(this, &m_actions); }
   //@}
 
-  size_t NumMembers() const { return m_members.size(); }
   GameNode GetMember(int p_index) const { return m_members.at(p_index - 1); }
   Members GetMembers() const { return Members(this, &m_members); }
 
@@ -388,6 +387,8 @@ class GamePlayerRep : public GameObject {
   ~GamePlayerRep() override;
 
 public:
+  using Infosets = ElementCollection<GamePlayer, GameInfosetRep>;
+
   int GetNumber() const { return m_number; }
   Game GetGame() const;
 
@@ -398,12 +399,10 @@ public:
 
   /// @name Information sets
   //@{
-  /// Returns the number of information sets at which the player makes a choice
-  size_t NumInfosets() const { return m_infosets.size(); }
   /// Returns the p_index'th information set
-  GameInfoset GetInfoset(int p_index) const;
-  /// Returns the information sets for the players
-  Array<GameInfoset> GetInfosets() const;
+  GameInfoset GetInfoset(int p_index) const { return m_infosets.at(p_index - 1); }
+  /// Returns the information sets for the player
+  Infosets GetInfosets() const { return Infosets(this, &m_infosets); }
 
   /// @name Strategies
   //@{
@@ -685,14 +684,10 @@ public:
   virtual GameInfoset GetInfoset(int iset) const = 0;
   /// Returns the set of information sets in the game
   virtual Array<GameInfoset> GetInfosets() const = 0;
-  /// Returns an array with the number of information sets per personal player
-  virtual Array<int> NumInfosets() const = 0;
   //@}
 
   /// @name Outcomes
   //@{
-  /// Returns the number of outcomes defined in the game
-  size_t NumOutcomes() const { return m_outcomes.size(); }
   /// Returns the index'th outcome defined in the game
   GameOutcome GetOutcome(int index) const { return m_outcomes.at(index - 1); }
   /// Returns the set of outcomes in the game

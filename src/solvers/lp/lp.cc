@@ -178,10 +178,10 @@ List<MixedBehaviorProfile<T>> LpBehaviorSolve(const Game &p_game,
 
   GameData<T> data(p_game);
 
-  Matrix<T> A(1, data.ns1 + p_game->GetPlayer(2)->NumInfosets() + 1, 1,
-              data.ns2 + p_game->GetPlayer(1)->NumInfosets() + 1);
-  Vector<T> b(1, data.ns1 + p_game->GetPlayer(2)->NumInfosets() + 1);
-  Vector<T> c(1, data.ns2 + p_game->GetPlayer(1)->NumInfosets() + 1);
+  Matrix<T> A(1, data.ns1 + p_game->GetPlayer(2)->GetInfosets().size() + 1, 1,
+              data.ns2 + p_game->GetPlayer(1)->GetInfosets().size() + 1);
+  Vector<T> b(1, data.ns1 + p_game->GetPlayer(2)->GetInfosets().size() + 1);
+  Vector<T> c(1, data.ns2 + p_game->GetPlayer(1)->GetInfosets().size() + 1);
 
   A = static_cast<T>(0);
   b = static_cast<T>(0);
@@ -196,7 +196,7 @@ List<MixedBehaviorProfile<T>> LpBehaviorSolve(const Game &p_game,
 
   Array<T> primal(A.NumColumns()), dual(A.NumRows());
   List<MixedBehaviorProfile<T>> solution;
-  SolveLP(A, b, c, p_game->GetPlayer(2)->NumInfosets() + 1, primal, dual);
+  SolveLP(A, b, c, p_game->GetPlayer(2)->GetInfosets().size() + 1, primal, dual);
   MixedBehaviorProfile<T> profile(p_game);
   data.GetBehavior(profile, primal, dual, p_game->GetRoot(), 1, 1);
   profile.UndefinedToCentroid();

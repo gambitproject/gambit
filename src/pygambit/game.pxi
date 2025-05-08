@@ -249,7 +249,7 @@ class GameOutcomes:
 
     def __len__(self) -> int:
         """The number of outcomes in the game."""
-        return self.game.deref().NumOutcomes()
+        return self.game.deref().GetOutcomes().size()
 
     def __iter__(self) -> typing.Iterator[Outcome]:
         for outcome in self.game.deref().GetOutcomes():
@@ -420,7 +420,7 @@ class GameStrategies:
         return obj
 
     def __repr__(self) -> str:
-        return f"GameOutcomes(game={self.game})"
+        return f"GameStrategies(game={self.game})"
 
     def __len__(self) -> int:
         return sum(len(p.strategies) for p in self.game.players)

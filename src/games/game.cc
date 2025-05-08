@@ -79,9 +79,9 @@ Array<GameStrategy> GamePlayerRep::GetStrategies() const
 
 void GamePlayerRep::MakeStrategy()
 {
-  Array<int> c(NumInfosets());
+  Array<int> c(m_infosets.size());
 
-  for (size_t i = 1; i <= NumInfosets(); i++) {
+  for (size_t i = 1; i <= m_infosets.size(); i++) {
     if (m_infosets[i - 1]->flag == 1) {
       c[i] = m_infosets[i - 1]->whichbranch;
     }
@@ -173,16 +173,6 @@ void GamePlayerRep::MakeReducedStrats(GameNodeRep *n, GameNodeRep *nn)
   else {
     MakeStrategy();
   }
-}
-
-GameInfoset GamePlayerRep::GetInfoset(int p_index) const { return m_infosets[p_index - 1]; }
-
-Array<GameInfoset> GamePlayerRep::GetInfosets() const
-{
-  Array<GameInfoset> ret(m_infosets.size());
-  std::transform(m_infosets.cbegin(), m_infosets.cend(), ret.begin(),
-                 [](const GameInfosetRep *s) -> GameInfoset { return s; });
-  return ret;
 }
 
 size_t GamePlayerRep::NumSequences() const

@@ -735,9 +735,9 @@ bool GameTreeRep::IsConstSum() const
 bool GameTreeRep::IsPerfectRecall(GameInfoset &s1, GameInfoset &s2) const
 {
   for (auto player : m_players) {
-    for (size_t i = 1; i <= player->NumInfosets(); i++) {
+    for (size_t i = 1; i <= player->m_infosets.size(); i++) {
       auto *iset1 = player->m_infosets[i - 1];
-      for (size_t j = 1; j <= player->NumInfosets(); j++) {
+      for (size_t j = 1; j <= player->m_infosets.size(); j++) {
         auto *iset2 = player->m_infosets[j - 1];
 
         bool precedes = false;
@@ -995,15 +995,6 @@ Array<GameInfoset> GameTreeRep::GetInfosets() const
   return infosets;
 }
 
-Array<int> GameTreeRep::NumInfosets() const
-{
-  Array<int> foo;
-  for (const auto &player : m_players) {
-    foo.push_back(player->NumInfosets());
-  }
-  return foo;
-}
-
 //------------------------------------------------------------------------
 //                        GameTreeRep: Outcomes
 //------------------------------------------------------------------------
@@ -1152,7 +1143,7 @@ Rational TreePureStrategyProfileRep::GetPayoff(const GamePlayer &p_player) const
 {
   PureBehaviorProfile behav(m_nfg);
   for (const auto &player : m_nfg->GetPlayers()) {
-    for (size_t iset = 1; iset <= player->NumInfosets(); iset++) {
+    for (size_t iset = 1; iset <= player->GetInfosets().size(); iset++) {
       if (const int act = m_profile.at(player)->m_behav[iset]) {
         behav.SetAction(player->GetInfoset(iset)->GetAction(act));
       }
