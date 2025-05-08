@@ -373,10 +373,11 @@ bool GameNodeRep::IsSubgameRoot() const
     for (auto infoset : player->GetInfosets()) {
       const bool precedes =
           infoset->m_members.front()->IsSuccessorOf(const_cast<GameNodeRep *>(this));
-      for (size_t mem = 0; mem < infoset->m_members.size(); mem++) {
-        if (infoset->m_members[mem]->IsSuccessorOf(const_cast<GameNodeRep *>(this)) != precedes) {
-          return false;
-        }
+      if (std::any_of(std::next(infoset->m_members.begin()), infoset->m_members.end(),
+                      [this, precedes](GameNodeRep *m) {
+                        return m->IsSuccessorOf(const_cast<GameNodeRep *>(this)) != precedes;
+                      })) {
+        return false;
       }
     }
   }
