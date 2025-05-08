@@ -55,6 +55,75 @@ using GameNode = GameObjectPtr<GameNodeRep>;
 class GameRep;
 using Game = GameObjectPtr<GameRep>;
 
+template <class P, class T> class ElementCollection {
+  P m_owner{nullptr};
+  const std::vector<T *> *m_container{nullptr};
+
+public:
+  class iterator {
+    P m_owner{nullptr};
+    const std::vector<T *> *m_container{nullptr};
+    size_t m_index{0};
+
+  public:
+    using iterator_category = std::bidirectional_iterator_tag;
+    using difference_type = std::ptrdiff_t;
+    using value_type = GameObjectPtr<T>;
+    using pointer = value_type *;
+    using reference = value_type &;
+
+    iterator() = default;
+    iterator(const P &p_owner, const std::vector<T *> *p_container, size_t p_index = 0)
+      : m_owner(p_owner), m_container(p_container), m_index(p_index)
+    {
+    }
+    iterator(const iterator &) = default;
+    ~iterator() = default;
+    iterator &operator=(const iterator &) = default;
+
+    bool operator==(const iterator &p_iter) const
+    {
+      return m_owner == p_iter.m_owner && m_container == p_iter.m_container &&
+             m_index == p_iter.m_index;
+    }
+    bool operator!=(const iterator &p_iter) const
+    {
+      return m_owner != p_iter.m_owner || m_container != p_iter.m_container ||
+             m_index != p_iter.m_index;
+    }
+
+    iterator &operator++()
+    {
+      m_index++;
+      return *this;
+    }
+    iterator &operator--()
+    {
+      m_index--;
+      return *this;
+    }
+    value_type operator*() const { return m_container->at(m_index); }
+  };
+
+  ElementCollection() = default;
+  explicit ElementCollection(const P &p_owner, const std::vector<T *> *p_container)
+    : m_owner(p_owner), m_container(p_container)
+  {
+  }
+  ElementCollection(const ElementCollection<P, T> &) = default;
+  ~ElementCollection() = default;
+  ElementCollection &operator=(const ElementCollection<P, T> &) = default;
+
+  size_t size() const { return m_container->size(); }
+  GameObjectPtr<T> front() const { return m_container->front(); }
+  GameObjectPtr<T> back() const { return m_container->back(); }
+
+  iterator begin() const { return {m_owner, m_container, 0}; }
+  iterator end() const { return {m_owner, m_container, (m_owner) ? m_container->size() : 0}; }
+  iterator cbegin() const { return {m_owner, m_container, 0}; }
+  iterator cend() const { return {m_owner, m_container, (m_owner) ? m_container->size() : 0}; }
+};
+
 //
 // Forward declarations of classes defined elsewhere.
 //
@@ -199,129 +268,8 @@ class GameInfosetRep : public GameObject {
   }
 
 public:
-  class Actions {
-    GameInfoset m_infoset{nullptr};
-
-  public:
-    class iterator {
-      GameInfoset m_infoset{nullptr};
-      size_t m_index{0};
-
-    public:
-      using iterator_category = std::bidirectional_iterator_tag;
-      using difference_type = std::ptrdiff_t;
-      using value_type = GameInfoset;
-      using pointer = value_type *;
-      using reference = value_type &;
-
-      iterator() = default;
-      iterator(const GameInfoset &p_infoset, size_t p_index = 0)
-        : m_infoset(p_infoset), m_index(p_index)
-      {
-      }
-      iterator(const iterator &) = default;
-      ~iterator() = default;
-      iterator &operator=(const iterator &) = default;
-
-      bool operator==(const iterator &p_iter) const
-      {
-        return m_infoset == p_iter.m_infoset && m_index == p_iter.m_index;
-      }
-      bool operator!=(const iterator &p_iter) const
-      {
-        return m_infoset != p_iter.m_infoset || m_index != p_iter.m_index;
-      }
-
-      iterator &operator++()
-      {
-        m_index++;
-        return *this;
-      }
-      iterator &operator--()
-      {
-        m_index--;
-        return *this;
-      }
-      GameAction operator*() const { return m_infoset->m_actions.at(m_index); }
-    };
-
-    Actions() = default;
-    explicit Actions(const GameInfoset &p_infoset) : m_infoset(p_infoset) {}
-    Actions(const Actions &) = default;
-    ~Actions() = default;
-    Actions &operator=(const Actions &) = default;
-
-    size_t size() const { return m_infoset->m_actions.size(); }
-    GameAction front() const { return m_infoset->m_actions.front(); }
-    GameAction back() const { return m_infoset->m_actions.back(); }
-
-    iterator begin() const { return {m_infoset, 0}; }
-    iterator end() const { return {m_infoset, (m_infoset) ? m_infoset->m_actions.size() : 0}; }
-    iterator cbegin() const { return {m_infoset, 0}; }
-    iterator cend() const { return {m_infoset, (m_infoset) ? m_infoset->m_actions.size() : 0}; }
-  };
-
-  class Members {
-    GameInfoset m_infoset{nullptr};
-
-  public:
-    class iterator {
-      GameInfoset m_infoset{nullptr};
-      size_t m_index{0};
-
-    public:
-      using iterator_category = std::bidirectional_iterator_tag;
-      using difference_type = std::ptrdiff_t;
-      using value_type = GameNode;
-      using pointer = value_type *;
-      using reference = value_type &;
-
-      iterator() = default;
-      iterator(const GameInfoset &p_infoset, size_t p_index = 0)
-        : m_infoset(p_infoset), m_index(p_index)
-      {
-      }
-      iterator(const iterator &) = default;
-      ~iterator() = default;
-      iterator &operator=(const iterator &) = default;
-
-      bool operator==(const iterator &p_iter) const
-      {
-        return m_infoset == p_iter.m_infoset && m_index == p_iter.m_index;
-      }
-      bool operator!=(const iterator &p_iter) const
-      {
-        return m_infoset != p_iter.m_infoset || m_index != p_iter.m_index;
-      }
-
-      iterator &operator++()
-      {
-        m_index++;
-        return *this;
-      }
-      iterator &operator--()
-      {
-        m_index--;
-        return *this;
-      }
-      GameNode operator*() const { return m_infoset->m_members.at(m_index); }
-    };
-
-    Members() = default;
-    explicit Members(const GameInfoset &p_infoset) : m_infoset(p_infoset) {}
-    Members(const Members &) = default;
-    ~Members() = default;
-    Members &operator=(const Members &) = default;
-
-    size_t size() const { return m_infoset->m_members.size(); }
-    GameNode front() const { return m_infoset->m_members.front(); }
-    GameNode back() const { return m_infoset->m_members.back(); }
-
-    iterator begin() const { return {m_infoset, 0}; }
-    iterator end() const { return {m_infoset, (m_infoset) ? m_infoset->m_members.size() : 0}; }
-    iterator cbegin() const { return {m_infoset, 0}; }
-    iterator cend() const { return {m_infoset, (m_infoset) ? m_infoset->m_members.size() : 0}; }
-  };
+  using Actions = ElementCollection<GameInfoset, GameActionRep>;
+  using Members = ElementCollection<GameInfoset, GameNodeRep>;
 
   Game GetGame() const;
   int GetNumber() const { return m_number; }
@@ -338,12 +286,12 @@ public:
   /// Returns the p_index'th action at the information set
   GameAction GetAction(int p_index) const { return m_actions.at(p_index - 1); }
   /// Returns the actions available at the information set
-  Actions GetActions() const { return Actions(this); }
+  Actions GetActions() const { return Actions(this, &m_actions); }
   //@}
 
   size_t NumMembers() const { return m_members.size(); }
   GameNode GetMember(int p_index) const { return m_members.at(p_index - 1); }
-  Members GetMembers() const { return Members(this); }
+  Members GetMembers() const { return Members(this, &m_members); }
 
   bool Precedes(GameNode) const;
 
@@ -498,64 +446,7 @@ class GameNodeRep : public GameObject {
   void DeleteOutcome(GameOutcomeRep *outc);
 
 public:
-  class Children {
-    GameNode m_node{nullptr};
-
-  public:
-    class iterator {
-      GameNode m_node{nullptr};
-      size_t m_index{0};
-
-    public:
-      using iterator_category = std::bidirectional_iterator_tag;
-      using difference_type = std::ptrdiff_t;
-      using value_type = GameNode;
-      using pointer = value_type *;
-      using reference = value_type &;
-
-      iterator() = default;
-      iterator(const GameNode &p_node, size_t p_index = 0) : m_node(p_node), m_index(p_index) {}
-      iterator(const iterator &) = default;
-      ~iterator() = default;
-      iterator &operator=(const iterator &) = default;
-
-      bool operator==(const iterator &p_iter) const
-      {
-        return m_node == p_iter.m_node && m_index == p_iter.m_index;
-      }
-      bool operator!=(const iterator &p_iter) const
-      {
-        return m_node != p_iter.m_node || m_index != p_iter.m_index;
-      }
-
-      iterator &operator++()
-      {
-        m_index++;
-        return *this;
-      }
-      iterator &operator--()
-      {
-        m_index--;
-        return *this;
-      }
-      GameNode operator*() const { return m_node->m_children.at(m_index); }
-    };
-
-    Children() = default;
-    explicit Children(const GameNode &p_node) : m_node(p_node) {}
-    Children(const Children &) = default;
-    ~Children() = default;
-    Children &operator=(const Children &) = default;
-
-    size_t size() const { return m_node->m_children.size(); }
-    GameNode front() const { return m_node->m_children.front(); }
-    GameNode back() const { return m_node->m_children.back(); }
-
-    iterator begin() const { return {m_node, 0}; }
-    iterator end() const { return {m_node, (m_node) ? m_node->m_children.size() : 0}; }
-    iterator cbegin() const { return {m_node, 0}; }
-    iterator cend() const { return {m_node, (m_node) ? m_node->m_children.size() : 0}; }
-  };
+  using Children = ElementCollection<GameNode, GameNodeRep>;
 
   Game GetGame() const;
 
@@ -570,7 +461,7 @@ public:
     }
     return m_children.at(p_action->GetNumber() - 1);
   }
-  Children GetChildren() const { return Children(this); }
+  Children GetChildren() const { return Children(this, &m_children); }
 
   GameInfoset GetInfoset() const { return m_infoset; }
 
@@ -585,73 +476,6 @@ public:
 
   bool IsSuccessorOf(GameNode from) const;
   bool IsSubgameRoot() const;
-};
-
-template <class T> class ElementCollection {
-  Game m_game{nullptr};
-  const std::vector<T *> *m_container{nullptr};
-
-public:
-  class iterator {
-    Game m_game{nullptr};
-    const std::vector<T *> *m_container{nullptr};
-    size_t m_index{0};
-
-  public:
-    using iterator_category = std::bidirectional_iterator_tag;
-    using difference_type = std::ptrdiff_t;
-    using value_type = GameObjectPtr<T>;
-    using pointer = value_type *;
-    using reference = value_type &;
-
-    iterator() = default;
-    iterator(const Game &p_game, const std::vector<T *> *p_container, size_t p_index = 0)
-      : m_game(p_game), m_container(p_container), m_index(p_index)
-    {
-    }
-    iterator(const iterator &) = default;
-    ~iterator() = default;
-    iterator &operator=(const iterator &) = default;
-
-    bool operator==(const iterator &p_iter) const
-    {
-      return m_game == p_iter.m_game && m_container == p_iter.m_container &&
-             m_index == p_iter.m_index;
-    }
-    bool operator!=(const iterator &p_iter) const
-    {
-      return m_game != p_iter.m_game || m_container != p_iter.m_container ||
-             m_index != p_iter.m_index;
-    }
-
-    iterator &operator++()
-    {
-      m_index++;
-      return *this;
-    }
-    iterator &operator--()
-    {
-      m_index--;
-      return *this;
-    }
-    value_type operator*() const { return m_container->at(m_index); }
-  };
-
-  ElementCollection() = default;
-  explicit ElementCollection(const Game &p_game, const std::vector<T *> *p_container)
-    : m_game(p_game), m_container(p_container)
-  {
-  }
-  ElementCollection(const ElementCollection<T> &) = default;
-  ~ElementCollection() = default;
-  ElementCollection &operator=(const ElementCollection<T> &) = default;
-
-  size_t size() const { return m_container->size(); }
-
-  iterator begin() const { return {m_game, m_container, 0}; }
-  iterator end() const { return {m_game, m_container, (m_game) ? m_container->size() : 0}; }
-  iterator cbegin() const { return {m_game, m_container, 0}; }
-  iterator cend() const { return {m_game, m_container, (m_game) ? m_container->size() : 0}; }
 };
 
 /// This is the class for representing an arbitrary finite game.
@@ -679,8 +503,8 @@ protected:
   //@}
 
 public:
-  using Players = ElementCollection<GamePlayerRep>;
-  using Outcomes = ElementCollection<GameOutcomeRep>;
+  using Players = ElementCollection<Game, GamePlayerRep>;
+  using Outcomes = ElementCollection<Game, GameOutcomeRep>;
 
   /// @name Lifecycle
   //@{
