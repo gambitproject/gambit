@@ -179,6 +179,16 @@ cdef extern from "games/game.h":
             iterator begin() except +
             iterator end() except +
 
+        cppclass Outcomes:
+            cppclass iterator:
+                c_GameOutcome operator *()
+                iterator operator++()
+                bint operator ==(iterator)
+                bint operator !=(iterator)
+            int size() except +
+            iterator begin() except +
+            iterator end() except +
+
         int IsTree() except +
 
         string GetTitle() except +
@@ -195,6 +205,7 @@ cdef extern from "games/game.h":
 
         int NumOutcomes() except +
         c_GameOutcome GetOutcome(int) except +IndexError
+        Outcomes GetOutcomes() except +
         c_GameOutcome NewOutcome() except +
         void DeleteOutcome(c_GameOutcome) except +
 

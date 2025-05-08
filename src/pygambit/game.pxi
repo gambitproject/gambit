@@ -252,8 +252,8 @@ class GameOutcomes:
         return self.game.deref().NumOutcomes()
 
     def __iter__(self) -> typing.Iterator[Outcome]:
-        for i in range(self.game.deref().NumOutcomes()):
-            yield Outcome.wrap(self.game.deref().GetOutcome(i + 1))
+        for outcome in self.game.deref().GetOutcomes():
+            yield Outcome.wrap(outcome)
 
     def __getitem__(self, index: typing.Union[int, str]) -> Outcome:
         if isinstance(index, str):
@@ -293,8 +293,8 @@ class GamePlayers:
         return self.game.deref().NumPlayers()
 
     def __iter__(self) -> typing.Iterator[Player]:
-        for i in range(self.game.deref().NumPlayers()):
-            yield Player.wrap(self.game.deref().GetPlayer(i + 1))
+        for player in self.game.deref().GetPlayers():
+            yield Player.wrap(player)
 
     def __getitem__(self, index: typing.Union[int, str]) -> Player:
         if isinstance(index, str):
