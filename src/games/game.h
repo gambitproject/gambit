@@ -489,6 +489,63 @@ public:
     iterator cend() const { return {m_game, (m_game) ? m_game->m_players.size() : 0}; }
   };
 
+  class Outcomes {
+    Game m_game{nullptr};
+
+  public:
+    class iterator {
+      Game m_game{nullptr};
+      size_t m_index{0};
+
+    public:
+      using iterator_category = std::bidirectional_iterator_tag;
+      using difference_type = std::ptrdiff_t;
+      using value_type = GameOutcome;
+      using pointer = value_type *;
+      using reference = value_type &;
+
+      iterator() = default;
+      iterator(const Game &p_game, size_t p_index = 0) : m_game(p_game), m_index(p_index) {}
+      iterator(const iterator &) = default;
+      ~iterator() = default;
+      iterator &operator=(const iterator &) = default;
+
+      bool operator==(const iterator &p_iter) const
+      {
+        return m_game == p_iter.m_game && m_index == p_iter.m_index;
+      }
+      bool operator!=(const iterator &p_iter) const
+      {
+        return m_game != p_iter.m_game || m_index != p_iter.m_index;
+      }
+
+      iterator &operator++()
+      {
+        m_index++;
+        return *this;
+      }
+      iterator &operator--()
+      {
+        m_index--;
+        return *this;
+      }
+      GameOutcome operator*() const { return m_game->m_outcomes.at(m_index); }
+    };
+
+    Outcomes() = default;
+    explicit Outcomes(const Game &p_game) : m_game(p_game) {}
+    Outcomes(const Outcomes &) = default;
+    ~Outcomes() = default;
+    Outcomes &operator=(const Outcomes &) = default;
+
+    size_t size() const { return m_game->m_outcomes.size(); }
+
+    iterator begin() const { return {m_game, 0}; }
+    iterator end() const { return {m_game, (m_game) ? m_game->m_outcomes.size() : 0}; }
+    iterator cbegin() const { return {m_game, 0}; }
+    iterator cend() const { return {m_game, (m_game) ? m_game->m_outcomes.size() : 0}; }
+  };
+
   /// @name Lifecycle
   //@{
   /// Clean up the game
@@ -675,13 +732,15 @@ public:
   /// @name Outcomes
   //@{
   /// Returns the number of outcomes defined in the game
-  virtual size_t NumOutcomes() const = 0;
+  size_t NumOutcomes() const { return m_outcomes.size(); }
   /// Returns the index'th outcome defined in the game
-  virtual GameOutcome GetOutcome(int index) const = 0;
+  GameOutcome GetOutcome(int index) const { return m_outcomes.at(index - 1); }
+  /// Returns the set of outcomes in the game
+  Outcomes GetOutcomes() const { return Outcomes(this); }
   /// Creates a new outcome in the game
-  virtual GameOutcome NewOutcome() = 0;
+  virtual GameOutcome NewOutcome() { throw UndefinedException(); }
   /// Deletes the specified outcome from the game
-  virtual void DeleteOutcome(const GameOutcome &) = 0;
+  virtual void DeleteOutcome(const GameOutcome &) { throw UndefinedException(); }
   //@}
 
   /// @name Nodes

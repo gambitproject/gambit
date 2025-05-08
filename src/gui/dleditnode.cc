@@ -27,11 +27,13 @@
 #include "gambit.h"
 #include "dleditnode.h"
 
+using namespace Gambit;
+
 //======================================================================
 //                      class dialogEditNode
 //======================================================================
 
-dialogEditNode::dialogEditNode(wxWindow *p_parent, const Gambit::GameNode &p_node)
+dialogEditNode::dialogEditNode(wxWindow *p_parent, const GameNode &p_node)
   : wxDialog(p_parent, wxID_ANY, _("Node properties"), wxDefaultPosition), m_node(p_node)
 {
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
@@ -104,12 +106,12 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, const Gambit::GameNode &p_nod
   m_outcome = new wxChoice(this, wxID_ANY);
   m_outcome->Append(_("(null)"));
   m_outcome->SetSelection(0);
-  const Gambit::Game efg = p_node->GetGame();
-  for (size_t outc = 1; outc <= efg->NumOutcomes(); outc++) {
-    const Gambit::GameOutcome outcome = efg->GetOutcome(outc);
-    std::string item = Gambit::lexical_cast<std::string>(outc) + ": " + outcome->GetLabel();
+  const Game efg = p_node->GetGame();
+  for (const auto &outcome : efg->GetOutcomes()) {
+    std::string item =
+        lexical_cast<std::string>(outcome->GetNumber()) + ": " + outcome->GetLabel();
     if (item.empty()) {
-      item = "Outcome" + Gambit::lexical_cast<std::string>(outc);
+      item = "Outcome" + lexical_cast<std::string>(outcome->GetNumber());
     }
 
     item += (" (" + outcome->GetPayoff<std::string>(efg->GetPlayer(1)) + ", " +
@@ -129,7 +131,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, const Gambit::GameNode &p_nod
 
     m_outcome->Append(wxString(item.c_str(), *wxConvCurrent));
     if (m_node->GetOutcome() == outcome) {
-      m_outcome->SetSelection(outc);
+      m_outcome->SetSelection(outcome->GetNumber());
     }
   }
   outcomeSizer->Add(m_outcome, 1, wxALL | wxEXPAND, 5);
@@ -150,7 +152,7 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, const Gambit::GameNode &p_nod
   CenterOnParent();
 }
 
-Gambit::GameInfoset dialogEditNode::GetInfoset() const
+GameInfoset dialogEditNode::GetInfoset() const
 {
   if (m_infoset->GetSelection() == 0) {
     return nullptr;
