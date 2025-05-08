@@ -149,6 +149,16 @@ cdef extern from "games/game.h":
         void SetPayoff(c_GamePlayer, c_Number) except +IndexError
 
     cdef cppclass c_GameNodeRep "GameNodeRep":
+        cppclass Children:
+            cppclass iterator:
+                c_GameNode operator *()
+                iterator operator++()
+                bint operator ==(iterator)
+                bint operator !=(iterator)
+            int size() except +
+            iterator begin() except +
+            iterator end() except +
+
         c_Game GetGame() except +
         int GetNumber() except +
 
@@ -159,6 +169,7 @@ cdef extern from "games/game.h":
         c_GamePlayer GetPlayer() except +
         c_GameNode GetParent() except +
         int NumChildren() except +
+        Children GetChildren() except +
         c_GameNode GetChild(c_GameAction) except +IndexError
         c_GameOutcome GetOutcome() except +
         c_GameNode GetPriorSibling() except +

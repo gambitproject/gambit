@@ -315,16 +315,6 @@ GameNodeRep::~GameNodeRep()
   std::for_each(m_children.begin(), m_children.end(), [](GameNodeRep *n) { n->Invalidate(); });
 }
 
-Game GameNodeRep::GetGame() const { return m_game; }
-
-Array<GameNode> GameNodeRep::GetChildren() const
-{
-  Array<GameNode> ret(m_children.size());
-  std::transform(m_children.cbegin(), m_children.cend(), ret.begin(),
-                 [](const GameNodeRep *n) -> GameNode { return n; });
-  return ret;
-}
-
 GameNode GameNodeRep::GetNextSibling() const
 {
   if (!m_parent || m_parent->m_children.back() == this) {
@@ -729,17 +719,16 @@ public:
   const char *what() const noexcept override { return "Game is not constant sum"; }
 };
 
-Rational SubtreeSum(const GameNode &p_node)
+Rational SubtreeSum(GameNode p_node)
 {
   Rational sum(0);
 
   if (p_node->NumChildren() > 0) {
     auto children = p_node->GetChildren();
     sum = SubtreeSum(children.front());
-    for (auto child = std::next(children.begin()); child != children.end(); child++) {
-      if (SubtreeSum(*child) != sum) {
-        throw NotZeroSumException();
-      }
+    if (std::any_of(std::next(children.begin()), children.end(),
+                    [sum](GameNode n) { return SubtreeSum(n) != sum; })) {
+      throw NotZeroSumException();
     }
   }
 

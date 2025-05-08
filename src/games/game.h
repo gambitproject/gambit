@@ -376,6 +376,65 @@ class GameNodeRep : public GameObject {
   void DeleteOutcome(GameOutcomeRep *outc);
 
 public:
+  class Children {
+    GameNode m_node{nullptr};
+
+  public:
+    class iterator {
+      GameNode m_node{nullptr};
+      size_t m_index{0};
+
+    public:
+      using iterator_category = std::bidirectional_iterator_tag;
+      using difference_type = std::ptrdiff_t;
+      using value_type = GameNode;
+      using pointer = value_type *;
+      using reference = value_type &;
+
+      iterator() = default;
+      iterator(const GameNode &p_node, size_t p_index = 0) : m_node(p_node), m_index(p_index) {}
+      iterator(const iterator &) = default;
+      ~iterator() = default;
+      iterator &operator=(const iterator &) = default;
+
+      bool operator==(const iterator &p_iter) const
+      {
+        return m_node == p_iter.m_node && m_index == p_iter.m_index;
+      }
+      bool operator!=(const iterator &p_iter) const
+      {
+        return m_node != p_iter.m_node || m_index != p_iter.m_index;
+      }
+
+      iterator &operator++()
+      {
+        m_index++;
+        return *this;
+      }
+      iterator &operator--()
+      {
+        m_index--;
+        return *this;
+      }
+      GameNode operator*() const { return m_node->m_children.at(m_index); }
+    };
+
+    Children() = default;
+    explicit Children(const GameNode &p_node) : m_node(p_node) {}
+    Children(const Children &) = default;
+    ~Children() = default;
+    Children &operator=(const Children &) = default;
+
+    size_t size() const { return m_node->m_children.size(); }
+    GameNode front() const { return m_node->m_children.front(); }
+    GameNode back() const { return m_node->m_children.back(); }
+
+    iterator begin() const { return {m_node, 0}; }
+    iterator end() const { return {m_node, (m_node) ? m_node->m_children.size() : 0}; }
+    iterator cbegin() const { return {m_node, 0}; }
+    iterator cend() const { return {m_node, (m_node) ? m_node->m_children.size() : 0}; }
+  };
+
   Game GetGame() const;
 
   const std::string &GetLabel() const { return m_label; }
@@ -390,7 +449,7 @@ public:
     }
     return m_children.at(p_action->GetNumber() - 1);
   }
-  Array<GameNode> GetChildren() const;
+  Children GetChildren() const { return Children(this); }
 
   GameInfoset GetInfoset() const { return m_infoset; }
 
@@ -814,6 +873,8 @@ inline GameStrategy GamePlayerRep::GetStrategy(int st) const
   m_game->BuildComputedValues();
   return m_strategies[st];
 }
+
+inline Game GameNodeRep::GetGame() const { return m_game; }
 
 //=======================================================================
 
