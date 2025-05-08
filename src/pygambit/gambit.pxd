@@ -117,6 +117,16 @@ cdef extern from "games/game.h":
             iterator begin() except +
             iterator end() except +
 
+        cppclass Members:
+            cppclass iterator:
+                c_GameNode operator *()
+                iterator operator++()
+                bint operator ==(iterator)
+                bint operator !=(iterator)
+            int size() except +
+            iterator begin() except +
+            iterator end() except +
+
         int GetNumber() except +
         c_Game GetGame() except +
         c_GamePlayer GetPlayer() except +
@@ -128,8 +138,8 @@ cdef extern from "games/game.h":
         Actions GetActions() except +
         c_Number GetActionProb(c_GameAction) except +IndexError
 
-        int NumMembers() except +
         c_GameNode GetMember(int) except +IndexError
+        Members GetMembers() except +
 
         bint IsChanceInfoset() except +
         bint Precedes(c_GameNode) except +

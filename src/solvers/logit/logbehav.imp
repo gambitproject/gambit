@@ -234,7 +234,7 @@ template <class T> void LogBehavProfile<T>::ComputeSolutionData() const
       }
       if (infosetProb == T(0)) {
         for (auto member : infoset->GetMembers()) {
-          m_beliefs[member] = 1.0 / T(infoset->NumMembers());
+          m_beliefs[member] = 1.0 / T(infoset->GetMembers().size());
         }
         continue;
       }

@@ -39,11 +39,11 @@ class InfosetMembers:
         return f"InfosetMembers(infoset={Infoset.wrap(self.infoset)})"
 
     def __len__(self) -> int:
-        return self.infoset.deref().NumMembers()
+        return self.infoset.deref().GetMembers().size()
 
     def __iter__(self) -> typing.Iterator[Node]:
-        for i in range(self.infoset.deref().NumMembers()):
-            yield Node.wrap(self.infoset.deref().GetMember(i + 1))
+        for member in self.infoset.deref().GetMembers():
+            yield Node.wrap(member)
 
     def __getitem__(self, index: typing.Union[int, str]) -> Node:
         if isinstance(index, str):

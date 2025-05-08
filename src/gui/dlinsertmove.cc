@@ -68,8 +68,8 @@ gbtInsertMoveDialog::gbtInsertMoveDialog(wxWindow *p_parent, gbtGameDocument *p_
       s += wxT("s");
     }
 
-    s += wxString::Format(wxT(", %d member node"), infoset->NumMembers());
-    if (infoset->NumMembers() > 1) {
+    s += wxString::Format(wxT(", %d member node"), infoset->GetMembers().size());
+    if (infoset->GetMembers().size() > 1) {
       s += wxT("s)");
     }
     else {
@@ -144,8 +144,8 @@ void gbtInsertMoveDialog::OnPlayer(wxCommandEvent &)
       s += wxT("s");
     }
 
-    s += wxString::Format(wxT(", %d member node"), infoset->NumMembers());
-    if (infoset->NumMembers() > 1) {
+    s += wxString::Format(wxT(", %d member node"), infoset->GetMembers().size());
+    if (infoset->GetMembers().size() > 1) {
       s += wxT("s)");
     }
     else {

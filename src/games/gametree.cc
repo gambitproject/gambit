@@ -281,20 +281,6 @@ void GameTreeRep::Reveal(GameInfoset p_atInfoset, GamePlayer p_player)
   Canonicalize();
 }
 
-GameNode GameInfosetRep::GetMember(int p_index) const { return m_members[p_index - 1]; }
-
-Array<GameNode> GameInfosetRep::GetMembers() const
-{
-  Array<GameNode> ret(m_members.size());
-  std::transform(m_members.cbegin(), m_members.cend(), ret.begin(),
-                 [](const GameNodeRep *n) -> GameNode { return n; });
-  return ret;
-}
-
-GamePlayer GameInfosetRep::GetPlayer() const { return m_player; }
-
-bool GameInfosetRep::IsChanceInfoset() const { return m_player->IsChance(); }
-
 //========================================================================
 //                         class GameNodeRep
 //========================================================================
@@ -373,7 +359,7 @@ bool GameNodeRep::IsSuccessorOf(GameNode p_node) const
 bool GameNodeRep::IsSubgameRoot() const
 {
   // First take care of a couple easy cases
-  if (m_children.empty() || m_infoset->NumMembers() > 1) {
+  if (m_children.empty() || m_infoset->m_members.size() > 1) {
     return false;
   }
   if (!m_parent) {
@@ -385,9 +371,10 @@ bool GameNodeRep::IsSubgameRoot() const
   // or all members do not succeed the node in the tree.
   for (auto player : m_game->GetPlayers()) {
     for (auto infoset : player->GetInfosets()) {
-      const bool precedes = infoset->GetMember(1)->IsSuccessorOf(const_cast<GameNodeRep *>(this));
-      for (size_t mem = 2; mem <= infoset->NumMembers(); mem++) {
-        if (infoset->GetMember(mem)->IsSuccessorOf(const_cast<GameNodeRep *>(this)) != precedes) {
+      const bool precedes =
+          infoset->m_members.front()->IsSuccessorOf(const_cast<GameNodeRep *>(this));
+      for (size_t mem = 0; mem < infoset->m_members.size(); mem++) {
+        if (infoset->m_members[mem]->IsSuccessorOf(const_cast<GameNodeRep *>(this)) != precedes) {
           return false;
         }
       }
@@ -755,9 +742,9 @@ bool GameTreeRep::IsPerfectRecall(GameInfoset &s1, GameInfoset &s2) const
         bool precedes = false;
         GameAction action = nullptr;
 
-        for (size_t m = 1; m <= iset2->NumMembers(); m++) {
+        for (size_t m = 1; m <= iset2->m_members.size(); m++) {
           size_t n;
-          for (n = 1; n <= iset1->NumMembers(); n++) {
+          for (n = 1; n <= iset1->m_members.size(); n++) {
             if (iset2->GetMember(m)->IsSuccessorOf(iset1->GetMember(n)) &&
                 iset1->GetMember(n) != iset2->GetMember(m)) {
               precedes = true;
@@ -781,7 +768,7 @@ bool GameTreeRep::IsPerfectRecall(GameInfoset &s1, GameInfoset &s2) const
             return false;
           }
 
-          if (n > iset1->NumMembers() && precedes) {
+          if (n > iset1->m_members.size() && precedes) {
             s1 = iset1;
             s2 = iset2;
             return false;

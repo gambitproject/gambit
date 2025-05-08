@@ -160,10 +160,10 @@ wxBEGIN_EVENT_TABLE(gbtEditMoveDialog,
   labelSizer->Add(m_infosetName, 1, wxALL | wxEXPAND, 5);
   topSizer->Add(labelSizer, 0, wxALL | wxEXPAND, 0);
 
-  topSizer->Add(
-      new wxStaticText(this, wxID_STATIC,
-                       wxString::Format(_("Number of members: %d"), p_infoset->NumMembers())),
-      0, wxALL | wxALIGN_CENTER, 5);
+  topSizer->Add(new wxStaticText(
+                    this, wxID_STATIC,
+                    wxString::Format(_("Number of members: %d"), p_infoset->GetMembers().size())),
+                0, wxALL | wxALIGN_CENTER, 5);
 
   auto *playerSizer = new wxBoxSizer(wxHORIZONTAL);
   playerSizer->Add(new wxStaticText(this, wxID_STATIC, _("Belongs to player")), 0,

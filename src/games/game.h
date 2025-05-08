@@ -261,6 +261,68 @@ public:
     iterator cend() const { return {m_infoset, (m_infoset) ? m_infoset->m_actions.size() : 0}; }
   };
 
+  class Members {
+    GameInfoset m_infoset{nullptr};
+
+  public:
+    class iterator {
+      GameInfoset m_infoset{nullptr};
+      size_t m_index{0};
+
+    public:
+      using iterator_category = std::bidirectional_iterator_tag;
+      using difference_type = std::ptrdiff_t;
+      using value_type = GameNode;
+      using pointer = value_type *;
+      using reference = value_type &;
+
+      iterator() = default;
+      iterator(const GameInfoset &p_infoset, size_t p_index = 0)
+        : m_infoset(p_infoset), m_index(p_index)
+      {
+      }
+      iterator(const iterator &) = default;
+      ~iterator() = default;
+      iterator &operator=(const iterator &) = default;
+
+      bool operator==(const iterator &p_iter) const
+      {
+        return m_infoset == p_iter.m_infoset && m_index == p_iter.m_index;
+      }
+      bool operator!=(const iterator &p_iter) const
+      {
+        return m_infoset != p_iter.m_infoset || m_index != p_iter.m_index;
+      }
+
+      iterator &operator++()
+      {
+        m_index++;
+        return *this;
+      }
+      iterator &operator--()
+      {
+        m_index--;
+        return *this;
+      }
+      GameNode operator*() const { return m_infoset->m_members.at(m_index); }
+    };
+
+    Members() = default;
+    explicit Members(const GameInfoset &p_infoset) : m_infoset(p_infoset) {}
+    Members(const Members &) = default;
+    ~Members() = default;
+    Members &operator=(const Members &) = default;
+
+    size_t size() const { return m_infoset->m_members.size(); }
+    GameNode front() const { return m_infoset->m_members.front(); }
+    GameNode back() const { return m_infoset->m_members.back(); }
+
+    iterator begin() const { return {m_infoset, 0}; }
+    iterator end() const { return {m_infoset, (m_infoset) ? m_infoset->m_members.size() : 0}; }
+    iterator cbegin() const { return {m_infoset, 0}; }
+    iterator cend() const { return {m_infoset, (m_infoset) ? m_infoset->m_members.size() : 0}; }
+  };
+
   Game GetGame() const;
   int GetNumber() const { return m_number; }
 
@@ -280,8 +342,8 @@ public:
   //@}
 
   size_t NumMembers() const { return m_members.size(); }
-  GameNode GetMember(int p_index) const;
-  Array<GameNode> GetMembers() const;
+  GameNode GetMember(int p_index) const { return m_members.at(p_index - 1); }
+  Members GetMembers() const { return Members(this); }
 
   bool Precedes(GameNode) const;
 
@@ -922,6 +984,8 @@ inline void GameOutcomeRep::SetPayoff(const GamePlayer &p_player, const Number &
 inline GamePlayer GameStrategyRep::GetPlayer() const { return m_player; }
 
 inline Game GameInfosetRep::GetGame() const { return m_game; }
+inline GamePlayer GameInfosetRep::GetPlayer() const { return m_player; }
+inline bool GameInfosetRep::IsChanceInfoset() const { return m_player->IsChance(); }
 
 inline Game GamePlayerRep::GetGame() const { return m_game; }
 inline size_t GamePlayerRep::NumStrategies() const

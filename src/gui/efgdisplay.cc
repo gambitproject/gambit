@@ -375,15 +375,10 @@ static GameNode PriorSameIset(const GameNode &n)
   if (!iset) {
     return nullptr;
   }
-  for (size_t i = 1; i <= iset->NumMembers(); i++) {
-    if (iset->GetMember(i) == n) {
-      if (i > 1) {
-        return iset->GetMember(i - 1);
-      }
-      else {
-        return nullptr;
-      }
-    }
+  auto members = iset->GetMembers();
+  auto node = std::find(members.begin(), members.end(), n);
+  if (node != members.begin()) {
+    return *std::prev(node);
   }
   return nullptr;
 }
@@ -394,15 +389,10 @@ static GameNode NextSameIset(const GameNode &n)
   if (!iset) {
     return nullptr;
   }
-  for (size_t i = 1; i <= iset->NumMembers(); i++) {
-    if (iset->GetMember(i) == n) {
-      if (i < iset->NumMembers()) {
-        return iset->GetMember(i + 1);
-      }
-      else {
-        return nullptr;
-      }
-    }
+  auto members = iset->GetMembers();
+  auto node = std::find(members.begin(), members.end(), n);
+  if (node != members.end()) {
+    return *std::next(node);
   }
   return nullptr;
 }
