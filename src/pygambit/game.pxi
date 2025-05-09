@@ -22,7 +22,6 @@
 import io
 import itertools
 import pathlib
-import warnings
 
 import numpy as np
 import scipy.stats

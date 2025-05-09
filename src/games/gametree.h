@@ -38,6 +38,7 @@ protected:
   GamePlayerRep *m_chance;
   std::size_t m_numNodes = 1;
   std::size_t m_numNonterminalNodes = 0;
+  std::map<GameNodeRep *, std::vector<GameNodeRep *>> m_nodePlays;
 
   /// @name Private auxiliary functions
   //@{
@@ -50,6 +51,7 @@ protected:
   //@{
   void Canonicalize();
   void BuildComputedValues() const override;
+  void BuildConsistentPlays();
   void ClearComputedValues() const;
 
   /// Removes the node from the information set, invalidating if emptied
@@ -141,6 +143,10 @@ public:
   void DeleteAction(GameAction) override;
   void SetOutcome(GameNode, const GameOutcome &p_outcome) override;
 
+  std::vector<GameNode> GetPlays(GameNode node) const override;
+  std::vector<GameNode> GetPlays(GameInfoset infoset) const override;
+  std::vector<GameNode> GetPlays(GameAction action) const override;
+
   Game CopySubgame(GameNode) const override;
   //@}
 
@@ -151,6 +157,9 @@ public:
   NewMixedStrategyProfile(double, const StrategySupportProfile &) const override;
   MixedStrategyProfile<Rational>
   NewMixedStrategyProfile(const Rational &, const StrategySupportProfile &) const override;
+
+private:
+  std::vector<GameNodeRep *> BuildConsistentPlaysRecursiveImpl(GameNodeRep *node);
 };
 
 template <class T> class TreeMixedStrategyProfileRep : public MixedStrategyProfileRep<T> {

@@ -772,3 +772,18 @@ def test_nonterminal_len_after_copy_tree():
 
     assert len(game._nonterminal_nodes) == initial_number_of_nodes \
         + number_of_nonterminal_src_ancestors
+
+
+def test_node_plays():
+    """Verify `node.plays` returns plays reachable from a given node.
+    """
+    game = games.read_from_file("e02.efg")
+    list_nodes = list(game.nodes)
+
+    test_node = list_nodes[2]  # path=[1]
+
+    expected_set_of_plays = {
+        list_nodes[3], list_nodes[5], list_nodes[6]
+    }  # paths=[0, 1], [0, 1, 1], [1, 1, 1]
+
+    assert set(test_node.plays) == expected_set_of_plays

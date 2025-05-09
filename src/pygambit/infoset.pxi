@@ -175,3 +175,11 @@ class Infoset:
     def player(self) -> Player:
         """The player who has the move at this information set."""
         return Player.wrap(self.infoset.deref().GetPlayer())
+
+    @property
+    def plays(self) -> typing.List[Node]:
+        """Returns a list of all terminal `Node` objects consistent with it.
+        """
+        return [
+            Node.wrap(n) for n in self.infoset.deref().GetGame().deref().GetPlays(self.infoset)
+        ]

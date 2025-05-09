@@ -127,3 +127,19 @@ def test_action_delete_chance(game: gbt.Game):
                     assert p2 == p1 / (1-old_probs[0])
     with pytest.raises(gbt.UndefinedOperationError):
         game.delete_action(chance_iset.actions[0])
+
+
+def test_action_plays():
+    """Verify `action.plays` returns plays reachable from a given action.
+    """
+    game = games.read_from_file("e01.efg")
+    list_nodes = list(game.nodes)
+    list_infosets = list(game.infosets)
+
+    test_action = list_infosets[2].actions[0]  # members' paths=[0, 1, 0], [0, 1]
+
+    expected_set_of_plays = {
+        list_nodes[4], list_nodes[7]
+    }  # paths=[0, 1, 0], [0, 1]
+
+    assert set(test_action.plays) == expected_set_of_plays

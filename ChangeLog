@@ -9,6 +9,10 @@
 - The deprecated functions `Game.read_game`, `Game.parse_game` and `Game.write` functions have
   been removed as planned. (#357)
 
+### Added
+- Implement `GetPlays()` (C++) and `get_plays` (Python) to compute the set of terminal nodes consistent
+  with a node, information set, or action (#517)
+
 
 ## [16.3.1] - unreleased
 
