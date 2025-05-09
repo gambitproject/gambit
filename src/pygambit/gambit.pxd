@@ -145,6 +145,17 @@ cdef extern from "games/game.h":
         bint Precedes(c_GameNode) except +
 
     cdef cppclass c_GamePlayerRep "GamePlayerRep":
+        cppclass Infosets:
+            cppclass iterator:
+                c_GameInfoset operator *()
+                iterator operator++()
+                bint operator ==(iterator)
+                bint operator !=(iterator)
+
+            int size() except +
+            iterator begin() except +
+            iterator end() except +
+
         c_Game GetGame() except +
         int GetNumber() except +
         int IsChance() except +
@@ -155,8 +166,8 @@ cdef extern from "games/game.h":
         int NumStrategies() except +
         c_GameStrategy GetStrategy(int) except +IndexError
 
-        int NumInfosets() except +
         c_GameInfoset GetInfoset(int) except +IndexError
+        Infosets GetInfosets() except +
 
     cdef cppclass c_GameOutcomeRep "GameOutcomeRep":
         c_Game GetGame() except +

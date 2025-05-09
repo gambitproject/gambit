@@ -42,11 +42,11 @@ class PlayerInfosets:
 
     def __len__(self) -> int:
         """The number of information sets at which the player has the decision."""
-        return self.player.deref().NumInfosets()
+        return self.player.deref().GetInfosets().size()
 
     def __iter__(self) -> typing.Iterator[Infoset]:
-        for i in range(self.player.deref().NumInfosets()):
-            yield Infoset.wrap(self.player.deref().GetInfoset(i + 1))
+        for infoset in self.player.deref().GetInfosets():
+            yield Infoset.wrap(infoset)
 
     def __getitem__(self, index: typing.Union[int, str]) -> Infoset:
         if isinstance(index, str):
