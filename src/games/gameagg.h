@@ -103,6 +103,8 @@ public:
   size_t NumNodes() const override { throw UndefinedException(); }
   /// Returns the number of non-terminal nodes in the game
   size_t NumNonterminalNodes() const override { throw UndefinedException(); }
+  /// Returns the set of terminal nodes which are descendants of node
+  std::vector<GameNode> GetPlays(GameNode node) const override { throw UndefinedException(); }
   //@}
 
   /// @name General data access

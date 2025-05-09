@@ -886,6 +886,7 @@ void GameTreeRep::ClearComputedValues() const
     }
     player->m_strategies.clear();
   }
+  const_cast<GameTreeRep *>(this)->m_nodePlays.clear();
   m_computedValues = false;
 }
 
@@ -894,11 +895,35 @@ void GameTreeRep::BuildComputedValues() const
   if (m_computedValues) {
     return;
   }
+  const_cast<GameTreeRep *>(this)->BuildConsistentPlays();
   const_cast<GameTreeRep *>(this)->Canonicalize();
   for (const auto &player : m_players) {
     player->MakeReducedStrats(m_root, nullptr);
   }
   m_computedValues = true;
+}
+
+void GameTreeRep::BuildConsistentPlays()
+{
+  m_nodePlays.clear();
+  BuildConsistentPlaysRecursiveImpl(m_root);
+}
+
+std::vector<GameNodeRep *> GameTreeRep::BuildConsistentPlaysRecursiveImpl(GameNodeRep *node)
+{
+  std::vector<GameNodeRep *> consistent_plays;
+  if (node->IsTerminal()) {
+    consistent_plays = std::vector<GameNodeRep *>{node};
+  }
+  else {
+    for (GameNodeRep *child : node->GetChildren()) {
+      auto child_consisent_plays = BuildConsistentPlaysRecursiveImpl(child);
+      consistent_plays.insert(consistent_plays.end(), child_consisent_plays.begin(),
+                              child_consisent_plays.end());
+    }
+  }
+  m_nodePlays[node] = consistent_plays;
+  return consistent_plays;
 }
 
 //------------------------------------------------------------------------
@@ -1039,6 +1064,15 @@ Array<int> GameTreeRep::NumInfosets() const
 //------------------------------------------------------------------------
 //                        GameTreeRep: Outcomes
 //------------------------------------------------------------------------
+
+std::vector<GameNode> GameTreeRep::GetPlays(GameNode node) const
+{
+  BuildComputedValues();
+  std::vector<GameNodeRep *> consistent_plays = m_nodePlays.at(node);
+  std::vector<GameNode> consistent_plays_copy;
+  std::copy(consistent_plays.cbegin(), consistent_plays.cend(), consistent_plays_copy.begin());
+  return consistent_plays_copy;
+}
 
 void GameTreeRep::DeleteOutcome(const GameOutcome &p_outcome)
 {

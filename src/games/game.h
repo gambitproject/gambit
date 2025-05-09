@@ -474,6 +474,9 @@ public:
   /// Returns the largest payoff to the player in any outcome of the game
   virtual Rational GetMaxPayoff(const GamePlayer &p_player) const = 0;
 
+  /// Returns the set of terminal nodes which are descendants of node
+  virtual std::vector<GameNode> GetPlays(GameNode node) const = 0;
+
   /// Returns true if the game is perfect recall.  If not,
   /// a pair of violating information sets is returned in the parameters.
   virtual bool IsPerfectRecall(GameInfoset &, GameInfoset &) const = 0;
