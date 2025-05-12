@@ -52,9 +52,6 @@ public:
   GameStrategy GetStrategy(int p_index) const override;
   /// Returns the total number of actions in the game
   int BehavProfileLength() const override { throw UndefinedException(); }
-  /// Returns the total number of strategies in the game
-  int MixedProfileLength() const override { return aggPtr->getNumActions(); }
-  int NumStrategyContingencies() const override { throw UndefinedException(); }
   //@}
 
   PureStrategyProfile NewPureStrategyProfile() const override;

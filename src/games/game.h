@@ -290,6 +290,7 @@ public:
 
 /// A player in a game
 class GamePlayerRep : public GameObject {
+  friend class GameRep;
   friend class GameExplicitRep;
   friend class GameTreeRep;
   friend class GameTableRep;
@@ -311,7 +312,7 @@ class GamePlayerRep : public GameObject {
   int m_number;
   std::string m_label;
   std::vector<GameInfosetRep *> m_infosets;
-  Array<GameStrategyRep *> m_strategies;
+  std::vector<GameStrategyRep *> m_strategies;
 
   GamePlayerRep(GameRep *p_game, int p_id) : m_game(p_game), m_number(p_id) {}
   GamePlayerRep(GameRep *p_game, int p_id, int m_strats);
@@ -553,11 +554,21 @@ public:
   /// Remove the strategy from the game
   virtual void DeleteStrategy(const GameStrategy &p_strategy) { throw UndefinedException(); }
   /// Returns the number of strategy contingencies in the game
-  virtual int NumStrategyContingencies() const = 0;
+  int NumStrategyContingencies() const
+  {
+    BuildComputedValues();
+    return std::transform_reduce(m_players.begin(), m_players.end(), 0, std::multiplies<>(),
+                                 [](const GamePlayerRep *p) { return p->m_strategies.size(); });
+  }
   /// Returns the total number of actions in the game
   virtual int BehavProfileLength() const = 0;
   /// Returns the total number of strategies in the game
-  virtual int MixedProfileLength() const = 0;
+  int MixedProfileLength() const
+  {
+    BuildComputedValues();
+    return std::transform_reduce(m_players.begin(), m_players.end(), 0, std::plus<>(),
+                                 [](const GamePlayerRep *p) { return p->m_strategies.size(); });
+  }
   //@}
 
   virtual PureStrategyProfile NewPureStrategyProfile() const = 0;
@@ -696,7 +707,7 @@ inline size_t GamePlayerRep::NumStrategies() const
 inline GameStrategy GamePlayerRep::GetStrategy(int st) const
 {
   m_game->BuildComputedValues();
-  return m_strategies[st];
+  return m_strategies.at(st - 1);
 }
 
 //=======================================================================

@@ -57,12 +57,8 @@ public:
   Array<int> NumStrategies() const override;
   /// Gets the i'th strategy in the game, numbered globally
   GameStrategy GetStrategy(int p_index) const override { throw UndefinedException(); }
-  /// Returns the number of strategy contingencies in the game
-  int NumStrategyContingencies() const override { throw UndefinedException(); }
   /// Returns the total number of actions in the game
   int BehavProfileLength() const override { throw UndefinedException(); }
-  /// Returns the total number of strategies in the game
-  int MixedProfileLength() const override;
   //@}
 
   PureStrategyProfile NewPureStrategyProfile() const override;
