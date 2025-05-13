@@ -1068,9 +1068,15 @@ Array<int> GameTreeRep::NumInfosets() const
 std::vector<GameNode> GameTreeRep::GetPlays(GameNode node) const
 {
   BuildComputedValues();
-  std::vector<GameNodeRep *> consistent_plays = m_nodePlays.at(node);
+
+  const std::vector<GameNodeRep *> &consistent_plays = m_nodePlays.at(node);
   std::vector<GameNode> consistent_plays_copy;
-  std::copy(consistent_plays.cbegin(), consistent_plays.cend(), consistent_plays_copy.begin());
+  consistent_plays_copy.reserve(consistent_plays.size());
+
+  std::transform(consistent_plays.cbegin(), consistent_plays.cend(),
+                 std::back_inserter(consistent_plays_copy),
+                 [](GameNodeRep *rep_ptr) -> GameNode { return GameNode(rep_ptr); });
+
   return consistent_plays_copy;
 }
 
