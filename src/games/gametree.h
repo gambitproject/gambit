@@ -146,6 +146,8 @@ public:
   void SetOutcome(GameNode, const GameOutcome &p_outcome) override;
 
   std::vector<GameNode> GetPlays(GameNode node) const override;
+  std::vector<GameNode> GetPlays(GameInfoset infoset) const override;
+  std::vector<GameNode> GetPlays(GameAction action) const override;
 
   Game CopySubgame(GameNode) const override;
   //@}

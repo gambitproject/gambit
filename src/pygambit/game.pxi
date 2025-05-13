@@ -22,7 +22,6 @@
 import io
 import itertools
 import pathlib
-import warnings
 
 import numpy as np
 import scipy.stats
@@ -2014,11 +2013,16 @@ class Game:
             raise UndefinedOperationError("Cannot delete the only strategy for a player")
         self.game.deref().DeleteStrategy(resolved_strategy.strategy)
 
-    def get_plays(self, node: typing.Union[Node, str]) -> typing.List[Node]:
-        resolved_node = cython.cast(Node, self._resolve_node(node, "get_plays", "node_obj"))
-
-        plays = []
-        for item in self.game.deref().GetPlays(resolved_node.node):
-            plays.append(Node.wrap(item))
-
-        return plays
+    def get_plays(self, obj: typing.Union[Node, Infoset, Action]) -> typing.List[Node]:
+        if isinstance(obj, Node):
+            return [Node.wrap(n) for n in self.game.deref().GetPlays(cython.cast(Node, obj).node)]
+        elif isinstance(obj, Infoset):
+            return [
+                Node.wrap(n) for n in self.game.deref().GetPlays(cython.cast(Infoset, obj).infoset)
+            ]
+        elif isinstance(obj, Action):
+            return [
+                Node.wrap(n) for n in self.game.deref().GetPlays(cython.cast(Action, obj).action)
+            ]
+        else:
+            raise TypeError("The object needs to be either Node, Infoset, or Action")

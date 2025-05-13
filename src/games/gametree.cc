@@ -1075,9 +1075,34 @@ std::vector<GameNode> GameTreeRep::GetPlays(GameNode node) const
 
   std::transform(consistent_plays.cbegin(), consistent_plays.cend(),
                  std::back_inserter(consistent_plays_copy),
-                 [](GameNodeRep *rep_ptr) -> GameNode { return GameNode(rep_ptr); });
+                 [](GameNodeRep *rep_ptr) -> GameNode { return {rep_ptr}; });
 
   return consistent_plays_copy;
+}
+
+std::vector<GameNode> GameTreeRep::GetPlays(GameInfoset infoset) const
+{
+  std::vector<GameNode> plays;
+  auto members = infoset->GetMembers();
+
+  for (const GameNode &node : members) {
+    std::vector<GameNode> member_plays = GetPlays(node);
+    plays.insert(plays.end(), member_plays.begin(), member_plays.end());
+  }
+  return plays;
+}
+
+std::vector<GameNode> GameTreeRep::GetPlays(GameAction action) const
+{
+  std::vector<GameNode> plays;
+  auto infoset = action->GetInfoset();
+  auto members = infoset->GetMembers();
+
+  for (const GameNode &node : members) {
+    std::vector<GameNode> child_plays = GetPlays(node->GetChild(action));
+    plays.insert(plays.end(), child_plays.begin(), child_plays.end());
+  }
+  return plays;
 }
 
 void GameTreeRep::DeleteOutcome(const GameOutcome &p_outcome)

@@ -476,6 +476,10 @@ public:
 
   /// Returns the set of terminal nodes which are descendants of node
   virtual std::vector<GameNode> GetPlays(GameNode node) const = 0;
+  /// Returns the set of terminal nodes which are descendants of members of an infoset
+  virtual std::vector<GameNode> GetPlays(GameInfoset infoset) const = 0;
+  /// Returns the set of terminal nodes which are descendants of members of an action
+  virtual std::vector<GameNode> GetPlays(GameAction action) const = 0;
 
   /// Returns true if the game is perfect recall.  If not,
   /// a pair of violating information sets is returned in the parameters.

@@ -105,6 +105,13 @@ public:
   size_t NumNonterminalNodes() const override { throw UndefinedException(); }
   /// Returns the set of terminal nodes which are descendants of node
   std::vector<GameNode> GetPlays(GameNode node) const override { throw UndefinedException(); }
+  /// Returns the set of terminal nodes which are descendants of members of an infoset
+  std::vector<GameNode> GetPlays(GameInfoset infoset) const override
+  {
+    throw UndefinedException();
+  }
+  /// Returns the set of terminal nodes which are descendants of members of an action
+  std::vector<GameNode> GetPlays(GameAction action) const override { throw UndefinedException(); }
   //@}
 
   /// @name General data access

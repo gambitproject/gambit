@@ -209,6 +209,8 @@ cdef extern from "games/game.h":
         c_Rational GetMaxPayoff() except +
         c_Rational GetMaxPayoff(c_GamePlayer) except +
         stdvector[c_GameNode] GetPlays(c_GameNode) except +
+        stdvector[c_GameNode] GetPlays(c_GameInfoset) except +
+        stdvector[c_GameNode] GetPlays(c_GameAction) except +
         bool IsPerfectRecall() except +
 
         c_GameInfoset AppendMove(c_GameNode, c_GamePlayer, int) except +ValueError
