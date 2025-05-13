@@ -2013,3 +2013,12 @@ class Game:
         if len(resolved_strategy.player.strategies) == 1:
             raise UndefinedOperationError("Cannot delete the only strategy for a player")
         self.game.deref().DeleteStrategy(resolved_strategy.strategy)
+
+    def get_plays(self, node: typing.Union[Node, str]) -> typing.List[Node]:
+        resolved_node = cython.cast(Node, self._resolve_node(node, "get_plays", "node_obj"))
+
+        plays = []
+        for item in self.game.deref().GetPlays(resolved_node.node):
+            plays.append(Node.wrap(item))
+
+        return plays
