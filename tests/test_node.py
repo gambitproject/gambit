@@ -787,3 +787,35 @@ def test_get_plays_node():
     }  # paths=[0, 1], [0, 1, 1], [1, 1, 1]
 
     assert set(game.get_plays(test_node)) == expected_set_of_plays
+
+
+def test_get_plays_infoset():
+    """Verify `get_plays` returns plays reachable from a given infoset.
+    """
+    game = games.read_from_file("e01.efg")
+    list_nodes = list(game.nodes)
+    list_infosets = list(game.infosets)
+
+    test_infoset = list_infosets[2]  # members' paths=[1, 0], [1]
+
+    expected_set_of_plays = {
+        list_nodes[4], list_nodes[5], list_nodes[7], list_nodes[8]
+    }  # paths=[0, 1, 0], [1, 1, 0], [0, 1], [1, 1]
+
+    assert set(game.get_plays(test_infoset)) == expected_set_of_plays
+
+
+def test_get_plays_action():
+    """Verify `get_plays` returns plays reachable from a given action.
+    """
+    game = games.read_from_file("e01.efg")
+    list_nodes = list(game.nodes)
+    list_infosets = list(game.infosets)
+
+    test_action = list_infosets[2].actions[0]  # members' paths=[0, 1, 0], [0, 1]
+
+    expected_set_of_plays = {
+        list_nodes[4], list_nodes[7]
+    }  # paths=[0, 1, 0], [0, 1]
+
+    assert set(game.get_plays(test_action)) == expected_set_of_plays
