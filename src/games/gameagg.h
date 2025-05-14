@@ -39,13 +39,6 @@ public:
   //@{
   /// Constructor
   explicit GameAGGRep(std::shared_ptr<agg::AGG>);
-  /// Destructor
-  ~GameAGGRep() override
-  {
-    for (auto player : m_players) {
-      player->Invalidate();
-    }
-  }
   /// Create a copy of the game, as a new game
   Game Copy() const override;
   //@}
@@ -59,9 +52,6 @@ public:
   GameStrategy GetStrategy(int p_index) const override;
   /// Returns the total number of actions in the game
   int BehavProfileLength() const override { throw UndefinedException(); }
-  /// Returns the total number of strategies in the game
-  int MixedProfileLength() const override { return aggPtr->getNumActions(); }
-  int NumStrategyContingencies() const override { throw UndefinedException(); }
   //@}
 
   PureStrategyProfile NewPureStrategyProfile() const override;
@@ -80,34 +70,14 @@ public:
   GamePlayer NewPlayer() override { throw UndefinedException(); }
   //@}
 
-  /// @name Information sets
-  //@{
-  /// Returns the iset'th information set in the game (numbered globally)
-  GameInfoset GetInfoset(int iset) const override { throw UndefinedException(); }
-  /// Returns the set of information sets in the game
-  Array<GameInfoset> GetInfosets() const override { throw UndefinedException(); }
-  /// Returns an array with the number of information sets per personal player
-  Array<int> NumInfosets() const override { throw UndefinedException(); }
-  //@}
-
-  /// @name Outcomes
-  //@{
-  /// Returns the number of outcomes defined in the game
-  size_t NumOutcomes() const override { throw UndefinedException(); }
-  /// Returns the index'th outcome defined in the game
-  GameOutcome GetOutcome(int index) const override { throw UndefinedException(); }
-  /// Creates a new outcome in the game
-  GameOutcome NewOutcome() override { throw UndefinedException(); }
-  /// Deletes the specified outcome from the game
-  void DeleteOutcome(const GameOutcome &) override { throw UndefinedException(); }
-  //@}
-
   /// @name Nodes
   //@{
   /// Returns the root node of the game
   GameNode GetRoot() const override { throw UndefinedException(); }
   /// Returns the number of nodes in the game
   size_t NumNodes() const override { throw UndefinedException(); }
+  /// Returns the number of non-terminal nodes in the game
+  size_t NumNonterminalNodes() const override { throw UndefinedException(); }
   //@}
 
   /// @name General data access

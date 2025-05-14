@@ -195,6 +195,41 @@ class GameNodes:
 
 
 @cython.cclass
+class GameNonterminalNodes:
+    """Represents the set of nodes in a game."""
+    game = cython.declare(c_Game)
+
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create GameNonterminalNodes outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(game: c_Game) -> GameNonterminalNodes:
+        obj: GameNonterminalNodes = GameNonterminalNodes.__new__(GameNonterminalNodes)
+        obj.game = game
+        return obj
+
+    def __repr__(self) -> str:
+        return f"GameNonterminalNodes(game={Game.wrap(self.game)})"
+
+    def __len__(self) -> int:
+        """The number of non-terminal nodes in the game."""
+        if not self.game.deref().IsTree():
+            return 0
+        return self.game.deref().NumNonterminalNodes()
+
+    def __iter__(self) -> typing.Iterator[Node]:
+        def dfs(node):
+            if not node.is_terminal:
+                yield node
+            for child in node.children:
+                yield from dfs(child)
+        if not self.game.deref().IsTree():
+            return
+        yield from dfs(Node.wrap(self.game.deref().GetRoot()))
+
+
+@cython.cclass
 class GameOutcomes:
     """Represents the set of outcomes in a game."""
     game = cython.declare(c_Game)
@@ -214,11 +249,11 @@ class GameOutcomes:
 
     def __len__(self) -> int:
         """The number of outcomes in the game."""
-        return self.game.deref().NumOutcomes()
+        return self.game.deref().GetOutcomes().size()
 
     def __iter__(self) -> typing.Iterator[Outcome]:
-        for i in range(self.game.deref().NumOutcomes()):
-            yield Outcome.wrap(self.game.deref().GetOutcome(i + 1))
+        for outcome in self.game.deref().GetOutcomes():
+            yield Outcome.wrap(outcome)
 
     def __getitem__(self, index: typing.Union[int, str]) -> Outcome:
         if isinstance(index, str):
@@ -258,8 +293,8 @@ class GamePlayers:
         return self.game.deref().NumPlayers()
 
     def __iter__(self) -> typing.Iterator[Player]:
-        for i in range(self.game.deref().NumPlayers()):
-            yield Player.wrap(self.game.deref().GetPlayer(i + 1))
+        for player in self.game.deref().GetPlayers():
+            yield Player.wrap(player)
 
     def __getitem__(self, index: typing.Union[int, str]) -> Player:
         if isinstance(index, str):
@@ -385,7 +420,7 @@ class GameStrategies:
         return obj
 
     def __repr__(self) -> str:
-        return f"GameOutcomes(game={self.game})"
+        return f"GameStrategies(game={self.game})"
 
     def __len__(self) -> int:
         return sum(len(p.strategies) for p in self.game.players)
@@ -482,10 +517,7 @@ class Game:
         Game
             The newly-created strategic game.
         """
-        cdef Array[int] d
-        for v in dim:
-            d.push_back(v)
-        g = Game.wrap(NewTable(d))
+        g = Game.wrap(NewTable(list(dim)))
         g.title = title
         return g
 
@@ -712,6 +744,15 @@ class Game:
 
         """
         return GameNodes.wrap(self.game)
+
+    @property
+    def _nonterminal_nodes(self) -> GameNonterminalNodes:
+        """The set of non-terminal nodes in the game.
+
+        Iteration over this property yields the non-terminal nodes in the order of depth-first
+        search.
+        """
+        return GameNonterminalNodes.wrap(self.game)
 
     @property
     def contingencies(self) -> pygambit.gameiter.Contingencies:

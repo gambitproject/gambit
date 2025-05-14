@@ -42,11 +42,11 @@ class PlayerInfosets:
 
     def __len__(self) -> int:
         """The number of information sets at which the player has the decision."""
-        return self.player.deref().NumInfosets()
+        return self.player.deref().GetInfosets().size()
 
     def __iter__(self) -> typing.Iterator[Infoset]:
-        for i in range(self.player.deref().NumInfosets()):
-            yield Infoset.wrap(self.player.deref().GetInfoset(i + 1))
+        for infoset in self.player.deref().GetInfosets():
+            yield Infoset.wrap(infoset)
 
     def __getitem__(self, index: typing.Union[int, str]) -> Infoset:
         if isinstance(index, str):
@@ -127,11 +127,11 @@ class PlayerStrategies:
 
     def __len__(self):
         """The number of strategies for the player in the game."""
-        return self.player.deref().NumStrategies()
+        return self.player.deref().GetStrategies().size()
 
     def __iter__(self) -> typing.Iterator[Strategy]:
-        for i in range(self.player.deref().NumStrategies()):
-            yield Strategy.wrap(self.player.deref().GetStrategy(i + 1))
+        for strategy in self.player.deref().GetStrategies():
+            yield Strategy.wrap(strategy)
 
     def __getitem__(self, index: typing.Union[int, str]) -> Strategy:
         if isinstance(index, str):

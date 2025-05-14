@@ -123,7 +123,7 @@ private:
 public:
   class iterator {
   private:
-    Array<GameStrategy> m_strategies;
+    GamePlayerRep::Strategies m_strategies;
     StrategySupport m_current;
     std::vector<bool> m_include;
     bool m_end;
@@ -132,17 +132,19 @@ public:
     void UpdateCurrent()
     {
       m_current.clear();
-      for (size_t i = 0; i < m_include.size(); i++) {
-        if (m_include[i]) {
-          m_current.push_back(m_strategies[i + 1]);
+      auto strategy = m_strategies.begin();
+      for (const auto &value : m_include) {
+        if (value) {
+          m_current.push_back(*strategy);
         }
+        ++strategy;
       }
     }
 
   public:
     using iterator_category = std::forward_iterator_tag;
 
-    iterator(const Array<GameStrategy> &p_strategies, size_t p_size, bool p_end = false)
+    iterator(const GamePlayerRep::Strategies &p_strategies, size_t p_size, bool p_end = false)
       : m_strategies(p_strategies), m_include(m_strategies.size()), m_end(p_end)
     {
       std::fill(m_include.begin(), m_include.begin() + p_size, true);

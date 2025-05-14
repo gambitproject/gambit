@@ -115,7 +115,7 @@ void MixedBehaviorProfile<T>::RealizationProbs(const MixedStrategyProfile<T> &mp
       prob = T(node->m_infoset->GetActionProb(node->m_infoset->GetAction(i)));
     }
 
-    GameNodeRep *child = node->m_children[i];
+    GameNodeRep *child = node->m_children[i - 1];
 
     map_bvals[child] = prob * map_bvals[node];
     map_nvals[child] += map_bvals[child];
@@ -428,8 +428,8 @@ T MixedBehaviorProfile<T>::DiffActionValue(const GameAction &p_action,
 
     deriv += DiffRealizProb(member, p_oppAction) *
              (map_nodeValues[child][player] - map_actionValues[p_action]);
-    deriv += map_realizProbs[member] *
-             DiffNodeValue(member->GetChild(p_action->GetNumber()), player, p_oppAction);
+    deriv +=
+        map_realizProbs[member] * DiffNodeValue(member->GetChild(p_action), player, p_oppAction);
   }
 
   return deriv / GetInfosetProb(p_action->GetInfoset());
@@ -465,28 +465,24 @@ T MixedBehaviorProfile<T>::DiffNodeValue(const GameNode &p_node, const GamePlaye
   CheckVersion();
   ComputeSolutionData();
 
-  if (p_node->NumChildren() > 0) {
-    const GameInfoset infoset = p_node->GetInfoset();
-
-    if (infoset == p_oppAction->GetInfoset()) {
-      // We've encountered the action; since we assume perfect recall,
-      // we won't encounter it again, and the downtree value must
-      // be the same.
-      return map_nodeValues[p_node->GetChild(p_oppAction)][p_player];
-    }
-    else {
-      T deriv = T(0);
-      for (auto action : infoset->GetActions()) {
-        deriv += (DiffNodeValue(p_node->GetChild(action), p_player, p_oppAction) *
-                  GetActionProb(action));
-      }
-      return deriv;
-    }
-  }
-  else {
+  if (p_node->IsTerminal()) {
     // If we reach a terminal node and haven't encountered p_oppAction,
     // derivative wrt this path is zero.
     return T(0);
+  }
+  if (p_node->GetInfoset() == p_oppAction->GetInfoset()) {
+    // We've encountered the action; since we assume perfect recall,
+    // we won't encounter it again, and the downtree value must
+    // be the same.
+    return map_nodeValues[p_node->GetChild(p_oppAction)][p_player];
+  }
+  else {
+    T deriv = T(0);
+    for (auto action : p_node->GetInfoset()->GetActions()) {
+      deriv +=
+          (DiffNodeValue(p_node->GetChild(action), p_player, p_oppAction) * GetActionProb(action));
+    }
+    return deriv;
   }
 }
 

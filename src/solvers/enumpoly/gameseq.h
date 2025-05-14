@@ -269,7 +269,7 @@ public:
 
   Contingencies GetContingencies() const { return {this}; }
 
-  Array<GamePlayer> GetPlayers() const { return m_support.GetGame()->GetPlayers(); }
+  GameRep::Players GetPlayers() const { return m_support.GetGame()->GetPlayers(); }
 
   Infosets GetInfosets() const { return {this}; }
 

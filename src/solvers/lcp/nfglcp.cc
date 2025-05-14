@@ -51,9 +51,9 @@ template <class T> Matrix<T> Make_A1(const Game &p_game)
   const Rational fac(1, max - min);
 
   for (int i = 1; i <= n1; i++) {
-    profile->SetStrategy(p_game->GetPlayer(1)->GetStrategies()[i]);
+    profile->SetStrategy(p_game->GetPlayer(1)->GetStrategy(i));
     for (int j = 1; j <= n2; j++) {
-      profile->SetStrategy(p_game->GetPlayer(2)->GetStrategies()[j]);
+      profile->SetStrategy(p_game->GetPlayer(2)->GetStrategy(j));
       A1(i, n1 + j) = fac * (profile->GetPayoff(p_game->GetPlayer(1)) - min);
     }
   }
@@ -82,9 +82,9 @@ template <class T> Matrix<T> Make_A2(const Game &p_game)
   const Rational fac(1, max - min);
 
   for (int i = 1; i <= n1; i++) {
-    profile->SetStrategy(p_game->GetPlayer(1)->GetStrategies()[i]);
+    profile->SetStrategy(p_game->GetPlayer(1)->GetStrategy(i));
     for (int j = 1; j <= n2; j++) {
-      profile->SetStrategy(p_game->GetPlayer(2)->GetStrategies()[j]);
+      profile->SetStrategy(p_game->GetPlayer(2)->GetStrategy(j));
       A2(n1 + j, i) = fac * (profile->GetPayoff(p_game->GetPlayer(2)) - min);
     }
   }
@@ -174,7 +174,7 @@ bool NashLcpStrategySolver<T>::OnBFS(const Game &p_game, linalg::LHTableau<T> &p
   }
 
   for (int j = 1; j <= n1; j++) {
-    const GameStrategy strategy = p_game->GetPlayer(1)->GetStrategies()[j];
+    const GameStrategy strategy = p_game->GetPlayer(1)->GetStrategy(j);
     if (cbfs.count(j)) {
       profile[strategy] = cbfs[j] / sum;
     }
@@ -191,7 +191,7 @@ bool NashLcpStrategySolver<T>::OnBFS(const Game &p_game, linalg::LHTableau<T> &p
   }
 
   for (int j = 1; j <= n2; j++) {
-    const GameStrategy strategy = p_game->GetPlayer(2)->GetStrategies()[j];
+    const GameStrategy strategy = p_game->GetPlayer(2)->GetStrategy(j);
     if (cbfs.count(n1 + j)) {
       profile[strategy] = cbfs[n1 + j] / sum;
     }

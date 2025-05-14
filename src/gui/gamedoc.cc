@@ -614,7 +614,7 @@ void gbtGameDocument::DoSetPlayerLabel(GamePlayer p_player, const wxString &p_la
 
 void gbtGameDocument::DoNewStrategy(GamePlayer p_player)
 {
-  m_game->NewStrategy(p_player, std::to_string(p_player->NumStrategies() + 1));
+  m_game->NewStrategy(p_player, std::to_string(p_player->GetStrategies().size() + 1));
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 

@@ -138,7 +138,7 @@ static GameNode GetNode(const GameNode &p_node, int p_id)
   if (p_node->GetNumber() == p_id) {
     return p_node;
   }
-  else if (p_node->NumChildren() == 0) {
+  else if (p_node->IsTerminal()) {
     return nullptr;
   }
   else {
@@ -158,7 +158,7 @@ bool gbtPlayerDropTarget::OnDropPlayer(const GameNode &p_node, const wxString &p
   p_text.Right(p_text.Length() - 1).ToLong(&pl);
   const Game efg = m_model->GetGame();
   const GamePlayer player = ((pl == 0) ? efg->GetChance() : efg->GetPlayer(pl));
-  if (p_node->NumChildren() == 0) {
+  if (p_node->IsTerminal()) {
     m_model->DoInsertMove(p_node, player, 2);
   }
   else if (p_node->GetPlayer() == player) {
@@ -178,7 +178,7 @@ bool gbtPlayerDropTarget::OnDropCopyNode(const GameNode &p_node, const wxString 
   if (!srcNode) {
     return false;
   }
-  if (p_node->NumChildren() == 0 && srcNode->NumChildren() > 0) {
+  if (p_node->IsTerminal() && !srcNode->IsTerminal()) {
     m_model->DoCopyTree(p_node, srcNode);
     return true;
   }
@@ -193,7 +193,7 @@ bool gbtPlayerDropTarget::OnDropMoveNode(const GameNode &p_node, const wxString 
   if (!srcNode) {
     return false;
   }
-  if (p_node->NumChildren() == 0 && srcNode->NumChildren() > 0) {
+  if (p_node->IsTerminal() && !srcNode->IsTerminal()) {
     m_model->DoMoveTree(p_node, srcNode);
     return true;
   }
@@ -208,11 +208,11 @@ bool gbtPlayerDropTarget::OnDropInfoset(const GameNode &p_node, const wxString &
   if (!srcNode) {
     return false;
   }
-  if (p_node->NumChildren() > 0 && p_node->NumChildren() == srcNode->NumChildren()) {
+  if (!p_node->IsTerminal() && p_node->GetChildren().size() == srcNode->GetChildren().size()) {
     m_model->DoSetInfoset(p_node, srcNode->GetInfoset());
     return true;
   }
-  else if (p_node->NumChildren() == 0 && srcNode->NumChildren() > 0) {
+  else if (p_node->IsTerminal() && !srcNode->IsTerminal()) {
     m_model->DoAppendMove(p_node, srcNode->GetInfoset());
     return true;
   }
@@ -375,15 +375,10 @@ static GameNode PriorSameIset(const GameNode &n)
   if (!iset) {
     return nullptr;
   }
-  for (size_t i = 1; i <= iset->NumMembers(); i++) {
-    if (iset->GetMember(i) == n) {
-      if (i > 1) {
-        return iset->GetMember(i - 1);
-      }
-      else {
-        return nullptr;
-      }
-    }
+  auto members = iset->GetMembers();
+  auto node = std::find(members.begin(), members.end(), n);
+  if (node != members.begin()) {
+    return *std::prev(node);
   }
   return nullptr;
 }
@@ -394,15 +389,10 @@ static GameNode NextSameIset(const GameNode &n)
   if (!iset) {
     return nullptr;
   }
-  for (size_t i = 1; i <= iset->NumMembers(); i++) {
-    if (iset->GetMember(i) == n) {
-      if (i < iset->NumMembers()) {
-        return iset->GetMember(i + 1);
-      }
-      else {
-        return nullptr;
-      }
-    }
+  auto members = iset->GetMembers();
+  auto node = std::find(members.begin(), members.end(), n);
+  if (node != members.end()) {
+    return *std::next(node);
   }
   return nullptr;
 }
@@ -599,7 +589,7 @@ void gbtEfgDisplay::OnUpdate()
   m_nodeMenu->Enable(GBT_MENU_EDIT_INSERT_MOVE, selectNode);
   m_nodeMenu->Enable(GBT_MENU_EDIT_INSERT_ACTION, selectNode && selectNode->GetInfoset());
   m_nodeMenu->Enable(GBT_MENU_EDIT_REVEAL, selectNode && selectNode->GetInfoset());
-  m_nodeMenu->Enable(GBT_MENU_EDIT_DELETE_TREE, selectNode && selectNode->NumChildren() > 0);
+  m_nodeMenu->Enable(GBT_MENU_EDIT_DELETE_TREE, selectNode && !selectNode->IsTerminal());
   m_nodeMenu->Enable(GBT_MENU_EDIT_DELETE_PARENT, selectNode && selectNode->GetParent());
   m_nodeMenu->Enable(GBT_MENU_EDIT_REMOVE_OUTCOME, selectNode && selectNode->GetOutcome());
   m_nodeMenu->Enable(GBT_MENU_EDIT_NODE, selectNode);
@@ -856,7 +846,7 @@ void gbtEfgDisplay::OnMouseMotion(wxMouseEvent &p_event)
 
     GameNode node = m_layout.NodeHitTest(x, y);
 
-    if (node && node->NumChildren() > 0) {
+    if (node && !node->IsTerminal()) {
       const GamePlayer player = node->GetPlayer();
       if (p_event.ControlDown()) {
         // Copy subtree

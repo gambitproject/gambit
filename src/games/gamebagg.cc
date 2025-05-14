@@ -242,15 +242,6 @@ Array<int> GameBAGGRep::NumStrategies() const
   return ns;
 }
 
-int GameBAGGRep::MixedProfileLength() const
-{
-  int res = 0;
-  for (const auto &player : m_players) {
-    res += player->m_strategies.size();
-  }
-  return res;
-}
-
 PureStrategyProfile GameBAGGRep::NewPureStrategyProfile() const
 {
   return PureStrategyProfile(

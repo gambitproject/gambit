@@ -48,7 +48,7 @@ template <class T> GameData<T>::GameData(const Game &p_game) : minpay(p_game->Ge
     int offset = 1;
     for (const auto &infoset : player->GetInfosets()) {
       infosetOffset[infoset] = offset;
-      offset += infoset->NumActions();
+      offset += infoset->GetActions().size();
     }
   }
 }
@@ -178,10 +178,10 @@ List<MixedBehaviorProfile<T>> LpBehaviorSolve(const Game &p_game,
 
   GameData<T> data(p_game);
 
-  Matrix<T> A(1, data.ns1 + p_game->GetPlayer(2)->NumInfosets() + 1, 1,
-              data.ns2 + p_game->GetPlayer(1)->NumInfosets() + 1);
-  Vector<T> b(1, data.ns1 + p_game->GetPlayer(2)->NumInfosets() + 1);
-  Vector<T> c(1, data.ns2 + p_game->GetPlayer(1)->NumInfosets() + 1);
+  Matrix<T> A(1, data.ns1 + p_game->GetPlayer(2)->GetInfosets().size() + 1, 1,
+              data.ns2 + p_game->GetPlayer(1)->GetInfosets().size() + 1);
+  Vector<T> b(1, data.ns1 + p_game->GetPlayer(2)->GetInfosets().size() + 1);
+  Vector<T> c(1, data.ns2 + p_game->GetPlayer(1)->GetInfosets().size() + 1);
 
   A = static_cast<T>(0);
   b = static_cast<T>(0);
@@ -196,7 +196,7 @@ List<MixedBehaviorProfile<T>> LpBehaviorSolve(const Game &p_game,
 
   Array<T> primal(A.NumColumns()), dual(A.NumRows());
   List<MixedBehaviorProfile<T>> solution;
-  SolveLP(A, b, c, p_game->GetPlayer(2)->NumInfosets() + 1, primal, dual);
+  SolveLP(A, b, c, p_game->GetPlayer(2)->GetInfosets().size() + 1, primal, dual);
   MixedBehaviorProfile<T> profile(p_game);
   data.GetBehavior(profile, primal, dual, p_game->GetRoot(), 1, 1);
   profile.UndefinedToCentroid();
@@ -236,9 +236,9 @@ List<MixedStrategyProfile<T>> LpStrategySolve(const Game &p_game,
   const Rational minpay = p_game->GetMinPayoff() - Rational(1);
 
   for (int i = 1; i <= k; i++) {
-    profile->SetStrategy(p_game->GetPlayer(2)->GetStrategies()[i]);
+    profile->SetStrategy(p_game->GetPlayer(2)->GetStrategy(i));
     for (int j = 1; j <= m; j++) {
-      profile->SetStrategy(p_game->GetPlayer(1)->GetStrategies()[j]);
+      profile->SetStrategy(p_game->GetPlayer(1)->GetStrategy(j));
       A(i, j) = minpay - profile->GetPayoff(p_game->GetPlayer(1));
     }
     A(i, m + 1) = static_cast<T>(1);
@@ -258,10 +258,10 @@ List<MixedStrategyProfile<T>> LpStrategySolve(const Game &p_game,
 
   MixedStrategyProfile<T> eqm(p_game->NewMixedStrategyProfile(static_cast<T>(0)));
   for (int j = 1; j <= m; j++) {
-    eqm[p_game->GetPlayer(1)->GetStrategies()[j]] = primal[j];
+    eqm[p_game->GetPlayer(1)->GetStrategy(j)] = primal[j];
   }
   for (int j = 1; j <= k; j++) {
-    eqm[p_game->GetPlayer(2)->GetStrategies()[j]] = dual[j];
+    eqm[p_game->GetPlayer(2)->GetStrategy(j)] = dual[j];
   }
   p_onEquilibrium(eqm, "NE");
   List<MixedStrategyProfile<T>> solution;

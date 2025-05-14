@@ -55,6 +55,79 @@ using GameNode = GameObjectPtr<GameNodeRep>;
 class GameRep;
 using Game = GameObjectPtr<GameRep>;
 
+template <class P, class T> class ElementCollection {
+  P m_owner{nullptr};
+  const std::vector<T *> *m_container{nullptr};
+
+public:
+  class iterator {
+    P m_owner{nullptr};
+    const std::vector<T *> *m_container{nullptr};
+    size_t m_index{0};
+
+  public:
+    using iterator_category = std::bidirectional_iterator_tag;
+    using difference_type = std::ptrdiff_t;
+    using value_type = GameObjectPtr<T>;
+    using pointer = value_type *;
+    using reference = value_type &;
+
+    iterator() = default;
+    iterator(const P &p_owner, const std::vector<T *> *p_container, size_t p_index = 0)
+      : m_owner(p_owner), m_container(p_container), m_index(p_index)
+    {
+    }
+    iterator(const iterator &) = default;
+    ~iterator() = default;
+    iterator &operator=(const iterator &) = default;
+
+    bool operator==(const iterator &p_iter) const
+    {
+      return m_owner == p_iter.m_owner && m_container == p_iter.m_container &&
+             m_index == p_iter.m_index;
+    }
+    bool operator!=(const iterator &p_iter) const
+    {
+      return m_owner != p_iter.m_owner || m_container != p_iter.m_container ||
+             m_index != p_iter.m_index;
+    }
+
+    iterator &operator++()
+    {
+      m_index++;
+      return *this;
+    }
+    iterator &operator--()
+    {
+      m_index--;
+      return *this;
+    }
+    value_type operator*() const { return m_container->at(m_index); }
+  };
+
+  ElementCollection() = default;
+  explicit ElementCollection(const P &p_owner, const std::vector<T *> *p_container)
+    : m_owner(p_owner), m_container(p_container)
+  {
+  }
+  ElementCollection(const ElementCollection<P, T> &) = default;
+  ~ElementCollection() = default;
+  ElementCollection &operator=(const ElementCollection<P, T> &) = default;
+
+  bool operator==(const ElementCollection<P, T> &p_other) const
+  {
+    return m_owner == p_other.m_owner && m_container == p_other.m_container;
+  }
+  size_t size() const { return m_container->size(); }
+  GameObjectPtr<T> front() const { return m_container->front(); }
+  GameObjectPtr<T> back() const { return m_container->back(); }
+
+  iterator begin() const { return {m_owner, m_container, 0}; }
+  iterator end() const { return {m_owner, m_container, (m_owner) ? m_container->size() : 0}; }
+  iterator cbegin() const { return {m_owner, m_container, 0}; }
+  iterator cend() const { return {m_owner, m_container, (m_owner) ? m_container->size() : 0}; }
+};
+
 //
 // Forward declarations of classes defined elsewhere.
 //
@@ -184,10 +257,10 @@ class GameInfosetRep : public GameObject {
   int m_number;
   std::string m_label;
   GamePlayerRep *m_player;
-  Array<GameActionRep *> m_actions;
+  std::vector<GameActionRep *> m_actions;
   std::vector<GameNodeRep *> m_members;
   int flag{0}, whichbranch{0};
-  Array<Number> m_probs;
+  std::vector<Number> m_probs;
 
   GameInfosetRep(GameRep *p_efg, int p_number, GamePlayerRep *p_player, int p_actions);
   ~GameInfosetRep() override;
@@ -199,6 +272,9 @@ class GameInfosetRep : public GameObject {
   }
 
 public:
+  using Actions = ElementCollection<GameInfoset, GameActionRep>;
+  using Members = ElementCollection<GameInfoset, GameNodeRep>;
+
   Game GetGame() const;
   int GetNumber() const { return m_number; }
 
@@ -211,17 +287,14 @@ public:
 
   /// @name Actions
   //@{
-  /// Returns the number of actions available at the information set
-  size_t NumActions() const { return m_actions.size(); }
   /// Returns the p_index'th action at the information set
-  GameAction GetAction(int p_index) const { return m_actions[p_index]; }
+  GameAction GetAction(int p_index) const { return m_actions.at(p_index - 1); }
   /// Returns the actions available at the information set
-  Array<GameAction> GetActions() const;
+  Actions GetActions() const { return Actions(this, &m_actions); }
   //@}
 
-  size_t NumMembers() const { return m_members.size(); }
-  GameNode GetMember(int p_index) const;
-  Array<GameNode> GetMembers() const;
+  GameNode GetMember(int p_index) const { return m_members.at(p_index - 1); }
+  Members GetMembers() const { return Members(this, &m_members); }
 
   bool Precedes(GameNode) const;
 
@@ -230,7 +303,7 @@ public:
     if (p_action->GetInfoset() != GameInfoset(const_cast<GameInfosetRep *>(this))) {
       throw MismatchException();
     }
-    return m_probs[p_action->GetNumber()];
+    return m_probs.at(p_action->GetNumber() - 1);
   }
 };
 
@@ -290,6 +363,7 @@ public:
 
 /// A player in a game
 class GamePlayerRep : public GameObject {
+  friend class GameRep;
   friend class GameExplicitRep;
   friend class GameTreeRep;
   friend class GameTableRep;
@@ -311,13 +385,16 @@ class GamePlayerRep : public GameObject {
   int m_number;
   std::string m_label;
   std::vector<GameInfosetRep *> m_infosets;
-  Array<GameStrategyRep *> m_strategies;
+  std::vector<GameStrategyRep *> m_strategies;
 
   GamePlayerRep(GameRep *p_game, int p_id) : m_game(p_game), m_number(p_id) {}
   GamePlayerRep(GameRep *p_game, int p_id, int m_strats);
   ~GamePlayerRep() override;
 
 public:
+  using Infosets = ElementCollection<GamePlayer, GameInfosetRep>;
+  using Strategies = ElementCollection<GamePlayer, GameStrategyRep>;
+
   int GetNumber() const { return m_number; }
   Game GetGame() const;
 
@@ -328,21 +405,17 @@ public:
 
   /// @name Information sets
   //@{
-  /// Returns the number of information sets at which the player makes a choice
-  size_t NumInfosets() const { return m_infosets.size(); }
   /// Returns the p_index'th information set
-  GameInfoset GetInfoset(int p_index) const;
-  /// Returns the information sets for the players
-  Array<GameInfoset> GetInfosets() const;
+  GameInfoset GetInfoset(int p_index) const { return m_infosets.at(p_index - 1); }
+  /// Returns the information sets for the player
+  Infosets GetInfosets() const { return Infosets(this, &m_infosets); }
 
   /// @name Strategies
   //@{
-  /// Returns the number of strategies available to the player
-  size_t NumStrategies() const;
   /// Returns the st'th strategy for the player
   GameStrategy GetStrategy(int st) const;
   /// Returns the array of strategies available to the player
-  Array<GameStrategy> GetStrategies() const;
+  Strategies GetStrategies() const;
   //@}
 
   /// @name Sequences
@@ -367,7 +440,7 @@ class GameNodeRep : public GameObject {
   GameInfosetRep *m_infoset{nullptr};
   GameNodeRep *m_parent;
   GameOutcomeRep *m_outcome{nullptr};
-  Array<GameNodeRep *> m_children;
+  std::vector<GameNodeRep *> m_children;
   GameNodeRep *whichbranch{nullptr}, *ptr{nullptr};
 
   GameNodeRep(GameRep *e, GameNodeRep *p);
@@ -376,22 +449,22 @@ class GameNodeRep : public GameObject {
   void DeleteOutcome(GameOutcomeRep *outc);
 
 public:
+  using Children = ElementCollection<GameNode, GameNodeRep>;
+
   Game GetGame() const;
 
   const std::string &GetLabel() const { return m_label; }
   void SetLabel(const std::string &p_label) { m_label = p_label; }
 
   int GetNumber() const { return m_number; }
-  size_t NumChildren() const { return m_children.size(); }
-  GameNode GetChild(int i) const { return m_children[i]; }
   GameNode GetChild(const GameAction &p_action)
   {
     if (p_action->GetInfoset() != m_infoset) {
       throw MismatchException();
     }
-    return m_children[p_action->GetNumber()];
+    return m_children.at(p_action->GetNumber() - 1);
   }
-  Array<GameNode> GetChildren() const;
+  Children GetChildren() const { return Children(this, &m_children); }
 
   GameInfoset GetInfoset() const { return m_infoset; }
 
@@ -420,6 +493,7 @@ class GameRep : public BaseGameRep {
 
 protected:
   std::vector<GamePlayerRep *> m_players;
+  std::vector<GameOutcomeRep *> m_outcomes;
   std::string m_title, m_comment;
   unsigned int m_version{0};
 
@@ -432,10 +506,14 @@ protected:
   //@}
 
 public:
+  using Players = ElementCollection<Game, GamePlayerRep>;
+  using Outcomes = ElementCollection<Game, GameOutcomeRep>;
+
   /// @name Lifecycle
   //@{
   /// Clean up the game
-  ~GameRep() override = default;
+  ~GameRep() override;
+
   /// Create a copy of the game, as a new game
   virtual Game Copy() const = 0;
   //@}
@@ -542,8 +620,6 @@ public:
   virtual Array<int> NumStrategies() const = 0;
   /// Gets the i'th strategy in the game, numbered globally
   virtual GameStrategy GetStrategy(int p_index) const = 0;
-  /// Gets the set of strategies in the game
-  Array<GameStrategy> GetStrategies() const;
   /// Creates a new strategy for the player
   virtual GameStrategy NewStrategy(const GamePlayer &p_player, const std::string &p_label)
   {
@@ -552,11 +628,21 @@ public:
   /// Remove the strategy from the game
   virtual void DeleteStrategy(const GameStrategy &p_strategy) { throw UndefinedException(); }
   /// Returns the number of strategy contingencies in the game
-  virtual int NumStrategyContingencies() const = 0;
+  int NumStrategyContingencies() const
+  {
+    BuildComputedValues();
+    return std::transform_reduce(m_players.begin(), m_players.end(), 0, std::multiplies<>(),
+                                 [](const GamePlayerRep *p) { return p->m_strategies.size(); });
+  }
   /// Returns the total number of actions in the game
   virtual int BehavProfileLength() const = 0;
   /// Returns the total number of strategies in the game
-  virtual int MixedProfileLength() const = 0;
+  int MixedProfileLength() const
+  {
+    BuildComputedValues();
+    return std::transform_reduce(m_players.begin(), m_players.end(), 0, std::plus<>(),
+                                 [](const GamePlayerRep *p) { return p->m_strategies.size(); });
+  }
   //@}
 
   virtual PureStrategyProfile NewPureStrategyProfile() const = 0;
@@ -597,7 +683,7 @@ public:
   /// Returns the pl'th player in the game
   GamePlayer GetPlayer(int pl) const { return m_players.at(pl - 1); }
   /// Returns the set of players in the game
-  Array<GamePlayer> GetPlayers() const;
+  Players GetPlayers() const { return Players(this, &m_players); }
   /// Returns the chance (nature) player
   virtual GamePlayer GetChance() const = 0;
   /// Creates a new player in the game, with no moves
@@ -607,25 +693,23 @@ public:
   /// @name Information sets
   //@{
   /// Returns the iset'th information set in the game (numbered globally)
-  virtual GameInfoset GetInfoset(int iset) const = 0;
+  virtual GameInfoset GetInfoset(int iset) const { throw UndefinedException(); }
   /// Returns the set of information sets in the game
-  virtual Array<GameInfoset> GetInfosets() const = 0;
-  /// Returns an array with the number of information sets per personal player
-  virtual Array<int> NumInfosets() const = 0;
+  virtual std::vector<GameInfoset> GetInfosets() const { throw UndefinedException(); }
   /// Sort the information sets for each player in a canonical order
   virtual void SortInfosets() {}
   //@}
 
   /// @name Outcomes
   //@{
-  /// Returns the number of outcomes defined in the game
-  virtual size_t NumOutcomes() const = 0;
   /// Returns the index'th outcome defined in the game
-  virtual GameOutcome GetOutcome(int index) const = 0;
+  GameOutcome GetOutcome(int index) const { return m_outcomes.at(index - 1); }
+  /// Returns the set of outcomes in the game
+  Outcomes GetOutcomes() const { return Outcomes(this, &m_outcomes); }
   /// Creates a new outcome in the game
-  virtual GameOutcome NewOutcome() = 0;
+  virtual GameOutcome NewOutcome() { throw UndefinedException(); }
   /// Deletes the specified outcome from the game
-  virtual void DeleteOutcome(const GameOutcome &) = 0;
+  virtual void DeleteOutcome(const GameOutcome &) { throw UndefinedException(); }
   //@}
 
   /// @name Nodes
@@ -634,6 +718,8 @@ public:
   virtual GameNode GetRoot() const = 0;
   /// Returns the number of nodes in the game
   virtual size_t NumNodes() const = 0;
+  /// Returns the number of non-terminal nodes in the game
+  virtual size_t NumNonterminalNodes() const = 0;
   //@}
 
   /// @name Modification
@@ -686,24 +772,30 @@ inline void GameOutcomeRep::SetPayoff(const GamePlayer &p_player, const Number &
 
 inline GamePlayer GameStrategyRep::GetPlayer() const { return m_player; }
 
+inline Game GameInfosetRep::GetGame() const { return m_game; }
+inline GamePlayer GameInfosetRep::GetPlayer() const { return m_player; }
+inline bool GameInfosetRep::IsChanceInfoset() const { return m_player->IsChance(); }
+
 inline Game GamePlayerRep::GetGame() const { return m_game; }
-inline size_t GamePlayerRep::NumStrategies() const
-{
-  m_game->BuildComputedValues();
-  return m_strategies.size();
-}
 inline GameStrategy GamePlayerRep::GetStrategy(int st) const
 {
   m_game->BuildComputedValues();
-  return m_strategies[st];
+  return m_strategies.at(st - 1);
 }
+inline GamePlayerRep::Strategies GamePlayerRep::GetStrategies() const
+{
+  m_game->BuildComputedValues();
+  return Strategies(this, &m_strategies);
+}
+
+inline Game GameNodeRep::GetGame() const { return m_game; }
 
 //=======================================================================
 
 /// Factory function to create new game tree
 Game NewTree();
 /// Factory function to create new game table
-Game NewTable(const Array<int> &p_dim, bool p_sparseOutcomes = false);
+Game NewTable(const std::vector<int> &p_dim, bool p_sparseOutcomes = false);
 
 /// @brief Reads a game representation in .efg format
 ///

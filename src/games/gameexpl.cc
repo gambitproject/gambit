@@ -33,20 +33,6 @@ namespace Gambit {
 //========================================================================
 
 //------------------------------------------------------------------------
-//                     GameExplicitRep: Lifecycle
-//------------------------------------------------------------------------
-
-GameExplicitRep::~GameExplicitRep()
-{
-  for (auto player : m_players) {
-    player->Invalidate();
-  }
-  for (auto outcome : m_outcomes) {
-    outcome->Invalidate();
-  }
-}
-
-//------------------------------------------------------------------------
 //                  GameExplicitRep: General data access
 //------------------------------------------------------------------------
 
@@ -114,22 +100,6 @@ GameStrategy GameExplicitRep::GetStrategy(int p_index) const
     }
   }
   throw IndexException();
-}
-
-int GameExplicitRep::NumStrategyContingencies() const
-{
-  BuildComputedValues();
-  return std::accumulate(
-      m_players.begin(), m_players.end(), 1,
-      [](int ncont, const GamePlayerRep *p) { return ncont * p->m_strategies.size(); });
-}
-
-int GameExplicitRep::MixedProfileLength() const
-{
-  BuildComputedValues();
-  return std::accumulate(
-      m_players.begin(), m_players.end(), 0,
-      [](int size, const GamePlayerRep *p) { return size + p->m_strategies.size(); });
 }
 
 //------------------------------------------------------------------------

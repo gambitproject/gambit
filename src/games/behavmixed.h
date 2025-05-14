@@ -244,7 +244,8 @@ MixedBehaviorProfile<Rational> GameRep::NewRandomBehaviorProfile(int p_denom,
   auto profile = MixedBehaviorProfile<Rational>(Game(const_cast<GameRep *>(this)));
   for (auto player : GetPlayers()) {
     for (auto infoset : player->GetInfosets()) {
-      std::list<Rational> dist = UniformOnSimplex(p_denom, infoset->NumActions(), generator);
+      std::list<Rational> dist =
+          UniformOnSimplex(p_denom, infoset->GetActions().size(), generator);
       auto prob = dist.cbegin();
       for (auto action : infoset->GetActions()) {
         profile[action] = *prob;

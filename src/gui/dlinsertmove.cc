@@ -63,13 +63,13 @@ gbtInsertMoveDialog::gbtInsertMoveDialog(wxWindow *p_parent, gbtGameDocument *p_
       s += wxString::Format(wxT("%d"), infoset->GetNumber());
     }
 
-    s += wxString::Format(wxT(" (%d action"), infoset->NumActions());
-    if (infoset->NumActions() > 1) {
+    s += wxString::Format(wxT(" (%d action"), infoset->GetActions().size());
+    if (infoset->GetActions().size() > 1) {
       s += wxT("s");
     }
 
-    s += wxString::Format(wxT(", %d member node"), infoset->NumMembers());
-    if (infoset->NumMembers() > 1) {
+    s += wxString::Format(wxT(", %d member node"), infoset->GetMembers().size());
+    if (infoset->GetMembers().size() > 1) {
       s += wxT("s)");
     }
     else {
@@ -139,13 +139,13 @@ void gbtInsertMoveDialog::OnPlayer(wxCommandEvent &)
       s += wxString::Format(wxT("%d"), infoset->GetNumber());
     }
 
-    s += wxString::Format(wxT(" (%d action"), infoset->NumActions());
-    if (infoset->NumActions() > 1) {
+    s += wxString::Format(wxT(" (%d action"), infoset->GetActions().size());
+    if (infoset->GetActions().size() > 1) {
       s += wxT("s");
     }
 
-    s += wxString::Format(wxT(", %d member node"), infoset->NumMembers());
-    if (infoset->NumMembers() > 1) {
+    s += wxString::Format(wxT(", %d member node"), infoset->GetMembers().size());
+    if (infoset->GetMembers().size() > 1) {
       s += wxT("s)");
     }
     else {
@@ -172,7 +172,7 @@ void gbtInsertMoveDialog::OnInfoset(wxCommandEvent &)
       infoset = m_doc->GetGame()->GetPlayer(playerNumber)->GetInfoset(infosetNumber);
     }
     m_actions->Enable(false);
-    m_actions->SetValue(infoset->NumActions());
+    m_actions->SetValue(infoset->GetActions().size());
   }
   else {
     m_actions->Enable(true);
@@ -216,5 +216,5 @@ Gambit::GameInfoset gbtInsertMoveDialog::GetInfoset() const
 
 int gbtInsertMoveDialog::GetActions() const
 {
-  return ((GetInfoset()) ? GetInfoset()->NumActions() : m_actions->GetValue());
+  return ((GetInfoset()) ? GetInfoset()->GetActions().size() : m_actions->GetValue());
 }

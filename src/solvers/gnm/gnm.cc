@@ -80,8 +80,10 @@ List<MixedStrategyProfile<double>> GNMStrategySolve(const Game &p_game, double p
   }
   const std::shared_ptr<gnmgame> A = BuildGame(p_game, true);
   MixedStrategyProfile<double> pert = p_game->NewMixedStrategyProfile(0.0);
-  for (auto strategy : p_game->GetStrategies()) {
-    pert[strategy] = 0.0;
+  for (const auto &player : p_game->GetPlayers()) {
+    for (const auto &strategy : player->GetStrategies()) {
+      pert[strategy] = 0.0;
+    }
   }
   for (auto player : p_game->GetPlayers()) {
     pert[player->GetStrategies().front()] = 1.0;

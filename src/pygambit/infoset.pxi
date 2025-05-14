@@ -39,11 +39,11 @@ class InfosetMembers:
         return f"InfosetMembers(infoset={Infoset.wrap(self.infoset)})"
 
     def __len__(self) -> int:
-        return self.infoset.deref().NumMembers()
+        return self.infoset.deref().GetMembers().size()
 
     def __iter__(self) -> typing.Iterator[Node]:
-        for i in range(self.infoset.deref().NumMembers()):
-            yield Node.wrap(self.infoset.deref().GetMember(i + 1))
+        for member in self.infoset.deref().GetMembers():
+            yield Node.wrap(member)
 
     def __getitem__(self, index: typing.Union[int, str]) -> Node:
         if isinstance(index, str):
@@ -80,11 +80,11 @@ class InfosetActions:
 
     def __len__(self):
         """The number of actions at the information set."""
-        return self.infoset.deref().NumActions()
+        return self.infoset.deref().GetActions().size()
 
     def __iter__(self) -> typing.Iterator[Action]:
-        for i in range(self.infoset.deref().NumActions()):
-            yield Action.wrap(self.infoset.deref().GetAction(i + 1))
+        for action in self.infoset.deref().GetActions():
+            yield Action.wrap(action)
 
     def __getitem__(self, index: typing.Union[int, str]) -> Action:
         if isinstance(index, str):

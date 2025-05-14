@@ -102,7 +102,7 @@ public:
   /// Returns the number of players in the game
   int NumPlayers() const { return m_nfg->NumPlayers(); }
   /// Returns the set of players in the game
-  Array<GamePlayer> GetPlayers() const { return m_nfg->GetPlayers(); }
+  GameRep::Players GetPlayers() const { return m_nfg->GetPlayers(); }
   /// Returns the set of strategies in the support for a player
   Support GetStrategies(const GamePlayer &p_player) const { return {this, p_player}; }
 

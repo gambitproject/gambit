@@ -304,9 +304,9 @@ public:
   std::vector<TableFilePlayer> m_players;
 
   size_t NumPlayers() const { return m_players.size(); }
-  Array<int> NumStrategies() const
+  std::vector<int> NumStrategies() const
   {
-    Array<int> ret(m_players.size());
+    std::vector<int> ret(m_players.size());
     std::transform(m_players.begin(), m_players.end(), ret.begin(),
                    [](const TableFilePlayer &player) { return player.m_strategies.size(); });
     return ret;
@@ -426,7 +426,7 @@ void ParsePayoffBody(GameFileLexer &p_parser, Game &p_nfg)
 {
   const StrategySupportProfile profile(p_nfg);
   for (auto iter : StrategyContingencies(profile)) {
-    for (auto player : p_nfg->GetPlayers()) {
+    for (const auto &player : p_nfg->GetPlayers()) {
       p_parser.ExpectCurrentToken(TOKEN_NUMBER, "numerical payoff");
       iter->GetOutcome()->SetPayoff(player, Number(p_parser.GetLastText()));
       p_parser.GetNextToken();

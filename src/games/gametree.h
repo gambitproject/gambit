@@ -37,6 +37,7 @@ protected:
   GameNodeRep *m_root;
   GamePlayerRep *m_chance;
   std::size_t m_numNodes = 1;
+  std::size_t m_numNonterminalNodes = 0;
 
   /// @name Private auxiliary functions
   //@{
@@ -86,6 +87,8 @@ public:
   GameNode GetRoot() const override { return m_root; }
   /// Returns the number of nodes in the game
   size_t NumNodes() const override { return m_numNodes; }
+  /// Returns the number of non-terminal nodes in the game
+  size_t NumNonterminalNodes() const override { return m_numNonterminalNodes; }
   //@}
 
   void DeleteOutcome(const GameOutcome &) override;
@@ -107,9 +110,7 @@ public:
   /// Returns the iset'th information set in the game (numbered globally)
   GameInfoset GetInfoset(int iset) const override;
   /// Returns the set of information sets in the game
-  Array<GameInfoset> GetInfosets() const override;
-  /// Returns an array with the number of information sets per personal player
-  Array<int> NumInfosets() const override;
+  std::vector<GameInfoset> GetInfosets() const override;
   /// Sort the information sets for each player in a canonical order
   void SortInfosets() override;
   //@}
