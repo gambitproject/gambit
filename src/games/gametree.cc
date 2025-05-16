@@ -895,7 +895,6 @@ void GameTreeRep::BuildComputedValues() const
   if (m_computedValues) {
     return;
   }
-  const_cast<GameTreeRep *>(this)->BuildConsistentPlays();
   const_cast<GameTreeRep *>(this)->Canonicalize();
   for (const auto &player : m_players) {
     player->MakeReducedStrats(m_root, nullptr);
@@ -1067,7 +1066,7 @@ Array<int> GameTreeRep::NumInfosets() const
 
 std::vector<GameNode> GameTreeRep::GetPlays(GameNode node) const
 {
-  BuildComputedValues();
+  const_cast<GameTreeRep *>(this)->BuildConsistentPlays();
 
   const std::vector<GameNodeRep *> &consistent_plays = m_nodePlays.at(node);
   std::vector<GameNode> consistent_plays_copy;
@@ -1083,9 +1082,8 @@ std::vector<GameNode> GameTreeRep::GetPlays(GameNode node) const
 std::vector<GameNode> GameTreeRep::GetPlays(GameInfoset infoset) const
 {
   std::vector<GameNode> plays;
-  auto members = infoset->GetMembers();
 
-  for (const GameNode &node : members) {
+  for (const GameNode &node : infoset->GetMembers()) {
     std::vector<GameNode> member_plays = GetPlays(node);
     plays.insert(plays.end(), member_plays.begin(), member_plays.end());
   }
@@ -1095,10 +1093,8 @@ std::vector<GameNode> GameTreeRep::GetPlays(GameInfoset infoset) const
 std::vector<GameNode> GameTreeRep::GetPlays(GameAction action) const
 {
   std::vector<GameNode> plays;
-  auto infoset = action->GetInfoset();
-  auto members = infoset->GetMembers();
 
-  for (const GameNode &node : members) {
+  for (const GameNode &node : action->GetInfoset()->GetMembers()) {
     std::vector<GameNode> child_plays = GetPlays(node->GetChild(action));
     plays.insert(plays.end(), child_plays.begin(), child_plays.end());
   }
