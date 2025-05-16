@@ -2025,4 +2025,6 @@ class Game:
                 Node.wrap(n) for n in self.game.deref().GetPlays(cython.cast(Action, obj).action)
             ]
         else:
-            raise TypeError("The object needs to be either Node, Infoset, or Action")
+            raise TypeError(
+                f"obj must be either Node, Infoset, or Action, not {obj.__class__.__name__}"
+            )
