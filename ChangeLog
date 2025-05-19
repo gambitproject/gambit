@@ -9,6 +9,13 @@
 - The deprecated functions `Game.read_game`, `Game.parse_game` and `Game.write` functions have
   been removed as planned. (#357)
 
+### Added
+- Introduced functionality to identify terminal plays consistent with specific game elements:
+  In Python, `Game.get_plays(obj)` now returns a list of terminal `Node` objects (plays)
+  that are descendants of the input `obj` (which can be a `Node`, `Infoset`, or `Action`).
+  Corresponding C++ methods `GameRep::GetPlays(GameNode node) const`,
+  `GameRep::GetPlays(GameInfoset infoset) const`, and
+  `GameRep::GetPlays(GameAction action) const` were implemented to support this.
 
 ## [16.3.1] - unreleased
 

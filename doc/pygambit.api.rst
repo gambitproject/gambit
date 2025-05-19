@@ -107,6 +107,7 @@ Information about the game
    Game.actions
    Game.infosets
    Game.nodes
+   Game.get_plays
    Game.contingencies
 
 .. autosummary::

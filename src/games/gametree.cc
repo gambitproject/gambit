@@ -916,9 +916,9 @@ std::vector<GameNodeRep *> GameTreeRep::BuildConsistentPlaysRecursiveImpl(GameNo
   }
   else {
     for (GameNodeRep *child : node->GetChildren()) {
-      auto child_consisent_plays = BuildConsistentPlaysRecursiveImpl(child);
-      consistent_plays.insert(consistent_plays.end(), child_consisent_plays.begin(),
-                              child_consisent_plays.end());
+      auto child_consistent_plays = BuildConsistentPlaysRecursiveImpl(child);
+      consistent_plays.insert(consistent_plays.end(), child_consistent_plays.begin(),
+                              child_consistent_plays.end());
     }
   }
   m_nodePlays[node] = consistent_plays;

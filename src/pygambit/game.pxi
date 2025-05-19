@@ -2014,6 +2014,25 @@ class Game:
         self.game.deref().DeleteStrategy(resolved_strategy.strategy)
 
     def get_plays(self, obj: typing.Union[Node, Infoset, Action]) -> typing.List[Node]:
+        """Return terminal nodes consistent with a game object.
+
+        For a given `Node`, `Infoset`, or `Action`, returns a list of all terminal `Node` objects
+        that represent (terminal) plays of the game consistent with the specified object.
+
+        Parameters
+        ----------
+        obj : Node or Infoset or Action
+
+        Returns
+        -------
+        list of Node
+
+        Raises
+        ------
+        TypeError
+            If `obj` is not a `Node`, `Infoset`, or `Action`
+            object from this game.
+        """
         if isinstance(obj, Node):
             return [Node.wrap(n) for n in self.game.deref().GetPlays(cython.cast(Node, obj).node)]
         elif isinstance(obj, Infoset):
