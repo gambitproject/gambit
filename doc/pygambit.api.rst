@@ -107,7 +107,6 @@ Information about the game
    Game.actions
    Game.infosets
    Game.nodes
-   Game.get_plays
    Game.contingencies
 
 .. autosummary::
@@ -146,6 +145,7 @@ Information about the game
    Node.infoset
    Node.player
    Node.is_successor_of
+   Node.plays
 
 .. autosummary::
 
@@ -158,6 +158,7 @@ Information about the game
    Infoset.actions
    Infoset.members
    Infoset.precedes
+   Infoset.plays
 
 .. autosummary::
 
@@ -167,6 +168,7 @@ Information about the game
    Action.infoset
    Action.precedes
    Action.prob
+   Action.plays
 
 .. autosummary::
 

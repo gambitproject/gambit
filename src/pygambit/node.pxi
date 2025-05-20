@@ -212,3 +212,9 @@ class Node:
         if self.node.deref().GetOutcome() == cython.cast(c_GameOutcome, NULL):
             return None
         return Outcome.wrap(self.node.deref().GetOutcome())
+
+    @property
+    def plays(self) -> typing.List[Node]:
+        """Returns a list of all terminal `Node` objects consistent with it.
+        """
+        return [Node.wrap(n) for n in self.node.deref().GetGame().deref().GetPlays(self.node)]

@@ -774,7 +774,7 @@ def test_nonterminal_len_after_copy_tree():
         + number_of_nonterminal_src_ancestors
 
 
-def test_get_plays_node():
+def test_node_plays():
     """Verify `get_plays` returns plays reachable from a given node.
     """
     game = games.read_from_file("e02.efg")
@@ -786,36 +786,4 @@ def test_get_plays_node():
         list_nodes[3], list_nodes[5], list_nodes[6]
     }  # paths=[0, 1], [0, 1, 1], [1, 1, 1]
 
-    assert set(game.get_plays(test_node)) == expected_set_of_plays
-
-
-def test_get_plays_infoset():
-    """Verify `get_plays` returns plays reachable from a given infoset.
-    """
-    game = games.read_from_file("e01.efg")
-    list_nodes = list(game.nodes)
-    list_infosets = list(game.infosets)
-
-    test_infoset = list_infosets[2]  # members' paths=[1, 0], [1]
-
-    expected_set_of_plays = {
-        list_nodes[4], list_nodes[5], list_nodes[7], list_nodes[8]
-    }  # paths=[0, 1, 0], [1, 1, 0], [0, 1], [1, 1]
-
-    assert set(game.get_plays(test_infoset)) == expected_set_of_plays
-
-
-def test_get_plays_action():
-    """Verify `get_plays` returns plays reachable from a given action.
-    """
-    game = games.read_from_file("e01.efg")
-    list_nodes = list(game.nodes)
-    list_infosets = list(game.infosets)
-
-    test_action = list_infosets[2].actions[0]  # members' paths=[0, 1, 0], [0, 1]
-
-    expected_set_of_plays = {
-        list_nodes[4], list_nodes[7]
-    }  # paths=[0, 1, 0], [0, 1]
-
-    assert set(game.get_plays(test_action)) == expected_set_of_plays
+    assert set(test_node.plays) == expected_set_of_plays

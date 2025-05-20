@@ -10,12 +10,10 @@
   been removed as planned. (#357)
 
 ### Added
-- Introduced functionality to identify terminal plays consistent with specific game elements:
-  In Python, `Game.get_plays(obj)` now returns a list of terminal `Node` objects (plays)
-  that are descendants of the input `obj` (which can be a `Node`, `Infoset`, or `Action`).
-  Corresponding C++ methods `GameRep::GetPlays(GameNode node) const`,
-  `GameRep::GetPlays(GameInfoset infoset) const`, and
-  `GameRep::GetPlays(GameAction action) const` were implemented to support this.
+- Added `Node.plays`, `Infoset.plays`, and `Action.plays` properties.
+  These properties return a list of terminal `Node` objects representing (terminal) plays
+  consistent with the specific node, information set, or action.
+  This functionality is backed by new C++ `GameRep::GetPlays()` overloads.
 
 ## [16.3.1] - unreleased
 
