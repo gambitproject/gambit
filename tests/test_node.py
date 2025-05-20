@@ -775,7 +775,7 @@ def test_nonterminal_len_after_copy_tree():
 
 
 def test_node_plays():
-    """Verify `get_plays` returns plays reachable from a given node.
+    """Verify `node.plays` returns plays reachable from a given node.
     """
     game = games.read_from_file("e02.efg")
     list_nodes = list(game.nodes)

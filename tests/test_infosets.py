@@ -56,7 +56,7 @@ def test_infoset_add_action_error():
 
 
 def test_infoset_plays():
-    """Verify `get_plays` returns plays reachable from a given infoset.
+    """Verify `infoset.plays` returns plays reachable from a given infoset.
     """
     game = games.read_from_file("e01.efg")
     list_nodes = list(game.nodes)

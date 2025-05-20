@@ -130,7 +130,7 @@ def test_action_delete_chance(game: gbt.Game):
 
 
 def test_action_plays():
-    """Verify `get_plays` returns plays reachable from a given action.
+    """Verify `action.plays` returns plays reachable from a given action.
     """
     game = games.read_from_file("e01.efg")
     list_nodes = list(game.nodes)
