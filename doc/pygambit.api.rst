@@ -169,6 +169,7 @@ Information about the game
    Action.precedes
    Action.prob
    Action.plays
+   Action.power
 
 .. autosummary::
 

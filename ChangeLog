@@ -10,8 +10,11 @@
   been removed as planned. (#357)
 
 ### Added
-- Implement `GetPlays()` (C++) and `get_plays` (Python) to compute the set of terminal nodes consistent
-  with a node, information set, or action (#517)
+- Implement `GameRep::GetPlays` (C++) and `Node.plays`, `Infoset.plays`, and `Action.plays` (Python)
+  to compute the set of terminal nodes consistent with a node, information set, or action (#517)
+- Implement `GameRep::GetPower` (C++) and `Action.power` (Python) to compute the power of an action,
+  that is, the set of plays (terminal nodes) consistent with passing throughn the action
+  and the plays that do not pass through the information set where this action is available.
 
 
 ## [16.3.1] - unreleased

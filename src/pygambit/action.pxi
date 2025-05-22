@@ -109,9 +109,18 @@ class Action:
 
     @property
     def plays(self) -> typing.List[Node]:
-        """Returns a list of all terminal `Node` objects consistent with it.
+        """Returns a list of all terminal `Node` objects consistent with the action.
         """
         return [
             Node.wrap(n) for n in
             self.action.deref().GetInfoset().deref().GetGame().deref().GetPlays(self.action)
+        ]
+
+    @property
+    def power(self) -> typing.List[Node]:
+        """Returns power of the action.
+        """
+        return [
+            Node.wrap(n) for n in
+            self.action.deref().GetInfoset().deref().GetGame().deref().GetPower(self.action)
         ]
