@@ -143,3 +143,21 @@ def test_action_plays():
     }  # paths=[0, 1, 0], [0, 1]
 
     assert set(test_action.plays) == expected_set_of_plays
+
+
+def test_action_power():
+    """Verify `action.power` returns the action's power
+    (terminal `Node` objects that can be reached from this action
+    or that cannot be reached from the information set associated with this action).
+    """
+    game = games.read_from_file("e01.efg")
+    list_nodes = list(game.nodes)
+    list_infosets = list(game.infosets)
+
+    test_action = list_infosets[2].actions[0]  # members' paths=[0, 1, 0], [0, 1]
+
+    expected_set_of_plays = {
+        list_nodes[2], list_nodes[4], list_nodes[7]
+    }  # paths=[0, 0], [0, 1, 0], [0, 1]
+
+    assert set(test_action.power) == expected_set_of_plays

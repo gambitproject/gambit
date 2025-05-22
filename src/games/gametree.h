@@ -147,6 +147,8 @@ public:
   std::vector<GameNode> GetPlays(GameInfoset infoset) const override;
   std::vector<GameNode> GetPlays(GameAction action) const override;
 
+  std::vector<GameNode> GetPower(GameAction action) const override;
+
   Game CopySubgame(GameNode) const override;
   //@}
 
