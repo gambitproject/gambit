@@ -558,6 +558,9 @@ public:
   /// Returns the set of terminal nodes which are descendants of members of an action
   virtual std::vector<GameNode> GetPlays(GameAction action) const { throw UndefinedException(); }
 
+  /// Returns the power of an action
+  virtual std::vector<GameNode> GetPower(GameAction action) const { throw UndefinedException(); }
+
   /// Returns true if the game is perfect recall.  If not,
   /// a pair of violating information sets is returned in the parameters.
   virtual bool IsPerfectRecall(GameInfoset &, GameInfoset &) const = 0;
