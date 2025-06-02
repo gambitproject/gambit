@@ -174,6 +174,8 @@ cdef extern from "games/game.h":
 
         c_GameStrategy GetStrategy(int) except +IndexError
         Strategies GetStrategies() except +
+        c_GameStrategy GetNonReducedStrategy(int) except +IndexError
+        Strategies GetNonReducedStrategies() except +
 
         c_GameInfoset GetInfoset(int) except +IndexError
         Infosets GetInfosets() except +

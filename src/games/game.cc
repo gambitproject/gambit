@@ -66,6 +66,9 @@ GamePlayerRep::~GamePlayerRep()
   for (auto strategy : m_strategies) {
     strategy->Invalidate();
   }
+  for (auto strategy : m_nonReducedStrategies) {
+    strategy->Invalidate();
+  }
 }
 
 void GamePlayerRep::MakeStrategy()
@@ -164,6 +167,42 @@ void GamePlayerRep::MakeReducedStrats(GameNodeRep *n, GameNodeRep *nn)
   else {
     MakeStrategy();
   }
+}
+
+void GamePlayerRep::MakeNonReducedStratsRecursiveImpl(GameStrategyRep *p_strat,
+                                                      Infosets::iterator it_infoset)
+{
+  if (it_infoset == GetInfosets().end()) {
+    auto p_strat_copy(new GameStrategyRep(*p_strat));
+    p_strat_copy->m_number = m_nonReducedStrategies.size() + 1;
+    m_nonReducedStrategies.push_back(p_strat_copy);
+    return;
+  }
+
+  GameInfosetRep *current_infoset = (*it_infoset);
+
+  for (const auto &action : current_infoset->GetActions()) {
+    auto p_strat_copy(new GameStrategyRep(*p_strat));
+
+    p_strat_copy->m_behav[current_infoset->GetNumber()] = action->GetNumber();
+    p_strat_copy->SetLabel(p_strat_copy->GetLabel() + action->GetLabel());
+    MakeNonReducedStratsRecursiveImpl(p_strat_copy, std::next(it_infoset));
+    delete p_strat_copy;
+  }
+}
+
+void GamePlayerRep::MakeNonReducedStrats()
+{
+  for (GameStrategyRep *strat : m_nonReducedStrategies) {
+    delete strat;
+  }
+  m_nonReducedStrategies.clear();
+
+  auto starting_strategy = new GameStrategyRep(this, 0, "");
+  starting_strategy->m_behav = Array<int>(GetInfosets().size());
+
+  MakeNonReducedStratsRecursiveImpl(starting_strategy, GetInfosets().begin());
+  delete starting_strategy;
 }
 
 size_t GamePlayerRep::NumSequences() const

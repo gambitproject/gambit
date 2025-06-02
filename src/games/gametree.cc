@@ -853,6 +853,7 @@ void GameTreeRep::ClearComputedValues() const
       strategy->Invalidate();
     }
     player->m_strategies.clear();
+    player->m_nonReducedStrategies.clear();
   }
   const_cast<GameTreeRep *>(this)->m_nodePlays.clear();
   m_computedValues = false;
@@ -866,6 +867,7 @@ void GameTreeRep::BuildComputedValues() const
   const_cast<GameTreeRep *>(this)->Canonicalize();
   for (const auto &player : m_players) {
     player->MakeReducedStrats(m_root, nullptr);
+    player->MakeNonReducedStrats();
   }
   m_computedValues = true;
 }
