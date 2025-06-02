@@ -375,10 +375,17 @@ class GamePlayerRep : public GameObject {
   template <class T> friend class MixedBehaviorProfile;
   template <class T> friend class MixedStrategyProfile;
 
+public:
+  using Infosets = ElementCollection<GamePlayer, GameInfosetRep>;
+  using Strategies = ElementCollection<GamePlayer, GameStrategyRep>;
+
+private:
   /// @name Building reduced form strategies
   //@{
   void MakeStrategy();
   void MakeReducedStrats(class GameNodeRep *, class GameNodeRep *);
+  void MakeNonReducedStrats();
+  void MakeNonReducedStratsRecursiveImpl(GameStrategyRep *, Infosets::iterator);
   //@}
 
   GameRep *m_game;
@@ -386,15 +393,13 @@ class GamePlayerRep : public GameObject {
   std::string m_label;
   std::vector<GameInfosetRep *> m_infosets;
   std::vector<GameStrategyRep *> m_strategies;
+  std::vector<GameStrategyRep *> m_nonReducedStrategies;
 
   GamePlayerRep(GameRep *p_game, int p_id) : m_game(p_game), m_number(p_id) {}
   GamePlayerRep(GameRep *p_game, int p_id, int m_strats);
   ~GamePlayerRep() override;
 
 public:
-  using Infosets = ElementCollection<GamePlayer, GameInfosetRep>;
-  using Strategies = ElementCollection<GamePlayer, GameStrategyRep>;
-
   int GetNumber() const { return m_number; }
   Game GetGame() const;
 
@@ -416,6 +421,10 @@ public:
   GameStrategy GetStrategy(int st) const;
   /// Returns the array of strategies available to the player
   Strategies GetStrategies() const;
+  /// Returns the st'th non-reduced strategy for the player
+  GameStrategy GetNonReducedStrategy(int st) const;
+  /// Returns the array of non-reduced strategies available to the player
+  Strategies GetNonReducedStrategies() const;
   //@}
 
   /// @name Sequences
@@ -791,6 +800,16 @@ inline GamePlayerRep::Strategies GamePlayerRep::GetStrategies() const
 {
   m_game->BuildComputedValues();
   return Strategies(this, &m_strategies);
+}
+inline GameStrategy GamePlayerRep::GetNonReducedStrategy(int st) const
+{
+  m_game->BuildComputedValues();
+  return m_nonReducedStrategies.at(st - 1);
+}
+inline GamePlayerRep::Strategies GamePlayerRep::GetNonReducedStrategies() const
+{
+  m_game->BuildComputedValues();
+  return Strategies(this, &m_nonReducedStrategies);
 }
 
 inline Game GameNodeRep::GetGame() const { return m_game; }

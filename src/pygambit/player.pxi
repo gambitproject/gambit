@@ -149,6 +149,49 @@ class PlayerStrategies:
 
 
 @cython.cclass
+class PlayerNonReducedStrategies:
+    """The set of non-reduced strategies available to a player."""
+    player = cython.declare(c_GamePlayer)
+
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create PlayerNonReducedStrategies outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(player: c_GamePlayer) -> PlayerNonReducedStrategies:
+        obj: PlayerNonReducedStrategies = PlayerNonReducedStrategies.__new__(
+            PlayerNonReducedStrategies
+        )
+        obj.player = player
+        return obj
+
+    def __repr__(self) -> str:
+        return f"PlayerNonReducedStrategies(player={Player.wrap(self.player)})"
+
+    def __len__(self):
+        """The number of non-reduced strategies for the player in the game."""
+        return self.player.deref().GetNonReducedStrategies().size()
+
+    def __iter__(self) -> typing.Iterator[Strategy]:
+        for strategy in self.player.deref().GetNonReducedStrategies():
+            yield Strategy.wrap(strategy)
+
+    def __getitem__(self, index: typing.Union[int, str]) -> Strategy:
+        if isinstance(index, str):
+            if not index.strip():
+                raise ValueError("Strategy label cannot be empty or all whitespace")
+            matches = [x for x in self if x.label == index.strip()]
+            if not matches:
+                raise KeyError(f"Player has no strategy with label '{index}'")
+            if len(matches) > 1:
+                raise ValueError(f"Player has multiple strategies with label '{index}'")
+            return matches[0]
+        if isinstance(index, int):
+            return Strategy.wrap(self.player.deref().GetNonReducedStrategy(index + 1))
+        raise TypeError(f"Strategy index must be int or str, not {index.__class__.__name__}")
+
+
+@cython.cclass
 class Player:
     """A player in a ``Game``."""
     player = cython.declare(c_GamePlayer)
@@ -213,6 +256,11 @@ class Player:
     def strategies(self) -> PlayerStrategies:
         """Returns the set of strategies belonging to the player."""
         return PlayerStrategies.wrap(self.player)
+
+    @property
+    def non_reduced_strategies(self) -> PlayerNonReducedStrategies:
+        """Returns the set of nonreduced strategies belonging to the player."""
+        return PlayerNonReducedStrategies.wrap(self.player)
 
     @property
     def infosets(self) -> PlayerInfosets:
