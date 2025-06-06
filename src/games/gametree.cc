@@ -1058,22 +1058,17 @@ std::vector<GameNode> GameTreeRep::GetPlays(GameAction action) const
   return plays;
 }
 
-std::vector<GameNode> GameTreeRep::GetPower(GameAction action) const
+std::vector<GameNode> GameTreeRep::GetVeto(GameAction action) const
 {
-  std::vector<GameNode> power;
-
-  const std::vector<GameNode> plays = GetPlays(GetRoot());
+  std::vector<GameNode> veto;
   const std::vector<GameNode> aplays = GetPlays(action);
-  const std::vector<GameNode> iplays = GetPlays(action->GetInfoset());
 
-  for (const auto &node : plays) {
-    if ((std::find(iplays.cbegin(), iplays.cend(), node) == iplays.cend()) ||
-        (std::find(aplays.cbegin(), aplays.cend(), node) != aplays.cend())) {
-      power.push_back(node);
+  for (const auto &node : GetPlays(action->GetInfoset())) {
+    if (!contains(aplays, node)) {
+      veto.push_back(node);
     }
   }
-
-  return power;
+  return veto;
 }
 
 void GameTreeRep::DeleteOutcome(const GameOutcome &p_outcome)

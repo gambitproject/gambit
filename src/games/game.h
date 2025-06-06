@@ -559,7 +559,7 @@ public:
   virtual std::vector<GameNode> GetPlays(GameAction action) const { throw UndefinedException(); }
 
   /// Returns the power of an action
-  virtual std::vector<GameNode> GetPower(GameAction action) const { throw UndefinedException(); }
+  virtual std::vector<GameNode> GetVeto(GameAction action) const { throw UndefinedException(); }
 
   /// Returns true if the game is perfect recall.  If not,
   /// a pair of violating information sets is returned in the parameters.

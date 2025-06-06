@@ -117,10 +117,10 @@ class Action:
         ]
 
     @property
-    def power(self) -> typing.List[Node]:
+    def veto(self) -> typing.List[Node]:
         """Returns power of the action.
         """
         return [
             Node.wrap(n) for n in
-            self.action.deref().GetInfoset().deref().GetGame().deref().GetPower(self.action)
+            self.action.deref().GetInfoset().deref().GetGame().deref().GetVeto(self.action)
         ]
