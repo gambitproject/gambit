@@ -10,8 +10,9 @@
   been removed as planned. (#357)
 
 ### Added
-- Implement `GetPlays()` (C++) and `get_plays` (Python) to compute the set of terminal nodes consistent
-  with a node, information set, or action (#517)
+- Implement `GameRep::GetPlays` (C++) and `Node.plays`, `Infoset.plays`, and `Action.plays` (Python)
+  to compute the set of terminal nodes consistent with a node, information set, or action (#517)
+- Implement `GameRep::GetVeto` (C++) and `Action.veto` (Python) to compute the veto of an action (#522).
 
 
 ## [16.3.1] - unreleased

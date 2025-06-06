@@ -143,3 +143,18 @@ def test_action_plays():
     }  # paths=[0, 1, 0], [0, 1]
 
     assert set(test_action.plays) == expected_set_of_plays
+
+
+def test_action_veto():
+    """Verify `action.veto` returns the action's veto
+    (terminal `Node` objects contained in the information set associated with this action
+    that cannot be reached from this action).
+    """
+    game = games.read_from_file("e01.efg")
+    list_infosets = list(game.infosets)
+
+    test_action = list_infosets[2].actions[0]  # members' paths=[0, 1, 0], [0, 1]
+
+    expected_set_of_plays = set(list_infosets[2].plays) - set(test_action.plays)
+
+    assert set(test_action.veto) == expected_set_of_plays

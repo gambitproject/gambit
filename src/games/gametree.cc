@@ -1058,6 +1058,19 @@ std::vector<GameNode> GameTreeRep::GetPlays(GameAction action) const
   return plays;
 }
 
+std::vector<GameNode> GameTreeRep::GetVeto(GameAction action) const
+{
+  std::vector<GameNode> veto;
+  const std::vector<GameNode> aplays = GetPlays(action);
+
+  for (const auto &node : GetPlays(action->GetInfoset())) {
+    if (!contains(aplays, node)) {
+      veto.push_back(node);
+    }
+  }
+  return veto;
+}
+
 void GameTreeRep::DeleteOutcome(const GameOutcome &p_outcome)
 {
   IncrementVersion();
