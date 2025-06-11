@@ -96,12 +96,9 @@ void GamePlayerRep::MakeStrategy(const std::map<GameInfosetRep *, int> &behav)
 }
 
 void GamePlayerRep::MakeReducedStrats(GameNodeRep *n, GameNodeRep *nn,
-                                      std::map<GameInfosetRep *, int> &behav)
+                                      std::map<GameInfosetRep *, int> &behav,
+                                      std::map<GameNodeRep *, GameNodeRep *> &ptr)
 {
-  if (!n->GetParent()) {
-    n->ptr = nullptr;
-  }
-
   if (!n->IsTerminal()) {
     if (n->m_infoset->m_player == this) {
       if (!contains(behav, n->m_infoset)) {
@@ -110,36 +107,38 @@ void GamePlayerRep::MakeReducedStrats(GameNodeRep *n, GameNodeRep *nn,
           GameNodeRep *m = n->m_children[i - 1];
           n->whichbranch = m;
           behav[n->m_infoset] = i;
-          MakeReducedStrats(m, nn, behav);
+          MakeReducedStrats(m, nn, behav, ptr);
         }
         behav.erase(n->m_infoset);
       }
       else {
         // we have visited this infoset, take same action
-        MakeReducedStrats(n->m_children[behav[n->m_infoset] - 1], nn, behav);
+        MakeReducedStrats(n->m_children[behav[n->m_infoset] - 1], nn, behav, ptr);
       }
     }
     else {
-      n->ptr = nullptr;
       if (nn != nullptr) {
-        n->ptr = nn->m_parent;
+        ptr[n] = nn->m_parent;
+      }
+      else {
+        ptr.erase(n);
       }
       n->whichbranch = n->m_children.front();
-      MakeReducedStrats(n->m_children.front(), n->m_children.front(), behav);
+      MakeReducedStrats(n->m_children.front(), n->m_children.front(), behav, ptr);
     }
   }
   else if (nn) {
     GameNodeRep *m;
-    for (;; nn = nn->m_parent->ptr->whichbranch) {
+    for (;; nn = ptr.at(nn->m_parent)->whichbranch) {
       m = nn->GetNextSibling();
-      if (m || nn->m_parent->ptr == nullptr) {
+      if (m || !contains(ptr, nn->m_parent)) {
         break;
       }
     }
     if (m) {
       GameNodeRep *mm = m->m_parent->whichbranch;
       m->m_parent->whichbranch = m;
-      MakeReducedStrats(m, m, behav);
+      MakeReducedStrats(m, m, behav, ptr);
       m->m_parent->whichbranch = mm;
     }
     else {
