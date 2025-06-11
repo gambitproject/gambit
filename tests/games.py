@@ -1,20 +1,24 @@
 """A utility module to create/load games for the test suite."""
+
 import pathlib
+
+import numpy as np
 
 import pygambit as gbt
 
 
 def read_from_file(fn: str) -> gbt.Game:
     if fn.endswith(".efg"):
-        return gbt.read_efg(pathlib.Path("tests/test_games")/fn)
+        return gbt.read_efg(pathlib.Path("tests/test_games") / fn)
     elif fn.endswith(".nfg"):
-        return gbt.read_nfg(pathlib.Path("tests/test_games")/fn)
+        return gbt.read_nfg(pathlib.Path("tests/test_games") / fn)
     else:
         raise ValueError(f"Unknown file extension in {fn}")
 
 
 ################################################################################################
 # Normal-form (aka strategic-form) games (nfg)
+
 
 def create_2x2_zero_nfg() -> gbt.Game:
     """
@@ -73,6 +77,7 @@ def create_coord_4x4_nfg(outcome_version: bool = False) -> gbt.Game:
 ################################################################################################
 # Extensive-form games (efg)
 
+
 def create_mixed_behav_game_efg() -> gbt.Game:
     """
     Returns
@@ -89,7 +94,8 @@ def create_myerson_2_card_poker_efg() -> gbt.Game:
     Returns
     -------
     Game
-        Myerson 2-card poker: Two-player extensive poker game with a chance move with two moves,
+        Simplied "stripped down" version of Myerson 2-card poker:
+        Two-player extensive poker game with a chance move with two moves,
         then player 1 can raise or fold; after raising player 2 is in an infoset with two nodes
         and can choose to meet or pass
     """
@@ -124,3 +130,112 @@ def create_selten_horse_game_efg() -> gbt.Game:
         5-player Selten's Horse Game
     """
     return read_from_file("e01.efg")
+
+
+def create_reduction_generic_payoffs_efg() -> gbt.Game:
+    # tree with only root
+    g = gbt.Game.new_tree(
+        players=["1", "2"], title="2 player reduction generic payoffs"
+    )
+
+    # add four children
+    g.append_move(g.root, "2", ["a", "b", "c", "d"])
+
+    # add L and R after a
+    g.append_move(g.root.children[0], "1", ["L", "R"])
+
+    # add C and D to single infoset after b and c
+    nodes = [g.root.children[1], g.root.children[2]]
+    g.append_move(nodes, "1", ["C", "D"])
+
+    # add s and t from single infoset after rightmost C and D
+    g.append_move(g.root.children[2].children, "2", ["s", "t"])
+
+    # add p and q
+    g.append_move(g.root.children[0].children[1], "2", ["p", "q"])
+
+    # add U and V in a single infoset after p and q
+    g.append_move(g.root.children[0].children[1].children, "1", ["U", "V"])
+
+    # Set outcomes
+
+    g.set_outcome(g.root.children[0].children[0], g.add_outcome([1, -1], label="aL"))
+    g.set_outcome(
+        g.root.children[0].children[1].children[0].children[0],
+        g.add_outcome([2, -2], label="aRpU"),
+    )
+    g.set_outcome(
+        g.root.children[0].children[1].children[0].children[1],
+        g.add_outcome([3, -3], label="aRpV"),
+    )
+    g.set_outcome(
+        g.root.children[0].children[1].children[1].children[0],
+        g.add_outcome([4, -4], label="aRqU"),
+    )
+    g.set_outcome(
+        g.root.children[0].children[1].children[1].children[1],
+        g.add_outcome([5, -5], label="aRqV"),
+    )
+
+    g.set_outcome(g.root.children[1].children[0], g.add_outcome([6, -6], label="bC"))
+    g.set_outcome(g.root.children[1].children[1], g.add_outcome([7, -7], label="bD"))
+
+    g.set_outcome(
+        g.root.children[2].children[0].children[0], g.add_outcome([8, -8], label="cCs")
+    )
+    g.set_outcome(
+        g.root.children[2].children[0].children[1], g.add_outcome([9, -9], label="cCt")
+    )
+    g.set_outcome(
+        g.root.children[2].children[1].children[0],
+        g.add_outcome([10, -10], label="cDs"),
+    )
+    g.set_outcome(
+        g.root.children[2].children[1].children[1],
+        g.add_outcome([11, -11], label="cDt"),
+    )
+
+    g.set_outcome(g.root.children[3], g.add_outcome([12, -12], label="d"))
+
+    return g
+
+
+def create_reduction_one_player_generic_payoffs_efg() -> gbt.Game:
+    g = gbt.Game.new_tree(players=["1"], title="One player reduction generic payoffs")
+    g.append_move(g.root, "1", ["a", "b", "c", "d"])
+    g.append_move(g.root.children[0], "1", ["e", "f"])
+    g.set_outcome(g.root.children[0].children[0], g.add_outcome([1]))
+    g.set_outcome(g.root.children[0].children[1], g.add_outcome([2]))
+    g.set_outcome(g.root.children[1], g.add_outcome([3]))
+    g.set_outcome(g.root.children[2], g.add_outcome([4]))
+    g.set_outcome(g.root.children[3], g.add_outcome([5]))
+    return g
+
+
+def create_reduction_both_players_payoff_ties_efg() -> gbt.Game:
+    g = gbt.Game.new_tree(players=["1", "2"], title="From GTE survey")
+    g.append_move(g.root, "1", ["A", "B", "C", "D"])
+    g.append_move(g.root.children[0], "2", ["a", "b"])
+    g.append_move(g.root.children[1], "2", ["c", "d"])
+    g.append_move(g.root.children[2], "2", ["e", "f"])
+    g.append_move(g.root.children[0].children[1], "2", ["g", "h"])
+    g.append_move(g.root.children[2].children, "1", ["E", "F"])
+
+    g.set_outcome(g.root.children[0].children[0], g.add_outcome([2, 8]))
+    g.set_outcome(g.root.children[0].children[1].children[0], g.add_outcome([0, 1]))
+    g.set_outcome(g.root.children[0].children[1].children[1], g.add_outcome([5, 2]))
+    g.set_outcome(g.root.children[1].children[0], g.add_outcome([7, 6]))
+    g.set_outcome(g.root.children[1].children[1], g.add_outcome([4, 2]))
+    g.set_outcome(g.root.children[2].children[0].children[0], g.add_outcome([3, 7]))
+    g.set_outcome(g.root.children[2].children[0].children[1], g.add_outcome([8, 3]))
+    g.set_outcome(g.root.children[2].children[1].children[0], g.add_outcome([7, 8]))
+    g.set_outcome(g.root.children[2].children[1].children[1], g.add_outcome([2, 2]))
+    g.set_outcome(g.root.children[3], g.add_outcome([6, 4]))
+    return g
+
+
+def make_rational(input: str):
+    return gbt.Rational(input)
+
+
+vectorized_make_rational = np.vectorize(make_rational)

@@ -10,10 +10,12 @@
   been removed as planned. (#357)
 
 ### Added
-- Implement `GetPlays()` (C++) and `get_plays` (Python) to compute the set of terminal nodes
-  consistent with a node, information set, or action (#517)
+- Implement `GetPlays()` (C++) and `get_plays` (Python) to compute the set of terminal nodes consistent
+  with a node, information set, or action (#517)
 - Implement `GameStrategyRep::GetAction` (C++) and `Strategy.action` (Python) retrieving the action
-  prescribed by a strategy at an information set
+    prescribed by a strategy at an information set
+- Tests for creation of the reduced strategic form from an extensive-form game (currently only
+  for games with perfect recall)
 
 
 ## [16.3.1] - unreleased
