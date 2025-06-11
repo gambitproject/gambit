@@ -260,7 +260,6 @@ class GameInfosetRep : public GameObject {
   GamePlayerRep *m_player;
   std::vector<GameActionRep *> m_actions;
   std::vector<GameNodeRep *> m_members;
-  int flag{0}, whichbranch{0};
   std::vector<Number> m_probs;
 
   GameInfosetRep(GameRep *p_efg, int p_number, GamePlayerRep *p_player, int p_actions);
@@ -381,8 +380,9 @@ class GamePlayerRep : public GameObject {
 
   /// @name Building reduced form strategies
   //@{
-  void MakeStrategy();
-  void MakeReducedStrats(class GameNodeRep *, class GameNodeRep *);
+  void MakeStrategy(const std::map<GameInfosetRep *, int> &);
+  void MakeReducedStrats(class GameNodeRep *, class GameNodeRep *,
+                         std::map<GameInfosetRep *, int> &);
   //@}
 
   GameRep *m_game;
