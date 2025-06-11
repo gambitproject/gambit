@@ -336,7 +336,7 @@ class GameStrategyRep : public GameObject {
   int m_number;
   long m_offset{-1L};
   std::string m_label;
-  Array<int> m_behav;
+  std::map<GameInfosetRep *, int> m_behav;
 
   /// @name Lifecycle
   //@{

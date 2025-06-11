@@ -83,32 +83,18 @@ GamePlayerRep::~GamePlayerRep()
 
 void GamePlayerRep::MakeStrategy()
 {
-  Array<int> c(m_infosets.size());
-
-  for (size_t i = 1; i <= m_infosets.size(); i++) {
-    if (m_infosets[i - 1]->flag == 1) {
-      c[i] = m_infosets[i - 1]->whichbranch;
+  auto *strategy = new GameStrategyRep(this, m_strategies.size() + 1, "");
+  for (const auto &infoset : m_infosets) {
+    if (infoset->flag == 1) {
+      strategy->m_behav[infoset] = infoset->whichbranch;
+      strategy->m_label += std::to_string(infoset->whichbranch);
     }
     else {
-      c[i] = 0;
+      strategy->m_behav[infoset] = 0;
+      strategy->m_label += "*";
     }
   }
-
-  auto *strategy = new GameStrategyRep(this, m_strategies.size() + 1, "");
-  strategy->m_behav = c;
-
-  // We generate a default labeling -- probably should be changed in future
-  if (!strategy->m_behav.empty()) {
-    for (size_t iset = 1; iset <= strategy->m_behav.size(); iset++) {
-      if (strategy->m_behav[iset] > 0) {
-        strategy->m_label += lexical_cast<std::string>(strategy->m_behav[iset]);
-      }
-      else {
-        strategy->m_label += "*";
-      }
-    }
-  }
-  else {
+  if (strategy->m_label.empty()) {
     strategy->m_label = "*";
   }
   m_strategies.push_back(strategy);
@@ -342,8 +328,8 @@ MixedStrategyProfile<T>::MixedStrategyProfile(const MixedBehaviorProfile<T> &p_p
     for (const auto &strategy : player->m_strategies) {
       auto prob = static_cast<T>(1);
       for (const auto &infoset : player->m_infosets) {
-        if (strategy->m_behav[infoset->GetNumber()] > 0) {
-          prob *= p_profile[infoset->GetAction(strategy->m_behav[infoset->GetNumber()])];
+        if (strategy->m_behav[infoset] > 0) {
+          prob *= p_profile[infoset->GetAction(strategy->m_behav[infoset])];
         }
       }
       (*m_rep)[strategy] = prob;

@@ -1204,9 +1204,9 @@ Rational TreePureStrategyProfileRep::GetPayoff(const GamePlayer &p_player) const
 {
   PureBehaviorProfile behav(m_nfg);
   for (const auto &player : m_nfg->GetPlayers()) {
-    for (size_t iset = 1; iset <= player->GetInfosets().size(); iset++) {
-      if (const int act = m_profile.at(player)->m_behav[iset]) {
-        behav.SetAction(player->GetInfoset(iset)->GetAction(act));
+    for (const auto &infoset : player->GetInfosets()) {
+      if (const int act = m_profile.at(player)->m_behav[infoset]) {
+        behav.SetAction(infoset->GetAction(act));
       }
     }
   }
