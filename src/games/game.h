@@ -263,7 +263,6 @@ class GameInfosetRep : public GameObject {
   GamePlayerRep *m_player;
   std::vector<GameActionRep *> m_actions;
   std::vector<GameNodeRep *> m_members;
-  int flag{0}, whichbranch{0};
   std::vector<Number> m_probs;
 
   GameInfosetRep(GameRep *p_efg, int p_number, GamePlayerRep *p_player, int p_actions);
@@ -339,7 +338,7 @@ class GameStrategyRep : public GameObject {
   int m_number;
   long m_offset{-1L};
   std::string m_label;
-  Array<int> m_behav;
+  std::map<GameInfosetRep *, int> m_behav;
 
   /// @name Lifecycle
   //@{
@@ -384,8 +383,11 @@ class GamePlayerRep : public GameObject {
 
   /// @name Building reduced form strategies
   //@{
-  void MakeStrategy();
-  void MakeReducedStrats(class GameNodeRep *, class GameNodeRep *);
+  void MakeStrategy(const std::map<GameInfosetRep *, int> &);
+  void MakeReducedStrats(class GameNodeRep *, class GameNodeRep *,
+                         std::map<GameInfosetRep *, int> &,
+                         std::map<GameNodeRep *, GameNodeRep *> &ptr,
+                         std::map<GameNodeRep *, GameNodeRep *> &whichbranch);
   //@}
 
   GameRep *m_game;
@@ -448,7 +450,6 @@ class GameNodeRep : public GameObject {
   GameNodeRep *m_parent;
   GameOutcomeRep *m_outcome{nullptr};
   std::vector<GameNodeRep *> m_children;
-  GameNodeRep *whichbranch{nullptr}, *ptr{nullptr};
 
   GameNodeRep(GameRep *e, GameNodeRep *p);
   ~GameNodeRep() override;

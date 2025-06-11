@@ -55,8 +55,12 @@ GameAction GameStrategyRep::GetAction(const GameInfoset &p_infoset) const
   if (p_infoset->GetPlayer() != m_player) {
     throw MismatchException();
   }
-  const int action = m_behav[p_infoset->GetNumber()];
-  return (action) ? *std::next(p_infoset->GetActions().cbegin(), action - 1) : nullptr;
+  try {
+    return *std::next(p_infoset->GetActions().cbegin(), m_behav.at(p_infoset) - 1);
+  }
+  catch (std::out_of_range &) {
+    return nullptr;
+  }
 }
 
 //========================================================================
@@ -81,101 +85,73 @@ GamePlayerRep::~GamePlayerRep()
   }
 }
 
-void GamePlayerRep::MakeStrategy()
+void GamePlayerRep::MakeStrategy(const std::map<GameInfosetRep *, int> &behav)
 {
-  Array<int> c(m_infosets.size());
-
-  for (size_t i = 1; i <= m_infosets.size(); i++) {
-    if (m_infosets[i - 1]->flag == 1) {
-      c[i] = m_infosets[i - 1]->whichbranch;
-    }
-    else {
-      c[i] = 0;
-    }
-  }
-
   auto *strategy = new GameStrategyRep(this, m_strategies.size() + 1, "");
-  strategy->m_behav = c;
-
-  // We generate a default labeling -- probably should be changed in future
-  if (!strategy->m_behav.empty()) {
-    for (size_t iset = 1; iset <= strategy->m_behav.size(); iset++) {
-      if (strategy->m_behav[iset] > 0) {
-        strategy->m_label += lexical_cast<std::string>(strategy->m_behav[iset]);
-      }
-      else {
-        strategy->m_label += "*";
-      }
-    }
+  strategy->m_behav = behav;
+  for (const auto &infoset : m_infosets) {
+    strategy->m_label +=
+        (contains(strategy->m_behav, infoset)) ? std::to_string(strategy->m_behav[infoset]) : "*";
   }
-  else {
+  if (strategy->m_label.empty()) {
     strategy->m_label = "*";
   }
   m_strategies.push_back(strategy);
 }
 
-void GamePlayerRep::MakeReducedStrats(GameNodeRep *n, GameNodeRep *nn)
+void GamePlayerRep::MakeReducedStrats(GameNodeRep *n, GameNodeRep *nn,
+                                      std::map<GameInfosetRep *, int> &behav,
+                                      std::map<GameNodeRep *, GameNodeRep *> &ptr,
+                                      std::map<GameNodeRep *, GameNodeRep *> &whichbranch)
 {
-  GameNodeRep *m;
-
-  if (!n->GetParent()) {
-    n->ptr = nullptr;
-  }
-
   if (!n->IsTerminal()) {
     if (n->m_infoset->m_player == this) {
-      if (n->m_infoset->flag == 0) {
+      if (!contains(behav, n->m_infoset)) {
         // we haven't visited this infoset before
-        n->m_infoset->flag = 1;
         for (size_t i = 1; i <= n->m_children.size(); i++) {
           GameNodeRep *m = n->m_children[i - 1];
-          n->whichbranch = m;
-          n->m_infoset->whichbranch = i;
-          MakeReducedStrats(m, nn);
+          whichbranch[n] = m;
+          behav[n->m_infoset] = i;
+          MakeReducedStrats(m, nn, behav, ptr, whichbranch);
         }
-        n->m_infoset->flag = 0;
+        behav.erase(n->m_infoset);
       }
       else {
         // we have visited this infoset, take same action
-        MakeReducedStrats(n->m_children[n->m_infoset->whichbranch - 1], nn);
+        MakeReducedStrats(n->m_children[behav[n->m_infoset] - 1], nn, behav, ptr, whichbranch);
       }
     }
     else {
-      n->ptr = nullptr;
       if (nn != nullptr) {
-        n->ptr = nn->m_parent;
+        ptr[n] = nn->m_parent;
       }
-      n->whichbranch = n->m_children.front();
-      if (n->m_infoset) {
-        n->m_infoset->whichbranch = 0;
+      else {
+        ptr.erase(n);
       }
-      MakeReducedStrats(n->m_children.front(), n->m_children.front());
+      whichbranch[n] = n->m_children.front();
+      MakeReducedStrats(n->m_children.front(), n->m_children.front(), behav, ptr, whichbranch);
     }
   }
   else if (nn) {
-    for (;; nn = nn->m_parent->ptr->whichbranch) {
-      if (!nn->GetNextSibling()) {
-        m = nullptr;
-      }
-      else {
-        m = nn->GetNextSibling();
-      }
-      if (m || nn->m_parent->ptr == nullptr) {
+    GameNodeRep *m;
+    for (;; nn = whichbranch.at(ptr.at(nn->m_parent))) {
+      m = nn->GetNextSibling();
+      if (m || !contains(ptr, nn->m_parent)) {
         break;
       }
     }
     if (m) {
-      GameNodeRep *mm = m->m_parent->whichbranch;
-      m->m_parent->whichbranch = m;
-      MakeReducedStrats(m, m);
-      m->m_parent->whichbranch = mm;
+      GameNodeRep *mm = whichbranch.at(m->m_parent);
+      whichbranch[m->m_parent] = m;
+      MakeReducedStrats(m, m, behav, ptr, whichbranch);
+      whichbranch[m->m_parent] = mm;
     }
     else {
-      MakeStrategy();
+      MakeStrategy(behav);
     }
   }
   else {
-    MakeStrategy();
+    MakeStrategy(behav);
   }
 }
 
@@ -342,8 +318,8 @@ MixedStrategyProfile<T>::MixedStrategyProfile(const MixedBehaviorProfile<T> &p_p
     for (const auto &strategy : player->m_strategies) {
       auto prob = static_cast<T>(1);
       for (const auto &infoset : player->m_infosets) {
-        if (strategy->m_behav[infoset->GetNumber()] > 0) {
-          prob *= p_profile[infoset->GetAction(strategy->m_behav[infoset->GetNumber()])];
+        if (strategy->m_behav[infoset] > 0) {
+          prob *= p_profile[infoset->GetAction(strategy->m_behav[infoset])];
         }
       }
       (*m_rep)[strategy] = prob;
