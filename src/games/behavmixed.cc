@@ -87,7 +87,8 @@ void MixedBehaviorProfile<T>::BehaviorStrat(GamePlayer &player, GameNode &p_node
 
 template <class T>
 void MixedBehaviorProfile<T>::RealizationProbs(const MixedStrategyProfile<T> &mp,
-                                               GamePlayer &player, const Array<int> &actions,
+                                               GamePlayer &player,
+                                               const std::map<GameInfosetRep *, int> &actions,
                                                GameNodeRep *node, std::map<GameNode, T> &map_nvals,
                                                std::map<GameNode, T> &map_bvals)
 {
@@ -96,7 +97,7 @@ void MixedBehaviorProfile<T>::RealizationProbs(const MixedStrategyProfile<T> &mp
   for (size_t i = 1; i <= node->m_children.size(); i++) {
     if (node->GetPlayer() && !node->GetPlayer()->IsChance()) {
       if (node->GetPlayer() == player) {
-        if (actions[node->GetInfoset()->GetNumber()] == static_cast<int>(i)) {
+        if (actions.at(node->GetInfoset()) == static_cast<int>(i)) {
           prob = T(1);
         }
         else {
@@ -148,7 +149,7 @@ MixedBehaviorProfile<T>::MixedBehaviorProfile(const MixedStrategyProfile<T> &p_p
     std::map<GameNode, T> map_nvals, map_bvals;
     for (auto strategy : support.GetStrategies(player)) {
       if (p_profile[strategy] > T(0)) {
-        const Array<int> &actions = strategy->m_behav;
+        const auto &actions = strategy->m_behav;
         map_bvals[root] = p_profile[strategy];
         RealizationProbs(p_profile, player, actions, root, map_nvals, map_bvals);
       }
