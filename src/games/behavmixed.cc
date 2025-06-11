@@ -97,7 +97,8 @@ void MixedBehaviorProfile<T>::RealizationProbs(const MixedStrategyProfile<T> &mp
   for (size_t i = 1; i <= node->m_children.size(); i++) {
     if (node->GetPlayer() && !node->GetPlayer()->IsChance()) {
       if (node->GetPlayer() == player) {
-        if (actions.at(node->GetInfoset()) == static_cast<int>(i)) {
+        if (contains(actions, node->m_infoset) &&
+            actions.at(node->GetInfoset()) == static_cast<int>(i)) {
           prob = T(1);
         }
         else {
