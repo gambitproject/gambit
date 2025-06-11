@@ -98,8 +98,6 @@ void GamePlayerRep::MakeStrategy(const std::map<GameInfosetRep *, int> &behav)
 void GamePlayerRep::MakeReducedStrats(GameNodeRep *n, GameNodeRep *nn,
                                       std::map<GameInfosetRep *, int> &behav)
 {
-  GameNodeRep *m;
-
   if (!n->GetParent()) {
     n->ptr = nullptr;
   }
@@ -131,13 +129,9 @@ void GamePlayerRep::MakeReducedStrats(GameNodeRep *n, GameNodeRep *nn,
     }
   }
   else if (nn) {
+    GameNodeRep *m;
     for (;; nn = nn->m_parent->ptr->whichbranch) {
-      if (!nn->GetNextSibling()) {
-        m = nullptr;
-      }
-      else {
-        m = nn->GetNextSibling();
-      }
+      m = nn->GetNextSibling();
       if (m || nn->m_parent->ptr == nullptr) {
         break;
       }
