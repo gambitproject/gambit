@@ -868,8 +868,8 @@ void GameTreeRep::BuildComputedValues() const
   const_cast<GameTreeRep *>(this)->Canonicalize();
   for (const auto &player : m_players) {
     std::map<GameInfosetRep *, int> behav;
-    std::map<GameNodeRep *, GameNodeRep *> ptr;
-    player->MakeReducedStrats(m_root, nullptr, behav, ptr);
+    std::map<GameNodeRep *, GameNodeRep *> ptr, whichbranch;
+    player->MakeReducedStrats(m_root, nullptr, behav, ptr, whichbranch);
   }
   m_computedValues = true;
 }

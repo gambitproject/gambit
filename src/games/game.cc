@@ -97,7 +97,8 @@ void GamePlayerRep::MakeStrategy(const std::map<GameInfosetRep *, int> &behav)
 
 void GamePlayerRep::MakeReducedStrats(GameNodeRep *n, GameNodeRep *nn,
                                       std::map<GameInfosetRep *, int> &behav,
-                                      std::map<GameNodeRep *, GameNodeRep *> &ptr)
+                                      std::map<GameNodeRep *, GameNodeRep *> &ptr,
+                                      std::map<GameNodeRep *, GameNodeRep *> &whichbranch)
 {
   if (!n->IsTerminal()) {
     if (n->m_infoset->m_player == this) {
@@ -105,15 +106,15 @@ void GamePlayerRep::MakeReducedStrats(GameNodeRep *n, GameNodeRep *nn,
         // we haven't visited this infoset before
         for (size_t i = 1; i <= n->m_children.size(); i++) {
           GameNodeRep *m = n->m_children[i - 1];
-          n->whichbranch = m;
+          whichbranch[n] = m;
           behav[n->m_infoset] = i;
-          MakeReducedStrats(m, nn, behav, ptr);
+          MakeReducedStrats(m, nn, behav, ptr, whichbranch);
         }
         behav.erase(n->m_infoset);
       }
       else {
         // we have visited this infoset, take same action
-        MakeReducedStrats(n->m_children[behav[n->m_infoset] - 1], nn, behav, ptr);
+        MakeReducedStrats(n->m_children[behav[n->m_infoset] - 1], nn, behav, ptr, whichbranch);
       }
     }
     else {
@@ -123,23 +124,23 @@ void GamePlayerRep::MakeReducedStrats(GameNodeRep *n, GameNodeRep *nn,
       else {
         ptr.erase(n);
       }
-      n->whichbranch = n->m_children.front();
-      MakeReducedStrats(n->m_children.front(), n->m_children.front(), behav, ptr);
+      whichbranch[n] = n->m_children.front();
+      MakeReducedStrats(n->m_children.front(), n->m_children.front(), behav, ptr, whichbranch);
     }
   }
   else if (nn) {
     GameNodeRep *m;
-    for (;; nn = ptr.at(nn->m_parent)->whichbranch) {
+    for (;; nn = whichbranch.at(ptr.at(nn->m_parent))) {
       m = nn->GetNextSibling();
       if (m || !contains(ptr, nn->m_parent)) {
         break;
       }
     }
     if (m) {
-      GameNodeRep *mm = m->m_parent->whichbranch;
-      m->m_parent->whichbranch = m;
-      MakeReducedStrats(m, m, behav, ptr);
-      m->m_parent->whichbranch = mm;
+      GameNodeRep *mm = whichbranch.at(m->m_parent);
+      whichbranch[m->m_parent] = m;
+      MakeReducedStrats(m, m, behav, ptr, whichbranch);
+      whichbranch[m->m_parent] = mm;
     }
     else {
       MakeStrategy(behav);

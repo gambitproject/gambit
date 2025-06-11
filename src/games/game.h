@@ -383,7 +383,8 @@ class GamePlayerRep : public GameObject {
   void MakeStrategy(const std::map<GameInfosetRep *, int> &);
   void MakeReducedStrats(class GameNodeRep *, class GameNodeRep *,
                          std::map<GameInfosetRep *, int> &,
-                         std::map<GameNodeRep *, GameNodeRep *> &);
+                         std::map<GameNodeRep *, GameNodeRep *> &ptr,
+                         std::map<GameNodeRep *, GameNodeRep *> &whichbranch);
   //@}
 
   GameRep *m_game;
@@ -446,7 +447,6 @@ class GameNodeRep : public GameObject {
   GameNodeRep *m_parent;
   GameOutcomeRep *m_outcome{nullptr};
   std::vector<GameNodeRep *> m_children;
-  GameNodeRep *whichbranch{nullptr};
 
   GameNodeRep(GameRep *e, GameNodeRep *p);
   ~GameNodeRep() override;
