@@ -55,8 +55,12 @@ GameAction GameStrategyRep::GetAction(const GameInfoset &p_infoset) const
   if (p_infoset->GetPlayer() != m_player) {
     throw MismatchException();
   }
-  const int action = m_behav[p_infoset->GetNumber()];
-  return (action) ? *std::next(p_infoset->GetActions().cbegin(), action - 1) : nullptr;
+  try {
+    return *std::next(p_infoset->GetActions().cbegin(), m_behav.at(p_infoset) - 1);
+  }
+  catch (std::out_of_range &) {
+    return nullptr;
+  }
 }
 
 //========================================================================
