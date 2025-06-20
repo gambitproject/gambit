@@ -307,16 +307,53 @@ def test_outcome_index_exception_label():
                 ),
             ],
         ),
-        # I M P E R F E C T   R E C A L L --- commented out in the test suite
+        # I M P E R F E C T   R E C A L L
         # Wichardt (2008): binary tree of height 3; 2 players; the root player forgets the action
-        # (
-        #    games.read_from_file("wichardt.efg"),
-        #    [["11", "12", "21", "22"], ["1", "2"]],
-        #    [
-        #        np.array([[1, -1], [-5, -5], [-5, -5], [-1, 1]]),
-        #        np.array([[-1, 1], [5, 5], [5, 5], [1, -1]]),
-        #    ],
-        # ),
+        (
+            games.read_from_file("wichardt.efg"),
+            [["11", "12", "21", "22"], ["1", "2"]],
+            [
+                np.array([[1, -1], [-5, -5], [-5, -5], [-1, 1]]),
+                np.array([[-1, 1], [5, 5], [5, 5], [1, -1]]),
+            ],
+        ),
+        # a simple game without Nature where two infosets of a player overlap
+        # without Thompson's Coalescing
+        (
+            games.read_from_file("non-COAable.efg"),
+            [["1", "2", "3"], ["11", "12", "21", "22"]],
+            [
+                np.array([[8, 8, 7, 7], [6, 5, 4, 3], [2, 1, 2, 1]]),
+                np.array([[-8, -8, -7, -7], [-6, -5, -4, -3], [-2, -1, -2, -1]]),
+            ]
+        ),
+        # Absent-minded driver with an infoset crossing a path more than once
+        (
+            games.read_from_file("AM.efg"),
+            [["1", "2"], ["1", "2"]],
+            [
+                np.array([[1, 0], [2, 2]]),
+                np.array([[1, 3], [0, 0]]),
+            ]
+        ),
+        # Absent-minded driver: Gilboa's reformulation with Nature and two crossing-over infosets
+        # (GEB, 1997)
+        (
+            games.read_from_file("gilboa.efg"),
+            [["11", "12", "21", "22"]],
+            [
+                np.array(["5/2", "7/2", "7/2", "9/2"])
+            ]
+        ),
+        # Absent-minded driver: Gilboa's reformulation -- no Nature at the root
+        (
+            games.read_from_file("gilboa-det.efg"),
+            [["1", "2"], ["11", "12", "21", "22"]],
+            [
+                np.array([[1, 1, 2, 3], [4, 6, 5, 6]]),
+                np.array([[-1, -1, -2, -3], [-4, -6, -5, -6]]),
+            ]
+        ),
     ],
 )
 def test_reduced_strategic_form(
