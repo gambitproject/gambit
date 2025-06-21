@@ -25,6 +25,7 @@
 
 #include <list>
 #include <set>
+#include <stack>
 
 #include "number.h"
 #include "gameobject.h"
@@ -61,6 +62,8 @@ template <class P, class T> class ElementCollection {
 
 public:
   class iterator {
+    friend class GameRep;
+
     P m_owner{nullptr};
     const std::vector<T *> *m_container{nullptr};
     size_t m_index{0};
@@ -512,6 +515,93 @@ public:
   using Players = ElementCollection<Game, GamePlayerRep>;
   using Outcomes = ElementCollection<Game, GameOutcomeRep>;
 
+  class Nodes {
+    Game m_owner{nullptr};
+
+  public:
+    class iterator {
+      friend class Nodes;
+      using ChildIterator = ElementCollection<GameNode, GameNodeRep>::iterator;
+
+      Game m_owner{nullptr};
+      GameNode m_current_node{nullptr};
+      std::stack<ChildIterator> m_stack{};
+
+      iterator(Game game) : m_owner(game) {}
+
+    public:
+      using iterator_category = std::forward_iterator_tag;
+      using value_type = GameNode;
+      using pointer = value_type *;
+
+      iterator() = default;
+
+      iterator(Game game, GameNode start_node) : m_owner(game), m_current_node(start_node)
+      {
+        if (!start_node) {
+          return;
+        }
+        if (start_node->GetGame() != m_owner) {
+          throw MismatchException();
+        }
+      }
+
+      value_type operator*() const
+      {
+        if (!m_current_node) {
+          throw std::runtime_error("Cannot dereference an end iterator");
+        }
+        return m_current_node;
+      }
+
+      iterator &operator++()
+      {
+        if (!m_current_node) {
+          throw std::out_of_range("Cannot increment an end iterator");
+        }
+
+        if (!m_current_node->IsTerminal()) {
+          m_stack.push(m_current_node->GetChildren().begin());
+        }
+
+        while (!m_stack.empty()) {
+          auto &top_it = m_stack.top();
+          auto end_it = top_it.m_owner->GetChildren().end();
+          if (top_it != end_it) {
+            m_current_node = *top_it;
+            ++top_it;
+            return *this;
+          }
+          m_stack.pop();
+        }
+
+        m_current_node = nullptr;
+        return *this;
+      }
+
+      bool operator==(const iterator &other) const
+      {
+        return m_owner == other.m_owner && m_current_node == other.m_current_node;
+      }
+      bool operator!=(const iterator &other) const { return !(*this == other); }
+    };
+
+    /// Default constructor to support declaration by other modules (e.g. Cython)
+    Nodes() = default;
+
+    /// Constructor for the Nodes range.
+    explicit Nodes(Game p_owner) : m_owner(p_owner) {}
+
+    /// Returns an iterator to the first node (the root).
+    iterator begin() const
+    {
+      return (m_owner) ? iterator{m_owner, m_owner->GetRoot()} : iterator{};
+    }
+
+    /// Returns an iterator to the past-the-end position.
+    iterator end() const { return (m_owner) ? iterator{m_owner} : iterator{}; }
+  };
+
   /// @name Lifecycle
   //@{
   /// Clean up the game
@@ -724,6 +814,8 @@ public:
   //@{
   /// Returns the root node of the game
   virtual GameNode GetRoot() const = 0;
+  /// Returns a range that can be used to iterate over the nodes of the game
+  Nodes GetNodes() const { return Nodes(this); }
   /// Returns the number of nodes in the game
   virtual size_t NumNodes() const = 0;
   /// Returns the number of non-terminal nodes in the game

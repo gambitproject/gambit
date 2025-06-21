@@ -16,6 +16,8 @@
     prescribed by a strategy at an information set
 - Tests for creation of the reduced strategic form from an extensive-form game (currently only
   for games with perfect recall)
+- Implement a `Nodes` class as a member of `GameRep`. This class includes an iterator
+  that starts from the root node and successively returns nodes in depth-first traversal order (#530)
 
 
 ## [16.3.1] - unreleased
