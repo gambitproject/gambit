@@ -1,3 +1,4 @@
+import itertools
 import typing
 
 import pytest
@@ -787,3 +788,26 @@ def test_node_plays():
     }  # paths=[0, 1], [0, 1, 1], [1, 1, 1]
 
     assert set(test_node.plays) == expected_set_of_plays
+
+
+@pytest.mark.parametrize(
+    "game_obj",
+    [
+        pytest.param(games.read_from_file("basic_extensive_game.efg")),
+        pytest.param(games.read_from_file("binary_3_levels_generic_payoffs.efg")),
+        pytest.param(games.read_from_file("cent3.efg")),
+        pytest.param(games.read_from_file("e01.efg")),
+        pytest.param(games.read_from_file("e02.efg")),
+        pytest.param(games.read_from_file("poker.efg")),
+        pytest.param(gbt.Game.new_tree()),
+    ],
+)
+def test_nodes_iteration_order(game_obj: gbt.Game):
+    """Verify that the C++ `game.nodes` iterator produces the DFS traversal.
+    """
+    def dfs(node: gbt.Node) -> typing.Iterator[gbt.Node]:
+        yield node
+        for child in node.children:
+            yield from dfs(child)
+
+    assert all(a == b for a, b in itertools.zip_longest(game_obj.nodes, dfs(game_obj.root)))
