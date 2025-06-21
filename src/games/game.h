@@ -512,6 +512,72 @@ public:
   using Players = ElementCollection<Game, GamePlayerRep>;
   using Outcomes = ElementCollection<Game, GameOutcomeRep>;
 
+  class Nodes {
+  private:
+    Game m_owner{nullptr};
+    std::stack<GameNode> m_stack{};
+    Nodes(Game game) : m_owner(game) {}
+
+  public:
+    Nodes() = default;
+
+    Nodes(Game game, GameNode start_node) : m_owner(game)
+    {
+      if (!start_node) {
+        return;
+      }
+      if (start_node->GetGame() != m_owner) {
+        throw MismatchException();
+      }
+      if (start_node != m_owner->GetRoot()) {
+        throw std::invalid_argument("Node iteration cannot be initiated for subtrees.");
+      }
+      m_stack.push(start_node);
+    }
+
+    GameNode operator*() const
+    {
+      if (m_stack.empty()) {
+        throw std::runtime_error("Cannot dereference an end iterator");
+      }
+      return m_stack.top();
+    }
+
+    Nodes &operator++()
+    {
+      if (m_stack.empty()) {
+        throw std::out_of_range("Cannot increment an end iterator");
+      }
+      const GameNode n = m_stack.top();
+      m_stack.pop();
+      auto children = n->GetChildren();
+      auto it = children.end();
+      while (it != children.begin()) {
+        --it; // Decrement first, then dereference
+        m_stack.push(*it);
+      }
+      return *this;
+    }
+
+    bool operator==(const Nodes &other) const
+    {
+      if (m_owner != other.m_owner) {
+        return false;
+      }
+      if (m_stack.empty() && other.m_stack.empty()) {
+        return true;
+      }
+      if (m_stack.empty() || other.m_stack.empty()) {
+        return false;
+      }
+      return m_stack.top() == other.m_stack.top();
+    }
+
+    bool operator!=(const Nodes &other) const { return !(*this == other); }
+
+    friend class GameRep;
+  };
+
   /// @name Lifecycle
   //@{
   /// Clean up the game
@@ -735,6 +801,10 @@ public:
   /// Set the probability distribution of actions at a chance node
   virtual Game SetChanceProbs(const GameInfoset &, const Array<Number> &) = 0;
   //@}
+
+  /// Node iterators
+  Nodes begin() const { return {this, GetRoot()}; }
+  Nodes end() const { return {this}; }
 
   /// Build any computed values anew
   virtual void BuildComputedValues() const {}
