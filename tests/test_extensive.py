@@ -49,14 +49,28 @@ def test_game_add_players_nolabel():
     game.add_player()
 
 
-def test_game_is_perfect_recall():
-    game = games.read_from_file("perfect_recall.efg")
-    assert game.is_perfect_recall
+@pytest.mark.parametrize("game_filename,expected_result", [
+    # Games that have perfect recall
+    ("e01.efg", True),
+    ("e02.efg", True),
+    ("cent3.efg", True),
+    ("poker.efg", True),
+    ("basic_extensive_game.efg", True),
 
-
-def test_game_is_not_perfect_recall():
-    game = games.read_from_file("not_perfect_recall.efg")
-    assert not game.is_perfect_recall
+    # Games that do not have perfect recall
+    ("wichardt.efg", False),  # forgetting past action
+    ("noPR-action-selten-horse.efg", False),  # forgetting past action
+    ("noPR-information-no-deflate.efg", False),  # forgetting past information
+    ("noPR-AM.efg", False),  # absent-mindedness
+    ("noPR-action-AM.efg", False),  # absent-mindedness + forgetting past action
+])
+def test_is_perfect_recall(game_filename: str, expected_result: bool):
+    """
+    Verify the IsPerfectRecall implementation against a suite of games
+    with and without the perfect recall property.
+    """
+    game = games.read_from_file(game_filename)
+    assert game.is_perfect_recall == expected_result
 
 
 def test_getting_payoff_by_label_string():
@@ -95,7 +109,7 @@ def test_outcome_index_exception_label():
     "game,strategy_labels,np_arrays_of_rsf",
     [
         ###############################################################################
-        # # 1 player; reduction; generic payoffs
+        # 1 player; reduction; generic payoffs
         (
             games.create_reduction_one_player_generic_payoffs_efg(),
             [["11", "12", "2*", "3*", "4*"]],

@@ -732,50 +732,63 @@ bool GameTreeRep::IsConstSum() const
   }
 }
 
-bool GameTreeRep::IsPerfectRecall(GameInfoset &s1, GameInfoset &s2) const
+bool GameTreeRep::IsPerfectRecall() const
 {
-  for (auto player : m_players) {
-    for (size_t i = 1; i <= player->m_infosets.size(); i++) {
-      auto *iset1 = player->m_infosets[i - 1];
-      for (size_t j = 1; j <= player->m_infosets.size(); j++) {
-        auto *iset2 = player->m_infosets[j - 1];
+  using ChildIterator = GameNodeRep::Children::iterator;
+  using ActionIterator = GameInfosetRep::Actions::iterator;
 
-        bool precedes = false;
-        GameAction action = nullptr;
+  std::map<GamePlayer, std::stack<GameAction>> prior_actions;
+  std::map<GameInfoset, std::vector<GameAction>> infoset_parents;
+  std::stack<std::tuple<GameNode, ChildIterator, ActionIterator>> position;
 
-        for (size_t m = 1; m <= iset2->m_members.size(); m++) {
-          size_t n;
-          for (n = 1; n <= iset1->m_members.size(); n++) {
-            if (iset2->GetMember(m)->IsSuccessorOf(iset1->GetMember(n)) &&
-                iset1->GetMember(n) != iset2->GetMember(m)) {
-              precedes = true;
-              for (const auto &act : iset1->GetActions()) {
-                if (iset2->GetMember(m)->IsSuccessorOf(iset1->GetMember(n)->GetChild(act))) {
-                  if (action != nullptr && action != act) {
-                    s1 = iset1;
-                    s2 = iset2;
-                    return false;
-                  }
-                  action = act;
-                }
-              }
-              break;
-            }
-          }
+  for (auto player : GetPlayers()) {
+    prior_actions[player].emplace(nullptr);
+  }
+  prior_actions[GetChance()].emplace(nullptr);
+  prior_actions[GetRoot()->GetPlayer()].emplace(nullptr);
 
-          if (i == j && precedes) {
-            s1 = iset1;
-            s2 = iset2;
-            return false;
-          }
+  if (GetRoot()->IsTerminal()) {
+    return true;
+  }
 
-          if (n > iset1->m_members.size() && precedes) {
-            s1 = iset1;
-            s2 = iset2;
-            return false;
-          }
-        }
+  position.emplace(GetRoot(), GetRoot()->GetChildren().begin(),
+                   GetRoot()->GetInfoset()->GetActions().begin());
+
+  infoset_parents[GetRoot()->GetInfoset()].emplace_back(nullptr);
+
+  while (!position.empty()) {
+    auto &[parent, child_it, action_it] = position.top();
+
+    if (child_it != parent->GetChildren().end()) {
+      const GameNode child = *child_it;
+      const GameAction action = *action_it;
+
+      prior_actions[parent->GetPlayer()].top() = action;
+
+      if (!child->IsTerminal()) {
+        infoset_parents[child->GetInfoset()].push_back(prior_actions[child->GetPlayer()].top());
+        position.emplace(child, child->GetChildren().begin(),
+                         child->GetInfoset()->GetActions().begin());
+        prior_actions[child->GetPlayer()].emplace(nullptr);
       }
+      ++child_it;
+      ++action_it;
+    }
+
+    else {
+      prior_actions[parent->GetPlayer()].pop();
+      position.pop();
+    }
+  }
+
+  for (const auto &[infoset, parent_action_options] : infoset_parents) {
+    if (parent_action_options.size() == 1) {
+      continue;
+    }
+    const std::set<std::optional<GameAction>> unique_parents(parent_action_options.begin(),
+                                                             parent_action_options.end());
+    if (unique_parents.size() > 1) {
+      return false;
     }
   }
 
