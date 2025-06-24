@@ -23,6 +23,8 @@
 #include <iostream>
 #include <algorithm>
 #include <numeric>
+#include <stack>
+#include <set>
 
 #include "gambit.h"
 #include "gametree.h"
@@ -747,54 +749,57 @@ bool GameTreeRep::IsConstSum() const
   }
 }
 
-bool GameTreeRep::IsPerfectRecall(GameInfoset &s1, GameInfoset &s2) const
+bool GameTreeRep::IsPerfectRecall() const
 {
-  for (auto player : m_players) {
-    for (size_t i = 1; i <= player->m_infosets.size(); i++) {
-      auto iset1 = player->m_infosets[i - 1];
-      for (size_t j = 1; j <= player->m_infosets.size(); j++) {
-        auto iset2 = player->m_infosets[j - 1];
+  if (m_infosetParents.empty() && !GetRoot()->IsTerminal()) {
+    const_cast<GameTreeRep *>(this)->BuildInfosetParents();
+  }
 
-        bool precedes = false;
-        GameAction action = nullptr;
+  // ====================================================================
 
-        for (size_t m = 1; m <= iset2->m_members.size(); m++) {
-          size_t n;
-          for (n = 1; n <= iset1->m_members.size(); n++) {
-            if (iset2->GetMember(m)->IsSuccessorOf(iset1->GetMember(n)) &&
-                iset1->GetMember(n) != iset2->GetMember(m)) {
-              precedes = true;
-              for (const auto &act : iset1->GetActions()) {
-                if (iset2->GetMember(m)->IsSuccessorOf(iset1->GetMember(n)->GetChild(act))) {
-                  if (action != nullptr && action != act) {
-                    s1 = iset1;
-                    s2 = iset2;
-                    return false;
-                  }
-                  action = act;
-                }
-              }
-              break;
-            }
-          }
+  std::cerr << "\n--- m_infosetParents ---\n";
 
-          if (i == j && precedes) {
-            s1 = iset1;
-            s2 = iset2;
-            return false;
-          }
+  if (m_infosetParents.empty() && !m_root->IsTerminal()) {
+    std::cerr << "  (Cache is empty or game is trivial)\n";
+  }
 
-          if (n > iset1->m_members.size() && precedes) {
-            s1 = iset1;
-            s2 = iset2;
-            return false;
-          }
-        }
+  // Iterate through the map to print its contents.
+  // Assumes m_infosetParents uses raw pointers as keys/values now.
+  for (const auto &[infoset_ptr, parent_actions_set] : m_infosetParents) {
+    // Print the information set identifier.
+    std::cerr << "  - Infoset " << infoset_ptr->GetPlayer()->GetNumber() << "."
+              << infoset_ptr->GetNumber() << " (Player '" << infoset_ptr->GetPlayer()->GetLabel()
+              << "'):\n";
+
+    if (parent_actions_set.empty()) {
+      std::cerr << "    - (No parent actions recorded)\n";
+    }
+
+    // Print each recorded parent action for this infoset.
+    for (const auto &action_ptr : parent_actions_set) {
+      if (action_ptr) {
+        // If the action is not null, print its label and the infoset it belongs to.
+        std::cerr << "    - Reached via Action '" << action_ptr->GetLabel() << "' (from Infoset "
+                  << action_ptr->GetInfoset()->GetPlayer()->GetNumber() << "."
+                  << action_ptr->GetInfoset()->GetNumber() << ")\n";
+      }
+      else {
+        // This case is for the root or for players who haven't acted yet on a path.
+        std::cerr << "    - Reached via null action\n";
       }
     }
   }
+  std::cerr << "---------------------------\n";
+  // ====================================================================
+  //                 DEBUGGING PRINTS END HERE
+  // ====================================================================
 
-  return true;
+  if (GetRoot()->IsTerminal()) {
+    return true;
+  }
+
+  return std::all_of(m_infosetParents.cbegin(), m_infosetParents.cend(),
+                     [](const auto &pair) { return pair.second.size() <= 1; });
 }
 
 //------------------------------------------------------------------------
@@ -871,6 +876,7 @@ void GameTreeRep::ClearComputedValues() const
     player->m_strategies.clear();
   }
   const_cast<GameTreeRep *>(this)->m_nodePlays.clear();
+  const_cast<GameTreeRep *>(this)->m_infosetParents.clear();
   m_computedValues = false;
 }
 
@@ -909,6 +915,82 @@ std::vector<GameNodeRep *> GameTreeRep::BuildConsistentPlaysRecursiveImpl(GameNo
   }
   m_nodePlays[node] = consistent_plays;
   return consistent_plays;
+}
+
+void GameTreeRep::BuildInfosetParents()
+{
+  // The main traversal stack. It holds iterators that explore the children nodes.
+  // It does not contain entries for the nodes that are skipped over
+  // or where the previously taken decision is taken again due to absent-mindedness.
+  std::stack<GameNodeRep::Actions::iterator> position;
+  // tracks actions taken by each player on the current path
+  std::map<GamePlayer, std::stack<GameAction>> prior_actions;
+  // stores the first action choice made for an infoset on a given exploration path
+  std::map<GameInfoset, std::pair<GameNode, GameAction>> initial_choice;
+
+  if (m_root->IsTerminal()) {
+    m_infosetParents[m_root->GetInfoset()].insert(nullptr);
+    return;
+  }
+
+  for (auto player : m_players) {
+    prior_actions[player].emplace(nullptr);
+  }
+  prior_actions[m_chance].emplace(nullptr);
+
+  position.emplace(m_root->GetActions().begin());
+  prior_actions[m_root->GetPlayer()].emplace(nullptr);
+  m_infosetParents[m_root->GetInfoset()].insert(nullptr);
+
+  while (!position.empty()) {
+    auto &current_it = position.top();
+    auto parent = current_it.GetOwner();
+
+    if (current_it != parent->GetActions().end()) {
+      auto [action, child] = *current_it;
+
+      prior_actions[parent->GetPlayer()].top() = action;
+      initial_choice[parent->GetInfoset()] = {parent, action};
+
+      // records every emplace made onto the prior_actions stack during a fast-forward.
+      std::vector<GamePlayer> fast_forward_history;
+
+      // fast forward absent-minded child nodes
+      auto initial_choice_it = initial_choice.find(child->GetInfoset());
+      while (initial_choice_it != initial_choice.end()) {
+        auto initial_action = initial_choice_it->second.second;
+        auto prior_action_ff = prior_actions[child->GetPlayer()].top();
+        m_infosetParents[child->GetInfoset()].insert(prior_action_ff);
+
+        auto newchild = child->GetChild(initial_action);
+
+        prior_actions[child->GetPlayer()].emplace(initial_action);
+        fast_forward_history.emplace_back(child->GetPlayer());
+
+        child = newchild;
+        initial_choice_it = initial_choice.find(newchild->GetInfoset());
+      }
+
+      if (!child->IsTerminal()) {
+        auto child_player = child->GetPlayer();
+        auto prior_action_desc = prior_actions[child_player].top();
+        m_infosetParents[child->GetInfoset()].insert(prior_action_desc);
+        position.emplace(child->GetActions().begin());
+        prior_actions[child_player].emplace(nullptr);
+      }
+
+      ++current_it;
+
+      for (auto it = fast_forward_history.rbegin(); it != fast_forward_history.rend(); ++it) {
+        prior_actions.at(*it).pop();
+      }
+    }
+    else {
+      prior_actions.at(parent->GetPlayer()).pop();
+      position.pop();
+      initial_choice.erase(parent->GetInfoset());
+    }
+  }
 }
 
 //------------------------------------------------------------------------

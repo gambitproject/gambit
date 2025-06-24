@@ -57,7 +57,7 @@ public:
   //@{
   bool IsTree() const override { return false; }
   bool IsConstSum() const override;
-  bool IsPerfectRecall(GameInfoset &, GameInfoset &) const override { return true; }
+  bool IsPerfectRecall() const override { return true; }
   //@}
 
   /// @name Dimensions of the game

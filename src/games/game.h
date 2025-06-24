@@ -57,6 +57,82 @@ using GameNode = GameObjectPtr<GameNodeRep>;
 class GameRep;
 using Game = std::shared_ptr<GameRep>;
 
+template <class P, class T> class ElementCollection {
+  P m_owner{nullptr};
+  const std::vector<T *> *m_container{nullptr};
+
+public:
+  class iterator {
+    P m_owner{nullptr};
+    const std::vector<T *> *m_container{nullptr};
+    size_t m_index{0};
+
+  public:
+    using iterator_category = std::bidirectional_iterator_tag;
+    using difference_type = std::ptrdiff_t;
+    using value_type = GameObjectPtr<T>;
+    using pointer = value_type *;
+    using reference = value_type &;
+
+    iterator() = default;
+    iterator(const P &p_owner, const std::vector<T *> *p_container, size_t p_index = 0)
+      : m_owner(p_owner), m_container(p_container), m_index(p_index)
+    {
+    }
+    iterator(const iterator &) = default;
+    ~iterator() = default;
+    iterator &operator=(const iterator &) = default;
+
+    bool operator==(const iterator &p_iter) const
+    {
+      return m_owner == p_iter.m_owner && m_container == p_iter.m_container &&
+             m_index == p_iter.m_index;
+    }
+    bool operator!=(const iterator &p_iter) const
+    {
+      return m_owner != p_iter.m_owner || m_container != p_iter.m_container ||
+             m_index != p_iter.m_index;
+    }
+
+    iterator &operator++()
+    {
+      m_index++;
+      return *this;
+    }
+    iterator &operator--()
+    {
+      m_index--;
+      return *this;
+    }
+    value_type operator*() const { return m_container->at(m_index); }
+    const P &GetOwner() const { return m_owner; }
+  };
+
+  ElementCollection() = default;
+  explicit ElementCollection(const P &p_owner, const std::vector<T *> *p_container)
+    : m_owner(p_owner), m_container(p_container)
+  {
+  }
+  ElementCollection(const ElementCollection<P, T> &) = default;
+  ~ElementCollection() = default;
+  ElementCollection &operator=(const ElementCollection<P, T> &) = default;
+
+  bool operator==(const ElementCollection<P, T> &p_other) const
+  {
+    return m_owner == p_other.m_owner && m_container == p_other.m_container;
+  }
+
+  bool empty() const { return m_container->empty(); }
+  size_t size() const { return m_container->size(); }
+  GameObjectPtr<T> front() const { return m_container->front(); }
+  GameObjectPtr<T> back() const { return m_container->back(); }
+
+  iterator begin() const { return {m_owner, m_container, 0}; }
+  iterator end() const { return {m_owner, m_container, (m_owner) ? m_container->size() : 0}; }
+  iterator cbegin() const { return {m_owner, m_container, 0}; }
+  iterator cend() const { return {m_owner, m_container, (m_owner) ? m_container->size() : 0}; }
+};
+
 //
 // Forward declarations of classes defined elsewhere.
 //
@@ -412,11 +488,22 @@ class GameNodeRep : public std::enable_shared_from_this<GameNodeRep> {
 public:
   using Children = ElementCollection<GameNode, GameNodeRep>;
 
-  GameNodeRep(GameRep *e, GameNodeRep *p);
-  ~GameNodeRep();
+  /// @brief A range class for iterating over a node's (action, child) pairs.
+  class Actions {
+  private:
+    GameNode m_owner{nullptr};
 
-  bool IsValid() const { return m_valid; }
-  void Invalidate() { m_valid = false; }
+  public:
+    class iterator;
+
+    Actions(const GameNode p_owner);
+
+    iterator begin() const;
+    iterator end() const;
+  };
+
+  /// @brief Returns a collection for iterating over this node's (action, child) pairs.
+  Actions GetActions() const;
 
   Game GetGame() const;
 
@@ -450,6 +537,97 @@ public:
   bool IsSuccessorOf(GameNode from) const;
   bool IsSubgameRoot() const;
 };
+
+class GameNodeRep::Actions::iterator {
+public:
+  /// @name Iterator
+  //@{
+  using iterator_category = std::forward_iterator_tag;
+  using value_type = std::pair<GameAction, GameNode>;
+  using difference_type = std::ptrdiff_t;
+  using pointer = value_type *;
+  using reference = value_type;
+  //@}
+
+private:
+  /// @brief An iterator to the action at the parent's information set.
+  GameInfosetRep::Actions::iterator m_action_it;
+  /// @brief An iterator to the child node.
+  GameNodeRep::Children::iterator m_child_it;
+
+public:
+  /// @name Lifecycle
+  //@{
+  /// Default constructor. Creates an iterator in a past-the-end state.
+  iterator() = default;
+
+  /// Creates a new iterator that zips an action iterator and a child iterator.
+  iterator(GameInfosetRep::Actions::iterator p_action_it,
+           GameNodeRep::Children::iterator p_child_it);
+  //@}
+
+  /// @name Iterator Operations
+  //@{
+  /// Returns the current action-child pair.
+  reference operator*() const { return {*m_action_it, *m_child_it}; }
+
+  /// Advances the iterator to the next pair (pre-increment).
+  iterator &operator++()
+  {
+    ++m_action_it;
+    ++m_child_it;
+    return *this;
+  }
+
+  /// Advances the iterator to the next pair (post-increment).
+  iterator operator++(int)
+  {
+    iterator tmp = *this;
+    ++(*this);
+    return tmp;
+  }
+
+  /// Compares two iterators for equality.
+  bool operator==(const iterator &p_other) const
+  {
+    // Comparing one of the wrapped iterators is sufficient as they move in lockstep.
+    return m_child_it == p_other.m_child_it;
+  }
+
+  /// Compares two iterators for inequality.
+  bool operator!=(const iterator &p_other) const { return !(*this == p_other); }
+  //@}
+
+  GameNode GetOwner() const;
+};
+
+inline GameNodeRep::Actions::Actions(GameNode p_owner) : m_owner(p_owner) {}
+
+inline GameNodeRep::Actions GameNodeRep::GetActions() const { return Actions(this); }
+
+inline GameNodeRep::Actions::iterator GameNodeRep::Actions::begin() const
+{
+  if (m_owner->IsTerminal()) {
+    return end();
+  }
+  return {m_owner->GetInfoset()->GetActions().begin(), m_owner->GetChildren().begin()};
+}
+
+inline GameNodeRep::Actions::iterator GameNodeRep::Actions::end() const
+{
+  if (m_owner->IsTerminal()) {
+    return {};
+  }
+  return {m_owner->GetInfoset()->GetActions().end(), m_owner->GetChildren().end()};
+}
+
+inline GameNodeRep::Actions::iterator::iterator(GameInfosetRep::Actions::iterator p_action_it,
+                                                GameNodeRep::Children::iterator p_child_it)
+  : m_action_it(p_action_it), m_child_it(p_child_it)
+{
+}
+
+inline GameNode GameNodeRep::Actions::iterator::GetOwner() const { return m_child_it.GetOwner(); }
 
 /// This is the class for representing an arbitrary finite game.
 class GameRep : public std::enable_shared_from_this<GameRep> {
@@ -611,15 +789,8 @@ public:
   /// Returns the set of terminal nodes which are descendants of members of an action
   virtual std::vector<GameNode> GetPlays(GameAction action) const { throw UndefinedException(); }
 
-  /// Returns true if the game is perfect recall.  If not,
-  /// a pair of violating information sets is returned in the parameters.
-  virtual bool IsPerfectRecall(GameInfoset &, GameInfoset &) const = 0;
   /// Returns true if the game is perfect recall
-  bool IsPerfectRecall() const
-  {
-    GameInfoset s, t;
-    return IsPerfectRecall(s, t);
-  }
+  virtual bool IsPerfectRecall() const = 0;
   //@}
 
   /// @name Writing data files

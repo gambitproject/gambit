@@ -39,6 +39,7 @@ protected:
   std::size_t m_numNodes = 1;
   std::size_t m_numNonterminalNodes = 0;
   std::map<GameNodeRep *, std::vector<GameNodeRep *>> m_nodePlays;
+  std::map<GameInfosetRep *, std::set<GameActionRep *>> m_infosetParents;
 
   /// @name Private auxiliary functions
   //@{
@@ -72,8 +73,7 @@ public:
   //@{
   bool IsTree() const override { return true; }
   bool IsConstSum() const override;
-  using GameRep::IsPerfectRecall;
-  bool IsPerfectRecall(GameInfoset &, GameInfoset &) const override;
+  bool IsPerfectRecall() const override;
   /// Turn on or off automatic canonicalization of the game
   void SetCanonicalization(bool p_doCanon) const
   {
@@ -160,6 +160,7 @@ public:
 
 private:
   std::vector<GameNodeRep *> BuildConsistentPlaysRecursiveImpl(GameNodeRep *node);
+  void BuildInfosetParents();
 };
 
 template <class T> class TreeMixedStrategyProfileRep : public MixedStrategyProfileRep<T> {
