@@ -23,6 +23,7 @@
 #include <iostream>
 #include <algorithm>
 #include <numeric>
+#include <optional>
 
 #include "gambit.h"
 #include "gametree.h"
