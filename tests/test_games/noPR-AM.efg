@@ -1,0 +1,13 @@
+EFG 2 R "Untitled Extensive Game" { "Player 1" "Player 2" }
+""
+
+p "" 1 1 "" { "1" "2" } 0
+p "" 2 1 "" { "1" "2" } 0
+p "" 1 1 "" { "1" "2" } 0
+t "" 1 "Outcome 1" { 1, 1 }
+p "" 2 2 "" { "1" "2" "3" } 0
+t "" 2 "Outcome 2" { 0, 2 }
+t "" 5 "Outcome 5" { 0, 5 }
+t "" 6 "Outcome 6" { 0, 6 }
+t "" 3 "Outcome 3" { 0, 3 }
+t "" 4 "Outcome 4" { 2, 0 }
