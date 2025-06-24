@@ -732,54 +732,106 @@ bool GameTreeRep::IsConstSum() const
   }
 }
 
-bool GameTreeRep::IsPerfectRecall(GameInfoset &s1, GameInfoset &s2) const
+bool GameTreeRep::IsPerfectRecall() const
 {
-  for (auto player : m_players) {
-    for (size_t i = 1; i <= player->m_infosets.size(); i++) {
-      auto *iset1 = player->m_infosets[i - 1];
-      for (size_t j = 1; j <= player->m_infosets.size(); j++) {
-        auto *iset2 = player->m_infosets[j - 1];
+  using Assignment = std::pair<GameInfoset, GameAction>;
+  // a bit unorthodox: history here is the last action of a player taken along a given path
+  using History = std::map<GamePlayer, std::optional<Assignment>>;
 
-        bool precedes = false;
-        GameAction action = nullptr;
+  // the mapping we may later need for RSF
+  std::map<GameNode, std::optional<Assignment>> last_action_for_node;
+  // auxiliary mapping used for PR verification
+  std::map<GameInfoset, std::optional<Assignment>> last_actions_for_infoset;
+  // mapping relating nodes with their histories (in the sense defined above)
+  std::map<GameNode, History> node_history;
+  // flag of bools for players
+  std::map<GamePlayer, bool> perfect_recall;
 
-        for (size_t m = 1; m <= iset2->m_members.size(); m++) {
-          size_t n;
-          for (n = 1; n <= iset1->m_members.size(); n++) {
-            if (iset2->GetMember(m)->IsSuccessorOf(iset1->GetMember(n)) &&
-                iset1->GetMember(n) != iset2->GetMember(m)) {
-              precedes = true;
-              for (const auto &act : iset1->GetActions()) {
-                if (iset2->GetMember(m)->IsSuccessorOf(iset1->GetMember(n)->GetChild(act))) {
-                  if (action != nullptr && action != act) {
-                    s1 = iset1;
-                    s2 = iset2;
-                    return false;
-                  }
-                  action = act;
-                }
-              }
-              break;
-            }
-          }
+  // Initialize the flags for individual players only (not Chance)
+  for (auto player : GetPlayers()) {
+    perfect_recall[player] = true;
+  }
 
-          if (i == j && precedes) {
-            s1 = iset1;
-            s2 = iset2;
-            return false;
-          }
+  History initial_history;
+  for (auto player : GetPlayers()) {
+    initial_history[player] = std::nullopt;
+  }
+  initial_history[GetChance()] = std::nullopt;
 
-          if (n > iset1->m_members.size() && precedes) {
-            s1 = iset1;
-            s2 = iset2;
-            return false;
-          }
+  node_history[GetRoot()] = initial_history;
+
+  for (const GameNode n : *this) {
+    History &history = node_history.at(n);
+
+    if (n->IsTerminal()) {
+      // erasing is optional
+      node_history.erase(n);
+      continue;
+    }
+
+    auto player = n->GetPlayer();
+    auto infoset = n->GetInfoset();
+
+    const std::optional<Assignment> last_player_action = history.at(player);
+
+    last_action_for_node[n] = last_player_action;
+
+    auto it = last_actions_for_infoset.find(infoset);
+    if (it == last_actions_for_infoset.end()) {
+      // We haven't seen this infoset before.
+      last_actions_for_infoset[infoset] = last_player_action;
+    }
+    else {
+      if (it->second != last_player_action) {
+        // A violation is found. Set the flag for the specific player involved.
+        if (!player->IsChance()) {
+          perfect_recall.at(player) = false;
         }
       }
     }
+
+    for (const GameAction action : infoset->GetActions()) {
+      const GameNode child = n->GetChild(action);
+      History child_history = history;
+      child_history.at(player) = std::make_pair(infoset, action);
+      node_history[child] = child_history;
+    }
+
+    // erasing is optional
+    node_history.erase(n);
   }
 
-  return true;
+  // --- Print the final output of last_action_for_node ---
+  std::cout << "\n--- Final output of last_action_for_node map ---\n";
+  for (const auto &entry : last_action_for_node) {
+    const GameNode node = entry.first;
+    const std::optional<Assignment> &last_action = entry.second;
+    std::cout << "  Node " << node->GetNumber() << ": ";
+    if (last_action.has_value()) {
+      const Assignment &assignment = *last_action;
+      const GameInfoset infoset = assignment.first;
+      const GameAction action = assignment.second;
+      std::cout << "Last action from Infoset " << infoset->GetNumber() << " (Player "
+                << infoset->GetPlayer()->GetNumber() << "), Action " << action->GetNumber()
+                << "\n";
+    }
+    else {
+      std::cout << "No prior action from this player on this path.\n";
+    }
+  }
+
+  // --- Print the final per-player perfect recall status ---
+  std::cout << "\n--- Per-player perfect recall status ---\n";
+  for (const auto &pr_entry : perfect_recall) {
+    const GamePlayer p = pr_entry.first;
+    const bool status = pr_entry.second;
+    std::cout << "  Player " << p->GetNumber() << ": " << (status ? "OK" : "VIOLATED") << "\n";
+  }
+  std::cout << "-----------------------------------------------\n" << std::endl;
+
+  // The game has perfect recall only if all strategic players have it.
+  return std::all_of(perfect_recall.cbegin(), perfect_recall.cend(),
+                     [](const auto &pair) { return pair.second; });
 }
 
 //------------------------------------------------------------------------
