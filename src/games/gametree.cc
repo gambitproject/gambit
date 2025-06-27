@@ -23,6 +23,7 @@
 #include <iostream>
 #include <algorithm>
 #include <numeric>
+#include <optional>
 
 #include "gambit.h"
 #include "gametree.h"
@@ -732,51 +733,52 @@ bool GameTreeRep::IsConstSum() const
   }
 }
 
-bool GameTreeRep::IsPerfectRecall(GameInfoset &s1, GameInfoset &s2) const
+bool GameTreeRep::IsPerfectRecall() const
 {
-  for (auto player : m_players) {
-    for (size_t i = 1; i <= player->m_infosets.size(); i++) {
-      auto *iset1 = player->m_infosets[i - 1];
-      for (size_t j = 1; j <= player->m_infosets.size(); j++) {
-        auto *iset2 = player->m_infosets[j - 1];
+  using Assignment = std::pair<GameInfoset, GameAction>;
+  // Histories track the last actions of players taken to reach a given node
+  using History = std::map<GamePlayer, std::optional<Assignment>>;
 
-        bool precedes = false;
-        GameAction action = nullptr;
+  std::map<GameInfoset, std::optional<Assignment>> last_actions_for_infoset;
+  std::map<GameNode, History> last_actions_for_node;
 
-        for (size_t m = 1; m <= iset2->m_members.size(); m++) {
-          size_t n;
-          for (n = 1; n <= iset1->m_members.size(); n++) {
-            if (iset2->GetMember(m)->IsSuccessorOf(iset1->GetMember(n)) &&
-                iset1->GetMember(n) != iset2->GetMember(m)) {
-              precedes = true;
-              for (const auto &act : iset1->GetActions()) {
-                if (iset2->GetMember(m)->IsSuccessorOf(iset1->GetMember(n)->GetChild(act))) {
-                  if (action != nullptr && action != act) {
-                    s1 = iset1;
-                    s2 = iset2;
-                    return false;
-                  }
-                  action = act;
-                }
-              }
-              break;
-            }
-          }
+  History initial_history;
+  for (const auto &player : GetPlayers()) {
+    initial_history[player] = std::nullopt;
+  }
+  initial_history[GetChance()] = std::nullopt;
+  last_actions_for_node[GetRoot()] = initial_history;
 
-          if (i == j && precedes) {
-            s1 = iset1;
-            s2 = iset2;
-            return false;
-          }
+  for (const GameNode n : *this) {
+    History &history = last_actions_for_node.at(n);
 
-          if (n > iset1->m_members.size() && precedes) {
-            s1 = iset1;
-            s2 = iset2;
-            return false;
-          }
+    if (n->IsTerminal()) {
+      last_actions_for_node.erase(n);
+      continue;
+    }
+
+    const GamePlayer player = n->GetPlayer();
+    const GameInfoset infoset = n->GetInfoset();
+    const std::optional<Assignment> &player_last_action = history.at(player);
+
+    auto [it, inserted] = last_actions_for_infoset.try_emplace(infoset, player_last_action);
+
+    if (!inserted) {
+      if (it->second != player_last_action) {
+        if (!player->IsChance()) {
+          return false;
         }
       }
     }
+
+    for (const GameAction action : infoset->GetActions()) {
+      const GameNode child = n->GetChild(action);
+      History child_history = history;
+      child_history.at(player) = std::make_pair(infoset, action);
+      last_actions_for_node[child] = child_history;
+    }
+
+    last_actions_for_node.erase(n);
   }
 
   return true;

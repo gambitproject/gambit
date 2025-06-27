@@ -28,6 +28,8 @@ import scipy.stats
 
 import pygambit.gameiter
 
+from cython.operator cimport dereference, preincrement
+
 ctypedef string (*GameWriter)(const c_Game &) except +IOError
 ctypedef c_Game (*GameParser)(const string &) except +IOError
 
@@ -184,13 +186,26 @@ class GameNodes:
         return self.game.deref().NumNodes()
 
     def __iter__(self) -> typing.Iterator[Node]:
-        def dfs(node):
-            yield node
-            for child in node.children:
-                yield from dfs(child)
+        """
+        A generator that efficiently iterates over the game nodes using
+        the underlying C++ iterator, without using cdef for local variables.
+        """
         if not self.game.deref().IsTree():
             return
-        yield from dfs(Node.wrap(self.game.deref().GetRoot()))
+
+        # Assign the C++ iterators to regular Python variables.
+        # Cython creates lightweight proxy objects automatically.
+        it = self.game.deref().begin()
+        end_it = self.game.deref().end()
+
+        # The loop still uses fast C++-backed operations on the proxies.
+        while it != end_it:
+            # deref(it) gets the underlying C++ GameNode, which is then
+            # immediately passed to Node.wrap(). No intermediate cdef needed.
+            yield Node.wrap(dereference(it))
+
+            # inc(it) calls the C++ pre-increment operator on the proxy.
+            preincrement(it)
 
 
 @cython.cclass
