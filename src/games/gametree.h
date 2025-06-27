@@ -27,6 +27,11 @@
 
 namespace Gambit {
 
+struct PlayerConsequences {
+  std::set<GameInfoset> root_infosets;
+  std::map<GameInfoset, std::map<GameAction, std::set<GameInfoset>>> transitions;
+};
+
 class GameTreeRep : public GameExplicitRep {
   friend class GameNodeRep;
   friend class GameInfosetRep;
@@ -40,12 +45,15 @@ protected:
   std::size_t m_numNodes = 1;
   std::size_t m_numNonterminalNodes = 0;
   std::map<GameNodeRep *, std::vector<GameNodeRep *>> m_nodePlays;
+  mutable std::map<GamePlayer, PlayerConsequences> m_playerConsequences;
 
   /// @name Private auxiliary functions
   //@{
   void NumberNodes(GameNodeRep *, int &);
   /// Normalize the probability distribution of actions at a chance node
   Game NormalizeChanceProbs(const GameInfoset &);
+  /// Compute an auxiliary map relating player's actions with the infosets it directly entails
+  void BuildPlayerConsequences() const;
   //@}
 
   /// @name Managing the representation

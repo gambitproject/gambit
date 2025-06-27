@@ -784,6 +784,106 @@ bool GameTreeRep::IsPerfectRecall() const
   return true;
 }
 
+void GameTreeRep::BuildPlayerConsequences() const
+{
+  using Assignment = std::pair<GameInfoset, GameAction>;
+  using History = std::map<GamePlayer, std::optional<Assignment>>;
+  std::map<GameNode, History> last_actions_for_node;
+
+  m_playerConsequences.clear();
+
+  std::vector<GamePlayer> players(GetPlayers().begin(), GetPlayers().end());
+  players.push_back(GetChance());
+
+  for (const auto &player : players) {
+    auto &consequences = m_playerConsequences[player];
+    for (const auto &infoset : player->GetInfosets()) {
+      for (const auto &action : infoset->GetActions()) {
+        consequences.transitions[infoset][action] = {};
+      }
+    }
+  }
+
+  History initial_history;
+  for (const auto &player : players) {
+    initial_history[player] = std::nullopt;
+  }
+  last_actions_for_node[GetRoot()] = initial_history;
+
+  for (const GameNode n : *this) {
+    History &history = last_actions_for_node.at(n);
+
+    if (n->IsTerminal()) {
+      last_actions_for_node.erase(n);
+      continue;
+    }
+
+    const GamePlayer player = n->GetPlayer();
+    const GameInfoset infoset = n->GetInfoset();
+    const std::optional<Assignment> &player_last_action = history.at(player);
+
+    if (player_last_action.has_value()) {
+      const auto &[prior_infoset, prior_action] = *player_last_action;
+      m_playerConsequences.at(player)
+          .transitions.at(prior_infoset)
+          .at(prior_action)
+          .insert(infoset);
+    }
+    else {
+      m_playerConsequences.at(player).root_infosets.insert(infoset);
+    }
+
+    for (const GameAction action : infoset->GetActions()) {
+      const GameNode child = n->GetChild(action);
+      History child_history = history;
+      child_history.at(player) = std::make_pair(infoset, action);
+      last_actions_for_node[child] = child_history;
+    }
+
+    last_actions_for_node.erase(n);
+  }
+
+  std::cout << "\n--- Players' Consequences  ---\n";
+  for (const auto &[player, consequences] : m_playerConsequences) {
+    // Corrected check for empty infosets
+    if (player->GetInfosets().size() == 0) {
+      continue;
+    }
+
+    std::cout << "Player " << player->GetNumber() << ":\n";
+
+    if (!consequences.root_infosets.empty()) {
+      std::cout << "  Root Infoset(s): { ";
+      for (auto it = consequences.root_infosets.begin(); it != consequences.root_infosets.end();
+           ++it) {
+        std::cout << "I" << (*it)->GetNumber()
+                  << (std::next(it) != consequences.root_infosets.end() ? ", " : "");
+      }
+      std::cout << " }\n";
+    }
+
+    for (const auto &[source_is, action_map] : consequences.transitions) {
+      std::cout << "  From I" << source_is->GetNumber() << ":\n";
+      for (const auto &[action, next_infosets] : action_map) {
+        std::cout << "    Action " << action->GetNumber() << " (" << action->GetLabel() << ") -> ";
+        if (next_infosets.empty()) {
+          std::cout << " (terminal or other player's move)\n";
+        }
+        else {
+          std::cout << "{ ";
+          for (auto it = next_infosets.begin(); it != next_infosets.end(); ++it) {
+            std::cout << "I" << (*it)->GetNumber()
+                      << (std::next(it) != next_infosets.end() ? ", " : "");
+          }
+          std::cout << " }\n";
+        }
+      }
+    }
+    std::cout << "\n";
+  }
+  std::cout << "---------------------------------------------\n" << std::endl;
+}
+
 //------------------------------------------------------------------------
 //               GameTreeRep: Managing the representation
 //------------------------------------------------------------------------
@@ -865,7 +965,29 @@ void GameTreeRep::BuildComputedValues() const
   if (m_computedValues) {
     return;
   }
+
   const_cast<GameTreeRep *>(this)->Canonicalize();
+
+  /* temporary addition to access debug prints
+  this block will be extended with MakeReducedStratsPR and merged with MakeReducedStrats as follows
+
+  if (this->IsPerfectRecall()) {
+    this->BuildPlayerConsequences();
+    for (const auto &player : m_players) {
+        player->MakeReducedStratPR();
+    }
+  } else {
+    for (const auto &player : m_players) {
+      std::map<GameInfosetRep *, int> behav;
+      std::map<GameNodeRep *, GameNodeRep *> ptr, whichbranch;
+      player->MakeReducedStrats(m_root, nullptr, behav, ptr, whichbranch);
+    }
+  }
+  */
+  if (this->IsPerfectRecall()) {
+    this->BuildPlayerConsequences();
+  }
+
   for (const auto &player : m_players) {
     std::map<GameInfosetRep *, int> behav;
     std::map<GameNodeRep *, GameNodeRep *> ptr, whichbranch;
