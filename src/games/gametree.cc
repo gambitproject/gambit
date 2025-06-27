@@ -736,84 +736,37 @@ bool GameTreeRep::IsConstSum() const
 bool GameTreeRep::IsPerfectRecall() const
 {
   using Assignment = std::pair<GameInfoset, GameAction>;
+  // Histories track the last actions of players taken to reach a given node
   using History = std::map<GamePlayer, std::optional<Assignment>>;
 
-  struct PlayerConsequences {
-    std::set<GameInfoset> root_infosets;
-    std::map<GameInfoset, std::map<GameAction, std::set<GameInfoset>>> transitions;
-  };
-  std::map<GamePlayer, PlayerConsequences> action_consequences_by_player;
-
-  std::map<GameNode, std::optional<Assignment>> last_action_for_node;
   std::map<GameInfoset, std::optional<Assignment>> last_actions_for_infoset;
-  std::map<GameNode, History> node_history;
-  std::map<GamePlayer, bool> perfect_recall;
-
-  // --- Pre-populate the map to guarantee all actions are present ---
-  // Initialize for all strategic players
-  for (auto player : GetPlayers()) {
-    perfect_recall[player] = true;
-    for (auto infoset : player->GetInfosets()) {
-      for (auto action : infoset->GetActions()) {
-        // Create an entry for each action with an empty set of consequences.
-        action_consequences_by_player[player].transitions[infoset][action] = {};
-      }
-    }
-  }
-  // Initialize for the Chance player
-  GamePlayer chance_player = GetChance();
-  for (auto infoset : chance_player->GetInfosets()) {
-    for (auto action : infoset->GetActions()) {
-      action_consequences_by_player[chance_player].transitions[infoset][action] = {};
-    }
-  }
-  // ---------------------------------------------------------------------
+  std::map<GameNode, History> last_actions_for_node;
 
   History initial_history;
-  for (auto player : GetPlayers()) {
+  for (const auto &player : GetPlayers()) {
     initial_history[player] = std::nullopt;
   }
   initial_history[GetChance()] = std::nullopt;
-
-  node_history[GetRoot()] = initial_history;
+  last_actions_for_node[GetRoot()] = initial_history;
 
   for (const GameNode n : *this) {
-    History &history = node_history.at(n);
+    History &history = last_actions_for_node.at(n);
 
     if (n->IsTerminal()) {
-      node_history.erase(n);
+      last_actions_for_node.erase(n);
       continue;
     }
 
-    auto player = n->GetPlayer();
-    auto infoset = n->GetInfoset();
-    const std::optional<Assignment> last_player_action = history.at(player);
-    last_action_for_node[n] = last_player_action;
+    const GamePlayer player = n->GetPlayer();
+    const GameInfoset infoset = n->GetInfoset();
+    const std::optional<Assignment> &player_last_action = history.at(player);
 
-    if (last_player_action.has_value()) {
-      const GameInfoset &prior_infoset = last_player_action->first;
-      const GameAction &prior_action = last_player_action->second;
-      const GamePlayer &acting_player = prior_infoset->GetPlayer();
+    auto [it, inserted] = last_actions_for_infoset.try_emplace(infoset, player_last_action);
 
-      if (acting_player == player) {
-        action_consequences_by_player.at(acting_player)
-            .transitions.at(prior_infoset)
-            .at(prior_action)
-            .insert(infoset);
-      }
-    }
-    else {
-      action_consequences_by_player[player].root_infosets.insert(infoset);
-    }
-
-    auto it = last_actions_for_infoset.find(infoset);
-    if (it == last_actions_for_infoset.end()) {
-      last_actions_for_infoset[infoset] = last_player_action;
-    }
-    else {
-      if (it->second != last_player_action) {
+    if (!inserted) {
+      if (it->second != player_last_action) {
         if (!player->IsChance()) {
-          perfect_recall.at(player) = false;
+          return false;
         }
       }
     }
@@ -822,68 +775,13 @@ bool GameTreeRep::IsPerfectRecall() const
       const GameNode child = n->GetChild(action);
       History child_history = history;
       child_history.at(player) = std::make_pair(infoset, action);
-      node_history[child] = child_history;
-    }
-    node_history.erase(n);
-  }
-
-  // --- Print the action consequences container ---
-  std::cout << "\n--- Action Consequences by Player ---\n";
-  for (const auto &player_entry : action_consequences_by_player) {
-    const GamePlayer p = player_entry.first;
-    const PlayerConsequences &consequences = player_entry.second;
-    std::cout << "Player " << p->GetNumber() << ":\n";
-
-    if (!consequences.root_infosets.empty()) {
-      std::cout << "  Root Infoset(s): { ";
-      for (auto it = consequences.root_infosets.begin(); it != consequences.root_infosets.end();
-           ++it) {
-        std::cout << "Infoset " << (*it)->GetNumber()
-                  << (std::next(it) != consequences.root_infosets.end() ? ", " : "");
-      }
-      std::cout << " }\n\n";
+      last_actions_for_node[child] = child_history;
     }
 
-    for (const auto &transition_entry : consequences.transitions) {
-      const GameInfoset source_is = transition_entry.first;
-      const auto &action_map = transition_entry.second;
-
-      std::cout << "  Infoset " << source_is->GetNumber() << ":\n";
-
-      for (const auto &action_entry : action_map) {
-        const GameAction act = action_entry.first;
-        const auto &next_infosets = action_entry.second;
-
-        std::cout << "    Action " << act->GetNumber() << " -> ";
-        if (next_infosets.empty()) {
-          std::cout << "emptyset\n";
-        }
-        else {
-          std::cout << "{ ";
-          for (auto it = next_infosets.begin(); it != next_infosets.end(); ++it) {
-            std::cout << "Infoset " << (*it)->GetNumber()
-                      << (std::next(it) != next_infosets.end() ? ", " : "");
-          }
-          std::cout << " }\n";
-        }
-      }
-      std::cout << "\n";
-    }
+    last_actions_for_node.erase(n);
   }
-  std::cout << "-------------------------------------\n" << std::endl;
 
-  // --- Print the final per-player perfect recall status ---
-  std::cout << "\n--- Per-player perfect recall status ---\n";
-  for (const auto &pr_entry : perfect_recall) {
-    const GamePlayer p = pr_entry.first;
-    const bool status = pr_entry.second;
-    std::cout << "  Player " << p->GetNumber() << ": " << (status ? "YES" : "NO") << "\n";
-  }
-  std::cout << "-----------------------------------------------\n" << std::endl;
-
-  // The game has perfect recall only if all strategic players have it.
-  return std::all_of(perfect_recall.cbegin(), perfect_recall.cend(),
-                     [](const auto &pair) { return pair.second; });
+  return true;
 }
 
 //------------------------------------------------------------------------
