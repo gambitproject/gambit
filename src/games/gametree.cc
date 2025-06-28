@@ -968,31 +968,20 @@ void GameTreeRep::BuildComputedValues() const
 
   const_cast<GameTreeRep *>(this)->Canonicalize();
 
-  /* temporary addition to access debug prints
-  this block will be extended with MakeReducedStratsPR and merged with MakeReducedStrats as follows
-
   if (this->IsPerfectRecall()) {
     this->BuildPlayerConsequences();
     for (const auto &player : m_players) {
-        player->MakeReducedStratPR();
+      player->MakeReducedStratsPR(m_playerConsequences.at(player));
     }
-  } else {
+  }
+  else {
     for (const auto &player : m_players) {
       std::map<GameInfosetRep *, int> behav;
       std::map<GameNodeRep *, GameNodeRep *> ptr, whichbranch;
       player->MakeReducedStrats(m_root, nullptr, behav, ptr, whichbranch);
     }
   }
-  */
-  if (this->IsPerfectRecall()) {
-    this->BuildPlayerConsequences();
-  }
 
-  for (const auto &player : m_players) {
-    std::map<GameInfosetRep *, int> behav;
-    std::map<GameNodeRep *, GameNodeRep *> ptr, whichbranch;
-    player->MakeReducedStrats(m_root, nullptr, behav, ptr, whichbranch);
-  }
   m_computedValues = true;
 }
 

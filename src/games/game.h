@@ -365,6 +365,16 @@ public:
 };
 
 /// A player in a game
+struct PlayerConsequences {
+  std::set<GameInfoset> root_infosets;
+  std::map<GameInfoset, std::map<GameAction, std::set<GameInfoset>>> transitions;
+};
+struct InfosetNumberCmp {
+  bool operator()(const GameInfoset &a, const GameInfoset &b) const
+  {
+    return a->GetNumber() < b->GetNumber();
+  }
+};
 class GamePlayerRep : public GameObject {
   friend class GameRep;
   friend class GameExplicitRep;
@@ -380,7 +390,12 @@ class GamePlayerRep : public GameObject {
 
   /// @name Building reduced form strategies
   //@{
+  void MakeStrategy(const std::map<GameInfoset, GameAction> &p_behavMap);
   void MakeStrategy(const std::map<GameInfosetRep *, int> &);
+  void MakeReducedStratsPR(const PlayerConsequences &p_consequences);
+  void BuildStratsRecursive(const PlayerConsequences &p_consequences,
+                            std::map<GameInfoset, GameAction> &current_strat,
+                            std::set<GameInfoset, InfosetNumberCmp> frontier);
   void MakeReducedStrats(class GameNodeRep *, class GameNodeRep *,
                          std::map<GameInfosetRep *, int> &,
                          std::map<GameNodeRep *, GameNodeRep *> &ptr,

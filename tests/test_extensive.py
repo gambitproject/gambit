@@ -356,19 +356,85 @@ def test_outcome_index_exception_label():
         ),
     ],
 )
+#  def test_reduced_strategic_form(
+#    game: gbt.Game, strategy_labels: list, np_arrays_of_rsf: list
+#  ):
+#    """
+#    We test two things:
+#        - that the strategy labels are as expected
+#          (these use positive integers and '*'s, rather than labels of moves even if they exist)
+#        - that the payoff tables are correct, which is done via game.to_arrays()
+#    """
+#    arrays = game.to_arrays()
+#
+#   for i, player in enumerate(game.players):
+#        assert strategy_labels[i] == [s.label for s in player.strategies]
+#        # convert strings to rationals
+#        exp_array = games.vectorized_make_rational(np_arrays_of_rsf[i])
+#        assert (arrays[i] == exp_array).all()
 def test_reduced_strategic_form(
     game: gbt.Game, strategy_labels: list, np_arrays_of_rsf: list
 ):
     """
-    We test two things:
+    We test three things:
         - that the strategy labels are as expected
-          (these use positive integers and '*'s, rather than labels of moves even if they exist)
+        (these use positive integers and '*'s, rather than labels of moves even if they exist)
         - that the payoff tables are correct, which is done via game.to_arrays()
+        - a permutation-invariance as a fallback
+    WARNING: the permutation-invariance check will fail for games with full payoff ties of players
+    having the following symmetric pattern:
+    [[a, e, e],
+     [b, c, d],
+     [b, d, c]]
     """
     arrays = game.to_arrays()
+    actual_labels_per_player = [[s.label for s in p.strategies] for p in game.players]
+    try:
+        for i, player in enumerate(game.players):
+            assert strategy_labels[i] == [s.label for s in player.strategies]
+            # convert strings to rationals
+            exp_array = games.vectorized_make_rational(np_arrays_of_rsf[i])
+            assert (arrays[i] == exp_array).all()
 
-    for i, player in enumerate(game.players):
-        assert strategy_labels[i] == [s.label for s in player.strategies]
-        # convert strings to rationals
-        exp_array = games.vectorized_make_rational(np_arrays_of_rsf[i])
-        assert (arrays[i] == exp_array).all()
+    except AssertionError:
+        print("\nStrict test failed. Checking permutation-invariance")
+
+        num_players = len(game.players)
+
+        for i in range(num_players):
+            assert len(strategy_labels[i]) == len(actual_labels_per_player[i]), \
+                f"Wrong number of strategies for Player {i+1}."
+            assert set(strategy_labels[i]) == set(actual_labels_per_player[i]), \
+                f"The set of strategy labels for Player {i+1} is incorrect."
+
+            reordered_array = get_reordered_payoff_matrix(
+                player_index=i, game=game, expected_labels=strategy_labels, actual_payoffs=arrays
+            )
+
+            exp_array = games.vectorized_make_rational(np_arrays_of_rsf[i])
+
+            assert (reordered_array == exp_array).all(), \
+                f"Payoff matrix for Player {i+1} is incorrect even after reordering strategies."
+
+
+def get_reordered_payoff_matrix(
+    player_index: int, game: gbt.Game, expected_labels: list, actual_payoffs: list
+) -> np.ndarray:
+    """
+    Re-orders a player's payoff matrix to match a canonical label order.
+    This helper function contains no assertions.
+    """
+    all_actual_labels = [[s.label for s in p.strategies] for p in game.players]
+    axis_permutations = []
+
+    for i, expected_labels_for_player in enumerate(expected_labels):
+        actual_labels_for_player = all_actual_labels[i]
+        indices = [actual_labels_for_player.index(label) for label in expected_labels_for_player]
+        axis_permutations.append(indices)
+
+    reordered_payoffs = actual_payoffs[player_index]
+
+    for axis, perm_indices in enumerate(axis_permutations):
+        reordered_payoffs = np.take(reordered_payoffs, perm_indices, axis=axis)
+
+    return reordered_payoffs

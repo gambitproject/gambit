@@ -27,11 +27,6 @@
 
 namespace Gambit {
 
-struct PlayerConsequences {
-  std::set<GameInfoset> root_infosets;
-  std::map<GameInfoset, std::map<GameAction, std::set<GameInfoset>>> transitions;
-};
-
 class GameTreeRep : public GameExplicitRep {
   friend class GameNodeRep;
   friend class GameInfosetRep;

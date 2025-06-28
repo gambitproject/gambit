@@ -23,6 +23,7 @@
 #include <iostream>
 #include <numeric>
 #include <random>
+#include <queue>
 
 #include "gambit.h"
 #include "writer.h"
@@ -85,6 +86,15 @@ GamePlayerRep::~GamePlayerRep()
   }
 }
 
+void GamePlayerRep::MakeStrategy(const std::map<GameInfoset, GameAction> &p_behavMap)
+{
+  std::map<GameInfosetRep *, int> array_behav;
+  for (auto [infoset, action] : p_behavMap) {
+    array_behav[infoset] = action->GetNumber();
+  }
+  return MakeStrategy(array_behav);
+}
+
 void GamePlayerRep::MakeStrategy(const std::map<GameInfosetRep *, int> &behav)
 {
   auto *strategy = new GameStrategyRep(this, m_strategies.size() + 1, "");
@@ -97,6 +107,52 @@ void GamePlayerRep::MakeStrategy(const std::map<GameInfosetRep *, int> &behav)
     strategy->m_label = "*";
   }
   m_strategies.push_back(strategy);
+}
+
+void GamePlayerRep::MakeReducedStratsPR(const PlayerConsequences &p_consequences)
+{
+  m_strategies.clear();
+  std::map<GameInfoset, GameAction> current_strat;
+
+  if (m_infosets.empty()) {
+    MakeStrategy(current_strat);
+    return;
+  }
+
+  // Initial frontier -- UNORDERED SET of roots; the range constructor builds an ORDERED SET
+  if (!p_consequences.root_infosets.empty()) {
+    const std::set<GameInfoset, InfosetNumberCmp> initial_frontier(
+        p_consequences.root_infosets.begin(), p_consequences.root_infosets.end());
+    BuildStratsRecursive(p_consequences, current_strat, initial_frontier);
+  }
+}
+
+// related to Bernhard's third algorithm
+void GamePlayerRep::BuildStratsRecursive(const PlayerConsequences &p_consequences,
+                                         std::map<GameInfoset, GameAction> &current_strat,
+                                         std::set<GameInfoset, InfosetNumberCmp> frontier)
+{
+  if (frontier.empty()) {
+    MakeStrategy(current_strat);
+    return;
+  }
+
+  // infoset with the smallest number
+  const GameInfoset infoset_to_explore = *frontier.begin();
+  frontier.erase(frontier.begin());
+
+  for (const auto &action : infoset_to_explore->GetActions()) {
+    current_strat[infoset_to_explore] = action;
+
+    // Recursion: The new frontier is a copy of the old one, plus new consequences.
+    auto next_frontier = frontier;
+    const auto &consequences = p_consequences.transitions.at(infoset_to_explore).at(action);
+    next_frontier.insert(consequences.begin(), consequences.end());
+
+    BuildStratsRecursive(p_consequences, current_strat, next_frontier);
+
+    current_strat.erase(infoset_to_explore);
+  }
 }
 
 void GamePlayerRep::MakeReducedStrats(GameNodeRep *n, GameNodeRep *nn,
