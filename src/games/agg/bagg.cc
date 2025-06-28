@@ -25,7 +25,7 @@ BAGG::BAGG(int N, int S, vector<int> &numTypes, vector<ProbDist> &TDist,
   strategyOffset[0] = 0;
   for (int i = 0; i < numPlayers; ++i) {
     for (int j = 0; j < numTypes[i]; ++j) {
-      int idx = typeOffset[i] + j;
+      const int idx = typeOffset[i] + j;
       strategyOffset[idx + 1] = strategyOffset[idx] + typeActionSets[i][j].size();
     }
   }
@@ -53,7 +53,7 @@ void stripComment(istream &in)
   const char COMMENT_CHAR = '#';
 
   in >> ws;
-  char c = in.peek();
+  const char c = in.peek();
   stringbuf discard(ios_base::out);
   if (c == COMMENT_CHAR) {
     in.get(discard);
@@ -157,7 +157,7 @@ std::shared_ptr<BAGG> BAGG::makeBAGG(istream &in)
     aggss << aggActionSets[i].size() << endl;
   }
   for (int i = 0; i < N; i++) {
-    for (int j : aggActionSets[i]) {
+    for (const int j : aggActionSets[i]) {
       aggss << j << " ";
     }
     aggss << endl;
@@ -170,7 +170,7 @@ std::shared_ptr<BAGG> BAGG::makeBAGG(istream &in)
     aggss << ln << endl;
   }
 
-  std::shared_ptr<AGG> aggPtr = AGG::makeAGG(aggss);
+  const std::shared_ptr<AGG> aggPtr = AGG::makeAGG(aggss);
   return std::make_shared<BAGG>(N, S, numTypes, TDist, typeActionSets, typeAction2ActionIndex,
                                 aggPtr);
 }
@@ -214,13 +214,13 @@ void BAGG::getAGGStrat(StrategyProfile &as, const StrategyProfile &s, int player
     if (pl != player) {
       for (int t = 0; t < numTypes[pl]; ++t) {
         for (size_t act = 0; act < typeActionSets[pl][t].size(); ++act) {
-          int aact = typeAction2ActionIndex[pl][t][act];
+          const int aact = typeAction2ActionIndex[pl][t][act];
           as[aact + aggPtr->firstAction(pl)] += indepTypeDist[pl][t] * s[act + firstAction(pl, t)];
         }
       }
     }
     else {
-      int aact = typeAction2ActionIndex[player][tp][action];
+      const int aact = typeAction2ActionIndex[player][tp][action];
       as[aact + aggPtr->firstAction(player)] = 1;
     }
   }
@@ -251,7 +251,7 @@ void BAGG::getSymAGGStrat(StrategyProfile &as, const StrategyProfile &s)
   }
   for (int t = 0; t < numTypes[0]; ++t) {
     for (size_t act = 0; act < typeActionSets[0][t].size(); ++act) {
-      int aact = typeAction2ActionIndex[0][t][act];
+      const int aact = typeAction2ActionIndex[0][t][act];
       as[aact] += indepTypeDist[0][t] * s[act + firstAction(0, t)];
     }
   }

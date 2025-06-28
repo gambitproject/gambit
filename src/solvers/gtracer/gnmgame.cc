@@ -28,8 +28,7 @@
 #include "cmatrix.h"
 #include "gnmgame.h"
 
-namespace Gambit {
-namespace gametracer {
+namespace Gambit::gametracer {
 
 gnmgame::gnmgame(const std::vector<int> &p_actions)
   : strategyOffset(p_actions.size() + 1), numPlayers(p_actions.size()),
@@ -157,5 +156,4 @@ void gnmgame::normalizeStrategy(cvector &s) const
   }
 }
 
-} // namespace gametracer
-} // end namespace Gambit
+} // end namespace Gambit::gametracer

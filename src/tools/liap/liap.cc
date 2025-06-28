@@ -12,7 +12,7 @@
 //
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FO fR A PARTICULAR PURPOSE.  See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
@@ -25,6 +25,7 @@
 #include <cstdlib>
 #include <getopt.h>
 #include "gambit.h"
+#include "tools/util.h"
 #include "solvers/liap/liap.h"
 
 using namespace Gambit;
@@ -128,12 +129,11 @@ List<MixedBehaviorProfile<double>> RandomBehaviorProfiles(const Game &p_game, in
 int main(int argc, char *argv[])
 {
   opterr = 0;
-  bool quiet = false, useStrategic = false, useRandom = false, verbose = false;
-  int numTries = 10;
+  bool quiet = false, useStrategic = false, verbose = false;
+  const int numTries = 10;
   int maxitsN = 1000;
   int numDecimals = 6;
   double maxregret = 1.0e-4;
-  double tolN = 1.0e-10;
   std::string startFile;
 
   int long_opt_index = 0;
@@ -202,7 +202,7 @@ int main(int argc, char *argv[])
   }
 
   try {
-    Game game = ReadGame(*input_stream);
+    const Game game = ReadGame(*input_stream);
     if (!game->IsTree() || useStrategic) {
       List<MixedStrategyProfile<double>> starts;
       if (!startFile.empty()) {
@@ -215,7 +215,7 @@ int main(int argc, char *argv[])
       }
 
       for (size_t i = 1; i <= starts.size(); i++) {
-        std::shared_ptr<StrategyProfileRenderer<double>> renderer(
+        const std::shared_ptr<StrategyProfileRenderer<double>> renderer(
             new MixedStrategyCSVRenderer<double>(std::cout, numDecimals));
 
         LiapStrategySolve(starts[i], maxregret, maxitsN,
@@ -239,7 +239,7 @@ int main(int argc, char *argv[])
       }
 
       for (size_t i = 1; i <= starts.size(); i++) {
-        std::shared_ptr<StrategyProfileRenderer<double>> renderer(
+        const std::shared_ptr<StrategyProfileRenderer<double>> renderer(
             new BehavStrategyCSVRenderer<double>(std::cout, numDecimals));
         LiapBehaviorSolve(starts[i], maxregret, maxitsN,
                           [renderer, verbose](const MixedBehaviorProfile<double> &p_profile,

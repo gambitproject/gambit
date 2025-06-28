@@ -26,6 +26,7 @@
 #include <fstream>
 
 #include "gambit.h"
+#include "tools/util.h"
 #include "solvers/enumpure/enumpure.h"
 
 using namespace Gambit;
@@ -119,7 +120,7 @@ int main(int argc, char *argv[])
   }
 
   try {
-    Game game = ReadGame(*input_stream);
+    const Game game = ReadGame(*input_stream);
     std::shared_ptr<StrategyProfileRenderer<Rational>> renderer;
     if (reportStrategic || !game->IsTree()) {
       if (printDetail) {
@@ -140,31 +141,34 @@ int main(int argc, char *argv[])
 
     if (game->IsTree()) {
       if (bySubgames) {
-        std::shared_ptr<BehavSolver<Rational>> stage;
+        BehaviorSolverType<Rational> func;
         if (solveAgent) {
-          stage = std::make_shared<EnumPureAgentSolver>();
+          func = [&](const Game &g) { return EnumPureAgentSolve(g); };
         }
         else {
-          std::shared_ptr<StrategySolver<Rational>> substage(new EnumPureStrategySolver());
-          stage = std::make_shared<BehavViaStrategySolver<Rational>>(substage);
+          func = [&](const Game &g) {
+            return ToMixedBehaviorProfile<Rational>(EnumPureStrategySolve(g));
+          };
         }
-        SubgameBehavSolver<Rational> algorithm(stage, renderer);
-        algorithm.Solve(game);
+        SolveBySubgames<Rational>(game, func,
+                                  [&](const MixedBehaviorProfile<Rational> &p,
+                                      const std::string &label) { renderer->Render(p, label); });
       }
       else {
         if (solveAgent) {
-          EnumPureAgentSolver algorithm(renderer);
-          algorithm.Solve(game);
+          EnumPureAgentSolve(game, [&](const MixedBehaviorProfile<Rational> &p,
+                                       const std::string &label) { renderer->Render(p, label); });
         }
         else {
-          EnumPureStrategySolver algorithm(renderer);
-          algorithm.Solve(game);
+          EnumPureStrategySolve(game,
+                                [&](const MixedStrategyProfile<Rational> &p,
+                                    const std::string &label) { renderer->Render(p, label); });
         }
       }
     }
     else {
-      EnumPureStrategySolver algorithm(renderer);
-      algorithm.Solve(game);
+      EnumPureStrategySolve(game, [&](const MixedStrategyProfile<Rational> &p,
+                                      const std::string &label) { renderer->Render(p, label); });
     }
     return 0;
   }

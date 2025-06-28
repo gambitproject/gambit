@@ -56,7 +56,7 @@ protected:
   std::map<GameAction, int> m_profileIndex;
 
   // structures for storing cached data
-  mutable bool m_cacheValid;
+  mutable bool m_cacheValid{false};
   mutable std::map<GameNode, T> m_logRealizProbs;
   mutable std::map<GameNode, T> m_beliefs;
   mutable std::map<GameNode, std::map<GamePlayer, T>> m_nodeValues;

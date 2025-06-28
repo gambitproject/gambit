@@ -146,8 +146,8 @@ bool StrategySupportProfile::Dominates(const GameStrategy &s, const GameStrategy
   bool equal = true;
 
   for (auto iter : StrategyContingencies(*this)) {
-    Rational ap = iter->GetStrategyValue(s);
-    Rational bp = iter->GetStrategyValue(t);
+    const Rational ap = iter->GetStrategyValue(s);
+    const Rational bp = iter->GetStrategyValue(t);
     if (p_strict && ap <= bp) {
       return false;
     }
@@ -238,7 +238,7 @@ bool UndominatedForPlayer(const StrategySupportProfile &p_support,
                           StrategySupportProfile &p_newSupport, const GamePlayer &p_player,
                           bool p_strict, bool p_external)
 {
-  std::vector<GameStrategy> set((p_external) ? p_player->NumStrategies()
+  std::vector<GameStrategy> set((p_external) ? p_player->GetStrategies().size()
                                              : p_support.GetStrategies(p_player).size());
   if (p_external) {
     auto strategies = p_player->GetStrategies();

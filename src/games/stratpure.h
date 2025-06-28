@@ -23,6 +23,8 @@
 #ifndef GAMBIT_GAMES_STRATPURE_H
 #define GAMBIT_GAMES_STRATPURE_H
 
+#include <memory>
+
 #include "game.h"
 
 namespace Gambit {
@@ -31,44 +33,36 @@ namespace Gambit {
 /// It specifies exactly one strategy for each player defined on the
 /// game.
 class PureStrategyProfileRep {
-  friend class GameTableRep;
-
-  friend class GameTreeRep;
-
-  friend class GameAGGRep;
-
   friend class PureStrategyProfile;
 
 protected:
   Game m_nfg;
-  Array<GameStrategy> m_profile;
+  std::map<GamePlayer, GameStrategy> m_profile;
 
   /// Construct a new strategy profile
   explicit PureStrategyProfileRep(const Game &p_game);
 
-  /// Create a copy of the strategy profile.
-  /// Caller is responsible for memory management of the created object.
-  virtual PureStrategyProfileRep *Copy() const = 0;
-
 public:
   virtual ~PureStrategyProfileRep() = default;
 
+  /// Create a copy of the strategy profile.
+  virtual std::shared_ptr<PureStrategyProfileRep> Copy() const = 0;
+
   /// @name Data access and manipulation
   //@{
-  /// Get the index uniquely identifying the strategy profile
-  virtual long GetIndex() const { throw UndefinedException(); }
-
-  /// Get the strategy played by player pl
-  const GameStrategy &GetStrategy(int pl) const { return m_profile[pl]; }
+  const Game &GetGame() const { return m_nfg; }
 
   /// Get the strategy played by the player
   const GameStrategy &GetStrategy(const GamePlayer &p_player) const
   {
-    return m_profile[p_player->GetNumber()];
+    return m_profile.at(p_player);
   }
 
   /// Set the strategy for a player
-  virtual void SetStrategy(const GameStrategy &) = 0;
+  virtual void SetStrategy(const GameStrategy &p_strategy)
+  {
+    m_profile[p_strategy->GetPlayer()] = p_strategy;
+  }
 
   /// Get the outcome that results from the profile
   virtual GameOutcome GetOutcome() const = 0;
@@ -76,26 +70,11 @@ public:
   /// Set the outcome that results from the profile
   virtual void SetOutcome(GameOutcome p_outcome) = 0;
 
-  /// Get the payoff to player pl that results from the profile
-  virtual Rational GetPayoff(int pl) const = 0;
-
   /// Get the payoff to the player resulting from the profile
-  Rational GetPayoff(const GamePlayer &p_player) const { return GetPayoff(p_player->GetNumber()); }
+  virtual Rational GetPayoff(const GamePlayer &p_player) const = 0;
 
   /// Get the value of playing strategy against the profile
   virtual Rational GetStrategyValue(const GameStrategy &) const = 0;
-
-  /// Is the profile a pure strategy Nash equilibrium?
-  bool IsNash() const;
-
-  /// Is the profile a strict pure stategy Nash equilibrium?
-  bool IsStrictNash() const;
-
-  /// Is the specificed player playing a best response?
-  bool IsBestResponse(const GamePlayer &p_player) const;
-
-  /// Get the list of best response strategies for a player
-  List<GameStrategy> GetBestResponse(const GamePlayer &p_player) const;
 
   /// Convert to a mixed strategy representation
   MixedStrategyProfile<Rational> ToMixedStrategyProfile() const;
@@ -104,27 +83,24 @@ public:
 
 class PureStrategyProfile {
 private:
-  PureStrategyProfileRep *rep;
+  std::shared_ptr<PureStrategyProfileRep> rep;
 
 public:
   PureStrategyProfile(const PureStrategyProfile &r) : rep(r.rep->Copy()) {}
 
-  explicit PureStrategyProfile(PureStrategyProfileRep *p_rep) : rep(p_rep) {}
+  explicit PureStrategyProfile(std::shared_ptr<PureStrategyProfileRep> p_rep) : rep(p_rep) {}
 
-  ~PureStrategyProfile() { delete rep; }
+  ~PureStrategyProfile() = default;
 
   PureStrategyProfile &operator=(const PureStrategyProfile &r)
   {
     if (&r != this) {
-      delete rep;
       rep = r.rep->Copy();
     }
     return *this;
   }
 
-  PureStrategyProfileRep *operator->() const { return rep; }
-
-  explicit operator PureStrategyProfileRep *() const { return rep; }
+  std::shared_ptr<PureStrategyProfileRep> operator->() const { return rep; }
 };
 
 class StrategyContingencies {

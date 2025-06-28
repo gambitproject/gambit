@@ -59,17 +59,19 @@ protected:
   }
 
 public:
-  NDArray() : m_vector_dim(0) {}
+  NDArray() : m_vector_dim(0), m_offsets_sum(0) {}
   explicit NDArray(const Array<int> &p_index_dim, int p_vector_dim)
     : m_index_dim(p_index_dim), m_vector_dim(p_vector_dim), m_offsets(p_index_dim.size() + 1),
-      m_storage(
-          std::accumulate(m_index_dim.begin(), m_index_dim.end(), 1, std::multiplies<int>()) *
-          m_vector_dim)
+      m_offsets_sum(0),
+      m_storage(std::accumulate(m_index_dim.begin(), m_index_dim.end(), 1, std::multiplies<>()) *
+                m_vector_dim)
   {
     m_offsets.front() = 1;
     std::partial_sum(m_index_dim.begin(), m_index_dim.end(), std::next(m_offsets.begin()),
-                     std::multiplies<int>());
+                     std::multiplies<>());
+    // NOLINTBEGIN(cppcoreguidelines-prefer-member-initializer)
     m_offsets_sum = std::accumulate(m_offsets.begin(), m_offsets.end(), 0);
+    // NOLINTEND(cppcoreguidelines-prefer-member-initializer)
   }
 
   NDArray(const NDArray<T> &) = default;

@@ -53,3 +53,19 @@ def test_infoset_add_action_error():
     game = games.read_from_file("basic_extensive_game.efg")
     with pytest.raises(gbt.MismatchError):
         game.add_action(game.players[0].infosets[0], game.players[1].infosets[0].actions[0])
+
+
+def test_infoset_plays():
+    """Verify `infoset.plays` returns plays reachable from a given infoset.
+    """
+    game = games.read_from_file("e01.efg")
+    list_nodes = list(game.nodes)
+    list_infosets = list(game.infosets)
+
+    test_infoset = list_infosets[2]  # members' paths=[1, 0], [1]
+
+    expected_set_of_plays = {
+        list_nodes[4], list_nodes[5], list_nodes[7], list_nodes[8]
+    }  # paths=[0, 1, 0], [1, 1, 0], [0, 1], [1, 1]
+
+    assert set(test_infoset.plays) == expected_set_of_plays

@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/matrix.h
+// FILE: src/core/matrix.h
 // Interface to a matrix class
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,8 +20,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef LIBGAMBIT_MATRIX_H
-#define LIBGAMBIT_MATRIX_H
+#ifndef GAMBIT_CORE_MATRIX_H
+#define GAMBIT_CORE_MATRIX_H
 
 #include "recarray.h"
 #include "vector.h"
@@ -80,14 +80,10 @@ public:
   Matrix<T> operator*(const Matrix<T> &) const;
   Vector<T> operator*(const Vector<T> &) const;
   Matrix<T> operator*(const T &) const;
-  Matrix<T> &operator*=(const Matrix<T> &);
   Matrix<T> &operator*=(const T &);
 
   Matrix<T> operator/(const T &) const;
   Matrix<T> &operator/=(const T &);
-
-  /// Kronecker product
-  Matrix<T> operator&(const Matrix<T> &) const;
   //@
 
   /// @name Other operations
@@ -103,4 +99,4 @@ template <class T> Vector<T> operator*(const Vector<T> &, const Matrix<T> &);
 
 } // end namespace Gambit
 
-#endif // LIBGAMBIT_MATRIX_H
+#endif // GAMBIT_CORE_MATRIX_H

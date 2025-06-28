@@ -198,10 +198,10 @@ gbtTreePlayerIcon::gbtTreePlayerIcon(wxWindow *p_parent, int p_player)
 
 void gbtTreePlayerIcon::OnLeftClick(wxMouseEvent &)
 {
-  wxBitmap bitmap(person_xpm);
+  const wxBitmap bitmap(person_xpm);
 
 #if defined(__WXMSW__) or defined(__WXMAC__)
-  wxImage image = bitmap.ConvertToImage();
+  const wxImage image = bitmap.ConvertToImage();
 #else
   wxIcon image;
   image.CopyFromBitmap(bitmap);
@@ -322,7 +322,7 @@ void gbtTreePlayerPanel::OnUpdate()
     return;
   }
 
-  wxColour color = m_doc->GetStyle().GetPlayerColor(m_player);
+  const wxColour color = m_doc->GetStyle().GetPlayerColor(m_player);
 
   m_playerLabel->SetForegroundColour(color);
   m_playerLabel->SetValue(
@@ -330,11 +330,11 @@ void gbtTreePlayerPanel::OnUpdate()
 
   m_payoff->SetForegroundColour(color);
   if (m_doc->GetCurrentProfile() > 0) {
-    std::string pay = m_doc->GetProfiles().GetPayoff(m_player);
+    const std::string pay = m_doc->GetProfiles().GetPayoff(m_player);
     m_payoff->SetLabel(wxT("Payoff: ") + wxString(pay.c_str(), *wxConvCurrent));
     GetSizer()->Show(m_payoff, true);
 
-    Gambit::GameNode node = m_doc->GetSelectNode();
+    const Gambit::GameNode node = m_doc->GetSelectNode();
 
     if (node) {
       m_nodeValue->SetForegroundColour(color);
@@ -344,7 +344,7 @@ void gbtTreePlayerPanel::OnUpdate()
 
       if (node->GetInfoset() && node->GetPlayer()->GetNumber() == m_player) {
         m_nodeProb->SetForegroundColour(color);
-        std::string value = m_doc->GetProfiles().GetRealizProb(node);
+        value = m_doc->GetProfiles().GetRealizProb(node);
         m_nodeProb->SetLabel(wxT("Node reached: ") + wxString(value.c_str(), *wxConvCurrent));
         GetSizer()->Show(m_nodeProb, true);
 
@@ -407,7 +407,7 @@ void gbtTreePlayerPanel::OnSetColor(wxCommandEvent &)
   dialog.SetTitle(wxString::Format(_("Choose color for player %d"), m_player));
 
   if (dialog.ShowModal() == wxID_OK) {
-    wxColour color = dialog.GetColourData().GetColour();
+    const wxColour color = dialog.GetColourData().GetColour();
     gbtStyle style = m_doc->GetStyle();
     style.SetPlayerColor(m_player, color);
     m_doc->SetStyle(style);
@@ -457,10 +457,10 @@ gbtTreeChanceIcon::gbtTreeChanceIcon(wxWindow *p_parent)
 
 void gbtTreeChanceIcon::OnLeftClick(wxMouseEvent &)
 {
-  wxBitmap bitmap(dice_xpm);
+  const wxBitmap bitmap(dice_xpm);
 
 #if defined(__WXMSW__) or defined(__WXMAC__)
-  wxImage image = bitmap.ConvertToImage();
+  const wxImage image = bitmap.ConvertToImage();
 #else
   wxIcon image;
   image.CopyFromBitmap(bitmap);
@@ -537,7 +537,7 @@ void gbtTreeChancePanel::OnSetColor(wxCommandEvent &)
   dialog.SetTitle(wxT("Choose color for chance player"));
 
   if (dialog.ShowModal() == wxID_OK) {
-    wxColour color = dialog.GetColourData().GetColour();
+    const wxColour color = dialog.GetColourData().GetColour();
     gbtStyle style = m_doc->GetStyle();
     style.SetChanceColor(color);
     m_doc->SetStyle(style);
@@ -571,7 +571,7 @@ gbtTreePlayerToolbar::gbtTreePlayerToolbar(wxWindow *p_parent, gbtGameDocument *
 
   topSizer->Add(m_chancePanel, 0, wxALL | wxEXPAND, 5);
 
-  for (int pl = 1; pl <= m_doc->NumPlayers(); pl++) {
+  for (size_t pl = 1; pl <= m_doc->NumPlayers(); pl++) {
     m_playerPanels.push_back(new gbtTreePlayerPanel(this, m_doc, pl));
     topSizer->Add(m_playerPanels[pl], 0, wxALL | wxEXPAND, 5);
   }
@@ -595,18 +595,15 @@ void gbtTreePlayerToolbar::OnUpdate()
     m_playerPanels.pop_back();
   }
 
-  for (int pl = 1; pl <= m_playerPanels.size(); pl++) {
-    m_playerPanels[pl]->OnUpdate();
-  }
-
+  std::for_each(m_playerPanels.begin(), m_playerPanels.end(),
+                std::mem_fn(&gbtTreePlayerPanel::OnUpdate));
   GetSizer()->Layout();
 }
 
 void gbtTreePlayerToolbar::PostPendingChanges()
 {
-  for (int pl = 1; pl <= m_playerPanels.size(); pl++) {
-    m_playerPanels[pl]->PostPendingChanges();
-  }
+  std::for_each(m_playerPanels.begin(), m_playerPanels.end(),
+                std::mem_fn(&gbtTreePlayerPanel::PostPendingChanges));
 }
 
 //=====================================================================
@@ -716,8 +713,8 @@ bool gbtEfgPanel::GetBitmap(wxBitmap &p_bitmap, int p_marginX, int p_marginY)
 void gbtEfgPanel::GetSVG(const wxString &p_filename, int p_marginX, int p_marginY)
 {
   // The size of the image to be drawn
-  int maxX = m_treeWindow->GetLayout().MaxX();
-  int maxY = m_treeWindow->GetLayout().MaxY();
+  const int maxX = m_treeWindow->GetLayout().MaxX();
+  const int maxY = m_treeWindow->GetLayout().MaxY();
 
   wxSVGFileDC dc(p_filename, maxX + 2 * p_marginX, maxY + 2 * p_marginY);
   // For some reason, this needs to be initialized
@@ -728,16 +725,16 @@ void gbtEfgPanel::GetSVG(const wxString &p_filename, int p_marginX, int p_margin
 void gbtEfgPanel::RenderGame(wxDC &p_dc, int p_marginX, int p_marginY)
 {
   // The size of the image to be drawn
-  int maxX = m_treeWindow->GetLayout().MaxX();
-  int maxY = m_treeWindow->GetLayout().MaxY();
+  const int maxX = m_treeWindow->GetLayout().MaxX();
+  const int maxY = m_treeWindow->GetLayout().MaxY();
 
   // Get the size of the DC in pixels
   wxCoord w, h;
   p_dc.GetSize(&w, &h);
 
   // Calculate a scaling factor
-  double scaleX = (double)w / (double)(maxX + 2 * p_marginX);
-  double scaleY = (double)h / (double)(maxY + 2 * p_marginY);
+  const double scaleX = (double)w / (double)(maxX + 2 * p_marginX);
+  const double scaleY = (double)h / (double)(maxY + 2 * p_marginY);
   double scale = (scaleX < scaleY) ? scaleX : scaleY;
   // Never zoom in
   if (scale > 1.0) {

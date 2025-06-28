@@ -123,7 +123,7 @@ private:
 public:
   class iterator {
   private:
-    Array<GameStrategy> m_strategies;
+    GamePlayerRep::Strategies m_strategies;
     StrategySupport m_current;
     std::vector<bool> m_include;
     bool m_end;
@@ -132,17 +132,19 @@ public:
     void UpdateCurrent()
     {
       m_current.clear();
-      for (size_t i = 0; i < m_include.size(); i++) {
-        if (m_include[i]) {
-          m_current.push_back(m_strategies[i + 1]);
+      auto strategy = m_strategies.begin();
+      for (const auto &value : m_include) {
+        if (value) {
+          m_current.push_back(*strategy);
         }
+        ++strategy;
       }
     }
 
   public:
     using iterator_category = std::forward_iterator_tag;
 
-    iterator(const Array<GameStrategy> &p_strategies, size_t p_size, bool p_end = false)
+    iterator(const GamePlayerRep::Strategies &p_strategies, size_t p_size, bool p_end = false)
       : m_strategies(p_strategies), m_include(m_strategies.size()), m_end(p_end)
     {
       std::fill(m_include.begin(), m_include.begin() + p_size, true);
@@ -243,17 +245,17 @@ PossibleNashStrategySupports(const Game &p_game)
   auto result = std::make_shared<PossibleNashStrategySupportsResult>();
   auto numActions = p_game->NumStrategies();
 
-  int maxsize =
+  const int maxsize =
       std::accumulate(numActions.begin(), numActions.end(), 0) - p_game->NumPlayers() + 1;
-  int maxdiff = *std::max_element(numActions.cbegin(), numActions.cend());
+  const int maxdiff = *std::max_element(numActions.cbegin(), numActions.cend());
 
-  bool preferBalance = p_game->NumPlayers() == 2;
+  const bool preferBalance = p_game->NumPlayers() == 2;
   Array<int> dim(2);
   dim[1] = (preferBalance) ? maxsize : maxdiff;
   dim[2] = (preferBalance) ? maxdiff : maxsize;
 
   CartesianRange range(dim);
-  std::list<MixedStrategyProfile<double>> solutions;
+  const std::list<MixedStrategyProfile<double>> solutions;
   for (auto x : range) {
     GenerateSizeDiff(p_game, ((preferBalance) ? x[1] : x[2]) + p_game->NumPlayers() - 1,
                      ((preferBalance) ? x[2] : x[1]) - 1,

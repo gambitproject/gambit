@@ -23,6 +23,8 @@
 #ifndef LIBGAMBIT_BEHAV_H
 #define LIBGAMBIT_BEHAV_H
 
+#include <random>
+
 #include "game.h"
 
 namespace Gambit {
@@ -62,8 +64,9 @@ protected:
   /// @name Converting mixed strategies to behavior
   //@{
   void BehaviorStrat(GamePlayer &, GameNode &, std::map<GameNode, T> &, std::map<GameNode, T> &);
-  void RealizationProbs(const MixedStrategyProfile<T> &, GamePlayer &, const Array<int> &,
-                        GameTreeNodeRep *, std::map<GameNode, T> &, std::map<GameNode, T> &);
+  void RealizationProbs(const MixedStrategyProfile<T> &, GamePlayer &,
+                        const std::map<GameInfosetRep *, int> &, GameNodeRep *,
+                        std::map<GameNode, T> &, std::map<GameNode, T> &);
   //@}
 
   /// Check underlying game has not changed; raise exception if it has
@@ -224,7 +227,7 @@ template <class Generator>
 MixedBehaviorProfile<double> GameRep::NewRandomBehaviorProfile(Generator &generator) const
 {
   auto profile = MixedBehaviorProfile<double>(Game(const_cast<GameRep *>(this)));
-  std::exponential_distribution<> dist(1);
+  std::exponential_distribution<> dist(1); // NOLINT(misc-const-correctness)
   for (auto player : GetPlayers()) {
     for (auto infoset : player->GetInfosets()) {
       for (auto action : infoset->GetActions()) {
@@ -242,7 +245,8 @@ MixedBehaviorProfile<Rational> GameRep::NewRandomBehaviorProfile(int p_denom,
   auto profile = MixedBehaviorProfile<Rational>(Game(const_cast<GameRep *>(this)));
   for (auto player : GetPlayers()) {
     for (auto infoset : player->GetInfosets()) {
-      std::list<Rational> dist = UniformOnSimplex(p_denom, infoset->NumActions(), generator);
+      std::list<Rational> dist =
+          UniformOnSimplex(p_denom, infoset->GetActions().size(), generator);
       auto prob = dist.cbegin();
       for (auto action : infoset->GetActions()) {
         profile[action] = *prob;

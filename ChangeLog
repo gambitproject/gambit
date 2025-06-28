@@ -2,10 +2,27 @@
 
 ## [16.4.0] - unreleased
 
-### Removed
+### General
+- Officially added support for Python 3.13.
 
+### Removed
 - The deprecated functions `Game.read_game`, `Game.parse_game` and `Game.write` functions have
   been removed as planned. (#357)
+
+### Added
+- Implement `GetPlays()` (C++) and `get_plays` (Python) to compute the set of terminal nodes consistent
+  with a node, information set, or action (#517)
+- Implement `GameStrategyRep::GetAction` (C++) and `Strategy.action` (Python) retrieving the action
+    prescribed by a strategy at an information set
+- Tests for creation of the reduced strategic form from an extensive-form game (currently only
+  for games with perfect recall)
+
+
+## [16.3.1] - unreleased
+
+### Fixed
+- Corrected a regression in which information sets were prematurely invalidated (and therefore
+  `delete this` called on them) when removing the last node from an information set.
 
 
 ## [16.3.0] - 2025-01-13
@@ -50,6 +67,12 @@
   Explorer, as GTE no longer reads files in this format.
 
 
+## [16.2.2] - unreleased
+
+### Fixed
+- `Game.copy_tree` and `Game.move_tree` implementations reversed the roles of the
+  `src` and `dest` nodes (#499)
+
 ## [16.2.1] - 2025-01-06
 
 ### Fixed
@@ -59,7 +82,6 @@
   an infinite loop (#457)
 - Attempting to call the default constructor on Game objects (rather than one of the factory
   functions) now raises a more informative exception (#463)
-
 
 ## [16.2.0] - 2024-04-05
 

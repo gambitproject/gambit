@@ -23,6 +23,7 @@
 #ifndef GAMBIT_GAMES_BEHAVPURE_H
 #define GAMBIT_GAMES_BEHAVPURE_H
 
+#include "game.h"
 #include "behavspt.h"
 
 namespace Gambit {
@@ -41,6 +42,8 @@ public:
   /// Construct a new behavior profile on the specified game
   explicit PureBehaviorProfile(const Game &);
   //@}
+
+  Game GetGame() const { return m_efg; }
 
   bool operator==(const PureBehaviorProfile &p_other) const
   {
@@ -61,9 +64,6 @@ public:
   template <class T> T GetPayoff(const GameNode &, const GamePlayer &) const;
   /// Get the payoff to playing the action, conditional on the profile
   template <class T> T GetPayoff(const GameAction &) const;
-
-  /// Is the profile a pure strategy agent Nash equilibrium?
-  bool IsAgentNash() const;
 
   /// Convert to a mixed behavior representation
   MixedBehaviorProfile<Rational> ToMixedBehaviorProfile() const;

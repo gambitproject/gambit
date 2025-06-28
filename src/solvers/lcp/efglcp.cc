@@ -21,13 +21,35 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include <iostream>
 #include "gambit.h"
 #include "solvers/linalg/lemketab.h"
 #include "solvers/lcp/lcp.h"
 
-namespace Gambit {
-namespace Nash {
+namespace Gambit::Nash {
+
+template <class T> class NashLcpBehaviorSolver {
+public:
+  NashLcpBehaviorSolver(int p_stopAfter, int p_maxDepth,
+                        BehaviorCallbackType<T> p_onEquilibrium = NullBehaviorCallback<T>)
+    : m_onEquilibrium(p_onEquilibrium), m_stopAfter(p_stopAfter), m_maxDepth(p_maxDepth)
+  {
+  }
+  ~NashLcpBehaviorSolver() = default;
+
+  List<MixedBehaviorProfile<T>> Solve(const Game &) const;
+
+private:
+  BehaviorCallbackType<T> m_onEquilibrium;
+  int m_stopAfter, m_maxDepth;
+
+  class Solution;
+
+  void FillTableau(Matrix<T> &, const GameNode &, T, int, int, Solution &) const;
+  void AllLemke(const Game &, int dup, linalg::LemkeTableau<T> &B, int depth, Matrix<T> &,
+                Solution &) const;
+  void GetProfile(const linalg::LemkeTableau<T> &tab, MixedBehaviorProfile<T> &, const Vector<T> &,
+                  const GameNode &n, int, int, Solution &) const;
+};
 
 template <class T> class NashLcpBehaviorSolver<T>::Solution {
 public:
@@ -48,14 +70,15 @@ public:
 template <class T>
 NashLcpBehaviorSolver<T>::Solution::Solution(const Game &p_game)
   : ns1(p_game->GetPlayer(1)->NumSequences()), ns2(p_game->GetPlayer(2)->NumSequences()),
-    ni1(p_game->GetPlayer(1)->NumInfosets() + 1), ni2(p_game->GetPlayer(2)->NumInfosets() + 1),
+    ni1(p_game->GetPlayer(1)->GetInfosets().size() + 1),
+    ni2(p_game->GetPlayer(2)->GetInfosets().size() + 1),
     maxpay(p_game->GetMaxPayoff() + Rational(1))
 {
   for (const auto &player : p_game->GetPlayers()) {
     int offset = 1;
     for (const auto &infoset : player->GetInfosets()) {
       infosetOffset[infoset] = offset;
-      offset += infoset->NumActions();
+      offset += infoset->GetActions().size();
     }
   }
 }
@@ -97,10 +120,10 @@ List<MixedBehaviorProfile<T>> NashLcpBehaviorSolver<T>::Solve(const Game &p_game
         "Computing equilibria of games with imperfect recall is not supported.");
   }
 
-  linalg::BFS<T> cbfs;
+  const linalg::BFS<T> cbfs;
   Solution solution(p_game);
 
-  int ntot = solution.ns1 + solution.ns2 + solution.ni1 + solution.ni2;
+  const int ntot = solution.ns1 + solution.ns2 + solution.ni1 + solution.ni2;
   Matrix<T> A(1, ntot, 0, ntot);
   A = static_cast<T>(0);
   FillTableau(A, p_game->GetRoot(), static_cast<T>(1), 1, 1, solution);
@@ -139,7 +162,7 @@ List<MixedBehaviorProfile<T>> NashLcpBehaviorSolver<T>::Solve(const Game &p_game
       GetProfile(tab, profile, sol, p_game->GetRoot(), 1, 1, solution);
       profile.UndefinedToCentroid();
       solution.m_equilibria.push_back(profile);
-      this->m_onEquilibrium->Render(profile);
+      this->m_onEquilibrium(profile, "NE");
     }
   }
   catch (std::runtime_error &e) {
@@ -194,7 +217,7 @@ void NashLcpBehaviorSolver<T>::AllLemke(const Game &p_game, int j, linalg::Lemke
       GetProfile(BCopy, profile, sol, p_game->GetRoot(), 1, 1, p_solution);
       profile.UndefinedToCentroid();
       if (newsol) {
-        this->m_onEquilibrium->Render(profile);
+        m_onEquilibrium(profile, "NE");
         p_solution.m_equilibria.push_back(profile);
         if (m_stopAfter > 0 && p_solution.EquilibriumCount() >= m_stopAfter) {
           throw EquilibriumLimitReached();
@@ -217,21 +240,21 @@ template <class T>
 void NashLcpBehaviorSolver<T>::FillTableau(Matrix<T> &A, const GameNode &n, T prob, int s1, int s2,
                                            Solution &p_solution) const
 {
-  int ns1 = p_solution.ns1;
-  int ns2 = p_solution.ns2;
-  int ni1 = p_solution.ni1;
+  const int ns1 = p_solution.ns1;
+  const int ns2 = p_solution.ns2;
+  const int ni1 = p_solution.ni1;
 
-  GameOutcome outcome = n->GetOutcome();
+  const GameOutcome outcome = n->GetOutcome();
   if (outcome) {
-    A(s1, ns1 + s2) +=
-        Rational(prob) * (static_cast<Rational>(outcome->GetPayoff(1)) - p_solution.maxpay);
-    A(ns1 + s2, s1) +=
-        Rational(prob) * (static_cast<Rational>(outcome->GetPayoff(2)) - p_solution.maxpay);
+    A(s1, ns1 + s2) += Rational(prob) * (outcome->GetPayoff<Rational>(n->GetGame()->GetPlayer(1)) -
+                                         p_solution.maxpay);
+    A(ns1 + s2, s1) += Rational(prob) * (outcome->GetPayoff<Rational>(n->GetGame()->GetPlayer(2)) -
+                                         p_solution.maxpay);
   }
   if (n->IsTerminal()) {
     return;
   }
-  GameInfoset infoset = n->GetInfoset();
+  const GameInfoset infoset = n->GetInfoset();
   if (n->GetPlayer()->IsChance()) {
     for (const auto &action : infoset->GetActions()) {
       FillTableau(A, n->GetChild(action),
@@ -240,7 +263,7 @@ void NashLcpBehaviorSolver<T>::FillTableau(Matrix<T> &A, const GameNode &n, T pr
     }
   }
   else if (n->GetPlayer()->GetNumber() == 1) {
-    int infoset_idx = ns1 + ns2 + infoset->GetNumber() + 1;
+    const int infoset_idx = ns1 + ns2 + infoset->GetNumber() + 1;
     A(s1, infoset_idx) = static_cast<T>(-1);
     A(infoset_idx, s1) = static_cast<T>(1);
     int snew = p_solution.infosetOffset.at(infoset);
@@ -252,7 +275,7 @@ void NashLcpBehaviorSolver<T>::FillTableau(Matrix<T> &A, const GameNode &n, T pr
     }
   }
   else {
-    int infoset_idx = ns1 + ns2 + ni1 + n->GetInfoset()->GetNumber() + 1;
+    const int infoset_idx = ns1 + ns2 + ni1 + n->GetInfoset()->GetNumber() + 1;
     A(ns1 + s2, infoset_idx) = static_cast<T>(-1);
     A(infoset_idx, ns1 + s2) = static_cast<T>(1);
     int snew = p_solution.infosetOffset.at(n->GetInfoset());
@@ -271,7 +294,7 @@ void NashLcpBehaviorSolver<T>::GetProfile(const linalg::LemkeTableau<T> &tab,
                                           const GameNode &n, int s1, int s2,
                                           Solution &p_solution) const
 {
-  int ns1 = p_solution.ns1;
+  const int ns1 = p_solution.ns1;
 
   if (n->IsTerminal()) {
     return;
@@ -287,9 +310,9 @@ void NashLcpBehaviorSolver<T>::GetProfile(const linalg::LemkeTableau<T> &tab,
       snew++;
       v[action] = static_cast<T>(0);
       if (tab.Member(s1)) {
-        int ind = tab.Find(s1);
+        const int ind = tab.Find(s1);
         if (sol[ind] > p_solution.eps && tab.Member(snew)) {
-          int ind2 = tab.Find(snew);
+          const int ind2 = tab.Find(snew);
           if (sol[ind2] > p_solution.eps) {
             v[action] = sol[ind2] / sol[ind];
           }
@@ -304,9 +327,9 @@ void NashLcpBehaviorSolver<T>::GetProfile(const linalg::LemkeTableau<T> &tab,
       snew++;
       v[action] = static_cast<T>(0);
       if (tab.Member(ns1 + s2)) {
-        int ind = tab.Find(ns1 + s2);
+        const int ind = tab.Find(ns1 + s2);
         if (sol[ind] > p_solution.eps && tab.Member(ns1 + snew)) {
-          int ind2 = tab.Find(ns1 + snew);
+          const int ind2 = tab.Find(ns1 + snew);
           if (sol[ind2] > p_solution.eps) {
             v[action] = sol[ind2] / sol[ind];
           }
@@ -317,8 +340,16 @@ void NashLcpBehaviorSolver<T>::GetProfile(const linalg::LemkeTableau<T> &tab,
   }
 }
 
-template class NashLcpBehaviorSolver<double>;
-template class NashLcpBehaviorSolver<Rational>;
+template <class T>
+List<MixedBehaviorProfile<T>> LcpBehaviorSolve(const Game &p_game, int p_stopAfter, int p_maxDepth,
+                                               BehaviorCallbackType<T> p_onEquilibrium)
+{
+  return NashLcpBehaviorSolver<T>(p_stopAfter, p_maxDepth, p_onEquilibrium).Solve(p_game);
+}
 
-} // namespace Nash
-} // end namespace Gambit
+template List<MixedBehaviorProfile<double>> LcpBehaviorSolve(const Game &, int, int,
+                                                             BehaviorCallbackType<double>);
+template List<MixedBehaviorProfile<Rational>> LcpBehaviorSolve(const Game &, int, int,
+                                                               BehaviorCallbackType<Rational>);
+
+} // end namespace Gambit::Nash

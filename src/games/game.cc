@@ -21,18 +21,16 @@
 //
 
 #include <iostream>
-#include <algorithm>
 #include <numeric>
 #include <random>
 
 #include "gambit.h"
 #include "writer.h"
 
-// The references to the table and tree representations violate the logic
+// The references to the tree representations violate the logic
 // of separating implementation types.  This will be fixed when we move
 // editing operations into the game itself instead of in the member-object
 // classes.
-#include "gametable.h"
 #include "gametree.h"
 
 namespace Gambit {
@@ -41,9 +39,11 @@ namespace Gambit {
 //                       class GameOutcomeRep
 //========================================================================
 
-GameOutcomeRep::GameOutcomeRep(GameRep *p_game, int p_number)
-  : m_game(p_game), m_number(p_number), m_payoffs(m_game->NumPlayers())
+GameOutcomeRep::GameOutcomeRep(GameRep *p_game, int p_number) : m_game(p_game), m_number(p_number)
 {
+  for (const auto &player : m_game->m_players) {
+    m_payoffs[player] = Number();
+  }
 }
 
 //========================================================================
@@ -55,27 +55,12 @@ GameAction GameStrategyRep::GetAction(const GameInfoset &p_infoset) const
   if (p_infoset->GetPlayer() != m_player) {
     throw MismatchException();
   }
-  int action = m_behav[p_infoset->GetNumber()];
-  return (action) ? p_infoset->GetActions()[action] : nullptr;
-}
-
-void GameStrategyRep::DeleteStrategy()
-{
-  if (m_player->GetGame()->IsTree()) {
-    throw UndefinedException();
+  try {
+    return *std::next(p_infoset->GetActions().cbegin(), m_behav.at(p_infoset) - 1);
   }
-  if (m_player->NumStrategies() == 1) {
-    return;
+  catch (std::out_of_range &) {
+    return nullptr;
   }
-
-  m_player->GetGame()->IncrementVersion();
-  m_player->m_strategies.erase(
-      std::find(m_player->m_strategies.begin(), m_player->m_strategies.end(), this));
-  for (int st = 1; st <= m_player->m_strategies.size(); st++) {
-    m_player->m_strategies[st]->m_number = st;
-  }
-  // m_player->m_game->RebuildTable();
-  this->Invalidate();
 }
 
 //========================================================================
@@ -83,11 +68,10 @@ void GameStrategyRep::DeleteStrategy()
 //========================================================================
 
 GamePlayerRep::GamePlayerRep(GameRep *p_game, int p_id, int p_strats)
-  : m_game(p_game), m_number(p_id), m_strategies(p_strats)
+  : m_game(p_game), m_number(p_id)
 {
   for (int j = 1; j <= p_strats; j++) {
-    m_strategies[j] = new GameStrategyRep(this);
-    m_strategies[j]->m_number = j;
+    m_strategies.push_back(new GameStrategyRep(this, j, ""));
   }
 }
 
@@ -101,175 +85,97 @@ GamePlayerRep::~GamePlayerRep()
   }
 }
 
-Array<GameStrategy> GamePlayerRep::GetStrategies() const
+void GamePlayerRep::MakeStrategy(const std::map<GameInfosetRep *, int> &behav)
 {
-  m_game->BuildComputedValues();
-  Array<GameStrategy> ret(m_strategies.size());
-  std::transform(m_strategies.cbegin(), m_strategies.cend(), ret.begin(),
-                 [](GameStrategyRep *s) -> GameStrategy { return s; });
-  return ret;
-}
-
-GameStrategy GamePlayerRep::NewStrategy()
-{
-  if (m_game->IsTree()) {
-    throw UndefinedException();
+  auto *strategy = new GameStrategyRep(this, m_strategies.size() + 1, "");
+  strategy->m_behav = behav;
+  for (const auto &infoset : m_infosets) {
+    strategy->m_label +=
+        (contains(strategy->m_behav, infoset)) ? std::to_string(strategy->m_behav[infoset]) : "*";
   }
-
-  m_game->IncrementVersion();
-  auto *strategy = new GameStrategyRep(this);
-  m_strategies.push_back(strategy);
-  strategy->m_number = m_strategies.size();
-  strategy->m_offset = -1; // this flags this action as new
-  dynamic_cast<GameTableRep *>(m_game)->RebuildTable();
-  return strategy;
-}
-
-void GamePlayerRep::MakeStrategy()
-{
-  Array<int> c(NumInfosets());
-
-  for (int i = 1; i <= NumInfosets(); i++) {
-    if (m_infosets[i]->flag == 1) {
-      c[i] = m_infosets[i]->whichbranch;
-    }
-    else {
-      c[i] = 0;
-    }
-  }
-
-  auto *strategy = new GameStrategyRep(this);
-  m_strategies.push_back(strategy);
-  strategy->m_number = m_strategies.size();
-  strategy->m_behav = c;
-  strategy->m_label = "";
-
-  // We generate a default labeling -- probably should be changed in future
-  if (!strategy->m_behav.empty()) {
-    for (int iset = 1; iset <= strategy->m_behav.size(); iset++) {
-      if (strategy->m_behav[iset] > 0) {
-        strategy->m_label += lexical_cast<std::string>(strategy->m_behav[iset]);
-      }
-      else {
-        strategy->m_label += "*";
-      }
-    }
-  }
-  else {
+  if (strategy->m_label.empty()) {
     strategy->m_label = "*";
   }
+  m_strategies.push_back(strategy);
 }
 
-void GamePlayerRep::MakeReducedStrats(GameTreeNodeRep *n, GameTreeNodeRep *nn)
+void GamePlayerRep::MakeReducedStrats(GameNodeRep *n, GameNodeRep *nn,
+                                      std::map<GameInfosetRep *, int> &behav,
+                                      std::map<GameNodeRep *, GameNodeRep *> &ptr,
+                                      std::map<GameNodeRep *, GameNodeRep *> &whichbranch)
 {
-  int i;
-  GameTreeNodeRep *m, *mm;
-
-  if (!n->GetParent()) {
-    n->ptr = nullptr;
-  }
-
-  if (n->NumChildren() > 0) {
-    if (n->infoset->m_player == this) {
-      if (n->infoset->flag == 0) {
+  if (!n->IsTerminal()) {
+    if (n->m_infoset->m_player == this) {
+      if (!contains(behav, n->m_infoset)) {
         // we haven't visited this infoset before
-        n->infoset->flag = 1;
-        for (i = 1; i <= n->NumChildren(); i++) {
-          GameTreeNodeRep *m = n->children[i];
-          n->whichbranch = m;
-          n->infoset->whichbranch = i;
-          MakeReducedStrats(m, nn);
+        for (size_t i = 1; i <= n->m_children.size(); i++) {
+          GameNodeRep *m = n->m_children[i - 1];
+          whichbranch[n] = m;
+          behav[n->m_infoset] = i;
+          MakeReducedStrats(m, nn, behav, ptr, whichbranch);
         }
-        n->infoset->flag = 0;
+        behav.erase(n->m_infoset);
       }
       else {
         // we have visited this infoset, take same action
-        MakeReducedStrats(n->children[n->infoset->whichbranch], nn);
+        MakeReducedStrats(n->m_children[behav[n->m_infoset] - 1], nn, behav, ptr, whichbranch);
       }
     }
     else {
-      n->ptr = nullptr;
       if (nn != nullptr) {
-        n->ptr = nn->m_parent;
+        ptr[n] = nn->m_parent;
       }
-      n->whichbranch = n->children[1];
-      if (n->infoset) {
-        n->infoset->whichbranch = 0;
+      else {
+        ptr.erase(n);
       }
-      MakeReducedStrats(n->children[1], n->children[1]);
+      whichbranch[n] = n->m_children.front();
+      MakeReducedStrats(n->m_children.front(), n->m_children.front(), behav, ptr, whichbranch);
     }
   }
   else if (nn) {
-    for (;; nn = nn->m_parent->ptr->whichbranch) {
-      if (!nn->GetNextSibling()) {
-        m = nullptr;
-      }
-      else {
-        m = dynamic_cast<GameTreeNodeRep *>(nn->GetNextSibling().operator->());
-      }
-      if (m || nn->m_parent->ptr == nullptr) {
+    GameNodeRep *m;
+    for (;; nn = whichbranch.at(ptr.at(nn->m_parent))) {
+      m = nn->GetNextSibling();
+      if (m || !contains(ptr, nn->m_parent)) {
         break;
       }
     }
     if (m) {
-      mm = m->m_parent->whichbranch;
-      m->m_parent->whichbranch = m;
-      MakeReducedStrats(m, m);
-      m->m_parent->whichbranch = mm;
+      GameNodeRep *mm = whichbranch.at(m->m_parent);
+      whichbranch[m->m_parent] = m;
+      MakeReducedStrats(m, m, behav, ptr, whichbranch);
+      whichbranch[m->m_parent] = mm;
     }
     else {
-      MakeStrategy();
+      MakeStrategy(behav);
     }
   }
   else {
-    MakeStrategy();
+    MakeStrategy(behav);
   }
 }
 
-GameInfoset GamePlayerRep::GetInfoset(int p_index) const { return m_infosets[p_index]; }
-
-Array<GameInfoset> GamePlayerRep::GetInfosets() const
-{
-  Array<GameInfoset> ret(m_infosets.size());
-  std::transform(m_infosets.cbegin(), m_infosets.cend(), ret.begin(),
-                 [](GameTreeInfosetRep *s) -> GameInfoset { return s; });
-  return ret;
-}
-
-int GamePlayerRep::NumSequences() const
+size_t GamePlayerRep::NumSequences() const
 {
   if (!m_game->IsTree()) {
     throw UndefinedException();
   }
-  return std::accumulate(
-      m_infosets.cbegin(), m_infosets.cend(), 1,
-      [](int ct, GameTreeInfosetRep *s) -> int { return ct + s->m_actions.size(); });
+  return std::transform_reduce(m_infosets.cbegin(), m_infosets.cend(), 1, std::plus<>(),
+                               [](const GameInfosetRep *s) { return s->m_actions.size(); });
 }
 
 //========================================================================
 //                            class GameRep
 //========================================================================
 
-Array<GamePlayer> GameRep::GetPlayers() const
+GameRep::~GameRep()
 {
-  Array<GamePlayer> ret(NumPlayers());
-  for (int pl = 1; pl <= NumPlayers(); pl++) {
-    ret[pl] = GetPlayer(pl);
+  for (auto player : m_players) {
+    player->Invalidate();
   }
-  return ret;
-}
-
-Array<GameStrategy> GameRep::GetStrategies() const
-{
-  Array<GameStrategy> ret(MixedProfileLength());
-  auto output = ret.begin();
-  for (auto player : GetPlayers()) {
-    for (auto strategy : player->GetStrategies()) {
-      *output = strategy;
-      ++output;
-    }
+  for (auto outcome : m_outcomes) {
+    outcome->Invalidate();
   }
-  return ret;
 }
 
 //------------------------------------------------------------------------
@@ -352,11 +258,11 @@ template <class T> MixedStrategyProfileRep<T> *MixedStrategyProfileRep<T>::Norma
 {
   auto norm = Copy();
   for (auto player : m_support.GetGame()->GetPlayers()) {
-    T sum = (T)0;
+    T sum = static_cast<T>(0);
     for (auto strategy : m_support.GetStrategies(player)) {
       sum += (*this)[strategy];
     }
-    if (sum == (T)0) {
+    if (sum == static_cast<T>(0)) {
       continue;
     }
     for (auto strategy : m_support.GetStrategies(player)) {
@@ -368,7 +274,7 @@ template <class T> MixedStrategyProfileRep<T> *MixedStrategyProfileRep<T>::Norma
 
 template <class T> T MixedStrategyProfileRep<T>::GetRegret(const GameStrategy &p_strategy) const
 {
-  GamePlayer player = p_strategy->GetPlayer();
+  const GamePlayer player = p_strategy->GetPlayer();
   T payoff = GetPayoffDeriv(player->GetNumber(), p_strategy);
   T brpayoff = payoff;
   for (auto strategy : player->GetStrategies()) {
@@ -407,30 +313,18 @@ template <class T>
 MixedStrategyProfile<T>::MixedStrategyProfile(const MixedBehaviorProfile<T> &p_profile)
   : m_rep(new TreeMixedStrategyProfileRep<T>(p_profile))
 {
-  Game game = p_profile.GetGame();
-  auto *efg = dynamic_cast<GameTreeRep *>(game.operator->());
-  for (int pl = 1; pl <= m_rep->m_support.GetGame()->NumPlayers(); pl++) {
-    GamePlayer player = m_rep->m_support.GetGame()->GetPlayer(pl);
-    for (int st = 1; st <= player->NumStrategies(); st++) {
-      T prob = (T)1;
-
-      for (int iset = 1; iset <= efg->GetPlayer(pl)->NumInfosets(); iset++) {
-        if (efg->m_players[pl]->m_strategies[st]->m_behav[iset] > 0) {
-          GameInfoset infoset = player->GetInfoset(iset);
-          prob *=
-              p_profile[infoset->GetAction(efg->m_players[pl]->m_strategies[st]->m_behav[iset])];
+  auto *efg = dynamic_cast<GameTreeRep *>(p_profile.GetGame().operator->());
+  for (const auto &player : efg->m_players) {
+    for (const auto &strategy : player->m_strategies) {
+      auto prob = static_cast<T>(1);
+      for (const auto &infoset : player->m_infosets) {
+        if (strategy->m_behav[infoset] > 0) {
+          prob *= p_profile[infoset->GetAction(strategy->m_behav[infoset])];
         }
       }
-      (*this)[m_rep->m_support.GetGame()->GetPlayer(pl)->GetStrategy(st)] = prob;
+      (*m_rep)[strategy] = prob;
     }
   }
-}
-
-template <class T>
-MixedStrategyProfile<T>::MixedStrategyProfile(const MixedStrategyProfile<T> &p_profile)
-  : m_rep(p_profile.m_rep->Copy())
-{
-  InvalidateCache();
 }
 
 template <class T>
@@ -439,13 +333,10 @@ MixedStrategyProfile<T>::operator=(const MixedStrategyProfile<T> &p_profile)
 {
   if (this != &p_profile) {
     InvalidateCache();
-    delete m_rep;
-    m_rep = p_profile.m_rep->Copy();
+    m_rep.reset(p_profile.m_rep->Copy());
   }
   return *this;
 }
-
-template <class T> MixedStrategyProfile<T>::~MixedStrategyProfile() { delete m_rep; }
 
 //========================================================================
 //             MixedStrategyProfile<T>: General data access
@@ -456,10 +347,8 @@ template <class T> Vector<T> MixedStrategyProfile<T>::operator[](const GamePlaye
   CheckVersion();
   auto strategies = m_rep->m_support.GetStrategies(p_player);
   Vector<T> probs(strategies.size());
-  int st = 1;
-  for (auto strategy : strategies) {
-    probs[st] = (*this)[strategy];
-  }
+  std::transform(strategies.begin(), strategies.end(), probs.begin(),
+                 [this](const GameStrategy &s) { return (*m_rep)[s]; });
   return probs;
 }
 
@@ -468,9 +357,10 @@ template <class T> MixedStrategyProfile<T> MixedStrategyProfile<T>::ToFullSuppor
   CheckVersion();
   MixedStrategyProfile<T> full(m_rep->m_support.GetGame()->NewMixedStrategyProfile(T(0)));
 
-  for (auto player : m_rep->m_support.GetGame()->GetPlayers()) {
-    for (auto strategy : player->GetStrategies()) {
-      full[strategy] = (m_rep->m_support.Contains(strategy)) ? (*this)[strategy] : T(0);
+  for (const auto &player : m_rep->m_support.GetGame()->GetPlayers()) {
+    for (const auto &strategy : player->GetStrategies()) {
+      full[strategy] =
+          (m_rep->m_support.Contains(strategy)) ? (*m_rep)[strategy] : static_cast<T>(0);
     }
   }
   return full;
@@ -479,6 +369,7 @@ template <class T> MixedStrategyProfile<T> MixedStrategyProfile<T>::ToFullSuppor
 //========================================================================
 //    MixedStrategyProfile<T>: Computation of interesting quantities
 //========================================================================
+
 template <class T> void MixedStrategyProfile<T>::ComputePayoffs() const
 {
   if (!map_profile_payoffs.empty()) {
@@ -486,10 +377,10 @@ template <class T> void MixedStrategyProfile<T>::ComputePayoffs() const
     // so don't compute anything, simply return
     return;
   }
-  for (auto player : m_rep->m_support.GetPlayers()) {
+  for (const auto &player : m_rep->m_support.GetPlayers()) {
     map_profile_payoffs[player] = GetPayoff(player);
     // values of the player's strategies
-    for (auto strategy : m_rep->m_support.GetStrategies(player)) {
+    for (const auto &strategy : m_rep->m_support.GetStrategies(player)) {
       map_strategy_payoffs[player][strategy] = GetPayoff(strategy);
     }
   }
@@ -500,13 +391,10 @@ template <class T> T MixedStrategyProfile<T>::GetLiapValue() const
   CheckVersion();
   ComputePayoffs();
 
-  T liapValue = T(0);
-  for (auto player : m_rep->m_support.GetPlayers()) {
+  auto liapValue = static_cast<T>(0);
+  for (auto [player, payoff] : map_profile_payoffs) {
     for (auto v : map_strategy_payoffs[player]) {
-      T regret = v.second - map_profile_payoffs[player];
-      if (regret > T(0)) {
-        liapValue += regret * regret; // penalty if not best response
-      }
+      liapValue += sqr(std::max(v.second - payoff, static_cast<T>(0)));
     }
   }
   return liapValue;

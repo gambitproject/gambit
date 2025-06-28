@@ -20,39 +20,23 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef LP_EFGLP_H
-#define LP_EFGLP_H
+#ifndef LP_LP_H
+#define LP_LP_H
 
 #include "games/nash.h"
 
-using namespace Gambit;
-using namespace Gambit::Nash;
+namespace Gambit::Nash {
 
-template <class T> class NashLpBehavSolver : public BehavSolver<T> {
-public:
-  explicit NashLpBehavSolver(std::shared_ptr<StrategyProfileRenderer<T>> p_onEquilibrium = nullptr)
-    : BehavSolver<T>(p_onEquilibrium)
-  {
-  }
-  ~NashLpBehavSolver() override = default;
+template <class T>
+List<MixedStrategyProfile<T>>
+LpStrategySolve(const Game &p_game,
+                StrategyCallbackType<T> p_onEquilibrium = NullStrategyCallback<T>);
 
-  List<MixedBehaviorProfile<T>> Solve(const Game &) const override;
+template <class T>
+List<MixedBehaviorProfile<T>>
+LpBehaviorSolve(const Game &p_game,
+                BehaviorCallbackType<T> p_onEquilibrium = NullBehaviorCallback<T>);
 
-private:
-  class GameData;
+}; // namespace Gambit::Nash
 
-  virtual bool SolveLP(const Matrix<T> &, const Vector<T> &, const Vector<T> &, int, Array<T> &,
-                       Array<T> &) const;
-};
-
-inline List<MixedBehaviorProfile<double>> LpBehaviorSolveDouble(const Game &p_game)
-{
-  return NashLpBehavSolver<double>().Solve(p_game);
-}
-
-inline List<MixedBehaviorProfile<Rational>> LpBehaviorSolveRational(const Game &p_game)
-{
-  return NashLpBehavSolver<Rational>().Solve(p_game);
-}
-
-#endif // LP_EFGLP_H
+#endif // LP_LP_H

@@ -52,7 +52,7 @@ public:
 gbtActionSheet::gbtActionSheet(wxWindow *p_parent, const Gambit::GameInfoset &p_infoset)
   : wxSheet(p_parent, wxID_ANY), m_infoset(p_infoset)
 {
-  CreateGrid(p_infoset->NumActions(), (p_infoset->IsChanceInfoset()) ? 2 : 1);
+  CreateGrid(p_infoset->GetActions().size(), (p_infoset->IsChanceInfoset()) ? 2 : 1);
   SetRowLabelWidth(40);
   SetColLabelHeight(25);
   SetColLabelValue(0, wxT("Label"));
@@ -60,12 +60,12 @@ gbtActionSheet::gbtActionSheet(wxWindow *p_parent, const Gambit::GameInfoset &p_
     SetColLabelValue(1, wxT("Probability"));
   }
 
-  for (int act = 1; act <= p_infoset->NumActions(); act++) {
-    SetCellValue(wxSheetCoords(act - 1, 0),
-                 wxString(p_infoset->GetAction(act)->GetLabel().c_str(), *wxConvCurrent));
+  for (const auto &action : p_infoset->GetActions()) {
+    SetCellValue(wxSheetCoords(action->GetNumber() - 1, 0),
+                 wxString(action->GetLabel().c_str(), *wxConvCurrent));
     if (p_infoset->IsChanceInfoset()) {
-      SetCellValue(wxSheetCoords(act - 1, 1),
-                   wxString(static_cast<std::string>(p_infoset->GetActionProb(act)).c_str(),
+      SetCellValue(wxSheetCoords(action->GetNumber() - 1, 1),
+                   wxString(static_cast<std::string>(p_infoset->GetActionProb(action)).c_str(),
                             *wxConvCurrent));
     }
   }
@@ -121,7 +121,7 @@ wxSheetCellAttr gbtActionSheet::GetAttr(const wxSheetCoords &p_coords, wxSheetAt
     return attr;
   }
   else if (IsCornerLabelCell(p_coords)) {
-    wxSheetCellAttr attr(GetSheetRefData()->m_defaultCornerLabelAttr);
+    const wxSheetCellAttr attr(GetSheetRefData()->m_defaultCornerLabelAttr);
     return attr;
   }
 
@@ -160,10 +160,10 @@ wxBEGIN_EVENT_TABLE(gbtEditMoveDialog,
   labelSizer->Add(m_infosetName, 1, wxALL | wxEXPAND, 5);
   topSizer->Add(labelSizer, 0, wxALL | wxEXPAND, 0);
 
-  topSizer->Add(
-      new wxStaticText(this, wxID_STATIC,
-                       wxString::Format(_("Number of members: %d"), p_infoset->NumMembers())),
-      0, wxALL | wxALIGN_CENTER, 5);
+  topSizer->Add(new wxStaticText(
+                    this, wxID_STATIC,
+                    wxString::Format(_("Number of members: %d"), p_infoset->GetMembers().size())),
+                0, wxALL | wxALIGN_CENTER, 5);
 
   auto *playerSizer = new wxBoxSizer(wxHORIZONTAL);
   playerSizer->Add(new wxStaticText(this, wxID_STATIC, _("Belongs to player")), 0,
@@ -174,10 +174,9 @@ wxBEGIN_EVENT_TABLE(gbtEditMoveDialog,
     m_player->SetSelection(0);
   }
   else {
-    for (int pl = 1; pl <= p_infoset->GetGame()->NumPlayers(); pl++) {
-      m_player->Append(
-          wxString::Format(_T("%d: "), pl) +
-          wxString(p_infoset->GetGame()->GetPlayer(pl)->GetLabel().c_str(), *wxConvCurrent));
+    for (const auto &player : p_infoset->GetGame()->GetPlayers()) {
+      m_player->Append(wxString::Format(_T("%d: "), player->GetNumber()) +
+                       wxString(player->GetLabel().c_str(), *wxConvCurrent));
     }
     m_player->SetSelection(p_infoset->GetPlayer()->GetNumber() - 1);
   }
@@ -210,17 +209,16 @@ void gbtEditMoveDialog::OnOK(wxCommandEvent &p_event)
     p_event.Skip();
     return;
   }
-  Array<Number> probs = m_actionSheet->GetActionProbs();
-  Rational sum(0);
-  for (int act = 1; act <= m_infoset->NumActions(); act++) {
-    auto prob = static_cast<Rational>(probs[act]);
-    if (prob < Gambit::Rational(0)) {
-      wxMessageBox("Action probabilities must be nonnegative numbers.", "Error");
-      return;
-    }
-    sum += prob;
+  auto probs = m_actionSheet->GetActionProbs();
+  if (std::any_of(probs.begin(), probs.end(),
+                  [](const Number &p) { return static_cast<Rational>(p) < Rational(0); })) {
+    wxMessageBox("Action probabilities must be non-negative numbers.", "Error");
+    return;
   }
-  if (sum == Gambit::Rational(1)) {
+  if (std::accumulate(probs.begin(), probs.end(), Rational(0),
+                      [](const Rational &s, const Number &p) {
+                        return s + static_cast<Rational>(p);
+                      }) != Rational(1)) {
     p_event.Skip();
   }
   else {

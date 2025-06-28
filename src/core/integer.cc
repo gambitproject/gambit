@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/integer.cc
+// FILE: src/core/integer.cc
 // Implementation of an arbitrary-length integer class
 //
 // The original copyright and license are included below.
@@ -35,14 +35,14 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 #include <iostream>
-
-#include "integer.h"
 #include <cctype>
 #include <cfloat>
 #include <climits>
 #include <cmath>
 #include <cstring>
-#include "gambit.h"
+
+#include "integer.h"
+#include "util.h"
 
 namespace Gambit {
 
@@ -79,14 +79,14 @@ long lg(unsigned long x)
 
 /* All routines assume SHORT_PER_LONG > 1 */
 #define SHORT_PER_LONG ((unsigned)(((sizeof(long) + sizeof(short) - 1) / sizeof(short))))
-#define CHAR_PER_LONG ((unsigned)sizeof(long))
+// #define CHAR_PER_LONG ((unsigned)sizeof(long))
 
 /*
   minimum and maximum sizes for an IntegerRep
 */
 
 #define MIN_INTREP_SIZE 16
-#define MAX_INTREP_SIZE I_MAXNUM
+// #define MAX_INTREP_SIZE I_MAXNUM
 
 #ifndef MALLOC_MIN_OVERHEAD
 #define MALLOC_MIN_OVERHEAD 4
@@ -176,7 +176,7 @@ static inline void nonnil(const IntegerRep *rep)
 
 static IntegerRep *Inew(int newlen)
 {
-  unsigned int siz = sizeof(IntegerRep) + newlen * sizeof(short) + MALLOC_MIN_OVERHEAD;
+  const unsigned int siz = sizeof(IntegerRep) + newlen * sizeof(short) + MALLOC_MIN_OVERHEAD;
   unsigned int allocsiz = MIN_INTREP_SIZE;
   while (allocsiz < siz) {
     allocsiz <<= 1; // find a power of 2
@@ -287,7 +287,7 @@ IntegerRep *Icopy(IntegerRep *old, const IntegerRep *src)
     rep->sgn = I_POSITIVE;
   }
   else {
-    int newlen = src->len;
+    const int newlen = src->len;
     if (old == nullptr || newlen > old->sz) {
       if (old != nullptr && !STATIC_IntegerRep(old)) {
         delete old;
@@ -311,7 +311,7 @@ IntegerRep *Icopy(IntegerRep *old, const IntegerRep *src)
 
 IntegerRep *Icopy_long(IntegerRep *old, long x)
 {
-  int newsgn = (x >= 0);
+  const int newsgn = (x >= 0);
   IntegerRep *rep = Icopy_ulong(old, newsgn ? x : -x);
   rep->sgn = newsgn;
   return rep;
@@ -427,7 +427,7 @@ long Itolong(const IntegerRep *rep)
 
 int Iislong(const IntegerRep *rep)
 {
-  unsigned int l = rep->len;
+  const unsigned int l = rep->len;
   if (l < SHORT_PER_LONG) {
     return 1;
   }
@@ -455,7 +455,7 @@ int Iislong(const IntegerRep *rep)
 double Itodouble(const IntegerRep *rep)
 {
   double d = 0.0;
-  double bound = DBL_MAX / 2.0;
+  const double bound = DBL_MAX / 2.0;
   for (int i = rep->len - 1; i >= 0; --i) {
     auto a = (unsigned short)(I_RADIX >> 1);
     while (a != 0) {
@@ -484,7 +484,7 @@ double Itodouble(const IntegerRep *rep)
 int Iisdouble(const IntegerRep *rep)
 {
   double d = 0.0;
-  double bound = DBL_MAX / 2.0;
+  const double bound = DBL_MAX / 2.0;
   for (int i = rep->len - 1; i >= 0; --i) {
     auto a = (unsigned short)(I_RADIX >> 1);
     while (a != 0) {
@@ -507,7 +507,7 @@ double ratio(const Integer &num, const Integer &den)
 {
   Integer q, r;
   divide(num, den, q, r);
-  double d1 = q.as_double();
+  const double d1 = q.as_double();
 
   if (d1 >= DBL_MAX || d1 <= -DBL_MAX || sign(r) == 0) {
     return d1;
@@ -581,8 +581,8 @@ int ucompare(const IntegerRep *x, const IntegerRep *y)
 
 int compare(const IntegerRep *x, long y)
 {
-  int xl = x->len;
-  int xsgn = x->sgn;
+  const int xl = x->len;
+  const int xsgn = x->sgn;
   if (y == 0) {
     if (xl == 0) {
       return 0;
@@ -595,7 +595,7 @@ int compare(const IntegerRep *x, long y)
     }
   }
   else {
-    int ysgn = y >= 0;
+    const int ysgn = y >= 0;
     unsigned long uy = (ysgn) ? y : -y;
     int diff = xsgn - ysgn;
     if (diff == 0) {
@@ -622,7 +622,7 @@ int compare(const IntegerRep *x, long y)
 
 int ucompare(const IntegerRep *x, long y)
 {
-  int xl = x->len;
+  const int xl = x->len;
   if (y == 0) {
     return xl;
   }
@@ -652,14 +652,14 @@ IntegerRep *add(const IntegerRep *x, int negatex, const IntegerRep *y, int negat
   nonnil(x);
   nonnil(y);
 
-  int xl = x->len;
-  int yl = y->len;
+  const int xl = x->len;
+  const int yl = y->len;
 
-  int xsgn = (negatex && xl != 0) ? !x->sgn : x->sgn;
-  int ysgn = (negatey && yl != 0) ? !y->sgn : y->sgn;
+  const int xsgn = (negatex && xl != 0) ? !x->sgn : x->sgn;
+  const int ysgn = (negatey && yl != 0) ? !y->sgn : y->sgn;
 
-  int xrsame = x == r;
-  int yrsame = y == r;
+  const int xrsame = x == r;
+  const int yrsame = y == r;
 
   if (yl == 0) {
     r = Ialloc(r, x->s, xl, xsgn, xl);
@@ -713,7 +713,7 @@ IntegerRep *add(const IntegerRep *x, int negatex, const IntegerRep *y, int negat
     }
   }
   else {
-    int comp = ucompare(x, y);
+    const int comp = ucompare(x, y);
     if (comp == 0) {
       r = Icopy_zero(r);
     }
@@ -768,11 +768,11 @@ IntegerRep *add(const IntegerRep *x, int negatex, const IntegerRep *y, int negat
 IntegerRep *add(const IntegerRep *x, int negatex, long y, IntegerRep *r)
 {
   nonnil(x);
-  int xl = x->len;
-  int xsgn = (negatex && xl != 0) ? !x->sgn : x->sgn;
-  int xrsame = x == r;
+  const int xl = x->len;
+  const int xsgn = (negatex && xl != 0) ? !x->sgn : x->sgn;
+  const int xrsame = x == r;
 
-  int ysgn = (y >= 0);
+  const int ysgn = (y >= 0);
   unsigned long uy = (ysgn) ? y : -y;
 
   if (y == 0) {
@@ -794,7 +794,7 @@ IntegerRep *add(const IntegerRep *x, int negatex, long y, IntegerRep *r)
     const unsigned short *topa = &(as[xl]);
     unsigned long sum = 0;
     while (as < topa && uy != 0) {
-      unsigned long u = extract(uy);
+      const unsigned long u = extract(uy);
       uy = down(uy);
       sum += (unsigned long)(*as++) + u;
       *rs++ = extract(sum);
@@ -880,13 +880,13 @@ IntegerRep *multiply(const IntegerRep *x, const IntegerRep *y, IntegerRep *r)
 {
   nonnil(x);
   nonnil(y);
-  int xl = x->len;
-  int yl = y->len;
-  int rl = xl + yl;
-  int rsgn = x->sgn == y->sgn;
-  int xrsame = x == r;
-  int yrsame = y == r;
-  int xysame = x == y;
+  const int xl = x->len;
+  const int yl = y->len;
+  const int rl = xl + yl;
+  const int rsgn = x->sgn == y->sgn;
+  const int xrsame = x == r;
+  const int yrsame = y == r;
+  const int xysame = x == y;
 
   if (xl == 0 || yl == 0) {
     r = Icopy_zero(r);
@@ -1026,7 +1026,7 @@ IntegerRep *multiply(const IntegerRep *x, const IntegerRep *y, IntegerRep *r)
 IntegerRep *multiply(const IntegerRep *x, long y, IntegerRep *r)
 {
   nonnil(x);
-  int xl = x->len;
+  const int xl = x->len;
 
   if (xl == 0 || y == 0) {
     r = Icopy_zero(r);
@@ -1035,8 +1035,8 @@ IntegerRep *multiply(const IntegerRep *x, long y, IntegerRep *r)
     r = Icopy(r, x);
   }
   else {
-    int ysgn = y >= 0;
-    int rsgn = x->sgn == ysgn;
+    const int ysgn = y >= 0;
+    const int rsgn = x->sgn == ysgn;
     unsigned long uy = (ysgn) ? y : -y;
     unsigned short tmp[SHORT_PER_LONG];
     int yl = 0;
@@ -1045,8 +1045,8 @@ IntegerRep *multiply(const IntegerRep *x, long y, IntegerRep *r)
       uy = down(uy);
     }
 
-    int rl = xl + yl;
-    int xrsame = x == r;
+    const int rl = xl + yl;
+    const int xrsame = x == r;
     if (xrsame) {
       r = Iresize(r, rl);
     }
@@ -1115,8 +1115,8 @@ static void do_divide(unsigned short *rs, const unsigned short *ys, int yl, unsi
                       int ql)
 {
   const unsigned short *topy = &(ys[yl]);
-  unsigned short d1 = ys[yl - 1];
-  unsigned short d2 = ys[yl - 2];
+  const unsigned short d1 = ys[yl - 1];
+  const unsigned short d2 = ys[yl - 2];
 
   int l = ql - 1;
   int i = l + yl;
@@ -1127,7 +1127,7 @@ static void do_divide(unsigned short *rs, const unsigned short *ys, int yl, unsi
       qhat = (unsigned short)I_MAXNUM;
     }
     else {
-      unsigned long lr = up((unsigned long)rs[i]) | rs[i - 1];
+      const unsigned long lr = up((unsigned long)rs[i]) | rs[i - 1];
       qhat = (unsigned short)(lr / d1);
     }
 
@@ -1197,11 +1197,11 @@ static int unscale(const unsigned short *x, int xl, unsigned short y, unsigned s
     unsigned long rem = 0;
     while (qs >= botq) {
       rem = up(rem) | *xs--;
-      unsigned long u = rem / y;
+      const unsigned long u = rem / y;
       *qs-- = extract(u);
       rem -= u * y;
     }
-    int r = extract(rem);
+    const int r = extract(rem);
     return r;
   }
   else // same loop, a bit faster if just need rem
@@ -1211,10 +1211,10 @@ static int unscale(const unsigned short *x, int xl, unsigned short y, unsigned s
     unsigned long rem = 0;
     while (xs >= botx) {
       rem = up(rem) | *xs--;
-      unsigned long u = rem / y;
+      const unsigned long u = rem / y;
       rem -= u * y;
     }
-    int r = extract(rem);
+    const int r = extract(rem);
     return r;
   }
 }
@@ -1223,17 +1223,17 @@ IntegerRep *div(const IntegerRep *x, const IntegerRep *y, IntegerRep *q)
 {
   nonnil(x);
   nonnil(y);
-  int xl = x->len;
-  int yl = y->len;
+  const int xl = x->len;
+  const int yl = y->len;
   if (yl == 0) {
     throw Gambit::ZeroDivideException();
   }
 
-  int comp = ucompare(x, y);
-  int xsgn = x->sgn;
-  int ysgn = y->sgn;
+  const int comp = ucompare(x, y);
+  const int xsgn = x->sgn;
+  const int ysgn = y->sgn;
 
-  int samesign = xsgn == ysgn;
+  const int samesign = xsgn == ysgn;
 
   if (comp < 0) {
     q = Icopy_zero(q);
@@ -1259,7 +1259,7 @@ IntegerRep *div(const IntegerRep *x, const IntegerRep *y, IntegerRep *q)
       scpy(x->s, r->s, xl);
     }
 
-    int ql = xl - yl + 1;
+    const int ql = xl - yl + 1;
 
     q = Icalloc(q, ql);
     do_divide(r->s, yy->s, yl, q->s, ql);
@@ -1279,14 +1279,14 @@ IntegerRep *div(const IntegerRep *x, const IntegerRep *y, IntegerRep *q)
 IntegerRep *div(const IntegerRep *x, long y, IntegerRep *q)
 {
   nonnil(x);
-  int xl = x->len;
+  const int xl = x->len;
   if (y == 0) {
     throw Gambit::ZeroDivideException();
   }
 
   unsigned short ys[SHORT_PER_LONG];
   unsigned long u;
-  int ysgn = y >= 0;
+  const int ysgn = y >= 0;
   if (ysgn) {
     u = y;
   }
@@ -1304,8 +1304,8 @@ IntegerRep *div(const IntegerRep *x, long y, IntegerRep *q)
     comp = docmp(x->s, ys, xl);
   }
 
-  int xsgn = x->sgn;
-  int samesign = xsgn == ysgn;
+  const int xsgn = x->sgn;
+  const int samesign = xsgn == ysgn;
 
   if (comp < 0) {
     q = Icopy_zero(q);
@@ -1332,7 +1332,7 @@ IntegerRep *div(const IntegerRep *x, long y, IntegerRep *q)
       scpy(x->s, r->s, xl);
     }
 
-    int ql = xl - yl + 1;
+    const int ql = xl - yl + 1;
 
     q = Icalloc(q, ql);
     do_divide(r->s, ys, yl, q->s, ql);
@@ -1351,13 +1351,13 @@ void divide(const Integer &Ix, long y, Integer &Iq, long &rem)
   const IntegerRep *x = Ix.rep;
   nonnil(x);
   IntegerRep *q = Iq.rep;
-  int xl = x->len;
+  const int xl = x->len;
   if (y == 0) {
     throw Gambit::ZeroDivideException();
   }
   unsigned short ys[SHORT_PER_LONG];
   unsigned long u;
-  int ysgn = y >= 0;
+  const int ysgn = y >= 0;
   if (ysgn) {
     u = y;
   }
@@ -1375,8 +1375,8 @@ void divide(const Integer &Ix, long y, Integer &Iq, long &rem)
     comp = docmp(x->s, ys, xl);
   }
 
-  int xsgn = x->sgn;
-  int samesign = xsgn == ysgn;
+  const int xsgn = x->sgn;
+  const int samesign = xsgn == ysgn;
 
   if (comp < 0) {
     rem = Itolong(x);
@@ -1405,7 +1405,7 @@ void divide(const Integer &Ix, long y, Integer &Iq, long &rem)
       scpy(x->s, r->s, xl);
     }
 
-    int ql = xl - yl + 1;
+    const int ql = xl - yl + 1;
 
     q = Icalloc(q, ql);
 
@@ -1439,16 +1439,16 @@ void divide(const Integer &Ix, const Integer &Iy, Integer &Iq, Integer &Ir)
   IntegerRep *q = Iq.rep;
   IntegerRep *r = Ir.rep;
 
-  int xl = x->len;
-  int yl = y->len;
+  const int xl = x->len;
+  const int yl = y->len;
   if (yl == 0) {
     throw Gambit::ZeroDivideException();
   }
-  int comp = ucompare(x, y);
-  int xsgn = x->sgn;
-  int ysgn = y->sgn;
+  const int comp = ucompare(x, y);
+  const int xsgn = x->sgn;
+  const int ysgn = y->sgn;
 
-  int samesign = xsgn == ysgn;
+  const int samesign = xsgn == ysgn;
 
   if (comp < 0) {
     q = Icopy_zero(q);
@@ -1460,7 +1460,7 @@ void divide(const Integer &Ix, const Integer &Iy, Integer &Iq, Integer &Ir)
   }
   else if (yl == 1) {
     q = Icopy(q, x);
-    int rem = unscale(q->s, q->len, y->s[0], q->s);
+    const int rem = unscale(q->s, q->len, y->s[0], q->s);
     r = Icopy_long(r, rem);
     if (rem != 0) {
       r->sgn = xsgn;
@@ -1479,7 +1479,7 @@ void divide(const Integer &Ix, const Integer &Iy, Integer &Iq, Integer &Ir)
       scpy(x->s, r->s, xl);
     }
 
-    int ql = xl - yl + 1;
+    const int ql = xl - yl + 1;
 
     q = Icalloc(q, ql);
     do_divide(r->s, yy->s, yl, q->s, ql);
@@ -1503,15 +1503,15 @@ IntegerRep *mod(const IntegerRep *x, const IntegerRep *y, IntegerRep *r)
 {
   nonnil(x);
   nonnil(y);
-  int xl = x->len;
-  int yl = y->len;
+  const int xl = x->len;
+  const int yl = y->len;
   // if (yl == 0) (*lib_error_handler)("Integer", "attempted division by zero");
   if (yl == 0) {
     throw Gambit::ZeroDivideException();
   }
 
-  int comp = ucompare(x, y);
-  int xsgn = x->sgn;
+  const int comp = ucompare(x, y);
+  const int xsgn = x->sgn;
 
   if (comp < 0) {
     r = Icopy(r, x);
@@ -1520,7 +1520,7 @@ IntegerRep *mod(const IntegerRep *x, const IntegerRep *y, IntegerRep *r)
     r = Icopy_zero(r);
   }
   else if (yl == 1) {
-    int rem = unscale(x->s, xl, y->s[0], nullptr);
+    const int rem = unscale(x->s, xl, y->s[0], nullptr);
     r = Icopy_long(r, rem);
     if (rem != 0) {
       r->sgn = xsgn;
@@ -1557,13 +1557,13 @@ IntegerRep *mod(const IntegerRep *x, const IntegerRep *y, IntegerRep *r)
 IntegerRep *mod(const IntegerRep *x, long y, IntegerRep *r)
 {
   nonnil(x);
-  int xl = x->len;
+  const int xl = x->len;
   if (y == 0) {
     throw Gambit::ZeroDivideException();
   }
   unsigned short ys[SHORT_PER_LONG];
   unsigned long u;
-  int ysgn = y >= 0;
+  const int ysgn = y >= 0;
   if (ysgn) {
     u = y;
   }
@@ -1581,7 +1581,7 @@ IntegerRep *mod(const IntegerRep *x, long y, IntegerRep *r)
     comp = docmp(x->s, ys, xl);
   }
 
-  int xsgn = x->sgn;
+  const int xsgn = x->sgn;
 
   if (comp < 0) {
     r = Icopy(r, x);
@@ -1590,7 +1590,7 @@ IntegerRep *mod(const IntegerRep *x, long y, IntegerRep *r)
     r = Icopy_zero(r);
   }
   else if (yl == 1) {
-    int rem = unscale(x->s, xl, ys[0], nullptr);
+    const int rem = unscale(x->s, xl, ys[0], nullptr);
     r = Icopy_long(r, rem);
     if (rem != 0) {
       r->sgn = xsgn;
@@ -1624,21 +1624,21 @@ IntegerRep *mod(const IntegerRep *x, long y, IntegerRep *r)
 IntegerRep *lshift(const IntegerRep *x, long y, IntegerRep *r)
 {
   nonnil(x);
-  int xl = x->len;
+  const int xl = x->len;
   if (xl == 0 || y == 0) {
     r = Icopy(r, x);
     return r;
   }
 
-  int xrsame = x == r;
-  int rsgn = x->sgn;
+  const int xrsame = x == r;
+  const int rsgn = x->sgn;
 
-  long ay = (y < 0) ? -y : y;
-  int bw = (int)(ay / I_SHIFT);
-  int sw = (int)(ay % I_SHIFT);
+  const long ay = (y < 0) ? -y : y;
+  const int bw = (int)(ay / I_SHIFT);
+  const int sw = (int)(ay % I_SHIFT);
 
   if (y > 0) {
-    int rl = bw + xl + 1;
+    const int rl = bw + xl + 1;
     if (xrsame) {
       r = Iresize(r, rl);
     }
@@ -1661,7 +1661,7 @@ IntegerRep *lshift(const IntegerRep *x, long y, IntegerRep *r)
     }
   }
   else {
-    int rl = xl - bw;
+    const int rl = xl - bw;
     if (rl < 0) {
       r = Icopy_zero(r);
     }
@@ -1672,7 +1672,7 @@ IntegerRep *lshift(const IntegerRep *x, long y, IntegerRep *r)
       else {
         r = Icalloc(r, rl);
       }
-      int rw = I_SHIFT - sw;
+      const int rw = I_SHIFT - sw;
       unsigned short *rs = r->s;
       unsigned short *topr = &(rs[rl]);
       const unsigned short *botx = (xrsame) ? rs : x->s;
@@ -1712,11 +1712,11 @@ IntegerRep *bitop(const IntegerRep *x, const IntegerRep *y, IntegerRep *r, char 
 {
   nonnil(x);
   nonnil(y);
-  int xl = x->len;
-  int yl = y->len;
-  int xsgn = x->sgn;
-  int xrsame = x == r;
-  int yrsame = y == r;
+  const int xl = x->len;
+  const int yl = y->len;
+  const int xsgn = x->sgn;
+  const int xrsame = x == r;
+  const int yrsame = y == r;
   if (xrsame || yrsame) {
     r = Iresize(r, calc_len(xl, yl, 0));
   }
@@ -1775,7 +1775,7 @@ IntegerRep *bitop(const IntegerRep *x, long y, IntegerRep *r, char op)
   nonnil(x);
   unsigned short tmp[SHORT_PER_LONG];
   unsigned long u;
-  int newsgn = (y >= 0);
+  const int newsgn = (y >= 0);
   if (newsgn) {
     u = y;
   }
@@ -1789,10 +1789,10 @@ IntegerRep *bitop(const IntegerRep *x, long y, IntegerRep *r, char op)
     u = down(u);
   }
 
-  int xl = x->len;
-  int yl = l;
-  int xsgn = x->sgn;
-  int xrsame = x == r;
+  const int xl = x->len;
+  const int yl = l;
+  const int xsgn = x->sgn;
+  const int xrsame = x == r;
   if (xrsame) {
     r = Iresize(r, calc_len(xl, yl, 0));
   }
@@ -1853,7 +1853,7 @@ IntegerRep *Compl(const IntegerRep *src, IntegerRep *r)
   unsigned short *s = r->s;
   unsigned short *top = &(s[r->len - 1]);
   while (s < top) {
-    unsigned short cmp = ~(*s);
+    const unsigned short cmp = ~(*s);
     *s++ = cmp;
   }
   unsigned short a = *s;
@@ -1873,9 +1873,9 @@ IntegerRep *Compl(const IntegerRep *src, IntegerRep *r)
 void(setbit)(Integer &x, long b)
 {
   if (b >= 0) {
-    int bw = (int)((unsigned long)b / I_SHIFT);
-    int sw = (int)((unsigned long)b % I_SHIFT);
-    int xl = x.rep ? x.rep->len : 0;
+    const int bw = (int)((unsigned long)b / I_SHIFT);
+    const int sw = (int)((unsigned long)b % I_SHIFT);
+    const int xl = x.rep ? x.rep->len : 0;
     if (xl <= bw) {
       x.rep = Iresize(x.rep, calc_len(xl, bw + 1, 0));
     }
@@ -1891,8 +1891,8 @@ void clearbit(Integer &x, long b)
       x.rep = &ZeroRep;
     }
     else {
-      int bw = (int)((unsigned long)b / I_SHIFT);
-      int sw = (int)((unsigned long)b % I_SHIFT);
+      const int bw = (int)((unsigned long)b / I_SHIFT);
+      const int sw = (int)((unsigned long)b % I_SHIFT);
       if (x.rep->len > bw) {
         x.rep->s[bw] &= ~(1 << sw);
       }
@@ -1904,8 +1904,8 @@ void clearbit(Integer &x, long b)
 int testbit(const Integer &x, long b)
 {
   if (x.rep != nullptr && b >= 0) {
-    int bw = (int)((unsigned long)b / I_SHIFT);
-    int sw = (int)((unsigned long)b % I_SHIFT);
+    const int bw = (int)((unsigned long)b / I_SHIFT);
+    const int sw = (int)((unsigned long)b % I_SHIFT);
     return (bw < x.rep->len && (x.rep->s[bw] & (1 << sw)) != 0);
   }
   else {
@@ -1920,8 +1920,8 @@ IntegerRep *gcd(const IntegerRep *x, const IntegerRep *y)
 {
   nonnil(x);
   nonnil(y);
-  int ul = x->len;
-  int vl = y->len;
+  const int ul = x->len;
+  const int vl = y->len;
 
   if (vl == 0) {
     return Ialloc(nullptr, x->s, ul, I_POSITIVE, ul);
@@ -1936,7 +1936,7 @@ IntegerRep *gcd(const IntegerRep *x, const IntegerRep *y)
   // find shift so that both not even
 
   long k = 0;
-  int l = (ul <= vl) ? ul : vl;
+  const int l = (ul <= vl) ? ul : vl;
   int cont = 1, i;
   for (i = 0; i < l && cont; ++i) {
     unsigned long a = (i < ul) ? u->s[i] : 0;
@@ -1970,7 +1970,7 @@ IntegerRep *gcd(const IntegerRep *x, const IntegerRep *y)
   while (t->len != 0) {
     long s = 0; // shift t until odd
     cont = 1;
-    int tl = t->len;
+    const int tl = t->len;
     for (i = 0; i < tl && cont; ++i) {
       unsigned long a = t->s[i];
       for (unsigned int j = 0; j < I_SHIFT; ++j) {
@@ -2013,7 +2013,7 @@ IntegerRep *gcd(const IntegerRep *x, const IntegerRep *y)
 long lg(const IntegerRep *x)
 {
   nonnil(x);
-  int xl = x->len;
+  const int xl = x->len;
   if (xl == 0) {
     return 0;
   }
@@ -2039,7 +2039,7 @@ IntegerRep *power(const IntegerRep *x, long y, IntegerRep *r)
     sgn = I_NEGATIVE;
   }
 
-  int xl = x->len;
+  const int xl = x->len;
 
   if (y == 0 || (xl == 1 && x->s[0] == 1)) {
     r = Icopy_one(r, sgn);
@@ -2051,7 +2051,7 @@ IntegerRep *power(const IntegerRep *x, long y, IntegerRep *r)
     r = Icopy(r, x);
   }
   else {
-    int maxsize = (int)(((lg(x) + 1) * y) / I_SHIFT + 2); // pre-allocate space
+    const int maxsize = (int)(((lg(x) + 1) * y) / I_SHIFT + 2); // pre-allocate space
     IntegerRep *b = Ialloc(nullptr, x->s, xl, I_POSITIVE, maxsize);
     b->len = xl;
     r = Icalloc(r, maxsize);
@@ -2103,7 +2103,7 @@ IntegerRep *negate(const IntegerRep *src, IntegerRep *dest)
 Integer sqrt(const Integer &x)
 {
   Integer r;
-  int s = sign(x);
+  const int s = sign(x);
   if (s < 0) {
     x.error("Attempted square root of negative Integer");
   }
@@ -2181,7 +2181,7 @@ Integer lcm(const Integer &x, const Integer &y)
 
 IntegerRep *atoIntegerRep(const char *s, int base)
 {
-  int sl = strlen(s);
+  const int sl = strlen(s);
   IntegerRep *r = Icalloc(nullptr, (int)(sl * (lg(base) + 1) / I_SHIFT + 1));
   if (s != nullptr) {
     char sgn;
@@ -2359,7 +2359,7 @@ std::istream &operator>>(std::istream &s, Integer &y)
     }
     else {
       if (ch >= '0' && ch <= '9') {
-        long digit = ch - '0';
+        const long digit = ch - '0';
         y *= 10;
         y += digit;
       }
@@ -2380,8 +2380,8 @@ std::istream &operator>>(std::istream &s, Integer &y)
 int Integer::OK() const
 {
   if (rep != nullptr) {
-    int l = rep->len;
-    int s = rep->sgn;
+    const int l = rep->len;
+    const int s = rep->sgn;
     int v = l <= rep->sz || STATIC_IntegerRep(rep); // length within bounds
     v &= s == 0 || s == 1;                          // legal sign
     Icheck(rep);                                    // and correctly adjusted

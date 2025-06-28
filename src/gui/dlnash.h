@@ -37,7 +37,7 @@ private:
 public:
   gbtNashChoiceDialog(wxWindow *, gbtGameDocument *);
 
-  gbtAnalysisOutput *GetCommand() const;
+  std::shared_ptr<gbtAnalysisOutput> GetCommand() const;
 
   bool UseStrategic() const;
 };

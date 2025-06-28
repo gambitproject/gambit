@@ -2,8 +2,8 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/liblinear/btableau.cc
-// Instantiation of base tableau classes
+// FILE: src/core/core.h
+// Core (game theory-independent) declarations and utilities for Gambit
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,20 +20,15 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include "gambit.h"
-#include "core/matrix.imp"
-#include "btableau.imp"
+#ifndef GAMBIT_CORE_CORE_H
+#define GAMBIT_CORE_CORE_H
 
-namespace Gambit {
+#include "util.h"
+#include "array.h"
+#include "list.h"
+#include "recarray.h"
+#include "vector.h"
+#include "matrix.h"
+#include "rational.h"
 
-namespace linalg {
-
-template class BaseTableau<double>;
-template class BaseTableau<Rational>;
-
-template class TableauInterface<double>;
-template class TableauInterface<Rational>;
-
-} // namespace linalg
-
-} // end namespace Gambit
+#endif // GAMBIT_CORE_CORE_H

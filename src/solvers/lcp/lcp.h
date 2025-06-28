@@ -25,83 +25,18 @@
 
 #include "games/nash.h"
 
-namespace Gambit {
+namespace Gambit::Nash {
 
-namespace linalg {
-template <class T> class LHTableau;
-template <class T> class LemkeTableau;
-} // namespace linalg
+template <class T>
+List<MixedStrategyProfile<T>>
+LcpStrategySolve(const Game &p_game, int p_stopAfter, int p_maxDepth,
+                 StrategyCallbackType<T> p_onEquilibrium = NullStrategyCallback<T>);
 
-namespace Nash {
+template <class T>
+List<MixedBehaviorProfile<T>>
+LcpBehaviorSolve(const Game &p_game, int p_stopAfter, int p_maxDepth,
+                 BehaviorCallbackType<T> p_onEquilibrium = NullBehaviorCallback<T>);
 
-template <class T> class NashLcpStrategySolver : public StrategySolver<T> {
-public:
-  NashLcpStrategySolver(int p_stopAfter, int p_maxDepth,
-                        std::shared_ptr<StrategyProfileRenderer<T>> p_onEquilibrium = nullptr)
-    : StrategySolver<T>(p_onEquilibrium), m_stopAfter(p_stopAfter), m_maxDepth(p_maxDepth)
-  {
-  }
-  ~NashLcpStrategySolver() override = default;
-
-  List<MixedStrategyProfile<T>> Solve(const Game &) const override;
-
-private:
-  int m_stopAfter, m_maxDepth;
-
-  class Solution;
-
-  bool OnBFS(const Game &, linalg::LHTableau<T> &, Solution &) const;
-  void AllLemke(const Game &, int j, linalg::LHTableau<T> &, Solution &, int) const;
-};
-
-inline List<MixedStrategyProfile<double>> LcpStrategySolveDouble(const Game &p_game,
-                                                                 int p_stopAfter, int p_maxDepth)
-{
-  return NashLcpStrategySolver<double>(p_stopAfter, p_maxDepth).Solve(p_game);
-}
-
-inline List<MixedStrategyProfile<Rational>>
-LcpStrategySolveRational(const Game &p_game, int p_stopAfter, int p_maxDepth)
-{
-  return NashLcpStrategySolver<Rational>(p_stopAfter, p_maxDepth).Solve(p_game);
-}
-
-template <class T> class NashLcpBehaviorSolver : public BehavSolver<T> {
-public:
-  NashLcpBehaviorSolver(int p_stopAfter, int p_maxDepth,
-                        std::shared_ptr<StrategyProfileRenderer<T>> p_onEquilibrium = nullptr)
-    : BehavSolver<T>(p_onEquilibrium), m_stopAfter(p_stopAfter), m_maxDepth(p_maxDepth)
-  {
-  }
-  ~NashLcpBehaviorSolver() override = default;
-
-  List<MixedBehaviorProfile<T>> Solve(const Game &) const override;
-
-private:
-  int m_stopAfter, m_maxDepth;
-
-  class Solution;
-
-  void FillTableau(Matrix<T> &, const GameNode &, T, int, int, Solution &) const;
-  void AllLemke(const Game &, int dup, linalg::LemkeTableau<T> &B, int depth, Matrix<T> &,
-                Solution &) const;
-  void GetProfile(const linalg::LemkeTableau<T> &tab, MixedBehaviorProfile<T> &, const Vector<T> &,
-                  const GameNode &n, int, int, Solution &) const;
-};
-
-inline List<MixedBehaviorProfile<double>> LcpBehaviorSolveDouble(const Game &p_game,
-                                                                 int p_stopAfter, int p_maxDepth)
-{
-  return NashLcpBehaviorSolver<double>(p_stopAfter, p_maxDepth).Solve(p_game);
-}
-
-inline List<MixedBehaviorProfile<Rational>>
-LcpBehaviorSolveRational(const Game &p_game, int p_stopAfter, int p_maxDepth)
-{
-  return NashLcpBehaviorSolver<Rational>(p_stopAfter, p_maxDepth).Solve(p_game);
-}
-
-} // end namespace Nash
-} // end namespace Gambit
+} // end namespace Gambit::Nash
 
 #endif // GAMBIT_NASH_LCP_H

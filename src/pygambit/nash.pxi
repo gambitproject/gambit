@@ -68,51 +68,51 @@ def _enumpure_agent_solve(game: Game) -> typing.List[MixedBehaviorProfileRationa
 
 
 def _enummixed_strategy_solve_double(game: Game) -> typing.List[MixedStrategyProfileDouble]:
-    return _convert_mspd(EnumMixedStrategySolveDouble(game.game))
+    return _convert_mspd(EnumMixedStrategySolve[double](game.game))
 
 
 def _enummixed_strategy_solve_rational(game: Game) -> typing.List[MixedStrategyProfileRational]:
-    return _convert_mspr(EnumMixedStrategySolveRational(game.game))
+    return _convert_mspr(EnumMixedStrategySolve[c_Rational](game.game))
 
 
 def _lcp_behavior_solve_double(
         game: Game, stop_after: int, max_depth: int
 ) -> typing.List[MixedBehaviorProfileDouble]:
-    return _convert_mbpd(LcpBehaviorSolveDouble(game.game, stop_after, max_depth))
+    return _convert_mbpd(LcpBehaviorSolve[double](game.game, stop_after, max_depth))
 
 
 def _lcp_behavior_solve_rational(
         game: Game, stop_after: int, max_depth: int
 ) -> typing.List[MixedBehaviorProfileRational]:
-    return _convert_mbpr(LcpBehaviorSolveRational(game.game, stop_after, max_depth))
+    return _convert_mbpr(LcpBehaviorSolve[c_Rational](game.game, stop_after, max_depth))
 
 
 def _lcp_strategy_solve_double(
         game: Game, stop_after: int, max_depth: int
 ) -> typing.List[MixedStrategyProfileDouble]:
-    return _convert_mspd(LcpStrategySolveDouble(game.game, stop_after, max_depth))
+    return _convert_mspd(LcpStrategySolve[double](game.game, stop_after, max_depth))
 
 
 def _lcp_strategy_solve_rational(
         game: Game, stop_after: int, max_depth: int
 ) -> typing.List[MixedStrategyProfileRational]:
-    return _convert_mspr(LcpStrategySolveRational(game.game, stop_after, max_depth))
+    return _convert_mspr(LcpStrategySolve[c_Rational](game.game, stop_after, max_depth))
 
 
 def _lp_behavior_solve_double(game: Game) -> typing.List[MixedBehaviorProfileDouble]:
-    return _convert_mbpd(LpBehaviorSolveDouble(game.game))
+    return _convert_mbpd(LpBehaviorSolve[double](game.game))
 
 
 def _lp_behavior_solve_rational(game: Game) -> typing.List[MixedBehaviorProfileRational]:
-    return _convert_mbpr(LpBehaviorSolveRational(game.game))
+    return _convert_mbpr(LpBehaviorSolve[c_Rational](game.game))
 
 
 def _lp_strategy_solve_double(game: Game) -> typing.List[MixedStrategyProfileDouble]:
-    return _convert_mspd(LpStrategySolveDouble(game.game))
+    return _convert_mspd(LpStrategySolve[double](game.game))
 
 
 def _lp_strategy_solve_rational(game: Game) -> typing.List[MixedStrategyProfileRational]:
-    return _convert_mspr(LpStrategySolveRational(game.game))
+    return _convert_mspr(LpStrategySolve[c_Rational](game.game))
 
 
 def _liap_strategy_solve(start: MixedStrategyProfileDouble,

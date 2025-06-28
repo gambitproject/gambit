@@ -181,8 +181,7 @@
 #include <cstdio>
 #include "gambit.h"
 
-namespace Gambit {
-namespace Nash {
+namespace Gambit::Nash {
 
 const int MAXM = 700;  // max. no of left nodes for incidence matrix
 const int MAXN = MAXM; // max. no of right nodes for incidence matrix
@@ -265,7 +264,6 @@ private:
   void workonco(int numco, Array<int> &firstedge, Array<Edge> &edgelist);
 };
 
-} // namespace Nash
-} // end namespace Gambit
+} // end namespace Gambit::Nash
 
 #endif // GAMBIT_ENUMMIXED_CLIQUE_H

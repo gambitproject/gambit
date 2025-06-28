@@ -22,13 +22,9 @@
 
 #include "lemketab.imp"
 
-namespace Gambit {
-
-namespace linalg {
+namespace Gambit::linalg {
 
 template class LemkeTableau<double>;
 template class LemkeTableau<Rational>;
 
-} // namespace linalg
-
-} // end namespace Gambit
+} // end namespace Gambit::linalg

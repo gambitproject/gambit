@@ -27,15 +27,16 @@
 
 using namespace Gambit::gametracer;
 
-namespace Gambit {
-namespace Nash {
+namespace Gambit::Nash {
 
 List<MixedStrategyProfile<double>> IPAStrategySolve(const Game &p_game,
-                                                    StrategyCallbackType p_callback)
+                                                    StrategyCallbackType<double> p_callback)
 {
   MixedStrategyProfile<double> pert = p_game->NewMixedStrategyProfile(0.0);
-  for (auto strategy : p_game->GetStrategies()) {
-    pert[strategy] = 0.0;
+  for (const auto &player : p_game->GetPlayers()) {
+    for (const auto &strategy : player->GetStrategies()) {
+      pert[strategy] = 0.0;
+    }
   }
   for (auto player : p_game->GetPlayers()) {
     pert[player->GetStrategies().front()] = 1.0;
@@ -44,15 +45,15 @@ List<MixedStrategyProfile<double>> IPAStrategySolve(const Game &p_game,
 }
 
 List<MixedStrategyProfile<double>> IPAStrategySolve(const MixedStrategyProfile<double> &p_pert,
-                                                    StrategyCallbackType p_callback)
+                                                    StrategyCallbackType<double> p_callback)
 {
   if (!p_pert.GetGame()->IsPerfectRecall()) {
     throw UndefinedException(
         "Computing equilibria of games with imperfect recall is not supported.");
   }
 
-  std::shared_ptr<gnmgame> A = BuildGame(p_pert.GetGame(), false);
-  cvector g(ToPerturbation(p_pert));
+  const std::shared_ptr<gnmgame> A = BuildGame(p_pert.GetGame(), false);
+  const cvector g(ToPerturbation(p_pert));
   cvector ans(A->getNumActions());
   cvector zh(A->getNumActions(), 1.0);
   while (true) {
@@ -69,5 +70,4 @@ List<MixedStrategyProfile<double>> IPAStrategySolve(const MixedStrategyProfile<d
   return solutions;
 }
 
-} // namespace Nash
-} // namespace Gambit
+} // namespace Gambit::Nash

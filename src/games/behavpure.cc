@@ -49,7 +49,7 @@ T PureBehaviorProfile::GetPayoff(const GameNode &p_node, const GamePlayer &p_pla
   T payoff(0);
 
   if (p_node->GetOutcome()) {
-    payoff += static_cast<T>(p_node->GetOutcome()->GetPayoff(p_player));
+    payoff += p_node->GetOutcome()->GetPayoff<T>(p_player);
   }
 
   if (!p_node->IsTerminal()) {
@@ -81,21 +81,6 @@ template <class T> T PureBehaviorProfile::GetPayoff(const GameAction &p_action) 
 // Explicit instantiations
 template double PureBehaviorProfile::GetPayoff(const GameAction &) const;
 template Rational PureBehaviorProfile::GetPayoff(const GameAction &) const;
-
-bool PureBehaviorProfile::IsAgentNash() const
-{
-  for (const auto &player : m_efg->GetPlayers()) {
-    auto current = GetPayoff<Rational>(player);
-    for (const auto &infoset : player->GetInfosets()) {
-      for (const auto &action : infoset->GetActions()) {
-        if (GetPayoff<Rational>(action) > current) {
-          return false;
-        }
-      }
-    }
-  }
-  return true;
-}
 
 MixedBehaviorProfile<Rational> PureBehaviorProfile::ToMixedBehaviorProfile() const
 {

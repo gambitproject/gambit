@@ -56,7 +56,7 @@ T PolynomialDerivatives<T>::MaximalNonconstantContribution(const Node &n, const 
     wrtos[i]++;
 
     T increment = Gambit::abs(child.data.Evaluate(p));
-    for (int j = 1; j <= p.size(); j++) {
+    for (size_t j = 1; j <= p.size(); j++) {
       for (int k = 1; k <= wrtos[j]; k++) {
         increment *= halvesoflengths[j];
         increment /= static_cast<T>(k);
@@ -84,9 +84,9 @@ template <class T> bool PolynomialDerivatives<T>::PolyHasNoRootsIn(const Rectang
   if (m_treeroot.data.IsMultiaffine()) {
     return MultiaffinePolyHasNoRootsIn(r);
   }
-  Vector<T> center = r.Center();
+  const Vector<T> center = r.Center();
   T constant = Gambit::abs(m_treeroot.data.Evaluate(center));
-  Vector<T> HalvesOfSideLengths = r.SideLengths() / 2;
+  const Vector<T> HalvesOfSideLengths = r.SideLengths() / 2;
   return MaximalNonconstantContribution(center, HalvesOfSideLengths) < constant;
 }
 
@@ -119,7 +119,7 @@ template <class T>
 bool PolynomialDerivatives<T>::MultiaffinePolyEverywhereNegativeIn(const Rectangle<T> &r) const
 {
   if (GetDimension() == 0) {
-    Vector<T> point(GetDimension());
+    const Vector<T> point(GetDimension());
     return m_treeroot.data.Evaluate(point) < static_cast<T>(0);
   }
 

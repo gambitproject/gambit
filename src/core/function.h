@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/function.h
+// FILE: src/core/function.h
 // Interface to function and function minimization routines
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,10 +20,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef LIBGAMBIT_FUNCTION_H
-#define LIBGAMBIT_FUNCTION_H
+#ifndef GAMBIT_CORE_FUNCTION_H
+#define GAMBIT_CORE_FUNCTION_H
 
-#include "core/vector.h"
+#include "vector.h"
 
 namespace Gambit {
 
@@ -106,4 +106,4 @@ private:
 
 } // end namespace Gambit
 
-#endif // LIBGAMBIT_FUNCTION_H
+#endif // GAMBIT_CORE_FUNCTION_H

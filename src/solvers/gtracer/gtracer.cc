@@ -26,22 +26,21 @@
 #include "gtracer.h"
 #include "gambit.h"
 
-namespace Gambit {
-namespace gametracer {
+namespace Gambit::gametracer {
 
 std::shared_ptr<gnmgame> BuildGame(const Game &p_game, bool p_scaled)
 {
   if (p_game->IsAgg()) {
     return std::shared_ptr<gnmgame>(new aggame(dynamic_cast<GameAGGRep &>(*p_game)));
   }
-  Rational maxPay = p_game->GetMaxPayoff();
-  Rational minPay = p_game->GetMinPayoff();
-  double scale = (p_scaled && maxPay > minPay) ? 1.0 / (maxPay - minPay) : 1.0;
+  const Rational maxPay = p_game->GetMaxPayoff();
+  const Rational minPay = p_game->GetMinPayoff();
+  const double scale = (p_scaled && maxPay > minPay) ? 1.0 / (maxPay - minPay) : 1.0;
 
   auto players = p_game->GetPlayers();
   std::vector<int> actions(players.size());
   std::transform(players.cbegin(), players.cend(), actions.begin(),
-                 [](const GamePlayer &p) { return p->NumStrategies(); });
+                 [](const GamePlayer &p) { return p->GetStrategies().size(); });
   std::shared_ptr<gnmgame> A(new nfgame(actions));
 
   std::vector<int> profile(players.size());
@@ -58,9 +57,14 @@ std::shared_ptr<gnmgame> BuildGame(const Game &p_game, bool p_scaled)
 
 cvector ToPerturbation(const MixedStrategyProfile<double> &p_pert)
 {
-  auto strategies = p_pert.GetGame()->GetStrategies();
-  cvector g(strategies.size());
-  std::transform(strategies.cbegin(), strategies.cend(), g.begin(),
+  std::vector<GameStrategy> all_strategies;
+  for (const auto &player : p_pert.GetGame()->GetPlayers()) {
+    for (const auto &strategy : player->GetStrategies()) {
+      all_strategies.push_back(strategy);
+    }
+  }
+  cvector g(all_strategies.size());
+  std::transform(all_strategies.cbegin(), all_strategies.cend(), g.begin(),
                  [p_pert](const GameStrategy &s) { return p_pert[s]; });
   for (auto player : p_pert.GetGame()->GetPlayers()) {
     bool is_tie = false;
@@ -89,12 +93,13 @@ MixedStrategyProfile<double> ToProfile(const Game &p_game, const cvector &p_prof
 {
   MixedStrategyProfile<double> msp = p_game->NewMixedStrategyProfile(0.0);
   auto value = p_profile.cbegin();
-  for (auto strategy : p_game->GetStrategies()) {
-    msp[strategy] = *value;
-    ++value;
+  for (const auto &player : p_game->GetPlayers()) {
+    for (const auto &strategy : player->GetStrategies()) {
+      msp[strategy] = *value;
+      ++value;
+    }
   }
   return msp;
 }
 
-} // namespace gametracer
-} // namespace Gambit
+} // namespace Gambit::gametracer
