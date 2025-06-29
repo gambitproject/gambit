@@ -789,31 +789,27 @@ def test_node_plays():
     assert set(test_node.plays) == expected_set_of_plays
 
 
-def test_nodes_iteration_matches_python_dfs():
+@pytest.mark.parametrize(
+    "game_obj",
+    [
+        pytest.param(games.read_from_file("basic_extensive_game.efg")),
+        pytest.param(games.read_from_file("binary_3_levels_generic_payoffs.efg")),
+        pytest.param(games.read_from_file("cent3.efg")),
+        pytest.param(games.read_from_file("e01.efg")),
+        pytest.param(games.read_from_file("e02.efg")),
+        pytest.param(games.read_from_file("poker.efg")),
+        pytest.param(gbt.Game.new_tree()),
+    ],
+)
+def test_nodes_iteration_order(game_obj: gbt.Game):
     """
-    Verify that game.nodes using the C++ iterator produces the same DFS traversal
-    as a pure Python recursive generator.
-    """
-    game = games.read_from_file("e01.efg")
-    game2 = games.read_from_file("basic_extensive_game.efg")
+    Verify that the C++ `game.nodes` iterator produces the DFS traversal.
 
+    """
     def dfs(node: gbt.Node) -> typing.Iterator[gbt.Node]:
         yield node
         for child in node.children:
             yield from dfs(child)
-
-    assert list(game.nodes) == list(dfs(game.root))
-    assert list(game2.nodes) == list(dfs(game2.root))
-
-
-def test_nodes_iteration_single_node_game():
-    """
-    Test that iteration works correctly on a game with only a root node.
-    """
-    game = gbt.Game.new_tree()
-    assert game.root.is_terminal
-
-    nodes = list(game.nodes)
-
-    assert len(nodes) == 1
-    assert nodes[0] == game.root
+    nodes_iter = list(game_obj.nodes)
+    expected_nodes = list(dfs(game_obj.root))
+    assert nodes_iter == expected_nodes

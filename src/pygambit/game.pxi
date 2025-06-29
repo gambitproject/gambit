@@ -193,18 +193,12 @@ class GameNodes:
         if not self.game.deref().IsTree():
             return
 
-        # Assign the C++ iterators to regular Python variables.
-        # Cython creates lightweight proxy objects automatically.
         it = self.game.deref().begin()
         end_it = self.game.deref().end()
 
-        # The loop still uses fast C++-backed operations on the proxies.
         while it != end_it:
-            # deref(it) gets the underlying C++ GameNode, which is then
-            # immediately passed to Node.wrap(). No intermediate cdef needed.
             yield Node.wrap(dereference(it))
 
-            # inc(it) calls the C++ pre-increment operator on the proxy.
             preincrement(it)
 
 

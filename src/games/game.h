@@ -515,14 +515,18 @@ public:
 
   class Nodes {
   private:
+    using ChildIterator = ElementCollection<GameNode, GameNodeRep>::iterator;
+
     Game m_owner{nullptr};
-    std::stack<GameNode> m_stack{};
+    GameNode m_current_node{nullptr};
+    std::stack<std::pair<ChildIterator, ChildIterator>> m_stack{};
+
     Nodes(Game game) : m_owner(game) {}
 
   public:
     Nodes() = default;
 
-    Nodes(Game game, GameNode start_node) : m_owner(game)
+    Nodes(Game game, GameNode start_node) : m_owner(game), m_current_node(start_node)
     {
       if (!start_node) {
         return;
@@ -531,47 +535,47 @@ public:
         throw MismatchException();
       }
       if (start_node != m_owner->GetRoot()) {
-        throw std::invalid_argument("Node iteration cannot be initiated for subtrees.");
+        throw std::invalid_argument("Node iteration can only be initiated from the game's root");
       }
-      m_stack.push(start_node);
     }
 
     GameNode operator*() const
     {
-      if (m_stack.empty()) {
+      if (!m_current_node) {
         throw std::runtime_error("Cannot dereference an end iterator");
       }
-      return m_stack.top();
+      return m_current_node;
     }
 
     Nodes &operator++()
     {
-      if (m_stack.empty()) {
+      if (!m_current_node) {
         throw std::out_of_range("Cannot increment an end iterator");
       }
-      const GameNode n = m_stack.top();
-      m_stack.pop();
-      auto children = n->GetChildren();
-      auto it = children.end();
-      while (it != children.begin()) {
-        --it; // Decrement first, then dereference
-        m_stack.push(*it);
+
+      auto children = m_current_node->GetChildren();
+      if (children.size() > 0) {
+        m_stack.emplace(children.begin(), children.end());
+      }
+
+      while (!m_stack.empty() && m_stack.top().first == m_stack.top().second) {
+        m_stack.pop();
+      }
+
+      if (m_stack.empty()) {
+        m_current_node = nullptr;
+      }
+      else {
+        auto &top_pair = m_stack.top();
+        m_current_node = *(top_pair.first);
+        ++(top_pair.first);
       }
       return *this;
     }
 
     bool operator==(const Nodes &other) const
     {
-      if (m_owner != other.m_owner) {
-        return false;
-      }
-      if (m_stack.empty() && other.m_stack.empty()) {
-        return true;
-      }
-      if (m_stack.empty() || other.m_stack.empty()) {
-        return false;
-      }
-      return m_stack.top() == other.m_stack.top();
+      return m_owner == other.m_owner && m_current_node == other.m_current_node;
     }
 
     bool operator!=(const Nodes &other) const { return !(*this == other); }
