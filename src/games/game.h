@@ -25,6 +25,7 @@
 
 #include <list>
 #include <set>
+#include <stack>
 
 #include "number.h"
 #include "gameobject.h"
@@ -512,6 +513,76 @@ public:
   using Players = ElementCollection<Game, GamePlayerRep>;
   using Outcomes = ElementCollection<Game, GameOutcomeRep>;
 
+  class Nodes {
+  private:
+    using ChildIterator = ElementCollection<GameNode, GameNodeRep>::iterator;
+
+    Game m_owner{nullptr};
+    GameNode m_current_node{nullptr};
+    std::stack<std::pair<ChildIterator, ChildIterator>> m_stack{};
+
+    Nodes(Game game) : m_owner(game) {}
+
+  public:
+    Nodes() = default;
+
+    Nodes(Game game, GameNode start_node) : m_owner(game), m_current_node(start_node)
+    {
+      if (!start_node) {
+        return;
+      }
+      if (start_node->GetGame() != m_owner) {
+        throw MismatchException();
+      }
+      if (start_node != m_owner->GetRoot()) {
+        throw std::invalid_argument("Node iteration can only be initiated from the game's root");
+      }
+    }
+
+    GameNode operator*() const
+    {
+      if (!m_current_node) {
+        throw std::runtime_error("Cannot dereference an end iterator");
+      }
+      return m_current_node;
+    }
+
+    Nodes &operator++()
+    {
+      if (!m_current_node) {
+        throw std::out_of_range("Cannot increment an end iterator");
+      }
+
+      auto children = m_current_node->GetChildren();
+      if (children.size() > 0) {
+        m_stack.emplace(children.begin(), children.end());
+      }
+
+      while (!m_stack.empty() && m_stack.top().first == m_stack.top().second) {
+        m_stack.pop();
+      }
+
+      if (m_stack.empty()) {
+        m_current_node = nullptr;
+      }
+      else {
+        auto &top_pair = m_stack.top();
+        m_current_node = *(top_pair.first);
+        ++(top_pair.first);
+      }
+      return *this;
+    }
+
+    bool operator==(const Nodes &other) const
+    {
+      return m_owner == other.m_owner && m_current_node == other.m_current_node;
+    }
+
+    bool operator!=(const Nodes &other) const { return !(*this == other); }
+
+    friend class GameRep;
+  };
+
   /// @name Lifecycle
   //@{
   /// Clean up the game
@@ -735,6 +806,10 @@ public:
   /// Set the probability distribution of actions at a chance node
   virtual Game SetChanceProbs(const GameInfoset &, const Array<Number> &) = 0;
   //@}
+
+  /// Node iterators
+  Nodes begin() const { return {this, GetRoot()}; }
+  Nodes end() const { return {this}; }
 
   /// Build any computed values anew
   virtual void BuildComputedValues() const {}
