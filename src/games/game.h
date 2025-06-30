@@ -361,6 +361,9 @@ public:
 
   /// Returns the action specified by the strategy at the information set
   GameAction GetAction(const GameInfoset &) const;
+
+  /// Remove this strategy from the game
+  void DeleteStrategy();
   //@}
 };
 

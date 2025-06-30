@@ -19,6 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
+from collections import deque
 import io
 import itertools
 import pathlib
@@ -2026,4 +2027,5 @@ class Game:
         )
         if len(resolved_strategy.player.strategies) == 1:
             raise UndefinedOperationError("Cannot delete the only strategy for a player")
+
         self.game.deref().DeleteStrategy(resolved_strategy.strategy)

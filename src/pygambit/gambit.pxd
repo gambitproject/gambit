@@ -99,6 +99,7 @@ cdef extern from "games/game.h":
         string GetLabel() except +
         void SetLabel(string) except +
         c_GameAction GetAction(c_GameInfoset) except +
+        void DeleteStrategy() except +
 
     cdef cppclass c_GameActionRep "GameActionRep":
         int GetNumber() except +

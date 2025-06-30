@@ -52,6 +52,16 @@ GameOutcomeRep::GameOutcomeRep(GameRep *p_game, int p_number) : m_game(p_game), 
 //========================================================================
 
 GameAction GameStrategyRep::GetAction(const GameInfoset &p_infoset) const
+
+{
+  if (p_infoset->GetPlayer() != m_player) {
+    throw MismatchException();
+  }
+  int action = m_behav[p_infoset->GetNumber()];
+  return (action) ? p_infoset->GetActions()[action] : nullptr;
+}
+
+void GameStrategyRep::DeleteStrategy()
 {
   if (p_infoset->GetPlayer() != m_player) {
     throw MismatchException();
