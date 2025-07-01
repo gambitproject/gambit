@@ -735,52 +735,64 @@ bool GameTreeRep::IsConstSum() const
 
 bool GameTreeRep::IsPerfectRecall() const
 {
-  using Assignment = std::pair<GameInfoset, GameAction>;
-  // Histories track the last actions of players taken to reach a given node
-  using History = std::map<GamePlayer, std::optional<Assignment>>;
+  using HistoryMap = std::map<GamePlayer, std::vector<GameAction>>;
+  using LastActionMap = std::map<GameInfoset, std::optional<GameAction>>;
+  LastActionMap last_actions_infoset;
+  std::stack<std::pair<GameNode, HistoryMap>> processing_stack;
 
-  std::map<GameInfoset, std::optional<Assignment>> last_actions_for_infoset;
-  std::map<GameNode, History> last_actions_for_node;
-
-  History initial_history;
-  for (const auto &player : GetPlayers()) {
-    initial_history[player] = std::nullopt;
+  const GameNode root_node = GetRoot();
+  if (!root_node) {
+    return true;
   }
-  initial_history[GetChance()] = std::nullopt;
-  last_actions_for_node[GetRoot()] = initial_history;
 
-  for (const GameNode n : *this) {
-    History &history = last_actions_for_node.at(n);
+  HistoryMap initial_history;
+  for (const auto &player : GetPlayers()) {
+    initial_history[player] = {};
+  }
+  initial_history[GetChance()] = {};
 
-    if (n->IsTerminal()) {
-      last_actions_for_node.erase(n);
+  processing_stack.emplace(root_node, initial_history);
+
+  while (!processing_stack.empty()) {
+    auto [current_node, current_history] = processing_stack.top();
+    processing_stack.pop();
+    if (current_node->IsTerminal()) {
       continue;
     }
 
-    const GamePlayer player = n->GetPlayer();
-    const GameInfoset infoset = n->GetInfoset();
-    const std::optional<Assignment> &player_last_action = history.at(player);
+    const GamePlayer player = current_node->GetPlayer();
+    const GameInfoset infoset = current_node->GetInfoset();
+    const std::vector<GameAction> &player_history_node = current_history.at(player);
+    const std::optional<GameAction> last_action =
+        player_history_node.empty() ? std::nullopt
+                                    : std::make_optional(player_history_node.back());
 
-    auto [it, inserted] = last_actions_for_infoset.try_emplace(infoset, player_last_action);
+    auto it = last_actions_infoset.find(infoset);
 
-    if (!inserted) {
-      if (it->second != player_last_action) {
+    if (it == last_actions_infoset.end()) {
+      last_actions_infoset[infoset] = last_action;
+    }
+    else {
+      const std::optional<GameAction> &reference_action = it->second;
+      if (last_action != reference_action) {
         if (!player->IsChance()) {
           return false;
         }
       }
     }
 
-    for (const GameAction action : infoset->GetActions()) {
-      const GameNode child = n->GetChild(action);
-      History child_history = history;
-      child_history.at(player) = std::make_pair(infoset, action);
-      last_actions_for_node[child] = child_history;
+    const auto actions = infoset->GetActions();
+    auto iter = actions.end();
+
+    while (iter != actions.begin()) {
+      --iter;
+      const GameAction action = *iter;
+      const GameNode child_node = current_node->GetChild(action);
+      HistoryMap child_history = current_history;
+      child_history.at(player).push_back(action);
+      processing_stack.emplace(child_node, child_history);
     }
-
-    last_actions_for_node.erase(n);
   }
-
   return true;
 }
 

@@ -60,7 +60,7 @@ def test_game_add_players_nolabel():
     # Games that do not have perfect recall
     ("wichardt.efg", False),  # forgetting past action
     ("noPR-action-selten-horse.efg", False),  # forgetting past action
-    ("noPR-information-no-deflate.efg", False),  # forgetting past information
+    ("noPR-information-no-deflate.efg", False),  # forgetting past information with nullopt
     ("noPR-AM.efg", False),  # absent-mindedness
     ("noPR-action-AM.efg", False),  # absent-mindedness + forgetting past action
 ])

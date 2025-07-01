@@ -16,6 +16,8 @@
     prescribed by a strategy at an information set
 - Tests for creation of the reduced strategic form from an extensive-form game (currently only
   for games with perfect recall)
+- Refactored `GameTreeRep::IsPerfectRecall` to perform the verification in one optimal tree traversal,
+  using the novel simplified last-action check, equivalent to the classic perfect recall (#484)
 
 
 ## [16.3.1] - unreleased
