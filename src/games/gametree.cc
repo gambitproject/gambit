@@ -23,6 +23,7 @@
 #include <iostream>
 #include <algorithm>
 #include <numeric>
+#include <optional>
 
 #include "gambit.h"
 #include "gametree.h"
@@ -732,53 +733,67 @@ bool GameTreeRep::IsConstSum() const
   }
 }
 
-bool GameTreeRep::IsPerfectRecall(GameInfoset &s1, GameInfoset &s2) const
+bool GameTreeRep::IsPerfectRecall() const
 {
-  for (auto player : m_players) {
-    for (size_t i = 1; i <= player->m_infosets.size(); i++) {
-      auto *iset1 = player->m_infosets[i - 1];
-      for (size_t j = 1; j <= player->m_infosets.size(); j++) {
-        auto *iset2 = player->m_infosets[j - 1];
+  using HistoryMap = std::map<GamePlayer, std::vector<GameAction>>;
+  using LastActionMap = std::map<GameInfoset, std::optional<GameAction>>;
+  LastActionMap last_actions_infoset;
+  std::stack<std::pair<GameNode, HistoryMap>> processing_stack;
 
-        bool precedes = false;
-        GameAction action = nullptr;
+  const GameNode root_node = GetRoot();
+  if (!root_node) {
+    return true;
+  }
 
-        for (size_t m = 1; m <= iset2->m_members.size(); m++) {
-          size_t n;
-          for (n = 1; n <= iset1->m_members.size(); n++) {
-            if (iset2->GetMember(m)->IsSuccessorOf(iset1->GetMember(n)) &&
-                iset1->GetMember(n) != iset2->GetMember(m)) {
-              precedes = true;
-              for (const auto &act : iset1->GetActions()) {
-                if (iset2->GetMember(m)->IsSuccessorOf(iset1->GetMember(n)->GetChild(act))) {
-                  if (action != nullptr && action != act) {
-                    s1 = iset1;
-                    s2 = iset2;
-                    return false;
-                  }
-                  action = act;
-                }
-              }
-              break;
-            }
-          }
+  HistoryMap initial_history;
+  for (const auto &player : GetPlayers()) {
+    initial_history[player] = {};
+  }
+  initial_history[GetChance()] = {};
 
-          if (i == j && precedes) {
-            s1 = iset1;
-            s2 = iset2;
-            return false;
-          }
+  processing_stack.emplace(root_node, initial_history);
 
-          if (n > iset1->m_members.size() && precedes) {
-            s1 = iset1;
-            s2 = iset2;
-            return false;
-          }
+  while (!processing_stack.empty()) {
+    auto [current_node, current_history] = std::move(processing_stack.top());
+    processing_stack.pop();
+
+    if (current_node->IsTerminal()) {
+      continue;
+    }
+
+    const GamePlayer player = current_node->GetPlayer();
+    const GameInfoset infoset = current_node->GetInfoset();
+    const std::vector<GameAction> &player_history_node = current_history.at(player);
+    const std::optional<GameAction> last_action =
+        player_history_node.empty() ? std::nullopt
+                                    : std::make_optional(player_history_node.back());
+
+    auto it = last_actions_infoset.find(infoset);
+
+    if (it == last_actions_infoset.end()) {
+      last_actions_infoset[infoset] = last_action;
+    }
+    else {
+      const std::optional<GameAction> &reference_action = it->second;
+      if (last_action != reference_action) {
+        if (!player->IsChance()) {
+          return false;
         }
       }
     }
-  }
 
+    const auto actions = infoset->GetActions();
+    auto iter = actions.end();
+
+    while (iter != actions.begin()) {
+      --iter;
+      const GameAction action = *iter;
+      const GameNode child_node = current_node->GetChild(action);
+      HistoryMap child_history = current_history;
+      child_history.at(player).push_back(action);
+      processing_stack.emplace(child_node, std::move(child_history));
+    }
+  }
   return true;
 }
 

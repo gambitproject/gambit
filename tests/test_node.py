@@ -787,3 +787,33 @@ def test_node_plays():
     }  # paths=[0, 1], [0, 1, 1], [1, 1, 1]
 
     assert set(test_node.plays) == expected_set_of_plays
+
+
+def test_nodes_iteration_matches_python_dfs():
+    """
+    Verify that game.nodes using the C++ iterator produces the same DFS traversal
+    as a pure Python recursive generator.
+    """
+    game = games.read_from_file("e01.efg")
+    game2 = games.read_from_file("basic_extensive_game.efg")
+
+    def dfs(node: gbt.Node) -> typing.Iterator[gbt.Node]:
+        yield node
+        for child in node.children:
+            yield from dfs(child)
+
+    assert list(game.nodes) == list(dfs(game.root))
+    assert list(game2.nodes) == list(dfs(game2.root))
+
+
+def test_nodes_iteration_single_node_game():
+    """
+    Test that iteration works correctly on a game with only a root node.
+    """
+    game = gbt.Game.new_tree()
+    assert game.root.is_terminal
+
+    nodes = list(game.nodes)
+
+    assert len(nodes) == 1
+    assert nodes[0] == game.root

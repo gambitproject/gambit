@@ -31,6 +31,7 @@ class GameTreeRep : public GameExplicitRep {
   friend class GameNodeRep;
   friend class GameInfosetRep;
   friend class GameActionRep;
+  using GameRep::Nodes;
 
 protected:
   mutable bool m_computedValues{false}, m_doCanon{true};
@@ -72,8 +73,7 @@ public:
   //@{
   bool IsTree() const override { return true; }
   bool IsConstSum() const override;
-  using GameRep::IsPerfectRecall;
-  bool IsPerfectRecall(GameInfoset &, GameInfoset &) const override;
+  bool IsPerfectRecall() const override;
   /// Turn on or off automatic canonicalization of the game
   void SetCanonicalization(bool p_doCanon) const
   {
