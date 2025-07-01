@@ -754,8 +754,9 @@ bool GameTreeRep::IsPerfectRecall() const
   processing_stack.emplace(root_node, initial_history);
 
   while (!processing_stack.empty()) {
-    auto [current_node, current_history] = processing_stack.top();
+    auto [current_node, current_history] = std::move(processing_stack.top());
     processing_stack.pop();
+
     if (current_node->IsTerminal()) {
       continue;
     }
@@ -790,7 +791,7 @@ bool GameTreeRep::IsPerfectRecall() const
       const GameNode child_node = current_node->GetChild(action);
       HistoryMap child_history = current_history;
       child_history.at(player).push_back(action);
-      processing_stack.emplace(child_node, child_history);
+      processing_stack.emplace(child_node, std::move(child_history));
     }
   }
   return true;
