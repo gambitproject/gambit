@@ -186,20 +186,12 @@ class GameNodes:
         return self.game.deref().NumNodes()
 
     def __iter__(self) -> typing.Iterator[Node]:
-        """
-        A generator that efficiently iterates over the game nodes using
-        the underlying C++ iterator, without using cdef for local variables.
-        """
+        """Iterate over the game nodes in the depth-first traversal order."""
         if not self.game.deref().IsTree():
             return
 
-        it = self.game.deref().begin()
-        end_it = self.game.deref().end()
-
-        while it != end_it:
-            yield Node.wrap(dereference(it))
-
-            preincrement(it)
+        for node in self.game.deref().GetNodes():
+            yield Node.wrap(node)
 
 
 @cython.cclass

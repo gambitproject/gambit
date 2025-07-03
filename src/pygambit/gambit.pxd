@@ -242,10 +242,13 @@ cdef extern from "games/game.h":
             iterator end() except +
 
         cppclass Nodes:
-            bint operator ==(Nodes)
-            bint operator !=(Nodes)
-            c_GameNode operator *()
-            Nodes operator++()
+            cppclass iterator:
+                bint operator ==(iterator)
+                bint operator !=(iterator)
+                c_GameNode operator *()
+                iterator operator++()
+            iterator begin() except +
+            iterator end() except +
 
         int IsTree() except +
 
@@ -270,6 +273,7 @@ cdef extern from "games/game.h":
         int NumNodes() except +
         int NumNonterminalNodes() except +
         c_GameNode GetRoot() except +
+        Nodes GetNodes() except +
 
         c_GameStrategy GetStrategy(int) except +IndexError
         c_GameStrategy NewStrategy(c_GamePlayer, string) except +
@@ -308,8 +312,6 @@ cdef extern from "games/game.h":
         void DeleteAction(c_GameAction) except +ValueError
         void SetOutcome(c_GameNode, c_GameOutcome) except +
         c_Game SetChanceProbs(c_GameInfoset, Array[c_Number]) except +
-        Nodes begin() except +
-        Nodes end() except +
 
         c_PureStrategyProfile NewPureStrategyProfile()  # except + doesn't compile
         c_MixedStrategyProfile[T] NewMixedStrategyProfile[T](T)  # except + doesn't compile

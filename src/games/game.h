@@ -514,73 +514,94 @@ public:
   using Outcomes = ElementCollection<Game, GameOutcomeRep>;
 
   class Nodes {
-  private:
-    using ChildIterator = ElementCollection<GameNode, GameNodeRep>::iterator;
-
     Game m_owner{nullptr};
-    GameNode m_current_node{nullptr};
-    std::stack<std::pair<ChildIterator, ChildIterator>> m_stack{};
-
-    Nodes(Game game) : m_owner(game) {}
 
   public:
+    class iterator {
+      friend class Nodes;
+      using ChildIterator = ElementCollection<GameNode, GameNodeRep>::iterator;
+
+      Game m_owner{nullptr};
+      GameNode m_current_node{nullptr};
+      std::stack<ChildIterator> m_stack{};
+
+      iterator(Game game) : m_owner(game) {}
+
+    public:
+      using iterator_category = std::forward_iterator_tag;
+      using value_type = GameNode;
+      using pointer = value_type *;
+
+      iterator() = default;
+
+      iterator(Game game, GameNode start_node) : m_owner(game), m_current_node(start_node)
+      {
+        if (!start_node) {
+          return;
+        }
+        if (start_node->GetGame() != m_owner) {
+          throw MismatchException();
+        }
+      }
+
+      value_type operator*() const
+      {
+        if (!m_current_node) {
+          throw std::runtime_error("Cannot dereference an end iterator");
+        }
+        return m_current_node;
+      }
+
+      iterator &operator++()
+      {
+        if (!m_current_node) {
+          throw std::out_of_range("Cannot increment an end iterator");
+        }
+
+        auto children = m_current_node->GetChildren();
+        if (children.size() > 0) {
+          m_stack.emplace(children.begin());
+        }
+
+        while (!m_stack.empty()) {
+          try {
+            *m_stack.top();
+            break;
+          }
+          catch (std::out_of_range) {
+            m_stack.pop();
+          }
+        }
+
+        if (m_stack.empty()) {
+          m_current_node = nullptr;
+        }
+        else {
+          auto &top_it = m_stack.top();
+          m_current_node = *top_it;
+          ++top_it;
+        }
+        return *this;
+      }
+
+      bool operator==(const iterator &other) const
+      {
+        return m_owner == other.m_owner && m_current_node == other.m_current_node;
+      }
+      bool operator!=(const iterator &other) const { return !(*this == other); }
+    };
+
+    /// Default constructor to support declaration by other modules (e.g. Cython)
     Nodes() = default;
 
-    Nodes(Game game, GameNode start_node) : m_owner(game), m_current_node(start_node)
-    {
-      if (!start_node) {
-        return;
-      }
-      if (start_node->GetGame() != m_owner) {
-        throw MismatchException();
-      }
-      if (start_node != m_owner->GetRoot()) {
-        throw std::invalid_argument("Node iteration can only be initiated from the game's root");
-      }
-    }
+    /// Constructor for the Nodes range.
+    explicit Nodes(Game p_owner) : m_owner(p_owner) {}
 
-    GameNode operator*() const
-    {
-      if (!m_current_node) {
-        throw std::runtime_error("Cannot dereference an end iterator");
-      }
-      return m_current_node;
-    }
+    /// Returns an iterator to the first node (the root).
+    iterator begin() const { return m_owner ? iterator(m_owner, m_owner->GetRoot()) : iterator(); }
 
-    Nodes &operator++()
-    {
-      if (!m_current_node) {
-        throw std::out_of_range("Cannot increment an end iterator");
-      }
-
-      auto children = m_current_node->GetChildren();
-      if (children.size() > 0) {
-        m_stack.emplace(children.begin(), children.end());
-      }
-
-      while (!m_stack.empty() && m_stack.top().first == m_stack.top().second) {
-        m_stack.pop();
-      }
-
-      if (m_stack.empty()) {
-        m_current_node = nullptr;
-      }
-      else {
-        auto &top_pair = m_stack.top();
-        m_current_node = *(top_pair.first);
-        ++(top_pair.first);
-      }
-      return *this;
-    }
-
-    bool operator==(const Nodes &other) const
-    {
-      return m_owner == other.m_owner && m_current_node == other.m_current_node;
-    }
-
-    bool operator!=(const Nodes &other) const { return !(*this == other); }
-
-    friend class GameRep;
+    /// Returns an iterator to the past-the-end position.
+    iterator end() const { return m_owner ? iterator(m_owner) : iterator(); }
   };
 
   /// @name Lifecycle
@@ -795,6 +816,8 @@ public:
   //@{
   /// Returns the root node of the game
   virtual GameNode GetRoot() const = 0;
+  /// Returns the nodes of the game in the DFT order
+  Nodes GetNodes() const { return Nodes(this); }
   /// Returns the number of nodes in the game
   virtual size_t NumNodes() const = 0;
   /// Returns the number of non-terminal nodes in the game
@@ -806,10 +829,6 @@ public:
   /// Set the probability distribution of actions at a chance node
   virtual Game SetChanceProbs(const GameInfoset &, const Array<Number> &) = 0;
   //@}
-
-  /// Node iterators
-  Nodes begin() const { return {this, GetRoot()}; }
-  Nodes end() const { return {this}; }
 
   /// Build any computed values anew
   virtual void BuildComputedValues() const {}
