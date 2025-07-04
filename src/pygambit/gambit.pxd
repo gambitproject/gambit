@@ -241,6 +241,15 @@ cdef extern from "games/game.h":
             iterator begin() except +
             iterator end() except +
 
+        cppclass Nodes:
+            cppclass iterator:
+                bint operator ==(iterator)
+                bint operator !=(iterator)
+                c_GameNode operator *()
+                iterator operator++()
+            iterator begin() except +
+            iterator end() except +
+
         int IsTree() except +
 
         string GetTitle() except +
@@ -264,6 +273,7 @@ cdef extern from "games/game.h":
         int NumNodes() except +
         int NumNonterminalNodes() except +
         c_GameNode GetRoot() except +
+        Nodes GetNodes() except +
 
         c_GameStrategy GetStrategy(int) except +IndexError
         c_GameStrategy NewStrategy(c_GamePlayer, string) except +
