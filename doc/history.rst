@@ -20,6 +20,8 @@ the California Institute of Technology. The original implementation
 was written in BASIC, with a simple graphical interface. This code was
 ported to C around 1990 with the help of Bruce Bell, and was
 distributed publicly as version 0.13 in 1991 and 1992.
+The earliest citation of Gambit is in Wilson, R. (1992),
+Computing Simply Stable Equilibria, Econometrica 60:5, 1039-1070.
 
 Much of the early development of the main Gambit codebase took place in
 1994-1996, under a grant from the National Science Foundation to the
