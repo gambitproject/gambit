@@ -23,6 +23,8 @@
 #include <iostream>
 #include <algorithm>
 #include <numeric>
+#include <stack>
+#include <set>
 
 #include "gambit.h"
 #include "gametree.h"
@@ -782,11 +784,8 @@ bool GameTreeRep::IsPerfectRecall() const
   }
 
   for (const auto &[infoset, parent_action_options] : infoset_parents) {
-    if (parent_action_options.size() == 1) {
-      continue;
-    }
-    const std::set<std::optional<GameAction>> unique_parents(parent_action_options.begin(),
-                                                             parent_action_options.end());
+    const std::set<GameAction> unique_parents(parent_action_options.begin(),
+                                              parent_action_options.end());
     if (unique_parents.size() > 1) {
       return false;
     }
