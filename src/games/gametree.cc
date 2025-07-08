@@ -324,13 +324,13 @@ GameAction GameNodeRep::GetPriorAction() const
   return nullptr;
 }
 
-void GameNodeRep::DeleteOutcome(GameOutcomeRep *outc)
+void GameNodeRep::DeleteOutcome(std::shared_ptr<GameOutcomeRep> outc)
 {
   m_game->IncrementVersion();
   if (outc == m_outcome) {
     m_outcome = nullptr;
   }
-  for (auto child : m_children) {
+  for (const auto &child : m_children) {
     child->DeleteOutcome(outc);
   }
 }
@@ -1066,10 +1066,10 @@ void GameTreeRep::DeleteOutcome(const GameOutcome &p_outcome)
 {
   IncrementVersion();
   m_root->DeleteOutcome(p_outcome);
-  m_outcomes.erase(std::find(m_outcomes.begin(), m_outcomes.end(), p_outcome));
+  m_outcomes.erase(std::find(m_outcomes.begin(), m_outcomes.end(), std::shared_ptr<GameOutcomeRep>(p_outcome)));
   p_outcome->Invalidate();
   std::for_each(m_outcomes.begin(), m_outcomes.end(),
-                [outc = 1](GameOutcomeRep *c) mutable { c->m_number = outc++; });
+                [outc = 1](const std::shared_ptr<GameOutcomeRep> &c) mutable { c->m_number = outc++; });
   ClearComputedValues();
 }
 

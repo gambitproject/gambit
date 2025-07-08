@@ -20,7 +20,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 import cython
-from cython.operator cimport dereference as deref
+from cython.operator cimport dereference
 from libcpp.memory cimport shared_ptr
 
 import typing
@@ -54,23 +54,23 @@ class Outcome:
         )
 
     def __hash__(self) -> int:
-        return cython.cast(cython.long, self.outcome.deref())
+        return cython.cast(cython.long, self.outcome.deref().get())
 
     @property
     def game(self) -> Game:
         """Returns the game with which this outcome is associated."""
-        return Game.wrap(self.outcome.deref().GetGame())
+        return Game.wrap(dereference(self.outcome.deref()).GetGame())
 
     @property
     def label(self) -> str:
         """The text label associated with this outcome."""
-        return self.outcome.deref().GetLabel().decode("ascii")
+        return dereference(self.outcome.deref()).GetLabel().decode("ascii")
 
     @label.setter
     def label(self, value: str) -> None:
         if value in [i.label for i in self.game.outcomes]:
             warnings.warn("Another outcome with an identical label exists")
-        self.outcome.deref().SetLabel(value.encode("ascii"))
+        dereference(self.outcome.deref()).SetLabel(value.encode("ascii"))
 
     def __getitem__(
             self, player: typing.Union[Player, str]
@@ -85,7 +85,7 @@ class Outcome:
         resolved_player = cython.cast(Player,
                                       self.game._resolve_player(player, "Outcome.__getitem__"))
         payoff = (
-            self.outcome.deref().GetPayoff[string](resolved_player.player).decode("ascii")
+            dereference(self.outcome.deref()).GetPayoff[string](resolved_player.player).decode("ascii")
         )
         if "." in payoff:
             return decimal.Decimal(payoff)
@@ -112,7 +112,7 @@ class Outcome:
         """
         resolved_player = cython.cast(Player,
                                       self.game._resolve_player(player, "Outcome.__setitem__"))
-        self.outcome.deref().SetPayoff(resolved_player.player, _to_number(value))
+        dereference(self.outcome.deref()).SetPayoff(resolved_player.player, _to_number(value))
 
 
 @cython.cclass
@@ -143,7 +143,7 @@ class TreeGameOutcome:
     def __eq__(self, other: typing.Any) -> bool:
         return (
             isinstance(other, TreeGameOutcome) and
-            deref(self.psp).deref() == deref(cython.cast(TreeGameOutcome, other).psp).deref()
+            dereference(self.psp).deref() == dereference(cython.cast(TreeGameOutcome, other).psp).deref()
         )
 
     def __getitem__(self, player: typing.Union[Player, str]) -> Rational:
@@ -168,7 +168,7 @@ class TreeGameOutcome:
         """
         resolved_player = cython.cast(Player,
                                       self.game._resolve_player(player, "Outcome.__getitem__"))
-        return rat_to_py(deref(deref(self.psp).deref()).GetPayoff(resolved_player.player))
+        return rat_to_py(dereference(dereference(self.psp).deref()).GetPayoff(resolved_player.player))
 
     def delete(self):
         raise UndefinedOperationError("Cannot modify outcomes in a derived strategic game.")
@@ -178,7 +178,7 @@ class TreeGameOutcome:
         """The text label associated with this outcome."""
         return "(%s)" % (
             ",".join(
-                [deref(deref(self.psp).deref()).GetStrategy(cython.cast(Player, player).player)
+                [dereference(dereference(self.psp).deref()).GetStrategy(cython.cast(Player, player).player)
                  .deref().GetLabel().c_str()
                  for player in self.game.players]
             )

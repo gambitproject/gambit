@@ -86,12 +86,12 @@ GameOutcome TablePureStrategyProfileRep::GetOutcome() const
 
 void TablePureStrategyProfileRep::SetOutcome(GameOutcome p_outcome)
 {
-  dynamic_cast<GameTableRep &>(*m_nfg).m_results[m_index] = p_outcome;
+  dynamic_cast<GameTableRep &>(*m_nfg).m_results[m_index] = std::shared_ptr<GameOutcomeRep>(p_outcome);
 }
 
 Rational TablePureStrategyProfileRep::GetPayoff(const GamePlayer &p_player) const
 {
-  GameOutcomeRep *outcome = dynamic_cast<GameTableRep &>(*m_nfg).m_results[m_index];
+  auto outcome = dynamic_cast<GameTableRep &>(*m_nfg).m_results[m_index];
   if (outcome) {
     return outcome->GetPayoff<Rational>(p_player);
   }
@@ -103,7 +103,7 @@ Rational TablePureStrategyProfileRep::GetPayoff(const GamePlayer &p_player) cons
 Rational TablePureStrategyProfileRep::GetStrategyValue(const GameStrategy &p_strategy) const
 {
   const auto &player = p_strategy->GetPlayer();
-  GameOutcomeRep *outcome =
+  auto outcome =
       dynamic_cast<GameTableRep &>(*m_nfg)
           .m_results[m_index - m_profile.at(player)->m_offset + p_strategy->m_offset];
   if (outcome) {
@@ -161,7 +161,7 @@ T TableMixedStrategyProfileRep<T>::GetPayoff(int pl, int index, int current) con
   if (current > static_cast<int>(this->m_support.GetGame()->NumPlayers())) {
     const Game game = this->m_support.GetGame();
     auto &g = dynamic_cast<GameTableRep &>(*game);
-    GameOutcomeRep *outcome = g.m_results[index];
+    auto outcome = g.m_results[index];
     if (outcome) {
       return outcome->GetPayoff<T>(this->m_support.GetGame()->GetPlayer(pl));
     }
@@ -194,7 +194,7 @@ void TableMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, int const_pl, int c
   if (cur_pl > static_cast<int>(this->m_support.GetGame()->NumPlayers())) {
     const Game game = this->m_support.GetGame();
     auto &g = dynamic_cast<GameTableRep &>(*game);
-    GameOutcomeRep *outcome = g.m_results[index];
+    auto outcome = g.m_results[index];
     if (outcome) {
       value += prob * outcome->GetPayoff<T>(this->m_support.GetGame()->GetPlayer(pl));
     }
@@ -227,7 +227,7 @@ void TableMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, int const_pl1, int 
   if (cur_pl > static_cast<int>(this->m_support.GetGame()->NumPlayers())) {
     const Game game = this->m_support.GetGame();
     auto &g = dynamic_cast<GameTableRep &>(*game);
-    GameOutcomeRep *outcome = g.m_results[index];
+    auto outcome = g.m_results[index];
     if (outcome) {
       value += prob * outcome->GetPayoff<T>(this->m_support.GetGame()->GetPlayer(pl));
     }
@@ -277,13 +277,10 @@ GameTableRep::GameTableRep(const std::vector<int> &dim, bool p_sparseOutcomes /*
   }
   IndexStrategies();
 
-  if (p_sparseOutcomes) {
-    std::fill(m_results.begin(), m_results.end(), nullptr);
-  }
-  else {
-    m_outcomes = std::vector<GameOutcomeRep *>(m_results.size());
+  if (!p_sparseOutcomes) {
+    m_outcomes = std::vector<std::shared_ptr<GameOutcomeRep>>(m_results.size());
     std::generate(m_outcomes.begin(), m_outcomes.end(),
-                  [this, outc = 1]() mutable { return new GameOutcomeRep(this, outc++); });
+                  [this, outc = 1]() mutable { return std::make_shared<GameOutcomeRep>(this, outc++); });
     std::copy(m_outcomes.begin(), m_outcomes.end(), m_results.begin());
   }
 }
@@ -360,7 +357,7 @@ void GameTableRep::WriteNfgFile(std::ostream &p_file) const
   }
   p_file << "}" << std::endl;
 
-  for (auto result : m_results) {
+  for (const auto &result : m_results) {
     p_file << ((result) ? result->m_number : 0) << ' ';
   }
   p_file << std::endl;
@@ -388,11 +385,12 @@ GamePlayer GameTableRep::NewPlayer()
 void GameTableRep::DeleteOutcome(const GameOutcome &p_outcome)
 {
   IncrementVersion();
-  std::replace(m_results.begin(), m_results.end(), p_outcome, GameOutcome(nullptr));
-  m_outcomes.erase(std::find(m_outcomes.begin(), m_outcomes.end(), p_outcome));
+  std::replace(m_results.begin(), m_results.end(),
+    std::shared_ptr<GameOutcomeRep>(p_outcome), std::shared_ptr<GameOutcomeRep>());
+  m_outcomes.erase(std::find(m_outcomes.begin(), m_outcomes.end(), std::shared_ptr<GameOutcomeRep>(p_outcome)));
   p_outcome->Invalidate();
   std::for_each(m_outcomes.begin(), m_outcomes.end(),
-                [outc = 1](GameOutcomeRep *c) mutable { c->m_number = outc++; });
+                [outc = 1](std::shared_ptr<GameOutcomeRep> c) mutable { c->m_number = outc++; });
 }
 
 //------------------------------------------------------------------------
@@ -474,8 +472,7 @@ void GameTableRep::RebuildTable()
     size *= player->m_strategies.size();
   }
 
-  std::vector<GameOutcomeRep *> newResults(size);
-  std::fill(newResults.begin(), newResults.end(), nullptr);
+  std::vector<std::shared_ptr<GameOutcomeRep>> newResults(size);
 
   for (auto iter : StrategyContingencies(
            StrategySupportProfile(std::const_pointer_cast<GameRep>(shared_from_this())))) {

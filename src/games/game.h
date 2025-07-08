@@ -38,7 +38,7 @@ namespace Gambit {
 // Forward declarations of classes defined in this file.
 //
 class GameOutcomeRep;
-using GameOutcome = GameObjectPtr<GameOutcomeRep>;
+using GameOutcome = GameObjectSharedPtr<GameOutcomeRep>;
 
 class GameActionRep;
 using GameAction = GameObjectSharedPtr<GameActionRep>;
@@ -263,24 +263,31 @@ public:
 
 /// This class represents an outcome in a game.  An outcome
 /// specifies a vector of payoffs to players.
-class GameOutcomeRep : public GameObject {
+class GameOutcomeRep : public std::enable_shared_from_this<GameOutcomeRep> {
   friend class GameExplicitRep;
   friend class GameTreeRep;
   friend class GameTableRep;
 
+  bool m_valid{true};
   GameRep *m_game;
   int m_number;
   std::string m_label;
   std::map<GamePlayerRep *, Number> m_payoffs;
 
+public:
   /// @name Lifecycle
   //@{
   /// Creates a new outcome object, with payoffs set to zero
   GameOutcomeRep(GameRep *p_game, int p_number);
-  ~GameOutcomeRep() override = default;
+  ~GameOutcomeRep() = default;
   //@}
 
-public:
+  /// @name Validity management
+  //@{
+  bool IsValid() const { return m_valid; }
+  void Invalidate() { m_valid = false; }
+  //@}
+
   /// @name Data access
   //@{
   /// Returns the strategic game on which the outcome is defined.
@@ -529,14 +536,14 @@ class GameNodeRep : public GameObject {
   std::string m_label;
   GameInfosetRep *m_infoset{nullptr};
   GameNodeRep *m_parent;
-  GameOutcomeRep *m_outcome{nullptr};
+  std::shared_ptr<GameOutcomeRep> m_outcome;
   std::vector<GameNodeRep *> m_children;
   GameNodeRep *whichbranch{nullptr}, *ptr{nullptr};
 
   GameNodeRep(GameRep *e, GameNodeRep *p);
   ~GameNodeRep() override;
 
-  void DeleteOutcome(GameOutcomeRep *outc);
+  void DeleteOutcome(std::shared_ptr<GameOutcomeRep> outc);
 
 public:
   using Children = ElementCollection<GameNode, GameNodeRep>;
@@ -583,7 +590,7 @@ class GameRep : public std::enable_shared_from_this<GameRep> {
 
 protected:
   std::vector<GamePlayerRep *> m_players;
-  std::vector<GameOutcomeRep *> m_outcomes;
+  std::vector<std::shared_ptr<GameOutcomeRep>> m_outcomes;
   std::string m_title, m_comment;
   unsigned int m_version{0};
 
@@ -597,7 +604,7 @@ protected:
 
 public:
   using Players = ElementCollection<Game, GamePlayerRep>;
-  using Outcomes = ElementCollection<Game, GameOutcomeRep>;
+  using Outcomes = SmartElementCollection<Game, GameOutcomeRep>;
 
   class Nodes {
     Game m_owner{nullptr};
