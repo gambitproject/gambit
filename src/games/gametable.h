@@ -36,7 +36,7 @@ class GameTableRep : public GameExplicitRep {
   template <class T> friend class TableMixedStrategyProfileRep;
 
 private:
-  std::vector<GameOutcomeRep *> m_results;
+  std::vector<std::shared_ptr<GameOutcomeRep>> m_results;
 
   /// @name Private auxiliary functions
   //@{
