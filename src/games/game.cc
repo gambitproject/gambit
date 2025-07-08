@@ -189,6 +189,20 @@ size_t GamePlayerRep::NumSequences() const
 }
 
 //========================================================================
+//                            class GameNodeRep
+//========================================================================
+
+GameNodeRep::Actions::iterator GameNodeRep::Actions::begin() const
+{
+  return {m_owner->GetInfoset()->GetActions().begin(), m_owner->GetChildren().begin()};
+}
+
+GameNodeRep::Actions::iterator GameNodeRep::Actions::end() const
+{
+  return {m_owner->GetInfoset()->GetActions().end(), m_owner->GetChildren().end()};
+}
+
+//========================================================================
 //                            class GameRep
 //========================================================================
 

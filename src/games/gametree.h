@@ -39,6 +39,7 @@ protected:
   std::size_t m_numNodes = 1;
   std::size_t m_numNonterminalNodes = 0;
   std::map<GameNodeRep *, std::vector<GameNodeRep *>> m_nodePlays;
+  std::map<GameInfoset, std::vector<GameAction>> m_infosetParents;
 
   /// @name Private auxiliary functions
   //@{
@@ -159,6 +160,7 @@ public:
 
 private:
   std::vector<GameNodeRep *> BuildConsistentPlaysRecursiveImpl(GameNodeRep *node);
+  void BuildInfosetParents();
 };
 
 template <class T> class TreeMixedStrategyProfileRep : public MixedStrategyProfileRep<T> {
