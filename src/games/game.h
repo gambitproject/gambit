@@ -62,7 +62,6 @@ template <class P, class T> class ElementCollection {
 
 public:
   class iterator {
-    friend class GameRep;
 
     P m_owner{nullptr};
     const std::vector<T *> *m_container{nullptr};
@@ -106,6 +105,7 @@ public:
       return *this;
     }
     value_type operator*() const { return m_container->at(m_index); }
+    P GetOwner() const { return m_owner; }
   };
 
   ElementCollection() = default;
@@ -121,6 +121,8 @@ public:
   {
     return m_owner == p_other.m_owner && m_container == p_other.m_container;
   }
+
+  bool empty() const { return size() == 0; }
   size_t size() const { return m_container->size(); }
   GameObjectPtr<T> front() const { return m_container->front(); }
   GameObjectPtr<T> back() const { return m_container->back(); }
@@ -525,7 +527,7 @@ public:
 
       Game m_owner{nullptr};
       GameNode m_current_node{nullptr};
-      std::stack<ChildIterator> m_stack{};
+      std::stack<std::pair<ChildIterator, ChildIterator>> m_stack{};
 
       iterator(Game game) : m_owner(game) {}
 
@@ -561,15 +563,16 @@ public:
         }
 
         if (!m_current_node->IsTerminal()) {
-          m_stack.push(m_current_node->GetChildren().begin());
+          auto children = m_current_node->GetChildren();
+          m_stack.emplace(children.begin(), children.end());
         }
 
         while (!m_stack.empty()) {
-          auto &top_it = m_stack.top();
-          auto end_it = top_it.m_owner->GetChildren().end();
-          if (top_it != end_it) {
-            m_current_node = *top_it;
-            ++top_it;
+          auto &[current_it, end_it] = m_stack.top();
+
+          if (current_it != end_it) {
+            m_current_node = *current_it;
+            ++current_it;
             return *this;
           }
           m_stack.pop();

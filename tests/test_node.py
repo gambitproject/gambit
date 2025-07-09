@@ -803,15 +803,11 @@ def test_node_plays():
     ],
 )
 def test_nodes_iteration_order(game_obj: gbt.Game):
-    """
-    Verify that the C++ `game.nodes` iterator produces the DFS traversal.
-
+    """Verify that the C++ `game.nodes` iterator produces the DFS traversal.
     """
     def dfs(node: gbt.Node) -> typing.Iterator[gbt.Node]:
         yield node
         for child in node.children:
             yield from dfs(child)
 
-    zipped_nodes = itertools.zip_longest(game_obj.nodes, dfs(game_obj.root))
-
-    assert all(a == b for a, b in zipped_nodes)
+    assert all(a == b for a, b in itertools.zip_longest(game_obj.nodes, dfs(game_obj.root)))
