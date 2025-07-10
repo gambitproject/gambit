@@ -86,7 +86,8 @@ GameOutcome TablePureStrategyProfileRep::GetOutcome() const
 
 void TablePureStrategyProfileRep::SetOutcome(GameOutcome p_outcome)
 {
-  dynamic_cast<GameTableRep &>(*m_nfg).m_results[m_index] = std::shared_ptr<GameOutcomeRep>(p_outcome);
+  dynamic_cast<GameTableRep &>(*m_nfg).m_results[m_index] =
+      std::shared_ptr<GameOutcomeRep>(p_outcome);
 }
 
 Rational TablePureStrategyProfileRep::GetPayoff(const GamePlayer &p_player) const
@@ -103,9 +104,8 @@ Rational TablePureStrategyProfileRep::GetPayoff(const GamePlayer &p_player) cons
 Rational TablePureStrategyProfileRep::GetStrategyValue(const GameStrategy &p_strategy) const
 {
   const auto &player = p_strategy->GetPlayer();
-  auto outcome =
-      dynamic_cast<GameTableRep &>(*m_nfg)
-          .m_results[m_index - m_profile.at(player)->m_offset + p_strategy->m_offset];
+  auto outcome = dynamic_cast<GameTableRep &>(*m_nfg)
+                     .m_results[m_index - m_profile.at(player)->m_offset + p_strategy->m_offset];
   if (outcome) {
     return outcome->GetPayoff<Rational>(player);
   }
@@ -246,8 +246,8 @@ template <class T>
 T TableMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &strategy1,
                                                   const GameStrategy &strategy2) const
 {
-  GamePlayerRep *player1 = strategy1->GetPlayer();
-  GamePlayerRep *player2 = strategy2->GetPlayer();
+  auto player1 = strategy1->GetPlayer();
+  auto player2 = strategy2->GetPlayer();
   if (player1 == player2) {
     return T(0);
   }
@@ -269,7 +269,7 @@ GameTableRep::GameTableRep(const std::vector<int> &dim, bool p_sparseOutcomes /*
   : m_results(std::accumulate(dim.begin(), dim.end(), 1, std::multiplies<>()))
 {
   for (const auto &nstrat : dim) {
-    m_players.push_back(new GamePlayerRep(this, m_players.size() + 1, nstrat));
+    m_players.push_back(GamePlayerRep::CreatePlayer(this, m_players.size() + 1, nstrat));
     m_players.back()->m_label = lexical_cast<std::string>(m_players.size());
     std::for_each(
         m_players.back()->m_strategies.begin(), m_players.back()->m_strategies.end(),
@@ -279,8 +279,9 @@ GameTableRep::GameTableRep(const std::vector<int> &dim, bool p_sparseOutcomes /*
 
   if (!p_sparseOutcomes) {
     m_outcomes = std::vector<std::shared_ptr<GameOutcomeRep>>(m_results.size());
-    std::generate(m_outcomes.begin(), m_outcomes.end(),
-                  [this, outc = 1]() mutable { return std::make_shared<GameOutcomeRep>(this, outc++); });
+    std::generate(m_outcomes.begin(), m_outcomes.end(), [this, outc = 1]() mutable {
+      return std::make_shared<GameOutcomeRep>(this, outc++);
+    });
     std::copy(m_outcomes.begin(), m_outcomes.end(), m_results.begin());
   }
 }
@@ -370,7 +371,7 @@ void GameTableRep::WriteNfgFile(std::ostream &p_file) const
 GamePlayer GameTableRep::NewPlayer()
 {
   IncrementVersion();
-  auto player = new GamePlayerRep(this, m_players.size() + 1, 1);
+  auto player = GamePlayerRep::CreatePlayer(this, m_players.size() + 1, 1);
   m_players.push_back(player);
   for (auto outcome : m_outcomes) {
     outcome->m_payoffs[player] = Number();
@@ -385,9 +386,10 @@ GamePlayer GameTableRep::NewPlayer()
 void GameTableRep::DeleteOutcome(const GameOutcome &p_outcome)
 {
   IncrementVersion();
-  std::replace(m_results.begin(), m_results.end(),
-    std::shared_ptr<GameOutcomeRep>(p_outcome), std::shared_ptr<GameOutcomeRep>());
-  m_outcomes.erase(std::find(m_outcomes.begin(), m_outcomes.end(), std::shared_ptr<GameOutcomeRep>(p_outcome)));
+  std::replace(m_results.begin(), m_results.end(), std::shared_ptr<GameOutcomeRep>(p_outcome),
+               std::shared_ptr<GameOutcomeRep>());
+  m_outcomes.erase(
+      std::find(m_outcomes.begin(), m_outcomes.end(), std::shared_ptr<GameOutcomeRep>(p_outcome)));
   p_outcome->Invalidate();
   std::for_each(m_outcomes.begin(), m_outcomes.end(),
                 [outc = 1](std::shared_ptr<GameOutcomeRep> c) mutable { c->m_number = outc++; });
@@ -411,7 +413,7 @@ GameStrategy GameTableRep::NewStrategy(const GamePlayer &p_player, const std::st
 
 void GameTableRep::DeleteStrategy(const GameStrategy &p_strategy)
 {
-  GamePlayerRep *player = p_strategy->GetPlayer();
+  auto player = p_strategy->GetPlayer();
   if (player->m_game != this) {
     throw MismatchException();
   }

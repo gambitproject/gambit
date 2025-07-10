@@ -152,7 +152,8 @@ GameInfoset GameActionRep::GetInfoset() const { return m_infoset.lock(); }
 //========================================================================
 
 std::shared_ptr<GameInfosetRep>
-GameInfosetRep::CreateInfoset(GameRep *p_efg, int p_number, GamePlayerRep *p_player, int p_actions)
+GameInfosetRep::CreateInfoset(GameRep *p_efg, int p_number,
+                              std::shared_ptr<GamePlayerRep> p_player, int p_actions)
 {
   auto infoset = std::make_shared<GameInfosetRep>();
   infoset->m_game = p_efg;
@@ -189,7 +190,7 @@ void GameTreeRep::SetPlayer(GameInfoset p_infoset, GamePlayer p_player)
     return;
   }
 
-  GamePlayerRep *oldPlayer = p_infoset->GetPlayer();
+  auto oldPlayer = p_infoset->GetPlayer();
   IncrementVersion();
   oldPlayer->m_infosets.erase(std::find(oldPlayer->m_infosets.begin(), oldPlayer->m_infosets.end(),
                                         std::shared_ptr<GameInfosetRep>(p_infoset)));
@@ -564,7 +565,7 @@ GameInfoset GameTreeRep::LeaveInfoset(GameNode p_node)
     return oldInfoset;
   }
 
-  GamePlayerRep *player = oldInfoset->m_player;
+  auto player = oldInfoset->m_player;
   RemoveMember(oldInfoset, node);
   node->m_infoset = GameInfosetRep::CreateInfoset(this, player->m_infosets.size() + 1, player,
                                                   node->m_children.size());
@@ -813,7 +814,7 @@ void GameTreeRep::Canonicalize()
   NumberNodes(m_root, nodeindex);
 
   for (size_t pl = 0; pl <= m_players.size(); pl++) {
-    GamePlayerRep *player = (pl) ? m_players[pl - 1] : m_chance;
+    auto player = (pl) ? m_players[pl - 1] : m_chance;
 
     // Sort nodes within information sets according to ID.
     // Coded using a bubble sort for simplicity; large games might
@@ -992,7 +993,7 @@ int GameTreeRep::BehavProfileLength() const
 GamePlayer GameTreeRep::NewPlayer()
 {
   IncrementVersion();
-  auto player = new GamePlayerRep(this, m_players.size() + 1);
+  auto player = std::make_shared<GamePlayerRep>(this, m_players.size() + 1);
   m_players.push_back(player);
   for (auto &outcome : m_outcomes) {
     outcome->m_payoffs[player] = Number();

@@ -62,7 +62,9 @@ class Strategy:
     @property
     def game(self) -> Game:
         """The game to which the strategy belongs."""
-        return Game.wrap(self.strategy.deref().GetPlayer().deref().GetGame())
+        return Game.wrap(
+            dereference(self.strategy.deref().GetPlayer().deref()).GetGame()
+        )
 
     @property
     def player(self) -> Player:

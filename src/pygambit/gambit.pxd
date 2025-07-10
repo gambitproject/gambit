@@ -59,9 +59,9 @@ cdef extern from "games/game.h":
     cdef cppclass c_Game "GameObjectPtr<GameRep>":
         c_GameRep *deref "operator->"() except +RuntimeError
 
-    cdef cppclass c_GamePlayer "GameObjectPtr<GamePlayerRep>":
+    cdef cppclass c_GamePlayer "GameObjectSharedPtr<GamePlayerRep>":
         bool operator !=(c_GamePlayer) except +
-        c_GamePlayerRep *deref "operator->"() except +RuntimeError
+        shared_ptr[c_GamePlayerRep] deref "operator->"() except +RuntimeError
 
     cdef cppclass c_GameOutcome "GameObjectSharedPtr<GameOutcomeRep>":
         bool operator==(c_GameOutcome) except +

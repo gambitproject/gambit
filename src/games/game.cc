@@ -63,12 +63,13 @@ GameAction GameStrategyRep::GetAction(const GameInfoset &p_infoset) const
 //                       class GamePlayerRep
 //========================================================================
 
-GamePlayerRep::GamePlayerRep(GameRep *p_game, int p_id, int p_strats)
-  : m_game(p_game), m_number(p_id)
+std::shared_ptr<GamePlayerRep> GamePlayerRep::CreatePlayer(GameRep *p_game, int p_id, int p_strats)
 {
+  auto player = std::make_shared<GamePlayerRep>(p_game, p_id);
   for (int j = 1; j <= p_strats; j++) {
-    m_strategies.push_back(new GameStrategyRep(this, j, ""));
+    player->m_strategies.push_back(new GameStrategyRep(player, j, ""));
   }
+  return player;
 }
 
 GamePlayerRep::~GamePlayerRep()
@@ -94,7 +95,8 @@ void GamePlayerRep::MakeStrategy()
     }
   }
 
-  auto *strategy = new GameStrategyRep(this, m_strategies.size() + 1, "");
+  auto *strategy = new GameStrategyRep(std::const_pointer_cast<GamePlayerRep>(shared_from_this()),
+                                       m_strategies.size() + 1, "");
   strategy->m_behav = c;
 
   // We generate a default labeling -- probably should be changed in future
@@ -123,7 +125,7 @@ void GamePlayerRep::MakeReducedStrats(GameNodeRep *n, GameNodeRep *nn)
   }
 
   if (!n->IsTerminal()) {
-    if (n->m_infoset->m_player == this) {
+    if (n->m_infoset->m_player.get() == this) {
       if (n->m_infoset->flag == 0) {
         // we haven't visited this infoset before
         n->m_infoset->flag = 1;
@@ -367,7 +369,7 @@ MixedStrategyProfile<T>::operator=(const MixedStrategyProfile<T> &p_profile)
 //             MixedStrategyProfile<T>: General data access
 //========================================================================
 
-template <class T> Vector<T> MixedStrategyProfile<T>::operator[](const GamePlayer &p_player) const
+template <class T> Vector<T> MixedStrategyProfile<T>::get(const GamePlayer &p_player) const
 {
   CheckVersion();
   auto strategies = m_rep->m_support.GetStrategies(p_player);
