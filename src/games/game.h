@@ -26,6 +26,7 @@
 #include <iostream>
 #include <list>
 #include <set>
+#include <stack>
 
 #include "number.h"
 #include "gameobject.h"
@@ -119,6 +120,8 @@ public:
   {
     return m_owner == p_other.m_owner && m_container == p_other.m_container;
   }
+
+  bool empty() const { return m_container->empty(); }
   size_t size() const { return m_container->size(); }
   GameObjectPtr<T> front() const { return m_container->front(); }
   GameObjectPtr<T> back() const { return m_container->back(); }
@@ -448,6 +451,9 @@ public:
   GamePlayer GetPlayer() const;
   /// Returns the index of the strategy for its player
   int GetNumber() const { return m_number; }
+
+  /// Returns the action specified by the strategy at the information set
+  GameAction GetAction(const GameInfoset &) const;
   //@}
 };
 
@@ -599,6 +605,88 @@ public:
   using Players = ElementCollection<Game, GamePlayerRep>;
   using Outcomes = SmartElementCollection<Game, GameOutcomeRep>;
 
+  class Nodes {
+    Game m_owner{nullptr};
+
+  public:
+    class iterator {
+      friend class Nodes;
+      using ChildIterator = ElementCollection<GameNode, GameNodeRep>::iterator;
+
+      Game m_owner{nullptr};
+      GameNode m_current_node{nullptr};
+      std::stack<std::pair<ChildIterator, ChildIterator>> m_stack{};
+
+      iterator(const Game &game) : m_owner(game) {}
+
+    public:
+      using iterator_category = std::forward_iterator_tag;
+      using value_type = GameNode;
+      using pointer = value_type *;
+
+      iterator() = default;
+
+      iterator(const Game &game, const GameNode &start_node) : m_owner(game), m_current_node(start_node)
+      {
+        if (!start_node) {
+          return;
+        }
+        if (start_node->GetGame() != m_owner) {
+          throw MismatchException();
+        }
+      }
+
+      value_type operator*() const
+      {
+        if (!m_current_node) {
+          throw std::runtime_error("Cannot dereference an end iterator");
+        }
+        return m_current_node;
+      }
+
+      iterator &operator++()
+      {
+        if (!m_current_node) {
+          throw std::out_of_range("Cannot increment an end iterator");
+        }
+
+        if (!m_current_node->IsTerminal()) {
+          auto children = m_current_node->GetChildren();
+          m_stack.emplace(children.begin(), children.end());
+        }
+
+        while (!m_stack.empty()) {
+          auto &[current_it, end_it] = m_stack.top();
+
+          if (current_it != end_it) {
+            m_current_node = *current_it;
+            ++current_it;
+            return *this;
+          }
+          m_stack.pop();
+        }
+
+        m_current_node = nullptr;
+        return *this;
+      }
+
+      bool operator==(const iterator &other) const
+      {
+        return m_owner == other.m_owner && m_current_node == other.m_current_node;
+      }
+      bool operator!=(const iterator &other) const { return !(*this == other); }
+    };
+
+    Nodes() = default;
+    explicit Nodes(const Game &p_owner) : m_owner(p_owner) {}
+
+    iterator begin() const
+    {
+      return (m_owner) ? iterator{m_owner, m_owner->GetRoot()} : iterator{};
+    }
+    iterator end() const { return (m_owner) ? iterator{m_owner} : iterator{}; }
+  };
+
   /// @name Lifecycle
   //@{
   /// Clean up the game
@@ -640,6 +728,13 @@ public:
   virtual Rational GetMaxPayoff() const = 0;
   /// Returns the largest payoff to the player in any outcome of the game
   virtual Rational GetMaxPayoff(const GamePlayer &p_player) const = 0;
+
+  /// Returns the set of terminal nodes which are descendants of node
+  virtual std::vector<GameNode> GetPlays(GameNode node) const { throw UndefinedException(); }
+  /// Returns the set of terminal nodes which are descendants of members of an infoset
+  virtual std::vector<GameNode> GetPlays(GameInfoset infoset) const { throw UndefinedException(); }
+  /// Returns the set of terminal nodes which are descendants of members of an action
+  virtual std::vector<GameNode> GetPlays(GameAction action) const { throw UndefinedException(); }
 
   /// Returns true if the game is perfect recall.  If not,
   /// a pair of violating information sets is returned in the parameters.
@@ -804,6 +899,8 @@ public:
   //@{
   /// Returns the root node of the game
   virtual GameNode GetRoot() const = 0;
+  /// Returns a range that can be used to iterate over the nodes of the game
+  Nodes GetNodes() const { return Nodes(this); }
   /// Returns the number of nodes in the game
   virtual size_t NumNodes() const = 0;
   /// Returns the number of non-terminal nodes in the game
