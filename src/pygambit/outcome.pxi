@@ -85,7 +85,8 @@ class Outcome:
         resolved_player = cython.cast(Player,
                                       self.game._resolve_player(player, "Outcome.__getitem__"))
         payoff = (
-            dereference(self.outcome.deref()).GetPayoff[string](resolved_player.player).decode("ascii")
+            dereference(self.outcome.deref())
+            .GetPayoff[string](resolved_player.player).decode("ascii")
         )
         if "." in payoff:
             return decimal.Decimal(payoff)
@@ -143,7 +144,10 @@ class TreeGameOutcome:
     def __eq__(self, other: typing.Any) -> bool:
         return (
             isinstance(other, TreeGameOutcome) and
-            dereference(self.psp).deref() == dereference(cython.cast(TreeGameOutcome, other).psp).deref()
+            (
+                dereference(self.psp).deref() ==
+                dereference(cython.cast(TreeGameOutcome, other).psp).deref()
+            )
         )
 
     def __getitem__(self, player: typing.Union[Player, str]) -> Rational:
@@ -168,7 +172,9 @@ class TreeGameOutcome:
         """
         resolved_player = cython.cast(Player,
                                       self.game._resolve_player(player, "Outcome.__getitem__"))
-        return rat_to_py(dereference(dereference(self.psp).deref()).GetPayoff(resolved_player.player))
+        return rat_to_py(
+            dereference(dereference(self.psp).deref()).GetPayoff(resolved_player.player)
+        )
 
     def delete(self):
         raise UndefinedOperationError("Cannot modify outcomes in a derived strategic game.")
@@ -178,7 +184,8 @@ class TreeGameOutcome:
         """The text label associated with this outcome."""
         return "(%s)" % (
             ",".join(
-                [dereference(dereference(self.psp).deref()).GetStrategy(cython.cast(Player, player).player)
+                [dereference(dereference(self.psp).deref())
+                 .GetStrategy(cython.cast(Player, player).player)
                  .deref().GetLabel().c_str()
                  for player in self.game.players]
             )
