@@ -20,6 +20,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
 import cython
+from cython.operator cimport dereference
 
 
 @cython.cclass
@@ -42,10 +43,10 @@ class PlayerInfosets:
 
     def __len__(self) -> int:
         """The number of information sets at which the player has the decision."""
-        return self.player.deref().GetInfosets().size()
+        return dereference(self.player.deref()).GetInfosets().size()
 
     def __iter__(self) -> typing.Iterator[Infoset]:
-        for infoset in self.player.deref().GetInfosets():
+        for infoset in dereference(self.player.deref()).GetInfosets():
             yield Infoset.wrap(infoset)
 
     def __getitem__(self, index: typing.Union[int, str]) -> Infoset:
@@ -59,7 +60,7 @@ class PlayerInfosets:
                 raise ValueError(f"Player has multiple infosets with label '{index}'")
             return matches[0]
         if isinstance(index, int):
-            return Infoset.wrap(self.player.deref().GetInfoset(index + 1))
+            return Infoset.wrap(dereference(self.player.deref()).GetInfoset(index + 1))
         raise TypeError(f"Infoset index must be int or str, not {index.__class__.__name__}")
 
 
@@ -127,10 +128,10 @@ class PlayerStrategies:
 
     def __len__(self):
         """The number of strategies for the player in the game."""
-        return self.player.deref().GetStrategies().size()
+        return dereference(self.player.deref()).GetStrategies().size()
 
     def __iter__(self) -> typing.Iterator[Strategy]:
-        for strategy in self.player.deref().GetStrategies():
+        for strategy in dereference(self.player.deref()).GetStrategies():
             yield Strategy.wrap(strategy)
 
     def __getitem__(self, index: typing.Union[int, str]) -> Strategy:
@@ -144,7 +145,7 @@ class PlayerStrategies:
                 raise ValueError(f"Player has multiple strategies with label '{index}'")
             return matches[0]
         if isinstance(index, int):
-            return Strategy.wrap(self.player.deref().GetStrategy(index + 1))
+            return Strategy.wrap(dereference(self.player.deref()).GetStrategy(index + 1))
         raise TypeError(f"Strategy index must be int or str, not {index.__class__.__name__}")
 
 
@@ -178,36 +179,36 @@ class Player:
         )
 
     def __hash__(self) -> int:
-        return cython.cast(cython.long, self.player.deref())
+        return cython.cast(cython.long, self.player.deref().get())
 
     @property
     def game(self) -> Game:
         """Gets the ``Game`` to which the player belongs."""
-        return Game.wrap(self.player.deref().GetGame())
+        return Game.wrap(dereference(self.player.deref()).GetGame())
 
     @property
     def label(self) -> str:
         """Gets or sets the text label of the player."""
-        return self.player.deref().GetLabel().decode("ascii")
+        return dereference(self.player.deref()).GetLabel().decode("ascii")
 
     @label.setter
     def label(self, value: str) -> None:
         # check to see if the player's name has been used elsewhere
         if value in [i.label for i in self.game.players]:
             warnings.warn("Another player with an identical label exists")
-        self.player.deref().SetLabel(value.encode("ascii"))
+        dereference(self.player.deref()).SetLabel(value.encode("ascii"))
 
     @property
     def number(self) -> int:
         """Returns the number of the player in its game.
         Players are numbered starting with 0.
         """
-        return self.player.deref().GetNumber() - 1
+        return dereference(self.player.deref()).GetNumber() - 1
 
     @property
     def is_chance(self) -> bool:
         """Returns whether the player is the chance player."""
-        return self.player.deref().IsChance() != 0
+        return dereference(self.player.deref()).IsChance() != 0
 
     @property
     def strategies(self) -> PlayerStrategies:
@@ -227,9 +228,13 @@ class Player:
     @property
     def min_payoff(self) -> Rational:
         """Returns the smallest payoff for the player in any outcome of the game."""
-        return rat_to_py(self.player.deref().GetGame().deref().GetMinPayoff(self.player))
+        return rat_to_py(
+            dereference(self.player.deref()).GetGame().deref().GetMinPayoff(self.player)
+        )
 
     @property
     def max_payoff(self) -> Rational:
         """Returns the largest payoff for the player in any outcome of the game."""
-        return rat_to_py(self.player.deref().GetGame().deref().GetMaxPayoff(self.player))
+        return rat_to_py(
+            dereference(self.player.deref()).GetGame().deref().GetMaxPayoff(self.player)
+        )

@@ -845,7 +845,7 @@ class Game:
 
         for (pl, st) in enumerate(args):
             deref(deref(psp).deref()).SetStrategy(
-                self.game.deref().GetPlayer(pl+1).deref().GetStrategy(st+1)
+                dereference(self.game.deref().GetPlayer(pl+1).deref()).GetStrategy(st+1)
             )
 
         if self.is_tree:

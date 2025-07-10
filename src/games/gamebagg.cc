@@ -156,10 +156,10 @@ template <class T>
 T BAGGMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &ps1,
                                                  const GameStrategy &ps2) const
 {
-  GamePlayerRep *player1 = ps1->GetPlayer();
-  GamePlayerRep *player2 = ps2->GetPlayer();
+  const std::shared_ptr<GamePlayerRep> player1 = ps1->GetPlayer();
+  const std::shared_ptr<GamePlayerRep> player2 = ps2->GetPlayer();
   if (player1 == player2) {
-    return (T)0;
+    return static_cast<T>(0);
   }
 
   auto &g = dynamic_cast<GameBAGGRep &>(*(this->m_support.GetGame()));
@@ -212,7 +212,7 @@ GameBAGGRep::GameBAGGRep(std::shared_ptr<agg::BAGG> _baggPtr)
   int k = 1;
   for (int pl = 1; pl <= baggPtr->getNumPlayers(); pl++) {
     for (int j = 0; j < baggPtr->getNumTypes(pl - 1); j++, k++) {
-      m_players.push_back(new GamePlayerRep(this, k, baggPtr->getNumActions(pl - 1, j)));
+      m_players.push_back(GamePlayerRep::CreatePlayer(this, k, baggPtr->getNumActions(pl - 1, j)));
       m_players.back()->m_label = std::to_string(k);
       agent2baggPlayer[k] = pl;
       std::for_each(m_players.back()->m_strategies.begin(), m_players.back()->m_strategies.end(),

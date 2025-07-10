@@ -50,7 +50,7 @@ class GameStrategyRep;
 using GameStrategy = GameObjectPtr<GameStrategyRep>;
 
 class GamePlayerRep;
-using GamePlayer = GameObjectPtr<GamePlayerRep>;
+using GamePlayer = GameObjectSharedPtr<GamePlayerRep>;
 
 class GameNodeRep;
 using GameNode = GameObjectPtr<GameNodeRep>;
@@ -272,7 +272,7 @@ class GameOutcomeRep : public std::enable_shared_from_this<GameOutcomeRep> {
   GameRep *m_game;
   int m_number;
   std::string m_label;
-  std::map<GamePlayerRep *, Number> m_payoffs;
+  std::map<std::shared_ptr<GamePlayerRep>, Number> m_payoffs;
 
 public:
   /// @name Lifecycle
@@ -349,10 +349,10 @@ class GameInfosetRep : public std::enable_shared_from_this<GameInfosetRep> {
   template <class T> friend class MixedBehaviorProfile;
 
   bool m_valid{true};
-  GameRep *m_game;
-  int m_number;
+  GameRep *m_game{nullptr};
+  int m_number{0};
   std::string m_label;
-  GamePlayerRep *m_player;
+  std::shared_ptr<GamePlayerRep> m_player;
   std::vector<std::shared_ptr<GameActionRep>> m_actions;
   std::vector<GameNodeRep *> m_members;
   int flag{0}, whichbranch{0};
@@ -372,7 +372,8 @@ public:
   ~GameInfosetRep();
 
   static std::shared_ptr<GameInfosetRep> CreateInfoset(GameRep *p_efg, int p_number,
-                                                       GamePlayerRep *p_player, int p_actions);
+                                                       std::shared_ptr<GamePlayerRep> p_player,
+                                                       int p_actions);
 
   /// @name Validity management
   //@{
@@ -442,7 +443,7 @@ class GameStrategyRep : public GameObject {
   template <class T> friend class TableMixedStrategyProfileRep;
   template <class T> friend class MixedBehaviorProfile;
 
-  GamePlayerRep *m_player;
+  std::shared_ptr<GamePlayerRep> m_player;
   int m_number;
   long m_offset{-1L};
   std::string m_label;
@@ -451,7 +452,8 @@ class GameStrategyRep : public GameObject {
   /// @name Lifecycle
   //@{
   /// Creates a new strategy for the given player.
-  explicit GameStrategyRep(GamePlayerRep *p_player, int p_number, const std::string &p_label)
+  explicit GameStrategyRep(std::shared_ptr<GamePlayerRep> p_player, int p_number,
+                           const std::string &p_label)
     : m_player(p_player), m_number(p_number), m_label(p_label)
   {
   }
@@ -476,7 +478,7 @@ public:
 };
 
 /// A player in a game
-class GamePlayerRep : public GameObject {
+class GamePlayerRep : public std::enable_shared_from_this<GamePlayerRep> {
   friend class GameRep;
   friend class GameExplicitRep;
   friend class GameTreeRep;
@@ -495,19 +497,26 @@ class GamePlayerRep : public GameObject {
   void MakeReducedStrats(class GameNodeRep *, class GameNodeRep *);
   //@}
 
+  bool m_valid{true};
   GameRep *m_game;
   int m_number;
   std::string m_label;
   std::vector<std::shared_ptr<GameInfosetRep>> m_infosets;
   std::vector<GameStrategyRep *> m_strategies;
 
-  GamePlayerRep(GameRep *p_game, int p_id) : m_game(p_game), m_number(p_id) {}
-  GamePlayerRep(GameRep *p_game, int p_id, int m_strats);
-  ~GamePlayerRep() override;
-
 public:
   using Infosets = SmartElementCollection<GamePlayer, GameInfosetRep>;
   using Strategies = ElementCollection<GamePlayer, GameStrategyRep>;
+
+  GamePlayerRep(GameRep *p_game, int p_id) : m_game(p_game), m_number(p_id) {}
+  static std::shared_ptr<GamePlayerRep> CreatePlayer(GameRep *p_game, int p_id, int p_strats);
+  ~GamePlayerRep();
+
+  /// @name Validity management
+  //@{
+  bool IsValid() const { return m_valid; }
+  void Invalidate() { m_valid = false; }
+  //@}
 
   int GetNumber() const { return m_number; }
   Game GetGame() const;
@@ -522,7 +531,10 @@ public:
   /// Returns the p_index'th information set
   GameInfoset GetInfoset(int p_index) const { return m_infosets.at(p_index - 1); }
   /// Returns the information sets for the player
-  Infosets GetInfosets() const { return Infosets(this, &m_infosets); }
+  Infosets GetInfosets() const
+  {
+    return Infosets(std::const_pointer_cast<GamePlayerRep>(shared_from_this()), &m_infosets);
+  }
 
   /// @name Strategies
   //@{
@@ -606,7 +618,7 @@ class GameRep : public std::enable_shared_from_this<GameRep> {
   template <class T> friend class TableMixedStrategyProfileRep;
 
 protected:
-  std::vector<GamePlayerRep *> m_players;
+  std::vector<std::shared_ptr<GamePlayerRep>> m_players;
   std::vector<std::shared_ptr<GameOutcomeRep>> m_outcomes;
   std::string m_title, m_comment;
   unsigned int m_version{0};
@@ -620,7 +632,7 @@ protected:
   //@}
 
 public:
-  using Players = ElementCollection<Game, GamePlayerRep>;
+  using Players = SmartElementCollection<Game, GamePlayerRep>;
   using Outcomes = SmartElementCollection<Game, GameOutcomeRep>;
 
   class Nodes {
@@ -835,8 +847,9 @@ public:
   int NumStrategyContingencies() const
   {
     BuildComputedValues();
-    return std::transform_reduce(m_players.begin(), m_players.end(), 0, std::multiplies<>(),
-                                 [](const GamePlayerRep *p) { return p->m_strategies.size(); });
+    return std::transform_reduce(
+        m_players.begin(), m_players.end(), 0, std::multiplies<>(),
+        [](const std::shared_ptr<GamePlayerRep> p) { return p->m_strategies.size(); });
   }
   /// Returns the total number of actions in the game
   virtual int BehavProfileLength() const = 0;
@@ -844,8 +857,9 @@ public:
   int MixedProfileLength() const
   {
     BuildComputedValues();
-    return std::transform_reduce(m_players.begin(), m_players.end(), 0, std::plus<>(),
-                                 [](const GamePlayerRep *p) { return p->m_strategies.size(); });
+    return std::transform_reduce(
+        m_players.begin(), m_players.end(), 0, std::plus<>(),
+        [](const std::shared_ptr<GamePlayerRep> p) { return p->m_strategies.size(); });
   }
   //@}
 
@@ -995,7 +1009,7 @@ inline GameStrategy GamePlayerRep::GetStrategy(int st) const
 inline GamePlayerRep::Strategies GamePlayerRep::GetStrategies() const
 {
   m_game->BuildComputedValues();
-  return Strategies(this, &m_strategies);
+  return Strategies(std::const_pointer_cast<GamePlayerRep>(shared_from_this()), &m_strategies);
 }
 
 inline Game GameNodeRep::GetGame() const { return m_game->shared_from_this(); }
