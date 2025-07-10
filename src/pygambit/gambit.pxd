@@ -56,7 +56,7 @@ cdef extern from "games/game.h":
     cdef cppclass c_GameOutcomeRep "GameOutcomeRep"
     cdef cppclass c_GameNodeRep "GameNodeRep"
 
-    cdef cppclass c_Game "GameObjectPtr<GameRep>":
+    cdef cppclass c_Game "Game":
         c_GameRep *deref "operator->"() except +RuntimeError
 
     cdef cppclass c_GamePlayer "GameObjectPtr<GamePlayerRep>":

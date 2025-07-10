@@ -244,20 +244,20 @@ Array<int> GameBAGGRep::NumStrategies() const
 
 PureStrategyProfile GameBAGGRep::NewPureStrategyProfile() const
 {
-  return PureStrategyProfile(
-      std::make_shared<BAGGPureStrategyProfileRep>(const_cast<GameBAGGRep *>(this)));
+  return PureStrategyProfile(std::make_shared<BAGGPureStrategyProfileRep>(
+      std::const_pointer_cast<GameRep>(shared_from_this())));
 }
 
 MixedStrategyProfile<double> GameBAGGRep::NewMixedStrategyProfile(double) const
 {
   return MixedStrategyProfile<double>(new BAGGMixedStrategyProfileRep<double>(
-      StrategySupportProfile(const_cast<GameBAGGRep *>(this))));
+      StrategySupportProfile(std::const_pointer_cast<GameRep>(shared_from_this()))));
 }
 
 MixedStrategyProfile<Rational> GameBAGGRep::NewMixedStrategyProfile(const Rational &) const
 {
   return MixedStrategyProfile<Rational>(new BAGGMixedStrategyProfileRep<Rational>(
-      StrategySupportProfile(const_cast<GameBAGGRep *>(this))));
+      StrategySupportProfile(std::const_pointer_cast<GameRep>(shared_from_this()))));
 }
 MixedStrategyProfile<double>
 GameBAGGRep::NewMixedStrategyProfile(double, const StrategySupportProfile &spt) const

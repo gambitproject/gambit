@@ -142,7 +142,7 @@ MixedBehaviorProfile<T>::MixedBehaviorProfile(const MixedStrategyProfile<T> &p_p
   GameNodeRep *root = m_support.GetGame()->GetRoot();
 
   const StrategySupportProfile &support = p_profile.GetSupport();
-  GameRep *game = m_support.GetGame();
+  GameRep *game = m_support.GetGame().get();
 
   for (auto player : game->GetPlayers()) {
     std::map<GameNode, T> map_nvals, map_bvals;

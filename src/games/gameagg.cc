@@ -226,20 +226,20 @@ GameStrategy GameAGGRep::GetStrategy(int p_index) const
 
 PureStrategyProfile GameAGGRep::NewPureStrategyProfile() const
 {
-  return PureStrategyProfile(
-      std::make_shared<AGGPureStrategyProfileRep>(const_cast<GameAGGRep *>(this)));
+  return PureStrategyProfile(std::make_shared<AGGPureStrategyProfileRep>(
+      std::const_pointer_cast<GameRep>(shared_from_this())));
 }
 
 MixedStrategyProfile<double> GameAGGRep::NewMixedStrategyProfile(double) const
 {
   return MixedStrategyProfile<double>(new AGGMixedStrategyProfileRep<double>(
-      StrategySupportProfile(const_cast<GameAGGRep *>(this))));
+      StrategySupportProfile(std::const_pointer_cast<GameRep>(shared_from_this()))));
 }
 
 MixedStrategyProfile<Rational> GameAGGRep::NewMixedStrategyProfile(const Rational &) const
 {
   return MixedStrategyProfile<Rational>(new AGGMixedStrategyProfileRep<Rational>(
-      StrategySupportProfile(const_cast<GameAGGRep *>(this))));
+      StrategySupportProfile(std::const_pointer_cast<GameRep>(shared_from_this()))));
 }
 MixedStrategyProfile<double>
 GameAGGRep::NewMixedStrategyProfile(double, const StrategySupportProfile &spt) const
@@ -265,7 +265,7 @@ bool GameAGGRep::IsConstSum() const
     sum += profile->GetPayoff(player);
   }
 
-  for (auto iter : StrategyContingencies(Game(this))) {
+  for (auto iter : StrategyContingencies(std::const_pointer_cast<GameRep>(shared_from_this()))) {
     Rational newsum(0);
     for (const auto &player : m_players) {
       newsum += iter->GetPayoff(player);

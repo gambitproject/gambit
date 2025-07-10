@@ -128,7 +128,7 @@ public:
 inline Game ReadBaggFile(std::istream &in)
 {
   try {
-    return new GameBAGGRep(agg::BAGG::makeBAGG(in));
+    return std::make_shared<GameBAGGRep>(agg::BAGG::makeBAGG(in));
   }
   catch (std::runtime_error &ex) {
     throw InvalidFileException(ex.what());

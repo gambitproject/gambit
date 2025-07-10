@@ -171,7 +171,7 @@ GameInfosetRep::~GameInfosetRep()
 
 void GameTreeRep::SetPlayer(GameInfoset p_infoset, GamePlayer p_player)
 {
-  if (p_infoset->GetGame() != this || p_player->GetGame() != this) {
+  if (p_infoset->m_game != this || p_player->m_game != this) {
     throw MismatchException();
   }
   if (p_infoset->GetPlayer()->IsChance() || p_player->IsChance()) {
@@ -335,10 +335,10 @@ void GameNodeRep::DeleteOutcome(GameOutcomeRep *outc)
 void GameTreeRep::SetOutcome(GameNode p_node, const GameOutcome &p_outcome)
 {
   IncrementVersion();
-  if (p_node->GetGame() != this) {
+  if (p_node->m_game != this) {
     throw MismatchException();
   }
-  if (p_outcome && p_outcome->GetGame() != this) {
+  if (p_outcome && p_outcome->m_game != this) {
     throw MismatchException();
   }
   if (p_outcome != p_node->m_outcome) {
@@ -387,7 +387,7 @@ bool GameNodeRep::IsSubgameRoot() const
 
 void GameTreeRep::DeleteParent(GameNode p_node)
 {
-  if (p_node->GetGame() != this) {
+  if (p_node->m_game != this) {
     throw MismatchException();
   }
   auto *node = dynamic_cast<GameNodeRep *>(p_node.operator->());
@@ -417,7 +417,7 @@ void GameTreeRep::DeleteParent(GameNode p_node)
 
 void GameTreeRep::DeleteTree(GameNode p_node)
 {
-  if (p_node->GetGame() != this) {
+  if (p_node->m_game != this) {
     throw MismatchException();
   }
   GameNodeRep *node = p_node;
@@ -464,7 +464,7 @@ void GameTreeRep::CopySubtree(GameNodeRep *dest, GameNodeRep *src, GameNodeRep *
 
 void GameTreeRep::CopyTree(GameNode p_dest, GameNode p_src)
 {
-  if (p_dest->GetGame() != this || p_src->GetGame() != this) {
+  if (p_dest->m_game != this || p_src->m_game != this) {
     throw MismatchException();
   }
   GameNodeRep *dest = p_dest;
@@ -487,7 +487,7 @@ void GameTreeRep::CopyTree(GameNode p_dest, GameNode p_src)
 
 void GameTreeRep::MoveTree(GameNode p_dest, GameNode p_src)
 {
-  if (p_dest->GetGame() != this || p_src->GetGame() != this) {
+  if (p_dest->m_game != this || p_src->m_game != this) {
     throw MismatchException();
   }
   GameNodeRep *dest = p_dest;
@@ -509,7 +509,7 @@ void GameTreeRep::MoveTree(GameNode p_dest, GameNode p_src)
 
 Game GameTreeRep::CopySubgame(GameNode p_root) const
 {
-  if (p_root->GetGame() != const_cast<GameTreeRep *>(this)) {
+  if (p_root->m_game != this) {
     throw MismatchException();
   }
   std::ostringstream os;
@@ -520,7 +520,7 @@ Game GameTreeRep::CopySubgame(GameNode p_root) const
 
 void GameTreeRep::SetInfoset(GameNode p_node, GameInfoset p_infoset)
 {
-  if (p_node->GetGame() != this || p_infoset->GetGame() != this) {
+  if (p_node->m_game != this || p_infoset->m_game != this) {
     throw MismatchException();
   }
   GameNodeRep *node = p_node;
@@ -575,7 +575,7 @@ GameInfoset GameTreeRep::AppendMove(GameNode p_node, GamePlayer p_player, int p_
   if (p_actions <= 0 || !node->m_children.empty()) {
     throw UndefinedException();
   }
-  if (p_node->GetGame() != this || p_player->GetGame() != this) {
+  if (p_node->m_game != this || p_player->m_game != this) {
     throw MismatchException();
   }
 
@@ -590,7 +590,7 @@ GameInfoset GameTreeRep::AppendMove(GameNode p_node, GameInfoset p_infoset)
   if (!node->m_children.empty()) {
     throw UndefinedException();
   }
-  if (p_node->GetGame() != this || p_infoset->GetGame() != this) {
+  if (p_node->m_game != this || p_infoset->m_game != this) {
     throw MismatchException();
   }
 
@@ -613,7 +613,7 @@ GameInfoset GameTreeRep::InsertMove(GameNode p_node, GamePlayer p_player, int p_
   if (p_actions <= 0) {
     throw UndefinedException();
   }
-  if (p_player->GetGame() != this) {
+  if (p_player->m_game != this) {
     throw MismatchException();
   }
 
@@ -624,7 +624,7 @@ GameInfoset GameTreeRep::InsertMove(GameNode p_node, GamePlayer p_player, int p_
 
 GameInfoset GameTreeRep::InsertMove(GameNode p_node, GameInfoset p_infoset)
 {
-  if (p_infoset->GetGame() != this) {
+  if (p_infoset->m_game != this) {
     throw MismatchException();
   }
 
@@ -684,7 +684,7 @@ Game GameTreeRep::Copy() const
   return ReadGame(is);
 }
 
-Game NewTree() { return new GameTreeRep(); }
+Game NewTree() { return std::make_shared<GameTreeRep>(); }
 
 //------------------------------------------------------------------------
 //                 GameTreeRep: General data access
@@ -1075,7 +1075,7 @@ void GameTreeRep::DeleteOutcome(const GameOutcome &p_outcome)
 
 Game GameTreeRep::SetChanceProbs(const GameInfoset &p_infoset, const Array<Number> &p_probs)
 {
-  if (p_infoset->GetGame() != this) {
+  if (p_infoset->m_game != this) {
     throw MismatchException();
   }
   if (!p_infoset->IsChanceInfoset()) {
@@ -1098,12 +1098,12 @@ Game GameTreeRep::SetChanceProbs(const GameInfoset &p_infoset, const Array<Numbe
   }
   std::copy(p_probs.begin(), p_probs.end(), p_infoset->m_probs.begin());
   ClearComputedValues();
-  return this;
+  return shared_from_this();
 }
 
 Game GameTreeRep::NormalizeChanceProbs(const GameInfoset &p_infoset)
 {
-  if (p_infoset->GetGame() != this) {
+  if (p_infoset->m_game != this) {
     throw MismatchException();
   }
   if (!p_infoset->IsChanceInfoset()) {
@@ -1123,7 +1123,7 @@ Game GameTreeRep::NormalizeChanceProbs(const GameInfoset &p_infoset)
     std::transform(probs.begin(), probs.end(), probs.begin(),
                    [&sum](const Number &n) { return static_cast<Rational>(n) / sum; });
   }
-  return this;
+  return shared_from_this();
 }
 
 //------------------------------------------------------------------------
@@ -1135,7 +1135,8 @@ MixedStrategyProfile<double> GameTreeRep::NewMixedStrategyProfile(double) const
   if (!IsPerfectRecall()) {
     throw UndefinedException("Mixed strategies not supported for games with imperfect recall.");
   }
-  return StrategySupportProfile(const_cast<GameTreeRep *>(this)).NewMixedStrategyProfile<double>();
+  return StrategySupportProfile(std::const_pointer_cast<GameRep>(shared_from_this()))
+      .NewMixedStrategyProfile<double>();
 }
 
 MixedStrategyProfile<Rational> GameTreeRep::NewMixedStrategyProfile(const Rational &) const
@@ -1143,7 +1144,7 @@ MixedStrategyProfile<Rational> GameTreeRep::NewMixedStrategyProfile(const Ration
   if (!IsPerfectRecall()) {
     throw UndefinedException("Mixed strategies not supported for games with imperfect recall.");
   }
-  return StrategySupportProfile(const_cast<GameTreeRep *>(this))
+  return StrategySupportProfile(std::const_pointer_cast<GameRep>(shared_from_this()))
       .NewMixedStrategyProfile<Rational>();
 }
 
@@ -1190,8 +1191,8 @@ public:
 
 PureStrategyProfile GameTreeRep::NewPureStrategyProfile() const
 {
-  return PureStrategyProfile(
-      std::make_shared<TreePureStrategyProfileRep>(const_cast<GameTreeRep *>(this)));
+  return PureStrategyProfile(std::make_shared<TreePureStrategyProfileRep>(
+      std::const_pointer_cast<GameRep>(shared_from_this())));
 }
 
 //------------------------------------------------------------------------

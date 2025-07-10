@@ -26,6 +26,7 @@
 #include <list>
 #include <set>
 #include <stack>
+#include <memory>
 
 #include "number.h"
 #include "gameobject.h"
@@ -54,7 +55,7 @@ class GameNodeRep;
 using GameNode = GameObjectPtr<GameNodeRep>;
 
 class GameRep;
-using Game = GameObjectPtr<GameRep>;
+using Game = std::shared_ptr<GameRep>;
 
 template <class P, class T> class ElementCollection {
   P m_owner{nullptr};
@@ -488,7 +489,7 @@ public:
 };
 
 /// This is the class for representing an arbitrary finite game.
-class GameRep : public BaseGameRep {
+class GameRep : public std::enable_shared_from_this<GameRep> {
   friend class GameOutcomeRep;
   friend class GameNodeRep;
   friend class PureStrategyProfileRep;
@@ -536,7 +537,8 @@ public:
 
       iterator() = default;
 
-      iterator(const Game &game, const GameNode &start_node) : m_owner(game), m_current_node(start_node)
+      iterator(const Game &game, const GameNode &start_node)
+        : m_owner(game), m_current_node(start_node)
       {
         if (!start_node) {
           return;
@@ -600,7 +602,7 @@ public:
   /// @name Lifecycle
   //@{
   /// Clean up the game
-  ~GameRep() override;
+  virtual ~GameRep();
 
   /// Create a copy of the game, as a new game
   virtual Game Copy() const = 0;
@@ -778,7 +780,10 @@ public:
   /// Returns the pl'th player in the game
   GamePlayer GetPlayer(int pl) const { return m_players.at(pl - 1); }
   /// Returns the set of players in the game
-  Players GetPlayers() const { return Players(this, &m_players); }
+  Players GetPlayers() const
+  {
+    return Players(std::const_pointer_cast<GameRep>(shared_from_this()), &m_players);
+  }
   /// Returns the chance (nature) player
   virtual GamePlayer GetChance() const = 0;
   /// Creates a new player in the game, with no moves
@@ -798,7 +803,10 @@ public:
   /// Returns the index'th outcome defined in the game
   GameOutcome GetOutcome(int index) const { return m_outcomes.at(index - 1); }
   /// Returns the set of outcomes in the game
-  Outcomes GetOutcomes() const { return Outcomes(this, &m_outcomes); }
+  Outcomes GetOutcomes() const
+  {
+    return Outcomes(std::const_pointer_cast<GameRep>(shared_from_this()), &m_outcomes);
+  }
   /// Creates a new outcome in the game
   virtual GameOutcome NewOutcome() { throw UndefinedException(); }
   /// Deletes the specified outcome from the game
@@ -810,7 +818,7 @@ public:
   /// Returns the root node of the game
   virtual GameNode GetRoot() const = 0;
   /// Returns a range that can be used to iterate over the nodes of the game
-  Nodes GetNodes() const { return Nodes(this); }
+  Nodes GetNodes() const { return Nodes(std::const_pointer_cast<GameRep>(shared_from_this())); }
   /// Returns the number of nodes in the game
   virtual size_t NumNodes() const = 0;
   /// Returns the number of non-terminal nodes in the game
@@ -834,7 +842,7 @@ public:
 // These must be postponed to here in the file because they require
 // all classes to be defined.
 
-inline Game GameOutcomeRep::GetGame() const { return m_game; }
+inline Game GameOutcomeRep::GetGame() const { return m_game->shared_from_this(); }
 
 template <class T> const T &GameOutcomeRep::GetPayoff(const GamePlayer &p_player) const
 {
@@ -867,11 +875,11 @@ inline void GameOutcomeRep::SetPayoff(const GamePlayer &p_player, const Number &
 
 inline GamePlayer GameStrategyRep::GetPlayer() const { return m_player; }
 
-inline Game GameInfosetRep::GetGame() const { return m_game; }
+inline Game GameInfosetRep::GetGame() const { return m_game->shared_from_this(); }
 inline GamePlayer GameInfosetRep::GetPlayer() const { return m_player; }
 inline bool GameInfosetRep::IsChanceInfoset() const { return m_player->IsChance(); }
 
-inline Game GamePlayerRep::GetGame() const { return m_game; }
+inline Game GamePlayerRep::GetGame() const { return m_game->shared_from_this(); }
 inline GameStrategy GamePlayerRep::GetStrategy(int st) const
 {
   m_game->BuildComputedValues();
@@ -883,7 +891,7 @@ inline GamePlayerRep::Strategies GamePlayerRep::GetStrategies() const
   return Strategies(this, &m_strategies);
 }
 
-inline Game GameNodeRep::GetGame() const { return m_game; }
+inline Game GameNodeRep::GetGame() const { return m_game->shared_from_this(); }
 
 //=======================================================================
 
