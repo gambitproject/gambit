@@ -115,7 +115,7 @@ bool GameActionRep::Precedes(const GameNode &n) const
 void GameTreeRep::DeleteAction(GameAction p_action)
 {
   const std::shared_ptr<GameActionRep> action = p_action;
-  auto *infoset = action->m_infoset;
+  const auto infoset = action->m_infoset.lock();
   if (infoset->m_game != this) {
     throw MismatchException();
   }
@@ -145,24 +145,30 @@ void GameTreeRep::DeleteAction(GameAction p_action)
   Canonicalize();
 }
 
-GameInfoset GameActionRep::GetInfoset() const { return m_infoset; }
+GameInfoset GameActionRep::GetInfoset() const { return m_infoset.lock(); }
 
 //========================================================================
 //                       class GameInfosetRep
 //========================================================================
 
-GameInfosetRep::GameInfosetRep(GameRep *p_efg, int p_number, GamePlayerRep *p_player,
-                               int p_actions)
-  : m_game(p_efg), m_number(p_number), m_player(p_player), m_actions(p_actions)
+std::shared_ptr<GameInfosetRep>
+GameInfosetRep::CreateInfoset(GameRep *p_efg, int p_number, GamePlayerRep *p_player, int p_actions)
 {
-  std::generate(m_actions.begin(), m_actions.end(), [this, i = 1]() mutable {
-    return std::make_shared<GameActionRep>(i++, "", this);
+  auto infoset = std::make_shared<GameInfosetRep>();
+  infoset->m_game = p_efg;
+  infoset->m_number = p_number;
+  infoset->m_player = p_player;
+  infoset->m_actions = std::vector<std::shared_ptr<GameActionRep>>(p_actions);
+  std::generate(infoset->m_actions.begin(), infoset->m_actions.end(), [infoset, i = 1]() mutable {
+    return std::make_shared<GameActionRep>(i++, "", infoset);
   });
   if (p_player->IsChance()) {
-    m_probs = std::vector<Number>(m_actions.size());
-    std::fill(m_probs.begin(), m_probs.end(), Rational(1, m_actions.size()));
+    infoset->m_probs = std::vector<Number>(infoset->m_actions.size());
+    std::fill(infoset->m_probs.begin(), infoset->m_probs.end(),
+              Rational(1, infoset->m_actions.size()));
   }
-  m_player->m_infosets.push_back(this);
+  infoset->m_player->m_infosets.push_back(infoset);
+  return infoset;
 }
 
 GameInfosetRep::~GameInfosetRep()
@@ -185,8 +191,8 @@ void GameTreeRep::SetPlayer(GameInfoset p_infoset, GamePlayer p_player)
 
   GamePlayerRep *oldPlayer = p_infoset->GetPlayer();
   IncrementVersion();
-  oldPlayer->m_infosets.erase(
-      std::find(oldPlayer->m_infosets.begin(), oldPlayer->m_infosets.end(), p_infoset));
+  oldPlayer->m_infosets.erase(std::find(oldPlayer->m_infosets.begin(), oldPlayer->m_infosets.end(),
+                                        std::shared_ptr<GameInfosetRep>(p_infoset)));
   p_infoset->m_player = p_player;
   p_player->m_infosets.push_back(p_infoset);
 
@@ -198,7 +204,7 @@ bool GameInfosetRep::Precedes(GameNode p_node) const
 {
   auto node = p_node;
   while (node->m_parent) {
-    if (node->m_infoset == this) {
+    if (node->m_infoset.get() == this) {
       return true;
     }
     node = node->m_parent;
@@ -238,7 +244,7 @@ GameAction GameTreeRep::InsertAction(GameInfoset p_infoset, GameAction p_action 
   return action;
 }
 
-void GameTreeRep::RemoveMember(GameInfosetRep *p_infoset, GameNodeRep *p_node)
+void GameTreeRep::RemoveMember(std::shared_ptr<GameInfosetRep> p_infoset, GameNodeRep *p_node)
 {
   IncrementVersion();
   p_infoset->m_members.erase(
@@ -527,7 +533,7 @@ void GameTreeRep::SetInfoset(GameNode p_node, GameInfoset p_infoset)
     throw MismatchException();
   }
   GameNodeRep *node = p_node;
-  if (!node->m_infoset || node->m_infoset == p_infoset) {
+  if (!node->m_infoset || node->m_infoset == std::shared_ptr<GameInfosetRep>(p_infoset)) {
     return;
   }
   if (p_infoset->m_actions.size() != node->m_children.size()) {
@@ -553,15 +559,15 @@ GameInfoset GameTreeRep::LeaveInfoset(GameNode p_node)
   }
 
   IncrementVersion();
-  auto *oldInfoset = node->m_infoset;
+  auto oldInfoset = node->m_infoset;
   if (oldInfoset->m_members.size() == 1) {
     return oldInfoset;
   }
 
   GamePlayerRep *player = oldInfoset->m_player;
   RemoveMember(oldInfoset, node);
-  node->m_infoset =
-      new GameInfosetRep(this, player->m_infosets.size() + 1, player, node->m_children.size());
+  node->m_infoset = GameInfosetRep::CreateInfoset(this, player->m_infosets.size() + 1, player,
+                                                  node->m_children.size());
   node->m_infoset->m_members.push_back(node);
   for (auto old_act = oldInfoset->m_actions.begin(), new_act = node->m_infoset->m_actions.begin();
        old_act != oldInfoset->m_actions.end(); ++old_act, ++new_act) {
@@ -583,8 +589,8 @@ GameInfoset GameTreeRep::AppendMove(GameNode p_node, GamePlayer p_player, int p_
   }
 
   IncrementVersion();
-  return AppendMove(
-      p_node, new GameInfosetRep(this, p_player->m_infosets.size() + 1, p_player, p_actions));
+  return AppendMove(p_node, GameInfosetRep::CreateInfoset(this, p_player->m_infosets.size() + 1,
+                                                          p_player, p_actions));
 }
 
 GameInfoset GameTreeRep::AppendMove(GameNode p_node, GameInfoset p_infoset)
@@ -621,8 +627,8 @@ GameInfoset GameTreeRep::InsertMove(GameNode p_node, GamePlayer p_player, int p_
   }
 
   IncrementVersion();
-  return InsertMove(
-      p_node, new GameInfosetRep(this, p_player->m_infosets.size() + 1, p_player, p_actions));
+  return InsertMove(p_node, GameInfosetRep::CreateInfoset(this, p_player->m_infosets.size() + 1,
+                                                          p_player, p_actions));
 }
 
 GameInfoset GameTreeRep::InsertMove(GameNode p_node, GameInfoset p_infoset)
@@ -740,9 +746,9 @@ bool GameTreeRep::IsPerfectRecall(GameInfoset &s1, GameInfoset &s2) const
 {
   for (auto player : m_players) {
     for (size_t i = 1; i <= player->m_infosets.size(); i++) {
-      auto *iset1 = player->m_infosets[i - 1];
+      auto iset1 = player->m_infosets[i - 1];
       for (size_t j = 1; j <= player->m_infosets.size(); j++) {
-        auto *iset2 = player->m_infosets[j - 1];
+        auto iset2 = player->m_infosets[j - 1];
 
         bool precedes = false;
         GameAction action = nullptr;
@@ -837,7 +843,7 @@ void GameTreeRep::Canonicalize()
                            : 0);
 
         if (a < b || b == 0) {
-          auto *tmp = player->m_infosets[j - 1];
+          auto tmp = player->m_infosets[j - 1];
           player->m_infosets[j - 1] = player->m_infosets[j];
           player->m_infosets[j] = tmp;
         }
@@ -846,7 +852,7 @@ void GameTreeRep::Canonicalize()
 
     // Reassign information set IDs
     std::for_each(player->m_infosets.begin(), player->m_infosets.end(),
-                  [iset = 1](GameInfosetRep *s) mutable { s->m_number = iset++; });
+                  [iset = 1](std::shared_ptr<GameInfosetRep> s) mutable { s->m_number = iset++; });
   }
 }
 
@@ -1066,10 +1072,12 @@ void GameTreeRep::DeleteOutcome(const GameOutcome &p_outcome)
 {
   IncrementVersion();
   m_root->DeleteOutcome(p_outcome);
-  m_outcomes.erase(std::find(m_outcomes.begin(), m_outcomes.end(), std::shared_ptr<GameOutcomeRep>(p_outcome)));
+  m_outcomes.erase(
+      std::find(m_outcomes.begin(), m_outcomes.end(), std::shared_ptr<GameOutcomeRep>(p_outcome)));
   p_outcome->Invalidate();
-  std::for_each(m_outcomes.begin(), m_outcomes.end(),
-                [outc = 1](const std::shared_ptr<GameOutcomeRep> &c) mutable { c->m_number = outc++; });
+  std::for_each(
+      m_outcomes.begin(), m_outcomes.end(),
+      [outc = 1](const std::shared_ptr<GameOutcomeRep> &c) mutable { c->m_number = outc++; });
   ClearComputedValues();
 }
 

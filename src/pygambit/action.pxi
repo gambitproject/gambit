@@ -103,7 +103,10 @@ class Action:
             )
         py_string = cython.cast(
             string,
-            dereference(self.action.deref()).GetInfoset().deref().GetActionProb(self.action)
+            (
+                dereference(dereference(self.action.deref()).GetInfoset().deref())
+                .GetActionProb(self.action)
+            )
         )
         if "." in py_string.decode("ascii"):
             return decimal.Decimal(py_string.decode("ascii"))
@@ -116,5 +119,8 @@ class Action:
         """
         return [
             Node.wrap(n) for n in
-            dereference(self.action.deref()).GetInfoset().deref().GetGame().deref().GetPlays(self.action)
+            (
+                dereference(dereference(self.action.deref()).GetInfoset().deref())
+                .GetGame().deref().GetPlays(self.action)
+            )
         ]

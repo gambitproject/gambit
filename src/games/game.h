@@ -44,7 +44,7 @@ class GameActionRep;
 using GameAction = GameObjectSharedPtr<GameActionRep>;
 
 class GameInfosetRep;
-using GameInfoset = GameObjectPtr<GameInfosetRep>;
+using GameInfoset = GameObjectSharedPtr<GameInfosetRep>;
 
 class GameStrategyRep;
 using GameStrategy = GameObjectPtr<GameStrategyRep>;
@@ -316,10 +316,11 @@ class GameActionRep : public std::enable_shared_from_this<GameActionRep> {
   bool m_valid{true};
   int m_number;
   std::string m_label;
-  GameInfosetRep *m_infoset;
+  std::weak_ptr<GameInfosetRep> m_infoset;
 
 public:
-  GameActionRep(int p_number, const std::string &p_label, GameInfosetRep *p_infoset)
+  GameActionRep(int p_number, const std::string &p_label,
+                std::shared_ptr<GameInfosetRep> p_infoset)
     : m_number(p_number), m_label(p_label), m_infoset(p_infoset)
   {
   }
@@ -341,12 +342,13 @@ public:
 };
 
 /// An information set in an extensive game
-class GameInfosetRep : public GameObject {
+class GameInfosetRep : public std::enable_shared_from_this<GameInfosetRep> {
   friend class GameTreeRep;
   friend class GamePlayerRep;
   friend class GameNodeRep;
   template <class T> friend class MixedBehaviorProfile;
 
+  bool m_valid{true};
   GameRep *m_game;
   int m_number;
   std::string m_label;
@@ -355,9 +357,6 @@ class GameInfosetRep : public GameObject {
   std::vector<GameNodeRep *> m_members;
   int flag{0}, whichbranch{0};
   std::vector<Number> m_probs;
-
-  GameInfosetRep(GameRep *p_efg, int p_number, GamePlayerRep *p_player, int p_actions);
-  ~GameInfosetRep() override;
 
   void RenumberActions()
   {
@@ -368,6 +367,18 @@ class GameInfosetRep : public GameObject {
 public:
   using Actions = SmartElementCollection<GameInfoset, GameActionRep>;
   using Members = ElementCollection<GameInfoset, GameNodeRep>;
+
+  GameInfosetRep() = default;
+  ~GameInfosetRep();
+
+  static std::shared_ptr<GameInfosetRep> CreateInfoset(GameRep *p_efg, int p_number,
+                                                       GamePlayerRep *p_player, int p_actions);
+
+  /// @name Validity management
+  //@{
+  bool IsValid() const { return m_valid; }
+  void Invalidate() { m_valid = false; }
+  //@}
 
   Game GetGame() const;
   int GetNumber() const { return m_number; }
@@ -384,17 +395,23 @@ public:
   /// Returns the p_index'th action at the information set
   GameAction GetAction(int p_index) const { return m_actions.at(p_index - 1); }
   /// Returns the actions available at the information set
-  Actions GetActions() const { return Actions(this, &m_actions); }
+  Actions GetActions() const
+  {
+    return Actions(std::const_pointer_cast<GameInfosetRep>(shared_from_this()), &m_actions);
+  }
   //@}
 
   GameNode GetMember(int p_index) const { return m_members.at(p_index - 1); }
-  Members GetMembers() const { return Members(this, &m_members); }
+  Members GetMembers() const
+  {
+    return Members(std::const_pointer_cast<GameInfosetRep>(shared_from_this()), &m_members);
+  }
 
   bool Precedes(GameNode) const;
 
   const Number &GetActionProb(const GameAction &p_action) const
   {
-    if (p_action->GetInfoset() != GameInfoset(const_cast<GameInfosetRep *>(this))) {
+    if (p_action->GetInfoset() != shared_from_this()) {
       throw MismatchException();
     }
     return m_probs.at(p_action->GetNumber() - 1);
@@ -481,7 +498,7 @@ class GamePlayerRep : public GameObject {
   GameRep *m_game;
   int m_number;
   std::string m_label;
-  std::vector<GameInfosetRep *> m_infosets;
+  std::vector<std::shared_ptr<GameInfosetRep>> m_infosets;
   std::vector<GameStrategyRep *> m_strategies;
 
   GamePlayerRep(GameRep *p_game, int p_id) : m_game(p_game), m_number(p_id) {}
@@ -489,7 +506,7 @@ class GamePlayerRep : public GameObject {
   ~GamePlayerRep() override;
 
 public:
-  using Infosets = ElementCollection<GamePlayer, GameInfosetRep>;
+  using Infosets = SmartElementCollection<GamePlayer, GameInfosetRep>;
   using Strategies = ElementCollection<GamePlayer, GameStrategyRep>;
 
   int GetNumber() const { return m_number; }
@@ -534,7 +551,7 @@ class GameNodeRep : public GameObject {
   int m_number{0};
   GameRep *m_game;
   std::string m_label;
-  GameInfosetRep *m_infoset{nullptr};
+  std::shared_ptr<GameInfosetRep> m_infoset{nullptr};
   GameNodeRep *m_parent;
   std::shared_ptr<GameOutcomeRep> m_outcome;
   std::vector<GameNodeRep *> m_children;

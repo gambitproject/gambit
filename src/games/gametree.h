@@ -55,7 +55,7 @@ protected:
   void ClearComputedValues() const;
 
   /// Removes the node from the information set, invalidating if emptied
-  void RemoveMember(GameInfosetRep *, GameNodeRep *);
+  void RemoveMember(std::shared_ptr<GameInfosetRep>, GameNodeRep *);
 
   void CopySubtree(GameNodeRep *, GameNodeRep *, GameNodeRep *);
   //@}

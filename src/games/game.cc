@@ -184,8 +184,9 @@ size_t GamePlayerRep::NumSequences() const
   if (!m_game->IsTree()) {
     throw UndefinedException();
   }
-  return std::transform_reduce(m_infosets.cbegin(), m_infosets.cend(), 1, std::plus<>(),
-                               [](const GameInfosetRep *s) { return s->m_actions.size(); });
+  return std::transform_reduce(
+      m_infosets.cbegin(), m_infosets.cend(), 1, std::plus<>(),
+      [](const std::shared_ptr<GameInfosetRep> s) { return s->m_actions.size(); });
 }
 
 //========================================================================
