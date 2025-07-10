@@ -116,5 +116,5 @@ class Action:
         """
         return [
             Node.wrap(n) for n in
-            self.action.deref().GetInfoset().deref().GetGame().deref().GetPlays(self.action)
+            dereference(self.action.deref()).GetInfoset().deref().GetGame().deref().GetPlays(self.action)
         ]
