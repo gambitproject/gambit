@@ -59,7 +59,7 @@ class NodeChildren:
             if self.parent.deref().GetInfoset() == cython.cast(c_GameInfoset, NULL):
                 raise IndexError("Index out of range")
             return Node.wrap(self.parent.deref().GetChild(
-                self.parent.deref().GetInfoset().deref().GetAction(index + 1)
+                dereference(self.parent.deref().GetInfoset().deref()).GetAction(index + 1)
             ))
         raise TypeError(f"Child index must be int or str, not {index.__class__.__name__}")
 

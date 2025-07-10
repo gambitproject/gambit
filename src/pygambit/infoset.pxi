@@ -19,6 +19,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
+from cython.operator cimport dereference
+
 
 @cython.cclass
 class InfosetMembers:
@@ -39,10 +41,10 @@ class InfosetMembers:
         return f"InfosetMembers(infoset={Infoset.wrap(self.infoset)})"
 
     def __len__(self) -> int:
-        return self.infoset.deref().GetMembers().size()
+        return dereference(self.infoset.deref()).GetMembers().size()
 
     def __iter__(self) -> typing.Iterator[Node]:
-        for member in self.infoset.deref().GetMembers():
+        for member in dereference(self.infoset.deref()).GetMembers():
             yield Node.wrap(member)
 
     def __getitem__(self, index: typing.Union[int, str]) -> Node:
@@ -56,7 +58,7 @@ class InfosetMembers:
                 raise ValueError(f"Infoset has multiple members with label '{index}'")
             return matches[0]
         if isinstance(index, int):
-            return Node.wrap(self.infoset.deref().GetMember(index + 1))
+            return Node.wrap(dereference(self.infoset.deref()).GetMember(index + 1))
         raise TypeError(f"Member index must be int or str, not {index.__class__.__name__}")
 
 
@@ -80,10 +82,10 @@ class InfosetActions:
 
     def __len__(self):
         """The number of actions at the information set."""
-        return self.infoset.deref().GetActions().size()
+        return dereference(self.infoset.deref()).GetActions().size()
 
     def __iter__(self) -> typing.Iterator[Action]:
-        for action in self.infoset.deref().GetActions():
+        for action in dereference(self.infoset.deref()).GetActions():
             yield Action.wrap(action)
 
     def __getitem__(self, index: typing.Union[int, str]) -> Action:
@@ -97,7 +99,7 @@ class InfosetActions:
                 raise ValueError(f"Infoset has multiple actions with label '{index}'")
             return matches[0]
         if isinstance(index, int):
-            return Action.wrap(self.infoset.deref().GetAction(index + 1))
+            return Action.wrap(dereference(self.infoset.deref()).GetAction(index + 1))
         raise TypeError(f"Action index must be int or str, not {index.__class__.__name__}")
 
 
@@ -129,37 +131,37 @@ class Infoset:
         )
 
     def __hash__(self) -> int:
-        return cython.cast(cython.long, self.infoset.deref())
+        return cython.cast(cython.long, self.infoset.deref().get())
 
     def precedes(self, node: Node) -> bool:
         """Return whether this information set precedes `node` in the game tree."""
-        return self.infoset.deref().Precedes(cython.cast(Node, node).node)
+        return dereference(self.infoset.deref()).Precedes(cython.cast(Node, node).node)
 
     @property
     def game(self) -> Game:
         """The ``Game`` to which the information set belongs."""
-        return Game.wrap(self.infoset.deref().GetGame())
+        return Game.wrap(dereference(self.infoset.deref()).GetGame())
 
     @property
     def label(self) -> str:
         """Get or set the text label of the information set."""
-        return self.infoset.deref().GetLabel().decode("ascii")
+        return dereference(self.infoset.deref()).GetLabel().decode("ascii")
 
     @label.setter
     def label(self, value: str) -> None:
-        self.infoset.deref().SetLabel(value.encode("ascii"))
+        dereference(self.infoset.deref()).SetLabel(value.encode("ascii"))
 
     @property
     def number(self) -> int:
         """Returns the number of the information set for its player.
         Information sets are numbered starting with 0.
         """
-        return self.infoset.deref().GetNumber() - 1
+        return dereference(self.infoset.deref()).GetNumber() - 1
 
     @property
     def is_chance(self) -> bool:
         """Whether the information set belongs to the chance player."""
-        return self.infoset.deref().IsChanceInfoset()
+        return dereference(self.infoset.deref()).IsChanceInfoset()
 
     @property
     def actions(self) -> InfosetActions:
@@ -174,12 +176,13 @@ class Infoset:
     @property
     def player(self) -> Player:
         """The player who has the move at this information set."""
-        return Player.wrap(self.infoset.deref().GetPlayer())
+        return Player.wrap(dereference(self.infoset.deref()).GetPlayer())
 
     @property
     def plays(self) -> typing.List[Node]:
         """Returns a list of all terminal `Node` objects consistent with it.
         """
         return [
-            Node.wrap(n) for n in self.infoset.deref().GetGame().deref().GetPlays(self.infoset)
+            Node.wrap(n) for n in
+            dereference(self.infoset.deref()).GetGame().deref().GetPlays(self.infoset)
         ]
