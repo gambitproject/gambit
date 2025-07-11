@@ -23,6 +23,8 @@
 #include <iostream>
 #include <algorithm>
 #include <numeric>
+#include <stack>
+#include <set>
 
 #include "gambit.h"
 #include "gametree.h"
@@ -732,53 +734,23 @@ bool GameTreeRep::IsConstSum() const
   }
 }
 
-bool GameTreeRep::IsPerfectRecall(GameInfoset &s1, GameInfoset &s2) const
+bool GameTreeRep::IsPerfectRecall() const
 {
-  for (auto player : m_players) {
-    for (size_t i = 1; i <= player->m_infosets.size(); i++) {
-      auto *iset1 = player->m_infosets[i - 1];
-      for (size_t j = 1; j <= player->m_infosets.size(); j++) {
-        auto *iset2 = player->m_infosets[j - 1];
-
-        bool precedes = false;
-        GameAction action = nullptr;
-
-        for (size_t m = 1; m <= iset2->m_members.size(); m++) {
-          size_t n;
-          for (n = 1; n <= iset1->m_members.size(); n++) {
-            if (iset2->GetMember(m)->IsSuccessorOf(iset1->GetMember(n)) &&
-                iset1->GetMember(n) != iset2->GetMember(m)) {
-              precedes = true;
-              for (const auto &act : iset1->GetActions()) {
-                if (iset2->GetMember(m)->IsSuccessorOf(iset1->GetMember(n)->GetChild(act))) {
-                  if (action != nullptr && action != act) {
-                    s1 = iset1;
-                    s2 = iset2;
-                    return false;
-                  }
-                  action = act;
-                }
-              }
-              break;
-            }
-          }
-
-          if (i == j && precedes) {
-            s1 = iset1;
-            s2 = iset2;
-            return false;
-          }
-
-          if (n > iset1->m_members.size() && precedes) {
-            s1 = iset1;
-            s2 = iset2;
-            return false;
-          }
-        }
-      }
-    }
+  if (m_infosetParents.empty() && !GetRoot()->IsTerminal()) {
+    const_cast<GameTreeRep *>(this)->BuildInfosetParents();
   }
 
+  if (GetRoot()->IsTerminal()) {
+    return true;
+  }
+
+  for (const auto &[infoset, parent_action_options] : m_infosetParents) {
+    const std::set<GameAction> unique_parents(parent_action_options.begin(),
+                                              parent_action_options.end());
+    if (unique_parents.size() > 1) {
+      return false;
+    }
+  }
   return true;
 }
 
@@ -855,6 +827,7 @@ void GameTreeRep::ClearComputedValues() const
     player->m_strategies.clear();
   }
   const_cast<GameTreeRep *>(this)->m_nodePlays.clear();
+  const_cast<GameTreeRep *>(this)->m_infosetParents.clear();
   m_computedValues = false;
 }
 
@@ -891,6 +864,43 @@ std::vector<GameNodeRep *> GameTreeRep::BuildConsistentPlaysRecursiveImpl(GameNo
   }
   m_nodePlays[node] = consistent_plays;
   return consistent_plays;
+}
+
+void GameTreeRep::BuildInfosetParents()
+{
+  std::map<GamePlayer, std::stack<GameAction>> prior_actions;
+  std::stack<ActionsIterator> position;
+
+  for (auto player : GetPlayers()) {
+    prior_actions[player].emplace(nullptr);
+  }
+  prior_actions[GetChance()].emplace(nullptr);
+  prior_actions[GetRoot()->GetPlayer()].emplace(nullptr);
+
+  position.emplace(GetRoot()->GetActions().begin());
+  m_infosetParents[GetRoot()->GetInfoset()].emplace_back(nullptr);
+
+  while (!position.empty()) {
+    ActionsIterator &current_it = position.top();
+    const GameNode parent = current_it.GetOwner();
+
+    if (current_it != parent->GetActions().end()) {
+      auto [action, child] = *current_it;
+
+      prior_actions[parent->GetPlayer()].top() = action;
+
+      if (!child->IsTerminal()) {
+        m_infosetParents[child->GetInfoset()].push_back(prior_actions[child->GetPlayer()].top());
+        position.emplace(child->GetActions().begin());
+        prior_actions[child->GetPlayer()].emplace(nullptr);
+      }
+      ++current_it;
+    }
+    else {
+      prior_actions[parent->GetPlayer()].pop();
+      position.pop();
+    }
+  }
 }
 
 //------------------------------------------------------------------------
