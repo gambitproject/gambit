@@ -1,6 +1,8 @@
 """A utility module to create/load games for the test suite."""
 
 import pathlib
+from abc import ABC, abstractmethod
+from itertools import product
 
 import numpy as np
 
@@ -232,6 +234,312 @@ def create_reduction_both_players_payoff_ties_efg() -> gbt.Game:
     g.set_outcome(g.root.children[2].children[1].children[1], g.add_outcome([2, 2]))
     g.set_outcome(g.root.children[3], g.add_outcome([6, 4]))
     return g
+
+
+class EfgFamilyForReducedStrategicFormTests(ABC):
+    """ """
+
+    @abstractmethod
+    def __init__(params):
+        pass
+
+    @abstractmethod
+    def gbt_game(self):
+        pass
+
+    @abstractmethod
+    def reduced_strategies(self):
+        pass
+
+    @abstractmethod
+    def reduced_strategic_form(self):
+        pass
+
+    def set_size_of_rsf(self, reduced_strategies):
+        self.size_of_rsf = [len(r) for r in reduced_strategies]
+
+    @classmethod
+    def get_test_data(cls, **params):
+        """
+        given the provided parameters, return a tuple with:
+            - the game as a gbt.Game object
+            - the expected list of players reduced strategies in this game
+            - the expected reduced strategic form (i.e. payoff tensors) for this game
+        the tuple is used directly in test_reduced_strategic_form in test_extensive.py
+        """
+
+        game = cls(params)
+
+        return (
+            game.gbt_game(),
+            game.reduced_strategies(),
+            game.reduced_strategic_form(),
+        )
+
+
+class Centipede(EfgFamilyForReducedStrategicFormTests):
+    """
+    Two-player Centipede game
+
+    Params: number of rounds (N); two payoff parameters (m0, m1)
+    """
+
+    def __init__(self, params):
+        self.N = params["N"]
+        self.m0 = params["m0"]
+        self.m1 = params["m1"]
+
+    def gbt_game(self):
+        g = gbt.Game.new_tree(
+            players=["1", "2"], title=f"Centipede Game with {self.N} rounds"
+        )
+        current_node = g.root
+        current_player = "1"
+        for t in range(self.N):
+            g.append_move(current_node, current_player, ["Take", "Push"])
+            payoffs = [2**t * self.m0, 2**t * self.m1]  # take payoffs
+            if current_player == "2":
+                payoffs.reverse()
+            g.set_outcome(current_node.children[0], g.add_outcome(payoffs))
+            if t == self.N - 1:  # for last round, push payoffs
+                payoffs = [2 ** (t + 1) * self.m1, 2 ** (t + 1) * self.m0]
+                if current_player == "2":
+                    payoffs.reverse()
+                g.set_outcome(current_node.children[1], g.add_outcome(payoffs))
+            current_node = current_node.children[1]
+            current_player = "2" if current_player == "1" else "1"
+        return g
+
+    def reduced_strategies(self):
+
+        if self.N % 2 == 0:
+            n_moves = [int(self.N / 2)] * 2
+        else:
+            n_moves = [int((self.N + 1) / 2), int((self.N - 1) / 2)]
+
+        def get_rss(n):
+            # Given n number of times a player moves, their reduced strategies are such that
+            # they Have n positions; have all *s after any 1; have prefixes 1, 21, 221, 2221, etc.
+            # and finally the last strategyt is all 2s
+            ret = ["2" * (i) + "1" * 1 + "*" * (n - i - 1) for i in range(n)]
+            ret.append("2" * n)
+            return ret
+
+        rs = [get_rss(n) for n in n_moves]
+        self.set_size_of_rsf(rs)
+        return rs
+
+    def reduced_strategic_form(self):
+        m, n = self.size_of_rsf
+        p1_payoffs = np.zeros((m, n), dtype=int)
+        p2_payoffs = np.zeros((m, n), dtype=int)
+        row1_1 = [self.m0] * n
+        row1_2 = [self.m1] * n
+        p1_payoffs[0, :] = row1_1
+        p2_payoffs[0, :] = row1_2
+
+        for j in range(n - 1 if self.N % 2 == 0 else n):
+            max_in_col_p1 = 2 ** (2 * j + 1) * self.m1
+            max_in_col_p2 = 2 ** (2 * j + 1) * self.m0
+            base1 = [max_in_col_p1] * (m - 1)
+            base2 = [max_in_col_p2] * (m - 1)
+            for i in range(1, (j + 1)):
+                base1[i - 1] = 2 ** (2 * i) * self.m0
+                base2[i - 1] = 2 ** (2 * i) * self.m1
+            p1_payoffs[1:, j] = base1
+            p2_payoffs[1:, j] = base2
+        if self.N % 2 == 0:
+            # final col
+            p1_payoffs[:, n - 1] = p1_payoffs[:, n - 2]
+            p2_payoffs[:, n - 1] = p2_payoffs[:, n - 2]
+            p1_extra_pay = 2 ** (2 * (n - 1)) * self.m0
+            p2_extra_pay = 2 ** (2 * (n - 1)) * self.m1
+        else:
+            # final row
+            p1_payoffs[m - 1, :] = p1_payoffs[m - 2, :]
+            p2_payoffs[m - 1, :] = p2_payoffs[m - 2, :]
+            p1_extra_pay = 2 ** (2 * (n) - 1) * self.m1
+            p2_extra_pay = 2 ** (2 * (n) - 1) * self.m0
+        p1_payoffs[m - 1, n - 1] = p1_extra_pay
+        p2_payoffs[m - 1, n - 1] = p2_extra_pay
+        return p1_payoffs, p2_payoffs
+
+
+class BinaryTreeGames(EfgFamilyForReducedStrategicFormTests):
+    """
+    Params:
+        - single positive integer, namely the number of "level"s
+        - number of players (currently the 1, 2, and 3-player versions are used in tests)
+
+    These games:
+        - are all binary trees with imperfect information
+        - after every L/R choice the subsequent, have the two subsequent nodes (unless terminal)
+            together and alone in a single infoset (so all infosets except the root are pairs)
+        - the purpose of these games is to test the reduced strategy lists
+        - payoff matrices are all zero for simplicity
+
+    These games have rougly 2^root(level) many reduced strategies
+
+    The 2-player versions appear in:
+
+    B. von Stengel, A. van den Elzen, and A. J. J. Talman (2002)
+    Computing normal form perfect equilibria for extensive two-person games
+    Econometrica 70(2), 693-715
+
+    The 1-player versions have Imperfect Recall
+    """
+
+    def __init__(self, n_players, params):
+        self.level = params["level"]
+        self.players = list(range(1, n_players + 1))
+        self.n_players = n_players
+
+    def get_n_infosets(self, level):
+
+        if self.n_players == 1:
+            return {1: 2 ** (level - 1)}
+
+        players = list(range(1, self.n_players + 1))
+        n_isets = [1] + [0] * (self.n_players - 1)
+        whose_turn = 1  # start from player 2 and level 2
+        for lev in range(2, level + 1):
+            n_isets[whose_turn] += 2 ** (lev - 2)
+            whose_turn = (whose_turn + 1) % self.n_players
+        return {p: n_isets[p - 1] for p in players}
+
+    def _redu_strategies_level_1(self, player):
+        return ["1", "2"] if player == 1 else ["*"]
+
+    def player_with_changes(self, level):
+        return ((level - 1) % self.n_players) + 1
+
+    def last_player_with_changes(self, level):
+        return ((level - 2) % self.n_players) + 1
+
+    @abstractmethod
+    def _redu_strats(self, player, level):
+        pass
+
+    def reduced_strategies(self):
+        rs = [self._redu_strats(player, self.level) for player in self.players]
+        self.set_size_of_rsf(rs)
+        return rs
+
+    def create_binary_tree(self, g, node, whose_turn, depth, max_depth):
+        # whose_turn cycles through 0,1,n_players-1; current player is str(whose_turn + 1)
+        if depth == max_depth:
+            g.set_outcome(node, g.add_outcome([0] * self.n_players))
+        else:
+            current_player = str(whose_turn + 1)
+            g.append_move(node, current_player, ["L", "R"])
+
+            whose_turn = (whose_turn + 1) % self.n_players
+            for child in node.children:
+                self.create_binary_tree(g, child, whose_turn, depth + 1, max_depth)
+
+    def gbt_game(self):
+        g = gbt.Game.new_tree(
+            players=[str(p) for p in self.players],
+            title=f"Binary Tree Game (L={self.level})",
+        )
+        self.create_binary_tree(g, g.root, 0, 0, self.level)
+        for n in g.nodes:
+            if not n.is_terminal and not n.children[0].is_terminal:
+                g.set_infoset(n.children[1], n.children[0].infoset)
+        return g
+
+    def reduced_strategic_form(self):
+        # special case for 1 player
+        dims = (
+            (self.size_of_rsf[0], 1) if len(self.size_of_rsf) == 1 else self.size_of_rsf
+        )
+
+        zeros = np.zeros(dims, dtype=int)
+        return [zeros] * len(self.players)
+
+
+class BinEfgOnePlayerIR(BinaryTreeGames):
+
+    def __init__(self, params):
+        super().__init__(n_players=1, params=params)
+
+    def _redu_strats(self, player, level):
+        if level == 1:
+            return self._redu_strategies_level_1(player)
+        else:
+            tmp = self._redu_strats(1, level - 1)
+            tmp = [
+                t[1:] for t in tmp
+            ]  # remove first action (1 from 1st half; 2 from 2nd half)
+            n_half = int(len(tmp) / 2)
+            first_half = tmp[:n_half]
+            second_half = tmp[n_half:]
+            n_stars = (
+                self.get_n_infosets(level)[1] - self.get_n_infosets(level - 1)[1] - 1
+            )
+            stars = "*" * n_stars
+            return (
+                ["11" + t + stars for t in first_half]
+                + ["12" + t + stars for t in second_half]
+                + ["21" + stars + t for t in first_half]
+                + ["22" + stars + t for t in second_half]
+            )
+
+
+class BinEfgTwoOrThreePlayers(BinaryTreeGames):
+
+    def _redu_strats(self, player, level):
+        if level == 1:
+            return self._redu_strategies_level_1(player)
+        elif player == self.player_with_changes(level):
+            if player == 1:
+                last_player = self.last_player_with_changes(level)
+                tmp1 = self.get_n_infosets(level)
+                tmp2 = self.get_n_infosets(level - 1)
+                n_stars = tmp1[player] - tmp2[last_player] - 1
+                stars = "*" * n_stars
+                return [
+                    "1" + t + stars
+                    for t in self._redu_strats(player=last_player, level=level - 1)
+                ] + [
+                    "2" + stars + t
+                    for t in self._redu_strats(player=last_player, level=level - 1)
+                ]
+            elif player == 2:
+                tmp = self._redu_strats(player=1, level=level - 1)
+                tmp = [
+                    t[1:] for t in tmp
+                ]  # remove first action (1 from 1st half; 2 from 2nd half)
+                # split into two halves
+                n_half = int(len(tmp) / 2)
+                first_half = tmp[:n_half]
+                second_half = tmp[n_half:]
+                # create first half suffix
+                first_half = product(first_half, first_half)
+                first_half = ["".join(t) for t in first_half]
+                first_half = ["1" + t for t in first_half]  # add 1 to front
+                # create second half suffix
+                second_half = product(second_half, second_half)
+                second_half = ["".join(t) for t in second_half]
+                second_half = ["2" + t for t in second_half]  # add 2 to front
+                return first_half + second_half  # glue halves together
+            else:  # player == 3:
+                tmp = self._redu_strats(player=2, level=level - 1)
+                tmp = product(tmp, tmp)
+                tmp = ["".join(t) for t in tmp]
+                return tmp
+        else:
+            return self._redu_strats(player, level - 1)
+
+
+class BinEfgTwoPlayer(BinEfgTwoOrThreePlayers):
+    def __init__(self, params):
+        super().__init__(n_players=2, params=params)
+
+
+class BinEfgThreePlayer(BinEfgTwoOrThreePlayers):
+    def __init__(self, params):
+        super().__init__(n_players=3, params=params)
 
 
 def make_rational(input: str):

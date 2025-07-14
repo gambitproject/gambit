@@ -293,6 +293,37 @@ def test_outcome_index_exception_label():
                 ),
             ],
         ),
+        # Centipede
+        (games.Centipede.get_test_data(N=3, m0=2, m1=7)),
+        (games.Centipede.get_test_data(N=4, m0=2, m1=7)),
+        (games.Centipede.get_test_data(N=5, m0=2, m1=7)),
+        (games.Centipede.get_test_data(N=3, m0=1, m1=3)),
+        (games.Centipede.get_test_data(N=4, m0=1, m1=3)),
+        (games.Centipede.get_test_data(N=5, m0=1, m1=3)),
+        (games.Centipede.get_test_data(N=9, m0=3, m1=11)),
+        # Two player binary tree
+        (games.BinEfgTwoPlayer.get_test_data(level=1)),
+        (games.BinEfgTwoPlayer.get_test_data(level=2)),
+        (games.BinEfgTwoPlayer.get_test_data(level=3)),
+        (games.BinEfgTwoPlayer.get_test_data(level=4)),
+        (games.BinEfgTwoPlayer.get_test_data(level=5)),
+        (games.BinEfgTwoPlayer.get_test_data(level=6)),
+        (games.BinEfgTwoPlayer.get_test_data(level=7)),
+        # Three player binary tree
+        (games.BinEfgThreePlayer.get_test_data(level=1)),
+        (games.BinEfgThreePlayer.get_test_data(level=2)),
+        (games.BinEfgThreePlayer.get_test_data(level=3)),
+        (games.BinEfgThreePlayer.get_test_data(level=4)),
+        (games.BinEfgThreePlayer.get_test_data(level=5)),
+        (games.BinEfgThreePlayer.get_test_data(level=6)),
+        # One player IR binary tree
+        (games.BinEfgOnePlayerIR.get_test_data(level=1)),
+        (games.BinEfgOnePlayerIR.get_test_data(level=2)),
+        (games.BinEfgOnePlayerIR.get_test_data(level=3)),
+        (games.BinEfgOnePlayerIR.get_test_data(level=4)),
+        (games.BinEfgOnePlayerIR.get_test_data(level=5)),
+        (games.BinEfgOnePlayerIR.get_test_data(level=6)),
+        #
         # I M P E R F E C T   R E C A L L --- commented out in the test suite
         # Wichardt (2008): binary tree of height 3; 2 players; the root player forgets the action
         # (
