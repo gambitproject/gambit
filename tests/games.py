@@ -1,6 +1,7 @@
 """A utility module to create/load games for the test suite."""
 
 import pathlib
+from itertools import product
 
 import numpy as np
 
@@ -232,6 +233,200 @@ def create_reduction_both_players_payoff_ties_efg() -> gbt.Game:
     g.set_outcome(g.root.children[2].children[1].children[1], g.add_outcome([2, 2]))
     g.set_outcome(g.root.children[3], g.add_outcome([6, 4]))
     return g
+
+
+class Centipede:
+    """
+    Helper class for creating EFG and corresponding reduced strategy sets and payoff arrays
+    for the two-player centipede game (with the number of rounds as a parameter, and two payoff
+    parameters, one for each player)
+    """
+
+    def create_game(N, m0, m1):
+        # Create two-player centipede game with N rounds and payoff params m0 and m1
+        g = gbt.Game.new_tree(
+            players=["1", "2"], title=f"Centipede Game with {N} rounds"
+        )
+        current_node = g.root
+        current_player = "1"
+        for t in range(N):
+            g.append_move(current_node, current_player, ["Take", "Push"])
+            payoffs = [2**t * m0, 2**t * m1]  # take payoffs
+            if current_player == "2":
+                payoffs.reverse()
+            g.set_outcome(current_node.children[0], g.add_outcome(payoffs))
+            if t == N - 1:  # for last round, push payoffs
+                payoffs = [2 ** (t + 1) * m1, 2 ** (t + 1) * m0]
+                if current_player == "2":
+                    payoffs.reverse()
+                g.set_outcome(current_node.children[1], g.add_outcome(payoffs))
+            current_node = current_node.children[1]
+            current_player = "2" if current_player == "1" else "1"
+        return g
+
+    def redu_strats(N):
+
+        if N % 2 == 0:
+            p1_n_moves = p2_n_moves = int(N / 2)
+        else:
+            p1_n_moves = int((N + 1) / 2)
+            p2_n_moves = int((N - 1) / 2)
+
+        def get_rss(n):
+            # Given n (which should be I and J for players 1 and 2 respectively)
+            # creates the set of strategies that:
+            # - have n + 1 positions
+            # - have all *s after any 1
+            # - have prefixes 1, 21, 221, 2221, etc. ending with all 2s
+            ret = ["2" * (i) + "1" * 1 + "*" * (n - i - 1) for i in range(n)]
+            ret.append("2" * n)
+            return ret
+
+        return [get_rss(n) for n in [p1_n_moves, p2_n_moves]]
+
+    def get_size_of_RSF(N):
+        return [len(x) for x in Centipede.redu_strats(N)]
+
+    def create_rsf(N, m0, m1):
+        m, n = Centipede.get_size_of_RSF(N)
+        p1_payoffs = np.zeros((m, n), dtype=int)
+        p2_payoffs = np.zeros((m, n), dtype=int)
+        row1_1 = [m0] * n
+        row1_2 = [m1] * n
+        p1_payoffs[0, :] = row1_1
+        p2_payoffs[0, :] = row1_2
+
+        for j in range(n - 1 if N % 2 == 0 else n):
+            max_in_col_p1 = 2 ** (2 * j + 1) * m1
+            max_in_col_p2 = 2 ** (2 * j + 1) * m0
+            base1 = [max_in_col_p1] * (m - 1)
+            base2 = [max_in_col_p2] * (m - 1)
+            for i in range(1, (j + 1)):
+                base1[i - 1] = 2 ** (2 * i) * m0
+                base2[i - 1] = 2 ** (2 * i) * m1
+            p1_payoffs[1:, j] = base1
+            p2_payoffs[1:, j] = base2
+        if N % 2 == 0:
+            # final col
+            p1_payoffs[:, n - 1] = p1_payoffs[:, n - 2]
+            p2_payoffs[:, n - 1] = p2_payoffs[:, n - 2]
+            p1_extra_pay = 2 ** (2 * (n - 1)) * m0
+            p2_extra_pay = 2 ** (2 * (n - 1)) * m1
+        else:
+            # final row
+            p1_payoffs[m - 1, :] = p1_payoffs[m - 2, :]
+            p2_payoffs[m - 1, :] = p2_payoffs[m - 2, :]
+            p1_extra_pay = 2 ** (2 * (n) - 1) * m1
+            p2_extra_pay = 2 ** (2 * (n) - 1) * m0
+        p1_payoffs[m - 1, n - 1] = p1_extra_pay
+        p2_payoffs[m - 1, n - 1] = p2_extra_pay
+        return p1_payoffs, p2_payoffs
+
+    def test_parametrization(N, m0, m1):
+        return (
+            Centipede.create_game(N, m0, m1),
+            Centipede.redu_strats(N),
+            Centipede.create_rsf(N, m0, m1),
+        )
+
+
+class BinEFGExpRSF:
+    """
+    Helper class for creating EFG and corresponding reduced strategy sets and payoff arrays
+    for two-player games on a binary tree with exponentially-many (~ 2^root(level))
+    reduced strategies
+
+    Games taken from:
+
+    B. von Stengel, A. van den Elzen, and A. J. J. Talman (2002)
+    Computing normal form perfect equilibria for extensive two-person games
+    Econometrica 70(2), 693-715
+
+    The games are parametrized by a single positive integer, namely the number of "level"s
+    """
+
+    def get_n_infosets(level):
+        if level % 2 == 0:
+            p1_n_moves = p2_n_moves = int(level / 2)
+        else:
+            p1_n_moves = int((level + 1) / 2)
+            p2_n_moves = int((level - 1) / 2)
+        p1_n_isets = (4**p1_n_moves + 2) / 6
+        p2_n_isets = (4**p2_n_moves - 1) / 3
+        return int(p1_n_isets), int(p2_n_isets)
+
+    def redu_strats(player, level):
+        assert player in [1, 2] and level >= 2
+        if level == 2:
+            return ["1", "2"]
+        elif (level % 2 == 0 and player == 1) or (level % 2 != 0 and player == 2):
+            return BinEFGExpRSF.redu_strats(player, level - 1)
+        elif player == 2:
+            tmp = BinEFGExpRSF.redu_strats(player=1, level=level - 1)
+            tmp = [
+                t[1:] for t in tmp
+            ]  # remove first action (1 from 1st half; 2 from 2nd half)
+            # split into two halves
+            n_half = int(len(tmp) / 2)
+            first_half = tmp[:n_half]
+            second_half = tmp[n_half:]
+            # create first half suffix
+            first_half = product(first_half, first_half)
+            first_half = ["".join(t) for t in first_half]
+            first_half = ["1" + t for t in first_half]  # add 1 to front
+            # create second half suffix
+            second_half = product(second_half, second_half)
+            second_half = ["".join(t) for t in second_half]
+            second_half = ["2" + t for t in second_half]  # add 2 to front
+            return first_half + second_half  # glue halves together
+        else:
+            p1_n_isets, p2_n_isets = BinEFGExpRSF.get_n_infosets(level)
+            p1_n_isets_level_minus1, p2_n_isets_level_minus1 = (
+                BinEFGExpRSF.get_n_infosets(level - 1)
+            )
+            stars = "*" * (p1_n_isets - p2_n_isets_level_minus1 - 1)
+            return [
+                "1" + t + stars
+                for t in BinEFGExpRSF.redu_strats(player=2, level=level - 1)
+            ] + [
+                "2" + stars + t
+                for t in BinEFGExpRSF.redu_strats(player=2, level=level - 1)
+            ]
+
+    def create_binary_tree(g, node, player1_turn, depth, max_depth):
+        if depth == max_depth:
+            payoff1 = payoff2 = 0
+            g.set_outcome(node, g.add_outcome([payoff1, payoff2]))
+        else:
+            current_player = "1" if player1_turn else "2"
+            g.append_move(node, current_player, ["L", "R"])
+            for child in node.children:
+                BinEFGExpRSF.create_binary_tree(
+                    g, child, not player1_turn, depth + 1, max_depth
+                )
+
+    def create_game(L):
+        g = gbt.Game.new_tree(players=["1", "2"], title=f"Binary Tree Game (L={L})")
+        BinEFGExpRSF.create_binary_tree(g, g.root, True, 0, L)
+        for n in g.nodes:
+            if not n.is_terminal and not n.children[0].is_terminal:
+                g.set_infoset(n.children[1], n.children[0].infoset)
+        return g
+
+    def create_rsf(reduced_strategies):
+        m = len(reduced_strategies[0])
+        n = len(reduced_strategies[1])
+        zeros = np.zeros((m, n), dtype=int)
+        return [zeros, zeros]
+
+    def test_parametrization(L):
+        redu_strats = [BinEFGExpRSF.redu_strats(1, L), BinEFGExpRSF.redu_strats(2, L)]
+
+        return (
+            BinEFGExpRSF.create_game(L),
+            redu_strats,
+            BinEFGExpRSF.create_rsf(redu_strats),
+        )
 
 
 def make_rational(input: str):
