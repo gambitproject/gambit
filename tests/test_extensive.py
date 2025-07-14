@@ -293,6 +293,19 @@ def test_outcome_index_exception_label():
                 ),
             ],
         ),
+        (games.Centipede.test_parametrization(N=3, m0=2, m1=7)),
+        (games.Centipede.test_parametrization(N=4, m0=2, m1=7)),
+        (games.Centipede.test_parametrization(N=5, m0=2, m1=7)),
+        (games.Centipede.test_parametrization(N=3, m0=1, m1=3)),
+        (games.Centipede.test_parametrization(N=4, m0=1, m1=3)),
+        (games.Centipede.test_parametrization(N=5, m0=1, m1=3)),
+        (games.Centipede.test_parametrization(N=9, m0=3, m1=11)),
+        (games.BinEFGExpRSF.test_parametrization(L=3)),
+        (games.BinEFGExpRSF.test_parametrization(L=4)),
+        (games.BinEFGExpRSF.test_parametrization(L=5)),
+        (games.BinEFGExpRSF.test_parametrization(L=6)),
+        (games.BinEFGExpRSF.test_parametrization(L=7)),
+        #
         # I M P E R F E C T   R E C A L L --- commented out in the test suite
         # Wichardt (2008): binary tree of height 3; 2 players; the root player forgets the action
         # (
