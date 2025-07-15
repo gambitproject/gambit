@@ -91,7 +91,7 @@ public:
   //@{
   bool IsTree() const override { return false; }
   virtual bool IsBagg() const { return true; }
-  bool IsPerfectRecall(GameInfoset &, GameInfoset &) const override { return true; }
+  bool IsPerfectRecall() const override { return true; }
   bool IsConstSum() const override { throw UndefinedException(); }
   /// Returns the smallest payoff to any player in any outcome of the game
   Rational GetMinPayoff() const override { return Rational(baggPtr->getMinPayoff()); }
