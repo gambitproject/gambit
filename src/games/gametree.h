@@ -44,7 +44,7 @@ protected:
   //@{
   void NumberNodes(GameNodeRep *, int &);
   /// Normalize the probability distribution of actions at a chance node
-  Game NormalizeChanceProbs(const GameInfoset &);
+  Game NormalizeChanceProbs(GameInfosetRep *);
   //@}
 
   /// @name Managing the representation

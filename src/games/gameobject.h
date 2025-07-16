@@ -186,6 +186,16 @@ public:
     }
     return m_rep;
   }
+  T *get() const
+  {
+    if (!m_rep) {
+      throw NullException();
+    }
+    if (!m_rep->IsValid()) {
+      throw InvalidObjectException();
+    }
+    return m_rep.get();
+  }
 
   bool operator==(const GameObjectSharedPtr<T> &r) const { return (m_rep == r.m_rep); }
   bool operator==(const std::shared_ptr<T> r) const { return (m_rep == r); }

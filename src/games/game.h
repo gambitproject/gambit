@@ -272,7 +272,7 @@ class GameOutcomeRep : public std::enable_shared_from_this<GameOutcomeRep> {
   GameRep *m_game;
   int m_number;
   std::string m_label;
-  std::map<std::shared_ptr<GamePlayerRep>, Number> m_payoffs;
+  std::map<GamePlayerRep *, Number> m_payoffs;
 
 public:
   /// @name Lifecycle
@@ -316,11 +316,10 @@ class GameActionRep : public std::enable_shared_from_this<GameActionRep> {
   bool m_valid{true};
   int m_number;
   std::string m_label;
-  std::weak_ptr<GameInfosetRep> m_infoset;
+  GameInfosetRep *m_infoset;
 
 public:
-  GameActionRep(int p_number, const std::string &p_label,
-                std::shared_ptr<GameInfosetRep> p_infoset)
+  GameActionRep(int p_number, const std::string &p_label, GameInfosetRep *p_infoset)
     : m_number(p_number), m_label(p_label), m_infoset(p_infoset)
   {
   }
@@ -968,7 +967,7 @@ inline Game GameOutcomeRep::GetGame() const { return m_game->shared_from_this();
 template <class T> const T &GameOutcomeRep::GetPayoff(const GamePlayer &p_player) const
 {
   try {
-    return static_cast<const T &>(m_payoffs.at(p_player));
+    return static_cast<const T &>(m_payoffs.at(p_player.get()));
   }
   catch (const std::out_of_range &) {
     throw MismatchException();
@@ -978,7 +977,7 @@ template <class T> const T &GameOutcomeRep::GetPayoff(const GamePlayer &p_player
 template <> inline const Number &GameOutcomeRep::GetPayoff(const GamePlayer &p_player) const
 {
   try {
-    return m_payoffs.at(p_player);
+    return m_payoffs.at(p_player.get());
   }
   catch (const std::out_of_range &) {
     throw MismatchException();
@@ -990,7 +989,7 @@ inline void GameOutcomeRep::SetPayoff(const GamePlayer &p_player, const Number &
   if (p_player->GetGame() != GetGame()) {
     throw MismatchException();
   }
-  m_payoffs[p_player] = p_value;
+  m_payoffs[p_player.get()] = p_value;
   m_game->IncrementVersion();
 }
 

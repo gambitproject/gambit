@@ -374,7 +374,7 @@ GamePlayer GameTableRep::NewPlayer()
   auto player = GamePlayerRep::CreatePlayer(this, m_players.size() + 1, 1);
   m_players.push_back(player);
   for (auto outcome : m_outcomes) {
-    outcome->m_payoffs[player] = Number();
+    outcome->m_payoffs[player.get()] = Number();
   }
   return player;
 }

@@ -42,7 +42,7 @@ namespace Gambit {
 GameOutcomeRep::GameOutcomeRep(GameRep *p_game, int p_number) : m_game(p_game), m_number(p_number)
 {
   for (const auto &player : m_game->m_players) {
-    m_payoffs[player] = Number();
+    m_payoffs[player.get()] = Number();
   }
 }
 

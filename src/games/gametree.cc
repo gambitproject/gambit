@@ -115,7 +115,7 @@ bool GameActionRep::Precedes(const GameNode &n) const
 void GameTreeRep::DeleteAction(GameAction p_action)
 {
   const std::shared_ptr<GameActionRep> action = p_action;
-  const auto infoset = action->m_infoset.lock();
+  const auto infoset = action->m_infoset;
   if (infoset->m_game != this) {
     throw MismatchException();
   }
@@ -145,7 +145,7 @@ void GameTreeRep::DeleteAction(GameAction p_action)
   Canonicalize();
 }
 
-GameInfoset GameActionRep::GetInfoset() const { return m_infoset.lock(); }
+GameInfoset GameActionRep::GetInfoset() const { return m_infoset->shared_from_this(); }
 
 //========================================================================
 //                       class GameInfosetRep
@@ -161,7 +161,7 @@ GameInfosetRep::CreateInfoset(GameRep *p_efg, int p_number,
   infoset->m_player = p_player;
   infoset->m_actions = std::vector<std::shared_ptr<GameActionRep>>(p_actions);
   std::generate(infoset->m_actions.begin(), infoset->m_actions.end(), [infoset, i = 1]() mutable {
-    return std::make_shared<GameActionRep>(i++, "", infoset);
+    return std::make_shared<GameActionRep>(i++, "", infoset.get());
   });
   if (p_player->IsChance()) {
     infoset->m_probs = std::vector<Number>(infoset->m_actions.size());
@@ -227,7 +227,7 @@ GameAction GameTreeRep::InsertAction(GameInfoset p_infoset, GameAction p_action 
                          std::shared_ptr<GameActionRep>(p_action));
   auto offset = where - p_infoset->m_actions.begin();
 
-  auto action = std::make_shared<GameActionRep>(offset + 1, "", p_infoset);
+  auto action = std::make_shared<GameActionRep>(offset + 1, "", p_infoset.get());
   p_infoset->m_actions.insert(where, action);
   if (p_infoset->m_player->IsChance()) {
     p_infoset->m_probs.insert(std::next(p_infoset->m_probs.cbegin(), offset), Number());
@@ -996,7 +996,7 @@ GamePlayer GameTreeRep::NewPlayer()
   auto player = std::make_shared<GamePlayerRep>(this, m_players.size() + 1);
   m_players.push_back(player);
   for (auto &outcome : m_outcomes) {
-    outcome->m_payoffs[player] = Number();
+    outcome->m_payoffs[player.get()] = Number();
   }
   ClearComputedValues();
   return player;
@@ -1114,7 +1114,7 @@ Game GameTreeRep::SetChanceProbs(const GameInfoset &p_infoset, const Array<Numbe
   return shared_from_this();
 }
 
-Game GameTreeRep::NormalizeChanceProbs(const GameInfoset &p_infoset)
+Game GameTreeRep::NormalizeChanceProbs(GameInfosetRep *p_infoset)
 {
   if (p_infoset->m_game != this) {
     throw MismatchException();
