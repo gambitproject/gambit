@@ -441,7 +441,7 @@ class GameStrategyRep : public GameObject {
   template <class T> friend class TableMixedStrategyProfileRep;
   template <class T> friend class MixedBehaviorProfile;
 
-  std::shared_ptr<GamePlayerRep> m_player;
+  GamePlayerRep *m_player;
   int m_number;
   long m_offset{-1L};
   std::string m_label;
@@ -450,8 +450,7 @@ class GameStrategyRep : public GameObject {
   /// @name Lifecycle
   //@{
   /// Creates a new strategy for the given player.
-  explicit GameStrategyRep(std::shared_ptr<GamePlayerRep> p_player, int p_number,
-                           const std::string &p_label)
+  explicit GameStrategyRep(GamePlayerRep *p_player, int p_number, const std::string &p_label)
     : m_player(p_player), m_number(p_number), m_label(p_label)
   {
   }
@@ -992,7 +991,7 @@ inline void GameOutcomeRep::SetPayoff(const GamePlayer &p_player, const Number &
   m_game->IncrementVersion();
 }
 
-inline GamePlayer GameStrategyRep::GetPlayer() const { return m_player; }
+inline GamePlayer GameStrategyRep::GetPlayer() const { return m_player->shared_from_this(); }
 
 inline Game GameInfosetRep::GetGame() const { return m_game->shared_from_this(); }
 inline GamePlayer GameInfosetRep::GetPlayer() const { return m_player->shared_from_this(); }

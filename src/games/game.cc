@@ -52,7 +52,7 @@ GameOutcomeRep::GameOutcomeRep(GameRep *p_game, int p_number) : m_game(p_game), 
 
 GameAction GameStrategyRep::GetAction(const GameInfoset &p_infoset) const
 {
-  if (p_infoset->GetPlayer() != m_player) {
+  if (p_infoset->GetPlayer().get() != m_player) {
     throw MismatchException();
   }
   const int action = m_behav[p_infoset->GetNumber()];
@@ -67,7 +67,7 @@ std::shared_ptr<GamePlayerRep> GamePlayerRep::CreatePlayer(GameRep *p_game, int 
 {
   auto player = std::make_shared<GamePlayerRep>(p_game, p_id);
   for (int j = 1; j <= p_strats; j++) {
-    player->m_strategies.push_back(new GameStrategyRep(player, j, ""));
+    player->m_strategies.push_back(new GameStrategyRep(player.get(), j, ""));
   }
   return player;
 }
@@ -95,8 +95,7 @@ void GamePlayerRep::MakeStrategy()
     }
   }
 
-  auto *strategy = new GameStrategyRep(std::const_pointer_cast<GamePlayerRep>(shared_from_this()),
-                                       m_strategies.size() + 1, "");
+  auto *strategy = new GameStrategyRep(this, m_strategies.size() + 1, "");
   strategy->m_behav = c;
 
   // We generate a default labeling -- probably should be changed in future

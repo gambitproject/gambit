@@ -406,7 +406,7 @@ GameStrategy GameTableRep::NewStrategy(const GamePlayer &p_player, const std::st
   }
   IncrementVersion();
   p_player->m_strategies.push_back(
-      new GameStrategyRep(p_player, p_player->m_strategies.size(), p_label));
+      new GameStrategyRep(p_player.get(), p_player->m_strategies.size(), p_label));
   RebuildTable();
   return p_player->m_strategies.back();
 }
