@@ -351,7 +351,7 @@ class GameInfosetRep : public std::enable_shared_from_this<GameInfosetRep> {
   GameRep *m_game{nullptr};
   int m_number{0};
   std::string m_label;
-  std::shared_ptr<GamePlayerRep> m_player;
+  GamePlayerRep *m_player{nullptr};
   std::vector<std::shared_ptr<GameActionRep>> m_actions;
   std::vector<GameNodeRep *> m_members;
   int flag{0}, whichbranch{0};
@@ -371,8 +371,7 @@ public:
   ~GameInfosetRep();
 
   static std::shared_ptr<GameInfosetRep> CreateInfoset(GameRep *p_efg, int p_number,
-                                                       std::shared_ptr<GamePlayerRep> p_player,
-                                                       int p_actions);
+                                                       GamePlayerRep *p_player, int p_actions);
 
   /// @name Validity management
   //@{
@@ -996,7 +995,7 @@ inline void GameOutcomeRep::SetPayoff(const GamePlayer &p_player, const Number &
 inline GamePlayer GameStrategyRep::GetPlayer() const { return m_player; }
 
 inline Game GameInfosetRep::GetGame() const { return m_game->shared_from_this(); }
-inline GamePlayer GameInfosetRep::GetPlayer() const { return m_player; }
+inline GamePlayer GameInfosetRep::GetPlayer() const { return m_player->shared_from_this(); }
 inline bool GameInfosetRep::IsChanceInfoset() const { return m_player->IsChance(); }
 
 inline Game GamePlayerRep::GetGame() const { return m_game->shared_from_this(); }

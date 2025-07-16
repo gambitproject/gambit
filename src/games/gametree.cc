@@ -152,8 +152,7 @@ GameInfoset GameActionRep::GetInfoset() const { return m_infoset->shared_from_th
 //========================================================================
 
 std::shared_ptr<GameInfosetRep>
-GameInfosetRep::CreateInfoset(GameRep *p_efg, int p_number,
-                              std::shared_ptr<GamePlayerRep> p_player, int p_actions)
+GameInfosetRep::CreateInfoset(GameRep *p_efg, int p_number, GamePlayerRep *p_player, int p_actions)
 {
   auto infoset = std::make_shared<GameInfosetRep>();
   infoset->m_game = p_efg;
@@ -194,7 +193,7 @@ void GameTreeRep::SetPlayer(GameInfoset p_infoset, GamePlayer p_player)
   IncrementVersion();
   oldPlayer->m_infosets.erase(std::find(oldPlayer->m_infosets.begin(), oldPlayer->m_infosets.end(),
                                         std::shared_ptr<GameInfosetRep>(p_infoset)));
-  p_infoset->m_player = p_player;
+  p_infoset->m_player = p_player.get();
   p_player->m_infosets.push_back(p_infoset);
 
   ClearComputedValues();
@@ -591,7 +590,7 @@ GameInfoset GameTreeRep::AppendMove(GameNode p_node, GamePlayer p_player, int p_
 
   IncrementVersion();
   return AppendMove(p_node, GameInfosetRep::CreateInfoset(this, p_player->m_infosets.size() + 1,
-                                                          p_player, p_actions));
+                                                          p_player.get(), p_actions));
 }
 
 GameInfoset GameTreeRep::AppendMove(GameNode p_node, GameInfoset p_infoset)
@@ -629,7 +628,7 @@ GameInfoset GameTreeRep::InsertMove(GameNode p_node, GamePlayer p_player, int p_
 
   IncrementVersion();
   return InsertMove(p_node, GameInfosetRep::CreateInfoset(this, p_player->m_infosets.size() + 1,
-                                                          p_player, p_actions));
+                                                          p_player.get(), p_actions));
 }
 
 GameInfoset GameTreeRep::InsertMove(GameNode p_node, GameInfoset p_infoset)

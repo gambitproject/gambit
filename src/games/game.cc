@@ -125,7 +125,7 @@ void GamePlayerRep::MakeReducedStrats(GameNodeRep *n, GameNodeRep *nn)
   }
 
   if (!n->IsTerminal()) {
-    if (n->m_infoset->m_player.get() == this) {
+    if (n->m_infoset->m_player == this) {
       if (n->m_infoset->flag == 0) {
         // we haven't visited this infoset before
         n->m_infoset->flag = 1;
