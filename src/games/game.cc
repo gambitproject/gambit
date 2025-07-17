@@ -42,7 +42,7 @@ namespace Gambit {
 GameOutcomeRep::GameOutcomeRep(GameRep *p_game, int p_number) : m_game(p_game), m_number(p_number)
 {
   for (const auto &player : m_game->m_players) {
-    m_payoffs[player] = Number();
+    m_payoffs[player.get()] = Number();
   }
 }
 
@@ -52,11 +52,11 @@ GameOutcomeRep::GameOutcomeRep(GameRep *p_game, int p_number) : m_game(p_game), 
 
 GameAction GameStrategyRep::GetAction(const GameInfoset &p_infoset) const
 {
-  if (p_infoset->GetPlayer() != m_player) {
+  if (p_infoset->GetPlayer().get() != m_player) {
     throw MismatchException();
   }
   try {
-    return *std::next(p_infoset->GetActions().cbegin(), m_behav.at(p_infoset) - 1);
+    return *std::next(p_infoset->GetActions().cbegin(), m_behav.at(p_infoset.get()) - 1);
   }
   catch (std::out_of_range &) {
     return nullptr;
@@ -71,7 +71,7 @@ GamePlayerRep::GamePlayerRep(GameRep *p_game, int p_id, int p_strats)
   : m_game(p_game), m_number(p_id)
 {
   for (int j = 1; j <= p_strats; j++) {
-    m_strategies.push_back(new GameStrategyRep(this, j, ""));
+    m_strategies.push_back(std::make_shared<GameStrategyRep>(this, j, ""));
   }
 }
 
@@ -87,11 +87,12 @@ GamePlayerRep::~GamePlayerRep()
 
 void GamePlayerRep::MakeStrategy(const std::map<GameInfosetRep *, int> &behav)
 {
-  auto *strategy = new GameStrategyRep(this, m_strategies.size() + 1, "");
+  auto strategy = std::make_shared<GameStrategyRep>(this, m_strategies.size() + 1, "");
   strategy->m_behav = behav;
   for (const auto &infoset : m_infosets) {
-    strategy->m_label +=
-        (contains(strategy->m_behav, infoset)) ? std::to_string(strategy->m_behav[infoset]) : "*";
+    strategy->m_label += (contains(strategy->m_behav, infoset.get()))
+                             ? std::to_string(strategy->m_behav[infoset.get()])
+                             : "*";
   }
   if (strategy->m_label.empty()) {
     strategy->m_label = "*";
@@ -109,7 +110,7 @@ void GamePlayerRep::MakeReducedStrats(GameNodeRep *n, GameNodeRep *nn,
       if (!contains(behav, n->m_infoset)) {
         // we haven't visited this infoset before
         for (size_t i = 1; i <= n->m_children.size(); i++) {
-          GameNodeRep *m = n->m_children[i - 1];
+          GameNodeRep *m = n->m_children[i - 1].get();
           whichbranch[n] = m;
           behav[n->m_infoset] = i;
           MakeReducedStrats(m, nn, behav, ptr, whichbranch);
@@ -118,7 +119,8 @@ void GamePlayerRep::MakeReducedStrats(GameNodeRep *n, GameNodeRep *nn,
       }
       else {
         // we have visited this infoset, take same action
-        MakeReducedStrats(n->m_children[behav[n->m_infoset] - 1], nn, behav, ptr, whichbranch);
+        MakeReducedStrats(n->m_children[behav[n->m_infoset] - 1].get(), nn, behav, ptr,
+                          whichbranch);
       }
     }
     else {
@@ -128,12 +130,13 @@ void GamePlayerRep::MakeReducedStrats(GameNodeRep *n, GameNodeRep *nn,
       else {
         ptr.erase(n);
       }
-      whichbranch[n] = n->m_children.front();
-      MakeReducedStrats(n->m_children.front(), n->m_children.front(), behav, ptr, whichbranch);
+      whichbranch[n] = n->m_children.front().get();
+      MakeReducedStrats(n->m_children.front().get(), n->m_children.front().get(), behav, ptr,
+                        whichbranch);
     }
   }
   else if (nn) {
-    GameNodeRep *m;
+    GameNode m;
     for (;; nn = whichbranch.at(ptr.at(nn->m_parent))) {
       m = nn->GetNextSibling();
       if (m || !contains(ptr, nn->m_parent)) {
@@ -142,8 +145,8 @@ void GamePlayerRep::MakeReducedStrats(GameNodeRep *n, GameNodeRep *nn,
     }
     if (m) {
       GameNodeRep *mm = whichbranch.at(m->m_parent);
-      whichbranch[m->m_parent] = m;
-      MakeReducedStrats(m, m, behav, ptr, whichbranch);
+      whichbranch[m->m_parent] = m.get();
+      MakeReducedStrats(m.get(), m.get(), behav, ptr, whichbranch);
       whichbranch[m->m_parent] = mm;
     }
     else {
@@ -160,8 +163,9 @@ size_t GamePlayerRep::NumSequences() const
   if (!m_game->IsTree()) {
     throw UndefinedException();
   }
-  return std::transform_reduce(m_infosets.cbegin(), m_infosets.cend(), 1, std::plus<>(),
-                               [](const GameInfosetRep *s) { return s->m_actions.size(); });
+  return std::transform_reduce(
+      m_infosets.cbegin(), m_infosets.cend(), 1, std::plus<>(),
+      [](const std::shared_ptr<GameInfosetRep> &s) { return s->m_actions.size(); });
 }
 
 //========================================================================
@@ -318,8 +322,8 @@ MixedStrategyProfile<T>::MixedStrategyProfile(const MixedBehaviorProfile<T> &p_p
     for (const auto &strategy : player->m_strategies) {
       auto prob = static_cast<T>(1);
       for (const auto &infoset : player->m_infosets) {
-        if (strategy->m_behav[infoset] > 0) {
-          prob *= p_profile[infoset->GetAction(strategy->m_behav[infoset])];
+        if (strategy->m_behav[infoset.get()] > 0) {
+          prob *= p_profile[infoset->GetAction(strategy->m_behav[infoset.get()])];
         }
       }
       (*m_rep)[strategy] = prob;
@@ -342,7 +346,7 @@ MixedStrategyProfile<T>::operator=(const MixedStrategyProfile<T> &p_profile)
 //             MixedStrategyProfile<T>: General data access
 //========================================================================
 
-template <class T> Vector<T> MixedStrategyProfile<T>::operator[](const GamePlayer &p_player) const
+template <class T> Vector<T> MixedStrategyProfile<T>::GetStrategy(const GamePlayer &p_player) const
 {
   CheckVersion();
   auto strategies = m_rep->m_support.GetStrategies(p_player);

@@ -61,29 +61,29 @@ cdef extern from "games/game.h":
 
     cdef cppclass c_GamePlayer "GameObjectPtr<GamePlayerRep>":
         bool operator !=(c_GamePlayer) except +
-        c_GamePlayerRep *deref "operator->"() except +RuntimeError
+        c_GamePlayerRep *deref "get"() except +RuntimeError
 
     cdef cppclass c_GameOutcome "GameObjectPtr<GameOutcomeRep>":
         bool operator==(c_GameOutcome) except +
         bool operator !=(c_GameOutcome) except +
-        c_GameOutcomeRep *deref "operator->"() except +RuntimeError
+        c_GameOutcomeRep *deref "get"() except +RuntimeError
 
     cdef cppclass c_GameNode "GameObjectPtr<GameNodeRep>":
         bool operator !=(c_GameNode) except +
-        c_GameNodeRep *deref "operator->"() except +RuntimeError
+        c_GameNodeRep *deref "get"() except +RuntimeError
 
     cdef cppclass c_GameAction "GameObjectPtr<GameActionRep>":
         bool operator !() except +
         bool operator !=(c_GameAction) except +
-        c_GameActionRep *deref "operator->"() except +RuntimeError
+        c_GameActionRep *deref "get"() except +RuntimeError
 
     cdef cppclass c_GameInfoset "GameObjectPtr<GameInfosetRep>":
         bool operator ==(c_GameInfoset) except +
         bool operator !=(c_GameInfoset) except +
-        c_GameInfosetRep *deref "operator->"() except +RuntimeError
+        c_GameInfosetRep *deref "get"() except +RuntimeError
 
     cdef cppclass c_GameStrategy "GameObjectPtr<GameStrategyRep>":
-        c_GameStrategyRep *deref "operator->"() except +RuntimeError
+        c_GameStrategyRep *deref "get"() except +RuntimeError
 
     cdef cppclass c_PureStrategyProfile "PureStrategyProfile":
         shared_ptr[c_PureStrategyProfileRep] deref "operator->"() except +

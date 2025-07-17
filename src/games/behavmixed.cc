@@ -98,7 +98,7 @@ void MixedBehaviorProfile<T>::RealizationProbs(const MixedStrategyProfile<T> &mp
     if (node->GetPlayer() && !node->GetPlayer()->IsChance()) {
       if (node->GetPlayer() == player) {
         if (contains(actions, node->m_infoset) &&
-            actions.at(node->GetInfoset()) == static_cast<int>(i)) {
+            actions.at(node->GetInfoset().get()) == static_cast<int>(i)) {
           prob = T(1);
         }
         else {
@@ -117,12 +117,12 @@ void MixedBehaviorProfile<T>::RealizationProbs(const MixedStrategyProfile<T> &mp
       prob = T(node->m_infoset->GetActionProb(node->m_infoset->GetAction(i)));
     }
 
-    GameNodeRep *child = node->m_children[i - 1];
+    auto child = node->m_children[i - 1];
 
-    map_bvals[child] = prob * map_bvals[node];
+    map_bvals[child] = prob * map_bvals[node->shared_from_this()];
     map_nvals[child] += map_bvals[child];
 
-    RealizationProbs(mp, player, actions, child, map_nvals, map_bvals);
+    RealizationProbs(mp, player, actions, child.get(), map_nvals, map_bvals);
   }
 }
 
@@ -141,7 +141,7 @@ MixedBehaviorProfile<T>::MixedBehaviorProfile(const MixedStrategyProfile<T> &p_p
     }
   }
 
-  GameNodeRep *root = m_support.GetGame()->GetRoot();
+  GameNodeRep *root = m_support.GetGame()->GetRoot().get();
 
   const StrategySupportProfile &support = p_profile.GetSupport();
   GameRep *game = m_support.GetGame().get();
@@ -151,11 +151,11 @@ MixedBehaviorProfile<T>::MixedBehaviorProfile(const MixedStrategyProfile<T> &p_p
     for (auto strategy : support.GetStrategies(player)) {
       if (p_profile[strategy] > T(0)) {
         const auto &actions = strategy->m_behav;
-        map_bvals[root] = p_profile[strategy];
+        map_bvals[root->shared_from_this()] = p_profile[strategy];
         RealizationProbs(p_profile, player, actions, root, map_nvals, map_bvals);
       }
     }
-    map_nvals[root] = T(1); // set the root nval
+    map_nvals[root->shared_from_this()] = T(1); // set the root nval
     auto root = m_support.GetGame()->GetRoot();
     BehaviorStrat(player, root, map_nvals, map_bvals);
   }

@@ -136,8 +136,8 @@ template <class T>
 T AGGMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &ps1,
                                                 const GameStrategy &ps2) const
 {
-  GamePlayerRep *player1 = ps1->GetPlayer();
-  GamePlayerRep *player2 = ps2->GetPlayer();
+  const auto player1 = ps1->GetPlayer().get();
+  const auto player2 = ps2->GetPlayer().get();
   if (player1 == player2) {
     return (T)0;
   }
@@ -179,10 +179,12 @@ template class AGGMixedStrategyProfileRep<Rational>;
 GameAGGRep::GameAGGRep(std::shared_ptr<agg::AGG> p_aggPtr) : aggPtr(p_aggPtr)
 {
   for (int pl = 1; pl <= aggPtr->getNumPlayers(); pl++) {
-    m_players.push_back(new GamePlayerRep(this, pl, aggPtr->getNumActions(pl - 1)));
+    m_players.push_back(std::make_shared<GamePlayerRep>(this, pl, aggPtr->getNumActions(pl - 1)));
     m_players.back()->m_label = lexical_cast<std::string>(pl);
     std::for_each(m_players.back()->m_strategies.begin(), m_players.back()->m_strategies.end(),
-                  [st = 1](GameStrategyRep *s) mutable { s->SetLabel(std::to_string(st++)); });
+                  [st = 1](const std::shared_ptr<GameStrategyRep> &s) mutable {
+                    s->m_label = std::to_string(st++);
+                  });
   }
 }
 

@@ -34,8 +34,8 @@ class GameTreeRep : public GameExplicitRep {
 
 protected:
   mutable bool m_computedValues{false}, m_doCanon{true};
-  GameNodeRep *m_root;
-  GamePlayerRep *m_chance;
+  std::shared_ptr<GameNodeRep> m_root;
+  std::shared_ptr<GamePlayerRep> m_chance;
   std::size_t m_numNodes = 1;
   std::size_t m_numNonterminalNodes = 0;
   std::map<GameNodeRep *, std::vector<GameNodeRep *>> m_nodePlays;
@@ -44,7 +44,7 @@ protected:
   //@{
   void NumberNodes(GameNodeRep *, int &);
   /// Normalize the probability distribution of actions at a chance node
-  Game NormalizeChanceProbs(const GameInfoset &);
+  Game NormalizeChanceProbs(GameInfosetRep *);
   //@}
 
   /// @name Managing the representation
@@ -87,7 +87,7 @@ public:
   /// @name Players
   //@{
   /// Returns the chance (nature) player
-  GamePlayer GetChance() const override { return m_chance; }
+  GamePlayer GetChance() const override { return m_chance->shared_from_this(); }
   /// Creates a new player in the game, with no moves
   GamePlayer NewPlayer() override;
   //@}

@@ -190,12 +190,12 @@ EnumMixedStrategySolveDetailed(const Game &p_game, StrategyCallbackType<T> p_onE
         if (vert1id[i1] == 0) {
           id1++;
           vert1id[i1] = id1;
-          solution->m_key2.push_back(eqm[p_game->GetPlayer(2)]);
+          solution->m_key2.push_back(eqm.GetStrategy(p_game->GetPlayer(2)));
         }
         if (vert2id[i2] == 0) {
           id2++;
           vert2id[i2] = id2;
-          solution->m_key1.push_back(eqm[p_game->GetPlayer(1)]);
+          solution->m_key1.push_back(eqm.GetStrategy(p_game->GetPlayer(1)));
         }
         solution->m_node1.push_back(vert2id[i2]);
         solution->m_node2.push_back(vert1id[i1]);

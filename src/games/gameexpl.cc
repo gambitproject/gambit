@@ -50,7 +50,7 @@ Rational GameExplicitRep::GetMinPayoff(const GamePlayer &p_player) const
   }
   return std::accumulate(std::next(m_outcomes.begin()), m_outcomes.end(),
                          m_outcomes.front()->GetPayoff<Rational>(p_player),
-                         [&p_player](const Rational &r, const GameOutcomeRep *c) {
+                         [&p_player](const Rational &r, const std::shared_ptr<GameOutcomeRep> &c) {
                            return std::min(r, c->GetPayoff<Rational>(p_player));
                          });
 }
@@ -69,7 +69,7 @@ Rational GameExplicitRep::GetMaxPayoff(const GamePlayer &p_player) const
   }
   return std::accumulate(std::next(m_outcomes.begin()), m_outcomes.end(),
                          m_outcomes.front()->GetPayoff<Rational>(p_player),
-                         [&p_player](const Rational &r, const GameOutcomeRep *c) {
+                         [&p_player](const Rational &r, const std::shared_ptr<GameOutcomeRep> &c) {
                            return std::max(r, c->GetPayoff<Rational>(p_player));
                          });
 }
@@ -108,7 +108,7 @@ GameStrategy GameExplicitRep::GetStrategy(int p_index) const
 
 GameOutcome GameExplicitRep::NewOutcome()
 {
-  m_outcomes.push_back(new GameOutcomeRep(this, m_outcomes.size() + 1));
+  m_outcomes.push_back(std::make_shared<GameOutcomeRep>(this, m_outcomes.size() + 1));
   return m_outcomes.back();
 }
 

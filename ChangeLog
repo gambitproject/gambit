@@ -19,6 +19,8 @@
 - Implement `Nodes` collection as a member of `GameRep`, including a C++ iterator that
   returns nodes in depth-first traversal order (#530)
 
+### Changed
+- Internally in C++ `std::shared_ptr` are now used to manage memory allocated for game objects.  (#518)
 
 ## [16.3.1] - unreleased
 

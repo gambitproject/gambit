@@ -177,7 +177,7 @@ public:
   }
 
   /// Returns the mixed strategy for the player
-  Vector<T> operator[](const GamePlayer &p_player) const;
+  Vector<T> GetStrategy(const GamePlayer &p_player) const;
 
   explicit operator const Vector<T> &() const
   {

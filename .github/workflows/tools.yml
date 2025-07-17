@@ -40,11 +40,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install dependencies
-        run: brew install automake autoconf wxwidgets
+        run: brew install automake autoconf wxwidgets@3.2
       - run: aclocal
       - run: automake --add-missing
       - run: autoconf
-      - run: ./configure
+      - run: ./configure --with-wx-config=wx-config-3.2
       - run: make
       - run: sudo make install
       - run: make osx-dmg

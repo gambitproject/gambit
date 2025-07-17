@@ -23,66 +23,9 @@
 #ifndef GAMBIT_GAMES_GAMEOBJECT_H
 #define GAMBIT_GAMES_GAMEOBJECT_H
 
+#include <memory>
+
 namespace Gambit {
-
-/// This is a base class for all game-related objects.  Primary among
-/// its responsibility is maintaining a reference count.  Calling code
-/// which maintains pointers to objects representing parts of a game
-/// (e.g., nodes) which may be deleted should increment the reference
-/// count for that object.  The library guarantees that any object
-/// with a positive reference count will not have its memory deleted,
-/// but will instead be marked as deleted.  Calling code should always
-/// be careful to check the deleted status of the object before any
-/// operations on it.
-class GameObject {
-protected:
-  int m_refCount{0};
-  bool m_valid{true};
-
-public:
-  /// @name Lifecycle
-  //@{
-  /// Constructor; initializes reference count
-  GameObject() = default;
-
-  /// Destructor
-  virtual ~GameObject() = default;
-  //@}
-
-  /// @name Validation
-  //@{
-  /// Is the object still valid?
-  bool IsValid() const { return m_valid; }
-
-  /// Invalidate the object; delete if not referenced elsewhere
-  void Invalidate()
-  {
-    if (!m_refCount) {
-      delete this;
-    }
-    else {
-      m_valid = false;
-    }
-  }
-  //@}
-
-  /// @name Reference counting
-  //@{
-  /// Increment the reference count
-  void IncRef() { m_refCount++; }
-
-  /// Decrement the reference count; delete if reference count is zero.
-  void DecRef()
-  {
-    if (!--m_refCount && !m_valid) {
-      delete this;
-    }
-  }
-
-  /// Returns the reference count
-  int RefCount() const { return m_refCount; }
-  //@}
-};
 
 /// An exception thrown when attempting to dereference an invalidated object
 class InvalidObjectException : public Exception {
@@ -92,73 +35,135 @@ public:
   const char *what() const noexcept override { return "Dereferencing an invalidated object"; }
 };
 
-//
-// This is a handle class that is used by all calling code to refer to
-// member objects of games.  It takes care of all the reference-counting
-// considerations.
-//
 template <class T> class GameObjectPtr {
-private:
-  T *rep;
+  std::shared_ptr<T> m_rep;
 
 public:
-  GameObjectPtr(const T *r = nullptr) : rep(const_cast<T *>(r))
-  {
-    if (rep) {
-      rep->IncRef();
-    }
-  }
+  GameObjectPtr() = default;
+  GameObjectPtr(std::nullptr_t r) : m_rep(r) {}
+  GameObjectPtr(std::shared_ptr<T> r) : m_rep(r) {}
+  GameObjectPtr(const GameObjectPtr<T> &) = default;
+  ~GameObjectPtr() = default;
 
-  GameObjectPtr(const GameObjectPtr<T> &r) : rep(r.rep)
-  {
-    if (rep) {
-      rep->IncRef();
-    }
-  }
+  GameObjectPtr<T> &operator=(const GameObjectPtr<T> &) = default;
 
-  ~GameObjectPtr()
+  std::shared_ptr<T> operator->() const
   {
-    if (rep) {
-      rep->DecRef();
-    }
-  }
-
-  GameObjectPtr<T> &operator=(const GameObjectPtr<T> &r)
-  {
-    if (&r != this) {
-      if (rep) {
-        rep->DecRef();
-      }
-      rep = r.rep;
-      if (rep) {
-        rep->IncRef();
-      }
-    }
-    return *this;
-  }
-
-  T *operator->() const
-  {
-    if (!rep) {
+    if (!m_rep) {
       throw NullException();
     }
-    if (!rep->IsValid()) {
+    if (!m_rep->IsValid()) {
       throw InvalidObjectException();
     }
-    return rep;
+    return m_rep;
+  }
+  std::shared_ptr<T> get_shared() const
+  {
+    if (!m_rep) {
+      throw NullException();
+    }
+    if (!m_rep->IsValid()) {
+      throw InvalidObjectException();
+    }
+    return m_rep;
+  }
+  T *get() const
+  {
+    if (!m_rep) {
+      throw NullException();
+    }
+    if (!m_rep->IsValid()) {
+      throw InvalidObjectException();
+    }
+    return m_rep.get();
   }
 
-  bool operator==(const GameObjectPtr<T> &r) const { return (rep == r.rep); }
+  bool operator==(const GameObjectPtr<T> &r) const { return (m_rep == r.m_rep); }
+  bool operator==(const std::shared_ptr<T> r) const { return (m_rep == r); }
+  bool operator==(const std::shared_ptr<const T> r) const { return (m_rep == r); }
+  bool operator==(const std::nullptr_t) const { return !bool(m_rep); }
+  bool operator!=(const GameObjectPtr<T> &r) const { return (m_rep != r.m_rep); }
+  bool operator!=(const std::shared_ptr<T> r) const { return (m_rep != r); }
+  bool operator!=(const std::shared_ptr<const T> r) const { return (m_rep != r); }
+  bool operator!=(const std::nullptr_t) const { return bool(m_rep); }
+  bool operator<(const GameObjectPtr<T> &r) const { return (m_rep < r.m_rep); }
 
-  bool operator==(T *r) const { return (rep == r); }
+  operator bool() const noexcept { return bool(m_rep); }
+  operator std::shared_ptr<T>() const { return m_rep; }
+};
 
-  bool operator!=(const GameObjectPtr<T> &r) const { return (rep != r.rep); }
+template <class P, class T> class ElementCollection {
+  P m_owner{nullptr};
+  const std::vector<std::shared_ptr<T>> *m_container{nullptr};
 
-  bool operator!=(T *r) const { return (rep != r); }
+public:
+  class iterator {
+    P m_owner{nullptr};
+    const std::vector<std::shared_ptr<T>> *m_container{nullptr};
+    size_t m_index{0};
 
-  operator T *() const { return rep; }
+  public:
+    using iterator_category = std::bidirectional_iterator_tag;
+    using difference_type = std::ptrdiff_t;
+    using value_type = GameObjectPtr<T>;
+    using pointer = value_type *;
+    using reference = value_type &;
 
-  bool operator!() const { return !rep; }
+    iterator() = default;
+    iterator(const P &p_owner, const std::vector<std::shared_ptr<T>> *p_container,
+             size_t p_index = 0)
+      : m_owner(p_owner), m_container(p_container), m_index(p_index)
+    {
+    }
+    iterator(const iterator &) = default;
+    ~iterator() = default;
+    iterator &operator=(const iterator &) = default;
+
+    bool operator==(const iterator &p_iter) const
+    {
+      return m_owner == p_iter.m_owner && m_container == p_iter.m_container &&
+             m_index == p_iter.m_index;
+    }
+    bool operator!=(const iterator &p_iter) const
+    {
+      return m_owner != p_iter.m_owner || m_container != p_iter.m_container ||
+             m_index != p_iter.m_index;
+    }
+
+    iterator &operator++()
+    {
+      m_index++;
+      return *this;
+    }
+    iterator &operator--()
+    {
+      m_index--;
+      return *this;
+    }
+    value_type operator*() const { return m_container->at(m_index); }
+  };
+
+  ElementCollection() = default;
+  explicit ElementCollection(const P &p_owner, const std::vector<std::shared_ptr<T>> *p_container)
+    : m_owner(p_owner), m_container(p_container)
+  {
+  }
+  ElementCollection(const ElementCollection<P, T> &) = default;
+  ~ElementCollection() = default;
+  ElementCollection &operator=(const ElementCollection<P, T> &) = default;
+
+  bool operator==(const ElementCollection<P, T> &p_other) const
+  {
+    return m_owner == p_other.m_owner && m_container == p_other.m_container;
+  }
+  size_t size() const { return m_container->size(); }
+  GameObjectPtr<T> front() const { return m_container->front(); }
+  GameObjectPtr<T> back() const { return m_container->back(); }
+
+  iterator begin() const { return {m_owner, m_container, 0}; }
+  iterator end() const { return {m_owner, m_container, (m_owner) ? m_container->size() : 0}; }
+  iterator cbegin() const { return {m_owner, m_container, 0}; }
+  iterator cend() const { return {m_owner, m_container, (m_owner) ? m_container->size() : 0}; }
 };
 
 } // end namespace Gambit
