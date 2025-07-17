@@ -246,8 +246,8 @@ template <class T>
 T TableMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &strategy1,
                                                   const GameStrategy &strategy2) const
 {
-  GamePlayerRep *player1 = strategy1->GetPlayer();
-  GamePlayerRep *player2 = strategy2->GetPlayer();
+  const auto player1 = strategy1->GetPlayer().get();
+  const auto player2 = strategy2->GetPlayer().get();
   if (player1 == player2) {
     return T(0);
   }
@@ -269,7 +269,7 @@ GameTableRep::GameTableRep(const std::vector<int> &dim, bool p_sparseOutcomes /*
   : m_results(std::accumulate(dim.begin(), dim.end(), 1, std::multiplies<>()))
 {
   for (const auto &nstrat : dim) {
-    m_players.push_back(new GamePlayerRep(this, m_players.size() + 1, nstrat));
+    m_players.push_back(std::make_shared<GamePlayerRep>(this, m_players.size() + 1, nstrat));
     m_players.back()->m_label = lexical_cast<std::string>(m_players.size());
     std::for_each(
         m_players.back()->m_strategies.begin(), m_players.back()->m_strategies.end(),
@@ -373,10 +373,10 @@ void GameTableRep::WriteNfgFile(std::ostream &p_file) const
 GamePlayer GameTableRep::NewPlayer()
 {
   IncrementVersion();
-  auto player = new GamePlayerRep(this, m_players.size() + 1, 1);
+  auto player = std::make_shared<GamePlayerRep>(this, m_players.size() + 1, 1);
   m_players.push_back(player);
-  for (auto outcome : m_outcomes) {
-    outcome->m_payoffs[player] = Number();
+  for (const auto outcome : m_outcomes) {
+    outcome->m_payoffs[player.get()] = Number();
   }
   return player;
 }
@@ -406,14 +406,14 @@ GameStrategy GameTableRep::NewStrategy(const GamePlayer &p_player, const std::st
   }
   IncrementVersion();
   p_player->m_strategies.push_back(
-      new GameStrategyRep(p_player, p_player->m_strategies.size(), p_label));
+      new GameStrategyRep(p_player.get(), p_player->m_strategies.size(), p_label));
   RebuildTable();
   return p_player->m_strategies.back();
 }
 
 void GameTableRep::DeleteStrategy(const GameStrategy &p_strategy)
 {
-  GamePlayerRep *player = p_strategy->GetPlayer();
+  const auto player = p_strategy->GetPlayer().get();
   if (player->m_game != this) {
     throw MismatchException();
   }

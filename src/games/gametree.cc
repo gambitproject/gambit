@@ -181,11 +181,11 @@ void GameTreeRep::SetPlayer(GameInfoset p_infoset, GamePlayer p_player)
     return;
   }
 
-  GamePlayerRep *oldPlayer = p_infoset->GetPlayer();
+  const auto oldPlayer = p_infoset->GetPlayer().get();
   IncrementVersion();
   oldPlayer->m_infosets.erase(
       std::find(oldPlayer->m_infosets.begin(), oldPlayer->m_infosets.end(), p_infoset));
-  p_infoset->m_player = p_player;
+  p_infoset->m_player = p_player.get();
   p_player->m_infosets.push_back(p_infoset);
 
   ClearComputedValues();
@@ -580,8 +580,8 @@ GameInfoset GameTreeRep::AppendMove(GameNode p_node, GamePlayer p_player, int p_
   }
 
   IncrementVersion();
-  return AppendMove(
-      p_node, new GameInfosetRep(this, p_player->m_infosets.size() + 1, p_player, p_actions));
+  return AppendMove(p_node, new GameInfosetRep(this, p_player->m_infosets.size() + 1,
+                                               p_player.get(), p_actions));
 }
 
 GameInfoset GameTreeRep::AppendMove(GameNode p_node, GameInfoset p_infoset)
@@ -618,8 +618,8 @@ GameInfoset GameTreeRep::InsertMove(GameNode p_node, GamePlayer p_player, int p_
   }
 
   IncrementVersion();
-  return InsertMove(
-      p_node, new GameInfosetRep(this, p_player->m_infosets.size() + 1, p_player, p_actions));
+  return InsertMove(p_node, new GameInfosetRep(this, p_player->m_infosets.size() + 1,
+                                               p_player.get(), p_actions));
 }
 
 GameInfoset GameTreeRep::InsertMove(GameNode p_node, GameInfoset p_infoset)
@@ -803,7 +803,7 @@ void GameTreeRep::Canonicalize()
   NumberNodes(m_root, nodeindex);
 
   for (size_t pl = 0; pl <= m_players.size(); pl++) {
-    GamePlayerRep *player = (pl) ? m_players[pl - 1] : m_chance;
+    auto player = (pl) ? m_players[pl - 1].get() : m_chance.get();
 
     // Sort nodes within information sets according to ID.
     // Coded using a bubble sort for simplicity; large games might
@@ -982,10 +982,10 @@ int GameTreeRep::BehavProfileLength() const
 GamePlayer GameTreeRep::NewPlayer()
 {
   IncrementVersion();
-  auto player = new GamePlayerRep(this, m_players.size() + 1);
+  auto player = std::make_shared<GamePlayerRep>(this, m_players.size() + 1);
   m_players.push_back(player);
-  for (auto &outcome : m_outcomes) {
-    outcome->m_payoffs[player] = Number();
+  for (const auto &outcome : m_outcomes) {
+    outcome->m_payoffs[player.get()] = Number();
   }
   ClearComputedValues();
   return player;

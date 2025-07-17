@@ -49,7 +49,7 @@ class GameStrategyRep;
 using GameStrategy = GameObjectPtr<GameStrategyRep>;
 
 class GamePlayerRep;
-using GamePlayer = GameObjectPtr<GamePlayerRep>;
+using GamePlayer = GameObjectSmartPtr<GamePlayerRep>;
 
 class GameNodeRep;
 using GameNode = GameObjectPtr<GameNodeRep>;
@@ -125,6 +125,81 @@ public:
   size_t size() const { return m_container->size(); }
   GameObjectPtr<T> front() const { return m_container->front(); }
   GameObjectPtr<T> back() const { return m_container->back(); }
+
+  iterator begin() const { return {m_owner, m_container, 0}; }
+  iterator end() const { return {m_owner, m_container, (m_owner) ? m_container->size() : 0}; }
+  iterator cbegin() const { return {m_owner, m_container, 0}; }
+  iterator cend() const { return {m_owner, m_container, (m_owner) ? m_container->size() : 0}; }
+};
+
+template <class P, class T> class SmartElementCollection {
+  P m_owner{nullptr};
+  const std::vector<std::shared_ptr<T>> *m_container{nullptr};
+
+public:
+  class iterator {
+    P m_owner{nullptr};
+    const std::vector<std::shared_ptr<T>> *m_container{nullptr};
+    size_t m_index{0};
+
+  public:
+    using iterator_category = std::bidirectional_iterator_tag;
+    using difference_type = std::ptrdiff_t;
+    using value_type = GameObjectSmartPtr<T>;
+    using pointer = value_type *;
+    using reference = value_type &;
+
+    iterator() = default;
+    iterator(const P &p_owner, const std::vector<std::shared_ptr<T>> *p_container,
+             size_t p_index = 0)
+      : m_owner(p_owner), m_container(p_container), m_index(p_index)
+    {
+    }
+    iterator(const iterator &) = default;
+    ~iterator() = default;
+    iterator &operator=(const iterator &) = default;
+
+    bool operator==(const iterator &p_iter) const
+    {
+      return m_owner == p_iter.m_owner && m_container == p_iter.m_container &&
+             m_index == p_iter.m_index;
+    }
+    bool operator!=(const iterator &p_iter) const
+    {
+      return m_owner != p_iter.m_owner || m_container != p_iter.m_container ||
+             m_index != p_iter.m_index;
+    }
+
+    iterator &operator++()
+    {
+      m_index++;
+      return *this;
+    }
+    iterator &operator--()
+    {
+      m_index--;
+      return *this;
+    }
+    value_type operator*() const { return m_container->at(m_index); }
+  };
+
+  SmartElementCollection() = default;
+  explicit SmartElementCollection(const P &p_owner,
+                                  const std::vector<std::shared_ptr<T>> *p_container)
+    : m_owner(p_owner), m_container(p_container)
+  {
+  }
+  SmartElementCollection(const SmartElementCollection<P, T> &) = default;
+  ~SmartElementCollection() = default;
+  SmartElementCollection &operator=(const SmartElementCollection<P, T> &) = default;
+
+  bool operator==(const SmartElementCollection<P, T> &p_other) const
+  {
+    return m_owner == p_other.m_owner && m_container == p_other.m_container;
+  }
+  size_t size() const { return m_container->size(); }
+  GameObjectSmartPtr<T> front() const { return m_container->front(); }
+  GameObjectSmartPtr<T> back() const { return m_container->back(); }
 
   iterator begin() const { return {m_owner, m_container, 0}; }
   iterator end() const { return {m_owner, m_container, (m_owner) ? m_container->size() : 0}; }
@@ -369,7 +444,7 @@ public:
 };
 
 /// A player in a game
-class GamePlayerRep : public GameObject {
+class GamePlayerRep : public std::enable_shared_from_this<GamePlayerRep> {
   friend class GameRep;
   friend class GameExplicitRep;
   friend class GameTreeRep;
@@ -388,19 +463,23 @@ class GamePlayerRep : public GameObject {
   void MakeReducedStrats(class GameNodeRep *, class GameNodeRep *);
   //@}
 
+  bool m_valid{true};
   GameRep *m_game;
   int m_number;
   std::string m_label;
   std::vector<GameInfosetRep *> m_infosets;
   std::vector<GameStrategyRep *> m_strategies;
 
-  GamePlayerRep(GameRep *p_game, int p_id) : m_game(p_game), m_number(p_id) {}
-  GamePlayerRep(GameRep *p_game, int p_id, int m_strats);
-  ~GamePlayerRep() override;
-
 public:
   using Infosets = ElementCollection<GamePlayer, GameInfosetRep>;
   using Strategies = ElementCollection<GamePlayer, GameStrategyRep>;
+
+  GamePlayerRep(GameRep *p_game, int p_id) : m_game(p_game), m_number(p_id) {}
+  GamePlayerRep(GameRep *p_game, int p_id, int m_strats);
+  ~GamePlayerRep();
+
+  bool IsValid() const { return m_valid; }
+  void Invalidate() { m_valid = false; }
 
   int GetNumber() const { return m_number; }
   Game GetGame() const;
@@ -415,7 +494,10 @@ public:
   /// Returns the p_index'th information set
   GameInfoset GetInfoset(int p_index) const { return m_infosets.at(p_index - 1); }
   /// Returns the information sets for the player
-  Infosets GetInfosets() const { return Infosets(this, &m_infosets); }
+  Infosets GetInfosets() const
+  {
+    return Infosets(std::const_pointer_cast<GamePlayerRep>(shared_from_this()), &m_infosets);
+  }
 
   /// @name Strategies
   //@{
@@ -499,7 +581,7 @@ class GameRep : public std::enable_shared_from_this<GameRep> {
   template <class T> friend class TableMixedStrategyProfileRep;
 
 protected:
-  std::vector<GamePlayerRep *> m_players;
+  std::vector<std::shared_ptr<GamePlayerRep>> m_players;
   std::vector<GameOutcomeRep *> m_outcomes;
   std::string m_title, m_comment;
   unsigned int m_version{0};
@@ -513,7 +595,7 @@ protected:
   //@}
 
 public:
-  using Players = ElementCollection<Game, GamePlayerRep>;
+  using Players = SmartElementCollection<Game, GamePlayerRep>;
   using Outcomes = ElementCollection<Game, GameOutcomeRep>;
 
   class Nodes {
@@ -728,8 +810,9 @@ public:
   int NumStrategyContingencies() const
   {
     BuildComputedValues();
-    return std::transform_reduce(m_players.begin(), m_players.end(), 0, std::multiplies<>(),
-                                 [](const GamePlayerRep *p) { return p->m_strategies.size(); });
+    return std::transform_reduce(
+        m_players.begin(), m_players.end(), 0, std::multiplies<>(),
+        [](const std::shared_ptr<GamePlayerRep> &p) { return p->m_strategies.size(); });
   }
   /// Returns the total number of actions in the game
   virtual int BehavProfileLength() const = 0;
@@ -737,8 +820,9 @@ public:
   int MixedProfileLength() const
   {
     BuildComputedValues();
-    return std::transform_reduce(m_players.begin(), m_players.end(), 0, std::plus<>(),
-                                 [](const GamePlayerRep *p) { return p->m_strategies.size(); });
+    return std::transform_reduce(
+        m_players.begin(), m_players.end(), 0, std::plus<>(),
+        [](const std::shared_ptr<GamePlayerRep> &p) { return p->m_strategies.size(); });
   }
   //@}
 
@@ -778,7 +862,7 @@ public:
   /// Returns the number of players in the game
   size_t NumPlayers() const { return m_players.size(); }
   /// Returns the pl'th player in the game
-  GamePlayer GetPlayer(int pl) const { return m_players.at(pl - 1); }
+  GamePlayer GetPlayer(int pl) const { return m_players.at(pl - 1)->shared_from_this(); }
   /// Returns the set of players in the game
   Players GetPlayers() const
   {
@@ -847,7 +931,7 @@ inline Game GameOutcomeRep::GetGame() const { return m_game->shared_from_this();
 template <class T> const T &GameOutcomeRep::GetPayoff(const GamePlayer &p_player) const
 {
   try {
-    return static_cast<const T &>(m_payoffs.at(p_player));
+    return static_cast<const T &>(m_payoffs.at(p_player.get()));
   }
   catch (const std::out_of_range &) {
     throw MismatchException();
@@ -857,7 +941,7 @@ template <class T> const T &GameOutcomeRep::GetPayoff(const GamePlayer &p_player
 template <> inline const Number &GameOutcomeRep::GetPayoff(const GamePlayer &p_player) const
 {
   try {
-    return m_payoffs.at(p_player);
+    return m_payoffs.at(p_player.get());
   }
   catch (const std::out_of_range &) {
     throw MismatchException();
@@ -869,14 +953,14 @@ inline void GameOutcomeRep::SetPayoff(const GamePlayer &p_player, const Number &
   if (p_player->GetGame() != GetGame()) {
     throw MismatchException();
   }
-  m_payoffs[p_player] = p_value;
+  m_payoffs[p_player.get()] = p_value;
   m_game->IncrementVersion();
 }
 
-inline GamePlayer GameStrategyRep::GetPlayer() const { return m_player; }
+inline GamePlayer GameStrategyRep::GetPlayer() const { return m_player->shared_from_this(); }
 
 inline Game GameInfosetRep::GetGame() const { return m_game->shared_from_this(); }
-inline GamePlayer GameInfosetRep::GetPlayer() const { return m_player; }
+inline GamePlayer GameInfosetRep::GetPlayer() const { return m_player->shared_from_this(); }
 inline bool GameInfosetRep::IsChanceInfoset() const { return m_player->IsChance(); }
 
 inline Game GamePlayerRep::GetGame() const { return m_game->shared_from_this(); }
@@ -888,7 +972,7 @@ inline GameStrategy GamePlayerRep::GetStrategy(int st) const
 inline GamePlayerRep::Strategies GamePlayerRep::GetStrategies() const
 {
   m_game->BuildComputedValues();
-  return Strategies(this, &m_strategies);
+  return Strategies(std::const_pointer_cast<GamePlayerRep>(shared_from_this()), &m_strategies);
 }
 
 inline Game GameNodeRep::GetGame() const { return m_game->shared_from_this(); }

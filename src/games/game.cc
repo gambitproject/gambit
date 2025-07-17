@@ -42,7 +42,7 @@ namespace Gambit {
 GameOutcomeRep::GameOutcomeRep(GameRep *p_game, int p_number) : m_game(p_game), m_number(p_number)
 {
   for (const auto &player : m_game->m_players) {
-    m_payoffs[player] = Number();
+    m_payoffs[player.get()] = Number();
   }
 }
 
@@ -52,7 +52,7 @@ GameOutcomeRep::GameOutcomeRep(GameRep *p_game, int p_number) : m_game(p_game), 
 
 GameAction GameStrategyRep::GetAction(const GameInfoset &p_infoset) const
 {
-  if (p_infoset->GetPlayer() != m_player) {
+  if (p_infoset->GetPlayer().get() != m_player) {
     throw MismatchException();
   }
   const int action = m_behav[p_infoset->GetNumber()];
@@ -366,7 +366,7 @@ MixedStrategyProfile<T>::operator=(const MixedStrategyProfile<T> &p_profile)
 //             MixedStrategyProfile<T>: General data access
 //========================================================================
 
-template <class T> Vector<T> MixedStrategyProfile<T>::operator[](const GamePlayer &p_player) const
+template <class T> Vector<T> MixedStrategyProfile<T>::GetStrategy(const GamePlayer &p_player) const
 {
   CheckVersion();
   auto strategies = m_rep->m_support.GetStrategies(p_player);
