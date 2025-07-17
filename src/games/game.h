@@ -37,7 +37,7 @@ namespace Gambit {
 // Forward declarations of classes defined in this file.
 //
 class GameOutcomeRep;
-using GameOutcome = GameObjectPtr<GameOutcomeRep>;
+using GameOutcome = GameObjectSmartPtr<GameOutcomeRep>;
 
 class GameActionRep;
 using GameAction = GameObjectPtr<GameActionRep>;
@@ -262,24 +262,28 @@ public:
 
 /// This class represents an outcome in a game.  An outcome
 /// specifies a vector of payoffs to players.
-class GameOutcomeRep : public GameObject {
+class GameOutcomeRep : public std::enable_shared_from_this<GameOutcomeRep> {
   friend class GameExplicitRep;
   friend class GameTreeRep;
   friend class GameTableRep;
 
+  bool m_valid{true};
   GameRep *m_game;
   int m_number;
   std::string m_label;
   std::map<GamePlayerRep *, Number> m_payoffs;
 
+public:
   /// @name Lifecycle
   //@{
   /// Creates a new outcome object, with payoffs set to zero
   GameOutcomeRep(GameRep *p_game, int p_number);
-  ~GameOutcomeRep() override = default;
+  ~GameOutcomeRep() = default;
   //@}
 
-public:
+  bool IsValid() const { return m_valid; }
+  void Invalidate() { m_valid = false; }
+
   /// @name Data access
   //@{
   /// Returns the strategic game on which the outcome is defined.
@@ -564,7 +568,7 @@ public:
   GameNode GetNextSibling() const;
   GameNode GetPriorSibling() const;
 
-  GameOutcome GetOutcome() const { return m_outcome; }
+  GameOutcome GetOutcome() const { return (m_outcome) ? m_outcome->shared_from_this() : nullptr; }
 
   bool IsSuccessorOf(GameNode from) const;
   bool IsSubgameRoot() const;
@@ -582,7 +586,7 @@ class GameRep : public std::enable_shared_from_this<GameRep> {
 
 protected:
   std::vector<std::shared_ptr<GamePlayerRep>> m_players;
-  std::vector<GameOutcomeRep *> m_outcomes;
+  std::vector<std::shared_ptr<GameOutcomeRep>> m_outcomes;
   std::string m_title, m_comment;
   unsigned int m_version{0};
 
@@ -596,7 +600,7 @@ protected:
 
 public:
   using Players = SmartElementCollection<Game, GamePlayerRep>;
-  using Outcomes = ElementCollection<Game, GameOutcomeRep>;
+  using Outcomes = SmartElementCollection<Game, GameOutcomeRep>;
 
   class Nodes {
     Game m_owner{nullptr};

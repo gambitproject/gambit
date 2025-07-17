@@ -341,8 +341,8 @@ void GameTreeRep::SetOutcome(GameNode p_node, const GameOutcome &p_outcome)
   if (p_outcome && p_outcome->m_game != this) {
     throw MismatchException();
   }
-  if (p_outcome != p_node->m_outcome) {
-    p_node->m_outcome = p_outcome;
+  if (p_outcome.get() != p_node->m_outcome) {
+    p_node->m_outcome = p_outcome.get();
     ClearComputedValues();
   }
 }
@@ -1061,11 +1061,13 @@ std::vector<GameNode> GameTreeRep::GetPlays(GameAction action) const
 void GameTreeRep::DeleteOutcome(const GameOutcome &p_outcome)
 {
   IncrementVersion();
-  m_root->DeleteOutcome(p_outcome);
-  m_outcomes.erase(std::find(m_outcomes.begin(), m_outcomes.end(), p_outcome));
+  m_root->DeleteOutcome(p_outcome.get());
   p_outcome->Invalidate();
-  std::for_each(m_outcomes.begin(), m_outcomes.end(),
-                [outc = 1](GameOutcomeRep *c) mutable { c->m_number = outc++; });
+  m_outcomes.erase(
+      std::find(m_outcomes.begin(), m_outcomes.end(), std::shared_ptr<GameOutcomeRep>(p_outcome)));
+  std::for_each(
+      m_outcomes.begin(), m_outcomes.end(),
+      [outc = 1](const std::shared_ptr<GameOutcomeRep> &c) mutable { c->m_number = outc++; });
   ClearComputedValues();
 }
 
