@@ -56,7 +56,7 @@ cdef extern from "games/game.h":
     cdef cppclass c_GameOutcomeRep "GameOutcomeRep"
     cdef cppclass c_GameNodeRep "GameNodeRep"
 
-    cdef cppclass c_Game "GameObjectPtr<GameRep>":
+    cdef cppclass c_Game "Game":
         c_GameRep *deref "operator->"() except +RuntimeError
 
     cdef cppclass c_GamePlayer "GameObjectPtr<GamePlayerRep>":
@@ -73,6 +73,7 @@ cdef extern from "games/game.h":
         c_GameNodeRep *deref "operator->"() except +RuntimeError
 
     cdef cppclass c_GameAction "GameObjectPtr<GameActionRep>":
+        bool operator !() except +
         bool operator !=(c_GameAction) except +
         c_GameActionRep *deref "operator->"() except +RuntimeError
 
@@ -97,6 +98,7 @@ cdef extern from "games/game.h":
         c_GamePlayer GetPlayer() except +
         string GetLabel() except +
         void SetLabel(string) except +
+        c_GameAction GetAction(c_GameInfoset) except +
 
     cdef cppclass c_GameActionRep "GameActionRep":
         int GetNumber() except +
@@ -239,6 +241,15 @@ cdef extern from "games/game.h":
             iterator begin() except +
             iterator end() except +
 
+        cppclass Nodes:
+            cppclass iterator:
+                bint operator ==(iterator)
+                bint operator !=(iterator)
+                c_GameNode operator *()
+                iterator operator++()
+            iterator begin() except +
+            iterator end() except +
+
         int IsTree() except +
 
         string GetTitle() except +
@@ -262,6 +273,7 @@ cdef extern from "games/game.h":
         int NumNodes() except +
         int NumNonterminalNodes() except +
         c_GameNode GetRoot() except +
+        Nodes GetNodes() except +
 
         c_GameStrategy GetStrategy(int) except +IndexError
         c_GameStrategy NewStrategy(c_GamePlayer, string) except +
@@ -280,6 +292,9 @@ cdef extern from "games/game.h":
         c_Rational GetMinPayoff(c_GamePlayer) except +
         c_Rational GetMaxPayoff() except +
         c_Rational GetMaxPayoff(c_GamePlayer) except +
+        stdvector[c_GameNode] GetPlays(c_GameNode) except +
+        stdvector[c_GameNode] GetPlays(c_GameInfoset) except +
+        stdvector[c_GameNode] GetPlays(c_GameAction) except +
         bool IsPerfectRecall() except +
 
         c_GameInfoset AppendMove(c_GameNode, c_GamePlayer, int) except +ValueError

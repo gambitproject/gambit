@@ -22,7 +22,6 @@
 import io
 import itertools
 import pathlib
-import warnings
 
 import numpy as np
 import scipy.stats
@@ -185,13 +184,12 @@ class GameNodes:
         return self.game.deref().NumNodes()
 
     def __iter__(self) -> typing.Iterator[Node]:
-        def dfs(node):
-            yield node
-            for child in node.children:
-                yield from dfs(child)
+        """Iterate over the game nodes in the depth-first traversal order."""
         if not self.game.deref().IsTree():
             return
-        yield from dfs(Node.wrap(self.game.deref().GetRoot()))
+
+        for node in self.game.deref().GetNodes():
+            yield Node.wrap(node)
 
 
 @cython.cclass

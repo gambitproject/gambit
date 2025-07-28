@@ -64,7 +64,7 @@ jobs:
       - uses: msys2/setup-msys2@v2
         with:
           install: mingw-w64-x86_64-toolchain make automake autoconf
-      - run: pacman -S --noconfirm mingw-w64-x86_64-wxmsw3.2
+      - run: pacman -S --noconfirm mingw-w64-x86_64-wxwidgets3.2
       - run: aclocal
       - run: automake --add-missing
       - run: autoconf

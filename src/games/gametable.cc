@@ -66,7 +66,7 @@ std::shared_ptr<PureStrategyProfileRep> TablePureStrategyProfileRep::Copy() cons
 
 Game NewTable(const std::vector<int> &p_dim, bool p_sparseOutcomes /*= false*/)
 {
-  return new GameTableRep(p_dim, p_sparseOutcomes);
+  return std::make_shared<GameTableRep>(p_dim, p_sparseOutcomes);
 }
 
 //------------------------------------------------------------------------
@@ -116,8 +116,8 @@ Rational TablePureStrategyProfileRep::GetStrategyValue(const GameStrategy &p_str
 
 PureStrategyProfile GameTableRep::NewPureStrategyProfile() const
 {
-  return PureStrategyProfile(
-      std::make_shared<TablePureStrategyProfileRep>(const_cast<GameTableRep *>(this)));
+  return PureStrategyProfile(std::make_shared<TablePureStrategyProfileRep>(
+      std::const_pointer_cast<GameRep>(shared_from_this())));
 }
 
 //========================================================================
@@ -308,7 +308,7 @@ bool GameTableRep::IsConstSum() const
     sum += profile->GetPayoff(player);
   }
 
-  for (auto iter : StrategyContingencies(Game(this))) {
+  for (auto iter : StrategyContingencies(std::const_pointer_cast<GameRep>(shared_from_this()))) {
     Rational newsum(0);
     for (const auto &player : m_players) {
       newsum += iter->GetPayoff(player);
@@ -401,7 +401,7 @@ void GameTableRep::DeleteOutcome(const GameOutcome &p_outcome)
 
 GameStrategy GameTableRep::NewStrategy(const GamePlayer &p_player, const std::string &p_label)
 {
-  if (p_player->GetGame() != this) {
+  if (p_player->GetGame().get() != this) {
     throw MismatchException();
   }
   IncrementVersion();
@@ -437,13 +437,13 @@ void GameTableRep::DeleteStrategy(const GameStrategy &p_strategy)
 
 MixedStrategyProfile<double> GameTableRep::NewMixedStrategyProfile(double) const
 {
-  return StrategySupportProfile(const_cast<GameTableRep *>(this))
+  return StrategySupportProfile(std::const_pointer_cast<GameRep>(shared_from_this()))
       .NewMixedStrategyProfile<double>();
 }
 
 MixedStrategyProfile<Rational> GameTableRep::NewMixedStrategyProfile(const Rational &) const
 {
-  return StrategySupportProfile(const_cast<GameTableRep *>(this))
+  return StrategySupportProfile(std::const_pointer_cast<GameRep>(shared_from_this()))
       .NewMixedStrategyProfile<Rational>();
 }
 
@@ -477,8 +477,8 @@ void GameTableRep::RebuildTable()
   std::vector<GameOutcomeRep *> newResults(size);
   std::fill(newResults.begin(), newResults.end(), nullptr);
 
-  for (auto iter :
-       StrategyContingencies(StrategySupportProfile(const_cast<GameTableRep *>(this)))) {
+  for (auto iter : StrategyContingencies(
+           StrategySupportProfile(std::const_pointer_cast<GameRep>(shared_from_this())))) {
     long newindex = 0L;
     for (const auto &player : m_players) {
       if (iter->GetStrategy(player)->m_offset < 0) {

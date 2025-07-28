@@ -1,0 +1,18 @@
+EFG 2 R "Wichardt (2008): 2 players, imperfect recall" { "Player 1" "Player 2" }
+""
+
+p "" 1 1 "" { "R" "L" } 0
+p "" 1 2 "" { "r" "l" } 0
+p "" 2 1 "" { "B" "T" } 0
+t "" 1 "outcome 1" { 1, -1 }
+t "" 2 "outcome 2" { -1, 1 }
+p "" 2 1 "" { "B" "T" } 0
+t "" 3 "outcome 3" { -5, 5 }
+t "" 4 "outcome 4" { -5, 5 }
+p "" 1 2 "" { "r" "l" } 0
+p "" 2 1 "" { "B" "T" } 0
+t "" 5 "outcome 5" { -5, 5 }
+t "" 6 "outcome 6" { -5, 5 }
+p "" 2 1 "" { "B" "T" } 0
+t "" 7 "outcome 7" { -1, 1 }
+t "" 8 "outcome 8" { 1, -1 }
