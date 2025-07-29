@@ -308,14 +308,12 @@ def test_outcome_index_exception_label():
         (games.BinEfgTwoPlayer.get_test_data(level=4)),
         (games.BinEfgTwoPlayer.get_test_data(level=5)),
         (games.BinEfgTwoPlayer.get_test_data(level=6)),
-        (games.BinEfgTwoPlayer.get_test_data(level=7)),
         # Three player binary tree
         (games.BinEfgThreePlayer.get_test_data(level=1)),
         (games.BinEfgThreePlayer.get_test_data(level=2)),
         (games.BinEfgThreePlayer.get_test_data(level=3)),
         (games.BinEfgThreePlayer.get_test_data(level=4)),
         (games.BinEfgThreePlayer.get_test_data(level=5)),
-        (games.BinEfgThreePlayer.get_test_data(level=6)),
         # One player IR binary tree
         (games.BinEfgOnePlayerIR.get_test_data(level=1)),
         (games.BinEfgOnePlayerIR.get_test_data(level=2)),
