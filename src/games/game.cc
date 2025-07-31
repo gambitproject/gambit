@@ -258,7 +258,8 @@ template <class T> void MixedStrategyProfileRep<T>::SetCentroid()
   }
 }
 
-template <class T> MixedStrategyProfileRep<T> *MixedStrategyProfileRep<T>::Normalize() const
+template <class T>
+std::unique_ptr<MixedStrategyProfileRep<T>> MixedStrategyProfileRep<T>::Normalize() const
 {
   auto norm = Copy();
   for (auto player : m_support.GetGame()->GetPlayers()) {
@@ -315,7 +316,7 @@ template <class T> T MixedStrategyProfileRep<T>::GetMaxRegret() const
 
 template <class T>
 MixedStrategyProfile<T>::MixedStrategyProfile(const MixedBehaviorProfile<T> &p_profile)
-  : m_rep(new TreeMixedStrategyProfileRep<T>(p_profile))
+  : m_rep(std::make_unique<TreeMixedStrategyProfileRep<T>>(p_profile))
 {
   auto *efg = dynamic_cast<GameTreeRep *>(p_profile.GetGame().operator->());
   for (const auto &player : efg->m_players) {
@@ -337,7 +338,7 @@ MixedStrategyProfile<T>::operator=(const MixedStrategyProfile<T> &p_profile)
 {
   if (this != &p_profile) {
     InvalidateCache();
-    m_rep.reset(p_profile.m_rep->Copy());
+    m_rep = p_profile.m_rep->Copy();
   }
   return *this;
 }

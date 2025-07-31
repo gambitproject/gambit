@@ -45,9 +45,10 @@ TreeMixedStrategyProfileRep<T>::TreeMixedStrategyProfileRep(
 {
 }
 
-template <class T> MixedStrategyProfileRep<T> *TreeMixedStrategyProfileRep<T>::Copy() const
+template <class T>
+std::unique_ptr<MixedStrategyProfileRep<T>> TreeMixedStrategyProfileRep<T>::Copy() const
 {
-  return new TreeMixedStrategyProfileRep(*this);
+  return std::make_unique<TreeMixedStrategyProfileRep>(*this);
 }
 
 template <class T> void TreeMixedStrategyProfileRep<T>::MakeBehavior() const
@@ -1174,7 +1175,7 @@ GameTreeRep::NewMixedStrategyProfile(double, const StrategySupportProfile &spt) 
   if (!IsPerfectRecall()) {
     throw UndefinedException("Mixed strategies not supported for games with imperfect recall.");
   }
-  return MixedStrategyProfile<double>(new TreeMixedStrategyProfileRep<double>(spt));
+  return MixedStrategyProfile<double>(std::make_unique<TreeMixedStrategyProfileRep<double>>(spt));
 }
 
 MixedStrategyProfile<Rational>
@@ -1183,7 +1184,8 @@ GameTreeRep::NewMixedStrategyProfile(const Rational &, const StrategySupportProf
   if (!IsPerfectRecall()) {
     throw UndefinedException("Mixed strategies not supported for games with imperfect recall.");
   }
-  return MixedStrategyProfile<Rational>(new TreeMixedStrategyProfileRep<Rational>(spt));
+  return MixedStrategyProfile<Rational>(
+      std::make_unique<TreeMixedStrategyProfileRep<Rational>>(spt));
 }
 
 //========================================================================
