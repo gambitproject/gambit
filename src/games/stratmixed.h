@@ -39,10 +39,10 @@ public:
 
   explicit MixedStrategyProfileRep(const StrategySupportProfile &);
   virtual ~MixedStrategyProfileRep() = default;
-  virtual MixedStrategyProfileRep<T> *Copy() const = 0;
+  virtual std::unique_ptr<MixedStrategyProfileRep<T>> Copy() const = 0;
 
   void SetCentroid();
-  MixedStrategyProfileRep<T> *Normalize() const;
+  std::unique_ptr<MixedStrategyProfileRep<T>> Normalize() const;
   /// Returns the probability the strategy is played
   const T &operator[](const GameStrategy &p_strategy) const
   {
@@ -108,7 +108,10 @@ private:
 public:
   /// @name Lifecycle
   //@{
-  explicit MixedStrategyProfile(MixedStrategyProfileRep<T> *p_rep) : m_rep(p_rep) {}
+  explicit MixedStrategyProfile(std::unique_ptr<MixedStrategyProfileRep<T>> &&p_rep)
+    : m_rep(std::move(p_rep))
+  {
+  }
   /// Convert a behavior strategy profile to a mixed strategy profile
   explicit MixedStrategyProfile(const MixedBehaviorProfile<T> &);
   /// Make a copy of the mixed strategy profile

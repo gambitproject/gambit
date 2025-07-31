@@ -87,9 +87,9 @@ public:
   }
   ~BAGGMixedStrategyProfileRep() override = default;
 
-  MixedStrategyProfileRep<T> *Copy() const override
+  std::unique_ptr<MixedStrategyProfileRep<T>> Copy() const override
   {
-    return new BAGGMixedStrategyProfileRep(*this);
+    return std::make_unique<BAGGMixedStrategyProfileRep>(*this);
   }
   T GetPayoff(int pl) const override;
   T GetPayoffDeriv(int pl, const GameStrategy &) const override;
@@ -253,25 +253,26 @@ PureStrategyProfile GameBAGGRep::NewPureStrategyProfile() const
 
 MixedStrategyProfile<double> GameBAGGRep::NewMixedStrategyProfile(double) const
 {
-  return MixedStrategyProfile<double>(new BAGGMixedStrategyProfileRep<double>(
+  return MixedStrategyProfile<double>(std::make_unique<BAGGMixedStrategyProfileRep<double>>(
       StrategySupportProfile(std::const_pointer_cast<GameRep>(shared_from_this()))));
 }
 
 MixedStrategyProfile<Rational> GameBAGGRep::NewMixedStrategyProfile(const Rational &) const
 {
-  return MixedStrategyProfile<Rational>(new BAGGMixedStrategyProfileRep<Rational>(
+  return MixedStrategyProfile<Rational>(std::make_unique<BAGGMixedStrategyProfileRep<Rational>>(
       StrategySupportProfile(std::const_pointer_cast<GameRep>(shared_from_this()))));
 }
 MixedStrategyProfile<double>
 GameBAGGRep::NewMixedStrategyProfile(double, const StrategySupportProfile &spt) const
 {
-  return MixedStrategyProfile<double>(new BAGGMixedStrategyProfileRep<double>(spt));
+  return MixedStrategyProfile<double>(std::make_unique<BAGGMixedStrategyProfileRep<double>>(spt));
 }
 
 MixedStrategyProfile<Rational>
 GameBAGGRep::NewMixedStrategyProfile(const Rational &, const StrategySupportProfile &spt) const
 {
-  return MixedStrategyProfile<Rational>(new BAGGMixedStrategyProfileRep<Rational>(spt));
+  return MixedStrategyProfile<Rational>(
+      std::make_unique<BAGGMixedStrategyProfileRep<Rational>>(spt));
 }
 
 //------------------------------------------------------------------------

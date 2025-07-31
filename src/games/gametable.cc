@@ -144,15 +144,16 @@ public:
   }
   ~TableMixedStrategyProfileRep() override = default;
 
-  MixedStrategyProfileRep<T> *Copy() const override;
+  std::unique_ptr<MixedStrategyProfileRep<T>> Copy() const override;
   T GetPayoff(int pl) const override;
   T GetPayoffDeriv(int pl, const GameStrategy &) const override;
   T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const override;
 };
 
-template <class T> MixedStrategyProfileRep<T> *TableMixedStrategyProfileRep<T>::Copy() const
+template <class T>
+std::unique_ptr<MixedStrategyProfileRep<T>> TableMixedStrategyProfileRep<T>::Copy() const
 {
-  return new TableMixedStrategyProfileRep(*this);
+  return std::make_unique<TableMixedStrategyProfileRep>(*this);
 }
 
 template <class T>
@@ -452,12 +453,13 @@ MixedStrategyProfile<Rational> GameTableRep::NewMixedStrategyProfile(const Ratio
 MixedStrategyProfile<double>
 GameTableRep::NewMixedStrategyProfile(double, const StrategySupportProfile &spt) const
 {
-  return MixedStrategyProfile<double>(new TableMixedStrategyProfileRep<double>(spt));
+  return MixedStrategyProfile<double>(std::make_unique<TableMixedStrategyProfileRep<double>>(spt));
 }
 MixedStrategyProfile<Rational>
 GameTableRep::NewMixedStrategyProfile(const Rational &, const StrategySupportProfile &spt) const
 {
-  return MixedStrategyProfile<Rational>(new TableMixedStrategyProfileRep<Rational>(spt));
+  return MixedStrategyProfile<Rational>(
+      std::make_unique<TableMixedStrategyProfileRep<Rational>>(spt));
 }
 
 //------------------------------------------------------------------------
