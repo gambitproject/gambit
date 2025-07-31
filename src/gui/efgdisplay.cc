@@ -852,7 +852,7 @@ void gbtEfgDisplay::OnMouseMotion(wxMouseEvent &p_event)
         // Copy subtree
         const wxBitmap bitmap(tree_xpm);
 #if defined(__WXMSW__) or defined(__WXMAC__)
-        const wxImage image = bitmap.ConvertToImage();
+        const auto image = wxCursor(bitmap.ConvertToImage());
 #else
         wxIcon image;
         image.CopyFromBitmap(bitmap);
@@ -867,7 +867,7 @@ void gbtEfgDisplay::OnMouseMotion(wxMouseEvent &p_event)
         // This should be the pawn icon!
         const wxBitmap bitmap(move_xpm);
 #if defined(__WXMSW__) or defined(__WXMAC__)
-        const wxImage image = bitmap.ConvertToImage();
+        const auto image = wxCursor(bitmap.ConvertToImage());
 #else
         wxIcon image;
         image.CopyFromBitmap(bitmap);
@@ -882,7 +882,7 @@ void gbtEfgDisplay::OnMouseMotion(wxMouseEvent &p_event)
         // Move subtree
         const wxBitmap bitmap(tree_xpm);
 #if defined(__WXMSW__) or defined(__WXMAC__)
-        const wxImage image = bitmap.ConvertToImage();
+        const auto image = wxCursor(bitmap.ConvertToImage());
 #else
         wxIcon image;
         image.CopyFromBitmap(bitmap);
@@ -901,7 +901,7 @@ void gbtEfgDisplay::OnMouseMotion(wxMouseEvent &p_event)
     if (node && node->GetOutcome()) {
       const wxBitmap bitmap = MakeOutcomeBitmap();
 #if defined(__WXMSW__) or defined(__WXMAC__)
-      const wxImage image = bitmap.ConvertToImage();
+      const auto image = wxCursor(bitmap.ConvertToImage());
 #else
       wxIcon image;
       image.CopyFromBitmap(bitmap);

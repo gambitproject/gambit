@@ -69,7 +69,7 @@ void gbtTablePlayerIcon::OnLeftClick(wxMouseEvent &)
   const wxBitmap bitmap(person_xpm);
 
 #if defined(__WXMSW__) or defined(__WXMAC__)
-  const wxImage image = bitmap.ConvertToImage();
+  const auto image = wxCursor(bitmap.ConvertToImage());
 #else
   wxIcon image;
   image.CopyFromBitmap(bitmap);

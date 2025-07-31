@@ -4,6 +4,7 @@
 
 ### General
 - Officially added support for Python 3.13.
+- For graphical interface, added support for wxWidgets 3.3; require minimum of wxWidgets 3.2.
 
 ### Removed
 - The deprecated functions `Game.read_game`, `Game.parse_game` and `Game.write` functions have

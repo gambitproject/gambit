@@ -201,7 +201,7 @@ void gbtTreePlayerIcon::OnLeftClick(wxMouseEvent &)
   const wxBitmap bitmap(person_xpm);
 
 #if defined(__WXMSW__) or defined(__WXMAC__)
-  const wxImage image = bitmap.ConvertToImage();
+  const auto image = wxCursor(bitmap.ConvertToImage());
 #else
   wxIcon image;
   image.CopyFromBitmap(bitmap);
@@ -460,7 +460,7 @@ void gbtTreeChanceIcon::OnLeftClick(wxMouseEvent &)
   const wxBitmap bitmap(dice_xpm);
 
 #if defined(__WXMSW__) or defined(__WXMAC__)
-  const wxImage image = bitmap.ConvertToImage();
+  const auto image = wxCursor(bitmap.ConvertToImage());
 #else
   wxIcon image;
   image.CopyFromBitmap(bitmap);
