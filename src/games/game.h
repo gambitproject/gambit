@@ -57,82 +57,6 @@ using GameNode = GameObjectPtr<GameNodeRep>;
 class GameRep;
 using Game = std::shared_ptr<GameRep>;
 
-template <class P, class T> class ElementCollection {
-  P m_owner{nullptr};
-  const std::vector<T *> *m_container{nullptr};
-
-public:
-  class iterator {
-    P m_owner{nullptr};
-    const std::vector<T *> *m_container{nullptr};
-    size_t m_index{0};
-
-  public:
-    using iterator_category = std::bidirectional_iterator_tag;
-    using difference_type = std::ptrdiff_t;
-    using value_type = GameObjectPtr<T>;
-    using pointer = value_type *;
-    using reference = value_type &;
-
-    iterator() = default;
-    iterator(const P &p_owner, const std::vector<T *> *p_container, size_t p_index = 0)
-      : m_owner(p_owner), m_container(p_container), m_index(p_index)
-    {
-    }
-    iterator(const iterator &) = default;
-    ~iterator() = default;
-    iterator &operator=(const iterator &) = default;
-
-    bool operator==(const iterator &p_iter) const
-    {
-      return m_owner == p_iter.m_owner && m_container == p_iter.m_container &&
-             m_index == p_iter.m_index;
-    }
-    bool operator!=(const iterator &p_iter) const
-    {
-      return m_owner != p_iter.m_owner || m_container != p_iter.m_container ||
-             m_index != p_iter.m_index;
-    }
-
-    iterator &operator++()
-    {
-      m_index++;
-      return *this;
-    }
-    iterator &operator--()
-    {
-      m_index--;
-      return *this;
-    }
-    value_type operator*() const { return m_container->at(m_index); }
-    const P &GetOwner() const { return m_owner; }
-  };
-
-  ElementCollection() = default;
-  explicit ElementCollection(const P &p_owner, const std::vector<T *> *p_container)
-    : m_owner(p_owner), m_container(p_container)
-  {
-  }
-  ElementCollection(const ElementCollection<P, T> &) = default;
-  ~ElementCollection() = default;
-  ElementCollection &operator=(const ElementCollection<P, T> &) = default;
-
-  bool operator==(const ElementCollection<P, T> &p_other) const
-  {
-    return m_owner == p_other.m_owner && m_container == p_other.m_container;
-  }
-
-  bool empty() const { return m_container->empty(); }
-  size_t size() const { return m_container->size(); }
-  GameObjectPtr<T> front() const { return m_container->front(); }
-  GameObjectPtr<T> back() const { return m_container->back(); }
-
-  iterator begin() const { return {m_owner, m_container, 0}; }
-  iterator end() const { return {m_owner, m_container, (m_owner) ? m_container->size() : 0}; }
-  iterator cbegin() const { return {m_owner, m_container, 0}; }
-  iterator cend() const { return {m_owner, m_container, (m_owner) ? m_container->size() : 0}; }
-};
-
 //
 // Forward declarations of classes defined elsewhere.
 //
@@ -491,16 +415,22 @@ public:
   /// @brief A range class for iterating over a node's (action, child) pairs.
   class Actions {
   private:
-    GameNode m_owner{nullptr};
+    const GameNodeRep *m_owner{nullptr};
 
   public:
     class iterator;
 
-    Actions(const GameNode p_owner);
+    Actions(const GameNodeRep *p_owner);
 
     iterator begin() const;
     iterator end() const;
   };
+
+  GameNodeRep(GameRep *e, GameNodeRep *p);
+  ~GameNodeRep();
+
+  bool IsValid() const { return m_valid; }
+  void Invalidate() { m_valid = false; }
 
   /// @brief Returns a collection for iterating over this node's (action, child) pairs.
   Actions GetActions() const;
@@ -601,9 +531,9 @@ public:
   GameNode GetOwner() const;
 };
 
-inline GameNodeRep::Actions::Actions(GameNode p_owner) : m_owner(p_owner) {}
+inline GameNodeRep::Actions::Actions(const GameNodeRep *p_owner) : m_owner(p_owner) {}
 
-inline GameNodeRep::Actions GameNodeRep::GetActions() const { return Actions(this); }
+inline GameNodeRep::Actions GameNodeRep::GetActions() const { return {Actions(this)}; }
 
 inline GameNodeRep::Actions::iterator GameNodeRep::Actions::begin() const
 {

@@ -899,7 +899,7 @@ void GameTreeRep::BuildInfosetParents()
   prior_actions[GamePlayer(m_chance)].emplace(nullptr);
 
   position.emplace(m_root->GetActions().begin());
-  prior_actions[m_root->m_infoset->m_player].emplace(nullptr);
+  prior_actions[m_root->m_infoset->m_player->shared_from_this()].emplace(nullptr);
   if (m_root->m_infoset) {
     m_infosetParents[m_root->m_infoset].insert(nullptr);
   }
@@ -914,15 +914,15 @@ void GameTreeRep::BuildInfosetParents()
       node = current_it.GetOwner();
 
       if (current_it == node->GetActions().end()) {
-        prior_actions.at(node->m_infoset->m_player).pop();
+        prior_actions.at(node->m_infoset->m_player->shared_from_this()).pop();
         position.pop();
-        path_choices.erase(node->m_infoset);
+        path_choices.erase(node->m_infoset->shared_from_this());
         continue;
       }
       else {
         std::tie(action, child) = *current_it;
         ++current_it;
-        path_choices[node->m_infoset] = action;
+        path_choices[node->m_infoset->shared_from_this()] = action;
       }
     }
     else {
@@ -931,15 +931,15 @@ void GameTreeRep::BuildInfosetParents()
       child = node->GetChild(action);
     }
 
-    prior_actions.at(node->m_infoset->m_player).top() = action;
+    prior_actions.at(node->m_infoset->m_player->shared_from_this()).top() = action;
 
     if (!child->IsTerminal()) {
-      auto child_player = child->m_infoset->m_player;
+      auto child_player = child->m_infoset->m_player->shared_from_this();
       auto prior_action = prior_actions.at(child_player).top();
-      m_infosetParents[child->m_infoset].insert(prior_action);
+      m_infosetParents[child->m_infoset].insert(prior_action ? prior_action.get() : nullptr);
 
-      if (path_choices.find(child->m_infoset) != path_choices.end()) {
-        const GameAction replay_action = path_choices.at(child->m_infoset);
+      if (path_choices.find(child->m_infoset->shared_from_this()) != path_choices.end()) {
+        const GameAction replay_action = path_choices.at(child->m_infoset->shared_from_this());
         position.emplace(AbsentMindedEdge{replay_action, child});
       }
       else {
