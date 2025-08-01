@@ -412,11 +412,28 @@ class GameNodeRep : public std::enable_shared_from_this<GameNodeRep> {
 public:
   using Children = ElementCollection<GameNode, GameNodeRep>;
 
+  /// @brief A range class for iterating over a node's (action, child) pairs.
+  class Actions {
+  private:
+    const GameNodeRep *m_owner{nullptr};
+
+  public:
+    class iterator;
+
+    Actions(const GameNodeRep *p_owner);
+
+    iterator begin() const;
+    iterator end() const;
+  };
+
   GameNodeRep(GameRep *e, GameNodeRep *p);
   ~GameNodeRep();
 
   bool IsValid() const { return m_valid; }
   void Invalidate() { m_valid = false; }
+
+  /// @brief Returns a collection for iterating over this node's (action, child) pairs.
+  Actions GetActions() const;
 
   Game GetGame() const;
 
@@ -450,6 +467,97 @@ public:
   bool IsSuccessorOf(GameNode from) const;
   bool IsSubgameRoot() const;
 };
+
+class GameNodeRep::Actions::iterator {
+public:
+  /// @name Iterator
+  //@{
+  using iterator_category = std::forward_iterator_tag;
+  using value_type = std::pair<GameAction, GameNode>;
+  using difference_type = std::ptrdiff_t;
+  using pointer = value_type *;
+  using reference = value_type;
+  //@}
+
+private:
+  /// @brief An iterator to the action at the parent's information set.
+  GameInfosetRep::Actions::iterator m_action_it;
+  /// @brief An iterator to the child node.
+  GameNodeRep::Children::iterator m_child_it;
+
+public:
+  /// @name Lifecycle
+  //@{
+  /// Default constructor. Creates an iterator in a past-the-end state.
+  iterator() = default;
+
+  /// Creates a new iterator that zips an action iterator and a child iterator.
+  iterator(GameInfosetRep::Actions::iterator p_action_it,
+           GameNodeRep::Children::iterator p_child_it);
+  //@}
+
+  /// @name Iterator Operations
+  //@{
+  /// Returns the current action-child pair.
+  reference operator*() const { return {*m_action_it, *m_child_it}; }
+
+  /// Advances the iterator to the next pair (pre-increment).
+  iterator &operator++()
+  {
+    ++m_action_it;
+    ++m_child_it;
+    return *this;
+  }
+
+  /// Advances the iterator to the next pair (post-increment).
+  iterator operator++(int)
+  {
+    iterator tmp = *this;
+    ++(*this);
+    return tmp;
+  }
+
+  /// Compares two iterators for equality.
+  bool operator==(const iterator &p_other) const
+  {
+    // Comparing one of the wrapped iterators is sufficient as they move in lockstep.
+    return m_child_it == p_other.m_child_it;
+  }
+
+  /// Compares two iterators for inequality.
+  bool operator!=(const iterator &p_other) const { return !(*this == p_other); }
+  //@}
+
+  GameNode GetOwner() const;
+};
+
+inline GameNodeRep::Actions::Actions(const GameNodeRep *p_owner) : m_owner(p_owner) {}
+
+inline GameNodeRep::Actions GameNodeRep::GetActions() const { return {Actions(this)}; }
+
+inline GameNodeRep::Actions::iterator GameNodeRep::Actions::begin() const
+{
+  if (m_owner->IsTerminal()) {
+    return end();
+  }
+  return {m_owner->GetInfoset()->GetActions().begin(), m_owner->GetChildren().begin()};
+}
+
+inline GameNodeRep::Actions::iterator GameNodeRep::Actions::end() const
+{
+  if (m_owner->IsTerminal()) {
+    return {};
+  }
+  return {m_owner->GetInfoset()->GetActions().end(), m_owner->GetChildren().end()};
+}
+
+inline GameNodeRep::Actions::iterator::iterator(GameInfosetRep::Actions::iterator p_action_it,
+                                                GameNodeRep::Children::iterator p_child_it)
+  : m_action_it(p_action_it), m_child_it(p_child_it)
+{
+}
+
+inline GameNode GameNodeRep::Actions::iterator::GetOwner() const { return m_child_it.GetOwner(); }
 
 /// This is the class for representing an arbitrary finite game.
 class GameRep : public std::enable_shared_from_this<GameRep> {
@@ -611,15 +719,8 @@ public:
   /// Returns the set of terminal nodes which are descendants of members of an action
   virtual std::vector<GameNode> GetPlays(GameAction action) const { throw UndefinedException(); }
 
-  /// Returns true if the game is perfect recall.  If not,
-  /// a pair of violating information sets is returned in the parameters.
-  virtual bool IsPerfectRecall(GameInfoset &, GameInfoset &) const = 0;
   /// Returns true if the game is perfect recall
-  bool IsPerfectRecall() const
-  {
-    GameInfoset s, t;
-    return IsPerfectRecall(s, t);
-  }
+  virtual bool IsPerfectRecall() const = 0;
   //@}
 
   /// @name Writing data files
