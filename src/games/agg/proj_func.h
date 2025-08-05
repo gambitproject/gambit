@@ -35,7 +35,7 @@ namespace Gambit::agg {
 
 // types of contribution-independent function:
 // sum, existence, highest, lowest and their extended versions
-using TypeEnum = enum {
+enum TypeEnum {
   P_SUM = 0,
   P_EXIST = 1,
   P_HIGH = 2,
