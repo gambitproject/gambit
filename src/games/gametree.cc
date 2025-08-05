@@ -23,6 +23,9 @@
 #include <iostream>
 #include <algorithm>
 #include <numeric>
+#include <stack>
+#include <set>
+#include <variant>
 
 #include "gambit.h"
 #include "gametree.h"
@@ -748,54 +751,18 @@ bool GameTreeRep::IsConstSum() const
   }
 }
 
-bool GameTreeRep::IsPerfectRecall(GameInfoset &s1, GameInfoset &s2) const
+bool GameTreeRep::IsPerfectRecall() const
 {
-  for (auto player : m_players) {
-    for (size_t i = 1; i <= player->m_infosets.size(); i++) {
-      auto iset1 = player->m_infosets[i - 1];
-      for (size_t j = 1; j <= player->m_infosets.size(); j++) {
-        auto iset2 = player->m_infosets[j - 1];
-
-        bool precedes = false;
-        GameAction action = nullptr;
-
-        for (size_t m = 1; m <= iset2->m_members.size(); m++) {
-          size_t n;
-          for (n = 1; n <= iset1->m_members.size(); n++) {
-            if (iset2->GetMember(m)->IsSuccessorOf(iset1->GetMember(n)) &&
-                iset1->GetMember(n) != iset2->GetMember(m)) {
-              precedes = true;
-              for (const auto &act : iset1->GetActions()) {
-                if (iset2->GetMember(m)->IsSuccessorOf(iset1->GetMember(n)->GetChild(act))) {
-                  if (action != nullptr && action != act) {
-                    s1 = iset1;
-                    s2 = iset2;
-                    return false;
-                  }
-                  action = act;
-                }
-              }
-              break;
-            }
-          }
-
-          if (i == j && precedes) {
-            s1 = iset1;
-            s2 = iset2;
-            return false;
-          }
-
-          if (n > iset1->m_members.size() && precedes) {
-            s1 = iset1;
-            s2 = iset2;
-            return false;
-          }
-        }
-      }
-    }
+  if (m_infosetParents.empty() && !m_root->IsTerminal()) {
+    const_cast<GameTreeRep *>(this)->BuildInfosetParents();
   }
 
-  return true;
+  if (GetRoot()->IsTerminal()) {
+    return true;
+  }
+
+  return std::all_of(m_infosetParents.cbegin(), m_infosetParents.cend(),
+                     [](const auto &pair) { return pair.second.size() <= 1; });
 }
 
 //------------------------------------------------------------------------
@@ -872,6 +839,7 @@ void GameTreeRep::ClearComputedValues() const
     player->m_strategies.clear();
   }
   const_cast<GameTreeRep *>(this)->m_nodePlays.clear();
+  const_cast<GameTreeRep *>(this)->m_infosetParents.clear();
   m_computedValues = false;
 }
 
@@ -910,6 +878,77 @@ std::vector<GameNodeRep *> GameTreeRep::BuildConsistentPlaysRecursiveImpl(GameNo
   }
   m_nodePlays[node] = consistent_plays;
   return consistent_plays;
+}
+
+void GameTreeRep::BuildInfosetParents()
+{
+  if (m_root->IsTerminal()) {
+    m_infosetParents[m_root->m_infoset].insert(nullptr);
+    return;
+  }
+
+  using AbsentMindedEdge = std::pair<GameAction, GameNode>;
+  using ActiveEdge = std::variant<GameNodeRep::Actions::iterator, AbsentMindedEdge>;
+  std::stack<ActiveEdge> position;
+
+  std::map<GamePlayer, std::stack<GameAction>> prior_actions;
+  std::map<GameInfoset, GameAction> path_choices;
+
+  for (auto player_rep : m_players) {
+    prior_actions[GamePlayer(player_rep)].emplace(nullptr);
+  }
+  prior_actions[GamePlayer(m_chance)].emplace(nullptr);
+
+  position.emplace(m_root->GetActions().begin());
+  prior_actions[m_root->m_infoset->m_player->shared_from_this()].emplace(nullptr);
+  if (m_root->m_infoset) {
+    m_infosetParents[m_root->m_infoset].insert(nullptr);
+  }
+
+  while (!position.empty()) {
+    ActiveEdge &current_edge = position.top();
+    GameNode child, node;
+    GameAction action;
+
+    if (std::holds_alternative<GameNodeRep::Actions::iterator>(current_edge)) {
+      auto &current_it = std::get<GameNodeRep::Actions::iterator>(current_edge);
+      node = current_it.GetOwner();
+
+      if (current_it == node->GetActions().end()) {
+        prior_actions.at(node->m_infoset->m_player->shared_from_this()).pop();
+        position.pop();
+        path_choices.erase(node->m_infoset->shared_from_this());
+        continue;
+      }
+      else {
+        std::tie(action, child) = *current_it;
+        ++current_it;
+        path_choices[node->m_infoset->shared_from_this()] = action;
+      }
+    }
+    else {
+      std::tie(action, node) = std::get<AbsentMindedEdge>(current_edge);
+      position.pop();
+      child = node->GetChild(action);
+    }
+
+    prior_actions.at(node->m_infoset->m_player->shared_from_this()).top() = action;
+
+    if (!child->IsTerminal()) {
+      auto child_player = child->m_infoset->m_player->shared_from_this();
+      auto prior_action = prior_actions.at(child_player).top();
+      m_infosetParents[child->m_infoset].insert(prior_action ? prior_action.get() : nullptr);
+
+      if (path_choices.find(child->m_infoset->shared_from_this()) != path_choices.end()) {
+        const GameAction replay_action = path_choices.at(child->m_infoset->shared_from_this());
+        position.emplace(AbsentMindedEdge{replay_action, child});
+      }
+      else {
+        position.emplace(child->GetActions().begin());
+      }
+      prior_actions.at(child_player).emplace(nullptr);
+    }
+  }
 }
 
 //------------------------------------------------------------------------
