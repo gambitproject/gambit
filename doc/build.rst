@@ -145,19 +145,31 @@ using `nose2`.
 Once installed, simply ``import pygambit`` in your Python shell or
 script to get started.
 
-Editing the documentation
+Editing this documentation
 --------------------------
 
-Devcontainer version:
+1. If you haven't already, clone the Gambit repository from GitHub: ::
 
-1. Open the Repo in VS Code which should automatically give you the option to open in a devcontainer.
-2. Open a terminal in VS Code.
-3. Run the following commands in the terminal: ::
+    git clone https://github.com/gambitproject/gambit.git
+    cd gambit
 
-    cd /workspaces/gambit/
+2. Either install the docs requirements into your existing PyGambit development environment, or create a new virtual environment and install both the requirements and PyGambit there. For example, you can use `venv` to create a new environment: ::
+
+    python -m venv docenv
+    source docenv/bin/activate
+
+3. Install the requirements and make the docs: ::
+
     pip install .
     cd doc
     pip install -r requirements.txt
     make html
 
-4. Open ``doc/_build/html/index.html`` in your browser.
+4. Open ``doc/_build/html/index.html`` in your browser to view the documentation.
+
+5. Make any changes you want to the `.rst` files in the ``doc`` directory and rebuld the documentation to check your changes.
+
+6. Follow the usual GitHub workflow to commit your changes and push them to the repository.
+
+.. TODO: Add instructions for the GitHub workflow during contributor docs refactoring.
+   See https://github.com/alan-turing-institute/gambit_admin/issues/1
