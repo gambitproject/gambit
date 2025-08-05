@@ -27,6 +27,9 @@
 
 namespace Gambit {
 
+class GameRep;
+using Game = std::shared_ptr<GameRep>;
+
 /// An exception thrown when attempting to dereference an invalidated object
 class InvalidObjectException : public Exception {
 public:
@@ -35,18 +38,40 @@ public:
   const char *what() const noexcept override { return "Dereferencing an invalidated object"; }
 };
 
+/// A handle object for referring to elements of a game
+///
+/// This class provides the facilities for safely referencing the objects representing
+/// elements of a game (players, outcomes, nodes, and so on).
+///
+/// This addresses two issues:
+///   * Holding a reference to some element of a game counts as holding a reference to the
+///     whole game.  This encapsulates such reference counting such that a game is only
+///     deallocated when all references to any part of it are deallocated.
+///   * Because games are mutable, the element of the game referred to by this class
+///     may be removed from the game.  When an element is removed from the game, it is
+///     marked as no longer valid.  This class automates the checking of validity when
+///     dereferencing the object, and raising an exception when appropriate.
 template <class T> class GameObjectPtr {
   std::shared_ptr<T> m_rep;
+  Game m_game;
 
 public:
   GameObjectPtr() = default;
-  GameObjectPtr(std::nullptr_t r) : m_rep(r) {}
-  GameObjectPtr(std::shared_ptr<T> r) : m_rep(r) {}
+  GameObjectPtr(std::nullptr_t r) : m_rep(r), m_game(nullptr) {}
+  GameObjectPtr(std::shared_ptr<T> r) : m_rep(r), m_game((r) ? r->GetGame() : nullptr) {}
   GameObjectPtr(const GameObjectPtr<T> &) = default;
   ~GameObjectPtr() = default;
 
   GameObjectPtr<T> &operator=(const GameObjectPtr<T> &) = default;
 
+  /// Access the shared pointer to the object representing the game element
+  ///
+  /// Returns the shared pointer to the game element.  Checks for the validity of the
+  /// game element held by this object and throws an exception if the object is the
+  /// null object, or is no longer valid (has been removed from the game)
+  ///
+  /// @exception NullException if the object holds a reference to a null element
+  /// @exception InvalidObjectException if the element referred to has been deleted from its game
   std::shared_ptr<T> operator->() const
   {
     if (!m_rep) {
@@ -57,6 +82,15 @@ public:
     }
     return m_rep;
   }
+
+  /// Access the shared pointer to the object representing the game element
+  ///
+  /// Returns the shared pointer to the game element.  Checks for the validity of the
+  /// game element held by this object and throws an exception if the object is the
+  /// null object, or is no longer valid (has been removed from the game)
+  ///
+  /// @exception NullException if the object holds a reference to a null element
+  /// @exception InvalidObjectException if the element referred to has been deleted from its game
   std::shared_ptr<T> get_shared() const
   {
     if (!m_rep) {
@@ -67,6 +101,15 @@ public:
     }
     return m_rep;
   }
+
+  /// Access the raw pointer to the object representing the game element
+  ///
+  /// Returns the raw pointer to the game element.  Checks for the validity of the
+  /// game element held by this object and throws an exception if the object is the
+  /// null object, or is no longer valid (has been removed from the game)
+  ///
+  /// @exception NullException if the object holds a reference to a null element
+  /// @exception InvalidObjectException if the element referred to has been deleted from its game
   T *get() const
   {
     if (!m_rep) {

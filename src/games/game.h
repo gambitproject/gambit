@@ -175,6 +175,7 @@ public:
   void Invalidate() { m_valid = false; }
 
   int GetNumber() const { return m_number; }
+  Game GetGame() const;
   GameInfoset GetInfoset() const;
 
   const std::string &GetLabel() const { return m_label; }
@@ -305,6 +306,8 @@ public:
   /// Sets the text label associated with the strategy
   void SetLabel(const std::string &p_label) { m_label = p_label; }
 
+  /// Returns the game on which the strategy is defined
+  Game GetGame() const;
   /// Returns the player for whom this is a strategy
   GamePlayer GetPlayer() const;
   /// Returns the index of the strategy for its player
@@ -940,6 +943,9 @@ inline void GameOutcomeRep::SetPayoff(const GamePlayer &p_player, const Number &
 }
 
 inline GamePlayer GameStrategyRep::GetPlayer() const { return m_player->shared_from_this(); }
+inline Game GameStrategyRep::GetGame() const { return m_player->GetGame(); }
+
+inline Game GameActionRep::GetGame() const { return m_infoset->GetGame(); }
 
 inline Game GameInfosetRep::GetGame() const { return m_game->shared_from_this(); }
 inline GamePlayer GameInfosetRep::GetPlayer() const { return m_player->shared_from_this(); }
