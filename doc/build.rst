@@ -144,3 +144,20 @@ using `nose2`.
 
 Once installed, simply ``import pygambit`` in your Python shell or
 script to get started.
+
+Editing the documentation
+--------------------------
+
+Devcontainer version:
+
+1. Open the Repo in VS Code which should automatically give you the option to open in a devcontainer.
+2. Open a terminal in VS Code.
+3. Run the following commands in the terminal: ::
+
+    cd /workspaces/gambit/
+    pip install .
+    cd doc
+    pip install -r requirements.txt
+    make html
+
+4. Open ``doc/_build/html/index.html`` in your browser.
