@@ -1,0 +1,27 @@
+name: Feature Request
+description: Suggest a new feature or improvement to the Gambit software.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this feature request!
+  - type: dropdown
+    id: software-component
+    attributes:
+      label: This feature request is for...
+      multiple: true
+      options:
+        - PyGambit
+        - Gambit CLI
+        - Gambit GUI
+        - Other
+  - type: textarea
+    id: request-details
+    attributes:
+      label: Requested enahancement or feature
+      description: Please provide details about the feature or improvement you would like to see and add any relevant labels.
+      placeholder: Describe the feature or improvement in detail.
+      value: "A feature or improvement suggestion!"
+    validations:
+      required: true
