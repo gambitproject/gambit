@@ -171,5 +171,7 @@ Editing this documentation
 
 6. Follow the usual GitHub workflow to commit your changes and push them to the repository.
 
+7. Core developers will review your changes and merge to the master branch, which automatically deploys the documentation via the ReadTheDocs service.
+
 .. TODO: Add instructions for the GitHub workflow during contributor docs refactoring.
    See https://github.com/alan-turing-institute/gambit_admin/issues/1
