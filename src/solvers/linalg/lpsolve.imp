@@ -27,7 +27,7 @@ namespace Gambit::linalg {
 template <class T> Array<int> MakeArtificials(const Vector<T> &b)
 {
   Array<int> ret;
-  for (int i = b.first_index(); i <= b.last_index(); i++) {
+  for (int i = b.front_index(); i <= b.back_index(); i++) {
     if (b[i] < static_cast<T>(0)) {
       ret.push_back(i);
     }

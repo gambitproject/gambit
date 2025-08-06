@@ -76,10 +76,10 @@ template <class T> Gambit::linalg::BFS<T> LHTableau<T>::GetBFS()
 {
   T1.BasisVector(tmp1);
   T2.BasisVector(tmp2);
-  for (int i = tmp1.first_index(); i <= tmp1.last_index(); i++) {
+  for (int i = tmp1.front_index(); i <= tmp1.back_index(); i++) {
     solution[i] = tmp1[i];
   }
-  for (int i = tmp2.first_index(); i <= tmp2.last_index(); i++) {
+  for (int i = tmp2.front_index(); i <= tmp2.back_index(); i++) {
     solution[i] = tmp2[i];
   }
   BFS<T> cbfs;

@@ -92,7 +92,7 @@ AgentLyapunovFunction::PenalizedLiapValue(const MixedBehaviorProfile<double> &p_
     }
   }
   // Penalty function for non-negativity constraint for each action
-  for (auto element : static_cast<const Array<double> &>(p_profile)) {
+  for (auto element : static_cast<const Vector<double> &>(p_profile)) {
     value += m_penalty * sqr(std::min(element, 0.0));
   }
   // Penalty function for sum-to-one constraint for each action

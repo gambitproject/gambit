@@ -85,24 +85,24 @@ public:
     : basis(first, last), cols(firstlabel, lastlabel), slacks(first, last)
   {
     std::fill(cols.begin(), cols.end(), 0);
-    std::iota(slacks.begin(), slacks.end(), slacks.first_index());
+    std::iota(slacks.begin(), slacks.end(), slacks.front_index());
     std::generate(basis.begin(), basis.end(),
-                  [n = -basis.first_index()]() mutable { return n--; });
+                  [n = -basis.front_index()]() mutable { return n--; });
   }
   Basis(const Basis &) = default;
   ~Basis() = default;
 
   Basis &operator=(const Basis &) = default;
 
-  int First() const { return basis.first_index(); }
-  int Last() const { return basis.last_index(); }
-  int MinCol() const { return cols.first_index(); }
-  int MaxCol() const { return cols.last_index(); }
+  int First() const { return basis.front_index(); }
+  int Last() const { return basis.back_index(); }
+  int MinCol() const { return cols.front_index(); }
+  int MaxCol() const { return cols.back_index(); }
 
-  bool IsRegColumn(int col) const { return col >= cols.first_index() && col <= cols.last_index(); }
+  bool IsRegColumn(int col) const { return col >= cols.front_index() && col <= cols.back_index(); }
   bool IsSlackColumn(int col) const
   {
-    return -col >= basis.first_index() && -col <= basis.last_index();
+    return -col >= basis.front_index() && -col <= basis.back_index();
   }
 
   // remove outindex, insert label, return outlabel
@@ -164,7 +164,7 @@ public:
   void CheckBasis()
   {
     is_ident = true;
-    for (int i = basis.first_index(); i <= basis.last_index(); i++) {
+    for (int i = basis.front_index(); i <= basis.back_index(); i++) {
       if (basis[i] != -i) {
         is_ident = false;
         return;
@@ -213,7 +213,7 @@ public:
     linalg::epsilon(eps1, 5);
     linalg::epsilon(eps2);
     for (size_t i = 0; i < art.size(); i++) {
-      artificial[A.MaxCol() + 1 + i] = art[art.first_index() + i];
+      artificial[A.MaxCol() + 1 + i] = art[art.front_index() + i];
     }
   }
   TableauInterface(const TableauInterface<T> &) = default;
@@ -309,7 +309,7 @@ public:
 
   bool IsArtifColumn(int col) const
   {
-    return (col >= artificial.first_index() && col <= artificial.last_index());
+    return (col >= artificial.front_index() && col <= artificial.back_index());
   }
 };
 

@@ -23,7 +23,7 @@
 #ifndef GAMBIT_CORE_RECARRAY_H
 #define GAMBIT_CORE_RECARRAY_H
 
-#include "array.h"
+#include "util.h"
 
 namespace Gambit {
 
@@ -38,16 +38,16 @@ protected:
   /// check for correct row index
   bool CheckRow(int row) const { return (minrow <= row && row <= maxrow); }
   /// check row vector for correct column boundaries
-  bool CheckRow(const Array<T> &v) const
+  template <class Vector> bool CheckRow(const Vector &v) const
   {
-    return (v.first_index() == mincol && v.last_index() == maxcol);
+    return (v.front_index() == mincol && v.back_index() == maxcol);
   }
   /// check for correct column index
   bool CheckColumn(int col) const { return (mincol <= col && col <= maxcol); }
   /// check column vector for correct row boundaries
-  bool CheckColumn(const Array<T> &v) const
+  template <class Vector> bool CheckColumn(const Vector &v) const
   {
-    return (v.first_index() == minrow && v.last_index() == maxrow);
+    return (v.front_index() == minrow && v.back_index() == maxrow);
   }
   /// check row and column indices
   bool Check(int row, int col) const { return CheckRow(row) && CheckColumn(col); }
@@ -113,10 +113,10 @@ public:
     }
     std::swap(data[i], data[j]);
   }
-  void GetRow(int, Array<T> &) const;
+  template <class Vector> void GetRow(int, Vector &) const;
 
-  void GetColumn(int, Array<T> &) const;
-  void SetColumn(int, const Array<T> &);
+  template <class Vector> void GetColumn(int, Vector &) const;
+  template <class Vector> void SetColumn(int, const Vector &);
   //@}
 };
 
@@ -232,7 +232,7 @@ template <class T> void RectArray<T>::RotateDown(int lo, int hi)
 //                 RectArray<T>: Row manipulation functions
 //-------------------------------------------------------------------------
 
-template <class T> void RectArray<T>::GetRow(int row, Array<T> &v) const
+template <class T> template <class Vector> void RectArray<T>::GetRow(int row, Vector &v) const
 {
   if (!CheckRow(row)) {
     throw IndexException();
@@ -250,7 +250,7 @@ template <class T> void RectArray<T>::GetRow(int row, Array<T> &v) const
 //                RectArray<T>: Column manipulation functions
 //-------------------------------------------------------------------------
 
-template <class T> void RectArray<T>::GetColumn(int col, Array<T> &v) const
+template <class T> template <class Vector> void RectArray<T>::GetColumn(int col, Vector &v) const
 {
   if (!CheckColumn(col)) {
     throw IndexException();
@@ -263,7 +263,7 @@ template <class T> void RectArray<T>::GetColumn(int col, Array<T> &v) const
   }
 }
 
-template <class T> void RectArray<T>::SetColumn(int col, const Array<T> &v)
+template <class T> template <class Vector> void RectArray<T>::SetColumn(int col, const Vector &v)
 {
   if (!CheckColumn(col)) {
     throw IndexException();

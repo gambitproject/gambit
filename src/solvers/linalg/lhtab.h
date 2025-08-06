@@ -32,8 +32,8 @@ public:
   /// @name Lifecycle
   //@{
   LHTableau(const Matrix<T> &A1, const Matrix<T> &A2, const Vector<T> &b1, const Vector<T> &b2)
-    : T1(A1, b1), T2(A2, b2), tmp1(b1.first_index(), b1.last_index()),
-      tmp2(b2.first_index(), b2.last_index()), solution(b1.first_index(), b2.last_index())
+    : T1(A1, b1), T2(A2, b2), tmp1(b1.front_index(), b1.back_index()),
+      tmp2(b2.front_index(), b2.back_index()), solution(b1.front_index(), b2.back_index())
   {
   }
   LHTableau(const LHTableau<T> &) = default;

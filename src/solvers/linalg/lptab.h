@@ -56,7 +56,7 @@ public:
   BFS<T> DualBFS() const;
 
   // as above, but unit column elements nonzero
-  void BasisSelect(const Array<T> &unitv, const Array<T> &rowv, Vector<T> &colv) const;
+  void BasisSelect(const Vector<T> &unitv, const Vector<T> &rowv, Vector<T> &colv) const;
 };
 
 } // end namespace Gambit::linalg
