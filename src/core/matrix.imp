@@ -399,7 +399,7 @@ template <class T> void Matrix<T>::MakeIdent()
 template <class T> void Matrix<T>::Pivot(int row, int col)
 {
   if (!this->CheckRow(row) || !this->CheckColumn(col)) {
-    throw IndexException();
+    throw std::out_of_range("Index out of range in Matrix::Pivot");
   }
   if (this->data[row][col] == (T)0) {
     throw ZeroDivideException();

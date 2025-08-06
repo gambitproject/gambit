@@ -164,11 +164,10 @@ void scpy(const unsigned short *src, unsigned short *dest, int nb)
 }
 
 // make sure an argument is valid
-
-static inline void nonnil(const IntegerRep *rep)
+inline void nonnil(const IntegerRep *rep)
 {
   if (rep == nullptr) {
-    throw Gambit::NullException();
+    throw std::runtime_error("Null IntegerRep pointer");
   }
 }
 

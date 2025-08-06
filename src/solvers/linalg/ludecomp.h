@@ -52,15 +52,15 @@ private:
   mutable int copycount;
 
 public:
-  class BadPivot : public Exception {
+  class BadPivot final : public std::runtime_error {
   public:
+    BadPivot() : std::runtime_error("Bad pivot in LUdecomp") {}
     ~BadPivot() noexcept override = default;
-    const char *what() const noexcept override { return "Bad pivot in LUdecomp"; }
   };
-  class BadCount : public Exception {
+  class BadCount final : public std::runtime_error {
   public:
+    BadCount() : std::runtime_error("Bad reference count in LUdecomp") {}
     ~BadCount() noexcept override = default;
-    const char *what() const noexcept override { return "Bad reference count in LUdecomp"; }
   };
 
   // ------------------------

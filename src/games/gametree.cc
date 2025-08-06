@@ -711,10 +711,10 @@ Game NewTree() { return std::make_shared<GameTreeRep>(); }
 
 namespace {
 
-class NotZeroSumException : public Exception {
+class NotZeroSumException final : public std::runtime_error {
 public:
+  NotZeroSumException() : std::runtime_error("Game is not constant sum") {}
   ~NotZeroSumException() noexcept override = default;
-  const char *what() const noexcept override { return "Game is not constant sum"; }
 };
 
 Rational SubtreeSum(GameNode p_node)
@@ -1063,7 +1063,7 @@ GameInfoset GameTreeRep::GetInfoset(int p_index) const
       }
     }
   }
-  throw IndexException();
+  throw std::out_of_range("Infoset index out of range");
 }
 
 std::vector<GameInfoset> GameTreeRep::GetInfosets() const

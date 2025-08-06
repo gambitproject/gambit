@@ -378,7 +378,7 @@ GameAction gbtGameDocument::GetAction(int p_index) const
       }
     }
   }
-  throw IndexException();
+  throw std::out_of_range("Action index out of range");
 }
 
 void gbtGameDocument::SetStyle(const gbtStyle &p_style)

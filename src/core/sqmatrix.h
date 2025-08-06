@@ -27,10 +27,10 @@
 
 namespace Gambit {
 
-class SingularMatrixException : public Exception {
+class SingularMatrixException final : public std::runtime_error {
 public:
+  SingularMatrixException() : std::runtime_error("Attempted to invert a singular matrix") {}
   ~SingularMatrixException() noexcept override = default;
-  const char *what() const noexcept override { return "Attempted to invert a singular matrix"; }
 };
 
 template <class T> class SquareMatrix : public Matrix<T> {

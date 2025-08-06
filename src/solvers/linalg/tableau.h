@@ -79,10 +79,10 @@ protected:
   Integer TotDenom() const { return totdenom; }
 
 public:
-  class BadDenom : public Exception {
+  class BadDenom final : public std::runtime_error {
   public:
+    BadDenom() : std::runtime_error("Bad denominator in Tableau") {}
     ~BadDenom() noexcept override = default;
-    const char *what() const noexcept override { return "Bad denominator in Tableau"; }
   };
 
   Tableau(const Matrix<Rational> &A, const Vector<Rational> &b);

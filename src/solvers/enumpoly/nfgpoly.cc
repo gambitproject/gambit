@@ -123,7 +123,7 @@ EnumPolyStrategySupportSolve(const StrategySupportProfile &support, bool &is_sin
   catch (const SingularMatrixException &) {
     is_singular = true;
   }
-  catch (const AssertionException &e) {
+  catch (const std::domain_error &) {
     // std::cerr << "Assertion warning: " << e.what() << std::endl;
     is_singular = true;
   }

@@ -59,7 +59,7 @@ public:
   const_reference operator[](int index) const
   {
     if (index < m_offset || index > back_index()) {
-      throw IndexException();
+      throw std::out_of_range("Index out of range in Array");
     }
     return m_data.at(index - m_offset);
   }
@@ -67,7 +67,7 @@ public:
   reference operator[](int index)
   {
     if (index < m_offset || index > back_index()) {
-      throw IndexException();
+      throw std::out_of_range("Index out of range in Array");
     }
     return m_data[index - m_offset];
   }

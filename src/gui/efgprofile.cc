@@ -146,7 +146,7 @@ wxSheetCellAttr gbtBehavProfileList::GetAttr(const wxSheetCoords &p_coords, wxSh
       attr.SetBackgroundColour(wxColour(225, 225, 225));
     }
   }
-  catch (Gambit::IndexException) {
+  catch (std::out_of_range &) {
     // If GetAction() throws this, just handle it silently; can occur
     // when solving a trivial game via the strategic form
   }

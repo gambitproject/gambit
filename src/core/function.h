@@ -45,10 +45,10 @@ protected:
   void Project(Vector<double> &x, const Array<int> &lengths) const;
 };
 
-class FunctionMinimizerError : public Exception {
+class FunctionMinimizerError : public std::runtime_error {
 public:
+  FunctionMinimizerError() : std::runtime_error("Internal error in function minimization") {}
   ~FunctionMinimizerError() noexcept override = default;
-  const char *what() const noexcept override { return "Internal error in function minimization"; }
 };
 
 // An abstract base class for function minimization

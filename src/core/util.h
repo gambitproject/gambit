@@ -67,68 +67,28 @@ template <class Key, class T> bool contains(const std::map<Key, T> &map, const K
 //                        Exception classes
 //========================================================================
 
-/// A base class for all Gambit exceptions
-class Exception : public std::runtime_error {
-public:
-  Exception() : std::runtime_error("") {}
-  explicit Exception(const std::string &s) : std::runtime_error(s) {}
-  ~Exception() noexcept override = default;
-};
-
-/// Exception thrown on out-of-range index
-class IndexException : public Exception {
-public:
-  IndexException() : Exception("Index out of range") {}
-  explicit IndexException(const std::string &s) : Exception(s) {}
-  ~IndexException() noexcept override = default;
-};
-
-/// Exception thrown on invalid index ranges
-class RangeException : public Exception {
-public:
-  RangeException() : Exception("Invalid index range") {}
-  explicit RangeException(const std::string &s) : Exception(s) {}
-  ~RangeException() noexcept override = default;
-};
-
 /// Exception thrown on dimension mismatches
-class DimensionException : public Exception {
+class DimensionException final : public std::runtime_error {
 public:
-  DimensionException() : Exception("Mismatched dimensions") {}
-  explicit DimensionException(const std::string &s) : Exception(s) {}
+  DimensionException() : std::runtime_error("Mismatched dimensions") {}
+  explicit DimensionException(const std::string &s) : std::runtime_error(s) {}
   ~DimensionException() noexcept override = default;
 };
 
 /// Exception thrown on invalid value
-class ValueException : public Exception {
+class ValueException final : public std::runtime_error {
 public:
-  ValueException() : Exception("Invalid value") {}
-  explicit ValueException(const std::string &s) : Exception(s) {}
+  ValueException() : std::runtime_error("Invalid value") {}
+  explicit ValueException(const std::string &s) : std::runtime_error(s) {}
   ~ValueException() noexcept override = default;
 };
 
-/// Exception thrown on a failed assertion
-class AssertionException : public Exception {
-public:
-  AssertionException() : Exception("Failed assertion") {}
-  explicit AssertionException(const std::string &s) : Exception(s) {}
-  ~AssertionException() noexcept override = default;
-};
-
 /// Exception thrown on attempted division by zero
-class ZeroDivideException : public Exception {
+class ZeroDivideException final : public std::runtime_error {
 public:
-  ZeroDivideException() : Exception("Attempted division by zero") {}
-  explicit ZeroDivideException(const std::string &s) : Exception(s) {}
+  ZeroDivideException() : std::runtime_error("Attempted division by zero") {}
+  explicit ZeroDivideException(const std::string &s) : std::runtime_error(s) {}
   ~ZeroDivideException() noexcept override = default;
-};
-
-/// An exception thrown when attempting to dereference a null pointer
-class NullException : public Exception {
-public:
-  NullException() : Exception("Dereferenced null pointer") {}
-  explicit NullException(const std::string &s) : Exception(s) {}
-  ~NullException() noexcept override = default;
 };
 
 } // end namespace Gambit

@@ -29,15 +29,15 @@ namespace Gambit::linalg {
 
 template <class T> class LemkeTableau : public Tableau<T> {
 public:
-  class BadPivot : public Exception {
+  class BadPivot final : public std::runtime_error {
   public:
+    BadPivot() : std::runtime_error("Bad pivot in LTableau") {}
     ~BadPivot() noexcept override = default;
-    const char *what() const noexcept override { return "Bad Pivot in LTableau"; }
   };
-  class BadExitIndex : public Exception {
+  class BadExitIndex final : public std::runtime_error {
   public:
+    BadExitIndex() : std::runtime_error("Bad exit index in LTableau") {}
     ~BadExitIndex() noexcept override = default;
-    const char *what() const noexcept override { return "Bad Exit Index in LTableau"; }
   };
   LemkeTableau(const Matrix<T> &A, const Vector<T> &b) : Tableau<T>(A, b) {}
   ~LemkeTableau() override = default;

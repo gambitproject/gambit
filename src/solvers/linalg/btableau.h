@@ -117,7 +117,7 @@ public:
       cols[col] = outindex;
     }
     else {
-      throw IndexException(); // not a valid column to pivot in.
+      throw std::out_of_range("Pivot in column out of range"); // not a valid column to pivot in.
     }
 
     if (IsSlackColumn(outlabel)) {
@@ -128,7 +128,7 @@ public:
     }
     else {
       // Note: here, should back out outindex.
-      throw IndexException(); // not a valid column to pivot out.
+      throw std::out_of_range("Pivot out column out of range"); // not a valid column to pivot out.
     }
 
     basis[outindex] = col;
@@ -149,12 +149,10 @@ public:
     if (IsSlackColumn(label)) {
       return slacks[-label];
     }
-    else if (IsRegColumn(label)) {
+    if (IsRegColumn(label)) {
       return cols[label];
     }
-    else {
-      throw Gambit::IndexException();
-    }
+    throw std::out_of_range("Column label index out of range");
   }
 
   // finds label of variable corresponding to Basis index
@@ -179,10 +177,10 @@ inline void epsilon(double &v, int i = 8) { v = std::pow(10.0, (double)-i); }
 
 inline void epsilon(Rational &v, int /*i*/ = 8) { v = Rational(0); }
 
-class BadPivot : public Exception {
+class BadPivot final : public std::runtime_error {
 public:
+  BadPivot() : std::runtime_error("Bad pivot") {}
   ~BadPivot() noexcept override = default;
-  const char *what() const noexcept override { return "Bad pivot"; }
 };
 
 template <class T> class TableauInterface {

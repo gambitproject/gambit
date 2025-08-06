@@ -61,7 +61,7 @@ public:
   const T &operator[](size_type p_index) const
   {
     if (p_index < 1 || p_index > m_list.size()) {
-      throw IndexException();
+      throw std::out_of_range("Index out of range in List");
     }
     return *std::next(m_list.cbegin(), p_index - 1);
   }
@@ -69,7 +69,7 @@ public:
   T &operator[](size_type p_index)
   {
     if (p_index < 1 || p_index > m_list.size()) {
-      throw IndexException();
+      throw std::out_of_range("Index out of range in List");
     }
     return *std::next(m_list.begin(), p_index - 1);
   }

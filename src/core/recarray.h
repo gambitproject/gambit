@@ -85,14 +85,14 @@ public:
   T &operator()(int r, int c)
   {
     if (!Check(r, c)) {
-      throw IndexException();
+      throw std::out_of_range("Index out of range in RectArray");
     }
     return data[r][c];
   }
   const T &operator()(int r, int c) const
   {
     if (!Check(r, c)) {
-      throw IndexException();
+      throw std::out_of_range("Index out of range in RectArray");
     }
     return data[r][c];
   }
@@ -108,8 +108,8 @@ public:
   //@{
   void SwitchRows(int i, int j)
   {
-    if (!CheckRow(i) || !CheckRow(j)) {
-      throw IndexException();
+    if (!Check(i, j)) {
+      throw std::out_of_range("Index out of range in RectArray");
     }
     std::swap(data[i], data[j]);
   }
@@ -205,7 +205,7 @@ template <class T> RectArray<T> &RectArray<T>::operator=(const RectArray<T> &a)
 template <class T> void RectArray<T>::RotateUp(int lo, int hi)
 {
   if (lo < minrow || hi < lo || maxrow < hi) {
-    throw IndexException();
+    throw std::out_of_range("Index out of range in RectArray");
   }
 
   T *temp = data[lo];
@@ -218,7 +218,7 @@ template <class T> void RectArray<T>::RotateUp(int lo, int hi)
 template <class T> void RectArray<T>::RotateDown(int lo, int hi)
 {
   if (lo < minrow || hi < lo || maxrow < hi) {
-    throw IndexException();
+    throw std::out_of_range("Index out of range in RectArray");
   }
 
   T *temp = data[hi];
@@ -235,7 +235,7 @@ template <class T> void RectArray<T>::RotateDown(int lo, int hi)
 template <class T> template <class Vector> void RectArray<T>::GetRow(int row, Vector &v) const
 {
   if (!CheckRow(row)) {
-    throw IndexException();
+    throw std::out_of_range("Index out of range in RectArray");
   }
   if (!CheckRow(v)) {
     throw DimensionException();
@@ -253,7 +253,7 @@ template <class T> template <class Vector> void RectArray<T>::GetRow(int row, Ve
 template <class T> template <class Vector> void RectArray<T>::GetColumn(int col, Vector &v) const
 {
   if (!CheckColumn(col)) {
-    throw IndexException();
+    throw std::out_of_range("Index out of range in RectArray");
   }
   if (!CheckColumn(v)) {
     throw DimensionException();
@@ -266,7 +266,7 @@ template <class T> template <class Vector> void RectArray<T>::GetColumn(int col,
 template <class T> template <class Vector> void RectArray<T>::SetColumn(int col, const Vector &v)
 {
   if (!CheckColumn(col)) {
-    throw IndexException();
+    throw std::out_of_range("Index out of range in RectArray");
   }
   if (!CheckColumn(v)) {
     throw DimensionException();

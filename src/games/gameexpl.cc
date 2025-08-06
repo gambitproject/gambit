@@ -99,7 +99,7 @@ GameStrategy GameExplicitRep::GetStrategy(int p_index) const
       }
     }
   }
-  throw IndexException();
+  throw std::out_of_range("Strategy index out of range");
 }
 
 //------------------------------------------------------------------------

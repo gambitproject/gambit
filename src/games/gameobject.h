@@ -30,12 +30,19 @@ namespace Gambit {
 class GameRep;
 using Game = std::shared_ptr<GameRep>;
 
-/// An exception thrown when attempting to dereference an invalidated object
-class InvalidObjectException : public Exception {
+/// An exception thrown when attempting to dereference a null pointer
+class NullException final : public std::runtime_error {
 public:
-  ~InvalidObjectException() noexcept override = default;
+  NullException() : std::runtime_error("Dereferenced null pointer") {}
+  explicit NullException(const std::string &s) : std::runtime_error(s) {}
+  ~NullException() noexcept override = default;
+};
 
-  const char *what() const noexcept override { return "Dereferencing an invalidated object"; }
+/// An exception thrown when attempting to dereference an invalidated object
+class InvalidObjectException final : public std::runtime_error {
+public:
+  InvalidObjectException() : std::runtime_error("Dereferencing an invalidated object") {}
+  ~InvalidObjectException() noexcept override = default;
 };
 
 /// A handle object for referring to elements of a game

@@ -117,7 +117,7 @@ double PolynomialSystemSolver::MaxDistanceFromPointToVertexAfterTransformation(
   // important for the case when a solution may be found on the boundary
   // of the rectangle but be slightly outside due to numerical error.
   if (!r.Contains(p, 1.0e-8)) {
-    throw AssertionException(
+    throw std::domain_error(
         "Point not in rectangle in MaxDistanceFromPointToVertexAfterTransformation.");
   }
   Array<int> bottom(GetDimension()), top(GetDimension());

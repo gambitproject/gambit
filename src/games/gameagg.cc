@@ -219,7 +219,7 @@ GameStrategy GameAGGRep::GetStrategy(int p_index) const
       p_index -= player->GetStrategies().size();
     }
   }
-  throw IndexException();
+  throw std::out_of_range("Strategy index out of range");
 }
 
 //------------------------------------------------------------------------

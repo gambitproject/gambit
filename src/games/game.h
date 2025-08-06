@@ -71,38 +71,35 @@ template <class T> class MixedBehaviorProfile;
 //=======================================================================
 
 /// Exception thrown when an operation that is undefined is attempted
-class UndefinedException : public Exception {
+class UndefinedException final : public std::runtime_error {
 public:
-  UndefinedException() : Exception("Undefined operation on game") {}
-  explicit UndefinedException(const std::string &s) : Exception(s) {}
+  UndefinedException() : std::runtime_error("Undefined operation on game") {}
+  explicit UndefinedException(const std::string &s) : std::runtime_error(s) {}
   ~UndefinedException() noexcept override = default;
 };
 
 /// Exception thrown on an operation between incompatible objects
-class MismatchException : public Exception {
+class MismatchException : public std::runtime_error {
 public:
+  MismatchException() : std::runtime_error("Operation between objects in different games") {}
   ~MismatchException() noexcept override = default;
-  const char *what() const noexcept override
-  {
-    return "Operation between objects in different games";
-  }
 };
 
 /// Exception thrown when comparing different versions of a game
-class GameStructureChangedException : public Exception {
+class GameStructureChangedException : public std::runtime_error {
 public:
-  ~GameStructureChangedException() noexcept override = default;
-  const char *what() const noexcept override
+  GameStructureChangedException()
+    : std::runtime_error("Game structure has changed since object was defined")
   {
-    return "Game structure has changed since object was defined";
   }
+  ~GameStructureChangedException() noexcept override = default;
 };
 
 /// Exception thrown on a parse error when reading a game savefile
-class InvalidFileException : public Exception {
+class InvalidFileException : public std::runtime_error {
 public:
-  InvalidFileException() : Exception("File not in a recognized format") {}
-  explicit InvalidFileException(const std::string &s) : Exception(s) {}
+  InvalidFileException() : std::runtime_error("File not in a recognized format") {}
+  explicit InvalidFileException(const std::string &s) : std::runtime_error(s) {}
   ~InvalidFileException() noexcept override = default;
 };
 

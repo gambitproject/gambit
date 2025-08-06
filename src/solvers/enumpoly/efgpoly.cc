@@ -173,7 +173,7 @@ std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfil
   catch (const SingularMatrixException &) {
     p_isSingular = true;
   }
-  catch (const AssertionException &e) {
+  catch (const std::domain_error &) {
     // std::cerr << "Assertion warning: " << e.what() << std::endl;
     p_isSingular = true;
   }

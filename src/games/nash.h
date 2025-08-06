@@ -68,10 +68,10 @@ List<MixedBehaviorProfile<T>> SolveBySubgames(const Game &, BehaviorSolverType<T
 // has been reached.  A convenience for unraveling a potentially
 // deep recursion.
 //
-class EquilibriumLimitReached : public Exception {
+class EquilibriumLimitReached : public std::runtime_error {
 public:
+  EquilibriumLimitReached() : std::runtime_error("Reached target number of equilibria") {}
   ~EquilibriumLimitReached() noexcept override = default;
-  const char *what() const noexcept override { return "Reached target number of equilibria"; }
 };
 
 } // namespace Gambit::Nash
