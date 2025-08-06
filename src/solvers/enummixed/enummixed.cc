@@ -143,12 +143,10 @@ EnumMixedStrategySolveDetailed(const Game &p_game, StrategyCallbackType<T> p_onE
   for (size_t i = 1; i <= vert2id.size(); vert2id[i++] = 0)
     ;
 
-  int i = 0;
   int id1 = 0, id2 = 0;
 
   for (int i2 = 2; i2 <= solution->m_v2; i2++) {
     const BFS<T> &bfs1 = verts2[i2];
-    i++;
     for (int i1 = 2; i1 <= solution->m_v1; i1++) {
       const BFS<T> &bfs2 = verts1[i1];
 

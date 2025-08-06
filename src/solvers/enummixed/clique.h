@@ -227,7 +227,7 @@ private:
                 int sn1, int *sc1, int ec1,   // start NOT1, start CAND1, end CAND1
                 int sn2, int sc2, int ec2,    // start NOT2, start CAND2, end CAND2
                 int tos,                      // top of stack
-                int orignode1[], int orignode2[]);
+                int orignode1[MAXM], int orignode2[MAXN]);
   void candtry2(int stk[], // stack
                 bool connected[MAXM][MAXN],
                 int cand,                     // the candidate from NODES2  to be added to CLIQUE

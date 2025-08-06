@@ -565,13 +565,12 @@ void CliqueEnumerator::workonco(int numco, Array<int> &firstedge, Array<Edge> &e
   int clique1[MAXM], clique2[MAXN];
   // CLIQUE for first and second node class
 
-  int co;
-  int countco = 0;
+  // int countco = 0;
 
-  for (co = 1; co <= numco; co++) {
+  for (int co = 1; co <= numco; co++) {
     if (firstedge[co]) {
       // found a nonzero component list
-      countco++;
+      // countco++;
       // printf("\nConnected component %d:\n", countco) ;
 
       genincidence(firstedge[co], edgelist, orignode1, orignode2, connected, &m, &n);
