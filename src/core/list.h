@@ -348,17 +348,6 @@ template <class T> T &List<T>::operator[](int num)
   return n->m_data;
 }
 
-template <class T> List<T> List<T>::operator+(const List<T> &b) const
-{
-  List<T> result(*this);
-  Node *n = b.m_head;
-  while (n) {
-    result.Append(n->data);
-    n = n->m_next;
-  }
-  return result;
-}
-
 template <class T> List<T> &List<T>::operator+=(const List<T> &b)
 {
   Node *n = b.m_head;

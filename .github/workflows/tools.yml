@@ -40,17 +40,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install dependencies
-        run: brew install automake autoconf wxwidgets
+        run: brew install automake autoconf wxwidgets@3.2
       - run: aclocal
       - run: automake --add-missing
       - run: autoconf
-      - run: ./configure
+      - run: ./configure --with-wx-config=wx-config-3.2
       - run: make
       - run: sudo make install
       - run: make osx-dmg
       - uses: actions/upload-artifact@v4
         with:
-          name: artifact-macos
+          name: artifact-osx
           path: "*.dmg"
 
   windows:
@@ -64,7 +64,7 @@ jobs:
       - uses: msys2/setup-msys2@v2
         with:
           install: mingw-w64-x86_64-toolchain make automake autoconf
-      - run: pacman -S --noconfirm mingw-w64-x86_64-wxmsw3.2
+      - run: pacman -S --noconfirm mingw-w64-x86_64-wxwidgets3.2
       - run: aclocal
       - run: automake --add-missing
       - run: autoconf
