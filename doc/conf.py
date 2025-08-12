@@ -28,6 +28,10 @@ extensions = [
     "sphinx_design",
 ]
 
+# IPython directive configuration
+ipython_execlines = ['import pygambit as gbt', 'import os', 'import sys']
+ipython_savefig_dir = 'savefig'
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 

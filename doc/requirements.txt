@@ -4,5 +4,6 @@ scipy
 pydata-sphinx-theme
 sphinx_design
 sphinx-autobuild
-ipython
+ipython<7.0.0
+matplotlib
 pickleshare
