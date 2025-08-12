@@ -181,19 +181,3 @@ include:
 
 .. _section-downloading:
 
-Bug reports
-===========
-
-In the first instance, bug reports or feature requests should be
-posted to the Gambit issue tracker, located at
-`<http://github.com/gambitproject/gambit/issues>`_.
-
-When reporting a bug, please be sure to include the following:
-
-* The version(s) of Gambit you are using.  (If possible, it is helpful
-  to know whether a bug exists in both the current stable/teaching and
-  the current development/research versions.)
-* The operating system(s) on which you encountered the bug.
-* A detailed list of steps to reproduce the bug.  Be sure to include a
-  sample game file or files if appropriate; it is often helpful to
-  simplify the game if possible.
