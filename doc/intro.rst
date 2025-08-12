@@ -1,9 +1,6 @@
-********
-Overview
-********
-
+***************
 What is Gambit?
-===============
+***************
 
 Gambit is a set of software tools for doing computation on finite,
 noncooperative games. These comprise a graphical interface for
@@ -13,51 +10,6 @@ equilibria and other solution concepts in games; and, a set of file
 formats for storing and communicating games to external tools.
 Gambit is fully-cross platform, and is supported on Linux, Mac OS X,
 and Microsoft Windows.
-
-A brief history of Gambit
-=========================
-
-The Gambit Project was founded in the mid-1980s by Richard McKelvey at
-the California Institute of Technology. The original implementation
-was written in BASIC, with a simple graphical interface. This code was
-ported to C around 1990 with the help of Bruce Bell, and was
-distributed publicly as version 0.13 in 1991 and 1992.
-
-A major step in the evolution of Gambit took place with the awarding
-of the NSF grants in 1994, with McKelvey and Andrew McLennan as
-principal investigators, and `Theodore Turocy <http://www.gambit-project.org/turocy>`__ as the head programmer.
-The grants sponsored a complete rewrite of Gambit in C++. The
-graphical interface was made portable across platforms through the use
-of the wxWidgets library (`http://www.wxwidgets.org
-<http://www.wxwidgets.org>`__). Version 0.94 of Gambit was released in
-the late summer of 1994, version 0.96 followed in 1999, and version
-0.97 in 2002. During this time, many students at Caltech and Minnesota
-contributed to the effort by programming, testing, and/or documenting.
-These include, alphabetically, Bruce Bell, Anand Chelian, Matthew
-Derer, Nelson Escobar, Ben Freeman, Eugene Grayver, Todd Kaplan, Geoff
-Matters, Brian Trotter, Michael Vanier, Roberto Weber, and Gary Wu.
-
-Over the same period, Bernhard von Stengel, of the London School of
-Economics, made significant contributions in the implementation of the
-sequence form methods for two-player extensive games, and for
-contributing his "clique" code for identification of equilibrium
-components in two-player strategic games, as well as other advice
-regarding Gambit's implementation and architecture.
-
-Development since the mid-2000s has focused on two objectives. First,
-the graphical interface was reimplemented and modernized, with the
-goal of following good interaction design principles, especially in
-regards to easing the learning curve for users new to Gambit and new
-to game theory.  Second, the internal architecture of Gambit was
-refactored to increase interoperability between the tools provided by
-Gambit and those written independently.
-
-Gambit is proud to have participated in the Google Summer of Code
-program in the summers of 2011 and 2012 as a mentoring organization.
-The Python API, which became part of Gambit from Gambit 13, was
-developed during these summers, thanks in particular to the work
-of Stephen Kunath and Alessandro Andrioni.
-
 
 Key features of Gambit
 ======================
@@ -184,3 +136,44 @@ include:
   of British Columbia, the NSERC Canada Graduate Scholarship, and a
   Google Research Award to Leyton-Brown.
 
+
+The Gambit Project was founded in the mid-1980s by Richard McKelvey at
+the California Institute of Technology. The original implementation
+was written in BASIC, with a simple graphical interface. This code was
+ported to C around 1990 with the help of Bruce Bell, and was
+distributed publicly as version 0.13 in 1991 and 1992.
+
+A major step in the evolution of Gambit took place with the awarding
+of the NSF grants in 1994, with McKelvey and Andrew McLennan as
+principal investigators, and `Theodore Turocy <http://www.gambit-project.org/turocy>`__ as the head programmer.
+The grants sponsored a complete rewrite of Gambit in C++. The
+graphical interface was made portable across platforms through the use
+of the wxWidgets library (`http://www.wxwidgets.org
+<http://www.wxwidgets.org>`__). Version 0.94 of Gambit was released in
+the late summer of 1994, version 0.96 followed in 1999, and version
+0.97 in 2002. During this time, many students at Caltech and Minnesota
+contributed to the effort by programming, testing, and/or documenting.
+These include, alphabetically, Bruce Bell, Anand Chelian, Matthew
+Derer, Nelson Escobar, Ben Freeman, Eugene Grayver, Todd Kaplan, Geoff
+Matters, Brian Trotter, Michael Vanier, Roberto Weber, and Gary Wu.
+
+Over the same period, Bernhard von Stengel, of the London School of
+Economics, made significant contributions in the implementation of the
+sequence form methods for two-player extensive games, and for
+contributing his "clique" code for identification of equilibrium
+components in two-player strategic games, as well as other advice
+regarding Gambit's implementation and architecture.
+
+Development since the mid-2000s has focused on two objectives. First,
+the graphical interface was reimplemented and modernized, with the
+goal of following good interaction design principles, especially in
+regards to easing the learning curve for users new to Gambit and new
+to game theory.  Second, the internal architecture of Gambit was
+refactored to increase interoperability between the tools provided by
+Gambit and those written independently.
+
+Gambit is proud to have participated in the Google Summer of Code
+program in the summers of 2011 and 2012 as a mentoring organization.
+The Python API, which became part of Gambit from Gambit 13, was
+developed during these summers, thanks in particular to the work
+of Stephen Kunath and Alessandro Andrioni.
