@@ -137,10 +137,15 @@ that Gambit will both contribute to these two areas of research, as
 well as make the resulting methods available to both students and
 practitioners.
 
-Developers
-==========
+Who built Gambit?
+=================
 
-The principal developers of Gambit are:
+Check out the `team page <https://www.gambit-project.org/team/>`__ on the Gambit website for up-to-date information on the current Gambit development team.
+
+History
+-------
+
+The principal developers of Gambit have been:
 
 * `Theodore Turocy <http://www.gambit-project.org/turocy>`__,
   University of East Anglia: director.
@@ -178,6 +183,4 @@ include:
   provided by a University Graduate Fellowship of the University
   of British Columbia, the NSERC Canada Graduate Scholarship, and a
   Google Research Award to Leyton-Brown.
-
-.. _section-downloading:
 
