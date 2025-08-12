@@ -1,6 +1,6 @@
-*********************
-An overview of Gambit
-*********************
+********
+Overview
+********
 
 What is Gambit?
 ===============
@@ -11,6 +11,8 @@ interactively building and analyzing general games in extensive or
 strategy form; a number of command-line tools for computing Nash
 equilibria and other solution concepts in games; and, a set of file
 formats for storing and communicating games to external tools.
+Gambit is fully-cross platform, and is supported on Linux, Mac OS X,
+and Microsoft Windows.
 
 A brief history of Gambit
 =========================

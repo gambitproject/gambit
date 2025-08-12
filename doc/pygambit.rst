@@ -1,8 +1,8 @@
 .. _pygambit:
 
 
-``pygambit`` Python package
-===========================
+PyGambit
+========
 
 Gambit provides a Python package, ``pygambit``, which provides access to
 Gambit's features.  ``pygambit`` is available on PyPI

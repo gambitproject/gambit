@@ -1,8 +1,8 @@
 .. _command-line:
 
-******************
-Command-line tools
-******************
+***
+CLI
+***
 
 Gambit provides command-line interfaces for each method for computing
 Nash equilibria.  These are suitable for scripting or calling from
