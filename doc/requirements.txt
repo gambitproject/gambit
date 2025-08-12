@@ -3,5 +3,6 @@ numpy
 scipy
 pydata-sphinx-theme
 sphinx_design
+sphinx-autobuild
 ipython
 pickleshare

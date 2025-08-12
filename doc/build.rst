@@ -163,7 +163,7 @@ Editing this documentation
     pip install .
     cd doc
     pip install -r requirements.txt
-    make html
+    make html  # or make livehtml for live server with auto-rebuild
 
 4. Open ``doc/_build/html/index.html`` in your browser to view the documentation.
 
