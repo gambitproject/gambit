@@ -115,7 +115,11 @@ html_theme_options = {
             "url": "https://github.com/gambitproject/gambit/releases"
         },
         {
-            "name": "Citing",
+            "name": "Older releases",
+            "url": "https://sourceforge.net/projects/gambit/files/"
+        },
+        {
+            "name": "Cite Gambit",
             "url": "https://www.gambit-project.org/cite/"
         }
     ],
