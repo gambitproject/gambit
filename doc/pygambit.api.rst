@@ -130,6 +130,7 @@ Information about the game
    :toctree: api/
 
    Outcome.label
+   Outcome.number
    Outcome.game
 
 .. autosummary::
