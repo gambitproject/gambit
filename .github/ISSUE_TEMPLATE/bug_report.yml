@@ -20,6 +20,15 @@ body:
     validations:
       required: true
   - type: textarea
+    id: version
+    attributes:
+      label: What version of Gambit are you using?
+      description: Please provide the version number.
+      placeholder: e.g., 16.3.0
+      value: "16.3.0"
+    validations:
+      required: true
+  - type: textarea
     id: what-happened
     attributes:
       label: What happened?
