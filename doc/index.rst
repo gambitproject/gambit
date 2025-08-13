@@ -67,7 +67,7 @@ construction and analysis of finite extensive and strategic games.
    tools
    gui
    samples
-   build
+   developer
    formats
    biblio
 
