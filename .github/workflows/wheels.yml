@@ -1,7 +1,11 @@
+
 name: pygambit wheels
 
 on:
   push:
+    paths-ignore:
+      - 'doc/**'
+      - '.github/ISSUE_TEMPLATE/**'
     tags:
       - 'v*'
   schedule:

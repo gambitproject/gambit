@@ -2,7 +2,13 @@ name: pygambit Python extension
 
 on:
   push:
+    paths-ignore:
+      - 'doc/**'
+      - '.github/ISSUE_TEMPLATE/**'
   pull_request:
+    paths-ignore:
+      - 'doc/**'
+      - '.github/ISSUE_TEMPLATE/**'
 
 jobs:
   linux:
