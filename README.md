@@ -13,6 +13,9 @@
 
 **Gambit** is the package for doing computation in (non-cooperative) game theory.
 
+- See our [documentation](https://gambitproject.readthedocs.io/)
+- Check our [project website](https://www.gambit-project.org/)
+
 Gambit provides:
 
 - Structures to represent games in extensive and strategic form
