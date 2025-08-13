@@ -1,8 +1,8 @@
 .. _section-gui:
 
-***********************
-The graphical interface
-***********************
+***
+GUI
+***
 
 Gambit's graphical user interface provides an
 "integrated development environment" to help visually construct

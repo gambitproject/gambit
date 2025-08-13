@@ -19,6 +19,26 @@ body:
         - Other
     validations:
       required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: What operating system are you using?
+      multiple: true
+      options:
+        - Windows
+        - macOS
+        - Linux
+    validations:
+      required: true
+  - type: textarea
+    id: version
+    attributes:
+      label: What version of Gambit are you using?
+      description: Please provide the version number.
+      placeholder: e.g., 16.3.0
+      value: "16.3.0"
+    validations:
+      required: true
   - type: textarea
     id: what-happened
     attributes:
