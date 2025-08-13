@@ -22,6 +22,38 @@ When reporting a bug, please be sure to include the following:
   sample game file or files if appropriate; it is often helpful to
   simplify the game if possible.
 
+Contributing code
+----------------
+
+Gambit is an open-source project, and contributions are welcome from anyone.
+The project is hosted on GitHub, and contributions can be made via pull requests following the standard GitHub workflow.
+
+1. To get started contributing code in the `Gambit GitHub repo <https://github.com/gambitproject/gambit>`__, do one of the following:
+
+- Core developers: request contributor access from one of the `team <https://www.gambit-project.org/team/>`__
+- External contributors: fork the repository on GitHub.
+
+2. Clone the repository to your local machine ::
+
+    git clone https://github.com/gambitproject/gambit.git  # or your fork URL
+    cd gambit
+
+3. Create a new branch for your changes ::
+
+    git checkout -b feature/your-feature-name
+
+4. Make your changes. Commit each change with a clear commit message ::
+
+    git add .
+    git commit -m "Add feature X or fix bug Y"
+
+5. Push your changes to your fork or branch ::
+
+    git push origin feature/your-feature-name
+
+6. Open a pull request on GitHub to the master branch of the upstream repository, describing your changes and linking to any relevant issues.
+7. Core developers will review your changes, provide feedback, and merge them into the master branch if they meet the project's standards.
+
 Editing this documentation
 --------------------------
 
