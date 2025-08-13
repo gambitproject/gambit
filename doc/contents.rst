@@ -11,7 +11,7 @@ Detailed table of contents
    tools
    gui
    samples
-   build
+   developer
    formats
    biblio
 
