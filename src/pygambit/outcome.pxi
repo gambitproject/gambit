@@ -179,7 +179,7 @@ class TreeGameOutcome:
         return "(%s)" % (
             ",".join(
                 [deref(deref(self.psp).deref()).GetStrategy(cython.cast(Player, player).player)
-                 .deref().GetLabel().c_str()
+                 .deref().GetLabel().c_str().decode()
                  for player in self.game.players]
             )
         )
