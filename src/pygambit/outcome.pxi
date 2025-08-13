@@ -187,8 +187,8 @@ class TreeGameOutcome:
         """The text label associated with this outcome."""
         return "(%s)" % (
             ",".join(
-                [deref(self.psp).deref().GetStrategy(cython.cast(Player, player).player)
-                 .deref().GetLabel().c_str()
+                [deref(deref(self.psp).deref()).GetStrategy(cython.cast(Player, player).player)
+                 .deref().GetLabel().c_str().decode()
                  for player in self.game.players]
             )
         )
