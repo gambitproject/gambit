@@ -6,6 +6,7 @@ on:
     paths-ignore:
       - 'doc/**'
       - '.github/ISSUE_TEMPLATE/**'
+      - 'README.md'
     tags:
       - 'v*'
   schedule:
