@@ -1,6 +1,27 @@
 Contributing to the Gambit Project
 ==================================
 
+This section provides guidelines for contributing to the Gambit project, including how to report bugs, suggest features, and contribute code.
+It includes information relevant to both core developers and external contributors.
+
+GitHub issues
+----------------
+
+In the first instance, bug reports, feature requests and improvements to the Gambit documentation should be
+posted to the Gambit issue tracker, located at
+`<http://github.com/gambitproject/gambit/issues>`_.
+Use the issue templates to help you provide the necessary information.
+
+When reporting a bug, please be sure to include the following:
+
+* The version(s) of Gambit you are using.  (If possible, it is helpful
+  to know whether a bug exists in both the current stable/teaching and
+  the current development/research versions.)
+* The operating system(s) on which you encountered the bug.
+* A detailed list of steps to reproduce the bug.  Be sure to include a
+  sample game file or files if appropriate; it is often helpful to
+  simplify the game if possible.
+
 Editing this documentation
 --------------------------
 
@@ -32,19 +53,3 @@ Editing this documentation
 .. TODO: Add instructions for the GitHub workflow during contributor docs refactoring.
    See https://github.com/gambitproject/gambit/issues/541
 
-Bug reports
------------
-
-In the first instance, bug reports or feature requests should be
-posted to the Gambit issue tracker, located at
-`<http://github.com/gambitproject/gambit/issues>`_.
-
-When reporting a bug, please be sure to include the following:
-
-* The version(s) of Gambit you are using.  (If possible, it is helpful
-  to know whether a bug exists in both the current stable/teaching and
-  the current development/research versions.)
-* The operating system(s) on which you encountered the bug.
-* A detailed list of steps to reproduce the bug.  Be sure to include a
-  sample game file or files if appropriate; it is often helpful to
-  simplify the game if possible.
