@@ -19,6 +19,17 @@ body:
         - Other
     validations:
       required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: What operating system are you using?
+      multiple: true
+      options:
+        - Windows
+        - macOS
+        - Linux
+    validations:
+      required: true
   - type: textarea
     id: version
     attributes:
