@@ -1,0 +1,37 @@
+name: MacOS static GUI binary
+
+on:
+  push:
+    tags:
+      - 'v*'
+  schedule:
+    - cron: '0 6 * * 4'
+
+jobs:
+  macos-13:
+    runs-on: macos-13
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
+    steps:
+      - uses: actions/checkout@v5
+      - name: Install dependencies
+        run: |
+            brew install automake autoconf
+            curl -L -O https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.8/wxWidgets-3.2.8.tar.bz2
+            tar xjf wxWidgets-3.2.8.tar.bz2
+            cd wxWidgets-3.2.8
+            mkdir build-release
+            cd build-release
+            ../configure --disable-shared --disable-sys-libs
+            make -j4
+            sudo make install
+      - run: aclocal
+      - run: automake --add-missing
+      - run: autoconf
+      - run: ./configure
+      - run: make
+      - run: sudo make install
+      - run: make osx-dmg
+      - uses: actions/upload-artifact@v4
+        with:
+          name: artifact-osx-13
+          path: "*.dmg"

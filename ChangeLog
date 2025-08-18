@@ -49,11 +49,14 @@
   Explorer, as GTE no longer reads files in this format.
 
 
-## [16.2.2] - unreleased
+## [16.2.2] - 2025-08-18
 
 ### Fixed
 - `Game.copy_tree` and `Game.move_tree` implementations reversed the roles of the
   `src` and `dest` nodes (#499)
+
+### Changed
+- For graphical interface, added support for wxWidgets 3.3; require minimum of wxWidgets 3.2.
 
 ## [16.2.1] - 2025-01-06
 

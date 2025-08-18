@@ -88,4 +88,4 @@ Computing an equilibrium in mixed strategies of :download:`e02.efg
    Gambit version 16.3.0, Copyright (C) 1994-2025, The Gambit Project
    This is free software, distributed under the GNU GPL
 
-   NE, 0.998701, 0.000229, 0.001070, 0.618833, 0.381167
+   NE,0.998701,0.000229,0.001070,0.618833,0.381167

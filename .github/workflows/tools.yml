@@ -9,14 +9,12 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Install dependencies
         run: |
           sudo apt-key adv --fetch-keys http://repos.codelite.org/CodeLite.asc
-          sudo apt-add-repository 'deb https://repos.codelite.org/wx3.1.5/ubuntu/ focal universe'
           sudo apt-get update
-          sudo apt-get install -y automake autoconf
-          sudo apt-get install -y libwxgtk3.2-dev
+          sudo apt-get install -y automake autoconf libwxgtk3.2-dev
       - name: Configure build with autotools
         run: |
           aclocal
@@ -57,7 +55,7 @@ jobs:
     runs-on: macos-14
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Install dependencies
         run: brew install automake autoconf wxwidgets
       - run: aclocal
@@ -79,11 +77,11 @@ jobs:
       run:
         shell: msys2 {0}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: msys2/setup-msys2@v2
         with:
           install: mingw-w64-x86_64-toolchain make automake autoconf
-      - run: pacman -S --noconfirm mingw-w64-x86_64-wxmsw3.2
+      - run: pacman -S --noconfirm mingw-w64-x86_64-wxwidgets3.2
       - run: aclocal
       - run: automake --add-missing
       - run: autoconf
