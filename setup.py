@@ -1,6 +1,6 @@
 #
 # This file is part of Gambit
-# Copyright (c) 1994-2023, The Gambit Project (http://www.gambit-project.org)
+# Copyright (c) 1994-2025, The Gambit Project (http://www.gambit-project.org)
 #
 # FILE: src/python/setup.py
 # Setuptools configuration file for Gambit Python extension
@@ -69,7 +69,7 @@ def readme():
 
 setuptools.setup(
     name="pygambit",
-    version="16.2.1",
+    version="16.2.2",
     description="The package for computation in game theory",
     long_description=readme(),
     classifiers=[
