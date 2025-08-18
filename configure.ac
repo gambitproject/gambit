@@ -20,7 +20,7 @@ dnl along with this program; if not, write to the Free Software
 dnl Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 dnl
 
-AC_INIT([gambit],[16.3.0])
+AC_INIT([gambit],[16.3.1])
 AC_CONFIG_SRCDIR([src/gambit.h])
 AM_INIT_AUTOMAKE([subdir-objects foreign])
 dnl AC_CONFIG_MACRO_DIR([m4])
@@ -63,7 +63,7 @@ if test x$with_gui = xtrue; then
   dnl------------------------
 
   dnl check for wx-config
-  AM_PATH_WXCONFIG(3.1.0, WXCONFIG=1)
+  AM_PATH_WXCONFIG(3.2.0, WXCONFIG=1)
   if test "$WXCONFIG" != 1; then
       AC_MSG_WARN([
             Did not find a new enough version of wxWidgets; disabling build of
@@ -71,7 +71,7 @@ if test x$with_gui = xtrue; then
             please check that wx-config is in path, the directory
             where wxWidgets libraries are installed (returned by
             'wx-config --libs' command) is in LD_LIBRARY_PATH or
-            equivalent variable and wxWidgets is version 3.1.0 or above.
+            equivalent variable and wxWidgets is version 3.2.0 or above.
       ])
       AM_CONDITIONAL(WITH_GUI, test x0 = x1)
   fi
