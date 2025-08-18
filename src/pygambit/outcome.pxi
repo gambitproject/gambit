@@ -72,6 +72,13 @@ class Outcome:
             warnings.warn("Another outcome with an identical label exists")
         self.outcome.deref().SetLabel(value.encode("ascii"))
 
+    @property
+    def number(self) -> int:
+        """Returns the number of the outcome in the game.
+        Outcomes are numbered starting with 0.
+        """
+        return self.outcome.deref().GetNumber() - 1
+
     def __getitem__(
             self, player: typing.Union[Player, str]
     ) -> typing.Union[decimal.Decimal, Rational]:
@@ -179,7 +186,7 @@ class TreeGameOutcome:
         return "(%s)" % (
             ",".join(
                 [deref(deref(self.psp).deref()).GetStrategy(cython.cast(Player, player).player)
-                 .deref().GetLabel().c_str()
+                 .deref().GetLabel().c_str().decode()
                  for player in self.game.players]
             )
         )
