@@ -821,6 +821,7 @@ inline bool MatchesPartialHistory(const std::map<GameInfoset, GameAction> &p_beh
 void GameTreeRep::MakeReducedStrategies() const
 {
   std::stack<GameNodeRep::Actions::iterator> position;
+  std::map<GameInfoset, GameAction> history;
 
   position.emplace(m_root->GetActions().begin());
 
@@ -836,6 +837,7 @@ void GameTreeRep::MakeReducedStrategies() const
   while (!position.empty()) {
     auto &current_iter = position.top();
     if (position.top() == position.top().GetOwner()->GetActions().end()) {
+      history.erase(position.top().GetOwner()->GetInfoset());
       position.pop();
       if (!position.empty()) {
         ++position.top();
@@ -844,7 +846,11 @@ void GameTreeRep::MakeReducedStrategies() const
     }
 
     auto [action, node] = *current_iter;
-    std::cout << "Visited " << node->m_number << std::endl;
+    if (current_iter == node->GetParent()->GetActions().begin()) {
+      history[position.top().GetOwner()->GetInfoset()] = action;
+    }
+    std::cout << "Visited " << node->m_number << " history size " << history.size() << std::endl;
+
     if (!node->IsTerminal()) {
       position.emplace(node->GetActions().begin());
       continue;
