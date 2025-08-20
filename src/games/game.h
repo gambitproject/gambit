@@ -329,15 +329,6 @@ class GamePlayerRep : public std::enable_shared_from_this<GamePlayerRep> {
   template <class T> friend class MixedBehaviorProfile;
   template <class T> friend class MixedStrategyProfile;
 
-  /// @name Building reduced form strategies
-  //@{
-  void MakeStrategy(const std::map<GameInfosetRep *, int> &);
-  void MakeReducedStrats(class GameNodeRep *, class GameNodeRep *,
-                         std::map<GameInfosetRep *, int> &,
-                         std::map<GameNodeRep *, GameNodeRep *> &ptr,
-                         std::map<GameNodeRep *, GameNodeRep *> &whichbranch);
-  //@}
-
   bool m_valid{true};
   GameRep *m_game;
   int m_number;

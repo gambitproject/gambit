@@ -803,15 +803,15 @@ void GameTreeRep::ClearComputedValues() const
   m_computedValues = false;
 }
 
-inline bool MatchesPartialHistory(const std::map<GameInfoset, GameAction> &p_behav,
-                                  const std::list<GameAction> &p_partialHistory,
+inline bool MatchesPartialHistory(const std::map<GameInfosetRep *, GameAction> &p_behavior,
+                                  const std::map<GameInfosetRep *, GameAction> &p_partialHistory,
                                   const GameInfoset &p_currentInfoset)
 {
-  if (contains(p_behav, p_currentInfoset)) {
+  if (contains(p_behavior, p_currentInfoset.get())) {
     return false;
   }
-  for (const auto &action : p_partialHistory) {
-    if (p_behav.at(action->GetInfoset()) != action) {
+  for (const auto &[infoset, action] : p_partialHistory) {
+    if (contains(p_behavior, infoset) && p_behavior.at(infoset) != action) {
       return false;
     }
   }
@@ -821,9 +821,16 @@ inline bool MatchesPartialHistory(const std::map<GameInfoset, GameAction> &p_beh
 void GameTreeRep::MakeReducedStrategies() const
 {
   std::stack<GameNodeRep::Actions::iterator> position;
-  std::map<GameInfoset, GameAction> history;
+  std::map<GameInfosetRep *, GameAction> history;
+  using StrategyMap = std::map<GameInfosetRep *, GameAction>;
+  std::map<GamePlayer, std::list<StrategyMap>> behaviors;
+  for (const auto &player : m_players) {
+    behaviors[player] = {{}};
+  }
 
-  position.emplace(m_root->GetActions().begin());
+  if (!m_root->IsTerminal()) {
+    position.emplace(m_root->GetActions().begin());
+  }
 
   // It is convenient that the position represents the node AFTER the node
   // currently being processed.
@@ -833,11 +840,10 @@ void GameTreeRep::MakeReducedStrategies() const
   // If position is a non-terminal node, push iterator at first child onto position
   // If position is a terminal node, increment iterator
   // If position is the end of iteration, pop iterator
-
   while (!position.empty()) {
     auto &current_iter = position.top();
     if (position.top() == position.top().GetOwner()->GetActions().end()) {
-      history.erase(position.top().GetOwner()->GetInfoset());
+      history.erase(position.top().GetOwner()->GetInfoset().get());
       position.pop();
       if (!position.empty()) {
         ++position.top();
@@ -847,9 +853,23 @@ void GameTreeRep::MakeReducedStrategies() const
 
     auto [action, node] = *current_iter;
     if (current_iter == node->GetParent()->GetActions().begin()) {
-      history[position.top().GetOwner()->GetInfoset()] = action;
+      // Update behaviors conditional on parent information set being reachable
+      std::list<StrategyMap> new_behaviors;
+      for (const auto &behav : behaviors[node->GetParent()->GetPlayer()]) {
+        if (MatchesPartialHistory(behav, history, node->GetParent()->GetInfoset())) {
+          for (const auto &action : node->GetParent()->GetInfoset()->GetActions()) {
+            StrategyMap behav_copy = behav;
+            behav_copy[node->GetParent()->GetInfoset().get()] = action;
+            new_behaviors.push_back(behav_copy);
+          }
+        }
+        else {
+          new_behaviors.push_back(behav);
+        }
+      }
+      behaviors[node->GetParent()->GetPlayer()] = new_behaviors;
     }
-    std::cout << "Visited " << node->m_number << " history size " << history.size() << std::endl;
+    history[position.top().GetOwner()->GetInfoset().get()] = action;
 
     if (!node->IsTerminal()) {
       position.emplace(node->GetActions().begin());
@@ -857,6 +877,30 @@ void GameTreeRep::MakeReducedStrategies() const
     }
 
     ++current_iter;
+  }
+
+  for (const auto &player : m_players) {
+    for (const auto &behav : behaviors[player]) {
+      std::string label;
+      for (const auto &infoset : player->GetInfosets()) {
+        if (contains(behav, infoset.get())) {
+          label += std::to_string(behav.at(infoset.get())->GetNumber());
+        }
+        else {
+          label += "*";
+        }
+      }
+      if (label.empty()) {
+        label = "*";
+      }
+      auto strategy =
+          std::make_shared<GameStrategyRep>(player.get(), player->m_strategies.size() + 1, label);
+      for (const auto &[infoset, action] : behav) {
+        strategy->m_behav[infoset] = action->GetNumber();
+        std::cout << action->GetNumber() << std::endl;
+      }
+      player->m_strategies.push_back(strategy);
+    }
   }
 }
 
@@ -867,11 +911,6 @@ void GameTreeRep::BuildComputedValues() const
   }
   const_cast<GameTreeRep *>(this)->SortInfosets();
   MakeReducedStrategies();
-  for (const auto &player : m_players) {
-    std::map<GameInfosetRep *, int> behav;
-    std::map<GameNodeRep *, GameNodeRep *> ptr, whichbranch;
-    player->MakeReducedStrats(m_root.get(), nullptr, behav, ptr, whichbranch);
-  }
   m_computedValues = true;
 }
 
