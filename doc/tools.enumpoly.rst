@@ -98,7 +98,7 @@ Computing equilibria of the strategic game :download:`e01.nfg
 
    $ gambit-enumpoly e01.nfg
    Compute Nash equilibria by solving polynomial systems
-   Gambit version 16.3.0, Copyright (C) 1994-2025, The Gambit Project
+   Gambit version 16.3.1, Copyright (C) 1994-2025, The Gambit Project
    This is free software, distributed under the GNU GPL
 
    NE,1.000000,0.000000,1.000000,0.000000,0.000000,1.000000
