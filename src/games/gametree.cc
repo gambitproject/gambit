@@ -852,22 +852,26 @@ void GameTreeRep::MakeReducedStrategies() const
     }
 
     auto [action, node] = *current_iter;
-    if (current_iter == node->GetParent()->GetActions().begin()) {
+    if (!node->GetParent()->GetPlayer()->IsChance() &&
+        current_iter == node->GetParent()->GetActions().begin()) {
       // Update behaviors conditional on parent information set being reachable
-      std::list<StrategyMap> new_behaviors;
-      for (const auto &behav : behaviors[node->GetParent()->GetPlayer()]) {
-        if (MatchesPartialHistory(behav, history, node->GetParent()->GetInfoset())) {
-          for (const auto &action : node->GetParent()->GetInfoset()->GetActions()) {
-            StrategyMap behav_copy = behav;
-            behav_copy[node->GetParent()->GetInfoset().get()] = action;
-            new_behaviors.push_back(behav_copy);
+      auto behav = behaviors[node->GetParent()->GetPlayer()].begin();
+      while (behav != behaviors[node->GetParent()->GetPlayer()].end()) {
+        if (MatchesPartialHistory(*behav, history, node->GetParent()->GetInfoset())) {
+          auto act = node->GetParent()->GetInfoset()->GetActions().begin();
+          (*behav)[node->GetParent()->GetInfoset().get()] = *act;
+          ++behav;
+          ++act;
+          while (act != node->GetParent()->GetInfoset()->GetActions().end()) {
+            behaviors[node->GetParent()->GetPlayer()].insert(behav, *std::prev(behav));
+            (*std::prev(behav))[node->GetParent()->GetInfoset().get()] = *act;
+            ++act;
           }
         }
         else {
-          new_behaviors.push_back(behav);
+          ++behav;
         }
       }
-      behaviors[node->GetParent()->GetPlayer()] = new_behaviors;
     }
     history[position.top().GetOwner()->GetInfoset().get()] = action;
 
@@ -897,7 +901,6 @@ void GameTreeRep::MakeReducedStrategies() const
           std::make_shared<GameStrategyRep>(player.get(), player->m_strategies.size() + 1, label);
       for (const auto &[infoset, action] : behav) {
         strategy->m_behav[infoset] = action->GetNumber();
-        std::cout << action->GetNumber() << std::endl;
       }
       player->m_strategies.push_back(strategy);
     }
