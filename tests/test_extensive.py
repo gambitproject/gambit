@@ -68,17 +68,30 @@ def test_game_add_players_nolabel():
     (games.BinEfgThreePlayer.get_test_data(level=3)[0], True),
 
     # Games with imperfect recall from files (game_input is a string)
+    #
     # - imperfect recall without absent-mindedness
-    ("wichardt.efg", False),  # forgetting past action; Wichardt (GEB, 2008)
-    ("noPR-action-selten-horse.efg", False),  # forgetting past action
-    ("noPR-information-no-deflate.efg", False),  # forgetting past information
-    ("gilboa_two_am_agents.efg", False),  # forgetting past information; Gilboa (GEB, 1997)
+    # Wichardt (GEB, 2008): 2 players; Player 1 in Infoset 1:2 forgets past action
+    ("wichardt.efg", False),
+    # variation of the Selten's Horse (1975): Player 1 in Infoset 1:2 forgets past action
+    ("noPR-action-selten-horse.efg", False),
+    # deflate-stable game (cf. Thompson); Player 2 in Infoset 2:2 forgets past information
+    ("noPR-information-no-deflate.efg", False),
+    # Gilboa (GEB, 1997) 2 players; agents of Player 1 forget past information
+    ("gilboa-two-am-agents-deterministic.efg", False),
+    #
     # - imperfect recall with absent-mindedness
-    ("noPR-AM-driver-one-player.efg", False),  # 1 players, one infoset unreached
-    ("noPR-AM-driver-two-players.efg", False),  # 2 players, one infoset unreached
-    ("noPR-action-AM.efg", False),  # 2 players + forgetting past action; P1 has one infoset
-    ("noPR-action-AM2.efg", False),  # 2 players + forgetting past action; P1 has >1 infoset
-    ("noPR-action-AM-two-hops.efg", False),  # 2 players, one AM-infoset each
+    # Classic AM-driver game: Player 2 does not move, but gets payoffs assigned
+    ("noPR-AM-driver-one-player.efg", False),
+    # forgetting past action; Player 1 in Infoset 1:1 has AM; unreachable: Infosets 2:2, 2:3
+    ("noPR-action-AM.efg", False),
+    # forgetting past action; Player 1 in Infoset 1:1 has AM; unreachable: Infosets 1:3, 2:1
+    ("noPR-action-AM2.efg", False),
+    # Player 1 in Infoset 1:1 has AM; unreachable: Infosets 1:3, 2:2, 2:3, 2:4, 2:5
+    ("noPR-action-big-AM.efg", False),
+    # one AM-infoset each, unreachable: Infoset 2:2
+    ("noPR-action-AM-two-hops.efg", False),
+    # one AM-infoset each, unreachable: Infosets 1:2, 2:2, Node 7 in Infoset 1:1
+    ("noPR-action-AM-two-hops-unreached.efg", False),
 
     # Games with imperfect recall from generated games (game_input is a gbt.Game object)
     # - One-player binary tree games
@@ -364,16 +377,113 @@ def test_outcome_index_exception_label():
         (games.BinEfgOnePlayerIR.get_test_data(level=5)),
         (games.BinEfgOnePlayerIR.get_test_data(level=6)),
         #
-        # I M P E R F E C T   R E C A L L --- commented out in the test suite
-        # Wichardt (2008): binary tree of height 3; 2 players; the root player forgets the action
-        # (
-        #    games.read_from_file("wichardt.efg"),
-        #    [["11", "12", "21", "22"], ["1", "2"]],
-        #    [
-        #        np.array([[1, -1], [-5, -5], [-5, -5], [-1, 1]]),
-        #        np.array([[-1, 1], [5, 5], [5, 5], [1, -1]]),
-        #    ],
-        # ),
+        # I M P E R F E C T   R E C A L L --- no absent-mindedness
+        # Wichardt (2008)
+        (
+           games.read_from_file("wichardt.efg"),
+           [["11", "12", "21", "22"], ["1", "2"]],
+           [
+               np.array([[1, -1], [-5, -5], [-5, -5], [-1, 1]]),
+               np.array([[-1, 1], [5, 5], [5, 5], [1, -1]]),
+           ],
+        ),
+        # variation of the Selten's Horse (1975): 2 players
+        (
+           games.read_from_file("noPR-action-selten-horse.efg"),
+           [["11", "12", "21", "22"], ["1", "2"]],
+           [
+               np.array([[1, 4], [1, 0], [3, 3], [0, 0]]),
+               np.array([[1, 4], [1, 0], [2, 2], [0, 0]]),
+           ],
+        ),
+        # deflate-stable game
+        (
+           games.read_from_file("noPR-information-no-deflate.efg"),
+           [["1", "2", "3"], ["11", "12", "21", "22"]],
+           [
+               np.array([[8, 8, 7, 7], [0, 0, 4, 3], [2, 1, 2, 1]]),
+               np.array([[-8, -8, -7, -7], [0, 0, -4, -3], [-2, -1, -2, -1]]),
+           ],
+        ),
+        # Gilboa (1997)
+        (
+           games.read_from_file("gilboa-two-am-agents-deterministic.efg"),
+           [["11", "12", "21", "22"], ["1", "2"]],
+           [
+               np.array([[1, 4], [1, 6], [2, 5], [3, 6]]),
+               np.array([[-1, -4], [-1, -6], [-2, -5], [-3, -6]]),
+           ],
+        ),
+        #
+        # A B S E N T   M I N D E D N E S S
+        # AM-driver ---- NB: the legacy algorithm works well, pytest.mark.xfail is thus not added
+        (
+           games.read_from_file("noPR-AM-driver-one-player.efg"),
+           [["11*", "12*", "2**"], ["*"]],
+           [
+               np.array([[1], [3], [4]]),
+               np.array([[-1], [-3], [-4]]),
+           ],
+        ),
+        pytest.param(
+           games.read_from_file("noPR-action-AM.efg"),
+           [["1", "2"], ["1**1", "1**2", "2**1", "2**2"]],
+           [
+               np.array([[1, 1, 2, 2], [7, 8, 7, 8]]),
+               np.array([[-1, -1, -2, -2], [-7, -8, -7, -8]]),
+           ],
+           marks=pytest.mark.xfail
+        ),
+        pytest.param(
+           games.read_from_file("noPR-action-AM2.efg"),
+           [["11*", "12*", "2**"], ["*1", "*2"]],
+           [
+               np.array([[1, 1], [2, 2], [7, 8]]),
+               np.array([[-1, -1], [-2, -2], [-7, -8]]),
+           ],
+           marks=pytest.mark.xfail
+        ),
+        pytest.param(
+           games.read_from_file("noPR-action-big-AM.efg"),
+           [["1***", "21**", "22*1", "22*2"], ["1****1", "1****2", "2****1", "2****2"]],
+           [
+               np.array(
+                    [
+                       [1, 1, 2, 2],
+                       [17, 17, 17, 17],
+                       [18, 19, 18, 19],
+                       [18, 20, 18, 20]
+                    ]
+                ),
+               np.array(
+                    [
+                        [-1, -1, -2, -2],
+                        [-17, -17, -17, -17],
+                        [-18, -19, -18, -19],
+                        [-18, -20, -18, -20]
+                    ]
+                ),
+           ],
+           marks=pytest.mark.xfail
+        ),
+        pytest.param(
+           games.read_from_file("noPR-action-AM-two-hops.efg"),
+           [["11", "12", "2*"], ["1*", "2*"]],
+           [
+               np.array([[1, 0], [10, 0], [2, 2]]),
+               np.array([[1, 3], [-10, 3], [0, 0]]),
+           ],
+           marks=pytest.mark.xfail
+        ),
+        pytest.param(
+           games.read_from_file("noPR-action-AM-two-hops-unreached.efg"),
+           [["1*", "2*"], ["1*", "2*"]],
+           [
+               np.array([[1, 0], [2, 2]]),
+               np.array([[1, 3], [0, 0]]),
+           ],
+           marks=pytest.mark.xfail
+        ),
     ],
 )
 def test_reduced_strategic_form(
