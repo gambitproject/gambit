@@ -803,12 +803,64 @@ void GameTreeRep::ClearComputedValues() const
   m_computedValues = false;
 }
 
+inline bool MatchesPartialHistory(const std::map<GameInfoset, GameAction> &p_behav,
+                                  const std::list<GameAction> &p_partialHistory,
+                                  const GameInfoset &p_currentInfoset)
+{
+  if (contains(p_behav, p_currentInfoset)) {
+    return false;
+  }
+  for (const auto &action : p_partialHistory) {
+    if (p_behav.at(action->GetInfoset()) != action) {
+      return false;
+    }
+  }
+  return true;
+}
+
+void GameTreeRep::MakeReducedStrategies() const
+{
+  std::stack<GameNodeRep::Actions::iterator> position;
+
+  position.emplace(m_root->GetActions().begin());
+
+  // It is convenient that the position represents the node AFTER the node
+  // currently being processed.
+  //
+  // Initialisation: First child of root node
+  // If position is the first child of a node, visit the node's parent
+  // If position is a non-terminal node, push iterator at first child onto position
+  // If position is a terminal node, increment iterator
+  // If position is the end of iteration, pop iterator
+
+  while (!position.empty()) {
+    auto &current_iter = position.top();
+    if (position.top() == position.top().GetOwner()->GetActions().end()) {
+      position.pop();
+      if (!position.empty()) {
+        ++position.top();
+      }
+      continue;
+    }
+
+    auto [action, node] = *current_iter;
+    std::cout << "Visited " << node->m_number << std::endl;
+    if (!node->IsTerminal()) {
+      position.emplace(node->GetActions().begin());
+      continue;
+    }
+
+    ++current_iter;
+  }
+}
+
 void GameTreeRep::BuildComputedValues() const
 {
   if (m_computedValues) {
     return;
   }
   const_cast<GameTreeRep *>(this)->SortInfosets();
+  MakeReducedStrategies();
   for (const auto &player : m_players) {
     std::map<GameInfosetRep *, int> behav;
     std::map<GameNodeRep *, GameNodeRep *> ptr, whichbranch;

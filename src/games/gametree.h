@@ -54,6 +54,7 @@ protected:
   void BuildComputedValues() const override;
   void BuildConsistentPlays();
   void ClearComputedValues() const;
+  void MakeReducedStrategies() const;
 
   /// Removes the node from the information set, invalidating if emptied
   void RemoveMember(GameInfosetRep *, GameNodeRep *);
