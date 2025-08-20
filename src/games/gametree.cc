@@ -852,19 +852,21 @@ void GameTreeRep::MakeReducedStrategies() const
     }
 
     auto [action, node] = *current_iter;
-    if (!node->GetParent()->GetPlayer()->IsChance() &&
-        current_iter == node->GetParent()->GetActions().begin()) {
+    const auto player = node->GetParent()->GetPlayer();
+    const auto infoset = node->GetParent()->GetInfoset();
+    if (const auto parent = node->m_parent;
+        !player->IsChance() && current_iter == parent->GetActions().begin()) {
       // Update behaviors conditional on parent information set being reachable
-      auto behav = behaviors[node->GetParent()->GetPlayer()].begin();
-      while (behav != behaviors[node->GetParent()->GetPlayer()].end()) {
-        if (MatchesPartialHistory(*behav, history, node->GetParent()->GetInfoset())) {
-          auto act = node->GetParent()->GetInfoset()->GetActions().begin();
-          (*behav)[node->GetParent()->GetInfoset().get()] = *act;
+      auto behav = behaviors[player].begin();
+      while (behav != behaviors[player].end()) {
+        if (MatchesPartialHistory(*behav, history, infoset)) {
+          auto act = infoset->GetActions().begin();
+          (*behav)[infoset.get()] = *act;
           ++behav;
           ++act;
-          while (act != node->GetParent()->GetInfoset()->GetActions().end()) {
-            behaviors[node->GetParent()->GetPlayer()].insert(behav, *std::prev(behav));
-            (*std::prev(behav))[node->GetParent()->GetInfoset().get()] = *act;
+          while (act != infoset->GetActions().end()) {
+            behaviors[player].insert(behav, *std::prev(behav));
+            (*std::prev(behav))[infoset.get()] = *act;
             ++act;
           }
         }
