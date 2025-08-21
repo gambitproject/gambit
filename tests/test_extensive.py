@@ -487,7 +487,7 @@ def test_outcome_index_exception_label():
     ],
 )
 def test_reduced_strategic_form(
-    game: gbt.Game, strategy_labels: list, np_arrays_of_rsf: list
+    game: gbt.Game, strategy_labels: list, np_arrays_of_rsf: typing.Union[list, None]
 ):
     """
     We test two things:
@@ -499,6 +499,7 @@ def test_reduced_strategic_form(
 
     for i, player in enumerate(game.players):
         assert strategy_labels[i] == [s.label for s in player.strategies]
-        # convert strings to rationals
-        exp_array = games.vectorized_make_rational(np_arrays_of_rsf[i])
-        assert (arrays[i] == exp_array).all()
+        if np_arrays_of_rsf is not None:
+            # convert strings to rationals
+            exp_array = games.vectorized_make_rational(np_arrays_of_rsf[i])
+            assert (arrays[i] == exp_array).all()

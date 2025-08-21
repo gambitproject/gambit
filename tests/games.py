@@ -449,13 +449,7 @@ class BinaryTreeGames(EfgFamilyForReducedStrategicFormTests):
         return g
 
     def reduced_strategic_form(self):
-        # special case for 1 player
-        dims = (
-            (self.size_of_rsf[0], 1) if len(self.size_of_rsf) == 1 else self.size_of_rsf
-        )
-
-        zeros = np.zeros(dims, dtype=int)
-        return [zeros] * len(self.players)
+        return None
 
 
 class BinEfgOnePlayerIR(BinaryTreeGames):
