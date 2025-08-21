@@ -811,7 +811,8 @@ inline bool MatchesPartialHistory(const std::map<GameInfosetRep *, GameAction> &
     return false;
   }
   for (const auto &[infoset, action] : p_partialHistory) {
-    if (contains(p_behavior, infoset) && p_behavior.at(infoset) != action) {
+    if (auto match = p_behavior.find(infoset);
+        match != p_behavior.end() && match->second != action) {
       return false;
     }
   }
