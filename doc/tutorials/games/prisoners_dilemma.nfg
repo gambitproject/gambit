@@ -1,0 +1,14 @@
+NFG 1 R "Prisoner's Dilemma" { "Tom" "Jerry" }
+
+{ { "Cooperate" "Defect" }
+{ "Cooperate" "Defect" }
+}
+""
+
+{
+{ "" -1, -1 }
+{ "" 0, -3 }
+{ "" -3, 0 }
+{ "" -2, -2 }
+}
+1 2 3 4 
