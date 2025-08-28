@@ -1,0 +1,8 @@
+EFG 2 R "One-shot trust game, after Kreps (1990)" { "Buyer" "Seller" }
+""
+
+p "" 1 1 "" { "Trust" "Not trust" } 0
+p "Trust" 2 1 "" { "Honor" "Abuse" } 0
+t "Honor" 1 "Trustworthy" { 1, 1 }
+t "Abuse" 2 "Untrustworthy" { -1, 2 }
+t "Not trust" 3 "Opt-out" { 0, 0 }
