@@ -169,12 +169,12 @@ public:
   ~TracingCallbackFunction() = default;
 
   void AppendPoint(const Vector<double> &p_point);
-  const List<LogitQREMixedStrategyProfile> &GetProfiles() const { return m_profiles; }
+  const std::list<LogitQREMixedStrategyProfile> &GetProfiles() const { return m_profiles; }
 
 private:
   Game m_game;
   MixedStrategyObserverFunctionType m_observer;
-  List<LogitQREMixedStrategyProfile> m_profiles;
+  std::list<LogitQREMixedStrategyProfile> m_profiles;
 };
 
 void TracingCallbackFunction::AppendPoint(const Vector<double> &p_point)
@@ -225,7 +225,7 @@ void EstimatorCallbackFunction::EvaluatePoint(const Vector<double> &p_point)
 
 } // namespace
 
-List<LogitQREMixedStrategyProfile> LogitStrategySolve(const LogitQREMixedStrategyProfile &p_start,
+std::list<LogitQREMixedStrategyProfile> LogitStrategySolve(const LogitQREMixedStrategyProfile &p_start,
                                                       double p_regret, double p_omega,
                                                       double p_firstStep, double p_maxAccel,
                                                       MixedStrategyObserverFunctionType p_observer)

@@ -147,7 +147,7 @@ MixedStrategyProfile<double> EnforceNonnegativity(const MixedStrategyProfile<dou
 
 } // namespace
 
-List<MixedStrategyProfile<double>> LiapStrategySolve(const MixedStrategyProfile<double> &p_start,
+std::list<MixedStrategyProfile<double>> LiapStrategySolve(const MixedStrategyProfile<double> &p_start,
                                                      double p_maxregret, int p_maxitsN,
                                                      StrategyCallbackType<double> p_callback)
 {
@@ -156,7 +156,7 @@ List<MixedStrategyProfile<double>> LiapStrategySolve(const MixedStrategyProfile<
         "Computing equilibria of games with imperfect recall is not supported.");
   }
 
-  List<MixedStrategyProfile<double>> solutions;
+  std::list<MixedStrategyProfile<double>> solutions;
 
   MixedStrategyProfile<double> p(p_start);
   p_callback(p, "start");

@@ -84,7 +84,7 @@ using MixedStrategyObserverFunctionType =
 
 inline void NullMixedStrategyObserver(const LogitQREMixedStrategyProfile &) {}
 
-List<LogitQREMixedStrategyProfile>
+std::list<LogitQREMixedStrategyProfile>
 LogitStrategySolve(const LogitQREMixedStrategyProfile &p_start, double p_regret, double p_omega,
                    double p_firstStep, double p_maxAccel,
                    MixedStrategyObserverFunctionType p_observer = NullMixedStrategyObserver);
@@ -107,7 +107,7 @@ using MixedBehaviorObserverFunctionType =
 
 inline void NullMixedBehaviorObserver(const LogitQREMixedBehaviorProfile &) {}
 
-List<LogitQREMixedBehaviorProfile>
+std::list<LogitQREMixedBehaviorProfile>
 LogitBehaviorSolve(const LogitQREMixedBehaviorProfile &p_start, double p_regret, double p_omega,
                    double p_firstStep, double p_maxAccel,
                    MixedBehaviorObserverFunctionType p_observer = NullMixedBehaviorObserver);
