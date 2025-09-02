@@ -118,7 +118,7 @@ public:
   }
   ~NashLcpStrategySolver() = default;
 
-  List<MixedStrategyProfile<T>> Solve(const Game &) const;
+  std::list<MixedStrategyProfile<T>> Solve(const Game &) const;
 
 private:
   StrategyCallbackType<T> m_onEquilibrium;
@@ -133,7 +133,7 @@ private:
 template <class T> class NashLcpStrategySolver<T>::Solution {
 public:
   List<Gambit::linalg::BFS<T>> m_bfsList;
-  List<MixedStrategyProfile<T>> m_equilibria;
+  std::list<MixedStrategyProfile<T>> m_equilibria;
 
   bool Contains(const Gambit::linalg::BFS<T> &p_bfs) const { return contains(m_bfsList, p_bfs); }
   void push_back(const Gambit::linalg::BFS<T> &p_bfs) { m_bfsList.push_back(p_bfs); }
@@ -241,7 +241,7 @@ void NashLcpStrategySolver<T>::AllLemke(const Game &p_game, int j, linalg::LHTab
 }
 
 template <class T>
-List<MixedStrategyProfile<T>> NashLcpStrategySolver<T>::Solve(const Game &p_game) const
+std::list<MixedStrategyProfile<T>> NashLcpStrategySolver<T>::Solve(const Game &p_game) const
 {
   if (p_game->NumPlayers() != 2) {
     throw UndefinedException("Method only valid for two-player games.");
@@ -278,15 +278,16 @@ List<MixedStrategyProfile<T>> NashLcpStrategySolver<T>::Solve(const Game &p_game
 }
 
 template <class T>
-List<MixedStrategyProfile<T>> LcpStrategySolve(const Game &p_game, int p_stopAfter, int p_maxDepth,
-                                               StrategyCallbackType<T> p_onEquilibrium)
+std::list<MixedStrategyProfile<T>> LcpStrategySolve(const Game &p_game, int p_stopAfter,
+                                                    int p_maxDepth,
+                                                    StrategyCallbackType<T> p_onEquilibrium)
 {
   return NashLcpStrategySolver<T>(p_stopAfter, p_maxDepth, p_onEquilibrium).Solve(p_game);
 }
 
-template List<MixedStrategyProfile<double>> LcpStrategySolve(const Game &, int, int,
-                                                             StrategyCallbackType<double>);
-template List<MixedStrategyProfile<Rational>> LcpStrategySolve(const Game &, int, int,
-                                                               StrategyCallbackType<Rational>);
+template std::list<MixedStrategyProfile<double>> LcpStrategySolve(const Game &, int, int,
+                                                                  StrategyCallbackType<double>);
+template std::list<MixedStrategyProfile<Rational>>
+LcpStrategySolve(const Game &, int, int, StrategyCallbackType<Rational>);
 
 } // end namespace Gambit::Nash

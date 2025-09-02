@@ -30,7 +30,7 @@ using namespace Gambit::gametracer;
 
 namespace {
 
-List<MixedStrategyProfile<double>>
+std::list<MixedStrategyProfile<double>>
 Solve(const Game &p_game, const std::shared_ptr<gnmgame> &p_rep, const cvector &p_pert,
       double p_lambdaEnd, int p_steps, int p_localNewtonInterval, int p_localNewtonMaxits,
       std::function<void(const MixedStrategyProfile<double> &, const std::string &)> &p_callback)
@@ -48,7 +48,7 @@ Solve(const Game &p_game, const std::shared_ptr<gnmgame> &p_rep, const cvector &
   if (!nonzero) {
     throw UndefinedException("Perturbation vector must have at least one nonzero component.");
   }
-  List<MixedStrategyProfile<double>> eqa;
+  std::list<MixedStrategyProfile<double>> eqa;
   p_callback(ToProfile(p_game, p_pert), "pert");
   cvector norm_pert = p_pert / p_pert.norm();
   std::list<cvector> answers;
@@ -69,10 +69,10 @@ Solve(const Game &p_game, const std::shared_ptr<gnmgame> &p_rep, const cvector &
 
 namespace Gambit::Nash {
 
-List<MixedStrategyProfile<double>> GNMStrategySolve(const Game &p_game, double p_lambdaEnd,
-                                                    int p_steps, int p_localNewtonInterval,
-                                                    int p_localNewtonMaxits,
-                                                    StrategyCallbackType<double> p_callback)
+std::list<MixedStrategyProfile<double>> GNMStrategySolve(const Game &p_game, double p_lambdaEnd,
+                                                         int p_steps, int p_localNewtonInterval,
+                                                         int p_localNewtonMaxits,
+                                                         StrategyCallbackType<double> p_callback)
 {
   if (!p_game->IsPerfectRecall()) {
     throw UndefinedException(
@@ -92,11 +92,10 @@ List<MixedStrategyProfile<double>> GNMStrategySolve(const Game &p_game, double p
                p_localNewtonMaxits, p_callback);
 }
 
-List<MixedStrategyProfile<double>> GNMStrategySolve(const MixedStrategyProfile<double> &p_pert,
-                                                    double p_lambdaEnd, int p_steps,
-                                                    int p_localNewtonInterval,
-                                                    int p_localNewtonMaxits,
-                                                    StrategyCallbackType<double> p_callback)
+std::list<MixedStrategyProfile<double>>
+GNMStrategySolve(const MixedStrategyProfile<double> &p_pert, double p_lambdaEnd, int p_steps,
+                 int p_localNewtonInterval, int p_localNewtonMaxits,
+                 StrategyCallbackType<double> p_callback)
 {
   if (!p_pert.GetGame()->IsPerfectRecall()) {
     throw UndefinedException(

@@ -251,18 +251,18 @@ public:
   ~TracingCallbackFunction() = default;
 
   void AppendPoint(const Vector<double> &p_point);
-  const List<LogitQREMixedBehaviorProfile> &GetProfiles() const { return m_profiles; }
+  const std::list<LogitQREMixedBehaviorProfile> &GetProfiles() const { return m_profiles; }
 
 private:
   Game m_game;
   MixedBehaviorObserverFunctionType m_observer;
-  List<LogitQREMixedBehaviorProfile> m_profiles;
+  std::list<LogitQREMixedBehaviorProfile> m_profiles;
 };
 
 void TracingCallbackFunction::AppendPoint(const Vector<double> &p_point)
 {
   const MixedBehaviorProfile<double> profile(PointToProfile(m_game, p_point));
-  m_profiles.push_back(LogitQREMixedBehaviorProfile(profile, p_point.back(), 1.0));
+  m_profiles.emplace_back(profile, p_point.back(), 1.0);
   m_observer(m_profiles.back());
 }
 
@@ -308,10 +308,10 @@ void EstimatorCallbackFunction::EvaluatePoint(const Vector<double> &p_point)
 
 namespace Gambit {
 
-List<LogitQREMixedBehaviorProfile> LogitBehaviorSolve(const LogitQREMixedBehaviorProfile &p_start,
-                                                      double p_regret, double p_omega,
-                                                      double p_firstStep, double p_maxAccel,
-                                                      MixedBehaviorObserverFunctionType p_observer)
+std::list<LogitQREMixedBehaviorProfile>
+LogitBehaviorSolve(const LogitQREMixedBehaviorProfile &p_start, double p_regret, double p_omega,
+                   double p_firstStep, double p_maxAccel,
+                   MixedBehaviorObserverFunctionType p_observer)
 {
   PathTracer tracer;
   tracer.SetMaxDecel(p_maxAccel);

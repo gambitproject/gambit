@@ -39,12 +39,15 @@ public:
   ~EnumMixedStrategySolution() = default;
 
   const Game &GetGame() const { return m_game; }
-  const List<MixedStrategyProfile<T>> &GetExtremeEquilibria() const { return m_extremeEquilibria; }
+  const std::list<MixedStrategyProfile<T>> &GetExtremeEquilibria() const
+  {
+    return m_extremeEquilibria;
+  }
 
   List<List<MixedStrategyProfile<T>>> GetCliques() const;
 
   Game m_game;
-  List<MixedStrategyProfile<T>> m_extremeEquilibria;
+  std::list<MixedStrategyProfile<T>> m_extremeEquilibria;
 
   /// Representation of the graph connecting the extreme equilibria
   ///@{
@@ -64,7 +67,7 @@ EnumMixedStrategySolveDetailed(const Game &p_game,
                                StrategyCallbackType<T> p_onEquilibrium = NullStrategyCallback<T>);
 
 template <class T>
-List<MixedStrategyProfile<T>>
+std::list<MixedStrategyProfile<T>>
 EnumMixedStrategySolve(const Game &p_game,
                        StrategyCallbackType<T> p_onEquilibrium = NullStrategyCallback<T>)
 {

@@ -194,7 +194,7 @@ std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfil
 
 namespace Gambit::Nash {
 
-List<MixedBehaviorProfile<double>>
+std::list<MixedBehaviorProfile<double>>
 EnumPolyBehaviorSolve(const Game &p_game, int p_stopAfter, double p_maxregret,
                       EnumPolyMixedBehaviorObserverFunctionType p_onEquilibrium,
                       EnumPolyBehaviorSupportObserverFunctionType p_onSupport)
@@ -204,7 +204,7 @@ EnumPolyBehaviorSolve(const Game &p_game, int p_stopAfter, double p_maxregret,
     p_maxregret *= scale;
   }
 
-  List<MixedBehaviorProfile<double>> ret;
+  std::list<MixedBehaviorProfile<double>> ret;
   auto possible_supports = PossibleNashBehaviorSupports(p_game);
 
   for (auto support : possible_supports->m_supports) {

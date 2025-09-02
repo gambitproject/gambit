@@ -78,8 +78,9 @@ public:
   }
   ~NashSimpdivStrategySolver() = default;
 
-  List<MixedStrategyProfile<Rational>> Solve(const MixedStrategyProfile<Rational> &p_start) const;
-  List<MixedStrategyProfile<Rational>> Solve(const Game &p_game) const;
+  std::list<MixedStrategyProfile<Rational>>
+  Solve(const MixedStrategyProfile<Rational> &p_start) const;
+  std::list<MixedStrategyProfile<Rational>> Solve(const Game &p_game) const;
 
 private:
   int m_gridResize, m_leashLength;
@@ -528,7 +529,7 @@ inline Integer find_lcd(const Vector<Rational> &vec)
   return lcd;
 }
 
-List<MixedStrategyProfile<Rational>>
+std::list<MixedStrategyProfile<Rational>>
 NashSimpdivStrategySolver::Solve(const MixedStrategyProfile<Rational> &p_start) const
 {
   if (!p_start.GetGame()->IsPerfectRecall()) {
@@ -551,7 +552,7 @@ NashSimpdivStrategySolver::Solve(const MixedStrategyProfile<Rational> &p_start) 
   }
 
   m_onEquilibrium(y, "NE");
-  List<MixedStrategyProfile<Rational>> sol;
+  std::list<MixedStrategyProfile<Rational>> sol;
   sol.push_back(y);
   return sol;
 }
@@ -568,7 +569,8 @@ NashSimpdivStrategySolver::Solve(const MixedStrategyProfile<Rational> &p_start) 
 /// to a long initial search before reaching a candidate neighborhood
 /// for an equilibrium.
 ///
-List<MixedStrategyProfile<Rational>> NashSimpdivStrategySolver::Solve(const Game &p_game) const
+std::list<MixedStrategyProfile<Rational>>
+NashSimpdivStrategySolver::Solve(const Game &p_game) const
 {
   MixedStrategyProfile<Rational> start = p_game->NewMixedStrategyProfile(Rational(0));
   start = Rational(0);
@@ -578,7 +580,7 @@ List<MixedStrategyProfile<Rational>> NashSimpdivStrategySolver::Solve(const Game
   return Solve(start);
 }
 
-List<MixedStrategyProfile<Rational>>
+std::list<MixedStrategyProfile<Rational>>
 SimpdivStrategySolve(const MixedStrategyProfile<Rational> &p_start, const Rational &p_maxregret,
                      int p_gridResize, int p_leashLength,
                      StrategyCallbackType<Rational> p_onEquilibrium)
