@@ -27,11 +27,11 @@
 
 namespace Gambit::Nash {
 
-List<MixedStrategyProfile<double>>
+std::list<MixedStrategyProfile<double>>
 IPAStrategySolve(const Game &p_game,
                  StrategyCallbackType<double> p_callback = NullStrategyCallback<double>);
 
-List<MixedStrategyProfile<double>>
+std::list<MixedStrategyProfile<double>>
 IPAStrategySolve(const MixedStrategyProfile<double> &p_pert,
                  StrategyCallbackType<double> p_callback = NullStrategyCallback<double>);
 
