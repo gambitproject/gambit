@@ -28,7 +28,7 @@
 namespace Gambit::Nash {
 
 template <class T>
-List<MixedStrategyProfile<T>>
+std::list<MixedStrategyProfile<T>>
 LpStrategySolve(const Game &p_game,
                 StrategyCallbackType<T> p_onEquilibrium = NullStrategyCallback<T>);
 

@@ -32,7 +32,7 @@ namespace Gambit::Nash {
 /// mixed strategy solutions to general finite n-person games.  It is based on
 /// van Der Laan, Talman and van Der Heyden, Math of Oper Res, 1987.
 ///
-List<MixedStrategyProfile<Rational>> SimpdivStrategySolve(
+std::list<MixedStrategyProfile<Rational>> SimpdivStrategySolve(
     const MixedStrategyProfile<Rational> &p_start,
     const Rational &p_maxregret = Rational(1, 1000000), int p_gridResize = 2,
     int p_leashLength = 0,

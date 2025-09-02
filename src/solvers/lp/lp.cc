@@ -211,7 +211,7 @@ template std::list<MixedBehaviorProfile<Rational>> LpBehaviorSolve(const Game &,
                                                               BehaviorCallbackType<Rational>);
 
 template <class T>
-List<MixedStrategyProfile<T>> LpStrategySolve(const Game &p_game,
+std::list<MixedStrategyProfile<T>> LpStrategySolve(const Game &p_game,
                                               StrategyCallbackType<T> p_onEquilibrium)
 {
   if (p_game->NumPlayers() != 2) {
@@ -264,14 +264,14 @@ List<MixedStrategyProfile<T>> LpStrategySolve(const Game &p_game,
     eqm[p_game->GetPlayer(2)->GetStrategy(j)] = dual[j];
   }
   p_onEquilibrium(eqm, "NE");
-  List<MixedStrategyProfile<T>> solution;
+  std::list<MixedStrategyProfile<T>> solution;
   solution.push_back(eqm);
   return solution;
 }
 
-template List<MixedStrategyProfile<double>> LpStrategySolve(const Game &,
+template std::list<MixedStrategyProfile<double>> LpStrategySolve(const Game &,
                                                             StrategyCallbackType<double>);
-template List<MixedStrategyProfile<Rational>> LpStrategySolve(const Game &,
+template std::list<MixedStrategyProfile<Rational>> LpStrategySolve(const Game &,
                                                               StrategyCallbackType<Rational>);
 
 } // end namespace Gambit::Nash
