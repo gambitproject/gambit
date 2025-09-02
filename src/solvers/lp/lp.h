@@ -33,7 +33,7 @@ LpStrategySolve(const Game &p_game,
                 StrategyCallbackType<T> p_onEquilibrium = NullStrategyCallback<T>);
 
 template <class T>
-List<MixedBehaviorProfile<T>>
+std::list<MixedBehaviorProfile<T>>
 LpBehaviorSolve(const Game &p_game,
                 BehaviorCallbackType<T> p_onEquilibrium = NullBehaviorCallback<T>);
 

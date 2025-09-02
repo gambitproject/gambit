@@ -33,7 +33,7 @@ LcpStrategySolve(const Game &p_game, int p_stopAfter, int p_maxDepth,
                  StrategyCallbackType<T> p_onEquilibrium = NullStrategyCallback<T>);
 
 template <class T>
-List<MixedBehaviorProfile<T>>
+std::list<MixedBehaviorProfile<T>>
 LcpBehaviorSolve(const Game &p_game, int p_stopAfter, int p_maxDepth,
                  BehaviorCallbackType<T> p_onEquilibrium = NullBehaviorCallback<T>);
 

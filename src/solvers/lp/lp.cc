@@ -162,7 +162,7 @@ void SolveLP(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c, int neq
 }
 
 template <class T>
-List<MixedBehaviorProfile<T>> LpBehaviorSolve(const Game &p_game,
+std::list<MixedBehaviorProfile<T>> LpBehaviorSolve(const Game &p_game,
                                               BehaviorCallbackType<T> p_onEquilibrium)
 {
   if (p_game->NumPlayers() != 2) {
@@ -195,7 +195,7 @@ List<MixedBehaviorProfile<T>> LpBehaviorSolve(const Game &p_game,
   c[data.ns2 + 1] = static_cast<T>(-1);
 
   Array<T> primal(A.NumColumns()), dual(A.NumRows());
-  List<MixedBehaviorProfile<T>> solution;
+  std::list<MixedBehaviorProfile<T>> solution;
   SolveLP(A, b, c, p_game->GetPlayer(2)->GetInfosets().size() + 1, primal, dual);
   MixedBehaviorProfile<T> profile(p_game);
   data.GetBehavior(profile, primal, dual, p_game->GetRoot(), 1, 1);
@@ -205,9 +205,9 @@ List<MixedBehaviorProfile<T>> LpBehaviorSolve(const Game &p_game,
   return solution;
 }
 
-template List<MixedBehaviorProfile<double>> LpBehaviorSolve(const Game &,
+template std::list<MixedBehaviorProfile<double>> LpBehaviorSolve(const Game &,
                                                             BehaviorCallbackType<double>);
-template List<MixedBehaviorProfile<Rational>> LpBehaviorSolve(const Game &,
+template std::list<MixedBehaviorProfile<Rational>> LpBehaviorSolve(const Game &,
                                                               BehaviorCallbackType<Rational>);
 
 template <class T>
