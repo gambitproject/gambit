@@ -37,7 +37,7 @@ List<MixedBehaviorProfile<double>> LogitBehaviorSolveWrapper(const Game &p_game,
   return ret;
 }
 
-inline List<LogitQREMixedBehaviorProfile> LogitBehaviorPrincipalBranchWrapper(const Game &p_game,
+inline std::list<LogitQREMixedBehaviorProfile> LogitBehaviorPrincipalBranchWrapper(const Game &p_game,
                                                                               double p_regret,
                                                                               double p_firstStep,
                                                                               double p_maxAccel)
@@ -77,7 +77,7 @@ List<MixedStrategyProfile<double>> LogitStrategySolveWrapper(const Game &p_game,
   return ret;
 }
 
-inline List<LogitQREMixedStrategyProfile> LogitStrategyPrincipalBranchWrapper(const Game &p_game,
+inline std::list<LogitQREMixedStrategyProfile> LogitStrategyPrincipalBranchWrapper(const Game &p_game,
                                                                               double p_regret,
                                                                               double p_firstStep,
                                                                               double p_maxAccel)
