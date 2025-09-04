@@ -28,6 +28,10 @@ extensions = [
     "sphinx_design",
 ]
 
+# IPython directive configuration
+ipython_execlines = ['import pygambit as gbt', 'import os', 'import sys']
+ipython_savefig_dir = 'savefig'
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 
@@ -100,7 +104,35 @@ html_theme = "pydata_sphinx_theme"
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-# html_theme_options = {}
+html_theme_options = {
+    "external_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/gambitproject/gambit"
+        },
+        {
+            "name": "Releases",
+            "url": "https://github.com/gambitproject/gambit/releases"
+        },
+        {
+            "name": "Older releases",
+            "url": "https://sourceforge.net/projects/gambit/files/"
+        },
+        {
+            "name": "Cite Gambit",
+            "url": "https://www.gambit-project.org/cite/"
+        }
+    ],
+    "navbar_end": ["theme-switcher", "navbar-icon-links"],
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/gambitproject/gambit",
+            "icon": "fab fa-github-square",
+            "type": "fontawesome",
+        }
+    ],
+}
 
 # Add any paths that contain custom themes here, relative to this directory.
 # html_theme_path = []

@@ -2,7 +2,15 @@ name: Build executables
 
 on:
   push:
+    paths-ignore:
+      - 'doc/**'
+      - '.github/ISSUE_TEMPLATE/**'
+      - 'README.md'
   pull_request:
+    paths-ignore:
+      - 'doc/**'
+      - '.github/ISSUE_TEMPLATE/**'
+      - 'README.md'
 
 jobs:
   linux:

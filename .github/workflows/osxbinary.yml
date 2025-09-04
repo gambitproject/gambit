@@ -2,6 +2,10 @@ name: MacOS static GUI binary
 
 on:
   push:
+    paths-ignore:
+      - 'doc/**'
+      - '.github/ISSUE_TEMPLATE/**'
+      - 'README.md'
     tags:
       - 'v*'
   schedule:
