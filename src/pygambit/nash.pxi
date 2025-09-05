@@ -23,8 +23,6 @@ import cython
 from libcpp.memory cimport shared_ptr, make_shared
 from cython.operator cimport dereference as deref
 from libcpp.list cimport list as stdlist
-from libcpp.vector cimport vector as stdvector
-from cython.operator cimport dereference as deref, preincrement as inc
 
 
 import typing
@@ -37,19 +35,12 @@ def _convert_mspd(
     return [MixedStrategyProfileDouble.wrap(copyitem_list_mspd(inlist, i+1))
             for i in range(inlist.size())]
 
-
 @cython.cfunc
 def _std_convert_mspd(
         inlist: stdlist[c_MixedStrategyProfile[float]]
 ) -> typing.List[MixedStrategyProfile[double]]:
-    outlist = []
-    cdef shared_ptr[c_MixedStrategyProfile[double]] pointer
-    cdef stdlist[c_MixedStrategyProfile[double]].iterator it = inlist.begin()
-    while it != inlist.end():
-        pointer = make_shared[c_MixedStrategyProfile[double]](deref(it))
-        outlist.append(MixedStrategyProfileDouble.wrap(pointer))
-        inc(it)
-    return outlist
+    return [MixedStrategyProfileDouble.wrap(profile)
+            for profile in make_list_of_pointer(inlist)]
 
 
 @cython.cfunc
@@ -64,14 +55,8 @@ def _convert_mspr(
 def _std_convert_mspr(
         inlist: stdlist[c_MixedStrategyProfile[c_Rational]]
 ) -> typing.List[MixedStrategyProfile[c_Rational]]:
-    outlist = []
-    cdef shared_ptr[c_MixedStrategyProfile[c_Rational]] pointer
-    cdef stdlist[c_MixedStrategyProfile[c_Rational]].iterator it = inlist.begin()
-    while it != inlist.end():
-        pointer = make_shared[c_MixedStrategyProfile[c_Rational]](deref(it))
-        outlist.append(MixedStrategyProfileRational.wrap(pointer))
-        inc(it)
-    return outlist
+    return [MixedStrategyProfileRational.wrap(profile)
+            for profile in make_list_of_pointer(inlist)]
 
 
 @cython.cfunc
@@ -86,14 +71,8 @@ def _convert_mbpd(
 def _std_convert_mbpd(
         inlist: stdlist[c_MixedBehaviorProfile[float]]
 ) -> typing.List[MixedBehaviorProfile[double]]:
-    outlist = []
-    cdef shared_ptr[c_MixedBehaviorProfile[double]] pointer
-    cdef stdlist[c_MixedBehaviorProfile[double]].iterator it = inlist.begin()
-    while it != inlist.end():
-        pointer = make_shared[c_MixedBehaviorProfile[double]](deref(it))
-        outlist.append(MixedBehaviorProfileDouble.wrap(pointer))
-        inc(it)
-    return outlist
+    return [MixedBehaviorProfileDouble.wrap(profile)
+            for profile in make_list_of_pointer(inlist)]
 
 
 @cython.cfunc
@@ -108,14 +87,8 @@ def _convert_mbpr(
 def _std_convert_mbpr(
         inlist: stdlist[c_MixedBehaviorProfile[c_Rational]]
 ) -> typing.List[MixedBehaviorProfile[c_Rational]]:
-    outlist = []
-    cdef shared_ptr[c_MixedBehaviorProfile[c_Rational]] pointer
-    cdef stdlist[c_MixedBehaviorProfile[c_Rational]].iterator it = inlist.begin()
-    while it != inlist.end():
-        pointer = make_shared[c_MixedBehaviorProfile[c_Rational]](deref(it))
-        outlist.append(MixedBehaviorProfileRational.wrap(pointer))
-        inc(it)
-    return outlist
+    return [MixedBehaviorProfileRational.wrap(profile)
+            for profile in make_list_of_pointer(inlist)]
 
 
 def _enumpure_strategy_solve(game: Game) -> typing.List[MixedStrategyProfile[c_Rational]]:
