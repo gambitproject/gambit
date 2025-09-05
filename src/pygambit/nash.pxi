@@ -24,6 +24,7 @@ from libcpp.memory cimport shared_ptr, make_shared
 from cython.operator cimport dereference as deref
 from libcpp.list cimport list as stdlist
 from libcpp.vector cimport vector as stdvector
+from cython.operator cimport dereference as deref, preincrement as inc
 
 
 import typing
@@ -41,13 +42,13 @@ def _convert_mspd(
 def _std_convert_mspd(
         inlist: stdlist[c_MixedStrategyProfile[float]]
 ) -> typing.List[MixedStrategyProfile[double]]:
-    cdef stdvector[c_MixedStrategyProfile[float]] vector
-    vector =  stdvector[c_MixedStrategyProfile[float]](inlist.begin(), inlist.end())
     outlist = []
     cdef shared_ptr[c_MixedStrategyProfile[double]] pointer
-    for i in range(vector.size()):
-        pointer = make_shared[c_MixedStrategyProfile[double]](vector[i])
+    cdef stdlist[c_MixedStrategyProfile[double]].iterator it = inlist.begin()
+    while it != inlist.end():
+        pointer = make_shared[c_MixedStrategyProfile[double]](deref(it))
         outlist.append(MixedStrategyProfileDouble.wrap(pointer))
+        inc(it)
     return outlist
 
 
@@ -63,13 +64,13 @@ def _convert_mspr(
 def _std_convert_mspr(
         inlist: stdlist[c_MixedStrategyProfile[c_Rational]]
 ) -> typing.List[MixedStrategyProfile[c_Rational]]:
-    cdef stdvector[c_MixedStrategyProfile[c_Rational]] vector
-    vector =  stdvector[c_MixedStrategyProfile[c_Rational]](inlist.begin(), inlist.end())
     outlist = []
     cdef shared_ptr[c_MixedStrategyProfile[c_Rational]] pointer
-    for i in range(vector.size()):
-        pointer = make_shared[c_MixedStrategyProfile[c_Rational]](vector[i])
+    cdef stdlist[c_MixedStrategyProfile[c_Rational]].iterator it = inlist.begin()
+    while it != inlist.end():
+        pointer = make_shared[c_MixedStrategyProfile[c_Rational]](deref(it))
         outlist.append(MixedStrategyProfileRational.wrap(pointer))
+        inc(it)
     return outlist
 
 
@@ -85,13 +86,13 @@ def _convert_mbpd(
 def _std_convert_mbpd(
         inlist: stdlist[c_MixedBehaviorProfile[float]]
 ) -> typing.List[MixedBehaviorProfile[double]]:
-    cdef stdvector[c_MixedBehaviorProfile[float]] vector
-    vector =  stdvector[c_MixedBehaviorProfile[float]](inlist.begin(), inlist.end())
     outlist = []
     cdef shared_ptr[c_MixedBehaviorProfile[double]] pointer
-    for i in range(vector.size()):
-        pointer = make_shared[c_MixedBehaviorProfile[double]](vector[i])
+    cdef stdlist[c_MixedBehaviorProfile[double]].iterator it = inlist.begin()
+    while it != inlist.end():
+        pointer = make_shared[c_MixedBehaviorProfile[double]](deref(it))
         outlist.append(MixedBehaviorProfileDouble.wrap(pointer))
+        inc(it)
     return outlist
 
 
@@ -107,13 +108,13 @@ def _convert_mbpr(
 def _std_convert_mbpr(
         inlist: stdlist[c_MixedBehaviorProfile[c_Rational]]
 ) -> typing.List[MixedBehaviorProfile[c_Rational]]:
-    cdef stdvector[c_MixedBehaviorProfile[c_Rational]] vector
-    vector =  stdvector[c_MixedBehaviorProfile[c_Rational]](inlist.begin(), inlist.end())
     outlist = []
     cdef shared_ptr[c_MixedBehaviorProfile[c_Rational]] pointer
-    for i in range(vector.size()):
-        pointer = make_shared[c_MixedBehaviorProfile[c_Rational]](vector[i])
+    cdef stdlist[c_MixedBehaviorProfile[c_Rational]].iterator it = inlist.begin()
+    while it != inlist.end():
+        pointer = make_shared[c_MixedBehaviorProfile[c_Rational]](deref(it))
         outlist.append(MixedBehaviorProfileRational.wrap(pointer))
+        inc(it)
     return outlist
 
 
