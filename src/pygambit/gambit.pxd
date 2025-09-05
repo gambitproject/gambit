@@ -551,10 +551,10 @@ cdef extern from "solvers/logit/logit.h":
 
 
 cdef extern from "nash.h":
-    c_List[c_MixedBehaviorProfile[double]] LogitBehaviorSolveWrapper(
+    stdlist[c_MixedBehaviorProfile[double]] LogitBehaviorSolveWrapper(
             c_Game, double, double, double
     ) except +
-    c_List[c_LogitQREMixedBehaviorProfile] LogitBehaviorPrincipalBranchWrapper(
+    stdlist[c_LogitQREMixedBehaviorProfile] LogitBehaviorPrincipalBranchWrapper(
             c_Game, double, double, double
     ) except +
     stdlist[shared_ptr[c_LogitQREMixedBehaviorProfile]] LogitBehaviorAtLambdaWrapper(
@@ -563,10 +563,10 @@ cdef extern from "nash.h":
     shared_ptr[c_LogitQREMixedBehaviorProfile] LogitBehaviorEstimateWrapper(
             shared_ptr[c_MixedBehaviorProfile[double]], bool, double, double
     ) except +
-    c_List[c_MixedStrategyProfile[double]] LogitStrategySolveWrapper(
+    stdlist[c_MixedStrategyProfile[double]] LogitStrategySolveWrapper(
             c_Game, double, double, double
     ) except +
-    c_List[c_LogitQREMixedStrategyProfile] LogitStrategyPrincipalBranchWrapper(
+    stdlist[c_LogitQREMixedStrategyProfile] LogitStrategyPrincipalBranchWrapper(
             c_Game, double, double, double
     ) except +
     stdlist[shared_ptr[c_LogitQREMixedStrategyProfile]] LogitStrategyAtLambdaWrapper(

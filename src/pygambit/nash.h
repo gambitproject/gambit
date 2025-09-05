@@ -26,10 +26,10 @@
 using namespace std;
 using namespace Gambit;
 
-List<MixedBehaviorProfile<double>> LogitBehaviorSolveWrapper(const Game &p_game, double p_regret,
+std::list<MixedBehaviorProfile<double>> LogitBehaviorSolveWrapper(const Game &p_game, double p_regret,
                                                              double p_firstStep, double p_maxAccel)
 {
-  List<MixedBehaviorProfile<double>> ret;
+  std::list<MixedBehaviorProfile<double>> ret;
   ret.push_back(LogitBehaviorSolve(LogitQREMixedBehaviorProfile(p_game), p_regret, 1.0,
                                    p_firstStep, p_maxAccel)
                     .back()
@@ -66,10 +66,10 @@ LogitBehaviorAtLambdaWrapper(const Game &p_game, const std::list<double> &p_targ
   return ret;
 }
 
-List<MixedStrategyProfile<double>> LogitStrategySolveWrapper(const Game &p_game, double p_regret,
+std::list<MixedStrategyProfile<double>> LogitStrategySolveWrapper(const Game &p_game, double p_regret,
                                                              double p_firstStep, double p_maxAccel)
 {
-  List<MixedStrategyProfile<double>> ret;
+  std::list<MixedStrategyProfile<double>> ret;
   ret.push_back(LogitStrategySolve(LogitQREMixedStrategyProfile(p_game), p_regret, 1.0,
                                    p_firstStep, p_maxAccel)
                     .back()

@@ -23,6 +23,7 @@ import cython
 from libcpp.memory cimport shared_ptr, make_shared
 from cython.operator cimport dereference as deref
 from libcpp.list cimport list as stdlist
+from cython.operator cimport dereference as deref, preincrement as inc
 
 
 import typing
@@ -222,13 +223,13 @@ def _enumpoly_behavior_solve(
 def _logit_strategy_solve(
         game: Game, maxregret: float, first_step: float, max_accel: float,
 ) -> typing.List[MixedStrategyProfileDouble]:
-    return _convert_mspd(LogitStrategySolveWrapper(game.game, maxregret, first_step, max_accel))
+    return _std_convert_mspd(LogitStrategySolveWrapper(game.game, maxregret, first_step, max_accel))
 
 
 def _logit_behavior_solve(
         game: Game, maxregret: float, first_step: float, max_accel: float,
 ) -> typing.List[MixedBehaviorProfileDouble]:
-    return _convert_mbpd(LogitBehaviorSolveWrapper(game.game, maxregret, first_step, max_accel))
+    return _std_convert_mbpd(LogitBehaviorSolveWrapper(game.game, maxregret, first_step, max_accel))
 
 
 @cython.cclass
@@ -311,8 +312,12 @@ def _logit_strategy_branch(game: Game,
                            first_step: float,
                            max_accel: float):
     solns = LogitStrategyPrincipalBranchWrapper(game.game, maxregret, first_step, max_accel)
-    return [LogitQREMixedStrategyProfile.wrap(copyitem_list_qrem(solns, i+1))
-            for i in range(solns.size())]
+    return [LogitQREMixedStrategyProfile.wrap(profile)
+                for profile in make_list_of_pointer(solns)]
+
+    # Above replaces following code:
+    # return [LogitQREMixedStrategyProfile.wrap(copyitem_list_qrem(solns, i+1))
+            # for i in range(solns.size())]
 
 
 @cython.cclass
@@ -398,8 +403,16 @@ def _logit_behavior_branch(game: Game,
                            max_accel: float):
     solns = LogitBehaviorPrincipalBranchWrapper(game.game, maxregret, first_step, max_accel)
     ret = []
-    for i in range(solns.size()):
+    for profile_ptr in make_list_of_pointer(solns):
         p = LogitQREMixedBehaviorProfile()
-        p.thisptr = copyitem_list_qreb(solns, i+1)
+        p.thisptr = profile_ptr
         ret.append(p)
     return ret
+
+
+# Above replaces following code
+    # for i in range(solns.size()):
+        # p = LogitQREMixedBehaviorProfile()
+        # p.thisptr = copyitem_list_qreb(solns, i+1)
+        # ret.append(p)
+    # return ret
