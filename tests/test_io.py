@@ -89,3 +89,27 @@ def test_read_write_nfg():
     deserialized_nfg_game = gbt.read_nfg(io.BytesIO(serialized_nfg_game.encode()))
     double_serialized_nfg_game = deserialized_nfg_game.to_nfg()
     assert serialized_nfg_game == double_serialized_nfg_game
+
+
+def test_print_mixed_strategy_profile():
+    game_path = os.path.join("tests", "test_games", "mixed_behavior_game.efg")
+    test_game = gbt.read_efg(game_path)
+    text_string = "\n".join(["Player 1 1 0.5",
+                             "         2 0.5",
+                             "Player 2 1 0.5",
+                             "         2 0.5",
+                             "Player 3 1 0.5",
+                             "         2 0.5"])
+    assert repr(test_game.mixed_strategy_profile()) == text_string
+
+
+def test_print_mixed_behavior_profile():
+    game_path = os.path.join("tests", "test_games", "mixed_behavior_game.efg")
+    test_game = gbt.read_efg(game_path)
+    text_string = "\n".join(["Player 1 Infoset 1:1 U1 0.5",
+                             "                     D1 0.5",
+                             "Player 2 Infoset 2:1 U2 0.5",
+                             "                     D2 0.5",
+                             "Player 3 Infoset 3:1 U3 0.5",
+                             "                     D3 0.5"])
+    assert repr(test_game.mixed_behavior_profile()) == text_string
