@@ -15,7 +15,7 @@ To install the package, use the following command::
    pip install pygambit
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    tutorials/tutorials
    pygambit.user
