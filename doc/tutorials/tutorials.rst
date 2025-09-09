@@ -11,3 +11,12 @@ Tutorial 4 assumes some familiarity with Game Theory terminology and concepts in
 - Nash equilibria
 - Mixed strategies
 - Simplex representations of available strategies
+
+.. toctree::
+   :maxdepth: 2
+
+   01_quickstart
+   02_extensive_form
+   03_poker
+   04_starting_points
+   05_quantal_response
