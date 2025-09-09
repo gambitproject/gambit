@@ -22,6 +22,8 @@ When reporting a bug, please be sure to include the following:
   sample game file or files if appropriate; it is often helpful to
   simplify the game if possible.
 
+.. _contributing-code:
+
 Contributing code
 ----------------
 
@@ -78,9 +80,9 @@ Editing this documentation
 
 5. Open ``doc/_build/html/index.html`` in your browser to view the documentation.
 
-6. Make any changes you want to the `.rst` files in the ``doc`` directory and rebuld the documentation to check your changes.
+6. Make any changes you want to the `.rst` files in the ``doc`` directory and rebuild the documentation to check your changes.
 
-7. Follow the usual GitHub workflow to commit your changes and push them to the repository.
+7. Follow the usual GitHub workflow (see :ref:`contributing-code` above) to commit your changes and push them to the repository.
 
 8. Core developers will review your changes and merge to the master branch, which automatically deploys the documentation via the ReadTheDocs service.
 
