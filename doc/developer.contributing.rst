@@ -67,21 +67,21 @@ Editing this documentation
     python -m venv docenv
     source docenv/bin/activate
 
-3. Install the requirements and make the docs: ::
+3. `Install Pandoc <https://pandoc.org/installing.html>`_ for your OS
+
+4. Install the requirements and make the docs: ::
 
     pip install .
     cd doc
     pip install -r requirements.txt
     make html  # or make livehtml for live server with auto-rebuild
 
-4. Open ``doc/_build/html/index.html`` in your browser to view the documentation.
+5. Open ``doc/_build/html/index.html`` in your browser to view the documentation.
 
-5. Make any changes you want to the `.rst` files in the ``doc`` directory and rebuld the documentation to check your changes.
+6. Make any changes you want to the `.rst` files in the ``doc`` directory and rebuld the documentation to check your changes.
 
-6. Follow the usual GitHub workflow to commit your changes and push them to the repository.
+7. Follow the usual GitHub workflow to commit your changes and push them to the repository.
 
-7. Core developers will review your changes and merge to the master branch, which automatically deploys the documentation via the ReadTheDocs service.
+8. Core developers will review your changes and merge to the master branch, which automatically deploys the documentation via the ReadTheDocs service.
 
-.. TODO: Add instructions for the GitHub workflow during contributor docs refactoring.
-   See https://github.com/gambitproject/gambit/issues/541
 
