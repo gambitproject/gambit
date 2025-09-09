@@ -470,45 +470,45 @@ cdef extern from "util.h":
 
 
 cdef extern from "solvers/enumpure/enumpure.h":
-    c_List[c_MixedStrategyProfile[c_Rational]] EnumPureStrategySolve(c_Game) except +RuntimeError
-    c_List[c_MixedBehaviorProfile[c_Rational]] EnumPureAgentSolve(c_Game) except +RuntimeError
+    stdlist[c_MixedStrategyProfile[c_Rational]] EnumPureStrategySolve(c_Game) except +RuntimeError
+    stdlist[c_MixedBehaviorProfile[c_Rational]] EnumPureAgentSolve(c_Game) except +RuntimeError
 
 cdef extern from "solvers/enummixed/enummixed.h":
-    c_List[c_MixedStrategyProfile[T]] EnumMixedStrategySolve[T](c_Game) except +RuntimeError
+    stdlist[c_MixedStrategyProfile[T]] EnumMixedStrategySolve[T](c_Game) except +RuntimeError
 
 cdef extern from "solvers/lcp/lcp.h":
-    c_List[c_MixedStrategyProfile[T]] LcpStrategySolve[T](
+    stdlist[c_MixedStrategyProfile[T]] LcpStrategySolve[T](
             c_Game, int p_stopAfter, int p_maxDepth
     ) except +RuntimeError
-    c_List[c_MixedBehaviorProfile[T]] LcpBehaviorSolve[T](
+    stdlist[c_MixedBehaviorProfile[T]] LcpBehaviorSolve[T](
             c_Game, int p_stopAfter, int p_maxDepth
     ) except +RuntimeError
 
 cdef extern from "solvers/lp/lp.h":
-    c_List[c_MixedStrategyProfile[T]] LpStrategySolve[T](c_Game) except +RuntimeError
-    c_List[c_MixedBehaviorProfile[T]] LpBehaviorSolve[T](c_Game) except +RuntimeError
+    stdlist[c_MixedStrategyProfile[T]] LpStrategySolve[T](c_Game) except +RuntimeError
+    stdlist[c_MixedBehaviorProfile[T]] LpBehaviorSolve[T](c_Game) except +RuntimeError
 
 cdef extern from "solvers/liap/liap.h":
-    c_List[c_MixedStrategyProfile[double]] LiapStrategySolve(
+    stdlist[c_MixedStrategyProfile[double]] LiapStrategySolve(
             c_MixedStrategyProfile[double], double p_maxregret, int p_maxitsN
     ) except +RuntimeError
-    c_List[c_MixedBehaviorProfile[double]] LiapBehaviorSolve(
+    stdlist[c_MixedBehaviorProfile[double]] LiapBehaviorSolve(
             c_MixedBehaviorProfile[double], double p_maxregret, int p_maxitsN
     ) except +RuntimeError
 
 cdef extern from "solvers/simpdiv/simpdiv.h":
-    c_List[c_MixedStrategyProfile[c_Rational]] SimpdivStrategySolve(
+    stdlist[c_MixedStrategyProfile[c_Rational]] SimpdivStrategySolve(
             c_MixedStrategyProfile[c_Rational] start, c_Rational p_maxregret, int p_gridResize,
             int p_leashLength
     ) except +RuntimeError
 
 cdef extern from "solvers/ipa/ipa.h":
-    c_List[c_MixedStrategyProfile[double]] IPAStrategySolve(
+    stdlist[c_MixedStrategyProfile[double]] IPAStrategySolve(
             c_MixedStrategyProfile[double]
     ) except +RuntimeError
 
 cdef extern from "solvers/gnm/gnm.h":
-    c_List[c_MixedStrategyProfile[double]] GNMStrategySolve(
+    stdlist[c_MixedStrategyProfile[double]] GNMStrategySolve(
             c_MixedStrategyProfile[double], double p_endLambda, int p_steps,
             int p_localNewtonInterval, int p_localNewtonMaxits
     ) except +RuntimeError
@@ -521,10 +521,10 @@ cdef extern from "solvers/nashsupport/nashsupport.h":
     ) except +RuntimeError
 
 cdef extern from "solvers/enumpoly/enumpoly.h":
-    c_List[c_MixedStrategyProfile[double]] EnumPolyStrategySolve(
+    stdlist[c_MixedStrategyProfile[double]] EnumPolyStrategySolve(
             c_Game, int, float
     ) except +RuntimeError
-    c_List[c_MixedBehaviorProfile[double]] EnumPolyBehaviorSolve(
+    stdlist[c_MixedBehaviorProfile[double]] EnumPolyBehaviorSolve(
             c_Game, int, float
     ) except +RuntimeError
 
@@ -551,10 +551,10 @@ cdef extern from "solvers/logit/logit.h":
 
 
 cdef extern from "nash.h":
-    c_List[c_MixedBehaviorProfile[double]] LogitBehaviorSolveWrapper(
+    stdlist[c_MixedBehaviorProfile[double]] LogitBehaviorSolveWrapper(
             c_Game, double, double, double
     ) except +
-    c_List[c_LogitQREMixedBehaviorProfile] LogitBehaviorPrincipalBranchWrapper(
+    stdlist[c_LogitQREMixedBehaviorProfile] LogitBehaviorPrincipalBranchWrapper(
             c_Game, double, double, double
     ) except +
     stdlist[shared_ptr[c_LogitQREMixedBehaviorProfile]] LogitBehaviorAtLambdaWrapper(
@@ -563,10 +563,10 @@ cdef extern from "nash.h":
     shared_ptr[c_LogitQREMixedBehaviorProfile] LogitBehaviorEstimateWrapper(
             shared_ptr[c_MixedBehaviorProfile[double]], bool, double, double
     ) except +
-    c_List[c_MixedStrategyProfile[double]] LogitStrategySolveWrapper(
+    stdlist[c_MixedStrategyProfile[double]] LogitStrategySolveWrapper(
             c_Game, double, double, double
     ) except +
-    c_List[c_LogitQREMixedStrategyProfile] LogitStrategyPrincipalBranchWrapper(
+    stdlist[c_LogitQREMixedStrategyProfile] LogitStrategyPrincipalBranchWrapper(
             c_Game, double, double, double
     ) except +
     stdlist[shared_ptr[c_LogitQREMixedStrategyProfile]] LogitStrategyAtLambdaWrapper(

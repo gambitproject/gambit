@@ -22,6 +22,7 @@
 import cython
 from libcpp.memory cimport shared_ptr, make_shared
 from cython.operator cimport dereference as deref
+from libcpp.list cimport list as stdlist
 
 
 import typing
@@ -29,34 +30,34 @@ import typing
 
 @cython.cfunc
 def _convert_mspd(
-        inlist: c_List[c_MixedStrategyProfile[float]]
+        inlist: stdlist[c_MixedStrategyProfile[float]]
 ) -> typing.List[MixedStrategyProfile[double]]:
-    return [MixedStrategyProfileDouble.wrap(copyitem_list_mspd(inlist, i+1))
-            for i in range(inlist.size())]
+    return [MixedStrategyProfileDouble.wrap(profile)
+            for profile in make_list_of_pointer(inlist)]
 
 
 @cython.cfunc
 def _convert_mspr(
-        inlist: c_List[c_MixedStrategyProfile[c_Rational]]
+        inlist: stdlist[c_MixedStrategyProfile[c_Rational]]
 ) -> typing.List[MixedStrategyProfile[c_Rational]]:
-    return [MixedStrategyProfileRational.wrap(copyitem_list_mspr(inlist, i+1))
-            for i in range(inlist.size())]
+    return [MixedStrategyProfileRational.wrap(profile)
+            for profile in make_list_of_pointer(inlist)]
 
 
 @cython.cfunc
 def _convert_mbpd(
-        inlist: c_List[c_MixedBehaviorProfile[float]]
+        inlist: stdlist[c_MixedBehaviorProfile[float]]
 ) -> typing.List[MixedBehaviorProfile[double]]:
-    return [MixedBehaviorProfileDouble.wrap(copyitem_list_mbpd(inlist, i+1))
-            for i in range(inlist.size())]
+    return [MixedBehaviorProfileDouble.wrap(profile)
+            for profile in make_list_of_pointer(inlist)]
 
 
 @cython.cfunc
 def _convert_mbpr(
-        inlist: c_List[c_MixedBehaviorProfile[c_Rational]]
+        inlist: stdlist[c_MixedBehaviorProfile[c_Rational]]
 ) -> typing.List[MixedBehaviorProfile[c_Rational]]:
-    return [MixedBehaviorProfileRational.wrap(copyitem_list_mbpr(inlist, i+1))
-            for i in range(inlist.size())]
+    return [MixedBehaviorProfileRational.wrap(profile)
+            for profile in make_list_of_pointer(inlist)]
 
 
 def _enumpure_strategy_solve(game: Game) -> typing.List[MixedStrategyProfile[c_Rational]]:
@@ -279,8 +280,7 @@ def _logit_strategy_branch(game: Game,
                            first_step: float,
                            max_accel: float):
     solns = LogitStrategyPrincipalBranchWrapper(game.game, maxregret, first_step, max_accel)
-    return [LogitQREMixedStrategyProfile.wrap(copyitem_list_qrem(solns, i+1))
-            for i in range(solns.size())]
+    return [LogitQREMixedStrategyProfile.wrap(profile) for profile in make_list_of_pointer(solns)]
 
 
 @cython.cclass
@@ -366,8 +366,8 @@ def _logit_behavior_branch(game: Game,
                            max_accel: float):
     solns = LogitBehaviorPrincipalBranchWrapper(game.game, maxregret, first_step, max_accel)
     ret = []
-    for i in range(solns.size()):
+    for profile_ptr in make_list_of_pointer(solns):
         p = LogitQREMixedBehaviorProfile()
-        p.thisptr = copyitem_list_qreb(solns, i+1)
+        p.thisptr = profile_ptr
         ret.append(p)
     return ret
