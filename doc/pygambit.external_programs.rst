@@ -1,29 +1,5 @@
-.. _pygambit-user:
-
-User guide
-----------
-
-Available Nash equilibria algorithms
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Interfaces to algorithms for computing Nash equilibria are provided in :py:mod:`pygambit.nash`.
-
-==========================================    ========================================
-Method                                        Python function
-==========================================    ========================================
-:ref:`gambit-enumpure <gambit-enumpure>`      :py:func:`pygambit.nash.enumpure_solve`
-:ref:`gambit-enummixed <gambit-enummixed>`    :py:func:`pygambit.nash.enummixed_solve`
-:ref:`gambit-lp <gambit-lp>`                  :py:func:`pygambit.nash.lp_solve`
-:ref:`gambit-lcp <gambit-lcp>`                :py:func:`pygambit.nash.lcp_solve`
-:ref:`gambit-liap <gambit-liap>`              :py:func:`pygambit.nash.liap_solve`
-:ref:`gambit-logit <gambit-logit>`            :py:func:`pygambit.nash.logit_solve`
-:ref:`gambit-simpdiv <gambit-simpdiv>`        :py:func:`pygambit.nash.simpdiv_solve`
-:ref:`gambit-ipa <gambit-ipa>`                :py:func:`pygambit.nash.ipa_solve`
-:ref:`gambit-gnm <gambit-gnm>`                :py:func:`pygambit.nash.gnm_solve`
-==========================================    ========================================
-
 Using external programs to compute Nash equilibria
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+==================================================
 
 Because the problem of finding Nash equilibria can be expressed in various
 mathematical formulations (see [McKMcL96]_), it is helpful to make use
