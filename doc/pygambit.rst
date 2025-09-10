@@ -9,8 +9,6 @@ Gambit provides a Python package, ``pygambit``, which is available on `PyPI
 
    pip install pygambit
 
-Tutorials
----------
 
 The goal of these tutorials is to introduce users to the Gambit API and its capabilities for analyzing and solving Game Theory games.
 
