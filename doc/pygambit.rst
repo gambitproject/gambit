@@ -15,8 +15,9 @@ These tutorials are available to be run interactively as Jupyter notebooks, see 
 
 Tutorials **1-3** assume no prior knowledge of Game Theory or the Gambit API and provide detailed explanations of the concepts and code used.
 
-Tutorials **4-6** demonstrate more advanced topics and do not re-explain the fundamentals of the Gambit API.
+Tutorials **4-5** demonstrate more advanced topics and do not re-explain the fundamentals of the Gambit API.
 They also assume some familiarity with Game Theory terminology and concepts including:
+
 - Nash equilibria
 - Pure and mixed strategies
 - Simplex representations of available strategies
