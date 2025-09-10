@@ -10,26 +10,27 @@ Gambit provides a Python package, ``pygambit``, which is available on `PyPI
    pip install pygambit
 
 
-The goal of these tutorials is to introduce users to the Gambit API and its capabilities for analyzing and solving Game Theory games.
+For newcomers to Gambit, we recommend reading through the PyGambit tutorials, which demonstrate the API's key capabilities for analyzing and solving Game Theory games.
+These tutorials are available to be run interactively as Jupyter notebooks, see :ref:`local_tutorials`.
 
-Tutorials 1-3 assume no prior knowledge of Game Theory or the Gambit API and provide detailed explanations of the concepts and code used.
+Tutorials **1-3** assume no prior knowledge of Game Theory or the Gambit API and provide detailed explanations of the concepts and code used.
 
-Tutorials 4-6 follow from tutorials 1-3 and do not re-explain the fundamentals of the Gambit API.
-
-Tutorial 4 assumes some familiarity with Game Theory terminology and concepts including:
+Tutorials **4-6** demonstrate more advanced topics and do not re-explain the fundamentals of the Gambit API.
+They also assume some familiarity with Game Theory terminology and concepts including:
 - Nash equilibria
-- Mixed strategies
+- Pure and mixed strategies
 - Simplex representations of available strategies
+- Logit quantal response equilibrium (LQRE) correspondence
 
 .. toctree::
    :maxdepth: 2
 
-   tutorials/running_locally
    tutorials/01_quickstart
    tutorials/02_extensive_form
    tutorials/03_poker
    tutorials/04_starting_points
    tutorials/05_quantal_response
+   tutorials/running_locally
    pygambit.external_programs
 
 
