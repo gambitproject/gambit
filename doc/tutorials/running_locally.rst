@@ -1,5 +1,5 @@
 .. _local_tutorials:
 
-Running the tutorials locally
-=============================
+How to run PyGambit tutorials on your computer
+==============================================
 
