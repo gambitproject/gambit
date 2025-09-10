@@ -34,13 +34,6 @@ Tutorial 4 assumes some familiarity with Game Theory terminology and concepts in
    tutorials/05_quantal_response
    pygambit.external_programs
 
-User guide
-----------
-
-.. toctree::
-   :maxdepth: 2
-
-   pygambit.user
 
 API documentation
 ----------------
