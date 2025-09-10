@@ -59,17 +59,17 @@ The project is hosted on GitHub, and contributions can be made via pull requests
 Editing this documentation
 --------------------------
 
-1. If you haven't already, clone the Gambit repository from GitHub: ::
+1. `Install Pandoc <https://pandoc.org/installing.html>`_ for your OS
+
+2. If you haven't already, clone the Gambit repository from GitHub: ::
 
     git clone https://github.com/gambitproject/gambit.git
     cd gambit
 
-2. Either install the docs requirements into your existing PyGambit development environment, or create a new virtual environment and install both the requirements and PyGambit there. For example, you can use `venv` to create a new environment: ::
+3. Either install the docs requirements into your existing PyGambit development environment, or create a new virtual environment and install both the requirements and PyGambit there. For example, you can use `venv` to create a new environment: ::
 
     python -m venv docenv
     source docenv/bin/activate
-
-3. `Install Pandoc <https://pandoc.org/installing.html>`_ for your OS
 
 4. Install the requirements and make the docs: ::
 
