@@ -74,16 +74,16 @@ class TestExtensiveDisplay(unittest.TestCase):
         players = [p.label for p in self.simple_game.players]
         color_map = create_player_color_map(players)
         
-        G, edge_colors, node_mapping = build_game_graph(self.simple_game, color_map)
+        G, node_colors, node_mapping = build_game_graph(self.simple_game, color_map)
         
         # Check graph properties
         self.assertIsInstance(G, nx.DiGraph)
         self.assertEqual(len(G.nodes), 3)  # Root + 2 children
         self.assertEqual(len(G.edges), 2)  # 2 edges from root
         
-        # Check edge colors
-        self.assertEqual(len(edge_colors), 2)
-        self.assertIsInstance(edge_colors[0], tuple)
+        # Check node colors
+        self.assertEqual(len(node_colors), 3)  # One color per node
+        self.assertIsInstance(node_colors[0], tuple)
         
         # Check node mapping - use the first node ID from the mapping
         self.assertEqual(len(node_mapping), 3)
@@ -96,14 +96,15 @@ class TestExtensiveDisplay(unittest.TestCase):
         players = [p.label for p in self.trust_game.players]
         color_map = create_player_color_map(players)
         
-        G, edge_colors, node_mapping = build_game_graph(self.trust_game, color_map)
+        G, node_colors, node_mapping = build_game_graph(self.trust_game, color_map)
         
         # Check graph properties for trust game structure
         self.assertIsInstance(G, nx.DiGraph)
         self.assertGreater(len(G.nodes), 3)  # Should have multiple nodes
         self.assertGreater(len(G.edges), 2)  # Should have multiple edges
         
-        # Check that all nodes are mapped
+        # Check that all nodes have colors and are mapped
+        self.assertEqual(len(node_colors), len(G.nodes))
         for node_id in G.nodes:
             self.assertIn(node_id, node_mapping)
 
@@ -216,16 +217,60 @@ class TestExtensiveDisplay(unittest.TestCase):
         
         players = [p.label for p in minimal_game.players]
         color_map = create_player_color_map(players)
-        G, edge_colors, node_mapping = build_game_graph(minimal_game, color_map)
+        G, node_colors, node_mapping = build_game_graph(minimal_game, color_map)
         
         # Should have one node, no edges
         self.assertEqual(len(G.nodes), 1)
         self.assertEqual(len(G.edges), 0)
-        self.assertEqual(len(edge_colors), 0)
+        self.assertEqual(len(node_colors), 1)  # One node color for the root
         
         # Should still create labels
         labels = create_node_labels(G, node_mapping, minimal_game)
         self.assertEqual(len(labels), 1)
+
+    def test_node_coloring_by_player(self):
+        """Test that nodes are properly colored based on their controlling player."""
+        # Create a more complex game to test node coloring
+        game = gbt.Game.new_tree(players=["Alice", "Bob"], title="Node Coloring Test")
+        
+        # Add some moves to create a meaningful tree structure
+        root = game.root
+        game.append_move(root, player="Alice", actions=["A1", "A2"])
+        alice_a1 = root.children[0]
+        game.append_move(alice_a1, player="Bob", actions=["B1", "B2"])
+        
+        # Add outcomes to terminal nodes
+        outcome1 = game.add_outcome(payoffs=[2, 1], label="Outcome1")
+        outcome2 = game.add_outcome(payoffs=[1, 2], label="Outcome2")
+        outcome3 = game.add_outcome(payoffs=[0, 0], label="Outcome3")
+        game.set_outcome(alice_a1.children[0], outcome1)
+        game.set_outcome(alice_a1.children[1], outcome2) 
+        game.set_outcome(root.children[1], outcome3)
+        
+        # Create color map and build graph
+        players = [p.label for p in game.players]
+        color_map = create_player_color_map(players)
+        G, node_colors, node_mapping = build_game_graph(game, color_map)
+        
+        # Verify we have colors for all nodes
+        self.assertEqual(len(node_colors), len(G.nodes))
+        
+        # Check that nodes are colored based on their controlling player
+        for node_id, color in enumerate(node_colors):
+            if node_id in node_mapping:
+                node = node_mapping[node_id]
+                if node.infoset is not None:
+                    # Decision node - should have player's color
+                    player_label = node.infoset.player.label
+                    expected_color = color_map[player_label]
+                    self.assertEqual(color, expected_color, 
+                                   f"Node {node_id} controlled by {player_label} should have "
+                                   f"color {expected_color}")
+                else:
+                    # Terminal or root node - should have neutral light gray color
+                    expected_color = (0.9, 0.9, 0.9, 1.0)
+                    self.assertEqual(color, expected_color,
+                                   f"Terminal/root node {node_id} should have neutral gray color")
 
 
 if __name__ == '__main__':

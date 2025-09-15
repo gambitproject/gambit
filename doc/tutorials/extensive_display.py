@@ -40,11 +40,11 @@ def build_game_graph(game: Any, player_colors: dict[str, tuple[float, float, flo
     Returns:
         Tuple containing:
         - NetworkX DiGraph representing the game tree
-        - List of edge colors corresponding to players who made moves
+        - List of node colors corresponding to players who control each node
         - Dictionary mapping node IDs to PyGambit node objects
     """
     G = nx.DiGraph()
-    edge_colors = []
+    node_colors = []
     node_mapping = {}  # Map node_id to actual node object
     node_counter = 0  # Use counter instead of object ID for stability
 
@@ -57,12 +57,18 @@ def build_game_graph(game: Any, player_colors: dict[str, tuple[float, float, flo
         # Always add the node to the graph
         G.add_node(current_counter)
         node_mapping[current_counter] = node
+        
+        # Assign node color based on the player who controls this node
+        if node.player:
+            player_label = node.player.label
+            node_colors.append(player_colors.get(player_label, (0.7, 0.7, 0.7, 1.0)))
+        else:
+            # Terminal nodes or root nodes get a neutral color
+            node_colors.append((0.9, 0.9, 0.9, 1.0))  # Light gray
 
         if parent is not None and parent_counter is not None:
-            # Color edge based on the player who made the move leading to this node
-            player_label = parent.player.label if parent.player else "chance"
-            G.add_edge(parent_counter, current_counter, label=action_label, player=player_label)
-            edge_colors.append(player_colors.get(player_label, (0, 0, 0, 1)))
+            # Add edge without color information (edges will be black)
+            G.add_edge(parent_counter, current_counter, label=action_label, player=parent.player.label if parent.player else "chance")
 
         for child in node.children:
             add_edges(child, node, child.label, current_counter)
@@ -72,7 +78,7 @@ def build_game_graph(game: Any, player_colors: dict[str, tuple[float, float, flo
     # Always add the root node, even if it has no children
     add_edges(game.root)
     
-    return G, edge_colors, node_mapping
+    return G, node_colors, node_mapping
 
 
 def compute_graph_layout(G: nx.DiGraph) -> dict[int, tuple[float, float]]:
@@ -162,7 +168,7 @@ def plot_gambit_tree(game: Any,
     player_colors = create_player_color_map(players)
     
     # Build the graph
-    G, edge_colors, node_mapping = build_game_graph(game, player_colors)
+    G, node_colors, node_mapping = build_game_graph(game, player_colors)
     
     # If graph is empty (no nodes), nothing to plot
     if len(G.nodes) == 0:
@@ -180,8 +186,8 @@ def plot_gambit_tree(game: Any,
         with_labels=False,
         arrows=True,
         node_size=node_size,
-        edge_color=edge_colors,
-        node_color="lightblue",
+        edge_color="black",
+        node_color=node_colors,
         arrowsize=20,
         width=2,
     )
