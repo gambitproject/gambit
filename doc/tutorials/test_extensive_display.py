@@ -66,8 +66,8 @@ class TestExtensiveDisplay(unittest.TestCase):
                 self.assertGreaterEqual(component, 0.0)
                 self.assertLessEqual(component, 1.0)
         
-        # Check that chance is gray
-        self.assertEqual(color_map["chance"], (0.5, 0.5, 0.5, 1.0))
+        # Check that chance is red
+        self.assertEqual(color_map["chance"], (1.0, 0.0, 0.0, 1.0))
 
     def test_build_game_graph_simple(self):
         """Test graph building with simple game."""
@@ -267,12 +267,66 @@ class TestExtensiveDisplay(unittest.TestCase):
                                    f"Node {node_id} controlled by {player_label} should have "
                                    f"color {expected_color}")
                 else:
-                    # Terminal or root node - should have neutral light gray color
-                    expected_color = (0.9, 0.9, 0.9, 1.0)
-                    self.assertEqual(color, expected_color,
-                                   f"Terminal/root node {node_id} should have neutral gray color")
+                    # Terminal nodes should be transparent (invisible)
+                    node = node_mapping[node_id]
+                    if node.outcome is not None:
+                        # Terminal node - should be transparent
+                        expected_color = (0.0, 0.0, 0.0, 0.0)
+                        self.assertEqual(color, expected_color,
+                                       f"Terminal node {node_id} should be transparent")
+                    else:
+                        # Root or other non-decision nodes - should have neutral light gray color
+                        expected_color = (0.9, 0.9, 0.9, 1.0)
+                        self.assertEqual(color, expected_color,
+                                       f"Root/other node {node_id} should have neutral gray color")
+
+    def test_chance_and_terminal_node_coloring(self):
+        """Test that chance nodes are red and terminal nodes are transparent."""
+        # Create a game with chance nodes
+        game = gbt.Game.new_tree(players=["Alice"], title="Chance Test Game")
+        
+        # Add a chance move first
+        root = game.root
+        game.append_move(root, player=game.players.chance, actions=["C1", "C2"])
+        
+        # Add Alice moves after chance
+        alice_node_1 = root.children[0] 
+        game.append_move(alice_node_1, player="Alice", actions=["A1", "A2"])
+        
+        # Add outcomes to terminal nodes
+        outcome1 = game.add_outcome(payoffs=[3], label="Win")
+        outcome2 = game.add_outcome(payoffs=[1], label="Lose") 
+        outcome3 = game.add_outcome(payoffs=[2], label="Draw")
+        
+        game.set_outcome(alice_node_1.children[0], outcome1)
+        game.set_outcome(alice_node_1.children[1], outcome2)
+        game.set_outcome(root.children[1], outcome3)
+        
+        # Test the coloring
+        players = [p.label for p in game.players if p != game.players.chance]
+        color_map = create_player_color_map(players)
+        G, node_colors, node_mapping = build_game_graph(game, color_map)
+        
+        # Define expected colors
+        chance_color = (1.0, 0.0, 0.0, 1.0)  # Red
+        terminal_color = (0.0, 0.0, 0.0, 0.0)  # Transparent
+        alice_color = color_map["Alice"]
+        
+        # Verify each node has the correct color
+        for i, color in enumerate(node_colors):
+            if i in node_mapping:
+                node = node_mapping[i]
+                if hasattr(node.player, "is_chance") and node.player.is_chance:
+                    self.assertEqual(color, chance_color, 
+                                   f"Chance node {i} should be red")
+                elif node.outcome is not None:
+                    self.assertEqual(color, terminal_color, 
+                                   f"Terminal node {i} should be transparent")
+                elif node.player and node.player.label == "Alice":
+                    self.assertEqual(color, alice_color, 
+                                   f"Alice node {i} should have Alice's color")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Run the tests
     unittest.main()

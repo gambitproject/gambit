@@ -25,7 +25,7 @@ def create_player_color_map(players: list[str]) -> dict[str, tuple[float, float,
     """
     color_map = plt.colormaps.get_cmap("tab10")
     player_colors = {p: color_map(i) for i, p in enumerate(players)}
-    player_colors["chance"] = (0.5, 0.5, 0.5, 1.0)  # gray for chance
+    player_colors["chance"] = (1.0, 0.0, 0.0, 1.0)  # red for chance
     return player_colors
 
 
@@ -61,9 +61,16 @@ def build_game_graph(game: Any, player_colors: dict[str, tuple[float, float, flo
         # Assign node color based on the player who controls this node
         if node.player:
             player_label = node.player.label
-            node_colors.append(player_colors.get(player_label, (0.7, 0.7, 0.7, 1.0)))
+            # Special handling for chance player
+            if hasattr(node.player, "is_chance") and node.player.is_chance:
+                node_colors.append(player_colors.get("chance", (1.0, 0.0, 0.0, 1.0)))
+            else:
+                node_colors.append(player_colors.get(player_label, (0.7, 0.7, 0.7, 1.0)))
+        elif node.outcome is not None:
+            # Terminal nodes should be invisible (transparent)
+            node_colors.append((0.0, 0.0, 0.0, 0.0))  # Fully transparent
         else:
-            # Terminal nodes or root nodes get a neutral color
+            # Root or other nodes get a neutral color
             node_colors.append((0.9, 0.9, 0.9, 1.0))  # Light gray
 
         if parent is not None and parent_counter is not None:
