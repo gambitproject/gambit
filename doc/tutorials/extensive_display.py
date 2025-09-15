@@ -141,7 +141,7 @@ def create_legend_elements(players: list[str], player_colors: dict[str, tuple[fl
 
 
 def plot_gambit_tree(game: Any, 
-                    figsize: tuple[int, int] = (12, 8),
+                    figsize: tuple[int, int] = (6, 6),
                     node_size: int = 500,
                     font_size: int = 8,
                     edge_font_size: int = 10,
