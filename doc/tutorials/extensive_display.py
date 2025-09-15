@@ -78,7 +78,7 @@ def build_game_graph(game: Any, player_colors: dict[str, tuple[float, float, flo
             G.add_edge(parent_counter, current_counter, label=action_label, player=parent.player.label if parent.player else "chance")
 
         for child in node.children:
-            add_edges(child, node, child.label, current_counter)
+            add_edges(child, node, child.prior_action.label, current_counter)
             
         return current_counter
 
