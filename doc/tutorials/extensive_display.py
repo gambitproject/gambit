@@ -75,27 +75,18 @@ def build_game_graph(game: Any, player_colors: dict[str, tuple[float, float, flo
     return G, edge_colors, node_mapping
 
 
-def compute_graph_layout(G: nx.DiGraph, layout_method: str = "graphviz") -> dict[int, tuple[float, float]]:
+def compute_graph_layout(G: nx.DiGraph) -> dict[int, tuple[float, float]]:
     """
     Compute node positions for the graph layout.
     
     Args:
         G: NetworkX DiGraph
-        layout_method: Layout method to use ("graphviz" or "spring")
         
     Returns:
         Dictionary mapping node IDs to (x, y) position tuples
     """
-    if layout_method == "graphviz":
-        try:
-            pos = nx.nx_agraph.graphviz_layout(G, prog="dot")
-            print("Graphviz layout succeeded")
-            return pos
-        except Exception:
-            print("Graphviz layout failed, falling back to spring layout")
-            
-    # Fallback to spring layout
-    return nx.spring_layout(G, k=2, iterations=50)
+    pos = nx.nx_agraph.graphviz_layout(G, prog="dot")
+    return pos
 
 
 def create_node_labels(G: nx.DiGraph, node_mapping: dict[int, Any], game: Any) -> dict[int, str]:
@@ -151,7 +142,6 @@ def create_legend_elements(players: list[str], player_colors: dict[str, tuple[fl
 
 def plot_gambit_tree(game: Any, 
                     figsize: tuple[int, int] = (12, 8),
-                    layout_method: str = "graphviz",
                     node_size: int = 500,
                     font_size: int = 8,
                     edge_font_size: int = 10,
@@ -162,7 +152,6 @@ def plot_gambit_tree(game: Any,
     Args:
         game: PyGambit Game object to visualize
         figsize: Figure size as (width, height) tuple
-        layout_method: Layout algorithm to use ("graphviz" or "spring")
         node_size: Size of nodes in the graph
         font_size: Font size for node labels
         edge_font_size: Font size for edge labels
@@ -181,8 +170,8 @@ def plot_gambit_tree(game: Any,
         return
     
     # Compute layout
-    pos = compute_graph_layout(G, layout_method)
-    
+    pos = compute_graph_layout(G)
+
     # Create the plot
     plt.figure(figsize=figsize)
     nx.draw(

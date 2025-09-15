@@ -107,9 +107,9 @@ class TestExtensiveDisplay(unittest.TestCase):
         for node_id in G.nodes:
             self.assertIn(node_id, node_mapping)
 
-    @patch('extensive_display.nx.nx_agraph.graphviz_layout')
+    @patch("extensive_display.nx.nx_agraph.graphviz_layout")
     def test_compute_graph_layout_graphviz_success(self, mock_graphviz):
-        """Test graph layout computation with successful graphviz."""
+        """Test graph layout computation with graphviz."""
         # Create test graph
         G = nx.DiGraph()
         G.add_edges_from([(1, 2), (2, 3)])
@@ -118,44 +118,10 @@ class TestExtensiveDisplay(unittest.TestCase):
         mock_positions = {1: (0, 0), 2: (1, 1), 3: (2, 2)}
         mock_graphviz.return_value = mock_positions
         
-        with patch('builtins.print') as mock_print:
-            result = compute_graph_layout(G, "graphviz")
-            
-        self.assertEqual(result, mock_positions)
-        mock_print.assert_called_with("Graphviz layout succeeded")
-
-    @patch('extensive_display.nx.nx_agraph.graphviz_layout')
-    @patch('extensive_display.nx.spring_layout')
-    def test_compute_graph_layout_graphviz_fallback(self, mock_spring, mock_graphviz):
-        """Test graph layout computation with graphviz fallback."""
-        # Create test graph
-        G = nx.DiGraph()
-        G.add_edges_from([(1, 2), (2, 3)])
-        
-        # Mock failed graphviz layout
-        mock_graphviz.side_effect = Exception("Graphviz failed")
-        mock_spring_positions = {1: (0, 0), 2: (1, 1), 3: (2, 2)}
-        mock_spring.return_value = mock_spring_positions
-        
-        with patch('builtins.print') as mock_print:
-            result = compute_graph_layout(G, "graphviz")
-            
-        self.assertEqual(result, mock_spring_positions)
-        mock_print.assert_called_with("Graphviz layout failed, falling back to spring layout")
-
-    @patch('extensive_display.nx.spring_layout')
-    def test_compute_graph_layout_spring(self, mock_spring):
-        """Test graph layout computation with spring layout."""
-        G = nx.DiGraph()
-        G.add_edges_from([(1, 2), (2, 3)])
-        
-        mock_positions = {1: (0, 0), 2: (1, 1), 3: (2, 2)}
-        mock_spring.return_value = mock_positions
-        
-        result = compute_graph_layout(G, "spring")
+        result = compute_graph_layout(G)
         
         self.assertEqual(result, mock_positions)
-        mock_spring.assert_called_once_with(G, k=2, iterations=50)
+        mock_graphviz.assert_called_once_with(G, prog="dot")
 
     def test_create_node_labels_simple(self):
         """Test node label creation with simple game."""
@@ -220,7 +186,7 @@ class TestExtensiveDisplay(unittest.TestCase):
     def test_plot_gambit_tree_integration(self, mock_figure, mock_show):
         """Test full plotting function integration."""
         # Test with simple game - disable edge labels to avoid drawing issues
-        plot_gambit_tree(self.simple_game, figsize=(10, 6), layout_method="spring", show_edge_labels=False)
+        plot_gambit_tree(self.simple_game, figsize=(10, 6), show_edge_labels=False)
         
         # Just verify that the plot functions were called, not specific arguments
         mock_figure.assert_called()
@@ -232,8 +198,7 @@ class TestExtensiveDisplay(unittest.TestCase):
         """Test plotting function with trust game."""
         plot_gambit_tree(
             self.trust_game, 
-            figsize=(14, 10), 
-            layout_method="spring",  # Use spring to avoid graphviz edge label issues
+            figsize=(14, 10),
             node_size=600,
             font_size=10,
             edge_font_size=12,
