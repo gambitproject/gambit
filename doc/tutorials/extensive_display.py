@@ -122,8 +122,11 @@ def create_node_labels(G: nx.DiGraph, node_mapping: dict[int, Any], game: Any) -
             payoffs = [str(node.outcome[player]) for player in game.players]
             node_labels[node_id] = f"{node.outcome.label}\n({', '.join(payoffs)})"
         elif node.player:
-            # Decision node - show player name
-            node_labels[node_id] = node.player.label
+            # Decision node - show information set
+            if node.player.is_chance:
+                node_labels[node_id] = f"Chance: IS {node.infoset.number}"
+            else:
+                node_labels[node_id] = f"{node.player.label}: IS {node.infoset.number}"
         else:
             # Root or other node
             node_labels[node_id] = "Root"
