@@ -74,7 +74,7 @@ class TestExtensiveDisplay(unittest.TestCase):
         players = [p.label for p in self.simple_game.players]
         color_map = create_player_color_map(players)
         
-        G, node_colors, node_mapping = build_game_graph(self.simple_game, color_map)
+        G, node_colors, node_mapping, _ = build_game_graph(self.simple_game, color_map)
         
         # Check graph properties
         self.assertIsInstance(G, nx.DiGraph)
@@ -96,7 +96,7 @@ class TestExtensiveDisplay(unittest.TestCase):
         players = [p.label for p in self.trust_game.players]
         color_map = create_player_color_map(players)
         
-        G, node_colors, node_mapping = build_game_graph(self.trust_game, color_map)
+        G, node_colors, node_mapping, _ = build_game_graph(self.trust_game, color_map)
         
         # Check graph properties for trust game structure
         self.assertIsInstance(G, nx.DiGraph)
@@ -128,15 +128,21 @@ class TestExtensiveDisplay(unittest.TestCase):
         """Test node label creation with simple game."""
         players = [p.label for p in self.simple_game.players]
         color_map = create_player_color_map(players)
-        G, _, node_mapping = build_game_graph(self.simple_game, color_map)
-        
+        G, node_colors, node_mapping, _ = build_game_graph(self.simple_game, color_map)
+
         labels = create_node_labels(G, node_mapping, self.simple_game)
-        
+
         # Check that all nodes have labels
         self.assertEqual(len(labels), len(G.nodes))
+
+        # Check label content - root should be at counter 0 and should show information set
+        self.assertTrue(labels[0].startswith("Player1"))
+        self.assertIn("IS", labels[0])  # Should contain information set information
         
-        # Check label content - root should be at counter 0
-        self.assertEqual(labels[0], "Player1")
+        # Check that terminal nodes have outcome information
+        terminal_labels = [label for label in labels.values() if "Outcome" in label]
+        self.assertGreater(len(terminal_labels), 0, 
+                          "Should have outcome labels for terminal nodes")
         
         # Check terminal node labels contain outcomes
         for node_id, label in labels.items():
@@ -217,7 +223,7 @@ class TestExtensiveDisplay(unittest.TestCase):
         
         players = [p.label for p in minimal_game.players]
         color_map = create_player_color_map(players)
-        G, node_colors, node_mapping = build_game_graph(minimal_game, color_map)
+        G, node_colors, node_mapping, _ = build_game_graph(minimal_game, color_map)
         
         # Should have one node, no edges
         self.assertEqual(len(G.nodes), 1)
@@ -250,7 +256,7 @@ class TestExtensiveDisplay(unittest.TestCase):
         # Create color map and build graph
         players = [p.label for p in game.players]
         color_map = create_player_color_map(players)
-        G, node_colors, node_mapping = build_game_graph(game, color_map)
+        G, node_colors, node_mapping, _ = build_game_graph(game, color_map)
         
         # Verify we have colors for all nodes
         self.assertEqual(len(node_colors), len(G.nodes))
@@ -305,7 +311,7 @@ class TestExtensiveDisplay(unittest.TestCase):
         # Test the coloring
         players = [p.label for p in game.players if p != game.players.chance]
         color_map = create_player_color_map(players)
-        G, node_colors, node_mapping = build_game_graph(game, color_map)
+        G, node_colors, node_mapping, _ = build_game_graph(game, color_map)
         
         # Define expected colors
         chance_color = (1.0, 0.0, 0.0, 1.0)  # Red
@@ -325,6 +331,21 @@ class TestExtensiveDisplay(unittest.TestCase):
                 elif node.player and node.player.label == "Alice":
                     self.assertEqual(color, alice_color, 
                                    f"Alice node {i} should have Alice's color")
+
+    def test_infoset_mapping_basic(self):
+        """Test that information set mapping is returned and has correct structure."""
+        game = self.trust_game  # Use the trust game which likely has information sets
+        players = [p.label for p in game.players]
+        color_map = create_player_color_map(players)
+        G, node_colors, node_mapping, infoset_mapping = build_game_graph(game, color_map)
+        
+        # Check that infoset_mapping is returned and is a dictionary
+        self.assertIsInstance(infoset_mapping, dict)
+        
+        # Check that all values in infoset_mapping are lists
+        for _, node_list in infoset_mapping.items():
+            self.assertIsInstance(node_list, list)
+            self.assertGreater(len(node_list), 0)
 
 
 if __name__ == "__main__":

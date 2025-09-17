@@ -29,7 +29,7 @@ def create_player_color_map(players: list[str]) -> dict[str, tuple[float, float,
     return player_colors
 
 
-def build_game_graph(game: Any, player_colors: dict[str, tuple[float, float, float, float]]) -> tuple[nx.DiGraph, list[tuple[float, float, float, float]], dict[int, Any]]:
+def build_game_graph(game: Any, player_colors: dict[str, tuple[float, float, float, float]]) -> tuple[nx.DiGraph, list[tuple[float, float, float, float]], dict[int, Any], dict[Any, list[int]]]:
     """
     Build a NetworkX directed graph from a PyGambit game tree.
     
@@ -42,10 +42,12 @@ def build_game_graph(game: Any, player_colors: dict[str, tuple[float, float, flo
         - NetworkX DiGraph representing the game tree
         - List of node colors corresponding to players who control each node
         - Dictionary mapping node IDs to PyGambit node objects
+        - Dictionary mapping infosets to lists of node IDs
     """
     G = nx.DiGraph()
     node_colors = []
     node_mapping = {}  # Map node_id to actual node object
+    infoset_mapping = {}  # Map infoset to list of node_ids
     node_counter = 0  # Use counter instead of object ID for stability
 
     def add_edges(node: Any, parent: Optional[Any] = None, action_label: Optional[str] = None, parent_counter: Optional[int] = None) -> int:
@@ -57,6 +59,13 @@ def build_game_graph(game: Any, player_colors: dict[str, tuple[float, float, flo
         # Always add the node to the graph
         G.add_node(current_counter)
         node_mapping[current_counter] = node
+        
+        # Track information sets
+        if node.infoset is not None:
+            infoset = node.infoset
+            if infoset not in infoset_mapping:
+                infoset_mapping[infoset] = []
+            infoset_mapping[infoset].append(current_counter)
         
         # Assign node color based on the player who controls this node
         if node.player:
@@ -85,7 +94,7 @@ def build_game_graph(game: Any, player_colors: dict[str, tuple[float, float, flo
     # Always add the root node, even if it has no children
     add_edges(game.root)
     
-    return G, node_colors, node_mapping
+    return G, node_colors, node_mapping, infoset_mapping
 
 
 def compute_graph_layout(G: nx.DiGraph) -> dict[int, tuple[float, float]]:
@@ -100,6 +109,96 @@ def compute_graph_layout(G: nx.DiGraph) -> dict[int, tuple[float, float]]:
     """
     pos = nx.nx_agraph.graphviz_layout(G, prog="dot")
     return pos
+
+
+def adjust_layout_for_infosets(pos: dict[int, tuple[float, float]], 
+                              infoset_mapping: dict[Any, list[int]], 
+                              node_mapping: dict[int, Any]) -> dict[int, tuple[float, float]]:
+    """
+    Adjust node positions to group information set nodes spatially close together.
+    
+    Args:
+        pos: Original positions from layout algorithm
+        infoset_mapping: Dictionary mapping infosets to lists of node IDs
+        node_mapping: Dictionary mapping node IDs to PyGambit node objects
+        
+    Returns:
+        Adjusted positions dictionary
+    """
+    adjusted_pos = pos.copy()
+    
+    # For each information set with multiple nodes, group them close together
+    for infoset, node_ids in infoset_mapping.items():
+        if len(node_ids) > 1:  # Only adjust if there are multiple nodes in the infoset
+            # Calculate the centroid of the original positions
+            centroid_x = sum(pos[node_id][0] for node_id in node_ids) / len(node_ids)
+            centroid_y = sum(pos[node_id][1] for node_id in node_ids) / len(node_ids)
+            
+            # Arrange nodes in a small circle around the centroid
+            import math
+            radius = 20  # Small radius for grouping
+            for i, node_id in enumerate(node_ids):
+                angle = 2 * math.pi * i / len(node_ids)
+                new_x = centroid_x + radius * math.cos(angle)
+                new_y = centroid_y + radius * math.sin(angle)
+                adjusted_pos[node_id] = (new_x, new_y)
+    
+    return adjusted_pos
+
+
+def draw_infoset_ovals(ax, pos: dict[int, tuple[float, float]], 
+                      infoset_mapping: dict[Any, list[int]], 
+                      node_mapping: dict[int, Any], 
+                      player_colors: dict[str, tuple[float, float, float, float]]) -> None:
+    """
+    Draw ovals around nodes that belong to the same information set.
+    
+    Args:
+        ax: Matplotlib axes object
+        pos: Node positions
+        infoset_mapping: Dictionary mapping infosets to lists of node IDs
+        node_mapping: Dictionary mapping node IDs to PyGambit node objects
+        player_colors: Dictionary mapping player labels to RGBA color tuples
+    """
+    from matplotlib.patches import Ellipse
+    
+    for infoset, node_ids in infoset_mapping.items():
+        if len(node_ids) > 1:  # Only draw ovals for multi-node information sets
+            # Get positions of all nodes in this information set
+            node_positions = [pos[node_id] for node_id in node_ids]
+            
+            if not node_positions:
+                continue
+                
+            # Calculate bounding box
+            xs = [p[0] for p in node_positions]
+            ys = [p[1] for p in node_positions]
+            
+            min_x, max_x = min(xs), max(xs)
+            min_y, max_y = min(ys), max(ys)
+            
+            # Add padding and create oval
+            padding = 30
+            center_x = (min_x + max_x) / 2
+            center_y = (min_y + max_y) / 2
+            width = max(max_x - min_x + padding, 50)  # Minimum width
+            height = max(max_y - min_y + padding, 50)  # Minimum height
+            
+            # Get player color for the oval
+            sample_node = node_mapping[node_ids[0]]
+            if sample_node.player:
+                if hasattr(sample_node.player, "is_chance") and sample_node.player.is_chance:
+                    color = player_colors.get("chance", (1.0, 0.0, 0.0, 1.0))
+                else:
+                    color = player_colors.get(sample_node.player.label, (0.7, 0.7, 0.7, 1.0))
+            else:
+                color = (0.7, 0.7, 0.7, 1.0)
+            
+            # Create ellipse with low alpha for transparency
+            ellipse = Ellipse((center_x, center_y), width, height, 
+                            facecolor=color[:3], alpha=0.2, 
+                            edgecolor=color[:3], linewidth=2)
+            ax.add_patch(ellipse)
 
 
 def create_node_labels(G: nx.DiGraph, node_mapping: dict[int, Any], game: Any) -> dict[int, str]:
@@ -178,18 +277,23 @@ def plot_gambit_tree(game: Any,
     player_colors = create_player_color_map(players)
     
     # Build the graph
-    G, node_colors, node_mapping = build_game_graph(game, player_colors)
+    G, node_colors, node_mapping, infoset_mapping = build_game_graph(game, player_colors)
     
     # If graph is empty (no nodes), nothing to plot
     if len(G.nodes) == 0:
         print("Warning: No nodes to plot in game tree")
         return
     
-    # Compute layout
+    # Compute layout and adjust for information sets
     pos = compute_graph_layout(G)
+    pos = adjust_layout_for_infosets(pos, infoset_mapping, node_mapping)
 
     # Create the plot
-    plt.figure(figsize=figsize)
+    fig, ax = plt.subplots(figsize=figsize)
+    
+    # Draw information set ovals first (so they appear behind nodes)
+    draw_infoset_ovals(ax, pos, infoset_mapping, node_mapping, player_colors)
+    
     nx.draw(
         G,
         pos,
@@ -200,6 +304,7 @@ def plot_gambit_tree(game: Any,
         node_color=node_colors,
         arrowsize=20,
         width=2,
+        ax=ax,
     )
 
     # Draw edge labels (action labels) only if there are edges and labels are requested
@@ -209,19 +314,19 @@ def plot_gambit_tree(game: Any,
             # Only try to draw labels if they exist
             if edge_labels:
                 nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, 
-                                            font_size=edge_font_size, font_color="black")
+                                            font_size=edge_font_size, font_color="black", ax=ax)
         except Exception as e:
             print(f"Warning: Could not draw edge labels: {e}")
 
     # Draw node labels
     node_labels = create_node_labels(G, node_mapping, game)
-    nx.draw_networkx_labels(G, pos, labels=node_labels, font_size=font_size)
+    nx.draw_networkx_labels(G, pos, labels=node_labels, font_size=font_size, ax=ax)
 
     # Create and display legend
     legend_elements = create_legend_elements(players, player_colors)
-    plt.legend(handles=legend_elements, loc="upper right")
+    ax.legend(handles=legend_elements, loc="upper right")
     
-    plt.title(f"Game Tree: {game.title}")
-    plt.axis("off")
-    plt.tight_layout()
+    ax.set_title(f"Game Tree: {game.title}")
+    ax.axis("off")
+    fig.tight_layout()
     plt.show()
