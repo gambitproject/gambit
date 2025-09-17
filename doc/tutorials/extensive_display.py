@@ -128,20 +128,27 @@ def adjust_layout_for_infosets(pos: dict[int, tuple[float, float]],
     adjusted_pos = pos.copy()
     
     # For each information set with multiple nodes, group them close together
-    for infoset, node_ids in infoset_mapping.items():
+    for _, node_ids in infoset_mapping.items():
         if len(node_ids) > 1:  # Only adjust if there are multiple nodes in the infoset
             # Calculate the centroid of the original positions
             centroid_x = sum(pos[node_id][0] for node_id in node_ids) / len(node_ids)
             centroid_y = sum(pos[node_id][1] for node_id in node_ids) / len(node_ids)
             
-            # Arrange nodes in a small circle around the centroid
-            import math
-            radius = 20  # Small radius for grouping
-            for i, node_id in enumerate(node_ids):
-                angle = 2 * math.pi * i / len(node_ids)
-                new_x = centroid_x + radius * math.cos(angle)
-                new_y = centroid_y + radius * math.sin(angle)
-                adjusted_pos[node_id] = (new_x, new_y)
+            # Determine layout strategy based on number of nodes
+            if len(node_ids) == 2:
+                # For 2 nodes, place them horizontally apart to avoid edge overlap
+                spacing = 60  # Horizontal spacing
+                adjusted_pos[node_ids[0]] = (centroid_x - spacing/2, centroid_y)
+                adjusted_pos[node_ids[1]] = (centroid_x + spacing/2, centroid_y)
+            else:
+                # For more than 2 nodes, use a larger radius circle
+                import math
+                radius = 40 + (len(node_ids) - 2) * 10  # Adaptive radius based on node count
+                for i, node_id in enumerate(node_ids):
+                    angle = 2 * math.pi * i / len(node_ids)
+                    new_x = centroid_x + radius * math.cos(angle)
+                    new_y = centroid_y + radius * math.sin(angle)
+                    adjusted_pos[node_id] = (new_x, new_y)
     
     return adjusted_pos
 
@@ -162,7 +169,7 @@ def draw_infoset_ovals(ax, pos: dict[int, tuple[float, float]],
     """
     from matplotlib.patches import Ellipse
     
-    for infoset, node_ids in infoset_mapping.items():
+    for _, node_ids in infoset_mapping.items():
         if len(node_ids) > 1:  # Only draw ovals for multi-node information sets
             # Get positions of all nodes in this information set
             node_positions = [pos[node_id] for node_id in node_ids]
@@ -177,12 +184,17 @@ def draw_infoset_ovals(ax, pos: dict[int, tuple[float, float]],
             min_x, max_x = min(xs), max(xs)
             min_y, max_y = min(ys), max(ys)
             
-            # Add padding and create oval
-            padding = 30
+            # Add adaptive padding based on number of nodes and their spread
+            base_padding = 40
+            spread_x = max_x - min_x
+            spread_y = max_y - min_y
+            padding_x = max(base_padding, spread_x * 0.3)
+            padding_y = max(base_padding, spread_y * 0.3)
+            
             center_x = (min_x + max_x) / 2
             center_y = (min_y + max_y) / 2
-            width = max(max_x - min_x + padding, 50)  # Minimum width
-            height = max(max_y - min_y + padding, 50)  # Minimum height
+            width = spread_x + padding_x
+            height = max(spread_y + padding_y, 60)  # Minimum height for visibility
             
             # Get player color for the oval
             sample_node = node_mapping[node_ids[0]]
@@ -196,8 +208,8 @@ def draw_infoset_ovals(ax, pos: dict[int, tuple[float, float]],
             
             # Create ellipse with low alpha for transparency
             ellipse = Ellipse((center_x, center_y), width, height, 
-                            facecolor=color[:3], alpha=0.2, 
-                            edgecolor=color[:3], linewidth=2)
+                            facecolor=color[:3], alpha=0.15, 
+                            edgecolor=color[:3], linewidth=1.5)
             ax.add_patch(ellipse)
 
 
@@ -232,7 +244,10 @@ def create_node_labels(G: nx.DiGraph, node_mapping: dict[int, Any], game: Any) -
     return node_labels
 
 
-def create_legend_elements(players: list[str], player_colors: dict[str, tuple[float, float, float, float]]) -> list[Line2D]:
+def create_legend_elements(
+    players: list[str], 
+    player_colors: dict[str, tuple[float, float, float, float]]
+) -> list[Line2D]:
     """
     Create legend elements for the plot.
     
