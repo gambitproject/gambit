@@ -79,7 +79,7 @@ def build_game_graph(game: Any, player_colors: dict[str, tuple[float, float, flo
             # Terminal nodes should be invisible (transparent)
             node_colors.append((0.0, 0.0, 0.0, 0.0))  # Fully transparent
         else:
-            # Root or other nodes get a neutral color
+            # Other nodes get a neutral color
             node_colors.append((0.9, 0.9, 0.9, 1.0))  # Light gray
 
         if parent is not None and parent_counter is not None:
@@ -337,8 +337,8 @@ def create_node_labels(G: nx.DiGraph, node_mapping: dict[int, Any], game: Any) -
             else:
                 node_labels[node_id] = f"{node.player.label}: IS {node.infoset.number}"
         else:
-            # Root or other node
-            node_labels[node_id] = "Root"
+            # Other node (unassigned)
+            node_labels[node_id] = "?"
     return node_labels
 
 
