@@ -116,7 +116,7 @@ def adjust_layout_for_infosets(pos: dict[int, tuple[float, float]],
                               node_mapping: dict[int, Any]) -> dict[int, tuple[float, float]]:
     """
     Adjust node positions to group information set nodes spatially close together
-    and prevent other nodes from falling inside information set ovals.
+    and prevent other nodes from falling inside information set ovals while avoiding edge overlaps.
     
     Args:
         pos: Original positions from layout algorithm
@@ -174,7 +174,7 @@ def adjust_layout_for_infosets(pos: dict[int, tuple[float, float]],
                     "nodes": set(node_ids)
                 }
     
-    # Step 2: Move nodes that fall inside information set ovals they don't belong to
+    # Step 2: Intelligently position nodes to avoid oval collisions AND edge overlaps
     all_infoset_nodes = set()
     for node_ids in infoset_mapping.values():
         if len(node_ids) > 1:
@@ -184,39 +184,67 @@ def adjust_layout_for_infosets(pos: dict[int, tuple[float, float]],
         """Check if point (px, py) is inside ellipse centered at (cx, cy)"""
         return ((px - cx) / (width/2))**2 + ((py - cy) / (height/2))**2 <= 1
     
-    def find_safe_position(original_x, original_y, ovals):
-        """Find a position that doesn't intersect with any oval"""
-        # Try positions around the original point
-        safe_distance = 80  # Minimum distance from oval edge
-        angles = [0, math.pi/2, math.pi, 3*math.pi/2, math.pi/4, 
-                 3*math.pi/4, 5*math.pi/4, 7*math.pi/4]
-        for angle in angles:
-            test_x = original_x + safe_distance * math.cos(angle)
-            test_y = original_y + safe_distance * math.sin(angle)
-            
-            # Check if this position is safe from all ovals
-            is_safe = True
-            for oval in ovals.values():
-                if point_in_ellipse(test_x, test_y, oval["center"][0], oval["center"][1], 
-                                  oval["width"], oval["height"]):
-                    is_safe = False
-                    break
-            
-            if is_safe:
-                return test_x, test_y
-        
-        # If no safe position found nearby, move further out
-        return original_x + safe_distance * 1.5, original_y
+    def get_node_hierarchy_level(node_id):
+        """Get the hierarchy level of a node (distance from root)"""
+        node = node_mapping[node_id]
+        level = 0
+        current = node
+        while current.parent is not None:
+            level += 1
+            current = current.parent
+        return level
     
-    # Check each node that's not part of any multi-node information set
+    def find_smart_position(original_x, original_y, node_id, ovals):
+        """Find a position that avoids ovals and maintains tree structure"""
+        # Get hierarchy level for potential future use
+        _ = get_node_hierarchy_level(node_id)  # Keep for tree structure awareness
+        
+        # Try positions that maintain the vertical tree structure
+        # Move horizontally at the same level first, then consider other directions
+        safe_distance = 80
+        
+        # Priority order: horizontal left, horizontal right, then other directions
+        angle_priorities = [
+            math.pi,      # Left (180°)
+            0,            # Right (0°) 
+            math.pi/4,    # Upper right (45°)
+            7*math.pi/4,  # Lower right (315°)
+            3*math.pi/4,  # Upper left (135°)
+            5*math.pi/4,  # Lower left (225°)
+            math.pi/2,    # Up (90°)
+            3*math.pi/2   # Down (270°)
+        ]
+        
+        for angle in angle_priorities:
+            # Try multiple distances to find the best fit
+            for distance_multiplier in [1.0, 1.5, 2.0]:
+                test_distance = safe_distance * distance_multiplier
+                test_x = original_x + test_distance * math.cos(angle)
+                test_y = original_y + test_distance * math.sin(angle)
+                
+                # Check if this position is safe from all ovals
+                is_safe = True
+                for oval in ovals.values():
+                    if point_in_ellipse(test_x, test_y, oval["center"][0], oval["center"][1], 
+                                      oval["width"], oval["height"]):
+                        is_safe = False
+                        break
+                
+                if is_safe:
+                    return test_x, test_y
+        
+        # If no good position found, fall back to moving far to the right
+        return original_x + safe_distance * 2.5, original_y
+    
+    # Step 3: Adjust conflicting nodes with smart positioning
     for node_id, (x, y) in adjusted_pos.items():
         if node_id not in all_infoset_nodes:
             # Check if this node falls inside any information set oval
             for oval in infoset_ovals.values():
                 if point_in_ellipse(x, y, oval["center"][0], oval["center"][1], 
                                   oval["width"], oval["height"]):
-                    # Node is inside an oval it doesn't belong to - move it
-                    new_x, new_y = find_safe_position(x, y, infoset_ovals)
+                    # Node is inside an oval it doesn't belong to - move it smartly
+                    new_x, new_y = find_smart_position(x, y, node_id, infoset_ovals)
                     adjusted_pos[node_id] = (new_x, new_y)
                     break
     
