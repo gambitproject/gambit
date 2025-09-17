@@ -115,7 +115,8 @@ def adjust_layout_for_infosets(pos: dict[int, tuple[float, float]],
                               infoset_mapping: dict[Any, list[int]], 
                               node_mapping: dict[int, Any]) -> dict[int, tuple[float, float]]:
     """
-    Adjust node positions to group information set nodes spatially close together.
+    Adjust node positions to group information set nodes spatially close together
+    and prevent other nodes from falling inside information set ovals.
     
     Args:
         pos: Original positions from layout algorithm
@@ -125,9 +126,12 @@ def adjust_layout_for_infosets(pos: dict[int, tuple[float, float]],
     Returns:
         Adjusted positions dictionary
     """
+    import math
     adjusted_pos = pos.copy()
     
-    # For each information set with multiple nodes, group them close together
+    # Step 1: Group information set nodes
+    infoset_ovals = {}  # Store oval parameters for collision detection
+    
     for _, node_ids in infoset_mapping.items():
         if len(node_ids) > 1:  # Only adjust if there are multiple nodes in the infoset
             # Calculate the centroid of the original positions
@@ -140,15 +144,81 @@ def adjust_layout_for_infosets(pos: dict[int, tuple[float, float]],
                 spacing = 60  # Horizontal spacing
                 adjusted_pos[node_ids[0]] = (centroid_x - spacing/2, centroid_y)
                 adjusted_pos[node_ids[1]] = (centroid_x + spacing/2, centroid_y)
+                
+                # Store oval parameters for collision detection
+                base_padding = 40
+                width = spacing + base_padding
+                height = max(base_padding, 60)
+                infoset_ovals[tuple(node_ids)] = {
+                    "center": (centroid_x, centroid_y),
+                    "width": width,
+                    "height": height,
+                    "nodes": set(node_ids)
+                }
             else:
                 # For more than 2 nodes, use a larger radius circle
-                import math
                 radius = 40 + (len(node_ids) - 2) * 10  # Adaptive radius based on node count
                 for i, node_id in enumerate(node_ids):
                     angle = 2 * math.pi * i / len(node_ids)
                     new_x = centroid_x + radius * math.cos(angle)
                     new_y = centroid_y + radius * math.sin(angle)
                     adjusted_pos[node_id] = (new_x, new_y)
+                
+                # Store oval parameters for collision detection
+                base_padding = 40
+                diameter = radius * 2 + base_padding
+                infoset_ovals[tuple(node_ids)] = {
+                    "center": (centroid_x, centroid_y),
+                    "width": diameter,
+                    "height": diameter,
+                    "nodes": set(node_ids)
+                }
+    
+    # Step 2: Move nodes that fall inside information set ovals they don't belong to
+    all_infoset_nodes = set()
+    for node_ids in infoset_mapping.values():
+        if len(node_ids) > 1:
+            all_infoset_nodes.update(node_ids)
+    
+    def point_in_ellipse(px, py, cx, cy, width, height):
+        """Check if point (px, py) is inside ellipse centered at (cx, cy)"""
+        return ((px - cx) / (width/2))**2 + ((py - cy) / (height/2))**2 <= 1
+    
+    def find_safe_position(original_x, original_y, ovals):
+        """Find a position that doesn't intersect with any oval"""
+        # Try positions around the original point
+        safe_distance = 80  # Minimum distance from oval edge
+        angles = [0, math.pi/2, math.pi, 3*math.pi/2, math.pi/4, 
+                 3*math.pi/4, 5*math.pi/4, 7*math.pi/4]
+        for angle in angles:
+            test_x = original_x + safe_distance * math.cos(angle)
+            test_y = original_y + safe_distance * math.sin(angle)
+            
+            # Check if this position is safe from all ovals
+            is_safe = True
+            for oval in ovals.values():
+                if point_in_ellipse(test_x, test_y, oval["center"][0], oval["center"][1], 
+                                  oval["width"], oval["height"]):
+                    is_safe = False
+                    break
+            
+            if is_safe:
+                return test_x, test_y
+        
+        # If no safe position found nearby, move further out
+        return original_x + safe_distance * 1.5, original_y
+    
+    # Check each node that's not part of any multi-node information set
+    for node_id, (x, y) in adjusted_pos.items():
+        if node_id not in all_infoset_nodes:
+            # Check if this node falls inside any information set oval
+            for oval in infoset_ovals.values():
+                if point_in_ellipse(x, y, oval["center"][0], oval["center"][1], 
+                                  oval["width"], oval["height"]):
+                    # Node is inside an oval it doesn't belong to - move it
+                    new_x, new_y = find_safe_position(x, y, infoset_ovals)
+                    adjusted_pos[node_id] = (new_x, new_y)
+                    break
     
     return adjusted_pos
 
