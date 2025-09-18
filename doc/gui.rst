@@ -82,6 +82,10 @@ Installation Instructions
 
             make osx-dmg
 
+      5. **Install the application:**
+
+         After creating the DMG file, open it and drag the Gambit application to your Applications folder.
+
    .. tab-item:: Windows
 
       TODO: Add Windows installation instructions
