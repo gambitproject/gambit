@@ -25,58 +25,70 @@ To build larger games or to explore parameter spaces of a game
 systematically, it is recommended to use
 :ref:`the Python package <pygambit>`.
 
-Install on Mac
-==============
+Installation Instructions
+=========================
 
-To build and install the Gambit GUI on macOS, follow these steps:
+.. tab-set::
 
-1. **Install build dependencies:**
+   .. tab-item:: macOS
 
-   .. code-block:: bash
+      To build and install the Gambit GUI on macOS, follow these steps:
 
-      brew install automake autoconf libtool
+      1. **Install build dependencies:**
 
-   .. note::
-      If you encounter interpreter errors with autom4te, you may need to ensure
-      your Perl installation is correct or reinstall the autotools:
+         .. code-block:: bash
 
-      .. code-block:: bash
+            brew install automake autoconf libtool
 
-         brew reinstall automake autoconf libtool
+         .. note::
+            If you encounter interpreter errors with autom4te, you may need to ensure
+            your Perl installation is correct or reinstall the autotools:
 
-2. **Download and build wxWidgets:**
+            .. code-block:: bash
 
-   .. code-block:: bash
+               brew reinstall automake autoconf libtool
 
-      curl -L -O https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.8/wxWidgets-3.2.8.tar.bz2
-      tar xjf wxWidgets-3.2.8.tar.bz2
-      cd wxWidgets-3.2.8
-      mkdir build-release
-      cd build-release
-      ../configure --disable-shared --disable-sys-libs
-      make -j4
-      sudo make install
+      2. **Download and build wxWidgets:**
 
-3. **Build and install Gambit:**
+         .. code-block:: bash
 
-   Navigate back to the Gambit source directory and run:
+            curl -L -O https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.8/wxWidgets-3.2.8.tar.bz2
+            tar xjf wxWidgets-3.2.8.tar.bz2
+            cd wxWidgets-3.2.8
+            mkdir build-release
+            cd build-release
+            ../configure --disable-shared --disable-sys-libs
+            make -j4
+            sudo make install
 
-   .. code-block:: bash
+      3. **Build and install Gambit:**
 
-      aclocal
-      automake --add-missing
-      autoconf
-      ./configure
-      make
-      sudo make install
+         Navigate back to the Gambit source directory and run:
 
-4. **Create macOS application bundle:**
+         .. code-block:: bash
 
-   To create a distributable DMG file:
+            aclocal
+            automake --add-missing
+            autoconf
+            ./configure
+            make
+            sudo make install
 
-   .. code-block:: bash
+      4. **Create macOS application bundle:**
 
-      make osx-dmg
+         To create a distributable DMG file:
+
+         .. code-block:: bash
+
+            make osx-dmg
+
+   .. tab-item:: Windows
+
+      TODO: Add Windows installation instructions
+
+   .. tab-item:: Linux
+
+      TODO: Add Linux installation instructions
 
 .. toctree::
    :maxdepth: 2
