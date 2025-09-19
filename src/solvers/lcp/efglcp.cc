@@ -36,7 +36,7 @@ public:
   }
   ~NashLcpBehaviorSolver() = default;
 
-  List<MixedBehaviorProfile<T>> Solve(const Game &) const;
+  std::list<MixedBehaviorProfile<T>> Solve(const Game &) const;
 
 private:
   BehaviorCallbackType<T> m_onEquilibrium;
@@ -58,7 +58,7 @@ public:
   std::map<GameInfoset, int> infosetOffset;
   T eps;
   List<linalg::BFS<T>> m_list;
-  List<MixedBehaviorProfile<T>> m_equilibria;
+  std::list<MixedBehaviorProfile<T>> m_equilibria;
 
   explicit Solution(const Game &);
 
@@ -110,7 +110,7 @@ bool NashLcpBehaviorSolver<T>::Solution::AddBFS(const linalg::LemkeTableau<T> &t
 // as refined by Eaves for degenerate problems, starting from the primary ray.
 //
 template <class T>
-List<MixedBehaviorProfile<T>> NashLcpBehaviorSolver<T>::Solve(const Game &p_game) const
+std::list<MixedBehaviorProfile<T>> NashLcpBehaviorSolver<T>::Solve(const Game &p_game) const
 {
   if (p_game->NumPlayers() != 2) {
     throw UndefinedException("Method only valid for two-player games.");
@@ -341,15 +341,16 @@ void NashLcpBehaviorSolver<T>::GetProfile(const linalg::LemkeTableau<T> &tab,
 }
 
 template <class T>
-List<MixedBehaviorProfile<T>> LcpBehaviorSolve(const Game &p_game, int p_stopAfter, int p_maxDepth,
-                                               BehaviorCallbackType<T> p_onEquilibrium)
+std::list<MixedBehaviorProfile<T>> LcpBehaviorSolve(const Game &p_game, int p_stopAfter,
+                                                    int p_maxDepth,
+                                                    BehaviorCallbackType<T> p_onEquilibrium)
 {
   return NashLcpBehaviorSolver<T>(p_stopAfter, p_maxDepth, p_onEquilibrium).Solve(p_game);
 }
 
-template List<MixedBehaviorProfile<double>> LcpBehaviorSolve(const Game &, int, int,
-                                                             BehaviorCallbackType<double>);
-template List<MixedBehaviorProfile<Rational>> LcpBehaviorSolve(const Game &, int, int,
-                                                               BehaviorCallbackType<Rational>);
+template std::list<MixedBehaviorProfile<double>> LcpBehaviorSolve(const Game &, int, int,
+                                                                  BehaviorCallbackType<double>);
+template std::list<MixedBehaviorProfile<Rational>>
+LcpBehaviorSolve(const Game &, int, int, BehaviorCallbackType<Rational>);
 
 } // end namespace Gambit::Nash

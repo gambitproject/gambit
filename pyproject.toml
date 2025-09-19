@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pygambit"
-version = "16.3.0"
+version = "16.4.0"
 description = "The package for computation in game theory"
 readme = "src/README.rst"
 requires-python = ">=3.9"

@@ -47,9 +47,10 @@ template <class T> void NullBehaviorCallback(const MixedBehaviorProfile<T> &, co
 }
 
 template <class T>
-List<MixedBehaviorProfile<T>> ToMixedBehaviorProfile(const List<MixedStrategyProfile<T>> &p_list)
+std::list<MixedBehaviorProfile<T>>
+ToMixedBehaviorProfile(const std::list<MixedStrategyProfile<T>> &p_list)
 {
-  List<MixedBehaviorProfile<T>> ret;
+  std::list<MixedBehaviorProfile<T>> ret;
   for (const auto &profile : p_list) {
     ret.push_back(MixedBehaviorProfile<T>(profile));
   }
@@ -57,11 +58,11 @@ List<MixedBehaviorProfile<T>> ToMixedBehaviorProfile(const List<MixedStrategyPro
 }
 
 template <class T>
-using BehaviorSolverType = std::function<List<MixedBehaviorProfile<T>>(const Game &)>;
+using BehaviorSolverType = std::function<std::list<MixedBehaviorProfile<T>>(const Game &)>;
 
 template <class T>
-List<MixedBehaviorProfile<T>> SolveBySubgames(const Game &, BehaviorSolverType<T> p_solver,
-                                              BehaviorCallbackType<T> p_onEquilibrium);
+std::list<MixedBehaviorProfile<T>> SolveBySubgames(const Game &, BehaviorSolverType<T> p_solver,
+                                                   BehaviorCallbackType<T> p_onEquilibrium);
 
 //
 // Exception raised when maximum number of equilibria to compute

@@ -37,3 +37,5 @@ gambit
 .python-version
 dist
 .venv
+*.dmg
+Gambit.app/*

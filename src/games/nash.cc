@@ -165,8 +165,9 @@ MixedBehaviorProfile<T> BuildProfile(const Game &p_game, const SubgameSolution<T
 }
 
 template <class T>
-List<MixedBehaviorProfile<T>> SolveBySubgames(const Game &p_game, BehaviorSolverType<T> p_solver,
-                                              BehaviorCallbackType<T> p_onEquilibrium)
+std::list<MixedBehaviorProfile<T>> SolveBySubgames(const Game &p_game,
+                                                   BehaviorSolverType<T> p_solver,
+                                                   BehaviorCallbackType<T> p_onEquilibrium)
 {
   const Game efg = p_game->CopySubgame(p_game->GetRoot());
 
@@ -185,7 +186,7 @@ List<MixedBehaviorProfile<T>> SolveBySubgames(const Game &p_game, BehaviorSolver
   }
 
   auto results = SolveSubgames(efg->GetRoot(), infoset_map, p_solver);
-  List<MixedBehaviorProfile<T>> solutions;
+  std::list<MixedBehaviorProfile<T>> solutions;
   for (const auto &result : results) {
     solutions.push_back(BuildProfile(p_game, result));
     p_onEquilibrium(solutions.back(), "NE");
@@ -193,10 +194,10 @@ List<MixedBehaviorProfile<T>> SolveBySubgames(const Game &p_game, BehaviorSolver
   return solutions;
 }
 
-template List<MixedBehaviorProfile<double>>
+template std::list<MixedBehaviorProfile<double>>
 SolveBySubgames(const Game &p_game, BehaviorSolverType<double> p_solver,
                 BehaviorCallbackType<double> p_onEquilibrium);
-template List<MixedBehaviorProfile<Rational>>
+template std::list<MixedBehaviorProfile<Rational>>
 SolveBySubgames(const Game &p_game, BehaviorSolverType<Rational> p_solver,
                 BehaviorCallbackType<Rational> p_onEquilibrium);
 

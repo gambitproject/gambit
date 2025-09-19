@@ -138,7 +138,7 @@ EnumPolyStrategySupportSolve(const StrategySupportProfile &support, bool &is_sin
   return solutions;
 }
 
-List<MixedStrategyProfile<double>>
+std::list<MixedStrategyProfile<double>>
 EnumPolyStrategySolve(const Game &p_game, int p_stopAfter, double p_maxregret,
                       EnumPolyMixedStrategyObserverFunctionType p_onEquilibrium,
                       EnumPolyStrategySupportObserverFunctionType p_onSupport)
@@ -148,7 +148,7 @@ EnumPolyStrategySolve(const Game &p_game, int p_stopAfter, double p_maxregret,
     p_maxregret *= scale;
   }
 
-  List<MixedStrategyProfile<double>> ret;
+  std::list<MixedStrategyProfile<double>> ret;
   auto possible_supports = PossibleNashStrategySupports(p_game);
 
   for (auto support : possible_supports->m_supports) {
