@@ -85,6 +85,21 @@ private:
   }
 
 public:
+  Rational PayoffFromActions(std::map<GamePlayer, GameAction> action_profile,
+                             GamePlayer p_player)
+  {
+    std::map<GamePlayer, GameSequence> p_profile;
+    for (const auto &pair : action_profile)
+    {
+      auto player = pair.first;
+      auto action = pair.second;
+      auto sequence = m_correspondence[action];
+      p_profile[player] = sequence;
+    }
+    return GetPayoffEntry(p_profile, p_player);
+  }
+
+public:
   class Infosets {
   private:
     const GameSequenceForm *m_sfg;
