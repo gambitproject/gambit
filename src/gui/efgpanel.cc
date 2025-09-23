@@ -322,7 +322,7 @@ void gbtTreePlayerPanel::OnUpdate()
     return;
   }
 
-  const wxColour color = m_doc->GetStyle().GetPlayerColor(m_player);
+  const wxColour color = m_doc->GetStyle().GetPlayerColor(m_doc->GetGame()->GetPlayer(m_player));
 
   m_playerLabel->SetForegroundColour(color);
   m_playerLabel->SetValue(
@@ -402,7 +402,7 @@ void gbtTreePlayerPanel::OnChar(wxKeyEvent &p_event)
 void gbtTreePlayerPanel::OnSetColor(wxCommandEvent &)
 {
   wxColourData data;
-  data.SetColour(m_doc->GetStyle().GetPlayerColor(m_player));
+  data.SetColour(m_doc->GetStyle().GetPlayerColor(m_doc->GetGame()->GetPlayer(m_player)));
   wxColourDialog dialog(this, &data);
   dialog.SetTitle(wxString::Format(_("Choose color for player %d"), m_player));
 

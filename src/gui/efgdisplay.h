@@ -28,8 +28,8 @@
 
 class gbtPayoffEditor : public wxTextCtrl {
 private:
-  gbtNodeEntry *m_entry{nullptr};
-  Gambit::GameOutcome m_outcome;
+  std::shared_ptr<gbtNodeEntry> m_entry{nullptr};
+  GameOutcome m_outcome;
   int m_player{0};
 
   /// @name Event handlers
@@ -40,13 +40,13 @@ private:
 public:
   explicit gbtPayoffEditor(wxWindow *p_parent);
 
-  void BeginEdit(gbtNodeEntry *p_node, int p_player);
+  void BeginEdit(std::shared_ptr<gbtNodeEntry> p_node, int p_player);
   void EndEdit();
 
   bool IsEditing() const { return IsShown(); }
 
-  gbtNodeEntry *GetNodeEntry() const { return m_entry; }
-  Gambit::GameOutcome GetOutcome() const { return m_outcome; }
+  std::shared_ptr<gbtNodeEntry> GetNodeEntry() const { return m_entry; }
+  GameOutcome GetOutcome() const { return m_outcome; }
   int GetPlayer() const { return m_player; }
 
   DECLARE_EVENT_TABLE()
@@ -94,7 +94,7 @@ public:
 
   const gbtTreeLayout &GetLayout() const { return m_layout; }
 
-  void EnsureNodeVisible(const Gambit::GameNode &);
+  void EnsureNodeVisible(const GameNode &);
 
   DECLARE_EVENT_TABLE()
 };

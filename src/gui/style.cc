@@ -48,13 +48,26 @@ static wxColour s_defaultColors[8] = {
 //! If this is the first request for that player's color, create the
 //! default one.
 //!
-const wxColour &gbtStyle::GetPlayerColor(int pl) const
+const wxColour &gbtStyle::GetPlayerColor(const int pl) const
 {
   while (pl > static_cast<int>(m_playerColors.size())) {
     m_playerColors.push_back(s_defaultColors[m_playerColors.size() % 8]);
   }
-
   return m_playerColors[pl];
+}
+
+const wxColour &gbtStyle::GetPlayerColor(const GamePlayer &p_player) const
+{
+  if (!p_player) {
+    return m_terminalColor;
+  }
+  if (p_player->IsChance()) {
+    return m_chanceColor;
+  }
+  while (p_player->GetNumber() > static_cast<int>(m_playerColors.size())) {
+    m_playerColors.push_back(s_defaultColors[m_playerColors.size() % 8]);
+  }
+  return m_playerColors[p_player->GetNumber()];
 }
 
 void gbtStyle::SetDefaults()
@@ -68,7 +81,7 @@ void gbtStyle::SetDefaults()
   m_branchLength = 60;
   m_tineLength = 20;
   m_branchStyle = GBT_BRANCH_STYLE_FORKTINE;
-  m_branchLabels = GBT_BRANCH_LABEL_HORIZONTAL;
+  m_branchLabels = GBT_BRANCH_LABEL_ORIENT_HORIZONTAL;
   m_infosetConnect = GBT_INFOSET_CONNECT_ALL;
   m_infosetJoin = GBT_INFOSET_JOIN_CIRCLES;
   m_nodeAboveLabel = GBT_NODE_LABEL_LABEL;
@@ -281,10 +294,10 @@ void gbtStyle::SetLayoutXML(TiXmlNode *p_node)
     if (labels) {
       const std::string s = labels;
       if (s == "horizontal") {
-        m_branchLabels = GBT_BRANCH_LABEL_HORIZONTAL;
+        m_branchLabels = GBT_BRANCH_LABEL_ORIENT_HORIZONTAL;
       }
       else if (s == "rotated") {
-        m_branchLabels = GBT_BRANCH_LABEL_ROTATED;
+        m_branchLabels = GBT_BRANCH_LABEL_ORIENT_ROTATED;
       }
     }
   }

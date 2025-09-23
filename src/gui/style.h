@@ -26,59 +26,71 @@
 #include "gambit.h"
 #include "core/tinyxml.h"
 
-const int GBT_NODE_TOKEN_LINE = 0;
-const int GBT_NODE_TOKEN_BOX = 1;
-const int GBT_NODE_TOKEN_CIRCLE = 2;
-const int GBT_NODE_TOKEN_DIAMOND = 3;
-const int GBT_NODE_TOKEN_DOT = 4;
+using namespace Gambit;
 
-const int GBT_BRANCH_STYLE_LINE = 0;
-const int GBT_BRANCH_STYLE_FORKTINE = 1;
+enum NodeTokenStyle {
+  GBT_NODE_TOKEN_LINE,
+  GBT_NODE_TOKEN_BOX,
+  GBT_NODE_TOKEN_CIRCLE,
+  GBT_NODE_TOKEN_DIAMOND,
+  GBT_NODE_TOKEN_DOT
+};
 
-const int GBT_BRANCH_LABEL_HORIZONTAL = 0;
-const int GBT_BRANCH_LABEL_ROTATED = 1;
+enum BranchLineStyle { GBT_BRANCH_STYLE_LINE, GBT_BRANCH_STYLE_FORKTINE };
 
-const int GBT_INFOSET_JOIN_LINES = 0;
-const int GBT_INFOSET_JOIN_CIRCLES = 1;
+enum BranchLabelOrientationStyle {
+  GBT_BRANCH_LABEL_ORIENT_HORIZONTAL,
+  GBT_BRANCH_LABEL_ORIENT_ROTATED
+};
 
-const int GBT_INFOSET_CONNECT_NONE = 0;
-const int GBT_INFOSET_CONNECT_SAMELEVEL = 1;
-const int GBT_INFOSET_CONNECT_ALL = 2;
+enum InfosetJoinStyle { GBT_INFOSET_JOIN_LINES, GBT_INFOSET_JOIN_CIRCLES };
 
-const int GBT_NODE_LABEL_NOTHING = 0;
-const int GBT_NODE_LABEL_LABEL = 1;
-const int GBT_NODE_LABEL_PLAYER = 2;
-const int GBT_NODE_LABEL_ISETLABEL = 3;
-const int GBT_NODE_LABEL_ISETID = 4;
-const int GBT_NODE_LABEL_REALIZPROB = 5;
-const int GBT_NODE_LABEL_BELIEFPROB = 6;
-const int GBT_NODE_LABEL_VALUE = 7;
+enum InfosetConnectStyle {
+  GBT_INFOSET_CONNECT_NONE,
+  GBT_INFOSET_CONNECT_SAMELEVEL,
+  GBT_INFOSET_CONNECT_ALL
+};
 
-const int GBT_BRANCH_LABEL_NOTHING = 0;
-const int GBT_BRANCH_LABEL_LABEL = 1;
-const int GBT_BRANCH_LABEL_PROBS = 2;
-const int GBT_BRANCH_LABEL_VALUE = 3;
+enum NodeLabelStyle {
+  GBT_NODE_LABEL_NOTHING,
+  GBT_NODE_LABEL_LABEL,
+  GBT_NODE_LABEL_PLAYER,
+  GBT_NODE_LABEL_ISETLABEL,
+  GBT_NODE_LABEL_ISETID,
+  GBT_NODE_LABEL_REALIZPROB,
+  GBT_NODE_LABEL_BELIEFPROB,
+  GBT_NODE_LABEL_VALUE
+};
+
+enum BranchLabelStyle {
+  GBT_BRANCH_LABEL_NOTHING,
+  GBT_BRANCH_LABEL_LABEL,
+  GBT_BRANCH_LABEL_PROBS,
+  GBT_BRANCH_LABEL_VALUE
+};
 
 class wxFont;
 
 class gbtStyle {
-private:
   // Node styling
   int m_nodeSize{10}, m_terminalSpacing{50};
-  int m_chanceToken{GBT_NODE_TOKEN_DOT}, m_playerToken{GBT_NODE_TOKEN_DOT},
+  NodeTokenStyle m_chanceToken{GBT_NODE_TOKEN_DOT}, m_playerToken{GBT_NODE_TOKEN_DOT},
       m_terminalToken{GBT_NODE_TOKEN_DOT};
   bool m_rootReachable{false};
 
   // Branch styling
   int m_branchLength{60}, m_tineLength{20};
-  int m_branchStyle{GBT_BRANCH_STYLE_FORKTINE}, m_branchLabels{GBT_BRANCH_LABEL_HORIZONTAL};
+  BranchLineStyle m_branchStyle{GBT_BRANCH_STYLE_FORKTINE};
+  BranchLabelOrientationStyle m_branchLabels{GBT_BRANCH_LABEL_ORIENT_HORIZONTAL};
 
   // Information set styling
-  int m_infosetConnect{GBT_INFOSET_CONNECT_ALL}, m_infosetJoin{GBT_INFOSET_JOIN_CIRCLES};
+  InfosetConnectStyle m_infosetConnect{GBT_INFOSET_CONNECT_ALL};
+  InfosetJoinStyle m_infosetJoin{GBT_INFOSET_JOIN_CIRCLES};
 
   // Legend styling
-  int m_nodeAboveLabel{GBT_NODE_LABEL_LABEL}, m_nodeBelowLabel{GBT_NODE_LABEL_ISETID};
-  int m_branchAboveLabel{GBT_BRANCH_LABEL_LABEL}, m_branchBelowLabel{GBT_BRANCH_LABEL_PROBS};
+  NodeLabelStyle m_nodeAboveLabel{GBT_NODE_LABEL_LABEL}, m_nodeBelowLabel{GBT_NODE_LABEL_ISETID};
+  BranchLabelStyle m_branchAboveLabel{GBT_BRANCH_LABEL_LABEL},
+      m_branchBelowLabel{GBT_BRANCH_LABEL_PROBS};
 
   // Fonts for legends
   wxFont m_font;
@@ -95,56 +107,64 @@ public:
   gbtStyle();
 
   // Node styling
-  int NodeSize() const { return m_nodeSize; }
+  int GetNodeSize() const { return m_nodeSize; }
   void SetNodeSize(int p_nodeSize) { m_nodeSize = p_nodeSize; }
 
   int TerminalSpacing() const { return m_terminalSpacing; }
   void SetTerminalSpacing(int p_spacing) { m_terminalSpacing = p_spacing; }
 
-  int ChanceToken() const { return m_chanceToken; }
-  void SetChanceToken(int p_token) { m_chanceToken = p_token; }
+  NodeTokenStyle GetChanceToken() const { return m_chanceToken; }
+  void SetChanceToken(NodeTokenStyle p_token) { m_chanceToken = p_token; }
 
-  int PlayerToken() const { return m_playerToken; }
-  void SetPlayerToken(int p_token) { m_playerToken = p_token; }
+  NodeTokenStyle GetPlayerToken() const { return m_playerToken; }
+  void SetPlayerToken(NodeTokenStyle p_token) { m_playerToken = p_token; }
 
-  int TerminalToken() const { return m_terminalToken; }
-  void SetTerminalToken(int p_token) { m_terminalToken = p_token; }
+  NodeTokenStyle GetTerminalToken() const { return m_terminalToken; }
+  void SetTerminalToken(NodeTokenStyle p_token) { m_terminalToken = p_token; }
 
   bool RootReachable() const { return m_rootReachable; }
   void SetRootReachable(bool p_reachable) { m_rootReachable = p_reachable; }
 
   // Branch styling
-  int BranchLength() const { return m_branchLength; }
+  int GetBranchLength() const { return m_branchLength; }
   void SetBranchLength(int p_length) { m_branchLength = p_length; }
 
-  int TineLength() const { return m_tineLength; }
+  int GetTineLength() const { return m_tineLength; }
   void SetTineLength(int p_length) { m_tineLength = p_length; }
 
-  int BranchStyle() const { return m_branchStyle; }
-  void SetBranchStyle(int p_style) { m_branchStyle = p_style; }
+  BranchLineStyle GetBranchStyle() const { return m_branchStyle; }
+  void SetBranchStyle(BranchLineStyle p_style) { m_branchStyle = p_style; }
 
-  int BranchLabels() const { return m_branchLabels; }
-  void SetBranchLabels(int p_labels) { m_branchLabels = p_labels; }
+  int GetNodeLevelLength() const
+  {
+    if (m_branchStyle == GBT_BRANCH_STYLE_LINE) {
+      return m_nodeSize + m_branchLength;
+    }
+    return m_nodeSize + m_branchLength + m_tineLength;
+  }
+
+  BranchLabelOrientationStyle GetBranchLabels() const { return m_branchLabels; }
+  void SetBranchLabels(BranchLabelOrientationStyle p_labels) { m_branchLabels = p_labels; }
 
   // Information set styling
-  int InfosetConnect() const { return m_infosetConnect; }
-  void SetInfosetConnect(int p_connect) { m_infosetConnect = p_connect; }
+  InfosetConnectStyle GetInfosetConnect() const { return m_infosetConnect; }
+  void SetInfosetConnect(InfosetConnectStyle p_connect) { m_infosetConnect = p_connect; }
 
-  int InfosetJoin() const { return m_infosetJoin; }
-  void SetInfosetJoin(int p_join) { m_infosetJoin = p_join; }
+  InfosetJoinStyle GetInfosetJoin() const { return m_infosetJoin; }
+  void SetInfosetJoin(InfosetJoinStyle p_join) { m_infosetJoin = p_join; }
 
   // Legends
-  int NodeAboveLabel() const { return m_nodeAboveLabel; }
-  void SetNodeAboveLabel(int p_label) { m_nodeAboveLabel = p_label; }
+  NodeLabelStyle GetNodeAboveLabel() const { return m_nodeAboveLabel; }
+  void SetNodeAboveLabel(NodeLabelStyle p_label) { m_nodeAboveLabel = p_label; }
 
-  int NodeBelowLabel() const { return m_nodeBelowLabel; }
-  void SetNodeBelowLabel(int p_label) { m_nodeBelowLabel = p_label; }
+  NodeLabelStyle GetNodeBelowLabel() const { return m_nodeBelowLabel; }
+  void SetNodeBelowLabel(NodeLabelStyle p_label) { m_nodeBelowLabel = p_label; }
 
-  int BranchAboveLabel() const { return m_branchAboveLabel; }
-  void SetBranchAboveLabel(int p_label) { m_branchAboveLabel = p_label; }
+  BranchLabelStyle GetBranchAboveLabel() const { return m_branchAboveLabel; }
+  void SetBranchAboveLabel(BranchLabelStyle p_label) { m_branchAboveLabel = p_label; }
 
-  int BranchBelowLabel() const { return m_branchBelowLabel; }
-  void SetBranchBelowLabel(int p_label) { m_branchBelowLabel = p_label; }
+  BranchLabelStyle GetBranchBelowLabel() const { return m_branchBelowLabel; }
+  void SetBranchBelowLabel(BranchLabelStyle p_label) { m_branchBelowLabel = p_label; }
 
   // Fonts
   const wxFont &GetFont() const { return m_font; }
@@ -158,6 +178,7 @@ public:
   void SetTerminalColor(const wxColour &p_color) { m_terminalColor = p_color; }
 
   const wxColour &GetPlayerColor(int pl) const;
+  const wxColour &GetPlayerColor(const GamePlayer &) const;
   void SetPlayerColor(int pl, const wxColour &p_color) { m_playerColors[pl] = p_color; }
 
   // Decimals

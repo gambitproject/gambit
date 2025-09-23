@@ -42,9 +42,18 @@ public:
   int NodeSize() const { return m_nodeSize->GetValue(); }
   int TerminalSpacing() const { return m_terminalSpacing->GetValue(); }
 
-  int ChanceToken() const { return m_chanceToken->GetSelection(); }
-  int PlayerToken() const { return m_playerToken->GetSelection(); }
-  int TerminalToken() const { return m_terminalToken->GetSelection(); }
+  NodeTokenStyle GetChanceToken() const
+  {
+    return static_cast<NodeTokenStyle>(m_chanceToken->GetSelection());
+  }
+  NodeTokenStyle GetPlayerToken() const
+  {
+    return static_cast<NodeTokenStyle>(m_playerToken->GetSelection());
+  }
+  NodeTokenStyle GetTerminalToken() const
+  {
+    return static_cast<NodeTokenStyle>(m_terminalToken->GetSelection());
+  }
 };
 
 gbtLayoutNodesPanel::gbtLayoutNodesPanel(wxWindow *p_parent, const gbtStyle &p_settings)
@@ -62,20 +71,20 @@ gbtLayoutNodesPanel::gbtLayoutNodesPanel(wxWindow *p_parent, const gbtStyle &p_s
   tokenSizer->Add(new wxStaticText(this, wxID_STATIC, _("Indicate chance nodes with")), 0,
                   wxALL | wxALIGN_CENTER_VERTICAL, 5);
   m_chanceToken = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 5, tokenChoices);
-  m_chanceToken->SetSelection(p_settings.ChanceToken());
+  m_chanceToken->SetSelection(p_settings.GetChanceToken());
   tokenSizer->Add(m_chanceToken, 1, wxALL | wxEXPAND, 5);
 
   tokenSizer->Add(new wxStaticText(this, wxID_STATIC, _("Indicate player nodes with")), 0,
                   wxALL | wxALIGN_CENTER_VERTICAL, 5);
   m_playerToken = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 5, tokenChoices);
-  m_playerToken->SetSelection(p_settings.PlayerToken());
+  m_playerToken->SetSelection(p_settings.GetPlayerToken());
   tokenSizer->Add(m_playerToken, 1, wxALL | wxEXPAND, 5);
 
   tokenSizer->Add(new wxStaticText(this, wxID_STATIC, _("Indicate terminal nodes with")), 0,
                   wxALL | wxALIGN_CENTER_VERTICAL, 5);
   m_terminalToken =
       new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 5, tokenChoices);
-  m_terminalToken->SetSelection(p_settings.TerminalToken());
+  m_terminalToken->SetSelection(p_settings.GetTerminalToken());
   tokenSizer->Add(m_terminalToken, 1, wxALL | wxEXPAND, 5);
 
   nodeSizer->Add(tokenSizer, 1, wxALL | wxEXPAND, 5);
@@ -92,7 +101,7 @@ gbtLayoutNodesPanel::gbtLayoutNodesPanel(wxWindow *p_parent, const gbtStyle &p_s
   const int NODE_LENGTH_MIN = 5;
   const int NODE_LENGTH_MAX = 100;
 
-  m_nodeSize = new wxSpinCtrl(this, wxID_ANY, wxString::Format(_T("%d"), p_settings.NodeSize()),
+  m_nodeSize = new wxSpinCtrl(this, wxID_ANY, wxString::Format(_T("%d"), p_settings.GetNodeSize()),
                               wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, NODE_LENGTH_MIN,
                               NODE_LENGTH_MAX);
   gridSizer->Add(m_nodeSize, 1, wxEXPAND | wxALL, 5);
@@ -125,11 +134,17 @@ private:
 public:
   gbtLayoutBranchesPanel(wxWindow *p_parent, const gbtStyle &);
 
-  int BranchLength() const { return m_branchLength->GetValue(); }
-  int TineLength() const { return m_tineLength->GetValue(); }
+  int GetBranchLength() const { return m_branchLength->GetValue(); }
+  int GetTineLength() const { return m_tineLength->GetValue(); }
 
-  int BranchStyle() const { return m_branchStyle->GetSelection(); }
-  int BranchLabels() const { return m_branchLabels->GetSelection(); }
+  BranchLineStyle GetBranchStyle() const
+  {
+    return static_cast<BranchLineStyle>(m_branchStyle->GetSelection());
+  }
+  BranchLabelOrientationStyle GetBranchLabels() const
+  {
+    return static_cast<BranchLabelOrientationStyle>(m_branchLabels->GetSelection());
+  }
 };
 
 gbtLayoutBranchesPanel::gbtLayoutBranchesPanel(wxWindow *p_parent, const gbtStyle &p_settings)
@@ -152,14 +167,14 @@ gbtLayoutBranchesPanel::gbtLayoutBranchesPanel(wxWindow *p_parent, const gbtStyl
   wxString styleChoices[] = {_("using straight lines between nodes"),
                              _("with a tine for branch labels")};
   m_branchStyle = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 2, styleChoices);
-  m_branchStyle->SetSelection(p_settings.BranchStyle());
+  m_branchStyle->SetSelection(p_settings.GetBranchStyle());
   styleSizer->Add(m_branchStyle, 1, wxALL | wxEXPAND, 5);
 
   styleSizer->Add(new wxStaticText(this, wxID_STATIC, _("Draw labels")), 1,
                   wxALL | wxALIGN_CENTER_VERTICAL, 5);
   wxString labelChoices[] = {_("horizontally"), _("rotated parallel to the branch")};
   m_branchLabels = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 2, labelChoices);
-  m_branchLabels->SetSelection(p_settings.BranchLabels());
+  m_branchLabels->SetSelection(p_settings.GetBranchLabels());
   styleSizer->Add(m_branchLabels, 1, wxALL | wxEXPAND, 5);
 
   styleBoxSizer->Add(styleSizer, 1, wxALL | wxEXPAND, 5);
@@ -173,14 +188,14 @@ gbtLayoutBranchesPanel::gbtLayoutBranchesPanel(wxWindow *p_parent, const gbtStyl
   gridSizer->Add(new wxStaticText(this, wxID_ANY, _("size of branch fork")), 0,
                  wxALIGN_CENTER_VERTICAL | wxALL, 5);
   m_branchLength = new wxSpinCtrl(
-      this, wxID_ANY, wxString::Format(_T("%d"), p_settings.BranchLength()), wxDefaultPosition,
+      this, wxID_ANY, wxString::Format(_T("%d"), p_settings.GetBranchLength()), wxDefaultPosition,
       wxDefaultSize, wxSP_ARROW_KEYS, BRANCH_LENGTH_MIN, BRANCH_LENGTH_MAX);
   gridSizer->Add(m_branchLength, 1, wxALL | wxEXPAND, 5);
 
   gridSizer->Add(new wxStaticText(this, wxID_ANY, _("size of branch tine")), 1,
                  wxALIGN_CENTER_VERTICAL | wxALL, 5);
   m_tineLength = new wxSpinCtrl(
-      this, wxID_ANY, wxString::Format(_T("%d"), p_settings.TineLength()), wxDefaultPosition,
+      this, wxID_ANY, wxString::Format(_T("%d"), p_settings.GetTineLength()), wxDefaultPosition,
       wxDefaultSize, wxSP_ARROW_KEYS, TINE_LENGTH_MIN, TINE_LENGTH_MAX);
   gridSizer->Add(m_tineLength, 1, wxALL | wxEXPAND, 5);
 
@@ -200,8 +215,14 @@ private:
 public:
   gbtLayoutInfosetsPanel(wxWindow *p_parent, const gbtStyle &);
 
-  int InfosetConnect() const { return m_infosetConnect->GetSelection(); }
-  int InfosetJoin() const { return m_infosetJoin->GetSelection(); }
+  InfosetConnectStyle GetInfosetConnect() const
+  {
+    return static_cast<InfosetConnectStyle>(m_infosetConnect->GetSelection());
+  }
+  InfosetJoinStyle GetInfosetJoin() const
+  {
+    return static_cast<InfosetJoinStyle>(m_infosetJoin->GetSelection());
+  }
 };
 
 gbtLayoutInfosetsPanel::gbtLayoutInfosetsPanel(wxWindow *p_parent, const gbtStyle &p_settings)
@@ -219,14 +240,14 @@ gbtLayoutInfosetsPanel::gbtLayoutInfosetsPanel(wxWindow *p_parent, const gbtStyl
                                _("only when on the same level"), _("regardless of level")};
   m_infosetConnect =
       new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 3, connectChoices);
-  m_infosetConnect->SetSelection(p_settings.InfosetConnect());
+  m_infosetConnect->SetSelection(p_settings.GetInfosetConnect());
   styleSizer->Add(m_infosetConnect, 0, wxALL, 5);
 
   styleSizer->Add(new wxStaticText(this, wxID_STATIC, _("Draw information set connections")), 0,
                   wxALL | wxALIGN_CENTER_VERTICAL, 5);
   wxString joinChoices[] = {_("using lines"), _("using bubbles")};
   m_infosetJoin = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 2, joinChoices);
-  m_infosetJoin->SetSelection(p_settings.InfosetJoin());
+  m_infosetJoin->SetSelection(p_settings.GetInfosetJoin());
   styleSizer->Add(m_infosetJoin, 0, wxALL | wxEXPAND, 5);
   infosetSizer->Add(styleSizer, 0, wxALL | wxALIGN_CENTER, 5);
   topSizer->Add(infosetSizer, 0, wxALL, 5);
@@ -277,19 +298,19 @@ void gbtLayoutDialog::GetSettings(gbtStyle &p_settings)
   auto *nodes = dynamic_cast<gbtLayoutNodesPanel *>(m_notebook->GetPage(0));
   p_settings.SetNodeSize(nodes->NodeSize());
   p_settings.SetTerminalSpacing(nodes->TerminalSpacing());
-  p_settings.SetChanceToken(nodes->ChanceToken());
-  p_settings.SetPlayerToken(nodes->PlayerToken());
-  p_settings.SetTerminalToken(nodes->TerminalToken());
+  p_settings.SetChanceToken(nodes->GetChanceToken());
+  p_settings.SetPlayerToken(nodes->GetPlayerToken());
+  p_settings.SetTerminalToken(nodes->GetTerminalToken());
 
   auto *branches = dynamic_cast<gbtLayoutBranchesPanel *>(m_notebook->GetPage(1));
-  p_settings.SetBranchLength(branches->BranchLength());
-  p_settings.SetTineLength(branches->TineLength());
-  p_settings.SetBranchStyle(branches->BranchStyle());
-  p_settings.SetBranchLabels(branches->BranchLabels());
+  p_settings.SetBranchLength(branches->GetBranchLength());
+  p_settings.SetTineLength(branches->GetTineLength());
+  p_settings.SetBranchStyle(branches->GetBranchStyle());
+  p_settings.SetBranchLabels(branches->GetBranchLabels());
 
   auto *infosets = dynamic_cast<gbtLayoutInfosetsPanel *>(m_notebook->GetPage(2));
-  p_settings.SetInfosetConnect(infosets->InfosetConnect());
-  p_settings.SetInfosetJoin(infosets->InfosetJoin());
+  p_settings.SetInfosetConnect(infosets->GetInfosetConnect());
+  p_settings.SetInfosetJoin(infosets->GetInfosetJoin());
 }
 
 void gbtLayoutDialog::OnSetDefaults(wxCommandEvent &)

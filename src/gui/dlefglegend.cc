@@ -50,7 +50,7 @@ gbtLegendDialog::gbtLegendDialog(wxWindow *p_parent, const gbtStyle &p_options)
   nodeAboveSizer->Add(new wxStaticText(this, wxID_STATIC, _("Display")), 0, wxALL | wxALIGN_CENTER,
                       5);
   m_nodeAbove = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 8, nodeLabelList);
-  m_nodeAbove->SetSelection(p_options.NodeAboveLabel());
+  m_nodeAbove->SetSelection(p_options.GetNodeAboveLabel());
   nodeAboveSizer->Add(m_nodeAbove, 1, wxALL | wxALIGN_CENTER, 5);
   nodeAboveSizer->Add(new wxStaticText(this, wxID_STATIC, _("above each node")), 0,
                       wxALL | wxALIGN_CENTER, 5);
@@ -60,7 +60,7 @@ gbtLegendDialog::gbtLegendDialog(wxWindow *p_parent, const gbtStyle &p_options)
   nodeBelowSizer->Add(new wxStaticText(this, wxID_STATIC, _("Display")), 0, wxALL | wxALIGN_CENTER,
                       5);
   m_nodeBelow = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 8, nodeLabelList);
-  m_nodeBelow->SetSelection(p_options.NodeBelowLabel());
+  m_nodeBelow->SetSelection(p_options.GetNodeBelowLabel());
   nodeBelowSizer->Add(m_nodeBelow, 1, wxALL | wxALIGN_CENTER, 5);
   nodeBelowSizer->Add(new wxStaticText(this, wxID_STATIC, _("below each node")), 0,
                       wxALL | wxALIGN_CENTER, 5);
@@ -78,7 +78,7 @@ gbtLegendDialog::gbtLegendDialog(wxWindow *p_parent, const gbtStyle &p_options)
                         wxALL | wxALIGN_CENTER, 5);
   m_actionAbove =
       new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 4, actionLabelList);
-  m_actionAbove->SetSelection(p_options.BranchAboveLabel());
+  m_actionAbove->SetSelection(p_options.GetBranchAboveLabel());
   actionAboveSizer->Add(m_actionAbove, 1, wxALL | wxALIGN_CENTER, 5);
   actionAboveSizer->Add(new wxStaticText(this, wxID_STATIC, _("above each action")), 0,
                         wxALL | wxALIGN_CENTER, 5);
@@ -89,7 +89,7 @@ gbtLegendDialog::gbtLegendDialog(wxWindow *p_parent, const gbtStyle &p_options)
                         wxALL | wxALIGN_CENTER, 5);
   m_actionBelow =
       new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 4, actionLabelList);
-  m_actionBelow->SetSelection(p_options.BranchBelowLabel());
+  m_actionBelow->SetSelection(p_options.GetBranchBelowLabel());
   actionBelowSizer->Add(m_actionBelow, 1, wxALL | wxALIGN_CENTER, 5);
   actionBelowSizer->Add(new wxStaticText(this, wxID_STATIC, _("below each action")), 0,
                         wxALL | wxALIGN_CENTER, 5);

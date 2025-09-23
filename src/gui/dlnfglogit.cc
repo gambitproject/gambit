@@ -179,7 +179,7 @@ static wxColour GetPlayerColor(gbtGameDocument *p_doc, int p_index)
   for (const auto &player : p_doc->GetGame()->GetPlayers()) {
     for (const auto &strategy : player->GetStrategies()) {
       if (index++ == p_index) {
-        return p_doc->GetStyle().GetPlayerColor(player->GetNumber());
+        return p_doc->GetStyle().GetPlayerColor(player);
       }
     }
   }
@@ -379,7 +379,7 @@ gbtLogitPlotStrategyList::gbtLogitPlotStrategyList(wxWindow *p_parent, gbtGameDo
   for (int st = 1; st <= m_doc->GetGame()->MixedProfileLength(); st++) {
     const GameStrategy strategy = m_doc->GetGame()->GetStrategy(st);
     const GamePlayer player = strategy->GetPlayer();
-    const wxColour color = m_doc->GetStyle().GetPlayerColor(player->GetNumber());
+    const wxColour color = m_doc->GetStyle().GetPlayerColor(player);
 
     if (strategy->GetNumber() == 1) {
       SetCellSpan(wxSheetCoords(st - 1, 0), wxSheetCoords(player->GetStrategies().size(), 1));
@@ -501,8 +501,8 @@ void LogitPlotPanel::Plot()
                       m_branch.GetProfile(i + 1)[st]);
     }
 
-    curve->SetPen(wxPLOTPEN_NORMAL, wxPen(m_doc->GetStyle().GetPlayerColor(player->GetNumber()), 1,
-                                          wxPENSTYLE_SOLID));
+    curve->SetPen(wxPLOTPEN_NORMAL,
+                  wxPen(m_doc->GetStyle().GetPlayerColor(player), 1, wxPENSTYLE_SOLID));
 
     m_plotCtrl->AddCurve(curve, false);
   }

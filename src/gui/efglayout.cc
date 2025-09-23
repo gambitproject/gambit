@@ -22,6 +22,7 @@
 
 #include <cmath>
 #include <algorithm> // for std::min, std::max
+#include <numeric>   // for std::partial_sum
 
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
@@ -33,128 +34,140 @@
 
 using namespace Gambit;
 
+namespace {
+
+NodeTokenStyle GetTokenForNode(const gbtStyle &p_style, const GameNode &p_node)
+{
+  if (p_node->IsTerminal()) {
+    return p_style.GetTerminalToken();
+  }
+  if (p_node->GetPlayer()->IsChance()) {
+    return p_style.GetChanceToken();
+  }
+  return p_style.GetPlayerToken();
+}
+
+} // namespace
+
 //-----------------------------------------------------------------------
 //                   class gbtNodeEntry: Member functions
 //-----------------------------------------------------------------------
-
-gbtNodeEntry::gbtNodeEntry(GameNode p_node)
-  : m_node(p_node), m_parent(nullptr), m_x(-1), m_y(-1), m_nextMember(nullptr), m_inSupport(true),
-    m_size(20), m_token(GBT_NODE_TOKEN_CIRCLE), m_branchStyle(GBT_BRANCH_STYLE_LINE),
-    m_branchLabel(GBT_BRANCH_LABEL_HORIZONTAL), m_branchLength(0), m_sublevel(0), m_actionProb(0)
-{
-}
-
-int gbtNodeEntry::GetChildNumber() const
-{
-  if (m_node->GetParent()) {
-    return m_node->GetPriorAction()->GetNumber();
-  }
-  else {
-    return 0;
-  }
-}
 
 //
 // Draws the node token itself, as well as the incoming branch
 // (if not the root node)
 //
-void gbtNodeEntry::Draw(wxDC &p_dc, GameNode p_selection, bool p_noHints) const
+void gbtTreeLayout::DrawNode(wxDC &p_dc, const std::shared_ptr<gbtNodeEntry> &p_entry,
+                             const GameNode &p_selection, bool p_noHints) const
 {
-  if (m_node->GetParent() && m_inSupport) {
-    DrawIncomingBranch(p_dc);
+  if (p_entry->m_node->GetParent() && p_entry->m_inSupport) {
+    DrawIncomingBranch(p_dc, p_entry);
   }
   else {
-    m_branchAboveRect = wxRect();
-    m_branchBelowRect = wxRect();
+    p_entry->m_branchAboveRect = wxRect();
+    p_entry->m_branchBelowRect = wxRect();
   }
 
-  p_dc.SetPen(
-      *wxThePenList->FindOrCreatePen(m_color, (p_selection == m_node) ? 6 : 3, wxPENSTYLE_SOLID));
-  p_dc.SetTextForeground(m_color);
+  const auto color = m_doc->GetStyle().GetPlayerColor(p_entry->m_node->GetPlayer());
+  p_dc.SetPen(*wxThePenList->FindOrCreatePen(color, (p_selection == p_entry->m_node) ? 6 : 3,
+                                             wxPENSTYLE_SOLID));
+  p_dc.SetTextForeground(color);
 
-  if (m_token == GBT_NODE_TOKEN_LINE) {
-    p_dc.DrawLine(m_x, m_y, m_x + m_size, m_y);
-    if (m_branchStyle == GBT_BRANCH_STYLE_FORKTINE) {
+  if (GetTokenForNode(m_doc->GetStyle(), p_entry->m_node) == GBT_NODE_TOKEN_LINE) {
+    p_dc.DrawLine(p_entry->m_x, p_entry->m_y, p_entry->m_x + p_entry->m_size, p_entry->m_y);
+    if (m_doc->GetStyle().GetBranchStyle() == GBT_BRANCH_STYLE_FORKTINE) {
       // "classic" Gambit style: draw a small 'token' to separate
       // the fork from the node
-      p_dc.DrawEllipse(m_x - 1, m_y - 1, 3, 3);
+      p_dc.DrawEllipse(p_entry->m_x - 1, p_entry->m_y - 1, 3, 3);
     }
   }
-  else if (m_token == GBT_NODE_TOKEN_BOX) {
+  else if (GetTokenForNode(m_doc->GetStyle(), p_entry->m_node) == GBT_NODE_TOKEN_BOX) {
     p_dc.SetBrush(*wxWHITE_BRUSH);
-    p_dc.DrawRectangle(m_x, m_y - m_size / 2, m_size, m_size);
+    p_dc.DrawRectangle(p_entry->m_x, p_entry->m_y - p_entry->m_size / 2, p_entry->m_size,
+                       p_entry->m_size);
   }
-  else if (m_token == GBT_NODE_TOKEN_DIAMOND) {
-    wxPoint points[4] = {wxPoint(m_x + m_size / 2, m_y - m_size / 2), wxPoint(m_x, m_y),
-                         wxPoint(m_x + m_size / 2, m_y + m_size / 2), wxPoint(m_x + m_size, m_y)};
+  else if (GetTokenForNode(m_doc->GetStyle(), p_entry->m_node) == GBT_NODE_TOKEN_DIAMOND) {
+    wxPoint points[4] = {
+        wxPoint(p_entry->m_x + p_entry->m_size / 2, p_entry->m_y - p_entry->m_size / 2),
+        wxPoint(p_entry->m_x, p_entry->m_y),
+        wxPoint(p_entry->m_x + p_entry->m_size / 2, p_entry->m_y + p_entry->m_size / 2),
+        wxPoint(p_entry->m_x + p_entry->m_size, p_entry->m_y)};
     p_dc.SetBrush(*wxWHITE_BRUSH);
     p_dc.DrawPolygon(4, points);
   }
-  else if (m_token == GBT_NODE_TOKEN_DOT) {
-    p_dc.SetBrush(wxBrush(m_color, wxBRUSHSTYLE_SOLID));
-    p_dc.DrawEllipse(m_x, m_y - m_size / 2, m_size, m_size);
+  else if (GetTokenForNode(m_doc->GetStyle(), p_entry->m_node) == GBT_NODE_TOKEN_DOT) {
+    p_dc.SetBrush(wxBrush(m_doc->GetStyle().GetPlayerColor(p_entry->m_node->GetPlayer()),
+                          wxBRUSHSTYLE_SOLID));
+    p_dc.DrawEllipse(p_entry->m_x, p_entry->m_y - p_entry->m_size / 2, p_entry->m_size,
+                     p_entry->m_size);
   }
   else {
     // Default: draw circles
     p_dc.SetBrush(*wxWHITE_BRUSH);
-    p_dc.DrawEllipse(m_x, m_y - m_size / 2, m_size, m_size);
+    p_dc.DrawEllipse(p_entry->m_x, p_entry->m_y - p_entry->m_size / 2, p_entry->m_size,
+                     p_entry->m_size);
   }
 
   int textWidth, textHeight;
-  p_dc.SetFont(m_nodeAboveFont);
-  p_dc.GetTextExtent(m_nodeAboveLabel, &textWidth, &textHeight);
-  p_dc.DrawText(m_nodeAboveLabel, m_x + (m_size - textWidth) / 2, m_y - textHeight - 9);
-  p_dc.SetFont(m_nodeBelowFont);
-  p_dc.GetTextExtent(m_nodeBelowLabel, &textWidth, &textHeight);
-  p_dc.DrawText(m_nodeBelowLabel, m_x + (m_size - textWidth) / 2, m_y + 9);
+  p_dc.SetFont(m_doc->GetStyle().GetFont());
+  p_dc.GetTextExtent(p_entry->m_nodeAboveLabel, &textWidth, &textHeight);
+  p_dc.DrawText(p_entry->m_nodeAboveLabel, p_entry->m_x + (p_entry->m_size - textWidth) / 2,
+                p_entry->m_y - textHeight - 9);
+  p_dc.SetFont(m_doc->GetStyle().GetFont());
+  p_dc.GetTextExtent(p_entry->m_nodeBelowLabel, &textWidth, &textHeight);
+  p_dc.DrawText(p_entry->m_nodeBelowLabel, p_entry->m_x + (p_entry->m_size - textWidth) / 2,
+                p_entry->m_y + 9);
 
   p_dc.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
-  DrawOutcome(p_dc, p_noHints);
+  DrawOutcome(p_dc, p_entry, p_noHints);
 }
 
-void gbtNodeEntry::DrawIncomingBranch(wxDC &p_dc) const
+void gbtTreeLayout::DrawIncomingBranch(wxDC &p_dc,
+                                       const std::shared_ptr<gbtNodeEntry> &p_entry) const
 {
-  const int xStart = m_parent->m_x + m_parent->m_size;
-  const int xEnd = m_x;
-  const int yStart = m_parent->m_y;
-  const int yEnd = m_y;
+  const int xStart = p_entry->m_parent->m_x + p_entry->m_parent->m_size;
+  const int xEnd = p_entry->m_x;
+  const int yStart = p_entry->m_parent->m_y;
+  const int yEnd = p_entry->m_y;
 
-  p_dc.SetPen(*wxThePenList->FindOrCreatePen(m_parent->m_color, 4, wxPENSTYLE_SOLID));
-  p_dc.SetTextForeground(m_parent->m_color);
+  const auto color = m_doc->GetStyle().GetPlayerColor(p_entry->m_node->GetParent()->GetPlayer());
+  p_dc.SetPen(*wxThePenList->FindOrCreatePen(color, 4, wxPENSTYLE_SOLID));
+  p_dc.SetTextForeground(color);
 
-  if (m_branchStyle == GBT_BRANCH_STYLE_LINE) {
+  if (m_doc->GetStyle().GetBranchStyle() == GBT_BRANCH_STYLE_LINE) {
     p_dc.DrawLine(xStart, yStart, xEnd, yEnd);
 
     // Draw in the highlight indicating action probabilities
-    if (m_actionProb >= Rational(0)) {
+    if (p_entry->m_actionProb >= 0.0) {
       p_dc.SetPen(*wxThePenList->FindOrCreatePen(*wxBLACK, 4, wxPENSTYLE_SOLID));
-      p_dc.DrawLine(xStart, yStart, xStart + (int)((double)(xEnd - xStart) * (double)m_actionProb),
-                    yStart + (int)((double)(yEnd - yStart) * (double)m_actionProb));
+      p_dc.DrawLine(xStart, yStart, xStart + (xEnd - xStart) * p_entry->m_actionProb,
+                    yStart + (yEnd - yStart) * p_entry->m_actionProb);
     }
 
     int textWidth, textHeight;
-    p_dc.SetFont(m_branchAboveFont);
-    p_dc.GetTextExtent(m_branchAboveLabel, &textWidth, &textHeight);
+    p_dc.SetFont(m_doc->GetStyle().GetFont());
+    p_dc.GetTextExtent(p_entry->m_branchAboveLabel, &textWidth, &textHeight);
 
     // The angle of the branch
-    const double theta = -atan((double)(yEnd - yStart) / (double)(xEnd - xStart));
+    const double theta =
+        -std::atan(static_cast<double>(yEnd - yStart) / static_cast<double>(xEnd - xStart));
     // The "centerpoint" of the branch
     const int xbar = (xStart + xEnd) / 2;
     const int ybar = (yStart + yEnd) / 2;
 
-    if (m_branchLabel == GBT_BRANCH_LABEL_HORIZONTAL) {
+    if (m_doc->GetStyle().GetBranchLabels() == GBT_BRANCH_LABEL_ORIENT_HORIZONTAL) {
       if (yStart >= yEnd) {
-        p_dc.DrawText(m_branchAboveLabel, xbar - textWidth / 2,
+        p_dc.DrawText(p_entry->m_branchAboveLabel, xbar - textWidth / 2,
                       ybar - textHeight + textWidth / 2 * (yEnd - yStart) / (xEnd - xStart));
-        m_branchAboveRect =
+        p_entry->m_branchAboveRect =
             wxRect(xbar - textWidth / 2,
                    ybar - textHeight + textWidth / 2 * (yEnd - yStart) / (xEnd - xStart),
                    textWidth, textHeight);
       }
       else {
-        p_dc.DrawText(m_branchAboveLabel, xbar - textWidth / 2,
+        p_dc.DrawText(p_entry->m_branchAboveLabel, xbar - textWidth / 2,
                       ybar - textHeight - textWidth / 2 * (yEnd - yStart) / (xEnd - xStart));
-        m_branchAboveRect =
+        p_entry->m_branchAboveRect =
             wxRect(xbar - textWidth / 2,
                    ybar - textHeight - textWidth / 2 * (yEnd - yStart) / (xEnd - xStart),
                    textWidth, textHeight);
@@ -162,65 +175,65 @@ void gbtNodeEntry::DrawIncomingBranch(wxDC &p_dc) const
     }
     else {
       // Draw the text rotated appropriately
-      p_dc.DrawRotatedText(m_branchAboveLabel,
-                           (int)((double)xbar - (double)textHeight * sin(theta) -
-                                 (double)textWidth * cos(theta) / 2.0),
-                           (int)((double)ybar - (double)textHeight * cos(theta) +
-                                 (double)textWidth * sin(theta) / 2.0),
-                           theta * 180.0 / 3.14159);
-      m_branchAboveRect = wxRect();
+      p_dc.DrawRotatedText(
+          p_entry->m_branchAboveLabel,
+          (xbar - textHeight * std::sin(theta) - textWidth * std::cos(theta) / 2.0),
+          (ybar - textHeight * std::cos(theta) + textWidth * std::sin(theta) / 2.0),
+          theta * 180.0 / 3.14159);
+      p_entry->m_branchAboveRect = wxRect();
     }
 
-    p_dc.SetFont(m_branchBelowFont);
-    p_dc.GetTextExtent(m_branchBelowLabel, &textWidth, &textHeight);
+    p_dc.SetFont(m_doc->GetStyle().GetFont());
+    p_dc.GetTextExtent(p_entry->m_branchBelowLabel, &textWidth, &textHeight);
 
-    if (m_branchLabel == GBT_BRANCH_LABEL_HORIZONTAL) {
+    if (m_doc->GetStyle().GetBranchLabels() == GBT_BRANCH_LABEL_ORIENT_HORIZONTAL) {
       if (yStart >= yEnd) {
-        p_dc.DrawText(m_branchBelowLabel, xbar - textWidth / 2,
+        p_dc.DrawText(p_entry->m_branchBelowLabel, xbar - textWidth / 2,
                       ybar - textWidth / 2 * (yEnd - yStart) / (xEnd - xStart));
-        m_branchBelowRect =
+        p_entry->m_branchBelowRect =
             wxRect(xbar - textWidth / 2, ybar - textWidth / 2 * (yEnd - yStart) / (xEnd - xStart),
                    textWidth, textHeight);
       }
       else {
-        p_dc.DrawText(m_branchBelowLabel, xbar - textWidth / 2,
+        p_dc.DrawText(p_entry->m_branchBelowLabel, xbar - textWidth / 2,
                       ybar + textWidth / 2 * (yEnd - yStart) / (xEnd - xStart));
-        m_branchBelowRect =
+        p_entry->m_branchBelowRect =
             wxRect(xbar - textWidth / 2, ybar + textWidth / 2 * (yEnd - yStart) / (xEnd - xStart),
                    textWidth, textHeight);
       }
     }
     else {
       // Draw the text rotated appropriately
-      p_dc.DrawRotatedText(
-          m_branchBelowLabel, (int)((double)xbar - (double)textWidth * cos(theta) / 2.0),
-          (int)((double)ybar + (double)textWidth * sin(theta) / 2.0), theta * 180.0 / 3.14159);
-      m_branchBelowRect = wxRect();
+      p_dc.DrawRotatedText(p_entry->m_branchBelowLabel, (xbar - textWidth * std::cos(theta) / 2.0),
+                           (ybar + textWidth * std::sin(theta) / 2.0), theta * 180.0 / 3.14159);
+      p_entry->m_branchBelowRect = wxRect();
     }
   }
   else {
     // Old style fork-tine
-    p_dc.DrawLine(xStart, yStart, xStart + m_branchLength, yEnd);
-    p_dc.DrawLine(xStart + m_branchLength, yEnd, xEnd, yEnd);
+    p_dc.DrawLine(xStart, yStart, xStart + p_entry->m_branchLength, yEnd);
+    p_dc.DrawLine(xStart + p_entry->m_branchLength, yEnd, xEnd, yEnd);
 
     // Draw in the highlight indicating action probabilities
-    if (m_actionProb >= Rational(0)) {
+    if (p_entry->m_actionProb >= 0.0) {
       p_dc.SetPen(*wxThePenList->FindOrCreatePen(*wxBLACK, 2, wxPENSTYLE_SOLID));
-      p_dc.DrawLine(xStart, yStart, xStart + (int)((double)m_branchLength * (double)m_actionProb),
-                    yStart + (int)((double)(yEnd - yStart) * (double)m_actionProb));
+      p_dc.DrawLine(xStart, yStart, xStart + p_entry->m_branchLength * p_entry->m_actionProb,
+                    yStart + (yEnd - yStart) * p_entry->m_actionProb);
     }
 
     int textWidth, textHeight;
-    p_dc.SetFont(m_branchAboveFont);
-    p_dc.GetTextExtent(m_branchAboveLabel, &textWidth, &textHeight);
-    p_dc.DrawText(m_branchAboveLabel, xStart + m_branchLength + 3, yEnd - textHeight - 3);
-    m_branchAboveRect =
-        wxRect(xStart + m_branchLength + 3, yEnd - textHeight - 3, textWidth, textHeight);
+    p_dc.SetFont(m_doc->GetStyle().GetFont());
+    p_dc.GetTextExtent(p_entry->m_branchAboveLabel, &textWidth, &textHeight);
+    p_dc.DrawText(p_entry->m_branchAboveLabel, xStart + p_entry->m_branchLength + 3,
+                  yEnd - textHeight - 3);
+    p_entry->m_branchAboveRect =
+        wxRect(xStart + p_entry->m_branchLength + 3, yEnd - textHeight - 3, textWidth, textHeight);
 
-    p_dc.SetFont(m_branchBelowFont);
-    p_dc.GetTextExtent(m_branchBelowLabel, &textWidth, &textHeight);
-    p_dc.DrawText(m_branchBelowLabel, xStart + m_branchLength + 3, yEnd + 3);
-    m_branchBelowRect = wxRect(xStart + m_branchLength + 3, yEnd + +3, textWidth, textHeight);
+    p_dc.SetFont(m_doc->GetStyle().GetFont());
+    p_dc.GetTextExtent(p_entry->m_branchBelowLabel, &textWidth, &textHeight);
+    p_dc.DrawText(p_entry->m_branchBelowLabel, xStart + p_entry->m_branchLength + 3, yEnd + 3);
+    p_entry->m_branchBelowRect =
+        wxRect(xStart + p_entry->m_branchLength + 3, yEnd + +3, textWidth, textHeight);
   }
 }
 
@@ -248,11 +261,12 @@ static wxPoint DrawFraction(wxDC &p_dc, wxPoint p_point, const Rational &p_value
   return p_point;
 }
 
-void gbtNodeEntry::DrawOutcome(wxDC &p_dc, bool p_noHints) const
+void gbtTreeLayout::DrawOutcome(wxDC &p_dc, const std::shared_ptr<gbtNodeEntry> &p_entry,
+                                bool p_noHints) const
 {
-  wxPoint point(m_x + m_size + 20, m_y);
+  wxPoint point(p_entry->m_x + p_entry->m_size + 20, p_entry->m_y);
 
-  const GameOutcome outcome = m_node->GetOutcome();
+  const GameOutcome outcome = p_entry->m_node->GetOutcome();
   if (!outcome) {
     if (p_noHints) {
       return;
@@ -263,30 +277,32 @@ void gbtNodeEntry::DrawOutcome(wxDC &p_dc, bool p_noHints) const
     p_dc.SetTextForeground(*wxLIGHT_GREY);
     p_dc.GetTextExtent(wxT("(u)"), &width, &height);
     p_dc.DrawText(wxT("(u)"), point.x, point.y - height / 2);
-    m_outcomeRect = wxRect(point.x, point.y - height / 2, width, height);
-    m_payoffRect = Array<wxRect>();
+    p_entry->m_outcomeRect = wxRect(point.x, point.y - height / 2, width, height);
+    p_entry->m_payoffRect = Array<wxRect>();
     return;
   }
 
   int width, height = 25;
-  m_payoffRect = Array<wxRect>();
-  for (const auto &player : m_node->GetGame()->GetPlayers()) {
-    p_dc.SetTextForeground(m_style->GetPlayerColor(player->GetNumber()));
+  p_entry->m_payoffRect = Array<wxRect>();
+  for (const auto &player : p_entry->m_node->GetGame()->GetPlayers()) {
+    p_dc.SetTextForeground(m_doc->GetStyle().GetPlayerColor(player));
 
     const auto &payoff = outcome->GetPayoff<std::string>(player);
 
     if (payoff.find('/') != std::string::npos) {
-      p_dc.SetPen(wxPen(m_style->GetPlayerColor(player->GetNumber()), 1, wxPENSTYLE_SOLID));
+      p_dc.SetPen(wxPen(m_doc->GetStyle().GetPlayerColor(player), 1, wxPENSTYLE_SOLID));
       const int oldX = point.x;
       point = DrawFraction(p_dc, point, outcome->GetPayoff<Rational>(player));
-      m_payoffRect.push_back(wxRect(oldX - 5, point.y - height / 2, point.x - oldX + 10, height));
+      p_entry->m_payoffRect.push_back(
+          wxRect(oldX - 5, point.y - height / 2, point.x - oldX + 10, height));
     }
     else {
       const wxString label = wxString(payoff.c_str(), *wxConvCurrent);
       p_dc.SetFont(wxFont(9, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
       p_dc.GetTextExtent(label, &width, &height);
       p_dc.DrawText(label, point.x, point.y - height / 2);
-      m_payoffRect.push_back(wxRect(point.x - 5, point.y - height / 2, width + 10, height));
+      p_entry->m_payoffRect.push_back(
+          wxRect(point.x - 5, point.y - height / 2, width + 10, height));
       point.x += width + 10;
     }
   }
@@ -296,96 +312,99 @@ void gbtNodeEntry::DrawOutcome(wxDC &p_dc, bool p_noHints) const
     height = 25;
   }
 
-  m_outcomeRect =
-      wxRect(m_x + m_size + 20, m_y - height / 2, point.x - (m_x + m_size + 20), height);
+  p_entry->m_outcomeRect = wxRect(p_entry->m_x + p_entry->m_size + 20, p_entry->m_y - height / 2,
+                                  point.x - (p_entry->m_x + p_entry->m_size + 20), height);
 }
 
-bool gbtNodeEntry::NodeHitTest(int p_x, int p_y) const
+bool gbtTreeLayout::NodeHitTest(const std::shared_ptr<gbtNodeEntry> &p_entry, const int p_x,
+                                const int p_y) const
 {
-  if (p_x < m_x || p_x >= m_x + m_size) {
+  if (p_x < p_entry->m_x || p_x >= p_entry->m_x + p_entry->m_size) {
     return false;
   }
 
-  if (m_token == GBT_NODE_TOKEN_LINE) {
-    const int DELTA = 8; // a fudge factor for "almost" hitting the node
-    return (p_y >= m_y - DELTA && p_y <= m_y + DELTA);
+  if (GetTokenForNode(m_doc->GetStyle(), p_entry->m_node) == GBT_NODE_TOKEN_LINE) {
+    constexpr int DELTA = 8; // a fudge factor for "almost" hitting the node
+    return (p_y >= p_entry->m_y - DELTA && p_y <= p_entry->m_y + DELTA);
   }
-  else {
-    return (p_y >= m_y - m_size / 2 && p_y <= m_y + m_size / 2);
-  }
+  return (p_y >= p_entry->m_y - p_entry->m_size / 2 && p_y <= p_entry->m_y + p_entry->m_size / 2);
 }
 
 //-----------------------------------------------------------------------
 //                class gbtTreeLayout: Member functions
 //-----------------------------------------------------------------------
 
-gbtTreeLayout::gbtTreeLayout(gbtEfgDisplay *p_parent, gbtGameDocument *p_doc)
-  : gbtGameView(p_doc),
-    /* m_parent(p_parent),*/ m_infosetSpacing(40), c_leftMargin(20), c_topMargin(40)
-{
-}
-
 GameNode gbtTreeLayout::NodeHitTest(int p_x, int p_y) const
 {
-  for (const auto &entry : m_nodeList) {
-    if (entry->NodeHitTest(p_x, p_y)) {
-      return entry->GetNode();
-    }
-  }
-  return nullptr;
+  const auto hit =
+      std::find_if(m_nodeList.begin(), m_nodeList.end(),
+                   [this, p_x, p_y](const std::shared_ptr<gbtNodeEntry> &p_entry) -> bool {
+                     return NodeHitTest(p_entry, p_x, p_y);
+                   });
+  return (hit != m_nodeList.end()) ? (*hit)->GetNode() : nullptr;
 }
 
 GameNode gbtTreeLayout::OutcomeHitTest(int p_x, int p_y) const
 {
-  for (const auto &entry : m_nodeList) {
-    if (entry->OutcomeHitTest(p_x, p_y)) {
-      return entry->GetNode();
-    }
-  }
-  return nullptr;
+  const auto hit =
+      std::find_if(m_nodeList.begin(), m_nodeList.end(),
+                   [this, p_x, p_y](const std::shared_ptr<gbtNodeEntry> &p_entry) -> bool {
+                     return p_entry->OutcomeHitTest(p_x, p_y);
+                   });
+  return (hit != m_nodeList.end()) ? (*hit)->GetNode() : nullptr;
 }
 
 GameNode gbtTreeLayout::BranchAboveHitTest(int p_x, int p_y) const
 {
-  for (const auto &entry : m_nodeList) {
-    if (entry->BranchAboveHitTest(p_x, p_y)) {
-      return entry->GetNode()->GetParent();
-    }
-  }
-  return nullptr;
+  const auto hit =
+      std::find_if(m_nodeList.begin(), m_nodeList.end(),
+                   [this, p_x, p_y](const std::shared_ptr<gbtNodeEntry> &p_entry) -> bool {
+                     return p_entry->BranchAboveHitTest(p_x, p_y);
+                   });
+  return (hit != m_nodeList.end()) ? (*hit)->GetNode()->GetParent() : nullptr;
 }
 
 GameNode gbtTreeLayout::BranchBelowHitTest(int p_x, int p_y) const
 {
-  for (const auto &entry : m_nodeList) {
-    if (entry->BranchAboveHitTest(p_x, p_y)) {
-      return entry->GetNode()->GetParent();
+  const auto hit =
+      std::find_if(m_nodeList.begin(), m_nodeList.end(),
+                   [this, p_x, p_y](const std::shared_ptr<gbtNodeEntry> &p_entry) -> bool {
+                     return p_entry->BranchBelowHitTest(p_x, p_y);
+                   });
+  return (hit != m_nodeList.end()) ? (*hit)->GetNode()->GetParent() : nullptr;
+}
+
+bool gbtTreeLayout::InfosetHitTest(const std::shared_ptr<gbtNodeEntry> &p_entry, const int p_x,
+                                   const int p_y) const
+{
+  if (p_entry->GetNextMember() && p_entry->GetNode()->GetInfoset()) {
+    if (p_x > p_entry->m_x + p_entry->GetSublevel() * m_infosetSpacing - 2 &&
+        p_x < p_entry->m_x + p_entry->GetSublevel() * m_infosetSpacing + 2) {
+      if (p_y > p_entry->m_y && p_y < p_entry->GetNextMember()->m_y) {
+        // next infoset is below this one
+        return true;
+      }
+      if (p_y > p_entry->GetNextMember()->m_y && p_y < p_entry->m_y) {
+        // next infoset is above this one
+        return true;
+      }
     }
   }
-  return nullptr;
+  return false;
 }
 
 GameNode gbtTreeLayout::InfosetHitTest(int p_x, int p_y) const
 {
-  for (const auto &entry : m_nodeList) {
-    if (entry->GetNextMember() && entry->GetNode()->GetInfoset()) {
-      if (p_x > entry->X() + entry->GetSublevel() * m_infosetSpacing - 2 &&
-          p_x < entry->X() + entry->GetSublevel() * m_infosetSpacing + 2) {
-        if (p_y > entry->Y() && p_y < entry->GetNextMember()->Y()) {
-          // next iset is below this one
-          return entry->GetNode();
-        }
-        else if (p_y > entry->GetNextMember()->Y() && p_y < entry->Y()) {
-          // next iset is above this one
-          return entry->GetNode();
-        }
-      }
-    }
-  }
-  return nullptr;
+  const auto hit =
+      std::find_if(m_nodeList.begin(), m_nodeList.end(),
+                   [this, p_x, p_y](const std::shared_ptr<gbtNodeEntry> &p_entry) -> bool {
+                     return InfosetHitTest(p_entry, p_x, p_y);
+                   });
+  return (hit != m_nodeList.end()) ? (*hit)->GetNode() : nullptr;
 }
 
-wxString gbtTreeLayout::CreateNodeLabel(const gbtNodeEntry *p_entry, int p_which) const
+wxString gbtTreeLayout::CreateNodeLabel(const std::shared_ptr<gbtNodeEntry> &p_entry,
+                                        int p_which) const
 {
   const GameNode n = p_entry->GetNode();
 
@@ -443,7 +462,8 @@ wxString gbtTreeLayout::CreateNodeLabel(const gbtNodeEntry *p_entry, int p_which
   }
 }
 
-wxString gbtTreeLayout::CreateBranchLabel(const gbtNodeEntry *p_entry, int p_which) const
+wxString gbtTreeLayout::CreateBranchLabel(const std::shared_ptr<gbtNodeEntry> &p_entry,
+                                          int p_which) const
 {
   const GameNode parent = p_entry->GetParent()->GetNode();
 
@@ -486,39 +506,27 @@ wxString gbtTreeLayout::CreateBranchLabel(const gbtNodeEntry *p_entry, int p_whi
   }
 }
 
-gbtNodeEntry *gbtTreeLayout::GetValidParent(const GameNode &e)
+std::shared_ptr<gbtNodeEntry> gbtTreeLayout::GetRenderedAncestor(const GameNode &p_node) const
 {
-  gbtNodeEntry *n = GetNodeEntry(e->GetParent());
-  if (n) {
-    return n;
+  auto n = p_node;
+  auto entry = GetNodeEntry(n->GetParent());
+  while (!entry) {
+    n = n->GetParent();
+    entry = GetNodeEntry(n->GetParent());
   }
-  else {
-    return GetValidParent(e->GetParent());
-  }
+  return entry;
 }
 
-gbtNodeEntry *gbtTreeLayout::GetValidChild(const GameNode &e)
+std::shared_ptr<gbtNodeEntry> gbtTreeLayout::GetRenderedDescendant(const GameNode &p_node) const
 {
-  for (const auto &child : e->GetChildren()) {
-    gbtNodeEntry *n = GetNodeEntry(child);
+  for (const auto &child : p_node->GetChildren()) {
+    auto n = GetNodeEntry(child);
     if (n) {
       return n;
     }
-    else {
-      n = GetValidChild(child);
-      if (n) {
-        return n;
-      }
-    }
-  }
-  return nullptr;
-}
-
-gbtNodeEntry *gbtTreeLayout::GetEntry(const GameNode &p_node) const
-{
-  for (const auto &entry : m_nodeList) {
-    if (entry->GetNode() == p_node) {
-      return entry;
+    n = GetRenderedDescendant(child);
+    if (n) {
+      return n;
     }
   }
   return nullptr;
@@ -526,13 +534,13 @@ gbtNodeEntry *gbtTreeLayout::GetEntry(const GameNode &p_node) const
 
 GameNode gbtTreeLayout::PriorSameLevel(const GameNode &p_node) const
 {
-  gbtNodeEntry *entry = GetEntry(p_node);
-  if (entry) {
+  if (auto entry = GetNodeEntry(p_node)) {
     auto e = std::next(std::find(m_nodeList.rbegin(), m_nodeList.rend(), entry));
     while (e != m_nodeList.rend()) {
       if ((*e)->GetLevel() == entry->GetLevel()) {
         return (*e)->GetNode();
       }
+      --e;
     }
   }
   return nullptr;
@@ -540,8 +548,7 @@ GameNode gbtTreeLayout::PriorSameLevel(const GameNode &p_node) const
 
 GameNode gbtTreeLayout::NextSameLevel(const GameNode &p_node) const
 {
-  gbtNodeEntry *entry = GetEntry(p_node);
-  if (entry) {
+  if (auto entry = GetNodeEntry(p_node)) {
     auto e = std::next(std::find(m_nodeList.begin(), m_nodeList.end(), entry));
     while (e != m_nodeList.end()) {
       if ((*e)->GetLevel() == entry->GetLevel()) {
@@ -553,242 +560,116 @@ GameNode gbtTreeLayout::NextSameLevel(const GameNode &p_node) const
   return nullptr;
 }
 
-int gbtTreeLayout::LayoutSubtree(const GameNode &p_node, const BehaviorSupportProfile &p_support,
-                                 int &p_maxy, int &p_miny, int &p_ycoord)
+void gbtTreeLayout::ComputeOffsets(const GameNode &p_node, const BehaviorSupportProfile &p_support,
+                                   int &p_ycoord)
 {
-  int y1 = -1, yn = 0;
-  const gbtStyle &settings = m_doc->GetStyle();
+  const auto &settings = m_doc->GetStyle();
 
-  gbtNodeEntry *entry = GetEntry(p_node);
-  entry->SetNextMember(nullptr);
+  const auto entry = GetNodeEntry(p_node);
   if (m_doc->GetStyle().RootReachable() && p_node->GetInfoset() &&
       !p_node->GetInfoset()->GetPlayer()->IsChance()) {
-    const GameInfoset infoset = p_node->GetInfoset();
-    for (auto action : p_support.GetActions(infoset)) {
-      yn = LayoutSubtree(p_node->GetChild(action), p_support, p_maxy, p_miny, p_ycoord);
-      if (y1 == -1) {
-        y1 = yn;
+    const auto actions = p_support.GetActions(p_node->GetInfoset());
+    for (const auto &action : actions) {
+      ComputeOffsets(p_node->GetChild(action), p_support, p_ycoord);
+    }
+    entry->m_y = (GetNodeEntry(p_node->GetChild(actions.front()))->m_y +
+                  GetNodeEntry(p_node->GetChild(actions.back()))->m_y) /
+                 2;
+  }
+  else if (!p_node->IsTerminal()) {
+    const auto actions = p_node->GetInfoset()->GetActions();
+    for (const auto &action : actions) {
+      const auto child = p_node->GetChild(action);
+      ComputeOffsets(child, p_support, p_ycoord);
+      if (!p_node->GetPlayer()->IsChance() && !p_support.Contains(action)) {
+        GetNodeEntry(child)->m_inSupport = false;
       }
     }
-    entry->SetY((y1 + yn) / 2);
+    entry->m_y = (GetNodeEntry(p_node->GetChild(actions.front()))->m_y +
+                  GetNodeEntry(p_node->GetChild(actions.back()))->m_y) /
+                 2;
   }
   else {
-    if (!p_node->IsTerminal()) {
-      for (const auto &action : p_node->GetInfoset()->GetActions()) {
-        yn = LayoutSubtree(p_node->GetChild(action), p_support, p_maxy, p_miny, p_ycoord);
-        if (y1 == -1) {
-          y1 = yn;
-        }
-
-        if (!p_node->GetPlayer()->IsChance() && !p_support.Contains(action)) {
-          (*std::find_if(m_nodeList.begin(), m_nodeList.end(), [&](const gbtNodeEntry *e) {
-            return e->GetNode() == p_node->GetChild(action);
-          }))->SetInSupport(false);
-        }
-      }
-      entry->SetY((y1 + yn) / 2);
-    }
-    else {
-      entry->SetY(p_ycoord);
-      p_ycoord += settings.TerminalSpacing();
-    }
+    entry->m_y = p_ycoord;
+    p_ycoord += settings.TerminalSpacing();
   }
-
-  if (settings.BranchStyle() == GBT_BRANCH_STYLE_LINE) {
-    entry->SetX(c_leftMargin +
-                entry->GetLevel() * (settings.NodeSize() + settings.BranchLength()));
-  }
-  else {
-    entry->SetX(c_leftMargin + entry->GetLevel() * (settings.NodeSize() + settings.BranchLength() +
-                                                    settings.TineLength()));
-  }
-
-  if (p_node->GetPlayer() && p_node->GetPlayer()->IsChance()) {
-    entry->SetColor(settings.ChanceColor());
-    entry->SetToken(settings.ChanceToken());
-  }
-  else if (p_node->GetPlayer()) {
-    entry->SetColor(settings.GetPlayerColor(p_node->GetPlayer()->GetNumber()));
-    entry->SetToken(settings.PlayerToken());
-  }
-  else {
-    entry->SetColor(settings.TerminalColor());
-    entry->SetToken(settings.TerminalToken());
-  }
-
-  entry->SetSize(settings.NodeSize());
-  entry->SetBranchStyle(settings.BranchStyle());
-  if (settings.BranchStyle() == GBT_BRANCH_STYLE_LINE) {
-    entry->SetBranchLabelStyle(settings.BranchLabels());
-  }
-  entry->SetBranchLength(settings.BranchLength());
-
-  p_maxy = std::max(entry->Y(), p_maxy);
-  p_miny = std::min(entry->Y(), p_miny);
-
-  return entry->Y();
 }
 
-//
-// Checks if there are any nodes in the same infoset as e that are either
-// on the same level (if SHOWISET_SAME) or on any level (if SHOWISET_ALL)
-//
-gbtNodeEntry *gbtTreeLayout::NextInfoset(gbtNodeEntry *e)
+std::shared_ptr<gbtNodeEntry>
+gbtTreeLayout::ComputeNextInInfoset(const std::shared_ptr<gbtNodeEntry> &p_entry)
 {
-  const gbtStyle &draw_settings = m_doc->GetStyle();
-
-  auto entry = std::next(std::find(m_nodeList.begin(), m_nodeList.end(), e));
-  while (entry != m_nodeList.end()) {
-    gbtNodeEntry *e1 = *entry;
-    // infosets are the same and the nodes are on the same level
-    if (e->GetNode()->GetInfoset() == e1->GetNode()->GetInfoset()) {
-      if (draw_settings.InfosetConnect() == GBT_INFOSET_CONNECT_ALL) {
-        return e1;
+  const auto infosetConnectStyle = m_doc->GetStyle().GetInfosetConnect();
+  const auto infoset = p_entry->m_node->GetInfoset();
+  if (!infoset) {
+    // For terminal nodes, the next in information set is always the next terminal node,
+    // irrespective of draw settings
+    auto entry = std::next(std::find(m_nodeList.begin(), m_nodeList.end(), p_entry));
+    while (entry != m_nodeList.end()) {
+      if ((*entry)->m_node->IsTerminal()) {
+        return *entry;
       }
-      else if (e->GetLevel() == e1->GetLevel()) {
-        return e1;
-      }
+      ++entry;
     }
-    ++entry;
+    return nullptr;
+  }
+  auto member = std::next(
+      std::find(infoset->GetMembers().begin(), infoset->GetMembers().end(), p_entry->m_node));
+  while (member != infoset->GetMembers().end()) {
+    auto member_entry = GetNodeEntry(*member);
+    if (member_entry != nullptr && (p_entry->m_level == member_entry->m_level ||
+                                    infosetConnectStyle == GBT_INFOSET_CONNECT_ALL)) {
+      return member_entry;
+    }
+    ++member;
   }
   return nullptr;
 }
 
-//
-// CheckInfosetEntry.  Checks how many infoset lines are to be drawn at each
-// level, spaces them by setting each infoset's node's num to the previous
-// infoset node+1.  Also lengthens the nodes by the amount of space taken up
-// by the infoset lines.
-//
-void gbtTreeLayout::CheckInfosetEntry(gbtNodeEntry *e)
+void gbtTreeLayout::ComputeSublevel(const std::shared_ptr<gbtNodeEntry> &p_entry)
 {
-  gbtNodeEntry *infoset_entry;
-  // Check if the infoset this entry belongs to (on this level) has already
-  // been processed.  If so, make this entry->num the same as the one already
-  // processed and return
-  infoset_entry = NextInfoset(e);
-  for (const auto &e1 : m_nodeList) {
-    // if the infosets are the same, and they are on the same level, and e1 has been processed
-    if (e->GetNode()->GetInfoset() == e1->GetNode()->GetInfoset() &&
-        e->GetLevel() == e1->GetLevel() && e1->GetSublevel() > 0) {
-      e->SetSublevel(e1->GetSublevel());
-      if (infoset_entry) {
-        e->SetNextMember(infoset_entry);
-      }
-      return;
-    }
+  try {
+    p_entry->m_sublevel = m_infosetSublevels.at({p_entry->m_level, p_entry->m_node->GetInfoset()});
   }
-
-  // If we got here, this entry does not belong to any processed infoset yet.
-  // Check if it belongs to ANY infoset, if not just return
-  if (!infoset_entry) {
-    return;
+  catch (std::out_of_range &) {
+    p_entry->m_sublevel = ++m_numSublevels[p_entry->m_level];
+    m_infosetSublevels[{p_entry->m_level, p_entry->m_node->GetInfoset()}] = p_entry->m_sublevel;
   }
-
-  // If we got here, then this entry is new and is connected to other entries
-  // find the entry on the same level with the maximum num.
-  // This entry will have num = num+1.
-  int num = 0;
-  for (const auto &e1 : m_nodeList) {
-    // Find the max num for this level
-    if (e->GetLevel() == e1->GetLevel()) {
-      num = std::max(e1->GetSublevel(), num);
-    }
-  }
-  num++;
-  e->SetSublevel(num);
-  e->SetNextMember(infoset_entry);
+  p_entry->m_nextMember = ComputeNextInInfoset(p_entry);
 }
 
-void gbtTreeLayout::FillInfosetTable(const GameNode &n, const BehaviorSupportProfile &cur_sup)
+void gbtTreeLayout::ComputeNodeDepths() const
 {
-  const gbtStyle &draw_settings = m_doc->GetStyle();
-  gbtNodeEntry *entry = GetNodeEntry(n);
-  if (!n->IsTerminal()) {
-    for (const auto &action : n->GetInfoset()->GetActions()) {
-      const bool in_sup = n->GetPlayer()->IsChance() || cur_sup.Contains(action);
-      if (in_sup || !draw_settings.RootReachable()) {
-        FillInfosetTable(n->GetChild(action), cur_sup);
-      }
-    }
-  }
-
-  if (entry) {
-    CheckInfosetEntry(entry);
-  }
-}
-
-void gbtTreeLayout::UpdateTableInfosets()
-{
-  // Note that levels are numbered from 0, not 1.
-  // create an array to hold max num for each level
-  Array<int> nums(0, m_maxLevel + 1);
-
-  for (int i = 0; i <= m_maxLevel + 1; nums[i++] = 0)
-    ;
-  // find the max e->num for each level
-  for (const auto &entry : m_nodeList) {
-    nums[entry->GetLevel()] = std::max(entry->GetSublevel() + 1, nums[entry->GetLevel()]);
-  }
-
-  for (int i = 0; i <= m_maxLevel; i++) {
-    nums[i + 1] += nums[i];
-  }
-
-  // now add the needed length to each level, and set maxX accordingly
+  std::vector<int> aggregateSublevels(m_maxLevel + 1);
+  std::partial_sum(m_numSublevels.cbegin(), m_numSublevels.cend(), aggregateSublevels.begin());
   m_maxX = 0;
   for (const auto &entry : m_nodeList) {
-    if (entry->GetLevel() != 0) {
-      entry->SetX(entry->X() +
-                  (nums[entry->GetLevel() - 1] + entry->GetSublevel()) * m_infosetSpacing);
+    entry->m_x = c_leftMargin + entry->m_level * m_doc->GetStyle().GetNodeLevelLength();
+    if (entry->m_level != 0) {
+      entry->m_x +=
+          (aggregateSublevels[entry->m_level - 1] + entry->m_sublevel) * m_infosetSpacing;
     }
-    m_maxX = std::max(m_maxX, entry->X() + entry->GetSize());
+    m_maxX = std::max(m_maxX, entry->m_x + entry->m_size);
   }
 }
 
-void gbtTreeLayout::UpdateTableParents()
+void gbtTreeLayout::ComputeRenderedParents() const
 {
   for (const auto &e : m_nodeList) {
-    e->SetParent((e->GetNode() == m_doc->GetGame()->GetRoot()) ? e : GetValidParent(e->GetNode()));
+    e->m_parent = (e->m_node == m_doc->GetGame()->GetRoot()) ? e : GetRenderedAncestor(e->m_node);
   }
-}
-
-void gbtTreeLayout::Layout(const BehaviorSupportProfile &p_support)
-{
-  // Kinda kludgey; probably should query draw settings whenever needed.
-  m_infosetSpacing = (m_doc->GetStyle().InfosetJoin() == GBT_INFOSET_JOIN_LINES) ? 10 : 40;
-
-  if (m_nodeList.size() != m_doc->GetGame()->NumNodes()) {
-    // A rebuild is in order; force it
-    BuildNodeList(p_support);
-  }
-
-  int miny = 0, maxy = 0, ycoord = c_topMargin;
-  LayoutSubtree(m_doc->GetGame()->GetRoot(), p_support, maxy, miny, ycoord);
-
-  const gbtStyle &draw_settings = m_doc->GetStyle();
-  if (draw_settings.InfosetConnect() != GBT_INFOSET_CONNECT_NONE) {
-    // FIXME! This causes lines to disappear... sometimes.
-    FillInfosetTable(m_doc->GetGame()->GetRoot(), p_support);
-    UpdateTableInfosets();
-  }
-
-  UpdateTableParents();
-  GenerateLabels();
-
-  m_maxY = maxy + 25;
 }
 
 void gbtTreeLayout::BuildNodeList(const GameNode &p_node, const BehaviorSupportProfile &p_support,
-                                  int p_level)
+                                  const int p_level)
 {
-  auto *entry = new gbtNodeEntry(p_node);
-  entry->SetStyle(&m_doc->GetStyle());
+  const auto entry = std::make_shared<gbtNodeEntry>(p_node);
   m_nodeList.push_back(entry);
-  entry->SetLevel(p_level);
+  m_nodeMap[p_node] = entry;
+  entry->m_size = m_doc->GetStyle().GetNodeSize();
+  entry->m_branchLength = m_doc->GetStyle().GetBranchLength();
+  entry->m_level = p_level;
   if (m_doc->GetStyle().RootReachable()) {
-    const GameInfoset infoset = p_node->GetInfoset();
-    if (infoset) {
+    if (const GameInfoset infoset = p_node->GetInfoset()) {
       if (infoset->GetPlayer()->IsChance()) {
         for (const auto &child : p_node->GetChildren()) {
           BuildNodeList(child, p_support, p_level + 1);
@@ -811,27 +692,48 @@ void gbtTreeLayout::BuildNodeList(const GameNode &p_node, const BehaviorSupportP
 
 void gbtTreeLayout::BuildNodeList(const BehaviorSupportProfile &p_support)
 {
-  for (auto entry : m_nodeList) {
-    delete entry;
-  }
   m_nodeList.clear();
+  m_nodeMap.clear();
   m_maxLevel = 0;
   BuildNodeList(m_doc->GetGame()->GetRoot(), p_support, 0);
 }
 
-void gbtTreeLayout::GenerateLabels()
+void gbtTreeLayout::Layout(const BehaviorSupportProfile &p_support)
+{
+  m_infosetSpacing = (m_doc->GetStyle().GetInfosetJoin() == GBT_INFOSET_JOIN_LINES) ? 10 : 40;
+
+  if (m_nodeList.size() != m_doc->GetGame()->NumNodes()) {
+    // We only rebuild the node list if the number of nodes changes.  If we only have
+    // information set changes this can be handled just by the traversal below
+    BuildNodeList(p_support);
+  }
+
+  int maxy = c_topMargin;
+  ComputeOffsets(m_doc->GetGame()->GetRoot(), p_support, maxy);
+  m_maxY = maxy + c_bottomMargin;
+
+  m_infosetSublevels.clear();
+  m_numSublevels = std::vector<int>(m_maxLevel + 1);
+  if (m_doc->GetStyle().GetInfosetConnect() != GBT_INFOSET_CONNECT_NONE) {
+    for (auto entry : m_nodeList) {
+      ComputeSublevel(entry);
+    }
+    ComputeNodeDepths();
+  }
+
+  ComputeRenderedParents();
+  GenerateLabels();
+}
+
+void gbtTreeLayout::GenerateLabels() const
 {
   const gbtStyle &settings = m_doc->GetStyle();
   for (const auto &entry : m_nodeList) {
-    entry->SetNodeAboveLabel(CreateNodeLabel(entry, settings.NodeAboveLabel()));
-    entry->SetNodeAboveFont(settings.GetFont());
-    entry->SetNodeBelowLabel(CreateNodeLabel(entry, settings.NodeBelowLabel()));
-    entry->SetNodeBelowFont(settings.GetFont());
+    entry->SetNodeAboveLabel(CreateNodeLabel(entry, settings.GetNodeAboveLabel()));
+    entry->SetNodeBelowLabel(CreateNodeLabel(entry, settings.GetNodeBelowLabel()));
     if (entry->GetChildNumber() > 0) {
-      entry->SetBranchAboveLabel(CreateBranchLabel(entry, settings.BranchAboveLabel()));
-      entry->SetBranchAboveFont(settings.GetFont());
-      entry->SetBranchBelowLabel(CreateBranchLabel(entry, settings.BranchBelowLabel()));
-      entry->SetBranchBelowFont(settings.GetFont());
+      entry->SetBranchAboveLabel(CreateBranchLabel(entry, settings.GetBranchAboveLabel()));
+      entry->SetBranchBelowLabel(CreateBranchLabel(entry, settings.GetBranchBelowLabel()));
 
       const GameNode parent = entry->GetNode()->GetParent();
       if (parent->GetPlayer()->IsChance()) {
@@ -873,49 +775,51 @@ void gbtTreeLayout::RenderSubtree(wxDC &p_dc, bool p_noHints) const
   const gbtStyle &settings = m_doc->GetStyle();
 
   for (const auto &entry : m_nodeList) {
-    gbtNodeEntry *parentEntry = entry->GetParent();
+    auto parentEntry = entry->GetParent();
 
     if (entry->GetChildNumber() == 1) {
-      parentEntry->Draw(p_dc, m_doc->GetSelectNode(), p_noHints);
+      DrawNode(p_dc, parentEntry, m_doc->GetSelectNode(), p_noHints);
 
-      if (m_doc->GetStyle().InfosetConnect() != GBT_INFOSET_CONNECT_NONE &&
+      if (m_doc->GetStyle().GetInfosetConnect() != GBT_INFOSET_CONNECT_NONE &&
           parentEntry->GetNextMember()) {
-        const int nextX = parentEntry->GetNextMember()->X();
-        const int nextY = parentEntry->GetNextMember()->Y();
+        const int nextX = parentEntry->GetNextMember()->m_x;
+        const int nextY = parentEntry->GetNextMember()->m_y;
 
-        if ((m_doc->GetStyle().InfosetConnect() != GBT_INFOSET_CONNECT_SAMELEVEL) ||
-            parentEntry->X() == nextX) {
+        if ((m_doc->GetStyle().GetInfosetConnect() != GBT_INFOSET_CONNECT_SAMELEVEL) ||
+            parentEntry->m_x == nextX) {
 #ifdef __WXGTK__
           // A problem with using styled pens and user scaling on wxGTK
-          p_dc.SetPen(wxPen(parentEntry->GetColor(), 1, wxPENSTYLE_SOLID));
+          p_dc.SetPen(wxPen(m_doc->GetStyle().GetPlayerColor(parentEntry->m_node->GetPlayer()), 1,
+                            wxPENSTYLE_SOLID));
 #else
-          p_dc.SetPen(wxPen(parentEntry->GetColor(), 1, wxPENSTYLE_DOT));
+          p_dc.SetPen(wxPen(m_doc->GetStyle().GetPlayerColor(parentEntry->m_node->GetPlayer()), 1,
+                            wxPENSTYLE_DOT));
 #endif // __WXGTK__
-          p_dc.DrawLine(parentEntry->X(), parentEntry->Y(), parentEntry->X(), nextY);
-          if (settings.InfosetJoin() == GBT_INFOSET_JOIN_CIRCLES) {
-            p_dc.DrawLine(parentEntry->X() + parentEntry->GetSize(), parentEntry->Y(),
-                          parentEntry->X() + parentEntry->GetSize(), nextY);
+          p_dc.DrawLine(parentEntry->m_x, parentEntry->m_y, parentEntry->m_x, nextY);
+          if (settings.GetInfosetJoin() == GBT_INFOSET_JOIN_CIRCLES) {
+            p_dc.DrawLine(parentEntry->m_x + parentEntry->GetSize(), parentEntry->m_y,
+                          parentEntry->m_x + parentEntry->GetSize(), nextY);
           }
 
-          if (parentEntry->GetNextMember()->X() != parentEntry->X()) {
+          if (parentEntry->GetNextMember()->m_x != parentEntry->m_x) {
             // Draw a little arrow in the direction of the iset.
             int startX, endX;
-            if (settings.InfosetJoin() == GBT_INFOSET_JOIN_LINES) {
-              startX = parentEntry->X();
+            if (settings.GetInfosetJoin() == GBT_INFOSET_JOIN_LINES) {
+              startX = parentEntry->m_x;
               endX =
                   (startX + m_infosetSpacing *
-                                ((parentEntry->GetNextMember()->X() > parentEntry->X()) ? 1 : -1));
+                                ((parentEntry->GetNextMember()->m_x > parentEntry->m_x) ? 1 : -1));
             }
             else {
-              if (parentEntry->GetNextMember()->X() < parentEntry->X()) {
+              if (parentEntry->GetNextMember()->m_x < parentEntry->m_x) {
                 // information set is continued to the left
-                startX = parentEntry->X() + parentEntry->GetSize();
-                endX = parentEntry->X() - m_infosetSpacing;
+                startX = parentEntry->m_x + parentEntry->GetSize();
+                endX = parentEntry->m_x - m_infosetSpacing;
               }
               else {
                 // information set is continued to the right
-                startX = parentEntry->X();
-                endX = (parentEntry->X() + parentEntry->GetSize() + m_infosetSpacing);
+                startX = parentEntry->m_x;
+                endX = (parentEntry->m_x + parentEntry->GetSize() + m_infosetSpacing);
               }
             }
             p_dc.DrawLine(startX, nextY, endX, nextY);
@@ -937,7 +841,7 @@ void gbtTreeLayout::RenderSubtree(wxDC &p_dc, bool p_noHints) const
     }
 
     if (entry->GetNode()->IsTerminal()) {
-      entry->Draw(p_dc, m_doc->GetSelectNode(), p_noHints);
+      DrawNode(p_dc, entry, m_doc->GetSelectNode(), p_noHints);
     }
 
     // As we draw, we determine the outcome label extents.  Adjust the

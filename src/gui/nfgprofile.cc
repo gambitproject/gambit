@@ -117,7 +117,7 @@ static wxColour GetPlayerColor(gbtGameDocument *p_doc, int p_index)
   for (const auto &player : p_doc->GetGame()->GetPlayers()) {
     for (const auto &strategy : player->GetStrategies()) {
       if (index++ == p_index) {
-        return p_doc->GetStyle().GetPlayerColor(player->GetNumber());
+        return p_doc->GetStyle().GetPlayerColor(player);
       }
     }
   }

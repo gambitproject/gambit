@@ -89,7 +89,7 @@ wxString gbtBehavProfileList::GetCellValue(const wxSheetCoords &p_coords)
 static wxColour GetPlayerColor(gbtGameDocument *p_doc, int p_index)
 {
   const Gambit::GameAction action = p_doc->GetAction(p_index + 1);
-  return p_doc->GetStyle().GetPlayerColor(action->GetInfoset()->GetPlayer()->GetNumber());
+  return p_doc->GetStyle().GetPlayerColor(action->GetInfoset()->GetPlayer());
 }
 
 wxSheetCellAttr gbtBehavProfileList::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
@@ -137,8 +137,7 @@ wxSheetCellAttr gbtBehavProfileList::GetAttr(const wxSheetCoords &p_coords, wxSh
 
   try {
     const Gambit::GameAction action = m_doc->GetAction(p_coords.GetCol() + 1);
-    attr.SetForegroundColour(
-        m_doc->GetStyle().GetPlayerColor(action->GetInfoset()->GetPlayer()->GetNumber()));
+    attr.SetForegroundColour(m_doc->GetStyle().GetPlayerColor(action->GetInfoset()->GetPlayer()));
     if (action->GetInfoset()->GetNumber() % 2 == 0) {
       attr.SetBackgroundColour(wxColour(250, 250, 250));
     }

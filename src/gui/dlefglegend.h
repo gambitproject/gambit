@@ -34,11 +34,23 @@ public:
   gbtLegendDialog(wxWindow *, const gbtStyle &);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
-  int GetNodeAbove() const { return m_nodeAbove->GetSelection(); }
-  int GetNodeBelow() const { return m_nodeBelow->GetSelection(); }
+  NodeLabelStyle GetNodeAbove() const
+  {
+    return static_cast<NodeLabelStyle>(m_nodeAbove->GetSelection());
+  }
+  NodeLabelStyle GetNodeBelow() const
+  {
+    return static_cast<NodeLabelStyle>(m_nodeBelow->GetSelection());
+  }
 
-  int GetBranchAbove() const { return m_actionAbove->GetSelection(); }
-  int GetBranchBelow() const { return m_actionBelow->GetSelection(); }
+  BranchLabelStyle GetBranchAbove() const
+  {
+    return static_cast<BranchLabelStyle>(m_actionAbove->GetSelection());
+  }
+  BranchLabelStyle GetBranchBelow() const
+  {
+    return static_cast<BranchLabelStyle>(m_actionBelow->GetSelection());
+  }
 };
 
 #endif // DLEFGLEGEND_H

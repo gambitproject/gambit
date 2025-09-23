@@ -51,7 +51,7 @@ gbtPayoffEditor::gbtPayoffEditor(wxWindow *p_parent)
   Show(false);
 }
 
-void gbtPayoffEditor::BeginEdit(gbtNodeEntry *p_entry, int p_player)
+void gbtPayoffEditor::BeginEdit(std::shared_ptr<gbtNodeEntry> p_entry, int p_player)
 {
   m_entry = p_entry;
   m_outcome = p_entry->GetNode()->GetOutcome();
@@ -323,7 +323,7 @@ END_EVENT_TABLE()
 //----------------------------------------------------------------------
 
 gbtEfgDisplay::gbtEfgDisplay(wxWindow *p_parent, gbtGameDocument *p_doc)
-  : wxScrolledWindow(p_parent), gbtGameView(p_doc), m_layout(this, p_doc), m_zoom(100),
+  : wxScrolledWindow(p_parent), gbtGameView(p_doc), m_layout(p_doc), m_zoom(100),
     m_payoffEditor(new gbtPayoffEditor(this))
 {
   SetBackgroundColour(wxColour(250, 250, 250));
@@ -457,7 +457,7 @@ void gbtEfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
       OnDraw(dc);
 
       if (player < static_cast<int>(m_doc->NumPlayers())) {
-        gbtNodeEntry *entry = m_layout.GetNodeEntry(node);
+        auto entry = m_layout.GetNodeEntry(node);
         const wxRect rect = entry->GetPayoffExtent(player + 1);
         int xx, yy;
         CalcScrolledPosition((int)(.01 * (rect.x - 3) * m_zoom),
@@ -494,13 +494,13 @@ void gbtEfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
   }
   case WXK_LEFT:
     if (selectNode->GetParent()) {
-      m_doc->SetSelectNode(m_layout.GetValidParent(selectNode)->GetNode());
+      m_doc->SetSelectNode(m_layout.GetRenderedAncestor(selectNode)->GetNode());
       EnsureNodeVisible(m_doc->GetSelectNode());
     }
     return;
   case WXK_RIGHT:
-    if (m_layout.GetValidChild(selectNode)) {
-      m_doc->SetSelectNode(m_layout.GetValidChild(selectNode)->GetNode());
+    if (m_layout.GetRenderedDescendant(selectNode)) {
+      m_doc->SetSelectNode(m_layout.GetRenderedDescendant(selectNode)->GetNode());
       EnsureNodeVisible(m_doc->GetSelectNode());
     }
     return;
@@ -573,7 +573,7 @@ void gbtEfgDisplay::OnUpdate()
 {
   // First make sure that the selected node is in fact still valid
   if (m_doc->GetSelectNode()) {
-    gbtNodeEntry *entry = m_layout.GetNodeEntry(m_doc->GetSelectNode());
+    auto entry = m_layout.GetNodeEntry(m_doc->GetSelectNode());
     if (!entry) {
       m_doc->SetSelectNode(nullptr);
     }
@@ -686,21 +686,21 @@ void gbtEfgDisplay::EnsureNodeVisible(const GameNode &p_node)
     return;
   }
 
-  gbtNodeEntry *entry = m_layout.GetNodeEntry(p_node);
+  auto entry = m_layout.GetNodeEntry(p_node);
   int xScroll, yScroll;
   GetViewStart(&xScroll, &yScroll);
   int width, height;
   GetClientSize(&width, &height);
 
   int xx, yy;
-  CalcScrolledPosition((int)(entry->X() * (.01 * m_zoom) - 20), (int)(entry->Y() * (.01 * m_zoom)),
-                       &xx, &yy);
+  CalcScrolledPosition((int)(entry->GetX() * (.01 * m_zoom) - 20),
+                       (int)(entry->GetY() * (.01 * m_zoom)), &xx, &yy);
   if (xx < 0) {
     xScroll -= -xx / 50 + 1;
   }
 
-  CalcScrolledPosition((int)(entry->X() * (.01 * m_zoom)), (int)(entry->Y() * (.01 * m_zoom)), &xx,
-                       &yy);
+  CalcScrolledPosition((int)(entry->GetX() * (.01 * m_zoom)),
+                       (int)(entry->GetY() * (.01 * m_zoom)), &xx, &yy);
   if (xx > width) {
     xScroll += (xx - width) / 50 + 1;
   }
@@ -711,13 +711,13 @@ void gbtEfgDisplay::EnsureNodeVisible(const GameNode &p_node)
     xScroll = GetScrollRange(wxHORIZONTAL);
   }
 
-  CalcScrolledPosition((int)(entry->X() * (.01 * m_zoom)), (int)(entry->Y() * (.01 * m_zoom) - 20),
-                       &xx, &yy);
+  CalcScrolledPosition((int)(entry->GetX() * (.01 * m_zoom)),
+                       (int)(entry->GetY() * (.01 * m_zoom) - 20), &xx, &yy);
   if (yy < 0) {
     yScroll -= -yy / 50 + 1;
   }
-  CalcScrolledPosition((int)(entry->X() * (.01 * m_zoom)), (int)(entry->Y() * (.01 * m_zoom) + 20),
-                       &xx, &yy);
+  CalcScrolledPosition((int)(entry->GetX() * (.01 * m_zoom)),
+                       (int)(entry->GetY() * (.01 * m_zoom) + 20), &xx, &yy);
   if (yy > height) {
     yScroll += (yy - height) / 50 + 1;
   }
@@ -780,7 +780,7 @@ void gbtEfgDisplay::OnLeftDoubleClick(wxMouseEvent &p_event)
       PrepareDC(dc);
       OnDraw(dc);
 
-      gbtNodeEntry *entry = m_layout.GetNodeEntry(node);
+      auto entry = m_layout.GetNodeEntry(node);
       const wxRect rect = entry->GetPayoffExtent(1);
 
       int xx, yy;
@@ -794,7 +794,7 @@ void gbtEfgDisplay::OnLeftDoubleClick(wxMouseEvent &p_event)
     }
 
     // Editing an existing outcome
-    gbtNodeEntry *entry = m_layout.GetNodeEntry(node);
+    auto entry = m_layout.GetNodeEntry(node);
     for (size_t pl = 1; pl <= m_doc->NumPlayers(); pl++) {
       const wxRect rect = entry->GetPayoffExtent(pl);
       if (rect.Contains(x, y)) {
@@ -812,7 +812,7 @@ void gbtEfgDisplay::OnLeftDoubleClick(wxMouseEvent &p_event)
     return;
   }
 
-  if (m_doc->GetStyle().BranchAboveLabel() == GBT_BRANCH_LABEL_LABEL) {
+  if (m_doc->GetStyle().GetBranchAboveLabel() == GBT_BRANCH_LABEL_LABEL) {
     node = m_layout.BranchAboveHitTest(x, y);
     if (node) {
       m_doc->SetSelectNode(node);
@@ -822,7 +822,7 @@ void gbtEfgDisplay::OnLeftDoubleClick(wxMouseEvent &p_event)
     }
   }
 
-  if (m_doc->GetStyle().BranchBelowLabel() == GBT_BRANCH_LABEL_LABEL) {
+  if (m_doc->GetStyle().GetBranchBelowLabel() == GBT_BRANCH_LABEL_LABEL) {
     node = m_layout.BranchBelowHitTest(x, y);
     if (node) {
       m_doc->SetSelectNode(node);

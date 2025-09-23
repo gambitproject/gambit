@@ -53,7 +53,7 @@ gbtRevealMoveDialog::gbtRevealMoveDialog(wxWindow *p_parent, gbtGameDocument *p_
       m_players.push_back(new wxCheckBox(this, wxID_ANY, wxString::Format(_T("Player %d"), pl)));
     }
     m_players[pl]->SetValue(true);
-    m_players[pl]->SetForegroundColour(m_doc->GetStyle().GetPlayerColor(pl));
+    m_players[pl]->SetForegroundColour(m_doc->GetStyle().GetPlayerColor(player));
     boxSizer->Add(m_players[pl], 1, wxALL | wxEXPAND, 0);
   }
   playerBox->Add(boxSizer, 1, wxALL | wxEXPAND, 5);
