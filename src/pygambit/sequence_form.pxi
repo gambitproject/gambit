@@ -1,5 +1,12 @@
 from libcpp.map cimport map as cpp_map
 
+@cython.cfunc
+def rat_to_py_new(r: c_Rational):
+    s = to_string(r).decode("ascii")
+    if not s:
+        return Rational(0)
+    return Rational(s)
+
 cdef extern from "../games/behavspt.h" namespace "Gambit":
     cdef cppclass c_BehaviorSupportProfile "BehaviorSupportProfile":
         c_BehaviourSupportProfile(const c_Game&) except +
@@ -41,5 +48,5 @@ cdef class GameSequenceForm:
             temp_action = <c_GameAction>value.action
             action_profile[temp_player] = temp_action
         cdef c_Rational payoff_obj = self.cpp_form.PayoffFromActions(action_profile, cpp_player)
-        return rat_to_py(payoff_obj)
+        return rat_to_py_new(payoff_obj)
 
