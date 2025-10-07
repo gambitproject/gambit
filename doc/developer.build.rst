@@ -90,7 +90,7 @@ instructions for Un*x/Linux platforms above.
 The graphical interface and wxWidgets
 -------------------------------------
 
-Gambit requires wxWidgets version 3.1.x or higher.
+Gambit requires wxWidgets version 3.2.x or higher.
 See the wxWidgets website at
 `<http://www.wxwidgets.org>`_
 to download this if you need it.  Packages of this should be available
