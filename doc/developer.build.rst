@@ -86,11 +86,57 @@ For OS X users
 For building the command-line tools only, one should follow the
 instructions for Un*x/Linux platforms above.
 
+.. _build-gui:
 
 The graphical interface and wxWidgets
 -------------------------------------
 
-Gambit requires wxWidgets version 3.2.x or higher.
+.. dropdown:: Manual macOS Build Instructions
+   :class-container: sd-border-0
+   
+   To build and install the Gambit GUI from source on macOS, follow these steps:
+
+   1. **Install build dependencies:**
+
+      .. code-block:: bash
+
+         brew install automake autoconf libtool wxwidgets
+
+      .. note::
+         If you encounter interpreter errors with autom4te, you may need to ensure
+         your Perl installation is correct or reinstall the autotools:
+
+         .. code-block:: bash
+
+            brew reinstall automake autoconf libtool wxwidgets
+
+   2. **Build and install Gambit:**
+
+      Navigate back to the Gambit source directory and run:
+
+      .. code-block:: bash
+
+         aclocal
+         automake --add-missing
+         autoconf
+         ./configure
+         make
+         sudo make install
+
+   3. **Create macOS application bundle:**
+
+      To create a distributable DMG file:
+
+      .. code-block:: bash
+
+         make osx-dmg
+
+   4. **Install the application:**
+
+      After creating the DMG file, open it and drag the Gambit application to your Applications folder.
+
+
+Note that Gambit requires wxWidgets version 3.2.x or higher.
 See the wxWidgets website at
 `<http://www.wxwidgets.org>`_
 to download this if you need it.  Packages of this should be available
@@ -115,16 +161,6 @@ can either (a) simply not install wxWidgets, or (b) pass the argument
 
 This will just build the command-line tools, and will not require
 a wxWidgets installation.
-
-For OS X users, after the usual ``make`` step, run
-
-  make osx-bundle
-
-This produces an application ``Gambit.app`` in the current directory,
-which can be run from its current location, or copied elsewhere in the
-disk (such as ``/Applications``).  The application bundle includes the
-command-line executables.
-
 
 
 .. _build-python:
