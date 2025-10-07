@@ -34,6 +34,7 @@ Tutorials **4-5** assume some familiarity with the PyGambit API and Game Theory 
 
    tutorials/04_starting_points
    tutorials/05_quantal_response
+   tutorials/06_gambit_with_openspiel
 
 You may also wish to read:
 
