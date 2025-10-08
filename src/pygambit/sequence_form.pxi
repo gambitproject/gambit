@@ -33,7 +33,7 @@ cdef extern from "../solvers/enumpoly/gameseq.h" namespace "Gambit":
 
 cdef class GameSequenceForm:
     cdef c_GameSequenceForm* cpp_form
-    cdef c_BehaviorSupportProfile* _bsp  # internal
+    cdef c_BehaviorSupportProfile* _bsp
 
     def __cinit__(self, py_game):
         cdef Game game = cython.cast(Game, py_game)
@@ -55,12 +55,12 @@ cdef class GameSequenceForm:
         cdef Action value
         for py_key, py_value in action_dict.items():
             key = cython.cast(Player, py_key)
-            temp_player = <c_GamePlayer>key.player
+            temp_player = key.player
             if py_value is None:
                 profile[temp_player] = self.cpp_form.GetEmptySequence(temp_player)
             else:
                 value = cython.cast(Action, py_value)
-                temp_action = <c_GameAction>value.action
+                temp_action = value.action
                 profile[temp_player] = self.cpp_form.GetCorrespondingSequence(temp_action)
         cdef c_Rational payoff_obj = self.cpp_form.GetPayoff(profile, cpp_player)
         return rat_to_py_new(payoff_obj)
