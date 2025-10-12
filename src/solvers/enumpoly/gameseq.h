@@ -86,19 +86,9 @@ private:
 
 public:
 
-  GameSequence GetEmptySequence(GamePlayer player)
-    {
-	  return m_sequences[player].front();
-	}
-
   GameSequence GetCorrespondingSequence(GameAction action)
 	{
 	  return m_correspondence[action];
-	}
-
-  Rational GetPayoff(std::map<GamePlayer, GameSequence> p_profile, GamePlayer p_player)
-	{
-	  return GetPayoffEntry(p_profile, p_player);
 	}
 
 public:

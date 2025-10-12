@@ -1,5 +1,6 @@
 from libcpp.map cimport map as cpp_map
 from libcpp.memory cimport shared_ptr as cpp_shared_ptr
+from libcpp.vector cimport vector as cpp_vector
 
 @cython.cfunc
 def rat_to_py_new(r: c_Rational):
@@ -23,27 +24,32 @@ ctypedef cpp_shared_ptr[c_GameSequenceRep] c_GameSequence
 
 
 cdef extern from "../solvers/enumpoly/gameseq.h" namespace "Gambit":
+    cdef cppclass c_PlayerSequences "GameSequenceForm::PlayerSequences":
+        cpp_vector[c_GameSequence].const_iterator begin()
+
+
+cdef extern from "../solvers/enumpoly/gameseq.h" namespace "Gambit":
     cdef cppclass c_GameSequenceForm "GameSequenceForm":
         c_GameSequenceForm(const c_BehaviorSupportProfile&) except +
-        c_Rational PayoffFromActions(cpp_map[c_GamePlayer, c_GameAction] action_profile,
-                                                c_GamePlayer p_player)
-        c_GameSequence GetEmptySequence(c_GamePlayer player)
+        c_Rational PayoffFromActions(cpp_map[c_GamePlayer, c_GameAction] action_profile, c_GamePlayer p_player)
         c_GameSequence GetCorrespondingSequence(c_GameAction action)
-        c_Rational GetPayoff(cpp_map[c_GamePlayer, c_GameSequence] p_profile, c_GamePlayer p_player)
+        c_PlayerSequences GetSequences(const c_GamePlayer &p_player) const
+        const c_Rational &GetPayoff(const cpp_map[c_GamePlayer, c_GameSequence] &p_profile, const c_GamePlayer &p_player) const
+
 
 cdef class GameSequenceForm:
-    cdef c_GameSequenceForm* cpp_form
-    cdef c_BehaviorSupportProfile* _bsp
+    cdef c_GameSequenceForm* seq_form
+    cdef c_BehaviorSupportProfile* support
 
     def __cinit__(self, py_game):
         cdef Game game = cython.cast(Game, py_game)
         cdef c_Game cpp_game = game.game
-        self._bsp = new c_BehaviorSupportProfile(cpp_game)
-        self.cpp_form = new c_GameSequenceForm(deref(self._bsp))
+        self.support = new c_BehaviorSupportProfile(cpp_game)
+        self.seq_form = new c_GameSequenceForm(deref(self.support))
 
     def __dealloc__(self):
-        del self.cpp_form
-        del self._bsp
+        del self.seq_form
+        del self.support
 
     def get_payoff(self, action_dict, py_player):
         cdef Player player = cython.cast(Player, py_player)
@@ -57,12 +63,12 @@ cdef class GameSequenceForm:
             key = cython.cast(Player, py_key)
             temp_player = key.player
             if py_value is None:
-                profile[temp_player] = self.cpp_form.GetEmptySequence(temp_player)
+                profile[temp_player] = deref(self.seq_form.GetSequences(temp_player).begin())
             else:
                 value = cython.cast(Action, py_value)
                 temp_action = value.action
-                profile[temp_player] = self.cpp_form.GetCorrespondingSequence(temp_action)
-        cdef c_Rational payoff_obj = self.cpp_form.GetPayoff(profile, cpp_player)
-        return rat_to_py_new(payoff_obj)
+                profile[temp_player] = self.seq_form.GetCorrespondingSequence(temp_action)
+        cdef c_Rational payoff = self.seq_form.GetPayoff(profile, cpp_player)
+        return rat_to_py_new(payoff)
 
 
