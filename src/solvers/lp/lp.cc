@@ -23,6 +23,7 @@
 #include "gambit.h"
 #include "solvers/lp/lp.h"
 #include "solvers/linalg/lpsolve.h"
+#include "solvers/enumpoly/gameseq.h"
 
 namespace Gambit::Nash {
 
@@ -35,6 +36,7 @@ public:
   explicit GameData(const Game &);
 
   void FillTableau(Matrix<T> &A, const GameNode &n, const T &prob, int s1, int s2);
+  void FillTableauNew(Matrix<T> &A, const Game &p_game);
 
   void GetBehavior(MixedBehaviorProfile<T> &v, const Array<T> &, const Array<T> &,
                    const GameNode &, int, int);
@@ -90,6 +92,50 @@ void GameData<T>::FillTableau(Matrix<T> &A, const GameNode &n, const T &prob, in
     for (const auto &child : n->GetChildren()) {
       A(row, ++snew) = static_cast<T>(1);
       FillTableau(A, child, prob, s1, snew);
+    }
+  }
+}
+
+template <class T>
+void GameData<T>::FillTableauNew(Matrix<T> &A, const Game &p_game)
+{
+  auto players = p_game->GetPlayers();
+  auto it = players.begin();
+  auto player1 = *it;
+  ++it;
+  auto player2 = *it;
+  BehaviorSupportProfile full_support(p_game);
+  Gambit::GameSequenceForm sequenceForm(full_support);
+  auto sequences1 = sequenceForm.GetSequences(player1);
+  auto sequences2 = sequenceForm.GetSequences(player2);
+  for (auto seq : sequences1) {
+    auto parentSeq = seq->parent.lock();
+    if (parentSeq) {
+      const int col = ns2 + seq->GetInfoset()->GetNumber() + 1;
+      const int row = seq->number;
+      const int parentRow = parentSeq->number;
+      A(parentRow, col) = static_cast<T>(1);
+      A(row, col) = static_cast<T>(-1);
+    }
+  }
+  for (auto seq : sequences2) {
+    auto parentSeq = seq->parent.lock();
+    if (parentSeq) {
+      const int row = ns1 + seq->GetInfoset()->GetNumber() + 1;
+      const int col = seq->number;
+      const int parentCol = parentSeq->number;
+      A(row, parentCol) = static_cast<T>(-1);
+      A(row, col) = static_cast<T>(1);
+    }
+  }
+  for (auto seq1 : sequences1) {
+    for (auto seq2 : sequences2) {
+      const int row = seq1->number;
+      const int col = seq2->number;
+      std::map<GamePlayer, GameSequence> profile;
+      profile[player1] = seq1;
+      profile[player2] = seq2;
+      A(row,col) = sequenceForm.GetPayoff(profile, player1);
     }
   }
 }
@@ -187,7 +233,8 @@ std::list<MixedBehaviorProfile<T>> LpBehaviorSolve(const Game &p_game,
   b = static_cast<T>(0);
   c = static_cast<T>(0);
 
-  data.FillTableau(A, p_game->GetRoot(), static_cast<T>(1), 1, 1);
+  //data.FillTableau(A, p_game->GetRoot(), static_cast<T>(1), 1, 1);
+  data.FillTableauNew(A, p_game);
   A(1, data.ns2 + 1) = static_cast<T>(-1);
   A(data.ns1 + 1, 1) = static_cast<T>(1);
 
