@@ -36,10 +36,12 @@ public:
   explicit GameData(const Game &);
 
   void FillTableau(Matrix<T> &A, const GameNode &n, const T &prob, int s1, int s2);
-  void FillTableauNew(Matrix<T> &A, const Game &p_game);
+  void FillTableauNew(Matrix<T> &A, const Gambit::GameSequenceForm &sequenceForm);
 
   void GetBehavior(MixedBehaviorProfile<T> &v, const Array<T> &, const Array<T> &,
                    const GameNode &, int, int);
+  void GetBehaviorNew(MixedBehaviorProfile<T> &v, const Array<T> &p_primal,
+                              const Array<T> &p_dual, const Gambit::GameSequenceForm &sequenceForm);
 };
 
 template <class T> GameData<T>::GameData(const Game &p_game) : minpay(p_game->GetMinPayoff())
@@ -97,15 +99,13 @@ void GameData<T>::FillTableau(Matrix<T> &A, const GameNode &n, const T &prob, in
 }
 
 template <class T>
-void GameData<T>::FillTableauNew(Matrix<T> &A, const Game &p_game)
+void GameData<T>::FillTableauNew(Matrix<T> &A, const Gambit::GameSequenceForm &sequenceForm)
 {
-  auto players = p_game->GetPlayers();
+  auto players = sequenceForm.GetPlayers();
   auto it = players.begin();
   auto player1 = *it;
   ++it;
   auto player2 = *it;
-  BehaviorSupportProfile full_support(p_game);
-  Gambit::GameSequenceForm sequenceForm(full_support);
   auto sequences1 = sequenceForm.GetSequences(player1);
   auto sequences2 = sequenceForm.GetSequences(player2);
   for (auto seq : sequences1) {
@@ -179,6 +179,38 @@ void GameData<T>::GetBehavior(MixedBehaviorProfile<T> &v, const Array<T> &p_prim
   }
 }
 
+
+template <class T>
+void GameData<T>::GetBehaviorNew(MixedBehaviorProfile<T> &v, const Array<T> &p_primal,
+                              const Array<T> &p_dual, const Gambit::GameSequenceForm &sequenceForm)
+{
+  auto players = sequenceForm.GetPlayers();
+  auto it = players.begin();
+  auto player1 = *it;
+  ++it;
+  auto player2 = *it;
+  auto sequences1 = sequenceForm.GetSequences(player1);
+  auto sequences2 = sequenceForm.GetSequences(player2);
+  for (auto seq : sequences1) {
+    auto parentSeq = seq->parent.lock();
+    if (parentSeq) {
+      auto action = seq->action;
+      int index = seq->number;
+      int parentIndex = parentSeq->number;
+      v[action] = (p_dual[parentIndex] > static_cast<T>(0)) ? p_dual[index] / p_dual[parentIndex] : static_cast<T>(0);
+    }
+  }
+  for (auto seq : sequences2) {
+    auto parentSeq = seq->parent.lock();
+    if (parentSeq) {
+      auto action = seq->action;
+      int index = seq->number;
+      int parentIndex = parentSeq->number;
+      v[action] = (p_primal[parentIndex] > static_cast<T>(0)) ? p_primal[index] / p_primal[parentIndex] : static_cast<T>(0);
+    }
+  }
+}
+
 //
 // The routine to actually solve the LP
 // This routine takes an LP of the form
@@ -233,8 +265,11 @@ std::list<MixedBehaviorProfile<T>> LpBehaviorSolve(const Game &p_game,
   b = static_cast<T>(0);
   c = static_cast<T>(0);
 
+  BehaviorSupportProfile full_support(p_game);
+  Gambit::GameSequenceForm sequenceForm(full_support);
+
   //data.FillTableau(A, p_game->GetRoot(), static_cast<T>(1), 1, 1);
-  data.FillTableauNew(A, p_game);
+  data.FillTableauNew(A, sequenceForm);
   A(1, data.ns2 + 1) = static_cast<T>(-1);
   A(data.ns1 + 1, 1) = static_cast<T>(1);
 
@@ -245,7 +280,8 @@ std::list<MixedBehaviorProfile<T>> LpBehaviorSolve(const Game &p_game,
   std::list<MixedBehaviorProfile<T>> solution;
   SolveLP(A, b, c, p_game->GetPlayer(2)->GetInfosets().size() + 1, primal, dual);
   MixedBehaviorProfile<T> profile(p_game);
-  data.GetBehavior(profile, primal, dual, p_game->GetRoot(), 1, 1);
+  //data.GetBehavior(profile, primal, dual, p_game->GetRoot(), 1, 1);
+  data.GetBehaviorNew(profile, primal, dual, sequenceForm);
   profile.UndefinedToCentroid();
   p_onEquilibrium(profile, "NE");
   solution.push_back(profile);
