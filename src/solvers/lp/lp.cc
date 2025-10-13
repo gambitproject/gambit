@@ -135,7 +135,7 @@ void GameData<T>::FillTableauNew(Matrix<T> &A, const Gambit::GameSequenceForm &s
       std::map<GamePlayer, GameSequence> profile;
       profile[player1] = seq1;
       profile[player2] = seq2;
-      A(row,col) = sequenceForm.GetPayoff(profile, player1);
+      A(row,col) = sequenceForm.GetPayoff(profile, player1) - minpay;
     }
   }
 }
