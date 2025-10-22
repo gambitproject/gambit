@@ -35,6 +35,7 @@ cdef extern from "../solvers/enumpoly/gameseq.h" namespace "Gambit":
         c_GameSequence GetCorrespondingSequence(c_GameAction action)
         c_PlayerSequences GetSequences(const c_GamePlayer &p_player) const
         const c_Rational &GetPayoff(const cpp_map[c_GamePlayer, c_GameSequence] &p_profile, const c_GamePlayer &p_player) const
+        int GetConstraintEntry(const c_GameInfoset &p_infoset, const c_GameAction &p_action) const
 
 
 cdef class GameSequenceForm:
@@ -70,5 +71,12 @@ cdef class GameSequenceForm:
                 profile[temp_player] = self.seq_form.GetCorrespondingSequence(temp_action)
         cdef c_Rational payoff = self.seq_form.GetPayoff(profile, cpp_player)
         return rat_to_py_new(payoff)
+
+    def get_constraint_entry(self, py_infoset, py_action):
+        cdef Infoset infoset = cython.cast(Infoset, py_infoset)
+        cdef c_GameInfoset cpp_infoset = infoset.infoset
+        cdef Action action = cython.cast(Action, py_action)
+        cdef c_GameAction cpp_action = action.action
+        return self.seq_form.GetConstraintEntry(cpp_infoset, cpp_action)
 
 
