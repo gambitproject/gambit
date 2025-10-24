@@ -20,20 +20,21 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef EFGPANEL_H
-#define EFGPANEL_H
+#ifndef GAMBIT_GUI_EFGPANEL_H
+#define GAMBIT_GUI_EFGPANEL_H
 
 #include "gamedoc.h"
 
 class wxPrintout;
-class gbtEfgDisplay;
 
-class gbtEfgPanel : public wxPanel, public gbtGameView {
-private:
-  gbtEfgDisplay *m_treeWindow;
+namespace Gambit::GUI {
+class EfgDisplay;
+
+class EfgPanel final : public wxPanel, public GameView {
+  EfgDisplay *m_treeWindow;
   wxWindow *m_dominanceToolbar, *m_playerToolbar;
 
-  // Overriding gbtGameView members
+  // Overriding GameView members
   void OnUpdate() override {}
 
   /// @name Command event handlers
@@ -46,8 +47,8 @@ private:
   //@}
 
 public:
-  gbtEfgPanel(wxWindow *p_parent, gbtGameDocument *p_doc);
-  ~gbtEfgPanel() override = default;
+  EfgPanel(wxWindow *p_parent, GameDocument *p_doc);
+  ~EfgPanel() override = default;
 
   /// @name Exporting/printing graphics
   //@{
@@ -55,7 +56,7 @@ public:
   wxPrintout *GetPrintout();
   /// Creates a bitmap of the game as currently displayed
   bool GetBitmap(wxBitmap &, int marginX, int marginY);
-  /// Outputs the game as currently displayed to a SVG file
+  /// Outputs the game as currently displayed to SVG file
   void GetSVG(const wxString &p_filename, int marginX, int marginY);
   /// Prints the game as currently displayed, centered on the DC
   void RenderGame(wxDC &p_dc, int marginX, int marginY);
@@ -63,5 +64,6 @@ public:
 
   DECLARE_EVENT_TABLE()
 };
+} // namespace Gambit::GUI
 
-#endif // EFGPANEL_H
+#endif // GAMBIT_GUI_EFGPANEL_H

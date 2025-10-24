@@ -27,24 +27,25 @@
 
 #include "dlefglegend.h"
 
+namespace Gambit::GUI {
 //==========================================================================
-//                 class gbtLegendDialog: Implementation
+//                 class LegendDialog: Implementation
 //==========================================================================
 
-gbtLegendDialog::gbtLegendDialog(wxWindow *p_parent, const gbtStyle &p_options)
+LegendDialog::LegendDialog(wxWindow *p_parent, const TreeRenderConfig &p_options)
   : wxDialog(p_parent, wxID_ANY, _("Labels"), wxDefaultPosition)
 {
   auto *nodeGroup =
       new wxStaticBoxSizer(new wxStaticBox(this, wxID_ANY, _("Node labeling")), wxVERTICAL);
 
-  wxString nodeLabelList[] = {_("no label"),
-                              _("the node's label"),
-                              _("the player's name"),
-                              _("the information set's label"),
-                              _("the information set's number"),
-                              _("the realization probability"),
-                              _("the belief probability"),
-                              _("the payoff of reaching the node")};
+  const wxString nodeLabelList[] = {_("no label"),
+                                    _("the node's label"),
+                                    _("the player's name"),
+                                    _("the information set's label"),
+                                    _("the information set's number"),
+                                    _("the realization probability"),
+                                    _("the belief probability"),
+                                    _("the payoff of reaching the node")};
 
   auto *nodeAboveSizer = new wxBoxSizer(wxHORIZONTAL);
   nodeAboveSizer->Add(new wxStaticText(this, wxID_STATIC, _("Display")), 0, wxALL | wxALIGN_CENTER,
@@ -69,9 +70,9 @@ gbtLegendDialog::gbtLegendDialog(wxWindow *p_parent, const gbtStyle &p_options)
   auto *actionGroup =
       new wxStaticBoxSizer(new wxStaticBox(this, wxID_ANY, _("Action labeling")), wxVERTICAL);
 
-  wxString actionLabelList[] = {_("no label"), _("the name of the action"),
-                                _("the probability the action is played"),
-                                _("the value of the action")};
+  const wxString actionLabelList[] = {_("no label"), _("the name of the action"),
+                                      _("the probability the action is played"),
+                                      _("the value of the action")};
 
   auto *actionAboveSizer = new wxBoxSizer(wxHORIZONTAL);
   actionAboveSizer->Add(new wxStaticText(this, wxID_STATIC, _("Display")), 0,
@@ -109,6 +110,7 @@ gbtLegendDialog::gbtLegendDialog(wxWindow *p_parent, const gbtStyle &p_options)
   SetSizer(topSizer);
   topSizer->Fit(this);
   topSizer->SetSizeHints(this);
-  Layout();
+  wxTopLevelWindowBase::Layout();
   CenterOnParent();
 }
+} // namespace Gambit::GUI

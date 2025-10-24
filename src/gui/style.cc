@@ -25,15 +25,15 @@
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif // WX_PRECOMP
-#include <wx/config.h>
 
 #include "style.h"
 
+namespace Gambit::GUI {
 //===========================================================================
-//                     class gbtStyle: Implementation
+//                 class TreeRenderConfig: Implementation
 //===========================================================================
 
-gbtStyle::gbtStyle()
+TreeRenderConfig::TreeRenderConfig()
   : m_font(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD))
 {
   SetDefaults();
@@ -48,7 +48,7 @@ static wxColour s_defaultColors[8] = {
 //! If this is the first request for that player's color, create the
 //! default one.
 //!
-const wxColour &gbtStyle::GetPlayerColor(const int pl) const
+const wxColour &TreeRenderConfig::GetPlayerColor(const int pl) const
 {
   while (pl > static_cast<int>(m_playerColors.size())) {
     m_playerColors.push_back(s_defaultColors[m_playerColors.size() % 8]);
@@ -56,7 +56,7 @@ const wxColour &gbtStyle::GetPlayerColor(const int pl) const
   return m_playerColors[pl];
 }
 
-const wxColour &gbtStyle::GetPlayerColor(const GamePlayer &p_player) const
+const wxColour &TreeRenderConfig::GetPlayerColor(const GamePlayer &p_player) const
 {
   if (!p_player) {
     return m_terminalColor;
@@ -70,7 +70,7 @@ const wxColour &gbtStyle::GetPlayerColor(const GamePlayer &p_player) const
   return m_playerColors[p_player->GetNumber()];
 }
 
-void gbtStyle::SetDefaults()
+void TreeRenderConfig::SetDefaults()
 {
   m_nodeSize = 10;
   m_terminalSpacing = 50;
@@ -98,7 +98,7 @@ void gbtStyle::SetDefaults()
   }
 }
 
-std::string gbtStyle::GetColorXML() const
+std::string TreeRenderConfig::GetColorXML() const
 {
   std::ostringstream s;
 
@@ -128,7 +128,7 @@ std::string gbtStyle::GetColorXML() const
   return s.str();
 }
 
-void gbtStyle::SetColorXML(TiXmlNode *p_colors)
+void TreeRenderConfig::SetColorXML(TiXmlNode *p_colors)
 {
   for (TiXmlNode *node = p_colors->FirstChild(); node; node = node->NextSiblingElement()) {
     int id = -2;
@@ -152,7 +152,7 @@ void gbtStyle::SetColorXML(TiXmlNode *p_colors)
   }
 }
 
-std::string gbtStyle::GetFontXML() const
+std::string TreeRenderConfig::GetFontXML() const
 {
   std::ostringstream s;
 
@@ -166,7 +166,7 @@ std::string gbtStyle::GetFontXML() const
   return s.str();
 }
 
-void gbtStyle::SetFontXML(TiXmlNode *p_font)
+void TreeRenderConfig::SetFontXML(TiXmlNode *p_font)
 {
   int size, family, style, weight;
   p_font->ToElement()->QueryIntAttribute("size", &size);
@@ -180,7 +180,7 @@ void gbtStyle::SetFontXML(TiXmlNode *p_font)
                  wxString(p_font->ToElement()->Attribute("face"), *wxConvCurrent)));
 }
 
-std::string gbtStyle::GetLayoutXML() const
+std::string TreeRenderConfig::GetLayoutXML() const
 {
   std::ostringstream s;
   s << "<autolayout>\n";
@@ -205,7 +205,7 @@ std::string gbtStyle::GetLayoutXML() const
   return s.str();
 }
 
-void gbtStyle::SetLayoutXML(TiXmlNode *p_node)
+void TreeRenderConfig::SetLayoutXML(TiXmlNode *p_node)
 {
   TiXmlNode *nodes = p_node->FirstChild("nodes");
   if (nodes) {
@@ -313,7 +313,7 @@ void gbtStyle::SetLayoutXML(TiXmlNode *p_node)
   }
 }
 
-std::string gbtStyle::GetLabelXML() const
+std::string TreeRenderConfig::GetLabelXML() const
 {
   std::ostringstream s;
   s << "<labels ";
@@ -330,7 +330,7 @@ std::string gbtStyle::GetLabelXML() const
   return s.str();
 }
 
-void gbtStyle::SetLabelXML(TiXmlNode *p_node)
+void TreeRenderConfig::SetLabelXML(TiXmlNode *p_node)
 {
   const char *abovenode = p_node->ToElement()->Attribute("abovenode");
   if (abovenode) {
@@ -424,3 +424,4 @@ void gbtStyle::SetLabelXML(TiXmlNode *p_node)
     }
   }
 }
+} // namespace Gambit::GUI

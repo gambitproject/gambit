@@ -20,10 +20,11 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef MENUCONST_H
-#define MENUCONST_H
+#ifndef GAMBIT_GUI_MENUCONST_H
+#define GAMBIT_GUI_MENUCONST_H
 
-typedef enum {
+namespace Gambit::GUI {
+enum MenuItems {
   GBT_MENU_FILE_NEW_EFG = 1098,
   GBT_MENU_FILE_NEW_NFG = 1099,
   GBT_MENU_FILE_EXPORT = 1102,
@@ -63,6 +64,7 @@ typedef enum {
   GBT_MENU_TOOLS_DOMINANCE = 1800,
   GBT_MENU_TOOLS_EQUILIBRIUM = 1801,
   GBT_MENU_TOOLS_QRE = 1802
-} gbtMenuItems;
+};
+} // namespace Gambit::GUI
 
-#endif // MENUCONST_H
+#endif // GAMBIT_GUI_MENUCONST_H

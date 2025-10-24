@@ -35,23 +35,22 @@
 #include "menuconst.h"
 #include "dlexcept.h"
 
-using namespace Gambit;
-
+namespace Gambit::GUI {
 //--------------------------------------------------------------------------
-//                         class gbtPayoffEditor
+//                         class TreePayoffEditor
 //--------------------------------------------------------------------------
 
-BEGIN_EVENT_TABLE(gbtPayoffEditor, wxTextCtrl)
-EVT_CHAR(gbtPayoffEditor::OnChar)
+BEGIN_EVENT_TABLE(TreePayoffEditor, wxTextCtrl)
+EVT_CHAR(TreePayoffEditor::OnChar)
 END_EVENT_TABLE()
 
-gbtPayoffEditor::gbtPayoffEditor(wxWindow *p_parent)
+TreePayoffEditor::TreePayoffEditor(wxWindow *p_parent)
   : wxTextCtrl(p_parent, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER)
 {
-  Show(false);
+  wxWindow::Show(false);
 }
 
-void gbtPayoffEditor::BeginEdit(std::shared_ptr<gbtNodeEntry> p_entry, int p_player)
+void TreePayoffEditor::BeginEdit(const std::shared_ptr<NodeEntry> &p_entry, int p_player)
 {
   m_entry = p_entry;
   m_outcome = p_entry->GetNode()->GetOutcome();
@@ -66,9 +65,9 @@ void gbtPayoffEditor::BeginEdit(std::shared_ptr<gbtNodeEntry> p_entry, int p_pla
   SetFocus();
 }
 
-void gbtPayoffEditor::EndEdit() { Show(false); }
+void TreePayoffEditor::EndEdit() { Show(false); }
 
-void gbtPayoffEditor::OnChar(wxKeyEvent &p_event)
+void TreePayoffEditor::OnChar(wxKeyEvent &p_event)
 {
   if (p_event.GetKeyCode() == WXK_TAB) {
     // We handle the event and pass it to the parent
@@ -104,13 +103,12 @@ static wxBitmap MakeOutcomeBitmap()
 }
 
 //--------------------------------------------------------------------------
-//                      class gbtPlayerDropTarget
+//                      class PlayerDropTarget
 //--------------------------------------------------------------------------
 
-class gbtPlayerDropTarget : public wxTextDropTarget {
-private:
-  gbtEfgDisplay *m_owner;
-  gbtGameDocument *m_model;
+class PlayerDropTarget : public wxTextDropTarget {
+  EfgDisplay *m_owner;
+  GameDocument *m_model;
 
   bool OnDropPlayer(const GameNode &p_node, const wxString &p_text);
   bool OnDropCopyNode(const GameNode &p_node, const wxString &p_text);
@@ -121,7 +119,7 @@ private:
   bool OnDropCopyOutcome(const GameNode &p_node, const wxString &p_text);
 
 public:
-  explicit gbtPlayerDropTarget(gbtEfgDisplay *p_owner)
+  explicit PlayerDropTarget(EfgDisplay *p_owner)
     : m_owner(p_owner), m_model(p_owner->GetDocument())
   {
   }
@@ -143,8 +141,7 @@ static GameNode GetNode(const GameNode &p_node, int p_id)
   }
   else {
     for (const auto &child : p_node->GetChildren()) {
-      const auto node = GetNode(child, p_id);
-      if (node) {
+      if (const auto node = GetNode(child, p_id)) {
         return node;
       }
     }
@@ -152,7 +149,7 @@ static GameNode GetNode(const GameNode &p_node, int p_id)
   }
 }
 
-bool gbtPlayerDropTarget::OnDropPlayer(const GameNode &p_node, const wxString &p_text)
+bool PlayerDropTarget::OnDropPlayer(const GameNode &p_node, const wxString &p_text)
 {
   long pl;
   p_text.Right(p_text.Length() - 1).ToLong(&pl);
@@ -170,7 +167,7 @@ bool gbtPlayerDropTarget::OnDropPlayer(const GameNode &p_node, const wxString &p
   return true;
 }
 
-bool gbtPlayerDropTarget::OnDropCopyNode(const GameNode &p_node, const wxString &p_text)
+bool PlayerDropTarget::OnDropCopyNode(const GameNode &p_node, const wxString &p_text)
 {
   long n;
   p_text.Right(p_text.Length() - 1).ToLong(&n);
@@ -185,7 +182,7 @@ bool gbtPlayerDropTarget::OnDropCopyNode(const GameNode &p_node, const wxString 
   return false;
 }
 
-bool gbtPlayerDropTarget::OnDropMoveNode(const GameNode &p_node, const wxString &p_text)
+bool PlayerDropTarget::OnDropMoveNode(const GameNode &p_node, const wxString &p_text)
 {
   long n;
   p_text.Right(p_text.Length() - 1).ToLong(&n);
@@ -200,7 +197,7 @@ bool gbtPlayerDropTarget::OnDropMoveNode(const GameNode &p_node, const wxString 
   return false;
 }
 
-bool gbtPlayerDropTarget::OnDropInfoset(const GameNode &p_node, const wxString &p_text)
+bool PlayerDropTarget::OnDropInfoset(const GameNode &p_node, const wxString &p_text)
 {
   long n;
   p_text.Right(p_text.Length() - 1).ToLong(&n);
@@ -219,7 +216,7 @@ bool gbtPlayerDropTarget::OnDropInfoset(const GameNode &p_node, const wxString &
   return false;
 }
 
-bool gbtPlayerDropTarget::OnDropSetOutcome(const GameNode &p_node, const wxString &p_text)
+bool PlayerDropTarget::OnDropSetOutcome(const GameNode &p_node, const wxString &p_text)
 {
   long n;
   p_text.Right(p_text.Length() - 1).ToLong(&n);
@@ -231,7 +228,7 @@ bool gbtPlayerDropTarget::OnDropSetOutcome(const GameNode &p_node, const wxStrin
   return true;
 }
 
-bool gbtPlayerDropTarget::OnDropMoveOutcome(const GameNode &p_node, const wxString &p_text)
+bool PlayerDropTarget::OnDropMoveOutcome(const GameNode &p_node, const wxString &p_text)
 {
   long n;
   p_text.Right(p_text.Length() - 1).ToLong(&n);
@@ -244,7 +241,7 @@ bool gbtPlayerDropTarget::OnDropMoveOutcome(const GameNode &p_node, const wxStri
   return true;
 }
 
-bool gbtPlayerDropTarget::OnDropCopyOutcome(const GameNode &p_node, const wxString &p_text)
+bool PlayerDropTarget::OnDropCopyOutcome(const GameNode &p_node, const wxString &p_text)
 {
   long n;
   p_text.Right(p_text.Length() - 1).ToLong(&n);
@@ -256,7 +253,7 @@ bool gbtPlayerDropTarget::OnDropCopyOutcome(const GameNode &p_node, const wxStri
   return true;
 }
 
-bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y, const wxString &p_text)
+bool PlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y, const wxString &p_text)
 {
   const Game efg = m_owner->GetDocument()->GetGame();
 
@@ -272,8 +269,8 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y, const wxString &p
   m_owner->CalcUnscrolledPosition(p_x, p_y, &x, &y);
 #endif // __WXMSW__ or defined(__WXMAC__)
 
-  x = (int)((float)x / (.01 * m_owner->GetZoom()));
-  y = (int)((float)y / (.01 * m_owner->GetZoom()));
+  x = static_cast<int>(static_cast<float>(x) / (.01 * m_owner->GetZoom()));
+  y = static_cast<int>(static_cast<float>(y) / (.01 * m_owner->GetZoom()));
 
   const GameNode node = m_owner->GetLayout().NodeHitTest(x, y);
   if (!node) {
@@ -281,7 +278,7 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y, const wxString &p
   }
 
   try {
-    switch ((char)p_text[0]) {
+    switch (static_cast<char>(p_text[0])) {
     case 'P':
       return OnDropPlayer(node, p_text);
     case 'C':
@@ -301,42 +298,42 @@ bool gbtPlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y, const wxString &p
     }
   }
   catch (std::exception &ex) {
-    gbtExceptionDialog(m_owner, ex.what()).ShowModal();
+    ExceptionDialog(m_owner, ex.what()).ShowModal();
     return false;
   }
 }
 
 //----------------------------------------------------------------------
-//                      gbtEfgDisplay: Member functions
+//                      EfgDisplay: Member functions
 //----------------------------------------------------------------------
 
-BEGIN_EVENT_TABLE(gbtEfgDisplay, wxScrolledWindow)
-EVT_MOTION(gbtEfgDisplay::OnMouseMotion)
-EVT_LEFT_DOWN(gbtEfgDisplay::OnLeftClick)
-EVT_LEFT_DCLICK(gbtEfgDisplay::OnLeftDoubleClick)
-EVT_RIGHT_DOWN(gbtEfgDisplay::OnRightClick)
-EVT_CHAR(gbtEfgDisplay::OnKeyEvent)
+BEGIN_EVENT_TABLE(EfgDisplay, wxScrolledWindow)
+EVT_MOTION(EfgDisplay::OnMouseMotion)
+EVT_LEFT_DOWN(EfgDisplay::OnLeftClick)
+EVT_LEFT_DCLICK(EfgDisplay::OnLeftDoubleClick)
+EVT_RIGHT_DOWN(EfgDisplay::OnRightClick)
+EVT_CHAR(EfgDisplay::OnKeyEvent)
 END_EVENT_TABLE()
 
 //----------------------------------------------------------------------
-//                gbtEfgDisplay: Constructor and destructor
+//                EfgDisplay: Constructor and destructor
 //----------------------------------------------------------------------
 
-gbtEfgDisplay::gbtEfgDisplay(wxWindow *p_parent, gbtGameDocument *p_doc)
-  : wxScrolledWindow(p_parent), gbtGameView(p_doc), m_layout(p_doc), m_zoom(100),
-    m_payoffEditor(new gbtPayoffEditor(this))
+EfgDisplay::EfgDisplay(wxWindow *p_parent, GameDocument *p_doc)
+  : wxScrolledWindow(p_parent), GameView(p_doc), m_layout(p_doc), m_zoom(100),
+    m_payoffEditor(new TreePayoffEditor(this))
 {
-  SetBackgroundColour(wxColour(250, 250, 250));
+  wxWindow::SetBackgroundColour(wxColour(250, 250, 250));
 
-  SetDropTarget(new gbtPlayerDropTarget(this));
+  wxWindow::SetDropTarget(new PlayerDropTarget(this));
   MakeMenus();
 
   Connect(m_payoffEditor->GetId(), wxEVT_COMMAND_TEXT_ENTER,
-          wxCommandEventHandler(gbtEfgDisplay::OnAcceptPayoffEdit));
+          wxCommandEventHandler(EfgDisplay::OnAcceptPayoffEdit));
   OnUpdate();
 }
 
-void gbtEfgDisplay::MakeMenus()
+void EfgDisplay::MakeMenus()
 {
   m_nodeMenu = new wxMenu;
 
@@ -366,7 +363,7 @@ void gbtEfgDisplay::MakeMenus()
 }
 
 //---------------------------------------------------------------------
-//                  gbtEfgDisplay: Event-hook members
+//                  EfgDisplay: Event-hook members
 //---------------------------------------------------------------------
 
 static GameNode PriorSameIset(const GameNode &n)
@@ -415,7 +412,7 @@ static GameNode NextSameIset(const GameNode &n)
 //     escape:       cancel edit of payoff
 //     tab:          accept edit of payoff, edit next payoff (if any)
 //
-void gbtEfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
+void EfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
 {
   const GameNode selectNode = m_doc->GetSelectNode();
 
@@ -445,7 +442,7 @@ void gbtEfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
         return;
       }
       catch (std::exception &ex) {
-        gbtExceptionDialog(this, ex.what()).ShowModal();
+        ExceptionDialog(this, ex.what()).ShowModal();
         return;
       }
 
@@ -460,10 +457,10 @@ void gbtEfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
         auto entry = m_layout.GetNodeEntry(node);
         const wxRect rect = entry->GetPayoffExtent(player + 1);
         int xx, yy;
-        CalcScrolledPosition((int)(.01 * (rect.x - 3) * m_zoom),
-                             (int)(.01 * (rect.y - 3) * m_zoom), &xx, &yy);
-        const int width = (int)(.01 * (rect.width + 10) * m_zoom);
-        const int height = (int)(.01 * (rect.height + 6) * m_zoom);
+        CalcScrolledPosition(static_cast<int>(.01 * (rect.x - 3) * m_zoom),
+                             static_cast<int>(.01 * (rect.y - 3) * m_zoom), &xx, &yy);
+        const int width = static_cast<int>(.01 * (rect.width + 10) * m_zoom);
+        const int height = static_cast<int>(.01 * (rect.height + 6) * m_zoom);
         m_payoffEditor->SetSize(xx, yy, width, height);
         m_payoffEditor->BeginEdit(entry, player + 1);
       }
@@ -541,7 +538,7 @@ void gbtEfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
   }
 }
 
-void gbtEfgDisplay::OnAcceptPayoffEdit(wxCommandEvent &)
+void EfgDisplay::OnAcceptPayoffEdit(wxCommandEvent &)
 {
   m_payoffEditor->EndEdit();
   const GameOutcome outcome = m_payoffEditor->GetOutcome();
@@ -555,21 +552,21 @@ void gbtEfgDisplay::OnAcceptPayoffEdit(wxCommandEvent &)
     return;
   }
   catch (std::exception &ex) {
-    gbtExceptionDialog(this, ex.what()).ShowModal();
+    ExceptionDialog(this, ex.what()).ShowModal();
   }
 }
 
 //---------------------------------------------------------------------
-//           gbtEfgDisplay: Implementing gbtGameView members
+//           EfgDisplay: Implementing GameView members
 //---------------------------------------------------------------------
 
-void gbtEfgDisplay::PostPendingChanges()
+void EfgDisplay::PostPendingChanges()
 {
   // FIXME: Save edit!
   m_payoffEditor->EndEdit();
 }
 
-void gbtEfgDisplay::OnUpdate()
+void EfgDisplay::OnUpdate()
 {
   // First make sure that the selected node is in fact still valid
   if (m_doc->GetSelectNode()) {
@@ -597,17 +594,17 @@ void gbtEfgDisplay::OnUpdate()
 }
 
 //---------------------------------------------------------------------
-//                   gbtEfgDisplay: Drawing functions
+//                   EfgDisplay: Drawing functions
 //---------------------------------------------------------------------
 
-void gbtEfgDisplay::RefreshTree()
+void EfgDisplay::RefreshTree()
 {
   m_layout.BuildNodeList(m_doc->GetEfgSupport());
   m_layout.Layout(m_doc->GetEfgSupport());
   Refresh();
 }
 
-void gbtEfgDisplay::AdjustScrollbarSteps()
+void EfgDisplay::AdjustScrollbarSteps()
 {
   int width, height;
   GetClientSize(&width, &height);
@@ -615,26 +612,26 @@ void gbtEfgDisplay::AdjustScrollbarSteps()
   int scrollX, scrollY;
   GetViewStart(&scrollX, &scrollY);
 
-  SetScrollbars(50, 50, (int)(m_layout.MaxX() * (.01 * m_zoom) / 50 + 1),
-                (int)(m_layout.MaxY() * (.01 * m_zoom) / 50 + 1), scrollX, scrollY);
+  SetScrollbars(50, 50, static_cast<int>(m_layout.MaxX() * (.01 * m_zoom) / 50 + 1),
+                static_cast<int>(m_layout.MaxY() * (.01 * m_zoom) / 50 + 1), scrollX, scrollY);
 }
 
-void gbtEfgDisplay::FitZoom()
+void EfgDisplay::FitZoom()
 {
   int width, height;
   GetClientSize(&width, &height);
 
-  double zoomx = (double)width / (double)m_layout.MaxX();
-  double zoomy = (double)height / (double)m_layout.MaxY();
+  double zoomx = static_cast<double>(width) / static_cast<double>(m_layout.MaxX());
+  double zoomy = static_cast<double>(height) / static_cast<double>(m_layout.MaxY());
 
   zoomx = std::min(zoomx, 1.0);
   zoomy = std::min(zoomy, 1.0); // never zoom in (only out)
-  m_zoom = int(100.0 * (std::min(zoomx, zoomy) * .9));
+  m_zoom = static_cast<int>(100.0 * (std::min(zoomx, zoomy) * .9));
   AdjustScrollbarSteps();
   Refresh();
 }
 
-void gbtEfgDisplay::SetZoom(int p_zoom)
+void EfgDisplay::SetZoom(int p_zoom)
 {
   m_zoom = p_zoom;
   AdjustScrollbarSteps();
@@ -642,7 +639,7 @@ void gbtEfgDisplay::SetZoom(int p_zoom)
   Refresh();
 }
 
-void gbtEfgDisplay::OnDraw(wxDC &p_dc)
+void EfgDisplay::OnDraw(wxDC &p_dc)
 {
   p_dc.SetUserScale(.01 * m_zoom, .01 * m_zoom);
   p_dc.Clear();
@@ -656,11 +653,11 @@ void gbtEfgDisplay::OnDraw(wxDC &p_dc)
   }
 }
 
-void gbtEfgDisplay::OnDraw(wxDC &p_dc, double p_zoom)
+void EfgDisplay::OnDraw(wxDC &p_dc, double p_zoom)
 {
   // A bit of a hack: this allows us to set zoom separately in printout code
   const int saveZoom = m_zoom;
-  m_zoom = int(100.0 * p_zoom);
+  m_zoom = static_cast<int>(100.0 * p_zoom);
 
   p_dc.SetUserScale(.01 * m_zoom, .01 * m_zoom);
   p_dc.Clear();
@@ -680,7 +677,7 @@ void gbtEfgDisplay::OnDraw(wxDC &p_dc, double p_zoom)
   m_zoom = saveZoom;
 }
 
-void gbtEfgDisplay::EnsureNodeVisible(const GameNode &p_node)
+void EfgDisplay::EnsureNodeVisible(const GameNode &p_node)
 {
   if (!p_node) {
     return;
@@ -693,14 +690,14 @@ void gbtEfgDisplay::EnsureNodeVisible(const GameNode &p_node)
   GetClientSize(&width, &height);
 
   int xx, yy;
-  CalcScrolledPosition((int)(entry->GetX() * (.01 * m_zoom) - 20),
-                       (int)(entry->GetY() * (.01 * m_zoom)), &xx, &yy);
+  CalcScrolledPosition(static_cast<int>(entry->GetX() * (.01 * m_zoom) - 20),
+                       static_cast<int>(entry->GetY() * (.01 * m_zoom)), &xx, &yy);
   if (xx < 0) {
     xScroll -= -xx / 50 + 1;
   }
 
-  CalcScrolledPosition((int)(entry->GetX() * (.01 * m_zoom)),
-                       (int)(entry->GetY() * (.01 * m_zoom)), &xx, &yy);
+  CalcScrolledPosition(static_cast<int>(entry->GetX() * (.01 * m_zoom)),
+                       static_cast<int>(entry->GetY() * (.01 * m_zoom)), &xx, &yy);
   if (xx > width) {
     xScroll += (xx - width) / 50 + 1;
   }
@@ -711,13 +708,13 @@ void gbtEfgDisplay::EnsureNodeVisible(const GameNode &p_node)
     xScroll = GetScrollRange(wxHORIZONTAL);
   }
 
-  CalcScrolledPosition((int)(entry->GetX() * (.01 * m_zoom)),
-                       (int)(entry->GetY() * (.01 * m_zoom) - 20), &xx, &yy);
+  CalcScrolledPosition(static_cast<int>(entry->GetX() * (.01 * m_zoom)),
+                       static_cast<int>(entry->GetY() * (.01 * m_zoom) - 20), &xx, &yy);
   if (yy < 0) {
     yScroll -= -yy / 50 + 1;
   }
-  CalcScrolledPosition((int)(entry->GetX() * (.01 * m_zoom)),
-                       (int)(entry->GetY() * (.01 * m_zoom) + 20), &xx, &yy);
+  CalcScrolledPosition(static_cast<int>(entry->GetX() * (.01 * m_zoom)),
+                       static_cast<int>(entry->GetY() * (.01 * m_zoom) + 20), &xx, &yy);
   if (yy > height) {
     yScroll += (yy - height) / 50 + 1;
   }
@@ -737,12 +734,12 @@ void gbtEfgDisplay::EnsureNodeVisible(const GameNode &p_node)
 // With shift key, selects whole subtree (not yet implemented)
 // With control key, adds node to selection (not yet implemented)
 //
-void gbtEfgDisplay::OnLeftClick(wxMouseEvent &p_event)
+void EfgDisplay::OnLeftClick(wxMouseEvent &p_event)
 {
   int x, y;
   CalcUnscrolledPosition(p_event.GetX(), p_event.GetY(), &x, &y);
-  x = (int)((float)x / (.01 * m_zoom));
-  y = (int)((float)y / (.01 * m_zoom));
+  x = static_cast<int>(static_cast<float>(x) / (.01 * m_zoom));
+  y = static_cast<int>(static_cast<float>(y) / (.01 * m_zoom));
 
   const GameNode node = m_layout.NodeHitTest(x, y);
   if (node != m_doc->GetSelectNode()) {
@@ -754,12 +751,12 @@ void gbtEfgDisplay::OnLeftClick(wxMouseEvent &p_event)
 // Left mouse button double-click:
 // Sets selection, brings up node properties dialog
 //
-void gbtEfgDisplay::OnLeftDoubleClick(wxMouseEvent &p_event)
+void EfgDisplay::OnLeftDoubleClick(wxMouseEvent &p_event)
 {
   int x, y;
   CalcUnscrolledPosition(p_event.GetX(), p_event.GetY(), &x, &y);
-  x = (int)((float)x / (.01 * m_zoom));
-  y = (int)((float)y / (.01 * m_zoom));
+  x = static_cast<int>(static_cast<float>(x) / (.01 * m_zoom));
+  y = static_cast<int>(static_cast<float>(y) / (.01 * m_zoom));
 
   GameNode node = m_layout.NodeHitTest(x, y);
   if (node) {
@@ -784,10 +781,10 @@ void gbtEfgDisplay::OnLeftDoubleClick(wxMouseEvent &p_event)
       const wxRect rect = entry->GetPayoffExtent(1);
 
       int xx, yy;
-      CalcScrolledPosition((int)(.01 * (rect.x - 3) * m_zoom), (int)(.01 * (rect.y - 3) * m_zoom),
-                           &xx, &yy);
-      const int width = (int)(.01 * (rect.width + 10) * m_zoom);
-      const int height = (int)(.01 * (rect.height + 6) * m_zoom);
+      CalcScrolledPosition(static_cast<int>(.01 * (rect.x - 3) * m_zoom),
+                           static_cast<int>(.01 * (rect.y - 3) * m_zoom), &xx, &yy);
+      const int width = static_cast<int>(.01 * (rect.width + 10) * m_zoom);
+      const int height = static_cast<int>(.01 * (rect.height + 6) * m_zoom);
       m_payoffEditor->SetSize(xx, yy, width, height);
       m_payoffEditor->BeginEdit(entry, 1);
       return;
@@ -799,10 +796,10 @@ void gbtEfgDisplay::OnLeftDoubleClick(wxMouseEvent &p_event)
       const wxRect rect = entry->GetPayoffExtent(pl);
       if (rect.Contains(x, y)) {
         int xx, yy;
-        CalcScrolledPosition((int)(.01 * (rect.x - 3) * m_zoom),
-                             (int)(.01 * (rect.y - 3) * m_zoom), &xx, &yy);
-        const int width = (int)(.01 * (rect.width + 10) * m_zoom);
-        const int height = (int)(.01 * (rect.height + 6) * m_zoom);
+        CalcScrolledPosition(static_cast<int>(.01 * (rect.x - 3) * m_zoom),
+                             static_cast<int>(.01 * (rect.y - 3) * m_zoom), &xx, &yy);
+        const int width = static_cast<int>(.01 * (rect.width + 10) * m_zoom);
+        const int height = static_cast<int>(.01 * (rect.height + 6) * m_zoom);
         m_payoffEditor->SetSize(xx, yy, width, height);
         m_payoffEditor->BeginEdit(entry, pl);
         return;
@@ -836,13 +833,13 @@ void gbtEfgDisplay::OnLeftDoubleClick(wxMouseEvent &p_event)
 #include "bitmaps/tree.xpm"
 #include "bitmaps/move.xpm"
 
-void gbtEfgDisplay::OnMouseMotion(wxMouseEvent &p_event)
+void EfgDisplay::OnMouseMotion(wxMouseEvent &p_event)
 {
   if (p_event.LeftIsDown() && p_event.Dragging()) {
     int x, y;
     CalcUnscrolledPosition(p_event.GetX(), p_event.GetY(), &x, &y);
-    x = (int)((float)x / (.01 * GetZoom()));
-    y = (int)((float)y / (.01 * GetZoom()));
+    x = static_cast<int>(static_cast<float>(x) / (.01 * GetZoom()));
+    y = static_cast<int>(static_cast<float>(y) / (.01 * GetZoom()));
 
     GameNode node = m_layout.NodeHitTest(x, y);
 
@@ -930,12 +927,12 @@ void gbtEfgDisplay::OnMouseMotion(wxMouseEvent &p_event)
 // Right mouse-button click:
 // Set selection, display context-sensitive popup menu
 //
-void gbtEfgDisplay::OnRightClick(wxMouseEvent &p_event)
+void EfgDisplay::OnRightClick(wxMouseEvent &p_event)
 {
   int x, y;
   CalcUnscrolledPosition(p_event.GetX(), p_event.GetY(), &x, &y);
-  x = (int)((float)x / (.01 * m_zoom));
-  y = (int)((float)y / (.01 * m_zoom));
+  x = static_cast<int>(static_cast<float>(x) / (.01 * m_zoom));
+  y = static_cast<int>(static_cast<float>(y) / (.01 * m_zoom));
 
   const GameNode node = m_layout.NodeHitTest(x, y);
   if (node != m_doc->GetSelectNode()) {
@@ -943,3 +940,4 @@ void gbtEfgDisplay::OnRightClick(wxMouseEvent &p_event)
   }
   PopupMenu(m_nodeMenu);
 }
+} // namespace Gambit::GUI

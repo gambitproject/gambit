@@ -20,24 +20,24 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef NFGTABLE_H
-#define NFGTABLE_H
+#ifndef GAMBIT_GUI_NFGTABLE_H
+#define GAMBIT_GUI_NFGTABLE_H
 
-class gbtGameDocument;
-class gbtNfgPanel;
+namespace Gambit::GUI {
+class GameDocument;
+class NfgPanel;
 
 //!
 //! This is a panel which manages three wxSheet instances: one which
 //! contains the payoffs of the strategic form, and two which handle
 //! the display of row and column labels
 //!
-class gbtTableWidget : public wxPanel {
-private:
-  gbtGameDocument *m_doc;
-  gbtNfgPanel *m_nfgPanel;
+class TableWidget final : public wxPanel {
+  GameDocument *m_doc;
+  NfgPanel *m_nfgPanel;
   wxSheet *m_payoffSheet, *m_rowSheet, *m_colSheet;
 
-  Gambit::Array<int> m_rowPlayers, m_colPlayers;
+  Array<int> m_rowPlayers, m_colPlayers;
 
   /// @name Event handlers
   //@{
@@ -68,13 +68,10 @@ private:
   //@}
 
 public:
-  gbtTableWidget(gbtNfgPanel *p_parent, wxWindowID p_id, gbtGameDocument *p_doc);
+  TableWidget(NfgPanel *p_parent, wxWindowID p_id, GameDocument *p_doc);
 
   /// @name Coordination of sheets
   //@{
-  /// Scroll row and column label sheets
-  void SetGridOrigin(int x, int y);
-
   /// Synchronize with document state
   void OnUpdate();
 
@@ -125,7 +122,7 @@ public:
   int ColToStrategy(int player, int row) const;
 
   /// Returns the strategy profile corresponding to a cell
-  Gambit::PureStrategyProfile CellToProfile(const wxSheetCoords &) const;
+  PureStrategyProfile CellToProfile(const wxSheetCoords &) const;
   //@}
 
   /// @name Exporting/printing graphics
@@ -140,5 +137,5 @@ public:
   void RenderGame(wxDC &p_dc, int marginX, int marginY);
   //@}
 };
-
-#endif // NFGTABLE_H
+} // namespace Gambit::GUI
+#endif // GAMBIT_GUI_NFGTABLE_H

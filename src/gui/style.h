@@ -26,8 +26,9 @@
 #include "gambit.h"
 #include "core/tinyxml.h"
 
-using namespace Gambit;
+class wxFont;
 
+namespace Gambit::GUI {
 enum NodeTokenStyle {
   GBT_NODE_TOKEN_LINE,
   GBT_NODE_TOKEN_BOX,
@@ -69,9 +70,8 @@ enum BranchLabelStyle {
   GBT_BRANCH_LABEL_VALUE
 };
 
-class wxFont;
-
-class gbtStyle {
+/// Options for automatic rendering of game trees
+class TreeRenderConfig {
   // Node styling
   int m_nodeSize{10}, m_terminalSpacing{50};
   NodeTokenStyle m_chanceToken{GBT_NODE_TOKEN_DOT}, m_playerToken{GBT_NODE_TOKEN_DOT},
@@ -103,7 +103,7 @@ class gbtStyle {
 
 public:
   // Lifecycle
-  gbtStyle();
+  TreeRenderConfig();
 
   // Node styling
   int GetNodeSize() const { return m_nodeSize; }
@@ -206,5 +206,7 @@ public:
   void SetLabelXML(TiXmlNode *p_node);
   //@}
 };
+
+} // namespace Gambit::GUI
 
 #endif // STYLE_H

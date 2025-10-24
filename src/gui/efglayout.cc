@@ -32,11 +32,10 @@
 #include "gambit.h"
 #include "efgdisplay.h"
 
-using namespace Gambit;
-
+namespace Gambit::GUI {
 namespace {
 
-NodeTokenStyle GetTokenForNode(const gbtStyle &p_style, const GameNode &p_node)
+NodeTokenStyle GetTokenForNode(const TreeRenderConfig &p_style, const GameNode &p_node)
 {
   if (p_node->IsTerminal()) {
     return p_style.GetTerminalToken();
@@ -50,15 +49,15 @@ NodeTokenStyle GetTokenForNode(const gbtStyle &p_style, const GameNode &p_node)
 } // namespace
 
 //-----------------------------------------------------------------------
-//                   class gbtNodeEntry: Member functions
+//                   class NodeEntry: Member functions
 //-----------------------------------------------------------------------
 
 //
 // Draws the node token itself, as well as the incoming branch
 // (if not the root node)
 //
-void gbtTreeLayout::DrawNode(wxDC &p_dc, const std::shared_ptr<gbtNodeEntry> &p_entry,
-                             const GameNode &p_selection, bool p_noHints) const
+void TreeLayout::DrawNode(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_entry,
+                          const GameNode &p_selection, bool p_noHints) const
 {
   if (p_entry->m_node->GetParent() && p_entry->m_inSupport) {
     DrawIncomingBranch(p_dc, p_entry);
@@ -122,8 +121,7 @@ void gbtTreeLayout::DrawNode(wxDC &p_dc, const std::shared_ptr<gbtNodeEntry> &p_
   DrawOutcome(p_dc, p_entry, p_noHints);
 }
 
-void gbtTreeLayout::DrawIncomingBranch(wxDC &p_dc,
-                                       const std::shared_ptr<gbtNodeEntry> &p_entry) const
+void TreeLayout::DrawIncomingBranch(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_entry) const
 {
   const int xStart = p_entry->m_parent->m_x + p_entry->m_parent->m_size;
   const int xEnd = p_entry->m_x;
@@ -261,8 +259,8 @@ static wxPoint DrawFraction(wxDC &p_dc, wxPoint p_point, const Rational &p_value
   return p_point;
 }
 
-void gbtTreeLayout::DrawOutcome(wxDC &p_dc, const std::shared_ptr<gbtNodeEntry> &p_entry,
-                                bool p_noHints) const
+void TreeLayout::DrawOutcome(wxDC &p_dc, const std::shared_ptr<NodeEntry> &p_entry,
+                             bool p_noHints) const
 {
   wxPoint point(p_entry->m_x + p_entry->m_size + 20, p_entry->m_y);
 
@@ -316,8 +314,8 @@ void gbtTreeLayout::DrawOutcome(wxDC &p_dc, const std::shared_ptr<gbtNodeEntry> 
                                   point.x - (p_entry->m_x + p_entry->m_size + 20), height);
 }
 
-bool gbtTreeLayout::NodeHitTest(const std::shared_ptr<gbtNodeEntry> &p_entry, const int p_x,
-                                const int p_y) const
+bool TreeLayout::NodeHitTest(const std::shared_ptr<NodeEntry> &p_entry, const int p_x,
+                             const int p_y) const
 {
   if (p_x < p_entry->m_x || p_x >= p_entry->m_x + p_entry->m_size) {
     return false;
@@ -331,51 +329,51 @@ bool gbtTreeLayout::NodeHitTest(const std::shared_ptr<gbtNodeEntry> &p_entry, co
 }
 
 //-----------------------------------------------------------------------
-//                class gbtTreeLayout: Member functions
+//                class TreeLayout: Member functions
 //-----------------------------------------------------------------------
 
-GameNode gbtTreeLayout::NodeHitTest(int p_x, int p_y) const
+GameNode TreeLayout::NodeHitTest(int p_x, int p_y) const
 {
   const auto hit =
       std::find_if(m_nodeList.begin(), m_nodeList.end(),
-                   [this, p_x, p_y](const std::shared_ptr<gbtNodeEntry> &p_entry) -> bool {
+                   [this, p_x, p_y](const std::shared_ptr<NodeEntry> &p_entry) -> bool {
                      return NodeHitTest(p_entry, p_x, p_y);
                    });
   return (hit != m_nodeList.end()) ? (*hit)->GetNode() : nullptr;
 }
 
-GameNode gbtTreeLayout::OutcomeHitTest(int p_x, int p_y) const
+GameNode TreeLayout::OutcomeHitTest(int p_x, int p_y) const
 {
   const auto hit =
       std::find_if(m_nodeList.begin(), m_nodeList.end(),
-                   [this, p_x, p_y](const std::shared_ptr<gbtNodeEntry> &p_entry) -> bool {
+                   [this, p_x, p_y](const std::shared_ptr<NodeEntry> &p_entry) -> bool {
                      return p_entry->OutcomeHitTest(p_x, p_y);
                    });
   return (hit != m_nodeList.end()) ? (*hit)->GetNode() : nullptr;
 }
 
-GameNode gbtTreeLayout::BranchAboveHitTest(int p_x, int p_y) const
+GameNode TreeLayout::BranchAboveHitTest(int p_x, int p_y) const
 {
   const auto hit =
       std::find_if(m_nodeList.begin(), m_nodeList.end(),
-                   [this, p_x, p_y](const std::shared_ptr<gbtNodeEntry> &p_entry) -> bool {
+                   [this, p_x, p_y](const std::shared_ptr<NodeEntry> &p_entry) -> bool {
                      return p_entry->BranchAboveHitTest(p_x, p_y);
                    });
   return (hit != m_nodeList.end()) ? (*hit)->GetNode()->GetParent() : nullptr;
 }
 
-GameNode gbtTreeLayout::BranchBelowHitTest(int p_x, int p_y) const
+GameNode TreeLayout::BranchBelowHitTest(int p_x, int p_y) const
 {
   const auto hit =
       std::find_if(m_nodeList.begin(), m_nodeList.end(),
-                   [this, p_x, p_y](const std::shared_ptr<gbtNodeEntry> &p_entry) -> bool {
+                   [this, p_x, p_y](const std::shared_ptr<NodeEntry> &p_entry) -> bool {
                      return p_entry->BranchBelowHitTest(p_x, p_y);
                    });
   return (hit != m_nodeList.end()) ? (*hit)->GetNode()->GetParent() : nullptr;
 }
 
-bool gbtTreeLayout::InfosetHitTest(const std::shared_ptr<gbtNodeEntry> &p_entry, const int p_x,
-                                   const int p_y) const
+bool TreeLayout::InfosetHitTest(const std::shared_ptr<NodeEntry> &p_entry, const int p_x,
+                                const int p_y) const
 {
   if (p_entry->GetNextMember() && p_entry->GetNode()->GetInfoset()) {
     if (p_x > p_entry->m_x + p_entry->GetSublevel() * m_infosetSpacing - 2 &&
@@ -393,18 +391,17 @@ bool gbtTreeLayout::InfosetHitTest(const std::shared_ptr<gbtNodeEntry> &p_entry,
   return false;
 }
 
-GameNode gbtTreeLayout::InfosetHitTest(int p_x, int p_y) const
+GameNode TreeLayout::InfosetHitTest(int p_x, int p_y) const
 {
   const auto hit =
       std::find_if(m_nodeList.begin(), m_nodeList.end(),
-                   [this, p_x, p_y](const std::shared_ptr<gbtNodeEntry> &p_entry) -> bool {
+                   [this, p_x, p_y](const std::shared_ptr<NodeEntry> &p_entry) -> bool {
                      return InfosetHitTest(p_entry, p_x, p_y);
                    });
   return (hit != m_nodeList.end()) ? (*hit)->GetNode() : nullptr;
 }
 
-wxString gbtTreeLayout::CreateNodeLabel(const std::shared_ptr<gbtNodeEntry> &p_entry,
-                                        int p_which) const
+wxString TreeLayout::CreateNodeLabel(const std::shared_ptr<NodeEntry> &p_entry, int p_which) const
 {
   const GameNode n = p_entry->GetNode();
 
@@ -462,8 +459,8 @@ wxString gbtTreeLayout::CreateNodeLabel(const std::shared_ptr<gbtNodeEntry> &p_e
   }
 }
 
-wxString gbtTreeLayout::CreateBranchLabel(const std::shared_ptr<gbtNodeEntry> &p_entry,
-                                          int p_which) const
+wxString TreeLayout::CreateBranchLabel(const std::shared_ptr<NodeEntry> &p_entry,
+                                       int p_which) const
 {
   const GameNode parent = p_entry->GetParent()->GetNode();
 
@@ -506,7 +503,7 @@ wxString gbtTreeLayout::CreateBranchLabel(const std::shared_ptr<gbtNodeEntry> &p
   }
 }
 
-std::shared_ptr<gbtNodeEntry> gbtTreeLayout::GetRenderedAncestor(const GameNode &p_node) const
+std::shared_ptr<NodeEntry> TreeLayout::GetRenderedAncestor(const GameNode &p_node) const
 {
   auto n = p_node;
   auto entry = GetNodeEntry(n->GetParent());
@@ -517,7 +514,7 @@ std::shared_ptr<gbtNodeEntry> gbtTreeLayout::GetRenderedAncestor(const GameNode 
   return entry;
 }
 
-std::shared_ptr<gbtNodeEntry> gbtTreeLayout::GetRenderedDescendant(const GameNode &p_node) const
+std::shared_ptr<NodeEntry> TreeLayout::GetRenderedDescendant(const GameNode &p_node) const
 {
   for (const auto &child : p_node->GetChildren()) {
     auto n = GetNodeEntry(child);
@@ -532,7 +529,7 @@ std::shared_ptr<gbtNodeEntry> gbtTreeLayout::GetRenderedDescendant(const GameNod
   return nullptr;
 }
 
-GameNode gbtTreeLayout::PriorSameLevel(const GameNode &p_node) const
+GameNode TreeLayout::PriorSameLevel(const GameNode &p_node) const
 {
   if (auto entry = GetNodeEntry(p_node)) {
     auto e = std::next(std::find(m_nodeList.rbegin(), m_nodeList.rend(), entry));
@@ -546,7 +543,7 @@ GameNode gbtTreeLayout::PriorSameLevel(const GameNode &p_node) const
   return nullptr;
 }
 
-GameNode gbtTreeLayout::NextSameLevel(const GameNode &p_node) const
+GameNode TreeLayout::NextSameLevel(const GameNode &p_node) const
 {
   if (auto entry = GetNodeEntry(p_node)) {
     auto e = std::next(std::find(m_nodeList.begin(), m_nodeList.end(), entry));
@@ -560,8 +557,8 @@ GameNode gbtTreeLayout::NextSameLevel(const GameNode &p_node) const
   return nullptr;
 }
 
-void gbtTreeLayout::ComputeOffsets(const GameNode &p_node, const BehaviorSupportProfile &p_support,
-                                   int &p_ycoord)
+void TreeLayout::ComputeOffsets(const GameNode &p_node, const BehaviorSupportProfile &p_support,
+                                int &p_ycoord)
 {
   const auto &settings = m_doc->GetStyle();
 
@@ -595,8 +592,8 @@ void gbtTreeLayout::ComputeOffsets(const GameNode &p_node, const BehaviorSupport
   }
 }
 
-std::shared_ptr<gbtNodeEntry>
-gbtTreeLayout::ComputeNextInInfoset(const std::shared_ptr<gbtNodeEntry> &p_entry)
+std::shared_ptr<NodeEntry>
+TreeLayout::ComputeNextInInfoset(const std::shared_ptr<NodeEntry> &p_entry)
 {
   const auto infoset = p_entry->m_node->GetInfoset();
   if (!infoset) {
@@ -623,7 +620,7 @@ gbtTreeLayout::ComputeNextInInfoset(const std::shared_ptr<gbtNodeEntry> &p_entry
   return nullptr;
 }
 
-void gbtTreeLayout::ComputeSublevel(const std::shared_ptr<gbtNodeEntry> &p_entry)
+void TreeLayout::ComputeSublevel(const std::shared_ptr<NodeEntry> &p_entry)
 {
   try {
     p_entry->m_sublevel = m_infosetSublevels.at({p_entry->m_level, p_entry->m_node->GetInfoset()});
@@ -635,7 +632,7 @@ void gbtTreeLayout::ComputeSublevel(const std::shared_ptr<gbtNodeEntry> &p_entry
   p_entry->m_nextMember = ComputeNextInInfoset(p_entry);
 }
 
-void gbtTreeLayout::ComputeNodeDepths() const
+void TreeLayout::ComputeNodeDepths() const
 {
   std::vector<int> aggregateSublevels(m_maxLevel + 1);
   std::partial_sum(m_numSublevels.cbegin(), m_numSublevels.cend(), aggregateSublevels.begin());
@@ -650,17 +647,17 @@ void gbtTreeLayout::ComputeNodeDepths() const
   }
 }
 
-void gbtTreeLayout::ComputeRenderedParents() const
+void TreeLayout::ComputeRenderedParents() const
 {
   for (const auto &e : m_nodeList) {
     e->m_parent = (e->m_node == m_doc->GetGame()->GetRoot()) ? e : GetRenderedAncestor(e->m_node);
   }
 }
 
-void gbtTreeLayout::BuildNodeList(const GameNode &p_node, const BehaviorSupportProfile &p_support,
-                                  const int p_level)
+void TreeLayout::BuildNodeList(const GameNode &p_node, const BehaviorSupportProfile &p_support,
+                               const int p_level)
 {
-  const auto entry = std::make_shared<gbtNodeEntry>(p_node);
+  const auto entry = std::make_shared<NodeEntry>(p_node);
   m_nodeList.push_back(entry);
   m_nodeMap[p_node] = entry;
   entry->m_size = m_doc->GetStyle().GetNodeSize();
@@ -688,7 +685,7 @@ void gbtTreeLayout::BuildNodeList(const GameNode &p_node, const BehaviorSupportP
   m_maxLevel = std::max(p_level, m_maxLevel);
 }
 
-void gbtTreeLayout::BuildNodeList(const BehaviorSupportProfile &p_support)
+void TreeLayout::BuildNodeList(const BehaviorSupportProfile &p_support)
 {
   m_nodeList.clear();
   m_nodeMap.clear();
@@ -696,7 +693,7 @@ void gbtTreeLayout::BuildNodeList(const BehaviorSupportProfile &p_support)
   BuildNodeList(m_doc->GetGame()->GetRoot(), p_support, 0);
 }
 
-void gbtTreeLayout::Layout(const BehaviorSupportProfile &p_support)
+void TreeLayout::Layout(const BehaviorSupportProfile &p_support)
 {
   m_infosetSpacing = (m_doc->GetStyle().GetInfosetJoin() == GBT_INFOSET_JOIN_LINES) ? 10 : 40;
 
@@ -721,9 +718,9 @@ void gbtTreeLayout::Layout(const BehaviorSupportProfile &p_support)
   GenerateLabels();
 }
 
-void gbtTreeLayout::GenerateLabels() const
+void TreeLayout::GenerateLabels() const
 {
-  const gbtStyle &settings = m_doc->GetStyle();
+  const TreeRenderConfig &settings = m_doc->GetStyle();
   for (const auto &entry : m_nodeList) {
     entry->SetNodeAboveLabel(CreateNodeLabel(entry, settings.GetNodeAboveLabel()));
     entry->SetNodeBelowLabel(CreateNodeLabel(entry, settings.GetNodeBelowLabel()));
@@ -766,9 +763,9 @@ void gbtTreeLayout::GenerateLabels() const
 // performance will require a more sophisticated solution to the
 // problem.  (TLT 5/2001)
 //
-void gbtTreeLayout::RenderSubtree(wxDC &p_dc, bool p_noHints) const
+void TreeLayout::RenderSubtree(wxDC &p_dc, bool p_noHints) const
 {
-  const gbtStyle &settings = m_doc->GetStyle();
+  const TreeRenderConfig &settings = m_doc->GetStyle();
 
   for (const auto &entry : m_nodeList) {
     auto parentEntry = entry->GetParent();
@@ -846,4 +843,5 @@ void gbtTreeLayout::RenderSubtree(wxDC &p_dc, bool p_noHints) const
   }
 }
 
-void gbtTreeLayout::Render(wxDC &p_dc, bool p_noHints) const { RenderSubtree(p_dc, p_noHints); }
+void TreeLayout::Render(wxDC &p_dc, bool p_noHints) const { RenderSubtree(p_dc, p_noHints); }
+} // namespace Gambit::GUI

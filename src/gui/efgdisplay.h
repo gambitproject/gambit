@@ -20,15 +20,15 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef EFGDISPLAY_H
-#define EFGDISPLAY_H
+#ifndef GAMBIT_GUI_EFGDISPLAY_H
+#define GAMBIT_GUI_EFGDISPLAY_H
 
 #include "gamedoc.h"
 #include "efglayout.h"
 
-class gbtPayoffEditor : public wxTextCtrl {
-private:
-  std::shared_ptr<gbtNodeEntry> m_entry{nullptr};
+namespace Gambit::GUI {
+class TreePayoffEditor final : public wxTextCtrl {
+  std::shared_ptr<NodeEntry> m_entry{nullptr};
   GameOutcome m_outcome;
   int m_player{0};
 
@@ -38,26 +38,25 @@ private:
   //@}
 
 public:
-  explicit gbtPayoffEditor(wxWindow *p_parent);
+  explicit TreePayoffEditor(wxWindow *p_parent);
 
-  void BeginEdit(std::shared_ptr<gbtNodeEntry> p_node, int p_player);
+  void BeginEdit(const std::shared_ptr<NodeEntry> &p_node, int p_player);
   void EndEdit();
 
   bool IsEditing() const { return IsShown(); }
 
-  std::shared_ptr<gbtNodeEntry> GetNodeEntry() const { return m_entry; }
+  std::shared_ptr<NodeEntry> GetNodeEntry() const { return m_entry; }
   GameOutcome GetOutcome() const { return m_outcome; }
   int GetPlayer() const { return m_player; }
 
   DECLARE_EVENT_TABLE()
 };
 
-class gbtEfgDisplay : public wxScrolledWindow, public gbtGameView {
-private:
-  gbtTreeLayout m_layout;
+class EfgDisplay final : public wxScrolledWindow, public GameView {
+  TreeLayout m_layout;
   int m_zoom;
   wxMenu *m_nodeMenu{nullptr};
-  gbtPayoffEditor *m_payoffEditor;
+  TreePayoffEditor *m_payoffEditor;
 
   // Private Functions
   void MakeMenus();
@@ -74,7 +73,7 @@ private:
   void OnAcceptPayoffEdit(wxCommandEvent &);
   //@}
 
-  /// @name Overriding gbtGameView members
+  /// @name Overriding GameView members
   //@{
   void OnUpdate() override;
   void PostPendingChanges() override;
@@ -83,7 +82,7 @@ private:
   void RefreshTree();
 
 public:
-  gbtEfgDisplay(wxWindow *p_parent, gbtGameDocument *p_doc);
+  EfgDisplay(wxWindow *p_parent, GameDocument *p_doc);
 
   void OnDraw(wxDC &dc) override;
   void OnDraw(wxDC &, double);
@@ -92,11 +91,12 @@ public:
   void SetZoom(int p_zoom);
   void FitZoom();
 
-  const gbtTreeLayout &GetLayout() const { return m_layout; }
+  const TreeLayout &GetLayout() const { return m_layout; }
 
   void EnsureNodeVisible(const GameNode &);
 
   DECLARE_EVENT_TABLE()
 };
+} // namespace Gambit::GUI
 
-#endif // EFGDISPLAY_H
+#endif // GAMBIT_GUI_EFGDISPLAY_H

@@ -35,6 +35,7 @@
 #include "menuconst.h"
 #include "edittext.h"
 
+namespace Gambit::GUI {
 //=====================================================================
 //                class gbtBehavDominanceToolbar
 //=====================================================================
@@ -43,12 +44,12 @@
 //! This panel serves as a toolbar for interactively viewing
 //! dominance information on extensive forms.
 //!
-class gbtBehavDominanceToolbar : public wxPanel, public gbtGameView {
+class gbtBehavDominanceToolbar : public wxPanel, public GameView {
 private:
   wxButton *m_topButton, *m_prevButton, *m_nextButton, *m_allButton;
   wxStaticText *m_level;
 
-  // Overriding gbtGameView members
+  // Overriding GameView members
   void OnUpdate() override;
 
   // Event handlers
@@ -60,7 +61,7 @@ private:
   void OnShowReachable(wxCommandEvent &);
 
 public:
-  gbtBehavDominanceToolbar(wxWindow *p_parent, gbtGameDocument *p_doc);
+  gbtBehavDominanceToolbar(wxWindow *p_parent, GameDocument *p_doc);
   ~gbtBehavDominanceToolbar() override = default;
 };
 
@@ -69,8 +70,8 @@ public:
 #include "bitmaps/tobegin.xpm"
 #include "bitmaps/toend.xpm"
 
-gbtBehavDominanceToolbar::gbtBehavDominanceToolbar(wxWindow *p_parent, gbtGameDocument *p_doc)
-  : wxPanel(p_parent, wxID_ANY), gbtGameView(p_doc)
+gbtBehavDominanceToolbar::gbtBehavDominanceToolbar(wxWindow *p_parent, GameDocument *p_doc)
+  : wxPanel(p_parent, wxID_ANY), GameView(p_doc)
 {
   auto *topSizer = new wxBoxSizer(wxHORIZONTAL);
 
@@ -122,7 +123,7 @@ gbtBehavDominanceToolbar::gbtBehavDominanceToolbar(wxWindow *p_parent, gbtGameDo
   topSizer->Add(showReachable, 0, wxALL | wxALIGN_CENTER, 5);
 
   SetSizer(topSizer);
-  Layout();
+  wxWindowBase::Layout();
 }
 
 void gbtBehavDominanceToolbar::OnStrength(wxCommandEvent &p_event)
@@ -147,7 +148,7 @@ void gbtBehavDominanceToolbar::OnLastLevel(wxCommandEvent &)
 
 void gbtBehavDominanceToolbar::OnShowReachable(wxCommandEvent &)
 {
-  gbtStyle style = m_doc->GetStyle();
+  TreeRenderConfig style = m_doc->GetStyle();
   style.SetRootReachable(!style.RootReachable());
   m_doc->SetStyle(style);
 }
@@ -214,9 +215,9 @@ void gbtTreePlayerIcon::OnLeftClick(wxMouseEvent &)
 
 class gbtTreePlayerPanel : public wxPanel {
 private:
-  gbtGameDocument *m_doc;
+  GameDocument *m_doc;
   int m_player;
-  gbtEditableText *m_playerLabel;
+  EditableText *m_playerLabel;
   wxStaticText *m_payoff, *m_nodeValue, *m_nodeProb;
   wxStaticText *m_infosetValue, *m_infosetProb, *m_belief;
 
@@ -233,7 +234,7 @@ private:
   //@}
 
 public:
-  gbtTreePlayerPanel(wxWindow *, gbtGameDocument *, int p_player);
+  gbtTreePlayerPanel(wxWindow *, GameDocument *, int p_player);
 
   void OnUpdate();
   void PostPendingChanges();
@@ -245,7 +246,7 @@ BEGIN_EVENT_TABLE(gbtTreePlayerPanel, wxPanel)
 EVT_CHAR(gbtTreePlayerPanel::OnChar)
 END_EVENT_TABLE()
 
-gbtTreePlayerPanel::gbtTreePlayerPanel(wxWindow *p_parent, gbtGameDocument *p_doc, int p_player)
+gbtTreePlayerPanel::gbtTreePlayerPanel(wxWindow *p_parent, GameDocument *p_doc, int p_player)
   : wxPanel(p_parent, wxID_ANY), m_doc(p_doc), m_player(p_player)
 {
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
@@ -263,7 +264,7 @@ gbtTreePlayerPanel::gbtTreePlayerPanel(wxWindow *p_parent, gbtGameDocument *p_do
   Connect(setColorIcon->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
           wxCommandEventHandler(gbtTreePlayerPanel::OnSetColor));
 
-  m_playerLabel = new gbtEditableText(this, wxID_ANY, wxT(""), wxDefaultPosition, wxSize(125, -1));
+  m_playerLabel = new EditableText(this, wxID_ANY, wxT(""), wxDefaultPosition, wxSize(125, -1));
   m_playerLabel->SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
   labelSizer->Add(m_playerLabel, 1, wxLEFT | wxEXPAND, 10);
   Connect(m_playerLabel->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
@@ -312,7 +313,7 @@ gbtTreePlayerPanel::gbtTreePlayerPanel(wxWindow *p_parent, gbtGameDocument *p_do
   SetSizer(topSizer);
   topSizer->SetSizeHints(this);
   topSizer->Fit(this);
-  Layout();
+  wxWindowBase::Layout();
   OnUpdate();
 }
 
@@ -334,9 +335,7 @@ void gbtTreePlayerPanel::OnUpdate()
     m_payoff->SetLabel(wxT("Payoff: ") + wxString(pay.c_str(), *wxConvCurrent));
     GetSizer()->Show(m_payoff, true);
 
-    const Gambit::GameNode node = m_doc->GetSelectNode();
-
-    if (node) {
+    if (const GameNode node = m_doc->GetSelectNode()) {
       m_nodeValue->SetForegroundColour(color);
       std::string value = m_doc->GetProfiles().GetNodeValue(node, m_player);
       m_nodeValue->SetLabel(wxT("Node value: ") + wxString(value.c_str(), *wxConvCurrent));
@@ -408,7 +407,7 @@ void gbtTreePlayerPanel::OnSetColor(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     const wxColour color = dialog.GetColourData().GetColour();
-    gbtStyle style = m_doc->GetStyle();
+    TreeRenderConfig style = m_doc->GetStyle();
     style.SetPlayerColor(m_player, color);
     m_doc->SetStyle(style);
   }
@@ -471,11 +470,11 @@ void gbtTreeChanceIcon::OnLeftClick(wxMouseEvent &)
   source.DoDragDrop(wxDrag_DefaultMove);
 }
 
-class gbtTreeChancePanel : public wxPanel, public gbtGameView {
+class gbtTreeChancePanel : public wxPanel, public GameView {
 private:
   wxStaticText *m_playerLabel;
 
-  // Implementation of gbtGameView members
+  // Implementation of GameView members
   void OnUpdate() override;
 
   /// @name Event handlers
@@ -485,11 +484,11 @@ private:
   //@}
 
 public:
-  gbtTreeChancePanel(wxWindow *, gbtGameDocument *);
+  gbtTreeChancePanel(wxWindow *, GameDocument *);
 };
 
-gbtTreeChancePanel::gbtTreeChancePanel(wxWindow *p_parent, gbtGameDocument *p_doc)
-  : wxPanel(p_parent, wxID_ANY), gbtGameView(p_doc)
+gbtTreeChancePanel::gbtTreeChancePanel(wxWindow *p_parent, GameDocument *p_doc)
+  : wxPanel(p_parent, wxID_ANY), GameView(p_doc)
 {
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
@@ -516,7 +515,7 @@ gbtTreeChancePanel::gbtTreeChancePanel(wxWindow *p_parent, gbtGameDocument *p_do
   SetSizer(topSizer);
   topSizer->SetSizeHints(this);
   topSizer->Fit(this);
-  Layout();
+  wxWindowBase::Layout();
 }
 
 void gbtTreeChancePanel::OnUpdate()
@@ -538,7 +537,7 @@ void gbtTreeChancePanel::OnSetColor(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     const wxColour color = dialog.GetColourData().GetColour();
-    gbtStyle style = m_doc->GetStyle();
+    TreeRenderConfig style = m_doc->GetStyle();
     style.SetChanceColor(color);
     m_doc->SetStyle(style);
   }
@@ -548,23 +547,23 @@ void gbtTreeChancePanel::OnSetColor(wxCommandEvent &)
 //                  class gbtTreePlayerToolbar
 //=====================================================================
 
-class gbtTreePlayerToolbar : public wxPanel, public gbtGameView {
+class gbtTreePlayerToolbar : public wxPanel, public GameView {
 private:
   gbtTreeChancePanel *m_chancePanel;
-  Gambit::Array<gbtTreePlayerPanel *> m_playerPanels;
+  Array<gbtTreePlayerPanel *> m_playerPanels;
 
-  // @name Implementation of gbtGameView members
+  // @name Implementation of GameView members
   //@{
   void OnUpdate() override;
   void PostPendingChanges() override;
   //@}
 
 public:
-  gbtTreePlayerToolbar(wxWindow *p_parent, gbtGameDocument *p_doc);
+  gbtTreePlayerToolbar(wxWindow *p_parent, GameDocument *p_doc);
 };
 
-gbtTreePlayerToolbar::gbtTreePlayerToolbar(wxWindow *p_parent, gbtGameDocument *p_doc)
-  : wxPanel(p_parent, wxID_ANY, wxDefaultPosition, wxSize(210, -1)), gbtGameView(p_doc),
+gbtTreePlayerToolbar::gbtTreePlayerToolbar(wxWindow *p_parent, GameDocument *p_doc)
+  : wxPanel(p_parent, wxID_ANY, wxDefaultPosition, wxSize(210, -1)), GameView(p_doc),
     m_chancePanel(new gbtTreeChancePanel(this, m_doc))
 {
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
@@ -577,7 +576,7 @@ gbtTreePlayerToolbar::gbtTreePlayerToolbar(wxWindow *p_parent, gbtGameDocument *
   }
 
   SetSizer(topSizer);
-  Layout();
+  wxWindowBase::Layout();
 }
 
 void gbtTreePlayerToolbar::OnUpdate()
@@ -607,19 +606,19 @@ void gbtTreePlayerToolbar::PostPendingChanges()
 }
 
 //=====================================================================
-//              Implementation of class gbtEfgPanel
+//              Implementation of class EfgPanel
 //=====================================================================
 
-BEGIN_EVENT_TABLE(gbtEfgPanel, wxPanel)
-EVT_MENU(GBT_MENU_TOOLS_DOMINANCE, gbtEfgPanel::OnToolsDominance)
-EVT_MENU(GBT_MENU_VIEW_ZOOMIN, gbtEfgPanel::OnViewZoomIn)
-EVT_MENU(GBT_MENU_VIEW_ZOOMOUT, gbtEfgPanel::OnViewZoomOut)
-EVT_MENU(GBT_MENU_VIEW_ZOOM100, gbtEfgPanel::OnViewZoom100)
-EVT_MENU(GBT_MENU_VIEW_ZOOMFIT, gbtEfgPanel::OnViewZoomFit)
+BEGIN_EVENT_TABLE(EfgPanel, wxPanel)
+EVT_MENU(GBT_MENU_TOOLS_DOMINANCE, EfgPanel::OnToolsDominance)
+EVT_MENU(GBT_MENU_VIEW_ZOOMIN, EfgPanel::OnViewZoomIn)
+EVT_MENU(GBT_MENU_VIEW_ZOOMOUT, EfgPanel::OnViewZoomOut)
+EVT_MENU(GBT_MENU_VIEW_ZOOM100, EfgPanel::OnViewZoom100)
+EVT_MENU(GBT_MENU_VIEW_ZOOMFIT, EfgPanel::OnViewZoomFit)
 END_EVENT_TABLE()
 
-gbtEfgPanel::gbtEfgPanel(wxWindow *p_parent, gbtGameDocument *p_doc)
-  : wxPanel(p_parent, wxID_ANY), gbtGameView(p_doc), m_treeWindow(new gbtEfgDisplay(this, m_doc)),
+EfgPanel::EfgPanel(wxWindow *p_parent, GameDocument *p_doc)
+  : wxPanel(p_parent, wxID_ANY), GameView(p_doc), m_treeWindow(new EfgDisplay(this, m_doc)),
     m_dominanceToolbar(new gbtBehavDominanceToolbar(this, m_doc)),
     m_playerToolbar(new gbtTreePlayerToolbar(this, m_doc))
 {
@@ -633,16 +632,16 @@ gbtEfgPanel::gbtEfgPanel(wxWindow *p_parent, gbtGameDocument *p_doc)
 
   topSizer->Add(treeSizer, 1, wxEXPAND, 0);
   SetSizer(topSizer);
-  Layout();
+  wxWindowBase::Layout();
 }
 
-void gbtEfgPanel::OnToolsDominance(wxCommandEvent &p_event)
+void EfgPanel::OnToolsDominance(wxCommandEvent &p_event)
 {
   GetSizer()->Show(m_dominanceToolbar, p_event.IsChecked(), true);
   GetSizer()->Layout();
 }
 
-void gbtEfgPanel::OnViewZoomIn(wxCommandEvent &)
+void EfgPanel::OnViewZoomIn(wxCommandEvent &)
 {
   int zoom = m_treeWindow->GetZoom();
   if (zoom < 150) {
@@ -651,7 +650,7 @@ void gbtEfgPanel::OnViewZoomIn(wxCommandEvent &)
   m_treeWindow->SetZoom(zoom);
 }
 
-void gbtEfgPanel::OnViewZoomOut(wxCommandEvent &)
+void EfgPanel::OnViewZoomOut(wxCommandEvent &)
 {
   int zoom = m_treeWindow->GetZoom();
   if (zoom > 10) {
@@ -660,16 +659,16 @@ void gbtEfgPanel::OnViewZoomOut(wxCommandEvent &)
   m_treeWindow->SetZoom(zoom);
 }
 
-void gbtEfgPanel::OnViewZoom100(wxCommandEvent &) { m_treeWindow->SetZoom(100); }
+void EfgPanel::OnViewZoom100(wxCommandEvent &) { m_treeWindow->SetZoom(100); }
 
-void gbtEfgPanel::OnViewZoomFit(wxCommandEvent &) { m_treeWindow->FitZoom(); }
+void EfgPanel::OnViewZoomFit(wxCommandEvent &) { m_treeWindow->FitZoom(); }
 
 class gbtEfgPrintout : public wxPrintout {
 private:
-  gbtEfgPanel *m_efgPanel;
+  EfgPanel *m_efgPanel;
 
 public:
-  gbtEfgPrintout(gbtEfgPanel *p_efgPanel, const wxString &p_label)
+  gbtEfgPrintout(EfgPanel *p_efgPanel, const wxString &p_label)
     : wxPrintout(p_label), m_efgPanel(p_efgPanel)
   {
   }
@@ -690,12 +689,12 @@ public:
   }
 };
 
-wxPrintout *gbtEfgPanel::GetPrintout()
+wxPrintout *EfgPanel::GetPrintout()
 {
   return new gbtEfgPrintout(this, wxString(m_doc->GetGame()->GetTitle().c_str(), *wxConvCurrent));
 }
 
-bool gbtEfgPanel::GetBitmap(wxBitmap &p_bitmap, int p_marginX, int p_marginY)
+bool EfgPanel::GetBitmap(wxBitmap &p_bitmap, int p_marginX, int p_marginY)
 {
   if (m_treeWindow->GetLayout().MaxX() > 65000 || m_treeWindow->GetLayout().MaxY() > 65000) {
     // This is just too huge to export to graphics
@@ -710,7 +709,7 @@ bool gbtEfgPanel::GetBitmap(wxBitmap &p_bitmap, int p_marginX, int p_marginY)
   return true;
 }
 
-void gbtEfgPanel::GetSVG(const wxString &p_filename, int p_marginX, int p_marginY)
+void EfgPanel::GetSVG(const wxString &p_filename, int p_marginX, int p_marginY)
 {
   // The size of the image to be drawn
   const int maxX = m_treeWindow->GetLayout().MaxX();
@@ -722,7 +721,7 @@ void gbtEfgPanel::GetSVG(const wxString &p_filename, int p_marginX, int p_margin
   RenderGame(dc, p_marginX, p_marginY);
 }
 
-void gbtEfgPanel::RenderGame(wxDC &p_dc, int p_marginX, int p_marginY)
+void EfgPanel::RenderGame(wxDC &p_dc, int p_marginX, int p_marginY)
 {
   // The size of the image to be drawn
   const int maxX = m_treeWindow->GetLayout().MaxX();
@@ -733,8 +732,8 @@ void gbtEfgPanel::RenderGame(wxDC &p_dc, int p_marginX, int p_marginY)
   p_dc.GetSize(&w, &h);
 
   // Calculate a scaling factor
-  const double scaleX = (double)w / (double)(maxX + 2 * p_marginX);
-  const double scaleY = (double)h / (double)(maxY + 2 * p_marginY);
+  const double scaleX = static_cast<double>(w) / static_cast<double>(maxX + 2 * p_marginX);
+  const double scaleY = static_cast<double>(h) / static_cast<double>(maxY + 2 * p_marginY);
   double scale = (scaleX < scaleY) ? scaleX : scaleY;
   // Never zoom in
   if (scale > 1.0) {
@@ -743,12 +742,13 @@ void gbtEfgPanel::RenderGame(wxDC &p_dc, int p_marginX, int p_marginY)
   p_dc.SetUserScale(scale, scale);
 
   // Calculate the position on the DC to center the tree
-  auto posX = (double)((w - (maxX * scale)) / 2.0);
-  auto posY = (double)((h - (maxY * scale)) / 2.0);
-  p_dc.SetDeviceOrigin((int)posX, (int)posY);
+  auto posX = ((w - (maxX * scale)) / 2.0);
+  auto posY = ((h - (maxY * scale)) / 2.0);
+  p_dc.SetDeviceOrigin(static_cast<int>(posX), static_cast<int>(posY));
 
   printf("Drawing with scale %f\n", scale);
 
   // Draw!
   m_treeWindow->OnDraw(p_dc, scale);
 }
+} // namespace Gambit::GUI

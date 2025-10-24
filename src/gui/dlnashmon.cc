@@ -32,19 +32,20 @@
 #include "efgprofile.h"
 #include "nfgprofile.h"
 
-const int GBT_ID_TIMER = 1000;
-const int GBT_ID_PROCESS = 1001;
+namespace Gambit::GUI {
+constexpr int GBT_ID_TIMER = 1000;
+constexpr int GBT_ID_PROCESS = 1001;
 
-BEGIN_EVENT_TABLE(gbtNashMonitorDialog, wxDialog)
-EVT_END_PROCESS(GBT_ID_PROCESS, gbtNashMonitorDialog::OnEndProcess)
-EVT_IDLE(gbtNashMonitorDialog::OnIdle)
-EVT_TIMER(GBT_ID_TIMER, gbtNashMonitorDialog::OnTimer)
+BEGIN_EVENT_TABLE(NashMonitorDialog, wxDialog)
+EVT_END_PROCESS(GBT_ID_PROCESS, NashMonitorDialog::OnEndProcess)
+EVT_IDLE(NashMonitorDialog::OnIdle)
+EVT_TIMER(GBT_ID_TIMER, NashMonitorDialog::OnTimer)
 END_EVENT_TABLE()
 
 #include "bitmaps/stop.xpm"
 
-gbtNashMonitorDialog::gbtNashMonitorDialog(wxWindow *p_parent, gbtGameDocument *p_doc,
-                                           std::shared_ptr<gbtAnalysisOutput> p_command)
+NashMonitorDialog::NashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
+                                     const std::shared_ptr<AnalysisOutput> &p_command)
   : wxDialog(p_parent, wxID_ANY, wxT("Computing Nash equilibria"), wxDefaultPosition),
     m_doc(p_doc), m_process(nullptr), m_timer(this, GBT_ID_TIMER), m_output(p_command)
 {
@@ -66,15 +67,15 @@ gbtNashMonitorDialog::gbtNashMonitorDialog(wxWindow *p_parent, gbtGameDocument *
   startSizer->Add(m_stopButton, 0, wxALL | wxALIGN_CENTER, 5);
 
   Connect(wxID_CANCEL, wxEVT_COMMAND_BUTTON_CLICKED,
-          wxCommandEventHandler(gbtNashMonitorDialog::OnStop));
+          wxCommandEventHandler(NashMonitorDialog::OnStop));
 
   sizer->Add(startSizer, 0, wxALL | wxALIGN_CENTER, 5);
 
   if (p_command->IsBehavior()) {
-    m_profileList = new gbtBehavProfileList(this, m_doc);
+    m_profileList = new BehaviorProfileList(this, m_doc);
   }
   else {
-    m_profileList = new gbtMixedProfileList(this, m_doc);
+    m_profileList = new MixedProfileList(this, m_doc);
   }
   m_profileList->SetSizeHints(wxSize(500, 300));
   sizer->Add(m_profileList, 1, wxALL | wxEXPAND, 5);
@@ -86,13 +87,13 @@ gbtNashMonitorDialog::gbtNashMonitorDialog(wxWindow *p_parent, gbtGameDocument *
   SetSizer(sizer);
   sizer->Fit(this);
   sizer->SetSizeHints(this);
-  Layout();
+  wxTopLevelWindowBase::Layout();
   CenterOnParent();
 
   Start(p_command);
 }
 
-void gbtNashMonitorDialog::Start(std::shared_ptr<gbtAnalysisOutput> p_command)
+void NashMonitorDialog::Start(std::shared_ptr<AnalysisOutput> p_command)
 {
   if (!p_command->IsBehavior()) {
     // Make sure we have a normal form representation
@@ -116,7 +117,7 @@ void gbtNashMonitorDialog::Start(std::shared_ptr<gbtAnalysisOutput> p_command)
   wxString str(wxString(s.str().c_str(), *wxConvCurrent));
 
   // It is possible that the whole string won't write on one go, so
-  // we should take this possibility into account.  If the write doesn't
+  // we should take this possibility into account.  If this doesn't
   // complete the whole way, we take a 100-millisecond siesta and try
   // again.  (This seems to primarily be an issue with -- you guessed it --
   // Windows!)
@@ -140,7 +141,7 @@ void gbtNashMonitorDialog::Start(std::shared_ptr<gbtAnalysisOutput> p_command)
   m_timer.Start(1000, false);
 }
 
-void gbtNashMonitorDialog::OnIdle(wxIdleEvent &p_event)
+void NashMonitorDialog::OnIdle(wxIdleEvent &p_event)
 {
   if (!m_process) {
     return;
@@ -163,9 +164,9 @@ void gbtNashMonitorDialog::OnIdle(wxIdleEvent &p_event)
   }
 }
 
-void gbtNashMonitorDialog::OnTimer(wxTimerEvent &p_event) { wxWakeUpIdle(); }
+void NashMonitorDialog::OnTimer(wxTimerEvent &p_event) { wxWakeUpIdle(); }
 
-void gbtNashMonitorDialog::OnEndProcess(wxProcessEvent &p_event)
+void NashMonitorDialog::OnEndProcess(wxProcessEvent &p_event)
 {
   m_stopButton->Enable(false);
   m_timer.Stop();
@@ -195,7 +196,7 @@ void gbtNashMonitorDialog::OnEndProcess(wxProcessEvent &p_event)
   m_okButton->Enable(true);
 }
 
-void gbtNashMonitorDialog::OnStop(wxCommandEvent &p_event)
+void NashMonitorDialog::OnStop(wxCommandEvent &p_event)
 {
   // Per the wxWidgets wiki, under Windows, programs that run
   // without a console window don't respond to the more polite
@@ -208,3 +209,4 @@ void gbtNashMonitorDialog::OnStop(wxCommandEvent &p_event)
   wxProcess::Kill(m_pid, wxSIGTERM);
 #endif // __WXMSW__
 }
+} // namespace Gambit::GUI

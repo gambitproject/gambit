@@ -25,17 +25,18 @@
 
 #include <wx/wx.h>
 
-//
-// A general-purpose dialog box to display the description of an internal
-// exception in Gambit.
-//
-class gbtExceptionDialog : public wxMessageDialog {
+namespace Gambit::GUI {
+
+// A general-purpose dialog box to display the description of an internal exception.
+class ExceptionDialog final : public wxMessageDialog {
 public:
-  gbtExceptionDialog(wxWindow *p_parent, const std::string &p_message)
+  ExceptionDialog(wxWindow *p_parent, const std::string &p_message)
     : wxMessageDialog(p_parent, wxString(p_message.c_str(), *wxConvCurrent),
                       wxT("Internal exception in Gambit"), wxICON_ERROR | wxCANCEL)
   {
   }
 };
+
+} // namespace Gambit::GUI
 
 #endif // DLEXCEPT_H

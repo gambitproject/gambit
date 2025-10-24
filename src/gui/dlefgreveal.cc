@@ -28,13 +28,12 @@
 #include "gambit.h"
 #include "dlefgreveal.h"
 
-using namespace Gambit;
-
+namespace Gambit::GUI {
 //=========================================================================
-//                  gbtRevealMoveDialog: Member functions
+//                  RevealMoveDialog: Member functions
 //=========================================================================
 
-gbtRevealMoveDialog::gbtRevealMoveDialog(wxWindow *p_parent, gbtGameDocument *p_doc)
+RevealMoveDialog::RevealMoveDialog(wxWindow *p_parent, GameDocument *p_doc)
   : wxDialog(p_parent, wxID_ANY, _("Reveal this move to players"), wxDefaultPosition), m_doc(p_doc)
 {
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
@@ -69,11 +68,11 @@ gbtRevealMoveDialog::gbtRevealMoveDialog(wxWindow *p_parent, gbtGameDocument *p_
   SetSizer(topSizer);
   topSizer->Fit(this);
   topSizer->SetSizeHints(this);
-  Layout();
+  wxTopLevelWindowBase::Layout();
   CenterOnParent();
 }
 
-Array<GamePlayer> gbtRevealMoveDialog::GetPlayers() const
+Array<GamePlayer> RevealMoveDialog::GetPlayers() const
 {
   Array<GamePlayer> players;
 
@@ -85,3 +84,5 @@ Array<GamePlayer> gbtRevealMoveDialog::GetPlayers() const
 
   return players;
 }
+
+} // namespace Gambit::GUI

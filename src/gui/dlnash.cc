@@ -22,7 +22,6 @@
 
 #include <sstream>
 
-#include <wx/wxprec.h>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif // WX_PRECOMP
@@ -30,6 +29,7 @@
 
 #include "dlnash.h"
 
+namespace Gambit::GUI {
 static wxString s_recommended(wxT("with Gambit's recommended method"));
 static wxString s_enumpure(wxT("by looking for pure strategy equilibria"));
 static wxString s_enummixed(wxT("by enumerating extreme points"));
@@ -42,7 +42,7 @@ static wxString s_liap(wxT("by minimizing the Lyapunov function"));
 static wxString s_logit(wxT("by tracing logit equilibria"));
 static wxString s_simpdiv(wxT("by simplicial subdivision"));
 
-gbtNashChoiceDialog::gbtNashChoiceDialog(wxWindow *p_parent, gbtGameDocument *p_doc)
+NashChoiceDialog::NashChoiceDialog(wxWindow *p_parent, GameDocument *p_doc)
   : wxDialog(p_parent, wxID_ANY, wxT("Compute Nash equilibria"), wxDefaultPosition), m_doc(p_doc)
 {
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
@@ -63,7 +63,7 @@ gbtNashChoiceDialog::gbtNashChoiceDialog(wxWindow *p_parent, gbtGameDocument *p_
   m_countChoice->SetSelection(0);
 
   Connect(m_countChoice->GetId(), wxEVT_COMMAND_CHOICE_SELECTED,
-          wxCommandEventHandler(gbtNashChoiceDialog::OnCount));
+          wxCommandEventHandler(NashChoiceDialog::OnCount));
   topSizer->Add(m_countChoice, 0, wxALL | wxEXPAND, 5);
 
   if (p_doc->NumPlayers() == 2 && m_doc->IsConstSum()) {
@@ -88,7 +88,7 @@ gbtNashChoiceDialog::gbtNashChoiceDialog(wxWindow *p_parent, gbtGameDocument *p_
     // We only need to respond to changes in method when we have an
     // extensive game
     Connect(m_methodChoice->GetId(), wxEVT_COMMAND_CHOICE_SELECTED,
-            wxCommandEventHandler(gbtNashChoiceDialog::OnMethod));
+            wxCommandEventHandler(NashChoiceDialog::OnMethod));
   }
   else {
     m_repChoice = nullptr;
@@ -108,7 +108,7 @@ gbtNashChoiceDialog::gbtNashChoiceDialog(wxWindow *p_parent, gbtGameDocument *p_
   CenterOnParent();
 }
 
-void gbtNashChoiceDialog::OnCount(wxCommandEvent &p_event)
+void NashChoiceDialog::OnCount(wxCommandEvent &p_event)
 {
   m_methodChoice->Clear();
   m_methodChoice->Append(s_recommended);
@@ -138,7 +138,7 @@ void gbtNashChoiceDialog::OnCount(wxCommandEvent &p_event)
   m_methodChoice->SetSelection(0);
 }
 
-void gbtNashChoiceDialog::OnMethod(wxCommandEvent &p_event)
+void NashChoiceDialog::OnMethod(wxCommandEvent &p_event)
 {
   const wxString method = m_methodChoice->GetString(p_event.GetSelection());
 
@@ -151,15 +151,15 @@ void gbtNashChoiceDialog::OnMethod(wxCommandEvent &p_event)
   }
 }
 
-bool gbtNashChoiceDialog::UseStrategic() const
+bool NashChoiceDialog::UseStrategic() const
 {
   return (m_repChoice == nullptr || m_repChoice->GetSelection() == 1);
 }
 
-std::shared_ptr<gbtAnalysisOutput> gbtNashChoiceDialog::GetCommand() const
+std::shared_ptr<AnalysisOutput> NashChoiceDialog::GetCommand() const
 {
   const bool useEfg = m_repChoice && m_repChoice->GetSelection() == 0;
-  std::shared_ptr<gbtAnalysisOutput> cmd = nullptr;
+  std::shared_ptr<AnalysisOutput> cmd = nullptr;
 
   const wxString method = m_methodChoice->GetStringSelection();
 
@@ -195,90 +195,90 @@ std::shared_ptr<gbtAnalysisOutput> gbtNashChoiceDialog::GetCommand() const
   if (method == s_recommended) {
     if (m_countChoice->GetSelection() == 0) {
       if (m_doc->NumPlayers() == 2 && m_doc->IsConstSum()) {
-        cmd = std::make_shared<gbtAnalysisProfileList<Rational>>(m_doc, useEfg);
+        cmd = std::make_shared<AnalysisProfileList<Rational>>(m_doc, useEfg);
         cmd->SetCommand(prefix + wxT("lp") + options);
         cmd->SetDescription(wxT("One equilibrium by solving a linear program ") + game);
       }
       else {
-        cmd = std::make_shared<gbtAnalysisProfileList<double>>(m_doc, useEfg);
+        cmd = std::make_shared<AnalysisProfileList<double>>(m_doc, useEfg);
         cmd->SetCommand(prefix + wxT("logit -e -d 10"));
         cmd->SetDescription(wxT("One equilibrium by logit tracing ") + game);
       }
     }
     else if (m_countChoice->GetSelection() == 1) {
       if (m_doc->NumPlayers() == 2) {
-        cmd = std::make_shared<gbtAnalysisProfileList<Rational>>(m_doc, useEfg);
+        cmd = std::make_shared<AnalysisProfileList<Rational>>(m_doc, useEfg);
         cmd->SetCommand(prefix + wxT("lcp") + options);
         cmd->SetDescription(wxT("Some equilibria by solving a linear complementarity program ") +
                             game);
       }
       else {
-        cmd = std::make_shared<gbtAnalysisProfileList<double>>(m_doc, false);
+        cmd = std::make_shared<AnalysisProfileList<double>>(m_doc, false);
         cmd->SetCommand(prefix + wxT("simpdiv -d 10 -n 20 -r 100") + options);
         cmd->SetDescription(wxT("Some equilibria by simplicial subdivision ") + game);
       }
     }
     else {
       if (m_doc->NumPlayers() == 2) {
-        cmd = std::make_shared<gbtAnalysisProfileList<Rational>>(m_doc, false);
+        cmd = std::make_shared<AnalysisProfileList<Rational>>(m_doc, false);
         cmd->SetCommand(prefix + wxT("enummixed"));
         cmd->SetDescription(
             wxT("All equilibria by enumeration of mixed strategies in strategic game"));
       }
       else {
-        cmd = std::make_shared<gbtAnalysisProfileList<double>>(m_doc, useEfg);
+        cmd = std::make_shared<AnalysisProfileList<double>>(m_doc, useEfg);
         cmd->SetCommand(prefix + wxT("enumpoly -d 10") + options);
         cmd->SetDescription(wxT("All equilibria by solving polynomial systems ") + game);
       }
     }
   }
   else if (method == s_enumpure) {
-    cmd = std::make_shared<gbtAnalysisProfileList<Rational>>(m_doc, useEfg);
+    cmd = std::make_shared<AnalysisProfileList<Rational>>(m_doc, useEfg);
     cmd->SetCommand(prefix + wxT("enumpure") + options);
     cmd->SetDescription(count + wxT(" in pure strategies ") + game);
   }
   else if (method == s_enummixed) {
-    cmd = std::make_shared<gbtAnalysisProfileList<Rational>>(m_doc, false);
+    cmd = std::make_shared<AnalysisProfileList<Rational>>(m_doc, false);
     cmd->SetCommand(prefix + wxT("enummixed") + options);
     cmd->SetDescription(count + wxT(" by enumeration of mixed strategies in strategic game"));
   }
   else if (method == s_enumpoly) {
-    cmd = std::make_shared<gbtAnalysisProfileList<double>>(m_doc, useEfg);
+    cmd = std::make_shared<AnalysisProfileList<double>>(m_doc, useEfg);
     cmd->SetCommand(prefix + wxT("enumpoly -d 10") + options);
     cmd->SetDescription(count + wxT(" by solving polynomial systems ") + game);
   }
   else if (method == s_gnm) {
-    cmd = std::make_shared<gbtAnalysisProfileList<double>>(m_doc, false);
+    cmd = std::make_shared<AnalysisProfileList<double>>(m_doc, false);
     cmd->SetCommand(prefix + wxT("gnm -d 10") + options);
     cmd->SetDescription(count + wxT(" by global Newton tracing in strategic game"));
   }
   else if (method == s_ipa) {
-    cmd = std::make_shared<gbtAnalysisProfileList<double>>(m_doc, false);
+    cmd = std::make_shared<AnalysisProfileList<double>>(m_doc, false);
     cmd->SetCommand(prefix + wxT("ipa -d 10") + options);
     cmd->SetDescription(count + wxT(" by iterated polymatrix approximation in strategic game"));
   }
   else if (method == s_lp) {
-    cmd = std::make_shared<gbtAnalysisProfileList<Rational>>(m_doc, useEfg);
+    cmd = std::make_shared<AnalysisProfileList<Rational>>(m_doc, useEfg);
     cmd->SetCommand(prefix + wxT("lp") + options);
     cmd->SetDescription(count + wxT(" by solving a linear program ") + game);
   }
   else if (method == s_lcp) {
-    cmd = std::make_shared<gbtAnalysisProfileList<Rational>>(m_doc, useEfg);
+    cmd = std::make_shared<AnalysisProfileList<Rational>>(m_doc, useEfg);
     cmd->SetCommand(prefix + wxT("lcp") + options);
     cmd->SetDescription(count + wxT(" by solving a linear complementarity program ") + game);
   }
   else if (method == s_liap) {
-    cmd = std::make_shared<gbtAnalysisProfileList<double>>(m_doc, useEfg);
+    cmd = std::make_shared<AnalysisProfileList<double>>(m_doc, useEfg);
     cmd->SetCommand(prefix + wxT("liap -d 10") + options);
     cmd->SetDescription(count + wxT(" by function minimization ") + game);
   }
   else if (method == s_logit) {
-    cmd = std::make_shared<gbtAnalysisProfileList<double>>(m_doc, useEfg);
+    cmd = std::make_shared<AnalysisProfileList<double>>(m_doc, useEfg);
     cmd->SetCommand(prefix + wxT("logit -e -d 10") + options);
     cmd->SetDescription(count + wxT(" by logit tracing ") + game);
   }
   else if (method == s_simpdiv) {
-    cmd = std::make_shared<gbtAnalysisProfileList<double>>(m_doc, false);
+    cmd = std::make_shared<AnalysisProfileList<double>>(m_doc, false);
     cmd->SetCommand(prefix + wxT("simpdiv -d 10 -n 20 -r 100") + options);
     cmd->SetDescription(count + wxT(" by simplicial subdivision in strategic game"));
   }
@@ -288,3 +288,4 @@ std::shared_ptr<gbtAnalysisOutput> gbtNashChoiceDialog::GetCommand() const
 
   return cmd;
 }
+} // namespace Gambit::GUI

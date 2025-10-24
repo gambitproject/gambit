@@ -60,29 +60,30 @@
 #include "dlefglayout.h"
 #include "dlefglegend.h"
 
+namespace Gambit::GUI {
+
 //=====================================================================
-//                    class gbtProfileListPanel
+//                    class ProfileListPanel
 //=====================================================================
 
-class gbtProfileListPanel : public wxPanel, public gbtGameView {
-private:
+class ProfileListPanel final : public wxPanel, public GameView {
   wxWindow *m_behavProfiles, *m_mixedProfiles;
 
   void OnUpdate() override {}
 
 public:
-  gbtProfileListPanel(wxWindow *p_parent, gbtGameDocument *p_doc);
+  ProfileListPanel(wxWindow *p_parent, GameDocument *p_doc);
 
   void ShowMixed(bool p_show);
 };
 
-gbtProfileListPanel::gbtProfileListPanel(wxWindow *p_parent, gbtGameDocument *p_doc)
-  : wxPanel(p_parent, wxID_ANY), gbtGameView(p_doc)
+ProfileListPanel::ProfileListPanel(wxWindow *p_parent, GameDocument *p_doc)
+  : wxPanel(p_parent, wxID_ANY), GameView(p_doc)
 {
   auto *topSizer = new wxBoxSizer(wxHORIZONTAL);
 
   if (p_doc->IsTree()) {
-    m_behavProfiles = new gbtBehavProfileList(this, p_doc);
+    m_behavProfiles = new BehaviorProfileList(this, p_doc);
     m_behavProfiles->Show(false);
     topSizer->Add(m_behavProfiles, 1, wxEXPAND, 0);
   }
@@ -90,15 +91,15 @@ gbtProfileListPanel::gbtProfileListPanel(wxWindow *p_parent, gbtGameDocument *p_
     m_behavProfiles = nullptr;
   }
 
-  m_mixedProfiles = new gbtMixedProfileList(this, p_doc);
+  m_mixedProfiles = new MixedProfileList(this, p_doc);
   m_mixedProfiles->Show(false);
   topSizer->Add(m_mixedProfiles, 1, wxEXPAND, 0);
 
   SetSizer(topSizer);
-  Layout();
+  wxWindowBase::Layout();
 }
 
-void gbtProfileListPanel::ShowMixed(bool p_show)
+void ProfileListPanel::ShowMixed(bool p_show)
 {
   m_mixedProfiles->Show(p_show);
   GetSizer()->Show(m_mixedProfiles, p_show);
@@ -112,12 +113,11 @@ void gbtProfileListPanel::ShowMixed(bool p_show)
 }
 
 //=====================================================================
-//                    class gbtAnalysisNotebook
+//                    class AnalysisNotebook
 //=====================================================================
 
-class gbtAnalysisNotebook : public wxPanel, public gbtGameView {
-private:
-  gbtProfileListPanel *m_profiles;
+class AnalysisNotebook final : public wxPanel, public GameView {
+  ProfileListPanel *m_profiles;
   wxChoice *m_choices;
   wxStaticText *m_description;
 
@@ -125,21 +125,20 @@ private:
   void OnUpdate() override;
 
 public:
-  gbtAnalysisNotebook(wxWindow *p_parent, gbtGameDocument *p_doc);
+  AnalysisNotebook(wxWindow *p_parent, GameDocument *p_doc);
 
   void ShowMixed(bool p_show);
 };
 
-gbtAnalysisNotebook::gbtAnalysisNotebook(wxWindow *p_parent, gbtGameDocument *p_doc)
-  : wxPanel(p_parent, wxID_ANY), gbtGameView(p_doc),
-    m_profiles(new gbtProfileListPanel(this, p_doc))
+AnalysisNotebook::AnalysisNotebook(wxWindow *p_parent, GameDocument *p_doc)
+  : wxPanel(p_parent, wxID_ANY), GameView(p_doc), m_profiles(new ProfileListPanel(this, p_doc))
 {
   m_choices = new wxChoice(this, wxID_ANY);
   m_choices->Append(wxT("Profiles"));
   m_choices->SetSelection(0);
 
   Connect(m_choices->GetId(), wxEVT_COMMAND_CHOICE_SELECTED,
-          wxCommandEventHandler(gbtAnalysisNotebook::OnChoice));
+          wxCommandEventHandler(AnalysisNotebook::OnChoice));
 
   m_description = new wxStaticText(this, wxID_STATIC, wxT(""));
 
@@ -152,17 +151,17 @@ gbtAnalysisNotebook::gbtAnalysisNotebook(wxWindow *p_parent, gbtGameDocument *p_
 
   topSizer->Add(m_profiles, 1, wxEXPAND, 0);
   SetSizer(topSizer);
-  Layout();
+  wxWindowBase::Layout();
 }
 
-void gbtAnalysisNotebook::ShowMixed(bool p_show) { m_profiles->ShowMixed(p_show); }
+void AnalysisNotebook::ShowMixed(bool p_show) { m_profiles->ShowMixed(p_show); }
 
-void gbtAnalysisNotebook::OnChoice(wxCommandEvent &p_event)
+void AnalysisNotebook::OnChoice(wxCommandEvent &p_event)
 {
   m_doc->SetProfileList(p_event.GetSelection() + 1);
 }
 
-void gbtAnalysisNotebook::OnUpdate()
+void AnalysisNotebook::OnUpdate()
 {
   m_choices->Clear();
   for (int i = 1; i <= m_doc->NumProfileLists(); i++) {
@@ -176,64 +175,64 @@ void gbtAnalysisNotebook::OnUpdate()
 }
 
 //=====================================================================
-//                 Implementation of class gbtGameFrame
+//                 Implementation of class GameFrame
 //=====================================================================
 
-BEGIN_EVENT_TABLE(gbtGameFrame, wxFrame)
-EVT_MENU(GBT_MENU_FILE_NEW_EFG, gbtGameFrame::OnFileNewEfg)
-EVT_MENU(GBT_MENU_FILE_NEW_NFG, gbtGameFrame::OnFileNewNfg)
-EVT_MENU(wxID_OPEN, gbtGameFrame::OnFileOpen)
-EVT_MENU(wxID_CLOSE, gbtGameFrame::OnFileClose)
-EVT_MENU(wxID_SAVE, gbtGameFrame::OnFileSave)
-EVT_MENU(wxID_SAVEAS, gbtGameFrame::OnFileSave)
-EVT_MENU(GBT_MENU_FILE_EXPORT_EFG, gbtGameFrame::OnFileExportEfg)
-EVT_MENU(GBT_MENU_FILE_EXPORT_NFG, gbtGameFrame::OnFileExportNfg)
-EVT_MENU(GBT_MENU_FILE_EXPORT_BMP, gbtGameFrame::OnFileExportGraphic)
-EVT_MENU(GBT_MENU_FILE_EXPORT_JPEG, gbtGameFrame::OnFileExportGraphic)
-EVT_MENU(GBT_MENU_FILE_EXPORT_PNG, gbtGameFrame::OnFileExportGraphic)
-EVT_MENU(GBT_MENU_FILE_EXPORT_POSTSCRIPT, gbtGameFrame::OnFileExportPS)
-EVT_MENU(GBT_MENU_FILE_EXPORT_SVG, gbtGameFrame::OnFileExportSVG)
-EVT_MENU(wxID_PRINT_SETUP, gbtGameFrame::OnFilePageSetup)
-EVT_MENU(wxID_PREVIEW, gbtGameFrame::OnFilePrintPreview)
-EVT_MENU(wxID_PRINT, gbtGameFrame::OnFilePrint)
-EVT_MENU(wxID_EXIT, gbtGameFrame::OnFileExit)
-EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, gbtGameFrame::OnFileMRUFile)
-EVT_MENU(wxID_UNDO, gbtGameFrame::OnEditUndo)
-EVT_MENU(wxID_REDO, gbtGameFrame::OnEditRedo)
-EVT_MENU(GBT_MENU_EDIT_INSERT_MOVE, gbtGameFrame::OnEditInsertMove)
-EVT_MENU(GBT_MENU_EDIT_INSERT_ACTION, gbtGameFrame::OnEditInsertAction)
-EVT_MENU(GBT_MENU_EDIT_DELETE_TREE, gbtGameFrame::OnEditDeleteTree)
-EVT_MENU(GBT_MENU_EDIT_DELETE_PARENT, gbtGameFrame::OnEditDeleteParent)
-EVT_MENU(GBT_MENU_EDIT_REMOVE_OUTCOME, gbtGameFrame::OnEditRemoveOutcome)
-EVT_MENU(GBT_MENU_EDIT_REVEAL, gbtGameFrame::OnEditReveal)
-EVT_MENU(GBT_MENU_EDIT_NODE, gbtGameFrame::OnEditNode)
-EVT_MENU(GBT_MENU_EDIT_MOVE, gbtGameFrame::OnEditMove)
-EVT_MENU(GBT_MENU_EDIT_GAME, gbtGameFrame::OnEditGame)
-EVT_MENU(GBT_MENU_EDIT_NEWPLAYER, gbtGameFrame::OnEditNewPlayer)
-EVT_MENU(GBT_MENU_VIEW_PROFILES, gbtGameFrame::OnViewProfiles)
-EVT_MENU(GBT_MENU_VIEW_ZOOMIN, gbtGameFrame::OnViewZoom)
-EVT_MENU(GBT_MENU_VIEW_ZOOMOUT, gbtGameFrame::OnViewZoom)
-EVT_MENU(GBT_MENU_VIEW_ZOOMFIT, gbtGameFrame::OnViewZoom)
-EVT_MENU(GBT_MENU_VIEW_ZOOM100, gbtGameFrame::OnViewZoom)
-EVT_MENU(GBT_MENU_VIEW_STRATEGIC, gbtGameFrame::OnViewStrategic)
-EVT_MENU(GBT_MENU_FORMAT_FONTS, gbtGameFrame::OnFormatFonts)
-EVT_MENU(GBT_MENU_FORMAT_LAYOUT, gbtGameFrame::OnFormatLayout)
-EVT_MENU(GBT_MENU_FORMAT_LABELS, gbtGameFrame::OnFormatLabels)
-EVT_MENU(GBT_MENU_FORMAT_DECIMALS_ADD, gbtGameFrame::OnFormatDecimalsAdd)
-EVT_MENU(GBT_MENU_FORMAT_DECIMALS_DELETE, gbtGameFrame::OnFormatDecimalsDelete)
-EVT_MENU(GBT_MENU_TOOLS_DOMINANCE, gbtGameFrame::OnToolsDominance)
-EVT_MENU(GBT_MENU_TOOLS_EQUILIBRIUM, gbtGameFrame::OnToolsEquilibrium)
-EVT_MENU(GBT_MENU_TOOLS_QRE, gbtGameFrame::OnToolsQre)
-EVT_MENU(wxID_ABOUT, gbtGameFrame::OnHelpAbout)
-EVT_CLOSE(gbtGameFrame::OnCloseWindow)
+BEGIN_EVENT_TABLE(GameFrame, wxFrame)
+EVT_MENU(GBT_MENU_FILE_NEW_EFG, GameFrame::OnFileNewEfg)
+EVT_MENU(GBT_MENU_FILE_NEW_NFG, GameFrame::OnFileNewNfg)
+EVT_MENU(wxID_OPEN, GameFrame::OnFileOpen)
+EVT_MENU(wxID_CLOSE, GameFrame::OnFileClose)
+EVT_MENU(wxID_SAVE, GameFrame::OnFileSave)
+EVT_MENU(wxID_SAVEAS, GameFrame::OnFileSave)
+EVT_MENU(GBT_MENU_FILE_EXPORT_EFG, GameFrame::OnFileExportEfg)
+EVT_MENU(GBT_MENU_FILE_EXPORT_NFG, GameFrame::OnFileExportNfg)
+EVT_MENU(GBT_MENU_FILE_EXPORT_BMP, GameFrame::OnFileExportGraphic)
+EVT_MENU(GBT_MENU_FILE_EXPORT_JPEG, GameFrame::OnFileExportGraphic)
+EVT_MENU(GBT_MENU_FILE_EXPORT_PNG, GameFrame::OnFileExportGraphic)
+EVT_MENU(GBT_MENU_FILE_EXPORT_POSTSCRIPT, GameFrame::OnFileExportPS)
+EVT_MENU(GBT_MENU_FILE_EXPORT_SVG, GameFrame::OnFileExportSVG)
+EVT_MENU(wxID_PRINT_SETUP, GameFrame::OnFilePageSetup)
+EVT_MENU(wxID_PREVIEW, GameFrame::OnFilePrintPreview)
+EVT_MENU(wxID_PRINT, GameFrame::OnFilePrint)
+EVT_MENU(wxID_EXIT, GameFrame::OnFileExit)
+EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, GameFrame::OnFileMRUFile)
+EVT_MENU(wxID_UNDO, GameFrame::OnEditUndo)
+EVT_MENU(wxID_REDO, GameFrame::OnEditRedo)
+EVT_MENU(GBT_MENU_EDIT_INSERT_MOVE, GameFrame::OnEditInsertMove)
+EVT_MENU(GBT_MENU_EDIT_INSERT_ACTION, GameFrame::OnEditInsertAction)
+EVT_MENU(GBT_MENU_EDIT_DELETE_TREE, GameFrame::OnEditDeleteTree)
+EVT_MENU(GBT_MENU_EDIT_DELETE_PARENT, GameFrame::OnEditDeleteParent)
+EVT_MENU(GBT_MENU_EDIT_REMOVE_OUTCOME, GameFrame::OnEditRemoveOutcome)
+EVT_MENU(GBT_MENU_EDIT_REVEAL, GameFrame::OnEditReveal)
+EVT_MENU(GBT_MENU_EDIT_NODE, GameFrame::OnEditNode)
+EVT_MENU(GBT_MENU_EDIT_MOVE, GameFrame::OnEditMove)
+EVT_MENU(GBT_MENU_EDIT_GAME, GameFrame::OnEditGame)
+EVT_MENU(GBT_MENU_EDIT_NEWPLAYER, GameFrame::OnEditNewPlayer)
+EVT_MENU(GBT_MENU_VIEW_PROFILES, GameFrame::OnViewProfiles)
+EVT_MENU(GBT_MENU_VIEW_ZOOMIN, GameFrame::OnViewZoom)
+EVT_MENU(GBT_MENU_VIEW_ZOOMOUT, GameFrame::OnViewZoom)
+EVT_MENU(GBT_MENU_VIEW_ZOOMFIT, GameFrame::OnViewZoom)
+EVT_MENU(GBT_MENU_VIEW_ZOOM100, GameFrame::OnViewZoom)
+EVT_MENU(GBT_MENU_VIEW_STRATEGIC, GameFrame::OnViewStrategic)
+EVT_MENU(GBT_MENU_FORMAT_FONTS, GameFrame::OnFormatFonts)
+EVT_MENU(GBT_MENU_FORMAT_LAYOUT, GameFrame::OnFormatLayout)
+EVT_MENU(GBT_MENU_FORMAT_LABELS, GameFrame::OnFormatLabels)
+EVT_MENU(GBT_MENU_FORMAT_DECIMALS_ADD, GameFrame::OnFormatDecimalsAdd)
+EVT_MENU(GBT_MENU_FORMAT_DECIMALS_DELETE, GameFrame::OnFormatDecimalsDelete)
+EVT_MENU(GBT_MENU_TOOLS_DOMINANCE, GameFrame::OnToolsDominance)
+EVT_MENU(GBT_MENU_TOOLS_EQUILIBRIUM, GameFrame::OnToolsEquilibrium)
+EVT_MENU(GBT_MENU_TOOLS_QRE, GameFrame::OnToolsQre)
+EVT_MENU(wxID_ABOUT, GameFrame::OnHelpAbout)
+EVT_CLOSE(GameFrame::OnCloseWindow)
 END_EVENT_TABLE()
 
 //---------------------------------------------------------------------
-//               gbtGameFrame: Constructor and destructor
+//               GameFrame: Constructor and destructor
 //---------------------------------------------------------------------
 
-gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
-  : wxFrame(p_parent, wxID_ANY, _T(""), wxDefaultPosition, wxSize(800, 600)), gbtGameView(p_doc)
+GameFrame::GameFrame(wxWindow *p_parent, GameDocument *p_doc)
+  : wxFrame(p_parent, wxID_ANY, _T(""), wxDefaultPosition, wxSize(800, 600)), GameView(p_doc)
 {
 #if defined(__WXMSW__)
   SetIcon(wxIcon(wxT("efg_icn")));
@@ -242,7 +241,7 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
   SetIcon(wxIcon(gambit_xpm));
 #endif
 
-  CreateStatusBar();
+  wxFrameBase::CreateStatusBar();
   MakeMenus();
   MakeToolbar();
 
@@ -260,35 +259,35 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
   entries[8].Set(wxACCEL_CTRL, (int)'+', GBT_MENU_VIEW_ZOOMIN);
   entries[9].Set(wxACCEL_CTRL, (int)'-', GBT_MENU_VIEW_ZOOMOUT);
   const wxAcceleratorTable accel(10, entries);
-  SetAcceleratorTable(accel);
+  wxWindowBase::SetAcceleratorTable(accel);
 
   m_splitter = new wxSplitterWindow(this, wxID_ANY);
   if (p_doc->IsTree()) {
-    m_efgPanel = new gbtEfgPanel(m_splitter, p_doc);
+    m_efgPanel = new EfgPanel(m_splitter, p_doc);
     m_efgPanel->Show(true);
     m_splitter->Initialize(m_efgPanel);
     m_nfgPanel = nullptr;
   }
   else {
     m_efgPanel = nullptr;
-    m_nfgPanel = new gbtNfgPanel(m_splitter, p_doc);
+    m_nfgPanel = new NfgPanel(m_splitter, p_doc);
     m_nfgPanel->Show(true);
     m_splitter->Initialize(m_nfgPanel);
   }
 
-  m_analysisPanel = new gbtAnalysisNotebook(m_splitter, p_doc);
+  m_analysisPanel = new AnalysisNotebook(m_splitter, p_doc);
   m_analysisPanel->Show(false);
 
   m_splitter->SetSashGravity(0.5);
   m_splitter->SetMinimumPaneSize(200);
 
   Connect(m_splitter->GetId(), wxEVT_COMMAND_SPLITTER_UNSPLIT,
-          wxSplitterEventHandler(gbtGameFrame::OnUnsplit));
+          wxSplitterEventHandler(GameFrame::OnUnsplit));
 
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
   topSizer->Add(m_splitter, 1, wxEXPAND, 0);
   SetSizer(topSizer);
-  Layout();
+  wxTopLevelWindowBase::Layout();
 
   if (p_doc->IsTree()) {
     m_efgPanel->SetFocus();
@@ -298,12 +297,12 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
   }
 
   OnUpdate();
-  Show(true);
+  wxFrame::Show(true);
 }
 
-gbtGameFrame::~gbtGameFrame() { wxGetApp().RemoveMenu(GetMenuBar()->GetMenu(0)); }
+GameFrame::~GameFrame() { wxGetApp().RemoveMenu(wxFrameBase::GetMenuBar()->GetMenu(0)); }
 
-void gbtGameFrame::OnUpdate()
+void GameFrame::OnUpdate()
 {
   std::string gameTitle;
   gameTitle = m_doc->GetGame()->GetTitle();
@@ -320,7 +319,7 @@ void gbtGameFrame::OnUpdate()
     SetTitle(GetTitle() + wxT(" (unsaved changes)"));
   }
 
-  const Gambit::GameNode selectNode = m_doc->GetSelectNode();
+  const GameNode selectNode = m_doc->GetSelectNode();
   wxMenuBar *menuBar = GetMenuBar();
 
   menuBar->Enable(GBT_MENU_FILE_EXPORT_EFG, m_doc->IsTree());
@@ -354,7 +353,7 @@ void gbtGameFrame::OnUpdate()
 }
 
 //--------------------------------------------------------------------
-//          gbtGameFrame: Creating and updating menus and toolbar
+//          GameFrame: Creating and updating menus and toolbar
 //--------------------------------------------------------------------
 
 #include "bitmaps/about.xpm"
@@ -403,7 +402,7 @@ static void AppendBitmapItem(wxMenu *p_menu, int p_id, const wxString &p_label,
   p_menu->Append(item);
 }
 
-void gbtGameFrame::MakeMenus()
+void GameFrame::MakeMenus()
 {
   auto *fileMenu = new wxMenu;
 
@@ -540,7 +539,7 @@ void gbtGameFrame::MakeMenus()
   wxGetApp().AddMenu(GetMenuBar()->GetMenu(0));
 }
 
-void gbtGameFrame::MakeToolbar()
+void GameFrame::MakeToolbar()
 {
   wxToolBar *toolBar = CreateToolBar(wxTB_HORIZONTAL | wxTB_FLAT);
   toolBar->SetMargins(4, 4);
@@ -621,33 +620,33 @@ void gbtGameFrame::MakeToolbar()
 }
 
 //----------------------------------------------------------------------
-//               gbtGameFrame: Menu handlers - File menu
+//               GameFrame: Menu handlers - File menu
 //----------------------------------------------------------------------
 
-void gbtGameFrame::OnFileNewEfg(wxCommandEvent &)
+void GameFrame::OnFileNewEfg(wxCommandEvent &)
 {
-  const Gambit::Game efg = Gambit::NewTree();
+  const Game efg = NewTree();
   efg->SetTitle("Untitled Extensive Game");
   efg->NewPlayer()->SetLabel("Player 1");
   efg->NewPlayer()->SetLabel("Player 2");
-  auto *doc = new gbtGameDocument(efg);
-  (void)new gbtGameFrame(nullptr, doc);
+  auto *doc = new GameDocument(efg);
+  (void)new GameFrame(nullptr, doc);
 }
 
-void gbtGameFrame::OnFileNewNfg(wxCommandEvent &)
+void GameFrame::OnFileNewNfg(wxCommandEvent &)
 {
   std::vector<int> dim(2);
   dim[0] = 2;
   dim[1] = 2;
-  const Gambit::Game nfg = Gambit::NewTable(dim);
+  const Game nfg = NewTable(dim);
   nfg->SetTitle("Untitled Strategic Game");
   nfg->GetPlayer(1)->SetLabel("Player 1");
   nfg->GetPlayer(2)->SetLabel("Player 2");
-  auto *doc = new gbtGameDocument(nfg);
-  (void)new gbtGameFrame(nullptr, doc);
+  auto *doc = new GameDocument(nfg);
+  (void)new GameFrame(nullptr, doc);
 }
 
-void gbtGameFrame::OnFileOpen(wxCommandEvent &)
+void GameFrame::OnFileOpen(wxCommandEvent &)
 {
   wxFileDialog dialog(
       this, _("Choose file to open"), wxGetApp().GetCurrentDir(), _T(""),
@@ -658,7 +657,7 @@ void gbtGameFrame::OnFileOpen(wxCommandEvent &)
     const wxString filename = dialog.GetPath();
     wxGetApp().SetCurrentDir(wxPathOnly(filename));
 
-    const gbtAppLoadResult result = wxGetApp().LoadFile(filename);
+    const AppLoadResult result = wxGetApp().LoadFile(filename);
     if (result == GBT_APP_OPEN_FAILED) {
       wxMessageDialog msgdialog(
           this, wxT("Gambit could not open file '") + filename + wxT("' for reading."),
@@ -674,9 +673,9 @@ void gbtGameFrame::OnFileOpen(wxCommandEvent &)
   }
 }
 
-void gbtGameFrame::OnFileClose(wxCommandEvent &) { Close(); }
+void GameFrame::OnFileClose(wxCommandEvent &) { Close(); }
 
-void gbtGameFrame::OnFileSave(wxCommandEvent &p_event)
+void GameFrame::OnFileSave(wxCommandEvent &p_event)
 {
   if (p_event.GetId() == wxID_SAVEAS || m_doc->GetFilename().empty()) {
     wxFileDialog dialog(this, _("Choose file"), wxPathOnly(m_doc->GetFilename()),
@@ -689,7 +688,7 @@ void gbtGameFrame::OnFileSave(wxCommandEvent &p_event)
         m_doc->DoSave(dialog.GetPath());
       }
       catch (std::exception &ex) {
-        gbtExceptionDialog(this, ex.what()).ShowModal();
+        ExceptionDialog(this, ex.what()).ShowModal();
       }
     }
   }
@@ -698,12 +697,12 @@ void gbtGameFrame::OnFileSave(wxCommandEvent &p_event)
       m_doc->DoSave(m_doc->GetFilename());
     }
     catch (std::exception &ex) {
-      gbtExceptionDialog(this, ex.what()).ShowModal();
+      ExceptionDialog(this, ex.what()).ShowModal();
     }
   }
 }
 
-void gbtGameFrame::OnFilePageSetup(wxCommandEvent &)
+void GameFrame::OnFilePageSetup(wxCommandEvent &)
 {
   wxPageSetupDialog dialog(this, &m_pageSetupData);
   m_printData.SetOrientation(wxLANDSCAPE);
@@ -713,7 +712,7 @@ void gbtGameFrame::OnFilePageSetup(wxCommandEvent &)
   }
 }
 
-void gbtGameFrame::OnFilePrintPreview(wxCommandEvent &)
+void GameFrame::OnFilePrintPreview(wxCommandEvent &)
 {
   wxPrintDialogData data(m_printData);
 
@@ -736,7 +735,7 @@ void gbtGameFrame::OnFilePrintPreview(wxCommandEvent &)
   frame->Show(true);
 }
 
-void gbtGameFrame::OnFilePrint(wxCommandEvent &)
+void GameFrame::OnFilePrint(wxCommandEvent &)
 {
   wxPrintDialogData data(m_printData);
   wxPrinter printer(&data);
@@ -761,7 +760,7 @@ void gbtGameFrame::OnFilePrint(wxCommandEvent &)
   }
 }
 
-void gbtGameFrame::OnFileExportEfg(wxCommandEvent &)
+void GameFrame::OnFileExportEfg(wxCommandEvent &)
 {
   wxFileDialog dialog(this, _("Choose file"), wxGetApp().GetCurrentDir(), _T(""),
                       wxT("Gambit extensive games (*.efg)|*.efg|") wxT("All files (*.*)|*.*"),
@@ -772,7 +771,7 @@ void gbtGameFrame::OnFileExportEfg(wxCommandEvent &)
   }
 }
 
-void gbtGameFrame::OnFileExportNfg(wxCommandEvent &)
+void GameFrame::OnFileExportNfg(wxCommandEvent &)
 {
   wxFileDialog dialog(this, _("Choose file"), wxGetApp().GetCurrentDir(), _T(""),
                       wxT("Gambit strategic games (*.nfg)|*.nfg|") wxT("All files (*.*)|*.*"),
@@ -783,7 +782,7 @@ void gbtGameFrame::OnFileExportNfg(wxCommandEvent &)
   }
 }
 
-void gbtGameFrame::OnFileExportGraphic(wxCommandEvent &p_event)
+void GameFrame::OnFileExportGraphic(wxCommandEvent &p_event)
 {
   wxBitmap bitmap = wxNullBitmap;
   bool bitmapOK = false;
@@ -841,7 +840,7 @@ void gbtGameFrame::OnFileExportGraphic(wxCommandEvent &p_event)
   }
 }
 
-void gbtGameFrame::OnFileExportPS(wxCommandEvent &)
+void GameFrame::OnFileExportPS(wxCommandEvent &)
 {
 #if wxUSE_POSTSCRIPT
   wxPrintData printData(m_printData);
@@ -877,7 +876,7 @@ void gbtGameFrame::OnFileExportPS(wxCommandEvent &)
 #endif // wxUSE_POSTSCRIPT
 }
 
-void gbtGameFrame::OnFileExportSVG(wxCommandEvent &)
+void GameFrame::OnFileExportSVG(wxCommandEvent &)
 {
   wxFileDialog dialog(this, _("Choose output file"), wxGetApp().GetCurrentDir(), _T(""),
                       wxT("SVG files (*.svg)|*.svg|") wxT("All files (*.*)|*.*"),
@@ -893,7 +892,7 @@ void gbtGameFrame::OnFileExportSVG(wxCommandEvent &)
   }
 }
 
-void gbtGameFrame::OnFileExit(wxCommandEvent &p_event)
+void GameFrame::OnFileExit(wxCommandEvent &p_event)
 {
   if (wxGetApp().AreDocumentsModified()) {
     if (wxMessageBox(wxT("There are modified games.\n") wxT("Any unsaved changes will be lost!\n")
@@ -908,10 +907,10 @@ void gbtGameFrame::OnFileExit(wxCommandEvent &p_event)
   }
 }
 
-void gbtGameFrame::OnFileMRUFile(wxCommandEvent &p_event)
+void GameFrame::OnFileMRUFile(wxCommandEvent &p_event)
 {
   const wxString filename = wxGetApp().GetHistoryFile(p_event.GetId() - wxID_FILE1);
-  const gbtAppLoadResult result = wxGetApp().LoadFile(filename);
+  const AppLoadResult result = wxGetApp().LoadFile(filename);
 
   if (result == GBT_APP_OPEN_FAILED) {
     wxMessageDialog dialog(this,
@@ -928,26 +927,26 @@ void gbtGameFrame::OnFileMRUFile(wxCommandEvent &p_event)
 }
 
 //----------------------------------------------------------------------
-//                gbtGameFrame: Menu handlers - Edit menu
+//                GameFrame: Menu handlers - Edit menu
 //----------------------------------------------------------------------
 
-void gbtGameFrame::OnEditUndo(wxCommandEvent &)
+void GameFrame::OnEditUndo(wxCommandEvent &)
 {
   if (m_doc->CanUndo()) {
     m_doc->Undo();
   }
 }
 
-void gbtGameFrame::OnEditRedo(wxCommandEvent &)
+void GameFrame::OnEditRedo(wxCommandEvent &)
 {
   if (m_doc->CanRedo()) {
     m_doc->Redo();
   }
 }
 
-void gbtGameFrame::OnEditInsertMove(wxCommandEvent &)
+void GameFrame::OnEditInsertMove(wxCommandEvent &)
 {
-  gbtInsertMoveDialog dialog(this, m_doc);
+  InsertMoveDialog dialog(this, m_doc);
   if (dialog.ShowModal() == wxID_OK) {
     try {
       if (dialog.GetInfoset()) {
@@ -958,54 +957,54 @@ void gbtGameFrame::OnEditInsertMove(wxCommandEvent &)
       }
     }
     catch (std::exception &ex) {
-      gbtExceptionDialog(this, ex.what()).ShowModal();
+      ExceptionDialog(this, ex.what()).ShowModal();
     }
   }
 }
 
-void gbtGameFrame::OnEditInsertAction(wxCommandEvent &)
+void GameFrame::OnEditInsertAction(wxCommandEvent &)
 {
   try {
     m_doc->DoInsertAction(m_doc->GetSelectNode());
   }
   catch (std::exception &ex) {
-    gbtExceptionDialog(this, ex.what()).ShowModal();
+    ExceptionDialog(this, ex.what()).ShowModal();
   }
 }
 
-void gbtGameFrame::OnEditDeleteTree(wxCommandEvent &)
+void GameFrame::OnEditDeleteTree(wxCommandEvent &)
 {
   try {
     m_doc->DoDeleteTree(m_doc->GetSelectNode());
   }
   catch (std::exception &ex) {
-    gbtExceptionDialog(this, ex.what()).ShowModal();
+    ExceptionDialog(this, ex.what()).ShowModal();
   }
 }
 
-void gbtGameFrame::OnEditDeleteParent(wxCommandEvent &)
+void GameFrame::OnEditDeleteParent(wxCommandEvent &)
 {
   try {
     m_doc->DoDeleteParent(m_doc->GetSelectNode());
   }
   catch (std::exception &ex) {
-    gbtExceptionDialog(this, ex.what()).ShowModal();
+    ExceptionDialog(this, ex.what()).ShowModal();
   }
 }
 
-void gbtGameFrame::OnEditRemoveOutcome(wxCommandEvent &)
+void GameFrame::OnEditRemoveOutcome(wxCommandEvent &)
 {
   try {
     m_doc->DoRemoveOutcome(m_doc->GetSelectNode());
   }
   catch (std::exception &ex) {
-    gbtExceptionDialog(this, ex.what()).ShowModal();
+    ExceptionDialog(this, ex.what()).ShowModal();
   }
 }
 
-void gbtGameFrame::OnEditReveal(wxCommandEvent &)
+void GameFrame::OnEditReveal(wxCommandEvent &)
 {
-  gbtRevealMoveDialog dialog(this, m_doc);
+  RevealMoveDialog dialog(this, m_doc);
 
   if (dialog.ShowModal() == wxID_OK) {
     try {
@@ -1014,14 +1013,14 @@ void gbtGameFrame::OnEditReveal(wxCommandEvent &)
       }
     }
     catch (std::exception &ex) {
-      gbtExceptionDialog(this, ex.what()).ShowModal();
+      ExceptionDialog(this, ex.what()).ShowModal();
     }
   }
 }
 
-void gbtGameFrame::OnEditNode(wxCommandEvent &)
+void GameFrame::OnEditNode(wxCommandEvent &)
 {
-  dialogEditNode dialog(this, m_doc->GetSelectNode());
+  EditNodeDialog dialog(this, m_doc->GetSelectNode());
   if (dialog.ShowModal() == wxID_OK) {
     try {
       m_doc->DoSetNodeLabel(m_doc->GetSelectNode(), dialog.GetNodeName());
@@ -1044,19 +1043,19 @@ void gbtGameFrame::OnEditNode(wxCommandEvent &)
       }
     }
     catch (std::exception &ex) {
-      gbtExceptionDialog(this, ex.what()).ShowModal();
+      ExceptionDialog(this, ex.what()).ShowModal();
     }
   }
 }
 
-void gbtGameFrame::OnEditMove(wxCommandEvent &)
+void GameFrame::OnEditMove(wxCommandEvent &)
 {
-  const Gambit::GameInfoset infoset = m_doc->GetSelectNode()->GetInfoset();
+  const GameInfoset infoset = m_doc->GetSelectNode()->GetInfoset();
   if (!infoset) {
     return;
   }
 
-  gbtEditMoveDialog dialog(this, infoset);
+  EditMoveDialog dialog(this, infoset);
   if (dialog.ShowModal() == wxID_OK) {
     try {
       m_doc->DoSetInfosetLabel(infoset, dialog.GetInfosetName());
@@ -1073,34 +1072,34 @@ void gbtGameFrame::OnEditMove(wxCommandEvent &)
       }
     }
     catch (std::exception &ex) {
-      gbtExceptionDialog(this, ex.what()).ShowModal();
+      ExceptionDialog(this, ex.what()).ShowModal();
     }
   }
 }
 
-void gbtGameFrame::OnEditGame(wxCommandEvent &)
+void GameFrame::OnEditGame(wxCommandEvent &)
 {
-  gbtGamePropertiesDialog dialog(this, m_doc);
+  GamePropertiesDialog dialog(this, m_doc);
   if (dialog.ShowModal() == wxID_OK) {
     m_doc->DoSetTitle(dialog.GetTitle(), dialog.GetComment());
   }
 }
 
-void gbtGameFrame::OnEditNewPlayer(wxCommandEvent &)
+void GameFrame::OnEditNewPlayer(wxCommandEvent &)
 {
   try {
     m_doc->DoNewPlayer();
   }
   catch (std::exception &ex) {
-    gbtExceptionDialog(this, ex.what()).ShowModal();
+    ExceptionDialog(this, ex.what()).ShowModal();
   }
 }
 
 //----------------------------------------------------------------------
-//                gbtGameFrame: Menu handlers - View menu
+//                GameFrame: Menu handlers - View menu
 //----------------------------------------------------------------------
 
-void gbtGameFrame::OnViewProfiles(wxCommandEvent &p_event)
+void GameFrame::OnViewProfiles(wxCommandEvent &p_event)
 {
   if (m_splitter->IsSplit()) {
     m_splitter->Unsplit(m_analysisPanel);
@@ -1118,13 +1117,13 @@ void gbtGameFrame::OnViewProfiles(wxCommandEvent &p_event)
   GetToolBar()->ToggleTool(GBT_MENU_VIEW_PROFILES, p_event.IsChecked());
 }
 
-void gbtGameFrame::OnViewZoom(wxCommandEvent &p_event)
+void GameFrame::OnViewZoom(wxCommandEvent &p_event)
 {
   // All zoom events get passed along to the panel
   wxPostEvent(m_efgPanel, p_event);
 }
 
-void gbtGameFrame::OnViewStrategic(wxCommandEvent &p_event)
+void GameFrame::OnViewStrategic(wxCommandEvent &p_event)
 {
   if (m_efgPanel->IsShown()) {
     // We are switching to strategic view
@@ -1149,7 +1148,7 @@ void gbtGameFrame::OnViewStrategic(wxCommandEvent &p_event)
     }
 
     if (!m_nfgPanel) {
-      m_nfgPanel = new gbtNfgPanel(m_splitter, m_doc);
+      m_nfgPanel = new NfgPanel(m_splitter, m_doc);
     }
     m_doc->BuildNfg();
 
@@ -1183,13 +1182,13 @@ void gbtGameFrame::OnViewStrategic(wxCommandEvent &p_event)
 }
 
 //----------------------------------------------------------------------
-//               gbtGameFrame: Menu handlers - Format menu
+//               GameFrame: Menu handlers - Format menu
 //----------------------------------------------------------------------
 
-void gbtGameFrame::OnFormatLayout(wxCommandEvent &)
+void GameFrame::OnFormatLayout(wxCommandEvent &)
 {
-  gbtStyle style = m_doc->GetStyle();
-  gbtLayoutDialog dialog(this, style);
+  TreeRenderConfig style = m_doc->GetStyle();
+  LayoutDialog dialog(this, style);
 
   if (dialog.ShowModal() == wxID_OK) {
     dialog.GetSettings(style);
@@ -1197,12 +1196,12 @@ void gbtGameFrame::OnFormatLayout(wxCommandEvent &)
   }
 }
 
-void gbtGameFrame::OnFormatLabels(wxCommandEvent &)
+void GameFrame::OnFormatLabels(wxCommandEvent &)
 {
-  gbtLegendDialog dialog(this, m_doc->GetStyle());
+  LegendDialog dialog(this, m_doc->GetStyle());
 
   if (dialog.ShowModal() == wxID_OK) {
-    gbtStyle style = m_doc->GetStyle();
+    TreeRenderConfig style = m_doc->GetStyle();
     style.SetNodeAboveLabel(dialog.GetNodeAbove());
     style.SetNodeBelowLabel(dialog.GetNodeBelow());
     style.SetBranchAboveLabel(dialog.GetBranchAbove());
@@ -1211,38 +1210,38 @@ void gbtGameFrame::OnFormatLabels(wxCommandEvent &)
   }
 }
 
-void gbtGameFrame::OnFormatFonts(wxCommandEvent &)
+void GameFrame::OnFormatFonts(wxCommandEvent &)
 {
   wxFontData data;
   data.SetInitialFont(m_doc->GetStyle().GetFont());
   wxFontDialog dialog(this, data);
 
   if (dialog.ShowModal() == wxID_OK) {
-    gbtStyle style = m_doc->GetStyle();
+    TreeRenderConfig style = m_doc->GetStyle();
     style.SetFont(dialog.GetFontData().GetChosenFont());
     m_doc->SetStyle(style);
   }
 }
 
-void gbtGameFrame::OnFormatDecimalsAdd(wxCommandEvent &)
+void GameFrame::OnFormatDecimalsAdd(wxCommandEvent &)
 {
-  gbtStyle style = m_doc->GetStyle();
+  TreeRenderConfig style = m_doc->GetStyle();
   style.SetNumDecimals(style.NumDecimals() + 1);
   m_doc->SetStyle(style);
 }
 
-void gbtGameFrame::OnFormatDecimalsDelete(wxCommandEvent &)
+void GameFrame::OnFormatDecimalsDelete(wxCommandEvent &)
 {
-  gbtStyle style = m_doc->GetStyle();
+  TreeRenderConfig style = m_doc->GetStyle();
   style.SetNumDecimals(style.NumDecimals() - 1);
   m_doc->SetStyle(style);
 }
 
 //----------------------------------------------------------------------
-//               gbtGameFrame: Menu handlers - Tools menu
+//               GameFrame: Menu handlers - Tools menu
 //----------------------------------------------------------------------
 
-void gbtGameFrame::OnToolsDominance(wxCommandEvent &p_event)
+void GameFrame::OnToolsDominance(wxCommandEvent &p_event)
 {
   if (m_efgPanel) {
     wxPostEvent(m_efgPanel, p_event);
@@ -1256,7 +1255,7 @@ void gbtGameFrame::OnToolsDominance(wxCommandEvent &p_event)
   }
 }
 
-void gbtGameFrame::OnToolsEquilibrium(wxCommandEvent &)
+void GameFrame::OnToolsEquilibrium(wxCommandEvent &)
 {
   if (!m_doc->GetGame()->IsPerfectRecall()) {
     wxMessageBox(wxT("This is not a game of perfect recall.\n")
@@ -1265,7 +1264,7 @@ void gbtGameFrame::OnToolsEquilibrium(wxCommandEvent &)
     return;
   }
 
-  gbtNashChoiceDialog dialog(this, m_doc);
+  NashChoiceDialog dialog(this, m_doc);
 
   if (dialog.ShowModal() == wxID_OK) {
     if (dialog.UseStrategic()) {
@@ -1285,7 +1284,7 @@ void gbtGameFrame::OnToolsEquilibrium(wxCommandEvent &)
 
     auto command = dialog.GetCommand();
 
-    gbtNashMonitorDialog monitordialog(this, m_doc, command);
+    NashMonitorDialog monitordialog(this, m_doc, command);
     monitordialog.ShowModal();
 
     if (!m_splitter->IsSplit()) {
@@ -1301,9 +1300,9 @@ void gbtGameFrame::OnToolsEquilibrium(wxCommandEvent &)
   }
 }
 
-extern void LogitStrategic(wxWindow *, gbtGameDocument *);
+extern void LogitStrategic(wxWindow *, GameDocument *);
 
-void gbtGameFrame::OnToolsQre(wxCommandEvent &)
+void GameFrame::OnToolsQre(wxCommandEvent &)
 {
   if (!m_doc->GetGame()->IsPerfectRecall()) {
     wxMessageBox(wxT("This is not a game of perfect recall.\n")
@@ -1314,7 +1313,7 @@ void gbtGameFrame::OnToolsQre(wxCommandEvent &)
   }
 
   if (m_efgPanel && m_splitter->GetWindow1() == m_efgPanel) {
-    gbtLogitBehavDialog(this, m_doc).ShowModal();
+    LogitBehavDialog(this, m_doc).ShowModal();
   }
   else {
     LogitStrategic(this, m_doc);
@@ -1322,22 +1321,22 @@ void gbtGameFrame::OnToolsQre(wxCommandEvent &)
 }
 
 //----------------------------------------------------------------------
-//                 gbtGameFrame: Menu handlers - Help menu
+//                 GameFrame: Menu handlers - Help menu
 //----------------------------------------------------------------------
 
-void gbtGameFrame::OnHelpAbout(wxCommandEvent &) { gbtAboutDialog(this).ShowModal(); }
+void GameFrame::OnHelpAbout(wxCommandEvent &) { AboutDialog(this).ShowModal(); }
 
 //----------------------------------------------------------------------
-//                  gbtGameFrame: Non-menu event handlers
+//                  GameFrame: Non-menu event handlers
 //----------------------------------------------------------------------
 
-void gbtGameFrame::OnUnsplit(wxSplitterEvent &)
+void GameFrame::OnUnsplit(wxSplitterEvent &)
 {
   GetMenuBar()->Check(GBT_MENU_VIEW_PROFILES, false);
   GetToolBar()->ToggleTool(GBT_MENU_VIEW_PROFILES, false);
 }
 
-void gbtGameFrame::OnCloseWindow(wxCloseEvent &p_event)
+void GameFrame::OnCloseWindow(wxCloseEvent &p_event)
 {
   if (p_event.CanVeto() && m_doc->IsModified()) {
     if (wxMessageBox(wxT("Game has been modified.\n") wxT("Unsaved changes will be lost!\n")
@@ -1350,10 +1349,12 @@ void gbtGameFrame::OnCloseWindow(wxCloseEvent &p_event)
   p_event.Skip();
 }
 
-bool gbtGameFrame::ProcessEvent(wxEvent &p_event)
+bool GameFrame::ProcessEvent(wxEvent &p_event)
 {
   if (p_event.GetEventType() == wxEVT_COMMAND_MENU_SELECTED) {
     m_doc->PostPendingChanges();
   }
   return wxFrame::ProcessEvent(p_event);
 }
+
+} // namespace Gambit::GUI

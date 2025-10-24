@@ -20,20 +20,21 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef EFGLAYOUT_H
-#define EFGLAYOUT_H
+#ifndef GAMBIT_GUI_EFGLAYOUT_H
+#define GAMBIT_GUI_EFGLAYOUT_H
 
 #include "gambit.h"
 #include "gamedoc.h"
 
-class gbtNodeEntry {
-  friend class gbtTreeLayout;
-  GameNode m_node;                            // the corresponding node in the game
-  std::shared_ptr<gbtNodeEntry> m_parent;     // parent node
-  int m_x{-1}, m_y{-1};                       // Cartesian coordinates of node
-  std::shared_ptr<gbtNodeEntry> m_nextMember; // entry of next information set member
-  bool m_inSupport{true};                     // true if node reachable in current support
-  int m_size{20};                             // horizontal size of the node
+namespace Gambit::GUI {
+class NodeEntry {
+  friend class TreeLayout;
+  GameNode m_node;                         // the corresponding node in the game
+  std::shared_ptr<NodeEntry> m_parent;     // parent node
+  int m_x{-1}, m_y{-1};                    // Cartesian coordinates of node
+  std::shared_ptr<NodeEntry> m_nextMember; // entry of next information set member
+  bool m_inSupport{true};                  // true if node reachable in current support
+  int m_size{20};                          // horizontal size of the node
   mutable wxRect m_outcomeRect;
   mutable Array<wxRect> m_payoffRect;
   mutable wxRect m_branchAboveRect, m_branchBelowRect;
@@ -48,16 +49,16 @@ class gbtNodeEntry {
   wxString m_branchAboveLabel, m_branchBelowLabel;
 
 public:
-  explicit gbtNodeEntry(const GameNode &p_node) : m_node(p_node) {}
+  explicit NodeEntry(const GameNode &p_node) : m_node(p_node) {}
   GameNode GetNode() const { return m_node; }
 
-  std::shared_ptr<gbtNodeEntry> GetParent() const { return m_parent; }
-  void SetParent(std::shared_ptr<gbtNodeEntry> p_parent) { m_parent = p_parent; }
+  std::shared_ptr<NodeEntry> GetParent() const { return m_parent; }
+  void SetParent(const std::shared_ptr<NodeEntry> &p_parent) { m_parent = p_parent; }
 
   int GetX() const { return m_x; }
   int GetY() const { return m_y; }
 
-  std::shared_ptr<gbtNodeEntry> GetNextMember() const { return m_nextMember; }
+  std::shared_ptr<NodeEntry> GetNextMember() const { return m_nextMember; }
 
   int GetChildNumber() const
   {
@@ -103,9 +104,9 @@ public:
   const wxRect &GetPayoffExtent(int pl) const { return m_payoffRect[pl]; }
 };
 
-class gbtTreeLayout : public gbtGameView {
-  std::list<std::shared_ptr<gbtNodeEntry>> m_nodeList;
-  std::map<GameNode, std::shared_ptr<gbtNodeEntry>> m_nodeMap;
+class TreeLayout final : public GameView {
+  std::list<std::shared_ptr<NodeEntry>> m_nodeList;
+  std::map<GameNode, std::shared_ptr<NodeEntry>> m_nodeMap;
   std::vector<int> m_numSublevels;
   std::map<std::pair<int, GameInfoset>, int> m_infosetSublevels;
 
@@ -114,8 +115,8 @@ class gbtTreeLayout : public gbtGameView {
 
   const int c_leftMargin{20}, c_topMargin{40}, c_bottomMargin{25};
 
-  std::shared_ptr<gbtNodeEntry> ComputeNextInInfoset(const std::shared_ptr<gbtNodeEntry> &);
-  void ComputeSublevel(const std::shared_ptr<gbtNodeEntry> &);
+  std::shared_ptr<NodeEntry> ComputeNextInInfoset(const std::shared_ptr<NodeEntry> &);
+  void ComputeSublevel(const std::shared_ptr<NodeEntry> &);
 
   void BuildNodeList(const GameNode &, const BehaviorSupportProfile &, int);
 
@@ -126,24 +127,24 @@ class gbtTreeLayout : public gbtGameView {
   void ComputeNodeDepths() const;
   void ComputeRenderedParents() const;
 
-  wxString CreateNodeLabel(const std::shared_ptr<gbtNodeEntry> &, int) const;
-  wxString CreateBranchLabel(const std::shared_ptr<gbtNodeEntry> &, int) const;
+  wxString CreateNodeLabel(const std::shared_ptr<NodeEntry> &, int) const;
+  wxString CreateBranchLabel(const std::shared_ptr<NodeEntry> &, int) const;
 
   void RenderSubtree(wxDC &dc, bool p_noHints) const;
 
-  // Overriding gbtGameView members
+  // Overriding GameView members
   void OnUpdate() override {}
 
-  void DrawNode(wxDC &, const std::shared_ptr<gbtNodeEntry> &, const GameNode &selection,
+  void DrawNode(wxDC &, const std::shared_ptr<NodeEntry> &, const GameNode &selection,
                 bool p_noHints) const;
-  void DrawIncomingBranch(wxDC &, const std::shared_ptr<gbtNodeEntry> &) const;
-  void DrawOutcome(wxDC &, const std::shared_ptr<gbtNodeEntry> &, bool p_noHints) const;
+  void DrawIncomingBranch(wxDC &, const std::shared_ptr<NodeEntry> &) const;
+  void DrawOutcome(wxDC &, const std::shared_ptr<NodeEntry> &, bool p_noHints) const;
 
-  bool NodeHitTest(const std::shared_ptr<gbtNodeEntry> &p_entry, int p_x, int p_y) const;
+  bool NodeHitTest(const std::shared_ptr<NodeEntry> &p_entry, int p_x, int p_y) const;
 
 public:
-  explicit gbtTreeLayout(gbtGameDocument *p_doc) : gbtGameView(p_doc) {}
-  ~gbtTreeLayout() override = default;
+  explicit TreeLayout(GameDocument *p_doc) : GameView(p_doc) {}
+  ~TreeLayout() override = default;
 
   GameNode PriorSameLevel(const GameNode &) const;
   GameNode NextSameLevel(const GameNode &) const;
@@ -152,16 +153,16 @@ public:
   void Layout(const BehaviorSupportProfile &);
   void GenerateLabels() const;
 
-  std::shared_ptr<gbtNodeEntry> GetNodeEntry(const GameNode &p_node) const
+  std::shared_ptr<NodeEntry> GetNodeEntry(const GameNode &p_node) const
   {
     return m_nodeMap.at(p_node);
   }
   /// Return the layout entry for the most immediate predecessor of p_node
   /// which is rendered in the layout
-  std::shared_ptr<gbtNodeEntry> GetRenderedAncestor(const GameNode &p_node) const;
+  std::shared_ptr<NodeEntry> GetRenderedAncestor(const GameNode &p_node) const;
   /// Return the layout entry for the first descendant node of p_node
   /// which is rendered in the layout, as determined by the depth-first traversal.
-  std::shared_ptr<gbtNodeEntry> GetRenderedDescendant(const GameNode &p_node) const;
+  std::shared_ptr<NodeEntry> GetRenderedDescendant(const GameNode &p_node) const;
 
   int MaxX() const { return m_maxX; }
   int MaxY() const { return m_maxY; }
@@ -170,10 +171,11 @@ public:
   GameNode OutcomeHitTest(int, int) const;
   GameNode BranchAboveHitTest(int, int) const;
   GameNode BranchBelowHitTest(int, int) const;
-  bool InfosetHitTest(const std::shared_ptr<gbtNodeEntry> &p_entry, int p_x, int p_y) const;
+  bool InfosetHitTest(const std::shared_ptr<NodeEntry> &p_entry, int p_x, int p_y) const;
   GameNode InfosetHitTest(int, int) const;
 
   void Render(wxDC &, bool p_noHints) const;
 };
+} // namespace Gambit::GUI
 
-#endif // EFGLAYOUT_H
+#endif // GAMBIT_GUI_EFGLAYOUT_H

@@ -20,14 +20,14 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef EFGPROFILE_H
-#define EFGPROFILE_H
+#ifndef GAMBIT_GUI_EFGPROFILE_H
+#define GAMBIT_GUI_EFGPROFILE_H
 
 #include "wx/sheet/sheet.h"
 #include "gamedoc.h"
 
-class gbtBehavProfileList : public wxSheet, public gbtGameView {
-private:
+namespace Gambit::GUI {
+class BehaviorProfileList final : public wxSheet, public GameView {
   // Overriding wxSheet members for data access
   wxString GetCellValue(const wxSheetCoords &) override;
   wxSheetCellAttr GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const override;
@@ -48,12 +48,13 @@ private:
   void OnLabelClick(wxSheetEvent &);
   void OnCellClick(wxSheetEvent &);
 
-  // Overriding gbtGameView members
+  // Overriding GameView members
   void OnUpdate() override;
 
 public:
-  gbtBehavProfileList(wxWindow *p_parent, gbtGameDocument *p_doc);
-  ~gbtBehavProfileList() override;
+  BehaviorProfileList(wxWindow *p_parent, GameDocument *p_doc);
+  ~BehaviorProfileList() override;
 };
+} // namespace Gambit::GUI
 
-#endif // EFGPROFILE_H
+#endif // GAMBIT_GUI_EFGPROFILE_H

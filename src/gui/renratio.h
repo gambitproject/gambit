@@ -20,11 +20,12 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef RENRATIO_H
-#define RENRATIO_H
+#ifndef GAMBIT_GUI_RENRATIO_H
+#define GAMBIT_GUI_RENRATIO_H
 
 #include "wx/sheet/sheet.h" // the wxSheet widget
 
+namespace Gambit::GUI {
 //
 // The below is taken from the implementation of
 // DECLARE_SHEETOBJREFDATA_COPY_CLASS in sheetdef.h.
@@ -44,9 +45,9 @@ public:                                                                         
 //
 // This class is based on the wxSheetCellStringRendererRefData implementation
 //
-class gbtRationalRendererRefData : public wxSheetCellRendererRefData {
+class RationalRendererRefData final : public wxSheetCellRendererRefData {
 public:
-  gbtRationalRendererRefData() = default;
+  RationalRendererRefData() = default;
 
   // draw the string
   void Draw(wxSheet &grid, const wxSheetCellAttr &attr, wxDC &dc, const wxRect &rect,
@@ -66,18 +67,18 @@ public:
   // calc the string extent for given string/font
   wxSize DoGetBestSize(wxSheet &grid, const wxSheetCellAttr &attr, wxDC &dc, const wxString &text);
 
-  bool Copy(const gbtRationalRendererRefData &other)
+  bool Copy(const RationalRendererRefData &other)
   {
     return wxSheetCellRendererRefData::Copy(other);
   }
 
   // NOLINTNEXTLINE(modernize-use-auto)
-  DECLARE_GAMBIT_SHEETOBJREFDATA_COPY_CLASS(gbtRationalRendererRefData, wxSheetCellRendererRefData)
+  DECLARE_GAMBIT_SHEETOBJREFDATA_COPY_CLASS(RationalRendererRefData, wxSheetCellRendererRefData)
 };
 
-class gbtRationalEditorRefData : public wxSheetCellTextEditorRefData {
+class RationalEditorRefData final : public wxSheetCellTextEditorRefData {
 public:
-  gbtRationalEditorRefData() = default;
+  RationalEditorRefData() = default;
 
   void CreateEditor(wxWindow *, wxWindowID, wxEvtHandler *, wxSheet *) override;
 
@@ -85,10 +86,11 @@ public:
   bool IsAcceptedKey(wxKeyEvent &) override;
   void StartingKey(wxKeyEvent &) override;
 
-  bool Copy(const gbtRationalEditorRefData &other);
+  bool Copy(const RationalEditorRefData &other);
 
   // NOLINTNEXTLINE(modernize-use-auto)
-  DECLARE_GAMBIT_SHEETOBJREFDATA_COPY_CLASS(gbtRationalEditorRefData, wxSheetCellTextEditorRefData)
+  DECLARE_GAMBIT_SHEETOBJREFDATA_COPY_CLASS(RationalEditorRefData, wxSheetCellTextEditorRefData)
 };
+} // namespace Gambit::GUI
 
-#endif // RENRATIO_H
+#endif // GAMBIT_GUI_RENRATIO_H

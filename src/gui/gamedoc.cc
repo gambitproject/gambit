@@ -32,17 +32,18 @@
 #include "app.h" // for wxGetApp()
 #include "gamedoc.h"
 
+namespace Gambit::GUI {
 //=========================================================================
-//                       class gbtBehavDominanceStack
+//                       class BehaviorDominanceStack
 //=========================================================================
 
-gbtBehavDominanceStack::gbtBehavDominanceStack(gbtGameDocument *p_doc, bool p_strict)
+BehaviorDominanceStack::BehaviorDominanceStack(GameDocument *p_doc, bool p_strict)
   : m_doc(p_doc), m_strict(p_strict), m_noFurther(false)
 {
   Reset();
 }
 
-void gbtBehavDominanceStack::SetStrict(bool p_strict)
+void BehaviorDominanceStack::SetStrict(bool p_strict)
 {
   if (m_strict != p_strict) {
     Reset();
@@ -50,7 +51,7 @@ void gbtBehavDominanceStack::SetStrict(bool p_strict)
   m_strict = p_strict;
 }
 
-void gbtBehavDominanceStack::Reset()
+void BehaviorDominanceStack::Reset()
 {
   m_supports.clear();
   if (m_doc->IsTree()) {
@@ -60,7 +61,7 @@ void gbtBehavDominanceStack::Reset()
   m_noFurther = false;
 }
 
-bool gbtBehavDominanceStack::NextLevel()
+bool BehaviorDominanceStack::NextLevel()
 {
   if (m_current < m_supports.size()) {
     m_current++;
@@ -84,7 +85,7 @@ bool gbtBehavDominanceStack::NextLevel()
   }
 }
 
-bool gbtBehavDominanceStack::PreviousLevel()
+bool BehaviorDominanceStack::PreviousLevel()
 {
   if (m_current > 1) {
     m_current--;
@@ -96,16 +97,16 @@ bool gbtBehavDominanceStack::PreviousLevel()
 }
 
 //=========================================================================
-//                   class gbtStrategyDominanceStack
+//                   class StrategyDominanceStack
 //=========================================================================
 
-gbtStrategyDominanceStack::gbtStrategyDominanceStack(gbtGameDocument *p_doc, bool p_strict)
+StrategyDominanceStack::StrategyDominanceStack(GameDocument *p_doc, bool p_strict)
   : m_doc(p_doc), m_strict(p_strict), m_noFurther(false)
 {
   Reset();
 }
 
-void gbtStrategyDominanceStack::SetStrict(bool p_strict)
+void StrategyDominanceStack::SetStrict(bool p_strict)
 {
   if (m_strict != p_strict) {
     Reset();
@@ -113,7 +114,7 @@ void gbtStrategyDominanceStack::SetStrict(bool p_strict)
   m_strict = p_strict;
 }
 
-void gbtStrategyDominanceStack::Reset()
+void StrategyDominanceStack::Reset()
 {
   m_supports.clear();
   m_supports.push_back(std::make_shared<StrategySupportProfile>(m_doc->GetGame()));
@@ -121,7 +122,7 @@ void gbtStrategyDominanceStack::Reset()
   m_noFurther = false;
 }
 
-bool gbtStrategyDominanceStack::NextLevel()
+bool StrategyDominanceStack::NextLevel()
 {
   if (m_current < m_supports.size()) {
     m_current++;
@@ -145,7 +146,7 @@ bool gbtStrategyDominanceStack::NextLevel()
   }
 }
 
-bool gbtStrategyDominanceStack::PreviousLevel()
+bool StrategyDominanceStack::PreviousLevel()
 {
   if (m_current > 1) {
     m_current--;
@@ -157,10 +158,10 @@ bool gbtStrategyDominanceStack::PreviousLevel()
 }
 
 //=========================================================================
-//                          class gbtGameDocument
+//                          class GameDocument
 //=========================================================================
 
-gbtGameDocument::gbtGameDocument(Game p_game)
+GameDocument::GameDocument(Game p_game)
   : m_game(p_game), m_selectNode(nullptr), m_modified(false), m_behavSupports(this, true),
     m_stratSupports(this, true), m_currentProfileList(0)
 {
@@ -171,9 +172,9 @@ gbtGameDocument::gbtGameDocument(Game p_game)
   m_undoList.push_back(s.str());
 }
 
-gbtGameDocument::~gbtGameDocument() { wxGetApp().RemoveDocument(this); }
+GameDocument::~GameDocument() { wxGetApp().RemoveDocument(this); }
 
-bool gbtGameDocument::LoadDocument(const wxString &p_filename, bool p_saveUndo)
+bool GameDocument::LoadDocument(const wxString &p_filename, bool p_saveUndo)
 {
   TiXmlDocument doc((const char *)p_filename.mb_str());
   if (!doc.LoadFile()) {
@@ -244,12 +245,12 @@ bool gbtGameDocument::LoadDocument(const wxString &p_filename, bool p_saveUndo)
       }
 
       if (isFloat) {
-        auto plist = std::make_shared<gbtAnalysisProfileList<double>>(this, false);
+        auto plist = std::make_shared<AnalysisProfileList<double>>(this, false);
         plist->Load(analysis);
         m_profiles.push_back(plist);
       }
       else {
-        auto plist = std::make_shared<gbtAnalysisProfileList<Rational>>(this, false);
+        auto plist = std::make_shared<AnalysisProfileList<Rational>>(this, false);
         plist->Load(analysis);
         m_profiles.push_back(plist);
       }
@@ -290,7 +291,7 @@ bool gbtGameDocument::LoadDocument(const wxString &p_filename, bool p_saveUndo)
   return true;
 }
 
-void gbtGameDocument::SaveDocument(std::ostream &p_file) const
+void GameDocument::SaveDocument(std::ostream &p_file) const
 {
   p_file << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 
@@ -320,14 +321,14 @@ void gbtGameDocument::SaveDocument(std::ostream &p_file) const
   }
 
   std::for_each(m_profiles.begin(), m_profiles.end(),
-                [&p_file](std::shared_ptr<gbtAnalysisOutput> a) { a->Save(p_file); });
+                [&p_file](std::shared_ptr<AnalysisOutput> a) { a->Save(p_file); });
 
   p_file << "</game>\n";
 
   p_file << "</gambit:document>\n";
 }
 
-void gbtGameDocument::UpdateViews(gbtGameModificationType p_modifications)
+void GameDocument::UpdateViews(GameModificationType p_modifications)
 {
   if (p_modifications != GBT_DOC_MODIFIED_NONE) {
     m_modified = true;
@@ -350,23 +351,23 @@ void gbtGameDocument::UpdateViews(gbtGameModificationType p_modifications)
     m_currentProfileList = 0;
   }
 
-  std::for_each(m_views.begin(), m_views.end(), std::mem_fn(&gbtGameView::OnUpdate));
+  std::for_each(m_views.begin(), m_views.end(), std::mem_fn(&GameView::OnUpdate));
 }
 
-void gbtGameDocument::PostPendingChanges()
+void GameDocument::PostPendingChanges()
 {
-  std::for_each(m_views.begin(), m_views.end(), std::mem_fn(&gbtGameView::PostPendingChanges));
+  std::for_each(m_views.begin(), m_views.end(), std::mem_fn(&GameView::PostPendingChanges));
 }
 
-void gbtGameDocument::BuildNfg()
+void GameDocument::BuildNfg()
 {
   if (m_game->IsTree()) {
     m_stratSupports.Reset();
-    std::for_each(m_profiles.begin(), m_profiles.end(), std::mem_fn(&gbtAnalysisOutput::BuildNfg));
+    std::for_each(m_profiles.begin(), m_profiles.end(), std::mem_fn(&AnalysisOutput::BuildNfg));
   }
 }
 
-GameAction gbtGameDocument::GetAction(int p_index) const
+GameAction GameDocument::GetAction(int p_index) const
 {
   int index = 1;
   for (auto player : m_game->GetPlayers()) {
@@ -381,7 +382,7 @@ GameAction gbtGameDocument::GetAction(int p_index) const
   throw std::out_of_range("Action index out of range");
 }
 
-void gbtGameDocument::SetStyle(const gbtStyle &p_style)
+void GameDocument::SetStyle(const TreeRenderConfig &p_style)
 {
   m_style = p_style;
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
@@ -395,7 +396,7 @@ void gbtGameDocument::SetStyle(const gbtStyle &p_style)
 // of the game (hence, CanUndo() only returns true when the list has
 // more than one element.
 //
-void gbtGameDocument::Undo()
+void GameDocument::Undo()
 {
   // The current game is at the end of the undo list; move it to the redo list
   m_redoList.push_back(m_undoList.back());
@@ -414,10 +415,10 @@ void gbtGameDocument::Undo()
   LoadDocument(tempfile, false);
   wxRemoveFile(tempfile);
 
-  std::for_each(m_views.begin(), m_views.end(), std::mem_fn(&gbtGameView::OnUpdate));
+  std::for_each(m_views.begin(), m_views.end(), std::mem_fn(&GameView::OnUpdate));
 }
 
-void gbtGameDocument::Redo()
+void GameDocument::Redo()
 {
   m_undoList.push_back(m_redoList.back());
   m_redoList.pop_back();
@@ -435,30 +436,30 @@ void gbtGameDocument::Redo()
   LoadDocument(tempfile, false);
   wxRemoveFile(tempfile);
 
-  std::for_each(m_views.begin(), m_views.end(), [](gbtGameView *v) { v->OnUpdate(); });
+  std::for_each(m_views.begin(), m_views.end(), [](GameView *v) { v->OnUpdate(); });
 }
 
-void gbtGameDocument::SetCurrentProfile(int p_profile)
+void GameDocument::SetCurrentProfile(int p_profile)
 {
   m_profiles[m_currentProfileList]->SetCurrent(p_profile);
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-void gbtGameDocument::AddProfileList(std::shared_ptr<gbtAnalysisOutput> p_profs)
+void GameDocument::AddProfileList(std::shared_ptr<AnalysisOutput> p_profs)
 {
   m_profiles.push_back(p_profs);
   m_currentProfileList = m_profiles.size();
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-void gbtGameDocument::SetProfileList(int p_index)
+void GameDocument::SetProfileList(int p_index)
 {
   m_currentProfileList = p_index;
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
 /*
-void gbtGameDocument::AddProfiles(const List<MixedBehavProfile<double> >
+void GameDocument::AddProfiles(const List<MixedBehavProfile<double> >
 &p_profiles)
 {
   for (int i = 1; i <= p_profiles.Length(); i++) {
@@ -469,14 +470,14 @@ void gbtGameDocument::AddProfiles(const List<MixedBehavProfile<double> >
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-void gbtGameDocument::AddProfile(const MixedBehavProfile<double> &p_profile)
+void GameDocument::AddProfile(const MixedBehavProfile<double> &p_profile)
 {
   m_profiles[m_currentProfileList].Append(p_profile);
   m_profiles[m_currentProfileList].SetCurrent(m_profiles[m_currentProfileList].NumProfiles());
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-void gbtGameDocument::AddProfiles(const List<MixedStrategyProfile<double> >
+void GameDocument::AddProfiles(const List<MixedStrategyProfile<double> >
 &p_profiles)
 {
   for (int i = 1; i <= p_profiles.Length(); i++) {
@@ -487,7 +488,7 @@ void gbtGameDocument::AddProfiles(const List<MixedStrategyProfile<double> >
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-void gbtGameDocument::AddProfile(const MixedStrategyProfile<double> &p_profile)
+void GameDocument::AddProfile(const MixedStrategyProfile<double> &p_profile)
 {
   m_profiles[m_currentProfileList].Append(p_profile);
   m_profiles[m_currentProfileList].SetCurrent(m_profiles[m_currentProfileList].NumProfiles());
@@ -495,67 +496,67 @@ void gbtGameDocument::AddProfile(const MixedStrategyProfile<double> &p_profile)
 }
 */
 
-void gbtGameDocument::SetBehavElimStrength(bool p_strict)
+void GameDocument::SetBehavElimStrength(bool p_strict)
 {
   m_behavSupports.SetStrict(p_strict);
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-bool gbtGameDocument::NextBehavElimLevel()
+bool GameDocument::NextBehavElimLevel()
 {
   const bool ret = m_behavSupports.NextLevel();
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
   return ret;
 }
 
-void gbtGameDocument::PreviousBehavElimLevel()
+void GameDocument::PreviousBehavElimLevel()
 {
   m_behavSupports.PreviousLevel();
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-void gbtGameDocument::TopBehavElimLevel()
+void GameDocument::TopBehavElimLevel()
 {
   m_behavSupports.TopLevel();
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-bool gbtGameDocument::CanBehavElim() const { return m_behavSupports.CanEliminate(); }
+bool GameDocument::CanBehavElim() const { return m_behavSupports.CanEliminate(); }
 
-int gbtGameDocument::GetBehavElimLevel() const { return m_behavSupports.GetLevel(); }
+int GameDocument::GetBehavElimLevel() const { return m_behavSupports.GetLevel(); }
 
-void gbtGameDocument::SetStrategyElimStrength(bool p_strict)
+void GameDocument::SetStrategyElimStrength(bool p_strict)
 {
   m_stratSupports.SetStrict(p_strict);
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-bool gbtGameDocument::GetStrategyElimStrength() const { return m_stratSupports.GetStrict(); }
+bool GameDocument::GetStrategyElimStrength() const { return m_stratSupports.GetStrict(); }
 
-bool gbtGameDocument::NextStrategyElimLevel()
+bool GameDocument::NextStrategyElimLevel()
 {
   const bool ret = m_stratSupports.NextLevel();
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
   return ret;
 }
 
-void gbtGameDocument::PreviousStrategyElimLevel()
+void GameDocument::PreviousStrategyElimLevel()
 {
   m_stratSupports.PreviousLevel();
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-void gbtGameDocument::TopStrategyElimLevel()
+void GameDocument::TopStrategyElimLevel()
 {
   m_stratSupports.TopLevel();
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-bool gbtGameDocument::CanStrategyElim() const { return m_stratSupports.CanEliminate(); }
+bool GameDocument::CanStrategyElim() const { return m_stratSupports.CanEliminate(); }
 
-int gbtGameDocument::GetStrategyElimLevel() const { return m_stratSupports.GetLevel(); }
+int GameDocument::GetStrategyElimLevel() const { return m_stratSupports.GetLevel(); }
 
-void gbtGameDocument::SetSelectNode(GameNode p_node)
+void GameDocument::SetSelectNode(GameNode p_node)
 {
   m_selectNode = p_node;
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
@@ -565,7 +566,7 @@ void gbtGameDocument::SetSelectNode(GameNode p_node)
 // Commands for model part of MVC architecture start here.
 //======================================================================
 
-void gbtGameDocument::DoSave(const wxString &p_filename)
+void GameDocument::DoSave(const wxString &p_filename)
 {
   std::ofstream file(static_cast<const char *>(p_filename.mb_str()));
   SaveDocument(file);
@@ -574,14 +575,14 @@ void gbtGameDocument::DoSave(const wxString &p_filename)
   UpdateViews(GBT_DOC_MODIFIED_NONE);
 }
 
-void gbtGameDocument::DoExportEfg(const wxString &p_filename)
+void GameDocument::DoExportEfg(const wxString &p_filename)
 {
   std::ofstream file(static_cast<const char *>(p_filename.mb_str()));
   m_game->Write(file, "efg");
   UpdateViews(GBT_DOC_MODIFIED_NONE);
 }
 
-void gbtGameDocument::DoExportNfg(const wxString &p_filename)
+void GameDocument::DoExportNfg(const wxString &p_filename)
 {
   std::ofstream file(static_cast<const char *>(p_filename.mb_str()));
   BuildNfg();
@@ -589,14 +590,14 @@ void gbtGameDocument::DoExportNfg(const wxString &p_filename)
   UpdateViews(GBT_DOC_MODIFIED_NONE);
 }
 
-void gbtGameDocument::DoSetTitle(const wxString &p_title, const wxString &p_comment)
+void GameDocument::DoSetTitle(const wxString &p_title, const wxString &p_comment)
 {
   m_game->SetTitle(static_cast<const char *>(p_title.mb_str()));
   m_game->SetComment(static_cast<const char *>(p_comment.mb_str()));
   UpdateViews(GBT_DOC_MODIFIED_LABELS);
 }
 
-void gbtGameDocument::DoNewPlayer()
+void GameDocument::DoNewPlayer()
 {
   const GamePlayer player = m_game->NewPlayer();
   player->SetLabel("Player " + lexical_cast<std::string>(player->GetNumber()));
@@ -606,70 +607,70 @@ void gbtGameDocument::DoNewPlayer()
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
-void gbtGameDocument::DoSetPlayerLabel(GamePlayer p_player, const wxString &p_label)
+void GameDocument::DoSetPlayerLabel(GamePlayer p_player, const wxString &p_label)
 {
   p_player->SetLabel(p_label.ToStdString());
   UpdateViews(GBT_DOC_MODIFIED_LABELS);
 }
 
-void gbtGameDocument::DoNewStrategy(GamePlayer p_player)
+void GameDocument::DoNewStrategy(GamePlayer p_player)
 {
   m_game->NewStrategy(p_player, std::to_string(p_player->GetStrategies().size() + 1));
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
-void gbtGameDocument::DoDeleteStrategy(GameStrategy p_strategy)
+void GameDocument::DoDeleteStrategy(GameStrategy p_strategy)
 {
   m_game->DeleteStrategy(p_strategy);
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
-void gbtGameDocument::DoSetStrategyLabel(GameStrategy p_strategy, const wxString &p_label)
+void GameDocument::DoSetStrategyLabel(GameStrategy p_strategy, const wxString &p_label)
 {
   p_strategy->SetLabel(p_label.ToStdString());
   UpdateViews(GBT_DOC_MODIFIED_LABELS);
 }
 
-void gbtGameDocument::DoSetInfosetLabel(GameInfoset p_infoset, const wxString &p_label)
+void GameDocument::DoSetInfosetLabel(GameInfoset p_infoset, const wxString &p_label)
 {
   p_infoset->SetLabel(p_label.ToStdString());
   UpdateViews(GBT_DOC_MODIFIED_LABELS);
 }
 
-void gbtGameDocument::DoSetActionLabel(GameAction p_action, const wxString &p_label)
+void GameDocument::DoSetActionLabel(GameAction p_action, const wxString &p_label)
 {
   p_action->SetLabel(p_label.ToStdString());
   UpdateViews(GBT_DOC_MODIFIED_LABELS);
 }
 
-void gbtGameDocument::DoSetActionProbs(GameInfoset p_infoset, const Array<Number> &p_probs)
+void GameDocument::DoSetActionProbs(GameInfoset p_infoset, const Array<Number> &p_probs)
 {
   m_game->SetChanceProbs(p_infoset, p_probs);
   UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
 }
 
-void gbtGameDocument::DoSetInfoset(GameNode p_node, GameInfoset p_infoset)
+void GameDocument::DoSetInfoset(GameNode p_node, GameInfoset p_infoset)
 {
   m_game->SetInfoset(p_node, p_infoset);
   m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
-void gbtGameDocument::DoLeaveInfoset(GameNode p_node)
+void GameDocument::DoLeaveInfoset(GameNode p_node)
 {
   m_game->LeaveInfoset(p_node);
   m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
-void gbtGameDocument::DoRevealAction(GameInfoset p_infoset, GamePlayer p_player)
+void GameDocument::DoRevealAction(GameInfoset p_infoset, GamePlayer p_player)
 {
   m_game->Reveal(p_infoset, p_player);
   m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
-void gbtGameDocument::DoInsertAction(GameNode p_node)
+void GameDocument::DoInsertAction(GameNode p_node)
 {
   if (!p_node || !p_node->GetInfoset()) {
     return;
@@ -680,20 +681,20 @@ void gbtGameDocument::DoInsertAction(GameNode p_node)
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
-void gbtGameDocument::DoSetNodeLabel(GameNode p_node, const wxString &p_label)
+void GameDocument::DoSetNodeLabel(GameNode p_node, const wxString &p_label)
 {
   p_node->SetLabel(p_label.ToStdString());
   UpdateViews(GBT_DOC_MODIFIED_LABELS);
 }
 
-void gbtGameDocument::DoAppendMove(GameNode p_node, GameInfoset p_infoset)
+void GameDocument::DoAppendMove(GameNode p_node, GameInfoset p_infoset)
 {
   m_game->AppendMove(p_node, p_infoset);
   m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
-void gbtGameDocument::DoInsertMove(GameNode p_node, GamePlayer p_player, unsigned int p_actions)
+void GameDocument::DoInsertMove(GameNode p_node, GamePlayer p_player, unsigned int p_actions)
 {
   const GameInfoset infoset = m_game->InsertMove(p_node, p_player, p_actions);
   auto actions = infoset->GetActions();
@@ -703,28 +704,28 @@ void gbtGameDocument::DoInsertMove(GameNode p_node, GamePlayer p_player, unsigne
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
-void gbtGameDocument::DoInsertMove(GameNode p_node, GameInfoset p_infoset)
+void GameDocument::DoInsertMove(GameNode p_node, GameInfoset p_infoset)
 {
   m_game->InsertMove(p_node, p_infoset);
   m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
-void gbtGameDocument::DoCopyTree(GameNode p_destNode, GameNode p_srcNode)
+void GameDocument::DoCopyTree(GameNode p_destNode, GameNode p_srcNode)
 {
   m_game->CopyTree(p_destNode, p_srcNode);
   m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
-void gbtGameDocument::DoMoveTree(GameNode p_destNode, GameNode p_srcNode)
+void GameDocument::DoMoveTree(GameNode p_destNode, GameNode p_srcNode)
 {
   m_game->MoveTree(p_destNode, p_srcNode);
   m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
-void gbtGameDocument::DoDeleteParent(GameNode p_node)
+void GameDocument::DoDeleteParent(GameNode p_node)
 {
   if (!p_node || !p_node->GetParent()) {
     return;
@@ -734,14 +735,14 @@ void gbtGameDocument::DoDeleteParent(GameNode p_node)
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
-void gbtGameDocument::DoDeleteTree(GameNode p_node)
+void GameDocument::DoDeleteTree(GameNode p_node)
 {
   m_game->DeleteTree(p_node);
   m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
-void gbtGameDocument::DoSetPlayer(GameInfoset p_infoset, GamePlayer p_player)
+void GameDocument::DoSetPlayer(GameInfoset p_infoset, GamePlayer p_player)
 {
   if (!p_player->IsChance() && !p_infoset->GetPlayer()->IsChance()) {
     // Currently don't support switching nodes to/from chance player
@@ -751,7 +752,7 @@ void gbtGameDocument::DoSetPlayer(GameInfoset p_infoset, GamePlayer p_player)
   }
 }
 
-void gbtGameDocument::DoSetPlayer(GameNode p_node, GamePlayer p_player)
+void GameDocument::DoSetPlayer(GameNode p_node, GamePlayer p_player)
 {
   if (!p_player->IsChance() && !p_node->GetPlayer()->IsChance()) {
     // Currently don't support switching nodes to/from chance player
@@ -761,25 +762,25 @@ void gbtGameDocument::DoSetPlayer(GameNode p_node, GamePlayer p_player)
   }
 }
 
-void gbtGameDocument::DoNewOutcome(GameNode p_node)
+void GameDocument::DoNewOutcome(GameNode p_node)
 {
   m_game->SetOutcome(p_node, m_game->NewOutcome());
   UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
 }
 
-void gbtGameDocument::DoNewOutcome(const PureStrategyProfile &p_profile)
+void GameDocument::DoNewOutcome(const PureStrategyProfile &p_profile)
 {
   p_profile->SetOutcome(m_game->NewOutcome());
   UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
 }
 
-void gbtGameDocument::DoSetOutcome(GameNode p_node, GameOutcome p_outcome)
+void GameDocument::DoSetOutcome(GameNode p_node, GameOutcome p_outcome)
 {
   m_game->SetOutcome(p_node, p_outcome);
   UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
 }
 
-void gbtGameDocument::DoRemoveOutcome(GameNode p_node)
+void GameDocument::DoRemoveOutcome(GameNode p_node)
 {
   if (!p_node || !p_node->GetOutcome()) {
     return;
@@ -788,7 +789,7 @@ void gbtGameDocument::DoRemoveOutcome(GameNode p_node)
   UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
 }
 
-void gbtGameDocument::DoCopyOutcome(GameNode p_node, GameOutcome p_outcome)
+void GameDocument::DoCopyOutcome(GameNode p_node, GameOutcome p_outcome)
 {
   const GameOutcome outcome = m_game->NewOutcome();
   outcome->SetLabel("Outcome" + lexical_cast<std::string>(outcome->GetNumber()));
@@ -799,14 +800,16 @@ void gbtGameDocument::DoCopyOutcome(GameNode p_node, GameOutcome p_outcome)
   UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
 }
 
-void gbtGameDocument::DoSetPayoff(GameOutcome p_outcome, int p_player, const wxString &p_value)
+void GameDocument::DoSetPayoff(GameOutcome p_outcome, int p_player, const wxString &p_value)
 {
   p_outcome->SetPayoff(m_game->GetPlayer(p_player), Number(p_value.ToStdString()));
   UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
 }
 
-void gbtGameDocument::DoAddOutput(gbtAnalysisOutput &p_list, const wxString &p_output)
+void GameDocument::DoAddOutput(AnalysisOutput &p_list, const wxString &p_output)
 {
   p_list.AddOutput(p_output);
   UpdateViews(GBT_DOC_MODIFIED_NONE);
 }
+
+} // namespace Gambit::GUI
