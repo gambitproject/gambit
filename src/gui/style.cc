@@ -82,7 +82,6 @@ void gbtStyle::SetDefaults()
   m_tineLength = 20;
   m_branchStyle = GBT_BRANCH_STYLE_FORKTINE;
   m_branchLabels = GBT_BRANCH_LABEL_ORIENT_HORIZONTAL;
-  m_infosetConnect = GBT_INFOSET_CONNECT_ALL;
   m_infosetJoin = GBT_INFOSET_JOIN_CIRCLES;
   m_nodeAboveLabel = GBT_NODE_LABEL_LABEL;
   m_nodeBelowLabel = GBT_NODE_LABEL_ISETID;
@@ -198,8 +197,7 @@ std::string gbtStyle::GetLayoutXML() const
   const std::string branchLabels[] = {"horizontal", "rotated"};
   s << "labels=\"" << branchLabels[m_branchLabels] << "\"/>\n";
 
-  const std::string infosetConnect[] = {"none", "same", "all"};
-  s << "<infosets connect=\"" << infosetConnect[m_infosetConnect] << "\" ";
+  s << "<infosets ";
   const std::string infosetStyle[] = {"lines", "circles"};
   s << "style=\"" << infosetStyle[m_infosetJoin] << "\"/>\n";
 
@@ -302,24 +300,8 @@ void gbtStyle::SetLayoutXML(TiXmlNode *p_node)
     }
   }
 
-  TiXmlNode *infosets = p_node->FirstChild("infosets");
-  if (infosets) {
-    const char *connect = infosets->ToElement()->Attribute("connect");
-    if (connect) {
-      const std::string s = connect;
-      if (s == "none") {
-        m_infosetConnect = GBT_INFOSET_CONNECT_NONE;
-      }
-      else if (s == "same") {
-        m_infosetConnect = GBT_INFOSET_CONNECT_SAMELEVEL;
-      }
-      else if (s == "all") {
-        m_infosetConnect = GBT_INFOSET_CONNECT_ALL;
-      }
-    }
-
-    const char *style = infosets->ToElement()->Attribute("style");
-    if (style) {
+  if (TiXmlNode *infosets = p_node->FirstChild("infosets")) {
+    if (const char *style = infosets->ToElement()->Attribute("style")) {
       const std::string s = style;
       if (s == "lines") {
         m_infosetJoin = GBT_INFOSET_JOIN_LINES;

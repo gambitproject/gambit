@@ -210,15 +210,11 @@ gbtLayoutBranchesPanel::gbtLayoutBranchesPanel(wxWindow *p_parent, const gbtStyl
 
 class gbtLayoutInfosetsPanel : public wxPanel {
 private:
-  wxChoice *m_infosetConnect, *m_infosetJoin;
+  wxChoice *m_infosetJoin;
 
 public:
   gbtLayoutInfosetsPanel(wxWindow *p_parent, const gbtStyle &);
 
-  InfosetConnectStyle GetInfosetConnect() const
-  {
-    return static_cast<InfosetConnectStyle>(m_infosetConnect->GetSelection());
-  }
   InfosetJoinStyle GetInfosetJoin() const
   {
     return static_cast<InfosetJoinStyle>(m_infosetJoin->GetSelection());
@@ -233,15 +229,6 @@ gbtLayoutInfosetsPanel::gbtLayoutInfosetsPanel(wxWindow *p_parent, const gbtStyl
   auto *infosetSizer = new wxStaticBoxSizer(wxVERTICAL, this, _("Drawing information sets"));
 
   auto *styleSizer = new wxFlexGridSizer(2);
-
-  styleSizer->Add(new wxStaticText(this, wxID_STATIC, _("Connect members of information sets")), 0,
-                  wxALL | wxALIGN_CENTER_VERTICAL, 5);
-  wxString connectChoices[] = {_("invisibly (don't draw indicators)"),
-                               _("only when on the same level"), _("regardless of level")};
-  m_infosetConnect =
-      new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 3, connectChoices);
-  m_infosetConnect->SetSelection(p_settings.GetInfosetConnect());
-  styleSizer->Add(m_infosetConnect, 0, wxALL, 5);
 
   styleSizer->Add(new wxStaticText(this, wxID_STATIC, _("Draw information set connections")), 0,
                   wxALL | wxALIGN_CENTER_VERTICAL, 5);
@@ -309,7 +296,6 @@ void gbtLayoutDialog::GetSettings(gbtStyle &p_settings)
   p_settings.SetBranchLabels(branches->GetBranchLabels());
 
   auto *infosets = dynamic_cast<gbtLayoutInfosetsPanel *>(m_notebook->GetPage(2));
-  p_settings.SetInfosetConnect(infosets->GetInfosetConnect());
   p_settings.SetInfosetJoin(infosets->GetInfosetJoin());
 }
 

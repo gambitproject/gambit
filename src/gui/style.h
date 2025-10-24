@@ -84,7 +84,6 @@ class gbtStyle {
   BranchLabelOrientationStyle m_branchLabels{GBT_BRANCH_LABEL_ORIENT_HORIZONTAL};
 
   // Information set styling
-  InfosetConnectStyle m_infosetConnect{GBT_INFOSET_CONNECT_ALL};
   InfosetJoinStyle m_infosetJoin{GBT_INFOSET_JOIN_CIRCLES};
 
   // Legend styling
@@ -145,10 +144,6 @@ public:
 
   BranchLabelOrientationStyle GetBranchLabels() const { return m_branchLabels; }
   void SetBranchLabels(BranchLabelOrientationStyle p_labels) { m_branchLabels = p_labels; }
-
-  // Information set styling
-  InfosetConnectStyle GetInfosetConnect() const { return m_infosetConnect; }
-  void SetInfosetConnect(InfosetConnectStyle p_connect) { m_infosetConnect = p_connect; }
 
   InfosetJoinStyle GetInfosetJoin() const { return m_infosetJoin; }
   void SetInfosetJoin(InfosetJoinStyle p_join) { m_infosetJoin = p_join; }

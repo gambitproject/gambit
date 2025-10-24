@@ -1,5 +1,12 @@
 # Changelog
 
+## [16.5.0] - unreleased
+
+### Changed
+- In the graphical interface, removed option to configure information set link drawing; information sets
+  are always drawn and indicators are always drawn if an information set spans multiple levels.
+
+
 ## [16.4.0] - 2025-09-05
 
 ### General

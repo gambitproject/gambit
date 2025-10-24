@@ -598,7 +598,6 @@ void gbtTreeLayout::ComputeOffsets(const GameNode &p_node, const BehaviorSupport
 std::shared_ptr<gbtNodeEntry>
 gbtTreeLayout::ComputeNextInInfoset(const std::shared_ptr<gbtNodeEntry> &p_entry)
 {
-  const auto infosetConnectStyle = m_doc->GetStyle().GetInfosetConnect();
   const auto infoset = p_entry->m_node->GetInfoset();
   if (!infoset) {
     // For terminal nodes, the next in information set is always the next terminal node,
@@ -616,8 +615,7 @@ gbtTreeLayout::ComputeNextInInfoset(const std::shared_ptr<gbtNodeEntry> &p_entry
       std::find(infoset->GetMembers().begin(), infoset->GetMembers().end(), p_entry->m_node));
   while (member != infoset->GetMembers().end()) {
     auto member_entry = GetNodeEntry(*member);
-    if (member_entry != nullptr && (p_entry->m_level == member_entry->m_level ||
-                                    infosetConnectStyle == GBT_INFOSET_CONNECT_ALL)) {
+    if (member_entry != nullptr && p_entry->m_level == member_entry->m_level) {
       return member_entry;
     }
     ++member;
@@ -714,12 +712,10 @@ void gbtTreeLayout::Layout(const BehaviorSupportProfile &p_support)
 
   m_infosetSublevels.clear();
   m_numSublevels = std::vector<int>(m_maxLevel + 1);
-  if (m_doc->GetStyle().GetInfosetConnect() != GBT_INFOSET_CONNECT_NONE) {
-    for (auto entry : m_nodeList) {
-      ComputeSublevel(entry);
-    }
-    ComputeNodeDepths();
+  for (auto entry : m_nodeList) {
+    ComputeSublevel(entry);
   }
+  ComputeNodeDepths();
 
   ComputeRenderedParents();
   GenerateLabels();
@@ -780,13 +776,11 @@ void gbtTreeLayout::RenderSubtree(wxDC &p_dc, bool p_noHints) const
     if (entry->GetChildNumber() == 1) {
       DrawNode(p_dc, parentEntry, m_doc->GetSelectNode(), p_noHints);
 
-      if (m_doc->GetStyle().GetInfosetConnect() != GBT_INFOSET_CONNECT_NONE &&
-          parentEntry->GetNextMember()) {
+      if (parentEntry->GetNextMember()) {
         const int nextX = parentEntry->GetNextMember()->m_x;
         const int nextY = parentEntry->GetNextMember()->m_y;
 
-        if ((m_doc->GetStyle().GetInfosetConnect() != GBT_INFOSET_CONNECT_SAMELEVEL) ||
-            parentEntry->m_x == nextX) {
+        if (parentEntry->m_x == nextX) {
 #ifdef __WXGTK__
           // A problem with using styled pens and user scaling on wxGTK
           p_dc.SetPen(wxPen(m_doc->GetStyle().GetPlayerColor(parentEntry->m_node->GetPlayer()), 1,
