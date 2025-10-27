@@ -55,6 +55,7 @@ public:
   void LayoutTree(const BehaviorSupportProfile &);
 
   const std::map<GameNode, std::shared_ptr<LayoutEntry>> &GetNodeMap() const { return m_nodeMap; }
+  const std::vector<int> &GetNumSublevels() const { return m_numSublevels; }
   float GetMinOffset() const { return 0; }
   float GetMaxOffset() const { return m_maxOffset; }
 };

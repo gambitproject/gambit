@@ -25,6 +25,8 @@
 
 #include "layout.h"
 
+#include <__ostream/basic_ostream.h>
+
 namespace Gambit {
 
 void Layout::LayoutSubtree(const GameNode &p_node, const BehaviorSupportProfile &p_support,
@@ -36,7 +38,10 @@ void Layout::LayoutSubtree(const GameNode &p_node, const BehaviorSupportProfile 
     entry->m_sublevel = m_infosetSublevels.at({entry->m_level, p_node->GetInfoset()});
   }
   catch (std::out_of_range &) {
-    entry->m_sublevel = ++m_numSublevels[entry->m_level];
+    if (p_level - 1 < static_cast<int>(m_numSublevels.size())) {
+      m_numSublevels.push_back(0);
+    }
+    entry->m_sublevel = ++m_numSublevels[p_level];
     m_infosetSublevels[{entry->m_level, p_node->GetInfoset()}] = entry->m_sublevel;
   }
 

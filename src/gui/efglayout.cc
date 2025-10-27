@@ -32,6 +32,8 @@
 #include "gambit.h"
 #include "efgdisplay.h"
 
+#include "layout.h"
+
 namespace Gambit::GUI {
 namespace {
 
@@ -622,6 +624,7 @@ TreeLayout::ComputeNextInInfoset(const std::shared_ptr<NodeEntry> &p_entry)
 
 void TreeLayout::ComputeSublevel(const std::shared_ptr<NodeEntry> &p_entry)
 {
+  /*
   try {
     p_entry->m_sublevel = m_infosetSublevels.at({p_entry->m_level, p_entry->m_node->GetInfoset()});
   }
@@ -629,13 +632,15 @@ void TreeLayout::ComputeSublevel(const std::shared_ptr<NodeEntry> &p_entry)
     p_entry->m_sublevel = ++m_numSublevels[p_entry->m_level];
     m_infosetSublevels[{p_entry->m_level, p_entry->m_node->GetInfoset()}] = p_entry->m_sublevel;
   }
+  */
   p_entry->m_nextMember = ComputeNextInInfoset(p_entry);
 }
 
-void TreeLayout::ComputeNodeDepths() const
+void TreeLayout::ComputeNodeDepths(const Gambit::Layout &p_layout) const
 {
   std::vector<int> aggregateSublevels(m_maxLevel + 1);
-  std::partial_sum(m_numSublevels.cbegin(), m_numSublevels.cend(), aggregateSublevels.begin());
+  std::partial_sum(p_layout.GetNumSublevels().cbegin(), p_layout.GetNumSublevels().cend(),
+                   aggregateSublevels.begin());
   m_maxX = 0;
   for (const auto &entry : m_nodeList) {
     entry->m_x = c_leftMargin + entry->m_level * m_doc->GetStyle().GetNodeLevelLength();
@@ -707,12 +712,20 @@ void TreeLayout::Layout(const BehaviorSupportProfile &p_support)
   ComputeOffsets(m_doc->GetGame()->GetRoot(), p_support, maxy);
   m_maxY = maxy + c_bottomMargin;
 
+  auto layout = Gambit::Layout(m_doc->GetGame());
+  layout.LayoutTree(p_support);
+
+  for (auto [node, entry] : layout.GetNodeMap()) {
+    m_nodeMap[node]->m_level = entry->m_level;
+    m_nodeMap[node]->m_sublevel = entry->m_sublevel;
+  }
+
   m_infosetSublevels.clear();
   m_numSublevels = std::vector<int>(m_maxLevel + 1);
   for (auto entry : m_nodeList) {
     ComputeSublevel(entry);
   }
-  ComputeNodeDepths();
+  ComputeNodeDepths(layout);
 
   ComputeRenderedParents();
   GenerateLabels();
