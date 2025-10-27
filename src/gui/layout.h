@@ -44,7 +44,6 @@ class Layout {
   std::map<std::pair<int, GameInfoset>, int> m_infosetSublevels;
 
   float m_maxOffset{0};
-  int m_maxLevel{0};
 
   void LayoutSubtree(const GameNode &, const BehaviorSupportProfile &, int, double &);
 

@@ -72,7 +72,6 @@ void Layout::LayoutSubtree(const GameNode &p_node, const BehaviorSupportProfile 
 void Layout::LayoutTree(const BehaviorSupportProfile &p_support)
 {
   m_nodeMap.clear();
-  m_maxLevel = 0;
   m_numSublevels.clear();
   m_infosetSublevels.clear();
 
