@@ -40,3 +40,4 @@ dist
 .venv
 *.dmg
 Gambit.app/*
+*.ef
