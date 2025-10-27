@@ -31,12 +31,11 @@
 namespace Gambit::GUI {
 class NodeEntry {
   friend class TreeLayout;
-  GameNode m_node;                         // the corresponding node in the game
-  std::shared_ptr<NodeEntry> m_parent;     // parent node
-  int m_x{-1}, m_y{-1};                    // Cartesian coordinates of node
-  std::shared_ptr<NodeEntry> m_nextMember; // entry of next information set member
-  bool m_inSupport{true};                  // true if node reachable in current support
-  int m_size{20};                          // horizontal size of the node
+  GameNode m_node;                     // the corresponding node in the game
+  std::shared_ptr<NodeEntry> m_parent; // parent node
+  int m_x{-1}, m_y{-1};                // Cartesian coordinates of node
+  bool m_inSupport{true};              // true if node reachable in current support
+  int m_size{20};                      // horizontal size of the node
   mutable wxRect m_outcomeRect;
   mutable Array<wxRect> m_payoffRect;
   mutable wxRect m_branchAboveRect, m_branchBelowRect;
@@ -59,8 +58,6 @@ public:
 
   int GetX() const { return m_x; }
   int GetY() const { return m_y; }
-
-  std::shared_ptr<NodeEntry> GetNextMember() const { return m_nextMember; }
 
   int GetChildNumber() const
   {
@@ -115,8 +112,7 @@ class TreeLayout final : public GameView {
 
   const int c_leftMargin{20}, c_topMargin{40}, c_bottomMargin{25};
 
-  std::shared_ptr<NodeEntry> ComputeNextInInfoset(const std::shared_ptr<NodeEntry> &);
-  void ComputeSublevel(const std::shared_ptr<NodeEntry> &);
+  std::shared_ptr<NodeEntry> ComputeNextInInfoset(const std::shared_ptr<NodeEntry> &) const;
 
   void BuildNodeList(const GameNode &, const BehaviorSupportProfile &);
 
