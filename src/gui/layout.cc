@@ -75,8 +75,8 @@ void Layout::LayoutTree(const BehaviorSupportProfile &p_support)
   m_numSublevels.clear();
   m_infosetSublevels.clear();
 
-  double ycoord = 0;
-  LayoutSubtree(m_game->GetRoot(), p_support, 0, ycoord);
+  m_maxOffset = 0;
+  LayoutSubtree(m_game->GetRoot(), p_support, 0, m_maxOffset);
 }
 
 } // namespace Gambit

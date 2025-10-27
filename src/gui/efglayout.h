@@ -116,8 +116,6 @@ class TreeLayout final : public GameView {
 
   void BuildNodeList(const GameNode &, const BehaviorSupportProfile &);
 
-  /// (Recursively) compute the y-offsets of all nodes
-  void ComputeOffsets(const GameNode &, const BehaviorSupportProfile &, int &);
   /// Based on node levels and information set sublevels, compute the depth
   /// (X coordinate) of all nodes
   void ComputeNodeDepths(const Gambit::Layout &) const;

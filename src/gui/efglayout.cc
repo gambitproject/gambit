@@ -560,41 +560,6 @@ GameNode TreeLayout::NextSameLevel(const GameNode &p_node) const
   return nullptr;
 }
 
-void TreeLayout::ComputeOffsets(const GameNode &p_node, const BehaviorSupportProfile &p_support,
-                                int &p_ycoord)
-{
-  const auto &settings = m_doc->GetStyle();
-
-  const auto entry = GetNodeEntry(p_node);
-  if (m_doc->GetStyle().RootReachable() && p_node->GetInfoset() &&
-      !p_node->GetInfoset()->GetPlayer()->IsChance()) {
-    const auto actions = p_support.GetActions(p_node->GetInfoset());
-    for (const auto &action : actions) {
-      ComputeOffsets(p_node->GetChild(action), p_support, p_ycoord);
-    }
-    entry->m_y = (GetNodeEntry(p_node->GetChild(actions.front()))->m_y +
-                  GetNodeEntry(p_node->GetChild(actions.back()))->m_y) /
-                 2;
-  }
-  else if (!p_node->IsTerminal()) {
-    const auto actions = p_node->GetInfoset()->GetActions();
-    for (const auto &action : actions) {
-      const auto child = p_node->GetChild(action);
-      ComputeOffsets(child, p_support, p_ycoord);
-      if (!p_node->GetPlayer()->IsChance() && !p_support.Contains(action)) {
-        GetNodeEntry(child)->m_inSupport = false;
-      }
-    }
-    entry->m_y = (GetNodeEntry(p_node->GetChild(actions.front()))->m_y +
-                  GetNodeEntry(p_node->GetChild(actions.back()))->m_y) /
-                 2;
-  }
-  else {
-    entry->m_y = p_ycoord;
-    p_ycoord += settings.TerminalSpacing();
-  }
-}
-
 std::shared_ptr<NodeEntry>
 TreeLayout::ComputeNextInInfoset(const std::shared_ptr<NodeEntry> &p_entry) const
 {
@@ -691,17 +656,17 @@ void TreeLayout::Layout(const BehaviorSupportProfile &p_support)
     BuildNodeList(p_support);
   }
 
-  int maxy = c_topMargin;
-  ComputeOffsets(m_doc->GetGame()->GetRoot(), p_support, maxy);
-  m_maxY = maxy + c_bottomMargin;
-
   auto layout = Gambit::Layout(m_doc->GetGame());
   layout.LayoutTree(p_support);
 
+  const auto spacing = m_doc->GetStyle().GetTerminalSpacing();
   for (auto [node, entry] : layout.GetNodeMap()) {
     m_nodeMap[node]->m_level = entry->m_level;
     m_nodeMap[node]->m_sublevel = entry->m_sublevel;
+    m_nodeMap[node]->m_y = entry->m_offset * spacing + c_topMargin;
   }
+  m_maxY =
+      c_topMargin + c_bottomMargin + spacing * (layout.GetMaxOffset() - layout.GetMinOffset());
   ComputeNodeDepths(layout);
 
   ComputeRenderedParents();

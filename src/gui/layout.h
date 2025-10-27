@@ -43,7 +43,7 @@ class Layout {
   std::vector<int> m_numSublevels;
   std::map<std::pair<int, GameInfoset>, int> m_infosetSublevels;
 
-  float m_maxOffset{0};
+  double m_maxOffset{0};
 
   void LayoutSubtree(const GameNode &, const BehaviorSupportProfile &, int, double &);
 
@@ -55,8 +55,8 @@ public:
 
   const std::map<GameNode, std::shared_ptr<LayoutEntry>> &GetNodeMap() const { return m_nodeMap; }
   const std::vector<int> &GetNumSublevels() const { return m_numSublevels; }
-  float GetMinOffset() const { return 0; }
-  float GetMaxOffset() const { return m_maxOffset; }
+  double GetMinOffset() const { return 0; }
+  double GetMaxOffset() const { return m_maxOffset; }
 };
 } // namespace Gambit
 #endif // GAMBIT_LAYOUT_H
