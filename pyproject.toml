@@ -28,7 +28,6 @@ classifiers=[
 dependencies = [
     "numpy",
     "scipy",
-    "draw-tree @ git+https://github.com/gambitproject/draw_tree.git@main",
 ]
 
 [project.urls]
