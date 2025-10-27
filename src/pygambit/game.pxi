@@ -22,11 +22,14 @@
 import io
 import itertools
 import pathlib
+import tempfile
 
 import numpy as np
 import scipy.stats
 
 import pygambit.gameiter
+
+from draw_tree import draw_tree
 
 ctypedef string (*GameWriter)(const c_Game &) except +IOError
 ctypedef c_Game (*GameParser)(const string &) except +IOError
@@ -494,6 +497,25 @@ class Game:
         for player in (players or []):
             Player.wrap(g.game.deref().NewPlayer()).label = str(player)
         return g
+
+    @classmethod
+    def draw(cls):
+        """
+        Draw the extensive form game tree.
+        Calls to_efg and saves the result to a temporary file, then uses the
+        draw_tree package to visualize the game tree.
+
+        Returns
+        -------
+        The result of the Jupyter cell magic execution, or the TikZ code string
+        if cell magic fails.
+        """
+        cls.to_efg("test.efg")
+        draw_tree("test.efg")
+
+    @classmethod
+    def hello(cls):
+        print("Hello, world!2")
 
     @classmethod
     def new_table(cls, dim, title: str = "Untitled strategic game") -> Game:
