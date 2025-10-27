@@ -41,3 +41,4 @@ dist
 *.dmg
 Gambit.app/*
 *.ef
+doc/tutorials/*.ipynb_checkpoints
