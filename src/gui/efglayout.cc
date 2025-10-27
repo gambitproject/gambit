@@ -624,23 +624,14 @@ TreeLayout::ComputeNextInInfoset(const std::shared_ptr<NodeEntry> &p_entry)
 
 void TreeLayout::ComputeSublevel(const std::shared_ptr<NodeEntry> &p_entry)
 {
-  /*
-  try {
-    p_entry->m_sublevel = m_infosetSublevels.at({p_entry->m_level, p_entry->m_node->GetInfoset()});
-  }
-  catch (std::out_of_range &) {
-    p_entry->m_sublevel = ++m_numSublevels[p_entry->m_level];
-    m_infosetSublevels[{p_entry->m_level, p_entry->m_node->GetInfoset()}] = p_entry->m_sublevel;
-  }
-  */
   p_entry->m_nextMember = ComputeNextInInfoset(p_entry);
 }
 
 void TreeLayout::ComputeNodeDepths(const Gambit::Layout &p_layout) const
 {
-  std::vector<int> aggregateSublevels(m_maxLevel + 1);
+  std::vector<int> aggregateSublevels;
   std::partial_sum(p_layout.GetNumSublevels().cbegin(), p_layout.GetNumSublevels().cend(),
-                   aggregateSublevels.begin());
+                   std::back_inserter(aggregateSublevels));
   m_maxX = 0;
   for (const auto &entry : m_nodeList) {
     entry->m_x = c_leftMargin + entry->m_level * m_doc->GetStyle().GetNodeLevelLength();
@@ -659,43 +650,39 @@ void TreeLayout::ComputeRenderedParents() const
   }
 }
 
-void TreeLayout::BuildNodeList(const GameNode &p_node, const BehaviorSupportProfile &p_support,
-                               const int p_level)
+void TreeLayout::BuildNodeList(const GameNode &p_node, const BehaviorSupportProfile &p_support)
 {
   const auto entry = std::make_shared<NodeEntry>(p_node);
   m_nodeList.push_back(entry);
   m_nodeMap[p_node] = entry;
   entry->m_size = m_doc->GetStyle().GetNodeSize();
   entry->m_branchLength = m_doc->GetStyle().GetBranchLength();
-  entry->m_level = p_level;
   if (m_doc->GetStyle().RootReachable()) {
     if (const GameInfoset infoset = p_node->GetInfoset()) {
       if (infoset->GetPlayer()->IsChance()) {
         for (const auto &child : p_node->GetChildren()) {
-          BuildNodeList(child, p_support, p_level + 1);
+          BuildNodeList(child, p_support);
         }
       }
       else {
         for (const auto &action : p_support.GetActions(infoset)) {
-          BuildNodeList(p_node->GetChild(action), p_support, p_level + 1);
+          BuildNodeList(p_node->GetChild(action), p_support);
         }
       }
     }
   }
   else {
     for (const auto &child : p_node->GetChildren()) {
-      BuildNodeList(child, p_support, p_level + 1);
+      BuildNodeList(child, p_support);
     }
   }
-  m_maxLevel = std::max(p_level, m_maxLevel);
 }
 
 void TreeLayout::BuildNodeList(const BehaviorSupportProfile &p_support)
 {
   m_nodeList.clear();
   m_nodeMap.clear();
-  m_maxLevel = 0;
-  BuildNodeList(m_doc->GetGame()->GetRoot(), p_support, 0);
+  BuildNodeList(m_doc->GetGame()->GetRoot(), p_support);
 }
 
 void TreeLayout::Layout(const BehaviorSupportProfile &p_support)

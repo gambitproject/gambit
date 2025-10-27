@@ -110,7 +110,7 @@ class TreeLayout final : public GameView {
   std::list<std::shared_ptr<NodeEntry>> m_nodeList;
   std::map<GameNode, std::shared_ptr<NodeEntry>> m_nodeMap;
 
-  mutable int m_maxX{0}, m_maxY{0}, m_maxLevel{0};
+  mutable int m_maxX{0}, m_maxY{0};
   int m_infosetSpacing{40};
 
   const int c_leftMargin{20}, c_topMargin{40}, c_bottomMargin{25};
@@ -118,7 +118,7 @@ class TreeLayout final : public GameView {
   std::shared_ptr<NodeEntry> ComputeNextInInfoset(const std::shared_ptr<NodeEntry> &);
   void ComputeSublevel(const std::shared_ptr<NodeEntry> &);
 
-  void BuildNodeList(const GameNode &, const BehaviorSupportProfile &, int);
+  void BuildNodeList(const GameNode &, const BehaviorSupportProfile &);
 
   /// (Recursively) compute the y-offsets of all nodes
   void ComputeOffsets(const GameNode &, const BehaviorSupportProfile &, int &);
