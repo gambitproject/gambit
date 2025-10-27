@@ -17,6 +17,8 @@ You will need a working installation of Python 3 (tested with 3.9 and later) on 
     source pygambit-env/bin/activate
     pip install pygambit jupyterlab
 
-3. Open `JupyterLab` and click on any of the tutorial notebooks (files ending in `.ipynb`) ::
+3. *[Optional]* For the extensive form visualizations, you'll also need to install the `draw_tree` package, which requires a LaTeX installation. Follow the `installation instructions <https://github.com/gambitproject/draw_tree>`_ for draw_tree on your OS.
+
+4. Open `JupyterLab` and click on any of the tutorial notebooks (files ending in `.ipynb`) ::
 
     jupyter lab
