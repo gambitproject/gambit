@@ -720,8 +720,6 @@ void TreeLayout::Layout(const BehaviorSupportProfile &p_support)
     m_nodeMap[node]->m_sublevel = entry->m_sublevel;
   }
 
-  m_infosetSublevels.clear();
-  m_numSublevels = std::vector<int>(m_maxLevel + 1);
   for (auto entry : m_nodeList) {
     ComputeSublevel(entry);
   }

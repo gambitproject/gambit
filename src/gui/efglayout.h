@@ -109,8 +109,6 @@ public:
 class TreeLayout final : public GameView {
   std::list<std::shared_ptr<NodeEntry>> m_nodeList;
   std::map<GameNode, std::shared_ptr<NodeEntry>> m_nodeMap;
-  std::vector<int> m_numSublevels;
-  std::map<std::pair<int, GameInfoset>, int> m_infosetSublevels;
 
   mutable int m_maxX{0}, m_maxY{0}, m_maxLevel{0};
   int m_infosetSpacing{40};
