@@ -1,5 +1,12 @@
 # Changelog
 
+## [16.4.1] - unreleased
+
+### Fixed
+- Fixed a regression in which null outcomes in strategic game tables were not handled correctly
+  when changing the number of strategies in the game (#571)
+
+
 ## [16.4.0] - 2025-09-05
 
 ### General

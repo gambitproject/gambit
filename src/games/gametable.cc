@@ -407,8 +407,8 @@ GameStrategy GameTableRep::NewStrategy(const GamePlayer &p_player, const std::st
     throw MismatchException();
   }
   IncrementVersion();
-  p_player->m_strategies.push_back(
-      std::make_shared<GameStrategyRep>(p_player.get(), p_player->m_strategies.size(), p_label));
+  p_player->m_strategies.push_back(std::make_shared<GameStrategyRep>(
+      p_player.get(), p_player->m_strategies.size() + 1, p_label));
   RebuildTable();
   return p_player->m_strategies.back();
 }
@@ -495,7 +495,7 @@ void GameTableRep::RebuildTable()
       }
     }
 
-    if (newindex >= 0) {
+    if (newindex >= 0 && iter->GetOutcome() != nullptr) {
       newResults[newindex] = iter->GetOutcome().get();
     }
   }
