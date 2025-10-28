@@ -55,6 +55,40 @@ public:
 
 using GameSequence = std::shared_ptr<GameSequenceRep>;
 
+// New class
+
+template <typename T>
+class MixedSequenceProfile {
+
+private:
+
+  std::map <GameSequence, T> probs;
+
+public:
+
+  const T &operator[](const GameSequence &p_key) const
+  {
+    return probs.at(p_key);
+  }
+
+  T &operator[](const GameSequence &p_key)
+  {
+    return probs[p_key];
+  }
+
+  void ToMixedBehaviorProfile(MixedBehaviorProfile<T> &p_profile) const
+  {
+    for (const auto& [seq, prob] : probs) {
+      auto parent_seq = seq->parent.lock();
+      if (parent_seq) {
+        T parent_prob = probs.at(parent_seq);
+        auto action = seq->action;
+        p_profile[action] = (parent_prob > static_cast<T>(0)) ? prob / parent_prob : static_cast<T>(0);
+      }
+    }
+  }
+}
+
 class GameSequenceForm {
 private:
   BehaviorSupportProfile m_support;
