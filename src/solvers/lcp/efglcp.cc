@@ -423,42 +423,28 @@ void NashLcpBehaviorSolver<T>::GetProfileNew(const linalg::LemkeTableau<T> &tab,
   auto player2 = *it;
   auto sequences1 = sequenceForm.GetSequences(player1);
   auto sequences2 = sequenceForm.GetSequences(player2);
+  Gambit::MixedSequenceProfile<T> msp;
   for (auto seq : sequences1) {
-    auto parentSeq = seq->parent.lock();
-    if (parentSeq) {
-      auto action = seq->action;
-      int index = seq->number;
-      int parentIndex = parentSeq->number;
-      v[action] = static_cast<T>(0);
-      if (tab.Member(parentIndex)) {
-        const int ind = tab.Find(parentIndex);
-        if (sol[ind] > p_solution.eps && tab.Member(index)) {
-          const int ind2 = tab.Find(index);
-          if (sol[ind2] > p_solution.eps) {
-            v[action] = sol[ind2] / sol[ind];
-          }
-        }
-      }
+    int seq_num = seq->number;
+    if (tab.Member(seq_num)) {
+      int index = tab.Find(seq_num);
+      msp[seq] = (sol[index] > p_solution.eps) ? sol[index] : static_cast<T>(0);
+    }
+    else {
+      msp[seq] = static_cast<T>(0);
     }
   }
   for (auto seq : sequences2) {
-    auto parentSeq = seq->parent.lock();
-    if (parentSeq) {
-      auto action = seq->action;
-      int index = seq->number;
-      int parentIndex = parentSeq->number;
-      v[action] = static_cast<T>(0);
-      if (tab.Member(ns1 + parentIndex)) {
-        const int ind = tab.Find(ns1 + parentIndex);
-        if (sol[ind] > p_solution.eps && tab.Member(ns1 + index)) {
-          const int ind2 = tab.Find(ns1 + index);
-          if (sol[ind2] > p_solution.eps) {
-            v[action] = sol[ind2] / sol[ind];
-          }
-        }
-      }
+    int seq_num = seq->number;
+    if (tab.Member(ns1 + seq_num)) {
+      int index = tab.Find(ns1 + seq_num);
+      msp[seq] = (sol[index] > p_solution.eps) ? sol[index] : static_cast<T>(0);
+    }
+    else {
+      msp[seq] = static_cast<T>(0);
     }
   }
+  msp.ToMixedBehaviorProfile(v);
 }
 
 

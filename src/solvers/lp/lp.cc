@@ -191,24 +191,16 @@ void GameData<T>::GetBehaviorNew(MixedBehaviorProfile<T> &v, const Array<T> &p_p
   auto player2 = *it;
   auto sequences1 = sequenceForm.GetSequences(player1);
   auto sequences2 = sequenceForm.GetSequences(player2);
+  Gambit::MixedSequenceProfile<T> msp;
   for (auto seq : sequences1) {
-    auto parentSeq = seq->parent.lock();
-    if (parentSeq) {
-      auto action = seq->action;
-      int index = seq->number;
-      int parentIndex = parentSeq->number;
-      v[action] = (p_dual[parentIndex] > static_cast<T>(0)) ? p_dual[index] / p_dual[parentIndex] : static_cast<T>(0);
-    }
+    int index = seq->number;
+    msp[seq] = p_dual[index];
   }
   for (auto seq : sequences2) {
-    auto parentSeq = seq->parent.lock();
-    if (parentSeq) {
-      auto action = seq->action;
-      int index = seq->number;
-      int parentIndex = parentSeq->number;
-      v[action] = (p_primal[parentIndex] > static_cast<T>(0)) ? p_primal[index] / p_primal[parentIndex] : static_cast<T>(0);
-    }
+    int index = seq->number;
+    msp[seq] = p_primal[index];
   }
+  msp.ToMixedBehaviorProfile(v);
 }
 
 //

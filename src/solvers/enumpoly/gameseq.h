@@ -87,7 +87,7 @@ public:
       }
     }
   }
-}
+};
 
 class GameSequenceForm {
 private:
