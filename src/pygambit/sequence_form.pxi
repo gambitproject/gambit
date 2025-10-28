@@ -75,8 +75,13 @@ cdef class GameSequenceForm:
     def get_constraint_entry(self, py_infoset, py_action):
         cdef Infoset infoset = cython.cast(Infoset, py_infoset)
         cdef c_GameInfoset cpp_infoset = infoset.infoset
-        cdef Action action = cython.cast(Action, py_action)
-        cdef c_GameAction cpp_action = action.action
+        cdef Action action
+        cdef c_GameAction cpp_action
+        if py_action is None:
+            cpp_action = <c_GameAction>0
+        else:
+            action = cython.cast(Action, py_action)
+            cpp_action = action.action
         return self.seq_form.GetConstraintEntry(cpp_infoset, cpp_action)
 
 
