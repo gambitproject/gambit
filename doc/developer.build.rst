@@ -81,23 +81,37 @@ Install build tools and dependencies
 Install CLI and GUI from source
 --------------------------------
 
-After this, you will need to set up the build scripts by executing ::
+.. dropdown:: Install on Windows
+   :class-container: sd-border-0
 
-  aclocal
-  libtoolize
-  automake --add-missing
-  autoconf
+    .. warning::
+       For Windows users wanting to compile Gambit on their own, you'll need to use either the Cygwin or MinGW environments.  We do compilation and testing of Gambit on Windows using MinGW.
 
-For this, you will need to have automake, autoconf, and libtool2
-installed on your system.
-
-You can then configure and build Gambit like so:
+The rest of these instructions are applicable to **Linux** and **macOS** users.
+Navigate to the Gambit source directory and run:
 
 .. code-block:: bash
 
+    aclocal
+    libtoolize
+    automake --add-missing
+    autoconf
     ./configure
     make
     sudo make install
+
+.. note::
+  If you don't want to build the graphical interface, you can pass the argument `--disable-gui` to the configure step, for example, ::
+
+  `./configure --disable-gui`
+
+.. warning::
+  For Linux users:
+  If wxWidgets it isn't installed in a standard place (e.g., /usr or
+  /usr/local), you'll need to tell configure where to find it with the
+  `--with-wx-prefix=PREFIX` option, for example::
+
+    `./configure --with-wx-prefix=/home/mylogin/wx`
 
 .. note::
   Command-line options are available to modify the configuration process;
@@ -115,60 +129,10 @@ You can then configure and build Gambit like so:
   equilibria.  It is strongly recommended that you install the Gambit
   executables to a directory in your path!
 
-In the git repository, the branch ``master`` always points to the
-latest development version.  New development should in general always
-be based off this branch.  Branches labeled ``maintVV``, where ``VV``
-is the version number, point to the latest commit on a stable
-version.
-
-For Un*x/Linux users:
-If wxWidgets it isn't installed in a standard place (e.g., /usr or
-/usr/local), you'll need to tell configure where to find it with the
---with-wx-prefix=PREFIX option, for example::
-
-  ./configure --with-wx-prefix=/home/mylogin/wx
-
-Finally, if you don't want to build the graphical interface, you
-can either (a) simply not install wxWidgets, or (b) pass the argument
---disable-gui to the configure step, for example, ::
-
-  ./configure --disable-gui
-
-This will just build the command-line tools, and will not require
-a wxWidgets installation.
-
-
-For Windows users
------------------
-
-For Windows users wanting to compile Gambit on their own, you'll need
-to use either the Cygwin or MinGW environments.  We do compilation and
-testing of Gambit on Windows using MinGW.
-
-
-For OS X users
---------------
-
-For building the command-line tools only, one should follow the
-instructions for Un*x/Linux platforms above.
-
-.. dropdown:: Manual macOS Build Instructions
+.. dropdown:: Build macOS application bundle
    :class-container: sd-border-0
 
-   2. **Build and install Gambit:**
-
-      Navigate back to the Gambit source directory and run:
-
-      .. code-block:: bash
-
-         aclocal
-         automake --add-missing
-         autoconf
-         ./configure
-         make
-         sudo make install
-
-   3. **Create macOS application bundle:**
+   1. **Create macOS application bundle:**
 
       To create a distributable DMG file:
 
@@ -176,14 +140,9 @@ instructions for Un*x/Linux platforms above.
 
          make osx-dmg
 
-   4. **Install the application:**
+   2. **Install the application:**
 
       After creating the DMG file, open it and drag the Gambit application to your Applications folder.
-
-
-
-
-
 
 .. _build-python:
 
