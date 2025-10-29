@@ -70,6 +70,12 @@ Install build tools and dependencies
       .. note::
          Note that Gambit requires wxWidgets version 3.2.x or higher.
 
+.. dropdown:: Install on Windows
+   :class-container: sd-border-0
+
+    .. warning::
+       TODO: Add Windows build dependencies instructions here.
+
 .. _cli-gui-from-source:
 
 Install CLI and GUI from source
