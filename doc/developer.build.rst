@@ -1,26 +1,33 @@
 Building Gambit from source
 ===========================
 
-This section covers instructions for building Gambit from source.
+This page covers instructions for building Gambit from source.
 This is for those who are interested in developing Gambit, or who
 want to play around with the latest features before they make it
 into a pre-compiled binary version.
-Developers and contributors should first refer to the :ref:`contributor page <contributing-code>` which explains how to clone the Gambit repository from GitHub.
 
-This section requires at least some familiarity with programming.
-Most users will want to stick with binary distributions; see the 
+This page requires at least some familiarity with programming.
+Most users will want to stick with released distributions; see the 
 :ref:`install` page for how to get the current version for
 your operating system.
+Following the instructions here will install the Gambit CLI, GUI and Python extension (PyGambit).
 
-Building from git repository
-----------------------------
+The steps you will need to follow to build from source are as follows:
 
-If you want to live on the bleeding edge, you can get the latest
-version of the Gambit sources from the Gambit repository on
-github.com, via ::
+1. Refer to the :ref:`contributor page <contributing-code>` which explains how to clone the Gambit repository from GitHub (you may first wish to create a fork).
+2. :ref:`Install the necessary build tools and dependencies for your platform <source-dependencies>`.
+3. :ref:`Follow the platform-specific instructions to build and install Gambit CLI and GUI components from source <cli-gui-from-source>`.
+4. :ref:`Build the Python extension (PyGambit) <build-python>`.
 
-  git clone https://github.com/gambitproject/gambit.git
-  cd gambit
+.. _source-dependencies:
+
+Install build tools and dependencies
+------------------------------------
+
+.. _cli-gui-from-source:
+
+Install CLI and GUI from source
+--------------------------------
 
 After this, you will need to set up the build scripts by executing ::
 
