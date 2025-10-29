@@ -39,7 +39,7 @@ Each release includes pre-built binaries for Windows, macOS, and Linux distribut
 
       Double click the `.dmg` file to mount it, then drag the Gambit application to your Applications folder.
 
-   .. note::
+   .. warning::
     You may need to adjust your macOS security settings to allow the installation of applications from unidentified developers.
 
     This can be done in ``System Preferences > Security & Privacy`` (see `Apple's documentation <https://support.apple.com/en-gb/guide/mac-help/mchleab3a043/mac>`_ for more details).
@@ -48,3 +48,14 @@ Each release includes pre-built binaries for Windows, macOS, and Linux distribut
 
 .. dropdown:: Install on macOS via Homebrew
    :class-container: sd-border-0
+
+   1. Check that you have Homebrew installed by running `brew --version`. If not, follow the instructions at `https://brew.sh/ <https://brew.sh/>`_.
+
+   2. Install Gambit using Homebrew:
+
+      .. code-block:: bash
+
+         brew install gambit
+
+   .. warning::
+    Homebrew installation has not been set up or tested by the Gambit development team.
