@@ -44,7 +44,7 @@ Each release includes pre-built binaries for Windows, macOS, and Linux distribut
 
     This can be done in ``System Preferences > Security & Privacy`` (see `Apple's documentation <https://support.apple.com/en-gb/guide/mac-help/mchleab3a043/mac>`_ for more details).
 
-    If your administration privileges prevent this, try the Homebrew installation method below, or build from source as described in the :ref:`developer build instructions <build-mac>`.
+    If your administration privileges prevent this, try the Homebrew installation method below, or build from source as described in the :ref:`developer build instructions <building-from-source>`.
 
 .. dropdown:: Install on macOS via Homebrew
    :class-container: sd-border-0
