@@ -7,6 +7,22 @@
   when changing the number of strategies in the game (#571)
 
 
+## [16.3.2] - unreleased
+
+### Fixed
+- Parsing of output of `gambit-logit` in the graphical interface did not handle the
+  terminal Nash profile correctly.  (#172)
+- Improved sizing of list of logit profiles computed for normal form games.
+
+### Changed
+- Removed Ctrl/Cmd-X accelerator for closing program, as this clashes with modern standard
+  expectations.  (#507)
+
+### Removed
+- Undo and redo have been removed from the graphical interface.  (These were meant to be
+  removed previously as they did not work properly and gave unpredictable behaviour.) (#505)
+
+
 ## [16.4.0] - 2025-09-05
 
 ### General
@@ -33,6 +49,7 @@
   depend on the order of operations to build a game tree.  The previous behaviour - ensuring sorting
   by the order encountered in a depth-first traversal of the tree - can now be obtained by calling
   `SortInfosets` (C++) or `sort_infosets` (Python) on the game.  (#483)
+
 
 ## [16.3.1] - 2025-08-18
 

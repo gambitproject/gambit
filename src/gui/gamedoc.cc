@@ -168,7 +168,6 @@ gbtGameDocument::gbtGameDocument(Game p_game)
 
   std::ostringstream s;
   SaveDocument(s);
-  m_undoList.push_back(s.str());
 }
 
 gbtGameDocument::~gbtGameDocument() { wxGetApp().RemoveDocument(this); }
@@ -284,7 +283,6 @@ bool gbtGameDocument::LoadDocument(const wxString &p_filename, bool p_saveUndo)
   if (p_saveUndo) {
     std::ostringstream s;
     SaveDocument(s);
-    m_undoList.push_back(s.str());
   }
 
   return true;
@@ -331,11 +329,8 @@ void gbtGameDocument::UpdateViews(gbtGameModificationType p_modifications)
 {
   if (p_modifications != GBT_DOC_MODIFIED_NONE) {
     m_modified = true;
-    m_redoList = std::list<std::string>();
-
     std::ostringstream s;
     SaveDocument(s);
-    m_undoList.push_back(s.str());
   }
 
   if (p_modifications == GBT_DOC_MODIFIED_GAME || p_modifications == GBT_DOC_MODIFIED_PAYOFFS) {
@@ -385,57 +380,6 @@ void gbtGameDocument::SetStyle(const gbtStyle &p_style)
 {
   m_style = p_style;
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
-}
-
-//
-// A word about the undo and redo features:
-// We store a list of the textual representation of games.  We don't
-// store other aspects of the state (e.g., profiles) as yet.
-// The "undo" list includes the representation of the current state
-// of the game (hence, CanUndo() only returns true when the list has
-// more than one element.
-//
-void gbtGameDocument::Undo()
-{
-  // The current game is at the end of the undo list; move it to the redo list
-  m_redoList.push_back(m_undoList.back());
-  m_undoList.pop_back();
-
-  m_game = nullptr;
-
-  m_profiles.clear();
-  m_currentProfileList = 0;
-
-  const wxString tempfile = wxFileName::CreateTempFileName(wxT("gambit"));
-  std::ofstream f((const char *)tempfile.mb_str());
-  f << m_undoList.back() << std::endl;
-  f.close();
-
-  LoadDocument(tempfile, false);
-  wxRemoveFile(tempfile);
-
-  std::for_each(m_views.begin(), m_views.end(), std::mem_fn(&gbtGameView::OnUpdate));
-}
-
-void gbtGameDocument::Redo()
-{
-  m_undoList.push_back(m_redoList.back());
-  m_redoList.pop_back();
-
-  m_game = nullptr;
-
-  m_profiles.clear();
-  m_currentProfileList = 0;
-
-  const wxString tempfile = wxFileName::CreateTempFileName(wxT("gambit"));
-  std::ofstream f((const char *)tempfile.mb_str());
-  f << m_undoList.back() << std::endl;
-  f.close();
-
-  LoadDocument(tempfile, false);
-  wxRemoveFile(tempfile);
-
-  std::for_each(m_views.begin(), m_views.end(), [](gbtGameView *v) { v->OnUpdate(); });
 }
 
 void gbtGameDocument::SetCurrentProfile(int p_profile)
