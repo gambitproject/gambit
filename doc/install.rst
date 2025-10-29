@@ -59,3 +59,28 @@ Each release includes pre-built binaries for Windows, macOS, and Linux distribut
 
    .. warning::
     Homebrew installation has not been set up or tested by the Gambit development team.
+
+.. dropdown:: Install on Linux or macOS from source tarball
+    :class-container: sd-border-0
+    
+    1. **Download the source tarball:**
+
+        Visit the `Gambit releases page on GitHub <https://github.com/gambitproject/gambit/releases>`_ and download the source tarball for the version of Gambit you wish to install.
+
+    2. **Extract the tarball:**
+
+       Once downloaded, extract the tarball using the following command:
+
+       .. code-block:: bash
+
+          tar -xzf gambit-*.tar.gz
+
+    3. **Build and install Gambit:**
+
+       Navigate to the extracted directory and run:
+
+       .. code-block:: bash
+
+          ./configure
+          make
+          sudo make install
