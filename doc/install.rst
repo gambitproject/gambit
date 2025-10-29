@@ -17,6 +17,8 @@ PyGambit is available on `PyPI <https://pypi.org/project/pygambit/>`_. We recomm
    pip install pygambit
 
 
+.. _install-cli-gui:
+
 Installing Gambit GUI & CLI tools
 ---------------------------------
 

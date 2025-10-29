@@ -4,6 +4,8 @@
 PyGambit
 ========
 
+See installation instructions in the :ref:`install` section.
+
 .. toctree::
    :maxdepth: 2
 

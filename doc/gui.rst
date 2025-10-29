@@ -4,6 +4,8 @@
 GUI
 ***
 
+See installation instructions in the :ref:`install-cli-gui` section.
+
 Gambit's graphical user interface provides an
 "integrated development environment" to help visually construct
 games and to investigate their main strategic features.
