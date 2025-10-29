@@ -335,11 +335,6 @@ gbtEfgDisplay::gbtEfgDisplay(wxWindow *p_parent, gbtGameDocument *p_doc)
 void gbtEfgDisplay::MakeMenus()
 {
   m_nodeMenu = new wxMenu;
-
-  m_nodeMenu->Append(wxID_UNDO, _("&Undo\tCtrl-Z"), _("Undo the last change"));
-  m_nodeMenu->Append(wxID_REDO, _("&Redo\tCtrl-Y"), _("Redo the last undone change"));
-  m_nodeMenu->AppendSeparator();
-
   m_nodeMenu->Append(GBT_MENU_EDIT_INSERT_MOVE, _("&Insert move"), _("Insert a move"));
   m_nodeMenu->Append(GBT_MENU_EDIT_INSERT_ACTION, _("Insert &action"),
                      _("Insert an action at the current move"));
@@ -590,8 +585,6 @@ void gbtEfgDisplay::OnUpdate()
 
   Gambit::GameNode selectNode = m_doc->GetSelectNode();
 
-  m_nodeMenu->Enable(wxID_UNDO, m_doc->CanUndo());
-  m_nodeMenu->Enable(wxID_REDO, m_doc->CanRedo());
   m_nodeMenu->Enable(GBT_MENU_EDIT_INSERT_MOVE, selectNode);
   m_nodeMenu->Enable(GBT_MENU_EDIT_INSERT_ACTION, selectNode && selectNode->GetInfoset());
   m_nodeMenu->Enable(GBT_MENU_EDIT_REVEAL, selectNode && selectNode->GetInfoset());

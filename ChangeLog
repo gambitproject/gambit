@@ -7,6 +7,10 @@
   terminal Nash profile correctly.  (#172)
 - Improved sizing of list of logit profiles computed for normal form games.
 
+### Removed
+- Undo and redo have been removed from the graphical interface.  (These were meant to be
+  removed previously as they did not work properly and gave unpredictable behaviour.) (#505)
+
 
 ## [16.3.1] - 2025-08-18
 

@@ -68,9 +68,6 @@ private:
   void OnFileExit(wxCommandEvent &);
   void OnFileMRUFile(wxCommandEvent &);
 
-  void OnEditUndo(wxCommandEvent &);
-  void OnEditRedo(wxCommandEvent &);
-
   void OnEditInsertMove(wxCommandEvent &);
   void OnEditInsertAction(wxCommandEvent &);
   void OnEditDeleteTree(wxCommandEvent &);
