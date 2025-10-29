@@ -25,14 +25,6 @@ To build larger games or to explore parameter spaces of a game
 systematically, it is recommended to use
 :ref:`the Python package <pygambit>`.
 
-Installation
-------------
-
-To install the Gambit GUI, visit the `Gambit releases page on GitHub <https://github.com/gambitproject/gambit/releases>`_ and download the appropriate installer or package for your operating system.
-Each release includes pre-built binaries for Windows, macOS, and Linux distributions, accessible under the "Assets" section of each release.
-
-Developers should refer to the :ref:`build instructions <build-gui>` for details on building the GUI from source.
-
 .. toctree::
    :maxdepth: 2
 
