@@ -35,7 +35,7 @@ jobs:
       - run: make
       - run: sudo make install
       - run: make osx-dmg
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: artifact-osx-13
           path: "*.dmg"

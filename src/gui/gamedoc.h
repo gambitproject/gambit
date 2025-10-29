@@ -232,8 +232,6 @@ class GameDocument {
   Array<std::shared_ptr<AnalysisOutput>> m_profiles;
   int m_currentProfileList;
 
-  std::list<std::string> m_undoList, m_redoList;
-
   void UpdateViews(GameModificationType p_modifications);
 
 public:
@@ -266,17 +264,6 @@ public:
   bool IsConstSum() const { return m_game->IsConstSum(); }
   bool IsTree() const { return m_game->IsTree(); }
   GameAction GetAction(int p_index) const;
-
-  //!
-  //! @name Handling of undo/redo features
-  //!
-  //@{
-  bool CanUndo() const { return (m_undoList.size() > 1); }
-  void Undo();
-
-  bool CanRedo() const { return (m_redoList.size() > 0); }
-  void Redo();
-  //@}
 
   //!
   //! @name Handling of list of computed profiles
