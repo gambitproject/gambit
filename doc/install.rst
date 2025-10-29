@@ -61,7 +61,7 @@ Each release includes pre-built binaries for Windows, macOS, and Linux distribut
     Homebrew installation has not been set up or tested by the Gambit development team.
 
 .. dropdown:: Install on Linux or macOS from source tarball
-    :class-container: sd-border-0
+   :class-container: sd-border-0
     
    1. **Download the source tarball:**
 
