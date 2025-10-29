@@ -250,10 +250,10 @@ gbtGameFrame::gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc)
   entries[2].Set(wxACCEL_CTRL | wxACCEL_SHIFT, (int)'s', wxID_SAVEAS);
   entries[3].Set(wxACCEL_CTRL, (int)'p', wxID_PRINT);
   entries[4].Set(wxACCEL_CTRL, (int)'w', wxID_CLOSE);
-  entries[5].Set(wxACCEL_CTRL, (int)'x', wxID_EXIT);
+  entries[5].Set(wxACCEL_CTRL, (int)'q', wxID_EXIT);
   entries[6].Set(wxACCEL_CTRL, (int)'+', GBT_MENU_VIEW_ZOOMIN);
   entries[7].Set(wxACCEL_CTRL, (int)'-', GBT_MENU_VIEW_ZOOMOUT);
-  wxAcceleratorTable accel(10, entries);
+  wxAcceleratorTable accel(8, entries);
   SetAcceleratorTable(accel);
 
   m_splitter = new wxSplitterWindow(this, wxID_ANY);
