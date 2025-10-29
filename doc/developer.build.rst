@@ -26,6 +26,25 @@ The steps you will need to follow to build from source are as follows:
 Install build tools and dependencies
 ------------------------------------
 
+.. dropdown:: Install on macOS via Homebrew
+   :class-container: sd-border-0
+   
+   1. Check that you have Homebrew installed by running `brew --version`. If not, follow the instructions at `https://brew.sh/ <https://brew.sh/>`_.
+
+   2. Install build dependencies:
+
+      .. code-block:: bash
+
+         brew install automake autoconf libtool wxwidgets
+
+      .. note::
+         If you encounter interpreter errors with autom4te, you may need to ensure
+         your Perl installation is correct or reinstall the autotools:
+
+         .. code-block:: bash
+
+            brew reinstall automake autoconf libtool wxwidgets
+
 .. _cli-gui-from-source:
 
 Install CLI and GUI from source
@@ -86,26 +105,8 @@ For OS X users
 For building the command-line tools only, one should follow the
 instructions for Un*x/Linux platforms above.
 
-.. _build-mac:
-
 .. dropdown:: Manual macOS Build Instructions
    :class-container: sd-border-0
-   
-   To build and install the Gambit GUI from source on macOS, follow these steps:
-
-   1. **Install build dependencies:**
-
-      .. code-block:: bash
-
-         brew install automake autoconf libtool wxwidgets
-
-      .. note::
-         If you encounter interpreter errors with autom4te, you may need to ensure
-         your Perl installation is correct or reinstall the autotools:
-
-         .. code-block:: bash
-
-            brew reinstall automake autoconf libtool wxwidgets
 
    2. **Build and install Gambit:**
 
