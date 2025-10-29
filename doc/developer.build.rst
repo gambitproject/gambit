@@ -5,10 +5,11 @@ This section covers instructions for building Gambit from source.
 This is for those who are interested in developing Gambit, or who
 want to play around with the latest features before they make it
 into a pre-compiled binary version.
+Developers and contributors should first refer to the :ref:`contributor page <contributing-code>` which explains how to clone the Gambit repository from GitHub.
 
 This section requires at least some familiarity with programming.
-Most users will want to stick with binary distributions; see
-:ref:`section-downloading` for how to get the current version for
+Most users will want to stick with binary distributions; see the 
+:ref:`install` page for how to get the current version for
 your operating system.
 
 General information
@@ -86,7 +87,7 @@ For OS X users
 For building the command-line tools only, one should follow the
 instructions for Un*x/Linux platforms above.
 
-.. _build-gui:
+.. _build-mac:
 
 The graphical interface and wxWidgets
 -------------------------------------

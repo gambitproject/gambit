@@ -22,6 +22,8 @@ When reporting a bug, please be sure to include the following:
   sample game file or files if appropriate; it is often helpful to
   simplify the game if possible.
 
+.. _contributing-code:
+
 Contributing code
 ----------------
 
