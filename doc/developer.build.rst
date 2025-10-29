@@ -12,37 +12,6 @@ Most users will want to stick with binary distributions; see the
 :ref:`install` page for how to get the current version for
 your operating system.
 
-General information
--------------------
-
-Gambit uses the standard autotools mechanism for configuring and building.
-This should be familiar to most users of Un*ces and MacOS X.
-
-If you are building from a source tarball,
-you just need to unpack the sources, change directory to the top level
-of the sources (typically of the form gambit-xx.y.z), and do the
-usual ::
-
-  ./configure
-  make
-  sudo make install
-
-Command-line options are available to modify the configuration process;
-do `./configure --help` for information.  Of these, the option which
-may be most useful is to disable the build of the graphical interface
-
-By default Gambit will be installed in /usr/local.  You can change this
-by replacing configure step with one of the form ::
-
-  ./configure --prefix=/your/path/here
-
-.. note::
-  The graphical interface relies on external calls to other
-  programs built in this process, especially for the computation of
-  equilibria.  It is strongly recommended that you install the Gambit
-  executables to a directory in your path!
-
-
 Building from git repository
 ----------------------------
 
@@ -63,8 +32,29 @@ After this, you will need to set up the build scripts by executing ::
 For this, you will need to have automake, autoconf, and libtool2
 installed on your system.
 
-At this point, you can then continue with the configuration and build
-stages as in the previous section.
+You can then configure and build Gambit like so:
+
+.. code-block:: bash
+
+    ./configure
+    make
+    sudo make install
+
+.. note::
+  Command-line options are available to modify the configuration process;
+  do `./configure --help` for information.  Of these, the option which
+  may be most useful is to disable the build of the graphical interface.
+
+  By default Gambit will be installed in /usr/local.  You can change this
+  by replacing configure step with one of the form ::
+
+  `./configure --prefix=/your/path/here`
+
+.. warning::
+  The graphical interface relies on external calls to other
+  programs built in this process, especially for the computation of
+  equilibria.  It is strongly recommended that you install the Gambit
+  executables to a directory in your path!
 
 In the git repository, the branch ``master`` always points to the
 latest development version.  New development should in general always
@@ -88,9 +78,6 @@ For building the command-line tools only, one should follow the
 instructions for Un*x/Linux platforms above.
 
 .. _build-mac:
-
-The graphical interface and wxWidgets
--------------------------------------
 
 .. dropdown:: Manual macOS Build Instructions
    :class-container: sd-border-0
@@ -136,6 +123,8 @@ The graphical interface and wxWidgets
 
       After creating the DMG file, open it and drag the Gambit application to your Applications folder.
 
+The graphical interface and wxWidgets
+-------------------------------------
 
 Note that Gambit requires wxWidgets version 3.2.x or higher.
 See the wxWidgets website at

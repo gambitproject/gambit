@@ -85,6 +85,22 @@ Each release includes pre-built binaries for Windows, macOS, and Linux distribut
          make
          sudo make install
 
+      .. note::
+       Command-line options are available to modify the configuration process;
+       do `./configure --help` for information.  Of these, the option which
+       may be most useful is to disable the build of the graphical interface.
+
+       By default Gambit will be installed in /usr/local.  You can change this
+       by replacing configure step with one of the form ::
+
+       `./configure --prefix=/your/path/here`
+
+      .. warning::
+       The graphical interface relies on external calls to other
+       programs built in this process, especially for the computation of
+       equilibria.  It is strongly recommended that you install the Gambit
+       executables to a directory in your path!
+
 .. dropdown:: Install on Windows with installer
    :class-container: sd-border-0
 
