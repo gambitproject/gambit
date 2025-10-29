@@ -84,3 +84,14 @@ Each release includes pre-built binaries for Windows, macOS, and Linux distribut
           ./configure
           make
           sudo make install
+
+.. dropdown:: Install on Windows with installer
+   :class-container: sd-border-0
+
+   1. **Download the installer:**
+
+      Visit the `Gambit releases page on GitHub <https://github.com/gambitproject/gambit/releases>`_ and download the `.msi`.
+
+    2. **Run the installer:**
+
+       Double click the downloaded `.msi` file and follow the on-screen instructions to complete the installation.
