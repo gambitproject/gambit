@@ -5,6 +5,8 @@
 ### Fixed
 - Fixed a regression in which null outcomes in strategic game tables were not handled correctly
   when changing the number of strategies in the game (#571)
+- Fixed improper shared pointer handling when writing a .nfg file based on a game in
+  extensive form.
 
 
 ## [16.3.2] - unreleased

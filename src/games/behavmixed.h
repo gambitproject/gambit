@@ -226,7 +226,8 @@ public:
 template <class Generator>
 MixedBehaviorProfile<double> GameRep::NewRandomBehaviorProfile(Generator &generator) const
 {
-  auto profile = MixedBehaviorProfile<double>(Game(const_cast<GameRep *>(this)));
+  auto profile =
+      MixedBehaviorProfile<double>(std::const_pointer_cast<GameRep>(shared_from_this()));
   std::exponential_distribution<> dist(1); // NOLINT(misc-const-correctness)
   for (auto player : GetPlayers()) {
     for (auto infoset : player->GetInfosets()) {
@@ -242,7 +243,8 @@ template <class Generator>
 MixedBehaviorProfile<Rational> GameRep::NewRandomBehaviorProfile(int p_denom,
                                                                  Generator &generator) const
 {
-  auto profile = MixedBehaviorProfile<Rational>(Game(const_cast<GameRep *>(this)));
+  auto profile =
+      MixedBehaviorProfile<Rational>(std::const_pointer_cast<GameRep>(shared_from_this()));
   for (auto player : GetPlayers()) {
     for (auto infoset : player->GetInfosets()) {
       std::list<Rational> dist =
