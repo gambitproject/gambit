@@ -63,27 +63,27 @@ Each release includes pre-built binaries for Windows, macOS, and Linux distribut
 .. dropdown:: Install on Linux or macOS from source tarball
     :class-container: sd-border-0
     
-    1. **Download the source tarball:**
+   1. **Download the source tarball:**
 
-        Visit the `Gambit releases page on GitHub <https://github.com/gambitproject/gambit/releases>`_ and download the source tarball for the version of Gambit you wish to install.
+      Visit the `Gambit releases page on GitHub <https://github.com/gambitproject/gambit/releases>`_ and download the source tarball for the version of Gambit you wish to install.
 
-    2. **Extract the tarball:**
+   2. **Extract the tarball:**
 
-       Once downloaded, extract the tarball using the following command:
+      Once downloaded, extract the tarball using the following command:
 
-       .. code-block:: bash
+      .. code-block:: bash
 
-          tar -xzf gambit-*.tar.gz
+         tar -xzf gambit-*.tar.gz
 
-    3. **Build and install Gambit:**
+   3. **Build and install Gambit:**
 
-       Navigate to the extracted directory and run:
+      Navigate to the extracted directory and run:
 
-       .. code-block:: bash
+      .. code-block:: bash
 
-          ./configure
-          make
-          sudo make install
+         ./configure
+         make
+         sudo make install
 
 .. dropdown:: Install on Windows with installer
    :class-container: sd-border-0
@@ -92,6 +92,6 @@ Each release includes pre-built binaries for Windows, macOS, and Linux distribut
 
       Visit the `Gambit releases page on GitHub <https://github.com/gambitproject/gambit/releases>`_ and download the `.msi`.
 
-    2. **Run the installer:**
+   2. **Run the installer:**
 
-       Double click the downloaded `.msi` file and follow the on-screen instructions to complete the installation.
+      Double click the downloaded `.msi` file and follow the on-screen instructions to complete the installation.
