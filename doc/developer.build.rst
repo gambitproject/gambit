@@ -150,11 +150,13 @@ Building the Python extension
 -----------------------------
 
 The :ref:`pygambit Python package <pygambit>` is in ``src/pygambit``
-in the Gambit source tree.
-Building the extension follows the standard approach.
-From the **root directory of the source tree** execute
+in the Gambit source tree. We recommend to install `pygambit`
+as part of a virtual environment rather than in the system's Python.
+Use `pip` to install from the **root directory of the source tree**, optionally including the `-e` flag for an editable install:
 
-    python -m pip install .
+.. code-block:: bash
+
+   pip install -e .
 
 There is a set of test cases in `src/pygambit/tests`, which can be run
 using `nose2`.
