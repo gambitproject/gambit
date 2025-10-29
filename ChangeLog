@@ -5,6 +5,7 @@
 ### Fixed
 - Parsing of output of `gambit-logit` in the graphical interface did not handle the
   terminal Nash profile correctly.  (#172)
+- Improved sizing of list of logit profiles computed for normal form games.
 
 
 ## [16.3.1] - 2025-08-18

@@ -119,7 +119,8 @@ public:
 
 LogitMixedSheet::LogitMixedSheet(wxWindow *p_parent, gbtGameDocument *p_doc,
                                  LogitMixedBranch &p_branch)
-  : wxSheet(p_parent, wxID_ANY), m_doc(p_doc), m_branch(p_branch)
+  : wxSheet(p_parent, wxID_ANY, wxDefaultPosition, wxSize(800, 600)), m_doc(p_doc),
+    m_branch(p_branch)
 {
   CreateGrid(p_branch.NumPoints(), p_doc->GetGame()->MixedProfileLength() + 1);
   SetRowLabelWidth(40);
@@ -239,7 +240,7 @@ LogitBranchDialog::LogitBranchDialog(wxWindow *p_parent, gbtGameDocument *p_doc,
   m_sheet->AutoSizeCol(0);
 
   auto *sizer = new wxBoxSizer(wxVERTICAL);
-  sizer->Add(m_sheet, 0, wxALL, 5);
+  sizer->Add(m_sheet, 0, wxEXPAND | wxALL, 5);
   sizer->Add(CreateButtonSizer(wxOK), 0, wxALL | wxEXPAND, 5);
 
   SetSizer(sizer);
