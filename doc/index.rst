@@ -63,6 +63,7 @@ construction and analysis of finite extensive and strategic games.
    :maxdepth: 1
 
    intro
+   install
    pygambit
    tools
    gui
