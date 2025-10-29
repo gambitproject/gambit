@@ -1,5 +1,12 @@
 # Changelog
 
+## [16.3.2] - unreleased
+
+### Fixed
+- Parsing of output of `gambit-logit` in the graphical interface did not handle the
+  terminal Nash profile correctly.  (#172)
+
+
 ## [16.3.1] - 2025-08-18
 
 ### Fixed

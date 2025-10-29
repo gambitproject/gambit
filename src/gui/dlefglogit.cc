@@ -174,15 +174,14 @@ void gbtLogitBehavList::AddProfile(const wxString &p_text, bool p_forceShow)
   auto profile = std::make_shared<MixedBehaviorProfile<double>>(m_doc->GetGame());
 
   wxStringTokenizer tok(p_text, wxT(","));
-
-  m_lambdas.push_back((double)Gambit::lexical_cast<Gambit::Rational>(
-      std::string((const char *)tok.GetNextToken().mb_str())));
-
-  for (size_t i = 1; i <= profile->BehaviorProfileLength(); i++) {
-    (*profile)[i] = Gambit::lexical_cast<Gambit::Rational>(
-        std::string((const char *)tok.GetNextToken().mb_str()));
+  const auto next = tok.GetNextToken();
+  if (next == "NE") {
+    return;
   }
-
+  m_lambdas.push_back(std::stod(next.ToStdString()));
+  for (size_t i = 1; i <= profile->BehaviorProfileLength(); i++) {
+    (*profile)[i] = std::stod(tok.GetNextToken().ToStdString());
+  }
   m_profiles.push_back(profile);
   if (p_forceShow || m_profiles.size() - GetNumberRows() > 20) {
     AppendRows(m_profiles.size() - GetNumberRows());
