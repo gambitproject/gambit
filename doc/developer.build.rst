@@ -45,6 +45,31 @@ Install build tools and dependencies
 
             brew reinstall automake autoconf libtool wxwidgets
 
+.. dropdown:: Install on Linux (Debian/Ubuntu) via apt
+   :class-container: sd-border-0
+
+   1. Update your package lists:
+
+      .. code-block:: bash
+
+         sudo apt update
+
+   2. Install general build dependencies:
+
+      .. code-block:: bash
+
+         sudo apt install build-essential automake autoconf libtool
+
+   3. Install GUI dependencies (replace X.X with the latest version available, e.g., 3.2):
+
+      .. code-block:: bash
+
+         sudo apt-cache search libwxgt*
+         sudo apt install libwxgtkX.X-dev
+
+      .. note::
+         Note that Gambit requires wxWidgets version 3.2.x or higher.
+
 .. _cli-gui-from-source:
 
 Install CLI and GUI from source
@@ -90,6 +115,22 @@ be based off this branch.  Branches labeled ``maintVV``, where ``VV``
 is the version number, point to the latest commit on a stable
 version.
 
+For Un*x/Linux users:
+If wxWidgets it isn't installed in a standard place (e.g., /usr or
+/usr/local), you'll need to tell configure where to find it with the
+--with-wx-prefix=PREFIX option, for example::
+
+  ./configure --with-wx-prefix=/home/mylogin/wx
+
+Finally, if you don't want to build the graphical interface, you
+can either (a) simply not install wxWidgets, or (b) pass the argument
+--disable-gui to the configure step, for example, ::
+
+  ./configure --disable-gui
+
+This will just build the command-line tools, and will not require
+a wxWidgets installation.
+
 
 For Windows users
 -----------------
@@ -133,34 +174,9 @@ instructions for Un*x/Linux platforms above.
 
       After creating the DMG file, open it and drag the Gambit application to your Applications folder.
 
-The graphical interface and wxWidgets
--------------------------------------
 
-Note that Gambit requires wxWidgets version 3.2.x or higher.
-See the wxWidgets website at
-`<http://www.wxwidgets.org>`_
-to download this if you need it.  Packages of this should be available
-for most Un*x users through their package managers (apt or rpm).  Note
-that you'll need the appropriate -dev package for wxWidgets to get the
-header files needed to build Gambit.
 
-Un*x users, please note that Gambit at this time only supports the
-GTK port of wxWidgets.
 
-If wxWidgets it isn't installed in a standard place (e.g., /usr or
-/usr/local), you'll need to tell configure where to find it with the
---with-wx-prefix=PREFIX option, for example::
-
-  ./configure --with-wx-prefix=/home/mylogin/wx
-
-Finally, if you don't want to build the graphical interface, you
-can either (a) simply not install wxWidgets, or (b) pass the argument
---disable-gui to the configure step, for example, ::
-
-  ./configure --disable-gui
-
-This will just build the command-line tools, and will not require
-a wxWidgets installation.
 
 
 .. _build-python:
