@@ -62,8 +62,13 @@ class MixedSequenceProfile {
 private:
 
   std::map <GameSequence, T> probs;
+  Game game;
 
 public:
+
+  MixedSequenceProfile(const Game &p_game) {
+    game = p_game;
+  }
 
   const T &operator[](const GameSequence &p_key) const
   {
@@ -75,16 +80,28 @@ public:
     return probs[p_key];
   }
 
-  void ToMixedBehaviorProfile(MixedBehaviorProfile<T> &p_profile) const
+  void GetMixedBehaviorProfile() const
   {
+    MixedBehaviorProfile<T> mbp(game);
     for (const auto& [seq, prob] : probs) {
       auto parent_seq = seq->parent.lock();
       if (parent_seq) {
         T parent_prob = probs.at(parent_seq);
         auto action = seq->action;
-        p_profile[action] = (parent_prob > static_cast<T>(0)) ? prob / parent_prob : static_cast<T>(0);
+        mbp[action] = (parent_prob > static_cast<T>(0)) ? prob / parent_prob : static_cast<T>(0);
       }
     }
+    return mbp;
+  }
+
+  std::map<GamePlayer, T> GetPayoffs() const
+  {
+    std::map<GamePlayer, T> payoffs;
+    auto mbp = GetMixedBehaviorProfile();
+    for (auto player : game->GetPlayers()) {
+      payoffs[player] = mbp.GetPayoff(player);
+    }
+    return payoffs;
   }
 };
 
