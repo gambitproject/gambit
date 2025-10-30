@@ -24,8 +24,11 @@
 #define GAMETREE_H
 
 #include "gameexpl.h"
+#include "gameseq.h"
 
 namespace Gambit {
+
+class GameSequenceForm;
 
 class GameTreeRep : public GameExplicitRep {
   friend class GameNodeRep;
@@ -34,6 +37,7 @@ class GameTreeRep : public GameExplicitRep {
 
 protected:
   mutable bool m_computedValues{false};
+  std::shared_ptr<GameSequenceForm> m_sequenceForm;
   std::shared_ptr<GameNodeRep> m_root;
   std::shared_ptr<GamePlayerRep> m_chance;
   std::size_t m_numNodes = 1;
@@ -68,6 +72,16 @@ public:
   ~GameTreeRep() override;
   Game Copy() const override;
   //@}
+
+  std::shared_ptr<GameSequenceForm> GetSequenceForm() const override {
+    return m_sequenceForm;
+  }
+
+  void ConstructSequenceForm() override {
+    auto game = shared_from_this();
+    BehaviorSupportProfile full_support(game);
+    m_sequenceForm.reset(new GameSequenceForm(full_support));
+  }
 
   /// @name General data access
   //@{

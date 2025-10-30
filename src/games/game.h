@@ -57,6 +57,8 @@ using GameNode = GameObjectPtr<GameNodeRep>;
 class GameRep;
 using Game = std::shared_ptr<GameRep>;
 
+class GameSequenceForm;
+
 //
 // Forward declarations of classes defined elsewhere.
 //
@@ -678,6 +680,9 @@ public:
   /// Create a copy of the game, as a new game
   virtual Game Copy() const = 0;
   //@}
+
+  virtual std::shared_ptr<GameSequenceForm> GetSequenceForm() const {return nullptr;};
+  virtual void ConstructSequenceForm() {};
 
   /// @name General data access
   //@{
