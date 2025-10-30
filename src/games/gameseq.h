@@ -56,6 +56,27 @@ public:
 using GameSequence = std::shared_ptr<GameSequenceRep>;
 
 
+class PureSequenceProfile {
+
+private:
+
+  std::map<GamePlayer, GameSequence> psp;
+
+public:
+
+  const GameSequence &operator[](const GamePlayer &p_key) const
+  {
+    return psp.at(p_key);
+  }
+
+  GameSequence &operator[](const GamePlayer &p_key)
+  {
+    return psp[p_key];
+  }
+
+};
+
+
 template <typename T>
 class MixedSequenceProfile {
 
