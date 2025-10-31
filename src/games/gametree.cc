@@ -804,6 +804,19 @@ Rational GameTreeRep::GetPlayerMaxPayoff(const GamePlayer &p_player) const
       p_player, m_root, [](const Rational &a, const Rational &b) { return std::max(a, b); });
 }
 
+bool GameTreeRep::IsAbsentMinded() const
+{
+  if (!m_ownPriorActionInfo && !m_root->IsTerminal()) {
+    const_cast<GameTreeRep *>(this)->BuildOwnPriorActions();
+  }
+
+  if (GetRoot()->IsTerminal()) {
+    return true;
+  }
+
+  return !m_absentMindedInfosets.empty();
+}
+
 bool GameTreeRep::IsPerfectRecall() const
 {
   if (!m_ownPriorActionInfo && !m_root->IsTerminal()) {
@@ -870,6 +883,7 @@ void GameTreeRep::ClearComputedValues() const
   const_cast<GameTreeRep *>(this)->m_nodePlays.clear();
   m_ownPriorActionInfo = nullptr;
   const_cast<GameTreeRep *>(this)->m_unreachableNodes = nullptr;
+  const_cast<GameTreeRep *>(this)->m_absentMindedInfosets.clear();
   m_computedValues = false;
 }
 
@@ -1052,6 +1066,7 @@ void GameTreeRep::BuildUnreachableNodes()
     if (!child->IsTerminal()) {
       // Check for Absent-Minded Re-entry of the infoset
       if (path_choices.find(child->m_infoset->shared_from_this()) != path_choices.end()) {
+        m_absentMindedInfosets.insert(child->m_infoset);
         const GameAction replay_action = path_choices.at(child->m_infoset->shared_from_this());
         position.emplace(AbsentMindedEdge{replay_action, child});
 

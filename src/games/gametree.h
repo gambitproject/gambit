@@ -47,6 +47,7 @@ protected:
   std::map<GameNodeRep *, std::vector<GameNodeRep *>> m_nodePlays;
   mutable std::shared_ptr<OwnPriorActionInfo> m_ownPriorActionInfo;
   mutable std::unique_ptr<std::set<GameNodeRep *>> m_unreachableNodes;
+  std::set<GameInfosetRep *> m_absentMindedInfosets;
 
   /// @name Private auxiliary functions
   //@{
@@ -86,6 +87,7 @@ public:
   Rational GetPlayerMinPayoff(const GamePlayer &) const override;
   /// Returns the largest payoff to the player in any play of the game
   Rational GetPlayerMaxPayoff(const GamePlayer &) const override;
+  bool IsAbsentMinded() const override;
   //@}
 
   /// @name Players

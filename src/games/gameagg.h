@@ -81,6 +81,7 @@ public:
   bool IsTree() const override { return false; }
   bool IsAgg() const override { return true; }
   bool IsPerfectRecall() const override { return true; }
+  bool IsAbsentMinded() const override { return false; }
   bool IsConstSum() const override;
   /// Returns the smallest payoff to any player in any outcome of the game
   Rational GetMinPayoff() const override { return Rational(aggPtr->getMinPayoff()); }

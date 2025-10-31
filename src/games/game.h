@@ -759,6 +759,8 @@ public:
 
   /// Returns true if the game is perfect recall
   virtual bool IsPerfectRecall() const = 0;
+  /// Returns true if the game has at least one absent-minded infoset
+  virtual bool IsAbsentMinded() const = 0;
   //@}
 
   /// @name Writing data files
