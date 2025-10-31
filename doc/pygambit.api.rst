@@ -98,6 +98,7 @@ Information about the game
    Game.comment
    Game.is_const_sum
    Game.is_tree
+   Game.is_absent_minded
    Game.is_perfect_recall
    Game.players
    Game.outcomes
