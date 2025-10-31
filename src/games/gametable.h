@@ -58,6 +58,7 @@ public:
   bool IsTree() const override { return false; }
   bool IsConstSum() const override;
   bool IsPerfectRecall() const override { return true; }
+  bool IsAbsentMinded() const override { return false; }
   //@}
 
   /// @name Dimensions of the game
