@@ -101,7 +101,7 @@ public:
     return probs[p_key];
   }
 
-  void GetMixedBehaviorProfile() const
+  MixedBehaviorProfile<T> GetMixedBehaviorProfile() const
   {
     MixedBehaviorProfile<T> mbp(game);
     for (const auto& [seq, prob] : probs) {
@@ -332,6 +332,8 @@ public:
   }
 
   ~GameSequenceForm() = default;
+
+  GameSequence GetCorrespondingSequence(GameAction action) { return m_correspondence[action]; }
 
   const BehaviorSupportProfile &GetSupport() const { return m_support; }
 
