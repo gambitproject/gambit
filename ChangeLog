@@ -6,6 +6,9 @@
 - In the graphical interface, removed option to configure information set link drawing; information sets
   are always drawn and indicators are always drawn if an information set spans multiple levels.
 
+### Added
+- Tests for EFG Nash solvers -- `enumpoly_solve`, `lp_solve`, `lcp_solve` -- in behavior stratgegies
+
 
 ## [16.4.1] - unreleased
 
