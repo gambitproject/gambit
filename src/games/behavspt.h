@@ -29,6 +29,13 @@
 
 namespace Gambit {
 
+class GameSequenceForm;
+struct GameSequenceRep;
+class SequencesWrapper;
+class PlayerSequencesWrapper;
+class InfosetsWrapper;
+class ContingenciesWrapper;
+
 /// This class represents a subset of the actions in an extensive game.
 /// It is enforced that each player has at least one action at each
 /// information set; thus, the actions in a support can be viewed as
@@ -139,6 +146,20 @@ public:
   /// Returns a copy of the support with dominated actions eliminated
   BehaviorSupportProfile Undominated(bool p_strict) const;
   //@}
+
+  mutable std::shared_ptr<GameSequenceForm> m_sequenceForm;
+  std::shared_ptr<GameSequenceForm> GetSequenceForm() const;
+  SequencesWrapper GetSequences() const;
+  PlayerSequencesWrapper GetSequences(GamePlayer &p_player) const;
+  int GetConstraintEntry(const GameInfoset &p_infoset, const GameAction &p_action) const;
+  const Rational &
+  GetPayoff(const std::map<GamePlayer, std::shared_ptr<GameSequenceRep>> &p_profile,
+            const GamePlayer &p_player) const;
+  GameRep::Players GetPlayers() const { return GetGame()->GetPlayers(); }
+  MixedBehaviorProfile<double>
+  ToMixedBehaviorProfile(const std::map<std::shared_ptr<GameSequenceRep>, double> &) const;
+  InfosetsWrapper GetInfosets() const;
+  ContingenciesWrapper GetContingencies() const;
 };
 
 } // end namespace Gambit
