@@ -274,12 +274,14 @@ std::shared_ptr<GameSequenceForm> BehaviorSupportProfile::GetSequenceForm() cons
 
 SequencesWrapper BehaviorSupportProfile::GetSequences() const
 {
-  return SequencesWrapper(GetSequenceForm()->GetSequences());
+  auto sequences = GetSequenceForm()->GetSequences();
+  return SequencesWrapper(sequences);
 }
 
 PlayerSequencesWrapper BehaviorSupportProfile::GetSequences(GamePlayer &p_player) const
 {
-  return PlayerSequencesWrapper(GetSequenceForm()->GetSequences(p_player));
+  auto sequences = GetSequenceForm()->GetSequences(p_player);
+  return PlayerSequencesWrapper(sequences);
 }
 
 int BehaviorSupportProfile::GetConstraintEntry(const GameInfoset &p_infoset,
@@ -303,12 +305,14 @@ MixedBehaviorProfile<double> BehaviorSupportProfile::ToMixedBehaviorProfile(
 
 InfosetsWrapper BehaviorSupportProfile::GetInfosets() const
 {
-  return InfosetsWrapper(GetSequenceForm()->GetInfosets());
+  auto infosets = GetSequenceForm()->GetInfosets();
+  return InfosetsWrapper(infosets);
 }
 
 ContingenciesWrapper BehaviorSupportProfile::GetContingencies() const
 {
-  return ContingenciesWrapper(GetSequenceForm()->GetContingencies());
+  auto contingencies = GetSequenceForm()->GetContingencies();
+  return ContingenciesWrapper(contingencies);
 }
 
 } // end namespace Gambit

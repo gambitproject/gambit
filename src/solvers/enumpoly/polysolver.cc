@@ -21,7 +21,7 @@
 //
 
 #include "polysolver.h"
-#include "indexproduct.h"
+#include "games/indexproduct.h"
 
 namespace Gambit {
 

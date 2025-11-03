@@ -287,6 +287,7 @@ game_SOURCES = \
 	src/gambit.h \
 	src/games/gameseq.cc \
 	src/games/gameseq.h \
+	src/games/indexproduct.h \
 	src/games/ndarray.h \
 	src/games/number.h \
 	src/games/gameobject.h \
@@ -401,7 +402,6 @@ gambit_nashsupport_SOURCES = \
 
 gambit_enumpoly_SOURCES = \
 	${core_SOURCES} ${game_SOURCES} ${gambit_nashsupport_SOURCES} \
-	src/solvers/enumpoly/indexproduct.h \
 	src/solvers/enumpoly/rectangle.h \
 	src/solvers/enumpoly/poly.cc \
 	src/solvers/enumpoly/poly.h \
