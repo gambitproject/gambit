@@ -1,0 +1,12 @@
+EFG 2 R "Coin Doubling Game" { "Alice" "Bob" }
+""
+
+p "" 1 1 "" { "take" "push" } 0
+t "" 1 "Alice takes first" { 4, 1 }
+p "" 2 1 "" { "take" "push" } 0
+t "" 2 "Bob takes first" { 2, 8 }
+p "" 1 2 "" { "take" "push" } 0
+t "" 3 "Alice takes second" { 16, 4 }
+p "" 2 2 "" { "take" "push" } 0
+t "" 4 "Bob takes second" { 8, 32 }
+t "" 5 "Final push" { 64, 16 }

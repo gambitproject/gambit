@@ -1,0 +1,12 @@
+EFG 2 R "Four-move doubling coin push game" { "Alice" "Bob" }
+""
+
+p "" 1 1 "" { "Take" "Push" } 0
+t "" 1 "Alice takes 4, Bob 1" { 4, 1 }
+p "" 2 1 "" { "Take" "Push" } 0
+t "" 2 "Bob takes 8, Alice 2" { 2, 8 }
+p "" 1 2 "" { "Take" "Push" } 0
+t "" 3 "Alice takes 16, Bob 4" { 16, 4 }
+p "" 2 2 "" { "Take" "Push" } 0
+t "" 4 "Bob takes 32, Alice 8" { 8, 32 }
+t "" 5 "No take: Alice 64, Bob 16" { 64, 16 }
