@@ -9,7 +9,7 @@ computes Nash equilibria by finding solutions to a linear
 complementarity problem. For extensive games, the program uses the
 sequence form representation of the extensive game, as defined by
 Koller, Megiddo, and von Stengel [KolMegSte94]_, and applies the
-algorithm developed by Lemke. For strategic games, the program using
+algorithm developed by Lemke. For strategic games, the program uses
 the method of Lemke and Howson [LemHow64]_.  There exist strategic
 games for which some equilibria cannot be located by this method; see
 Shapley [Sha74]_.
