@@ -162,6 +162,11 @@ class Infoset:
         return self.infoset.deref().IsChanceInfoset()
 
     @property
+    def is_absent_minded(self) -> bool:
+        """Whether the information set has absent-mindedness."""
+        return self.infoset.deref().IsAbsentMinded()
+
+    @property
     def actions(self) -> InfosetActions:
         """The set of actions at the information set."""
         return InfosetActions.wrap(self.infoset)

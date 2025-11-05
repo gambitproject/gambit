@@ -47,6 +47,23 @@ GameOutcomeRep::GameOutcomeRep(GameRep *p_game, int p_number) : m_game(p_game), 
 }
 
 //========================================================================
+//                       class GameInfosetRep
+//========================================================================
+
+bool GameInfosetRep::IsAbsentMinded() const
+{
+  if (this->GetGame() m_infosetParents.empty() && !m_root->IsTerminal()) {
+    const_cast<GameTreeRep *>(this)->BuildInfosetParents();
+  }
+
+  if (GetRoot()->IsTerminal()) {
+    return true;
+  }
+
+  return !m_absentMindedInfosets.empty();
+}
+
+//========================================================================
 //                      class GameStrategyRep
 //========================================================================
 

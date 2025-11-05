@@ -780,15 +780,6 @@ class Game:
         return self.game.deref().IsConstSum()
 
     @property
-    def is_absent_minded(self) -> bool:
-        """Whether the game has absent-mindedness.
-
-        By convention, games with a strategic representation have perfect recall as they
-        are treated as simultaneous-move games, thus, they do not have absent-mindedness.
-        """
-        return self.game.deref().IsAbsentMinded()
-
-    @property
     def is_perfect_recall(self) -> bool:
         """Whether the game is perfect recall.
 

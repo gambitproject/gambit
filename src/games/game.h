@@ -225,6 +225,8 @@ public:
 
   bool IsChanceInfoset() const;
 
+  bool IsAbsentMinded() const;
+
   void SetLabel(const std::string &p_label) { m_label = p_label; }
   const std::string &GetLabel() const { return m_label; }
 
@@ -759,8 +761,6 @@ public:
 
   /// Returns true if the game is perfect recall
   virtual bool IsPerfectRecall() const = 0;
-  /// Returns true if the game has at least one absent-minded infoset
-  virtual bool IsAbsentMinded() const = 0;
   //@}
 
   /// @name Writing data files
