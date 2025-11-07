@@ -796,10 +796,21 @@ def test_node_children_action_label():
     assert game.root.children["Black"].children["Fold"] == game.root.children[1].children[1]
 
 
+def test_node_children_action():
+    game = games.read_from_file("poker.efg")
+    assert game.root.children[game.root.infoset.actions["Red"]] == game.root.children[0]
+
+
 def test_node_children_nonexistent_action():
     game = games.read_from_file("poker.efg")
     with pytest.raises(ValueError):
         _ = game.root.children["Green"]
+
+
+def test_node_children_other_infoset_action():
+    game = games.read_from_file("poker.efg")
+    with pytest.raises(ValueError):
+        _ = game.root.children[game.root.children[0].infoset.actions["Raise"]]
 
 
 def test_node_plus_action():
@@ -812,6 +823,12 @@ def test_node_plus_nonexistent_action():
     game = games.read_from_file("poker.efg")
     with pytest.raises(ValueError):
         _ = game.root + "Green"
+
+
+def test_node_plus_other_infoset_action():
+    game = games.read_from_file("poker.efg")
+    with pytest.raises(ValueError):
+        _ = game.root + game.root.children["Black"].infoset.actions[0]
 
 
 @pytest.mark.parametrize(
