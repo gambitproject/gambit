@@ -48,13 +48,13 @@ class NodeChildren:
     def __getitem__(self, index: typing.Union[int, str]) -> Node:
         if isinstance(index, str):
             if not index.strip():
-                raise ValueError("Node label cannot be empty or all whitespace")
-            matches = [x for x in self if x.label == index.strip()]
-            if not matches:
-                raise KeyError(f"Node has no child with label '{index}'")
-            if len(matches) > 1:
-                raise ValueError(f"Node has multiple children with label '{index}'")
-            return matches[0]
+                raise ValueError("Action label cannot be empty or all whitespace")
+            if self.parent.deref().GetInfoset() == cython.cast(c_GameInfoset, NULL):
+                raise ValueError(f"No action with label '{index}' at node")
+            for action in self.parent.deref().GetInfoset().deref().GetActions():
+                if action.deref().GetLabel() == cython.cast(str, index):
+                    return Node.wrap(self.parent.deref().GetChild(action))
+            raise ValueError(f"No action with label '{index}' at node")
         if isinstance(index, int):
             if self.parent.deref().GetInfoset() == cython.cast(c_GameInfoset, NULL):
                 raise IndexError("Index out of range")
