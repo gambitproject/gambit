@@ -52,7 +52,7 @@ class NodeChildren:
             if self.parent.deref().GetInfoset() == cython.cast(c_GameInfoset, NULL):
                 raise ValueError(f"No action with label '{index}' at node")
             for action in self.parent.deref().GetInfoset().deref().GetActions():
-                if action.deref().GetLabel() == cython.cast(str, index):
+                if action.deref().GetLabel().decode("ascii") == cython.cast(str, index):
                     return Node.wrap(self.parent.deref().GetChild(action))
             raise ValueError(f"No action with label '{index}' at node")
         if isinstance(index, int):
@@ -61,7 +61,7 @@ class NodeChildren:
             return Node.wrap(self.parent.deref().GetChild(
                 self.parent.deref().GetInfoset().deref().GetAction(index + 1)
             ))
-        raise TypeError(f"Child index must be int or str, not {index.__class__.__name__}")
+        raise TypeError(f"Action index must be int or str, not {index.__class__.__name__}")
 
 
 @cython.cclass
@@ -213,3 +213,17 @@ class Node:
         """Returns a list of all terminal `Node` objects consistent with it.
         """
         return [Node.wrap(n) for n in self.node.deref().GetGame().deref().GetPlays(self.node)]
+
+    def __add__(self, action: str) -> Node:
+        """Return the child of the node which succeeds this node after `action` is played)
+
+        .. versionadded:: 16.5.0
+        """
+        if not action.strip():
+            raise ValueError("Action label cannot be empty or all whitespace")
+        if self.node.deref().GetInfoset() == cython.cast(c_GameInfoset, NULL):
+            raise ValueError(f"No action with label '{action}' at node")
+        for act in self.node.deref().GetInfoset().deref().GetActions():
+            if act.deref().GetLabel().decode("ascii") == cython.cast(str, action):
+                return Node.wrap(self.node.deref().GetChild(act))
+        raise ValueError(f"No action with label '{action}' at node")
