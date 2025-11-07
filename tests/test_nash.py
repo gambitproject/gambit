@@ -40,19 +40,48 @@ def test_enummixed_double():
 
 @pytest.mark.nash
 @pytest.mark.nash_enummixed_strategy
-def test_enummixed_rational():
-    """Test calls of enumeration of mixed strategy equilibria, rational precision."""
-    game = games.read_from_file("poker.efg")
+@pytest.mark.parametrize(
+    "game,mixed_strategy_prof_data",
+    [
+        # Zero-sum games
+        (games.create_1_card_poker_efg(), [[["1/3", "2/3", 0, 0], ["2/3", "1/3"]]]),
+        (games.create_myerson_2_card_poker_efg(), [[["1/3", "2/3", 0, 0], ["2/3", "1/3"]]]),
+        # Non-zero-sum games
+        (games.create_one_shot_trust_efg(), [[[0, 1], ["1/2", "1/2"]],
+                                             [[0, 1], [0, 1]]]),
+        (
+            games.create_EFG_for_nxn_bimatrix_coordination_game(3),
+            [
+                [[1, 0, 0], [1, 0, 0]],
+                [["1/2", "1/2", 0], ["1/2", "1/2", 0]],
+                [["1/3", "1/3", "1/3"], ["1/3", "1/3", "1/3"]],
+                [["1/2", 0, "1/2"], ["1/2", 0, "1/2"]],
+                [[0, 1, 0], [0, 1, 0]],
+                [[0, "1/2", "1/2"], [0, "1/2", "1/2"]],
+                [[0, 0, 1], [0, 0, 1]],
+            ],
+        ),
+        (
+            games.create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq(),
+            [
+                [["1/30", "1/6", "3/10", "3/10", "1/6", "1/30"],
+                 ["1/6", "1/30", "3/10", "3/10", "1/30", "1/6"]],
+            ],
+        ),
+    ]
+)
+def test_enummixed_rational(game: gbt.Game, mixed_strategy_prof_data: list):
+    """Test calls of enumeration of extreme mixed strategy equilibria, rational precision
+
+       Tests max regret being zero (internal consistency) and compares the computed sequence of
+       extreme equilibria to a previosuly computed sequence (regression test)
+    """
     result = gbt.nash.enummixed_solve(game, rational=True)
-    assert len(result.equilibria) == 1
-    expected = game.mixed_strategy_profile(
-        rational=True,
-        data=[
-            [gbt.Rational(1, 3), gbt.Rational(2, 3), gbt.Rational(0), gbt.Rational(0)],
-            [gbt.Rational(2, 3), gbt.Rational(1, 3)],
-        ],
-    )
-    assert result.equilibria[0] == expected
+    assert len(result.equilibria) == len(mixed_strategy_prof_data)
+    for eq, exp in zip(result.equilibria, mixed_strategy_prof_data):
+        assert eq.max_regret() == 0
+        expected = game.mixed_strategy_profile(rational=True, data=exp)
+        assert eq == expected
 
 
 @pytest.mark.nash
@@ -219,19 +248,65 @@ def test_lcp_strategy_double():
 
 @pytest.mark.nash
 @pytest.mark.nash_lcp_strategy
-def test_lcp_strategy_rational():
-    """Test calls of LCP for mixed strategy equilibria, rational precision."""
-    game = games.read_from_file("poker.efg")
-    result = gbt.nash.lcp_solve(game, use_strategic=True, rational=True)
-    assert len(result.equilibria) == 1
-    expected = game.mixed_strategy_profile(
-        rational=True,
-        data=[
-            [gbt.Rational(1, 3), gbt.Rational(2, 3), gbt.Rational(0), gbt.Rational(0)],
-            [gbt.Rational(2, 3), gbt.Rational(1, 3)],
-        ],
-    )
-    assert result.equilibria[0] == expected
+@pytest.mark.parametrize(
+    "game,mixed_strategy_prof_data,stop_after",
+    [
+        # Zero-sum games
+        (games.create_1_card_poker_efg(), [[["1/3", "2/3", 0, 0], ["2/3", "1/3"]]], None),
+        (games.create_myerson_2_card_poker_efg(), [[["1/3", "2/3", 0, 0], ["2/3", "1/3"]]], None),
+        (games.create_kuhn_poker_efg(), [games.kuhn_poker_lcp_first_mixed_strategy_prof()], 1),
+        # Non-zero-sum games
+        (games.create_one_shot_trust_efg(), [[[0, 1], ["1/2", "1/2"]]], None),
+        (
+            games.create_EFG_for_nxn_bimatrix_coordination_game(3),
+            [
+                [[1, 0, 0], [1, 0, 0]],
+                [["1/2", "1/2", 0], ["1/2", "1/2", 0]],
+                [[0, 1, 0], [0, 1, 0]],
+                [[0, "1/2", "1/2"], [0, "1/2", "1/2"]],
+                [["1/3", "1/3", "1/3"], ["1/3", "1/3", "1/3"]],
+                [["1/2", 0, "1/2"], ["1/2", 0, "1/2"]],
+                [[0, 0, 1], [0, 0, 1]],
+            ],
+            None,
+        ),
+        (
+            games.create_EFG_for_nxn_bimatrix_coordination_game(4),
+            [[[1, 0, 0, 0], [1, 0, 0, 0]]],
+            1,
+        ),
+        (
+            games.create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq(),
+            [
+                [["1/30", "1/6", "3/10", "3/10", "1/6", "1/30"],
+                 ["1/6", "1/30", "3/10", "3/10", "1/30", "1/6"]],
+            ],
+            None
+        ),
+    ]
+)
+def test_lcp_strategy_rational(game: gbt.Game, mixed_strategy_prof_data: list,
+                               stop_after: typing.Union[None, int]):
+    """Test calls of LCP for mixed strategy equilibria, rational precision
+    using max_regret (internal consistency); and comparison to a sequence of previously
+    computed equilibria using this function (regression test).
+
+    This sequence will correspond to the full set of all computed equilibria if stop_after
+    is None, else the first stop_after-many equilibria.
+    """
+    result = gbt.nash.lcp_solve(game, use_strategic=True, rational=True, stop_after=stop_after)
+
+    if stop_after:
+        result = gbt.nash.lcp_solve(game, use_strategic=True, stop_after=stop_after)
+        assert len(result.equilibria) == stop_after
+    else:
+        # compute all
+        result = gbt.nash.lcp_solve(game, use_strategic=True)
+    assert len(result.equilibria) == len(mixed_strategy_prof_data)
+    for eq, exp in zip(result.equilibria, mixed_strategy_prof_data):
+        assert eq.max_regret() == 0
+        expected = game.mixed_strategy_profile(rational=True, data=exp)
+        assert eq == expected
 
 
 def test_lcp_behavior_double():
