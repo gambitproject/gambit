@@ -229,7 +229,7 @@ def test_profile_indexing_by_infoset_and_action_labels_reference(game: gbt.Game,
                                                                  action_label: str,
                                                                  prob: typing.Union[str, float],
                                                                  rational_flag: bool):
-    """Here we use the infoset label and action label, with some exampels where the action label
+    """Here we use the infoset label and action label, with some examples where the action label
     alone throws a ValueError (checked in a separate test)
     """
     profile = game.mixed_behavior_profile(rational=rational_flag)
@@ -259,7 +259,7 @@ def test_profile_indexing_by_player_infoset_action_labels_reference(game: gbt.Ga
                                                                     action_label: str,
                                                                     prob: typing.Union[str, float],
                                                                     rational_flag: bool):
-    """Here we use the infoset label and action label, with some exampels where the action label
+    """Here we use the infoset label and action label, with some examples where the action label
     alone throws a ValueError (checked in a separate test)
     """
     profile = game.mixed_behavior_profile(rational=rational_flag)
