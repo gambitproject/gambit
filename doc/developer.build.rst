@@ -103,7 +103,7 @@ Navigate to the Gambit source directory and run:
 .. note::
   If you don't want to build the graphical interface, you can pass the argument `--disable-gui` to the configure step, for example, ::
 
-  `./configure --disable-gui`
+  ./configure --disable-gui
 
 .. warning::
   For Linux users:
@@ -111,7 +111,7 @@ Navigate to the Gambit source directory and run:
   /usr/local), you'll need to tell configure where to find it with the
   `--with-wx-prefix=PREFIX` option, for example::
 
-    `./configure --with-wx-prefix=/home/mylogin/wx`
+   ./configure --with-wx-prefix=/home/mylogin/wx
 
 .. note::
   Command-line options are available to modify the configuration process;
@@ -121,7 +121,7 @@ Navigate to the Gambit source directory and run:
   By default Gambit will be installed in /usr/local.  You can change this
   by replacing configure step with one of the form ::
 
-  `./configure --prefix=/your/path/here`
+  ./configure --prefix=/your/path/here
 
 .. warning::
   The graphical interface relies on external calls to other
