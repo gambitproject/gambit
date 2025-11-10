@@ -4,7 +4,7 @@ How to run PyGambit tutorials on your computer
 ==============================================
 
 The PyGambit tutorials are available as Jupyter notebooks and can be run interactively using any program that supports Jupyter notebooks, such as JupyterLab or VSCode.
-You will need a working installation of Python 3 (tested with 3.9 and later) on your machine.
+You will need a working installation of Python 3.9+ on your machine to run PyGambit (however the tutorials contain some syntax that may not be compatible with earlier versions of Python than 3.13).
 
 1. To download the tutorials, open your OS's command prompt and clone the Gambit repository from GitHub, then navigate to the tutorials directory: ::
 
