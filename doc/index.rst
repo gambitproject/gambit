@@ -7,13 +7,13 @@ construction and analysis of finite extensive and strategic games.
 
 .. grid::
 
-   .. grid-item-card:: Python user guide
+   .. grid-item-card:: Python tutorials and user guide
       :columns: 6
 
       An introduction to using the ``pygambit`` package
       in Python.
 
-      .. button-ref:: pygambit-user
+      .. button-ref:: pygambit
          :ref-type: ref
          :click-parent:
          :color: secondary
