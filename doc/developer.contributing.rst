@@ -32,8 +32,7 @@ The project is hosted on GitHub, and contributions can be made via pull requests
 
 In the git repository, the branch ``master`` always points to the
 latest development version.  New development should in general always
-be based off this branch.  Branches labeled ``maintVV``, where ``VV``
-is the version number, point to the latest commit on a stable
+be based off this branch.  Branches labeled ``maintX_Y``, where ``X`` is the major version number and ``Y`` is the minor version number, point to the latest commit on a stable
 version.
 
 1. To get started contributing code in the `Gambit GitHub repo <https://github.com/gambitproject/gambit>`__, do one of the following:
