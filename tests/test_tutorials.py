@@ -4,6 +4,7 @@ import nbformat
 import pytest
 from nbclient import NotebookClient
 from nbclient.exceptions import CellExecutionError
+import contextlib
 
 
 def _find_tutorial_notebooks():
@@ -50,7 +51,5 @@ def test_execute_notebook(nb_path):
 		raise AssertionError(f"Error while executing notebook {nb_path}: {exc}") from exc
 	finally:
 		# Ensure kernel is shut down.
-		try:
+		with contextlib.suppress(Exception):
 			client.shutdown_kernel()
-		except Exception:
-			pass
