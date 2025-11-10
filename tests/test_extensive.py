@@ -377,7 +377,7 @@ def test_outcome_index_exception_label():
     ],
 )
 def test_reduced_strategic_form(
-    game: gbt.Game, strategy_labels: list, np_arrays_of_rsf: list
+    game: gbt.Game, strategy_labels: list, np_arrays_of_rsf: typing.Union[list, None]
 ):
     """
     We test two things:

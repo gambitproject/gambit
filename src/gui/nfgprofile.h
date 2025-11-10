@@ -20,14 +20,14 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef NFGPROFILE_H
-#define NFGPROFILE_H
+#ifndef GAMBIT_GUI_NFGPROFILE_H
+#define GAMBIT_GUI_NFGPROFILE_H
 
 #include "wx/sheet/sheet.h"
 #include "gamedoc.h"
 
-class gbtMixedProfileList : public wxSheet, public gbtGameView {
-private:
+namespace Gambit::GUI {
+class MixedProfileList final : public wxSheet, public GameView {
   int m_showProbs, m_showPayoff;
 
   // Overriding wxSheet members for data access
@@ -50,7 +50,7 @@ private:
   void OnLabelClick(wxSheetEvent &);
   void OnCellClick(wxSheetEvent &);
 
-  // Overriding gbtGameView members
+  // Overriding GameView members
   void OnUpdate() override;
 
   // Which profile index corresponds to a sheet row
@@ -59,8 +59,9 @@ private:
   bool IsPayoffRow(int row) const { return (m_showProbs == 0 || row % 2 == 1); }
 
 public:
-  gbtMixedProfileList(wxWindow *p_parent, gbtGameDocument *p_doc);
-  ~gbtMixedProfileList() override;
+  MixedProfileList(wxWindow *p_parent, GameDocument *p_doc);
+  ~MixedProfileList() override;
 };
+} // namespace Gambit::GUI
 
-#endif // NFGPROFILE_H
+#endif // GAMBIT_GUI_NFGPROFILE_H

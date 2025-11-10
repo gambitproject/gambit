@@ -27,30 +27,31 @@
 
 #include "dlefglegend.h"
 
+namespace Gambit::GUI {
 //==========================================================================
-//                 class gbtLegendDialog: Implementation
+//                 class LegendDialog: Implementation
 //==========================================================================
 
-gbtLegendDialog::gbtLegendDialog(wxWindow *p_parent, const gbtStyle &p_options)
+LegendDialog::LegendDialog(wxWindow *p_parent, const TreeRenderConfig &p_options)
   : wxDialog(p_parent, wxID_ANY, _("Labels"), wxDefaultPosition)
 {
   auto *nodeGroup =
       new wxStaticBoxSizer(new wxStaticBox(this, wxID_ANY, _("Node labeling")), wxVERTICAL);
 
-  wxString nodeLabelList[] = {_("no label"),
-                              _("the node's label"),
-                              _("the player's name"),
-                              _("the information set's label"),
-                              _("the information set's number"),
-                              _("the realization probability"),
-                              _("the belief probability"),
-                              _("the payoff of reaching the node")};
+  const wxString nodeLabelList[] = {_("no label"),
+                                    _("the node's label"),
+                                    _("the player's name"),
+                                    _("the information set's label"),
+                                    _("the information set's number"),
+                                    _("the realization probability"),
+                                    _("the belief probability"),
+                                    _("the payoff of reaching the node")};
 
   auto *nodeAboveSizer = new wxBoxSizer(wxHORIZONTAL);
   nodeAboveSizer->Add(new wxStaticText(this, wxID_STATIC, _("Display")), 0, wxALL | wxALIGN_CENTER,
                       5);
   m_nodeAbove = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 8, nodeLabelList);
-  m_nodeAbove->SetSelection(p_options.NodeAboveLabel());
+  m_nodeAbove->SetSelection(p_options.GetNodeAboveLabel());
   nodeAboveSizer->Add(m_nodeAbove, 1, wxALL | wxALIGN_CENTER, 5);
   nodeAboveSizer->Add(new wxStaticText(this, wxID_STATIC, _("above each node")), 0,
                       wxALL | wxALIGN_CENTER, 5);
@@ -60,7 +61,7 @@ gbtLegendDialog::gbtLegendDialog(wxWindow *p_parent, const gbtStyle &p_options)
   nodeBelowSizer->Add(new wxStaticText(this, wxID_STATIC, _("Display")), 0, wxALL | wxALIGN_CENTER,
                       5);
   m_nodeBelow = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 8, nodeLabelList);
-  m_nodeBelow->SetSelection(p_options.NodeBelowLabel());
+  m_nodeBelow->SetSelection(p_options.GetNodeBelowLabel());
   nodeBelowSizer->Add(m_nodeBelow, 1, wxALL | wxALIGN_CENTER, 5);
   nodeBelowSizer->Add(new wxStaticText(this, wxID_STATIC, _("below each node")), 0,
                       wxALL | wxALIGN_CENTER, 5);
@@ -69,16 +70,16 @@ gbtLegendDialog::gbtLegendDialog(wxWindow *p_parent, const gbtStyle &p_options)
   auto *actionGroup =
       new wxStaticBoxSizer(new wxStaticBox(this, wxID_ANY, _("Action labeling")), wxVERTICAL);
 
-  wxString actionLabelList[] = {_("no label"), _("the name of the action"),
-                                _("the probability the action is played"),
-                                _("the value of the action")};
+  const wxString actionLabelList[] = {_("no label"), _("the name of the action"),
+                                      _("the probability the action is played"),
+                                      _("the value of the action")};
 
   auto *actionAboveSizer = new wxBoxSizer(wxHORIZONTAL);
   actionAboveSizer->Add(new wxStaticText(this, wxID_STATIC, _("Display")), 0,
                         wxALL | wxALIGN_CENTER, 5);
   m_actionAbove =
       new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 4, actionLabelList);
-  m_actionAbove->SetSelection(p_options.BranchAboveLabel());
+  m_actionAbove->SetSelection(p_options.GetBranchAboveLabel());
   actionAboveSizer->Add(m_actionAbove, 1, wxALL | wxALIGN_CENTER, 5);
   actionAboveSizer->Add(new wxStaticText(this, wxID_STATIC, _("above each action")), 0,
                         wxALL | wxALIGN_CENTER, 5);
@@ -89,7 +90,7 @@ gbtLegendDialog::gbtLegendDialog(wxWindow *p_parent, const gbtStyle &p_options)
                         wxALL | wxALIGN_CENTER, 5);
   m_actionBelow =
       new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 4, actionLabelList);
-  m_actionBelow->SetSelection(p_options.BranchBelowLabel());
+  m_actionBelow->SetSelection(p_options.GetBranchBelowLabel());
   actionBelowSizer->Add(m_actionBelow, 1, wxALL | wxALIGN_CENTER, 5);
   actionBelowSizer->Add(new wxStaticText(this, wxID_STATIC, _("below each action")), 0,
                         wxALL | wxALIGN_CENTER, 5);
@@ -109,6 +110,7 @@ gbtLegendDialog::gbtLegendDialog(wxWindow *p_parent, const gbtStyle &p_options)
   SetSizer(topSizer);
   topSizer->Fit(this);
   topSizer->SetSizeHints(this);
-  Layout();
+  wxTopLevelWindowBase::Layout();
   CenterOnParent();
 }
+} // namespace Gambit::GUI

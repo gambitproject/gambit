@@ -20,15 +20,16 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef DLINSERTMOVE_H
-#define DLINSERTMOVE_H
+#ifndef GAMBIT_GUI_DLINSERTMOVE_H
+#define GAMBIT_GUI_DLINSERTMOVE_H
 
 #include <wx/spinctrl.h>
 #include "gamedoc.h"
 
-class gbtInsertMoveDialog : public wxDialog {
-private:
-  gbtGameDocument *m_doc;
+namespace Gambit::GUI {
+
+class InsertMoveDialog final : public wxDialog {
+  GameDocument *m_doc;
 
   wxChoice *m_playerItem, *m_infosetItem;
   wxSpinCtrl *m_actions;
@@ -38,13 +39,15 @@ private:
 
 public:
   // Constructor
-  gbtInsertMoveDialog(wxWindow *, gbtGameDocument *);
+  InsertMoveDialog(wxWindow *, GameDocument *);
 
   // Data access (only valid if ShowModal() returns wxID_OK.
   // If GetInfoset() returns null, user selected "new infoset"
-  Gambit::GamePlayer GetPlayer() const;
-  Gambit::GameInfoset GetInfoset() const;
+  GamePlayer GetPlayer() const;
+  GameInfoset GetInfoset() const;
   int GetActions() const;
 };
 
-#endif // DLINSERTMOVE_H
+} // namespace Gambit::GUI
+
+#endif // GAMBIT_GUI_DLINSERTMOVE_H

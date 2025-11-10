@@ -1,7 +1,7 @@
-Contributing to the Gambit Project
-==================================
+Contributing to Gambit
+======================
 
-This section provides guidelines for contributing to the Gambit project, including how to report bugs, suggest features, and contribute code.
+This section provides guidelines for contributing to Gambit, including how to report bugs, suggest features, and contribute code.
 It includes information relevant to both core developers and external contributors.
 
 GitHub issues
@@ -29,6 +29,11 @@ Contributing code
 
 Gambit is an open-source project, and contributions are welcome from anyone.
 The project is hosted on GitHub, and contributions can be made via pull requests following the standard GitHub workflow.
+
+In the git repository, the branch ``master`` always points to the
+latest development version.  New development should in general always
+be based off this branch.  Branches labeled ``maintX_Y``, where ``X`` is the major version number and ``Y`` is the minor version number, point to the latest commit on a stable
+version.
 
 1. To get started contributing code in the `Gambit GitHub repo <https://github.com/gambitproject/gambit>`__, do one of the following:
 

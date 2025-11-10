@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pygambit"
-version = "16.3.0"
+version = "16.4.0"
 description = "The package for computation in game theory"
 readme = "src/README.rst"
 requires-python = ">=3.9"
@@ -54,6 +54,7 @@ select = [
     "SIM", # flake8-simplify
     "I", # isort
     "Q", # prefer double quotes
+    "W291", # trailing-whitespace
 ]
 ignore = []
 
@@ -75,11 +76,12 @@ max-line-length = 99
 [tool.pytest.ini_options]
 addopts = "--strict-markers"
 markers = [
-    "nash_enummixed_strategy: tests of enummixed_solve in strategies",
-    "nash_lcp_strategy: tests of lcp_solve in strategies",
-    "nash_lcp_behavior: tests of lcp_solve in behaviors",
-    "nash_lp_strategy: tests of lp_solve in strategies",
-    "nash_lp_behavior: tests of lp_solve in behaviors",
+    "nash_enummixed_strategy: tests of enummixed_solve in mixed strategies",
+    "nash_enumpoly_behavior: tests of enumpoly_solve in behavior strategies",
+    "nash_lcp_strategy: tests of lcp_solve in mixed strategies",
+    "nash_lcp_behavior: tests of lcp_solve in behavior strategies",
+    "nash_lp_strategy: tests of lp_solve in mixed strategies",
+    "nash_lp_behavior: tests of lp_solve in behavior strategies",
     "nash: all tests of Nash equilibrium solvers",
     "slow: all time-consuming tests",
 ]

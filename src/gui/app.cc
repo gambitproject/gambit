@@ -34,9 +34,9 @@
 #include "app.h"
 #include "gameframe.h"
 
-gbtApplication::gbtApplication() : m_fileHistory(10) {}
+namespace Gambit::GUI {
 
-bool gbtApplication::OnInit()
+bool Application::OnInit()
 {
 #include "bitmaps/gambitbig.xpm"
   wxConfigBase::Set(new wxConfig(_T("Gambit"), _T("Gambit")));
@@ -55,7 +55,7 @@ bool gbtApplication::OnInit()
 
   // Process command line arguments, if any.
   for (int i = 1; i < wxApp::argc; i++) {
-    const gbtAppLoadResult result = LoadFile(wxApp::argv[i]);
+    const AppLoadResult result = LoadFile(wxApp::argv[i]);
     if (result == GBT_APP_OPEN_FAILED) {
       wxMessageDialog dialog(
           nullptr, wxT("Gambit could not open file '") + wxApp::argv[i] + wxT("' for reading."),
@@ -74,13 +74,13 @@ bool gbtApplication::OnInit()
     // If we don't have any game files -- whether because none were
     // specified on the command line, or because those specified couldn't
     // be read -- create a default document.
-    const Gambit::Game efg = Gambit::NewTree();
+    const Game efg = NewTree();
     efg->NewPlayer()->SetLabel("Player 1");
     efg->NewPlayer()->SetLabel("Player 2");
     efg->SetTitle("Untitled Extensive Game");
 
-    auto *game = new gbtGameDocument(efg);
-    (void)new gbtGameFrame(nullptr, game);
+    auto *game = new GameDocument(efg);
+    (void)new GameFrame(nullptr, game);
   }
 
   // Set up the help system.
@@ -89,19 +89,19 @@ bool gbtApplication::OnInit()
   return true;
 }
 
-gbtAppLoadResult gbtApplication::LoadFile(const wxString &p_filename)
+AppLoadResult Application::LoadFile(const wxString &p_filename)
 {
   std::ifstream infile((const char *)p_filename.mb_str());
   if (!infile.good()) {
     return GBT_APP_OPEN_FAILED;
   }
 
-  auto *doc = new gbtGameDocument(Gambit::NewTree());
+  auto *doc = new GameDocument(NewTree());
   if (doc->LoadDocument(p_filename)) {
     doc->SetFilename(p_filename);
     m_fileHistory.AddFileToHistory(p_filename);
     m_fileHistory.Save(*wxConfigBase::Get());
-    (void)new gbtGameFrame(nullptr, doc);
+    (void)new GameFrame(nullptr, doc);
     return GBT_APP_FILE_OK;
   }
   else {
@@ -109,30 +109,32 @@ gbtAppLoadResult gbtApplication::LoadFile(const wxString &p_filename)
   }
 
   try {
-    const Gambit::Game nfg = Gambit::ReadGame(infile);
+    const Game nfg = ReadGame(infile);
 
     m_fileHistory.AddFileToHistory(p_filename);
     m_fileHistory.Save(*wxConfigBase::Get());
-    doc = new gbtGameDocument(nfg);
+    doc = new GameDocument(nfg);
     doc->SetFilename(wxT(""));
-    (void)new gbtGameFrame(nullptr, doc);
+    (void)new GameFrame(nullptr, doc);
     return GBT_APP_FILE_OK;
   }
-  catch (Gambit::InvalidFileException &) {
+  catch (InvalidFileException &) {
     return GBT_APP_PARSE_FAILED;
   }
 }
 
-void gbtApplication::SetCurrentDir(const wxString &p_dir)
+void Application::SetCurrentDir(const wxString &p_dir)
 {
   m_currentDir = p_dir;
   wxConfigBase::Get()->Write(_T("/General/CurrentDirectory"), p_dir);
 }
 
-bool gbtApplication::AreDocumentsModified() const
+bool Application::AreDocumentsModified() const
 {
   return std::any_of(m_documents.begin(), m_documents.end(),
-                     std::mem_fn(&gbtGameDocument::IsModified));
+                     std::mem_fn(&GameDocument::IsModified));
 }
 
-IMPLEMENT_APP(gbtApplication)
+} // namespace Gambit::GUI
+
+IMPLEMENT_APP(Gambit::GUI::Application)

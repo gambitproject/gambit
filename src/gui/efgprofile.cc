@@ -28,12 +28,13 @@
 #include "efgprofile.h"
 #include "renratio.h" // for rational number rendering
 
+namespace Gambit::GUI {
 //-------------------------------------------------------------------------
-//              class gbtBehavProfileList: Member functions
+//              class BehaviorProfileList: Member functions
 //-------------------------------------------------------------------------
 
-gbtBehavProfileList::gbtBehavProfileList(wxWindow *p_parent, gbtGameDocument *p_doc)
-  : wxSheet(p_parent, wxID_ANY), gbtGameView(p_doc)
+BehaviorProfileList::BehaviorProfileList(wxWindow *p_parent, GameDocument *p_doc)
+  : wxSheet(p_parent, wxID_ANY), GameView(p_doc)
 {
   CreateGrid(0, 0);
   SetRowLabelWidth(40);
@@ -41,16 +42,18 @@ gbtBehavProfileList::gbtBehavProfileList(wxWindow *p_parent, gbtGameDocument *p_
 
   Connect(GetId(), wxEVT_SHEET_LABEL_LEFT_DOWN,
           (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
-              wxSheetEventFunction, wxSheetEventFunction(&gbtBehavProfileList::OnLabelClick))));
+              wxSheetEventFunction,
+              static_cast<wxSheetEventFunction>(&BehaviorProfileList::OnLabelClick))));
 
   Connect(GetId(), wxEVT_SHEET_CELL_LEFT_DOWN,
           (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
-              wxSheetEventFunction, wxSheetEventFunction(&gbtBehavProfileList::OnCellClick))));
+              wxSheetEventFunction,
+              static_cast<wxSheetEventFunction>(&BehaviorProfileList::OnCellClick))));
 }
 
-gbtBehavProfileList::~gbtBehavProfileList() = default;
+BehaviorProfileList::~BehaviorProfileList() = default;
 
-void gbtBehavProfileList::OnLabelClick(wxSheetEvent &p_event)
+void BehaviorProfileList::OnLabelClick(wxSheetEvent &p_event)
 {
   if (p_event.GetCol() == -1) {
     m_doc->SetCurrentProfile(p_event.GetRow() + 1);
@@ -58,27 +61,27 @@ void gbtBehavProfileList::OnLabelClick(wxSheetEvent &p_event)
   else {
     // Clicking on an action column sets the selected node to the first
     // member of that information set.
-    const Gambit::GameAction action = m_doc->GetAction(p_event.GetCol() + 1);
+    const GameAction action = m_doc->GetAction(p_event.GetCol() + 1);
     m_doc->SetSelectNode(action->GetInfoset()->GetMember(1));
   }
 }
 
-void gbtBehavProfileList::OnCellClick(wxSheetEvent &p_event)
+void BehaviorProfileList::OnCellClick(wxSheetEvent &p_event)
 {
   m_doc->SetCurrentProfile(p_event.GetRow() + 1);
 }
 
-wxString gbtBehavProfileList::GetCellValue(const wxSheetCoords &p_coords)
+wxString BehaviorProfileList::GetCellValue(const wxSheetCoords &p_coords)
 {
   if (IsRowLabelCell(p_coords)) {
     return wxString::Format(wxT("%d"), p_coords.GetRow() + 1);
   }
-  else if (IsColLabelCell(p_coords)) {
-    const Gambit::GameAction action = m_doc->GetAction(p_coords.GetCol() + 1);
+  if (IsColLabelCell(p_coords)) {
+    const GameAction action = m_doc->GetAction(p_coords.GetCol() + 1);
     return (wxString::Format(wxT("%d: "), action->GetInfoset()->GetNumber()) +
             wxString(action->GetLabel().c_str(), *wxConvCurrent));
   }
-  else if (IsCornerLabelCell(p_coords)) {
+  if (IsCornerLabelCell(p_coords)) {
     return wxT("#");
   }
 
@@ -86,13 +89,13 @@ wxString gbtBehavProfileList::GetCellValue(const wxSheetCoords &p_coords)
           *wxConvCurrent};
 }
 
-static wxColour GetPlayerColor(gbtGameDocument *p_doc, int p_index)
+static wxColour GetPlayerColor(const GameDocument *p_doc, int p_index)
 {
-  const Gambit::GameAction action = p_doc->GetAction(p_index + 1);
-  return p_doc->GetStyle().GetPlayerColor(action->GetInfoset()->GetPlayer()->GetNumber());
+  const GameAction action = p_doc->GetAction(p_index + 1);
+  return p_doc->GetStyle().GetPlayerColor(action->GetInfoset()->GetPlayer());
 }
 
-wxSheetCellAttr gbtBehavProfileList::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
+wxSheetCellAttr BehaviorProfileList::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
 {
   const int currentProfile = m_doc->GetCurrentProfile();
 
@@ -109,7 +112,7 @@ wxSheetCellAttr gbtBehavProfileList::GetAttr(const wxSheetCoords &p_coords, wxSh
     attr.SetReadOnly(true);
     return attr;
   }
-  else if (IsColLabelCell(p_coords)) {
+  if (IsColLabelCell(p_coords)) {
     wxSheetCellAttr attr(GetSheetRefData()->m_defaultColLabelAttr);
     attr.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
     attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
@@ -120,7 +123,7 @@ wxSheetCellAttr gbtBehavProfileList::GetAttr(const wxSheetCoords &p_coords, wxSh
     }
     return attr;
   }
-  else if (IsCornerLabelCell(p_coords)) {
+  if (IsCornerLabelCell(p_coords)) {
     return GetSheetRefData()->m_defaultCornerLabelAttr;
   }
 
@@ -133,12 +136,11 @@ wxSheetCellAttr gbtBehavProfileList::GetAttr(const wxSheetCoords &p_coords, wxSh
   }
   attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
   attr.SetOrientation(wxHORIZONTAL);
-  attr.SetRenderer(wxSheetCellRenderer(new gbtRationalRendererRefData()));
+  attr.SetRenderer(wxSheetCellRenderer(new RationalRendererRefData()));
 
   try {
-    const Gambit::GameAction action = m_doc->GetAction(p_coords.GetCol() + 1);
-    attr.SetForegroundColour(
-        m_doc->GetStyle().GetPlayerColor(action->GetInfoset()->GetPlayer()->GetNumber()));
+    const GameAction action = m_doc->GetAction(p_coords.GetCol() + 1);
+    attr.SetForegroundColour(m_doc->GetStyle().GetPlayerColor(action->GetInfoset()->GetPlayer()));
     if (action->GetInfoset()->GetNumber() % 2 == 0) {
       attr.SetBackgroundColour(wxColour(250, 250, 250));
     }
@@ -154,14 +156,14 @@ wxSheetCellAttr gbtBehavProfileList::GetAttr(const wxSheetCoords &p_coords, wxSh
   return attr;
 }
 
-void gbtBehavProfileList::OnUpdate()
+void BehaviorProfileList::OnUpdate()
 {
   if (!m_doc->GetGame() || m_doc->NumProfileLists() == 0) {
     DeleteRows(0, GetNumberRows());
     return;
   }
 
-  const gbtAnalysisOutput &profiles = m_doc->GetProfiles();
+  const AnalysisOutput &profiles = m_doc->GetProfiles();
   const int profileLength = m_doc->GetGame()->BehavProfileLength();
 
   BeginBatch();
@@ -184,3 +186,4 @@ void gbtBehavProfileList::OnUpdate()
 
   EndBatch();
 }
+} // namespace Gambit::GUI

@@ -29,10 +29,7 @@
 #include "dlabout.h"
 #include "bitmaps/gambitbig.xpm"
 
-#include "wx/sheet/sheetdef.h" // Always include sheetdef.h first
-#include "wx/sheet/sheetatr.h" // might as well include everything
-#include "wx/grid.h"
-
+namespace Gambit::GUI {
 static wxStaticText *FormattedText(wxWindow *p_parent, const wxString &p_label,
                                    const wxFont &p_font)
 {
@@ -41,10 +38,10 @@ static wxStaticText *FormattedText(wxWindow *p_parent, const wxString &p_label,
   return t;
 }
 
-gbtAboutDialog::gbtAboutDialog(wxWindow *p_parent)
+AboutDialog::AboutDialog(wxWindow *p_parent)
   : wxDialog(p_parent, wxID_ANY, _T("About Gambit..."), wxDefaultPosition, wxDefaultSize)
 {
-  SetFont(wxFont(12, wxFONTFAMILY_ROMAN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
+  wxWindow::SetFont(wxFont(12, wxFONTFAMILY_ROMAN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
   topSizer->Add(new wxStaticBitmap(this, wxID_STATIC, wxBitmap(gambitbig_xpm)), 0,
@@ -65,7 +62,7 @@ gbtAboutDialog::gbtAboutDialog(wxWindow *p_parent)
                     wxFont(12, wxFONTFAMILY_ROMAN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL)),
       0, wxTOP | wxALIGN_CENTER, 20);
   topSizer->Add(
-      FormattedText(this, _T("http://www.wxwidgets.org"),
+      FormattedText(this, _T("https://www.wxwidgets.org"),
                     wxFont(12, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL)),
       0, wxALIGN_CENTER, 5);
 
@@ -103,6 +100,7 @@ gbtAboutDialog::gbtAboutDialog(wxWindow *p_parent)
   topSizer->Fit(this);
   topSizer->SetSizeHints(this);
 
-  Layout();
+  wxTopLevelWindowBase::Layout();
   CenterOnParent();
 }
+} // namespace Gambit::GUI

@@ -20,22 +20,21 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef EDITTEXT_H
-#define EDITTEXT_H
+#ifndef GAMBIT_GUI_EDITTEXT_H
+#define GAMBIT_GUI_EDITTEXT_H
 
+namespace Gambit::GUI {
 //!
-//! A gbtStaticTextButton is a wxStaticText object that generates a
+//! A StaticTextButton is a wxStaticText object that generates a
 //! button click event when it is left-clicked
 //!
-class gbtStaticTextButton : public wxStaticText {
-private:
+class StaticTextButton final : public wxStaticText {
   // Event handlers
   void OnLeftClick(wxMouseEvent &);
 
 public:
-  gbtStaticTextButton(wxWindow *p_parent, wxWindowID p_id, const wxString &,
-                      const wxPoint & = wxDefaultPosition, const wxSize & = wxDefaultSize,
-                      long = 0);
+  StaticTextButton(wxWindow *p_parent, wxWindowID p_id, const wxString &,
+                   const wxPoint & = wxDefaultPosition, const wxSize & = wxDefaultSize, long = 0);
 
   DECLARE_EVENT_TABLE()
 };
@@ -44,9 +43,8 @@ public:
 //! This control looks like a wxStaticText, but when clicked it shows
 //! a wxTextCtrl to edit the value.
 //!
-class gbtEditableText : public wxPanel {
-private:
-  gbtStaticTextButton *m_staticText;
+class EditableText : public wxPanel {
+  StaticTextButton *m_staticText;
   wxTextCtrl *m_textCtrl;
 
   /// @name Event handlers
@@ -58,8 +56,8 @@ private:
   //@}
 
 public:
-  gbtEditableText(wxWindow *p_parent, int p_id, const wxString &p_value, const wxPoint &p_position,
-                  const wxSize &p_size);
+  EditableText(wxWindow *p_parent, int p_id, const wxString &p_value, const wxPoint &p_position,
+               const wxSize &p_size);
 
   bool IsEditing() const { return GetSizer()->IsShown(m_textCtrl); }
   void BeginEdit();
@@ -75,5 +73,6 @@ public:
   bool SetFont(const wxFont &) override;
   //@}
 };
+} // namespace Gambit::GUI
 
-#endif // EDITTEXT_H
+#endif // GAMBIT_GUI_EDITTEXT_H

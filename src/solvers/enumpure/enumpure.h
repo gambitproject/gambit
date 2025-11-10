@@ -44,7 +44,7 @@ inline bool IsNash(const PureStrategyProfile &p_profile)
 /// Enumerate pure-strategy Nash equilibria of a game.  By definition,
 /// pure-strategy equilibrium uses the strategic representation of a game.
 ///
-inline List<MixedStrategyProfile<Rational>> EnumPureStrategySolve(
+inline std::list<MixedStrategyProfile<Rational>> EnumPureStrategySolve(
     const Game &p_game,
     StrategyCallbackType<Rational> p_onEquilibrium = NullStrategyCallback<Rational>)
 {
@@ -52,7 +52,7 @@ inline List<MixedStrategyProfile<Rational>> EnumPureStrategySolve(
     throw UndefinedException(
         "Computing equilibria of games with imperfect recall is not supported.");
   }
-  List<MixedStrategyProfile<Rational>> solutions;
+  std::list<MixedStrategyProfile<Rational>> solutions;
   for (auto citer : StrategyContingencies(p_game)) {
     if (IsNash(citer)) {
       solutions.push_back(citer->ToMixedStrategyProfile());
@@ -84,11 +84,11 @@ inline bool IsAgentNash(const PureBehaviorProfile &p_profile)
 /// set (rather than possible deviations by the same player at multiple
 /// information sets.
 ///
-inline List<MixedBehaviorProfile<Rational>>
+inline std::list<MixedBehaviorProfile<Rational>>
 EnumPureAgentSolve(const Game &p_game,
                    BehaviorCallbackType<Rational> p_onEquilibrium = NullBehaviorCallback<Rational>)
 {
-  List<MixedBehaviorProfile<Rational>> solutions;
+  std::list<MixedBehaviorProfile<Rational>> solutions;
   const BehaviorSupportProfile support(p_game);
   for (auto citer : BehaviorContingencies(BehaviorSupportProfile(p_game))) {
     if (IsAgentNash(citer)) {

@@ -25,15 +25,15 @@
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif // WX_PRECOMP
-#include <wx/config.h>
 
 #include "style.h"
 
+namespace Gambit::GUI {
 //===========================================================================
-//                     class gbtStyle: Implementation
+//                 class TreeRenderConfig: Implementation
 //===========================================================================
 
-gbtStyle::gbtStyle()
+TreeRenderConfig::TreeRenderConfig()
   : m_font(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD))
 {
   SetDefaults();
@@ -48,16 +48,29 @@ static wxColour s_defaultColors[8] = {
 //! If this is the first request for that player's color, create the
 //! default one.
 //!
-const wxColour &gbtStyle::GetPlayerColor(int pl) const
+const wxColour &TreeRenderConfig::GetPlayerColor(const int pl) const
 {
   while (pl > static_cast<int>(m_playerColors.size())) {
     m_playerColors.push_back(s_defaultColors[m_playerColors.size() % 8]);
   }
-
   return m_playerColors[pl];
 }
 
-void gbtStyle::SetDefaults()
+const wxColour &TreeRenderConfig::GetPlayerColor(const GamePlayer &p_player) const
+{
+  if (!p_player) {
+    return m_terminalColor;
+  }
+  if (p_player->IsChance()) {
+    return m_chanceColor;
+  }
+  while (p_player->GetNumber() > static_cast<int>(m_playerColors.size())) {
+    m_playerColors.push_back(s_defaultColors[m_playerColors.size() % 8]);
+  }
+  return m_playerColors[p_player->GetNumber()];
+}
+
+void TreeRenderConfig::SetDefaults()
 {
   m_nodeSize = 10;
   m_terminalSpacing = 50;
@@ -68,8 +81,7 @@ void gbtStyle::SetDefaults()
   m_branchLength = 60;
   m_tineLength = 20;
   m_branchStyle = GBT_BRANCH_STYLE_FORKTINE;
-  m_branchLabels = GBT_BRANCH_LABEL_HORIZONTAL;
-  m_infosetConnect = GBT_INFOSET_CONNECT_ALL;
+  m_branchLabels = GBT_BRANCH_LABEL_ORIENT_HORIZONTAL;
   m_infosetJoin = GBT_INFOSET_JOIN_CIRCLES;
   m_nodeAboveLabel = GBT_NODE_LABEL_LABEL;
   m_nodeBelowLabel = GBT_NODE_LABEL_ISETID;
@@ -86,7 +98,7 @@ void gbtStyle::SetDefaults()
   }
 }
 
-std::string gbtStyle::GetColorXML() const
+std::string TreeRenderConfig::GetColorXML() const
 {
   std::ostringstream s;
 
@@ -116,7 +128,7 @@ std::string gbtStyle::GetColorXML() const
   return s.str();
 }
 
-void gbtStyle::SetColorXML(TiXmlNode *p_colors)
+void TreeRenderConfig::SetColorXML(TiXmlNode *p_colors)
 {
   for (TiXmlNode *node = p_colors->FirstChild(); node; node = node->NextSiblingElement()) {
     int id = -2;
@@ -140,7 +152,7 @@ void gbtStyle::SetColorXML(TiXmlNode *p_colors)
   }
 }
 
-std::string gbtStyle::GetFontXML() const
+std::string TreeRenderConfig::GetFontXML() const
 {
   std::ostringstream s;
 
@@ -154,7 +166,7 @@ std::string gbtStyle::GetFontXML() const
   return s.str();
 }
 
-void gbtStyle::SetFontXML(TiXmlNode *p_font)
+void TreeRenderConfig::SetFontXML(TiXmlNode *p_font)
 {
   int size, family, style, weight;
   p_font->ToElement()->QueryIntAttribute("size", &size);
@@ -168,7 +180,7 @@ void gbtStyle::SetFontXML(TiXmlNode *p_font)
                  wxString(p_font->ToElement()->Attribute("face"), *wxConvCurrent)));
 }
 
-std::string gbtStyle::GetLayoutXML() const
+std::string TreeRenderConfig::GetLayoutXML() const
 {
   std::ostringstream s;
   s << "<autolayout>\n";
@@ -185,8 +197,7 @@ std::string gbtStyle::GetLayoutXML() const
   const std::string branchLabels[] = {"horizontal", "rotated"};
   s << "labels=\"" << branchLabels[m_branchLabels] << "\"/>\n";
 
-  const std::string infosetConnect[] = {"none", "same", "all"};
-  s << "<infosets connect=\"" << infosetConnect[m_infosetConnect] << "\" ";
+  s << "<infosets ";
   const std::string infosetStyle[] = {"lines", "circles"};
   s << "style=\"" << infosetStyle[m_infosetJoin] << "\"/>\n";
 
@@ -194,7 +205,7 @@ std::string gbtStyle::GetLayoutXML() const
   return s.str();
 }
 
-void gbtStyle::SetLayoutXML(TiXmlNode *p_node)
+void TreeRenderConfig::SetLayoutXML(TiXmlNode *p_node)
 {
   TiXmlNode *nodes = p_node->FirstChild("nodes");
   if (nodes) {
@@ -281,32 +292,16 @@ void gbtStyle::SetLayoutXML(TiXmlNode *p_node)
     if (labels) {
       const std::string s = labels;
       if (s == "horizontal") {
-        m_branchLabels = GBT_BRANCH_LABEL_HORIZONTAL;
+        m_branchLabels = GBT_BRANCH_LABEL_ORIENT_HORIZONTAL;
       }
       else if (s == "rotated") {
-        m_branchLabels = GBT_BRANCH_LABEL_ROTATED;
+        m_branchLabels = GBT_BRANCH_LABEL_ORIENT_ROTATED;
       }
     }
   }
 
-  TiXmlNode *infosets = p_node->FirstChild("infosets");
-  if (infosets) {
-    const char *connect = infosets->ToElement()->Attribute("connect");
-    if (connect) {
-      const std::string s = connect;
-      if (s == "none") {
-        m_infosetConnect = GBT_INFOSET_CONNECT_NONE;
-      }
-      else if (s == "same") {
-        m_infosetConnect = GBT_INFOSET_CONNECT_SAMELEVEL;
-      }
-      else if (s == "all") {
-        m_infosetConnect = GBT_INFOSET_CONNECT_ALL;
-      }
-    }
-
-    const char *style = infosets->ToElement()->Attribute("style");
-    if (style) {
+  if (TiXmlNode *infosets = p_node->FirstChild("infosets")) {
+    if (const char *style = infosets->ToElement()->Attribute("style")) {
       const std::string s = style;
       if (s == "lines") {
         m_infosetJoin = GBT_INFOSET_JOIN_LINES;
@@ -318,7 +313,7 @@ void gbtStyle::SetLayoutXML(TiXmlNode *p_node)
   }
 }
 
-std::string gbtStyle::GetLabelXML() const
+std::string TreeRenderConfig::GetLabelXML() const
 {
   std::ostringstream s;
   s << "<labels ";
@@ -335,7 +330,7 @@ std::string gbtStyle::GetLabelXML() const
   return s.str();
 }
 
-void gbtStyle::SetLabelXML(TiXmlNode *p_node)
+void TreeRenderConfig::SetLabelXML(TiXmlNode *p_node)
 {
   const char *abovenode = p_node->ToElement()->Attribute("abovenode");
   if (abovenode) {
@@ -429,3 +424,4 @@ void gbtStyle::SetLabelXML(TiXmlNode *p_node)
     }
   }
 }
+} // namespace Gambit::GUI

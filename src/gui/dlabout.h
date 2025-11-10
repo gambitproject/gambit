@@ -20,13 +20,15 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef DLABOUT_H
-#define DLABOUT_H
+#ifndef GAMBIT_GUI_DLABOUT_H
+#define GAMBIT_GUI_DLABOUT_H
 
-class gbtAboutDialog : public wxDialog {
+namespace Gambit::GUI {
+class AboutDialog final : public wxDialog {
 public:
-  explicit gbtAboutDialog(wxWindow *p_parent);
-  ~gbtAboutDialog() override = default;
+  explicit AboutDialog(wxWindow *p_parent);
+  ~AboutDialog() override = default;
 };
+} // namespace Gambit::GUI
 
-#endif // DLABOUT_H
+#endif // GAMBIT_GUI_DLABOUT_H

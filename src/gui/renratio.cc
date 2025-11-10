@@ -20,23 +20,24 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include <wx/wxprec.h>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif // WX_PRECOMP
 
 #include "renratio.h"
+#include "valnumber.h"
 
 #include "wx/sheet/sheet.h" // the wxSheet widget
 
+namespace Gambit::GUI {
 //----------------------------------------------------------------------------
-//                   class gbtRationalRendererRefData
+//                   class RationalRendererRefData
 //----------------------------------------------------------------------------
 
-IMPLEMENT_DYNAMIC_CLASS(gbtRationalRendererRefData, wxSheetCellRendererRefData)
+IMPLEMENT_DYNAMIC_CLASS(RationalRendererRefData, wxSheetCellRendererRefData)
 
-void gbtRationalRendererRefData::SetTextColoursAndFont(wxSheet &grid, const wxSheetCellAttr &attr,
-                                                       wxDC &dc, bool isSelected)
+void RationalRendererRefData::SetTextColoursAndFont(wxSheet &grid, const wxSheetCellAttr &attr,
+                                                    wxDC &dc, bool isSelected)
 {
   dc.SetBackgroundMode(wxTRANSPARENT);
 
@@ -84,8 +85,8 @@ static wxSize GetFractionExtent(wxDC &p_dc, const wxString &p_value)
   return {width + 4, numHeight + denHeight};
 }
 
-wxSize gbtRationalRendererRefData::DoGetBestSize(wxSheet &grid, const wxSheetCellAttr &attr,
-                                                 wxDC &dc, const wxString &text)
+wxSize RationalRendererRefData::DoGetBestSize(wxSheet &grid, const wxSheetCellAttr &attr, wxDC &dc,
+                                              const wxString &text)
 {
   if (text.Find('/') != -1) {
     return GetFractionExtent(dc, text);
@@ -101,15 +102,15 @@ wxSize gbtRationalRendererRefData::DoGetBestSize(wxSheet &grid, const wxSheetCel
   return {static_cast<int>(w), static_cast<int>(h)};
 }
 
-wxSize gbtRationalRendererRefData::GetBestSize(wxSheet &grid, const wxSheetCellAttr &attr,
-                                               wxDC &dc, const wxSheetCoords &coords)
+wxSize RationalRendererRefData::GetBestSize(wxSheet &grid, const wxSheetCellAttr &attr, wxDC &dc,
+                                            const wxSheetCoords &coords)
 {
   return DoGetBestSize(grid, attr, dc, grid.GetCellValue(coords));
 }
 
-void gbtRationalRendererRefData::Draw(wxSheet &grid, const wxSheetCellAttr &attr, wxDC &dc,
-                                      const wxRect &rectCell, const wxSheetCoords &coords,
-                                      bool isSelected)
+void RationalRendererRefData::Draw(wxSheet &grid, const wxSheetCellAttr &attr, wxDC &dc,
+                                   const wxRect &rectCell, const wxSheetCoords &coords,
+                                   bool isSelected)
 {
   wxRect rect = rectCell;
   rect.Inflate(-1);
@@ -151,9 +152,9 @@ static void DrawFraction(wxDC &p_dc, wxRect p_rect, const wxString &p_value)
                 point.x + (p_rect.width - width) / 2 + width + 2, point.y);
 }
 
-void gbtRationalRendererRefData::DoDraw(wxSheet &grid, const wxSheetCellAttr &attr, wxDC &dc,
-                                        const wxRect &rectCell, const wxSheetCoords &coords,
-                                        bool isSelected)
+void RationalRendererRefData::DoDraw(wxSheet &grid, const wxSheetCellAttr &attr, wxDC &dc,
+                                     const wxRect &rectCell, const wxSheetCoords &coords,
+                                     bool isSelected)
 {
   wxRect rect = rectCell;
   rect.Inflate(-1);
@@ -182,30 +183,28 @@ void gbtRationalRendererRefData::DoDraw(wxSheet &grid, const wxSheetCellAttr &at
 }
 
 //----------------------------------------------------------------------------
-//                   class gbtRationalEditorRefData
+//                   class RationalEditorRefData
 //----------------------------------------------------------------------------
 
-IMPLEMENT_DYNAMIC_CLASS(gbtRationalEditorRefData, wxSheetCellTextEditorRefData)
+IMPLEMENT_DYNAMIC_CLASS(RationalEditorRefData, wxSheetCellTextEditorRefData)
 
-#include "valnumber.h"
-
-void gbtRationalEditorRefData::CreateEditor(wxWindow *parent, wxWindowID id,
-                                            wxEvtHandler *evtHandler, wxSheet *sheet)
+void RationalEditorRefData::CreateEditor(wxWindow *parent, wxWindowID id, wxEvtHandler *evtHandler,
+                                         wxSheet *sheet)
 {
   wxSheetCellTextEditorRefData::CreateEditor(parent, id, evtHandler, sheet);
-  GetTextCtrl()->SetValidator(gbtNumberValidator(nullptr));
+  GetTextCtrl()->SetValidator(NumberValidator(nullptr));
 }
 
-bool gbtRationalEditorRefData::Copy(const gbtRationalEditorRefData &p_other)
+bool RationalEditorRefData::Copy(const RationalEditorRefData &p_other)
 {
   return wxSheetCellTextEditorRefData::Copy(p_other);
 }
 
-void gbtRationalEditorRefData::StartingKey(wxKeyEvent &event)
+void RationalEditorRefData::StartingKey(wxKeyEvent &event)
 {
   const int keycode = event.GetKeyCode();
   char tmpbuf[2];
-  tmpbuf[0] = (char)keycode;
+  tmpbuf[0] = static_cast<char>(keycode);
   tmpbuf[1] = '\0';
   const wxString strbuf(tmpbuf, *wxConvCurrent);
 #if wxUSE_INTL
@@ -222,12 +221,12 @@ void gbtRationalEditorRefData::StartingKey(wxKeyEvent &event)
   event.Skip();
 }
 
-bool gbtRationalEditorRefData::IsAcceptedKey(wxKeyEvent &p_event)
+bool RationalEditorRefData::IsAcceptedKey(wxKeyEvent &p_event)
 {
   if (wxSheetCellEditorRefData::IsAcceptedKey(p_event)) {
     const int keycode = p_event.GetKeyCode();
     char tmpbuf[2];
-    tmpbuf[0] = (char)keycode;
+    tmpbuf[0] = static_cast<char>(keycode);
     tmpbuf[1] = '\0';
     const wxString strbuf(tmpbuf, *wxConvCurrent);
 #if wxUSE_INTL
@@ -244,3 +243,4 @@ bool gbtRationalEditorRefData::IsAcceptedKey(wxKeyEvent &p_event)
 
   return false;
 }
+} // namespace Gambit::GUI

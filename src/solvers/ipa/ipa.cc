@@ -29,8 +29,8 @@ using namespace Gambit::gametracer;
 
 namespace Gambit::Nash {
 
-List<MixedStrategyProfile<double>> IPAStrategySolve(const Game &p_game,
-                                                    StrategyCallbackType<double> p_callback)
+std::list<MixedStrategyProfile<double>> IPAStrategySolve(const Game &p_game,
+                                                         StrategyCallbackType<double> p_callback)
 {
   MixedStrategyProfile<double> pert = p_game->NewMixedStrategyProfile(0.0);
   for (const auto &player : p_game->GetPlayers()) {
@@ -44,8 +44,9 @@ List<MixedStrategyProfile<double>> IPAStrategySolve(const Game &p_game,
   return IPAStrategySolve(pert, p_callback);
 }
 
-List<MixedStrategyProfile<double>> IPAStrategySolve(const MixedStrategyProfile<double> &p_pert,
-                                                    StrategyCallbackType<double> p_callback)
+std::list<MixedStrategyProfile<double>>
+IPAStrategySolve(const MixedStrategyProfile<double> &p_pert,
+                 StrategyCallbackType<double> p_callback)
 {
   if (!p_pert.GetGame()->IsPerfectRecall()) {
     throw UndefinedException(
@@ -64,7 +65,7 @@ List<MixedStrategyProfile<double>> IPAStrategySolve(const MixedStrategyProfile<d
     }
   }
 
-  List<MixedStrategyProfile<double>> solutions;
+  std::list<MixedStrategyProfile<double>> solutions;
   solutions.push_back(ToProfile(p_pert.GetGame(), ans));
   p_callback(solutions.back(), "NE");
   return solutions;

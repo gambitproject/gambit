@@ -20,23 +20,23 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef DLEDITMOVE_H
-#define DLEDITMOVE_H
+#ifndef GAMBIT_GUI_DLEDITMOVE_H
+#define GAMBIT_GUI_DLEDITMOVE_H
 
-class gbtActionSheet;
+namespace Gambit::GUI {
+class ActionSheet;
 
-class gbtEditMoveDialog : public wxDialog {
-private:
-  Gambit::GameInfoset m_infoset;
+class EditMoveDialog final : public wxDialog {
+  GameInfoset m_infoset;
   wxChoice *m_player;
   wxTextCtrl *m_infosetName;
-  gbtActionSheet *m_actionSheet;
+  ActionSheet *m_actionSheet;
 
   void OnOK(wxCommandEvent &);
 
 public:
   // Lifecycle
-  gbtEditMoveDialog(wxWindow *p_parent, const Gambit::GameInfoset &p_infoset);
+  EditMoveDialog(wxWindow *p_parent, const GameInfoset &p_infoset);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
   wxString GetInfosetName() const { return m_infosetName->GetValue(); }
@@ -44,9 +44,10 @@ public:
 
   int NumActions() const;
   wxString GetActionName(int p_act) const;
-  Gambit::Array<Gambit::Number> GetActionProbs() const;
+  Array<Number> GetActionProbs() const;
 
   wxDECLARE_EVENT_TABLE();
 };
+} // namespace Gambit::GUI
 
-#endif // DLEDITMOVE_H
+#endif // GAMBIT_GUI_DLEDITMOVE_H

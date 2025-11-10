@@ -1,8 +1,8 @@
 """A utility module to create/load games for the test suite."""
 
+import itertools
 import pathlib
 from abc import ABC, abstractmethod
-from itertools import product
 
 import numpy as np
 
@@ -16,6 +16,26 @@ def read_from_file(fn: str) -> gbt.Game:
         return gbt.read_nfg(pathlib.Path("tests/test_games") / fn)
     else:
         raise ValueError(f"Unknown file extension in {fn}")
+
+
+def create_efg_corresponding_to_bimatrix_game(
+    A: np.ndarray, B: np.ndarray, title: str
+) -> gbt.Game:
+    """
+    There is no direct pygambit method to create an EFG from a stategic-form game.
+    Here we create an EFG corresponding to a bimatrix game, given by two numpy arrays.
+    Player 1 moves first.
+    """
+    assert A.shape == B.shape
+    m, n = A.shape
+    g = gbt.Game.new_tree(players=["1", "2"], title=title)
+    actions1 = [str(i) for i in range(m)]
+    actions2 = [str(i) for i in range(n)]
+    g.append_move(g.root, "1", actions1)
+    g.append_move(g.root.children, "2", actions2)
+    for i, j in itertools.product(range(m), range(n)):
+        g.set_outcome(g.root.children[i].children[j], g.add_outcome([A[i, j], B[i, j]]))
+    return g
 
 
 ################################################################################################
@@ -87,8 +107,20 @@ def create_mixed_behav_game_efg() -> gbt.Game:
     Game
         Three-player extensive form game: binary tree with 3 infomation sets, one per player,
         with 1, 2, and 4 nodes respectively
+
+        Since no information is revealed this is directly equivalent to a simultaneous move game
     """
     return read_from_file("mixed_behavior_game.efg")
+
+
+def create_1_card_poker_efg() -> gbt.Game:
+    """
+    Returns
+    -------
+    Game
+        One-card two-player poker game, as used in the user guide
+    """
+    return read_from_file("poker.efg")
 
 
 def create_myerson_2_card_poker_efg() -> gbt.Game:
@@ -102,6 +134,119 @@ def create_myerson_2_card_poker_efg() -> gbt.Game:
         and can choose to meet or pass
     """
     return read_from_file("myerson_2_card_poker.efg")
+
+
+def create_kuhn_poker_efg() -> gbt.Game:
+    """
+    Returns
+    -------
+    Game
+        Kuhn poker with 3 cards and 2 players
+    """
+    g = gbt.Game.new_tree(
+        players=["Alice", "Bob"], title="Three-card poker (J, Q, K), two-player"
+    )
+    deals = ["JQ", "JK", "QJ", "QK", "KJ", "KQ"]
+    g.append_move(g.root, g.players.chance, deals)
+    g.set_chance_probs(g.root.infoset, [gbt.Rational(1, 6)]*6)
+    # group the children of the root (indices of `deals`) by each player's dealt card
+    alice_grouping = [[0, 1], [2, 3], [4, 5]]  # J, Q, K
+    bob_grouping = [[0, 5], [1, 3], [2, 4]]  # Q, K, J
+
+    # Alice's first move
+    for ij in alice_grouping:
+        term_nodes = [g.root.children[k] for k in ij]
+        g.append_move(term_nodes, "Alice", ["Check", "Bet"])
+    # Bob's move after Alice checks
+    for ij in bob_grouping:
+        term_nodes = [g.root.children[k].children[0] for k in ij]
+        g.append_move(term_nodes, "Bob", ["Check", "Bet"])
+    # Alice's move if Bob's second action is bet
+    for ij in alice_grouping:
+        term_nodes = [g.root.children[k].children[0].children[1] for k in ij]
+        g.append_move(term_nodes, "Alice", ["Fold", "Call"])
+    # Bob's move after Alice bets initially
+    for ij in bob_grouping:
+        term_nodes = [g.root.children[k].children[1] for k in ij]
+        g.append_move(term_nodes, "Bob", ["Fold", "Call"])
+
+    def calculate_payoffs(term_node):
+
+        def get_path(node):
+            path = []
+            while node.parent:
+                path.append(node.prior_action.label)
+                node = node.parent
+            return path
+
+        def showdown_winner(deal):
+            # deal is an element of deals = ["JQ", "JK", "QJ", "QK", "KJ", "KQ"]
+            card_values = dict(J=0, Q=1, K=2)
+            a, b = deal
+            return "Alice" if card_values[a] > card_values[b] else "Bob"
+
+        def showdown(deal, payoffs, pot):
+            payoffs[showdown_winner(deal)] += pot
+            return payoffs
+
+        def bet(player, payoffs, pot):
+            payoffs[player] += -1
+            pot += 1
+            return payoffs, pot
+
+        path = get_path(term_node)
+        deal = path.pop()  # needed if there is a showdown
+        payoffs = dict(Alice=-1, Bob=-1)  # ante of 1 for both players
+        pot = 2
+        if path.pop() == "Check":  # Alice checks
+            if path.pop() == "Check":  # Bob checks
+                payoffs = showdown(deal, payoffs, pot)
+            else:  # Bob bets
+                payoffs, pot = bet("Bob", payoffs, pot)
+                if path.pop() == "Fold":  # Alice folds
+                    payoffs["Bob"] += pot
+                else:  # Alice calls
+                    payoffs, pot = bet("Alice", payoffs, pot)
+                    payoffs = showdown(deal, payoffs, pot)
+        else:  # Alice bets
+            payoffs, pot = bet("Alice", payoffs, pot)
+            if path.pop() == "Fold":  # Bob
+                payoffs["Alice"] += pot
+            else:  # Bob calls
+                payoffs, pot = bet("Bob", payoffs, pot)
+                payoffs = showdown(deal, payoffs, pot)
+
+        return tuple(payoffs.values())
+
+    # create 4 possible outcomes just once
+    payoffs_to_outcomes = {(1, -1): g.add_outcome([1, -1], label="Alice wins 1"),
+                           (2, -2): g.add_outcome([2, -2], label="Alice wins 2"),
+                           (-1, 1): g.add_outcome([-1, 1], label="Bob wins 1"),
+                           (-2, 2): g.add_outcome([-2, 2], label="Bob wins 2")}
+
+    for term_node in [n for n in g.nodes if n.is_terminal]:
+        outcome = payoffs_to_outcomes[calculate_payoffs(term_node)]
+        g.set_outcome(term_node, outcome)
+
+    # Ensure infosets are in the same order as if game was written to efg and read back in
+    g.sort_infosets()
+    return g
+
+
+def create_one_shot_trust_efg() -> gbt.Game:
+    g = gbt.Game.new_tree(
+        players=["Buyer", "Seller"], title="One-shot trust game, after Kreps (1990)"
+    )
+    g.append_move(g.root, "Buyer", ["Trust", "Not trust"])
+    g.append_move(g.root.children[0], "Seller", ["Honor", "Abuse"])
+    g.set_outcome(
+        g.root.children[0].children[0], g.add_outcome([1, 1], label="Trustworthy")
+    )
+    g.set_outcome(
+        g.root.children[0].children[1], g.add_outcome([-1, 2], label="Untrustworthy")
+    )
+    g.set_outcome(g.root.children[1], g.add_outcome([0, 0], label="Opt-out"))
+    return g
 
 
 def create_centipede_game_with_chance_efg() -> gbt.Game:
@@ -198,7 +343,6 @@ def create_reduction_generic_payoffs_efg() -> gbt.Game:
     )
 
     g.set_outcome(g.root.children[3], g.add_outcome([12, -12], label="d"))
-
     return g
 
 
@@ -234,6 +378,138 @@ def create_reduction_both_players_payoff_ties_efg() -> gbt.Game:
     g.set_outcome(g.root.children[2].children[1].children[1], g.add_outcome([2, 2]))
     g.set_outcome(g.root.children[3], g.add_outcome([6, 4]))
     return g
+
+
+def create_seq_form_STOC_paper_zero_sum_2_player_efg() -> gbt.Game:
+    """
+    Example from
+
+    Fast Algorithms for Finding Randomized Strategies in Game Trees (1994)
+    Koller, Megiddo, von Stengel
+    """
+    g = gbt.Game.new_tree(players=["1", "2"], title="From STOC'94 paper")
+    g.append_move(g.root, g.players.chance, actions=["1", "2", "3", "4"])
+    g.set_chance_probs(g.root.infoset, [0.2, 0.2, 0.2, 0.4])
+    g.append_move(g.root.children[0], player="1", actions=["l", "r"])
+    g.append_move(g.root.children[1], player="1", actions=["c", "d"])
+    g.append_infoset(g.root.children[2], g.root.children[1].infoset)
+    g.append_move(g.root.children[0].children[1], player="2", actions=["p", "q"])
+    g.append_move(
+        g.root.children[0].children[1].children[0], player="1", actions=["L", "R"]
+    )
+    g.append_infoset(
+        g.root.children[0].children[1].children[1],
+        g.root.children[0].children[1].children[0].infoset,
+    )
+    g.append_move(g.root.children[2].children[0], player="2", actions=["s", "t"])
+    g.append_infoset(
+        g.root.children[2].children[1], g.root.children[2].children[0].infoset
+    )
+
+    g.set_outcome(
+        g.root.children[0].children[0],
+        outcome=g.add_outcome(payoffs=[5, -5], label="l"),
+    )
+    g.set_outcome(
+        g.root.children[0].children[1].children[0].children[0],
+        outcome=g.add_outcome(payoffs=[10, -10], label="rpL"),
+    )
+    g.set_outcome(
+        g.root.children[0].children[1].children[0].children[1],
+        outcome=g.add_outcome(payoffs=[15, -15], label="rpR"),
+    )
+    g.set_outcome(
+        g.root.children[0].children[1].children[1].children[0],
+        outcome=g.add_outcome(payoffs=[20, -20], label="rqL"),
+    )
+    g.set_outcome(
+        g.root.children[0].children[1].children[1].children[1],
+        outcome=g.add_outcome(payoffs=[-5, 5], label="rqR"),
+    )
+    g.set_outcome(
+        g.root.children[1].children[0],
+        outcome=g.add_outcome(payoffs=[10, -10], label="c"),
+    )
+    g.set_outcome(
+        g.root.children[1].children[1],
+        outcome=g.add_outcome(payoffs=[20, -20], label="d"),
+    )
+    g.set_outcome(
+        g.root.children[2].children[0].children[0],
+        outcome=g.add_outcome(payoffs=[20, -20], label="cs"),
+    )
+    g.set_outcome(
+        g.root.children[2].children[0].children[1],
+        outcome=g.add_outcome(payoffs=[50, -50], label="ct"),
+    )
+    g.set_outcome(
+        g.root.children[2].children[1].children[0],
+        outcome=g.add_outcome(payoffs=[30, -30], label="ds"),
+    )
+    g.set_outcome(
+        g.root.children[2].children[1].children[1],
+        outcome=g.add_outcome(payoffs=[15, -15], label="dt"),
+    )
+    g.set_outcome(
+        g.root.children[3], outcome=g.add_outcome(payoffs=[5, -5], label="nothing")
+    )
+    g.root.children[0].infoset.label = "0"
+    g.root.children[1].infoset.label = "1"
+    g.root.children[0].children[1].infoset.label = "01"
+    g.root.children[2].children[0].infoset.label = "20"
+    g.root.children[0].children[1].children[0].infoset.label = "010"
+
+    return g
+
+
+def create_two_player_perfect_info_win_lose_efg() -> gbt.Game:
+    g = gbt.Game.new_tree(players=["1", "2"], title="2 player perfect info win lose")
+    g.append_move(g.root, "2", ["a", "b"])
+    g.append_move(g.root.children[0], "1", ["L", "R"])
+    g.append_move(g.root.children[1], "1", ["L", "R"])
+    g.append_move(g.root.children[0].children[0], "2", ["l", "r"])
+    g.set_outcome(
+        g.root.children[0].children[0].children[0], g.add_outcome([1, -1], label="aLl")
+    )
+    g.set_outcome(
+        g.root.children[0].children[0].children[1], g.add_outcome([-1, 1], label="aLr")
+    )
+    g.set_outcome(g.root.children[0].children[1], g.add_outcome([1, -1], label="aR"))
+    g.set_outcome(g.root.children[1].children[0], g.add_outcome([1, -1], label="bL"))
+    g.set_outcome(g.root.children[1].children[1], g.add_outcome([-1, 1], label="bR"))
+    return g
+
+
+def create_EFG_for_nxn_bimatrix_coordination_game(n: int) -> gbt.Game:
+    A = np.eye(n, dtype=int)
+    B = A
+    title = f"{n}x{n} coordination game, {2**n - 1} equilibria"
+    return create_efg_corresponding_to_bimatrix_game(A, B, title)
+
+
+def create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq() -> gbt.Game:
+    # 6 x 6 Payoff matrix A:
+    A = [
+        [-180, 72, -333, 297, -153, 270],
+        [-30, 17, -33, 42, -3, 20],
+        [-81, 36, -126, 126, -36, 90],
+        [90, -36, 126, -126, 36, -81],
+        [20, -3, 42, -33, 17, -30],
+        [270, -153, 297, -333, 72, -180],
+    ]
+    # 6 x 6 Payoff matrix B:
+    B = [
+        [72, 36, 17, -3, -36, -153],
+        [-180, -81, -30, 20, 90, 270],
+        [297, 126, 42, -33, -126, -333],
+        [-333, -126, -33, 42, 126, 297],
+        [270, 90, 20, -30, -81, -180],
+        [-153, -36, -3, 17, 36, 72],
+    ]
+    A = np.array(A)
+    B = np.array(B)
+    title = "6x6 Long Lemke-Howson Paths, unique eq"
+    return create_efg_corresponding_to_bimatrix_game(A, B, title)
 
 
 class EfgFamilyForReducedStrategicFormTests(ABC):
@@ -515,17 +791,17 @@ class BinEfgTwoOrThreePlayers(BinaryTreeGames):
                 first_half = tmp[:n_half]
                 second_half = tmp[n_half:]
                 # create first half suffix
-                first_half = product(first_half, first_half)
+                first_half = itertools.product(first_half, first_half)
                 first_half = ["".join(t) for t in first_half]
                 first_half = ["1" + t for t in first_half]  # add 1 to front
                 # create second half suffix
-                second_half = product(second_half, second_half)
+                second_half = itertools.product(second_half, second_half)
                 second_half = ["".join(t) for t in second_half]
                 second_half = ["2" + t for t in second_half]  # add 2 to front
                 return first_half + second_half  # glue halves together
             else:  # player == 3:
                 tmp = self._redu_strats(player=2, level=level - 1)
-                tmp = product(tmp, tmp)
+                tmp = itertools.product(tmp, tmp)
                 tmp = ["".join(t) for t in tmp]
                 return tmp
         else:

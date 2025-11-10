@@ -143,16 +143,16 @@ MixedBehaviorProfile<double> EnforceNonnegativity(const MixedBehaviorProfile<dou
 
 } // namespace
 
-List<MixedBehaviorProfile<double>> LiapBehaviorSolve(const MixedBehaviorProfile<double> &p_start,
-                                                     double p_maxregret, int p_maxitsN,
-                                                     BehaviorCallbackType<double> p_callback)
+std::list<MixedBehaviorProfile<double>>
+LiapBehaviorSolve(const MixedBehaviorProfile<double> &p_start, double p_maxregret, int p_maxitsN,
+                  BehaviorCallbackType<double> p_callback)
 {
   if (!p_start.GetGame()->IsPerfectRecall()) {
     throw UndefinedException(
         "Computing equilibria of games with imperfect recall is not supported.");
   }
 
-  List<MixedBehaviorProfile<double>> solutions;
+  std::list<MixedBehaviorProfile<double>> solutions;
 
   MixedBehaviorProfile<double> p(p_start);
   p_callback(p, "start");

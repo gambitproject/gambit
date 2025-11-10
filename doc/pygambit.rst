@@ -4,9 +4,7 @@
 PyGambit
 ========
 
-The Gambit Python package, ``pygambit``, is available on `PyPI <https://pypi.org/project/pygambit/>`_ and can be installed with pip::
-
-   pip install pygambit
+See installation instructions in the :ref:`install` section.
 
 
 For newcomers to Gambit, we recommend reading through the PyGambit tutorials, which demonstrate the API's key capabilities for analyzing and solving Game Theory games.

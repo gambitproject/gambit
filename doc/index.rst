@@ -4,29 +4,28 @@ Gambit: User documentation
 
 **Gambit** is a library of game theory software and tools for the
 construction and analysis of finite extensive and strategic games.
+We recommended most new users install the PyGambit Python package and read the associated documentation, which includes tutorials and a complete API reference.
 
 .. grid::
 
-   .. grid-item-card:: Python tutorials and user guide
+   .. grid-item-card:: Installing Gambit
       :columns: 6
 
-      An introduction to using the ``pygambit`` package
-      in Python.
+      Get started by installing Gambit. PyGambit quickstart: ``pip install pygambit``
 
-      .. button-ref:: pygambit
+      .. button-ref:: install
          :ref-type: ref
          :click-parent:
          :color: secondary
          :expand:
 
 
-   .. grid-item-card:: Python API reference
+   .. grid-item-card:: PyGambit Python package
       :columns: 6
 
-      The complete reference to all the functionality
-      of ``pygambit``.
+      Create games and compute equilibria with the PyGambit package.
 
-      .. button-ref:: pygambit-api
+      .. button-ref:: pygambit
          :ref-type: ref
          :click-parent:
          :color: secondary
@@ -36,8 +35,7 @@ construction and analysis of finite extensive and strategic games.
    .. grid-item-card:: Command-line tools
       :columns: 6
 
-      All Gambit's methods for equilibrium computation are
-      available via command-line programs.
+      Quickly compute equilibria with the Gambit command-line tools.
 
       .. button-ref:: command-line
          :ref-type: ref
@@ -63,6 +61,7 @@ construction and analysis of finite extensive and strategic games.
    :maxdepth: 1
 
    intro
+   install
    pygambit
    tools
    gui

@@ -20,24 +20,24 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef DLEDITNODE_H
-#define DLEDITNODE_H
+#ifndef GAMBIT_GUI_DLEDITNODE_H
+#define GAMBIT_GUI_DLEDITNODE_H
 
-class dialogEditNode : public wxDialog {
-private:
-  Gambit::GameNode m_node;
+namespace Gambit::GUI {
+class EditNodeDialog final : public wxDialog {
+  GameNode m_node;
   wxTextCtrl *m_nodeName;
   wxChoice *m_outcome, *m_infoset;
-  Gambit::Array<Gambit::GameInfoset> m_infosetList;
+  Array<GameInfoset> m_infosetList;
 
 public:
   // Lifecycle
-  dialogEditNode(wxWindow *p_parent, const Gambit::GameNode &p_node);
+  EditNodeDialog(wxWindow *p_parent, const GameNode &p_node);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
   wxString GetNodeName() const { return m_nodeName->GetValue(); }
   int GetOutcome() const { return m_outcome->GetSelection(); }
-  Gambit::GameInfoset GetInfoset() const;
+  GameInfoset GetInfoset() const;
 };
-
-#endif // DLEDITNODE_H
+} // namespace Gambit::GUI
+#endif // GAMBIT_GUI_DLEDITNODE_H

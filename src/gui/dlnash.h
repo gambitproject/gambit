@@ -20,14 +20,14 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef DLNASH_H
-#define DLNASH_H
+#ifndef GAMBIT_GUI_DLNASH_H
+#define GAMBIT_GUI_DLNASH_H
 
 #include "gamedoc.h"
 
-class gbtNashChoiceDialog : public wxDialog {
-private:
-  gbtGameDocument *m_doc;
+namespace Gambit::GUI {
+class NashChoiceDialog final : public wxDialog {
+  GameDocument *m_doc;
   wxChoice *m_countChoice, *m_methodChoice, *m_repChoice;
 
   // Event handlers
@@ -35,11 +35,12 @@ private:
   void OnMethod(wxCommandEvent &);
 
 public:
-  gbtNashChoiceDialog(wxWindow *, gbtGameDocument *);
+  NashChoiceDialog(wxWindow *, GameDocument *);
 
-  std::shared_ptr<gbtAnalysisOutput> GetCommand() const;
+  std::shared_ptr<AnalysisOutput> GetCommand() const;
 
   bool UseStrategic() const;
 };
+} // namespace Gambit::GUI
 
 #endif // DLNFGNASH_H
