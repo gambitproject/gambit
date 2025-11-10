@@ -4,6 +4,8 @@
 CLI
 ***
 
+See installation instructions in the :ref:`install-cli-gui` section.
+
 Gambit provides command-line interfaces for each method for computing
 Nash equilibria.  These are suitable for scripting or calling from
 other programs.  This chapter describes the use of these programs.
