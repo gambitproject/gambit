@@ -4,6 +4,8 @@
 GUI
 ***
 
+See installation instructions in the :ref:`install-cli-gui` section.
+
 Gambit's graphical user interface provides an
 "integrated development environment" to help visually construct
 games and to investigate their main strategic features.
@@ -24,7 +26,6 @@ quantal response equilibria of a game, see the section on
 To build larger games or to explore parameter spaces of a game
 systematically, it is recommended to use
 :ref:`the Python package <pygambit>`.
-
 
 .. toctree::
    :maxdepth: 2

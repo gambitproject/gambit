@@ -197,8 +197,6 @@ EVT_MENU(wxID_PREVIEW, GameFrame::OnFilePrintPreview)
 EVT_MENU(wxID_PRINT, GameFrame::OnFilePrint)
 EVT_MENU(wxID_EXIT, GameFrame::OnFileExit)
 EVT_MENU_RANGE(wxID_FILE1, wxID_FILE9, GameFrame::OnFileMRUFile)
-EVT_MENU(wxID_UNDO, GameFrame::OnEditUndo)
-EVT_MENU(wxID_REDO, GameFrame::OnEditRedo)
 EVT_MENU(GBT_MENU_EDIT_INSERT_MOVE, GameFrame::OnEditInsertMove)
 EVT_MENU(GBT_MENU_EDIT_INSERT_ACTION, GameFrame::OnEditInsertAction)
 EVT_MENU(GBT_MENU_EDIT_DELETE_TREE, GameFrame::OnEditDeleteTree)
@@ -245,20 +243,16 @@ GameFrame::GameFrame(wxWindow *p_parent, GameDocument *p_doc)
   MakeMenus();
   MakeToolbar();
 
-  wxAcceleratorEntry entries[10];
-  entries[0].Set(wxACCEL_CTRL, (int)'o', wxID_OPEN);
-  entries[1].Set(wxACCEL_CTRL, (int)'s', wxID_SAVE);
-  entries[2].Set(wxACCEL_CTRL | wxACCEL_SHIFT, (int)'s', wxID_SAVEAS);
-  entries[3].Set(wxACCEL_CTRL, (int)'p', wxID_PRINT);
-  entries[4].Set(wxACCEL_CTRL, (int)'w', wxID_CLOSE);
-  entries[5].Set(wxACCEL_CTRL, (int)'x', wxID_EXIT);
-  entries[6].Set(wxACCEL_CTRL, (int)'z', wxID_UNDO);
-  entries[7].Set(wxACCEL_CTRL, (int)'y', wxID_REDO);
-  //  entries[8].Set(wxACCEL_NORMAL, WXK_DELETE, GBT_MENU_EDIT_DELETE_TREE);
-  // entries[9].Set(wxACCEL_NORMAL, WXK_BACK, GBT_MENU_EDIT_DELETE_PARENT);
-  entries[8].Set(wxACCEL_CTRL, (int)'+', GBT_MENU_VIEW_ZOOMIN);
-  entries[9].Set(wxACCEL_CTRL, (int)'-', GBT_MENU_VIEW_ZOOMOUT);
-  const wxAcceleratorTable accel(10, entries);
+  wxAcceleratorEntry entries[8];
+  entries[0].Set(wxACCEL_CTRL, 'o', wxID_OPEN);
+  entries[1].Set(wxACCEL_CTRL, 's', wxID_SAVE);
+  entries[2].Set(wxACCEL_CTRL | wxACCEL_SHIFT, 's', wxID_SAVEAS);
+  entries[3].Set(wxACCEL_CTRL, 'p', wxID_PRINT);
+  entries[4].Set(wxACCEL_CTRL, 'w', wxID_CLOSE);
+  entries[5].Set(wxACCEL_CTRL, 'q', wxID_EXIT);
+  entries[6].Set(wxACCEL_CTRL, '+', GBT_MENU_VIEW_ZOOMIN);
+  entries[7].Set(wxACCEL_CTRL, '-', GBT_MENU_VIEW_ZOOMOUT);
+  const wxAcceleratorTable accel(8, entries);
   wxWindowBase::SetAcceleratorTable(accel);
 
   m_splitter = new wxSplitterWindow(this, wxID_ANY);
@@ -324,10 +318,6 @@ void GameFrame::OnUpdate()
 
   menuBar->Enable(GBT_MENU_FILE_EXPORT_EFG, m_doc->IsTree());
 
-  menuBar->Enable(wxID_UNDO, m_doc->CanUndo());
-  GetToolBar()->EnableTool(wxID_UNDO, m_doc->CanUndo());
-  menuBar->Enable(wxID_REDO, m_doc->CanRedo());
-  GetToolBar()->EnableTool(wxID_REDO, m_doc->CanRedo());
   menuBar->Enable(GBT_MENU_EDIT_INSERT_MOVE, selectNode != nullptr);
   menuBar->Enable(GBT_MENU_EDIT_INSERT_ACTION, selectNode && selectNode->GetInfoset());
   menuBar->Enable(GBT_MENU_EDIT_REVEAL, selectNode && selectNode->GetInfoset());
@@ -455,13 +445,6 @@ void GameFrame::MakeMenus()
   AppendBitmapItem(fileMenu, wxID_EXIT, _("E&xit\tCtrl-Q"), _("Exit Gambit"), wxBitmap(exit_xpm));
 
   auto *editMenu = new wxMenu;
-
-  AppendBitmapItem(editMenu, wxID_UNDO, _("&Undo\tCtrl-Z"), _("Undo the last change"),
-                   wxBitmap(undo_xpm));
-  AppendBitmapItem(editMenu, wxID_REDO, _("&Redo\tCtrl-Y"), _("Redo the last undone change"),
-                   wxBitmap(redo_xpm));
-
-  editMenu->AppendSeparator();
   AppendBitmapItem(editMenu, GBT_MENU_EDIT_NEWPLAYER, _("Add p&layer"),
                    _("Add a new player to the game"), wxBitmap(newplayer_xpm));
 
@@ -929,20 +912,6 @@ void GameFrame::OnFileMRUFile(wxCommandEvent &p_event)
 //----------------------------------------------------------------------
 //                GameFrame: Menu handlers - Edit menu
 //----------------------------------------------------------------------
-
-void GameFrame::OnEditUndo(wxCommandEvent &)
-{
-  if (m_doc->CanUndo()) {
-    m_doc->Undo();
-  }
-}
-
-void GameFrame::OnEditRedo(wxCommandEvent &)
-{
-  if (m_doc->CanRedo()) {
-    m_doc->Redo();
-  }
-}
 
 void GameFrame::OnEditInsertMove(wxCommandEvent &)
 {
