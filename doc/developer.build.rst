@@ -60,74 +60,65 @@ Install build tools and dependencies
 
          sudo apt install build-essential automake autoconf libtool
 
-   3. Install GUI dependencies (replace X.X with the latest version available, e.g., 3.2):
+   3. Install GUI dependencies:
 
       .. code-block:: bash
 
-         sudo apt-cache search libwxgt*
-         sudo apt install libwxgtkX.X-dev
-
-      .. note::
-         Note that Gambit requires wxWidgets version 3.2.x or higher.
+         sudo apt install libwxgtk3.2-dev
 
 .. dropdown:: Install on Windows
    :class-container: sd-border-0
 
-    .. warning::
-       TODO: Add Windows build dependencies instructions here.
+   The recommended way to build Gambit on modern Windows is to use the
+   MSYS2 / MinGW-w64 environment.
+
+   1. Download and install MSYS2 from https://www.msys2.org/ and follow
+      the update instructions there (you will typically run ``pacman -Syu``
+      and restart the MSYS2 terminal as instructed).
+
+   2. Open the "MSYS2 MinGW 64-bit" terminal (important: use the MinGW
+      shell, not the plain MSYS shell).
+
+   3. Install general build dependencies
+
+      .. code-block:: bash
+
+         # update package DB & core packages first (may require closing/reopening the shell)
+         pacman -Syu
+
+         # install compiler toolchain, autotools and libtool
+         pacman -S --needed mingw-w64-x86_64-toolchain mingw-w64-x86_64-automake \
+         mingw-w64-x86_64-autoconf mingw-w64-x86_64-libtool mingw-w64-x86_64-make
+
+   4. Install GUI dependencies
+
+      .. code-block:: bash
+
+         pacman -S --needed mingw-w64-x86_64-wxwidgets3.2
+
+   .. note::
+      When building for a different target (32-bit) substitute the corresponding MinGW packages (``mingw-w64-i686-*``).
+
 
 .. _cli-gui-from-source:
 
 Install CLI and GUI from source
 --------------------------------
 
-.. dropdown:: Install on Windows
+.. dropdown:: Install on macOS and Linux
    :class-container: sd-border-0
 
-    .. warning::
-       For Windows users wanting to compile Gambit on their own, you'll need to use either the Cygwin or MinGW environments.  We do compilation and testing of Gambit on Windows using MinGW.
+   Navigate to the Gambit source directory and run:
 
-The rest of these instructions are applicable to **Linux** and **macOS** users.
-Navigate to the Gambit source directory and run:
+   .. code-block:: bash
 
-.. code-block:: bash
-
-    aclocal
-    libtoolize
-    automake --add-missing
-    autoconf
-    ./configure
-    make
-    sudo make install
-
-.. note::
-  If you don't want to build the graphical interface, you can pass the argument `--disable-gui` to the configure step, for example, ::
-
-  ./configure --disable-gui
-
-.. warning::
-  For Linux users:
-  If wxWidgets it isn't installed in a standard place (e.g., /usr or
-  /usr/local), you'll need to tell configure where to find it with the
-  `--with-wx-prefix=PREFIX` option, for example::
-
-   ./configure --with-wx-prefix=/home/mylogin/wx
-
-.. note::
-  Command-line options are available to modify the configuration process;
-  do `./configure --help` for information.  Of these, the option which
-  may be most useful is to disable the build of the graphical interface.
-
-  By default Gambit will be installed in /usr/local.  You can change this
-  by replacing configure step with one of the form ::
-
-  ./configure --prefix=/your/path/here
-
-.. warning::
-  The graphical interface relies on external calls to other
-  programs built in this process, especially for the computation of
-  equilibria.  It is strongly recommended that you install the Gambit
-  executables to a directory in your path!
+      aclocal
+      libtoolize
+      automake --add-missing
+      autoconf
+      ./configure
+      make
+      sudo make install
 
 .. dropdown:: Build macOS application bundle
    :class-container: sd-border-0
@@ -143,6 +134,61 @@ Navigate to the Gambit source directory and run:
    2. **Install the application:**
 
       After creating the DMG file, open it and drag the Gambit application to your Applications folder.
+
+.. dropdown:: Install on Windows
+   :class-container: sd-border-0
+
+   Creating a Windows installer (optional)
+   --------------------------------------
+
+   1. Create a ``.msi`` installer using the WiX toolset:
+
+      .. code-block:: powershell
+
+         mkdir installer
+         copy gambit* installer
+         "$env:WIX\bin\candle" gambit.wxs
+         "$env:WIX\bin\light" -ext WixUIExtension gambit.wixobj
+
+   2. From the "MSYS2 MinGW 64-bit" terminal, navigate to the Gambit source
+      directory and run:
+
+      .. code-block:: bash
+
+         aclocal
+         libtoolize
+         automake --add-missing
+         autoconf
+         ./configure
+         make
+
+.. note::
+  Command-line options are available to modify the configuration process;
+  do `./configure --help` for information.  Of these, the option which
+  may be most useful is to disable the build of the graphical interface.
+
+  By default Gambit will be installed in /usr/local.  You can change this
+  by replacing configure step with one of the form ::
+
+  ./configure --prefix=/your/path/here
+
+.. note::
+   If you don't want to build the graphical interface, you can pass the argument ``--disable-gui`` to the configure step, for example::
+
+      ./configure --disable-gui
+
+.. warning::
+   If wxWidgets isn't installed in a standard place (e.g., ``/usr`` or
+   ``/usr/local``), you'll need to tell ``configure`` where to find it with the
+   ``--with-wx-prefix=PREFIX`` option, for example::
+
+      ./configure --with-wx-prefix=/home/mylogin/wx
+
+.. warning::
+  The graphical interface relies on external calls to other
+  programs built in this process, especially for the computation of
+  equilibria.  It is strongly recommended that you install the Gambit
+  executables to a directory in your path!
 
 .. _build-python:
 
