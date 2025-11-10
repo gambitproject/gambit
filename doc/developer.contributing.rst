@@ -1,7 +1,7 @@
-Contributing to the Gambit Project
-==================================
+Contributing to Gambit
+======================
 
-This section provides guidelines for contributing to the Gambit project, including how to report bugs, suggest features, and contribute code.
+This section provides guidelines for contributing to Gambit, including how to report bugs, suggest features, and contribute code.
 It includes information relevant to both core developers and external contributors.
 
 GitHub issues
