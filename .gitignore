@@ -20,6 +20,7 @@ _build
 build
 *.egg-info
 *.pyc
+*.so
 
 config.guess
 config.sub
@@ -37,3 +38,5 @@ gambit
 .python-version
 dist
 .venv
+*.dmg
+Gambit.app/*

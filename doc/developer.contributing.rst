@@ -22,6 +22,8 @@ When reporting a bug, please be sure to include the following:
   sample game file or files if appropriate; it is often helpful to
   simplify the game if possible.
 
+.. _contributing-code:
+
 Contributing code
 ----------------
 
@@ -57,31 +59,31 @@ The project is hosted on GitHub, and contributions can be made via pull requests
 Editing this documentation
 --------------------------
 
-1. If you haven't already, clone the Gambit repository from GitHub: ::
+1. `Install Pandoc <https://pandoc.org/installing.html>`_ for your OS
+
+2. If you haven't already, clone the Gambit repository from GitHub: ::
 
     git clone https://github.com/gambitproject/gambit.git
     cd gambit
 
-2. Either install the docs requirements into your existing PyGambit development environment, or create a new virtual environment and install both the requirements and PyGambit there. For example, you can use `venv` to create a new environment: ::
+3. Either install the docs requirements into your existing PyGambit development environment, or create a new virtual environment and install both the requirements and PyGambit there. For example, you can use `venv` to create a new environment: ::
 
     python -m venv docenv
     source docenv/bin/activate
 
-3. Install the requirements and make the docs: ::
+4. Install the requirements and make the docs: ::
 
     pip install .
     cd doc
     pip install -r requirements.txt
     make html  # or make livehtml for live server with auto-rebuild
 
-4. Open ``doc/_build/html/index.html`` in your browser to view the documentation.
+5. Open ``doc/_build/html/index.html`` in your browser to view the documentation.
 
-5. Make any changes you want to the `.rst` files in the ``doc`` directory and rebuld the documentation to check your changes.
+6. Make any changes you want to the `.rst` files in the ``doc`` directory and rebuild the documentation to check your changes.
 
-6. Follow the usual GitHub workflow to commit your changes and push them to the repository.
+7. Follow the usual GitHub workflow (see :ref:`contributing-code` above) to commit your changes and push them to the repository.
 
-7. Core developers will review your changes and merge to the master branch, which automatically deploys the documentation via the ReadTheDocs service.
+8. Core developers will review your changes and merge to the master branch, which automatically deploys the documentation via the ReadTheDocs service.
 
-.. TODO: Add instructions for the GitHub workflow during contributor docs refactoring.
-   See https://github.com/gambitproject/gambit/issues/541
 
