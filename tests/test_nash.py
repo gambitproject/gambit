@@ -106,20 +106,20 @@ def test_enummixed_rational():
         # ),
     ],
 )
-def test_enumpoly_ordered_behavior_rational(
+def test_enumpoly_ordered_behavior(
     game: gbt.Game, mixed_behav_prof_data: list, stop_after: typing.Union[None, int]
 ):
-    """Test calls of enumpoly for mixed behavior equilibria, rational precision,
+    """Test calls of enumpoly for mixed behavior equilibria,
     using max_regret (internal consistency); and comparison to a set of previously
     computed equilibria using this function (regression test).
     This set will be the full set of all computed equilibria if stop_after is None,
     else the first stop_after-many equilibria.
 
     This is the "ordered" version where we test for the outputs coming in a specific
-    order; this is also an "unordered" version that includes examples where the order
-    could not be relied on even for repeated runs on the same system when on Windows
-    (vis github actions)
-
+    order; there is also an "unordered" version.  The game 2x2x2.nfg, for example,
+    has a point at which the Jacobian is singular.  As a result, the order in which it
+    returns the two totally-mixed equilbria is system-dependent due, essentially,
+    to inherent numerical instability near that point.
     """
     if stop_after:
         result = gbt.nash.enumpoly_solve(
@@ -162,10 +162,10 @@ def test_enumpoly_ordered_behavior_rational(
         ),
     ],
 )
-def test_enumpoly_unordered_behavior_rational(
+def test_enumpoly_unordered_behavior(
     game: gbt.Game, mixed_behav_prof_data: list, stop_after: typing.Union[None, int]
 ):
-    """Test calls of enumpoly for mixed behavior equilibria, rational precision,
+    """Test calls of enumpoly for mixed behavior equilibria,
     using max_regret (internal consistency); and comparison to a set of previously
     computed equilibria using this function (regression test).
 
