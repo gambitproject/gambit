@@ -96,28 +96,34 @@ def test_enummixed_rational():
             1,
         ),
         # 3-player game
-        (
-            games.create_mixed_behav_game_efg(),
-            [
-                [[["1/2", "1/2"]], [["2/5", "3/5"]], [["1/4", "3/4"]]],
-                [[["2/5", "3/5"]], [["1/2", "1/2"]], [["1/3", "2/3"]]],
-            ],
-            2,  # 9 in total found by enumpoly
-        ),
+        # (
+        # games.create_mixed_behav_game_efg(),
+        # [
+        # [[["1/2", "1/2"]], [["2/5", "3/5"]], [["1/4", "3/4"]]],
+        # [[["2/5", "3/5"]], [["1/2", "1/2"]], [["1/3", "2/3"]]],
+        # ],
+        # 2,  # 9 in total found by enumpoly (see unordered test)
+        # ),
     ],
 )
-def test_enumpoly_behavior_rational(
+def test_enumpoly_ordered_behavior(
     game: gbt.Game, mixed_behav_prof_data: list, stop_after: typing.Union[None, int]
 ):
-    """Test calls of enumpoly for mixed behavior equilibria, rational precision,
+    """Test calls of enumpoly for mixed behavior equilibria,
     using max_regret (internal consistency); and comparison to a set of previously
     computed equilibria using this function (regression test).
     This set will be the full set of all computed equilibria if stop_after is None,
     else the first stop_after-many equilibria.
+
+    This is the "ordered" version where we test for the outputs coming in a specific
+    order; there is also an "unordered" version.  The game 2x2x2.nfg, for example,
+    has a point at which the Jacobian is singular.  As a result, the order in which it
+    returns the two totally-mixed equilbria is system-dependent due, essentially,
+    to inherent numerical instability near that point.
     """
     if stop_after:
         result = gbt.nash.enumpoly_solve(
-            game, use_strategic=False, stop_after=stop_after
+            game, use_strategic=False, stop_after=stop_after, maxregret=0.00001
         )
         assert len(result.equilibria) == stop_after
     else:
@@ -131,6 +137,76 @@ def test_enumpoly_behavior_rational(
             for i in p.infosets:
                 for a in i.actions:
                     assert abs(eq[p][i][a] - expected[p][i][a]) <= TOL
+
+
+@pytest.mark.nash
+@pytest.mark.nash_enumpoly_behavior
+@pytest.mark.parametrize(
+    "game,mixed_behav_prof_data,stop_after",
+    [
+        # 3-player game
+        (
+            games.create_mixed_behav_game_efg(),
+            [
+                [[["2/5", "3/5"]], [["1/2", "1/2"]], [["1/3", "2/3"]]],
+                [[["1/2", "1/2"]], [["2/5", "3/5"]], [["1/4", "3/4"]]],
+                [[["1/2", "1/2"]], [["1/2", "1/2"]], [[1, 0]]],
+                [[["1/3", "2/3"]], [[1, 0]], [["1/4", "3/4"]]],
+                [[[1, 0]], [[1, 0]], [[1, 0]]],
+                [[[1, 0]], [[0, 1]], [[0, 1]]],
+                [[[0, 1]], [["1/4", "3/4"]], [["1/3", "2/3"]]],
+                [[[0, 1]], [[1, 0]], [[0, 1]]],
+                [[[0, 1]], [[0, 1]], [[1, 0]]],
+            ],
+            9,
+        ),
+    ],
+)
+def test_enumpoly_unordered_behavior(
+    game: gbt.Game, mixed_behav_prof_data: list, stop_after: typing.Union[None, int]
+):
+    """Test calls of enumpoly for mixed behavior equilibria,
+    using max_regret (internal consistency); and comparison to a set of previously
+    computed equilibria using this function (regression test).
+
+    This set will be the full set of all computed equilibria if stop_after is None,
+    else the first stop_after-many equilibria.
+
+    This is the "unordered" version where we test for the outputs belong to a set
+    of expected output; there is also an "unordered" that expects the outputs in a specific order.
+
+    In this unordered version, once something from the expected set is found it is removed,
+    so we are checking for no duplicate outputs.
+    """
+    if stop_after:
+        result = gbt.nash.enumpoly_solve(
+            game, use_strategic=False, stop_after=stop_after, maxregret=0.00001
+        )
+        assert len(result.equilibria) == stop_after
+    else:
+        # compute all
+        result = gbt.nash.enumpoly_solve(game, use_strategic=False)
+
+    assert len(result.equilibria) == len(mixed_behav_prof_data)
+
+    def are_the_same(game, found, candidate):
+        for p in game.players:
+            for i in p.infosets:
+                for a in i.actions:
+                    if not abs(found[p][i][a] - candidate[p][i][a]) <= TOL:
+                        return False
+        return True
+
+    for eq in result.equilibria:
+        assert abs(eq.max_regret()) <= TOL
+        found = False
+        for exp in mixed_behav_prof_data[:]:
+            expected = game.mixed_behavior_profile(rational=True, data=exp)
+            if are_the_same(game, eq, expected):
+                mixed_behav_prof_data.remove(exp)
+                found = True
+                break
+        assert found
 
 
 def test_lcp_strategy_double():
@@ -261,7 +337,6 @@ def test_lp_behavior_double():
 
 
 @pytest.mark.nash
-@pytest.mark.slow
 @pytest.mark.nash_lp_behavior
 @pytest.mark.parametrize(
     "game,mixed_behav_prof_data",
