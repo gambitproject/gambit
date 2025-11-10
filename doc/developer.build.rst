@@ -136,14 +136,11 @@ Navigate to the Gambit source directory (use the "MSYS2 MinGW 64-bit" terminal o
 .. dropdown:: Creating a Windows installer
    :class-container: sd-border-0
 
-   1. Create a ``.msi`` installer using the WiX toolset:
+   1. Create a ``.msi`` installer.  This requires the `Wix toolset <https://github.com/wixtoolset>`__.
 
       .. code-block:: powershell
 
-         mkdir installer
-         copy gambit* installer
-         "$env:WIX\bin\candle" gambit.wxs
-         "$env:WIX\bin\light" -ext WixUIExtension gambit.wixobj
+         make msw-msi
 
    2. Install the application:
 
@@ -192,7 +189,7 @@ Use `pip` to install from the **root directory of the source tree**, optionally 
    python -m pip install .
 
 There is a set of test cases in `src/pygambit/tests`, which can be run
-using `nose2`.
+using `pytest`.
 
 Once installed, simply ``import pygambit`` in your Python shell or
 script to get started.
