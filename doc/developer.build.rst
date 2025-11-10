@@ -105,25 +105,23 @@ Install build tools and dependencies
 Install CLI and GUI from source
 --------------------------------
 
-.. dropdown:: Install on macOS and Linux
-   :class-container: sd-border-0
+Navigate to the Gambit source directory (use the "MSYS2 MinGW 64-bit" terminal on Windows) and run:
 
-   Navigate to the Gambit source directory and run:
+.. code-block:: bash
 
-   .. code-block:: bash
-
-      aclocal
-      libtoolize
-      automake --add-missing
-      autoconf
-      ./configure
-      make
-      sudo make install
+   aclocal
+   libtoolize
+   automake --add-missing
+   autoconf
+   ./configure
+   make
+   # Skip this on Windows:
+   sudo make install
 
 .. dropdown:: Build macOS application bundle
    :class-container: sd-border-0
 
-   1. **Create macOS application bundle:**
+   1. Create macOS application bundle:
 
       To create a distributable DMG file:
 
@@ -131,15 +129,12 @@ Install CLI and GUI from source
 
          make osx-dmg
 
-   2. **Install the application:**
+   2. Install the application:
 
       After creating the DMG file, open it and drag the Gambit application to your Applications folder.
 
-.. dropdown:: Install on Windows
+.. dropdown:: Creating a Windows installer
    :class-container: sd-border-0
-
-   Creating a Windows installer (optional)
-   --------------------------------------
 
    1. Create a ``.msi`` installer using the WiX toolset:
 
@@ -150,17 +145,9 @@ Install CLI and GUI from source
          "$env:WIX\bin\candle" gambit.wxs
          "$env:WIX\bin\light" -ext WixUIExtension gambit.wixobj
 
-   2. From the "MSYS2 MinGW 64-bit" terminal, navigate to the Gambit source
-      directory and run:
+   2. Install the application:
 
-      .. code-block:: bash
-
-         aclocal
-         libtoolize
-         automake --add-missing
-         autoconf
-         ./configure
-         make
+      Run the generated ``gambit-X.Y.Z.msi`` file to install Gambit on your system.
 
 .. note::
   Command-line options are available to modify the configuration process;
