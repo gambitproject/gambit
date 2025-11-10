@@ -156,7 +156,7 @@ Use `pip` to install from the **root directory of the source tree**, optionally 
 
 .. code-block:: bash
 
-   pip install -e .
+   python -m pip install .
 
 There is a set of test cases in `src/pygambit/tests`, which can be run
 using `nose2`.
