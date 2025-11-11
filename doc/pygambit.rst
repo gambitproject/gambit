@@ -35,6 +35,8 @@ These tutorials assume some familiarity with the PyGambit API and Game Theory te
 - Simplex representations of available strategies
 - Logit quantal response equilibrium (LQRE) correspondence
 
+Advanced tutorials:
+
 .. toctree::
    :maxdepth: 2
 
