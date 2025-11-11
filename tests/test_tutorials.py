@@ -15,7 +15,18 @@ def _find_tutorial_notebooks():
     root = Path(__file__).resolve().parents[1] / "doc" / "tutorials"
     if not root.exists():
         pytest.skip(f"Tutorials folder not found: {root}")
-    notebooks = sorted(root.rglob("*.ipynb"))
+
+    # Collect notebooks from the tutorials root (recursive).
+    notebooks = set(root.rglob("*.ipynb"))
+
+    # Also explicitly include notebooks under an "advanced_tutorials" subfolder
+    # (in case they are separate or not picked up for some layouts). Use a set
+    # to deduplicate if the subfolder is already part of the root search.
+    advanced = root / "advanced_tutorials"
+    if advanced.exists():
+        notebooks.update(advanced.rglob("*.ipynb"))
+
+    notebooks = sorted(notebooks)
     if not notebooks:
         pytest.skip(f"No tutorial notebooks found in: {root}")
     return notebooks
