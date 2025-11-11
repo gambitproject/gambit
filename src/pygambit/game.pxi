@@ -777,6 +777,23 @@ class Game:
         """Whether the game is constant sum."""
         return self.game.deref().IsConstSum()
 
+    def get_own_prior_actions(self, infoset: typing.Union[Infoset, str]):
+        """ For a given information set, find the most recent action(s)
+        of the player active in it which precede this information set.
+
+        Raises
+        ------
+        RuntimeError
+            If the information set is not reachable from the root of the game.
+        """
+        infoset = self._resolve_infoset(infoset, "get_own_prior_actions")
+
+        own_prior_actions = []
+        for action in self.game.deref().GetOwnPriorActions(cython.cast(Infoset, infoset).infoset):
+            own_prior_actions.append(Action.wrap(action))
+
+        return own_prior_actions
+
     @property
     def is_perfect_recall(self) -> bool:
         """Whether the game is perfect recall.
