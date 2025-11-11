@@ -188,8 +188,6 @@ Use `pip` to install from the **root directory of the source tree**, optionally 
 
    python -m pip install .
 
-There is a set of test cases in `src/pygambit/tests`, which can be run
-using `pytest`.
 
 Once installed, simply ``import pygambit`` in your Python shell or
 script to get started.

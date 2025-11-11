@@ -61,6 +61,21 @@ version.
 6. Open a pull request on GitHub to the master branch of the upstream repository, describing your changes and linking to any relevant issues.
 7. Core developers will review your changes, provide feedback, and merge them into the master branch if they meet the project's standards.
 
+Testing your changes
+^^^^^^^^^^^^^^^^^^^^
+
+By default, pull requests on GitHub will trigger the running of Gambit's test suite using GitHub Actions.
+You can also run the tests locally before submitting your pull request, using `pytest`.
+
+1. If you haven't already, install the test dependencies: ::
+
+    pip install -r tests/requirements.txt
+
+2. Navigate to the Gambit repository and run the tests: ::
+
+    pytest
+
+
 Editing this documentation
 --------------------------
 
