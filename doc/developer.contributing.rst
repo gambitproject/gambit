@@ -45,21 +45,23 @@ version.
     git clone https://github.com/gambitproject/gambit.git  # or your fork URL
     cd gambit
 
-3. Create a new branch for your changes ::
+3. Follow the instructions in the :ref:`building-from-source` page to set up your development environment and build Gambit from source. If you only plan to make changes to the PyGambit Python code, you can skip to :ref:`build-python`.
+
+4. Create a new branch for your changes ::
 
     git checkout -b feature/your-feature-name
 
-4. Make your changes. Commit each change with a clear commit message ::
+5. Make your changes. Commit each change with a clear commit message ::
 
     git add .
     git commit -m "Add feature X or fix bug Y"
 
-5. Push your changes to your fork or branch ::
+6. Push your changes to your fork or branch ::
 
     git push origin feature/your-feature-name
 
-6. Open a pull request on GitHub to the master branch of the upstream repository, describing your changes and linking to any relevant issues.
-7. Core developers will review your changes, provide feedback, and merge them into the master branch if they meet the project's standards.
+7. Open a pull request on GitHub to the master branch of the upstream repository, describing your changes and linking to any relevant issues.
+8. Core developers will review your changes, provide feedback, and merge them into the master branch if they meet the project's standards.
 
 Testing your changes
 ^^^^^^^^^^^^^^^^^^^^
