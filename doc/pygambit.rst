@@ -11,6 +11,9 @@ For newcomers to Gambit, we recommend reading through the PyGambit tutorials, wh
 These tutorials are available to be run interactively as Jupyter notebooks, see :ref:`local_tutorials`.
 All of the tutorials assume a basic knowledge of programming in Python.
 
+New user tutorials
+------------------
+
 Tutorials **1-3** assume no prior knowledge of Game Theory or the PyGambit API and provide detailed explanations of the concepts and code.
 
 .. toctree::
@@ -20,6 +23,9 @@ Tutorials **1-3** assume no prior knowledge of Game Theory or the PyGambit API a
    tutorials/01_quickstart
    tutorials/02_extensive_form
    tutorials/03_poker
+
+Advanced user tutorials
+-----------------------
 
 Tutorials **4-5** assume some familiarity with the PyGambit API and Game Theory terminology and concepts including:
 
@@ -33,13 +39,7 @@ Tutorials **4-5** assume some familiarity with the PyGambit API and Game Theory 
 
    tutorials/04_starting_points
    tutorials/05_quantal_response
-
-You may also wish to read:
-
-.. toctree::
-   :maxdepth: 2
-
-   pygambit.external_programs
+   .. pygambit.external_programs
 
 Algorithms for computing Nash equilibria
 ----------------------------------------
