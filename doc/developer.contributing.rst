@@ -79,6 +79,13 @@ You can also run the tests locally before submitting your pull request, using `p
 
     pytest
 
+Adding to the test suite
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+Tests can be added to the test suite by creating new test files in the ``tests`` directory.
+Tests should be written using the `pytest` framework.
+Refer to existing test files for examples of how to write tests or see the `pytest documentation <https://docs.pytest.org/en/stable/>`_ for more information.
+
 
 Editing this documentation
 ---------------------------
