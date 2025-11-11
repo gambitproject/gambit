@@ -14,7 +14,8 @@ All of the tutorials assume a basic knowledge of programming in Python.
 New user tutorials
 ------------------
 
-Tutorials **1-3** assume no prior knowledge of Game Theory or the PyGambit API and provide detailed explanations of the concepts and code.
+These tutorials assume no prior knowledge of Game Theory or the PyGambit API and provide detailed explanations of the concepts and code.
+They are numbered in the order they should be read.
 
 .. toctree::
    :maxdepth: 2
@@ -27,7 +28,7 @@ Tutorials **1-3** assume no prior knowledge of Game Theory or the PyGambit API a
 Advanced user tutorials
 -----------------------
 
-Tutorials **4-5** assume some familiarity with the PyGambit API and Game Theory terminology and concepts including:
+These tutorials assume some familiarity with the PyGambit API and Game Theory terminology and concepts including:
 
 - Nash equilibria
 - Pure and mixed strategies
