@@ -750,7 +750,7 @@ std::vector<GameAction> GameTreeRep::GetOwnPriorActions(GameInfoset infoset) con
   std::vector<GameAction> own_prior_actions;
   for (auto action : it->second) {
     if (action) {
-      own_prior_actions.push_back(action->shared_from_this());
+      own_prior_actions.emplace_back(action->shared_from_this());
     }
   }
 
