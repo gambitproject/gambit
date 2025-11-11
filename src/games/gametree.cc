@@ -736,6 +736,27 @@ bool GameTreeRep::IsConstSum() const
   }
 }
 
+std::vector<GameAction> GameTreeRep::GetOwnPriorActions(GameInfoset infoset) const
+{
+  if (m_infosetParents.empty() && !m_root->IsTerminal()) {
+    const_cast<GameTreeRep *>(this)->BuildInfosetParents();
+  }
+
+  auto it = m_infosetParents.find(infoset.get());
+  if (it == m_infosetParents.end()) {
+    throw UndefinedException("Cannot get prior actions for an unreached information set.");
+  }
+
+  std::vector<GameAction> own_prior_actions;
+  for (auto action : it->second) {
+    if (action) {
+      own_prior_actions.push_back(action->shared_from_this());
+    }
+  }
+
+  return own_prior_actions;
+}
+
 bool GameTreeRep::IsPerfectRecall() const
 {
   if (m_infosetParents.empty() && !m_root->IsTerminal()) {

@@ -719,6 +719,8 @@ public:
   /// Returns the set of terminal nodes which are descendants of members of an action
   virtual std::vector<GameNode> GetPlays(GameAction action) const { throw UndefinedException(); }
 
+  /// Returns, for a given infoset, the set of the most recent action(s) of the player active in it
+  virtual std::vector<GameAction> GetOwnPriorActions(GameInfoset infoset) const = 0;
   /// Returns true if the game is perfect recall
   virtual bool IsPerfectRecall() const = 0;
   //@}

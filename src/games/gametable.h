@@ -57,6 +57,11 @@ public:
   //@{
   bool IsTree() const override { return false; }
   bool IsConstSum() const override;
+  std::vector<GameAction> GetOwnPriorActions(GameInfoset infoset) const override
+  {
+    throw UndefinedException();
+  }
+
   bool IsPerfectRecall() const override { return true; }
   //@}
 
