@@ -7,7 +7,7 @@ PyGambit
 See installation instructions in the :ref:`install` section.
 
 
-For newcomers to Gambit, we recommend reading through the PyGambit tutorials, which demonstrate the API's key capabilities for analyzing and solving Game Theory games.
+For newcomers to Gambit, we recommend reading through the PyGambit tutorials, which demonstrate the API's key capabilities for analyzing and solving games.
 These tutorials are available to be run interactively as Jupyter notebooks, see :ref:`local_tutorials`.
 All of the tutorials assume a basic knowledge of programming in Python.
 
