@@ -16,6 +16,7 @@ Tutorials **1-3** assume no prior knowledge of Game Theory or the PyGambit API a
 .. toctree::
    :maxdepth: 2
 
+   tutorials/running_locally
    tutorials/01_quickstart
    tutorials/02_extensive_form
    tutorials/03_poker
@@ -38,7 +39,6 @@ You may also wish to read:
 .. toctree::
    :maxdepth: 2
 
-   tutorials/running_locally
    pygambit.external_programs
 
 Algorithms for computing Nash equilibria
