@@ -64,7 +64,9 @@ version.
 8. Core developers will review your changes, provide feedback, and merge them into the master branch if they meet the project's standards.
 
 Testing your changes
-^^^^^^^^^^^^^^^^^^^^
+--------------------
+
+Be sure to familiarise yourself with :ref:`contributing-code` before reading this section.
 
 By default, pull requests on GitHub will trigger the running of Gambit's test suite using GitHub Actions.
 You can also run the tests locally before submitting your pull request, using `pytest`.
@@ -79,7 +81,9 @@ You can also run the tests locally before submitting your pull request, using `p
 
 
 Editing this documentation
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+---------------------------
+
+Be sure to familiarise yourself with :ref:`contributing-code` before reading this section.
 
 You can make changes to the documentation by editing the `.rst` files in the ``doc`` directory.
 Creating a pull request with your changes will automatically trigger a build of the documentation via the ReadTheDocs service, which can be viewed online.
