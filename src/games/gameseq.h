@@ -28,7 +28,7 @@
 
 namespace Gambit {
 
-struct GameSequenceRep {
+class GameSequenceRep {
 public:
   GamePlayer player;
   GameAction action;

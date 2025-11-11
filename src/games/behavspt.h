@@ -30,7 +30,7 @@
 namespace Gambit {
 
 class GameSequenceForm;
-struct GameSequenceRep;
+class GameSequenceRep;
 class SequencesWrapper;
 class PlayerSequencesWrapper;
 class InfosetsWrapper;
