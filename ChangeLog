@@ -2,6 +2,10 @@
 
 ## [16.5.0] - unreleased
 
+### Added
+- Implement `GameTreeRep::GetOwnPriorActions` (C++) and `Game.get_own_prior_actions` (Python) to compute
+  the set of actions taken by a player on the path leading to one of their own information sets (#582)
+
 ### Changed
 - In the graphical interface, removed option to configure information set link drawing; information sets
   are always drawn and indicators are always drawn if an information set spans multiple levels.
