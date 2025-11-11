@@ -69,7 +69,7 @@ Testing your changes
 By default, pull requests on GitHub will trigger the running of Gambit's test suite using GitHub Actions.
 You can also run the tests locally before submitting your pull request, using `pytest`.
 
-1. If you haven't already, install the test dependencies: ::
+1. Install the test dependencies (into the virtual environment where you installed PyGambit): ::
 
     pip install -r tests/requirements.txt
 
@@ -79,32 +79,23 @@ You can also run the tests locally before submitting your pull request, using `p
 
 
 Editing this documentation
---------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-1. If you haven't already, clone the Gambit repository from GitHub: ::
+You can make changes to the documentation by editing the `.rst` files in the ``doc`` directory.
+Creating a pull request with your changes will automatically trigger a build of the documentation via the ReadTheDocs service, which can be viewed online.
+You can also build the documentation locally to preview your changes before submitting a pull request.
 
-    git clone https://github.com/gambitproject/gambit.git
-    cd gambit
+1. Install the docs dependencies (into the virtual environment where you installed PyGambit): ::
 
-2. Either install the docs requirements into your existing PyGambit development environment, or create a new virtual environment and install both the requirements and PyGambit there. For example, you can use `venv` to create a new environment: ::
+    pip install -r doc/requirements.txt
 
-    python -m venv docenv
-    source docenv/bin/activate
+2. Navigate to the Gambit repo and build the docs: ::
 
-3. Install the requirements and make the docs: ::
-
-    pip install .
     cd doc
-    pip install -r requirements.txt
     make html  # or make livehtml for live server with auto-rebuild
 
-4. Open ``doc/_build/html/index.html`` in your browser to view the documentation.
+3. Open ``doc/_build/html/index.html`` in your browser to view the documentation.
 
-5. Make any changes you want to the `.rst` files in the ``doc`` directory and rebuld the documentation to check your changes.
-
-6. Follow the usual GitHub workflow to commit your changes and push them to the repository.
-
-7. Core developers will review your changes and merge to the master branch, which automatically deploys the documentation via the ReadTheDocs service.
 
 .. TODO: Add instructions for the GitHub workflow during contributor docs refactoring.
    See https://github.com/gambitproject/gambit/issues/541
