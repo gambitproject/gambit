@@ -38,8 +38,8 @@ These tutorials assume some familiarity with the PyGambit API and Game Theory te
 .. toctree::
    :maxdepth: 2
 
-   advanced_tutorials/starting_points
-   advanced_tutorials/quantal_response
+   tutorials/advanced_tutorials/starting_points
+   tutorials/advanced_tutorials/quantal_response
    .. pygambit.external_programs
 
 Algorithms for computing Nash equilibria
