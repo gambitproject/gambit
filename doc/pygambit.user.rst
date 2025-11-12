@@ -48,7 +48,7 @@ We can then also add the Seller's move in the situation after the Buyer chooses 
 
 .. ipython:: python
 
-   g.append_move(g.root.children[0], "Seller", ["Honor", "Abuse"])
+   g.append_move(g.root.children["Trust"], "Seller", ["Honor", "Abuse"])
 
 Now that we have the moves of the game defined, we add payoffs.  Payoffs are associated with
 an :py:class:`.Outcome`; each :py:class:`Outcome` has a vector of payoffs, one for each player,
@@ -57,20 +57,20 @@ Seller proving themselves trustworthy:
 
 .. ipython:: python
 
-   g.set_outcome(g.root.children[0].children[0], g.add_outcome([1, 1], label="Trustworthy"))
+   g.set_outcome(g.root.children["Trust"].children["Honor"], g.add_outcome([1, 1], label="Trustworthy"))
 
 Next, the outcome associated with the scenario where the Buyer trusts but the Seller does
 not return the trust:
 
 .. ipython:: python
 
-   g.set_outcome(g.root.children[0].children[1], g.add_outcome([-1, 2], label="Untrustworthy"))
+   g.set_outcome(g.root.children["Trust"].children["Abuse"], g.add_outcome([-1, 2], label="Untrustworthy"))
 
 And, finally the outcome associated with the Buyer opting out of the interaction:
 
 .. ipython:: python
 
-   g.set_outcome(g.root.children[1], g.add_outcome([0, 0], label="Opt-out"))
+   g.set_outcome(g.root.children["Not trust"], g.add_outcome([0, 0], label="Opt-out"))
 
 Nodes without an outcome attached are assumed to have payoffs of zero for all players.
 Therefore, adding the outcome to this latter terminal node is not strictly necessary in Gambit,
@@ -111,19 +111,19 @@ We can build this game using the following script::
         g.append_move(g.root, g.players.chance, ["King", "Queen"])
         for node in g.root.children:
             g.append_move(node, "Alice", ["Raise", "Fold"])
-        g.append_move(g.root.children[0].children[0], "Bob", ["Meet", "Pass"])
-        g.append_infoset(g.root.children[1].children[0],
-                         g.root.children[0].children[0].infoset)
+        g.append_move(g.root.children["King"].children["Raise"], "Bob", ["Meet", "Pass"])
+        g.append_infoset(g.root.children["Queen"].children["Raise"],
+                         g.root.children["King"].children["Raise"].infoset)
         alice_winsbig = g.add_outcome([2, -2], label="Alice wins big")
         alice_wins = g.add_outcome([1, -1], label="Alice wins")
         bob_winsbig = g.add_outcome([-2, 2], label="Bob wins big")
         bob_wins = g.add_outcome([-1, 1], label="Bob wins")
-        g.set_outcome(g.root.children[0].children[0].children[0], alice_winsbig)
-        g.set_outcome(g.root.children[0].children[0].children[1], alice_wins)
-        g.set_outcome(g.root.children[0].children[1], bob_wins)
-        g.set_outcome(g.root.children[1].children[0].children[0], bob_winsbig)
-        g.set_outcome(g.root.children[1].children[0].children[1], alice_wins)
-        g.set_outcome(g.root.children[1].children[1], bob_wins)
+        g.set_outcome(g.root.children["King"].children["Raise"].children["Meet"], alice_winsbig)
+        g.set_outcome(g.root.children["King"].children["Raise"].children["Pass"], alice_wins)
+        g.set_outcome(g.root.children["King"].children["Fold"], bob_wins)
+        g.set_outcome(g.root.children["Queen"].children["Raise"].children["Meet"], bob_winsbig)
+        g.set_outcome(g.root.children["Queen"].children["Raise"].children["Pass"], alice_wins)
+        g.set_outcome(g.root.children["Queen"].children["Fold"], bob_wins)
 
 All extensive games have a chance (or nature) player, accessible as
 ``.Game.players.chance``.  Moves belonging to the chance player can be added in the same
@@ -140,9 +140,9 @@ causes each of the newly-appended moves to be in new information sets.  In contr
 does not know Alice's card, and therefore cannot distinguish between the two nodes at which
 he has the decision.   This is implemented in the following lines::
 
-        g.append_move(g.root.children[0].children[0], "Bob", ["Meet", "Pass"])
-        g.append_infoset(g.root.children[1].children[0],
-                         g.root.children[0].children[0].infoset)
+        g.append_move(g.root.children["King"].children["Raise"], "Bob", ["Meet", "Pass"])
+        g.append_infoset(g.root.children["Queen"].children["Raise"],
+                         g.root.children["King"].children["Raise"].infoset)
 
 The call :py:meth:`.Game.append_infoset` adds a move at a terminal node as part of
 an existing information set (represented in ``pygambit`` as an :py:class:`.Infoset`).
