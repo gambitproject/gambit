@@ -146,28 +146,30 @@ def create_kuhn_poker_efg() -> gbt.Game:
     g = gbt.Game.new_tree(
         players=["Alice", "Bob"], title="Three-card poker (J, Q, K), two-player"
     )
+    cards = ["J", "Q", "K"]
     deals = ["JQ", "JK", "QJ", "QK", "KJ", "KQ"]
+
+    def deals_by_infoset(player, card):
+        player_idx = 0 if player == "Alice" else 1
+        return [d for d in deals if d[player_idx] == card]
+
     g.append_move(g.root, g.players.chance, deals)
     g.set_chance_probs(g.root.infoset, [gbt.Rational(1, 6)]*6)
-    # group the children of the root (indices of `deals`) by each player's dealt card
-    alice_grouping = [[0, 1], [2, 3], [4, 5]]  # J, Q, K
-    bob_grouping = [[0, 5], [1, 3], [2, 4]]  # Q, K, J
-
-    # Alice's first move
-    for ij in alice_grouping:
-        term_nodes = [g.root.children[k] for k in ij]
+    for alice_card in cards:
+        # Alice's first move
+        term_nodes = [g.root + d for d in deals_by_infoset("Alice", alice_card)]
         g.append_move(term_nodes, "Alice", ["Check", "Bet"])
-    # Bob's move after Alice checks
-    for ij in bob_grouping:
-        term_nodes = [g.root.children[k].children[0] for k in ij]
+    for bob_card in cards:
+        # Bob's move after Alice checks
+        term_nodes = [g.root + d + "Check" for d in deals_by_infoset("Bob", bob_card)]
         g.append_move(term_nodes, "Bob", ["Check", "Bet"])
-    # Alice's move if Bob's second action is bet
-    for ij in alice_grouping:
-        term_nodes = [g.root.children[k].children[0].children[1] for k in ij]
+    for alice_card in cards:
+        # Alice's move if Bob's second action is bet
+        term_nodes = [g.root + d + "Check" + "Bet" for d in deals_by_infoset("Alice", alice_card)]
         g.append_move(term_nodes, "Alice", ["Fold", "Call"])
-    # Bob's move after Alice bets initially
-    for ij in bob_grouping:
-        term_nodes = [g.root.children[k].children[1] for k in ij]
+    for bob_card in cards:
+        # Bob's move after Alice bets initially
+        term_nodes = [g.root + d + "Bet" for d in deals_by_infoset("Bob", bob_card)]
         g.append_move(term_nodes, "Bob", ["Fold", "Call"])
 
     def calculate_payoffs(term_node):
