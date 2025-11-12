@@ -1,4 +1,69 @@
 {
   "projectName": "gambit",
-  "projectOwner": "gambitproject"
+  "projectOwner": "gambitproject",
+  "files": [
+    "README.md"
+  ],
+  "commitType": "docs",
+  "commitConvention": "angular",
+  "contributorsPerLine": 7,
+  "contributors": [
+    {
+      "login": "tturocy",
+      "name": "Ted Turocy",
+      "avatar_url": "https://avatars.githubusercontent.com/u/180959?v=4",
+      "profile": "https://github.com/tturocy",
+      "contributions": [
+        "code",
+        "doc",
+        "research",
+        "maintenance",
+        "ideas"
+      ]
+    },
+    {
+      "login": "rahulsavani",
+      "name": "Rahul Savani",
+      "avatar_url": "https://avatars.githubusercontent.com/u/743139?v=4",
+      "profile": "http://www.csc.liv.ac.uk/~rahul",
+      "contributions": [
+        "code",
+        "doc",
+        "research",
+        "maintenance",
+        "ideas"
+      ]
+    },
+    {  
+      "login": "edwardchalstrey1",
+      "name": "Ed Chalstrey",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5486164?v=4",
+      "profile": "https://edchalstrey.com/",
+      "contributions": [
+        "code",
+        "doc",
+        "tutorial"
+      ]
+    },
+    {
+      "login": "StephenPasteris",
+      "name": "StephenPasteris",
+      "avatar_url": "https://avatars.githubusercontent.com/u/140617768?v=4",
+      "profile": "https://github.com/StephenPasteris",
+      "contributions": [
+        "research",
+        "code"
+      ]
+    },
+    {
+      "login": "d-kad",
+      "name": "Daniel Kadnikov",
+      "avatar_url": "https://avatars.githubusercontent.com/u/165307096?v=4",
+      "profile": "https://github.com/d-kad",
+      "contributions": [
+        "research",
+        "code"
+      ]
+    }
+  ]
 }

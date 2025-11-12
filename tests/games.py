@@ -233,7 +233,28 @@ def create_kuhn_poker_efg() -> gbt.Game:
     return g
 
 
+def kuhn_poker_lcp_first_mixed_strategy_prof():
+    """
+    Returns
+    -------
+    Data for the first extreme equilibrium in mixed stategies for Kuhn poker found by lcp_solve
+    """
+    alice = [0] * 27
+    alice[1] = "2/3"
+    alice[4] = "1/3"
+    bob = [0] * 64
+    bob[12] = "2/3"
+    bob[30] = "1/3"
+    return [alice, bob]
+
+
 def create_one_shot_trust_efg() -> gbt.Game:
+    """
+    Returns
+    -------
+    Game
+        One-shot trust game, after Kreps (1990)
+    """
     g = gbt.Game.new_tree(
         players=["Buyer", "Seller"], title="One-shot trust game, after Kreps (1990)"
     )
