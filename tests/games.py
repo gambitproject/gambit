@@ -113,16 +113,6 @@ def create_mixed_behav_game_efg() -> gbt.Game:
     return read_from_file("mixed_behavior_game.efg")
 
 
-def create_1_card_poker_efg() -> gbt.Game:
-    """
-    Returns
-    -------
-    Game
-        One-card two-player poker game, as used in the user guide
-    """
-    return read_from_file("poker.efg")
-
-
 def create_myerson_2_card_poker_efg() -> gbt.Game:
     """
     Returns

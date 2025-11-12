@@ -54,7 +54,7 @@ def test_game_add_players_nolabel():
     ("e01.efg", True),
     ("e02.efg", True),
     ("cent3.efg", True),
-    ("poker.efg", True),
+    ("myerson_2_card_poker.efg", True),
     ("basic_extensive_game.efg", True),
 
     # Games with perfect recall from generated games (game_input is a gbt.Game object)
