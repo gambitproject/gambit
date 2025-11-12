@@ -49,6 +49,7 @@ installable via PyPI.
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://edchalstrey.com/"><img src="https://avatars.githubusercontent.com/u/5486164?v=4?s=100" width="100px;" alt="Ed Chalstrey"/><br /><sub><b>Ed Chalstrey</b></sub></a><br /><a href="#code-edwardchalstrey1" title="Code">💻</a> <a href="#doc-edwardchalstrey1" title="Documentation">📖</a> <a href="#tutorial-edwardchalstrey1" title="Tutorials">✅</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/d-kad"><img src="https://avatars.githubusercontent.com/u/165307096?v=4?s=100" width="100px;" alt="Daniel "/><br /><sub><b>Daniel </b></sub></a><br /><a href="#research-d-kad" title="Research">🔬</a> <a href="#code-d-kad" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/StephenPasteris"><img src="https://avatars.githubusercontent.com/u/140617768?v=4?s=100" width="100px;" alt="StephenPasteris"/><br /><sub><b>StephenPasteris</b></sub></a><br /><a href="#research-StephenPasteris" title="Research">🔬</a> <a href="#code-StephenPasteris" title="Code">💻</a></td>
     </tr>
   </tbody>
