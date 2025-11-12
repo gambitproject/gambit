@@ -790,7 +790,7 @@ class Game:
         -------
         list of Action or None
             A list of the preceding actions.
-            An element can be None, if the infoset contains the player's first possible move.
+            An element in the list can be None, if the infoset contains a first move of the player.
             An empty list is returned if the information set is unreachable.
         """
         infoset = self._resolve_infoset(infoset, "get_own_prior_actions")
