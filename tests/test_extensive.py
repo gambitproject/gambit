@@ -55,63 +55,61 @@ def test_game_add_players_nolabel():
         # ======================================================================
         # Game 1: binary_3_levels_generic_payoffs.efg (Perfect Recall)
         # ======================================================================
-        # Case: Player 1's root infoset. No prior actions.
-        ("binary_3_levels_generic_payoffs.efg", ("Player 1", 0), []),
-        # Case: Player 1's second infoset (L branch). Reached after P1's own
-        # action 'Left' (0) from their root infoset.
+        # Player 1's root infoset. Reachable
+        ("binary_3_levels_generic_payoffs.efg", ("Player 1", 0), [None]),
+        # Player 1's second infoset. Reached after P1's own action 0 ("1").
         (
             "binary_3_levels_generic_payoffs.efg",
             ("Player 1", 1),
             [("Player 1", 0, 0)],
         ),
-        # Case: Player 1's third infoset (R branch). Reached after P1's own
-        # action 'Right' (1) from their root infoset.
+        # Player 1's third infoset. Reached after P1's own action 1 ("2").
         (
             "binary_3_levels_generic_payoffs.efg",
             ("Player 1", 2),
             [("Player 1", 0, 1)],
         ),
-        # Case: Player 2's only infoset. Reached after P1's actions, so it has
-        # no *own* prior actions for Player 2.
-        ("binary_3_levels_generic_payoffs.efg", ("Player 2", 0), []),
+        # Player 2's only infoset. Reachable
+        ("binary_3_levels_generic_payoffs.efg", ("Player 2", 0), [None]),
         # ======================================================================
-        # GAME 2: wichardt.efg (Imperfect Recall, all infosets reachable)
+        # Game 2: wichardt.efg (Imperfect Recall)
         # ======================================================================
-        # Case: The root infoset for Player 1. Should have no prior actions.
-        ("wichardt.efg", ("Player 1", 0), []),
-        # Case: Player 1's second infoset. This is reached after P1's action 'L'
-        # from infoset 0, or P1's action 'R' from infoset 0. A key test case.
+        # The root infoset for Player 1. Reachable
+        ("wichardt.efg", ("Player 1", 0), [None]),
+        # Player 1's second infoset. It can be reached after either action 0 ("L") or 1 ("R").
         (
             "wichardt.efg",
             ("Player 1", 1),
             [("Player 1", 0, 0), ("Player 1", 0, 1)],
         ),
-        # Case: Player 2's only infoset. Has no *own* prior actions.
-        ("wichardt.efg", ("Player 2", 0), []),
+        # Player 2's only infoset. Reachable.
+        ("wichardt.efg", ("Player 2", 0), [None]),
         # ======================================================================
-        # GAME 3: noPR-action-AM-two-hops.efg (Absent-Mindedness, one unreached)
+        # Game 3: noPR-action-AM-two-hops.efg (Absent-Mindedness)
         # ======================================================================
-        # Case: Player 1's infoset 0. Reached via its own action '1' and
-        # P1's action '2' from infoset 1.
+        # Player 1's infoset 0. Has the property of Absent-Mindedness:
+        # Contains the root vertex and can be further reached via two different prior actions.
         (
             "noPR-action-AM-two-hops.efg",
             ("Player 1", 0),
-            [("Player 1", 0, 0), ("Player 1", 1, 1)],
+            [None, ("Player 1", 0, 0), ("Player 1", 1, 1)],
         ),
-        # Case: Player 1's infoset 1. Reached via P1's action '1' from infoset 0.
+        # Player 1's infoset 1. Reached via a single prior action.
         ("noPR-action-AM-two-hops.efg", ("Player 1", 1), [("Player 1", 0, 0)]),
-        # Case: Player 2's infoset 0. Reached via P2's own action '1'.
-        ("noPR-action-AM-two-hops.efg", ("Player 2", 0), [("Player 2", 0, 0)]),
+        # Player 2's infoset 0. Reached via a single prior action.
+        ("noPR-action-AM-two-hops.efg", ("Player 2", 0), [None, ("Player 2", 0, 0)]),
+        # Player 2's infoset 1. This infoset is unreachable.
+        ("noPR-action-AM-two-hops.efg", ("Player 2", 1), []),
     ],
 )
-def test_get_own_prior_actions_return_values(
+def test_get_own_prior_actions(
     game_file: str,
     infoset_specification: tuple[str, int],
-    expected_actions: list[tuple[str, int, str]],
+    expected_actions: list,
 ):
     """
-    Verifies the get_own_prior_actions method returns correct actions for
-    a variety of reachable information sets across different games.
+    Verifies get_own_prior_actions returns correct sets of actions for various infosets:
+    root, perfect recall, imperfect recall, absent-minded, and unreachable cases.
     """
     game = games.read_from_file(game_file)
     player_label, infoset_num = infoset_specification
@@ -122,7 +120,7 @@ def test_get_own_prior_actions_return_values(
     result_actions = game.get_own_prior_actions(infoset)
 
     results = [
-        (
+        None if action is None else (
             action.infoset.player.label,
             action.infoset.number,
             action.number,
@@ -130,21 +128,7 @@ def test_get_own_prior_actions_return_values(
         for action in result_actions
     ]
 
-    assert set(results) == set(expected_actions)
-
-
-def test_get_own_prior_actions_on_unreached_infoset_raises_error():
-    """
-    Verifies that calling get_own_prior_actions on an infoset that is
-    unreachable from the game's root correctly raises a RuntimeError.
-    """
-    game = games.read_from_file("noPR-action-AM-two-hops.efg")
-    unreached_infoset = game.players["Player 2"].infosets[1]
-
-    with pytest.raises(
-        RuntimeError, match="Cannot get prior actions for an unreached information set."
-    ):
-        game.get_own_prior_actions(unreached_infoset)
+    assert sorted(results, key=str) == sorted(expected_actions, key=str)
 
 
 @pytest.mark.parametrize("game_input,expected_result", [
