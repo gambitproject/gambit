@@ -45,16 +45,37 @@ class NodeChildren:
         for child in self.parent.deref().GetChildren():
             yield Node.wrap(child)
 
-    def __getitem__(self, index: typing.Union[int, str, Action]) -> Node:
-        if isinstance(index, (Action, str)):
-            return Node.wrap(self.parent) + index
-        if isinstance(index, int):
+    def __getitem__(self, action: typing.Union[int, str, Action]) -> Node:
+        """Returns the successor node which is reached after 'action' is played.
+
+        .. versionchanged: 16.5.0
+            Previously indexing by string searched the labels of the child nodes,
+            rather than referring to actions.  This implements the more natural
+            interpretation that strings refer to action labels.
+
+            Relatedly, the collection can now be indexed by an Action object.
+        """
+        if isinstance(action, str):
+            if not action.strip():
+                raise ValueError("Action label cannot be empty or all whitespace")
+            if self.parent.deref().GetInfoset() == cython.cast(c_GameInfoset, NULL):
+                raise ValueError(f"No action with label '{action}' at node")
+            for act in self.parent.deref().GetInfoset().deref().GetActions():
+                if act.deref().GetLabel().decode("ascii") == cython.cast(str, action):
+                    return Node.wrap(self.parent.deref().GetChild(act))
+            raise ValueError(f"No action with label '{action}' at node")
+        if isinstance(action, Action):
+            try:
+                return Node.wrap(self.parent.deref().GetChild(cython.cast(Action, action).action))
+            except IndexError:
+                raise ValueError(f"Action is from a different information set than node")
+        if isinstance(action, int):
             if self.parent.deref().GetInfoset() == cython.cast(c_GameInfoset, NULL):
                 raise IndexError("Index out of range")
             return Node.wrap(self.parent.deref().GetChild(
-                self.parent.deref().GetInfoset().deref().GetAction(index + 1)
+                self.parent.deref().GetInfoset().deref().GetAction(action + 1)
             ))
-        raise TypeError(f"Action must be int, str, or Action, not {index.__class__.__name__}")
+        raise TypeError(f"Index must be int, str, or Action, not {action.__class__.__name__}")
 
 
 @cython.cclass
@@ -206,30 +227,3 @@ class Node:
         """Returns a list of all terminal `Node` objects consistent with it.
         """
         return [Node.wrap(n) for n in self.node.deref().GetGame().deref().GetPlays(self.node)]
-
-    def __add__(self, action: typing.Union[str, Action]) -> Node:
-        """Return the child of the node which succeeds this node after `action` is played)
-
-        Raises
-        ------
-        ValueError
-            If 'action' does not specify an action label at the information set, or if
-            'action' is an action not from the node's information set
-
-        .. versionadded:: 16.5.0
-        """
-        if isinstance(action, str):
-            if not action.strip():
-                raise ValueError("Action label cannot be empty or all whitespace")
-            if self.node.deref().GetInfoset() == cython.cast(c_GameInfoset, NULL):
-                raise ValueError(f"No action with label '{action}' at node")
-            for act in self.node.deref().GetInfoset().deref().GetActions():
-                if act.deref().GetLabel().decode("ascii") == cython.cast(str, action):
-                    return Node.wrap(self.node.deref().GetChild(act))
-            raise ValueError(f"No action with label '{action}' at node")
-        if isinstance(action, Action):
-            try:
-                return Node.wrap(self.node.deref().GetChild(cython.cast(Action, action).action))
-            except IndexError:
-                raise ValueError(f"Action is from a different information set than node")
-        raise TypeError(f"Action must be str or Action, not {action.__class__.__name__}")

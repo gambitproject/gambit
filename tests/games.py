@@ -157,19 +157,22 @@ def create_kuhn_poker_efg() -> gbt.Game:
     g.set_chance_probs(g.root.infoset, [gbt.Rational(1, 6)]*6)
     for alice_card in cards:
         # Alice's first move
-        term_nodes = [g.root + d for d in deals_by_infoset("Alice", alice_card)]
+        term_nodes = [g.root.children[d] for d in deals_by_infoset("Alice", alice_card)]
         g.append_move(term_nodes, "Alice", ["Check", "Bet"])
     for bob_card in cards:
         # Bob's move after Alice checks
-        term_nodes = [g.root + d + "Check" for d in deals_by_infoset("Bob", bob_card)]
+        term_nodes = [g.root.children[d].children["Check"]
+                      for d in deals_by_infoset("Bob", bob_card)]
         g.append_move(term_nodes, "Bob", ["Check", "Bet"])
     for alice_card in cards:
         # Alice's move if Bob's second action is bet
-        term_nodes = [g.root + d + "Check" + "Bet" for d in deals_by_infoset("Alice", alice_card)]
+        term_nodes = [g.root.children[d].children["Check"].children["Bet"]
+                      for d in deals_by_infoset("Alice", alice_card)]
         g.append_move(term_nodes, "Alice", ["Fold", "Call"])
     for bob_card in cards:
         # Bob's move after Alice bets initially
-        term_nodes = [g.root + d + "Bet" for d in deals_by_infoset("Bob", bob_card)]
+        term_nodes = [g.root.children[d].children["Bet"]
+                      for d in deals_by_infoset("Bob", bob_card)]
         g.append_move(term_nodes, "Bob", ["Fold", "Call"])
 
     def calculate_payoffs(term_node):
