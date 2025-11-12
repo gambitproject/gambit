@@ -324,16 +324,6 @@ private:
   GameSequenceForm::PlayerSequences m_sequences;
 };
 
-class InfosetsWrapper {
-public:
-  explicit InfosetsWrapper(const GameSequenceForm::Infosets &infosets) : m_infosets(infosets) {}
-
-  std::size_t size() const { return m_infosets.size(); }
-
-private:
-  GameSequenceForm::Infosets m_infosets;
-};
-
 class ContingenciesWrapper {
 public:
   explicit ContingenciesWrapper(const GameSequenceForm::Contingencies &contingencies)

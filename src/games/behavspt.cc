@@ -303,11 +303,6 @@ MixedBehaviorProfile<double> BehaviorSupportProfile::ToMixedBehaviorProfile(
   return GetSequenceForm()->ToMixedBehaviorProfile(p_profile);
 }
 
-InfosetsWrapper BehaviorSupportProfile::GetInfosets() const
-{
-  return InfosetsWrapper(GetSequenceForm()->GetInfosets());
-}
-
 ContingenciesWrapper BehaviorSupportProfile::GetContingencies() const
 {
   return ContingenciesWrapper(GetSequenceForm()->GetContingencies());
