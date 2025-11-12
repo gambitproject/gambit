@@ -44,8 +44,14 @@ installable via PyPI.
 <table>
   <tbody>
     <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://edchalstrey.com/"><img src="https://avatars.githubusercontent.com/u/5486164?v=4?s=100" width="100px;" alt="Ed Chalstrey"/><br /><sub><b>Ed Chalstrey</b></sub></a><br /><a href="#code-edwardchalstrey1" title="Code">💻</a> <a href="#doc-edwardchalstrey1" title="Documentation">📖</a> <a href="#tutorial-edwardchalstrey1" title="Tutorials">✅</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/tturocy"><img src="https://avatars.githubusercontent.com/u/180959?v=4?s=100" width="100px;" alt="Ted Turocy"/><br /><sub><b>Ted Turocy</b></sub></a><br /><a href="#code-tturocy" title="Code">💻</a> <a href="#doc-tturocy" title="Documentation">📖</a> <a href="#research-tturocy" title="Research">🔬</a> <a href="#maintenance-tturocy" title="Maintenance">🚧</a> <a href="#ideas-tturocy" title="Ideas, Planning, & Feedback">🤔</a></td>
     </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="http://www.csc.liv.ac.uk/~rahul"><img src="https://avatars.githubusercontent.com/u/743139?v=4?s=100" width="100px;" alt="Rahul Savani"/><br /><sub><b>Rahul Savani</b></sub></a><br /><a href="#code-rahulsavani" title="Code">💻</a> <a href="#doc-rahulsavani" title="Documentation">📖</a> <a href="#research-rahulsavani" title="Research">🔬</a> <a href="#maintenance-rahulsavani" title="Maintenance">🚧</a> <a href="#ideas-rahulsavani" title="Ideas, Planning, & Feedback">🤔</a></td>
+    </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://edchalstrey.com/"><img src="https://avatars.githubusercontent.com/u/5486164?v=4?s=100" width="100px;" alt="Ed Chalstrey"/><br /><sub><b>Ed Chalstrey</b></sub></a><br /><a href="#code-edwardchalstrey1" title="Code">💻</a> <a href="#doc-edwardchalstrey1" title="Documentation">📖</a> <a href="#tutorial-edwardchalstrey1" title="Tutorials">✅</a></td>
+    </td>
   </tbody>
 </table>
 
