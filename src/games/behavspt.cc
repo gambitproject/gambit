@@ -66,6 +66,7 @@ size_t BehaviorSupportProfile::BehaviorProfileLength() const
 
 void BehaviorSupportProfile::AddAction(const GameAction &p_action)
 {
+  m_reachable = nullptr;
   auto &support = m_actions.at(p_action->GetInfoset());
   auto pos = std::find_if(support.begin(), support.end(), [p_action](const GameAction &a) {
     return a->GetNumber() >= p_action->GetNumber();
@@ -81,6 +82,7 @@ void BehaviorSupportProfile::AddAction(const GameAction &p_action)
 
 bool BehaviorSupportProfile::RemoveAction(const GameAction &p_action)
 {
+  m_reachable = nullptr;
   auto &support = m_actions.at(p_action->GetInfoset());
   auto pos = std::find(support.begin(), support.end(), p_action);
   if (pos != support.end()) {
