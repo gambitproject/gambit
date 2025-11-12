@@ -41,6 +41,13 @@ installable via PyPI.
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="http://www.csc.liv.ac.uk/~rahul"><img src="https://avatars.githubusercontent.com/u/743139?v=4?s=100" width="100px;" alt="Rahul Savani"/><br /><sub><b>Rahul Savani</b></sub></a><br /><a href="#code-rahulsavani" title="Code">💻</a> <a href="#doc-rahulsavani" title="Documentation">📖</a> <a href="#research-rahulsavani" title="Research">🔬</a> <a href="#maintenance-rahulsavani" title="Maintenance">🚧</a> <a href="#ideas-rahulsavani" title="Ideas, Planning, & Feedback">🤔</a></td>
+    </tr>
+  </tbody>
+</table>
 
 <!-- markdownlint-restore -->
 <!-- prettier-ignore-end -->
