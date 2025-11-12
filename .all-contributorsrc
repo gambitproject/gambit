@@ -1,4 +1,23 @@
 {
   "projectName": "gambit",
-  "projectOwner": "gambitproject"
+  "projectOwner": "gambitproject",
+  "files": [
+    "README.md"
+  ],
+  "commitType": "docs",
+  "commitConvention": "angular",
+  "contributorsPerLine": 7,
+  "contributors": [
+    {
+      "login": "edwardchalstrey1",
+      "name": "Ed Chalstrey",
+      "avatar_url": "https://avatars.githubusercontent.com/u/5486164?v=4",
+      "profile": "https://edchalstrey.com/",
+      "contributions": [
+        "code",
+        "doc",
+        "tutorial"
+      ]
+    }
+  ]
 }
