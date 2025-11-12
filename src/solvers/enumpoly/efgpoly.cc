@@ -80,9 +80,10 @@ Polynomial<double> BuildSequenceVariable(ProblemData &p_data, const GameSequence
 }
 
 ProblemData::ProblemData(const BehaviorSupportProfile &p_support)
-  : m_support(p_support), space(std::make_shared<VariableSpace>(m_support.GetSequences().size() -
-                                                                m_support.GetInfosets().size() -
-                                                                m_support.GetPlayers().size()))
+  : m_support(p_support),
+    space(std::make_shared<VariableSpace>(m_support.GetSequences().size() -
+                                          m_support.GetReachableInfosets()->size() -
+                                          m_support.GetPlayers().size()))
 {
   for (auto sequence : m_support.GetSequences()) {
     if (sequence->action &&
