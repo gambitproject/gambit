@@ -311,4 +311,28 @@ ContingenciesWrapper BehaviorSupportProfile::GetContingencies() const
   return ContingenciesWrapper(GetSequenceForm()->GetContingencies());
 }
 
+//========================================================================
+//                 BehaviorSupportProfile: Reachable Information Sets
+//========================================================================
+
+void BehaviorSupportProfile::FindReachableInfosets(GameNode p_node) const
+{
+  if (!p_node->IsTerminal()) {
+    auto infoset = p_node->GetInfoset();
+    m_reachable->insert(infoset);
+    for (auto action : GetActions(infoset)) {
+      FindReachableInfosets(p_node->GetChild(action));
+    }
+  }
+}
+
+std::shared_ptr<std::set<GameInfoset>> BehaviorSupportProfile::GetReachableInfosets() const
+{
+  if (!m_reachable) {
+    m_reachable = std::make_shared<std::set<GameInfoset>>();
+    FindReachableInfosets(GetGame()->GetRoot());
+  }
+  return m_reachable;
+}
+
 } // end namespace Gambit

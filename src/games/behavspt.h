@@ -160,6 +160,10 @@ public:
   ToMixedBehaviorProfile(const std::map<std::shared_ptr<GameSequenceRep>, double> &) const;
   InfosetsWrapper GetInfosets() const;
   ContingenciesWrapper GetContingencies() const;
+
+  mutable std::shared_ptr<std::set<GameInfoset>> m_reachable;
+  void FindReachableInfosets(GameNode p_node) const;
+  std::shared_ptr<std::set<GameInfoset>> GetReachableInfosets() const;
 };
 
 } // end namespace Gambit
