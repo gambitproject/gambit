@@ -777,20 +777,30 @@ class Game:
         """Whether the game is constant sum."""
         return self.game.deref().IsConstSum()
 
-    def get_own_prior_actions(self, infoset: typing.Union[Infoset, str]):
-        """ For a given information set, find the most recent action(s)
-        of the player active in it which precede this information set.
+    def get_own_prior_actions(
+        self,
+        infoset: typing.Union[Infoset, str]
+    ) -> typing.List[typing.Optional[Action]]:
+        """ For a given infoset and the player active in it,
+        find the set of last action(s) the player took along the paths reaching the infoset.
 
-        Raises
-        ------
-        RuntimeError
-            If the information set is not reachable from the root of the game.
+        .. versionadded:: 16.5
+
+        Returns
+        -------
+        list of Action or None
+            A list of the preceding actions.
+            An element can be None, if the infoset contains the player's first possible move.
+            An empty list is returned if the information set is unreachable.
         """
         infoset = self._resolve_infoset(infoset, "get_own_prior_actions")
 
-        own_prior_actions = []
-        for action in self.game.deref().GetOwnPriorActions(cython.cast(Infoset, infoset).infoset):
-            own_prior_actions.append(Action.wrap(action))
+        own_prior_actions = [
+            None if not action else Action.wrap(action)
+            for action in self.game.deref().GetOwnPriorActions(
+                cython.cast(Infoset, infoset).infoset
+            )
+        ]
 
         return own_prior_actions
 

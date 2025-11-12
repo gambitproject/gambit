@@ -743,14 +743,19 @@ std::vector<GameAction> GameTreeRep::GetOwnPriorActions(GameInfoset infoset) con
   }
 
   auto it = m_infosetParents.find(infoset.get());
+
+  // If the infoset is unreachable, return an empty vector.
   if (it == m_infosetParents.end()) {
-    throw UndefinedException("Cannot get prior actions for an unreachable information set.");
+    return {};
   }
 
   std::vector<GameAction> own_prior_actions;
-  for (auto action : it->second) {
-    if (action) {
-      own_prior_actions.emplace_back(action->shared_from_this());
+  for (auto action_ptr : it->second) {
+    if (action_ptr) {
+      own_prior_actions.emplace_back(action_ptr->shared_from_this());
+    }
+    else {
+      own_prior_actions.emplace_back(nullptr);
     }
   }
 
