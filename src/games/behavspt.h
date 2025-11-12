@@ -147,6 +147,26 @@ public:
   BehaviorSupportProfile Undominated(bool p_strict) const;
   //@}
 
+  class Infosets {
+  private:
+    const BehaviorSupportProfile *m_support;
+
+  public:
+    Infosets(const BehaviorSupportProfile *p_support) : m_support(p_support) {}
+
+    size_t size() const
+    {
+      auto reachable_infosets = m_support->GetReachableInfosets();
+      size_t count = 0;
+      for (auto [key, value] : *reachable_infosets) {
+        if (value) {
+          ++count;
+        }
+      }
+      return count;
+    }
+  };
+
   mutable std::shared_ptr<GameSequenceForm> m_sequenceForm;
   std::shared_ptr<GameSequenceForm> GetSequenceForm() const;
   SequencesWrapper GetSequences() const;
