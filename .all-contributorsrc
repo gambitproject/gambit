@@ -44,6 +44,16 @@
         "doc",
         "tutorial"
       ]
+    },
+    {
+      "login": "StephenPasteris",
+      "name": "StephenPasteris",
+      "avatar_url": "https://avatars.githubusercontent.com/u/140617768?v=4",
+      "profile": "https://github.com/StephenPasteris",
+      "contributions": [
+        "research",
+        "code"
+      ]
     }
   ]
 }
