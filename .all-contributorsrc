@@ -1,4 +1,25 @@
 {
   "projectName": "gambit",
-  "projectOwner": "gambitproject"
+  "projectOwner": "gambitproject",
+  "files": [
+    "README.md"
+  ],
+  "commitType": "docs",
+  "commitConvention": "angular",
+  "contributorsPerLine": 7,
+  "contributors": [
+    {
+      "login": "rahulsavani",
+      "name": "Rahul Savani",
+      "avatar_url": "https://avatars.githubusercontent.com/u/743139?v=4",
+      "profile": "http://www.csc.liv.ac.uk/~rahul",
+      "contributions": [
+        "code",
+        "doc",
+        "research",
+        "maintenance",
+        "ideas"
+      ]
+    }
+  ]
 }
