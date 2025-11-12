@@ -22,6 +22,7 @@
 
 #include "gambit.h"
 #include "gameseq.h"
+#include "behavsptseqform.h"
 
 namespace Gambit {
 
@@ -279,9 +280,10 @@ SequencesWrapper BehaviorSupportProfile::GetSequences() const
   return SequencesWrapper(GetSequenceForm()->GetSequences());
 }
 
-PlayerSequencesWrapper BehaviorSupportProfile::GetSequences(GamePlayer &p_player) const
+BehaviorSupportProfile::PlayerSequences
+BehaviorSupportProfile::GetSequences(GamePlayer &p_player) const
 {
-  return PlayerSequencesWrapper(GetSequenceForm()->GetSequences(p_player));
+  return PlayerSequences(GetSequenceForm(), p_player);
 }
 
 int BehaviorSupportProfile::GetConstraintEntry(const GameInfoset &p_infoset,

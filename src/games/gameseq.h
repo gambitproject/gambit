@@ -56,6 +56,9 @@ public:
 using GameSequence = std::shared_ptr<GameSequenceRep>;
 
 class GameSequenceForm {
+
+  friend class BehaviorSupportProfile;
+
 private:
   BehaviorSupportProfile m_support;
   std::map<GamePlayer, std::vector<GameSequence>> m_sequences;
