@@ -744,7 +744,7 @@ std::vector<GameAction> GameTreeRep::GetOwnPriorActions(GameInfoset infoset) con
 
   auto it = m_infosetParents.find(infoset.get());
   if (it == m_infosetParents.end()) {
-    throw UndefinedException("Cannot get prior actions for an unreached information set.");
+    throw UndefinedException("Cannot get prior actions for an unreachable information set.");
   }
 
   std::vector<GameAction> own_prior_actions;
