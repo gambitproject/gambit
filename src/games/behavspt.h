@@ -161,9 +161,9 @@ public:
   InfosetsWrapper GetInfosets() const;
   ContingenciesWrapper GetContingencies() const;
 
-  mutable std::shared_ptr<std::set<GameInfoset>> m_reachable;
+  mutable std::shared_ptr<std::map<GameInfoset, bool>> m_reachable;
   void FindReachableInfosets(GameNode p_node) const;
-  std::shared_ptr<std::set<GameInfoset>> GetReachableInfosets() const;
+  std::shared_ptr<std::map<GameInfoset, bool>> GetReachableInfosets() const;
 };
 
 } // end namespace Gambit

@@ -328,7 +328,7 @@ void BehaviorSupportProfile::FindReachableInfosets(GameNode p_node) const
       }
     }
     else {
-      m_reachable->insert(infoset);
+      (*m_reachable)[infoset] = true;
       for (auto action : GetActions(infoset)) {
         FindReachableInfosets(p_node->GetChild(action));
       }
@@ -336,10 +336,16 @@ void BehaviorSupportProfile::FindReachableInfosets(GameNode p_node) const
   }
 }
 
-std::shared_ptr<std::set<GameInfoset>> BehaviorSupportProfile::GetReachableInfosets() const
+std::shared_ptr<std::map<GameInfoset, bool>> BehaviorSupportProfile::GetReachableInfosets() const
 {
   if (!m_reachable) {
-    m_reachable = std::make_shared<std::set<GameInfoset>>();
+    m_reachable = std::make_shared<std::map<GameInfoset, bool>>();
+    for (size_t pl = 0; pl <= GetGame()->NumPlayers(); pl++) {
+      const GamePlayer player = (pl == 0) ? GetGame()->GetChance() : GetGame()->GetPlayer(pl);
+      for (const auto &infoset : player->GetInfosets()) {
+        (*m_reachable)[infoset] = false;
+      }
+    }
     FindReachableInfosets(GetGame()->GetRoot());
   }
   return m_reachable;
