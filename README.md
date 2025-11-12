@@ -41,6 +41,13 @@ installable via PyPI.
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/StephenPasteris"><img src="https://avatars.githubusercontent.com/u/140617768?v=4?s=100" width="100px;" alt="StephenPasteris"/><br /><sub><b>StephenPasteris</b></sub></a><br /><a href="#research-StephenPasteris" title="Research">🔬</a> <a href="#code-StephenPasteris" title="Code">💻</a></td>
+    </tr>
+  </tbody>
+</table>
 
 <!-- markdownlint-restore -->
 <!-- prettier-ignore-end -->
