@@ -111,3 +111,15 @@ You can also build the documentation locally to preview your changes before subm
 .. TODO: Add instructions for the GitHub workflow during contributor docs refactoring.
    See https://github.com/gambitproject/gambit/issues/541
 
+Recognising contributions
+-------------------------
+
+Gambit is set up with `All Contributors <https://allcontributors.org/>`__ to recognise all types of contributions, including code, documentation, bug reports, and more.
+
+You can see the list of contributors on the README page of the `Gambit GitHub repo <https://github.com/gambitproject/gambit>`__.
+
+To add a contributor, comment on a GitHub Issue or Pull Request, asking @all-contributors to add a contributor:
+
+ @all-contributors please add @<username> for <contributions>
+
+Refer to the `emoji key <https://allcontributors.org/docs/en/emoji-key>`__ for a list of contribution types.
