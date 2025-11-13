@@ -22,7 +22,7 @@
 
 #include "enumpoly.h"
 #include "solvers/nashsupport/nashsupport.h"
-#include "gameseq.h"
+#include "games/gameseq.h"
 #include "polysystem.h"
 #include "polysolver.h"
 #include "behavextend.h"
@@ -48,7 +48,7 @@ namespace {
 
 class ProblemData {
 public:
-  GameSequenceForm sfg;
+  BehaviorSupportProfile m_support;
   std::shared_ptr<VariableSpace> space;
   std::map<GameSequence, int> var;
   std::map<GameSequence, Polynomial<double>> variables;
@@ -62,17 +62,17 @@ Polynomial<double> BuildSequenceVariable(ProblemData &p_data, const GameSequence
   if (!p_sequence->action) {
     return {p_data.space, 1};
   }
-  if (p_sequence->action != p_data.sfg.GetSupport().GetActions(p_sequence->GetInfoset()).back()) {
+  if (p_sequence->action != p_data.m_support.GetActions(p_sequence->GetInfoset()).back()) {
     return {p_data.space, var.at(p_sequence), 1};
   }
 
   Polynomial<double> equation(p_data.space);
-  for (auto seq : p_data.sfg.GetSequences(p_sequence->player)) {
+  for (auto seq : p_data.m_support.GetSequences(p_sequence->player)) {
     if (seq == p_sequence) {
       continue;
     }
     if (const int constraint_coef =
-            p_data.sfg.GetConstraintEntry(p_sequence->GetInfoset(), seq->action)) {
+            p_data.m_support.GetConstraintEntry(p_sequence->GetInfoset(), seq->action)) {
       equation += BuildSequenceVariable(p_data, seq, var) * double(constraint_coef);
     }
   }
@@ -80,18 +80,18 @@ Polynomial<double> BuildSequenceVariable(ProblemData &p_data, const GameSequence
 }
 
 ProblemData::ProblemData(const BehaviorSupportProfile &p_support)
-  : sfg(p_support),
-    space(std::make_shared<VariableSpace>(sfg.GetSequences().size() - sfg.GetInfosets().size() -
-                                          sfg.GetPlayers().size()))
+  : m_support(p_support), space(std::make_shared<VariableSpace>(m_support.GetSequences().size() -
+                                                                m_support.GetInfosets().size() -
+                                                                m_support.GetPlayers().size()))
 {
-  for (auto sequence : sfg.GetSequences()) {
+  for (auto sequence : m_support.GetSequences()) {
     if (sequence->action &&
         (sequence->action != p_support.GetActions(sequence->GetInfoset()).back())) {
       var[sequence] = var.size() + 1;
     }
   }
 
-  for (auto sequence : sfg.GetSequences()) {
+  for (auto sequence : m_support.GetSequences()) {
     variables.emplace(sequence, BuildSequenceVariable(*this, sequence, var));
   }
 }
@@ -100,11 +100,11 @@ Polynomial<double> GetPayoff(ProblemData &p_data, const GamePlayer &p_player)
 {
   Polynomial<double> equation(p_data.space);
 
-  for (auto profile : p_data.sfg.GetContingencies()) {
-    auto pay = p_data.sfg.GetPayoff(profile, p_player);
+  for (auto profile : p_data.m_support.GetContingencies()) {
+    auto pay = p_data.m_support.GetPayoff(profile, p_player);
     if (pay != Rational(0)) {
       Polynomial<double> term(p_data.space, double(pay));
-      for (auto player : p_data.sfg.GetPlayers()) {
+      for (auto player : p_data.m_support.GetPlayers()) {
         term *= p_data.variables.at(profile[player]);
       }
       equation += term;
@@ -115,9 +115,9 @@ Polynomial<double> GetPayoff(ProblemData &p_data, const GamePlayer &p_player)
 
 void IndifferenceEquations(ProblemData &p_data, PolynomialSystem<double> &p_equations)
 {
-  for (auto player : p_data.sfg.GetPlayers()) {
+  for (auto player : p_data.m_support.GetPlayers()) {
     const Polynomial<double> payoff = GetPayoff(p_data, player);
-    for (auto sequence : p_data.sfg.GetSequences(player)) {
+    for (auto sequence : p_data.m_support.GetSequences(player)) {
       try {
         p_equations.push_back(payoff.PartialDerivative(p_data.var.at(sequence)));
       }
@@ -131,11 +131,11 @@ void IndifferenceEquations(ProblemData &p_data, PolynomialSystem<double> &p_equa
 
 void LastActionProbPositiveInequalities(ProblemData &p_data, PolynomialSystem<double> &p_equations)
 {
-  for (auto sequence : p_data.sfg.GetSequences()) {
+  for (auto sequence : p_data.m_support.GetSequences()) {
     if (!sequence->action) {
       continue;
     }
-    const auto &actions = p_data.sfg.GetSupport().GetActions(sequence->action->GetInfoset());
+    const auto &actions = p_data.m_support.GetActions(sequence->action->GetInfoset());
     if (actions.size() > 1 && sequence->action == actions.back()) {
       p_equations.push_back(p_data.variables.at(sequence));
     }
@@ -145,7 +145,7 @@ void LastActionProbPositiveInequalities(ProblemData &p_data, PolynomialSystem<do
 std::map<GameSequence, double> ToSequenceProbs(const ProblemData &p_data, const Vector<double> &v)
 {
   std::map<GameSequence, double> x;
-  for (auto sequence : p_data.sfg.GetSequences()) {
+  for (auto sequence : p_data.m_support.GetSequences()) {
     x[sequence] = p_data.variables.at(sequence).Evaluate(v);
   }
   return x;
@@ -181,7 +181,7 @@ std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfil
   std::list<MixedBehaviorProfile<double>> solutions;
   for (auto root : roots) {
     const MixedBehaviorProfile<double> sol(
-        data.sfg.ToMixedBehaviorProfile(ToSequenceProbs(data, root)));
+        data.m_support.ToMixedBehaviorProfile(ToSequenceProbs(data, root)));
     if (ExtendsToNash(sol, BehaviorSupportProfile(sol.GetGame()),
                       BehaviorSupportProfile(sol.GetGame()))) {
       solutions.push_back(sol);

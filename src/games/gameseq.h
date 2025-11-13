@@ -28,7 +28,7 @@
 
 namespace Gambit {
 
-struct GameSequenceRep {
+class GameSequenceRep {
 public:
   GamePlayer player;
   GameAction action;
@@ -291,6 +291,61 @@ public:
 
   MixedBehaviorProfile<double>
   ToMixedBehaviorProfile(const std::map<GameSequence, double> &) const;
+};
+
+class SequencesWrapper {
+public:
+  explicit SequencesWrapper(const GameSequenceForm::Sequences &sequences) : m_sequences(sequences)
+  {
+  }
+
+  auto begin() const { return m_sequences.begin(); }
+  auto end() const { return m_sequences.end(); }
+
+  std::size_t size() const { return m_sequences.size(); }
+
+private:
+  GameSequenceForm::Sequences m_sequences;
+};
+
+class PlayerSequencesWrapper {
+public:
+  explicit PlayerSequencesWrapper(const GameSequenceForm::PlayerSequences &sequences)
+    : m_sequences(sequences)
+  {
+  }
+
+  auto begin() const { return m_sequences.begin(); }
+  auto end() const { return m_sequences.end(); }
+
+  std::size_t size() const { return m_sequences.size(); }
+
+private:
+  GameSequenceForm::PlayerSequences m_sequences;
+};
+
+class InfosetsWrapper {
+public:
+  explicit InfosetsWrapper(const GameSequenceForm::Infosets &infosets) : m_infosets(infosets) {}
+
+  std::size_t size() const { return m_infosets.size(); }
+
+private:
+  GameSequenceForm::Infosets m_infosets;
+};
+
+class ContingenciesWrapper {
+public:
+  explicit ContingenciesWrapper(const GameSequenceForm::Contingencies &contingencies)
+    : m_contingencies(contingencies)
+  {
+  }
+
+  auto begin() { return m_contingencies.begin(); }
+  auto end() { return m_contingencies.end(); }
+
+private:
+  GameSequenceForm::Contingencies m_contingencies;
 };
 
 } // end namespace Gambit

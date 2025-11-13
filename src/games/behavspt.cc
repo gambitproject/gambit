@@ -21,6 +21,7 @@
 //
 
 #include "gambit.h"
+#include "gameseq.h"
 
 namespace Gambit {
 
@@ -257,6 +258,57 @@ std::list<GameNode> BehaviorSupportProfile::GetMembers(const GameInfoset &p_info
     }
   }
   return answer;
+}
+
+//========================================================================
+//                 BehaviorSupportProfile: Sequence form
+//========================================================================
+
+std::shared_ptr<GameSequenceForm> BehaviorSupportProfile::GetSequenceForm() const
+{
+  if (!m_sequenceForm) {
+    m_sequenceForm = std::make_shared<GameSequenceForm>(*this);
+  }
+  return m_sequenceForm;
+}
+
+SequencesWrapper BehaviorSupportProfile::GetSequences() const
+{
+  return SequencesWrapper(GetSequenceForm()->GetSequences());
+}
+
+PlayerSequencesWrapper BehaviorSupportProfile::GetSequences(GamePlayer &p_player) const
+{
+  return PlayerSequencesWrapper(GetSequenceForm()->GetSequences(p_player));
+}
+
+int BehaviorSupportProfile::GetConstraintEntry(const GameInfoset &p_infoset,
+                                               const GameAction &p_action) const
+{
+  return GetSequenceForm()->GetConstraintEntry(p_infoset, p_action);
+}
+
+const Rational &BehaviorSupportProfile::GetPayoff(
+    const std::map<GamePlayer, std::shared_ptr<GameSequenceRep>> &p_profile,
+    const GamePlayer &p_player) const
+{
+  return GetSequenceForm()->GetPayoff(p_profile, p_player);
+}
+
+MixedBehaviorProfile<double> BehaviorSupportProfile::ToMixedBehaviorProfile(
+    const std::map<std::shared_ptr<GameSequenceRep>, double> &p_profile) const
+{
+  return GetSequenceForm()->ToMixedBehaviorProfile(p_profile);
+}
+
+InfosetsWrapper BehaviorSupportProfile::GetInfosets() const
+{
+  return InfosetsWrapper(GetSequenceForm()->GetInfosets());
+}
+
+ContingenciesWrapper BehaviorSupportProfile::GetContingencies() const
+{
+  return ContingenciesWrapper(GetSequenceForm()->GetContingencies());
 }
 
 } // end namespace Gambit
