@@ -167,11 +167,12 @@ public:
     }
   };
 
+  class Sequences;
   class PlayerSequences;
 
   mutable std::shared_ptr<GameSequenceForm> m_sequenceForm;
   std::shared_ptr<GameSequenceForm> GetSequenceForm() const;
-  SequencesWrapper GetSequences() const;
+  Sequences GetSequences() const;
   PlayerSequences GetSequences(GamePlayer &p_player) const;
   int GetConstraintEntry(const GameInfoset &p_infoset, const GameAction &p_action) const;
   const Rational &
