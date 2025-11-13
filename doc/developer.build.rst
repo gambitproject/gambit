@@ -181,15 +181,15 @@ Building the Python extension
 
 The :ref:`pygambit Python package <pygambit>` is in ``src/pygambit``
 in the Gambit source tree. We recommend to install `pygambit`
-as part of a virtual environment rather than in the system's Python.
-Use `pip` to install from the **root directory of the source tree**, optionally including the `-e` flag for an editable install:
+as part of a virtual environment rather than in the system's Python (for example using `venv`).
+Use `pip` to install from the **root directory of the source tree**:
 
 .. code-block:: bash
 
+   python -m venv venv
+   source venv/bin/activate
    python -m pip install .
 
-There is a set of test cases in `src/pygambit/tests`, which can be run
-using `pytest`.
 
 Once installed, simply ``import pygambit`` in your Python shell or
 script to get started.
