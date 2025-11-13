@@ -790,6 +790,9 @@ class Game:
         yet played prior to reaching that node, the own prior action is null, which is represented
         by `None` in the list of actions returned.
 
+        If a member node is not reachable due to the path to the node passing through an
+        absent-minded information set, that node has no own prior action.
+
         .. versionadded:: 16.5
 
         Returns
