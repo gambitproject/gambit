@@ -68,10 +68,10 @@ version.
 
     git checkout -b feature/your-feature-name
 
-6. Make your changes.
+6. Make your changes. ::
 
-    git add .
-    git commit 
+    git add <files>
+    git commit -m "Clear and descriptive commit message"
 
    Provide a clear commit message.  Gambit does not have its own set of guidelines for commit messages.
    However, there are a number of webpages that have suggestions for writing effective commit messages (and for deciding how to structure your contributions as one or more
