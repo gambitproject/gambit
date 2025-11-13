@@ -113,17 +113,20 @@ def create_mixed_behav_game_efg() -> gbt.Game:
     return read_from_file("mixed_behavior_game.efg")
 
 
-def create_myerson_2_card_poker_efg() -> gbt.Game:
+def create_stripped_down_poker_efg() -> gbt.Game:
     """
     Returns
     -------
     Game
-        Simplied "stripped down" version of Myerson 2-card poker:
-        Two-player extensive poker game with a chance move with two moves,
-        then player 1 can raise or fold; after raising player 2 is in an infoset with two nodes
-        and can choose to meet or pass
+        Stripped-Down Poker: A Classroom Game with Signaling and Bluﬃng
+        Reiley et al (2008)
+
+        Two-player extensive-form poker game between Fred and Alice
+        Chance deals King or Queen to Fred
+        Fred can then Bet or Fold; after raising Alice is in an infoset with two nodes
+        and can choose to Call or Fold
     """
-    return read_from_file("myerson_2_card_poker.efg")
+    return read_from_file("stripped_down_poker.efg")
 
 
 def create_kuhn_poker_efg() -> gbt.Game:
