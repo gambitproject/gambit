@@ -47,22 +47,35 @@ version.
 
 3. Follow the instructions in the :ref:`building-from-source` page to set up your development environment and build Gambit from source. If you only plan to make changes to the PyGambit Python code, you can skip to :ref:`build-python`.
 
-4. *[Optional]* Install `pre-commit` which is used to run code formatters and linters before each commit. This helps ensure code quality and consistency. Install it into the virtual environment where you installed PyGambit ::
+4. *[Optional but recommended]* Install `pre-commit` which is used to run code formatters and linters before each commit. This helps ensure code quality and consistency. You can it into the virtual environment where you installed PyGambit ::
 
     pip install pre-commit
+
+   Alternatively, `pre-commit` is also available via various packaging systems.  For example, you can install via `Homebrew <https://brew.sh>`__ ::
+
+    brew install pre-commit
+
+   If you install via a package manager (instead of into the virtual environment), `pre-commit` will be available for use with other projects.
 
    Then, set it up in the Gambit repository ::
 
     pre-commit install
 
+   Having `pre-commit` installed is recommended as it runs many of the same checks that are automatically conducted on any pull request.  This will let you make any adjustments required prior to pushing and initiating
+   a pull request.
+
 5. Create a new branch for your changes ::
 
     git checkout -b feature/your-feature-name
 
-6. Make your changes. Commit each change with a clear commit message ::
+6. Make your changes.
 
     git add .
-    git commit -m "Add feature X or fix bug Y"
+    git commit 
+
+   Provide a clear commit message.  Gambit does not have its own set of guidelines for commit messages.
+   However, there are a number of webpages that have suggestions for writing effective commit messages (and for deciding how to structure your contributions as one or more
+   commits as appropriate).  See for example `this page <https://wiki.openstack.org/wiki/GitCommitMessages>`__.
 
 7. Push your changes to your fork or branch ::
 
