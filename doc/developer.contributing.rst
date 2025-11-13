@@ -5,7 +5,7 @@ This section provides guidelines for contributing to Gambit, including how to re
 It includes information relevant to both core developers and external contributors.
 
 GitHub issues
-----------------
+-------------
 
 In the first instance, bug reports, feature requests and improvements to the Gambit documentation should be
 posted to the Gambit issue tracker, located at
@@ -25,7 +25,7 @@ When reporting a bug, please be sure to include the following:
 .. _contributing-code:
 
 Contributing code
-----------------
+-----------------
 
 Gambit is an open-source project, and contributions are welcome from anyone.
 The project is hosted on GitHub, and contributions can be made via pull requests following the standard GitHub workflow.
@@ -47,21 +47,29 @@ version.
 
 3. Follow the instructions in the :ref:`building-from-source` page to set up your development environment and build Gambit from source. If you only plan to make changes to the PyGambit Python code, you can skip to :ref:`build-python`.
 
-4. Create a new branch for your changes ::
+4. *[Optional]* Install `pre-commit` which is used to run code formatters and linters before each commit. This helps ensure code quality and consistency. Install it into the virtual environment where you installed PyGambit ::
+
+    pip install pre-commit
+
+   Then, set it up in the Gambit repository ::
+
+    pre-commit install
+
+5. Create a new branch for your changes ::
 
     git checkout -b feature/your-feature-name
 
-5. Make your changes. Commit each change with a clear commit message ::
+6. Make your changes. Commit each change with a clear commit message ::
 
     git add .
     git commit -m "Add feature X or fix bug Y"
 
-6. Push your changes to your fork or branch ::
+7. Push your changes to your fork or branch ::
 
     git push origin feature/your-feature-name
 
-7. Open a pull request on GitHub to the master branch of the upstream repository, describing your changes and linking to any relevant issues.
-8. Core developers will review your changes, provide feedback, and merge them into the master branch if they meet the project's standards.
+8. Open a pull request on GitHub to the master branch of the upstream repository, describing your changes and linking to any relevant issues.
+9. Core developers will review your changes, provide feedback, and merge them into the master branch if they meet the project's standards.
 
 Testing your changes
 --------------------
