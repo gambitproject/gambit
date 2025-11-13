@@ -2010,7 +2010,7 @@ class Game:
         Parameters
         ----------
         strategy : Strategy or str
-            The strategy to delete
+            The strategy to delete yahoo
 
         Raises
         ------
