@@ -4,6 +4,7 @@ scipy==1.16.1
 pydata-sphinx-theme==0.16.1
 sphinx_design==0.6.1
 sphinx-autobuild==2024.10.3
+nbsphinx==0.9.7
 ipython==9.4.0
 matplotlib==3.10.5
 pickleshare==0.7.5

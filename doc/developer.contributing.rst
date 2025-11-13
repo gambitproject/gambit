@@ -96,20 +96,21 @@ You can make changes to the documentation by editing the `.rst` files in the ``d
 Creating a pull request with your changes will automatically trigger a build of the documentation via the ReadTheDocs service, which can be viewed online.
 You can also build the documentation locally to preview your changes before submitting a pull request.
 
-1. Install the docs dependencies (into the virtual environment where you installed PyGambit): ::
+1. `Install Pandoc <https://pandoc.org/installing.html>`_ for your OS
+
+2. Install the docs dependencies (into the virtual environment where you installed PyGambit): ::
 
     pip install -r doc/requirements.txt
 
-2. Navigate to the Gambit repo and build the docs: ::
+3. Navigate to the Gambit repo and build the docs: ::
 
     cd doc
     make html  # or make livehtml for live server with auto-rebuild
 
-3. Open ``doc/_build/html/index.html`` in your browser to view the documentation.
+4. Open ``doc/_build/html/index.html`` in your browser to view the documentation.
 
 
-.. TODO: Add instructions for the GitHub workflow during contributor docs refactoring.
-   See https://github.com/gambitproject/gambit/issues/541
+
 
 Recognising contributions
 -------------------------
