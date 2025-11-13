@@ -39,3 +39,4 @@ dist
 .venv
 *.dmg
 Gambit.app/*
+*.so
