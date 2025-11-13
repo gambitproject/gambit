@@ -305,9 +305,9 @@ MixedBehaviorProfile<double> BehaviorSupportProfile::ToMixedBehaviorProfile(
   return GetSequenceForm()->ToMixedBehaviorProfile(p_profile);
 }
 
-ContingenciesWrapper BehaviorSupportProfile::GetContingencies() const
+BehaviorSupportProfile::Contingencies BehaviorSupportProfile::GetContingencies() const
 {
-  return ContingenciesWrapper(GetSequenceForm()->GetContingencies());
+  return Contingencies(GetSequenceForm());
 }
 
 //========================================================================
