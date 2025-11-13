@@ -40,5 +40,5 @@ dist
 *.dmg
 Gambit.app/*
 *.so
-tutorials/games/*.nfg
-tutorials/games/*.efg
+doc/tutorials/games/*.nfg
+doc/tutorials/games/*.efg
