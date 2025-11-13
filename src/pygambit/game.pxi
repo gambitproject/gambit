@@ -781,28 +781,29 @@ class Game:
         self,
         infoset: typing.Union[Infoset, str]
     ) -> typing.List[typing.Optional[Action]]:
-        """ For a given infoset and the player active in it,
-        find the set of last action(s) the player took along the paths reaching the infoset.
+        """Return the list of actions which immediately precede `infoset` in the graph of
+        the player's information set.
+
+        An "own prior action" is an action such that, for a given member node of the information
+        set, it is the action most recently played by the player on the path to that node.
+        If there is a member node where there is no such action, that is, the player has not
+        yet played prior to reaching that node, the own prior action is null, which is represented
+        by `None` in the list of actions returned.
 
         .. versionadded:: 16.5
 
         Returns
         -------
-        list of Action or None
-            A list of the preceding actions.
-            An element in the list can be None, if the infoset contains a first move of the player.
-            An empty list is returned if the information set is unreachable.
+        list of {Action, None}
+            The list of the prior actions.
         """
         infoset = self._resolve_infoset(infoset, "get_own_prior_actions")
-
-        own_prior_actions = [
+        return [
             None if not action else Action.wrap(action)
             for action in self.game.deref().GetOwnPriorActions(
                 cython.cast(Infoset, infoset).infoset
             )
         ]
-
-        return own_prior_actions
 
     @property
     def is_perfect_recall(self) -> bool:
