@@ -299,15 +299,28 @@ const Rational &BehaviorSupportProfile::GetPayoff(
   return GetSequenceForm()->GetPayoff(p_profile, p_player);
 }
 
-MixedBehaviorProfile<double> BehaviorSupportProfile::ToMixedBehaviorProfile(
-    const std::map<std::shared_ptr<GameSequenceRep>, double> &p_profile) const
-{
-  return GetSequenceForm()->ToMixedBehaviorProfile(p_profile);
-}
-
 BehaviorSupportProfile::Contingencies BehaviorSupportProfile::GetContingencies() const
 {
   return Contingencies(GetSequenceForm());
+}
+
+MixedBehaviorProfile<double>
+BehaviorSupportProfile::ToMixedBehaviorProfile(const std::map<GameSequence, double> &x) const
+{
+  MixedBehaviorProfile<double> b(*this);
+  for (auto sequence : GetSequences()) {
+    if (sequence->action == nullptr) {
+      continue;
+    }
+    const double parent_prob = x.at(sequence->parent.lock());
+    if (parent_prob > 0) {
+      b[sequence->action] = x.at(sequence) / parent_prob;
+    }
+    else {
+      b[sequence->action] = 0;
+    }
+  }
+  return b;
 }
 
 //========================================================================

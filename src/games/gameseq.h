@@ -291,9 +291,6 @@ public:
       return 0;
     }
   }
-
-  MixedBehaviorProfile<double>
-  ToMixedBehaviorProfile(const std::map<GameSequence, double> &) const;
 };
 
 } // end namespace Gambit
