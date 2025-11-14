@@ -67,7 +67,7 @@ size_t BehaviorSupportProfile::BehaviorProfileLength() const
 
 void BehaviorSupportProfile::AddAction(const GameAction &p_action)
 {
-  m_reachable = nullptr;
+  m_reachableInfosets = nullptr;
   auto &support = m_actions.at(p_action->GetInfoset());
   auto pos = std::find_if(support.begin(), support.end(), [p_action](const GameAction &a) {
     return a->GetNumber() >= p_action->GetNumber();
@@ -83,7 +83,7 @@ void BehaviorSupportProfile::AddAction(const GameAction &p_action)
 
 bool BehaviorSupportProfile::RemoveAction(const GameAction &p_action)
 {
-  m_reachable = nullptr;
+  m_reachableInfosets = nullptr;
   auto &support = m_actions.at(p_action->GetInfoset());
   auto pos = std::find(support.begin(), support.end(), p_action);
   if (pos != support.end()) {
@@ -338,7 +338,7 @@ void BehaviorSupportProfile::FindReachableInfosets(GameNode p_node) const
       }
     }
     else {
-      (*m_reachable)[infoset] = true;
+      (*m_reachableInfosets)[infoset] = true;
       for (auto action : GetActions(infoset)) {
         FindReachableInfosets(p_node->GetChild(action));
       }
@@ -348,17 +348,17 @@ void BehaviorSupportProfile::FindReachableInfosets(GameNode p_node) const
 
 std::shared_ptr<std::map<GameInfoset, bool>> BehaviorSupportProfile::GetReachableInfosets() const
 {
-  if (!m_reachable) {
-    m_reachable = std::make_shared<std::map<GameInfoset, bool>>();
+  if (!m_reachableInfosets) {
+    m_reachableInfosets = std::make_shared<std::map<GameInfoset, bool>>();
     for (size_t pl = 0; pl <= GetGame()->NumPlayers(); pl++) {
       const GamePlayer player = (pl == 0) ? GetGame()->GetChance() : GetGame()->GetPlayer(pl);
       for (const auto &infoset : player->GetInfosets()) {
-        (*m_reachable)[infoset] = false;
+        (*m_reachableInfosets)[infoset] = false;
       }
     }
     FindReachableInfosets(GetGame()->GetRoot());
   }
-  return m_reachable;
+  return m_reachableInfosets;
 }
 
 } // end namespace Gambit

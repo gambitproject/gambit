@@ -185,7 +185,7 @@ public:
   Infosets GetInfosets() const { return Infosets(this); };
   Contingencies GetContingencies() const;
 
-  mutable std::shared_ptr<std::map<GameInfoset, bool>> m_reachable;
+  mutable std::shared_ptr<std::map<GameInfoset, bool>> m_reachableInfosets;
   void FindReachableInfosets(GameNode p_node) const;
   std::shared_ptr<std::map<GameInfoset, bool>> GetReachableInfosets() const;
 };
