@@ -48,7 +48,7 @@
            (unsigned char)((c) & 0xFF))
 #define WXCOLOUR_TO_LONG(c) ((c.Red() << 16) | (c.Green() << 8) | (c.Blue()))
 
-#define RINT(x) int((x) >= 0 ? ((x) + 0.5) : ((x)-0.5))
+#define RINT(x) int((x) >= 0 ? ((x) + 0.5) : ((x) - 0.5))
 
 #if !wxCHECK_VERSION(2, 5, 0)
 bool WXRECT2DDOUBLE_EQUAL(const wxRect2DDouble &r1, const wxRect2DDouble &r2)

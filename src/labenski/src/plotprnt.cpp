@@ -26,7 +26,7 @@
 #include "wx/plotctrl/plotctrl.h"
 #include "wx/plotctrl/plotprnt.h"
 
-#define RINT(x) int((x) >= 0 ? ((x) + 0.5) : ((x)-0.5))
+#define RINT(x) int((x) >= 0 ? ((x) + 0.5) : ((x) - 0.5))
 
 //-----------------------------------------------------------------------------
 // wxPlotPrintout
