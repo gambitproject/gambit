@@ -9,7 +9,7 @@ want to play around with the latest features before they make it
 into a pre-compiled binary version.
 
 This page requires at least some familiarity with programming.
-Most users will want to stick with released distributions; see the 
+Most users will want to stick with released distributions; see the
 :ref:`install` page for how to get the current version for
 your operating system.
 Following the instructions here will install the Gambit CLI, GUI and Python extension (PyGambit).
@@ -28,7 +28,7 @@ Install build tools and dependencies
 
 .. dropdown:: Install on macOS via Homebrew
    :class-container: sd-border-0
-   
+
    1. Check that you have Homebrew installed by running `brew --version`. If not, follow the instructions at `https://brew.sh/ <https://brew.sh/>`_.
 
    2. Install build dependencies:
