@@ -322,9 +322,9 @@ void aggame::payoffMatrix(cmatrix &dest, const cvector &s, agg::AggNumber fuzz) 
           }
           computePayoff(dest, rown, act1, *p, act2, aggPtr->cache);
         } // end for(act2
-      } // end for(p
-    } // end for(act1
-  } // end for(rown
+      }   // end for(p
+    }     // end for(act1
+  }       // end for(rown
 }
 
 void aggame::computeUndisturbedPayoff(agg::AggNumber &undisturbedPayoff, bool &has, int player1,

@@ -214,9 +214,11 @@ void GenerateSizeDiff(const Game &game, int size, int diff, CallbackFunction cal
       continue;
     }
     std::list<StrategySubsets> domains;
-    std::transform(
-        players.begin(), players.end(), size_profile.begin(), std::back_inserter(domains),
-        [](const GamePlayer &player, size_t sz) -> StrategySubsets { return {player, sz}; });
+    std::transform(players.begin(), players.end(), size_profile.begin(),
+                   std::back_inserter(domains),
+                   [](const GamePlayer &player, size_t sz) -> StrategySubsets {
+                     return {player, sz};
+                   });
     GenerateSupportProfiles(game, std::map<GamePlayer, StrategySupport>(), domains, callback);
   }
 }
