@@ -22,6 +22,7 @@
 
 #include "gambit.h"
 #include "gameseq.h"
+#include "behavsptseqform.h"
 
 namespace Gambit {
 
@@ -66,6 +67,7 @@ size_t BehaviorSupportProfile::BehaviorProfileLength() const
 
 void BehaviorSupportProfile::AddAction(const GameAction &p_action)
 {
+  m_reachableInfosets = nullptr;
   auto &support = m_actions.at(p_action->GetInfoset());
   auto pos = std::find_if(support.begin(), support.end(), [p_action](const GameAction &a) {
     return a->GetNumber() >= p_action->GetNumber();
@@ -81,6 +83,7 @@ void BehaviorSupportProfile::AddAction(const GameAction &p_action)
 
 bool BehaviorSupportProfile::RemoveAction(const GameAction &p_action)
 {
+  m_reachableInfosets = nullptr;
   auto &support = m_actions.at(p_action->GetInfoset());
   auto pos = std::find(support.begin(), support.end(), p_action);
   if (pos != support.end()) {
@@ -272,14 +275,15 @@ std::shared_ptr<GameSequenceForm> BehaviorSupportProfile::GetSequenceForm() cons
   return m_sequenceForm;
 }
 
-SequencesWrapper BehaviorSupportProfile::GetSequences() const
+BehaviorSupportProfile::Sequences BehaviorSupportProfile::GetSequences() const
 {
-  return SequencesWrapper(GetSequenceForm()->GetSequences());
+  return {GetSequenceForm()};
 }
 
-PlayerSequencesWrapper BehaviorSupportProfile::GetSequences(GamePlayer &p_player) const
+BehaviorSupportProfile::PlayerSequences
+BehaviorSupportProfile::GetSequences(GamePlayer &p_player) const
 {
-  return PlayerSequencesWrapper(GetSequenceForm()->GetSequences(p_player));
+  return {GetSequenceForm(), p_player};
 }
 
 int BehaviorSupportProfile::GetConstraintEntry(const GameInfoset &p_infoset,
@@ -295,20 +299,65 @@ const Rational &BehaviorSupportProfile::GetPayoff(
   return GetSequenceForm()->GetPayoff(p_profile, p_player);
 }
 
-MixedBehaviorProfile<double> BehaviorSupportProfile::ToMixedBehaviorProfile(
-    const std::map<std::shared_ptr<GameSequenceRep>, double> &p_profile) const
+BehaviorSupportProfile::Contingencies BehaviorSupportProfile::GetContingencies() const
 {
-  return GetSequenceForm()->ToMixedBehaviorProfile(p_profile);
+  return {GetSequenceForm()};
 }
 
-InfosetsWrapper BehaviorSupportProfile::GetInfosets() const
+MixedBehaviorProfile<double>
+BehaviorSupportProfile::ToMixedBehaviorProfile(const std::map<GameSequence, double> &x) const
 {
-  return InfosetsWrapper(GetSequenceForm()->GetInfosets());
+  MixedBehaviorProfile<double> b(*this);
+  for (auto sequence : GetSequences()) {
+    if (sequence->action == nullptr) {
+      continue;
+    }
+    const double parent_prob = x.at(sequence->parent.lock());
+    if (parent_prob > 0) {
+      b[sequence->action] = x.at(sequence) / parent_prob;
+    }
+    else {
+      b[sequence->action] = 0;
+    }
+  }
+  return b;
 }
 
-ContingenciesWrapper BehaviorSupportProfile::GetContingencies() const
+//========================================================================
+//                 BehaviorSupportProfile: Reachable Information Sets
+//========================================================================
+
+void BehaviorSupportProfile::FindReachableInfosets(GameNode p_node) const
 {
-  return ContingenciesWrapper(GetSequenceForm()->GetContingencies());
+  if (!p_node->IsTerminal()) {
+    auto infoset = p_node->GetInfoset();
+    (*m_reachableInfosets)[infoset] = true;
+    if (p_node->GetPlayer()->IsChance()) {
+      for (auto action : infoset->GetActions()) {
+        FindReachableInfosets(p_node->GetChild(action));
+      }
+    }
+    else {
+      for (auto action : GetActions(infoset)) {
+        FindReachableInfosets(p_node->GetChild(action));
+      }
+    }
+  }
+}
+
+std::shared_ptr<std::map<GameInfoset, bool>> BehaviorSupportProfile::GetReachableInfosets() const
+{
+  if (!m_reachableInfosets) {
+    m_reachableInfosets = std::make_shared<std::map<GameInfoset, bool>>();
+    for (size_t pl = 0; pl <= GetGame()->NumPlayers(); pl++) {
+      const GamePlayer player = (pl == 0) ? GetGame()->GetChance() : GetGame()->GetPlayer(pl);
+      for (const auto &infoset : player->GetInfosets()) {
+        (*m_reachableInfosets)[infoset] = false;
+      }
+    }
+    FindReachableInfosets(GetGame()->GetRoot());
+  }
+  return m_reachableInfosets;
 }
 
 } // end namespace Gambit

@@ -147,10 +147,34 @@ public:
   BehaviorSupportProfile Undominated(bool p_strict) const;
   //@}
 
+  class Infosets {
+  private:
+    const BehaviorSupportProfile *m_support;
+
+  public:
+    Infosets(const BehaviorSupportProfile *p_support) : m_support(p_support) {}
+
+    size_t size() const
+    {
+      auto reachable_infosets = m_support->GetReachableInfosets();
+      size_t count = 0;
+      for (auto [infoset, is_reachable] : *reachable_infosets) {
+        if (is_reachable && !infoset->GetPlayer()->IsChance()) {
+          ++count;
+        }
+      }
+      return count;
+    }
+  };
+
+  class Sequences;
+  class PlayerSequences;
+  class Contingencies;
+
   mutable std::shared_ptr<GameSequenceForm> m_sequenceForm;
   std::shared_ptr<GameSequenceForm> GetSequenceForm() const;
-  SequencesWrapper GetSequences() const;
-  PlayerSequencesWrapper GetSequences(GamePlayer &p_player) const;
+  Sequences GetSequences() const;
+  PlayerSequences GetSequences(GamePlayer &p_player) const;
   int GetConstraintEntry(const GameInfoset &p_infoset, const GameAction &p_action) const;
   const Rational &
   GetPayoff(const std::map<GamePlayer, std::shared_ptr<GameSequenceRep>> &p_profile,
@@ -158,8 +182,12 @@ public:
   GameRep::Players GetPlayers() const { return GetGame()->GetPlayers(); }
   MixedBehaviorProfile<double>
   ToMixedBehaviorProfile(const std::map<std::shared_ptr<GameSequenceRep>, double> &) const;
-  InfosetsWrapper GetInfosets() const;
-  ContingenciesWrapper GetContingencies() const;
+  Infosets GetInfosets() const { return {this}; };
+  Contingencies GetContingencies() const;
+
+  mutable std::shared_ptr<std::map<GameInfoset, bool>> m_reachableInfosets;
+  void FindReachableInfosets(GameNode p_node) const;
+  std::shared_ptr<std::map<GameInfoset, bool>> GetReachableInfosets() const;
 };
 
 } // end namespace Gambit
