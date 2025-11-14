@@ -49,6 +49,88 @@ def test_game_add_players_nolabel():
     game.add_player()
 
 
+@pytest.mark.parametrize(
+    "game_file, infoset_specification, expected_actions",
+    [
+        # ======================================================================
+        # Game 1: binary_3_levels_generic_payoffs.efg (Perfect Recall)
+        # ======================================================================
+        # Player 1's root infoset. Reachable
+        ("binary_3_levels_generic_payoffs.efg", ("Player 1", 0), [None]),
+        # Player 1's second infoset. Reached after P1's own action 0 ("1").
+        (
+            "binary_3_levels_generic_payoffs.efg",
+            ("Player 1", 1),
+            [("Player 1", 0, 0)],
+        ),
+        # Player 1's third infoset. Reached after P1's own action 1 ("2").
+        (
+            "binary_3_levels_generic_payoffs.efg",
+            ("Player 1", 2),
+            [("Player 1", 0, 1)],
+        ),
+        # Player 2's only infoset. Reachable
+        ("binary_3_levels_generic_payoffs.efg", ("Player 2", 0), [None]),
+        # ======================================================================
+        # Game 2: wichardt.efg (Imperfect Recall)
+        # ======================================================================
+        # The root infoset for Player 1. Reachable
+        ("wichardt.efg", ("Player 1", 0), [None]),
+        # Player 1's second infoset. It can be reached after either action 0 ("L") or 1 ("R").
+        (
+            "wichardt.efg",
+            ("Player 1", 1),
+            [("Player 1", 0, 0), ("Player 1", 0, 1)],
+        ),
+        # Player 2's only infoset. Reachable.
+        ("wichardt.efg", ("Player 2", 0), [None]),
+        # ======================================================================
+        # Game 3: noPR-action-AM-two-hops.efg (Absent-Mindedness)
+        # ======================================================================
+        # Player 1's infoset 0. Has the property of Absent-Mindedness:
+        # Contains the root vertex and can be further reached via two different prior actions.
+        (
+            "noPR-action-AM-two-hops.efg",
+            ("Player 1", 0),
+            [None, ("Player 1", 0, 0), ("Player 1", 1, 1)],
+        ),
+        # Player 1's infoset 1. Reached via a single prior action.
+        ("noPR-action-AM-two-hops.efg", ("Player 1", 1), [("Player 1", 0, 0)]),
+        # Player 2's infoset 0. Reached via a single prior action.
+        ("noPR-action-AM-two-hops.efg", ("Player 2", 0), [None, ("Player 2", 0, 0)]),
+        # Player 2's infoset 1. This infoset is unreachable.
+        ("noPR-action-AM-two-hops.efg", ("Player 2", 1), []),
+    ],
+)
+def test_get_own_prior_actions(
+    game_file: str,
+    infoset_specification: tuple[str, int],
+    expected_actions: list,
+):
+    """
+    Verifies get_own_prior_actions returns correct sets of actions for various infosets:
+    root, perfect recall, imperfect recall, absent-minded, and unreachable cases.
+    """
+    game = games.read_from_file(game_file)
+    player_label, infoset_num = infoset_specification
+
+    player = game.players[player_label]
+    infoset = player.infosets[infoset_num]
+
+    result_actions = game.get_own_prior_actions(infoset)
+
+    results = [
+        None if action is None else (
+            action.infoset.player.label,
+            action.infoset.number,
+            action.number,
+        )
+        for action in result_actions
+    ]
+
+    assert sorted(results, key=str) == sorted(expected_actions, key=str)
+
+
 @pytest.mark.parametrize("game_input,expected_result", [
     # Games with perfect recall from files (game_input is a string)
     ("e01.efg", True),

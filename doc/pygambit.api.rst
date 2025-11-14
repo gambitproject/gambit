@@ -109,6 +109,7 @@ Information about the game
    Game.infosets
    Game.nodes
    Game.contingencies
+   Game.get_own_prior_actions
 
 .. autosummary::
    :toctree: api/
