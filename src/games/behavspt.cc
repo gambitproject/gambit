@@ -277,13 +277,13 @@ std::shared_ptr<GameSequenceForm> BehaviorSupportProfile::GetSequenceForm() cons
 
 BehaviorSupportProfile::Sequences BehaviorSupportProfile::GetSequences() const
 {
-  return Sequences(GetSequenceForm());
+  return {GetSequenceForm()};
 }
 
 BehaviorSupportProfile::PlayerSequences
 BehaviorSupportProfile::GetSequences(GamePlayer &p_player) const
 {
-  return PlayerSequences(GetSequenceForm(), p_player);
+  return {GetSequenceForm(), p_player};
 }
 
 int BehaviorSupportProfile::GetConstraintEntry(const GameInfoset &p_infoset,
@@ -301,7 +301,7 @@ const Rational &BehaviorSupportProfile::GetPayoff(
 
 BehaviorSupportProfile::Contingencies BehaviorSupportProfile::GetContingencies() const
 {
-  return Contingencies(GetSequenceForm());
+  return {GetSequenceForm()};
 }
 
 MixedBehaviorProfile<double>

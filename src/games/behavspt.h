@@ -182,7 +182,7 @@ public:
   GameRep::Players GetPlayers() const { return GetGame()->GetPlayers(); }
   MixedBehaviorProfile<double>
   ToMixedBehaviorProfile(const std::map<std::shared_ptr<GameSequenceRep>, double> &) const;
-  Infosets GetInfosets() const { return Infosets(this); };
+  Infosets GetInfosets() const { return {this}; };
   Contingencies GetContingencies() const;
 
   mutable std::shared_ptr<std::map<GameInfoset, bool>> m_reachableInfosets;
