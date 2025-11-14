@@ -40,6 +40,7 @@ protected:
   std::size_t m_numNonterminalNodes = 0;
   std::map<GameNodeRep *, std::vector<GameNodeRep *>> m_nodePlays;
   std::map<GameInfosetRep *, std::set<GameActionRep *>> m_infosetParents;
+  std::set<GameInfosetRep *> m_absentMindedInfosets;
 
   /// @name Private auxiliary functions
   //@{
@@ -74,6 +75,7 @@ public:
   bool IsTree() const override { return true; }
   bool IsConstSum() const override;
   bool IsPerfectRecall() const override;
+  bool IsAbsentMinded() const override;
   //@}
 
   /// @name Players
