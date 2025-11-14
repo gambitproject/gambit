@@ -158,8 +158,8 @@ public:
     {
       auto reachable_infosets = m_support->GetReachableInfosets();
       size_t count = 0;
-      for (auto [key, value] : *reachable_infosets) {
-        if (value) {
+      for (auto [infoset, is_reachable] : *reachable_infosets) {
+        if (is_reachable && !infoset->GetPlayer()->IsChance()) {
           ++count;
         }
       }

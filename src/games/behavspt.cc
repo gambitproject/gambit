@@ -331,14 +331,13 @@ void BehaviorSupportProfile::FindReachableInfosets(GameNode p_node) const
 {
   if (!p_node->IsTerminal()) {
     auto infoset = p_node->GetInfoset();
-
+    (*m_reachableInfosets)[infoset] = true;
     if (p_node->GetPlayer()->IsChance()) {
       for (auto action : infoset->GetActions()) {
         FindReachableInfosets(p_node->GetChild(action));
       }
     }
     else {
-      (*m_reachableInfosets)[infoset] = true;
       for (auto action : GetActions(infoset)) {
         FindReachableInfosets(p_node->GetChild(action));
       }
