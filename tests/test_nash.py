@@ -74,6 +74,9 @@ def test_enumpure_strategy(game: gbt.Game, pure_strategy_prof_data: list):
 @pytest.mark.parametrize(
     "game,pure_behav_prof_data",
     [
+        #############################################################
+        # Examples where Nash pure behaviors and agent-form pure equillibrium behaviors coincide
+        #############################################################
         # Zero-sum games
         (
             games.create_two_player_perfect_info_win_lose_efg(),
@@ -107,6 +110,16 @@ def test_enumpure_strategy(game: gbt.Game, pure_strategy_prof_data: list):
                 [[[0, 1]], [[0, 1]], [[1, 0]]],
             ],
         ),
+        #############################################################
+        # Examples where the are agent-form pure equillibrium behaviors that are not Nash eq
+        #############################################################
+        (
+            games.read_from_file("agent_form_eq_example.efg"),
+            [
+                [[[1, 0], [0, 1]], [[0, 1]]],
+                [[[0, 1], [0, 1]], [[1, 0]]]
+            ]
+        ),
     ]
 )
 def test_enumpure_agent(game: gbt.Game, pure_behav_prof_data: list):
@@ -114,11 +127,15 @@ def test_enumpure_agent(game: gbt.Game, pure_behav_prof_data: list):
 
        Tests max regret being zero (internal consistency) and compares the computed sequence of
        pure agent equilibria to a previosuly computed sequence (regression test)
+
+       This should include all Nash equilibria in pure behaviors, but may include further
+       profiles that are not Nash equilibria
+
     """
     result = gbt.nash.enumpure_solve(game, use_strategic=False)
     assert len(result.equilibria) == len(pure_behav_prof_data)
     for eq, exp in zip(result.equilibria, pure_behav_prof_data):
-        assert eq.max_regret() == 0
+        assert eq.max_regret() == 0  # This is true even for an agent form eq that is not Nash
         expected = game.mixed_behavior_profile(rational=True, data=exp)
         assert eq == expected
 

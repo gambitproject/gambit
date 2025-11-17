@@ -1,0 +1,14 @@
+EFG 2 R "Untitled Extensive Game" { "Player 1" "Player 2" }
+"Example from Figure 4.2 from Myerson's 1991 textbook"
+
+p "" 1 1 "" { "A1" "B1" } 0
+p "" 2 1 "" { "W2" "X2" } 0
+p "" 1 2 "" { "Y1" "Z1" } 0
+t "" 1 "" { 3, 0 }
+t "" 2 "" { 0, 0 }
+p "" 1 2 "" { "Y1" "Z1" } 0
+t "" 3 "" { 2, 3 }
+t "" 4 "" { 4, 1 }
+p "" 2 1 "" { "W2" "X2" } 0
+t "" 5 "" { 2, 3 }
+t "" 6 "" { 3, 2 }
