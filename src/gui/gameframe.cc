@@ -264,7 +264,7 @@ GameFrame::GameFrame(wxWindow *p_parent, GameDocument *p_doc)
   }
   else {
     m_efgPanel = nullptr;
-    m_nfgPanel = new NfgPanel(m_splitter, p_doc);
+    m_nfgPanel = new NfgPanel(m_splitter, p_doc, false);
     m_nfgPanel->Show(true);
     m_splitter->Initialize(m_nfgPanel);
   }
@@ -1117,7 +1117,8 @@ void GameFrame::OnViewStrategic(wxCommandEvent &p_event)
     }
 
     if (!m_nfgPanel) {
-      m_nfgPanel = new NfgPanel(m_splitter, m_doc);
+      m_nfgPanel =
+          new NfgPanel(m_splitter, m_doc, GetMenuBar()->IsChecked(GBT_MENU_TOOLS_DOMINANCE));
     }
     m_doc->BuildNfg();
 
@@ -1212,14 +1213,10 @@ void GameFrame::OnFormatDecimalsDelete(wxCommandEvent &)
 
 void GameFrame::OnToolsDominance(wxCommandEvent &p_event)
 {
-  if (m_efgPanel) {
-    wxPostEvent(m_efgPanel, p_event);
-  }
   if (m_nfgPanel) {
     wxPostEvent(m_nfgPanel, p_event);
   }
   if (!p_event.IsChecked()) {
-    m_doc->TopBehavElimLevel();
     m_doc->TopStrategyElimLevel();
   }
 }
