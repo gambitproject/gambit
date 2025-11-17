@@ -569,7 +569,8 @@ GameInfoset GameTreeRep::LeaveInfoset(GameNode p_node)
   return node->m_infoset->shared_from_this();
 }
 
-GameInfoset GameTreeRep::AppendMove(GameNode p_node, GamePlayer p_player, int p_actions)
+GameInfoset GameTreeRep::AppendMove(GameNode p_node, GamePlayer p_player, int p_actions,
+                                    bool p_generateLabels)
 {
   GameNodeRep *node = p_node.get();
   if (p_actions <= 0 || !node->m_children.empty()) {
@@ -583,6 +584,10 @@ GameInfoset GameTreeRep::AppendMove(GameNode p_node, GamePlayer p_player, int p_
   auto newInfoset = std::make_shared<GameInfosetRep>(this, p_player->m_infosets.size() + 1,
                                                      p_player.get(), p_actions);
   p_player->m_infosets.push_back(newInfoset);
+  if (p_generateLabels) {
+    std::for_each(newInfoset->m_actions.begin(), newInfoset->m_actions.end(),
+                  [act = 1](const GameAction &a) mutable { a->SetLabel(std::to_string(act++)); });
+  }
   return AppendMove(p_node, newInfoset);
 }
 
@@ -609,7 +614,8 @@ GameInfoset GameTreeRep::AppendMove(GameNode p_node, GameInfoset p_infoset)
   return node->m_infoset->shared_from_this();
 }
 
-GameInfoset GameTreeRep::InsertMove(GameNode p_node, GamePlayer p_player, int p_actions)
+GameInfoset GameTreeRep::InsertMove(GameNode p_node, GamePlayer p_player, int p_actions,
+                                    bool p_generateLabels)
 {
   if (p_actions <= 0) {
     throw UndefinedException();
@@ -622,6 +628,10 @@ GameInfoset GameTreeRep::InsertMove(GameNode p_node, GamePlayer p_player, int p_
   auto newInfoset = std::make_shared<GameInfosetRep>(this, p_player->m_infosets.size() + 1,
                                                      p_player.get(), p_actions);
   p_player->m_infosets.push_back(newInfoset);
+  if (p_generateLabels) {
+    std::for_each(newInfoset->m_actions.begin(), newInfoset->m_actions.end(),
+                  [act = 1](const GameAction &a) mutable { a->SetLabel(std::to_string(act++)); });
+  }
   return InsertMove(p_node, newInfoset);
 }
 
