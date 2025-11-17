@@ -52,7 +52,7 @@ These tutorials demonstrate how to use PyGambit alongside other game-theoretic s
 .. toctree::
    :maxdepth: 2
 
-   interoperability_tutorials/openspiel
+   tutorials/interoperability_tutorials/openspiel
 
 Algorithms for computing Nash equilibria
 ----------------------------------------
