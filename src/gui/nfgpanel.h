@@ -20,26 +20,27 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef NFGPANEL_H
-#define NFGPANEL_H
+#ifndef GAMBIT_GUI_NFGPANEL_H
+#define GAMBIT_GUI_NFGPANEL_H
 
 #include "wx/sheet/sheet.h" // for wxSheet
 
 class wxPrintout;
-class gbtTableWidget;
-class gbtTablePlayerToolbar;
 
-class gbtNfgPanel : public wxPanel, public gbtGameView {
-private:
+namespace Gambit::GUI {
+class TableWidget;
+class TablePlayerToolbar;
+
+class NfgPanel final : public wxPanel, public GameView {
   wxWindow *m_dominanceToolbar;
-  gbtTablePlayerToolbar *m_playerToolbar;
-  gbtTableWidget *m_tableWidget;
+  TablePlayerToolbar *m_playerToolbar;
+  TableWidget *m_tableWidget;
 
   void OnToolsDominance(wxCommandEvent &);
 
 public:
-  gbtNfgPanel(wxWindow *p_parent, gbtGameDocument *p_doc);
-  ~gbtNfgPanel() override = default;
+  NfgPanel(wxWindow *p_parent, GameDocument *p_doc);
+  ~NfgPanel() override = default;
 
   bool IsDominanceShown() const { return m_dominanceToolbar->IsShown(); }
 
@@ -55,11 +56,12 @@ public:
   void RenderGame(wxDC &p_dc, int marginX, int marginY);
   //@}
 
-  // Overriding gbtGameView members
+  // Overriding GameView members
   void OnUpdate() override;
   void PostPendingChanges() override;
 
   DECLARE_EVENT_TABLE()
 };
+} // namespace Gambit::GUI
 
-#endif // NFGPANEL_H
+#endif // GAMBIT_GUI_NFGPANEL_H

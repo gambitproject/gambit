@@ -20,8 +20,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMEFRAME_H
-#define GAMEFRAME_H
+#ifndef GAMBIT_GUI_GAMEFRAME_H
+#define GAMBIT_GUI_GAMEFRAME_H
 
 #include <wx/printdlg.h>
 
@@ -30,16 +30,16 @@
 class wxSplitterWindow;
 class wxSplitterEvent;
 
-class gbtAnalysisNotebook;
-class gbtEfgPanel;
-class gbtNfgPanel;
+namespace Gambit::GUI {
+class AnalysisNotebook;
+class EfgPanel;
+class NfgPanel;
 
-class gbtGameFrame : public wxFrame, public gbtGameView {
-private:
+class GameFrame final : public wxFrame, public GameView {
   wxSplitterWindow *m_splitter;
-  gbtEfgPanel *m_efgPanel;
-  gbtNfgPanel *m_nfgPanel;
-  gbtAnalysisNotebook *m_analysisPanel;
+  EfgPanel *m_efgPanel;
+  NfgPanel *m_nfgPanel;
+  AnalysisNotebook *m_analysisPanel;
 
   wxPageSetupData m_pageSetupData;
   wxPrintData m_printData;
@@ -67,9 +67,6 @@ private:
   void OnFilePrint(wxCommandEvent &);
   void OnFileExit(wxCommandEvent &);
   void OnFileMRUFile(wxCommandEvent &);
-
-  void OnEditUndo(wxCommandEvent &);
-  void OnEditRedo(wxCommandEvent &);
 
   void OnEditInsertMove(wxCommandEvent &);
   void OnEditInsertAction(wxCommandEvent &);
@@ -108,15 +105,17 @@ private:
   bool ProcessEvent(wxEvent &) override;
   //@}
 
-  // Overriding gbtGameView members
+  // Overriding GameView members
   void OnUpdate() override;
 
 public:
   // CONSTRUCTOR AND DESTRUCTOR
-  gbtGameFrame(wxWindow *p_parent, gbtGameDocument *p_doc);
-  ~gbtGameFrame() override;
+  GameFrame(wxWindow *p_parent, GameDocument *p_doc);
+  ~GameFrame() override;
 
   DECLARE_EVENT_TABLE()
 };
 
-#endif // GAMEFRAME_H
+} // namespace Gambit::GUI
+
+#endif // GAMBIT_GUI_GAMEFRAME_H

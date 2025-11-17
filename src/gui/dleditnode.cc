@@ -27,13 +27,12 @@
 #include "gambit.h"
 #include "dleditnode.h"
 
-using namespace Gambit;
-
+namespace Gambit::GUI {
 //======================================================================
-//                      class dialogEditNode
+//                      class EditNodeDialog
 //======================================================================
 
-dialogEditNode::dialogEditNode(wxWindow *p_parent, const GameNode &p_node)
+EditNodeDialog::EditNodeDialog(wxWindow *p_parent, const GameNode &p_node)
   : wxDialog(p_parent, wxID_ANY, _("Node properties"), wxDefaultPosition), m_node(p_node)
 {
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
@@ -148,11 +147,11 @@ dialogEditNode::dialogEditNode(wxWindow *p_parent, const GameNode &p_node)
   topSizer->Fit(this);
   topSizer->SetSizeHints(this);
 
-  Layout();
+  wxTopLevelWindowBase::Layout();
   CenterOnParent();
 }
 
-GameInfoset dialogEditNode::GetInfoset() const
+GameInfoset EditNodeDialog::GetInfoset() const
 {
   if (m_infoset->GetSelection() == 0) {
     return nullptr;
@@ -161,3 +160,4 @@ GameInfoset dialogEditNode::GetInfoset() const
     return m_infosetList[m_infoset->GetSelection()];
   }
 }
+} // namespace Gambit::GUI

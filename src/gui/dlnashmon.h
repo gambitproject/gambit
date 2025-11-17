@@ -20,25 +20,25 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef DLNASHMON_H
-#define DLNASHMON_H
+#ifndef GAMBIT_GUI_DLNASHMON_H
+#define GAMBIT_GUI_DLNASHMON_H
 
 #include <wx/process.h>
 #include "wx/sheet/sheet.h"
 #include "gamedoc.h"
 
-class gbtNashMonitorDialog : public wxDialog {
-private:
-  gbtGameDocument *m_doc;
+namespace Gambit::GUI {
+class NashMonitorDialog final : public wxDialog {
+  GameDocument *m_doc;
   int m_pid{0};
   wxProcess *m_process;
   wxWindow *m_profileList;
   wxStaticText *m_statusText, *m_countText;
   wxButton *m_stopButton, *m_okButton;
   wxTimer m_timer;
-  std::shared_ptr<gbtAnalysisOutput> m_output;
+  std::shared_ptr<AnalysisOutput> m_output;
 
-  void Start(std::shared_ptr<gbtAnalysisOutput> p_command);
+  void Start(std::shared_ptr<AnalysisOutput> p_command);
 
   void OnStop(wxCommandEvent &);
   void OnTimer(wxTimerEvent &);
@@ -46,10 +46,11 @@ private:
   void OnEndProcess(wxProcessEvent &);
 
 public:
-  gbtNashMonitorDialog(wxWindow *p_parent, gbtGameDocument *p_doc,
-                       std::shared_ptr<gbtAnalysisOutput> p_command);
+  NashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
+                    const std::shared_ptr<AnalysisOutput> &p_command);
 
   DECLARE_EVENT_TABLE()
 };
+} // namespace Gambit::GUI
 
-#endif // DLNASHMON_H
+#endif // GAMBIT_GUI_DLNASHMON_H

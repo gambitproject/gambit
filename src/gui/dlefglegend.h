@@ -20,25 +20,38 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef DLEFGLEGEND_H
-#define DLEFGLEGEND_H
+#ifndef GAMBIT_GUI_DLEFGLEGEND_H
+#define GAMBIT_GUI_DLEFGLEGEND_H
 
 #include "style.h"
 
-class gbtLegendDialog : public wxDialog {
-private:
+namespace Gambit::GUI {
+class LegendDialog final : public wxDialog {
   wxChoice *m_nodeAbove, *m_nodeBelow, *m_actionAbove, *m_actionBelow;
 
 public:
   // Lifecycle
-  gbtLegendDialog(wxWindow *, const gbtStyle &);
+  LegendDialog(wxWindow *, const TreeRenderConfig &);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
-  int GetNodeAbove() const { return m_nodeAbove->GetSelection(); }
-  int GetNodeBelow() const { return m_nodeBelow->GetSelection(); }
+  NodeLabelStyle GetNodeAbove() const
+  {
+    return static_cast<NodeLabelStyle>(m_nodeAbove->GetSelection());
+  }
+  NodeLabelStyle GetNodeBelow() const
+  {
+    return static_cast<NodeLabelStyle>(m_nodeBelow->GetSelection());
+  }
 
-  int GetBranchAbove() const { return m_actionAbove->GetSelection(); }
-  int GetBranchBelow() const { return m_actionBelow->GetSelection(); }
+  BranchLabelStyle GetBranchAbove() const
+  {
+    return static_cast<BranchLabelStyle>(m_actionAbove->GetSelection());
+  }
+  BranchLabelStyle GetBranchBelow() const
+  {
+    return static_cast<BranchLabelStyle>(m_actionBelow->GetSelection());
+  }
 };
+} // namespace Gambit::GUI
 
-#endif // DLEFGLEGEND_H
+#endif // GAMBIT_GUI_DLEFGLEGEND_H

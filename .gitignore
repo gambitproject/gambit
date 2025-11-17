@@ -40,3 +40,8 @@ dist
 .venv
 *.dmg
 Gambit.app/*
+*.so
+doc/tutorials/games/*.nfg
+doc/tutorials/games/*.efg
+*.dmg
+Gambit.app/*

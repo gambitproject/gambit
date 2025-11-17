@@ -28,12 +28,13 @@
 #include "nfgprofile.h"
 #include "renratio.h" // for rational number rendering
 
+namespace Gambit::GUI {
 //-------------------------------------------------------------------------
-//              class gbtMixedProfileList: Member functions
+//              class MixedProfileList: Member functions
 //-------------------------------------------------------------------------
 
-gbtMixedProfileList::gbtMixedProfileList(wxWindow *p_parent, gbtGameDocument *p_doc)
-  : wxSheet(p_parent, wxID_ANY), gbtGameView(p_doc), m_showProbs(1), m_showPayoff(0)
+MixedProfileList::MixedProfileList(wxWindow *p_parent, GameDocument *p_doc)
+  : wxSheet(p_parent, wxID_ANY), GameView(p_doc), m_showProbs(1), m_showPayoff(0)
 {
   CreateGrid(0, 0);
   SetRowLabelWidth(40);
@@ -41,29 +42,31 @@ gbtMixedProfileList::gbtMixedProfileList(wxWindow *p_parent, gbtGameDocument *p_
 
   Connect(GetId(), wxEVT_SHEET_LABEL_LEFT_DOWN,
           (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
-              wxSheetEventFunction, wxSheetEventFunction(&gbtMixedProfileList::OnLabelClick))));
+              wxSheetEventFunction,
+              static_cast<wxSheetEventFunction>(&MixedProfileList::OnLabelClick))));
 
   Connect(GetId(), wxEVT_SHEET_CELL_LEFT_DOWN,
           (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
-              wxSheetEventFunction, wxSheetEventFunction(&gbtMixedProfileList::OnCellClick))));
+              wxSheetEventFunction,
+              static_cast<wxSheetEventFunction>(&MixedProfileList::OnCellClick))));
 }
 
-gbtMixedProfileList::~gbtMixedProfileList() = default;
+MixedProfileList::~MixedProfileList() = default;
 
-void gbtMixedProfileList::OnLabelClick(wxSheetEvent &p_event)
+void MixedProfileList::OnLabelClick(wxSheetEvent &p_event)
 {
   if (p_event.GetCol() == -1) {
     m_doc->SetCurrentProfile(RowToProfile(p_event.GetRow()));
   }
 }
 
-void gbtMixedProfileList::OnCellClick(wxSheetEvent &p_event)
+void MixedProfileList::OnCellClick(wxSheetEvent &p_event)
 {
   m_doc->SetCurrentProfile(RowToProfile(p_event.GetRow()));
 }
 
 #ifdef UNUSED
-static Gambit::GameStrategy GetStrategy(gbtGameDocument *p_doc, int p_index)
+static Gambit::GameStrategy GetStrategy(GameDocument *p_doc, int p_index)
 {
   int index = 0;
   for (int pl = 1; pl <= p_doc->GetGame()->NumPlayers(); pl++) {
@@ -78,7 +81,7 @@ static Gambit::GameStrategy GetStrategy(gbtGameDocument *p_doc, int p_index)
 }
 #endif
 
-wxString gbtMixedProfileList::GetCellValue(const wxSheetCoords &p_coords)
+wxString MixedProfileList::GetCellValue(const wxSheetCoords &p_coords)
 {
   if (IsRowLabelCell(p_coords)) {
     return wxString::Format(wxT("%d"), RowToProfile(p_coords.GetRow()));
@@ -111,20 +114,20 @@ wxString gbtMixedProfileList::GetCellValue(const wxSheetCoords &p_coords)
   }
 }
 
-static wxColour GetPlayerColor(gbtGameDocument *p_doc, int p_index)
+static wxColour GetPlayerColor(const GameDocument *p_doc, int p_index)
 {
   int index = 0;
   for (const auto &player : p_doc->GetGame()->GetPlayers()) {
     for (const auto &strategy : player->GetStrategies()) {
       if (index++ == p_index) {
-        return p_doc->GetStyle().GetPlayerColor(player->GetNumber());
+        return p_doc->GetStyle().GetPlayerColor(player);
       }
     }
   }
   return *wxBLACK;
 }
 
-wxSheetCellAttr gbtMixedProfileList::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
+wxSheetCellAttr MixedProfileList::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
 {
   const int currentProfile = m_doc->GetCurrentProfile();
 
@@ -163,21 +166,21 @@ wxSheetCellAttr gbtMixedProfileList::GetAttr(const wxSheetCoords &p_coords, wxSh
   }
   attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
   attr.SetOrientation(wxHORIZONTAL);
-  attr.SetRenderer(wxSheetCellRenderer(new gbtRationalRendererRefData()));
+  attr.SetRenderer(wxSheetCellRenderer(new RationalRendererRefData()));
   attr.SetForegroundColour(GetPlayerColor(m_doc, p_coords.GetCol()));
 
   attr.SetReadOnly(true);
   return attr;
 }
 
-void gbtMixedProfileList::OnUpdate()
+void MixedProfileList::OnUpdate()
 {
   if (m_doc->NumProfileLists() == 0) {
     DeleteRows(0, GetNumberRows());
     return;
   }
 
-  const gbtAnalysisOutput &profiles = m_doc->GetProfiles();
+  const AnalysisOutput &profiles = m_doc->GetProfiles();
 
   BeginBatch();
 
@@ -209,3 +212,4 @@ void gbtMixedProfileList::OnUpdate()
 
   EndBatch();
 }
+} // namespace Gambit::GUI

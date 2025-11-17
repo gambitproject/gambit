@@ -42,8 +42,7 @@ Changelog = "https://github.com/gambitproject/gambit/blob/master/ChangeLog"
 line-length = 99
 indent-width = 4
 target-version = "py39"
-include = ["setup.py", "src/pygambit/**/*.py", "tests/**/*.py"]
-exclude = ["contrib/**.py"]
+include = ["setup.py", "src/pygambit/**/*.py", "tests/**/*.py, doc/tutorials/*.ipynb"]
 
 [tool.ruff.lint]
 select = [
@@ -54,6 +53,7 @@ select = [
     "SIM", # flake8-simplify
     "I", # isort
     "Q", # prefer double quotes
+    "W291", # trailing-whitespace
 ]
 ignore = []
 
@@ -75,11 +75,12 @@ max-line-length = 99
 [tool.pytest.ini_options]
 addopts = "--strict-markers"
 markers = [
-    "nash_enummixed_strategy: tests of enummixed_solve in strategies",
-    "nash_lcp_strategy: tests of lcp_solve in strategies",
-    "nash_lcp_behavior: tests of lcp_solve in behaviors",
-    "nash_lp_strategy: tests of lp_solve in strategies",
-    "nash_lp_behavior: tests of lp_solve in behaviors",
+    "nash_enummixed_strategy: tests of enummixed_solve in mixed strategies",
+    "nash_enumpoly_behavior: tests of enumpoly_solve in behavior strategies",
+    "nash_lcp_strategy: tests of lcp_solve in mixed strategies",
+    "nash_lcp_behavior: tests of lcp_solve in behavior strategies",
+    "nash_lp_strategy: tests of lp_solve in mixed strategies",
+    "nash_lp_behavior: tests of lp_solve in behavior strategies",
     "nash: all tests of Nash equilibrium solvers",
     "slow: all time-consuming tests",
 ]

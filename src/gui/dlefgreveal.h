@@ -20,22 +20,25 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef DLEFGREVEAL_H
-#define DLEFGREVEAL_H
+#ifndef GAMBIT_GUI_DLEFGREVEAL_H
+#define GAMBIT_GUI_DLEFGREVEAL_H
 
 #include "gamedoc.h"
 
-class gbtRevealMoveDialog : public wxDialog {
-private:
-  gbtGameDocument *m_doc;
-  Gambit::Array<wxCheckBox *> m_players;
+namespace Gambit::GUI {
+
+class RevealMoveDialog final : public wxDialog {
+  GameDocument *m_doc;
+  Array<wxCheckBox *> m_players;
 
 public:
   // Lifecycle
-  gbtRevealMoveDialog(wxWindow *, gbtGameDocument *);
+  RevealMoveDialog(wxWindow *, GameDocument *);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
-  Gambit::Array<Gambit::GamePlayer> GetPlayers() const;
+  Array<GamePlayer> GetPlayers() const;
 };
 
-#endif // DLEFGREVEAL_H
+} // end namespace Gambit::GUI
+
+#endif // GAMBIT_GUI_DLEFGREVEAL_H

@@ -1,131 +1,178 @@
+.. _building-from-source:
+
 Building Gambit from source
 ===========================
 
-This section covers instructions for building Gambit from source.
+This page covers instructions for building Gambit from source.
 This is for those who are interested in developing Gambit, or who
 want to play around with the latest features before they make it
 into a pre-compiled binary version.
 
-This section requires at least some familiarity with programming.
-Most users will want to stick with binary distributions; see
-:ref:`section-downloading` for how to get the current version for
+This page requires at least some familiarity with programming.
+Most users will want to stick with released distributions; see the
+:ref:`install` page for how to get the current version for
 your operating system.
+Following the instructions here will install the Gambit CLI, GUI and Python extension (PyGambit).
 
-General information
--------------------
+The steps you will need to follow to build from source are as follows:
 
-Gambit uses the standard autotools mechanism for configuring and building.
-This should be familiar to most users of Un*ces and MacOS X.
+1. Refer to the :ref:`contributor page <contributing-code>` which explains how to clone the Gambit repository from GitHub (you may first wish to create a fork).
+2. :ref:`Install the necessary build tools and dependencies for your platform <source-dependencies>`.
+3. :ref:`Follow the platform-specific instructions to build and install Gambit CLI and GUI components from source <cli-gui-from-source>`.
+4. :ref:`Build the Python extension (PyGambit) <build-python>`.
 
-If you are building from a source tarball,
-you just need to unpack the sources, change directory to the top level
-of the sources (typically of the form gambit-xx.y.z), and do the
-usual ::
+.. _source-dependencies:
 
-  ./configure
-  make
-  sudo make install
+Install build tools and dependencies
+------------------------------------
 
-Command-line options are available to modify the configuration process;
-do `./configure --help` for information.  Of these, the option which
-may be most useful is to disable the build of the graphical interface
+.. dropdown:: Install on macOS via Homebrew
+   :class-container: sd-border-0
 
-By default Gambit will be installed in /usr/local.  You can change this
-by replacing configure step with one of the form ::
+   1. Check that you have Homebrew installed by running `brew --version`. If not, follow the instructions at `https://brew.sh/ <https://brew.sh/>`_.
+
+   2. Install build dependencies:
+
+      .. code-block:: bash
+
+         brew install automake autoconf libtool wxwidgets
+
+      .. note::
+         If you encounter interpreter errors with autom4te, you may need to ensure
+         your Perl installation is correct or reinstall the autotools:
+
+         .. code-block:: bash
+
+            brew reinstall automake autoconf libtool wxwidgets
+
+.. dropdown:: Install on Linux (Debian/Ubuntu) via apt
+   :class-container: sd-border-0
+
+   1. Update your package lists:
+
+      .. code-block:: bash
+
+         sudo apt update
+
+   2. Install general build dependencies:
+
+      .. code-block:: bash
+
+         sudo apt install build-essential automake autoconf libtool
+
+   3. Install GUI dependencies:
+
+      .. code-block:: bash
+
+         sudo apt install libwxgtk3.2-dev
+
+.. dropdown:: Install on Windows
+   :class-container: sd-border-0
+
+   The recommended way to build Gambit on modern Windows is to use the
+   MSYS2 / MinGW-w64 environment.
+
+   1. Download and install MSYS2 from https://www.msys2.org/ and follow
+      the update instructions there (you will typically run ``pacman -Syu``
+      and restart the MSYS2 terminal as instructed).
+
+   2. Open the "MSYS2 MinGW 64-bit" terminal (important: use the MinGW
+      shell, not the plain MSYS shell).
+
+   3. Install general build dependencies
+
+      .. code-block:: bash
+
+         # update package DB & core packages first (may require closing/reopening the shell)
+         pacman -Syu
+
+         # install compiler toolchain, autotools and libtool
+         pacman -S --needed mingw-w64-x86_64-toolchain mingw-w64-x86_64-automake \
+         mingw-w64-x86_64-autoconf mingw-w64-x86_64-libtool mingw-w64-x86_64-make
+
+   4. Install GUI dependencies
+
+      .. code-block:: bash
+
+         pacman -S --needed mingw-w64-x86_64-wxwidgets3.2
+
+   .. note::
+      When building for a different target (32-bit) substitute the corresponding MinGW packages (``mingw-w64-i686-*``).
+
+
+.. _cli-gui-from-source:
+
+Install CLI and GUI from source
+--------------------------------
+
+Navigate to the Gambit source directory (use the "MSYS2 MinGW 64-bit" terminal on Windows) and run:
+
+.. code-block:: bash
+
+   aclocal
+   libtoolize
+   automake --add-missing
+   autoconf
+   ./configure
+   make
+   # Skip this on Windows:
+   sudo make install
+
+.. dropdown:: Build macOS application bundle
+   :class-container: sd-border-0
+
+   1. Create macOS application bundle:
+
+      To create a distributable DMG file:
+
+      .. code-block:: bash
+
+         make osx-dmg
+
+   2. Install the application:
+
+      After creating the DMG file, open it and drag the Gambit application to your Applications folder.
+
+.. dropdown:: Creating a Windows installer
+   :class-container: sd-border-0
+
+   1. Create a ``.msi`` installer.  This requires the `Wix toolset <https://github.com/wixtoolset>`__.
+
+      .. code-block:: powershell
+
+         make msw-msi
+
+   2. Install the application:
+
+      Run the generated ``gambit-X.Y.Z.msi`` file to install Gambit on your system.
+
+.. note::
+  Command-line options are available to modify the configuration process;
+  do `./configure --help` for information.  Of these, the option which
+  may be most useful is to disable the build of the graphical interface.
+
+  By default Gambit will be installed in /usr/local.  You can change this
+  by replacing configure step with one of the form ::
 
   ./configure --prefix=/your/path/here
 
 .. note::
+   If you don't want to build the graphical interface, you can pass the argument ``--disable-gui`` to the configure step, for example::
+
+      ./configure --disable-gui
+
+.. warning::
+   If wxWidgets isn't installed in a standard place (e.g., ``/usr`` or
+   ``/usr/local``), you'll need to tell ``configure`` where to find it with the
+   ``--with-wx-prefix=PREFIX`` option, for example::
+
+      ./configure --with-wx-prefix=/home/mylogin/wx
+
+.. warning::
   The graphical interface relies on external calls to other
   programs built in this process, especially for the computation of
   equilibria.  It is strongly recommended that you install the Gambit
   executables to a directory in your path!
-
-
-Building from git repository
-----------------------------
-
-If you want to live on the bleeding edge, you can get the latest
-version of the Gambit sources from the Gambit repository on
-github.com, via ::
-
-  git clone https://github.com/gambitproject/gambit.git
-  cd gambit
-
-After this, you will need to set up the build scripts by executing ::
-
-  aclocal
-  libtoolize
-  automake --add-missing
-  autoconf
-
-For this, you will need to have automake, autoconf, and libtool2
-installed on your system.
-
-At this point, you can then continue with the configuration and build
-stages as in the previous section.
-
-In the git repository, the branch ``master`` always points to the
-latest development version.  New development should in general always
-be based off this branch.  Branches labeled ``maintVV``, where ``VV``
-is the version number, point to the latest commit on a stable
-version.
-
-
-For Windows users
------------------
-
-For Windows users wanting to compile Gambit on their own, you'll need
-to use either the Cygwin or MinGW environments.  We do compilation and
-testing of Gambit on Windows using MinGW.
-
-
-For OS X users
---------------
-
-For building the command-line tools only, one should follow the
-instructions for Un*x/Linux platforms above.
-
-
-The graphical interface and wxWidgets
--------------------------------------
-
-Gambit requires wxWidgets version 3.1.x or higher.
-See the wxWidgets website at
-`<http://www.wxwidgets.org>`_
-to download this if you need it.  Packages of this should be available
-for most Un*x users through their package managers (apt or rpm).  Note
-that you'll need the appropriate -dev package for wxWidgets to get the
-header files needed to build Gambit.
-
-Un*x users, please note that Gambit at this time only supports the
-GTK port of wxWidgets.
-
-If wxWidgets it isn't installed in a standard place (e.g., /usr or
-/usr/local), you'll need to tell configure where to find it with the
---with-wx-prefix=PREFIX option, for example::
-
-  ./configure --with-wx-prefix=/home/mylogin/wx
-
-Finally, if you don't want to build the graphical interface, you
-can either (a) simply not install wxWidgets, or (b) pass the argument
---disable-gui to the configure step, for example, ::
-
-  ./configure --disable-gui
-
-This will just build the command-line tools, and will not require
-a wxWidgets installation.
-
-For OS X users, after the usual ``make`` step, run
-
-  make osx-bundle
-
-This produces an application ``Gambit.app`` in the current directory,
-which can be run from its current location, or copied elsewhere in the
-disk (such as ``/Applications``).  The application bundle includes the
-command-line executables.
-
-
 
 .. _build-python:
 
@@ -133,14 +180,16 @@ Building the Python extension
 -----------------------------
 
 The :ref:`pygambit Python package <pygambit>` is in ``src/pygambit``
-in the Gambit source tree.
-Building the extension follows the standard approach.
-From the **root directory of the source tree** execute
+in the Gambit source tree. We recommend to install `pygambit`
+as part of a virtual environment rather than in the system's Python (for example using `venv`).
+Use `pip` to install from the **root directory of the source tree**:
 
-    python -m pip install .
+.. code-block:: bash
 
-There is a set of test cases in `src/pygambit/tests`, which can be run
-using `nose2`.
+   python -m venv venv
+   source venv/bin/activate
+   python -m pip install .
+
 
 Once installed, simply ``import pygambit`` in your Python shell or
 script to get started.

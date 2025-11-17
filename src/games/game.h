@@ -82,6 +82,7 @@ public:
 class MismatchException : public std::runtime_error {
 public:
   MismatchException() : std::runtime_error("Operation between objects in different games") {}
+  explicit MismatchException(const std::string &s) : std::runtime_error(s) {}
   ~MismatchException() noexcept override = default;
 };
 
@@ -444,7 +445,7 @@ public:
   GameNode GetChild(const GameAction &p_action)
   {
     if (p_action->GetInfoset().get() != m_infoset) {
-      throw MismatchException();
+      throw MismatchException("Action is from a different information set than node");
     }
     return m_children.at(p_action->GetNumber() - 1);
   }
