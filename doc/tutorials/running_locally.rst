@@ -11,11 +11,11 @@ You will need a working installation of Python 3.9+ on your machine to run PyGam
     git clone https://github.com/gambitproject/gambit.git
     cd gambit/doc/tutorials
 
-2. Install `PyGambit` and `JupyterLab`. We recommend creating a new virtual environment and installing both the requirements there. e.g. ::
+2. Install the requirements used by the tutorials. These include the latest version of `PyGambit` itself, `JupyterLab` and other packages used by the tutorials. We recommend creating a new virtual environment and installing both the requirements there. e.g. ::
 
     python -m venv pygambit-env
     source pygambit-env/bin/activate
-    pip install pygambit jupyterlab
+    pip install -r requirements.txt
 
 3. Open `JupyterLab` and click on any of the tutorial notebooks (files ending in `.ipynb`) ::
 
