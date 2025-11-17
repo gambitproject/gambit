@@ -24,8 +24,6 @@ When reporting a bug, please be sure to include the following:
 
 .. _contributing-code:
 
-.. _contributing-code:
-
 Contributing code
 ----------------
 
@@ -109,7 +107,7 @@ You can also build the documentation locally to preview your changes before subm
     cd doc
     make html  # or make livehtml for live server with auto-rebuild
 
-5. Open ``doc/_build/html/index.html`` in your browser to view the documentation.
+4. Open ``doc/_build/html/index.html`` in your browser to view the documentation.
 
 
 
