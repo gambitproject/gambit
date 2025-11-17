@@ -104,31 +104,6 @@ std::list<GameInfoset> BehaviorSupportProfile::GetInfosets(const GamePlayer &p_p
   return answer;
 }
 
-namespace {
-
-void ReachableInfosets(const BehaviorSupportProfile &p_support, const GameNode &p_node,
-                       std::set<GameInfoset> &p_reached)
-{
-  if (p_node->IsTerminal()) {
-    return;
-  }
-
-  const GameInfoset infoset = p_node->GetInfoset();
-  if (!infoset->GetPlayer()->IsChance()) {
-    p_reached.insert(infoset);
-    for (const auto &action : p_support.GetActions(infoset)) {
-      ReachableInfosets(p_support, p_node->GetChild(action), p_reached);
-    }
-  }
-  else {
-    for (const auto &child : p_node->GetChildren()) {
-      ReachableInfosets(p_support, child, p_reached);
-    }
-  }
-}
-
-} // end anonymous namespace
-
 bool BehaviorSupportProfile::HasReachableMembers(const GameInfoset &p_infoset) const
 {
   const auto &members = p_infoset->GetMembers();

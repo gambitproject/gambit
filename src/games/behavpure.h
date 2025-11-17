@@ -32,7 +32,6 @@ namespace Gambit {
 /// It specifies exactly one strategy for each information set in the
 /// game.
 class PureBehaviorProfile {
-private:
   Game m_efg;
   std::map<GameInfoset, GameAction> m_profile;
 
@@ -86,14 +85,11 @@ template <> inline std::string PureBehaviorProfile::GetPayoff(const GamePlayer &
 }
 
 class BehaviorContingencies {
-private:
   BehaviorSupportProfile m_support;
-  std::vector<GameAction> m_frozen;
-  std::list<GameInfoset> m_activeInfosets;
+  std::list<GameInfoset> m_reachableInfosets;
 
 public:
   class iterator {
-  private:
     BehaviorContingencies *m_cont;
     bool m_atEnd;
     std::map<GameInfoset, BehaviorSupportProfile::Support::const_iterator> m_currentBehav;
@@ -127,10 +123,8 @@ public:
   };
   /// @name Lifecycle
   //@{
-  /// Construct a new iterator on the support, holding the listed actions fixed
-  explicit BehaviorContingencies(const BehaviorSupportProfile &,
-                                 const std::set<GameInfoset> &p_active = {},
-                                 const std::vector<GameAction> &p_frozen = {});
+  /// Construct a new iterator on the support
+  explicit BehaviorContingencies(const BehaviorSupportProfile &);
   //@}
   iterator begin() { return {this, false}; }
   iterator end() { return {this, true}; }
