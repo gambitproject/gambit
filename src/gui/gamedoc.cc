@@ -639,10 +639,7 @@ void gbtGameDocument::DoAppendMove(GameNode p_node, GameInfoset p_infoset)
 
 void gbtGameDocument::DoInsertMove(GameNode p_node, GamePlayer p_player, unsigned int p_actions)
 {
-  const GameInfoset infoset = m_game->InsertMove(p_node, p_player, p_actions);
-  auto actions = infoset->GetActions();
-  std::for_each(actions.begin(), actions.end(),
-                [act = 1](const GameAction &a) mutable { a->SetLabel(std::to_string(act)); });
+  m_game->InsertMove(p_node, p_player, p_actions, true);
   m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }

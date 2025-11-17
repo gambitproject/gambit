@@ -743,7 +743,8 @@ public:
   {
     throw UndefinedException();
   }
-  virtual GameInfoset AppendMove(GameNode p_node, GamePlayer p_player, int p_actions)
+  virtual GameInfoset AppendMove(GameNode p_node, GamePlayer p_player, int p_actions,
+                                 bool p_generateLabels = false)
   {
     throw UndefinedException();
   }
@@ -751,7 +752,8 @@ public:
   {
     throw UndefinedException();
   }
-  virtual GameInfoset InsertMove(GameNode p_node, GamePlayer p_player, int p_actions)
+  virtual GameInfoset InsertMove(GameNode p_node, GamePlayer p_player, int p_actions,
+                                 bool p_generateLabels = false)
   {
     throw UndefinedException();
   }

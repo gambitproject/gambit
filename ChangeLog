@@ -7,6 +7,8 @@
   when changing the number of strategies in the game (#571)
 - Fixed improper shared pointer handling when writing a .nfg file based on a game in
   extensive form.
+- Fixed a regression in the GUI in which unique action labels were not being generated when
+  adding a move via drag-and-drop of a player icon (#618)
 
 
 ## [16.3.2] - unreleased
