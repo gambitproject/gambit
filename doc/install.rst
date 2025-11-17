@@ -30,7 +30,7 @@ Each release includes pre-built binaries for Windows, macOS, and Linux distribut
 
 .. dropdown:: Install on macOS with disk image
    :class-container: sd-border-0
-   
+
    1. **Download the .dmg installer:**
 
       Visit the `Gambit releases page on GitHub <https://github.com/gambitproject/gambit/releases>`_ and download the `.dmg` file for the version of Gambit you wish to install.
@@ -62,7 +62,7 @@ Each release includes pre-built binaries for Windows, macOS, and Linux distribut
 
 .. dropdown:: Install on Linux or macOS from source tarball
    :class-container: sd-border-0
-    
+
    1. **Download the source tarball:**
 
       Visit the `Gambit releases page on GitHub <https://github.com/gambitproject/gambit/releases>`_ and download the source tarball for the version of Gambit you wish to install.
