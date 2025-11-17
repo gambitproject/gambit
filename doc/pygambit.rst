@@ -47,7 +47,8 @@ Advanced tutorials:
 Interoperability tutorials
 --------------------------
 
-These tutorials demonstrate how to use PyGambit alongside other game-theoretic software packages:
+These tutorials demonstrate how to use PyGambit alongside other game-theoretic software packages.
+These tutorials assume you have read the new user tutorials and are familiar with the PyGambit API, however they do not assume prior knowledge of the other software packages or an advanced understanding of Game Theory:
 
 .. toctree::
    :maxdepth: 2
