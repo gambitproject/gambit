@@ -44,6 +44,16 @@ Advanced tutorials:
    tutorials/advanced_tutorials/quantal_response
    .. pygambit.external_programs
 
+Interoperability tutorials
+--------------------------
+
+These tutorials demonstrate how to use PyGambit alongside other game-theoretic software packages:
+
+.. toctree::
+   :maxdepth: 2
+
+   interoperability_tutorials/openspiel
+
 Algorithms for computing Nash equilibria
 ----------------------------------------
 
