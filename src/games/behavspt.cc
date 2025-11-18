@@ -321,6 +321,65 @@ BehaviorSupportProfile::ToMixedBehaviorProfile(const std::map<GameSequence, doub
   return b;
 }
 
+size_t BehaviorSupportProfile::Sequences::size() const
+{
+  return std::accumulate(m_support->GetSequenceForm()->m_sequences.cbegin(),
+                         m_support->GetSequenceForm()->m_sequences.cend(), 0,
+                         [](int acc, const std::pair<GamePlayer, std::vector<GameSequence>> &seq) {
+                           return acc + seq.second.size();
+                         });
+}
+
+BehaviorSupportProfile::Sequences::iterator BehaviorSupportProfile::Sequences::begin() const
+{
+  return {m_support->GetSequenceForm(), false};
+}
+BehaviorSupportProfile::Sequences::iterator BehaviorSupportProfile::Sequences::end() const
+{
+  return {m_support->GetSequenceForm(), true};
+}
+
+BehaviorSupportProfile::Sequences::iterator::iterator(
+    const std::shared_ptr<GameSequenceForm> p_sfg, bool p_end)
+  : m_sfg(p_sfg)
+{
+  if (p_end) {
+    m_currentPlayer = m_sfg->m_sequences.cend();
+  }
+  else {
+    m_currentPlayer = m_sfg->m_sequences.cbegin();
+    m_currentSequence = m_currentPlayer->second.cbegin();
+  }
+}
+
+BehaviorSupportProfile::Sequences::iterator &
+BehaviorSupportProfile::Sequences::iterator::operator++()
+{
+  if (m_currentPlayer == m_sfg->m_sequences.cend()) {
+    return *this;
+  }
+  m_currentSequence++;
+  if (m_currentSequence != m_currentPlayer->second.cend()) {
+    return *this;
+  }
+  m_currentPlayer++;
+  if (m_currentPlayer != m_sfg->m_sequences.cend()) {
+    m_currentSequence = m_currentPlayer->second.cbegin();
+  }
+  return *this;
+}
+
+bool BehaviorSupportProfile::Sequences::iterator::operator==(const iterator &it) const
+{
+  if (m_sfg != it.m_sfg || m_currentPlayer != it.m_currentPlayer) {
+    return false;
+  }
+  if (m_currentPlayer == m_sfg->m_sequences.end()) {
+    return true;
+  }
+  return (m_currentSequence == it.m_currentSequence);
+}
+
 std::vector<GameSequence>::const_iterator BehaviorSupportProfile::PlayerSequences::begin() const
 {
   return m_support->GetSequenceForm()->m_sequences.at(m_player).begin();

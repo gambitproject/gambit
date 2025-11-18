@@ -168,7 +168,36 @@ public:
     }
   };
 
-  class Sequences;
+  class Sequences {
+  private:
+    const BehaviorSupportProfile *m_support;
+
+  public:
+    class iterator {
+    private:
+      const std::shared_ptr<GameSequenceForm> m_sfg;
+      std::map<GamePlayer, std::vector<GameSequence>>::const_iterator m_currentPlayer;
+      std::vector<GameSequence>::const_iterator m_currentSequence;
+
+    public:
+      iterator(const std::shared_ptr<GameSequenceForm> p_sfg, bool p_end);
+
+      GameSequence operator*() const { return *m_currentSequence; }
+      GameSequence operator->() const { return *m_currentSequence; }
+
+      iterator &operator++();
+
+      bool operator==(const iterator &it) const;
+      bool operator!=(const iterator &it) const { return !(*this == it); }
+    };
+
+    Sequences(const BehaviorSupportProfile *p_support) : m_support(p_support) {}
+
+    size_t size() const;
+
+    iterator begin() const;
+    iterator end() const;
+  };
 
   class PlayerSequences {
   private:
