@@ -83,10 +83,10 @@ public:
 
 class BehaviorSupportProfile::Contingencies {
 private:
-  const std::shared_ptr<GameSequenceForm> m_sfg;
+  const BehaviorSupportProfile *m_support;
 
 public:
-  Contingencies(const std::shared_ptr<GameSequenceForm> p_sfg) : m_sfg(p_sfg) {}
+  Contingencies(const BehaviorSupportProfile *p_support) : m_support(p_support) {}
 
   class iterator {
   private:
@@ -143,8 +143,8 @@ public:
     bool operator!=(const iterator &it) const { return !(*this == it); }
   };
 
-  iterator begin() { return {m_sfg}; }
-  iterator end() { return {m_sfg, true}; }
+  iterator begin() { return {m_support->GetSequenceForm()}; }
+  iterator end() { return {m_support->GetSequenceForm(), true}; }
 };
 
 } // namespace Gambit

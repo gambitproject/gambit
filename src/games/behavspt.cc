@@ -298,7 +298,7 @@ const Rational &BehaviorSupportProfile::GetPayoff(
 
 BehaviorSupportProfile::Contingencies BehaviorSupportProfile::GetContingencies() const
 {
-  return {GetSequenceForm()};
+  return {this};
 }
 
 MixedBehaviorProfile<double>
