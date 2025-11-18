@@ -186,7 +186,7 @@ public:
     std::vector<GameSequence>::const_iterator end() const;
   };
 
-  class Contingencies;
+  class SequenceContingencies;
 
   mutable std::shared_ptr<GameSequenceForm> m_sequenceForm;
   std::shared_ptr<GameSequenceForm> GetSequenceForm() const;
@@ -200,7 +200,7 @@ public:
   MixedBehaviorProfile<double>
   ToMixedBehaviorProfile(const std::map<std::shared_ptr<GameSequenceRep>, double> &) const;
   Infosets GetInfosets() const { return {this}; };
-  Contingencies GetContingencies() const;
+  SequenceContingencies GetSequenceContingencies() const;
 
   mutable std::shared_ptr<std::map<GameInfoset, bool>> m_reachableInfosets;
   void FindReachableInfosets(GameNode p_node) const;

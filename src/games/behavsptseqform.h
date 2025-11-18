@@ -81,12 +81,12 @@ public:
   iterator end() const { return {m_support->GetSequenceForm(), true}; }
 };
 
-class BehaviorSupportProfile::Contingencies {
+class BehaviorSupportProfile::SequenceContingencies {
 private:
   const BehaviorSupportProfile *m_support;
 
 public:
-  Contingencies(const BehaviorSupportProfile *p_support) : m_support(p_support) {}
+  SequenceContingencies(const BehaviorSupportProfile *p_support) : m_support(p_support) {}
 
   class iterator {
   private:

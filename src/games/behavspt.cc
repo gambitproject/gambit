@@ -296,7 +296,8 @@ const Rational &BehaviorSupportProfile::GetPayoff(
   return GetSequenceForm()->GetPayoff(p_profile, p_player);
 }
 
-BehaviorSupportProfile::Contingencies BehaviorSupportProfile::GetContingencies() const
+BehaviorSupportProfile::SequenceContingencies
+BehaviorSupportProfile::GetSequenceContingencies() const
 {
   return {this};
 }
