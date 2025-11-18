@@ -92,12 +92,12 @@ def test_is_successor_of():
     (games.read_from_file("e02.efg"), {0, 2, 4}),
     (games.read_from_file("subgames.efg"), {0, 1, 4, 7, 11, 13, 34}),
 
-    # Games with Absent-Mindedness where the legacy method is known to fail.
     pytest.param(
         games.read_from_file("AM-driver-subgame.efg"),
         {0, 3},  # The correct set of subgame roots
         marks=pytest.mark.xfail(
-            reason="Legacy method does not detect subgame roots that are members of AM-infosets."
+            reason="Current method does not detect roots of proper subgames "
+                   "that are members of AM-infosets."
         )
     ),
 ])
