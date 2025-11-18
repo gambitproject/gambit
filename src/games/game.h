@@ -66,6 +66,7 @@ using Game = std::shared_ptr<GameRep>;
 class PureStrategyProfile;
 template <class T> class MixedStrategyProfile;
 class StrategySupportProfile;
+class BehaviorSupportProfile;
 
 template <class T> class MixedBehaviorProfile;
 
@@ -957,6 +958,11 @@ public:
 
   /// Build any computed values anew
   virtual void BuildComputedValues() const {}
+
+  virtual std::shared_ptr<BehaviorSupportProfile> GetFullSupport()
+  {
+    throw std::runtime_error("Sequence form can only be generated for extensive form games");
+  };
 };
 
 //=======================================================================
