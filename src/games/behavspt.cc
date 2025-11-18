@@ -395,6 +395,49 @@ size_t BehaviorSupportProfile::PlayerSequences::size() const
   return m_support->GetSequenceForm()->m_sequences.at(m_player).size();
 }
 
+BehaviorSupportProfile::SequenceContingencies::iterator::iterator(
+    const std::shared_ptr<GameSequenceForm> p_sfg, bool p_end)
+  : m_sfg(p_sfg), m_end(p_end)
+{
+  for (auto [player, sequences] : m_sfg->m_sequences) {
+    m_indices[player] = 0;
+  }
+}
+
+std::map<GamePlayer, GameSequence>
+BehaviorSupportProfile::SequenceContingencies::iterator::operator*() const
+{
+  std::map<GamePlayer, GameSequence> ret;
+  for (auto [player, index] : m_indices) {
+    ret[player] = m_sfg->m_sequences.at(player)[index];
+  }
+  return ret;
+}
+
+std::map<GamePlayer, GameSequence>
+BehaviorSupportProfile::SequenceContingencies::iterator::operator->() const
+{
+  std::map<GamePlayer, GameSequence> ret;
+  for (auto [player, index] : m_indices) {
+    ret[player] = m_sfg->m_sequences.at(player)[index];
+  }
+  return ret;
+}
+
+BehaviorSupportProfile::SequenceContingencies::iterator &
+BehaviorSupportProfile::SequenceContingencies::iterator::operator++()
+{
+  for (auto [player, index] : m_indices) {
+    if (index < m_sfg->m_sequences.at(player).size() - 1) {
+      m_indices[player]++;
+      return *this;
+    }
+    m_indices[player] = 0;
+  }
+  m_end = true;
+  return *this;
+}
+
 //========================================================================
 //                 BehaviorSupportProfile: Reachable Information Sets
 //========================================================================

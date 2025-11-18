@@ -215,7 +215,40 @@ public:
     std::vector<GameSequence>::const_iterator end() const;
   };
 
-  class SequenceContingencies;
+  class SequenceContingencies {
+  private:
+    const BehaviorSupportProfile *m_support;
+
+  public:
+    SequenceContingencies(const BehaviorSupportProfile *p_support) : m_support(p_support) {}
+
+    class iterator {
+    private:
+      const std::shared_ptr<GameSequenceForm> m_sfg;
+      bool m_end{false};
+      std::map<GamePlayer, size_t> m_indices;
+
+    public:
+      using iterator_category = std::input_iterator_tag;
+
+      iterator(const std::shared_ptr<GameSequenceForm> p_sfg, bool p_end = false);
+
+      std::map<GamePlayer, GameSequence> operator*() const;
+
+      std::map<GamePlayer, GameSequence> operator->() const;
+
+      iterator &operator++();
+
+      bool operator==(const iterator &it) const
+      {
+        return (m_end == it.m_end && m_sfg == it.m_sfg && m_indices == it.m_indices);
+      }
+      bool operator!=(const iterator &it) const { return !(*this == it); }
+    };
+
+    iterator begin() { return {m_support->GetSequenceForm()}; }
+    iterator end() { return {m_support->GetSequenceForm(), true}; }
+  };
 
   mutable std::shared_ptr<GameSequenceForm> m_sequenceForm;
   std::shared_ptr<GameSequenceForm> GetSequenceForm() const;
