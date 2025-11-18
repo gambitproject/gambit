@@ -300,7 +300,6 @@ game_SOURCES = \
 	src/games/gametree.h \
 	src/games/behavspt.cc \
 	src/games/behavspt.h \
-	src/games/behavsptseqform.h \
 	src/games/behavpure.cc \
 	src/games/behavpure.h \
 	src/games/behavmixed.cc \

@@ -26,7 +26,6 @@
 #include "polysystem.h"
 #include "polysolver.h"
 #include "behavextend.h"
-#include "games/behavsptseqform.h"
 
 using namespace Gambit;
 using namespace Gambit::Nash;

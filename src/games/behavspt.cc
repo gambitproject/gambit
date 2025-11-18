@@ -22,7 +22,6 @@
 
 #include "gambit.h"
 #include "gameseq.h"
-#include "behavsptseqform.h"
 
 namespace Gambit {
 
