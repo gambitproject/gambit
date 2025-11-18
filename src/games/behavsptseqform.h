@@ -80,29 +80,6 @@ public:
   iterator end() const { return {m_sfg, true}; }
 };
 
-class BehaviorSupportProfile::PlayerSequences {
-private:
-  std::shared_ptr<GameSequenceForm> m_sfg;
-  GamePlayer m_player;
-
-public:
-  PlayerSequences(const std::shared_ptr<GameSequenceForm> p_sfg, const GamePlayer &p_player)
-    : m_sfg(p_sfg), m_player(p_player)
-  {
-  }
-
-  size_t size() const { return m_sfg->m_sequences.at(m_player).size(); }
-
-  std::vector<GameSequence>::const_iterator begin() const
-  {
-    return m_sfg->m_sequences.at(m_player).begin();
-  }
-  std::vector<GameSequence>::const_iterator end() const
-  {
-    return m_sfg->m_sequences.at(m_player).end();
-  }
-};
-
 class BehaviorSupportProfile::Contingencies {
 private:
   const std::shared_ptr<GameSequenceForm> m_sfg;

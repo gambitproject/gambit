@@ -35,6 +35,7 @@ class SequencesWrapper;
 class PlayerSequencesWrapper;
 class InfosetsWrapper;
 class ContingenciesWrapper;
+using GameSequence = std::shared_ptr<GameSequenceRep>;
 
 /// This class represents a subset of the actions in an extensive game.
 /// It is enforced that each player has at least one action at each
@@ -168,7 +169,23 @@ public:
   };
 
   class Sequences;
-  class PlayerSequences;
+
+  class PlayerSequences {
+  private:
+    const BehaviorSupportProfile *m_support;
+    GamePlayer m_player;
+
+  public:
+    PlayerSequences(const BehaviorSupportProfile *p_support, const GamePlayer &p_player)
+      : m_support(p_support), m_player(p_player)
+    {
+    }
+
+    size_t size() const;
+    std::vector<GameSequence>::const_iterator begin() const;
+    std::vector<GameSequence>::const_iterator end() const;
+  };
+
   class Contingencies;
 
   mutable std::shared_ptr<GameSequenceForm> m_sequenceForm;
