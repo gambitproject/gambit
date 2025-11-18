@@ -24,6 +24,7 @@
 #define GAMETREE_H
 
 #include "gameexpl.h"
+#include "behavspt.h"
 
 namespace Gambit {
 
@@ -40,6 +41,15 @@ protected:
   std::size_t m_numNonterminalNodes = 0;
   std::map<GameNodeRep *, std::vector<GameNodeRep *>> m_nodePlays;
   std::map<GameInfosetRep *, std::set<GameActionRep *>> m_infosetParents;
+  mutable std::shared_ptr<BehaviorSupportProfile> m_fullSupport;
+
+  std::shared_ptr<BehaviorSupportProfile> GetFullSupport() override
+  {
+    if (!m_fullSupport) {
+      m_fullSupport = std::make_shared<BehaviorSupportProfile>(shared_from_this());
+    }
+    return m_fullSupport;
+  }
 
   /// @name Private auxiliary functions
   //@{
