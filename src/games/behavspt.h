@@ -30,12 +30,10 @@
 namespace Gambit {
 
 class GameSequenceForm;
-class GameSequenceRep;
 class SequencesWrapper;
 class PlayerSequencesWrapper;
 class InfosetsWrapper;
 class ContingenciesWrapper;
-using GameSequence = std::shared_ptr<GameSequenceRep>;
 
 /// This class represents a subset of the actions in an extensive game.
 /// It is enforced that each player has at least one action at each
@@ -48,6 +46,7 @@ class BehaviorSupportProfile {
   Game m_efg;
   std::map<GameInfoset, std::vector<GameAction>> m_actions;
   mutable std::shared_ptr<GameSequenceForm> m_sequenceForm;
+  mutable std::shared_ptr<std::map<GameInfoset, bool>> m_reachableInfosets;
 
   std::map<GameInfoset, bool> m_infosetReachable;
   std::map<GameNode, bool> m_nonterminalReachable;
@@ -248,16 +247,14 @@ public:
   Sequences GetSequences() const;
   PlayerSequences GetSequences(GamePlayer &p_player) const;
   int GetConstraintEntry(const GameInfoset &p_infoset, const GameAction &p_action) const;
-  const Rational &
-  GetPayoff(const std::map<GamePlayer, std::shared_ptr<GameSequenceRep>> &p_profile,
-            const GamePlayer &p_player) const;
+  const Rational &GetPayoff(const std::map<GamePlayer, GameSequence> &p_profile,
+                            const GamePlayer &p_player) const;
   GameRep::Players GetPlayers() const { return GetGame()->GetPlayers(); }
   MixedBehaviorProfile<double>
-  ToMixedBehaviorProfile(const std::map<std::shared_ptr<GameSequenceRep>, double> &) const;
+  ToMixedBehaviorProfile(const std::map<GameSequence, double> &) const;
   Infosets GetInfosets() const { return {this}; };
   SequenceContingencies GetSequenceContingencies() const;
 
-  mutable std::shared_ptr<std::map<GameInfoset, bool>> m_reachableInfosets;
   void FindReachableInfosets(GameNode p_node) const;
   std::shared_ptr<std::map<GameInfoset, bool>> GetReachableInfosets() const;
 };

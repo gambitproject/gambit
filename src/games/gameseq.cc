@@ -44,7 +44,8 @@ void GameSequenceForm::BuildSequences(const GameNode &n,
     for (auto action : m_support.GetActions(n->GetInfoset())) {
       if (m_correspondence.find(action) == m_correspondence.end()) {
         m_sequences[n->GetPlayer()].push_back(std::make_shared<GameSequenceRep>(
-            n->GetPlayer(), action, m_sequences[n->GetPlayer()].size() + 1, tmp_sequence));
+            n->GetPlayer(), action, m_sequences[n->GetPlayer()].size() + 1,
+            tmp_sequence.get_shared()));
         m_correspondence[action] = m_sequences[n->GetPlayer()].back();
       }
       p_currentSequences[n->GetPlayer()] = m_correspondence[action];

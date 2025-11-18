@@ -28,33 +28,6 @@
 
 namespace Gambit {
 
-class GameSequenceRep {
-public:
-  GamePlayer player;
-  GameAction action;
-  size_t number;
-  std::weak_ptr<GameSequenceRep> parent;
-
-  explicit GameSequenceRep(const GamePlayer &p_player, const GameAction &p_action, size_t p_number,
-                           std::weak_ptr<GameSequenceRep> p_parent)
-    : player(p_player), action(p_action), number(p_number), parent(p_parent)
-  {
-  }
-
-  GameInfoset GetInfoset() const { return (action) ? action->GetInfoset() : nullptr; }
-
-  bool operator<(const GameSequenceRep &other) const
-  {
-    return player < other.player || (player == other.player && action < other.action);
-  }
-  bool operator==(const GameSequenceRep &other) const
-  {
-    return player == other.player && action == other.action;
-  }
-};
-
-using GameSequence = std::shared_ptr<GameSequenceRep>;
-
 class GameSequenceForm {
   friend class BehaviorSupportProfile;
 
