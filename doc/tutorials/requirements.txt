@@ -1,3 +1,0 @@
-pygambit
-jupyterlab==4.4.6
-openspiel==1.6.1
