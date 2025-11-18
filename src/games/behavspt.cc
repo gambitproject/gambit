@@ -275,10 +275,7 @@ std::shared_ptr<GameSequenceForm> BehaviorSupportProfile::GetSequenceForm() cons
   return m_sequenceForm;
 }
 
-BehaviorSupportProfile::Sequences BehaviorSupportProfile::GetSequences() const
-{
-  return {GetSequenceForm()};
-}
+BehaviorSupportProfile::Sequences BehaviorSupportProfile::GetSequences() const { return {this}; }
 
 BehaviorSupportProfile::PlayerSequences
 BehaviorSupportProfile::GetSequences(GamePlayer &p_player) const

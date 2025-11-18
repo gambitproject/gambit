@@ -12,7 +12,7 @@ namespace Gambit {
 
 class BehaviorSupportProfile::Sequences {
 private:
-  const std::shared_ptr<GameSequenceForm> m_sfg;
+  const BehaviorSupportProfile *m_support;
 
 public:
   class iterator {
@@ -65,19 +65,20 @@ public:
     bool operator!=(const iterator &it) const { return !(*this == it); }
   };
 
-  Sequences(const std::shared_ptr<GameSequenceForm> p_sfg) : m_sfg(p_sfg) {}
+  Sequences(const BehaviorSupportProfile *p_support) : m_support(p_support) {}
 
   size_t size() const
   {
     return std::accumulate(
-        m_sfg->m_sequences.cbegin(), m_sfg->m_sequences.cend(), 0,
+        m_support->GetSequenceForm()->m_sequences.cbegin(),
+        m_support->GetSequenceForm()->m_sequences.cend(), 0,
         [](int acc, const std::pair<GamePlayer, std::vector<GameSequence>> &seq) {
           return acc + seq.second.size();
         });
   }
 
-  iterator begin() const { return {m_sfg, false}; }
-  iterator end() const { return {m_sfg, true}; }
+  iterator begin() const { return {m_support->GetSequenceForm(), false}; }
+  iterator end() const { return {m_support->GetSequenceForm(), true}; }
 };
 
 class BehaviorSupportProfile::Contingencies {
