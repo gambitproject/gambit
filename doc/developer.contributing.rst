@@ -109,7 +109,20 @@ You can also build the documentation locally to preview your changes before subm
 
 4. Open ``doc/_build/html/index.html`` in your browser to view the documentation.
 
+Contibuting tutorials
+~~~~~~~~~~~~~~~~~~~~~
 
+To submit a tutorial for inclusion in the Gambit documentation, please follow these steps:
+
+1. Open a GitHub issue using the *Tutorial request* issue template on the `Gambit GitHub repo <https://github.com/gambitproject/gambit/issues/new/choose>`__ or choose an issue already opened with the `tutorial` label.
+
+2. Write the tutorial as a Jupyter notebook (`.ipynb` file), following the style and format of existing tutorials in the `doc/tutorials` directory.
+    - Develop this on a branch as per the instructions in :ref:`contributing-code`.
+    - Add the tutorial to the `doc/tutorials` directory in the repository. Put it in an appropriate subdirectory or create a new one if necessary.
+
+3. Update `doc/pygambit.rst` to ensure the tutorial is listed in the docs at an appropriate location.
+
+4. *[Optional]* If your tutorial requires additional dependencies not already listed in `doc/requirements.txt`, please add them to the file.
 
 
 Recognising contributions
