@@ -45,9 +45,9 @@ using GameSequence = std::shared_ptr<GameSequenceRep>;
 /// computational approaches that enumerate possible equilibrium
 /// supports.
 class BehaviorSupportProfile {
-protected:
   Game m_efg;
   std::map<GameInfoset, std::vector<GameAction>> m_actions;
+  mutable std::shared_ptr<GameSequenceForm> m_sequenceForm;
 
   std::map<GameInfoset, bool> m_infosetReachable;
   std::map<GameNode, bool> m_nonterminalReachable;
@@ -58,7 +58,6 @@ protected:
 
 public:
   class Support {
-  private:
     const BehaviorSupportProfile *m_profile;
     GameInfoset m_infoset;
 
@@ -149,7 +148,6 @@ public:
   //@}
 
   class Infosets {
-  private:
     const BehaviorSupportProfile *m_support;
 
   public:
@@ -169,12 +167,10 @@ public:
   };
 
   class Sequences {
-  private:
     const BehaviorSupportProfile *m_support;
 
   public:
     class iterator {
-    private:
       const std::shared_ptr<GameSequenceForm> m_sfg;
       std::map<GamePlayer, std::vector<GameSequence>>::const_iterator m_currentPlayer;
       std::vector<GameSequence>::const_iterator m_currentSequence;
@@ -200,7 +196,6 @@ public:
   };
 
   class PlayerSequences {
-  private:
     const BehaviorSupportProfile *m_support;
     GamePlayer m_player;
 
@@ -216,7 +211,6 @@ public:
   };
 
   class SequenceContingencies {
-  private:
     const BehaviorSupportProfile *m_support;
 
   public:
@@ -250,7 +244,6 @@ public:
     iterator end() { return {m_support->GetSequenceForm(), true}; }
   };
 
-  mutable std::shared_ptr<GameSequenceForm> m_sequenceForm;
   std::shared_ptr<GameSequenceForm> GetSequenceForm() const;
   Sequences GetSequences() const;
   PlayerSequences GetSequences(GamePlayer &p_player) const;

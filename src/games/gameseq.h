@@ -56,10 +56,8 @@ public:
 using GameSequence = std::shared_ptr<GameSequenceRep>;
 
 class GameSequenceForm {
-
   friend class BehaviorSupportProfile;
 
-private:
   BehaviorSupportProfile m_support;
   std::map<GamePlayer, std::vector<GameSequence>> m_sequences;
   NDArray<Rational> m_payoffs;
@@ -89,7 +87,6 @@ private:
 
 public:
   class Infosets {
-  private:
     const GameSequenceForm *m_sfg;
 
   public:
