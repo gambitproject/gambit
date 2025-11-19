@@ -66,6 +66,11 @@ protected:
     return GetFullSupport()->GetSequenceConstraintEntry(p_infoset, p_action);
   }
 
+  const GameSequence GetEmptySequence(const GamePlayer &p_player) override
+  {
+    return *(GetFullSupport()->GetSequences(p_player).begin());
+  }
+
   /// @name Private auxiliary functions
   //@{
   void SortInfosets(GamePlayerRep *);

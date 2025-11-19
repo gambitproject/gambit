@@ -188,7 +188,7 @@ int BehaviorSupportProfile::GetSequenceConstraintEntry(const GameInfoset &p_info
 }
 
 BehaviorSupportProfile::PlayerSequences
-BehaviorSupportProfile::GetSequences(GamePlayer &p_player) const
+BehaviorSupportProfile::GetSequences(const GamePlayer &p_player) const
 {
   return {this, p_player};
 }

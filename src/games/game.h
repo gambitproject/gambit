@@ -1016,6 +1016,11 @@ public:
   {
     throw std::runtime_error("Sequence form can only be generated for extensive form games");
   }
+
+  virtual const GameSequence GetEmptySequence(const GamePlayer &p_player)
+  {
+    throw std::runtime_error("Sequence form can only be generated for extensive form games");
+  }
 };
 
 //=======================================================================
