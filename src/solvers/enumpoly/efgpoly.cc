@@ -100,7 +100,7 @@ Polynomial<double> GetPayoff(ProblemData &p_data, const GamePlayer &p_player)
 {
   Polynomial<double> equation(p_data.space);
 
-  for (auto profile : p_data.m_support.GetContingencies()) {
+  for (auto profile : p_data.m_support.GetSequenceContingencies()) {
     auto pay = p_data.m_support.GetPayoff(profile, p_player);
     if (pay != Rational(0)) {
       Polynomial<double> term(p_data.space, double(pay));

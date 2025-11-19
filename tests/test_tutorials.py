@@ -1,10 +1,16 @@
 import contextlib
+import os
 from pathlib import Path
 
 import nbformat
 import pytest
-from nbclient import NotebookClient
-from nbclient.exceptions import CellExecutionError
+
+# Ensure Jupyter uses the new platformdirs paths to avoid DeprecationWarning
+# This will become the default in `jupyter_core` v6
+os.environ.setdefault("JUPYTER_PLATFORM_DIRS", "1")
+
+from nbclient import NotebookClient  # noqa: E402
+from nbclient.exceptions import CellExecutionError  # noqa: E402
 
 
 def _find_tutorial_notebooks():
@@ -16,17 +22,9 @@ def _find_tutorial_notebooks():
     if not root.exists():
         pytest.skip(f"Tutorials folder not found: {root}")
 
-    # Collect notebooks from the tutorials root (recursive).
-    notebooks = set(root.rglob("*.ipynb"))
+    # Collect all notebooks under doc/tutorials (including any subfolders).
+    notebooks = sorted(set(root.rglob("*.ipynb")))
 
-    # Also explicitly include notebooks under an "advanced_tutorials" subfolder
-    # (in case they are separate or not picked up for some layouts). Use a set
-    # to deduplicate if the subfolder is already part of the root search.
-    advanced = root / "advanced_tutorials"
-    if advanced.exists():
-        notebooks.update(advanced.rglob("*.ipynb"))
-
-    notebooks = sorted(notebooks)
     if not notebooks:
         pytest.skip(f"No tutorial notebooks found in: {root}")
     return notebooks
