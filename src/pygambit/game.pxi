@@ -19,6 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
+import dataclasses
 import io
 import itertools
 import pathlib
@@ -2033,14 +2034,21 @@ class Game:
         self.game.deref().DeleteStrategy(resolved_strategy.strategy)
 
 
+@dataclasses.dataclass
+class NodeCoordinates:
+    level: int
+    sublevel: int
+    offset: float
+
+
 @cython.cfunc
-def _layout_tree(game: Game) -> dict[GameNode, dict]:
+def _layout_tree(game: Game) -> dict[GameNode, NodeCoordinates]:
     layout = CreateLayout(game.game)
     data = {}
     for node in game.nodes:
-        data[node] = {"level": deref(layout).GetNodeLevel(cython.cast(Node, node).node),
-                      "sublevel": deref(layout).GetNodeSublevel(cython.cast(Node, node).node),
-                      "offset": deref(layout).GetNodeOffset(cython.cast(Node, node).node)}
+        data[node] = NodeCoordinates(deref(layout).GetNodeLevel(cython.cast(Node, node).node),
+                                     deref(layout).GetNodeSublevel(cython.cast(Node, node).node),
+                                     deref(layout).GetNodeOffset(cython.cast(Node, node).node))
     return data
 
 
