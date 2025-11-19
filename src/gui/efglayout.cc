@@ -29,8 +29,7 @@
 #include <wx/wx.h>
 #endif // WX_PRECOMP
 
-#include "gambit.h"
-#include "efgdisplay.h"
+#include "efglayout.h"
 
 namespace Gambit::GUI {
 namespace {
@@ -375,14 +374,15 @@ GameNode TreeLayout::BranchBelowHitTest(int p_x, int p_y) const
 bool TreeLayout::InfosetHitTest(const std::shared_ptr<NodeEntry> &p_entry, const int p_x,
                                 const int p_y) const
 {
-  if (p_entry->GetNextMember() && p_entry->GetNode()->GetInfoset()) {
+  auto nextMember = ComputeNextInInfoset(p_entry);
+  if (nextMember && p_entry->GetNode()->GetInfoset()) {
     if (p_x > p_entry->m_x + p_entry->GetSublevel() * m_infosetSpacing - 2 &&
         p_x < p_entry->m_x + p_entry->GetSublevel() * m_infosetSpacing + 2) {
-      if (p_y > p_entry->m_y && p_y < p_entry->GetNextMember()->m_y) {
+      if (p_y > p_entry->m_y && p_y < nextMember->m_y) {
         // next infoset is below this one
         return true;
       }
-      if (p_y > p_entry->GetNextMember()->m_y && p_y < p_entry->m_y) {
+      if (p_y > nextMember->m_y && p_y < p_entry->m_y) {
         // next infoset is above this one
         return true;
       }
@@ -557,43 +557,8 @@ GameNode TreeLayout::NextSameLevel(const GameNode &p_node) const
   return nullptr;
 }
 
-void TreeLayout::ComputeOffsets(const GameNode &p_node, const BehaviorSupportProfile &p_support,
-                                int &p_ycoord)
-{
-  const auto &settings = m_doc->GetStyle();
-
-  const auto entry = GetNodeEntry(p_node);
-  if (m_doc->GetStyle().RootReachable() && p_node->GetInfoset() &&
-      !p_node->GetInfoset()->GetPlayer()->IsChance()) {
-    const auto actions = p_support.GetActions(p_node->GetInfoset());
-    for (const auto &action : actions) {
-      ComputeOffsets(p_node->GetChild(action), p_support, p_ycoord);
-    }
-    entry->m_y = (GetNodeEntry(p_node->GetChild(actions.front()))->m_y +
-                  GetNodeEntry(p_node->GetChild(actions.back()))->m_y) /
-                 2;
-  }
-  else if (!p_node->IsTerminal()) {
-    const auto actions = p_node->GetInfoset()->GetActions();
-    for (const auto &action : actions) {
-      const auto child = p_node->GetChild(action);
-      ComputeOffsets(child, p_support, p_ycoord);
-      if (!p_node->GetPlayer()->IsChance() && !p_support.Contains(action)) {
-        GetNodeEntry(child)->m_inSupport = false;
-      }
-    }
-    entry->m_y = (GetNodeEntry(p_node->GetChild(actions.front()))->m_y +
-                  GetNodeEntry(p_node->GetChild(actions.back()))->m_y) /
-                 2;
-  }
-  else {
-    entry->m_y = p_ycoord;
-    p_ycoord += settings.TerminalSpacing();
-  }
-}
-
 std::shared_ptr<NodeEntry>
-TreeLayout::ComputeNextInInfoset(const std::shared_ptr<NodeEntry> &p_entry)
+TreeLayout::ComputeNextInInfoset(const std::shared_ptr<NodeEntry> &p_entry) const
 {
   const auto infoset = p_entry->m_node->GetInfoset();
   if (!infoset) {
@@ -620,22 +585,11 @@ TreeLayout::ComputeNextInInfoset(const std::shared_ptr<NodeEntry> &p_entry)
   return nullptr;
 }
 
-void TreeLayout::ComputeSublevel(const std::shared_ptr<NodeEntry> &p_entry)
+void TreeLayout::ComputeNodeDepths(const Gambit::Layout &p_layout) const
 {
-  try {
-    p_entry->m_sublevel = m_infosetSublevels.at({p_entry->m_level, p_entry->m_node->GetInfoset()});
-  }
-  catch (std::out_of_range &) {
-    p_entry->m_sublevel = ++m_numSublevels[p_entry->m_level];
-    m_infosetSublevels[{p_entry->m_level, p_entry->m_node->GetInfoset()}] = p_entry->m_sublevel;
-  }
-  p_entry->m_nextMember = ComputeNextInInfoset(p_entry);
-}
-
-void TreeLayout::ComputeNodeDepths() const
-{
-  std::vector<int> aggregateSublevels(m_maxLevel + 1);
-  std::partial_sum(m_numSublevels.cbegin(), m_numSublevels.cend(), aggregateSublevels.begin());
+  std::vector<int> aggregateSublevels;
+  std::partial_sum(p_layout.GetNumSublevels().cbegin(), p_layout.GetNumSublevels().cend(),
+                   std::back_inserter(aggregateSublevels));
   m_maxX = 0;
   for (const auto &entry : m_nodeList) {
     entry->m_x = c_leftMargin + entry->m_level * m_doc->GetStyle().GetNodeLevelLength();
@@ -654,43 +608,39 @@ void TreeLayout::ComputeRenderedParents() const
   }
 }
 
-void TreeLayout::BuildNodeList(const GameNode &p_node, const BehaviorSupportProfile &p_support,
-                               const int p_level)
+void TreeLayout::BuildNodeList(const GameNode &p_node, const BehaviorSupportProfile &p_support)
 {
   const auto entry = std::make_shared<NodeEntry>(p_node);
   m_nodeList.push_back(entry);
   m_nodeMap[p_node] = entry;
   entry->m_size = m_doc->GetStyle().GetNodeSize();
   entry->m_branchLength = m_doc->GetStyle().GetBranchLength();
-  entry->m_level = p_level;
   if (m_doc->GetStyle().RootReachable()) {
     if (const GameInfoset infoset = p_node->GetInfoset()) {
       if (infoset->GetPlayer()->IsChance()) {
         for (const auto &child : p_node->GetChildren()) {
-          BuildNodeList(child, p_support, p_level + 1);
+          BuildNodeList(child, p_support);
         }
       }
       else {
         for (const auto &action : p_support.GetActions(infoset)) {
-          BuildNodeList(p_node->GetChild(action), p_support, p_level + 1);
+          BuildNodeList(p_node->GetChild(action), p_support);
         }
       }
     }
   }
   else {
     for (const auto &child : p_node->GetChildren()) {
-      BuildNodeList(child, p_support, p_level + 1);
+      BuildNodeList(child, p_support);
     }
   }
-  m_maxLevel = std::max(p_level, m_maxLevel);
 }
 
 void TreeLayout::BuildNodeList(const BehaviorSupportProfile &p_support)
 {
   m_nodeList.clear();
   m_nodeMap.clear();
-  m_maxLevel = 0;
-  BuildNodeList(m_doc->GetGame()->GetRoot(), p_support, 0);
+  BuildNodeList(m_doc->GetGame()->GetRoot(), p_support);
 }
 
 void TreeLayout::Layout(const BehaviorSupportProfile &p_support)
@@ -703,16 +653,18 @@ void TreeLayout::Layout(const BehaviorSupportProfile &p_support)
     BuildNodeList(p_support);
   }
 
-  int maxy = c_topMargin;
-  ComputeOffsets(m_doc->GetGame()->GetRoot(), p_support, maxy);
-  m_maxY = maxy + c_bottomMargin;
+  auto layout = Gambit::Layout(m_doc->GetGame());
+  layout.LayoutTree(p_support);
 
-  m_infosetSublevels.clear();
-  m_numSublevels = std::vector<int>(m_maxLevel + 1);
-  for (auto entry : m_nodeList) {
-    ComputeSublevel(entry);
+  const auto spacing = m_doc->GetStyle().GetTerminalSpacing();
+  for (auto [node, entry] : layout.GetNodeMap()) {
+    m_nodeMap[node]->m_level = entry->m_level;
+    m_nodeMap[node]->m_sublevel = entry->m_sublevel;
+    m_nodeMap[node]->m_y = entry->m_offset * spacing + c_topMargin;
   }
-  ComputeNodeDepths();
+  m_maxY =
+      c_topMargin + c_bottomMargin + spacing * (layout.GetMaxOffset() - layout.GetMinOffset());
+  ComputeNodeDepths(layout);
 
   ComputeRenderedParents();
   GenerateLabels();
@@ -773,9 +725,9 @@ void TreeLayout::RenderSubtree(wxDC &p_dc, bool p_noHints) const
     if (entry->GetChildNumber() == 1) {
       DrawNode(p_dc, parentEntry, m_doc->GetSelectNode(), p_noHints);
 
-      if (parentEntry->GetNextMember()) {
-        const int nextX = parentEntry->GetNextMember()->m_x;
-        const int nextY = parentEntry->GetNextMember()->m_y;
+      if (auto nextMember = ComputeNextInInfoset(parentEntry)) {
+        const int nextX = nextMember->m_x;
+        const int nextY = nextMember->m_y;
 
         if (parentEntry->m_x == nextX) {
 #ifdef __WXGTK__
@@ -792,17 +744,15 @@ void TreeLayout::RenderSubtree(wxDC &p_dc, bool p_noHints) const
                           parentEntry->m_x + parentEntry->GetSize(), nextY);
           }
 
-          if (parentEntry->GetNextMember()->m_x != parentEntry->m_x) {
+          if (nextMember->m_x != parentEntry->m_x) {
             // Draw a little arrow in the direction of the iset.
             int startX, endX;
             if (settings.GetInfosetJoin() == GBT_INFOSET_JOIN_LINES) {
               startX = parentEntry->m_x;
-              endX =
-                  (startX + m_infosetSpacing *
-                                ((parentEntry->GetNextMember()->m_x > parentEntry->m_x) ? 1 : -1));
+              endX = (startX + m_infosetSpacing * ((nextMember->m_x > parentEntry->m_x) ? 1 : -1));
             }
             else {
-              if (parentEntry->GetNextMember()->m_x < parentEntry->m_x) {
+              if (nextMember->m_x < parentEntry->m_x) {
                 // information set is continued to the left
                 startX = parentEntry->m_x + parentEntry->GetSize();
                 endX = parentEntry->m_x - m_infosetSpacing;
