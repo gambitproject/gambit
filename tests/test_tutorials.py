@@ -1,3 +1,9 @@
+import os
+
+# Ensure Jupyter uses the new platformdirs paths to avoid DeprecationWarning
+# This will become the default in `jupyter_core` v6
+os.environ.setdefault("JUPYTER_PLATFORM_DIRS", "1")
+
 import contextlib
 from pathlib import Path
 
