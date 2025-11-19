@@ -26,8 +26,10 @@
 #include <map>
 
 #include "gambit.h"
+#include "game.h"
 
 namespace Gambit {
+
 struct LayoutEntry {
   friend class Layout;
   double m_offset{-1};        // Cartesian coordinates of node
@@ -54,10 +56,22 @@ public:
   void LayoutTree(const BehaviorSupportProfile &);
 
   const std::map<GameNode, std::shared_ptr<LayoutEntry>> &GetNodeMap() const { return m_nodeMap; }
+  int GetNodeLevel(const GameNode &p_node) const { return m_nodeMap.at(p_node)->m_level; }
+  int GetNodeSublevel(const GameNode &p_node) const { return m_nodeMap.at(p_node)->m_sublevel; }
+  double GetNodeOffset(const GameNode &p_node) const { return m_nodeMap.at(p_node)->m_offset; }
+
   const std::vector<int> &GetNumSublevels() const { return m_numSublevels; }
   double GetMinOffset() const { return 0; }
   double GetMaxOffset() const { return m_maxOffset; }
 };
+
+inline std::shared_ptr<Layout> CreateLayout(const Game &p_game)
+{
+  auto layout = std::make_shared<Layout>(p_game);
+  layout->LayoutTree(BehaviorSupportProfile(p_game));
+  return layout;
+}
+
 } // namespace Gambit
 
 #endif // GAMBIT_GAMES_TREELAYOUT_H
