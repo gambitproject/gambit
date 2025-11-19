@@ -3,6 +3,10 @@ description: Submit a request for a new tutorial to be added to the Gambit docum
 title: "[Tutorial]: "
 labels: ["tutorial", "documentation"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this tutorial request!
   - type: textarea
     id: describe
     attributes:
