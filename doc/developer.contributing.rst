@@ -175,6 +175,7 @@ When making a new release of Gambit, follow these steps:
    Include a summary of changes from the `ChangeLog` file in the release notes.
 
 7. Currently there is no automated process for pushing the new release to PyPI. This must be done manually by Ted Turocy or Rahul Savani.
+
 .. TODO: update this process to be automated via GitHub Actions: Issue #557
 
 Patching maintained versions
