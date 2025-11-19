@@ -28,4 +28,4 @@ body:
     attributes:
       label: Add links to papers and software.
       description: Add links to any research papers or other resources the author will need to write this tutorial.
-      value: ""
+      value: "`[Markdown link text](url)`"
