@@ -10,6 +10,9 @@
 
 ### Added
 - Tests for EFG Nash solvers -- `enumpoly_solve`, `lp_solve`, `lcp_solve` -- in behavior stratgegies
+- In `pygambit`, `Node` objects now have a read-only property `is_strategy_reachable` to determine
+  if the node is reachable by at least one pure strategy profile. This is particularly useful for
+  identifying unreachable parts of the game tree in games with absent-mindedness.
 
 
 ## [16.4.1] - unreleased
