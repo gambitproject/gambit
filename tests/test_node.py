@@ -86,11 +86,30 @@ def test_is_successor_of():
         game.root.is_successor_of(game.players[0])
 
 
-def test_is_subgame_root():
-    """Test whether nodes are correctly labeled as roots of proper subgames."""
-    game = games.read_from_file("basic_extensive_game.efg")
-    assert game.root.is_subgame_root
-    assert not game.root.children[0].is_subgame_root
+@pytest.mark.parametrize("game, expected_result", [
+    # Games without Absent-Mindedness for which the legacy method is known to be correct.
+    (games.read_from_file("wichardt.efg"), {0}),
+    (games.read_from_file("e02.efg"), {0, 2, 4}),
+    (games.read_from_file("subgames.efg"), {0, 1, 4, 7, 11, 13, 34}),
+
+    pytest.param(
+        games.read_from_file("AM-driver-subgame.efg"),
+        {0, 3},  # The correct set of subgame roots
+        marks=pytest.mark.xfail(
+            reason="Current method does not detect roots of proper subgames "
+                   "that are members of AM-infosets."
+        )
+    ),
+])
+def test_legacy_is_subgame_root_set(game: gbt.Game, expected_result: set):
+    """
+    Tests the legacy `node.is_subgame_root` against an expected set of nodes.
+    Includes both passing cases and games with Absent-Mindedness where it is expected to fail.
+    """
+    list_nodes = list(game.nodes)
+    expected_roots = {list_nodes[i] for i in expected_result}
+    legacy_roots = {node for node in game.nodes if node.is_subgame_root}
+    assert legacy_roots == expected_roots
 
 
 def test_append_move_error_player_actions():
@@ -791,26 +810,26 @@ def test_node_plays():
 
 
 def test_node_children_action_label():
-    game = games.read_from_file("poker.efg")
-    assert game.root.children["Red"] == game.root.children[0]
-    assert game.root.children["Black"].children["Fold"] == game.root.children[1].children[1]
+    game = games.read_from_file("stripped_down_poker.efg")
+    assert game.root.children["King"] == game.root.children[0]
+    assert game.root.children["Queen"].children["Fold"] == game.root.children[1].children[1]
 
 
 def test_node_children_action():
-    game = games.read_from_file("poker.efg")
-    assert game.root.children[game.root.infoset.actions["Red"]] == game.root.children[0]
+    game = games.read_from_file("stripped_down_poker.efg")
+    assert game.root.children[game.root.infoset.actions["King"]] == game.root.children[0]
 
 
 def test_node_children_nonexistent_action():
-    game = games.read_from_file("poker.efg")
+    game = games.read_from_file("stripped_down_poker.efg")
     with pytest.raises(ValueError):
-        _ = game.root.children["Green"]
+        _ = game.root.children["Jack"]
 
 
 def test_node_children_other_infoset_action():
-    game = games.read_from_file("poker.efg")
+    game = games.read_from_file("stripped_down_poker.efg")
     with pytest.raises(ValueError):
-        _ = game.root.children[game.root.children[0].infoset.actions["Raise"]]
+        _ = game.root.children[game.root.children[0].infoset.actions["Bet"]]
 
 
 @pytest.mark.parametrize(
@@ -821,7 +840,7 @@ def test_node_children_other_infoset_action():
         pytest.param(games.read_from_file("cent3.efg")),
         pytest.param(games.read_from_file("e01.efg")),
         pytest.param(games.read_from_file("e02.efg")),
-        pytest.param(games.read_from_file("poker.efg")),
+        pytest.param(games.read_from_file("stripped_down_poker.efg")),
         pytest.param(gbt.Game.new_tree()),
     ],
 )

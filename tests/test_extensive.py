@@ -54,7 +54,7 @@ def test_game_add_players_nolabel():
     ("e01.efg", True),
     ("e02.efg", True),
     ("cent3.efg", True),
-    ("poker.efg", True),
+    ("stripped_down_poker.efg", True),
     ("basic_extensive_game.efg", True),
 
     # Games with perfect recall from generated games (game_input is a gbt.Game object)
@@ -283,13 +283,13 @@ def test_outcome_index_exception_label():
                 ),
             ],
         ),
-        # Stripped down "Myerson" 2-card poker; 2 player zero-sum game with chance at the root
+        # Stripped-down poker; 2 player zero-sum game with chance at the root
         (
-            games.create_myerson_2_card_poker_efg(),
+            games.create_stripped_down_poker_efg(),
             [["11", "12", "21", "22"], ["1", "2"]],
             [
-                np.array([[-1, 0], ["-1/2", -1], ["-5/2", -1], [-2, -2]]),
-                np.array([[1, 0], ["1/2", 1], ["5/2", 1], [2, 2]]),
+                np.array([[0, 1], ["1/2", 0], ["-3/2", 0], [-1, -1]]),
+                np.array([[0, -1], ["-1/2", 0], ["3/2", 0], [1, 1]]),
             ],
         ),
         # Nature playing at the root, 2 players, no reduction, non-generic payoffs
