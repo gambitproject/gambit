@@ -146,6 +146,8 @@ Branches labeled ``maintX`` and ``maintX_Y``, where ``X`` is the major version n
 Navigate to the Gambit repository on GitHub and select the `branches` tab to see the list of active maintenance branches.
 Be sure to delete any maintenance branches that are no longer being maintained.
 
+.. _making-a-new-release:
+
 Making a new release
 ^^^^^^^^^^^^^^^^^^^^
 
@@ -154,18 +156,17 @@ When making a new release of Gambit, follow these steps:
 1. Create a new branch from the latest commit on the ``master`` branch named ``maintX_Y``, where ``X`` is the major version number and ``Y`` is the minor version number of the new release.
 
 2. Update the version number in the following places:
-
-    * `pyproject.toml`
-    * `doc/conf.py`
-    * `configure.ac`
+- `pyproject.toml`
+- `doc/conf.py`
+- `configure.ac`
 
 3. Update the `ChangeLog` file with a summary of changes
 
-4. Once there are no further commits to be made for the release, create a tag for the release from the latest commit on the maintenance branch.
+4. Once there are no further commits to be made for the release, create a tag for the release from the latest commit on the maintenance branch. ::
     
     git tag -a vX.Y.Z -m "Gambit version X.Y.Z"
 
-5. Push the maintenance branch and tags to the GitHub repository.
+5. Push the maintenance branch and tags to the GitHub repository. ::
     
     git push origin maintX_Y
     git push origin --tags
@@ -174,6 +175,7 @@ When making a new release of Gambit, follow these steps:
    Include a summary of changes from the `ChangeLog` file in the release notes.
 
 7. Currently there is no automated process for pushing the new release to PyPI. This must be done manually by Ted Turocy or Rahul Savani.
+.. TODO: update this process to be automated via GitHub Actions: Issue #557
 
 Patching maintained versions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -183,3 +185,4 @@ If you have bug fixes that should be applied across maintained versions:
 1. Make a branch from the oldest maintenance branch to which the change applies
 2. Apply the change and make a pull request to that maintenance branch
 3. After the pull request is merged, open new pull requests to each subsequent maintenance branch and finally to the master branch, merging each in turn
+4. Create new releases from each maintenance branch as needed, following the steps in :ref:`making-a-new-release`.
