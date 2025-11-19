@@ -16,7 +16,7 @@ body:
     validations:
       required: true
   - type: textarea
-    id: describe
+    id: who
     attributes:
       label: Who is the tutorial for?
       description: Explain who the target audience is for this tutorial and what prior knowledge they should have.
