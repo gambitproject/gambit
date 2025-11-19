@@ -112,6 +112,29 @@ def test_legacy_is_subgame_root_set(game: gbt.Game, expected_result: set):
     assert legacy_roots == expected_roots
 
 
+@pytest.mark.parametrize("game, expected_reachable_indices", [
+    # Games without Absent-Mindedness where all nodes are reachable.
+    (games.read_from_file("e02.efg"), set(range(7))),
+    (games.read_from_file("wichardt.efg"), set(range(15))),
+    (games.read_from_file("subgames.efg"), set(range(37))),
+
+    # Games with absent-mindedness where some nodes are unreachable.
+    (games.read_from_file("AM-driver-one-infoset.efg"), {0, 1, 2, 4}),
+    (games.read_from_file("AM-driver-subgame.efg"), {0, 1, 2, 6}),
+])
+def test_is_strategy_reachable(game: gbt.Game, expected_reachable_indices: set):
+    """
+    Tests `node.is_strategy_reachable` by comparing the set of reachable nodes
+    against a pre-computed set of node indices.
+    """
+    all_nodes = list(game.nodes)
+
+    expected_reachable = {all_nodes[i] for i in expected_reachable_indices}
+    actual_reachable = {node for node in all_nodes if node.is_strategy_reachable}
+
+    assert actual_reachable == expected_reachable
+
+
 def test_append_move_error_player_actions():
     """Test to ensure there are actions when appending with a player"""
     game = games.read_from_file("basic_extensive_game.efg")
