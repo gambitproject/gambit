@@ -313,6 +313,8 @@ game_SOURCES = \
 	src/games/file.cc \
 	src/games/writer.cc \
 	src/games/writer.h \
+	src/games/layout.cc \
+    src/games/layout.h \
 	${agg_SOURCES} \
 	src/games/nash.h
 
@@ -589,8 +591,6 @@ gambit_SOURCES = \
 	src/gui/gamedoc.h \
 	src/gui/gameframe.cc \
 	src/gui/gameframe.h \
-	src/gui/layout.cc \
-	src/gui/layout.h \
 	src/gui/menuconst.h \
 	src/gui/nfgpanel.cc \
 	src/gui/nfgpanel.h \

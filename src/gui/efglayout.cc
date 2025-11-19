@@ -29,10 +29,7 @@
 #include <wx/wx.h>
 #endif // WX_PRECOMP
 
-#include "gambit.h"
-#include "efgdisplay.h"
-
-#include "layout.h"
+#include "efglayout.h"
 
 namespace Gambit::GUI {
 namespace {

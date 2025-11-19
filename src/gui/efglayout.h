@@ -26,7 +26,7 @@
 #include "gambit.h"
 #include "gamedoc.h"
 
-#include "layout.h"
+#include "games/layout.h"
 
 namespace Gambit::GUI {
 class NodeEntry {
@@ -118,7 +118,7 @@ class TreeLayout final : public GameView {
 
   /// Based on node levels and information set sublevels, compute the depth
   /// (X coordinate) of all nodes
-  void ComputeNodeDepths(const Gambit::Layout &) const;
+  void ComputeNodeDepths(const Layout &) const;
   void ComputeRenderedParents() const;
 
   wxString CreateNodeLabel(const std::shared_ptr<NodeEntry> &, int) const;

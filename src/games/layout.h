@@ -2,8 +2,8 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/gui/efglayout.h
-// Interface to tree layout representation
+// FILE: src/games/layout.h
+// Interface to generic tree layout representation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,12 +20,12 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMBIT_LAYOUT_H
-#define GAMBIT_LAYOUT_H
-
-#include "gambit.h"
+#ifndef GAMBIT_GAMES_TREELAYOUT_H
+#define GAMBIT_GAMES_TREELAYOUT_H
 
 #include <map>
+
+#include "gambit.h"
 
 namespace Gambit {
 struct LayoutEntry {
@@ -59,4 +59,5 @@ public:
   double GetMaxOffset() const { return m_maxOffset; }
 };
 } // namespace Gambit
-#endif // GAMBIT_LAYOUT_H
+
+#endif // GAMBIT_GAMES_TREELAYOUT_H
