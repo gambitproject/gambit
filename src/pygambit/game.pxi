@@ -777,6 +777,37 @@ class Game:
         """Whether the game is constant sum."""
         return self.game.deref().IsConstSum()
 
+    def get_own_prior_actions(
+        self,
+        infoset: typing.Union[Infoset, str]
+    ) -> typing.List[typing.Optional[Action]]:
+        """Return the list of actions which immediately precede `infoset` in the graph of
+        the player's information set.
+
+        An "own prior action" is an action such that, for a given member node of the information
+        set, it is the action most recently played by the player on the path to that node.
+        If there is a member node where there is no such action, that is, the player has not
+        yet played prior to reaching that node, the own prior action is null, which is represented
+        by `None` in the list of actions returned.
+
+        If a member node is not reachable due to the path to the node passing through an
+        absent-minded information set, that node has no own prior action.
+
+        .. versionadded:: 16.5
+
+        Returns
+        -------
+        list of {Action, None}
+            The list of the prior actions.
+        """
+        infoset = self._resolve_infoset(infoset, "get_own_prior_actions")
+        return [
+            None if not action else Action.wrap(action)
+            for action in self.game.deref().GetOwnPriorActions(
+                cython.cast(Infoset, infoset).infoset
+            )
+        ]
+
     @property
     def is_perfect_recall(self) -> bool:
         """Whether the game is perfect recall.

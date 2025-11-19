@@ -84,6 +84,10 @@ public:
   //@{
   bool IsTree() const override { return false; }
   bool IsAgg() const override { return true; }
+  std::vector<GameAction> GetOwnPriorActions(GameInfoset infoset) const override
+  {
+    throw UndefinedException();
+  }
   bool IsPerfectRecall() const override { return true; }
   bool IsConstSum() const override;
   /// Returns the smallest payoff to any player in any outcome of the game
