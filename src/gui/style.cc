@@ -77,7 +77,6 @@ void TreeRenderConfig::SetDefaults()
   m_chanceToken = GBT_NODE_TOKEN_DOT;
   m_playerToken = GBT_NODE_TOKEN_DOT;
   m_terminalToken = GBT_NODE_TOKEN_DOT;
-  m_rootReachable = false;
   m_branchLength = 60;
   m_tineLength = 20;
   m_branchStyle = GBT_BRANCH_STYLE_FORKTINE;
