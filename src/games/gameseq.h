@@ -30,6 +30,7 @@ namespace Gambit {
 
 class GameSequenceForm {
   friend class BehaviorSupportProfile;
+  friend class Sequences;
 
   BehaviorSupportProfile m_support;
   std::map<GamePlayer, std::vector<GameSequence>> m_sequences;

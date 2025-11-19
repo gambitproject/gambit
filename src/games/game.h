@@ -67,6 +67,7 @@ class PureStrategyProfile;
 template <class T> class MixedStrategyProfile;
 class StrategySupportProfile;
 class BehaviorSupportProfile;
+class GameSequenceForm;
 
 template <class T> class MixedBehaviorProfile;
 
@@ -598,6 +599,35 @@ inline GameNodeRep::Actions::iterator::iterator(GameInfosetRep::Actions::iterato
 
 inline GameNode GameNodeRep::Actions::iterator::GetOwner() const { return m_child_it.GetOwner(); }
 
+class Sequences {
+  const BehaviorSupportProfile *m_support;
+
+public:
+  class iterator {
+    const std::shared_ptr<GameSequenceForm> m_sfg;
+    std::map<GamePlayer, std::vector<GameSequence>>::const_iterator m_currentPlayer;
+    std::vector<GameSequence>::const_iterator m_currentSequence;
+
+  public:
+    iterator(const std::shared_ptr<GameSequenceForm> p_sfg, bool p_end);
+
+    GameSequence operator*() const { return *m_currentSequence; }
+    GameSequence operator->() const { return *m_currentSequence; }
+
+    iterator &operator++();
+
+    bool operator==(const iterator &it) const;
+    bool operator!=(const iterator &it) const { return !(*this == it); }
+  };
+
+  Sequences(const BehaviorSupportProfile *p_support) : m_support(p_support) {}
+
+  size_t size() const;
+
+  iterator begin() const;
+  iterator end() const;
+};
+
 /// This is the class for representing an arbitrary finite game.
 class GameRep : public std::enable_shared_from_this<GameRep> {
   friend class GameOutcomeRep;
@@ -963,6 +993,15 @@ public:
   {
     throw std::runtime_error("Sequence form can only be generated for extensive form games");
   };
+
+  virtual const Sequences GetSequences() const {}
+
+  virtual const Rational &GetPayoff(const std::map<GamePlayer, GameSequence> &p_profile,
+                                    const GamePlayer &p_player) const
+  {
+  }
+
+  virtual const GameSequence GetCorrespondingSequence(const GameAction &p_action) {}
 };
 
 //=======================================================================

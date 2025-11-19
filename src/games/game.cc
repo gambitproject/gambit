@@ -32,6 +32,7 @@
 // editing operations into the game itself instead of in the member-object
 // classes.
 #include "gametree.h"
+#include "gameseq.h"
 
 namespace Gambit {
 
@@ -408,5 +409,60 @@ template class MixedStrategyProfileRep<Rational>;
 
 template class MixedStrategyProfile<double>;
 template class MixedStrategyProfile<Rational>;
+
+//========================================================================
+//    Sequences
+//========================================================================
+
+size_t Sequences::size() const
+{
+  return std::accumulate(m_support->GetSequenceForm()->m_sequences.cbegin(),
+                         m_support->GetSequenceForm()->m_sequences.cend(), 0,
+                         [](int acc, const std::pair<GamePlayer, std::vector<GameSequence>> &seq) {
+                           return acc + seq.second.size();
+                         });
+}
+
+Sequences::iterator Sequences::begin() const { return {m_support->GetSequenceForm(), false}; }
+Sequences::iterator Sequences::end() const { return {m_support->GetSequenceForm(), true}; }
+
+Sequences::iterator::iterator(const std::shared_ptr<GameSequenceForm> p_sfg, bool p_end)
+  : m_sfg(p_sfg)
+{
+  if (p_end) {
+    m_currentPlayer = m_sfg->m_sequences.cend();
+  }
+  else {
+    m_currentPlayer = m_sfg->m_sequences.cbegin();
+    m_currentSequence = m_currentPlayer->second.cbegin();
+  }
+}
+
+Sequences::iterator &Sequences::iterator::operator++()
+{
+  if (m_currentPlayer == m_sfg->m_sequences.cend()) {
+    return *this;
+  }
+  m_currentSequence++;
+  if (m_currentSequence != m_currentPlayer->second.cend()) {
+    return *this;
+  }
+  m_currentPlayer++;
+  if (m_currentPlayer != m_sfg->m_sequences.cend()) {
+    m_currentSequence = m_currentPlayer->second.cbegin();
+  }
+  return *this;
+}
+
+bool Sequences::iterator::operator==(const iterator &it) const
+{
+  if (m_sfg != it.m_sfg || m_currentPlayer != it.m_currentPlayer) {
+    return false;
+  }
+  if (m_currentPlayer == m_sfg->m_sequences.end()) {
+    return true;
+  }
+  return (m_currentSequence == it.m_currentSequence);
+}
 
 } // end namespace Gambit
