@@ -2030,3 +2030,24 @@ class Game:
         if len(resolved_strategy.player.strategies) == 1:
             raise UndefinedOperationError("Cannot delete the only strategy for a player")
         self.game.deref().DeleteStrategy(resolved_strategy.strategy)
+
+    def get_sequence_form_payoff(self, action_dict, py_player):
+        cdef Player player = cython.cast(Player, py_player)
+        cdef c_GamePlayer cpp_player = player.player
+        cdef stdmap[c_GamePlayer, c_GameSequence] profile
+        cdef c_GamePlayer temp_player
+        cdef c_GameAction temp_action
+        cdef Player key
+        cdef Action value
+        cdef c_GameSequence* seq_ptr
+        for py_key, py_value in action_dict.items():
+            key = cython.cast(Player, py_key)
+            temp_player = key.player
+            if py_value is None:
+                profile[temp_player] = self.game.deref().GetEmptySequence(temp_player)
+            else:
+                value = cython.cast(Action, py_value)
+                temp_action = value.action
+                profile[temp_player] = self.game.deref().GetCorrespondingSequence(temp_action)
+        cdef c_Rational payoff = self.game.deref().GetPayoff(profile, cpp_player)
+        return rat_to_py(payoff)

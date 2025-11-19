@@ -3,6 +3,7 @@ from libcpp.string cimport string
 from libcpp.memory cimport shared_ptr, unique_ptr
 from libcpp.list cimport list as stdlist
 from libcpp.vector cimport vector as stdvector
+from libcpp.map cimport map as stdmap
 
 
 cdef extern from "gambit.h":
@@ -55,6 +56,10 @@ cdef extern from "games/game.h":
     cdef cppclass c_GamePlayerRep "GamePlayerRep"
     cdef cppclass c_GameOutcomeRep "GameOutcomeRep"
     cdef cppclass c_GameNodeRep "GameNodeRep"
+    cdef cppclass c_GameSequenceRep "GameSequenceRep"
+
+    cdef cppclass c_GameSequence "GameObjectPtr<GameSequenceRep>":
+        c_GameSequenceRep *deref "get"() except +RuntimeError
 
     cdef cppclass c_Game "Game":
         c_GameRep *deref "operator->"() except +RuntimeError
@@ -316,6 +321,12 @@ cdef extern from "games/game.h":
 
         c_PureStrategyProfile NewPureStrategyProfile()  # except + doesn't compile
         c_MixedStrategyProfile[T] NewMixedStrategyProfile[T](T)  # except + doesn't compile
+
+        const c_Rational &GetPayoff(
+            const stdmap[c_GamePlayer, c_GameSequence], const c_GamePlayer) except +
+        int GetSequenceConstraintEntry(const c_GameInfoset, const c_GameAction) except +
+        const c_GameSequence GetCorrespondingSequence(const c_GameAction)
+        const c_GameSequence GetEmptySequence(const c_GamePlayer)
 
     c_Game NewTree() except +
     c_Game NewTable(stdvector[int]) except +

@@ -50,7 +50,10 @@ class Rational(fractions.Fraction):
 @cython.cfunc
 def rat_to_py(r: c_Rational):
     """Convert a C++ Rational number to a Python Rational."""
-    return Rational(to_string(r).decode("ascii"))
+    s = to_string(r).decode("ascii")
+    if not s:
+        return Rational(0)
+    return Rational(s)
 
 
 @cython.cfunc
