@@ -2051,3 +2051,15 @@ class Game:
                 profile[temp_player] = self.game.deref().GetCorrespondingSequence(temp_action)
         cdef c_Rational payoff = self.game.deref().GetPayoff(profile, cpp_player)
         return rat_to_py(payoff)
+
+    def get_sequence_form_constraint_entry(self, py_infoset, py_action):
+        cdef Infoset infoset = cython.cast(Infoset, py_infoset)
+        cdef c_GameInfoset cpp_infoset = infoset.infoset
+        cdef Action action
+        cdef c_GameAction cpp_action
+        if py_action is None:
+            cpp_action = <c_GameAction>0
+        else:
+            action = cython.cast(Action, py_action)
+            cpp_action = action.action
+        return self.game.deref().GetSequenceConstraintEntry(cpp_infoset, cpp_action)
