@@ -113,27 +113,20 @@ def create_mixed_behav_game_efg() -> gbt.Game:
     return read_from_file("mixed_behavior_game.efg")
 
 
-def create_1_card_poker_efg() -> gbt.Game:
+def create_stripped_down_poker_efg() -> gbt.Game:
     """
     Returns
     -------
     Game
-        One-card two-player poker game, as used in the user guide
-    """
-    return read_from_file("poker.efg")
+        Stripped-Down Poker: A Classroom Game with Signaling and Bluﬃng
+        Reiley et al (2008)
 
-
-def create_myerson_2_card_poker_efg() -> gbt.Game:
+        Two-player extensive-form poker game between Fred and Alice
+        Chance deals King or Queen to Fred
+        Fred can then Bet or Fold; after raising Alice is in an infoset with two nodes
+        and can choose to Call or Fold
     """
-    Returns
-    -------
-    Game
-        Simplied "stripped down" version of Myerson 2-card poker:
-        Two-player extensive poker game with a chance move with two moves,
-        then player 1 can raise or fold; after raising player 2 is in an infoset with two nodes
-        and can choose to meet or pass
-    """
-    return read_from_file("myerson_2_card_poker.efg")
+    return read_from_file("stripped_down_poker.efg")
 
 
 def create_kuhn_poker_efg() -> gbt.Game:
@@ -146,28 +139,33 @@ def create_kuhn_poker_efg() -> gbt.Game:
     g = gbt.Game.new_tree(
         players=["Alice", "Bob"], title="Three-card poker (J, Q, K), two-player"
     )
+    cards = ["J", "Q", "K"]
     deals = ["JQ", "JK", "QJ", "QK", "KJ", "KQ"]
+
+    def deals_by_infoset(player, card):
+        player_idx = 0 if player == "Alice" else 1
+        return [d for d in deals if d[player_idx] == card]
+
     g.append_move(g.root, g.players.chance, deals)
     g.set_chance_probs(g.root.infoset, [gbt.Rational(1, 6)]*6)
-    # group the children of the root (indices of `deals`) by each player's dealt card
-    alice_grouping = [[0, 1], [2, 3], [4, 5]]  # J, Q, K
-    bob_grouping = [[0, 5], [1, 3], [2, 4]]  # Q, K, J
-
-    # Alice's first move
-    for ij in alice_grouping:
-        term_nodes = [g.root.children[k] for k in ij]
+    for alice_card in cards:
+        # Alice's first move
+        term_nodes = [g.root.children[d] for d in deals_by_infoset("Alice", alice_card)]
         g.append_move(term_nodes, "Alice", ["Check", "Bet"])
-    # Bob's move after Alice checks
-    for ij in bob_grouping:
-        term_nodes = [g.root.children[k].children[0] for k in ij]
+    for bob_card in cards:
+        # Bob's move after Alice checks
+        term_nodes = [g.root.children[d].children["Check"]
+                      for d in deals_by_infoset("Bob", bob_card)]
         g.append_move(term_nodes, "Bob", ["Check", "Bet"])
-    # Alice's move if Bob's second action is bet
-    for ij in alice_grouping:
-        term_nodes = [g.root.children[k].children[0].children[1] for k in ij]
+    for alice_card in cards:
+        # Alice's move if Bob's second action is bet
+        term_nodes = [g.root.children[d].children["Check"].children["Bet"]
+                      for d in deals_by_infoset("Alice", alice_card)]
         g.append_move(term_nodes, "Alice", ["Fold", "Call"])
-    # Bob's move after Alice bets initially
-    for ij in bob_grouping:
-        term_nodes = [g.root.children[k].children[1] for k in ij]
+    for bob_card in cards:
+        # Bob's move after Alice bets initially
+        term_nodes = [g.root.children[d].children["Bet"]
+                      for d in deals_by_infoset("Bob", bob_card)]
         g.append_move(term_nodes, "Bob", ["Fold", "Call"])
 
     def calculate_payoffs(term_node):
@@ -233,7 +231,28 @@ def create_kuhn_poker_efg() -> gbt.Game:
     return g
 
 
+def kuhn_poker_lcp_first_mixed_strategy_prof():
+    """
+    Returns
+    -------
+    Data for the first extreme equilibrium in mixed stategies for Kuhn poker found by lcp_solve
+    """
+    alice = [0] * 27
+    alice[1] = "2/3"
+    alice[4] = "1/3"
+    bob = [0] * 64
+    bob[12] = "2/3"
+    bob[30] = "1/3"
+    return [alice, bob]
+
+
 def create_one_shot_trust_efg() -> gbt.Game:
+    """
+    Returns
+    -------
+    Game
+        One-shot trust game, after Kreps (1990)
+    """
     g = gbt.Game.new_tree(
         players=["Buyer", "Seller"], title="One-shot trust game, after Kreps (1990)"
     )
