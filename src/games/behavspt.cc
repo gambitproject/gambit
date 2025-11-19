@@ -176,6 +176,17 @@ std::shared_ptr<GameSequenceForm> BehaviorSupportProfile::GetSequenceForm() cons
 
 Sequences BehaviorSupportProfile::GetSequences() const { return {this}; }
 
+GameSequence BehaviorSupportProfile::GetCorrespondingSequence(const GameAction &p_action) const
+{
+  return GetSequenceForm()->m_correspondence.at(p_action);
+}
+
+int BehaviorSupportProfile::GetSequenceConstraintEntry(const GameInfoset &p_infoset,
+                                                       const GameAction &p_action) const
+{
+  return GetSequenceForm()->GetConstraintEntry(p_infoset, p_action);
+}
+
 BehaviorSupportProfile::PlayerSequences
 BehaviorSupportProfile::GetSequences(GamePlayer &p_player) const
 {

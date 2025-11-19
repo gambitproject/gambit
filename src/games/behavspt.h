@@ -221,6 +221,8 @@ public:
   ToMixedBehaviorProfile(const std::map<GameSequence, double> &) const;
   Infosets GetInfosets() const { return {this}; };
   SequenceContingencies GetSequenceContingencies() const;
+  GameSequence GetCorrespondingSequence(const GameAction &p_action) const;
+  int GetSequenceConstraintEntry(const GameInfoset &p_infoset, const GameAction &p_action) const;
 
   void FindReachableInfosets(GameNode p_node) const;
   std::shared_ptr<std::map<GameInfoset, bool>> GetReachableInfosets() const;

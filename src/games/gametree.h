@@ -48,6 +48,24 @@ protected:
   mutable std::shared_ptr<OwnPriorActionInfo> m_ownPriorActionInfo;
   mutable std::unique_ptr<std::set<GameNodeRep *>> m_unreachableNodes;
 
+  const Sequences GetSequences() override { return GetFullSupport()->GetSequences(); }
+
+  const Rational &GetPayoff(const std::map<GamePlayer, GameSequence> &p_profile,
+                            const GamePlayer &p_player) override
+  {
+    return GetFullSupport()->GetPayoff(p_profile, p_player);
+  }
+
+  const GameSequence GetCorrespondingSequence(const GameAction &p_action) override
+  {
+    return GetFullSupport()->GetCorrespondingSequence(p_action);
+  }
+
+  int GetSequenceConstraintEntry(const GameInfoset &p_infoset, const GameAction &p_action) override
+  {
+    return GetFullSupport()->GetSequenceConstraintEntry(p_infoset, p_action);
+  }
+
   /// @name Private auxiliary functions
   //@{
   void SortInfosets(GamePlayerRep *);

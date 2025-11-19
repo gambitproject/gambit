@@ -989,19 +989,33 @@ public:
   /// Build any computed values anew
   virtual void BuildComputedValues() const {}
 
+  // Sequence form methods
+
   virtual std::shared_ptr<BehaviorSupportProfile> GetFullSupport()
   {
     throw std::runtime_error("Sequence form can only be generated for extensive form games");
   };
 
-  virtual const Sequences GetSequences() const {}
-
-  virtual const Rational &GetPayoff(const std::map<GamePlayer, GameSequence> &p_profile,
-                                    const GamePlayer &p_player) const
+  virtual const Sequences GetSequences()
   {
+    throw std::runtime_error("Sequence form can only be generated for extensive form games");
   }
 
-  virtual const GameSequence GetCorrespondingSequence(const GameAction &p_action) {}
+  virtual const Rational &GetPayoff(const std::map<GamePlayer, GameSequence> &p_profile,
+                                    const GamePlayer &p_player)
+  {
+    throw std::runtime_error("Sequence form can only be generated for extensive form games");
+  }
+
+  virtual const GameSequence GetCorrespondingSequence(const GameAction &p_action)
+  {
+    throw std::runtime_error("Sequence form can only be generated for extensive form games");
+  }
+
+  virtual int GetSequenceConstraintEntry(const GameInfoset &p_infoset, const GameAction &p_action)
+  {
+    throw std::runtime_error("Sequence form can only be generated for extensive form games");
+  }
 };
 
 //=======================================================================
