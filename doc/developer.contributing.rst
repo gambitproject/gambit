@@ -156,6 +156,7 @@ When making a new release of Gambit, follow these steps:
 1. Create a new branch from the latest commit on the ``master`` branch named ``maintX_Y``, where ``X`` is the major version number and ``Y`` is the minor version number of the new release.
 
 2. Update the version number in the following places:
+
 - `pyproject.toml`
 - `doc/conf.py`
 - `configure.ac`
