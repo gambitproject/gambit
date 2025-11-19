@@ -1,16 +1,15 @@
-import os
-
-# Ensure Jupyter uses the new platformdirs paths to avoid DeprecationWarning
-# This will become the default in `jupyter_core` v6
-os.environ.setdefault("JUPYTER_PLATFORM_DIRS", "1")
-
 import contextlib
+import os
 from pathlib import Path
 
 import nbformat
 import pytest
 from nbclient import NotebookClient
 from nbclient.exceptions import CellExecutionError
+
+# Ensure Jupyter uses the new platformdirs paths to avoid DeprecationWarning
+# This will become the default in `jupyter_core` v6
+os.environ.setdefault("JUPYTER_PLATFORM_DIRS", "1")
 
 
 def _find_tutorial_notebooks():
