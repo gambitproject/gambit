@@ -109,7 +109,7 @@ public:
   int GetNodeSize() const { return m_nodeSize; }
   void SetNodeSize(int p_nodeSize) { m_nodeSize = p_nodeSize; }
 
-  int TerminalSpacing() const { return m_terminalSpacing; }
+  int GetTerminalSpacing() const { return m_terminalSpacing; }
   void SetTerminalSpacing(int p_spacing) { m_terminalSpacing = p_spacing; }
 
   NodeTokenStyle GetChanceToken() const { return m_chanceToken; }
