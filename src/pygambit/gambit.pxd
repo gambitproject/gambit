@@ -218,6 +218,7 @@ cdef extern from "games/game.h":
         bint IsTerminal() except +
         bint IsSuccessorOf(c_GameNode) except +
         bint IsSubgameRoot() except +
+        bint IsStrategyReachable() except +
         c_GameAction GetPriorAction() except +
 
     cdef cppclass c_GameRep "GameRep":
