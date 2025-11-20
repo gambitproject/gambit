@@ -138,10 +138,10 @@ def test_set_and_get_probability_by_strategy_label(game: gbt.Game, strategy_labe
      (games.create_coord_4x4_nfg(), P1, True, ["1/4", 0, 0, "3/4"]),
      ##############################################################################
      # stripped-down poker efg
-     (games.create_stripped_down_poker_efg(), "Fred", False, [0.25, 0.75, 0, 0]),
-     (games.create_stripped_down_poker_efg(), "Alice", False, [1, 0]),
-     (games.create_stripped_down_poker_efg(), "Fred", True, ["1/4", "3/4", 0, 0]),
-     (games.create_stripped_down_poker_efg(), "Alice", True, [1, 0]),
+     (games.create_stripped_down_poker_efg(), "Alice", False, [0.25, 0.75, 0, 0]),
+     (games.create_stripped_down_poker_efg(), "Bob", False, [1, 0]),
+     (games.create_stripped_down_poker_efg(), "Alice", True, ["1/4", "3/4", 0, 0]),
+     (games.create_stripped_down_poker_efg(), "Bob", True, [1, 0]),
     ],
 )
 def test_set_and_get_probabilities_by_player_label(game: gbt.Game, player_label: str,
@@ -158,19 +158,19 @@ def test_set_and_get_probabilities_by_player_label(game: gbt.Game, player_label:
      ##############################################################################
      # stripped-down poker efg
      # Player 1
-     (games.create_stripped_down_poker_efg(), "Fred", "11", 0.25, False),
-     (games.create_stripped_down_poker_efg(), "Fred", "12", 0.25, False),
-     (games.create_stripped_down_poker_efg(), "Fred", "21", 0.25, False),
-     (games.create_stripped_down_poker_efg(), "Fred", "22", 0.25, False),
-     (games.create_stripped_down_poker_efg(), "Fred", "11", "1/4", True),
-     (games.create_stripped_down_poker_efg(), "Fred", "12", "1/4", True),
-     (games.create_stripped_down_poker_efg(), "Fred", "21", "1/4", True),
-     (games.create_stripped_down_poker_efg(), "Fred", "22", "1/4", True),
+     (games.create_stripped_down_poker_efg(), "Alice", "11", 0.25, False),
+     (games.create_stripped_down_poker_efg(), "Alice", "12", 0.25, False),
+     (games.create_stripped_down_poker_efg(), "Alice", "21", 0.25, False),
+     (games.create_stripped_down_poker_efg(), "Alice", "22", 0.25, False),
+     (games.create_stripped_down_poker_efg(), "Alice", "11", "1/4", True),
+     (games.create_stripped_down_poker_efg(), "Alice", "12", "1/4", True),
+     (games.create_stripped_down_poker_efg(), "Alice", "21", "1/4", True),
+     (games.create_stripped_down_poker_efg(), "Alice", "22", "1/4", True),
      # Player 2
-     (games.create_stripped_down_poker_efg(), "Alice", "1", 0.5, False),
-     (games.create_stripped_down_poker_efg(), "Alice", "2", 0.5, False),
-     (games.create_stripped_down_poker_efg(), "Alice", "1", "1/2", True),
-     (games.create_stripped_down_poker_efg(), "Alice", "2", "1/2", True),
+     (games.create_stripped_down_poker_efg(), "Bob", "1", 0.5, False),
+     (games.create_stripped_down_poker_efg(), "Bob", "2", 0.5, False),
+     (games.create_stripped_down_poker_efg(), "Bob", "1", "1/2", True),
+     (games.create_stripped_down_poker_efg(), "Bob", "2", "1/2", True),
      ##############################################################################
      # coordination 4x4 nfg outcome version with strategy labels
      (games.create_coord_4x4_nfg(outcome_version=True), P1, "1-1", "1/4", True),
@@ -191,12 +191,12 @@ def test_profile_indexing_by_player_and_strategy_label_reference(game: gbt.Game,
     [
      ##############################################################################
      # stripped-down poker efg
-     (games.create_stripped_down_poker_efg(), "Alice", "11", True),
-     (games.create_stripped_down_poker_efg(), "Alice", "11", False),
-     (games.create_stripped_down_poker_efg(), "Fred", "1", True),
-     (games.create_stripped_down_poker_efg(), "Fred", "1", False),
-     (games.create_stripped_down_poker_efg(), "Fred", "2", True),
-     (games.create_stripped_down_poker_efg(), "Fred", "2", False),
+     (games.create_stripped_down_poker_efg(), "Bob", "11", True),
+     (games.create_stripped_down_poker_efg(), "Bob", "11", False),
+     (games.create_stripped_down_poker_efg(), "Alice", "1", True),
+     (games.create_stripped_down_poker_efg(), "Alice", "1", False),
+     (games.create_stripped_down_poker_efg(), "Alice", "2", True),
+     (games.create_stripped_down_poker_efg(), "Alice", "2", False),
      ##############################################################################
      # coordination 4x4 nfg outcome version with strategy labels
      (games.create_coord_4x4_nfg(outcome_version=True), P1, "2-1", True),
@@ -295,10 +295,10 @@ def test_profile_indexing_by_strategy_label_reference(game: gbt.Game, strategy_l
      (games.create_mixed_behav_game_efg(), P3, ["1/2", "1/2"], True),
      ############################################################################
      # stripped-down poker efg
-     (games.create_stripped_down_poker_efg(), "Fred", [0.25, 0.25, 0.25, 0.25], False),
-     (games.create_stripped_down_poker_efg(), "Alice", [0.5, 0.5], False),
-     (games.create_stripped_down_poker_efg(), "Fred", ["1/4", "1/4", "1/4", "1/4"], True),
-     (games.create_stripped_down_poker_efg(), "Alice", ["1/2", "1/2"], True),
+     (games.create_stripped_down_poker_efg(), "Alice", [0.25, 0.25, 0.25, 0.25], False),
+     (games.create_stripped_down_poker_efg(), "Bob", [0.5, 0.5], False),
+     (games.create_stripped_down_poker_efg(), "Alice", ["1/4", "1/4", "1/4", "1/4"], True),
+     (games.create_stripped_down_poker_efg(), "Bob", ["1/2", "1/2"], True),
      ############################################################################
      # coordination 4x4 nfg
      (games.create_coord_4x4_nfg(), P1, [0.25, 0.25, 0.25, 0.25], False),
@@ -338,24 +338,24 @@ def test_profile_indexing_by_player_label_reference(game: gbt.Game, player_label
      (games.create_coord_4x4_nfg(), True,  [[1, 0, 0, 0], [0, 1, 0, 0]], P2, 0),
      #########################################################################
      # stripped-down poker efg
-     (games.create_stripped_down_poker_efg(), False, None, "Fred", -0.25),
-     (games.create_stripped_down_poker_efg(), False, None, "Alice", 0.25),
-     (games.create_stripped_down_poker_efg(), True,  None, "Fred", "-1/4"),
-     (games.create_stripped_down_poker_efg(), True,  None, "Alice", "1/4"),
-     # Raise/Raise for player 1
-     (games.create_stripped_down_poker_efg(), False, [[1, 0, 0, 0], [1, 0]], "Fred",  0),
-     (games.create_stripped_down_poker_efg(), False, [[1, 0, 0, 0], [1, 0]], "Alice", 0),
-     (games.create_stripped_down_poker_efg(), True,  [[1, 0, 0, 0], [1, 0]], "Fred",  0),
-     (games.create_stripped_down_poker_efg(), True,  [[1, 0, 0, 0], [1, 0]], "Alice", 0),
+     (games.create_stripped_down_poker_efg(), False, None, "Alice", -0.25),
+     (games.create_stripped_down_poker_efg(), False, None, "Bob", 0.25),
+     (games.create_stripped_down_poker_efg(), True,  None, "Alice", "-1/4"),
+     (games.create_stripped_down_poker_efg(), True,  None, "Bob", "1/4"),
+     # Bet/Call
+     (games.create_stripped_down_poker_efg(), False, [[1, 0, 0, 0], [1, 0]], "Alice",  0),
+     (games.create_stripped_down_poker_efg(), False, [[1, 0, 0, 0], [1, 0]], "Bob", 0),
+     (games.create_stripped_down_poker_efg(), True,  [[1, 0, 0, 0], [1, 0]], "Alice",  0),
+     (games.create_stripped_down_poker_efg(), True,  [[1, 0, 0, 0], [1, 0]], "Bob", 0),
      # Fold/Fold for player 1 (player 2's strategy is payoff-irrelevant)
-     (games.create_stripped_down_poker_efg(), False, [[0, 0, 0, 1], [1, 0]], "Fred", -1),
-     (games.create_stripped_down_poker_efg(), False, [[0, 0, 0, 1], [1, 0]], "Alice", 1),
-     (games.create_stripped_down_poker_efg(), True,  [[0, 0, 0, 1], [1, 0]], "Fred", -1),
-     (games.create_stripped_down_poker_efg(), True,  [[0, 0, 0, 1], [1, 0]], "Alice", 1),
-     (games.create_stripped_down_poker_efg(), False, [[0, 0, 0, 1], [0.5, 0.5]], "Fred", -1),
-     (games.create_stripped_down_poker_efg(), False, [[0, 0, 0, 1], [0.5, 0.5]], "Alice", 1),
-     (games.create_stripped_down_poker_efg(), True,  [[0, 0, 0, 1], ["1/2", "1/2"]], "Fred", -1),
-     (games.create_stripped_down_poker_efg(), True,  [[0, 0, 0, 1], ["1/2", "1/2"]], "Alice", 1),
+     (games.create_stripped_down_poker_efg(), False, [[0, 0, 0, 1], [1, 0]], "Alice", -1),
+     (games.create_stripped_down_poker_efg(), False, [[0, 0, 0, 1], [1, 0]], "Bob", 1),
+     (games.create_stripped_down_poker_efg(), True,  [[0, 0, 0, 1], [1, 0]], "Alice", -1),
+     (games.create_stripped_down_poker_efg(), True,  [[0, 0, 0, 1], [1, 0]], "Bob", 1),
+     (games.create_stripped_down_poker_efg(), False, [[0, 0, 0, 1], [0.5, 0.5]], "Alice", -1),
+     (games.create_stripped_down_poker_efg(), False, [[0, 0, 0, 1], [0.5, 0.5]], "Bob", 1),
+     (games.create_stripped_down_poker_efg(), True,  [[0, 0, 0, 1], ["1/2", "1/2"]], "Alice", -1),
+     (games.create_stripped_down_poker_efg(), True,  [[0, 0, 0, 1], ["1/2", "1/2"]], "Bob", 1),
      #########################################################################
      (games.create_mixed_behav_game_efg(), False, None, P1, 3.0),
      (games.create_mixed_behav_game_efg(), False, None, P2, 3.0),

@@ -23,7 +23,7 @@ They are numbered in the order they should be read.
    tutorials/running_locally
    tutorials/01_quickstart
    tutorials/02_extensive_form
-   tutorials/03_poker
+   tutorials/03_stripped_down_poker
 
 Advanced user tutorials
 -----------------------
@@ -43,6 +43,17 @@ Advanced tutorials:
    tutorials/advanced_tutorials/starting_points
    tutorials/advanced_tutorials/quantal_response
    .. pygambit.external_programs
+
+Interoperability tutorials
+--------------------------
+
+These tutorials demonstrate how to use PyGambit alongside other game-theoretic software packages.
+These tutorials assume you have read the new user tutorials and are familiar with the PyGambit API, however they do not assume prior knowledge of the other software packages or an advanced understanding of Game Theory:
+
+.. toctree::
+   :maxdepth: 2
+
+   tutorials/interoperability_tutorials/openspiel
 
 Algorithms for computing Nash equilibria
 ----------------------------------------

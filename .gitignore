@@ -20,6 +20,7 @@ _build
 build
 *.egg-info
 *.pyc
+*.so
 
 config.guess
 config.sub
@@ -42,3 +43,5 @@ Gambit.app/*
 *.so
 doc/tutorials/games/*.nfg
 doc/tutorials/games/*.efg
+*.dmg
+Gambit.app/*
