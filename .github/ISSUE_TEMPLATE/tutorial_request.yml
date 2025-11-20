@@ -3,19 +3,25 @@ description: Submit a request for a new tutorial to be added to the Gambit docum
 title: "[Tutorial]: "
 labels: ["tutorial", "documentation"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this tutorial request!
   - type: textarea
     id: describe
     attributes:
       label: Describe the tutorial you want to see.
       description: Go into as much detail as you can regarding the tutorial you would like to see, how long it should be etc.
+      placeholder: "E.g. A step-by-step guide showing how to use PyGambit to compute equilibria for normal and extensive form games..."
       value: "Add a tutorial demonstrating the core components of the PyGambit API."
     validations:
       required: true
   - type: textarea
-    id: describe
+    id: who
     attributes:
       label: Who is the tutorial for?
       description: Explain who the target audience is for this tutorial and what prior knowledge they should have.
+      placeholder: "E.g. Beginners in game theory who know basic Python."
       value: "Newcomers to game theory and the Gambit software who have basic Python programming skills."
     validations:
       required: true
@@ -24,4 +30,6 @@ body:
     attributes:
       label: Add links to papers and software.
       description: Add links to any research papers or other resources the author will need to write this tutorial.
-      value: ""
+      value: "`[Markdown link text](url)`"
+    validations:
+      required: false
