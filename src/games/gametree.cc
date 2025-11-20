@@ -388,6 +388,18 @@ bool GameNodeRep::IsSubgameRoot() const
   return true;
 }
 
+bool GameNodeRep::IsStrategyReachable() const
+{
+  auto tree_game = static_cast<GameTreeRep *>(m_game);
+
+  if (tree_game->m_reachableNodes.empty() && !tree_game->GetRoot()->IsTerminal()) {
+    tree_game->BuildInfosetParents();
+  }
+
+  return tree_game->m_reachableNodes.find(const_cast<GameNodeRep *>(this)) !=
+         tree_game->m_reachableNodes.end();
+}
+
 void GameTreeRep::DeleteParent(GameNode p_node)
 {
   if (p_node->m_game != this) {
@@ -800,6 +812,7 @@ void GameTreeRep::ClearComputedValues() const
   }
   const_cast<GameTreeRep *>(this)->m_nodePlays.clear();
   const_cast<GameTreeRep *>(this)->m_infosetParents.clear();
+  const_cast<GameTreeRep *>(this)->m_reachableNodes.clear();
   m_computedValues = false;
 }
 
@@ -842,6 +855,9 @@ std::vector<GameNodeRep *> GameTreeRep::BuildConsistentPlaysRecursiveImpl(GameNo
 
 void GameTreeRep::BuildInfosetParents()
 {
+  m_reachableNodes.clear();
+  m_reachableNodes.insert(m_root.get());
+
   if (m_root->IsTerminal()) {
     m_infosetParents[m_root->m_infoset].insert(nullptr);
     return;
@@ -893,7 +909,7 @@ void GameTreeRep::BuildInfosetParents()
     }
 
     prior_actions.at(node->m_infoset->m_player->shared_from_this()).top() = action;
-
+    m_reachableNodes.insert(child.get());
     if (!child->IsTerminal()) {
       auto child_player = child->m_infoset->m_player->shared_from_this();
       auto prior_action = prior_actions.at(child_player).top();
