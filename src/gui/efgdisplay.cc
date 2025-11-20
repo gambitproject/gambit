@@ -592,8 +592,7 @@ void EfgDisplay::OnUpdate()
 
 void EfgDisplay::RefreshTree()
 {
-  m_layout.BuildNodeList(m_doc->GetEfgSupport());
-  m_layout.Layout(m_doc->GetEfgSupport());
+  m_layout.Layout(m_doc->GetGame());
   Refresh();
 }
 
