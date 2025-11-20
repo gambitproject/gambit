@@ -40,7 +40,7 @@ protected:
   std::size_t m_numNonterminalNodes = 0;
   std::map<GameNodeRep *, std::vector<GameNodeRep *>> m_nodePlays;
   std::map<GameInfosetRep *, std::set<GameActionRep *>> m_infosetParents;
-  mutable std::set<GameNodeRep *> m_reachableNodes;
+  mutable std::set<GameNodeRep *> m_unreachableNodes;
 
   /// @name Private auxiliary functions
   //@{
