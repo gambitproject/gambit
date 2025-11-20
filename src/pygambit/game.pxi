@@ -160,6 +160,35 @@ def read_agg(filepath_or_buffer: typing.Union[str, pathlib.Path, io.IOBase]) -> 
 
 
 @cython.cclass
+class Sequence:
+    """A player in a ``Game``."""
+    seq = cython.declare(c_GameSequence)
+
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create a Sequence directly.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(seq: c_GameSequence) -> Sequence:
+        obj: Sequence = Sequence.__new__(Sequence)
+        obj.seq = seq
+        return obj
+
+    @property
+    def action(self) -> Action:
+        """Gets the terminal ``Action`` of the sequence."""
+        cdef c_GameAction action = self.seq.deref().action
+        if not action:
+            return None
+        return Action.wrap(action)
+
+    @property
+    def player(self) -> Player:
+        """Gets the ``Player`` to which the sequence belongs."""
+        return Player.wrap(self.seq.deref().player)
+
+
+@cython.cclass
 class GameNodes:
     """Represents the set of nodes in a game."""
     game = cython.declare(c_Game)
@@ -2063,3 +2092,15 @@ class Game:
             action = cython.cast(Action, py_action)
             cpp_action = action.action
         return self.game.deref().GetSequenceConstraintEntry(cpp_infoset, cpp_action)
+
+    def get_corresponding_sequence(self, py_action):
+        cdef Action action = cython.cast(Action, py_action)
+        cdef c_GameAction cpp_action = action.action
+        cdef c_GameSequence seq = self.game.deref().GetCorrespondingSequence(cpp_action)
+        return Sequence.wrap(seq)
+
+    def get_empty_sequence(self, py_player):
+        cdef Player player = cython.cast(Player, py_player)
+        cdef c_GamePlayer cpp_player = player.player
+        cdef c_GameSequence seq = self.game.deref().GetEmptySequence(cpp_player)
+        return Sequence.wrap(seq)

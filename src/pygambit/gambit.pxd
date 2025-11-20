@@ -1,6 +1,6 @@
 from libcpp cimport bool
 from libcpp.string cimport string
-from libcpp.memory cimport shared_ptr, unique_ptr
+from libcpp.memory cimport shared_ptr, unique_ptr, weak_ptr
 from libcpp.list cimport list as stdlist
 from libcpp.vector cimport vector as stdvector
 from libcpp.map cimport map as stdmap
@@ -96,6 +96,11 @@ cdef extern from "games/game.h":
 
     cdef cppclass c_PureBehaviorProfile "PureBehaviorProfile":
         c_PureBehaviorProfile(c_Game) except +
+
+    cdef cppclass c_GameSequenceRep "GameSequenceRep":
+        c_GamePlayer player
+        c_GameAction action
+        weak_ptr[c_GameSequenceRep] parent
 
     cdef cppclass c_GameStrategyRep "GameStrategyRep":
         int GetNumber() except +
