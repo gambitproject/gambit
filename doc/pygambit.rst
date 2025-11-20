@@ -23,7 +23,7 @@ They are numbered in the order they should be read.
    tutorials/running_locally
    tutorials/01_quickstart
    tutorials/02_extensive_form
-   tutorials/03_poker
+   tutorials/03_stripped_down_poker
 
 Advanced user tutorials
 -----------------------
