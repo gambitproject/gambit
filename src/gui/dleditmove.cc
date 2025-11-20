@@ -31,17 +31,15 @@
 #include "dleditmove.h"
 #include "renratio.h"
 
-using namespace Gambit;
-
-class gbtActionSheet : public wxSheet {
-private:
+namespace Gambit::GUI {
+class ActionSheet final : public wxSheet {
   GameInfoset m_infoset;
 
   // Overriding wxSheet members
   wxSheetCellAttr GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const override;
 
 public:
-  gbtActionSheet(wxWindow *p_parent, const GameInfoset &p_infoset);
+  ActionSheet(wxWindow *p_parent, const GameInfoset &p_infoset);
 
   int NumActions() const { return GetNumberRows(); }
 
@@ -49,7 +47,7 @@ public:
   Array<Number> GetActionProbs();
 };
 
-gbtActionSheet::gbtActionSheet(wxWindow *p_parent, const Gambit::GameInfoset &p_infoset)
+ActionSheet::ActionSheet(wxWindow *p_parent, const GameInfoset &p_infoset)
   : wxSheet(p_parent, wxID_ANY), m_infoset(p_infoset)
 {
   CreateGrid(p_infoset->GetActions().size(), (p_infoset->IsChanceInfoset()) ? 2 : 1);
@@ -61,12 +59,13 @@ gbtActionSheet::gbtActionSheet(wxWindow *p_parent, const Gambit::GameInfoset &p_
   }
 
   for (const auto &action : p_infoset->GetActions()) {
-    SetCellValue(wxSheetCoords(action->GetNumber() - 1, 0),
-                 wxString(action->GetLabel().c_str(), *wxConvCurrent));
+    wxSheet::SetCellValue(wxSheetCoords(action->GetNumber() - 1, 0),
+                          wxString(action->GetLabel().c_str(), *wxConvCurrent));
     if (p_infoset->IsChanceInfoset()) {
-      SetCellValue(wxSheetCoords(action->GetNumber() - 1, 1),
-                   wxString(static_cast<std::string>(p_infoset->GetActionProb(action)).c_str(),
-                            *wxConvCurrent));
+      wxSheet::SetCellValue(
+          wxSheetCoords(action->GetNumber() - 1, 1),
+          wxString(static_cast<std::string>(p_infoset->GetActionProb(action)).c_str(),
+                   *wxConvCurrent));
     }
   }
   SetDefaultColWidth(150);
@@ -76,7 +75,7 @@ gbtActionSheet::gbtActionSheet(wxWindow *p_parent, const Gambit::GameInfoset &p_
   InvalidateBestSize();
 }
 
-wxString gbtActionSheet::GetActionName(int p_act)
+wxString ActionSheet::GetActionName(int p_act)
 {
   if (IsCellEditControlCreated()) {
     SaveEditControlValue();
@@ -87,7 +86,7 @@ wxString gbtActionSheet::GetActionName(int p_act)
   return GetCellValue(wxSheetCoords(p_act - 1, 0));
 }
 
-Array<Number> gbtActionSheet::GetActionProbs()
+Array<Number> ActionSheet::GetActionProbs()
 {
   if (IsCellEditControlCreated()) {
     SaveEditControlValue();
@@ -102,7 +101,7 @@ Array<Number> gbtActionSheet::GetActionProbs()
   return probs;
 }
 
-wxSheetCellAttr gbtActionSheet::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
+wxSheetCellAttr ActionSheet::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
 {
   if (IsRowLabelCell(p_coords)) {
     wxSheetCellAttr attr(GetSheetRefData()->m_defaultRowLabelAttr);
@@ -131,8 +130,8 @@ wxSheetCellAttr gbtActionSheet::GetAttr(const wxSheetCoords &p_coords, wxSheetAt
   attr.SetOrientation(wxHORIZONTAL);
   attr.SetReadOnly(false);
   if (p_coords.GetCol() == 1) {
-    attr.SetRenderer(wxSheetCellRenderer(new gbtRationalRendererRefData()));
-    attr.SetEditor(wxSheetCellEditor(new gbtRationalEditorRefData()));
+    attr.SetRenderer(wxSheetCellRenderer(new RationalRendererRefData()));
+    attr.SetEditor(wxSheetCellEditor(new RationalEditorRefData()));
   }
   else {
     attr.SetEditor(wxSheetCellEditor(new wxSheetCellTextEditorRefData()));
@@ -141,13 +140,12 @@ wxSheetCellAttr gbtActionSheet::GetAttr(const wxSheetCoords &p_coords, wxSheetAt
 }
 
 //======================================================================
-//                      class gbtEditMoveDialog
+//                      class EditMoveDialog
 //======================================================================
 
-wxBEGIN_EVENT_TABLE(gbtEditMoveDialog,
-                    wxDialog) EVT_BUTTON(wxID_OK, gbtEditMoveDialog::OnOK) wxEND_EVENT_TABLE()
-
-    gbtEditMoveDialog::gbtEditMoveDialog(wxWindow *p_parent, const Gambit::GameInfoset &p_infoset)
+wxBEGIN_EVENT_TABLE(EditMoveDialog, wxDialog) EVT_BUTTON(wxID_OK, EditMoveDialog::OnOK)
+    wxEND_EVENT_TABLE() EditMoveDialog::EditMoveDialog(wxWindow *p_parent,
+                                                       const GameInfoset &p_infoset)
   : wxDialog(p_parent, wxID_ANY, _("Move properties"), wxDefaultPosition), m_infoset(p_infoset)
 {
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
@@ -185,7 +183,7 @@ wxBEGIN_EVENT_TABLE(gbtEditMoveDialog,
 
   auto *actionBoxSizer =
       new wxStaticBoxSizer(new wxStaticBox(this, wxID_STATIC, _("Actions")), wxHORIZONTAL);
-  m_actionSheet = new gbtActionSheet(this, p_infoset);
+  m_actionSheet = new ActionSheet(this, p_infoset);
   actionBoxSizer->Add(m_actionSheet, 1, wxALL | wxEXPAND, 5);
   topSizer->Add(actionBoxSizer, 0, wxALL | wxEXPAND, 5);
 
@@ -199,11 +197,11 @@ wxBEGIN_EVENT_TABLE(gbtEditMoveDialog,
   SetSizer(topSizer);
   topSizer->Fit(this);
   topSizer->SetSizeHints(this);
-  Layout();
+  wxTopLevelWindowBase::Layout();
   CenterOnParent();
 }
 
-void gbtEditMoveDialog::OnOK(wxCommandEvent &p_event)
+void EditMoveDialog::OnOK(wxCommandEvent &p_event)
 {
   if (!m_infoset->IsChanceInfoset()) {
     p_event.Skip();
@@ -228,11 +226,12 @@ void gbtEditMoveDialog::OnOK(wxCommandEvent &p_event)
   }
 }
 
-int gbtEditMoveDialog::NumActions() const { return m_actionSheet->NumActions(); }
+int EditMoveDialog::NumActions() const { return m_actionSheet->NumActions(); }
 
-wxString gbtEditMoveDialog::GetActionName(int p_act) const
+wxString EditMoveDialog::GetActionName(int p_act) const
 {
   return m_actionSheet->GetActionName(p_act);
 }
 
-Array<Number> gbtEditMoveDialog::GetActionProbs() const { return m_actionSheet->GetActionProbs(); }
+Array<Number> EditMoveDialog::GetActionProbs() const { return m_actionSheet->GetActionProbs(); }
+} // namespace Gambit::GUI

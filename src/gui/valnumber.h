@@ -20,30 +20,31 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef VALNUMBER_H
-#define VALNUMBER_H
+#ifndef GAMBIT_GUI_VALNUMBER_H
+#define GAMBIT_GUI_VALNUMBER_H
 
 #include <wx/validate.h>
 #include "gambit.h"
 
-class gbtNumberValidator : public wxValidator {
+namespace Gambit::GUI {
+class NumberValidator final : public wxValidator {
 protected:
   wxString *m_stringValue;
   bool m_hasMin, m_hasMax;
-  Gambit::Rational m_minValue, m_maxValue;
+  Rational m_minValue, m_maxValue;
 
   // Event handlers
   void OnChar(wxKeyEvent &);
 
 public:
-  explicit gbtNumberValidator(wxString *);
-  gbtNumberValidator(wxString *, const Gambit::Rational &);
-  gbtNumberValidator(wxString *, const Gambit::Rational &, const Gambit::Rational &);
-  gbtNumberValidator(const gbtNumberValidator &);
-  ~gbtNumberValidator() override = default;
+  explicit NumberValidator(wxString *);
+  NumberValidator(wxString *, const Rational &);
+  NumberValidator(wxString *, const Rational &, const Rational &);
+  NumberValidator(const NumberValidator &);
+  ~NumberValidator() override = default;
 
-  wxObject *Clone() const override { return new gbtNumberValidator(*this); }
-  bool Copy(const gbtNumberValidator &);
+  wxObject *Clone() const override { return new NumberValidator(*this); }
+  bool Copy(const NumberValidator &);
 
   bool Validate(wxWindow *parent) override;
   bool TransferToWindow() override;
@@ -51,5 +52,6 @@ public:
 
   DECLARE_EVENT_TABLE()
 };
+} // namespace Gambit::GUI
 
-#endif // VALNUMBER_H
+#endif // GAMBIT_GUI_VALNUMBER_H

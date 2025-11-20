@@ -20,32 +20,29 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMBIT_APP_H
-#define GAMBIT_APP_H
+#ifndef GAMBIT_GUI_APP_H
+#define GAMBIT_GUI_APP_H
 
 #include <wx/wx.h>
 #include <wx/config.h>  // for wxConfig
 #include <wx/docview.h> // for wxFileHistory
 
-class gbtGameDocument;
+namespace Gambit::GUI {
 
-typedef enum {
-  GBT_APP_FILE_OK = 0,
-  GBT_APP_OPEN_FAILED = 1,
-  GBT_APP_PARSE_FAILED = 2
-} gbtAppLoadResult;
+class GameDocument;
 
-class gbtApplication : public wxApp {
-private:
+enum AppLoadResult { GBT_APP_FILE_OK = 0, GBT_APP_OPEN_FAILED = 1, GBT_APP_PARSE_FAILED = 2 };
+
+class Application final : public wxApp {
   wxString m_currentDir; /* Current position in directory tree. */
-  wxFileHistory m_fileHistory;
-  Gambit::Array<gbtGameDocument *> m_documents;
+  wxFileHistory m_fileHistory{10};
+  std::list<GameDocument *> m_documents;
 
   bool OnInit() override;
 
 public:
-  gbtApplication();
-  ~gbtApplication() override = default;
+  Application() = default;
+  ~Application() override = default;
 
   const wxString &GetCurrentDir() { return m_currentDir; }
   void SetCurrentDir(const wxString &p_dir);
@@ -58,7 +55,7 @@ public:
   }
   void RemoveMenu(wxMenu *p_menu) { m_fileHistory.RemoveMenu(p_menu); }
 
-  gbtAppLoadResult LoadFile(const wxString &);
+  AppLoadResult LoadFile(const wxString &);
 #ifdef __WXMAC__
   void MacOpenFile(const wxString &filename) override { LoadFile(filename); }
 #endif // __WXMAC__
@@ -67,8 +64,8 @@ public:
   //! These manage the list of open documents
   //!
   //@{
-  void AddDocument(gbtGameDocument *p_doc) { m_documents.push_back(p_doc); }
-  void RemoveDocument(gbtGameDocument *p_doc)
+  void AddDocument(GameDocument *p_doc) { m_documents.push_back(p_doc); }
+  void RemoveDocument(const GameDocument *p_doc)
   {
     m_documents.erase(std::find(m_documents.begin(), m_documents.end(), p_doc));
   }
@@ -76,6 +73,8 @@ public:
   //@}
 };
 
-DECLARE_APP(gbtApplication)
+} // namespace Gambit::GUI
 
-#endif // GAMBIT_APP_H
+DECLARE_APP(Gambit::GUI::Application)
+
+#endif // GAMBIT_GUI_APP_H

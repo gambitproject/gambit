@@ -4,45 +4,56 @@
 PyGambit
 ========
 
-The Gambit Python package, ``pygambit``, is available on `PyPI <https://pypi.org/project/pygambit/>`_ and can be installed with pip::
-
-   pip install pygambit
+See installation instructions in the :ref:`install` section.
 
 
-For newcomers to Gambit, we recommend reading through the PyGambit tutorials, which demonstrate the API's key capabilities for analyzing and solving Game Theory games.
+For newcomers to Gambit, we recommend reading through the PyGambit tutorials, which demonstrate the API's key capabilities for analyzing and solving games.
 These tutorials are available to be run interactively as Jupyter notebooks, see :ref:`local_tutorials`.
 All of the tutorials assume a basic knowledge of programming in Python.
 
-Tutorials **1-3** assume no prior knowledge of Game Theory or the PyGambit API and provide detailed explanations of the concepts and code.
+New user tutorials
+------------------
+
+These tutorials assume no prior knowledge of Game Theory or the PyGambit API and provide detailed explanations of the concepts and code.
+They are numbered in the order they should be read.
 
 .. toctree::
    :maxdepth: 2
 
+   tutorials/running_locally
    tutorials/01_quickstart
    tutorials/02_extensive_form
-   tutorials/03_poker
+   tutorials/03_stripped_down_poker
 
-Tutorials **4-5** assume some familiarity with the PyGambit API and Game Theory terminology and concepts including:
+Advanced user tutorials
+-----------------------
+
+These tutorials assume some familiarity with the PyGambit API and Game Theory terminology and concepts including:
 
 - Nash equilibria
 - Pure and mixed strategies
 - Simplex representations of available strategies
 - Logit quantal response equilibrium (LQRE) correspondence
 
-.. toctree::
-   :maxdepth: 2
-
-   tutorials/04_starting_points
-   tutorials/05_quantal_response
-   tutorials/06_gambit_with_openspiel
-
-You may also wish to read:
+Advanced tutorials:
 
 .. toctree::
    :maxdepth: 2
 
-   tutorials/running_locally
-   pygambit.external_programs
+   tutorials/advanced_tutorials/starting_points
+   tutorials/advanced_tutorials/quantal_response
+   .. pygambit.external_programs
+
+Interoperability tutorials
+--------------------------
+
+These tutorials demonstrate how to use PyGambit alongside other game-theoretic software packages.
+These tutorials assume you have read the new user tutorials and are familiar with the PyGambit API, however they do not assume prior knowledge of the other software packages or an advanced understanding of Game Theory:
+
+.. toctree::
+   :maxdepth: 2
+
+   tutorials/interoperability_tutorials/openspiel
 
 Algorithms for computing Nash equilibria
 ----------------------------------------

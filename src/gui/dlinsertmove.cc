@@ -27,11 +27,12 @@
 #include "gambit.h"
 #include "dlinsertmove.h"
 
+namespace Gambit::GUI {
 //=========================================================================
-//                   gbtInsertMoveDialog: Member functions
+//                   InsertMoveDialog: Member functions
 //=========================================================================
 
-gbtInsertMoveDialog::gbtInsertMoveDialog(wxWindow *p_parent, gbtGameDocument *p_doc)
+InsertMoveDialog::InsertMoveDialog(wxWindow *p_parent, GameDocument *p_doc)
   : wxDialog(p_parent, wxID_ANY, _("Insert Move"), wxDefaultPosition), m_doc(p_doc)
 {
   m_playerItem = new wxChoice(this, wxID_ANY);
@@ -49,11 +50,11 @@ gbtInsertMoveDialog::gbtInsertMoveDialog(wxWindow *p_parent, gbtGameDocument *p_
   m_playerItem->Append(_("Insert move for a new player"));
   m_playerItem->SetSelection(1);
   Connect(m_playerItem->GetId(), wxEVT_COMMAND_CHOICE_SELECTED,
-          wxCommandEventHandler(gbtInsertMoveDialog::OnPlayer));
+          wxCommandEventHandler(InsertMoveDialog::OnPlayer));
 
   m_infosetItem = new wxChoice(this, wxID_ANY);
   m_infosetItem->Append(_("at a new information set"));
-  const Gambit::GamePlayer player = m_doc->GetGame()->GetPlayer(1);
+  const GamePlayer player = m_doc->GetGame()->GetPlayer(1);
   for (const auto &infoset : player->GetInfosets()) {
     wxString s = _("at information set ");
     if (infoset->GetLabel() != "") {
@@ -79,7 +80,7 @@ gbtInsertMoveDialog::gbtInsertMoveDialog(wxWindow *p_parent, gbtGameDocument *p_
   }
   m_infosetItem->SetSelection(0);
   Connect(m_infosetItem->GetId(), wxEVT_COMMAND_CHOICE_SELECTED,
-          wxCommandEventHandler(gbtInsertMoveDialog::OnInfoset));
+          wxCommandEventHandler(InsertMoveDialog::OnInfoset));
 
   auto *actionSizer = new wxBoxSizer(wxHORIZONTAL);
   actionSizer->Add(new wxStaticText(this, wxID_STATIC, _("with")), 0, wxALL | wxALIGN_CENTER, 5);
@@ -105,15 +106,15 @@ gbtInsertMoveDialog::gbtInsertMoveDialog(wxWindow *p_parent, gbtGameDocument *p_
   SetSizer(topSizer);
   topSizer->Fit(this);
   topSizer->SetSizeHints(this);
-  Layout();
+  wxTopLevelWindowBase::Layout();
   CenterOnParent();
 }
 
-void gbtInsertMoveDialog::OnPlayer(wxCommandEvent &)
+void InsertMoveDialog::OnPlayer(wxCommandEvent &)
 {
   const int playerNumber = m_playerItem->GetSelection();
 
-  Gambit::GamePlayer player;
+  GamePlayer player;
   if (playerNumber == 0) {
     player = m_doc->GetGame()->GetChance();
   }
@@ -158,13 +159,13 @@ void gbtInsertMoveDialog::OnPlayer(wxCommandEvent &)
   m_actions->Enable(true);
 }
 
-void gbtInsertMoveDialog::OnInfoset(wxCommandEvent &)
+void InsertMoveDialog::OnInfoset(wxCommandEvent &)
 {
   const int infosetNumber = m_infosetItem->GetSelection();
 
   if (infosetNumber > 0) {
     const int playerNumber = m_playerItem->GetSelection();
-    Gambit::GameInfoset infoset;
+    GameInfoset infoset;
     if (playerNumber == 0) {
       infoset = m_doc->GetGame()->GetChance()->GetInfoset(infosetNumber);
     }
@@ -179,42 +180,38 @@ void gbtInsertMoveDialog::OnInfoset(wxCommandEvent &)
   }
 }
 
-Gambit::GamePlayer gbtInsertMoveDialog::GetPlayer() const
+GamePlayer InsertMoveDialog::GetPlayer() const
 {
   const int playerNumber = m_playerItem->GetSelection();
 
   if (playerNumber == 0) {
     return m_doc->GetGame()->GetChance();
   }
-  else if (playerNumber <= static_cast<int>(m_doc->NumPlayers())) {
+  if (playerNumber <= static_cast<int>(m_doc->NumPlayers())) {
     return m_doc->GetGame()->GetPlayer(playerNumber);
   }
-  else {
-    const Gambit::GamePlayer player = m_doc->GetGame()->NewPlayer();
-    player->SetLabel("Player " + Gambit::lexical_cast<std::string>(m_doc->NumPlayers()));
-    return player;
-  }
+  const GamePlayer player = m_doc->GetGame()->NewPlayer();
+  player->SetLabel("Player " + lexical_cast<std::string>(m_doc->NumPlayers()));
+  return player;
 }
 
-Gambit::GameInfoset gbtInsertMoveDialog::GetInfoset() const
+GameInfoset InsertMoveDialog::GetInfoset() const
 {
   if (m_playerItem->GetSelection() <= static_cast<int>(m_doc->NumPlayers())) {
-    const Gambit::GamePlayer player = GetPlayer();
+    const GamePlayer player = GetPlayer();
     const int infosetNumber = m_infosetItem->GetSelection();
 
     if (player && infosetNumber > 0) {
       return player->GetInfoset(infosetNumber);
     }
-    else {
-      return nullptr;
-    }
-  }
-  else {
     return nullptr;
   }
+  return nullptr;
 }
 
-int gbtInsertMoveDialog::GetActions() const
+int InsertMoveDialog::GetActions() const
 {
   return ((GetInfoset()) ? GetInfoset()->GetActions().size() : m_actions->GetValue());
 }
+
+} // namespace Gambit::GUI

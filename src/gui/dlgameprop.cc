@@ -28,11 +28,12 @@
 #include "gamedoc.h"
 #include "dlgameprop.h"
 
+namespace Gambit::GUI {
 //========================================================================
-//                   class gbtGamePropertiesDialog
+//                   class GamePropertiesDialog
 //========================================================================
 
-gbtGamePropertiesDialog::gbtGamePropertiesDialog(wxWindow *p_parent, gbtGameDocument *p_doc)
+GamePropertiesDialog::GamePropertiesDialog(wxWindow *p_parent, GameDocument *p_doc)
   : wxDialog(p_parent, wxID_ANY, _("Game properties"), wxDefaultPosition), m_doc(p_doc)
 {
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
@@ -61,7 +62,7 @@ gbtGamePropertiesDialog::gbtGamePropertiesDialog(wxWindow *p_parent, gbtGameDocu
       new wxStaticText(this, wxID_STATIC, wxString(_("Filename: ")) + m_doc->GetFilename()), 0,
       wxALL, 5);
 
-  const Gambit::Game game = m_doc->GetGame();
+  const Game game = m_doc->GetGame();
   boxSizer->Add(new wxStaticText(this, wxID_STATIC,
                                  wxString::Format(_("Number of players: %d"), game->NumPlayers())),
                 0, wxALL, 5);
@@ -99,6 +100,8 @@ gbtGamePropertiesDialog::gbtGamePropertiesDialog(wxWindow *p_parent, gbtGameDocu
   topSizer->Fit(this);
   topSizer->SetSizeHints(this);
 
-  Layout();
+  wxTopLevelWindowBase::Layout();
   CenterOnParent();
 }
+
+} // namespace Gambit::GUI

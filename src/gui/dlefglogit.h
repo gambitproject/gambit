@@ -20,20 +20,20 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef DLEFGLOGIT_H
-#define DLEFGLOGIT_H
+#ifndef GAMBIT_GUI_DLEFGLOGIT_H
+#define GAMBIT_GUI_DLEFGLOGIT_H
 
 #include <wx/process.h>
 #include "gamedoc.h"
 
-class gbtLogitBehavList;
+namespace Gambit::GUI {
+class LogitBehavList;
 
-class gbtLogitBehavDialog : public wxDialog {
-private:
-  gbtGameDocument *m_doc;
+class LogitBehavDialog final : public wxDialog {
+  GameDocument *m_doc;
   int m_pid{0};
   wxProcess *m_process;
-  gbtLogitBehavList *m_behavList;
+  LogitBehavList *m_behavList;
   wxStaticText *m_statusText;
   wxButton *m_stopButton, *m_okButton, *m_saveButton;
   wxTimer m_timer;
@@ -48,9 +48,11 @@ private:
   void Start();
 
 public:
-  gbtLogitBehavDialog(wxWindow *p_parent, gbtGameDocument *p_doc);
+  LogitBehavDialog(wxWindow *p_parent, GameDocument *p_doc);
 
   DECLARE_EVENT_TABLE()
 };
 
-#endif // DLLOGIT_H
+} // namespace Gambit::GUI
+
+#endif // GAMBIT_GUI_DLEFGLOGIT_H

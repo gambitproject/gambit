@@ -20,10 +20,10 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef ANALYSIS_H
-#define ANALYSIS_H
+#ifndef GAMBIT_GUI_ANALYSIS_H
+#define GAMBIT_GUI_ANALYSIS_H
 
-class gbtGameDocument;
+class TiXmlNode;
 
 //
 // This file contains classes which manage the output of analysis tools.
@@ -33,22 +33,22 @@ class gbtGameDocument;
 // output of stable sets or convex components of equilibria, etc.)
 //
 
-class TiXmlNode;
+namespace Gambit::GUI {
 
-using namespace Gambit;
+class GameDocument;
 
-class gbtAnalysisOutput {
+class AnalysisOutput {
 protected:
-  gbtGameDocument *m_doc;
+  GameDocument *m_doc;
   wxString m_label, m_description, m_command;
 
 public:
   /// @name Lifecycle
   //@{
   /// Construct a new output group
-  explicit gbtAnalysisOutput(gbtGameDocument *p_doc) : m_doc(p_doc) {}
+  explicit AnalysisOutput(GameDocument *p_doc) : m_doc(p_doc) {}
   /// Clean up an output group
-  virtual ~gbtAnalysisOutput() = default;
+  virtual ~AnalysisOutput() = default;
   //@}
 
   /// @name General data access
@@ -87,14 +87,13 @@ public:
 
   virtual std::string GetPayoff(int pl, int p_index = -1) const = 0;
 
-  virtual std::string GetRealizProb(const Gambit::GameNode &, int p_index = -1) const = 0;
-  virtual std::string GetBeliefProb(const Gambit::GameNode &, int p_index = -1) const = 0;
-  virtual std::string GetNodeValue(const Gambit::GameNode &, int pl, int p_index = -1) const = 0;
-  virtual std::string GetInfosetProb(const Gambit::GameNode &, int p_index = -1) const = 0;
-  virtual std::string GetInfosetValue(const Gambit::GameNode &, int p_index = -1) const = 0;
-  virtual std::string GetActionValue(const Gambit::GameNode &, int act,
-                                     int p_index = -1) const = 0;
-  virtual std::string GetActionProb(const Gambit::GameNode &, int act, int p_index = -1) const = 0;
+  virtual std::string GetRealizProb(const GameNode &, int p_index = -1) const = 0;
+  virtual std::string GetBeliefProb(const GameNode &, int p_index = -1) const = 0;
+  virtual std::string GetNodeValue(const GameNode &, int pl, int p_index = -1) const = 0;
+  virtual std::string GetInfosetProb(const GameNode &, int p_index = -1) const = 0;
+  virtual std::string GetInfosetValue(const GameNode &, int p_index = -1) const = 0;
+  virtual std::string GetActionValue(const GameNode &, int act, int p_index = -1) const = 0;
+  virtual std::string GetActionProb(const GameNode &, int act, int p_index = -1) const = 0;
   virtual std::string GetActionProb(int p_action, int p_index = -1) const = 0;
   virtual std::string GetStrategyProb(int p_strategy, int p_index = -1) const = 0;
   virtual std::string GetStrategyValue(int p_strategy, int p_index = -1) const = 0;
@@ -114,10 +113,9 @@ public:
 //! of profiles, one with the behavior representation and the other
 //! with the mixed representation.
 //!
-template <class T> class gbtAnalysisProfileList : public gbtAnalysisOutput {
-private:
+template <class T> class AnalysisProfileList final : public AnalysisOutput {
   bool m_isBehav;
-  int m_current;
+  int m_current{0};
   Array<std::shared_ptr<MixedBehaviorProfile<T>>> m_behavProfiles;
   Array<std::shared_ptr<MixedStrategyProfile<T>>> m_mixedProfiles;
 
@@ -127,12 +125,12 @@ public:
   //!
   //@{
   /// Construct a new profile list for the specified document
-  gbtAnalysisProfileList(gbtGameDocument *p_doc, bool p_isBehav)
-    : gbtAnalysisOutput(p_doc), m_isBehav(p_isBehav), m_current(0)
+  AnalysisProfileList(GameDocument *p_doc, bool p_isBehav)
+    : AnalysisOutput(p_doc), m_isBehav(p_isBehav)
   {
   }
   /// Cleanup the profile list
-  ~gbtAnalysisProfileList() override = default;
+  ~AnalysisProfileList() override = default;
   //@}
 
   //!
@@ -148,13 +146,13 @@ public:
   std::string GetPayoff(int pl, int p_index = -1) const override;
   /// Return the realization probability of the node for the given
   /// profile.  (index == -1 for currently selected profile)
-  std::string GetRealizProb(const Gambit::GameNode &, int p_index = -1) const override;
-  std::string GetBeliefProb(const Gambit::GameNode &, int p_index = -1) const override;
-  std::string GetNodeValue(const Gambit::GameNode &, int pl, int p_index = -1) const override;
-  std::string GetInfosetProb(const Gambit::GameNode &, int p_index = -1) const override;
-  std::string GetInfosetValue(const Gambit::GameNode &, int p_index = -1) const override;
-  std::string GetActionValue(const Gambit::GameNode &, int act, int p_index = -1) const override;
-  std::string GetActionProb(const Gambit::GameNode &, int act, int p_index = -1) const override;
+  std::string GetRealizProb(const GameNode &, int p_index = -1) const override;
+  std::string GetBeliefProb(const GameNode &, int p_index = -1) const override;
+  std::string GetNodeValue(const GameNode &, int pl, int p_index = -1) const override;
+  std::string GetInfosetProb(const GameNode &, int p_index = -1) const override;
+  std::string GetInfosetValue(const GameNode &, int p_index = -1) const override;
+  std::string GetActionValue(const GameNode &, int act, int p_index = -1) const override;
+  std::string GetActionProb(const GameNode &, int act, int p_index = -1) const override;
   std::string GetActionProb(int p_action, int p_index = -1) const override;
   std::string GetStrategyProb(int p_strategy, int p_index = -1) const override;
   std::string GetStrategyValue(int p_strategy, int p_index = -1) const override;
@@ -190,4 +188,6 @@ public:
   //@}
 };
 
-#endif // ANALYSIS_H
+} // namespace Gambit::GUI
+
+#endif // GAMBIT_GUI_ANALYSIS_H

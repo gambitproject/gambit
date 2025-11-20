@@ -1,6 +1,8 @@
 Using external programs to compute Nash equilibria
 ==================================================
 
+.. TODO: this needs to be updated, see issue #561
+
 Because the problem of finding Nash equilibria can be expressed in various
 mathematical formulations (see [McKMcL96]_), it is helpful to make use
 of other software packages designed specifically for solving those problems.

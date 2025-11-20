@@ -20,33 +20,32 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef GAMEDOC_H
-#define GAMEDOC_H
+#ifndef GAMBIT_GUI_GAMEDOC_H
+#define GAMBIT_GUI_GAMEDOC_H
 
 #include "gambit.h"
 #include "style.h"
 #include "analysis.h"
 
-using namespace Gambit;
+namespace Gambit::GUI {
 
-class gbtGameView;
-class gbtGameDocument;
+class GameView;
+class GameDocument;
 
 //!
 //! This class manages the "stack" of supports obtained by eliminating
 //! dominated actions from consideration.
 //!
-class gbtBehavDominanceStack {
-private:
-  gbtGameDocument *m_doc;
+class BehaviorDominanceStack {
+  GameDocument *m_doc;
   bool m_strict;
   Array<std::shared_ptr<BehaviorSupportProfile>> m_supports;
   size_t m_current{0};
   bool m_noFurther;
 
 public:
-  gbtBehavDominanceStack(gbtGameDocument *p_doc, bool p_strict);
-  ~gbtBehavDominanceStack() = default;
+  BehaviorDominanceStack(GameDocument *p_doc, bool p_strict);
+  ~BehaviorDominanceStack() = default;
 
   //!
   //! Returns the number of supports in the stack
@@ -107,17 +106,16 @@ public:
 //! This class manages the "stack" of supports obtained by eliminating
 //! dominated strategies from consideration.
 //!
-class gbtStrategyDominanceStack {
-private:
-  gbtGameDocument *m_doc;
+class StrategyDominanceStack {
+  GameDocument *m_doc;
   bool m_strict;
   Array<std::shared_ptr<StrategySupportProfile>> m_supports;
   size_t m_current{0};
   bool m_noFurther;
 
 public:
-  gbtStrategyDominanceStack(gbtGameDocument *p_doc, bool p_strict);
-  ~gbtStrategyDominanceStack() = default;
+  StrategyDominanceStack(GameDocument *p_doc, bool p_strict);
+  ~StrategyDominanceStack() = default;
 
   //!
   //! Returns the number of supports in the stack
@@ -180,7 +178,7 @@ public:
 };
 
 //
-// These are passed to gbtGameDocument::UpdateViews() to indicate which
+// These are passed to GameDocument::UpdateViews() to indicate which
 // types of modifications have occurred.
 //
 // GBT_DOC_MODIFIED_GAME: The game itself has been modified; that is, the
@@ -199,22 +197,21 @@ public:
 // (e.g., player colors) has changed.  We want to track this for undo,
 // but, again, this has no effect on the game mathematically.
 //
-typedef enum {
+using GameModificationType = enum {
   GBT_DOC_MODIFIED_NONE = 0x00,
   GBT_DOC_MODIFIED_GAME = 0x01,
   GBT_DOC_MODIFIED_PAYOFFS = 0x02,
   GBT_DOC_MODIFIED_LABELS = 0x04,
   GBT_DOC_MODIFIED_VIEWS = 0x08
-} gbtGameModificationType;
+};
 
-class gbtGameDocument {
-  friend class gbtGameView;
+class GameDocument {
+  friend class GameView;
 
-private:
-  Array<gbtGameView *> m_views;
+  std::list<GameView *> m_views;
 
-  void AddView(gbtGameView *p_view) { m_views.push_back(p_view); }
-  void RemoveView(gbtGameView *p_view)
+  void AddView(GameView *p_view) { m_views.push_back(p_view); }
+  void RemoveView(GameView *p_view)
   {
     m_views.erase(std::find(m_views.begin(), m_views.end(), p_view));
     if (m_views.empty()) {
@@ -225,23 +222,21 @@ private:
   Game m_game;
   wxString m_filename;
 
-  gbtStyle m_style;
+  TreeRenderConfig m_style;
   GameNode m_selectNode;
   bool m_modified;
 
-  gbtBehavDominanceStack m_behavSupports;
-  gbtStrategyDominanceStack m_stratSupports;
+  BehaviorDominanceStack m_behavSupports;
+  StrategyDominanceStack m_stratSupports;
 
-  Array<std::shared_ptr<gbtAnalysisOutput>> m_profiles;
+  Array<std::shared_ptr<AnalysisOutput>> m_profiles;
   int m_currentProfileList;
 
-  std::list<std::string> m_undoList, m_redoList;
-
-  void UpdateViews(gbtGameModificationType p_modifications);
+  void UpdateViews(GameModificationType p_modifications);
 
 public:
-  explicit gbtGameDocument(Game p_game);
-  ~gbtGameDocument();
+  explicit GameDocument(Game p_game);
+  ~GameDocument();
 
   //!
   //! @name Reading and writing .gbt savefiles
@@ -262,8 +257,8 @@ public:
   bool IsModified() const { return m_modified; }
   void SetModified(bool p_modified) { m_modified = p_modified; }
 
-  const gbtStyle &GetStyle() const { return m_style; }
-  void SetStyle(const gbtStyle &p_style);
+  const TreeRenderConfig &GetStyle() const { return m_style; }
+  void SetStyle(const TreeRenderConfig &p_style);
 
   size_t NumPlayers() const { return m_game->NumPlayers(); }
   bool IsConstSum() const { return m_game->IsConstSum(); }
@@ -271,23 +266,12 @@ public:
   GameAction GetAction(int p_index) const;
 
   //!
-  //! @name Handling of undo/redo features
-  //!
-  //@{
-  bool CanUndo() const { return (m_undoList.size() > 1); }
-  void Undo();
-
-  bool CanRedo() const { return (m_redoList.size() > 0); }
-  void Redo();
-  //@}
-
-  //!
   //! @name Handling of list of computed profiles
   //!
   //@{
-  const gbtAnalysisOutput &GetProfiles() const { return *m_profiles[m_currentProfileList]; }
-  const gbtAnalysisOutput &GetProfiles(int p_index) const { return *m_profiles[p_index]; }
-  void AddProfileList(std::shared_ptr<gbtAnalysisOutput> p_profs);
+  const AnalysisOutput &GetProfiles() const { return *m_profiles[m_currentProfileList]; }
+  const AnalysisOutput &GetProfiles(int p_index) const { return *m_profiles[p_index]; }
+  void AddProfileList(std::shared_ptr<AnalysisOutput> p_profs);
   void SetProfileList(int p_index);
   int NumProfileLists() const { return m_profiles.size(); }
   int GetCurrentProfileList() const { return m_currentProfileList; }
@@ -372,23 +356,25 @@ public:
   void DoCopyOutcome(GameNode p_node, GameOutcome p_outcome);
   void DoSetPayoff(GameOutcome p_outcome, int p_player, const wxString &p_value);
 
-  void DoAddOutput(gbtAnalysisOutput &p_list, const wxString &p_output);
+  void DoAddOutput(AnalysisOutput &p_list, const wxString &p_output);
 };
 
-class gbtGameView {
+class GameView {
 protected:
-  gbtGameDocument *m_doc;
+  GameDocument *m_doc;
 
 public:
-  explicit gbtGameView(gbtGameDocument *p_doc) : m_doc(p_doc) { m_doc->AddView(this); }
-  virtual ~gbtGameView() { m_doc->RemoveView(this); }
+  explicit GameView(GameDocument *p_doc) : m_doc(p_doc) { m_doc->AddView(this); }
+  virtual ~GameView() { m_doc->RemoveView(this); }
 
   virtual void OnUpdate() = 0;
 
   /// Post any pending changes in the viewer to the document
   virtual void PostPendingChanges() {}
 
-  gbtGameDocument *GetDocument() const { return m_doc; }
+  GameDocument *GetDocument() const { return m_doc; }
 };
 
-#endif // GAMEDOC_H
+} // namespace Gambit::GUI
+
+#endif // GAMBIT_GUI_GAMEDOC_H

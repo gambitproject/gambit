@@ -20,21 +20,23 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef DLGAMEPROP_H
-#define DLGAMEPROP_H
+#ifndef GAMBIT_GUI_DLGAMEPROP_H
+#define GAMBIT_GUI_DLGAMEPROP_H
 
-class gbtGamePropertiesDialog : public wxDialog {
-private:
-  gbtGameDocument *m_doc;
+namespace Gambit::GUI {
+class GamePropertiesDialog final : public wxDialog {
+  GameDocument *m_doc;
   wxTextCtrl *m_title, *m_comment;
 
 public:
   // Lifecycle
-  gbtGamePropertiesDialog(wxWindow *p_parent, gbtGameDocument *p_doc);
+  GamePropertiesDialog(wxWindow *p_parent, GameDocument *p_doc);
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
   wxString GetTitle() const override { return m_title->GetValue(); }
   wxString GetComment() const { return m_comment->GetValue(); }
 };
 
-#endif // DLGAMEPROP_H
+} // namespace Gambit::GUI
+
+#endif // GAMBIT_GUI_DLGAMEPROP_H

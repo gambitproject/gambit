@@ -32,30 +32,27 @@
 #include "analysis.h"
 #include "gamedoc.h"
 
-using namespace Gambit;
-
+namespace Gambit::GUI {
 //=========================================================================
-//                     class gbtAnalysisProfileList
+//                     class AnalysisProfileList
 //=========================================================================
 
 // Use anonymous namespace to make these helpers private
 namespace {
 
-class gbtNotNashException final : public std::runtime_error {
+class NotNashException final : public std::runtime_error {
 public:
-  gbtNotNashException() : std::runtime_error("Output line does not contain a Nash equilibrium") {}
-  ~gbtNotNashException() noexcept override = default;
+  NotNashException() : std::runtime_error("Output line does not contain a Nash equilibrium") {}
+  ~NotNashException() noexcept override = default;
 };
 
 template <class T>
-MixedStrategyProfile<T> OutputToMixedProfile(gbtGameDocument *p_doc, const wxString &p_text)
+MixedStrategyProfile<T> OutputToMixedProfile(GameDocument *p_doc, const wxString &p_text)
 {
-  MixedStrategyProfile<T> profile(p_doc->GetGame()->NewMixedStrategyProfile((T)0.0));
+  MixedStrategyProfile<T> profile(p_doc->GetGame()->NewMixedStrategyProfile(static_cast<T>(0.0)));
 
-  wxStringTokenizer tok(p_text, wxT(","));
-
-  if (tok.GetNextToken() == wxT("NE")) {
-    if (tok.CountTokens() == (unsigned int)profile.MixedProfileLength()) {
+  if (wxStringTokenizer tok(p_text, wxT(",")); tok.GetNextToken() == wxT("NE")) {
+    if (tok.CountTokens() == static_cast<unsigned int>(profile.MixedProfileLength())) {
       for (size_t i = 1; i <= profile.MixedProfileLength(); i++) {
         profile[i] =
             lexical_cast<Rational>(std::string((const char *)tok.GetNextToken().mb_str()));
@@ -64,32 +61,31 @@ MixedStrategyProfile<T> OutputToMixedProfile(gbtGameDocument *p_doc, const wxStr
     }
   }
 
-  throw gbtNotNashException();
+  throw NotNashException();
 }
 
 template <class T>
-MixedBehaviorProfile<T> OutputToBehavProfile(gbtGameDocument *p_doc, const wxString &p_text)
+MixedBehaviorProfile<T> OutputToBehavProfile(GameDocument *p_doc, const wxString &p_text)
 {
   MixedBehaviorProfile<T> profile(p_doc->GetGame());
 
   wxStringTokenizer tok(p_text, wxT(","));
 
   if (tok.GetNextToken() == wxT("NE")) {
-    if (tok.CountTokens() == (unsigned int)profile.BehaviorProfileLength()) {
+    if (tok.CountTokens() == static_cast<unsigned int>(profile.BehaviorProfileLength())) {
       for (size_t i = 1; i <= profile.BehaviorProfileLength(); i++) {
-        profile[i] =
-            lexical_cast<Rational>(std::string((const char *)tok.GetNextToken().mb_str()));
+        profile[i] = lexical_cast<Rational>(std::string(tok.GetNextToken().mb_str()));
       }
       return profile;
     }
   }
 
-  throw gbtNotNashException();
+  throw NotNashException();
 }
 
 } // end anonymous namespace
 
-template <class T> void gbtAnalysisProfileList<T>::AddOutput(const wxString &p_output)
+template <class T> void AnalysisProfileList<T>::AddOutput(const wxString &p_output)
 {
   try {
     if (m_isBehav) {
@@ -110,11 +106,11 @@ template <class T> void gbtAnalysisProfileList<T>::AddOutput(const wxString &p_o
       m_current = m_mixedProfiles.size();
     }
   }
-  catch (gbtNotNashException &) {
+  catch (NotNashException &) {
   }
 }
 
-template <class T> void gbtAnalysisProfileList<T>::BuildNfg()
+template <class T> void AnalysisProfileList<T>::BuildNfg()
 {
   for (auto profile : m_behavProfiles) {
     m_mixedProfiles.push_back(
@@ -122,17 +118,12 @@ template <class T> void gbtAnalysisProfileList<T>::BuildNfg()
   }
 }
 
-template <class T> int gbtAnalysisProfileList<T>::NumProfiles() const
+template <class T> int AnalysisProfileList<T>::NumProfiles() const
 {
-  if (m_doc->IsTree()) {
-    return m_behavProfiles.size();
-  }
-  else {
-    return m_mixedProfiles.size();
-  }
+  return (m_doc->IsTree()) ? m_behavProfiles.size() : m_mixedProfiles.size();
 }
 
-template <class T> void gbtAnalysisProfileList<T>::Clear()
+template <class T> void AnalysisProfileList<T>::Clear()
 {
   m_behavProfiles.clear();
   m_mixedProfiles.clear();
@@ -140,34 +131,34 @@ template <class T> void gbtAnalysisProfileList<T>::Clear()
 }
 
 //-------------------------------------------------------------------------
-//         gbtAnalysisProfileList: Saving and loading profile lists
+//         AnalysisProfileList: Saving and loading profile lists
 //-------------------------------------------------------------------------
 
 // Use anonymous namespace to make these helpers private
 namespace {
 
 template <class T>
-MixedStrategyProfile<T> TextToMixedProfile(gbtGameDocument *p_doc, const wxString &p_text)
+MixedStrategyProfile<T> TextToMixedProfile(GameDocument *p_doc, const wxString &p_text)
 {
-  MixedStrategyProfile<T> profile(p_doc->GetGame()->NewMixedStrategyProfile((T)0));
+  MixedStrategyProfile<T> profile(p_doc->GetGame()->NewMixedStrategyProfile(static_cast<T>(0)));
 
   wxStringTokenizer tok(p_text, wxT(","));
 
   for (size_t i = 1; i <= profile.MixedProfileLength(); i++) {
-    profile[i] = lexical_cast<Rational>(std::string((const char *)tok.GetNextToken().mb_str()));
+    profile[i] = lexical_cast<Rational>(std::string(tok.GetNextToken().mb_str()));
   }
 
   return profile;
 }
 
 template <class T>
-MixedBehaviorProfile<T> TextToBehavProfile(gbtGameDocument *p_doc, const wxString &p_text)
+MixedBehaviorProfile<T> TextToBehavProfile(GameDocument *p_doc, const wxString &p_text)
 {
   MixedBehaviorProfile<T> profile(p_doc->GetGame());
 
   wxStringTokenizer tok(p_text, wxT(","));
   for (size_t i = 1; i <= profile.BehaviorProfileLength(); i++) {
-    profile[i] = lexical_cast<Rational>(std::string((const char *)tok.GetNextToken().mb_str()));
+    profile[i] = lexical_cast<Rational>(std::string(tok.GetNextToken().mb_str()));
   }
 
   return profile;
@@ -179,19 +170,17 @@ MixedBehaviorProfile<T> TextToBehavProfile(gbtGameDocument *p_doc, const wxStrin
 // Load a profile list from XML.  Pass a node pointing to an
 // <analysis> entry in the workbook file
 //
-template <class T> void gbtAnalysisProfileList<T>::Load(TiXmlNode *p_analysis)
+template <class T> void AnalysisProfileList<T>::Load(TiXmlNode *p_analysis)
 {
   Clear();
 
-  TiXmlNode *description = p_analysis->FirstChild("description");
-  if (description) {
+  if (TiXmlNode *description = p_analysis->FirstChild("description")) {
     m_description = wxString(description->FirstChild()->Value(), *wxConvCurrent);
   }
 
   for (TiXmlNode *node = p_analysis->FirstChild("profile"); node;
        node = node->NextSiblingElement()) {
-    const char *type = node->ToElement()->Attribute("type");
-    if (!strcmp(type, "behav")) {
+    if (const char *type = node->ToElement()->Attribute("type"); !strcmp(type, "behav")) {
       const MixedBehaviorProfile<T> profile =
           TextToBehavProfile<T>(m_doc, wxString(node->FirstChild()->Value(), *wxConvCurrent));
       m_behavProfiles.push_back(std::make_shared<MixedBehaviorProfile<T>>(profile));
@@ -208,7 +197,7 @@ template <class T> void gbtAnalysisProfileList<T>::Load(TiXmlNode *p_analysis)
   }
 }
 
-template <class T> std::string gbtAnalysisProfileList<T>::GetPayoff(int pl, int p_index) const
+template <class T> std::string AnalysisProfileList<T>::GetPayoff(int pl, int p_index) const
 {
   const int index = (p_index == -1) ? m_current : p_index;
 
@@ -217,10 +206,8 @@ template <class T> std::string gbtAnalysisProfileList<T>::GetPayoff(int pl, int 
       return lexical_cast<std::string>(m_behavProfiles[index]->GetPayoff(pl),
                                        m_doc->GetStyle().NumDecimals());
     }
-    else {
-      return lexical_cast<std::string>(m_mixedProfiles[index]->GetPayoff(pl),
-                                       m_doc->GetStyle().NumDecimals());
-    }
+    return lexical_cast<std::string>(m_mixedProfiles[index]->GetPayoff(pl),
+                                     m_doc->GetStyle().NumDecimals());
   }
   catch (std::out_of_range &) {
     return "";
@@ -228,7 +215,7 @@ template <class T> std::string gbtAnalysisProfileList<T>::GetPayoff(int pl, int 
 }
 
 template <class T>
-std::string gbtAnalysisProfileList<T>::GetRealizProb(const GameNode &p_node, int p_index) const
+std::string AnalysisProfileList<T>::GetRealizProb(const GameNode &p_node, int p_index) const
 {
   const int index = (p_index == -1) ? m_current : p_index;
 
@@ -242,7 +229,7 @@ std::string gbtAnalysisProfileList<T>::GetRealizProb(const GameNode &p_node, int
 }
 
 template <class T>
-std::string gbtAnalysisProfileList<T>::GetBeliefProb(const GameNode &p_node, int p_index) const
+std::string AnalysisProfileList<T>::GetBeliefProb(const GameNode &p_node, int p_index) const
 {
   const int index = (p_index == -1) ? m_current : p_index;
 
@@ -255,10 +242,8 @@ std::string gbtAnalysisProfileList<T>::GetBeliefProb(const GameNode &p_node, int
       return lexical_cast<std::string>(m_behavProfiles[index]->GetBeliefProb(p_node),
                                        m_doc->GetStyle().NumDecimals());
     }
-    else {
-      // We don't compute assessments yet!
-      return "*";
-    }
+    // We don't compute assessments yet!
+    return "*";
   }
   catch (std::out_of_range &) {
     return "";
@@ -266,8 +251,8 @@ std::string gbtAnalysisProfileList<T>::GetBeliefProb(const GameNode &p_node, int
 }
 
 template <class T>
-std::string gbtAnalysisProfileList<T>::GetNodeValue(const GameNode &p_node, int p_player,
-                                                    int p_index) const
+std::string AnalysisProfileList<T>::GetNodeValue(const GameNode &p_node, int p_player,
+                                                 int p_index) const
 {
   const int index = (p_index == -1) ? m_current : p_index;
 
@@ -281,7 +266,7 @@ std::string gbtAnalysisProfileList<T>::GetNodeValue(const GameNode &p_node, int 
 }
 
 template <class T>
-std::string gbtAnalysisProfileList<T>::GetInfosetProb(const GameNode &p_node, int p_index) const
+std::string AnalysisProfileList<T>::GetInfosetProb(const GameNode &p_node, int p_index) const
 {
   const int index = (p_index == -1) ? m_current : p_index;
 
@@ -299,7 +284,7 @@ std::string gbtAnalysisProfileList<T>::GetInfosetProb(const GameNode &p_node, in
 }
 
 template <class T>
-std::string gbtAnalysisProfileList<T>::GetInfosetValue(const GameNode &p_node, int p_index) const
+std::string AnalysisProfileList<T>::GetInfosetValue(const GameNode &p_node, int p_index) const
 {
   const int index = (p_index == -1) ? m_current : p_index;
 
@@ -312,10 +297,8 @@ std::string gbtAnalysisProfileList<T>::GetInfosetValue(const GameNode &p_node, i
       return lexical_cast<std::string>(m_behavProfiles[index]->GetPayoff(p_node->GetInfoset()),
                                        m_doc->GetStyle().NumDecimals());
     }
-    else {
-      // In the absence of beliefs, this is not well-defined in general
-      return "*";
-    }
+    // In the absence of beliefs, this is not well-defined in general
+    return "*";
   }
   catch (std::out_of_range &) {
     return "";
@@ -323,8 +306,8 @@ std::string gbtAnalysisProfileList<T>::GetInfosetValue(const GameNode &p_node, i
 }
 
 template <class T>
-std::string gbtAnalysisProfileList<T>::GetActionProb(const GameNode &p_node, int p_act,
-                                                     int p_index) const
+std::string AnalysisProfileList<T>::GetActionProb(const GameNode &p_node, int p_act,
+                                                  int p_index) const
 {
   const int index = (p_index == -1) ? m_current : p_index;
 
@@ -353,7 +336,7 @@ std::string gbtAnalysisProfileList<T>::GetActionProb(const GameNode &p_node, int
 }
 
 template <class T>
-std::string gbtAnalysisProfileList<T>::GetActionProb(int p_action, int p_index) const
+std::string AnalysisProfileList<T>::GetActionProb(int p_action, int p_index) const
 {
   const int index = (p_index == -1) ? m_current : p_index;
 
@@ -372,8 +355,8 @@ std::string gbtAnalysisProfileList<T>::GetActionProb(int p_action, int p_index) 
 }
 
 template <class T>
-std::string gbtAnalysisProfileList<T>::GetActionValue(const GameNode &p_node, int p_act,
-                                                      int p_index) const
+std::string AnalysisProfileList<T>::GetActionValue(const GameNode &p_node, int p_act,
+                                                   int p_index) const
 {
   const int index = (p_index == -1) ? m_current : p_index;
 
@@ -387,10 +370,8 @@ std::string gbtAnalysisProfileList<T>::GetActionValue(const GameNode &p_node, in
           m_behavProfiles[index]->GetPayoff(p_node->GetInfoset()->GetAction(p_act)),
           m_doc->GetStyle().NumDecimals());
     }
-    else {
-      // In the absence of beliefs, this is not well-defined
-      return "*";
-    }
+    // In the absence of beliefs, this is not well-defined
+    return "*";
   }
   catch (std::out_of_range &) {
     return "";
@@ -398,7 +379,7 @@ std::string gbtAnalysisProfileList<T>::GetActionValue(const GameNode &p_node, in
 }
 
 template <class T>
-std::string gbtAnalysisProfileList<T>::GetStrategyProb(int p_strategy, int p_index) const
+std::string AnalysisProfileList<T>::GetStrategyProb(int p_strategy, int p_index) const
 {
   const int index = (p_index == -1) ? m_current : p_index;
 
@@ -412,7 +393,7 @@ std::string gbtAnalysisProfileList<T>::GetStrategyProb(int p_strategy, int p_ind
 }
 
 template <class T>
-std::string gbtAnalysisProfileList<T>::GetStrategyValue(int p_strategy, int p_index) const
+std::string AnalysisProfileList<T>::GetStrategyValue(int p_strategy, int p_index) const
 {
   const int index = (p_index == -1) ? m_current : p_index;
 
@@ -426,12 +407,12 @@ std::string gbtAnalysisProfileList<T>::GetStrategyValue(int p_strategy, int p_in
   }
 }
 
-template <class T> void gbtAnalysisProfileList<T>::Save(std::ostream &p_file) const
+template <class T> void AnalysisProfileList<T>::Save(std::ostream &p_file) const
 {
   p_file << "<analysis type=\"list\">\n";
 
   p_file << "<description>\n";
-  p_file << (const char *)m_description.mb_str() << "\n";
+  p_file << static_cast<const char *>(m_description.mb_str()) << "\n";
   p_file << "</description>\n";
 
   if (m_doc->IsTree()) {
@@ -470,5 +451,7 @@ template <class T> void gbtAnalysisProfileList<T>::Save(std::ostream &p_file) co
 }
 
 // Explicit instantiations
-template class gbtAnalysisProfileList<double>;
-template class gbtAnalysisProfileList<Rational>;
+template class AnalysisProfileList<double>;
+template class AnalysisProfileList<Rational>;
+
+} // namespace Gambit::GUI

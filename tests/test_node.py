@@ -790,6 +790,29 @@ def test_node_plays():
     assert set(test_node.plays) == expected_set_of_plays
 
 
+def test_node_children_action_label():
+    game = games.read_from_file("stripped_down_poker.efg")
+    assert game.root.children["King"] == game.root.children[0]
+    assert game.root.children["Queen"].children["Fold"] == game.root.children[1].children[1]
+
+
+def test_node_children_action():
+    game = games.read_from_file("stripped_down_poker.efg")
+    assert game.root.children[game.root.infoset.actions["King"]] == game.root.children[0]
+
+
+def test_node_children_nonexistent_action():
+    game = games.read_from_file("stripped_down_poker.efg")
+    with pytest.raises(ValueError):
+        _ = game.root.children["Jack"]
+
+
+def test_node_children_other_infoset_action():
+    game = games.read_from_file("stripped_down_poker.efg")
+    with pytest.raises(ValueError):
+        _ = game.root.children[game.root.children[0].infoset.actions["Bet"]]
+
+
 @pytest.mark.parametrize(
     "game_obj",
     [
@@ -798,7 +821,7 @@ def test_node_plays():
         pytest.param(games.read_from_file("cent3.efg")),
         pytest.param(games.read_from_file("e01.efg")),
         pytest.param(games.read_from_file("e02.efg")),
-        pytest.param(games.read_from_file("poker.efg")),
+        pytest.param(games.read_from_file("stripped_down_poker.efg")),
         pytest.param(gbt.Game.new_tree()),
     ],
 )
