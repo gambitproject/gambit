@@ -1,0 +1,14 @@
+EFG 2 R "One card poker" { "Alice" "Bob" }
+""
+
+c "" 1 "" { "King" 1/2 "Queen" 1/2 } 0
+p "King" 1 1 "" { "Raise" "Fold" } 0
+p "Raise" 2 1 "" { "Meet" "Pass" } 0
+t "Meet" 1 "Alice wins big" { 2, -2 }
+t "Pass" 2 "Alice wins" { 1, -1 }
+t "Fold" 4 "Bob wins" { -1, 1 }
+p "Queen" 1 2 "" { "Raise" "Fold" } 0
+p "Raise" 2 1 "" { "Meet" "Pass" } 0
+t "Meet" 3 "Bob wins big" { -2, 2 }
+t "Pass" 2 "Alice wins" { 1, -1 }
+t "Fold" 4 "Bob wins" { -1, 1 }

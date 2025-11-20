@@ -12,6 +12,7 @@ build:
   apt_packages:
     - libgmp-dev
     - pandoc
+    - texlive-full
 
 python:
   install:

@@ -20,6 +20,7 @@ _build
 build
 *.egg-info
 *.pyc
+*.so
 
 config.guess
 config.sub
@@ -39,6 +40,5 @@ dist
 .venv
 *.dmg
 Gambit.app/*
-*.so
-doc/tutorials/games/*.nfg
-doc/tutorials/games/*.efg
+*.ef
+doc/tutorials/*.ipynb_checkpoints
