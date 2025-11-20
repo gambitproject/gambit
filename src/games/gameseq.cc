@@ -43,8 +43,9 @@ void GameSequenceForm::BuildSequences(const GameNode &n,
     auto tmp_sequence = p_currentSequences.at(n->GetPlayer());
     for (auto action : m_support.GetActions(n->GetInfoset())) {
       if (m_correspondence.find(action) == m_correspondence.end()) {
-        m_sequences[n->GetPlayer()].push_back(std::make_shared<GameSequenceRep>(
-            n->GetPlayer(), action, m_sequences[n->GetPlayer()].size() + 1, tmp_sequence));
+        m_sequences[n->GetPlayer()].emplace_back(std::make_shared<GameSequenceRep>(
+            n->GetPlayer(), action, m_sequences[n->GetPlayer()].size() + 1,
+            tmp_sequence.get_shared()));
         m_correspondence[action] = m_sequences[n->GetPlayer()].back();
       }
       p_currentSequences[n->GetPlayer()] = m_correspondence[action];
@@ -109,25 +110,6 @@ void GameSequenceForm::FillTableau()
     currentSequence[player] = m_sequences[player].front();
   }
   FillTableau(m_support.GetGame()->GetRoot(), Rational(1), currentSequence);
-}
-
-MixedBehaviorProfile<double>
-GameSequenceForm::ToMixedBehaviorProfile(const std::map<GameSequence, double> &x) const
-{
-  MixedBehaviorProfile<double> b(m_support);
-  for (auto sequence : GetSequences()) {
-    if (sequence->action == nullptr) {
-      continue;
-    }
-    const double parent_prob = x.at(sequence->parent.lock());
-    if (parent_prob > 0) {
-      b[sequence->action] = x.at(sequence) / parent_prob;
-    }
-    else {
-      b[sequence->action] = 0;
-    }
-  }
-  return b;
 }
 
 } // end namespace Gambit

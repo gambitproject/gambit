@@ -417,6 +417,14 @@ cdef extern from "games/behavspt.h":
         c_BehaviorSupportProfile(c_Game) except +
 
 
+cdef extern from "games/layout.h":
+    cdef cppclass c_Layout "Layout":
+        int GetNodeLevel(c_GameNode) except +
+        int GetNodeSublevel(c_GameNode) except +
+        double GetNodeOffset(c_GameNode) except +
+    shared_ptr[c_Layout] CreateLayout(c_Game) except +
+
+
 cdef extern from "util.h":
     c_Game ParseGbtGame(string) except +IOError
     c_Game ParseEfgGame(string) except +IOError

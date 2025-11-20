@@ -86,11 +86,30 @@ def test_is_successor_of():
         game.root.is_successor_of(game.players[0])
 
 
-def test_is_subgame_root():
-    """Test whether nodes are correctly labeled as roots of proper subgames."""
-    game = games.read_from_file("basic_extensive_game.efg")
-    assert game.root.is_subgame_root
-    assert not game.root.children[0].is_subgame_root
+@pytest.mark.parametrize("game, expected_result", [
+    # Games without Absent-Mindedness for which the legacy method is known to be correct.
+    (games.read_from_file("wichardt.efg"), {0}),
+    (games.read_from_file("e02.efg"), {0, 2, 4}),
+    (games.read_from_file("subgames.efg"), {0, 1, 4, 7, 11, 13, 34}),
+
+    pytest.param(
+        games.read_from_file("AM-driver-subgame.efg"),
+        {0, 3},  # The correct set of subgame roots
+        marks=pytest.mark.xfail(
+            reason="Current method does not detect roots of proper subgames "
+                   "that are members of AM-infosets."
+        )
+    ),
+])
+def test_legacy_is_subgame_root_set(game: gbt.Game, expected_result: set):
+    """
+    Tests the legacy `node.is_subgame_root` against an expected set of nodes.
+    Includes both passing cases and games with Absent-Mindedness where it is expected to fail.
+    """
+    list_nodes = list(game.nodes)
+    expected_roots = {list_nodes[i] for i in expected_result}
+    legacy_roots = {node for node in game.nodes if node.is_subgame_root}
+    assert legacy_roots == expected_roots
 
 
 def test_append_move_error_player_actions():
