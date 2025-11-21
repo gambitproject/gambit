@@ -187,8 +187,7 @@ int BehaviorSupportProfile::GetSequenceConstraintEntry(const GameInfoset &p_info
   return GetSequenceForm()->GetConstraintEntry(p_infoset, p_action);
 }
 
-BehaviorSupportProfile::PlayerSequences
-BehaviorSupportProfile::GetSequences(const GamePlayer &p_player) const
+PlayerSequences BehaviorSupportProfile::GetSequences(const GamePlayer &p_player) const
 {
   return {this, p_player};
 }
@@ -229,21 +228,6 @@ BehaviorSupportProfile::ToMixedBehaviorProfile(const std::map<GameSequence, doub
     }
   }
   return b;
-}
-
-std::vector<GameSequence>::const_iterator BehaviorSupportProfile::PlayerSequences::begin() const
-{
-  return m_support->GetSequenceForm()->m_sequences.at(m_player).begin();
-}
-
-std::vector<GameSequence>::const_iterator BehaviorSupportProfile::PlayerSequences::end() const
-{
-  return m_support->GetSequenceForm()->m_sequences.at(m_player).end();
-}
-
-size_t BehaviorSupportProfile::PlayerSequences::size() const
-{
-  return m_support->GetSequenceForm()->m_sequences.at(m_player).size();
 }
 
 BehaviorSupportProfile::SequenceContingencies::iterator::iterator(

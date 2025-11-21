@@ -50,6 +50,11 @@ protected:
 
   const Sequences GetSequences() override { return GetFullSupport()->GetSequences(); }
 
+  const PlayerSequences GetSequences(const GamePlayer &p_player) override
+  {
+    return GetFullSupport()->GetSequences(p_player);
+  }
+
   const Rational &GetPayoff(const std::map<GamePlayer, GameSequence> &p_profile,
                             const GamePlayer &p_player) override
   {

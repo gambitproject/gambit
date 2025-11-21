@@ -465,4 +465,19 @@ bool Sequences::iterator::operator==(const iterator &it) const
   return (m_currentSequence == it.m_currentSequence);
 }
 
+std::vector<GameSequence>::const_iterator PlayerSequences::begin() const
+{
+  return m_support->GetSequenceForm()->m_sequences.at(m_player).begin();
+}
+
+std::vector<GameSequence>::const_iterator PlayerSequences::end() const
+{
+  return m_support->GetSequenceForm()->m_sequences.at(m_player).end();
+}
+
+size_t PlayerSequences::size() const
+{
+  return m_support->GetSequenceForm()->m_sequences.at(m_player).size();
+}
+
 } // end namespace Gambit
