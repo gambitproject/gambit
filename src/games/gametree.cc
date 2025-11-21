@@ -920,13 +920,11 @@ void GameTreeRep::BuildInfosetParents()
         position.emplace(AbsentMindedEdge{replay_action, child});
 
         // Start of the traversal of unreachable subtrees
-        for (const auto &action_child_pair : child->GetActions()) {
-          const GameAction current_action = action_child_pair.first;
+        for (const auto &[current_action, subtree_root] : child->GetActions()) {
           if (current_action != replay_action) {
-            const GameNode unreachable_subtree_root = action_child_pair.second;
 
             std::stack<GameNodeRep *> nodes_to_visit;
-            nodes_to_visit.push(unreachable_subtree_root.get());
+            nodes_to_visit.push(subtree_root.get());
 
             while (!nodes_to_visit.empty()) {
               GameNodeRep *current_unreachable_node = nodes_to_visit.top();
