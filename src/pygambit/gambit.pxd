@@ -101,6 +101,12 @@ cdef extern from "games/game.h":
         c_GamePlayer player
         c_GameAction action
         weak_ptr[c_GameSequenceRep] parent
+        size_t number
+
+    cdef cppclass c_PlayerSequences "PlayerSequences":
+        size_t size() except +
+        stdvector[c_GameSequence].const_iterator begin() except +
+        stdvector[c_GameSequence].const_iterator end() except +
 
     cdef cppclass c_GameStrategyRep "GameStrategyRep":
         int GetNumber() except +
@@ -327,11 +333,12 @@ cdef extern from "games/game.h":
         c_PureStrategyProfile NewPureStrategyProfile()  # except + doesn't compile
         c_MixedStrategyProfile[T] NewMixedStrategyProfile[T](T)  # except + doesn't compile
 
-        const c_Rational &GetPayoff(
+        c_Rational &GetPayoff(
             const stdmap[c_GamePlayer, c_GameSequence], const c_GamePlayer) except +
         int GetSequenceConstraintEntry(const c_GameInfoset, const c_GameAction) except +
-        const c_GameSequence GetCorrespondingSequence(const c_GameAction)
-        const c_GameSequence GetEmptySequence(const c_GamePlayer)
+        c_GameSequence GetCorrespondingSequence(c_GameAction)
+        c_GameSequence GetEmptySequence(c_GamePlayer)
+        c_PlayerSequences GetSequences(c_GamePlayer)
 
     c_Game NewTree() except +
     c_Game NewTable(stdvector[int]) except +

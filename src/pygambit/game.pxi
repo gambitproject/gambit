@@ -22,6 +22,7 @@
 import io
 import itertools
 import pathlib
+from parser import sequence2st
 
 import numpy as np
 import scipy.stats
@@ -186,6 +187,10 @@ class Sequence:
     def player(self) -> Player:
         """Gets the ``Player`` to which the sequence belongs."""
         return Player.wrap(self.seq.deref().player)
+
+    @property
+    def number(self) -> int:
+        return self.seq.deref().number
 
 
 @cython.cclass
@@ -473,6 +478,35 @@ class GameStrategies:
             else:
                 raise IndexError("Index out of range")
         raise TypeError(f"Strategy index must be int or str, not {index.__class__.__name__}")
+
+
+@cython.cclass
+class PlayerSequences:
+    game = cython.declare(c_Game)
+    player = cython.declare(c_GamePlayer)
+
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create PlayerSequences outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(game : c_Game, player : c_GamePlayer) -> PlayerSequences:
+        obj: PlayerSequences = PlayerSequences.__new__(PlayerSequences)
+        obj.game = game
+        obj.player = player
+        return obj
+
+    def __len__(self) -> int:
+        return self.game.deref().GetSequences(self.player).size()
+
+    def __iter__(self):
+        cdef stdvector[c_GameSequence].const_iterator it = (
+            self.game.deref().GetSequences(self.player).begin())
+        cdef stdvector[c_GameSequence].const_iterator end = (
+            self.game.deref().GetSequences(self.player).end())
+        while it != end:
+            yield Sequence.wrap(deref(it))
+            it += 1
 
 
 @cython.cclass
@@ -2104,3 +2138,8 @@ class Game:
         cdef c_GamePlayer cpp_player = player.player
         cdef c_GameSequence seq = self.game.deref().GetEmptySequence(cpp_player)
         return Sequence.wrap(seq)
+
+    def get_sequences(self, py_player):
+        cdef Player player = cython.cast(Player, py_player)
+        cdef c_GamePlayer cpp_player = player.player
+        return PlayerSequences.wrap(self.game, cpp_player)
