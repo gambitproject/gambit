@@ -213,6 +213,19 @@ class Node:
         return self.node.deref().IsSubgameRoot()
 
     @property
+    def is_strategy_reachable(self) -> bool:
+        """Returns whether this node is reachable by any pure strategy profile.
+
+        A node is considered reachable if there exists at least one pure
+        strategy profile where the resulting path of play passes
+        through that node.
+
+        In games with absent-mindedness, some nodes may be unreachable because
+        any path to them requires conflicting choices at the same information set.
+        """
+        return self.node.deref().IsStrategyReachable()
+
+    @property
     def outcome(self) -> typing.Optional[Outcome]:
         """Returns the outcome attached to the node.
 

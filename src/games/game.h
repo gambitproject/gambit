@@ -500,6 +500,7 @@ public:
 
   bool IsSuccessorOf(GameNode from) const;
   bool IsSubgameRoot() const;
+  bool IsStrategyReachable() const;
 };
 
 class GameNodeRep::Actions::iterator {
