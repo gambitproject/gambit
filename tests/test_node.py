@@ -151,7 +151,7 @@ def test_is_strategy_reachable(game_file: str, expected_unreachable_paths: list[
     """
     Tests `node.is_strategy_reachable` by collecting all unreachable nodes,
     converting them to their action-label paths, and comparing the resulting
-    list of paths against a known-correct list in an order-independent way.
+    list of paths against a known-correct list.
     """
     game = games.read_from_file(game_file)
     nodes = game.nodes
