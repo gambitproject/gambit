@@ -112,27 +112,55 @@ def test_legacy_is_subgame_root_set(game: gbt.Game, expected_result: set):
     assert legacy_roots == expected_roots
 
 
-@pytest.mark.parametrize("game, expected_reachable_indices", [
-    # Games without Absent-Mindedness where all nodes are reachable.
-    (games.read_from_file("e02.efg"), set(range(7))),
-    (games.read_from_file("wichardt.efg"), set(range(15))),
-    (games.read_from_file("subgames.efg"), set(range(37))),
+def get_path_of_action_labels(node: gbt.Node) -> list[str]:
+    """
+    Computes the path of action labels from the root to the given node.
+    Returns a list of strings.
+    """
+    if not isinstance(node, gbt.Node):
+        raise TypeError(f"Input must be a pygambit.Node, but got {type(node).__name__}")
 
-    # Games with absent-mindedness where some nodes are unreachable.
-    (games.read_from_file("AM-driver-one-infoset.efg"), {0, 1, 2, 4}),
-    (games.read_from_file("AM-driver-subgame.efg"), {0, 1, 2, 6}),
+    path = []
+    current_node = node
+    while current_node.parent:
+        path.append(current_node.prior_action.label)
+        current_node = current_node.parent
+
+    return path[::-1]
+
+
+@pytest.mark.parametrize("game_file, expected_unreachable_paths", [
+    # Games without absent-mindedness, where all nodes are reachable
+    ("e02.efg", []),
+    ("wichardt.efg", []),
+    ("subgames.efg", []),
+
+    # An absent-minded driver game with an unreachable terminal node
+    (
+        "AM-driver-one-infoset.efg",
+        [["S", "T"]]
+    ),
+
+    # An absent-minded driver game with an unreachable subtree
+    (
+        "AM-driver-subgame.efg",
+        [["S", "T"], ["S", "T", "r"], ["S", "T", "l"]]
+    ),
 ])
-def test_is_strategy_reachable(game: gbt.Game, expected_reachable_indices: set):
+def test_is_strategy_reachable(game_file: str, expected_unreachable_paths: list[list[str]]):
     """
-    Tests `node.is_strategy_reachable` by comparing the set of reachable nodes
-    against a pre-computed set of node indices.
+    Tests `node.is_strategy_reachable` by collecting all unreachable nodes,
+    converting them to their action-label paths, and comparing the resulting
+    list of paths against a known-correct list in an order-independent way.
     """
-    all_nodes = list(game.nodes)
+    game = games.read_from_file(game_file)
+    nodes = game.nodes
 
-    expected_reachable = {all_nodes[i] for i in expected_reachable_indices}
-    actual_reachable = {node for node in all_nodes if node.is_strategy_reachable}
+    actual_unreachable_paths = [
+        get_path_of_action_labels(node) for node in nodes if not node.is_strategy_reachable
+    ]
 
-    assert actual_reachable == expected_reachable
+    assert actual_unreachable_paths == expected_unreachable_paths
 
 
 def test_append_move_error_player_actions():
