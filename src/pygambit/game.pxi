@@ -2127,18 +2127,6 @@ class Game:
             cpp_action = action.action
         return self.game.deref().GetSequenceConstraintEntry(cpp_infoset, cpp_action)
 
-    def get_corresponding_sequence(self, py_action):
-        cdef Action action = cython.cast(Action, py_action)
-        cdef c_GameAction cpp_action = action.action
-        cdef c_GameSequence seq = self.game.deref().GetCorrespondingSequence(cpp_action)
-        return Sequence.wrap(seq)
-
-    def get_empty_sequence(self, py_player):
-        cdef Player player = cython.cast(Player, py_player)
-        cdef c_GamePlayer cpp_player = player.player
-        cdef c_GameSequence seq = self.game.deref().GetEmptySequence(cpp_player)
-        return Sequence.wrap(seq)
-
     def get_sequence_form_payoffs(self, dtype: typing.Type = Rational) -> typing.List[np.array]:
         cdef stdmap[c_GamePlayer, c_GameSequence] c_profile
         cdef Player player

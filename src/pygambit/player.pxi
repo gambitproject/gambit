@@ -252,3 +252,15 @@ class Player:
     @property
     def sequences(self):
         return PlayerSequences.wrap(self.player)
+
+    def get_corresponding_sequence(self, py_action):
+        cdef Action action
+        cdef c_GameAction cpp_action
+        cdef c_GameSequence sequence
+        if py_action is None:
+            sequence = self.player.deref().GetGame().deref().GetEmptySequence(self.player)
+        else:
+            action = cython.cast(Action, py_action)
+            cpp_action = action.action
+            sequence = self.player.deref().GetGame().deref().GetCorrespondingSequence(cpp_action)
+        return Sequence.wrap(sequence)
