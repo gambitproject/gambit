@@ -2165,13 +2165,13 @@ class Game:
 
     def get_sequence_form_constraints(self) -> typing.List[np.array]:
         arrays = []
-        for py_player in self.players:
-            array = np.zeros((len(self.infosets), len(py_player.sequences)), dtype=int)
-            for i in range(len(self.infosets)):
-                for py_sequence in py_player.sequences:
-                    action = py_sequence.action
-                    infoset = self.infosets[i]
-                    array[i, py_sequence.index] = (
+        for player in self.players:
+            array = np.zeros((len(player.infosets), len(player.sequences)), dtype=int)
+            for i in range(len(player.infosets)):
+                for sequence in player.sequences:
+                    action = sequence.action
+                    infoset = player.infosets[i]
+                    array[i, sequence.index] = (
                         self.get_sequence_form_constraint_entry(infoset, action))
             arrays.append(array)
         return arrays
