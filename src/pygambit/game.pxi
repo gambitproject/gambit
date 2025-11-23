@@ -162,23 +162,23 @@ def read_agg(filepath_or_buffer: typing.Union[str, pathlib.Path, io.IOBase]) -> 
 
 @cython.cclass
 class Sequence:
-    """A player in a ``Game``."""
-    seq = cython.declare(c_GameSequence)
+    """A sequence of actions in a ``Game``."""
+    sequence = cython.declare(c_GameSequence)
 
     def __init__(self, *args, **kwargs) -> None:
         raise ValueError("Cannot create a Sequence directly.")
 
     @staticmethod
     @cython.cfunc
-    def wrap(seq: c_GameSequence) -> Sequence:
+    def wrap(sequence: c_GameSequence) -> Sequence:
         obj: Sequence = Sequence.__new__(Sequence)
-        obj.seq = seq
+        obj.sequence = sequence
         return obj
 
     @property
     def action(self) -> Action:
         """Gets the terminal ``Action`` of the sequence."""
-        cdef c_GameAction action = self.seq.deref().action
+        cdef c_GameAction action = self.sequence.deref().action
         if not action:
             return None
         return Action.wrap(action)
@@ -186,11 +186,11 @@ class Sequence:
     @property
     def player(self) -> Player:
         """Gets the ``Player`` to which the sequence belongs."""
-        return Player.wrap(self.seq.deref().player)
+        return Player.wrap(self.sequence.deref().player)
 
     @property
-    def number(self) -> int:
-        return self.seq.deref().number
+    def index(self) -> int:
+        return self.sequence.deref().number - 1
 
 
 @cython.cclass
@@ -490,9 +490,9 @@ class PlayerSequences:
 
     @staticmethod
     @cython.cfunc
-    def wrap(game : c_Game, player : c_GamePlayer) -> PlayerSequences:
+    def wrap(player : c_GamePlayer) -> PlayerSequences:
         obj: PlayerSequences = PlayerSequences.__new__(PlayerSequences)
-        obj.game = game
+        obj.game = player.deref().GetGame()
         obj.player = player
         return obj
 
@@ -2139,7 +2139,26 @@ class Game:
         cdef c_GameSequence seq = self.game.deref().GetEmptySequence(cpp_player)
         return Sequence.wrap(seq)
 
-    def get_sequences(self, py_player):
-        cdef Player player = cython.cast(Player, py_player)
-        cdef c_GamePlayer cpp_player = player.player
-        return PlayerSequences.wrap(self.game, cpp_player)
+    def get_sequence_form_payoffs(self, dtype: typing.Type = Rational) -> typing.List[np.array]:
+        cdef stdmap[c_GamePlayer, c_GameSequence] c_profile
+        cdef Player player
+        cdef Player temp_player
+        cdef Sequence sequence
+        cdef c_Rational c_payoff
+        arrays = []
+        shape = tuple(len(py_player.sequences) for py_player in self.players)
+        player_sequences = [py_player.sequences for py_player in self.players]
+        for py_player in self.players:
+            player = cython.cast(Player, py_player)
+            array = np.zeros(shape=shape, dtype=object)
+            for profile in itertools.product(*player_sequences):
+                for i in range(len(profile)):
+                    temp_player = cython.cast(Player, self.players[i])
+                    sequence = cython.cast(Sequence, profile[i])
+                    c_profile[temp_player.player] = sequence.sequence
+                idx_tuple = tuple(sequence.index for sequence in profile)
+                c_payoff = self.game.deref().GetPayoff(c_profile, player.player)
+                payoff = rat_to_py(c_payoff)
+                array[idx_tuple] = dtype(payoff)
+            arrays.append(array)
+        return arrays

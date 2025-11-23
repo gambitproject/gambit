@@ -248,3 +248,7 @@ class Player:
     def max_payoff(self) -> Rational:
         """Returns the largest payoff for the player in any outcome of the game."""
         return rat_to_py(self.player.deref().GetGame().deref().GetMaxPayoff(self.player))
+
+    @property
+    def sequences(self):
+        return PlayerSequences.wrap(self.player)
