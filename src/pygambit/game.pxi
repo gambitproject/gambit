@@ -2115,16 +2115,12 @@ class Game:
         cdef c_Rational payoff = self.game.deref().GetPayoff(profile, cpp_player)
         return rat_to_py(payoff)
 
-    def get_sequence_form_constraint_entry(self, py_infoset, py_action):
+    def get_sequence_form_constraint_entry(self, py_infoset, py_sequence):
         cdef Infoset infoset = cython.cast(Infoset, py_infoset)
         cdef c_GameInfoset cpp_infoset = infoset.infoset
-        cdef Action action
-        cdef c_GameAction cpp_action
-        if py_action is None:
-            cpp_action = <c_GameAction>0
-        else:
-            action = cython.cast(Action, py_action)
-            cpp_action = action.action
+        cdef Sequence sequence = cython.cast(Sequence, py_sequence)
+        cdef c_GameSequence cpp_sequence = sequence.sequence
+        cdef c_GameAction cpp_action = cpp_sequence.deref().action
         return self.game.deref().GetSequenceConstraintEntry(cpp_infoset, cpp_action)
 
     def get_sequence_form_payoffs(self, dtype: typing.Type = Rational) -> typing.List[np.array]:
@@ -2157,9 +2153,8 @@ class Game:
             array = np.zeros((len(player.infosets), len(player.sequences)), dtype=int)
             for i in range(len(player.infosets)):
                 for sequence in player.sequences:
-                    action = sequence.action
                     infoset = player.infosets[i]
                     array[i, sequence.index] = (
-                        self.get_sequence_form_constraint_entry(infoset, action))
+                        self.get_sequence_form_constraint_entry(infoset, sequence))
             arrays.append(array)
         return arrays
