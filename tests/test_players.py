@@ -61,6 +61,18 @@ def test_player_label_invalid():
         _ = game.players["Not a player"]
 
 
+def test_set_empty_player_futurewarning():
+    game = games.create_stripped_down_poker_efg()
+    with pytest.warns(FutureWarning):
+        game.players[0].label = ""
+
+
+def test_set_duplicate_player_futurewarning():
+    game = games.create_stripped_down_poker_efg()
+    with pytest.warns(FutureWarning):
+        game.players[0].label = game.players[1].label
+
+
 def test_strategic_game_add_player():
     game = gbt.Game.new_table([2, 2])
     game.add_player()
