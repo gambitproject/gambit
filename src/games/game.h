@@ -1165,6 +1165,44 @@ std::list<Rational> UniformOnSimplex(int p_denom, size_t p_dim, Generator &gener
   return output;
 }
 
+template <typename T> class MixedSequenceProfile {
+
+private:
+  std::map<GameSequence, T> probs;
+  Game m_game;
+
+public:
+  MixedSequenceProfile(const Game &p_game) { m_game = p_game; }
+
+  const T &operator[](const GameSequence &p_key) const { return probs.at(p_key); }
+
+  T &operator[](const GameSequence &p_key) { return probs[p_key]; }
+
+  MixedBehaviorProfile<T> GetMixedBehaviorProfile() const
+  {
+    MixedBehaviorProfile<T> mbp(m_game);
+    for (const auto &[seq, prob] : probs) {
+      auto parent_seq = seq->parent.lock();
+      if (parent_seq) {
+        T parent_prob = probs.at(parent_seq);
+        auto action = seq->action;
+        mbp[action] = (parent_prob > static_cast<T>(0)) ? prob / parent_prob : static_cast<T>(0);
+      }
+    }
+    return mbp;
+  }
+
+  std::map<GamePlayer, T> GetPayoffs() const
+  {
+    std::map<GamePlayer, T> payoffs;
+    auto mbp = GetMixedBehaviorProfile();
+    for (auto player : m_game->GetPlayers()) {
+      payoffs[player] = mbp.GetPayoff(player);
+    }
+    return payoffs;
+  }
+};
+
 } // namespace Gambit
 
 #endif // LIBGAMBIT_GAME_H
