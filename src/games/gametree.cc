@@ -207,6 +207,15 @@ bool GameInfosetRep::Precedes(GameNode p_node) const
   return false;
 }
 
+bool GameInfosetRep::IsAbsentMinded() const
+{
+  auto *tree = dynamic_cast<GameTreeRep *>(m_game);
+  if (tree) {
+    return tree->IsAbsentMinded(this);
+  }
+  return false;
+}
+
 GameAction GameTreeRep::InsertAction(GameInfoset p_infoset, GameAction p_action /* =nullptr */)
 {
   if (p_action && p_action->GetInfoset() != p_infoset) {
@@ -830,6 +839,15 @@ bool GameTreeRep::IsPerfectRecall() const
   return std::all_of(m_ownPriorActionInfo->infoset_map.cbegin(),
                      m_ownPriorActionInfo->infoset_map.cend(),
                      [](const auto &pair) { return pair.second.size() <= 1; });
+}
+
+bool GameTreeRep::IsAbsentMinded(const GameInfosetRep *infoset) const
+{
+  if (m_infosetParents.empty() && !m_root->IsTerminal()) {
+    const_cast<GameTreeRep *>(this)->BuildInfosetParents();
+  }
+
+  return m_absentMindedInfosets.count(const_cast<GameInfosetRep *>(infoset));
 }
 
 //------------------------------------------------------------------------

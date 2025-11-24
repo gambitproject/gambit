@@ -87,7 +87,7 @@ public:
   Rational GetPlayerMinPayoff(const GamePlayer &) const override;
   /// Returns the largest payoff to the player in any play of the game
   Rational GetPlayerMaxPayoff(const GamePlayer &) const override;
-  bool IsAbsentMinded() const;
+  bool IsAbsentMinded(const GameInfosetRep *) const;
   //@}
 
   /// @name Players

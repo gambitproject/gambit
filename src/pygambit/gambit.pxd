@@ -148,6 +148,8 @@ cdef extern from "games/game.h":
         bint Precedes(c_GameNode) except +
         stdset[c_GameAction] GetOwnPriorActions() except +
 
+        bint IsAbsentMinded() except +
+
     cdef cppclass c_GamePlayerRep "GamePlayerRep":
         cppclass Infosets:
             cppclass iterator:
