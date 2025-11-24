@@ -20,7 +20,6 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include <cstdlib>
 #include <getopt.h>
 #include <iostream>
 #include <fstream>
@@ -62,7 +61,7 @@ int main(int argc, char *argv[])
   bool printDetail = false;
 
   int long_opt_index = 0;
-  struct option long_options[] = {
+  option long_options[] = {
       {"help", 0, nullptr, 'h'}, {"version", 0, nullptr, 'v'}, {nullptr, 0, nullptr, 0}};
   int c;
   while ((c = getopt_long(argc, argv, "DvhqAS", long_options, &long_opt_index)) != -1) {
@@ -87,7 +86,7 @@ int main(int argc, char *argv[])
       break;
     case '?':
       if (isprint(optopt)) {
-        std::cerr << argv[0] << ": Unknown option `-" << ((char)optopt) << "'.\n";
+        std::cerr << argv[0] << ": Unknown option `-" << static_cast<char>(optopt) << "'.\n";
       }
       else {
         std::cerr << argv[0] << ": Unknown option character `\\x" << optopt << "`.\n";
@@ -117,22 +116,12 @@ int main(int argc, char *argv[])
 
   try {
     const Game game = ReadGame(*input_stream);
-    std::shared_ptr<StrategyProfileRenderer<Rational>> renderer;
+    std::shared_ptr<MixedProfileRenderer<Rational>> renderer;
     if (reportStrategic || !game->IsTree()) {
-      if (printDetail) {
-        renderer = std::make_shared<MixedStrategyDetailRenderer<Rational>>(std::cout);
-      }
-      else {
-        renderer = std::make_shared<MixedStrategyCSVRenderer<Rational>>(std::cout);
-      }
+      renderer = MakeMixedStrategyProfileRenderer<Rational>(std::cout, 0, printDetail);
     }
     else {
-      if (printDetail) {
-        renderer = std::make_shared<BehavStrategyDetailRenderer<Rational>>(std::cout);
-      }
-      else {
-        renderer = std::make_shared<BehavStrategyCSVRenderer<Rational>>(std::cout);
-      }
+      renderer = MakeMixedBehaviorProfileRenderer<Rational>(std::cout, 0, printDetail);
     }
 
     if (game->IsTree() && solveAgent) {

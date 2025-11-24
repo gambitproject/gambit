@@ -22,7 +22,6 @@
 
 #include <iostream>
 #include <fstream>
-#include <cstdlib>
 #include <memory>
 #include <getopt.h>
 #include "gambit.h"
@@ -69,7 +68,7 @@ int main(int argc, char *argv[])
   int numDecimals = 6, stopAfter = 0, maxDepth = 0;
 
   int long_opt_index = 0;
-  struct option long_options[] = {
+  option long_options[] = {
       {"help", 0, nullptr, 'h'}, {"version", 0, nullptr, 'v'}, {nullptr, 0, nullptr, 0}};
   while ((c = getopt_long(argc, argv, "d:DvhqSe:r:", long_options, &long_opt_index)) != -1) {
     switch (c) {
@@ -100,7 +99,7 @@ int main(int argc, char *argv[])
       break;
     case '?':
       if (isprint(optopt)) {
-        std::cerr << argv[0] << ": Unknown option `-" << ((char)optopt) << "'.\n";
+        std::cerr << argv[0] << ": Unknown option `-" << static_cast<char>(optopt) << "'.\n";
       }
       else {
         std::cerr << argv[0] << ": Unknown option character `\\x" << optopt << "`.\n";
@@ -132,25 +131,15 @@ int main(int argc, char *argv[])
     const Game game = ReadGame(*input_stream);
     if (!game->IsTree() || useStrategic) {
       if (useFloat) {
-        std::shared_ptr<StrategyProfileRenderer<double>> renderer;
-        if (printDetail) {
-          renderer = std::make_shared<MixedStrategyDetailRenderer<double>>(std::cout, numDecimals);
-        }
-        else {
-          renderer = std::make_shared<MixedStrategyCSVRenderer<double>>(std::cout, numDecimals);
-        }
+        auto renderer =
+            MakeMixedStrategyProfileRenderer<double>(std::cout, numDecimals, printDetail);
         LcpStrategySolve<double>(game, stopAfter, maxDepth,
                                  [&](const MixedStrategyProfile<double> &p,
                                      const std::string &label) { renderer->Render(p, label); });
       }
       else {
-        std::shared_ptr<StrategyProfileRenderer<Rational>> renderer;
-        if (printDetail) {
-          renderer = std::make_shared<MixedStrategyDetailRenderer<Rational>>(std::cout);
-        }
-        else {
-          renderer = std::make_shared<MixedStrategyCSVRenderer<Rational>>(std::cout);
-        }
+        auto renderer =
+            MakeMixedStrategyProfileRenderer<Rational>(std::cout, numDecimals, printDetail);
         LcpStrategySolve<Rational>(game, stopAfter, maxDepth,
                                    [&](const MixedStrategyProfile<Rational> &p,
                                        const std::string &label) { renderer->Render(p, label); });
@@ -158,25 +147,15 @@ int main(int argc, char *argv[])
     }
     else {
       if (useFloat) {
-        std::shared_ptr<StrategyProfileRenderer<double>> renderer;
-        if (printDetail) {
-          renderer = std::make_shared<BehavStrategyDetailRenderer<double>>(std::cout, numDecimals);
-        }
-        else {
-          renderer = std::make_shared<BehavStrategyCSVRenderer<double>>(std::cout, numDecimals);
-        }
+        auto renderer =
+            MakeMixedBehaviorProfileRenderer<double>(std::cout, numDecimals, printDetail);
         LcpBehaviorSolve<double>(game, stopAfter, maxDepth,
                                  [&](const MixedBehaviorProfile<double> &p,
                                      const std::string &label) { renderer->Render(p, label); });
       }
       else {
-        std::shared_ptr<StrategyProfileRenderer<Rational>> renderer;
-        if (printDetail) {
-          renderer = std::make_shared<BehavStrategyDetailRenderer<Rational>>(std::cout);
-        }
-        else {
-          renderer = std::make_shared<BehavStrategyCSVRenderer<Rational>>(std::cout);
-        }
+        auto renderer =
+            MakeMixedBehaviorProfileRenderer<Rational>(std::cout, numDecimals, printDetail);
         LcpBehaviorSolve<Rational>(game, stopAfter, maxDepth,
                                    [&](const MixedBehaviorProfile<Rational> &p,
                                        const std::string &label) { renderer->Render(p, label); });
