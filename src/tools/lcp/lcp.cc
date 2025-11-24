@@ -50,7 +50,6 @@ void PrintHelp(char *progname)
   std::cerr << "  -d DECIMALS      compute using floating-point arithmetic;\n";
   std::cerr << "                   display results with DECIMALS digits\n";
   std::cerr << "  -S               use strategic game\n";
-  std::cerr << "  -P               find only subgame-perfect equilibria\n";
   std::cerr << "  -e EQA           terminate after finding EQA equilibria\n";
   std::cerr << "                   (default is to find all accessible equilbria)\n";
   std::cerr << "  -r DEPTH         terminate recursion at DEPTH\n";
@@ -65,14 +64,14 @@ void PrintHelp(char *progname)
 int main(int argc, char *argv[])
 {
   int c;
-  bool useFloat = false, useStrategic = false, bySubgames = false, quiet = false;
+  bool useFloat = false, useStrategic = false, quiet = false;
   bool printDetail = false;
   int numDecimals = 6, stopAfter = 0, maxDepth = 0;
 
   int long_opt_index = 0;
   struct option long_options[] = {
       {"help", 0, nullptr, 'h'}, {"version", 0, nullptr, 'v'}, {nullptr, 0, nullptr, 0}};
-  while ((c = getopt_long(argc, argv, "d:DvhqSPe:r:", long_options, &long_opt_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "d:DvhqSe:r:", long_options, &long_opt_index)) != -1) {
     switch (c) {
     case 'v':
       PrintBanner(std::cerr);
@@ -98,9 +97,6 @@ int main(int argc, char *argv[])
       break;
     case 'S':
       useStrategic = true;
-      break;
-    case 'P':
-      bySubgames = true;
       break;
     case '?':
       if (isprint(optopt)) {
@@ -161,77 +157,29 @@ int main(int argc, char *argv[])
       }
     }
     else {
-      if (!bySubgames) {
-        if (useFloat) {
-          std::shared_ptr<StrategyProfileRenderer<double>> renderer;
-          if (printDetail) {
-            renderer =
-                std::make_shared<BehavStrategyDetailRenderer<double>>(std::cout, numDecimals);
-          }
-          else {
-            renderer = std::make_shared<BehavStrategyCSVRenderer<double>>(std::cout, numDecimals);
-          }
-          LcpBehaviorSolve<double>(game, stopAfter, maxDepth,
-                                   [&](const MixedBehaviorProfile<double> &p,
-                                       const std::string &label) { renderer->Render(p, label); });
+      if (useFloat) {
+        std::shared_ptr<StrategyProfileRenderer<double>> renderer;
+        if (printDetail) {
+          renderer = std::make_shared<BehavStrategyDetailRenderer<double>>(std::cout, numDecimals);
         }
         else {
-          std::shared_ptr<StrategyProfileRenderer<Rational>> renderer;
-          if (printDetail) {
-            renderer = std::make_shared<BehavStrategyDetailRenderer<Rational>>(std::cout);
-          }
-          else {
-            renderer = std::make_shared<BehavStrategyCSVRenderer<Rational>>(std::cout);
-          }
-          LcpBehaviorSolve<Rational>(
-              game, stopAfter, maxDepth,
-              [&](const MixedBehaviorProfile<Rational> &p, const std::string &label) {
-                renderer->Render(p, label);
-              });
+          renderer = std::make_shared<BehavStrategyCSVRenderer<double>>(std::cout, numDecimals);
         }
+        LcpBehaviorSolve<double>(game, stopAfter, maxDepth,
+                                 [&](const MixedBehaviorProfile<double> &p,
+                                     const std::string &label) { renderer->Render(p, label); });
       }
       else {
-        if (useFloat) {
-          std::shared_ptr<StrategyProfileRenderer<double>> renderer;
-          if (printDetail) {
-            renderer =
-                std::make_shared<BehavStrategyDetailRenderer<double>>(std::cout, numDecimals);
-          }
-          else {
-            renderer = std::make_shared<BehavStrategyCSVRenderer<double>>(std::cout, numDecimals);
-          }
-          const BehaviorSolverType<double> func = [&](const Game &g) {
-            return LcpBehaviorSolve<double>(
-                g, stopAfter, maxDepth,
-                [&](const MixedBehaviorProfile<double> &p, const std::string &label) {
-                  renderer->Render(p, label);
-                });
-          };
-          SolveBySubgames<double>(game, func,
-                                  [&](const MixedBehaviorProfile<double> &p,
-                                      const std::string &label) { renderer->Render(p, label); });
+        std::shared_ptr<StrategyProfileRenderer<Rational>> renderer;
+        if (printDetail) {
+          renderer = std::make_shared<BehavStrategyDetailRenderer<Rational>>(std::cout);
         }
         else {
-          std::shared_ptr<StrategyProfileRenderer<Rational>> renderer;
-          if (printDetail) {
-            renderer =
-                std::make_shared<BehavStrategyDetailRenderer<Rational>>(std::cout, numDecimals);
-          }
-          else {
-            renderer =
-                std::make_shared<BehavStrategyCSVRenderer<Rational>>(std::cout, numDecimals);
-          }
-          const BehaviorSolverType<Rational> func = [&](const Game &g) {
-            return LcpBehaviorSolve<Rational>(
-                g, stopAfter, maxDepth,
-                [&](const MixedBehaviorProfile<Rational> &p, const std::string &label) {
-                  renderer->Render(p, label);
-                });
-          };
-          SolveBySubgames<Rational>(game, func,
-                                    [&](const MixedBehaviorProfile<Rational> &p,
-                                        const std::string &label) { renderer->Render(p, label); });
+          renderer = std::make_shared<BehavStrategyCSVRenderer<Rational>>(std::cout);
         }
+        LcpBehaviorSolve<Rational>(game, stopAfter, maxDepth,
+                                   [&](const MixedBehaviorProfile<Rational> &p,
+                                       const std::string &label) { renderer->Render(p, label); });
       }
     }
     return 0;

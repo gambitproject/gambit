@@ -43,14 +43,6 @@ pure-strategy Nash equilibria.
    extensive games, as strategic games have only one information set
    per player.
 
-.. cmdoption:: -P
-
-   By default, the program computes all pure-strategy Nash
-   equilibria in an extensive game. This switch instructs the program to
-   find only pure-strategy Nash equilibria which are subgame perfect.
-   (This has no effect for strategic games, since there are no proper
-   subgames of a strategic game.)
-
 .. cmdoption:: -h
 
    Prints a help message listing the available options.

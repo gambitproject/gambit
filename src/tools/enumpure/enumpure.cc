@@ -49,7 +49,6 @@ void PrintHelp(char *progname)
   std::cerr << "Options:\n";
   std::cerr << "  -S               report equilibria in strategies even for extensive games\n";
   std::cerr << "  -A               compute agent form equilibria\n";
-  std::cerr << "  -P               find only subgame-perfect equilibria\n";
   std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
   std::cerr << "  -v, --version    print version information\n";
@@ -59,14 +58,14 @@ void PrintHelp(char *progname)
 int main(int argc, char *argv[])
 {
   opterr = 0;
-  bool quiet = false, reportStrategic = false, solveAgent = false, bySubgames = false;
+  bool quiet = false, reportStrategic = false, solveAgent = false;
   bool printDetail = false;
 
   int long_opt_index = 0;
   struct option long_options[] = {
       {"help", 0, nullptr, 'h'}, {"version", 0, nullptr, 'v'}, {nullptr, 0, nullptr, 0}};
   int c;
-  while ((c = getopt_long(argc, argv, "DvhqASP", long_options, &long_opt_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "DvhqAS", long_options, &long_opt_index)) != -1) {
     switch (c) {
     case 'v':
       PrintBanner(std::cerr);
@@ -79,9 +78,6 @@ int main(int argc, char *argv[])
       break;
     case 'A':
       solveAgent = true;
-      break;
-    case 'P':
-      bySubgames = true;
       break;
     case 'h':
       PrintHelp(argv[0]);
@@ -139,32 +135,9 @@ int main(int argc, char *argv[])
       }
     }
 
-    if (game->IsTree()) {
-      if (bySubgames) {
-        BehaviorSolverType<Rational> func;
-        if (solveAgent) {
-          func = [&](const Game &g) { return EnumPureAgentSolve(g); };
-        }
-        else {
-          func = [&](const Game &g) {
-            return ToMixedBehaviorProfile<Rational>(EnumPureStrategySolve(g));
-          };
-        }
-        SolveBySubgames<Rational>(game, func,
-                                  [&](const MixedBehaviorProfile<Rational> &p,
-                                      const std::string &label) { renderer->Render(p, label); });
-      }
-      else {
-        if (solveAgent) {
-          EnumPureAgentSolve(game, [&](const MixedBehaviorProfile<Rational> &p,
-                                       const std::string &label) { renderer->Render(p, label); });
-        }
-        else {
-          EnumPureStrategySolve(game,
-                                [&](const MixedStrategyProfile<Rational> &p,
-                                    const std::string &label) { renderer->Render(p, label); });
-        }
-      }
+    if (game->IsTree() && solveAgent) {
+      EnumPureAgentSolve(game, [&](const MixedBehaviorProfile<Rational> &p,
+                                   const std::string &label) { renderer->Render(p, label); });
     }
     else {
       EnumPureStrategySolve(game, [&](const MixedStrategyProfile<Rational> &p,
