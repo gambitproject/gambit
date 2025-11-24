@@ -112,7 +112,7 @@ def test_legacy_is_subgame_root_set(game: gbt.Game, expected_result: set):
     assert legacy_roots == expected_roots
 
 
-def get_path_of_action_labels(node: gbt.Node) -> list[str]:
+def _get_path_of_action_labels(node: gbt.Node) -> list[str]:
     """
     Computes the path of action labels from the root to the given node.
     Returns a list of strings.
@@ -157,7 +157,7 @@ def test_is_strategy_reachable(game_file: str, expected_unreachable_paths: list[
     nodes = game.nodes
 
     actual_unreachable_paths = [
-        get_path_of_action_labels(node) for node in nodes if not node.is_strategy_reachable
+        _get_path_of_action_labels(node) for node in nodes if not node.is_strategy_reachable
     ]
 
     assert actual_unreachable_paths == expected_unreachable_paths

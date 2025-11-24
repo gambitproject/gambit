@@ -392,13 +392,12 @@ bool GameNodeRep::IsStrategyReachable() const
 {
   auto tree_game = static_cast<GameTreeRep *>(m_game);
 
-  if (tree_game->m_unreachableNodes.empty() && !tree_game->GetRoot()->IsTerminal()) {
+  if (!tree_game->m_unreachableNodes) {
     tree_game->BuildInfosetParents();
   }
 
   // A node is reachable if it is NOT in the set of unreachable nodes.
-  return tree_game->m_unreachableNodes.find(const_cast<GameNodeRep *>(this)) ==
-         tree_game->m_unreachableNodes.end();
+  return !contains(*tree_game->m_unreachableNodes, const_cast<GameNodeRep *>(this));
 }
 
 void GameTreeRep::DeleteParent(GameNode p_node)
@@ -813,7 +812,7 @@ void GameTreeRep::ClearComputedValues() const
   }
   const_cast<GameTreeRep *>(this)->m_nodePlays.clear();
   const_cast<GameTreeRep *>(this)->m_infosetParents.clear();
-  const_cast<GameTreeRep *>(this)->m_unreachableNodes.clear();
+  const_cast<GameTreeRep *>(this)->m_unreachableNodes = nullptr;
   m_computedValues = false;
 }
 
@@ -857,7 +856,7 @@ std::vector<GameNodeRep *> GameTreeRep::BuildConsistentPlaysRecursiveImpl(GameNo
 void GameTreeRep::BuildInfosetParents()
 {
   m_infosetParents.clear();
-  m_unreachableNodes.clear();
+  m_unreachableNodes = std::make_unique<std::set<GameNodeRep *>>();
 
   if (m_root->IsTerminal()) {
     m_infosetParents[m_root->m_infoset].insert(nullptr);
@@ -929,7 +928,7 @@ void GameTreeRep::BuildInfosetParents()
             while (!nodes_to_visit.empty()) {
               GameNodeRep *current_unreachable_node = nodes_to_visit.top();
               nodes_to_visit.pop();
-              m_unreachableNodes.insert(current_unreachable_node);
+              m_unreachableNodes->insert(current_unreachable_node);
 
               for (const auto &unreachable_child : current_unreachable_node->GetChildren()) {
                 nodes_to_visit.push(unreachable_child.get());
