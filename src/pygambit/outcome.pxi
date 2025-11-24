@@ -68,8 +68,6 @@ class Outcome:
 
     @label.setter
     def label(self, value: str) -> None:
-        if value in [i.label for i in self.game.outcomes]:
-            warnings.warn("Another outcome with an identical label exists")
         self.outcome.deref().SetLabel(value.encode("ascii"))
 
     @property
