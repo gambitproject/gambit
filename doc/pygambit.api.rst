@@ -299,6 +299,7 @@ Computation of Nash equilibria
    lp_solve
    lcp_solve
    liap_solve
+   liap_agent_solve
    logit_solve
    simpdiv_solve
    ipa_solve

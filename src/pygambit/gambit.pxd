@@ -500,7 +500,7 @@ cdef extern from "solvers/liap/liap.h":
     stdlist[c_MixedStrategyProfile[double]] LiapStrategySolve(
             c_MixedStrategyProfile[double], double p_maxregret, int p_maxitsN
     ) except +RuntimeError
-    stdlist[c_MixedBehaviorProfile[double]] LiapBehaviorSolve(
+    stdlist[c_MixedBehaviorProfile[double]] LiapAgentSolve(
             c_MixedBehaviorProfile[double], double p_maxregret, int p_maxitsN
     ) except +RuntimeError
 

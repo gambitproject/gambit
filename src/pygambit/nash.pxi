@@ -125,7 +125,7 @@ def _liap_strategy_solve(start: MixedStrategyProfileDouble,
 def _liap_behavior_solve(start: MixedBehaviorProfileDouble,
                          maxregret: float,
                          maxiter: int) -> typing.List[MixedBehaviorProfileDouble]:
-    return _convert_mbpd(LiapBehaviorSolve(deref(start.profile), maxregret, maxiter))
+    return _convert_mbpd(LiapAgentSolve(deref(start.profile), maxregret, maxiter))
 
 
 def _simpdiv_strategy_solve(

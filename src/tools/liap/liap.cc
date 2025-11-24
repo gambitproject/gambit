@@ -241,13 +241,13 @@ int main(int argc, char *argv[])
       for (size_t i = 1; i <= starts.size(); i++) {
         const std::shared_ptr<StrategyProfileRenderer<double>> renderer(
             new BehavStrategyCSVRenderer<double>(std::cout, numDecimals));
-        LiapBehaviorSolve(starts[i], maxregret, maxitsN,
-                          [renderer, verbose](const MixedBehaviorProfile<double> &p_profile,
-                                              const std::string &p_label) {
-                            if (p_label == "NE" || verbose) {
-                              renderer->Render(p_profile, p_label);
-                            }
-                          });
+        LiapAgentSolve(starts[i], maxregret, maxitsN,
+                       [renderer, verbose](const MixedBehaviorProfile<double> &p_profile,
+                                           const std::string &p_label) {
+                         if (p_label == "NE" || verbose) {
+                           renderer->Render(p_profile, p_label);
+                         }
+                       });
       }
     }
     return 0;
