@@ -1143,6 +1143,10 @@ std::list<Rational> UniformOnSimplex(int p_denom, size_t p_dim, Generator &gener
   return output;
 }
 
+//=======================================================================
+//          Mixed sequence profile class
+//=======================================================================
+
 template <typename T> class MixedSequenceProfile {
 
 private:
