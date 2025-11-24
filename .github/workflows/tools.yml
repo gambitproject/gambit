@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Install dependencies
         run: |
           sudo apt-key adv --fetch-keys http://repos.codelite.org/CodeLite.asc
@@ -36,7 +36,7 @@ jobs:
     runs-on: macos-13
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Install dependencies
         run: brew install automake autoconf wxwidgets
       - run: aclocal
@@ -55,7 +55,7 @@ jobs:
     runs-on: macos-14
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Install dependencies
         run: brew install automake autoconf wxwidgets
       - run: aclocal
@@ -77,7 +77,7 @@ jobs:
       run:
         shell: msys2 {0}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: msys2/setup-msys2@v2
         with:
           install: mingw-w64-x86_64-toolchain make automake autoconf
