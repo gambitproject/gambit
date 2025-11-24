@@ -480,6 +480,36 @@ void ReadPlayers(GameFileLexer &p_state, Game &p_game, TreeData &p_treeData)
   p_state.ExpectCurrentToken(TOKEN_RBRACE, "'}'");
 }
 
+void CheckOutcomeDefinition(const GameFileLexer &p_state, int p_outcomeId,
+                            const GameOutcome &p_outcome, const std::string &p_label,
+                            const GameRep::Players &p_players,
+                            const std::vector<Number> &p_payoffs)
+{
+  if (p_outcome->GetLabel() != p_label) {
+    p_state.OnParseError("Outcome label does not match previous definition "
+                         "(outcome " +
+                         std::to_string(p_outcomeId) + ")");
+  }
+
+  if (p_players.size() != p_payoffs.size()) {
+    p_state.OnParseError("Outcome payoff count mismatch "
+                         "(outcome " +
+                         std::to_string(p_outcomeId) + ")");
+  }
+
+  auto player_it = p_players.begin();
+  for (const auto &payoff : p_payoffs) {
+    if (p_outcome->GetPayoff<std::string>(*player_it) !=
+        static_cast<const std::string &>(payoff)) {
+      p_state.OnParseError("Outcome payoffs do not match previous definition "
+                           "(outcome " +
+                           std::to_string(p_outcomeId) + ", player " +
+                           std::to_string((*player_it)->GetNumber()) + ")");
+    }
+    ++player_it;
+  }
+}
+
 void ParseOutcome(GameFileLexer &p_state, Game &p_game, TreeData &p_treeData, GameNode &p_node)
 {
   p_state.ExpectCurrentToken(TOKEN_NUMBER, "index of outcome");
@@ -488,26 +518,38 @@ void ParseOutcome(GameFileLexer &p_state, Game &p_game, TreeData &p_treeData, Ga
 
   if (p_state.GetCurrentToken() == TOKEN_TEXT) {
     // This node entry contains information about the outcome
-    GameOutcome outcome;
-    try {
-      outcome = p_treeData.m_outcomeMap.at(outcomeId);
+    if (outcomeId == 0) {
+      p_state.OnParseError("Cannot specify a label or payoffs for the null outcome");
     }
-    catch (std::out_of_range &) {
-      outcome = p_game->NewOutcome();
-      p_treeData.m_outcomeMap[outcomeId] = outcome;
-    }
-    outcome->SetLabel(p_state.GetLastText());
-    p_game->SetOutcome(p_node, outcome);
+    const std::string label = p_state.GetLastText();
+    std::vector<Number> payoffs;
 
     p_state.ExpectNextToken(TOKEN_LBRACE, "'{'");
     p_state.GetNextToken();
     for (auto player : p_game->GetPlayers()) {
       p_state.ExpectCurrentToken(TOKEN_NUMBER, "numerical payoff");
-      outcome->SetPayoff(player, Number(p_state.GetLastText()));
+      payoffs.emplace_back(p_state.GetLastText());
       p_state.AcceptNextToken(TOKEN_COMMA);
     }
     p_state.ExpectCurrentToken(TOKEN_RBRACE, "'}'");
     p_state.GetNextToken();
+
+    GameOutcome outcome;
+    if (!contains(p_treeData.m_outcomeMap, outcomeId)) {
+      outcome = p_game->NewOutcome();
+      p_treeData.m_outcomeMap[outcomeId] = outcome;
+      outcome->SetLabel(label);
+      auto player_it = p_game->GetPlayers().begin();
+      for (const auto &payoff : payoffs) {
+        outcome->SetPayoff(*player_it, payoff);
+        ++player_it;
+      }
+    }
+    else {
+      outcome = p_treeData.m_outcomeMap.at(outcomeId);
+      CheckOutcomeDefinition(p_state, outcomeId, outcome, label, p_game->GetPlayers(), payoffs);
+    }
+    p_game->SetOutcome(p_node, outcome);
   }
   else if (outcomeId != 0) {
     // The node entry does not contain information about the outcome.
@@ -518,6 +560,56 @@ void ParseOutcome(GameFileLexer &p_state, Game &p_game, TreeData &p_treeData, Ga
     catch (std::out_of_range) {
       p_state.OnParseError("Outcome not defined");
     }
+  }
+}
+
+void CheckInfosetActions(const GameFileLexer &p_state, const int p_playerId, const int p_infosetId,
+                         const GameInfoset &p_infoset, const std::string &p_label,
+                         const std::list<std::string> &p_labels)
+{
+  if (p_infoset->GetLabel() != p_label) {
+    p_state.OnParseError("Infoset labels does not match previous definition "
+                         "(player " +
+                         std::to_string(p_playerId) + ", infoset " + std::to_string(p_infosetId) +
+                         ")");
+  }
+
+  const auto &actions = p_infoset->GetActions();
+  if (actions.size() != p_labels.size()) {
+    p_state.OnParseError("Infoset action count mismatch "
+                         "(player " +
+                         std::to_string(p_playerId) + ", infoset " + std::to_string(p_infosetId) +
+                         ")");
+  }
+  auto label_it = p_labels.begin();
+  for (auto action : actions) {
+    if (action->GetLabel() != *label_it) {
+      p_state.OnParseError("Infoset action labels do not match previous definition "
+                           "(player " +
+                           std::to_string(p_playerId) + ", infoset " +
+                           std::to_string(p_infosetId) + ")");
+    }
+    ++label_it;
+  }
+}
+
+void CheckChanceProbs(const GameFileLexer &p_state, const int p_infosetId,
+                      const GameInfoset &p_infoset, const Array<Number> &p_probs)
+{
+  if (p_infoset->GetActions().size() != p_probs.size()) {
+    p_state.OnParseError("Chance infoset probability count mismatch "
+                         "(infoset " +
+                         std::to_string(p_infosetId) + ")");
+  }
+  auto action_it = p_infoset->GetActions().begin();
+  for (size_t i = 1; i <= p_probs.size(); ++i) {
+    if (static_cast<const std::string &>(p_infoset->GetActionProb(*action_it)) !=
+        static_cast<const std::string &>(p_probs[i])) {
+      p_state.OnParseError("Chance infoset probabilities do not match previous definition "
+                           "(infoset " +
+                           std::to_string(p_infosetId) + ")");
+    }
+    ++action_it;
   }
 }
 
@@ -561,7 +653,8 @@ void ParseChanceNode(GameFileLexer &p_state, Game &p_game, GameNode &p_node, Tre
       p_game->SetChanceProbs(infoset, probs);
     }
     else {
-      // TODO: Verify actions match up to any previous specifications
+      CheckInfosetActions(p_state, 0, infosetId, infoset, label, action_labels);
+      CheckChanceProbs(p_state, infosetId, infoset, probs);
       p_game->AppendMove(p_node, infoset);
     }
   }
@@ -616,7 +709,7 @@ void ParsePersonalNode(GameFileLexer &p_state, Game p_game, GameNode p_node, Tre
       }
     }
     else {
-      // TODO: Verify actions match up to previous specifications
+      CheckInfosetActions(p_state, player, infosetId, infoset, label, action_labels);
       p_game->AppendMove(p_node, infoset);
     }
   }
