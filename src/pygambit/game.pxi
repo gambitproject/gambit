@@ -499,6 +499,20 @@ class PlayerSequences:
     def __len__(self) -> int:
         return self.game.deref().GetSequences(self.player).size()
 
+    def __getitem__(self, index: int) -> Sequence:
+        length = self.__len__()
+        if (index<0):
+            index+=length
+        if (index<0 or index>=length):
+            raise IndexError("index out of range")
+        cdef int current_idx = 0
+        cdef stdvector[c_GameSequence].const_iterator it = (
+            self.game.deref().GetSequences(self.player).begin())
+        while current_idx != index:
+            current_idx += 1
+            it += 1
+        return Sequence.wrap(deref(it))
+
     def __iter__(self):
         cdef stdvector[c_GameSequence].const_iterator it = (
             self.game.deref().GetSequences(self.player).begin())
