@@ -65,39 +65,65 @@ class NashComputationResult:
     parameters: dict = dataclasses.field(default_factory=dict)
 
 
-def enumpure_solve(game: libgbt.Game, use_strategic: bool = True) -> NashComputationResult:
+def enumpure_solve(game: libgbt.Game) -> NashComputationResult:
     """Compute all :ref:`pure-strategy Nash equilibria <gambit-enumpure>` of game.
+
+    .. versionchanged:: 16.5.0
+
+       `use_strategic` parameter removed.  The old behavior in the case
+        of `use_strategic=False` is now available as `enumpure_agent_solve`.
 
     Parameters
     ----------
     game : Game
         The game to compute equilibria in.
-    use_strategic : bool, default True
-        Whether to use the strategic form.  If False, computes all agent-form
-        pure-strategy equilibria, which consider only unilateral deviations at each
-        individual information set.
 
     Returns
     -------
     res : NashComputationResult
         The result represented as a ``NashComputationResult`` object.
+
+    See also
+    --------
+    enumpure_agent_solve
     """
-    if not game.is_tree or use_strategic:
-        return NashComputationResult(
-            game=game,
-            method="enumpure",
-            rational=True,
-            use_strategic=True,
-            equilibria=libgbt._enumpure_strategy_solve(game)
-        )
-    else:
-        return NashComputationResult(
-            game=game,
-            method="enumpure",
-            rational=True,
-            use_strategic=False,
-            equilibria=libgbt._enumpure_agent_solve(game)
-        )
+    return NashComputationResult(
+        game=game,
+        method="enumpure",
+        rational=True,
+        use_strategic=True,
+        equilibria=libgbt._enumpure_strategy_solve(game)
+    )
+
+
+def enumpure_agent_solve(game: libgbt.Game) -> NashComputationResult:
+    """Compute all :ref:`pure-strategy agent Nash equilibria <gambit-enumpure>` of game.
+
+    .. versioncadded:: 16.5.0
+
+       Formerly implemented as `enumpure_solve` with `use_strategic=False`.
+
+    Parameters
+    ----------
+    game : Game
+        The game to compute agent-Nash equilibria in.
+
+    Returns
+    -------
+    res : NashComputationResult
+        The result represented as a ``NashComputationResult`` object.
+
+    See also
+    --------
+    enumpure_solve
+    """
+    return NashComputationResult(
+        game=game,
+        method="enumpure-agent",
+        rational=True,
+        use_strategic=False,
+        equilibria=libgbt._enumpure_agent_solve(game)
+    )
 
 
 def enummixed_solve(

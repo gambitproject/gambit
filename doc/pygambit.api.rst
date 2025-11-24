@@ -293,6 +293,7 @@ Computation of Nash equilibria
 
    NashComputationResult
    enumpure_solve
+   enumpure_agent_solve
    enummixed_solve
    enumpoly_solve
    lp_solve

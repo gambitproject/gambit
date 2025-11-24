@@ -20,13 +20,13 @@ TOL = 1e-13  # tolerance for floating point assertions
 def test_enumpure_strategy():
     """Test calls of enumeration of pure strategies."""
     game = games.read_from_file("stripped_down_poker.efg")
-    assert len(gbt.nash.enumpure_solve(game, use_strategic=True).equilibria) == 0
+    assert len(gbt.nash.enumpure_solve(game).equilibria) == 0
 
 
 def test_enumpure_agent():
     """Test calls of enumeration of pure agent strategies."""
     game = games.read_from_file("stripped_down_poker.efg")
-    assert len(gbt.nash.enumpure_solve(game, use_strategic=False).equilibria) == 0
+    assert len(gbt.nash.enumpure_agent_solve(game).equilibria) == 0
 
 
 def test_enummixed_double():
