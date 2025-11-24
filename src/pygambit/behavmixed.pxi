@@ -930,7 +930,7 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
         return deref(self.profile).GetRegret(infoset.infoset)
 
     def _agent_max_regret(self) -> float:
-        return deref(self.profile).GetMaxRegret()
+        return deref(self.profile).GetAgentMaxRegret()
 
     def __eq__(self, other: typing.Any) -> bool:
         return (
@@ -949,7 +949,7 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
         ))
 
     def _agent_liap_value(self) -> float:
-        return deref(self.profile).GetLiapValue()
+        return deref(self.profile).GetAgentLiapValue()
 
     def _normalize(self) -> MixedBehaviorProfileDouble:
         return MixedBehaviorProfileDouble.wrap(
@@ -1026,7 +1026,7 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
         return rat_to_py(deref(self.profile).GetRegret(infoset.infoset))
 
     def _agent_max_regret(self) -> Rational:
-        return rat_to_py(deref(self.profile).GetMaxRegret())
+        return rat_to_py(deref(self.profile).GetAgentMaxRegret())
 
     def __eq__(self, other: typing.Any) -> bool:
         return (
@@ -1045,7 +1045,7 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
         ))
 
     def _agent_liap_value(self) -> Rational:
-        return rat_to_py(deref(self.profile).GetLiapValue())
+        return rat_to_py(deref(self.profile).GetAgentLiapValue())
 
     def _normalize(self) -> MixedBehaviorProfileRational:
         return MixedBehaviorProfileRational.wrap(

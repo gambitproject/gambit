@@ -261,7 +261,7 @@ template <class T> MixedBehaviorProfile<T> MixedBehaviorProfile<T>::ToFullSuppor
 //              MixedBehaviorProfile<T>: Interesting quantities
 //========================================================================
 
-template <class T> T MixedBehaviorProfile<T>::GetLiapValue() const
+template <class T> T MixedBehaviorProfile<T>::GetAgentLiapValue() const
 {
   CheckVersion();
   ComputeSolutionData();
@@ -364,7 +364,7 @@ template <class T> T MixedBehaviorProfile<T>::GetRegret(const GameInfoset &p_inf
   return br_payoff - GetPayoff(p_infoset);
 }
 
-template <class T> T MixedBehaviorProfile<T>::GetMaxRegret() const
+template <class T> T MixedBehaviorProfile<T>::GetAgentMaxRegret() const
 {
   auto infosets = m_support.GetGame()->GetInfosets();
   return std::accumulate(

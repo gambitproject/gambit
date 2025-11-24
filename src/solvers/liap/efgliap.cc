@@ -176,7 +176,7 @@ LiapBehaviorSolve(const MixedBehaviorProfile<double> &p_start, double p_maxregre
   }
 
   auto p2 = EnforceNonnegativity(p);
-  if (p2.GetMaxRegret() * F.GetScale() < p_maxregret) {
+  if (p2.GetAgentMaxRegret() * F.GetScale() < p_maxregret) {
     p_callback(p2, "NE");
     solutions.push_back(p2);
   }

@@ -279,7 +279,7 @@ public:
   ///          \p p_strategy.
   /// @param[in] p_strategy  The strategy to compute the regret for.
   /// @sa GetRegret(const GamePlayer &) const;
-  ///     GetMaxRegret() const
+  ///     GetAgentMaxRegret() const
   T GetRegret(const GameStrategy &p_strategy) const
   {
     CheckVersion();
@@ -293,7 +293,7 @@ public:
   ///          their specified mixed strategy.
   /// @param[in] p_player  The player to compute the regret for.
   /// @sa GetRegret(const GameStrategy &) const;
-  ///     GetMaxRegret() const
+  ///     GetAgentMaxRegret() const
   T GetRegret(const GamePlayer &p_player) const
   {
     CheckVersion();

@@ -213,7 +213,7 @@ EnumPolyBehaviorSolve(const Game &p_game, int p_stopAfter, double p_maxregret,
     for (auto solution :
          SolveSupport(support, isSingular, std::max(p_stopAfter - int(ret.size()), 0))) {
       const MixedBehaviorProfile<double> fullProfile = solution.ToFullSupport();
-      if (fullProfile.GetMaxRegret() < p_maxregret) {
+      if (fullProfile.GetAgentMaxRegret() < p_maxregret) {
         p_onEquilibrium(fullProfile);
         ret.push_back(fullProfile);
       }
