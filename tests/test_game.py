@@ -191,4 +191,4 @@ def test_behavior_profile_invalidation():
         with pytest.raises(gbt.GameStructureChangedError):
             profile.payoff(g.players[0])
         with pytest.raises(gbt.GameStructureChangedError):
-            profile.liap_value()
+            profile.agent_liap_value()

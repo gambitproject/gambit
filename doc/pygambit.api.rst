@@ -254,8 +254,8 @@ Probability distributions over behavior
    MixedBehaviorProfile.infoset_prob
    MixedBehaviorProfile.belief
    MixedBehaviorProfile.is_defined_at
-   MixedBehaviorProfile.max_regret
-   MixedBehaviorProfile.liap_value
+   MixedBehaviorProfile.agent_max_regret
+   MixedBehaviorProfile.agent_liap_value
    MixedBehaviorProfile.as_strategy
    MixedBehaviorProfile.normalize
    MixedBehaviorProfile.copy

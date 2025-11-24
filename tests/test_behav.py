@@ -941,16 +941,17 @@ def test_node_value_consistency(game: gbt.Game, rational_flag: bool):
      (games.create_stripped_down_poker_efg(), [1.0, 0.0, 1.0, 0.0, 1.0, 0.0], False, 1.0),
      ]
 )
-def test_liap_value_reference(game: gbt.Game, action_probs: typing.Union[None, list],
-                              rational_flag: bool, expected_value: typing.Union[str, float]):
-    """Tests liap_value under profile given by action_probs
+def test_agent_liap_value_reference(game: gbt.Game, action_probs: typing.Union[None, list],
+                                    rational_flag: bool, expected_value: typing.Union[str, float]):
+    """Tests agent_liap_value under profile given by action_probs
     (which will be uniform if action_probs is None)
     """
     profile = game.mixed_behavior_profile(rational=rational_flag)
     if action_probs:
         _set_action_probs(profile, action_probs, rational_flag)
     assert (
-        profile.liap_value() == (gbt.Rational(expected_value) if rational_flag else expected_value)
+        profile.agent_liap_value() == (gbt.Rational(expected_value)
+                                       if rational_flag else expected_value)
     )
 
 
@@ -1146,15 +1147,16 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
       lambda x, y: x.node_value(player=y[0], node=y[1]),
       lambda x: list(product(x.players, x.nodes))),
      ######################################################################################
-     # liap_value (of profile, hence [1] for objects_to_test, any singleton collection would do)
+     # agent_liap_value (of profile, hence [1] for objects_to_test,
+     # any singleton collection would do)
      (games.create_mixed_behav_game_efg(), PROBS_1A_doub, PROBS_2A_doub, False,
-      lambda x, y: x.liap_value(), lambda x: [1]),
+      lambda x, y: x.agent_liap_value(), lambda x: [1]),
      (games.create_mixed_behav_game_efg(), PROBS_1A_rat, PROBS_2A_rat, True,
-      lambda x, y: x.liap_value(), lambda x: [1]),
+      lambda x, y: x.agent_liap_value(), lambda x: [1]),
      (games.create_stripped_down_poker_efg(), PROBS_1B_doub, PROBS_2B_doub, False,
-      lambda x, y: x.liap_value(), lambda x: [1]),
+      lambda x, y: x.agent_liap_value(), lambda x: [1]),
      (games.create_stripped_down_poker_efg(), PROBS_1A_rat, PROBS_2A_rat, True,
-      lambda x, y: x.liap_value(), lambda x: [1]),
+      lambda x, y: x.agent_liap_value(), lambda x: [1]),
      ]
 )
 def test_profile_order_consistency(game: gbt.Game,
