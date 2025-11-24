@@ -28,8 +28,8 @@
 namespace Gambit::Nash {
 
 std::list<MixedBehaviorProfile<double>>
-LiapBehaviorSolve(const MixedBehaviorProfile<double> &p_start, double p_maxregret, int p_maxitsN,
-                  BehaviorCallbackType<double> p_callback = NullBehaviorCallback<double>);
+LiapAgentSolve(const MixedBehaviorProfile<double> &p_start, double p_maxregret, int p_maxitsN,
+               BehaviorCallbackType<double> p_callback = NullBehaviorCallback<double>);
 
 std::list<MixedStrategyProfile<double>>
 LiapStrategySolve(const MixedStrategyProfile<double> &p_start, double p_maxregret, int p_maxitsN,

@@ -372,8 +372,8 @@ cdef extern from "games/behavmixed.h" namespace "Gambit":
         T GetPayoff(c_GameAction) except +
         T GetRegret(c_GameAction) except +
         T GetRegret(c_GameInfoset) except +
-        T GetMaxRegret() except +
-        T GetLiapValue() except +
+        T GetAgentMaxRegret() except +
+        T GetAgentLiapValue() except +
         c_MixedStrategyProfile[T] ToMixedProfile()  # except + doesn't compile
         c_MixedBehaviorProfile(c_MixedStrategyProfile[T]) except +NotImplementedError
         c_MixedBehaviorProfile(c_Game) except +
@@ -500,7 +500,7 @@ cdef extern from "solvers/liap/liap.h":
     stdlist[c_MixedStrategyProfile[double]] LiapStrategySolve(
             c_MixedStrategyProfile[double], double p_maxregret, int p_maxitsN
     ) except +RuntimeError
-    stdlist[c_MixedBehaviorProfile[double]] LiapBehaviorSolve(
+    stdlist[c_MixedBehaviorProfile[double]] LiapAgentSolve(
             c_MixedBehaviorProfile[double], double p_maxregret, int p_maxitsN
     ) except +RuntimeError
 
