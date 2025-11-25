@@ -240,3 +240,40 @@ class Node:
         """Returns a list of all terminal `Node` objects consistent with it.
         """
         return [Node.wrap(n) for n in self.node.deref().GetGame().deref().GetPlays(self.node)]
+
+
+@cython.cclass
+class Subgame:
+    """A subgame in a ``Game``."""
+    subgame = cython.declare(c_GameSubgame)
+
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create a Subgame outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(subgame: c_GameSubgame) -> Subgame:
+        obj: Subgame = Subgame.__new__(Subgame)
+        obj.subgame = subgame
+        return obj
+
+    # needs a __repr__
+
+    def __eq__(self, other: typing.Any) -> bool:
+        return (
+            isinstance(other, Subgame) and
+            self.subgame.deref() == cython.cast(Subgame, other).subgame.deref()
+        )
+
+    def __hash__(self) -> long:
+        return cython.cast(long, self.subgame.deref())
+
+    @property
+    def game(self) -> Game:
+        """Gets the ``Game`` to which the subgame belongs."""
+        return Game.wrap(self.subgame.deref().GetGame())
+
+    @property
+    def root(self) -> Node:
+        """The root node of the subgame."""
+        return Node.wrap(self.subgame.deref().GetRoot())

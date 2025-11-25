@@ -55,6 +55,7 @@ cdef extern from "games/game.h":
     cdef cppclass c_GamePlayerRep "GamePlayerRep"
     cdef cppclass c_GameOutcomeRep "GameOutcomeRep"
     cdef cppclass c_GameNodeRep "GameNodeRep"
+    cdef cppclass c_GameSubgameRep "GameSubgameRep"
 
     cdef cppclass c_Game "Game":
         c_GameRep *deref "operator->"() except +RuntimeError
@@ -71,6 +72,10 @@ cdef extern from "games/game.h":
     cdef cppclass c_GameNode "GameObjectPtr<GameNodeRep>":
         bool operator !=(c_GameNode) except +
         c_GameNodeRep *deref "get"() except +RuntimeError
+
+    cdef cppclass c_GameSubgame "GameObjectPtr<GameSubgameRep>":
+        bool operator !=(c_GameSubgame) except +
+        c_GameSubgameRep *deref "get"() except +RuntimeError
 
     cdef cppclass c_GameAction "GameObjectPtr<GameActionRep>":
         bool operator !() except +
@@ -220,6 +225,12 @@ cdef extern from "games/game.h":
         bint IsSubgameRoot() except +
         bint IsStrategyReachable() except +
         c_GameAction GetPriorAction() except +
+
+    cdef cppclass c_GameSubgameRep "GameSubgameRep":
+        c_Game GetGame() except +
+        c_GameNode GetRoot() except +
+        # GetParent()
+        # GetChildren()
 
     cdef cppclass c_GameRep "GameRep":
         cppclass Players:

@@ -57,6 +57,9 @@ using GamePlayer = GameObjectPtr<GamePlayerRep>;
 class GameNodeRep;
 using GameNode = GameObjectPtr<GameNodeRep>;
 
+class GameSubgameRep;
+using GameSubgame = GameObjectPtr<GameSubgameRep>;
+
 class GameRep;
 using Game = std::shared_ptr<GameRep>;
 
@@ -594,6 +597,26 @@ inline GameNodeRep::Actions::iterator::iterator(GameInfosetRep::Actions::iterato
 
 inline GameNode GameNodeRep::Actions::iterator::GetOwner() const { return m_child_it.GetOwner(); }
 
+class GameSubgameRep : public std::enable_shared_from_this<GameSubgameRep> {
+  bool m_valid{true};
+  GameRep *m_game;
+  GameNodeRep *m_root;
+
+public:
+  GameSubgameRep(GameRep *p_game, GameNodeRep *p_root) : m_game(p_game), m_root(p_root) {}
+  ~GameSubgameRep() = default;
+
+  bool IsValid() const { return m_valid; }
+  void Invalidate() { m_valid = false; }
+
+  GameNode GetRoot() const { return m_root->shared_from_this(); }
+  Game GetGame() const;
+
+  // Functions to implement suitably:
+  // GetParent()
+  // GetChildren()
+};
+
 /// This is the class for representing an arbitrary finite game.
 class GameRep : public std::enable_shared_from_this<GameRep> {
   friend class GameOutcomeRep;
@@ -1000,6 +1023,8 @@ inline GamePlayerRep::Strategies GamePlayerRep::GetStrategies() const
 }
 
 inline Game GameNodeRep::GetGame() const { return m_game->shared_from_this(); }
+
+inline Game GameSubgameRep::GetGame() const { return m_game->shared_from_this(); }
 
 //=======================================================================
 

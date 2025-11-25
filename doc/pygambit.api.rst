@@ -19,6 +19,7 @@ Representation of games
    Node
    Infoset
    Action
+   Subgame
    Strategy
 
 
@@ -151,7 +152,6 @@ Information about the game
    Node.plays
 
 .. autosummary::
-
    :toctree: api/
 
    Infoset.label
@@ -164,7 +164,6 @@ Information about the game
    Infoset.plays
 
 .. autosummary::
-
    :toctree: api/
 
    Action.label
@@ -174,7 +173,12 @@ Information about the game
    Action.plays
 
 .. autosummary::
+   :toctree: api/
 
+   Subgame.game
+   Subgame.root
+
+.. autosummary::
    :toctree: api/
 
    Strategy.label
