@@ -18,7 +18,9 @@ You will need a working installation of Python 3.9+ on your machine to run PyGam
     pip install pygambit
     pip install -r requirements.txt
 
-3. Open `JupyterLab` and click on any of the tutorial notebooks (files ending in `.ipynb`) ::
+3. You'll also need to install the requirements of the `draw_tree` package, which includes a LaTeX installation. Follow the `installation instructions <https://github.com/gambitproject/draw_tree>`_ for draw_tree on your OS.
+
+4. Open `JupyterLab` and click on any of the tutorial notebooks (files ending in `.ipynb`) ::
 
     cd tutorials
     jupyter lab
