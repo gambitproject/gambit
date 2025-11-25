@@ -44,13 +44,6 @@ points of that set.
    causes the program to output greater detail on each equilbrium
    profile computed.
 
-.. cmdoption:: -P
-
-   By default, the program computes Nash equilibria in an extensive
-   game. This switch instructs the program to find only equilibria
-   which are subgame perfect.  (This has no effect for strategic
-   games, since there are no proper subgames of a strategic game.)
-
 .. cmdoption:: -h
 
    Prints a help message listing the available options.
