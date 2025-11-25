@@ -112,6 +112,57 @@ def test_legacy_is_subgame_root_set(game: gbt.Game, expected_result: set):
     assert legacy_roots == expected_roots
 
 
+def _get_path_of_action_labels(node: gbt.Node) -> list[str]:
+    """
+    Computes the path of action labels from the root to the given node.
+    Returns a list of strings.
+    """
+    if not isinstance(node, gbt.Node):
+        raise TypeError(f"Input must be a pygambit.Node, but got {type(node).__name__}")
+
+    path = []
+    current_node = node
+    while current_node.parent:
+        path.append(current_node.prior_action.label)
+        current_node = current_node.parent
+
+    return path[::-1]
+
+
+@pytest.mark.parametrize("game_file, expected_unreachable_paths", [
+    # Games without absent-mindedness, where all nodes are reachable
+    ("e02.efg", []),
+    ("wichardt.efg", []),
+    ("subgames.efg", []),
+
+    # An absent-minded driver game with an unreachable terminal node
+    (
+        "AM-driver-one-infoset.efg",
+        [["S", "T"]]
+    ),
+
+    # An absent-minded driver game with an unreachable subtree
+    (
+        "AM-driver-subgame.efg",
+        [["S", "T"], ["S", "T", "r"], ["S", "T", "l"]]
+    ),
+])
+def test_is_strategy_reachable(game_file: str, expected_unreachable_paths: list[list[str]]):
+    """
+    Tests `node.is_strategy_reachable` by collecting all unreachable nodes,
+    converting them to their action-label paths, and comparing the resulting
+    list of paths against a known-correct list.
+    """
+    game = games.read_from_file(game_file)
+    nodes = game.nodes
+
+    actual_unreachable_paths = [
+        _get_path_of_action_labels(node) for node in nodes if not node.is_strategy_reachable
+    ]
+
+    assert actual_unreachable_paths == expected_unreachable_paths
+
+
 def test_append_move_error_player_actions():
     """Test to ensure there are actions when appending with a player"""
     game = games.read_from_file("basic_extensive_game.efg")
