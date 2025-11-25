@@ -22,7 +22,7 @@
 import io
 import itertools
 import pathlib
-from parser import sequence2st
+# from parser import sequence2st
 
 import numpy as np
 import scipy.stats
