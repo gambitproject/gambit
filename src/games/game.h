@@ -58,6 +58,9 @@ using GamePlayer = GameObjectPtr<GamePlayerRep>;
 class GameNodeRep;
 using GameNode = GameObjectPtr<GameNodeRep>;
 
+class GameSubgameRep;
+using GameSubgame = GameObjectPtr<GameSubgameRep>;
+
 class GameRep;
 using Game = std::shared_ptr<GameRep>;
 
@@ -592,6 +595,26 @@ inline GameNodeRep::Actions::iterator::iterator(GameInfosetRep::Actions::iterato
 }
 
 inline GameNode GameNodeRep::Actions::iterator::GetOwner() const { return m_child_it.GetOwner(); }
+
+class GameSubgameRep : public std::enable_shared_from_this<GameSubgameRep> {
+  bool m_valid{true};
+  GameRep *m_game;
+  GameNodeRep *m_root;
+
+public:
+  GameSubgameRep(GameRep *p_game, GameNodeRep *p_root) : m_game(p_game), m_root(p_root) {}
+  ~GameSubgameRep() = default;
+
+  bool IsValid() const { return m_valid; }
+  void Invalidate() { m_valid = false; }
+
+  GameNode GetRoot() const { return m_root->shared_from_this(); }
+  Game GetGame() const;
+
+  // Functions to implement suitably:
+  // GetParent()
+  // GetChildren()
+};
 
 inline void ValidateDistribution(const Array<Number> &p_probs, const bool p_normalized = true)
 {
@@ -1245,6 +1268,8 @@ inline GamePlayerRep::Infosets GamePlayerRep::GetInfosets() const
   m_game->EnsureInfosetOrdering();
   return Infosets(std::const_pointer_cast<GamePlayerRep>(shared_from_this()), &m_infosets);
 }
+
+inline Game GameSubgameRep::GetGame() const { return m_game->shared_from_this(); }
 
 //=======================================================================
 
