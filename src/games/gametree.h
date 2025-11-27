@@ -39,8 +39,10 @@ protected:
   std::size_t m_numNodes = 1;
   std::size_t m_numNonterminalNodes = 0;
   std::map<GameNodeRep *, std::vector<GameNodeRep *>> m_nodePlays;
-  std::map<GameInfosetRep *, std::set<GameActionRep *>> m_infosetParents;
+  std::map<GameNodeRep *, GameActionRep *> m_nodeOwnPriorAction;
+  std::map<GameInfosetRep *, std::set<GameActionRep *>> m_infosetOwnPriorActions;
   mutable std::unique_ptr<std::set<GameNodeRep *>> m_unreachableNodes;
+  mutable std::unique_ptr<std::set<GameNodeRep *>> m_unreachableNodes_old;
 
   /// @name Private auxiliary functions
   //@{
@@ -93,6 +95,8 @@ public:
   size_t NumNodes() const override { return m_numNodes; }
   /// Returns the number of non-terminal nodes in the game
   size_t NumNonterminalNodes() const override { return m_numNonterminalNodes; }
+  /// Returns the last action taken by the node's owner before reaching this node
+  GameAction GetOwnPriorAction(GameNode node) const;
   //@}
 
   void DeleteOutcome(const GameOutcome &) override;
@@ -117,6 +121,8 @@ public:
   std::vector<GameInfoset> GetInfosets() const override;
   /// Sort the information sets for each player in a canonical order
   void SortInfosets() override;
+  /// Returns the set of actions taken by the infoset's owner before reaching this infoset
+  std::set<GameAction> GetOwnPriorActions(GameInfoset infoset) const;
   //@}
 
   /// @name Modification
@@ -155,7 +161,8 @@ public:
 
 private:
   std::vector<GameNodeRep *> BuildConsistentPlaysRecursiveImpl(GameNodeRep *node);
-  void BuildInfosetParents();
+  void BuildOwnPriorActions();
+  void BuildUnreachableNodes();
 };
 
 template <class T> class TreeMixedStrategyProfileRep : public MixedStrategyProfileRep<T> {

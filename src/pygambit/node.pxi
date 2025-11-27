@@ -177,6 +177,16 @@ class Node:
         return None
 
     @property
+    def own_prior_action(self) -> typing.Optional[Action]:
+        """The last action taken by the node's owner before reaching this node.
+
+        If the player has not moved previously on the path to this node, None is returned.
+        """
+        if self.node.deref().GetOwnPriorAction() != cython.cast(c_GameAction, NULL):
+            return Action.wrap(self.node.deref().GetOwnPriorAction())
+        return None
+
+    @property
     def prior_sibling(self) -> typing.Optional[Node]:
         """The node which is immediately before this one in its parent's children.
 

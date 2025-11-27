@@ -247,6 +247,8 @@ public:
 
   bool Precedes(GameNode) const;
 
+  std::set<GameAction> GetOwnPriorActions() const;
+
   const Number &GetActionProb(const GameAction &p_action) const
   {
     if (p_action->GetInfoset().get() != this) {
@@ -492,6 +494,7 @@ public:
   bool IsTerminal() const { return m_children.empty(); }
   GamePlayer GetPlayer() const { return (m_infoset) ? m_infoset->GetPlayer() : nullptr; }
   GameAction GetPriorAction() const; // returns null if root node
+  GameAction GetOwnPriorAction() const;
   GameNode GetParent() const { return (m_parent) ? m_parent->shared_from_this() : nullptr; }
   GameNode GetNextSibling() const;
   GameNode GetPriorSibling() const;
