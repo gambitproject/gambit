@@ -48,6 +48,9 @@ using GameInfoset = GameObjectPtr<GameInfosetRep>;
 class GameStrategyRep;
 using GameStrategy = GameObjectPtr<GameStrategyRep>;
 
+class GameSequenceRep;
+using GameSequence = GameObjectPtr<GameSequenceRep>;
+
 class GamePlayerRep;
 using GamePlayer = GameObjectPtr<GamePlayerRep>;
 
@@ -316,6 +319,36 @@ public:
   //@}
 };
 
+class GameSequenceRep : public std::enable_shared_from_this<GameSequenceRep> {
+public:
+  bool m_valid{true};
+  GamePlayer player;
+  GameAction action;
+  size_t number;
+  std::weak_ptr<GameSequenceRep> parent;
+
+  explicit GameSequenceRep(const GamePlayer &p_player, const GameAction &p_action, size_t p_number,
+                           std::weak_ptr<GameSequenceRep> p_parent)
+    : player(p_player), action(p_action), number(p_number), parent(p_parent)
+  {
+  }
+
+  bool IsValid() const { return m_valid; }
+  void Invalidate() { m_valid = false; }
+
+  Game GetGame() const;
+  GameInfoset GetInfoset() const { return (action) ? action->GetInfoset() : nullptr; }
+
+  bool operator<(const GameSequenceRep &other) const
+  {
+    return player < other.player || (player == other.player && action < other.action);
+  }
+  bool operator==(const GameSequenceRep &other) const
+  {
+    return player == other.player && action == other.action;
+  }
+};
+
 /// A player in a game
 class GamePlayerRep : public std::enable_shared_from_this<GamePlayerRep> {
   friend class GameRep;
@@ -467,6 +500,7 @@ public:
 
   bool IsSuccessorOf(GameNode from) const;
   bool IsSubgameRoot() const;
+  bool IsStrategyReachable() const;
 };
 
 class GameNodeRep::Actions::iterator {
@@ -944,6 +978,8 @@ inline void GameOutcomeRep::SetPayoff(const GamePlayer &p_player, const Number &
 
 inline GamePlayer GameStrategyRep::GetPlayer() const { return m_player->shared_from_this(); }
 inline Game GameStrategyRep::GetGame() const { return m_player->GetGame(); }
+
+inline Game GameSequenceRep::GetGame() const { return player->GetGame(); }
 
 inline Game GameActionRep::GetGame() const { return m_infoset->GetGame(); }
 

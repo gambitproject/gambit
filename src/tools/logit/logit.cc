@@ -23,7 +23,6 @@
 
 #include <iostream>
 #include <fstream>
-#include <cstdlib>
 #include <getopt.h>
 #include "gambit.h"
 #include "solvers/logit/logit.h"
@@ -120,7 +119,7 @@ int main(int argc, char *argv[])
   int decimals = 6;
 
   int long_opt_index = 0;
-  struct option long_options[] = {
+  option long_options[] = {
       {"help", 0, nullptr, 'h'}, {"version", 0, nullptr, 'v'}, {nullptr, 0, nullptr, 0}};
   int c;
   while ((c = getopt_long(argc, argv, "d:s:a:m:vqehSL:p:l:", long_options, &long_opt_index)) !=
@@ -161,7 +160,7 @@ int main(int argc, char *argv[])
       break;
     case '?':
       if (isprint(optopt)) {
-        std::cerr << argv[0] << ": Unknown option `-" << ((char)optopt) << "'.\n";
+        std::cerr << argv[0] << ": Unknown option `-" << static_cast<char>(optopt) << "'.\n";
       }
       else {
         std::cerr << argv[0] << ": Unknown option character `\\x" << optopt << "`.\n";

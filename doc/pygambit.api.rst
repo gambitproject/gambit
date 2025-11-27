@@ -141,6 +141,7 @@ Information about the game
    Node.parent
    Node.is_subgame_root
    Node.is_terminal
+   Node.is_strategy_reachable
    Node.prior_action
    Node.prior_sibling
    Node.next_sibling

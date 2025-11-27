@@ -218,6 +218,7 @@ cdef extern from "games/game.h":
         bint IsTerminal() except +
         bint IsSuccessorOf(c_GameNode) except +
         bint IsSubgameRoot() except +
+        bint IsStrategyReachable() except +
         c_GameAction GetPriorAction() except +
 
     cdef cppclass c_GameRep "GameRep":
@@ -415,6 +416,14 @@ cdef extern from "games/stratspt.h":
 cdef extern from "games/behavspt.h":
     cdef cppclass c_BehaviorSupportProfile "BehaviorSupportProfile":
         c_BehaviorSupportProfile(c_Game) except +
+
+
+cdef extern from "games/layout.h":
+    cdef cppclass c_Layout "Layout":
+        int GetNodeLevel(c_GameNode) except +
+        int GetNodeSublevel(c_GameNode) except +
+        double GetNodeOffset(c_GameNode) except +
+    shared_ptr[c_Layout] CreateLayout(c_Game) except +
 
 
 cdef extern from "util.h":
