@@ -126,7 +126,90 @@ def _get_path_of_action_labels(node: gbt.Node) -> list[str]:
         path.append(current_node.prior_action.label)
         current_node = current_node.parent
 
-    return path[::-1]
+    return path
+
+
+@pytest.mark.parametrize("game_file, expected_node_data", [
+    (
+        "binary_3_levels_generic_payoffs.efg",
+        [
+            # Format: ([Path Leaf->Root], (Player Label, Infoset Num, Action Label) or None)
+            ([], None),
+            (["Left"], None),
+            (["Left", "Left"], ("Player 1", 0, "Left")),
+            (["Right", "Left"], ("Player 1", 0, "Left")),
+            (["Right"], None),
+            (["Left", "Right"], ("Player 1", 0, "Right")),
+            (["Right", "Right"], ("Player 1", 0, "Right")),
+        ]
+    ),
+    (
+        "wichardt.efg",
+        [
+            ([], None),
+            (["R"], ("Player 1", 0, "R")),
+            (["r", "R"], None),
+            (["l", "R"], None),
+            (["L"], ("Player 1", 0, "L")),
+            (["r", "L"], None),
+            (["l", "L"], None),
+        ]
+    ),
+    (
+        "subgames.efg",
+        [
+            ([], None),
+            (["1"], None),
+            (["2"], None),
+            (["1", "2"], ("Player 2", 0, "2")),
+            (["2", "1", "2"], ("Player 1", 1, "1")),
+            (["2", "2"], ("Player 2", 0, "2")),
+            (["1", "2", "2"], ("Player 2", 1, "1")),
+            (["1", "1", "2", "2"], ("Player 1", 1, "2")),
+            (["1", "1", "1", "2", "2"], ("Player 2", 2, "1")),
+            (["2", "1", "2", "2"], ("Player 1", 1, "2")),
+            (["1", "2", "1", "2", "2"], ("Player 2", 2, "2")),
+            (["2", "2", "1", "2", "2"], ("Player 2", 2, "2")),
+            (["1", "2", "2", "1", "2", "2"], ("Player 1", 4, "2")),
+            (["1", "1", "2", "2", "1", "2", "2"], ("Player 2", 4, "1")),
+            (["1", "1", "1", "2", "2", "1", "2", "2"], ("Player 1", 5, "1")),
+            (["2", "1", "1", "2", "2", "1", "2", "2"], ("Player 1", 5, "1")),
+            (["2", "2", "2", "1", "2", "2"], ("Player 1", 4, "2")),
+            (["2", "2", "2"], ("Player 1", 1, "2")),
+        ]
+    ),
+    (
+        "AM-driver-subgame.efg",
+        [
+            ([], None),
+            (["S"], ("Player 1", 0, "S")),
+            (["T", "S"], None),
+        ]
+    ),
+])
+def test_node_own_prior_action_non_terminal(game_file, expected_node_data):
+    """
+    Tests `node.own_prior_action` for non-terminal nodes.
+    Also verifies that all terminal nodes return None.
+    """
+    game = games.read_from_file(game_file)
+
+    actual_node_data = []
+
+    for node in game.nodes:
+        if node.is_terminal:
+            assert node.own_prior_action is None, \
+                f"Terminal node at {_get_path_of_action_labels(node)} must be None"
+        else:
+            # Collection: Only collect data for non-terminal nodes
+            opa = node.own_prior_action
+            details = (
+                (opa.infoset.player.label, opa.infoset.number, opa.label)
+                if opa is not None else None
+            )
+            actual_node_data.append((_get_path_of_action_labels(node), details))
+
+    assert actual_node_data == expected_node_data
 
 
 @pytest.mark.parametrize("game_file, expected_unreachable_paths", [
@@ -138,13 +221,13 @@ def _get_path_of_action_labels(node: gbt.Node) -> list[str]:
     # An absent-minded driver game with an unreachable terminal node
     (
         "AM-driver-one-infoset.efg",
-        [["S", "T"]]
+        [["T", "S"]]
     ),
 
     # An absent-minded driver game with an unreachable subtree
     (
         "AM-driver-subgame.efg",
-        [["S", "T"], ["S", "T", "r"], ["S", "T", "l"]]
+        [["T", "S"], ["r", "T", "S"], ["l", "T", "S"]]
     ),
 ])
 def test_is_strategy_reachable(game_file: str, expected_unreachable_paths: list[list[str]]):
