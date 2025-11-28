@@ -1181,7 +1181,7 @@ private:
   Game m_game;
 
 public:
-  MixedSequenceProfile(const Game &p_game) { m_game = p_game; }
+  MixedSequenceProfile(const Game &p_game) : m_game(p_game) {}
 
   const T &operator[](const GameSequence &p_key) const { return probs.at(p_key); }
 
