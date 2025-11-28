@@ -375,7 +375,12 @@ endif
 
 EXTRA_PROGRAMS = gambit-enumpoly gambit
 
-AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/labenski/include ${WX_CXXFLAGS}
+# Read version from GAMBIT_VERSION file for use in compilation
+GAMBIT_VERSION = $(shell cat $(top_srcdir)/GAMBIT_VERSION)
+
+# Define VERSION for all C++ compilations
+AM_CPPFLAGS = -DVERSION=\"$(GAMBIT_VERSION)\"
+
 AM_CXXFLAGS = ${LLVM_CXXFLAGS}
 
 ## Command-line tools
@@ -638,7 +643,7 @@ msw-msi:
 	light -ext WixUIExtension gambit.wixobj
 
 clang-tidy:
-	clang-tidy ${top_srcdir}/src/core/*.cc -- --std=c++17 -I ${top_srcdir}/src -DVERSION=""
-	clang-tidy ${top_srcdir}/src/games/*.cc ${top_srcdir}/src/games/*/*.cc -- --std=c++17 -I ${top_srcdir}/src -DVERSION=""
-	clang-tidy ${top_srcdir}/src/solvers/*/*.cc -- --std=c++17 -I ${top_srcdir}/src -DVERSION=""
-	clang-tidy ${top_srcdir}/src/tools/*/*.cc -- --std=c++17 -I ${top_srcdir}/src -DVERSION=""
+	clang-tidy ${top_srcdir}/src/core/*.cc -- --std=c++17 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"
+	clang-tidy ${top_srcdir}/src/games/*.cc ${top_srcdir}/src/games/*/*.cc -- --std=c++17 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"
+	clang-tidy ${top_srcdir}/src/solvers/*/*.cc -- --std=c++17 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"
+	clang-tidy ${top_srcdir}/src/tools/*/*.cc -- --std=c++17 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"

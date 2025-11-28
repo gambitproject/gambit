@@ -20,7 +20,7 @@ dnl along with this program; if not, write to the Free Software
 dnl Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 dnl
 
-AC_INIT([gambit],[m4_esyscmd_s([cat VERSION])])
+AC_INIT([gambit],[m4_esyscmd_s([cat GAMBIT_VERSION])])
 AC_CONFIG_SRCDIR([src/gambit.h])
 AM_INIT_AUTOMAKE([subdir-objects foreign])
 dnl AC_CONFIG_MACRO_DIR([m4])
@@ -145,7 +145,7 @@ AC_SUBST(WX_CXXFLAGS)
 REZFLAGS=`echo $CXXFLAGS $WX_CXXFLAGS | sed 's/-mthreads//g' | sed 's/-g//g' | sed 's/-O. / /g' | sed 's/-I/--include-dir /g'`
 AC_SUBST(REZFLAGS)
 
-GAMBIT_VERSION=`cat VERSION`
+GAMBIT_VERSION=`cat GAMBIT_VERSION`
 AC_SUBST(GAMBIT_VERSION)
 
 AC_CONFIG_FILES([Makefile contrib/mac/Info.plist gambit.wxs])

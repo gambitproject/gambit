@@ -155,14 +155,14 @@ When making a new release of Gambit, follow these steps:
 
 1. Create a new branch from the latest commit on the ``master`` branch named ``maintX_Y``, where ``X`` is the major version number and ``Y`` is the minor version number of the new release.
 
-2. Update the version number in the ``VERSION`` file at the root of the repository to ``X.Y.Z``.
+2. Update the version number in the ``GAMBIT_VERSION`` file at the root of the repository to ``X.Y.Z``.
 
    All other files will automatically use the updated version number:
    
-   - `pyproject.toml` reads from VERSION file at build time
-   - `configure.ac` reads from VERSION file and substitutes into `Info.plist` and `gambit.wxs`
-   - `src/pygambit/__init__.py` reads from installed package metadata or VERSION file
-   - `doc/conf.py` reads from VERSION file at documentation build time
+   - `pyproject.toml` reads from GAMBIT_VERSION file at build time
+   - `configure.ac` reads from GAMBIT_VERSION file and substitutes into `Info.plist` and `gambit.wxs`
+   - `src/pygambit/__init__.py` reads from installed package metadata or GAMBIT_VERSION file
+   - `doc/conf.py` reads from GAMBIT_VERSION file at documentation build time
    - Documentation pages reference the `|release|` substitution variable to automatically reflect the updated version number.
 
 3. Update the `ChangeLog` file with a summary of changes

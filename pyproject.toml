@@ -86,4 +86,4 @@ markers = [
 ]
 
 [tool.setuptools.dynamic]
-version = {file = "VERSION"}
+version = {file = "GAMBIT_VERSION"}
