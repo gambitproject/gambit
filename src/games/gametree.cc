@@ -748,6 +748,26 @@ bool GameTreeRep::IsConstSum() const
   }
 }
 
+std::vector<GameAction> GameTreeRep::GetOwnPriorActions(GameInfoset infoset) const
+{
+  if (m_infosetParents.empty() && !m_root->IsTerminal()) {
+    const_cast<GameTreeRep *>(this)->BuildInfosetParents();
+  }
+
+  auto it = m_infosetParents.find(infoset.get());
+
+  // If the infoset is unreachable, return an empty vector.
+  if (it == m_infosetParents.end()) {
+    return {};
+  }
+
+  std::vector<GameAction> own_prior_actions;
+  for (auto action_ptr : it->second) {
+    own_prior_actions.emplace_back((action_ptr) ? action_ptr->shared_from_this() : nullptr);
+  }
+  return own_prior_actions;
+}
+
 bool GameTreeRep::IsPerfectRecall() const
 {
   if (m_infosetParents.empty() && !m_root->IsTerminal()) {
