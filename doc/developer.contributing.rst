@@ -61,8 +61,7 @@ version.
 
     pre-commit install
 
-   Having `pre-commit` installed is recommended as it runs many of the same checks that are automatically conducted on any pull request.  This will let you make any adjustments required prior to pushing and initiating
-   a pull request.
+   Having `pre-commit` installed is recommended as it runs many of the same checks that are automatically conducted on any pull request.  Every time you commit, it will automatically fix some issues and highlight others for manual adjustment.
 
 5. Create a new branch for your changes ::
 
