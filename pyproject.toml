@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pygambit"
-version = "16.4.0"
+dynamic = ["version"]
 description = "The package for computation in game theory"
 readme = "src/README.rst"
 requires-python = ">=3.9"
@@ -84,3 +84,6 @@ markers = [
     "nash: all tests of Nash equilibrium solvers",
     "slow: all time-consuming tests",
 ]
+
+[tool.setuptools.dynamic]
+version = {file = "VERSION"}
