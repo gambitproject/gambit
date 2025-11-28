@@ -35,13 +35,10 @@ public:
 
   explicit GameData(const Game &);
 
-  void FillTableau(Matrix<T> &A, const GameNode &n, const T &prob, int s1, int s2);
-  void FillTableauNew(Matrix<T> &A, const Game &p_game);
+  void FillTableau(Matrix<T> &A, const Game &p_game);
 
-  void GetBehavior(MixedBehaviorProfile<T> &v, const Array<T> &, const Array<T> &,
-                   const GameNode &, int, int);
-  MixedBehaviorProfile<T> GetBehaviorNew(const Array<T> &p_primal, const Array<T> &p_dual,
-                                         const Game &p_game);
+  MixedBehaviorProfile<T> GetBehavior(const Array<T> &p_primal, const Array<T> &p_dual,
+                                      const Game &p_game);
 };
 
 template <class T> GameData<T>::GameData(const Game &p_game) : minpay(p_game->GetMinPayoff())
@@ -57,54 +54,10 @@ template <class T> GameData<T>::GameData(const Game &p_game) : minpay(p_game->Ge
   }
 }
 
-//
-// Recursively fills the constraint matrix A for the subtree rooted at 'n'.
-//
-template <class T>
-void GameData<T>::FillTableau(Matrix<T> &A, const GameNode &n, const T &prob, int s1, int s2)
+template <class T> void GameData<T>::FillTableau(Matrix<T> &A, const Game &p_game)
 {
-  const GameOutcome outcome = n->GetOutcome();
-  if (outcome) {
-    A(s1, s2) +=
-        Rational(prob) * (outcome->GetPayoff<Rational>(n->GetGame()->GetPlayer(1)) - minpay);
-  }
-  if (n->IsTerminal()) {
-    return;
-  }
-  const GameInfoset infoset = n->GetInfoset();
-  if (n->GetPlayer()->IsChance()) {
-    for (const auto &action : infoset->GetActions()) {
-      FillTableau(A, n->GetChild(action), prob * static_cast<T>(infoset->GetActionProb(action)),
-                  s1, s2);
-    }
-  }
-  else if (n->GetPlayer()->GetNumber() == 1) {
-    const int col = ns2 + infoset->GetNumber() + 1;
-    int snew = infosetOffset.at(infoset);
-    A(s1, col) = static_cast<T>(1);
-    for (const auto &child : n->GetChildren()) {
-      A(++snew, col) = static_cast<T>(-1);
-      FillTableau(A, child, prob, snew, s2);
-    }
-  }
-  else {
-    const int row = ns1 + infoset->GetNumber() + 1;
-    int snew = infosetOffset.at(infoset);
-    A(row, s2) = static_cast<T>(-1);
-    for (const auto &child : n->GetChildren()) {
-      A(row, ++snew) = static_cast<T>(1);
-      FillTableau(A, child, prob, s1, snew);
-    }
-  }
-}
-
-template <class T> void GameData<T>::FillTableauNew(Matrix<T> &A, const Game &p_game)
-{
-  auto players = p_game->GetPlayers();
-  auto it = players.begin();
-  auto player1 = *it;
-  ++it;
-  auto player2 = *it;
+  auto player1 = p_game->GetPlayer(1);
+  auto player2 = p_game->GetPlayer(2);
   auto sequences1 = p_game->GetSequences(player1);
   auto sequences2 = p_game->GetSequences(player2);
   for (auto seq : sequences1) {
@@ -141,54 +94,12 @@ template <class T> void GameData<T>::FillTableauNew(Matrix<T> &A, const Game &p_
   }
 }
 
-//
-// Recursively construct the behavior profile from the sequence form
-// solution represented by 'p_primal' (containing player 2's
-// sequences) and 'p_dual' (containing player 1's sequences).
-//
-// Any information sets not reached with positive probability have
-// their action probabilities set to zero.
-//
 template <class T>
-void GameData<T>::GetBehavior(MixedBehaviorProfile<T> &v, const Array<T> &p_primal,
-                              const Array<T> &p_dual, const GameNode &n, int s1, int s2)
+MixedBehaviorProfile<T> GameData<T>::GetBehavior(const Array<T> &p_primal, const Array<T> &p_dual,
+                                                 const Game &p_game)
 {
-  if (n->IsTerminal()) {
-    return;
-  }
-  if (n->GetPlayer()->IsChance()) {
-    for (const auto &child : n->GetChildren()) {
-      GetBehavior(v, p_primal, p_dual, child, s1, s2);
-    }
-  }
-  else if (n->GetPlayer()->GetNumber() == 2) {
-    int snew = infosetOffset.at(n->GetInfoset());
-    for (const auto &action : n->GetInfoset()->GetActions()) {
-      snew++;
-      v[action] =
-          (p_primal[s1] > static_cast<T>(0)) ? p_primal[snew] / p_primal[s1] : static_cast<T>(0);
-      GetBehavior(v, p_primal, p_dual, n->GetChild(action), snew, s2);
-    }
-  }
-  else {
-    int snew = infosetOffset.at(n->GetInfoset());
-    for (const auto &action : n->GetInfoset()->GetActions()) {
-      snew++;
-      v[action] = (p_dual[s2] > static_cast<T>(0)) ? p_dual[snew] / p_dual[s2] : static_cast<T>(0);
-      GetBehavior(v, p_primal, p_dual, n->GetChild(action), s1, snew);
-    }
-  }
-}
-
-template <class T>
-MixedBehaviorProfile<T> GameData<T>::GetBehaviorNew(const Array<T> &p_primal,
-                                                    const Array<T> &p_dual, const Game &p_game)
-{
-  auto players = p_game->GetPlayers();
-  auto it = players.begin();
-  auto player1 = *it;
-  ++it;
-  auto player2 = *it;
+  auto player1 = p_game->GetPlayer(1);
+  auto player2 = p_game->GetPlayer(2);
   auto sequences1 = p_game->GetSequences(player1);
   auto sequences2 = p_game->GetSequences(player2);
   Gambit::MixedSequenceProfile<T> msp(p_game);
@@ -257,11 +168,7 @@ std::list<MixedBehaviorProfile<T>> LpBehaviorSolve(const Game &p_game,
   b = static_cast<T>(0);
   c = static_cast<T>(0);
 
-  // BehaviorSupportProfile full_support(p_game);
-  // Gambit::GameSequenceForm sequenceForm(full_support);
-
-  // data.FillTableau(A, p_game->GetRoot(), static_cast<T>(1), 1, 1);
-  data.FillTableauNew(A, p_game);
+  data.FillTableau(A, p_game);
   A(1, data.ns2 + 1) = static_cast<T>(-1);
   A(data.ns1 + 1, 1) = static_cast<T>(1);
 
@@ -271,9 +178,7 @@ std::list<MixedBehaviorProfile<T>> LpBehaviorSolve(const Game &p_game,
   Array<T> primal(A.NumColumns()), dual(A.NumRows());
   std::list<MixedBehaviorProfile<T>> solution;
   SolveLP(A, b, c, p_game->GetPlayer(2)->GetInfosets().size() + 1, primal, dual);
-  // MixedBehaviorProfile<T> profile(p_game);
-  // data.GetBehavior(profile, primal, dual, p_game->GetRoot(), 1, 1);
-  MixedBehaviorProfile<T> profile = data.GetBehaviorNew(primal, dual, p_game);
+  MixedBehaviorProfile<T> profile = data.GetBehavior(primal, dual, p_game);
   profile.UndefinedToCentroid();
   p_onEquilibrium(profile, "NE");
   solution.push_back(profile);
