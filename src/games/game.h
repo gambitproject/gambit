@@ -1016,9 +1016,14 @@ public:
     throw std::runtime_error("Sequence form can only be generated for extensive form games");
   }
 
+  virtual const uint8_t &IsOutcome(const std::map<GamePlayer, GameSequence> &p_profile)
+  {
+    throw std::runtime_error("Sequence form can only be generated for extensive form games");
+  }
+
   virtual const PlayerSequences GetSequences(const GamePlayer &p_player)
   {
-    throw std::runtime_error("Sequence form can only be generated for extensive");
+    throw std::runtime_error("Sequence form can only be generated for extensive form games");
   }
 
   virtual const Rational &GetPayoff(const std::map<GamePlayer, GameSequence> &p_profile,

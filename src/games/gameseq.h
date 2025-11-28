@@ -36,6 +36,7 @@ class GameSequenceForm {
   BehaviorSupportProfile m_support;
   std::map<GamePlayer, std::vector<GameSequence>> m_sequences;
   NDArray<Rational> m_payoffs;
+  NDArray<uint8_t> m_isOutcome;
   std::map<std::pair<GameInfoset, GameAction>, int> m_constraints; // (sparse) constraint matrices
   std::set<GameInfoset> m_infosets; // infosets actually reachable given support
   std::map<GameAction, GameSequence> m_correspondence;
@@ -52,6 +53,11 @@ class GameSequenceForm {
       index[player->GetNumber()] = p_profile.at(player)->number;
     }
     return index;
+  }
+
+  uint8_t &IsOutcome(const std::map<GamePlayer, GameSequence> &p_profile)
+  {
+    return m_isOutcome.at(ProfileToIndex(p_profile), 1);
   }
 
   Rational &GetPayoffEntry(const std::map<GamePlayer, GameSequence> &p_profile,

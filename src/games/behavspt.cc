@@ -198,6 +198,12 @@ int BehaviorSupportProfile::GetConstraintEntry(const GameInfoset &p_infoset,
   return GetSequenceForm()->GetConstraintEntry(p_infoset, p_action);
 }
 
+uint8_t &
+BehaviorSupportProfile::IsOutcome(const std::map<GamePlayer, GameSequence> &p_profile) const
+{
+  return GetSequenceForm()->IsOutcome(p_profile);
+}
+
 const Rational &
 BehaviorSupportProfile::GetPayoff(const std::map<GamePlayer, GameSequence> &p_profile,
                                   const GamePlayer &p_player) const
