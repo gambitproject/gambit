@@ -192,8 +192,7 @@ PlayerSequences BehaviorSupportProfile::GetSequences(const GamePlayer &p_player)
   return {this, p_player};
 }
 
-uint8_t &
-BehaviorSupportProfile::IsOutcome(const std::map<GamePlayer, GameSequence> &p_profile) const
+int &BehaviorSupportProfile::IsOutcome(const std::map<GamePlayer, GameSequence> &p_profile) const
 {
   return GetSequenceForm()->IsOutcome(p_profile);
 }

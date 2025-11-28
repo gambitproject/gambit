@@ -105,7 +105,7 @@ void GameSequenceForm::FillTableau()
     dim[player->GetNumber()] = m_sequences.at(player).size();
   }
   m_payoffs = NDArray<Rational>(dim, dim.size());
-  m_isOutcome = NDArray<uint8_t>(dim, dim.size());
+  m_isOutcome = NDArray<int>(dim, dim.size());
 
   std::map<GamePlayer, GameSequence> currentSequence;
   for (auto player : GetPlayers()) {

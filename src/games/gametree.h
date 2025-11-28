@@ -55,7 +55,7 @@ protected:
     return GetFullSupport()->GetSequences(p_player);
   }
 
-  const uint8_t &IsOutcome(const std::map<GamePlayer, GameSequence> &p_profile) override
+  const int &IsOutcome(const std::map<GamePlayer, GameSequence> &p_profile) override
   {
     return GetFullSupport()->IsOutcome(p_profile);
   }
