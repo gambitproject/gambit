@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
   const std::string startFile;
 
   int long_opt_index = 0;
-  struct option long_options[] = {
+  option long_options[] = {
       {"help", 0, nullptr, 'h'}, {"version", 0, nullptr, 'v'}, {nullptr, 0, nullptr, 0}};
   int c;
   while ((c = getopt_long(argc, argv, "d:n:vqh", long_options, &long_opt_index)) != -1) {
@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
       break;
     case '?':
       if (isprint(optopt)) {
-        std::cerr << argv[0] << ": Unknown option `-" << ((char)optopt) << "'.\n";
+        std::cerr << argv[0] << ": Unknown option `-" << static_cast<char>(optopt) << "'.\n";
       }
       else {
         std::cerr << argv[0] << ": Unknown option character `\\x" << optopt << "`.\n";
@@ -119,8 +119,7 @@ int main(int argc, char *argv[])
 
   try {
     const Game game = ReadGame(*input_stream);
-    const std::shared_ptr<StrategyProfileRenderer<double>> renderer(
-        new MixedStrategyCSVRenderer<double>(std::cout, numDecimals));
+    auto renderer = MakeMixedStrategyProfileRenderer<double>(std::cout, numDecimals, false);
 
     List<MixedStrategyProfile<double>> perts;
     if (!startFile.empty()) {

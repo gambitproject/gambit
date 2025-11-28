@@ -22,11 +22,12 @@
 
 #include <iostream>
 #include <fstream>
-#include <cstdlib>
 #include <getopt.h>
 
 #include "gambit.h"
 #include "games/writer.h"
+
+using namespace Gambit;
 
 void PrintBanner(std::ostream &p_stream)
 {
@@ -79,7 +80,7 @@ int main(int argc, char *argv[])
       break;
     case '?':
       if (isprint(optopt)) {
-        std::cerr << argv[0] << ": Unknown option `-" << ((char)optopt) << "'.\n";
+        std::cerr << argv[0] << ": Unknown option `-" << static_cast<char>(optopt) << "'.\n";
       }
       else {
         std::cerr << argv[0] << ": Unknown option character `\\x" << optopt << "`.\n";
@@ -122,7 +123,7 @@ int main(int argc, char *argv[])
   }
 
   try {
-    const Gambit::Game game = Gambit::ReadGame(*input_stream);
+    const Game game = ReadGame(*input_stream);
 
     if (rowPlayer < 1 || rowPlayer > static_cast<int>(game->NumPlayers())) {
       std::cerr << argv[0] << ": Player " << rowPlayer << " does not exist.\n";
