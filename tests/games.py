@@ -230,6 +230,7 @@ def create_kuhn_poker_efg() -> gbt.Game:
     g.sort_infosets()
     return g
 
+
 def create_kuhn_poker_efg_internal_outcomes() -> gbt.Game:
     """
     Returns
