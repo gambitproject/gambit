@@ -47,13 +47,13 @@ class Layout {
 
   double m_maxOffset{0};
 
-  void LayoutSubtree(const GameNode &, const BehaviorSupportProfile &, int, double &);
+  void LayoutSubtree(const GameNode &, int, double &);
 
 public:
   explicit Layout(const Game &p_game) : m_game(p_game) {}
   ~Layout() = default;
 
-  void LayoutTree(const BehaviorSupportProfile &);
+  void LayoutTree(const Game &);
 
   const std::map<GameNode, std::shared_ptr<LayoutEntry>> &GetNodeMap() const { return m_nodeMap; }
   int GetNodeLevel(const GameNode &p_node) const { return m_nodeMap.at(p_node)->m_level; }
@@ -68,7 +68,7 @@ public:
 inline std::shared_ptr<Layout> CreateLayout(const Game &p_game)
 {
   auto layout = std::make_shared<Layout>(p_game);
-  layout->LayoutTree(BehaviorSupportProfile(p_game));
+  layout->LayoutTree(p_game);
   return layout;
 }
 

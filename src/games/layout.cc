@@ -24,8 +24,7 @@
 
 namespace Gambit {
 
-void Layout::LayoutSubtree(const GameNode &p_node, const BehaviorSupportProfile &p_support,
-                           int p_level, double &p_offset)
+void Layout::LayoutSubtree(const GameNode &p_node, int p_level, double &p_offset)
 {
   const auto entry = std::make_shared<LayoutEntry>(p_level);
   m_nodeMap[p_node] = entry;
@@ -46,9 +45,9 @@ void Layout::LayoutSubtree(const GameNode &p_node, const BehaviorSupportProfile 
     return;
   }
   if (p_node->GetInfoset() && !p_node->GetInfoset()->GetPlayer()->IsChance()) {
-    const auto actions = p_support.GetActions(p_node->GetInfoset());
-    for (const auto &action : actions) {
-      LayoutSubtree(p_node->GetChild(action), p_support, p_level + 1, p_offset);
+    const auto actions = p_node->GetInfoset()->GetActions();
+    for (const auto &action : p_node->GetInfoset()->GetActions()) {
+      LayoutSubtree(p_node->GetChild(action), p_level + 1, p_offset);
     }
     entry->m_offset = (m_nodeMap.at(p_node->GetChild(actions.front()))->m_offset +
                        m_nodeMap.at(p_node->GetChild(actions.back()))->m_offset) /
@@ -56,7 +55,7 @@ void Layout::LayoutSubtree(const GameNode &p_node, const BehaviorSupportProfile 
   }
   else {
     for (const auto &child : p_node->GetChildren()) {
-      LayoutSubtree(child, p_support, p_level + 1, p_offset);
+      LayoutSubtree(child, p_level + 1, p_offset);
     }
     entry->m_offset = (m_nodeMap.at(p_node->GetChildren().front())->m_offset +
                        m_nodeMap.at(p_node->GetChildren().back())->m_offset) /
@@ -64,14 +63,14 @@ void Layout::LayoutSubtree(const GameNode &p_node, const BehaviorSupportProfile 
   }
 }
 
-void Layout::LayoutTree(const BehaviorSupportProfile &p_support)
+void Layout::LayoutTree(const Game &p_game)
 {
   m_nodeMap.clear();
   m_numSublevels.clear();
   m_infosetSublevels.clear();
 
   m_maxOffset = 0;
-  LayoutSubtree(m_game->GetRoot(), p_support, 0, m_maxOffset);
+  LayoutSubtree(p_game->GetRoot(), 0, m_maxOffset);
 }
 
 } // namespace Gambit
