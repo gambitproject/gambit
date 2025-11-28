@@ -201,7 +201,7 @@ def test_node_own_prior_action_non_terminal(game_file, expected_node_data):
             assert node.own_prior_action is None, \
                 f"Terminal node at {_get_path_of_action_labels(node)} must be None"
         else:
-            # Collection: Only collect data for non-terminal nodes
+            # Only collect data for non-terminal nodes
             opa = node.own_prior_action
             details = (
                 (opa.infoset.player.label, opa.infoset.number, opa.label)

@@ -943,7 +943,7 @@ void GameTreeRep::BuildOwnPriorActions()
 
 GameAction GameTreeRep::GetOwnPriorAction(GameNode node) const
 {
-  if (const_cast<GameTreeRep *>(this)->m_nodeOwnPriorAction.empty()) {
+  if (m_nodeOwnPriorAction.empty()) {
     const_cast<GameTreeRep *>(this)->BuildOwnPriorActions();
   }
 
@@ -956,14 +956,14 @@ GameAction GameTreeRep::GetOwnPriorAction(GameNode node) const
   return nullptr;
 }
 
-std::set<GameAction> GameTreeRep::GetOwnPriorActions(GameInfoset iset) const
+std::set<GameAction> GameTreeRep::GetOwnPriorActions(GameInfoset infoset) const
 {
-  if (const_cast<GameTreeRep *>(this)->m_nodeOwnPriorAction.empty()) {
+  if (m_nodeOwnPriorAction.empty()) {
     const_cast<GameTreeRep *>(this)->BuildOwnPriorActions();
   }
 
   std::set<GameAction> result;
-  auto it = m_infosetOwnPriorActions.find(iset.get());
+  auto it = m_infosetOwnPriorActions.find(infoset.get());
 
   if (it != m_infosetOwnPriorActions.end()) {
     for (auto *ptr : it->second) {

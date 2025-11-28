@@ -42,7 +42,6 @@ protected:
   std::map<GameNodeRep *, GameActionRep *> m_nodeOwnPriorAction;
   std::map<GameInfosetRep *, std::set<GameActionRep *>> m_infosetOwnPriorActions;
   mutable std::unique_ptr<std::set<GameNodeRep *>> m_unreachableNodes;
-  mutable std::unique_ptr<std::set<GameNodeRep *>> m_unreachableNodes_old;
 
   /// @name Private auxiliary functions
   //@{

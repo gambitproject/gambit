@@ -175,17 +175,17 @@ class Infoset:
         is reached without the player having moved previously, None will be
         included in the set.
         """
-        cdef stdset[c_GameAction] c_actions = self.infoset.deref().GetOwnPriorActions()
-        cdef c_GameAction action
-        py_result = set()
+        c_actions: stdset[c_GameAction] = self.infoset.deref().GetOwnPriorActions()
+        action: c_GameAction
+        result = set()
 
         for action in c_actions:
             if action != cython.cast(c_GameAction, NULL):
-                py_result.add(Action.wrap(action))
+                result.add(Action.wrap(action))
             else:
-                py_result.add(None)
+                result.add(None)
 
-        return py_result
+        return result
 
     @property
     def members(self) -> InfosetMembers:

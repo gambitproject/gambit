@@ -156,7 +156,6 @@ def test_infoset_own_prior_actions(game_file, expected_results):
 
         actual_actions = infoset.own_prior_actions
 
-        # Updated to capture player.label instead of player.number
         actual_details = {
             (a.infoset.player.label, a.infoset.number, a.label) if a is not None else None
             for a in actual_actions
