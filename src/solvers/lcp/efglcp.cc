@@ -45,14 +45,11 @@ private:
 
   class Solution;
 
-  void FillTableau(Matrix<T> &, const GameNode &, T, int, int, Solution &) const;
-  void FillTableauNew(Matrix<T> &A, const Game &p_game, Solution &p_solution) const;
+  void FillTableau(Matrix<T> &A, const Game &p_game, Solution &p_solution) const;
   void AllLemke(const Game &, int dup, linalg::LemkeTableau<T> &B, int depth, Matrix<T> &,
                 Solution &) const;
-  void GetProfile(const linalg::LemkeTableau<T> &tab, MixedBehaviorProfile<T> &, const Vector<T> &,
-                  const GameNode &n, int, int, Solution &) const;
-  MixedBehaviorProfile<T> GetProfileNew(const linalg::LemkeTableau<T> &tab, const Vector<T> &sol,
-                                        const Game &p_game, Solution &p_solution) const;
+  MixedBehaviorProfile<T> GetProfile(const linalg::LemkeTableau<T> &tab, const Vector<T> &sol,
+                                     const Game &p_game, Solution &p_solution) const;
 };
 
 template <class T> class NashLcpBehaviorSolver<T>::Solution {
@@ -131,11 +128,7 @@ std::list<MixedBehaviorProfile<T>> NashLcpBehaviorSolver<T>::Solve(const Game &p
   Matrix<T> A(1, ntot, 0, ntot);
   A = static_cast<T>(0);
 
-  // BehaviorSupportProfile full_support(p_game);
-  // Gambit::GameSequenceForm sequenceForm(full_support);
-
-  // FillTableau(A, p_game->GetRoot(), static_cast<T>(1), 1, 1, solution);
-  FillTableauNew(A, p_game, solution);
+  FillTableau(A, p_game, solution);
   for (int i = A.MinRow(); i <= A.MaxRow(); i++) {
     A(i, 0) = static_cast<T>(-1);
   }
@@ -167,9 +160,7 @@ std::list<MixedBehaviorProfile<T>> NashLcpBehaviorSolver<T>::Solve(const Game &p
       solution.AddBFS(tab);
       Vector<T> sol(tab.MinRow(), tab.MaxRow());
       tab.BasisVector(sol);
-      // MixedBehaviorProfile<T> profile(p_game);
-      // GetProfile(tab, profile, sol, p_game->GetRoot(), 1, 1, solution);
-      auto profile = GetProfileNew(tab, sol, p_game, solution);
+      auto profile = GetProfile(tab, sol, p_game, solution);
       profile.UndefinedToCentroid();
       solution.m_equilibria.push_back(profile);
       this->m_onEquilibrium(profile, "NE");
@@ -197,7 +188,6 @@ void NashLcpBehaviorSolver<T>::AllLemke(const Game &p_game, int j, linalg::Lemke
   }
 
   Vector<T> sol(B.MinRow(), B.MaxRow());
-  // MixedBehaviorProfile<T> profile(p_game);
 
   bool newsol = false;
   for (int i = B.MinRow(); i <= B.MaxRow() && !newsol; i++) {
@@ -224,10 +214,7 @@ void NashLcpBehaviorSolver<T>::AllLemke(const Game &p_game, int j, linalg::Lemke
     if (BCopy.SF_LCPPath(-missing) == 1) {
       newsol = p_solution.AddBFS(BCopy);
       BCopy.BasisVector(sol);
-      // BehaviorSupportProfile full_support(p_game);
-      // Gambit::GameSequenceForm sequenceForm(full_support);
-      // GetProfile(BCopy, profile, sol, p_game->GetRoot(), 1, 1, p_solution);
-      auto profile = GetProfileNew(BCopy, sol, p_game, p_solution);
+      auto profile = GetProfile(BCopy, sol, p_game, p_solution);
       profile.UndefinedToCentroid();
       if (newsol) {
         m_onEquilibrium(profile, "NE");
@@ -250,69 +237,14 @@ void NashLcpBehaviorSolver<T>::AllLemke(const Game &p_game, int j, linalg::Lemke
 }
 
 template <class T>
-void NashLcpBehaviorSolver<T>::FillTableau(Matrix<T> &A, const GameNode &n, T prob, int s1, int s2,
+void NashLcpBehaviorSolver<T>::FillTableau(Matrix<T> &A, const Game &p_game,
                                            Solution &p_solution) const
 {
   const int ns1 = p_solution.ns1;
   const int ns2 = p_solution.ns2;
   const int ni1 = p_solution.ni1;
-
-  const GameOutcome outcome = n->GetOutcome();
-  if (outcome) {
-    A(s1, ns1 + s2) += Rational(prob) * (outcome->GetPayoff<Rational>(n->GetGame()->GetPlayer(1)) -
-                                         p_solution.maxpay);
-    A(ns1 + s2, s1) += Rational(prob) * (outcome->GetPayoff<Rational>(n->GetGame()->GetPlayer(2)) -
-                                         p_solution.maxpay);
-  }
-  if (n->IsTerminal()) {
-    return;
-  }
-  const GameInfoset infoset = n->GetInfoset();
-  if (n->GetPlayer()->IsChance()) {
-    for (const auto &action : infoset->GetActions()) {
-      FillTableau(A, n->GetChild(action),
-                  Rational(prob) * static_cast<Rational>(infoset->GetActionProb(action)), s1, s2,
-                  p_solution);
-    }
-  }
-  else if (n->GetPlayer()->GetNumber() == 1) {
-    const int infoset_idx = ns1 + ns2 + infoset->GetNumber() + 1;
-    A(s1, infoset_idx) = static_cast<T>(-1);
-    A(infoset_idx, s1) = static_cast<T>(1);
-    int snew = p_solution.infosetOffset.at(infoset);
-    for (const auto &child : n->GetChildren()) {
-      snew++;
-      A(snew, infoset_idx) = static_cast<T>(1);
-      A(infoset_idx, snew) = static_cast<T>(-1);
-      FillTableau(A, child, prob, snew, s2, p_solution);
-    }
-  }
-  else {
-    const int infoset_idx = ns1 + ns2 + ni1 + n->GetInfoset()->GetNumber() + 1;
-    A(ns1 + s2, infoset_idx) = static_cast<T>(-1);
-    A(infoset_idx, ns1 + s2) = static_cast<T>(1);
-    int snew = p_solution.infosetOffset.at(n->GetInfoset());
-    for (const auto &child : n->GetChildren()) {
-      snew++;
-      A(ns1 + snew, infoset_idx) = static_cast<T>(1);
-      A(infoset_idx, ns1 + snew) = static_cast<T>(-1);
-      FillTableau(A, child, prob, s1, snew, p_solution);
-    }
-  }
-}
-
-template <class T>
-void NashLcpBehaviorSolver<T>::FillTableauNew(Matrix<T> &A, const Game &p_game,
-                                              Solution &p_solution) const
-{
-  const int ns1 = p_solution.ns1;
-  const int ns2 = p_solution.ns2;
-  const int ni1 = p_solution.ni1;
-  auto players = p_game->GetPlayers();
-  auto it = players.begin();
-  auto player1 = *it;
-  ++it;
-  auto player2 = *it;
+  auto player1 = p_game->GetPlayer(1);
+  auto player2 = p_game->GetPlayer(2);
   auto sequences1 = p_game->GetSequences(player1);
   auto sequences2 = p_game->GetSequences(player2);
   for (auto seq : sequences1) {
@@ -355,68 +287,13 @@ void NashLcpBehaviorSolver<T>::FillTableauNew(Matrix<T> &A, const Game &p_game,
 }
 
 template <class T>
-void NashLcpBehaviorSolver<T>::GetProfile(const linalg::LemkeTableau<T> &tab,
-                                          MixedBehaviorProfile<T> &v, const Vector<T> &sol,
-                                          const GameNode &n, int s1, int s2,
-                                          Solution &p_solution) const
-{
-  const int ns1 = p_solution.ns1;
-
-  if (n->IsTerminal()) {
-    return;
-  }
-  if (n->GetPlayer()->IsChance()) {
-    for (const auto &child : n->GetChildren()) {
-      GetProfile(tab, v, sol, child, s1, s2, p_solution);
-    }
-  }
-  else if (n->GetPlayer()->GetNumber() == 1) {
-    int snew = p_solution.infosetOffset.at(n->GetInfoset());
-    for (const auto &action : n->GetInfoset()->GetActions()) {
-      snew++;
-      v[action] = static_cast<T>(0);
-      if (tab.Member(s1)) {
-        const int ind = tab.Find(s1);
-        if (sol[ind] > p_solution.eps && tab.Member(snew)) {
-          const int ind2 = tab.Find(snew);
-          if (sol[ind2] > p_solution.eps) {
-            v[action] = sol[ind2] / sol[ind];
-          }
-        }
-      }
-      GetProfile(tab, v, sol, n->GetChild(action), snew, s2, p_solution);
-    }
-  }
-  else {
-    int snew = p_solution.infosetOffset.at(n->GetInfoset());
-    for (const auto &action : n->GetInfoset()->GetActions()) {
-      snew++;
-      v[action] = static_cast<T>(0);
-      if (tab.Member(ns1 + s2)) {
-        const int ind = tab.Find(ns1 + s2);
-        if (sol[ind] > p_solution.eps && tab.Member(ns1 + snew)) {
-          const int ind2 = tab.Find(ns1 + snew);
-          if (sol[ind2] > p_solution.eps) {
-            v[action] = sol[ind2] / sol[ind];
-          }
-        }
-      }
-      GetProfile(tab, v, sol, n->GetChild(action), s1, snew, p_solution);
-    }
-  }
-}
-
-template <class T>
 MixedBehaviorProfile<T>
-NashLcpBehaviorSolver<T>::GetProfileNew(const linalg::LemkeTableau<T> &tab, const Vector<T> &sol,
-                                        const Game &p_game, Solution &p_solution) const
+NashLcpBehaviorSolver<T>::GetProfile(const linalg::LemkeTableau<T> &tab, const Vector<T> &sol,
+                                     const Game &p_game, Solution &p_solution) const
 {
   const int ns1 = p_solution.ns1;
-  auto players = p_game->GetPlayers();
-  auto it = players.begin();
-  auto player1 = *it;
-  ++it;
-  auto player2 = *it;
+  auto player1 = p_game->GetPlayer(1);
+  auto player2 = p_game->GetPlayer(2);
   auto sequences1 = p_game->GetSequences(player1);
   auto sequences2 = p_game->GetSequences(player2);
   Gambit::MixedSequenceProfile<T> msp(p_game);
