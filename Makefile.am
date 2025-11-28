@@ -378,8 +378,8 @@ EXTRA_PROGRAMS = gambit-enumpoly gambit
 # Read version from GAMBIT_VERSION file for use in compilation
 GAMBIT_VERSION = $(shell cat $(top_srcdir)/GAMBIT_VERSION)
 
-# Define VERSION for all C++ compilations
-AM_CPPFLAGS = -DVERSION=\"$(GAMBIT_VERSION)\"
+# Define VERSION for all C++ compilations and set include paths
+AM_CPPFLAGS = -I$(top_srcdir)/src -DVERSION=\"$(GAMBIT_VERSION)\"
 
 AM_CXXFLAGS = ${LLVM_CXXFLAGS}
 
@@ -608,6 +608,9 @@ gambit_SOURCES = \
 	src/gui/valnumber.cc \
 	src/gui/valnumber.h
 
+# Add wxWidgets compilation flags for the GUI program
+gambit_CXXFLAGS = $(AM_CXXFLAGS) $(WX_CXXFLAGS)
+gambit_CPPFLAGS = $(AM_CPPFLAGS) $(WX_CXXFLAGS) -I$(top_srcdir)/src/labenski/include
 
 if IS_WIN32
 gambit_LDADD = $(RC_OBJECT_PATH) $(WX_LIBS_STATIC) -ldeflate -lzstd -llerc -lWebP
