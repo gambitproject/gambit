@@ -23,7 +23,11 @@ def _find_tutorial_notebooks():
         pytest.skip(f"Tutorials folder not found: {root}")
 
     # Collect all notebooks under doc/tutorials (including any subfolders).
-    notebooks = sorted(set(root.rglob("*.ipynb")))
+    # Exclude Jupyter checkpoint files
+    notebooks = sorted(
+        p for p in root.rglob("*.ipynb")
+        if ".ipynb_checkpoints" not in p.parts
+    )
 
     if not notebooks:
         pytest.skip(f"No tutorial notebooks found in: {root}")
