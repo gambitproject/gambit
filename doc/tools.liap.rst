@@ -81,11 +81,14 @@ not guaranteed to find all, or even any, Nash equilibria.
 
 Computing an equilibrium in mixed strategies of :download:`e02.efg
 <../contrib/games/e02.efg>`, the example in Figure 2 of Selten
-(International Journal of Game Theory, 1975)::
+(International Journal of Game Theory, 1975)
 
    $ gambit-liap e02.nfg
+
    Compute Nash equilibria by minimizing the Lyapunov function
+
    Gambit version |release|, Copyright (C) 1994-2025, The Gambit Project
+
    This is free software, distributed under the GNU GPL
 
    NE,0.998701,0.000229,0.001070,0.618833,0.381167

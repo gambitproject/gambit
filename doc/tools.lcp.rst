@@ -75,11 +75,14 @@ game.
 
 Computing an equilibrium of extensive game :download:`e02.efg
 <../contrib/games/e02.efg>`, the example in Figure 2 of Selten
-(International Journal of Game Theory, 1975)::
+(International Journal of Game Theory, 1975)
 
    $ gambit-lcp e02.efg
+
    Compute Nash equilibria by solving a linear complementarity program
+
    Gambit version |release|, Copyright (C) 1994-2025, The Gambit Project
+
    This is free software, distributed under the GNU GPL
 
    NE,1,0,1/2,1/2,1/2,1/2
