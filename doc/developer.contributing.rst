@@ -47,7 +47,7 @@ version.
 
 3. Follow the instructions in the :ref:`building-from-source` page to set up your development environment and build Gambit from source. If you only plan to make changes to the PyGambit Python code, you can skip to :ref:`build-python`.
 
-4. *[Optional but recommended]* Install `pre-commit` which is used to run code formatters and linters before each commit. This helps ensure code quality and consistency. You can it into the virtual environment where you installed PyGambit ::
+4. *[Optional but recommended]* Install `pre-commit` which is used to run code formatters and linters before each commit. This helps ensure code quality and consistency. You can install it into the virtual environment where you installed PyGambit ::
 
     pip install pre-commit
 
