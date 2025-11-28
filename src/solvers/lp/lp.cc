@@ -104,11 +104,11 @@ MixedBehaviorProfile<T> GameData<T>::GetBehavior(const Array<T> &p_primal, const
   auto sequences2 = p_game->GetSequences(player2);
   Gambit::MixedSequenceProfile<T> msp(p_game);
   for (auto seq : sequences1) {
-    int index = seq->number;
+    const int index = seq->number;
     msp[seq] = p_dual[index];
   }
   for (auto seq : sequences2) {
-    int index = seq->number;
+    const int index = seq->number;
     msp[seq] = p_primal[index];
   }
   return msp.GetMixedBehaviorProfile();

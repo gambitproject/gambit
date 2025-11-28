@@ -298,9 +298,9 @@ NashLcpBehaviorSolver<T>::GetProfile(const linalg::LemkeTableau<T> &tab, const V
   auto sequences2 = p_game->GetSequences(player2);
   Gambit::MixedSequenceProfile<T> msp(p_game);
   for (auto seq : sequences1) {
-    int seq_num = seq->number;
+    const int seq_num = seq->number;
     if (tab.Member(seq_num)) {
-      int index = tab.Find(seq_num);
+      const int index = tab.Find(seq_num);
       msp[seq] = (sol[index] > p_solution.eps) ? sol[index] : static_cast<T>(0);
     }
     else {
@@ -308,9 +308,9 @@ NashLcpBehaviorSolver<T>::GetProfile(const linalg::LemkeTableau<T> &tab, const V
     }
   }
   for (auto seq : sequences2) {
-    int seq_num = seq->number;
+    const int seq_num = seq->number;
     if (tab.Member(ns1 + seq_num)) {
-      int index = tab.Find(ns1 + seq_num);
+      const int index = tab.Find(ns1 + seq_num);
       msp[seq] = (sol[index] > p_solution.eps) ? sol[index] : static_cast<T>(0);
     }
     else {
