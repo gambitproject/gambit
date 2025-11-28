@@ -2107,26 +2107,16 @@ class Game:
             raise UndefinedOperationError("Cannot delete the only strategy for a player")
         self.game.deref().DeleteStrategy(resolved_strategy.strategy)
 
-    def get_sequence_form_payoff(self, action_dict, py_player):
+    def get_sequence_form_payoff(self, profile, py_player):
         cdef Player player = cython.cast(Player, py_player)
-        cdef c_GamePlayer cpp_player = player.player
-        cdef stdmap[c_GamePlayer, c_GameSequence] profile
-        cdef c_GamePlayer temp_player
-        cdef c_GameAction temp_action
-        cdef Player key
-        cdef Action value
-        cdef c_GameSequence* seq_ptr
-        for py_key, py_value in action_dict.items():
-            key = cython.cast(Player, py_key)
-            temp_player = key.player
-            if py_value is None:
-                profile[temp_player] = self.game.deref().GetEmptySequence(temp_player)
-            else:
-                value = cython.cast(Action, py_value)
-                temp_action = value.action
-                profile[temp_player] = self.game.deref().GetCorrespondingSequence(temp_action)
-        cdef c_Rational payoff = self.game.deref().GetPayoff(profile, cpp_player)
-        return rat_to_py(payoff)
+        cdef stdmap[c_GamePlayer, c_GameSequence] c_profile
+        cdef Sequence seq
+        cdef c_GameSequence c_seq
+        for py_seq in profile:
+            seq = cython.cast(Sequence, py_seq)
+            c_seq = seq.sequence
+            c_profile[c_seq.deref().player] = c_seq
+        return rat_to_py(self.game.deref().GetPayoff(c_profile, player.player))
 
     def get_sequence_form_constraint_entry(self, py_infoset, py_sequence):
         cdef Infoset infoset = cython.cast(Infoset, py_infoset)
@@ -2137,25 +2127,14 @@ class Game:
         return self.game.deref().GetSequenceConstraintEntry(cpp_infoset, cpp_action)
 
     def get_sequence_form_payoffs(self, dtype: typing.Type = Rational) -> typing.List[np.array]:
-        cdef stdmap[c_GamePlayer, c_GameSequence] c_profile
-        cdef Player player
-        cdef Player temp_player
-        cdef Sequence sequence
-        cdef c_Rational c_payoff
         arrays = []
         shape = tuple(len(py_player.sequences) for py_player in self.players)
         player_sequences = [py_player.sequences for py_player in self.players]
         for py_player in self.players:
-            player = cython.cast(Player, py_player)
             array = np.zeros(shape=shape, dtype=object)
             for profile in itertools.product(*player_sequences):
-                for i in range(len(profile)):
-                    temp_player = cython.cast(Player, self.players[i])
-                    sequence = cython.cast(Sequence, profile[i])
-                    c_profile[temp_player.player] = sequence.sequence
                 idx_tuple = tuple(sequence.index for sequence in profile)
-                c_payoff = self.game.deref().GetPayoff(c_profile, player.player)
-                payoff = rat_to_py(c_payoff)
+                payoff = self.get_sequence_form_payoff(profile, py_player)
                 array[idx_tuple] = dtype(payoff)
             arrays.append(array)
         return arrays
