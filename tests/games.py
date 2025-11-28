@@ -230,6 +230,110 @@ def create_kuhn_poker_efg() -> gbt.Game:
     g.sort_infosets()
     return g
 
+def create_kuhn_poker_efg_internal_outcomes() -> gbt.Game:
+    """
+    Returns
+    -------
+    Game
+        Kuhn poker with 3 cards and 2 players
+    """
+    g = gbt.Game.new_tree(
+        players=["Alice", "Bob"], title="Three-card poker (J, Q, K), two-player"
+    )
+    cards = ["J", "Q", "K"]
+    deals = ["JQ", "JK", "QJ", "QK", "KJ", "KQ"]
+
+    def deals_by_infoset(player, card):
+        player_idx = 0 if player == "Alice" else 1
+        return [d for d in deals if d[player_idx] == card]
+
+    g.append_move(g.root, g.players.chance, deals)
+    g.set_chance_probs(g.root.infoset, [gbt.Rational(1, 6)]*6)
+    for alice_card in cards:
+        # Alice's first move
+        term_nodes = [g.root.children[d] for d in deals_by_infoset("Alice", alice_card)]
+        g.append_move(term_nodes, "Alice", ["Check", "Bet"])
+    for bob_card in cards:
+        # Bob's move after Alice checks
+        term_nodes = [g.root.children[d].children["Check"]
+                      for d in deals_by_infoset("Bob", bob_card)]
+        g.append_move(term_nodes, "Bob", ["Check", "Bet"])
+    for alice_card in cards:
+        # Alice's move if Bob's second action is bet
+        term_nodes = [g.root.children[d].children["Check"].children["Bet"]
+                      for d in deals_by_infoset("Alice", alice_card)]
+        g.append_move(term_nodes, "Alice", ["Fold", "Call"])
+    for bob_card in cards:
+        # Bob's move after Alice bets initially
+        term_nodes = [g.root.children[d].children["Bet"]
+                      for d in deals_by_infoset("Bob", bob_card)]
+        g.append_move(term_nodes, "Bob", ["Fold", "Call"])
+
+    g.set_outcome(g.root, g.add_outcome([-1, -1], label="Ante"))
+
+    def calculate_payoffs(term_node):
+
+        def get_path(node):
+            path = []
+            while node.parent:
+                path.append(node.prior_action.label)
+                node = node.parent
+            return path
+
+        def showdown_winner(deal):
+            # deal is an element of deals = ["JQ", "JK", "QJ", "QK", "KJ", "KQ"]
+            card_values = dict(J=0, Q=1, K=2)
+            a, b = deal
+            return "Alice" if card_values[a] > card_values[b] else "Bob"
+
+        def showdown(deal, payoffs, pot):
+            payoffs[showdown_winner(deal)] += pot
+            return payoffs
+
+        def bet(player, payoffs, pot):
+            payoffs[player] += -1
+            pot += 1
+            return payoffs, pot
+
+        path = get_path(term_node)
+        deal = path.pop()  # needed if there is a showdown
+        payoffs = dict(Alice=0, Bob=0)  # ante of 1 for both players now ignored
+        # outcome at root -- both pay -1
+        pot = 2
+        if path.pop() == "Check":  # Alice checks
+            if path.pop() == "Check":  # Bob checks
+                payoffs = showdown(deal, payoffs, pot)
+            else:  # Bob bets
+                payoffs, pot = bet("Bob", payoffs, pot)
+                if path.pop() == "Fold":  # Alice folds
+                    payoffs["Bob"] += pot
+                else:  # Alice calls
+                    payoffs, pot = bet("Alice", payoffs, pot)
+                    payoffs = showdown(deal, payoffs, pot)
+        else:  # Alice bets
+            payoffs, pot = bet("Alice", payoffs, pot)
+            if path.pop() == "Fold":  # Bob
+                payoffs["Alice"] += pot
+            else:  # Bob calls
+                payoffs, pot = bet("Bob", payoffs, pot)
+                payoffs = showdown(deal, payoffs, pot)
+
+        return tuple(payoffs.values())
+
+    # create 4 possible outcomes just once
+    payoffs_to_outcomes = {(2, 0): g.add_outcome([2, 0], label="Alice wins 1"),
+                           (3, -1): g.add_outcome([3, -1], label="Alice wins 2"),
+                           (0, 2): g.add_outcome([0, 2], label="Bob wins 1"),
+                           (-1, 3): g.add_outcome([-1, 3], label="Bob wins 2")}
+
+    for term_node in [n for n in g.nodes if n.is_terminal]:
+        outcome = payoffs_to_outcomes[calculate_payoffs(term_node)]
+        g.set_outcome(term_node, outcome)
+
+    # Ensure infosets are in the same order as if game was written to efg and read back in
+    g.sort_infosets()
+    return g
+
 
 def kuhn_poker_lcp_first_mixed_strategy_prof():
     """
