@@ -145,5 +145,8 @@ AC_SUBST(WX_CXXFLAGS)
 REZFLAGS=`echo $CXXFLAGS $WX_CXXFLAGS | sed 's/-mthreads//g' | sed 's/-g//g' | sed 's/-O. / /g' | sed 's/-I/--include-dir /g'`
 AC_SUBST(REZFLAGS)
 
-AC_CONFIG_FILES([Makefile])
+GAMBIT_VERSION=`cat VERSION`
+AC_SUBST(GAMBIT_VERSION)
+
+AC_CONFIG_FILES([Makefile contrib/mac/Info.plist gambit.wxs])
 AC_OUTPUT

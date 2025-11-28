@@ -28,4 +28,15 @@ from . import (  # noqa: F401
     supports,  # noqa: F401
 )
 
-__version__ = "16.4.0"
+import importlib.metadata
+
+try:
+    __version__ = importlib.metadata.version("pygambit")
+except importlib.metadata.PackageNotFoundError:
+    # Package is not installed, fallback to reading VERSION file
+    import pathlib
+    _version_file = pathlib.Path(__file__).parent.parent.parent / "VERSION"
+    if _version_file.exists():
+        __version__ = _version_file.read_text().strip()
+    else:
+        __version__ = "unknown"
