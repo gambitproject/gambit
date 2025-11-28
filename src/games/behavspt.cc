@@ -192,12 +192,6 @@ PlayerSequences BehaviorSupportProfile::GetSequences(const GamePlayer &p_player)
   return {this, p_player};
 }
 
-int BehaviorSupportProfile::GetConstraintEntry(const GameInfoset &p_infoset,
-                                               const GameAction &p_action) const
-{
-  return GetSequenceForm()->GetConstraintEntry(p_infoset, p_action);
-}
-
 uint8_t &
 BehaviorSupportProfile::IsOutcome(const std::map<GamePlayer, GameSequence> &p_profile) const
 {

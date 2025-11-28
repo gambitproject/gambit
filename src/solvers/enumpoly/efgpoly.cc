@@ -72,7 +72,7 @@ Polynomial<double> BuildSequenceVariable(ProblemData &p_data, const GameSequence
       continue;
     }
     if (const int constraint_coef =
-            p_data.m_support.GetConstraintEntry(p_sequence->GetInfoset(), seq->action)) {
+            p_data.m_support.GetSequenceConstraintEntry(p_sequence->GetInfoset(), seq->action)) {
       equation += BuildSequenceVariable(p_data, seq, var) * double(constraint_coef);
     }
   }
