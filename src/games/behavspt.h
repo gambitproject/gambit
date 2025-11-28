@@ -198,7 +198,6 @@ public:
   std::shared_ptr<GameSequenceForm> GetSequenceForm() const;
   Sequences GetSequences() const;
   PlayerSequences GetSequences(const GamePlayer &p_player) const;
-  int GetConstraintEntry(const GameInfoset &p_infoset, const GameAction &p_action) const;
   const Rational &GetPayoff(const std::map<GamePlayer, GameSequence> &p_profile,
                             const GamePlayer &p_player) const;
   uint8_t &IsOutcome(const std::map<GamePlayer, GameSequence> &p_profile) const;
