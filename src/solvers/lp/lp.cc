@@ -134,7 +134,9 @@ template <class T> void GameData<T>::FillTableauNew(Matrix<T> &A, const Game &p_
       std::map<GamePlayer, GameSequence> profile;
       profile[player1] = seq1;
       profile[player2] = seq2;
-      A(row, col) = p_game->GetPayoff(profile, player1) - minpay;
+      if (p_game->IsOutcome(profile)) {
+        A(row, col) = p_game->GetPayoff(profile, player1) - minpay;
+      }
     }
   }
 }
