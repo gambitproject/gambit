@@ -201,6 +201,7 @@ public:
   int GetConstraintEntry(const GameInfoset &p_infoset, const GameAction &p_action) const;
   const Rational &GetPayoff(const std::map<GamePlayer, GameSequence> &p_profile,
                             const GamePlayer &p_player) const;
+  uint8_t &IsOutcome(const std::map<GamePlayer, GameSequence> &p_profile) const;
   GameRep::Players GetPlayers() const { return GetGame()->GetPlayers(); }
   MixedBehaviorProfile<double>
   ToMixedBehaviorProfile(const std::map<GameSequence, double> &) const;

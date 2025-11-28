@@ -346,8 +346,10 @@ void NashLcpBehaviorSolver<T>::FillTableauNew(Matrix<T> &A, const Game &p_game,
       std::map<GamePlayer, GameSequence> profile;
       profile[player1] = seq1;
       profile[player2] = seq2;
-      A(s1, ns1 + s2) = p_game->GetPayoff(profile, player1) - p_solution.maxpay;
-      A(ns1 + s2, s1) = p_game->GetPayoff(profile, player2) - p_solution.maxpay;
+      if (p_game->IsOutcome(profile)) {
+        A(s1, ns1 + s2) = p_game->GetPayoff(profile, player1) - p_solution.maxpay;
+        A(ns1 + s2, s1) = p_game->GetPayoff(profile, player2) - p_solution.maxpay;
+      }
     }
   }
 }
