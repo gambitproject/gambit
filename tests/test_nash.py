@@ -543,11 +543,10 @@ def test_logit_solve_lambda():
     assert len(gbt.qre.logit_solve_lambda(
                 game=game, lam=[1, 2, 3], first_step=0.2, max_accel=1)) > 0
 
+
 def test_kuhn():
     old = games.create_kuhn_poker_efg()
-    new = games.create_kuhn_poker_efg_internal_outcomes() 
+    new = games.create_kuhn_poker_efg_internal_outcomes()
 
-    for i in [0,1]:
+    for i in [0, 1]:
         assert (old.to_arrays()[i] == new.to_arrays()[i]).all()
-
-
