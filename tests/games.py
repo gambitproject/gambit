@@ -129,6 +129,64 @@ def create_stripped_down_poker_efg() -> gbt.Game:
     return read_from_file("stripped_down_poker.efg")
 
 
+def create_stripped_down_poker_efg_nonterminal_outcomes() -> gbt.Game:
+    """
+    Returns
+    -------
+    Game
+        Stripped-Down Poker: A Classroom Game with Signaling and Bluﬃng
+        Reiley et al (2008)
+
+        Two-player extensive-form poker game between Fred and Alice
+        Chance deals King or Queen to Fred
+        Fred can then Bet or Fold; after raising Alice is in an infoset with two nodes
+        and can choose to Call or Fold
+    """
+    g = gbt.Game.new_tree(
+        players=["Alice", "Bob"], title="Stripped-Down Poker: a simple game of one-card\
+                                            poker from Reiley et al (2008)."
+    )
+    deals = ["King", "Queen"]
+    g.append_move(g.root, g.players.chance, deals)
+
+    ante_outcome = g.add_outcome([-1, -1], label="Ante")
+    g.set_outcome(g.root, ante_outcome)
+
+    alice_folds_outcome = g.add_outcome([0, 2], label="Alice Folds")
+    alice_bets_outcome = g.add_outcome([-1, 0], label="Alice Bets")
+    bob_folds_outcome = g.add_outcome([3, 0], label="Bob Folds")
+    bob_calls_and_wins_outcome = g.add_outcome([0, 3], label="Bob Calls and Wins")
+    bob_calls_and_loses_outcome = g.add_outcome([4, -1], label="Bob Calls and Loses")
+
+    for node in g.root.children:
+        g.append_move(
+            node,
+            player="Alice",
+            actions=["Bet", "Fold"]
+        )
+        g.set_outcome(node.children["Fold"], alice_folds_outcome)
+        g.set_outcome(node.children["Bet"], alice_bets_outcome)
+
+    alice_bets_nodes = [g.root.children["King"].children["Bet"],
+                        g.root.children["Queen"].children["Bet"]]
+    g.append_move(
+        alice_bets_nodes,
+        player="Bob",
+        actions=["Call", "Fold"]
+    )
+    for node in alice_bets_nodes:
+        g.set_outcome(node.children["Fold"], bob_folds_outcome)
+
+    bob_calls_and_loses_node = g.root.children["King"].children["Bet"].children["Call"]
+    g.set_outcome(bob_calls_and_loses_node, bob_calls_and_loses_outcome)
+    bob_calls_and_wins_node = g.root.children["Queen"].children["Bet"].children["Call"]
+    g.set_outcome(bob_calls_and_wins_node, bob_calls_and_wins_outcome)
+
+    g.to_efg("stripped_down_poker_nonterminal_outcomes.efg")
+
+    return g
+
+
 def create_kuhn_poker_efg() -> gbt.Game:
     """
     Returns
@@ -234,7 +292,7 @@ def create_kuhn_poker_efg() -> gbt.Game:
     return g
 
 
-def create_kuhn_poker_efg_internal_outcomes() -> gbt.Game:
+def create_kuhn_poker_efg_nonterminal_outcomes() -> gbt.Game:
     """
     Returns
     -------
