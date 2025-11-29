@@ -432,6 +432,11 @@ def test_lp_behavior_double():
             games.create_two_player_perfect_info_win_lose_efg(),
             [[[0, 1], [1, 0]], [[1, 0], [1, 0]]],
         ),
+        pytest.param(
+            games.create_two_player_perfect_info_win_lose_efg_nonterminal_outcomes(),
+            [[[0, 1], [1, 0]], [[1, 0], [1, 0]]],
+            marks=pytest.mark.xfail(reason="Problem with nonterminal nodes in LP/LCP")
+        ),
         (
             games.create_stripped_down_poker_efg(),
             [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]],

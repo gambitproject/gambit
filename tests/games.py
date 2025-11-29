@@ -682,6 +682,25 @@ def create_two_player_perfect_info_win_lose_efg() -> gbt.Game:
     return g
 
 
+def create_two_player_perfect_info_win_lose_efg_nonterminal_outcomes() -> gbt.Game:
+    g = gbt.Game.new_tree(players=["1", "2"], title="2 player perfect info win lose")
+    g.append_move(g.root, "2", ["a", "b"])
+    g.append_move(g.root.children[0], "1", ["L", "R"])
+    g.append_move(g.root.children[1], "1", ["L", "R"])
+    g.append_move(g.root.children[0].children[0], "2", ["l", "r"])
+    g.set_outcome(g.root.children[0], g.add_outcome([0, 0], label="a"))
+    g.set_outcome(
+        g.root.children[0].children[0].children[0], g.add_outcome([1, -1], label="aLl")
+    )
+    g.set_outcome(
+        g.root.children[0].children[0].children[1], g.add_outcome([-1, 1], label="aLr")
+    )
+    g.set_outcome(g.root.children[0].children[1], g.add_outcome([1, -1], label="aR"))
+    g.set_outcome(g.root.children[1].children[0], g.add_outcome([1, -1], label="bL"))
+    g.set_outcome(g.root.children[1].children[1], g.add_outcome([-1, 1], label="bR"))
+    return g
+
+
 def create_EFG_for_nxn_bimatrix_coordination_game(n: int) -> gbt.Game:
     A = np.eye(n, dtype=int)
     B = A
