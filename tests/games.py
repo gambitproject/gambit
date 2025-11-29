@@ -228,6 +228,9 @@ def create_kuhn_poker_efg() -> gbt.Game:
 
     # Ensure infosets are in the same order as if game was written to efg and read back in
     g.sort_infosets()
+
+    g.to_efg("Kuhn.efg")
+
     return g
 
 
@@ -247,6 +250,9 @@ def create_kuhn_poker_efg_internal_outcomes() -> gbt.Game:
     def deals_by_infoset(player, card):
         player_idx = 0 if player == "Alice" else 1
         return [d for d in deals if d[player_idx] == card]
+
+    ante_outcome = g.add_outcome([-1, -1], label="Ante")
+    g.set_outcome(g.root, ante_outcome)
 
     g.append_move(g.root, g.players.chance, deals)
     g.set_chance_probs(g.root.infoset, [gbt.Rational(1, 6)]*6)
@@ -270,14 +276,41 @@ def create_kuhn_poker_efg_internal_outcomes() -> gbt.Game:
                       for d in deals_by_infoset("Bob", bob_card)]
         g.append_move(term_nodes, "Bob", ["Fold", "Call"])
 
-    g.set_outcome(g.root, g.add_outcome([-1, -1], label="Ante"))
+    #####################################################################################
+    #####################################################################################
+    outcomes_dict = dict()
+    for player in ["Alice", "Bob"]:
+        # non-terminal outcomes for betting
+        payoffs = [-1, 0] if player == "Alice" else [0, -1]
+        tmp = f"{player} bets"
+        outcomes_dict[tmp] = g.add_outcome(payoffs, label=tmp)
 
-    def calculate_payoffs(term_node):
+        # terminal outcomes for showdown after both check (pot of 2)
+        payoffs = [2, 0] if player == "Alice" else [0, 2]
+        tmp = f"{player} wins showdown for pot of 2"
+        outcomes_dict[tmp] = g.add_outcome(payoffs, label=tmp)
+
+        # terminal outcomes after a player folds (pot of 3)
+        payoffs = [0, 3] if player == "Alice" else [3, 0]
+        tmp = f"{player} folds"
+        outcomes_dict[tmp] = g.add_outcome(payoffs, label=tmp)
+
+        # terminal outcomes after a player calls and wins: bet first (-1) then win pot (4)
+        payoffs = [3, 0] if player == "Alice" else [0, 3]
+        tmp = f"{player} calls and wins"
+        outcomes_dict[tmp] = g.add_outcome(payoffs, label=tmp)
+
+        # terminal outcomes after a player calls and loses: bet first (-1) then lose pot (4)
+        payoffs = [-1, 4] if player == "Alice" else [4, -1]
+        tmp = f"{player} calls and loses"
+        outcomes_dict[tmp] = g.add_outcome(payoffs, label=tmp)
+
+    def add_outcomes(term_node):
 
         def get_path(node):
             path = []
             while node.parent:
-                path.append(node.prior_action.label)
+                path.append(node)
                 node = node.parent
             return path
 
@@ -287,52 +320,39 @@ def create_kuhn_poker_efg_internal_outcomes() -> gbt.Game:
             a, b = deal
             return "Alice" if card_values[a] > card_values[b] else "Bob"
 
-        def showdown(deal, payoffs, pot):
-            payoffs[showdown_winner(deal)] += pot
-            return payoffs
-
-        def bet(player, payoffs, pot):
-            payoffs[player] += -1
-            pot += 1
-            return payoffs, pot
-
         path = get_path(term_node)
-        deal = path.pop()  # needed if there is a showdown
-        payoffs = dict(Alice=0, Bob=0)  # ante of 1 for both players now ignored
-        # outcome at root -- both pay -1
-        pot = 2
-        if path.pop() == "Check":  # Alice checks
-            if path.pop() == "Check":  # Bob checks
-                payoffs = showdown(deal, payoffs, pot)
+        deal = path.pop().prior_action.label
+        winner = showdown_winner(deal)  # needed if there is a showdown
+
+        n = path.pop()
+        if n.prior_action.label == "Check":  # Alice checks
+            n = path.pop()
+            if n.prior_action.label == "Check":  # Bob checks
+                g.set_outcome(n, outcomes_dict[f"{winner} wins showdown for pot of 2"])
             else:  # Bob bets
-                payoffs, pot = bet("Bob", payoffs, pot)
-                if path.pop() == "Fold":  # Alice folds
-                    payoffs["Bob"] += pot
+                g.set_outcome(n, outcomes_dict["Bob bets"])
+                n = path.pop()
+                if n.prior_action.label == "Fold":  # Alice folds
+                    g.set_outcome(n, outcomes_dict["Alice folds"])
                 else:  # Alice calls
-                    payoffs, pot = bet("Alice", payoffs, pot)
-                    payoffs = showdown(deal, payoffs, pot)
+                    tmp = "wins" if winner == "Alice" else "loses"
+                    g.set_outcome(n, outcomes_dict[f"Alice calls and {tmp}"])
         else:  # Alice bets
-            payoffs, pot = bet("Alice", payoffs, pot)
-            if path.pop() == "Fold":  # Bob
-                payoffs["Alice"] += pot
+            g.set_outcome(n, outcomes_dict["Alice bets"])
+            n = path.pop()
+            if n.prior_action.label == "Fold":  # Bob
+                g.set_outcome(n, outcomes_dict["Bob folds"])
             else:  # Bob calls
-                payoffs, pot = bet("Bob", payoffs, pot)
-                payoffs = showdown(deal, payoffs, pot)
-
-        return tuple(payoffs.values())
-
-    # create 4 possible outcomes just once
-    payoffs_to_outcomes = {(2, 0): g.add_outcome([2, 0], label="Alice wins 1"),
-                           (3, -1): g.add_outcome([3, -1], label="Alice wins 2"),
-                           (0, 2): g.add_outcome([0, 2], label="Bob wins 1"),
-                           (-1, 3): g.add_outcome([-1, 3], label="Bob wins 2")}
+                tmp = "wins" if winner == "Bob" else "loses"
+                g.set_outcome(n, outcomes_dict[f"Bob calls and {tmp}"])
 
     for term_node in [n for n in g.nodes if n.is_terminal]:
-        outcome = payoffs_to_outcomes[calculate_payoffs(term_node)]
-        g.set_outcome(term_node, outcome)
+        add_outcomes(term_node)
 
     # Ensure infosets are in the same order as if game was written to efg and read back in
     g.sort_infosets()
+
+    g.to_efg("Kuhn_nonterminal.efg")
     return g
 
 

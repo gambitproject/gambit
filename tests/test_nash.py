@@ -549,4 +549,9 @@ def test_kuhn():
     new = games.create_kuhn_poker_efg_internal_outcomes()
 
     for i in [0, 1]:
+
+        # print(old.to_arrays()[i])
+        # print("===============================")
+        # print(new.to_arrays()[i])
+
         assert (old.to_arrays()[i] == new.to_arrays()[i]).all()
