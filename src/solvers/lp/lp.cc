@@ -90,6 +90,9 @@ template <class T> void GameData<T>::FillTableau(Matrix<T> &A, const Game &p_gam
       if (p_game->IsOutcome(profile)) {
         A(row, col) = p_game->GetPayoff(profile, player1) - minpay;
       }
+      else {
+        A(row, col) = p_game->GetPayoff(profile, player1);
+      }
     }
   }
 }

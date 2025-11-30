@@ -70,13 +70,13 @@ void GameSequenceForm::FillTableau(const GameNode &n, const Rational &prob,
                                    std::map<GamePlayer, GameSequence> &p_currentSequences)
 {
   if (n->GetOutcome()) {
-    IsOutcome(p_currentSequences) = 1;
     for (auto player : m_support.GetGame()->GetPlayers()) {
       GetPayoffEntry(p_currentSequences, player) +=
           prob * n->GetOutcome()->GetPayoff<Rational>(player);
     }
   }
   if (!n->GetInfoset()) {
+    IsOutcome(p_currentSequences) = 1;
     return;
   }
   if (n->GetPlayer()->IsChance()) {
