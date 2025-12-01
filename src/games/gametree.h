@@ -95,7 +95,7 @@ public:
   /// Returns the number of non-terminal nodes in the game
   size_t NumNonterminalNodes() const override { return m_numNonterminalNodes; }
   /// Returns the last action taken by the node's owner before reaching this node
-  GameAction GetOwnPriorAction(GameNode node) const;
+  GameAction GetOwnPriorAction(const GameNode &p_node) const override;
   //@}
 
   void DeleteOutcome(const GameOutcome &) override;
@@ -121,7 +121,7 @@ public:
   /// Sort the information sets for each player in a canonical order
   void SortInfosets() override;
   /// Returns the set of actions taken by the infoset's owner before reaching this infoset
-  std::set<GameAction> GetOwnPriorActions(GameInfoset infoset) const;
+  std::set<GameAction> GetOwnPriorActions(const GameInfoset &p_infoset) const override;
   //@}
 
   /// @name Modification

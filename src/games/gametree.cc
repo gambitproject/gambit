@@ -325,17 +325,12 @@ GameAction GameNodeRep::GetPriorAction() const
 
 GameAction GameNodeRep::GetOwnPriorAction() const
 {
-  auto tree_game = static_cast<GameTreeRep *>(m_game);
-
-  return tree_game->GetOwnPriorAction(std::const_pointer_cast<GameNodeRep>(shared_from_this()));
+  return m_game->GetOwnPriorAction(std::const_pointer_cast<GameNodeRep>(shared_from_this()));
 }
 
 std::set<GameAction> GameInfosetRep::GetOwnPriorActions() const
 {
-  auto tree_game = static_cast<GameTreeRep *>(m_game);
-
-  return tree_game->GetOwnPriorActions(
-      std::const_pointer_cast<GameInfosetRep>(shared_from_this()));
+  return m_game->GetOwnPriorActions(std::const_pointer_cast<GameInfosetRep>(shared_from_this()));
 }
 
 void GameNodeRep::DeleteOutcome(GameOutcomeRep *outc)
@@ -941,38 +936,31 @@ void GameTreeRep::BuildOwnPriorActions()
   }
 }
 
-GameAction GameTreeRep::GetOwnPriorAction(GameNode node) const
+GameAction GameTreeRep::GetOwnPriorAction(const GameNode &p_node) const
 {
   if (m_nodeOwnPriorAction.empty()) {
     const_cast<GameTreeRep *>(this)->BuildOwnPriorActions();
   }
 
-  auto it = m_nodeOwnPriorAction.find(node.get());
-  if (it != m_nodeOwnPriorAction.end()) {
-    if (it->second) {
-      return it->second->shared_from_this();
-    }
+  auto it = m_nodeOwnPriorAction.find(p_node.get());
+  if (it != m_nodeOwnPriorAction.end() && it->second) {
+    return it->second->shared_from_this();
   }
   return nullptr;
 }
 
-std::set<GameAction> GameTreeRep::GetOwnPriorActions(GameInfoset infoset) const
+std::set<GameAction> GameTreeRep::GetOwnPriorActions(const GameInfoset &p_infoset) const
 {
   if (m_nodeOwnPriorAction.empty()) {
     const_cast<GameTreeRep *>(this)->BuildOwnPriorActions();
   }
 
   std::set<GameAction> result;
-  auto it = m_infosetOwnPriorActions.find(infoset.get());
+  auto it = m_infosetOwnPriorActions.find(p_infoset.get());
 
   if (it != m_infosetOwnPriorActions.end()) {
     for (auto *ptr : it->second) {
-      if (ptr) {
-        result.insert(ptr->shared_from_this());
-      }
-      else {
-        result.insert(nullptr);
-      }
+      result.insert(ptr ? ptr->shared_from_this() : nullptr);
     }
   }
   return result;
@@ -990,9 +978,7 @@ void GameTreeRep::BuildUnreachableNodes()
   using ActiveEdge = std::variant<GameNodeRep::Actions::iterator, AbsentMindedEdge>;
 
   std::stack<ActiveEdge> position;
-
   std::map<GameInfoset, GameAction> path_choices;
-
   position.emplace(m_root->GetActions().begin());
 
   while (!position.empty()) {
@@ -1024,24 +1010,18 @@ void GameTreeRep::BuildUnreachableNodes()
     if (!child->IsTerminal()) {
       // Check for Absent-Minded Re-entry of the infoset
       if (path_choices.find(child->m_infoset->shared_from_this()) != path_choices.end()) {
-
         const GameAction replay_action = path_choices.at(child->m_infoset->shared_from_this());
-
         position.emplace(AbsentMindedEdge{replay_action, child});
 
         // Mark siblings and the nodes in their subtrees as unreachable
         for (const auto &[current_action, subtree_root] : child->GetActions()) {
           if (current_action != replay_action) {
-
             std::stack<GameNodeRep *> nodes_to_visit;
             nodes_to_visit.push(subtree_root.get());
-
             while (!nodes_to_visit.empty()) {
               GameNodeRep *current_unreachable_node = nodes_to_visit.top();
               nodes_to_visit.pop();
-
               m_unreachableNodes->insert(current_unreachable_node);
-
               for (const auto &unreachable_child : current_unreachable_node->GetChildren()) {
                 nodes_to_visit.push(unreachable_child.get());
               }

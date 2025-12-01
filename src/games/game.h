@@ -902,6 +902,11 @@ public:
   virtual std::vector<GameInfoset> GetInfosets() const { throw UndefinedException(); }
   /// Sort the information sets for each player in a canonical order
   virtual void SortInfosets() {}
+  /// Returns the set of actions taken by the infoset's owner before reaching this infoset
+  virtual std::set<GameAction> GetOwnPriorActions(const GameInfoset &p_infoset) const
+  {
+    throw UndefinedException();
+  }
   //@}
 
   /// @name Outcomes
@@ -929,6 +934,11 @@ public:
   virtual size_t NumNodes() const = 0;
   /// Returns the number of non-terminal nodes in the game
   virtual size_t NumNonterminalNodes() const = 0;
+  /// Returns the last action taken by the node's owner before reaching this node
+  virtual GameAction GetOwnPriorAction(const GameNode &p_node) const
+  {
+    throw UndefinedException();
+  }
   //@}
 
   /// @name Modification
