@@ -23,8 +23,6 @@
 ACLOCAL_AMFLAGS = -I m4
 
 EXTRA_DIST = \
-	gambit.spec \
-	gambit.desktop \
     gambit.wxs \
 	contrib/mac/Info.plist \
 	contrib/mac/gambit.icns \
