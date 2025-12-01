@@ -373,8 +373,6 @@ if WITH_GUI
 bin_PROGRAMS += gambit
 endif
 
-EXTRA_PROGRAMS = gambit-enumpoly gambit
-
 # Read version from GAMBIT_VERSION file for use in compilation
 GAMBIT_VERSION = $(shell cat $(top_srcdir)/GAMBIT_VERSION)
 
