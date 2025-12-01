@@ -198,8 +198,9 @@ def test_node_own_prior_action_non_terminal(game_file, expected_node_data):
 
     for node in game.nodes:
         if node.is_terminal:
-            assert node.own_prior_action is None, \
+            assert node.own_prior_action is None, (
                 f"Terminal node at {_get_path_of_action_labels(node)} must be None"
+            )
         else:
             # Only collect data for non-terminal nodes
             opa = node.own_prior_action
