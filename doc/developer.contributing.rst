@@ -158,7 +158,7 @@ When making a new release of Gambit, follow these steps:
 2. Update the version number in the ``GAMBIT_VERSION`` file at the root of the repository to ``X.Y.Z``.
 
    All other files will automatically use the updated version number:
-   
+
    - `pyproject.toml` reads from GAMBIT_VERSION file at build time
    - `configure.ac` reads from GAMBIT_VERSION file and substitutes into `Info.plist` and `gambit.wxs`
    - `src/pygambit/__init__.py` reads from installed package metadata or GAMBIT_VERSION file
@@ -168,18 +168,18 @@ When making a new release of Gambit, follow these steps:
 3. Update the `ChangeLog` file with a summary of changes
 
 4. Once there are no further commits to be made for the release, create a tag for the release from the latest commit on the maintenance branch. ::
-    
+
     git tag -a vX.Y.Z -m "Gambit version X.Y.Z"
 
 5. Push the maintenance branch and tags to the GitHub repository. ::
-    
+
     git push origin maintX_Y
     git push origin --tags
 
 6. Create a new release on the `GitHub releases page <https://github.com/gambitproject/gambit/releases>`__, using the tag created in step 4.
    Include a summary of changes from the `ChangeLog` file in the release notes.
 
-7. Currently there is no automated process for pushing the new release to PyPI. This must be done manually by Ted Turocy or Rahul Savani.
+7. Currently there is no automated process for pushing the new release to PyPI. This must be done manually.
 
 .. TODO: update this process to be automated via GitHub Actions: Issue #557
 
