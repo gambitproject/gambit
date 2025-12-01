@@ -149,6 +149,7 @@ Information about the game
    Node.player
    Node.is_successor_of
    Node.plays
+   Node.own_prior_action
 
 .. autosummary::
 
@@ -162,6 +163,7 @@ Information about the game
    Infoset.members
    Infoset.precedes
    Infoset.plays
+   Infoset.own_prior_actions
 
 .. autosummary::
 
