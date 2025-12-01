@@ -167,25 +167,23 @@ class Infoset:
         return InfosetActions.wrap(self.infoset)
 
     @property
-    def own_prior_actions(self) -> typing.Set[typing.Optional[Action]]:
+    def own_prior_actions(self) -> typing.List[typing.Optional[Action]]:
         """The set of actions taken by the player immediately preceding the member nodes
         in the information set.
 
-        Returns a set containing Action objects. If a node in the information set
-        is reached without the player having moved previously, None will be
-        included in the set.
+        Returns
+        -------
+        list of Action or None
+            A list containing Action objects. If a node in the information set
+            is reached without the player having moved previously, None will be
+            included in the list.
         """
         c_actions: stdset[c_GameAction] = self.infoset.deref().GetOwnPriorActions()
-        action: c_GameAction
-        result = set()
 
-        for action in c_actions:
-            if action != cython.cast(c_GameAction, NULL):
-                result.add(Action.wrap(action))
-            else:
-                result.add(None)
-
-        return result
+        return [
+            Action.wrap(action) if action != cython.cast(c_GameAction, NULL) else None
+            for action in c_actions
+        ]
 
     @property
     def members(self) -> InfosetMembers:
