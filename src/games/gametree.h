@@ -32,6 +32,12 @@ class GameTreeRep : public GameExplicitRep {
   friend class GameInfosetRep;
   friend class GameActionRep;
 
+private:
+  struct OwnPriorActionInfo {
+    std::map<GameNodeRep *, GameActionRep *> node_map;
+    std::map<GameInfosetRep *, std::set<GameActionRep *>> infoset_map;
+  };
+
 protected:
   mutable bool m_computedValues{false};
   std::shared_ptr<GameNodeRep> m_root;
@@ -39,8 +45,7 @@ protected:
   std::size_t m_numNodes = 1;
   std::size_t m_numNonterminalNodes = 0;
   std::map<GameNodeRep *, std::vector<GameNodeRep *>> m_nodePlays;
-  std::map<GameNodeRep *, GameActionRep *> m_nodeOwnPriorAction;
-  std::map<GameInfosetRep *, std::set<GameActionRep *>> m_infosetOwnPriorActions;
+  mutable std::shared_ptr<OwnPriorActionInfo> m_ownPriorActionInfo;
   mutable std::unique_ptr<std::set<GameNodeRep *>> m_unreachableNodes;
 
   /// @name Private auxiliary functions
@@ -160,7 +165,7 @@ public:
 
 private:
   std::vector<GameNodeRep *> BuildConsistentPlaysRecursiveImpl(GameNodeRep *node);
-  void BuildOwnPriorActions();
+  void BuildOwnPriorActions() const;
   void BuildUnreachableNodes();
 };
 

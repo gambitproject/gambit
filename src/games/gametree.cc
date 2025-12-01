@@ -760,15 +760,16 @@ bool GameTreeRep::IsConstSum() const
 
 bool GameTreeRep::IsPerfectRecall() const
 {
-  if (m_nodeOwnPriorAction.empty() && !m_root->IsTerminal()) {
-    const_cast<GameTreeRep *>(this)->BuildOwnPriorActions();
+  if (!m_ownPriorActionInfo && !m_root->IsTerminal()) {
+    BuildOwnPriorActions();
   }
 
   if (GetRoot()->IsTerminal()) {
     return true;
   }
 
-  return std::all_of(m_infosetOwnPriorActions.cbegin(), m_infosetOwnPriorActions.cend(),
+  return std::all_of(m_ownPriorActionInfo->infoset_map.cbegin(),
+                     m_ownPriorActionInfo->infoset_map.cend(),
                      [](const auto &pair) { return pair.second.size() <= 1; });
 }
 
@@ -821,8 +822,7 @@ void GameTreeRep::ClearComputedValues() const
     player->m_strategies.clear();
   }
   const_cast<GameTreeRep *>(this)->m_nodePlays.clear();
-  const_cast<GameTreeRep *>(this)->m_nodeOwnPriorAction.clear();
-  const_cast<GameTreeRep *>(this)->m_infosetOwnPriorActions.clear();
+  m_ownPriorActionInfo = nullptr;
   const_cast<GameTreeRep *>(this)->m_unreachableNodes = nullptr;
   m_computedValues = false;
 }
@@ -864,18 +864,18 @@ std::vector<GameNodeRep *> GameTreeRep::BuildConsistentPlaysRecursiveImpl(GameNo
   return consistent_plays;
 }
 
-void GameTreeRep::BuildOwnPriorActions()
+void GameTreeRep::BuildOwnPriorActions() const
 {
-  m_nodeOwnPriorAction.clear();
-  m_infosetOwnPriorActions.clear();
+  auto info = std::make_shared<OwnPriorActionInfo>();
 
   if (m_root->IsTerminal()) {
+    m_ownPriorActionInfo = info;
     return;
   }
 
-  m_nodeOwnPriorAction[m_root.get()] = nullptr;
+  info->node_map[m_root.get()] = nullptr;
   if (m_root->m_infoset) {
-    m_infosetOwnPriorActions[m_root->m_infoset].insert(nullptr);
+    info->infoset_map[m_root->m_infoset].insert(nullptr);
   }
 
   using ActiveEdge = GameNodeRep::Actions::iterator;
@@ -923,8 +923,8 @@ void GameTreeRep::BuildOwnPriorActions()
         auto prior_action = prior_actions.at(child_player).top();
         GameActionRep *raw_prior = prior_action ? prior_action.get() : nullptr;
 
-        m_nodeOwnPriorAction[child.get()] = raw_prior;
-        m_infosetOwnPriorActions[child->m_infoset].insert(raw_prior);
+        info->node_map[child.get()] = raw_prior;
+        info->infoset_map[child->m_infoset].insert(raw_prior);
 
         position.emplace(child->GetActions().begin());
         prior_actions.at(child_player).emplace(nullptr);
@@ -934,16 +934,17 @@ void GameTreeRep::BuildOwnPriorActions()
       }
     }
   }
+  m_ownPriorActionInfo = info;
 }
 
 GameAction GameTreeRep::GetOwnPriorAction(const GameNode &p_node) const
 {
-  if (m_nodeOwnPriorAction.empty()) {
-    const_cast<GameTreeRep *>(this)->BuildOwnPriorActions();
+  if (!m_ownPriorActionInfo) {
+    BuildOwnPriorActions();
   }
 
-  auto it = m_nodeOwnPriorAction.find(p_node.get());
-  if (it != m_nodeOwnPriorAction.end() && it->second) {
+  auto it = m_ownPriorActionInfo->node_map.find(p_node.get());
+  if (it != m_ownPriorActionInfo->node_map.end() && it->second) {
     return it->second->shared_from_this();
   }
   return nullptr;
@@ -951,14 +952,14 @@ GameAction GameTreeRep::GetOwnPriorAction(const GameNode &p_node) const
 
 std::set<GameAction> GameTreeRep::GetOwnPriorActions(const GameInfoset &p_infoset) const
 {
-  if (m_nodeOwnPriorAction.empty()) {
-    const_cast<GameTreeRep *>(this)->BuildOwnPriorActions();
+  if (!m_ownPriorActionInfo) {
+    BuildOwnPriorActions();
   }
 
   std::set<GameAction> result;
-  auto it = m_infosetOwnPriorActions.find(p_infoset.get());
+  auto it = m_ownPriorActionInfo->infoset_map.find(p_infoset.get());
 
-  if (it != m_infosetOwnPriorActions.end()) {
+  if (it != m_ownPriorActionInfo->infoset_map.end()) {
     for (auto *ptr : it->second) {
       result.insert(ptr ? ptr->shared_from_this() : nullptr);
     }
