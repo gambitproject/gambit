@@ -762,6 +762,33 @@ bool GameTreeRep::IsPerfectRecall() const
                      [](const auto &pair) { return pair.second.size() <= 1; });
 }
 
+namespace {
+Rational GetSubtreeMinPayoff(const GamePlayer &p_player, const GameNode &p_node)
+{
+  if (p_node->IsTerminal()) {
+    if (p_node->GetOutcome()) {
+      return p_node->GetOutcome()->GetPayoff<Rational>(p_player);
+    }
+    return Rational(0);
+  }
+  const auto &children = p_node->GetChildren();
+  auto subtree = std::accumulate(std::next(children.begin()), children.end(),
+                                 GetSubtreeMinPayoff(p_player, children.front()),
+                                 [&p_player](const Rational &r, const GameNode &c) {
+                                   return std::min(r, GetSubtreeMinPayoff(p_player, c));
+                                 });
+  if (p_node->GetOutcome()) {
+    return subtree + p_node->GetOutcome()->GetPayoff<Rational>(p_player);
+  }
+  return subtree;
+}
+} // namespace
+
+Rational GameTreeRep::GetMinPayoff(const GamePlayer &p_player) const
+{
+  return GetSubtreeMinPayoff(p_player, m_root);
+}
+
 //------------------------------------------------------------------------
 //               GameTreeRep: Managing the representation
 //------------------------------------------------------------------------

@@ -143,6 +143,18 @@ def test_player_get_min_payoff():
     assert game.players["Player 2"].min_payoff == 1
 
 
+def test_player_get_min_payoff_nonterminal_outcomes():
+    """Test whether `min_payoff` correctly reports minimum payoffs
+    when there are non-terminal outcomes.
+    """
+    game = games.read_from_file("stripped_down_poker.efg")
+    assert game.players["Alice"].min_payoff == -2
+    assert game.players["Bob"].min_payoff == -2
+    game.set_outcome(game.root, game.add_outcome([-1, -1]))
+    assert game.players["Alice"].min_payoff == -3
+    assert game.players["Bob"].min_payoff == -3
+
+
 def test_player_get_max_payoff():
     game = games.read_from_file("payoff_game.nfg")
     assert game.players[0].max_payoff == 10
