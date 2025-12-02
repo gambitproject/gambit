@@ -31,7 +31,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install setuptools build cython wheel
           pip install -r tests/requirements.txt
-          pip install -r doc/requirements.txt
+          if [ "${{ matrix.python-version }}" != "3.9" ]; then
+            pip install -r doc/requirements.txt
+          fi
       - name: Build source distribution
         run:
           python -m build
