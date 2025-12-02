@@ -22,6 +22,7 @@
 
 #include <iostream>
 #include <algorithm>
+#include <functional>
 #include <numeric>
 #include <stack>
 #include <set>
