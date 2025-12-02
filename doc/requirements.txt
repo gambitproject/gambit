@@ -9,4 +9,4 @@ ipython
 matplotlib
 pickleshare
 jupyter
-open_spiel==1.6.9
+open_spiel
