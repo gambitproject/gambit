@@ -12,21 +12,25 @@ The tutorials are available as Jupyter notebooks and can be run interactively us
 
     git clone https://github.com/gambitproject/gambit.git
 
-2. Install the latest release of `pygambit` from PyPI ::
+2. Install `pygambit`:
 
-    pip install pygambit
+   * To install the latest release from PyPI::
 
-    .. note::
-     Alternatively, to install the latest development version of `pygambit`, run ::
+       pip install pygambit
 
-        pip install .
+   * Alternatively, to install the latest development version::
 
-2. Install `pygambit` and other requirements (including `JupyterLab` and other packages used by the tutorials) ::
+       pip install .
+
+3. Install `pygambit` and other requirements (including `JupyterLab` and other packages used by the tutorials) ::
 
     cd gambit/doc
     pip install -r requirements.txt
 
-3. Open `JupyterLab` and click on any of the tutorial notebooks (files ending in `.ipynb`) ::
+.. warning::
+    Windows users will encounter an error when installing the requirements, which include the OpenSpiel library. Users wishing to run the OpenSpiel tutorial will need to install this manually; see the `OpenSpiel installation instructions <https://openspiel.readthedocs.io/en/latest/windows.html>`_ for details.
+
+4. Open `JupyterLab` and click on any of the tutorial notebooks (files ending in `.ipynb`) ::
 
     cd tutorials
     jupyter lab
