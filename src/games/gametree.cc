@@ -763,7 +763,9 @@ bool GameTreeRep::IsPerfectRecall() const
 }
 
 namespace {
-Rational GetSubtreeMinPayoff(const GamePlayer &p_player, const GameNode &p_node)
+Rational
+AggregateSubtreePayoff(const GamePlayer &p_player, const GameNode &p_node,
+                       std::function<Rational(const Rational &, const Rational &)> p_aggregator)
 {
   if (p_node->IsTerminal()) {
     if (p_node->GetOutcome()) {
@@ -772,21 +774,32 @@ Rational GetSubtreeMinPayoff(const GamePlayer &p_player, const GameNode &p_node)
     return Rational(0);
   }
   const auto &children = p_node->GetChildren();
-  auto subtree = std::accumulate(std::next(children.begin()), children.end(),
-                                 GetSubtreeMinPayoff(p_player, children.front()),
-                                 [&p_player](const Rational &r, const GameNode &c) {
-                                   return std::min(r, GetSubtreeMinPayoff(p_player, c));
-                                 });
+  auto subtree =
+      std::accumulate(std::next(children.begin()), children.end(),
+                      AggregateSubtreePayoff(p_player, children.front(), p_aggregator),
+                      [&p_aggregator, &p_player](const Rational &r, const GameNode &c) {
+                        return p_aggregator(r, AggregateSubtreePayoff(p_player, c, p_aggregator));
+                      });
   if (p_node->GetOutcome()) {
     return subtree + p_node->GetOutcome()->GetPayoff<Rational>(p_player);
   }
   return subtree;
 }
+
 } // namespace
 
 Rational GameTreeRep::GetMinPayoff(const GamePlayer &p_player) const
 {
-  return GetSubtreeMinPayoff(p_player, m_root);
+  return AggregateSubtreePayoff(
+      p_player, m_root, [](const Rational &a, const Rational &b) { return std::min(a, b); });
+  ;
+}
+
+Rational GameTreeRep::GetMaxPayoff(const GamePlayer &p_player) const
+{
+  return AggregateSubtreePayoff(
+      p_player, m_root, [](const Rational &a, const Rational &b) { return std::max(a, b); });
+  ;
 }
 
 //------------------------------------------------------------------------

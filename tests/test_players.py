@@ -161,3 +161,15 @@ def test_player_get_max_payoff():
     assert game.players["Player 1"].max_payoff == 10
     assert game.players[1].max_payoff == 8
     assert game.players["Player 2"].max_payoff == 8
+
+
+def test_player_get_max_payoff_nonterminal_outcomes():
+    """Test whether `max_payoff` correctly reports maximum payoffs
+    when there are non-terminal outcomes.
+    """
+    game = games.read_from_file("stripped_down_poker.efg")
+    assert game.players["Alice"].max_payoff == 2
+    assert game.players["Bob"].max_payoff == 2
+    game.set_outcome(game.root, game.add_outcome([-1, -1]))
+    assert game.players["Alice"].max_payoff == 1
+    assert game.players["Bob"].max_payoff == 1

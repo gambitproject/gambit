@@ -78,6 +78,8 @@ public:
 
   /// Returns the smallest payoff to the player in any play of the game
   Rational GetMinPayoff(const GamePlayer &) const override;
+  /// Returns the largest payoff to the player in any play of the game
+  Rational GetMaxPayoff(const GamePlayer &) const override;
   //@}
 
   /// @name Players
