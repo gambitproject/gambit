@@ -7,6 +7,8 @@
   are always drawn and indicators are always drawn if an information set spans multiple levels.
 - In `pygambit`, indexing the children of a node by a string inteprets the string as an action label,
   not a label of a child node.  In addition, indexing by an action object is now supported. (#587)
+- In `pygambit`, `min_payoff` and `max_payoff` (for both games and players) now refers to payoffs in
+  any play of the game; previously this referred only to the set of outcomes. (#498)
 
 ### Added
 - Tests for EFG Nash solvers -- `enumpoly_solve`, `lp_solve`, `lcp_solve` -- in behavior stratgegies
