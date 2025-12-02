@@ -177,6 +177,11 @@ class Infoset:
             A list containing Action objects. If a node in the information set
             is reached without the player having moved previously, None will be
             included in the list.
+        .. versionadded:: 16.5.0
+
+        See Also
+        --------
+        Node.own_prior_action
         """
         c_actions: stdset[c_GameAction] = self.infoset.deref().GetOwnPriorActions()
 

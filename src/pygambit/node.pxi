@@ -185,6 +185,11 @@ class Node:
         Action or None
             The action object, or None if the player has not moved previously
             on the path to this node.
+        .. versionadded:: 16.5.0
+
+        See Also
+        --------
+        Infoset.own_prior_actions
         """
         if self.node.deref().GetOwnPriorAction() != cython.cast(c_GameAction, NULL):
             return Action.wrap(self.node.deref().GetOwnPriorAction())
