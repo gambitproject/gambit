@@ -22,13 +22,13 @@ The tutorials are available as Jupyter notebooks and can be run interactively us
 
        pip install .
 
-3. Install `pygambit` and other requirements (including `JupyterLab` and other packages used by the tutorials) ::
+3. Install other requirements (including `JupyterLab`) used by the tutorials ::
 
     cd gambit/doc
     pip install -r requirements.txt
 
-.. warning::
-    Windows users will encounter an error when installing the requirements, which include the OpenSpiel library. Users wishing to run the OpenSpiel tutorial will need to install this manually; see the `OpenSpiel installation instructions <https://openspiel.readthedocs.io/en/latest/windows.html>`_ for details.
+   .. warning::
+       Windows users will encounter an error when installing the requirements, which include the OpenSpiel library. Users wishing to run the OpenSpiel tutorial will need to install this manually; see the `OpenSpiel installation instructions <https://openspiel.readthedocs.io/en/latest/windows.html>`_ for details.
 
 4. Open `JupyterLab` and click on any of the tutorial notebooks (files ending in `.ipynb`) ::
 
