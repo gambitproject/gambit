@@ -290,9 +290,9 @@ cdef extern from "games/game.h":
 
         bool IsConstSum() except +
         c_Rational GetMinPayoff() except +
-        c_Rational GetMinPayoff(c_GamePlayer) except +
+        c_Rational GetPlayerMinPayoff(c_GamePlayer) except +
         c_Rational GetMaxPayoff() except +
-        c_Rational GetMaxPayoff(c_GamePlayer) except +
+        c_Rational GetPlayerMaxPayoff(c_GamePlayer) except +
         stdvector[c_GameNode] GetPlays(c_GameNode) except +
         stdvector[c_GameNode] GetPlays(c_GameInfoset) except +
         stdvector[c_GameNode] GetPlays(c_GameAction) except +

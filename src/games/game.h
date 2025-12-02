@@ -738,14 +738,14 @@ public:
 
   /// Returns true if the game is constant-sum
   virtual bool IsConstSum() const = 0;
-  /// Returns the smallest payoff to any player in any outcome of the game
+  /// Returns the smallest payoff to any player in any play of the game
   virtual Rational GetMinPayoff() const = 0;
-  /// Returns the smallest payoff to the player in any outcome of the game
-  virtual Rational GetMinPayoff(const GamePlayer &p_player) const = 0;
-  /// Returns the largest payoff to any player in any outcome of the game
+  /// Returns the smallest payoff to the player in any play of the game
+  virtual Rational GetPlayerMinPayoff(const GamePlayer &p_player) const = 0;
+  /// Returns the largest payoff to any player in any play of the game
   virtual Rational GetMaxPayoff() const = 0;
-  /// Returns the largest payoff to the player in any outcome of the game
-  virtual Rational GetMaxPayoff(const GamePlayer &p_player) const = 0;
+  /// Returns the largest payoff to the player in any play of the game
+  virtual Rational GetPlayerMaxPayoff(const GamePlayer &p_player) const = 0;
 
   /// Returns the set of terminal nodes which are descendants of node
   virtual std::vector<GameNode> GetPlays(GameNode node) const { throw UndefinedException(); }

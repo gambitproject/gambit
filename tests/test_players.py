@@ -155,6 +155,19 @@ def test_player_get_min_payoff_nonterminal_outcomes():
     assert game.players["Bob"].min_payoff == -3
 
 
+def test_player_get_min_payoff_null_outcome():
+    """Test whether `min_payoff` correctly reports minimum payoffs
+    in a strategic game with a null outcome."""
+    game = gbt.Game.from_arrays([[1, 1], [1, 1]], [[2, 2], [2, 2]])
+    assert game.players[0].min_payoff == 1
+    assert game.players[1].min_payoff == 2
+    game.add_strategy(game.players[0])
+    # Currently the outcomes associated with the new entries in the table
+    # are null outcomes.  So now minimum payoff should be zero from those.
+    for player in game.players:
+        assert player.min_payoff == 0
+
+
 def test_player_get_max_payoff():
     game = games.read_from_file("payoff_game.nfg")
     assert game.players[0].max_payoff == 10
@@ -173,3 +186,16 @@ def test_player_get_max_payoff_nonterminal_outcomes():
     game.set_outcome(game.root, game.add_outcome([-1, -1]))
     assert game.players["Alice"].max_payoff == 1
     assert game.players["Bob"].max_payoff == 1
+
+
+def test_player_get_max_payoff_null_outcome():
+    """Test whether `max_payoff` correctly reports maximum payoffs
+    in a strategic game with a null outcome."""
+    game = gbt.Game.from_arrays([[-1, -1], [-1, -1]], [[-2, -2], [-2, -2]])
+    assert game.players[0].max_payoff == -1
+    assert game.players[1].max_payoff == -2
+    game.add_strategy(game.players[0])
+    # Currently the outcomes associated with the new entries in the table
+    # are null outcomes.  So now minimum payoff should be zero from those.
+    for player in game.players:
+        assert player.max_payoff == 0
