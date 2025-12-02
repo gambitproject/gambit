@@ -895,11 +895,7 @@ void GameTreeRep::BuildOwnPriorActions() const
 
   while (!position.empty()) {
     ActiveEdge &current_edge = position.top();
-
-    GameNode child, node;
-    GameAction action;
-
-    node = current_edge.GetOwner();
+    auto node = current_edge.GetOwner();
 
     if (current_edge == node->GetActions().end()) {
       if (node->m_infoset) {
@@ -908,10 +904,9 @@ void GameTreeRep::BuildOwnPriorActions() const
       position.pop();
       continue;
     }
-    else {
-      std::tie(action, child) = *current_edge;
-      ++current_edge;
-    }
+
+    auto [action, child] = *current_edge;
+    ++current_edge;
 
     if (node->m_infoset) {
       prior_actions.at(node->m_infoset->m_player->shared_from_this()).top() = action;
