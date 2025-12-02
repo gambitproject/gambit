@@ -1,5 +1,6 @@
 import contextlib
 import os
+import sys
 from pathlib import Path
 
 import nbformat
@@ -45,6 +46,10 @@ def test_execute_notebook(nb_path):
     This uses nbclient.NotebookClient to run the notebook in its parent directory
     so relative paths within the notebook resolve correctly.
     """
+    # Skip notebook execution tests on Python < 3.12 (notebooks may require newer kernels/deps)
+    if sys.version_info < (3, 12):
+        pytest.skip("Notebook execution tests require Python 3.12 or newer")
+    
     nb = nbformat.read(str(nb_path), as_version=4)
 
     # Prefer the notebook's kernelspec if provided, otherwise let nbclient pick the default.

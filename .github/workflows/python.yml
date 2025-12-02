@@ -40,13 +40,7 @@ jobs:
           cd dist
           pip install -v pygambit*.tar.gz
       - name: Run tests
-        run: |
-          if [ "${{ matrix.python-version }}" = "3.9" ]; then
-            # Python 3.9 on linux skips the notebook execution test (notebooks may require newer kernels/deps)
-            pytest -q -k 'not test_execute_notebook'
-          else
-            pytest
-          fi
+        run: pytest
 
   macos-13:
     runs-on: macos-13
