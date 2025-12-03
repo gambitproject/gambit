@@ -45,3 +45,4 @@ doc/tutorials/games/*.nfg
 doc/tutorials/games/*.efg
 *.dmg
 Gambit.app/*
+*.ipynb_checkpoints
