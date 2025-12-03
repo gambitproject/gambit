@@ -46,3 +46,4 @@ doc/tutorials/games/*.efg
 *.dmg
 Gambit.app/*
 *.ipynb_checkpoints
+*.ef
