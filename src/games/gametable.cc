@@ -307,7 +307,8 @@ bool GameTableRep::IsConstSum() const
     sum += profile->GetPayoff(player);
   }
 
-  for (auto iter : StrategyContingencies(std::const_pointer_cast<GameRep>(shared_from_this()))) {
+  for (const auto iter :
+       StrategyContingencies(std::const_pointer_cast<GameRep>(shared_from_this()))) {
     Rational newsum(0);
     for (const auto &player : m_players) {
       newsum += iter->GetPayoff(player);
@@ -317,6 +318,26 @@ bool GameTableRep::IsConstSum() const
     }
   }
   return true;
+}
+
+Rational GameTableRep::GetPlayerMinPayoff(const GamePlayer &p_player) const
+{
+  Rational minpay = NewPureStrategyProfile()->GetPayoff(p_player);
+  for (const auto &profile :
+       StrategyContingencies(std::const_pointer_cast<GameRep>(shared_from_this()))) {
+    minpay = std::min(minpay, profile->GetPayoff(p_player));
+  }
+  return minpay;
+}
+
+Rational GameTableRep::GetPlayerMaxPayoff(const GamePlayer &p_player) const
+{
+  Rational maxpay = NewPureStrategyProfile()->GetPayoff(p_player);
+  for (const auto &profile :
+       StrategyContingencies(std::const_pointer_cast<GameRep>(shared_from_this()))) {
+    maxpay = std::max(maxpay, profile->GetPayoff(p_player));
+  }
+  return maxpay;
 }
 
 //------------------------------------------------------------------------

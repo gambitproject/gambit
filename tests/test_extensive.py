@@ -171,6 +171,17 @@ def test_outcome_index_exception_label():
                 np.array([[[1, 1], [0, 1]], [[2, 0], [2, 0]]]),
             ],
         ),
+        # EFG for 2x2 zero-sum game (I,-I) where the second version is missing a terminal outcome
+        (
+            games.create_2x2_zero_sum_efg(),
+            [["1", "2"], ["1", "2"]],
+            [np.array([[1, 0], [0, 1]]), np.array([[-1, 0], [0, -1]])]
+        ),
+        (
+            games.create_2x2_zero_sum_efg(missing_term_outcome=True),
+            [["1", "2"], ["1", "2"]],
+            [np.array([[1, 0], [0, 1]]), np.array([[-1, 0], [0, -1]])]
+        ),
         # 2-player (zero-sum) game; reduction for both players; generic payoffs
         (
             games.create_reduction_generic_payoffs_efg(),
@@ -286,6 +297,14 @@ def test_outcome_index_exception_label():
         # Stripped-down poker; 2 player zero-sum game with chance at the root
         (
             games.create_stripped_down_poker_efg(),
+            [["11", "12", "21", "22"], ["1", "2"]],
+            [
+                np.array([[0, 1], ["1/2", 0], ["-3/2", 0], [-1, -1]]),
+                np.array([[0, -1], ["-1/2", 0], ["3/2", 0], [1, 1]]),
+            ],
+        ),
+        (
+            games.create_stripped_down_poker_efg(nonterm_outcomes=True),
             [["11", "12", "21", "22"], ["1", "2"]],
             [
                 np.array([[0, 1], ["1/2", 0], ["-3/2", 0], [-1, -1]]),

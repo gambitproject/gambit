@@ -790,12 +790,32 @@ class Game:
 
     @property
     def min_payoff(self) -> typing.Union[decimal.Decimal, Rational]:
-        """The minimum payoff in the game."""
+        """The minimum payoff to any player in any play of the game.
+
+        .. versionchanged:: 16.5.0
+           Changed from reporting minimum payoff in any (non-null) outcome to the minimum
+           payoff in any play of the game.
+
+        See also
+        --------
+        Game.max_payoff
+        Player.min_payoff
+        """
         return rat_to_py(self.game.deref().GetMinPayoff())
 
     @property
     def max_payoff(self) -> typing.Union[decimal.Decimal, Rational]:
-        """The maximum payoff in the game."""
+        """The maximum payoff to any player in any play of the game.
+
+        .. versionchanged:: 16.5.0
+           Changed from reporting maximum payoff in any (non-null) outcome to the maximum
+           payoff in any play of the game.
+
+        See also
+        --------
+        Game.min_payoff
+        Player.max_payoff
+        """
         return rat_to_py(self.game.deref().GetMaxPayoff())
 
     def set_chance_probs(self, infoset: typing.Union[Infoset, str], probs: typing.Sequence):

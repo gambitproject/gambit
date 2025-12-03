@@ -246,8 +246,28 @@ def test_lcp_strategy_double():
     "game,mixed_strategy_prof_data,stop_after",
     [
         # Zero-sum games
+        (
+            games.create_2x2_zero_sum_efg(),
+            [[["1/2", "1/2"], ["1/2", "1/2"]]],
+            None
+        ),
+        (
+            games.create_2x2_zero_sum_efg(missing_term_outcome=True),
+            [[["1/2", "1/2"], ["1/2", "1/2"]]],
+            None
+        ),
         (games.create_stripped_down_poker_efg(), [[["1/3", "2/3", 0, 0], ["2/3", "1/3"]]], None),
+        (
+            games.create_stripped_down_poker_efg(nonterm_outcomes=True),
+            [[["1/3", "2/3", 0, 0], ["2/3", "1/3"]]],
+            None
+        ),
         (games.create_kuhn_poker_efg(), [games.kuhn_poker_lcp_first_mixed_strategy_prof()], 1),
+        (
+            games.create_kuhn_poker_efg(nonterm_outcomes=True),
+            [games.kuhn_poker_lcp_first_mixed_strategy_prof()],
+            1
+        ),
         # Non-zero-sum games
         (games.create_one_shot_trust_efg(), [[[0, 1], ["1/2", "1/2"]]], None),
         (
@@ -316,7 +336,28 @@ def test_lcp_behavior_double():
     "game,mixed_behav_prof_data",
     [
         # Zero-sum games (also tested with lp solve)
+        (
+            games.create_2x2_zero_sum_efg(),
+            [[["1/2", "1/2"]], [["1/2", "1/2"]]]
+        ),
+        pytest.param(
+            games.create_2x2_zero_sum_efg(missing_term_outcome=True),
+            [[["1/2", "1/2"]], [["1/2", "1/2"]]],
+            marks=pytest.mark.xfail(reason="Problem with missing terminal outcome in LP/LCP")
+        ),
+        (games.create_matching_pennies_efg(),
+            [[["1/2", "1/2"]], [["1/2", "1/2"]]]),
+        pytest.param(
+            games.create_matching_pennies_efg(with_neutral_outcome=True),
+            [[["1/2", "1/2"]], [["1/2", "1/2"]]],
+            marks=pytest.mark.xfail(reason="Problem with nonterminal nodes in LP/LCP")
+        ),
         (games.create_stripped_down_poker_efg(), [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]]),
+        pytest.param(
+            games.create_stripped_down_poker_efg(nonterm_outcomes=True),
+            [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]],
+            marks=pytest.mark.xfail(reason="Problem with missing terminal outcome in LP/LCP")
+        ),
         (
             games.create_kuhn_poker_efg(),
             [
@@ -330,6 +371,21 @@ def test_lcp_behavior_double():
                 ],
                 [[1, 0], ["2/3", "1/3"], [0, 1], [0, 1], ["2/3", "1/3"], [1, 0]],
             ],
+        ),
+        pytest.param(
+            games.create_kuhn_poker_efg(nonterm_outcomes=True),
+            [
+                [
+                    ["2/3", "1/3"],
+                    [1, 0],
+                    [1, 0],
+                    ["1/3", "2/3"],
+                    [0, 1],
+                    ["1/2", "1/2"],
+                ],
+                [[1, 0], ["2/3", "1/3"], [0, 1], [0, 1], ["2/3", "1/3"], [1, 0]],
+            ],
+            marks=pytest.mark.xfail(reason="Problem with missing terminal outcome in LP/LCP")
         ),
         # In the next test case:
         # 1/2-1/2 for l/r is determined by MixedBehaviorProfile.UndefinedToCentroid()
@@ -380,19 +436,37 @@ def test_lp_strategy_double():
 
 @pytest.mark.nash
 @pytest.mark.nash_lp_strategy
-def test_lp_strategy_rational():
+@pytest.mark.parametrize(
+    "game,mixed_strategy_prof_data",
+    [
+        (
+            games.create_2x2_zero_sum_efg(),
+            [["1/2", "1/2"], ["1/2", "1/2"]],
+        ),
+        (
+            games.create_2x2_zero_sum_efg(missing_term_outcome=True),
+            [["1/2", "1/2"], ["1/2", "1/2"]],
+        ),
+        (games.create_stripped_down_poker_efg(), [["1/3", "2/3", 0, 0], ["2/3", "1/3"]]),
+        (
+            games.create_stripped_down_poker_efg(nonterm_outcomes=True),
+            [["1/3", "2/3", 0, 0], ["2/3", "1/3"]]
+        ),
+        (games.create_kuhn_poker_efg(), games.kuhn_poker_lp_mixed_strategy_prof()),
+        (
+            games.create_kuhn_poker_efg(nonterm_outcomes=True),
+            games.kuhn_poker_lp_mixed_strategy_prof()
+        ),
+    ],
+)
+def test_lp_strategy_rational(game: gbt.Game, mixed_strategy_prof_data: list):
     """Test calls of LP for mixed strategy equilibria, rational precision."""
-    game = games.read_from_file("stripped_down_poker.efg")
     result = gbt.nash.lp_solve(game, use_strategic=True, rational=True)
     assert len(result.equilibria) == 1
-    expected = game.mixed_strategy_profile(
-        rational=True,
-        data=[
-            [gbt.Rational(1, 3), gbt.Rational(2, 3), gbt.Rational(0), gbt.Rational(0)],
-            [gbt.Rational(2, 3), gbt.Rational(1, 3)],
-        ],
-    )
-    assert result.equilibria[0] == expected
+    eq = result.equilibria[0]
+    assert eq.max_regret() == 0
+    expected = game.mixed_strategy_profile(rational=True, data=mixed_strategy_prof_data)
+    assert eq == expected
 
 
 def test_lp_behavior_double():
@@ -413,8 +487,29 @@ def test_lp_behavior_double():
             [[[0, 1], [1, 0]], [[1, 0], [1, 0]]],
         ),
         (
+            games.create_2x2_zero_sum_efg(missing_term_outcome=False),
+            [[["1/2", "1/2"]], [["1/2", "1/2"]]]
+        ),
+        pytest.param(
+            games.create_2x2_zero_sum_efg(missing_term_outcome=True),
+            [[["1/2", "1/2"]], [["1/2", "1/2"]]],
+            marks=pytest.mark.xfail(reason="Problem with missing terminal outcome in LP/LCP")
+        ),
+        (games.create_matching_pennies_efg(with_neutral_outcome=False),
+            [[["1/2", "1/2"]], [["1/2", "1/2"]]]),
+        pytest.param(
+            games.create_matching_pennies_efg(with_neutral_outcome=True),
+            [[["1/2", "1/2"]], [["1/2", "1/2"]]],
+            marks=pytest.mark.xfail(reason="Problem with nonterminal nodes in LP/LCP")
+        ),
+        (
             games.create_stripped_down_poker_efg(),
             [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]],
+        ),
+        pytest.param(
+            games.create_stripped_down_poker_efg(nonterm_outcomes=True),
+            [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]],
+            marks=pytest.mark.xfail(reason="Problem with nonterminal nodes in LP/LCP")
         ),
         (
             games.create_kuhn_poker_efg(),
@@ -422,6 +517,21 @@ def test_lp_behavior_double():
                 [[1, 0], [1, 0], [1, 0], ["2/3", "1/3"], [1, 0], [0, 1]],
                 [[1, 0], ["2/3", "1/3"], [0, 1], [0, 1], ["2/3", "1/3"], [1, 0]],
             ],
+        ),
+        pytest.param(
+            games.create_kuhn_poker_efg(nonterm_outcomes=True),
+            [
+                [
+                    ["2/3", "1/3"],
+                    [1, 0],
+                    [1, 0],
+                    ["1/3", "2/3"],
+                    [0, 1],
+                    ["1/2", "1/2"],
+                ],
+                [[1, 0], ["2/3", "1/3"], [0, 1], [0, 1], ["2/3", "1/3"], [1, 0]],
+            ],
+            marks=pytest.mark.xfail(reason="Problem with nonterminal nodes in LP/LCP")
         ),
         (
             games.create_seq_form_STOC_paper_zero_sum_2_player_efg(),
@@ -542,3 +652,29 @@ def test_logit_solve_lambda():
     game = games.read_from_file("const_sum_game.nfg")
     assert len(gbt.qre.logit_solve_lambda(
                 game=game, lam=[1, 2, 3], first_step=0.2, max_accel=1)) > 0
+
+
+def test_kuhn():
+    """
+    TEMPORARY
+
+    Check that the reduced strategic forms match for the versions with and without
+    nonterminal nodes
+    """
+    old = games.create_kuhn_poker_efg(nonterm_outcomes=False)
+    new = games.create_kuhn_poker_efg(nonterm_outcomes=True)
+    for i in [0, 1]:
+        assert (old.to_arrays()[i] == new.to_arrays()[i]).all()
+
+
+def test_stripped():
+    """
+    TEMPORARY
+
+    Check that the reduced strategic forms match for the versions with and without
+    nonterminal nodes
+    """
+    old = games.create_stripped_down_poker_efg()
+    new = games.create_stripped_down_poker_efg(nonterm_outcomes=True)
+    for i in [0, 1]:
+        assert (old.to_arrays()[i] == new.to_arrays()[i]).all()

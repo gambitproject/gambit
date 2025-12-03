@@ -22,6 +22,7 @@
 
 #include <iostream>
 #include <algorithm>
+#include <functional>
 #include <numeric>
 #include <stack>
 #include <set>
@@ -719,10 +720,10 @@ Rational SubtreeSum(GameNode p_node)
   Rational sum(0);
 
   if (!p_node->IsTerminal()) {
-    auto children = p_node->GetChildren();
+    const auto children = p_node->GetChildren();
     sum = SubtreeSum(children.front());
     if (std::any_of(std::next(children.begin()), children.end(),
-                    [sum](GameNode n) { return SubtreeSum(n) != sum; })) {
+                    [sum](const GameNode &n) { return SubtreeSum(n) != sum; })) {
       throw NotZeroSumException();
     }
   }
@@ -733,6 +734,29 @@ Rational SubtreeSum(GameNode p_node)
     }
   }
   return sum;
+}
+
+Rational
+AggregateSubtreePayoff(const GamePlayer &p_player, const GameNode &p_node,
+                       std::function<Rational(const Rational &, const Rational &)> p_aggregator)
+{
+  if (p_node->IsTerminal()) {
+    if (p_node->GetOutcome()) {
+      return p_node->GetOutcome()->GetPayoff<Rational>(p_player);
+    }
+    return Rational(0);
+  }
+  const auto &children = p_node->GetChildren();
+  auto subtree =
+      std::accumulate(std::next(children.begin()), children.end(),
+                      AggregateSubtreePayoff(p_player, children.front(), p_aggregator),
+                      [&p_aggregator, &p_player](const Rational &r, const GameNode &c) {
+                        return p_aggregator(r, AggregateSubtreePayoff(p_player, c, p_aggregator));
+                      });
+  if (p_node->GetOutcome()) {
+    return subtree + p_node->GetOutcome()->GetPayoff<Rational>(p_player);
+  }
+  return subtree;
 }
 
 } // end anonymous namespace
@@ -746,6 +770,18 @@ bool GameTreeRep::IsConstSum() const
   catch (NotZeroSumException &) {
     return false;
   }
+}
+
+Rational GameTreeRep::GetPlayerMinPayoff(const GamePlayer &p_player) const
+{
+  return AggregateSubtreePayoff(
+      p_player, m_root, [](const Rational &a, const Rational &b) { return std::min(a, b); });
+}
+
+Rational GameTreeRep::GetPlayerMaxPayoff(const GamePlayer &p_player) const
+{
+  return AggregateSubtreePayoff(
+      p_player, m_root, [](const Rational &a, const Rational &b) { return std::max(a, b); });
 }
 
 bool GameTreeRep::IsPerfectRecall() const

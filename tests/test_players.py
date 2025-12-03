@@ -39,7 +39,6 @@ def test_player_index_by_string():
 
 def test_player_index_out_of_range():
     game = gbt.Game.new_table([2, 2])
-    print(f"Number of players: {len(game.players)}")
     assert len(game.players) == 2
     with pytest.raises(IndexError):
         _ = game.players[2]
@@ -135,17 +134,75 @@ def test_player_strategy_bad_type():
         _ = game.players[0].strategies[1.3]
 
 
-def test_player_get_min_payoff():
-    game = games.read_from_file("payoff_game.nfg")
-    assert game.players[0].min_payoff == 4
-    assert game.players["Player 1"].min_payoff == 4
-    assert game.players[1].min_payoff == 1
-    assert game.players["Player 2"].min_payoff == 1
+@pytest.mark.parametrize(
+    "game,exp_min_payoffs,exp_max_payoffs",
+    [
+        # NFGs
+        (
+            games.read_from_file("2x2x2_nfg_with_two_pure_one_mixed_eq.nfg"),
+            [-1, 0, -1],
+            [2, 4, 2]
+        ),
+        (games.read_from_file("mixed_strategy.nfg"), [0, 0], [2, 3]),
+        # EFGs only terminal outcomes
+        (games.create_kuhn_poker_efg(), [-2, -2], [2, 2]),
+        (games.create_stripped_down_poker_efg(), [-2, -2], [2, 2]),
+        # with non-terminal outcomes
+        (games.create_kuhn_poker_efg(nonterm_outcomes=True), [-2, -2], [2, 2]),
+        (games.create_stripped_down_poker_efg(nonterm_outcomes=True), [-2, -2], [2, 2]),
+    ],
+)
+def test_player_get_min_max_payoff(game: gbt.Game, exp_min_payoffs: list, exp_max_payoffs: list):
+    for i in range(len(game.players)):
+        assert game.players[i].min_payoff == exp_min_payoffs[i]
+        assert game.players[i].max_payoff == exp_max_payoffs[i]
 
 
-def test_player_get_max_payoff():
-    game = games.read_from_file("payoff_game.nfg")
-    assert game.players[0].max_payoff == 10
-    assert game.players["Player 1"].max_payoff == 10
-    assert game.players[1].max_payoff == 8
-    assert game.players["Player 2"].max_payoff == 8
+def test_player_get_min_payoff_nonterminal_outcomes():
+    """Test whether `min_payoff` correctly reports minimum payoffs
+    when there are non-terminal outcomes.
+    """
+    game = games.read_from_file("stripped_down_poker.efg")
+    assert game.players["Alice"].min_payoff == -2
+    assert game.players["Bob"].min_payoff == -2
+    game.set_outcome(game.root, game.add_outcome([-1, -1]))
+    assert game.players["Alice"].min_payoff == -3
+    assert game.players["Bob"].min_payoff == -3
+
+
+def test_player_get_min_payoff_null_outcome():
+    """Test whether `min_payoff` correctly reports minimum payoffs
+    in a strategic game with a null outcome."""
+    game = gbt.Game.from_arrays([[1, 1], [1, 1]], [[2, 2], [2, 2]])
+    assert game.players[0].min_payoff == 1
+    assert game.players[1].min_payoff == 2
+    game.add_strategy(game.players[0])
+    # Currently the outcomes associated with the new entries in the table
+    # are null outcomes.  So now minimum payoff should be zero from those.
+    for player in game.players:
+        assert player.min_payoff == 0
+
+
+def test_player_get_max_payoff_nonterminal_outcomes():
+    """Test whether `max_payoff` correctly reports maximum payoffs
+    when there are non-terminal outcomes.
+    """
+    game = games.read_from_file("stripped_down_poker.efg")
+    assert game.players["Alice"].max_payoff == 2
+    assert game.players["Bob"].max_payoff == 2
+    game.set_outcome(game.root, game.add_outcome([-1, -1]))
+    assert game.players["Alice"].max_payoff == 1
+    assert game.players["Bob"].max_payoff == 1
+
+
+def test_player_get_max_payoff_null_outcome():
+    """Test whether `max_payoff` correctly reports maximum payoffs
+    in a strategic game with a null outcome."""
+    game = gbt.Game.from_arrays([[-1, -1], [-1, -1]], [[-2, -2], [-2, -2]])
+    assert game.players[0].max_payoff == -1
+    assert game.players[1].max_payoff == -2
+    game.add_strategy(game.players[0])
+    # Currently the outcomes associated with the new entries in the table
+    # are null outcomes.  So now minimum payoff should be zero from those.
+    for player in game.players:
+        assert player.max_payoff == 0
