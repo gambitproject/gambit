@@ -7,13 +7,24 @@
   are always drawn and indicators are always drawn if an information set spans multiple levels.
 - In `pygambit`, indexing the children of a node by a string inteprets the string as an action label,
   not a label of a child node.  In addition, indexing by an action object is now supported. (#587)
+- In `pygambit`, `min_payoff` and `max_payoff` (for both games and players) now refers to payoffs in
+  any play of the game; previously this referred only to the set of outcomes. (#498)
 
 ### Added
 - Tests for EFG Nash solvers -- `enumpoly_solve`, `lp_solve`, `lcp_solve` -- in behavior stratgegies
+- In `pygambit`, `Node` objects now have a read-only property `own_prior_action` and `Infoset` objects
+  have a read-only property `own_prior_actions` to retrieve the last action or the set of last actions
+  taken by the player before reaching the node or information set, respectively. (#582)
+- In `pygambit`, `Node` objects now have a read-only property `is_strategy_reachable` to determine
+  if the node is reachable by at least one pure strategy profile. This proves useful for identifying
+  unreachable parts of the game tree in games with absent-mindedness. (#629)
 
 ### Removed
 - Eliminating dominated actions has been removed from the GUI as it was implementing a non-standard
   formulation of dominance.  (#612)
+- The C++ method for computing subgame perfect equilibria with selected methods has been removed
+  (and as a result from the `enumpure`, `lp`, and `lcp` command-line tools); this will be replaced
+  with new and more customisable approaches. (#639)
 
 ## [16.4.1] - unreleased
 

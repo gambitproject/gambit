@@ -241,10 +241,30 @@ class Player:
 
     @property
     def min_payoff(self) -> Rational:
-        """Returns the smallest payoff for the player in any outcome of the game."""
-        return rat_to_py(self.player.deref().GetGame().deref().GetMinPayoff(self.player))
+        """Returns the smallest payoff for the player in any play of the game.
+
+        .. versionchanged:: 16.5.0
+           Changed from reporting minimum payoff in any (non-null) outcome to the minimum
+           payoff in any play of the game.
+
+        See also
+        --------
+        Player.max_payoff
+        Game.min_payoff
+        """
+        return rat_to_py(self.player.deref().GetGame().deref().GetPlayerMinPayoff(self.player))
 
     @property
     def max_payoff(self) -> Rational:
-        """Returns the largest payoff for the player in any outcome of the game."""
-        return rat_to_py(self.player.deref().GetGame().deref().GetMaxPayoff(self.player))
+        """Returns the largest payoff for the player in any play of the game.
+
+        .. versionchanged:: 16.5.0
+           Changed from reporting maximum payoff in any (non-null) outcome to the maximum
+           payoff in any play of the game.
+
+        See also
+        --------
+        Player.min_payoff
+        Game.max_payoff
+        """
+        return rat_to_py(self.player.deref().GetGame().deref().GetPlayerMaxPayoff(self.player))

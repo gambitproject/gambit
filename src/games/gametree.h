@@ -32,6 +32,12 @@ class GameTreeRep : public GameExplicitRep {
   friend class GameInfosetRep;
   friend class GameActionRep;
 
+private:
+  struct OwnPriorActionInfo {
+    std::map<GameNodeRep *, GameActionRep *> node_map;
+    std::map<GameInfosetRep *, std::set<GameActionRep *>> infoset_map;
+  };
+
 protected:
   mutable bool m_computedValues{false};
   std::shared_ptr<GameNodeRep> m_root;
@@ -39,7 +45,8 @@ protected:
   std::size_t m_numNodes = 1;
   std::size_t m_numNonterminalNodes = 0;
   std::map<GameNodeRep *, std::vector<GameNodeRep *>> m_nodePlays;
-  std::map<GameInfosetRep *, std::set<GameActionRep *>> m_infosetParents;
+  mutable std::shared_ptr<OwnPriorActionInfo> m_ownPriorActionInfo;
+  mutable std::unique_ptr<std::set<GameNodeRep *>> m_unreachableNodes;
 
   /// @name Private auxiliary functions
   //@{
@@ -74,6 +81,11 @@ public:
   bool IsTree() const override { return true; }
   bool IsConstSum() const override;
   bool IsPerfectRecall() const override;
+
+  /// Returns the smallest payoff to the player in any play of the game
+  Rational GetPlayerMinPayoff(const GamePlayer &) const override;
+  /// Returns the largest payoff to the player in any play of the game
+  Rational GetPlayerMaxPayoff(const GamePlayer &) const override;
   //@}
 
   /// @name Players
@@ -92,6 +104,8 @@ public:
   size_t NumNodes() const override { return m_numNodes; }
   /// Returns the number of non-terminal nodes in the game
   size_t NumNonterminalNodes() const override { return m_numNonterminalNodes; }
+  /// Returns the last action taken by the node's owner before reaching this node
+  GameAction GetOwnPriorAction(const GameNode &p_node) const override;
   //@}
 
   void DeleteOutcome(const GameOutcome &) override;
@@ -116,6 +130,8 @@ public:
   std::vector<GameInfoset> GetInfosets() const override;
   /// Sort the information sets for each player in a canonical order
   void SortInfosets() override;
+  /// Returns the set of actions taken by the infoset's owner before reaching this infoset
+  std::set<GameAction> GetOwnPriorActions(const GameInfoset &p_infoset) const override;
   //@}
 
   /// @name Modification
@@ -154,7 +170,8 @@ public:
 
 private:
   std::vector<GameNodeRep *> BuildConsistentPlaysRecursiveImpl(GameNodeRep *node);
-  void BuildInfosetParents();
+  void BuildOwnPriorActions() const;
+  void BuildUnreachableNodes();
 };
 
 template <class T> class TreeMixedStrategyProfileRep : public MixedStrategyProfileRep<T> {

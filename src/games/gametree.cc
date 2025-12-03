@@ -22,6 +22,7 @@
 
 #include <iostream>
 #include <algorithm>
+#include <functional>
 #include <numeric>
 #include <stack>
 #include <set>
@@ -323,6 +324,16 @@ GameAction GameNodeRep::GetPriorAction() const
   return nullptr;
 }
 
+GameAction GameNodeRep::GetOwnPriorAction() const
+{
+  return m_game->GetOwnPriorAction(std::const_pointer_cast<GameNodeRep>(shared_from_this()));
+}
+
+std::set<GameAction> GameInfosetRep::GetOwnPriorActions() const
+{
+  return m_game->GetOwnPriorActions(std::const_pointer_cast<GameInfosetRep>(shared_from_this()));
+}
+
 void GameNodeRep::DeleteOutcome(GameOutcomeRep *outc)
 {
   m_game->IncrementVersion();
@@ -386,6 +397,18 @@ bool GameNodeRep::IsSubgameRoot() const
   }
 
   return true;
+}
+
+bool GameNodeRep::IsStrategyReachable() const
+{
+  auto tree_game = static_cast<GameTreeRep *>(m_game);
+
+  if (!tree_game->m_unreachableNodes) {
+    tree_game->BuildUnreachableNodes();
+  }
+
+  // A node is reachable if it is NOT in the set of unreachable nodes.
+  return !contains(*tree_game->m_unreachableNodes, const_cast<GameNodeRep *>(this));
 }
 
 void GameTreeRep::DeleteParent(GameNode p_node)
@@ -707,10 +730,10 @@ Rational SubtreeSum(GameNode p_node)
   Rational sum(0);
 
   if (!p_node->IsTerminal()) {
-    auto children = p_node->GetChildren();
+    const auto children = p_node->GetChildren();
     sum = SubtreeSum(children.front());
     if (std::any_of(std::next(children.begin()), children.end(),
-                    [sum](GameNode n) { return SubtreeSum(n) != sum; })) {
+                    [sum](const GameNode &n) { return SubtreeSum(n) != sum; })) {
       throw NotZeroSumException();
     }
   }
@@ -721,6 +744,29 @@ Rational SubtreeSum(GameNode p_node)
     }
   }
   return sum;
+}
+
+Rational
+AggregateSubtreePayoff(const GamePlayer &p_player, const GameNode &p_node,
+                       std::function<Rational(const Rational &, const Rational &)> p_aggregator)
+{
+  if (p_node->IsTerminal()) {
+    if (p_node->GetOutcome()) {
+      return p_node->GetOutcome()->GetPayoff<Rational>(p_player);
+    }
+    return Rational(0);
+  }
+  const auto &children = p_node->GetChildren();
+  auto subtree =
+      std::accumulate(std::next(children.begin()), children.end(),
+                      AggregateSubtreePayoff(p_player, children.front(), p_aggregator),
+                      [&p_aggregator, &p_player](const Rational &r, const GameNode &c) {
+                        return p_aggregator(r, AggregateSubtreePayoff(p_player, c, p_aggregator));
+                      });
+  if (p_node->GetOutcome()) {
+    return subtree + p_node->GetOutcome()->GetPayoff<Rational>(p_player);
+  }
+  return subtree;
 }
 
 } // end anonymous namespace
@@ -736,17 +782,30 @@ bool GameTreeRep::IsConstSum() const
   }
 }
 
+Rational GameTreeRep::GetPlayerMinPayoff(const GamePlayer &p_player) const
+{
+  return AggregateSubtreePayoff(
+      p_player, m_root, [](const Rational &a, const Rational &b) { return std::min(a, b); });
+}
+
+Rational GameTreeRep::GetPlayerMaxPayoff(const GamePlayer &p_player) const
+{
+  return AggregateSubtreePayoff(
+      p_player, m_root, [](const Rational &a, const Rational &b) { return std::max(a, b); });
+}
+
 bool GameTreeRep::IsPerfectRecall() const
 {
-  if (m_infosetParents.empty() && !m_root->IsTerminal()) {
-    const_cast<GameTreeRep *>(this)->BuildInfosetParents();
+  if (!m_ownPriorActionInfo && !m_root->IsTerminal()) {
+    BuildOwnPriorActions();
   }
 
   if (GetRoot()->IsTerminal()) {
     return true;
   }
 
-  return std::all_of(m_infosetParents.cbegin(), m_infosetParents.cend(),
+  return std::all_of(m_ownPriorActionInfo->infoset_map.cbegin(),
+                     m_ownPriorActionInfo->infoset_map.cend(),
                      [](const auto &pair) { return pair.second.size() <= 1; });
 }
 
@@ -799,7 +858,8 @@ void GameTreeRep::ClearComputedValues() const
     player->m_strategies.clear();
   }
   const_cast<GameTreeRep *>(this)->m_nodePlays.clear();
-  const_cast<GameTreeRep *>(this)->m_infosetParents.clear();
+  m_ownPriorActionInfo = nullptr;
+  const_cast<GameTreeRep *>(this)->m_unreachableNodes = nullptr;
   m_computedValues = false;
 }
 
@@ -840,19 +900,24 @@ std::vector<GameNodeRep *> GameTreeRep::BuildConsistentPlaysRecursiveImpl(GameNo
   return consistent_plays;
 }
 
-void GameTreeRep::BuildInfosetParents()
+void GameTreeRep::BuildOwnPriorActions() const
 {
+  auto info = std::make_shared<OwnPriorActionInfo>();
+
   if (m_root->IsTerminal()) {
-    m_infosetParents[m_root->m_infoset].insert(nullptr);
+    m_ownPriorActionInfo = info;
     return;
   }
 
-  using AbsentMindedEdge = std::pair<GameAction, GameNode>;
-  using ActiveEdge = std::variant<GameNodeRep::Actions::iterator, AbsentMindedEdge>;
-  std::stack<ActiveEdge> position;
+  info->node_map[m_root.get()] = nullptr;
+  if (m_root->m_infoset) {
+    info->infoset_map[m_root->m_infoset].insert(nullptr);
+  }
 
+  using ActiveEdge = GameNodeRep::Actions::iterator;
+
+  std::stack<ActiveEdge> position;
   std::map<GamePlayer, std::stack<GameAction>> prior_actions;
-  std::map<GameInfoset, GameAction> path_choices;
 
   for (auto player_rep : m_players) {
     prior_actions[GamePlayer(player_rep)].emplace(nullptr);
@@ -860,10 +925,93 @@ void GameTreeRep::BuildInfosetParents()
   prior_actions[GamePlayer(m_chance)].emplace(nullptr);
 
   position.emplace(m_root->GetActions().begin());
-  prior_actions[m_root->m_infoset->m_player->shared_from_this()].emplace(nullptr);
   if (m_root->m_infoset) {
-    m_infosetParents[m_root->m_infoset].insert(nullptr);
+    prior_actions[m_root->m_infoset->m_player->shared_from_this()].emplace(nullptr);
   }
+
+  while (!position.empty()) {
+    ActiveEdge &current_edge = position.top();
+    auto node = current_edge.GetOwner();
+
+    if (current_edge == node->GetActions().end()) {
+      if (node->m_infoset) {
+        prior_actions.at(node->m_infoset->m_player->shared_from_this()).pop();
+      }
+      position.pop();
+      continue;
+    }
+
+    auto [action, child] = *current_edge;
+    ++current_edge;
+
+    if (node->m_infoset) {
+      prior_actions.at(node->m_infoset->m_player->shared_from_this()).top() = action;
+    }
+
+    if (!child->IsTerminal()) {
+      if (child->m_infoset) {
+        auto child_player = child->m_infoset->m_player->shared_from_this();
+        auto prior_action = prior_actions.at(child_player).top();
+        GameActionRep *raw_prior = prior_action ? prior_action.get() : nullptr;
+
+        info->node_map[child.get()] = raw_prior;
+        info->infoset_map[child->m_infoset].insert(raw_prior);
+
+        position.emplace(child->GetActions().begin());
+        prior_actions.at(child_player).emplace(nullptr);
+      }
+      else {
+        position.emplace(child->GetActions().begin());
+      }
+    }
+  }
+  m_ownPriorActionInfo = info;
+}
+
+GameAction GameTreeRep::GetOwnPriorAction(const GameNode &p_node) const
+{
+  if (!m_ownPriorActionInfo) {
+    BuildOwnPriorActions();
+  }
+
+  auto it = m_ownPriorActionInfo->node_map.find(p_node.get());
+  if (it != m_ownPriorActionInfo->node_map.end() && it->second) {
+    return it->second->shared_from_this();
+  }
+  return nullptr;
+}
+
+std::set<GameAction> GameTreeRep::GetOwnPriorActions(const GameInfoset &p_infoset) const
+{
+  if (!m_ownPriorActionInfo) {
+    BuildOwnPriorActions();
+  }
+
+  std::set<GameAction> result;
+  auto it = m_ownPriorActionInfo->infoset_map.find(p_infoset.get());
+
+  if (it != m_ownPriorActionInfo->infoset_map.end()) {
+    for (auto *ptr : it->second) {
+      result.insert(ptr ? ptr->shared_from_this() : nullptr);
+    }
+  }
+  return result;
+}
+
+void GameTreeRep::BuildUnreachableNodes()
+{
+  m_unreachableNodes = std::make_unique<std::set<GameNodeRep *>>();
+
+  if (m_root->IsTerminal()) {
+    return;
+  }
+
+  using AbsentMindedEdge = std::pair<GameAction, GameNode>;
+  using ActiveEdge = std::variant<GameNodeRep::Actions::iterator, AbsentMindedEdge>;
+
+  std::stack<ActiveEdge> position;
+  std::map<GameInfoset, GameAction> path_choices;
+  position.emplace(m_root->GetActions().begin());
 
   while (!position.empty()) {
     ActiveEdge &current_edge = position.top();
@@ -875,7 +1023,6 @@ void GameTreeRep::BuildInfosetParents()
       node = current_it.GetOwner();
 
       if (current_it == node->GetActions().end()) {
-        prior_actions.at(node->m_infoset->m_player->shared_from_this()).pop();
         position.pop();
         path_choices.erase(node->m_infoset->shared_from_this());
         continue;
@@ -892,21 +1039,31 @@ void GameTreeRep::BuildInfosetParents()
       child = node->GetChild(action);
     }
 
-    prior_actions.at(node->m_infoset->m_player->shared_from_this()).top() = action;
-
     if (!child->IsTerminal()) {
-      auto child_player = child->m_infoset->m_player->shared_from_this();
-      auto prior_action = prior_actions.at(child_player).top();
-      m_infosetParents[child->m_infoset].insert(prior_action ? prior_action.get() : nullptr);
-
+      // Check for Absent-Minded Re-entry of the infoset
       if (path_choices.find(child->m_infoset->shared_from_this()) != path_choices.end()) {
         const GameAction replay_action = path_choices.at(child->m_infoset->shared_from_this());
         position.emplace(AbsentMindedEdge{replay_action, child});
+
+        // Mark siblings and the nodes in their subtrees as unreachable
+        for (const auto &[current_action, subtree_root] : child->GetActions()) {
+          if (current_action != replay_action) {
+            std::stack<GameNodeRep *> nodes_to_visit;
+            nodes_to_visit.push(subtree_root.get());
+            while (!nodes_to_visit.empty()) {
+              GameNodeRep *current_unreachable_node = nodes_to_visit.top();
+              nodes_to_visit.pop();
+              m_unreachableNodes->insert(current_unreachable_node);
+              for (const auto &unreachable_child : current_unreachable_node->GetChildren()) {
+                nodes_to_visit.push(unreachable_child.get());
+              }
+            }
+          }
+        }
       }
       else {
         position.emplace(child->GetActions().begin());
       }
-      prior_actions.at(child_player).emplace(nullptr);
     }
   }
 }

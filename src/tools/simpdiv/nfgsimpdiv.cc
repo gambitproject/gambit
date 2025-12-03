@@ -21,7 +21,6 @@
 //
 
 #include <getopt.h>
-#include <cstdlib>
 #include <iostream>
 #include <fstream>
 #include "gambit.h"
@@ -66,7 +65,7 @@ List<MixedStrategyProfile<Rational>> RandomProfiles(const Game &p_game, int p_co
   return profiles;
 }
 
-class MixedStrategyCSVAsFloatRenderer : public MixedStrategyRenderer<Rational> {
+class MixedStrategyCSVAsFloatRenderer final : public MixedStrategyProfileRenderer<Rational> {
 public:
   explicit MixedStrategyCSVAsFloatRenderer(std::ostream &p_stream, int p_numDecimals = 6)
     : m_stream(p_stream), m_numDecimals(p_numDecimals)
@@ -174,7 +173,7 @@ int main(int argc, char *argv[])
       break;
     case '?':
       if (isprint(optopt)) {
-        std::cerr << argv[0] << ": Unknown option `-" << ((char)optopt) << "'.\n";
+        std::cerr << argv[0] << ": Unknown option `-" << static_cast<char>(optopt) << "'.\n";
       }
       else {
         std::cerr << argv[0] << ": Unknown option character `\\x" << optopt << "`.\n";
@@ -231,7 +230,7 @@ int main(int argc, char *argv[])
             });
       }
       else {
-        auto renderer = std::make_shared<MixedStrategyCSVRenderer<Rational>>(std::cout);
+        auto renderer = std::make_shared<MixedStrategyProfileCSVRenderer<Rational>>(std::cout);
         SimpdivStrategySolve(
             start, maxregret, gridResize, 0,
             [&](const MixedStrategyProfile<Rational> &p, const std::string &label) {
