@@ -69,3 +69,96 @@ def test_infoset_plays():
     }  # paths=[0, 1, 0], [1, 1, 0], [0, 1], [1, 1]
 
     assert set(test_infoset.plays) == expected_set_of_plays
+
+
+@pytest.mark.parametrize("game_file, expected_results", [
+    # Perfect recall game
+    (
+        "binary_3_levels_generic_payoffs.efg",
+        [
+            # Player 1, Infoset 0 (Root):
+            # No prior history.
+            ("Player 1", 0, {None}),
+
+            # Player 1, Infoset 1:
+            # Reached via "Left" from Infoset 0.
+            ("Player 1", 1, {("Player 1", 0, "Left")}),
+
+            # Player 1, Infoset 2:
+            # Reached via "Right" from Infoset 0.
+            ("Player 1", 2, {("Player 1", 0, "Right")}),
+
+            # Player 2, Infoset 0:
+            # No prior history.
+            ("Player 2", 0, {None}),
+        ]
+    ),
+    # Imperfect recall games, no absent-mindedness
+    (
+        "wichardt.efg",
+        [
+            # Player 1, Infoset 0 (Root):
+            # No prior history.
+            ("Player 1", 0, {None}),
+
+            # Player 1, Infoset 1:
+            # Reachable via "L" or "R" from Infoset 0.
+            ("Player 1", 1, {("Player 1", 0, "L"), ("Player 1", 0, "R")}),
+
+            # Player 2, Infoset 0:
+            # No prior history.
+            ("Player 2", 0, {None}),
+        ]
+    ),
+    (
+        "subgames.efg",
+        [
+            ("Player 1", 0, {None}),
+            ("Player 1", 1, {None}),
+            ("Player 1", 2, {("Player 1", 1, "1")}),
+            ("Player 1", 3, {("Player 1", 5, "1"), ("Player 1", 1, "2")}),
+            ("Player 1", 4, {("Player 1", 1, "2")}),
+            ("Player 1", 5, {("Player 1", 4, "2")}),
+            ("Player 1", 6, {("Player 1", 1, "2")}),
+            ("Player 2", 0, {None}),
+            ("Player 2", 1, {("Player 2", 0, "2")}),
+            ("Player 2", 2, {("Player 2", 1, "1")}),
+            ("Player 2", 3, {("Player 2", 2, "1")}),
+            ("Player 2", 4, {("Player 2", 2, "2")}),
+            ("Player 2", 5, {("Player 2", 4, "1")}),
+        ]
+    ),
+    # An absent-minded driver game
+    (
+        "AM-driver-subgame.efg",
+        [
+            # Player 1, Infoset 0:
+            # One member is the root (no prior history),
+            # the other is reached via "S" from this same infoset.
+            ("Player 1", 0, {None, ("Player 1", 0, "S")}),
+
+            # Player 2, Infoset 0:
+            # No prior history.
+            ("Player 2", 0, {None}),
+        ]
+    ),
+])
+def test_infoset_own_prior_actions(game_file, expected_results):
+    """
+    Tests `infoset.own_prior_actions` by collecting the action details
+    (player label, infoset num, label) and comparing against expected sets.
+    """
+    game = games.read_from_file(game_file)
+
+    for player_label, infoset_num, expected_set in expected_results:
+        player = game.players[player_label]
+        infoset = player.infosets[infoset_num]
+
+        actual_actions = infoset.own_prior_actions
+
+        actual_details = {
+            (a.infoset.player.label, a.infoset.number, a.label) if a is not None else None
+            for a in actual_actions
+        }
+
+        assert actual_details == expected_set
