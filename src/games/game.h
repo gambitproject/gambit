@@ -432,6 +432,7 @@ class GameNodeRep : public std::enable_shared_from_this<GameNodeRep> {
   friend class GameInfosetRep;
   friend class GamePlayerRep;
   friend class PureBehaviorProfile;
+  friend class SubgameRootFinder;
   template <class T> friend class MixedBehaviorProfile;
 
   bool m_valid{true};
@@ -836,6 +837,8 @@ public:
     }
     return false;
   }
+  ///
+  virtual GameNode GetSubgameRoot(GameInfoset) const = 0;
   //@}
 
   /// @name Writing data files

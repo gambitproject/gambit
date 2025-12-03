@@ -756,6 +756,10 @@ class Game:
         """
         return self.game.deref().IsPerfectRecall()
 
+    def subgame_root(self, infoset: typing.Union[Infoset, str]) -> Node:
+        infoset = self._resolve_infoset(infoset, "subgame_root")
+        return Node.wrap(self.game.deref().GetSubgameRoot(cython.cast(Infoset, infoset).infoset))
+
     @property
     def min_payoff(self) -> decimal.Decimal | Rational:
         """The minimum payoff to any player in any play of the game.
