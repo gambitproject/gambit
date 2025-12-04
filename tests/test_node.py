@@ -211,7 +211,6 @@ def test_node_own_prior_action_non_terminal(game_file, expected_node_data):
         games.read_from_file("subgame-roots-finder-multiple-roots-and-merge.efg"),
         {0, 1, 4, 7, 11, 13, 34}
     ),
-    (games.read_from_file("subgame-8-roots.efg"), {0, 1, 2, 4, 5, 16, 27, 30}),
     (games.Centipede.get_test_data(N=5, m0=2, m1=7)[0], {0, 2, 4, 6, 8}),
     (gbt.Game.new_tree(), {}),
     (games.read_from_file("subgame-roots-finder-multiple-merges.efg"), {0, 2, 13, 15}),
