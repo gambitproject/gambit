@@ -290,17 +290,6 @@ template <class T> T MixedStrategyProfileRep<T>::GetRegret(const GameStrategy &p
   return brpayoff - payoff;
 }
 
-template <class T> T MixedStrategyProfileRep<T>::GetRegret(const GamePlayer &p_player) const
-{
-  auto strategies = p_player->GetStrategies();
-  T br_payoff = std::accumulate(std::next(strategies.begin()), strategies.end(),
-                                GetPayoff(*strategies.begin()),
-                                [this](const T &x, const GameStrategy &strategy) {
-                                  return std::max(x, GetPayoff(strategy));
-                                });
-  return br_payoff - GetPayoff(p_player);
-}
-
 //========================================================================
 //                 MixedStrategyProfile<T>: Lifecycle
 //========================================================================
@@ -406,11 +395,20 @@ auto maximize_function(const Container &p_container, const Func &p_function)
       [](const T &a, const T &b) { return std::max(a, b); }, p_function);
 }
 
+template <class T> T MixedStrategyProfile<T>::GetRegret(const GamePlayer &p_player) const
+{
+  CheckVersion();
+  auto br_payoff =
+      maximize_function(p_player->GetStrategies(),
+                        [this](const GameStrategy &strategy) -> T { return GetPayoff(strategy); });
+  return br_payoff - GetPayoff(p_player);
+}
+
 template <class T> T MixedStrategyProfile<T>::GetMaxRegret() const
 {
   CheckVersion();
   return maximize_function(GetGame()->GetPlayers(), [this](const GamePlayer &p_player) -> T {
-    return this->m_rep->GetRegret(p_player);
+    return this->GetRegret(p_player);
   });
 }
 

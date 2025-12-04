@@ -74,8 +74,6 @@ public:
   }
 
   T GetRegret(const GameStrategy &) const;
-  T GetRegret(const GamePlayer &) const;
-  T GetMaxRegret() const;
 
   virtual void InvalidateCache() const {}
 };
@@ -298,11 +296,7 @@ public:
   /// @param[in] p_player  The player to compute the regret for.
   /// @sa GetRegret(const GameStrategy &) const;
   ///     GetMaxRegret() const
-  T GetRegret(const GamePlayer &p_player) const
-  {
-    CheckVersion();
-    return m_rep->GetRegret(p_player);
-  }
+  T GetRegret(const GamePlayer &p_player) const;
 
   /// @brief Computes the maximum regret to any player in the profile
   /// @details Computes the maximum of the regrets of the players in the profile.
