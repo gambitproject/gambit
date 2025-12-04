@@ -13,6 +13,13 @@ os.environ.setdefault("JUPYTER_PLATFORM_DIRS", "1")
 from nbclient import NotebookClient  # noqa: E402
 from nbclient.exceptions import CellExecutionError  # noqa: E402
 
+# Check if draw_tree is available
+try:
+    import draw_tree  # noqa: F401
+    DRAW_TREE_AVAILABLE = True
+except ImportError:
+    DRAW_TREE_AVAILABLE = False
+
 
 def _find_tutorial_notebooks():
     """Return a sorted list of notebook Paths under doc/tutorials.
@@ -54,6 +61,10 @@ def test_execute_notebook(nb_path):
     # (OpenSpiel is not available on Windows without manual install)
     if sys.platform == "win32" and "openspiel" in nb_path.name.lower():
         pytest.skip("OpenSpiel notebook requires OpenSpiel, which is not available on Windows")
+
+    # Skip all notebook tests if draw_tree is not installed
+    if not DRAW_TREE_AVAILABLE:
+        pytest.skip("Notebook execution tests require draw_tree package")
 
     nb = nbformat.read(str(nb_path), as_version=4)
 
