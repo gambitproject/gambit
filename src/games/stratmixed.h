@@ -308,11 +308,7 @@ public:
   /// @details Computes the maximum of the regrets of the players in the profile.
   /// @sa GetRegret(const GamePlayer &) const;
   ///     GetRegret(const GameStrategy &) const
-  T GetMaxRegret() const
-  {
-    CheckVersion();
-    return m_rep->GetMaxRegret();
-  }
+  T GetMaxRegret() const;
 
   /// @brief Computes the Lyapunov value of the profile
   /// @details Computes the Lyapunov value of the profile.  This is a nonnegative
