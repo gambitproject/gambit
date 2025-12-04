@@ -1146,7 +1146,6 @@ void UnionSets(SubgameScratchData &p_data, int p_i, int p_j, GameNodeRep *p_curr
   // Prefer j's root if it exists, otherwise use current node
   auto *best_candidate =
       p_data.leader_subgame_map[leader_j] ? p_data.leader_subgame_map[leader_j] : p_current_node;
-
   p_data.dsu_parent[leader_j] = leader_i;
   p_data.leader_subgame_map[leader_i] = best_candidate;
 }
@@ -1181,17 +1180,18 @@ void GenerateComponent(SubgameScratchData &p_data, GameNodeRep *p_start_node)
       }
     }
     else {
-      p_data.infoset_visited[curr_id] = true;
-    }
-
-    // adds other members of the corresponding infoset to the frontier
-    for (const auto &member_sp : curr->GetInfoset()->GetMembers()) {
-      auto *member = member_sp.get();
-      if (p_data.node_visited_token[member->GetNumber()] != p_data.current_token) {
+      // Add other members of the corresponding infoset to the frontier
+      for (const auto &member_sp : curr->GetInfoset()->GetMembers()) {
+        auto *member = member_sp.get();
+        if (member == curr) {
+          continue;
+        }
         local_frontier.push(member);
         p_data.node_visited_token[member->GetNumber()] = p_data.current_token;
       }
+      p_data.infoset_visited[curr_id] = true;
     }
+
     // if the frontier is not empty and the parent exists, add it to the frontier
     if (!local_frontier.empty()) {
       if (auto parent_sp = curr->GetParent()) {
@@ -1205,12 +1205,13 @@ void GenerateComponent(SubgameScratchData &p_data, GameNodeRep *p_start_node)
   }
 }
 
-// Main algorithm: find subgame roots for all infosets
+// Find subgame roots for all infosets
 std::map<GameInfosetRep *, GameNodeRep *> FindSubgameRoots(const Game &p_game)
 {
   if (p_game->GetRoot()->IsTerminal()) {
     return {};
   }
+
   SubgameScratchData data;
 
   // Initialize infoset ID mapping using iterators
@@ -1260,7 +1261,6 @@ std::map<GameInfosetRep *, GameNodeRep *> FindSubgameRoots(const Game &p_game)
     global_frontier.pop();
 
     const int id = data.infoset_to_id[node->GetInfoset().get()];
-
     if (data.infoset_visited[id]) {
       continue;
     }
@@ -1268,7 +1268,6 @@ std::map<GameInfosetRep *, GameNodeRep *> FindSubgameRoots(const Game &p_game)
     GenerateComponent(data, node);
 
     auto *component_top_node = data.leader_subgame_map[FindSet(data, id)];
-
     if (auto parent_sp = component_top_node->GetParent()) {
       auto *parent = parent_sp.get();
       if (data.node_visited_token[parent->GetNumber()] == 0) {
