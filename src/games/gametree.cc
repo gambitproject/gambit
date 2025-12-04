@@ -334,17 +334,17 @@ void GameNodeRep::DeleteOutcome(GameOutcomeRep *outc)
   }
 }
 
-void GameTreeRep::SetOutcome(GameNode p_node, const GameOutcome &p_outcome)
+void GameTreeRep::SetOutcome(const GameNode &p_node, const GameOutcome &p_outcome)
 {
-  IncrementVersion();
   if (p_node->m_game != this) {
     throw MismatchException();
   }
   if (p_outcome && p_outcome->m_game != this) {
     throw MismatchException();
   }
-  if (p_outcome.get() != p_node->m_outcome) {
-    p_node->m_outcome = p_outcome.get();
+  if (const auto newOutcome = p_outcome.get_shared().get(); newOutcome != p_node->m_outcome) {
+    p_node->m_outcome = newOutcome;
+    IncrementVersion();
     ClearComputedValues();
   }
 }

@@ -137,7 +137,7 @@ public:
   Game SetChanceProbs(const GameInfoset &, const Array<Number> &) override;
   GameAction InsertAction(GameInfoset, GameAction p_where = nullptr) override;
   void DeleteAction(GameAction) override;
-  void SetOutcome(GameNode, const GameOutcome &p_outcome) override;
+  void SetOutcome(const GameNode &p_node, const GameOutcome &p_outcome) override;
 
   std::vector<GameNode> GetPlays(GameNode node) const override;
   std::vector<GameNode> GetPlays(GameInfoset infoset) const override;

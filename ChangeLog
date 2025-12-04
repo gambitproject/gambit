@@ -9,6 +9,8 @@
   extensive form.
 - Fixed a regression in the GUI in which unique action labels were not being generated when
   adding a move via drag-and-drop of a player icon (#618)
+- Fixed a regression generating null pointer dereference errors when setting the outcome of
+  a node to the null outcome (#625, #647)
 
 
 ## [16.3.2] - unreleased
