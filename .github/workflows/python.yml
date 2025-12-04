@@ -32,7 +32,7 @@ jobs:
           cd dist
           pip install -v pygambit*.tar.gz
       - name: Run tests
-        run: pytest
+        run: pytest --run-tutorials
 
   macos-13:
     runs-on: macos-13
@@ -57,7 +57,7 @@ jobs:
         run: |
           python -m pip install -v .
       - name: Run tests
-        run: pytest
+        run: pytest --run-tutorials
 
   macos-14:
     runs-on: macos-14
@@ -82,7 +82,7 @@ jobs:
         run: |
           python -m pip install -v .
       - name: Run tests
-        run: pytest
+        run: pytest --run-tutorials
 
   windows:
     runs-on: windows-latest
@@ -107,4 +107,4 @@ jobs:
         run: |
           python -m pip install -v .
       - name: Run tests
-        run: pytest
+        run: pytest --run-tutorials
