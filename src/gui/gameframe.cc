@@ -489,6 +489,10 @@ void gbtGameFrame::MakeMenus()
 
   viewMenu->Append(GBT_MENU_VIEW_STRATEGIC, _("&Strategic game"),
                    wxT("Display the reduced strategic representation ") wxT("of the game"), true);
+  if (!m_doc->GetGame()->IsTree()) {
+    viewMenu->Check(GBT_MENU_VIEW_STRATEGIC, true);
+    viewMenu->Enable(GBT_MENU_VIEW_STRATEGIC, false);
+  }
 
   auto *formatMenu = new wxMenu;
   AppendBitmapItem(formatMenu, GBT_MENU_FORMAT_LAYOUT, _("&Layout"),

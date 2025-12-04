@@ -13,7 +13,7 @@
   a node to the null outcome (#625, #647)
 
 
-## [16.3.2] - unreleased
+## [16.3.2] - 2025-12-04
 
 ### Fixed
 - Parsing of output of `gambit-logit` in the graphical interface did not handle the

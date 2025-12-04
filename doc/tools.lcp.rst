@@ -9,7 +9,7 @@ computes Nash equilibria by finding solutions to a linear
 complementarity problem. For extensive games, the program uses the
 sequence form representation of the extensive game, as defined by
 Koller, Megiddo, and von Stengel [KolMegSte94]_, and applies the
-algorithm developed by Lemke. For strategic games, the program using
+algorithm developed by Lemke. For strategic games, the program uses
 the method of Lemke and Howson [LemHow64]_.  There exist strategic
 games for which some equilibria cannot be located by this method; see
 Shapley [Sha74]_.
@@ -79,7 +79,7 @@ Computing an equilibrium of extensive game :download:`e02.efg
 
    $ gambit-lcp e02.efg
    Compute Nash equilibria by solving a linear complementarity program
-   Gambit version 16.4.0, Copyright (C) 1994-2025, The Gambit Project
+   Gambit version 16.4.1, Copyright (C) 1994-2025, The Gambit Project
    This is free software, distributed under the GNU GPL
 
    NE,1,0,1/2,1/2,1/2,1/2
