@@ -461,11 +461,11 @@ template <class T> T MixedStrategyProfile<T>::GetRegret(const GameStrategy &p_st
   CheckVersion();
   const GamePlayer player = p_strategy->GetPlayer();
   T payoff = GetPayoffDeriv(player->GetNumber(), p_strategy);
-  T brpayoff = payoff;
-  for (const auto &strategy : make_filter_iterator(player->GetStrategies(), p_strategy)) {
-    brpayoff = std::max(brpayoff, GetPayoffDeriv(player->GetNumber(), strategy));
-  }
-  return brpayoff - payoff;
+  T best_other_payoff = maximize_function(filter_range(player->GetStrategies(), p_strategy),
+                                          [this, player](const GameStrategy &p_strategy) -> T {
+                                            return GetPayoffDeriv(player->GetNumber(), p_strategy);
+                                          });
+  return std::max(best_other_payoff - payoff, static_cast<T>(0));
 }
 
 template <class T> T MixedStrategyProfile<T>::GetRegret(const GamePlayer &p_player) const
