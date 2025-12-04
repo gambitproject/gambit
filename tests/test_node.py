@@ -19,8 +19,15 @@ def test_get_infoset():
 def test_get_outcome():
     """Test to ensure that we can retrieve an outcome for a given node"""
     game = games.read_from_file("basic_extensive_game.efg")
-    assert game.root.children[0].children[1].children[0].outcome == game.outcomes[1]
+    assert game.root.children[0].children[1].children[0].outcome == game.outcomes["Outcome 1"]
     assert game.root.outcome is None
+
+
+def test_set_outcome_null():
+    """Test to set an outcome to the null outcome."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    game.set_outcome(game.root.children[0].children[0].children[0], None)
+    assert game.root.children[0].children[0].children[0].outcome is None
 
 
 def test_get_player():

@@ -781,7 +781,8 @@ public:
   {
     throw UndefinedException();
   }
-  virtual GameInfoset AppendMove(GameNode p_node, GamePlayer p_player, int p_actions)
+  virtual GameInfoset AppendMove(GameNode p_node, GamePlayer p_player, int p_actions,
+                                 bool p_generateLabels = false)
   {
     throw UndefinedException();
   }
@@ -789,7 +790,8 @@ public:
   {
     throw UndefinedException();
   }
-  virtual GameInfoset InsertMove(GameNode p_node, GamePlayer p_player, int p_actions)
+  virtual GameInfoset InsertMove(GameNode p_node, GamePlayer p_player, int p_actions,
+                                 bool p_generateLabels = false)
   {
     throw UndefinedException();
   }
@@ -811,7 +813,10 @@ public:
     throw UndefinedException();
   }
   virtual void DeleteAction(GameAction) { throw UndefinedException(); }
-  virtual void SetOutcome(GameNode, const GameOutcome &p_outcome) { throw UndefinedException(); }
+  virtual void SetOutcome(const GameNode &p_node, const GameOutcome &p_outcome)
+  {
+    throw UndefinedException();
+  }
 
   /// @name Dimensions of the game
   //@{

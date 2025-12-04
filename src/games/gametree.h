@@ -136,9 +136,11 @@ public:
 
   /// @name Modification
   //@{
-  GameInfoset AppendMove(GameNode p_node, GamePlayer p_player, int p_actions) override;
+  GameInfoset AppendMove(GameNode p_node, GamePlayer p_player, int p_actions,
+                         bool p_generateLabels = false) override;
   GameInfoset AppendMove(GameNode p_node, GameInfoset p_infoset) override;
-  GameInfoset InsertMove(GameNode p_node, GamePlayer p_player, int p_actions) override;
+  GameInfoset InsertMove(GameNode p_node, GamePlayer p_player, int p_actions,
+                         bool p_generateLabels = false) override;
   GameInfoset InsertMove(GameNode p_node, GameInfoset p_infoset) override;
   void CopyTree(GameNode dest, GameNode src) override;
   void MoveTree(GameNode dest, GameNode src) override;
@@ -151,7 +153,7 @@ public:
   Game SetChanceProbs(const GameInfoset &, const Array<Number> &) override;
   GameAction InsertAction(GameInfoset, GameAction p_where = nullptr) override;
   void DeleteAction(GameAction) override;
-  void SetOutcome(GameNode, const GameOutcome &p_outcome) override;
+  void SetOutcome(const GameNode &p_node, const GameOutcome &p_outcome) override;
 
   std::vector<GameNode> GetPlays(GameNode node) const override;
   std::vector<GameNode> GetPlays(GameInfoset infoset) const override;

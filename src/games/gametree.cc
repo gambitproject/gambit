@@ -345,17 +345,17 @@ void GameNodeRep::DeleteOutcome(GameOutcomeRep *outc)
   }
 }
 
-void GameTreeRep::SetOutcome(GameNode p_node, const GameOutcome &p_outcome)
+void GameTreeRep::SetOutcome(const GameNode &p_node, const GameOutcome &p_outcome)
 {
-  IncrementVersion();
   if (p_node->m_game != this) {
     throw MismatchException();
   }
   if (p_outcome && p_outcome->m_game != this) {
     throw MismatchException();
   }
-  if (p_outcome.get() != p_node->m_outcome) {
-    p_node->m_outcome = p_outcome.get();
+  if (const auto newOutcome = p_outcome.get_shared().get(); newOutcome != p_node->m_outcome) {
+    p_node->m_outcome = newOutcome;
+    IncrementVersion();
     ClearComputedValues();
   }
 }
@@ -592,7 +592,8 @@ GameInfoset GameTreeRep::LeaveInfoset(GameNode p_node)
   return node->m_infoset->shared_from_this();
 }
 
-GameInfoset GameTreeRep::AppendMove(GameNode p_node, GamePlayer p_player, int p_actions)
+GameInfoset GameTreeRep::AppendMove(GameNode p_node, GamePlayer p_player, int p_actions,
+                                    bool p_generateLabels)
 {
   GameNodeRep *node = p_node.get();
   if (p_actions <= 0 || !node->m_children.empty()) {
@@ -606,6 +607,10 @@ GameInfoset GameTreeRep::AppendMove(GameNode p_node, GamePlayer p_player, int p_
   auto newInfoset = std::make_shared<GameInfosetRep>(this, p_player->m_infosets.size() + 1,
                                                      p_player.get(), p_actions);
   p_player->m_infosets.push_back(newInfoset);
+  if (p_generateLabels) {
+    std::for_each(newInfoset->m_actions.begin(), newInfoset->m_actions.end(),
+                  [act = 1](const GameAction &a) mutable { a->SetLabel(std::to_string(act++)); });
+  }
   return AppendMove(p_node, newInfoset);
 }
 
@@ -632,7 +637,8 @@ GameInfoset GameTreeRep::AppendMove(GameNode p_node, GameInfoset p_infoset)
   return node->m_infoset->shared_from_this();
 }
 
-GameInfoset GameTreeRep::InsertMove(GameNode p_node, GamePlayer p_player, int p_actions)
+GameInfoset GameTreeRep::InsertMove(GameNode p_node, GamePlayer p_player, int p_actions,
+                                    bool p_generateLabels)
 {
   if (p_actions <= 0) {
     throw UndefinedException();
@@ -645,6 +651,10 @@ GameInfoset GameTreeRep::InsertMove(GameNode p_node, GamePlayer p_player, int p_
   auto newInfoset = std::make_shared<GameInfosetRep>(this, p_player->m_infosets.size() + 1,
                                                      p_player.get(), p_actions);
   p_player->m_infosets.push_back(newInfoset);
+  if (p_generateLabels) {
+    std::for_each(newInfoset->m_actions.begin(), newInfoset->m_actions.end(),
+                  [act = 1](const GameAction &a) mutable { a->SetLabel(std::to_string(act++)); });
+  }
   return InsertMove(p_node, newInfoset);
 }
 
