@@ -9,5 +9,5 @@ ipython
 matplotlib
 pickleshare
 jupyter
-open_spiel
-draw-tree @ git+https://github.com/gambitproject/draw_tree.git@main
+open_spiel; sys_platform != 'win32'
+draw-tree @ git+https://github.com/gambitproject/draw_tree.git@main;
