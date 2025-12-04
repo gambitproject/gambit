@@ -11,6 +11,8 @@
   adding a move via drag-and-drop of a player icon (#618)
 - Fixed a regression generating null pointer dereference errors when setting the outcome of
   a node to the null outcome (#625, #647)
+- Fixed a regression in calculating payoff quantities for mixed strategy profiles derived from
+  mixed behavior profiles (#616)
 
 
 ## [16.3.2] - unreleased

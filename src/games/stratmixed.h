@@ -49,7 +49,11 @@ public:
     return m_probs[m_profileIndex.at(p_strategy)];
   }
   /// Returns the probability the strategy is played
-  T &operator[](const GameStrategy &p_strategy) { return m_probs[m_profileIndex.at(p_strategy)]; }
+  T &operator[](const GameStrategy &p_strategy)
+  {
+    InvalidateCache();
+    return m_probs[m_profileIndex.at(p_strategy)];
+  }
   /// Set the strategy of the corresponding player to a pure strategy
   void SetStrategy(const GameStrategy &p_strategy)
   {
