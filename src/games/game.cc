@@ -459,12 +459,10 @@ template <class Container, class T> auto make_filter_iterator(const Container &c
 template <class T> T MixedStrategyProfile<T>::GetRegret(const GameStrategy &p_strategy) const
 {
   CheckVersion();
-  const GamePlayer player = p_strategy->GetPlayer();
-  T payoff = GetPayoffDeriv(player->GetNumber(), p_strategy);
-  T best_other_payoff = maximize_function(filter_range(player->GetStrategies(), p_strategy),
-                                          [this, player](const GameStrategy &p_strategy) -> T {
-                                            return GetPayoffDeriv(player->GetNumber(), p_strategy);
-                                          });
+  T payoff = GetPayoff(p_strategy);
+  T best_other_payoff = maximize_function(
+      filter_range(p_strategy->GetPlayer()->GetStrategies(), p_strategy),
+      [this](const GameStrategy &p_strategy) -> T { return GetPayoff(p_strategy); });
   return std::max(best_other_payoff - payoff, static_cast<T>(0));
 }
 
