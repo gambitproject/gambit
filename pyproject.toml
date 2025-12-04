@@ -7,7 +7,7 @@ name = "pygambit"
 version = "16.4.0"
 description = "The package for computation in game theory"
 readme = "src/README.rst"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 license = "GPL-2.0-or-later"
 authors = [
     {name = "Theodore Turocy", email = "ted.turocy@gmail.com"},
@@ -17,7 +17,6 @@ keywords = ["game theory", "Nash equilibrium"]
 classifiers=[
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Science/Research",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
