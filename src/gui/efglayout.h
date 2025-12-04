@@ -114,7 +114,7 @@ class TreeLayout final : public GameView {
 
   std::shared_ptr<NodeEntry> ComputeNextInInfoset(const std::shared_ptr<NodeEntry> &) const;
 
-  void BuildNodeList(const GameNode &, const BehaviorSupportProfile &);
+  void BuildNodeList(const GameNode &);
 
   /// Based on node levels and information set sublevels, compute the depth
   /// (X coordinate) of all nodes
@@ -135,6 +135,7 @@ class TreeLayout final : public GameView {
   void DrawOutcome(wxDC &, const std::shared_ptr<NodeEntry> &, bool p_noHints) const;
 
   bool NodeHitTest(const std::shared_ptr<NodeEntry> &p_entry, int p_x, int p_y) const;
+  void BuildNodeList(const Game &);
 
 public:
   explicit TreeLayout(GameDocument *p_doc) : GameView(p_doc) {}
@@ -143,8 +144,7 @@ public:
   GameNode PriorSameLevel(const GameNode &) const;
   GameNode NextSameLevel(const GameNode &) const;
 
-  void BuildNodeList(const BehaviorSupportProfile &);
-  void Layout(const BehaviorSupportProfile &);
+  void Layout(const Game &);
   void GenerateLabels() const;
 
   std::shared_ptr<NodeEntry> GetNodeEntry(const GameNode &p_node) const
