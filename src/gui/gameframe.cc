@@ -504,6 +504,9 @@ void GameFrame::MakeMenus()
   auto *toolsMenu = new wxMenu;
   toolsMenu->Append(GBT_MENU_TOOLS_DOMINANCE, _("&Dominance"), _("Find undominated actions"),
                     true);
+  if (m_doc->GetGame()->IsTree()) {
+    toolsMenu->Enable(GBT_MENU_TOOLS_DOMINANCE, false);
+  }
   AppendBitmapItem(toolsMenu, GBT_MENU_TOOLS_EQUILIBRIUM, _("&Equilibrium"),
                    _("Compute Nash equilibria and refinements"), wxBitmap(calc_xpm));
 
@@ -1148,6 +1151,7 @@ void GameFrame::OnViewStrategic(wxCommandEvent &p_event)
   GetMenuBar()->Check(GBT_MENU_VIEW_STRATEGIC, m_nfgPanel->IsShown());
   GetMenuBar()->Enable(GBT_MENU_VIEW_ZOOMIN, !p_event.IsChecked());
   GetMenuBar()->Enable(GBT_MENU_VIEW_ZOOMOUT, !p_event.IsChecked());
+  GetMenuBar()->Enable(GBT_MENU_TOOLS_DOMINANCE, m_nfgPanel->IsShown());
 
   GetToolBar()->ToggleTool(GBT_MENU_VIEW_STRATEGIC, p_event.IsChecked());
   GetToolBar()->EnableTool(GBT_MENU_VIEW_ZOOMIN, !p_event.IsChecked());
