@@ -13,9 +13,13 @@ build:
     - libgmp-dev
     - pandoc
     - texlive-full
-  commands:
-    - pip install --upgrade --force-reinstall "draw-tree @ git+https://github.com/gambitproject/draw_tree.git@main#egg=draw-tree"
-    - pip install -r doc/requirements.txt
-    - pip install .
+  jobs:
+    pre_install:
+      - pip install --upgrade --force-reinstall "draw_tree @ git+https://github.com/gambitproject/draw_tree.git@main#egg=draw_tree"
 
-python: {}
+python:
+  install:
+    - requirements: doc/requirements.txt
+    - method: pip
+      path: "."
+  system_packages: true
