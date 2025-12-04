@@ -73,8 +73,6 @@ public:
     return GetPayoffDeriv(p_strategy->GetPlayer()->GetNumber(), p_strategy);
   }
 
-  T GetRegret(const GameStrategy &) const;
-
   virtual void InvalidateCache() const {}
 };
 
@@ -282,11 +280,7 @@ public:
   /// @param[in] p_strategy  The strategy to compute the regret for.
   /// @sa GetRegret(const GamePlayer &) const;
   ///     GetMaxRegret() const
-  T GetRegret(const GameStrategy &p_strategy) const
-  {
-    CheckVersion();
-    return m_rep->GetRegret(p_strategy);
-  }
+  T GetRegret(const GameStrategy &p_strategy) const;
 
   /// @brief Computes the regret for player \p p_player
   /// @details Computes the regret to the player of playing their mixed strategy

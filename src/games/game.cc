@@ -277,19 +277,6 @@ std::unique_ptr<MixedStrategyProfileRep<T>> MixedStrategyProfileRep<T>::Normaliz
   return norm;
 }
 
-template <class T> T MixedStrategyProfileRep<T>::GetRegret(const GameStrategy &p_strategy) const
-{
-  const GamePlayer player = p_strategy->GetPlayer();
-  T payoff = GetPayoffDeriv(player->GetNumber(), p_strategy);
-  T brpayoff = payoff;
-  for (auto strategy : player->GetStrategies()) {
-    if (strategy != p_strategy) {
-      brpayoff = std::max(brpayoff, GetPayoffDeriv(player->GetNumber(), strategy));
-    }
-  }
-  return brpayoff - payoff;
-}
-
 //========================================================================
 //                 MixedStrategyProfile<T>: Lifecycle
 //========================================================================
@@ -393,6 +380,92 @@ auto maximize_function(const Container &p_container, const Func &p_function)
   return std::transform_reduce(
       std::next(it), p_container.end(), p_function(*it),
       [](const T &a, const T &b) { return std::max(a, b); }, p_function);
+}
+
+template <class Iter, class T> class filter_iterator {
+public:
+  using iterator_category = std::forward_iterator_tag;
+  using value_type = typename std::iterator_traits<Iter>::value_type;
+  using difference_type = typename std::iterator_traits<Iter>::difference_type;
+  using reference = typename std::iterator_traits<Iter>::reference;
+  using pointer = typename std::iterator_traits<Iter>::pointer;
+
+  filter_iterator(Iter current, Iter end, const T &value)
+    : m_current(current), m_end(end), m_value(value)
+  {
+    skip_if_value();
+  }
+
+  value_type operator*() const { return *m_current; }
+  pointer operator->() const { return std::addressof(*m_current); }
+
+  filter_iterator &operator++()
+  {
+    ++m_current;
+    skip_if_value();
+    return *this;
+  }
+
+  filter_iterator operator++(int)
+  {
+    auto tmp = *this;
+    ++(*this);
+    return tmp;
+  }
+
+  friend bool operator==(const filter_iterator &a, const filter_iterator &b)
+  {
+    return a.m_current == b.m_current;
+  }
+
+  friend bool operator!=(const filter_iterator &a, const filter_iterator &b)
+  {
+    return a.m_current != b.m_current;
+  }
+
+private:
+  Iter m_current, m_end;
+  T m_value;
+
+  void skip_if_value()
+  {
+    while (m_current != m_end && *m_current == m_value) {
+      ++m_current;
+    }
+  }
+};
+
+template <typename Container, typename T> class filter_range {
+public:
+  using Iter = decltype(std::begin(std::declval<Container &>()));
+
+  filter_range(const Container &c, const T &value)
+    : m_begin(c.begin(), c.end(), value), m_end(c.end(), c.end(), value)
+  {
+  }
+
+  filter_iterator<Iter, T> begin() const { return m_begin; }
+  filter_iterator<Iter, T> end() const { return m_end; }
+
+private:
+  filter_iterator<Iter, T> m_begin, m_end;
+};
+
+template <class Container, class T> auto make_filter_iterator(const Container &c, const T &value)
+{
+  return filter_range<Container, T>(c, value);
+}
+
+template <class T> T MixedStrategyProfile<T>::GetRegret(const GameStrategy &p_strategy) const
+{
+  CheckVersion();
+  const GamePlayer player = p_strategy->GetPlayer();
+  T payoff = GetPayoffDeriv(player->GetNumber(), p_strategy);
+  T brpayoff = payoff;
+  for (const auto &strategy : make_filter_iterator(player->GetStrategies(), p_strategy)) {
+    brpayoff = std::max(brpayoff, GetPayoffDeriv(player->GetNumber(), strategy));
+  }
+  return brpayoff - payoff;
 }
 
 template <class T> T MixedStrategyProfile<T>::GetRegret(const GamePlayer &p_player) const
