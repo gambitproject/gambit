@@ -3,6 +3,7 @@ from libcpp.string cimport string
 from libcpp.memory cimport shared_ptr, unique_ptr
 from libcpp.list cimport list as stdlist
 from libcpp.vector cimport vector as stdvector
+from libcpp.set cimport set as stdset
 
 
 cdef extern from "gambit.h":
@@ -145,6 +146,7 @@ cdef extern from "games/game.h":
 
         bint IsChanceInfoset() except +
         bint Precedes(c_GameNode) except +
+        stdset[c_GameAction] GetOwnPriorActions() except +
 
     cdef cppclass c_GamePlayerRep "GamePlayerRep":
         cppclass Infosets:
@@ -220,6 +222,7 @@ cdef extern from "games/game.h":
         bint IsSubgameRoot() except +
         bint IsStrategyReachable() except +
         c_GameAction GetPriorAction() except +
+        c_GameAction GetOwnPriorAction() except +
 
     cdef cppclass c_GameRep "GameRep":
         cppclass Players:

@@ -21,6 +21,12 @@ def pytest_collection_modifyitems(config, items):
         # --run-tutorials given in cli: do not skip tutorial tests
         return
 
+    # Check if test_tutorials.py was explicitly specified
+    args = config.invocation_params.args
+    if any("test_tutorials.py" in str(arg) for arg in args):
+        # test_tutorials.py explicitly run: do not skip
+        return
+
     skip_tutorials = pytest.mark.skip(reason="need --run-tutorials option to run")
     for item in items:
         if "tutorials" in item.keywords:

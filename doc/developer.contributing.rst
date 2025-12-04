@@ -99,6 +99,11 @@ You can also run the tests locally before submitting your pull request, using `p
 
     pytest
 
+3. [Optional] If you wish to run the tutorial notebook tests, you will need to add the ``--run-tutorials`` flag, which require the `doc` dependencies: ::
+
+    pip install -r doc/requirements.txt
+    pytest --run-tutorials
+
 Adding to the test suite
 ^^^^^^^^^^^^^^^^^^^^^^^^
 

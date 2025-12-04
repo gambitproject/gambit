@@ -608,53 +608,37 @@ void TreeLayout::ComputeRenderedParents() const
   }
 }
 
-void TreeLayout::BuildNodeList(const GameNode &p_node, const BehaviorSupportProfile &p_support)
+void TreeLayout::BuildNodeList(const GameNode &p_node)
 {
   const auto entry = std::make_shared<NodeEntry>(p_node);
   m_nodeList.push_back(entry);
   m_nodeMap[p_node] = entry;
   entry->m_size = m_doc->GetStyle().GetNodeSize();
   entry->m_branchLength = m_doc->GetStyle().GetBranchLength();
-  if (m_doc->GetStyle().RootReachable()) {
-    if (const GameInfoset infoset = p_node->GetInfoset()) {
-      if (infoset->GetPlayer()->IsChance()) {
-        for (const auto &child : p_node->GetChildren()) {
-          BuildNodeList(child, p_support);
-        }
-      }
-      else {
-        for (const auto &action : p_support.GetActions(infoset)) {
-          BuildNodeList(p_node->GetChild(action), p_support);
-        }
-      }
-    }
-  }
-  else {
-    for (const auto &child : p_node->GetChildren()) {
-      BuildNodeList(child, p_support);
-    }
+  for (const auto &child : p_node->GetChildren()) {
+    BuildNodeList(child);
   }
 }
 
-void TreeLayout::BuildNodeList(const BehaviorSupportProfile &p_support)
+void TreeLayout::BuildNodeList(const Game &p_game)
 {
   m_nodeList.clear();
   m_nodeMap.clear();
-  BuildNodeList(m_doc->GetGame()->GetRoot(), p_support);
+  BuildNodeList(p_game->GetRoot());
 }
 
-void TreeLayout::Layout(const BehaviorSupportProfile &p_support)
+void TreeLayout::Layout(const Game &p_game)
 {
   m_infosetSpacing = (m_doc->GetStyle().GetInfosetJoin() == GBT_INFOSET_JOIN_LINES) ? 10 : 40;
 
   if (m_nodeList.size() != m_doc->GetGame()->NumNodes()) {
     // We only rebuild the node list if the number of nodes changes.  If we only have
     // information set changes this can be handled just by the traversal below
-    BuildNodeList(p_support);
+    BuildNodeList(p_game);
   }
 
   auto layout = Gambit::Layout(m_doc->GetGame());
-  layout.LayoutTree(p_support);
+  layout.LayoutTree(p_game);
 
   const auto spacing = m_doc->GetStyle().GetTerminalSpacing();
   for (auto [node, entry] : layout.GetNodeMap()) {
