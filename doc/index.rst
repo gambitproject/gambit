@@ -33,7 +33,7 @@ made.
 If you are citing Gambit in a paper, we suggest a citation of the form:
 
   Savani, Rahul and Turocy, Theodore L. (2025)
-  Gambit: The package for computation in game theory, Version 16.3.1.
+  Gambit: The package for computation in game theory, Version 16.3.2.
   https://www.gambit-project.org.
 
 Replace the version number and year as appropriate if you use a
