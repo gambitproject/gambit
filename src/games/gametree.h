@@ -127,7 +127,10 @@ public:
   /// Returns the iset'th information set in the game (numbered globally)
   GameInfoset GetInfoset(int iset) const override;
   /// Returns the set of information sets in the game
-  Infosets GetInfosets() const override { return Infosets(this); }
+  Infosets GetInfosets() const override
+  {
+    return Infosets(std::const_pointer_cast<GameRep>(this->shared_from_this()));
+  }
   /// Sort the information sets for each player in a canonical order
   void SortInfosets() override;
   /// Returns the set of actions taken by the infoset's owner before reaching this infoset
