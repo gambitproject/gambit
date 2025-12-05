@@ -967,7 +967,8 @@ public:
   virtual void BuildComputedValues() const {}
 };
 
-#include <assert.h>
+#undef NDEBUG
+#include <cassert>
 
 class GameRep::Infosets {
 public:
