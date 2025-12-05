@@ -901,10 +901,13 @@ public:
 
   /// @name Information sets
   //@{
+  using Infosets =
+      NestedElementCollection<&GameRep::m_players, &GamePlayerRep::m_infosets, GameInfoset>;
+
   /// Returns the iset'th information set in the game (numbered globally)
   virtual GameInfoset GetInfoset(int iset) const { throw UndefinedException(); }
   /// Returns the set of information sets in the game
-  virtual std::vector<GameInfoset> GetInfosets() const { throw UndefinedException(); }
+  virtual Infosets GetInfosets() const { throw UndefinedException(); }
   /// Sort the information sets for each player in a canonical order
   virtual void SortInfosets() {}
   /// Returns the set of actions taken by the infoset's owner before reaching this infoset

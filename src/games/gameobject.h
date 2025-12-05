@@ -214,6 +214,124 @@ public:
   iterator cend() const { return {m_owner, m_container, (m_owner) ? m_container->size() : 0}; }
 };
 
+template <auto OuterMember, auto InnerMember, typename ValueType> class NestedElementCollection {
+  template <typename MemberPtr> struct outer_element_of;
+
+  template <typename OuterClass, typename Elem>
+  struct outer_element_of<std::vector<std::shared_ptr<Elem>> OuterClass::*> {
+    using outer_class = OuterClass;
+    using outer_elem = Elem;
+    using container = std::vector<std::shared_ptr<Elem>>;
+  };
+
+  template <typename MemberPtr> struct inner_element_of;
+
+  template <typename OuterElem, typename InnerElem>
+  struct inner_element_of<std::vector<std::shared_ptr<InnerElem>> OuterElem::*> {
+    using outer_elem = OuterElem;
+    using inner_elem = InnerElem;
+    using container = std::vector<std::shared_ptr<InnerElem>>;
+  };
+
+  using OM = outer_element_of<decltype(OuterMember)>;
+  using IM = inner_element_of<decltype(InnerMember)>;
+
+  using OuterClass = typename OM::outer_class;
+  using OuterElem = typename OM::outer_elem;
+  using InnerElem = typename IM::inner_elem;
+
+public:
+  class iterator {
+    using outer_iter = typename OM::container::const_iterator;
+    using inner_iter = typename IM::container::const_iterator;
+
+    outer_iter m_outer, m_outerEnd;
+    inner_iter m_inner, m_innerEnd;
+    mutable ValueType m_cache;
+
+    void advance()
+    {
+      while (m_outer != m_outerEnd && m_inner == m_innerEnd) {
+        ++m_outer;
+        if (m_outer != m_outerEnd) {
+          const auto &outerPtr = *m_outer;
+          const auto &innerVec = outerPtr.get()->*InnerMember;
+          m_inner = innerVec.begin();
+          m_innerEnd = innerVec.end();
+        }
+      }
+    }
+
+  public:
+    using iterator_category = std::input_iterator_tag;
+    using value_type = ValueType;
+    using difference_type = std::ptrdiff_t;
+    using reference = ValueType;
+    using pointer = const ValueType *;
+
+    iterator() = default;
+
+    iterator(const OuterClass *p_obj, bool p_isEnd)
+    {
+      const auto &outerVec = p_obj->*OuterMember;
+
+      m_outer = outerVec.begin();
+      m_outerEnd = outerVec.end();
+
+      if (p_isEnd || m_outer == m_outerEnd) {
+        m_outer = m_outerEnd;
+        return;
+      }
+
+      const auto &outerPtr = *m_outer;
+      const auto &innerVec = outerPtr.get()->*InnerMember;
+
+      m_inner = innerVec.begin();
+      m_innerEnd = innerVec.end();
+
+      advance();
+    }
+
+    reference operator*() const { return ValueType(*m_inner); }
+
+    pointer operator->() const
+    {
+      m_cache = ValueType(*m_inner);
+      return &m_cache;
+    }
+
+    iterator &operator++()
+    {
+      ++m_inner;
+      advance();
+      return *this;
+    }
+
+    iterator operator++(int)
+    {
+      iterator tmp = *this;
+      ++(*this);
+      return tmp;
+    }
+
+    bool operator==(const iterator &p_other) const
+    {
+      return m_outer == p_other.m_outer && (m_outer == m_outerEnd || m_inner == p_other.m_inner);
+    }
+
+    bool operator!=(const iterator &p_other) const { return !(*this == p_other); }
+  };
+
+private:
+  const OuterClass *m_obj;
+
+public:
+  explicit NestedElementCollection(const OuterClass *p_obj) : m_obj(p_obj) {}
+
+  iterator begin() const { return {m_obj, false}; }
+  iterator end() const { return {m_obj, true}; }
+};
+
 } // end namespace Gambit
 
 #endif // GAMBIT_GAMES_GAMEOBJECT_H
