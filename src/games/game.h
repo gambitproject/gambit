@@ -820,10 +820,19 @@ public:
 
   /// @name Dimensions of the game
   //@{
+  using Strategies =
+      NestedElementCollection<&GameRep::m_players, &GamePlayerRep::m_strategies, GameStrategy>;
+
   /// The number of strategies for each player
   virtual Array<int> NumStrategies() const = 0;
   /// Gets the i'th strategy in the game, numbered globally
   virtual GameStrategy GetStrategy(int p_index) const = 0;
+  /// Gets the collection of all strategies in the game
+  Strategies GetStrategies() const
+  {
+    BuildComputedValues();
+    return Strategies(this);
+  }
   /// Creates a new strategy for the player
   virtual GameStrategy NewStrategy(const GamePlayer &p_player, const std::string &p_label)
   {
