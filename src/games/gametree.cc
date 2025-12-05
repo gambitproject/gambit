@@ -813,18 +813,18 @@ Rational GameTreeRep::GetPlayerMaxPayoff(const GamePlayer &p_player) const
       p_player, m_root, [](const Rational &a, const Rational &b) { return std::max(a, b); });
 }
 
-bool GameTreeRep::IsAbsentMinded() const
-{
-  if (!m_ownPriorActionInfo && !m_root->IsTerminal()) {
-    const_cast<GameTreeRep *>(this)->BuildOwnPriorActions();
-  }
+// bool GameTreeRep::IsAbsentMinded() const
+//{
+//   if (!m_ownPriorActionInfo && !m_root->IsTerminal()) {
+//     const_cast<GameTreeRep *>(this)->BuildOwnPriorActions();
+//   }
 
-  if (GetRoot()->IsTerminal()) {
-    return true;
-  }
+//  if (GetRoot()->IsTerminal()) {
+//    return true;
+//  }
 
-  return !m_absentMindedInfosets.empty();
-}
+//  return !m_absentMindedInfosets.empty();
+//}
 
 bool GameTreeRep::IsPerfectRecall() const
 {
@@ -843,8 +843,8 @@ bool GameTreeRep::IsPerfectRecall() const
 
 bool GameTreeRep::IsAbsentMinded(const GameInfosetRep *infoset) const
 {
-  if (m_infosetParents.empty() && !m_root->IsTerminal()) {
-    const_cast<GameTreeRep *>(this)->BuildInfosetParents();
+  if (!m_ownPriorActionInfo && !m_root->IsTerminal()) {
+    const_cast<GameTreeRep *>(this)->BuildOwnPriorActions();
   }
 
   return m_absentMindedInfosets.count(const_cast<GameInfosetRep *>(infoset));
