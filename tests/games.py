@@ -467,8 +467,9 @@ def create_one_shot_trust_efg(unique_NE_variant=False) -> gbt.Game:
 
         The unique_NE_variant makes Trust a dominant strategy, replacing the
         non-singleton equilibrium component from the standard version of the game
-        where the Buyer plays "Not Trust" and the seller can play any mixture < 0.5 probability
-        on Honor with a unique NE where the Buyer plays Trust and the Seller plays Abuse.
+        where the Buyer plays "Not Trust" and the seller can play any mixture with
+        < 0.5 probability on Honor with a unique NE where the Buyer plays Trust and
+        the Seller plays Abuse.
 
         This is not a standard variant but is useful for testing enumpoly_solve.
     """
