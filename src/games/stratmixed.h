@@ -24,7 +24,6 @@
 #define LIBGAMBIT_MIXED_H
 
 #include "core/vector.h"
-#include "games/gameagg.h"
 #include "games/gamebagg.h"
 
 namespace Gambit {
@@ -39,10 +38,10 @@ public:
 
   explicit MixedStrategyProfileRep(const StrategySupportProfile &);
   virtual ~MixedStrategyProfileRep() = default;
-  virtual std::unique_ptr<MixedStrategyProfileRep<T>> Copy() const = 0;
+  virtual std::unique_ptr<MixedStrategyProfileRep> Copy() const = 0;
 
   void SetCentroid();
-  std::unique_ptr<MixedStrategyProfileRep<T>> Normalize() const;
+  std::unique_ptr<MixedStrategyProfileRep> Normalize() const;
   /// Returns the probability the strategy is played
   const T &operator[](const GameStrategy &p_strategy) const
   {
@@ -82,7 +81,6 @@ public:
 /// independently chooses from among his strategies with specified
 /// probabilities.
 template <class T> class MixedStrategyProfile {
-private:
   std::unique_ptr<MixedStrategyProfileRep<T>> m_rep;
   mutable std::map<GamePlayer, std::map<GameStrategy, T>> map_strategy_payoffs;
   mutable std::map<GamePlayer, T> map_profile_payoffs;
@@ -115,20 +113,18 @@ public:
   /// Convert a behavior strategy profile to a mixed strategy profile
   explicit MixedStrategyProfile(const MixedBehaviorProfile<T> &);
   /// Make a copy of the mixed strategy profile
-  MixedStrategyProfile(const MixedStrategyProfile<T> &p_profile) : m_rep(p_profile.m_rep->Copy())
-  {
-  }
+  MixedStrategyProfile(const MixedStrategyProfile &p_profile) : m_rep(p_profile.m_rep->Copy()) {}
   /// Destructor
   ~MixedStrategyProfile() = default;
 
-  MixedStrategyProfile<T> &operator=(const MixedStrategyProfile<T> &);
-  MixedStrategyProfile<T> &operator=(const Vector<T> &v)
+  MixedStrategyProfile &operator=(const MixedStrategyProfile &);
+  MixedStrategyProfile &operator=(const Vector<T> &v)
   {
     InvalidateCache();
     m_rep->m_probs = v;
     return *this;
   }
-  MixedStrategyProfile<T> &operator=(const T &c)
+  MixedStrategyProfile &operator=(const T &c)
   {
     InvalidateCache();
     m_rep->m_probs = c;
@@ -139,13 +135,13 @@ public:
   /// @name Operator overloading
   //@{
   /// Test for the equality of two profiles
-  bool operator==(const MixedStrategyProfile<T> &p_profile) const
+  bool operator==(const MixedStrategyProfile &p_profile) const
   {
     return (m_rep->m_support == p_profile.m_rep->m_support &&
             m_rep->m_probs == p_profile.m_rep->m_probs);
   }
   /// Test for the inequality of two profiles
-  bool operator!=(const MixedStrategyProfile<T> &p_profile) const
+  bool operator!=(const MixedStrategyProfile &p_profile) const
   {
     return (m_rep->m_support != p_profile.m_rep->m_support ||
             m_rep->m_probs != p_profile.m_rep->m_probs);
@@ -215,7 +211,7 @@ public:
   /// Create a new mixed strategy profile where strategies are played
   /// in the same proportions, but with probabilities for each player
   /// summing to one.
-  MixedStrategyProfile<T> Normalize() const
+  MixedStrategyProfile Normalize() const
   {
     CheckVersion();
     return MixedStrategyProfile<T>(m_rep->Normalize());
@@ -225,7 +221,7 @@ public:
   size_t MixedProfileLength() const { return m_rep->m_probs.size(); }
 
   /// Converts the profile to one on the full support of the game
-  MixedStrategyProfile<T> ToFullSupport() const;
+  MixedStrategyProfile ToFullSupport() const;
   //@}
 
   /// @name Computation of interesting quantities
@@ -331,7 +327,7 @@ MixedStrategyProfile<Rational> GameRep::NewRandomStrategyProfile(int p_denom,
     auto prob = dist.cbegin();
     for (auto strategy : player->GetStrategies()) {
       profile[strategy] = *prob;
-      prob++;
+      ++prob;
     }
   }
   return profile;

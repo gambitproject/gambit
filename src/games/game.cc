@@ -251,7 +251,7 @@ MixedStrategyProfileRep<T>::MixedStrategyProfileRep(const StrategySupportProfile
 template <class T> void MixedStrategyProfileRep<T>::SetCentroid()
 {
   for (auto player : m_support.GetGame()->GetPlayers()) {
-    T center = T(1) / T(m_support.GetStrategies(player).size());
+    T center = static_cast<T>(1) / static_cast<T>(m_support.GetStrategies(player).size());
     for (auto strategy : m_support.GetStrategies(player)) {
       (*this)[strategy] = center;
     }
@@ -300,8 +300,7 @@ MixedStrategyProfile<T>::MixedStrategyProfile(const MixedBehaviorProfile<T> &p_p
 }
 
 template <class T>
-MixedStrategyProfile<T> &
-MixedStrategyProfile<T>::operator=(const MixedStrategyProfile<T> &p_profile)
+MixedStrategyProfile<T> &MixedStrategyProfile<T>::operator=(const MixedStrategyProfile &p_profile)
 {
   if (this != &p_profile) {
     InvalidateCache();
@@ -351,7 +350,6 @@ template <class T> void MixedStrategyProfile<T>::ComputePayoffs() const
   }
   for (const auto &player : m_rep->m_support.GetPlayers()) {
     map_profile_payoffs[player] = GetPayoff(player);
-    // values of the player's strategies
     for (const auto &strategy : m_rep->m_support.GetStrategies(player)) {
       map_strategy_payoffs[player][strategy] = GetPayoff(strategy);
     }
