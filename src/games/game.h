@@ -824,6 +824,18 @@ public:
   virtual Array<int> NumStrategies() const = 0;
   /// Gets the i'th strategy in the game, numbered globally
   virtual GameStrategy GetStrategy(int p_index) const = 0;
+  /// Gets the set of strategies in the game
+  std::vector<GameStrategy> GetStrategies() const
+  {
+    BuildComputedValues();
+    std::vector<GameStrategy> ret;
+    for (const auto &player : m_players) {
+      for (const auto &strategy : player->m_strategies) {
+        ret.emplace_back(strategy);
+      }
+    }
+    return ret;
+  }
   /// Creates a new strategy for the player
   virtual GameStrategy NewStrategy(const GamePlayer &p_player, const std::string &p_label)
   {
