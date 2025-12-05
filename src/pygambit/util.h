@@ -30,6 +30,7 @@
 #include <fstream>
 #include <sstream>
 #include "gambit.h"
+#include "games/gameagg.h"
 #include "games/nash.h"
 
 using namespace std;

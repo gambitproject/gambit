@@ -188,7 +188,7 @@ public:
     }
     value_type operator*() const { return m_container->at(m_index); }
 
-    inline const P &GetOwner() const { return m_owner; }
+    const P &GetOwner() const { return m_owner; }
   };
 
   ElementCollection() = default;
