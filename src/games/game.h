@@ -967,71 +967,122 @@ public:
   virtual void BuildComputedValues() const {}
 };
 
+#include <assert.h>
+
 class GameRep::Infosets {
 public:
   class iterator {
   public:
-    using iterator_category = std::input_iterator_tag;
+    using iterator_category = std::forward_iterator_tag; // diagnostic: proper category
     using value_type = GameInfoset;
     using difference_type = std::ptrdiff_t;
-    using pointer = GameInfoset;
-    using reference = GameInfoset;
+    using pointer = value_type *;
+    using reference = value_type &;
 
     using outer_iter = std::vector<std::shared_ptr<GamePlayerRep>>::const_iterator;
     using inner_iter = std::vector<std::shared_ptr<GameInfosetRep>>::const_iterator;
 
-    iterator() = default;
+    iterator() : owner_id_(0), players_(nullptr) {}
 
-    iterator(outer_iter outer, outer_iter outer_end) : outer_(outer), outer_end_(outer_end)
+    iterator(outer_iter outer, outer_iter outer_end,
+             const std::vector<std::shared_ptr<GamePlayerRep>> *players, std::size_t owner_id)
+      : outer_(outer), outer_end_(outer_end), players_(players), owner_id_(owner_id)
     {
+      // ------ DIAGNOSTICS ----------------------------------------------------
+
+      // Detect dangling players pointer
+      assert(players_ != nullptr && "Infosets iterator constructed with null players pointer.");
+
+      // Detect begin()==end() but outer mismatch
+      if (outer_ == outer_end_) {
+        assert(inner_ == inner_end_ && "Inner iterators must be empty for end iterator.");
+      }
+
       if (outer_ != outer_end_) {
         init_inner();
         satisfy_invariant();
       }
     }
 
-    GameInfoset operator*() const { return *inner_; }
-    GameInfoset operator->() const { return *inner_; }
+    // -------------------------------------------------------------------------
+    // Dereference
+    // -------------------------------------------------------------------------
+    value_type operator*() const
+    {
+      assert(players_ != nullptr);
+      assert(!is_end() && "Dereferencing end iterator!");
 
+      // Check many possible UB causes
+      assert(inner_ != inner_end_ && "Inner iterator invalid during dereference.");
+      assert(valid_owner() &&
+             "Iterator used after view destruction or copying from different view.");
+
+      // Additional optional check: ensure GameInfoset is safe to construct
+      // You can instrument your GameInfoset(value_type) here to assert its invariants.
+
+      return *inner_;
+    }
+
+    value_type operator->() const { return operator*(); }
+
+    // -------------------------------------------------------------------------
+    // Increment
+    // -------------------------------------------------------------------------
     iterator &operator++()
     {
+      assert(players_ != nullptr);
+      assert(!is_end() && "Incrementing end iterator!");
+
       ++inner_;
       satisfy_invariant();
       return *this;
     }
 
-    // -------- Windows/MSVC-safe equality ----------
+    // -------------------------------------------------------------------------
+    // Equality / Inequality
+    // -------------------------------------------------------------------------
     bool operator==(const iterator &other) const
     {
-      // Both are end() ⇒ equal
+      // Detect comparing iterators from different views
+      if (owner_id_ != other.owner_id_) {
+        assert(false && "Comparing iterators from different Infosets views!");
+      }
+
+      // Both end iterators must compare equal
       if (is_end() && other.is_end()) {
         return true;
       }
 
-      // Otherwise, must match outer + inner (safe because both non-end)
+      // Detect illegal comparisons
+      assert(players_ == other.players_ &&
+             "Comparing iterators belonging to different container instances!");
+
       return outer_ == other.outer_ && inner_ == other.inner_;
     }
 
     bool operator!=(const iterator &other) const { return !(*this == other); }
 
   private:
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
     bool is_end() const { return outer_ == outer_end_; }
 
-    // Safe initialization even when shared_ptr is null
+    bool valid_owner() const { return players_ != nullptr && owner_id_ != 0; }
+
+    // Initialize inner iter safely
     void init_inner()
     {
       const auto &playerPtr = *outer_;
 
-      if (!playerPtr) {
-        // Null shared_ptr → no infosets
-        inner_ = inner_end_ = inner_iter{};
-        return;
-      }
+      // Check for null shared_ptr (VERY COMMON SOURCE OF UB)
+      assert(playerPtr && "Null shared_ptr<GamePlayerRep> inside m_players!");
 
       inner_ = playerPtr->m_infosets.begin();
       inner_end_ = playerPtr->m_infosets.end();
     }
 
+    // Advance to next non-empty inner range
     void satisfy_invariant()
     {
       while (!is_end() && inner_ == inner_end_) {
@@ -1042,23 +1093,45 @@ public:
       }
     }
 
+    // -------------------------------------------------------------------------
+    // Data members
+    // -------------------------------------------------------------------------
     outer_iter outer_{};
     outer_iter outer_end_{};
     inner_iter inner_{};
     inner_iter inner_end_{};
+
+    const std::vector<std::shared_ptr<GamePlayerRep>> *players_ = nullptr;
+
+    // Unique stamp to detect view lifetime/dangling iterator
+    std::size_t owner_id_ = 0;
   };
 
+  // -------------------------------------------------------------------------
   // View interface
-  iterator begin() const { return iterator(players_->begin(), players_->end()); }
-  iterator end() const { return iterator(players_->end(), players_->end()); }
-
-  explicit Infosets(const GameRep *game)
-    : players_(&game->m_players) // ✔ store pointer, not reference
+  // -------------------------------------------------------------------------
+  iterator begin() const
   {
+    return iterator(players_->begin(), players_->end(), players_, owner_id_);
+  }
+
+  iterator end() const { return iterator(players_->end(), players_->end(), players_, owner_id_); }
+
+  explicit Infosets(const GameRep *game) : players_(&game->m_players)
+  {
+    assert(game != nullptr);
+    owner_id_ = next_owner_id(); // unique ID for detecting illegal comparisons
   }
 
 private:
   const std::vector<std::shared_ptr<GamePlayerRep>> *players_;
+  std::size_t owner_id_;
+
+  static std::size_t next_owner_id()
+  {
+    static std::size_t id = 1;
+    return id++;
+  }
 };
 
 inline GameRep::Infosets GameRep::GetInfosets() const { return Infosets(this); }
