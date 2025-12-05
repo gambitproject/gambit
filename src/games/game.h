@@ -910,13 +910,12 @@ public:
 
   /// @name Information sets
   //@{
-  using Infosets =
-      NestedElementCollection<&GameRep::m_players, &GamePlayerRep::m_infosets, GameInfoset>;
+  class Infosets;
 
   /// Returns the iset'th information set in the game (numbered globally)
   virtual GameInfoset GetInfoset(int iset) const { throw UndefinedException(); }
   /// Returns the set of information sets in the game
-  virtual Infosets GetInfosets() const { throw UndefinedException(); }
+  virtual Infosets GetInfosets() const;
   /// Sort the information sets for each player in a canonical order
   virtual void SortInfosets() {}
   /// Returns the set of actions taken by the infoset's owner before reaching this infoset
@@ -967,6 +966,78 @@ public:
   /// Build any computed values anew
   virtual void BuildComputedValues() const {}
 };
+
+class GameRep::Infosets {
+public:
+  class iterator {
+  public:
+    using iterator_category = std::input_iterator_tag;
+    using value_type = GameInfoset;
+    using difference_type = std::ptrdiff_t;
+    using pointer = GameInfoset;
+    using reference = GameInfoset;
+
+    using outer_iter = std::vector<std::shared_ptr<GamePlayerRep>>::const_iterator;
+    using inner_iter = std::vector<std::shared_ptr<GameInfosetRep>>::const_iterator;
+
+    iterator() = default;
+
+    iterator(outer_iter outer, outer_iter outer_end) : outer_(outer), outer_end_(outer_end)
+    {
+      if (outer_ != outer_end_) {
+        inner_ = (*outer_)->m_infosets.begin();
+        inner_end_ = (*outer_)->m_infosets.end();
+        satisfy_invariant();
+      }
+    }
+
+    GameInfoset operator*() const { return *inner_; }
+    GameInfoset operator->() const { return *inner_; }
+
+    iterator &operator++()
+    {
+      ++inner_;
+      satisfy_invariant();
+      return *this;
+    }
+
+    bool operator==(const iterator &other) const
+    {
+      return outer_ == other.outer_ && (outer_ == outer_end_ || inner_ == other.inner_);
+    }
+
+    bool operator!=(const iterator &other) const { return !(*this == other); }
+
+  private:
+    void satisfy_invariant()
+    {
+      while (outer_ != outer_end_ && inner_ == inner_end_) {
+        ++outer_;
+        if (outer_ != outer_end_) {
+          inner_ = (*outer_)->m_infosets.begin();
+          inner_end_ = (*outer_)->m_infosets.end();
+        }
+      }
+    }
+
+    outer_iter outer_{};
+    outer_iter outer_end_{};
+    inner_iter inner_{};
+    inner_iter inner_end_{};
+  };
+
+  // View interface
+  iterator begin() const { return {players_.begin(), players_.end()}; }
+
+  iterator end() const { return {players_.end(), players_.end()}; }
+
+  explicit Infosets(const GameRep *game) : players_(game->m_players) {}
+
+private:
+  const std::vector<std::shared_ptr<GamePlayerRep>> &players_;
+};
+
+inline GameRep::Infosets GameRep::GetInfosets() const { return Infosets(this); }
 
 //=======================================================================
 //          Inline members of game representation classes
