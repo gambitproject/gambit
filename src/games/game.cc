@@ -370,101 +370,15 @@ template <class T> T MixedStrategyProfile<T>::GetLiapValue() const
   return liapValue;
 }
 
-template <class Container, class Func>
-auto maximize_function(const Container &p_container, const Func &p_function)
-{
-  auto it = p_container.begin();
-  using T = decltype(p_function(*it));
-  return std::transform_reduce(
-      std::next(it), p_container.end(), p_function(*it),
-      [](const T &a, const T &b) { return std::max(a, b); }, p_function);
-}
-
-template <class Iter, class T> class filter_iterator {
-public:
-  using iterator_category = std::forward_iterator_tag;
-  using value_type = typename std::iterator_traits<Iter>::value_type;
-  using difference_type = typename std::iterator_traits<Iter>::difference_type;
-  using reference = typename std::iterator_traits<Iter>::reference;
-  using pointer = typename std::iterator_traits<Iter>::pointer;
-
-  filter_iterator(Iter current, Iter end, const T &value)
-    : m_current(current), m_end(end), m_value(value)
-  {
-    skip_if_value();
-  }
-
-  value_type operator*() const { return *m_current; }
-  pointer operator->() const { return std::addressof(*m_current); }
-
-  filter_iterator &operator++()
-  {
-    ++m_current;
-    skip_if_value();
-    return *this;
-  }
-
-  filter_iterator operator++(int)
-  {
-    auto tmp = *this;
-    ++(*this);
-    return tmp;
-  }
-
-  friend bool operator==(const filter_iterator &a, const filter_iterator &b)
-  {
-    return a.m_current == b.m_current;
-  }
-
-  friend bool operator!=(const filter_iterator &a, const filter_iterator &b)
-  {
-    return a.m_current != b.m_current;
-  }
-
-private:
-  Iter m_current, m_end;
-  T m_value;
-
-  void skip_if_value()
-  {
-    while (m_current != m_end && *m_current == m_value) {
-      ++m_current;
-    }
-  }
-};
-
-template <typename Container, typename T> class filter_range {
-public:
-  using Iter = decltype(std::begin(std::declval<Container &>()));
-
-  filter_range(const Container &c, const T &value)
-    : m_begin(c.begin(), c.end(), value), m_end(c.end(), c.end(), value)
-  {
-  }
-
-  filter_iterator<Iter, T> begin() const { return m_begin; }
-  filter_iterator<Iter, T> end() const { return m_end; }
-
-private:
-  filter_iterator<Iter, T> m_begin, m_end;
-};
-
-template <class Container, class T> auto make_filter_iterator(const Container &c, const T &value)
-{
-  return filter_range<Container, T>(c, value);
-}
-
 template <class T> T MixedStrategyProfile<T>::GetRegret(const GameStrategy &p_strategy) const
 {
   CheckVersion();
   ComputePayoffs();
   auto player = p_strategy->GetPlayer();
-  T payoff = m_strategyValues[player][p_strategy];
-  T best_other_payoff = maximize_function(filter_range(player->GetStrategies(), p_strategy),
-                                          [this, &player](const GameStrategy &strategy) -> T {
-                                            return m_strategyValues[player][strategy];
-                                          });
-  return std::max(best_other_payoff - payoff, static_cast<T>(0));
+  T best_other_payoff = maximize_function(
+      exclude_value(player->GetStrategies(), p_strategy),
+      [this, &player](const auto &strategy) -> T { return m_strategyValues[player][strategy]; });
+  return std::max(best_other_payoff - m_strategyValues[player][p_strategy], static_cast<T>(0));
 }
 
 template <class T> T MixedStrategyProfile<T>::GetRegret(const GamePlayer &p_player) const
@@ -481,9 +395,8 @@ template <class T> T MixedStrategyProfile<T>::GetRegret(const GamePlayer &p_play
 template <class T> T MixedStrategyProfile<T>::GetMaxRegret() const
 {
   CheckVersion();
-  return maximize_function(GetGame()->GetPlayers(), [this](const GamePlayer &p_player) -> T {
-    return this->GetRegret(p_player);
-  });
+  return maximize_function(GetGame()->GetPlayers(),
+                           [this](const auto &player) -> T { return this->GetRegret(player); });
 }
 
 template class MixedStrategyProfileRep<double>;
