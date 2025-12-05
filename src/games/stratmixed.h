@@ -82,8 +82,8 @@ public:
 /// probabilities.
 template <class T> class MixedStrategyProfile {
   std::unique_ptr<MixedStrategyProfileRep<T>> m_rep;
-  mutable std::map<GamePlayer, std::map<GameStrategy, T>> map_strategy_payoffs;
-  mutable std::map<GamePlayer, T> map_profile_payoffs;
+  mutable std::map<GamePlayer, T> m_payoffs;
+  mutable std::map<GamePlayer, std::map<GameStrategy, T>> m_strategyValues;
 
   /// Check underlying game has not changed; raise exception if it has
   void CheckVersion() const
@@ -98,8 +98,8 @@ template <class T> class MixedStrategyProfile {
   /// Reset cache for payoffs and strategy values
   void InvalidateCache() const
   {
-    map_strategy_payoffs.clear();
-    map_profile_payoffs.clear();
+    m_strategyValues.clear();
+    m_payoffs.clear();
     m_rep->InvalidateCache();
   }
 

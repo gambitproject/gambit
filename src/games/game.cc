@@ -343,15 +343,15 @@ template <class T> MixedStrategyProfile<T> MixedStrategyProfile<T>::ToFullSuppor
 
 template <class T> void MixedStrategyProfile<T>::ComputePayoffs() const
 {
-  if (!map_profile_payoffs.empty()) {
-    // caches (map_profile_payoffs and map_strategy_payoffs) are valid,
+  if (!m_payoffs.empty()) {
+    // caches (m_payoffs and m_strategyValues) are valid,
     // so don't compute anything, simply return
     return;
   }
   for (const auto &player : m_rep->m_support.GetPlayers()) {
-    map_profile_payoffs[player] = GetPayoff(player);
+    m_payoffs[player] = GetPayoff(player);
     for (const auto &strategy : m_rep->m_support.GetStrategies(player)) {
-      map_strategy_payoffs[player][strategy] = GetPayoff(strategy);
+      m_strategyValues[player][strategy] = GetPayoff(strategy);
     }
   }
 };
@@ -362,8 +362,8 @@ template <class T> T MixedStrategyProfile<T>::GetLiapValue() const
   ComputePayoffs();
 
   auto liapValue = static_cast<T>(0);
-  for (auto [player, payoff] : map_profile_payoffs) {
-    for (auto v : map_strategy_payoffs[player]) {
+  for (auto [player, payoff] : m_payoffs) {
+    for (auto v : m_strategyValues[player]) {
       liapValue += sqr(std::max(v.second - payoff, static_cast<T>(0)));
     }
   }
@@ -457,20 +457,25 @@ template <class Container, class T> auto make_filter_iterator(const Container &c
 template <class T> T MixedStrategyProfile<T>::GetRegret(const GameStrategy &p_strategy) const
 {
   CheckVersion();
-  T payoff = GetPayoff(p_strategy);
-  T best_other_payoff = maximize_function(
-      filter_range(p_strategy->GetPlayer()->GetStrategies(), p_strategy),
-      [this](const GameStrategy &p_strategy) -> T { return GetPayoff(p_strategy); });
+  ComputePayoffs();
+  auto player = p_strategy->GetPlayer();
+  T payoff = m_strategyValues[player][p_strategy];
+  T best_other_payoff = maximize_function(filter_range(player->GetStrategies(), p_strategy),
+                                          [this, &player](const GameStrategy &strategy) -> T {
+                                            return m_strategyValues[player][strategy];
+                                          });
   return std::max(best_other_payoff - payoff, static_cast<T>(0));
 }
 
 template <class T> T MixedStrategyProfile<T>::GetRegret(const GamePlayer &p_player) const
 {
   CheckVersion();
+  ComputePayoffs();
   auto br_payoff =
-      maximize_function(p_player->GetStrategies(),
-                        [this](const GameStrategy &strategy) -> T { return GetPayoff(strategy); });
-  return br_payoff - GetPayoff(p_player);
+      maximize_function(p_player->GetStrategies(), [this, p_player](const auto &strategy) -> T {
+        return m_strategyValues[p_player][strategy];
+      });
+  return br_payoff - m_payoffs[p_player];
 }
 
 template <class T> T MixedStrategyProfile<T>::GetMaxRegret() const
