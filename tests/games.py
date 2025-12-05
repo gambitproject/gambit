@@ -100,7 +100,7 @@ def create_coord_4x4_nfg(outcome_version: bool = False) -> gbt.Game:
 # Extensive-form games (efg)
 
 
-def create_2x2_zero_sum_efg(missing_term_outcome=False) -> gbt.Game:
+def create_2x2_zero_sum_efg(missing_term_outcome: bool = False) -> gbt.Game:
     """
     EFG corresponding to 2x2 zero-sum game (I,-I).
     If missing_term_outcome, the terminal node after "T" then "r" does not have an outcome.
@@ -123,7 +123,7 @@ def create_2x2_zero_sum_efg(missing_term_outcome=False) -> gbt.Game:
     return g
 
 
-def create_matching_pennies_efg(with_neutral_outcome=False) -> gbt.Game:
+def create_matching_pennies_efg(with_neutral_outcome: bool = False) -> gbt.Game:
     """
     The version with_neutral_outcome adds a (0,0) payoff outcomes at a non-terminal node.
     """
@@ -156,7 +156,7 @@ def create_mixed_behav_game_efg() -> gbt.Game:
     return read_from_file("mixed_behavior_game.efg")
 
 
-def create_stripped_down_poker_efg(nonterm_outcomes=False) -> gbt.Game:
+def create_stripped_down_poker_efg(nonterm_outcomes: bool = False) -> gbt.Game:
     """
     Returns
     -------
@@ -404,7 +404,7 @@ def _create_kuhn_poker_efg_nonterm_outcomes() -> gbt.Game:
     return g
 
 
-def create_kuhn_poker_efg(nonterm_outcomes=False) -> gbt.Game:
+def create_kuhn_poker_efg(nonterm_outcomes: bool = False) -> gbt.Game:
     """
     Returns
     -------
@@ -458,20 +458,15 @@ def kuhn_poker_lcp_first_mixed_strategy_prof():
     return [alice, bob]
 
 
-def create_one_shot_trust_efg(unique_NE_variant=False) -> gbt.Game:
+def create_one_shot_trust_efg(unique_NE_variant: bool = False) -> gbt.Game:
     """
-    Returns
-    -------
-    Game
-        One-shot trust game, after Kreps (1990)
+    One-shot trust game, after Kreps (1990)
 
-        The unique_NE_variant makes Trust a dominant strategy, replacing the
-        non-singleton equilibrium component from the standard version of the game
-        where the Buyer plays "Not Trust" and the seller can play any mixture with
-        < 0.5 probability on Honor with a unique NE where the Buyer plays Trust and
-        the Seller plays Abuse.
-
-        This is not a standard variant but is useful for testing enumpoly_solve.
+    The unique_NE_variant makes Trust a dominant strategy, replacing the
+    non-singleton equilibrium component from the standard version of the game
+    where the Buyer plays "Not Trust" and the seller can play any mixture with
+    < 0.5 probability on Honor with a unique NE where the Buyer plays Trust and
+    the Seller plays Abuse.
     """
     g = gbt.Game.new_tree(
         players=["Buyer", "Seller"], title="One-shot trust game, after Kreps (1990)"
