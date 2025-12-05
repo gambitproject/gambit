@@ -967,6 +967,8 @@ public:
   virtual void BuildComputedValues() const {}
 };
 
+#include <assert.h>
+
 class GameRep::Infosets {
 public:
   class iterator {
@@ -993,10 +995,29 @@ public:
 
     value_type operator*() const
     {
+      assert(inner_ != inner_end_);
+      assert(*inner_);
+      assert((*inner_)->IsValid());
+      assert((*inner_)->m_game != nullptr);
+      assert((*inner_)->m_player != nullptr);
+
+      auto g = (*inner_)->GetGame();
+      assert(g);                   // i.e. g != nullptr
       return GameInfoset(*inner_); // GameObjectPtr constructor
     }
 
-    value_type operator->() const { return GameInfoset(*inner_); }
+    value_type operator->() const
+    {
+      assert(inner_ != inner_end_);
+      assert(*inner_);
+      assert((*inner_)->IsValid());
+      assert((*inner_)->m_game != nullptr);
+      assert((*inner_)->m_player != nullptr);
+
+      auto g = (*inner_)->GetGame();
+      assert(g); // i.e. g != nullptrreturn
+      return GameInfoset(*inner_);
+    }
 
     iterator &operator++()
     {
