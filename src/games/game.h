@@ -985,8 +985,7 @@ public:
     iterator(outer_iter outer, outer_iter outer_end) : outer_(outer), outer_end_(outer_end)
     {
       if (outer_ != outer_end_) {
-        inner_ = (*outer_)->m_infosets.begin();
-        inner_end_ = (*outer_)->m_infosets.end();
+        init_inner();
         satisfy_invariant();
       }
     }
@@ -1001,21 +1000,44 @@ public:
       return *this;
     }
 
+    // -------- Windows/MSVC-safe equality ----------
     bool operator==(const iterator &other) const
     {
-      return outer_ == other.outer_ && (outer_ == outer_end_ || inner_ == other.inner_);
+      // Both are end() ⇒ equal
+      if (is_end() && other.is_end()) {
+        return true;
+      }
+
+      // Otherwise, must match outer + inner (safe because both non-end)
+      return outer_ == other.outer_ && inner_ == other.inner_;
     }
 
     bool operator!=(const iterator &other) const { return !(*this == other); }
 
   private:
+    bool is_end() const { return outer_ == outer_end_; }
+
+    // Safe initialization even when shared_ptr is null
+    void init_inner()
+    {
+      const auto &playerPtr = *outer_;
+
+      if (!playerPtr) {
+        // Null shared_ptr → no infosets
+        inner_ = inner_end_ = inner_iter{};
+        return;
+      }
+
+      inner_ = playerPtr->m_infosets.begin();
+      inner_end_ = playerPtr->m_infosets.end();
+    }
+
     void satisfy_invariant()
     {
-      while (outer_ != outer_end_ && inner_ == inner_end_) {
+      while (!is_end() && inner_ == inner_end_) {
         ++outer_;
-        if (outer_ != outer_end_) {
-          inner_ = (*outer_)->m_infosets.begin();
-          inner_end_ = (*outer_)->m_infosets.end();
+        if (!is_end()) {
+          init_inner();
         }
       }
     }
@@ -1027,14 +1049,16 @@ public:
   };
 
   // View interface
-  iterator begin() const { return {players_.begin(), players_.end()}; }
+  iterator begin() const { return iterator(players_->begin(), players_->end()); }
+  iterator end() const { return iterator(players_->end(), players_->end()); }
 
-  iterator end() const { return {players_.end(), players_.end()}; }
-
-  explicit Infosets(const GameRep *game) : players_(game->m_players) {}
+  explicit Infosets(const GameRep *game)
+    : players_(&game->m_players) // ✔ store pointer, not reference
+  {
+  }
 
 private:
-  const std::vector<std::shared_ptr<GamePlayerRep>> &players_;
+  const std::vector<std::shared_ptr<GamePlayerRep>> *players_;
 };
 
 inline GameRep::Infosets GameRep::GetInfosets() const { return Infosets(this); }

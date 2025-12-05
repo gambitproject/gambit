@@ -231,7 +231,6 @@ def test_strategy_action_raises_value_error_for_wrong_player(game, player_ind, i
 def test_strategy_action_raises_error_for_strategic_game():
     """Verify `Strategy.action` retrieves the action prescribed by the strategy
     """
-    return
     game_efg = games.read_from_file("e02.efg")
     game_nfg = game_efg.from_arrays(game_efg.to_arrays()[0], game_efg.to_arrays()[1])
     alice = game_nfg.players[0]
