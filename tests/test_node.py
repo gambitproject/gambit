@@ -93,32 +93,6 @@ def test_is_successor_of():
         game.root.is_successor_of(game.players[0])
 
 
-@pytest.mark.parametrize("game, expected_result", [
-    # Games without Absent-Mindedness for which the legacy method is known to be correct.
-    (games.read_from_file("wichardt.efg"), {0}),
-    (games.read_from_file("e02.efg"), {0, 2, 4}),
-    (games.read_from_file("subgames.efg"), {0, 1, 4, 7, 11, 13, 34}),
-
-    pytest.param(
-        games.read_from_file("AM-driver-subgame.efg"),
-        {0, 3},  # The correct set of subgame roots
-        marks=pytest.mark.xfail(
-            reason="Current method does not detect roots of proper subgames "
-                   "that are members of AM-infosets."
-        )
-    ),
-])
-def test_legacy_is_subgame_root_set(game: gbt.Game, expected_result: set):
-    """
-    Tests the legacy `node.is_subgame_root` against an expected set of nodes.
-    Includes both passing cases and games with Absent-Mindedness where it is expected to fail.
-    """
-    list_nodes = list(game.nodes)
-    expected_roots = {list_nodes[i] for i in expected_result}
-    legacy_roots = {node for node in game.nodes if node.is_subgame_root}
-    assert legacy_roots == expected_roots
-
-
 def _get_path_of_action_labels(node: gbt.Node) -> list[str]:
     """
     Computes the path of action labels from the root to the given node.
@@ -163,22 +137,26 @@ def _get_path_of_action_labels(node: gbt.Node) -> list[str]:
         ]
     ),
     (
-        "subgames.efg",
+        "subgame-roots-finder-small-subgames-and-merges.efg",
         [
             ([], None),
             (["1"], None),
             (["2"], None),
             (["1", "2"], ("Player 2", 0, "2")),
             (["2", "1", "2"], ("Player 1", 1, "1")),
+            (["1", "2", "1", "2"], ("Player 2", 1, "2")),
+            (["1", "1", "2", "1", "2"], ("Player 2", 2, "1")),
+            (["2", "2", "1", "2"], ("Player 2", 1, "2")),
+            (["1", "2", "2", "1", "2"], ("Player 2", 3, "1")),
             (["2", "2"], ("Player 2", 0, "2")),
             (["1", "2", "2"], ("Player 2", 1, "1")),
             (["1", "1", "2", "2"], ("Player 1", 1, "2")),
-            (["1", "1", "1", "2", "2"], ("Player 2", 2, "1")),
+            (["1", "1", "1", "2", "2"], ("Player 2", 4, "1")),
             (["2", "1", "2", "2"], ("Player 1", 1, "2")),
-            (["1", "2", "1", "2", "2"], ("Player 2", 2, "2")),
-            (["2", "2", "1", "2", "2"], ("Player 2", 2, "2")),
+            (["1", "2", "1", "2", "2"], ("Player 2", 4, "2")),
+            (["2", "2", "1", "2", "2"], ("Player 2", 4, "2")),
             (["1", "2", "2", "1", "2", "2"], ("Player 1", 4, "2")),
-            (["1", "1", "2", "2", "1", "2", "2"], ("Player 2", 4, "1")),
+            (["1", "1", "2", "2", "1", "2", "2"], ("Player 2", 6, "1")),
             (["1", "1", "1", "2", "2", "1", "2", "2"], ("Player 1", 5, "1")),
             (["2", "1", "1", "2", "2", "1", "2", "2"], ("Player 1", 5, "1")),
             (["2", "2", "2", "1", "2", "2"], ("Player 1", 4, "2")),
@@ -220,11 +198,155 @@ def test_node_own_prior_action_non_terminal(game_file, expected_node_data):
     assert actual_node_data == expected_node_data
 
 
+# ==============================================================================
+#                   New Test Suite for the Subgame Root Checker
+# ==============================================================================
+
+@pytest.mark.parametrize("game, expected_result", [
+    # Games without Absent-Mindedness for which the legacy method is known to be correct.
+    (games.read_from_file("wichardt.efg"), {0}),
+    (games.read_from_file("e02.efg"), {0, 2, 4}),
+    (games.read_from_file("subgame-roots-finder-one-merge.efg"), {0, 2}),
+    (
+        games.read_from_file("subgame-roots-finder-multiple-roots-and-merge.efg"),
+        {0, 1, 4, 7, 11, 13, 34}
+    ),
+    (games.Centipede.get_test_data(N=5, m0=2, m1=7)[0], {0, 2, 4, 6, 8}),
+    (gbt.Game.new_tree(), {}),
+    (games.read_from_file("subgame-roots-finder-multiple-merges.efg"), {0, 2, 13, 15}),
+
+    # Games with Absent-Mindedness where the legacy method is known to fail.
+    pytest.param(
+        games.read_from_file("AM-subgames.efg"),
+        {0, 2, 5, 8},  # The correct set of roots
+        marks=pytest.mark.xfail(
+            reason="Legacy method does not detect subgame roots that are members of AM-infosets."
+        )
+    ),
+])
+def test_legacy_is_subgame_root_set(game: gbt.Game, expected_result: set):
+    """
+    Tests the legacy `node.is_subgame_root` against an expected set of nodes.
+    Includes both passing cases and games with Absent-Mindedness where it is expected to fail.
+    """
+    list_nodes = list(game.nodes)
+    expected_roots = {list_nodes[i] for i in expected_result}
+    legacy_roots = {node for node in game.nodes if node.is_subgame_root}
+    assert legacy_roots == expected_roots
+
+
+# NEW subgame finder algorithm
+@pytest.mark.parametrize("game, expected_paths_list", [
+    # Empty game has no subgames
+    (
+        gbt.Game.new_tree(),
+        []
+    ),
+    # --- Games without Absent-Mindedness. ---
+    # Perfect Information
+    (
+        games.read_from_file("e02.efg"),
+        [
+            [],
+            ["L"],
+            ["L", "L"]
+        ]
+    ),
+    (
+        games.Centipede.get_test_data(N=5, m0=2, m1=7)[0],
+        [
+            ["Push", "Push"],
+            ["Push", "Push", "Push", "Push"],
+            ["Push", "Push", "Push"],
+            ["Push"],
+            []
+        ]
+    ),
+    # Perfect Recall
+    (
+        games.read_from_file("binary_3_levels_generic_payoffs.efg"),
+        [
+            []
+        ]
+    ),
+    # No perfect recall
+    (
+        games.read_from_file("wichardt.efg"),
+        [
+            []
+        ]
+    ),
+    (
+        games.read_from_file("subgame-roots-finder-one-merge.efg"),
+        [
+            [],
+            ["1"]
+        ]
+    ),
+    (
+        games.read_from_file("subgame-roots-finder-small-subgames-and-merges.efg"),
+        [
+            ["2"],
+            ["1"],
+            ["1", "2", "2"],
+            ["2", "1", "2"],
+            [],
+            ["1", "1", "1", "2", "2"],
+            ["2", "2", "2"]
+        ]
+    ),
+    (
+        games.read_from_file("subgame-roots-finder-multiple-merges.efg"),
+        [
+            [],
+            ["1", "1"],
+            ["1"],
+            ["1", "1", "1"]
+        ]
+    ),
+
+    # --- Games with Absent-Mindedness. ---
+    (
+        games.read_from_file("AM-subgames.efg"),
+        [
+            [],
+            ["1", "1"],
+            ["2"],
+            ["2", "1"]
+        ]
+    ),
+    (
+        games.read_from_file("noPR-action-AM-two-hops.efg"),
+        [
+            [],
+            ["2", "1", "1"]
+        ]
+    ),
+])
+def test_new_subgame_root_method_paths(game: gbt.Game, expected_paths_list: list):
+    """
+    Tests `game.subgame_root()` by comparing the paths of the identified root nodes
+    against the expected paths.
+    """
+    actual_root_nodes = {
+        game.subgame_root(infoset)
+        for infoset in game.infosets
+        if not infoset.is_chance
+    }
+
+    actual_paths = [
+        _get_path_of_action_labels(node)
+        for node in actual_root_nodes
+    ]
+
+    assert sorted(actual_paths) == sorted(expected_paths_list)
+
+
 @pytest.mark.parametrize("game_file, expected_unreachable_paths", [
     # Games without absent-mindedness, where all nodes are reachable
     ("e02.efg", []),
     ("wichardt.efg", []),
-    ("subgames.efg", []),
+    ("subgame-roots-finder-small-subgames-and-merges.efg", []),
 
     # An absent-minded driver game with an unreachable terminal node
     (
