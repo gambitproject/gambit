@@ -163,7 +163,7 @@ def test_enumpoly_ordered_behavior(
         result = gbt.nash.enumpoly_solve(game, use_strategic=False)
     assert len(result.equilibria) == len(mixed_behav_prof_data)
     for eq, exp in zip(result.equilibria, mixed_behav_prof_data):
-        # assert abs(eq.max_regret()) <= TOL
+        assert abs(eq.max_regret()) <= TOL
         expected = game.mixed_behavior_profile(rational=True, data=exp)
         for p in game.players:
             for i in p.infosets:
