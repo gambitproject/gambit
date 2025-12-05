@@ -362,10 +362,12 @@ template <class T> T MixedStrategyProfile<T>::GetLiapValue() const
   ComputePayoffs();
 
   auto liapValue = static_cast<T>(0);
-  for (auto [player, payoff] : m_payoffs) {
-    for (auto v : m_strategyValues[player]) {
-      liapValue += sqr(std::max(v.second - payoff, static_cast<T>(0)));
-    }
+  for (auto p : m_payoffs) {
+    liapValue += std::transform_reduce(
+        m_strategyValues.at(p.first).begin(), m_strategyValues.at(p.first).end(),
+        static_cast<T>(0), std::plus<T>(), [&p](const auto &v) -> T {
+          return sqr(std::max(v.second - p.second, static_cast<T>(0)));
+        });
   }
   return liapValue;
 }
@@ -375,10 +377,12 @@ template <class T> T MixedStrategyProfile<T>::GetRegret(const GameStrategy &p_st
   CheckVersion();
   ComputePayoffs();
   auto player = p_strategy->GetPlayer();
-  T best_other_payoff = maximize_function(
-      exclude_value(player->GetStrategies(), p_strategy),
-      [this, &player](const auto &strategy) -> T { return m_strategyValues[player][strategy]; });
-  return std::max(best_other_payoff - m_strategyValues[player][p_strategy], static_cast<T>(0));
+  T best_other_payoff = maximize_function(exclude_value(player->GetStrategies(), p_strategy),
+                                          [this, &player](const auto &strategy) -> T {
+                                            return m_strategyValues.at(player).at(strategy);
+                                          });
+  return std::max(best_other_payoff - m_strategyValues.at(player).at(p_strategy),
+                  static_cast<T>(0));
 }
 
 template <class T> T MixedStrategyProfile<T>::GetRegret(const GamePlayer &p_player) const
@@ -387,9 +391,9 @@ template <class T> T MixedStrategyProfile<T>::GetRegret(const GamePlayer &p_play
   ComputePayoffs();
   auto br_payoff =
       maximize_function(p_player->GetStrategies(), [this, p_player](const auto &strategy) -> T {
-        return m_strategyValues[p_player][strategy];
+        return m_strategyValues.at(p_player).at(strategy);
       });
-  return br_payoff - m_payoffs[p_player];
+  return br_payoff - m_payoffs.at(p_player);
 }
 
 template <class T> T MixedStrategyProfile<T>::GetMaxRegret() const
