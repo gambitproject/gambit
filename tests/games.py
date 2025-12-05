@@ -458,12 +458,19 @@ def kuhn_poker_lcp_first_mixed_strategy_prof():
     return [alice, bob]
 
 
-def create_one_shot_trust_efg() -> gbt.Game:
+def create_one_shot_trust_efg(unique_NE_variant=False) -> gbt.Game:
     """
     Returns
     -------
     Game
         One-shot trust game, after Kreps (1990)
+
+        The unique_NE_variant makes Trust a dominant strategy, replacing the
+        non-singleton equilibrium component from the standard version of the game
+        where the Buyer plays "Not Trust" and the seller can play any mixture < 0.5 probability
+        on Honor with a unique NE where the Buyer plays Trust and the Seller plays Abuse.
+
+        This is not a standard variant but is useful for testing enumpoly_solve.
     """
     g = gbt.Game.new_tree(
         players=["Buyer", "Seller"], title="One-shot trust game, after Kreps (1990)"
@@ -473,9 +480,14 @@ def create_one_shot_trust_efg() -> gbt.Game:
     g.set_outcome(
         g.root.children[0].children[0], g.add_outcome([1, 1], label="Trustworthy")
     )
-    g.set_outcome(
-        g.root.children[0].children[1], g.add_outcome([-1, 2], label="Untrustworthy")
-    )
+    if unique_NE_variant:
+        g.set_outcome(
+            g.root.children[0].children[1], g.add_outcome(["1/2", 2], label="Untrustworthy")
+        )
+    else:
+        g.set_outcome(
+            g.root.children[0].children[1], g.add_outcome([-1, 2], label="Untrustworthy")
+        )
     g.set_outcome(g.root.children[1], g.add_outcome([0, 0], label="Opt-out"))
     return g
 
