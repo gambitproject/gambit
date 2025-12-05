@@ -39,6 +39,7 @@ def _find_tutorial_notebooks():
 _NOTEBOOKS = _find_tutorial_notebooks()
 
 
+@pytest.mark.tutorials
 @pytest.mark.parametrize("nb_path", _NOTEBOOKS, ids=[p.name for p in _NOTEBOOKS])
 def test_execute_notebook(nb_path):
     """Execute a single Jupyter notebook and fail if any cell errors occur.
