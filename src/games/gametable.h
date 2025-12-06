@@ -64,7 +64,7 @@ public:
   Rational GetPlayerMaxPayoff(const GamePlayer &) const override;
 
   bool IsPerfectRecall() const override { return true; }
-  GameNode GetSubgameRoot(GameInfoset) const override { return {nullptr}; }
+  GameNode GetSubgameRoot(const GameInfoset &) const override { return {nullptr}; }
   //@}
 
   /// @name Dimensions of the game

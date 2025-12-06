@@ -81,7 +81,7 @@ public:
   bool IsTree() const override { return false; }
   bool IsAgg() const override { return true; }
   bool IsPerfectRecall() const override { return true; }
-  GameNode GetSubgameRoot(GameInfoset) const override { return {nullptr}; }
+  GameNode GetSubgameRoot(const GameInfoset &) const override { return {nullptr}; }
   bool IsConstSum() const override;
   /// Returns the smallest payoff to any player in any outcome of the game
   Rational GetMinPayoff() const override { return Rational(aggPtr->getMinPayoff()); }
