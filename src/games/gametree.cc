@@ -372,32 +372,10 @@ bool GameNodeRep::IsSuccessorOf(GameNode p_node) const
 
 bool GameNodeRep::IsSubgameRoot() const
 {
-  // First take care of a couple easy cases
-  if (m_children.empty() || m_infoset->m_members.size() > 1) {
+  if (m_children.empty()) {
     return false;
   }
-  if (!m_parent) {
-    return true;
-  }
-
-  // A node is a subgame root if and only if in every information set,
-  // either all members succeed the node in the tree,
-  // or all members do not succeed the node in the tree.
-  for (auto player : m_game->GetPlayers()) {
-    for (auto infoset : player->GetInfosets()) {
-      const bool precedes = infoset->m_members.front()->IsSuccessorOf(
-          std::const_pointer_cast<GameNodeRep>(shared_from_this()));
-      if (std::any_of(std::next(infoset->m_members.begin()), infoset->m_members.end(),
-                      [this, precedes](const std::shared_ptr<GameNodeRep> &m) {
-                        return m->IsSuccessorOf(std::const_pointer_cast<GameNodeRep>(
-                                   shared_from_this())) != precedes;
-                      })) {
-        return false;
-      }
-    }
-  }
-
-  return true;
+  return m_game->GetSubgameRoot(m_infoset->shared_from_this()) == shared_from_this();
 }
 
 bool GameNodeRep::IsStrategyReachable() const
@@ -1184,8 +1162,7 @@ void GenerateComponent(SubgameScratchData &p_data, GameNodeRep *p_start_node)
 
     // External collision: current node belongs to a previously generated component
     if (p_data.visited[curr_infoset]) {
-      auto *leader = p_data.FindSet(curr_infoset);
-      auto *candidate_root = p_data.subgame_root_candidate[leader];
+      auto *candidate_root = p_data.subgame_root_candidate[p_data.FindSet(curr_infoset)];
 
       if (p_data.node_visited_token[candidate_root] != p_data.current_token) {
         local_frontier.push(candidate_root);
