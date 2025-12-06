@@ -48,7 +48,7 @@ protected:
   mutable std::shared_ptr<OwnPriorActionInfo> m_ownPriorActionInfo;
   mutable std::unique_ptr<std::set<GameNodeRep *>> m_unreachableNodes;
   mutable std::set<GameInfosetRep *> m_absentMindedInfosets;
-  std::map<GameInfosetRep *, GameNodeRep *> m_infosetSubgameRoot;
+  mutable std::map<GameInfosetRep *, GameNodeRep *> m_infosetSubgameRoot;
 
   /// @name Private auxiliary functions
   //@{
@@ -182,7 +182,7 @@ private:
   std::vector<GameNodeRep *> BuildConsistentPlaysRecursiveImpl(GameNodeRep *node);
   void BuildOwnPriorActions() const;
   void BuildUnreachableNodes() const;
-  void BuildSubgameRoots();
+  void BuildSubgameRoots() const;
 };
 
 template <class T> class TreeMixedStrategyProfileRep : public MixedStrategyProfileRep<T> {
