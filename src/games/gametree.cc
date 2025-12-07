@@ -1088,38 +1088,34 @@ struct NodeCmp {
 
 // Scratch data structure for subgame root finding algorithm
 struct SubgameScratchData {
+  // DSU structures
   std::map<GameInfosetRep *, GameInfosetRep *> dsu_parent;
   std::map<GameInfosetRep *, GameNodeRep *> subgame_root_candidate;
-  std::map<GameInfosetRep *, bool> visited;
+  // Timestamps for nodes
   std::map<GameNodeRep *, int> node_visited_token;
   int current_token = 0;
 
-  // Iterative DSU Find + path compression
+  // DSU Find with path compression
   GameInfosetRep *FindSet(GameInfosetRep *p_infoset)
   {
-    // Initialize if not present
-    if (dsu_parent.find(p_infoset) == dsu_parent.end()) {
-      dsu_parent[p_infoset] = p_infoset;
-    }
-
-    // Find root
-    auto *root = p_infoset;
-    while (dsu_parent[root] != root) {
-      root = dsu_parent[root];
+    // Initialize and retrieve current parent in one step.
+    auto *leader = dsu_parent.try_emplace(p_infoset, p_infoset).first->second;
+    while (dsu_parent[leader] != leader) {
+      leader = dsu_parent[leader];
     }
 
     // Path compression
-    GameInfosetRep *curr = p_infoset;
-    while (curr != root) {
-      auto *next = dsu_parent[curr];
-      dsu_parent[curr] = root;
-      curr = next;
+    auto *curr = p_infoset;
+    while (curr != leader) {
+      auto &parent_ref = dsu_parent[curr];
+      curr = parent_ref;
+      parent_ref = leader;
     }
 
-    return root;
+    return leader;
   }
 
-  // DSU Union - merge current infoset into the staring one, tracking best subgame root candidate
+  // DSU Union - merge current infoset into the start one, find best subgame candidate root
   void UnionSets(GameInfosetRep *p_start_infoset, GameInfosetRep *p_current_infoset,
                  GameNodeRep *p_current_node)
   {
@@ -1132,9 +1128,8 @@ struct SubgameScratchData {
     }
 
     // Prefer the current infoset's root if it exists; otherwise use the current node being visited
-    auto *best_candidate = subgame_root_candidate[leader_current]
-                               ? subgame_root_candidate[leader_current]
-                               : p_current_node;
+    auto *existing_candidate = subgame_root_candidate[leader_current];
+    auto *best_candidate = existing_candidate ? existing_candidate : p_current_node;
 
     dsu_parent[leader_current] = leader_start;
     subgame_root_candidate[leader_start] = best_candidate;
@@ -1155,22 +1150,21 @@ void GenerateComponent(SubgameScratchData &p_data, GameNodeRep *p_start_node)
   while (!local_frontier.empty()) {
     auto *curr = local_frontier.top();
     local_frontier.pop();
-
-    GameInfosetRep *curr_infoset = curr->GetInfoset().get();
+    auto *curr_infoset = curr->GetInfoset().get();
+    const bool is_external_collision = p_data.dsu_parent.count(curr_infoset);
 
     p_data.UnionSets(start_infoset, curr_infoset, curr);
 
-    // External collision: current node belongs to a previously generated component
-    if (p_data.visited[curr_infoset]) {
+    if (is_external_collision) {
+      // We hit a node belonging to a previously generated component.
       auto *candidate_root = p_data.subgame_root_candidate[p_data.FindSet(curr_infoset)];
-
       if (p_data.node_visited_token[candidate_root] != p_data.current_token) {
         local_frontier.push(candidate_root);
         p_data.node_visited_token[candidate_root] = p_data.current_token;
       }
     }
     else {
-      // Add other members of the corresponding infoset to the frontier
+      // First time seeing this infoset: add all its members to the frontier.
       for (const auto &member_sp : curr->GetInfoset()->GetMembers()) {
         auto *member = member_sp.get();
         if (member == curr) {
@@ -1179,7 +1173,6 @@ void GenerateComponent(SubgameScratchData &p_data, GameNodeRep *p_start_node)
         local_frontier.push(member);
         p_data.node_visited_token[member] = p_data.current_token;
       }
-      p_data.visited[curr_infoset] = true;
     }
 
     if (!local_frontier.empty()) {
@@ -1194,7 +1187,7 @@ void GenerateComponent(SubgameScratchData &p_data, GameNodeRep *p_start_node)
   }
 }
 
-// Find subgame roots for all infosets
+// For each infoset, find the root of the smallest subgame containing it
 std::map<GameInfosetRep *, GameNodeRep *> FindSubgameRoots(const Game &p_game)
 {
   if (p_game->GetRoot()->IsTerminal()) {
@@ -1217,21 +1210,20 @@ std::map<GameInfosetRep *, GameNodeRep *> FindSubgameRoots(const Game &p_game)
     }
   }
 
-  // Process components in descending node order
   while (!global_frontier.empty()) {
     auto *node = global_frontier.top();
     global_frontier.pop();
 
     auto *infoset = node->GetInfoset().get();
 
-    if (data.visited[infoset]) {
+    // If infoset is already in dsu_parent, it has been processed.
+    if (data.dsu_parent.count(infoset)) {
       continue;
     }
 
     GenerateComponent(data, node);
 
     auto *component_top_node = data.subgame_root_candidate[data.FindSet(infoset)];
-
     if (auto parent_sp = component_top_node->GetParent()) {
       auto *parent = parent_sp.get();
       if (data.node_visited_token[parent] == 0) {
