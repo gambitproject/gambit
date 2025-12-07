@@ -999,114 +999,81 @@ inline void GameInfosetRep::DebugSanityCheck() const
 }
 
 class GameRep::Infosets {
+  Players m_players;
+
 public:
+  explicit Infosets(const Players &outer) : m_players(outer) {}
+
   class iterator {
-  public:
-    using iterator_category = std::forward_iterator_tag;
-    using value_type = GameInfoset;
-    using difference_type = std::ptrdiff_t;
-    using pointer = value_type;
-    using reference = value_type;
+    using OuterIter = Players::iterator;
+    using InnerIter = GamePlayerRep::Infosets::iterator;
 
-    using outer_iter = std::vector<std::shared_ptr<GamePlayerRep>>::const_iterator;
-    using inner_iter = std::vector<std::shared_ptr<GameInfosetRep>>::const_iterator;
+    OuterIter m_playerIterator, m_playerEnd;
+    InnerIter m_infosetIterator, m_infosetEnd;
 
-    iterator() = default;
-
-    iterator(std::shared_ptr<GameRep> game, outer_iter outer, outer_iter outer_end)
-      : game_(std::move(game)), outer_(outer), outer_end_(outer_end)
+    void next()
     {
-      if (outer_ != outer_end_) {
-        init_inner();
-        satisfy_invariant();
-      }
-    }
-
-    value_type operator*() const
-    {
-      (*inner_)->DebugSanityCheck();
-      (*inner_)->GetPlayer()->DebugSanityCheck();
-      auto g = (*inner_)->GetGame();
-      assert(g);                   // i.e. g != nullptr
-      return GameInfoset(*inner_); // GameObjectPtr constructor
-    }
-
-    value_type operator->() const
-    {
-      (*inner_)->DebugSanityCheck();
-      (*inner_)->GetPlayer()->DebugSanityCheck();
-      auto g = (*inner_)->GetGame();
-      assert(g); // i.e. g != nullptrreturn
-      return GameInfoset(*inner_);
-    }
-
-    iterator &operator++()
-    {
-      ++inner_;
-      satisfy_invariant();
-      return *this;
-    }
-
-    bool operator==(const iterator &other) const
-    {
-      // Compare end iterators correctly
-      if (outer_ == outer_end_ && other.outer_ == other.outer_end_) {
-        return true;
-      }
-
-      return outer_ == other.outer_ && inner_ == other.inner_;
-    }
-
-    bool operator!=(const iterator &other) const { return !(*this == other); }
-
-  private:
-    bool is_end() const { return outer_ == outer_end_; }
-
-    void init_inner()
-    {
-      const auto &player = *outer_;
-      inner_ = player->m_infosets.begin();
-      inner_end_ = player->m_infosets.end();
-    }
-
-    void satisfy_invariant()
-    {
-      while (!is_end() && inner_ == inner_end_) {
-        ++outer_;
-        if (!is_end()) {
-          init_inner();
+      while (m_playerIterator != m_playerEnd && m_infosetIterator == m_infosetEnd) {
+        ++m_playerIterator;
+        if (m_playerIterator != m_playerEnd) {
+          auto infosets = (*m_playerIterator)->GetInfosets();
+          m_infosetIterator = infosets.begin();
+          m_infosetEnd = infosets.end();
         }
       }
     }
 
-    // HOLD GAME ALIVE
-    std::shared_ptr<GameRep> game_;
+  public:
+    using iterator_category = std::forward_iterator_tag;
+    using value_type = GameInfoset;
+    using reference = GameInfoset;
+    using pointer = GameInfoset;
+    using difference_type = std::ptrdiff_t;
 
-    outer_iter outer_{};
-    outer_iter outer_end_{};
-    inner_iter inner_{};
-    inner_iter inner_end_{};
+    iterator() = default;
+
+    iterator(const OuterIter &p_playerIterator, const OuterIter &p_playerEnd)
+      : m_playerIterator(p_playerIterator), m_playerEnd(p_playerEnd)
+    {
+      if (m_playerIterator != m_playerEnd) {
+        const auto infosets = (*m_playerIterator)->GetInfosets();
+        m_infosetIterator = infosets.begin();
+        m_infosetEnd = infosets.end();
+      }
+      next();
+    }
+
+    reference operator*() const { return *m_infosetIterator; }
+    pointer operator->() const { return *m_infosetIterator; }
+
+    iterator &operator++()
+    {
+      ++m_infosetIterator;
+      next();
+      return *this;
+    }
+
+    iterator operator++(int)
+    {
+      iterator tmp = *this;
+      ++(*this);
+      return tmp;
+    }
+
+    friend bool operator==(const iterator &a, const iterator &b)
+    {
+      return a.m_playerIterator == b.m_playerIterator &&
+             (a.m_playerIterator == a.m_playerEnd || a.m_infosetIterator == b.m_infosetIterator);
+    }
+
+    friend bool operator!=(const iterator &a, const iterator &b) { return !(a == b); }
   };
 
-  // Construct a view storing a strong reference to the GameRep
-  explicit Infosets(std::shared_ptr<GameRep> game)
-    : game_(std::move(game)), players_(&game_->m_players)
-  {
-  }
-
-  iterator begin() const { return iterator(game_, players_->begin(), players_->end()); }
-
-  iterator end() const { return iterator(game_, players_->end(), players_->end()); }
-
-private:
-  std::shared_ptr<GameRep> game_;
-  const std::vector<std::shared_ptr<GamePlayerRep>> *players_;
+  iterator begin() const { return {m_players.begin(), m_players.end()}; }
+  iterator end() const { return {m_players.end(), m_players.end()}; }
 };
 
-inline GameRep::Infosets GameRep::GetInfosets() const
-{
-  return Infosets(std::const_pointer_cast<GameRep>(this->shared_from_this()));
-}
+inline GameRep::Infosets GameRep::GetInfosets() const { return Infosets(GetPlayers()); }
 
 //=======================================================================
 //          Inline members of game representation classes
