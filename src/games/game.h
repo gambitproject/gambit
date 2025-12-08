@@ -209,7 +209,6 @@ class GameInfosetRep : public std::enable_shared_from_this<GameInfosetRep> {
   }
 
 public:
-  void DebugSanityCheck() const;
   using Actions = ElementCollection<GameInfoset, GameActionRep>;
   using Members = ElementCollection<GameInfoset, GameNodeRep>;
 
@@ -383,15 +382,6 @@ class GamePlayerRep : public std::enable_shared_from_this<GamePlayerRep> {
   std::vector<std::shared_ptr<GameStrategyRep>> m_strategies;
 
 public:
-  void DebugSanityCheck() const
-  {
-    if (!m_game) {
-      throw std::runtime_error("PlayerRep: m_game is null");
-    }
-    if (!m_valid) {
-      throw std::runtime_error("PlayerRep: IsValid() is false");
-    }
-  }
   using Infosets = ElementCollection<GamePlayer, GameInfosetRep>;
   using Strategies = ElementCollection<GamePlayer, GameStrategyRep>;
 
@@ -976,27 +966,6 @@ public:
   /// Build any computed values anew
   virtual void BuildComputedValues() const {}
 };
-
-#undef NDEBUG
-#include <cassert>
-
-inline void GameInfosetRep::DebugSanityCheck() const
-{
-  if (!m_game) {
-    throw std::runtime_error("InfosetRep: m_game is null");
-  }
-  if (!m_player) {
-    throw std::runtime_error("InfosetRep: m_player is null");
-  }
-  if (!m_valid) {
-    throw std::runtime_error("InfosetRep: IsValid() is false");
-  }
-
-  // Optional deeper checks:
-  if (m_player->m_game != m_game) {
-    throw std::runtime_error("InfosetRep: player->m_game mismatch");
-  }
-}
 
 class GameRep::Infosets {
   Players m_players;
