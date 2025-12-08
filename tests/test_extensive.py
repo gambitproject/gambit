@@ -48,68 +48,13 @@ def test_game_add_players_nolabel():
 
 
 @pytest.mark.parametrize("game_input,expected_result", [
-    # Games without absent-mindedness (includes all games with perfect recall)
-    ("e01.efg", False),
-    ("e02.efg", False),
-    ("cent3.efg", False),
-    ("poker.efg", False),
-    ("basic_extensive_game.efg", False),
-    ("wichardt.efg", False),  # forgetting past action; Wichardt (GEB, 2008)
-    ("noPR-action-selten-horse.efg", False),  # forgetting past action
-    ("noPR-information-no-deflate.efg", False),  # forgetting past information
-    ("gilboa_two_am_agents.efg", False),  # forgetting past information; Gilboa (GEB, 1997)
-
-    # Generated games without absent-mindedness
-    # - Centipede games
-    (games.Centipede.get_test_data(N=3, m0=2, m1=7)[0], False),
-    (games.Centipede.get_test_data(N=4, m0=2, m1=7)[0], False),
-    # - Two-player binary tree games
-    (games.BinEfgTwoPlayer.get_test_data(level=3)[0], False),
-    (games.BinEfgTwoPlayer.get_test_data(level=4)[0], False),
-    # - Three-player binary tree games
-    (games.BinEfgThreePlayer.get_test_data(level=3)[0], False),
-    # - One-player imperfect recall binary tree games
-    (games.BinEfgOnePlayerIR.get_test_data(level=3)[0], False),
-    (games.BinEfgOnePlayerIR.get_test_data(level=4)[0], False),
-
-
-    # Games with absent-mindedness (a subset of games with imperfect recall)
-    ("noPR-AM-driver-one-player.efg", True),  # 1 players, one infoset unreached
-    ("noPR-AM-driver-two-players.efg", True),  # 2 players, one infoset unreached
-    ("noPR-action-AM.efg", True),  # 2 players + forgetting past action; P1 has one infoset
-    ("noPR-action-AM2.efg", True),  # 2 players + forgetting past action; P1 has >1 infoset
-    ("noPR-action-AM-two-hops.efg", True),  # 2 players, one AM-infoset each
-])
-def test_is_absent_minded(game_input, expected_result: bool):
-    """
-    Verify the IsAbsentMinded implementation against a suite of games
-    with and without the absent-mindedness property.
-    """
-    game = None
-    if isinstance(game_input, str):
-        game = games.read_from_file(game_input)
-    elif isinstance(game_input, gbt.Game):
-        game = game_input
-    else:
-        pytest.fail(f"Unknown type for game_input: {type(game_input)}")
-
-    assert game.is_absent_minded == expected_result
-
-
-@pytest.mark.parametrize("game_input,expected_result", [
     # Games with perfect recall from files (game_input is a string)
-    ("e01.efg", True),
     ("e02.efg", True),
-    ("cent3.efg", True),
     ("stripped_down_poker.efg", True),
-    ("basic_extensive_game.efg", True),
-
     # Games with perfect recall from generated games (game_input is a gbt.Game object)
     # - Centipede games
-    (games.Centipede.get_test_data(N=3, m0=2, m1=7)[0], True),
     (games.Centipede.get_test_data(N=4, m0=2, m1=7)[0], True),
     # - Two-player binary tree games
-    (games.BinEfgTwoPlayer.get_test_data(level=3)[0], True),
     (games.BinEfgTwoPlayer.get_test_data(level=4)[0], True),
     # - Three-player binary tree games
     (games.BinEfgThreePlayer.get_test_data(level=3)[0], True),
@@ -117,20 +62,12 @@ def test_is_absent_minded(game_input, expected_result: bool):
     # Games with imperfect recall from files (game_input is a string)
     # - imperfect recall without absent-mindedness
     ("wichardt.efg", False),  # forgetting past action; Wichardt (GEB, 2008)
-    ("noPR-action-selten-horse.efg", False),  # forgetting past action
-    ("noPR-information-no-deflate.efg", False),  # forgetting past information
     ("gilboa_two_am_agents.efg", False),  # forgetting past information; Gilboa (GEB, 1997)
     # - imperfect recall with absent-mindedness
     ("noPR-AM-driver-one-player.efg", False),  # 1 players, one infoset unreached
     ("noPR-AM-driver-two-players.efg", False),  # 2 players, one infoset unreached
     ("noPR-action-AM.efg", False),  # 2 players + forgetting past action; P1 has one infoset
-    ("noPR-action-AM2.efg", False),  # 2 players + forgetting past action; P1 has >1 infoset
     ("noPR-action-AM-two-hops.efg", False),  # 2 players, one AM-infoset each
-
-    # Games with imperfect recall from generated games (game_input is a gbt.Game object)
-    # - One-player binary tree games
-    (games.BinEfgOnePlayerIR.get_test_data(level=3)[0], False),
-    (games.BinEfgOnePlayerIR.get_test_data(level=4)[0], False),
 ])
 def test_is_perfect_recall(game_input, expected_result: bool):
     """

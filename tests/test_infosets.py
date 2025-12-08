@@ -162,3 +162,31 @@ def test_infoset_own_prior_actions(game_file, expected_results):
         }
 
         assert actual_details == expected_set
+
+
+@pytest.mark.parametrize("game_input,expected_infosets", [
+    # Games without absent-mindedness
+    ("e02.efg", set()),
+    ("stripped_down_poker.efg", set()),
+    ("basic_extensive_game.efg", set()),
+    ("gilboa_two_am_agents.efg", set()),  # forgetting past information; Gilboa (GEB, 1997)
+    ("wichardt.efg", set()),  # forgetting past action; Wichardt (GEB, 2008)
+
+    # Games with absent-mindedness
+    ("noPR-AM-driver-two-players.efg", {("Player 1", 0)}),
+    ("noPR-action-AM.efg", {("Player 1", 0)}),
+    ("noPR-action-AM-two-hops.efg", {("Player 1", 0), ("Player 2", 0)}),
+])
+def test_infoset_is_absent_minded(game_input, expected_infosets):
+    """
+    Verify the is_absent_minded property of information sets.
+    """
+    game = games.read_from_file(game_input)
+
+    actual_infosets = {
+        (infoset.player.label, infoset.number)
+        for infoset in game.infosets
+        if infoset.is_absent_minded
+    }
+
+    assert actual_infosets == expected_infosets
