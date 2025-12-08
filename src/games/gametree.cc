@@ -843,8 +843,8 @@ bool GameTreeRep::IsPerfectRecall() const
 
 bool GameTreeRep::IsAbsentMinded(const GameInfosetRep *infoset) const
 {
-  if (!m_ownPriorActionInfo && !m_root->IsTerminal()) {
-    const_cast<GameTreeRep *>(this)->BuildOwnPriorActions();
+  if (!m_unreachableNodes && !m_root->IsTerminal()) {
+    const_cast<GameTreeRep *>(this)->BuildUnreachableNodes();
   }
 
   return m_absentMindedInfosets.count(const_cast<GameInfosetRep *>(infoset));
