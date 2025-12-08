@@ -261,6 +261,11 @@ template <class T> MixedBehaviorProfile<T> MixedBehaviorProfile<T>::ToFullSuppor
 //              MixedBehaviorProfile<T>: Interesting quantities
 //========================================================================
 
+template <class T> T MixedBehaviorProfile<T>::GetLiapValue() const
+{
+  return MixedStrategyProfile<T>(*this).GetLiapValue();
+}
+
 template <class T> T MixedBehaviorProfile<T>::GetAgentLiapValue() const
 {
   CheckVersion();
@@ -362,6 +367,11 @@ template <class T> T MixedBehaviorProfile<T>::GetRegret(const GameInfoset &p_inf
     return map_actionValues.at(action);
   });
   return br_payoff - map_infosetValues[p_infoset];
+}
+
+template <class T> T MixedBehaviorProfile<T>::GetMaxRegret() const
+{
+  return MixedStrategyProfile<T>(*this).GetMaxRegret();
 }
 
 template <class T> T MixedBehaviorProfile<T>::GetAgentMaxRegret() const

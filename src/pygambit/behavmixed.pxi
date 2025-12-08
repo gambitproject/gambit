@@ -819,7 +819,7 @@ class MixedBehaviorProfile:
     def agent_max_regret(self) -> ProfileDType:
         """Returns the maximum regret at any information set.
 
-        A profile is an agent Nash equilibrium if and only if `max_regret()` is 0.
+        A profile is an agent Nash equilibrium if and only if `agent_max_regret()` is 0.
 
         .. versionchanged:: 16.5.0
 
@@ -830,6 +830,7 @@ class MixedBehaviorProfile:
         --------
         action_regret
         infoset_regret
+        max_regret
         agent_liap_value
         """
         self._check_validity()
@@ -838,7 +839,7 @@ class MixedBehaviorProfile:
     def agent_liap_value(self) -> ProfileDType:
         """Returns the Lyapunov value (see [McK91]_) of the strategy profile.
 
-        The Lyapunov value is a non-negative number which is zero exactly at
+        The agent Lyapunov value is a non-negative number which is zero exactly at
         agent Nash equilibria.
 
         .. versionchanged:: 16.5.0
@@ -849,6 +850,44 @@ class MixedBehaviorProfile:
         See Also
         --------
         agent_max_regret
+        liap_value
+        """
+        self._check_validity()
+        return self._agent_liap_value()
+
+    def max_regret(self) -> ProfileDType:
+        """Returns the maximum regret at any information set.
+
+        A profile is a Nash equilibrium if and only if `max_regret()` is 0.
+
+        .. versionchanged:: 16.5.0
+
+           New implementation of `max_regret` to clarify the distinction between
+           per-player and per-agent concepts.
+
+        See Also
+        --------
+        liap_value
+        agent_max_regret
+        """
+        self._check_validity()
+        return self.__max_regret()
+
+    def liap_value(self) -> ProfileDType:
+        """Returns the Lyapunov value (see [McK91]_) of the strategy profile.
+
+        The Lyapunov value is a non-negative number which is zero exactly at
+        Nash equilibria.
+
+        .. versionchanged:: 16.5.0
+
+           New implementation of `liap_value` to clarify the distinction between
+           per-player and per-agent concepts.
+
+        See Also
+        --------
+        max_regret
+        agent_liap_value
         """
         self._check_validity()
         return self._agent_liap_value()
@@ -932,6 +971,9 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
     def _agent_max_regret(self) -> float:
         return deref(self.profile).GetAgentMaxRegret()
 
+    def _max_regret(self) -> float:
+        return deref(self.profile).GetMaxRegret()
+
     def __eq__(self, other: typing.Any) -> bool:
         return (
             isinstance(other, MixedBehaviorProfileDouble) and
@@ -950,6 +992,9 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
 
     def _agent_liap_value(self) -> float:
         return deref(self.profile).GetAgentLiapValue()
+
+    def _liap_value(self) -> float:
+        return deref(self.profile).GetLiapValue()
 
     def _normalize(self) -> MixedBehaviorProfileDouble:
         return MixedBehaviorProfileDouble.wrap(
@@ -1028,6 +1073,9 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
     def _agent_max_regret(self) -> Rational:
         return rat_to_py(deref(self.profile).GetAgentMaxRegret())
 
+    def _max_regret(self) -> Rational:
+        return rat_to_py(deref(self.profile).GetMaxRegret())
+
     def __eq__(self, other: typing.Any) -> bool:
         return (
             isinstance(other, MixedBehaviorProfileRational) and
@@ -1046,6 +1094,9 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
 
     def _agent_liap_value(self) -> Rational:
         return rat_to_py(deref(self.profile).GetAgentLiapValue())
+
+    def _liap_value(self) -> Rational:
+        return rat_to_py(deref(self.profile).GetLiapValue())
 
     def _normalize(self) -> MixedBehaviorProfileRational:
         return MixedBehaviorProfileRational.wrap(
