@@ -3,8 +3,8 @@
 Nash equilibria algorithms
 ==========================
 
-Interfaces to algorithms for computing Nash equilibria are provided in :py:mod:`pygambit.nash`.
-The table below summarizes the available PyGambit functions and the corresponding Gambit CLI commands.
+The table below summarizes the available PyGambit functions and corresponding Gambit CLI commandsto algorithms for computing Nash equilibria.
+Scroll down for detailed descriptions of each algorithm.
 
 ================  ===========================================================================   ========================================  ==========================================
 Algorithm         Description                                                                   PyGambit function                         CLI command
