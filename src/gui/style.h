@@ -76,7 +76,6 @@ class TreeRenderConfig {
   int m_nodeSize{10}, m_terminalSpacing{50};
   NodeTokenStyle m_chanceToken{GBT_NODE_TOKEN_DOT}, m_playerToken{GBT_NODE_TOKEN_DOT},
       m_terminalToken{GBT_NODE_TOKEN_DOT};
-  bool m_rootReachable{false};
 
   // Branch styling
   int m_branchLength{60}, m_tineLength{20};
@@ -96,7 +95,7 @@ class TreeRenderConfig {
 
   // Colors for nodes
   wxColour m_chanceColor, m_terminalColor;
-  mutable Gambit::Array<wxColour> m_playerColors;
+  mutable Array<wxColour> m_playerColors;
 
   // Decimal places to display
   int m_numDecimals{4};
@@ -109,7 +108,7 @@ public:
   int GetNodeSize() const { return m_nodeSize; }
   void SetNodeSize(int p_nodeSize) { m_nodeSize = p_nodeSize; }
 
-  int TerminalSpacing() const { return m_terminalSpacing; }
+  int GetTerminalSpacing() const { return m_terminalSpacing; }
   void SetTerminalSpacing(int p_spacing) { m_terminalSpacing = p_spacing; }
 
   NodeTokenStyle GetChanceToken() const { return m_chanceToken; }
@@ -120,9 +119,6 @@ public:
 
   NodeTokenStyle GetTerminalToken() const { return m_terminalToken; }
   void SetTerminalToken(NodeTokenStyle p_token) { m_terminalToken = p_token; }
-
-  bool RootReachable() const { return m_rootReachable; }
-  void SetRootReachable(bool p_reachable) { m_rootReachable = p_reachable; }
 
   // Branch styling
   int GetBranchLength() const { return m_branchLength; }

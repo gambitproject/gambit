@@ -247,6 +247,8 @@ public:
 
   bool Precedes(GameNode) const;
 
+  std::set<GameAction> GetOwnPriorActions() const;
+
   const Number &GetActionProb(const GameAction &p_action) const
   {
     if (p_action->GetInfoset().get() != this) {
@@ -492,6 +494,7 @@ public:
   bool IsTerminal() const { return m_children.empty(); }
   GamePlayer GetPlayer() const { return (m_infoset) ? m_infoset->GetPlayer() : nullptr; }
   GameAction GetPriorAction() const; // returns null if root node
+  GameAction GetOwnPriorAction() const;
   GameNode GetParent() const { return (m_parent) ? m_parent->shared_from_this() : nullptr; }
   GameNode GetNextSibling() const;
   GameNode GetPriorSibling() const;
@@ -500,6 +503,7 @@ public:
 
   bool IsSuccessorOf(GameNode from) const;
   bool IsSubgameRoot() const;
+  bool IsStrategyReachable() const;
 };
 
 class GameNodeRep::Actions::iterator {
@@ -737,14 +741,14 @@ public:
 
   /// Returns true if the game is constant-sum
   virtual bool IsConstSum() const = 0;
-  /// Returns the smallest payoff to any player in any outcome of the game
+  /// Returns the smallest payoff to any player in any play of the game
   virtual Rational GetMinPayoff() const = 0;
-  /// Returns the smallest payoff to the player in any outcome of the game
-  virtual Rational GetMinPayoff(const GamePlayer &p_player) const = 0;
-  /// Returns the largest payoff to any player in any outcome of the game
+  /// Returns the smallest payoff to the player in any play of the game
+  virtual Rational GetPlayerMinPayoff(const GamePlayer &p_player) const = 0;
+  /// Returns the largest payoff to any player in any play of the game
   virtual Rational GetMaxPayoff() const = 0;
-  /// Returns the largest payoff to the player in any outcome of the game
-  virtual Rational GetMaxPayoff(const GamePlayer &p_player) const = 0;
+  /// Returns the largest payoff to the player in any play of the game
+  virtual Rational GetPlayerMaxPayoff(const GamePlayer &p_player) const = 0;
 
   /// Returns the set of terminal nodes which are descendants of node
   virtual std::vector<GameNode> GetPlays(GameNode node) const { throw UndefinedException(); }
@@ -777,7 +781,8 @@ public:
   {
     throw UndefinedException();
   }
-  virtual GameInfoset AppendMove(GameNode p_node, GamePlayer p_player, int p_actions)
+  virtual GameInfoset AppendMove(GameNode p_node, GamePlayer p_player, int p_actions,
+                                 bool p_generateLabels = false)
   {
     throw UndefinedException();
   }
@@ -785,7 +790,8 @@ public:
   {
     throw UndefinedException();
   }
-  virtual GameInfoset InsertMove(GameNode p_node, GamePlayer p_player, int p_actions)
+  virtual GameInfoset InsertMove(GameNode p_node, GamePlayer p_player, int p_actions,
+                                 bool p_generateLabels = false)
   {
     throw UndefinedException();
   }
@@ -807,7 +813,10 @@ public:
     throw UndefinedException();
   }
   virtual void DeleteAction(GameAction) { throw UndefinedException(); }
-  virtual void SetOutcome(GameNode, const GameOutcome &p_outcome) { throw UndefinedException(); }
+  virtual void SetOutcome(const GameNode &p_node, const GameOutcome &p_outcome)
+  {
+    throw UndefinedException();
+  }
 
   /// @name Dimensions of the game
   //@{
@@ -892,12 +901,19 @@ public:
 
   /// @name Information sets
   //@{
+  class Infosets;
+
   /// Returns the iset'th information set in the game (numbered globally)
   virtual GameInfoset GetInfoset(int iset) const { throw UndefinedException(); }
   /// Returns the set of information sets in the game
-  virtual std::vector<GameInfoset> GetInfosets() const { throw UndefinedException(); }
+  virtual Infosets GetInfosets() const;
   /// Sort the information sets for each player in a canonical order
   virtual void SortInfosets() {}
+  /// Returns the set of actions taken by the infoset's owner before reaching this infoset
+  virtual std::set<GameAction> GetOwnPriorActions(const GameInfoset &p_infoset) const
+  {
+    throw UndefinedException();
+  }
   //@}
 
   /// @name Outcomes
@@ -925,6 +941,11 @@ public:
   virtual size_t NumNodes() const = 0;
   /// Returns the number of non-terminal nodes in the game
   virtual size_t NumNonterminalNodes() const = 0;
+  /// Returns the last action taken by the node's owner before reaching this node
+  virtual GameAction GetOwnPriorAction(const GameNode &p_node) const
+  {
+    throw UndefinedException();
+  }
   //@}
 
   /// @name Modification
@@ -936,6 +957,83 @@ public:
   /// Build any computed values anew
   virtual void BuildComputedValues() const {}
 };
+
+class GameRep::Infosets {
+  Players m_players;
+
+public:
+  explicit Infosets(const Players &outer) : m_players(outer) {}
+
+  class iterator {
+    using OuterIter = Players::iterator;
+    using InnerIter = GamePlayerRep::Infosets::iterator;
+
+    OuterIter m_playerIterator, m_playerEnd;
+    InnerIter m_infosetIterator, m_infosetEnd;
+
+    void next()
+    {
+      while (m_playerIterator != m_playerEnd && m_infosetIterator == m_infosetEnd) {
+        ++m_playerIterator;
+        if (m_playerIterator != m_playerEnd) {
+          auto infosets = (*m_playerIterator)->GetInfosets();
+          m_infosetIterator = infosets.begin();
+          m_infosetEnd = infosets.end();
+        }
+      }
+    }
+
+  public:
+    using iterator_category = std::forward_iterator_tag;
+    using value_type = GameInfoset;
+    using reference = GameInfoset;
+    using pointer = GameInfoset;
+    using difference_type = std::ptrdiff_t;
+
+    iterator() = default;
+
+    iterator(const OuterIter &p_playerIterator, const OuterIter &p_playerEnd)
+      : m_playerIterator(p_playerIterator), m_playerEnd(p_playerEnd)
+    {
+      if (m_playerIterator != m_playerEnd) {
+        const auto infosets = (*m_playerIterator)->GetInfosets();
+        m_infosetIterator = infosets.begin();
+        m_infosetEnd = infosets.end();
+      }
+      next();
+    }
+
+    reference operator*() const { return *m_infosetIterator; }
+    pointer operator->() const { return *m_infosetIterator; }
+
+    iterator &operator++()
+    {
+      ++m_infosetIterator;
+      next();
+      return *this;
+    }
+
+    iterator operator++(int)
+    {
+      iterator tmp = *this;
+      ++(*this);
+      return tmp;
+    }
+
+    friend bool operator==(const iterator &a, const iterator &b)
+    {
+      return a.m_playerIterator == b.m_playerIterator &&
+             (a.m_playerIterator == a.m_playerEnd || a.m_infosetIterator == b.m_infosetIterator);
+    }
+
+    friend bool operator!=(const iterator &a, const iterator &b) { return !(a == b); }
+  };
+
+  iterator begin() const { return {m_players.begin(), m_players.end()}; }
+  iterator end() const { return {m_players.end(), m_players.end()}; }
+};
+
+inline GameRep::Infosets GameRep::GetInfosets() const { return Infosets(GetPlayers()); }
 
 //=======================================================================
 //          Inline members of game representation classes

@@ -38,39 +38,19 @@ namespace Gambit {
 
 Rational GameExplicitRep::GetMinPayoff() const
 {
-  return std::accumulate(
-      std::next(m_players.begin()), m_players.end(), GetMinPayoff(m_players.front()),
-      [this](const Rational &r, const GamePlayer &p) { return std::min(r, GetMinPayoff(p)); });
-}
-
-Rational GameExplicitRep::GetMinPayoff(const GamePlayer &p_player) const
-{
-  if (m_outcomes.empty()) {
-    return Rational(0);
-  }
-  return std::accumulate(std::next(m_outcomes.begin()), m_outcomes.end(),
-                         m_outcomes.front()->GetPayoff<Rational>(p_player),
-                         [&p_player](const Rational &r, const std::shared_ptr<GameOutcomeRep> &c) {
-                           return std::min(r, c->GetPayoff<Rational>(p_player));
+  return std::accumulate(std::next(m_players.begin()), m_players.end(),
+                         GetPlayerMinPayoff(m_players.front()),
+                         [this](const Rational &r, const GamePlayer &p) {
+                           return std::min(r, GetPlayerMinPayoff(p));
                          });
 }
 
 Rational GameExplicitRep::GetMaxPayoff() const
 {
-  return std::accumulate(
-      std::next(m_players.begin()), m_players.end(), GetMaxPayoff(m_players.front()),
-      [this](const Rational &r, const GamePlayer &p) { return std::max(r, GetMaxPayoff(p)); });
-}
-
-Rational GameExplicitRep::GetMaxPayoff(const GamePlayer &p_player) const
-{
-  if (m_outcomes.empty()) {
-    return Rational(0);
-  }
-  return std::accumulate(std::next(m_outcomes.begin()), m_outcomes.end(),
-                         m_outcomes.front()->GetPayoff<Rational>(p_player),
-                         [&p_player](const Rational &r, const std::shared_ptr<GameOutcomeRep> &c) {
-                           return std::max(r, c->GetPayoff<Rational>(p_player));
+  return std::accumulate(std::next(m_players.begin()), m_players.end(),
+                         GetPlayerMaxPayoff(m_players.front()),
+                         [this](const Rational &r, const GamePlayer &p) {
+                           return std::max(r, GetPlayerMaxPayoff(p));
                          });
 }
 

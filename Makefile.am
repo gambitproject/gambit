@@ -307,10 +307,11 @@ game_SOURCES = \
 	src/games/stratpure.cc \
 	src/games/stratpure.h \
 	src/games/stratmixed.h \
-	src/games/nash.cc \
 	src/games/file.cc \
 	src/games/writer.cc \
 	src/games/writer.h \
+	src/games/layout.cc \
+    src/games/layout.h \
 	${agg_SOURCES} \
 	src/games/nash.h
 

@@ -33,14 +33,10 @@ class GameExplicitRep : public GameRep {
 public:
   /// @name General data access
   //@{
-  /// Returns the smallest payoff to any player in any outcome of the game
+  /// Returns the smallest payoff to any player in any play of the game
   Rational GetMinPayoff() const override;
-  /// Returns the smallest payoff to the player in any outcome of the game
-  Rational GetMinPayoff(const GamePlayer &) const override;
-  /// Returns the largest payoff to any player in any outcome of the game
+  /// Returns the largest payoff to any player in any play of the game
   Rational GetMaxPayoff() const override;
-  /// Returns the largest payoff to the player in any outcome of the game
-  Rational GetMaxPayoff(const GamePlayer &) const override;
   //@}
 
   /// @name Dimensions of the game

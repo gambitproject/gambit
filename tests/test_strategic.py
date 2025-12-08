@@ -45,10 +45,10 @@ def test_game_is_not_const_sum():
 
 
 def test_game_get_min_payoff():
-    game = games.read_from_file("payoff_game.nfg")
-    assert game.min_payoff == 1
+    game = games.read_from_file("mixed_strategy.nfg")
+    assert game.min_payoff == 0
 
 
 def test_game_get_max_payoff():
-    game = games.read_from_file("payoff_game.nfg")
-    assert game.max_payoff == 10
+    game = games.read_from_file("mixed_strategy.nfg")
+    assert game.max_payoff == 3

@@ -115,8 +115,8 @@ LayoutNodesPanel::LayoutNodesPanel(wxWindow *p_parent, const TreeRenderConfig &p
   constexpr int Y_SPACING_MAX = 60;
 
   m_terminalSpacing = new wxSpinCtrl(
-      this, wxID_ANY, wxString::Format(_T("%d"), p_settings.TerminalSpacing()), wxDefaultPosition,
-      wxDefaultSize, wxSP_ARROW_KEYS, Y_SPACING_MIN, Y_SPACING_MAX);
+      this, wxID_ANY, wxString::Format(_T("%d"), p_settings.GetTerminalSpacing()),
+      wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, Y_SPACING_MIN, Y_SPACING_MAX);
   gridSizer->Add(m_terminalSpacing, 1, wxEXPAND | wxALL, 5);
 
   sizeSizer->Add(gridSizer, 1, wxALL | wxEXPAND, 5);

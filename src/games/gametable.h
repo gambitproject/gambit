@@ -57,6 +57,12 @@ public:
   //@{
   bool IsTree() const override { return false; }
   bool IsConstSum() const override;
+
+  /// Returns the smallest payoff to the player in any play of the game
+  Rational GetPlayerMinPayoff(const GamePlayer &) const override;
+  /// Returns the largest payoff to the player in any play of the game
+  Rational GetPlayerMaxPayoff(const GamePlayer &) const override;
+
   bool IsPerfectRecall() const override { return true; }
   //@}
 

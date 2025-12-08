@@ -1,10 +1,17 @@
 import contextlib
+import os
+import sys
 from pathlib import Path
 
 import nbformat
 import pytest
-from nbclient import NotebookClient
-from nbclient.exceptions import CellExecutionError
+
+# Ensure Jupyter uses the new platformdirs paths to avoid DeprecationWarning
+# This will become the default in `jupyter_core` v6
+os.environ.setdefault("JUPYTER_PLATFORM_DIRS", "1")
+
+from nbclient import NotebookClient  # noqa: E402
+from nbclient.exceptions import CellExecutionError  # noqa: E402
 
 
 def _find_tutorial_notebooks():
@@ -17,7 +24,11 @@ def _find_tutorial_notebooks():
         pytest.skip(f"Tutorials folder not found: {root}")
 
     # Collect all notebooks under doc/tutorials (including any subfolders).
-    notebooks = sorted(set(root.rglob("*.ipynb")))
+    # Exclude Jupyter checkpoint files
+    notebooks = sorted(
+        p for p in root.rglob("*.ipynb")
+        if ".ipynb_checkpoints" not in p.parts
+    )
 
     if not notebooks:
         pytest.skip(f"No tutorial notebooks found in: {root}")
@@ -28,6 +39,7 @@ def _find_tutorial_notebooks():
 _NOTEBOOKS = _find_tutorial_notebooks()
 
 
+@pytest.mark.tutorials
 @pytest.mark.parametrize("nb_path", _NOTEBOOKS, ids=[p.name for p in _NOTEBOOKS])
 def test_execute_notebook(nb_path):
     """Execute a single Jupyter notebook and fail if any cell errors occur.
@@ -35,6 +47,15 @@ def test_execute_notebook(nb_path):
     This uses nbclient.NotebookClient to run the notebook in its parent directory
     so relative paths within the notebook resolve correctly.
     """
+    # Skip notebook execution tests on Python < 3.12 (notebooks may require newer kernels/deps)
+    if sys.version_info < (3, 12):
+        pytest.skip("Notebook execution tests require Python 3.12 or newer")
+
+    # Skip OpenSpiel notebook on Windows
+    # (OpenSpiel is not available on Windows without manual install)
+    if sys.platform == "win32" and "openspiel" in nb_path.name.lower():
+        pytest.skip("OpenSpiel notebook requires OpenSpiel, which is not available on Windows")
+
     nb = nbformat.read(str(nb_path), as_version=4)
 
     # Prefer the notebook's kernelspec if provided, otherwise let nbclient pick the default.

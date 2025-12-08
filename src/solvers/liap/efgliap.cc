@@ -38,18 +38,10 @@ public:
     : m_game(p_start.GetGame()), m_profile(p_start)
   {
     m_scale = m_game->GetMaxPayoff() - m_game->GetMinPayoff();
-    if (m_scale == 0.0) {
-      m_scale = 1.0;
-    }
-    else {
-      m_scale = 1.0 / m_scale;
-    }
-
-    for (const auto &player : m_game->GetPlayers()) {
-      for (const auto &infoset : player->GetInfosets()) {
-        m_shape.push_back(infoset->GetActions().size());
-      }
-    }
+    m_scale = (m_scale == 0.0) ? 1.0 : 1.0 / m_scale;
+    std::transform(
+        m_game->GetInfosets().begin(), m_game->GetInfosets().end(), std::back_inserter(m_shape),
+        [](const auto &infoset) -> std::size_t { return infoset->GetActions().size(); });
   }
 
   ~AgentLyapunovFunction() override = default;
@@ -72,35 +64,29 @@ private:
 inline double sum_infoset_probs(const MixedBehaviorProfile<double> &p_profile,
                                 const GameInfoset &p_infoset)
 {
-  auto actions = p_infoset->GetActions();
-  return std::accumulate(actions.begin(), actions.end(), 0.0,
-                         [p_profile](double t, const GameAction &a) { return t + p_profile[a]; });
+  return sum_function(p_infoset->GetActions(),
+                      [&p_profile](const auto &action) { return p_profile[action]; });
 }
 
 double
 AgentLyapunovFunction::PenalizedLiapValue(const MixedBehaviorProfile<double> &p_profile) const
 {
   double value = 0.0;
-  // Liapunov function proper - should be replaced with call to profile once
-  // the penalty is removed from that implementation.
-  for (auto player : p_profile.GetGame()->GetPlayers()) {
-    for (auto infoset : player->GetInfosets()) {
-      for (auto action : infoset->GetActions()) {
-        value += sqr(
-            std::max(m_scale * (p_profile.GetPayoff(action) - p_profile.GetPayoff(infoset)), 0.0));
-      }
-    }
+  // Liapunov function proper.
+  for (const auto &infoset : p_profile.GetGame()->GetInfosets()) {
+    double infosetValue = p_profile.GetPayoff(infoset);
+    value += sum_function(infoset->GetActions(), [&](const auto &action) -> double {
+      return sqr(std::max(m_scale * (p_profile.GetPayoff(action) - infosetValue), 0.0));
+    });
   }
   // Penalty function for non-negativity constraint for each action
   for (auto element : static_cast<const Vector<double> &>(p_profile)) {
     value += m_penalty * sqr(std::min(element, 0.0));
   }
   // Penalty function for sum-to-one constraint for each action
-  for (auto player : p_profile.GetGame()->GetPlayers()) {
-    for (auto infoset : player->GetInfosets()) {
-      value += m_penalty * sqr(sum_infoset_probs(m_profile, infoset) - 1.0);
-    }
-  }
+  value += sum_function(p_profile.GetGame()->GetInfosets(), [&](const auto &infoset) -> double {
+    return m_penalty * sqr(sum_infoset_probs(m_profile, infoset) - 1.0);
+  });
   return value;
 }
 
@@ -131,11 +117,9 @@ namespace {
 MixedBehaviorProfile<double> EnforceNonnegativity(const MixedBehaviorProfile<double> &p_profile)
 {
   auto profile = p_profile;
-  for (auto player : p_profile.GetGame()->GetPlayers()) {
-    for (auto infoset : player->GetInfosets()) {
-      for (auto action : infoset->GetActions()) {
-        profile[action] = std::max(profile[action], 0.0);
-      }
+  for (const auto &infoset : p_profile.GetGame()->GetInfosets()) {
+    for (const auto &action : infoset->GetActions()) {
+      profile[action] = std::max(profile[action], 0.0);
     }
   }
   return profile.Normalize();
