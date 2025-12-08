@@ -97,7 +97,7 @@ def fit_coghier(game, data, min_tau, max_tau, min_lam, max_lam,
     points, to polish the maximizer.
     """
     def log_like(profile, data):
-        return sum(math.log(p) * d for (p, d) in zip(profile, data))
+        return sum(math.log(p) * d for (p, d) in zip(profile, data, strict=True))
 
     def objective(params, game, data):
         penalty = 0.0

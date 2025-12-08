@@ -6,7 +6,6 @@ checking the expected results on a very simple game.
 There is better test coverage for
 lp_solve, lcp_solve, and enumpoly_solve, all in mixed behaviors.
 """
-import typing
 
 import pytest
 
@@ -77,7 +76,7 @@ def test_enummixed_rational(game: gbt.Game, mixed_strategy_prof_data: list):
     """
     result = gbt.nash.enummixed_solve(game, rational=True)
     assert len(result.equilibria) == len(mixed_strategy_prof_data)
-    for eq, exp in zip(result.equilibria, mixed_strategy_prof_data):
+    for eq, exp in zip(result.equilibria, mixed_strategy_prof_data, strict=True):
         assert eq.max_regret() == 0
         expected = game.mixed_strategy_profile(rational=True, data=exp)
         assert eq == expected
@@ -139,7 +138,7 @@ def test_enummixed_rational(game: gbt.Game, mixed_strategy_prof_data: list):
     ],
 )
 def test_enumpoly_ordered_behavior(
-    game: gbt.Game, mixed_behav_prof_data: list, stop_after: typing.Union[None, int]
+    game: gbt.Game, mixed_behav_prof_data: list, stop_after: None | int
 ):
     """Test calls of enumpoly for mixed behavior equilibria,
     using max_regret (internal consistency); and comparison to a set of previously
@@ -162,7 +161,7 @@ def test_enumpoly_ordered_behavior(
         # compute all
         result = gbt.nash.enumpoly_solve(game, use_strategic=False)
     assert len(result.equilibria) == len(mixed_behav_prof_data)
-    for eq, exp in zip(result.equilibria, mixed_behav_prof_data):
+    for eq, exp in zip(result.equilibria, mixed_behav_prof_data, strict=True):
         assert abs(eq.max_regret()) <= TOL
         expected = game.mixed_behavior_profile(rational=True, data=exp)
         for p in game.players:
@@ -195,7 +194,7 @@ def test_enumpoly_ordered_behavior(
     ],
 )
 def test_enumpoly_unordered_behavior(
-    game: gbt.Game, mixed_behav_prof_data: list, stop_after: typing.Union[None, int]
+    game: gbt.Game, mixed_behav_prof_data: list, stop_after: None | int
 ):
     """Test calls of enumpoly for mixed behavior equilibria,
     using max_regret (internal consistency); and comparison to a set of previously
@@ -308,7 +307,7 @@ def test_lcp_strategy_double():
     ]
 )
 def test_lcp_strategy_rational(game: gbt.Game, mixed_strategy_prof_data: list,
-                               stop_after: typing.Union[None, int]):
+                               stop_after: None | int):
     """Test calls of LCP for mixed strategy equilibria, rational precision
     using max_regret (internal consistency); and comparison to a sequence of previously
     computed equilibria using this function (regression test).
@@ -325,7 +324,7 @@ def test_lcp_strategy_rational(game: gbt.Game, mixed_strategy_prof_data: list,
         # compute all
         result = gbt.nash.lcp_solve(game, use_strategic=True)
     assert len(result.equilibria) == len(mixed_strategy_prof_data)
-    for eq, exp in zip(result.equilibria, mixed_strategy_prof_data):
+    for eq, exp in zip(result.equilibria, mixed_strategy_prof_data, strict=True):
         assert eq.max_regret() == 0
         expected = game.mixed_strategy_profile(rational=True, data=exp)
         assert eq == expected

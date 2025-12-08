@@ -48,7 +48,7 @@ class PlayerInfosets:
         for infoset in self.player.deref().GetInfosets():
             yield Infoset.wrap(infoset)
 
-    def __getitem__(self, index: typing.Union[int, str]) -> Infoset:
+    def __getitem__(self, index: int | str) -> Infoset:
         if isinstance(index, str):
             if not index.strip():
                 raise ValueError("Infoset label cannot be empty or all whitespace")
@@ -88,7 +88,7 @@ class PlayerActions:
         for infoset in self.player.infosets:
             yield from infoset.actions
 
-    def __getitem__(self, index: typing.Union[int, str]) -> Action:
+    def __getitem__(self, index: int | str) -> Action:
         if isinstance(index, str):
             if not index.strip():
                 raise ValueError("Action label cannot be empty or all whitespace")
@@ -133,7 +133,7 @@ class PlayerStrategies:
         for strategy in self.player.deref().GetStrategies():
             yield Strategy.wrap(strategy)
 
-    def __getitem__(self, index: typing.Union[int, str]) -> Strategy:
+    def __getitem__(self, index: int | str) -> Strategy:
         if isinstance(index, str):
             if not index.strip():
                 raise ValueError("Strategy label cannot be empty or all whitespace")

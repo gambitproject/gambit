@@ -74,14 +74,14 @@ def _to_number(value: typing.Any) -> c_Number:
     return c_Number(value.encode("ascii"))
 
 
-PlayerReference = typing.Union[Player, str]
-StrategyReference = typing.Union[Strategy, str]
-InfosetReference = typing.Union[Infoset, str]
-ActionReference = typing.Union[Action, str]
-NodeReference = typing.Union[Node, str]
+PlayerReference = Player | str
+StrategyReference = Strategy | str
+InfosetReference = Infoset | str
+ActionReference = Action | str
+NodeReference = Node | str
 NodeReferenceSet = typing.Iterable[NodeReference]
 
-ProfileDType = typing.Union[float, Rational]
+ProfileDType = float | Rational
 
 
 ######################

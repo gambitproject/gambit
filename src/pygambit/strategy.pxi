@@ -74,7 +74,7 @@ class Strategy:
         """The number of the strategy."""
         return self.strategy.deref().GetNumber() - 1
 
-    def action(self, infoset: typing.Union[Infoset, str]) -> typing.Optional[Action]:
+    def action(self, infoset: Infoset | str) -> Action | None:
         """Get the action prescribed by a strategy for a given information set.
 
         .. versionadded:: 16.4.0

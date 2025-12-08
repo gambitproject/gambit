@@ -118,7 +118,7 @@ def test_normalize(game, profile_data, expected_data, rational_flag):
 )
 def test_set_and_get_probability_by_strategy_label(game: gbt.Game, strategy_label: str,
                                                    rational_flag: bool,
-                                                   prob: typing.Union[float, str]):
+                                                   prob: float | str):
     profile = game.mixed_strategy_profile(rational=rational_flag)
     prob = gbt.Rational(prob) if rational_flag else prob
     profile[strategy_label] = prob
@@ -179,7 +179,7 @@ def test_set_and_get_probabilities_by_player_label(game: gbt.Game, player_label:
 )
 def test_profile_indexing_by_player_and_strategy_label_reference(game: gbt.Game, player_label: str,
                                                                  strategy_label: str,
-                                                                 prob: typing.Union[str, float],
+                                                                 prob: str | float,
                                                                  rational_flag: bool):
     profile = game.mixed_strategy_profile(rational=rational_flag)
     prob = gbt.Rational(prob) if rational_flag else prob
@@ -229,8 +229,8 @@ def test_profile_indexing_by_player_and_invalid_strategy_label(game: gbt.Game,
 )
 def test_profile_indexing_by_invalid_strategy_label(game: gbt.Game, strategy_label: str,
                                                     rational_flag: bool,
-                                                    error: typing.Union[ValueError, KeyError],
-                                                    message: typing.Union[str, None]):
+                                                    error: ValueError | KeyError,
+                                                    message: str | None):
     """Check that we get a ValueError for an ambigious strategy label and a KeyError for one that
     is neither a player or strategy label in the game
     """
@@ -275,7 +275,7 @@ def test_profile_indexing_by_player_and_duplicate_strategy_label():
     ]
 )
 def test_profile_indexing_by_strategy_label_reference(game: gbt.Game, strategy_label: str,
-                                                      prob: typing.Union[str, float],
+                                                      prob: str | float,
                                                       rational_flag: bool):
     profile = game.mixed_strategy_profile(rational=rational_flag)
     prob = gbt.Rational(prob) if rational_flag else prob
@@ -366,7 +366,7 @@ def test_profile_indexing_by_player_label_reference(game: gbt.Game, player_label
     ]
 )
 def test_payoff_by_label_reference(game: gbt.Game, rational_flag: bool, profile_data: list,
-                                   label: str, payoff: typing.Union[float, str]):
+                                   label: str, payoff: float | str):
     payoff = gbt.Rational(payoff) if rational_flag else payoff
     profile = game.mixed_strategy_profile(rational=rational_flag, data=profile_data)
     assert profile.payoff(label) == payoff
@@ -396,7 +396,7 @@ def test_payoff_by_label_reference(game: gbt.Game, rational_flag: bool, profile_
     ]
 )
 def test_strategy_value_by_label_reference(game: gbt.Game, rational_flag: bool, label: str,
-                                           value: typing.Union[float, str]):
+                                           value: float | str):
     value = gbt.Rational(value) if rational_flag else value
     assert game.mixed_strategy_profile(rational=rational_flag).strategy_value(label) == value
 
@@ -456,7 +456,7 @@ def test_as_behavior_error(game: gbt.Game, rational_flag: bool):
 def test_payoffs_reference(game: gbt.Game, profile_data: list, rational_flag: bool,
                            payoffs: tuple):
     profile = game.mixed_strategy_profile(rational=rational_flag, data=profile_data)
-    for payoff, player in zip(payoffs, profile.game.players):
+    for payoff, player in zip(payoffs, profile.game.players, strict=True):
         payoff = gbt.Rational(payoff) if rational_flag else payoff
         assert profile.payoff(player) == payoff
 
@@ -491,7 +491,8 @@ def test_strategy_value_reference(game: gbt.Game, profile_data: list, rational_f
                                   strategy_values: list):
     profile = game.mixed_strategy_profile(rational=rational_flag, data=profile_data)
     for strategy_values_for_player, player in zip(
-        strategy_values, profile.game.players
+        strategy_values, profile.game.players,
+        strict=True
     ):
         for i, s in enumerate(player.strategies):
             sv = strategy_values_for_player[i]
@@ -537,8 +538,8 @@ def test_strategy_value_reference(game: gbt.Game, profile_data: list, rational_f
     ]
 )
 def test_liapunov_value_reference(game: gbt.Game, profile_data: list,
-                                  liap_expected: typing.Union[float, str],
-                                  tol: typing.Union[float, gbt.Rational, int],
+                                  liap_expected: float | str,
+                                  tol: float | gbt.Rational | int,
                                   rational_flag: bool):
     liap_expected = gbt.Rational(liap_expected) if rational_flag else liap_expected
     profile = game.mixed_strategy_profile(rational=rational_flag, data=profile_data)
@@ -613,7 +614,7 @@ def test_strategy_regret_consistency(game: gbt.Game, rational_flag: bool):
     ]
 )
 def test_liapunov_value_consistency(game: gbt.Game, profile_data: list,
-                                    tol: typing.Union[float, gbt.Rational],
+                                    tol: float | gbt.Rational,
                                     rational_flag: bool):
     profile = game.mixed_strategy_profile(rational=rational_flag, data=profile_data)
 
@@ -665,8 +666,8 @@ def test_liapunov_value_consistency(game: gbt.Game, profile_data: list,
     ]
 )
 def test_linearity_payoff_property(game: gbt.Game, profile1: list, profile2: list,
-                                   alpha: typing.Union[float, gbt.Rational],
-                                   tol: typing.Union[float, gbt.Rational], rational_flag: bool):
+                                   alpha: float | gbt.Rational,
+                                   tol: float | gbt.Rational, rational_flag: bool):
     profile1 = game.mixed_strategy_profile(rational=rational_flag, data=profile1)
     profile2 = game.mixed_strategy_profile(rational=rational_flag, data=profile2)
 
@@ -713,7 +714,7 @@ def test_linearity_payoff_property(game: gbt.Game, profile1: list, profile2: lis
     ]
 )
 def test_payoff_and_strategy_value_consistency(game: gbt.Game, profile_data: list,
-                                               tol: typing.Union[float, gbt.Rational],
+                                               tol: float | gbt.Rational,
                                                rational_flag: bool):
     profile = game.mixed_strategy_profile(rational=rational_flag, data=profile_data)
     for player in game.players:
@@ -746,8 +747,8 @@ def test_payoff_and_strategy_value_consistency(game: gbt.Game, profile_data: lis
     ]
 )
 def test_property_linearity_strategy_value(game: gbt.Game, profile1: list, profile2: list,
-                                           alpha: typing.Union[float, str], rational_flag: bool,
-                                           tol: typing.Union[float, gbt.Rational]):
+                                           alpha: float | str, rational_flag: bool,
+                                           tol: float | gbt.Rational):
 
     alpha = gbt.Rational(alpha) if rational_flag else alpha
 

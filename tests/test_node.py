@@ -338,7 +338,7 @@ def test_node_copy_across_games():
 def _subtrees_equal(
         n1: gbt.Node,
         n2: gbt.Node,
-        recursion_stop_node: typing.Union[gbt.Node, None] = None
+        recursion_stop_node: gbt.Node | None = None
 ) -> bool:
     if n1 == recursion_stop_node:
         return n2.is_terminal
@@ -355,7 +355,9 @@ def _subtrees_equal(
         return False
 
     return all(
-        _subtrees_equal(c1, c2, recursion_stop_node) for (c1, c2) in zip(n1.children, n2.children)
+        _subtrees_equal(c1, c2, recursion_stop_node) for (c1, c2) in zip(
+            n1.children, n2.children, strict=True
+            )
     )
 
 
@@ -485,7 +487,7 @@ def test_append_move_labels_list_of_nodes():
     tmp1 = game.root.children[1].children[0].infoset.actions
     tmp2 = game.root.children[0].children[0].infoset.actions
 
-    for (action, action1, action2) in zip(action_list, tmp1, tmp2):
+    for (action, action1, action2) in zip(action_list, tmp1, tmp2, strict=True):
         assert action.label == action1.label
         assert action.label == action2.label
 
