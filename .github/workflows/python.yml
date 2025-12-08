@@ -32,7 +32,7 @@ jobs:
           cd dist
           pip install -v pygambit*.tar.gz
       - name: Run tests
-        run: pytest
+        run: pytest --run-tutorials
 
   macos-13:
     runs-on: macos-13
@@ -52,7 +52,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install setuptools build cython wheel
           pip install -r tests/requirements.txt
-          pip install -r doc/requirements.txt
       - name: Build extension
         run: |
           python -m pip install -v .
@@ -82,7 +81,7 @@ jobs:
         run: |
           python -m pip install -v .
       - name: Run tests
-        run: pytest
+        run: pytest --run-tutorials
 
   windows:
     runs-on: windows-latest
@@ -102,9 +101,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install setuptools build cython wheel
           pip install -r tests/requirements.txt
-          pip install nbformat nbclient ipykernel jupyter matplotlib
+          pip install -r doc/requirements.txt
       - name: Build extension
         run: |
           python -m pip install -v .
       - name: Run tests
-        run: pytest
+        run: pytest --run-tutorials
