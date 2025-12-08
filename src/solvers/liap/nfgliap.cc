@@ -38,12 +38,7 @@ public:
     : m_game(p_start.GetGame()), m_profile(p_start)
   {
     m_scale = m_game->GetMaxPayoff() - m_game->GetMinPayoff();
-    if (m_scale == 0.0) {
-      m_scale = 1.0;
-    }
-    else {
-      m_scale = 1.0 / m_scale;
-    }
+    m_scale = (m_scale == 0.0) ? 1.0 : 1.0 / m_scale;
   }
   ~StrategicLyapunovFunction() override = default;
 
