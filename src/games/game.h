@@ -876,8 +876,15 @@ public:
     BuildComputedValues();
     return Strategies(std::const_pointer_cast<GameRep>(this->shared_from_this()));
   }
-  /// Gets the i'th strategy in the game, numbered globally
-  virtual GameStrategy GetStrategy(int p_index) const = 0;
+  /// Gets the i'th strategy in the game, numbered globally starting from 1
+  GameStrategy GetStrategy(const int p_index) const
+  {
+    const auto strategies = GetStrategies();
+    if (p_index < 1 || p_index > strategies.size()) {
+      throw std::out_of_range("Strategy index out of range");
+    }
+    return *std::next(strategies.begin(), p_index - 1);
+  }
   /// Creates a new strategy for the player
   virtual GameStrategy NewStrategy(const GamePlayer &p_player, const std::string &p_label)
   {

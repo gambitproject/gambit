@@ -55,24 +55,6 @@ Rational GameExplicitRep::GetMaxPayoff() const
 }
 
 //------------------------------------------------------------------------
-//                GameExplicitRep: Dimensions of the game
-//------------------------------------------------------------------------
-
-GameStrategy GameExplicitRep::GetStrategy(int p_index) const
-{
-  BuildComputedValues();
-  int i = 1;
-  for (const auto &player : m_players) {
-    for (const auto &strategy : player->m_strategies) {
-      if (p_index == i++) {
-        return strategy;
-      }
-    }
-  }
-  throw std::out_of_range("Strategy index out of range");
-}
-
-//------------------------------------------------------------------------
 //                      GameExplicitRep: Outcomes
 //------------------------------------------------------------------------
 

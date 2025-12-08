@@ -306,9 +306,10 @@ public:
   std::size_t size() const
   {
     auto outer = (m_owner.get()->*OuterMemFn)();
-    return std::accumulate(
-        outer.begin(), outer.end(), static_cast<std::size_t>(0),
-        [](std::size_t acc, auto &elem) { return acc + (elem.get()->*InnerMemFn)().size(); });
+    return std::accumulate(outer.begin(), outer.end(), static_cast<std::size_t>(0),
+                           [](std::size_t acc, const auto &element) {
+                             return acc + (element.get()->*InnerMemFn)().size();
+                           });
   }
 
   /// @brief Returns the shape, a vector of the sizes of the inner ranges

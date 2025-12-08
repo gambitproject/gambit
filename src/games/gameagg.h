@@ -46,8 +46,6 @@ public:
   std::shared_ptr<agg::AGG> GetUnderlyingAGG() const { return aggPtr; }
   /// @name Dimensions of the game
   //@{
-  /// Gets the i'th strategy in the game, numbered globally
-  GameStrategy GetStrategy(int p_index) const override;
   /// Returns the total number of actions in the game
   int BehavProfileLength() const override { throw UndefinedException(); }
   //@}
