@@ -10,4 +10,4 @@ matplotlib
 pickleshare
 jupyter
 open_spiel; sys_platform != 'win32'
-draw-tree @ git+https://github.com/gambitproject/draw_tree.git@v0.1.1
+draw-tree @ git+https://github.com/gambitproject/draw_tree.git@v0.2.0
