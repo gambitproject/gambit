@@ -28,6 +28,7 @@
 #include <iomanip>
 #include <cmath>
 #include <algorithm>
+#include <numeric>
 #include <map>
 
 namespace Gambit {
@@ -63,6 +64,108 @@ template <class Key, class T> bool contains(const std::map<Key, T> &map, const K
 {
   return map.find(key) != map.end();
 }
+
+/// @brief A container adaptor which skips over a given value when iterating
+template <typename Container, typename T> class exclude_value {
+public:
+  using Iter = decltype(std::begin(std::declval<Container &>()));
+
+  class iterator {
+  public:
+    using iterator_category = std::forward_iterator_tag;
+    using value_type = typename std::iterator_traits<Iter>::value_type;
+    using difference_type = typename std::iterator_traits<Iter>::difference_type;
+    using reference = typename std::iterator_traits<Iter>::reference;
+    using pointer = typename std::iterator_traits<Iter>::pointer;
+
+    iterator(Iter current, Iter end, const T &value)
+      : m_current(current), m_end(end), m_value(value)
+    {
+      skip_if_value();
+    }
+
+    value_type operator*() const { return *m_current; }
+    pointer operator->() const { return std::addressof(*m_current); }
+
+    iterator &operator++()
+    {
+      ++m_current;
+      skip_if_value();
+      return *this;
+    }
+
+    iterator operator++(int)
+    {
+      auto tmp = *this;
+      ++(*this);
+      return tmp;
+    }
+
+    friend bool operator==(const iterator &a, const iterator &b)
+    {
+      return a.m_current == b.m_current;
+    }
+
+    friend bool operator!=(const iterator &a, const iterator &b)
+    {
+      return a.m_current != b.m_current;
+    }
+
+  private:
+    Iter m_current, m_end;
+    T m_value;
+
+    void skip_if_value()
+    {
+      while (m_current != m_end && *m_current == m_value) {
+        ++m_current;
+      }
+    }
+  };
+
+  exclude_value(const Container &c, const T &value)
+    : m_begin(c.begin(), c.end(), value), m_end(c.end(), c.end(), value)
+  {
+  }
+
+  iterator begin() const { return m_begin; }
+  iterator end() const { return m_end; }
+
+private:
+  iterator m_begin, m_end;
+};
+
+/// @brief Returns the maximum value of the function over the *non-empty* container
+template <class Container, class Func>
+auto maximize_function(const Container &p_container, const Func &p_function)
+{
+  auto it = p_container.begin();
+  using T = decltype(p_function(*it));
+  return std::transform_reduce(
+      std::next(it), p_container.end(), p_function(*it),
+      [](const T &a, const T &b) -> T { return std::max(a, b); }, p_function);
+}
+
+/// @brief Returns the minimum value of the function over the *non-empty* container
+template <class Container, class Func>
+auto minimize_function(const Container &p_container, const Func &p_function)
+{
+  auto it = p_container.begin();
+  using T = decltype(p_function(*it));
+  return std::transform_reduce(
+      std::next(it), p_container.end(), p_function(*it),
+      [](const T &a, const T &b) -> T { return std::min(a, b); }, p_function);
+}
+
+/// @brief Returns the sum of the function over the container
+template <class Container, class Func>
+auto sum_function(const Container &p_container, const Func &p_function)
+{
+  using T = decltype(p_function(*(p_container.begin())));
+  return std::transform_reduce(p_container.begin(), p_container.end(), static_cast<T>(0),
+                               std::plus<>{}, p_function);
+}
+
 //========================================================================
 //                        Exception classes
 //========================================================================

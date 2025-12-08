@@ -96,14 +96,10 @@ public:
   /// game element held by this object and throws an exception if the object is the
   /// null object, or is no longer valid (has been removed from the game)
   ///
-  /// @exception NullException if the object holds a reference to a null element
   /// @exception InvalidObjectException if the element referred to has been deleted from its game
   std::shared_ptr<T> get_shared() const
   {
-    if (!m_rep) {
-      throw NullException();
-    }
-    if (!m_rep->IsValid()) {
+    if (m_rep && !m_rep->IsValid()) {
       throw InvalidObjectException();
     }
     return m_rep;
@@ -129,16 +125,16 @@ public:
   }
 
   bool operator==(const GameObjectPtr<T> &r) const { return (m_rep == r.m_rep); }
-  bool operator==(const std::shared_ptr<T> r) const { return (m_rep == r); }
-  bool operator==(const std::shared_ptr<const T> r) const { return (m_rep == r); }
-  bool operator==(const std::nullptr_t) const { return !bool(m_rep); }
+  bool operator==(const std::shared_ptr<T> &r) const { return (m_rep == r); }
+  bool operator==(const std::shared_ptr<const T> &r) const { return (m_rep == r); }
+  bool operator==(const std::nullptr_t &) const { return m_rep == nullptr; }
   bool operator!=(const GameObjectPtr<T> &r) const { return (m_rep != r.m_rep); }
-  bool operator!=(const std::shared_ptr<T> r) const { return (m_rep != r); }
-  bool operator!=(const std::shared_ptr<const T> r) const { return (m_rep != r); }
-  bool operator!=(const std::nullptr_t) const { return bool(m_rep); }
+  bool operator!=(const std::shared_ptr<T> &r) const { return (m_rep != r); }
+  bool operator!=(const std::shared_ptr<const T> &r) const { return (m_rep != r); }
+  bool operator!=(const std::nullptr_t &) const { return m_rep != nullptr; }
   bool operator<(const GameObjectPtr<T> &r) const { return (m_rep < r.m_rep); }
 
-  operator bool() const noexcept { return bool(m_rep); }
+  operator bool() const noexcept { return m_rep != nullptr; }
   operator std::shared_ptr<T>() const { return m_rep; }
 };
 
@@ -192,7 +188,7 @@ public:
     }
     value_type operator*() const { return m_container->at(m_index); }
 
-    inline const P &GetOwner() const { return m_owner; }
+    const P &GetOwner() const { return m_owner; }
   };
 
   ElementCollection() = default;
