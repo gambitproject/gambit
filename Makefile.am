@@ -23,9 +23,9 @@
 ACLOCAL_AMFLAGS = -I m4
 
 EXTRA_DIST = \
-    build_support/gambit.wxs \
-	build_support/mac/Info.plist \
-	contrib/mac/gambit.icns \
+    build_support/msw/gambit.wxs.in \
+	build_support/osx/Info.plist.in \
+	build_support/osx/gambit.icns \
 	src/labenski/README.txt \
 	src/labenski/art/grab.xpm \
 	src/labenski/art/hand.xpm \
@@ -623,8 +623,8 @@ osx-bundle:
 	-mkdir Gambit.app/Contents
 	-mkdir Gambit.app/Contents/MacOS
 	-mkdir Gambit.app/Contents/Resources
-	cp ${top_srcdir}/build_support/mac/Info.plist Gambit.app/Contents
-	cp ${top_srcdir}/contrib/mac/gambit.icns Gambit.app/Contents/Resources/gambit.icns
+	cp build_support/osx/Info.plist Gambit.app/Contents
+	cp ${top_srcdir}/build_support/osx/gambit.icns Gambit.app/Contents/Resources/gambit.icns
 	echo -n 'APPL????' > Gambit.app/Contents/PkgInfo
 	cp gambit Gambit.app/Contents/MacOS/gambit
 	cp ${bin_PROGRAMS} Gambit.app/Contents/MacOS
@@ -639,7 +639,7 @@ osx-dmg:  osx-bundle
 msw-msi:
 	-mkdir installer
 	cp gambit* installer
-	candle build_support/gambit.wxs
+	candle build_support/msw/gambit.wxs
 	light -ext WixUIExtension gambit.wixobj
 
 clang-tidy:

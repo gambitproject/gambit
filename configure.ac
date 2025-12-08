@@ -148,5 +148,5 @@ AC_SUBST(REZFLAGS)
 GAMBIT_VERSION=`cat build_support/GAMBIT_VERSION`
 AC_SUBST(GAMBIT_VERSION)
 
-AC_CONFIG_FILES([Makefile build_support/mac/Info.plist build_support/gambit.wxs])
+AC_CONFIG_FILES([Makefile build_support/osx/Info.plist build_support/msw/gambit.wxs])
 AC_OUTPUT
