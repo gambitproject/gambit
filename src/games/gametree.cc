@@ -701,28 +701,10 @@ GameInfoset GameTreeRep::InsertMove(GameNode p_node, GameInfoset p_infoset)
 //                        GameTreeRep: Lifecycle
 //------------------------------------------------------------------------
 
-GameTreeRep::GameTreeRep() = default;
-
-void GameTreeRep::Initialize()
+GameTreeRep::GameTreeRep()
+  : m_root(std::make_shared<GameNodeRep>(this, nullptr)),
+    m_chance(std::make_shared<GamePlayerRep>(this, 0))
 {
-  auto self = shared_from_this();
-
-  // Now construct children using the VALID GameTreeRep*
-  m_root = std::make_shared<GameNodeRep>(self.get(), nullptr);
-  m_chance = std::make_shared<GamePlayerRep>(self.get(), 0);
-
-  // If GameNodeRep creates children of its own, same pattern applies
-}
-
-std::shared_ptr<GameTreeRep> GameTreeRep::Create()
-{
-  // Construct object under shared_ptr CONTROL BLOCK
-  auto rep = std::shared_ptr<GameTreeRep>(new GameTreeRep());
-
-  // Now safe to construct children because shared_from_this works
-  rep->Initialize();
-
-  return rep;
 }
 
 GameTreeRep::~GameTreeRep()
@@ -739,7 +721,7 @@ Game GameTreeRep::Copy() const
   return ReadGame(is);
 }
 
-Game NewTree() { return GameTreeRep::Create(); }
+Game NewTree() { return std::make_shared<GameTreeRep>(); }
 
 //------------------------------------------------------------------------
 //                 GameTreeRep: General data access

@@ -68,14 +68,10 @@ protected:
   void CopySubtree(GameNodeRep *, GameNodeRep *, GameNodeRep *);
   //@}
 
-  GameTreeRep();
-  void Initialize();
-
 public:
   /// @name Lifecycle
   //@{
-
-  static std::shared_ptr<GameTreeRep> Create();
+  GameTreeRep();
   ~GameTreeRep() override;
   Game Copy() const override;
   //@}

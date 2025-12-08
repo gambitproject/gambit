@@ -44,16 +44,12 @@ private:
   void RebuildTable();
   //@}
 
-  explicit GameTableRep(const std::vector<int> &p_dim, bool p_sparseOutcomes = false);
-  void Initialize(const std::vector<int> &dim, bool p_sparseOutcomes);
-
 public:
   /// @name Lifecycle
   //@{
   /// Construct a new table game with the given dimension
   /// If p_sparseOutcomes = true, outcomes for all contingencies are left null
-  static std::shared_ptr<GameTableRep> Create(const std::vector<int> &dim,
-                                              bool sparseOutcomes = false);
+  explicit GameTableRep(const std::vector<int> &p_dim, bool p_sparseOutcomes = false);
   Game Copy() const override;
   //@}
 

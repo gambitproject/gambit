@@ -107,4 +107,4 @@ jobs:
         run: |
           python -m pip install -v .
       - name: Run tests
-        run: pytest -vv
+        run: pytest

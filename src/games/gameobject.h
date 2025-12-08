@@ -135,7 +135,7 @@ public:
   bool operator<(const GameObjectPtr<T> &r) const { return (m_rep < r.m_rep); }
 
   operator bool() const noexcept { return m_rep != nullptr; }
-  operator std::shared_ptr<T>() const { return get_shared(); }
+  operator std::shared_ptr<T>() const { return m_rep; }
 };
 
 template <class P, class T> class ElementCollection {

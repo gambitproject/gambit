@@ -21,7 +21,6 @@
 //
 
 #include <iostream>
-#include <memory>
 
 #include "gambit.h"
 #include "gametable.h"
@@ -67,7 +66,7 @@ std::shared_ptr<PureStrategyProfileRep> TablePureStrategyProfileRep::Copy() cons
 
 Game NewTable(const std::vector<int> &p_dim, bool p_sparseOutcomes /*= false*/)
 {
-  return GameTableRep::Create(p_dim, p_sparseOutcomes);
+  return std::make_shared<GameTableRep>(p_dim, p_sparseOutcomes);
 }
 
 //------------------------------------------------------------------------
@@ -265,10 +264,6 @@ template class TableMixedStrategyProfileRep<Rational>;
 GameTableRep::GameTableRep(const std::vector<int> &dim, bool p_sparseOutcomes /* = false */)
   : m_results(std::accumulate(dim.begin(), dim.end(), 1, std::multiplies<>()))
 {
-}
-
-void GameTableRep::Initialize(const std::vector<int> &dim, bool p_sparseOutcomes /* = false */)
-{
   for (const auto &nstrat : dim) {
     m_players.push_back(std::make_shared<GamePlayerRep>(this, m_players.size() + 1, nstrat));
     m_players.back()->m_label = lexical_cast<std::string>(m_players.size());
@@ -290,15 +285,6 @@ void GameTableRep::Initialize(const std::vector<int> &dim, bool p_sparseOutcomes
     std::transform(m_outcomes.begin(), m_outcomes.end(), m_results.begin(),
                    [](const std::shared_ptr<GameOutcomeRep> &c) { return c.get(); });
   }
-}
-
-std::shared_ptr<GameTableRep> GameTableRep::Create(const std::vector<int> &dim,
-                                                   bool sparseOutcomes)
-{
-  auto rep = std::shared_ptr<GameTableRep>(new GameTableRep(dim, sparseOutcomes));
-  rep->Initialize(dim, sparseOutcomes);
-
-  return rep;
 }
 
 Game GameTableRep::Copy() const
