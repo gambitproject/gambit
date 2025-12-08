@@ -66,7 +66,7 @@ class NashComputationResult:
 
 
 def enumpure_solve(game: libgbt.Game, use_strategic: bool = True) -> NashComputationResult:
-    """Compute all :ref:`pure-strategy Nash equilibria <gambit-enumpure>` of game.
+    """Compute all :ref:`pure-strategy Nash equilibria <enumpure>` of game.
 
     Parameters
     ----------
@@ -105,7 +105,7 @@ def enummixed_solve(
         rational: bool = True,
         lrsnash_path: pathlib.Path | str | None = None,
 ) -> NashComputationResult:
-    """Compute all :ref:`mixed-strategy Nash equilibria <gambit-enummixed>`
+    """Compute all :ref:`mixed-strategy Nash equilibria <enummixed>`
     of a two-player game using the strategic representation.
 
     Parameters
@@ -168,7 +168,7 @@ def lcp_solve(
         max_depth: int | None = None
 ) -> NashComputationResult:
     """Compute Nash equilibria of a two-player game using :ref:`linear
-    complementarity programming <gambit-lcp>`.
+    complementarity programming <lcp>`.
 
     Parameters
     ----------
@@ -234,7 +234,7 @@ def lp_solve(
         use_strategic: bool = False
 ) -> NashComputationResult:
     """Compute Nash equilibria of a two-player constant-sum game using :ref:`linear
-    programming <gambit-lp>`.
+    programming <lp>`.
 
     Parameters
     ----------
@@ -283,7 +283,7 @@ def liap_solve(
         maxiter: int = 1000
 ) -> NashComputationResult:
     """Compute approximate Nash equilibria of a game using
-    :ref:`Lyapunov function minimization <gambit-liap>`.
+    :ref:`Lyapunov function minimization <liap>`.
 
     .. versionchanged:: 16.2.0
 
@@ -345,7 +345,7 @@ def simpdiv_solve(
         leash: int | None = None
 ) -> NashComputationResult:
     """Compute Nash equilibria of a game using :ref:`simplicial
-    subdivision <gambit-simpdiv>`.
+    subdivision <simpdiv>`.
 
     .. versionchanged:: 16.2.0
 
@@ -404,7 +404,7 @@ def ipa_solve(
         perturbation: libgbt.Game | libgbt.MixedStrategyProfileDouble,
 ) -> NashComputationResult:
     """Compute Nash equilibria of a game using :ref:`iterated polymatrix
-    approximation <gambit-ipa>`.
+    approximation <ipa>`.
 
     Parameters
     ----------
@@ -460,7 +460,7 @@ def gnm_solve(
         local_newton_maxits: int = 10,
 ) -> NashComputationResult:
     """Compute Nash equilibria of a game using :ref:`a global Newton
-    method <gambit-gnm>`.
+    method <gnm>`.
 
     Parameters
     ----------
@@ -585,9 +585,9 @@ def enumpoly_solve(
         maxregret: float = 1.0e-4,
         phcpack_path: pathlib.Path | str | None = None
 ) -> NashComputationResult:
-    """Compute Nash equilibria by enumerating all support profiles of strategies
-    or actions, and for each support finding all totally-mixed equilibria of
-    the game over that support.
+    """:ref:`Compute Nash equilibria by enumerating all support profiles
+    of strategies or actions, and for each support finding all totally-mixed equilibria of
+    the game over that support.<enumpoly_solve>`
 
     Parameters
     ----------
@@ -671,7 +671,7 @@ def logit_solve(
         max_accel: float = 1.1,
 ) -> NashComputationResult:
     """Compute Nash equilibria of a game using :ref:`the logit quantal response
-    equilibrium correspondence <gambit-logit>`.
+    equilibrium correspondence <logit>`.
 
     Returns an approximation to the limiting point on the principal branch of
     the correspondence for the game.
