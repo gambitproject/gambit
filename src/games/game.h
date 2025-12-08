@@ -818,39 +818,6 @@ public:
     throw UndefinedException();
   }
 
-  /// @name Dimensions of the game
-  //@{
-  /// The number of strategies for each player
-  virtual Array<int> NumStrategies() const = 0;
-  /// Gets the i'th strategy in the game, numbered globally
-  virtual GameStrategy GetStrategy(int p_index) const = 0;
-  /// Creates a new strategy for the player
-  virtual GameStrategy NewStrategy(const GamePlayer &p_player, const std::string &p_label)
-  {
-    throw UndefinedException();
-  }
-  /// Remove the strategy from the game
-  virtual void DeleteStrategy(const GameStrategy &p_strategy) { throw UndefinedException(); }
-  /// Returns the number of strategy contingencies in the game
-  int NumStrategyContingencies() const
-  {
-    BuildComputedValues();
-    return std::transform_reduce(
-        m_players.begin(), m_players.end(), 0, std::multiplies<>(),
-        [](const std::shared_ptr<GamePlayerRep> &p) { return p->m_strategies.size(); });
-  }
-  /// Returns the total number of actions in the game
-  virtual int BehavProfileLength() const = 0;
-  /// Returns the total number of strategies in the game
-  int MixedProfileLength() const
-  {
-    BuildComputedValues();
-    return std::transform_reduce(
-        m_players.begin(), m_players.end(), 0, std::plus<>(),
-        [](const std::shared_ptr<GamePlayerRep> &p) { return p->m_strategies.size(); });
-  }
-  //@}
-
   virtual PureStrategyProfile NewPureStrategyProfile() const = 0;
   virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double) const = 0;
   virtual MixedStrategyProfile<Rational> NewMixedStrategyProfile(const Rational &) const = 0;
@@ -899,14 +866,48 @@ public:
   virtual GamePlayer NewPlayer() = 0;
   //@}
 
+  /// @name Dimensions of the game
+  //@{
+  using Strategies =
+      NestedElementCollection<Game, &GameRep::GetPlayers, &GamePlayerRep::GetStrategies>;
+  /// Returns the set of strategies in the game
+  Strategies GetStrategies() const
+  {
+    BuildComputedValues();
+    return Strategies(std::const_pointer_cast<GameRep>(this->shared_from_this()));
+  }
+  /// Gets the i'th strategy in the game, numbered globally starting from 1
+  GameStrategy GetStrategy(const std::size_t p_index) const
+  {
+    const auto strategies = GetStrategies();
+    if (p_index < 1 || p_index > strategies.size()) {
+      throw std::out_of_range("Strategy index out of range");
+    }
+    return *std::next(strategies.begin(), p_index - 1);
+  }
+  /// Creates a new strategy for the player
+  virtual GameStrategy NewStrategy(const GamePlayer &p_player, const std::string &p_label)
+  {
+    throw UndefinedException();
+  }
+  /// Remove the strategy from the game
+  virtual void DeleteStrategy(const GameStrategy &p_strategy) { throw UndefinedException(); }
+  /// Returns the total number of actions in the game
+  virtual int BehavProfileLength() const = 0;
+  //@}
+
   /// @name Information sets
   //@{
-  class Infosets;
+  using Infosets =
+      NestedElementCollection<Game, &GameRep::GetPlayers, &GamePlayerRep::GetInfosets>;
 
   /// Returns the iset'th information set in the game (numbered globally)
   virtual GameInfoset GetInfoset(int iset) const { throw UndefinedException(); }
   /// Returns the set of information sets in the game
-  virtual Infosets GetInfosets() const;
+  virtual Infosets GetInfosets() const
+  {
+    return Infosets(std::const_pointer_cast<GameRep>(this->shared_from_this()));
+  }
   /// Sort the information sets for each player in a canonical order
   virtual void SortInfosets() {}
   /// Returns the set of actions taken by the infoset's owner before reaching this infoset
@@ -957,83 +958,6 @@ public:
   /// Build any computed values anew
   virtual void BuildComputedValues() const {}
 };
-
-class GameRep::Infosets {
-  Players m_players;
-
-public:
-  explicit Infosets(const Players &outer) : m_players(outer) {}
-
-  class iterator {
-    using OuterIter = Players::iterator;
-    using InnerIter = GamePlayerRep::Infosets::iterator;
-
-    OuterIter m_playerIterator, m_playerEnd;
-    InnerIter m_infosetIterator, m_infosetEnd;
-
-    void next()
-    {
-      while (m_playerIterator != m_playerEnd && m_infosetIterator == m_infosetEnd) {
-        ++m_playerIterator;
-        if (m_playerIterator != m_playerEnd) {
-          auto infosets = (*m_playerIterator)->GetInfosets();
-          m_infosetIterator = infosets.begin();
-          m_infosetEnd = infosets.end();
-        }
-      }
-    }
-
-  public:
-    using iterator_category = std::forward_iterator_tag;
-    using value_type = GameInfoset;
-    using reference = GameInfoset;
-    using pointer = GameInfoset;
-    using difference_type = std::ptrdiff_t;
-
-    iterator() = default;
-
-    iterator(const OuterIter &p_playerIterator, const OuterIter &p_playerEnd)
-      : m_playerIterator(p_playerIterator), m_playerEnd(p_playerEnd)
-    {
-      if (m_playerIterator != m_playerEnd) {
-        const auto infosets = (*m_playerIterator)->GetInfosets();
-        m_infosetIterator = infosets.begin();
-        m_infosetEnd = infosets.end();
-      }
-      next();
-    }
-
-    reference operator*() const { return *m_infosetIterator; }
-    pointer operator->() const { return *m_infosetIterator; }
-
-    iterator &operator++()
-    {
-      ++m_infosetIterator;
-      next();
-      return *this;
-    }
-
-    iterator operator++(int)
-    {
-      iterator tmp = *this;
-      ++(*this);
-      return tmp;
-    }
-
-    friend bool operator==(const iterator &a, const iterator &b)
-    {
-      return a.m_playerIterator == b.m_playerIterator &&
-             (a.m_playerIterator == a.m_playerEnd || a.m_infosetIterator == b.m_infosetIterator);
-    }
-
-    friend bool operator!=(const iterator &a, const iterator &b) { return !(a == b); }
-  };
-
-  iterator begin() const { return {m_players.begin(), m_players.end()}; }
-  iterator end() const { return {m_players.end(), m_players.end()}; }
-};
-
-inline GameRep::Infosets GameRep::GetInfosets() const { return Infosets(GetPlayers()); }
 
 //=======================================================================
 //          Inline members of game representation classes

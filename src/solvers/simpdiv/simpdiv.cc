@@ -29,11 +29,11 @@ namespace Gambit::Nash {
 template <class T> class PVector {
 private:
   Vector<T> m_values;
-  Array<int> m_offsets;
-  Array<int> m_shape;
+  Array<size_t> m_offsets;
+  Array<size_t> m_shape;
 
 public:
-  explicit PVector(const Array<int> &p_shape)
+  explicit PVector(const Array<size_t> &p_shape)
     : m_values(std::accumulate(p_shape.begin(), p_shape.end(), 0)), m_offsets(p_shape.size()),
       m_shape(p_shape)
   {
@@ -62,7 +62,7 @@ public:
     return *this;
   }
 
-  const Array<int> &GetShape() const { return m_shape; }
+  const Array<size_t> &GetShape() const { return m_shape; }
   explicit operator const Vector<T> &() const { return m_values; }
 };
 
@@ -137,7 +137,7 @@ Rational NashSimpdivStrategySolver::Simplex(MixedStrategyProfile<Rational> &y,
   const Game game = y.GetGame();
   State state(m_leashLength);
   state.d = d;
-  Array<int> nstrats(game->NumStrategies());
+  Array<size_t> nstrats(game->GetStrategies().shape_array());
   Array<int> ylabel(2);
   RectArray<int> labels(y.MixedProfileLength(), 2), pi(y.MixedProfileLength(), 2);
   PVector<int> U(nstrats), TT(nstrats);

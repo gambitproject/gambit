@@ -36,30 +36,29 @@ using StrategySupport = std::vector<GameStrategy>;
 using CallbackFunction = std::function<void(const std::map<GamePlayer, StrategySupport> &)>;
 
 class CartesianRange {
-private:
-  Array<int> m_sizes;
+  Array<size_t> m_sizes;
 
 public:
-  CartesianRange(const Array<int> &p_sizes) : m_sizes(p_sizes) {}
+  CartesianRange(const Array<size_t> &p_sizes) : m_sizes(p_sizes) {}
 
   class iterator {
   private:
-    Array<int> m_sizes;
-    Array<int> m_indices;
+    Array<size_t> m_sizes;
+    Array<size_t> m_indices;
     bool m_end;
 
   public:
     using iterator_category = std::forward_iterator_tag;
 
-    iterator(const Array<int> &p_sizes, bool p_end = false)
+    iterator(const Array<size_t> &p_sizes, bool p_end = false)
       : m_sizes(p_sizes), m_indices(m_sizes.size()), m_end(p_end)
     {
       std::fill(m_indices.begin(), m_indices.end(), 1);
     }
 
-    const Array<int> &operator*() const { return m_indices; }
+    const Array<size_t> &operator*() const { return m_indices; }
 
-    const Array<int> &operator->() const { return m_indices; }
+    const Array<size_t> &operator->() const { return m_indices; }
 
     iterator &operator++()
     {
@@ -205,7 +204,7 @@ void GenerateSupportProfiles(const Game &game,
 void GenerateSizeDiff(const Game &game, int size, int diff, CallbackFunction callback)
 {
   auto players = game->GetPlayers();
-  CartesianRange range(game->NumStrategies());
+  CartesianRange range(game->GetStrategies().shape_array());
   for (auto size_profile : range) {
     if (*std::max_element(size_profile.cbegin(), size_profile.cend()) -
                 *std::min_element(size_profile.cbegin(), size_profile.cend()) !=
@@ -243,14 +242,14 @@ std::shared_ptr<PossibleNashStrategySupportsResult>
 PossibleNashStrategySupports(const Game &p_game)
 {
   auto result = std::make_shared<PossibleNashStrategySupportsResult>();
-  auto numActions = p_game->NumStrategies();
+  auto numActions = p_game->GetStrategies().shape_array();
 
   const int maxsize =
       std::accumulate(numActions.begin(), numActions.end(), 0) - p_game->NumPlayers() + 1;
   const int maxdiff = *std::max_element(numActions.cbegin(), numActions.cend());
 
   const bool preferBalance = p_game->NumPlayers() == 2;
-  Array<int> dim(2);
+  Array<size_t> dim(2);
   dim[1] = (preferBalance) ? maxsize : maxdiff;
   dim[2] = (preferBalance) ? maxdiff : maxsize;
 

@@ -1111,14 +1111,15 @@ void GameFrame::OnViewStrategic(wxCommandEvent &p_event)
       return;
     }
 
-    const int ncont = m_doc->GetGame()->NumStrategyContingencies();
-    if (!m_nfgPanel && ncont >= 50000) {
-      if (wxMessageBox(
-              wxString::Format(wxT("This game has %d contingencies in strategic form.\n"), ncont) +
-                  wxT("Performance in browsing strategic form will be poor,\n") +
-                  wxT("and may render the program nonresponsive.\n") +
-                  wxT("Do you wish to continue?"),
-              _("Large strategic game warning"), wxOK | wxCANCEL | wxALIGN_CENTER, this) != wxOK) {
+    if (const size_t contingencies = m_doc->GetGame()->GetStrategies().extent_product();
+        !m_nfgPanel && contingencies >= 50000) {
+      if (wxMessageBox(wxString::Format(wxT("This game has %d contingencies in strategic form.\n"),
+                                        contingencies) +
+                           wxT("Performance in browsing strategic form will be poor,\n") +
+                           wxT("and may render the program nonresponsive.\n") +
+                           wxT("Do you wish to continue?"),
+                       _("Large strategic game warning"), wxOK | wxCANCEL | wxALIGN_CENTER,
+                       this) != wxOK) {
         return;
       }
     }
@@ -1242,15 +1243,16 @@ void GameFrame::OnToolsEquilibrium(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     if (dialog.UseStrategic()) {
-      const int ncont = m_doc->GetGame()->NumStrategyContingencies();
-      if (ncont >= 50000) {
-        if (wxMessageBox(wxString::Format(
-                             wxT("This game has %d contingencies in strategic form.\n"), ncont) +
-                             wxT("Performance in solving strategic form will be poor,\n") +
-                             wxT("and may render the program nonresponsive.\n") +
-                             wxT("Do you wish to continue?"),
-                         _("Large strategic game warning"), wxOK | wxCANCEL | wxALIGN_CENTER,
-                         this) != wxOK) {
+      if (const int contingencies = m_doc->GetGame()->GetStrategies().extent_product();
+          contingencies >= 50000) {
+        if (wxMessageBox(
+                wxString::Format(wxT("This game has %d contingencies in strategic form.\n"),
+                                 contingencies) +
+                    wxT("Performance in solving strategic form will be poor,\n") +
+                    wxT("and may render the program nonresponsive.\n") +
+                    wxT("Do you wish to continue?"),
+                _("Large strategic game warning"), wxOK | wxCANCEL | wxALIGN_CENTER,
+                this) != wxOK) {
           return;
         }
       }

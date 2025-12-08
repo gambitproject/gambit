@@ -51,7 +51,7 @@ public:
 private:
   Game m_game;
   mutable MixedBehaviorProfile<double> m_profile;
-  Array<int> m_shape;
+  Array<size_t> m_shape;
   double m_scale, m_penalty{100.0};
 
   double Value(const Vector<double> &x) const override;

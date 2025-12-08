@@ -53,10 +53,6 @@ public:
 
   /// @name Dimensions of the game
   //@{
-  /// The number of strategies for each player
-  Array<int> NumStrategies() const override;
-  /// Gets the i'th strategy in the game, numbered globally
-  GameStrategy GetStrategy(int p_index) const override { throw UndefinedException(); }
   /// Returns the total number of actions in the game
   int BehavProfileLength() const override { throw UndefinedException(); }
   //@}
