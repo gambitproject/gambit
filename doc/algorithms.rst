@@ -69,14 +69,23 @@ supports which have the fewest strategies in total.  For many classes
 of games, this will tend to lower the average time until finding one equilibrium,
 as well as finding the second equilibrium (if one exists).
 
-.. _lcp:
-
-lcp
----
-
 .. _lp:
 
 lp
+---
+
+Reads a two-player constant-sum game on standard input
+and computes a Nash equilibrium by solving a linear program. The
+program uses the sequence form formulation of Koller, Megiddo, and von
+Stengel [KolMegSte94]_ for extensive games.
+
+While the set of equilibria in a two-player constant-sum strategic
+game is convex, this method will only identify one of the extreme
+points of that set.
+
+.. _lcp:
+
+lcp
 ---
 
 .. _liap:
