@@ -63,32 +63,34 @@ private:
 inline double sum_player_probs(const MixedStrategyProfile<double> &p_profile,
                                const GamePlayer &p_player)
 {
-  return sum_function(p_player->GetStrategies(),
-                      [&p_profile](const auto &s) -> double { return p_profile[s]; });
+  auto strategies = p_player->GetStrategies();
+  return std::accumulate(
+      strategies.cbegin(), strategies.cend(), 0.0,
+      [p_profile](double t, const GameStrategy &s) { return t + p_profile[s]; });
 }
 
 double StrategicLyapunovFunction::Value(const Vector<double> &v) const
 {
   m_profile = v;
   double value = 0;
-  // Liapunov function proper
-  for (const auto &player : m_profile.GetGame()->GetPlayers()) {
-    const auto payoff = m_profile.GetPayoff(player);
-    for (const auto strategy : player->GetStrategies()) {
-      value += sqr(std::max(m_scale * (m_profile.GetPayoff(strategy) - payoff), 0.0));
+  // Liapunov function proper - should be replaced with call to profile once
+  // the penalty is removed from that implementation.
+  for (auto player : m_profile.GetGame()->GetPlayers()) {
+    for (auto strategy : player->GetStrategies()) {
+      value += sqr(
+          std::max(m_scale * (m_profile.GetPayoff(strategy) - m_profile.GetPayoff(player)), 0.0));
     }
   }
   // Penalty function for non-negativity constraint for each strategy
-  value += m_penalty *
-           sum_function(m_profile.GetGame()->GetStrategies(), [this](const auto &s) -> double {
-             return sqr(std::min(m_profile[s], 0.0));
-           });
-
+  for (auto player : m_profile.GetGame()->GetPlayers()) {
+    for (auto strategy : player->GetStrategies()) {
+      value += m_penalty * sqr(std::min(m_profile[strategy], 0.0));
+    }
+  }
   // Penalty function for sum-to-one constraint for each player
-  value +=
-      m_penalty * sum_function(m_profile.GetGame()->GetPlayers(), [this](const auto &p) -> double {
-        return sqr(sum_player_probs(m_profile, p) - 1.0);
-      });
+  for (auto player : m_profile.GetGame()->GetPlayers()) {
+    value += m_penalty * sqr(sum_player_probs(m_profile, player) - 1.0);
+  }
   return value;
 }
 
@@ -96,10 +98,10 @@ double StrategicLyapunovFunction::LiapDerivValue(const MixedStrategyProfile<doub
                                                  const GameStrategy &p_wrt_strategy) const
 {
   double deriv = 0.0;
-  for (const auto &player : m_game->GetPlayers()) {
-    const auto payoff = p_profile.GetPayoff(player);
-    for (const auto &strategy : player->GetStrategies()) {
-      const double loss = sqr(m_scale) * (p_profile.GetPayoff(strategy) - payoff);
+  for (auto player : m_game->GetPlayers()) {
+    for (auto strategy : player->GetStrategies()) {
+      const double loss =
+          sqr(m_scale) * (p_profile.GetPayoff(strategy) - p_profile.GetPayoff(player));
       if (loss <= 0.0) {
         continue;
       }
@@ -135,8 +137,10 @@ namespace {
 MixedStrategyProfile<double> EnforceNonnegativity(const MixedStrategyProfile<double> &p_profile)
 {
   auto profile = p_profile;
-  for (const auto &strategy : p_profile.GetGame()->GetStrategies()) {
-    profile[strategy] = std::max(profile[strategy], 0.0);
+  for (auto player : p_profile.GetGame()->GetPlayers()) {
+    for (auto strategy : player->GetStrategies()) {
+      profile[strategy] = std::max(profile[strategy], 0.0);
+    }
   }
   return profile.Normalize();
 }
