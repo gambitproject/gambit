@@ -99,7 +99,7 @@ public:
 template <class T> T BAGGMixedStrategyProfileRep<T>::GetPayoff(int pl) const
 {
   auto &g = dynamic_cast<GameBAGGRep &>(*(this->m_support.GetGame()));
-  std::vector<double> s(g.MixedProfileLength());
+  std::vector<double> s(g.GetStrategies().size());
   const auto ns = g.GetStrategies().shape();
   int bplayer = -1, btype = -1;
   for (int i = 0, offs = 0; i < g.baggPtr->getNumPlayers(); ++i) {
@@ -124,7 +124,7 @@ template <class T>
 T BAGGMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &ps) const
 {
   auto &g = dynamic_cast<GameBAGGRep &>(*(this->m_support.GetGame()));
-  std::vector<double> s(g.MixedProfileLength());
+  std::vector<double> s(g.GetStrategies().size());
   int bplayer = -1, btype = -1;
   for (int i = 0; i < g.baggPtr->getNumPlayers(); ++i) {
     for (int tp = 0; tp < g.baggPtr->getNumTypes(i); ++tp) {
@@ -163,7 +163,7 @@ T BAGGMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &ps1
   }
 
   auto &g = dynamic_cast<GameBAGGRep &>(*(this->m_support.GetGame()));
-  std::vector<double> s(g.MixedProfileLength());
+  std::vector<double> s(g.GetStrategies().size());
   int bplayer = -1, btype = -1;
   for (int i = 0; i < g.baggPtr->getNumPlayers(); ++i) {
     for (int tp = 0; tp < g.baggPtr->getNumTypes(i); ++tp) {
