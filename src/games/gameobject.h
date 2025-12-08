@@ -228,7 +228,7 @@ public:
     using InnerRange = decltype((std::declval<OuterElem>().get()->*InnerMemFn)());
     using InnerIter = decltype(std::begin(std::declval<InnerRange &>()));
 
-    T m_owner;
+    T m_iterOwner;
     OuterRange m_outerRange;
     OuterIter m_outerIt, m_outerEnd;
     InnerRange m_innerRange;
@@ -263,7 +263,7 @@ public:
     iterator() = default;
 
     iterator(T p_owner, const bool p_isEnd)
-      : m_owner(p_owner), m_outerRange((m_owner.get()->*OuterMemFn)()),
+      : m_iterOwner(p_owner), m_outerRange((m_iterOwner.get()->*OuterMemFn)()),
         m_outerIt(std::begin(m_outerRange)), m_outerEnd(std::end(m_outerRange))
     {
       if (p_isEnd) {

@@ -877,7 +877,7 @@ public:
     return Strategies(std::const_pointer_cast<GameRep>(this->shared_from_this()));
   }
   /// Gets the i'th strategy in the game, numbered globally starting from 1
-  GameStrategy GetStrategy(const int p_index) const
+  GameStrategy GetStrategy(const std::size_t p_index) const
   {
     const auto strategies = GetStrategies();
     if (p_index < 1 || p_index > strategies.size()) {
