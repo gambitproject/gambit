@@ -302,6 +302,26 @@ public:
 
   explicit NestedElementCollection(T owner) : m_owner(owner) {}
 
+  /// @brief Return the total number of elements summed across all inner ranges
+  std::size_t size() const
+  {
+    auto outer = (m_owner->*OuterMemFn)();
+    return std::accumulate(
+        outer.begin(), outer.end(), static_cast<std::size_t>(0),
+        [](std::size_t acc, auto &elem) { return acc + (elem.*InnerMemFn)().size(); });
+  }
+
+  /// @brief Returns the shape, a vector of the sizes of the inner ranges
+  std::vector<std::size_t> shape() const
+  {
+    std::vector<std::size_t> result;
+    auto outer = (m_owner->*OuterMemFn)();
+    result.reserve(outer.size());
+    std::transform(outer.begin(), outer.end(), std::back_inserter(result),
+                   [](const auto &element) { return (element.*InnerMemFn)().size(); });
+    return result;
+  }
+
   iterator begin() const { return {m_owner, false}; }
   iterator end() const { return {m_owner, true}; }
 };
