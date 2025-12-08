@@ -3,9 +3,8 @@
 ## [16.5.0] - unreleased
 
 ### Added
-- Implement `IsAbsentMinded()` (C++) and `is_absent_minded` (Python) to detect
-if a game has absent-mindedness (a player, moving along a single path of play,
-can re-enter an information set visited previously).
+- Implement `IsAbsentMinded()` on information sets (C++) and `Infoset.is_absent_minded` (Python)
+  to detect if an information set has absent-mindedness.
 
 ### Changed
 - In the graphical interface, removed option to configure information set link drawing; information sets

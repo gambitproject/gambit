@@ -98,7 +98,6 @@ Information about the game
    Game.comment
    Game.is_const_sum
    Game.is_tree
-   Game.is_absent_minded
    Game.is_perfect_recall
    Game.players
    Game.outcomes
@@ -159,6 +158,7 @@ Information about the game
    Infoset.label
    Infoset.game
    Infoset.is_chance
+   Infoset.is_absent_minded
    Infoset.player
    Infoset.actions
    Infoset.members
