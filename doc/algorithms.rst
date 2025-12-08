@@ -25,6 +25,8 @@ Algorithm         Description                                                   
 enumpure
 --------
 
+Reads a game on standard input and searches for pure-strategy Nash equilibria.
+
 .. _enummixed:
 
 enummixed
