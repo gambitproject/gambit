@@ -3,16 +3,7 @@
 :program:`gambit-liap`: Compute Nash equilibria using function minimization
 ===========================================================================
 
-:program:`gambit-liap` reads a game on standard input and computes
-approximate Nash equilibria using a function minimization approach.
-
-This procedure searches for equilibria by generating random starting
-points and using conjugate gradient descent to minimize the Lyapunov
-function of the game. This is a nonnegative function which is
-zero exactly at strategy profiles which are Nash equilibria.
-
-Note that this procedure is not globally convergent. That is, it is
-not guaranteed to find all, or even any, Nash equilibria.
+:ref:`Algorithm description <liap>`
 
 .. versionchanged:: 16.2.0
 
