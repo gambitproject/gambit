@@ -51,13 +51,6 @@ game.
    causes the program to output greater detail on each equilbrium
    profile computed.
 
-.. cmdoption:: -P
-
-   By default, the program computes Nash equilibria in an extensive
-   game. This switch instructs the program to find only equilibria
-   which are subgame perfect.  (This has no effect for strategic
-   games, since there are no proper subgames of a strategic game.)
-
 .. cmdoption:: -e EQA
 
    By default, the program will find all equilibria accessible from
@@ -75,11 +68,11 @@ game.
 
 Computing an equilibrium of extensive game :download:`e02.efg
 <../contrib/games/e02.efg>`, the example in Figure 2 of Selten
-(International Journal of Game Theory, 1975)::
+(International Journal of Game Theory, 1975)
 
    $ gambit-lcp e02.efg
    Compute Nash equilibria by solving a linear complementarity program
-   Gambit version 16.4.0, Copyright (C) 1994-2025, The Gambit Project
+   Gambit version |release|, Copyright (C) 1994-2025, The Gambit Project
    This is free software, distributed under the GNU GPL
 
    NE,1,0,1/2,1/2,1/2,1/2

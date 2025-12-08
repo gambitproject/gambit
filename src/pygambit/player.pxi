@@ -48,7 +48,7 @@ class PlayerInfosets:
         for infoset in self.player.deref().GetInfosets():
             yield Infoset.wrap(infoset)
 
-    def __getitem__(self, index: typing.Union[int, str]) -> Infoset:
+    def __getitem__(self, index: int | str) -> Infoset:
         if isinstance(index, str):
             if not index.strip():
                 raise ValueError("Infoset label cannot be empty or all whitespace")
@@ -88,7 +88,7 @@ class PlayerActions:
         for infoset in self.player.infosets:
             yield from infoset.actions
 
-    def __getitem__(self, index: typing.Union[int, str]) -> Action:
+    def __getitem__(self, index: int | str) -> Action:
         if isinstance(index, str):
             if not index.strip():
                 raise ValueError("Action label cannot be empty or all whitespace")
@@ -133,7 +133,7 @@ class PlayerStrategies:
         for strategy in self.player.deref().GetStrategies():
             yield Strategy.wrap(strategy)
 
-    def __getitem__(self, index: typing.Union[int, str]) -> Strategy:
+    def __getitem__(self, index: int | str) -> Strategy:
         if isinstance(index, str):
             if not index.strip():
                 raise ValueError("Strategy label cannot be empty or all whitespace")
@@ -241,10 +241,30 @@ class Player:
 
     @property
     def min_payoff(self) -> Rational:
-        """Returns the smallest payoff for the player in any outcome of the game."""
-        return rat_to_py(self.player.deref().GetGame().deref().GetMinPayoff(self.player))
+        """Returns the smallest payoff for the player in any play of the game.
+
+        .. versionchanged:: 16.5.0
+           Changed from reporting minimum payoff in any (non-null) outcome to the minimum
+           payoff in any play of the game.
+
+        See also
+        --------
+        Player.max_payoff
+        Game.min_payoff
+        """
+        return rat_to_py(self.player.deref().GetGame().deref().GetPlayerMinPayoff(self.player))
 
     @property
     def max_payoff(self) -> Rational:
-        """Returns the largest payoff for the player in any outcome of the game."""
-        return rat_to_py(self.player.deref().GetGame().deref().GetMaxPayoff(self.player))
+        """Returns the largest payoff for the player in any play of the game.
+
+        .. versionchanged:: 16.5.0
+           Changed from reporting maximum payoff in any (non-null) outcome to the maximum
+           payoff in any play of the game.
+
+        See also
+        --------
+        Player.min_payoff
+        Game.max_payoff
+        """
+        return rat_to_py(self.player.deref().GetGame().deref().GetPlayerMaxPayoff(self.player))

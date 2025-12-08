@@ -85,7 +85,7 @@ class Action:
         return Infoset.wrap(self.action.deref().GetInfoset())
 
     @property
-    def prob(self) -> typing.Union[decimal.Decimal, Rational]:
+    def prob(self) -> decimal.Decimal | Rational:
         """
         Get the probability a chance action is played.
 
@@ -108,7 +108,7 @@ class Action:
             return Rational(py_string.decode("ascii"))
 
     @property
-    def plays(self) -> typing.List[Node]:
+    def plays(self) -> list[Node]:
         """Returns a list of all terminal `Node` objects consistent with it.
         """
         return [

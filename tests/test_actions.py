@@ -23,7 +23,7 @@ def test_set_action_label(game: gbt.Game, label: str):
 )
 def test_set_chance_valid_probability(game: gbt.Game, inprobs: list, outprobs: list):
     game.set_chance_probs(game.root.infoset, inprobs)
-    for (action, prob) in zip(game.root.infoset.actions, outprobs):
+    for (action, prob) in zip(game.root.infoset.actions, outprobs, strict=True):
         assert action.prob == prob
 
 
@@ -120,7 +120,7 @@ def test_action_delete_chance(game: gbt.Game):
             for p in new_probs:
                 assert p == 1/len(new_probs)
         else:
-            for p1, p2 in zip(old_probs[1:], new_probs):
+            for p1, p2 in zip(old_probs[1:], new_probs, strict=True):
                 if p1 == 0:
                     assert p2 == 0
                 else:

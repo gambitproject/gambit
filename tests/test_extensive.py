@@ -1,5 +1,3 @@
-import typing
-
 import numpy as np
 import pytest
 
@@ -11,10 +9,10 @@ from . import games
 @pytest.mark.parametrize(
     "players,title", [([], "New game"), (["Alice", "Bob"], "A poker game")]
 )
-def test_new_tree(players: list, title: typing.Optional[str]):
+def test_new_tree(players: list, title: str | None):
     game = gbt.Game.new_tree(players=players, title=title)
     assert len(game.players) == len(players)
-    for player, label in zip(game.players, players):
+    for player, label in zip(game.players, players, strict=True):
         assert player.label == label
     assert game.title == title
 
@@ -40,7 +38,7 @@ def test_game_add_players_label(players: list):
     game = gbt.Game.new_tree()
     for player in players:
         game.add_player(player)
-    for player, label in zip(game.players, players):
+    for player, label in zip(game.players, players, strict=True):
         assert player.label == label
 
 
@@ -171,6 +169,17 @@ def test_outcome_index_exception_label():
                 np.array([[[1, 1], [0, 1]], [[2, 0], [2, 0]]]),
             ],
         ),
+        # EFG for 2x2 zero-sum game (I,-I) where the second version is missing a terminal outcome
+        (
+            games.create_2x2_zero_sum_efg(),
+            [["1", "2"], ["1", "2"]],
+            [np.array([[1, 0], [0, 1]]), np.array([[-1, 0], [0, -1]])]
+        ),
+        (
+            games.create_2x2_zero_sum_efg(missing_term_outcome=True),
+            [["1", "2"], ["1", "2"]],
+            [np.array([[1, 0], [0, 1]]), np.array([[-1, 0], [0, -1]])]
+        ),
         # 2-player (zero-sum) game; reduction for both players; generic payoffs
         (
             games.create_reduction_generic_payoffs_efg(),
@@ -292,6 +301,14 @@ def test_outcome_index_exception_label():
                 np.array([[0, -1], ["-1/2", 0], ["3/2", 0], [1, 1]]),
             ],
         ),
+        (
+            games.create_stripped_down_poker_efg(nonterm_outcomes=True),
+            [["11", "12", "21", "22"], ["1", "2"]],
+            [
+                np.array([[0, 1], ["1/2", 0], ["-3/2", 0], [-1, -1]]),
+                np.array([[0, -1], ["-1/2", 0], ["3/2", 0], [1, 1]]),
+            ],
+        ),
         # Nature playing at the root, 2 players, no reduction, non-generic payoffs
         (
             games.read_from_file("nature_rooted_nongeneric.efg"),
@@ -377,7 +394,7 @@ def test_outcome_index_exception_label():
     ],
 )
 def test_reduced_strategic_form(
-    game: gbt.Game, strategy_labels: list, np_arrays_of_rsf: typing.Union[list, None]
+    game: gbt.Game, strategy_labels: list, np_arrays_of_rsf: list | None
 ):
     """
     We test two things:

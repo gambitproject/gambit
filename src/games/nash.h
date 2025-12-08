@@ -60,10 +60,6 @@ ToMixedBehaviorProfile(const std::list<MixedStrategyProfile<T>> &p_list)
 template <class T>
 using BehaviorSolverType = std::function<std::list<MixedBehaviorProfile<T>>(const Game &)>;
 
-template <class T>
-std::list<MixedBehaviorProfile<T>> SolveBySubgames(const Game &, BehaviorSolverType<T> p_solver,
-                                                   BehaviorCallbackType<T> p_onEquilibrium);
-
 //
 // Exception raised when maximum number of equilibria to compute
 // has been reached.  A convenience for unraveling a potentially

@@ -247,6 +247,8 @@ public:
 
   bool Precedes(GameNode) const;
 
+  std::set<GameAction> GetOwnPriorActions() const;
+
   const Number &GetActionProb(const GameAction &p_action) const
   {
     if (p_action->GetInfoset().get() != this) {
@@ -492,6 +494,7 @@ public:
   bool IsTerminal() const { return m_children.empty(); }
   GamePlayer GetPlayer() const { return (m_infoset) ? m_infoset->GetPlayer() : nullptr; }
   GameAction GetPriorAction() const; // returns null if root node
+  GameAction GetOwnPriorAction() const;
   GameNode GetParent() const { return (m_parent) ? m_parent->shared_from_this() : nullptr; }
   GameNode GetNextSibling() const;
   GameNode GetPriorSibling() const;
@@ -500,6 +503,7 @@ public:
 
   bool IsSuccessorOf(GameNode from) const;
   bool IsSubgameRoot() const;
+  bool IsStrategyReachable() const;
 };
 
 class GameNodeRep::Actions::iterator {
@@ -737,14 +741,14 @@ public:
 
   /// Returns true if the game is constant-sum
   virtual bool IsConstSum() const = 0;
-  /// Returns the smallest payoff to any player in any outcome of the game
+  /// Returns the smallest payoff to any player in any play of the game
   virtual Rational GetMinPayoff() const = 0;
-  /// Returns the smallest payoff to the player in any outcome of the game
-  virtual Rational GetMinPayoff(const GamePlayer &p_player) const = 0;
-  /// Returns the largest payoff to any player in any outcome of the game
+  /// Returns the smallest payoff to the player in any play of the game
+  virtual Rational GetPlayerMinPayoff(const GamePlayer &p_player) const = 0;
+  /// Returns the largest payoff to any player in any play of the game
   virtual Rational GetMaxPayoff() const = 0;
-  /// Returns the largest payoff to the player in any outcome of the game
-  virtual Rational GetMaxPayoff(const GamePlayer &p_player) const = 0;
+  /// Returns the largest payoff to the player in any play of the game
+  virtual Rational GetPlayerMaxPayoff(const GamePlayer &p_player) const = 0;
 
   /// Returns the set of terminal nodes which are descendants of node
   virtual std::vector<GameNode> GetPlays(GameNode node) const { throw UndefinedException(); }
@@ -777,7 +781,8 @@ public:
   {
     throw UndefinedException();
   }
-  virtual GameInfoset AppendMove(GameNode p_node, GamePlayer p_player, int p_actions)
+  virtual GameInfoset AppendMove(GameNode p_node, GamePlayer p_player, int p_actions,
+                                 bool p_generateLabels = false)
   {
     throw UndefinedException();
   }
@@ -785,7 +790,8 @@ public:
   {
     throw UndefinedException();
   }
-  virtual GameInfoset InsertMove(GameNode p_node, GamePlayer p_player, int p_actions)
+  virtual GameInfoset InsertMove(GameNode p_node, GamePlayer p_player, int p_actions,
+                                 bool p_generateLabels = false)
   {
     throw UndefinedException();
   }
@@ -807,40 +813,10 @@ public:
     throw UndefinedException();
   }
   virtual void DeleteAction(GameAction) { throw UndefinedException(); }
-  virtual void SetOutcome(GameNode, const GameOutcome &p_outcome) { throw UndefinedException(); }
-
-  /// @name Dimensions of the game
-  //@{
-  /// The number of strategies for each player
-  virtual Array<int> NumStrategies() const = 0;
-  /// Gets the i'th strategy in the game, numbered globally
-  virtual GameStrategy GetStrategy(int p_index) const = 0;
-  /// Creates a new strategy for the player
-  virtual GameStrategy NewStrategy(const GamePlayer &p_player, const std::string &p_label)
+  virtual void SetOutcome(const GameNode &p_node, const GameOutcome &p_outcome)
   {
     throw UndefinedException();
   }
-  /// Remove the strategy from the game
-  virtual void DeleteStrategy(const GameStrategy &p_strategy) { throw UndefinedException(); }
-  /// Returns the number of strategy contingencies in the game
-  int NumStrategyContingencies() const
-  {
-    BuildComputedValues();
-    return std::transform_reduce(
-        m_players.begin(), m_players.end(), 0, std::multiplies<>(),
-        [](const std::shared_ptr<GamePlayerRep> &p) { return p->m_strategies.size(); });
-  }
-  /// Returns the total number of actions in the game
-  virtual int BehavProfileLength() const = 0;
-  /// Returns the total number of strategies in the game
-  int MixedProfileLength() const
-  {
-    BuildComputedValues();
-    return std::transform_reduce(
-        m_players.begin(), m_players.end(), 0, std::plus<>(),
-        [](const std::shared_ptr<GamePlayerRep> &p) { return p->m_strategies.size(); });
-  }
-  //@}
 
   virtual PureStrategyProfile NewPureStrategyProfile() const = 0;
   virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double) const = 0;
@@ -890,14 +866,55 @@ public:
   virtual GamePlayer NewPlayer() = 0;
   //@}
 
+  /// @name Dimensions of the game
+  //@{
+  using Strategies =
+      NestedElementCollection<Game, &GameRep::GetPlayers, &GamePlayerRep::GetStrategies>;
+  /// Returns the set of strategies in the game
+  Strategies GetStrategies() const
+  {
+    BuildComputedValues();
+    return Strategies(std::const_pointer_cast<GameRep>(this->shared_from_this()));
+  }
+  /// Gets the i'th strategy in the game, numbered globally starting from 1
+  GameStrategy GetStrategy(const std::size_t p_index) const
+  {
+    const auto strategies = GetStrategies();
+    if (p_index < 1 || p_index > strategies.size()) {
+      throw std::out_of_range("Strategy index out of range");
+    }
+    return *std::next(strategies.begin(), p_index - 1);
+  }
+  /// Creates a new strategy for the player
+  virtual GameStrategy NewStrategy(const GamePlayer &p_player, const std::string &p_label)
+  {
+    throw UndefinedException();
+  }
+  /// Remove the strategy from the game
+  virtual void DeleteStrategy(const GameStrategy &p_strategy) { throw UndefinedException(); }
+  /// Returns the total number of actions in the game
+  virtual int BehavProfileLength() const = 0;
+  //@}
+
   /// @name Information sets
   //@{
+  using Infosets =
+      NestedElementCollection<Game, &GameRep::GetPlayers, &GamePlayerRep::GetInfosets>;
+
   /// Returns the iset'th information set in the game (numbered globally)
   virtual GameInfoset GetInfoset(int iset) const { throw UndefinedException(); }
   /// Returns the set of information sets in the game
-  virtual std::vector<GameInfoset> GetInfosets() const { throw UndefinedException(); }
+  virtual Infosets GetInfosets() const
+  {
+    return Infosets(std::const_pointer_cast<GameRep>(this->shared_from_this()));
+  }
   /// Sort the information sets for each player in a canonical order
   virtual void SortInfosets() {}
+  /// Returns the set of actions taken by the infoset's owner before reaching this infoset
+  virtual std::set<GameAction> GetOwnPriorActions(const GameInfoset &p_infoset) const
+  {
+    throw UndefinedException();
+  }
   //@}
 
   /// @name Outcomes
@@ -925,6 +942,11 @@ public:
   virtual size_t NumNodes() const = 0;
   /// Returns the number of non-terminal nodes in the game
   virtual size_t NumNonterminalNodes() const = 0;
+  /// Returns the last action taken by the node's owner before reaching this node
+  virtual GameAction GetOwnPriorAction(const GameNode &p_node) const
+  {
+    throw UndefinedException();
+  }
   //@}
 
   /// @name Modification

@@ -81,7 +81,7 @@ class MixedAction:
     def __len__(self) -> len:
         return len(self.infoset.actions)
 
-    def __iter__(self) -> typing.Iterator[typing.Tuple[Action, ProfileDType], None, None]:
+    def __iter__(self) -> typing.Iterator[tuple[Action, ProfileDType], None, None]:
         """Iterate over the probabilities assigned to actions by the mixed action.
 
         .. versionadded:: 16.2.0
@@ -225,7 +225,7 @@ class MixedBehavior:
     def __len__(self) -> int:
         return len(self.player.actions)
 
-    def mixed_actions(self) -> typing.Iterator[typing.Tuple[Infoset, MixedAction], None, None]:
+    def mixed_actions(self) -> typing.Iterator[tuple[Infoset, MixedAction], None, None]:
         """Iterate over the mixed actions specified by the mixed behavior.
 
         .. versionadded:: 16.2.0
@@ -240,7 +240,7 @@ class MixedBehavior:
         for infoset in self.player.infosets:
             yield infoset, self[infoset]
 
-    def __iter__(self) -> typing.Iterator[typing.Tuple[Action, ProfileDType], None, None]:
+    def __iter__(self) -> typing.Iterator[tuple[Action, ProfileDType], None, None]:
         """Iterate over the probabilities assigned to actions by the mixed behavior.
 
         .. versionadded:: 16.2.0
@@ -257,8 +257,8 @@ class MixedBehavior:
 
     def __getitem__(
             self,
-            index: typing.Union[InfosetReference, ActionReference]
-    ) -> typing.Union[MixedAction, ProfileDType]:
+            index: InfosetReference | ActionReference
+    ) -> MixedAction | ProfileDType:
         """Access a component of the mixed behavior specified by `index`.
 
         Parameters
@@ -299,7 +299,7 @@ class MixedBehavior:
         )
 
     def __setitem__(self,
-                    index: typing.Union[InfosetReference, ActionReference],
+                    index: InfosetReference | ActionReference,
                     value: typing.Any) -> None:
         """Sets a component of the mixed behavior to `value`.
 
@@ -387,7 +387,7 @@ class MixedBehaviorProfile:
         """The game on which this mixed behavior profile is defined."""
         return self._game
 
-    def mixed_behaviors(self) -> typing.Iterator[typing.Tuple[Player, MixedBehavior], None, None]:
+    def mixed_behaviors(self) -> typing.Iterator[tuple[Player, MixedBehavior], None, None]:
         """Iterate over the mixed behaviors in the profile.
 
         .. versionadded:: 16.2.0
@@ -402,7 +402,7 @@ class MixedBehaviorProfile:
         for player in self.game.players:
             yield player, self[player]
 
-    def mixed_actions(self) -> typing.Iterator[typing.Tuple[Infoset, MixedAction], None, None]:
+    def mixed_actions(self) -> typing.Iterator[tuple[Infoset, MixedAction], None, None]:
         """Iterate over the mixed actions specified by the profile.
 
         .. versionadded:: 16.2.0
@@ -417,7 +417,7 @@ class MixedBehaviorProfile:
         for infoset in self.game.infosets:
             yield infoset, self[infoset]
 
-    def __iter__(self) -> typing.Iterator[typing.Tuple[Action, ProfileDType], None, None]:
+    def __iter__(self) -> typing.Iterator[tuple[Action, ProfileDType], None, None]:
         """Iterate over the probabilities assigned to actions by the profile.
 
         .. versionadded:: 16.2.0
@@ -434,8 +434,8 @@ class MixedBehaviorProfile:
 
     def __getitem__(
             self,
-            index: typing.Union[PlayerReference, InfosetReference, ActionReference]
-    ) -> typing.Union[MixedBehavior, MixedAction, ProfileDType]:
+            index: PlayerReference | InfosetReference | ActionReference
+    ) -> MixedBehavior | MixedAction | ProfileDType:
         """Access a component of the mixed behavior specified by `index`.
 
         Parameters
@@ -506,7 +506,7 @@ class MixedBehaviorProfile:
 
     def __setitem__(
             self,
-            index: typing.Union[PlayerReference, InfosetReference, ActionReference],
+            index: PlayerReference | InfosetReference | ActionReference,
             value: typing.Any
     ) -> None:
         """Sets a probability, mixed agent strategy, or mixed behavior strategy to `value`.

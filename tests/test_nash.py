@@ -6,7 +6,6 @@ checking the expected results on a very simple game.
 There is better test coverage for
 lp_solve, lcp_solve, and enumpoly_solve, all in mixed behaviors.
 """
-import typing
 
 import pytest
 
@@ -77,7 +76,7 @@ def test_enummixed_rational(game: gbt.Game, mixed_strategy_prof_data: list):
     """
     result = gbt.nash.enummixed_solve(game, rational=True)
     assert len(result.equilibria) == len(mixed_strategy_prof_data)
-    for eq, exp in zip(result.equilibria, mixed_strategy_prof_data):
+    for eq, exp in zip(result.equilibria, mixed_strategy_prof_data, strict=True):
         assert eq.max_regret() == 0
         expected = game.mixed_strategy_profile(rational=True, data=exp)
         assert eq == expected
@@ -95,11 +94,20 @@ def test_enummixed_rational(game: gbt.Game, mixed_strategy_prof_data: list):
             None,
         ),
         # 2-player non-zero-sum games
-        (
+        pytest.param(
             games.create_one_shot_trust_efg(),
-            [[[[0, 1]], [["1/2", "1/2"]]], [[[0, 1]], [[0, 0]]]],
-            2,
-        ),  # Note all zero probs at iset
+            [[[[0, 1]], [["1/2", "1/2"]]], [[[0, 1]], [[0, 1]]]],
+            # second entry assumes we extend to Nash using only pure behaviors
+            # currently we get [[0, 1]], [[0, 0]]] as a second eq
+            None,
+            marks=pytest.mark.xfail(reason="Problem with enumpoly, as per issue #660")
+        ),
+        pytest.param(
+            games.create_one_shot_trust_efg(unique_NE_variant=True),
+            [[[[1, 0]], [[0, 1]]]],  # currently we get [[0, 1]], [[0, 0]]] as a second eq
+            None,
+            marks=pytest.mark.xfail(reason="Problem with enumpoly, as per issue #660")
+        ),
         (
             games.create_EFG_for_nxn_bimatrix_coordination_game(3),
             [
@@ -130,7 +138,7 @@ def test_enummixed_rational(game: gbt.Game, mixed_strategy_prof_data: list):
     ],
 )
 def test_enumpoly_ordered_behavior(
-    game: gbt.Game, mixed_behav_prof_data: list, stop_after: typing.Union[None, int]
+    game: gbt.Game, mixed_behav_prof_data: list, stop_after: None | int
 ):
     """Test calls of enumpoly for mixed behavior equilibria,
     using max_regret (internal consistency); and comparison to a set of previously
@@ -153,7 +161,7 @@ def test_enumpoly_ordered_behavior(
         # compute all
         result = gbt.nash.enumpoly_solve(game, use_strategic=False)
     assert len(result.equilibria) == len(mixed_behav_prof_data)
-    for eq, exp in zip(result.equilibria, mixed_behav_prof_data):
+    for eq, exp in zip(result.equilibria, mixed_behav_prof_data, strict=True):
         assert abs(eq.agent_max_regret()) <= TOL
         expected = game.mixed_behavior_profile(rational=True, data=exp)
         for p in game.players:
@@ -186,7 +194,7 @@ def test_enumpoly_ordered_behavior(
     ],
 )
 def test_enumpoly_unordered_behavior(
-    game: gbt.Game, mixed_behav_prof_data: list, stop_after: typing.Union[None, int]
+    game: gbt.Game, mixed_behav_prof_data: list, stop_after: None | int
 ):
     """Test calls of enumpoly for mixed behavior equilibria,
     using max_regret (internal consistency); and comparison to a set of previously
@@ -246,8 +254,28 @@ def test_lcp_strategy_double():
     "game,mixed_strategy_prof_data,stop_after",
     [
         # Zero-sum games
+        (
+            games.create_2x2_zero_sum_efg(),
+            [[["1/2", "1/2"], ["1/2", "1/2"]]],
+            None
+        ),
+        (
+            games.create_2x2_zero_sum_efg(missing_term_outcome=True),
+            [[["1/2", "1/2"], ["1/2", "1/2"]]],
+            None
+        ),
         (games.create_stripped_down_poker_efg(), [[["1/3", "2/3", 0, 0], ["2/3", "1/3"]]], None),
+        (
+            games.create_stripped_down_poker_efg(nonterm_outcomes=True),
+            [[["1/3", "2/3", 0, 0], ["2/3", "1/3"]]],
+            None
+        ),
         (games.create_kuhn_poker_efg(), [games.kuhn_poker_lcp_first_mixed_strategy_prof()], 1),
+        (
+            games.create_kuhn_poker_efg(nonterm_outcomes=True),
+            [games.kuhn_poker_lcp_first_mixed_strategy_prof()],
+            1
+        ),
         # Non-zero-sum games
         (games.create_one_shot_trust_efg(), [[[0, 1], ["1/2", "1/2"]]], None),
         (
@@ -279,7 +307,7 @@ def test_lcp_strategy_double():
     ]
 )
 def test_lcp_strategy_rational(game: gbt.Game, mixed_strategy_prof_data: list,
-                               stop_after: typing.Union[None, int]):
+                               stop_after: None | int):
     """Test calls of LCP for mixed strategy equilibria, rational precision
     using max_regret (internal consistency); and comparison to a sequence of previously
     computed equilibria using this function (regression test).
@@ -296,7 +324,7 @@ def test_lcp_strategy_rational(game: gbt.Game, mixed_strategy_prof_data: list,
         # compute all
         result = gbt.nash.lcp_solve(game, use_strategic=True)
     assert len(result.equilibria) == len(mixed_strategy_prof_data)
-    for eq, exp in zip(result.equilibria, mixed_strategy_prof_data):
+    for eq, exp in zip(result.equilibria, mixed_strategy_prof_data, strict=True):
         assert eq.max_regret() == 0
         expected = game.mixed_strategy_profile(rational=True, data=exp)
         assert eq == expected
@@ -316,7 +344,28 @@ def test_lcp_behavior_double():
     "game,mixed_behav_prof_data",
     [
         # Zero-sum games (also tested with lp solve)
+        (
+            games.create_2x2_zero_sum_efg(),
+            [[["1/2", "1/2"]], [["1/2", "1/2"]]]
+        ),
+        pytest.param(
+            games.create_2x2_zero_sum_efg(missing_term_outcome=True),
+            [[["1/2", "1/2"]], [["1/2", "1/2"]]],
+            marks=pytest.mark.xfail(reason="Problem with missing terminal outcome in LP/LCP")
+        ),
+        (games.create_matching_pennies_efg(),
+            [[["1/2", "1/2"]], [["1/2", "1/2"]]]),
+        pytest.param(
+            games.create_matching_pennies_efg(with_neutral_outcome=True),
+            [[["1/2", "1/2"]], [["1/2", "1/2"]]],
+            marks=pytest.mark.xfail(reason="Problem with nonterminal nodes in LP/LCP")
+        ),
         (games.create_stripped_down_poker_efg(), [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]]),
+        pytest.param(
+            games.create_stripped_down_poker_efg(nonterm_outcomes=True),
+            [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]],
+            marks=pytest.mark.xfail(reason="Problem with missing terminal outcome in LP/LCP")
+        ),
         (
             games.create_kuhn_poker_efg(),
             [
@@ -330,6 +379,21 @@ def test_lcp_behavior_double():
                 ],
                 [[1, 0], ["2/3", "1/3"], [0, 1], [0, 1], ["2/3", "1/3"], [1, 0]],
             ],
+        ),
+        pytest.param(
+            games.create_kuhn_poker_efg(nonterm_outcomes=True),
+            [
+                [
+                    ["2/3", "1/3"],
+                    [1, 0],
+                    [1, 0],
+                    ["1/3", "2/3"],
+                    [0, 1],
+                    ["1/2", "1/2"],
+                ],
+                [[1, 0], ["2/3", "1/3"], [0, 1], [0, 1], ["2/3", "1/3"], [1, 0]],
+            ],
+            marks=pytest.mark.xfail(reason="Problem with missing terminal outcome in LP/LCP")
         ),
         # In the next test case:
         # 1/2-1/2 for l/r is determined by MixedBehaviorProfile.UndefinedToCentroid()
@@ -380,19 +444,37 @@ def test_lp_strategy_double():
 
 @pytest.mark.nash
 @pytest.mark.nash_lp_strategy
-def test_lp_strategy_rational():
+@pytest.mark.parametrize(
+    "game,mixed_strategy_prof_data",
+    [
+        (
+            games.create_2x2_zero_sum_efg(),
+            [["1/2", "1/2"], ["1/2", "1/2"]],
+        ),
+        (
+            games.create_2x2_zero_sum_efg(missing_term_outcome=True),
+            [["1/2", "1/2"], ["1/2", "1/2"]],
+        ),
+        (games.create_stripped_down_poker_efg(), [["1/3", "2/3", 0, 0], ["2/3", "1/3"]]),
+        (
+            games.create_stripped_down_poker_efg(nonterm_outcomes=True),
+            [["1/3", "2/3", 0, 0], ["2/3", "1/3"]]
+        ),
+        (games.create_kuhn_poker_efg(), games.kuhn_poker_lp_mixed_strategy_prof()),
+        (
+            games.create_kuhn_poker_efg(nonterm_outcomes=True),
+            games.kuhn_poker_lp_mixed_strategy_prof()
+        ),
+    ],
+)
+def test_lp_strategy_rational(game: gbt.Game, mixed_strategy_prof_data: list):
     """Test calls of LP for mixed strategy equilibria, rational precision."""
-    game = games.read_from_file("stripped_down_poker.efg")
     result = gbt.nash.lp_solve(game, use_strategic=True, rational=True)
     assert len(result.equilibria) == 1
-    expected = game.mixed_strategy_profile(
-        rational=True,
-        data=[
-            [gbt.Rational(1, 3), gbt.Rational(2, 3), gbt.Rational(0), gbt.Rational(0)],
-            [gbt.Rational(2, 3), gbt.Rational(1, 3)],
-        ],
-    )
-    assert result.equilibria[0] == expected
+    eq = result.equilibria[0]
+    assert eq.max_regret() == 0
+    expected = game.mixed_strategy_profile(rational=True, data=mixed_strategy_prof_data)
+    assert eq == expected
 
 
 def test_lp_behavior_double():
@@ -413,8 +495,29 @@ def test_lp_behavior_double():
             [[[0, 1], [1, 0]], [[1, 0], [1, 0]]],
         ),
         (
+            games.create_2x2_zero_sum_efg(missing_term_outcome=False),
+            [[["1/2", "1/2"]], [["1/2", "1/2"]]]
+        ),
+        pytest.param(
+            games.create_2x2_zero_sum_efg(missing_term_outcome=True),
+            [[["1/2", "1/2"]], [["1/2", "1/2"]]],
+            marks=pytest.mark.xfail(reason="Problem with missing terminal outcome in LP/LCP")
+        ),
+        (games.create_matching_pennies_efg(with_neutral_outcome=False),
+            [[["1/2", "1/2"]], [["1/2", "1/2"]]]),
+        pytest.param(
+            games.create_matching_pennies_efg(with_neutral_outcome=True),
+            [[["1/2", "1/2"]], [["1/2", "1/2"]]],
+            marks=pytest.mark.xfail(reason="Problem with nonterminal nodes in LP/LCP")
+        ),
+        (
             games.create_stripped_down_poker_efg(),
             [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]],
+        ),
+        pytest.param(
+            games.create_stripped_down_poker_efg(nonterm_outcomes=True),
+            [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]],
+            marks=pytest.mark.xfail(reason="Problem with nonterminal nodes in LP/LCP")
         ),
         (
             games.create_kuhn_poker_efg(),
@@ -422,6 +525,21 @@ def test_lp_behavior_double():
                 [[1, 0], [1, 0], [1, 0], ["2/3", "1/3"], [1, 0], [0, 1]],
                 [[1, 0], ["2/3", "1/3"], [0, 1], [0, 1], ["2/3", "1/3"], [1, 0]],
             ],
+        ),
+        pytest.param(
+            games.create_kuhn_poker_efg(nonterm_outcomes=True),
+            [
+                [
+                    ["2/3", "1/3"],
+                    [1, 0],
+                    [1, 0],
+                    ["1/3", "2/3"],
+                    [0, 1],
+                    ["1/2", "1/2"],
+                ],
+                [[1, 0], ["2/3", "1/3"], [0, 1], [0, 1], ["2/3", "1/3"], [1, 0]],
+            ],
+            marks=pytest.mark.xfail(reason="Problem with nonterminal nodes in LP/LCP")
         ),
         (
             games.create_seq_form_STOC_paper_zero_sum_2_player_efg(),
@@ -542,3 +660,29 @@ def test_logit_solve_lambda():
     game = games.read_from_file("const_sum_game.nfg")
     assert len(gbt.qre.logit_solve_lambda(
                 game=game, lam=[1, 2, 3], first_step=0.2, max_accel=1)) > 0
+
+
+def test_kuhn():
+    """
+    TEMPORARY
+
+    Check that the reduced strategic forms match for the versions with and without
+    nonterminal nodes
+    """
+    old = games.create_kuhn_poker_efg(nonterm_outcomes=False)
+    new = games.create_kuhn_poker_efg(nonterm_outcomes=True)
+    for i in [0, 1]:
+        assert (old.to_arrays()[i] == new.to_arrays()[i]).all()
+
+
+def test_stripped():
+    """
+    TEMPORARY
+
+    Check that the reduced strategic forms match for the versions with and without
+    nonterminal nodes
+    """
+    old = games.create_stripped_down_poker_efg()
+    new = games.create_stripped_down_poker_efg(nonterm_outcomes=True)
+    for i in [0, 1]:
+        assert (old.to_arrays()[i] == new.to_arrays()[i]).all()

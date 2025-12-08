@@ -22,13 +22,12 @@
 
 #include <iostream>
 #include <fstream>
-#include <cstdlib>
 #include <getopt.h>
 #include "gambit.h"
 #include "solvers/enumpoly/enumpoly.h"
 
 using namespace Gambit;
-using namespace Gambit::Nash;
+using namespace Nash;
 
 int g_numDecimals = 6;
 bool g_verbose = false;
@@ -128,10 +127,10 @@ int main(int argc, char *argv[])
   int stopAfter = 0;
 
   int long_opt_index = 0;
-  struct option long_options[] = {{"help", 0, nullptr, 'h'},
-                                  {"version", 0, nullptr, 'v'},
-                                  {"verbose", 0, nullptr, 'V'},
-                                  {nullptr, 0, nullptr, 0}};
+  option long_options[] = {{"help", 0, nullptr, 'h'},
+                           {"version", 0, nullptr, 'v'},
+                           {"verbose", 0, nullptr, 'V'},
+                           {nullptr, 0, nullptr, 0}};
   int c;
   while ((c = getopt_long(argc, argv, "d:hSm:e:qvV", long_options, &long_opt_index)) != -1) {
     switch (c) {
@@ -161,7 +160,7 @@ int main(int argc, char *argv[])
       break;
     case '?':
       if (isprint(optopt)) {
-        std::cerr << argv[0] << ": Unknown option `-" << ((char)optopt) << "'.\n";
+        std::cerr << argv[0] << ": Unknown option `-" << static_cast<char>(optopt) << "'.\n";
       }
       else {
         std::cerr << argv[0] << ": Unknown option character `\\x" << optopt << "`.\n";
@@ -190,9 +189,9 @@ int main(int argc, char *argv[])
   }
 
   try {
-    const Gambit::Game game = Gambit::ReadGame(*input_stream);
+    const Game game = ReadGame(*input_stream);
     if (!game->IsPerfectRecall()) {
-      throw Gambit::UndefinedException(
+      throw UndefinedException(
           "Computing equilibria of games with imperfect recall is not supported.");
     }
 

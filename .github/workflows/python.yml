@@ -2,15 +2,7 @@ name: pygambit Python extension
 
 on:
   push:
-    paths-ignore:
-      - 'doc/**'
-      - '.github/ISSUE_TEMPLATE/**'
-      - 'README.md'
   pull_request:
-    paths-ignore:
-      - 'doc/**'
-      - '.github/ISSUE_TEMPLATE/**'
-      - 'README.md'
 
 jobs:
   linux:
@@ -18,7 +10,7 @@ jobs:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
     strategy:
       matrix:
-        python-version: ['3.9', '3.13']
+        python-version: ['3.10', '3.14']
 
     steps:
       - uses: actions/checkout@v5
@@ -29,7 +21,9 @@ jobs:
       - name: Set up dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install setuptools build cython pytest pytest-skip-slow wheel lxml numpy scipy nbformat nbclient ipykernel
+          pip install setuptools build cython wheel
+          pip install -r tests/requirements.txt
+          pip install -r doc/requirements.txt
       - name: Build source distribution
         run:
           python -m build
@@ -38,20 +32,14 @@ jobs:
           cd dist
           pip install -v pygambit*.tar.gz
       - name: Run tests
-        run: |
-          if [ "${{ matrix.python-version }}" = "3.9" ]; then
-            # Python 3.9 on linux skips the notebook execution test (notebooks may require newer kernels/deps)
-            pytest -q -k 'not test_execute_notebook'
-          else
-            pytest
-          fi
+        run: pytest --run-tutorials
 
   macos-13:
-    runs-on: macos-13
+    runs-on: macos-14
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
     strategy:
       matrix:
-        python-version: ['3.13']
+        python-version: ['3.14']
 
     steps:
       - uses: actions/checkout@v4
@@ -62,7 +50,8 @@ jobs:
       - name: Set up dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install cython pytest pytest-skip-slow wheel lxml numpy scipy nbformat nbclient ipykernel
+          pip install setuptools build cython wheel
+          pip install -r tests/requirements.txt
       - name: Build extension
         run: |
           python -m pip install -v .
@@ -70,11 +59,11 @@ jobs:
         run: pytest
 
   macos-14:
-    runs-on: macos-14
+    runs-on: macos-15
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
     strategy:
       matrix:
-        python-version: ['3.13']
+        python-version: ['3.14']
 
     steps:
       - uses: actions/checkout@v4
@@ -85,19 +74,21 @@ jobs:
       - name: Set up dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install cython pytest pytest-skip-slow wheel lxml numpy scipy nbformat nbclient ipykernel
+          pip install setuptools build cython wheel
+          pip install -r tests/requirements.txt
+          pip install -r doc/requirements.txt
       - name: Build extension
         run: |
           python -m pip install -v .
       - name: Run tests
-        run: pytest
+        run: pytest --run-tutorials
 
   windows:
     runs-on: windows-latest
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
     strategy:
       matrix:
-        python-version: ['3.13']
+        python-version: ['3.14']
 
     steps:
       - uses: actions/checkout@v5
@@ -108,9 +99,11 @@ jobs:
       - name: Set up dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install cython pytest pytest-skip-slow wheel lxml numpy scipy nbformat nbclient ipykernel
+          pip install setuptools build cython wheel
+          pip install -r tests/requirements.txt
+          pip install -r doc/requirements.txt
       - name: Build extension
         run: |
           python -m pip install -v .
       - name: Run tests
-        run: pytest
+        run: pytest --run-tutorials

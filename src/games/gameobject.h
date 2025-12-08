@@ -96,14 +96,10 @@ public:
   /// game element held by this object and throws an exception if the object is the
   /// null object, or is no longer valid (has been removed from the game)
   ///
-  /// @exception NullException if the object holds a reference to a null element
   /// @exception InvalidObjectException if the element referred to has been deleted from its game
   std::shared_ptr<T> get_shared() const
   {
-    if (!m_rep) {
-      throw NullException();
-    }
-    if (!m_rep->IsValid()) {
+    if (m_rep && !m_rep->IsValid()) {
       throw InvalidObjectException();
     }
     return m_rep;
@@ -129,16 +125,16 @@ public:
   }
 
   bool operator==(const GameObjectPtr<T> &r) const { return (m_rep == r.m_rep); }
-  bool operator==(const std::shared_ptr<T> r) const { return (m_rep == r); }
-  bool operator==(const std::shared_ptr<const T> r) const { return (m_rep == r); }
-  bool operator==(const std::nullptr_t) const { return !bool(m_rep); }
+  bool operator==(const std::shared_ptr<T> &r) const { return (m_rep == r); }
+  bool operator==(const std::shared_ptr<const T> &r) const { return (m_rep == r); }
+  bool operator==(const std::nullptr_t &) const { return m_rep == nullptr; }
   bool operator!=(const GameObjectPtr<T> &r) const { return (m_rep != r.m_rep); }
-  bool operator!=(const std::shared_ptr<T> r) const { return (m_rep != r); }
-  bool operator!=(const std::shared_ptr<const T> r) const { return (m_rep != r); }
-  bool operator!=(const std::nullptr_t) const { return bool(m_rep); }
+  bool operator!=(const std::shared_ptr<T> &r) const { return (m_rep != r); }
+  bool operator!=(const std::shared_ptr<const T> &r) const { return (m_rep != r); }
+  bool operator!=(const std::nullptr_t &) const { return m_rep != nullptr; }
   bool operator<(const GameObjectPtr<T> &r) const { return (m_rep < r.m_rep); }
 
-  operator bool() const noexcept { return bool(m_rep); }
+  operator bool() const noexcept { return m_rep != nullptr; }
   operator std::shared_ptr<T>() const { return m_rep; }
 };
 
@@ -192,7 +188,7 @@ public:
     }
     value_type operator*() const { return m_container->at(m_index); }
 
-    inline const P &GetOwner() const { return m_owner; }
+    const P &GetOwner() const { return m_owner; }
   };
 
   ElementCollection() = default;
@@ -216,6 +212,141 @@ public:
   iterator end() const { return {m_owner, m_container, (m_owner) ? m_container->size() : 0}; }
   iterator cbegin() const { return {m_owner, m_container, 0}; }
   iterator cend() const { return {m_owner, m_container, (m_owner) ? m_container->size() : 0}; }
+};
+
+/// @brief A view on a nested collection of objects (e.g. infosets of players or strategies of
+/// players)
+template <class T, auto OuterMemFn, auto InnerMemFn> class NestedElementCollection {
+  T m_owner;
+
+public:
+  class iterator {
+    using OuterRange = decltype((m_owner.get()->*OuterMemFn)());
+    using OuterIter = decltype(std::begin(std::declval<OuterRange &>()));
+
+    using OuterElem = decltype(*std::declval<OuterIter>());
+    using InnerRange = decltype((std::declval<OuterElem>().get()->*InnerMemFn)());
+    using InnerIter = decltype(std::begin(std::declval<InnerRange &>()));
+
+    T m_iterOwner;
+    OuterRange m_outerRange;
+    OuterIter m_outerIt, m_outerEnd;
+    InnerRange m_innerRange;
+    InnerIter m_innerIt, m_innerEnd;
+
+    void update_inner()
+    {
+      if (m_outerIt != m_outerEnd) {
+        m_innerRange = ((*m_outerIt).get()->*InnerMemFn)();
+        m_innerIt = m_innerRange.begin();
+        m_innerEnd = m_innerRange.end();
+      }
+    }
+
+    void skip_empty()
+    {
+      while (m_outerIt != m_outerEnd && m_innerIt == m_innerEnd) {
+        ++m_outerIt;
+        if (m_outerIt != m_outerEnd) {
+          update_inner();
+        }
+      }
+    }
+
+  public:
+    using iterator_category = std::forward_iterator_tag;
+    using reference = decltype(*std::declval<InnerIter>());
+    using pointer = std::add_pointer_t<reference>;
+    using value_type = std::remove_reference_t<reference>;
+    using difference_type = std::ptrdiff_t;
+
+    iterator() = default;
+
+    iterator(T p_owner, const bool p_isEnd)
+      : m_iterOwner(p_owner), m_outerRange((m_iterOwner.get()->*OuterMemFn)()),
+        m_outerIt(std::begin(m_outerRange)), m_outerEnd(std::end(m_outerRange))
+    {
+      if (p_isEnd) {
+        m_outerIt = m_outerEnd;
+        return;
+      }
+      if (m_outerIt != m_outerEnd) {
+        update_inner();
+      }
+      skip_empty();
+    }
+
+    reference operator*() const { return *m_innerIt; }
+    pointer operator->() const { return *m_innerIt; }
+
+    iterator &operator++()
+    {
+      ++m_innerIt;
+      skip_empty();
+      return *this;
+    }
+    iterator operator++(int)
+    {
+      iterator tmp = *this;
+      ++(*this);
+      return tmp;
+    }
+
+    bool operator==(const iterator &p_other) const
+    {
+      return m_outerIt == p_other.m_outerIt &&
+             (m_outerIt == m_outerEnd || m_innerIt == p_other.m_innerIt);
+    }
+    bool operator!=(const iterator &p_other) const { return !(*this == p_other); }
+  };
+
+  explicit NestedElementCollection(T owner) : m_owner(owner) {}
+
+  /// @brief Return the total number of elements summed across all inner ranges
+  std::size_t size() const
+  {
+    auto outer = (m_owner.get()->*OuterMemFn)();
+    return std::accumulate(outer.begin(), outer.end(), static_cast<std::size_t>(0),
+                           [](std::size_t acc, const auto &element) {
+                             return acc + (element.get()->*InnerMemFn)().size();
+                           });
+  }
+
+  /// @brief Returns the shape, a vector of the sizes of the inner ranges
+  std::vector<std::size_t> shape() const
+  {
+    std::vector<std::size_t> result;
+    auto outer = (m_owner.get()->*OuterMemFn)();
+    result.reserve(outer.size());
+    std::transform(outer.begin(), outer.end(), std::back_inserter(result),
+                   [](const auto &element) { return (element.get()->*InnerMemFn)().size(); });
+    return result;
+  }
+
+  /// @brief Returns the shape, a Gambit Array of the sizes of the inner ranges
+  /// @deprecated This is for backwards compatibility; uses should be migrated to shape().
+  Array<std::size_t> shape_array() const
+  {
+    Array<std::size_t> result;
+    auto outer = (m_owner.get()->*OuterMemFn)();
+    result.reserve(outer.size());
+    std::transform(outer.begin(), outer.end(), std::back_inserter(result),
+                   [](const auto &element) { return (element.get()->*InnerMemFn)().size(); });
+    return result;
+  }
+
+  /// @brief Returns the Cartesian product of the sizes of the inner ranges
+  std::size_t extent_product() const
+  {
+    auto outer = (m_owner.get()->*OuterMemFn)();
+    return std::accumulate(outer.begin(), outer.end(), static_cast<std::size_t>(1),
+                           [](std::size_t acc, const auto &element) {
+                             return acc * (element.get()->*InnerMemFn)().size();
+                           });
+  }
+
+  iterator begin() const { return {m_owner, false}; }
+  iterator end() const { return {m_owner, true}; }
 };
 
 } // end namespace Gambit

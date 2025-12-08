@@ -264,7 +264,7 @@ GameFrame::GameFrame(wxWindow *p_parent, GameDocument *p_doc)
   }
   else {
     m_efgPanel = nullptr;
-    m_nfgPanel = new NfgPanel(m_splitter, p_doc);
+    m_nfgPanel = new NfgPanel(m_splitter, p_doc, false);
     m_nfgPanel->Show(true);
     m_splitter->Initialize(m_nfgPanel);
   }
@@ -488,6 +488,10 @@ void GameFrame::MakeMenus()
 
   viewMenu->Append(GBT_MENU_VIEW_STRATEGIC, _("&Strategic game"),
                    wxT("Display the reduced strategic representation ") wxT("of the game"), true);
+  if (!m_doc->GetGame()->IsTree()) {
+    viewMenu->Check(GBT_MENU_VIEW_STRATEGIC, true);
+    viewMenu->Enable(GBT_MENU_VIEW_STRATEGIC, false);
+  }
 
   auto *formatMenu = new wxMenu;
   AppendBitmapItem(formatMenu, GBT_MENU_FORMAT_LAYOUT, _("&Layout"),
@@ -500,6 +504,9 @@ void GameFrame::MakeMenus()
   auto *toolsMenu = new wxMenu;
   toolsMenu->Append(GBT_MENU_TOOLS_DOMINANCE, _("&Dominance"), _("Find undominated actions"),
                     true);
+  if (m_doc->GetGame()->IsTree()) {
+    toolsMenu->Enable(GBT_MENU_TOOLS_DOMINANCE, false);
+  }
   AppendBitmapItem(toolsMenu, GBT_MENU_TOOLS_EQUILIBRIUM, _("&Equilibrium"),
                    _("Compute Nash equilibria and refinements"), wxBitmap(calc_xpm));
 
@@ -1104,20 +1111,22 @@ void GameFrame::OnViewStrategic(wxCommandEvent &p_event)
       return;
     }
 
-    const int ncont = m_doc->GetGame()->NumStrategyContingencies();
-    if (!m_nfgPanel && ncont >= 50000) {
-      if (wxMessageBox(
-              wxString::Format(wxT("This game has %d contingencies in strategic form.\n"), ncont) +
-                  wxT("Performance in browsing strategic form will be poor,\n") +
-                  wxT("and may render the program nonresponsive.\n") +
-                  wxT("Do you wish to continue?"),
-              _("Large strategic game warning"), wxOK | wxCANCEL | wxALIGN_CENTER, this) != wxOK) {
+    if (const size_t contingencies = m_doc->GetGame()->GetStrategies().extent_product();
+        !m_nfgPanel && contingencies >= 50000) {
+      if (wxMessageBox(wxString::Format(wxT("This game has %d contingencies in strategic form.\n"),
+                                        contingencies) +
+                           wxT("Performance in browsing strategic form will be poor,\n") +
+                           wxT("and may render the program nonresponsive.\n") +
+                           wxT("Do you wish to continue?"),
+                       _("Large strategic game warning"), wxOK | wxCANCEL | wxALIGN_CENTER,
+                       this) != wxOK) {
         return;
       }
     }
 
     if (!m_nfgPanel) {
-      m_nfgPanel = new NfgPanel(m_splitter, m_doc);
+      m_nfgPanel =
+          new NfgPanel(m_splitter, m_doc, GetMenuBar()->IsChecked(GBT_MENU_TOOLS_DOMINANCE));
     }
     m_doc->BuildNfg();
 
@@ -1143,6 +1152,7 @@ void GameFrame::OnViewStrategic(wxCommandEvent &p_event)
   GetMenuBar()->Check(GBT_MENU_VIEW_STRATEGIC, m_nfgPanel->IsShown());
   GetMenuBar()->Enable(GBT_MENU_VIEW_ZOOMIN, !p_event.IsChecked());
   GetMenuBar()->Enable(GBT_MENU_VIEW_ZOOMOUT, !p_event.IsChecked());
+  GetMenuBar()->Enable(GBT_MENU_TOOLS_DOMINANCE, m_nfgPanel->IsShown());
 
   GetToolBar()->ToggleTool(GBT_MENU_VIEW_STRATEGIC, p_event.IsChecked());
   GetToolBar()->EnableTool(GBT_MENU_VIEW_ZOOMIN, !p_event.IsChecked());
@@ -1212,14 +1222,10 @@ void GameFrame::OnFormatDecimalsDelete(wxCommandEvent &)
 
 void GameFrame::OnToolsDominance(wxCommandEvent &p_event)
 {
-  if (m_efgPanel) {
-    wxPostEvent(m_efgPanel, p_event);
-  }
   if (m_nfgPanel) {
     wxPostEvent(m_nfgPanel, p_event);
   }
   if (!p_event.IsChecked()) {
-    m_doc->TopBehavElimLevel();
     m_doc->TopStrategyElimLevel();
   }
 }
@@ -1237,15 +1243,16 @@ void GameFrame::OnToolsEquilibrium(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     if (dialog.UseStrategic()) {
-      const int ncont = m_doc->GetGame()->NumStrategyContingencies();
-      if (ncont >= 50000) {
-        if (wxMessageBox(wxString::Format(
-                             wxT("This game has %d contingencies in strategic form.\n"), ncont) +
-                             wxT("Performance in solving strategic form will be poor,\n") +
-                             wxT("and may render the program nonresponsive.\n") +
-                             wxT("Do you wish to continue?"),
-                         _("Large strategic game warning"), wxOK | wxCANCEL | wxALIGN_CENTER,
-                         this) != wxOK) {
+      if (const int contingencies = m_doc->GetGame()->GetStrategies().extent_product();
+          contingencies >= 50000) {
+        if (wxMessageBox(
+                wxString::Format(wxT("This game has %d contingencies in strategic form.\n"),
+                                 contingencies) +
+                    wxT("Performance in solving strategic form will be poor,\n") +
+                    wxT("and may render the program nonresponsive.\n") +
+                    wxT("Do you wish to continue?"),
+                _("Large strategic game warning"), wxOK | wxCANCEL | wxALIGN_CENTER,
+                this) != wxOK) {
           return;
         }
       }

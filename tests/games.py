@@ -100,6 +100,49 @@ def create_coord_4x4_nfg(outcome_version: bool = False) -> gbt.Game:
 # Extensive-form games (efg)
 
 
+def create_2x2_zero_sum_efg(missing_term_outcome: bool = False) -> gbt.Game:
+    """
+    EFG corresponding to 2x2 zero-sum game (I,-I).
+    If missing_term_outcome, the terminal node after "T" then "r" does not have an outcome.
+    """
+    g = gbt.Game.new_tree(
+        players=["Alice", "Bob"], title="2x2 matrix games (I,-I)")
+    g.append_move(g.root, "Alice", ["T", "B"])
+    g.append_move(g.root.children, "Bob", ["l", "r"])
+
+    alice_win = g.add_outcome([1, -1], label="Alice win")
+    draw = g.add_outcome([0, 0], label="Draw")
+
+    g.set_outcome(g.root.children["T"].children["l"], alice_win)
+    g.set_outcome(g.root.children["B"].children["r"], alice_win)
+    g.set_outcome(g.root.children["B"].children["l"], draw)
+
+    if not missing_term_outcome:
+        g.set_outcome(g.root.children["T"].children["r"], draw)
+
+    return g
+
+
+def create_matching_pennies_efg(with_neutral_outcome: bool = False) -> gbt.Game:
+    """
+    The version with_neutral_outcome adds a (0,0) payoff outcomes at a non-terminal node.
+    """
+    g = gbt.Game.new_tree(
+        players=["Alice", "Bob"], title="Matching pennies")
+    g.append_move(g.root, "Alice", ["H", "T"])
+    g.append_move(g.root.children, "Bob", ["h", "t"])
+    alice_lose = g.add_outcome([-1, 1], label="Alice lose")
+    alice_win = g.add_outcome([1, -1], label="Alice win")
+    if with_neutral_outcome:
+        neutral = g.add_outcome([0, 0], label="neutral")
+        g.set_outcome(g.root.children["H"], neutral)
+    g.set_outcome(g.root.children["H"].children["h"], alice_win)
+    g.set_outcome(g.root.children["T"].children["t"], alice_win)
+    g.set_outcome(g.root.children["H"].children["t"], alice_lose)
+    g.set_outcome(g.root.children["T"].children["h"], alice_lose)
+    return g
+
+
 def create_mixed_behav_game_efg() -> gbt.Game:
     """
     Returns
@@ -113,7 +156,7 @@ def create_mixed_behav_game_efg() -> gbt.Game:
     return read_from_file("mixed_behavior_game.efg")
 
 
-def create_stripped_down_poker_efg() -> gbt.Game:
+def create_stripped_down_poker_efg(nonterm_outcomes: bool = False) -> gbt.Game:
     """
     Returns
     -------
@@ -121,20 +164,61 @@ def create_stripped_down_poker_efg() -> gbt.Game:
         Stripped-Down Poker: A Classroom Game with Signaling and Bluﬃng
         Reiley et al (2008)
 
-        Two-player extensive-form poker game between Fred and Alice
+        Two-player extensive-form poker game between Alice and Bob
         Chance deals King or Queen to Fred
-        Fred can then Bet or Fold; after raising Alice is in an infoset with two nodes
+        Alice can then Bet or Fold; after raising Bob is in an infoset with two nodes
         and can choose to Call or Fold
     """
-    return read_from_file("stripped_down_poker.efg")
+    if not nonterm_outcomes:
+        return read_from_file("stripped_down_poker.efg")
+
+    g = gbt.Game.new_tree(
+        players=["Alice", "Bob"], title="Stripped-Down Poker: a simple game of one-card\
+                                            poker from Reiley et al (2008)."
+    )
+    deals = ["King", "Queen"]
+    g.append_move(g.root, g.players.chance, deals)
+
+    ante_outcome = g.add_outcome([-1, -1], label="Ante")
+    g.set_outcome(g.root, ante_outcome)
+
+    alice_folds_outcome = g.add_outcome([0, 2], label="Alice Folds")
+    alice_bets_outcome = g.add_outcome([-1, 0], label="Alice Bets")
+    bob_folds_outcome = g.add_outcome([3, 0], label="Bob Folds")
+    bob_calls_and_wins_outcome = g.add_outcome([0, 3], label="Bob Calls and Wins")
+    bob_calls_and_loses_outcome = g.add_outcome([4, -1], label="Bob Calls and Loses")
+
+    for node in g.root.children:
+        g.append_move(
+            node,
+            player="Alice",
+            actions=["Bet", "Fold"]
+        )
+        g.set_outcome(node.children["Fold"], alice_folds_outcome)
+        g.set_outcome(node.children["Bet"], alice_bets_outcome)
+
+    alice_bets_nodes = [g.root.children["King"].children["Bet"],
+                        g.root.children["Queen"].children["Bet"]]
+    g.append_move(
+        alice_bets_nodes,
+        player="Bob",
+        actions=["Call", "Fold"]
+    )
+    for node in alice_bets_nodes:
+        g.set_outcome(node.children["Fold"], bob_folds_outcome)
+
+    bob_calls_and_loses_node = g.root.children["King"].children["Bet"].children["Call"]
+    g.set_outcome(bob_calls_and_loses_node, bob_calls_and_loses_outcome)
+    bob_calls_and_wins_node = g.root.children["Queen"].children["Bet"].children["Call"]
+    g.set_outcome(bob_calls_and_wins_node, bob_calls_and_wins_outcome)
+    # g.to_efg("stripped_down_poker_nonterminal_outcomes.efg")
+
+    return g
 
 
-def create_kuhn_poker_efg() -> gbt.Game:
+def _create_kuhn_poker_efg_without_outcomes():
     """
-    Returns
-    -------
-    Game
-        Kuhn poker with 3 cards and 2 players
+    Used in create_kuhn_poker_efg()
     """
     g = gbt.Game.new_tree(
         players=["Alice", "Bob"], title="Three-card poker (J, Q, K), two-player"
@@ -167,6 +251,26 @@ def create_kuhn_poker_efg() -> gbt.Game:
         term_nodes = [g.root.children[d].children["Bet"]
                       for d in deals_by_infoset("Bob", bob_card)]
         g.append_move(term_nodes, "Bob", ["Fold", "Call"])
+    return g
+
+
+def _kuhn_showdown_winner(deal: str):
+    """
+    Used in:
+    _create_kuhn_poker_efg_only_term_outcomes();
+    _create_kuhn_poker_efg_nonterm_outcomes()
+    """
+    # deal is an element of deals = ["JQ", "JK", "QJ", "QK", "KJ", "KQ"]
+    card_values = dict(J=0, Q=1, K=2)
+    a, b = deal
+    return "Alice" if card_values[a] > card_values[b] else "Bob"
+
+
+def _create_kuhn_poker_efg_only_term_outcomes() -> gbt.Game:
+    """
+    Used in create_kuhn_poker_efg()
+    """
+    g = _create_kuhn_poker_efg_without_outcomes()
 
     def calculate_payoffs(term_node):
 
@@ -177,14 +281,8 @@ def create_kuhn_poker_efg() -> gbt.Game:
                 node = node.parent
             return path
 
-        def showdown_winner(deal):
-            # deal is an element of deals = ["JQ", "JK", "QJ", "QK", "KJ", "KQ"]
-            card_values = dict(J=0, Q=1, K=2)
-            a, b = deal
-            return "Alice" if card_values[a] > card_values[b] else "Bob"
-
         def showdown(deal, payoffs, pot):
-            payoffs[showdown_winner(deal)] += pot
+            payoffs[_kuhn_showdown_winner(deal)] += pot
             return payoffs
 
         def bet(player, payoffs, pot):
@@ -226,9 +324,123 @@ def create_kuhn_poker_efg() -> gbt.Game:
         outcome = payoffs_to_outcomes[calculate_payoffs(term_node)]
         g.set_outcome(term_node, outcome)
 
+    return g
+
+
+def _create_kuhn_poker_efg_nonterm_outcomes() -> gbt.Game:
+    """
+    Used in create_kuhn_poker_efg()
+    """
+    g = _create_kuhn_poker_efg_without_outcomes()
+
+    ante_outcome = g.add_outcome([-1, -1], label="Ante")
+    g.set_outcome(g.root, ante_outcome)
+
+    outcomes_dict = dict()
+    for player in ["Alice", "Bob"]:
+        # non-terminal outcomes for betting
+        payoffs = [-1, 0] if player == "Alice" else [0, -1]
+        tmp = f"{player} bets"
+        outcomes_dict[tmp] = g.add_outcome(payoffs, label=tmp)
+
+        # terminal outcomes for showdown after both check (pot of 2)
+        payoffs = [2, 0] if player == "Alice" else [0, 2]
+        tmp = f"{player} wins showdown for pot of 2"
+        outcomes_dict[tmp] = g.add_outcome(payoffs, label=tmp)
+
+        # terminal outcomes after a player folds (pot of 3)
+        payoffs = [0, 3] if player == "Alice" else [3, 0]
+        tmp = f"{player} folds"
+        outcomes_dict[tmp] = g.add_outcome(payoffs, label=tmp)
+
+        # terminal outcomes after a player calls and wins: bet first (-1) then win pot (4)
+        payoffs = [3, 0] if player == "Alice" else [0, 3]
+        tmp = f"{player} calls and wins"
+        outcomes_dict[tmp] = g.add_outcome(payoffs, label=tmp)
+
+        # terminal outcomes after a player calls and loses: bet first (-1) then lose pot (4)
+        payoffs = [-1, 4] if player == "Alice" else [4, -1]
+        tmp = f"{player} calls and loses"
+        outcomes_dict[tmp] = g.add_outcome(payoffs, label=tmp)
+
+    def add_outcomes(term_node):
+
+        def get_path(node):
+            path = []
+            while node.parent:
+                path.append((node, node.prior_action.label))
+                node = node.parent
+            return path
+
+        path = get_path(term_node)
+        _, deal = path.pop()
+        winner = _kuhn_showdown_winner(deal)  # needed if there is a showdown
+
+        n, label = path.pop()
+        if label == "Check":  # Alice checks
+            n, label = path.pop()
+            if label == "Check":  # Bob checks
+                g.set_outcome(n, outcomes_dict[f"{winner} wins showdown for pot of 2"])
+            else:  # Bob bets
+                g.set_outcome(n, outcomes_dict["Bob bets"])
+                n, label = path.pop()
+                if label == "Fold":  # Alice folds
+                    g.set_outcome(n, outcomes_dict["Alice folds"])
+                else:  # Alice calls
+                    tmp = "wins" if winner == "Alice" else "loses"
+                    g.set_outcome(n, outcomes_dict[f"Alice calls and {tmp}"])
+        else:  # Alice bets
+            g.set_outcome(n, outcomes_dict["Alice bets"])
+            n, label = path.pop()
+            if label == "Fold":  # Bob
+                g.set_outcome(n, outcomes_dict["Bob folds"])
+            else:  # Bob calls
+                tmp = "wins" if winner == "Bob" else "loses"
+                g.set_outcome(n, outcomes_dict[f"Bob calls and {tmp}"])
+
+    for term_node in [n for n in g.nodes if n.is_terminal]:
+        add_outcomes(term_node)
+
+    return g
+
+
+def create_kuhn_poker_efg(nonterm_outcomes: bool = False) -> gbt.Game:
+    """
+    Returns
+    -------
+    Game
+        Kuhn poker with 3 cards and 2 players
+
+        If nonterm_outcomes is True then the ante and bets are captured with nonterminal
+        outcomes; else the only outcomes are at terminal nodes.
+        In both cases, all terminal nodes have outcomes.
+    """
+    if nonterm_outcomes:
+        g = _create_kuhn_poker_efg_nonterm_outcomes()
+    else:
+        g = _create_kuhn_poker_efg_only_term_outcomes()
+
     # Ensure infosets are in the same order as if game was written to efg and read back in
     g.sort_infosets()
     return g
+
+
+def kuhn_poker_lp_mixed_strategy_prof():
+    """
+    Returns
+    -------
+    Data for the extreme equilibrium in mixed stategies for Kuhn poker found by lp_solve
+    """
+    alice = [0] * 27
+    alice[2] = "6/15"
+    alice[4] = "7/15"
+    alice[19] = "2/15"
+
+    bob = [0] * 64
+    bob[12] = "1/3"
+    bob[14] = "1/3"
+    bob[28] = "1/3"
+    return [alice, bob]
 
 
 def kuhn_poker_lcp_first_mixed_strategy_prof():
@@ -246,12 +458,15 @@ def kuhn_poker_lcp_first_mixed_strategy_prof():
     return [alice, bob]
 
 
-def create_one_shot_trust_efg() -> gbt.Game:
+def create_one_shot_trust_efg(unique_NE_variant: bool = False) -> gbt.Game:
     """
-    Returns
-    -------
-    Game
-        One-shot trust game, after Kreps (1990)
+    One-shot trust game, after Kreps (1990)
+
+    The unique_NE_variant makes Trust a dominant strategy, replacing the
+    non-singleton equilibrium component from the standard version of the game
+    where the Buyer plays "Not Trust" and the seller can play any mixture with
+    < 0.5 probability on Honor with a unique NE where the Buyer plays Trust and
+    the Seller plays Abuse.
     """
     g = gbt.Game.new_tree(
         players=["Buyer", "Seller"], title="One-shot trust game, after Kreps (1990)"
@@ -261,9 +476,14 @@ def create_one_shot_trust_efg() -> gbt.Game:
     g.set_outcome(
         g.root.children[0].children[0], g.add_outcome([1, 1], label="Trustworthy")
     )
-    g.set_outcome(
-        g.root.children[0].children[1], g.add_outcome([-1, 2], label="Untrustworthy")
-    )
+    if unique_NE_variant:
+        g.set_outcome(
+            g.root.children[0].children[1], g.add_outcome(["1/2", 2], label="Untrustworthy")
+        )
+    else:
+        g.set_outcome(
+            g.root.children[0].children[1], g.add_outcome([-1, 2], label="Untrustworthy")
+        )
     g.set_outcome(g.root.children[1], g.add_outcome([0, 0], label="Opt-out"))
     return g
 

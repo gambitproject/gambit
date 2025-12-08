@@ -22,7 +22,6 @@
 
 #include <iostream>
 #include <fstream>
-#include <cstdlib>
 #include <getopt.h>
 #include "gambit.h"
 #include "tools/util.h"
@@ -138,10 +137,10 @@ int main(int argc, char *argv[])
   std::string startFile;
 
   int long_opt_index = 0;
-  struct option long_options[] = {{"help", 0, nullptr, 'h'},
-                                  {"version", 0, nullptr, 'v'},
-                                  {"verbose", 0, nullptr, 'V'},
-                                  {nullptr, 0, nullptr, 0}};
+  option long_options[] = {{"help", 0, nullptr, 'h'},
+                           {"version", 0, nullptr, 'v'},
+                           {"verbose", 0, nullptr, 'V'},
+                           {nullptr, 0, nullptr, 0}};
   int c;
   while ((c = getopt_long(argc, argv, "d:n:i:s:m:hqVvAS", long_options, &long_opt_index)) != -1) {
     switch (c) {
@@ -177,7 +176,7 @@ int main(int argc, char *argv[])
       break;
     case '?':
       if (isprint(optopt)) {
-        std::cerr << argv[0] << ": Unknown option `-" << ((char)optopt) << "'.\n";
+        std::cerr << argv[0] << ": Unknown option `-" << static_cast<char>(optopt) << "'.\n";
       }
       else {
         std::cerr << argv[0] << ": Unknown option character `\\x" << optopt << "`.\n";
@@ -219,9 +218,7 @@ int main(int argc, char *argv[])
       }
 
       for (size_t i = 1; i <= starts.size(); i++) {
-        const std::shared_ptr<StrategyProfileRenderer<double>> renderer(
-            new MixedStrategyCSVRenderer<double>(std::cout, numDecimals));
-
+        auto renderer = MakeMixedStrategyProfileRenderer<double>(std::cout, numDecimals, false);
         LiapStrategySolve(starts[i], maxregret, maxitsN,
                           [renderer, verbose](const MixedStrategyProfile<double> &p_profile,
                                               const std::string &p_label) {
@@ -243,8 +240,7 @@ int main(int argc, char *argv[])
       }
 
       for (size_t i = 1; i <= starts.size(); i++) {
-        const std::shared_ptr<StrategyProfileRenderer<double>> renderer(
-            new BehavStrategyCSVRenderer<double>(std::cout, numDecimals));
+        auto renderer = MakeMixedBehaviorProfileRenderer<double>(std::cout, numDecimals, false);
         LiapAgentSolve(starts[i], maxregret, maxitsN,
                        [renderer, verbose](const MixedBehaviorProfile<double> &p_profile,
                                            const std::string &p_label) {

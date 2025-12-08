@@ -43,14 +43,6 @@ pure-strategy Nash equilibria.
    an effect for extensive games, as strategic games have only
    one information set per player.
 
-.. cmdoption:: -P
-
-   By default, the program computes all pure-strategy Nash
-   equilibria in an extensive game. This switch instructs the program to
-   find only pure-strategy Nash equilibria which are subgame perfect.
-   (This has no effect for strategic games, since there are no proper
-   subgames of a strategic game.)
-
 .. cmdoption:: -h
 
    Prints a help message listing the available options.
@@ -62,33 +54,37 @@ pure-strategy Nash equilibria.
 
 Computing the pure-strategy equilibria of extensive game :download:`e02.efg
 <../contrib/games/e02.efg>`, the example in Figure 2 of Selten
-(International Journal of Game Theory, 1975)::
+(International Journal of Game Theory, 1975)
 
    $ gambit-enumpure e02.efg
+
    Search for Nash equilibria in pure strategies
-   Gambit version 16.4.0, Copyright (C) 1994-2025, The Gambit Project
+
+   Gambit version |release|, Copyright (C) 1994-2025, The Gambit Project
+
    This is free software, distributed under the GNU GPL
 
    NE,1,0,0,0,1,0
 
 With the `-S` switch, the set of equilibria returned is the same,
 except expressed in strategic game strategies rather than behavior
-strategies::
+strategies
 
    $ gambit-enumpure -S e02.efg
+
    Search for Nash equilibria in pure strategies
-   Gambit version 16.4.0, Copyright (C) 1994-2025, The Gambit Project
+   Gambit version |release|, Copyright (C) 1994-2025, The Gambit Project
    This is free software, distributed under the GNU GPL
 
    NE,1,0,0,1,0
 
 The `-A` switch considers only behavior strategy profiles where there
 is no way for a player to improve his payoff by changing action at
-only one information set; therefore the set of solutions is larger::
+only one information set; therefore the set of solutions is larger
 
    $ gambit-enumpure -A e02.efg
    Search for Nash equilibria in pure strategies
-   Gambit version 16.4.0, Copyright (C) 1994-2025, The Gambit Project
+   Gambit version |release|, Copyright (C) 1994-2025, The Gambit Project
    This is free software, distributed under the GNU GPL
 
    NE,1,0,1,0,1,0

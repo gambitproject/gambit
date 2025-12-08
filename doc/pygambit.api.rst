@@ -141,6 +141,7 @@ Information about the game
    Node.parent
    Node.is_subgame_root
    Node.is_terminal
+   Node.is_strategy_reachable
    Node.prior_action
    Node.prior_sibling
    Node.next_sibling
@@ -148,6 +149,7 @@ Information about the game
    Node.player
    Node.is_successor_of
    Node.plays
+   Node.own_prior_action
 
 .. autosummary::
 
@@ -161,6 +163,7 @@ Information about the game
    Infoset.members
    Infoset.precedes
    Infoset.plays
+   Infoset.own_prior_actions
 
 .. autosummary::
 

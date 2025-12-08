@@ -5,7 +5,7 @@ This section provides guidelines for contributing to Gambit, including how to re
 It includes information relevant to both core developers and external contributors.
 
 GitHub issues
-----------------
+-------------
 
 In the first instance, bug reports, feature requests and improvements to the Gambit documentation should be
 posted to the Gambit issue tracker, located at
@@ -25,7 +25,7 @@ When reporting a bug, please be sure to include the following:
 .. _contributing-code:
 
 Contributing code
-----------------
+-----------------
 
 Gambit is an open-source project, and contributions are welcome from anyone.
 The project is hosted on GitHub, and contributions can be made via pull requests following the standard GitHub workflow.
@@ -47,21 +47,41 @@ version.
 
 3. Follow the instructions in the :ref:`building-from-source` page to set up your development environment and build Gambit from source. If you only plan to make changes to the PyGambit Python code, you can skip to :ref:`build-python`.
 
-4. Create a new branch for your changes ::
+4. *[Optional but recommended]* Install `pre-commit` which is used to run code formatters and linters before each commit. This helps ensure code quality and consistency. You can install it into the virtual environment where you installed PyGambit ::
+
+    pip install pre-commit
+
+   Alternatively, `pre-commit` is also available via various packaging systems.  For example, you can install via `Homebrew <https://brew.sh>`__ ::
+
+    brew install pre-commit
+
+   If you install via a package manager (instead of into the virtual environment), `pre-commit` will be available for use with other projects.
+
+   Then, set it up in the Gambit repository ::
+
+    pre-commit install
+
+   Having `pre-commit` installed is recommended as it runs many of the same checks that are automatically conducted on any pull request.  Every time you commit, it will automatically fix some issues and highlight others for manual adjustment.
+
+5. Create a new branch for your changes ::
 
     git checkout -b feature/your-feature-name
 
-5. Make your changes. Commit each change with a clear commit message ::
+6. Make your changes. ::
 
-    git add .
-    git commit -m "Add feature X or fix bug Y"
+    git add <files>
+    git commit -m "Clear and descriptive commit message"
 
-6. Push your changes to your fork or branch ::
+   Provide a clear commit message.  Gambit does not have its own set of guidelines for commit messages.
+   However, there are a number of webpages that have suggestions for writing effective commit messages (and for deciding how to structure your contributions as one or more
+   commits as appropriate).  See for example `this page <https://wiki.openstack.org/wiki/GitCommitMessages>`__.
+
+7. Push your changes to your fork or branch ::
 
     git push origin feature/your-feature-name
 
-7. Open a pull request on GitHub to the master branch of the upstream repository, describing your changes and linking to any relevant issues.
-8. Core developers will review your changes, provide feedback, and merge them into the master branch if they meet the project's standards.
+8. Open a pull request on GitHub to the master branch of the upstream repository, describing your changes and linking to any relevant issues.
+9. Core developers will review your changes, provide feedback, and merge them into the master branch if they meet the project's standards.
 
 Testing your changes
 --------------------
@@ -78,6 +98,11 @@ You can also run the tests locally before submitting your pull request, using `p
 2. Navigate to the Gambit repository and run the tests: ::
 
     pytest
+
+3. [Optional] If you wish to run the tutorial notebook tests, you will need to add the ``--run-tutorials`` flag, which require the `doc` dependencies: ::
+
+    pip install -r doc/requirements.txt
+    pytest --run-tutorials
 
 Adding to the test suite
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -135,3 +160,60 @@ To add a contributor, comment on a GitHub Issue or Pull Request, asking @all-con
  @all-contributors please add @<username> for <contributions>
 
 Refer to the `emoji key <https://allcontributors.org/docs/en/emoji-key>`__ for a list of contribution types.
+
+Releases & maintenance branches
+-------------------------------
+
+Releases of Gambit are made by core developers.
+Details of previous releases can be found in the `GitHub releases page <https://github.com/gambitproject/gambit/releases>`__.
+
+Branches labeled ``maintX`` and ``maintX_Y``, where ``X`` is the major version number and ``Y`` is the minor version number, are associated with releases and point to the latest commit on a stable version.
+Navigate to the Gambit repository on GitHub and select the `branches` tab to see the list of active maintenance branches.
+Be sure to delete any maintenance branches that are no longer being maintained.
+
+.. _making-a-new-release:
+
+Making a new release
+^^^^^^^^^^^^^^^^^^^^
+
+When making a new release of Gambit, follow these steps:
+
+1. Create a new branch from the latest commit on the ``master`` branch named ``maintX_Y``, where ``X`` is the major version number and ``Y`` is the minor version number of the new release.
+
+2. Update the version number in the ``build_support/GAMBIT_VERSION`` file to ``X.Y.Z``.
+
+   All other files will automatically use the updated version number:
+
+   - `pyproject.toml` reads from GAMBIT_VERSION file at build time
+   - `configure.ac` reads from GAMBIT_VERSION file and substitutes into `build_support/osx/Info.plist` and `build_support/msw/gambit.wxs`
+   - `src/pygambit/__init__.py` reads from installed package metadata or GAMBIT_VERSION file
+   - `doc/conf.py` reads from GAMBIT_VERSION file at documentation build time
+   - Documentation pages reference the `|release|` substitution variable to automatically reflect the updated version number.
+
+3. Update the `ChangeLog` file with a summary of changes
+
+4. Once there are no further commits to be made for the release, create a tag for the release from the latest commit on the maintenance branch. ::
+
+    git tag -a vX.Y.Z -m "Gambit version X.Y.Z"
+
+5. Push the maintenance branch and tags to the GitHub repository. ::
+
+    git push origin maintX_Y
+    git push origin --tags
+
+6. Create a new release on the `GitHub releases page <https://github.com/gambitproject/gambit/releases>`__, using the tag created in step 4.
+   Include a summary of changes from the `ChangeLog` file in the release notes.
+
+7. Currently there is no automated process for pushing the new release to PyPI. This must be done manually.
+
+.. TODO: update this process to be automated via GitHub Actions: Issue #557
+
+Patching maintained versions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you have bug fixes that should be applied across maintained versions:
+
+1. Make a branch from the oldest maintenance branch to which the change applies
+2. Apply the change and make a pull request to that maintenance branch
+3. After the pull request is merged, open new pull requests to each subsequent maintenance branch and finally to the master branch, merging each in turn
+4. Create new releases from each maintenance branch as needed, following the steps in :ref:`making-a-new-release`.

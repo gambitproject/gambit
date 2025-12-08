@@ -577,7 +577,7 @@ TreeLayout::ComputeNextInInfoset(const std::shared_ptr<NodeEntry> &p_entry) cons
       std::find(infoset->GetMembers().begin(), infoset->GetMembers().end(), p_entry->m_node));
   while (member != infoset->GetMembers().end()) {
     auto member_entry = GetNodeEntry(*member);
-    if (member_entry != nullptr && p_entry->m_level == member_entry->m_level) {
+    if (member_entry != nullptr) {
       return member_entry;
     }
     ++member;
@@ -608,53 +608,37 @@ void TreeLayout::ComputeRenderedParents() const
   }
 }
 
-void TreeLayout::BuildNodeList(const GameNode &p_node, const BehaviorSupportProfile &p_support)
+void TreeLayout::BuildNodeList(const GameNode &p_node)
 {
   const auto entry = std::make_shared<NodeEntry>(p_node);
   m_nodeList.push_back(entry);
   m_nodeMap[p_node] = entry;
   entry->m_size = m_doc->GetStyle().GetNodeSize();
   entry->m_branchLength = m_doc->GetStyle().GetBranchLength();
-  if (m_doc->GetStyle().RootReachable()) {
-    if (const GameInfoset infoset = p_node->GetInfoset()) {
-      if (infoset->GetPlayer()->IsChance()) {
-        for (const auto &child : p_node->GetChildren()) {
-          BuildNodeList(child, p_support);
-        }
-      }
-      else {
-        for (const auto &action : p_support.GetActions(infoset)) {
-          BuildNodeList(p_node->GetChild(action), p_support);
-        }
-      }
-    }
-  }
-  else {
-    for (const auto &child : p_node->GetChildren()) {
-      BuildNodeList(child, p_support);
-    }
+  for (const auto &child : p_node->GetChildren()) {
+    BuildNodeList(child);
   }
 }
 
-void TreeLayout::BuildNodeList(const BehaviorSupportProfile &p_support)
+void TreeLayout::BuildNodeList(const Game &p_game)
 {
   m_nodeList.clear();
   m_nodeMap.clear();
-  BuildNodeList(m_doc->GetGame()->GetRoot(), p_support);
+  BuildNodeList(p_game->GetRoot());
 }
 
-void TreeLayout::Layout(const BehaviorSupportProfile &p_support)
+void TreeLayout::Layout(const Game &p_game)
 {
   m_infosetSpacing = (m_doc->GetStyle().GetInfosetJoin() == GBT_INFOSET_JOIN_LINES) ? 10 : 40;
 
   if (m_nodeList.size() != m_doc->GetGame()->NumNodes()) {
     // We only rebuild the node list if the number of nodes changes.  If we only have
     // information set changes this can be handled just by the traversal below
-    BuildNodeList(p_support);
+    BuildNodeList(p_game);
   }
 
   auto layout = Gambit::Layout(m_doc->GetGame());
-  layout.LayoutTree(p_support);
+  layout.LayoutTree(p_game);
 
   const auto spacing = m_doc->GetStyle().GetTerminalSpacing();
   for (auto [node, entry] : layout.GetNodeMap()) {
@@ -729,53 +713,47 @@ void TreeLayout::RenderSubtree(wxDC &p_dc, bool p_noHints) const
         const int nextX = nextMember->m_x;
         const int nextY = nextMember->m_y;
 
-        if (parentEntry->m_x == nextX) {
 #ifdef __WXGTK__
-          // A problem with using styled pens and user scaling on wxGTK
-          p_dc.SetPen(wxPen(m_doc->GetStyle().GetPlayerColor(parentEntry->m_node->GetPlayer()), 1,
-                            wxPENSTYLE_SOLID));
+        // A problem with using styled pens and user scaling on wxGTK
+        p_dc.SetPen(wxPen(m_doc->GetStyle().GetPlayerColor(parentEntry->m_node->GetPlayer()), 1,
+                          wxPENSTYLE_SOLID));
 #else
-          p_dc.SetPen(wxPen(m_doc->GetStyle().GetPlayerColor(parentEntry->m_node->GetPlayer()), 1,
-                            wxPENSTYLE_DOT));
+        p_dc.SetPen(wxPen(m_doc->GetStyle().GetPlayerColor(parentEntry->m_node->GetPlayer()), 1,
+                          wxPENSTYLE_DOT));
 #endif // __WXGTK__
-          p_dc.DrawLine(parentEntry->m_x, parentEntry->m_y, parentEntry->m_x, nextY);
-          if (settings.GetInfosetJoin() == GBT_INFOSET_JOIN_CIRCLES) {
-            p_dc.DrawLine(parentEntry->m_x + parentEntry->GetSize(), parentEntry->m_y,
-                          parentEntry->m_x + parentEntry->GetSize(), nextY);
-          }
+        p_dc.DrawLine(parentEntry->m_x, parentEntry->m_y, parentEntry->m_x, nextY);
+        if (settings.GetInfosetJoin() == GBT_INFOSET_JOIN_CIRCLES) {
+          p_dc.DrawLine(parentEntry->m_x + parentEntry->GetSize(), parentEntry->m_y,
+                        parentEntry->m_x + parentEntry->GetSize(), nextY);
+        }
 
-          if (nextMember->m_x != parentEntry->m_x) {
-            // Draw a little arrow in the direction of the iset.
-            int startX, endX;
-            if (settings.GetInfosetJoin() == GBT_INFOSET_JOIN_LINES) {
+        if (nextMember->m_x != parentEntry->m_x) {
+          // Draw a little arrow in the direction of the iset.
+          int startX, endX;
+          if (settings.GetInfosetJoin() == GBT_INFOSET_JOIN_LINES) {
+            startX = parentEntry->m_x;
+            endX = (startX + m_infosetSpacing * ((nextMember->m_x > parentEntry->m_x) ? 1 : -1));
+          }
+          else {
+            if (nextMember->m_x < parentEntry->m_x) {
+              // information set is continued to the left
+              startX = parentEntry->m_x + parentEntry->GetSize();
+              endX = parentEntry->m_x - m_infosetSpacing;
+            }
+            else {
+              // information set is continued to the right
               startX = parentEntry->m_x;
-              endX = (startX + m_infosetSpacing * ((nextMember->m_x > parentEntry->m_x) ? 1 : -1));
+              endX = (parentEntry->m_x + parentEntry->GetSize() + m_infosetSpacing);
             }
-            else {
-              if (nextMember->m_x < parentEntry->m_x) {
-                // information set is continued to the left
-                startX = parentEntry->m_x + parentEntry->GetSize();
-                endX = parentEntry->m_x - m_infosetSpacing;
-              }
-              else {
-                // information set is continued to the right
-                startX = parentEntry->m_x;
-                endX = (parentEntry->m_x + parentEntry->GetSize() + m_infosetSpacing);
-              }
-            }
-            p_dc.DrawLine(startX, nextY, endX, nextY);
-            if (startX > endX) {
-              p_dc.DrawLine(endX, nextY, endX + m_infosetSpacing / 2,
-                            nextY + m_infosetSpacing / 2);
-              p_dc.DrawLine(endX, nextY, endX + m_infosetSpacing / 2,
-                            nextY - m_infosetSpacing / 2);
-            }
-            else {
-              p_dc.DrawLine(endX, nextY, endX - m_infosetSpacing / 2,
-                            nextY + m_infosetSpacing / 2);
-              p_dc.DrawLine(endX, nextY, endX - m_infosetSpacing / 2,
-                            nextY - m_infosetSpacing / 2);
-            }
+          }
+          p_dc.DrawLine(startX, nextY, endX, nextY);
+          if (startX > endX) {
+            p_dc.DrawLine(endX, nextY, endX + m_infosetSpacing / 2, nextY + m_infosetSpacing / 2);
+            p_dc.DrawLine(endX, nextY, endX + m_infosetSpacing / 2, nextY - m_infosetSpacing / 2);
+          }
+          else {
+            p_dc.DrawLine(endX, nextY, endX - m_infosetSpacing / 2, nextY + m_infosetSpacing / 2);
+            p_dc.DrawLine(endX, nextY, endX - m_infosetSpacing / 2, nextY - m_infosetSpacing / 2);
           }
         }
       }

@@ -46,10 +46,6 @@ public:
   std::shared_ptr<agg::AGG> GetUnderlyingAGG() const { return aggPtr; }
   /// @name Dimensions of the game
   //@{
-  /// The number of strategies for each player
-  Array<int> NumStrategies() const override;
-  /// Gets the i'th strategy in the game, numbered globally
-  GameStrategy GetStrategy(int p_index) const override;
   /// Returns the total number of actions in the game
   int BehavProfileLength() const override { throw UndefinedException(); }
   //@}
@@ -89,11 +85,11 @@ public:
   /// Returns the smallest payoff to any player in any outcome of the game
   Rational GetMinPayoff() const override { return Rational(aggPtr->getMinPayoff()); }
   /// Returns the smallest payoff to the player in any outcome of the game
-  Rational GetMinPayoff(const GamePlayer &) const override { throw UndefinedException(); }
+  Rational GetPlayerMinPayoff(const GamePlayer &) const override { throw UndefinedException(); }
   /// Returns the largest payoff to any player in any outcome of the game
   Rational GetMaxPayoff() const override { return Rational(aggPtr->getMaxPayoff()); }
   /// Returns the largest payoff to the player in any outcome of the game
-  Rational GetMaxPayoff(const GamePlayer &) const override { throw UndefinedException(); }
+  Rational GetPlayerMaxPayoff(const GamePlayer &) const override { throw UndefinedException(); }
   //@}
 
   /// @name Modification

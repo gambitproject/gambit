@@ -2,15 +2,7 @@ name: Linters and coding standards checks
 
 on:
   push:
-    paths-ignore:
-      - 'doc/**'
-      - '.github/ISSUE_TEMPLATE/**'
-      - 'README.md'
   pull_request:
-    paths-ignore:
-      - 'doc/**'
-      - '.github/ISSUE_TEMPLATE/**'
-      - 'README.md'
 
 jobs:
   clang-format:
@@ -55,7 +47,7 @@ jobs:
       - uses: actions/checkout@v5
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.12"
+          python-version: "3.14"
       - uses: py-actions/flake8@v2
 
   cython-lint:
@@ -66,7 +58,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
-          python-version: "3.12"
+          python-version: "3.14"
       - name: Install Python packages
         run: python -m pip install cython-lint
       - name: cython-lint

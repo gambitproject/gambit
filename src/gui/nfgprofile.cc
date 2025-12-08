@@ -188,7 +188,7 @@ void MixedProfileList::OnUpdate()
   DeleteRows(0, GetNumberRows());
   InsertRows(0, newRows);
 
-  const int profileLength = m_doc->GetGame()->MixedProfileLength();
+  const int profileLength = m_doc->GetGame()->GetStrategies().size();
   const int newCols = profileLength;
   DeleteCols(0, GetNumberCols());
   InsertCols(0, newCols);
