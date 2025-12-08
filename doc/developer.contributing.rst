@@ -160,3 +160,60 @@ To add a contributor, comment on a GitHub Issue or Pull Request, asking @all-con
  @all-contributors please add @<username> for <contributions>
 
 Refer to the `emoji key <https://allcontributors.org/docs/en/emoji-key>`__ for a list of contribution types.
+
+Releases & maintenance branches
+-------------------------------
+
+Releases of Gambit are made by core developers.
+Details of previous releases can be found in the `GitHub releases page <https://github.com/gambitproject/gambit/releases>`__.
+
+Branches labeled ``maintX`` and ``maintX_Y``, where ``X`` is the major version number and ``Y`` is the minor version number, are associated with releases and point to the latest commit on a stable version.
+Navigate to the Gambit repository on GitHub and select the `branches` tab to see the list of active maintenance branches.
+Be sure to delete any maintenance branches that are no longer being maintained.
+
+.. _making-a-new-release:
+
+Making a new release
+^^^^^^^^^^^^^^^^^^^^
+
+When making a new release of Gambit, follow these steps:
+
+1. Create a new branch from the latest commit on the ``master`` branch named ``maintX_Y``, where ``X`` is the major version number and ``Y`` is the minor version number of the new release.
+
+2. Update the version number in the ``build_support/GAMBIT_VERSION`` file to ``X.Y.Z``.
+
+   All other files will automatically use the updated version number:
+
+   - `pyproject.toml` reads from GAMBIT_VERSION file at build time
+   - `configure.ac` reads from GAMBIT_VERSION file and substitutes into `build_support/osx/Info.plist` and `build_support/msw/gambit.wxs`
+   - `src/pygambit/__init__.py` reads from installed package metadata or GAMBIT_VERSION file
+   - `doc/conf.py` reads from GAMBIT_VERSION file at documentation build time
+   - Documentation pages reference the `|release|` substitution variable to automatically reflect the updated version number.
+
+3. Update the `ChangeLog` file with a summary of changes
+
+4. Once there are no further commits to be made for the release, create a tag for the release from the latest commit on the maintenance branch. ::
+
+    git tag -a vX.Y.Z -m "Gambit version X.Y.Z"
+
+5. Push the maintenance branch and tags to the GitHub repository. ::
+
+    git push origin maintX_Y
+    git push origin --tags
+
+6. Create a new release on the `GitHub releases page <https://github.com/gambitproject/gambit/releases>`__, using the tag created in step 4.
+   Include a summary of changes from the `ChangeLog` file in the release notes.
+
+7. Currently there is no automated process for pushing the new release to PyPI. This must be done manually.
+
+.. TODO: update this process to be automated via GitHub Actions: Issue #557
+
+Patching maintained versions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you have bug fixes that should be applied across maintained versions:
+
+1. Make a branch from the oldest maintenance branch to which the change applies
+2. Apply the change and make a pull request to that maintenance branch
+3. After the pull request is merged, open new pull requests to each subsequent maintenance branch and finally to the master branch, merging each in turn
+4. Create new releases from each maintenance branch as needed, following the steps in :ref:`making-a-new-release`.

@@ -66,11 +66,11 @@ points.
 Computing the equilibria, in mixed strategies, of :download:`e02.nfg
 <../contrib/games/e02.nfg>`, the reduced strategic form of the example
 in Figure 2 of Selten (International Journal of Game Theory,
-1975)::
+1975)
 
    $ gambit-enummixed e02.nfg
    Compute Nash equilibria by enumerating extreme points
-   Gambit version 16.4.0, Copyright (C) 1994-2025, The Gambit Project
+   Gambit version |release|, Copyright (C) 1994-2025, The Gambit Project
    This is free software, distributed under the GNU GPL
 
    NE,1,0,0,1,0
@@ -78,11 +78,11 @@ in Figure 2 of Selten (International Journal of Game Theory,
 
 In fact, the game e02.nfg has a one-dimensional continuum of
 equilibria.  This fact can be observed by examining the connectedness
-information using the `-c` switch::
+information using the `-c` switch
 
    $ gambit-enummixed -c e02.nfg
    Compute Nash equilibria by enumerating extreme points
-   Gambit version 16.4.0, Copyright (C) 1994-2025, The Gambit Project
+   Gambit version |release|, Copyright (C) 1994-2025, The Gambit Project
    This is free software, distributed under the GNU GPL
 
    NE,1,0,0,1,0
