@@ -9,4 +9,4 @@ ipython
 matplotlib
 pickleshare
 jupyter
-open_spiel
+open_spiel; sys_platform != 'win32'

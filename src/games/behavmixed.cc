@@ -266,12 +266,11 @@ template <class T> T MixedBehaviorProfile<T>::GetLiapValue() const
   CheckVersion();
   ComputeSolutionData();
 
-  auto value = T(0);
-  for (auto player : m_support.GetGame()->GetPlayers()) {
-    for (auto infoset : player->GetInfosets()) {
-      for (auto action : m_support.GetActions(infoset)) {
-        value += sqr(std::max(GetPayoff(action) - GetPayoff(infoset), T(0)));
-      }
+  auto value = static_cast<T>(0);
+  for (auto infoset : m_support.GetGame()->GetInfosets()) {
+    for (auto action : m_support.GetActions(infoset)) {
+      value +=
+          sqr(std::max(map_actionValues[action] - map_infosetValues[infoset], static_cast<T>(0)));
     }
   }
   return value;
@@ -352,24 +351,23 @@ template <class T> const T &MixedBehaviorProfile<T>::GetRegret(const GameAction 
 {
   CheckVersion();
   ComputeSolutionData();
-  return map_regret[act];
+  return map_regret.at(act);
 }
 
 template <class T> T MixedBehaviorProfile<T>::GetRegret(const GameInfoset &p_infoset) const
 {
-  auto actions = p_infoset->GetActions();
-  T br_payoff = std::accumulate(
-      std::next(actions.begin()), actions.end(), GetPayoff(*actions.begin()),
-      [this](const T &x, const GameAction &action) { return std::max(x, GetPayoff(action)); });
-  return br_payoff - GetPayoff(p_infoset);
+  CheckVersion();
+  ComputeSolutionData();
+  T br_payoff = maximize_function(p_infoset->GetActions(), [this](const auto &action) -> T {
+    return map_actionValues.at(action);
+  });
+  return br_payoff - map_infosetValues[p_infoset];
 }
 
 template <class T> T MixedBehaviorProfile<T>::GetMaxRegret() const
 {
-  auto infosets = m_support.GetGame()->GetInfosets();
-  return std::accumulate(
-      infosets.begin(), infosets.end(), T(0),
-      [this](const T &x, const GameInfoset &infoset) { return std::max(x, GetRegret(infoset)); });
+  return maximize_function(m_support.GetGame()->GetInfosets(),
+                           [this](const auto &infoset) -> T { return this->GetRegret(infoset); });
 }
 
 template <class T>

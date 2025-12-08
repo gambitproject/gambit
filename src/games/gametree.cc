@@ -1193,15 +1193,6 @@ GameInfoset GameTreeRep::GetInfoset(int p_index) const
   throw std::out_of_range("Infoset index out of range");
 }
 
-std::vector<GameInfoset> GameTreeRep::GetInfosets() const
-{
-  std::vector<GameInfoset> infosets;
-  for (const auto &player : m_players) {
-    std::copy(player->m_infosets.begin(), player->m_infosets.end(), std::back_inserter(infosets));
-  }
-  return infosets;
-}
-
 //------------------------------------------------------------------------
 //                        GameTreeRep: Outcomes
 //------------------------------------------------------------------------
