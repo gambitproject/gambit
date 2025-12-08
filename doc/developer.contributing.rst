@@ -185,7 +185,7 @@ When making a new release of Gambit, follow these steps:
    All other files will automatically use the updated version number:
 
    - `pyproject.toml` reads from GAMBIT_VERSION file at build time
-   - `configure.ac` reads from GAMBIT_VERSION file and substitutes into `build_support/mac/Info.plist` and `build_support/gambit.wxs`
+   - `configure.ac` reads from GAMBIT_VERSION file and substitutes into `build_support/osx/Info.plist` and `build_support/msw/gambit.wxs`
    - `src/pygambit/__init__.py` reads from installed package metadata or GAMBIT_VERSION file
    - `doc/conf.py` reads from GAMBIT_VERSION file at documentation build time
    - Documentation pages reference the `|release|` substitution variable to automatically reflect the updated version number.
