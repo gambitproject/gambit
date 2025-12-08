@@ -91,7 +91,7 @@ jobs:
         run: |
           mkdir installer
           cp gambit* installer
-          "${WIX}bin/candle" gambit.wxs
+          "${WIX}bin/candle" build_support/gambit.wxs
           "${WIX}bin/light" -ext WixUIExtension gambit.wixobj
       - uses: actions/upload-artifact@v5
         with:
