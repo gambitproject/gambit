@@ -167,7 +167,7 @@ class Infoset:
         return InfosetActions.wrap(self.infoset)
 
     @property
-    def own_prior_actions(self) -> typing.List[Action | None]:
+    def own_prior_actions(self) -> list[Action | None]:
         """The set of actions taken by the player immediately preceding the member nodes
         in the information set.
 
@@ -216,7 +216,7 @@ class Infoset:
         return Player.wrap(self.infoset.deref().GetPlayer())
 
     @property
-    def plays(self) -> typing.List[Node]:
+    def plays(self) -> list[Node]:
         """Returns a list of all terminal `Node` objects consistent with it.
         """
         return [

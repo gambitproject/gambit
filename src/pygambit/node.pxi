@@ -255,7 +255,7 @@ class Node:
         return Outcome.wrap(self.node.deref().GetOutcome())
 
     @property
-    def plays(self) -> typing.List[Node]:
+    def plays(self) -> list[Node]:
         """Returns a list of all terminal `Node` objects consistent with it.
         """
         return [Node.wrap(n) for n in self.node.deref().GetGame().deref().GetPlays(self.node)]

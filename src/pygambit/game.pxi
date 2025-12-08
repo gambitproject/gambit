@@ -468,7 +468,7 @@ class Game:
 
     @classmethod
     def new_tree(cls,
-                 players: typing.List[str] | None = None,
+                 players: list[str] | None = None,
                  title: str = "Untitled extensive game") -> Game:
         """Create a new ``Game`` consisting of a trivial game tree,
         with one node, which is both root and terminal.
@@ -562,7 +562,7 @@ class Game:
         g.title = title
         return g
 
-    def to_arrays(self, dtype: typing.Type = Rational) -> typing.List[np.array]:
+    def to_arrays(self, dtype: typing.Type = Rational) -> list[np.array]:
         """Generate the payoff tables for players represented as numpy arrays.
 
         Parameters
@@ -1475,7 +1475,7 @@ class Game:
     def _resolve_nodes(self,
                        nodes: typing.Any,
                        funcname: str,
-                       argname: str = "nodes") -> typing.List[Node]:
+                       argname: str = "nodes") -> list[Node]:
         """Resolve an attempt to reference a subset of the nodes of the game of the game.
 
         See `_resolve_node` for details on functionality.
@@ -1575,7 +1575,7 @@ class Game:
 
     def append_move(self, nodes: Node | NodeReferenceSet,
                     player: Player | str,
-                    actions: typing.List[str]) -> None:
+                    actions: list[str]) -> None:
         """Add a move for `player` at terminal `nodes`.  All elements of `nodes` become part of
         a new information set, with actions labeled according to `actions`.
 
@@ -1753,7 +1753,7 @@ class Game:
         self.game.deref().DeleteTree(resolved_node.node)
 
     def add_action(self,
-                   infoset: typing.Infoset | str,
+                   infoset: Infoset | str,
                    before: Action | str | None = None) -> None:
         """Add an action at the information set `infoset`.   If `before` is not null, the new
         action is inserted before `before`.

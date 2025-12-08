@@ -108,7 +108,7 @@ class Action:
             return Rational(py_string.decode("ascii"))
 
     @property
-    def plays(self) -> typing.List[Node]:
+    def plays(self) -> list[Node]:
         """Returns a list of all terminal `Node` objects consistent with it.
         """
         return [
