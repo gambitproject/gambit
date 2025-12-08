@@ -557,7 +557,7 @@ class Game:
         shape = arrays[0].shape
         g = Game.new_table(shape)
         for profile in itertools.product(*(range(s) for s in shape)):
-            for array, player in zip(arrays, g.players):
+            for array, player in zip(arrays, g.players, strict=True):
                 g[profile][player] = array[profile]
         g.title = title
         return g
@@ -628,10 +628,10 @@ class Game:
         arrays = list(payoffs.values())
         shape = arrays[0].shape
         g = Game.new_table(shape)
-        for (player, label) in zip(g.players, payoffs):
+        for (player, label) in zip(g.players, payoffs, strict=True):
             player.label = label
         for profile in itertools.product(*(range(s) for s in shape)):
-            for array, player in zip(arrays, g.players):
+            for array, player in zip(arrays, g.players, strict=True):
                 g[profile][player] = array[profile]
         g.title = title
         return g
@@ -916,12 +916,12 @@ class Game:
             return profile
         if len(data) != len(self.players):
             raise ValueError("Number of elements does not match number of players")
-        for (p, d) in zip(self.players, data):
+        for (p, d) in zip(self.players, data, strict=True):
             if len(p.strategies) != len(d):
                 raise ValueError(
                     f"Number of elements does not match number of strategies for {p}"
                 )
-            for (s, v) in zip(p.strategies, d):
+            for (s, v) in zip(p.strategies, d, strict=True):
                 profile[s] = typefunc(v)
         return profile
 
@@ -1000,9 +1000,12 @@ class Game:
             for player in self.players:
                 for strategy, prob in zip(
                         player.strategies,
-                        scipy.stats.dirichlet(alpha=[1 for strategy in player.strategies],
-                                              seed=gen).rvs(size=1)[0]
-                ):
+                        scipy.stats.dirichlet(
+                            alpha=[1 for strategy in player.strategies],
+                            seed=gen
+                        ).rvs(size=1)[0],
+                        strict=True
+                        ):
                     profile[strategy] = prob
             return profile
         elif denom < 1:
@@ -1018,7 +1021,15 @@ class Game:
                     ) +
                     [denom + k]
                 )
-                for strategy, (hi, lo) in zip(player.strategies, zip(sample[1:], sample[:-1])):
+                for strategy, (hi, lo) in zip(
+                    player.strategies,
+                    zip(
+                        sample[1:],
+                        sample[:-1],
+                        strict=True
+                    ),
+                    strict=True
+                ):
                     profile[strategy] = Rational(hi - lo - 1, denom)
             return profile
 
@@ -1034,13 +1045,13 @@ class Game:
         for (p, d) in zip(self.players, data):
             if len(p.infosets) != len(d):
                 raise ValueError(f"Number of elements does not match number of infosets for {p}")
-            for (i, v) in zip(p.infosets, d):
+            for (i, v) in zip(p.infosets, d, strict=True):
                 if len(i.actions) != len(v):
                     raise ValueError(
                         f"Number of elements does not match number of "
                         f"actions for infoset {i} for {p}"
                     )
-                for (a, u) in zip(i.actions, v):
+                for (a, u) in zip(i.actions, v, strict=True):
                     profile[a] = typefunc(u)
         return profile
 
@@ -1123,7 +1134,8 @@ class Game:
                 for action, prob in zip(
                         infoset.actions,
                         scipy.stats.dirichlet(alpha=[1 for action in infoset.actions],
-                                              seed=gen).rvs(size=1)[0]
+                                              seed=gen).rvs(size=1)[0],
+                        strict=True
                 ):
                     profile[action] = prob
             return profile
@@ -1140,7 +1152,14 @@ class Game:
                     ) +
                     [denom + k]
                 )
-                for action, (hi, lo) in zip(infoset.actions, zip(sample[1:], sample[:-1])):
+                for action, (hi, lo) in zip(
+                    infoset.actions,
+                    zip(
+                        sample[1:], sample[:-1],
+                        strict=True
+                    ),
+                    strict=True
+                ):
                     profile[action] = Rational(hi - lo - 1, denom)
             return profile
 
@@ -1579,7 +1598,7 @@ class Game:
 
         resolved_node = cython.cast(Node, resolved_nodes[0])
         self.game.deref().AppendMove(resolved_node.node, resolved_player.player, len(actions))
-        for label, action in zip(actions, resolved_node.infoset.actions):
+        for label, action in zip(actions, resolved_node.infoset.actions, strict=True):
             action.label = label
         resolved_infoset = cython.cast(Infoset, resolved_node.infoset)
         for n in resolved_nodes[1:]:
@@ -1943,7 +1962,7 @@ class Game:
         c = Outcome.wrap(self.game.deref().NewOutcome())
         if str(label) != "":
             c.label = str(label)
-        for player, payoff in zip(self.players, payoffs):
+        for player, payoff in zip(self.players, payoffs, strict=True):
             c[player] = payoff
         return c
 

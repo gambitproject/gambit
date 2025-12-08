@@ -34,7 +34,7 @@ def _set_action_probs(profile: gbt.MixedBehaviorProfile, probs: list, rational_f
      (games.create_stripped_down_poker_efg(), 1, "1/4", True)
      ]
 )
-def test_payoff_reference(game: gbt.Game, player_idx: int, payoff: typing.Union[str, float],
+def test_payoff_reference(game: gbt.Game, player_idx: int, payoff: str | float,
                           rational_flag: bool):
     profile = game.mixed_behavior_profile(rational=rational_flag)
     payoff = gbt.Rational(payoff) if rational_flag else payoff
@@ -55,7 +55,7 @@ def test_payoff_reference(game: gbt.Game, player_idx: int, payoff: typing.Union[
      (games.create_stripped_down_poker_efg(), "Bob", "1/4", True),
      ]
 )
-def test_payoff_by_label_reference(game: gbt.Game, label: str, payoff: typing.Union[str, float],
+def test_payoff_by_label_reference(game: gbt.Game, label: str, payoff: str | float,
                                    rational_flag: bool):
     profile = game.mixed_behavior_profile(rational=rational_flag)
     payoff = gbt.Rational(payoff) if rational_flag else payoff
@@ -130,7 +130,7 @@ def test_is_defined_at_by_label(game: gbt.Game, label: str, rational_flag: bool)
 def test_profile_indexing_by_player_infoset_action_idx_reference(game: gbt.Game, player_idx: int,
                                                                  infoset_idx: int,
                                                                  action_idx: int,
-                                                                 prob: typing.Union[str, float],
+                                                                 prob: str | float,
                                                                  rational_flag: bool):
     profile = game.mixed_behavior_profile(rational=rational_flag)
     action = game.players[player_idx].infosets[infoset_idx].actions[action_idx]
@@ -157,7 +157,7 @@ def test_profile_indexing_by_player_infoset_action_idx_reference(game: gbt.Game,
      ]
 )
 def test_profile_indexing_by_action_label_reference(game: gbt.Game, action_label: str,
-                                                    prob: typing.Union[str, float],
+                                                    prob: str | float,
                                                     rational_flag: bool):
     """Here we only use the action label, which are all valid"""
     profile = game.mixed_behavior_profile(rational=rational_flag)
@@ -181,7 +181,7 @@ def test_profile_indexing_by_action_label_reference(game: gbt.Game, action_label
 )
 def test_profile_indexing_by_invalid_action_label(game: gbt.Game, action_label: str,
                                                   rational_flag: bool,
-                                                  error: typing.Union[ValueError, KeyError]):
+                                                  error: ValueError | KeyError):
     """Test that we get a KeyError for a missing label, and a ValueError for an ambigiuous label
     """
     with pytest.raises(error):
@@ -225,7 +225,7 @@ def test_profile_indexing_by_invalid_infoset_label(rational_flag: bool):
 def test_profile_indexing_by_infoset_and_action_labels_reference(game: gbt.Game,
                                                                  infoset_label: str,
                                                                  action_label: str,
-                                                                 prob: typing.Union[str, float],
+                                                                 prob: str | float,
                                                                  rational_flag: bool):
     """Here we use the infoset label and action label, with some examples where the action label
     alone throws a ValueError (checked in a separate test)
@@ -255,7 +255,7 @@ def test_profile_indexing_by_player_infoset_action_labels_reference(game: gbt.Ga
                                                                     player_label: str,
                                                                     infoset_label: str,
                                                                     action_label: str,
-                                                                    prob: typing.Union[str, float],
+                                                                    prob: str | float,
                                                                     rational_flag: bool):
     """Here we use the infoset label and action label, with some examples where the action label
     alone throws a ValueError (checked in a separate test)
@@ -443,7 +443,7 @@ def test_profile_indexing_by_player_label_reference(game: gbt.Game, player_label
      (games.create_stripped_down_poker_efg(), 5, "6/10", True),
      ]
 )
-def test_set_probabilities_action(game: gbt.Game, action_idx: int, prob: typing.Union[str, float],
+def test_set_probabilities_action(game: gbt.Game, action_idx: int, prob: str | float,
                                   rational_flag: bool):
     """Test to set probabilities of actions by action index"""
     profile = game.mixed_behavior_profile(rational=rational_flag)
@@ -472,7 +472,7 @@ def test_set_probabilities_action(game: gbt.Game, action_idx: int, prob: typing.
      ]
 )
 def test_set_probabilities_action_by_label(game: gbt.Game, label: str,
-                                           prob: typing.Union[str, float], rational_flag: bool):
+                                           prob: str | float, rational_flag: bool):
     profile = game.mixed_behavior_profile(rational=rational_flag)
     prob = gbt.Rational(prob) if rational_flag else prob
     profile[label] = prob
@@ -634,7 +634,7 @@ def test_set_probabilities_player_by_label(game: gbt.Game, player_label: str, be
      (games.create_stripped_down_poker_efg(), 10, 0.25, False)]
 )
 def test_realiz_prob_nodes_reference(game: gbt.Game, node_idx: int,
-                                     realiz_prob: typing.Union[str, float], rational_flag: bool):
+                                     realiz_prob: str | float, rational_flag: bool):
     profile = game.mixed_behavior_profile(rational=rational_flag)
     realiz_prob = (gbt.Rational(realiz_prob) if rational_flag else realiz_prob)
     node = list(game.nodes)[node_idx]
@@ -658,7 +658,7 @@ def test_realiz_prob_nodes_reference(game: gbt.Game, node_idx: int,
      ]
 )
 def test_infoset_prob_reference(game: gbt.Game, player_idx: int, infoset_idx: int,
-                                prob: typing.Union[str, float], rational_flag: bool):
+                                prob: str | float, rational_flag: bool):
     profile = game.mixed_behavior_profile(rational=rational_flag)
     ip = profile.infoset_prob(game.players[player_idx].infosets[infoset_idx])
     assert ip == (gbt.Rational(prob) if rational_flag else prob)
@@ -681,7 +681,7 @@ def test_infoset_prob_reference(game: gbt.Game, player_idx: int, infoset_idx: in
      ]
 )
 def test_infoset_prob_by_label_reference(game: gbt.Game, label: str,
-                                         prob: typing.Union[str, float], rational_flag: bool):
+                                         prob: str | float, rational_flag: bool):
     profile = game.mixed_behavior_profile(rational=rational_flag)
     assert profile.infoset_prob(label) == (gbt.Rational(prob) if rational_flag else prob)
 
@@ -703,7 +703,7 @@ def test_infoset_prob_by_label_reference(game: gbt.Game, label: str,
      ]
 )
 def test_infoset_payoff_reference(game: gbt.Game, player_idx: int, infoset_idx: int,
-                                  payoff: typing.Union[str, float], rational_flag: bool):
+                                  payoff: str | float, rational_flag: bool):
     profile = game.mixed_behavior_profile(rational=rational_flag)
     iv = profile.infoset_value(game.players[player_idx].infosets[infoset_idx])
     assert iv == (gbt.Rational(payoff) if rational_flag else payoff)
@@ -726,7 +726,7 @@ def test_infoset_payoff_reference(game: gbt.Game, player_idx: int, infoset_idx: 
      ]
 )
 def test_infoset_payoff_by_label_reference(game: gbt.Game, label: str,
-                                           payoff: typing.Union[str, float], rational_flag: bool):
+                                           payoff: str | float, rational_flag: bool):
     profile = game.mixed_behavior_profile(rational=rational_flag)
     assert profile.infoset_value(label) == (gbt.Rational(payoff) if rational_flag else payoff)
 
@@ -761,7 +761,7 @@ def test_infoset_payoff_by_label_reference(game: gbt.Game, label: str,
      ]
 )
 def test_action_payoff_reference(game: gbt.Game, player_idx: int, infoset_idx: int,
-                                 action_idx: int, payoff: typing.Union[str, float],
+                                 action_idx: int, payoff: str | float,
                                  rational_flag: bool):
     profile = game.mixed_behavior_profile(rational=rational_flag)
     av = profile.action_value(game.players[player_idx].infosets[infoset_idx].actions[action_idx])
@@ -787,7 +787,7 @@ def test_action_payoff_reference(game: gbt.Game, player_idx: int, infoset_idx: i
      ]
 )
 def test_action_value_by_label_reference(game: gbt.Game, label: str,
-                                         payoff: typing.Union[str, float], rational_flag: bool):
+                                         payoff: str | float, rational_flag: bool):
     profile = game.mixed_behavior_profile(rational=rational_flag)
     assert profile.action_value(label) == (gbt.Rational(payoff) if rational_flag else payoff)
 
@@ -859,8 +859,8 @@ def test_regret_consistency(game: gbt.Game, rational_flag: bool):
      ]
 )
 def test_regret_reference(game: gbt.Game, player_idx: int, infoset_idx: int, action_idx: int,
-                          action_probs: typing.Union[None, list], rational_flag: bool,
-                          tol: typing.Union[gbt.Rational, float], value: typing.Union[str, float]):
+                          action_probs: None | list, rational_flag: bool,
+                          tol: gbt.Rational | float, value: str | float):
     action = game.players[player_idx].infosets[infoset_idx].actions[action_idx]
     profile = game.mixed_behavior_profile(rational=rational_flag)
     if action_probs:
@@ -941,8 +941,8 @@ def test_node_value_consistency(game: gbt.Game, rational_flag: bool):
      (games.create_stripped_down_poker_efg(), [1.0, 0.0, 1.0, 0.0, 1.0, 0.0], False, 1.0),
      ]
 )
-def test_liap_value_reference(game: gbt.Game, action_probs: typing.Union[None, list],
-                              rational_flag: bool, expected_value: typing.Union[str, float]):
+def test_liap_value_reference(game: gbt.Game, action_probs: None | list,
+                              rational_flag: bool, expected_value: str | float):
     """Tests liap_value under profile given by action_probs
     (which will be uniform if action_probs is None)
     """
@@ -985,9 +985,9 @@ def test_liap_value_reference(game: gbt.Game, action_probs: typing.Union[None, l
       2, 1, "2/7", True),
      ]
     )
-def test_node_belief_reference(game: gbt.Game, tol: typing.Union[gbt.Rational, float],
+def test_node_belief_reference(game: gbt.Game, tol: gbt.Rational | float,
                                probs: list, infoset_idx: int, member_idx: int,
-                               value: typing.Union[str, float], rational_flag: bool):
+                               value: str | float, rational_flag: bool):
     profile = game.mixed_behavior_profile(rational=rational_flag)
     _set_action_probs(profile, probs, rational_flag)
     node = game.infosets[infoset_idx].members[member_idx]
@@ -1181,7 +1181,7 @@ def test_specific_profile(game: gbt.Game, rational_flag: bool, data: list):
     for each player over his actions.
     """
     profile = game.mixed_behavior_profile(rational=rational_flag, data=data)
-    for (action, prob) in zip(game.actions, [k for i in data for j in i for k in j]):
+    for (action, prob) in zip(game.actions, [k for i in data for j in i for k in j], strict=True):
         assert profile[action] == (gbt.Rational(prob) if rational_flag else prob)
 
 

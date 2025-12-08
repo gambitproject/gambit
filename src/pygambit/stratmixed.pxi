@@ -288,7 +288,7 @@ class MixedStrategyProfile:
             raise ValueError(
                 "when setting a mixed strategy, must specify exactly one value per strategy"
             )
-        for s, v in zip(player.strategies, value):
+        for s, v in zip(player.strategies, value, strict=True):
             self._setprob_strategy(s, v)
 
     def __setitem__(
