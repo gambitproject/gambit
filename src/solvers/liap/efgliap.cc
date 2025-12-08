@@ -75,10 +75,10 @@ AgentLyapunovFunction::PenalizedLiapValue(const MixedBehaviorProfile<double> &p_
   double value = 0.0;
   // Liapunov function proper.
   for (const auto &infoset : p_profile.GetGame()->GetInfosets()) {
-    for (const auto &action : infoset->GetActions()) {
-      value += sqr(
-          std::max(m_scale * (p_profile.GetPayoff(action) - p_profile.GetPayoff(infoset)), 0.0));
-    }
+    double infosetValue = p_profile.GetPayoff(infoset);
+    value += sum_function(infoset->GetActions(), [&](const auto &action) {
+      return sqr(std::max(m_scale * (p_profile.GetPayoff(action) - infosetValue), 0.0));
+    });
   }
   // Penalty function for non-negativity constraint for each action
   for (auto element : static_cast<const Vector<double> &>(p_profile)) {
