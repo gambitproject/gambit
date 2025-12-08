@@ -56,7 +56,7 @@ copyright = "1994-2025, The Gambit Project"  # noqa
 # built documents.
 #
 
-_version_file = pathlib.Path(__file__).parent.parent / "GAMBIT_VERSION"
+_version_file = pathlib.Path(__file__).parent.parent / "build_support/GAMBIT_VERSION"
 if _version_file.exists():
     _full_version = _version_file.read_text().strip()
     # The short X.Y version.

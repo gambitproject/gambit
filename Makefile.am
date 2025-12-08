@@ -23,8 +23,8 @@
 ACLOCAL_AMFLAGS = -I m4
 
 EXTRA_DIST = \
-    gambit.wxs \
-	contrib/mac/Info.plist \
+    build_support/gambit.wxs \
+	build_support/mac/Info.plist \
 	contrib/mac/gambit.icns \
 	src/labenski/README.txt \
 	src/labenski/art/grab.xpm \
@@ -373,7 +373,7 @@ bin_PROGRAMS += gambit
 endif
 
 # Read version from GAMBIT_VERSION file for use in compilation
-GAMBIT_VERSION = $(shell cat $(top_srcdir)/GAMBIT_VERSION)
+GAMBIT_VERSION = $(shell cat $(top_srcdir)/build_support/GAMBIT_VERSION)
 
 # Define VERSION for all C++ compilations and set include paths
 AM_CPPFLAGS = -I$(top_srcdir)/src -DVERSION=\"$(GAMBIT_VERSION)\"
@@ -623,7 +623,7 @@ osx-bundle:
 	-mkdir Gambit.app/Contents
 	-mkdir Gambit.app/Contents/MacOS
 	-mkdir Gambit.app/Contents/Resources
-	cp ${top_srcdir}/contrib/mac/Info.plist Gambit.app/Contents
+	cp ${top_srcdir}/build_support/mac/Info.plist Gambit.app/Contents
 	cp ${top_srcdir}/contrib/mac/gambit.icns Gambit.app/Contents/Resources/gambit.icns
 	echo -n 'APPL????' > Gambit.app/Contents/PkgInfo
 	cp gambit Gambit.app/Contents/MacOS/gambit
@@ -639,7 +639,7 @@ osx-dmg:  osx-bundle
 msw-msi:
 	-mkdir installer
 	cp gambit* installer
-	candle gambit.wxs
+	candle build_support/gambit.wxs
 	light -ext WixUIExtension gambit.wixobj
 
 clang-tidy:
