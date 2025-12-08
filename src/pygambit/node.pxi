@@ -45,7 +45,7 @@ class NodeChildren:
         for child in self.parent.deref().GetChildren():
             yield Node.wrap(child)
 
-    def __getitem__(self, action: typing.Union[int, str, Action]) -> Node:
+    def __getitem__(self, action: int | str | Action) -> Node:
         """Returns the successor node which is reached after 'action' is played.
 
         .. versionchanged: 16.5.0
@@ -136,7 +136,7 @@ class Node:
         return Game.wrap(self.node.deref().GetGame())
 
     @property
-    def infoset(self) -> typing.Optional[Infoset]:
+    def infoset(self) -> Infoset | None:
         """The information set to which this node belongs.
 
         If this is a terminal node, which belongs to no information set,
@@ -147,7 +147,7 @@ class Node:
         return None
 
     @property
-    def player(self) -> typing.Optional[Player]:
+    def player(self) -> Player | None:
         """The player who makes the decision at this node.
 
         If this is a terminal node, None is returned.
@@ -157,7 +157,7 @@ class Node:
         return None
 
     @property
-    def parent(self) -> typing.Optional[Node]:
+    def parent(self) -> Node | None:
         """The parent of this node.
 
         If this is the root node, None is returned.
@@ -167,7 +167,7 @@ class Node:
         return None
 
     @property
-    def prior_action(self) -> typing.Optional[Action]:
+    def prior_action(self) -> Action | None:
         """The action which leads to this node.
 
         If this is the root node, None is returned.
@@ -177,7 +177,7 @@ class Node:
         return None
 
     @property
-    def own_prior_action(self) -> typing.Optional[Action]:
+    def own_prior_action(self) -> Action | None:
         """The last action taken by the node's owner before reaching this node.
 
         Returns
@@ -196,7 +196,7 @@ class Node:
         return None
 
     @property
-    def prior_sibling(self) -> typing.Optional[Node]:
+    def prior_sibling(self) -> Node | None:
         """The node which is immediately before this one in its parent's children.
 
         If this is the root node or the first child of its parent,
@@ -207,7 +207,7 @@ class Node:
         return None
 
     @property
-    def next_sibling(self) -> typing.Optional[Node]:
+    def next_sibling(self) -> Node | None:
         """The node which is immediately after this one in its parent's children.
 
         If this is the root node or the last child of its parent,
@@ -245,7 +245,7 @@ class Node:
         return self.node.deref().IsStrategyReachable()
 
     @property
-    def outcome(self) -> typing.Optional[Outcome]:
+    def outcome(self) -> Outcome | None:
         """Returns the outcome attached to the node.
 
         If no outcome is attached to the node, None is returned.

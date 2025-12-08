@@ -85,7 +85,7 @@ class Action:
         return Infoset.wrap(self.action.deref().GetInfoset())
 
     @property
-    def prob(self) -> typing.Union[decimal.Decimal, Rational]:
+    def prob(self) -> decimal.Decimal | Rational:
         """
         Get the probability a chance action is played.
 

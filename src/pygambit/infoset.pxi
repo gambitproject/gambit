@@ -45,7 +45,7 @@ class InfosetMembers:
         for member in self.infoset.deref().GetMembers():
             yield Node.wrap(member)
 
-    def __getitem__(self, index: typing.Union[int, str]) -> Node:
+    def __getitem__(self, index: int | str) -> Node:
         if isinstance(index, str):
             if not index.strip():
                 raise ValueError("Node label cannot be empty or all whitespace")
@@ -86,7 +86,7 @@ class InfosetActions:
         for action in self.infoset.deref().GetActions():
             yield Action.wrap(action)
 
-    def __getitem__(self, index: typing.Union[int, str]) -> Action:
+    def __getitem__(self, index: int | str) -> Action:
         if isinstance(index, str):
             if not index.strip():
                 raise ValueError("Action label cannot be empty or all whitespace")
@@ -167,7 +167,7 @@ class Infoset:
         return InfosetActions.wrap(self.infoset)
 
     @property
-    def own_prior_actions(self) -> typing.List[typing.Optional[Action]]:
+    def own_prior_actions(self) -> typing.List[Action | None]:
         """The set of actions taken by the player immediately preceding the member nodes
         in the information set.
 

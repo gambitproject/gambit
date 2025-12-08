@@ -261,7 +261,7 @@ def _logit_strategy_estimate(profile: MixedStrategyProfileDouble,
 
 
 def _logit_strategy_lambda(game: Game,
-                           lam: typing.Union[float, typing.List[float]],
+                           lam: float | typing.List[float],
                            first_step: float = .03,
                            max_accel: float = 1.1) -> typing.List[LogitQREMixedStrategyProfile]:
     """Compute the first QRE encountered along the principal branch of the strategic
@@ -342,7 +342,7 @@ def _logit_behavior_estimate(profile: MixedBehaviorProfileDouble,
 
 
 def _logit_behavior_lambda(game: Game,
-                           lam: typing.Union[float, typing.List[float]],
+                           lam: float | typing.List[float],
                            first_step: float = .03,
                            max_accel: float = 1.1) -> typing.List[LogitQREMixedBehaviorProfile]:
     """Compute the first QRE encountered along the principal branch of the extensive

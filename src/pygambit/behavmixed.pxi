@@ -257,8 +257,8 @@ class MixedBehavior:
 
     def __getitem__(
             self,
-            index: typing.Union[InfosetReference, ActionReference]
-    ) -> typing.Union[MixedAction, ProfileDType]:
+            index: InfosetReference | ActionReference
+    ) -> MixedAction | ProfileDType:
         """Access a component of the mixed behavior specified by `index`.
 
         Parameters
@@ -299,7 +299,7 @@ class MixedBehavior:
         )
 
     def __setitem__(self,
-                    index: typing.Union[InfosetReference, ActionReference],
+                    index: InfosetReference | ActionReference,
                     value: typing.Any) -> None:
         """Sets a component of the mixed behavior to `value`.
 
@@ -434,8 +434,8 @@ class MixedBehaviorProfile:
 
     def __getitem__(
             self,
-            index: typing.Union[PlayerReference, InfosetReference, ActionReference]
-    ) -> typing.Union[MixedBehavior, MixedAction, ProfileDType]:
+            index: PlayerReference | InfosetReference | ActionReference
+    ) -> MixedBehavior | MixedAction | ProfileDType:
         """Access a component of the mixed behavior specified by `index`.
 
         Parameters
@@ -506,7 +506,7 @@ class MixedBehaviorProfile:
 
     def __setitem__(
             self,
-            index: typing.Union[PlayerReference, InfosetReference, ActionReference],
+            index: PlayerReference | InfosetReference | ActionReference,
             value: typing.Any
     ) -> None:
         """Sets a probability, mixed agent strategy, or mixed behavior strategy to `value`.

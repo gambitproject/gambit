@@ -240,8 +240,8 @@ class MixedStrategyProfile:
 
     def __getitem__(
             self,
-            index: typing.Union[PlayerReference, StrategyReference]
-    ) -> typing.Union[MixedStrategy, ProfileDType]:
+            index: PlayerReference | StrategyReference
+    ) -> MixedStrategy | ProfileDType:
         """Access a component of the mixed strategy profile specified by `index`.
 
         Parameters
@@ -293,7 +293,7 @@ class MixedStrategyProfile:
 
     def __setitem__(
             self,
-            index: typing.Union[PlayerReference, StrategyReference],
+            index: PlayerReference | StrategyReference,
             value: typing.Any
     ) -> None:
         """Sets a probability or a mixed strategy to `value`.

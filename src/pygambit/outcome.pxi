@@ -80,8 +80,8 @@ class Outcome:
         return self.outcome.deref().GetNumber() - 1
 
     def __getitem__(
-            self, player: typing.Union[Player, str]
-    ) -> typing.Union[decimal.Decimal, Rational]:
+            self, player: Player | str
+    ) -> decimal.Decimal | Rational:
         """The payoff to `player` at the outcome.
 
         Raises
@@ -99,7 +99,7 @@ class Outcome:
         else:
             return Rational(payoff)
 
-    def __setitem__(self, player: typing.Union[Player, str], value: typing.Any) -> None:
+    def __setitem__(self, player: Player | str, value: typing.Any) -> None:
         """Set the payoff to `player` at the outcome.
 
         Parameters
@@ -153,7 +153,7 @@ class TreeGameOutcome:
             deref(self.psp).deref() == deref(cython.cast(TreeGameOutcome, other).psp).deref()
         )
 
-    def __getitem__(self, player: typing.Union[Player, str]) -> Rational:
+    def __getitem__(self, player: Player | str) -> Rational:
         """The payoff to `player` at the outcome.
 
         Parameters
