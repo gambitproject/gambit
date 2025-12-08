@@ -164,17 +164,24 @@ grid. The program continues this process with finer and finer grids
 until locating a mixed strategy profile at which the maximum regret is
 small.
 
-.. _gnm:
-
-gnm
----
-
 .. _ipa:
 
 ipa
 ---
 
-.. _convert:
+:program:`gambit-ipa` reads a game on standard input and computes Nash
+equilibria using an iterated polymatrix approximation approach
+developed by Govindan and Wilson [GovWil04]_.
+This program is based on the
+`Gametracer 0.2 <http://dags.stanford.edu/Games/gametracer.html>`_
+implementation by Ben Blum and Christian Shelton.
 
-convert
--------
+The algorithm takes as a parameter a mixed strategy profile.  This profile is
+interpreted as defining a ray in the space of games.  The profile must have
+the property that, for each player, the most frequently played strategy must
+be unique.
+
+.. _gnm:
+
+gnm
+---
