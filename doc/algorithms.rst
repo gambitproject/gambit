@@ -11,6 +11,7 @@ Algorithm         Description                                                   
 ================  ===========================================================================   ========================================  ==========================================
 :ref:`enumpure`   Enumerate pure-strategy equilibria of a game                                  :py:func:`pygambit.nash.enumpure_solve`   :ref:`gambit-enumpure <gambit-enumpure>`
 :ref:`enummixed`  Enumerate equilibria in a two-player game                                     :py:func:`pygambit.nash.enummixed_solve`  :ref:`gambit-enummixed <gambit-enummixed>`
+:ref:`enumpoly`   Compute equilibria of a game using polynomial systems of equations            :py:func:`pygambit.nash.enumpoly_solve`   :ref:`gambit-enumpoly <gambit-enumpoly>`
 :ref:`lp`         Compute equilibria in a two-player constant-sum game via linear programming   :py:func:`pygambit.nash.lp_solve`         :ref:`gambit-lp <gambit-lp>`
 :ref:`lcp`        Compute equilibria in a two-player game via linear complementarity            :py:func:`pygambit.nash.lcp_solve`        :ref:`gambit-lcp <gambit-lcp>`
 :ref:`liap`       Compute Nash equilibria using function minimization                           :py:func:`pygambit.nash.liap_solve`       :ref:`gambit-liap <gambit-liap>`
@@ -44,6 +45,29 @@ It was shown by Shapley [Sha74]_ that there are equilibria not accessible via th
 
 enumpoly
 --------
+
+Reads a game on standard input and
+computes Nash equilibria by solving systems of polynomial equations
+and inequalities.
+
+This program searches for all Nash equilibria in a strategic game
+using a support enumeration approach. This approach computes all the
+supports which could, in principle, be the support of a Nash
+equilibrium.  For each candidate support, it attempts to compute
+totally mixed equilibria on that support by successively subdividing
+the space of mixed strategy profiles or mixed behavior profiles (as appropriate).
+By using the fact that the equilibrium conditions imply a collection
+of equations and inequalities which can be expressed as multilinear
+polynomials, the subdivision constructed is such that each cell
+contains either no equilibria or exactly one equilibrium.
+
+For strategic games, the program searches supports in the order proposed
+by Porter, Nudelman, and Shoham [PNS04]_.  For two-player games, this
+prioritises supports for which both players have the same number of
+strategies.  For games with three or more players, this prioritises
+supports which have the fewest strategies in total.  For many classes
+of games, this will tend to lower the average time until finding one equilibrium,
+as well as finding the second equilibrium (if one exists).
 
 .. _lcp:
 
