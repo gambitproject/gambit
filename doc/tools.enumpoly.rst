@@ -97,11 +97,8 @@ Computing equilibria of the strategic game :download:`e01.nfg
 "Selten's horse"
 
    $ gambit-enumpoly e01.nfg
-
    Compute Nash equilibria by solving polynomial systems
-
    Gambit version |release|, Copyright (C) 1994-2025, The Gambit Project
-
    This is free software, distributed under the GNU GPL
 
    NE,1.000000,0.000000,1.000000,0.000000,0.000000,1.000000

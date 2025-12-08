@@ -91,11 +91,8 @@ Computing an equilibrium in mixed strategies of :download:`e02.efg
 (International Journal of Game Theory, 1975)
 
    $ gambit-simpdiv e02.nfg
-
    Compute Nash equilibria using simplicial subdivision
-
    Gambit version |release|, Copyright (C) 1994-2025, The Gambit Project
-
    This is free software, distributed under the GNU GPL
 
    NE,1,0,0,1,0
