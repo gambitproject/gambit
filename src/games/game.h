@@ -892,14 +892,6 @@ public:
   }
   /// Remove the strategy from the game
   virtual void DeleteStrategy(const GameStrategy &p_strategy) { throw UndefinedException(); }
-  /// Returns the number of strategy contingencies in the game
-  int NumStrategyContingencies() const
-  {
-    BuildComputedValues();
-    return std::transform_reduce(
-        m_players.begin(), m_players.end(), 0, std::multiplies<>(),
-        [](const std::shared_ptr<GamePlayerRep> &p) { return p->m_strategies.size(); });
-  }
   /// Returns the total number of actions in the game
   virtual int BehavProfileLength() const = 0;
   //@}
