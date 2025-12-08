@@ -120,15 +120,36 @@ zero exactly at strategy profiles which are Nash equilibria.
 Note that this procedure is not globally convergent. That is, it is
 not guaranteed to find all, or even any, Nash equilibria.
 
-.. _simpdiv:
-
-simpdiv
---------
-
 .. _logit:
 
 logit
 -----
+
+Reads a game on standard input and computes the
+principal branch of the (logit) quantal response correspondence.
+
+The method is based on the procedure described in Turocy [Tur05]_ for
+strategic games and Turocy [Tur10]_ for extensive games.
+It uses standard path-following methods (as
+described in Allgower and Georg's "Numerical Continuation Methods") to
+adaptively trace the principal branch of the correspondence
+efficiently and securely.
+
+The method used is a predictor-corrector method, which first generates
+a prediction using the differential equations describing the branch of
+the correspondence, followed by a corrector step which refines the
+prediction using Newton's method for finding a zero of a function. Two
+parameters control the operation of this tracing.
+
+In extensive games, logit quantal response equilibria are not well-defined
+if an information set is not reached due to being the successor of chance
+moves with zero probability.  In such games, the implementation treats
+the beliefs at such information sets as being uniform across all member nodes.
+
+.. _simpdiv:
+
+simpdiv
+--------
 
 .. _gnm:
 
