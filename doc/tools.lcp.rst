@@ -4,21 +4,7 @@
 =========================================================================================
 
 
-:program:`gambit-lcp` reads a two-player game on standard input and
-computes Nash equilibria by finding solutions to a linear
-complementarity problem. For extensive games, the program uses the
-sequence form representation of the extensive game, as defined by
-Koller, Megiddo, and von Stengel [KolMegSte94]_, and applies the
-algorithm developed by Lemke. For strategic games, the program using
-the method of Lemke and Howson [LemHow64]_.  There exist strategic
-games for which some equilibria cannot be located by this method; see
-Shapley [Sha74]_.
-
-In a two-player strategic game, the set of Nash equilibria can be expressed
-as the union of convex sets. This program will find extreme points
-of those convex sets.  See :ref:`gambit-enummixed` for a method
-which is guaranteed to find all the extreme points for a strategic
-game.
+:ref:`Algorithm description <lcp>`
 
 .. program:: gambit-lcp
 
