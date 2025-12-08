@@ -305,20 +305,32 @@ public:
   /// @brief Return the total number of elements summed across all inner ranges
   std::size_t size() const
   {
-    auto outer = (m_owner->*OuterMemFn)();
+    auto outer = (m_owner.get()->*OuterMemFn)();
     return std::accumulate(
         outer.begin(), outer.end(), static_cast<std::size_t>(0),
-        [](std::size_t acc, auto &elem) { return acc + (elem.*InnerMemFn)().size(); });
+        [](std::size_t acc, auto &elem) { return acc + (elem.get()->*InnerMemFn)().size(); });
   }
 
   /// @brief Returns the shape, a vector of the sizes of the inner ranges
   std::vector<std::size_t> shape() const
   {
     std::vector<std::size_t> result;
-    auto outer = (m_owner->*OuterMemFn)();
+    auto outer = (m_owner.get()->*OuterMemFn)();
     result.reserve(outer.size());
     std::transform(outer.begin(), outer.end(), std::back_inserter(result),
-                   [](const auto &element) { return (element.*InnerMemFn)().size(); });
+                   [](const auto &element) { return (element.get()->*InnerMemFn)().size(); });
+    return result;
+  }
+
+  /// @brief Returns the shape, a Gambit Array of the sizes of the inner ranges
+  /// @deprecated This is for backwards compatibility; uses should be migrated to shape().
+  Array<std::size_t> shape_array() const
+  {
+    Array<std::size_t> result;
+    auto outer = (m_owner.get()->*OuterMemFn)();
+    result.reserve(outer.size());
+    std::transform(outer.begin(), outer.end(), std::back_inserter(result),
+                   [](const auto &element) { return (element.get()->*InnerMemFn)().size(); });
     return result;
   }
 

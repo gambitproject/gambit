@@ -128,7 +128,7 @@ bool StrategicLyapunovFunction::Gradient(const Vector<double> &v, Vector<double>
       ++element;
     }
   }
-  Project(d, m_game->NumStrategies());
+  Project(d, m_game->GetStrategies().shape_array());
   return true;
 }
 

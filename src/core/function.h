@@ -42,7 +42,7 @@ public:
 
 protected:
   // Project the gradient 'x' onto the plane of the product of simplices.
-  void Project(Vector<double> &x, const Array<int> &lengths) const;
+  void Project(Vector<double> &x, const Array<size_t> &lengths) const;
 };
 
 class FunctionMinimizerError : public std::runtime_error {

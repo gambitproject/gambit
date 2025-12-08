@@ -200,15 +200,6 @@ Game GameAGGRep::Copy() const
 //                  GameAGGRep: Dimensions of the game
 //------------------------------------------------------------------------
 
-Array<int> GameAGGRep::NumStrategies() const
-{
-  Array<int> ns;
-  for (const auto &player : m_players) {
-    ns.push_back(player->GetStrategies().size());
-  }
-  return ns;
-}
-
 GameStrategy GameAGGRep::GetStrategy(int p_index) const
 {
   for (const auto &player : m_players) {

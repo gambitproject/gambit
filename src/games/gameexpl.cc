@@ -58,16 +58,6 @@ Rational GameExplicitRep::GetMaxPayoff() const
 //                GameExplicitRep: Dimensions of the game
 //------------------------------------------------------------------------
 
-Array<int> GameExplicitRep::NumStrategies() const
-{
-  BuildComputedValues();
-  Array<int> dim;
-  for (const auto &player : m_players) {
-    dim.push_back(player->m_strategies.size());
-  }
-  return dim;
-}
-
 GameStrategy GameExplicitRep::GetStrategy(int p_index) const
 {
   BuildComputedValues();

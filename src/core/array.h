@@ -94,6 +94,7 @@ public:
   void erase(iterator pos) { m_data.erase(pos); }
   void push_back(const T &value) { m_data.push_back(value); }
   void pop_back() { m_data.pop_back(); }
+  void reserve(size_t len) { m_data.reserve(len); }
 };
 
 /// Convenience function to erase the element at `p_index`

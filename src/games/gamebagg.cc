@@ -100,7 +100,7 @@ template <class T> T BAGGMixedStrategyProfileRep<T>::GetPayoff(int pl) const
 {
   auto &g = dynamic_cast<GameBAGGRep &>(*(this->m_support.GetGame()));
   std::vector<double> s(g.MixedProfileLength());
-  Array<int> ns = g.NumStrategies();
+  const auto ns = g.GetStrategies().shape();
   int bplayer = -1, btype = -1;
   for (int i = 0, offs = 0; i < g.baggPtr->getNumPlayers(); ++i) {
     for (int tp = 0; tp < g.baggPtr->getNumTypes(i); ++tp) {
@@ -108,7 +108,7 @@ template <class T> T BAGGMixedStrategyProfileRep<T>::GetPayoff(int pl) const
         bplayer = i;
         btype = tp;
       }
-      for (int j = 0; j < ns[g.baggPtr->typeOffset[i] + tp + 1]; ++j, ++offs) {
+      for (int j = 0; j < ns[g.baggPtr->typeOffset[i] + tp]; ++j, ++offs) {
         const GameStrategy strategy = this->m_support.GetGame()
                                           ->GetPlayer(g.baggPtr->typeOffset[i] + tp + 1)
                                           ->GetStrategy(j + 1);
@@ -235,15 +235,6 @@ Game GameBAGGRep::Copy() const
 //------------------------------------------------------------------------
 //                 GameBAGGRep: Dimensions of the game
 //------------------------------------------------------------------------
-
-Array<int> GameBAGGRep::NumStrategies() const
-{
-  Array<int> ns;
-  for (const auto &player : m_players) {
-    ns.push_back(player->m_strategies.size());
-  }
-  return ns;
-}
 
 PureStrategyProfile GameBAGGRep::NewPureStrategyProfile() const
 {

@@ -871,13 +871,11 @@ public:
   using Strategies =
       NestedElementCollection<Game, &GameRep::GetPlayers, &GamePlayerRep::GetStrategies>;
   /// Returns the set of strategies in the game
-  virtual Strategies GetStrategies() const
+  Strategies GetStrategies() const
   {
     BuildComputedValues();
     return Strategies(std::const_pointer_cast<GameRep>(this->shared_from_this()));
   }
-  /// The number of strategies for each player
-  virtual Array<int> NumStrategies() const = 0;
   /// Gets the i'th strategy in the game, numbered globally
   virtual GameStrategy GetStrategy(int p_index) const = 0;
   /// Creates a new strategy for the player
