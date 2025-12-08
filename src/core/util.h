@@ -157,6 +157,15 @@ auto minimize_function(const Container &p_container, const Func &p_function)
       [](const T &a, const T &b) -> T { return std::min(a, b); }, p_function);
 }
 
+/// @brief Returns the sum of the function over the container
+template <class Container, class Func>
+auto sum_function(const Container &p_container, const Func &p_function)
+{
+  using T = decltype(p_function(*(p_container.begin())));
+  return std::transform_reduce(p_container.begin(), p_container.end(), static_cast<T>(0),
+                               std::plus<>{}, p_function);
+}
+
 //========================================================================
 //                        Exception classes
 //========================================================================
