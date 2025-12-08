@@ -64,9 +64,8 @@ private:
 inline double sum_infoset_probs(const MixedBehaviorProfile<double> &p_profile,
                                 const GameInfoset &p_infoset)
 {
-  auto actions = p_infoset->GetActions();
-  return std::accumulate(actions.begin(), actions.end(), 0.0,
-                         [p_profile](double t, const GameAction &a) { return t + p_profile[a]; });
+  return sum_function(p_infoset->GetActions(),
+                      [&p_profile](const auto &action) { return p_profile[action]; });
 }
 
 double
@@ -76,7 +75,7 @@ AgentLyapunovFunction::PenalizedLiapValue(const MixedBehaviorProfile<double> &p_
   // Liapunov function proper.
   for (const auto &infoset : p_profile.GetGame()->GetInfosets()) {
     double infosetValue = p_profile.GetPayoff(infoset);
-    value += sum_function(infoset->GetActions(), [&](const auto &action) {
+    value += sum_function(infoset->GetActions(), [&](const auto &action) -> double {
       return sqr(std::max(m_scale * (p_profile.GetPayoff(action) - infosetValue), 0.0));
     });
   }
@@ -85,9 +84,9 @@ AgentLyapunovFunction::PenalizedLiapValue(const MixedBehaviorProfile<double> &p_
     value += m_penalty * sqr(std::min(element, 0.0));
   }
   // Penalty function for sum-to-one constraint for each action
-  for (const auto &infoset : p_profile.GetGame()->GetInfosets()) {
-    value += m_penalty * sqr(sum_infoset_probs(m_profile, infoset) - 1.0);
-  }
+  value += sum_function(p_profile.GetGame()->GetInfosets(), [&](const auto &infoset) -> double {
+    return m_penalty * sqr(sum_infoset_probs(m_profile, infoset) - 1.0);
+  });
   return value;
 }
 
