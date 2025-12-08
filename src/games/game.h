@@ -901,12 +901,16 @@ public:
 
   /// @name Information sets
   //@{
-  class Infosets;
+  using Infosets =
+      NestedElementCollection<Game, &GameRep::GetPlayers, &GamePlayerRep::GetInfosets>;
 
   /// Returns the iset'th information set in the game (numbered globally)
   virtual GameInfoset GetInfoset(int iset) const { throw UndefinedException(); }
   /// Returns the set of information sets in the game
-  virtual Infosets GetInfosets() const;
+  virtual Infosets GetInfosets() const
+  {
+    return Infosets(std::const_pointer_cast<GameRep>(this->shared_from_this()));
+  }
   /// Sort the information sets for each player in a canonical order
   virtual void SortInfosets() {}
   /// Returns the set of actions taken by the infoset's owner before reaching this infoset
@@ -957,83 +961,6 @@ public:
   /// Build any computed values anew
   virtual void BuildComputedValues() const {}
 };
-
-class GameRep::Infosets {
-  Players m_players;
-
-public:
-  explicit Infosets(const Players &outer) : m_players(outer) {}
-
-  class iterator {
-    using OuterIter = Players::iterator;
-    using InnerIter = GamePlayerRep::Infosets::iterator;
-
-    OuterIter m_playerIterator, m_playerEnd;
-    InnerIter m_infosetIterator, m_infosetEnd;
-
-    void next()
-    {
-      while (m_playerIterator != m_playerEnd && m_infosetIterator == m_infosetEnd) {
-        ++m_playerIterator;
-        if (m_playerIterator != m_playerEnd) {
-          auto infosets = (*m_playerIterator)->GetInfosets();
-          m_infosetIterator = infosets.begin();
-          m_infosetEnd = infosets.end();
-        }
-      }
-    }
-
-  public:
-    using iterator_category = std::forward_iterator_tag;
-    using value_type = GameInfoset;
-    using reference = GameInfoset;
-    using pointer = GameInfoset;
-    using difference_type = std::ptrdiff_t;
-
-    iterator() = default;
-
-    iterator(const OuterIter &p_playerIterator, const OuterIter &p_playerEnd)
-      : m_playerIterator(p_playerIterator), m_playerEnd(p_playerEnd)
-    {
-      if (m_playerIterator != m_playerEnd) {
-        const auto infosets = (*m_playerIterator)->GetInfosets();
-        m_infosetIterator = infosets.begin();
-        m_infosetEnd = infosets.end();
-      }
-      next();
-    }
-
-    reference operator*() const { return *m_infosetIterator; }
-    pointer operator->() const { return *m_infosetIterator; }
-
-    iterator &operator++()
-    {
-      ++m_infosetIterator;
-      next();
-      return *this;
-    }
-
-    iterator operator++(int)
-    {
-      iterator tmp = *this;
-      ++(*this);
-      return tmp;
-    }
-
-    friend bool operator==(const iterator &a, const iterator &b)
-    {
-      return a.m_playerIterator == b.m_playerIterator &&
-             (a.m_playerIterator == a.m_playerEnd || a.m_infosetIterator == b.m_infosetIterator);
-    }
-
-    friend bool operator!=(const iterator &a, const iterator &b) { return !(a == b); }
-  };
-
-  iterator begin() const { return {m_players.begin(), m_players.end()}; }
-  iterator end() const { return {m_players.end(), m_players.end()}; }
-};
-
-inline GameRep::Infosets GameRep::GetInfosets() const { return Infosets(GetPlayers()); }
 
 //=======================================================================
 //          Inline members of game representation classes

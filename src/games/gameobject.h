@@ -214,6 +214,98 @@ public:
   iterator cend() const { return {m_owner, m_container, (m_owner) ? m_container->size() : 0}; }
 };
 
+/// @brief A view on a nested collection of objects (e.g. infosets of players or strategies of
+/// players)
+template <class T, auto OuterMemFn, auto InnerMemFn> class NestedElementCollection {
+  T m_owner;
+
+public:
+  class iterator {
+    using OuterRange = decltype((m_owner.get()->*OuterMemFn)());
+    using OuterIter = decltype(std::begin(std::declval<OuterRange &>()));
+
+    using OuterElem = decltype(*std::declval<OuterIter>());
+    using InnerRange = decltype((std::declval<OuterElem>().get()->*InnerMemFn)());
+    using InnerIter = decltype(std::begin(std::declval<InnerRange &>()));
+
+    T m_owner;
+    OuterRange m_outerRange;
+    OuterIter m_outerIt, m_outerEnd;
+    InnerRange m_innerRange;
+    InnerIter m_innerIt, m_innerEnd;
+
+    void update_inner()
+    {
+      if (m_outerIt != m_outerEnd) {
+        m_innerRange = ((*m_outerIt).get()->*InnerMemFn)();
+        m_innerIt = m_innerRange.begin();
+        m_innerEnd = m_innerRange.end();
+      }
+    }
+
+    void skip_empty()
+    {
+      while (m_outerIt != m_outerEnd && m_innerIt == m_innerEnd) {
+        ++m_outerIt;
+        if (m_outerIt != m_outerEnd) {
+          update_inner();
+        }
+      }
+    }
+
+  public:
+    using iterator_category = std::forward_iterator_tag;
+    using reference = decltype(*std::declval<InnerIter>());
+    using pointer = std::add_pointer_t<reference>;
+    using value_type = std::remove_reference_t<reference>;
+    using difference_type = std::ptrdiff_t;
+
+    iterator() = default;
+
+    iterator(T p_owner, const bool p_isEnd)
+      : m_owner(p_owner), m_outerRange((m_owner.get()->*OuterMemFn)()),
+        m_outerIt(std::begin(m_outerRange)), m_outerEnd(std::end(m_outerRange))
+    {
+      if (p_isEnd) {
+        m_outerIt = m_outerEnd;
+        return;
+      }
+      if (m_outerIt != m_outerEnd) {
+        update_inner();
+      }
+      skip_empty();
+    }
+
+    reference operator*() const { return *m_innerIt; }
+    pointer operator->() const { return *m_innerIt; }
+
+    iterator &operator++()
+    {
+      ++m_innerIt;
+      skip_empty();
+      return *this;
+    }
+    iterator operator++(int)
+    {
+      iterator tmp = *this;
+      ++(*this);
+      return tmp;
+    }
+
+    bool operator==(const iterator &p_other) const
+    {
+      return m_outerIt == p_other.m_outerIt &&
+             (m_outerIt == m_outerEnd || m_innerIt == p_other.m_innerIt);
+    }
+    bool operator!=(const iterator &p_other) const { return !(*this == p_other); }
+  };
+
+  explicit NestedElementCollection(T owner) : m_owner(owner) {}
+
+  iterator begin() const { return {m_owner, false}; }
+  iterator end() const { return {m_owner, true}; }
+};
+
 } // end namespace Gambit
 
 #endif // GAMBIT_GAMES_GAMEOBJECT_H
