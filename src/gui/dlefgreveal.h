@@ -28,15 +28,18 @@
 namespace Gambit::GUI {
 
 class RevealMoveDialog final : public wxDialog {
-  GameDocument *m_doc;
-  Array<wxCheckBox *> m_players;
+  GameDocument *m_doc{nullptr};
+
+  struct PlayerEntry {
+    GamePlayer player;
+    wxCheckBox *checkbox;
+  };
+
+  std::vector<PlayerEntry> m_entries;
 
 public:
-  // Lifecycle
-  RevealMoveDialog(wxWindow *, GameDocument *);
-
-  // Data access (only valid when ShowModal() returns with wxID_OK)
-  Array<GamePlayer> GetPlayers() const;
+  RevealMoveDialog(wxWindow *p_parent, GameDocument *p_doc);
+  std::vector<GamePlayer> GetPlayers() const;
 };
 
 } // end namespace Gambit::GUI

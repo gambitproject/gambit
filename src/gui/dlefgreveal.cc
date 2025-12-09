@@ -29,60 +29,54 @@
 #include "dlefgreveal.h"
 
 namespace Gambit::GUI {
-//=========================================================================
-//                  RevealMoveDialog: Member functions
-//=========================================================================
 
 RevealMoveDialog::RevealMoveDialog(wxWindow *p_parent, GameDocument *p_doc)
-  : wxDialog(p_parent, wxID_ANY, _("Reveal this move to players"), wxDefaultPosition), m_doc(p_doc)
+  : wxDialog(p_parent, wxID_ANY, _("Reveal this move to players"), wxDefaultPosition,
+             wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
+    m_doc(p_doc)
 {
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
-  auto *playerBox = new wxStaticBoxSizer(wxHORIZONTAL, this, _("Reveal the move to players"));
+  auto *playerBox = new wxStaticBoxSizer(wxVERTICAL, this, _("Reveal the move to players"));
 
-  auto *boxSizer = new wxBoxSizer(wxVERTICAL);
+  const auto &players = m_doc->GetGame()->GetPlayers();
+  m_entries.reserve(players.size());
 
-  for (size_t pl = 1; pl <= m_doc->NumPlayers(); pl++) {
-    auto player = m_doc->GetGame()->GetPlayer(pl);
-    if (player->GetLabel().empty()) {
-      m_players.push_back(
-          new wxCheckBox(this, wxID_ANY, wxString(player->GetLabel().c_str(), *wxConvCurrent)));
+  for (const auto &player : players) {
+    wxString label;
+    if (!player->GetLabel().empty()) {
+      label = wxString::FromUTF8(player->GetLabel());
     }
     else {
-      m_players.push_back(new wxCheckBox(this, wxID_ANY, wxString::Format(_T("Player %d"), pl)));
+      label = wxString::Format("Player %u", player->GetNumber());
     }
-    m_players[pl]->SetValue(true);
-    m_players[pl]->SetForegroundColour(m_doc->GetStyle().GetPlayerColor(player));
-    boxSizer->Add(m_players[pl], 1, wxALL | wxEXPAND, 0);
+    auto *cb = new wxCheckBox(this, wxID_ANY, label);
+    cb->SetValue(true);
+    cb->SetForegroundColour(m_doc->GetStyle().GetPlayerColor(player));
+
+    m_entries.push_back({player, cb});
+    playerBox->Add(cb, wxSizerFlags().Expand().Border(wxALL, 2));
   }
-  playerBox->Add(boxSizer, 1, wxALL | wxEXPAND, 5);
-  topSizer->Add(playerBox, 1, wxALL | wxEXPAND, 5);
 
-  auto *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
-  buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
-  auto *okButton = new wxButton(this, wxID_OK, _("OK"));
-  okButton->SetDefault();
-  buttonSizer->Add(okButton, 0, wxALL, 5);
-  topSizer->Add(buttonSizer, 0, wxALL | wxALIGN_RIGHT, 5);
+  topSizer->Add(playerBox, wxSizerFlags(1).Expand().Border());
 
-  SetSizer(topSizer);
-  topSizer->Fit(this);
-  topSizer->SetSizeHints(this);
-  wxTopLevelWindowBase::Layout();
+  auto *buttonSizer = CreateStdDialogButtonSizer(wxOK | wxCANCEL);
+  topSizer->Add(buttonSizer, wxSizerFlags().Right().Border());
+
+  SetSizerAndFit(topSizer);
   CenterOnParent();
 }
 
-Array<GamePlayer> RevealMoveDialog::GetPlayers() const
+std::vector<GamePlayer> RevealMoveDialog::GetPlayers() const
 {
-  Array<GamePlayer> players;
-
-  for (size_t pl = 1; pl <= m_doc->NumPlayers(); pl++) {
-    if (m_players[pl]->GetValue()) {
-      players.push_back(m_doc->GetGame()->GetPlayer(pl));
+  std::vector<GamePlayer> result;
+  result.reserve(m_entries.size());
+  for (const auto &[player, checkbox] : m_entries) {
+    if (checkbox->GetValue()) {
+      result.push_back(player);
     }
   }
-
-  return players;
+  return result;
 }
 
 } // namespace Gambit::GUI
