@@ -568,7 +568,6 @@ gambit_SOURCES = \
 	src/gui/dlefglogit.cc \
 	src/gui/dlefglogit.h \
 	src/gui/dlefgreveal.cc \
-	src/gui/dlefgreveal.h \
 	src/gui/dlexcept.h \
 	src/gui/dlgameprop.cc \
 	src/gui/dlgameprop.h \
