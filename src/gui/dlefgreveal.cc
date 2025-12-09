@@ -28,17 +28,21 @@
 #include "gambit.h"
 #include "dlefgreveal.h"
 
-namespace Gambit::GUI {
+namespace {
+
+using namespace Gambit;
+using namespace Gambit::GUI;
 
 class RevealMoveDialog final : public wxDialog {
-  GameDocument *m_doc{nullptr};
-
   struct PlayerEntry {
     GamePlayer player;
     wxCheckBox *checkbox;
   };
-
+  GameDocument *m_doc{nullptr};
   std::vector<PlayerEntry> m_entries;
+
+  void OnCheckbox(wxCommandEvent &) { UpdateButtonState(); }
+  void UpdateButtonState();
 
 public:
   RevealMoveDialog(wxWindow *p_parent, GameDocument *p_doc);
@@ -52,7 +56,14 @@ RevealMoveDialog::RevealMoveDialog(wxWindow *p_parent, GameDocument *p_doc)
 {
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
-  auto *playerBox = new wxStaticBoxSizer(wxVERTICAL, this, _("Reveal the move to players"));
+  auto *groupLabel = new wxStaticText(this, wxID_ANY, _("Reveal this move to players"));
+  auto f = groupLabel->GetFont();
+  f.SetWeight(wxFONTWEIGHT_BOLD);
+  groupLabel->SetFont(f);
+  topSizer->Add(groupLabel, wxSizerFlags().Border(wxLEFT | wxTOP | wxRIGHT, 10));
+
+  auto *playerBox = new wxBoxSizer(wxVERTICAL);
+  playerBox->AddSpacer(3);
 
   const auto &players = m_doc->GetGame()->GetPlayers();
   m_entries.reserve(players.size());
@@ -68,18 +79,28 @@ RevealMoveDialog::RevealMoveDialog(wxWindow *p_parent, GameDocument *p_doc)
     auto *cb = new wxCheckBox(this, wxID_ANY, label);
     cb->SetValue(true);
     cb->SetForegroundColour(m_doc->GetStyle().GetPlayerColor(player));
-
+    cb->Bind(wxEVT_CHECKBOX, &RevealMoveDialog::OnCheckbox, this);
     m_entries.push_back({player, cb});
-    playerBox->Add(cb, wxSizerFlags().Expand().Border(wxALL, 2));
+    playerBox->Add(cb, wxSizerFlags().Expand().Border(wxLEFT | wxRIGHT | wxTOP, 4));
   }
 
-  topSizer->Add(playerBox, wxSizerFlags(1).Expand().Border());
+  topSizer->Add(playerBox, wxSizerFlags(1).Expand().Border(wxALL, 5));
 
   auto *buttonSizer = CreateStdDialogButtonSizer(wxOK | wxCANCEL);
-  topSizer->Add(buttonSizer, wxSizerFlags().Right().Border());
+  buttonSizer->Realize();
+  topSizer->Add(buttonSizer, wxSizerFlags().Right().Border(wxALL, 10));
 
   SetSizerAndFit(topSizer);
   CenterOnParent();
+  UpdateButtonState();
+}
+
+void RevealMoveDialog::UpdateButtonState()
+{
+  const bool anyChecked =
+      std::any_of(m_entries.begin(), m_entries.end(),
+                  [](const PlayerEntry &entry) { return entry.checkbox->IsChecked(); });
+  FindWindow(wxID_OK)->Enable(anyChecked);
 }
 
 std::vector<GamePlayer> RevealMoveDialog::GetPlayers() const
@@ -93,6 +114,9 @@ std::vector<GamePlayer> RevealMoveDialog::GetPlayers() const
   }
   return result;
 }
+} // anonymous namespace
+
+namespace Gambit::GUI {
 
 std::optional<std::vector<GamePlayer>> RevealMove(wxWindow *p_parent, GameDocument *p_doc)
 {
