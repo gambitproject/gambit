@@ -21,6 +21,7 @@
 //
 
 #include <fstream>
+#include <optional>
 
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
