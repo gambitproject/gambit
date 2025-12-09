@@ -26,7 +26,7 @@
 #endif // WX_PRECOMP
 
 #include "gambit.h"
-#include "dlefgreveal.h"
+#include "gamedoc.h"
 
 namespace {
 

@@ -54,7 +54,6 @@
 #include "dlabout.h"
 
 #include "dlinsertmove.h"
-#include "dlefgreveal.h"
 #include "dleditnode.h"
 #include "dleditmove.h"
 #include "dlefglayout.h"
@@ -977,6 +976,8 @@ void GameFrame::OnEditRemoveOutcome(wxCommandEvent &)
     ExceptionDialog(this, ex.what()).ShowModal();
   }
 }
+
+std::optional<std::vector<GamePlayer>> RevealMove(wxWindow *p_parent, GameDocument *p_doc);
 
 void GameFrame::OnEditReveal(wxCommandEvent &)
 {
