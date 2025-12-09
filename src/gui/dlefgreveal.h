@@ -27,20 +27,7 @@
 
 namespace Gambit::GUI {
 
-class RevealMoveDialog final : public wxDialog {
-  GameDocument *m_doc{nullptr};
-
-  struct PlayerEntry {
-    GamePlayer player;
-    wxCheckBox *checkbox;
-  };
-
-  std::vector<PlayerEntry> m_entries;
-
-public:
-  RevealMoveDialog(wxWindow *p_parent, GameDocument *p_doc);
-  std::vector<GamePlayer> GetPlayers() const;
-};
+std::optional<std::vector<GamePlayer>> RevealMove(wxWindow *p_parent, GameDocument *p_doc);
 
 } // end namespace Gambit::GUI
 

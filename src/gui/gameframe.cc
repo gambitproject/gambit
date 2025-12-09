@@ -980,12 +980,11 @@ void GameFrame::OnEditRemoveOutcome(wxCommandEvent &)
 
 void GameFrame::OnEditReveal(wxCommandEvent &)
 {
-  RevealMoveDialog dialog(this, m_doc);
-
-  if (dialog.ShowModal() == wxID_OK) {
+  if (const auto players = RevealMove(this, m_doc); players) {
     try {
-      for (const auto &player : dialog.GetPlayers()) {
-        m_doc->DoRevealAction(m_doc->GetSelectNode()->GetInfoset(), player);
+      const auto &infoset = m_doc->GetSelectNode()->GetInfoset();
+      for (const auto &player : *players) {
+        m_doc->DoRevealAction(infoset, player);
       }
     }
     catch (std::exception &ex) {

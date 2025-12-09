@@ -30,6 +30,21 @@
 
 namespace Gambit::GUI {
 
+class RevealMoveDialog final : public wxDialog {
+  GameDocument *m_doc{nullptr};
+
+  struct PlayerEntry {
+    GamePlayer player;
+    wxCheckBox *checkbox;
+  };
+
+  std::vector<PlayerEntry> m_entries;
+
+public:
+  RevealMoveDialog(wxWindow *p_parent, GameDocument *p_doc);
+  std::vector<GamePlayer> GetPlayers() const;
+};
+
 RevealMoveDialog::RevealMoveDialog(wxWindow *p_parent, GameDocument *p_doc)
   : wxDialog(p_parent, wxID_ANY, _("Reveal this move to players"), wxDefaultPosition,
              wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
@@ -77,6 +92,15 @@ std::vector<GamePlayer> RevealMoveDialog::GetPlayers() const
     }
   }
   return result;
+}
+
+std::optional<std::vector<GamePlayer>> RevealMove(wxWindow *p_parent, GameDocument *p_doc)
+{
+  RevealMoveDialog dialog(p_parent, p_doc);
+  if (dialog.ShowModal() == wxID_OK) {
+    return dialog.GetPlayers();
+  }
+  return std::nullopt;
 }
 
 } // namespace Gambit::GUI
