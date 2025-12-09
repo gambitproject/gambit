@@ -977,11 +977,11 @@ void GameFrame::OnEditRemoveOutcome(wxCommandEvent &)
   }
 }
 
-std::optional<std::vector<GamePlayer>> RevealMove(wxWindow *p_parent, GameDocument *p_doc);
+std::optional<std::vector<GamePlayer>> RevealMove(wxWindow *p_parent, const Game &p_game);
 
 void GameFrame::OnEditReveal(wxCommandEvent &)
 {
-  if (const auto players = RevealMove(this, m_doc); players) {
+  if (const auto players = RevealMove(this, m_doc->GetGame()); players) {
     try {
       const auto &infoset = m_doc->GetSelectNode()->GetInfoset();
       for (const auto &player : *players) {

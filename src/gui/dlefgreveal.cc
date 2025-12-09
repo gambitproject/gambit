@@ -38,21 +38,19 @@ class RevealMoveDialog final : public wxDialog {
     GamePlayer player;
     wxCheckBox *checkbox;
   };
-  GameDocument *m_doc{nullptr};
   std::vector<PlayerEntry> m_entries;
 
   void OnCheckbox(wxCommandEvent &) { UpdateButtonState(); }
   void UpdateButtonState();
 
 public:
-  RevealMoveDialog(wxWindow *p_parent, GameDocument *p_doc);
+  RevealMoveDialog(wxWindow *p_parent, const Game &p_game);
   std::vector<GamePlayer> GetPlayers() const;
 };
 
-RevealMoveDialog::RevealMoveDialog(wxWindow *p_parent, GameDocument *p_doc)
+RevealMoveDialog::RevealMoveDialog(wxWindow *p_parent, const Game &p_game)
   : wxDialog(p_parent, wxID_ANY, _("Reveal this move to players"), wxDefaultPosition,
-             wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER),
-    m_doc(p_doc)
+             wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
 {
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
@@ -65,7 +63,7 @@ RevealMoveDialog::RevealMoveDialog(wxWindow *p_parent, GameDocument *p_doc)
   auto *playerBox = new wxBoxSizer(wxVERTICAL);
   playerBox->AddSpacer(3);
 
-  const auto &players = m_doc->GetGame()->GetPlayers();
+  const auto &players = p_game->GetPlayers();
   m_entries.reserve(players.size());
 
   for (const auto &player : players) {
@@ -78,7 +76,6 @@ RevealMoveDialog::RevealMoveDialog(wxWindow *p_parent, GameDocument *p_doc)
     }
     auto *cb = new wxCheckBox(this, wxID_ANY, label);
     cb->SetValue(true);
-    cb->SetForegroundColour(m_doc->GetStyle().GetPlayerColor(player));
     cb->Bind(wxEVT_CHECKBOX, &RevealMoveDialog::OnCheckbox, this);
     m_entries.push_back({player, cb});
     playerBox->Add(cb, wxSizerFlags().Expand().Border(wxLEFT | wxRIGHT | wxTOP, 4));
@@ -118,10 +115,9 @@ std::vector<GamePlayer> RevealMoveDialog::GetPlayers() const
 
 namespace Gambit::GUI {
 
-std::optional<std::vector<GamePlayer>> RevealMove(wxWindow *p_parent, GameDocument *p_doc)
+std::optional<std::vector<GamePlayer>> RevealMove(wxWindow *p_parent, const Game &p_game)
 {
-  RevealMoveDialog dialog(p_parent, p_doc);
-  if (dialog.ShowModal() == wxID_OK) {
+  if (RevealMoveDialog dialog(p_parent, p_game); dialog.ShowModal() == wxID_OK) {
     return dialog.GetPlayers();
   }
   return std::nullopt;
