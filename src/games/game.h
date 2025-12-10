@@ -597,6 +597,8 @@ inline GameNodeRep::Actions::iterator::iterator(GameInfosetRep::Actions::iterato
 
 inline GameNode GameNodeRep::Actions::iterator::GetOwner() const { return m_child_it.GetOwner(); }
 
+enum class TraversalOrder { Preorder, Postorder };
+
 /// This is the class for representing an arbitrary finite game.
 class GameRep : public std::enable_shared_from_this<GameRep> {
   friend class GameOutcomeRep;
@@ -627,85 +629,147 @@ public:
 
   class Nodes {
     Game m_owner{nullptr};
+    TraversalOrder m_order{TraversalOrder::Preorder};
 
   public:
     class iterator {
       friend class Nodes;
+
       using ChildIterator = ElementCollection<GameNode, GameNodeRep>::iterator;
 
+      struct Frame {
+        GameNode m_node;
+        ChildIterator m_current, m_end;
+        bool m_expanded = false;
+      };
+
       Game m_owner{nullptr};
-      GameNode m_current_node{nullptr};
-      std::stack<std::pair<ChildIterator, ChildIterator>> m_stack{};
+      TraversalOrder m_order{TraversalOrder::Preorder};
+      std::stack<Frame> m_stack{};
+      GameNode m_current{nullptr};
 
-      iterator(const Game &game) : m_owner(game) {}
-
-    public:
-      using iterator_category = std::forward_iterator_tag;
-      using value_type = GameNode;
-      using pointer = value_type *;
-
-      iterator() = default;
-
-      iterator(const Game &game, const GameNode &start_node)
-        : m_owner(game), m_current_node(start_node)
+      iterator(const Game &p_game, const GameNode &p_start, const TraversalOrder p_order)
+        : m_owner(p_game), m_order(p_order)
       {
-        if (!start_node) {
+        if (!p_start) {
           return;
         }
-        if (start_node->GetGame() != m_owner) {
+        if (p_start->GetGame() != p_game) {
           throw MismatchException();
+        }
+        m_stack.push(make_frame(p_start));
+        if (m_order == TraversalOrder::Preorder) {
+          m_current = p_start;
+        }
+        else {
+          descend_postorder();
+          m_current = m_stack.empty() ? nullptr : m_stack.top().m_node;
+        }
+        if (!m_current) {
+          m_owner = nullptr;
         }
       }
 
+      static Frame make_frame(const GameNode &p_node)
+      {
+        if (p_node->IsTerminal()) {
+          return Frame{p_node, {}, {}, true};
+        }
+        const auto children = p_node->GetChildren();
+        return Frame{p_node, children.begin(), children.end(), false};
+      }
+
+      void descend_postorder()
+      {
+        while (!m_stack.empty()) {
+          auto &f = m_stack.top();
+          if (f.m_expanded || f.m_current == f.m_end) {
+            return;
+          }
+          f.m_expanded = true;
+          const GameNode child = *f.m_current;
+          ++f.m_current;
+          m_stack.push(make_frame(child));
+        }
+      }
+
+      GameNode advance_preorder()
+      {
+        if (auto &top = m_stack.top(); !top.m_node->IsTerminal()) {
+          const auto children = top.m_node->GetChildren();
+          top.m_current = children.begin();
+          top.m_end = children.end();
+        }
+        while (!m_stack.empty()) {
+          if (auto &f = m_stack.top(); f.m_current != f.m_end) {
+            GameNode const next = *f.m_current;
+            ++f.m_current;
+            m_stack.push(make_frame(next));
+            return next;
+          }
+          m_stack.pop();
+        }
+        return nullptr;
+      }
+
+      GameNode advance_postorder()
+      {
+        m_stack.pop();
+        if (m_stack.empty()) {
+          return nullptr;
+        }
+        descend_postorder();
+        return m_stack.empty() ? nullptr : m_stack.top().m_node;
+      }
+
+    public:
+      using iterator_category = std::input_iterator_tag;
+      using value_type = GameNode;
+
+      iterator() = default;
+      iterator(const iterator &) = default;
+      iterator &operator=(const iterator &) = default;
+
       value_type operator*() const
       {
-        if (!m_current_node) {
-          throw std::runtime_error("Cannot dereference an end iterator");
+        if (!m_current) {
+          throw std::runtime_error("Dereferencing end iterator");
         }
-        return m_current_node;
+        return m_current;
       }
 
       iterator &operator++()
       {
-        if (!m_current_node) {
-          throw std::out_of_range("Cannot increment an end iterator");
+        if (!m_current) {
+          return *this;
         }
-
-        if (!m_current_node->IsTerminal()) {
-          auto children = m_current_node->GetChildren();
-          m_stack.emplace(children.begin(), children.end());
+        const GameNode next =
+            (m_order == TraversalOrder::Preorder) ? advance_preorder() : advance_postorder();
+        m_current = next;
+        if (!m_current) {
+          m_owner = nullptr;
         }
-
-        while (!m_stack.empty()) {
-          auto &[current_it, end_it] = m_stack.top();
-
-          if (current_it != end_it) {
-            m_current_node = *current_it;
-            ++current_it;
-            return *this;
-          }
-          m_stack.pop();
-        }
-
-        m_current_node = nullptr;
         return *this;
       }
 
-      bool operator==(const iterator &other) const
+      bool operator==(const iterator &p_other) const
       {
-        return m_owner == other.m_owner && m_current_node == other.m_current_node;
+        return m_owner == p_other.m_owner && m_current == p_other.m_current;
       }
-      bool operator!=(const iterator &other) const { return !(*this == other); }
+      bool operator!=(const iterator &p_other) const { return !(*this == p_other); }
     };
 
     Nodes() = default;
-    explicit Nodes(const Game &p_owner) : m_owner(p_owner) {}
+    Nodes(const Game &p_owner, const TraversalOrder p_order = TraversalOrder::Preorder)
+      : m_owner(p_owner), m_order(p_order)
+    {
+    }
 
     iterator begin() const
     {
-      return (m_owner) ? iterator{m_owner, m_owner->GetRoot()} : iterator{};
+      return (m_owner) ? iterator{m_owner, m_owner->GetRoot(), m_order} : iterator{};
     }
-    iterator end() const { return (m_owner) ? iterator{m_owner} : iterator{}; }
+    static iterator end() { return iterator{}; }
   };
 
   /// @name Lifecycle
@@ -937,7 +1001,7 @@ public:
   /// Returns the root node of the game
   virtual GameNode GetRoot() const = 0;
   /// Returns a range that can be used to iterate over the nodes of the game
-  Nodes GetNodes() const { return Nodes(std::const_pointer_cast<GameRep>(shared_from_this())); }
+  Nodes GetNodes() const { return {std::const_pointer_cast<GameRep>(shared_from_this())}; }
   /// Returns the number of nodes in the game
   virtual size_t NumNodes() const = 0;
   /// Returns the number of non-terminal nodes in the game
