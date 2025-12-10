@@ -47,6 +47,15 @@ protected:
   std::map<GameNodeRep *, std::vector<GameNodeRep *>> m_nodePlays;
   mutable std::shared_ptr<OwnPriorActionInfo> m_ownPriorActionInfo;
   mutable std::unique_ptr<std::set<GameNodeRep *>> m_unreachableNodes;
+  mutable std::shared_ptr<BehaviorSupportProfile> m_fullSupport;
+
+  std::shared_ptr<BehaviorSupportProfile> GetFullSupport() override
+  {
+    if (!m_fullSupport) {
+      m_fullSupport = std::make_shared<BehaviorSupportProfile>(shared_from_this());
+    }
+    return m_fullSupport;
+  }
 
   const Sequences GetSequences() override { return GetFullSupport()->GetSequences(); }
 
