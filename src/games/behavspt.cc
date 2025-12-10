@@ -192,9 +192,10 @@ PlayerSequences BehaviorSupportProfile::GetSequences(const GamePlayer &p_player)
   return {this, p_player};
 }
 
-int &BehaviorSupportProfile::IsOutcome(const std::map<GamePlayer, GameSequence> &p_profile) const
+const Rational &
+BehaviorSupportProfile::GetTerminalProb(const std::map<GamePlayer, GameSequence> &p_profile) const
 {
-  return GetSequenceForm()->IsOutcome(p_profile);
+  return GetSequenceForm()->GetTerminalProb(p_profile);
 }
 
 const Rational &

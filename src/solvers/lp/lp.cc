@@ -87,9 +87,8 @@ template <class T> void GameData<T>::FillTableau(Matrix<T> &A, const Game &p_gam
       std::map<GamePlayer, GameSequence> profile;
       profile[player1] = seq1;
       profile[player2] = seq2;
-      if (p_game->IsOutcome(profile)) {
-        A(row, col) = p_game->GetPayoff(profile, player1) - minpay;
-      }
+      A(row, col) =
+          p_game->GetPayoff(profile, player1) - (minpay * p_game->GetTerminalProb(profile));
     }
   }
 }

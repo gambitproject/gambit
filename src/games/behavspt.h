@@ -200,7 +200,7 @@ public:
   PlayerSequences GetSequences(const GamePlayer &p_player) const;
   const Rational &GetPayoff(const std::map<GamePlayer, GameSequence> &p_profile,
                             const GamePlayer &p_player) const;
-  int &IsOutcome(const std::map<GamePlayer, GameSequence> &p_profile) const;
+  const Rational &GetTerminalProb(const std::map<GamePlayer, GameSequence> &p_profile) const;
   GameRep::Players GetPlayers() const { return GetGame()->GetPlayers(); }
   MixedBehaviorProfile<double>
   ToMixedBehaviorProfile(const std::map<GameSequence, double> &) const;

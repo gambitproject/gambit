@@ -55,9 +55,9 @@ protected:
     return GetFullSupport()->GetSequences(p_player);
   }
 
-  const int &IsOutcome(const std::map<GamePlayer, GameSequence> &p_profile) override
+  const Rational &GetTerminalProb(const std::map<GamePlayer, GameSequence> &p_profile) override
   {
-    return GetFullSupport()->IsOutcome(p_profile);
+    return GetFullSupport()->GetTerminalProb(p_profile);
   }
 
   const Rational &GetPayoff(const std::map<GamePlayer, GameSequence> &p_profile,
