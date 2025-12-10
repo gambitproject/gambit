@@ -41,24 +41,96 @@ protected:
   std::map<GameAction, int> m_profileIndex;
   unsigned int m_gameversion;
 
-  // structures for storing cached data: nodes
-  mutable std::map<GameNode, T> map_realizProbs, map_beliefs;
-  mutable std::map<GameNode, std::map<GamePlayer, T>> map_nodeValues;
+  struct Cache {
+    enum class Level { None, Realizations, Beliefs, NodeValues, ActionValues, Regrets };
 
-  // structures for storing cached data: information sets
-  mutable std::map<GameInfoset, T> map_infosetValues;
+    Level m_level{Level::None};
+    std::map<GameNode, T> m_realizProbs, m_beliefs;
+    std::map<GameNode, std::map<GamePlayer, T>> m_nodeValues;
+    std::map<GameInfoset, T> m_infosetValues;
+    std::map<GameAction, T> m_actionValues;
+    std::map<GameAction, T> m_regret;
 
-  // structures for storing cached data: actions
-  mutable std::map<GameAction, T> map_actionValues; // aka conditional payoffs
-  mutable std::map<GameAction, T> map_regret;
+    Cache() = default;
+    Cache(const Cache &) = default;
+    Cache &operator=(const Cache &) = default;
+    ~Cache() = default;
+
+    void Clear()
+    {
+      m_level = Level::None;
+      m_realizProbs.clear();
+      m_beliefs.clear();
+      m_nodeValues.clear();
+      m_infosetValues.clear();
+      m_actionValues.clear();
+      m_regret.clear();
+    }
+  };
+
+  mutable Cache m_cache;
 
   /// @name Auxiliary functions for computation of interesting values
   //@{
   void GetPayoff(const GameNode &, const T &, const GamePlayer &, T &) const;
-  void ComputePass1_realizProbs(const GameNode &node) const;
-  void ComputePass2_beliefs_nodeValues_actionValues(const GameNode &node) const;
-  void ComputePass3_infosetValues_regret() const;
-  void ComputeSolutionData() const;
+  /// Compute the realisation probabilities of all nodes
+  void ComputeRealizationProbs() const;
+  /// Compute the realisation probabilities of information sets, and beliefs at
+  /// information sets reached with positive probability
+  void ComputeBeliefs() const;
+  /// Compute the expected payoffs conditional on reaching each node
+  void ComputeNodeValues() const;
+  /// Compute the expected (conditional) payoffs to each action
+  void ComputeActionValues() const;
+  /// Compute the conditional value of being at an information set, and corresponding
+  /// (agent) action regrets
+  void ComputeActionRegrets() const;
+
+  void EnsureRealizations() const
+  {
+    if (m_cache.m_level >= Cache::Level::Realizations) {
+      return;
+    }
+    ComputeRealizationProbs();
+    m_cache.m_level = Cache::Level::Realizations;
+  }
+  void EnsureBeliefs() const
+  {
+    EnsureRealizations();
+    if (m_cache.m_level >= Cache::Level::Beliefs) {
+      return;
+    }
+    ComputeBeliefs();
+    m_cache.m_level = Cache::Level::Beliefs;
+  }
+  void EnsureNodeValues() const
+  {
+    EnsureBeliefs();
+    if (m_cache.m_level >= Cache::Level::NodeValues) {
+      return;
+    }
+    ComputeNodeValues();
+    m_cache.m_level = Cache::Level::NodeValues;
+  }
+  void EnsureActionValues() const
+  {
+    EnsureNodeValues();
+    if (m_cache.m_level >= Cache::Level::ActionValues) {
+      return;
+    }
+    ComputeActionValues();
+    m_cache.m_level = Cache::Level::ActionValues;
+  }
+  void EnsureRegrets() const
+  {
+    EnsureActionValues();
+    if (m_cache.m_level >= Cache::Level::Regrets) {
+      return;
+    }
+    ComputeActionRegrets();
+    m_cache.m_level = Cache::Level::Regrets;
+  }
+
   //@}
 
   /// @name Converting mixed strategies to behavior
@@ -89,13 +161,13 @@ public:
   MixedBehaviorProfile<T> &operator=(const MixedBehaviorProfile<T> &);
   MixedBehaviorProfile<T> &operator=(const Vector<T> &p)
   {
-    InvalidateCache();
+    m_cache.Clear();
     m_probs = p;
     return *this;
   }
   MixedBehaviorProfile<T> &operator=(const T &x)
   {
-    InvalidateCache();
+    m_cache.Clear();
     m_probs = x;
     return *this;
   }
@@ -119,14 +191,14 @@ public:
   }
   T &operator[](const GameAction &p_action)
   {
-    InvalidateCache();
+    m_cache.Clear();
     return m_probs[m_profileIndex.at(p_action)];
   }
 
   const T &operator[](int a) const { return m_probs[a]; }
   T &operator[](int a)
   {
-    InvalidateCache();
+    m_cache.Clear();
     return m_probs[a];
   }
 
@@ -135,20 +207,6 @@ public:
 
   /// @name Initialization, validation
   //@{
-  /// Force recomputation of stored quantities
-  /// The validity of all caches is determined by the existence of the root node in the
-  /// primary cache (first to be computed) map_realizProbs
-  /// We also clear
-  /// map_nodeValues, map_actionValues
-  /// as otherwise we would need to reset them to 0 while populating them
-  void InvalidateCache() const
-  {
-    map_realizProbs.clear();
-    map_nodeValues.clear();
-    map_actionValues.clear();
-  }
-  /// Reset certain cached values
-
   /// Set the profile to the centroid
   void SetCentroid();
   /// Set the behavior at any undefined information set to the centroid
@@ -177,11 +235,11 @@ public:
   T GetLiapValue() const;
 
   const T &GetRealizProb(const GameNode &node) const;
-  T GetInfosetProb(const GameInfoset &iset) const;
+  T GetInfosetProb(const GameInfoset &p_infoset) const;
   const T &GetBeliefProb(const GameNode &node) const;
   Vector<T> GetPayoff(const GameNode &node) const;
   const T &GetPayoff(const GamePlayer &player, const GameNode &node) const;
-  const T &GetPayoff(const GameInfoset &iset) const;
+  const T &GetPayoff(const GameInfoset &p_infoset) const;
   const T &GetPayoff(const GameAction &act) const;
   T GetActionProb(const GameAction &act) const;
 
