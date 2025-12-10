@@ -164,29 +164,42 @@ def test_infoset_own_prior_actions(game_file, expected_results):
         assert actual_details == expected_set
 
 
-@pytest.mark.parametrize("game_input,expected_infosets", [
+def _get_infoset_by_path(game, path: list[str]) -> gbt.Infoset:
+    """
+    Helper to find an infoset by following a sequence of action labels.
+
+    Parameters
+    ----------
+    path : list[str]
+        A list of action labels in Node->Root order.
+    """
+    node = game.root
+    for action_label in reversed(path):
+        node = node.children[action_label]
+
+    return node.infoset
+
+
+@pytest.mark.parametrize("game_input, expected_am_paths", [
     # Games without absent-mindedness
-    ("e02.efg", set()),
-    ("stripped_down_poker.efg", set()),
-    ("basic_extensive_game.efg", set()),
-    ("gilboa_two_am_agents.efg", set()),  # forgetting past information; Gilboa (GEB, 1997)
-    ("wichardt.efg", set()),  # forgetting past action; Wichardt (GEB, 2008)
+    ("e02.efg", []),
+    ("stripped_down_poker.efg", []),
+    ("basic_extensive_game.efg", []),
+    ("gilboa_two_am_agents.efg", []),  # forgetting past information; Gilboa (GEB, 1997)
+    ("wichardt.efg", []),              # forgetting past action; Wichardt (GEB, 2008)
 
     # Games with absent-mindedness
-    ("noPR-AM-driver-two-players.efg", {("Player 1", 0)}),
-    ("noPR-action-AM.efg", {("Player 1", 0)}),
-    ("noPR-action-AM-two-hops.efg", {("Player 1", 0), ("Player 2", 0)}),
+    ("noPR-AM-driver-two-players.efg", [[]]),
+    ("noPR-action-AM.efg", [[]]),
+    ("noPR-action-AM-two-hops.efg", [["2", "1", "1", "1", "1"], ["1", "1", "1"]]),
 ])
-def test_infoset_is_absent_minded(game_input, expected_infosets):
+def test_infoset_is_absent_minded(game_input, expected_am_paths):
     """
     Verify the is_absent_minded property of information sets.
     """
     game = games.read_from_file(game_input)
 
-    actual_infosets = {
-        (infoset.player.label, infoset.number)
-        for infoset in game.infosets
-        if infoset.is_absent_minded
-    }
+    expected_infosets = {_get_infoset_by_path(game, path) for path in expected_am_paths}
+    actual_infosets = {infoset for infoset in game.infosets if infoset.is_absent_minded}
 
     assert actual_infosets == expected_infosets

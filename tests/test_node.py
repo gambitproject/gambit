@@ -140,7 +140,7 @@ def _get_path_of_action_labels(node: gbt.Node) -> list[str]:
     (
         "binary_3_levels_generic_payoffs.efg",
         [
-            # Format: ([Path Leaf->Root], (Player Label, Infoset Num, Action Label) or None)
+            # Format: (Path in Node->Root order, (Player Label, Infoset Num, Action Label) or None)
             ([], None),
             (["Left"], None),
             (["Left", "Left"], ("Player 1", 0, "Left")),
