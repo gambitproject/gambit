@@ -207,15 +207,6 @@ bool GameInfosetRep::Precedes(GameNode p_node) const
   return false;
 }
 
-bool GameInfosetRep::IsAbsentMinded() const
-{
-  auto *tree = dynamic_cast<GameTreeRep *>(m_game);
-  if (tree) {
-    return tree->IsAbsentMinded(this);
-  }
-  return false;
-}
-
 GameAction GameTreeRep::InsertAction(GameInfoset p_infoset, GameAction p_action /* =nullptr */)
 {
   if (p_action && p_action->GetInfoset() != p_infoset) {
@@ -813,19 +804,6 @@ Rational GameTreeRep::GetPlayerMaxPayoff(const GamePlayer &p_player) const
       p_player, m_root, [](const Rational &a, const Rational &b) { return std::max(a, b); });
 }
 
-// bool GameTreeRep::IsAbsentMinded() const
-//{
-//   if (!m_ownPriorActionInfo && !m_root->IsTerminal()) {
-//     const_cast<GameTreeRep *>(this)->BuildOwnPriorActions();
-//   }
-
-//  if (GetRoot()->IsTerminal()) {
-//    return true;
-//  }
-
-//  return !m_absentMindedInfosets.empty();
-//}
-
 bool GameTreeRep::IsPerfectRecall() const
 {
   if (!m_ownPriorActionInfo && !m_root->IsTerminal()) {
@@ -841,13 +819,17 @@ bool GameTreeRep::IsPerfectRecall() const
                      [](const auto &pair) { return pair.second.size() <= 1; });
 }
 
-bool GameTreeRep::IsAbsentMinded(const GameInfosetRep *infoset) const
+bool GameTreeRep::IsAbsentMinded(const GameInfoset &p_infoset) const
 {
-  if (!m_unreachableNodes && !m_root->IsTerminal()) {
-    const_cast<GameTreeRep *>(this)->BuildUnreachableNodes();
+  if (p_infoset->GetGame().get() != this) {
+    throw MismatchException();
   }
 
-  return m_absentMindedInfosets.count(const_cast<GameInfosetRep *>(infoset));
+  if (!m_unreachableNodes && !m_root->IsTerminal()) {
+    BuildUnreachableNodes();
+  }
+
+  return contains(m_absentMindedInfosets, p_infoset.get());
 }
 
 //------------------------------------------------------------------------
@@ -1040,7 +1022,7 @@ std::set<GameAction> GameTreeRep::GetOwnPriorActions(const GameInfoset &p_infose
   return result;
 }
 
-void GameTreeRep::BuildUnreachableNodes()
+void GameTreeRep::BuildUnreachableNodes() const
 {
   m_unreachableNodes = std::make_unique<std::set<GameNodeRep *>>();
 
