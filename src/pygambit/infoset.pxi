@@ -164,7 +164,7 @@ class Infoset:
     @property
     def is_absent_minded(self) -> bool:
         """Whether the information set has absent-mindedness."""
-        return self.infoset.deref().IsAbsentMinded()
+        return self.infoset.deref().GetGame().deref().IsAbsentMinded(self.infoset)
 
     @property
     def actions(self) -> InfosetActions:

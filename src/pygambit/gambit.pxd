@@ -148,8 +148,6 @@ cdef extern from "games/game.h":
         bint Precedes(c_GameNode) except +
         stdset[c_GameAction] GetOwnPriorActions() except +
 
-        bint IsAbsentMinded() except +
-
     cdef cppclass c_GamePlayerRep "GamePlayerRep":
         cppclass Infosets:
             cppclass iterator:
@@ -302,6 +300,7 @@ cdef extern from "games/game.h":
         stdvector[c_GameNode] GetPlays(c_GameInfoset) except +
         stdvector[c_GameNode] GetPlays(c_GameAction) except +
         bool IsPerfectRecall() except +
+        bool IsAbsentMinded(c_GameInfoset) except +
 
         c_GameInfoset AppendMove(c_GameNode, c_GamePlayer, int) except +ValueError
         c_GameInfoset AppendMove(c_GameNode, c_GameInfoset) except +ValueError
