@@ -3,7 +3,7 @@
   "features": {
     "ghcr.io/devcontainers/features/python:1": {
       "installTools": true,
-      "version": "3.11"
+      "version": "3.14"
     },
     "ghcr.io/devcontainers-contrib/features/gdbgui:2": {
       "version": "latest"

@@ -21,6 +21,7 @@
 //
 
 #include <fstream>
+#include <optional>
 
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
@@ -54,7 +55,6 @@
 #include "dlabout.h"
 
 #include "dlinsertmove.h"
-#include "dlefgreveal.h"
 #include "dleditnode.h"
 #include "dleditmove.h"
 #include "dlefglayout.h"
@@ -978,14 +978,15 @@ void GameFrame::OnEditRemoveOutcome(wxCommandEvent &)
   }
 }
 
+std::optional<std::vector<GamePlayer>> RevealMove(wxWindow *p_parent, const Game &p_game);
+
 void GameFrame::OnEditReveal(wxCommandEvent &)
 {
-  RevealMoveDialog dialog(this, m_doc);
-
-  if (dialog.ShowModal() == wxID_OK) {
+  if (const auto players = RevealMove(this, m_doc->GetGame()); players) {
     try {
-      for (const auto &player : dialog.GetPlayers()) {
-        m_doc->DoRevealAction(m_doc->GetSelectNode()->GetInfoset(), player);
+      const auto &infoset = m_doc->GetSelectNode()->GetInfoset();
+      for (const auto &player : *players) {
+        m_doc->DoRevealAction(infoset, player);
       }
     }
     catch (std::exception &ex) {
@@ -1111,14 +1112,15 @@ void GameFrame::OnViewStrategic(wxCommandEvent &p_event)
       return;
     }
 
-    const int ncont = m_doc->GetGame()->NumStrategyContingencies();
-    if (!m_nfgPanel && ncont >= 50000) {
-      if (wxMessageBox(
-              wxString::Format(wxT("This game has %d contingencies in strategic form.\n"), ncont) +
-                  wxT("Performance in browsing strategic form will be poor,\n") +
-                  wxT("and may render the program nonresponsive.\n") +
-                  wxT("Do you wish to continue?"),
-              _("Large strategic game warning"), wxOK | wxCANCEL | wxALIGN_CENTER, this) != wxOK) {
+    if (const size_t contingencies = m_doc->GetGame()->GetStrategies().extent_product();
+        !m_nfgPanel && contingencies >= 50000) {
+      if (wxMessageBox(wxString::Format(wxT("This game has %d contingencies in strategic form.\n"),
+                                        contingencies) +
+                           wxT("Performance in browsing strategic form will be poor,\n") +
+                           wxT("and may render the program nonresponsive.\n") +
+                           wxT("Do you wish to continue?"),
+                       _("Large strategic game warning"), wxOK | wxCANCEL | wxALIGN_CENTER,
+                       this) != wxOK) {
         return;
       }
     }
@@ -1242,15 +1244,16 @@ void GameFrame::OnToolsEquilibrium(wxCommandEvent &)
 
   if (dialog.ShowModal() == wxID_OK) {
     if (dialog.UseStrategic()) {
-      const int ncont = m_doc->GetGame()->NumStrategyContingencies();
-      if (ncont >= 50000) {
-        if (wxMessageBox(wxString::Format(
-                             wxT("This game has %d contingencies in strategic form.\n"), ncont) +
-                             wxT("Performance in solving strategic form will be poor,\n") +
-                             wxT("and may render the program nonresponsive.\n") +
-                             wxT("Do you wish to continue?"),
-                         _("Large strategic game warning"), wxOK | wxCANCEL | wxALIGN_CENTER,
-                         this) != wxOK) {
+      if (const int contingencies = m_doc->GetGame()->GetStrategies().extent_product();
+          contingencies >= 50000) {
+        if (wxMessageBox(
+                wxString::Format(wxT("This game has %d contingencies in strategic form.\n"),
+                                 contingencies) +
+                    wxT("Performance in solving strategic form will be poor,\n") +
+                    wxT("and may render the program nonresponsive.\n") +
+                    wxT("Do you wish to continue?"),
+                _("Large strategic game warning"), wxOK | wxCANCEL | wxALIGN_CENTER,
+                this) != wxOK) {
           return;
         }
       }

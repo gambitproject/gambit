@@ -39,6 +39,11 @@ protected:
   int m_offset;
   std::vector<T> m_data;
 
+  bool is_in_range(const int p_index) const
+  {
+    return p_index >= m_offset && p_index <= back_index();
+  }
+
 public:
   using iterator = typename std::vector<T>::iterator;
   using const_iterator = typename std::vector<T>::const_iterator;
@@ -46,31 +51,43 @@ public:
   using reference = typename std::vector<T>::reference;
   using const_reference = typename std::vector<T>::const_reference;
 
-  explicit Array(size_t len = 0) : m_offset(1), m_data(len) {}
-  Array(int lo, int hi) : m_offset(lo), m_data(hi - lo + 1) {}
-  Array(const Array<T> &) = default;
+  explicit Array(size_t p_length = 0) : m_offset(1), m_data(p_length) {}
+  /// Construct an array with the given index bounds.
+  /// If p_high is less than p_low, the resulting array will have
+  /// front_index equal to p_low, and size 0.
+  explicit Array(const int p_low, const int p_high) : m_offset(p_low)
+  {
+    if (p_high >= p_low) {
+      m_data.resize(p_high - p_low + 1);
+    }
+  }
+  Array(const Array &) = default;
+  Array(Array &&) noexcept = default;
   ~Array() = default;
 
-  Array<T> &operator=(const Array<T> &) = default;
+  Array &operator=(const Array &) = default;
+  Array &operator=(Array &&) noexcept = default;
 
-  bool operator==(const Array<T> &a) const { return m_offset == a.m_offset && m_data == a.m_data; }
-
-  bool operator!=(const Array<T> &a) const { return m_offset != a.m_offset || m_data != a.m_data; }
-
-  const_reference operator[](int index) const
+  bool operator==(const Array &p_other) const
   {
-    if (index < m_offset || index > back_index()) {
+    return m_offset == p_other.m_offset && m_data == p_other.m_data;
+  }
+  bool operator!=(const Array &p_other) const { return !(*this == p_other); }
+
+  const_reference operator[](const int p_index) const
+  {
+    if (!is_in_range(p_index)) {
       throw std::out_of_range("Index out of range in Array");
     }
-    return m_data.at(index - m_offset);
+    return m_data.at(p_index - m_offset);
   }
 
-  reference operator[](int index)
+  reference operator[](const int p_index)
   {
-    if (index < m_offset || index > back_index()) {
+    if (!is_in_range(p_index)) {
       throw std::out_of_range("Index out of range in Array");
     }
-    return m_data[index - m_offset];
+    return m_data.at(p_index - m_offset);
   }
   const T &front() const { return m_data.front(); }
   T &front() { return m_data.front(); }
@@ -84,23 +101,25 @@ public:
   const_iterator cbegin() const { return m_data.cbegin(); }
   const_iterator cend() const { return m_data.cend(); }
 
-  bool empty() const { return m_data.empty(); }
-  size_t size() const { return m_data.size(); }
-  int front_index() const { return m_offset; }
-  int back_index() const { return m_offset + m_data.size() - 1; }
+  [[nodiscard]] bool empty() const noexcept { return m_data.empty(); }
+  [[nodiscard]] size_t size() const noexcept { return m_data.size(); }
+  [[nodiscard]] int front_index() const noexcept { return m_offset; }
+  [[nodiscard]] int back_index() const { return m_offset + m_data.size() - 1; }
 
   void clear() { m_data.clear(); }
   void insert(const_iterator pos, const T &value) { m_data.insert(pos, value); }
   void erase(iterator pos) { m_data.erase(pos); }
+  void erase_at(const int p_index)
+  {
+    if (!is_in_range(p_index)) {
+      throw std::out_of_range("Index out of range in Array");
+    }
+    erase(std::next(begin(), p_index - front_index()));
+  }
   void push_back(const T &value) { m_data.push_back(value); }
   void pop_back() { m_data.pop_back(); }
+  void reserve(size_t len) { m_data.reserve(len); }
 };
-
-/// Convenience function to erase the element at `p_index`
-template <class T> void erase_atindex(Array<T> &p_array, int p_index)
-{
-  p_array.erase(std::next(p_array.begin(), p_index - p_array.front_index()));
-}
 
 } // end namespace Gambit
 

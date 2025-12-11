@@ -180,7 +180,7 @@ template <class T> std::list<Array<int>> LPTableau<T>::ReversePivots()
         for (int i = best_set.size(); i >= 1; i--) {
           x = solution[best_set[i]] / tmpcol[best_set[i]];
           if (this->LtZero(x - ratio)) {
-            erase_atindex(best_set, i);
+            best_set.erase_at(i);
           }
         }
 
@@ -190,7 +190,7 @@ template <class T> std::list<Array<int>> LPTableau<T>::ReversePivots()
         for (int i = best_set.size(); i >= 1; i--) {
           a_ij = static_cast<T>(1) / tmpcol[best_set[i]];
           if (this->LeZero(a_ij)) {
-            erase_atindex(best_set, i);
+            best_set.erase_at(i);
           }
           else {
             // next check that prior pivot entry attains max ratio
@@ -203,12 +203,12 @@ template <class T> std::list<Array<int>> LPTableau<T>::ReversePivots()
                 a_ik = -a_ij * tmpcol[k];
                 b_k = solution[k] - b_i * tmpcol[k];
                 if (this->GtZero(a_ik) && this->GtZero(b_k / a_ik - ratio)) {
-                  erase_atindex(best_set, i);
+                  best_set.erase_at(i);
                   flag = true;
                 }
                 else if (this->GtZero(a_ik) && this->EqZero(b_k / a_ik - ratio) &&
                          this->Label(k) < j) {
-                  erase_atindex(best_set, i);
+                  best_set.erase_at(i);
                   flag = true;
                 }
               }
@@ -227,7 +227,7 @@ template <class T> std::list<Array<int>> LPTableau<T>::ReversePivots()
         a_ij = tmpdual * tmpcol;
         c_j = RelativeCost(j);
         if (this->EqZero(a_ij)) {
-          erase_atindex(best_set, i);
+          best_set.erase_at(i);
         }
         else {
           ratio = c_j / a_ij;
@@ -241,7 +241,7 @@ template <class T> std::list<Array<int>> LPTableau<T>::ReversePivots()
           c_k = RelativeCost(enter);
           c_jo = c_k - a_ik * ratio;
           if (this->GeZero(c_jo)) {
-            erase_atindex(best_set, i);
+            best_set.erase_at(i);
           }
           else {
             flag = false;
@@ -258,7 +258,7 @@ template <class T> std::list<Array<int>> LPTableau<T>::ReversePivots()
                 c_jo = c_k - a_ik * ratio;
 
                 if (this->LtZero(c_jo)) {
-                  erase_atindex(best_set, i);
+                  best_set.erase_at(i);
                   flag = true;
                 }
               }

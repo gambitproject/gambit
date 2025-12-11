@@ -88,7 +88,7 @@ template <class T> int LemkeTableau<T>::SF_ExitIndex(int inlabel)
     for (size_t i = BestSet.size(); i >= 1; i--) {
       ratio = col[BestSet[i]] / incol[BestSet[i]];
       if (ratio > tempmax + this->eps2) {
-        erase_atindex(BestSet, i);
+        BestSet.erase_at(i);
       }
     }
     c++;
@@ -159,7 +159,7 @@ template <class T> int LemkeTableau<T>::ExitIndex(int inlabel)
     for (size_t j = BestSet.size(); j >= 1; j--) {
       ratio = col[BestSet[j]] / incol[BestSet[j]];
       if (ratio < tempmax - this->eps1) {
-        erase_atindex(BestSet, j);
+        BestSet.erase_at(j);
       }
     }
     c++;

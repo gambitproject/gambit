@@ -10,7 +10,7 @@ jobs:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
     strategy:
       matrix:
-        python-version: ['3.9', '3.13']
+        python-version: ['3.10', '3.14']
 
     steps:
       - uses: actions/checkout@v5
@@ -35,11 +35,11 @@ jobs:
         run: pytest --run-tutorials
 
   macos-13:
-    runs-on: macos-13
+    runs-on: macos-14
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
     strategy:
       matrix:
-        python-version: ['3.13']
+        python-version: ['3.14']
 
     steps:
       - uses: actions/checkout@v4
@@ -59,11 +59,11 @@ jobs:
         run: pytest
 
   macos-14:
-    runs-on: macos-14
+    runs-on: macos-15
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
     strategy:
       matrix:
-        python-version: ['3.13']
+        python-version: ['3.14']
 
     steps:
       - uses: actions/checkout@v4
@@ -88,7 +88,7 @@ jobs:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
     strategy:
       matrix:
-        python-version: ['3.13']
+        python-version: ['3.14']
 
     steps:
       - uses: actions/checkout@v5

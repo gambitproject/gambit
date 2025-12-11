@@ -117,7 +117,7 @@ LogitMixedSheet::LogitMixedSheet(wxWindow *p_parent, GameDocument *p_doc,
   : wxSheet(p_parent, wxID_ANY, wxDefaultPosition, wxSize(800, 600)), m_doc(p_doc),
     m_branch(p_branch)
 {
-  CreateGrid(p_branch.NumPoints(), p_doc->GetGame()->MixedProfileLength() + 1);
+  CreateGrid(p_branch.NumPoints(), p_doc->GetGame()->GetStrategies().size() + 1);
   SetRowLabelWidth(40);
   SetColLabelHeight(25);
 }
@@ -359,13 +359,13 @@ public:
 LogitPlotStrategyList::LogitPlotStrategyList(wxWindow *p_parent, GameDocument *p_doc)
   : wxSheet(p_parent, wxID_ANY), m_doc(p_doc)
 {
-  CreateGrid(m_doc->GetGame()->MixedProfileLength(), 3);
+  CreateGrid(m_doc->GetGame()->GetStrategies().size(), 3);
 
   SetRowLabelWidth(0);
   SetColLabelHeight(0);
   SetGridLineColour(*wxWHITE);
 
-  for (int st = 1; st <= m_doc->GetGame()->MixedProfileLength(); st++) {
+  for (int st = 1; st <= m_doc->GetGame()->GetStrategies().size(); st++) {
     const GameStrategy strategy = m_doc->GetGame()->GetStrategy(st);
     const GamePlayer player = strategy->GetPlayer();
     const wxColour color = m_doc->GetStyle().GetPlayerColor(player);
@@ -476,7 +476,7 @@ void LogitPlotPanel::Plot()
 
   m_plotCtrl->DeleteCurve(-1);
 
-  for (int st = 1; st <= m_doc->GetGame()->MixedProfileLength(); st++) {
+  for (int st = 1; st <= m_doc->GetGame()->GetStrategies().size(); st++) {
     if (!m_plotStrategies->IsStrategyShown(st)) {
       continue;
     }

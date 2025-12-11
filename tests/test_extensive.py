@@ -1,5 +1,3 @@
-import typing
-
 import numpy as np
 import pytest
 
@@ -11,10 +9,10 @@ from . import games
 @pytest.mark.parametrize(
     "players,title", [([], "New game"), (["Alice", "Bob"], "A poker game")]
 )
-def test_new_tree(players: list, title: typing.Optional[str]):
+def test_new_tree(players: list, title: str | None):
     game = gbt.Game.new_tree(players=players, title=title)
     assert len(game.players) == len(players)
-    for player, label in zip(game.players, players):
+    for player, label in zip(game.players, players, strict=True):
         assert player.label == label
     assert game.title == title
 
@@ -40,7 +38,7 @@ def test_game_add_players_label(players: list):
     game = gbt.Game.new_tree()
     for player in players:
         game.add_player(player)
-    for player, label in zip(game.players, players):
+    for player, label in zip(game.players, players, strict=True):
         assert player.label == label
 
 
@@ -396,7 +394,7 @@ def test_outcome_index_exception_label():
     ],
 )
 def test_reduced_strategic_form(
-    game: gbt.Game, strategy_labels: list, np_arrays_of_rsf: typing.Union[list, None]
+    game: gbt.Game, strategy_labels: list, np_arrays_of_rsf: list | None
 ):
     """
     We test two things:

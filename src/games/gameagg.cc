@@ -197,32 +197,6 @@ Game GameAGGRep::Copy() const
 }
 
 //------------------------------------------------------------------------
-//                  GameAGGRep: Dimensions of the game
-//------------------------------------------------------------------------
-
-Array<int> GameAGGRep::NumStrategies() const
-{
-  Array<int> ns;
-  for (const auto &player : m_players) {
-    ns.push_back(player->GetStrategies().size());
-  }
-  return ns;
-}
-
-GameStrategy GameAGGRep::GetStrategy(int p_index) const
-{
-  for (const auto &player : m_players) {
-    if (static_cast<int>(player->GetStrategies().size()) >= p_index) {
-      return player->GetStrategy(p_index);
-    }
-    else {
-      p_index -= player->GetStrategies().size();
-    }
-  }
-  throw std::out_of_range("Strategy index out of range");
-}
-
-//------------------------------------------------------------------------
 //                    GameAGGRep: Factory functions
 //------------------------------------------------------------------------
 

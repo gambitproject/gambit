@@ -87,11 +87,11 @@ phase for large values of the precision parameter lambda.
 Computing the principal branch, in mixed strategies, of :download:`e02.nfg
 <../contrib/games/e02.nfg>`, the reduced strategic form of the example
 in Figure 2 of Selten (International Journal of Game Theory,
-1975)::
+1975)
 
    $ gambit-logit e02.nfg
    Compute a branch of the logit equilibrium correspondence
-   Gambit version 16.4.0, Copyright (C) 1994-2025, The Gambit Project
+   Gambit version |release|, Copyright (C) 1994-2025, The Gambit Project
    This is free software, distributed under the GNU GPL
 
    0.000000,0.333333,0.333333,0.333333,0.5,0.5
