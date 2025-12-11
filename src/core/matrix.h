@@ -28,6 +28,12 @@
 
 namespace Gambit {
 
+class SingularMatrixException final : public std::runtime_error {
+public:
+  SingularMatrixException() : std::runtime_error("Attempted to invert a singular matrix") {}
+  ~SingularMatrixException() noexcept override = default;
+};
+
 template <class T> Vector<T> operator*(const Vector<T> &, const Matrix<T> &);
 
 template <class T> class Matrix : public RectArray<T> {
@@ -49,6 +55,10 @@ public:
 
   /// @name Extracting rows and columns
   //@{
+  bool IsSquare() const
+  {
+    return this->MinRow() == this->MinCol() && this->MaxRow() == this->MaxCol();
+  }
   Vector<T> Row(int) const;
   Vector<T> Column(int) const;
   //@}
@@ -93,6 +103,9 @@ public:
   void MakeIdent();
   void Pivot(int, int);
   //@}
+
+  Matrix Inverse() const;
+  T Determinant() const;
 };
 
 template <class T> Vector<T> operator*(const Vector<T> &, const Matrix<T> &);

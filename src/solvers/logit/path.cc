@@ -24,7 +24,6 @@
 #include <algorithm> // for std::max
 
 #include "gambit.h"
-#include "core/sqmatrix.h"
 #include "path.h"
 
 namespace Gambit {
@@ -143,7 +142,7 @@ void PathTracer::TracePath(
   Vector<double> t(x.size()), newT(x.size());
   Vector<double> y(x.size() - 1);
   Matrix<double> b(x.size(), x.size() - 1);
-  SquareMatrix<double> q(x.size());
+  Matrix<double> q(x.size(), x.size());
 
   p_jacobian(x, b);
   QRDecomp(b, q);

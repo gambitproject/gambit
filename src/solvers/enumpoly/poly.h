@@ -24,7 +24,6 @@
 #define POLY_H
 
 #include "gambit.h"
-#include "core/sqmatrix.h"
 
 namespace Gambit {
 
@@ -193,7 +192,7 @@ private:
   Polynomial<T> DivideByPolynomial(const Polynomial<T> &den) const;
 
   Polynomial<T> TranslateOfMono(const Monomial<T> &, const Vector<T> &) const;
-  Polynomial<T> MonoInNewCoordinates(const Monomial<T> &, const SquareMatrix<T> &) const;
+  Polynomial<T> MonoInNewCoordinates(const Monomial<T> &, const Matrix<T> &) const;
 
 public:
   Polynomial(std::shared_ptr<VariableSpace> p) : m_space(p) {}
@@ -329,7 +328,7 @@ public:
   const List<Monomial<T>> &MonomialList() const { return m_terms; }
 
   Polynomial<T> TranslateOfPoly(const Vector<T> &) const;
-  Polynomial<T> PolyInNewCoordinates(const SquareMatrix<T> &) const;
+  Polynomial<T> PolyInNewCoordinates(const Matrix<T> &) const;
   T MaximalValueOfNonlinearPart(const T &) const;
   Polynomial<T> Normalize() const;
 };
