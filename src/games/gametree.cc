@@ -374,7 +374,7 @@ bool GameNodeRep::IsSuccessorOf(GameNode p_node) const
 bool GameNodeRep::IsSubgameRoot() const
 {
   if (m_children.empty()) {
-    return false;
+    return !GetParent();
   }
   return m_game->GetSubgameRoot(m_infoset->shared_from_this()) == shared_from_this();
 }
@@ -1081,6 +1081,8 @@ void GameTreeRep::BuildUnreachableNodes() const
 namespace { // Anonymous namespace
 
 // Comparator for priority queue (ancestors have lower priority than descendants)
+// This ensures descendants are processed first, allowing upward traversal to find
+// the highest reachable node in each component
 struct NodeCmp {
   bool operator()(const GameNodeRep *a, const GameNodeRep *b) const
   {
@@ -1088,16 +1090,21 @@ struct NodeCmp {
   }
 };
 
-// Scratch data structure for subgame root finding algorithm
 struct SubgameScratchData {
-  // DSU structures
+  /// DSU structures
+  ///
+  /// Maps each infoset to its parent in the union-find structure.
+  /// After path compression, points to the component leader directly.
   std::unordered_map<GameInfosetRep *, GameInfosetRep *> dsu_parent;
+  /// Maps each component leader to the highest node (candidate root) in that component
   std::unordered_map<GameInfosetRep *, GameNodeRep *> subgame_root_candidate;
-  // Timestamps for nodes
-  std::vector<int> node_visited_token;
-  int current_token = 0;
 
-  // DSU Find with path compression
+  /// DSU Find + path compression: Finds the leader of the component containing p_infoset.
+  ///
+  /// @param p_infoset The infoset to find the component leader for
+  /// @return Pointer to the leader infoset of the component
+  ///
+  /// Postcondition: Path from p_infoset to leader is compressed (flattened)
   GameInfosetRep *FindSet(GameInfosetRep *p_infoset)
   {
     // Initialize/retrieve current parent
@@ -1115,7 +1122,14 @@ struct SubgameScratchData {
     return leader;
   }
 
-  // DSU Union - merge current infoset into the start one and update the root candidate
+  /// DSU Union: Merges the components containing two infosets, updates the subgame root candidate.
+  ///
+  /// @param p_start_infoset The infoset whose component should absorb the other
+  /// @param p_current_infoset The infoset whose component is being merged
+  /// @param p_current_node The node being processed, considered as potential subgame root
+  ///
+  /// Postcondition: Both infosets belong to the same component
+  /// Postcondition: The component's subgame_root_candidate is updated to the highest node
   void UnionSets(GameInfosetRep *p_start_infoset, GameInfosetRep *p_current_infoset,
                  GameNodeRep *p_current_node)
   {
@@ -1137,16 +1151,37 @@ struct SubgameScratchData {
   }
 };
 
-// Generate a single component starting from a given node
+/// Generates a single connected component starting from a given node.
+///
+/// The local frontier driving the exploration is a priority queue.
+/// This design choice ensures that nodes are processed before their ancestors.
+///
+/// Starting from p_start_node, explores the game tree by:
+/// 1. Adding all members of each encountered infoset (horizontal expansion of the frontier)
+/// 2. Moving to parent nodes (vertical expansion of the frontier)
+/// 3. When hitting nodes from previously-generated components (external collision)
+///    it merges the components and adds the root of the external component to the frontier
+///
+/// The component gathers all infosets that share the same minimal subgame root.
+/// The highest node processed that empties the frontier without adding any new nodes
+/// to horizontal expansion becomes the subgame root candidate.
+///
+/// @param p_data The DSU data structure to update with component information
+/// @param p_start_node The node to start component generation from
+///
+/// Precondition: p_start_node must be non-terminal
+/// Precondition: p_start_node's infoset must not already be in p_data.dsu_parent
+/// Postcondition: p_data.subgame_root_candidate[leader] contains the highest node
+///                in the newly-formed component
 void GenerateComponent(SubgameScratchData &p_data, GameNodeRep *p_start_node)
 {
   auto *start_infoset = p_start_node->GetInfoset().get();
-  p_data.current_token++;
 
+  std::unordered_set<GameNodeRep *> visited_this_component;
   std::priority_queue<GameNodeRep *, std::vector<GameNodeRep *>, NodeCmp> local_frontier;
 
   local_frontier.push(p_start_node);
-  p_data.node_visited_token[p_start_node->GetNumber()] = p_data.current_token;
+  visited_this_component.insert(p_start_node);
 
   while (!local_frontier.empty()) {
     auto *curr = local_frontier.top();
@@ -1160,9 +1195,9 @@ void GenerateComponent(SubgameScratchData &p_data, GameNodeRep *p_start_node)
     if (is_external_collision) {
       // We hit a node belonging to a previously generated component.
       auto *candidate_root = p_data.subgame_root_candidate.at(p_data.FindSet(curr_infoset));
-      if (p_data.node_visited_token[candidate_root->GetNumber()] != p_data.current_token) {
+      if (!visited_this_component.count(candidate_root)) {
         local_frontier.push(candidate_root);
-        p_data.node_visited_token[candidate_root->GetNumber()] = p_data.current_token;
+        visited_this_component.insert(candidate_root);
       }
     }
     else {
@@ -1173,23 +1208,35 @@ void GenerateComponent(SubgameScratchData &p_data, GameNodeRep *p_start_node)
           continue;
         }
         local_frontier.push(member);
-        p_data.node_visited_token[member->GetNumber()] = p_data.current_token;
+        visited_this_component.insert(member);
       }
     }
 
     if (!local_frontier.empty()) {
       if (auto parent_sp = curr->GetParent()) {
         auto *parent = parent_sp.get();
-        if (p_data.node_visited_token[parent->GetNumber()] != p_data.current_token) {
+        if (!visited_this_component.count(parent)) {
           local_frontier.push(parent);
-          p_data.node_visited_token[parent->GetNumber()] = p_data.current_token;
+          visited_this_component.insert(parent);
         }
       }
     }
   }
 }
 
-// For each infoset, find the root of the smallest subgame containing it
+/// For each infoset in the game, computes the root of the smallest subgame containing it.
+///
+/// Processes nodes in reverse DFS order (postorder), building a component for each node,
+/// skipping a node if it is:
+/// 1. A member of an infoset already belonging to some component, or
+/// 2. Terminal
+///
+/// @param p_game The game tree
+/// @return Map from each infoset to the root of its smallest containing subgame
+///
+/// Precondition: p_game must be a valid game tree
+/// Postcondition: Every infoset in the game is mapped to exactly one subgame root node
+/// Returns: Empty map if the game root is terminal (trivial game)
 std::map<GameInfosetRep *, GameNodeRep *> FindSubgameRoots(const Game &p_game)
 {
   if (p_game->GetRoot()->IsTerminal()) {
@@ -1197,10 +1244,7 @@ std::map<GameInfosetRep *, GameNodeRep *> FindSubgameRoots(const Game &p_game)
   }
 
   SubgameScratchData data;
-  data.current_token++;
   const int num_nodes = p_game->NumNodes();
-
-  data.node_visited_token.resize(num_nodes + 1, 0);
 
   // Collect nodes in ascending order (depth-first traversal) -- TODO: Replace with proper iterator
   std::vector<GameNodeRep *> nodes_ascending;
