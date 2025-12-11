@@ -871,7 +871,7 @@ class MixedBehaviorProfile:
         agent_max_regret
         """
         self._check_validity()
-        return self.__max_regret()
+        return self._max_regret()
 
     def liap_value(self) -> ProfileDType:
         """Returns the Lyapunov value (see [McK91]_) of the strategy profile.
