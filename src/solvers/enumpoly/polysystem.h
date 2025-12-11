@@ -89,7 +89,7 @@ public:
     return ret;
   }
   /// Transform system to new coordinates
-  PolynomialSystem<T> TransformCoords(const SquareMatrix<T> &M) const
+  PolynomialSystem<T> TransformCoords(const Matrix<T> &M) const
   {
     PolynomialSystem<T> ret(m_space);
     for (const auto &v : m_system) {

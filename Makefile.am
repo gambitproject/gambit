@@ -251,14 +251,11 @@ core_SOURCES = \
 	src/core/recarray.h \
 	src/core/matrix.h \
 	src/core/matrix.imp \
-	src/core/sqmatrix.h \
-	src/core/sqmatrix.imp \
 	src/core/integer.cc \
 	src/core/integer.h \
 	src/core/rational.cc \
 	src/core/rational.h \
 	src/core/matrix.cc \
-	src/core/sqmatrix.cc \
 	src/core/function.cc \
 	src/core/function.h \
 	src/core/tinyxml.cc \

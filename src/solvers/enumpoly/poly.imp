@@ -239,7 +239,7 @@ template <class T> Polynomial<T> Polynomial<T>::TranslateOfPoly(const Vector<T> 
 
 template <class T>
 Polynomial<T> Polynomial<T>::MonoInNewCoordinates(const Monomial<T> &m,
-                                                  const SquareMatrix<T> &M) const
+                                                  const Matrix<T> &M) const
 {
   Polynomial<T> answer(m_space, static_cast<T>(1));
 
@@ -259,7 +259,7 @@ Polynomial<T> Polynomial<T>::MonoInNewCoordinates(const Monomial<T> &m,
 }
 
 template <class T>
-Polynomial<T> Polynomial<T>::PolyInNewCoordinates(const SquareMatrix<T> &M) const
+Polynomial<T> Polynomial<T>::PolyInNewCoordinates(const Matrix<T> &M) const
 {
   Polynomial<T> answer(m_space);
   for (const auto &term : m_terms) {
