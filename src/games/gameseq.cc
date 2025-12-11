@@ -67,23 +67,28 @@ void GameSequenceForm::BuildSequences()
 }
 
 void GameSequenceForm::FillTableau(const GameNode &n, const Rational &prob,
-                                   std::map<GamePlayer, GameSequence> &p_currentSequences)
+                                   std::map<GamePlayer, GameSequence> &p_currentSequences,
+                                   std::map<GamePlayer, Rational> p_cumPayoff)
 {
   if (n->GetOutcome()) {
     for (auto player : m_support.GetGame()->GetPlayers()) {
-      GetPayoffEntry(p_currentSequences, player) +=
-          prob * n->GetOutcome()->GetPayoff<Rational>(player);
+      p_cumPayoff[player] += n->GetOutcome()->GetPayoff<Rational>(player);
+      // GetPayoffEntry(p_currentSequences, player) +=
+      // prob * n->GetOutcome()->GetPayoff<Rational>(player);
     }
   }
   if (!n->GetInfoset()) {
     GetTerminalProb(p_currentSequences) += prob;
+    for (auto player : m_support.GetGame()->GetPlayers()) {
+      GetPayoffEntry(p_currentSequences, player) += prob * p_cumPayoff[player];
+    }
     return;
   }
   if (n->GetPlayer()->IsChance()) {
     for (auto action : n->GetInfoset()->GetActions()) {
       FillTableau(n->GetChild(action),
                   prob * static_cast<Rational>(n->GetInfoset()->GetActionProb(action)),
-                  p_currentSequences);
+                  p_currentSequences, p_cumPayoff);
     }
   }
   else {
@@ -92,7 +97,7 @@ void GameSequenceForm::FillTableau(const GameNode &n, const Rational &prob,
     for (auto action : m_support.GetActions(n->GetInfoset())) {
       m_constraints[{n->GetInfoset(), action}] = -1;
       p_currentSequences[n->GetPlayer()] = m_correspondence.at(action);
-      FillTableau(n->GetChild(action), prob, p_currentSequences);
+      FillTableau(n->GetChild(action), prob, p_currentSequences, p_cumPayoff);
     }
     p_currentSequences[n->GetPlayer()] = tmp_sequence;
   }
@@ -108,10 +113,12 @@ void GameSequenceForm::FillTableau()
   m_terminalProb = NDArray<Rational>(dim, dim.size());
 
   std::map<GamePlayer, GameSequence> currentSequence;
+  std::map<GamePlayer, Rational> cumPayoff;
   for (auto player : GetPlayers()) {
     currentSequence[player] = m_sequences[player].front();
+    cumPayoff[player] = Rational(0);
   }
-  FillTableau(m_support.GetGame()->GetRoot(), Rational(1), currentSequence);
+  FillTableau(m_support.GetGame()->GetRoot(), Rational(1), currentSequence, cumPayoff);
 }
 
 } // end namespace Gambit

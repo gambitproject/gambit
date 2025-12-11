@@ -44,7 +44,8 @@ class GameSequenceForm {
   void BuildSequences();
   void BuildSequences(const GameNode &, std::map<GamePlayer, GameSequence> &);
   void FillTableau();
-  void FillTableau(const GameNode &, const Rational &, std::map<GamePlayer, GameSequence> &);
+  void FillTableau(const GameNode &, const Rational &, std::map<GamePlayer, GameSequence> &,
+                   std::map<GamePlayer, Rational>);
 
   Array<int> ProfileToIndex(const std::map<GamePlayer, GameSequence> &p_profile) const
   {
