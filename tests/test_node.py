@@ -205,7 +205,7 @@ def test_node_own_prior_action_non_terminal(game_file, expected_node_data):
     # Empty game has no subgames
     (
         gbt.Game.new_tree(),
-        []
+        [[]]
     ),
     # --- Games without Absent-Mindedness. ---
     # Perfect Information
@@ -293,14 +293,18 @@ def test_subgame_root_consistency(game: gbt.Game, expected_paths_list: list):
     Tests `game.subgame_root` and `node.is_subgame_root` for consistency and correctness
     by comparing the paths of the identified root nodes against the expected paths.
     """
-    roots_from_lookup = {game.subgame_root(infoset) for infoset in game.infosets}
     roots_from_property = {node for node in game.nodes if node.is_subgame_root}
 
-    assert roots_from_lookup == roots_from_property
+    # For trivial games with no infosets, check the property-based roots
+    if len(game.infosets) == 0:
+        actual_paths = [_get_path_of_action_labels(node) for node in roots_from_property]
+        assert actual_paths == expected_paths_list
+    else:
+        roots_from_lookup = {game.subgame_root(infoset) for infoset in game.infosets}
+        assert roots_from_lookup == roots_from_property
 
-    actual_paths = [_get_path_of_action_labels(node) for node in roots_from_lookup]
-
-    assert sorted(actual_paths) == sorted(expected_paths_list)
+        actual_paths = [_get_path_of_action_labels(node) for node in roots_from_lookup]
+        assert sorted(actual_paths) == sorted(expected_paths_list)
 
 
 @pytest.mark.parametrize("game_file, expected_unreachable_paths", [
