@@ -564,5 +564,4 @@ template <class T> T Matrix<T>::Determinant() const
   return det;
 }
 
-
 } // end namespace Gambit
