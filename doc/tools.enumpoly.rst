@@ -1,3 +1,5 @@
+.. _gambit-enumpoly:
+
 :program:`gambit-enumpoly`: Compute equilibria of a game using polynomial systems of equations
 ==============================================================================================
 
