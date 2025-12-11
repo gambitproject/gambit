@@ -760,7 +760,7 @@ public:
   /// Returns true if the game is perfect recall
   virtual bool IsPerfectRecall() const = 0;
   ///
-  virtual GameNode GetSubgameRoot(const GameInfoset &) const = 0;
+  virtual GameNode GetSubgameRoot(const GameInfoset &) const { throw UndefinedException(); }
   //@}
 
   /// @name Writing data files
