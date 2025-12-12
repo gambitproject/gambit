@@ -3,8 +3,7 @@
 :program:`gambit-enumpure`: Enumerate pure-strategy equilibria of a game
 ========================================================================
 
-:program:`gambit-enumpure` reads a game on standard input and searches for
-pure-strategy Nash equilibria.
+:ref:`Algorithm description <enumpure>`
 
 .. versionchanged:: 14.0.2
    The effect of the `-S` switch is now purely cosmetic, determining
