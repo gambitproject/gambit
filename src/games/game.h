@@ -640,7 +640,6 @@ public:
       struct Frame {
         GameNode m_node;
         ChildIterator m_current, m_end;
-        bool m_expanded = false;
       };
 
       Game m_owner{nullptr};
@@ -673,32 +672,18 @@ public:
       static Frame make_frame(const GameNode &p_node)
       {
         if (p_node->IsTerminal()) {
-          return Frame{p_node, {}, {}, true};
+          return Frame{p_node, {}, {}};
         }
         const auto children = p_node->GetChildren();
-        return Frame{p_node, children.begin(), children.end(), false};
-      }
-
-      void descend_postorder()
-      {
-        while (!m_stack.empty()) {
-          auto &f = m_stack.top();
-          if (f.m_expanded || f.m_current == f.m_end) {
-            return;
-          }
-          f.m_expanded = true;
-          const GameNode child = *f.m_current;
-          ++f.m_current;
-          m_stack.push(make_frame(child));
-        }
+        return Frame{p_node, children.begin(), children.end()};
       }
 
       GameNode advance_preorder()
       {
-        if (auto &top = m_stack.top(); !top.m_node->IsTerminal()) {
-          const auto children = top.m_node->GetChildren();
-          top.m_current = children.begin();
-          top.m_end = children.end();
+        if (auto &[node, current, m_end] = m_stack.top(); !node->IsTerminal()) {
+          const auto children = node->GetChildren();
+          current = children.begin();
+          m_end = children.end();
         }
         while (!m_stack.empty()) {
           if (auto &f = m_stack.top(); f.m_current != f.m_end) {
@@ -710,6 +695,23 @@ public:
           m_stack.pop();
         }
         return nullptr;
+      }
+
+      void descend_postorder()
+      {
+        while (!m_stack.empty()) {
+          auto &f = m_stack.top();
+          if (f.m_current == f.m_end) {
+            return;
+          }
+          const auto child = *f.m_current;
+          ++f.m_current;
+          m_stack.push(make_frame(child));
+          if (!child->IsTerminal()) {
+            continue;
+          }
+          return;
+        }
       }
 
       GameNode advance_postorder()
@@ -743,7 +745,7 @@ public:
         if (!m_current) {
           return *this;
         }
-        const GameNode next =
+        const auto next =
             (m_order == TraversalOrder::Preorder) ? advance_preorder() : advance_postorder();
         m_current = next;
         if (!m_current) {
@@ -1001,7 +1003,10 @@ public:
   /// Returns the root node of the game
   virtual GameNode GetRoot() const = 0;
   /// Returns a range that can be used to iterate over the nodes of the game
-  Nodes GetNodes() const { return {std::const_pointer_cast<GameRep>(shared_from_this())}; }
+  Nodes GetNodes(TraversalOrder p_traversal = TraversalOrder::Preorder) const
+  {
+    return {std::const_pointer_cast<GameRep>(shared_from_this()), p_traversal};
+  }
   /// Returns the number of nodes in the game
   virtual size_t NumNodes() const = 0;
   /// Returns the number of non-terminal nodes in the game
