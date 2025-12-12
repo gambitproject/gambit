@@ -24,9 +24,11 @@
 #include <algorithm>
 #include <functional>
 #include <numeric>
+#include <queue>
 #include <stack>
 #include <set>
 #include <variant>
+#include <unordered_set>
 
 #include "gambit.h"
 #include "gametree.h"
@@ -371,32 +373,10 @@ bool GameNodeRep::IsSuccessorOf(GameNode p_node) const
 
 bool GameNodeRep::IsSubgameRoot() const
 {
-  // First take care of a couple easy cases
-  if (m_children.empty() || m_infoset->m_members.size() > 1) {
-    return false;
+  if (m_children.empty()) {
+    return !GetParent();
   }
-  if (!m_parent) {
-    return true;
-  }
-
-  // A node is a subgame root if and only if in every information set,
-  // either all members succeed the node in the tree,
-  // or all members do not succeed the node in the tree.
-  for (auto player : m_game->GetPlayers()) {
-    for (auto infoset : player->GetInfosets()) {
-      const bool precedes = infoset->m_members.front()->IsSuccessorOf(
-          std::const_pointer_cast<GameNodeRep>(shared_from_this()));
-      if (std::any_of(std::next(infoset->m_members.begin()), infoset->m_members.end(),
-                      [this, precedes](const std::shared_ptr<GameNodeRep> &m) {
-                        return m->IsSuccessorOf(std::const_pointer_cast<GameNodeRep>(
-                                   shared_from_this())) != precedes;
-                      })) {
-        return false;
-      }
-    }
-  }
-
-  return true;
+  return m_game->GetSubgameRoot(m_infoset->shared_from_this()) == shared_from_this();
 }
 
 bool GameNodeRep::IsStrategyReachable() const
@@ -870,6 +850,7 @@ void GameTreeRep::ClearComputedValues() const
   const_cast<GameTreeRep *>(this)->m_nodePlays.clear();
   m_ownPriorActionInfo = nullptr;
   const_cast<GameTreeRep *>(this)->m_unreachableNodes = nullptr;
+  m_infosetSubgameRoot.clear();
   m_computedValues = false;
 }
 
@@ -1076,6 +1057,221 @@ void GameTreeRep::BuildUnreachableNodes()
       }
     }
   }
+}
+
+//------------------------------------------------------------------------
+//                        Subgame Root Finder
+//------------------------------------------------------------------------
+
+namespace { // Anonymous namespace
+
+// Comparator for priority queue (ancestors have lower priority than descendants)
+// This ensures descendants are processed first, allowing upward traversal to find
+// the highest reachable node in each component
+struct NodeCmp {
+  bool operator()(const GameNodeRep *a, const GameNodeRep *b) const
+  {
+    return a->GetNumber() < b->GetNumber();
+  }
+};
+
+struct SubgameScratchData {
+  /// DSU structures
+  ///
+  /// Maps each infoset to its parent in the union-find structure.
+  /// After path compression, points to the component leader directly.
+  std::unordered_map<GameInfosetRep *, GameInfosetRep *> dsu_parent;
+  /// Maps each component leader to the highest node (candidate root) in that component
+  std::unordered_map<GameInfosetRep *, GameNodeRep *> subgame_root_candidate;
+
+  /// DSU Find + path compression: Finds the leader of the component containing p_infoset.
+  ///
+  /// @param p_infoset The infoset to find the component leader for
+  /// @return Pointer to the leader infoset of the component
+  ///
+  /// Postcondition: Path from p_infoset to leader is compressed (flattened)
+  GameInfosetRep *FindSet(GameInfosetRep *p_infoset)
+  {
+    // Initialize/retrieve current parent
+    auto *leader = dsu_parent.try_emplace(p_infoset, p_infoset).first->second;
+    while (dsu_parent.at(leader) != leader) {
+      leader = dsu_parent.at(leader);
+    }
+    // Path compression
+    auto *curr = p_infoset;
+    while (curr != leader) {
+      auto &parent_ref = dsu_parent.at(curr);
+      curr = parent_ref;
+      parent_ref = leader;
+    }
+    return leader;
+  }
+
+  /// DSU Union: Merges the components containing two infosets, updates the subgame root candidate.
+  ///
+  /// @param p_start_infoset The infoset whose component should absorb the other
+  /// @param p_current_infoset The infoset whose component is being merged
+  /// @param p_current_node The node being processed, considered as potential subgame root
+  ///
+  /// Postcondition: Both infosets belong to the same component
+  /// Postcondition: The component's subgame_root_candidate is updated to the highest node
+  void UnionSets(GameInfosetRep *p_start_infoset, GameInfosetRep *p_current_infoset,
+                 GameNodeRep *p_current_node)
+  {
+    auto *leader_start = FindSet(p_start_infoset);
+    auto *leader_current = FindSet(p_current_infoset);
+
+    if (leader_start == leader_current) {
+      subgame_root_candidate[leader_start] = p_current_node;
+      return;
+    }
+
+    // Check if candidate exists before accessing
+    auto it = subgame_root_candidate.find(leader_current);
+    auto *existing_candidate = (it != subgame_root_candidate.end()) ? it->second : nullptr;
+    auto *best_candidate = existing_candidate ? existing_candidate : p_current_node;
+
+    dsu_parent[leader_current] = leader_start;
+    subgame_root_candidate[leader_start] = best_candidate;
+  }
+};
+
+/// Generates a single connected component starting from a given node.
+///
+/// The local frontier driving the exploration is a priority queue.
+/// This design choice ensures that nodes are processed before their ancestors.
+///
+/// Starting from p_start_node, explores the game tree by:
+/// 1. Adding all members of each encountered infoset (horizontal expansion of the frontier)
+/// 2. Moving to parent nodes (vertical expansion of the frontier)
+/// 3. When hitting nodes from previously-generated components (external collision)
+///    it merges the components and adds the root of the external component to the frontier
+///
+/// The component gathers all infosets that share the same minimal subgame root.
+/// The highest node processed that empties the frontier without adding any new nodes
+/// to horizontal expansion becomes the subgame root candidate.
+///
+/// @param p_data The DSU data structure to update with component information
+/// @param p_start_node The node to start component generation from
+///
+/// Precondition: p_start_node must be non-terminal
+/// Precondition: p_start_node's infoset must not already be in p_data.dsu_parent
+/// Postcondition: p_data.subgame_root_candidate[leader] contains the highest node
+///                in the newly-formed component
+void GenerateComponent(SubgameScratchData &p_data, GameNodeRep *p_start_node)
+{
+  auto *start_infoset = p_start_node->GetInfoset().get();
+
+  std::unordered_set<GameNodeRep *> visited_this_component;
+  std::priority_queue<GameNodeRep *, std::vector<GameNodeRep *>, NodeCmp> local_frontier;
+
+  local_frontier.push(p_start_node);
+  visited_this_component.insert(p_start_node);
+
+  while (!local_frontier.empty()) {
+    auto *curr = local_frontier.top();
+    local_frontier.pop();
+
+    auto *curr_infoset = curr->GetInfoset().get();
+    const bool is_external_collision = p_data.dsu_parent.count(curr_infoset);
+
+    p_data.UnionSets(start_infoset, curr_infoset, curr);
+
+    if (is_external_collision) {
+      // We hit a node belonging to a previously generated component.
+      auto *candidate_root = p_data.subgame_root_candidate.at(p_data.FindSet(curr_infoset));
+      if (!visited_this_component.count(candidate_root)) {
+        local_frontier.push(candidate_root);
+        visited_this_component.insert(candidate_root);
+      }
+    }
+    else {
+      // First time seeing this infoset: add all its members to the frontier.
+      for (const auto &member_sp : curr->GetInfoset()->GetMembers()) {
+        auto *member = member_sp.get();
+        if (member == curr) {
+          continue;
+        }
+        local_frontier.push(member);
+        visited_this_component.insert(member);
+      }
+    }
+
+    if (!local_frontier.empty()) {
+      if (auto parent_sp = curr->GetParent()) {
+        auto *parent = parent_sp.get();
+        if (!visited_this_component.count(parent)) {
+          local_frontier.push(parent);
+          visited_this_component.insert(parent);
+        }
+      }
+    }
+  }
+}
+
+/// For each infoset in the game, computes the root of the smallest subgame containing it.
+///
+/// Processes nodes in reverse DFS order (postorder), building a component for each node,
+/// skipping a node if it is:
+/// 1. A member of an infoset already belonging to some component, or
+/// 2. Terminal
+///
+/// @param p_game The game tree
+/// @return Map from each infoset to the root of its smallest containing subgame
+///
+/// Precondition: p_game must be a valid game tree
+/// Postcondition: Every infoset in the game is mapped to exactly one subgame root node
+/// Returns: Empty map if the game root is terminal (trivial game)
+std::map<GameInfosetRep *, GameNodeRep *> FindSubgameRoots(const Game &p_game)
+{
+  if (p_game->GetRoot()->IsTerminal()) {
+    return {};
+  }
+
+  SubgameScratchData data;
+  const int num_nodes = p_game->NumNodes();
+
+  // Collect nodes in ascending order (depth-first traversal) -- TODO: Replace with proper iterator
+  std::vector<GameNodeRep *> nodes_ascending;
+  nodes_ascending.reserve(num_nodes);
+  for (const auto &node : p_game->GetNodes()) {
+    nodes_ascending.push_back(node.get());
+  }
+
+  // Process in reverse order (descending node numbers, children before parents)
+  for (auto it = nodes_ascending.rbegin(); it != nodes_ascending.rend(); ++it) {
+    auto *node = *it;
+    if (node->IsTerminal() || data.dsu_parent.count(node->GetInfoset().get())) {
+      continue;
+    }
+    GenerateComponent(data, node);
+  }
+
+  std::map<GameInfosetRep *, GameNodeRep *> result;
+
+  auto collect_results = [&](const GamePlayer &p_player) {
+    for (const auto &infoset : p_player->GetInfosets()) {
+      auto *ptr = infoset.get();
+      result[ptr] = data.subgame_root_candidate.at(data.FindSet(ptr));
+    }
+  };
+
+  collect_results(p_game->GetChance());
+  for (const auto &player : p_game->GetPlayers()) {
+    collect_results(player);
+  }
+
+  return result;
+}
+
+} // end anonymous namespace
+
+void GameTreeRep::BuildSubgameRoots() const
+{
+  if (!m_computedValues) {
+    BuildComputedValues();
+  }
+  m_infosetSubgameRoot = FindSubgameRoots(std::const_pointer_cast<GameRep>(shared_from_this()));
 }
 
 //------------------------------------------------------------------------
