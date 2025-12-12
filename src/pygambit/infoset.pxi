@@ -168,6 +168,8 @@ class Infoset:
 
         An information set is absent-minded if there exists a path of play
         in the game tree that intersects the information set more than once.
+
+        .. versionadded:: 16.5.0
         """
         return self.infoset.deref().GetGame().deref().IsAbsentMinded(self.infoset)
 
