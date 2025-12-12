@@ -1,6 +1,6 @@
 _Thanks for contributing to Gambit! Before you submitting or reviewing a pull request, check out our [guidelines for contributing](https://gambitproject.readthedocs.io/en/latest/developer.contributing.html)._
 
-_The person submitting the PR should update the headers below, before marking the PR as ready for review and assigning reviewers._
+_The person submitting the PR should ensure it has an informative title and update the headers below, before marking the PR as ready for review and assigning reviewers._
 
 ### Issues closed by this PR
 
