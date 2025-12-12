@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/integer.h
+// FILE: src/core/integer.h
 // Interface to an arbitrary-length integer class
 //
 // The original copyright and license are included below.
@@ -25,8 +25,8 @@ License along with this library; if not, write to the Free Software
 Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef LIBGAMBIT_INTEGER_H
-#define LIBGAMBIT_INTEGER_H
+#ifndef GAMBIT_CORE_INTEGER_H
+#define GAMBIT_CORE_INTEGER_H
 
 #include <string>
 
@@ -249,4 +249,4 @@ extern Integer lcm(const Integer &x, const Integer &y); // least common mult
 
 } // end namespace Gambit
 
-#endif // LIBGAMBIT_INTEGER_H
+#endif // GAMBIT_CORE_INTEGER_H

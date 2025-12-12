@@ -36,20 +36,6 @@ using namespace std;
 using namespace Gambit;
 using namespace Gambit::Nash;
 
-inline Game NewTable(Array<int> *dim) { return NewTable(*dim); }
-
-Game ReadGame(char *fn)
-{
-  std::ifstream f(fn);
-  return ReadGame(f);
-}
-
-Game ParseGame(char *s)
-{
-  std::istringstream f(s);
-  return ReadGame(f);
-}
-
 Game ParseGbtGame(std::string const &s)
 {
   std::istringstream f(s);
@@ -77,14 +63,14 @@ Game ParseAggGame(std::string const &s)
 std::string WriteEfgFile(const Game &p_game)
 {
   std::ostringstream f;
-  p_game->Write(f, "efg");
+  p_game->WriteEfgFile(f);
   return f.str();
 }
 
 std::string WriteNfgFile(const Game &p_game)
 {
   std::ostringstream f;
-  p_game->Write(f, "nfg");
+  p_game->WriteNfgFile(f);
   return f.str();
 }
 
@@ -98,38 +84,11 @@ std::string WriteLaTeXFile(const Game &p_game)
   return WriteLaTeXFile(p_game, p_game->GetPlayer(1), p_game->GetPlayer(2));
 }
 
-/// @deprecated Deprecated in favour of WriteXXXFile
-std::string WriteGame(const Game &p_game, const std::string &p_format)
-{
-  if (p_format == "html") {
-    return WriteHTMLFile(p_game, p_game->GetPlayer(1), p_game->GetPlayer(2));
-  }
-  else if (p_format == "sgame") {
-    return WriteLaTeXFile(p_game, p_game->GetPlayer(1), p_game->GetPlayer(2));
-  }
-  else if (p_format == "native" || p_format == "nfg" || p_format == "efg") {
-    std::ostringstream f;
-    p_game->Write(f, p_format);
-    return f.str();
-  }
-  else {
-    throw ValueException("Unknown game save file format '" + p_format + "'");
-  }
-}
-
-std::string WriteGame(const StrategySupportProfile &p_support)
+std::string WriteNfgFileSupport(const StrategySupportProfile &p_support)
 {
   std::ostringstream f;
   p_support.WriteNfgFile(f);
   return f.str();
-}
-
-// Create a copy on the heap (via new) of the element at index p_index of
-// container p_container.
-template <template <class> class C, class T, class X>
-T *copyitem(const C<T> &p_container, const X &p_index)
-{
-  return new T(p_container[p_index]);
 }
 
 template <template <class> class C, class T, class X>
@@ -151,17 +110,11 @@ void setitem(C &p_container, const X &p_index, const T &p_value)
   p_container[p_index] = p_value;
 }
 
-// Convert the (C-style) string p_value to a Rational
-inline Rational to_rational(const char *p_value)
+template <class T> std::list<std::shared_ptr<T>> make_list_of_pointer(const std::list<T> &p_list)
 {
-  return lexical_cast<Rational>(std::string(p_value));
-}
-
-template <class T> std::list<T *> make_list_of_pointer(const std::list<T> &p_list)
-{
-  std::list<T *> result;
-  for (auto element : p_list) {
-    result.push_back(new T(element));
+  std::list<std::shared_ptr<T>> result;
+  for (const auto &element : p_list) {
+    result.push_back(std::make_shared<T>(element));
   }
   return result;
 }

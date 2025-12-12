@@ -19,6 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
+import io
 import cython
 from cython.operator cimport dereference as deref
 from libcpp.memory cimport unique_ptr
@@ -40,10 +41,8 @@ class StrategySupport:
         return self._player
 
     def __iter__(self) -> typing.Generator[Strategy, None, None]:
-        for strat in deref(self._profile.support).GetStrategies(self._player.player):
-            s = Strategy()
-            s.strategy = strat
-            yield s
+        for strat in deref(self._profile.profile).GetStrategies(self._player.player):
+            yield Strategy.wrap(strat)
 
 
 @cython.cclass
@@ -52,34 +51,34 @@ class StrategySupportProfile:
     A StrategySupportProfile always contains at least one strategy for each player
     in the game.
     """
-    support = cython.declare(unique_ptr[c_StrategySupportProfile])
+    profile = cython.declare(shared_ptr[c_StrategySupportProfile])
 
     def __init__(self, *args, **kwargs) -> None:
         raise ValueError("Cannot create a StrategySupportProfile outside a Game.")
 
     @staticmethod
     @cython.cfunc
-    def wrap(game: Game) -> StrategySupportProfile:
+    def wrap(profile: shared_ptr[c_StrategySupportProfile]) -> StrategySupportProfile:
         obj: StrategySupportProfile = StrategySupportProfile.__new__(StrategySupportProfile)
-        obj.support.reset(new c_StrategySupportProfile(game.game))
+        obj.profile = profile
         return obj
 
     @property
     def game(self) -> Game:
         """The `Game` on which the support profile is defined."""
-        return Game.wrap(deref(self.support).GetGame())
+        return Game.wrap(deref(self.profile).GetGame())
 
     def __repr__(self) -> str:
         return f"StrategySupportProfile(game={self.game})"
 
     def __len__(self) -> int:
         """Returns the total number of strategies in the support profile."""
-        return deref(self.support).MixedProfileLength()
+        return deref(self.profile).MixedProfileLength()
 
     def __eq__(self, other: typing.Any) -> bool:
         return (
             isinstance(other, StrategySupportProfile) and
-            deref(self.support) == deref(cython.cast(StrategySupportProfile, other).support)
+            deref(self.profile) == deref(cython.cast(StrategySupportProfile, other).profile)
         )
 
     def __le__(self, other: StrategySupportProfile) -> bool:
@@ -93,11 +92,11 @@ class StrategySupportProfile:
             raise MismatchError(
                 "strategy is not part of the game on which the profile is defined."
             )
-        return deref(self.support).Contains(strategy.strategy)
+        return deref(self.profile).Contains(strategy.strategy)
 
     def __iter__(self) -> typing.Generator[Strategy, None, None]:
-        for player in deref(self.support).GetGame().deref().GetPlayers():
-            for strat in deref(self.support).GetStrategies(player):
+        for player in deref(self.profile).GetGame().deref().GetPlayers():
+            for strat in deref(self.profile).GetStrategies(player):
                 yield Strategy.wrap(strat)
 
     def __getitem__(self, player: PlayerReference) -> StrategySupport:
@@ -163,7 +162,7 @@ class StrategySupportProfile:
             raise MismatchError(
                 "remove(): strategy is not part of the game on which the profile is defined."
             )
-        if deref(self.support).GetStrategies(
+        if deref(self.profile).GetStrategies(
                 cython.cast(Player, strategy.player).player
         ).size() == 1:
             raise UndefinedOperationError(
@@ -262,7 +261,7 @@ class StrategySupportProfile:
         """
         if self.game != other.game:
             raise MismatchError("issubset(): support profiles are defined on different games")
-        return deref(self.support).IsSubsetOf(deref(other.support))
+        return deref(self.profile).IsSubsetOf(deref(other.profile))
 
     def issuperset(self, other: StrategySupportProfile) -> bool:
         """Test for whether another support is contained in this one.
@@ -294,17 +293,18 @@ class StrategySupportProfile:
             In 16.0.x, this returned a `StrategicRestriction` object.  Strategic restrictions
             have been removed in favor of using deep copies of games.
         """
-        return Game.parse_game(WriteGame(deref(self.support)).decode("ascii"))
+        with io.StringIO(WriteNfgFileSupport(deref(self.profile)).decode()) as f:
+            return read_nfg(f)
 
     def is_dominated(self, strategy: Strategy, strict: bool, external: bool = False) -> bool:
-        return deref(self.support).IsDominated(strategy.strategy, strict, external)
+        return deref(self.profile).IsDominated(strategy.strategy, strict, external)
 
 
 def _undominated_strategies_solve(
         profile: StrategySupportProfile, strict: bool, external: bool
 ) -> StrategySupportProfile:
-    result = StrategySupportProfile.wrap(profile.game)
-    result.support.reset(
-        new c_StrategySupportProfile(deref(profile.support).Undominated(strict, external))
+    return StrategySupportProfile.wrap(
+        make_shared[c_StrategySupportProfile](
+            deref(profile.profile).Undominated(strict, external)
+        )
     )
-    return result

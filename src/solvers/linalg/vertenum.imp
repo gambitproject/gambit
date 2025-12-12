@@ -29,7 +29,7 @@ VertexEnumerator<T>::VertexEnumerator(const Matrix<T> &A, const Vector<T> &b)
   : mult_opt(std::any_of(b.begin(), b.end(), [](const T &v) { return v == static_cast<T>(0); })),
     A(A), b(b), btemp(b)
 {
-  btemp = static_cast<T>(-1);
+  btemp = static_cast<T>(-1); // NOLINT(cppcoreguidelines-prefer-member-initializer)
   LPTableau<T> tab(A, b);
   Vector<T> c(A.MinCol(), A.MaxCol());
   c = static_cast<T>(1);
@@ -76,10 +76,10 @@ template <class T> void VertexEnumerator<T>::DualSearch(LPTableau<T> &tab)
   if (mult_opt) {
     tab.SetConst(btemp); // install artificial constraint vector
     LPTableau<T> tab2(tab);
-    for (int i = b.first_index(); i <= b.last_index(); i++) {
+    for (int i = b.front_index(); i <= b.back_index(); i++) {
       if (b[i] == static_cast<T>(0)) {
-        for (int j = -b.last_index(); j <= A.MaxCol(); j++) {
-          if (j && !tab.Member(j) && !tab.IsBlocked(j)) {
+        for (int j = -b.back_index(); j <= A.MaxCol(); j++) {
+          if (j && !tab.Member(j)) {
             if (tab.IsDualReversePivot(i, j)) {
               branches[depth] += 1;
               tab2 = tab;

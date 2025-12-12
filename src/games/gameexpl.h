@@ -30,23 +30,17 @@ namespace Gambit {
 class GameExplicitRep : public GameRep {
   template <class T> friend class MixedStrategyProfile;
 
-protected:
-  Array<GamePlayerRep *> m_players;
-  Array<GameOutcomeRep *> m_outcomes;
-
 public:
-  /// @name Lifecycle
-  //@{
-  /// Destructor
-  ~GameExplicitRep() override;
-  //@}
-
   /// @name General data access
   //@{
-  /// Returns the smallest payoff in any outcome of the game
-  Rational GetMinPayoff(int pl = 0) const override;
-  /// Returns the largest payoff in any outcome of the game
-  Rational GetMaxPayoff(int pl = 0) const override;
+  /// Returns the smallest payoff to any player in any outcome of the game
+  Rational GetMinPayoff() const override;
+  /// Returns the smallest payoff to the player in any outcome of the game
+  Rational GetMinPayoff(const GamePlayer &) const override;
+  /// Returns the largest payoff to any player in any outcome of the game
+  Rational GetMaxPayoff() const override;
+  /// Returns the largest payoff to the player in any outcome of the game
+  Rational GetMaxPayoff(const GamePlayer &) const override;
   //@}
 
   /// @name Dimensions of the game
@@ -55,26 +49,10 @@ public:
   Array<int> NumStrategies() const override;
   /// Gets the i'th strategy in the game, numbered globally
   GameStrategy GetStrategy(int p_index) const override;
-  /// Returns the number of strategy contingencies in the game
-  int NumStrategyContingencies() const override;
-  /// Returns the total number of strategies in the game
-  int MixedProfileLength() const override;
-  //@}
-
-  /// @name Players
-  //@{
-  /// Returns the number of players in the game
-  int NumPlayers() const override { return m_players.size(); }
-  /// Returns the pl'th player in the game
-  GamePlayer GetPlayer(int pl) const override { return m_players[pl]; }
   //@}
 
   /// @name Outcomes
   //@{
-  /// Returns the number of outcomes defined in the game
-  int NumOutcomes() const override { return m_outcomes.size(); }
-  /// Returns the index'th outcome defined in the game
-  GameOutcome GetOutcome(int index) const override { return m_outcomes[index]; }
   /// Creates a new outcome in the game
   GameOutcome NewOutcome() override;
 

@@ -28,8 +28,6 @@
 #include <algorithm>
 
 #include "gambit.h"
-// for explicit access to turning off canonicalization
-#include "gametree.h"
 
 namespace {
 // This anonymous namespace encapsulates the file-parsing code
@@ -306,9 +304,9 @@ public:
   std::vector<TableFilePlayer> m_players;
 
   size_t NumPlayers() const { return m_players.size(); }
-  Array<int> NumStrategies() const
+  std::vector<int> NumStrategies() const
   {
-    Array<int> ret(m_players.size());
+    std::vector<int> ret(m_players.size());
     std::transform(m_players.begin(), m_players.end(), ret.begin(),
                    [](const TableFilePlayer &player) { return player.m_strategies.size(); });
     return ret;
@@ -414,10 +412,10 @@ void ReadOutcomeList(GameFileLexer &p_parser, Game &p_nfg)
 void ParseOutcomeBody(GameFileLexer &p_parser, Game &p_nfg)
 {
   ReadOutcomeList(p_parser, p_nfg);
-  StrategySupportProfile profile(p_nfg);
+  const StrategySupportProfile profile(p_nfg);
   for (auto iter : StrategyContingencies(profile)) {
     p_parser.ExpectCurrentToken(TOKEN_NUMBER, "outcome index");
-    if (int outcomeId = std::stoi(p_parser.GetLastText())) {
+    if (const int outcomeId = std::stoi(p_parser.GetLastText())) {
       iter->SetOutcome(p_nfg->GetOutcome(outcomeId));
     }
     p_parser.GetNextToken();
@@ -426,9 +424,9 @@ void ParseOutcomeBody(GameFileLexer &p_parser, Game &p_nfg)
 
 void ParsePayoffBody(GameFileLexer &p_parser, Game &p_nfg)
 {
-  StrategySupportProfile profile(p_nfg);
+  const StrategySupportProfile profile(p_nfg);
   for (auto iter : StrategyContingencies(profile)) {
-    for (auto player : p_nfg->GetPlayers()) {
+    for (const auto &player : p_nfg->GetPlayers()) {
       p_parser.ExpectCurrentToken(TOKEN_NUMBER, "numerical payoff");
       iter->GetOutcome()->SetPayoff(player, Number(p_parser.GetLastText()));
       p_parser.GetNextToken();
@@ -486,7 +484,7 @@ void ReadPlayers(GameFileLexer &p_state, Game &p_game, TreeData &p_treeData)
 void ParseOutcome(GameFileLexer &p_state, Game &p_game, TreeData &p_treeData, GameNode &p_node)
 {
   p_state.ExpectCurrentToken(TOKEN_NUMBER, "index of outcome");
-  int outcomeId = std::stoi(p_state.GetLastText());
+  const int outcomeId = std::stoi(p_state.GetLastText());
   p_state.GetNextToken();
 
   if (p_state.GetCurrentToken() == TOKEN_TEXT) {
@@ -500,7 +498,7 @@ void ParseOutcome(GameFileLexer &p_state, Game &p_game, TreeData &p_treeData, Ga
       p_treeData.m_outcomeMap[outcomeId] = outcome;
     }
     outcome->SetLabel(p_state.GetLastText());
-    p_node->SetOutcome(outcome);
+    p_game->SetOutcome(p_node, outcome);
 
     p_state.ExpectNextToken(TOKEN_LBRACE, "'{'");
     p_state.GetNextToken();
@@ -516,7 +514,7 @@ void ParseOutcome(GameFileLexer &p_state, Game &p_game, TreeData &p_treeData, Ga
     // The node entry does not contain information about the outcome.
     // This means the outcome should have been defined already.
     try {
-      p_node->SetOutcome(p_treeData.m_outcomeMap.at(outcomeId));
+      p_game->SetOutcome(p_node, p_treeData.m_outcomeMap.at(outcomeId));
     }
     catch (std::out_of_range) {
       p_state.OnParseError("Outcome not defined");
@@ -532,7 +530,7 @@ void ParseChanceNode(GameFileLexer &p_state, Game &p_game, GameNode &p_node, Tre
   p_node->SetLabel(p_state.GetLastText());
 
   p_state.ExpectNextToken(TOKEN_NUMBER, "infoset id");
-  int infosetId = atoi(p_state.GetLastText().c_str());
+  const int infosetId = atoi(p_state.GetLastText().c_str());
   GameInfoset infoset = p_treeData.m_infosetMap[0][infosetId];
 
   if (p_state.GetNextToken() == TOKEN_TEXT) {
@@ -540,7 +538,7 @@ void ParseChanceNode(GameFileLexer &p_state, Game &p_game, GameNode &p_node, Tre
     std::list<std::string> action_labels;
     Array<Number> probs;
 
-    std::string label = p_state.GetLastText();
+    const std::string label = p_state.GetLastText();
     p_state.ExpectNextToken(TOKEN_LBRACE, "'{'");
     p_state.GetNextToken();
     do {
@@ -553,7 +551,7 @@ void ParseChanceNode(GameFileLexer &p_state, Game &p_game, GameNode &p_node, Tre
     p_state.GetNextToken();
 
     if (!infoset) {
-      infoset = p_node->AppendMove(p_game->GetChance(), action_labels.size());
+      infoset = p_game->AppendMove(p_node, p_game->GetChance(), action_labels.size());
       p_treeData.m_infosetMap[0][infosetId] = infoset;
       infoset->SetLabel(label);
       auto action_label = action_labels.begin();
@@ -565,11 +563,11 @@ void ParseChanceNode(GameFileLexer &p_state, Game &p_game, GameNode &p_node, Tre
     }
     else {
       // TODO: Verify actions match up to any previous specifications
-      p_node->AppendMove(infoset);
+      p_game->AppendMove(p_node, infoset);
     }
   }
   else if (infoset) {
-    p_node->AppendMove(infoset);
+    p_game->AppendMove(p_node, infoset);
   }
   else {
     p_state.OnParseError("Referencing an undefined infoset");
@@ -587,17 +585,17 @@ void ParsePersonalNode(GameFileLexer &p_state, Game p_game, GameNode p_node, Tre
   p_node->SetLabel(p_state.GetLastText());
 
   p_state.ExpectNextToken(TOKEN_NUMBER, "player id");
-  int playerId = std::stoi(p_state.GetLastText());
-  GamePlayer player = p_game->GetPlayer(playerId);
+  const int playerId = std::stoi(p_state.GetLastText());
+  const GamePlayer player = p_game->GetPlayer(playerId);
 
   p_state.ExpectNextToken(TOKEN_NUMBER, "infoset id");
-  int infosetId = std::stoi(p_state.GetLastText());
+  const int infosetId = std::stoi(p_state.GetLastText());
   GameInfoset infoset = p_treeData.m_infosetMap[playerId][infosetId];
 
   if (p_state.GetNextToken() == TOKEN_TEXT) {
     // Information set data is specified
     std::list<std::string> action_labels;
-    std::string label = p_state.GetLastText();
+    const std::string label = p_state.GetLastText();
 
     p_state.ExpectNextToken(TOKEN_LBRACE, "'{'");
     p_state.GetNextToken();
@@ -609,7 +607,7 @@ void ParsePersonalNode(GameFileLexer &p_state, Game p_game, GameNode p_node, Tre
     p_state.GetNextToken();
 
     if (!infoset) {
-      infoset = p_node->AppendMove(player, action_labels.size());
+      infoset = p_game->AppendMove(p_node, player, action_labels.size());
       p_treeData.m_infosetMap[playerId][infosetId] = infoset;
       infoset->SetLabel(label);
       auto action_label = action_labels.begin();
@@ -620,11 +618,11 @@ void ParsePersonalNode(GameFileLexer &p_state, Game p_game, GameNode p_node, Tre
     }
     else {
       // TODO: Verify actions match up to previous specifications
-      p_node->AppendMove(infoset);
+      p_game->AppendMove(p_node, infoset);
     }
   }
   else if (infoset) {
-    p_node->AppendMove(infoset);
+    p_game->AppendMove(p_node, infoset);
   }
   else {
     p_state.OnParseError("Referencing an undefined infoset");
@@ -732,7 +730,6 @@ Game ReadEfgFile(std::istream &p_stream)
 
   TreeData treeData;
   Game game = NewTree();
-  dynamic_cast<GameTreeRep &>(*game).SetCanonicalization(false);
   game->SetTitle(parser.GetLastText());
   ReadPlayers(parser, game, treeData);
   if (parser.GetNextToken() == TOKEN_TEXT) {
@@ -741,7 +738,7 @@ Game ReadEfgFile(std::istream &p_stream)
     parser.GetNextToken();
   }
   ParseNode(parser, game, game->GetRoot(), treeData);
-  dynamic_cast<GameTreeRep &>(*game).SetCanonicalization(true);
+  game->SortInfosets();
   return game;
 }
 

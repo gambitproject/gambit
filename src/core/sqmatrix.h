@@ -2,7 +2,7 @@
 // This file is part of Gambit
 // Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/sqmatrix.h
+// FILE: src/core/sqmatrix.h
 // Implementation of square matrices
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,17 +20,17 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef LIBGAMBIT_SQMATRIX_H
-#define LIBGAMBIT_SQMATRIX_H
+#ifndef GAMBIT_CORE_SQMATRIX_H
+#define GAMBIT_CORE_SQMATRIX_H
 
 #include "matrix.h"
 
 namespace Gambit {
 
-class SingularMatrixException : public Exception {
+class SingularMatrixException final : public std::runtime_error {
 public:
+  SingularMatrixException() : std::runtime_error("Attempted to invert a singular matrix") {}
   ~SingularMatrixException() noexcept override = default;
-  const char *what() const noexcept override { return "Attempted to invert a singular matrix"; }
 };
 
 template <class T> class SquareMatrix : public Matrix<T> {
@@ -49,4 +49,4 @@ public:
 
 } // end namespace Gambit
 
-#endif // LIBGAMBIT_SQMATRIX_H
+#endif // GAMBIT_CORE_SQMATRIX_H

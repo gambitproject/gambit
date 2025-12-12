@@ -23,32 +23,7 @@
 #include "lhtab.h"
 #include "gambit.h"
 
-namespace Gambit {
-namespace linalg {
-
-//---------------------------------------------------------------------------
-//                         LHTableau<T>: Lifecycle
-//---------------------------------------------------------------------------
-
-template <class T>
-LHTableau<T>::LHTableau(const Matrix<T> &A1, const Matrix<T> &A2, const Vector<T> &b1,
-                        const Vector<T> &b2)
-  : T1(A1, b1), T2(A2, b2), tmp1(b1.first_index(), b1.last_index()),
-    tmp2(b2.first_index(), b2.last_index()), solution(b1.first_index(), b2.last_index())
-{
-}
-
-template <class T> LHTableau<T> &LHTableau<T>::operator=(const LHTableau<T> &orig)
-{
-  if (this != &orig) {
-    T1 = orig.T1;
-    T2 = orig.T2;
-    tmp1 = orig.tmp1;
-    tmp2 = orig.tmp2;
-    solution = orig.solution;
-  }
-  return *this;
-}
+namespace Gambit::linalg {
 
 //---------------------------------------------------------------------------
 //                     LHTableau<T>: General information
@@ -80,12 +55,6 @@ template <class T> int LHTableau<T>::Find(int i) const
 //                     LHTableau<T>: Pivoting operations
 //---------------------------------------------------------------------------
 
-template <class T> bool LHTableau<T>::CanPivot(int outlabel, int inlabel) const
-{
-  return ((T1.ValidIndex(outlabel) && T1.CanPivot(outlabel, inlabel)) ||
-          (T2.ValidIndex(outlabel) && T2.CanPivot(outlabel, inlabel)));
-}
-
 template <class T> void LHTableau<T>::Pivot(int outrow, int inlabel)
 {
   if (!this->RowIndex(outrow)) {
@@ -107,13 +76,13 @@ template <class T> Gambit::linalg::BFS<T> LHTableau<T>::GetBFS()
 {
   T1.BasisVector(tmp1);
   T2.BasisVector(tmp2);
-  for (int i = tmp1.first_index(); i <= tmp1.last_index(); i++) {
+  for (int i = tmp1.front_index(); i <= tmp1.back_index(); i++) {
     solution[i] = tmp1[i];
   }
-  for (int i = tmp2.first_index(); i <= tmp2.last_index(); i++) {
+  for (int i = tmp2.front_index(); i <= tmp2.back_index(); i++) {
     solution[i] = tmp2[i];
   }
-  Gambit::linalg::BFS<T> cbfs;
+  BFS<T> cbfs;
   for (int i = MinCol(); i <= MaxCol(); i++) {
     if (Member(i)) {
       cbfs.insert(i, solution[Find(i)]);
@@ -124,8 +93,8 @@ template <class T> Gambit::linalg::BFS<T> LHTableau<T>::GetBFS()
 
 template <class T> int LHTableau<T>::PivotIn(int inlabel)
 {
-  int outindex = ExitIndex(inlabel);
-  int outlabel = Label(outindex);
+  const int outindex = ExitIndex(inlabel);
+  const int outlabel = Label(outindex);
   if (outlabel == 0) {
     return 0;
   }
@@ -163,5 +132,4 @@ template <class T> int LHTableau<T>::LemkePath(int dup)
   return 1;
 }
 
-} // namespace linalg
-} // end namespace Gambit
+} // end namespace Gambit::linalg

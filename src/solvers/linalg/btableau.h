@@ -23,112 +23,272 @@
 #ifndef BTABLEAU_H
 #define BTABLEAU_H
 
-#include "bfs.h"
-#include "basis.h"
+#include "gambit.h"
 
-namespace Gambit {
+namespace Gambit::linalg {
 
-namespace linalg {
+template <class T> class BFS {
+private:
+  std::map<int, T> m_map;
+  T m_default;
+
+public:
+  // Lifecycle
+  BFS() : m_default(0) {}
+  ~BFS() = default;
+
+  // define two BFS's to be equal if their bases are equal
+  bool operator==(const BFS &M) const
+  {
+    if (m_map.size() != M.m_map.size()) {
+      return false;
+    }
+
+    for (auto iter = m_map.begin(); iter != m_map.end(); iter++) {
+      if (M.m_map.count((*iter).first) == 0) {
+        return false;
+      }
+    }
+    return true;
+  }
+  bool operator!=(const BFS &M) const { return !(*this == M); }
+
+  // Provide map-like operations
+  int count(int key) const { return (m_map.count(key) > 0); }
+
+  void insert(int key, const T &value)
+  {
+    m_map.erase(key);
+    m_map.insert(std::pair<int, T>(key, value));
+  }
+
+  const T &operator[](int key) const
+  {
+    if (m_map.count(key) == 1) {
+      return const_cast<std::map<int, T> &>(m_map)[key];
+    }
+    else {
+      return m_default;
+    }
+  }
+};
+
+class Basis {
+private:
+  Array<int> basis;  // current members of basis (neg for slacks)
+  Array<int> cols;   // location of col in basis (0 if not in basis)
+  Array<int> slacks; // location of slacks in basis
+  bool is_ident{true};
+
+public:
+  Basis(int first, int last, int firstlabel, int lastlabel)
+    : basis(first, last), cols(firstlabel, lastlabel), slacks(first, last)
+  {
+    std::fill(cols.begin(), cols.end(), 0);
+    std::iota(slacks.begin(), slacks.end(), slacks.front_index());
+    std::generate(basis.begin(), basis.end(),
+                  [n = -basis.front_index()]() mutable { return n--; });
+  }
+  Basis(const Basis &) = default;
+  ~Basis() = default;
+
+  Basis &operator=(const Basis &) = default;
+
+  int First() const { return basis.front_index(); }
+  int Last() const { return basis.back_index(); }
+  int MinCol() const { return cols.front_index(); }
+  int MaxCol() const { return cols.back_index(); }
+
+  bool IsRegColumn(int col) const { return col >= cols.front_index() && col <= cols.back_index(); }
+  bool IsSlackColumn(int col) const
+  {
+    return -col >= basis.front_index() && -col <= basis.back_index();
+  }
+
+  // remove outindex, insert label, return outlabel
+  int Pivot(int outindex, int col)
+  {
+    const int outlabel = basis[outindex];
+
+    if (IsSlackColumn(col)) {
+      slacks[-col] = outindex;
+    }
+    else if (IsRegColumn(col)) {
+      cols[col] = outindex;
+    }
+    else {
+      throw std::out_of_range("Pivot in column out of range"); // not a valid column to pivot in.
+    }
+
+    if (IsSlackColumn(outlabel)) {
+      slacks[-outlabel] = 0;
+    }
+    else if (IsRegColumn(outlabel)) {
+      cols[outlabel] = 0;
+    }
+    else {
+      // Note: here, should back out outindex.
+      throw std::out_of_range("Pivot out column out of range"); // not a valid column to pivot out.
+    }
+
+    basis[outindex] = col;
+    CheckBasis();
+
+    return outlabel;
+  }
+
+  // return true iff label is a Basis member
+  bool Member(int label) const
+  {
+    return ((IsSlackColumn(label) && slacks[-label] != 0) ||
+            (IsRegColumn(label) && cols[label] != 0));
+  }
+  // finds Basis index corresponding to label number
+  int Find(int label) const
+  {
+    if (IsSlackColumn(label)) {
+      return slacks[-label];
+    }
+    if (IsRegColumn(label)) {
+      return cols[label];
+    }
+    throw std::out_of_range("Column label index out of range");
+  }
+
+  // finds label of variable corresponding to Basis index
+  int Label(int index) const { return basis[index]; }
+
+  // Check if Basis is Ident
+  void CheckBasis()
+  {
+    is_ident = true;
+    for (int i = basis.front_index(); i <= basis.back_index(); i++) {
+      if (basis[i] != -i) {
+        is_ident = false;
+        return;
+      }
+    }
+  }
+  // returns whether the basis is the identity matrix
+  bool IsIdent() const { return is_ident; }
+};
 
 inline void epsilon(double &v, int i = 8) { v = std::pow(10.0, (double)-i); }
 
 inline void epsilon(Rational &v, int /*i*/ = 8) { v = Rational(0); }
 
-template <class T> class BaseTableau {
+class BadPivot final : public std::runtime_error {
 public:
-  class BadPivot : public Exception {
-  public:
-    ~BadPivot() noexcept override = default;
-    const char *what() const noexcept override { return "Bad Pivot in BaseTableau"; }
-  };
-
-  virtual ~BaseTableau() = default;
-
-  bool ColIndex(int) const;
-  bool RowIndex(int) const;
-  bool ValidIndex(int) const;
-  virtual int MinRow() const = 0;
-  virtual int MaxRow() const = 0;
-  virtual int MinCol() const = 0;
-  virtual int MaxCol() const = 0;
-
-  virtual bool Member(int i) const = 0;
-  // is variable i is a member of basis
-  virtual int Label(int i) const = 0;
-  // return variable in i'th position of Tableau
-  virtual int Find(int i) const = 0;
-  // return position of variable i
-
-  // pivoting
-  virtual bool CanPivot(int outgoing, int incoming) const = 0;
-  virtual void Pivot(int outrow, int col) = 0;
-  // perform pivot operation -- outgoing is row, incoming is column
-  void CompPivot(int outlabel, int col);
-  virtual long NumPivots() const = 0;
-
-  // raw Tableau functions
-  virtual void Refactor() = 0;
+  BadPivot() : std::runtime_error("Bad pivot") {}
+  ~BadPivot() noexcept override = default;
 };
 
-// ---------------------------------------------------------------------------
-//                           TableauInterface Stuff
-// ---------------------------------------------------------------------------
-
-template <class T> class TableauInterface : public BaseTableau<T> {
+template <class T> class TableauInterface {
 protected:
-  const Matrix<T> *A; // should this be private?
-  const Vector<T> *b; // should this be private?
+  Matrix<T> A; // should this be private?
+  Vector<T> b; // should this be private?
   Basis basis;
   Vector<T> solution; // current solution vector. should this be private?
-  long npivots;
   T eps1, eps2;
   Array<int> artificial; // artificial variables
 
 public:
-  TableauInterface(const Matrix<T> &A, const Vector<T> &b);
-  TableauInterface(const Matrix<T> &A, const Array<int> &art, const Vector<T> &b);
-  TableauInterface(const TableauInterface<T> &);
-  ~TableauInterface() override = default;
+  TableauInterface(const Matrix<T> &A, const Vector<T> &b)
+    : A(A), b(b), basis(A.MinRow(), A.MaxRow(), A.MinCol(), A.MaxCol()),
+      solution(A.MinRow(), A.MaxRow()), artificial(A.MaxCol() + 1, A.MaxCol())
 
-  TableauInterface<T> &operator=(const TableauInterface<T> &);
+  {
+    // These are the values recommended by Murtagh (1981) for 15 digit
+    // accuracy in LP problems
+    // Note: for Rational, eps1 and eps2 resolve to 0
+    linalg::epsilon(eps1, 5);
+    linalg::epsilon(eps2);
+  }
+  TableauInterface(const Matrix<T> &A, const Array<int> &art, const Vector<T> &b)
+    : A(A), b(b), basis(A.MinRow(), A.MaxRow(), A.MinCol(), A.MaxCol() + art.size()),
+      solution(A.MinRow(), A.MaxRow()), artificial(A.MaxCol() + 1, A.MaxCol() + art.size())
+  {
+    linalg::epsilon(eps1, 5);
+    linalg::epsilon(eps2);
+    for (size_t i = 0; i < art.size(); i++) {
+      artificial[A.MaxCol() + 1 + i] = art[art.front_index() + i];
+    }
+  }
+  TableauInterface(const TableauInterface<T> &) = default;
+  virtual ~TableauInterface() = default;
+
+  TableauInterface<T> &operator=(const TableauInterface<T> &) = default;
 
   // information
 
-  int MinRow() const override;
-  int MaxRow() const override;
-  int MinCol() const override;
-  int MaxCol() const override;
+  int MinRow() const { return A.MinRow(); }
+  int MaxRow() const { return A.MaxRow(); }
+  int MinCol() const { return basis.MinCol(); }
+  int MaxCol() const { return basis.MaxCol(); }
 
-  Basis &GetBasis();
-  const Matrix<T> &Get_A() const;
-  const Vector<T> &Get_b() const;
+  bool ColIndex(int x) const { return MinCol() <= x && x <= MaxCol(); }
+  bool RowIndex(int x) const { return MinRow() <= x && x <= MaxRow(); }
+  bool ValidIndex(int x) const { return ColIndex(x) || RowIndex(-x); }
 
-  bool Member(int i) const override;
-  int Label(int i) const override; // return variable in i'th position of Tableau
-  int Find(int i) const override;  // return Tableau position of variable i
+  Basis &GetBasis() { return basis; }
 
-  long NumPivots() const override;
-  long &NumPivots();
-
-  void Mark(int label);            // marks label to block it from entering basis
-  void UnMark(int label);          // unmarks label
-  bool IsBlocked(int label) const; // returns true if label is blocked
+  bool Member(int i) const { return basis.Member(i); }
+  // return variable in i'th position of Tableau
+  int Label(int i) const { return basis.Label(i); }
+  // return Tableau position of variable i
+  int Find(int i) const { return basis.Find(i); }
 
   virtual void BasisVector(Vector<T> &x) const = 0; // solve M x = (*b)
-  void GetColumn(int, Vector<T> &) const;           // raw column
-  void GetBasis(Basis &) const;                     // return Basis for current Tableau
+  virtual void GetColumn(int col, Vector<T> &ret) const
+  {
+    if (IsArtifColumn(col)) {
+      ret = (T)0;
+      ret[artificial[col]] = (T)1;
+    }
+    else if (basis.IsRegColumn(col)) {
+      A.GetColumn(col, ret);
+    }
+    else if (basis.IsSlackColumn(col)) {
+      ret = (T)0;
+      ret[-col] = (T)1;
+    }
+  }
 
-  BFS<T> GetBFS1() const;
-  BFS<T> GetBFS(); // used in lpsolve for some reason
+  BFS<T> GetBFS1() const
+  {
+    Vector<T> sol(basis.First(), basis.Last());
+    BasisVector(sol);
 
-  bool CanPivot(int outgoing, int incoming) const override = 0;
-  void Pivot(int outrow, int col) override = 0;   // pivot -- outgoing is row, incoming is column
+    BFS<T> cbfs;
+    for (int i = -MaxRow(); i <= -MinRow(); i++) {
+      if (Member(i)) {
+        cbfs.insert(i, sol[basis.Find(i)]);
+      }
+    }
+    for (int i = MinCol(); i <= MaxCol(); i++) {
+      if (Member(i)) {
+        cbfs.insert(i, sol[basis.Find(i)]);
+      }
+    }
+    return cbfs;
+  }
+
+  BFS<T> GetBFS() const
+  {
+    Vector<T> sol(basis.First(), basis.Last());
+    BasisVector(sol);
+
+    BFS<T> cbfs;
+    for (int i = MinCol(); i <= MaxCol(); i++) {
+      if (Member(i)) {
+        cbfs.insert(i, sol[basis.Find(i)]);
+      }
+    }
+    return cbfs;
+  }
+
+  virtual void Pivot(int outrow, int col) = 0;    // pivot -- outgoing is row, incoming is column
   virtual void SolveColumn(int, Vector<T> &) = 0; // column in new basis
-  virtual void Solve(const Vector<T> &b, Vector<T> &x) = 0;  // solve M x = b
-  virtual void SolveT(const Vector<T> &c, Vector<T> &y) = 0; // solve y M = c
-
-  void Refactor() override = 0;
-  virtual void SetRefactor(int) = 0;
 
   // miscellaneous functions
   bool EqZero(const T &x) const { return (LeZero(x) && GeZero(x)); }
@@ -137,12 +297,20 @@ public:
   bool LeZero(const T &x) const { return (x <= eps2); }
   bool GeZero(const T &x) const { return (x >= -eps2); }
 
-  T Epsilon(int i = 2) const;
-  bool IsArtifColumn(int col) const;
+  T Epsilon(int i = 2) const
+  {
+    if (i != 1 && i != 2) {
+      throw Gambit::DimensionException();
+    }
+    return (i == 1) ? eps1 : eps2;
+  }
+
+  bool IsArtifColumn(int col) const
+  {
+    return (col >= artificial.front_index() && col <= artificial.back_index());
+  }
 };
 
-} // namespace linalg
-
-} // end namespace Gambit
+} // end namespace Gambit::linalg
 
 #endif // BTABLEAU_H

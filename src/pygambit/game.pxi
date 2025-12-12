@@ -22,7 +22,6 @@
 import io
 import itertools
 import pathlib
-import warnings
 
 import numpy as np
 import scipy.stats
@@ -34,11 +33,13 @@ ctypedef c_Game (*GameParser)(const string &) except +IOError
 
 
 @cython.cfunc
-def read_game(filepath_or_buffer: typing.Union[str, pathlib.Path, io.BytesIO],
+def read_game(filepath_or_buffer: typing.Union[str, pathlib.Path, io.IOBase],
               parser: GameParser):
 
     g = cython.declare(Game)
-    if isinstance(filepath_or_buffer, io.BytesIO):
+    if isinstance(filepath_or_buffer, io.TextIOBase):
+        data = filepath_or_buffer.read().encode("utf-8")
+    elif isinstance(filepath_or_buffer, io.IOBase):
         data = filepath_or_buffer.read()
     else:
         with open(filepath_or_buffer, "rb") as f:
@@ -50,12 +51,12 @@ def read_game(filepath_or_buffer: typing.Union[str, pathlib.Path, io.BytesIO],
     return g
 
 
-def read_gbt(filepath_or_buffer: typing.Union[str, pathlib.Path, io.BytesIO]) -> Game:
+def read_gbt(filepath_or_buffer: typing.Union[str, pathlib.Path, io.IOBase]) -> Game:
     """Construct a game from its serialised representation in a GBT file.
 
     Parameters
     ----------
-    filepath_or_buffer : str, Path or BytesIO
+    filepath_or_buffer : str, pathlib.Path or io.IOBase
         The path to the file containing the game representation or file-like object
 
     Returns
@@ -77,12 +78,12 @@ def read_gbt(filepath_or_buffer: typing.Union[str, pathlib.Path, io.BytesIO]) ->
     return read_game(filepath_or_buffer, parser=ParseGbtGame)
 
 
-def read_efg(filepath_or_buffer: typing.Union[str, pathlib.Path, io.BytesIO]) -> Game:
+def read_efg(filepath_or_buffer: typing.Union[str, pathlib.Path, io.IOBase]) -> Game:
     """Construct a game from its serialised representation in an EFG file.
 
     Parameters
     ----------
-    filepath_or_buffer : str, Path or BytesIO
+    filepath_or_buffer : str, pathlib.Path or io.IOBase
         The path to the file containing the game representation or file-like object
 
     Returns
@@ -104,12 +105,12 @@ def read_efg(filepath_or_buffer: typing.Union[str, pathlib.Path, io.BytesIO]) ->
     return read_game(filepath_or_buffer, parser=ParseEfgGame)
 
 
-def read_nfg(filepath_or_buffer: typing.Union[str, pathlib.Path, io.BytesIO]) -> Game:
+def read_nfg(filepath_or_buffer: typing.Union[str, pathlib.Path, io.IOBase]) -> Game:
     """Construct a game from its serialised representation in a NFG file.
 
     Parameters
     ----------
-    filepath_or_buffer : str, Path or BytesIO
+    filepath_or_buffer : str, pathlib.Path or io.IOBase
         The path to the file containing the game representation or file-like object
 
     Returns
@@ -131,12 +132,12 @@ def read_nfg(filepath_or_buffer: typing.Union[str, pathlib.Path, io.BytesIO]) ->
     return read_game(filepath_or_buffer, parser=ParseNfgGame)
 
 
-def read_agg(filepath_or_buffer: typing.Union[str, pathlib.Path, io.BytesIO]) -> Game:
+def read_agg(filepath_or_buffer: typing.Union[str, pathlib.Path, io.IOBase]) -> Game:
     """Construct a game from its serialised representation in an AGG file.
 
     Parameters
     ----------
-    filepath_or_buffer : str, Path or BytesIO
+    filepath_or_buffer : str, pathlib.Path or io.IOBase
         The path to the file containing the game representation or file-like object
 
     Returns
@@ -159,6 +160,74 @@ def read_agg(filepath_or_buffer: typing.Union[str, pathlib.Path, io.BytesIO]) ->
 
 
 @cython.cclass
+class GameNodes:
+    """Represents the set of nodes in a game."""
+    game = cython.declare(c_Game)
+
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create GameNodes outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(game: c_Game) -> GameNodes:
+        obj: GameNodes = GameNodes.__new__(GameNodes)
+        obj.game = game
+        return obj
+
+    def __repr__(self) -> str:
+        return f"GameNodes(game={Game.wrap(self.game)})"
+
+    def __len__(self) -> int:
+        """The number of nodes in the game."""
+        if not self.game.deref().IsTree():
+            return 0
+        return self.game.deref().NumNodes()
+
+    def __iter__(self) -> typing.Iterator[Node]:
+        """Iterate over the game nodes in the depth-first traversal order."""
+        if not self.game.deref().IsTree():
+            return
+
+        for node in self.game.deref().GetNodes():
+            yield Node.wrap(node)
+
+
+@cython.cclass
+class GameNonterminalNodes:
+    """Represents the set of nodes in a game."""
+    game = cython.declare(c_Game)
+
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create GameNonterminalNodes outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(game: c_Game) -> GameNonterminalNodes:
+        obj: GameNonterminalNodes = GameNonterminalNodes.__new__(GameNonterminalNodes)
+        obj.game = game
+        return obj
+
+    def __repr__(self) -> str:
+        return f"GameNonterminalNodes(game={Game.wrap(self.game)})"
+
+    def __len__(self) -> int:
+        """The number of non-terminal nodes in the game."""
+        if not self.game.deref().IsTree():
+            return 0
+        return self.game.deref().NumNonterminalNodes()
+
+    def __iter__(self) -> typing.Iterator[Node]:
+        def dfs(node):
+            if not node.is_terminal:
+                yield node
+            for child in node.children:
+                yield from dfs(child)
+        if not self.game.deref().IsTree():
+            return
+        yield from dfs(Node.wrap(self.game.deref().GetRoot()))
+
+
+@cython.cclass
 class GameOutcomes:
     """Represents the set of outcomes in a game."""
     game = cython.declare(c_Game)
@@ -178,11 +247,11 @@ class GameOutcomes:
 
     def __len__(self) -> int:
         """The number of outcomes in the game."""
-        return self.game.deref().NumOutcomes()
+        return self.game.deref().GetOutcomes().size()
 
     def __iter__(self) -> typing.Iterator[Outcome]:
-        for i in range(self.game.deref().NumOutcomes()):
-            yield Outcome.wrap(self.game.deref().GetOutcome(i + 1))
+        for outcome in self.game.deref().GetOutcomes():
+            yield Outcome.wrap(outcome)
 
     def __getitem__(self, index: typing.Union[int, str]) -> Outcome:
         if isinstance(index, str):
@@ -222,8 +291,8 @@ class GamePlayers:
         return self.game.deref().NumPlayers()
 
     def __iter__(self) -> typing.Iterator[Player]:
-        for i in range(self.game.deref().NumPlayers()):
-            yield Player.wrap(self.game.deref().GetPlayer(i + 1))
+        for player in self.game.deref().GetPlayers():
+            yield Player.wrap(player)
 
     def __getitem__(self, index: typing.Union[int, str]) -> Player:
         if isinstance(index, str):
@@ -349,7 +418,7 @@ class GameStrategies:
         return obj
 
     def __repr__(self) -> str:
-        return f"GameOutcomes(game={self.game})"
+        return f"GameStrategies(game={self.game})"
 
     def __len__(self) -> int:
         return sum(len(p.strategies) for p in self.game.players)
@@ -446,14 +515,7 @@ class Game:
         Game
             The newly-created strategic game.
         """
-        cdef Array[int] *d
-        d = new Array[int](len(dim))
-        try:
-            for i in range(1, len(dim)+1):
-                setitem_array_int(d, i, dim[i-1])
-            g = Game.wrap(NewTable(d))
-        finally:
-            del d
+        g = Game.wrap(NewTable(list(dim)))
         g.title = title
         return g
 
@@ -572,75 +634,6 @@ class Game:
         g.title = title
         return g
 
-    @classmethod
-    def read_game(cls, filepath: typing.Union[str, pathlib.Path]) -> Game:
-        """Construct a game from its serialised representation in a file.
-
-        .. deprecated:: 16.3.0
-            Method `Game.read_game` is deprecated, use one of the respective functions instead:
-            ``read_gbt``, ``read_efg``, ``read_nfg``, ``read_agg``
-
-        Parameters
-        ----------
-        filepath : str or path object
-            The path to the file containing the game representation.
-
-        Returns
-        -------
-        Game
-            A game constructed from the representation in the file.
-
-        Raises
-        ------
-        IOError
-            If the file cannot be opened or read
-        ValueError
-            If the contents of the file are not a valid game representation.
-
-        See Also
-        --------
-        parse_game : Constructs a game from a text string.
-        """
-        warnings.warn(
-            "Game.read_game() is deprecated and will be removed in 16.4. "
-            "Use the appropriate module-level .read_*() function instead.",
-            FutureWarning
-        )
-        with open(filepath, "rb") as f:
-            data = f.read()
-        try:
-            return Game.wrap(ParseGame(data))
-        except Exception as exc:
-            raise ValueError(f"Parse error in game file: {exc}") from None
-
-    @classmethod
-    def parse_game(cls, text: str) -> Game:
-        """Construct a game from its serialised representation in a string
-
-        Parameters
-        ----------
-        text : str
-            A string containing the game representation.
-
-        Returns
-        -------
-        Game
-            A game constructed from the representation in the string.
-
-        Raises
-        ------
-        ValueError
-            If the contents of the file are not a valid game representation.
-
-        See Also
-        --------
-        read_game : Constructs a game from a representation in a file.
-        """
-        try:
-            return Game.wrap(ParseGame(text.encode("ascii")))
-        except Exception as exc:
-            raise ValueError(f"Parse error in game file: {exc}") from None
-
     def __repr__(self) -> str:
         if self.title:
             return f"Game(title='{self.title}')"
@@ -739,6 +732,27 @@ class Game:
         return GameOutcomes.wrap(self.game)
 
     @property
+    def nodes(self) -> GameNodes:
+        """The set of nodes in the game.
+
+        Iteration over this property yields the nodes in the order of depth-first search.
+
+        .. versionchanged:: 16.4
+           Changed from a method ``nodes()`` to a property.
+
+        """
+        return GameNodes.wrap(self.game)
+
+    @property
+    def _nonterminal_nodes(self) -> GameNonterminalNodes:
+        """The set of non-terminal nodes in the game.
+
+        Iteration over this property yields the non-terminal nodes in the order of depth-first
+        search.
+        """
+        return GameNonterminalNodes.wrap(self.game)
+
+    @property
     def contingencies(self) -> pygambit.gameiter.Contingencies:
         """An iterator over the contingencies in the game."""
         return pygambit.gameiter.Contingencies(self)
@@ -775,12 +789,12 @@ class Game:
     @property
     def min_payoff(self) -> typing.Union[decimal.Decimal, Rational]:
         """The minimum payoff in the game."""
-        return rat_to_py(self.game.deref().GetMinPayoff(0))
+        return rat_to_py(self.game.deref().GetMinPayoff())
 
     @property
     def max_payoff(self) -> typing.Union[decimal.Decimal, Rational]:
         """The maximum payoff in the game."""
-        return rat_to_py(self.game.deref().GetMaxPayoff(0))
+        return rat_to_py(self.game.deref().GetMaxPayoff())
 
     def set_chance_probs(self, infoset: typing.Union[Infoset, str], probs: typing.Sequence):
         """Set the action probabilities at chance information set `infoset`.
@@ -830,14 +844,14 @@ class Game:
         )
 
         for (pl, st) in enumerate(args):
-            deref(psp).deref().SetStrategy(
+            deref(deref(psp).deref()).SetStrategy(
                 self.game.deref().GetPlayer(pl+1).deref().GetStrategy(st+1)
             )
 
         if self.is_tree:
             return TreeGameOutcome.wrap(self.game, psp)
         else:
-            outcome = Outcome.wrap(deref(psp).deref().GetOutcome())
+            outcome = Outcome.wrap(deref(deref(psp).deref()).GetOutcome())
             if outcome.outcome != cython.cast(c_GameOutcome, NULL):
                 return outcome
             else:
@@ -919,12 +933,14 @@ class Game:
                 "Mixed strategies not supported for games with imperfect recall."
             )
         if rational:
-            mspr = MixedStrategyProfileRational.wrap(make_shared[c_MixedStrategyProfileRational](
-                self.game.deref().NewMixedStrategyProfile(c_Rational())
-            ))
+            mspr = MixedStrategyProfileRational.wrap(
+                make_shared[c_MixedStrategyProfile[c_Rational]](
+                    self.game.deref().NewMixedStrategyProfile(c_Rational())
+                )
+            )
             return self._fill_strategy_profile(mspr, data, Rational)
         else:
-            mspd = MixedStrategyProfileDouble.wrap(make_shared[c_MixedStrategyProfileDouble](
+            mspd = MixedStrategyProfileDouble.wrap(make_shared[c_MixedStrategyProfile[double]](
                 self.game.deref().NewMixedStrategyProfile(0.0)
             ))
             return self._fill_strategy_profile(mspd, data, float)
@@ -1038,12 +1054,12 @@ class Game:
             )
         if rational:
             mbpr = MixedBehaviorProfileRational.wrap(
-                make_shared[c_MixedBehaviorProfileRational](self.game)
+                make_shared[c_MixedBehaviorProfile[c_Rational]](self.game)
             )
             return self._fill_behavior_profile(mbpr, data, Rational)
         else:
             mbpd = MixedBehaviorProfileDouble.wrap(
-                make_shared[c_MixedBehaviorProfileDouble](self.game)
+                make_shared[c_MixedBehaviorProfile[double]](self.game)
             )
             return self._fill_behavior_profile(mbpd, data, float)
 
@@ -1122,118 +1138,41 @@ class Game:
         -------
         StrategySupportProfile
         """
-        profile = StrategySupportProfile.wrap(self)
+        profile = StrategySupportProfile.wrap(make_shared[c_StrategySupportProfile](self.game))
         if strategies is not None:
             for strategy in self.strategies:
                 if not strategies(strategy):
-                    if not (deref(profile.support)
+                    if not (deref(profile.profile)
                             .RemoveStrategy(cython.cast(Strategy, strategy).strategy)):
                         raise ValueError("attempted to remove the last strategy for player")
         return profile
-
-    def nodes(
-            self,
-            subtree: typing.Optional[typing.Union[Node, str]] = None
-    ) -> typing.List[Node]:
-        """Return a list of nodes in the game tree.  If `subtree` is not None, returns
-        the nodes in the subtree rooted at that node.
-
-        Nodes are returned in prefix-traversal order: a node appears prior to the list of
-        nodes in the subtrees rooted at the node's children.
-
-        Parameters
-        ----------
-        subtree : Node or str, optional
-            If specified, return only the nodes in the subtree rooted at `subtree`.
-
-        Raises
-        ------
-        MismatchError
-            If `node` is a `Node` from a different game.
-        """
-        if not self.is_tree:
-            return []
-        if subtree:
-            resolved_node = cython.cast(Node, self._resolve_node(subtree, "nodes", "subtree"))
-        else:
-            resolved_node = self.root
-        return (
-            [resolved_node] +
-            [n for child in resolved_node.children for n in self.nodes(child)]
-        )
-
-    def write(self, format="native") -> str:
-        """Produce a serialization of the game.
-
-        Several output formats are
-        supported, depending on the representation of the game.
-
-        * `efg`: A representation of the game in
-          :ref:`the .efg extensive game file format <file-formats-efg>`.
-          Not available for games in strategic representation.
-        * `nfg`: A representation of the game in
-          :ref:`the .nfg strategic game file format <file-formats-nfg>`.
-          For an extensive game, this uses the reduced strategic form
-          representation.
-        * `native`: The format most appropriate to the
-          underlying representation of the game, i.e., `efg` or `nfg`.
-
-        This method also supports exporting to other output formats
-        (which cannot be used directly to re-load the game later, but
-        are suitable for human consumption, inclusion in papers, and so
-        on).
-
-        * `html`: A rendering of the strategic form of the game as a
-          collection of HTML tables.  The first player is the row
-          chooser; the second player the column chooser.  For games with
-          more than two players, a collection of tables is generated,
-          one for each possible strategy combination of players 3 and higher.
-        * `sgame`: A rendering of the strategic form of the game in
-          LaTeX, suitable for use with `Martin Osborne's sgame style
-          <https://www.economics.utoronto.ca/osborne/latex/>`_.
-          The first player is the row
-          chooser; the second player the column chooser.  For games with
-          more than two players, a collection of tables is generated,
-          one for each possible strategy combination of players 3 and higher.
-
-        .. versionchanged:: 16.3.0
-           Removed support for writing Game Theory Explorer format as the XML format
-           is no longer supported by recent versions of GTE.
-
-        .. deprecated:: 16.3.0
-            Method Game.write is deprecated, use one of the respective methods instead:
-            ``Game.to_efg``, ``Game.to_nfg``, ``Game.to_html``, ``Game.to_latex``
-        """
-        warnings.warn(
-            "Game.write() is deprecated and will be removed in 16.4. "
-            "Use the appropriate Game.to_*() function instead.",
-            FutureWarning
-        )
-        return WriteGame(self.game, format.encode("ascii")).decode("ascii")
 
     @cython.cfunc
     def _to_format(
         self,
         writer: GameWriter,
-        filepath_or_buffer: typing.Union[str, pathlib.Path, io.BufferedWriter, None] = None
+        filepath_or_buffer: typing.Union[str, pathlib.Path, io.IOBase, None] = None
     ):
         serialized_game = writer(self.game)
         if filepath_or_buffer is None:
             return serialized_game.decode()
-        if isinstance(filepath_or_buffer, io.BufferedWriter):
+        if isinstance(filepath_or_buffer, io.TextIOBase):
+            filepath_or_buffer.write(serialized_game.decode())
+        elif isinstance(filepath_or_buffer, io.IOBase):
             filepath_or_buffer.write(serialized_game)
         else:
-            with open(filepath_or_buffer, "wb") as f:
-                f.write(serialized_game)
+            with open(filepath_or_buffer, "w") as f:
+                f.write(serialized_game.decode())
 
-    def to_efg(self,
-               filepath_or_buffer: typing.Union[str, pathlib.Path, io.BufferedWriter, None] = None
-               ) -> typing.Union[str, None]:
+    def to_efg(
+        self,
+        filepath_or_buffer: typing.Union[str, pathlib.Path, io.IOBase, None] = None
+    ) -> typing.Union[str, None]:
         """Save the game to an .efg file or return its serialized representation
 
         Parameters
         ----------
-        filepath_or_buffer : str or Path or BufferedWriter or None, default None
+        filepath_or_buffer : str or Path or io.IOBase or None, default None
             String, path object, or file-like object implementing a write() function.
             If None, the result is returned as a string.
 
@@ -1247,9 +1186,10 @@ class Game:
         """
         return self._to_format(WriteEfgFile, filepath_or_buffer)
 
-    def to_nfg(self,
-               filepath_or_buffer: typing.Union[str, pathlib.Path, io.BufferedWriter, None] = None
-               ) -> typing.Union[str, None]:
+    def to_nfg(
+        self,
+        filepath_or_buffer: typing.Union[str, pathlib.Path, io.IOBase, None] = None
+    ) -> typing.Union[str, None]:
         """Save the game to a .nfg file or return its serialized representation
 
         Parameters
@@ -1268,10 +1208,17 @@ class Game:
         """
         return self._to_format(WriteNfgFile, filepath_or_buffer)
 
-    def to_html(self,
-                filepath_or_buffer: typing.Union[str, pathlib.Path, io.BufferedWriter, None] = None
-                ) -> typing.Union[str, None]:
-        """Export the game to an .html file or return its serialized representation
+    def to_html(
+        self,
+        filepath_or_buffer: typing.Union[str, pathlib.Path, io.IOBase, None] = None
+    ) -> typing.Union[str, None]:
+        """Export the game to HTML format.
+
+        Generates a rendering of the strategic form of the game as a
+        collection of HTML tables.  The first player is the row
+        chooser; the second player the column chooser.  For games with
+        more than two players, a collection of tables is generated,
+        one for each possible strategy combination of players 3 and higher.
 
         Parameters
         ----------
@@ -1290,10 +1237,18 @@ class Game:
         return self._to_format(WriteHTMLFile, filepath_or_buffer)
 
     def to_latex(
-            self,
-            filepath_or_buffer: typing.Union[str, pathlib.Path, io.BufferedWriter, None] = None
-            ) -> typing.Union[str, None]:
-        """Export the game to a .tex file or return its serialized representation
+        self,
+        filepath_or_buffer: typing.Union[str, pathlib.Path, io.IOBase, None] = None
+    ) -> typing.Union[str, None]:
+        """Export the game to LaTeX format.
+
+        Generates a rendering of the strategic form of the game in
+        LaTeX, suitable for use with `Martin Osborne's sgame style
+        <https://www.economics.utoronto.ca/osborne/latex/>`_.
+        The first player is the row
+        chooser; the second player the column chooser.  For games with
+        more than two players, a collection of tables is generated,
+        one for each possible strategy combination of players 3 and higher.
 
         Parameters
         ----------
@@ -1468,7 +1423,7 @@ class Game:
                 raise ValueError(
                     f"{funcname}(): {argname} cannot be an empty string or all spaces"
                 )
-            for n in self.nodes():
+            for n in self.nodes:
                 if n.label == node:
                     return n
             raise KeyError(f"{funcname}(): no node with label '{node}'")
@@ -1601,12 +1556,12 @@ class Game:
             raise UndefinedOperationError("append_move(): `nodes` must be terminal nodes")
 
         resolved_node = cython.cast(Node, resolved_nodes[0])
-        resolved_node.node.deref().AppendMove(resolved_player.player, len(actions))
+        self.game.deref().AppendMove(resolved_node.node, resolved_player.player, len(actions))
         for label, action in zip(actions, resolved_node.infoset.actions):
             action.label = label
         resolved_infoset = cython.cast(Infoset, resolved_node.infoset)
         for n in resolved_nodes[1:]:
-            cython.cast(Node, n).node.deref().AppendMove(resolved_infoset.infoset)
+            self.game.deref().AppendMove(cython.cast(Node, n).node, resolved_infoset.infoset)
 
     def append_infoset(self, nodes: typing.Union[NodeReference, NodeReferenceSet],
                        infoset: typing.Union[Infoset, str]) -> None:
@@ -1627,7 +1582,7 @@ class Game:
         if any(len(n.children) > 0 for n in resolved_nodes):
             raise UndefinedOperationError("append_infoset(): `nodes` must be terminal nodes")
         for n in resolved_nodes:
-            cython.cast(Node, n).node.deref().AppendMove(resolved_infoset.infoset)
+            self.game.deref().AppendMove(cython.cast(Node, n).node, resolved_infoset.infoset)
 
     def insert_move(self, node: typing.Union[Node, str],
                     player: typing.Union[Player, str], actions: int) -> None:
@@ -1646,7 +1601,7 @@ class Game:
         resolved_player = cython.cast(Player, self._resolve_player(player, "insert_move"))
         if actions < 1:
             raise UndefinedOperationError("insert_move(): `actions` must be a positive number")
-        resolved_node.node.deref().InsertMove(resolved_player.player, actions)
+        self.game.deref().InsertMove(resolved_node.node, resolved_player.player, actions)
 
     def insert_infoset(self, node: typing.Union[Node, str],
                        infoset: typing.Union[Infoset, str]) -> None:
@@ -1661,7 +1616,7 @@ class Game:
         """
         resolved_node = cython.cast(Node, self._resolve_node(node, "insert_infoset"))
         resolved_infoset = cython.cast(Infoset, self._resolve_infoset(infoset, "insert_infoset"))
-        resolved_node.node.deref().InsertMove(resolved_infoset.infoset)
+        self.game.deref().InsertMove(resolved_node.node, resolved_infoset.infoset)
 
     def copy_tree(self, src: typing.Union[Node, str], dest: typing.Union[Node, str]) -> None:
         """Copy the subtree rooted at the node `src` to the node `dest`.
@@ -1693,7 +1648,7 @@ class Game:
         resolved_dest = cython.cast(Node, self._resolve_node(dest, "copy_tree", "dest"))
         if not resolved_dest.is_terminal:
             raise UndefinedOperationError("copy_tree(): `dest` must be a terminal node.")
-        resolved_dest.node.deref().CopyTree(resolved_src.node)
+        self.game.deref().CopyTree(resolved_dest.node, resolved_src.node)
 
     def move_tree(self, src: typing.Union[Node, str], dest: typing.Union[Node, str]) -> None:
         """Move the subtree rooted at 'src' to 'dest'.
@@ -1718,7 +1673,7 @@ class Game:
             raise UndefinedOperationError("move_tree(): `dest` must be a terminal node.")
         if resolved_dest.is_successor_of(resolved_src):
             raise UndefinedOperationError("move_tree(): `dest` cannot be a successor of `src`.")
-        resolved_dest.node.deref().MoveTree(resolved_src.node)
+        self.game.deref().MoveTree(resolved_dest.node, resolved_src.node)
 
     def delete_parent(self, node: typing.Union[Node, str]) -> None:
         """Delete the parent node of `node`.  `node` replaces its parent in the tree.  All other
@@ -1737,7 +1692,7 @@ class Game:
             If `node` is a `Node` from a different game.
         """
         resolved_node = cython.cast(Node, self._resolve_node(node, "delete_parent"))
-        resolved_node.node.deref().DeleteParent()
+        self.game.deref().DeleteParent(resolved_node.node)
 
     def delete_tree(self, node: typing.Union[Node, str]) -> None:
         """Truncate the game tree at `node`, deleting the subtree beneath it.
@@ -1754,7 +1709,7 @@ class Game:
             If `node` is a `Node` from a different game.
         """
         resolved_node = cython.cast(Node, self._resolve_node(node, "delete_tree"))
-        resolved_node.node.deref().DeleteTree()
+        self.game.deref().DeleteTree(resolved_node.node)
 
     def add_action(self,
                    infoset: typing.Union[typing.Infoset, str],
@@ -1778,14 +1733,15 @@ class Game:
         """
         resolved_infoset = cython.cast(Infoset, self._resolve_infoset(infoset, "add_action"))
         if before is None:
-            resolved_infoset.infoset.deref().InsertAction(cython.cast(c_GameAction, NULL))
+            self.game.deref().InsertAction(resolved_infoset.infoset,
+                                           cython.cast(c_GameAction, NULL))
         else:
             resolved_action = cython.cast(
                 Action, self._resolve_action(before, "add_action", "before")
             )
             if resolved_infoset != resolved_action.infoset:
                 raise MismatchError("add_action(): must specify an action from the same infoset")
-            resolved_infoset.infoset.deref().InsertAction(resolved_action.action)
+            self.game.deref().InsertAction(resolved_infoset.infoset, resolved_action.action)
 
     def delete_action(self, action: typing.Union[Action, str]) -> None:
         """Deletes `action` from its information set.  The subtrees which
@@ -1806,7 +1762,7 @@ class Game:
             raise UndefinedOperationError(
                 "delete_action(): cannot delete the only action at an information set"
             )
-        resolved_action.action.deref().DeleteAction()
+        self.game.deref().DeleteAction(resolved_action.action)
 
     def leave_infoset(self, node: typing.Union[Node, str]):
         """Remove this node from its information set. If this node is the only node
@@ -1818,7 +1774,7 @@ class Game:
             The node to move to a new singleton information set.
         """
         resolved_node = cython.cast(Node, self._resolve_node(node, "leave_infoset"))
-        resolved_node.node.deref().LeaveInfoset()
+        self.game.deref().LeaveInfoset(resolved_node.node)
 
     def set_infoset(self,
                     node: typing.Union[Node, str],
@@ -1845,7 +1801,7 @@ class Game:
             raise ValueError(
                 "set_infoset(): `infoset` must have same number of actions as `node` has children."
             )
-        resolved_node.node.deref().SetInfoset(resolved_infoset.infoset)
+        self.game.deref().SetInfoset(resolved_node.node, resolved_infoset.infoset)
 
     def reveal(self,
                infoset: typing.Union[Infoset, str],
@@ -1874,7 +1830,26 @@ class Game:
         """
         resolved_infoset = cython.cast(Infoset, self._resolve_infoset(infoset, "reveal"))
         resolved_player = cython.cast(Player, self._resolve_player(player, "reveal"))
-        resolved_infoset.infoset.deref().Reveal(resolved_player.player)
+        self.game.deref().Reveal(resolved_infoset.infoset, resolved_player.player)
+
+    def sort_infosets(self) -> None:
+        """Sort information sets into a standard order.
+
+        When iterating the information sets of a player, the order in which information
+        sets are visited may be dependent on the order of the operations used to build
+        the extensive game.  This function sorts each player's information sets into
+        a standard order, namely, the order in which they are encountered in a depth-first
+        traversal of the tree, and likewise sorts the members of each information set
+        by the order in which they are encountered in a depth-first traversal.
+
+        .. versionadded:: 16.4.0
+
+        See also
+        --------
+        Player.infosets
+        Infoset.members
+        """
+        self.game.deref().SortInfosets()
 
     def add_player(self, label: str = "") -> Player:
         """Add a new player to the game.
@@ -1913,7 +1888,7 @@ class Game:
         """
         resolved_player = cython.cast(Player, self._resolve_player(player, "set_player"))
         resolved_infoset = cython.cast(Infoset, self._resolve_infoset(infoset, "set_player"))
-        resolved_infoset.infoset.deref().SetPlayer(resolved_player.player)
+        self.game.deref().SetPlayer(resolved_infoset.infoset, resolved_player.player)
 
     def add_outcome(self,
                     payoffs: typing.Optional[typing.List] = None,
@@ -1991,10 +1966,10 @@ class Game:
         """
         resolved_node = cython.cast(Node, self._resolve_node(node, "set_outcome"))
         if outcome is None:
-            resolved_node.node.deref().SetOutcome(cython.cast(c_GameOutcome, NULL))
+            self.game.deref().SetOutcome(resolved_node.node, cython.cast(c_GameOutcome, NULL))
             return
         resolved_outcome = cython.cast(Outcome, self._resolve_outcome(outcome, "set_outcome"))
-        resolved_node.node.deref().SetOutcome(resolved_outcome.outcome)
+        self.game.deref().SetOutcome(resolved_node.node, resolved_outcome.outcome)
 
     def add_strategy(self, player: typing.Union[Player, str], label: str = None) -> Strategy:
         """Add a new strategy to the set of strategies for `player`.
@@ -2024,10 +1999,10 @@ class Game:
             )
         resolved_player = cython.cast(Player,
                                       self._resolve_player(player, "add_strategy"))
-        s = Strategy.wrap(resolved_player.player.deref().NewStrategy())
-        if label is not None:
-            s.label = str(label)
-        return s
+        return Strategy.wrap(
+            self.game.deref().NewStrategy(resolved_player.player,
+                                          (str(label) if label is not None else "").encode())
+        )
 
     def delete_strategy(self, strategy: typing.Union[Strategy, str]) -> None:
         """Delete `strategy` from the game.
@@ -2054,4 +2029,4 @@ class Game:
         )
         if len(resolved_strategy.player.strategies) == 1:
             raise UndefinedOperationError("Cannot delete the only strategy for a player")
-        resolved_strategy.strategy.deref().DeleteStrategy()
+        self.game.deref().DeleteStrategy(resolved_strategy.strategy)

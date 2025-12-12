@@ -66,13 +66,47 @@ public:
   explicit operator const Vector<T> &() const { return m_values; }
 };
 
+class NashSimpdivStrategySolver {
+public:
+  explicit NashSimpdivStrategySolver(
+      int p_gridResize = 2, int p_leashLength = 0,
+      const Rational &p_maxregret = Rational(1, 1000000),
+      StrategyCallbackType<Rational> p_onEquilibrium = NullStrategyCallback<Rational>)
+    : m_gridResize(p_gridResize), m_leashLength((p_leashLength > 0) ? p_leashLength : 32000),
+      m_maxregret(p_maxregret), m_onEquilibrium(p_onEquilibrium)
+  {
+  }
+  ~NashSimpdivStrategySolver() = default;
+
+  List<MixedStrategyProfile<Rational>> Solve(const MixedStrategyProfile<Rational> &p_start) const;
+  List<MixedStrategyProfile<Rational>> Solve(const Game &p_game) const;
+
+private:
+  int m_gridResize, m_leashLength;
+  Rational m_maxregret;
+  StrategyCallbackType<Rational> m_onEquilibrium;
+
+  class State;
+
+  Rational Simplex(MixedStrategyProfile<Rational> &, const Rational &d) const;
+  static void update(State &, RectArray<int> &, RectArray<int> &, PVector<Rational> &,
+                     const PVector<int> &, int j, int i);
+  static void getY(const State &, MixedStrategyProfile<Rational> &x, PVector<Rational> &,
+                   const PVector<int> &, const PVector<int> &, const PVector<Rational> &,
+                   const RectArray<int> &, int k);
+  static void getnexty(const State &, MixedStrategyProfile<Rational> &x, const RectArray<int> &,
+                       const PVector<int> &, int i);
+  static int get_c(int j, int h, int nstrats, const PVector<int> &);
+  static int get_b(int j, int h, int nstrats, const PVector<int> &);
+};
+
 //-------------------------------------------------------------------------
 //          NashSimpdivStrategySolver: Private member functions
 //-------------------------------------------------------------------------
 
 inline GameStrategy GetStrategy(const Game &game, int pl, int st)
 {
-  return game->GetPlayer(pl)->GetStrategies()[st];
+  return game->GetPlayer(pl)->GetStrategy(st);
 }
 
 class NashSimpdivStrategySolver::State {
@@ -99,7 +133,7 @@ public:
 Rational NashSimpdivStrategySolver::Simplex(MixedStrategyProfile<Rational> &y,
                                             const Rational &d) const
 {
-  Game game = y.GetGame();
+  const Game game = y.GetGame();
   State state(m_leashLength);
   state.d = d;
   Array<int> nstrats(game->NumStrategies());
@@ -120,13 +154,13 @@ Rational NashSimpdivStrategySolver::Simplex(MixedStrategyProfile<Rational> &y,
   TT = 0;
   U = 0;
   ab = Rational(0);
-  for (j = 1; j <= game->NumPlayers(); j++) {
-    GamePlayer player = game->GetPlayer(j);
+  for (j = 1; j <= static_cast<int>(game->NumPlayers()); j++) {
+    const GamePlayer player = game->GetPlayer(j);
     for (h = 1; h <= nstrats[j]; h++) {
       if (v(j, h) == Rational(0)) {
         U(j, h) = 1;
       }
-      y[player->GetStrategies()[h]] = v(j, h);
+      y[player->GetStrategy(h)] = v(j, h);
     }
   }
 
@@ -334,7 +368,7 @@ step5:
 
 end:
   maxz = state.bestz;
-  for (i = 1; i <= game->NumPlayers(); i++) {
+  for (i = 1; i <= static_cast<int>(game->NumPlayers()); i++) {
     for (j = 1; j <= nstrats[i]; j++) {
       y[GetStrategy(game, i, j)] = besty(i, j);
     }
@@ -399,13 +433,13 @@ void NashSimpdivStrategySolver::getY(const State &state, MixedStrategyProfile<Ra
                                      const RectArray<int> &pi, int k)
 {
   x = static_cast<const Vector<Rational> &>(v);
-  for (int j = 1; j <= x.GetGame()->NumPlayers(); j++) {
-    GamePlayer player = x.GetGame()->GetPlayer(j);
+  for (int j = 1; j <= static_cast<int>(x.GetGame()->NumPlayers()); j++) {
+    const GamePlayer player = x.GetGame()->GetPlayer(j);
     for (size_t h = 1; h <= player->GetStrategies().size(); h++) {
       if (TT(j, h) == 1 || U(j, h) == 1) {
-        x[player->GetStrategies()[h]] += state.d * ab(j, h);
-        int hh = (h > 1) ? h - 1 : player->GetStrategies().size();
-        x[player->GetStrategies()[hh]] -= state.d * ab(j, h);
+        x[player->GetStrategy(h)] += state.d * ab(j, h);
+        const int hh = (h > 1) ? h - 1 : player->GetStrategies().size();
+        x[player->GetStrategy(hh)] -= state.d * ab(j, h);
       }
     }
   }
@@ -417,12 +451,12 @@ void NashSimpdivStrategySolver::getY(const State &state, MixedStrategyProfile<Ra
 void NashSimpdivStrategySolver::getnexty(const State &state, MixedStrategyProfile<Rational> &x,
                                          const RectArray<int> &pi, const PVector<int> &U, int i)
 {
-  int j = pi(i, 1);
-  GamePlayer player = x.GetGame()->GetPlayer(j);
-  int h = pi(i, 2);
-  x[player->GetStrategies()[h]] += state.d;
-  int hh = get_b(j, h, player->GetStrategies().size(), U);
-  x[player->GetStrategies()[hh]] -= state.d;
+  const int j = pi(i, 1);
+  const GamePlayer player = x.GetGame()->GetPlayer(j);
+  const int h = pi(i, 2);
+  x[player->GetStrategy(h)] += state.d;
+  const int hh = get_b(j, h, player->GetStrategies().size(), U);
+  x[player->GetStrategy(hh)] -= state.d;
 }
 
 int NashSimpdivStrategySolver::get_b(int j, int h, int nstrats, const PVector<int> &U)
@@ -439,7 +473,7 @@ int NashSimpdivStrategySolver::get_b(int j, int h, int nstrats, const PVector<in
 
 int NashSimpdivStrategySolver::get_c(int j, int h, int nstrats, const PVector<int> &U)
 {
-  int hh = get_b(j, h, nstrats, U) + 1;
+  const int hh = get_b(j, h, nstrats, U) + 1;
   return (hh > nstrats) ? 1 : hh;
 }
 
@@ -450,14 +484,14 @@ Rational NashSimpdivStrategySolver::State::getlabel(MixedStrategyProfile<Rationa
   ylabel[1] = 1;
   ylabel[2] = 1;
 
-  for (int i = 1; i <= yy.GetGame()->NumPlayers(); i++) {
-    GamePlayer player = yy.GetGame()->GetPlayer(i);
+  for (int i = 1; i <= static_cast<int>(yy.GetGame()->NumPlayers()); i++) {
+    const GamePlayer player = yy.GetGame()->GetPlayer(i);
     Rational payoff(0);
     Rational maxval(-1000000);
     int jj = 0;
     for (size_t j = 1; j <= player->GetStrategies().size(); j++) {
-      pay = yy.GetPayoff(player->GetStrategies()[j]);
-      payoff += yy[player->GetStrategies()[j]] * pay;
+      pay = yy.GetPayoff(player->GetStrategy(j));
+      payoff += yy[player->GetStrategy(j)] * pay;
       if (pay > maxval) {
         maxval = pay;
         jj = j;
@@ -471,10 +505,10 @@ Rational NashSimpdivStrategySolver::State::getlabel(MixedStrategyProfile<Rationa
   }
   if (maxz < bestz) {
     bestz = maxz;
-    for (int i = 1; i <= yy.GetGame()->NumPlayers(); i++) {
-      GamePlayer player = yy.GetGame()->GetPlayer(i);
+    for (int i = 1; i <= static_cast<int>(yy.GetGame()->NumPlayers()); i++) {
+      const GamePlayer player = yy.GetGame()->GetPlayer(i);
       for (size_t j = 1; j <= player->GetStrategies().size(); j++) {
-        besty(i, j) = yy[player->GetStrategies()[j]];
+        besty(i, j) = yy[player->GetStrategy(j)];
       }
     }
   }
@@ -488,7 +522,7 @@ Rational NashSimpdivStrategySolver::State::getlabel(MixedStrategyProfile<Rationa
 inline Integer find_lcd(const Vector<Rational> &vec)
 {
   Integer lcd(1);
-  for (int i = vec.first_index(); i <= vec.last_index(); i++) {
+  for (int i = vec.front_index(); i <= vec.back_index(); i++) {
     lcd = lcm(vec[i].denominator(), lcd);
   }
   return lcd;
@@ -502,26 +536,21 @@ NashSimpdivStrategySolver::Solve(const MixedStrategyProfile<Rational> &p_start) 
         "Computing equilibria of games with imperfect recall is not supported.");
   }
   Rational d(Integer(1), find_lcd(static_cast<const Vector<Rational> &>(p_start)));
-  Rational scale = p_start.GetGame()->GetMaxPayoff() - p_start.GetGame()->GetMinPayoff();
+  const Rational scale = p_start.GetGame()->GetMaxPayoff() - p_start.GetGame()->GetMinPayoff();
 
   MixedStrategyProfile<Rational> y(p_start);
-  if (m_verbose) {
-    this->m_onEquilibrium->Render(y, "start");
-  }
+  m_onEquilibrium(y, "start");
 
   while (true) {
     d /= Rational(m_gridResize);
-    Rational regret = Simplex(y, d);
-
-    if (m_verbose) {
-      this->m_onEquilibrium->Render(y, std::to_string(d));
-    }
+    const Rational regret = Simplex(y, d);
+    m_onEquilibrium(y, std::to_string(d));
     if (regret <= m_maxregret * scale) {
       break;
     }
   }
 
-  this->m_onEquilibrium->Render(y);
+  m_onEquilibrium(y, "NE");
   List<MixedStrategyProfile<Rational>> sol;
   sol.push_back(y);
   return sol;
@@ -543,10 +572,19 @@ List<MixedStrategyProfile<Rational>> NashSimpdivStrategySolver::Solve(const Game
 {
   MixedStrategyProfile<Rational> start = p_game->NewMixedStrategyProfile(Rational(0));
   start = Rational(0);
-  for (int pl = 1; pl <= p_game->NumPlayers(); pl++) {
-    start[p_game->GetPlayer(pl)->GetStrategies()[1]] = Rational(1);
+  for (const auto &player : p_game->GetPlayers()) {
+    start[player->GetStrategies().front()] = Rational(1);
   }
   return Solve(start);
+}
+
+List<MixedStrategyProfile<Rational>>
+SimpdivStrategySolve(const MixedStrategyProfile<Rational> &p_start, const Rational &p_maxregret,
+                     int p_gridResize, int p_leashLength,
+                     StrategyCallbackType<Rational> p_onEquilibrium)
+{
+  return NashSimpdivStrategySolver(p_gridResize, p_leashLength, p_maxregret, p_onEquilibrium)
+      .Solve(p_start);
 }
 
 } // end namespace Gambit::Nash

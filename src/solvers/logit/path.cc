@@ -50,19 +50,19 @@ void Givens(Matrix<double> &b, Matrix<double> &q, double &c1, double &c2, int l1
   else {
     sn = std::sqrt(1.0 + sqr(c2 / c1)) * fabs(c1);
   }
-  double s1 = c1 / sn;
-  double s2 = c2 / sn;
+  const double s1 = c1 / sn;
+  const double s2 = c2 / sn;
 
-  for (int k = 1; k <= q.NumColumns(); k++) {
-    double sv1 = q(l1, k);
-    double sv2 = q(l2, k);
+  for (size_t k = 1; k <= q.NumColumns(); k++) {
+    const double sv1 = q(l1, k);
+    const double sv2 = q(l2, k);
     q(l1, k) = s1 * sv1 + s2 * sv2;
     q(l2, k) = -s2 * sv1 + s1 * sv2;
   }
 
-  for (int k = l3; k <= b.NumColumns(); k++) {
-    double sv1 = b(l1, k);
-    double sv2 = b(l2, k);
+  for (size_t k = l3; k <= b.NumColumns(); k++) {
+    const double sv1 = b(l1, k);
+    const double sv2 = b(l2, k);
     b(l1, k) = s1 * sv1 + s2 * sv2;
     b(l2, k) = -s2 * sv1 + s1 * sv2;
   }
@@ -74,8 +74,8 @@ void Givens(Matrix<double> &b, Matrix<double> &q, double &c1, double &c2, int l1
 void QRDecomp(Matrix<double> &b, Matrix<double> &q)
 {
   q.MakeIdent();
-  for (int m = 1; m <= b.NumColumns(); m++) {
-    for (int k = m + 1; k <= b.NumRows(); k++) {
+  for (size_t m = 1; m <= b.NumColumns(); m++) {
+    for (size_t k = m + 1; k <= b.NumRows(); k++) {
       Givens(b, q, b(m, m), b(k, m), m, k, m + 1);
     }
   }
@@ -84,17 +84,17 @@ void QRDecomp(Matrix<double> &b, Matrix<double> &q)
 void NewtonStep(Matrix<double> &q, Matrix<double> &b, Vector<double> &u, Vector<double> &y,
                 double &d)
 {
-  for (int k = 1; k <= b.NumColumns(); k++) {
-    for (int l = 1; l <= k - 1; l++) {
+  for (size_t k = 1; k <= b.NumColumns(); k++) {
+    for (size_t l = 1; l <= k - 1; l++) {
       y[k] -= b(l, k) * y[l];
     }
     y[k] /= b(k, k);
   }
 
   d = 0.0;
-  for (int k = 1; k <= b.NumRows(); k++) {
+  for (size_t k = 1; k <= b.NumRows(); k++) {
     double s = 0.0;
-    for (int l = 1; l <= b.NumColumns(); l++) {
+    for (size_t l = 1; l <= b.NumColumns(); l++) {
       s += q(l, k) * y[l];
     }
     u[k] -= s;
@@ -158,7 +158,7 @@ void PathTracer::TracePath(
     }
 
     // Predictor step
-    for (int k = 1; k <= x.size(); k++) {
+    for (size_t k = 1; k <= x.size(); k++) {
       u[k] = x[k] + h * p_omega * t[k];
     }
 
@@ -182,7 +182,7 @@ void PathTracer::TracePath(
 
       decel = std::max(decel, std::sqrt(dist / c_maxDist) * m_maxDecel);
       if (iter >= 2) {
-        double contr = dist / (disto + c_tol * c_eta);
+        const double contr = dist / (disto + c_tol * c_eta);
         if (contr > c_maxContr) {
           accept = false;
           break;
@@ -203,7 +203,7 @@ void PathTracer::TracePath(
 
     // Obtain the tangent at the next step
     q.GetRow(q.NumRows(), newT);
-    double omega_flip = (t * newT < 0.0) ? -1.0 : 1.0;
+    const double omega_flip = (t * newT < 0.0) ? -1.0 : 1.0;
 
     if (omega_flip == -1.0) {
       // The orientation of the curve has changed, indicating a bifurcation.

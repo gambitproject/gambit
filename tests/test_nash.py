@@ -32,6 +32,8 @@ def test_enummixed_strategy_double():
     # For floating-point results are not exact, so we skip testing exact values for now
 
 
+@pytest.mark.nash
+@pytest.mark.nash_enummixed_strategy
 def test_enummixed_strategy_rational():
     """Test calls of enumeration of mixed strategy equilibria, rational precision."""
     game = games.read_from_file("poker.efg")
@@ -53,6 +55,8 @@ def test_lcp_strategy_double():
     # For floating-point results are not exact, so we skip testing exact values for now
 
 
+@pytest.mark.nash
+@pytest.mark.nash_lcp_strategy
 def test_lcp_strategy_rational():
     """Test calls of LCP for mixed strategy equilibria, rational precision."""
     game = games.read_from_file("poker.efg")
@@ -74,6 +78,8 @@ def test_lcp_behavior_double():
     # For floating-point results are not exact, so we skip testing exact values for now
 
 
+@pytest.mark.nash
+@pytest.mark.nash_lcp_behavior
 def test_lcp_behavior_rational():
     """Test calls of LCP for mixed behavior equilibria, rational precision."""
     game = games.read_from_file("poker.efg")
@@ -94,6 +100,8 @@ def test_lp_strategy_double():
     # For floating-point results are not exact, so we skip testing exact values for now
 
 
+@pytest.mark.nash
+@pytest.mark.nash_lp_strategy
 def test_lp_strategy_rational():
     """Test calls of LP for mixed strategy equilibria, rational precision."""
     game = games.read_from_file("poker.efg")
@@ -115,6 +123,9 @@ def test_lp_behavior_double():
     # For floating-point results are not exact, so we skip testing exact values for now
 
 
+@pytest.mark.nash
+@pytest.mark.slow
+@pytest.mark.nash_lp_behavior
 def test_lp_behavior_rational():
     """Test calls of LP for mixed behavior equilibria, rational precision."""
     game = games.read_from_file("poker.efg")

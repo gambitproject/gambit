@@ -24,9 +24,7 @@
 #include <cmath>
 #include "trie_map.h"
 
-namespace Gambit {
-
-namespace agg {
+namespace Gambit::agg {
 
 template <class V>
 std::pair<typename trie_map<V>::iterator, bool>
@@ -113,7 +111,7 @@ template <class V> trie_map<V> &trie_map<V>::operator=(const trie_map<V> &other)
 template <class V> void trie_map<V>::swap(trie_map<V> &other)
 {
   if (this != &other) {
-    trie_map<V> temp = *this;
+    const trie_map<V> temp = *this;
     *this = other;
     other = temp;
   }
@@ -361,7 +359,7 @@ void trie_map<V>::div(const std::vector<V> &denom, TrieNode<V> *n, int current, 
 {
   int i;
   if (pivot != current) {
-    int s = n->children.size();
+    const int s = n->children.size();
     for (i = 0; i < s; i++) {
       if (n->children[i]) {
         div(denom, n->children[i], current + 1, pivot);
@@ -401,8 +399,8 @@ template <class V> void trie_map<V>::deleteNodes(TrieNode<V> *n)
   if (!n) {
     return;
   }
-  size_type i, s = n->children.size();
-  for (i = 0; i < s; ++i) {
+  const size_type s = n->children.size();
+  for (size_type i = 0; i < s; ++i) {
     if (n->children[i]) {
       deleteNodes(n->children[i]);
     }
@@ -412,8 +410,8 @@ template <class V> void trie_map<V>::deleteNodes(TrieNode<V> *n)
 
 template <class V> void trie_map<V>::div_helper_mul::add(const std::vector<int> &conf, V y)
 {
-  size_t i, keylen = conf.size();
-  double th(THRESH / (double)denom[pivot]);
+  const size_t keylen = conf.size();
+  const double th(THRESH / (double)denom[pivot]);
   // if (y<=th&&y>=-th) return;
 
   if (!dest) {
@@ -425,7 +423,7 @@ template <class V> void trie_map<V>::div_helper_mul::add(const std::vector<int> 
     return;
   }
   TrieNode<V> *ptr = dest;
-  for (i = pivot + 1; i < keylen; ++i) {
+  for (size_t i = pivot + 1; i < keylen; ++i) {
     if ((*ptr)[conf[i]] == nullptr) {
       if ((double)y > th || (double)y < -th) {
         std::stringstream str;
@@ -454,11 +452,11 @@ template <class V> void trie_map<V>::div_helper_mul::operator()(iterator p)
   if (p == endp) {
     return;
   }
-  size_t i, keylen = p->first.size();
+  const size_t keylen = p->first.size();
   // assert(keylen==denom.size());
   V null_prob(((V)1) - denom[pivot]);
   // V th(THRESH);
-  for (i = pivot + 1; i < keylen; ++i) {
+  for (size_t i = pivot + 1; i < keylen; ++i) {
     if (denom[i] > (V)0) {
       p->first[i]++;
       add(p->first, -denom[i] * p->second);
@@ -472,6 +470,4 @@ template <class V> void trie_map<V>::div_helper_mul::operator()(iterator p)
   }
 }
 
-} // namespace agg
-
-} // end namespace Gambit
+} // end namespace Gambit::agg

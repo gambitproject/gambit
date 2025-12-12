@@ -102,11 +102,11 @@ const int TIXML_PATCH_VERSION = 2;
         in the XML file.
 */
 struct TiXmlCursor {
-  TiXmlCursor() { Clear(); }
+  TiXmlCursor() = default;
   void Clear() { row = col = -1; }
 
-  int row; // 0 based.
-  int col; // 0 based.
+  int row{-1}; // 0 based.
+  int col{-1}; // 0 based.
 };
 
 // Only used by Attribute::Query functions
@@ -145,7 +145,7 @@ class TiXmlBase {
   friend class TiXmlDocument;
 
 public:
-  TiXmlBase() : userData(nullptr) {}
+  TiXmlBase() = default;
   virtual ~TiXmlBase() = default;
 
   /**	All TinyXml classes can print themselves to a filestream.
@@ -267,7 +267,7 @@ protected:
   {
     assert(p);
     if (encoding == TIXML_ENCODING_UTF8) {
-      *length = utf8ByteTable[*((unsigned char *)p)];
+      *length = utf8ByteTable[*(reinterpret_cast<const unsigned char *>(p))];
       assert(*length >= 0 && *length < 5);
     }
     else {
@@ -312,7 +312,7 @@ protected:
   TiXmlCursor location;
 
   /// Field containing a generic user pointer
-  void *userData;
+  void *userData{nullptr};
 
   // None of these methods are reliable for any language except English.
   // Good for approximation, not great for accuracy.
@@ -438,7 +438,7 @@ public:
   /// STL std::string form.
   void SetValue(const std::string &_value)
   {
-    StringToBuffer buf(_value);
+    StringToBuffer const buf(_value);
     SetValue(buf.buffer ? buf.buffer : "");
   }
 #endif
@@ -652,55 +652,19 @@ public:
   /// Returns true if this node has no children.
   bool NoChildren() const { return !firstChild; }
 
-  const TiXmlDocument *ToDocument() const
-  {
-    return (type == DOCUMENT) ? (const TiXmlDocument *)this : nullptr;
-  } ///< Cast to a more defined type. Will return null not of the requested type.
-  const TiXmlElement *ToElement() const
-  {
-    return (type == ELEMENT) ? (const TiXmlElement *)this : nullptr;
-  } ///< Cast to a more defined type. Will return null not of the requested type.
-  const TiXmlComment *ToComment() const
-  {
-    return (type == COMMENT) ? (const TiXmlComment *)this : nullptr;
-  } ///< Cast to a more defined type. Will return null not of the requested type.
-  const TiXmlUnknown *ToUnknown() const
-  {
-    return (type == UNKNOWN) ? (const TiXmlUnknown *)this : nullptr;
-  } ///< Cast to a more defined type. Will return null not of the requested type.
-  const TiXmlText *ToText() const
-  {
-    return (type == TEXT) ? (const TiXmlText *)this : nullptr;
-  } ///< Cast to a more defined type. Will return null not of the requested type.
-  const TiXmlDeclaration *ToDeclaration() const
-  {
-    return (type == DECLARATION) ? (const TiXmlDeclaration *)this : nullptr;
-  } ///< Cast to a more defined type. Will return null not of the requested type.
+  const TiXmlDocument *ToDocument() const;
+  const TiXmlElement *ToElement() const;
+  const TiXmlComment *ToComment() const;
+  const TiXmlUnknown *ToUnknown() const;
+  const TiXmlText *ToText() const;
+  const TiXmlDeclaration *ToDeclaration() const;
 
-  TiXmlDocument *ToDocument()
-  {
-    return (type == DOCUMENT) ? (TiXmlDocument *)this : nullptr;
-  } ///< Cast to a more defined type. Will return null not of the requested type.
-  TiXmlElement *ToElement()
-  {
-    return (type == ELEMENT) ? (TiXmlElement *)this : nullptr;
-  } ///< Cast to a more defined type. Will return null not of the requested type.
-  TiXmlComment *ToComment()
-  {
-    return (type == COMMENT) ? (TiXmlComment *)this : nullptr;
-  } ///< Cast to a more defined type. Will return null not of the requested type.
-  TiXmlUnknown *ToUnknown()
-  {
-    return (type == UNKNOWN) ? (TiXmlUnknown *)this : nullptr;
-  } ///< Cast to a more defined type. Will return null not of the requested type.
-  TiXmlText *ToText()
-  {
-    return (type == TEXT) ? (TiXmlText *)this : nullptr;
-  } ///< Cast to a more defined type. Will return null not of the requested type.
-  TiXmlDeclaration *ToDeclaration()
-  {
-    return (type == DECLARATION) ? (TiXmlDeclaration *)this : nullptr;
-  } ///< Cast to a more defined type. Will return null not of the requested type.
+  TiXmlDocument *ToDocument();
+  TiXmlElement *ToElement();
+  TiXmlComment *ToComment();
+  TiXmlUnknown *ToUnknown();
+  TiXmlText *ToText();
+  TiXmlDeclaration *ToDeclaration();
 
   /** Create an exact duplicate of this node and return it. The memory must be deleted
           by the caller.
@@ -708,7 +672,7 @@ public:
   virtual TiXmlNode *Clone() const = 0;
 
 protected:
-  TiXmlNode(NodeType _type);
+  TiXmlNode(NodeType _type) : TiXmlBase(), type(_type) {}
 
   // Copy to the allocated object. Shared functionality between Clone, Copy constructor,
   // and the assignment operator.
@@ -722,16 +686,16 @@ protected:
   // Figure out what is at *p, and parse it. Returns null if it is not an xml node.
   TiXmlNode *Identify(const char *start, TiXmlEncoding encoding);
 
-  TiXmlNode *parent;
+  TiXmlNode *parent{nullptr};
   NodeType type;
 
-  TiXmlNode *firstChild;
-  TiXmlNode *lastChild;
+  TiXmlNode *firstChild{nullptr};
+  TiXmlNode *lastChild{nullptr};
 
   TIXML_STRING value;
 
-  TiXmlNode *prev;
-  TiXmlNode *next;
+  TiXmlNode *prev{nullptr};
+  TiXmlNode *next{nullptr};
 
 private:
   TiXmlNode(const TiXmlNode &);          // not implemented.
@@ -750,29 +714,21 @@ class TiXmlAttribute : public TiXmlBase {
 
 public:
   /// Construct an empty attribute.
-  TiXmlAttribute() : TiXmlBase()
-  {
-    document = nullptr;
-    prev = next = nullptr;
-  }
+  TiXmlAttribute() : TiXmlBase(), document(nullptr) { prev = next = nullptr; }
 
 #ifdef TIXML_USE_STL
   /// std::string constructor.
   TiXmlAttribute(const std::string &_name, const std::string &_value)
+    : document(nullptr), name(_name), value(_value)
   {
-    name = _name;
-    value = _value;
-    document = nullptr;
     prev = next = nullptr;
   }
 #endif
 
   /// Construct an attribute with a name and value.
   TiXmlAttribute(const char *_name, const char *_value)
+    : document(nullptr), name(_name), value(_value)
   {
-    name = _name;
-    value = _value;
-    document = nullptr;
     prev = next = nullptr;
   }
 
@@ -804,13 +760,13 @@ public:
   /// STL std::string form.
   void SetName(const std::string &_name)
   {
-    StringToBuffer buf(_name);
+    const StringToBuffer buf(_name);
     SetName(buf.buffer ? buf.buffer : "error");
   }
   /// STL std::string form.
   void SetValue(const std::string &_value)
   {
-    StringToBuffer buf(_value);
+    const StringToBuffer buf(_value);
     SetValue(buf.buffer ? buf.buffer : "error");
   }
 #endif
@@ -884,12 +840,10 @@ public:
   const TiXmlAttribute *Find(const char *name) const;
   TiXmlAttribute *Find(const char *name);
 
-private:
-  //*ME:	Because of hidden/disabled copy-construktor in TiXmlAttribute (sentinel-element),
-  //*ME:	this class must be also use a hidden/disabled copy-constructor !!!
-  TiXmlAttributeSet(const TiXmlAttributeSet &); // not allowed
-  void operator=(const TiXmlAttributeSet &);    // not allowed (as TiXmlAttribute)
+  TiXmlAttributeSet(const TiXmlAttributeSet &) = delete; // not allowed
+  void operator=(const TiXmlAttributeSet &) = delete;    // not allowed (as TiXmlAttribute)
 
+private:
   TiXmlAttribute sentinel;
 };
 
@@ -948,7 +902,7 @@ public:
   int QueryFloatAttribute(const char *name, float *_value) const
   {
     double d;
-    int result = QueryDoubleAttribute(name, &d);
+    const int result = QueryDoubleAttribute(name, &d);
     if (result == TIXML_SUCCESS) {
       *_value = (float)d;
     }
@@ -982,8 +936,8 @@ public:
   /// STL std::string form.
   void SetAttribute(const std::string &name, const std::string &_value)
   {
-    StringToBuffer n(name);
-    StringToBuffer v(_value);
+    const StringToBuffer n(name);
+    const StringToBuffer v(_value);
     if (n.buffer && v.buffer) {
       SetAttribute(n.buffer, v.buffer);
     }
@@ -991,7 +945,7 @@ public:
   ///< STL std::string form.
   void SetAttribute(const std::string &name, int _value)
   {
-    StringToBuffer n(name);
+    const StringToBuffer n(name);
     if (n.buffer) {
       SetAttribute(n.buffer, _value);
     }
@@ -1139,23 +1093,24 @@ public:
           normal, encoded text. If you want it be output as a CDATA text
           element, set the parameter _cdata to 'true'
   */
-  TiXmlText(const char *initValue) : TiXmlNode(TiXmlNode::TEXT)
+  TiXmlText(const char *initValue) : TiXmlNode(TiXmlNode::TEXT), cdata(false)
   {
     SetValue(initValue);
-    cdata = false;
   }
   ~TiXmlText() override = default;
 
 #ifdef TIXML_USE_STL
   /// Constructor.
-  TiXmlText(const std::string &initValue) : TiXmlNode(TiXmlNode::TEXT)
+  TiXmlText(const std::string &initValue) : TiXmlNode(TiXmlNode::TEXT), cdata(false)
   {
     SetValue(initValue);
-    cdata = false;
   }
 #endif
 
-  TiXmlText(const TiXmlText &copy) : TiXmlNode(TiXmlNode::TEXT) { copy.CopyTo(this); }
+  TiXmlText(const TiXmlText &copy) : TiXmlNode(TiXmlNode::TEXT), cdata(copy.cdata)
+  {
+    copy.CopyTo(this);
+  }
   void operator=(const TiXmlText &base) { base.CopyTo(this); }
 
   /// Write this text object to a FILE stream.
@@ -1314,12 +1269,12 @@ public:
   bool LoadFile(const std::string &filename,
                 TiXmlEncoding encoding = TIXML_DEFAULT_ENCODING) ///< STL std::string version.
   {
-    StringToBuffer f(filename);
+    const StringToBuffer f(filename);
     return (f.buffer && LoadFile(f.buffer, encoding));
   }
   bool SaveFile(const std::string &filename) const ///< STL std::string version.
   {
-    StringToBuffer f(filename);
+    const StringToBuffer f(filename);
     return (f.buffer && SaveFile(f.buffer));
   }
 #endif
@@ -1517,9 +1472,9 @@ private:
 class TiXmlHandle {
 public:
   /// Create a handle from any node (at any depth of the tree.) This can be a null pointer.
-  TiXmlHandle(TiXmlNode *_node) { this->node = _node; }
+  TiXmlHandle(TiXmlNode *_node) : node(_node) {}
   /// Copy constructor
-  TiXmlHandle(const TiXmlHandle &ref) { this->node = ref.node; }
+  TiXmlHandle(const TiXmlHandle &ref) = default;
   TiXmlHandle operator=(const TiXmlHandle &ref)
   {
     this->node = ref.node;
@@ -1589,6 +1544,56 @@ public:
 private:
   TiXmlNode *node;
 };
+
+inline const TiXmlDocument *TiXmlNode::ToDocument() const
+{
+  return (type == DOCUMENT) ? dynamic_cast<const TiXmlDocument *>(this) : nullptr;
+}
+inline const TiXmlElement *TiXmlNode::ToElement() const
+{
+  return (type == ELEMENT) ? dynamic_cast<const TiXmlElement *>(this) : nullptr;
+}
+inline const TiXmlComment *TiXmlNode::ToComment() const
+{
+  return (type == COMMENT) ? dynamic_cast<const TiXmlComment *>(this) : nullptr;
+}
+inline const TiXmlUnknown *TiXmlNode::ToUnknown() const
+{
+  return (type == UNKNOWN) ? dynamic_cast<const TiXmlUnknown *>(this) : nullptr;
+}
+inline const TiXmlText *TiXmlNode::ToText() const
+{
+  return (type == TEXT) ? dynamic_cast<const TiXmlText *>(this) : nullptr;
+}
+inline const TiXmlDeclaration *TiXmlNode::ToDeclaration() const
+{
+  return (type == DECLARATION) ? dynamic_cast<const TiXmlDeclaration *>(this) : nullptr;
+}
+
+inline TiXmlDocument *TiXmlNode::ToDocument()
+{
+  return (type == DOCUMENT) ? dynamic_cast<TiXmlDocument *>(this) : nullptr;
+}
+inline TiXmlElement *TiXmlNode::ToElement()
+{
+  return (type == ELEMENT) ? dynamic_cast<TiXmlElement *>(this) : nullptr;
+}
+inline TiXmlComment *TiXmlNode::ToComment()
+{
+  return (type == COMMENT) ? dynamic_cast<TiXmlComment *>(this) : nullptr;
+}
+inline TiXmlUnknown *TiXmlNode::ToUnknown()
+{
+  return (type == UNKNOWN) ? dynamic_cast<TiXmlUnknown *>(this) : nullptr;
+}
+inline TiXmlText *TiXmlNode::ToText()
+{
+  return (type == TEXT) ? dynamic_cast<TiXmlText *>(this) : nullptr;
+}
+inline TiXmlDeclaration *TiXmlNode::ToDeclaration()
+{
+  return (type == DECLARATION) ? dynamic_cast<TiXmlDeclaration *>(this) : nullptr;
+}
 
 #ifdef _MSC_VER
 #pragma warning(pop)

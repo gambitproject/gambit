@@ -25,37 +25,29 @@
 
 #include "tableau.h"
 
-namespace Gambit {
-namespace linalg {
+namespace Gambit::linalg {
 
 template <class T> class LemkeTableau : public Tableau<T> {
-protected:
-  //  T eps2;
 public:
-  //   LTableau(void);
-  class BadPivot : public Exception {
+  class BadPivot final : public std::runtime_error {
   public:
+    BadPivot() : std::runtime_error("Bad pivot in LTableau") {}
     ~BadPivot() noexcept override = default;
-    const char *what() const noexcept override { return "Bad Pivot in LTableau"; }
   };
-  class BadExitIndex : public Exception {
+  class BadExitIndex final : public std::runtime_error {
   public:
+    BadExitIndex() : std::runtime_error("Bad exit index in LTableau") {}
     ~BadExitIndex() noexcept override = default;
-    const char *what() const noexcept override { return "Bad Exit Index in LTableau"; }
   };
-  LemkeTableau(const Matrix<T> &A, const Vector<T> &b);
-  explicit LemkeTableau(const Tableau<T> &);
+  LemkeTableau(const Matrix<T> &A, const Vector<T> &b) : Tableau<T>(A, b) {}
   ~LemkeTableau() override = default;
 
   int SF_PivotIn(int i);
   int SF_ExitIndex(int i);
   int SF_LCPPath(int dup); // follow a path of ACBFS's from one CBFS to another
-  int PivotIn(int i);
   int ExitIndex(int i);
-  int LemkePath(int dup); // follow a path of ACBFS's from one CBFS to another
 };
 
-} // namespace linalg
-} // end namespace Gambit
+} // end namespace Gambit::linalg
 
 #endif // GAMBIT_LINALG_LEMKETAB_H

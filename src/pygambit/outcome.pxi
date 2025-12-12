@@ -92,9 +92,7 @@ class Outcome:
         resolved_player = cython.cast(Player,
                                       self.game._resolve_player(player, "Outcome.__getitem__"))
         payoff = (
-            cython.cast(bytes,
-                        self.outcome.deref().GetPayoff(resolved_player.player).as_string())
-            .decode("ascii")
+            self.outcome.deref().GetPayoff[string](resolved_player.player).decode("ascii")
         )
         if "." in payoff:
             return decimal.Decimal(payoff)
@@ -177,7 +175,7 @@ class TreeGameOutcome:
         """
         resolved_player = cython.cast(Player,
                                       self.game._resolve_player(player, "Outcome.__getitem__"))
-        return rat_to_py(deref(self.psp).deref().GetPayoff(resolved_player.player))
+        return rat_to_py(deref(deref(self.psp).deref()).GetPayoff(resolved_player.player))
 
     def delete(self):
         raise UndefinedOperationError("Cannot modify outcomes in a derived strategic game.")

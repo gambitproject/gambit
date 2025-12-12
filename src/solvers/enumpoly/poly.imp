@@ -87,7 +87,7 @@ List<Monomial<T>> Polynomial<T>::Mult(const List<Monomial<T>> &One,
 
   for (size_t i = 1; i <= One.size(); i++) {
     for (size_t j = 1; j <= Two.size(); j++) {
-      Monomial<T> next = One[i] * Two[j];
+      const Monomial<T> next = One[i] * Two[j];
 
       if (answer.empty()) {
         answer.push_back(next);
@@ -111,7 +111,7 @@ List<Monomial<T>> Polynomial<T>::Mult(const List<Monomial<T>> &One,
           }
 
           while (bot < top - 1) {
-            int test = bot + (top - bot) / 2;
+            const int test = bot + (top - bot) / 2;
             if (answer[test].ExpV() == next.ExpV()) {
               bot = top = test;
             }
@@ -138,7 +138,7 @@ List<Monomial<T>> Polynomial<T>::Mult(const List<Monomial<T>> &One,
 
 template <class T> Polynomial<T> Polynomial<T>::DivideByPolynomial(const Polynomial<T> &den) const
 {
-  Polynomial<T> zero(m_space, static_cast<T>(0));
+  const Polynomial<T> zero(m_space, static_cast<T>(0));
 
   if (den == zero) {
     throw ZeroDivideException();
@@ -163,9 +163,9 @@ template <class T> Polynomial<T> Polynomial<T>::DivideByPolynomial(const Polynom
     Polynomial<T> remainder = *this;
 
     while (remainder != zero) {
-      Polynomial<T> quot = remainder.LeadingCoefficient(last) / den.LeadingCoefficient(last);
-      Polynomial<T> power_of_last(m_space, last,
-                                  remainder.DegreeOfVar(last) - den.DegreeOfVar(last));
+      const Polynomial<T> quot = remainder.LeadingCoefficient(last) / den.LeadingCoefficient(last);
+      const Polynomial<T> power_of_last(m_space, last,
+                                        remainder.DegreeOfVar(last) - den.DegreeOfVar(last));
       result += quot * power_of_last;
       remainder -= quot * power_of_last * den;
     }
@@ -199,7 +199,7 @@ template <class T> Polynomial<T> Polynomial<T>::PartialDerivative(int varnumber)
 template <class T> Polynomial<T> Polynomial<T>::LeadingCoefficient(int varnumber) const
 {
   Polynomial<T> newPoly(*this);
-  int degree = DegreeOfVar(varnumber);
+  const int degree = DegreeOfVar(varnumber);
   newPoly.m_terms = List<Monomial<T>>();
   for (size_t j = 1; j <= m_terms.size(); j++) {
     if (m_terms[j].ExpV()[varnumber] == degree) {

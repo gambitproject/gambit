@@ -38,9 +38,6 @@ Creating, reading, and writing games
    Game.from_arrays
    Game.to_arrays
    Game.from_dict
-   Game.read_game
-   Game.parse_game
-   Game.write
    Game.to_efg
    Game.to_nfg
    Game.to_html
@@ -72,8 +69,9 @@ Transforming game information structure
    Game.set_player
    Game.set_infoset
    Game.leave_infoset
-   Game.reveal
    Game.set_chance_probs
+   Game.reveal
+   Game.sort_infosets
 
 
 Transforming game components
@@ -149,6 +147,7 @@ Information about the game
    Node.infoset
    Node.player
    Node.is_successor_of
+   Node.plays
 
 .. autosummary::
 
@@ -161,6 +160,7 @@ Information about the game
    Infoset.actions
    Infoset.members
    Infoset.precedes
+   Infoset.plays
 
 .. autosummary::
 
@@ -170,6 +170,7 @@ Information about the game
    Action.infoset
    Action.precedes
    Action.prob
+   Action.plays
 
 .. autosummary::
 
@@ -179,6 +180,7 @@ Information about the game
    Strategy.game
    Strategy.player
    Strategy.number
+   Strategy.action
 
 
 Player behavior
@@ -216,8 +218,8 @@ Probability distributions over strategies
    MixedStrategyProfile.strategy_value
    MixedStrategyProfile.strategy_regret
    MixedStrategyProfile.player_regret
-   MixedStrategyProfile.max_regret
    MixedStrategyProfile.strategy_value_deriv
+   MixedStrategyProfile.max_regret
    MixedStrategyProfile.liap_value
    MixedStrategyProfile.as_behavior
    MixedStrategyProfile.normalize
@@ -243,14 +245,16 @@ Probability distributions over behavior
    MixedBehaviorProfile.__getitem__
    MixedBehaviorProfile.__setitem__
    MixedBehaviorProfile.payoff
-   MixedBehaviorProfile.action_regret
    MixedBehaviorProfile.action_value
+   MixedBehaviorProfile.action_regret
    MixedBehaviorProfile.infoset_value
+   MixedBehaviorProfile.infoset_regret
    MixedBehaviorProfile.node_value
    MixedBehaviorProfile.realiz_prob
    MixedBehaviorProfile.infoset_prob
    MixedBehaviorProfile.belief
    MixedBehaviorProfile.is_defined_at
+   MixedBehaviorProfile.max_regret
    MixedBehaviorProfile.liap_value
    MixedBehaviorProfile.as_strategy
    MixedBehaviorProfile.normalize

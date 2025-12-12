@@ -23,13 +23,13 @@
 
 #include "aggame.h"
 
-namespace Gambit {
-namespace gametracer {
+namespace Gambit::gametracer {
 
 void aggame::computePartialP_PureNode(int player1, int act1, std::vector<int> &tasks) const
 {
-  int i, j, Node = aggPtr->actionSets[player1][act1];
-  int numNei = aggPtr->neighbors[Node].size();
+  int i, j;
+  const int Node = aggPtr->actionSets[player1][act1];
+  const int numNei = aggPtr->neighbors[Node].size();
 
   // assert(aggPtr->isPure[Node]||tasks.size()==0);
   std::vector<agg::AggNumber> strat(numNei);
@@ -90,8 +90,8 @@ void aggame::computePartialP_bisect(int player1, int act1, std::vector<int>::ite
     aggPtr->Pr[*start].reset();
     return;
   }
-  int Node = aggPtr->actionSets[player1][act1];
-  int numNei = aggPtr->neighbors[Node].size();
+  const int Node = aggPtr->actionSets[player1][act1];
+  const int numNei = aggPtr->neighbors[Node].size();
 
   int player2;
   std::vector<int>::iterator ptr, mid = start + (endp - start) / 2;
@@ -333,8 +333,8 @@ void aggame::computeUndisturbedPayoff(agg::AggNumber &undisturbedPayoff, bool &h
   if (has) {
     return;
   }
-  int Node = aggPtr->actionSets[player1][act1];
-  int numNei = aggPtr->neighbors[Node].size();
+  const int Node = aggPtr->actionSets[player1][act1];
+  const int numNei = aggPtr->neighbors[Node].size();
   if (player2 == player1) {
     undisturbedPayoff = aggPtr->Pr[player2].inner_prod(aggPtr->payoffs[Node]);
   }
@@ -352,8 +352,8 @@ void aggame::savePayoff(cmatrix &dest, int player1, int act1, int player2, int a
                         bool partial) const
 {
 
-  int Node = aggPtr->actionSets[player1][act1];
-  int numNei = aggPtr->neighbors[Node].size();
+  const int Node = aggPtr->actionSets[player1][act1];
+  const int numNei = aggPtr->neighbors[Node].size();
 
   if (!partial) {
     std::pair<std::vector<int>, agg::AggNumber> pair1(aggPtr->projection[Node][player2][act2],
@@ -381,15 +381,15 @@ void aggame::savePayoff(cmatrix &dest, int player1, int act1, int player2, int a
 void aggame::computePayoff(cmatrix &dest, int player1, int act1, int player2, int act2,
                            agg::trie_map<agg::AggNumber> &cache) const
 {
-  int Node = aggPtr->actionSets[player1][act1];
-  int numNei = aggPtr->neighbors[Node].size();
+  const int Node = aggPtr->actionSets[player1][act1];
+  const int numNei = aggPtr->neighbors[Node].size();
 
   std::pair<std::vector<int>, agg::AggNumber> insPair(aggPtr->projection[Node][player2][act2], 0);
   insPair.first.reserve(numNei + 3);
   insPair.first.push_back(player1);
   insPair.first.push_back(act1);
   insPair.first.push_back(player2);
-  std::pair<agg::trie_map<agg::AggNumber>::iterator, bool> r = cache.insert(insPair);
+  const std::pair<agg::trie_map<agg::AggNumber>::iterator, bool> r = cache.insert(insPair);
   if (!r.second) {
     dest(act1 + firstAction(player1), act2 + firstAction(player2)) = r.first->second;
   }
@@ -403,7 +403,7 @@ void aggame::computePayoff(cmatrix &dest, int player1, int act1, int player2, in
 
 void aggame::KSymPayoffMatrix(cmatrix &dest, const cvector &s, agg::AggNumber fuzz) const
 {
-  std::vector<double> sp(s.values(), s.values() + s.getm());
+  const std::vector<double> sp(s.values(), s.values() + s.getm());
   // simple implementation using expected payoffs:
   for (int rowcls = 0; rowcls < getNumPlayerClasses(); ++rowcls) {
     for (int rowa = 0; rowa < getNumKSymActions(rowcls); ++rowa) {
@@ -440,5 +440,4 @@ void aggame::KSymPayoffMatrix(cmatrix &dest, const cvector &s, agg::AggNumber fu
   }
 }
 
-} // namespace gametracer
-} // end namespace Gambit
+} // end namespace Gambit::gametracer

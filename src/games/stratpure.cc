@@ -29,76 +29,19 @@ namespace Gambit {
 //                    class PureStrategyProfileRep
 //========================================================================
 
-PureStrategyProfileRep::PureStrategyProfileRep(const Game &p_game)
-  : m_nfg(p_game), m_profile(p_game->NumPlayers())
+PureStrategyProfileRep::PureStrategyProfileRep(const Game &p_game) : m_nfg(p_game)
 {
-  for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
-    m_profile[pl] = m_nfg->GetPlayer(pl)->GetStrategy(1);
+  for (const auto &player : m_nfg->GetPlayers()) {
+    m_profile[player] = player->GetStrategies().front();
   }
-}
-
-bool PureStrategyProfileRep::IsNash() const
-{
-  for (auto player : m_nfg->GetPlayers()) {
-    Rational current = GetPayoff(player);
-    for (auto strategy : player->GetStrategies()) {
-      if (GetStrategyValue(strategy) > current) {
-        return false;
-      }
-    }
-  }
-  return true;
-}
-
-bool PureStrategyProfileRep::IsStrictNash() const
-{
-  for (auto player : m_nfg->GetPlayers()) {
-    Rational current = GetPayoff(player);
-    for (auto strategy : player->GetStrategies()) {
-      if (GetStrategyValue(strategy) >= current) {
-        return false;
-      }
-    }
-  }
-  return true;
-}
-
-bool PureStrategyProfileRep::IsBestResponse(const GamePlayer &p_player) const
-{
-  Rational current = GetPayoff(p_player);
-  for (auto strategy : p_player->GetStrategies()) {
-    if (GetStrategyValue(strategy) > current) {
-      return false;
-    }
-  }
-  return true;
-}
-
-List<GameStrategy> PureStrategyProfileRep::GetBestResponse(const GamePlayer &p_player) const
-{
-  auto strategy = p_player->GetStrategy(1);
-  Rational max_payoff = GetStrategyValue(strategy);
-  List<GameStrategy> br;
-  br.push_back(strategy);
-  for (auto strategy : p_player->GetStrategies()) {
-    Rational this_payoff = GetStrategyValue(strategy);
-    if (this_payoff > max_payoff) {
-      br.clear();
-      max_payoff = this_payoff;
-    }
-    if (this_payoff >= max_payoff) {
-      br.push_back(strategy);
-    }
-  }
-  return br;
 }
 
 MixedStrategyProfile<Rational> PureStrategyProfileRep::ToMixedStrategyProfile() const
 {
-  MixedStrategyProfile<Rational> temp(m_nfg->NewMixedStrategyProfile(Rational(0)));
+  auto temp = m_nfg->NewMixedStrategyProfile(Rational(0));
   temp = Rational(0);
-  for (int pl = 1; pl <= m_nfg->NumPlayers(); pl++) {
-    temp[GetStrategy(m_nfg->GetPlayer(pl))] = Rational(1);
+  for (auto [player, strategy] : m_profile) {
+    temp[strategy] = Rational(1);
   }
   return temp;
 }

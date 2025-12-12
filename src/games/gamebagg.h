@@ -34,7 +34,6 @@ class GameBAGGRep : public GameRep {
 private:
   std::shared_ptr<agg::BAGG> baggPtr;
   Array<int> agent2baggPlayer;
-  Array<GamePlayerRep *> m_players;
 
 public:
   /// @name Lifecycle
@@ -58,12 +57,8 @@ public:
   Array<int> NumStrategies() const override;
   /// Gets the i'th strategy in the game, numbered globally
   GameStrategy GetStrategy(int p_index) const override { throw UndefinedException(); }
-  /// Returns the number of strategy contingencies in the game
-  int NumStrategyContingencies() const override { throw UndefinedException(); }
   /// Returns the total number of actions in the game
   int BehavProfileLength() const override { throw UndefinedException(); }
-  /// Returns the total number of strategies in the game
-  int MixedProfileLength() const override;
   //@}
 
   PureStrategyProfile NewPureStrategyProfile() const override;
@@ -76,38 +71,10 @@ public:
 
   /// @name Players
   //@{
-  /// Returns the number of players in the game
-  int NumPlayers() const override { return m_players.size(); }
-  /// Returns the pl'th player in the game
-  GamePlayer GetPlayer(int pl) const override { return m_players[pl]; }
   /// Returns the chance (nature) player
   GamePlayer GetChance() const override { throw UndefinedException(); }
   /// Creates a new player in the game, with no moves
   GamePlayer NewPlayer() override { throw UndefinedException(); }
-  //@}
-
-  /// @name Information sets
-  //@{
-  /// Returns the iset'th information set in the game (numbered globally)
-  GameInfoset GetInfoset(int iset) const override { throw UndefinedException(); }
-  /// Returns the set of information sets in the game
-  Array<GameInfoset> GetInfosets() const override { throw UndefinedException(); }
-  /// Returns an array with the number of information sets per personal player
-  Array<int> NumInfosets() const override { throw UndefinedException(); }
-  /// Returns the act'th action in the game (numbered globally)
-  GameAction GetAction(int act) const override { throw UndefinedException(); }
-  //@}
-
-  /// @name Outcomes
-  //@{
-  /// Returns the number of outcomes defined in the game
-  int NumOutcomes() const override { throw UndefinedException(); }
-  /// Returns the index'th outcome defined in the game
-  GameOutcome GetOutcome(int index) const override { throw UndefinedException(); }
-  /// Creates a new outcome in the game
-  GameOutcome NewOutcome() override { throw UndefinedException(); }
-  /// Deletes the specified outcome from the game
-  void DeleteOutcome(const GameOutcome &) override { throw UndefinedException(); }
   //@}
 
   /// @name Nodes
@@ -115,19 +82,25 @@ public:
   /// Returns the root node of the game
   GameNode GetRoot() const override { throw UndefinedException(); }
   /// Returns the number of nodes in the game
-  int NumNodes() const override { throw UndefinedException(); }
+  size_t NumNodes() const override { throw UndefinedException(); }
+  /// Returns the number of non-terminal nodes in the game
+  size_t NumNonterminalNodes() const override { throw UndefinedException(); }
   //@}
 
   /// @name General data access
   //@{
   bool IsTree() const override { return false; }
   virtual bool IsBagg() const { return true; }
-  bool IsPerfectRecall(GameInfoset &, GameInfoset &) const override { return true; }
+  bool IsPerfectRecall() const override { return true; }
   bool IsConstSum() const override { throw UndefinedException(); }
-  /// Returns the smallest payoff in any outcome of the game
-  Rational GetMinPayoff(int) const override { return Rational(baggPtr->getMinPayoff()); }
-  /// Returns the largest payoff in any outcome of the game
-  Rational GetMaxPayoff(int) const override { return Rational(baggPtr->getMaxPayoff()); }
+  /// Returns the smallest payoff to any player in any outcome of the game
+  Rational GetMinPayoff() const override { return Rational(baggPtr->getMinPayoff()); }
+  /// Returns the smallest payoff to the player in any outcome of the game
+  Rational GetMinPayoff(const GamePlayer &) const override { throw UndefinedException(); }
+  /// Returns the largest payoff to any player in any outcome of the game
+  Rational GetMaxPayoff() const override { return Rational(baggPtr->getMaxPayoff()); }
+  /// Returns the largest payoff to the player in any outcome of the game
+  Rational GetMaxPayoff(const GamePlayer &) const override { throw UndefinedException(); }
   //@}
 
   /// @name Writing data files
@@ -155,7 +128,7 @@ public:
 inline Game ReadBaggFile(std::istream &in)
 {
   try {
-    return new GameBAGGRep(agg::BAGG::makeBAGG(in));
+    return std::make_shared<GameBAGGRep>(agg::BAGG::makeBAGG(in));
   }
   catch (std::runtime_error &ex) {
     throw InvalidFileException(ex.what());

@@ -45,10 +45,8 @@ public:
 
   // cost information
   void SetCost(const Vector<T> &); // unit column cost := 0
-  const Vector<T> &GetCost() const { return cost; }
-  const Vector<T> &GetUnitCost() const { return unitcost; }
-  T TotalCost() const;       // cost of current solution
-  T RelativeCost(int) const; // negative index convention
+  T TotalCost() const;             // cost of current solution
+  T RelativeCost(int) const;       // negative index convention
   const Vector<T> &GetDualVector() const { return dual; }
 
   void Refactor() override;
@@ -57,14 +55,8 @@ public:
   bool IsDualReversePivot(int i, int j);
   BFS<T> DualBFS() const;
 
-  // returns the label of the index of the last artificial variable
-  int GetLastLabel() { return this->artificial.last_index(); }
-
-  // select Basis elements according to Tableau rows and cols
-  void BasisSelect(const Array<T> &rowv, Vector<T> &colv) const;
-
   // as above, but unit column elements nonzero
-  void BasisSelect(const Array<T> &unitv, const Array<T> &rowv, Vector<T> &colv) const;
+  void BasisSelect(const Vector<T> &unitv, const Vector<T> &rowv, Vector<T> &colv) const;
 };
 
 } // end namespace Gambit::linalg

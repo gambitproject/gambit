@@ -44,7 +44,7 @@ END_EVENT_TABLE()
 #include "bitmaps/stop.xpm"
 
 gbtNashMonitorDialog::gbtNashMonitorDialog(wxWindow *p_parent, gbtGameDocument *p_doc,
-                                           gbtAnalysisOutput *p_command)
+                                           std::shared_ptr<gbtAnalysisOutput> p_command)
   : wxDialog(p_parent, wxID_ANY, wxT("Computing Nash equilibria"), wxDefaultPosition),
     m_doc(p_doc), m_process(nullptr), m_timer(this, GBT_ID_TIMER), m_output(p_command)
 {
@@ -92,7 +92,7 @@ gbtNashMonitorDialog::gbtNashMonitorDialog(wxWindow *p_parent, gbtGameDocument *
   Start(p_command);
 }
 
-void gbtNashMonitorDialog::Start(gbtAnalysisOutput *p_command)
+void gbtNashMonitorDialog::Start(std::shared_ptr<gbtAnalysisOutput> p_command)
 {
   if (!p_command->IsBehavior()) {
     // Make sure we have a normal form representation

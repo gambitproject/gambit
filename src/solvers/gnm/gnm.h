@@ -26,8 +26,7 @@
 #include "games/nash.h"
 #include "solvers/gtracer/gtracer.h"
 
-namespace Gambit {
-namespace Nash {
+namespace Gambit::Nash {
 
 const double GNM_LAMBDA_END_DEFAULT = -10.0;
 const int GNM_LOCAL_NEWTON_INTERVAL_DEFAULT = 3;
@@ -36,16 +35,16 @@ const int GNM_STEPS_DEFAULT = 100;
 
 List<MixedStrategyProfile<double>>
 GNMStrategySolve(const Game &p_game, double p_lambdaEnd, int p_steps, int p_localNewtonInterval,
-                 int p_localNewtonMaxits, StrategyCallbackType p_callback = NullStrategyCallback);
+                 int p_localNewtonMaxits,
+                 StrategyCallbackType<double> p_callback = NullStrategyCallback<double>);
 
 /// @brief Compute the mixed strategy equilibria accessible via the initial ray determined
 ///        by \p p_profile using the Global Newton method
 List<MixedStrategyProfile<double>>
 GNMStrategySolve(const MixedStrategyProfile<double> &p_profile, double p_lambdaEnd, int p_steps,
                  int p_localNewtonInterval, int p_localNewtonMaxits,
-                 StrategyCallbackType p_callback = NullStrategyCallback);
+                 StrategyCallbackType<double> p_callback = NullStrategyCallback<double>);
 
-} // namespace Nash
-} // end namespace Gambit
+} // end namespace Gambit::Nash
 
 #endif // GAMBIT_NASH_GNM_H

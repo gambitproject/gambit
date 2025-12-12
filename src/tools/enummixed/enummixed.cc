@@ -26,6 +26,7 @@
 #include <fstream>
 
 #include "gambit.h"
+#include "tools/util.h"
 #include "solvers/enummixed/enummixed.h"
 
 using namespace Gambit;
@@ -59,7 +60,6 @@ void PrintHelp(char *progname)
   std::cerr << "Options:\n";
   std::cerr << "  -d DECIMALS      compute using floating-point arithmetic;\n";
   std::cerr << "                   display results with DECIMALS digits\n";
-  std::cerr << "  -D               don't eliminate dominated strategies first\n";
   std::cerr << "  -c               output connectedness information\n";
   std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
@@ -70,14 +70,14 @@ void PrintHelp(char *progname)
 int main(int argc, char *argv[])
 {
   int c;
-  bool useFloat = false, uselrs = false, quiet = false, eliminate = true;
+  bool useFloat = false, quiet = false;
   bool showConnect = false;
   int numDecimals = 6;
 
   int long_opt_index = 0;
   struct option long_options[] = {
       {"help", 0, nullptr, 'h'}, {"version", 0, nullptr, 'v'}, {nullptr, 0, nullptr, 0}};
-  while ((c = getopt_long(argc, argv, "d:DvhqcS", long_options, &long_opt_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "d:vhqcS", long_options, &long_opt_index)) != -1) {
     switch (c) {
     case 'v':
       PrintBanner(std::cerr);
@@ -85,9 +85,6 @@ int main(int argc, char *argv[])
     case 'd':
       useFloat = true;
       numDecimals = atoi(optarg);
-      break;
-    case 'D':
-      eliminate = false;
       break;
     case 'h':
       PrintHelp(argv[0]);
@@ -131,25 +128,27 @@ int main(int argc, char *argv[])
   }
 
   try {
-    Game game = ReadGame(*input_stream);
+    const Game game = ReadGame(*input_stream);
     if (useFloat) {
-      std::shared_ptr<StrategyProfileRenderer<double>> renderer(
-          new MixedStrategyCSVRenderer<double>(std::cout, numDecimals));
-      EnumMixedStrategySolver<double> solver(renderer);
-      std::shared_ptr<EnumMixedStrategySolution<double>> solution = solver.SolveDetailed(game);
+      std::shared_ptr<StrategyProfileRenderer<double>> renderer =
+          std::make_shared<MixedStrategyCSVRenderer<double>>(std::cout, numDecimals);
+      auto solution = EnumMixedStrategySolveDetailed<double>(
+          game, [&](const MixedStrategyProfile<double> &p, const std::string &label) {
+            renderer->Render(p, label);
+          });
       if (showConnect) {
-        List<List<MixedStrategyProfile<double>>> cliques = solution->GetCliques();
-        PrintCliques(cliques, renderer);
+        PrintCliques(solution->GetCliques(), renderer);
       }
     }
     else {
       std::shared_ptr<StrategyProfileRenderer<Rational>> renderer(
           new MixedStrategyCSVRenderer<Rational>(std::cout));
-      EnumMixedStrategySolver<Rational> solver(renderer);
-      std::shared_ptr<EnumMixedStrategySolution<Rational>> solution = solver.SolveDetailed(game);
+      auto solution = EnumMixedStrategySolveDetailed<Rational>(
+          game, [&](const MixedStrategyProfile<Rational> &p, const std::string &label) {
+            renderer->Render(p, label);
+          });
       if (showConnect) {
-        List<List<MixedStrategyProfile<Rational>>> cliques = solution->GetCliques();
-        PrintCliques(cliques, renderer);
+        PrintCliques(solution->GetCliques(), renderer);
       }
     }
     return 0;

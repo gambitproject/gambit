@@ -100,9 +100,18 @@ class Action:
             )
         py_string = cython.cast(
             string,
-            self.action.deref().GetInfoset().deref().GetActionProb(self.action.deref().GetNumber())
+            self.action.deref().GetInfoset().deref().GetActionProb(self.action)
         )
         if "." in py_string.decode("ascii"):
             return decimal.Decimal(py_string.decode("ascii"))
         else:
             return Rational(py_string.decode("ascii"))
+
+    @property
+    def plays(self) -> typing.List[Node]:
+        """Returns a list of all terminal `Node` objects consistent with it.
+        """
+        return [
+            Node.wrap(n) for n in
+            self.action.deref().GetInfoset().deref().GetGame().deref().GetPlays(self.action)
+        ]

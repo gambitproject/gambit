@@ -25,49 +25,45 @@
 
 #include "lemketab.h"
 
-namespace Gambit {
-namespace linalg {
+namespace Gambit::linalg {
 
-template <class T> class LHTableau : public BaseTableau<T> {
+template <class T> class LHTableau {
 public:
   /// @name Lifecycle
   //@{
-  LHTableau(const Matrix<T> &A1, const Matrix<T> &A2, const Vector<T> &b1, const Vector<T> &b2);
-  ~LHTableau() override = default;
+  LHTableau(const Matrix<T> &A1, const Matrix<T> &A2, const Vector<T> &b1, const Vector<T> &b2)
+    : T1(A1, b1), T2(A2, b2), tmp1(b1.front_index(), b1.back_index()),
+      tmp2(b2.front_index(), b2.back_index()), solution(b1.front_index(), b2.back_index())
+  {
+  }
+  LHTableau(const LHTableau<T> &) = default;
+  ~LHTableau() = default;
 
-  LHTableau<T> &operator=(const LHTableau<T> &);
+  LHTableau<T> &operator=(const LHTableau<T> &) = delete;
   //@}
 
   /// @name General information
   //@{
-  int MinRow() const override { return T1.MinRow(); }
-  int MaxRow() const override { return T2.MaxRow(); }
-  int MinCol() const override { return T2.MinCol(); }
-  int MaxCol() const override { return T1.MaxCol(); }
-  T Epsilon() const { return T1.Epsilon(); }
 
-  bool Member(int i) const override { return T1.Member(i) || T2.Member(i); }
+  int MinRow() const { return T1.MinRow(); }
+  int MaxRow() const { return T2.MaxRow(); }
+  int MinCol() const { return T2.MinCol(); }
+  int MaxCol() const { return T1.MaxCol(); }
+
+  bool ColIndex(int x) const { return MinCol() <= x && x <= MaxCol(); }
+  bool RowIndex(int x) const { return MinRow() <= x && x <= MaxRow(); }
+
+  bool Member(int i) const { return T1.Member(i) || T2.Member(i); }
   /// Return variable in i'th position of Tableau
-  int Label(int i) const override;
+  int Label(int i) const;
   /// Return Tableau position of variable i
-  int Find(int i) const override;
+  int Find(int i) const;
   //@}
 
   /// @name Pivoting operations
   //@{
-  bool CanPivot(int outgoing, int incoming) const override;
   /// Perform apivot operation -- outgoing is row, incoming is column
-  void Pivot(int outrow, int inlabel) override;
-  long NumPivots() const override { return T1.NumPivots() + T2.NumPivots(); }
-  //@}
-
-  /// @name Raw Tableau functions
-  //@{
-  void Refactor() override
-  {
-    T1.Refactor();
-    T2.Refactor();
-  }
+  void Pivot(int outrow, int inlabel);
   //@}
 
   /// @name Miscellaneous functions
@@ -86,7 +82,6 @@ protected:
   Vector<T> solution;
 };
 
-} // namespace linalg
-} // end namespace Gambit
+} // end namespace Gambit::linalg
 
 #endif // GAMBIT_LINALG_LHTAB_H

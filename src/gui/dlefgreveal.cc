@@ -28,6 +28,8 @@
 #include "gambit.h"
 #include "dlefgreveal.h"
 
+using namespace Gambit;
+
 //=========================================================================
 //                  gbtRevealMoveDialog: Member functions
 //=========================================================================
@@ -41,8 +43,8 @@ gbtRevealMoveDialog::gbtRevealMoveDialog(wxWindow *p_parent, gbtGameDocument *p_
 
   auto *boxSizer = new wxBoxSizer(wxVERTICAL);
 
-  for (int pl = 1; pl <= m_doc->NumPlayers(); pl++) {
-    Gambit::GamePlayer player = m_doc->GetGame()->GetPlayer(pl);
+  for (size_t pl = 1; pl <= m_doc->NumPlayers(); pl++) {
+    auto player = m_doc->GetGame()->GetPlayer(pl);
     if (player->GetLabel().empty()) {
       m_players.push_back(
           new wxCheckBox(this, wxID_ANY, wxString(player->GetLabel().c_str(), *wxConvCurrent)));
@@ -71,11 +73,11 @@ gbtRevealMoveDialog::gbtRevealMoveDialog(wxWindow *p_parent, gbtGameDocument *p_
   CenterOnParent();
 }
 
-Gambit::Array<Gambit::GamePlayer> gbtRevealMoveDialog::GetPlayers() const
+Array<GamePlayer> gbtRevealMoveDialog::GetPlayers() const
 {
-  Gambit::Array<Gambit::GamePlayer> players;
+  Array<GamePlayer> players;
 
-  for (int pl = 1; pl <= m_doc->NumPlayers(); pl++) {
+  for (size_t pl = 1; pl <= m_doc->NumPlayers(); pl++) {
     if (m_players[pl]->GetValue()) {
       players.push_back(m_doc->GetGame()->GetPlayer(pl));
     }

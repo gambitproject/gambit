@@ -36,9 +36,9 @@ private:
   wxStaticText *m_statusText, *m_countText;
   wxButton *m_stopButton, *m_okButton;
   wxTimer m_timer;
-  gbtAnalysisOutput *m_output;
+  std::shared_ptr<gbtAnalysisOutput> m_output;
 
-  void Start(gbtAnalysisOutput *);
+  void Start(std::shared_ptr<gbtAnalysisOutput> p_command);
 
   void OnStop(wxCommandEvent &);
   void OnTimer(wxTimerEvent &);
@@ -46,7 +46,8 @@ private:
   void OnEndProcess(wxProcessEvent &);
 
 public:
-  gbtNashMonitorDialog(wxWindow *p_parent, gbtGameDocument *p_doc, gbtAnalysisOutput *p_command);
+  gbtNashMonitorDialog(wxWindow *p_parent, gbtGameDocument *p_doc,
+                       std::shared_ptr<gbtAnalysisOutput> p_command);
 
   DECLARE_EVENT_TABLE()
 };

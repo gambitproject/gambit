@@ -28,8 +28,7 @@
 #include "gnmgame.h"
 #include "cmatrix.h"
 
-namespace Gambit {
-namespace gametracer {
+namespace Gambit::gametracer {
 
 class nfgame : public gnmgame {
 public:
@@ -88,7 +87,6 @@ inline std::ostream &operator<<(std::ostream &s, nfgame &g)
   return s;
 }
 
-} // namespace gametracer
-} // end namespace Gambit
+} // end namespace Gambit::gametracer
 
 #endif // GAMBIT_GTRACER_NFGAME_H

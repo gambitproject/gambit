@@ -39,8 +39,14 @@ def test_player_index_by_string():
 
 def test_player_index_out_of_range():
     game = gbt.Game.new_table([2, 2])
+    print(f"Number of players: {len(game.players)}")
+    assert len(game.players) == 2
+    with pytest.raises(IndexError):
+        _ = game.players[2]
     with pytest.raises(IndexError):
         _ = game.players[3]
+    with pytest.raises(IndexError):
+        _ = game.players[-1]
 
 
 def test_player_index_invalid():
@@ -74,6 +80,10 @@ def test_strategic_game_add_strategy():
     game = gbt.Game.new_table([2, 2])
     game.add_strategy(game.players[0], "new strategy")
     assert len(game.players[0].strategies) == 3
+    # This second add also ensures that we are testing the case where there
+    # are null outcomes in the table
+    game.add_strategy(game.players[1], "new strategy")
+    assert len(game.players[1].strategies) == 3
 
 
 def test_extensive_game_add_strategy():

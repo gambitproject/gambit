@@ -74,7 +74,7 @@ void PossibleNashBehaviorSupports(const BehaviorSupportProfile &p_support,
 std::shared_ptr<PossibleNashBehaviorSupportsResult>
 PossibleNashBehaviorSupports(const Game &p_game)
 {
-  BehaviorSupportProfile support(p_game);
+  const BehaviorSupportProfile support(p_game);
   auto result = std::make_shared<PossibleNashBehaviorSupportsResult>();
 
   std::list<GameAction> actions;

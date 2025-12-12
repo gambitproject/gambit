@@ -42,12 +42,6 @@ gbtBehavDominanceStack::gbtBehavDominanceStack(gbtGameDocument *p_doc, bool p_st
   Reset();
 }
 
-gbtBehavDominanceStack::~gbtBehavDominanceStack()
-{
-  for (int i = 1; i <= m_supports.size(); delete m_supports[i++])
-    ;
-}
-
 void gbtBehavDominanceStack::SetStrict(bool p_strict)
 {
   if (m_strict != p_strict) {
@@ -58,11 +52,9 @@ void gbtBehavDominanceStack::SetStrict(bool p_strict)
 
 void gbtBehavDominanceStack::Reset()
 {
-  for (int i = 1; i <= m_supports.size(); delete m_supports[i++])
-    ;
-  m_supports = Gambit::Array<Gambit::BehaviorSupportProfile *>();
+  m_supports.clear();
   if (m_doc->IsTree()) {
-    m_supports.push_back(new Gambit::BehaviorSupportProfile(m_doc->GetGame()));
+    m_supports.push_back(std::make_shared<BehaviorSupportProfile>(m_doc->GetGame()));
     m_current = 1;
   }
   m_noFurther = false;
@@ -79,10 +71,10 @@ bool gbtBehavDominanceStack::NextLevel()
     return false;
   }
 
-  Gambit::BehaviorSupportProfile newSupport = m_supports[m_current]->Undominated(m_strict);
+  const BehaviorSupportProfile newSupport = m_supports[m_current]->Undominated(m_strict);
 
   if (newSupport != *m_supports[m_current]) {
-    m_supports.push_back(new Gambit::BehaviorSupportProfile(newSupport));
+    m_supports.push_back(std::make_shared<BehaviorSupportProfile>(newSupport));
     m_current++;
     return true;
   }
@@ -113,12 +105,6 @@ gbtStrategyDominanceStack::gbtStrategyDominanceStack(gbtGameDocument *p_doc, boo
   Reset();
 }
 
-gbtStrategyDominanceStack::~gbtStrategyDominanceStack()
-{
-  for (int i = 1; i <= m_supports.size(); delete m_supports[i++])
-    ;
-}
-
 void gbtStrategyDominanceStack::SetStrict(bool p_strict)
 {
   if (m_strict != p_strict) {
@@ -129,10 +115,8 @@ void gbtStrategyDominanceStack::SetStrict(bool p_strict)
 
 void gbtStrategyDominanceStack::Reset()
 {
-  for (int i = 1; i <= m_supports.size(); delete m_supports[i++])
-    ;
-  m_supports = Gambit::Array<Gambit::StrategySupportProfile *>();
-  m_supports.push_back(new Gambit::StrategySupportProfile(m_doc->GetGame()));
+  m_supports.clear();
+  m_supports.push_back(std::make_shared<StrategySupportProfile>(m_doc->GetGame()));
   m_current = 1;
   m_noFurther = false;
 }
@@ -148,10 +132,10 @@ bool gbtStrategyDominanceStack::NextLevel()
     return false;
   }
 
-  Gambit::StrategySupportProfile newSupport = m_supports[m_current]->Undominated(m_strict);
+  const StrategySupportProfile newSupport = m_supports[m_current]->Undominated(m_strict);
 
   if (newSupport != *m_supports[m_current]) {
-    m_supports.push_back(new Gambit::StrategySupportProfile(newSupport));
+    m_supports.push_back(std::make_shared<StrategySupportProfile>(newSupport));
     m_current++;
     return true;
   }
@@ -176,7 +160,7 @@ bool gbtStrategyDominanceStack::PreviousLevel()
 //                          class gbtGameDocument
 //=========================================================================
 
-gbtGameDocument::gbtGameDocument(Gambit::Game p_game)
+gbtGameDocument::gbtGameDocument(Game p_game)
   : m_game(p_game), m_selectNode(nullptr), m_modified(false), m_behavSupports(this, true),
     m_stratSupports(this, true), m_currentProfileList(0)
 {
@@ -213,7 +197,7 @@ bool gbtGameDocument::LoadDocument(const wxString &p_filename, bool p_saveUndo)
   if (efgfile) {
     try {
       std::istringstream s(efgfile->FirstChild()->Value());
-      m_game = Gambit::ReadGame(s);
+      m_game = ReadGame(s);
     }
     catch (...) {
       return false;
@@ -224,7 +208,7 @@ bool gbtGameDocument::LoadDocument(const wxString &p_filename, bool p_saveUndo)
   if (nfgfile) {
     try {
       std::istringstream s(nfgfile->FirstChild()->Value());
-      m_game = Gambit::ReadGame(s);
+      m_game = ReadGame(s);
     }
     catch (...) {
       return false;
@@ -239,7 +223,7 @@ bool gbtGameDocument::LoadDocument(const wxString &p_filename, bool p_saveUndo)
   m_behavSupports.Reset();
   m_stratSupports.Reset();
 
-  m_profiles = Gambit::Array<gbtAnalysisOutput *>();
+  m_profiles.clear();
 
   for (TiXmlNode *analysis = game->FirstChild("analysis"); analysis;
        analysis = analysis->NextSibling()) {
@@ -259,12 +243,12 @@ bool gbtGameDocument::LoadDocument(const wxString &p_filename, bool p_saveUndo)
       }
 
       if (isFloat) {
-        auto *plist = new gbtAnalysisProfileList<double>(this, false);
+        auto plist = std::make_shared<gbtAnalysisProfileList<double>>(this, false);
         plist->Load(analysis);
         m_profiles.push_back(plist);
       }
       else {
-        auto *plist = new gbtAnalysisProfileList<Rational>(this, false);
+        auto plist = std::make_shared<gbtAnalysisProfileList<Rational>>(this, false);
         plist->Load(analysis);
         m_profiles.push_back(plist);
       }
@@ -333,9 +317,8 @@ void gbtGameDocument::SaveDocument(std::ostream &p_file) const
     p_file << "</nfgfile>\n";
   }
 
-  for (int i = 1; i <= m_profiles.size(); i++) {
-    m_profiles[i]->Save(p_file);
-  }
+  std::for_each(m_profiles.begin(), m_profiles.end(),
+                [&p_file](std::shared_ptr<gbtAnalysisOutput> a) { a->Save(p_file); });
 
   p_file << "</game>\n";
 
@@ -358,30 +341,39 @@ void gbtGameDocument::UpdateViews(gbtGameModificationType p_modifications)
     // computed profiles invalid for the edited game, it does mean
     // that, in general, they won't be Nash.  For now, to avoid confusion,
     // we will wipe them out.
-    while (!m_profiles.empty()) {
-      delete m_profiles.back();
-      m_profiles.pop_back();
-    }
+    m_profiles.clear();
     m_currentProfileList = 0;
   }
 
-  for (int i = 1; i <= m_views.size(); m_views[i++]->OnUpdate())
-    ;
+  std::for_each(m_views.begin(), m_views.end(), std::mem_fn(&gbtGameView::OnUpdate));
 }
 
 void gbtGameDocument::PostPendingChanges()
 {
-  for (int i = 1; i <= m_views.size(); m_views[i++]->PostPendingChanges())
-    ;
+  std::for_each(m_views.begin(), m_views.end(), std::mem_fn(&gbtGameView::PostPendingChanges));
 }
 
 void gbtGameDocument::BuildNfg()
 {
   if (m_game->IsTree()) {
     m_stratSupports.Reset();
-    for (int i = 1; i <= m_profiles.size(); m_profiles[i++]->BuildNfg())
-      ;
+    std::for_each(m_profiles.begin(), m_profiles.end(), std::mem_fn(&gbtAnalysisOutput::BuildNfg));
   }
+}
+
+GameAction gbtGameDocument::GetAction(int p_index) const
+{
+  int index = 1;
+  for (auto player : m_game->GetPlayers()) {
+    for (auto infoset : player->GetInfosets()) {
+      for (auto action : infoset->GetActions()) {
+        if (index++ == p_index) {
+          return action;
+        }
+      }
+    }
+  }
+  throw std::out_of_range("Action index out of range");
 }
 
 void gbtGameDocument::SetStyle(const gbtStyle &p_style)
@@ -396,7 +388,7 @@ void gbtGameDocument::SetCurrentProfile(int p_profile)
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-void gbtGameDocument::AddProfileList(gbtAnalysisOutput *p_profs)
+void gbtGameDocument::AddProfileList(std::shared_ptr<gbtAnalysisOutput> p_profs)
 {
   m_profiles.push_back(p_profs);
   m_currentProfileList = m_profiles.size();
@@ -410,7 +402,7 @@ void gbtGameDocument::SetProfileList(int p_index)
 }
 
 /*
-void gbtGameDocument::AddProfiles(const Gambit::List<Gambit::MixedBehavProfile<double> >
+void gbtGameDocument::AddProfiles(const List<MixedBehavProfile<double> >
 &p_profiles)
 {
   for (int i = 1; i <= p_profiles.Length(); i++) {
@@ -421,14 +413,14 @@ void gbtGameDocument::AddProfiles(const Gambit::List<Gambit::MixedBehavProfile<d
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-void gbtGameDocument::AddProfile(const Gambit::MixedBehavProfile<double> &p_profile)
+void gbtGameDocument::AddProfile(const MixedBehavProfile<double> &p_profile)
 {
   m_profiles[m_currentProfileList].Append(p_profile);
   m_profiles[m_currentProfileList].SetCurrent(m_profiles[m_currentProfileList].NumProfiles());
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-void gbtGameDocument::AddProfiles(const Gambit::List<Gambit::MixedStrategyProfile<double> >
+void gbtGameDocument::AddProfiles(const List<MixedStrategyProfile<double> >
 &p_profiles)
 {
   for (int i = 1; i <= p_profiles.Length(); i++) {
@@ -439,7 +431,7 @@ void gbtGameDocument::AddProfiles(const Gambit::List<Gambit::MixedStrategyProfil
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-void gbtGameDocument::AddProfile(const Gambit::MixedStrategyProfile<double> &p_profile)
+void gbtGameDocument::AddProfile(const MixedStrategyProfile<double> &p_profile)
 {
   m_profiles[m_currentProfileList].Append(p_profile);
   m_profiles[m_currentProfileList].SetCurrent(m_profiles[m_currentProfileList].NumProfiles());
@@ -455,7 +447,7 @@ void gbtGameDocument::SetBehavElimStrength(bool p_strict)
 
 bool gbtGameDocument::NextBehavElimLevel()
 {
-  bool ret = m_behavSupports.NextLevel();
+  const bool ret = m_behavSupports.NextLevel();
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
   return ret;
 }
@@ -486,7 +478,7 @@ bool gbtGameDocument::GetStrategyElimStrength() const { return m_stratSupports.G
 
 bool gbtGameDocument::NextStrategyElimLevel()
 {
-  bool ret = m_stratSupports.NextLevel();
+  const bool ret = m_stratSupports.NextLevel();
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
   return ret;
 }
@@ -507,7 +499,7 @@ bool gbtGameDocument::CanStrategyElim() const { return m_stratSupports.CanElimin
 
 int gbtGameDocument::GetStrategyElimLevel() const { return m_stratSupports.GetLevel(); }
 
-void gbtGameDocument::SetSelectNode(Gambit::GameNode p_node)
+void gbtGameDocument::SetSelectNode(GameNode p_node)
 {
   m_selectNode = p_node;
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
@@ -550,7 +542,7 @@ void gbtGameDocument::DoSetTitle(const wxString &p_title, const wxString &p_comm
 
 void gbtGameDocument::DoNewPlayer()
 {
-  GamePlayer player = m_game->NewPlayer();
+  const GamePlayer player = m_game->NewPlayer();
   player->SetLabel("Player " + lexical_cast<std::string>(player->GetNumber()));
   if (!m_game->IsTree()) {
     player->GetStrategy(1)->SetLabel("1");
@@ -560,38 +552,37 @@ void gbtGameDocument::DoNewPlayer()
 
 void gbtGameDocument::DoSetPlayerLabel(GamePlayer p_player, const wxString &p_label)
 {
-  p_player->SetLabel(static_cast<const char *>(p_label.mb_str()));
+  p_player->SetLabel(p_label.ToStdString());
   UpdateViews(GBT_DOC_MODIFIED_LABELS);
 }
 
 void gbtGameDocument::DoNewStrategy(GamePlayer p_player)
 {
-  GameStrategy strategy = p_player->NewStrategy();
-  strategy->SetLabel(lexical_cast<std::string>(strategy->GetNumber()));
+  m_game->NewStrategy(p_player, std::to_string(p_player->GetStrategies().size() + 1));
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
 void gbtGameDocument::DoDeleteStrategy(GameStrategy p_strategy)
 {
-  p_strategy->DeleteStrategy();
+  m_game->DeleteStrategy(p_strategy);
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
 void gbtGameDocument::DoSetStrategyLabel(GameStrategy p_strategy, const wxString &p_label)
 {
-  p_strategy->SetLabel(static_cast<const char *>(p_label.mb_str()));
+  p_strategy->SetLabel(p_label.ToStdString());
   UpdateViews(GBT_DOC_MODIFIED_LABELS);
 }
 
 void gbtGameDocument::DoSetInfosetLabel(GameInfoset p_infoset, const wxString &p_label)
 {
-  p_infoset->SetLabel(static_cast<const char *>(p_label.mb_str()));
+  p_infoset->SetLabel(p_label.ToStdString());
   UpdateViews(GBT_DOC_MODIFIED_LABELS);
 }
 
 void gbtGameDocument::DoSetActionLabel(GameAction p_action, const wxString &p_label)
 {
-  p_action->SetLabel(static_cast<const char *>(p_label.mb_str()));
+  p_action->SetLabel(p_label.ToStdString());
   UpdateViews(GBT_DOC_MODIFIED_LABELS);
 }
 
@@ -603,19 +594,22 @@ void gbtGameDocument::DoSetActionProbs(GameInfoset p_infoset, const Array<Number
 
 void gbtGameDocument::DoSetInfoset(GameNode p_node, GameInfoset p_infoset)
 {
-  p_node->SetInfoset(p_infoset);
+  m_game->SetInfoset(p_node, p_infoset);
+  m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
 void gbtGameDocument::DoLeaveInfoset(GameNode p_node)
 {
-  p_node->LeaveInfoset();
+  m_game->LeaveInfoset(p_node);
+  m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
 void gbtGameDocument::DoRevealAction(GameInfoset p_infoset, GamePlayer p_player)
 {
-  p_infoset->Reveal(p_player);
+  m_game->Reveal(p_infoset, p_player);
+  m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
@@ -624,47 +618,50 @@ void gbtGameDocument::DoInsertAction(GameNode p_node)
   if (!p_node || !p_node->GetInfoset()) {
     return;
   }
-  GameAction action = p_node->GetInfoset()->InsertAction();
-  action->SetLabel(lexical_cast<std::string>(action->GetNumber()));
+  const GameAction action = m_game->InsertAction(p_node->GetInfoset());
+  action->SetLabel(std::to_string(action->GetNumber()));
+  m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
 void gbtGameDocument::DoSetNodeLabel(GameNode p_node, const wxString &p_label)
 {
-  p_node->SetLabel(static_cast<const char *>(p_label.mb_str()));
+  p_node->SetLabel(p_label.ToStdString());
   UpdateViews(GBT_DOC_MODIFIED_LABELS);
 }
 
 void gbtGameDocument::DoAppendMove(GameNode p_node, GameInfoset p_infoset)
 {
-  p_node->AppendMove(p_infoset);
+  m_game->AppendMove(p_node, p_infoset);
+  m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
 void gbtGameDocument::DoInsertMove(GameNode p_node, GamePlayer p_player, unsigned int p_actions)
 {
-  GameInfoset infoset = p_node->InsertMove(p_player, p_actions);
-  for (int act = 1; act <= infoset->NumActions(); act++) {
-    infoset->GetAction(act)->SetLabel(lexical_cast<std::string>(act));
-  }
+  m_game->InsertMove(p_node, p_player, p_actions, true);
+  m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
 void gbtGameDocument::DoInsertMove(GameNode p_node, GameInfoset p_infoset)
 {
-  p_node->InsertMove(p_infoset);
+  m_game->InsertMove(p_node, p_infoset);
+  m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
 void gbtGameDocument::DoCopyTree(GameNode p_destNode, GameNode p_srcNode)
 {
-  p_destNode->CopyTree(p_srcNode);
+  m_game->CopyTree(p_destNode, p_srcNode);
+  m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
 void gbtGameDocument::DoMoveTree(GameNode p_destNode, GameNode p_srcNode)
 {
-  p_destNode->MoveTree(p_srcNode);
+  m_game->MoveTree(p_destNode, p_srcNode);
+  m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
@@ -673,13 +670,15 @@ void gbtGameDocument::DoDeleteParent(GameNode p_node)
   if (!p_node || !p_node->GetParent()) {
     return;
   }
-  p_node->DeleteParent();
+  m_game->DeleteParent(p_node);
+  m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
 void gbtGameDocument::DoDeleteTree(GameNode p_node)
 {
-  p_node->DeleteTree();
+  m_game->DeleteTree(p_node);
+  m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
@@ -687,7 +686,8 @@ void gbtGameDocument::DoSetPlayer(GameInfoset p_infoset, GamePlayer p_player)
 {
   if (!p_player->IsChance() && !p_infoset->GetPlayer()->IsChance()) {
     // Currently don't support switching nodes to/from chance player
-    p_infoset->SetPlayer(p_player);
+    m_game->SetPlayer(p_infoset, p_player);
+    m_game->SortInfosets();
     UpdateViews(GBT_DOC_MODIFIED_GAME);
   }
 }
@@ -696,14 +696,15 @@ void gbtGameDocument::DoSetPlayer(GameNode p_node, GamePlayer p_player)
 {
   if (!p_player->IsChance() && !p_node->GetPlayer()->IsChance()) {
     // Currently don't support switching nodes to/from chance player
-    p_node->GetInfoset()->SetPlayer(p_player);
+    m_game->SetPlayer(p_node->GetInfoset(), p_player);
+    m_game->SortInfosets();
     UpdateViews(GBT_DOC_MODIFIED_GAME);
   }
 }
 
 void gbtGameDocument::DoNewOutcome(GameNode p_node)
 {
-  p_node->SetOutcome(m_game->NewOutcome());
+  m_game->SetOutcome(p_node, m_game->NewOutcome());
   UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
 }
 
@@ -715,7 +716,7 @@ void gbtGameDocument::DoNewOutcome(const PureStrategyProfile &p_profile)
 
 void gbtGameDocument::DoSetOutcome(GameNode p_node, GameOutcome p_outcome)
 {
-  p_node->SetOutcome(p_outcome);
+  m_game->SetOutcome(p_node, p_outcome);
   UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
 }
 
@@ -724,24 +725,24 @@ void gbtGameDocument::DoRemoveOutcome(GameNode p_node)
   if (!p_node || !p_node->GetOutcome()) {
     return;
   }
-  p_node->SetOutcome(nullptr);
+  m_game->SetOutcome(p_node, nullptr);
   UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
 }
 
 void gbtGameDocument::DoCopyOutcome(GameNode p_node, GameOutcome p_outcome)
 {
-  GameOutcome outcome = m_game->NewOutcome();
+  const GameOutcome outcome = m_game->NewOutcome();
   outcome->SetLabel("Outcome" + lexical_cast<std::string>(outcome->GetNumber()));
-  for (int pl = 1; pl <= m_game->NumPlayers(); pl++) {
-    outcome->SetPayoff(pl, p_outcome->GetPayoff(pl));
+  for (const auto &player : m_game->GetPlayers()) {
+    outcome->SetPayoff(player, p_outcome->GetPayoff<Number>(player));
   }
-  p_node->SetOutcome(outcome);
+  m_game->SetOutcome(p_node, outcome);
   UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
 }
 
 void gbtGameDocument::DoSetPayoff(GameOutcome p_outcome, int p_player, const wxString &p_value)
 {
-  p_outcome->SetPayoff(p_player, Number(p_value.ToStdString()));
+  p_outcome->SetPayoff(m_game->GetPlayer(p_player), Number(p_value.ToStdString()));
   UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
 }
 

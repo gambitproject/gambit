@@ -50,7 +50,7 @@ static wxColour s_defaultColors[8] = {
 //!
 const wxColour &gbtStyle::GetPlayerColor(int pl) const
 {
-  while (pl > m_playerColors.size()) {
+  while (pl > static_cast<int>(m_playerColors.size())) {
     m_playerColors.push_back(s_defaultColors[m_playerColors.size() % 8]);
   }
 
@@ -81,7 +81,7 @@ void gbtStyle::SetDefaults()
 
   m_chanceColor = wxColour(154, 205, 50);
   m_terminalColor = *wxBLACK;
-  for (int pl = 1; pl <= m_playerColors.size(); pl++) {
+  for (size_t pl = 1; pl <= m_playerColors.size(); pl++) {
     m_playerColors[pl] = s_defaultColors[(pl - 1) % 8];
   }
 }
@@ -103,7 +103,7 @@ std::string gbtStyle::GetColorXML() const
   s << "blue=\"" << ((int)m_chanceColor.Blue()) << "\" ";
   s << "/>\n";
 
-  for (int pl = 1; pl <= m_playerColors.size(); pl++) {
+  for (size_t pl = 1; pl <= m_playerColors.size(); pl++) {
     s << "<player id=\"" << pl << "\" ";
     s << "red=\"" << ((int)m_playerColors[pl].Red()) << "\" ";
     s << "green=\"" << ((int)m_playerColors[pl].Green()) << "\" ";
@@ -174,20 +174,20 @@ std::string gbtStyle::GetLayoutXML() const
   s << "<autolayout>\n";
 
   s << "<nodes size=\"" << m_nodeSize << "\" spacing=\"" << m_terminalSpacing << "\" ";
-  std::string nodeTokens[] = {"line", "box", "circle", "diamond", "dot"};
+  const std::string nodeTokens[] = {"line", "box", "circle", "diamond", "dot"};
   s << "chance=\"" << nodeTokens[m_chanceToken] << "\" ";
   s << "player=\"" << nodeTokens[m_playerToken] << "\" ";
   s << "terminal=\"" << nodeTokens[m_terminalToken] << "\"/>\n";
 
   s << "<branches size=\"" << m_branchLength << "\" tine=\"" << m_tineLength << "\" ";
-  std::string branchStyles[] = {"line", "forktine"};
+  const std::string branchStyles[] = {"line", "forktine"};
   s << "branch=\"" << branchStyles[m_branchStyle] << "\" ";
-  std::string branchLabels[] = {"horizontal", "rotated"};
+  const std::string branchLabels[] = {"horizontal", "rotated"};
   s << "labels=\"" << branchLabels[m_branchLabels] << "\"/>\n";
 
-  std::string infosetConnect[] = {"none", "same", "all"};
+  const std::string infosetConnect[] = {"none", "same", "all"};
   s << "<infosets connect=\"" << infosetConnect[m_infosetConnect] << "\" ";
-  std::string infosetStyle[] = {"lines", "circles"};
+  const std::string infosetStyle[] = {"lines", "circles"};
   s << "style=\"" << infosetStyle[m_infosetJoin] << "\"/>\n";
 
   s << "</autolayout>\n";
@@ -202,7 +202,7 @@ void gbtStyle::SetLayoutXML(TiXmlNode *p_node)
     nodes->ToElement()->QueryIntAttribute("spacing", &m_terminalSpacing);
     const char *chance = nodes->ToElement()->Attribute("chance");
     if (chance) {
-      std::string s = chance;
+      const std::string s = chance;
       if (s == "line") {
         m_chanceToken = GBT_NODE_TOKEN_LINE;
       }
@@ -222,7 +222,7 @@ void gbtStyle::SetLayoutXML(TiXmlNode *p_node)
 
     const char *player = nodes->ToElement()->Attribute("player");
     if (player) {
-      std::string s = player;
+      const std::string s = player;
       if (s == "line") {
         m_playerToken = GBT_NODE_TOKEN_LINE;
       }
@@ -242,7 +242,7 @@ void gbtStyle::SetLayoutXML(TiXmlNode *p_node)
 
     const char *terminal = nodes->ToElement()->Attribute("terminal");
     if (terminal) {
-      std::string s = terminal;
+      const std::string s = terminal;
       if (s == "line") {
         m_terminalToken = GBT_NODE_TOKEN_LINE;
       }
@@ -268,7 +268,7 @@ void gbtStyle::SetLayoutXML(TiXmlNode *p_node)
 
     const char *branch = branches->ToElement()->Attribute("branch");
     if (branch) {
-      std::string s = branch;
+      const std::string s = branch;
       if (s == "line") {
         m_branchStyle = GBT_BRANCH_STYLE_LINE;
       }
@@ -279,7 +279,7 @@ void gbtStyle::SetLayoutXML(TiXmlNode *p_node)
 
     const char *labels = branches->ToElement()->Attribute("labels");
     if (labels) {
-      std::string s = labels;
+      const std::string s = labels;
       if (s == "horizontal") {
         m_branchLabels = GBT_BRANCH_LABEL_HORIZONTAL;
       }
@@ -293,7 +293,7 @@ void gbtStyle::SetLayoutXML(TiXmlNode *p_node)
   if (infosets) {
     const char *connect = infosets->ToElement()->Attribute("connect");
     if (connect) {
-      std::string s = connect;
+      const std::string s = connect;
       if (s == "none") {
         m_infosetConnect = GBT_INFOSET_CONNECT_NONE;
       }
@@ -307,7 +307,7 @@ void gbtStyle::SetLayoutXML(TiXmlNode *p_node)
 
     const char *style = infosets->ToElement()->Attribute("style");
     if (style) {
-      std::string s = style;
+      const std::string s = style;
       if (s == "lines") {
         m_infosetJoin = GBT_INFOSET_JOIN_LINES;
       }
@@ -322,12 +322,12 @@ std::string gbtStyle::GetLabelXML() const
 {
   std::ostringstream s;
   s << "<labels ";
-  std::string nodeLabels[] = {"none",   "label",      "player",     "isetlabel",
-                              "isetid", "realizprob", "beliefprob", "value"};
+  const std::string nodeLabels[] = {"none",   "label",      "player",     "isetlabel",
+                                    "isetid", "realizprob", "beliefprob", "value"};
   s << "abovenode=\"" << nodeLabels[m_nodeAboveLabel] << "\" ";
   s << "belownode=\"" << nodeLabels[m_nodeBelowLabel] << "\" ";
 
-  std::string branchLabels[] = {"none", "label", "probs", "value"};
+  const std::string branchLabels[] = {"none", "label", "probs", "value"};
   s << "abovebranch=\"" << branchLabels[m_branchAboveLabel] << "\" ";
   s << "belowbranch=\"" << branchLabels[m_branchBelowLabel] << "\" ";
 
@@ -339,7 +339,7 @@ void gbtStyle::SetLabelXML(TiXmlNode *p_node)
 {
   const char *abovenode = p_node->ToElement()->Attribute("abovenode");
   if (abovenode) {
-    std::string s = abovenode;
+    const std::string s = abovenode;
     if (s == "none") {
       m_nodeAboveLabel = GBT_NODE_LABEL_NOTHING;
     }
@@ -368,7 +368,7 @@ void gbtStyle::SetLabelXML(TiXmlNode *p_node)
 
   const char *belownode = p_node->ToElement()->Attribute("belownode");
   if (belownode) {
-    std::string s = belownode;
+    const std::string s = belownode;
     if (s == "none") {
       m_nodeBelowLabel = GBT_NODE_LABEL_NOTHING;
     }
@@ -397,7 +397,7 @@ void gbtStyle::SetLabelXML(TiXmlNode *p_node)
 
   const char *abovebranch = p_node->ToElement()->Attribute("abovebranch");
   if (abovebranch) {
-    std::string s = abovebranch;
+    const std::string s = abovebranch;
     if (s == "none") {
       m_branchAboveLabel = GBT_BRANCH_LABEL_NOTHING;
     }
@@ -414,7 +414,7 @@ void gbtStyle::SetLabelXML(TiXmlNode *p_node)
 
   const char *belowbranch = p_node->ToElement()->Attribute("belowbranch");
   if (belowbranch) {
-    std::string s = belowbranch;
+    const std::string s = belowbranch;
     if (s == "none") {
       m_branchBelowLabel = GBT_BRANCH_LABEL_NOTHING;
     }

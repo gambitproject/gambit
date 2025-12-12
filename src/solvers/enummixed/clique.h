@@ -181,8 +181,7 @@
 #include <cstdio>
 #include "gambit.h"
 
-namespace Gambit {
-namespace Nash {
+namespace Gambit::Nash {
 
 const int MAXM = 700;  // max. no of left nodes for incidence matrix
 const int MAXN = MAXM; // max. no of right nodes for incidence matrix
@@ -228,7 +227,7 @@ private:
                 int sn1, int *sc1, int ec1,   // start NOT1, start CAND1, end CAND1
                 int sn2, int sc2, int ec2,    // start NOT2, start CAND2, end CAND2
                 int tos,                      // top of stack
-                int orignode1[], int orignode2[]);
+                int orignode1[MAXM], int orignode2[MAXN]);
   void candtry2(int stk[], // stack
                 bool connected[MAXM][MAXN],
                 int cand,                     // the candidate from NODES2  to be added to CLIQUE
@@ -265,7 +264,6 @@ private:
   void workonco(int numco, Array<int> &firstedge, Array<Edge> &edgelist);
 };
 
-} // namespace Nash
-} // end namespace Gambit
+} // end namespace Gambit::Nash
 
 #endif // GAMBIT_ENUMMIXED_CLIQUE_H

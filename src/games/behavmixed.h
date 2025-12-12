@@ -23,6 +23,8 @@
 #ifndef LIBGAMBIT_BEHAV_H
 #define LIBGAMBIT_BEHAV_H
 
+#include <random>
+
 #include "game.h"
 
 namespace Gambit {
@@ -62,8 +64,9 @@ protected:
   /// @name Converting mixed strategies to behavior
   //@{
   void BehaviorStrat(GamePlayer &, GameNode &, std::map<GameNode, T> &, std::map<GameNode, T> &);
-  void RealizationProbs(const MixedStrategyProfile<T> &, GamePlayer &, const Array<int> &,
-                        GameTreeNodeRep *, std::map<GameNode, T> &, std::map<GameNode, T> &);
+  void RealizationProbs(const MixedStrategyProfile<T> &, GamePlayer &,
+                        const std::map<GameInfosetRep *, int> &, GameNodeRep *,
+                        std::map<GameNode, T> &, std::map<GameNode, T> &);
   //@}
 
   /// Check underlying game has not changed; raise exception if it has
@@ -223,8 +226,9 @@ public:
 template <class Generator>
 MixedBehaviorProfile<double> GameRep::NewRandomBehaviorProfile(Generator &generator) const
 {
-  auto profile = MixedBehaviorProfile<double>(Game(const_cast<GameRep *>(this)));
-  std::exponential_distribution<> dist(1);
+  auto profile =
+      MixedBehaviorProfile<double>(std::const_pointer_cast<GameRep>(shared_from_this()));
+  std::exponential_distribution<> dist(1); // NOLINT(misc-const-correctness)
   for (auto player : GetPlayers()) {
     for (auto infoset : player->GetInfosets()) {
       for (auto action : infoset->GetActions()) {
@@ -239,10 +243,12 @@ template <class Generator>
 MixedBehaviorProfile<Rational> GameRep::NewRandomBehaviorProfile(int p_denom,
                                                                  Generator &generator) const
 {
-  auto profile = MixedBehaviorProfile<Rational>(Game(const_cast<GameRep *>(this)));
+  auto profile =
+      MixedBehaviorProfile<Rational>(std::const_pointer_cast<GameRep>(shared_from_this()));
   for (auto player : GetPlayers()) {
     for (auto infoset : player->GetInfosets()) {
-      std::list<Rational> dist = UniformOnSimplex(p_denom, infoset->NumActions(), generator);
+      std::list<Rational> dist =
+          UniformOnSimplex(p_denom, infoset->GetActions().size(), generator);
       auto prob = dist.cbegin();
       for (auto action : infoset->GetActions()) {
         profile[action] = *prob;

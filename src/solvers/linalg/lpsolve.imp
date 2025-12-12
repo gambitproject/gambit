@@ -22,15 +22,25 @@
 
 #include "lpsolve.h"
 
-namespace Gambit {
+namespace Gambit::linalg {
 
-namespace linalg {
+template <class T> Array<int> MakeArtificials(const Vector<T> &b)
+{
+  Array<int> ret;
+  for (int i = b.front_index(); i <= b.back_index(); i++) {
+    if (b[i] < static_cast<T>(0)) {
+      ret.push_back(i);
+    }
+  }
+  return ret;
+}
 
 template <class T>
 LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c, int nequals)
-  : well_formed(true), feasible(true), bounded(true), nvars(c.size()), neqns(b.size()),
-    nequals(nequals), total_cost(0), tmin(0), tab(A, Artificials(b), b), UB(nullptr), LB(nullptr),
-    ub(nullptr), lb(nullptr), xx(nullptr), cost(nullptr), y(b.size()), x(b.size()), d(b.size())
+  : nvars(c.size()), neqns(b.size()), nequals(nequals), total_cost(0), tmin(0),
+    tab(A, MakeArtificials(b), b), UB(nvars + neqns), LB(nvars + neqns), ub(nvars + neqns),
+    lb(nvars + neqns), xx(nvars + neqns), cost(nvars + neqns), y(b.size()), x(b.size()),
+    d(b.size())
 {
   // These are the values recommended by Murtagh (1981) for 15 digit
   // accuracy in LP problems
@@ -45,75 +55,63 @@ LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c, 
   }
 
   // initialize data
-  int i, j, num_inequals, xlab, num_artific;
-
-  num_inequals = A.NumRows() - nequals;
-  num_artific = Artificials(b).size();
+  int xlab;
+  const int num_inequals = A.NumRows() - nequals;
+  const int num_artific = MakeArtificials(b).size();
   nvars += num_artific;
 
-  UB = new Array<bool>(nvars + neqns);
-  LB = new Array<bool>(nvars + neqns);
-  ub = new Array<T>(nvars + neqns);
-  lb = new Array<T>(nvars + neqns);
-  xx = new Vector<T>(nvars + neqns);
-  cost = new Vector<T>(nvars + neqns);
-
-  for (j = (*UB).first_index(); j <= (*UB).last_index(); j++) {
-    (*UB)[j] = false;
-    (*LB)[j] = false;
-    (*ub)[j] = (T)0;
-    (*lb)[j] = (T)0;
-  }
+  std::fill(UB.begin(), UB.end(), false);
+  std::fill(LB.begin(), LB.end(), false);
+  std::fill(ub.begin(), ub.end(), static_cast<T>(0));
+  std::fill(lb.begin(), lb.end(), static_cast<T>(0));
 
   // Define Phase I upper and lower bounds
-  for (i = 1; i <= nvars; i++) {
-    (*LB)[i] = true; // original and artificial variables
-                     //    (*lb)[i]=(T)0;         // have lower bounds of 0
+  for (int i = 1; i <= nvars; i++) {
+    LB[i] = true; // original and artificial variables have lower bounds of 0
   }
   // for slack variables
-  for (i = 1; i <= neqns; i++) {
+  for (int i = 1; i <= neqns; i++) {
     if (b[i] >= (T)0) {
-      (*LB)[nvars + i] = true;
+      LB[nvars + i] = true;
     }
     else {
-      (*UB)[nvars + i] = true;
+      UB[nvars + i] = true;
     }
   }
   // define Phase 1 unit cost vector
-  (*cost) = (T)0;
-  for (i = 1; i <= neqns; i++) {
-    (*cost)[nvars + i] = (T)0;
-    if ((*UB)[nvars + i]) {
-      (*cost)[nvars + i] = (T)1;
+  cost = static_cast<T>(0);
+  for (int i = 1; i <= neqns; i++) {
+    cost[nvars + i] = static_cast<T>(0);
+    if (UB[nvars + i]) {
+      cost[nvars + i] = static_cast<T>(1);
     }
     else if (i > num_inequals) {
-      (*cost)[nvars + i] = -(T)1;
+      cost[nvars + i] = static_cast<T>(-1);
     }
   }
 
   // Initialize the tableau
-
-  tab.SetCost(*cost);
+  tab.SetCost(cost);
 
   // set xx to be initial feasible solution to phase II
-  for (i = 1; i <= (*xx).size(); i++) {
-    if ((*LB)[i]) {
-      (*xx)[i] = (*lb)[i];
+  for (size_t i = 1; i <= xx.size(); i++) {
+    if (LB[i]) {
+      xx[i] = lb[i];
     }
-    else if ((*UB)[i]) {
-      (*xx)[i] = (*ub)[i];
+    else if (UB[i]) {
+      xx[i] = ub[i];
     }
     else {
-      (*xx)[i] = (T)0;
+      xx[i] = static_cast<T>(0);
     }
   }
   tab.BasisVector(x);
-  for (i = 1; i <= x.size(); i++) {
+  for (size_t i = 1; i <= x.size(); i++) {
     xlab = tab.Label(i);
     if (xlab < 0) {
       xlab = nvars - xlab;
     }
-    (*xx)[xlab] = x[i];
+    xx[xlab] = x[i];
   }
 
   Solve(1);
@@ -128,25 +126,20 @@ LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c, 
 
   // Define Phase II upper and lower bounds for slack variables
 
-  for (i = num_inequals + 1; i <= neqns; i++) {
-    (*UB)[nvars + i] = true;
+  for (int i = num_inequals + 1; i <= neqns; i++) {
+    UB[nvars + i] = true;
   }
-  for (i = 1; i <= neqns; i++) {
+  for (int i = 1; i <= neqns; i++) {
     if (b[i] < (T)0) {
-      (*LB)[nvars + i] = true;
+      LB[nvars + i] = true;
     }
   }
 
   // install Phase II unit cost vector
+  cost = static_cast<T>(0);
+  std::copy(c.begin(), c.end(), cost.begin());
 
-  for (i = c.first_index(); i <= c.last_index(); i++) {
-    (*cost)[i] = c[i];
-  }
-  for (i = c.last_index() + 1; i <= nvars + neqns; i++) {
-    (*cost)[i] = (T)0;
-  }
-
-  tab.SetCost(*cost);
+  tab.SetCost(cost);
   Solve(2);
 
   total_cost = tab.TotalCost();
@@ -154,30 +147,19 @@ LPSolve<T>::LPSolve(const Matrix<T> &A, const Vector<T> &b, const Vector<T> &c, 
   opt_bfs = tab.GetBFS();
   dual_bfs = tab.DualBFS();
 
-  for (i = 1; i <= neqns; i++) {
+  for (int i = 1; i <= neqns; i++) {
     if (dual_bfs.count(-i)) {
       opt_bfs.insert(-i, dual_bfs[-i]);
     }
   }
 }
 
-template <class T> Array<int> LPSolve<T>::Artificials(const Vector<T> &b)
-{
-  Array<int> ret;
-  for (int i = b.first_index(); i <= b.last_index(); i++) {
-    if (b[i] < (T)0) {
-      ret.push_back(i);
-    }
-  }
-  return ret;
-}
-
 template <class T> void LPSolve<T>::Solve(int phase)
 {
-  int i, in, xlab;
+  int in, xlab;
   int outlab = 0;
   int out = 0;
-  Vector<T> a(neqns);
+  const Vector<T> a(neqns);
 
   do {
     // step 1: Solve y B = c_B
@@ -197,18 +179,18 @@ template <class T> void LPSolve<T>::Solve(int phase)
           outlab = tab.Label(out);
         }
         // update xx
-        for (i = 1; i <= x.size(); i++) {
+        for (size_t i = 1; i <= x.size(); i++) {
           xlab = tab.Label(i);
           if (xlab < 0) {
             xlab = nvars - xlab;
           }
-          (*xx)[xlab] = (*xx)[xlab] + (T)flag * tmin * d[i];
+          xx[xlab] = xx[xlab] + (T)flag * tmin * d[i];
         }
         if (in > 0) {
-          (*xx)[in] -= (T)flag * tmin;
+          xx[in] -= (T)flag * tmin;
         }
         if (in < 0) {
-          (*xx)[nvars - in] -= (T)flag * tmin;
+          xx[nvars - in] -= (T)flag * tmin;
         }
       }
     } while (outlab == in && outlab != 0);
@@ -224,27 +206,24 @@ template <class T> void LPSolve<T>::Solve(int phase)
 
 template <class T> int LPSolve<T>::Enter()
 {
-  int i, in;
-  T rc;
-  in = 0;
-
-  T test = (T)0;
-  for (i = 1; i <= nvars + neqns; i++) {
+  int in = 0;
+  T test = static_cast<T>(0);
+  for (int i = 1; i <= nvars + neqns; i++) {
     int lab = i;
     if (i > nvars) {
       lab = nvars - i;
     }
     if (!tab.Member(lab)) {
-      rc = tab.RelativeCost(lab);
+      T rc = tab.RelativeCost(lab);
       if (rc > test + eps1) {
-        if (!(*UB)[i] || ((*UB)[i] && (*xx)[i] - (*ub)[i] < -eps1)) {
+        if (!UB[i] || (UB[i] && xx[i] - ub[i] < -eps1)) {
           test = rc;
           in = lab;
           flag = -1;
         }
       }
       if (-rc > test + eps1) {
-        if (!(*LB)[i] || ((*LB)[i] && (*xx)[i] - (*lb)[i] > eps1)) {
+        if (!LB[i] || (LB[i] && xx[i] - lb[i] > eps1)) {
           test = -rc;
           in = lab;
           flag = 1;
@@ -270,11 +249,11 @@ template <class T> int LPSolve<T>::Exit(int in)
     }
     if (flag == -1) {
       t = (T)1000000000;
-      if (d[j] > eps2 && (*LB)[col]) {
-        t = ((*xx)[col] - (*lb)[col]) / d[j];
+      if (d[j] > eps2 && LB[col]) {
+        t = (xx[col] - lb[col]) / d[j];
       }
-      if (d[j] < -eps2 && (*UB)[col]) {
-        t = ((*xx)[col] - (*ub)[col]) / d[j];
+      if (d[j] < -eps2 && UB[col]) {
+        t = (xx[col] - ub[col]) / d[j];
       }
       if (t >= -eps2 && t < tmin - eps2) {
         tmin = t;
@@ -283,11 +262,11 @@ template <class T> int LPSolve<T>::Exit(int in)
     }
     if (flag == 1) {
       t = (T)1000000000;
-      if (d[j] > eps2 && (*UB)[col]) {
-        t = ((*ub)[col] - (*xx)[col]) / d[j];
+      if (d[j] > eps2 && UB[col]) {
+        t = (ub[col] - xx[col]) / d[j];
       }
-      if (d[j] < -eps2 && (*LB)[col]) {
-        t = ((*lb)[col] - (*xx)[col]) / d[j];
+      if (d[j] < -eps2 && LB[col]) {
+        t = (lb[col] - xx[col]) / d[j];
       }
       if (t >= -eps2 && t < tmin - eps2) {
         tmin = t;
@@ -300,11 +279,11 @@ template <class T> int LPSolve<T>::Exit(int in)
     col = nvars - in;
   }
   t = (T)1000000000;
-  if (flag == -1 && (*UB)[col]) {
-    t = (*ub)[col] - (*xx)[col];
+  if (flag == -1 && UB[col]) {
+    t = ub[col] - xx[col];
   }
-  if (flag == 1 && (*LB)[col]) {
-    t = (*xx)[col] - (*lb)[col];
+  if (flag == 1 && LB[col]) {
+    t = xx[col] - lb[col];
   }
   if (t > eps2 && t < tmin - eps2) {
     tmin = t;
@@ -314,28 +293,4 @@ template <class T> int LPSolve<T>::Exit(int in)
   return out;
 }
 
-template <class T> LPSolve<T>::~LPSolve()
-{
-  if (UB) {
-    delete UB;
-  }
-  if (LB) {
-    delete LB;
-  }
-  if (ub) {
-    delete ub;
-  }
-  if (lb) {
-    delete lb;
-  }
-  if (xx) {
-    delete xx;
-  }
-  if (cost) {
-    delete cost;
-  }
-}
-
-} // namespace linalg
-
-} // end namespace Gambit
+} // end namespace Gambit::linalg

@@ -2,7 +2,7 @@
 // This file is part of Gambit Copyright (c) 1994-2025, The Gambit
 // Project (https://www.gambit-project.org)
 //
-// FILE: src/libgambit/rational.cc
+// FILE: src/core/rational.cc
 // Implementation of a rational number class
 //
 //
@@ -26,12 +26,12 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 #include <iostream>
-
-#include "gambit.h"
-#include "rational.h"
 #include <cmath>
 #include <cfloat>
 #include <cctype>
+
+#include "util.h"
+#include "rational.h"
 
 namespace Gambit {
 
@@ -39,7 +39,7 @@ static const Integer Int_One(1);
 
 void Rational::normalize()
 {
-  int s = sign(den);
+  const int s = sign(den);
   if (s == 0) {
     throw ZeroDivideException();
   }
@@ -48,7 +48,7 @@ void Rational::normalize()
     num.negate();
   }
 
-  Integer g = gcd(num, den);
+  const Integer g = gcd(num, den);
   if (ucompare(g, Int_One) != 0) {
     num /= g;
     den /= g;
@@ -115,10 +115,10 @@ void div(const Rational &x, const Rational &y, Rational &r)
 
 void Rational::invert()
 {
-  Integer tmp = num;
+  const Integer tmp = num;
   num = den;
   den = tmp;
-  int s = sign(den);
+  const int s = sign(den);
   if (s == 0) {
     throw ZeroDivideException();
   }
@@ -130,8 +130,8 @@ void Rational::invert()
 
 int compare(const Rational &x, const Rational &y)
 {
-  int xsgn = sign(x.num);
-  int ysgn = sign(y.num);
+  const int xsgn = sign(x.num);
+  const int ysgn = sign(y.num);
   int d = xsgn - ysgn;
   if (d == 0 && xsgn != 0) {
     d = compare(x.num * y.den, x.den * y.num);
@@ -142,7 +142,7 @@ int compare(const Rational &x, const Rational &y)
 Rational::Rational(double x) : num(0), den(1)
 {
   if (x != 0.0) {
-    int neg = x < 0;
+    const int neg = x < 0;
     if (neg) {
       x = -x;
     }
@@ -180,7 +180,7 @@ Integer trunc(const Rational &x) { return x.num / x.den; }
 
 Rational pow(const Rational &x, const Integer &y)
 {
-  long yy = y.as_long();
+  const long yy = y.as_long();
   return pow(x, yy);
 }
 

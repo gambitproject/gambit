@@ -44,7 +44,7 @@ class PolynomialFeasibilitySolver {
 private:
   PolynomialSystem<double> m_system;
   PolynomialSystemDerivatives<double> m_systemDerivs;
-  double m_epsilon;
+  double m_epsilon{1.0e-6};
 
   bool IsASolution(const Vector<double> &v) const
   {
@@ -56,7 +56,7 @@ private:
     for (int i = 1; i <= m_system.size(); i++) {
       if (m_systemDerivs[precedence[i]].PolyEverywhereNegativeIn(r)) {
         if (i != 1) { // We have found a new "most likely to never be positive"
-          int tmp = precedence[i];
+          const int tmp = precedence[i];
           for (int j = 1; j <= i - 1; j++) {
             precedence[i - j + 1] = precedence[i - j];
           }
@@ -86,7 +86,7 @@ private:
 
 public:
   explicit PolynomialFeasibilitySolver(const PolynomialSystem<double> &given)
-    : m_system(given), m_systemDerivs(given), m_epsilon(1.0e-6)
+    : m_system(given), m_systemDerivs(given)
   {
   }
   PolynomialFeasibilitySolver(const PolynomialFeasibilitySolver &) = delete;

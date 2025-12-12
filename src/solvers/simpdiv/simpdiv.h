@@ -27,54 +27,16 @@
 
 namespace Gambit::Nash {
 
-template <class T> class PVector;
 ///
 /// This is a simplicial subdivision algorithm with restart, for finding
 /// mixed strategy solutions to general finite n-person games.  It is based on
 /// van Der Laan, Talman and van Der Heyden, Math of Oper Res, 1987.
 ///
-class NashSimpdivStrategySolver : public StrategySolver<Rational> {
-public:
-  explicit NashSimpdivStrategySolver(
-      int p_gridResize = 2, int p_leashLength = 0,
-      const Rational &p_maxregret = Rational(1, 1000000), bool p_verbose = false,
-      std::shared_ptr<StrategyProfileRenderer<Rational>> p_onEquilibrium = nullptr)
-    : StrategySolver<Rational>(p_onEquilibrium), m_gridResize(p_gridResize),
-      m_leashLength((p_leashLength > 0) ? p_leashLength : 32000), m_maxregret(p_maxregret),
-      m_verbose(p_verbose)
-  {
-  }
-  ~NashSimpdivStrategySolver() override = default;
-
-  List<MixedStrategyProfile<Rational>> Solve(const MixedStrategyProfile<Rational> &p_start) const;
-  List<MixedStrategyProfile<Rational>> Solve(const Game &p_game) const override;
-
-private:
-  int m_gridResize, m_leashLength;
-  Rational m_maxregret;
-  bool m_verbose;
-
-  class State;
-
-  Rational Simplex(MixedStrategyProfile<Rational> &, const Rational &d) const;
-  static void update(State &, RectArray<int> &, RectArray<int> &, PVector<Rational> &,
-                     const PVector<int> &, int j, int i);
-  static void getY(const State &, MixedStrategyProfile<Rational> &x, PVector<Rational> &,
-                   const PVector<int> &, const PVector<int> &, const PVector<Rational> &,
-                   const RectArray<int> &, int k);
-  static void getnexty(const State &, MixedStrategyProfile<Rational> &x, const RectArray<int> &,
-                       const PVector<int> &, int i);
-  static int get_c(int j, int h, int nstrats, const PVector<int> &);
-  static int get_b(int j, int h, int nstrats, const PVector<int> &);
-};
-
-inline List<MixedStrategyProfile<Rational>>
-SimpdivStrategySolve(const MixedStrategyProfile<Rational> &p_start,
-                     const Rational &p_maxregret = Rational(1, 1000000), int p_gridResize = 2,
-                     int p_leashLength = 0)
-{
-  return NashSimpdivStrategySolver(p_gridResize, p_leashLength, p_maxregret).Solve(p_start);
-}
+List<MixedStrategyProfile<Rational>> SimpdivStrategySolve(
+    const MixedStrategyProfile<Rational> &p_start,
+    const Rational &p_maxregret = Rational(1, 1000000), int p_gridResize = 2,
+    int p_leashLength = 0,
+    StrategyCallbackType<Rational> p_onEquilibrium = NullStrategyCallback<Rational>);
 
 } // end namespace Gambit::Nash
 

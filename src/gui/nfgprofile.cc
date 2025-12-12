@@ -85,12 +85,11 @@ wxString gbtMixedProfileList::GetCellValue(const wxSheetCoords &p_coords)
   }
   else if (IsColLabelCell(p_coords)) {
     int index = 0;
-    for (int pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
-      Gambit::GamePlayer player = m_doc->GetGame()->GetPlayer(pl);
-      for (int st = 1; st <= player->NumStrategies(); st++) {
+    for (const auto &player : m_doc->GetGame()->GetPlayers()) {
+      for (const auto &strategy : player->GetStrategies()) {
         if (index++ == p_coords.GetCol()) {
-          return (wxString::Format(wxT("%d: "), pl) +
-                  wxString(player->GetStrategy(st)->GetLabel().c_str(), *wxConvCurrent));
+          return (wxString::Format(wxT("%d: "), player->GetNumber()) +
+                  wxString(strategy->GetLabel().c_str(), *wxConvCurrent));
         }
       }
     }
@@ -100,7 +99,7 @@ wxString gbtMixedProfileList::GetCellValue(const wxSheetCoords &p_coords)
     return wxT("#");
   }
 
-  int profile = RowToProfile(p_coords.GetRow());
+  const int profile = RowToProfile(p_coords.GetRow());
 
   if (IsProbabilityRow(p_coords.GetRow())) {
     return {m_doc->GetProfiles().GetStrategyProb(p_coords.GetCol() + 1, profile).c_str(),
@@ -115,11 +114,10 @@ wxString gbtMixedProfileList::GetCellValue(const wxSheetCoords &p_coords)
 static wxColour GetPlayerColor(gbtGameDocument *p_doc, int p_index)
 {
   int index = 0;
-  for (int pl = 1; pl <= p_doc->GetGame()->NumPlayers(); pl++) {
-    Gambit::GamePlayer player = p_doc->GetGame()->GetPlayer(pl);
-    for (int st = 1; st <= player->NumStrategies(); st++) {
+  for (const auto &player : p_doc->GetGame()->GetPlayers()) {
+    for (const auto &strategy : player->GetStrategies()) {
       if (index++ == p_index) {
-        return p_doc->GetStyle().GetPlayerColor(pl);
+        return p_doc->GetStyle().GetPlayerColor(player->GetNumber());
       }
     }
   }
@@ -128,7 +126,7 @@ static wxColour GetPlayerColor(gbtGameDocument *p_doc, int p_index)
 
 wxSheetCellAttr gbtMixedProfileList::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
 {
-  int currentProfile = m_doc->GetCurrentProfile();
+  const int currentProfile = m_doc->GetCurrentProfile();
 
   if (IsRowLabelCell(p_coords)) {
     wxSheetCellAttr attr(GetSheetRefData()->m_defaultRowLabelAttr);
@@ -183,12 +181,12 @@ void gbtMixedProfileList::OnUpdate()
 
   BeginBatch();
 
-  int newRows = profiles.NumProfiles() * (m_showProbs + m_showPayoff);
+  const int newRows = profiles.NumProfiles() * (m_showProbs + m_showPayoff);
   DeleteRows(0, GetNumberRows());
   InsertRows(0, newRows);
 
-  int profileLength = m_doc->GetGame()->MixedProfileLength();
-  int newCols = profileLength;
+  const int profileLength = m_doc->GetGame()->MixedProfileLength();
+  const int newCols = profileLength;
   DeleteCols(0, GetNumberCols());
   InsertCols(0, newCols);
 

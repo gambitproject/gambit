@@ -39,11 +39,11 @@ class InfosetMembers:
         return f"InfosetMembers(infoset={Infoset.wrap(self.infoset)})"
 
     def __len__(self) -> int:
-        return self.infoset.deref().NumMembers()
+        return self.infoset.deref().GetMembers().size()
 
     def __iter__(self) -> typing.Iterator[Node]:
-        for i in range(self.infoset.deref().NumMembers()):
-            yield Node.wrap(self.infoset.deref().GetMember(i + 1))
+        for member in self.infoset.deref().GetMembers():
+            yield Node.wrap(member)
 
     def __getitem__(self, index: typing.Union[int, str]) -> Node:
         if isinstance(index, str):
@@ -80,11 +80,11 @@ class InfosetActions:
 
     def __len__(self):
         """The number of actions at the information set."""
-        return self.infoset.deref().NumActions()
+        return self.infoset.deref().GetActions().size()
 
     def __iter__(self) -> typing.Iterator[Action]:
-        for i in range(self.infoset.deref().NumActions()):
-            yield Action.wrap(self.infoset.deref().GetAction(i + 1))
+        for action in self.infoset.deref().GetActions():
+            yield Action.wrap(action)
 
     def __getitem__(self, index: typing.Union[int, str]) -> Action:
         if isinstance(index, str):
@@ -168,10 +168,33 @@ class Infoset:
 
     @property
     def members(self) -> InfosetMembers:
-        """The set of nodes which are members of the information set."""
+        """The set of nodes which are members of the information set.
+
+        The order in which members are iterated is dependent on the order of
+        operations used to define the game.  A standard ordering, in which members
+        are iterated in the order encountered in a depth-first traversal of the tree,
+        can be obtained by calling `Game.sort_infosets` on the game after construction.
+
+        .. versionchanged:: 16.4.0
+           The ordering of members is now dependent on the order of operations;
+           previously, members sets were (expensively) re-sorted after every change
+           to the game tree.
+
+        See also
+        --------
+        Game.sort_infosets
+        """
         return InfosetMembers.wrap(self.infoset)
 
     @property
     def player(self) -> Player:
         """The player who has the move at this information set."""
         return Player.wrap(self.infoset.deref().GetPlayer())
+
+    @property
+    def plays(self) -> typing.List[Node]:
+        """Returns a list of all terminal `Node` objects consistent with it.
+        """
+        return [
+            Node.wrap(n) for n in self.infoset.deref().GetGame().deref().GetPlays(self.infoset)
+        ]

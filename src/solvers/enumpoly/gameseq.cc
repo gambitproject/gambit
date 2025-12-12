@@ -71,7 +71,7 @@ void GameSequenceForm::FillTableau(const GameNode &n, const Rational &prob,
   if (n->GetOutcome()) {
     for (auto player : m_support.GetGame()->GetPlayers()) {
       GetPayoffEntry(p_currentSequences, player) +=
-          prob * static_cast<Rational>(n->GetOutcome()->GetPayoff(player));
+          prob * n->GetOutcome()->GetPayoff<Rational>(player);
     }
   }
   if (!n->GetInfoset()) {
@@ -119,7 +119,8 @@ GameSequenceForm::ToMixedBehaviorProfile(const std::map<GameSequence, double> &x
     if (sequence->action == nullptr) {
       continue;
     }
-    if (double parent_prob = x.at(sequence->parent.lock()) > 0) {
+    const double parent_prob = x.at(sequence->parent.lock());
+    if (parent_prob > 0) {
       b[sequence->action] = x.at(sequence) / parent_prob;
     }
     else {

@@ -80,8 +80,8 @@ public:
 
   CartesianIndexProduct &operator=(const CartesianIndexProduct &) = default;
 
-  iterator begin() { return iterator(this, false); }
-  iterator end() { return iterator(this, true); }
+  iterator begin() { return {this, false}; }
+  iterator end() { return {this, true}; }
 };
 
 } // namespace Gambit

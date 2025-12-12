@@ -42,8 +42,9 @@ Solve(const Game &p_game, const std::shared_ptr<gnmgame> &p_rep, const cvector &
   if (p_lambdaEnd >= 0.0) {
     throw std::out_of_range("Value of lambdaEnd must be negative");
   }
-  bool nonzero = std::accumulate(p_pert.cbegin(), p_pert.cend(), false,
-                                 [](bool accum, double value) { return accum || value != 0.0; });
+  const bool nonzero =
+      std::accumulate(p_pert.cbegin(), p_pert.cend(), false,
+                      [](bool accum, double value) { return accum || value != 0.0; });
   if (!nonzero) {
     throw UndefinedException("Perturbation vector must have at least one nonzero component.");
   }
@@ -66,22 +67,23 @@ Solve(const Game &p_game, const std::shared_ptr<gnmgame> &p_rep, const cvector &
 
 } // namespace
 
-namespace Gambit {
-namespace Nash {
+namespace Gambit::Nash {
 
 List<MixedStrategyProfile<double>> GNMStrategySolve(const Game &p_game, double p_lambdaEnd,
                                                     int p_steps, int p_localNewtonInterval,
                                                     int p_localNewtonMaxits,
-                                                    StrategyCallbackType p_callback)
+                                                    StrategyCallbackType<double> p_callback)
 {
   if (!p_game->IsPerfectRecall()) {
     throw UndefinedException(
         "Computing equilibria of games with imperfect recall is not supported.");
   }
-  std::shared_ptr<gnmgame> A = BuildGame(p_game, true);
+  const std::shared_ptr<gnmgame> A = BuildGame(p_game, true);
   MixedStrategyProfile<double> pert = p_game->NewMixedStrategyProfile(0.0);
-  for (auto strategy : p_game->GetStrategies()) {
-    pert[strategy] = 0.0;
+  for (const auto &player : p_game->GetPlayers()) {
+    for (const auto &strategy : player->GetStrategies()) {
+      pert[strategy] = 0.0;
+    }
   }
   for (auto player : p_game->GetPlayers()) {
     pert[player->GetStrategies().front()] = 1.0;
@@ -94,16 +96,15 @@ List<MixedStrategyProfile<double>> GNMStrategySolve(const MixedStrategyProfile<d
                                                     double p_lambdaEnd, int p_steps,
                                                     int p_localNewtonInterval,
                                                     int p_localNewtonMaxits,
-                                                    StrategyCallbackType p_callback)
+                                                    StrategyCallbackType<double> p_callback)
 {
   if (!p_pert.GetGame()->IsPerfectRecall()) {
     throw UndefinedException(
         "Computing equilibria of games with imperfect recall is not supported.");
   }
-  std::shared_ptr<gnmgame> A = BuildGame(p_pert.GetGame(), true);
+  const std::shared_ptr<gnmgame> A = BuildGame(p_pert.GetGame(), true);
   return Solve(p_pert.GetGame(), A, ToPerturbation(p_pert), p_lambdaEnd, p_steps,
                p_localNewtonInterval, p_localNewtonMaxits, p_callback);
 }
 
-} // namespace Nash
-} // end namespace Gambit
+} // end namespace Gambit::Nash

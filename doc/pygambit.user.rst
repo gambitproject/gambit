@@ -334,6 +334,46 @@ Games stored in existing Gambit savefiles can be loaded using :meth:`.read_efg` 
    cd ../../doc
 
 
+Lifetime of a game object and its elements
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A game is only deallocated when all variables referring to the game either directly
+or indirectly have gone out of scope.  Indirect references to games include objects such
+as :py:class:`~pygambit.gambit.MixedStrategyProfile` or :py:class:`~pygambit.gambit.MixedBehaviorProfile`,
+or variables referring to individual elements of a game.
+
+So for example, the following sequence of operations is valid:
+
+.. ipython:: python
+   :suppress:
+
+   cd ../contrib/games
+
+
+.. ipython:: python
+
+   g = gbt.read_efg("e02.efg")
+   p = g.players[0]
+   print(p)
+   g = gbt.read_efg("poker.efg")
+   print(p)
+   print(g)
+
+.. ipython:: python
+   :suppress:
+
+   cd ../../doc
+
+The variable `p` refers to a player in the game read from ``e02.efg``.
+So, when ``poker.efg`` is read and assigned to the variable `g`, the game from
+``e02.efg`` is still referred to indirectly via `p`.  The game object from the
+first game can therefore still be obtained from the object referring to the
+player:
+
+.. ipython:: python
+
+   print(p.game)
+
 
 Computing Nash equilibria
 ~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -87,17 +87,18 @@ void MixedBehaviorProfile<T>::BehaviorStrat(GamePlayer &player, GameNode &p_node
 
 template <class T>
 void MixedBehaviorProfile<T>::RealizationProbs(const MixedStrategyProfile<T> &mp,
-                                               GamePlayer &player, const Array<int> &actions,
-                                               GameTreeNodeRep *node,
-                                               std::map<GameNode, T> &map_nvals,
+                                               GamePlayer &player,
+                                               const std::map<GameInfosetRep *, int> &actions,
+                                               GameNodeRep *node, std::map<GameNode, T> &map_nvals,
                                                std::map<GameNode, T> &map_bvals)
 {
   T prob;
 
-  for (int i = 1; i <= node->children.size(); i++) {
+  for (size_t i = 1; i <= node->m_children.size(); i++) {
     if (node->GetPlayer() && !node->GetPlayer()->IsChance()) {
       if (node->GetPlayer() == player) {
-        if (actions[node->GetInfoset()->GetNumber()] == i) {
+        if (contains(actions, node->m_infoset) &&
+            actions.at(node->GetInfoset().get()) == static_cast<int>(i)) {
           prob = T(1);
         }
         else {
@@ -105,7 +106,7 @@ void MixedBehaviorProfile<T>::RealizationProbs(const MixedStrategyProfile<T> &mp
         }
       }
       else if (GetSupport().Contains(node->GetInfoset()->GetAction(i))) {
-        int num_actions = GetSupport().GetActions(node->GetInfoset()).size();
+        const int num_actions = GetSupport().GetActions(node->GetInfoset()).size();
         prob = T(1) / T(num_actions);
       }
       else {
@@ -113,15 +114,15 @@ void MixedBehaviorProfile<T>::RealizationProbs(const MixedStrategyProfile<T> &mp
       }
     }
     else { // n.GetPlayer() == 0
-      prob = T(node->infoset->GetActionProb(i));
+      prob = T(node->m_infoset->GetActionProb(node->m_infoset->GetAction(i)));
     }
 
-    GameTreeNodeRep *child = node->children[i];
+    auto child = node->m_children[i - 1];
 
-    map_bvals[child] = prob * map_bvals[node];
+    map_bvals[child] = prob * map_bvals[node->shared_from_this()];
     map_nvals[child] += map_bvals[child];
 
-    RealizationProbs(mp, player, actions, child, map_nvals, map_bvals);
+    RealizationProbs(mp, player, actions, child.get(), map_nvals, map_bvals);
   }
 }
 
@@ -140,22 +141,21 @@ MixedBehaviorProfile<T>::MixedBehaviorProfile(const MixedStrategyProfile<T> &p_p
     }
   }
 
-  GameTreeNodeRep *root =
-      dynamic_cast<GameTreeNodeRep *>(m_support.GetGame()->GetRoot().operator->());
+  GameNodeRep *root = m_support.GetGame()->GetRoot().get();
 
   const StrategySupportProfile &support = p_profile.GetSupport();
-  GameRep *game = m_support.GetGame();
+  GameRep *game = m_support.GetGame().get();
 
   for (auto player : game->GetPlayers()) {
     std::map<GameNode, T> map_nvals, map_bvals;
     for (auto strategy : support.GetStrategies(player)) {
       if (p_profile[strategy] > T(0)) {
-        const Array<int> &actions = strategy->m_behav;
-        map_bvals[root] = p_profile[strategy];
+        const auto &actions = strategy->m_behav;
+        map_bvals[root->shared_from_this()] = p_profile[strategy];
         RealizationProbs(p_profile, player, actions, root, map_nvals, map_bvals);
       }
     }
-    map_nvals[root] = T(1); // set the root nval
+    map_nvals[root->shared_from_this()] = T(1); // set the root nval
     auto root = m_support.GetGame()->GetRoot();
     BehaviorStrat(player, root, map_nvals, map_bvals);
   }
@@ -203,7 +203,7 @@ template <class T> void MixedBehaviorProfile<T>::SetCentroid()
 template <class T> void MixedBehaviorProfile<T>::UndefinedToCentroid()
 {
   CheckVersion();
-  Game efg = m_support.GetGame();
+  const Game efg = m_support.GetGame();
   for (auto infoset : efg->GetInfosets()) {
     if (GetInfosetProb(infoset) > T(0)) {
       continue;
@@ -289,8 +289,8 @@ template <class T> T MixedBehaviorProfile<T>::GetInfosetProb(const GameInfoset &
   CheckVersion();
   ComputeSolutionData();
   T prob = T(0);
-  for (auto iset : iset->GetMembers()) {
-    prob += map_realizProbs[iset];
+  for (auto member : iset->GetMembers()) {
+    prob += map_realizProbs[member];
   }
   return prob;
 }
@@ -333,16 +333,12 @@ template <class T> T MixedBehaviorProfile<T>::GetActionProb(const GameAction &ac
 {
   CheckVersion();
   if (action->GetInfoset()->GetPlayer()->IsChance()) {
-    GameTreeInfosetRep *infoset =
-        dynamic_cast<GameTreeInfosetRep *>(action->GetInfoset().operator->());
-    return static_cast<T>(infoset->GetActionProb(action->GetNumber()));
+    return static_cast<T>(action->GetInfoset()->GetActionProb(action));
   }
-  else if (!m_support.Contains(action)) {
+  if (!m_support.Contains(action)) {
     return T(0);
   }
-  else {
-    return m_probs[m_profileIndex.at(action)];
-  }
+  return m_probs[m_profileIndex.at(action)];
 }
 
 template <class T> const T &MixedBehaviorProfile<T>::GetPayoff(const GameAction &act) const
@@ -381,7 +377,7 @@ void MixedBehaviorProfile<T>::GetPayoff(const GameNode &node, const T &prob,
                                         const GamePlayer &player, T &value) const
 {
   if (node->GetOutcome()) {
-    value += prob * static_cast<T>(node->GetOutcome()->GetPayoff(player));
+    value += prob * node->GetOutcome()->GetPayoff<T>(player);
   }
 
   if (!node->IsTerminal()) {
@@ -426,16 +422,16 @@ T MixedBehaviorProfile<T>::DiffActionValue(const GameAction &p_action,
   CheckVersion();
   ComputeSolutionData();
   T deriv = T(0);
-  GameInfoset infoset = p_action->GetInfoset();
-  GamePlayer player = p_action->GetInfoset()->GetPlayer();
+  const GameInfoset infoset = p_action->GetInfoset();
+  const GamePlayer player = p_action->GetInfoset()->GetPlayer();
 
   for (auto member : infoset->GetMembers()) {
-    GameNode child = member->GetChild(p_action);
+    const GameNode child = member->GetChild(p_action);
 
     deriv += DiffRealizProb(member, p_oppAction) *
              (map_nodeValues[child][player] - map_actionValues[p_action]);
-    deriv += map_realizProbs[member] *
-             DiffNodeValue(member->GetChild(p_action->GetNumber()), player, p_oppAction);
+    deriv +=
+        map_realizProbs[member] * DiffNodeValue(member->GetChild(p_action), player, p_oppAction);
   }
 
   return deriv / GetInfosetProb(p_action->GetInfoset());
@@ -451,7 +447,7 @@ T MixedBehaviorProfile<T>::DiffRealizProb(const GameNode &p_node,
   bool isPrec = false;
   GameNode node = p_node;
   while (node->GetParent()) {
-    GameAction prevAction = node->GetPriorAction();
+    const GameAction prevAction = node->GetPriorAction();
     if (prevAction != p_oppAction) {
       deriv *= GetActionProb(prevAction);
     }
@@ -471,28 +467,24 @@ T MixedBehaviorProfile<T>::DiffNodeValue(const GameNode &p_node, const GamePlaye
   CheckVersion();
   ComputeSolutionData();
 
-  if (p_node->NumChildren() > 0) {
-    GameInfoset infoset = p_node->GetInfoset();
-
-    if (infoset == p_oppAction->GetInfoset()) {
-      // We've encountered the action; since we assume perfect recall,
-      // we won't encounter it again, and the downtree value must
-      // be the same.
-      return map_nodeValues[p_node->GetChild(p_oppAction)][p_player];
-    }
-    else {
-      T deriv = T(0);
-      for (auto action : infoset->GetActions()) {
-        deriv += (DiffNodeValue(p_node->GetChild(action), p_player, p_oppAction) *
-                  GetActionProb(action));
-      }
-      return deriv;
-    }
-  }
-  else {
+  if (p_node->IsTerminal()) {
     // If we reach a terminal node and haven't encountered p_oppAction,
     // derivative wrt this path is zero.
     return T(0);
+  }
+  if (p_node->GetInfoset() == p_oppAction->GetInfoset()) {
+    // We've encountered the action; since we assume perfect recall,
+    // we won't encounter it again, and the downtree value must
+    // be the same.
+    return map_nodeValues[p_node->GetChild(p_oppAction)][p_player];
+  }
+  else {
+    T deriv = T(0);
+    for (auto action : p_node->GetInfoset()->GetActions()) {
+      deriv +=
+          (DiffNodeValue(p_node->GetChild(action), p_player, p_oppAction) * GetActionProb(action));
+    }
+    return deriv;
   }
 }
 
@@ -518,9 +510,9 @@ void MixedBehaviorProfile<T>::ComputePass2_beliefs_nodeValues_actionValues(
     const GameNode &node) const
 {
   if (node->GetOutcome()) {
-    GameOutcome outcome = node->GetOutcome();
+    const GameOutcome outcome = node->GetOutcome();
     for (auto player : m_support.GetGame()->GetPlayers()) {
-      map_nodeValues[node][player] += static_cast<T>(outcome->GetPayoff(player));
+      map_nodeValues[node][player] += outcome->GetPayoff<T>(player);
     }
   }
 
@@ -528,7 +520,7 @@ void MixedBehaviorProfile<T>::ComputePass2_beliefs_nodeValues_actionValues(
     return;
   }
 
-  GameInfoset iset = node->GetInfoset();
+  const GameInfoset iset = node->GetInfoset();
   auto nodes = iset->GetMembers();
   T infosetProb =
       std::accumulate(nodes.begin(), nodes.end(), T(0),
@@ -550,7 +542,7 @@ void MixedBehaviorProfile<T>::ComputePass2_beliefs_nodeValues_actionValues(
   for (auto child : node->GetChildren()) {
     ComputePass2_beliefs_nodeValues_actionValues(child);
 
-    GameAction act = child->GetPriorAction();
+    const GameAction act = child->GetPriorAction();
 
     for (auto player : m_support.GetGame()->GetPlayers()) {
       map_nodeValues[node][player] += GetActionProb(act) * map_nodeValues[child][player];

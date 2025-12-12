@@ -7,11 +7,11 @@ Detailed table of contents
    :maxdepth: 3
 
    intro
-   tools
    pygambit
+   tools
    gui
    samples
-   build
+   developer
    formats
    biblio
 

@@ -26,8 +26,7 @@
 #include "core/function.h"
 #include "liap.h"
 
-namespace Gambit {
-namespace Nash {
+namespace Gambit::Nash {
 
 //------------------------------------------------------------------------
 //                      class AgentLyapunovFunction
@@ -48,7 +47,7 @@ public:
 
     for (const auto &player : m_game->GetPlayers()) {
       for (const auto &infoset : player->GetInfosets()) {
-        m_shape.push_back(infoset->NumActions());
+        m_shape.push_back(infoset->GetActions().size());
       }
     }
   }
@@ -93,7 +92,7 @@ AgentLyapunovFunction::PenalizedLiapValue(const MixedBehaviorProfile<double> &p_
     }
   }
   // Penalty function for non-negativity constraint for each action
-  for (auto element : static_cast<const Array<double> &>(p_profile)) {
+  for (auto element : static_cast<const Vector<double> &>(p_profile)) {
     value += m_penalty * sqr(std::min(element, 0.0));
   }
   // Penalty function for sum-to-one constraint for each action
@@ -115,7 +114,7 @@ bool AgentLyapunovFunction::Gradient(const Vector<double> &x, Vector<double> &gr
 {
   const double DELTA = .00001;
   m_profile = x;
-  for (int i = 1; i <= x.size(); i++) {
+  for (size_t i = 1; i <= x.size(); i++) {
     m_profile[i] += DELTA;
     double value = PenalizedLiapValue(m_profile);
     m_profile[i] -= 2.0 * DELTA;
@@ -146,7 +145,7 @@ MixedBehaviorProfile<double> EnforceNonnegativity(const MixedBehaviorProfile<dou
 
 List<MixedBehaviorProfile<double>> LiapBehaviorSolve(const MixedBehaviorProfile<double> &p_start,
                                                      double p_maxregret, int p_maxitsN,
-                                                     BehaviorCallbackType p_callback)
+                                                     BehaviorCallbackType<double> p_callback)
 {
   if (!p_start.GetGame()->IsPerfectRecall()) {
     throw UndefinedException(
@@ -158,8 +157,8 @@ List<MixedBehaviorProfile<double>> LiapBehaviorSolve(const MixedBehaviorProfile<
   MixedBehaviorProfile<double> p(p_start);
   p_callback(p, "start");
 
-  AgentLyapunovFunction F(p);
-  Matrix<double> xi(p.BehaviorProfileLength(), p.BehaviorProfileLength());
+  const AgentLyapunovFunction F(p);
+  const Matrix<double> xi(p.BehaviorProfileLength(), p.BehaviorProfileLength());
   ConjugatePRMinimizer minimizer(p.BehaviorProfileLength());
   Vector<double> gradient(p.BehaviorProfileLength()), dx(p.BehaviorProfileLength());
   double fval;
@@ -187,5 +186,4 @@ List<MixedBehaviorProfile<double>> LiapBehaviorSolve(const MixedBehaviorProfile<
   return solutions;
 }
 
-} // namespace Nash
-} // namespace Gambit
+} // namespace Gambit::Nash

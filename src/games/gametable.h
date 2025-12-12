@@ -36,7 +36,7 @@ class GameTableRep : public GameExplicitRep {
   template <class T> friend class TableMixedStrategyProfileRep;
 
 private:
-  Array<GameOutcomeRep *> m_results;
+  std::vector<GameOutcomeRep *> m_results;
 
   /// @name Private auxiliary functions
   //@{
@@ -49,7 +49,7 @@ public:
   //@{
   /// Construct a new table game with the given dimension
   /// If p_sparseOutcomes = true, outcomes for all contingencies are left null
-  explicit GameTableRep(const Array<int> &p_dim, bool p_sparseOutcomes = false);
+  explicit GameTableRep(const std::vector<int> &p_dim, bool p_sparseOutcomes = false);
   Game Copy() const override;
   //@}
 
@@ -57,7 +57,7 @@ public:
   //@{
   bool IsTree() const override { return false; }
   bool IsConstSum() const override;
-  bool IsPerfectRecall(GameInfoset &, GameInfoset &) const override { return true; }
+  bool IsPerfectRecall() const override { return true; }
   //@}
 
   /// @name Dimensions of the game
@@ -74,30 +74,26 @@ public:
   GamePlayer NewPlayer() override;
   //@}
 
-  /// @name Information sets
-  //@{
-  /// Returns the iset'th information set in the game (numbered globally)
-  GameInfoset GetInfoset(int iset) const override { throw UndefinedException(); }
-  /// Returns the set of information sets in the game
-  Array<GameInfoset> GetInfosets() const override { throw UndefinedException(); }
-  /// Returns an array with the number of information sets per personal player
-  Array<int> NumInfosets() const override { throw UndefinedException(); }
-  /// Returns the act'th action in the game (numbered globally)
-  GameAction GetAction(int act) const override { throw UndefinedException(); }
-  //@}
-
   /// @name Nodes
   //@{
   /// Returns the root node of the game
   GameNode GetRoot() const override { throw UndefinedException(); }
   /// Returns the number of nodes in the game
-  int NumNodes() const override { throw UndefinedException(); }
+  size_t NumNodes() const override { throw UndefinedException(); }
+  /// Returns the number of non-terminal nodes in the game
+  size_t NumNonterminalNodes() const override { throw UndefinedException(); }
   //@}
 
   /// @name Outcomes
   //@{
   /// Deletes the specified outcome from the game
   void DeleteOutcome(const GameOutcome &) override;
+  //@}
+
+  /// @name Strategies
+  //@{
+  GameStrategy NewStrategy(const GamePlayer &, const std::string &) override;
+  void DeleteStrategy(const GameStrategy &p_strategy) override;
   //@}
 
   /// @name Writing data files

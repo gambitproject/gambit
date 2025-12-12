@@ -26,6 +26,7 @@
 #include <memory>
 #include <getopt.h>
 #include "gambit.h"
+#include "tools/util.h"
 #include "solvers/lcp/lcp.h"
 
 using namespace Gambit;
@@ -132,7 +133,7 @@ int main(int argc, char *argv[])
   }
 
   try {
-    Game game = ReadGame(*input_stream);
+    const Game game = ReadGame(*input_stream);
     if (!game->IsTree() || useStrategic) {
       if (useFloat) {
         std::shared_ptr<StrategyProfileRenderer<double>> renderer;
@@ -142,8 +143,9 @@ int main(int argc, char *argv[])
         else {
           renderer = std::make_shared<MixedStrategyCSVRenderer<double>>(std::cout, numDecimals);
         }
-        NashLcpStrategySolver<double> algorithm(stopAfter, maxDepth, renderer);
-        algorithm.Solve(game);
+        LcpStrategySolve<double>(game, stopAfter, maxDepth,
+                                 [&](const MixedStrategyProfile<double> &p,
+                                     const std::string &label) { renderer->Render(p, label); });
       }
       else {
         std::shared_ptr<StrategyProfileRenderer<Rational>> renderer;
@@ -153,8 +155,9 @@ int main(int argc, char *argv[])
         else {
           renderer = std::make_shared<MixedStrategyCSVRenderer<Rational>>(std::cout);
         }
-        NashLcpStrategySolver<Rational> algorithm(stopAfter, maxDepth, renderer);
-        algorithm.Solve(game);
+        LcpStrategySolve<Rational>(game, stopAfter, maxDepth,
+                                   [&](const MixedStrategyProfile<Rational> &p,
+                                       const std::string &label) { renderer->Render(p, label); });
       }
     }
     else {
@@ -168,8 +171,9 @@ int main(int argc, char *argv[])
           else {
             renderer = std::make_shared<BehavStrategyCSVRenderer<double>>(std::cout, numDecimals);
           }
-          NashLcpBehaviorSolver<double> algorithm(stopAfter, maxDepth, renderer);
-          algorithm.Solve(game);
+          LcpBehaviorSolve<double>(game, stopAfter, maxDepth,
+                                   [&](const MixedBehaviorProfile<double> &p,
+                                       const std::string &label) { renderer->Render(p, label); });
         }
         else {
           std::shared_ptr<StrategyProfileRenderer<Rational>> renderer;
@@ -179,14 +183,15 @@ int main(int argc, char *argv[])
           else {
             renderer = std::make_shared<BehavStrategyCSVRenderer<Rational>>(std::cout);
           }
-          NashLcpBehaviorSolver<Rational> algorithm(stopAfter, maxDepth, renderer);
-          algorithm.Solve(game);
+          LcpBehaviorSolve<Rational>(
+              game, stopAfter, maxDepth,
+              [&](const MixedBehaviorProfile<Rational> &p, const std::string &label) {
+                renderer->Render(p, label);
+              });
         }
       }
       else {
         if (useFloat) {
-          std::shared_ptr<BehavSolver<double>> stage(
-              new NashLcpBehaviorSolver<double>(stopAfter, maxDepth));
           std::shared_ptr<StrategyProfileRenderer<double>> renderer;
           if (printDetail) {
             renderer =
@@ -195,12 +200,18 @@ int main(int argc, char *argv[])
           else {
             renderer = std::make_shared<BehavStrategyCSVRenderer<double>>(std::cout, numDecimals);
           }
-          SubgameBehavSolver<double> algorithm(stage, renderer);
-          algorithm.Solve(game);
+          const BehaviorSolverType<double> func = [&](const Game &g) {
+            return LcpBehaviorSolve<double>(
+                g, stopAfter, maxDepth,
+                [&](const MixedBehaviorProfile<double> &p, const std::string &label) {
+                  renderer->Render(p, label);
+                });
+          };
+          SolveBySubgames<double>(game, func,
+                                  [&](const MixedBehaviorProfile<double> &p,
+                                      const std::string &label) { renderer->Render(p, label); });
         }
         else {
-          std::shared_ptr<BehavSolver<Rational>> stage(
-              new NashLcpBehaviorSolver<Rational>(stopAfter, maxDepth));
           std::shared_ptr<StrategyProfileRenderer<Rational>> renderer;
           if (printDetail) {
             renderer =
@@ -210,8 +221,16 @@ int main(int argc, char *argv[])
             renderer =
                 std::make_shared<BehavStrategyCSVRenderer<Rational>>(std::cout, numDecimals);
           }
-          SubgameBehavSolver<Rational> algorithm(stage, renderer);
-          algorithm.Solve(game);
+          const BehaviorSolverType<Rational> func = [&](const Game &g) {
+            return LcpBehaviorSolve<Rational>(
+                g, stopAfter, maxDepth,
+                [&](const MixedBehaviorProfile<Rational> &p, const std::string &label) {
+                  renderer->Render(p, label);
+                });
+          };
+          SolveBySubgames<Rational>(game, func,
+                                    [&](const MixedBehaviorProfile<Rational> &p,
+                                        const std::string &label) { renderer->Render(p, label); });
         }
       }
     }

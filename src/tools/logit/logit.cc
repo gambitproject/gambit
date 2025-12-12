@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
   opterr = 0;
 
   bool quiet = false, useStrategic = false;
-  double maxLambda = 1000000.0;
+  const double maxLambda = 1000000.0;
   double maxregret = 1.0e-8;
   std::string mleFile;
   double maxDecel = 1.1;
@@ -190,7 +190,7 @@ int main(int argc, char *argv[])
   }
 
   try {
-    Game game = ReadGame(*input_stream);
+    const Game game = ReadGame(*input_stream);
     if (!game->IsPerfectRecall()) {
       throw UndefinedException(
           "Computing equilibria of games with imperfect recall is not supported.");
@@ -218,7 +218,7 @@ int main(int argc, char *argv[])
           PrintProfile(std::cout, decimals, p);
         }
       };
-      LogitQREMixedStrategyProfile start(game);
+      const LogitQREMixedStrategyProfile start(game);
       if (!targetLambda.empty()) {
         auto result =
             LogitStrategySolveLambda(start, targetLambda, 1.0, hStart, maxDecel, printer);
@@ -237,7 +237,7 @@ int main(int argc, char *argv[])
           PrintProfile(std::cout, decimals, p);
         }
       };
-      LogitQREMixedBehaviorProfile start(game);
+      const LogitQREMixedBehaviorProfile start(game);
       if (!targetLambda.empty()) {
         auto result =
             LogitBehaviorSolveLambda(start, targetLambda, 1.0, hStart, maxDecel, printer);

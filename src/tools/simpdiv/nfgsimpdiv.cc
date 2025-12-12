@@ -25,7 +25,7 @@
 #include <iostream>
 #include <fstream>
 #include "gambit.h"
-#include "games/nash.h"
+#include "tools/util.h"
 #include "solvers/simpdiv/simpdiv.h"
 
 using namespace Gambit;
@@ -203,7 +203,7 @@ int main(int argc, char *argv[])
   }
 
   try {
-    Game game = ReadGame(*input_stream);
+    const Game game = ReadGame(*input_stream);
     List<MixedStrategyProfile<Rational>> starts;
     if (!startFile.empty()) {
       std::ifstream startPoints(startFile.c_str());
@@ -214,21 +214,31 @@ int main(int argc, char *argv[])
     }
     else {
       starts.push_back(game->NewMixedStrategyProfile(Rational(0)));
-      starts[1] = Rational(0);
-      for (int pl = 1; pl <= game->NumPlayers(); pl++) {
-        starts[1][game->GetPlayer(pl)->GetStrategies()[1]] = Rational(1);
+      starts.back() = Rational(0);
+      for (const auto &player : game->GetPlayers()) {
+        starts.back()[player->GetStrategies().back()] = Rational(1);
       }
     }
     for (auto start : starts) {
       if (decimals > 0) {
         auto renderer = std::make_shared<MixedStrategyCSVAsFloatRenderer>(std::cout, decimals);
-        NashSimpdivStrategySolver algorithm(gridResize, 0, maxregret, verbose, renderer);
-        algorithm.Solve(start);
+        SimpdivStrategySolve(
+            start, maxregret, gridResize, 0,
+            [&](const MixedStrategyProfile<Rational> &p, const std::string &label) {
+              if (label == "NE" || verbose) {
+                renderer->Render(p, label);
+              }
+            });
       }
       else {
         auto renderer = std::make_shared<MixedStrategyCSVRenderer<Rational>>(std::cout);
-        NashSimpdivStrategySolver algorithm(gridResize, 0, maxregret, verbose, renderer);
-        algorithm.Solve(start);
+        SimpdivStrategySolve(
+            start, maxregret, gridResize, 0,
+            [&](const MixedStrategyProfile<Rational> &p, const std::string &label) {
+              if (label == "NE" || verbose) {
+                renderer->Render(p, label);
+              }
+            });
       }
     }
     return 0;

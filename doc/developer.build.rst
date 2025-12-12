@@ -1,5 +1,5 @@
-For developers: Building Gambit from source
-===========================================
+Building Gambit from source
+===========================
 
 This section covers instructions for building Gambit from source.
 This is for those who are interested in developing Gambit, or who
