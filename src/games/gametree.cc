@@ -883,7 +883,7 @@ void GameTreeRep::ClearComputedValues() const
   const_cast<GameTreeRep *>(this)->m_nodePlays.clear();
   m_ownPriorActionInfo = nullptr;
   const_cast<GameTreeRep *>(this)->m_unreachableNodes = nullptr;
-  const_cast<GameTreeRep *>(this)->m_absentMindedInfosets.clear();
+  m_absentMindedInfosets.clear();
   m_computedValues = false;
 }
 
