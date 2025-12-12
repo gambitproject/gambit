@@ -4,7 +4,7 @@
 
 ### Added
 - Implement `IsAbsentMinded()` on information sets (C++) and `Infoset.is_absent_minded` (Python)
-  to detect if an information set has absent-mindedness.
+  to detect if an information is absent-minded.
 
 ### Changed
 - In the graphical interface, removed option to configure information set link drawing; information sets

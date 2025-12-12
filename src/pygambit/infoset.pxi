@@ -163,7 +163,12 @@ class Infoset:
 
     @property
     def is_absent_minded(self) -> bool:
-        """Whether the information set has absent-mindedness."""
+        """
+        Whether the information set is absent-minded.
+
+        An information set is absent-minded if there exists a path of play
+        in the game tree that intersects the information set more than once.
+        """
         return self.infoset.deref().GetGame().deref().IsAbsentMinded(self.infoset)
 
     @property
