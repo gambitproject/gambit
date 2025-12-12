@@ -19,13 +19,13 @@ TOL = 1e-13  # tolerance for floating point assertions
 def test_enumpure_strategy():
     """Test calls of enumeration of pure strategies."""
     game = games.read_from_file("stripped_down_poker.efg")
-    assert len(gbt.nash.enumpure_solve(game, use_strategic=True).equilibria) == 0
+    assert len(gbt.nash.enumpure_solve(game).equilibria) == 0
 
 
 def test_enumpure_agent():
     """Test calls of enumeration of pure agent strategies."""
     game = games.read_from_file("stripped_down_poker.efg")
-    assert len(gbt.nash.enumpure_solve(game, use_strategic=False).equilibria) == 0
+    assert len(gbt.nash.enumpure_agent_solve(game).equilibria) == 0
 
 
 def test_enummixed_double():
@@ -162,7 +162,7 @@ def test_enumpoly_ordered_behavior(
         result = gbt.nash.enumpoly_solve(game, use_strategic=False)
     assert len(result.equilibria) == len(mixed_behav_prof_data)
     for eq, exp in zip(result.equilibria, mixed_behav_prof_data, strict=True):
-        assert abs(eq.max_regret()) <= TOL
+        assert abs(eq.agent_max_regret()) <= TOL
         expected = game.mixed_behavior_profile(rational=True, data=exp)
         for p in game.players:
             for i in p.infosets:
@@ -229,7 +229,7 @@ def test_enumpoly_unordered_behavior(
         return True
 
     for eq in result.equilibria:
-        assert abs(eq.max_regret()) <= TOL
+        assert abs(eq.agent_max_regret()) <= TOL
         found = False
         for exp in mixed_behav_prof_data[:]:
             expected = game.mixed_behavior_profile(rational=True, data=exp)
@@ -429,7 +429,7 @@ def test_lcp_behavior_rational(game: gbt.Game, mixed_behav_prof_data: list):
     result = gbt.nash.lcp_solve(game, use_strategic=False, rational=True)
     assert len(result.equilibria) == 1
     eq = result.equilibria[0]
-    assert eq.max_regret() == 0
+    assert eq.agent_max_regret() == 0
     expected = game.mixed_behavior_profile(rational=True, data=mixed_behav_prof_data)
     assert eq == expected
 
@@ -558,7 +558,7 @@ def test_lp_behavior_rational(game: gbt.Game, mixed_behav_prof_data: list):
     result = gbt.nash.lp_solve(game, use_strategic=False, rational=True)
     assert len(result.equilibria) == 1
     eq = result.equilibria[0]
-    assert eq.max_regret() == 0
+    assert eq.agent_max_regret() == 0
     expected = game.mixed_behavior_profile(rational=True, data=mixed_behav_prof_data)
     assert eq == expected
 
@@ -569,10 +569,10 @@ def test_liap_strategy():
     _ = gbt.nash.liap_solve(game.mixed_strategy_profile())
 
 
-def test_liap_behavior():
-    """Test calls of liap for mixed behavior equilibria."""
+def test_liap_agent():
+    """Test calls of agent liap for mixed behavior equilibria."""
     game = games.read_from_file("stripped_down_poker.efg")
-    _ = gbt.nash.liap_solve(game.mixed_behavior_profile())
+    _ = gbt.nash.liap_agent_solve(game.mixed_behavior_profile())
 
 
 def test_simpdiv_strategy():
