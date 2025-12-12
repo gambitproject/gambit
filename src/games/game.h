@@ -759,6 +759,14 @@ public:
 
   /// Returns true if the game is perfect recall
   virtual bool IsPerfectRecall() const = 0;
+  /// Returns true if the information set is absent-minded
+  virtual bool IsAbsentMinded(const GameInfoset &p_infoset) const
+  {
+    if (p_infoset->GetGame().get() != this) {
+      throw MismatchException();
+    }
+    return false;
+  }
   //@}
 
   /// @name Writing data files
