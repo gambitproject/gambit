@@ -91,6 +91,8 @@ version.
 
 9. Core developers will review your changes, provide feedback, and merge them into the master branch if they meet the project's standards.
 
+10. Once your pull request is merged, delete your branch on GitHub (a button should appear to do this automatically).
+
 Testing your changes
 --------------------
 
