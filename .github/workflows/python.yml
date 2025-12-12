@@ -34,7 +34,7 @@ jobs:
       - name: Run tests
         run: pytest --run-tutorials
 
-  macos-13:
+  macos-14:
     runs-on: macos-14
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
     strategy:
@@ -58,7 +58,7 @@ jobs:
       - name: Run tests
         run: pytest
 
-  macos-14:
+  macos-15:
     runs-on: macos-15
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
     strategy:
