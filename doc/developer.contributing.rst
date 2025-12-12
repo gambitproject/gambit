@@ -82,6 +82,7 @@ version.
 
 8. Open a pull request on GitHub to the master branch of the upstream repository. Ensure your pull request:
 
+   - Has an informative title.
    - Links to any relevant issues.
    - Includes a clear description of the changes made.
    - Explains how a reviewer can test the changes.
