@@ -87,7 +87,7 @@ version.
 - Explains how a reviewer can test the changes.
 
 .. note::
-    It's good practice to open a draft pull request early in the development process to facilitate discussion and feedback.
+    It's good practice to open a draft pull request early in the development process to facilitate discussion and feedback, ensure there are no merge conflicts, and allow for continuous integration testing via GitHub Actions.
 
 9. Core developers will review your changes, provide feedback, and merge them into the master branch if they meet the project's standards.
 
