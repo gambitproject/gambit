@@ -164,9 +164,9 @@ def test_infoset_own_prior_actions(game_file, expected_results):
         assert actual_details == expected_set
 
 
-def _get_infoset_by_path(game, path: list[str]) -> gbt.Infoset:
+def _get_node_by_path(game, path: list[str]) -> gbt.Node:
     """
-    Helper to find an infoset by following a sequence of action labels.
+    Helper to find a node by following a sequence of action labels.
 
     Parameters
     ----------
@@ -177,7 +177,7 @@ def _get_infoset_by_path(game, path: list[str]) -> gbt.Infoset:
     for action_label in reversed(path):
         node = node.children[action_label]
 
-    return node.infoset
+    return node
 
 
 @pytest.mark.parametrize("game_input, expected_am_paths", [
@@ -199,7 +199,7 @@ def test_infoset_is_absent_minded(game_input, expected_am_paths):
     """
     game = games.read_from_file(game_input)
 
-    expected_infosets = {_get_infoset_by_path(game, path) for path in expected_am_paths}
+    expected_infosets = {_get_node_by_path(game, path).infoset for path in expected_am_paths}
     actual_infosets = {infoset for infoset in game.infosets if infoset.is_absent_minded}
 
     assert actual_infosets == expected_infosets
