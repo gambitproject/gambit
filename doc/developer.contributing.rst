@@ -85,7 +85,7 @@ version.
    - Has an informative title.
    - Links to any relevant issues.
    - Includes a clear description of the changes made.
-   - Explains how a reviewer can test the changes.
+   - Explains how a reviewer can test the changes. test
 
    .. note::
       It's good practice to open a draft pull request early in the development process to facilitate discussion and feedback, ensure there are no merge conflicts, and allow for continuous integration testing via GitHub Actions.
