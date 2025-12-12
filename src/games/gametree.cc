@@ -871,6 +871,7 @@ void GameTreeRep::ClearComputedValues() const
   m_ownPriorActionInfo = nullptr;
   const_cast<GameTreeRep *>(this)->m_unreachableNodes = nullptr;
   m_computedValues = false;
+  m_fullSupport = nullptr;
 }
 
 void GameTreeRep::BuildComputedValues() const
