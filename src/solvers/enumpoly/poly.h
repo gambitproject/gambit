@@ -34,6 +34,7 @@ public:
     int number{0};
   };
 
+  VariableSpace() = delete;
   explicit VariableSpace(size_t nvars)
   {
     for (size_t i = 1; i <= nvars; i++) {
@@ -55,11 +56,13 @@ private:
 //
 // Exponent vectors are ordered lexicographically.
 class ExponentVector {
-private:
   std::shared_ptr<VariableSpace> m_space;
   Vector<int> m_components;
 
 public:
+  using iterator = Vector<int>::iterator;
+  using const_iterator = Vector<int>::const_iterator;
+
   explicit ExponentVector(std::shared_ptr<VariableSpace> p)
     : m_space(p), m_components(p->GetDimension())
   {
@@ -76,8 +79,14 @@ public:
   ~ExponentVector() = default;
   ExponentVector &operator=(const ExponentVector &) = default;
 
+  auto begin() const noexcept { return m_components.begin(); }
+  auto end() const noexcept { return m_components.end(); }
+
+  auto begin() noexcept { return m_components.begin(); }
+  auto end() noexcept { return m_components.end(); }
+
   std::shared_ptr<VariableSpace> GetSpace() const { return m_space; }
-  int operator[](int index) const { return m_components[index]; }
+  int operator[](const int index) const { return m_components[index]; }
 
   bool operator==(const ExponentVector &y) const
   {
@@ -87,6 +96,18 @@ public:
   {
     return m_space != y.m_space || m_components != y.m_components;
   }
+
+  bool operator<(const ExponentVector &y) const
+  {
+    if (m_space != y.m_space) {
+      throw std::logic_error("Cannot order exponent vectors from different spaces");
+    }
+    return std::lexicographical_compare(begin(), end(), y.begin(), y.end());
+  }
+  bool operator<=(const ExponentVector &y) const { return !(y < *this); }
+  bool operator>(const ExponentVector &y) const { return y < *this; }
+  bool operator>=(const ExponentVector &y) const { return !(*this < y); }
+
   ExponentVector operator+(const ExponentVector &v) const
   {
     ExponentVector tmp(*this);
@@ -100,6 +121,12 @@ public:
     tmp.m_components[varnumber] = 0;
     return tmp;
   }
+  ExponentVector DecrementExponent(const int varnumber) const
+  {
+    ExponentVector tmp(*this);
+    tmp.m_components[varnumber] -= 1;
+    return tmp;
+  }
 
   int GetDimension() const { return m_space->GetDimension(); }
   bool IsMultiaffine() const
@@ -109,206 +136,252 @@ public:
   int TotalDegree() const { return std::accumulate(m_components.begin(), m_components.end(), 0); }
 
   void ToZero() { m_components = 0; }
-
-  bool operator<(const ExponentVector &y) const
-  {
-    for (int i = 1; i <= GetDimension(); i++) {
-      if (m_components[i] < y.m_components[i]) {
-        return true;
-      }
-      if (m_components[i] > y.m_components[i]) {
-        return false;
-      }
-    }
-    return false;
-  }
-  bool operator<=(const ExponentVector &y) const { return *this < y || *this == y; }
-  bool operator>(const ExponentVector &y) const { return !(*this <= y); }
-  bool operator>=(const ExponentVector &y) const { return !(*this < y); }
 };
 
 /// A monomial of multiple variables with non-negative exponents
 template <class T> class Monomial {
-private:
   T coef;
   ExponentVector exps;
+
+  static T int_power(T base, int exp)
+  {
+    T result = static_cast<T>(1);
+    while (exp > 0) {
+      if (exp & 1) {
+        result *= base;
+      }
+      base *= base;
+      exp >>= 1;
+    }
+    return result;
+  }
 
 public:
   Monomial(std::shared_ptr<VariableSpace> p, const T &x) : coef(x), exps(p) {}
   Monomial(const T &x, const ExponentVector &e) : coef(x), exps(e)
   {
+    if (!exps.GetSpace()) {
+      throw std::logic_error("Monomial must be defined with respect to a space");
+    }
     if (x == static_cast<T>(0)) {
       exps.ToZero();
     }
   }
-  Monomial(const Monomial<T> &) = default;
+  Monomial(const Monomial &) = default;
+  Monomial(Monomial &&) noexcept = default;
+  Monomial &operator=(Monomial &&) noexcept = default;
   ~Monomial() = default;
 
   // operators
-  Monomial<T> &operator=(const Monomial<T> &) = default;
+  Monomial &operator=(const Monomial &) = default;
 
-  bool operator==(const Monomial<T> &y) const { return (coef == y.coef && exps == y.exps); }
-  bool operator!=(const Monomial<T> &y) const { return (coef != y.coef || exps != y.exps); }
-  Monomial<T> operator*(const Monomial<T> &y) const { return {coef * y.coef, exps + y.exps}; }
-  Monomial<T> operator+(const Monomial<T> &y) const { return {coef + y.coef, exps}; }
-  Monomial<T> &operator+=(const Monomial<T> &y)
+  auto begin() noexcept { return exps.begin(); }
+  auto end() noexcept { return exps.end(); }
+
+  auto begin() const noexcept { return exps.begin(); }
+  auto end() const noexcept { return exps.end(); }
+
+  bool IsZero() const { return coef == static_cast<T>(0); }
+  bool operator==(const Monomial &y) const { return (coef == y.coef && exps == y.exps); }
+  bool operator!=(const Monomial &y) const { return (coef != y.coef || exps != y.exps); }
+  bool operator<(const Monomial &y) const { return exps < y.exps; }
+  Monomial operator*(const Monomial &y) const
   {
+    if (GetSpace() != y.GetSpace()) {
+      throw std::logic_error("Cannot multiply monomials of different spaces");
+    }
+    return {coef * y.coef, exps + y.exps};
+  }
+  Monomial operator+(const Monomial &y) const
+  {
+    if (exps != y.exps) {
+      throw std::logic_error("Attempted to add monomials with different exponents.");
+    }
+    return {coef + y.coef, exps};
+  }
+  Monomial &operator+=(const Monomial &y)
+  {
+    if (exps != y.exps) {
+      throw std::logic_error("Attempted to add monomials with different exponents.");
+    }
     coef += y.coef;
     return *this;
   }
-  Monomial<T> &operator*=(const T &v)
+  Monomial &operator*=(const T &v)
   {
     coef *= v;
     return *this;
   }
-  Monomial<T> operator-() const { return {-coef, exps}; }
+  Monomial operator-() const { return {-coef, exps}; }
 
   std::shared_ptr<VariableSpace> GetSpace() const { return exps.GetSpace(); }
   const T &Coef() const { return coef; }
   int TotalDegree() const { return exps.TotalDegree(); }
   bool IsMultiaffine() const { return exps.IsMultiaffine(); }
   const ExponentVector &ExpV() const { return exps; }
-  T Evaluate(const Vector<T> &vals) const
+
+  T Evaluate(const Vector<T> &p_values) const
   {
     T answer = coef;
-    for (int i = 1; i <= exps.GetDimension(); i++) {
-      for (int j = 1; j <= exps[i]; j++) {
-        answer *= vals[i];
+
+    auto exp_it = exps.begin();
+    auto exp_end = exps.end();
+    auto val_it = p_values.begin();
+    for (; exp_it != exp_end; ++exp_it, ++val_it) {
+      if (const int e = *exp_it; e > 0) {
+        answer *= int_power(*val_it, e);
       }
     }
+
     return answer;
   }
 };
 
 // A multivariate polynomial
 template <class T> class Polynomial {
-private:
   std::shared_ptr<VariableSpace> m_space;
-  List<Monomial<T>> m_terms;
+  std::vector<Monomial<T>> m_terms;
 
   // Arithmetic
-  List<Monomial<T>> Adder(const List<Monomial<T>> &, const List<Monomial<T>> &) const;
-  List<Monomial<T>> Mult(const List<Monomial<T>> &, const List<Monomial<T>> &) const;
-  Polynomial<T> DivideByPolynomial(const Polynomial<T> &den) const;
+  std::vector<Monomial<T>> Adder(const std::vector<Monomial<T>> &,
+                                 const std::vector<Monomial<T>> &) const;
+  std::vector<Monomial<T>> Mult(const std::vector<Monomial<T>> &,
+                                const std::vector<Monomial<T>> &) const;
+  Polynomial DivideByPolynomial(const Polynomial &den) const;
 
-  Polynomial<T> TranslateOfMono(const Monomial<T> &, const Vector<T> &) const;
-  Polynomial<T> MonoInNewCoordinates(const Monomial<T> &, const Matrix<T> &) const;
+  Polynomial TranslateOfMono(const Monomial<T> &, const Vector<T> &) const;
+  Polynomial MonoInNewCoordinates(const Monomial<T> &, const Matrix<T> &) const;
 
 public:
-  Polynomial(std::shared_ptr<VariableSpace> p) : m_space(p) {}
+  explicit Polynomial(std::shared_ptr<VariableSpace> p) : m_space(p) {}
   // A constant polynomial
-  Polynomial(std::shared_ptr<VariableSpace> p, const T &constant) : m_space(p)
+  explicit Polynomial(std::shared_ptr<VariableSpace> p, const T &constant) : m_space(p)
   {
     if (constant != static_cast<T>(0)) {
       m_terms.push_back(Monomial<T>(p, constant));
     }
   }
-  Polynomial(const Polynomial<T> &) = default;
+  Polynomial(const Polynomial &) = default;
+  Polynomial(Polynomial &&) = default;
+  Polynomial &operator=(Polynomial &&) = default;
   // Constructs a polynomial x_{var_no}^exp
-  Polynomial(std::shared_ptr<VariableSpace> p, const int var_no, const int exp) : m_space(p)
+  explicit Polynomial(std::shared_ptr<VariableSpace> p, const int var_no, const int exp)
+    : m_space(p)
   {
     m_terms.push_back(Monomial<T>(static_cast<T>(1), ExponentVector(p, var_no, exp)));
   }
   // Constructs a polynomial with single monomial
   explicit Polynomial(const Monomial<T> &mono) : m_space(mono.GetSpace())
   {
+    if (!m_space) {
+      throw std::logic_error("Polynomials must be defined with respect to a space");
+    }
     m_terms.push_back(mono);
   }
   ~Polynomial() = default;
 
-  Polynomial<T> &operator=(const Polynomial<T> &) = default;
-  Polynomial<T> operator-() const
+  Polynomial &operator=(const Polynomial &) = default;
+  Polynomial operator-() const
   {
-    Polynomial<T> neg(*this);
-    for (size_t j = 1; j <= m_terms.size(); j++) {
-      neg.m_terms[j] = -m_terms[j];
+    Polynomial neg(*this);
+    for (auto &term : neg.m_terms) {
+      term = -term;
     }
     return neg;
   }
-  Polynomial<T> operator-(const Polynomial<T> &p) const
+  Polynomial operator-(const Polynomial &p) const
   {
-    Polynomial<T> dif(*this);
+    Polynomial dif(*this);
     dif -= p;
     return dif;
   }
-  void operator-=(const Polynomial<T> &p)
+  void operator-=(const Polynomial &p)
   {
-    Polynomial<T> neg = p;
-    for (size_t i = 1; i <= neg.m_terms.size(); i++) {
-      neg.m_terms[i] = -neg.m_terms[i];
+    auto neg_terms = p.m_terms;
+    for (auto &term : neg_terms) {
+      term = -term;
     }
-    m_terms = Adder(m_terms, neg.m_terms);
+    m_terms = Adder(m_terms, neg_terms);
   }
-  Polynomial<T> operator+(const Polynomial<T> &p) const
+  Polynomial operator+(const Polynomial<T> &p) const
   {
-    Polynomial<T> sum(*this);
+    Polynomial sum(*this);
     sum += p;
     return sum;
   }
-  Polynomial<T> operator+(const T &v) const
+  Polynomial operator+(const T &v) const
   {
-    Polynomial<T> result(*this);
+    Polynomial result(*this);
     result += v;
     return result;
   }
-  void operator+=(const Polynomial<T> &p) { m_terms = Adder(m_terms, p.m_terms); }
+  void operator+=(const Polynomial &p) { m_terms = Adder(m_terms, p.m_terms); }
   void operator+=(const T &val) { *this += Polynomial<T>(m_space, val); }
-  Polynomial<T> operator*(const Polynomial<T> &p) const
+  Polynomial operator*(const Polynomial &p) const
   {
-    Polynomial<T> prod(*this);
+    Polynomial prod(*this);
     prod *= p;
     return prod;
   }
-  Polynomial<T> operator*(const T &v) const
+  Polynomial operator*(const T &v) const
   {
-    Polynomial<T> result(*this);
+    Polynomial result(*this);
     result *= v;
     return result;
   }
-  void operator*=(const Polynomial<T> &p) { m_terms = Mult(m_terms, p.m_terms); }
+  void operator*=(const Polynomial &p) { m_terms = Mult(m_terms, p.m_terms); }
   void operator*=(const T &val)
   {
-    for (size_t j = 1; j <= m_terms.size(); j++) {
-      m_terms[j] *= val;
+    for (auto &term : m_terms) {
+      term *= val;
     }
   }
-  Polynomial<T> operator/(const T &val) const
+  Polynomial operator/(const T &val) const
   {
     if (val == static_cast<T>(0)) {
       throw ZeroDivideException();
     }
     return (*this) * (static_cast<T>(1) / val);
   }
-  Polynomial<T> operator/(const Polynomial<T> &den) const { return DivideByPolynomial(den); }
+  Polynomial operator/(const Polynomial &den) const { return DivideByPolynomial(den); }
 
-  bool operator==(const Polynomial<T> &p) const
+  bool operator==(const Polynomial &p) const
   {
     return m_space == p.m_space && m_terms == p.m_terms;
   }
-  bool operator!=(const Polynomial<T> &p) const
+  bool operator!=(const Polynomial &p) const
   {
     return m_space != p.m_space || m_terms != p.m_terms;
   }
+
+  Polynomial pow(int exponent) const;
 
   //-------------
   // Information
   //-------------
 
-  std::shared_ptr<VariableSpace> GetSpace() const { return m_space; }
-  int GetDimension() const { return m_space->GetDimension(); }
-  int DegreeOfVar(int var_no) const
+  [[nodiscard]] std::shared_ptr<VariableSpace> GetSpace() const noexcept { return m_space; }
+  [[nodiscard]] int GetDimension() const noexcept { return m_space->GetDimension(); }
+  [[nodiscard]] int DegreeOfVar(int var_no) const
   {
     return std::accumulate(
         m_terms.begin(), m_terms.end(), 0,
         [&var_no](int v, const Monomial<T> &m) { return std::max(v, m.ExpV()[var_no]); });
   }
-  int Degree() const
+  [[nodiscard]] int Degree() const
   {
     return std::accumulate(m_terms.begin(), m_terms.end(), 0, [](int v, const Monomial<T> &m) {
       return std::max(v, m.TotalDegree());
     });
   }
-  Polynomial<T> LeadingCoefficient(int varnumber) const;
+  [[nodiscard]] const std::vector<Monomial<T>> &GetTerms() const noexcept { return m_terms; }
+  bool IsZero() const noexcept { return m_terms.empty(); }
+  bool IsConstant() const noexcept
+  {
+    return m_terms.size() == 1 && m_terms.front().TotalDegree() == 0;
+  }
+
+  Polynomial LeadingCoefficient(int varnumber) const;
   T NumLeadCoeff() const
   {
     return (m_terms.size() == 1) ? m_terms.front().Coef() : static_cast<T>(0);
@@ -324,13 +397,12 @@ public:
         m_terms.begin(), m_terms.end(), static_cast<T>(0),
         [&values](const T &v, const Monomial<T> &m) { return v + m.Evaluate(values); });
   }
-  Polynomial<T> PartialDerivative(int varnumber) const;
-  const List<Monomial<T>> &MonomialList() const { return m_terms; }
+  Polynomial PartialDerivative(int varnumber) const;
 
-  Polynomial<T> TranslateOfPoly(const Vector<T> &) const;
-  Polynomial<T> PolyInNewCoordinates(const Matrix<T> &) const;
+  Polynomial TranslateOfPoly(const Vector<T> &) const;
+  Polynomial PolyInNewCoordinates(const Matrix<T> &) const;
   T MaximalValueOfNonlinearPart(const T &) const;
-  Polynomial<T> Normalize() const;
+  Polynomial Normalize() const;
 };
 
 } // end namespace Gambit

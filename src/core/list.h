@@ -96,7 +96,18 @@ public:
   /// Inserts the value at the specified position
   void insert(iterator pos, const T &value) { m_list.insert(pos, value); }
   /// Erases the element at the specified position
-  void erase(iterator pos) { m_list.erase(pos); }
+  iterator erase(iterator pos) { return m_list.erase(pos); }
+  template <class Predicate> void remove_if(Predicate pred)
+  {
+    for (auto it = begin(); it != end();) {
+      if (pred(*it)) {
+        it = erase(it);
+      }
+      else {
+        ++it;
+      }
+    }
+  }
 
   /// Removes all elements from the list container (which are destroyed),
   /// leaving the container with a size of 0.

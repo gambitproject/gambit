@@ -60,10 +60,10 @@ Polynomial<double> BuildSequenceVariable(ProblemData &p_data, const GameSequence
                                          const std::map<GameSequence, int> &var)
 {
   if (!p_sequence->action) {
-    return {p_data.space, 1};
+    return Polynomial<double>(p_data.space, 1);
   }
   if (p_sequence->action != p_data.m_support.GetActions(p_sequence->GetInfoset()).back()) {
-    return {p_data.space, var.at(p_sequence), 1};
+    return Polynomial<double>(p_data.space, var.at(p_sequence), 1);
   }
 
   Polynomial<double> equation(p_data.space);
