@@ -80,7 +80,15 @@ version.
 
     git push origin feature/issue-number
 
-8. Open a pull request on GitHub to the master branch of the upstream repository, describing your changes and linking to any relevant issues.
+8. Open a pull request on GitHub to the master branch of the upstream repository. Ensure your pull request:
+
+- Links to any relevant issues.
+- Includes a clear description of the changes made.
+- Explains how a reviewer can test the changes.
+
+.. note::
+    It's good practice to open a draft pull request early in the development process to facilitate discussion and feedback.
+
 9. Core developers will review your changes, provide feedback, and merge them into the master branch if they meet the project's standards.
 
 Testing your changes
