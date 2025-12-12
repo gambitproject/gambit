@@ -37,8 +37,8 @@ version.
 
 1. To get started contributing code in the `Gambit GitHub repo <https://github.com/gambitproject/gambit>`__, do one of the following:
 
-- Core developers: request contributor access from one of the `team <https://www.gambit-project.org/team/>`__
-- External contributors: fork the repository on GitHub.
+   - Core developers: request contributor access from one of the `team <https://www.gambit-project.org/team/>`__
+   - External contributors: fork the repository on GitHub.
 
 2. Clone the repository to your local machine ::
 
@@ -82,12 +82,12 @@ version.
 
 8. Open a pull request on GitHub to the master branch of the upstream repository. Ensure your pull request:
 
-- Links to any relevant issues.
-- Includes a clear description of the changes made.
-- Explains how a reviewer can test the changes.
+   - Links to any relevant issues.
+   - Includes a clear description of the changes made.
+   - Explains how a reviewer can test the changes.
 
-.. note::
-    It's good practice to open a draft pull request early in the development process to facilitate discussion and feedback, ensure there are no merge conflicts, and allow for continuous integration testing via GitHub Actions.
+   .. note::
+      It's good practice to open a draft pull request early in the development process to facilitate discussion and feedback, ensure there are no merge conflicts, and allow for continuous integration testing via GitHub Actions.
 
 9. Core developers will review your changes, provide feedback, and merge them into the master branch if they meet the project's standards.
 
