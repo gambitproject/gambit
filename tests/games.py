@@ -146,7 +146,7 @@ def create_perfect_info_with_chance_efg() -> gbt.Game:
     return g
 
 
-def create_one_card_poker_lacking_outcome() -> gbt.Game:
+def create_one_card_poker_lacking_outcome_efg() -> gbt.Game:
     g = gbt.Game.new_tree(players=["Bob", "Alice"],
                           title="One card poker game, after Myerson (1991)")
     g.append_move(g.root, g.players.chance, ["King", "Queen"])
@@ -162,6 +162,25 @@ def create_one_card_poker_lacking_outcome() -> gbt.Game:
     g.set_outcome(g.root.children[0].children[1], bob_wins)
     g.set_outcome(g.root.children[1].children[0].children[0], bob_winsbig)
     g.set_outcome(g.root.children[1].children[1], bob_wins)
+    return g
+
+
+def create_perfect_info_internal_outcomes_efg() -> gbt.Game:
+    g = gbt.Game.new_tree(players=["1", "2"], title="2 player perfect info win lose")
+    g.append_move(g.root, "2", ["a", "b"])
+    g.append_move(g.root.children[0], "1", ["L", "R"])
+    g.append_move(g.root.children[1], "1", ["L", "R"])
+    g.append_move(g.root.children[0].children[0], "2", ["l", "r"])
+    g.set_outcome(g.root.children[0], g.add_outcome([-100, 50], label="a"))
+    g.set_outcome(
+        g.root.children[0].children[0].children[0], g.add_outcome([101, -51], label="aLl")
+    )
+    g.set_outcome(
+        g.root.children[0].children[0].children[1], g.add_outcome([99, -49], label="aLr")
+    )
+    g.set_outcome(g.root.children[0].children[1], g.add_outcome([101, -51], label="aR"))
+    g.set_outcome(g.root.children[1].children[0], g.add_outcome([1, -1], label="bL"))
+    g.set_outcome(g.root.children[1].children[1], g.add_outcome([-1, 1], label="bR"))
     return g
 
 
