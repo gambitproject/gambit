@@ -184,6 +184,33 @@ def create_perfect_info_internal_outcomes_efg() -> gbt.Game:
     return g
 
 
+def create_three_action_internal_outcomes_efg() -> gbt.Game:
+    # Test 3 actions at infoset, internal outcomes and missing some outcomes at leaves
+    g = gbt.Game.new_tree(players=["1", "2"],
+                          title="3 action, internal outcomes, lacking terminal outcomes")
+    g.append_move(g.root, g.players.chance, ["H", "L"])
+    for i in range(2):
+        g.append_move(g.root.children[i], "1", ["A", "B", "C"])
+    for i in range(3):
+        g.append_move(g.root.children[0].children[i], "2", ["X", "Y"])
+        g.append_infoset(g.root.children[1].children[i], g.root.children[0].children[i].infoset)
+    o_1 = g.add_outcome([1, -1], label="1")
+    o_m1 = g.add_outcome([-1, 1], label="-1")
+    o_2 = g.add_outcome([2, -2], label="2")
+    o_m2 = g.add_outcome([-2, 2], label="-2")
+    g.set_outcome(g.root.children[0].children[0], o_1)
+    g.set_outcome(g.root.children[1].children[2], o_m1)
+    g.set_outcome(g.root.children[0].children[0].children[1], o_m2)
+    g.set_outcome(g.root.children[0].children[1].children[0], o_m1)
+    g.set_outcome(g.root.children[0].children[1].children[1], o_1)
+    g.set_outcome(g.root.children[0].children[2].children[0], o_1)
+    g.set_outcome(g.root.children[1].children[0].children[1], o_1)
+    g.set_outcome(g.root.children[1].children[1].children[0], o_1)
+    g.set_outcome(g.root.children[1].children[1].children[1], o_m1)
+    g.set_outcome(g.root.children[1].children[2].children[1], o_2)
+    return g
+
+
 def create_matching_pennies_efg(with_neutral_outcome: bool = False) -> gbt.Game:
     """
     The version with_neutral_outcome adds a (0,0) payoff outcomes at a non-terminal node.
