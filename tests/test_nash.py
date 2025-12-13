@@ -418,6 +418,11 @@ def test_lcp_behavior_double():
             games.create_EFG_for_nxn_bimatrix_coordination_game(4),
             [[[0, 0, 0, 1]], [[0, 0, 0, 1]]],
         ),
+        (
+            games.create_perfect_info_with_chance_efg(),
+            [[[0, 1]], [[0, 1], [0, 1]]],
+
+        ),
     ],
 )
 def test_lcp_behavior_rational(game: gbt.Game, mixed_behav_prof_data: list):
@@ -547,6 +552,10 @@ def test_lp_behavior_double():
                 [[0, 1], ["1/3", "2/3"], ["2/3", "1/3"]],
                 [["5/6", "1/6"], ["5/9", "4/9"]],
             ],
+        ),
+        (
+            games.create_perfect_info_with_chance_efg(),
+            [[[0, 1]], [[1, 0], [1, 0]]],
         ),
     ],
 )

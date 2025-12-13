@@ -123,6 +123,29 @@ def create_2x2_zero_sum_efg(missing_term_outcome: bool = False) -> gbt.Game:
     return g
 
 
+def create_perfect_info_with_chance_efg():
+    # Tests case in which sequence profile probabilities don't sum to 1
+    g = gbt.Game.new_tree(players=["1", "2"], title="2 player perfect info with chance")
+    g.append_move(g.root, "1", ["a", "b"])
+    g.append_move(g.root.children[0], g.players.chance, ["L", "R"])
+    g.append_move(g.root.children[0].children[0], "2", ["A", "B"])
+    g.append_move(g.root.children[0].children[1], "2", ["C", "D"])
+    g.set_outcome(
+        g.root.children[0].children[0].children[0], g.add_outcome([-2, 2], label="aLA")
+    )
+    g.set_outcome(
+        g.root.children[0].children[0].children[1], g.add_outcome([-2, 2], label="aLB")
+    )
+    g.set_outcome(
+        g.root.children[0].children[1].children[0], g.add_outcome([-2, 2], label="aRC")
+    )
+    g.set_outcome(
+        g.root.children[0].children[1].children[1], g.add_outcome([-2, 2], label="aRD")
+    )
+    g.set_outcome(g.root.children[1], g.add_outcome([-1, 1], label="b"))
+    return g
+
+
 def create_matching_pennies_efg(with_neutral_outcome: bool = False) -> gbt.Game:
     """
     The version with_neutral_outcome adds a (0,0) payoff outcomes at a non-terminal node.
