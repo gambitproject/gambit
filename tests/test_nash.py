@@ -423,6 +423,10 @@ def test_lcp_behavior_double():
             [[[0, 1]], [[0, 1], [0, 1]]],
 
         ),
+        (
+            games.create_one_card_poker_lacking_outcome(),
+            [[["2/3", "1/3"]], [[1, 0], ["1/3", "2/3"]]],
+        ),
     ],
 )
 def test_lcp_behavior_rational(game: gbt.Game, mixed_behav_prof_data: list):
@@ -556,6 +560,10 @@ def test_lp_behavior_double():
         (
             games.create_perfect_info_with_chance_efg(),
             [[[0, 1]], [[1, 0], [1, 0]]],
+        ),
+        (
+            games.create_one_card_poker_lacking_outcome(),
+            [[["2/3", "1/3"]], [[1, 0], ["1/3", "2/3"]]],
         ),
     ],
 )
