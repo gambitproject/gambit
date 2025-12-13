@@ -211,6 +211,29 @@ def create_three_action_internal_outcomes_efg() -> gbt.Game:
     return g
 
 
+def create_large_payoff_game_efg() -> gbt.Game:
+    g = gbt.Game.new_tree(players=["1", "2"], title="Large payoff game")
+    g.append_move(g.root, g.players.chance, ["L", "R"])
+    for i in range(2):
+        g.append_move(g.root.children[i], "1", ["A", "B"])
+    for i in range(2):
+        g.append_move(g.root.children[0].children[i], "2", ["X", "Y"])
+        g.append_infoset(g.root.children[1].children[i], g.root.children[0].children[i].infoset)
+    o_large = g.add_outcome([10000000000000000000, -10000000000000000000], label="large payoff")
+    o_1 = g.add_outcome([1, -1], label="1")
+    o_m1 = g.add_outcome([-1, 1], label="-1")
+    o_zero = g.add_outcome([0, 0], label="0")
+    g.set_outcome(g.root.children[0].children[0].children[0], o_large)
+    g.set_outcome(g.root.children[0].children[0].children[1], o_1)
+    g.set_outcome(g.root.children[0].children[1].children[0], o_m1)
+    g.set_outcome(g.root.children[0].children[1].children[1], o_zero)
+    g.set_outcome(g.root.children[1].children[0].children[0], o_m1)
+    g.set_outcome(g.root.children[1].children[0].children[1], o_1)
+    g.set_outcome(g.root.children[1].children[1].children[0], o_zero)
+    g.set_outcome(g.root.children[1].children[1].children[1], o_large)
+    return g
+
+
 def create_matching_pennies_efg(with_neutral_outcome: bool = False) -> gbt.Game:
     """
     The version with_neutral_outcome adds a (0,0) payoff outcomes at a non-terminal node.
