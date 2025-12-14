@@ -401,23 +401,6 @@ def test_lcp_behavior_double():
             games.create_two_player_perfect_info_win_lose_efg(),
             [[[0, 1], [1, 0]], [[0, 1], ["1/2", "1/2"]]],
         ),
-        # Non-zero-sum games
-        (
-            games.create_reduction_both_players_payoff_ties_efg(),
-            [[[0, 0, 1, 0], [1, 0]], [[0, 1], [0, 1], [0, 1], [0, 1]]],
-        ),
-        (
-            games.create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq(),
-            [
-                [["1/30", "1/6", "3/10", "3/10", "1/6", "1/30"]],
-                [["1/6", "1/30", "3/10", "3/10", "1/30", "1/6"]],
-            ],
-        ),
-        (games.create_EFG_for_nxn_bimatrix_coordination_game(3), [[[0, 0, 1]], [[0, 0, 1]]]),
-        (
-            games.create_EFG_for_nxn_bimatrix_coordination_game(4),
-            [[[0, 0, 0, 1]], [[0, 0, 0, 1]]],
-        ),
         (
             games.create_perfect_info_with_chance_efg(),
             [[[0, 1]], [[0, 1], [0, 1]]],
@@ -443,6 +426,30 @@ def test_lcp_behavior_double():
                 [[1, 0], [1, 0]],
                 [[0, 1], ["9999999999999999999/10000000000000000000", "1/10000000000000000000"]],
             ],
+        ),
+        (
+            games.create_chance_in_middle_efg(),
+            [
+                [["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]],
+                [[1, 0], ["6/11", "5/11"]]
+            ],
+        ),
+        # Non-zero-sum games
+        (
+            games.create_reduction_both_players_payoff_ties_efg(),
+            [[[0, 0, 1, 0], [1, 0]], [[0, 1], [0, 1], [0, 1], [0, 1]]],
+        ),
+        (
+            games.create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq(),
+            [
+                [["1/30", "1/6", "3/10", "3/10", "1/6", "1/30"]],
+                [["1/6", "1/30", "3/10", "3/10", "1/30", "1/6"]],
+            ],
+        ),
+        (games.create_EFG_for_nxn_bimatrix_coordination_game(3), [[[0, 0, 1]], [[0, 0, 1]]]),
+        (
+            games.create_EFG_for_nxn_bimatrix_coordination_game(4),
+            [[[0, 0, 0, 1]], [[0, 0, 0, 1]]],
         ),
     ],
 )
@@ -598,6 +605,13 @@ def test_lp_behavior_double():
             [
                 [[1, 0], [1, 0]],
                 [[0, 1], ["9999999999999999999/10000000000000000000", "1/10000000000000000000"]],
+            ],
+        ),
+        (
+            games.create_chance_in_middle_efg(),
+            [
+                [["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]],
+                [[1, 0], ["6/11", "5/11"]]
             ],
         ),
     ],
