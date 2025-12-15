@@ -47,8 +47,9 @@ Array<Array<MixedStrategyProfile<T>>> EnumMixedStrategySolution<T>::GetCliques()
       throw DimensionException();
     }
 
-    Array<CliqueEnumerator::Edge> edgelist(n);
-    std::transform(m_node1.begin(), m_node1.end(), m_node2.begin(), edgelist.begin(),
+    Array<CliqueEnumerator::Edge> edgelist;
+    edgelist.reserve(n);
+    std::transform(m_node1.begin(), m_node1.end(), m_node2.begin(), std::back_inserter(edgelist),
                    [](const int a, const int b) { return CliqueEnumerator::Edge(a, b); });
 
     const CliqueEnumerator clique(edgelist, m_v2 + 1, m_v1 + 1);
