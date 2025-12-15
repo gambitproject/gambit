@@ -27,6 +27,6 @@ jobs:
           python -m cibuildwheel --output-dir wheelhouse/
         env:
           CIBW_SKIP: "pp*"
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           path: ./wheelhouse/*.whl
