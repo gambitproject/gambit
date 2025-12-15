@@ -211,13 +211,13 @@ public:
   CliqueEnumerator(Array<Edge> &, int, int);
   ~CliqueEnumerator() = default;
 
-  const List<Array<int>> &GetCliques1() const { return m_cliques1; }
-  const List<Array<int>> &GetCliques2() const { return m_cliques2; }
+  const Array<Array<int>> &GetCliques1() const { return m_cliques1; }
+  const Array<Array<int>> &GetCliques2() const { return m_cliques2; }
 
 private:
   Array<int> firstedge;
   int maxinp1, maxinp2;
-  List<Array<int>> m_cliques1, m_cliques2;
+  Array<Array<int>> m_cliques1, m_cliques2;
 
   void candtry1(int stk[], // stack
                 bool connected[MAXM][MAXN],
