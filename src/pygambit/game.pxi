@@ -745,7 +745,16 @@ class Game:
         .. versionchanged:: 16.4
            Changed from a method ``nodes()`` to a property.
 
+        Raises
+        ------
+        UndefinedOperationError
+            If the game does not have a tree representation.
         """
+        if not self.is_tree:
+            raise UndefinedOperationError(
+                "Operation only defined for games with a tree representation"
+            )
+
         return GameNodes.wrap(self.game)
 
     @property
@@ -1888,11 +1897,20 @@ class Game:
 
         .. versionadded:: 16.4.0
 
+        Raises
+        ------
+        UndefinedOperationError
+            If the game does not have a tree representation.
+
         See also
         --------
         Player.infosets
         Infoset.members
         """
+        if not self.is_tree:
+            raise UndefinedOperationError(
+                "Operation only defined for games with a tree representation"
+            )
         self.game.deref().SortInfosets()
 
     def add_player(self, label: str = "") -> Player:
