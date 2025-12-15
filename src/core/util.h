@@ -65,10 +65,6 @@ template <class Key, class T> bool contains(const std::map<Key, T> &map, const K
   return map.find(key) != map.end();
 }
 
-#include <iterator>
-#include <tuple>
-#include <utility>
-
 template <class C> class EnumerateView {
 public:
   explicit EnumerateView(C &p_range) : m_range(p_range) {}
@@ -77,7 +73,10 @@ public:
   public:
     using base_iterator = decltype(std::begin(std::declval<C &>()));
 
-    iterator(std::size_t index, base_iterator it) : m_index(index), m_current(it) {}
+    iterator(const std::size_t p_index, base_iterator p_current)
+      : m_index(p_index), m_current(p_current)
+    {
+    }
 
     iterator &operator++()
     {
@@ -87,7 +86,6 @@ public:
     }
 
     bool operator!=(const iterator &p_other) const { return m_current != p_other.m_current; }
-
     auto operator*() const { return std::tie(m_index, *m_current); }
 
   private:
@@ -96,14 +94,13 @@ public:
   };
 
   iterator begin() { return iterator{0, std::begin(m_range)}; }
-
   iterator end() { return iterator{0, std::end(m_range)}; }
 
 private:
   C &m_range;
 };
 
-template <class Range> auto enumerate(Range &p_range) { return EnumerateView<Range>(p_range); }
+template <class C> auto enumerate(C &p_range) { return EnumerateView<C>(p_range); }
 
 /// @brief A container adaptor which skips over a given value when iterating
 template <typename Container, typename T> class exclude_value {
