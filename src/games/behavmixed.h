@@ -70,9 +70,8 @@ protected:
 
   mutable Cache m_cache;
 
-  /// @name Auxiliary functions for computation of interesting values
+  /// @name Auxiliary functions for cached computation of interesting values
   //@{
-  void GetPayoff(const GameNode &, const T &, const GamePlayer &, T &) const;
   /// Compute the realisation probabilities of all nodes
   void ComputeRealizationProbs() const;
   /// Compute the realisation probabilities of information sets, and beliefs at

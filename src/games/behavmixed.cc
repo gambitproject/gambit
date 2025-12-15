@@ -359,38 +359,11 @@ template <class T> T MixedBehaviorProfile<T>::GetMaxRegret() const
                            [this](const auto &infoset) -> T { return this->GetRegret(infoset); });
 }
 
-template <class T>
-void MixedBehaviorProfile<T>::GetPayoff(const GameNode &node, const T &prob,
-                                        const GamePlayer &player, T &value) const
-{
-  if (node->GetOutcome()) {
-    value += prob * node->GetOutcome()->GetPayoff<T>(player);
-  }
-
-  if (!node->IsTerminal()) {
-    if (node->GetPlayer()->IsChance()) {
-      // chance player
-      for (auto child : node->GetChildren()) {
-        GetPayoff(child, prob * static_cast<T>(GetActionProb(child->GetPriorAction())), player,
-                  value);
-      }
-    }
-    else {
-      for (auto child : node->GetChildren()) {
-        GetPayoff(child, prob * GetActionProb(child->GetPriorAction()), player, value);
-      }
-    }
-  }
-}
-
 template <class T> T MixedBehaviorProfile<T>::GetPayoff(int pl) const
 {
   CheckVersion();
-  T value = T(0);
-  auto rootNode = m_support.GetGame()->GetRoot();
-  auto player = m_support.GetGame()->GetPlayer(pl);
-  GetPayoff(rootNode, T(1), player, value);
-  return value;
+  EnsureNodeValues();
+  return m_cache.m_nodeValues[m_support.GetGame()->GetRoot()][m_support.GetGame()->GetPlayer(pl)];
 }
 
 //
