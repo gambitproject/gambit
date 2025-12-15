@@ -38,11 +38,9 @@ MixedBehaviorProfile<T>::MixedBehaviorProfile(const Game &p_game)
     m_gameversion(p_game->GetVersion())
 {
   int index = 1;
-  for (const auto &player : p_game->GetPlayers()) {
-    for (const auto &infoset : player->GetInfosets()) {
-      for (const auto &action : infoset->GetActions()) {
-        m_profileIndex[action] = index++;
-      }
+  for (const auto &infoset : p_game->GetInfosets()) {
+    for (const auto &action : infoset->GetActions()) {
+      m_profileIndex[action] = index++;
     }
   }
   SetCentroid();
@@ -54,15 +52,13 @@ MixedBehaviorProfile<T>::MixedBehaviorProfile(const BehaviorSupportProfile &p_su
     m_gameversion(p_support.GetGame()->GetVersion())
 {
   int index = 1;
-  for (const auto &player : p_support.GetGame()->GetPlayers()) {
-    for (const auto &infoset : player->GetInfosets()) {
-      for (const auto &action : infoset->GetActions()) {
-        if (p_support.Contains(action)) {
-          m_profileIndex[action] = index++;
-        }
-        else {
-          m_profileIndex[action] = -1;
-        }
+  for (const auto &infoset : p_support.GetGame()->GetInfosets()) {
+    for (const auto &action : infoset->GetActions()) {
+      if (p_support.Contains(action)) {
+        m_profileIndex[action] = index++;
+      }
+      else {
+        m_profileIndex[action] = -1;
       }
     }
   }
@@ -70,13 +66,13 @@ MixedBehaviorProfile<T>::MixedBehaviorProfile(const BehaviorSupportProfile &p_su
 }
 
 template <class T>
-void MixedBehaviorProfile<T>::BehaviorStrat(GamePlayer &player, GameNode &p_node,
+void MixedBehaviorProfile<T>::BehaviorStrat(const GamePlayer &player, const GameNode &p_node,
                                             std::map<GameNode, T> &map_nvals,
                                             std::map<GameNode, T> &map_bvals)
 {
-  for (auto child : p_node->GetChildren()) {
+  for (const auto &child : p_node->GetChildren()) {
     if (p_node->GetPlayer() == player) {
-      if (map_nvals[p_node] > T(0) && map_nvals[child] > T(0)) {
+      if (map_nvals[p_node] > static_cast<T>(0) && map_nvals[child] > static_cast<T>(0)) {
         (*this)[child->GetPriorAction()] = map_nvals[child] / map_nvals[p_node];
       }
     }
@@ -86,7 +82,7 @@ void MixedBehaviorProfile<T>::BehaviorStrat(GamePlayer &player, GameNode &p_node
 
 template <class T>
 void MixedBehaviorProfile<T>::RealizationProbs(const MixedStrategyProfile<T> &mp,
-                                               GamePlayer &player,
+                                               const GamePlayer &player,
                                                const std::map<GameInfosetRep *, int> &actions,
                                                GameNodeRep *node, std::map<GameNode, T> &map_nvals,
                                                std::map<GameNode, T> &map_bvals)
@@ -98,22 +94,22 @@ void MixedBehaviorProfile<T>::RealizationProbs(const MixedStrategyProfile<T> &mp
       if (node->GetPlayer() == player) {
         if (contains(actions, node->m_infoset) &&
             actions.at(node->GetInfoset().get()) == static_cast<int>(i)) {
-          prob = T(1);
+          prob = static_cast<T>(1);
         }
         else {
-          prob = T(0);
+          prob = static_cast<T>(0);
         }
       }
       else if (GetSupport().Contains(node->GetInfoset()->GetAction(i))) {
         const int num_actions = GetSupport().GetActions(node->GetInfoset()).size();
-        prob = T(1) / T(num_actions);
+        prob = static_cast<T>(1) / static_cast<T>(num_actions);
       }
       else {
-        prob = T(0);
+        prob = static_cast<T>(0);
       }
     }
-    else { // n.GetPlayer() == 0
-      prob = T(node->m_infoset->GetActionProb(node->m_infoset->GetAction(i)));
+    else {
+      prob = static_cast<T>(node->m_infoset->GetActionProb(node->m_infoset->GetAction(i)));
     }
 
     auto child = node->m_children[i - 1];
@@ -131,12 +127,10 @@ MixedBehaviorProfile<T>::MixedBehaviorProfile(const MixedStrategyProfile<T> &p_p
     m_gameversion(p_profile.GetGame()->GetVersion())
 {
   int index = 1;
-  for (const auto &player : p_profile.GetGame()->GetPlayers()) {
-    for (const auto &infoset : player->GetInfosets()) {
-      for (const auto &action : infoset->GetActions()) {
-        m_profileIndex[action] = index;
-        m_probs[index++] = static_cast<T>(0);
-      }
+  for (const auto &infoset : p_profile.GetGame()->GetInfosets()) {
+    for (const auto &action : infoset->GetActions()) {
+      m_profileIndex[action] = index;
+      m_probs[index++] = static_cast<T>(0);
     }
   }
 
@@ -145,18 +139,17 @@ MixedBehaviorProfile<T>::MixedBehaviorProfile(const MixedStrategyProfile<T> &p_p
   const StrategySupportProfile &support = p_profile.GetSupport();
   GameRep *game = m_support.GetGame().get();
 
-  for (auto player : game->GetPlayers()) {
+  for (const auto &player : game->GetPlayers()) {
     std::map<GameNode, T> map_nvals, map_bvals;
-    for (auto strategy : support.GetStrategies(player)) {
-      if (p_profile[strategy] > T(0)) {
+    for (const auto &strategy : support.GetStrategies(player)) {
+      if (p_profile[strategy] > static_cast<T>(0)) {
         const auto &actions = strategy->m_behav;
         map_bvals[root->shared_from_this()] = p_profile[strategy];
         RealizationProbs(p_profile, player, actions, root, map_nvals, map_bvals);
       }
     }
-    map_nvals[root->shared_from_this()] = T(1); // set the root nval
-    auto root = m_support.GetGame()->GetRoot();
-    BehaviorStrat(player, root, map_nvals, map_bvals);
+    map_nvals[root->shared_from_this()] = static_cast<T>(1);
+    BehaviorStrat(player, m_support.GetGame()->GetRoot(), map_nvals, map_bvals);
   }
 }
 

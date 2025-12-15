@@ -134,8 +134,9 @@ protected:
 
   /// @name Converting mixed strategies to behavior
   //@{
-  void BehaviorStrat(GamePlayer &, GameNode &, std::map<GameNode, T> &, std::map<GameNode, T> &);
-  void RealizationProbs(const MixedStrategyProfile<T> &, GamePlayer &,
+  void BehaviorStrat(const GamePlayer &, const GameNode &, std::map<GameNode, T> &,
+                     std::map<GameNode, T> &);
+  void RealizationProbs(const MixedStrategyProfile<T> &, const GamePlayer &,
                         const std::map<GameInfosetRep *, int> &, GameNodeRep *,
                         std::map<GameNode, T> &, std::map<GameNode, T> &);
   //@}
