@@ -199,9 +199,8 @@ class CliqueEnumerator {
 public:
   class Edge {
   public:
-    int node1;
-    int node2;
-    int nextedge;
+    int node1, node2, nextedge{};
+
     Edge() = default;
     explicit Edge(const int n1, const int n2) : node1(n1), node2(n2) {}
     ~Edge() = default;
