@@ -374,7 +374,7 @@ T MixedBehaviorProfile<T>::DiffActionValue(const GameAction &p_action,
 {
   CheckVersion();
   EnsureActionValues();
-  T deriv = T(0);
+  T deriv = static_cast<T>(0);
   const GameInfoset infoset = p_action->GetInfoset();
   const GamePlayer player = p_action->GetInfoset()->GetPlayer();
 
@@ -396,12 +396,11 @@ T MixedBehaviorProfile<T>::DiffRealizProb(const GameNode &p_node,
 {
   CheckVersion();
   EnsureActionValues();
-  T deriv = T(1);
+  T deriv = static_cast<T>(1);
   bool isPrec = false;
   GameNode node = p_node;
   while (node->GetParent()) {
-    const GameAction prevAction = node->GetPriorAction();
-    if (prevAction != p_oppAction) {
+    if (const GameAction prevAction = node->GetPriorAction(); prevAction != p_oppAction) {
       deriv *= GetActionProb(prevAction);
     }
     else {
@@ -410,7 +409,7 @@ T MixedBehaviorProfile<T>::DiffRealizProb(const GameNode &p_node,
     node = node->GetParent();
   }
 
-  return (isPrec) ? deriv : T(0);
+  return (isPrec) ? deriv : static_cast<T>(0);
 }
 
 template <class T>
@@ -418,12 +417,12 @@ T MixedBehaviorProfile<T>::DiffNodeValue(const GameNode &p_node, const GamePlaye
                                          const GameAction &p_oppAction) const
 {
   CheckVersion();
-  EnsureActionValues();
+  EnsureNodeValues();
 
   if (p_node->IsTerminal()) {
     // If we reach a terminal node and haven't encountered p_oppAction,
     // derivative wrt this path is zero.
-    return T(0);
+    return static_cast<T>(0);
   }
   if (p_node->GetInfoset() == p_oppAction->GetInfoset()) {
     // We've encountered the action; since we assume perfect recall,
@@ -431,14 +430,10 @@ T MixedBehaviorProfile<T>::DiffNodeValue(const GameNode &p_node, const GamePlaye
     // be the same.
     return m_cache.m_nodeValues[p_node->GetChild(p_oppAction)][p_player];
   }
-  else {
-    T deriv = T(0);
-    for (auto action : p_node->GetInfoset()->GetActions()) {
-      deriv +=
-          (DiffNodeValue(p_node->GetChild(action), p_player, p_oppAction) * GetActionProb(action));
-    }
-    return deriv;
-  }
+  return sum_function(p_node->GetActions(), [&](auto action_child) -> T {
+    return DiffNodeValue(action_child.second, p_player, p_oppAction) *
+           GetActionProb(action_child.first);
+  });
 }
 
 //========================================================================
