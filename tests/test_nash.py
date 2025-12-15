@@ -135,6 +135,14 @@ def test_enummixed_rational(game: gbt.Game, mixed_strategy_prof_data: list):
         # ],
         # 2,  # 9 in total found by enumpoly (see unordered test)
         # ),
+        (
+            games.create_3_player_with_internal_outcomes_efg(),
+            [
+                [[[1.0, 0.0], [1.0, 0.0]], [[1.0, 0.0], [0.5, 0.5]], [[0.0, 1.0], [1.0, 0.0]]],
+                [[[1.0, 0.0], [1.0, 0.0]], [[1.0, 0.0], [0.0, 1.0]],
+                 [[0.3333333333333333, 0.6666666666666667], [1.0, 0.0]]]],
+            2,
+        ),
     ],
 )
 def test_enumpoly_ordered_behavior(

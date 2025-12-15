@@ -312,6 +312,41 @@ def create_large_payoff_game_efg() -> gbt.Game:
     return g
 
 
+def create_3_player_with_internal_outcomes_efg() -> gbt.Game:
+    g = gbt.Game.new_tree(players=["1", "2", "3"], title="3 player game with internal outcomes")
+    g.append_move(g.root, g.players.chance, ["H", "T"])
+    g.set_chance_probs(g.root.infoset, ["1/2", "1/2"])
+    g.append_move(g.root.children[0], "1", ["a", "b"])
+    g.append_move(g.root.children[1], "1", ["c", "d"])
+    g.append_move(g.root.children[0].children[0], "2", ["A", "B"])
+    g.append_infoset(g.root.children[1].children[0], g.root.children[0].children[0].infoset)
+    g.append_move(g.root.children[0].children[1], "3", ["W", "X"])
+    g.append_infoset(g.root.children[1].children[1], g.root.children[0].children[1].infoset)
+    g.append_move(g.root.children[0].children[0].children[0], "3", ["Y", "Z"])
+    iset = g.root.children[0].children[0].children[0].infoset
+    g.append_infoset(g.root.children[0].children[0].children[1], iset)
+    g.append_move(g.root.children[0].children[1].children[1], "2", ["C", "D"])
+    o = g.add_outcome([1, 2, 3])
+    g.set_outcome(g.root.children[1], o)
+    o = g.add_outcome([3, 1, 4])
+    g.set_outcome(g.root.children[0].children[0].children[0].children[0], o)
+    o = g.add_outcome([4, 0, 1])
+    g.set_outcome(g.root.children[0].children[0].children[0].children[1], o)
+    o = g.add_outcome([1, 0, 1])
+    g.set_outcome(g.root.children[1].children[0].children[0], o)
+    o = g.add_outcome([2, -1, -2])
+    g.set_outcome(g.root.children[1].children[0].children[1], o)
+    o = g.add_outcome([1, 3, 2])
+    g.set_outcome(g.root.children[0].children[1].children[0], o)
+    o = g.add_outcome([2, 4, 1])
+    g.set_outcome(g.root.children[0].children[1].children[1].children[0], o)
+    o = g.add_outcome([4, 1, 3])
+    g.set_outcome(g.root.children[0].children[1].children[1].children[1], o)
+    o = g.add_outcome([-1, 2, -1])
+    g.set_outcome(g.root.children[1].children[1].children[0], o)
+    return g
+
+
 def create_matching_pennies_efg(with_neutral_outcome: bool = False) -> gbt.Game:
     """
     The version with_neutral_outcome adds a (0,0) payoff outcomes at a non-terminal node.
