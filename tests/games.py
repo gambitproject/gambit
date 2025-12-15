@@ -228,6 +228,26 @@ def create_entry_accomodation_efg() -> gbt.Game:
     return g
 
 
+def create_non_zero_sum_lacking_outcome_efg() -> gbt.Game:
+    g = gbt.Game.new_tree(players=["1", "2"], title="Non constant-sum game lacking outcome")
+    g.append_move(g.root, g.players.chance, ["H", "T"])
+    g.set_chance_probs(g.root.infoset, ["1/2", "1/2"])
+    g.append_move(g.root.children[0], "1", ["A", "B"])
+    g.append_infoset(g.root.children[1], g.root.children[0].infoset)
+    g.append_move(g.root.children[0].children[0], "2", ["X", "Y"])
+    g.append_infoset(g.root.children[0].children[1], g.root.children[0].children[0].infoset)
+    g.append_infoset(g.root.children[1].children[0], g.root.children[0].children[0].infoset)
+    g.append_infoset(g.root.children[1].children[1], g.root.children[0].children[0].infoset)
+    g.set_outcome(g.root.children[0].children[0].children[0], g.add_outcome([2, 1]))
+    g.set_outcome(g.root.children[0].children[0].children[1], g.add_outcome([-1, 2]))
+    g.set_outcome(g.root.children[0].children[1].children[0], g.add_outcome([1, -1]))
+    g.set_outcome(g.root.children[1].children[0].children[0], g.add_outcome([1, 0]))
+    g.set_outcome(g.root.children[1].children[0].children[1], g.add_outcome([0, 1]))
+    g.set_outcome(g.root.children[1].children[1].children[0], g.add_outcome([-1, 1]))
+    g.set_outcome(g.root.children[1].children[1].children[1], g.add_outcome([2, -1]))
+    return g
+
+
 def create_chance_in_middle_efg() -> gbt.Game:
     g = gbt.Game.new_tree(players=["1", "2"],
                           title="Chance in middle game")

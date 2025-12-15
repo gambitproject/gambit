@@ -455,6 +455,10 @@ def test_lcp_behavior_double():
             games.create_entry_accomodation_efg(),
             [[["2/3", "1/3"], [1, 0], [1, 0]], [["2/3", "1/3"]]],
         ),
+        (
+            games.create_non_zero_sum_lacking_outcome_efg(),
+            [[["1/3", "2/3"]], [["1/2", "1/2"]]],
+        ),
     ],
 )
 def test_lcp_behavior_rational(game: gbt.Game, mixed_behav_prof_data: list):
