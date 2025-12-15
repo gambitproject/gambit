@@ -37,7 +37,14 @@ def test_strategic_game_root():
 
 def test_strategic_game_nodes():
     game = gbt.Game.new_table([2, 2])
-    assert list(game.nodes) == []
+    with pytest.raises(gbt.UndefinedOperationError):
+        _ = game.nodes
+
+
+def test_strategic_game_sort_infosets():
+    game = gbt.Game.new_table([2, 2])
+    with pytest.raises(gbt.UndefinedOperationError):
+        _ = game.sort_infosets()
 
 
 def test_game_behav_profile_error():
