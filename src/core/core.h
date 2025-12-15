@@ -25,7 +25,6 @@
 
 #include "util.h"
 #include "array.h"
-#include "list.h"
 #include "recarray.h"
 #include "vector.h"
 #include "matrix.h"
