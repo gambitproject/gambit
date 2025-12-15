@@ -11,10 +11,22 @@ def test_strategic_game_actions():
         _ = game.actions
 
 
+def test_strategic_game_player_actions():
+    game = gbt.Game.new_table([2, 2])
+    with pytest.raises(gbt.UndefinedOperationError):
+        _ = game.players[0].actions
+
+
 def test_strategic_game_infosets():
     game = gbt.Game.new_table([2, 2])
     with pytest.raises(gbt.UndefinedOperationError):
         _ = game.infosets
+
+
+def test_strategic_game_player_infosets():
+    game = gbt.Game.new_table([2, 2])
+    with pytest.raises(gbt.UndefinedOperationError):
+        _ = game.players[0].infosets
 
 
 def test_strategic_game_root():
