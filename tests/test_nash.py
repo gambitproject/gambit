@@ -143,6 +143,21 @@ def test_enummixed_rational(game: gbt.Game, mixed_strategy_prof_data: list):
                  [[0.3333333333333333, 0.6666666666666667], [1.0, 0.0]]]],
             2,
         ),
+        (
+            games.create_entry_accomodation_efg(),
+            [
+                [[[0.6666666666666666, 0.33333333333333337], [1.0, 0.0], [1.0, 0.0]],
+                 [[0.6666666666666666, 0.33333333333333337]]],
+                [[[0.0, 1.0], [0.0, 0.0], [0.3333333333333333, 0.6666666666666667]], [[0.0, 1.0]]],
+                [[[0.0, 1.0], [0.0, 0.0], [1.0, 0.0]], [[1.0, 0.0]]],
+                [[[0.0, 1.0], [0.0, 0.0], [0.0, 0.0]], [[0.0, 1.0]]]],
+            4,
+        ),
+        (
+            games.create_non_zero_sum_lacking_outcome_efg(),
+            [[[[0.33333333333333337, 0.6666666666666666]], [[0.5, 0.5]]]],
+            1,
+        ),
     ],
 )
 def test_enumpoly_ordered_behavior(
@@ -358,21 +373,18 @@ def test_lcp_behavior_double():
         ),
         pytest.param(
             games.create_2x2_zero_sum_efg(missing_term_outcome=True),
-            [[["1/2", "1/2"]], [["1/2", "1/2"]]],
-            marks=pytest.mark.xfail(reason="Problem with missing terminal outcome in LP/LCP")
+            [[["1/2", "1/2"]], [["1/2", "1/2"]]]
         ),
         (games.create_matching_pennies_efg(),
             [[["1/2", "1/2"]], [["1/2", "1/2"]]]),
         pytest.param(
             games.create_matching_pennies_efg(with_neutral_outcome=True),
-            [[["1/2", "1/2"]], [["1/2", "1/2"]]],
-            marks=pytest.mark.xfail(reason="Problem with nonterminal nodes in LP/LCP")
+            [[["1/2", "1/2"]], [["1/2", "1/2"]]]
         ),
         (games.create_stripped_down_poker_efg(), [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]]),
         pytest.param(
             games.create_stripped_down_poker_efg(nonterm_outcomes=True),
-            [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]],
-            marks=pytest.mark.xfail(reason="Problem with missing terminal outcome in LP/LCP")
+            [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]]
         ),
         (
             games.create_kuhn_poker_efg(),
@@ -400,8 +412,7 @@ def test_lcp_behavior_double():
                     ["1/2", "1/2"],
                 ],
                 [[1, 0], ["2/3", "1/3"], [0, 1], [0, 1], ["2/3", "1/3"], [1, 0]],
-            ],
-            marks=pytest.mark.xfail(reason="Problem with missing terminal outcome in LP/LCP")
+            ]
         ),
         # In the next test case:
         # 1/2-1/2 for l/r is determined by MixedBehaviorProfile.UndefinedToCentroid()
@@ -549,15 +560,13 @@ def test_lp_behavior_double():
         ),
         pytest.param(
             games.create_2x2_zero_sum_efg(missing_term_outcome=True),
-            [[["1/2", "1/2"]], [["1/2", "1/2"]]],
-            marks=pytest.mark.xfail(reason="Problem with missing terminal outcome in LP/LCP")
+            [[["1/2", "1/2"]], [["1/2", "1/2"]]]
         ),
         (games.create_matching_pennies_efg(with_neutral_outcome=False),
             [[["1/2", "1/2"]], [["1/2", "1/2"]]]),
         pytest.param(
             games.create_matching_pennies_efg(with_neutral_outcome=True),
-            [[["1/2", "1/2"]], [["1/2", "1/2"]]],
-            marks=pytest.mark.xfail(reason="Problem with nonterminal nodes in LP/LCP")
+            [[["1/2", "1/2"]], [["1/2", "1/2"]]]
         ),
         (
             games.create_stripped_down_poker_efg(),
@@ -565,8 +574,7 @@ def test_lp_behavior_double():
         ),
         pytest.param(
             games.create_stripped_down_poker_efg(nonterm_outcomes=True),
-            [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]],
-            marks=pytest.mark.xfail(reason="Problem with nonterminal nodes in LP/LCP")
+            [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]]
         ),
         (
             games.create_kuhn_poker_efg(),
@@ -587,8 +595,7 @@ def test_lp_behavior_double():
                     [0, 1],
                 ],
                 [[1, 0], ["2/3", "1/3"], [0, 1], [0, 1], ["2/3", "1/3"], [1, 0]],
-            ],
-            marks=pytest.mark.xfail(reason="Problem with nonterminal nodes in LP/LCP")
+            ]
         ),
         (
             games.create_seq_form_STOC_paper_zero_sum_2_player_efg(),
