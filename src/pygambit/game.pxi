@@ -307,10 +307,10 @@ class GamePlayers:
                 raise ValueError(f"Game has multiple players with label '{index}'")
             return matches[0]
         if isinstance(index, int):
-            if index in range(self.game.deref().NumPlayers()):
+            try:
                 return Player.wrap(self.game.deref().GetPlayer(index + 1))
-            else:
-                raise IndexError("Index out of range")
+            except IndexError:
+                raise IndexError("Index out of range") from None
         raise TypeError(f"Player index must be int or str, not {index.__class__.__name__}")
 
     @property
