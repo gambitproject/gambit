@@ -44,7 +44,7 @@ public:
     return m_extremeEquilibria;
   }
 
-  List<List<MixedStrategyProfile<T>>> GetCliques() const;
+  Array<Array<MixedStrategyProfile<T>>> GetCliques() const;
 
   Game m_game;
   std::list<MixedStrategyProfile<T>> m_extremeEquilibria;
