@@ -451,6 +451,10 @@ def test_lcp_behavior_double():
             games.create_EFG_for_nxn_bimatrix_coordination_game(4),
             [[[0, 0, 0, 1]], [[0, 0, 0, 1]]],
         ),
+        (
+            games.create_entry_accomodation_efg(),
+            [[["2/3", "1/3"], [1, 0], [1, 0]], [["2/3", "1/3"]]],
+        ),
     ],
 )
 def test_lcp_behavior_rational(game: gbt.Game, mixed_behav_prof_data: list):
