@@ -47,7 +47,7 @@ std::list<GameNode> TerminalNodes(const Game &p_efg)
   return ret;
 }
 
-void DeviationInfosets(List<GameInfoset> &answer, const BehaviorSupportProfile &big_supp,
+void DeviationInfosets(Array<GameInfoset> &answer, const BehaviorSupportProfile &big_supp,
                        const GamePlayer &p_player, const GameNode &p_node,
                        const GameAction &p_action)
 {
@@ -73,11 +73,11 @@ void DeviationInfosets(List<GameInfoset> &answer, const BehaviorSupportProfile &
   }
 }
 
-List<GameInfoset> DeviationInfosets(const BehaviorSupportProfile &big_supp,
-                                    const GamePlayer &p_player, const GameInfoset &p_infoset,
-                                    const GameAction &p_action)
+Array<GameInfoset> DeviationInfosets(const BehaviorSupportProfile &big_supp,
+                                     const GamePlayer &p_player, const GameInfoset &p_infoset,
+                                     const GameAction &p_action)
 {
-  List<GameInfoset> answer;
+  Array<GameInfoset> answer;
   for (auto member : p_infoset->GetMembers()) {
     DeviationInfosets(answer, big_supp, p_player, member, p_action);
   }
@@ -107,7 +107,7 @@ PolynomialSystem<double> ActionProbsSumToOneIneqs(const MixedBehaviorProfile<dou
 }
 
 std::list<BehaviorSupportProfile> DeviationSupports(const BehaviorSupportProfile &big_supp,
-                                                    const List<GameInfoset> &isetlist)
+                                                    const Array<GameInfoset> &isetlist)
 {
   std::list<BehaviorSupportProfile> answer;
 

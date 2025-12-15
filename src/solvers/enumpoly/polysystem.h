@@ -28,13 +28,12 @@
 namespace Gambit {
 
 template <class T> class PolynomialSystem {
-private:
   std::shared_ptr<VariableSpace> m_space;
   std::list<Polynomial<T>> m_system;
 
 public:
-  using iterator = typename List<Polynomial<T>>::iterator;
-  using const_iterator = typename List<Polynomial<T>>::const_iterator;
+  using iterator = typename std::list<Polynomial<T>>::iterator;
+  using const_iterator = typename std::list<Polynomial<T>>::const_iterator;
 
   PolynomialSystem(std::shared_ptr<VariableSpace> p_space) : m_space(p_space) {}
   PolynomialSystem(const PolynomialSystem<T> &) = default;
