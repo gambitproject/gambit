@@ -229,8 +229,12 @@ public:
 
   /// @name Computation of interesting quantities
   //@{
-  T GetPayoff(int p_player) const;
-  T GetPayoff(const GamePlayer &p_player) const { return GetPayoff(p_player->GetNumber()); }
+  T GetPayoff(const GamePlayer &p_player) const
+  {
+    CheckVersion();
+    EnsureNodeValues();
+    return m_cache.m_nodeValues[m_support.GetGame()->GetRoot()][p_player];
+  }
   T GetLiapValue() const;
 
   const T &GetRealizProb(const GameNode &node) const;

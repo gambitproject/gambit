@@ -359,13 +359,6 @@ template <class T> T MixedBehaviorProfile<T>::GetMaxRegret() const
                            [this](const auto &infoset) -> T { return this->GetRegret(infoset); });
 }
 
-template <class T> T MixedBehaviorProfile<T>::GetPayoff(int pl) const
-{
-  CheckVersion();
-  EnsureNodeValues();
-  return m_cache.m_nodeValues[m_support.GetGame()->GetRoot()][m_support.GetGame()->GetPlayer(pl)];
-}
-
 //
 // The following routines compute the derivatives of quantities as
 // the probability of the action 'p_oppAction' is changed.
