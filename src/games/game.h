@@ -936,6 +936,7 @@ public:
   }
   /// Returns the chance (nature) player
   virtual GamePlayer GetChance() const = 0;
+  auto GetPlayersWithChance() const { return prepend_value(GetChance(), GetPlayers()); }
   /// Creates a new player in the game, with no moves
   virtual GamePlayer NewPlayer() = 0;
   //@}
