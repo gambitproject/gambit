@@ -72,14 +72,14 @@ def create_2x2x2_nfg() -> gbt.Game:
     - The payoff to a player is the sum of their incident edges across the implied cut
     - Pure equilibrium iff local max cuts; in addition, uniform mixture is an equilibrium
     - Equilibrium analysis for pure profiles:
-        a a a:  0 0  0 -- Not Nash (2 can deviate and get 4)
-        b a a:  1 2 -1 -- Not Nash (3 can deviate and get 2)
+        a a a:  0 0  0 -- Not Nash (regrets: 1, 4, 1)
+        b a a:  1 2 -1 -- Not Nash (regrets: 0, 0, 3)
         a b a:  2 4  2 -- Nash (global max cut)
-        b b a: -1 2  1 -- Not Nash (1 can deviate and get 2)
-        a a b: -1 2  1 -- Not Nash (1 can deviate and get 2)
+        b b a: -1 2  1 -- Not Nash (regrets: 3, 0, 0)
+        a a b: -1 2  1 -- Not Nash (regrets: 3, 0, 0)
         b a b:  2 4  2 -- Nash (global max cut)
-        a b b:  1 2 -1 -- Not Nash (3 can deviate and get 2)
-        b b b:  0 0  0 -- Not Nash (2 can deviate and get 4)
+        a b b:  1 2 -1 -- Not Nash (regrets: 0, 0, 3)
+        b b b:  0 0  0 -- Not Nash (regrets: 1, 4, 1)
     """
     return read_from_file("2x2x2_nfg_with_two_pure_one_mixed_eq.nfg")
 
