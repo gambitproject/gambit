@@ -195,41 +195,6 @@ class GameNodes:
 
 
 @cython.cclass
-class GameNonterminalNodes:
-    """Represents the set of nodes in a game."""
-    game = cython.declare(c_Game)
-
-    def __init__(self, *args, **kwargs) -> None:
-        raise ValueError("Cannot create GameNonterminalNodes outside a Game.")
-
-    @staticmethod
-    @cython.cfunc
-    def wrap(game: c_Game) -> GameNonterminalNodes:
-        obj: GameNonterminalNodes = GameNonterminalNodes.__new__(GameNonterminalNodes)
-        obj.game = game
-        return obj
-
-    def __repr__(self) -> str:
-        return f"GameNonterminalNodes(game={Game.wrap(self.game)})"
-
-    def __len__(self) -> int:
-        """The number of non-terminal nodes in the game."""
-        if not self.game.deref().IsTree():
-            return 0
-        return self.game.deref().NumNonterminalNodes()
-
-    def __iter__(self) -> typing.Iterator[Node]:
-        def dfs(node):
-            if not node.is_terminal:
-                yield node
-            for child in node.children:
-                yield from dfs(child)
-        if not self.game.deref().IsTree():
-            return
-        yield from dfs(Node.wrap(self.game.deref().GetRoot()))
-
-
-@cython.cclass
 class GameOutcomes:
     """Represents the set of outcomes in a game."""
     game = cython.declare(c_Game)
@@ -744,15 +709,6 @@ class Game:
 
         """
         return GameNodes.wrap(self.game)
-
-    @property
-    def _nonterminal_nodes(self) -> GameNonterminalNodes:
-        """The set of non-terminal nodes in the game.
-
-        Iteration over this property yields the non-terminal nodes in the order of depth-first
-        search.
-        """
-        return GameNonterminalNodes.wrap(self.game)
 
     @property
     def contingencies(self) -> pygambit.gameiter.Contingencies:
