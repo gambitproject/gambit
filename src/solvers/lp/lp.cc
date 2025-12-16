@@ -34,7 +34,7 @@ public:
 
   explicit GameData(const Game &);
 
-  void FillTableau(Matrix<T> &A, const GameNode &n, const T &prob, int s1, int s2);
+  void FillTableau(Matrix<T> &A, const GameNode &n, const T &prob, int s1, int s2, T payoff);
 
   void GetBehavior(MixedBehaviorProfile<T> &v, const Array<T> &, const Array<T> &,
                    const GameNode &, int, int);
@@ -57,21 +57,22 @@ template <class T> GameData<T>::GameData(const Game &p_game) : minpay(p_game->Ge
 // Recursively fills the constraint matrix A for the subtree rooted at 'n'.
 //
 template <class T>
-void GameData<T>::FillTableau(Matrix<T> &A, const GameNode &n, const T &prob, int s1, int s2)
+void GameData<T>::FillTableau(Matrix<T> &A, const GameNode &n, const T &prob, int s1, int s2,
+                              T payoff)
 {
   const GameOutcome outcome = n->GetOutcome();
   if (outcome) {
-    A(s1, s2) +=
-        Rational(prob) * (outcome->GetPayoff<Rational>(n->GetGame()->GetPlayer(1)) - minpay);
+    payoff += outcome->GetPayoff<Rational>(n->GetGame()->GetPlayer(1));
   }
   if (n->IsTerminal()) {
+    A(s1, s2) += Rational(prob) * (payoff - minpay);
     return;
   }
   const GameInfoset infoset = n->GetInfoset();
   if (n->GetPlayer()->IsChance()) {
     for (const auto &action : infoset->GetActions()) {
       FillTableau(A, n->GetChild(action), prob * static_cast<T>(infoset->GetActionProb(action)),
-                  s1, s2);
+                  s1, s2, payoff);
     }
   }
   else if (n->GetPlayer()->GetNumber() == 1) {
@@ -80,7 +81,7 @@ void GameData<T>::FillTableau(Matrix<T> &A, const GameNode &n, const T &prob, in
     A(s1, col) = static_cast<T>(1);
     for (const auto &child : n->GetChildren()) {
       A(++snew, col) = static_cast<T>(-1);
-      FillTableau(A, child, prob, snew, s2);
+      FillTableau(A, child, prob, snew, s2, payoff);
     }
   }
   else {
@@ -89,7 +90,7 @@ void GameData<T>::FillTableau(Matrix<T> &A, const GameNode &n, const T &prob, in
     A(row, s2) = static_cast<T>(-1);
     for (const auto &child : n->GetChildren()) {
       A(row, ++snew) = static_cast<T>(1);
-      FillTableau(A, child, prob, s1, snew);
+      FillTableau(A, child, prob, s1, snew, payoff);
     }
   }
 }
@@ -187,7 +188,7 @@ std::list<MixedBehaviorProfile<T>> LpBehaviorSolve(const Game &p_game,
   b = static_cast<T>(0);
   c = static_cast<T>(0);
 
-  data.FillTableau(A, p_game->GetRoot(), static_cast<T>(1), 1, 1);
+  data.FillTableau(A, p_game->GetRoot(), static_cast<T>(1), 1, 1, static_cast<T>(0));
   A(1, data.ns2 + 1) = static_cast<T>(-1);
   A(data.ns1 + 1, 1) = static_cast<T>(1);
 
