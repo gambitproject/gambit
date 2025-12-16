@@ -19,7 +19,7 @@ def read_from_file(fn: str) -> gbt.Game:
 
 
 def create_efg_corresponding_to_bimatrix_game(
-    A: np.ndarray, B: np.ndarray, title: str
+        A: np.ndarray, B: np.ndarray, title: str
 ) -> gbt.Game:
     """
     There is no direct pygambit method to create an EFG from a stategic-form game.
@@ -120,6 +120,230 @@ def create_2x2_zero_sum_efg(missing_term_outcome: bool = False) -> gbt.Game:
     if not missing_term_outcome:
         g.set_outcome(g.root.children["T"].children["r"], draw)
 
+    return g
+
+
+def create_perfect_info_with_chance_efg() -> gbt.Game:
+    # Tests case in which sequence profile probabilities don't sum to 1
+    g = gbt.Game.new_tree(players=["1", "2"], title="2 player perfect info with chance")
+    g.append_move(g.root, "1", ["a", "b"])
+    g.append_move(g.root.children[0], g.players.chance, ["L", "R"])
+    g.append_move(g.root.children[0].children[0], "2", ["A", "B"])
+    g.append_move(g.root.children[0].children[1], "2", ["C", "D"])
+    g.set_outcome(
+        g.root.children[0].children[0].children[0], g.add_outcome([-2, 2], label="aLA")
+    )
+    g.set_outcome(
+        g.root.children[0].children[0].children[1], g.add_outcome([-2, 2], label="aLB")
+    )
+    g.set_outcome(
+        g.root.children[0].children[1].children[0], g.add_outcome([-2, 2], label="aRC")
+    )
+    g.set_outcome(
+        g.root.children[0].children[1].children[1], g.add_outcome([-2, 2], label="aRD")
+    )
+    g.set_outcome(g.root.children[1], g.add_outcome([-1, 1], label="b"))
+    return g
+
+
+def create_one_card_poker_lacking_outcome_efg() -> gbt.Game:
+    g = gbt.Game.new_tree(players=["Bob", "Alice"],
+                          title="One card poker game, after Myerson (1991)")
+    g.append_move(g.root, g.players.chance, ["King", "Queen"])
+    for node in g.root.children:
+        g.append_move(node, "Alice", ["Raise", "Fold"])
+    g.append_move(g.root.children[0].children[0], "Bob", ["Meet", "Pass"])
+    g.append_infoset(g.root.children[1].children[0],
+                     g.root.children[0].children[0].infoset)
+    alice_winsbig = g.add_outcome([-1, 1], label="Alice wins big")
+    bob_winsbig = g.add_outcome([3, -3], label="Bob wins big")
+    bob_wins = g.add_outcome([2, -2], label="Bob wins")
+    g.set_outcome(g.root.children[0].children[0].children[0], alice_winsbig)
+    g.set_outcome(g.root.children[0].children[1], bob_wins)
+    g.set_outcome(g.root.children[1].children[0].children[0], bob_winsbig)
+    g.set_outcome(g.root.children[1].children[1], bob_wins)
+    return g
+
+
+def create_perfect_info_internal_outcomes_efg() -> gbt.Game:
+    g = gbt.Game.new_tree(players=["1", "2"], title="2 player perfect info win lose")
+    g.append_move(g.root, "2", ["a", "b"])
+    g.append_move(g.root.children[0], "1", ["L", "R"])
+    g.append_move(g.root.children[1], "1", ["L", "R"])
+    g.append_move(g.root.children[0].children[0], "2", ["l", "r"])
+    g.set_outcome(g.root.children[0], g.add_outcome([-100, 50], label="a"))
+    g.set_outcome(
+        g.root.children[0].children[0].children[0], g.add_outcome([101, -51], label="aLl")
+    )
+    g.set_outcome(
+        g.root.children[0].children[0].children[1], g.add_outcome([99, -49], label="aLr")
+    )
+    g.set_outcome(g.root.children[0].children[1], g.add_outcome([101, -51], label="aR"))
+    g.set_outcome(g.root.children[1].children[0], g.add_outcome([1, -1], label="bL"))
+    g.set_outcome(g.root.children[1].children[1], g.add_outcome([-1, 1], label="bR"))
+    return g
+
+
+def create_three_action_internal_outcomes_efg() -> gbt.Game:
+    # Test 3 actions at infoset, internal outcomes and missing some outcomes at leaves
+    g = gbt.Game.new_tree(players=["1", "2"],
+                          title="3 action, internal outcomes, lacking terminal outcomes")
+    g.append_move(g.root, g.players.chance, ["H", "L"])
+    for i in range(2):
+        g.append_move(g.root.children[i], "1", ["A", "B", "C"])
+    for i in range(3):
+        g.append_move(g.root.children[0].children[i], "2", ["X", "Y"])
+        g.append_infoset(g.root.children[1].children[i], g.root.children[0].children[i].infoset)
+    o_1 = g.add_outcome([1, -1], label="1")
+    o_m1 = g.add_outcome([-1, 1], label="-1")
+    o_2 = g.add_outcome([2, -2], label="2")
+    o_m2 = g.add_outcome([-2, 2], label="-2")
+    g.set_outcome(g.root.children[0].children[0], o_1)
+    g.set_outcome(g.root.children[1].children[2], o_m1)
+    g.set_outcome(g.root.children[0].children[0].children[1], o_m2)
+    g.set_outcome(g.root.children[0].children[1].children[0], o_m1)
+    g.set_outcome(g.root.children[0].children[1].children[1], o_1)
+    g.set_outcome(g.root.children[0].children[2].children[0], o_1)
+    g.set_outcome(g.root.children[1].children[0].children[1], o_1)
+    g.set_outcome(g.root.children[1].children[1].children[0], o_1)
+    g.set_outcome(g.root.children[1].children[1].children[1], o_m1)
+    g.set_outcome(g.root.children[1].children[2].children[1], o_2)
+    return g
+
+
+def create_entry_accomodation_efg() -> gbt.Game:
+    g = gbt.Game.new_tree(players=["1", "2"],
+                          title="Entry-accomodation game with internal outcomes")
+    g.append_move(g.root, "1", ["S", "T"])
+    g.append_move(g.root.children[0], "2", ["E", "O"])
+    g.append_infoset(g.root.children[1], g.root.children[0].infoset)
+    g.append_move(g.root.children[0].children[0], "1", ["A", "F"])
+    g.append_move(g.root.children[1].children[0], "1", ["A", "F"])
+    g.set_outcome(g.root.children[0], g.add_outcome([3, 2]))
+    g.set_outcome(g.root.children[0].children[0].children[1], g.add_outcome([-3, -1]))
+    g.set_outcome(g.root.children[0].children[1], g.add_outcome([-2, 1]))
+    g.set_outcome(g.root.children[1].children[0].children[0], g.add_outcome([2, 3]))
+    g.set_outcome(g.root.children[1].children[0].children[1], g.add_outcome([1, 0]))
+    g.set_outcome(g.root.children[1].children[1], g.add_outcome([3, 1]))
+    return g
+
+
+def create_non_zero_sum_lacking_outcome_efg() -> gbt.Game:
+    g = gbt.Game.new_tree(players=["1", "2"], title="Non constant-sum game lacking outcome")
+    g.append_move(g.root, g.players.chance, ["H", "T"])
+    g.set_chance_probs(g.root.infoset, ["1/2", "1/2"])
+    g.append_move(g.root.children[0], "1", ["A", "B"])
+    g.append_infoset(g.root.children[1], g.root.children[0].infoset)
+    g.append_move(g.root.children[0].children[0], "2", ["X", "Y"])
+    g.append_infoset(g.root.children[0].children[1], g.root.children[0].children[0].infoset)
+    g.append_infoset(g.root.children[1].children[0], g.root.children[0].children[0].infoset)
+    g.append_infoset(g.root.children[1].children[1], g.root.children[0].children[0].infoset)
+    g.set_outcome(g.root.children[0].children[0].children[0], g.add_outcome([2, 1]))
+    g.set_outcome(g.root.children[0].children[0].children[1], g.add_outcome([-1, 2]))
+    g.set_outcome(g.root.children[0].children[1].children[0], g.add_outcome([1, -1]))
+    g.set_outcome(g.root.children[1].children[0].children[0], g.add_outcome([1, 0]))
+    g.set_outcome(g.root.children[1].children[0].children[1], g.add_outcome([0, 1]))
+    g.set_outcome(g.root.children[1].children[1].children[0], g.add_outcome([-1, 1]))
+    g.set_outcome(g.root.children[1].children[1].children[1], g.add_outcome([2, -1]))
+    return g
+
+
+def create_chance_in_middle_efg() -> gbt.Game:
+    g = gbt.Game.new_tree(players=["1", "2"],
+                          title="Chance in middle game")
+    g.append_move(g.root, "1", ["A", "B"])
+    g.append_move(g.root.children[0], g.players.chance, ["H", "L"])
+    g.set_chance_probs(g.root.children[0].infoset, ["1/5", "4/5"])
+    g.append_move(g.root.children[1], g.players.chance, ["H", "L"])
+    g.set_chance_probs(g.root.children[1].infoset, ["7/10", "3/10"])
+    g.set_outcome(g.root.children[0].children[0], g.add_outcome([-1, 1], label="a"))
+    for i in range(2):
+        g.append_move(g.root.children[0].children[i], "2", ["X", "Y"])
+        ist = g.root.children[0].children[i].infoset
+        g.append_infoset(g.root.children[1].children[i], ist)
+    for i in range(2):
+        for j in range(2):
+            g.append_move(g.root.children[i].children[0].children[j], "1", ["C", "D"])
+            ist = g.root.children[i].children[0].children[j].infoset
+            g.append_infoset(g.root.children[i].children[1].children[j], ist)
+    o_1 = g.add_outcome([1, -1], label="1")
+    o_m1 = g.add_outcome([-1, 1], label="-1")
+    o_h = g.add_outcome(["1/2", "-1/2"], label="0.5")
+    o_mh = g.add_outcome(["-1/2", "1/2"], label="-0.5")
+    g.set_outcome(g.root.children[0].children[0].children[0].children[0], o_1)
+    g.set_outcome(g.root.children[0].children[0].children[0].children[1], o_m1)
+    g.set_outcome(g.root.children[0].children[0].children[1].children[0], o_h)
+    g.set_outcome(g.root.children[0].children[0].children[1].children[1], o_mh)
+    g.set_outcome(g.root.children[0].children[1].children[0].children[0], o_h)
+    g.set_outcome(g.root.children[0].children[1].children[0].children[1], o_mh)
+    g.set_outcome(g.root.children[0].children[1].children[1].children[0], o_1)
+    g.set_outcome(g.root.children[0].children[1].children[1].children[1], o_m1)
+    g.set_outcome(g.root.children[1].children[0].children[0].children[0], o_h)
+    g.set_outcome(g.root.children[1].children[0].children[0].children[1], o_mh)
+    g.set_outcome(g.root.children[1].children[0].children[1].children[0], o_1)
+    g.set_outcome(g.root.children[1].children[0].children[1].children[1], o_m1)
+    g.set_outcome(g.root.children[1].children[1].children[0].children[0], o_1)
+    g.set_outcome(g.root.children[1].children[1].children[0].children[1], o_m1)
+    g.set_outcome(g.root.children[1].children[1].children[1].children[0], o_h)
+    g.set_outcome(g.root.children[1].children[1].children[1].children[1], o_mh)
+    return g
+
+
+def create_large_payoff_game_efg() -> gbt.Game:
+    g = gbt.Game.new_tree(players=["1", "2"], title="Large payoff game")
+    g.append_move(g.root, g.players.chance, ["L", "R"])
+    for i in range(2):
+        g.append_move(g.root.children[i], "1", ["A", "B"])
+    for i in range(2):
+        g.append_move(g.root.children[0].children[i], "2", ["X", "Y"])
+        g.append_infoset(g.root.children[1].children[i], g.root.children[0].children[i].infoset)
+    o_large = g.add_outcome([10000000000000000000, -10000000000000000000], label="large payoff")
+    o_1 = g.add_outcome([1, -1], label="1")
+    o_m1 = g.add_outcome([-1, 1], label="-1")
+    o_zero = g.add_outcome([0, 0], label="0")
+    g.set_outcome(g.root.children[0].children[0].children[0], o_large)
+    g.set_outcome(g.root.children[0].children[0].children[1], o_1)
+    g.set_outcome(g.root.children[0].children[1].children[0], o_m1)
+    g.set_outcome(g.root.children[0].children[1].children[1], o_zero)
+    g.set_outcome(g.root.children[1].children[0].children[0], o_m1)
+    g.set_outcome(g.root.children[1].children[0].children[1], o_1)
+    g.set_outcome(g.root.children[1].children[1].children[0], o_zero)
+    g.set_outcome(g.root.children[1].children[1].children[1], o_large)
+    return g
+
+
+def create_3_player_with_internal_outcomes_efg() -> gbt.Game:
+    g = gbt.Game.new_tree(players=["1", "2", "3"], title="3 player game with internal outcomes")
+    g.append_move(g.root, g.players.chance, ["H", "T"])
+    g.set_chance_probs(g.root.infoset, ["1/2", "1/2"])
+    g.append_move(g.root.children[0], "1", ["a", "b"])
+    g.append_move(g.root.children[1], "1", ["c", "d"])
+    g.append_move(g.root.children[0].children[0], "2", ["A", "B"])
+    g.append_infoset(g.root.children[1].children[0], g.root.children[0].children[0].infoset)
+    g.append_move(g.root.children[0].children[1], "3", ["W", "X"])
+    g.append_infoset(g.root.children[1].children[1], g.root.children[0].children[1].infoset)
+    g.append_move(g.root.children[0].children[0].children[0], "3", ["Y", "Z"])
+    iset = g.root.children[0].children[0].children[0].infoset
+    g.append_infoset(g.root.children[0].children[0].children[1], iset)
+    g.append_move(g.root.children[0].children[1].children[1], "2", ["C", "D"])
+    o = g.add_outcome([1, 2, 3])
+    g.set_outcome(g.root.children[1], o)
+    o = g.add_outcome([3, 1, 4])
+    g.set_outcome(g.root.children[0].children[0].children[0].children[0], o)
+    o = g.add_outcome([4, 0, 1])
+    g.set_outcome(g.root.children[0].children[0].children[0].children[1], o)
+    o = g.add_outcome([1, 0, 1])
+    g.set_outcome(g.root.children[1].children[0].children[0], o)
+    o = g.add_outcome([2, -1, -2])
+    g.set_outcome(g.root.children[1].children[0].children[1], o)
+    o = g.add_outcome([1, 3, 2])
+    g.set_outcome(g.root.children[0].children[1].children[0], o)
+    o = g.add_outcome([2, 4, 1])
+    g.set_outcome(g.root.children[0].children[1].children[1].children[0], o)
+    o = g.add_outcome([4, 1, 3])
+    g.set_outcome(g.root.children[0].children[1].children[1].children[1], o)
+    o = g.add_outcome([-1, 2, -1])
+    g.set_outcome(g.root.children[1].children[1].children[0], o)
     return g
 
 
@@ -990,14 +1214,14 @@ class BinEfgOnePlayerIR(BinaryTreeGames):
             first_half = tmp[:n_half]
             second_half = tmp[n_half:]
             n_stars = (
-                self.get_n_infosets(level)[1] - self.get_n_infosets(level - 1)[1] - 1
+                    self.get_n_infosets(level)[1] - self.get_n_infosets(level - 1)[1] - 1
             )
             stars = "*" * n_stars
             return (
-                ["11" + t + stars for t in first_half]
-                + ["12" + t + stars for t in second_half]
-                + ["21" + stars + t for t in first_half]
-                + ["22" + stars + t for t in second_half]
+                    ["11" + t + stars for t in first_half]
+                    + ["12" + t + stars for t in second_half]
+                    + ["21" + stars + t for t in first_half]
+                    + ["22" + stars + t for t in second_half]
             )
 
 
