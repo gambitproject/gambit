@@ -141,8 +141,8 @@ def test_enumpoly_ordered_behavior(
     game: gbt.Game, mixed_behav_prof_data: list, stop_after: None | int
 ):
     """Test calls of enumpoly for mixed behavior equilibria,
-    using max_regret (internal consistency); and comparison to a set of previously
-    computed equilibria using this function (regression test).
+    using max_regret and agent_max_regret (internal consistency); and
+    comparison to a set of previously computed equilibria with this function (regression test).
     This set will be the full set of all computed equilibria if stop_after is None,
     else the first stop_after-many equilibria.
 
@@ -162,6 +162,7 @@ def test_enumpoly_ordered_behavior(
         result = gbt.nash.enumpoly_solve(game, use_strategic=False)
     assert len(result.equilibria) == len(mixed_behav_prof_data)
     for eq, exp in zip(result.equilibria, mixed_behav_prof_data, strict=True):
+        assert abs(eq.max_regret()) <= TOL
         assert abs(eq.agent_max_regret()) <= TOL
         expected = game.mixed_behavior_profile(rational=True, data=exp)
         for p in game.players:
@@ -197,8 +198,8 @@ def test_enumpoly_unordered_behavior(
     game: gbt.Game, mixed_behav_prof_data: list, stop_after: None | int
 ):
     """Test calls of enumpoly for mixed behavior equilibria,
-    using max_regret (internal consistency); and comparison to a set of previously
-    computed equilibria using this function (regression test).
+    using max_regret and agent_max_regret (internal consistency); and
+    comparison to a set of previously computed equilibria using this function (regression test).
 
     This set will be the full set of all computed equilibria if stop_after is None,
     else the first stop_after-many equilibria.
@@ -229,6 +230,7 @@ def test_enumpoly_unordered_behavior(
         return True
 
     for eq in result.equilibria:
+        assert abs(eq.max_regret()) <= TOL
         assert abs(eq.agent_max_regret()) <= TOL
         found = False
         for exp in mixed_behav_prof_data[:]:
@@ -423,12 +425,13 @@ def test_lcp_behavior_double():
 def test_lcp_behavior_rational(game: gbt.Game, mixed_behav_prof_data: list):
     """Test calls of LCP for mixed behavior equilibria, rational precision.
 
-    using max_regret (internal consistency); and comparison to a previously
-    computed equilibrium using this function (regression test)
+    using max_regret and agent_max_regret (internal consistency); and
+    comparison to a previously computed equilibrium using this function (regression test).
     """
     result = gbt.nash.lcp_solve(game, use_strategic=False, rational=True)
     assert len(result.equilibria) == 1
     eq = result.equilibria[0]
+    assert eq.max_regret() == 0
     assert eq.agent_max_regret() == 0
     expected = game.mixed_behavior_profile(rational=True, data=mixed_behav_prof_data)
     assert eq == expected
@@ -552,12 +555,13 @@ def test_lp_behavior_double():
 )
 def test_lp_behavior_rational(game: gbt.Game, mixed_behav_prof_data: list):
     """Test calls of LP for mixed behavior equilibria, rational precision,
-    using max_regret (internal consistency); and comparison to a previously
-    computed equilibrium using this function (regression test)
+    using max_regret and agent_max_regret (internal consistency); and
+    comparison to a previously computed equilibrium using this function (regression test).
     """
     result = gbt.nash.lp_solve(game, use_strategic=False, rational=True)
     assert len(result.equilibria) == 1
     eq = result.equilibria[0]
+    assert eq.max_regret() == 0
     assert eq.agent_max_regret() == 0
     expected = game.mixed_behavior_profile(rational=True, data=mixed_behav_prof_data)
     assert eq == expected

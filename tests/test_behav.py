@@ -798,9 +798,11 @@ def test_action_value_by_label_reference(game: gbt.Game, label: str,
      (games.create_mixed_behav_game_efg(), True),
      (games.create_stripped_down_poker_efg(), False),
      (games.create_stripped_down_poker_efg(), True),
+     (games.create_kuhn_poker_efg(), False),
+     (games.create_kuhn_poker_efg(), True),
      ]
 )
-def test_regret_consistency(game: gbt.Game, rational_flag: bool):
+def test_action_regret_consistency(game: gbt.Game, rational_flag: bool):
     profile = game.mixed_behavior_profile(rational=rational_flag)
     for player in game.players:
         for infoset in player.infosets:
@@ -810,6 +812,60 @@ def test_regret_consistency(game: gbt.Game, rational_flag: bool):
                     max(profile.action_value(a) for a in infoset.actions) -
                     profile.action_value(action)
                 )
+
+
+@pytest.mark.parametrize(
+    "game,rational_flag",
+    [(games.create_mixed_behav_game_efg(), False),
+     (games.create_mixed_behav_game_efg(), True),
+     (games.create_stripped_down_poker_efg(), False),
+     (games.create_stripped_down_poker_efg(), True),
+     (games.create_kuhn_poker_efg(), False),
+     (games.create_kuhn_poker_efg(), True),
+     ]
+)
+def test_infoset_regret_consistency(game: gbt.Game, rational_flag: bool):
+    profile = game.mixed_behavior_profile(rational=rational_flag)
+    for player in game.players:
+        for infoset in player.infosets:
+            assert (
+                profile.infoset_regret(infoset) ==
+                max(profile.action_value(a) for a in infoset.actions) -
+                profile.infoset_value(infoset)
+            )
+
+
+@pytest.mark.parametrize(
+    "game,rational_flag",
+    [(games.create_mixed_behav_game_efg(), False),
+     (games.create_mixed_behav_game_efg(), True),
+     (games.create_stripped_down_poker_efg(), False),
+     (games.create_stripped_down_poker_efg(), True),
+     (games.create_kuhn_poker_efg(), False),
+     (games.create_kuhn_poker_efg(), True),
+     ]
+)
+def test_max_regret_consistency(game: gbt.Game, rational_flag: bool):
+    profile = game.mixed_behavior_profile(rational=rational_flag)
+    assert profile.max_regret() == profile.as_strategy().max_regret()
+
+
+@pytest.mark.parametrize(
+    "game,rational_flag",
+    [(games.create_mixed_behav_game_efg(), False),
+     (games.create_mixed_behav_game_efg(), True),
+     (games.create_stripped_down_poker_efg(), False),
+     (games.create_stripped_down_poker_efg(), True),
+     (games.create_kuhn_poker_efg(), False),
+     (games.create_kuhn_poker_efg(), True),
+     ]
+)
+def test_agent_max_regret_consistency(game: gbt.Game, rational_flag: bool):
+    profile = game.mixed_behavior_profile(rational=rational_flag)
+    assert (
+        profile.agent_max_regret() ==
+        max([profile.infoset_regret(infoset) for infoset in game.infosets])
+    )
 
 
 @pytest.mark.parametrize(
@@ -823,14 +879,14 @@ def test_regret_consistency(game: gbt.Game, rational_flag: bool):
      (games.create_mixed_behav_game_efg(), 2, 0, 0, None, False, TOL, 0),
      (games.create_mixed_behav_game_efg(), 2, 0, 1, None, False, TOL, 0.5),  # 3.5 - 3
      # U1 U2 U3
-     (games.create_mixed_behav_game_efg(), 0, 0, 0, [1.0, 0.0, 1.0, 0.0, 1.0, 0.0], False, TOL, 0),
-     (games.create_mixed_behav_game_efg(), 0, 0, 0, ["1", "0", "1", "0", "1", "0"], True, ZERO, 0),
-     (games.create_mixed_behav_game_efg(), 0, 0, 1, [1.0, 0.0, 1.0, 0.0, 1.0, 0.0], False, TOL, 9),
-     (games.create_mixed_behav_game_efg(), 0, 0, 1, ["1", "0", "1", "0", "1", "0"], True, ZERO, 9),
-     (games.create_mixed_behav_game_efg(), 1, 0, 0, [1.0, 0.0, 1.0, 0.0, 1.0, 0.0], False, TOL, 0),
-     (games.create_mixed_behav_game_efg(), 1, 0, 0, ["1", "0", "1", "0", "1", "0"], True, ZERO, 0),
-     (games.create_mixed_behav_game_efg(), 1, 0, 1, [1.0, 0.0, 1.0, 0.0, 1.0, 0.0], False, TOL, 8),
-     (games.create_mixed_behav_game_efg(), 1, 0, 1, ["1", "0", "1", "0", "1", "0"], True, ZERO, 8),
+     (games.create_mixed_behav_game_efg(), 0, 0, 0, [1, 0, 1, 0, 1, 0], False, TOL, 0),
+     (games.create_mixed_behav_game_efg(), 0, 0, 0, [1, 0, 1, 0, 1, 0], True, ZERO, 0),
+     (games.create_mixed_behav_game_efg(), 0, 0, 1, [1, 0, 1, 0, 1, 0], False, TOL, 9),
+     (games.create_mixed_behav_game_efg(), 0, 0, 1, [1, 0, 1, 0, 1, 0], True, ZERO, 9),
+     (games.create_mixed_behav_game_efg(), 1, 0, 0, [1, 0, 1, 0, 1, 0], False, TOL, 0),
+     (games.create_mixed_behav_game_efg(), 1, 0, 0, [1, 0, 1, 0, 1, 0], True, ZERO, 0),
+     (games.create_mixed_behav_game_efg(), 1, 0, 1, [1, 0, 1, 0, 1, 0], False, TOL, 8),
+     (games.create_mixed_behav_game_efg(), 1, 0, 1, [1, 0, 1, 0, 1, 0], True, ZERO, 8),
      # Mixed Nash equilibrium
      (games.create_mixed_behav_game_efg(), 0, 0, 0, ["2/5", "3/5", "1/2", "1/2", "1/3", "2/3"],
       True, ZERO, 0),
@@ -858,9 +914,9 @@ def test_regret_consistency(game: gbt.Game, rational_flag: bool):
       True, ZERO, "8/3"),  # (2/3*2 + 1/3*1) - (-1)
      ]
 )
-def test_regret_reference(game: gbt.Game, player_idx: int, infoset_idx: int, action_idx: int,
-                          action_probs: None | list, rational_flag: bool,
-                          tol: gbt.Rational | float, value: str | float):
+def test_action_regret_reference(game: gbt.Game, player_idx: int, infoset_idx: int,
+                                 action_idx: int, action_probs: None | list, rational_flag: bool,
+                                 tol: gbt.Rational | float, value: str | float):
     action = game.players[player_idx].infosets[infoset_idx].actions[action_idx]
     profile = game.mixed_behavior_profile(rational=rational_flag)
     if action_probs:
@@ -952,6 +1008,41 @@ def test_agent_liap_value_reference(game: gbt.Game, action_probs: None | list,
     assert (
         profile.agent_liap_value() == (gbt.Rational(expected_value)
                                        if rational_flag else expected_value)
+    )
+
+
+@pytest.mark.parametrize(
+    "game,action_probs,rational_flag,max_regret,agent_max_regret,liap_value,agent_liap_value",
+    [
+     # uniform (non-Nash):
+     (games.create_mixed_behav_game_efg(), None, True, "1/4", "1/4", "1/16", "1/16"),
+     (games.create_mixed_behav_game_efg(), None, False, 0.25, 0.25, 0.0625, 0.0625),
+     # Myerson fig 2.4
+     pytest.param(
+        games.read_from_file("myerson_fig_4_2.efg"), [0, 1, 0, 1, 1, 0], True, 1, 0, 1, 0,
+        marks=pytest.mark.xfail(reason="Needs to be fixed now")
+     ),
+     ]
+)
+def test_agent_max_regret_versus_non_agent(game: gbt.Game, action_probs: None | list,
+                                           rational_flag: bool,
+                                           max_regret: str | float,
+                                           agent_max_regret: str | float,
+                                           agent_liap_value: str | float,
+                                           liap_value: str | float,
+                                           ):
+    profile = game.mixed_behavior_profile(rational=rational_flag)
+    if action_probs:
+        _set_action_probs(profile, action_probs, rational_flag)
+    assert (profile.max_regret() == (gbt.Rational(max_regret) if rational_flag else max_regret))
+    assert (
+        profile.agent_max_regret() == (gbt.Rational(agent_max_regret)
+                                       if rational_flag else agent_max_regret)
+    )
+    assert (profile.liap_value() == (gbt.Rational(liap_value) if rational_flag else liap_value))
+    assert (
+        profile.agent_liap_value() == (gbt.Rational(agent_liap_value)
+                                       if rational_flag else agent_liap_value)
     )
 
 
@@ -1157,6 +1248,39 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
       lambda x, y: x.agent_liap_value(), lambda x: [1]),
      (games.create_stripped_down_poker_efg(), PROBS_1A_rat, PROBS_2A_rat, True,
       lambda x, y: x.agent_liap_value(), lambda x: [1]),
+     ######################################################################################
+     # liap_value (of profile, hence [1] for objects_to_test,
+     # any singleton collection would do)
+     (games.create_mixed_behav_game_efg(), PROBS_1A_doub, PROBS_2A_doub, False,
+      lambda x, y: x.liap_value(), lambda x: [1]),
+     (games.create_mixed_behav_game_efg(), PROBS_1A_rat, PROBS_2A_rat, True,
+      lambda x, y: x.liap_value(), lambda x: [1]),
+     (games.create_stripped_down_poker_efg(), PROBS_1B_doub, PROBS_2B_doub, False,
+      lambda x, y: x.liap_value(), lambda x: [1]),
+     (games.create_stripped_down_poker_efg(), PROBS_1A_rat, PROBS_2A_rat, True,
+      lambda x, y: x.liap_value(), lambda x: [1]),
+     ######################################################################################
+     # agent_max_regret (of profile, hence [1] for objects_to_test,
+     # any singleton collection would do)
+     (games.create_mixed_behav_game_efg(), PROBS_1A_doub, PROBS_2A_doub, False,
+      lambda x, y: x.agent_max_regret(), lambda x: [1]),
+     (games.create_mixed_behav_game_efg(), PROBS_1A_rat, PROBS_2A_rat, True,
+      lambda x, y: x.agent_max_regret(), lambda x: [1]),
+     (games.create_stripped_down_poker_efg(), PROBS_1B_doub, PROBS_2B_doub, False,
+      lambda x, y: x.agent_max_regret(), lambda x: [1]),
+     (games.create_stripped_down_poker_efg(), PROBS_1A_rat, PROBS_2A_rat, True,
+      lambda x, y: x.agent_max_regret(), lambda x: [1]),
+     ######################################################################################
+     # max_regret (of profile, hence [1] for objects_to_test,
+     # any singleton collection would do)
+     (games.create_mixed_behav_game_efg(), PROBS_1A_doub, PROBS_2A_doub, False,
+      lambda x, y: x.max_regret(), lambda x: [1]),
+     (games.create_mixed_behav_game_efg(), PROBS_1A_rat, PROBS_2A_rat, True,
+      lambda x, y: x.max_regret(), lambda x: [1]),
+     (games.create_stripped_down_poker_efg(), PROBS_1B_doub, PROBS_2B_doub, False,
+      lambda x, y: x.max_regret(), lambda x: [1]),
+     (games.create_stripped_down_poker_efg(), PROBS_1A_rat, PROBS_2A_rat, True,
+      lambda x, y: x.max_regret(), lambda x: [1]),
      ]
 )
 def test_profile_order_consistency(game: gbt.Game,

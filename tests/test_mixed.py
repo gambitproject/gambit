@@ -795,7 +795,7 @@ PROBS_1A_doub = (0.25, 0.25, 0.25, 0.25)
 PROBS_2A_doub = (0.5, 0, 0.5, 0)
 PROBS_1A_rat = ("1/4", "1/4", "1/4", "1/4")
 PROBS_2A_rat = ("1/2", "0", "1/2", "0")
-# For 2x2x2 nfg and Myserson 2-card poker efg (both have 6 strategies in total):
+# For 2x2x2 nfg and stripped_down_poker efg (both have 6 strategies in total):
 PROBS_1B_doub = (0.5, 0.5, 0.5, 0.5, 0.5, 0.5)
 PROBS_2B_doub = (1.0, 0.0, 1.0, 0.0, 1.0, 0.0)
 PROBS_1B_rat = ("1/2", "1/2", "1/2", "1/2", "1/2", "1/2")
@@ -933,6 +933,29 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
      pytest.param(games.create_stripped_down_poker_efg(), PROBS_1B_rat, PROBS_2B_rat, True,
                   lambda profile, y: profile.liap_value(), lambda x: [1],
                   id="liap_value_poker_rat"),
+     #################################################################################
+     # max_regret (of profile, hence [1] for objects_to_test, any singleton collection would do)
+     # 4x4 coordination nfg
+     pytest.param(games.create_coord_4x4_nfg(), PROBS_1A_doub, PROBS_2A_doub, False,
+                  lambda profile, y: profile.max_regret(), lambda x: [1],
+                  id="max_regret_coord_doub"),
+     pytest.param(games.create_coord_4x4_nfg(), PROBS_1A_rat, PROBS_2A_rat, True,
+                  lambda profile, y: profile.max_regret(), lambda x: [1],
+                  id="max_regret_coord_rat"),
+     # 2x2x2 nfg
+     pytest.param(games.create_2x2x2_nfg(), PROBS_1B_doub, PROBS_2B_doub, False,
+                  lambda profile, y: profile.max_regret(), lambda x: [1],
+                  id="max_regret_2x2x2_doub"),
+     pytest.param(games.create_2x2x2_nfg(), PROBS_1B_rat, PROBS_2B_rat, True,
+                  lambda profile, y: profile.max_regret(), lambda x: [1],
+                  id="max_regret_2x2x2_rat"),
+     # stripped-down poker
+     pytest.param(games.create_stripped_down_poker_efg(), PROBS_1B_doub, PROBS_2B_doub, False,
+                  lambda profile, y: profile.max_regret(), lambda x: [1],
+                  id="max_regret_poker_doub"),
+     pytest.param(games.create_stripped_down_poker_efg(), PROBS_1B_rat, PROBS_2B_rat, True,
+                  lambda profile, y: profile.max_regret(), lambda x: [1],
+                  id="max_regret_poker_rat"),
      ]
 )
 def test_profile_order_consistency(game: gbt.Game,
