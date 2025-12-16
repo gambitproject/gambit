@@ -37,8 +37,8 @@ version.
 
 1. To get started contributing code in the `Gambit GitHub repo <https://github.com/gambitproject/gambit>`__, do one of the following:
 
-- Core developers: request contributor access from one of the `team <https://www.gambit-project.org/team/>`__
-- External contributors: fork the repository on GitHub.
+   - Core developers: request contributor access from one of the `team <https://www.gambit-project.org/team/>`__
+   - External contributors: fork the repository on GitHub.
 
 2. Clone the repository to your local machine ::
 
@@ -63,9 +63,9 @@ version.
 
    Having `pre-commit` installed is recommended as it runs many of the same checks that are automatically conducted on any pull request.  Every time you commit, it will automatically fix some issues and highlight others for manual adjustment.
 
-5. Create a new branch for your changes ::
+5. Create a new branch for your changes. It's good practice to either give the branch a descriptive name or directly reference an issue number ::
 
-    git checkout -b feature/your-feature-name
+    git checkout -b feature/issue-number
 
 6. Make your changes. ::
 
@@ -78,10 +78,21 @@ version.
 
 7. Push your changes to your fork or branch ::
 
-    git push origin feature/your-feature-name
+    git push origin feature/issue-number
 
-8. Open a pull request on GitHub to the master branch of the upstream repository, describing your changes and linking to any relevant issues.
+8. Open a pull request on GitHub to the master branch of the upstream repository. Ensure your pull request:
+
+   - Has an informative title.
+   - Links to any relevant issues.
+   - Includes a clear description of the changes made.
+   - Explains how a reviewer can test the changes.
+
+   .. note::
+      It's good practice to open a draft pull request early in the development process to facilitate discussion and feedback, ensure there are no merge conflicts, and allow for continuous integration testing via GitHub Actions.
+
 9. Core developers will review your changes, provide feedback, and merge them into the master branch if they meet the project's standards.
+
+10. Once your pull request is merged, delete your branch on GitHub (a button should appear to do this automatically).
 
 Testing your changes
 --------------------
