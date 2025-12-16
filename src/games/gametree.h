@@ -89,7 +89,7 @@ public:
   /// Returns the largest payoff to the player in any play of the game
   Rational GetPlayerMaxPayoff(const GamePlayer &) const override;
   bool IsAbsentMinded(const GameInfoset &p_infoset) const override;
-  GameNode GetSubgameRoot(GameInfoset infoset) const override
+  GameNode GetSubgameRoot(const GameInfoset &infoset) const override
   {
     if (m_infosetSubgameRoot.empty()) {
       const_cast<GameTreeRep *>(this)->BuildSubgameRoots();

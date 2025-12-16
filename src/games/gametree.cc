@@ -1244,22 +1244,13 @@ std::map<GameInfosetRep *, GameNodeRep *> FindSubgameRoots(const Game &p_game)
   }
 
   SubgameScratchData data;
-  const int num_nodes = p_game->NumNodes();
 
-  // Collect nodes in ascending order (depth-first traversal) -- TODO: Replace with proper iterator
-  std::vector<GameNodeRep *> nodes_ascending;
-  nodes_ascending.reserve(num_nodes);
-  for (const auto &node : p_game->GetNodes()) {
-    nodes_ascending.push_back(node.get());
-  }
-
-  // Process in reverse order (descending node numbers, children before parents)
-  for (auto it = nodes_ascending.rbegin(); it != nodes_ascending.rend(); ++it) {
-    auto *node = *it;
+  // Process nodes in postorder
+  for (const auto &node : p_game->GetNodes(TraversalOrder::Postorder)) {
     if (node->IsTerminal() || data.dsu_parent.count(node->GetInfoset().get())) {
       continue;
     }
-    GenerateComponent(data, node);
+    GenerateComponent(data, node.get());
   }
 
   std::map<GameInfosetRep *, GameNodeRep *> result;
