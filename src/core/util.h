@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <numeric>
 #include <map>
+#include <optional>
 
 namespace Gambit {
 
