@@ -497,10 +497,14 @@ def test_lcp_behavior_double():
                 [[["2/3", "1/3"]], [[1, 0], ["1/3", "2/3"]]],
                 marks=pytest.mark.xfail(reason="Problem with missing terminal outcome")
         ),
-        pytest.param(
-                games.create_perfect_info_internal_outcomes_efg(),
+        (
+                games.create_two_player_perfect_info_win_lose_efg(),
                 [[[0, 1], [1, 0]], [[0, 1], ["1/2", "1/2"]]],
-                marks=pytest.mark.xfail(reason="Problem with internal outcomes")
+        ),
+        pytest.param(
+            games.create_two_player_perfect_info_win_lose_efg(nonterm_outcomes=True),
+            [[[0, 1], [1, 0]], [[0, 1], ["1/2", "1/2"]]],
+            marks=pytest.mark.xfail(reason="Problem with non-terminal outcomes")
         ),
         (
             games.create_three_action_internal_outcomes_efg(),
@@ -651,6 +655,11 @@ def test_lp_behavior_double():
                 games.create_two_player_perfect_info_win_lose_efg(),
                 [[[0, 1], [1, 0]], [[1, 0], [1, 0]]],
         ),
+        pytest.param(
+                games.create_two_player_perfect_info_win_lose_efg(nonterm_outcomes=True),
+                [[[0, 1], [1, 0]], [[1, 0], [1, 0]]],
+                marks=pytest.mark.xfail(reason="Problem with non-terminal outcomes")
+        ),
         (
                 games.create_2x2_zero_sum_efg(missing_term_outcome=False),
                 [[["1/2", "1/2"]], [["1/2", "1/2"]]]
@@ -713,11 +722,6 @@ def test_lp_behavior_double():
                 games.create_one_card_poker_lacking_outcome_efg(),
                 [[["2/3", "1/3"]], [[1, 0], ["1/3", "2/3"]]],
                 marks=pytest.mark.xfail(reason="Problem with missing terminal outcome")
-        ),
-        pytest.param(
-                games.create_perfect_info_internal_outcomes_efg(),
-                [[[0, 1], [1, 0]], [[1, 0], [1, 0]]],
-                marks=pytest.mark.xfail(reason="Problem with internal outcomes")
         ),
         (
             games.create_three_action_internal_outcomes_efg(nonterm_outcomes=True),
