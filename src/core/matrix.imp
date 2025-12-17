@@ -28,37 +28,11 @@ namespace Gambit {
 //       Matrix<T>: Constructors, destructors, constructive operators
 //-------------------------------------------------------------------------
 
-template <class T> Matrix<T>::Matrix() = default;
-
-template <class T>
-Matrix<T>::Matrix(unsigned int rows, unsigned int cols) : RectArray<T>(rows, cols)
-{
-}
-
-template <class T>
-Matrix<T>::Matrix(unsigned int rows, unsigned int cols, int minrows)
-  : RectArray<T>(minrows, minrows + rows - 1, 1, cols)
-{
-}
-
-template <class T> Matrix<T>::Matrix(int rl, int rh, int cl, int ch) : RectArray<T>(rl, rh, cl, ch)
-{
-}
-
-template <class T> Matrix<T>::Matrix(const Matrix<T> &M) : RectArray<T>(M) {}
-
-template <class T> Matrix<T>::~Matrix() = default;
-
-template <class T> Matrix<T> &Matrix<T>::operator=(const Matrix<T> &M)
-{
-  RectArray<T>::operator=(M);
-  return *this;
-}
 
 template <class T> Matrix<T> &Matrix<T>::operator=(const T &c)
 {
-  for (int i = this->minrow; i <= this->maxrow; i++) {
-    for (int j = this->mincol; j <= this->maxcol; j++) {
+  for (int i = MinRow(); i <= MaxRow(); i++) {
+    for (int j = MinCol(); j <= MaxCol(); j++) {
       (*this)(i, j) = c;
     }
   }
@@ -67,9 +41,9 @@ template <class T> Matrix<T> &Matrix<T>::operator=(const T &c)
 
 template <class T> Matrix<T> Matrix<T>::operator-()
 {
-  Matrix<T> tmp(this->minrow, this->maxrow, this->mincol, this->maxcol);
-  for (int i = this->minrow; i <= this->maxrow; i++) {
-    for (int j = this->mincol; j <= this->maxcol; j++) {
+  Matrix<T> tmp(MinRow(), MaxRow(), MinCol(), MaxCol());
+  for (int i = MinRow(); i <= MaxRow(); i++) {
+    for (int j = MinCol(); j <= MaxCol(); j++) {
       tmp(i, j) = -(*this)(i, j);
     }
   }
@@ -86,17 +60,14 @@ template <class T> Matrix<T> Matrix<T>::operator+(const Matrix<T> &M) const
     throw DimensionException();
   }
 
-  const Matrix<T> tmp(this->minrow, this->maxrow, this->mincol, this->maxcol);
-  for (int i = this->minrow; i <= this->maxrow; i++) {
-    T *src1 = this->data[i] + this->mincol;
-    T *src2 = M.data[i] + this->mincol;
-    T *dst = tmp.data[i] + this->mincol;
-    int j = this->maxcol - this->mincol + 1;
-    while (j--) {
-      *(dst++) = *(src1++) + *(src2++);
+  Matrix<T> tmp(MinRow(), MaxRow(), MinCol(), MaxCol());
+
+  for (int i = MinRow(); i <= MaxRow(); ++i) {
+    for (int j = MinCol(); j <= MaxCol(); ++j) {
+      tmp(i, j) = (*this)(i, j) + M(i, j);
     }
-    // assert((dst - 1) == tmp.data[i] + this->maxcol );
   }
+
   return tmp;
 }
 
@@ -106,17 +77,14 @@ template <class T> Matrix<T> Matrix<T>::operator-(const Matrix<T> &M) const
     throw DimensionException();
   }
 
-  const Matrix<T> tmp(this->minrow, this->maxrow, this->mincol, this->maxcol);
-  for (int i = this->minrow; i <= this->maxrow; i++) {
-    T *src1 = this->data[i] + this->mincol;
-    T *src2 = M.data[i] + this->mincol;
-    T *dst = tmp.data[i] + this->mincol;
-    int j = this->maxcol - this->mincol + 1;
-    while (j--) {
-      *(dst++) = *(src1++) - *(src2++);
+  Matrix<T> tmp(MinRow(), MaxRow(), MinCol(), MaxCol());
+
+  for (int i = MinRow(); i <= MaxRow(); ++i) {
+    for (int j = MinCol(); j <= MaxCol(); ++j) {
+      tmp(i, j) = (*this)(i, j) - M(i, j);
     }
-    // assert((dst - 1) == tmp.data[i] + this->maxcol);
   }
+
   return tmp;
 }
 
@@ -126,15 +94,13 @@ template <class T> Matrix<T> &Matrix<T>::operator+=(const Matrix<T> &M)
     throw DimensionException();
   }
 
-  for (int i = this->minrow; i <= this->maxrow; i++) {
-    T *src = M.data[i] + this->mincol;
-    T *dst = this->data[i] + this->mincol;
-    int j = this->maxcol - this->mincol + 1;
-    while (j--) {
-      *(dst++) += *(src++);
+  for (int i = MinRow(); i <= MaxRow(); ++i) {
+    for (int j = MinCol(); j <= MaxCol(); ++j) {
+      (*this)(i, j) += M(i, j);
     }
   }
-  return (*this);
+
+  return *this;
 }
 
 template <class T> Matrix<T> &Matrix<T>::operator-=(const Matrix<T> &M)
@@ -143,16 +109,13 @@ template <class T> Matrix<T> &Matrix<T>::operator-=(const Matrix<T> &M)
     throw DimensionException();
   }
 
-  for (int i = this->minrow; i <= this->maxrow; i++) {
-    T *src = M.data[i] + this->mincol;
-    T *dst = this->data[i] + this->mincol;
-    int j = this->maxcol - this->mincol + 1;
-    while (j--) {
-      *(dst++) -= *(src++);
+  for (int i = MinRow(); i <= MaxRow(); ++i) {
+    for (int j = MinCol(); j <= MaxCol(); ++j) {
+      (*this)(i, j) -= M(i, j);
     }
-    // assert((dst - 1) == this->data[i] + this->maxcol);
   }
-  return (*this);
+
+  return *this;
 }
 
 //-------------------------------------------------------------------------
@@ -165,29 +128,28 @@ template <class T> void Matrix<T>::CMultiply(const Vector<T> &in, Vector<T> &out
     throw DimensionException();
   }
 
-  for (int i = this->minrow; i <= this->maxrow; i++) {
+  for (int i = MinRow(); i <= MaxRow(); ++i) {
     T sum = (T)0;
 
-    T *src1 = this->data[i] + this->mincol;
     auto src2 = in.begin();
-    int j = this->maxcol - this->mincol + 1;
-    while (j--) {
-      sum += *(src1++) * *(src2++);
+    for (int j = MinCol(); j <= MaxCol(); ++j) {
+      sum += (*this)(i, j) * *(src2++);
     }
+
     out[i] = sum;
   }
 }
 
 template <class T> Matrix<T> Matrix<T>::operator*(const Matrix<T> &M) const
 {
-  if (this->mincol != M.minrow || this->maxcol != M.maxrow) {
+  if (MinCol() != M.MinRow() || MaxCol() != M.MaxRow()) {
     throw DimensionException();
   }
 
-  Matrix<T> tmp(this->minrow, this->maxrow, M.mincol, M.maxcol);
-  Vector<T> column(M.minrow, M.maxrow);
-  Vector<T> result(this->minrow, this->maxrow);
-  for (int j = M.mincol; j <= M.maxcol; j++) {
+  Matrix<T> tmp(MinRow(), MaxRow(), M.MinCol(), M.MaxCol());
+  Vector<T> column(M.MinRow(), M.MaxRow());
+  Vector<T> result(MinRow(), MaxRow());
+  for (int j = M.MinCol(); j <= M.MaxCol(); j++) {
     M.GetColumn(j, column);
     CMultiply(column, result);
     tmp.SetColumn(j, result);
@@ -201,7 +163,7 @@ template <class T> Vector<T> Matrix<T>::operator*(const Vector<T> &v) const
     throw DimensionException();
   }
 
-  Vector<T> tmp(this->minrow, this->maxrow);
+  Vector<T> tmp(MinRow(), MaxRow());
   CMultiply(v, tmp);
   return tmp;
 }
@@ -213,16 +175,12 @@ template <class T> void Matrix<T>::RMultiply(const Vector<T> &in, Vector<T> &out
   }
 
   out = (T)0;
-  for (int i = this->minrow; i <= this->maxrow; i++) {
-    T k = in[i];
 
-    T *src = this->data[i] + this->mincol;
-    auto dst = out.begin();
-    int j = this->maxcol - this->mincol + 1;
-    while (j--) {
-      *(dst++) += *(src++) * k;
+  for (int i = MinRow(); i <= MaxRow(); ++i) {
+    T k = in[i];
+    for (int j = MinCol(); j <= MaxCol(); ++j) {
+      out[j] += (*this)(i, j) * k;
     }
-    // assert(src - 1 == this->data[i] + this->maxcol);
   }
 }
 
@@ -240,29 +198,25 @@ template <class T> Vector<T> operator*(const Vector<T> &v, const Matrix<T> &M)
 
 template <class T> Matrix<T> Matrix<T>::operator*(const T &s) const
 {
-  const Matrix<T> tmp(this->minrow, this->maxrow, this->mincol, this->maxcol);
-  for (int i = this->minrow; i <= this->maxrow; i++) {
-    T *src = this->data[i] + this->mincol;
-    T *dst = tmp.data[i] + this->mincol;
-    int j = this->maxcol - this->mincol + 1;
-    while (j--) {
-      *(dst++) = *(src++) * s;
+  Matrix<T> tmp(MinRow(), MaxRow(), MinCol(), MaxCol());
+
+  for (int i = MinRow(); i <= MaxRow(); ++i) {
+    for (int j = MinCol(); j <= MaxCol(); ++j) {
+      tmp(i, j) = (*this)(i, j) * s;
     }
-    // assert((src - 1) == this->data[i] + this->maxcol);
   }
+
   return tmp;
 }
 
 template <class T> Matrix<T> &Matrix<T>::operator*=(const T &s)
 {
-  for (int i = this->minrow; i <= this->maxrow; i++) {
-    T *dst = this->data[i] + this->mincol;
-    int j = this->maxcol - this->mincol + 1;
-    while (j--) {
-      *(dst++) *= s;
+  for (int i = MinRow(); i <= MaxRow(); ++i) {
+    for (int j = MinCol(); j <= MaxCol(); ++j) {
+      (*this)(i, j) *= s;
     }
   }
-  return (*this);
+  return *this;
 }
 
 template <class T> Matrix<T> Matrix<T>::operator/(const T &s) const
@@ -271,15 +225,14 @@ template <class T> Matrix<T> Matrix<T>::operator/(const T &s) const
     throw ZeroDivideException();
   }
 
-  const Matrix<T> tmp(this->minrow, this->maxrow, this->mincol, this->maxcol);
-  for (int i = this->minrow; i <= this->maxrow; i++) {
-    T *src = this->data[i] + this->mincol;
-    T *dst = tmp.data[i] + this->mincol;
-    int j = this->maxcol - this->mincol + 1;
-    while (j--) {
-      *(dst++) = *(src++) / s;
+  Matrix<T> tmp(MinRow(), MaxRow(), MinCol(), MaxCol());
+
+  for (int i = MinRow(); i <= MaxRow(); ++i) {
+    for (int j = MinCol(); j <= MaxCol(); ++j) {
+      tmp(i, j) = (*this)(i, j) / s;
     }
   }
+
   return tmp;
 }
 
@@ -289,14 +242,13 @@ template <class T> Matrix<T> &Matrix<T>::operator/=(const T &s)
     throw ZeroDivideException();
   }
 
-  for (int i = this->minrow; i <= this->maxrow; i++) {
-    T *dst = this->data[i] + this->mincol;
-    int j = this->maxcol - this->mincol + 1;
-    while (j--) {
-      *(dst++) /= s;
+  for (int i = MinRow(); i <= MaxRow(); ++i) {
+    for (int j = MinCol(); j <= MaxCol(); ++j) {
+      (*this)(i, j) /= s;
     }
   }
-  return (*this);
+
+  return *this;
 }
 
 //-------------------------------------------------------------------------
@@ -305,10 +257,10 @@ template <class T> Matrix<T> &Matrix<T>::operator/=(const T &s)
 
 template <class T> Matrix<T> Matrix<T>::Transpose() const
 {
-  Matrix<T> tmp(this->mincol, this->maxcol, this->minrow, this->maxrow);
+  Matrix<T> tmp(MinCol(), MaxCol(), MinRow(), MaxRow());
 
-  for (int i = this->minrow; i <= this->maxrow; i++) {
-    for (int j = this->mincol; j <= this->maxcol; j++) {
+  for (int i = MinRow(); i <= MaxRow(); i++) {
+    for (int j = MinCol(); j <= MaxCol(); j++) {
       tmp(j, i) = (*this)(i, j);
     }
   }
@@ -326,18 +278,14 @@ template <class T> bool Matrix<T>::operator==(const Matrix<T> &M) const
     throw DimensionException();
   }
 
-  for (int i = this->minrow; i <= this->maxrow; i++) {
-    // inner loop
-    T *src1 = M.data[i] + this->mincol;
-    T *src2 = this->data[i] + this->mincol;
-    int j = this->maxcol - this->mincol + 1;
-    while (j--) {
-      if (*(src1++) != *(src2++)) {
+  for (int i = MinRow(); i <= MaxRow(); ++i) {
+    for (int j = MinCol(); j <= MaxCol(); ++j) {
+      if ((*this)(i, j) != M(i, j)) {
         return false;
       }
     }
-    // assert(src1 - 1 == M.data[i] + this->maxcol);
   }
+
   return true;
 }
 
@@ -345,18 +293,16 @@ template <class T> bool Matrix<T>::operator!=(const Matrix<T> &M) const { return
 
 template <class T> bool Matrix<T>::operator==(const T &s) const
 {
-  for (int i = this->minrow; i <= this->maxrow; i++) {
-    T *src = this->data[i] + this->mincol;
-    int j = this->maxcol - this->mincol + 1;
-    while (j--) {
-      if (*(src++) != s) {
+  for (int i = MinRow(); i <= MaxRow(); ++i) {
+    for (int j = MinCol(); j <= MaxCol(); ++j) {
+      if ((*this)(i, j) != s) {
         return false;
       }
     }
-    // assert(src - 1 == this->data[i] + this->maxcol);
   }
   return true;
 }
+
 
 template <class T> bool Matrix<T>::operator!=(const T &s) const { return !(*this == s); }
 
@@ -364,8 +310,8 @@ template <class T> bool Matrix<T>::operator!=(const T &s) const { return !(*this
 
 template <class T> Vector<T> Matrix<T>::Row(int i) const
 {
-  Vector<T> answer(this->mincol, this->maxcol);
-  for (int j = this->mincol; j <= this->maxcol; j++) {
+  Vector<T> answer(MinCol(), MaxCol());
+  for (int j = MinCol(); j <= MaxCol(); j++) {
     answer[j] = (*this)(i, j);
   }
   return answer;
@@ -373,8 +319,8 @@ template <class T> Vector<T> Matrix<T>::Row(int i) const
 
 template <class T> Vector<T> Matrix<T>::Column(int j) const
 {
-  Vector<T> answer(this->minrow, this->maxrow);
-  for (int i = this->minrow; i <= this->maxrow; i++) {
+  Vector<T> answer(MinRow(), MaxRow());
+  for (int i = MinRow(); i <= MaxRow(); i++) {
     answer[i] = (*this)(i, j);
   }
   return answer;
@@ -387,8 +333,8 @@ template <class T> void Matrix<T>::MakeIdent()
   if (!IsSquare()) {
     throw DimensionException();
   }
-  for (int i = this->minrow; i <= this->maxrow; i++) {
-    for (int j = this->mincol; j <= this->maxcol; j++) {
+  for (int i = MinRow(); i <= MaxRow(); i++) {
+    for (int j = MinCol(); j <= MaxCol(); j++) {
       if (i == j) {
         (*this)(i, j) = (T)1;
       }
@@ -404,27 +350,24 @@ template <class T> void Matrix<T>::Pivot(int row, int col)
   if (!this->CheckRow(row) || !this->CheckColumn(col)) {
     throw std::out_of_range("Index out of range in Matrix::Pivot");
   }
-  if (this->data[row][col] == (T)0) {
+  if ((*this)(row, col) == (T)0) {
     throw ZeroDivideException();
   }
 
-  T mult = (T)1 / this->data[row][col];
-  for (int j = this->mincol; j <= this->maxcol; j++) {
-    this->data[row][j] *= mult;
-  }
-  for (int i = this->minrow; i <= this->maxrow; i++) {
-    if (i != row) {
-      mult = this->data[i][col];
+  T inv = (T)1 / (*this)(row, col);
 
-      // inner loop
-      T *src = this->data[row] + this->mincol;
-      T *dst = this->data[i] + this->mincol;
-      int j = this->maxcol - this->mincol + 1;
-      while (j--) {
-        *(dst++) -= *(src++) * mult;
+  // scale pivot row
+  for (int j = MinCol(); j <= MaxCol(); ++j) {
+    (*this)(row, j) *= inv;
+  }
+
+  // eliminate column
+  for (int i = MinRow(); i <= MaxRow(); ++i) {
+    if (i != row) {
+      T mult = (*this)(i, col);
+      for (int j = MinCol(); j <= MaxCol(); ++j) {
+        (*this)(i, j) -= (*this)(row, j) * mult;
       }
-      // assert( dst-1 == this->data[i] + this->maxcol ); // debug
-      //  end inner loop
     }
   }
 }
@@ -436,12 +379,12 @@ template <class T> Matrix<T> Matrix<T>::Inverse() const
   }
 
   Matrix copy(*this);
-  Matrix inv(this->MaxRow(), this->MaxRow());
+  Matrix inv(MaxRow(), MaxRow());
 
   // initialize inverse matrix and prescale row vectors
-  for (int i = this->MinRow(); i <= this->MaxRow(); i++) {
+  for (int i = MinRow(); i <= MaxRow(); i++) {
     T max = (T)0;
-    for (int j = this->MinCol(); j <= this->MaxCol(); j++) {
+    for (int j = MinCol(); j <= MaxCol(); j++) {
       T abs = copy(i, j);
       if (abs < (T)0) {
         abs = -abs;
@@ -456,7 +399,7 @@ template <class T> Matrix<T> Matrix<T>::Inverse() const
     }
 
     T scale = (T)1 / max;
-    for (int j = this->MinCol(); j <= this->MaxCol(); j++) {
+    for (int j = MinCol(); j <= MaxCol(); j++) {
       copy(i, j) *= scale;
       if (i == j) {
         inv(i, j) = scale;
@@ -467,14 +410,14 @@ template <class T> Matrix<T> Matrix<T>::Inverse() const
     }
   }
 
-  for (int i = this->MinCol(); i <= this->MaxCol(); i++) {
+  for (int i = MinCol(); i <= MaxCol(); i++) {
     // find pivot row
     T max = copy(i, i);
     if (max < (T)0) {
       max = -max;
     }
     int row = i;
-    for (int j = i + 1; j <= this->MaxRow(); j++) {
+    for (int j = i + 1; j <= MaxRow(); j++) {
       T abs = copy(j, i);
       if (abs < (T)0) {
         abs = -abs;
@@ -493,16 +436,16 @@ template <class T> Matrix<T> Matrix<T>::Inverse() const
     inv.SwitchRows(i, row);
     // scale pivot row
     T factor = (T)1 / copy(i, i);
-    for (int k = this->MinCol(); k <= this->MaxCol(); k++) {
+    for (int k = MinCol(); k <= MaxCol(); k++) {
       copy(i, k) *= factor;
       inv(i, k) *= factor;
     }
 
     // reduce other rows
-    for (int j = this->MinRow(); j <= this->MaxRow(); j++) {
+    for (int j = MinRow(); j <= MaxRow(); j++) {
       if (j != i) {
         T mult = copy(j, i);
-        for (int k = this->MinCol(); k <= this->MaxCol(); k++) {
+        for (int k = MinCol(); k <= MaxCol(); k++) {
           copy(j, k) -= copy(i, k) * mult;
           inv(j, k) -= inv(i, k) * mult;
         }
@@ -522,44 +465,44 @@ template <class T> T Matrix<T>::Determinant() const
   T factor = (T)1;
   Matrix M(*this);
 
-  for (int row = this->MinRow(); row <= this->MaxRow(); row++) {
+  for (int row = MinRow(); row <= MaxRow(); row++) {
 
     // Experience (as of 3/22/99) suggests that, in the interest of
     // numerical stability, it might be best to do Gaussian
     // elimination with respect to the row (of those feasible)
     // whose entry has the largest absolute value.
     int swap_row = row;
-    for (int i = row + 1; i <= this->MaxRow(); i++) {
-      if (abs(M.data[i][row]) > abs(M.data[swap_row][row])) {
+    for (int i = row + 1; i <= MaxRow(); i++) {
+      if (abs(M(i, row)) > abs(M(swap_row, row))) {
         swap_row = i;
       }
     }
 
     if (swap_row != row) {
       M.SwitchRows(row, swap_row);
-      for (int j = this->MinCol(); j <= this->MaxCol(); j++) {
-        M.data[row][j] *= (T)-1;
+      for (int j = MinCol(); j <= MaxCol(); j++) {
+        M(row, j) *= (T)-1;
       }
     }
 
-    if (M.data[row][row] == (T)0) {
+    if (M(row, row) == (T)0) {
       return (T)0;
     }
 
     // now do row operations to clear the row'th column
     // below the diagonal
-    for (int row1 = row + 1; row1 <= this->MaxRow(); row1++) {
-      factor = -M.data[row1][row] / M.data[row][row];
-      for (int i = this->MinCol(); i <= this->MaxCol(); i++) {
-        M.data[row1][i] += M.data[row][i] * factor;
+    for (int row1 = row + 1; row1 <= MaxRow(); row1++) {
+      factor = -M(row1, row) / M(row, row);
+      for (int i = MinCol(); i <= MaxCol(); i++) {
+        M(row1, i) += M(row, i) * factor;
       }
     }
   }
 
   // finally we multiply the diagonal elements
   T det = (T)1;
-  for (int row = this->MinRow(); row <= this->MaxRow(); row++) {
-    det *= M.data[row][row];
+  for (int row = MinRow(); row <= MaxRow(); row++) {
+    det *= M(row, row);
   }
   return det;
 }

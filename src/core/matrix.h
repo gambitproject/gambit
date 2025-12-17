@@ -36,49 +36,77 @@ public:
 
 template <class T> Vector<T> operator*(const Vector<T> &, const Matrix<T> &);
 
-template <class T> class Matrix : public RectArray<T> {
-  friend Vector<T> operator* <>(const Vector<T> &, const Matrix<T> &);
+template <class T> class Matrix {
+  friend Vector<T> operator* <>(const Vector<T> &, const Matrix &);
+
+  RectArray<T> m_data;
 
 public:
   /// @name Lifecycle
   //@{
-  Matrix();
-  Matrix(unsigned int rows, unsigned int cols);
-  Matrix(unsigned int rows, unsigned int cols, int minrows);
-  Matrix(int rl, int rh, int cl, int ch);
-  Matrix(const Matrix<T> &);
-  ~Matrix() override;
+  Matrix() = default;
+  Matrix(unsigned int rows, unsigned int cols) : m_data(rows, cols) {}
+  Matrix(unsigned int rows, unsigned int cols, int minrows)
+    : m_data(minrows, minrows + rows - 1, 1, cols)
+  {
+  }
+  Matrix(int rl, int rh, int cl, int ch) : m_data(rl, rh, cl, ch) {}
+  Matrix(const Matrix &) = default;
+  Matrix(Matrix &&) noexcept = default;
+  ~Matrix() = default;
 
-  Matrix<T> &operator=(const Matrix<T> &);
-  Matrix<T> &operator=(const T &);
+  Matrix &operator=(const Matrix &) = default;
+  Matrix &operator=(Matrix &&) noexcept = default;
+  Matrix &operator=(const T &);
   //@}
+
+  // element access
+  T &operator()(int r, int c) { return m_data(r, c); }
+  const T &operator()(int r, int c) const { return m_data(r, c); }
+
+  // bounds / dimensions
+  int MinRow() const { return m_data.MinRow(); }
+  int MaxRow() const { return m_data.MaxRow(); }
+  int MinCol() const { return m_data.MinCol(); }
+  int MaxCol() const { return m_data.MaxCol(); }
+  int NumRows() const { return m_data.NumRows(); }
+  int NumColumns() const { return m_data.NumColumns(); }
+
+  bool IsSquare() const { return MinRow() == MinCol() && MaxRow() == MaxCol(); }
+
+  // row ops used internally
+  void SwitchRows(int i, int j) { m_data.SwitchRows(i, j); }
+  template <class V> void GetColumn(int j, V &) const;
+  template <class V> void SetColumn(int j, const V &);
+  template <class V> void GetRow(int row, V &) const;
+  template <class V> void SetRow(int row, const V &);
+  // vector helpers used internally
+  template <class V> bool CheckRow(const V &v) const { return m_data.CheckRow(v); }
+  template <class V> bool CheckColumn(const V &v) const { return m_data.CheckColumn(v); }
+  bool CheckBounds(const Matrix &M) const { return m_data.CheckBounds(M.m_data); }
 
   /// @name Extracting rows and columns
   //@{
-  bool IsSquare() const
-  {
-    return this->MinRow() == this->MinCol() && this->MaxRow() == this->MaxCol();
-  }
   Vector<T> Row(int) const;
   Vector<T> Column(int) const;
   //@}
 
   /// @name Comparison operators
   //@{
-  bool operator==(const Matrix<T> &) const;
-  bool operator!=(const Matrix<T> &) const;
+  bool operator==(const Matrix &) const;
+  bool operator!=(const Matrix &) const;
   bool operator==(const T &) const;
   bool operator!=(const T &) const;
   //@}
 
   /// @name Additive operators
   //@{
-  Matrix<T> operator+(const Matrix<T> &) const;
-  Matrix<T> operator-(const Matrix<T> &) const;
-  Matrix<T> &operator+=(const Matrix<T> &);
-  Matrix<T> &operator-=(const Matrix<T> &);
+  Matrix operator+(const Matrix &) const;
+  Matrix operator-(const Matrix &) const;
+  Matrix &operator+=(const Matrix &);
+  Matrix &operator-=(const Matrix &);
 
-  Matrix<T> operator-();
+  Matrix operator-();
   //@}
 
   /// @name Multiplicative operators
@@ -87,18 +115,18 @@ public:
   void CMultiply(const Vector<T> &, Vector<T> &) const;
   /// "in-place" row (transposed) multiply
   void RMultiply(const Vector<T> &, Vector<T> &) const;
-  Matrix<T> operator*(const Matrix<T> &) const;
+  Matrix operator*(const Matrix<T> &) const;
   Vector<T> operator*(const Vector<T> &) const;
-  Matrix<T> operator*(const T &) const;
-  Matrix<T> &operator*=(const T &);
+  Matrix operator*(const T &) const;
+  Matrix &operator*=(const T &);
 
-  Matrix<T> operator/(const T &) const;
-  Matrix<T> &operator/=(const T &);
+  Matrix operator/(const T &) const;
+  Matrix &operator/=(const T &);
   //@
 
   /// @name Other operations
   //@{
-  Matrix<T> Transpose() const;
+  Matrix Transpose() const;
   /// Set matrix to identity matrix
   void MakeIdent();
   void Pivot(int, int);
@@ -109,6 +137,62 @@ public:
 };
 
 template <class T> Vector<T> operator*(const Vector<T> &, const Matrix<T> &);
+
+template <class T> template <class Vector> void Matrix<T>::GetColumn(int col, Vector &v) const
+{
+  if (col < MinCol() || col > MaxCol()) {
+    throw std::out_of_range("Index out of range in Matrix::GetColumn");
+  }
+  if (!CheckColumn(v)) {
+    throw DimensionException();
+  }
+
+  for (int i = MinRow(); i <= MaxRow(); ++i) {
+    v[i] = (*this)(i, col);
+  }
+}
+
+template <class T> template <class Vector> void Matrix<T>::SetColumn(int col, const Vector &v)
+{
+  if (col < MinCol() || col > MaxCol()) {
+    throw std::out_of_range("Index out of range in Matrix::SetColumn");
+  }
+  if (!CheckColumn(v)) {
+    throw DimensionException();
+  }
+
+  for (int i = MinRow(); i <= MaxRow(); ++i) {
+    (*this)(i, col) = v[i];
+  }
+}
+
+template <class T> template <class Vector> void Matrix<T>::GetRow(int row, Vector &v) const
+{
+  if (row < MinRow() || row > MaxRow()) {
+    throw std::out_of_range("Index out of range in Matrix::GetRow");
+  }
+  if (!CheckRow(v)) {
+    throw DimensionException();
+  }
+
+  for (int j = MinCol(); j <= MaxCol(); ++j) {
+    v[j] = (*this)(row, j);
+  }
+}
+
+template <class T> template <class Vector> void Matrix<T>::SetRow(int row, const Vector &v)
+{
+  if (row < MinRow() || row > MaxRow()) {
+    throw std::out_of_range("Index out of range in Matrix::SetRow");
+  }
+  if (!CheckRow(v)) {
+    throw DimensionException();
+  }
+
+  for (int j = MinCol(); j <= MaxCol(); ++j) {
+    (*this)(row, j) = v[j];
+  }
+}
 
 } // end namespace Gambit
 
