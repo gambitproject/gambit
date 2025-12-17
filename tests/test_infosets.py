@@ -162,3 +162,44 @@ def test_infoset_own_prior_actions(game_file, expected_results):
         }
 
         assert actual_details == expected_set
+
+
+def _get_node_by_path(game, path: list[str]) -> gbt.Node:
+    """
+    Helper to find a node by following a sequence of action labels.
+
+    Parameters
+    ----------
+    path : list[str]
+        A list of action labels in Node->Root order.
+    """
+    node = game.root
+    for action_label in reversed(path):
+        node = node.children[action_label]
+
+    return node
+
+
+@pytest.mark.parametrize("game_input, expected_am_paths", [
+    # Games without absent-mindedness
+    ("e02.efg", []),
+    ("stripped_down_poker.efg", []),
+    ("basic_extensive_game.efg", []),
+    ("gilboa_two_am_agents.efg", []),  # forgetting past information; Gilboa (GEB, 1997)
+    ("wichardt.efg", []),              # forgetting past action; Wichardt (GEB, 2008)
+
+    # Games with absent-mindedness
+    ("noPR-AM-driver-two-players.efg", [[]]),
+    ("noPR-action-AM.efg", [[]]),
+    ("noPR-action-AM-two-hops.efg", [["2", "1", "1", "1", "1"], ["1", "1", "1"]]),
+])
+def test_infoset_is_absent_minded(game_input, expected_am_paths):
+    """
+    Verify the is_absent_minded property of information sets.
+    """
+    game = games.read_from_file(game_input)
+
+    expected_infosets = {_get_node_by_path(game, path).infoset for path in expected_am_paths}
+    actual_infosets = {infoset for infoset in game.infosets if infoset.is_absent_minded}
+
+    assert actual_infosets == expected_infosets

@@ -300,6 +300,7 @@ cdef extern from "games/game.h":
         stdvector[c_GameNode] GetPlays(c_GameInfoset) except +
         stdvector[c_GameNode] GetPlays(c_GameAction) except +
         bool IsPerfectRecall() except +
+        bool IsAbsentMinded(c_GameInfoset) except +
 
         c_GameInfoset AppendMove(c_GameNode, c_GamePlayer, int) except +ValueError
         c_GameInfoset AppendMove(c_GameNode, c_GameInfoset) except +ValueError

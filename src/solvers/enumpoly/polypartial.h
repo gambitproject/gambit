@@ -98,7 +98,7 @@ public:
   }
   int GetDimension() const { return m_system.front().GetDimension(); }
   Matrix<T> DerivativeMatrix(const Vector<T> &, int) const;
-  SquareMatrix<T> SquareDerivativeMatrix(const Vector<T> &) const;
+  Matrix<T> SquareDerivativeMatrix(const Vector<T> &) const;
   Vector<T> ValuesOfRootPolys(const Vector<T> &, int) const;
 };
 

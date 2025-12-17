@@ -43,7 +43,6 @@ namespace Gambit {
 /// Note importantly that the index operator [] is **1-based** - that is, the first
 /// element of the list is 1, not 0.
 template <class T> class List {
-private:
   std::list<T> m_list;
 
 public:
@@ -53,10 +52,12 @@ public:
   using size_type = typename std::list<T>::size_type;
 
   List() = default;
-  List(const List<T> &) = default;
+  List(const List &) = default;
+  List(List &&) noexcept = default;
+  List &operator=(List &&) noexcept = default;
   ~List() = default;
 
-  List<T> &operator=(const List<T> &) = default;
+  List &operator=(const List &) = default;
 
   const T &operator[](size_type p_index) const
   {
@@ -95,7 +96,18 @@ public:
   /// Inserts the value at the specified position
   void insert(iterator pos, const T &value) { m_list.insert(pos, value); }
   /// Erases the element at the specified position
-  void erase(iterator pos) { m_list.erase(pos); }
+  iterator erase(iterator pos) { return m_list.erase(pos); }
+  template <class Predicate> void remove_if(Predicate pred)
+  {
+    for (auto it = begin(); it != end();) {
+      if (pred(*it)) {
+        it = erase(it);
+      }
+      else {
+        ++it;
+      }
+    }
+  }
 
   /// Removes all elements from the list container (which are destroyed),
   /// leaving the container with a size of 0.
@@ -109,8 +121,8 @@ public:
   /// Returns a reference to the last element in the list container.
   const T &back() const { return m_list.back(); }
 
-  bool operator==(const List<T> &b) const { return m_list == b.m_list; }
-  bool operator!=(const List<T> &b) const { return m_list != b.m_list; }
+  bool operator==(const List &b) const { return m_list == b.m_list; }
+  bool operator!=(const List &b) const { return m_list != b.m_list; }
 
   /// Return a forward iterator starting at the beginning of the list
   iterator begin() { return m_list.begin(); }

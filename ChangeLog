@@ -2,6 +2,10 @@
 
 ## [16.5.0] - unreleased
 
+### Added
+- Implement `IsAbsentMinded()` on information sets (C++) and `Infoset.is_absent_minded` (Python)
+  to detect if an information is absent-minded.
+
 ### Changed
 - In the graphical interface, removed option to configure information set link drawing; information sets
   are always drawn and indicators are always drawn if an information set spans multiple levels.

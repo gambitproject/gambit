@@ -66,7 +66,7 @@ private:
   // the one produced by the last step
   double MaxDistanceFromPointToVertexAfterTransformation(const Rectangle<double> &,
                                                          const Vector<double> &,
-                                                         const SquareMatrix<double> &) const;
+                                                         const Matrix<double> &) const;
 
   bool HasNoOtherRootsIn(const Rectangle<double> &, const Vector<double> &) const;
 

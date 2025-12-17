@@ -72,8 +72,7 @@ public:
 
 /// A cartesian product of intervals
 template <class T> class Rectangle {
-private:
-  List<Interval<T>> sides;
+  Array<Interval<T>> sides;
 
   Rectangle() = default;
 
