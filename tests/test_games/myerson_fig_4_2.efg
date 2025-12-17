@@ -1,5 +1,6 @@
-EFG 2 R "Untitled Extensive Game" { "Player 1" "Player 2" }
-""
+EFG 2 R "Myerson (1991) Fig 4.2" { "Player 1" "Player 2" }
+"An example from Myerson (1991) Fig 4.2 which has an agent Nash equilibrium that is
+not a Nash equilibrium"
 
 p "" 1 1 "" { "A1" "B1" } 0
 p "" 2 1 "" { "W2" "X2" } 0

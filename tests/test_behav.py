@@ -1017,7 +1017,7 @@ def test_agent_liap_value_reference(game: gbt.Game, action_probs: None | list,
      # uniform (non-Nash):
      (games.create_mixed_behav_game_efg(), None, True, "1/4", "1/4", "1/16", "1/16"),
      (games.create_mixed_behav_game_efg(), None, False, 0.25, 0.25, 0.0625, 0.0625),
-     # Myerson fig 2.4
+     # Myerson fig 4.2
      (games.read_from_file("myerson_fig_4_2.efg"), [0, 1, 0, 1, 1, 0], True, 1, 0, 1, 0),
     ]
 )
