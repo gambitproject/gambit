@@ -182,6 +182,17 @@ def test_enummixed_rational(game: gbt.Game, mixed_strategy_prof_data: list):
                 3,
         ),
         (
+                games.create_chance_in_middle_efg(nonterm_outcomes=True),
+                [[[[0.27272727272727276, 0.7272727272727273],
+                   [1.0, 0.0], [1.0, 0.0], [1.0, 0.0], [1.0, 0.0]],
+                  [[1.0, 0.0], [0.5454545454545455, 0.4545454545454545]]],
+                 [[[1.0, 0.0], [1.0, 0.0], [1.0, 0.0], [0.0, 0.0], [0.0, 0.0]],
+                  [[0.0, 1.0], [1.0, 0.0]]],
+                 [[[0.0, 1.0], [0.0, 0.0], [0.0, 0.0], [1.0, 0.0], [1.0, 0.0]],
+                  [[1.0, 0.0], [0.0, 1.0]]]],
+                3,
+        ),
+        (
                 games.create_one_card_poker_lacking_outcome_efg(),
                 [[[[0.6666666666666666, 0.33333333333333337]],
                   [[1.0, 0.0], [0.3333333333333333, 0.6666666666666667]]]],
@@ -483,13 +494,20 @@ def test_lcp_behavior_double():
                               "1/10000000000000000000"]],
                 ],
         ),
+        (
+            games.create_chance_in_middle_efg(),
+            [
+                [["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]],
+                [[1, 0], ["6/11", "5/11"]]
+            ]
+        ),
         pytest.param(
-                games.create_chance_in_middle_efg(),
-                [
-                    [["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]],
-                    [[1, 0], ["6/11", "5/11"]]
-                ],
-                marks=pytest.mark.xfail(reason="Problem with internal outcomes")
+            games.create_chance_in_middle_efg(nonterm_outcomes=True),
+            [
+                [["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]],
+                [[1, 0], ["6/11", "5/11"]]
+            ],
+            marks=pytest.mark.xfail(reason="Problem with internal outcomes")
         ),
         # Non-zero-sum games
         (
@@ -678,13 +696,20 @@ def test_lp_behavior_double():
                               "1/10000000000000000000"]],
                 ],
         ),
+        (
+            games.create_chance_in_middle_efg(),
+            [
+                [["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]],
+                [[1, 0], ["6/11", "5/11"]]
+            ],
+        ),
         pytest.param(
-                games.create_chance_in_middle_efg(),
-                [
-                    [["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]],
-                    [[1, 0], ["6/11", "5/11"]]
-                ],
-                marks=pytest.mark.xfail(reason="Problem with internal outcomes")
+            games.create_chance_in_middle_efg(nonterm_outcomes=True),
+            [
+                [["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]],
+                [[1, 0], ["6/11", "5/11"]]
+            ],
+            marks=pytest.mark.xfail(reason="Problem with internal outcomes")
         ),
     ],
 )

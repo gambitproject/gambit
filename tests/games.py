@@ -248,7 +248,7 @@ def create_non_zero_sum_lacking_outcome_efg() -> gbt.Game:
     return g
 
 
-def create_chance_in_middle_efg() -> gbt.Game:
+def create_chance_in_middle_efg(nonterm_outcomes: bool = False) -> gbt.Game:
     g = gbt.Game.new_tree(players=["1", "2"],
                           title="Chance in middle game")
     g.append_move(g.root, "1", ["A", "B"])
@@ -256,7 +256,6 @@ def create_chance_in_middle_efg() -> gbt.Game:
     g.set_chance_probs(g.root.children[0].infoset, ["1/5", "4/5"])
     g.append_move(g.root.children[1], g.players.chance, ["H", "L"])
     g.set_chance_probs(g.root.children[1].infoset, ["7/10", "3/10"])
-    g.set_outcome(g.root.children[0].children[0], g.add_outcome([-1, 1], label="a"))
     for i in range(2):
         g.append_move(g.root.children[0].children[i], "2", ["X", "Y"])
         ist = g.root.children[0].children[i].infoset
@@ -268,12 +267,22 @@ def create_chance_in_middle_efg() -> gbt.Game:
             g.append_infoset(g.root.children[i].children[1].children[j], ist)
     o_1 = g.add_outcome([1, -1], label="1")
     o_m1 = g.add_outcome([-1, 1], label="-1")
+    o_m2 = g.add_outcome([-2, 2], label="-2")
     o_h = g.add_outcome(["1/2", "-1/2"], label="0.5")
     o_mh = g.add_outcome(["-1/2", "1/2"], label="-0.5")
-    g.set_outcome(g.root.children[0].children[0].children[0].children[0], o_1)
-    g.set_outcome(g.root.children[0].children[0].children[0].children[1], o_m1)
-    g.set_outcome(g.root.children[0].children[0].children[1].children[0], o_h)
-    g.set_outcome(g.root.children[0].children[0].children[1].children[1], o_mh)
+    o_z = g.add_outcome([0, 0], label="0")
+    o_m3o2 = g.add_outcome(["-3/2", "3/2"], label="-1.5")
+    if nonterm_outcomes:
+        g.set_outcome(g.root.children[0].children[0], g.add_outcome([-1, 1], label="a"))
+        g.set_outcome(g.root.children[0].children[0].children[0].children[0], o_1)
+        g.set_outcome(g.root.children[0].children[0].children[0].children[1], o_m1)
+        g.set_outcome(g.root.children[0].children[0].children[1].children[0], o_h)
+        g.set_outcome(g.root.children[0].children[0].children[1].children[1], o_mh)
+    else:
+        g.set_outcome(g.root.children[0].children[0].children[0].children[0], o_z)
+        g.set_outcome(g.root.children[0].children[0].children[0].children[1], o_m2)
+        g.set_outcome(g.root.children[0].children[0].children[1].children[0], o_mh)
+        g.set_outcome(g.root.children[0].children[0].children[1].children[1], o_m3o2)
     g.set_outcome(g.root.children[0].children[1].children[0].children[0], o_h)
     g.set_outcome(g.root.children[0].children[1].children[0].children[1], o_mh)
     g.set_outcome(g.root.children[0].children[1].children[1].children[0], o_1)
