@@ -71,7 +71,7 @@ template <class T> void TreeMixedStrategyProfileRep<T>::InvalidateCache() const
 template <class T> T TreeMixedStrategyProfileRep<T>::GetPayoff(int pl) const
 {
   MakeBehavior();
-  return mixed_behav_profile_sptr->GetPayoff(pl);
+  return mixed_behav_profile_sptr->GetPayoff(mixed_behav_profile_sptr->GetGame()->GetPlayer(pl));
 }
 
 template <class T>

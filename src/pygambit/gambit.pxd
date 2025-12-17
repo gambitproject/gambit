@@ -368,7 +368,7 @@ cdef extern from "games/behavmixed.h" namespace "Gambit":
         c_MixedBehaviorProfile[T] Normalize()  # except + doesn't compile
         T getitem "operator[]"(int) except +IndexError
         T getaction "operator[]"(c_GameAction) except +IndexError
-        T GetPayoff(int) except +
+        T GetPayoff(c_GamePlayer) except +
         T GetBeliefProb(c_GameNode) except +
         T GetRealizProb(c_GameNode) except +
         T GetInfosetProb(c_GameInfoset) except +

@@ -231,7 +231,8 @@ public:
   T GetPayoff(int pl) const
   {
     CheckVersion();
-    return m_rep->GetPayoff(pl);
+    return m_rep->GetPayoff(GetGame()->GetPlayer(pl));
+    ;
   }
 
   /// Computes the payoff of the profile to the player

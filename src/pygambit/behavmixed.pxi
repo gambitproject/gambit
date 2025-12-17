@@ -942,7 +942,7 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
         setitem_mbpd_action(deref(self.profile), index.action, value)
 
     def _payoff(self, player: Player) -> float:
-        return deref(self.profile).GetPayoff(player.player.deref().GetNumber())
+        return deref(self.profile).GetPayoff(player.player)
 
     def _belief(self, node: Node) -> float:
         return deref(self.profile).GetBeliefProb(node.node)
@@ -1044,7 +1044,7 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
                             to_rational(str(value).encode("ascii")))
 
     def _payoff(self, player: Player) -> Rational:
-        return rat_to_py(deref(self.profile).GetPayoff(player.player.deref().GetNumber()))
+        return rat_to_py(deref(self.profile).GetPayoff(player.player))
 
     def _belief(self, node: Node) -> Rational:
         return rat_to_py(deref(self.profile).GetBeliefProb(node.node))
