@@ -492,19 +492,13 @@ def test_lcp_behavior_double():
                 games.create_perfect_info_with_chance_efg(),
                 [[[0, 1]], [[0, 1], [0, 1]]],
         ),
-        pytest.param(
-                games.create_one_card_poker_lacking_outcome_efg(),
-                [[["2/3", "1/3"]], [[1, 0], ["1/3", "2/3"]]],
-                marks=pytest.mark.xfail(reason="Problem with missing terminal outcome")
-        ),
         (
                 games.create_two_player_perfect_info_win_lose_efg(),
                 [[[0, 1], [1, 0]], [[0, 1], ["1/2", "1/2"]]],
         ),
-        pytest.param(
+        (
             games.create_two_player_perfect_info_win_lose_efg(nonterm_outcomes=True),
             [[[0, 1], [1, 0]], [[0, 1], ["1/2", "1/2"]]],
-            marks=pytest.mark.xfail(reason="Problem with non-terminal outcomes")
         ),
         (
             games.create_three_action_internal_outcomes_efg(),
@@ -718,13 +712,8 @@ def test_lp_behavior_double():
                 games.create_perfect_info_with_chance_efg(),
                 [[[0, 1]], [[1, 0], [1, 0]]],
         ),
-        pytest.param(
-                games.create_one_card_poker_lacking_outcome_efg(),
-                [[["2/3", "1/3"]], [[1, 0], ["1/3", "2/3"]]],
-                marks=pytest.mark.xfail(reason="Problem with missing terminal outcome")
-        ),
         (
-            games.create_three_action_internal_outcomes_efg(nonterm_outcomes=True),
+            games.create_three_action_internal_outcomes_efg(),
             [
                 [["1/3", 0, "2/3"], ["2/3", 0, "1/3"]],
                 [["2/3", "1/3"], ["2/3", "1/3"], ["1/3", "2/3"]],

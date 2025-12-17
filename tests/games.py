@@ -146,44 +146,6 @@ def create_perfect_info_with_chance_efg() -> gbt.Game:
     return g
 
 
-def create_one_card_poker_lacking_outcome_efg() -> gbt.Game:
-    g = gbt.Game.new_tree(players=["Bob", "Alice"],
-                          title="One card poker game, after Myerson (1991)")
-    g.append_move(g.root, g.players.chance, ["King", "Queen"])
-    for node in g.root.children:
-        g.append_move(node, "Alice", ["Raise", "Fold"])
-    g.append_move(g.root.children[0].children[0], "Bob", ["Meet", "Pass"])
-    g.append_infoset(g.root.children[1].children[0],
-                     g.root.children[0].children[0].infoset)
-    alice_winsbig = g.add_outcome([-1, 1], label="Alice wins big")
-    bob_winsbig = g.add_outcome([3, -3], label="Bob wins big")
-    bob_wins = g.add_outcome([2, -2], label="Bob wins")
-    g.set_outcome(g.root.children[0].children[0].children[0], alice_winsbig)
-    g.set_outcome(g.root.children[0].children[1], bob_wins)
-    g.set_outcome(g.root.children[1].children[0].children[0], bob_winsbig)
-    g.set_outcome(g.root.children[1].children[1], bob_wins)
-    return g
-
-
-def create_perfect_info_internal_outcomes_efg() -> gbt.Game:
-    g = gbt.Game.new_tree(players=["1", "2"], title="2 player perfect info win lose")
-    g.append_move(g.root, "2", ["a", "b"])
-    g.append_move(g.root.children[0], "1", ["L", "R"])
-    g.append_move(g.root.children[1], "1", ["L", "R"])
-    g.append_move(g.root.children[0].children[0], "2", ["l", "r"])
-    g.set_outcome(g.root.children[0], g.add_outcome([-100, 50], label="a"))
-    g.set_outcome(
-        g.root.children[0].children[0].children[0], g.add_outcome([101, -51], label="aLl")
-    )
-    g.set_outcome(
-        g.root.children[0].children[0].children[1], g.add_outcome([99, -49], label="aLr")
-    )
-    g.set_outcome(g.root.children[0].children[1], g.add_outcome([101, -51], label="aR"))
-    g.set_outcome(g.root.children[1].children[0], g.add_outcome([1, -1], label="bL"))
-    g.set_outcome(g.root.children[1].children[1], g.add_outcome([-1, 1], label="bR"))
-    return g
-
-
 def create_three_action_internal_outcomes_efg(nonterm_outcomes: bool = False) -> gbt.Game:
     # Test 3 actions at infoset, internal outcomes and missing some outcomes at leaves
     g = gbt.Game.new_tree(players=["1", "2"],
