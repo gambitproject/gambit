@@ -727,6 +727,9 @@ public:
     public:
       using iterator_category = std::input_iterator_tag;
       using value_type = GameNode;
+      using difference_type = std::ptrdiff_t;
+      using reference = GameNode;
+      using pointer = GameNode;
 
       iterator() = default;
       iterator(const iterator &) = default;
@@ -1014,6 +1017,15 @@ public:
   Nodes GetNodes(TraversalOrder p_traversal = TraversalOrder::Preorder) const
   {
     return {std::const_pointer_cast<GameRep>(shared_from_this()), p_traversal};
+  }
+  auto GetTerminalNodes() const
+  {
+    return filter_if(GetNodes(), [](const auto &node) -> bool { return node->IsTerminal(); });
+  }
+  auto GetNonterminalNodes(TraversalOrder p_traversal = TraversalOrder::Preorder) const
+  {
+    return filter_if(GetNodes(p_traversal),
+                     [](const auto &node) -> bool { return !node->IsTerminal(); });
   }
   /// Returns the number of nodes in the game
   virtual size_t NumNodes() const = 0;

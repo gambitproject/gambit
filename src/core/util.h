@@ -65,8 +65,9 @@ template <class Key, class T> bool contains(const std::map<Key, T> &map, const K
   return map.find(key) != map.end();
 }
 
-/// @brief A container adaptor which skips over a given value when iterating
-template <typename Container, typename T> class exclude_value {
+/// @brief A container adaptor which returns only the elements matching the predicate
+///        This is intended to look forward to C++20-style ranges
+template <typename Container, typename Pred> class filter_if {
 public:
   using Iter = decltype(std::begin(std::declval<Container &>()));
 
@@ -78,10 +79,10 @@ public:
     using reference = typename std::iterator_traits<Iter>::reference;
     using pointer = typename std::iterator_traits<Iter>::pointer;
 
-    iterator(Iter current, Iter end, const T &value)
-      : m_current(current), m_end(end), m_value(value)
+    iterator(Iter current, Iter end, Pred pred)
+      : m_current(current), m_end(end), m_pred(std::move(pred))
     {
-      skip_if_value();
+      advance_next_valid();
     }
 
     value_type operator*() const { return *m_current; }
@@ -90,7 +91,7 @@ public:
     iterator &operator++()
     {
       ++m_current;
-      skip_if_value();
+      advance_next_valid();
       return *this;
     }
 
@@ -106,25 +107,22 @@ public:
       return a.m_current == b.m_current;
     }
 
-    friend bool operator!=(const iterator &a, const iterator &b)
-    {
-      return a.m_current != b.m_current;
-    }
+    friend bool operator!=(const iterator &a, const iterator &b) { return !(a == b); }
 
   private:
     Iter m_current, m_end;
-    T m_value;
+    Pred m_pred;
 
-    void skip_if_value()
+    void advance_next_valid()
     {
-      while (m_current != m_end && *m_current == m_value) {
+      while (m_current != m_end && !m_pred(*m_current)) {
         ++m_current;
       }
     }
   };
 
-  exclude_value(const Container &c, const T &value)
-    : m_begin(c.begin(), c.end(), value), m_end(c.end(), c.end(), value)
+  filter_if(const Container &c, Pred pred)
+    : m_begin(c.begin(), c.end(), pred), m_end(c.end(), c.end(), pred)
   {
   }
 

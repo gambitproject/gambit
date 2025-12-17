@@ -377,10 +377,11 @@ template <class T> T MixedStrategyProfile<T>::GetRegret(const GameStrategy &p_st
   CheckVersion();
   ComputePayoffs();
   auto player = p_strategy->GetPlayer();
-  T best_other_payoff = maximize_function(exclude_value(player->GetStrategies(), p_strategy),
-                                          [this, &player](const auto &strategy) -> T {
-                                            return m_strategyValues.at(player).at(strategy);
-                                          });
+  T best_other_payoff = maximize_function(
+      filter_if(player->GetStrategies(), [&](const auto &s) { return s != p_strategy; }),
+      [this, &player](const auto &strategy) -> T {
+        return m_strategyValues.at(player).at(strategy);
+      });
   return std::max(best_other_payoff - m_strategyValues.at(player).at(p_strategy),
                   static_cast<T>(0));
 }
