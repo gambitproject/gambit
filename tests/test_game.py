@@ -255,7 +255,11 @@ def test_mixed_behavior_profile_game_structure_changed():
         with pytest.raises(gbt.GameStructureChangedError):
             profile.is_defined_at(g.infosets[0])
         with pytest.raises(gbt.GameStructureChangedError):
+            profile.agent_liap_value()
+        with pytest.raises(gbt.GameStructureChangedError):
             profile.liap_value()
+        with pytest.raises(gbt.GameStructureChangedError):
+            profile.agent_max_regret()
         with pytest.raises(gbt.GameStructureChangedError):
             profile.max_regret()
         with pytest.raises(gbt.GameStructureChangedError):
