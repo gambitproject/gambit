@@ -30,6 +30,7 @@
 #include <algorithm>
 #include <numeric>
 #include <map>
+#include <optional>
 
 namespace Gambit {
 
@@ -131,6 +132,60 @@ public:
 
 private:
   iterator m_begin, m_end;
+};
+
+template <typename Value, typename Range> class prepend_value {
+public:
+  using Iter = decltype(std::begin(std::declval<Range &>()));
+
+  class iterator {
+  public:
+    using iterator_category = std::forward_iterator_tag;
+    ;
+    using value_type = Value;
+    using difference_type = std::ptrdiff_t;
+    using reference = Value;
+    using pointer = Value;
+
+    iterator(std::optional<Value> first, Iter current, Iter end)
+      : m_first(std::move(first)), m_current(current), m_end(end)
+    {
+    }
+
+    reference operator*() const { return m_first ? *m_first : *m_current; }
+
+    iterator &operator++()
+    {
+      if (m_first) {
+        m_first.reset();
+      }
+      else {
+        ++m_current;
+      }
+      return *this;
+    }
+
+    bool operator==(const iterator &other) const
+    {
+      return m_first == other.m_first && m_current == other.m_current;
+    }
+
+    bool operator!=(const iterator &other) const { return !(*this == other); }
+
+  private:
+    std::optional<Value> m_first;
+    Iter m_current, m_end;
+  };
+
+  prepend_value(Value first, Range range) : m_first(first), m_range(std::move(range)) {}
+
+  iterator begin() const { return {m_first, std::begin(m_range), std::end(m_range)}; }
+
+  iterator end() const { return {std::nullopt, std::end(m_range), std::end(m_range)}; }
+
+private:
+  Value m_first;
+  Range m_range;
 };
 
 /// @brief Returns the maximum value of the function over the *non-empty* container
