@@ -81,9 +81,21 @@ public:
 /// independently chooses from among his strategies with specified
 /// probabilities.
 template <class T> class MixedStrategyProfile {
+  struct Cache {
+    bool m_valid{false};
+    std::map<GamePlayer, T> m_payoffs;
+    std::map<GamePlayer, std::map<GameStrategy, T>> m_strategyValues;
+
+    void clear()
+    {
+      m_valid = false;
+      m_payoffs.clear();
+      m_strategyValues.clear();
+    }
+  };
+
   std::unique_ptr<MixedStrategyProfileRep<T>> m_rep;
-  mutable std::map<GamePlayer, T> m_payoffs;
-  mutable std::map<GamePlayer, std::map<GameStrategy, T>> m_strategyValues;
+  mutable Cache m_cache;
 
   /// Check underlying game has not changed; raise exception if it has
   void CheckVersion() const
@@ -98,8 +110,7 @@ template <class T> class MixedStrategyProfile {
   /// Reset cache for payoffs and strategy values
   void InvalidateCache() const
   {
-    m_strategyValues.clear();
-    m_payoffs.clear();
+    m_cache.clear();
     m_rep->InvalidateCache();
   }
 
@@ -171,7 +182,7 @@ public:
   T &operator[](const GameStrategy &p_strategy)
   {
     CheckVersion();
-    InvalidateCache(); // NEW
+    InvalidateCache();
     return m_rep->operator[](p_strategy);
   }
 
@@ -205,6 +216,7 @@ public:
   void SetCentroid()
   {
     CheckVersion();
+    InvalidateCache();
     m_rep->SetCentroid();
   }
 
