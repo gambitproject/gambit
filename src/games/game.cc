@@ -316,7 +316,7 @@ MixedStrategyProfile<T> &MixedStrategyProfile<T>::operator=(const MixedStrategyP
 template <class T> Vector<T> MixedStrategyProfile<T>::GetStrategy(const GamePlayer &p_player) const
 {
   CheckVersion();
-  auto strategies = m_rep->m_support.GetStrategies(p_player);
+  auto strategies = m_rep->GetSupport().GetStrategies(p_player);
   Vector<T> probs(strategies.size());
   std::transform(strategies.begin(), strategies.end(), probs.begin(),
                  [this](const GameStrategy &s) { return (*m_rep)[s]; });
@@ -326,12 +326,12 @@ template <class T> Vector<T> MixedStrategyProfile<T>::GetStrategy(const GamePlay
 template <class T> MixedStrategyProfile<T> MixedStrategyProfile<T>::ToFullSupport() const
 {
   CheckVersion();
-  MixedStrategyProfile<T> full(m_rep->m_support.GetGame()->NewMixedStrategyProfile(T(0)));
+  MixedStrategyProfile<T> full(m_rep->GetSupport().GetGame()->NewMixedStrategyProfile(T(0)));
 
-  for (const auto &player : m_rep->m_support.GetGame()->GetPlayers()) {
+  for (const auto &player : m_rep->GetSupport().GetGame()->GetPlayers()) {
     for (const auto &strategy : player->GetStrategies()) {
       full[strategy] =
-          (m_rep->m_support.Contains(strategy)) ? (*m_rep)[strategy] : static_cast<T>(0);
+          (m_rep->GetSupport().Contains(strategy)) ? (*m_rep)[strategy] : static_cast<T>(0);
     }
   }
   return full;
@@ -347,9 +347,9 @@ template <class T> void MixedStrategyProfile<T>::ComputePayoffs() const
     return;
   }
   Cache newCache;
-  for (const auto &player : m_rep->m_support.GetPlayers()) {
+  for (const auto &player : m_rep->GetSupport().GetPlayers()) {
     newCache.m_payoffs[player] = GetPayoff(player);
-    for (const auto &strategy : m_rep->m_support.GetStrategies(player)) {
+    for (const auto &strategy : m_rep->GetSupport().GetStrategies(player)) {
       newCache.m_strategyValues[player][strategy] = GetPayoff(strategy);
     }
   }
