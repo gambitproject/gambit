@@ -151,10 +151,10 @@ LiapStrategySolve(const MixedStrategyProfile<double> &p_start, double p_maxregre
   ConjugatePRMinimizer minimizer(p.MixedProfileLength());
   Vector<double> gradient(p.MixedProfileLength()), dx(p.MixedProfileLength());
   double fval;
-  minimizer.Set(F, static_cast<const Vector<double> &>(p), fval, gradient, .001, .00001);
+  minimizer.Set(F, p.GetProbVector(), fval, gradient, .001, .00001);
 
   for (int iter = 1; iter <= p_maxitsN; iter++) {
-    Vector<double> point(p);
+    Vector<double> point(p.GetProbVector());
     if (!minimizer.Iterate(F, point, fval, gradient, dx)) {
       break;
     }

@@ -228,15 +228,34 @@ class Player:
            previously, information sets were (expensively) re-sorted after every change
            to the game tree.
 
+        Raises
+        ------
+        UndefinedOperationError
+            If the game does not have a tree representation.
+
         See also
         --------
         Game.sort_infosets
         """
+        if not self.game.is_tree:
+            raise UndefinedOperationError(
+                "Operation only defined for games with a tree representation"
+            )
         return PlayerInfosets.wrap(self.player)
 
     @property
     def actions(self) -> PlayerActions:
-        """Returns the set of actions available to the player at some information set."""
+        """Returns the set of actions available to the player at some information set.
+
+        Raises
+        ------
+        UndefinedOperationError
+            If the game does not have a tree representation.
+        """
+        if not self.game.is_tree:
+            raise UndefinedOperationError(
+                "Operation only defined for games with a tree representation"
+            )
         return PlayerActions.wrap(self)
 
     @property

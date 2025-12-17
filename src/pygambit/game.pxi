@@ -195,41 +195,6 @@ class GameNodes:
 
 
 @cython.cclass
-class GameNonterminalNodes:
-    """Represents the set of nodes in a game."""
-    game = cython.declare(c_Game)
-
-    def __init__(self, *args, **kwargs) -> None:
-        raise ValueError("Cannot create GameNonterminalNodes outside a Game.")
-
-    @staticmethod
-    @cython.cfunc
-    def wrap(game: c_Game) -> GameNonterminalNodes:
-        obj: GameNonterminalNodes = GameNonterminalNodes.__new__(GameNonterminalNodes)
-        obj.game = game
-        return obj
-
-    def __repr__(self) -> str:
-        return f"GameNonterminalNodes(game={Game.wrap(self.game)})"
-
-    def __len__(self) -> int:
-        """The number of non-terminal nodes in the game."""
-        if not self.game.deref().IsTree():
-            return 0
-        return self.game.deref().NumNonterminalNodes()
-
-    def __iter__(self) -> typing.Iterator[Node]:
-        def dfs(node):
-            if not node.is_terminal:
-                yield node
-            for child in node.children:
-                yield from dfs(child)
-        if not self.game.deref().IsTree():
-            return
-        yield from dfs(Node.wrap(self.game.deref().GetRoot()))
-
-
-@cython.cclass
 class GameOutcomes:
     """Represents the set of outcomes in a game."""
     game = cython.declare(c_Game)
@@ -307,7 +272,10 @@ class GamePlayers:
                 raise ValueError(f"Game has multiple players with label '{index}'")
             return matches[0]
         if isinstance(index, int):
-            return Player.wrap(self.game.deref().GetPlayer(index + 1))
+            try:
+                return Player.wrap(self.game.deref().GetPlayer(index + 1))
+            except IndexError:
+                raise IndexError("Index out of range") from None
         raise TypeError(f"Player index must be int or str, not {index.__class__.__name__}")
 
     @property
@@ -742,17 +710,17 @@ class Game:
         .. versionchanged:: 16.4
            Changed from a method ``nodes()`` to a property.
 
+        Raises
+        ------
+        UndefinedOperationError
+            If the game does not have a tree representation.
         """
+        if not self.is_tree:
+            raise UndefinedOperationError(
+                "Operation only defined for games with a tree representation"
+            )
+
         return GameNodes.wrap(self.game)
-
-    @property
-    def _nonterminal_nodes(self) -> GameNonterminalNodes:
-        """The set of non-terminal nodes in the game.
-
-        Iteration over this property yields the non-terminal nodes in the order of depth-first
-        search.
-        """
-        return GameNonterminalNodes.wrap(self.game)
 
     @property
     def contingencies(self) -> pygambit.gameiter.Contingencies:
@@ -1885,11 +1853,20 @@ class Game:
 
         .. versionadded:: 16.4.0
 
+        Raises
+        ------
+        UndefinedOperationError
+            If the game does not have a tree representation.
+
         See also
         --------
         Player.infosets
         Infoset.members
         """
+        if not self.is_tree:
+            raise UndefinedOperationError(
+                "Operation only defined for games with a tree representation"
+            )
         self.game.deref().SortInfosets()
 
     def add_player(self, label: str = "") -> Player:
