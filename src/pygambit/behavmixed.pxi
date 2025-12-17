@@ -890,7 +890,7 @@ class MixedBehaviorProfile:
         agent_liap_value
         """
         self._check_validity()
-        return self._agent_liap_value()
+        return self._liap_value()
 
     def as_strategy(self) -> MixedStrategyProfile:
         """Returns a `MixedStrategyProfile` which is equivalent
