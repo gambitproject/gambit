@@ -228,7 +228,7 @@ def create_entry_accomodation_efg() -> gbt.Game:
     return g
 
 
-def create_non_zero_sum_lacking_outcome_efg() -> gbt.Game:
+def create_non_zero_sum_lacking_outcome_efg(missing_term_outcome: bool = False) -> gbt.Game:
     g = gbt.Game.new_tree(players=["1", "2"], title="Non constant-sum game lacking outcome")
     g.append_move(g.root, g.players.chance, ["H", "T"])
     g.set_chance_probs(g.root.infoset, ["1/2", "1/2"])
@@ -241,6 +241,8 @@ def create_non_zero_sum_lacking_outcome_efg() -> gbt.Game:
     g.set_outcome(g.root.children[0].children[0].children[0], g.add_outcome([2, 1]))
     g.set_outcome(g.root.children[0].children[0].children[1], g.add_outcome([-1, 2]))
     g.set_outcome(g.root.children[0].children[1].children[0], g.add_outcome([1, -1]))
+    if not missing_term_outcome:
+        g.set_outcome(g.root.children[0].children[1].children[1], g.add_outcome([0, 0]))
     g.set_outcome(g.root.children[1].children[0].children[0], g.add_outcome([1, 0]))
     g.set_outcome(g.root.children[1].children[0].children[1], g.add_outcome([0, 1]))
     g.set_outcome(g.root.children[1].children[1].children[0], g.add_outcome([-1, 1]))

@@ -155,9 +155,14 @@ def test_enummixed_rational(game: gbt.Game, mixed_strategy_prof_data: list):
                 4,
         ),
         (
-                games.create_non_zero_sum_lacking_outcome_efg(),
-                [[[[0.33333333333333337, 0.6666666666666666]], [[0.5, 0.5]]]],
-                1,
+            games.create_non_zero_sum_lacking_outcome_efg(),
+            [[[[0.33333333333333337, 0.6666666666666666]], [[0.5, 0.5]]]],
+            1,
+        ),
+        (
+            games.create_non_zero_sum_lacking_outcome_efg(missing_term_outcome=True),
+            [[[[0.33333333333333337, 0.6666666666666666]], [[0.5, 0.5]]]],
+            1,
         ),
         pytest.param(
             games.create_large_payoff_game_efg(),
@@ -527,14 +532,18 @@ def test_lcp_behavior_double():
                 [[[0, 0, 0, 1]], [[0, 0, 0, 1]]],
         ),
         pytest.param(
-                games.create_entry_accomodation_efg(),
-                [[["2/3", "1/3"], [1, 0], [1, 0]], [["2/3", "1/3"]]],
-                marks=pytest.mark.xfail(reason="Problem with internal outcomes")
+            games.create_entry_accomodation_efg(),
+            [[["2/3", "1/3"], [1, 0], [1, 0]], [["2/3", "1/3"]]],
+            marks=pytest.mark.xfail(reason="Problem with internal outcomes")
+        ),
+        (
+            games.create_non_zero_sum_lacking_outcome_efg(),
+            [[["1/3", "2/3"]], [["1/2", "1/2"]]]
         ),
         pytest.param(
-                games.create_non_zero_sum_lacking_outcome_efg(),
-                [[["1/3", "2/3"]], [["1/2", "1/2"]]],
-                marks=pytest.mark.xfail(reason="Problem with missing terminal outcome")
+            games.create_non_zero_sum_lacking_outcome_efg(missing_term_outcome=True),
+            [[["1/3", "2/3"]], [["1/2", "1/2"]]],
+            marks=pytest.mark.xfail(reason="Problem with missing terminal outcome")
         ),
     ],
 )
