@@ -163,6 +163,17 @@ def test_enummixed_rational(game: gbt.Game, mixed_strategy_prof_data: list):
                 4,
         ),
         (
+                games.create_entry_accomodation_efg(nonterm_outcomes=True),
+                [
+                    [[[0.6666666666666666, 0.33333333333333337], [1.0, 0.0], [1.0, 0.0]],
+                     [[0.6666666666666666, 0.33333333333333337]]],
+                    [[[0.0, 1.0], [0.0, 0.0], [0.3333333333333333, 0.6666666666666667]],
+                     [[0.0, 1.0]]],
+                    [[[0.0, 1.0], [0.0, 0.0], [1.0, 0.0]], [[1.0, 0.0]]],
+                    [[[0.0, 1.0], [0.0, 0.0], [0.0, 0.0]], [[0.0, 1.0]]]],
+                4,
+        ),
+        (
             games.create_non_zero_sum_lacking_outcome_efg(),
             [[[[0.33333333333333337, 0.6666666666666666]], [[0.5, 0.5]]]],
             1,
@@ -539,8 +550,12 @@ def test_lcp_behavior_double():
                 games.create_EFG_for_nxn_bimatrix_coordination_game(4),
                 [[[0, 0, 0, 1]], [[0, 0, 0, 1]]],
         ),
-        pytest.param(
+        (
             games.create_entry_accomodation_efg(),
+            [[["2/3", "1/3"], [1, 0], [1, 0]], [["2/3", "1/3"]]]
+        ),
+        pytest.param(
+            games.create_entry_accomodation_efg(nonterm_outcomes=True),
             [[["2/3", "1/3"], [1, 0], [1, 0]], [["2/3", "1/3"]]],
             marks=pytest.mark.xfail(reason="Problem with internal outcomes")
         ),

@@ -211,7 +211,7 @@ def create_three_action_internal_outcomes_efg() -> gbt.Game:
     return g
 
 
-def create_entry_accomodation_efg() -> gbt.Game:
+def create_entry_accomodation_efg(nonterm_outcomes: bool = False) -> gbt.Game:
     g = gbt.Game.new_tree(players=["1", "2"],
                           title="Entry-accomodation game with internal outcomes")
     g.append_move(g.root, "1", ["S", "T"])
@@ -219,9 +219,14 @@ def create_entry_accomodation_efg() -> gbt.Game:
     g.append_infoset(g.root.children[1], g.root.children[0].infoset)
     g.append_move(g.root.children[0].children[0], "1", ["A", "F"])
     g.append_move(g.root.children[1].children[0], "1", ["A", "F"])
-    g.set_outcome(g.root.children[0], g.add_outcome([3, 2]))
-    g.set_outcome(g.root.children[0].children[0].children[1], g.add_outcome([-3, -1]))
-    g.set_outcome(g.root.children[0].children[1], g.add_outcome([-2, 1]))
+    if nonterm_outcomes:
+        g.set_outcome(g.root.children[0], g.add_outcome([3, 2]))
+        g.set_outcome(g.root.children[0].children[0].children[1], g.add_outcome([-3, -1]))
+        g.set_outcome(g.root.children[0].children[1], g.add_outcome([-2, 1]))
+    else:
+        g.set_outcome(g.root.children[0].children[0].children[0], g.add_outcome([3, 2]))
+        g.set_outcome(g.root.children[0].children[0].children[1], g.add_outcome([0, 1]))
+        g.set_outcome(g.root.children[0].children[1], g.add_outcome([1, 3]))
     g.set_outcome(g.root.children[1].children[0].children[0], g.add_outcome([2, 3]))
     g.set_outcome(g.root.children[1].children[0].children[1], g.add_outcome([1, 0]))
     g.set_outcome(g.root.children[1].children[1], g.add_outcome([3, 1]))
