@@ -57,7 +57,7 @@ public:
   Rational maxpay;
   std::map<GameInfoset, int> infosetOffset;
   T eps;
-  List<linalg::BFS<T>> m_list;
+  Array<linalg::BFS<T>> m_list;
   std::list<MixedBehaviorProfile<T>> m_equilibria;
 
   explicit Solution(const Game &);
