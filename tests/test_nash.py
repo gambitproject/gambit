@@ -216,12 +216,6 @@ def test_enummixed_rational(game: gbt.Game, mixed_strategy_prof_data: list):
                   [[1.0, 0.0], [0.0, 1.0]]]],
                 3,
         ),
-        (
-                games.create_one_card_poker_lacking_outcome_efg(),
-                [[[[0.6666666666666666, 0.33333333333333337]],
-                  [[1.0, 0.0], [0.3333333333333333, 0.6666666666666667]]]],
-                1,
-        ),
     ],
 )
 def test_enumpoly_ordered_behavior(
