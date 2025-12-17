@@ -57,21 +57,20 @@ std::unique_ptr<MixedStrategyProfileRep<T>> TreeMixedStrategyProfileRep<T>::Copy
 
 template <class T> void TreeMixedStrategyProfileRep<T>::MakeBehavior() const
 {
-  if (mixed_behav_profile_sptr.get() == nullptr) {
-    mixed_behav_profile_sptr =
-        std::make_shared<MixedBehaviorProfile<T>>(MixedStrategyProfile<T>(Copy()));
+  if (m_mixedBehavior == nullptr) {
+    m_mixedBehavior = std::make_shared<MixedBehaviorProfile<T>>(MixedStrategyProfile<T>(Copy()));
   }
 }
 
-template <class T> void TreeMixedStrategyProfileRep<T>::InvalidateCache() const
+template <class T> void TreeMixedStrategyProfileRep<T>::OnProfileChanged() const
 {
-  mixed_behav_profile_sptr = nullptr;
+  m_mixedBehavior = nullptr;
 }
 
 template <class T> T TreeMixedStrategyProfileRep<T>::GetPayoff(int pl) const
 {
   MakeBehavior();
-  return mixed_behav_profile_sptr->GetPayoff(mixed_behav_profile_sptr->GetGame()->GetPlayer(pl));
+  return m_mixedBehavior->GetPayoff(m_mixedBehavior->GetGame()->GetPlayer(pl));
 }
 
 template <class T>

@@ -40,7 +40,7 @@ private:
 
   /// @name Private auxiliary functions
   //@{
-  void IndexStrategies();
+  void IndexStrategies() const;
   void RebuildTable();
   //@}
 

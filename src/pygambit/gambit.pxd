@@ -342,7 +342,7 @@ cdef extern from "games/stratmixed.h" namespace "Gambit":
         bool operator==(c_MixedStrategyProfile[T]) except +
         bool operator!=(c_MixedStrategyProfile[T]) except +
         c_Game GetGame() except +
-        bool IsInvalidated()
+        bool HasOutdatedGameVersion()
         int MixedProfileLength() except +
         c_StrategySupportProfile GetSupport() except +
         c_MixedStrategyProfile[T] Normalize()  # except + doesn't compile

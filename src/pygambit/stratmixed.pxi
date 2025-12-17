@@ -574,7 +574,7 @@ class MixedStrategyProfileDouble(MixedStrategyProfile):
         return obj
 
     def _check_validity(self) -> None:
-        if deref(self.profile).IsInvalidated():
+        if deref(self.profile).HasOutdatedGameVersion():
             raise GameStructureChangedError()
 
     def __len__(self) -> int:
@@ -651,7 +651,7 @@ class MixedStrategyProfileRational(MixedStrategyProfile):
         return obj
 
     def _check_validity(self) -> None:
-        if deref(self.profile).IsInvalidated():
+        if deref(self.profile).HasOutdatedGameVersion():
             raise GameStructureChangedError()
 
     def __len__(self) -> int:
