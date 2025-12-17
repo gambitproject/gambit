@@ -502,13 +502,20 @@ def test_lcp_behavior_double():
                 [[[0, 1], [1, 0]], [[0, 1], ["1/2", "1/2"]]],
                 marks=pytest.mark.xfail(reason="Problem with internal outcomes")
         ),
+        (
+            games.create_three_action_internal_outcomes_efg(),
+            [
+                [["1/3", 0, "2/3"], ["2/3", 0, "1/3"]],
+                [["2/3", "1/3"], ["1/3", "2/3"], ["1/3", "2/3"]],
+            ]
+        ),
         pytest.param(
-                games.create_three_action_internal_outcomes_efg(),
-                [
-                    [["1/3", 0, "2/3"], ["2/3", 0, "1/3"]],
-                    [["2/3", "1/3"], ["1/3", "2/3"], ["1/3", "2/3"]],
-                ],
-                marks=pytest.mark.xfail(reason="Problem with internal outcomes")
+            games.create_three_action_internal_outcomes_efg(nonterm_outcomes=True),
+            [
+                [["1/3", 0, "2/3"], ["2/3", 0, "1/3"]],
+                [["2/3", "1/3"], ["1/3", "2/3"], ["1/3", "2/3"]],
+            ],
+            marks=pytest.mark.xfail(reason="Problem with internal outcomes")
         ),
         (
                 games.create_large_payoff_game_efg(),
@@ -712,13 +719,20 @@ def test_lp_behavior_double():
                 [[[0, 1], [1, 0]], [[1, 0], [1, 0]]],
                 marks=pytest.mark.xfail(reason="Problem with internal outcomes")
         ),
+        (
+            games.create_three_action_internal_outcomes_efg(nonterm_outcomes=True),
+            [
+                [["1/3", 0, "2/3"], ["2/3", 0, "1/3"]],
+                [["2/3", "1/3"], ["2/3", "1/3"], ["1/3", "2/3"]],
+            ]
+        ),
         pytest.param(
-                games.create_three_action_internal_outcomes_efg(),
-                [
-                    [["1/3", 0, "2/3"], ["2/3", 0, "1/3"]],
-                    [["2/3", "1/3"], ["2/3", "1/3"], ["1/3", "2/3"]],
-                ],
-                marks=pytest.mark.xfail(reason="Problem with internal and missing outcomes")
+            games.create_three_action_internal_outcomes_efg(nonterm_outcomes=True),
+            [
+                [["1/3", 0, "2/3"], ["2/3", 0, "1/3"]],
+                [["2/3", "1/3"], ["2/3", "1/3"], ["1/3", "2/3"]],
+            ],
+            marks=pytest.mark.xfail(reason="Problem with internal and missing outcomes")
         ),
         (
                 games.create_large_payoff_game_efg(),

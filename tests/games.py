@@ -184,7 +184,7 @@ def create_perfect_info_internal_outcomes_efg() -> gbt.Game:
     return g
 
 
-def create_three_action_internal_outcomes_efg() -> gbt.Game:
+def create_three_action_internal_outcomes_efg(nonterm_outcomes: bool = False) -> gbt.Game:
     # Test 3 actions at infoset, internal outcomes and missing some outcomes at leaves
     g = gbt.Game.new_tree(players=["1", "2"],
                           title="3 action, internal outcomes, lacking terminal outcomes")
@@ -198,16 +198,33 @@ def create_three_action_internal_outcomes_efg() -> gbt.Game:
     o_m1 = g.add_outcome([-1, 1], label="-1")
     o_2 = g.add_outcome([2, -2], label="2")
     o_m2 = g.add_outcome([-2, 2], label="-2")
-    g.set_outcome(g.root.children[0].children[0], o_1)
-    g.set_outcome(g.root.children[1].children[2], o_m1)
-    g.set_outcome(g.root.children[0].children[0].children[1], o_m2)
-    g.set_outcome(g.root.children[0].children[1].children[0], o_m1)
-    g.set_outcome(g.root.children[0].children[1].children[1], o_1)
-    g.set_outcome(g.root.children[0].children[2].children[0], o_1)
-    g.set_outcome(g.root.children[1].children[0].children[1], o_1)
-    g.set_outcome(g.root.children[1].children[1].children[0], o_1)
-    g.set_outcome(g.root.children[1].children[1].children[1], o_m1)
-    g.set_outcome(g.root.children[1].children[2].children[1], o_2)
+    o_z = g.add_outcome([0, 0], label="0")
+    if nonterm_outcomes:
+        g.set_outcome(g.root.children[0].children[0], o_1)
+        g.set_outcome(g.root.children[1].children[2], o_m1)
+        g.set_outcome(g.root.children[0].children[0].children[1], o_m2)
+        g.set_outcome(g.root.children[0].children[1].children[0], o_m1)
+        g.set_outcome(g.root.children[0].children[1].children[1], o_1)
+        g.set_outcome(g.root.children[0].children[2].children[0], o_1)
+        g.set_outcome(g.root.children[1].children[0].children[1], o_1)
+        g.set_outcome(g.root.children[1].children[1].children[0], o_1)
+        g.set_outcome(g.root.children[1].children[1].children[1], o_m1)
+        g.set_outcome(g.root.children[1].children[2].children[1], o_2)
+    else:
+        g.set_outcome(g.root.children[0].children[0].children[0], o_1)
+        g.set_outcome(g.root.children[0].children[0].children[1], o_m1)
+        g.set_outcome(g.root.children[0].children[1].children[0], o_m1)
+        g.set_outcome(g.root.children[0].children[1].children[1], o_1)
+        g.set_outcome(g.root.children[0].children[2].children[0], o_1)
+        g.set_outcome(g.root.children[0].children[2].children[1], o_z)
+
+        g.set_outcome(g.root.children[1].children[0].children[0], o_z)
+        g.set_outcome(g.root.children[1].children[0].children[1], o_1)
+        g.set_outcome(g.root.children[1].children[1].children[0], o_1)
+        g.set_outcome(g.root.children[1].children[1].children[1], o_m1)
+        g.set_outcome(g.root.children[1].children[2].children[0], o_m1)
+        g.set_outcome(g.root.children[1].children[2].children[1], o_1)
+
     return g
 
 
