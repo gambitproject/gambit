@@ -191,10 +191,10 @@ public:
   T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const override;
 
 private:
-  mutable std::shared_ptr<MixedBehaviorProfile<T>> mixed_behav_profile_sptr;
+  mutable std::shared_ptr<MixedBehaviorProfile<T>> m_mixedBehavior;
 
   void MakeBehavior() const;
-  void InvalidateCache() const override;
+  void OnProfileChanged() const override;
 };
 
 } // namespace Gambit
