@@ -202,91 +202,30 @@ def test_node_own_prior_action_non_terminal(game_file, expected_node_data):
 #                    Test Suite for the Subgame Root Checker
 # ==============================================================================
 @pytest.mark.parametrize("game, expected_paths_list", [
-    # Empty game has no subgames
-    (
-        gbt.Game.new_tree(),
-        [[]]
-    ),
+    # Empty game
+    (gbt.Game.new_tree(), [[]]),
+
     # --- Games without Absent-Mindedness. ---
     # Perfect Information
-    (
-        games.read_from_file("e02.efg"),
-        [
-            [],
-            ["L"],
-            ["L", "L"]
-        ]
-    ),
-    (
-        games.Centipede.get_test_data(N=5, m0=2, m1=7)[0],
-        [
-            ["Push", "Push"],
-            ["Push", "Push", "Push", "Push"],
-            ["Push", "Push", "Push"],
-            ["Push"],
-            []
-        ]
-    ),
+    (games.read_from_file("e02.efg"), [[], ["L"], ["L", "L"]]),
+    (games.Centipede.get_test_data(N=5, m0=2, m1=7)[0],
+     [["Push", "Push"], ["Push", "Push", "Push", "Push"], ["Push", "Push", "Push"], ["Push"], []]),
+
     # Perfect Recall
-    (
-        games.read_from_file("binary_3_levels_generic_payoffs.efg"),
-        [
-            []
-        ]
-    ),
+    (games.read_from_file("binary_3_levels_generic_payoffs.efg"), [[]]),
+
     # No perfect recall
-    (
-        games.read_from_file("wichardt.efg"),
-        [
-            []
-        ]
-    ),
-    (
-        games.read_from_file("subgame-roots-finder-one-merge.efg"),
-        [
-            [],
-            ["1"]
-        ]
-    ),
-    (
-        games.read_from_file("subgame-roots-finder-small-subgames-and-merges.efg"),
-        [
-            ["2"],
-            ["1"],
-            ["1", "2", "2"],
-            ["2", "1", "2"],
-            [],
-            ["1", "1", "1", "2", "2"],
-            ["2", "2", "2"]
-        ]
-    ),
-    (
-        games.read_from_file("subgame-roots-finder-multiple-merges.efg"),
-        [
-            [],
-            ["1", "1"],
-            ["1"],
-            ["1", "1", "1"]
-        ]
-    ),
+    (games.read_from_file("wichardt.efg"), [[]]),
+    (games.read_from_file("subgame-roots-finder-one-merge.efg"), [[], ["1"]]),
+    (games.read_from_file("subgame-roots-finder-small-subgames-and-merges.efg"),
+     [["2"], ["1"], ["1", "2", "2"], ["2", "1", "2"], [],
+      ["1", "1", "1", "2", "2"], ["2", "2", "2"]]),
+    (games.read_from_file("subgame-roots-finder-multiple-merges.efg"),
+     [[], ["1", "1"], ["1"], ["1", "1", "1"]]),
 
     # --- Games with Absent-Mindedness. ---
-    (
-        games.read_from_file("AM-subgames.efg"),
-        [
-            [],
-            ["1", "1"],
-            ["2"],
-            ["2", "1"]
-        ]
-    ),
-    (
-        games.read_from_file("noPR-action-AM-two-hops.efg"),
-        [
-            [],
-            ["2", "1", "1"]
-        ]
-    ),
+    (games.read_from_file("AM-subgames.efg"), [[], ["1", "1"], ["2"], ["2", "1"]]),
+    (games.read_from_file("noPR-action-AM-two-hops.efg"), [[], ["2", "1", "1"]]),
 ])
 def test_subgame_root_consistency(game: gbt.Game, expected_paths_list: list):
     """
