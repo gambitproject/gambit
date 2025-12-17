@@ -42,6 +42,12 @@ public:
 
   void SetCentroid();
   std::unique_ptr<MixedStrategyProfileRep> Normalize() const;
+  const T &operator[](int i) const { return m_probs[i]; }
+  T &operator[](int i)
+  {
+    OnProfileChanged();
+    return m_probs[i];
+  }
   /// Returns the probability the strategy is played
   const T &operator[](const GameStrategy &p_strategy) const
   {
@@ -50,7 +56,7 @@ public:
   /// Returns the probability the strategy is played
   T &operator[](const GameStrategy &p_strategy)
   {
-    InvalidateCache();
+    OnProfileChanged();
     return m_probs[m_profileIndex.at(p_strategy)];
   }
   /// Set the strategy of the corresponding player to a pure strategy
@@ -60,6 +66,17 @@ public:
       (*this)[s] = static_cast<T>(0);
     }
     (*this)[p_strategy] = static_cast<T>(1);
+    OnProfileChanged();
+  }
+  void SetProbVector(const Vector<T> &p_vector)
+  {
+    m_probs = p_vector;
+    OnProfileChanged();
+  }
+  void SetProbConstant(const T &c)
+  {
+    m_probs = c;
+    OnProfileChanged();
   }
 
   virtual T GetPayoff(int pl) const = 0;
@@ -72,7 +89,7 @@ public:
     return GetPayoffDeriv(p_strategy->GetPlayer()->GetNumber(), p_strategy);
   }
 
-  virtual void InvalidateCache() const {}
+  virtual void OnProfileChanged() const {}
 };
 
 /// \brief A probability distribution over strategies in a game
@@ -108,11 +125,7 @@ template <class T> class MixedStrategyProfile {
   void ComputePayoffs() const;
 
   /// Reset cache for payoffs and strategy values
-  void InvalidateCache() const
-  {
-    m_cache.clear();
-    m_rep->InvalidateCache();
-  }
+  void InvalidateCache() const { m_cache.clear(); }
 
 public:
   /// @name Lifecycle
@@ -132,13 +145,13 @@ public:
   MixedStrategyProfile &operator=(const Vector<T> &v)
   {
     InvalidateCache();
-    m_rep->m_probs = v;
+    m_rep->SetProbVector(v);
     return *this;
   }
   MixedStrategyProfile &operator=(const T &c)
   {
     InvalidateCache();
-    m_rep->m_probs = c;
+    m_rep->SetProbConstant(c);
     return *this;
   }
   //@}
@@ -162,28 +175,28 @@ public:
   const T &operator[](int i) const
   {
     CheckVersion();
-    return m_rep->m_probs[i];
+    return (*m_rep)[i];
   }
   /// Vector-style access to probabilities
   T &operator[](int i)
   {
     CheckVersion();
     InvalidateCache();
-    return m_rep->m_probs[i];
+    return (*m_rep)[i];
   }
 
   /// Returns the probability the strategy is played
   const T &operator[](const GameStrategy &p_strategy) const
   {
     CheckVersion();
-    return m_rep->operator[](p_strategy);
+    return (*m_rep)[p_strategy];
   }
   /// Returns the probability the strategy is played
   T &operator[](const GameStrategy &p_strategy)
   {
     CheckVersion();
     InvalidateCache();
-    return m_rep->operator[](p_strategy);
+    return (*m_rep)[p_strategy];
   }
 
   /// Returns the mixed strategy for the player
