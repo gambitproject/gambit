@@ -1202,11 +1202,9 @@ void GenerateComponent(SubgameScratchData &p_data, GameNodeRep *p_start_node)
     }
     else {
       // First time seeing this infoset: add all its members to the frontier.
-      for (const auto &member_sp : curr->GetInfoset()->GetMembers()) {
+      for (const auto &member_sp : filter_if(curr->GetInfoset()->GetMembers(),
+                                             [curr](const auto &m) { return m.get() != curr; })) {
         auto *member = member_sp.get();
-        if (member == curr) {
-          continue;
-        }
         local_frontier.push(member);
         visited_this_component.insert(member);
       }
@@ -1246,8 +1244,8 @@ std::map<GameInfosetRep *, GameNodeRep *> FindSubgameRoots(const Game &p_game)
   SubgameScratchData data;
 
   // Process nodes in postorder
-  for (const auto &node : p_game->GetNodes(TraversalOrder::Postorder)) {
-    if (node->IsTerminal() || data.dsu_parent.count(node->GetInfoset().get())) {
+  for (const auto &node : p_game->GetNonterminalNodes(TraversalOrder::Postorder)) {
+    if (data.dsu_parent.count(node->GetInfoset().get())) {
       continue;
     }
     GenerateComponent(data, node.get());
@@ -1255,16 +1253,11 @@ std::map<GameInfosetRep *, GameNodeRep *> FindSubgameRoots(const Game &p_game)
 
   std::map<GameInfosetRep *, GameNodeRep *> result;
 
-  auto collect_results = [&](const GamePlayer &p_player) {
-    for (const auto &infoset : p_player->GetInfosets()) {
+  for (const auto &player : p_game->GetPlayersWithChance()) {
+    for (const auto &infoset : player->GetInfosets()) {
       auto *ptr = infoset.get();
       result[ptr] = data.subgame_root_candidate.at(data.FindSet(ptr));
     }
-  };
-
-  collect_results(p_game->GetChance());
-  for (const auto &player : p_game->GetPlayers()) {
-    collect_results(player);
   }
 
   return result;
