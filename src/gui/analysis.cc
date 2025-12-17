@@ -203,11 +203,13 @@ template <class T> std::string AnalysisProfileList<T>::GetPayoff(int pl, int p_i
 
   try {
     if (m_doc->IsTree()) {
-      return lexical_cast<std::string>(m_behavProfiles[index]->GetPayoff(pl),
-                                       m_doc->GetStyle().NumDecimals());
+      return lexical_cast<std::string>(
+          m_behavProfiles[index]->GetPayoff(m_doc->GetGame()->GetPlayer(pl)),
+          m_doc->GetStyle().NumDecimals());
     }
-    return lexical_cast<std::string>(m_mixedProfiles[index]->GetPayoff(pl),
-                                     m_doc->GetStyle().NumDecimals());
+    return lexical_cast<std::string>(
+        m_mixedProfiles[index]->GetPayoff(m_doc->GetGame()->GetPlayer(pl)),
+        m_doc->GetStyle().NumDecimals());
   }
   catch (std::out_of_range &) {
     return "";
