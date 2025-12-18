@@ -1157,16 +1157,19 @@ struct SubgameScratchData {
 ///
 /// @param p_data The DSU data structure to update with component information
 /// @param p_start_node The node to start component generation from
+/// @param p_node_ordering A map providing a strict total ordering (DFS Preorder) of nodes
 ///
 /// Precondition: p_start_node must be non-terminal
 /// Precondition: p_start_node's infoset must not already be in p_data.dsu_parent
 /// Postcondition: p_data.subgame_root_candidate[leader] contains the highest node
 ///                in the newly-formed component
-void GenerateComponent(SubgameScratchData &p_data, GameNodeRep *p_start_node)
+void GenerateComponent(SubgameScratchData &p_data, GameNodeRep *p_start_node,
+                       const std::unordered_map<const GameNodeRep *, int> &p_node_ordering)
 {
-  auto node_cmp = [](const GameNodeRep *a, const GameNodeRep *b) {
-    return a->GetNumber() < b->GetNumber();
+  auto node_cmp = [&p_node_ordering](const GameNodeRep *a, const GameNodeRep *b) {
+    return p_node_ordering.at(a) < p_node_ordering.at(b);
   };
+
   std::priority_queue<GameNodeRep *, std::vector<GameNodeRep *>, decltype(node_cmp)>
       local_frontier(node_cmp);
 
@@ -1234,14 +1237,24 @@ std::map<GameInfosetRep *, GameNodeRep *> FindSubgameRoots(const Game &p_game)
     return {};
   }
 
+  // Pre-compute DFS numbers locally.
+  std::unordered_map<const GameNodeRep *, int> node_ordering;
+  int counter = 0;
+  for (const auto &node : p_game->GetNodes(TraversalOrder::Preorder)) {
+    node_ordering[node.get()] = counter++;
+  }
+
   SubgameScratchData data;
 
+  // Define filter predicate
+  auto is_unvisited_infoset = [&data](const auto &node) {
+    return !data.dsu_parent.count(node->GetInfoset().get());
+  };
+
   // Process nodes in postorder
-  for (const auto &node : filter_if(p_game->GetNonterminalNodes(TraversalOrder::Postorder),
-                                    [&data](const auto &node) {
-                                      return !data.dsu_parent.count(node->GetInfoset().get());
-                                    })) {
-    GenerateComponent(data, node.get());
+  for (const auto &node :
+       filter_if(p_game->GetNonterminalNodes(TraversalOrder::Postorder), is_unvisited_infoset)) {
+    GenerateComponent(data, node.get(), node_ordering);
   }
 
   std::map<GameInfosetRep *, GameNodeRep *> result;
