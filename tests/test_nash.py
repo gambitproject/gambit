@@ -183,17 +183,6 @@ def test_enummixed_rational(game: gbt.Game, mixed_strategy_prof_data: list):
             [[[["1/3", "2/3"]], [["1/2", "1/2"]]]],
             1,
         ),
-        pytest.param(
-            games.create_large_payoff_game_efg(),
-            [[[[1.0, 0.0], [1.0, 0.0]], [[0.0, 1.0], [1.0, 0.0]]],
-             [[[1.0, 0.0], [1.0, 0.0]], [[0.0, 1.0], [0.0, 0.0]]],
-             [[[1.0, 0.0], [0.0, 1.0]], [[0.0, 1.0], [1.0, 0.0]]],
-             [[[0.0, 1.0], [1.0, 0.0]], [[0.0, 1.0], [1.0, 0.0]]],
-             [[[0.0, 1.0], [1.0, 0.0]], [[0.0, 1.0], [1.0, 0.0]]],
-             [[[0.0, 1.0], [0.0, 1.0]], [[0.0, 0.0], [1.0, 0.0]]]],
-            6,
-            marks=pytest.mark.xfail(reason="True equilibrium has tiny probabilities")
-        ),
         (
                 games.create_chance_in_middle_efg(),
                 [[[["3/11", "8/11"],
