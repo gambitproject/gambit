@@ -34,11 +34,7 @@ public:
   ~SingularMatrixException() noexcept override = default;
 };
 
-template <class T> Vector<T> operator*(const Vector<T> &, const Matrix<T> &);
-
 template <class T> class Matrix {
-  friend Vector<T> operator* <>(const Vector<T> &, const Matrix &);
-
   RectArray<T> m_data;
 
 public:
@@ -115,7 +111,7 @@ public:
   void CMultiply(const Vector<T> &, Vector<T> &) const;
   /// "in-place" row (transposed) multiply
   void RMultiply(const Vector<T> &, Vector<T> &) const;
-  Matrix operator*(const Matrix<T> &) const;
+  Matrix operator*(const Matrix &) const;
   Vector<T> operator*(const Vector<T> &) const;
   Matrix operator*(const T &) const;
   Matrix &operator*=(const T &);
@@ -138,7 +134,7 @@ public:
 
 template <class T> Vector<T> operator*(const Vector<T> &, const Matrix<T> &);
 
-template <class T> template <class Vector> void Matrix<T>::GetColumn(int col, Vector &v) const
+template <class T> template <class V> void Matrix<T>::GetColumn(int col, V &v) const
 {
   if (col < MinCol() || col > MaxCol()) {
     throw std::out_of_range("Index out of range in Matrix::GetColumn");
@@ -146,13 +142,12 @@ template <class T> template <class Vector> void Matrix<T>::GetColumn(int col, Ve
   if (!CheckColumn(v)) {
     throw DimensionException();
   }
-
   for (int i = MinRow(); i <= MaxRow(); ++i) {
     v[i] = (*this)(i, col);
   }
 }
 
-template <class T> template <class Vector> void Matrix<T>::SetColumn(int col, const Vector &v)
+template <class T> template <class V> void Matrix<T>::SetColumn(int col, const V &v)
 {
   if (col < MinCol() || col > MaxCol()) {
     throw std::out_of_range("Index out of range in Matrix::SetColumn");
@@ -160,13 +155,12 @@ template <class T> template <class Vector> void Matrix<T>::SetColumn(int col, co
   if (!CheckColumn(v)) {
     throw DimensionException();
   }
-
   for (int i = MinRow(); i <= MaxRow(); ++i) {
     (*this)(i, col) = v[i];
   }
 }
 
-template <class T> template <class Vector> void Matrix<T>::GetRow(int row, Vector &v) const
+template <class T> template <class V> void Matrix<T>::GetRow(int row, V &v) const
 {
   if (row < MinRow() || row > MaxRow()) {
     throw std::out_of_range("Index out of range in Matrix::GetRow");
@@ -174,13 +168,12 @@ template <class T> template <class Vector> void Matrix<T>::GetRow(int row, Vecto
   if (!CheckRow(v)) {
     throw DimensionException();
   }
-
   for (int j = MinCol(); j <= MaxCol(); ++j) {
     v[j] = (*this)(row, j);
   }
 }
 
-template <class T> template <class Vector> void Matrix<T>::SetRow(int row, const Vector &v)
+template <class T> template <class V> void Matrix<T>::SetRow(int row, const V &v)
 {
   if (row < MinRow() || row > MaxRow()) {
     throw std::out_of_range("Index out of range in Matrix::SetRow");
@@ -188,7 +181,6 @@ template <class T> template <class Vector> void Matrix<T>::SetRow(int row, const
   if (!CheckRow(v)) {
     throw DimensionException();
   }
-
   for (int j = MinCol(); j <= MaxCol(); ++j) {
     (*this)(row, j) = v[j];
   }

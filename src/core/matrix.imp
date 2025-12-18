@@ -184,7 +184,6 @@ template <class T> void Matrix<T>::RMultiply(const Vector<T> &in, Vector<T> &out
 }
 
 // transposed (row) vector*matrix multiplication operator
-// a friend function of Matrix
 template <class T> Vector<T> operator*(const Vector<T> &v, const Matrix<T> &M)
 {
   if (!M.CheckColumn(v)) {

@@ -45,45 +45,46 @@ public:
   /// @name Lifecycle
   //@{
   RectArray() : m_minrow(1), m_maxrow(0), m_mincol(1), m_maxcol(0), m_storage() {}
-  RectArray(unsigned int nrows, unsigned int ncols);
-  RectArray(int minr, int maxr, int minc, int maxc)
-    : m_minrow(minr), m_maxrow(maxr), m_mincol(minc), m_maxcol(maxc),
-      m_storage((maxr >= minr && maxc >= minc) ? (maxr - minr + 1) * (maxc - minc + 1) : 0)
+  RectArray(const size_t nrows, const size_t ncols) : RectArray(1, nrows, 1, ncols) {}
+  RectArray(const int minrow, const int maxrow, const int mincol, const int maxcol)
+    : m_minrow(minrow), m_maxrow(maxrow), m_mincol(mincol), m_maxcol(maxcol),
+      m_storage((maxrow >= minrow && maxcol >= mincol)
+                    ? (maxrow - minrow + 1) * (maxcol - mincol + 1)
+                    : 0)
   {
   }
   RectArray(const RectArray &) = default;
   RectArray(RectArray &&) noexcept = default;
-
-  virtual ~RectArray() = default;
+  ~RectArray() = default;
 
   RectArray &operator=(const RectArray &) = default;
   RectArray &operator=(RectArray &&) noexcept = default;
   //@}
 
+  /// @name Range checking functions; returns true only if valid index/size
+  //@{
   /// check array for same row and column boundaries
   bool CheckBounds(const RectArray<T> &m) const
   {
     return (m_minrow == m.m_minrow && m_maxrow == m.m_maxrow && m_mincol == m.m_mincol &&
             m_maxcol == m.m_maxcol);
   }
-  /// @name Range checking functions; returns true only if valid index/size
-  //@{
   /// check for correct row index
-  bool CheckRow(int row) const { return (m_minrow <= row && row <= m_maxrow); }
+  bool CheckRow(const int row) const { return (m_minrow <= row && row <= m_maxrow); }
   /// check row vector for correct column boundaries
-  template <class Vector> bool CheckRow(const Vector &v) const
+  template <class V> bool CheckRow(const V &v) const
   {
-    return (v.front_index() == m_mincol && v.back_index() == m_maxcol);
+    return v.front_index() == m_mincol && v.back_index() == m_maxcol;
   }
   /// check for correct column index
-  bool CheckColumn(int col) const { return (m_mincol <= col && col <= m_maxcol); }
+  bool CheckColumn(const int col) const { return (m_mincol <= col && col <= m_maxcol); }
   /// check column vector for correct row boundaries
-  template <class Vector> bool CheckColumn(const Vector &v) const
+  template <class V> bool CheckColumn(const V &v) const
   {
     return (v.front_index() == m_minrow && v.back_index() == m_maxrow);
   }
   /// check row and column indices
-  bool Check(int row, int col) const { return CheckRow(row) && CheckColumn(col); }
+  bool Check(const int row, const int col) const { return CheckRow(row) && CheckColumn(col); }
 
   //@}
   /// @name General data access
@@ -131,7 +132,7 @@ public:
       return;
     }
 
-    auto stride = row_stride();
+    const auto stride = row_stride();
     const size_t ai = index(i, m_mincol);
     const size_t aj = index(j, m_mincol);
     for (size_t k = 0; k < stride; ++k) {
@@ -146,15 +147,6 @@ public:
 };
 
 //------------------------------------------------------------------------
-//     RectArray<T>: Constructors, destructor, constructive operators
-//------------------------------------------------------------------------
-
-template <class T>
-RectArray<T>::RectArray(unsigned int rows, unsigned int cols) : RectArray(1, rows, 1, cols)
-{
-}
-
-//------------------------------------------------------------------------
 //                   RectArray<T>: Row and column rotation
 //------------------------------------------------------------------------
 
@@ -163,12 +155,9 @@ template <class T> void RectArray<T>::RotateUp(int lo, int hi)
   if (lo < m_minrow || hi < lo || m_maxrow < hi) {
     throw std::out_of_range("Index out of range in RectArray");
   }
-
-  auto stride = row_stride();
-
-  size_t first = index(lo, m_mincol);
-  size_t last = index(hi + 1, m_mincol);
-
+  const auto stride = row_stride();
+  const size_t first = index(lo, m_mincol);
+  const size_t last = index(hi + 1, m_mincol);
   std::rotate(m_storage.begin() + first, m_storage.begin() + first + stride,
               m_storage.begin() + last);
 }
@@ -178,12 +167,9 @@ template <class T> void RectArray<T>::RotateDown(int lo, int hi)
   if (lo < m_minrow || hi < lo || m_maxrow < hi) {
     throw std::out_of_range("Index out of range in RectArray");
   }
-
-  auto stride = row_stride();
-
-  size_t first = index(lo, m_mincol);
-  size_t last = index(hi + 1, m_mincol);
-
+  const auto stride = row_stride();
+  const size_t first = index(lo, m_mincol);
+  const size_t last = index(hi + 1, m_mincol);
   std::rotate(m_storage.begin() + first, m_storage.begin() + last - stride,
               m_storage.begin() + last);
 }
@@ -200,7 +186,7 @@ template <class T> template <class Vector> void RectArray<T>::GetRow(int row, Ve
   if (!CheckRow(v)) {
     throw DimensionException();
   }
-  size_t base = index(row, m_mincol);
+  const size_t base = index(row, m_mincol);
   for (int c = m_mincol; c <= m_maxcol; ++c) {
     v[c] = m_storage[base + (c - m_mincol)];
   }
