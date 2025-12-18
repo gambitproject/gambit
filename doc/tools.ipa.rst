@@ -53,7 +53,6 @@ the reduced strategic form of the example in Figure 2 of Selten
 (International Journal of Game Theory, 1975)
 
    $ gambit-ipa e02.nfg
-
    Compute Nash equilibria using iterated polymatrix approximation
    Gametracer version 0.2, Copyright (C) 2002, Ben Blum and Christian Shelton
    Gambit version |release|, Copyright (C) 1994-2025, The Gambit Project

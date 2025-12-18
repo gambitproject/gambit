@@ -1497,7 +1497,7 @@ class Game:
             except KeyError:
                 raise KeyError(f"{funcname}(): no information set with label '{infoset}'")
         raise TypeError(
-            f"{funcname}(): {argname} must be Infoset or str, not {node.__class__.__name__}"
+            f"{funcname}(): {argname} must be Infoset or str, not {infoset.__class__.__name__}"
         )
 
     def _resolve_action(self,
