@@ -1079,17 +1079,6 @@ void GameTreeRep::BuildUnreachableNodes() const
 //------------------------------------------------------------------------
 
 namespace { // Anonymous namespace
-
-// Comparator for priority queue (ancestors have lower priority than descendants)
-// This ensures descendants are processed first, allowing upward traversal to find
-// the highest reachable node in each component
-struct NodeCmp {
-  bool operator()(const GameNodeRep *a, const GameNodeRep *b) const
-  {
-    return a->GetNumber() < b->GetNumber();
-  }
-};
-
 struct SubgameScratchData {
   /// DSU structures
   ///
@@ -1175,13 +1164,17 @@ struct SubgameScratchData {
 ///                in the newly-formed component
 void GenerateComponent(SubgameScratchData &p_data, GameNodeRep *p_start_node)
 {
-  auto *start_infoset = p_start_node->GetInfoset().get();
+  auto node_cmp = [](const GameNodeRep *a, const GameNodeRep *b) {
+    return a->GetNumber() < b->GetNumber();
+  };
+  std::priority_queue<GameNodeRep *, std::vector<GameNodeRep *>, decltype(node_cmp)>
+      local_frontier(node_cmp);
 
   std::unordered_set<GameNodeRep *> visited_this_component;
-  std::priority_queue<GameNodeRep *, std::vector<GameNodeRep *>, NodeCmp> local_frontier;
 
   local_frontier.push(p_start_node);
   visited_this_component.insert(p_start_node);
+  auto *start_infoset = p_start_node->GetInfoset().get();
 
   while (!local_frontier.empty()) {
     auto *curr = local_frontier.top();
@@ -1244,20 +1237,21 @@ std::map<GameInfosetRep *, GameNodeRep *> FindSubgameRoots(const Game &p_game)
   SubgameScratchData data;
 
   // Process nodes in postorder
-  for (const auto &node : p_game->GetNonterminalNodes(TraversalOrder::Postorder)) {
-    if (data.dsu_parent.count(node->GetInfoset().get())) {
-      continue;
-    }
+  for (const auto &node : filter_if(p_game->GetNonterminalNodes(TraversalOrder::Postorder),
+                                    [&data](const auto &node) {
+                                      return !data.dsu_parent.count(node->GetInfoset().get());
+                                    })) {
     GenerateComponent(data, node.get());
   }
 
   std::map<GameInfosetRep *, GameNodeRep *> result;
 
-  for (const auto &player : p_game->GetPlayersWithChance()) {
-    for (const auto &infoset : player->GetInfosets()) {
-      auto *ptr = infoset.get();
-      result[ptr] = data.subgame_root_candidate.at(data.FindSet(ptr));
-    }
+  using InfosetsWithChance =
+      NestedElementCollection<Game, &GameRep::GetPlayersWithChance, &GamePlayerRep::GetInfosets>;
+
+  for (const auto &infoset : InfosetsWithChance(p_game)) {
+    auto *ptr = infoset.get();
+    result[ptr] = data.subgame_root_candidate.at(data.FindSet(ptr));
   }
 
   return result;
@@ -1267,9 +1261,6 @@ std::map<GameInfosetRep *, GameNodeRep *> FindSubgameRoots(const Game &p_game)
 
 void GameTreeRep::BuildSubgameRoots() const
 {
-  if (!m_computedValues) {
-    BuildComputedValues();
-  }
   m_infosetSubgameRoot = FindSubgameRoots(std::const_pointer_cast<GameRep>(shared_from_this()));
 }
 
