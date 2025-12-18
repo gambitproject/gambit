@@ -28,7 +28,6 @@ namespace Gambit {
 //       Matrix<T>: Constructors, destructors, constructive operators
 //-------------------------------------------------------------------------
 
-
 template <class T> Matrix<T> &Matrix<T>::operator=(const T &c)
 {
   for (int i = MinRow(); i <= MaxRow(); i++) {
@@ -302,7 +301,6 @@ template <class T> bool Matrix<T>::operator==(const T &s) const
   }
   return true;
 }
-
 
 template <class T> bool Matrix<T>::operator!=(const T &s) const { return !(*this == s); }
 

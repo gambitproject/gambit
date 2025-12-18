@@ -132,9 +132,8 @@ public:
     }
 
     auto stride = row_stride();
-    size_t ai = index(i, m_mincol);
-    size_t aj = index(j, m_mincol);
-
+    const size_t ai = index(i, m_mincol);
+    const size_t aj = index(j, m_mincol);
     for (size_t k = 0; k < stride; ++k) {
       std::swap(m_storage[ai + k], m_storage[aj + k]);
     }
