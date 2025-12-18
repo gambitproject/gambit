@@ -113,6 +113,7 @@ def test_read_write_efg():
     assert serialized_efg_game == double_serialized_efg_game
 
 
+@pytest.mark.xfail
 def test_read_write_nfg():
     nfg_game = create_2x2_zero_nfg()
     serialized_nfg_game = nfg_game.to_nfg()

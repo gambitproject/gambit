@@ -802,6 +802,41 @@ Game GameXMLSavefile::GetGame() const
   throw InvalidFileException("No game representation found in document");
 }
 
+template <class C> void StandardizeLabels(C &&p_container)
+{
+  std::map<std::string, std::size_t> counts;
+  for (const auto &element : p_container) {
+    ++counts[element->GetLabel()];
+  }
+  std::map<std::string, std::size_t> visited;
+  for (auto element : p_container) {
+    const auto label = element->GetLabel();
+    if (counts[label] == 1) {
+      continue;
+    }
+    const auto index = ++visited[label];
+    element->SetLabel(label + "_" + std::to_string(index));
+  }
+}
+
+void StandardizeGameLabels(const Game &p_game)
+{
+  StandardizeLabels(p_game->GetPlayers());
+  StandardizeLabels(p_game->GetOutcomes());
+  if (p_game->IsTree()) {
+    for (const auto &player : p_game->GetPlayersWithChance()) {
+      for (const auto &infoset : player->GetInfosets()) {
+        StandardizeLabels(infoset->GetActions());
+      }
+    }
+  }
+  else {
+    for (const auto &player : p_game->GetPlayers()) {
+      StandardizeLabels(player->GetStrategies());
+    }
+  }
+}
+
 Game ReadEfgFile(std::istream &p_stream)
 {
   GameFileLexer parser(p_stream);
@@ -831,6 +866,7 @@ Game ReadEfgFile(std::istream &p_stream)
   }
   ParseNode(parser, game, game->GetRoot(), treeData);
   game->SortInfosets();
+  StandardizeGameLabels(game);
   return game;
 }
 
@@ -839,7 +875,9 @@ Game ReadNfgFile(std::istream &p_stream)
   GameFileLexer parser(p_stream);
   TableFileGame data;
   ParseNfgHeader(parser, data);
-  return BuildNfg(parser, data);
+  auto game = BuildNfg(parser, data);
+  StandardizeGameLabels(game);
+  return game;
 }
 
 Game ReadGbtFile(std::istream &p_stream)
