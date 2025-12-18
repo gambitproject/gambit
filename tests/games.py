@@ -120,7 +120,6 @@ def create_2x2_zero_sum_efg(missing_term_outcome: bool = False) -> gbt.Game:
     if not missing_term_outcome:
         g.set_outcome(g.root.children["T"].children["r"], draw)
 
-    g.to_efg(f"2x2_zero_sum_efg_{missing_term_outcome}.efg")
     return g
 
 
@@ -188,7 +187,6 @@ def create_three_action_internal_outcomes_efg(nonterm_outcomes: bool = False) ->
         g.set_outcome(g.root.children[1].children[1].children[1], o_m1)
         g.set_outcome(g.root.children[1].children[2].children[0], o_m1)
         g.set_outcome(g.root.children[1].children[2].children[1], o_1)
-    g.to_efg(f"three_action_internal_outcomes_efg_{nonterm_outcomes}.efg")
     return g
 
 
@@ -211,7 +209,6 @@ def create_entry_accomodation_efg(nonterm_outcomes: bool = False) -> gbt.Game:
     g.set_outcome(g.root.children[1].children[0].children[0], g.add_outcome([2, 3]))
     g.set_outcome(g.root.children[1].children[0].children[1], g.add_outcome([1, 0]))
     g.set_outcome(g.root.children[1].children[1], g.add_outcome([3, 1]))
-    g.to_efg(f"entry_accomodation_efg_{nonterm_outcomes}.efg")
     return g
 
 
@@ -234,7 +231,6 @@ def create_non_zero_sum_lacking_outcome_efg(missing_term_outcome: bool = False) 
     g.set_outcome(g.root.children[1].children[0].children[1], g.add_outcome([0, 1]))
     g.set_outcome(g.root.children[1].children[1].children[0], g.add_outcome([-1, 1]))
     g.set_outcome(g.root.children[1].children[1].children[1], g.add_outcome([2, -1]))
-    g.to_efg(f"non_zero_sum_lacking_outcome_efg_{missing_term_outcome}.efg")
     return g
 
 
@@ -285,7 +281,6 @@ def create_chance_in_middle_efg(nonterm_outcomes: bool = False) -> gbt.Game:
     g.set_outcome(g.root.children[1].children[1].children[0].children[1], o_m1)
     g.set_outcome(g.root.children[1].children[1].children[1].children[0], o_h)
     g.set_outcome(g.root.children[1].children[1].children[1].children[1], o_mh)
-    g.to_efg(f"chance_in_middle_efg_{nonterm_outcomes}.efg")
     return g
 
 
@@ -354,7 +349,6 @@ def create_3_player_with_internal_outcomes_efg(nonterm_outcomes: bool = False) -
         g.set_outcome(g.root.children[1].children[1].children[0], o)
         o = g.add_outcome([1, 2, 3])
         g.set_outcome(g.root.children[1].children[1].children[1], o)
-    g.to_efg(f"3_player_with_internal_outcomes_{nonterm_outcomes}.efg")
     return g
 
 
@@ -375,7 +369,6 @@ def create_matching_pennies_efg(with_neutral_outcome: bool = False) -> gbt.Game:
     g.set_outcome(g.root.children["T"].children["t"], alice_win)
     g.set_outcome(g.root.children["H"].children["t"], alice_lose)
     g.set_outcome(g.root.children["T"].children["h"], alice_lose)
-    g.to_efg(f"matching_pennies_efg_{with_neutral_outcome}.efg")
     return g
 
 
@@ -962,7 +955,6 @@ def create_two_player_perfect_info_win_lose_efg(nonterm_outcomes: bool = False) 
         g.set_outcome(g.root.children[0].children[1], g.add_outcome([101, -51], label="aR"))
         g.set_outcome(g.root.children[1].children[0], g.add_outcome([1, -1], label="bL"))
         g.set_outcome(g.root.children[1].children[1], g.add_outcome([-1, 1], label="bR"))
-    g.to_efg(f"two_player_perfect_info_win_lose_efg_{nonterm_outcomes}.efg")
     return g
 
 
