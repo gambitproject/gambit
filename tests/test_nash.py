@@ -847,27 +847,54 @@ def test_logit_solve_lambda():
         game=game, lam=[1, 2, 3], first_step=0.2, max_accel=1)) > 0
 
 
-def test_kuhn():
-    """
-    TEMPORARY
-
-    Check that the reduced strategic forms match for the versions with and without
-    nonterminal nodes
-    """
-    old = games.create_kuhn_poker_efg(nonterm_outcomes=False)
-    new = games.create_kuhn_poker_efg(nonterm_outcomes=True)
-    for i in [0, 1]:
-        assert (old.to_arrays()[i] == new.to_arrays()[i]).all()
-
-
-def test_stripped():
-    """
-    TEMPORARY
-
-    Check that the reduced strategic forms match for the versions with and without
-    nonterminal nodes
-    """
-    old = games.create_stripped_down_poker_efg()
-    new = games.create_stripped_down_poker_efg(nonterm_outcomes=True)
-    for i in [0, 1]:
-        assert (old.to_arrays()[i] == new.to_arrays()[i]).all()
+@pytest.mark.parametrize(
+    "standard, modified",
+    [
+        (
+            games.create_two_player_perfect_info_win_lose_efg(),
+            games.create_two_player_perfect_info_win_lose_efg(nonterm_outcomes=True)
+        ),
+        (
+            games.create_3_player_with_internal_outcomes_efg(),
+            games.create_3_player_with_internal_outcomes_efg(nonterm_outcomes=True)
+        ),
+        (
+            games.create_chance_in_middle_efg(),
+            games.create_chance_in_middle_efg(nonterm_outcomes=True)
+        ),
+        (
+            games.create_non_zero_sum_lacking_outcome_efg(),
+            games.create_non_zero_sum_lacking_outcome_efg(missing_term_outcome=True)
+        ),
+        (
+            games.create_entry_accomodation_efg(),
+            games.create_entry_accomodation_efg(nonterm_outcomes=True)
+        ),
+        (
+            games.create_three_action_internal_outcomes_efg(),
+            games.create_three_action_internal_outcomes_efg(nonterm_outcomes=True)
+        ),
+        (
+            games.create_kuhn_poker_efg(),
+            games.create_kuhn_poker_efg(nonterm_outcomes=True)
+        ),
+        (
+            games.create_stripped_down_poker_efg(),
+            games.create_stripped_down_poker_efg(nonterm_outcomes=True)
+        ),
+        (
+            games.create_2x2_zero_sum_efg(),
+            games.create_2x2_zero_sum_efg(missing_term_outcome=True)
+        ),
+        (
+            games.create_matching_pennies_efg(),
+            games.create_matching_pennies_efg(with_neutral_outcome=True)
+        ),
+    ],
+)
+def test_games_match(standard: gbt.Game, modified: gbt.Game):
+    arrays_standard = standard.to_arrays()
+    arrays_modified = modified.to_arrays()
+    assert (len(arrays_standard) == len(arrays_modified))
+    for i in range(len(arrays_standard)):
+        assert (arrays_standard[i] == arrays_modified[i]).all()
