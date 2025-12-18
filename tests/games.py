@@ -349,6 +349,9 @@ def create_3_player_with_internal_outcomes_efg(nonterm_outcomes: bool = False) -
         g.set_outcome(g.root.children[1].children[1].children[0], o)
         o = g.add_outcome([1, 2, 3])
         g.set_outcome(g.root.children[1].children[1].children[1], o)
+        o = g.add_outcome([0, 0, 0])
+        g.set_outcome(g.root.children[0].children[0].children[1].children[0], o)
+        g.set_outcome(g.root.children[0].children[0].children[1].children[1], o)
     return g
 
 
