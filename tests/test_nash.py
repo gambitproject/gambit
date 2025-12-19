@@ -247,7 +247,7 @@ def test_enumpoly_ordered_behavior(
         ##############################################################################
     ],
 )
-def test_enumpoly_ordered_behavior2(
+def test_enumpoly_ordered_behavior_PROBLEM_CASE(
         game: gbt.Game, mixed_behav_prof_data: list, stop_after: None | int
 ):
     """Test calls of enumpoly for mixed behavior equilibria,
@@ -896,13 +896,25 @@ def test_regrets_tmp():
 
     g = games.create_3_player_with_internal_outcomes_efg()
     prof_data = []
+    prof_data.append([[[1, 0], [1, 0]], [[1, 0], [0.5, 0.5]], [[1, 0], [0, 1]]])
+    prof_data.append([[[1, 0], [1, 0]], [[1, 0], [0, 1]], [[1, 0], [0.33333, 0.6666]]])
+    prof_data.append([[[1, 0], [1, 0]], [[1, 0], [0.5, 0.5]], [[0, 1], [1, 0]]])
+    prof_data.append([[[1, 0], [1, 0]], [[1, 0], [0, 1]], [[0.33333, 0.6666], [1, 0]]])
+    print("==================")
+    for p in prof_data:
+        prof = g.mixed_behavior_profile(rational=False, data=p)
+        # print(prof)
+        print(prof.max_regret())
+        print(prof.agent_max_regret())
+
+    print("==================")
+    prof_data = []
     prof_data.append([[[1, 0], [1, 0]], [[1, 0], ["1/2", "1/2"]], [[1, 0], [0, 1]]])
     prof_data.append([[[1, 0], [1, 0]], [[1, 0], [0, 1]], [[1, 0], ["1/3", "2/3"]]])
     prof_data.append([[[1, 0], [1, 0]], [[1, 0], ["1/2", "1/2"]], [[0, 1], [1, 0]]])
     prof_data.append([[[1, 0], [1, 0]], [[1, 0], [0, 1]], [["1/3", "2/3"], [1, 0]]])
-
     for p in prof_data:
         prof = g.mixed_behavior_profile(rational=True, data=p)
-        print(prof)
+        # print(prof)
         print(prof.max_regret())
         print(prof.agent_max_regret())
