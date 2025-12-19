@@ -32,12 +32,13 @@ using namespace Gambit;
 using namespace Gambit::Nash;
 
 template <class T>
-void PrintCliques(const List<List<MixedStrategyProfile<T>>> &p_cliques,
+void PrintCliques(const Array<Array<MixedStrategyProfile<T>>> &p_cliques,
                   std::shared_ptr<MixedProfileRenderer<T>> p_renderer)
 {
-  for (size_t cl = 1; cl <= p_cliques.size(); cl++) {
-    for (size_t i = 1; i <= p_cliques[cl].size(); i++) {
-      p_renderer->Render(p_cliques[cl][i], "convex-" + lexical_cast<std::string>(cl));
+  for (auto [cl, clique] : enumerate(p_cliques)) {
+    const std::string label = "convex-" + std::to_string(cl + 1);
+    for (const auto &profile : clique) {
+      p_renderer->Render(profile, label);
     }
   }
 }

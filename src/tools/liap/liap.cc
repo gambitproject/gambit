@@ -60,9 +60,10 @@ void PrintHelp(char *progname)
   exit(1);
 }
 
-List<MixedStrategyProfile<double>> ReadStrategyProfiles(const Game &p_game, std::istream &p_stream)
+Array<MixedStrategyProfile<double>> ReadStrategyProfiles(const Game &p_game,
+                                                         std::istream &p_stream)
 {
-  List<MixedStrategyProfile<double>> profiles;
+  Array<MixedStrategyProfile<double>> profiles;
   while (!p_stream.eof() && !p_stream.bad()) {
     MixedStrategyProfile<double> p(p_game->NewMixedStrategyProfile(0.0));
     for (size_t i = 1; i <= p.MixedProfileLength(); i++) {
@@ -83,19 +84,20 @@ List<MixedStrategyProfile<double>> ReadStrategyProfiles(const Game &p_game, std:
   return profiles;
 }
 
-List<MixedStrategyProfile<double>> RandomStrategyProfiles(const Game &p_game, int p_count)
+Array<MixedStrategyProfile<double>> RandomStrategyProfiles(const Game &p_game, int p_count)
 {
   std::default_random_engine engine;
-  List<MixedStrategyProfile<double>> profiles;
+  Array<MixedStrategyProfile<double>> profiles;
   for (int i = 1; i <= p_count; i++) {
     profiles.push_back(p_game->NewRandomStrategyProfile(engine));
   }
   return profiles;
 }
 
-List<MixedBehaviorProfile<double>> ReadBehaviorProfiles(const Game &p_game, std::istream &p_stream)
+Array<MixedBehaviorProfile<double>> ReadBehaviorProfiles(const Game &p_game,
+                                                         std::istream &p_stream)
 {
-  List<MixedBehaviorProfile<double>> profiles;
+  Array<MixedBehaviorProfile<double>> profiles;
   while (!p_stream.eof() && !p_stream.bad()) {
     MixedBehaviorProfile<double> p(p_game);
     for (size_t i = 1; i <= p.BehaviorProfileLength(); i++) {
@@ -116,10 +118,10 @@ List<MixedBehaviorProfile<double>> ReadBehaviorProfiles(const Game &p_game, std:
   return profiles;
 }
 
-List<MixedBehaviorProfile<double>> RandomBehaviorProfiles(const Game &p_game, int p_count)
+Array<MixedBehaviorProfile<double>> RandomBehaviorProfiles(const Game &p_game, int p_count)
 {
   std::default_random_engine engine;
-  List<MixedBehaviorProfile<double>> profiles;
+  Array<MixedBehaviorProfile<double>> profiles;
   for (int i = 1; i <= p_count; i++) {
     profiles.push_back(p_game->NewRandomBehaviorProfile(engine));
   }
@@ -207,7 +209,7 @@ int main(int argc, char *argv[])
   try {
     const Game game = ReadGame(*input_stream);
     if (!game->IsTree() || !solveAgent) {
-      List<MixedStrategyProfile<double>> starts;
+      Array<MixedStrategyProfile<double>> starts;
       if (!startFile.empty()) {
         std::ifstream startPoints(startFile.c_str());
         starts = ReadStrategyProfiles(game, startPoints);
@@ -229,7 +231,7 @@ int main(int argc, char *argv[])
       }
     }
     else {
-      List<MixedBehaviorProfile<double>> starts;
+      Array<MixedBehaviorProfile<double>> starts;
       if (!startFile.empty()) {
         std::ifstream startPoints(startFile.c_str());
         starts = ReadBehaviorProfiles(game, startPoints);

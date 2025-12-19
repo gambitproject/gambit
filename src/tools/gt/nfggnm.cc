@@ -31,10 +31,10 @@
 using namespace Gambit;
 using namespace Gambit::Nash;
 
-extern List<MixedStrategyProfile<double>> ReadStrategyPerturbations(const Game &p_game,
-                                                                    std::istream &p_stream);
-extern List<MixedStrategyProfile<double>> RandomStrategyPerturbations(const Game &p_game,
-                                                                      int p_count);
+extern Array<MixedStrategyProfile<double>> ReadStrategyPerturbations(const Game &p_game,
+                                                                     std::istream &p_stream);
+extern Array<MixedStrategyProfile<double>> RandomStrategyPerturbations(const Game &p_game,
+                                                                       int p_count);
 
 void PrintBanner(std::ostream &p_stream)
 {
@@ -174,7 +174,7 @@ int main(int argc, char *argv[])
   try {
     const Game game = ReadGame(*input_stream);
     auto renderer = MakeMixedStrategyProfileRenderer<double>(std::cout, numDecimals, false);
-    List<MixedStrategyProfile<double>> perts;
+    Array<MixedStrategyProfile<double>> perts;
     if (!startFile.empty()) {
       std::ifstream startPerts(startFile.c_str());
       perts = ReadStrategyPerturbations(game, startPerts);

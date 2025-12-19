@@ -66,6 +66,43 @@ template <class Key, class T> bool contains(const std::map<Key, T> &map, const K
   return map.find(key) != map.end();
 }
 
+template <class C> class EnumerateView {
+public:
+  explicit EnumerateView(C &p_range) : m_range(p_range) {}
+
+  class iterator {
+  public:
+    using base_iterator = decltype(std::begin(std::declval<C &>()));
+
+    iterator(const std::size_t p_index, base_iterator p_current)
+      : m_index(p_index), m_current(p_current)
+    {
+    }
+
+    iterator &operator++()
+    {
+      ++m_index;
+      ++m_current;
+      return *this;
+    }
+
+    bool operator!=(const iterator &p_other) const { return m_current != p_other.m_current; }
+    auto operator*() const { return std::tie(m_index, *m_current); }
+
+  private:
+    std::size_t m_index;
+    base_iterator m_current;
+  };
+
+  iterator begin() { return iterator{0, std::begin(m_range)}; }
+  iterator end() { return iterator{0, std::end(m_range)}; }
+
+private:
+  C &m_range;
+};
+
+template <class C> auto enumerate(C &p_range) { return EnumerateView<C>(p_range); }
+
 /// @brief A container adaptor which returns only the elements matching the predicate
 ///        This is intended to look forward to C++20-style ranges
 template <typename Container, typename Pred> class filter_if {

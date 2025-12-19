@@ -44,21 +44,21 @@ public:
     return m_extremeEquilibria;
   }
 
-  List<List<MixedStrategyProfile<T>>> GetCliques() const;
+  Array<Array<MixedStrategyProfile<T>>> GetCliques() const;
 
   Game m_game;
   std::list<MixedStrategyProfile<T>> m_extremeEquilibria;
 
   /// Representation of the graph connecting the extreme equilibria
   ///@{
-  List<Vector<T>> m_key1, m_key2;
-  List<int> m_node1, m_node2; // IDs of each component of the extreme equilibria
+  Array<Vector<T>> m_key1, m_key2;
+  Array<int> m_node1, m_node2; // IDs of each component of the extreme equilibria
   int m_v1{0}, m_v2{0};
   ///@}
 
   /// Representation of the connectedness of the extreme equilibria
   /// These are generated only on demand
-  mutable List<Array<int>> m_cliques1, m_cliques2;
+  mutable Array<Array<int>> m_cliques1, m_cliques2;
 };
 
 template <class T>
