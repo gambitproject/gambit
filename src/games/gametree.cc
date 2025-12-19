@@ -594,7 +594,7 @@ GameInfoset GameTreeRep::LeaveInfoset(GameNode p_node)
 GameInfoset GameTreeRep::AppendMove(GameNode p_node, GamePlayer p_player, int p_actions,
                                     bool p_generateLabels)
 {
-  GameNodeRep *node = p_node.get();
+  const GameNodeRep *node = p_node.get();
   if (p_actions <= 0 || !node->m_children.empty()) {
     throw UndefinedException();
   }
@@ -1075,7 +1075,9 @@ void GameTreeRep::BuildUnreachableNodes() const
             std::stack<GameNodeRep *> nodes_to_visit;
             nodes_to_visit.push(subtree_root.get());
             while (!nodes_to_visit.empty()) {
+              // NOLINTBEGIN(misc-const-correctness)
               GameNodeRep *current_unreachable_node = nodes_to_visit.top();
+              // NOLINTEND(misc-const-correctness)
               nodes_to_visit.pop();
               m_unreachableNodes->insert(current_unreachable_node);
               for (const auto &unreachable_child : current_unreachable_node->GetChildren()) {
