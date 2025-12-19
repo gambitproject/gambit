@@ -811,7 +811,9 @@ template <class C> void StandardizeLabels(C &&p_container)
   std::map<std::string, std::size_t> visited;
   for (auto element : p_container) {
     const auto label = element->GetLabel();
-    if (counts[label] == 1) {
+    // A special case: If only one label is the empty string we still want to
+    // convert it to "_1"
+    if (counts[label] == 1 && label != "") {
       continue;
     }
     const auto index = ++visited[label];
