@@ -1142,11 +1142,13 @@ Game ReadNfgFile(std::istream &p_stream, bool p_normalizeLabels = false);
 
 /// @brief Reads a game representation from a graphical interface XML saveflie
 /// @param[in] p_stream An input stream, positioned at the start of the text
+/// @param[in] p_normalizeLabels Require element labels to be nonempty and unique within
+///                              their scope
 /// @return A handle to the game representation constructed
 /// @throw InvalidFileException If the stream does not contain a valid serialisation
 ///                             of a game in an XML savefile
 /// @sa ReadEfgFile, ReadNfgFile, ReadAggFile, ReadBaggFile
-Game ReadGbtFile(std::istream &p_stream);
+Game ReadGbtFile(std::istream &p_stream, bool p_normalizeLabels = false);
 
 /// @brief Reads a game from the input stream, attempting to autodetect file format
 /// @deprecated Deprecated in favour of the various ReadXXXGame functions.

@@ -802,7 +802,7 @@ Game GameXMLSavefile::GetGame() const
   throw InvalidFileException("No game representation found in document");
 }
 
-template <class C> void StandardizeLabels(C &&p_container)
+template <class C> void NormalizeLabels(C &&p_container)
 {
   std::map<std::string, std::size_t> counts;
   for (const auto &element : p_container) {
@@ -821,20 +821,20 @@ template <class C> void StandardizeLabels(C &&p_container)
   }
 }
 
-void StandardizeGameLabels(const Game &p_game)
+void NormalizeGameLabels(const Game &p_game)
 {
-  StandardizeLabels(p_game->GetPlayers());
-  StandardizeLabels(p_game->GetOutcomes());
+  NormalizeLabels(p_game->GetPlayers());
+  NormalizeLabels(p_game->GetOutcomes());
   if (p_game->IsTree()) {
     for (const auto &player : p_game->GetPlayersWithChance()) {
       for (const auto &infoset : player->GetInfosets()) {
-        StandardizeLabels(infoset->GetActions());
+        NormalizeLabels(infoset->GetActions());
       }
     }
   }
   else {
     for (const auto &player : p_game->GetPlayers()) {
-      StandardizeLabels(player->GetStrategies());
+      NormalizeLabels(player->GetStrategies());
     }
   }
 }
@@ -869,7 +869,7 @@ Game ReadEfgFile(std::istream &p_stream, bool p_normalizeLabels /* = false */)
   ParseNode(parser, game, game->GetRoot(), treeData);
   game->SortInfosets();
   if (p_normalizeLabels) {
-    StandardizeGameLabels(game);
+    NormalizeGameLabels(game);
   }
   return game;
 }
@@ -881,16 +881,48 @@ Game ReadNfgFile(std::istream &p_stream, bool p_normalizeLabels /* = false */)
   ParseNfgHeader(parser, data);
   auto game = BuildNfg(parser, data);
   if (p_normalizeLabels) {
-    StandardizeGameLabels(game);
+    NormalizeGameLabels(game);
   }
   return game;
 }
 
-Game ReadGbtFile(std::istream &p_stream)
+Game ReadGbtFile(std::istream &p_stream, bool p_normalizeLabels /* = false */)
 {
   std::stringstream buffer;
   buffer << p_stream.rdbuf();
-  return GameXMLSavefile(buffer.str()).GetGame();
+  auto game = GameXMLSavefile(buffer.str()).GetGame();
+  if (p_normalizeLabels) {
+    NormalizeGameLabels(game);
+  }
+  return game;
+}
+
+Game ReadAggFile(std::istream &p_stream, bool p_normalizeLabels /* = false */)
+{
+  try {
+    auto game = std::make_shared<GameAGGRep>(agg::AGG::makeAGG(p_stream));
+    if (p_normalizeLabels) {
+      NormalizeGameLabels(game);
+    }
+    return game;
+  }
+  catch (std::runtime_error &ex) {
+    throw InvalidFileException(ex.what());
+  }
+}
+
+Game ReadBaggFile(std::istream &p_stream, bool p_normalizeLabels /* = false */)
+{
+  try {
+    auto game = std::make_shared<GameBAGGRep>(agg::BAGG::makeBAGG(p_stream));
+    if (p_normalizeLabels) {
+      NormalizeGameLabels(game);
+    }
+    return game;
+  }
+  catch (std::runtime_error &ex) {
+    throw InvalidFileException(ex.what());
+  }
 }
 
 Game ReadGame(std::istream &p_file, bool p_normalizeLabels /* = false */)
