@@ -147,7 +147,9 @@ static void Icheck(IntegerRep *rep)
 
 static void Iclear_from(IntegerRep *rep, int p)
 {
+  // NOLINTBEGIN(misc-const-correctness)
   unsigned short *cp = &(rep->s[p]);
+  // NOLINTEND(misc-const-correctness)
   const unsigned short *cf = &(rep->s[rep->len]);
   while (cp < cf) {
     *cp++ = 0;
@@ -723,7 +725,9 @@ IntegerRep *add(const IntegerRep *x, int negatex, const IntegerRep *y, int negat
       else {
         r = Icalloc(r, calc_len(xl, yl, 0));
       }
+      // NOLINTBEGIN(misc-const-correctness)
       unsigned short *rs = r->s;
+      // NOLINTEND(misc-const-correctness)
       const unsigned short *as;
       const unsigned short *bs;
       const unsigned short *topa;
@@ -834,7 +838,9 @@ IntegerRep *add(const IntegerRep *x, int negatex, long y, IntegerRep *r)
       else {
         r = Icalloc(r, calc_len(xl, yl, 0));
       }
+      // NOLINTBEGIN(misc-const-correctness)
       unsigned short *rs = r->s;
+      // NOLINTEND(misc-const-correctness)
       const unsigned short *as;
       const unsigned short *bs;
       const unsigned short *topa;
@@ -904,7 +910,9 @@ IntegerRep *multiply(const IntegerRep *x, const IntegerRep *y, IntegerRep *r)
       r = Icalloc(r, rl);
     }
     unsigned short *rs = r->s;
+    // NOLINTBEGIN(misc-const-correctness)
     unsigned short *topr = &(rs[rl]);
+    // NOLINTEND(misc-const-correctness)
 
     // use best inner/outer loop params given constraints
     unsigned short *currentr;
@@ -965,7 +973,9 @@ IntegerRep *multiply(const IntegerRep *x, const IntegerRep *y, IntegerRep *r)
   {
     r = Iresize(r, rl);
     unsigned short *botr = r->s;
+    // NOLINTBEGIN(misc-const-correctness)
     unsigned short *topr = &(botr[rl]);
+    // NOLINTEND(misc-const-correctness)
     unsigned short *rs = &(botr[rl - 2]);
 
     const unsigned short *bota = (xrsame) ? botr : x->s;
@@ -979,7 +989,9 @@ IntegerRep *multiply(const IntegerRep *x, const IntegerRep *y, IntegerRep *r)
       *rs = 0;
 
       for (;;) {
+        // NOLINTBEGIN(misc-const-correctness)
         unsigned short *rt = rs;
+        // NOLINTEND(misc-const-correctness)
         unsigned long sum = prod + (unsigned long)(*rt);
         *rt++ = extract(sum);
         sum = down(sum);
@@ -1054,7 +1066,9 @@ IntegerRep *multiply(const IntegerRep *x, long y, IntegerRep *r)
     }
 
     unsigned short *rs = r->s;
+    // NOLINTBEGIN(misc-const-correctness)
     unsigned short *topr = &(rs[rl]);
+    // NOLINTEND(misc-const-correctness)
     unsigned short *currentr;
     const unsigned short *bota;
     const unsigned short *as;
@@ -1191,7 +1205,9 @@ static int unscale(const unsigned short *x, int xl, unsigned short y, unsigned s
   }
   else if (q != nullptr) {
     unsigned short *botq = q;
+    // NOLINTBEGIN(misc-const-correctness)
     unsigned short *qs = &(botq[xl - 1]);
+    // NOLINTEND(misc-const-correctness)
     const unsigned short *xs = &(x[xl - 1]);
     unsigned long rem = 0;
     while (qs >= botq) {
@@ -1646,7 +1662,9 @@ IntegerRep *lshift(const IntegerRep *x, long y, IntegerRep *r)
     }
 
     unsigned short *botr = r->s;
+    // NOLINTBEGIN(misc-const-correctness)
     unsigned short *rs = &(botr[rl - 1]);
+    // NOLINTEND(misc-const-correctness)
     const unsigned short *botx = (xrsame) ? botr : x->s;
     const unsigned short *xs = &(botx[xl - 1]);
     unsigned long a = 0;
@@ -1673,7 +1691,9 @@ IntegerRep *lshift(const IntegerRep *x, long y, IntegerRep *r)
       }
       const int rw = I_SHIFT - sw;
       unsigned short *rs = r->s;
+      // NOLINTBEGIN(misc-const-correctness)
       unsigned short *topr = &(rs[rl]);
+      // NOLINTEND(misc-const-correctness)
       const unsigned short *botx = (xrsame) ? rs : x->s;
       const unsigned short *xs = &(botx[bw]);
       const unsigned short *topx = &(botx[xl]);
@@ -1724,7 +1744,9 @@ IntegerRep *bitop(const IntegerRep *x, const IntegerRep *y, IntegerRep *r, char 
   }
   r->sgn = xsgn;
   unsigned short *rs = r->s;
+  // NOLINTBEGIN(misc-const-correctness)
   unsigned short *topr = &(rs[r->len]);
+  // NOLINTEND(misc-const-correctness)
   const unsigned short *as;
   const unsigned short *bs;
   const unsigned short *topb;
@@ -1800,7 +1822,9 @@ IntegerRep *bitop(const IntegerRep *x, long y, IntegerRep *r, char op)
   }
   r->sgn = xsgn;
   unsigned short *rs = r->s;
+  // NOLINTBEGIN(misc-const-correctness)
   unsigned short *topr = &(rs[r->len]);
+  // NOLINTEND(misc-const-correctness)
   const unsigned short *as;
   const unsigned short *bs;
   const unsigned short *topb;
@@ -1850,7 +1874,9 @@ IntegerRep *Compl(const IntegerRep *src, IntegerRep *r)
   nonnil(src);
   r = Icopy(r, src);
   unsigned short *s = r->s;
+  // NOLINTBEGIN(misc-const-correctness)
   unsigned short *top = &(s[r->len - 1]);
+  // NOLINTEND(misc-const-correctness)
   while (s < top) {
     const unsigned short cmp = ~(*s);
     *s++ = cmp;
@@ -2240,7 +2266,9 @@ std::string cvtItoa(const IntegerRep *x, std::string fmt, int &fmtlen, int base,
                     int width, int align_right, char fillchar, char Xcase, int showpos)
 {
   char *e = const_cast<char *>(fmt.c_str()) + fmtlen - 1;
+  // NOLINTBEGIN(misc-const-correctness)
   char *s = e;
+  // NOLINTEND(misc-const-correctness)
   *--s = 0;
 
   if (x->len == 0) {
@@ -2323,7 +2351,7 @@ std::string cvtItoa(const IntegerRep *x, std::string fmt, int &fmtlen, int base,
 #ifdef UNUSED
     int gap = (int)(s - p);
 #endif // UNUSED
-    for (char *t = s; *t != 0; ++t, ++p) {
+    for (const char *t = s; *t != 0; ++t, ++p) {
       *p = *t;
     }
     while (w++ < width) {

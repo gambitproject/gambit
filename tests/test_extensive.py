@@ -395,3 +395,63 @@ def test_reduced_strategic_form(
         # convert strings to rationals
         exp_array = games.vectorized_make_rational(np_arrays_of_rsf[i])
         assert (arrays[i] == exp_array).all()
+
+
+@pytest.mark.parametrize(
+    "standard,modified",
+    [
+        (
+            games.create_two_player_perfect_info_win_lose_efg(),
+            games.create_two_player_perfect_info_win_lose_efg(nonterm_outcomes=True)
+        ),
+        (
+            games.create_3_player_with_internal_outcomes_efg(),
+            games.create_3_player_with_internal_outcomes_efg(nonterm_outcomes=True)
+        ),
+        (
+            games.create_chance_in_middle_efg(),
+            games.create_chance_in_middle_efg(nonterm_outcomes=True)
+        ),
+        (
+            games.create_non_zero_sum_lacking_outcome_efg(),
+            games.create_non_zero_sum_lacking_outcome_efg(missing_term_outcome=True)
+        ),
+        (
+            games.create_entry_accomodation_efg(),
+            games.create_entry_accomodation_efg(nonterm_outcomes=True)
+        ),
+        (
+            games.create_three_action_internal_outcomes_efg(),
+            games.create_three_action_internal_outcomes_efg(nonterm_outcomes=True)
+        ),
+        (
+            games.create_kuhn_poker_efg(),
+            games.create_kuhn_poker_efg(nonterm_outcomes=True)
+        ),
+        (
+            games.create_stripped_down_poker_efg(),
+            games.create_stripped_down_poker_efg(nonterm_outcomes=True)
+        ),
+        (
+            games.create_2x2_zero_sum_efg(),
+            games.create_2x2_zero_sum_efg(missing_term_outcome=True)
+        ),
+        (
+            games.create_matching_pennies_efg(),
+            games.create_matching_pennies_efg(with_neutral_outcome=True)
+        ),
+    ],
+)
+def test_reduced_strategy_form_nonterminal_outcomes_consistency(standard: gbt.Game,
+                                                                modified: gbt.Game):
+    """
+    standard: game uses only non-terminal outcomes, with all non-terminal nodes having outcomes
+    modified: is payoff equivalent, but with non-terminal outcomes or missing terminal outcomes
+
+    The test checks that the corresponding reduced strategic forms match.
+    """
+    arrays_s = standard.to_arrays()
+    arrays_m = modified.to_arrays()
+    assert (len(arrays_s) == len(arrays_m))
+    for array_s, array_m in zip(arrays_s, arrays_m, strict=True):
+        assert (array_s == array_m).all()
