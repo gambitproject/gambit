@@ -42,12 +42,6 @@ cdef extern from "core/array.h":
         iterator end() except +
 
 
-cdef extern from "core/list.h":
-    cdef cppclass c_List "List"[T]:
-        T & getitem "operator[]"(int) except +
-        int size() except +
-        void push_back(T) except +
-
 cdef extern from "games/game.h":
     cdef cppclass c_GameRep "GameRep"
     cdef cppclass c_GameStrategyRep "GameStrategyRep"
@@ -300,6 +294,7 @@ cdef extern from "games/game.h":
         stdvector[c_GameNode] GetPlays(c_GameInfoset) except +
         stdvector[c_GameNode] GetPlays(c_GameAction) except +
         bool IsPerfectRecall() except +
+        bool IsAbsentMinded(c_GameInfoset) except +
 
         c_GameInfoset AppendMove(c_GameNode, c_GamePlayer, int) except +ValueError
         c_GameInfoset AppendMove(c_GameNode, c_GameInfoset) except +ValueError
@@ -341,7 +336,7 @@ cdef extern from "games/stratmixed.h" namespace "Gambit":
         bool operator==(c_MixedStrategyProfile[T]) except +
         bool operator!=(c_MixedStrategyProfile[T]) except +
         c_Game GetGame() except +
-        bool IsInvalidated()
+        bool HasOutdatedGameVersion()
         int MixedProfileLength() except +
         c_StrategySupportProfile GetSupport() except +
         c_MixedStrategyProfile[T] Normalize()  # except + doesn't compile
@@ -367,7 +362,7 @@ cdef extern from "games/behavmixed.h" namespace "Gambit":
         c_MixedBehaviorProfile[T] Normalize()  # except + doesn't compile
         T getitem "operator[]"(int) except +IndexError
         T getaction "operator[]"(c_GameAction) except +IndexError
-        T GetPayoff(int) except +
+        T GetPayoff(c_GamePlayer) except +
         T GetBeliefProb(c_GameNode) except +
         T GetRealizProb(c_GameNode) except +
         T GetInfosetProb(c_GameInfoset) except +
@@ -462,22 +457,22 @@ cdef extern from "util.h":
                                        c_GameAction, c_Rational) except +
 
     shared_ptr[c_MixedStrategyProfile[double]] copyitem_list_mspd "sharedcopyitem"(
-            c_List[c_MixedStrategyProfile[double]], int
+            stdlist[c_MixedStrategyProfile[double]], int
     ) except +
     shared_ptr[c_MixedStrategyProfile[c_Rational]] copyitem_list_mspr "sharedcopyitem"(
-            c_List[c_MixedStrategyProfile[c_Rational]], int
+            stdlist[c_MixedStrategyProfile[c_Rational]], int
     ) except +
     shared_ptr[c_MixedBehaviorProfile[double]] copyitem_list_mbpd "sharedcopyitem"(
-            c_List[c_MixedBehaviorProfile[double]], int
+            stdlist[c_MixedBehaviorProfile[double]], int
     ) except +
     shared_ptr[c_MixedBehaviorProfile[c_Rational]] copyitem_list_mbpr "sharedcopyitem"(
-            c_List[c_MixedBehaviorProfile[c_Rational]], int
+            stdlist[c_MixedBehaviorProfile[c_Rational]], int
     ) except +
     shared_ptr[c_LogitQREMixedStrategyProfile] copyitem_list_qrem "sharedcopyitem"(
-            c_List[c_LogitQREMixedStrategyProfile], int
+            stdlist[c_LogitQREMixedStrategyProfile], int
     ) except +
     shared_ptr[c_LogitQREMixedBehaviorProfile] copyitem_list_qreb "sharedcopyitem"(
-            c_List[c_LogitQREMixedBehaviorProfile], int
+            stdlist[c_LogitQREMixedBehaviorProfile], int
     ) except +
 
 

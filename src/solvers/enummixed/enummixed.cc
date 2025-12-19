@@ -38,7 +38,7 @@ bool EqZero(const double &x)
 bool EqZero(const Rational &x) { return x == Rational(0); }
 
 template <class T>
-List<List<MixedStrategyProfile<T>>> EnumMixedStrategySolution<T>::GetCliques() const
+Array<Array<MixedStrategyProfile<T>>> EnumMixedStrategySolution<T>::GetCliques() const
 {
   if (m_cliques1.empty()) {
     // Cliques are generated on demand
@@ -47,20 +47,19 @@ List<List<MixedStrategyProfile<T>>> EnumMixedStrategySolution<T>::GetCliques() c
       throw DimensionException();
     }
 
-    Array<CliqueEnumerator::Edge> edgelist(n);
-    for (size_t i = 1; i <= n; i++) {
-      edgelist[i].node1 = m_node1[i];
-      edgelist[i].node2 = m_node2[i];
-    }
+    Array<CliqueEnumerator::Edge> edgelist;
+    edgelist.reserve(n);
+    std::transform(m_node1.begin(), m_node1.end(), m_node2.begin(), std::back_inserter(edgelist),
+                   [](const int a, const int b) { return CliqueEnumerator::Edge(a, b); });
 
     const CliqueEnumerator clique(edgelist, m_v2 + 1, m_v1 + 1);
     m_cliques1 = clique.GetCliques1();
     m_cliques2 = clique.GetCliques2();
   }
 
-  List<List<MixedStrategyProfile<T>>> solution;
+  Array<Array<MixedStrategyProfile<T>>> solution;
   for (size_t cl = 1; cl <= m_cliques1.size(); cl++) {
-    solution.push_back(List<MixedStrategyProfile<T>>());
+    solution.push_back(Array<MixedStrategyProfile<T>>());
     for (size_t i = 1; i <= m_cliques1[cl].size(); i++) {
       for (size_t j = 1; j <= m_cliques2[cl].size(); j++) {
         MixedStrategyProfile<T> profile(m_game->NewMixedStrategyProfile(static_cast<T>(0)));
@@ -138,10 +137,8 @@ EnumMixedStrategySolveDetailed(const Game &p_game, StrategyCallbackType<T> p_onE
 
   Array<int> vert1id(solution->m_v1);
   Array<int> vert2id(solution->m_v2);
-  for (size_t i = 1; i <= vert1id.size(); vert1id[i++] = 0)
-    ;
-  for (size_t i = 1; i <= vert2id.size(); vert2id[i++] = 0)
-    ;
+  std::fill(vert1id.begin(), vert1id.end(), 0);
+  std::fill(vert2id.begin(), vert2id.end(), 0);
 
   int id1 = 0, id2 = 0;
 

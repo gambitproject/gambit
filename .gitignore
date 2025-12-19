@@ -43,5 +43,8 @@ Gambit.app/*
 *.so
 doc/tutorials/games/*.nfg
 doc/tutorials/games/*.efg
+doc/tutorials/*.png
 *.dmg
 Gambit.app/*
+*.ipynb_checkpoints
+*.ef

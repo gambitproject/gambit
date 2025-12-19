@@ -384,6 +384,9 @@ template <class T> Vector<T> Matrix<T>::Column(int j) const
 
 template <class T> void Matrix<T>::MakeIdent()
 {
+  if (!IsSquare()) {
+    throw DimensionException();
+  }
   for (int i = this->minrow; i <= this->maxrow; i++) {
     for (int j = this->mincol; j <= this->maxcol; j++) {
       if (i == j) {
@@ -424,6 +427,141 @@ template <class T> void Matrix<T>::Pivot(int row, int col)
       //  end inner loop
     }
   }
+}
+
+template <class T> Matrix<T> Matrix<T>::Inverse() const
+{
+  if (!IsSquare()) {
+    throw DimensionException();
+  }
+
+  Matrix copy(*this);
+  Matrix inv(this->MaxRow(), this->MaxRow());
+
+  // initialize inverse matrix and prescale row vectors
+  for (int i = this->MinRow(); i <= this->MaxRow(); i++) {
+    T max = (T)0;
+    for (int j = this->MinCol(); j <= this->MaxCol(); j++) {
+      T abs = copy(i, j);
+      if (abs < (T)0) {
+        abs = -abs;
+      }
+      if (abs > max) {
+        max = abs;
+      }
+    }
+
+    if (max == (T)0) {
+      throw SingularMatrixException();
+    }
+
+    T scale = (T)1 / max;
+    for (int j = this->MinCol(); j <= this->MaxCol(); j++) {
+      copy(i, j) *= scale;
+      if (i == j) {
+        inv(i, j) = scale;
+      }
+      else {
+        inv(i, j) = (T)0;
+      }
+    }
+  }
+
+  for (int i = this->MinCol(); i <= this->MaxCol(); i++) {
+    // find pivot row
+    T max = copy(i, i);
+    if (max < (T)0) {
+      max = -max;
+    }
+    int row = i;
+    for (int j = i + 1; j <= this->MaxRow(); j++) {
+      T abs = copy(j, i);
+      if (abs < (T)0) {
+        abs = -abs;
+      }
+      if (abs > max) {
+        max = abs;
+        row = j;
+      }
+    }
+
+    if (max <= (T)0) {
+      throw SingularMatrixException();
+    }
+
+    copy.SwitchRows(i, row);
+    inv.SwitchRows(i, row);
+    // scale pivot row
+    T factor = (T)1 / copy(i, i);
+    for (int k = this->MinCol(); k <= this->MaxCol(); k++) {
+      copy(i, k) *= factor;
+      inv(i, k) *= factor;
+    }
+
+    // reduce other rows
+    for (int j = this->MinRow(); j <= this->MaxRow(); j++) {
+      if (j != i) {
+        T mult = copy(j, i);
+        for (int k = this->MinCol(); k <= this->MaxCol(); k++) {
+          copy(j, k) -= copy(i, k) * mult;
+          inv(j, k) -= inv(i, k) * mult;
+        }
+      }
+    }
+  }
+
+  return inv;
+}
+
+template <class T> T Matrix<T>::Determinant() const
+{
+  if (!IsSquare()) {
+    throw DimensionException();
+  }
+
+  T factor = (T)1;
+  Matrix M(*this);
+
+  for (int row = this->MinRow(); row <= this->MaxRow(); row++) {
+
+    // Experience (as of 3/22/99) suggests that, in the interest of
+    // numerical stability, it might be best to do Gaussian
+    // elimination with respect to the row (of those feasible)
+    // whose entry has the largest absolute value.
+    int swap_row = row;
+    for (int i = row + 1; i <= this->MaxRow(); i++) {
+      if (abs(M.data[i][row]) > abs(M.data[swap_row][row])) {
+        swap_row = i;
+      }
+    }
+
+    if (swap_row != row) {
+      M.SwitchRows(row, swap_row);
+      for (int j = this->MinCol(); j <= this->MaxCol(); j++) {
+        M.data[row][j] *= (T)-1;
+      }
+    }
+
+    if (M.data[row][row] == (T)0) {
+      return (T)0;
+    }
+
+    // now do row operations to clear the row'th column
+    // below the diagonal
+    for (int row1 = row + 1; row1 <= this->MaxRow(); row1++) {
+      factor = -M.data[row1][row] / M.data[row][row];
+      for (int i = this->MinCol(); i <= this->MaxCol(); i++) {
+        M.data[row1][i] += M.data[row][i] * factor;
+      }
+    }
+  }
+
+  // finally we multiply the diagonal elements
+  T det = (T)1;
+  for (int row = this->MinRow(); row <= this->MaxRow(); row++) {
+    det *= M.data[row][row];
+  }
+  return det;
 }
 
 } // end namespace Gambit

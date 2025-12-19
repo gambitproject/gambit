@@ -210,13 +210,6 @@ public:
     return (m_profiles.size() == 0) ? 0 : GetProfiles().GetCurrent();
   }
   void SetCurrentProfile(int p_profile);
-  /*
-  void AddProfiles(const List<MixedBehavProfile<double> > &);
-  void AddProfile(const MixedBehavProfile<double> &);
-  void AddProfiles(const List<MixedStrategyProfile<double> > &);
-  void AddProfile(const MixedStrategyProfile<double> &);
-  */
-  //@}
 
   //!
   //! @name Handling of behavior supports

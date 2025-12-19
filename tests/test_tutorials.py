@@ -47,9 +47,6 @@ def test_execute_notebook(nb_path):
     This uses nbclient.NotebookClient to run the notebook in its parent directory
     so relative paths within the notebook resolve correctly.
     """
-    # Skip notebook execution tests on Python < 3.12 (notebooks may require newer kernels/deps)
-    if sys.version_info < (3, 12):
-        pytest.skip("Notebook execution tests require Python 3.12 or newer")
 
     # Skip OpenSpiel notebook on Windows
     # (OpenSpiel is not available on Windows without manual install)

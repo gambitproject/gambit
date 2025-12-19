@@ -57,21 +57,20 @@ std::unique_ptr<MixedStrategyProfileRep<T>> TreeMixedStrategyProfileRep<T>::Copy
 
 template <class T> void TreeMixedStrategyProfileRep<T>::MakeBehavior() const
 {
-  if (mixed_behav_profile_sptr.get() == nullptr) {
-    mixed_behav_profile_sptr =
-        std::make_shared<MixedBehaviorProfile<T>>(MixedStrategyProfile<T>(Copy()));
+  if (m_mixedBehavior == nullptr) {
+    m_mixedBehavior = std::make_shared<MixedBehaviorProfile<T>>(MixedStrategyProfile<T>(Copy()));
   }
 }
 
-template <class T> void TreeMixedStrategyProfileRep<T>::InvalidateCache() const
+template <class T> void TreeMixedStrategyProfileRep<T>::OnProfileChanged() const
 {
-  mixed_behav_profile_sptr = nullptr;
+  m_mixedBehavior = nullptr;
 }
 
 template <class T> T TreeMixedStrategyProfileRep<T>::GetPayoff(int pl) const
 {
   MakeBehavior();
-  return mixed_behav_profile_sptr->GetPayoff(pl);
+  return m_mixedBehavior->GetPayoff(m_mixedBehavior->GetGame()->GetPlayer(pl));
 }
 
 template <class T>
@@ -819,6 +818,19 @@ bool GameTreeRep::IsPerfectRecall() const
                      [](const auto &pair) { return pair.second.size() <= 1; });
 }
 
+bool GameTreeRep::IsAbsentMinded(const GameInfoset &p_infoset) const
+{
+  if (p_infoset->GetGame().get() != this) {
+    throw MismatchException();
+  }
+
+  if (!m_unreachableNodes && !m_root->IsTerminal()) {
+    BuildUnreachableNodes();
+  }
+
+  return contains(m_absentMindedInfosets, p_infoset.get());
+}
+
 //------------------------------------------------------------------------
 //               GameTreeRep: Managing the representation
 //------------------------------------------------------------------------
@@ -870,6 +882,7 @@ void GameTreeRep::ClearComputedValues() const
   const_cast<GameTreeRep *>(this)->m_nodePlays.clear();
   m_ownPriorActionInfo = nullptr;
   const_cast<GameTreeRep *>(this)->m_unreachableNodes = nullptr;
+  m_absentMindedInfosets.clear();
   m_computedValues = false;
 }
 
@@ -1008,7 +1021,7 @@ std::set<GameAction> GameTreeRep::GetOwnPriorActions(const GameInfoset &p_infose
   return result;
 }
 
-void GameTreeRep::BuildUnreachableNodes()
+void GameTreeRep::BuildUnreachableNodes() const
 {
   m_unreachableNodes = std::make_unique<std::set<GameNodeRep *>>();
 
@@ -1052,6 +1065,7 @@ void GameTreeRep::BuildUnreachableNodes()
     if (!child->IsTerminal()) {
       // Check for Absent-Minded Re-entry of the infoset
       if (path_choices.find(child->m_infoset->shared_from_this()) != path_choices.end()) {
+        m_absentMindedInfosets.insert(child->m_infoset);
         const GameAction replay_action = path_choices.at(child->m_infoset->shared_from_this());
         position.emplace(AbsentMindedEdge{replay_action, child});
 

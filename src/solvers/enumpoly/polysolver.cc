@@ -110,7 +110,7 @@ bool PolynomialSystemSolver::NewtonRootInRectangle(const Rectangle<double> &r,
 }
 
 double PolynomialSystemSolver::MaxDistanceFromPointToVertexAfterTransformation(
-    const Rectangle<double> &r, const Vector<double> &p, const SquareMatrix<double> &M) const
+    const Rectangle<double> &r, const Vector<double> &p, const Matrix<double> &M) const
 {
   // A very early implementation of this method used a type gDouble which
   // implemented fuzzy comparisons.  Adding the epsilon parameter here is
@@ -152,7 +152,7 @@ Vector<double> PolynomialSystemSolver::NewtonStep(const Vector<double> &point) c
   const Vector<double> evals = m_derivatives.ValuesOfRootPolys(point, NumEquations());
   const Matrix<double> deriv = m_derivatives.DerivativeMatrix(point, NumEquations());
   auto transpose = deriv.Transpose();
-  auto sqmat = SquareMatrix<double>(deriv * transpose);
+  auto sqmat = Matrix<double>(deriv * transpose);
   if (std::abs(sqmat.Determinant()) <= 1.0e-9) {
     throw SingularMatrixException();
   }
@@ -164,7 +164,7 @@ Vector<double> PolynomialSystemSolver::ImprovingNewtonStep(const Vector<double> 
   const Vector<double> evals = m_derivatives.ValuesOfRootPolys(point, NumEquations());
   const Matrix<double> deriv = m_derivatives.DerivativeMatrix(point, NumEquations());
   auto transpose = deriv.Transpose();
-  auto sqmat = SquareMatrix<double>(deriv * transpose);
+  auto sqmat = Matrix<double>(deriv * transpose);
   if (std::abs(sqmat.Determinant()) <= 1.0e-9) {
     throw SingularMatrixException();
   }

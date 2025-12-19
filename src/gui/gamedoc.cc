@@ -338,44 +338,6 @@ void GameDocument::SetProfileList(int p_index)
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-/*
-void GameDocument::AddProfiles(const List<MixedBehavProfile<double> >
-&p_profiles)
-{
-  for (int i = 1; i <= p_profiles.Length(); i++) {
-    m_profiles[m_currentProfileList].Append(p_profiles[i]);
-  }
-
-  m_profiles[m_currentProfileList].SetCurrent(m_profiles[m_currentProfileList].NumProfiles());
-  UpdateViews(GBT_DOC_MODIFIED_VIEWS);
-}
-
-void GameDocument::AddProfile(const MixedBehavProfile<double> &p_profile)
-{
-  m_profiles[m_currentProfileList].Append(p_profile);
-  m_profiles[m_currentProfileList].SetCurrent(m_profiles[m_currentProfileList].NumProfiles());
-  UpdateViews(GBT_DOC_MODIFIED_VIEWS);
-}
-
-void GameDocument::AddProfiles(const List<MixedStrategyProfile<double> >
-&p_profiles)
-{
-  for (int i = 1; i <= p_profiles.Length(); i++) {
-    m_profiles[m_currentProfileList].Append(p_profiles[i]);
-  }
-
-  m_profiles[m_currentProfileList].SetCurrent(m_profiles[m_currentProfileList].NumProfiles());
-  UpdateViews(GBT_DOC_MODIFIED_VIEWS);
-}
-
-void GameDocument::AddProfile(const MixedStrategyProfile<double> &p_profile)
-{
-  m_profiles[m_currentProfileList].Append(p_profile);
-  m_profiles[m_currentProfileList].SetCurrent(m_profiles[m_currentProfileList].NumProfiles());
-  UpdateViews(GBT_DOC_MODIFIED_VIEWS);
-}
-*/
-
 void GameDocument::SetStrategyElimStrength(bool p_strict)
 {
   m_stratSupports.SetStrict(p_strict);

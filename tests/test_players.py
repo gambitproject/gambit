@@ -40,11 +40,12 @@ def test_player_index_by_string():
 def test_player_index_out_of_range():
     game = gbt.Game.new_table([2, 2])
     assert len(game.players) == 2
-    with pytest.raises(IndexError):
+    exp_error_msg = "Index out of range"
+    with pytest.raises(IndexError, match=exp_error_msg):
         _ = game.players[2]
-    with pytest.raises(IndexError):
+    with pytest.raises(IndexError, match=exp_error_msg):
         _ = game.players[3]
-    with pytest.raises(IndexError):
+    with pytest.raises(IndexError, match=exp_error_msg):
         _ = game.players[-1]
 
 

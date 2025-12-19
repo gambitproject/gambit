@@ -158,6 +158,7 @@ Information about the game
    Infoset.label
    Infoset.game
    Infoset.is_chance
+   Infoset.is_absent_minded
    Infoset.player
    Infoset.actions
    Infoset.members

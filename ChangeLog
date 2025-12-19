@@ -2,6 +2,10 @@
 
 ## [16.5.0] - unreleased
 
+### Added
+- Implement `IsAbsentMinded()` on information sets (C++) and `Infoset.is_absent_minded` (Python)
+  to detect if an information is absent-minded.
+
 ### Changed
 - In the graphical interface, removed option to configure information set link drawing; information sets
   are always drawn and indicators are always drawn if an information set spans multiple levels.
@@ -26,7 +30,7 @@
   (and as a result from the `enumpure`, `lp`, and `lcp` command-line tools); this will be replaced
   with new and more customisable approaches. (#639)
 
-## [16.4.1] - unreleased
+## [16.4.1] - 2025-12-17
 
 ### Fixed
 - Fixed a regression in which null outcomes in strategic game tables were not handled correctly
@@ -41,7 +45,7 @@
   mixed behavior profiles (#616)
 
 
-## [16.3.2] - unreleased
+## [16.3.2] - 2025-12-04
 
 ### Fixed
 - Parsing of output of `gambit-logit` in the graphical interface did not handle the
