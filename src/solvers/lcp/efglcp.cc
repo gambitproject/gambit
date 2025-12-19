@@ -39,7 +39,6 @@ public:
 
 private:
   BehaviorCallbackType<T> m_onEquilibrium;
-  int m_stopAfter, m_maxDepth;
 
   class Solution;
 
