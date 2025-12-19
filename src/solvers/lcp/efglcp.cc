@@ -29,9 +29,8 @@ namespace Gambit::Nash {
 
 template <class T> class NashLcpBehaviorSolver {
 public:
-  NashLcpBehaviorSolver(int p_stopAfter, int p_maxDepth,
-                        BehaviorCallbackType<T> p_onEquilibrium = NullBehaviorCallback<T>)
-    : m_onEquilibrium(p_onEquilibrium), m_stopAfter(p_stopAfter), m_maxDepth(p_maxDepth)
+  NashLcpBehaviorSolver(BehaviorCallbackType<T> p_onEquilibrium = NullBehaviorCallback<T>)
+    : m_onEquilibrium(p_onEquilibrium)
   {
   }
   ~NashLcpBehaviorSolver() = default;
@@ -144,96 +143,21 @@ std::list<MixedBehaviorProfile<T>> NashLcpBehaviorSolver<T>::Solve(const Game &p
   solution.eps = tab.Epsilon();
 
   try {
-    if (m_stopAfter != 1) {
-      try {
-        AllLemke(p_game, solution.ns1 + solution.ns2 + 1, tab, 0, A, solution);
-      }
-      catch (EquilibriumLimitReached &) {
-        // Handle this silently; equilibria are recorded as found so no action needed
-      }
-    }
-    else {
-      tab.Pivot(solution.ns1 + solution.ns2 + 1, 0);
-      tab.SF_LCPPath(solution.ns1 + solution.ns2 + 1);
-      solution.AddBFS(tab);
-      Vector<T> sol(tab.MinRow(), tab.MaxRow());
-      tab.BasisVector(sol);
-      MixedBehaviorProfile<T> profile(p_game);
-      GetProfile(tab, profile, sol, p_game->GetRoot(), 1, 1, solution);
-      profile.UndefinedToCentroid();
-      solution.m_equilibria.push_back(profile);
-      this->m_onEquilibrium(profile, "NE");
-    }
+    tab.Pivot(solution.ns1 + solution.ns2 + 1, 0);
+    tab.SF_LCPPath(solution.ns1 + solution.ns2 + 1);
+    solution.AddBFS(tab);
+    Vector<T> sol(tab.MinRow(), tab.MaxRow());
+    tab.BasisVector(sol);
+    MixedBehaviorProfile<T> profile(p_game);
+    GetProfile(tab, profile, sol, p_game->GetRoot(), 1, 1, solution);
+    profile.UndefinedToCentroid();
+    solution.m_equilibria.push_back(profile);
+    this->m_onEquilibrium(profile, "NE");
   }
   catch (std::runtime_error &e) {
     std::cerr << "Error: " << e.what() << std::endl;
   }
   return solution.m_equilibria;
-}
-
-//
-// All_Lemke finds all accessible Nash equilibria by recursively
-// calling itself.  List maintains the list of basic variables
-// for the equilibria that have already been found.
-// From each new accessible equilibrium, it follows
-// all possible paths, adding any new equilibria to the List.
-//
-template <class T>
-void NashLcpBehaviorSolver<T>::AllLemke(const Game &p_game, int j, linalg::LemkeTableau<T> &B,
-                                        int depth, Matrix<T> &A, Solution &p_solution) const
-{
-  if (m_maxDepth != 0 && depth > m_maxDepth) {
-    return;
-  }
-
-  Vector<T> sol(B.MinRow(), B.MaxRow());
-  MixedBehaviorProfile<T> profile(p_game);
-
-  bool newsol = false;
-  for (int i = B.MinRow(); i <= B.MaxRow() && !newsol; i++) {
-    if (i == j) {
-      continue;
-    }
-
-    linalg::LemkeTableau<T> BCopy(B);
-    // Perturb tableau by a small number
-    A(i, 0) = static_cast<T>(-1) / static_cast<T>(1000);
-    BCopy.Refactor();
-
-    int missing;
-    if (depth == 0) {
-      BCopy.Pivot(j, 0);
-      missing = -j;
-    }
-    else {
-      missing = BCopy.SF_PivotIn(0);
-    }
-
-    newsol = false;
-
-    if (BCopy.SF_LCPPath(-missing) == 1) {
-      newsol = p_solution.AddBFS(BCopy);
-      BCopy.BasisVector(sol);
-      GetProfile(BCopy, profile, sol, p_game->GetRoot(), 1, 1, p_solution);
-      profile.UndefinedToCentroid();
-      if (newsol) {
-        m_onEquilibrium(profile, "NE");
-        p_solution.m_equilibria.push_back(profile);
-        if (m_stopAfter > 0 && p_solution.EquilibriumCount() >= m_stopAfter) {
-          throw EquilibriumLimitReached();
-        }
-      }
-    }
-    else {
-      // Dead end
-    }
-
-    A(i, 0) = static_cast<T>(-1);
-    if (newsol) {
-      BCopy.Refactor();
-      AllLemke(p_game, i, BCopy, depth + 1, A, p_solution);
-    }
-  }
 }
 
 template <class T>
@@ -341,16 +265,15 @@ void NashLcpBehaviorSolver<T>::GetProfile(const linalg::LemkeTableau<T> &tab,
 }
 
 template <class T>
-std::list<MixedBehaviorProfile<T>> LcpBehaviorSolve(const Game &p_game, int p_stopAfter,
-                                                    int p_maxDepth,
+std::list<MixedBehaviorProfile<T>> LcpBehaviorSolve(const Game &p_game,
                                                     BehaviorCallbackType<T> p_onEquilibrium)
 {
-  return NashLcpBehaviorSolver<T>(p_stopAfter, p_maxDepth, p_onEquilibrium).Solve(p_game);
+  return NashLcpBehaviorSolver<T>(p_onEquilibrium).Solve(p_game);
 }
 
-template std::list<MixedBehaviorProfile<double>> LcpBehaviorSolve(const Game &, int, int,
+template std::list<MixedBehaviorProfile<double>> LcpBehaviorSolve(const Game &,
                                                                   BehaviorCallbackType<double>);
 template std::list<MixedBehaviorProfile<Rational>>
-LcpBehaviorSolve(const Game &, int, int, BehaviorCallbackType<Rational>);
+LcpBehaviorSolve(const Game &, BehaviorCallbackType<Rational>);
 
 } // end namespace Gambit::Nash

@@ -34,7 +34,7 @@ LcpStrategySolve(const Game &p_game, int p_stopAfter, int p_maxDepth,
 
 template <class T>
 std::list<MixedBehaviorProfile<T>>
-LcpBehaviorSolve(const Game &p_game, int p_stopAfter, int p_maxDepth,
+LcpBehaviorSolve(const Game &p_game,
                  BehaviorCallbackType<T> p_onEquilibrium = NullBehaviorCallback<T>);
 
 } // end namespace Gambit::Nash
