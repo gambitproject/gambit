@@ -36,6 +36,7 @@ ctypedef c_Game (*GameParser)(const string &, bool) except +IOError
 
 @cython.cfunc
 def read_game(filepath_or_buffer: str | pathlib.Path | io.IOBase,
+              normalize_labels: bool,
               parser: GameParser):
 
     g = cython.declare(Game)
@@ -47,7 +48,7 @@ def read_game(filepath_or_buffer: str | pathlib.Path | io.IOBase,
         with open(filepath_or_buffer, "rb") as f:
             data = f.read()
     try:
-        g = Game.wrap(parser(data, False))
+        g = Game.wrap(parser(data, normalize_labels))
     except Exception as exc:
         raise ValueError(f"Parse error in game file: {exc}") from None
     return g
@@ -77,16 +78,20 @@ def read_gbt(filepath_or_buffer: str | pathlib.Path | io.IOBase) -> Game:
     --------
     read_efg, read_nfg, read_agg
     """
-    return read_game(filepath_or_buffer, parser=ParseGbtGame)
+    return read_game(filepath_or_buffer, False, parser=ParseGbtGame)
 
 
-def read_efg(filepath_or_buffer: str | pathlib.Path | io.IOBase) -> Game:
+def read_efg(filepath_or_buffer: str | pathlib.Path | io.IOBase,
+             normalize_labels: bool = False) -> Game:
     """Construct a game from its serialised representation in an EFG file.
 
     Parameters
     ----------
     filepath_or_buffer : str, pathlib.Path or io.IOBase
         The path to the file containing the game representation or file-like object
+    normalize_labels : bool (default False)
+        Ensure all labels are nonempty and unique within their scopes.
+        This will be enforced in a future version of Gambit.
 
     Returns
     -------
@@ -104,16 +109,20 @@ def read_efg(filepath_or_buffer: str | pathlib.Path | io.IOBase) -> Game:
     --------
     read_gbt, read_nfg, read_agg
     """
-    return read_game(filepath_or_buffer, parser=ParseEfgGame)
+    return read_game(filepath_or_buffer, normalize_labels, parser=ParseEfgGame)
 
 
-def read_nfg(filepath_or_buffer: str | pathlib.Path | io.IOBase) -> Game:
+def read_nfg(filepath_or_buffer: str | pathlib.Path | io.IOBase,
+             normalize_labels: bool = False) -> Game:
     """Construct a game from its serialised representation in a NFG file.
 
     Parameters
     ----------
     filepath_or_buffer : str, pathlib.Path or io.IOBase
         The path to the file containing the game representation or file-like object
+    normalize_labels : bool (default False)
+        Ensure all labels are nonempty and unique within their scopes.
+        This will be enforced in a future version of Gambit.
 
     Returns
     -------
@@ -131,7 +140,7 @@ def read_nfg(filepath_or_buffer: str | pathlib.Path | io.IOBase) -> Game:
     --------
     read_gbt, read_efg, read_agg
     """
-    return read_game(filepath_or_buffer, parser=ParseNfgGame)
+    return read_game(filepath_or_buffer, normalize_labels, parser=ParseNfgGame)
 
 
 def read_agg(filepath_or_buffer: str | pathlib.Path | io.IOBase) -> Game:
@@ -158,7 +167,7 @@ def read_agg(filepath_or_buffer: str | pathlib.Path | io.IOBase) -> Game:
     --------
     read_gbt, read_efg, read_nfg
     """
-    return read_game(filepath_or_buffer, parser=ParseAggGame)
+    return read_game(filepath_or_buffer, False, parser=ParseAggGame)
 
 
 @cython.cclass
