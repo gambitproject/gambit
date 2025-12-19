@@ -837,7 +837,7 @@ void StandardizeGameLabels(const Game &p_game)
   }
 }
 
-Game ReadEfgFile(std::istream &p_stream)
+Game ReadEfgFile(std::istream &p_stream, bool p_normalizeLabels /* = false */)
 {
   GameFileLexer parser(p_stream);
 
@@ -866,17 +866,21 @@ Game ReadEfgFile(std::istream &p_stream)
   }
   ParseNode(parser, game, game->GetRoot(), treeData);
   game->SortInfosets();
-  StandardizeGameLabels(game);
+  if (p_normalizeLabels) {
+    StandardizeGameLabels(game);
+  }
   return game;
 }
 
-Game ReadNfgFile(std::istream &p_stream)
+Game ReadNfgFile(std::istream &p_stream, bool p_normalizeLabels /* = false */)
 {
   GameFileLexer parser(p_stream);
   TableFileGame data;
   ParseNfgHeader(parser, data);
   auto game = BuildNfg(parser, data);
-  StandardizeGameLabels(game);
+  if (p_normalizeLabels) {
+    StandardizeGameLabels(game);
+  }
   return game;
 }
 
@@ -887,7 +891,7 @@ Game ReadGbtFile(std::istream &p_stream)
   return GameXMLSavefile(buffer.str()).GetGame();
 }
 
-Game ReadGame(std::istream &p_file)
+Game ReadGame(std::istream &p_file, bool p_normalizeLabels /* = false */)
 {
   std::stringstream buffer;
   buffer << p_file.rdbuf();
@@ -908,20 +912,18 @@ Game ReadGame(std::istream &p_file)
     }
     buffer.seekg(0, std::ios::beg);
     if (parser.GetLastText() == "NFG") {
-      return ReadNfgFile(buffer);
+      return ReadNfgFile(buffer, p_normalizeLabels);
     }
-    else if (parser.GetLastText() == "EFG") {
-      return ReadEfgFile(buffer);
+    if (parser.GetLastText() == "EFG") {
+      return ReadEfgFile(buffer, p_normalizeLabels);
     }
-    else if (parser.GetLastText() == "#AGG") {
+    if (parser.GetLastText() == "#AGG") {
       return ReadAggFile(buffer);
     }
-    else if (parser.GetLastText() == "#BAGG") {
+    if (parser.GetLastText() == "#BAGG") {
       return ReadBaggFile(buffer);
     }
-    else {
-      throw InvalidFileException("Unrecognized file format");
-    }
+    throw InvalidFileException("Unrecognized file format");
   }
   catch (std::exception &ex) {
     throw InvalidFileException(ex.what());
