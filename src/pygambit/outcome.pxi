@@ -68,6 +68,11 @@ class Outcome:
 
     @label.setter
     def label(self, value: str) -> None:
+        if value == self.label:
+            return
+        if value == "" or value in (outcome.label for outcome in self.game.outcomes):
+            warnings.warn("In a future version, outcomes must have unique labels",
+                          FutureWarning)
         self.outcome.deref().SetLabel(value.encode("ascii"))
 
     @property

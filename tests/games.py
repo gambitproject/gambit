@@ -5,6 +5,7 @@ import pathlib
 from abc import ABC, abstractmethod
 
 import numpy as np
+import pytest
 
 import pygambit as gbt
 
@@ -58,8 +59,9 @@ def create_2x2_zero_nfg() -> gbt.Game:
 
     game.players[1].label = "Dan"
     game.players["Dan"].strategies[0].label = "defect"
-    # intentional duplicate label for player (generates warning):
-    game.players["Dan"].strategies[1].label = "defect"
+    # intentional duplicate label for player
+    with pytest.warns(FutureWarning):
+        game.players["Dan"].strategies[1].label = "defect"
 
     return game
 
