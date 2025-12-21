@@ -894,27 +894,94 @@ def test_logit_solve_lambda():
 
 def test_regrets_tmp():
 
+    prof_data_doub = []
+    prof_data_doub.append([[[1, 0], [1, 0]], [[1, 0], [0.5, 0.5]], [[1, 0], [0, 1]]])
+    # prof_data_doub.append([[[1, 0], [1, 0]], [[1, 0], [0, 1]], [[1, 0], [0.33333, 0.6666]]])
+    # prof_data_doub.append([[[1, 0], [1, 0]], [[1, 0], [0.5, 0.5]], [[0, 1], [1, 0]]])
+    # prof_data_doub.append([[[1, 0], [1, 0]], [[1, 0], [0, 1]], [[0.33333, 0.6666], [1, 0]]])
+
+    prof_data_rat = []
+    prof_data_rat.append([[[1, 0], [1, 0]], [[1, 0], ["1/2", "1/2"]], [[1, 0], [0, 1]]])
+    # prof_data_rat.append([[[1, 0], [1, 0]], [[1, 0], [0, 1]], [[1, 0], ["1/3", "2/3"]]])
+    # prof_data_rat.append([[[1, 0], [1, 0]], [[1, 0], ["1/2", "1/2"]], [[0, 1], [1, 0]]])
+    # prof_data_rat.append([[[1, 0], [1, 0]], [[1, 0], [0, 1]], [["1/3", "2/3"], [1, 0]]])
+
     g = games.create_3_player_with_internal_outcomes_efg()
-    prof_data = []
-    prof_data.append([[[1, 0], [1, 0]], [[1, 0], [0.5, 0.5]], [[1, 0], [0, 1]]])
-    prof_data.append([[[1, 0], [1, 0]], [[1, 0], [0, 1]], [[1, 0], [0.33333, 0.6666]]])
-    prof_data.append([[[1, 0], [1, 0]], [[1, 0], [0.5, 0.5]], [[0, 1], [1, 0]]])
-    prof_data.append([[[1, 0], [1, 0]], [[1, 0], [0, 1]], [[0.33333, 0.6666], [1, 0]]])
+
+    print()
     print("==================")
-    for p in prof_data:
+    for p in prof_data_doub:
         prof = g.mixed_behavior_profile(rational=False, data=p)
-        # print(prof)
+        print(prof.max_regret())
+        print(prof.agent_max_regret())
+    print("==================")
+    for p in prof_data_rat:
+        prof = g.mixed_behavior_profile(rational=True, data=p)
+        print(prof.max_regret())
+        print(prof.agent_max_regret())
+    print("==================")
+    for p in prof_data_doub:
+        prof = g.mixed_behavior_profile(rational=False, data=p)
         print(prof.max_regret())
         print(prof.agent_max_regret())
 
-    print("==================")
-    prof_data = []
-    prof_data.append([[[1, 0], [1, 0]], [[1, 0], ["1/2", "1/2"]], [[1, 0], [0, 1]]])
-    prof_data.append([[[1, 0], [1, 0]], [[1, 0], [0, 1]], [[1, 0], ["1/3", "2/3"]]])
-    prof_data.append([[[1, 0], [1, 0]], [[1, 0], ["1/2", "1/2"]], [[0, 1], [1, 0]]])
-    prof_data.append([[[1, 0], [1, 0]], [[1, 0], [0, 1]], [["1/3", "2/3"], [1, 0]]])
-    for p in prof_data:
-        prof = g.mixed_behavior_profile(rational=True, data=p)
-        # print(prof)
-        print(prof.max_regret())
-        print(prof.agent_max_regret())
+
+def test_regrets_tmp2():
+
+    g = games.create_3_player_with_internal_outcomes_efg()
+
+    prof_data_rat = [[[1, 0], [1, 0]], [[1, 0], ["1/2", "1/2"]], [[1, 0], [0, 1]]]
+    profile_rat = g.mixed_behavior_profile(rational=True, data=prof_data_rat)
+    print()
+    print(profile_rat.max_regret())  # 3/2
+    # print(profile1.max_regret()) # same
+    profile_rat = g.mixed_behavior_profile(rational=True, data=prof_data_rat)
+    print(profile_rat.max_regret())  # now different! 0
+    print("=======================================")
+
+    prof_data_doub = [[[1, 0], [1, 0]], [[1, 0], [0.5, 0.5]], [[1, 0], [0, 1]]]
+    profile_doub = g.mixed_behavior_profile(rational=False, data=prof_data_doub)
+    print()
+    print(profile_doub.max_regret())
+    # print(profile1.max_regret()) # same
+    profile_doub = g.mixed_behavior_profile(rational=False, data=prof_data_doub)
+    print(profile_doub.max_regret())
+    print("=======================================")
+
+    prof_data_rat = [[[1, 0], [1, 0]], [[1, 0], ["1/2", "1/2"]], [[1, 0], [0, 1]]]
+    profile_rat = g.mixed_behavior_profile(rational=True, data=prof_data_rat)
+    print()
+    print(profile_rat.max_regret())
+    # print(profile1.max_regret()) # same
+    profile_rat = g.mixed_behavior_profile(rational=True, data=prof_data_rat)
+    print(profile_rat.max_regret())
+    print("=======================================")
+
+
+def test_regrets_tmp3():
+
+    g = games.create_3_player_with_internal_outcomes_efg()
+
+    prof_data_doub = [[[1, 0], [1, 0]], [[1, 0], [0.5, 0.5]], [[1, 0], [0, 1]]]
+    profile_doub = g.mixed_behavior_profile(rational=False, data=prof_data_doub)
+    print()
+    print(profile_doub.max_regret())  # 1.5
+    profile_doub = g.mixed_behavior_profile(rational=False, data=prof_data_doub)
+    print(profile_doub.max_regret())  # now different! 0
+    print("=======================================")
+
+    prof_data_rat = [[[1, 0], [1, 0]], [[1, 0], ["1/2", "1/2"]], [[1, 0], [0, 1]]]
+    profile_rat = g.mixed_behavior_profile(rational=True, data=prof_data_rat)
+    print()
+    print(profile_rat.max_regret())
+    profile_rat = g.mixed_behavior_profile(rational=True, data=prof_data_rat)
+    print(profile_rat.max_regret())
+    print("=======================================")
+
+    prof_data_doub = [[[1, 0], [1, 0]], [[1, 0], [0.5, 0.5]], [[1, 0], [0, 1]]]
+    profile_doub = g.mixed_behavior_profile(rational=False, data=prof_data_doub)
+    print()
+    print(profile_doub.max_regret())
+    profile_doub = g.mixed_behavior_profile(rational=False, data=prof_data_doub)
+    print(profile_doub.max_regret())
+    print("=======================================")
