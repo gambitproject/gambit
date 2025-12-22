@@ -149,14 +149,14 @@ int main(int argc, char *argv[])
       if (useFloat) {
         auto renderer =
             MakeMixedBehaviorProfileRenderer<double>(std::cout, numDecimals, printDetail);
-        LcpBehaviorSolve<double>(game, stopAfter, maxDepth,
+        LcpBehaviorSolve<double>(game,
                                  [&](const MixedBehaviorProfile<double> &p,
                                      const std::string &label) { renderer->Render(p, label); });
       }
       else {
         auto renderer =
             MakeMixedBehaviorProfileRenderer<Rational>(std::cout, numDecimals, printDetail);
-        LcpBehaviorSolve<Rational>(game, stopAfter, maxDepth,
+        LcpBehaviorSolve<Rational>(game,
                                    [&](const MixedBehaviorProfile<Rational> &p,
                                        const std::string &label) { renderer->Render(p, label); });
       }

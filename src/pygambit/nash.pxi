@@ -74,15 +74,15 @@ def _enummixed_strategy_solve_rational(game: Game) -> list[MixedStrategyProfileR
 
 
 def _lcp_behavior_solve_double(
-        game: Game, stop_after: int, max_depth: int
+        game: Game
 ) -> list[MixedBehaviorProfileDouble]:
-    return _convert_mbpd(LcpBehaviorSolve[double](game.game, stop_after, max_depth))
+    return _convert_mbpd(LcpBehaviorSolve[double](game.game))
 
 
 def _lcp_behavior_solve_rational(
-        game: Game, stop_after: int, max_depth: int
+        game: Game
 ) -> list[MixedBehaviorProfileRational]:
-    return _convert_mbpr(LcpBehaviorSolve[c_Rational](game.game, stop_after, max_depth))
+    return _convert_mbpr(LcpBehaviorSolve[c_Rational](game.game))
 
 
 def _lcp_strategy_solve_double(
