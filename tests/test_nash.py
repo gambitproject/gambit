@@ -934,3 +934,48 @@ def test_regrets_tmp2():
     print(profile_rat.max_regret())  # 3/2
     profile_rat = g.mixed_behavior_profile(rational=True, data=prof_data_rat)
     print(profile_rat.max_regret())  # now different! 0
+
+
+@pytest.mark.nash
+@pytest.mark.nash_lp_behavior
+@pytest.mark.parametrize(
+    "game,mixed_behav_prof_data",
+    [
+        (
+            games.create_seq_form_STOC_paper_zero_sum_2_player_efg(),
+            [
+                [[0, 1], ["1/3", "2/3"], ["2/3", "1/3"]],
+                [["5/6", "1/6"], ["5/9", "4/9"]],
+            ],
+        ),
+        (
+            games.create_3_player_with_internal_outcomes_efg(),
+            [
+                [[1, 0], [1, 0]], [[1, 0], ["1/2", "1/2"]],
+                [[1, 0], [0, 1]]
+            ],
+        ),
+        (
+            games.create_STOC_simplified(),
+            [
+                [[0, 1], ["1/3", "2/3"], ["2/3", "1/3"]],
+                [["5/6", "1/6"]],
+            ],
+        ),
+        # (
+        # games.create_STOC_simplified2(),
+        # [
+        # [[1], [1], ["1/3", "2/3"]],
+        # [["5/6", "1/6"]],
+        # ],
+        # ),
+    ],
+)
+def test_repeat_max_regret(game: gbt.Game, mixed_behav_prof_data: list):
+    profile1 = game.mixed_behavior_profile(rational=True, data=mixed_behav_prof_data)
+    mr1 = profile1.max_regret()
+    profile2 = game.mixed_behavior_profile(rational=True, data=mixed_behav_prof_data)
+    mr2 = profile2.max_regret()
+    print()
+    print(mr1, mr2)
+    assert mr1 == mr2
