@@ -68,13 +68,19 @@ template <class Key, class T> bool contains(const std::map<Key, T> &map, const K
 
 template <class C> class EnumerateView {
 public:
-  explicit EnumerateView(C &p_range) : m_range(p_range) {}
+  explicit EnumerateView(const C &p_range) : m_range(p_range) {}
 
   class iterator {
-  public:
-    using base_iterator = decltype(std::begin(std::declval<C &>()));
+    using base_iterator = decltype(std::begin(std::declval<const C &>()));
 
-    iterator(const std::size_t p_index, base_iterator p_current)
+  public:
+    using difference_type = std::ptrdiff_t;
+    using index_type = std::size_t;
+    using reference = decltype(*std::declval<base_iterator &>());
+    using value_type = std::pair<index_type, std::remove_reference_t<reference>>;
+    using iterator_category = typename std::iterator_traits<base_iterator>::iterator_category;
+
+    iterator(const index_type p_index, base_iterator p_current)
       : m_index(p_index), m_current(p_current)
     {
     }
@@ -87,21 +93,29 @@ public:
     }
 
     bool operator!=(const iterator &p_other) const { return m_current != p_other.m_current; }
-    auto operator*() const { return std::tie(m_index, *m_current); }
+    auto operator*() const { return std::pair(m_index, *m_current); }
 
   private:
-    std::size_t m_index;
+    index_type m_index;
     base_iterator m_current;
   };
 
   iterator begin() { return iterator{0, std::begin(m_range)}; }
-  iterator end() { return iterator{0, std::end(m_range)}; }
+  iterator end()
+  {
+    return iterator{
+        static_cast<std::size_t>(std::distance(std::begin(m_range), std::end(m_range))),
+        std::end(m_range)};
+  }
 
 private:
-  C &m_range;
+  const C &m_range;
 };
 
-template <class C> auto enumerate(C &p_range) { return EnumerateView<C>(p_range); }
+template <class C> EnumerateView<C> enumerate(const C &p_range)
+{
+  return EnumerateView<C>(p_range);
+}
 
 /// @brief A container adaptor which returns only the elements matching the predicate
 ///        This is intended to look forward to C++20-style ranges

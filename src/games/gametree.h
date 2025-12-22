@@ -51,7 +51,7 @@ protected:
 
   /// @name Private auxiliary functions
   //@{
-  void SortInfosets(GamePlayerRep *);
+  static void SortInfosets(GamePlayerRep *);
   static void RenumberInfosets(GamePlayerRep *);
   /// Normalize the probability distribution of actions at a chance node
   Game NormalizeChanceProbs(GameInfosetRep *);

@@ -607,8 +607,9 @@ GameInfoset GameTreeRep::AppendMove(GameNode p_node, GamePlayer p_player, int p_
                                                      p_player.get(), p_actions);
   p_player->m_infosets.push_back(newInfoset);
   if (p_generateLabels) {
-    std::for_each(newInfoset->m_actions.begin(), newInfoset->m_actions.end(),
-                  [act = 1](const GameAction &a) mutable { a->SetLabel(std::to_string(act++)); });
+    for (auto [index, action] : enumerate(newInfoset->m_actions)) {
+      action->SetLabel(std::to_string(index + 1));
+    }
   }
   return AppendMove(p_node, newInfoset);
 }
@@ -651,8 +652,9 @@ GameInfoset GameTreeRep::InsertMove(GameNode p_node, GamePlayer p_player, int p_
                                                      p_player.get(), p_actions);
   p_player->m_infosets.push_back(newInfoset);
   if (p_generateLabels) {
-    std::for_each(newInfoset->m_actions.begin(), newInfoset->m_actions.end(),
-                  [act = 1](const GameAction &a) mutable { a->SetLabel(std::to_string(act++)); });
+    for (auto [index, action] : enumerate(newInfoset->m_actions)) {
+      action->SetLabel(std::to_string(index + 1));
+    }
   }
   return InsertMove(p_node, newInfoset);
 }
@@ -852,21 +854,20 @@ void GameTreeRep::SortInfosets(GamePlayerRep *p_player)
       });
   RenumberInfosets(p_player);
 }
+
 void GameTreeRep::RenumberInfosets(GamePlayerRep *p_player)
 {
-  std::for_each(
-      p_player->m_infosets.begin(), p_player->m_infosets.end(),
-      [iset = 1](const std::shared_ptr<GameInfosetRep> &s) mutable { s->m_number = iset++; });
+  for (auto [index, infoset] : enumerate(p_player->m_infosets)) {
+    infoset->m_number = index + 1;
+  }
 }
 
 void GameTreeRep::SortInfosets()
 {
-  int nodeindex = 1;
-  for (const auto &node : GetNodes()) {
-    node->m_number = nodeindex++;
+  for (auto [index, node] : enumerate(GetNodes())) {
+    node->m_number = index + 1;
   }
-  SortInfosets(m_chance.get());
-  for (auto player : m_players) {
+  for (const auto &player : GetPlayersWithChance()) {
     SortInfosets(player.get());
   }
 }
@@ -1257,9 +1258,9 @@ void GameTreeRep::DeleteOutcome(const GameOutcome &p_outcome)
   p_outcome->Invalidate();
   m_outcomes.erase(
       std::find(m_outcomes.begin(), m_outcomes.end(), std::shared_ptr<GameOutcomeRep>(p_outcome)));
-  std::for_each(
-      m_outcomes.begin(), m_outcomes.end(),
-      [outc = 1](const std::shared_ptr<GameOutcomeRep> &c) mutable { c->m_number = outc++; });
+  for (auto [index, outcome] : enumerate(m_outcomes)) {
+    outcome->m_number = index + 1;
+  }
   ClearComputedValues();
 }
 

@@ -270,10 +270,9 @@ GameTableRep::GameTableRep(const std::vector<int> &dim, bool p_sparseOutcomes /*
   for (const auto &nstrat : dim) {
     m_players.push_back(std::make_shared<GamePlayerRep>(this, m_players.size() + 1, nstrat));
     m_players.back()->m_label = lexical_cast<std::string>(m_players.size());
-    std::for_each(m_players.back()->m_strategies.begin(), m_players.back()->m_strategies.end(),
-                  [st = 1](const std::shared_ptr<GameStrategyRep> &s) mutable {
-                    s->m_label = std::to_string(st++);
-                  });
+    for (auto [index, strategy] : enumerate(m_players.back()->m_strategies)) {
+      strategy->m_label = std::to_string(index + 1);
+    }
   }
   IndexStrategies();
 
@@ -416,9 +415,9 @@ void GameTableRep::DeleteOutcome(const GameOutcome &p_outcome)
   m_outcomes.erase(
       std::find(m_outcomes.begin(), m_outcomes.end(), std::shared_ptr<GameOutcomeRep>(p_outcome)));
   p_outcome->Invalidate();
-  std::for_each(
-      m_outcomes.begin(), m_outcomes.end(),
-      [outc = 1](const std::shared_ptr<GameOutcomeRep> &c) mutable { c->m_number = outc++; });
+  for (auto [index, outcome] : enumerate(m_outcomes)) {
+    outcome->m_number = index + 1;
+  }
 }
 
 //------------------------------------------------------------------------
@@ -450,9 +449,9 @@ void GameTableRep::DeleteStrategy(const GameStrategy &p_strategy)
   IncrementVersion();
   player->m_strategies.erase(std::find(player->m_strategies.begin(), player->m_strategies.end(),
                                        std::shared_ptr<GameStrategyRep>(p_strategy)));
-  std::for_each(
-      player->m_strategies.begin(), player->m_strategies.end(),
-      [st = 1](const std::shared_ptr<GameStrategyRep> &s) mutable { s->m_number = st++; });
+  for (auto [index, strategy] : enumerate(player->m_strategies)) {
+    strategy->m_number = index + 1;
+  }
   // Note that we do not reindex strategies, and so we do not need to re-build the
   // table of outcomes.
   p_strategy->Invalidate();

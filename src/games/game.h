@@ -203,9 +203,9 @@ class GameInfosetRep : public std::enable_shared_from_this<GameInfosetRep> {
 
   void RenumberActions()
   {
-    std::for_each(
-        m_actions.begin(), m_actions.end(),
-        [act = 1](const std::shared_ptr<GameActionRep> &a) mutable { a->m_number = act++; });
+    for (auto [index, action] : enumerate(m_actions)) {
+      action->m_number = index + 1;
+    }
   }
 
 public:
