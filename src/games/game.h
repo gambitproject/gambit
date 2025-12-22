@@ -836,6 +836,8 @@ public:
     }
     return false;
   }
+  ///
+  virtual GameNode GetSubgameRoot(const GameInfoset &) const { throw UndefinedException(); }
   //@}
 
   /// @name Writing data files
