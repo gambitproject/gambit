@@ -936,8 +936,6 @@ def test_regrets_tmp2():
     print(profile_rat.max_regret())  # now different! 0
 
 
-@pytest.mark.nash
-@pytest.mark.nash_lp_behavior
 @pytest.mark.parametrize(
     "game,mixed_behav_prof_data",
     [
