@@ -239,7 +239,7 @@ public:
   }
   //@}
 
-  GameNode GetMember(int p_index) const { return m_members.at(p_index - 1); }
+  GameNode GetMember(int p_index) const;
   Members GetMembers() const;
 
   bool Precedes(GameNode) const;
@@ -1115,6 +1115,12 @@ inline int GameNodeRep::GetNumber() const
 {
   m_game->EnsureNodeOrdering();
   return m_number;
+}
+
+inline GameNode GameInfosetRep::GetMember(int p_index) const
+{
+  m_game->EnsureInfosetOrdering();
+  return m_members.at(p_index - 1);
 }
 
 inline GameInfosetRep::Members GameInfosetRep::GetMembers() const
