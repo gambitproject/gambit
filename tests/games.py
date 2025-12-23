@@ -1029,7 +1029,7 @@ def create_seq_form_STOC_paper_zero_sum_2_player_efg() -> gbt.Game:
     g.root.children[0].children[1].infoset.label = "01"
     g.root.children[2].children[0].infoset.label = "20"
     g.root.children[0].children[1].children[0].infoset.label = "010"
-    # g.sort_infosets()
+    g.sort_infosets()
     return g
 
 

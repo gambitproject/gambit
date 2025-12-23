@@ -607,6 +607,7 @@ def test_lcp_behavior_rational(game: gbt.Game, mixed_behav_prof_data: list):
     using max_regret and agent_max_regret (internal consistency); and
     comparison to a previously computed equilibrium using this function (regression test).
     """
+    game.sort_infosets()
     result = gbt.nash.lcp_solve(game, use_strategic=False, rational=True)
     assert len(result.equilibria) == 1
     eq = result.equilibria[0]
@@ -731,7 +732,7 @@ def test_lp_behavior_double():
         (
                 games.create_seq_form_STOC_paper_zero_sum_2_player_efg(),
                 [
-                    [[0, 1], ["1/3", "2/3"], ["2/3", "1/3"]],
+                    [[0, 1], ["2/3", "1/3"], ["1/3", "2/3"]],
                     [["5/6", "1/6"], ["5/9", "4/9"]],
                 ],
         ),
@@ -784,12 +785,15 @@ def test_lp_behavior_rational(game: gbt.Game, mixed_behav_prof_data: list):
     using max_regret and agent_max_regret (internal consistency); and
     comparison to a previously computed equilibrium using this function (regression test).
     """
+    game.sort_infosets()
     result = gbt.nash.lp_solve(game, use_strategic=False, rational=True)
     assert len(result.equilibria) == 1
     eq = result.equilibria[0]
     assert eq.max_regret() == 0
     assert eq.agent_max_regret() == 0
     expected = game.mixed_behavior_profile(rational=True, data=mixed_behav_prof_data)
+    print(expected)
+    print(eq)
     assert eq == expected
 
 
@@ -970,6 +974,7 @@ def test_regrets_tmp2():
     ],
 )
 def test_repeat_max_regret(game: gbt.Game, mixed_behav_prof_data: list):
+    game.sort_infosets()
     profile1 = game.mixed_behavior_profile(rational=True, data=mixed_behav_prof_data)
     mr1 = profile1.max_regret()
     profile2 = game.mixed_behavior_profile(rational=True, data=mixed_behav_prof_data)
