@@ -1867,7 +1867,7 @@ class Game:
             raise UndefinedOperationError(
                 "Operation only defined for games with a tree representation"
             )
-        self.game.deref().SortInfosets()
+        pass
 
     def add_player(self, label: str = "") -> Player:
         """Add a new player to the game.

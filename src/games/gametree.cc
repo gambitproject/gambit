@@ -835,7 +835,7 @@ bool GameTreeRep::IsAbsentMinded(const GameInfoset &p_infoset) const
 //               GameTreeRep: Managing the representation
 //------------------------------------------------------------------------
 
-void GameTreeRep::SortInfosets(GamePlayerRep *p_player)
+void GameTreeRep::SortInfosets(GamePlayerRep *p_player) const
 {
   // Sort nodes within information sets according to ID.
   for (auto &infoset : p_player->m_infosets) {
@@ -859,16 +859,28 @@ void GameTreeRep::RenumberInfosets(GamePlayerRep *p_player)
       [iset = 1](const std::shared_ptr<GameInfosetRep> &s) mutable { s->m_number = iset++; });
 }
 
-void GameTreeRep::SortInfosets()
+void GameTreeRep::EnsureNodeOrdering() const
 {
+  if (m_nodesOrdered) {
+    return;
+  }
   int nodeindex = 1;
   for (const auto &node : GetNodes()) {
     node->m_number = nodeindex++;
   }
-  SortInfosets(m_chance.get());
-  for (auto player : m_players) {
+  m_nodesOrdered = true;
+}
+
+void GameTreeRep::EnsureInfosetOrdering() const
+{
+  if (m_infosetsOrdered) {
+    return;
+  }
+  EnsureNodeOrdering();
+  for (auto player : GetPlayersWithChance()) {
     SortInfosets(player.get());
   }
+  m_infosetsOrdered = true;
 }
 
 void GameTreeRep::ClearComputedValues() const
@@ -891,7 +903,7 @@ void GameTreeRep::BuildComputedValues() const
   if (m_computedValues) {
     return;
   }
-  const_cast<GameTreeRep *>(this)->SortInfosets();
+  EnsureNodeOrdering();
   for (const auto &player : m_players) {
     std::map<GameInfosetRep *, int> behav;
     std::map<GameNodeRep *, GameNodeRep *> ptr, whichbranch;

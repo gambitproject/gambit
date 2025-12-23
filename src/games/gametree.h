@@ -38,7 +38,7 @@ class GameTreeRep final : public GameExplicitRep {
   };
 
 protected:
-  mutable bool m_computedValues{false}, m_preorderValid{false};
+  mutable bool m_computedValues{false}, m_nodesOrdered{false}, m_infosetsOrdered{false};
   std::shared_ptr<GameNodeRep> m_root;
   std::shared_ptr<GamePlayerRep> m_chance;
   std::size_t m_numNodes = 1;
@@ -50,7 +50,7 @@ protected:
 
   /// @name Private auxiliary functions
   //@{
-  void SortInfosets(GamePlayerRep *);
+  void SortInfosets(GamePlayerRep *) const;
   static void RenumberInfosets(GamePlayerRep *);
   /// Normalize the probability distribution of actions at a chance node
   Game NormalizeChanceProbs(GameInfosetRep *);
@@ -58,6 +58,9 @@ protected:
 
   /// @name Managing the representation
   //@{
+  void EnsureNodeOrdering() const override;
+  void EnsureInfosetOrdering() const override;
+
   void BuildComputedValues() const override;
   void BuildConsistentPlays();
   void ClearComputedValues() const;
@@ -127,8 +130,6 @@ public:
   //@{
   /// Returns the iset'th information set in the game (numbered globally)
   GameInfoset GetInfoset(int iset) const override;
-  /// Sort the information sets for each player in a canonical order
-  void SortInfosets() override;
   /// Returns the set of actions taken by the infoset's owner before reaching this infoset
   std::set<GameAction> GetOwnPriorActions(const GameInfoset &p_infoset) const override;
   //@}

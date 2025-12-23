@@ -400,7 +400,7 @@ public:
   /// @name Information sets
   //@{
   /// Returns the p_index'th information set
-  GameInfoset GetInfoset(int p_index) const { return m_infosets.at(p_index - 1); }
+  GameInfoset GetInfoset(int p_index) const;
   /// Returns the information sets for the player
   Infosets GetInfosets() const;
 
@@ -986,8 +986,7 @@ public:
   {
     return Infosets(std::const_pointer_cast<GameRep>(this->shared_from_this()));
   }
-  /// Sort the information sets for each player in a canonical order
-  virtual void SortInfosets() {}
+
   /// Returns the set of actions taken by the infoset's owner before reaching this infoset
   virtual std::set<GameAction> GetOwnPriorActions(const GameInfoset &p_infoset) const
   {
@@ -1127,6 +1126,12 @@ inline GameInfosetRep::Members GameInfosetRep::GetMembers() const
 {
   m_game->EnsureInfosetOrdering();
   return Members(std::const_pointer_cast<GameInfosetRep>(shared_from_this()), &m_members);
+}
+
+inline GameInfoset GamePlayerRep::GetInfoset(int p_index) const
+{
+  m_game->EnsureInfosetOrdering();
+  return m_infosets.at(p_index - 1);
 }
 
 inline GamePlayerRep::Infosets GamePlayerRep::GetInfosets() const
