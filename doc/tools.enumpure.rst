@@ -38,10 +38,10 @@ pure-strategy Nash equilibria.
 
    .. versionadded:: 14.0.2
 
-   Report agent form equilibria, that is, equilibria which consider
-   only deviations at one information set.  Only has an effect for
-   extensive games, as strategic games have only one information set
-   per player.
+   Report agent Nash equilibria, that is, equilibria which consider
+   only deviations at a single information set at a time.  Only has
+   an effect for extensive games, as strategic games have only
+   one information set per player.
 
 .. cmdoption:: -h
 

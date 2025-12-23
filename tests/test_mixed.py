@@ -910,7 +910,7 @@ PROBS_1A_doub = (0.25, 0.25, 0.25, 0.25)
 PROBS_2A_doub = (0.5, 0, 0.5, 0)
 PROBS_1A_rat = ("1/4", "1/4", "1/4", "1/4")
 PROBS_2A_rat = ("1/2", "0", "1/2", "0")
-# For 2x2x2 nfg and Myserson 2-card poker efg (both have 6 strategies in total):
+# For 2x2x2 nfg and stripped_down_poker efg (both have 6 strategies in total):
 PROBS_1B_doub = (0.5, 0.5, 0.5, 0.5, 0.5, 0.5)
 PROBS_2B_doub = (1.0, 0.0, 1.0, 0.0, 1.0, 0.0)
 PROBS_1B_rat = ("1/2", "1/2", "1/2", "1/2", "1/2", "1/2")

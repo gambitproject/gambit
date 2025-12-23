@@ -43,4 +43,4 @@ public:
 };
 } // namespace Gambit::GUI
 
-#endif // DLNFGNASH_H
+#endif // GAMBIT_GUI_DLNASH_H
