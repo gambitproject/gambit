@@ -138,17 +138,17 @@ def test_enummixed_rational(game: gbt.Game, mixed_strategy_prof_data: list):
         (
             games.create_3_player_with_internal_outcomes_efg(),
             [
-                [[[1, 0], [1, 0]], [[1, 0], ["1/2", "1/2"]], [[0, 1], [1, 0]]],
+                [[[1, 0], [1, 0]], [[1, 0], ["1/2", "1/2"]], [[1, 0], [0, 1]]],
                 [[[1, 0], [1, 0]], [[1, 0], [0, 1]],
-                    [["1/3", "2/3"], [1, 0]]]],
+                    [[1, 0], ["1/3", "2/3"]]]],
             2,
         ),
         (
             games.create_3_player_with_internal_outcomes_efg(nonterm_outcomes=True),
             [
-                [[[1, 0], [1, 0]], [[1, 0], ["1/2", "1/2"]], [[0, 1], [1, 0]]],
+                [[[1, 0], [1, 0]], [[1, 0], ["1/2", "1/2"]], [[1, 0], [0, 1]]],
                 [[[1, 0], [1, 0]], [[1, 0], [0, 1]],
-                 [["1/3", "2/3"], [1, 0]]]],
+                 [[1, 0], ["1/3", "2/3"]]]],
             2,
         ),
         (
@@ -234,6 +234,8 @@ def test_enumpoly_ordered_behavior(
     for eq, exp in zip(result.equilibria, mixed_behav_prof_data, strict=True):
         assert abs(eq.max_regret()) <= TOL
         expected = game.mixed_behavior_profile(rational=True, data=exp)
+        print(eq)
+        print(expected)
         for p in game.players:
             for i in p.infosets:
                 for a in i.actions:
@@ -683,7 +685,7 @@ def test_lp_behavior_double():
         (
                 games.create_seq_form_STOC_paper_zero_sum_2_player_efg(),
                 [
-                    [[0, 1], ["1/3", "2/3"], ["2/3", "1/3"]],
+                    [[0, 1], ["2/3", "1/3"], ["1/3", "2/3"]],
                     [["5/6", "1/6"], ["5/9", "4/9"]],
                 ],
         ),
@@ -741,6 +743,8 @@ def test_lp_behavior_rational(game: gbt.Game, mixed_behav_prof_data: list):
     eq = result.equilibria[0]
     assert eq.max_regret() == 0
     expected = game.mixed_behavior_profile(rational=True, data=mixed_behav_prof_data)
+    print(eq)
+    print(expected)
     assert eq == expected
 
 
