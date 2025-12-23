@@ -7,6 +7,11 @@ There is better test coverage for
 lp_solve, lcp_solve, and enumpoly_solve, all in mixed behaviors.
 """
 
+import dataclasses
+import functools
+import typing
+from fractions import Fraction as Q
+
 import pytest
 
 import pygambit as gbt
@@ -37,49 +42,84 @@ def test_enummixed_double():
     # For floating-point results are not exact, so we skip testing exact values for now
 
 
+def d(*probs) -> tuple:
+    """Helper function to let us write d() to be suggestive of
+    "probability distribution on simplex" ("Delta")
+    """
+    return tuple(probs)
+
+
+@dataclasses.dataclass
+class EquilibriumTestCase:
+    """Summarising the data relevant for a test fixture of a call to an equilibrium solver."""
+    label: str
+    factory: typing.Callable[[], gbt.Game]
+    expected: list
+
+
+NASH_ENUMMIXED_RATIONAL_CASES = [
+    EquilibriumTestCase(
+        label="test1",
+        factory=games.create_stripped_down_poker_efg,
+        expected=[
+            [d(Q("1/3"), Q("2/3"), 0, 0), d(Q("2/3"), Q("1/3"))],
+        ]
+    ),
+    EquilibriumTestCase(
+        label="test2",
+        factory=games.create_one_shot_trust_efg,
+        expected=[
+            [d(0, 1), d(Q("1/2"), Q("1/2"))],
+            [d(0, 1), d(0, 1)],
+        ]
+    ),
+    EquilibriumTestCase(
+        label="test3",
+        factory=functools.partial(games.create_EFG_for_nxn_bimatrix_coordination_game, n=3),
+        expected=[
+            [d(1, 0, 0), d(1, 0, 0)],
+            [d(Q("1/2"), Q("1/2"), 0), d(Q("1/2"), Q("1/2"), 0)],
+            [d(Q("1/3"), Q("1/3"), Q("1/3")), d(Q("1/3"), Q("1/3"), Q("1/3"))],
+            [d(Q("1/2"), 0, Q("1/2")), d(Q("1/2"), 0, Q("1/2"))],
+            [d(0, 1, 0), d(0, 1, 0)],
+            [d(0, Q("1/2"), Q("1/2")), d(0, Q("1/2"), Q("1/2"))],
+            [d(0, 0, 1), d(0, 0, 1)],
+        ]
+    ),
+    EquilibriumTestCase(
+        label="test4",
+        factory=games.create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq,
+        expected=[
+            [d(Q("1/30"), Q("1/6"), Q("3/10"), Q("3/10"), Q("1/6"), Q("1/30")),
+             d(Q("1/6"), Q("1/30"), Q("3/10"), Q("3/10"), Q("1/30"), Q("1/6"))],
+        ]
+    ),
+]
+
+
 @pytest.mark.nash
 @pytest.mark.nash_enummixed_strategy
 @pytest.mark.parametrize(
-    "game,mixed_strategy_prof_data",
-    [
-        # Zero-sum games
-        (games.create_stripped_down_poker_efg(), [[["1/3", "2/3", 0, 0], ["2/3", "1/3"]]]),
-        # Non-zero-sum games
-        (games.create_one_shot_trust_efg(), [[[0, 1], ["1/2", "1/2"]],
-                                             [[0, 1], [0, 1]]]),
-        (
-                games.create_EFG_for_nxn_bimatrix_coordination_game(3),
-                [
-                    [[1, 0, 0], [1, 0, 0]],
-                    [["1/2", "1/2", 0], ["1/2", "1/2", 0]],
-                    [["1/3", "1/3", "1/3"], ["1/3", "1/3", "1/3"]],
-                    [["1/2", 0, "1/2"], ["1/2", 0, "1/2"]],
-                    [[0, 1, 0], [0, 1, 0]],
-                    [[0, "1/2", "1/2"], [0, "1/2", "1/2"]],
-                    [[0, 0, 1], [0, 0, 1]],
-                ],
-        ),
-        (
-                games.create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq(),
-                [
-                    [["1/30", "1/6", "3/10", "3/10", "1/6", "1/30"],
-                     ["1/6", "1/30", "3/10", "3/10", "1/30", "1/6"]],
-                ],
-        ),
-    ]
+    "test_case", NASH_ENUMMIXED_RATIONAL_CASES, ids=lambda c: c.label
 )
-def test_enummixed_rational(game: gbt.Game, mixed_strategy_prof_data: list):
+def test_enummixed_rational(
+    test_case: EquilibriumTestCase,
+    subtests,
+) -> None:
     """Test calls of enumeration of extreme mixed strategy equilibria, rational precision
 
        Tests max regret being zero (internal consistency) and compares the computed sequence of
-       extreme equilibria to a previosuly computed sequence (regression test)
+       extreme equilibria to a previously-computed sequence (regression test)
     """
+    game = test_case.factory()
     result = gbt.nash.enummixed_solve(game, rational=True)
-    assert len(result.equilibria) == len(mixed_strategy_prof_data)
-    for eq, exp in zip(result.equilibria, mixed_strategy_prof_data, strict=True):
-        assert eq.max_regret() == 0
-        expected = game.mixed_strategy_profile(rational=True, data=exp)
-        assert eq == expected
+    with subtests.test("number of equilibria found"):
+        assert len(result.equilibria) == len(test_case.expected)
+    for (i, (eq, exp)) in enumerate(zip(result.equilibria, test_case.expected, strict=True)):
+        with subtests.test(eq=i, check="max_regret"):
+            assert eq.max_regret() == 0
+        with subtests.test(eq=i, check="strategy_profile"):
+            assert eq == game.mixed_strategy_profile(rational=True, data=exp)
 
 
 @pytest.mark.nash
