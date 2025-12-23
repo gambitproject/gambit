@@ -13,6 +13,9 @@
   not a label of a child node.  In addition, indexing by an action object is now supported. (#587)
 - In `pygambit`, `min_payoff` and `max_payoff` (for both games and players) now refers to payoffs in
   any play of the game; previously this referred only to the set of outcomes. (#498)
+- In `pygambit`, calls to `sort_infosets` are no longer required to normalise the game representation.
+  Iteration ordering of information sets and their members is ensured internally.  `sort_infosets`
+  is therefore now a no-op and is deprecated; it will be removed in a future version.
 
 ### Added
 - Tests for EFG Nash solvers -- `enumpoly_solve`, `lp_solve`, `lcp_solve` -- in behavior stratgegies

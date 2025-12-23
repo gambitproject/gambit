@@ -43,7 +43,7 @@ def test_strategic_game_nodes():
 
 def test_strategic_game_sort_infosets():
     game = gbt.Game.new_table([2, 2])
-    with pytest.raises(gbt.UndefinedOperationError):
+    with pytest.warns(FutureWarning), pytest.raises(gbt.UndefinedOperationError):
         _ = game.sort_infosets()
 
 

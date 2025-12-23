@@ -737,7 +737,6 @@ Game ReadEfgFile(std::istream &p_stream)
     parser.GetNextToken();
   }
   ParseNode(parser, game, game->GetRoot(), treeData);
-  game->SortInfosets();
   return game;
 }
 
