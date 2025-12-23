@@ -27,19 +27,18 @@
 
 namespace Gambit {
 
-class GameTreeRep : public GameExplicitRep {
+class GameTreeRep final : public GameExplicitRep {
   friend class GameNodeRep;
   friend class GameInfosetRep;
   friend class GameActionRep;
 
-private:
   struct OwnPriorActionInfo {
     std::map<GameNodeRep *, GameActionRep *> node_map;
     std::map<GameInfosetRep *, std::set<GameActionRep *>> infoset_map;
   };
 
 protected:
-  mutable bool m_computedValues{false};
+  mutable bool m_computedValues{false}, m_preorderValid{false};
   std::shared_ptr<GameNodeRep> m_root;
   std::shared_ptr<GamePlayerRep> m_chance;
   std::size_t m_numNodes = 1;
