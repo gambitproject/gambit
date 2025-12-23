@@ -50,7 +50,7 @@ protected:
 
   /// @name Private auxiliary functions
   //@{
-  void SortInfosets(GamePlayerRep *) const;
+  static void SortInfosets(GamePlayerRep *);
   static void RenumberInfosets(GamePlayerRep *);
   /// Normalize the probability distribution of actions at a chance node
   Game NormalizeChanceProbs(GameInfosetRep *);
@@ -58,6 +58,12 @@ protected:
 
   /// @name Managing the representation
   //@{
+  void InvalidateNodeOrdering() const
+  {
+    m_nodesOrdered = false;
+    m_infosetsOrdered = false;
+  }
+  void InvalidateInfosetOrdering() const { m_infosetsOrdered = false; }
   void EnsureNodeOrdering() const override;
   void EnsureInfosetOrdering() const override;
 
