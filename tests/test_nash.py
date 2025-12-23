@@ -7,9 +7,14 @@ There is better test coverage for
 lp_solve, lcp_solve, and enumpoly_solve, all in mixed behaviors.
 """
 
+import dataclasses
+import functools
+import typing
+
 import pytest
 
 import pygambit as gbt
+from pygambit import Rational as Q
 
 from . import games
 
@@ -37,49 +42,103 @@ def test_enummixed_double():
     # For floating-point results are not exact, so we skip testing exact values for now
 
 
-@pytest.mark.nash
-@pytest.mark.nash_enummixed_strategy
-@pytest.mark.parametrize(
-    "game,mixed_strategy_prof_data",
-    [
-        # Zero-sum games
-        (games.create_stripped_down_poker_efg(), [[["1/3", "2/3", 0, 0], ["2/3", "1/3"]]]),
-        # Non-zero-sum games
-        (games.create_one_shot_trust_efg(), [[[0, 1], ["1/2", "1/2"]],
-                                             [[0, 1], [0, 1]]]),
-        (
-                games.create_EFG_for_nxn_bimatrix_coordination_game(3),
-                [
-                    [[1, 0, 0], [1, 0, 0]],
-                    [["1/2", "1/2", 0], ["1/2", "1/2", 0]],
-                    [["1/3", "1/3", "1/3"], ["1/3", "1/3", "1/3"]],
-                    [["1/2", 0, "1/2"], ["1/2", 0, "1/2"]],
-                    [[0, 1, 0], [0, 1, 0]],
-                    [[0, "1/2", "1/2"], [0, "1/2", "1/2"]],
-                    [[0, 0, 1], [0, 0, 1]],
-                ],
-        ),
-        (
-                games.create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq(),
-                [
-                    [["1/30", "1/6", "3/10", "3/10", "1/6", "1/30"],
-                     ["1/6", "1/30", "3/10", "3/10", "1/30", "1/6"]],
-                ],
-        ),
-    ]
-)
-def test_enummixed_rational(game: gbt.Game, mixed_strategy_prof_data: list):
-    """Test calls of enumeration of extreme mixed strategy equilibria, rational precision
-
-       Tests max regret being zero (internal consistency) and compares the computed sequence of
-       extreme equilibria to a previosuly computed sequence (regression test)
+def d(*probs) -> tuple:
+    """Helper function to let us write d() to be suggestive of
+    "probability distribution on simplex" ("Delta")
     """
-    result = gbt.nash.enummixed_solve(game, rational=True)
-    assert len(result.equilibria) == len(mixed_strategy_prof_data)
-    for eq, exp in zip(result.equilibria, mixed_strategy_prof_data, strict=True):
-        assert eq.max_regret() == 0
-        expected = game.mixed_strategy_profile(rational=True, data=exp)
-        assert eq == expected
+    return tuple(probs)
+
+
+@dataclasses.dataclass
+class EquilibriumTestCase:
+    """Summarising the data relevant for a test fixture of a call to an equilibrium solver."""
+    factory: typing.Callable[[], gbt.Game]
+    solver: typing.Callable[[gbt.Game], gbt.nash.NashComputationResult]
+    expected: list
+    regret_tol: float | gbt.Rational = Q(0)
+    prob_tol: float | gbt.Rational = Q(0)
+
+
+NASH_ENUMMIXED_RATIONAL_CASES = [
+    pytest.param(
+        EquilibriumTestCase(
+            factory=games.create_stripped_down_poker_efg,
+            solver=functools.partial(gbt.nash.enummixed_solve, rational=True),
+            expected=[
+                [d(Q("1/3"), Q("2/3"), 0, 0), d(Q("2/3"), Q("1/3"))],
+            ],
+        ),
+        marks=pytest.mark.nash_enummixed_strategy,
+        id="test1",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=games.create_one_shot_trust_efg,
+            solver=functools.partial(gbt.nash.enummixed_solve, rational=True),
+            expected=[
+                [d(0, 1), d(Q("1/2"), Q("1/2"))],
+                [d(0, 1), d(0, 1)],
+            ],
+        ),
+        marks=pytest.mark.nash_enummixed_strategy,
+        id="test2",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.create_EFG_for_nxn_bimatrix_coordination_game, n=3),
+            solver=functools.partial(gbt.nash.enummixed_solve, rational=True),
+            expected=[
+                [d(1, 0, 0), d(1, 0, 0)],
+                [d(Q("1/2"), Q("1/2"), 0), d(Q("1/2"), Q("1/2"), 0)],
+                [d(Q("1/3"), Q("1/3"), Q("1/3")), d(Q("1/3"), Q("1/3"), Q("1/3"))],
+                [d(Q("1/2"), 0, Q("1/2")), d(Q("1/2"), 0, Q("1/2"))],
+                [d(0, 1, 0), d(0, 1, 0)],
+                [d(0, Q("1/2"), Q("1/2")), d(0, Q("1/2"), Q("1/2"))],
+                [d(0, 0, 1), d(0, 0, 1)],
+            ]
+        ),
+        marks=pytest.mark.nash_enummixed_strategy,
+        id="test3",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=games.create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq,
+            solver=functools.partial(gbt.nash.enummixed_solve, rational=True),
+            expected=[
+                [d(Q("1/30"), Q("1/6"), Q("3/10"), Q("3/10"), Q("1/6"), Q("1/30")),
+                 d(Q("1/6"), Q("1/30"), Q("3/10"), Q("3/10"), Q("1/30"), Q("1/6"))],
+            ]
+        ),
+        marks=pytest.mark.nash_enummixed_strategy,
+        id="test4",
+    )
+]
+
+
+@pytest.mark.nash
+@pytest.mark.parametrize(
+    "test_case", NASH_ENUMMIXED_RATIONAL_CASES, ids=lambda c: c.label
+)
+def test_nash_strategy_solver(test_case: EquilibriumTestCase, subtests) -> None:
+    """Test calls of Nash solvers.
+
+    Subtests:
+    - Max regret no more than `test_case.regret_tol`
+    - Equilibria are output in the expected order.  Equilibria are deemed to match if the maximum
+      difference in probabilities is no more than `test_case.prob_tol`
+    """
+    game = test_case.factory()
+    result = test_case.solver(game)
+    with subtests.test("number of equilibria found"):
+        assert len(result.equilibria) == len(test_case.expected)
+    for (i, (eq, exp)) in enumerate(zip(result.equilibria, test_case.expected, strict=True)):
+        with subtests.test(eq=i, check="max_regret"):
+            assert eq.max_regret() <= test_case.regret_tol
+        with subtests.test(eq=i, check="strategy_profile"):
+            expected = game.mixed_strategy_profile(rational=True, data=exp)
+            for player in game.players:
+                for strategy in player.strategies:
+                    assert abs(eq[strategy] - expected[strategy]) <= test_case.prob_tol
 
 
 @pytest.mark.nash
