@@ -85,15 +85,25 @@ public:
   /// @name Comparison operators
   //@{
   bool operator==(const Matrix &) const;
-  bool operator!=(const Matrix &) const;
+  bool operator!=(const Matrix &M) const { return !(*this == M); }
   bool operator==(const T &) const;
-  bool operator!=(const T &) const;
+  bool operator!=(const T &c) const { return !(*this == c); }
   //@}
 
   /// @name Additive operators
   //@{
-  Matrix operator+(const Matrix &) const;
-  Matrix operator-(const Matrix &) const;
+  Matrix operator+(const Matrix &M) const
+  {
+    Matrix tmp(*this);
+    tmp += M;
+    return tmp;
+  }
+  Matrix operator-(const Matrix &M) const
+  {
+    Matrix tmp(*this);
+    tmp -= M;
+    return tmp;
+  }
   Matrix &operator+=(const Matrix &);
   Matrix &operator-=(const Matrix &);
 
@@ -108,10 +118,20 @@ public:
   void RMultiply(const Vector<T> &, Vector<T> &) const;
   Matrix operator*(const Matrix &) const;
   Vector<T> operator*(const Vector<T> &) const;
-  Matrix operator*(const T &) const;
+  Matrix operator*(const T &c) const
+  {
+    Matrix tmp(*this);
+    tmp *= c;
+    return tmp;
+  }
   Matrix &operator*=(const T &);
 
-  Matrix operator/(const T &) const;
+  Matrix operator/(const T &c) const
+  {
+    Matrix tmp(*this);
+    tmp /= c;
+    return tmp;
+  }
   Matrix &operator/=(const T &);
   //@
 
@@ -127,13 +147,15 @@ public:
   T Determinant() const;
 };
 
-template <class T> Vector<T> operator*(const Vector<T> &, const Matrix<T> &);
-
 template <class T> Matrix<T> &Matrix<T>::operator=(const T &c)
 {
   std::fill(m_data.elements_begin(), m_data.elements_end(), c);
   return *this;
 }
+
+// ----------------------------------------------------------------------------
+// Implementation of element-wise operations
+// ----------------------------------------------------------------------------
 
 template <class T> bool Matrix<T>::operator==(const Matrix &M) const
 {
@@ -143,15 +165,11 @@ template <class T> bool Matrix<T>::operator==(const Matrix &M) const
   return std::equal(m_data.elements_begin(), m_data.elements_end(), M.m_data.elements_begin());
 }
 
-template <class T> bool Matrix<T>::operator!=(const Matrix &M) const { return !(*this == M); }
-
 template <class T> bool Matrix<T>::operator==(const T &c) const
 {
   return std::all_of(m_data.elements_begin(), m_data.elements_end(),
                      [&c](const auto &v) { return v == c; });
 }
-
-template <class T> bool Matrix<T>::operator!=(const T &c) const { return !(*this == c); }
 
 template <class T> Matrix<T> &Matrix<T>::operator+=(const Matrix &M)
 {
@@ -163,13 +181,6 @@ template <class T> Matrix<T> &Matrix<T>::operator+=(const Matrix &M)
   return *this;
 }
 
-template <class T> Matrix<T> Matrix<T>::operator+(const Matrix &M) const
-{
-  Matrix tmp(*this);
-  tmp += M;
-  return tmp;
-}
-
 template <class T> Matrix<T> &Matrix<T>::operator-=(const Matrix &M)
 {
   if (!this->CheckBounds(M)) {
@@ -178,13 +189,6 @@ template <class T> Matrix<T> &Matrix<T>::operator-=(const Matrix &M)
   std::transform(m_data.elements_begin(), m_data.elements_end(), M.m_data.elements_begin(),
                  m_data.elements_begin(), std::minus<>());
   return *this;
-}
-
-template <class T> Matrix<T> Matrix<T>::operator-(const Matrix &M) const
-{
-  Matrix tmp(*this);
-  tmp -= M;
-  return tmp;
 }
 
 template <class T> Matrix<T> Matrix<T>::operator-() const
@@ -202,13 +206,6 @@ template <class T> Matrix<T> &Matrix<T>::operator*=(const T &c)
   return *this;
 }
 
-template <class T> Matrix<T> Matrix<T>::operator*(const T &c) const
-{
-  Matrix tmp(*this);
-  tmp *= c;
-  return tmp;
-}
-
 template <class T> Matrix<T> &Matrix<T>::operator/=(const T &c)
 {
   if (c == static_cast<T>(0)) {
@@ -219,12 +216,9 @@ template <class T> Matrix<T> &Matrix<T>::operator/=(const T &c)
   return *this;
 }
 
-template <class T> Matrix<T> Matrix<T>::operator/(const T &c) const
-{
-  Matrix tmp(*this);
-  tmp /= c;
-  return tmp;
-}
+// ----------------------------------------------------------------------------
+// Implementation of row/column access
+// ----------------------------------------------------------------------------
 
 template <class T> template <class V> void Matrix<T>::GetColumn(int col, V &v) const
 {
@@ -278,6 +272,10 @@ template <class T> template <class V> void Matrix<T>::SetRow(int row, const V &v
   }
 }
 
+// ----------------------------------------------------------------------------
+// Implementation of linear algebra concepts
+// ----------------------------------------------------------------------------
+
 template <class T> void Matrix<T>::CMultiply(const Vector<T> &in, Vector<T> &out) const
 {
   if (!this->CheckRow(in) || !this->CheckColumn(out)) {
@@ -287,33 +285,6 @@ template <class T> void Matrix<T>::CMultiply(const Vector<T> &in, Vector<T> &out
     auto row = m_data.GetRowView(i);
     out[i] = std::inner_product(row.begin(), row.end(), in.begin(), T{0});
   }
-}
-
-template <class T> Matrix<T> Matrix<T>::operator*(const Matrix<T> &M) const
-{
-  if (MinCol() != M.MinRow() || MaxCol() != M.MaxRow()) {
-    throw DimensionException();
-  }
-  Matrix<T> tmp(MinRow(), MaxRow(), M.MinCol(), M.MaxCol());
-  for (int i = MinRow(); i <= MaxRow(); ++i) {
-    auto row = m_data.GetRowView(i);
-    for (int j = M.MinCol(); j <= M.MaxCol(); ++j) {
-      auto col = M.m_data.GetColumnView(j);
-      tmp(i, j) = std::inner_product(row.begin(), row.end(), col.begin(), T{0});
-    }
-  }
-  return tmp;
-}
-
-template <class T> Vector<T> Matrix<T>::operator*(const Vector<T> &v) const
-{
-  if (!this->CheckRow(v)) {
-    throw DimensionException();
-  }
-
-  Vector<T> tmp(MinRow(), MaxRow());
-  CMultiply(v, tmp);
-  return tmp;
 }
 
 template <class T> void Matrix<T>::RMultiply(const Vector<T> &in, Vector<T> &out) const
@@ -333,29 +304,48 @@ template <class T> void Matrix<T>::RMultiply(const Vector<T> &in, Vector<T> &out
   }
 }
 
-// transposed (row) vector*matrix multiplication operator
-template <class T> Vector<T> operator*(const Vector<T> &v, const Matrix<T> &M)
+template <class T> Vector<T> Matrix<T>::operator*(const Vector<T> &v) const
 {
-  if (!M.CheckColumn(v)) {
+  if (!this->CheckRow(v)) {
     throw DimensionException();
   }
-  Vector<T> tmp(M.MinCol(), M.MaxCol());
-  M.RMultiply(v, tmp);
+  Vector<T> tmp(MinRow(), MaxRow());
+  CMultiply(v, tmp);
+  return tmp;
+}
+
+template <class T> Matrix<T> Matrix<T>::operator*(const Matrix &M) const
+{
+  if (MinCol() != M.MinRow() || MaxCol() != M.MaxRow()) {
+    throw DimensionException();
+  }
+  Matrix<T> tmp(MinRow(), MaxRow(), M.MinCol(), M.MaxCol());
+  for (int i = MinRow(); i <= MaxRow(); ++i) {
+    auto row = m_data.GetRowView(i);
+    for (int j = M.MinCol(); j <= M.MaxCol(); ++j) {
+      auto col = M.m_data.GetColumnView(j);
+      tmp(i, j) = std::inner_product(row.begin(), row.end(), col.begin(), T{0});
+    }
+  }
   return tmp;
 }
 
 template <class T> Matrix<T> Matrix<T>::Transpose() const
 {
-  Matrix<T> tmp(MinCol(), MaxCol(), MinRow(), MaxRow());
+  Matrix tmp(MinCol(), MaxCol(), MinRow(), MaxRow());
 
-  for (int i = MinRow(); i <= MaxRow(); i++) {
-    for (int j = MinCol(); j <= MaxCol(); j++) {
+  for (int i = MinRow(); i <= MaxRow(); ++i) {
+    for (int j = MinCol(); j <= MaxCol(); ++j) {
       tmp(j, i) = (*this)(i, j);
     }
   }
 
   return tmp;
 }
+
+// ----------------------------------------------------------------------------
+// Implementation of additional operations
+// ----------------------------------------------------------------------------
 
 template <class T> void Matrix<T>::MakeIdent()
 {
@@ -536,10 +526,28 @@ template <class T> T Matrix<T>::Determinant() const
   return det;
 }
 
-extern template class Matrix<double>;
-extern template class Matrix<Rational>;
-extern template class Matrix<Integer>;
+// ----------------------------------------------------------------------------
+// Implementation of operators
+// ----------------------------------------------------------------------------
+
+template <class T> Vector<T> operator*(const Vector<T> &v, const Matrix<T> &M)
+{
+  if (!M.CheckColumn(v)) {
+    throw DimensionException();
+  }
+  Vector<T> tmp(M.MinCol(), M.MaxCol());
+  M.RMultiply(v, tmp);
+  return tmp;
+}
+
+// ----------------------------------------------------------------------------
+// Explicit instantiations
+// ----------------------------------------------------------------------------
+
 extern template class Matrix<int>;
+extern template class Matrix<double>;
+extern template class Matrix<Integer>;
+extern template class Matrix<Rational>;
 
 } // end namespace Gambit
 
