@@ -923,6 +923,7 @@ void GameTreeRep::BuildComputedValues() const
     std::map<GameNodeRep *, GameNodeRep *> ptr, whichbranch;
     player->MakeReducedStrats(m_root.get(), nullptr, behav, ptr, whichbranch);
   }
+  IndexStrategies();
   m_computedValues = true;
 }
 
@@ -1427,11 +1428,11 @@ PureStrategyProfile GameTreeRep::NewPureStrategyProfile() const
 
 Rational TreePureStrategyProfileRep::GetPayoff(const GamePlayer &p_player) const
 {
-  PureBehaviorProfile behav(m_nfg);
-  for (const auto &player : m_nfg->GetPlayers()) {
+  PureBehaviorProfile behav(m_game);
+  for (const auto &player : m_game->GetPlayers()) {
     for (const auto &infoset : player->GetInfosets()) {
       try {
-        behav.SetAction(infoset->GetAction(m_profile.at(player)->m_behav[infoset.get()]));
+        behav.SetAction(infoset->GetAction(GetStrategy(player)->m_behav[infoset.get()]));
       }
       catch (std::out_of_range &) {
       }

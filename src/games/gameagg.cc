@@ -51,10 +51,10 @@ public:
 
 Rational AGGPureStrategyProfileRep::GetPayoff(const GamePlayer &p_player) const
 {
-  const std::shared_ptr<agg::AGG> aggPtr = dynamic_cast<GameAGGRep &>(*m_nfg).aggPtr;
+  const std::shared_ptr<agg::AGG> aggPtr = dynamic_cast<GameAGGRep &>(*m_game).aggPtr;
   std::vector<int> s(aggPtr->getNumPlayers());
   for (int i = 1; i <= aggPtr->getNumPlayers(); i++) {
-    s[i - 1] = m_profile.at(m_nfg->GetPlayer(i))->GetNumber() - 1;
+    s[i - 1] = GetStrategy(m_game->GetPlayer(i))->GetNumber() - 1;
   }
   return Rational(aggPtr->getPurePayoff(p_player->GetNumber() - 1, s));
 }
@@ -62,10 +62,10 @@ Rational AGGPureStrategyProfileRep::GetPayoff(const GamePlayer &p_player) const
 Rational AGGPureStrategyProfileRep::GetStrategyValue(const GameStrategy &p_strategy) const
 {
   const int player = p_strategy->GetPlayer()->GetNumber();
-  const std::shared_ptr<agg::AGG> aggPtr = dynamic_cast<GameAGGRep &>(*m_nfg).aggPtr;
+  const std::shared_ptr<agg::AGG> aggPtr = dynamic_cast<GameAGGRep &>(*m_game).aggPtr;
   std::vector<int> s(aggPtr->getNumPlayers());
   for (int i = 1; i <= aggPtr->getNumPlayers(); i++) {
-    s[i - 1] = m_profile.at(m_nfg->GetPlayer(i))->GetNumber() - 1;
+    s[i - 1] = GetStrategy(m_game->GetPlayer(i))->GetNumber() - 1;
   }
   s[player - 1] = p_strategy->GetNumber() - 1;
   return Rational(aggPtr->getPurePayoff(player - 1, s));

@@ -266,6 +266,7 @@ public:
 /// relatively efficient.
 class GameStrategyRep : public std::enable_shared_from_this<GameStrategyRep> {
   friend class GameExplicitRep;
+  friend class GameRep;
   friend class GameTreeRep;
   friend class GameTableRep;
   friend class GameAGGRep;
@@ -359,6 +360,7 @@ class GamePlayerRep : public std::enable_shared_from_this<GamePlayerRep> {
   friend class GameInfosetRep;
   friend class GameNodeRep;
   friend class StrategySupportProfile;
+  friend class PureStrategyProfileRep;
   template <class T> friend class MixedBehaviorProfile;
   template <class T> friend class MixedStrategyProfile;
 
@@ -374,6 +376,8 @@ class GamePlayerRep : public std::enable_shared_from_this<GamePlayerRep> {
   bool m_valid{true};
   GameRep *m_game;
   int m_number;
+  // The stride of the player into the set of pure strategy profiles
+  long m_stride{0};
   std::string m_label;
   std::vector<std::shared_ptr<GameInfosetRep>> m_infosets;
   std::vector<std::shared_ptr<GameStrategyRep>> m_strategies;
@@ -617,6 +621,7 @@ protected:
   //@{
   /// Mark that the content of the game has changed
   void IncrementVersion() { m_version++; }
+  void IndexStrategies() const;
   //@}
 
   /// Hooks for derived classes to update lazily-computed orderings if required

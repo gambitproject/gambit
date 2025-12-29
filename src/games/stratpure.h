@@ -36,11 +36,16 @@ class PureStrategyProfileRep {
   friend class PureStrategyProfile;
 
 protected:
-  Game m_nfg;
-  std::map<GamePlayer, GameStrategy> m_profile;
+  Game m_game;
+  long m_index{0};
 
   /// Construct a new strategy profile
-  explicit PureStrategyProfileRep(const Game &p_game);
+  explicit PureStrategyProfileRep(const Game &p_game) : m_game(p_game)
+  {
+    for (const auto &player : p_game->GetPlayers()) {
+      m_index += player->GetStrategies().front()->m_offset;
+    }
+  }
 
 public:
   virtual ~PureStrategyProfileRep() = default;
@@ -50,18 +55,22 @@ public:
 
   /// @name Data access and manipulation
   //@{
-  const Game &GetGame() const { return m_nfg; }
+  const Game &GetGame() const { return m_game; }
 
   /// Get the strategy played by the player
-  const GameStrategy &GetStrategy(const GamePlayer &p_player) const
+  GameStrategy GetStrategy(const GamePlayer &p_player) const
   {
-    return m_profile.at(p_player);
+    const long stride = p_player->m_stride;
+    const long radix = p_player->m_strategies.size();
+    const long digit = (m_index / stride) % radix;
+    return p_player->m_strategies[digit];
   }
 
   /// Set the strategy for a player
-  virtual void SetStrategy(const GameStrategy &p_strategy)
+  void SetStrategy(const GameStrategy &p_strategy)
   {
-    m_profile[p_strategy->GetPlayer()] = p_strategy;
+    const auto &old_strategy = GetStrategy(p_strategy->GetPlayer());
+    m_index += p_strategy->m_offset - old_strategy->m_offset;
   }
 
   /// Get the outcome that results from the profile

@@ -29,19 +29,12 @@ namespace Gambit {
 //                    class PureStrategyProfileRep
 //========================================================================
 
-PureStrategyProfileRep::PureStrategyProfileRep(const Game &p_game) : m_nfg(p_game)
-{
-  for (const auto &player : m_nfg->GetPlayers()) {
-    m_profile[player] = player->GetStrategies().front();
-  }
-}
-
 MixedStrategyProfile<Rational> PureStrategyProfileRep::ToMixedStrategyProfile() const
 {
-  auto temp = m_nfg->NewMixedStrategyProfile(Rational(0));
+  auto temp = m_game->NewMixedStrategyProfile(Rational(0));
   temp = Rational(0);
-  for (auto [player, strategy] : m_profile) {
-    temp[strategy] = Rational(1);
+  for (const auto &player : m_game->GetPlayers()) {
+    temp[GetStrategy(player)] = Rational(1);
   }
   return temp;
 }

@@ -34,35 +34,18 @@ namespace Gambit {
 
 class TablePureStrategyProfileRep : public PureStrategyProfileRep {
 protected:
-  long m_index{0L};
-
-  std::shared_ptr<PureStrategyProfileRep> Copy() const override;
+  std::shared_ptr<PureStrategyProfileRep> Copy() const override
+  {
+    return std::make_shared<TablePureStrategyProfileRep>(*this);
+  }
 
 public:
-  explicit TablePureStrategyProfileRep(const Game &p_game);
-  void SetStrategy(const GameStrategy &) override;
+  explicit TablePureStrategyProfileRep(const Game &p_game) : PureStrategyProfileRep(p_game) {}
   GameOutcome GetOutcome() const override;
   void SetOutcome(GameOutcome p_outcome) override;
   Rational GetPayoff(const GamePlayer &) const override;
   Rational GetStrategyValue(const GameStrategy &) const override;
 };
-
-//------------------------------------------------------------------------
-//               TablePureStrategyProfileRep: Lifecycle
-//------------------------------------------------------------------------
-
-TablePureStrategyProfileRep::TablePureStrategyProfileRep(const Game &p_nfg)
-  : PureStrategyProfileRep(p_nfg)
-{
-  for (auto [player, strategy] : m_profile) {
-    m_index += strategy->m_offset;
-  }
-}
-
-std::shared_ptr<PureStrategyProfileRep> TablePureStrategyProfileRep::Copy() const
-{
-  return std::make_shared<TablePureStrategyProfileRep>(*this);
-}
 
 Game NewTable(const std::vector<int> &p_dim, bool p_sparseOutcomes /*= false*/)
 {
@@ -73,15 +56,9 @@ Game NewTable(const std::vector<int> &p_dim, bool p_sparseOutcomes /*= false*/)
 //       TablePureStrategyProfileRep: Data access and manipulation
 //------------------------------------------------------------------------
 
-void TablePureStrategyProfileRep::SetStrategy(const GameStrategy &s)
-{
-  m_index += s->m_offset - m_profile.at(s->GetPlayer())->m_offset;
-  m_profile[s->GetPlayer()] = s;
-}
-
 GameOutcome TablePureStrategyProfileRep::GetOutcome() const
 {
-  if (const auto outcome = dynamic_cast<GameTableRep &>(*m_nfg).m_results[m_index]) {
+  if (const auto outcome = dynamic_cast<GameTableRep &>(*m_game).m_results.at(m_index)) {
     return outcome->shared_from_this();
   }
   return nullptr;
@@ -89,12 +66,12 @@ GameOutcome TablePureStrategyProfileRep::GetOutcome() const
 
 void TablePureStrategyProfileRep::SetOutcome(GameOutcome p_outcome)
 {
-  dynamic_cast<GameTableRep &>(*m_nfg).m_results[m_index] = p_outcome.get();
+  dynamic_cast<GameTableRep &>(*m_game).m_results[m_index] = p_outcome.get();
 }
 
 Rational TablePureStrategyProfileRep::GetPayoff(const GamePlayer &p_player) const
 {
-  if (const auto outcome = dynamic_cast<GameTableRep &>(*m_nfg).m_results[m_index]) {
+  if (const auto outcome = dynamic_cast<GameTableRep &>(*m_game).m_results.at(m_index)) {
     return outcome->GetPayoff<Rational>(p_player);
   }
   return Rational(0);
@@ -104,8 +81,8 @@ Rational TablePureStrategyProfileRep::GetStrategyValue(const GameStrategy &p_str
 {
   const auto &player = p_strategy->GetPlayer();
   const GameOutcomeRep *outcome =
-      dynamic_cast<GameTableRep &>(*m_nfg)
-          .m_results[m_index - m_profile.at(player)->m_offset + p_strategy->m_offset];
+      dynamic_cast<GameTableRep &>(*m_game)
+          .m_results[m_index - GetStrategy(player)->m_offset + p_strategy->m_offset];
   if (outcome) {
     return outcome->GetPayoff<Rational>(player);
   }
@@ -431,9 +408,13 @@ GameStrategy GameTableRep::NewStrategy(const GamePlayer &p_player, const std::st
     throw MismatchException();
   }
   IncrementVersion();
+  std::vector<long> old_radices;
+  for (const auto &player : m_players) {
+    old_radices.push_back(player->m_strategies.size());
+  }
   p_player->m_strategies.push_back(std::make_shared<GameStrategyRep>(
       p_player.get(), p_player->m_strategies.size() + 1, p_label));
-  RebuildTable();
+  RebuildTable(old_radices);
   return p_player->m_strategies.back();
 }
 
@@ -493,52 +474,37 @@ GameTableRep::NewMixedStrategyProfile(const Rational &, const StrategySupportPro
 /// This rebuilds a new table of outcomes after the game has been
 /// redimensioned (change in the number of strategies).  Strategies
 /// numbered -1 are identified as the new strategies.
-void GameTableRep::RebuildTable()
+void GameTableRep::RebuildTable(const std::vector<long> &old_radices)
 {
-  long size = 1L;
-  std::vector<long> offsets;
-  for (const auto &player : m_players) {
-    offsets.push_back(size);
-    size *= player->m_strategies.size();
+  std::vector<long> old_strides(old_radices.size());
+  long stride = 1;
+  for (size_t i = 0; i < old_radices.size(); ++i) {
+    old_strides[i] = stride;
+    stride *= old_radices[i];
+  }
+  const long old_size = stride;
+
+  long new_size = 1;
+  std::vector<long> new_strides(m_players.size());
+  for (size_t i = 0; i < m_players.size(); ++i) {
+    new_strides[i] = new_size;
+    new_size *= m_players[i]->m_strategies.size();
   }
 
-  std::vector<GameOutcomeRep *> newResults(size);
-  std::fill(newResults.begin(), newResults.end(), nullptr);
-
-  for (auto iter : StrategyContingencies(
-           StrategySupportProfile(std::const_pointer_cast<GameRep>(shared_from_this())))) {
-    long newindex = 0L;
-    for (const auto &player : m_players) {
-      if (iter->GetStrategy(player)->m_offset < 0) {
-        // This is a contingency involving a new strategy... skip
-        newindex = -1L;
-        break;
-      }
-      else {
-        newindex += (iter->GetStrategy(player)->m_number - 1) * offsets[player->m_number - 1];
-      }
+  std::vector<GameOutcomeRep *> newResults(new_size, nullptr);
+  for (long old_index = 0; old_index < old_size; ++old_index) {
+    if (m_results[old_index] == nullptr) {
+      continue;
     }
-
-    if (newindex >= 0 && iter->GetOutcome() != nullptr) {
-      newResults[newindex] = iter->GetOutcome().get();
+    long new_index = 0;
+    for (size_t i = 0; i < m_players.size(); ++i) {
+      const long digit = (old_index / old_strides[i]) % old_radices[i];
+      new_index += digit * new_strides[i];
     }
+    newResults[new_index] = m_results[old_index];
   }
   m_results.swap(newResults);
   IndexStrategies();
-}
-
-void GameTableRep::IndexStrategies() const
-{
-  long offset = 1L;
-  for (auto player : m_players) {
-    int st = 1;
-    for (auto strategy : player->m_strategies) {
-      strategy->m_number = st;
-      strategy->m_offset = (st - 1) * offset;
-      st++;
-    }
-    offset *= player->m_strategies.size();
-  }
 }
 
 } // end namespace Gambit

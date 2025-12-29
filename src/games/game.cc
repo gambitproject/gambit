@@ -182,6 +182,22 @@ GameRep::~GameRep()
   }
 }
 
+void GameRep::IndexStrategies() const
+{
+  std::cout << "IndexStrategies" << std::endl;
+  long stride = 1L;
+  for (const auto player : m_players) {
+    player->m_stride = stride;
+    int digit = 0;
+    for (const auto strategy : player->m_strategies) {
+      strategy->m_number = digit + 1;
+      strategy->m_offset = digit * stride;
+      ++digit;
+    }
+    stride *= player->m_strategies.size();
+  }
+}
+
 //------------------------------------------------------------------------
 //                     GameRep: Writing data files
 //------------------------------------------------------------------------
