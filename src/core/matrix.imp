@@ -25,99 +25,6 @@
 namespace Gambit {
 
 //-------------------------------------------------------------------------
-//       Matrix<T>: Constructors, destructors, constructive operators
-//-------------------------------------------------------------------------
-
-template <class T> Matrix<T> &Matrix<T>::operator=(const T &c)
-{
-  for (int i = MinRow(); i <= MaxRow(); i++) {
-    for (int j = MinCol(); j <= MaxCol(); j++) {
-      (*this)(i, j) = c;
-    }
-  }
-  return *this;
-}
-
-template <class T> Matrix<T> Matrix<T>::operator-()
-{
-  Matrix<T> tmp(MinRow(), MaxRow(), MinCol(), MaxCol());
-  for (int i = MinRow(); i <= MaxRow(); i++) {
-    for (int j = MinCol(); j <= MaxCol(); j++) {
-      tmp(i, j) = -(*this)(i, j);
-    }
-  }
-  return tmp;
-}
-
-//-------------------------------------------------------------------------
-//                     Matrix<T>: Additive operators
-//-------------------------------------------------------------------------
-
-template <class T> Matrix<T> Matrix<T>::operator+(const Matrix<T> &M) const
-{
-  if (!this->CheckBounds(M)) {
-    throw DimensionException();
-  }
-
-  Matrix<T> tmp(MinRow(), MaxRow(), MinCol(), MaxCol());
-
-  for (int i = MinRow(); i <= MaxRow(); ++i) {
-    for (int j = MinCol(); j <= MaxCol(); ++j) {
-      tmp(i, j) = (*this)(i, j) + M(i, j);
-    }
-  }
-
-  return tmp;
-}
-
-template <class T> Matrix<T> Matrix<T>::operator-(const Matrix<T> &M) const
-{
-  if (!this->CheckBounds(M)) {
-    throw DimensionException();
-  }
-
-  Matrix<T> tmp(MinRow(), MaxRow(), MinCol(), MaxCol());
-
-  for (int i = MinRow(); i <= MaxRow(); ++i) {
-    for (int j = MinCol(); j <= MaxCol(); ++j) {
-      tmp(i, j) = (*this)(i, j) - M(i, j);
-    }
-  }
-
-  return tmp;
-}
-
-template <class T> Matrix<T> &Matrix<T>::operator+=(const Matrix<T> &M)
-{
-  if (!this->CheckBounds(M)) {
-    throw DimensionException();
-  }
-
-  for (int i = MinRow(); i <= MaxRow(); ++i) {
-    for (int j = MinCol(); j <= MaxCol(); ++j) {
-      (*this)(i, j) += M(i, j);
-    }
-  }
-
-  return *this;
-}
-
-template <class T> Matrix<T> &Matrix<T>::operator-=(const Matrix<T> &M)
-{
-  if (!this->CheckBounds(M)) {
-    throw DimensionException();
-  }
-
-  for (int i = MinRow(); i <= MaxRow(); ++i) {
-    for (int j = MinCol(); j <= MaxCol(); ++j) {
-      (*this)(i, j) -= M(i, j);
-    }
-  }
-
-  return *this;
-}
-
-//-------------------------------------------------------------------------
 //                  Matrix<T>: Multiplicative operators
 //-------------------------------------------------------------------------
 
@@ -194,60 +101,6 @@ template <class T> Vector<T> operator*(const Vector<T> &v, const Matrix<T> &M)
   return tmp;
 }
 
-template <class T> Matrix<T> Matrix<T>::operator*(const T &s) const
-{
-  Matrix<T> tmp(MinRow(), MaxRow(), MinCol(), MaxCol());
-
-  for (int i = MinRow(); i <= MaxRow(); ++i) {
-    for (int j = MinCol(); j <= MaxCol(); ++j) {
-      tmp(i, j) = (*this)(i, j) * s;
-    }
-  }
-
-  return tmp;
-}
-
-template <class T> Matrix<T> &Matrix<T>::operator*=(const T &s)
-{
-  for (int i = MinRow(); i <= MaxRow(); ++i) {
-    for (int j = MinCol(); j <= MaxCol(); ++j) {
-      (*this)(i, j) *= s;
-    }
-  }
-  return *this;
-}
-
-template <class T> Matrix<T> Matrix<T>::operator/(const T &s) const
-{
-  if (s == (T)0) {
-    throw ZeroDivideException();
-  }
-
-  Matrix<T> tmp(MinRow(), MaxRow(), MinCol(), MaxCol());
-
-  for (int i = MinRow(); i <= MaxRow(); ++i) {
-    for (int j = MinCol(); j <= MaxCol(); ++j) {
-      tmp(i, j) = (*this)(i, j) / s;
-    }
-  }
-
-  return tmp;
-}
-
-template <class T> Matrix<T> &Matrix<T>::operator/=(const T &s)
-{
-  if (s == (T)0) {
-    throw ZeroDivideException();
-  }
-
-  for (int i = MinRow(); i <= MaxRow(); ++i) {
-    for (int j = MinCol(); j <= MaxCol(); ++j) {
-      (*this)(i, j) /= s;
-    }
-  }
-
-  return *this;
-}
 
 //-------------------------------------------------------------------------
 //                         Matrix<T>: Transpose
@@ -265,43 +118,6 @@ template <class T> Matrix<T> Matrix<T>::Transpose() const
 
   return tmp;
 }
-
-//-------------------------------------------------------------------------
-//                    Matrix<T>: Comparison operators
-//-------------------------------------------------------------------------
-
-template <class T> bool Matrix<T>::operator==(const Matrix<T> &M) const
-{
-  if (!this->CheckBounds(M)) {
-    throw DimensionException();
-  }
-
-  for (int i = MinRow(); i <= MaxRow(); ++i) {
-    for (int j = MinCol(); j <= MaxCol(); ++j) {
-      if ((*this)(i, j) != M(i, j)) {
-        return false;
-      }
-    }
-  }
-
-  return true;
-}
-
-template <class T> bool Matrix<T>::operator!=(const Matrix<T> &M) const { return !(*this == M); }
-
-template <class T> bool Matrix<T>::operator==(const T &s) const
-{
-  for (int i = MinRow(); i <= MaxRow(); ++i) {
-    for (int j = MinCol(); j <= MaxCol(); ++j) {
-      if ((*this)(i, j) != s) {
-        return false;
-      }
-    }
-  }
-  return true;
-}
-
-template <class T> bool Matrix<T>::operator!=(const T &s) const { return !(*this == s); }
 
 
 // more complex functions

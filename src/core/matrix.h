@@ -96,7 +96,7 @@ public:
   Matrix &operator+=(const Matrix &);
   Matrix &operator-=(const Matrix &);
 
-  Matrix operator-();
+  Matrix operator-() const;
   //@}
 
   /// @name Multiplicative operators
@@ -127,6 +127,103 @@ public:
 };
 
 template <class T> Vector<T> operator*(const Vector<T> &, const Matrix<T> &);
+
+template <class T> Matrix<T> &Matrix<T>::operator=(const T &c)
+{
+  std::fill(m_data.elements_begin(), m_data.elements_end(), c);
+  return *this;
+}
+
+template <class T> bool Matrix<T>::operator==(const Matrix &M) const
+{
+  if (!this->CheckBounds(M)) {
+    throw DimensionException();
+  }
+  return std::equal(m_data.elements_begin(), m_data.elements_end(), M.m_data.elements_begin());
+}
+
+template <class T> bool Matrix<T>::operator!=(const Matrix &M) const { return !(*this == M); }
+
+template <class T> bool Matrix<T>::operator==(const T &c) const
+{
+  return std::all_of(m_data.elements_begin(), m_data.elements_end(),
+                     [&c](const auto &v) { return v == c; });
+}
+
+template <class T> bool Matrix<T>::operator!=(const T &c) const { return !(*this == c); }
+
+template <class T> Matrix<T> &Matrix<T>::operator+=(const Matrix &M)
+{
+  if (!this->CheckBounds(M)) {
+    throw DimensionException();
+  }
+  std::transform(m_data.elements_begin(), m_data.elements_end(), M.m_data.elements_begin(),
+                 m_data.elements_begin(), std::plus<>());
+  return *this;
+}
+
+template <class T> Matrix<T> Matrix<T>::operator+(const Matrix &M) const
+{
+  Matrix tmp(*this);
+  tmp += M;
+  return tmp;
+}
+
+template <class T> Matrix<T> &Matrix<T>::operator-=(const Matrix &M)
+{
+  if (!this->CheckBounds(M)) {
+    throw DimensionException();
+  }
+  std::transform(m_data.elements_begin(), m_data.elements_end(), M.m_data.elements_begin(),
+                 m_data.elements_begin(), std::minus<>());
+  return *this;
+}
+
+template <class T> Matrix<T> Matrix<T>::operator-(const Matrix &M) const
+{
+  Matrix tmp(*this);
+  tmp -= M;
+  return tmp;
+}
+
+template <class T> Matrix<T> Matrix<T>::operator-() const
+{
+  Matrix tmp(*this);
+  std::transform(tmp.m_data.elements_begin(), tmp.m_data.elements_end(),
+                 tmp.m_data.elements_begin(), std::negate<>());
+  return tmp;
+}
+
+template <class T> Matrix<T> &Matrix<T>::operator*=(const T &c)
+{
+  std::transform(m_data.elements_begin(), m_data.elements_end(), m_data.elements_begin(),
+                 [&c](const T &v) { return v * c; });
+  return *this;
+}
+
+template <class T> Matrix<T> Matrix<T>::operator*(const T &c) const
+{
+  Matrix tmp(*this);
+  tmp *= c;
+  return tmp;
+}
+
+template <class T> Matrix<T> &Matrix<T>::operator/=(const T &c)
+{
+  if (c == static_cast<T>(0)) {
+    throw ZeroDivideException();
+  }
+  std::transform(m_data.elements_begin(), m_data.elements_end(), m_data.elements_begin(),
+                 [&c](const T &v) { return v / c; });
+  return *this;
+}
+
+template <class T> Matrix<T> Matrix<T>::operator/(const T &c) const
+{
+  Matrix tmp(*this);
+  tmp /= c;
+  return tmp;
+}
 
 template <class T> template <class V> void Matrix<T>::GetColumn(int col, V &v) const
 {

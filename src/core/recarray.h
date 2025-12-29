@@ -144,6 +144,19 @@ public:
   template <class Vector> void GetColumn(int, Vector &) const;
   template <class Vector> void SetColumn(int, const Vector &);
   //@}
+
+  /// @name Iteration
+  /// @{
+  using element_iterator = typename std::vector<T>::iterator;
+  using const_element_iterator = typename std::vector<T>::const_iterator;
+
+  element_iterator elements_begin() noexcept { return m_storage.begin(); }
+  element_iterator elements_end() noexcept { return m_storage.end(); }
+  const_element_iterator elements_begin() const noexcept { return m_storage.begin(); }
+  const_element_iterator elements_end() const noexcept { return m_storage.end(); }
+  const_element_iterator elements_cbegin() const noexcept { return m_storage.cbegin(); }
+  const_element_iterator elements_cend() const noexcept { return m_storage.cend(); }
+  /// @}
 };
 
 //------------------------------------------------------------------------
