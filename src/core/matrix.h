@@ -443,47 +443,54 @@ template <class T> T Matrix<T>::Determinant() const
   if (!IsSquare()) {
     throw DimensionException();
   }
+  const int rmin = MinRow();
+  const int rmax = MaxRow();
 
-  T factor = (T)1;
   Matrix M(*this);
 
-  for (int row = MinRow(); row <= MaxRow(); row++) {
-
+  for (int row = rmin; row <= rmax; ++row) {
     // Experience (as of 3/22/99) suggests that, in the interest of
     // numerical stability, it might be best to do Gaussian
     // elimination with respect to the row (of those feasible)
     // whose entry has the largest absolute value.
     int swap_row = row;
-    for (int i = row + 1; i <= MaxRow(); i++) {
-      if (abs(M(i, row)) > abs(M(swap_row, row))) {
+    T max = abs(M(row, row));
+    for (int i = row + 1; i <= rmax; ++i) {
+      const T v = abs(M(i, row));
+      if (v > max) {
+        max = v;
         swap_row = i;
       }
     }
 
     if (swap_row != row) {
       M.SwitchRows(row, swap_row);
-      for (int j = MinCol(); j <= MaxCol(); j++) {
-        M(row, j) *= (T)-1;
+      auto pivot_row = M.m_data.GetRowView(row);
+      for (auto &v : pivot_row) {
+        v = -v;
       }
     }
 
-    if (M(row, row) == (T)0) {
-      return (T)0;
+    if (M(row, row) == T{0}) {
+      return T{0};
     }
-
     // now do row operations to clear the row'th column
     // below the diagonal
-    for (int row1 = row + 1; row1 <= MaxRow(); row1++) {
-      factor = -M(row1, row) / M(row, row);
-      for (int i = MinCol(); i <= MaxCol(); i++) {
-        M(row1, i) += M(row, i) * factor;
+    auto pivot_row = M.m_data.GetRowView(row);
+    for (int row1 = row + 1; row1 <= rmax; ++row1) {
+      auto elim_row = M.m_data.GetRowView(row1);
+      const T factor = -elim_row[row] / pivot_row[row];
+      auto pivot_it = pivot_row.begin();
+      auto elim_it = elim_row.begin();
+      for (; pivot_it != pivot_row.end(); ++pivot_it, ++elim_it) {
+        *elim_it += (*pivot_it) * factor;
       }
     }
   }
 
   // finally we multiply the diagonal elements
-  T det = (T)1;
-  for (int row = MinRow(); row <= MaxRow(); row++) {
+  T det = T{1};
+  for (int row = rmin; row <= rmax; ++row) {
     det *= M(row, row);
   }
   return det;
