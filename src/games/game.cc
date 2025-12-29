@@ -182,6 +182,24 @@ GameRep::~GameRep()
   }
 }
 
+void GameRep::IndexStrategies() const
+{
+  const size_t n = m_players.size();
+  m_pureStrategies.m_radices.resize(n);
+  m_pureStrategies.m_strides.resize(n);
+
+  long stride = 1L;
+  for (size_t i = 0; i < n; ++i) {
+    const auto &player = m_players[i];
+    m_pureStrategies.m_strides[i] = stride;
+    m_pureStrategies.m_radices[i] = player->m_strategies.size();
+    for (auto [st, strategy] : enumerate(player->m_strategies)) {
+      strategy->m_number = st + 1;
+    }
+    stride *= m_pureStrategies.m_radices[i];
+  }
+}
+
 //------------------------------------------------------------------------
 //                     GameRep: Writing data files
 //------------------------------------------------------------------------
@@ -403,6 +421,16 @@ template <class T> T MixedStrategyProfile<T>::GetMaxRegret() const
   CheckVersion();
   return maximize_function(GetGame()->GetPlayers(),
                            [this](const auto &player) -> T { return this->GetRegret(player); });
+}
+
+MixedStrategyProfile<Rational> PureStrategyProfileRep::ToMixedStrategyProfile() const
+{
+  auto temp = m_game->NewMixedStrategyProfile(Rational(0));
+  temp = Rational(0);
+  for (const auto &player : m_game->GetPlayers()) {
+    temp[GetStrategy(player)] = Rational(1);
+  }
+  return temp;
 }
 
 template class MixedStrategyProfileRep<double>;

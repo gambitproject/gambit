@@ -63,7 +63,7 @@ IndifferenceEquation(std::shared_ptr<VariableSpace> space, const StrategySupport
 {
   Polynomial<double> equation(space);
 
-  for (auto iter : StrategyContingencies(support, {s1})) {
+  for (const auto &iter : StrategyContingencies(support.RestrictTo(s1))) {
     Polynomial<double> term(space, 1);
     for (auto player : support.GetGame()->GetPlayers()) {
       if (player != s1->GetPlayer()) {
