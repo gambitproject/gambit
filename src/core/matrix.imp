@@ -35,7 +35,7 @@ template <class T> void Matrix<T>::CMultiply(const Vector<T> &in, Vector<T> &out
   }
   for (int i = MinRow(); i <= MaxRow(); ++i) {
     auto row = m_data.GetRowView(i);
-    out[i] = std::inner_product(row.begin(), row.end(), in.begin(), static_cast<T>(0));
+    out[i] = std::inner_product(row.begin(), row.end(), in.begin(), T{0});
   }
 }
 
@@ -44,14 +44,13 @@ template <class T> Matrix<T> Matrix<T>::operator*(const Matrix<T> &M) const
   if (MinCol() != M.MinRow() || MaxCol() != M.MaxRow()) {
     throw DimensionException();
   }
-
   Matrix<T> tmp(MinRow(), MaxRow(), M.MinCol(), M.MaxCol());
-  Vector<T> column(M.MinRow(), M.MaxRow());
-  Vector<T> result(MinRow(), MaxRow());
-  for (int j = M.MinCol(); j <= M.MaxCol(); j++) {
-    M.GetColumn(j, column);
-    CMultiply(column, result);
-    tmp.SetColumn(j, result);
+  for (int i = MinRow(); i <= MaxRow(); ++i) {
+    auto row = m_data.GetRowView(i);
+    for (int j = M.MinCol(); j <= M.MaxCol(); ++j) {
+      auto col = M.m_data.GetColumnView(j);
+      tmp(i, j) = std::inner_product(row.begin(), row.end(), col.begin(), T{0});
+    }
   }
   return tmp;
 }
@@ -73,12 +72,13 @@ template <class T> void Matrix<T>::RMultiply(const Vector<T> &in, Vector<T> &out
     throw DimensionException();
   }
 
-  out = (T)0;
-
+  out = T{0};
   for (int i = MinRow(); i <= MaxRow(); ++i) {
-    T k = in[i];
-    for (int j = MinCol(); j <= MaxCol(); ++j) {
-      out[j] += (*this)(i, j) * k;
+    auto row = m_data.GetRowView(i);
+    const T k = in[i];
+    auto dst = out.begin();
+    for (auto it = row.begin(); it != row.end(); ++it, ++dst) {
+      *dst += (*it) * k;
     }
   }
 }
