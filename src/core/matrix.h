@@ -23,6 +23,8 @@
 #ifndef GAMBIT_CORE_MATRIX_H
 #define GAMBIT_CORE_MATRIX_H
 
+#include <functional>
+
 #include "recarray.h"
 #include "vector.h"
 #include "rational.h"
@@ -98,10 +100,13 @@ public:
   template <class V> void SetColumn(int j, const V &);
   template <class V> void GetRow(int row, V &) const;
   template <class V> void SetRow(int row, const V &);
-  // vector helpers used internally
-  template <class V> bool CheckRow(const V &v) const { return m_data.CheckRow(v); }
-  template <class V> bool CheckColumn(const V &v) const { return m_data.CheckColumn(v); }
-  bool CheckBounds(const Matrix &M) const { return m_data.CheckBounds(M.m_data); }
+
+  /// @brief Test whether a vector conforms to the matrix row shape
+  template <class V> bool ConformsToRow(const V &v) const { return m_data.ConformsToRow(v); }
+  /// @brief Test whether a vector conforms to the matrix column shape
+  template <class V> bool ConformsToColumn(const V &v) const { return m_data.ConformsToColumn(v); }
+  /// @brief Test whether another matrix conforms to the shape of this matrix
+  bool ConformsTo(const Matrix &M) const { return m_data.ConformsTo(M.m_data); }
   ///@}
 
   /// @name Comparison operators
@@ -219,7 +224,7 @@ template <class T> Matrix<T> &Matrix<T>::operator=(const T &c)
 
 template <class T> bool Matrix<T>::operator==(const Matrix &M) const
 {
-  if (!this->CheckBounds(M)) {
+  if (!this->ConformsTo(M)) {
     throw DimensionException();
   }
   return std::equal(m_data.elements_begin(), m_data.elements_end(), M.m_data.elements_begin());
@@ -233,7 +238,7 @@ template <class T> bool Matrix<T>::operator==(const T &c) const
 
 template <class T> Matrix<T> &Matrix<T>::operator+=(const Matrix &M)
 {
-  if (!this->CheckBounds(M)) {
+  if (!this->ConformsTo(M)) {
     throw DimensionException();
   }
   std::transform(m_data.elements_begin(), m_data.elements_end(), M.m_data.elements_begin(),
@@ -243,7 +248,7 @@ template <class T> Matrix<T> &Matrix<T>::operator+=(const Matrix &M)
 
 template <class T> Matrix<T> &Matrix<T>::operator-=(const Matrix &M)
 {
-  if (!this->CheckBounds(M)) {
+  if (!this->ConformsTo(M)) {
     throw DimensionException();
   }
   std::transform(m_data.elements_begin(), m_data.elements_end(), M.m_data.elements_begin(),
@@ -268,7 +273,7 @@ template <class T> Matrix<T> &Matrix<T>::operator*=(const T &c)
 
 template <class T> Matrix<T> &Matrix<T>::operator/=(const T &c)
 {
-  if (c == static_cast<T>(0)) {
+  if (c == T{0}) {
     throw ZeroDivideException();
   }
   std::transform(m_data.elements_begin(), m_data.elements_end(), m_data.elements_begin(),
@@ -285,7 +290,7 @@ template <class T> template <class V> void Matrix<T>::GetColumn(int col, V &v) c
   if (col < MinCol() || col > MaxCol()) {
     throw std::out_of_range("Index out of range in Matrix::GetColumn");
   }
-  if (!CheckColumn(v)) {
+  if (!ConformsToColumn(v)) {
     throw DimensionException();
   }
   for (int i = MinRow(); i <= MaxRow(); ++i) {
@@ -298,7 +303,7 @@ template <class T> template <class V> void Matrix<T>::SetColumn(int col, const V
   if (col < MinCol() || col > MaxCol()) {
     throw std::out_of_range("Index out of range in Matrix::SetColumn");
   }
-  if (!CheckColumn(v)) {
+  if (!ConformsToColumn(v)) {
     throw DimensionException();
   }
   for (int i = MinRow(); i <= MaxRow(); ++i) {
@@ -311,7 +316,7 @@ template <class T> template <class V> void Matrix<T>::GetRow(int row, V &v) cons
   if (row < MinRow() || row > MaxRow()) {
     throw std::out_of_range("Index out of range in Matrix::GetRow");
   }
-  if (!CheckRow(v)) {
+  if (!ConformsToRow(v)) {
     throw DimensionException();
   }
   for (int j = MinCol(); j <= MaxCol(); ++j) {
@@ -324,7 +329,7 @@ template <class T> template <class V> void Matrix<T>::SetRow(int row, const V &v
   if (row < MinRow() || row > MaxRow()) {
     throw std::out_of_range("Index out of range in Matrix::SetRow");
   }
-  if (!CheckRow(v)) {
+  if (!ConformsToRow(v)) {
     throw DimensionException();
   }
   for (int j = MinCol(); j <= MaxCol(); ++j) {
@@ -338,7 +343,7 @@ template <class T> template <class V> void Matrix<T>::SetRow(int row, const V &v
 
 template <class T> void Matrix<T>::CMultiply(const Vector<T> &p_input, Vector<T> &p_output) const
 {
-  if (!this->CheckRow(p_input) || !this->CheckColumn(p_output)) {
+  if (!this->ConformsToRow(p_input) || !this->ConformsToColumn(p_output)) {
     throw DimensionException();
   }
   for (int i = MinRow(); i <= MaxRow(); ++i) {
@@ -349,7 +354,7 @@ template <class T> void Matrix<T>::CMultiply(const Vector<T> &p_input, Vector<T>
 
 template <class T> void Matrix<T>::RMultiply(const Vector<T> &p_input, Vector<T> &p_output) const
 {
-  if (!this->CheckColumn(p_input) || !this->CheckRow(p_output)) {
+  if (!this->ConformsToColumn(p_input) || !this->ConformsToRow(p_output)) {
     throw DimensionException();
   }
 
@@ -366,7 +371,7 @@ template <class T> void Matrix<T>::RMultiply(const Vector<T> &p_input, Vector<T>
 
 template <class T> Vector<T> Matrix<T>::operator*(const Vector<T> &v) const
 {
-  if (!this->CheckRow(v)) {
+  if (!this->ConformsToRow(v)) {
     throw DimensionException();
   }
   Vector<T> tmp(MinRow(), MaxRow());
@@ -575,7 +580,7 @@ template <class T> T Matrix<T>::Determinant() const
 /// @sa Matrix<T>::RMultiply
 template <class T> Vector<T> operator*(const Vector<T> &v, const Matrix<T> &M)
 {
-  if (!M.CheckColumn(v)) {
+  if (!M.ConformsToColumn(v)) {
     throw DimensionException();
   }
   Vector<T> tmp(M.MinCol(), M.MaxCol());

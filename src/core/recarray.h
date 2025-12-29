@@ -156,7 +156,7 @@ public:
   /// @name Range checking functions; returns true only if valid index/size
   //@{
   /// check array for same row and column boundaries
-  bool CheckBounds(const RectArray<T> &m) const
+  bool ConformsTo(const RectArray &m) const
   {
     return (m_minrow == m.m_minrow && m_maxrow == m.m_maxrow && m_mincol == m.m_mincol &&
             m_maxcol == m.m_maxcol);
@@ -164,14 +164,14 @@ public:
   /// check for correct row index
   bool CheckRow(const int row) const { return (m_minrow <= row && row <= m_maxrow); }
   /// check row vector for correct column boundaries
-  template <class V> bool CheckRow(const V &v) const
+  template <class V> bool ConformsToRow(const V &v) const
   {
     return v.front_index() == m_mincol && v.back_index() == m_maxcol;
   }
   /// check for correct column index
   bool CheckColumn(const int col) const { return (m_mincol <= col && col <= m_maxcol); }
   /// check column vector for correct row boundaries
-  template <class V> bool CheckColumn(const V &v) const
+  template <class V> bool ConformsToColumn(const V &v) const
   {
     return (v.front_index() == m_minrow && v.back_index() == m_maxrow);
   }
@@ -292,7 +292,7 @@ template <class T> template <class Vector> void RectArray<T>::GetRow(int row, Ve
   if (!CheckRow(row)) {
     throw std::out_of_range("Index out of range in RectArray");
   }
-  if (!CheckRow(v)) {
+  if (!ConformsToRow(v)) {
     throw DimensionException();
   }
   const size_t base = index(row, m_mincol);
@@ -310,7 +310,7 @@ template <class T> template <class Vector> void RectArray<T>::GetColumn(int col,
   if (!CheckColumn(col)) {
     throw std::out_of_range("Index out of range in RectArray");
   }
-  if (!CheckColumn(v)) {
+  if (!ConformsToColumn(v)) {
     throw DimensionException();
   }
   for (int r = m_minrow; r <= m_maxrow; ++r) {
@@ -323,7 +323,7 @@ template <class T> template <class Vector> void RectArray<T>::SetColumn(int col,
   if (!CheckColumn(col)) {
     throw std::out_of_range("Index out of range in RectArray");
   }
-  if (!CheckColumn(v)) {
+  if (!ConformsToColumn(v)) {
     throw DimensionException();
   }
   for (int r = m_minrow; r <= m_maxrow; ++r) {
