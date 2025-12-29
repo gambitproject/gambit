@@ -53,9 +53,9 @@ inline std::list<MixedStrategyProfile<Rational>> EnumPureStrategySolve(
         "Computing equilibria of games with imperfect recall is not supported.");
   }
   std::list<MixedStrategyProfile<Rational>> solutions;
-  for (auto citer : StrategyContingencies(p_game)) {
-    if (IsNash(citer)) {
-      solutions.push_back(citer->ToMixedStrategyProfile());
+  for (const auto &profile : StrategyContingencies(p_game)) {
+    if (IsNash(profile)) {
+      solutions.push_back(profile->ToMixedStrategyProfile());
       p_onEquilibrium(solutions.back(), "NE");
     }
   }
