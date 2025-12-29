@@ -355,78 +355,82 @@ template <class T> Matrix<T> Matrix<T>::Inverse() const
   if (!IsSquare()) {
     throw DimensionException();
   }
+  const int rmin = MinRow();
+  const int rmax = MaxRow();
+  const int cmin = MinCol();
+  const int cmax = MaxCol();
 
   Matrix copy(*this);
-  Matrix inv(MaxRow(), MaxRow());
+  Matrix inv(rmin, rmax, cmin, cmax);
+
+  inv = T{0};
 
   // initialize inverse matrix and prescale row vectors
-  for (int i = MinRow(); i <= MaxRow(); i++) {
-    T max = (T)0;
-    for (int j = MinCol(); j <= MaxCol(); j++) {
-      T abs = copy(i, j);
-      if (abs < (T)0) {
-        abs = -abs;
-      }
-      if (abs > max) {
-        max = abs;
-      }
-    }
+  for (int i = rmin; i <= rmax; ++i) {
+    auto copy_row = copy.m_data.GetRowView(i);
+    auto inv_row = inv.m_data.GetRowView(i);
 
-    if (max == (T)0) {
+    T max = maximize_function(copy_row, [](const T &v) { return abs(v); });
+    if (max == T{0}) {
       throw SingularMatrixException();
     }
-
-    T scale = (T)1 / max;
-    for (int j = MinCol(); j <= MaxCol(); j++) {
-      copy(i, j) *= scale;
-      if (i == j) {
-        inv(i, j) = scale;
-      }
-      else {
-        inv(i, j) = (T)0;
-      }
+    const T scale = T{1} / max;
+    for (auto &v : copy_row) {
+      v *= scale;
     }
+    inv_row[i] = scale;
   }
 
-  for (int i = MinCol(); i <= MaxCol(); i++) {
+  for (int i = cmin; i <= cmax; ++i) {
     // find pivot row
-    T max = copy(i, i);
-    if (max < (T)0) {
-      max = -max;
-    }
+    auto col_i = copy.m_data.GetColumnView(i);
+    T max = abs(col_i[i]);
     int row = i;
-    for (int j = i + 1; j <= MaxRow(); j++) {
-      T abs = copy(j, i);
-      if (abs < (T)0) {
-        abs = -abs;
-      }
-      if (abs > max) {
-        max = abs;
+    for (int j = i + 1; j <= rmax; ++j) {
+      const T v = abs(col_i[j]);
+      if (v > max) {
+        max = v;
         row = j;
       }
     }
 
-    if (max <= (T)0) {
+    if (max <= T{0}) {
       throw SingularMatrixException();
     }
 
     copy.SwitchRows(i, row);
     inv.SwitchRows(i, row);
     // scale pivot row
-    T factor = (T)1 / copy(i, i);
-    for (int k = MinCol(); k <= MaxCol(); k++) {
-      copy(i, k) *= factor;
-      inv(i, k) *= factor;
+    T factor = T{1} / copy(i, i);
+    auto copy_row = copy.m_data.GetRowView(i);
+    auto inv_row = inv.m_data.GetRowView(i);
+    auto copy_it = copy_row.begin();
+    auto inv_it = inv_row.begin();
+    for (; copy_it != copy_row.end(); ++copy_it, ++inv_it) {
+      *copy_it *= factor;
+      *inv_it *= factor;
     }
 
     // reduce other rows
-    for (int j = MinRow(); j <= MaxRow(); j++) {
-      if (j != i) {
-        T mult = copy(j, i);
-        for (int k = MinCol(); k <= MaxCol(); k++) {
-          copy(j, k) -= copy(i, k) * mult;
-          inv(j, k) -= inv(i, k) * mult;
-        }
+    auto pivot_copy_row = copy.m_data.GetRowView(i);
+    auto pivot_inv_row = inv.m_data.GetRowView(i);
+
+    for (int j = rmin; j <= rmax; ++j) {
+      if (j == i) {
+        continue;
+      }
+      auto row_copy = copy.m_data.GetRowView(j);
+      auto row_inv = inv.m_data.GetRowView(j);
+      const T mult = row_copy[i];
+      auto pivot_copy_it = pivot_copy_row.begin();
+      auto pivot_inv_it = pivot_inv_row.begin();
+      auto row_copy_it = row_copy.begin();
+      auto row_inv_it = row_inv.begin();
+
+      for (; pivot_copy_it != pivot_copy_row.end();
+           ++pivot_copy_it, ++pivot_inv_it, ++row_copy_it, ++row_inv_it) {
+        *row_copy_it -= (*pivot_copy_it) * mult;
+        *row_inv_it -= (*pivot_inv_it) * mult;
       }
     }
   }

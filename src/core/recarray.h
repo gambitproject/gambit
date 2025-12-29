@@ -83,7 +83,9 @@ public:
     int MinIndex() const { return m_array->MinCol(); }
     int MaxIndex() const { return m_array->MaxCol(); }
     iterator begin() { return iterator(this, MinIndex()); }
+    iterator begin() const { return iterator(const_cast<RowView *>(this), MinIndex()); }
     iterator end() { return iterator(this, MaxIndex() + 1); }
+    iterator end() const { return iterator(const_cast<RowView *>(this), MaxIndex() + 1); }
   };
 
   class ColumnView {
@@ -127,7 +129,9 @@ public:
     int MinIndex() const { return m_array->MinRow(); }
     int MaxIndex() const { return m_array->MaxRow(); }
     iterator begin() { return iterator(this, MinIndex()); }
+    iterator begin() const { return iterator(const_cast<ColumnView *>(this), MinIndex()); }
     iterator end() { return iterator(this, MaxIndex() + 1); }
+    iterator end() const { return iterator(const_cast<ColumnView *>(this), MaxIndex() + 1); }
   };
 
   /// @name Lifecycle
