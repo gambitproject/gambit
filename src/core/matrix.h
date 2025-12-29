@@ -138,8 +138,6 @@ public:
   /// @name Other operations
   //@{
   Matrix Transpose() const;
-  /// Set matrix to identity matrix
-  void MakeIdent();
   void Pivot(int, int);
   //@}
 
@@ -346,23 +344,6 @@ template <class T> Matrix<T> Matrix<T>::Transpose() const
 // ----------------------------------------------------------------------------
 // Implementation of additional operations
 // ----------------------------------------------------------------------------
-
-template <class T> void Matrix<T>::MakeIdent()
-{
-  if (!IsSquare()) {
-    throw DimensionException();
-  }
-  for (int i = MinRow(); i <= MaxRow(); i++) {
-    for (int j = MinCol(); j <= MaxCol(); j++) {
-      if (i == j) {
-        (*this)(i, j) = (T)1;
-      }
-      else {
-        (*this)(i, j) = (T)0;
-      }
-    }
-  }
-}
 
 template <class T> void Matrix<T>::Pivot(int row, int col)
 {
