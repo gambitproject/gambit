@@ -35,12 +35,21 @@ public:
   ~SingularMatrixException() noexcept override = default;
 };
 
+/// @brief Dense rectangular matrix with arbitrary integer index ranges.
+///
+/// @tparam T Scalar element type. Must support arithmetic operations,
+///           comparison with zero, and abs(T).
+///
+/// @note Inverse and Determinant use legacy Gaussian elimination algorithms.
+///       They are known not to be numerically optimal for near-singular matrices.
+///       Current behaviour is temporarily preserved for historical compatibility.
 template <class T> class Matrix {
   RectArray<T> m_data;
 
 public:
   /// @name Lifecycle
-  //@{
+  /// Constructors, assignment, and destruction
+  ///@{
   Matrix() = default;
   Matrix(unsigned int rows, unsigned int cols) : m_data(rows, cols) {}
   Matrix(unsigned int rows, unsigned int cols, int minrows)
@@ -55,23 +64,35 @@ public:
   Matrix &operator=(const Matrix &) = default;
   Matrix &operator=(Matrix &&) noexcept = default;
   Matrix &operator=(const T &);
-  //@}
+  ///@}
 
-  // element access
+  /// @brief Access matrix element at (row, column) with bounds checking
+  ///
+  /// @param r Row index
+  /// @param c Column index
+  /// @throws std::out_of_range on invalid index.
   T &operator()(int r, int c) { return m_data(r, c); }
+  /// @copydoc operator(int, int)
   const T &operator()(int r, int c) const { return m_data(r, c); }
 
-  // bounds / dimensions
+  /// @brief Lowest valid row index
   int MinRow() const { return m_data.MinRow(); }
+  /// @brief Highest valid row index
   int MaxRow() const { return m_data.MaxRow(); }
+  /// @brief Lowest valid column index
   int MinCol() const { return m_data.MinCol(); }
+  /// @brief Highest valid column index
   int MaxCol() const { return m_data.MaxCol(); }
+  /// @brief Number of rows in the matrix
   int NumRows() const { return m_data.NumRows(); }
+  /// @brief Number of columns in the matrix
   int NumColumns() const { return m_data.NumColumns(); }
 
+  /// @brief Check if the matrix is a square matrix (num rows == num columns)
   bool IsSquare() const { return MinRow() == MinCol() && MaxRow() == MaxCol(); }
 
-  // row ops used internally
+  /// @name Row and column helpers
+  ///@{
   void SwitchRows(int i, int j) { m_data.SwitchRows(i, j); }
   template <class V> void GetColumn(int j, V &) const;
   template <class V> void SetColumn(int j, const V &);
@@ -81,17 +102,24 @@ public:
   template <class V> bool CheckRow(const V &v) const { return m_data.CheckRow(v); }
   template <class V> bool CheckColumn(const V &v) const { return m_data.CheckColumn(v); }
   bool CheckBounds(const Matrix &M) const { return m_data.CheckBounds(M.m_data); }
+  ///@}
 
   /// @name Comparison operators
-  //@{
+  /// Element-wise comparisons
+  ///@{
   bool operator==(const Matrix &) const;
   bool operator!=(const Matrix &M) const { return !(*this == M); }
   bool operator==(const T &) const;
   bool operator!=(const T &c) const { return !(*this == c); }
-  //@}
+  ///@}
 
-  /// @name Additive operators
-  //@{
+  /// @name Arithmetic operators
+  /// Element-wise and scalar arithmetic
+  ///
+  /// All matrix-matrix operations require identical row and column bounds and
+  /// operate component-by-component.  Scalar operations apply uniformly to all
+  /// elements.
+  ///@{
   Matrix operator+(const Matrix &M) const
   {
     Matrix tmp(*this);
@@ -108,16 +136,7 @@ public:
   Matrix &operator-=(const Matrix &);
 
   Matrix operator-() const;
-  //@}
 
-  /// @name Multiplicative operators
-  //@{
-  /// "in-place" column multiply
-  void CMultiply(const Vector<T> &, Vector<T> &) const;
-  /// "in-place" row (transposed) multiply
-  void RMultiply(const Vector<T> &, Vector<T> &) const;
-  Matrix operator*(const Matrix &) const;
-  Vector<T> operator*(const Vector<T> &) const;
   Matrix operator*(const T &c) const
   {
     Matrix tmp(*this);
@@ -133,15 +152,59 @@ public:
     return tmp;
   }
   Matrix &operator/=(const T &);
-  //@
+  ///@}
+
+  /// @name Linear algebra operations
+  /// Some primitives for doing linear algebra.
+  ///@{
+
+  /// @brief Multiply a matrix by a column vector
+  ///
+  /// Computes p_output = (*this) * p_input, where @p p_input is interpreted
+  /// as a column vector and @p p_output receives the resulting column vector.
+  ///
+  /// @param p_input Input column vector
+  /// @param p_output Output column vector
+  /// @throws DimensionException if dimensions are incompatible
+  void CMultiply(const Vector<T> &p_input, Vector<T> &p_output) const;
+
+  /// @brief Multiply a row vector by the matrix
+  ///
+  /// Computes p_output = p_input * (*this), where @p p_input is interpreted
+  /// as a row vector and @p p_output receives the resulting row vector.
+  ///
+  /// @param p_input Input row vector
+  /// @param p_output Output row vector
+  /// @throws DimensionException if dimensions are incompatible
+  void RMultiply(const Vector<T> &p_input, Vector<T> &p_output) const;
+
+  /// @brief Multiply matrix by a column vector.
+  ///
+  /// Equivalent to CMultiply(v, result)
+  ///
+  /// @param v Input column vector
+  /// @return Resulting column vector
+  /// @throws DimensionException if dimensions are incompatible
+  Vector<T> operator*(const Vector<T> &v) const;
+
+  /// @brief Matrix-matrix multiplication
+  ///
+  /// Computes the product (*this) * M; the number of columns of this matrix
+  /// must equal the number of rows in @param M .
+  ///
+  /// @param M Matrix to multiply this with
+  /// @return Resulting matrix
+  /// @throws DimensionException if dimensions are incompatible
+  Matrix operator*(const Matrix &M) const;
+
+  ///@
 
   /// @name Other operations
-  //@{
+  ///@{
   Matrix Transpose() const;
-  //@}
-
   Matrix Inverse() const;
   T Determinant() const;
+  ///@}
 };
 
 template <class T> Matrix<T> &Matrix<T>::operator=(const T &c)
@@ -273,28 +336,28 @@ template <class T> template <class V> void Matrix<T>::SetRow(int row, const V &v
 // Implementation of linear algebra concepts
 // ----------------------------------------------------------------------------
 
-template <class T> void Matrix<T>::CMultiply(const Vector<T> &in, Vector<T> &out) const
+template <class T> void Matrix<T>::CMultiply(const Vector<T> &p_input, Vector<T> &p_output) const
 {
-  if (!this->CheckRow(in) || !this->CheckColumn(out)) {
+  if (!this->CheckRow(p_input) || !this->CheckColumn(p_output)) {
     throw DimensionException();
   }
   for (int i = MinRow(); i <= MaxRow(); ++i) {
     auto row = m_data.GetRowView(i);
-    out[i] = std::inner_product(row.begin(), row.end(), in.begin(), T{0});
+    p_output[i] = std::inner_product(row.begin(), row.end(), p_input.begin(), T{0});
   }
 }
 
-template <class T> void Matrix<T>::RMultiply(const Vector<T> &in, Vector<T> &out) const
+template <class T> void Matrix<T>::RMultiply(const Vector<T> &p_input, Vector<T> &p_output) const
 {
-  if (!this->CheckColumn(in) || !this->CheckRow(out)) {
+  if (!this->CheckColumn(p_input) || !this->CheckRow(p_output)) {
     throw DimensionException();
   }
 
-  out = T{0};
+  p_output = T{0};
   for (int i = MinRow(); i <= MaxRow(); ++i) {
     auto row = m_data.GetRowView(i);
-    const T k = in[i];
-    auto dst = out.begin();
+    const T k = p_input[i];
+    auto dst = p_output.begin();
     for (auto it = row.begin(); it != row.end(); ++it, ++dst) {
       *dst += (*it) * k;
     }
@@ -359,6 +422,7 @@ template <class T> Matrix<T> Matrix<T>::Inverse() const
   const int rmax = MaxRow();
   const int cmin = MinCol();
   const int cmax = MaxCol();
+  using Gambit::abs;
 
   Matrix copy(*this);
   Matrix inv(rmin, rmax, cmin, cmax);
@@ -445,6 +509,7 @@ template <class T> T Matrix<T>::Determinant() const
   }
   const int rmin = MinRow();
   const int rmax = MaxRow();
+  using Gambit::abs;
 
   Matrix M(*this);
 
@@ -500,6 +565,14 @@ template <class T> T Matrix<T>::Determinant() const
 // Implementation of operators
 // ----------------------------------------------------------------------------
 
+/// @brief Multiple a row vector by a matrix
+///
+/// Computes v * M, where @param v is interpreted as a row vector
+///
+/// @param v The row vector
+/// @param M The matrix to multiply with
+/// @throws DimensionException if dimensions are incompatible
+/// @sa Matrix<T>::RMultiply
 template <class T> Vector<T> operator*(const Vector<T> &v, const Matrix<T> &M)
 {
   if (!M.CheckColumn(v)) {
