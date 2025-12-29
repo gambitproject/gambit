@@ -81,12 +81,6 @@ public:
   template <class V> bool CheckColumn(const V &v) const { return m_data.CheckColumn(v); }
   bool CheckBounds(const Matrix &M) const { return m_data.CheckBounds(M.m_data); }
 
-  /// @name Extracting rows and columns
-  //@{
-  Vector<T> Row(int) const;
-  Vector<T> Column(int) const;
-  //@}
-
   /// @name Comparison operators
   //@{
   bool operator==(const Matrix &) const;

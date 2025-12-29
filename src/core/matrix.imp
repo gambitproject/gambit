@@ -303,25 +303,6 @@ template <class T> bool Matrix<T>::operator==(const T &s) const
 
 template <class T> bool Matrix<T>::operator!=(const T &s) const { return !(*this == s); }
 
-// Information
-
-template <class T> Vector<T> Matrix<T>::Row(int i) const
-{
-  Vector<T> answer(MinCol(), MaxCol());
-  for (int j = MinCol(); j <= MaxCol(); j++) {
-    answer[j] = (*this)(i, j);
-  }
-  return answer;
-}
-
-template <class T> Vector<T> Matrix<T>::Column(int j) const
-{
-  Vector<T> answer(MinRow(), MaxRow());
-  for (int i = MinRow(); i <= MaxRow(); i++) {
-    answer[i] = (*this)(i, j);
-  }
-  return answer;
-}
 
 // more complex functions
 
