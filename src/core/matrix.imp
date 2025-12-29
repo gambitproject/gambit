@@ -33,16 +33,9 @@ template <class T> void Matrix<T>::CMultiply(const Vector<T> &in, Vector<T> &out
   if (!this->CheckRow(in) || !this->CheckColumn(out)) {
     throw DimensionException();
   }
-
   for (int i = MinRow(); i <= MaxRow(); ++i) {
-    T sum = (T)0;
-
-    auto src2 = in.begin();
-    for (int j = MinCol(); j <= MaxCol(); ++j) {
-      sum += (*this)(i, j) * *(src2++);
-    }
-
-    out[i] = sum;
+    auto row = m_data.GetRowView(i);
+    out[i] = std::inner_product(row.begin(), row.end(), in.begin(), static_cast<T>(0));
   }
 }
 

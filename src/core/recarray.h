@@ -42,6 +42,94 @@ protected:
   }
 
 public:
+  class RowView {
+    RectArray *m_array;
+    int m_row;
+
+  public:
+    class iterator {
+      RowView *m_view;
+      int m_col;
+
+    public:
+      using iterator_category = std::forward_iterator_tag;
+      using value_type = T;
+      using difference_type = int;
+      using pointer = T *;
+      using reference = T &;
+
+      iterator(RowView *p_view, int p_col) : m_view(p_view), m_col(p_col) {}
+
+      reference operator*() const { return (*m_view)[m_col]; }
+
+      iterator &operator++()
+      {
+        ++m_col;
+        return *this;
+      }
+
+      bool operator==(const iterator &p_other) const { return m_col == p_other.m_col; }
+      bool operator!=(const iterator &p_other) const { return !(*this == p_other); }
+    };
+
+    RowView(RectArray &p_array, int p_row) : m_array(&p_array), m_row(p_row)
+    {
+      if (!m_array->CheckRow(m_row)) {
+        throw std::out_of_range("RowView");
+      }
+    }
+    T &operator[](int c) { return (*m_array)(m_row, c); }
+    const T &operator[](int c) const { return (*m_array)(m_row, c); }
+    int MinIndex() const { return m_array->MinCol(); }
+    int MaxIndex() const { return m_array->MaxCol(); }
+    iterator begin() { return iterator(this, MinIndex()); }
+    iterator end() { return iterator(this, MaxIndex() + 1); }
+  };
+
+  class ColumnView {
+    RectArray *m_array;
+    int m_col;
+
+  public:
+    class iterator {
+      ColumnView *m_view;
+      int m_row;
+
+    public:
+      using iterator_category = std::forward_iterator_tag;
+      using value_type = T;
+      using difference_type = int;
+      using pointer = T *;
+      using reference = T &;
+
+      iterator(ColumnView *p_view, int p_row) : m_view(p_view), m_row(p_row) {}
+
+      reference operator*() const { return (*m_view)[m_row]; }
+
+      iterator &operator++()
+      {
+        ++m_row;
+        return *this;
+      }
+
+      bool operator==(const iterator &p_other) const { return m_row == p_other.m_row; }
+      bool operator!=(const iterator &p_other) const { return !(*this == p_other); }
+    };
+
+    ColumnView(RectArray &p_array, int p_col) : m_array(&p_array), m_col(p_col)
+    {
+      if (!m_array->CheckColumn(m_col)) {
+        throw std::out_of_range("ColumnView");
+      }
+    }
+    T &operator[](int r) { return (*m_array)(r, m_col); }
+    const T &operator[](int r) const { return (*m_array)(r, m_col); }
+    int MinIndex() const { return m_array->MinRow(); }
+    int MaxIndex() const { return m_array->MaxRow(); }
+    iterator begin() { return iterator(this, MinIndex()); }
+    iterator end() { return iterator(this, MaxIndex() + 1); }
+  };
+
   /// @name Lifecycle
   //@{
   RectArray() : m_minrow(1), m_maxrow(0), m_mincol(1), m_maxcol(0), m_storage() {}
@@ -139,6 +227,10 @@ public:
       std::swap(m_storage[ai + k], m_storage[aj + k]);
     }
   }
+  RowView GetRowView(int r) { return RowView(*this, r); }
+  RowView GetRowView(int r) const { return RowView(const_cast<RectArray &>(*this), r); }
+  ColumnView GetColumnView(int c) { return ColumnView(*this, c); }
+  ColumnView GetColumnView(int c) const { return ColumnView(const_cast<RectArray &>(*this), c); }
   template <class Vector> void GetRow(int, Vector &) const;
 
   template <class Vector> void GetColumn(int, Vector &) const;
