@@ -138,7 +138,6 @@ public:
   /// @name Other operations
   //@{
   Matrix Transpose() const;
-  void Pivot(int, int);
   //@}
 
   Matrix Inverse() const;
@@ -333,8 +332,14 @@ template <class T> Matrix<T> Matrix<T>::Transpose() const
   Matrix tmp(MinCol(), MaxCol(), MinRow(), MaxRow());
 
   for (int i = MinRow(); i <= MaxRow(); ++i) {
-    for (int j = MinCol(); j <= MaxCol(); ++j) {
-      tmp(j, i) = (*this)(i, j);
+    auto src_row = m_data.GetRowView(i);
+    auto dst_col = tmp.m_data.GetColumnView(i);
+
+    auto src = src_row.begin();
+    auto dst = dst_col.begin();
+
+    for (; src != src_row.end(); ++src, ++dst) {
+      *dst = *src;
     }
   }
 
@@ -344,33 +349,6 @@ template <class T> Matrix<T> Matrix<T>::Transpose() const
 // ----------------------------------------------------------------------------
 // Implementation of additional operations
 // ----------------------------------------------------------------------------
-
-template <class T> void Matrix<T>::Pivot(int row, int col)
-{
-  if (!this->CheckRow(row) || !this->CheckColumn(col)) {
-    throw std::out_of_range("Index out of range in Matrix::Pivot");
-  }
-  if ((*this)(row, col) == (T)0) {
-    throw ZeroDivideException();
-  }
-
-  T inv = (T)1 / (*this)(row, col);
-
-  // scale pivot row
-  for (int j = MinCol(); j <= MaxCol(); ++j) {
-    (*this)(row, j) *= inv;
-  }
-
-  // eliminate column
-  for (int i = MinRow(); i <= MaxRow(); ++i) {
-    if (i != row) {
-      T mult = (*this)(i, col);
-      for (int j = MinCol(); j <= MaxCol(); ++j) {
-        (*this)(i, j) -= (*this)(row, j) * mult;
-      }
-    }
-  }
-}
 
 template <class T> Matrix<T> Matrix<T>::Inverse() const
 {
