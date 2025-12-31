@@ -865,6 +865,7 @@ void GameTreeRep::SortInfosets(GamePlayerRep *p_player)
       });
   RenumberInfosets(p_player);
 }
+
 void GameTreeRep::RenumberInfosets(GamePlayerRep *p_player)
 {
   std::for_each(
