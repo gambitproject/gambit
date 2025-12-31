@@ -234,8 +234,6 @@ def test_enumpoly_ordered_behavior(
     for eq, exp in zip(result.equilibria, mixed_behav_prof_data, strict=True):
         assert abs(eq.max_regret()) <= TOL
         expected = game.mixed_behavior_profile(rational=True, data=exp)
-        print(eq)
-        print(expected)
         for p in game.players:
             for i in p.infosets:
                 for a in i.actions:
