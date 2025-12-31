@@ -741,8 +741,6 @@ def test_lp_behavior_rational(game: gbt.Game, mixed_behav_prof_data: list):
     eq = result.equilibria[0]
     assert eq.max_regret() == 0
     expected = game.mixed_behavior_profile(rational=True, data=mixed_behav_prof_data)
-    print(eq)
-    print(expected)
     assert eq == expected
 
 
