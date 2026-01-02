@@ -252,6 +252,11 @@ template <class T> MixedBehaviorProfile<T> MixedBehaviorProfile<T>::ToFullSuppor
 
 template <class T> T MixedBehaviorProfile<T>::GetLiapValue() const
 {
+  return MixedStrategyProfile<T>(*this).GetLiapValue();
+}
+
+template <class T> T MixedBehaviorProfile<T>::GetAgentLiapValue() const
+{
   CheckVersion();
   EnsureRegrets();
   auto value = static_cast<T>(0);
@@ -350,6 +355,11 @@ template <class T> T MixedBehaviorProfile<T>::GetRegret(const GameInfoset &p_inf
 }
 
 template <class T> T MixedBehaviorProfile<T>::GetMaxRegret() const
+{
+  return MixedStrategyProfile<T>(*this).GetMaxRegret();
+}
+
+template <class T> T MixedBehaviorProfile<T>::GetAgentMaxRegret() const
 {
   return maximize_function(m_support.GetGame()->GetInfosets(),
                            [this](const auto &infoset) -> T { return this->GetRegret(infoset); });

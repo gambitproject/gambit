@@ -65,39 +65,65 @@ class NashComputationResult:
     parameters: dict = dataclasses.field(default_factory=dict)
 
 
-def enumpure_solve(game: libgbt.Game, use_strategic: bool = True) -> NashComputationResult:
+def enumpure_solve(game: libgbt.Game) -> NashComputationResult:
     """Compute all :ref:`pure-strategy Nash equilibria <gambit-enumpure>` of game.
+
+    .. versionchanged:: 16.5.0
+
+       `use_strategic` parameter removed.  The old behavior in the case
+        of `use_strategic=False` is now available as `enumpure_agent_solve`.
 
     Parameters
     ----------
     game : Game
         The game to compute equilibria in.
-    use_strategic : bool, default True
-        Whether to use the strategic form.  If False, computes all agent-form
-        pure-strategy equilibria, which consider only unilateral deviations at each
-        individual information set.
 
     Returns
     -------
     res : NashComputationResult
         The result represented as a ``NashComputationResult`` object.
+
+    See also
+    --------
+    enumpure_agent_solve
     """
-    if not game.is_tree or use_strategic:
-        return NashComputationResult(
-            game=game,
-            method="enumpure",
-            rational=True,
-            use_strategic=True,
-            equilibria=libgbt._enumpure_strategy_solve(game)
-        )
-    else:
-        return NashComputationResult(
-            game=game,
-            method="enumpure",
-            rational=True,
-            use_strategic=False,
-            equilibria=libgbt._enumpure_agent_solve(game)
-        )
+    return NashComputationResult(
+        game=game,
+        method="enumpure",
+        rational=True,
+        use_strategic=True,
+        equilibria=libgbt._enumpure_strategy_solve(game)
+    )
+
+
+def enumpure_agent_solve(game: libgbt.Game) -> NashComputationResult:
+    """Compute all :ref:`pure-strategy agent Nash equilibria <gambit-enumpure>` of game.
+
+    .. versioncadded:: 16.5.0
+
+       Formerly implemented as `enumpure_solve` with `use_strategic=False`.
+
+    Parameters
+    ----------
+    game : Game
+        The game to compute agent-Nash equilibria in.
+
+    Returns
+    -------
+    res : NashComputationResult
+        The result represented as a ``NashComputationResult`` object.
+
+    See also
+    --------
+    enumpure_solve
+    """
+    return NashComputationResult(
+        game=game,
+        method="enumpure-agent",
+        rational=True,
+        use_strategic=False,
+        equilibria=libgbt._enumpure_agent_solve(game)
+    )
 
 
 def enummixed_solve(
@@ -278,7 +304,7 @@ def lp_solve(
 
 
 def liap_solve(
-        start: libgbt.MixedStrategyProfileDouble | libgbt.MixedBehaviorProfileDouble,
+        start: libgbt.MixedStrategyProfileDouble,
         maxregret: float = 1.0e-4,
         maxiter: int = 1000
 ) -> NashComputationResult:
@@ -291,9 +317,14 @@ def liap_solve(
        instead of a game.  Implemented `maxregret` to specify acceptance criterion
        for approximation.
 
+    .. versionchanged:: 16.5.0
+
+       Computing agent Nash equilibria in the extensive game moved to
+       `liap_agent_solve` for clarity.
+
     Parameters
     ----------
-    start : MixedStrategyProfileDouble or MixedBehaviorProfileDouble
+    start : MixedStrategyProfileDouble
         The starting profile for function minimization.  Up to one equilibrium will be found
         from any starting profile, and the equilibrium found may (and generally will)
         depend on the initial profile chosen.
@@ -317,22 +348,60 @@ def liap_solve(
     """
     if maxregret <= 0.0:
         raise ValueError("liap_solve(): maxregret argument must be positive")
-    if isinstance(start, libgbt.MixedStrategyProfileDouble):
-        equilibria = libgbt._liap_strategy_solve(start,
-                                                 maxregret=maxregret, maxiter=maxiter)
-    elif isinstance(start, libgbt.MixedBehaviorProfileDouble):
-        equilibria = libgbt._liap_behavior_solve(start,
-                                                 maxregret=maxregret, maxiter=maxiter)
-    else:
-        raise TypeError(
-            f"liap_solve(): start must be a MixedStrategyProfile or MixedBehaviorProfile, "
-            f"not {start.__class__.__name__}"
-        )
+    equilibria = libgbt._liap_strategy_solve(start,
+                                             maxregret=maxregret, maxiter=maxiter)
     return NashComputationResult(
         game=start.game,
         method="liap",
         rational=False,
-        use_strategic=isinstance(start, libgbt.MixedStrategyProfileDouble),
+        use_strategic=True,
+        equilibria=equilibria,
+        parameters={"start": start, "maxregret": maxregret, "maxiter": maxiter}
+    )
+
+
+def liap_agent_solve(
+        start: libgbt.MixedBehaviorProfileDouble,
+        maxregret: float = 1.0e-4,
+        maxiter: int = 1000
+) -> NashComputationResult:
+    """Compute approximate agent Nash equilibria of a game using
+    :ref:`Lyapunov function minimization <gambit-liap>`.
+
+    .. versionadded:: 16.5.0
+
+       Moved from `liap_solve` passing a `MixedBehaviorProfileDouble` for additional
+       clarity in the solution concept computed.
+
+    Parameters
+    ----------
+    start : MixedBehaviorProfileDouble
+        The starting profile for function minimization.  Up to one equilibrium will be found
+        from any starting profile, and the equilibrium found may (and generally will)
+        depend on the initial profile chosen.
+
+    maxregret : float, default 1e-4
+        The acceptance criterion for approximate Nash equilibrium; the maximum
+        regret of any player must be no more than `maxregret` times the
+        difference of the maximum and minimum payoffs of the game
+
+    maxiter : int, default 1000
+        Maximum number of iterations in function minimization.
+
+    Returns
+    -------
+    res : NashComputationResult
+        The result represented as a ``NashComputationResult`` object.
+    """
+    if maxregret <= 0.0:
+        raise ValueError("liap_solve(): maxregret argument must be positive")
+    equilibria = libgbt._liap_behavior_solve(start,
+                                             maxregret=maxregret, maxiter=maxiter)
+    return NashComputationResult(
+        game=start.game,
+        method="liap-agent",
+        rational=False,
+        use_strategic=False,
         equilibria=equilibria,
         parameters={"start": start, "maxregret": maxregret, "maxiter": maxiter}
     )

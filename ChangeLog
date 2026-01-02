@@ -7,6 +7,10 @@
   to detect if an information is absent-minded.
 
 ### Changed
+- Terminology for agent-form calculations on extensive games has been clarified.  Mixed behavior profiles
+  distinguish "agent" regret and liap values from their strategy-based analogs.  Methods which compute
+  using the agent-form - specifically `enumpure_solve` and `liap_solve`, now clarify this by being named
+  differently in `pygambit`. (#617)
 - In the graphical interface, removed option to configure information set link drawing; information sets
   are always drawn and indicators are always drawn if an information set spans multiple levels.
 - In `pygambit`, indexing the children of a node by a string inteprets the string as an action label,

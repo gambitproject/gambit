@@ -5,7 +5,6 @@ import pathlib
 from abc import ABC, abstractmethod
 
 import numpy as np
-import pytest
 
 import pygambit as gbt
 
@@ -650,10 +649,6 @@ def create_kuhn_poker_efg(nonterm_outcomes: bool = False) -> gbt.Game:
         g = _create_kuhn_poker_efg_nonterm_outcomes()
     else:
         g = _create_kuhn_poker_efg_only_term_outcomes()
-
-    # Ensure infosets are in the same order as if game was written to efg and read back in
-    with pytest.warns(FutureWarning):
-        g.sort_infosets()
     return g
 
 
@@ -851,6 +846,105 @@ def create_reduction_both_players_payoff_ties_efg() -> gbt.Game:
     return g
 
 
+def create_problem_example_efg() -> gbt.Game:
+    g = gbt.Game.new_tree(players=["1", "2"], title="")
+    g.append_move(g.root, player="1", actions=["L", "R"])
+    # do the second child first on purpose to diverge from sort infosets order
+    g.append_move(g.root.children[1], "2", actions=["l2", "r2"])
+    g.append_move(g.root.children[0], "2", actions=["l1", "r1"])
+    g.set_outcome(g.root.children[0].children[0], outcome=g.add_outcome(payoffs=[5, -5]))
+    g.set_outcome(g.root.children[0].children[1], outcome=g.add_outcome(payoffs=[2, -2]))
+    g.set_outcome(g.root.children[1].children[0], outcome=g.add_outcome(payoffs=[-5, 5]))
+    g.set_outcome(g.root.children[1].children[1], outcome=g.add_outcome(payoffs=[-2, 2]))
+    return g
+
+
+def create_STOC_simplified() -> gbt.Game:
+    """
+    """
+    g = gbt.Game.new_tree(players=["1", "2"], title="")
+    g.append_move(g.root, g.players.chance, actions=["1", "2"])
+    g.set_chance_probs(g.root.infoset, [0.2, 0.8])
+    g.append_move(g.root.children[0], player="1", actions=["l", "r"])
+    g.append_move(g.root.children[1], player="1", actions=["c", "d"])
+    g.append_move(g.root.children[0].children[1], player="2", actions=["p", "q"])
+    g.append_move(
+        g.root.children[0].children[1].children[0], player="1", actions=["L", "R"]
+    )
+    g.append_infoset(
+        g.root.children[0].children[1].children[1],
+        g.root.children[0].children[1].children[0].infoset,
+    )
+    g.set_outcome(
+        g.root.children[0].children[0],
+        outcome=g.add_outcome(payoffs=[5, -5], label="l"),
+    )
+    g.set_outcome(
+        g.root.children[0].children[1].children[0].children[0],
+        outcome=g.add_outcome(payoffs=[10, -10], label="rpL"),
+    )
+    g.set_outcome(
+        g.root.children[0].children[1].children[0].children[1],
+        outcome=g.add_outcome(payoffs=[15, -15], label="rpR"),
+    )
+    g.set_outcome(
+        g.root.children[0].children[1].children[1].children[0],
+        outcome=g.add_outcome(payoffs=[20, -20], label="rqL"),
+    )
+    g.set_outcome(
+        g.root.children[0].children[1].children[1].children[1],
+        outcome=g.add_outcome(payoffs=[-5, 5], label="rqR"),
+    )
+    g.set_outcome(
+        g.root.children[1].children[0],
+        outcome=g.add_outcome(payoffs=[10, -10], label="c"),
+    )
+    g.set_outcome(
+        g.root.children[1].children[1],
+        outcome=g.add_outcome(payoffs=[20, -20], label="d"),
+    )
+    return g
+
+
+def create_STOC_simplified2() -> gbt.Game:
+    """
+    """
+    g = gbt.Game.new_tree(players=["1", "2"], title="")
+    g.append_move(g.root, g.players.chance, actions=["1", "2"])
+    g.set_chance_probs(g.root.infoset, [0.2, 0.8])
+    g.append_move(g.root.children[0], player="1", actions=["r"])
+    g.append_move(g.root.children[1], player="1", actions=["c"])
+    g.append_move(g.root.children[0].children[0], player="2", actions=["p", "q"])
+    g.append_move(
+        g.root.children[0].children[0].children[0], player="1", actions=["L", "R"]
+    )
+    g.append_infoset(
+        g.root.children[0].children[0].children[1],
+        g.root.children[0].children[0].children[0].infoset,
+    )
+    g.set_outcome(
+        g.root.children[0].children[0].children[0].children[0],
+        outcome=g.add_outcome(payoffs=[10, -10], label="rpL"),
+    )
+    g.set_outcome(
+        g.root.children[0].children[0].children[0].children[1],
+        outcome=g.add_outcome(payoffs=[15, -15], label="rpR"),
+    )
+    g.set_outcome(
+        g.root.children[0].children[0].children[1].children[0],
+        outcome=g.add_outcome(payoffs=[20, -20], label="rqL"),
+    )
+    g.set_outcome(
+        g.root.children[0].children[0].children[1].children[1],
+        outcome=g.add_outcome(payoffs=[-5, 5], label="rqR"),
+    )
+    g.set_outcome(
+        g.root.children[1].children[0],
+        outcome=g.add_outcome(payoffs=[10, -10], label="c"),
+    )
+    return g
+
+
 def create_seq_form_STOC_paper_zero_sum_2_player_efg() -> gbt.Game:
     """
     Example from
@@ -929,7 +1023,6 @@ def create_seq_form_STOC_paper_zero_sum_2_player_efg() -> gbt.Game:
     g.root.children[0].children[1].infoset.label = "01"
     g.root.children[2].children[0].infoset.label = "20"
     g.root.children[0].children[1].children[0].infoset.label = "010"
-
     return g
 
 
