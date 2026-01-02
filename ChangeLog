@@ -7,6 +7,12 @@
   to detect if an information is absent-minded.
 
 ### Changed
+- Labels for players, outcomes, strategies, and actions are expected to be non-empty and unique within
+  the relevant scope (games for players and outcomes, players for strategies, and information sets for
+  actions).  `pygambit` now issues a `FutureWarning` if a label is changed that does not conform to these
+  expectations.  There is now an optional flag `normalize_labels` to `read_*` which will automatically
+  fill in non-confirming sets of labels.  In version 16.6 these will be enforced; invalid label sets will
+  generate an error and files will be normalized automatically on read. (#614)
 - Terminology for agent-form calculations on extensive games has been clarified.  Mixed behavior profiles
   distinguish "agent" regret and liap values from their strategy-based analogs.  Methods which compute
   using the agent-form - specifically `enumpure_solve` and `liap_solve`, now clarify this by being named

@@ -426,10 +426,10 @@ cdef extern from "games/layout.h":
 
 
 cdef extern from "util.h":
-    c_Game ParseGbtGame(string) except +IOError
-    c_Game ParseEfgGame(string) except +IOError
-    c_Game ParseNfgGame(string) except +IOError
-    c_Game ParseAggGame(string) except +IOError
+    c_Game ParseGbtGame(string, bint) except +IOError
+    c_Game ParseEfgGame(string, bint) except +IOError
+    c_Game ParseNfgGame(string, bint) except +IOError
+    c_Game ParseAggGame(string, bint) except +IOError
     string WriteEfgFile(c_Game)
     string WriteNfgFile(c_Game)
     string WriteNfgFileSupport(c_StrategySupportProfile) except +IOError

@@ -1150,32 +1150,38 @@ Game NewTable(const std::vector<int> &p_dim, bool p_sparseOutcomes = false);
 /// @brief Reads a game representation in .efg format
 ///
 /// @param[in] p_stream An input stream, positioned at the start of the text in .efg format
+/// @param[in] p_normalizeLabels Require element labels to be nonempty and unique within
+///                              their scope
 /// @return A handle to the game representation constructed
 /// @throw InvalidFileException If the stream does not contain a valid serialisation
 ///                             of a game in .efg format.
 /// @sa Game::WriteEfgFile, ReadNfgFile, ReadAggFile, ReadBaggFile
-Game ReadEfgFile(std::istream &p_stream);
+Game ReadEfgFile(std::istream &p_stream, bool p_normalizeLabels = false);
 
 /// @brief Reads a game representation in .nfg format
 /// @param[in] p_stream An input stream, positioned at the start of the text in .nfg format
+/// @param[in] p_normalizeLabels Require element labels to be nonempty and unique within
+///                              their scope
 /// @return A handle to the game representation constructed
 /// @throw InvalidFileException If the stream does not contain a valid serialisation
 ///                             of a game in .nfg format.
 /// @sa Game::WriteNfgFile, ReadEfgFile, ReadAggFile, ReadBaggFile
-Game ReadNfgFile(std::istream &p_stream);
+Game ReadNfgFile(std::istream &p_stream, bool p_normalizeLabels = false);
 
 /// @brief Reads a game representation from a graphical interface XML saveflie
 /// @param[in] p_stream An input stream, positioned at the start of the text
+/// @param[in] p_normalizeLabels Require element labels to be nonempty and unique within
+///                              their scope
 /// @return A handle to the game representation constructed
 /// @throw InvalidFileException If the stream does not contain a valid serialisation
 ///                             of a game in an XML savefile
 /// @sa ReadEfgFile, ReadNfgFile, ReadAggFile, ReadBaggFile
-Game ReadGbtFile(std::istream &p_stream);
+Game ReadGbtFile(std::istream &p_stream, bool p_normalizeLabels = false);
 
 /// @brief Reads a game from the input stream, attempting to autodetect file format
 /// @deprecated Deprecated in favour of the various ReadXXXGame functions.
 /// @sa ReadEfgFile, ReadNfgFile, ReadGbtFile, ReadAggFile, ReadBaggFile
-Game ReadGame(std::istream &p_stream);
+Game ReadGame(std::istream &p_stream, bool p_normalizeLabels = false);
 
 /// @brief Generate a distribution over a simplex restricted to rational numbers of given
 /// denominator

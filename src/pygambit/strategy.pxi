@@ -57,6 +57,11 @@ class Strategy:
 
     @label.setter
     def label(self, value: str) -> None:
+        if value == self.label:
+            return
+        if value == "" or value in (strategy.label for strategy in self.player.strategies):
+            warnings.warn("In a future version, strategies for a player must have unique labels",
+                          FutureWarning)
         self.strategy.deref().SetLabel(value.encode("ascii"))
 
     @property
