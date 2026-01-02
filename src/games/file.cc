@@ -867,7 +867,6 @@ Game ReadEfgFile(std::istream &p_stream, bool p_normalizeLabels /* = false */)
     parser.GetNextToken();
   }
   ParseNode(parser, game, game->GetRoot(), treeData);
-  game->SortInfosets();
   if (p_normalizeLabels) {
     NormalizeGameLabels(game);
   }

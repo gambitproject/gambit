@@ -1861,30 +1861,25 @@ class Game:
     def sort_infosets(self) -> None:
         """Sort information sets into a standard order.
 
-        When iterating the information sets of a player, the order in which information
-        sets are visited may be dependent on the order of the operations used to build
-        the extensive game.  This function sorts each player's information sets into
-        a standard order, namely, the order in which they are encountered in a depth-first
-        traversal of the tree, and likewise sorts the members of each information set
-        by the order in which they are encountered in a depth-first traversal.
-
-        .. versionadded:: 16.4.0
+        .. deprecated:: 16.5.0
+           This operation is deprecated as efficient management of the iteration orders of
+           information sets and their members is now handled by the representation objects.
 
         Raises
         ------
         UndefinedOperationError
             If the game does not have a tree representation.
-
-        See also
-        --------
-        Player.infosets
-        Infoset.members
         """
+        warnings.warn(
+            "sort_infosets() is deprecated; This operation is now done automatically when"
+            " required. "
+            "This function will be removed in a future release.",
+            FutureWarning
+        )
         if not self.is_tree:
             raise UndefinedOperationError(
                 "Operation only defined for games with a tree representation"
             )
-        self.game.deref().SortInfosets()
 
     def add_player(self, label: str = "") -> Player:
         """Add a new player to the game.

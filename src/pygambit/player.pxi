@@ -220,24 +220,17 @@ class Player:
     def infosets(self) -> PlayerInfosets:
         """Returns the set of information sets at which the player has the decision.
 
-        The order in which information sets are iterated is dependent on the order of
-        operations used to define the game.  A standard ordering, in which information
-        sets are iterated in the order encountered in a depth-first traversal of the tree,
-        can be obtained by calling `Game.sort_infosets` on the game after construction.
+        The iteration order of information sets is the order in which they
+        are encountered in the pre-order depth first traversal of the game tree.
 
-        .. versionchanged:: 16.4.0
-           The ordering of information sets is now dependent on the order of operations;
-           previously, information sets were (expensively) re-sorted after every change
-           to the game tree.
+        .. versionchanged:: 16.5.0
+           It is no longer necessary to call `Game.sort_infosets` to standardise
+           iteration order.
 
         Raises
         ------
         UndefinedOperationError
             If the game does not have a tree representation.
-
-        See also
-        --------
-        Game.sort_infosets
         """
         if not self.game.is_tree:
             raise UndefinedOperationError(
