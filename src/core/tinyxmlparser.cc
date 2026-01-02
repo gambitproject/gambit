@@ -716,7 +716,7 @@ const char *TiXmlDocument::Parse(const char *p, TiXmlParsingData *prevData, TiXm
 
     // Did we get encoding info?
     if (encoding == TIXML_ENCODING_UNKNOWN && node->ToDeclaration()) {
-      TiXmlDeclaration *dec = node->ToDeclaration();
+      const TiXmlDeclaration *dec = node->ToDeclaration();
       const char *enc = dec->Encoding();
       assert(enc);
 

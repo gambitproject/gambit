@@ -5,6 +5,7 @@ import pathlib
 from abc import ABC, abstractmethod
 
 import numpy as np
+import pytest
 
 import pygambit as gbt
 
@@ -652,7 +653,8 @@ def create_kuhn_poker_efg(nonterm_outcomes: bool = False) -> gbt.Game:
         g = _create_kuhn_poker_efg_only_term_outcomes()
 
     # Ensure infosets are in the same order as if game was written to efg and read back in
-    # g.sort_infosets()
+    with pytest.warns(FutureWarning):
+        g.sort_infosets()
     return g
 
 
