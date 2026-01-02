@@ -5,7 +5,6 @@ import pathlib
 from abc import ABC, abstractmethod
 
 import numpy as np
-import pytest
 
 import pygambit as gbt
 
@@ -353,7 +352,6 @@ def create_3_player_with_internal_outcomes_efg(nonterm_outcomes: bool = False) -
         o = g.add_outcome([0, 0, 0])
         g.set_outcome(g.root.children[0].children[0].children[1].children[0], o)
         g.set_outcome(g.root.children[0].children[0].children[1].children[1], o)
-    # g.sort_infosets()
     return g
 
 
@@ -651,10 +649,6 @@ def create_kuhn_poker_efg(nonterm_outcomes: bool = False) -> gbt.Game:
         g = _create_kuhn_poker_efg_nonterm_outcomes()
     else:
         g = _create_kuhn_poker_efg_only_term_outcomes()
-
-    # Ensure infosets are in the same order as if game was written to efg and read back in
-    with pytest.warns(FutureWarning):
-        g.sort_infosets()
     return g
 
 
@@ -909,7 +903,6 @@ def create_STOC_simplified() -> gbt.Game:
         g.root.children[1].children[1],
         outcome=g.add_outcome(payoffs=[20, -20], label="d"),
     )
-    # g.sort_infosets()
     return g
 
 
@@ -949,7 +942,6 @@ def create_STOC_simplified2() -> gbt.Game:
         g.root.children[1].children[0],
         outcome=g.add_outcome(payoffs=[10, -10], label="c"),
     )
-    # g.sort_infosets()
     return g
 
 
@@ -1031,7 +1023,6 @@ def create_seq_form_STOC_paper_zero_sum_2_player_efg() -> gbt.Game:
     g.root.children[0].children[1].infoset.label = "01"
     g.root.children[2].children[0].infoset.label = "20"
     g.root.children[0].children[1].children[0].infoset.label = "010"
-    g.sort_infosets()
     return g
 
 
