@@ -808,9 +808,11 @@ template <class C> void NormalizeLabels(C &&p_container)
   std::map<std::string, std::size_t> counts;
   // NOLINTEND(misc-const-correctness)
   for (const auto &element : p_container) {
-    ++counts[element->GetLabel()];
+    counts[element->GetLabel()] += 1;
   }
+  // NOLINTBEGIN(misc-const-correctness)
   std::map<std::string, std::size_t> visited;
+  // NOLINTEND(misc-const-correctness)
   for (auto element : p_container) {
     const auto label = element->GetLabel();
     // A special case: If only one label is the empty string we still want to
