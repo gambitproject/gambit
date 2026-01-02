@@ -466,23 +466,20 @@ def test_lcp_behavior_double():
                 games.create_2x2_zero_sum_efg(),
                 [[["1/2", "1/2"]], [["1/2", "1/2"]]]
         ),
-        pytest.param(
+        (
             games.create_2x2_zero_sum_efg(missing_term_outcome=True),
             [[["1/2", "1/2"]], [["1/2", "1/2"]]],
-            marks=pytest.mark.xfail(reason="Problem with non-standard outcomes")
         ),
         (games.create_matching_pennies_efg(),
          [[["1/2", "1/2"]], [["1/2", "1/2"]]]),
-        pytest.param(
+        (
             games.create_matching_pennies_efg(with_neutral_outcome=True),
             [[["1/2", "1/2"]], [["1/2", "1/2"]]],
-            marks=pytest.mark.xfail(reason="Problem with non-standard outcomes")
         ),
         (games.create_stripped_down_poker_efg(), [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]]),
-        pytest.param(
+        (
             games.create_stripped_down_poker_efg(nonterm_outcomes=True),
             [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]],
-            marks=pytest.mark.xfail(reason="Problem with non-standard outcomes")
         ),
         (
                 games.create_kuhn_poker_efg(),
@@ -498,7 +495,7 @@ def test_lcp_behavior_double():
                     [[1, 0], ["2/3", "1/3"], [0, 1], [0, 1], ["2/3", "1/3"], [1, 0]],
                 ],
         ),
-        pytest.param(
+        (
             games.create_kuhn_poker_efg(nonterm_outcomes=True),
             [
                 [
@@ -511,7 +508,6 @@ def test_lcp_behavior_double():
                 ],
                 [[1, 0], ["2/3", "1/3"], [0, 1], [0, 1], ["2/3", "1/3"], [1, 0]],
             ],
-            marks=pytest.mark.xfail(reason="Problem with non-standard outcomes")
         ),
         # In the next test case:
         # 1/2-1/2 for l/r is determined by MixedBehaviorProfile.UndefinedToCentroid()
@@ -534,13 +530,12 @@ def test_lcp_behavior_double():
                 [["2/3", "1/3"], ["1/3", "2/3"], ["1/3", "2/3"]],
             ]
         ),
-        pytest.param(
+        (
             games.create_three_action_internal_outcomes_efg(nonterm_outcomes=True),
             [
                 [["1/3", 0, "2/3"], ["2/3", 0, "1/3"]],
                 [["2/3", "1/3"], ["1/3", "2/3"], ["1/3", "2/3"]],
             ],
-            marks=pytest.mark.xfail(reason="Problem with non-standard outcomes")
         ),
         (
                 games.create_large_payoff_game_efg(),
@@ -557,13 +552,12 @@ def test_lcp_behavior_double():
                 [[1, 0], ["6/11", "5/11"]]
             ]
         ),
-        pytest.param(
+        (
             games.create_chance_in_middle_efg(nonterm_outcomes=True),
             [
                 [["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]],
                 [[1, 0], ["6/11", "5/11"]]
             ],
-            marks=pytest.mark.xfail(reason="Problem with non-standard outcomes")
         ),
         # Non-zero-sum games
         (
@@ -586,19 +580,17 @@ def test_lcp_behavior_double():
             games.create_entry_accomodation_efg(),
             [[["2/3", "1/3"], [1, 0], [1, 0]], [["2/3", "1/3"]]]
         ),
-        pytest.param(
+        (
             games.create_entry_accomodation_efg(nonterm_outcomes=True),
             [[["2/3", "1/3"], [1, 0], [1, 0]], [["2/3", "1/3"]]],
-            marks=pytest.mark.xfail(reason="Problem with non-standard outcomes")
         ),
         (
             games.create_non_zero_sum_lacking_outcome_efg(),
             [[["1/3", "2/3"]], [["1/2", "1/2"]]]
         ),
-        pytest.param(
+        (
             games.create_non_zero_sum_lacking_outcome_efg(missing_term_outcome=True),
             [[["1/3", "2/3"]], [["1/2", "1/2"]]],
-            marks=pytest.mark.xfail(reason="Problem with non-standard outcomes")
         ),
     ],
 )
@@ -677,35 +669,31 @@ def test_lp_behavior_double():
                 games.create_two_player_perfect_info_win_lose_efg(),
                 [[[0, 1], [1, 0]], [[1, 0], [1, 0]]],
         ),
-        pytest.param(
+        (
                 games.create_two_player_perfect_info_win_lose_efg(nonterm_outcomes=True),
                 [[[0, 1], [1, 0]], [[1, 0], [1, 0]]],
-                marks=pytest.mark.xfail(reason="Problem with non-standard outcomes")
         ),
         (
                 games.create_2x2_zero_sum_efg(missing_term_outcome=False),
                 [[["1/2", "1/2"]], [["1/2", "1/2"]]]
         ),
-        pytest.param(
+        (
             games.create_2x2_zero_sum_efg(missing_term_outcome=True),
             [[["1/2", "1/2"]], [["1/2", "1/2"]]],
-            marks=pytest.mark.xfail(reason="Problem with non-standard outcomes")
         ),
         (games.create_matching_pennies_efg(with_neutral_outcome=False),
          [[["1/2", "1/2"]], [["1/2", "1/2"]]]),
-        pytest.param(
+        (
             games.create_matching_pennies_efg(with_neutral_outcome=True),
             [[["1/2", "1/2"]], [["1/2", "1/2"]]],
-            marks=pytest.mark.xfail(reason="Problem with non-standard outcomes")
         ),
         (
                 games.create_stripped_down_poker_efg(),
                 [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]],
         ),
-        pytest.param(
+        (
             games.create_stripped_down_poker_efg(nonterm_outcomes=True),
             [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]],
-            marks=pytest.mark.xfail(reason="Problem with non-standard outcomes")
         ),
         (
                 games.create_kuhn_poker_efg(),
@@ -714,7 +702,7 @@ def test_lp_behavior_double():
                     [[1, 0], ["2/3", "1/3"], [0, 1], [0, 1], ["2/3", "1/3"], [1, 0]],
                 ],
         ),
-        pytest.param(
+        (
             games.create_kuhn_poker_efg(nonterm_outcomes=True),
             [
                 [
@@ -727,7 +715,6 @@ def test_lp_behavior_double():
                 ],
                 [[1, 0], ["2/3", "1/3"], [0, 1], [0, 1], ["2/3", "1/3"], [1, 0]],
             ],
-            marks=pytest.mark.xfail(reason="Problem with non-standard outcomes")
         ),
         (
                 games.create_seq_form_STOC_paper_zero_sum_2_player_efg(),
@@ -747,13 +734,12 @@ def test_lp_behavior_double():
                 [["2/3", "1/3"], ["2/3", "1/3"], ["1/3", "2/3"]],
             ]
         ),
-        pytest.param(
+        (
             games.create_three_action_internal_outcomes_efg(nonterm_outcomes=True),
             [
                 [["1/3", 0, "2/3"], ["2/3", 0, "1/3"]],
                 [["2/3", "1/3"], ["2/3", "1/3"], ["1/3", "2/3"]],
             ],
-            marks=pytest.mark.xfail(reason="Problem with non-standard outcomes")
         ),
         (
                 games.create_large_payoff_game_efg(),
@@ -770,13 +756,12 @@ def test_lp_behavior_double():
                 [[1, 0], ["6/11", "5/11"]]
             ],
         ),
-        pytest.param(
+        (
             games.create_chance_in_middle_efg(nonterm_outcomes=True),
             [
                 [["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]],
                 [[1, 0], ["6/11", "5/11"]]
             ],
-            marks=pytest.mark.xfail(reason="Problem with non-standard outcomes")
         ),
     ],
 )

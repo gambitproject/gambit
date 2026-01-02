@@ -2,9 +2,19 @@
 
 ## [16.5.0] - unreleased
 
+### Fixed
+- Sequence-form based equilibrium-finding methods returned incorrect output on games with
+  outcomes at non-terminal nodes.  (#654)
 ### Added
 - Implement `IsAbsentMinded()` on information sets (C++) and `Infoset.is_absent_minded` (Python)
   to detect if an information is absent-minded.
+- Tests for EFG Nash solvers -- `enumpoly_solve`, `lp_solve`, `lcp_solve` -- in behavior stratgegies
+- In `pygambit`, `Node` objects now have a read-only property `own_prior_action` and `Infoset` objects
+  have a read-only property `own_prior_actions` to retrieve the last action or the set of last actions
+  taken by the player before reaching the node or information set, respectively. (#582)
+- In `pygambit`, `Node` objects now have a read-only property `is_strategy_reachable` to determine
+  if the node is reachable by at least one pure strategy profile. This proves useful for identifying
+  unreachable parts of the game tree in games with absent-mindedness. (#629)
 
 ### Changed
 - Labels for players, outcomes, strategies, and actions are expected to be non-empty and unique within
@@ -26,15 +36,6 @@
 - In `pygambit`, calls to `sort_infosets` are no longer required to normalise the game representation.
   Iteration ordering of information sets and their members is ensured internally.  `sort_infosets`
   is therefore now a no-op and is deprecated; it will be removed in a future version.
-
-### Added
-- Tests for EFG Nash solvers -- `enumpoly_solve`, `lp_solve`, `lcp_solve` -- in behavior stratgegies
-- In `pygambit`, `Node` objects now have a read-only property `own_prior_action` and `Infoset` objects
-  have a read-only property `own_prior_actions` to retrieve the last action or the set of last actions
-  taken by the player before reaching the node or information set, respectively. (#582)
-- In `pygambit`, `Node` objects now have a read-only property `is_strategy_reachable` to determine
-  if the node is reachable by at least one pure strategy profile. This proves useful for identifying
-  unreachable parts of the game tree in games with absent-mindedness. (#629)
 
 ### Removed
 - Eliminating dominated actions has been removed from the GUI as it was implementing a non-standard

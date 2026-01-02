@@ -44,7 +44,7 @@ private:
 
   class Solution;
 
-  void FillTableau(Matrix<T> &, const GameNode &, T, int, int, Solution &) const;
+  void FillTableau(Matrix<T> &, const GameNode &, T, int, int, T, T, Solution &) const;
   void AllLemke(const Game &, int dup, linalg::LemkeTableau<T> &B, int depth, Matrix<T> &,
                 Solution &) const;
   void GetProfile(const linalg::LemkeTableau<T> &tab, MixedBehaviorProfile<T> &, const Vector<T> &,
@@ -126,7 +126,8 @@ std::list<MixedBehaviorProfile<T>> NashLcpBehaviorSolver<T>::Solve(const Game &p
   const int ntot = solution.ns1 + solution.ns2 + solution.ni1 + solution.ni2;
   Matrix<T> A(1, ntot, 0, ntot);
   A = static_cast<T>(0);
-  FillTableau(A, p_game->GetRoot(), static_cast<T>(1), 1, 1, solution);
+  FillTableau(A, p_game->GetRoot(), static_cast<T>(1), 1, 1, static_cast<T>(0), static_cast<T>(0),
+              solution);
   for (int i = A.MinRow(); i <= A.MaxRow(); i++) {
     A(i, 0) = static_cast<T>(-1);
   }
@@ -238,7 +239,7 @@ void NashLcpBehaviorSolver<T>::AllLemke(const Game &p_game, int j, linalg::Lemke
 
 template <class T>
 void NashLcpBehaviorSolver<T>::FillTableau(Matrix<T> &A, const GameNode &n, T prob, int s1, int s2,
-                                           Solution &p_solution) const
+                                           T payoff1, T payoff2, Solution &p_solution) const
 {
   const int ns1 = p_solution.ns1;
   const int ns2 = p_solution.ns2;
@@ -246,12 +247,12 @@ void NashLcpBehaviorSolver<T>::FillTableau(Matrix<T> &A, const GameNode &n, T pr
 
   const GameOutcome outcome = n->GetOutcome();
   if (outcome) {
-    A(s1, ns1 + s2) += Rational(prob) * (outcome->GetPayoff<Rational>(n->GetGame()->GetPlayer(1)) -
-                                         p_solution.maxpay);
-    A(ns1 + s2, s1) += Rational(prob) * (outcome->GetPayoff<Rational>(n->GetGame()->GetPlayer(2)) -
-                                         p_solution.maxpay);
+    payoff1 += outcome->GetPayoff<Rational>(n->GetGame()->GetPlayer(1));
+    payoff2 += outcome->GetPayoff<Rational>(n->GetGame()->GetPlayer(2));
   }
   if (n->IsTerminal()) {
+    A(s1, ns1 + s2) += Rational(prob) * (payoff1 - p_solution.maxpay);
+    A(ns1 + s2, s1) += Rational(prob) * (payoff2 - p_solution.maxpay);
     return;
   }
   const GameInfoset infoset = n->GetInfoset();
@@ -259,7 +260,7 @@ void NashLcpBehaviorSolver<T>::FillTableau(Matrix<T> &A, const GameNode &n, T pr
     for (const auto &action : infoset->GetActions()) {
       FillTableau(A, n->GetChild(action),
                   Rational(prob) * static_cast<Rational>(infoset->GetActionProb(action)), s1, s2,
-                  p_solution);
+                  payoff1, payoff2, p_solution);
     }
   }
   else if (n->GetPlayer()->GetNumber() == 1) {
@@ -271,7 +272,7 @@ void NashLcpBehaviorSolver<T>::FillTableau(Matrix<T> &A, const GameNode &n, T pr
       snew++;
       A(snew, infoset_idx) = static_cast<T>(1);
       A(infoset_idx, snew) = static_cast<T>(-1);
-      FillTableau(A, child, prob, snew, s2, p_solution);
+      FillTableau(A, child, prob, snew, s2, payoff1, payoff2, p_solution);
     }
   }
   else {
@@ -283,7 +284,7 @@ void NashLcpBehaviorSolver<T>::FillTableau(Matrix<T> &A, const GameNode &n, T pr
       snew++;
       A(ns1 + snew, infoset_idx) = static_cast<T>(1);
       A(infoset_idx, ns1 + snew) = static_cast<T>(-1);
-      FillTableau(A, child, prob, s1, snew, p_solution);
+      FillTableau(A, child, prob, s1, snew, payoff1, payoff2, p_solution);
     }
   }
 }
