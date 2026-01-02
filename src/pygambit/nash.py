@@ -206,22 +206,18 @@ def lcp_solve(
         If stop_after or max_depth are supplied for use on the tree representation.
     """
     if game.is_tree and not use_strategic:
-        if stop_after:
+        if stop_after is not None:
             raise ValueError(
                 "lcp_solve(): stop_after can only be used on the strategic representation"
             )
-        if max_depth:
+        if max_depth is not None:
             raise ValueError(
                 "lcp_solve(): max_depth can only be used on the strategic representation"
             )
-    if stop_after is None:
-        stop_after = 0
-    elif stop_after < 0:
+    if stop_after is not None and stop_after < 0:
         raise ValueError(
             f"lcp_solve(): stop_after argument must be a non-negative number; got {stop_after}"
         )
-    if max_depth is None:
-        max_depth = 0
     if not game.is_tree or use_strategic:
         if rational:
             equilibria = libgbt._lcp_strategy_solve_rational(game, stop_after or 0, max_depth or 0)
