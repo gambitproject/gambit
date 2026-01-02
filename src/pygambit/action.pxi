@@ -77,6 +77,12 @@ class Action:
 
     @label.setter
     def label(self, value: str) -> None:
+        if value == self.label:
+            return
+        if value == "" or value in (act.label for act in self.infoset.actions):
+            warnings.warn("In a future version, actions must have unique labels "
+                          "within their information set",
+                          FutureWarning)
         self.action.deref().SetLabel(value.encode("ascii"))
 
     @property

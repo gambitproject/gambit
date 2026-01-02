@@ -17,12 +17,25 @@
   unreachable parts of the game tree in games with absent-mindedness. (#629)
 
 ### Changed
+- Labels for players, outcomes, strategies, and actions are expected to be non-empty and unique within
+  the relevant scope (games for players and outcomes, players for strategies, and information sets for
+  actions).  `pygambit` now issues a `FutureWarning` if a label is changed that does not conform to these
+  expectations.  There is now an optional flag `normalize_labels` to `read_*` which will automatically
+  fill in non-confirming sets of labels.  In version 16.6 these will be enforced; invalid label sets will
+  generate an error and files will be normalized automatically on read. (#614)
+- Terminology for agent-form calculations on extensive games has been clarified.  Mixed behavior profiles
+  distinguish "agent" regret and liap values from their strategy-based analogs.  Methods which compute
+  using the agent-form - specifically `enumpure_solve` and `liap_solve`, now clarify this by being named
+  differently in `pygambit`. (#617)
 - In the graphical interface, removed option to configure information set link drawing; information sets
   are always drawn and indicators are always drawn if an information set spans multiple levels.
 - In `pygambit`, indexing the children of a node by a string inteprets the string as an action label,
   not a label of a child node.  In addition, indexing by an action object is now supported. (#587)
 - In `pygambit`, `min_payoff` and `max_payoff` (for both games and players) now refers to payoffs in
   any play of the game; previously this referred only to the set of outcomes. (#498)
+- In `pygambit`, calls to `sort_infosets` are no longer required to normalise the game representation.
+  Iteration ordering of information sets and their members is ensured internally.  `sort_infosets`
+  is therefore now a no-op and is deprecated; it will be removed in a future version.
 
 ### Removed
 - Eliminating dominated actions has been removed from the GUI as it was implementing a non-standard

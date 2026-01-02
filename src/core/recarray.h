@@ -240,7 +240,7 @@ template <class T> template <class Vector> void RectArray<T>::GetRow(int row, Ve
   if (!CheckRow(v)) {
     throw DimensionException();
   }
-  T *rowptr = data[row];
+  const T *rowptr = data[row];
   for (int i = mincol; i <= maxcol; i++) {
     v[i] = rowptr[i];
   }
