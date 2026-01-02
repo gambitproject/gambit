@@ -5,10 +5,11 @@
 ### Fixed
 - Sequence-form based equilibrium-finding methods returned incorrect output on games with
   outcomes at non-terminal nodes.  (#654)
+
 ### Added
 - Implement `IsAbsentMinded()` on information sets (C++) and `Infoset.is_absent_minded` (Python)
   to detect if an information is absent-minded.
-- Tests for EFG Nash solvers -- `enumpoly_solve`, `lp_solve`, `lcp_solve` -- in behavior stratgegies
+- Tests for EFG Nash solvers -- `enumpoly_solve`, `lp_solve`, `lcp_solve` -- in behavior strategies
 - In `pygambit`, `Node` objects now have a read-only property `own_prior_action` and `Infoset` objects
   have a read-only property `own_prior_actions` to retrieve the last action or the set of last actions
   taken by the player before reaching the node or information set, respectively. (#582)
@@ -27,6 +28,8 @@
   distinguish "agent" regret and liap values from their strategy-based analogs.  Methods which compute
   using the agent-form - specifically `enumpure_solve` and `liap_solve`, now clarify this by being named
   differently in `pygambit`. (#617)
+- For clarity, the `stop_after` and `max_depth` arguments to `lcp_solve` are no longer permitted when solving using
+  the sequence form.  These actually had no effect in previous versions. (#671)
 - In the graphical interface, removed option to configure information set link drawing; information sets
   are always drawn and indicators are always drawn if an information set spans multiple levels.
 - In `pygambit`, indexing the children of a node by a string inteprets the string as an action label,

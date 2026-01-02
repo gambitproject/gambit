@@ -210,12 +210,13 @@ def lcp_solve(
         representation even if the game's native representation is extensive.
 
     stop_after : int, optional
-        Maximum number of equilibria to compute.  If not specified, computes all
-        accessible equilibria.
+        Maximum number of equilibria to compute when using the strategic representation.
+        If not specified, computes all accessible equilibria.
 
     max_depth : int, optional
-        Maximum depth of recursion.  If specified, will limit the recursive search,
-        but may result in some accessible equilibria not being found.
+        Maximum depth of recursion when using the strategic representation.
+        If specified, will limit the recursive search, but may result in some accessible
+        equilibria not being found.
 
     Returns
     -------
@@ -226,24 +227,32 @@ def lcp_solve(
     ------
     RuntimeError
         If game has more than two players.
+
+    ValueError
+        If stop_after or max_depth are supplied for use on the tree representation.
     """
-    if stop_after is None:
-        stop_after = 0
-    elif stop_after < 0:
+    if game.is_tree and not use_strategic:
+        if stop_after is not None:
+            raise ValueError(
+                "lcp_solve(): stop_after can only be used on the strategic representation"
+            )
+        if max_depth is not None:
+            raise ValueError(
+                "lcp_solve(): max_depth can only be used on the strategic representation"
+            )
+    if stop_after is not None and stop_after < 0:
         raise ValueError(
             f"lcp_solve(): stop_after argument must be a non-negative number; got {stop_after}"
         )
-    if max_depth is None:
-        max_depth = 0
     if not game.is_tree or use_strategic:
         if rational:
             equilibria = libgbt._lcp_strategy_solve_rational(game, stop_after or 0, max_depth or 0)
         else:
             equilibria = libgbt._lcp_strategy_solve_double(game, stop_after or 0, max_depth or 0)
     elif rational:
-        equilibria = libgbt._lcp_behavior_solve_rational(game, stop_after or 0, max_depth or 0)
+        equilibria = libgbt._lcp_behavior_solve_rational(game)
     else:
-        equilibria = libgbt._lcp_behavior_solve_double(game, stop_after or 0, max_depth or 0)
+        equilibria = libgbt._lcp_behavior_solve_double(game)
     return NashComputationResult(
         game=game,
         method="lcp",
