@@ -804,7 +804,9 @@ Game GameXMLSavefile::GetGame() const
 
 template <class C> void NormalizeLabels(C &&p_container)
 {
+  // NOLINTBEGIN(misc-const-correctness)
   std::map<std::string, std::size_t> counts;
+  // NOLINTEND(misc-const-correctness)
   for (const auto &element : p_container) {
     ++counts[element->GetLabel()];
   }
