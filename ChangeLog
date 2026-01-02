@@ -9,7 +9,7 @@
 ### Added
 - Implement `IsAbsentMinded()` on information sets (C++) and `Infoset.is_absent_minded` (Python)
   to detect if an information is absent-minded.
-- Tests for EFG Nash solvers -- `enumpoly_solve`, `lp_solve`, `lcp_solve` -- in behavior stratgegies
+- Tests for EFG Nash solvers -- `enumpoly_solve`, `lp_solve`, `lcp_solve` -- in behavior strategies
 - In `pygambit`, `Node` objects now have a read-only property `own_prior_action` and `Infoset` objects
   have a read-only property `own_prior_actions` to retrieve the last action or the set of last actions
   taken by the player before reaching the node or information set, respectively. (#582)
