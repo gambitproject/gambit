@@ -88,9 +88,11 @@ template <class T> Matrix<T> Matrix<T>::operator+(const Matrix<T> &M) const
 
   const Matrix<T> tmp(this->minrow, this->maxrow, this->mincol, this->maxcol);
   for (int i = this->minrow; i <= this->maxrow; i++) {
-    T *src1 = this->data[i] + this->mincol;
-    T *src2 = M.data[i] + this->mincol;
+    const T *src1 = this->data[i] + this->mincol;
+    const T *src2 = M.data[i] + this->mincol;
+    // NOLINTBEGIN(misc-const-correctness)
     T *dst = tmp.data[i] + this->mincol;
+    // NOLINTEND(misc-const-correctness)
     int j = this->maxcol - this->mincol + 1;
     while (j--) {
       *(dst++) = *(src1++) + *(src2++);
@@ -108,9 +110,11 @@ template <class T> Matrix<T> Matrix<T>::operator-(const Matrix<T> &M) const
 
   const Matrix<T> tmp(this->minrow, this->maxrow, this->mincol, this->maxcol);
   for (int i = this->minrow; i <= this->maxrow; i++) {
-    T *src1 = this->data[i] + this->mincol;
-    T *src2 = M.data[i] + this->mincol;
+    const T *src1 = this->data[i] + this->mincol;
+    const T *src2 = M.data[i] + this->mincol;
+    // NOLINTBEGIN(misc-const-correctness)
     T *dst = tmp.data[i] + this->mincol;
+    // NOLINTEND(misc-const-correctness)
     int j = this->maxcol - this->mincol + 1;
     while (j--) {
       *(dst++) = *(src1++) - *(src2++);
@@ -127,8 +131,10 @@ template <class T> Matrix<T> &Matrix<T>::operator+=(const Matrix<T> &M)
   }
 
   for (int i = this->minrow; i <= this->maxrow; i++) {
-    T *src = M.data[i] + this->mincol;
+    const T *src = M.data[i] + this->mincol;
+    // NOLINTBEGIN(misc-const-correctness)
     T *dst = this->data[i] + this->mincol;
+    // NOLINTEND(misc-const-correctness)
     int j = this->maxcol - this->mincol + 1;
     while (j--) {
       *(dst++) += *(src++);
@@ -144,8 +150,10 @@ template <class T> Matrix<T> &Matrix<T>::operator-=(const Matrix<T> &M)
   }
 
   for (int i = this->minrow; i <= this->maxrow; i++) {
-    T *src = M.data[i] + this->mincol;
+    const T *src = M.data[i] + this->mincol;
+    // NOLINTBEGIN(misc-const-correctness)
     T *dst = this->data[i] + this->mincol;
+    // NOLINTEND(misc-const-correctness)
     int j = this->maxcol - this->mincol + 1;
     while (j--) {
       *(dst++) -= *(src++);
@@ -168,7 +176,7 @@ template <class T> void Matrix<T>::CMultiply(const Vector<T> &in, Vector<T> &out
   for (int i = this->minrow; i <= this->maxrow; i++) {
     T sum = (T)0;
 
-    T *src1 = this->data[i] + this->mincol;
+    const T *src1 = this->data[i] + this->mincol;
     auto src2 = in.begin();
     int j = this->maxcol - this->mincol + 1;
     while (j--) {
@@ -216,7 +224,7 @@ template <class T> void Matrix<T>::RMultiply(const Vector<T> &in, Vector<T> &out
   for (int i = this->minrow; i <= this->maxrow; i++) {
     T k = in[i];
 
-    T *src = this->data[i] + this->mincol;
+    const T *src = this->data[i] + this->mincol;
     auto dst = out.begin();
     int j = this->maxcol - this->mincol + 1;
     while (j--) {
@@ -242,8 +250,10 @@ template <class T> Matrix<T> Matrix<T>::operator*(const T &s) const
 {
   const Matrix<T> tmp(this->minrow, this->maxrow, this->mincol, this->maxcol);
   for (int i = this->minrow; i <= this->maxrow; i++) {
-    T *src = this->data[i] + this->mincol;
+    const T *src = this->data[i] + this->mincol;
+    // NOLINTBEGIN(misc-const-correctness)
     T *dst = tmp.data[i] + this->mincol;
+    // NOLINTEND(misc-const-correctness)
     int j = this->maxcol - this->mincol + 1;
     while (j--) {
       *(dst++) = *(src++) * s;
@@ -256,7 +266,9 @@ template <class T> Matrix<T> Matrix<T>::operator*(const T &s) const
 template <class T> Matrix<T> &Matrix<T>::operator*=(const T &s)
 {
   for (int i = this->minrow; i <= this->maxrow; i++) {
+    // NOLINTBEGIN(misc-const-correctness)
     T *dst = this->data[i] + this->mincol;
+    // NOLINTEND(misc-const-correctness)
     int j = this->maxcol - this->mincol + 1;
     while (j--) {
       *(dst++) *= s;
@@ -273,8 +285,10 @@ template <class T> Matrix<T> Matrix<T>::operator/(const T &s) const
 
   const Matrix<T> tmp(this->minrow, this->maxrow, this->mincol, this->maxcol);
   for (int i = this->minrow; i <= this->maxrow; i++) {
-    T *src = this->data[i] + this->mincol;
+    const T *src = this->data[i] + this->mincol;
+    // NOLINTBEGIN(misc-const-correctness)
     T *dst = tmp.data[i] + this->mincol;
+    // NOLINTEND(misc-const-correctness)
     int j = this->maxcol - this->mincol + 1;
     while (j--) {
       *(dst++) = *(src++) / s;
@@ -290,7 +304,9 @@ template <class T> Matrix<T> &Matrix<T>::operator/=(const T &s)
   }
 
   for (int i = this->minrow; i <= this->maxrow; i++) {
+    // NOLINTBEGIN(misc-const-correctness)
     T *dst = this->data[i] + this->mincol;
+    // NOLINTEND(misc-const-correctness)
     int j = this->maxcol - this->mincol + 1;
     while (j--) {
       *(dst++) /= s;
@@ -328,8 +344,8 @@ template <class T> bool Matrix<T>::operator==(const Matrix<T> &M) const
 
   for (int i = this->minrow; i <= this->maxrow; i++) {
     // inner loop
-    T *src1 = M.data[i] + this->mincol;
-    T *src2 = this->data[i] + this->mincol;
+    const T *src1 = M.data[i] + this->mincol;
+    const T *src2 = this->data[i] + this->mincol;
     int j = this->maxcol - this->mincol + 1;
     while (j--) {
       if (*(src1++) != *(src2++)) {
@@ -346,7 +362,7 @@ template <class T> bool Matrix<T>::operator!=(const Matrix<T> &M) const { return
 template <class T> bool Matrix<T>::operator==(const T &s) const
 {
   for (int i = this->minrow; i <= this->maxrow; i++) {
-    T *src = this->data[i] + this->mincol;
+    const T *src = this->data[i] + this->mincol;
     int j = this->maxcol - this->mincol + 1;
     while (j--) {
       if (*(src++) != s) {
@@ -417,8 +433,10 @@ template <class T> void Matrix<T>::Pivot(int row, int col)
       mult = this->data[i][col];
 
       // inner loop
-      T *src = this->data[row] + this->mincol;
+      const T *src = this->data[row] + this->mincol;
+      // NOLINTBEGIN(misc-const-correctness)
       T *dst = this->data[i] + this->mincol;
+      // NOLINTEND(misc-const-correctness)
       int j = this->maxcol - this->mincol + 1;
       while (j--) {
         *(dst++) -= *(src++) * mult;

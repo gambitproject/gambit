@@ -237,6 +237,7 @@ public:
     return m_cache.m_nodeValues[m_support.GetGame()->GetRoot()][p_player];
   }
   T GetLiapValue() const;
+  T GetAgentLiapValue() const;
 
   const T &GetRealizProb(const GameNode &node) const;
   T GetInfosetProb(const GameInfoset &p_infoset) const;
@@ -253,8 +254,8 @@ public:
   ///          between the best-response payoff and the payoff to playing
   ///          \p p_action.
   /// @param[in] p_action  The action to compute the regret for.
-  /// @sa GetRegret(const GameInfoset &) const;
-  ///     GetMaxRegret() const
+  /// @sa GetRegret(const GameInfoset &) const
+  ///     GetAgentMaxRegret() const
   const T &GetRegret(const GameAction &p_action) const;
 
   /// @brief Computes the regret at information set \p p_infoset
@@ -263,14 +264,20 @@ public:
   ///          as the difference between the payoff of the best response action and
   ///          the payoff to playing their specified mixed action.
   /// @param[in] p_infoset  The information set to compute the regret at.
-  /// @sa GetRegret(const GameAction &) const;
-  ///     GetMaxRegret() const
+  /// @sa GetRegret(const GameAction &) const
+  ///     GetAgentMaxRegret() const
   T GetRegret(const GameInfoset &p_infoset) const;
 
   /// @brief Computes the maximum regret at any information set in the profile
   /// @details Computes the maximum of the regrets of the information sets in the profile.
-  /// @sa GetRegret(const GameInfoset &) const;
+  /// @sa GetRegret(const GameInfoset &) const
   ///     GetRegret(const GameAction &) const
+  ///     GetMaxRegret() const
+  T GetAgentMaxRegret() const;
+
+  /// @brief Computes the maximum regret for any player in the profile
+  /// @sa GetAgentMaxRegret() const
+  ///
   T GetMaxRegret() const;
 
   T DiffActionValue(const GameAction &action, const GameAction &oppAction) const;

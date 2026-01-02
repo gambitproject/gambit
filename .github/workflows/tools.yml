@@ -33,25 +33,6 @@ jobs:
           sudo make install
 
   macos:
-    runs-on: macos-14
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
-    steps:
-      - uses: actions/checkout@v6
-      - name: Install dependencies
-        run: brew install automake autoconf wxwidgets
-      - run: aclocal
-      - run: automake --add-missing
-      - run: autoconf
-      - run: ./configure
-      - run: make
-      - run: sudo make install
-      - run: make osx-dmg
-      - uses: actions/upload-artifact@v6
-        with:
-          name: artifact-osx-14
-          path: "*.dmg"
-
-  macos-14:
     runs-on: macos-15
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
     steps:
@@ -63,12 +44,6 @@ jobs:
       - run: autoconf
       - run: ./configure
       - run: make
-      - run: sudo make install
-      - run: make osx-dmg
-      - uses: actions/upload-artifact@v6
-        with:
-          name: artifact-osx-15
-          path: "*.dmg"
 
   windows:
     runs-on: windows-latest

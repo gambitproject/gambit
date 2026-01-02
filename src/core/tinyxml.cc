@@ -122,8 +122,8 @@ TiXmlBase::StringToBuffer::~StringToBuffer() { delete[] buffer; }
 
 TiXmlNode::~TiXmlNode()
 {
-  TiXmlNode *node = firstChild;
-  TiXmlNode *temp = nullptr;
+  const TiXmlNode *node = firstChild;
+  const TiXmlNode *temp = nullptr;
 
   while (node) {
     temp = node;
@@ -140,8 +140,8 @@ void TiXmlNode::CopyTo(TiXmlNode *target) const
 
 void TiXmlNode::Clear()
 {
-  TiXmlNode *node = firstChild;
-  TiXmlNode *temp = nullptr;
+  const TiXmlNode *node = firstChild;
+  const TiXmlNode *temp = nullptr;
 
   while (node) {
     temp = node;
