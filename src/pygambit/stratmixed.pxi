@@ -193,7 +193,7 @@ class MixedStrategyProfile:
         raise ValueError("Cannot create a MixedStrategyProfile outside a Game.")
 
     def __repr__(self) -> str:
-        return str([self[player] for player in self.game.players])
+        return MultiIndexSeriesFormatter().format(self.as_dict())
 
     def _repr_latex_(self) -> str:
         return (
@@ -202,6 +202,13 @@ class MixedStrategyProfile:
                       for player in self.game.players]) +
             r"\right]$"
         )
+
+    def as_dict(self) -> dict[tuple, float]:
+        result = {}
+        for player in self.game.players:
+            for strategy in player.strategies:
+                result[(player.label, strategy.label)] = self[player][strategy]
+        return result
 
     @property
     def game(self) -> Game:
