@@ -208,14 +208,9 @@ def test_enumpoly_ordered_behavior(
         result = gbt.nash.enumpoly_solve(game, use_strategic=False)
     assert len(result.equilibria) == len(mixed_behav_prof_data)
     for eq, exp in zip(result.equilibria, mixed_behav_prof_data, strict=True):
-        print("FOUND EQ:", eq)
-        print(eq.max_regret())
-        print(eq.agent_max_regret())
         assert abs(eq.max_regret()) <= TOL
         assert abs(eq.agent_max_regret()) <= TOL
         expected = game.mixed_behavior_profile(rational=True, data=exp)
-        # print(expected)
-        # print(eq)
         for p in game.players:
             for i in p.infosets:
                 for a in i.actions:
@@ -273,14 +268,9 @@ def test_enumpoly_ordered_behavior_PROBLEM_CASE(
         result = gbt.nash.enumpoly_solve(game, use_strategic=False)
     assert len(result.equilibria) == len(mixed_behav_prof_data)
     for eq, exp in zip(result.equilibria, mixed_behav_prof_data, strict=True):
-        print("FOUND EQ:", eq)
-        print("found max regret:", eq.max_regret())
-        print("found agent max regret:", eq.agent_max_regret())
         assert abs(eq.max_regret()) <= TOL
         assert abs(eq.agent_max_regret()) <= TOL
         expected = game.mixed_behavior_profile(rational=True, data=exp)
-        print("exp max regret:", eq.max_regret())
-        print("exp agent max regret:", eq.agent_max_regret())
         for p in game.players:
             for i in p.infosets:
                 for a in i.actions:
@@ -876,88 +866,3 @@ def test_logit_solve_lambda():
     game = games.read_from_file("const_sum_game.nfg")
     assert len(gbt.qre.logit_solve_lambda(
         game=game, lam=[1, 2, 3], first_step=0.2, max_accel=1)) > 0
-
-
-def test_regrets_tmp():
-
-    prof_data_doub = []
-    prof_data_doub.append([[[1, 0], [1, 0]], [[1, 0], [0.5, 0.5]], [[1, 0], [0, 1]]])
-    # prof_data_doub.append([[[1, 0], [1, 0]], [[1, 0], [0, 1]], [[1, 0], [0.33333, 0.6666]]])
-    # prof_data_doub.append([[[1, 0], [1, 0]], [[1, 0], [0.5, 0.5]], [[0, 1], [1, 0]]])
-    # prof_data_doub.append([[[1, 0], [1, 0]], [[1, 0], [0, 1]], [[0.33333, 0.6666], [1, 0]]])
-
-    prof_data_rat = []
-    prof_data_rat.append([[[1, 0], [1, 0]], [[1, 0], ["1/2", "1/2"]], [[1, 0], [0, 1]]])
-    # prof_data_rat.append([[[1, 0], [1, 0]], [[1, 0], [0, 1]], [[1, 0], ["1/3", "2/3"]]])
-    # prof_data_rat.append([[[1, 0], [1, 0]], [[1, 0], ["1/2", "1/2"]], [[0, 1], [1, 0]]])
-    # prof_data_rat.append([[[1, 0], [1, 0]], [[1, 0], [0, 1]], [["1/3", "2/3"], [1, 0]]])
-
-    g = games.create_3_player_with_internal_outcomes_efg()
-
-    print()
-    print("==================")
-    for p in prof_data_doub:
-        prof = g.mixed_behavior_profile(rational=False, data=p)
-        print(prof.max_regret())
-        print(prof.agent_max_regret())
-    print("==================")
-    for p in prof_data_rat:
-        prof = g.mixed_behavior_profile(rational=True, data=p)
-        print(prof.max_regret())
-        print(prof.agent_max_regret())
-    print("==================")
-    for p in prof_data_doub:
-        prof = g.mixed_behavior_profile(rational=False, data=p)
-        print(prof.max_regret())
-        print(prof.agent_max_regret())
-
-
-def test_regrets_tmp2():
-    g = games.create_3_player_with_internal_outcomes_efg()
-    prof_data_rat = [[[1, 0], [1, 0]], [[1, 0], ["1/2", "1/2"]], [[1, 0], [0, 1]]]
-    profile_rat = g.mixed_behavior_profile(rational=True, data=prof_data_rat)
-    print()
-    print(profile_rat.max_regret())  # 3/2
-    profile_rat = g.mixed_behavior_profile(rational=True, data=prof_data_rat)
-    print(profile_rat.max_regret())  # now different! 0
-
-
-@pytest.mark.parametrize(
-    "game,mixed_behav_prof_data",
-    [
-        (
-            games.create_seq_form_STOC_paper_zero_sum_2_player_efg(),
-            [
-                [[0, 1], ["1/3", "2/3"], ["2/3", "1/3"]],
-                [["5/6", "1/6"], ["5/9", "4/9"]],
-            ],
-        ),
-        (
-            games.create_3_player_with_internal_outcomes_efg(),
-            [
-                [[1, 0], [1, 0]], [[1, 0], ["1/2", "1/2"]],
-                [[1, 0], [0, 1]]
-            ],
-        ),
-        (
-            games.create_STOC_simplified(),
-            [
-                [[0, 1], ["1/3", "2/3"], ["2/3", "1/3"]],
-                [["5/6", "1/6"]],
-            ],
-        ),
-        # (
-        # games.create_STOC_simplified2(),
-        # [
-        # [[1], [1], ["1/3", "2/3"]],
-        # [["5/6", "1/6"]],
-        # ],
-        # ),
-    ],
-)
-def test_repeat_max_regret(game: gbt.Game, mixed_behav_prof_data: list):
-    profile1 = game.mixed_behavior_profile(rational=True, data=mixed_behav_prof_data)
-    mr1 = profile1.max_regret()
-    profile2 = game.mixed_behavior_profile(rational=True, data=mixed_behav_prof_data)
-    mr2 = profile2.max_regret()
-    assert mr1 == mr2
