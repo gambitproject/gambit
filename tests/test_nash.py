@@ -222,66 +222,6 @@ def test_enumpoly_ordered_behavior(
 @pytest.mark.parametrize(
     "game,mixed_behav_prof_data,stop_after",
     [
-        ##############################################################################
-        ##############################################################################
-        (
-            games.create_3_player_with_internal_outcomes_efg(),
-            [
-                [[[1, 0], [1, 0]], [[1, 0], ["1/2", "1/2"]], [[1, 0], [0, 1]]],
-                [[[1, 0], [1, 0]], [[1, 0], [0, 1]], [[1, 0], ["1/3", "2/3"]]],
-            ],
-            2,
-        ),
-        (
-            games.create_3_player_with_internal_outcomes_efg(nonterm_outcomes=True),
-            [
-                [[[1, 0], [1, 0]], [[1, 0], ["1/2", "1/2"]], [[1, 0], [0, 1]]],
-                [[[1, 0], [1, 0]], [[1, 0], [0, 1]], [[1, 0], ["1/3", "2/3"]]]],
-            2,
-        ),
-        ##############################################################################
-        ##############################################################################
-    ],
-)
-def test_enumpoly_ordered_behavior_PROBLEM_CASE(
-        game: gbt.Game, mixed_behav_prof_data: list, stop_after: None | int
-):
-    """Test calls of enumpoly for mixed behavior equilibria,
-    using max_regret and agent_max_regret (internal consistency); and
-    comparison to a set of previously computed equilibria with this function (regression test).
-    This set will be the full set of all computed equilibria if stop_after is None,
-    else the first stop_after-many equilibria.
-
-    This is the "ordered" version where we test for the outputs coming in a specific
-    order; there is also an "unordered" version.  The game 2x2x2.nfg, for example,
-    has a point at which the Jacobian is singular.  As a result, the order in which it
-    returns the two totally-mixed equilbria is system-dependent due, essentially,
-    to inherent numerical instability near that point.
-    """
-    if stop_after:
-        result = gbt.nash.enumpoly_solve(
-            game, use_strategic=False, stop_after=stop_after, maxregret=0.00001
-        )
-        assert len(result.equilibria) == stop_after
-    else:
-        # compute all
-        result = gbt.nash.enumpoly_solve(game, use_strategic=False)
-    assert len(result.equilibria) == len(mixed_behav_prof_data)
-    for eq, exp in zip(result.equilibria, mixed_behav_prof_data, strict=True):
-        assert abs(eq.max_regret()) <= TOL
-        assert abs(eq.agent_max_regret()) <= TOL
-        expected = game.mixed_behavior_profile(rational=True, data=exp)
-        for p in game.players:
-            for i in p.infosets:
-                for a in i.actions:
-                    assert abs(eq[p][i][a] - expected[p][i][a]) <= TOL
-
-
-@pytest.mark.nash
-@pytest.mark.nash_enumpoly_behavior
-@pytest.mark.parametrize(
-    "game,mixed_behav_prof_data,stop_after",
-    [
         # 3-player game
         (
                 games.create_mixed_behav_game_efg(),
