@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/solvers/enumpoly/polysolver.cc
 // Implementation of polynomial system solver

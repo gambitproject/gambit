@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/tools/enummixed/enummixed.cc
 // Compute Nash equilibria via Mangasarian's algorithm
@@ -46,7 +46,7 @@ void PrintCliques(const Array<Array<MixedStrategyProfile<T>>> &p_cliques,
 void PrintBanner(std::ostream &p_stream)
 {
   p_stream << "Compute Nash equilibria by enumerating extreme points\n";
-  p_stream << "Gambit version " VERSION ", Copyright (C) 1994-2025, The Gambit Project\n";
+  p_stream << "Gambit version " VERSION ", Copyright (C) 1994-2026, The Gambit Project\n";
   p_stream << "This is free software, distributed under the GNU GPL\n\n";
 }
 

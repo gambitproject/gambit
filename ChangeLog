@@ -1,6 +1,6 @@
 # Changelog
 
-## [16.5.0] - unreleased
+## [16.5.0] - 2026-01-05
 
 ### Fixed
 - Sequence-form based equilibrium-finding methods returned incorrect output on games with
