@@ -1,6 +1,6 @@
 #
 # This file is part of Gambit
-# Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+# Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 #
 # FILE: src/pygambit/nash.pxi
 # Cython wrapper for Nash equilibrium computations
@@ -74,15 +74,15 @@ def _enummixed_strategy_solve_rational(game: Game) -> list[MixedStrategyProfileR
 
 
 def _lcp_behavior_solve_double(
-        game: Game, stop_after: int, max_depth: int
+        game: Game
 ) -> list[MixedBehaviorProfileDouble]:
-    return _convert_mbpd(LcpBehaviorSolve[double](game.game, stop_after, max_depth))
+    return _convert_mbpd(LcpBehaviorSolve[double](game.game))
 
 
 def _lcp_behavior_solve_rational(
-        game: Game, stop_after: int, max_depth: int
+        game: Game
 ) -> list[MixedBehaviorProfileRational]:
-    return _convert_mbpr(LcpBehaviorSolve[c_Rational](game.game, stop_after, max_depth))
+    return _convert_mbpr(LcpBehaviorSolve[c_Rational](game.game))
 
 
 def _lcp_strategy_solve_double(
@@ -122,7 +122,7 @@ def _liap_strategy_solve(start: MixedStrategyProfileDouble,
 def _liap_behavior_solve(start: MixedBehaviorProfileDouble,
                          maxregret: float,
                          maxiter: int) -> list[MixedBehaviorProfileDouble]:
-    return _convert_mbpd(LiapBehaviorSolve(deref(start.profile), maxregret, maxiter))
+    return _convert_mbpd(LiapAgentSolve(deref(start.profile), maxregret, maxiter))
 
 
 def _simpdiv_strategy_solve(

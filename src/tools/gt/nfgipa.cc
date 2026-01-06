@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/tools/gt/nfgipa.cc
 // Gambit frontend to Gametracer IPA
@@ -31,16 +31,16 @@ using namespace Gambit;
 using namespace Gambit::Nash;
 using namespace Gambit::gametracer;
 
-extern List<MixedStrategyProfile<double>> ReadStrategyPerturbations(const Game &p_game,
-                                                                    std::istream &p_stream);
-extern List<MixedStrategyProfile<double>> RandomStrategyPerturbations(const Game &p_game,
-                                                                      int p_count);
+extern Array<MixedStrategyProfile<double>> ReadStrategyPerturbations(const Game &p_game,
+                                                                     std::istream &p_stream);
+extern Array<MixedStrategyProfile<double>> RandomStrategyPerturbations(const Game &p_game,
+                                                                       int p_count);
 
 void PrintBanner(std::ostream &p_stream)
 {
   p_stream << "Compute Nash equilibria using iterated polymatrix approximation\n";
   p_stream << "Gametracer version 0.2, Copyright (C) 2002, Ben Blum and Christian Shelton\n";
-  p_stream << "Gambit version " VERSION ", Copyright (C) 1994-2025, The Gambit Project\n";
+  p_stream << "Gambit version " VERSION ", Copyright (C) 1994-2026, The Gambit Project\n";
   p_stream << "This is free software, distributed under the GNU GPL\n\n";
 }
 
@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
     const Game game = ReadGame(*input_stream);
     auto renderer = MakeMixedStrategyProfileRenderer<double>(std::cout, numDecimals, false);
 
-    List<MixedStrategyProfile<double>> perts;
+    Array<MixedStrategyProfile<double>> perts;
     if (!startFile.empty()) {
       std::ifstream startPerts(startFile.c_str());
       perts = ReadStrategyPerturbations(game, startPerts);

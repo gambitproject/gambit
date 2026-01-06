@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/solvers/enumpoly/rectangle.h
 // A utility class representing a (generalised) rectangle in N-dimensional space
@@ -72,8 +72,7 @@ public:
 
 /// A cartesian product of intervals
 template <class T> class Rectangle {
-private:
-  List<Interval<T>> sides;
+  Array<Interval<T>> sides;
 
   Rectangle() = default;
 

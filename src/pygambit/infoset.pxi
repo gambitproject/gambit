@@ -1,6 +1,6 @@
 #
 # This file is part of Gambit
-# Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+# Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 #
 # FILE: src/pygambit/infoset.pxi
 # Cython wrapper for information sets
@@ -162,6 +162,18 @@ class Infoset:
         return self.infoset.deref().IsChanceInfoset()
 
     @property
+    def is_absent_minded(self) -> bool:
+        """
+        Whether the information set is absent-minded.
+
+        An information set is absent-minded if there exists a path of play
+        in the game tree that intersects the information set more than once.
+
+        .. versionadded:: 16.5.0
+        """
+        return self.infoset.deref().GetGame().deref().IsAbsentMinded(self.infoset)
+
+    @property
     def actions(self) -> InfosetActions:
         """The set of actions at the information set."""
         return InfosetActions.wrap(self.infoset)
@@ -194,19 +206,13 @@ class Infoset:
     def members(self) -> InfosetMembers:
         """The set of nodes which are members of the information set.
 
-        The order in which members are iterated is dependent on the order of
-        operations used to define the game.  A standard ordering, in which members
-        are iterated in the order encountered in a depth-first traversal of the tree,
-        can be obtained by calling `Game.sort_infosets` on the game after construction.
+        The iteration order of information set members is the order in which they
+        are encountered in the pre-order depth first traversal of the game tree.
 
-        .. versionchanged:: 16.4.0
-           The ordering of members is now dependent on the order of operations;
-           previously, members sets were (expensively) re-sorted after every change
-           to the game tree.
+        .. versionchanged:: 16.5.0
+           It is no longer necessary to call `Game.sort_infosets` to standardise
+           iteration order.
 
-        See also
-        --------
-        Game.sort_infosets
         """
         return InfosetMembers.wrap(self.infoset)
 

@@ -1,6 +1,6 @@
 ##
 ## This file is part of Gambit
-## Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+## Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 ##
 ## FILE: Makefile.am
 ## Top-level automake input file for Gambit
@@ -246,19 +246,14 @@ core_SOURCES = \
     src/core/core.h \
     src/core/util.h \
 	src/core/array.h \
-	src/core/list.h \
 	src/core/vector.h \
 	src/core/recarray.h \
 	src/core/matrix.h \
-	src/core/matrix.imp \
-	src/core/sqmatrix.h \
-	src/core/sqmatrix.imp \
 	src/core/integer.cc \
 	src/core/integer.h \
 	src/core/rational.cc \
 	src/core/rational.h \
 	src/core/matrix.cc \
-	src/core/sqmatrix.cc \
 	src/core/function.cc \
 	src/core/function.h \
 	src/core/tinyxml.cc \
@@ -407,7 +402,6 @@ gambit_enumpoly_SOURCES = \
 	src/solvers/enumpoly/rectangle.h \
 	src/solvers/enumpoly/poly.cc \
 	src/solvers/enumpoly/poly.h \
-	src/solvers/enumpoly/poly.imp \
 	src/solvers/enumpoly/polysystem.h \
     src/solvers/enumpoly/polypartial.h \
     src/solvers/enumpoly/polypartial.imp \

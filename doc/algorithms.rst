@@ -93,10 +93,14 @@ computes Nash equilibria by finding solutions to a linear
 complementarity problem. For extensive games, the program uses the
 sequence form representation of the extensive game, as defined by
 Koller, Megiddo, and von Stengel [KolMegSte94]_, and applies the
-algorithm developed by Lemke. For strategic games, the program using
-the method of Lemke and Howson [LemHow64]_.  There exist strategic
-games for which some equilibria cannot be located by this method; see
-Shapley [Sha74]_.
+algorithm developed by Lemke.
+
+For strategic games, the program uses the method of Lemke and Howson
+[LemHow64]_. In this case, the method will find all "accessible"
+equilibria, i.e., those that can be found as concatenations of Lemke-Howson
+paths that start at the artificial equilibrium.
+There exist strategic-form games for which some equilibria cannot be found
+by this method, i.e., some equilibria are inaccessible; see Shapley [Sha74]_.
 
 In a two-player strategic game, the set of Nash equilibria can be expressed
 as the union of convex sets. This program will find extreme points

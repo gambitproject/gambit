@@ -158,6 +158,7 @@ Information about the game
    Infoset.label
    Infoset.game
    Infoset.is_chance
+   Infoset.is_absent_minded
    Infoset.player
    Infoset.actions
    Infoset.members
@@ -257,6 +258,8 @@ Probability distributions over behavior
    MixedBehaviorProfile.infoset_prob
    MixedBehaviorProfile.belief
    MixedBehaviorProfile.is_defined_at
+   MixedBehaviorProfile.agent_max_regret
+   MixedBehaviorProfile.agent_liap_value
    MixedBehaviorProfile.max_regret
    MixedBehaviorProfile.liap_value
    MixedBehaviorProfile.as_strategy
@@ -296,11 +299,13 @@ Computation of Nash equilibria
 
    NashComputationResult
    enumpure_solve
+   enumpure_agent_solve
    enummixed_solve
    enumpoly_solve
    lp_solve
    lcp_solve
    liap_solve
+   liap_agent_solve
    logit_solve
    simpdiv_solve
    ipa_solve

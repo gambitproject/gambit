@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/solvers/enumpoly/efgpoly.cc
 // Enumerates all Nash equilibria of a game, via polynomial equations
@@ -60,10 +60,10 @@ Polynomial<double> BuildSequenceVariable(ProblemData &p_data, const GameSequence
                                          const std::map<GameSequence, int> &var)
 {
   if (!p_sequence->action) {
-    return {p_data.space, 1};
+    return Polynomial<double>(p_data.space, 1);
   }
   if (p_sequence->action != p_data.m_support.GetActions(p_sequence->GetInfoset()).back()) {
-    return {p_data.space, var.at(p_sequence), 1};
+    return Polynomial<double>(p_data.space, var.at(p_sequence), 1);
   }
 
   Polynomial<double> equation(p_data.space);
@@ -213,7 +213,7 @@ EnumPolyBehaviorSolve(const Game &p_game, int p_stopAfter, double p_maxregret,
     for (auto solution :
          SolveSupport(support, isSingular, std::max(p_stopAfter - int(ret.size()), 0))) {
       const MixedBehaviorProfile<double> fullProfile = solution.ToFullSupport();
-      if (fullProfile.GetMaxRegret() < p_maxregret) {
+      if (fullProfile.GetAgentMaxRegret() < p_maxregret) {
         p_onEquilibrium(fullProfile);
         ret.push_back(fullProfile);
       }

@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/libgambit/gametree.cc
 // Implementation of extensive game representation
@@ -57,21 +57,20 @@ std::unique_ptr<MixedStrategyProfileRep<T>> TreeMixedStrategyProfileRep<T>::Copy
 
 template <class T> void TreeMixedStrategyProfileRep<T>::MakeBehavior() const
 {
-  if (mixed_behav_profile_sptr.get() == nullptr) {
-    mixed_behav_profile_sptr =
-        std::make_shared<MixedBehaviorProfile<T>>(MixedStrategyProfile<T>(Copy()));
+  if (m_mixedBehavior == nullptr) {
+    m_mixedBehavior = std::make_shared<MixedBehaviorProfile<T>>(MixedStrategyProfile<T>(Copy()));
   }
 }
 
-template <class T> void TreeMixedStrategyProfileRep<T>::InvalidateCache() const
+template <class T> void TreeMixedStrategyProfileRep<T>::OnProfileChanged() const
 {
-  mixed_behav_profile_sptr = nullptr;
+  m_mixedBehavior = nullptr;
 }
 
 template <class T> T TreeMixedStrategyProfileRep<T>::GetPayoff(int pl) const
 {
   MakeBehavior();
-  return mixed_behav_profile_sptr->GetPayoff(pl);
+  return m_mixedBehavior->GetPayoff(m_mixedBehavior->GetGame()->GetPlayer(pl));
 }
 
 template <class T>
@@ -146,6 +145,7 @@ void GameTreeRep::DeleteAction(GameAction p_action)
     member->m_children.erase(it);
   }
   ClearComputedValues();
+  InvalidateNodeOrdering();
 }
 
 GameInfoset GameActionRep::GetInfoset() const { return m_infoset->shared_from_this(); }
@@ -193,6 +193,7 @@ void GameTreeRep::SetPlayer(GameInfoset p_infoset, GamePlayer p_player)
   p_player->m_infosets.push_back(p_infoset);
 
   ClearComputedValues();
+  InvalidateNodeOrdering();
 }
 
 bool GameInfosetRep::Precedes(GameNode p_node) const
@@ -236,6 +237,7 @@ GameAction GameTreeRep::InsertAction(GameInfoset p_infoset, GameAction p_action 
   m_numNodes += p_infoset->m_members.size();
   // m_numNonterminalNodes stays unchanged when an action is appended to an information set
   ClearComputedValues();
+  InvalidateNodeOrdering();
   return action;
 }
 
@@ -251,6 +253,7 @@ void GameTreeRep::RemoveMember(GameInfosetRep *p_infoset, GameNodeRep *p_node)
         player->m_infosets.begin(), player->m_infosets.end(), p_infoset->shared_from_this()));
     RenumberInfosets(player);
   }
+  InvalidateNodeOrdering();
 }
 
 void GameTreeRep::Reveal(GameInfoset p_atInfoset, GamePlayer p_player)
@@ -279,6 +282,7 @@ void GameTreeRep::Reveal(GameInfoset p_atInfoset, GamePlayer p_player)
   }
 
   ClearComputedValues();
+  InvalidateNodeOrdering();
 }
 
 //========================================================================
@@ -438,6 +442,7 @@ void GameTreeRep::DeleteParent(GameNode p_node)
 
   oldParent->Invalidate();
   ClearComputedValues();
+  InvalidateNodeOrdering();
 }
 
 void GameTreeRep::DeleteTree(GameNode p_node)
@@ -464,6 +469,7 @@ void GameTreeRep::DeleteTree(GameNode p_node)
   node->m_label = "";
 
   ClearComputedValues();
+  InvalidateNodeOrdering();
 }
 
 void GameTreeRep::CopySubtree(GameNodeRep *dest, GameNodeRep *src, GameNodeRep *stop)
@@ -505,6 +511,7 @@ void GameTreeRep::CopyTree(GameNode p_dest, GameNode p_src)
       CopySubtree(dest_child->get(), src_child->get(), dest);
     }
     ClearComputedValues();
+    InvalidateNodeOrdering();
   }
 }
 
@@ -528,6 +535,7 @@ void GameTreeRep::MoveTree(GameNode p_dest, GameNode p_src)
   dest->m_outcome = nullptr;
 
   ClearComputedValues();
+  InvalidateNodeOrdering();
 }
 
 Game GameTreeRep::CopySubgame(GameNode p_root) const
@@ -559,6 +567,7 @@ void GameTreeRep::SetInfoset(GameNode p_node, GameInfoset p_infoset)
   node->m_infoset = p_infoset.get();
 
   ClearComputedValues();
+  InvalidateInfosetOrdering();
 }
 
 GameInfoset GameTreeRep::LeaveInfoset(GameNode p_node)
@@ -589,13 +598,14 @@ GameInfoset GameTreeRep::LeaveInfoset(GameNode p_node)
     (*new_act)->SetLabel((*old_act)->GetLabel());
   }
   ClearComputedValues();
+  InvalidateInfosetOrdering();
   return node->m_infoset->shared_from_this();
 }
 
 GameInfoset GameTreeRep::AppendMove(GameNode p_node, GamePlayer p_player, int p_actions,
                                     bool p_generateLabels)
 {
-  GameNodeRep *node = p_node.get();
+  const GameNodeRep *node = p_node.get();
   if (p_actions <= 0 || !node->m_children.empty()) {
     throw UndefinedException();
   }
@@ -634,6 +644,7 @@ GameInfoset GameTreeRep::AppendMove(GameNode p_node, GameInfoset p_infoset)
                 });
   m_numNonterminalNodes++;
   ClearComputedValues();
+  InvalidateNodeOrdering();
   return node->m_infoset->shared_from_this();
 }
 
@@ -690,6 +701,7 @@ GameInfoset GameTreeRep::InsertMove(GameNode p_node, GameInfoset p_infoset)
   m_numNodes += newNode->m_infoset->m_actions.size();
   m_numNonterminalNodes++;
   ClearComputedValues();
+  InvalidateNodeOrdering();
   return p_infoset;
 }
 
@@ -819,6 +831,19 @@ bool GameTreeRep::IsPerfectRecall() const
                      [](const auto &pair) { return pair.second.size() <= 1; });
 }
 
+bool GameTreeRep::IsAbsentMinded(const GameInfoset &p_infoset) const
+{
+  if (p_infoset->GetGame().get() != this) {
+    throw MismatchException();
+  }
+
+  if (!m_unreachableNodes && !m_root->IsTerminal()) {
+    BuildUnreachableNodes();
+  }
+
+  return contains(m_absentMindedInfosets, p_infoset.get());
+}
+
 //------------------------------------------------------------------------
 //               GameTreeRep: Managing the representation
 //------------------------------------------------------------------------
@@ -840,6 +865,7 @@ void GameTreeRep::SortInfosets(GamePlayerRep *p_player)
       });
   RenumberInfosets(p_player);
 }
+
 void GameTreeRep::RenumberInfosets(GamePlayerRep *p_player)
 {
   std::for_each(
@@ -847,16 +873,28 @@ void GameTreeRep::RenumberInfosets(GamePlayerRep *p_player)
       [iset = 1](const std::shared_ptr<GameInfosetRep> &s) mutable { s->m_number = iset++; });
 }
 
-void GameTreeRep::SortInfosets()
+void GameTreeRep::EnsureNodeOrdering() const
 {
+  if (m_nodesOrdered) {
+    return;
+  }
   int nodeindex = 1;
   for (const auto &node : GetNodes()) {
     node->m_number = nodeindex++;
   }
-  SortInfosets(m_chance.get());
-  for (auto player : m_players) {
+  m_nodesOrdered = true;
+}
+
+void GameTreeRep::EnsureInfosetOrdering() const
+{
+  if (m_infosetsOrdered) {
+    return;
+  }
+  EnsureNodeOrdering();
+  for (auto player : GetPlayersWithChance()) {
     SortInfosets(player.get());
   }
+  m_infosetsOrdered = true;
 }
 
 void GameTreeRep::ClearComputedValues() const
@@ -870,6 +908,7 @@ void GameTreeRep::ClearComputedValues() const
   const_cast<GameTreeRep *>(this)->m_nodePlays.clear();
   m_ownPriorActionInfo = nullptr;
   const_cast<GameTreeRep *>(this)->m_unreachableNodes = nullptr;
+  m_absentMindedInfosets.clear();
   m_computedValues = false;
 }
 
@@ -878,7 +917,7 @@ void GameTreeRep::BuildComputedValues() const
   if (m_computedValues) {
     return;
   }
-  const_cast<GameTreeRep *>(this)->SortInfosets();
+  EnsureInfosetOrdering();
   for (const auto &player : m_players) {
     std::map<GameInfosetRep *, int> behav;
     std::map<GameNodeRep *, GameNodeRep *> ptr, whichbranch;
@@ -1008,7 +1047,7 @@ std::set<GameAction> GameTreeRep::GetOwnPriorActions(const GameInfoset &p_infose
   return result;
 }
 
-void GameTreeRep::BuildUnreachableNodes()
+void GameTreeRep::BuildUnreachableNodes() const
 {
   m_unreachableNodes = std::make_unique<std::set<GameNodeRep *>>();
 
@@ -1052,6 +1091,7 @@ void GameTreeRep::BuildUnreachableNodes()
     if (!child->IsTerminal()) {
       // Check for Absent-Minded Re-entry of the infoset
       if (path_choices.find(child->m_infoset->shared_from_this()) != path_choices.end()) {
+        m_absentMindedInfosets.insert(child->m_infoset);
         const GameAction replay_action = path_choices.at(child->m_infoset->shared_from_this());
         position.emplace(AbsentMindedEdge{replay_action, child});
 
@@ -1061,7 +1101,9 @@ void GameTreeRep::BuildUnreachableNodes()
             std::stack<GameNodeRep *> nodes_to_visit;
             nodes_to_visit.push(subtree_root.get());
             while (!nodes_to_visit.empty()) {
+              // NOLINTBEGIN(misc-const-correctness)
               GameNodeRep *current_unreachable_node = nodes_to_visit.top();
+              // NOLINTEND(misc-const-correctness)
               nodes_to_visit.pop();
               m_unreachableNodes->insert(current_unreachable_node);
               for (const auto &unreachable_child : current_unreachable_node->GetChildren()) {
@@ -1313,6 +1355,7 @@ MixedStrategyProfile<double> GameTreeRep::NewMixedStrategyProfile(double) const
   if (!IsPerfectRecall()) {
     throw UndefinedException("Mixed strategies not supported for games with imperfect recall.");
   }
+  EnsureInfosetOrdering();
   return StrategySupportProfile(std::const_pointer_cast<GameRep>(shared_from_this()))
       .NewMixedStrategyProfile<double>();
 }
@@ -1322,6 +1365,7 @@ MixedStrategyProfile<Rational> GameTreeRep::NewMixedStrategyProfile(const Ration
   if (!IsPerfectRecall()) {
     throw UndefinedException("Mixed strategies not supported for games with imperfect recall.");
   }
+  EnsureInfosetOrdering();
   return StrategySupportProfile(std::const_pointer_cast<GameRep>(shared_from_this()))
       .NewMixedStrategyProfile<Rational>();
 }
@@ -1332,6 +1376,7 @@ GameTreeRep::NewMixedStrategyProfile(double, const StrategySupportProfile &spt) 
   if (!IsPerfectRecall()) {
     throw UndefinedException("Mixed strategies not supported for games with imperfect recall.");
   }
+  EnsureInfosetOrdering();
   return MixedStrategyProfile<double>(std::make_unique<TreeMixedStrategyProfileRep<double>>(spt));
 }
 
@@ -1341,6 +1386,7 @@ GameTreeRep::NewMixedStrategyProfile(const Rational &, const StrategySupportProf
   if (!IsPerfectRecall()) {
     throw UndefinedException("Mixed strategies not supported for games with imperfect recall.");
   }
+  EnsureInfosetOrdering();
   return MixedStrategyProfile<Rational>(
       std::make_unique<TreeMixedStrategyProfileRep<Rational>>(spt));
 }
@@ -1370,6 +1416,7 @@ public:
 
 PureStrategyProfile GameTreeRep::NewPureStrategyProfile() const
 {
+  EnsureInfosetOrdering();
   return PureStrategyProfile(std::make_shared<TreePureStrategyProfileRep>(
       std::const_pointer_cast<GameRep>(shared_from_this())));
 }

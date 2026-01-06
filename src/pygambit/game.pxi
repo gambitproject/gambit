@@ -1,6 +1,6 @@
 #
 # This file is part of Gambit
-# Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+# Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 #
 # FILE: src/pygambit/game.pxi
 # Cython wrapper for games
@@ -31,11 +31,12 @@ import scipy.stats
 import pygambit.gameiter
 
 ctypedef string (*GameWriter)(const c_Game &) except +IOError
-ctypedef c_Game (*GameParser)(const string &) except +IOError
+ctypedef c_Game (*GameParser)(const string &, bool) except +IOError
 
 
 @cython.cfunc
 def read_game(filepath_or_buffer: str | pathlib.Path | io.IOBase,
+              normalize_labels: bool,
               parser: GameParser):
 
     g = cython.declare(Game)
@@ -47,19 +48,23 @@ def read_game(filepath_or_buffer: str | pathlib.Path | io.IOBase,
         with open(filepath_or_buffer, "rb") as f:
             data = f.read()
     try:
-        g = Game.wrap(parser(data))
+        g = Game.wrap(parser(data, normalize_labels))
     except Exception as exc:
         raise ValueError(f"Parse error in game file: {exc}") from None
     return g
 
 
-def read_gbt(filepath_or_buffer: str | pathlib.Path | io.IOBase) -> Game:
+def read_gbt(filepath_or_buffer: str | pathlib.Path | io.IOBase,
+             normalize_labels: bool = False) -> Game:
     """Construct a game from its serialised representation in a GBT file.
 
     Parameters
     ----------
     filepath_or_buffer : str, pathlib.Path or io.IOBase
         The path to the file containing the game representation or file-like object
+    normalize_labels : bool (default False)
+        Ensure all labels are nonempty and unique within their scopes.
+        This will be enforced in a future version of Gambit.
 
     Returns
     -------
@@ -77,16 +82,20 @@ def read_gbt(filepath_or_buffer: str | pathlib.Path | io.IOBase) -> Game:
     --------
     read_efg, read_nfg, read_agg
     """
-    return read_game(filepath_or_buffer, parser=ParseGbtGame)
+    return read_game(filepath_or_buffer, normalize_labels, parser=ParseGbtGame)
 
 
-def read_efg(filepath_or_buffer: str | pathlib.Path | io.IOBase) -> Game:
+def read_efg(filepath_or_buffer: str | pathlib.Path | io.IOBase,
+             normalize_labels: bool = False) -> Game:
     """Construct a game from its serialised representation in an EFG file.
 
     Parameters
     ----------
     filepath_or_buffer : str, pathlib.Path or io.IOBase
         The path to the file containing the game representation or file-like object
+    normalize_labels : bool (default False)
+        Ensure all labels are nonempty and unique within their scopes.
+        This will be enforced in a future version of Gambit.
 
     Returns
     -------
@@ -104,16 +113,20 @@ def read_efg(filepath_or_buffer: str | pathlib.Path | io.IOBase) -> Game:
     --------
     read_gbt, read_nfg, read_agg
     """
-    return read_game(filepath_or_buffer, parser=ParseEfgGame)
+    return read_game(filepath_or_buffer, normalize_labels, parser=ParseEfgGame)
 
 
-def read_nfg(filepath_or_buffer: str | pathlib.Path | io.IOBase) -> Game:
+def read_nfg(filepath_or_buffer: str | pathlib.Path | io.IOBase,
+             normalize_labels: bool = False) -> Game:
     """Construct a game from its serialised representation in a NFG file.
 
     Parameters
     ----------
     filepath_or_buffer : str, pathlib.Path or io.IOBase
         The path to the file containing the game representation or file-like object
+    normalize_labels : bool (default False)
+        Ensure all labels are nonempty and unique within their scopes.
+        This will be enforced in a future version of Gambit.
 
     Returns
     -------
@@ -131,16 +144,20 @@ def read_nfg(filepath_or_buffer: str | pathlib.Path | io.IOBase) -> Game:
     --------
     read_gbt, read_efg, read_agg
     """
-    return read_game(filepath_or_buffer, parser=ParseNfgGame)
+    return read_game(filepath_or_buffer, normalize_labels, parser=ParseNfgGame)
 
 
-def read_agg(filepath_or_buffer: str | pathlib.Path | io.IOBase) -> Game:
+def read_agg(filepath_or_buffer: str | pathlib.Path | io.IOBase,
+             normalize_labels: bool = False) -> Game:
     """Construct a game from its serialised representation in an AGG file.
 
     Parameters
     ----------
     filepath_or_buffer : str, pathlib.Path or io.IOBase
         The path to the file containing the game representation or file-like object
+    normalize_labels : bool (default False)
+        Ensure all labels are nonempty and unique within their scopes.
+        This will be enforced in a future version of Gambit.
 
     Returns
     -------
@@ -158,7 +175,7 @@ def read_agg(filepath_or_buffer: str | pathlib.Path | io.IOBase) -> Game:
     --------
     read_gbt, read_efg, read_nfg
     """
-    return read_game(filepath_or_buffer, parser=ParseAggGame)
+    return read_game(filepath_or_buffer, normalize_labels, parser=ParseAggGame)
 
 
 @cython.cclass
@@ -192,41 +209,6 @@ class GameNodes:
 
         for node in self.game.deref().GetNodes():
             yield Node.wrap(node)
-
-
-@cython.cclass
-class GameNonterminalNodes:
-    """Represents the set of nodes in a game."""
-    game = cython.declare(c_Game)
-
-    def __init__(self, *args, **kwargs) -> None:
-        raise ValueError("Cannot create GameNonterminalNodes outside a Game.")
-
-    @staticmethod
-    @cython.cfunc
-    def wrap(game: c_Game) -> GameNonterminalNodes:
-        obj: GameNonterminalNodes = GameNonterminalNodes.__new__(GameNonterminalNodes)
-        obj.game = game
-        return obj
-
-    def __repr__(self) -> str:
-        return f"GameNonterminalNodes(game={Game.wrap(self.game)})"
-
-    def __len__(self) -> int:
-        """The number of non-terminal nodes in the game."""
-        if not self.game.deref().IsTree():
-            return 0
-        return self.game.deref().NumNonterminalNodes()
-
-    def __iter__(self) -> typing.Iterator[Node]:
-        def dfs(node):
-            if not node.is_terminal:
-                yield node
-            for child in node.children:
-                yield from dfs(child)
-        if not self.game.deref().IsTree():
-            return
-        yield from dfs(Node.wrap(self.game.deref().GetRoot()))
 
 
 @cython.cclass
@@ -307,7 +289,10 @@ class GamePlayers:
                 raise ValueError(f"Game has multiple players with label '{index}'")
             return matches[0]
         if isinstance(index, int):
-            return Player.wrap(self.game.deref().GetPlayer(index + 1))
+            try:
+                return Player.wrap(self.game.deref().GetPlayer(index + 1))
+            except IndexError:
+                raise IndexError("Index out of range") from None
         raise TypeError(f"Player index must be int or str, not {index.__class__.__name__}")
 
     @property
@@ -742,17 +727,17 @@ class Game:
         .. versionchanged:: 16.4
            Changed from a method ``nodes()`` to a property.
 
+        Raises
+        ------
+        UndefinedOperationError
+            If the game does not have a tree representation.
         """
+        if not self.is_tree:
+            raise UndefinedOperationError(
+                "Operation only defined for games with a tree representation"
+            )
+
         return GameNodes.wrap(self.game)
-
-    @property
-    def _nonterminal_nodes(self) -> GameNonterminalNodes:
-        """The set of non-terminal nodes in the game.
-
-        Iteration over this property yields the non-terminal nodes in the order of depth-first
-        search.
-        """
-        return GameNonterminalNodes.wrap(self.game)
 
     @property
     def contingencies(self) -> pygambit.gameiter.Contingencies:
@@ -1529,7 +1514,7 @@ class Game:
             except KeyError:
                 raise KeyError(f"{funcname}(): no information set with label '{infoset}'")
         raise TypeError(
-            f"{funcname}(): {argname} must be Infoset or str, not {node.__class__.__name__}"
+            f"{funcname}(): {argname} must be Infoset or str, not {infoset.__class__.__name__}"
         )
 
     def _resolve_action(self,
@@ -1876,21 +1861,25 @@ class Game:
     def sort_infosets(self) -> None:
         """Sort information sets into a standard order.
 
-        When iterating the information sets of a player, the order in which information
-        sets are visited may be dependent on the order of the operations used to build
-        the extensive game.  This function sorts each player's information sets into
-        a standard order, namely, the order in which they are encountered in a depth-first
-        traversal of the tree, and likewise sorts the members of each information set
-        by the order in which they are encountered in a depth-first traversal.
+        .. deprecated:: 16.5.0
+           This operation is deprecated as efficient management of the iteration orders of
+           information sets and their members is now handled by the representation objects.
 
-        .. versionadded:: 16.4.0
-
-        See also
-        --------
-        Player.infosets
-        Infoset.members
+        Raises
+        ------
+        UndefinedOperationError
+            If the game does not have a tree representation.
         """
-        self.game.deref().SortInfosets()
+        warnings.warn(
+            "sort_infosets() is deprecated; This operation is now done automatically when"
+            " required. "
+            "This function will be removed in a future release.",
+            FutureWarning
+        )
+        if not self.is_tree:
+            raise UndefinedOperationError(
+                "Operation only defined for games with a tree representation"
+            )
 
     def add_player(self, label: str = "") -> Player:
         """Add a new player to the game.

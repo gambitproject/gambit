@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/libgambit/behavspt.cc
 // Implementation of supports for extensive forms
@@ -40,8 +40,7 @@ BehaviorSupportProfile::BehaviorSupportProfile(const Game &p_efg) : m_efg(p_efg)
   }
 
   // Initialize the list of reachable information sets and nodes
-  for (size_t pl = 0; pl <= GetGame()->NumPlayers(); pl++) {
-    const GamePlayer player = (pl == 0) ? GetGame()->GetChance() : GetGame()->GetPlayer(pl);
+  for (const auto &player : p_efg->GetPlayersWithChance()) {
     for (const auto &infoset : player->GetInfosets()) {
       m_infosetReachable[infoset] = true;
       for (const auto &member : infoset->GetMembers()) {

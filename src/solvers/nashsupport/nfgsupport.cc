@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/solvers/nashsupport/nfgsupport.cc
 // Generate possible Nash supports based on the heuristic search approach of

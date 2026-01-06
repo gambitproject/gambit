@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/core/array.h
 // A basic bounds-checked array type
@@ -51,7 +51,8 @@ public:
   using reference = typename std::vector<T>::reference;
   using const_reference = typename std::vector<T>::const_reference;
 
-  explicit Array(size_t p_length = 0) : m_offset(1), m_data(p_length) {}
+  Array() : m_offset(1) {}
+  explicit Array(size_t p_length) : m_offset(1), m_data(p_length) {}
   /// Construct an array with the given index bounds.
   /// If p_high is less than p_low, the resulting array will have
   /// front_index equal to p_low, and size 0.
@@ -116,7 +117,17 @@ public:
     }
     erase(std::next(begin(), p_index - front_index()));
   }
+  template <class Pred> void remove_if(Pred p)
+  {
+    auto it = std::remove_if(m_data.begin(), m_data.end(), p);
+    m_data.erase(it, m_data.end());
+  }
+
   void push_back(const T &value) { m_data.push_back(value); }
+  template <class... Args> T &emplace_back(Args &&...args)
+  {
+    return m_data.emplace_back(std::forward<Args>(args)...);
+  }
   void pop_back() { m_data.pop_back(); }
   void reserve(size_t len) { m_data.reserve(len); }
 };

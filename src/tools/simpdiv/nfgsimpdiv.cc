@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/tools/simpdiv/nfgsimpdiv.cc
 // Compute Nash equilibria via simplicial subdivision on the normal form
@@ -30,9 +30,9 @@
 using namespace Gambit;
 using namespace Gambit::Nash;
 
-List<MixedStrategyProfile<Rational>> ReadProfiles(const Game &p_game, std::istream &p_stream)
+Array<MixedStrategyProfile<Rational>> ReadProfiles(const Game &p_game, std::istream &p_stream)
 {
-  List<MixedStrategyProfile<Rational>> profiles;
+  Array<MixedStrategyProfile<Rational>> profiles;
   while (!p_stream.eof() && !p_stream.bad()) {
     MixedStrategyProfile<Rational> p(p_game->NewMixedStrategyProfile(Rational(0)));
     for (size_t i = 1; i <= p.MixedProfileLength(); i++) {
@@ -53,11 +53,11 @@ List<MixedStrategyProfile<Rational>> ReadProfiles(const Game &p_game, std::istre
   return profiles;
 }
 
-List<MixedStrategyProfile<Rational>> RandomProfiles(const Game &p_game, int p_count,
-                                                    const Rational &denom)
+Array<MixedStrategyProfile<Rational>> RandomProfiles(const Game &p_game, int p_count,
+                                                     const Rational &denom)
 {
   std::default_random_engine engine;
-  List<MixedStrategyProfile<Rational>> profiles;
+  Array<MixedStrategyProfile<Rational>> profiles;
   for (int i = 1; i <= p_count; i++) {
     std::cout << "profile " << i << std::endl;
     profiles.push_back(p_game->NewRandomStrategyProfile(denom, engine));
@@ -93,7 +93,7 @@ void MixedStrategyCSVAsFloatRenderer::Render(const MixedStrategyProfile<Rational
 void PrintBanner(std::ostream &p_stream)
 {
   p_stream << "Compute Nash equilibria using simplicial subdivision\n";
-  p_stream << "Gambit version " VERSION ", Copyright (C) 1994-2025, The Gambit Project\n";
+  p_stream << "Gambit version " VERSION ", Copyright (C) 1994-2026, The Gambit Project\n";
   p_stream << "This is free software, distributed under the GNU GPL\n\n";
 }
 
@@ -203,7 +203,7 @@ int main(int argc, char *argv[])
 
   try {
     const Game game = ReadGame(*input_stream);
-    List<MixedStrategyProfile<Rational>> starts;
+    Array<MixedStrategyProfile<Rational>> starts;
     if (!startFile.empty()) {
       std::ifstream startPoints(startFile.c_str());
       starts = ReadProfiles(game, startPoints);

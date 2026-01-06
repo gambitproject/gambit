@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/gui/gamedoc.h
 // Declaration of game document class
@@ -210,13 +210,6 @@ public:
     return (m_profiles.size() == 0) ? 0 : GetProfiles().GetCurrent();
   }
   void SetCurrentProfile(int p_profile);
-  /*
-  void AddProfiles(const List<MixedBehavProfile<double> > &);
-  void AddProfile(const MixedBehavProfile<double> &);
-  void AddProfiles(const List<MixedStrategyProfile<double> > &);
-  void AddProfile(const MixedStrategyProfile<double> &);
-  */
-  //@}
 
   //!
   //! @name Handling of behavior supports

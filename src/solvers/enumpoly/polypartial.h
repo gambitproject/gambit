@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/solvers/enumpoly/polypartial.h
 // Efficient representation of partial derivatives of polynomials
@@ -98,7 +98,7 @@ public:
   }
   int GetDimension() const { return m_system.front().GetDimension(); }
   Matrix<T> DerivativeMatrix(const Vector<T> &, int) const;
-  SquareMatrix<T> SquareDerivativeMatrix(const Vector<T> &) const;
+  Matrix<T> SquareDerivativeMatrix(const Vector<T> &) const;
   Vector<T> ValuesOfRootPolys(const Vector<T> &, int) const;
 };
 

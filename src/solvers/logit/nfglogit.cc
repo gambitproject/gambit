@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/tools/logit/nfglogit.cc
 // Computation of quantal response equilibrium correspondence for
@@ -206,17 +206,15 @@ EstimatorCallbackFunction::EstimatorCallbackFunction(const Game &p_game,
                                                      MixedStrategyObserverFunctionType p_observer)
   : m_game(p_game), m_frequencies(p_frequencies), m_observer(p_observer),
     m_bestProfile(p_game->NewMixedStrategyProfile(0.0), 0.0,
-                  LogLike(p_frequencies, static_cast<const Vector<double> &>(
-                                             p_game->NewMixedStrategyProfile(0.0))))
+                  LogLike(p_frequencies, p_game->NewMixedStrategyProfile(0.0).GetProbVector()))
 {
 }
 
 void EstimatorCallbackFunction::EvaluatePoint(const Vector<double> &p_point)
 {
   const MixedStrategyProfile<double> profile(PointToProfile(m_game, p_point));
-  auto qre = LogitQREMixedStrategyProfile(
-      profile, p_point.back(),
-      LogLike(m_frequencies, static_cast<const Vector<double> &>(profile)));
+  auto qre = LogitQREMixedStrategyProfile(profile, p_point.back(),
+                                          LogLike(m_frequencies, profile.GetProbVector()));
   m_observer(qre);
   if (qre.GetLogLike() > m_bestProfile.GetLogLike()) {
     m_bestProfile = qre;
@@ -298,9 +296,8 @@ LogitStrategyEstimate(const MixedStrategyProfile<double> &p_frequencies, double 
   tracer.SetStepsize(p_firstStep);
 
   Vector<double> x(ProfileToPoint(start)), restart(x);
-  const Vector<double> freq_vector(static_cast<const Vector<double> &>(p_frequencies));
-  EstimatorCallbackFunction callback(
-      start.GetGame(), static_cast<const Vector<double> &>(p_frequencies), p_observer);
+  const Vector<double> freq_vector(p_frequencies.GetProbVector());
+  EstimatorCallbackFunction callback(start.GetGame(), p_frequencies.GetProbVector(), p_observer);
   while (true) {
     tracer.TracePath(
         [&start](const Vector<double> &p_point, Vector<double> &p_lhs) {

@@ -60,7 +60,6 @@ We recommended most new users install the PyGambit Python package and read the a
    :hidden:
    :maxdepth: 1
 
-   intro
    install
    algorithms
    pygambit

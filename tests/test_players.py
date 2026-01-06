@@ -40,11 +40,12 @@ def test_player_index_by_string():
 def test_player_index_out_of_range():
     game = gbt.Game.new_table([2, 2])
     assert len(game.players) == 2
-    with pytest.raises(IndexError):
+    exp_error_msg = "Index out of range"
+    with pytest.raises(IndexError, match=exp_error_msg):
         _ = game.players[2]
-    with pytest.raises(IndexError):
+    with pytest.raises(IndexError, match=exp_error_msg):
         _ = game.players[3]
-    with pytest.raises(IndexError):
+    with pytest.raises(IndexError, match=exp_error_msg):
         _ = game.players[-1]
 
 
@@ -58,6 +59,18 @@ def test_player_label_invalid():
     game = gbt.Game.new_table([2, 2])
     with pytest.raises(KeyError):
         _ = game.players["Not a player"]
+
+
+def test_set_empty_player_futurewarning():
+    game = games.create_stripped_down_poker_efg()
+    with pytest.warns(FutureWarning):
+        game.players[0].label = ""
+
+
+def test_set_duplicate_player_futurewarning():
+    game = games.create_stripped_down_poker_efg()
+    with pytest.warns(FutureWarning):
+        game.players[0].label = game.players[1].label
 
 
 def test_strategic_game_add_player():

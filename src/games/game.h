@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/libgambit/game.h
 // Declaration of base class for representing games
@@ -239,11 +239,8 @@ public:
   }
   //@}
 
-  GameNode GetMember(int p_index) const { return m_members.at(p_index - 1); }
-  Members GetMembers() const
-  {
-    return Members(std::const_pointer_cast<GameInfosetRep>(shared_from_this()), &m_members);
-  }
+  GameNode GetMember(int p_index) const;
+  Members GetMembers() const;
 
   bool Precedes(GameNode) const;
 
@@ -403,12 +400,9 @@ public:
   /// @name Information sets
   //@{
   /// Returns the p_index'th information set
-  GameInfoset GetInfoset(int p_index) const { return m_infosets.at(p_index - 1); }
+  GameInfoset GetInfoset(int p_index) const;
   /// Returns the information sets for the player
-  Infosets GetInfosets() const
-  {
-    return Infosets(std::const_pointer_cast<GamePlayerRep>(shared_from_this()), &m_infosets);
-  }
+  Infosets GetInfosets() const;
 
   /// @name Strategies
   //@{
@@ -476,7 +470,7 @@ public:
   const std::string &GetLabel() const { return m_label; }
   void SetLabel(const std::string &p_label) { m_label = p_label; }
 
-  int GetNumber() const { return m_number; }
+  int GetNumber() const;
   GameNode GetChild(const GameAction &p_action)
   {
     if (p_action->GetInfoset().get() != m_infoset) {
@@ -597,10 +591,14 @@ inline GameNodeRep::Actions::iterator::iterator(GameInfosetRep::Actions::iterato
 
 inline GameNode GameNodeRep::Actions::iterator::GetOwner() const { return m_child_it.GetOwner(); }
 
+enum class TraversalOrder { Preorder, Postorder };
+
 /// This is the class for representing an arbitrary finite game.
 class GameRep : public std::enable_shared_from_this<GameRep> {
   friend class GameOutcomeRep;
   friend class GameNodeRep;
+  friend class GameInfosetRep;
+  friend class GamePlayerRep;
   friend class PureStrategyProfileRep;
   friend class TablePureStrategyProfileRep;
   template <class T> friend class MixedBehaviorProfile;
@@ -621,91 +619,162 @@ protected:
   void IncrementVersion() { m_version++; }
   //@}
 
+  /// Hooks for derived classes to update lazily-computed orderings if required
+  virtual void EnsureNodeOrdering() const {}
+  virtual void EnsureInfosetOrdering() const {}
+
 public:
   using Players = ElementCollection<Game, GamePlayerRep>;
   using Outcomes = ElementCollection<Game, GameOutcomeRep>;
 
   class Nodes {
     Game m_owner{nullptr};
+    TraversalOrder m_order{TraversalOrder::Preorder};
 
   public:
     class iterator {
       friend class Nodes;
+
       using ChildIterator = ElementCollection<GameNode, GameNodeRep>::iterator;
 
+      struct Frame {
+        GameNode m_node;
+        ChildIterator m_current, m_end;
+      };
+
       Game m_owner{nullptr};
-      GameNode m_current_node{nullptr};
-      std::stack<std::pair<ChildIterator, ChildIterator>> m_stack{};
+      TraversalOrder m_order{TraversalOrder::Preorder};
+      std::stack<Frame> m_stack{};
+      GameNode m_current{nullptr};
 
-      iterator(const Game &game) : m_owner(game) {}
-
-    public:
-      using iterator_category = std::forward_iterator_tag;
-      using value_type = GameNode;
-      using pointer = value_type *;
-
-      iterator() = default;
-
-      iterator(const Game &game, const GameNode &start_node)
-        : m_owner(game), m_current_node(start_node)
+      iterator(const Game &p_game, const GameNode &p_start, const TraversalOrder p_order)
+        : m_owner(p_game), m_order(p_order)
       {
-        if (!start_node) {
+        if (!p_start) {
           return;
         }
-        if (start_node->GetGame() != m_owner) {
+        if (p_start->GetGame() != p_game) {
           throw MismatchException();
+        }
+        m_stack.push(make_frame(p_start));
+        if (m_order == TraversalOrder::Preorder) {
+          m_current = p_start;
+        }
+        else {
+          descend_postorder();
+          m_current = m_stack.empty() ? nullptr : m_stack.top().m_node;
+        }
+        if (!m_current) {
+          m_owner = nullptr;
         }
       }
 
+      static Frame make_frame(const GameNode &p_node)
+      {
+        if (p_node->IsTerminal()) {
+          return Frame{p_node, {}, {}};
+        }
+        const auto children = p_node->GetChildren();
+        return Frame{p_node, children.begin(), children.end()};
+      }
+
+      GameNode advance_preorder()
+      {
+        if (auto &[node, current, m_end] = m_stack.top(); !node->IsTerminal()) {
+          const auto children = node->GetChildren();
+          current = children.begin();
+          m_end = children.end();
+        }
+        while (!m_stack.empty()) {
+          if (auto &f = m_stack.top(); f.m_current != f.m_end) {
+            GameNode const next = *f.m_current;
+            ++f.m_current;
+            m_stack.push(make_frame(next));
+            return next;
+          }
+          m_stack.pop();
+        }
+        return nullptr;
+      }
+
+      void descend_postorder()
+      {
+        while (!m_stack.empty()) {
+          auto &f = m_stack.top();
+          if (f.m_current == f.m_end) {
+            return;
+          }
+          const auto child = *f.m_current;
+          ++f.m_current;
+          m_stack.push(make_frame(child));
+          if (!child->IsTerminal()) {
+            continue;
+          }
+          return;
+        }
+      }
+
+      GameNode advance_postorder()
+      {
+        m_stack.pop();
+        if (m_stack.empty()) {
+          return nullptr;
+        }
+        descend_postorder();
+        return m_stack.empty() ? nullptr : m_stack.top().m_node;
+      }
+
+    public:
+      using iterator_category = std::input_iterator_tag;
+      using value_type = GameNode;
+      using difference_type = std::ptrdiff_t;
+      using reference = GameNode;
+      using pointer = GameNode;
+
+      iterator() = default;
+      iterator(const iterator &) = default;
+      iterator &operator=(const iterator &) = default;
+
       value_type operator*() const
       {
-        if (!m_current_node) {
-          throw std::runtime_error("Cannot dereference an end iterator");
+        if (!m_current) {
+          throw std::runtime_error("Dereferencing end iterator");
         }
-        return m_current_node;
+        return m_current;
       }
 
       iterator &operator++()
       {
-        if (!m_current_node) {
-          throw std::out_of_range("Cannot increment an end iterator");
+        if (!m_current) {
+          return *this;
         }
-
-        if (!m_current_node->IsTerminal()) {
-          auto children = m_current_node->GetChildren();
-          m_stack.emplace(children.begin(), children.end());
+        const auto next =
+            (m_order == TraversalOrder::Preorder) ? advance_preorder() : advance_postorder();
+        m_current = next;
+        if (!m_current) {
+          m_owner = nullptr;
         }
-
-        while (!m_stack.empty()) {
-          auto &[current_it, end_it] = m_stack.top();
-
-          if (current_it != end_it) {
-            m_current_node = *current_it;
-            ++current_it;
-            return *this;
-          }
-          m_stack.pop();
-        }
-
-        m_current_node = nullptr;
         return *this;
       }
 
-      bool operator==(const iterator &other) const
+      bool operator==(const iterator &p_other) const
       {
-        return m_owner == other.m_owner && m_current_node == other.m_current_node;
+        return m_owner == p_other.m_owner && m_current == p_other.m_current;
       }
-      bool operator!=(const iterator &other) const { return !(*this == other); }
+      bool operator!=(const iterator &p_other) const { return !(*this == p_other); }
     };
 
     Nodes() = default;
-    explicit Nodes(const Game &p_owner) : m_owner(p_owner) {}
+    Nodes(const Game &p_owner, const TraversalOrder p_order = TraversalOrder::Preorder)
+      : m_owner(p_owner), m_order(p_order)
+    {
+    }
 
     iterator begin() const
     {
-      return (m_owner) ? iterator{m_owner, m_owner->GetRoot()} : iterator{};
+      return (m_owner) ? iterator{m_owner, m_owner->GetRoot(), m_order} : iterator{};
     }
-    iterator end() const { return (m_owner) ? iterator{m_owner} : iterator{}; }
+    static iterator end() { return iterator{}; }
   };
 
   /// @name Lifecycle
@@ -759,6 +828,14 @@ public:
 
   /// Returns true if the game is perfect recall
   virtual bool IsPerfectRecall() const = 0;
+  /// Returns true if the information set is absent-minded
+  virtual bool IsAbsentMinded(const GameInfoset &p_infoset) const
+  {
+    if (p_infoset->GetGame().get() != this) {
+      throw MismatchException();
+    }
+    return false;
+  }
   //@}
 
   /// @name Writing data files
@@ -862,6 +939,7 @@ public:
   }
   /// Returns the chance (nature) player
   virtual GamePlayer GetChance() const = 0;
+  auto GetPlayersWithChance() const { return prepend_value(GetChance(), GetPlayers()); }
   /// Creates a new player in the game, with no moves
   virtual GamePlayer NewPlayer() = 0;
   //@}
@@ -908,8 +986,7 @@ public:
   {
     return Infosets(std::const_pointer_cast<GameRep>(this->shared_from_this()));
   }
-  /// Sort the information sets for each player in a canonical order
-  virtual void SortInfosets() {}
+
   /// Returns the set of actions taken by the infoset's owner before reaching this infoset
   virtual std::set<GameAction> GetOwnPriorActions(const GameInfoset &p_infoset) const
   {
@@ -937,7 +1014,19 @@ public:
   /// Returns the root node of the game
   virtual GameNode GetRoot() const = 0;
   /// Returns a range that can be used to iterate over the nodes of the game
-  Nodes GetNodes() const { return Nodes(std::const_pointer_cast<GameRep>(shared_from_this())); }
+  Nodes GetNodes(TraversalOrder p_traversal = TraversalOrder::Preorder) const
+  {
+    return {std::const_pointer_cast<GameRep>(shared_from_this()), p_traversal};
+  }
+  auto GetTerminalNodes() const
+  {
+    return filter_if(GetNodes(), [](const auto &node) -> bool { return node->IsTerminal(); });
+  }
+  auto GetNonterminalNodes(TraversalOrder p_traversal = TraversalOrder::Preorder) const
+  {
+    return filter_if(GetNodes(p_traversal),
+                     [](const auto &node) -> bool { return !node->IsTerminal(); });
+  }
   /// Returns the number of nodes in the game
   virtual size_t NumNodes() const = 0;
   /// Returns the number of non-terminal nodes in the game
@@ -1021,6 +1110,35 @@ inline GamePlayerRep::Strategies GamePlayerRep::GetStrategies() const
 }
 
 inline Game GameNodeRep::GetGame() const { return m_game->shared_from_this(); }
+inline int GameNodeRep::GetNumber() const
+{
+  m_game->EnsureNodeOrdering();
+  return m_number;
+}
+
+inline GameNode GameInfosetRep::GetMember(int p_index) const
+{
+  m_game->EnsureInfosetOrdering();
+  return m_members.at(p_index - 1);
+}
+
+inline GameInfosetRep::Members GameInfosetRep::GetMembers() const
+{
+  m_game->EnsureInfosetOrdering();
+  return Members(std::const_pointer_cast<GameInfosetRep>(shared_from_this()), &m_members);
+}
+
+inline GameInfoset GamePlayerRep::GetInfoset(int p_index) const
+{
+  m_game->EnsureInfosetOrdering();
+  return m_infosets.at(p_index - 1);
+}
+
+inline GamePlayerRep::Infosets GamePlayerRep::GetInfosets() const
+{
+  m_game->EnsureInfosetOrdering();
+  return Infosets(std::const_pointer_cast<GamePlayerRep>(shared_from_this()), &m_infosets);
+}
 
 //=======================================================================
 
@@ -1032,32 +1150,38 @@ Game NewTable(const std::vector<int> &p_dim, bool p_sparseOutcomes = false);
 /// @brief Reads a game representation in .efg format
 ///
 /// @param[in] p_stream An input stream, positioned at the start of the text in .efg format
+/// @param[in] p_normalizeLabels Require element labels to be nonempty and unique within
+///                              their scope
 /// @return A handle to the game representation constructed
 /// @throw InvalidFileException If the stream does not contain a valid serialisation
 ///                             of a game in .efg format.
 /// @sa Game::WriteEfgFile, ReadNfgFile, ReadAggFile, ReadBaggFile
-Game ReadEfgFile(std::istream &p_stream);
+Game ReadEfgFile(std::istream &p_stream, bool p_normalizeLabels = false);
 
 /// @brief Reads a game representation in .nfg format
 /// @param[in] p_stream An input stream, positioned at the start of the text in .nfg format
+/// @param[in] p_normalizeLabels Require element labels to be nonempty and unique within
+///                              their scope
 /// @return A handle to the game representation constructed
 /// @throw InvalidFileException If the stream does not contain a valid serialisation
 ///                             of a game in .nfg format.
 /// @sa Game::WriteNfgFile, ReadEfgFile, ReadAggFile, ReadBaggFile
-Game ReadNfgFile(std::istream &p_stream);
+Game ReadNfgFile(std::istream &p_stream, bool p_normalizeLabels = false);
 
 /// @brief Reads a game representation from a graphical interface XML saveflie
 /// @param[in] p_stream An input stream, positioned at the start of the text
+/// @param[in] p_normalizeLabels Require element labels to be nonempty and unique within
+///                              their scope
 /// @return A handle to the game representation constructed
 /// @throw InvalidFileException If the stream does not contain a valid serialisation
 ///                             of a game in an XML savefile
 /// @sa ReadEfgFile, ReadNfgFile, ReadAggFile, ReadBaggFile
-Game ReadGbtFile(std::istream &p_stream);
+Game ReadGbtFile(std::istream &p_stream, bool p_normalizeLabels = false);
 
 /// @brief Reads a game from the input stream, attempting to autodetect file format
 /// @deprecated Deprecated in favour of the various ReadXXXGame functions.
 /// @sa ReadEfgFile, ReadNfgFile, ReadGbtFile, ReadAggFile, ReadBaggFile
-Game ReadGame(std::istream &p_stream);
+Game ReadGame(std::istream &p_stream, bool p_normalizeLabels = false);
 
 /// @brief Generate a distribution over a simplex restricted to rational numbers of given
 /// denominator
