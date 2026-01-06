@@ -14,6 +14,18 @@ def test_set_action_label(game: gbt.Game, label: str):
     assert game.root.infoset.actions[0].label == label
 
 
+def test_set_empty_action_futurewarning():
+    game = games.create_stripped_down_poker_efg()
+    with pytest.warns(FutureWarning):
+        game.root.infoset.actions[0].label = ""
+
+
+def test_set_duplicate_action_futurewarning():
+    game = games.create_stripped_down_poker_efg()
+    with pytest.warns(FutureWarning):
+        game.root.infoset.actions[0].label = "Queen"
+
+
 @pytest.mark.parametrize(
     "game,inprobs,outprobs",
     [(games.create_stripped_down_poker_efg(),

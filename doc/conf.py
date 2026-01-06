@@ -49,7 +49,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "Gambit"
-copyright = "1994-2025, The Gambit Project"  # noqa
+copyright = "1994-2026, The Gambit Project"  # noqa
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

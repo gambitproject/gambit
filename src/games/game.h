@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/libgambit/game.h
 // Declaration of base class for representing games
@@ -239,11 +239,8 @@ public:
   }
   //@}
 
-  GameNode GetMember(int p_index) const { return m_members.at(p_index - 1); }
-  Members GetMembers() const
-  {
-    return Members(std::const_pointer_cast<GameInfosetRep>(shared_from_this()), &m_members);
-  }
+  GameNode GetMember(int p_index) const;
+  Members GetMembers() const;
 
   bool Precedes(GameNode) const;
 
@@ -403,12 +400,9 @@ public:
   /// @name Information sets
   //@{
   /// Returns the p_index'th information set
-  GameInfoset GetInfoset(int p_index) const { return m_infosets.at(p_index - 1); }
+  GameInfoset GetInfoset(int p_index) const;
   /// Returns the information sets for the player
-  Infosets GetInfosets() const
-  {
-    return Infosets(std::const_pointer_cast<GamePlayerRep>(shared_from_this()), &m_infosets);
-  }
+  Infosets GetInfosets() const;
 
   /// @name Strategies
   //@{
@@ -476,7 +470,7 @@ public:
   const std::string &GetLabel() const { return m_label; }
   void SetLabel(const std::string &p_label) { m_label = p_label; }
 
-  int GetNumber() const { return m_number; }
+  int GetNumber() const;
   GameNode GetChild(const GameAction &p_action)
   {
     if (p_action->GetInfoset().get() != m_infoset) {
@@ -603,6 +597,8 @@ enum class TraversalOrder { Preorder, Postorder };
 class GameRep : public std::enable_shared_from_this<GameRep> {
   friend class GameOutcomeRep;
   friend class GameNodeRep;
+  friend class GameInfosetRep;
+  friend class GamePlayerRep;
   friend class PureStrategyProfileRep;
   friend class TablePureStrategyProfileRep;
   template <class T> friend class MixedBehaviorProfile;
@@ -622,6 +618,10 @@ protected:
   /// Mark that the content of the game has changed
   void IncrementVersion() { m_version++; }
   //@}
+
+  /// Hooks for derived classes to update lazily-computed orderings if required
+  virtual void EnsureNodeOrdering() const {}
+  virtual void EnsureInfosetOrdering() const {}
 
 public:
   using Players = ElementCollection<Game, GamePlayerRep>;
@@ -986,8 +986,7 @@ public:
   {
     return Infosets(std::const_pointer_cast<GameRep>(this->shared_from_this()));
   }
-  /// Sort the information sets for each player in a canonical order
-  virtual void SortInfosets() {}
+
   /// Returns the set of actions taken by the infoset's owner before reaching this infoset
   virtual std::set<GameAction> GetOwnPriorActions(const GameInfoset &p_infoset) const
   {
@@ -1111,6 +1110,35 @@ inline GamePlayerRep::Strategies GamePlayerRep::GetStrategies() const
 }
 
 inline Game GameNodeRep::GetGame() const { return m_game->shared_from_this(); }
+inline int GameNodeRep::GetNumber() const
+{
+  m_game->EnsureNodeOrdering();
+  return m_number;
+}
+
+inline GameNode GameInfosetRep::GetMember(int p_index) const
+{
+  m_game->EnsureInfosetOrdering();
+  return m_members.at(p_index - 1);
+}
+
+inline GameInfosetRep::Members GameInfosetRep::GetMembers() const
+{
+  m_game->EnsureInfosetOrdering();
+  return Members(std::const_pointer_cast<GameInfosetRep>(shared_from_this()), &m_members);
+}
+
+inline GameInfoset GamePlayerRep::GetInfoset(int p_index) const
+{
+  m_game->EnsureInfosetOrdering();
+  return m_infosets.at(p_index - 1);
+}
+
+inline GamePlayerRep::Infosets GamePlayerRep::GetInfosets() const
+{
+  m_game->EnsureInfosetOrdering();
+  return Infosets(std::const_pointer_cast<GamePlayerRep>(shared_from_this()), &m_infosets);
+}
 
 //=======================================================================
 
@@ -1122,32 +1150,38 @@ Game NewTable(const std::vector<int> &p_dim, bool p_sparseOutcomes = false);
 /// @brief Reads a game representation in .efg format
 ///
 /// @param[in] p_stream An input stream, positioned at the start of the text in .efg format
+/// @param[in] p_normalizeLabels Require element labels to be nonempty and unique within
+///                              their scope
 /// @return A handle to the game representation constructed
 /// @throw InvalidFileException If the stream does not contain a valid serialisation
 ///                             of a game in .efg format.
 /// @sa Game::WriteEfgFile, ReadNfgFile, ReadAggFile, ReadBaggFile
-Game ReadEfgFile(std::istream &p_stream);
+Game ReadEfgFile(std::istream &p_stream, bool p_normalizeLabels = false);
 
 /// @brief Reads a game representation in .nfg format
 /// @param[in] p_stream An input stream, positioned at the start of the text in .nfg format
+/// @param[in] p_normalizeLabels Require element labels to be nonempty and unique within
+///                              their scope
 /// @return A handle to the game representation constructed
 /// @throw InvalidFileException If the stream does not contain a valid serialisation
 ///                             of a game in .nfg format.
 /// @sa Game::WriteNfgFile, ReadEfgFile, ReadAggFile, ReadBaggFile
-Game ReadNfgFile(std::istream &p_stream);
+Game ReadNfgFile(std::istream &p_stream, bool p_normalizeLabels = false);
 
 /// @brief Reads a game representation from a graphical interface XML saveflie
 /// @param[in] p_stream An input stream, positioned at the start of the text
+/// @param[in] p_normalizeLabels Require element labels to be nonempty and unique within
+///                              their scope
 /// @return A handle to the game representation constructed
 /// @throw InvalidFileException If the stream does not contain a valid serialisation
 ///                             of a game in an XML savefile
 /// @sa ReadEfgFile, ReadNfgFile, ReadAggFile, ReadBaggFile
-Game ReadGbtFile(std::istream &p_stream);
+Game ReadGbtFile(std::istream &p_stream, bool p_normalizeLabels = false);
 
 /// @brief Reads a game from the input stream, attempting to autodetect file format
 /// @deprecated Deprecated in favour of the various ReadXXXGame functions.
 /// @sa ReadEfgFile, ReadNfgFile, ReadGbtFile, ReadAggFile, ReadBaggFile
-Game ReadGame(std::istream &p_stream);
+Game ReadGame(std::istream &p_stream, bool p_normalizeLabels = false);
 
 /// @brief Generate a distribution over a simplex restricted to rational numbers of given
 /// denominator

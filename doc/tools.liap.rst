@@ -26,7 +26,23 @@ not guaranteed to find all, or even any, Nash equilibria.
    in terms of the maximum regret.  This regret is interpreted as a fraction
    of the difference between the maximum and minimum payoffs in the game.
 
+.. versionchanged:: 16.5.0
+
+   The `-A` switch has been introduced to be explicit in choosing to compute
+   agent Nash equilibria.  The default is now to compute using the strategic
+   form even for extensive games.
+
+
 .. program:: gambit-liap
+
+.. cmdoption:: -A
+
+   .. versionadded:: 16.5.0
+
+   Report agent Nash equilibria, that is, equilibria which consider
+   only deviations at a single information set at a time.  Only has
+   an effect for extensive games, as strategic games have only
+   one information set per player.
 
 .. cmdoption:: -d
 
@@ -85,7 +101,7 @@ Computing an equilibrium in mixed strategies of :download:`e02.efg
 
    $ gambit-liap e02.nfg
    Compute Nash equilibria by minimizing the Lyapunov function
-   Gambit version |release|, Copyright (C) 1994-2025, The Gambit Project
+   Gambit version |release|, Copyright (C) 1994-2026, The Gambit Project
    This is free software, distributed under the GNU GPL
 
    NE,0.998701,0.000229,0.001070,0.618833,0.381167
