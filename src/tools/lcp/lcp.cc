@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/tools/lcp/lcp.cc
 // Compute Nash equilibria via linear complementarity program
@@ -34,7 +34,7 @@ using namespace Gambit::Nash;
 void PrintBanner(std::ostream &p_stream)
 {
   p_stream << "Compute Nash equilibria by solving a linear complementarity program\n";
-  p_stream << "Gambit version " VERSION ", Copyright (C) 1994-2025, The Gambit Project\n";
+  p_stream << "Gambit version " VERSION ", Copyright (C) 1994-2026, The Gambit Project\n";
   p_stream << "This is free software, distributed under the GNU GPL\n\n";
 }
 
@@ -149,14 +149,14 @@ int main(int argc, char *argv[])
       if (useFloat) {
         auto renderer =
             MakeMixedBehaviorProfileRenderer<double>(std::cout, numDecimals, printDetail);
-        LcpBehaviorSolve<double>(game, stopAfter, maxDepth,
+        LcpBehaviorSolve<double>(game,
                                  [&](const MixedBehaviorProfile<double> &p,
                                      const std::string &label) { renderer->Render(p, label); });
       }
       else {
         auto renderer =
             MakeMixedBehaviorProfileRenderer<Rational>(std::cout, numDecimals, printDetail);
-        LcpBehaviorSolve<Rational>(game, stopAfter, maxDepth,
+        LcpBehaviorSolve<Rational>(game,
                                    [&](const MixedBehaviorProfile<Rational> &p,
                                        const std::string &label) { renderer->Render(p, label); });
       }

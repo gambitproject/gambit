@@ -19,13 +19,13 @@ TOL = 1e-13  # tolerance for floating point assertions
 def test_enumpure_strategy():
     """Test calls of enumeration of pure strategies."""
     game = games.read_from_file("stripped_down_poker.efg")
-    assert len(gbt.nash.enumpure_solve(game, use_strategic=True).equilibria) == 0
+    assert len(gbt.nash.enumpure_solve(game).equilibria) == 0
 
 
 def test_enumpure_agent():
     """Test calls of enumeration of pure agent strategies."""
     game = games.read_from_file("stripped_down_poker.efg")
-    assert len(gbt.nash.enumpure_solve(game, use_strategic=False).equilibria) == 0
+    assert len(gbt.nash.enumpure_agent_solve(game).equilibria) == 0
 
 
 def test_enummixed_double():
@@ -135,44 +135,26 @@ def test_enummixed_rational(game: gbt.Game, mixed_strategy_prof_data: list):
         # ],
         # 2,  # 9 in total found by enumpoly (see unordered test)
         # ),
+        ##############################################################################
+        ##############################################################################
         (
             games.create_3_player_with_internal_outcomes_efg(),
             [
-                [[[1, 0], [1, 0]], [[1, 0], ["1/2", "1/2"]], [[0, 1], [1, 0]]],
+                [[[1, 0], [1, 0]], [[1, 0], ["1/2", "1/2"]], [[1, 0], [0, 1]]],
                 [[[1, 0], [1, 0]], [[1, 0], [0, 1]],
-                    [["1/3", "2/3"], [1, 0]]]],
+                    [[1, 0], ["1/3", "2/3"]]]],
             2,
         ),
         (
             games.create_3_player_with_internal_outcomes_efg(nonterm_outcomes=True),
             [
-                [[[1, 0], [1, 0]], [[1, 0], ["1/2", "1/2"]], [[0, 1], [1, 0]]],
+                [[[1, 0], [1, 0]], [[1, 0], ["1/2", "1/2"]], [[1, 0], [0, 1]]],
                 [[[1, 0], [1, 0]], [[1, 0], [0, 1]],
-                 [["1/3", "2/3"], [1, 0]]]],
+                 [[1, 0], ["1/3", "2/3"]]]],
             2,
         ),
-        (
-                games.create_entry_accomodation_efg(),
-                [
-                    [[["2/3", "1/3"], [1, 0], [1, 0]],
-                     [["2/3", "1/3"]]],
-                    [[[0, 1], [0, 0], ["1/3", "2/3"]],
-                     [[0, 1]]],
-                    [[[0, 1], [0, 0], [1, 0]], [[1, 0]]],
-                    [[[0, 1], [0, 0], [0, 0]], [[0, 1]]]],
-                4,
-        ),
-        # (
-        #         games.create_entry_accomodation_efg(nonterm_outcomes=True),
-        #         [
-        #             [[["2/3", "1/3"], [1, 0], [1, 0]],
-        #              [["2/3", "1/3"]]],
-        #             [[[0, 1], [0, 0], ["1/3", "2/3"]],
-        #              [[0, 1]]],
-        #             [[[0, 1], [0, 0], [1, 0]], [[1, 0]]],
-        #             [[[0, 1], [0, 0], [0, 0]], [[0, 1]]]],
-        #         4,
-        # ),
+        ##############################################################################
+        ##############################################################################
         (
             games.create_non_zero_sum_lacking_outcome_efg(),
             [[[["1/3", "2/3"]], [["1/2", "1/2"]]]],
@@ -183,27 +165,21 @@ def test_enummixed_rational(game: gbt.Game, mixed_strategy_prof_data: list):
             [[[["1/3", "2/3"]], [["1/2", "1/2"]]]],
             1,
         ),
+        ##############################################################################
+        ##############################################################################
         (
                 games.create_chance_in_middle_efg(),
-                [[[["3/11", "8/11"],
-                   [1, 0], [1, 0], [1, 0], [1, 0]],
-                  [[1, 0], ["6/11", "5/11"]]],
-                 [[[1, 0], [1, 0], [1, 0], [0, 0], [0, 0]],
-                  [[0, 1], [1, 0]]],
-                 [[[0, 1], [0, 0], [0, 0], [1, 0], [1, 0]],
-                  [[1, 0], [0, 1]]]],
-                3,
+                [[[["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]], [[1, 0], ["6/11", "5/11"]]],
+                 ],  # [[[1, 0], [1, 0], [1, 0], [0, 0], [0, 0]], [[0, 1], [1, 0]]],
+                     # [[[0, 1], [0, 0], [0, 0], [1, 0], [1, 0]], [[1, 0], [0, 1]]],
+                1,  # subsequent eqs have undefined infosets; include after #issue 660
         ),
         (
                 games.create_chance_in_middle_efg(nonterm_outcomes=True),
-                [[[["3/11", "8/11"],
-                   [1, 0], [1, 0], [1, 0], [1, 0]],
-                  [[1, 0], ["6/11", "5/11"]]],
-                 [[[1, 0], [1, 0], [1, 0], [0, 0], [0, 0]],
-                  [[0, 1], [1, 0]]],
-                 [[[0, 1], [0, 0], [0, 0], [1, 0], [1, 0]],
-                  [[1, 0], [0, 1]]]],
-                3,
+                [[[["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]], [[1, 0], ["6/11", "5/11"]]],
+                 ],  # [[[1, 0], [1, 0], [1, 0], [0, 0], [0, 0]], [[0, 1], [1, 0]]],
+                     # [[[0, 1], [0, 0], [0, 0], [1, 0], [1, 0]], [[1, 0], [0, 1]]],
+                1,
         ),
     ],
 )
@@ -211,8 +187,8 @@ def test_enumpoly_ordered_behavior(
         game: gbt.Game, mixed_behav_prof_data: list, stop_after: None | int
 ):
     """Test calls of enumpoly for mixed behavior equilibria,
-    using max_regret (internal consistency); and comparison to a set of previously
-    computed equilibria using this function (regression test).
+    using max_regret and agent_max_regret (internal consistency); and
+    comparison to a set of previously computed equilibria with this function (regression test).
     This set will be the full set of all computed equilibria if stop_after is None,
     else the first stop_after-many equilibria.
 
@@ -233,6 +209,67 @@ def test_enumpoly_ordered_behavior(
     assert len(result.equilibria) == len(mixed_behav_prof_data)
     for eq, exp in zip(result.equilibria, mixed_behav_prof_data, strict=True):
         assert abs(eq.max_regret()) <= TOL
+        assert abs(eq.agent_max_regret()) <= TOL
+        expected = game.mixed_behavior_profile(rational=True, data=exp)
+        for p in game.players:
+            for i in p.infosets:
+                for a in i.actions:
+                    assert abs(eq[p][i][a] - expected[p][i][a]) <= TOL
+
+
+@pytest.mark.nash
+@pytest.mark.nash_enumpoly_behavior
+@pytest.mark.parametrize(
+    "game,mixed_behav_prof_data,stop_after",
+    [
+        ##############################################################################
+        ##############################################################################
+        (
+            games.create_3_player_with_internal_outcomes_efg(),
+            [
+                [[[1, 0], [1, 0]], [[1, 0], ["1/2", "1/2"]], [[1, 0], [0, 1]]],
+                [[[1, 0], [1, 0]], [[1, 0], [0, 1]], [[1, 0], ["1/3", "2/3"]]],
+            ],
+            2,
+        ),
+        (
+            games.create_3_player_with_internal_outcomes_efg(nonterm_outcomes=True),
+            [
+                [[[1, 0], [1, 0]], [[1, 0], ["1/2", "1/2"]], [[1, 0], [0, 1]]],
+                [[[1, 0], [1, 0]], [[1, 0], [0, 1]], [[1, 0], ["1/3", "2/3"]]]],
+            2,
+        ),
+        ##############################################################################
+        ##############################################################################
+    ],
+)
+def test_enumpoly_ordered_behavior_PROBLEM_CASE(
+        game: gbt.Game, mixed_behav_prof_data: list, stop_after: None | int
+):
+    """Test calls of enumpoly for mixed behavior equilibria,
+    using max_regret and agent_max_regret (internal consistency); and
+    comparison to a set of previously computed equilibria with this function (regression test).
+    This set will be the full set of all computed equilibria if stop_after is None,
+    else the first stop_after-many equilibria.
+
+    This is the "ordered" version where we test for the outputs coming in a specific
+    order; there is also an "unordered" version.  The game 2x2x2.nfg, for example,
+    has a point at which the Jacobian is singular.  As a result, the order in which it
+    returns the two totally-mixed equilbria is system-dependent due, essentially,
+    to inherent numerical instability near that point.
+    """
+    if stop_after:
+        result = gbt.nash.enumpoly_solve(
+            game, use_strategic=False, stop_after=stop_after, maxregret=0.00001
+        )
+        assert len(result.equilibria) == stop_after
+    else:
+        # compute all
+        result = gbt.nash.enumpoly_solve(game, use_strategic=False)
+    assert len(result.equilibria) == len(mixed_behav_prof_data)
+    for eq, exp in zip(result.equilibria, mixed_behav_prof_data, strict=True):
+        assert abs(eq.max_regret()) <= TOL
+        assert abs(eq.agent_max_regret()) <= TOL
         expected = game.mixed_behavior_profile(rational=True, data=exp)
         for p in game.players:
             for i in p.infosets:
@@ -267,8 +304,8 @@ def test_enumpoly_unordered_behavior(
         game: gbt.Game, mixed_behav_prof_data: list, stop_after: None | int
 ):
     """Test calls of enumpoly for mixed behavior equilibria,
-    using max_regret (internal consistency); and comparison to a set of previously
-    computed equilibria using this function (regression test).
+    using max_regret and agent_max_regret (internal consistency); and
+    comparison to a set of previously computed equilibria using this function (regression test).
 
     This set will be the full set of all computed equilibria if stop_after is None,
     else the first stop_after-many equilibria.
@@ -300,6 +337,7 @@ def test_enumpoly_unordered_behavior(
 
     for eq in result.equilibria:
         assert abs(eq.max_regret()) <= TOL
+        assert abs(eq.agent_max_regret()) <= TOL
         found = False
         for exp in mixed_behav_prof_data[:]:
             expected = game.mixed_behavior_profile(rational=True, data=exp)
@@ -418,23 +456,20 @@ def test_lcp_behavior_double():
                 games.create_2x2_zero_sum_efg(),
                 [[["1/2", "1/2"]], [["1/2", "1/2"]]]
         ),
-        pytest.param(
+        (
             games.create_2x2_zero_sum_efg(missing_term_outcome=True),
             [[["1/2", "1/2"]], [["1/2", "1/2"]]],
-            marks=pytest.mark.xfail(reason="Problem with non-standard outcomes")
         ),
         (games.create_matching_pennies_efg(),
          [[["1/2", "1/2"]], [["1/2", "1/2"]]]),
-        pytest.param(
+        (
             games.create_matching_pennies_efg(with_neutral_outcome=True),
             [[["1/2", "1/2"]], [["1/2", "1/2"]]],
-            marks=pytest.mark.xfail(reason="Problem with non-standard outcomes")
         ),
         (games.create_stripped_down_poker_efg(), [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]]),
-        pytest.param(
+        (
             games.create_stripped_down_poker_efg(nonterm_outcomes=True),
             [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]],
-            marks=pytest.mark.xfail(reason="Problem with non-standard outcomes")
         ),
         (
                 games.create_kuhn_poker_efg(),
@@ -450,7 +485,7 @@ def test_lcp_behavior_double():
                     [[1, 0], ["2/3", "1/3"], [0, 1], [0, 1], ["2/3", "1/3"], [1, 0]],
                 ],
         ),
-        pytest.param(
+        (
             games.create_kuhn_poker_efg(nonterm_outcomes=True),
             [
                 [
@@ -463,7 +498,6 @@ def test_lcp_behavior_double():
                 ],
                 [[1, 0], ["2/3", "1/3"], [0, 1], [0, 1], ["2/3", "1/3"], [1, 0]],
             ],
-            marks=pytest.mark.xfail(reason="Problem with non-standard outcomes")
         ),
         # In the next test case:
         # 1/2-1/2 for l/r is determined by MixedBehaviorProfile.UndefinedToCentroid()
@@ -486,13 +520,12 @@ def test_lcp_behavior_double():
                 [["2/3", "1/3"], ["1/3", "2/3"], ["1/3", "2/3"]],
             ]
         ),
-        pytest.param(
+        (
             games.create_three_action_internal_outcomes_efg(nonterm_outcomes=True),
             [
                 [["1/3", 0, "2/3"], ["2/3", 0, "1/3"]],
                 [["2/3", "1/3"], ["1/3", "2/3"], ["1/3", "2/3"]],
             ],
-            marks=pytest.mark.xfail(reason="Problem with non-standard outcomes")
         ),
         (
                 games.create_large_payoff_game_efg(),
@@ -509,13 +542,12 @@ def test_lcp_behavior_double():
                 [[1, 0], ["6/11", "5/11"]]
             ]
         ),
-        pytest.param(
+        (
             games.create_chance_in_middle_efg(nonterm_outcomes=True),
             [
                 [["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]],
                 [[1, 0], ["6/11", "5/11"]]
             ],
-            marks=pytest.mark.xfail(reason="Problem with non-standard outcomes")
         ),
         # Non-zero-sum games
         (
@@ -538,32 +570,31 @@ def test_lcp_behavior_double():
             games.create_entry_accomodation_efg(),
             [[["2/3", "1/3"], [1, 0], [1, 0]], [["2/3", "1/3"]]]
         ),
-        pytest.param(
+        (
             games.create_entry_accomodation_efg(nonterm_outcomes=True),
             [[["2/3", "1/3"], [1, 0], [1, 0]], [["2/3", "1/3"]]],
-            marks=pytest.mark.xfail(reason="Problem with non-standard outcomes")
         ),
         (
             games.create_non_zero_sum_lacking_outcome_efg(),
             [[["1/3", "2/3"]], [["1/2", "1/2"]]]
         ),
-        pytest.param(
+        (
             games.create_non_zero_sum_lacking_outcome_efg(missing_term_outcome=True),
             [[["1/3", "2/3"]], [["1/2", "1/2"]]],
-            marks=pytest.mark.xfail(reason="Problem with non-standard outcomes")
         ),
     ],
 )
 def test_lcp_behavior_rational(game: gbt.Game, mixed_behav_prof_data: list):
     """Test calls of LCP for mixed behavior equilibria, rational precision.
 
-    using max_regret (internal consistency); and comparison to a previously
-    computed equilibrium using this function (regression test)
+    using max_regret and agent_max_regret (internal consistency); and
+    comparison to a previously computed equilibrium using this function (regression test).
     """
     result = gbt.nash.lcp_solve(game, use_strategic=False, rational=True)
     assert len(result.equilibria) == 1
     eq = result.equilibria[0]
     assert eq.max_regret() == 0
+    assert eq.agent_max_regret() == 0
     expected = game.mixed_behavior_profile(rational=True, data=mixed_behav_prof_data)
     assert eq == expected
 
@@ -628,35 +659,31 @@ def test_lp_behavior_double():
                 games.create_two_player_perfect_info_win_lose_efg(),
                 [[[0, 1], [1, 0]], [[1, 0], [1, 0]]],
         ),
-        pytest.param(
+        (
                 games.create_two_player_perfect_info_win_lose_efg(nonterm_outcomes=True),
                 [[[0, 1], [1, 0]], [[1, 0], [1, 0]]],
-                marks=pytest.mark.xfail(reason="Problem with non-standard outcomes")
         ),
         (
                 games.create_2x2_zero_sum_efg(missing_term_outcome=False),
                 [[["1/2", "1/2"]], [["1/2", "1/2"]]]
         ),
-        pytest.param(
+        (
             games.create_2x2_zero_sum_efg(missing_term_outcome=True),
             [[["1/2", "1/2"]], [["1/2", "1/2"]]],
-            marks=pytest.mark.xfail(reason="Problem with non-standard outcomes")
         ),
         (games.create_matching_pennies_efg(with_neutral_outcome=False),
          [[["1/2", "1/2"]], [["1/2", "1/2"]]]),
-        pytest.param(
+        (
             games.create_matching_pennies_efg(with_neutral_outcome=True),
             [[["1/2", "1/2"]], [["1/2", "1/2"]]],
-            marks=pytest.mark.xfail(reason="Problem with non-standard outcomes")
         ),
         (
                 games.create_stripped_down_poker_efg(),
                 [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]],
         ),
-        pytest.param(
+        (
             games.create_stripped_down_poker_efg(nonterm_outcomes=True),
             [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]],
-            marks=pytest.mark.xfail(reason="Problem with non-standard outcomes")
         ),
         (
                 games.create_kuhn_poker_efg(),
@@ -665,7 +692,7 @@ def test_lp_behavior_double():
                     [[1, 0], ["2/3", "1/3"], [0, 1], [0, 1], ["2/3", "1/3"], [1, 0]],
                 ],
         ),
-        pytest.param(
+        (
             games.create_kuhn_poker_efg(nonterm_outcomes=True),
             [
                 [
@@ -678,12 +705,11 @@ def test_lp_behavior_double():
                 ],
                 [[1, 0], ["2/3", "1/3"], [0, 1], [0, 1], ["2/3", "1/3"], [1, 0]],
             ],
-            marks=pytest.mark.xfail(reason="Problem with non-standard outcomes")
         ),
         (
                 games.create_seq_form_STOC_paper_zero_sum_2_player_efg(),
                 [
-                    [[0, 1], ["1/3", "2/3"], ["2/3", "1/3"]],
+                    [[0, 1], ["2/3", "1/3"], ["1/3", "2/3"]],
                     [["5/6", "1/6"], ["5/9", "4/9"]],
                 ],
         ),
@@ -698,13 +724,12 @@ def test_lp_behavior_double():
                 [["2/3", "1/3"], ["2/3", "1/3"], ["1/3", "2/3"]],
             ]
         ),
-        pytest.param(
+        (
             games.create_three_action_internal_outcomes_efg(nonterm_outcomes=True),
             [
                 [["1/3", 0, "2/3"], ["2/3", 0, "1/3"]],
                 [["2/3", "1/3"], ["2/3", "1/3"], ["1/3", "2/3"]],
             ],
-            marks=pytest.mark.xfail(reason="Problem with non-standard outcomes")
         ),
         (
                 games.create_large_payoff_game_efg(),
@@ -721,25 +746,25 @@ def test_lp_behavior_double():
                 [[1, 0], ["6/11", "5/11"]]
             ],
         ),
-        pytest.param(
+        (
             games.create_chance_in_middle_efg(nonterm_outcomes=True),
             [
                 [["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]],
                 [[1, 0], ["6/11", "5/11"]]
             ],
-            marks=pytest.mark.xfail(reason="Problem with non-standard outcomes")
         ),
     ],
 )
 def test_lp_behavior_rational(game: gbt.Game, mixed_behav_prof_data: list):
     """Test calls of LP for mixed behavior equilibria, rational precision,
-    using max_regret (internal consistency); and comparison to a previously
-    computed equilibrium using this function (regression test)
+    using max_regret and agent_max_regret (internal consistency); and
+    comparison to a previously computed equilibrium using this function (regression test).
     """
     result = gbt.nash.lp_solve(game, use_strategic=False, rational=True)
     assert len(result.equilibria) == 1
     eq = result.equilibria[0]
     assert eq.max_regret() == 0
+    assert eq.agent_max_regret() == 0
     expected = game.mixed_behavior_profile(rational=True, data=mixed_behav_prof_data)
     assert eq == expected
 
@@ -750,10 +775,10 @@ def test_liap_strategy():
     _ = gbt.nash.liap_solve(game.mixed_strategy_profile())
 
 
-def test_liap_behavior():
-    """Test calls of liap for mixed behavior equilibria."""
+def test_liap_agent():
+    """Test calls of agent liap for mixed behavior equilibria."""
     game = games.read_from_file("stripped_down_poker.efg")
-    _ = gbt.nash.liap_solve(game.mixed_behavior_profile())
+    _ = gbt.nash.liap_agent_solve(game.mixed_behavior_profile())
 
 
 def test_simpdiv_strategy():

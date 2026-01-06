@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/gui/dlnash.cc
 // Dialog for selecting algorithms to compute Nash equilibria
@@ -104,7 +104,7 @@ NashChoiceDialog::NashChoiceDialog(wxWindow *p_parent, GameDocument *p_doc)
   SetSizer(topSizer);
   topSizer->Fit(this);
   topSizer->SetSizeHints(this);
-  Layout();
+  wxTopLevelWindowBase::Layout();
   CenterOnParent();
 }
 
@@ -140,9 +140,10 @@ void NashChoiceDialog::OnCount(wxCommandEvent &p_event)
 
 void NashChoiceDialog::OnMethod(wxCommandEvent &p_event)
 {
-  const wxString method = m_methodChoice->GetString(p_event.GetSelection());
 
-  if (method == s_simpdiv || method == s_enummixed || method == s_gnm || method == s_ipa) {
+  if (const wxString method = m_methodChoice->GetString(p_event.GetSelection());
+      method == s_enumpure || method == s_simpdiv || method == s_enummixed || method == s_liap ||
+      method == s_gnm || method == s_ipa) {
     m_repChoice->SetSelection(1);
     m_repChoice->Enable(false);
   }
@@ -233,9 +234,9 @@ std::shared_ptr<AnalysisOutput> NashChoiceDialog::GetCommand() const
     }
   }
   else if (method == s_enumpure) {
-    cmd = std::make_shared<AnalysisProfileList<Rational>>(m_doc, useEfg);
+    cmd = std::make_shared<AnalysisProfileList<Rational>>(m_doc, false);
     cmd->SetCommand(prefix + wxT("enumpure") + options);
-    cmd->SetDescription(count + wxT(" in pure strategies ") + game);
+    cmd->SetDescription(count + wxT(" in pure strategies in strategic game"));
   }
   else if (method == s_enummixed) {
     cmd = std::make_shared<AnalysisProfileList<Rational>>(m_doc, false);
@@ -268,9 +269,9 @@ std::shared_ptr<AnalysisOutput> NashChoiceDialog::GetCommand() const
     cmd->SetDescription(count + wxT(" by solving a linear complementarity program ") + game);
   }
   else if (method == s_liap) {
-    cmd = std::make_shared<AnalysisProfileList<double>>(m_doc, useEfg);
+    cmd = std::make_shared<AnalysisProfileList<double>>(m_doc, false);
     cmd->SetCommand(prefix + wxT("liap -d 10") + options);
-    cmd->SetDescription(count + wxT(" by function minimization ") + game);
+    cmd->SetDescription(count + wxT(" by function minimization in strategic game"));
   }
   else if (method == s_logit) {
     cmd = std::make_shared<AnalysisProfileList<double>>(m_doc, useEfg);

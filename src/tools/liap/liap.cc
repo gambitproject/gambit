@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/tools/liap/liap.cc
 // Compute Nash equilibria by minimizing Liapunov function
@@ -33,7 +33,7 @@ using namespace Gambit::Nash;
 void PrintBanner(std::ostream &p_stream)
 {
   p_stream << "Compute Nash equilibria by minimizing the Lyapunov function\n";
-  p_stream << "Gambit version " VERSION ", Copyright (C) 1994-2025, The Gambit Project\n";
+  p_stream << "Gambit version " VERSION ", Copyright (C) 1994-2026, The Gambit Project\n";
   p_stream << "This is free software, distributed under the GNU GPL\n\n";
 }
 
@@ -45,6 +45,7 @@ void PrintHelp(char *progname)
   std::cerr << "With no options, attempts to compute one equilibrium starting at centroid.\n";
 
   std::cerr << "Options:\n";
+  std::cerr << "  -A               compute agent form equilibria\n";
   std::cerr << "  -d DECIMALS      print probabilities with DECIMALS digits\n";
   std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -n COUNT         number of starting points to generate\n";
@@ -130,7 +131,7 @@ Array<MixedBehaviorProfile<double>> RandomBehaviorProfiles(const Game &p_game, i
 int main(int argc, char *argv[])
 {
   opterr = 0;
-  bool quiet = false, useStrategic = false, verbose = false;
+  bool quiet = false, reportStrategic = false, solveAgent = false, verbose = false;
   const int numTries = 10;
   int maxitsN = 1000;
   int numDecimals = 6;
@@ -143,7 +144,7 @@ int main(int argc, char *argv[])
                            {"verbose", 0, nullptr, 'V'},
                            {nullptr, 0, nullptr, 0}};
   int c;
-  while ((c = getopt_long(argc, argv, "d:n:i:s:m:hqVvS", long_options, &long_opt_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "d:n:i:s:m:hqVvAS", long_options, &long_opt_index)) != -1) {
     switch (c) {
     case 'v':
       PrintBanner(std::cerr);
@@ -164,7 +165,10 @@ int main(int argc, char *argv[])
       PrintHelp(argv[0]);
       break;
     case 'S':
-      useStrategic = true;
+      reportStrategic = true;
+      break;
+    case 'A':
+      solveAgent = true;
       break;
     case 'q':
       quiet = true;
@@ -204,7 +208,7 @@ int main(int argc, char *argv[])
 
   try {
     const Game game = ReadGame(*input_stream);
-    if (!game->IsTree() || useStrategic) {
+    if (!game->IsTree() || !solveAgent) {
       Array<MixedStrategyProfile<double>> starts;
       if (!startFile.empty()) {
         std::ifstream startPoints(startFile.c_str());
@@ -239,13 +243,13 @@ int main(int argc, char *argv[])
 
       for (size_t i = 1; i <= starts.size(); i++) {
         auto renderer = MakeMixedBehaviorProfileRenderer<double>(std::cout, numDecimals, false);
-        LiapBehaviorSolve(starts[i], maxregret, maxitsN,
-                          [renderer, verbose](const MixedBehaviorProfile<double> &p_profile,
-                                              const std::string &p_label) {
-                            if (p_label == "NE" || verbose) {
-                              renderer->Render(p_profile, p_label);
-                            }
-                          });
+        LiapAgentSolve(starts[i], maxregret, maxitsN,
+                       [renderer, verbose](const MixedBehaviorProfile<double> &p_profile,
+                                           const std::string &p_label) {
+                         if (p_label == "NE" || verbose) {
+                           renderer->Render(p_profile, p_label);
+                         }
+                       });
       }
     }
     return 0;

@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/tools/liap/efgliap.cc
 // Compute Nash equilibria via Lyapunov function minimization
@@ -127,9 +127,9 @@ MixedBehaviorProfile<double> EnforceNonnegativity(const MixedBehaviorProfile<dou
 
 } // namespace
 
-std::list<MixedBehaviorProfile<double>>
-LiapBehaviorSolve(const MixedBehaviorProfile<double> &p_start, double p_maxregret, int p_maxitsN,
-                  BehaviorCallbackType<double> p_callback)
+std::list<MixedBehaviorProfile<double>> LiapAgentSolve(const MixedBehaviorProfile<double> &p_start,
+                                                       double p_maxregret, int p_maxitsN,
+                                                       BehaviorCallbackType<double> p_callback)
 {
   if (!p_start.GetGame()->IsPerfectRecall()) {
     throw UndefinedException(
@@ -160,7 +160,7 @@ LiapBehaviorSolve(const MixedBehaviorProfile<double> &p_start, double p_maxregre
   }
 
   auto p2 = EnforceNonnegativity(p);
-  if (p2.GetMaxRegret() * F.GetScale() < p_maxregret) {
+  if (p2.GetAgentMaxRegret() * F.GetScale() < p_maxregret) {
     p_callback(p2, "NE");
     solutions.push_back(p2);
   }

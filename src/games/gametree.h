@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/libgambit/gametree.h
 // Declaration of extensive game representation
@@ -27,19 +27,18 @@
 
 namespace Gambit {
 
-class GameTreeRep : public GameExplicitRep {
+class GameTreeRep final : public GameExplicitRep {
   friend class GameNodeRep;
   friend class GameInfosetRep;
   friend class GameActionRep;
 
-private:
   struct OwnPriorActionInfo {
     std::map<GameNodeRep *, GameActionRep *> node_map;
     std::map<GameInfosetRep *, std::set<GameActionRep *>> infoset_map;
   };
 
 protected:
-  mutable bool m_computedValues{false};
+  mutable bool m_computedValues{false}, m_nodesOrdered{false}, m_infosetsOrdered{false};
   std::shared_ptr<GameNodeRep> m_root;
   std::shared_ptr<GamePlayerRep> m_chance;
   std::size_t m_numNodes = 1;
@@ -51,7 +50,7 @@ protected:
 
   /// @name Private auxiliary functions
   //@{
-  void SortInfosets(GamePlayerRep *);
+  static void SortInfosets(GamePlayerRep *);
   template <class Aggregator>
   Rational AggregateSubtreePayoff(const GamePlayer &p_player, Aggregator p_aggregator) const;
   static void RenumberInfosets(GamePlayerRep *);
@@ -61,6 +60,15 @@ protected:
 
   /// @name Managing the representation
   //@{
+  void InvalidateNodeOrdering() const
+  {
+    m_nodesOrdered = false;
+    m_infosetsOrdered = false;
+  }
+  void InvalidateInfosetOrdering() const { m_infosetsOrdered = false; }
+  void EnsureNodeOrdering() const override;
+  void EnsureInfosetOrdering() const override;
+
   void BuildComputedValues() const override;
   void BuildConsistentPlays();
   void ClearComputedValues() const;
@@ -130,8 +138,6 @@ public:
   //@{
   /// Returns the iset'th information set in the game (numbered globally)
   GameInfoset GetInfoset(int iset) const override;
-  /// Sort the information sets for each player in a canonical order
-  void SortInfosets() override;
   /// Returns the set of actions taken by the infoset's owner before reaching this infoset
   std::set<GameAction> GetOwnPriorActions(const GameInfoset &p_infoset) const override;
   //@}
