@@ -18,6 +18,12 @@ class CatalogGame:
     def __new__(cls) -> Game:
         raise NotImplementedError("Subclasses must implement __new__ method")
 
+    @classmethod
+    def _extract_metadata_from_game(cls, game: Game) -> None:
+        """Extract metadata from the game and set as class attributes."""
+        cls.title = game.title
+        cls.num_players = len(game.players)
+
 
 class CatalogGameFromFile(CatalogGame):
     """
@@ -27,29 +33,41 @@ class CatalogGameFromFile(CatalogGame):
     """
     # Subclasses must define these
     game_file: str | None = None
+    _cached_game: Game | None = None
 
     def __new__(cls) -> Game:
+        # Return cached game if available, otherwise load it
+        if cls._cached_game is None:
+            cls._cached_game = cls._load_game()
+        # Return a fresh instance (not the cached one)
+        return cls._load_game()
+
+    @classmethod
+    def _load_game(cls) -> Game:
+        """Load the game from file."""
         if cls.game_file is None:
             raise NotImplementedError(f"{cls.__name__} must define 'game_file'")
-        cls.game_type = cls.game_file.split(".")[-1]  # infer game type from file extension
 
-        # Load the appropriate game type
+        cls.game_type = cls.game_file.split(".")[-1]
         file_path = _GAMEFILES_DIR / cls.game_file
+
         if cls.game_type == "nfg":
-            game = read_nfg(str(file_path))
+            return read_nfg(str(file_path))
         elif cls.game_type == "efg":
-            game = read_efg(str(file_path))
+            return read_efg(str(file_path))
         else:
             raise ValueError(f"Game file extension must be 'nfg' or 'efg', got '{cls.game_type}'")
 
-        return game
-
     def __init_subclass__(cls, **kwargs):
-        """Validate that subclasses define required attributes."""
+        """Validate and extract metadata when subclass is defined."""
         super().__init_subclass__(**kwargs)
-        # This runs when a subclass is defined
+
         if not hasattr(cls, "game_file") or cls.game_file is None:
             raise TypeError(f"{cls.__name__} must define 'game_file' class attribute")
+
+        # Load game and extract metadata immediately when class is defined
+        cls._cached_game = cls._load_game()
+        cls._extract_metadata_from_game(cls._cached_game)
 
 
 class PrisonersDilemma(CatalogGameFromFile):
@@ -64,6 +82,7 @@ class TwoStageMatchingPennies(CatalogGameFromFile):
 
 class PrisonersDilemmaTestgame(CatalogGame):
     """A simple test game based on the Prisoner's Dilemma."""
+
     def __new__(cls) -> Game:
         player1_payoffs = np.array([[-1, -3], [0, -2]])
         player2_payoffs = np.transpose(player1_payoffs)
@@ -73,4 +92,8 @@ class PrisonersDilemmaTestgame(CatalogGame):
             player2_payoffs,
             title="Test Prisoner's Dilemma"
         )
+
+        # Extract metadata from game and set as class attributes
+        cls._extract_metadata_from_game(g1)
+
         return g1
