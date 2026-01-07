@@ -14,13 +14,11 @@ class CatalogGame:
     """
     # Subclasses must define these
     game_file: str | None = None
-    game_type: str | None = None  # 'nfg' or 'efg'
 
     def __new__(cls) -> Game:
         if cls.game_file is None:
             raise NotImplementedError(f"{cls.__name__} must define 'game_file'")
-        if cls.game_type is None:
-            raise NotImplementedError(f"{cls.__name__} must define 'game_type'")
+        cls.game_type = cls.game_file.split(".")[-1]  # infer game type from file extension
 
         # Load the appropriate game type
         file_path = _GAMEFILES_DIR / cls.game_file
@@ -29,7 +27,7 @@ class CatalogGame:
         elif cls.game_type == "efg":
             game = read_efg(str(file_path))
         else:
-            raise ValueError(f"game_type must be 'nfg' or 'efg', got '{cls.game_type}'")
+            raise ValueError(f"Game file extension must be 'nfg' or 'efg', got '{cls.game_type}'")
 
         return game
 
@@ -39,17 +37,13 @@ class CatalogGame:
         # This runs when a subclass is defined
         if not hasattr(cls, "game_file") or cls.game_file is None:
             raise TypeError(f"{cls.__name__} must define 'game_file' class attribute")
-        if not hasattr(cls, "game_type") or cls.game_type is None:
-            raise TypeError(f"{cls.__name__} must define 'game_type' class attribute")
 
 
 class PrisonersDilemma(CatalogGame):
     """Prisoner's Dilemma game."""
     game_file = "pd.nfg"
-    game_type = "nfg"
 
 
 class TwoStageMatchingPennies(CatalogGame):
     """Two-Stage Matching Pennies game."""
     game_file = "2smp.efg"
-    game_type = "efg"
