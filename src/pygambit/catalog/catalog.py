@@ -15,6 +15,12 @@ class CatalogGame:
     Calling any subclass will return an instance of the corresponding game.
     """
 
+    title: str | None = None
+    num_players: int | None = None
+    game_type: str | None = None
+    description: str | None = None
+    citation: str | None = None
+
     def __new__(cls) -> Game:
         raise NotImplementedError("Subclasses must implement __new__ method")
 
@@ -47,7 +53,7 @@ class CatalogGameFromFile(CatalogGame):
     This class serves as a template for specific games in the catalog.
     Calling any subclass will return an instance of the corresponding game.
     """
-    # Subclasses must define these
+
     game_file: str | None = None
     _cached_game: Game | None = None
 
@@ -87,17 +93,22 @@ class CatalogGameFromFile(CatalogGame):
 
 
 class PrisonersDilemma(CatalogGameFromFile):
-    """Prisoner's Dilemma game."""
     game_file = "pd.nfg"
+    description = "Prisoner's Dilemma game."
+    citation = "Example citation for Prisoner's Dilemma."
 
 
 class TwoStageMatchingPennies(CatalogGameFromFile):
-    """Two-Stage Matching Pennies game."""
     game_file = "2smp.efg"
+    description = "Two-Stage Matching Pennies game."
+    citation = "Example citation for Two-Stage Matching Pennies."
 
 
 class PrisonersDilemmaTestgame(CatalogGame):
-    """A simple test game based on the Prisoner's Dilemma."""
+    title = "Test Prisoner's Dilemma"
+    game_type = "nfg"
+    description = "A simple test game based on the Prisoner's Dilemma."
+    citation = "Example citation for Test Prisoner's Dilemma."
 
     def __new__(cls) -> Game:
         player1_payoffs = np.array([[-1, -3], [0, -2]])
@@ -106,7 +117,7 @@ class PrisonersDilemmaTestgame(CatalogGame):
         g1 = Game.from_arrays(
             player1_payoffs,
             player2_payoffs,
-            title="Test Prisoner's Dilemma"
+            title=cls.title,
         )
 
         return g1
