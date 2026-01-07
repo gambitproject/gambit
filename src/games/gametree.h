@@ -51,6 +51,8 @@ protected:
   /// @name Private auxiliary functions
   //@{
   static void SortInfosets(GamePlayerRep *);
+  template <class Aggregator>
+  Rational AggregateSubtreePayoff(const GamePlayer &p_player, Aggregator p_aggregator) const;
   static void RenumberInfosets(GamePlayerRep *);
   /// Normalize the probability distribution of actions at a chance node
   Game NormalizeChanceProbs(GameInfosetRep *);

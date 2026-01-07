@@ -739,83 +739,112 @@ Game NewTree() { return std::make_shared<GameTreeRep>(); }
 //                 GameTreeRep: General data access
 //------------------------------------------------------------------------
 
-namespace {
-
-class NotZeroSumException final : public std::runtime_error {
-public:
-  NotZeroSumException() : std::runtime_error("Game is not constant sum") {}
-  ~NotZeroSumException() noexcept override = default;
-};
-
-Rational SubtreeSum(GameNode p_node)
-{
-  Rational sum(0);
-
-  if (!p_node->IsTerminal()) {
-    const auto children = p_node->GetChildren();
-    sum = SubtreeSum(children.front());
-    if (std::any_of(std::next(children.begin()), children.end(),
-                    [sum](const GameNode &n) { return SubtreeSum(n) != sum; })) {
-      throw NotZeroSumException();
-    }
-  }
-
-  if (p_node->GetOutcome()) {
-    for (const auto &player : p_node->GetGame()->GetPlayers()) {
-      sum += p_node->GetOutcome()->GetPayoff<Rational>(player);
-    }
-  }
-  return sum;
-}
-
-Rational
-AggregateSubtreePayoff(const GamePlayer &p_player, const GameNode &p_node,
-                       std::function<Rational(const Rational &, const Rational &)> p_aggregator)
-{
-  if (p_node->IsTerminal()) {
-    if (p_node->GetOutcome()) {
-      return p_node->GetOutcome()->GetPayoff<Rational>(p_player);
-    }
-    return Rational(0);
-  }
-  const auto &children = p_node->GetChildren();
-  auto subtree =
-      std::accumulate(std::next(children.begin()), children.end(),
-                      AggregateSubtreePayoff(p_player, children.front(), p_aggregator),
-                      [&p_aggregator, &p_player](const Rational &r, const GameNode &c) {
-                        return p_aggregator(r, AggregateSubtreePayoff(p_player, c, p_aggregator));
-                      });
-  if (p_node->GetOutcome()) {
-    return subtree + p_node->GetOutcome()->GetPayoff<Rational>(p_player);
-  }
-  return subtree;
-}
-
-} // end anonymous namespace
-
 bool GameTreeRep::IsConstSum() const
 {
-  try {
-    SubtreeSum(m_root);
-    return true;
-  }
-  catch (NotZeroSumException &) {
-    return false;
-  }
+  struct ConstSumCallback {
+    const GameTreeRep *m_game;
+    std::map<GameNode, Rational> m_subtreeSums;
+    bool m_isConstSum{true};
+
+    static DFSCallbackResult OnEnter(GameNode, int) { return DFSCallbackResult::Continue; }
+    static DFSCallbackResult OnAction(GameNode, GameNode, int)
+    {
+      return DFSCallbackResult::Continue;
+    }
+    DFSCallbackResult OnExit(const GameNode &p_node, int)
+    {
+      Rational sum(0);
+      if (!p_node->IsTerminal()) {
+        const auto children = p_node->GetChildren();
+
+        if (std::adjacent_find(children.begin(), children.end(),
+                               [&](const GameNode &a, const GameNode &b) {
+                                 return m_subtreeSums[a] != m_subtreeSums[b];
+                               }) != children.end()) {
+          m_isConstSum = false;
+          return DFSCallbackResult::Stop;
+        }
+        sum = m_subtreeSums[*children.begin()];
+        for (const auto &child : children) {
+          m_subtreeSums.erase(child);
+        }
+      }
+
+      if (const auto outcome = p_node->GetOutcome()) {
+        sum += sum_function(m_game->m_players, [&](const auto &p_player) {
+          return outcome->GetPayoff<Rational>(p_player);
+        });
+      }
+      m_subtreeSums[p_node] = sum;
+      return DFSCallbackResult::Continue;
+    }
+    static void OnVisit(GameNode, int) {}
+  };
+
+  ConstSumCallback callback{this};
+  WalkDFS(Game(const_cast<GameTreeRep *>(this)->shared_from_this()), m_root,
+          TraversalOrder::Postorder, callback);
+  return callback.m_isConstSum;
+}
+
+template <class Aggregator>
+Rational GameTreeRep::AggregateSubtreePayoff(const GamePlayer &p_player,
+                                             Aggregator p_aggregator) const
+{
+  struct AggregatePayoffCallback {
+    const GamePlayer &m_player;
+    Aggregator m_aggregator;
+
+    std::map<GameNode, Rational> m_subtreeValues;
+    Rational m_result{0};
+
+    static DFSCallbackResult OnEnter(GameNode, int) { return DFSCallbackResult::Continue; }
+    static DFSCallbackResult OnAction(GameNode, GameNode, int)
+    {
+      return DFSCallbackResult::Continue;
+    }
+    DFSCallbackResult OnExit(const GameNode &p_node, int)
+    {
+      Rational value(0);
+      if (!p_node->IsTerminal()) {
+        const auto children = p_node->GetChildren();
+        value = m_aggregator(children, [&](const GameNode &c) { return m_subtreeValues[c]; });
+        for (const auto &child : children) {
+          m_subtreeValues.erase(child);
+        }
+      }
+      if (const auto outcome = p_node->GetOutcome()) {
+        value += outcome->GetPayoff<Rational>(m_player);
+      }
+      m_subtreeValues[p_node] = value;
+      m_result = value; // We write the root node value last, so will be correct on termination
+      return DFSCallbackResult::Continue;
+    }
+
+    static void OnVisit(GameNode, int) {}
+  };
+
+  AggregatePayoffCallback callback{p_player, std::move(p_aggregator)};
+
+  WalkDFS(Game(const_cast<GameTreeRep *>(this)->shared_from_this()), m_root,
+          TraversalOrder::Postorder, callback);
+
+  return callback.m_result;
 }
 
 Rational GameTreeRep::GetPlayerMinPayoff(const GamePlayer &p_player) const
 {
-  return AggregateSubtreePayoff(
-      p_player, m_root, [](const Rational &a, const Rational &b) { return std::min(a, b); });
+  return AggregateSubtreePayoff(p_player, [](const auto &range, auto value_fn) {
+    return minimize_function(range, value_fn);
+  });
 }
 
 Rational GameTreeRep::GetPlayerMaxPayoff(const GamePlayer &p_player) const
 {
-  return AggregateSubtreePayoff(
-      p_player, m_root, [](const Rational &a, const Rational &b) { return std::max(a, b); });
+  return AggregateSubtreePayoff(p_player, [](const auto &range, auto value_fn) {
+    return maximize_function(range, value_fn);
+  });
 }
-
 bool GameTreeRep::IsPerfectRecall() const
 {
   if (!m_ownPriorActionInfo && !m_root->IsTerminal()) {
