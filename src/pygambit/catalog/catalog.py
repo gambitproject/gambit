@@ -24,6 +24,22 @@ class CatalogGame:
         cls.title = game.title
         cls.num_players = len(game.players)
 
+    def __init_subclass__(cls, **kwargs):
+        """Extract metadata when subclass is defined (if not a file-based game)."""
+        super().__init_subclass__(**kwargs)
+
+        # Skip if this is CatalogGameFromFile or its subclasses
+        if cls.__name__ == "CatalogGameFromFile" or issubclass(cls, CatalogGameFromFile):
+            return
+
+        # For non-file-based games, create a temporary instance to extract metadata
+        try:
+            temp_game = cls.__new__(cls)
+            cls._extract_metadata_from_game(temp_game)
+        except NotImplementedError:
+            # Base class, skip
+            pass
+
 
 class CatalogGameFromFile(CatalogGame):
     """
@@ -92,8 +108,5 @@ class PrisonersDilemmaTestgame(CatalogGame):
             player2_payoffs,
             title="Test Prisoner's Dilemma"
         )
-
-        # Extract metadata from game and set as class attributes
-        cls._extract_metadata_from_game(g1)
 
         return g1
