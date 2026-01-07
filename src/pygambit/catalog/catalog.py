@@ -92,6 +92,20 @@ class CatalogGameFromFile(CatalogGame):
         cls._extract_metadata_from_game(cls._cached_game)
 
 
+def games() -> list[str]:
+    """Return a list of all catalog game names."""
+    def get_all_subclasses(cls):
+        """Recursively get all subclasses."""
+        all_subclasses = []
+        for subclass in cls.__subclasses__():
+            if subclass.__name__ not in ["CatalogGameFromFile"]:
+                all_subclasses.append(subclass.__name__)
+            all_subclasses.extend(get_all_subclasses(subclass))
+        return all_subclasses
+
+    return get_all_subclasses(CatalogGame)
+
+
 ############################
 # Catalog games from files #
 ############################
