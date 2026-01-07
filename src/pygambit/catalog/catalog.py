@@ -92,6 +92,11 @@ class CatalogGameFromFile(CatalogGame):
         cls._extract_metadata_from_game(cls._cached_game)
 
 
+############################
+# Catalog games from files #
+############################
+
+
 class PrisonersDilemma(CatalogGameFromFile):
     game_file = "pd.nfg"
     description = "Prisoner's Dilemma game."
@@ -102,6 +107,11 @@ class TwoStageMatchingPennies(CatalogGameFromFile):
     game_file = "2smp.efg"
     description = "Two-Stage Matching Pennies game."
     citation = "Example citation for Two-Stage Matching Pennies."
+
+
+##########################################
+# Catalog games defined programmatically #
+##########################################
 
 
 class PrisonersDilemmaTestgame(CatalogGame):
