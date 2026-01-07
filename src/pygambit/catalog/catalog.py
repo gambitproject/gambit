@@ -15,11 +15,11 @@ class CatalogGame:
     Calling any subclass will return an instance of the corresponding game.
     """
 
-    title: str | None = None
-    num_players: int | None = None
-    game_type: str | None = None
-    description: str | None = None
-    citation: str | None = None
+    title: str
+    num_players: int
+    game_type: str
+    description: str
+    citation: str
 
     def __new__(cls) -> Game:
         raise NotImplementedError("Subclasses must implement __new__ method")
@@ -54,7 +54,7 @@ class CatalogGameFromFile(CatalogGame):
     Calling any subclass will return an instance of the corresponding game.
     """
 
-    game_file: str | None = None
+    game_file: str
     _cached_game: Game | None = None
 
     def __new__(cls) -> Game:
