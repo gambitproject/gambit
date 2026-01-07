@@ -26,6 +26,7 @@
 #include <list>
 #include <set>
 #include <stack>
+#include <queue>
 #include <memory>
 
 #include "number.h"
