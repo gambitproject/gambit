@@ -1,3 +1,3 @@
-from .catalog import PrisonersDilemma, TwoStageMatchingPennies
+from .catalog import PrisonersDilemma, PrisonersDilemmaTestgame, TwoStageMatchingPennies
 
-__all__ = ["PrisonersDilemma", "TwoStageMatchingPennies"]
+__all__ = ["PrisonersDilemma", "TwoStageMatchingPennies", "PrisonersDilemmaTestgame"]
