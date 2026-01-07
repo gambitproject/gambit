@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Literal
 
 import numpy as np
 
@@ -17,7 +18,7 @@ class CatalogGame:
 
     title: str
     num_players: int
-    game_type: str
+    game_type: Literal["nfg", "efg"]
     description: str
     citation: str
 
@@ -92,13 +93,30 @@ class CatalogGameFromFile(CatalogGame):
         cls._extract_metadata_from_game(cls._cached_game)
 
 
-def games() -> list[str]:
-    """Return a list of all catalog game names."""
+def games(game_type: Literal["all", "nfg", "efg"] = "all") -> list[str]:
+    """
+    Return a list of catalog game names.
+
+    Parameters
+    ----------
+    game_type : {"all", "nfg", "efg"}, default "all"
+        Filter games by type:
+        - "all": return all games
+        - "nfg": return only normal-form (strategic) games
+        - "efg": return only extensive-form games
+
+    Returns
+    -------
+    list[str]
+        List of game class names matching the specified type.
+    """
     def get_all_subclasses(cls):
         """Recursively get all subclasses."""
         all_subclasses = []
         for subclass in cls.__subclasses__():
-            if subclass.__name__ not in ["CatalogGameFromFile"]:
+            if subclass.__name__ not in ["CatalogGameFromFile"] and (
+                game_type == "all" or subclass.game_type == game_type
+            ):
                 all_subclasses.append(subclass.__name__)
             all_subclasses.extend(get_all_subclasses(subclass))
         return all_subclasses
