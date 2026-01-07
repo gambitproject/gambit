@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/libgambit/mixed.h
 // Declaration of mixed strategy profile classes
@@ -29,19 +29,29 @@
 namespace Gambit {
 
 template <class T> class MixedStrategyProfileRep {
-public:
+protected:
   Vector<T> m_probs;
   StrategySupportProfile m_support;
   /// The index into the strategy profile for a strategy (-1 if not in support)
   std::map<GameStrategy, int> m_profileIndex;
   unsigned int m_gameversion;
 
+public:
   explicit MixedStrategyProfileRep(const StrategySupportProfile &);
   virtual ~MixedStrategyProfileRep() = default;
   virtual std::unique_ptr<MixedStrategyProfileRep> Copy() const = 0;
 
+  const StrategySupportProfile &GetSupport() const { return m_support; }
+  unsigned int GetGameVersion() const { return m_gameversion; }
+
   void SetCentroid();
   std::unique_ptr<MixedStrategyProfileRep> Normalize() const;
+  const T &operator[](int i) const { return m_probs[i]; }
+  T &operator[](int i)
+  {
+    OnProfileChanged();
+    return m_probs[i];
+  }
   /// Returns the probability the strategy is played
   const T &operator[](const GameStrategy &p_strategy) const
   {
@@ -50,7 +60,7 @@ public:
   /// Returns the probability the strategy is played
   T &operator[](const GameStrategy &p_strategy)
   {
-    InvalidateCache();
+    OnProfileChanged();
     return m_probs[m_profileIndex.at(p_strategy)];
   }
   /// Set the strategy of the corresponding player to a pure strategy
@@ -60,8 +70,23 @@ public:
       (*this)[s] = static_cast<T>(0);
     }
     (*this)[p_strategy] = static_cast<T>(1);
+    OnProfileChanged();
   }
-
+  const Vector<T> &GetProbVector() const { return m_probs; }
+  void SetProbVector(const Vector<T> &p_vector)
+  {
+    m_probs = p_vector;
+    OnProfileChanged();
+  }
+  void SetProbConstant(const T &c)
+  {
+    m_probs = c;
+    OnProfileChanged();
+  }
+  unsigned int GetProfileIndex(const GameStrategy &p_strategy) const
+  {
+    return m_profileIndex.at(p_strategy);
+  }
   virtual T GetPayoff(int pl) const = 0;
   virtual T GetPayoffDeriv(int pl, const GameStrategy &) const = 0;
   virtual T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const = 0;
@@ -72,7 +97,7 @@ public:
     return GetPayoffDeriv(p_strategy->GetPlayer()->GetNumber(), p_strategy);
   }
 
-  virtual void InvalidateCache() const {}
+  virtual void OnProfileChanged() const {}
 };
 
 /// \brief A probability distribution over strategies in a game
@@ -81,14 +106,26 @@ public:
 /// independently chooses from among his strategies with specified
 /// probabilities.
 template <class T> class MixedStrategyProfile {
+  struct Cache {
+    bool m_valid{false};
+    std::map<GamePlayer, T> m_payoffs;
+    std::map<GamePlayer, std::map<GameStrategy, T>> m_strategyValues;
+
+    void clear()
+    {
+      m_valid = false;
+      m_payoffs.clear();
+      m_strategyValues.clear();
+    }
+  };
+
   std::unique_ptr<MixedStrategyProfileRep<T>> m_rep;
-  mutable std::map<GamePlayer, T> m_payoffs;
-  mutable std::map<GamePlayer, std::map<GameStrategy, T>> m_strategyValues;
+  mutable Cache m_cache;
 
   /// Check underlying game has not changed; raise exception if it has
   void CheckVersion() const
   {
-    if (IsInvalidated()) {
+    if (HasOutdatedGameVersion()) {
       throw GameStructureChangedException();
     }
   }
@@ -96,12 +133,7 @@ template <class T> class MixedStrategyProfile {
   void ComputePayoffs() const;
 
   /// Reset cache for payoffs and strategy values
-  void InvalidateCache() const
-  {
-    m_strategyValues.clear();
-    m_payoffs.clear();
-    m_rep->InvalidateCache();
-  }
+  void InvalidateCache() const { m_cache.clear(); }
 
 public:
   /// @name Lifecycle
@@ -121,13 +153,13 @@ public:
   MixedStrategyProfile &operator=(const Vector<T> &v)
   {
     InvalidateCache();
-    m_rep->m_probs = v;
+    m_rep->SetProbVector(v);
     return *this;
   }
   MixedStrategyProfile &operator=(const T &c)
   {
     InvalidateCache();
-    m_rep->m_probs = c;
+    m_rep->SetProbConstant(c);
     return *this;
   }
   //@}
@@ -137,74 +169,75 @@ public:
   /// Test for the equality of two profiles
   bool operator==(const MixedStrategyProfile &p_profile) const
   {
-    return (m_rep->m_support == p_profile.m_rep->m_support &&
-            m_rep->m_probs == p_profile.m_rep->m_probs);
+    return (m_rep->GetSupport() == p_profile.m_rep->GetSupport() &&
+            m_rep->GetProbVector() == p_profile.m_rep->GetProbVector());
   }
   /// Test for the inequality of two profiles
   bool operator!=(const MixedStrategyProfile &p_profile) const
   {
-    return (m_rep->m_support != p_profile.m_rep->m_support ||
-            m_rep->m_probs != p_profile.m_rep->m_probs);
+    return (m_rep->GetSupport() != p_profile.m_rep->GetSupport() ||
+            m_rep->GetProbVector() != p_profile.m_rep->GetProbVector());
   }
 
   /// Vector-style access to probabilities
   const T &operator[](int i) const
   {
     CheckVersion();
-    return m_rep->m_probs[i];
+    return (*m_rep)[i];
   }
   /// Vector-style access to probabilities
   T &operator[](int i)
   {
     CheckVersion();
     InvalidateCache();
-    return m_rep->m_probs[i];
+    return (*m_rep)[i];
   }
 
   /// Returns the probability the strategy is played
   const T &operator[](const GameStrategy &p_strategy) const
   {
     CheckVersion();
-    return m_rep->operator[](p_strategy);
+    return (*m_rep)[p_strategy];
   }
   /// Returns the probability the strategy is played
   T &operator[](const GameStrategy &p_strategy)
   {
     CheckVersion();
-    InvalidateCache(); // NEW
-    return m_rep->operator[](p_strategy);
+    InvalidateCache();
+    return (*m_rep)[p_strategy];
   }
 
   /// Returns the mixed strategy for the player
   Vector<T> GetStrategy(const GamePlayer &p_player) const;
 
-  explicit operator const Vector<T> &() const
+  const Vector<T> &GetProbVector() const
   {
     CheckVersion();
-    return m_rep->m_probs;
+    return m_rep->GetProbVector();
   }
   //@}
 
   /// @name General data access
   //@{
   /// Returns the game on which the profile is defined
-  Game GetGame() const { return m_rep->m_support.GetGame(); }
+  Game GetGame() const { return m_rep->GetSupport().GetGame(); }
   /// Returns the support on which the profile is defined
   const StrategySupportProfile &GetSupport() const
   {
     CheckVersion();
-    return m_rep->m_support;
+    return m_rep->GetSupport();
   }
   /// Returns whether the profile has been invalidated by a subsequent revision to the game
-  bool IsInvalidated() const
+  bool HasOutdatedGameVersion() const
   {
-    return m_rep->m_gameversion != m_rep->m_support.GetGame()->GetVersion();
+    return m_rep->GetGameVersion() != m_rep->GetSupport().GetGame()->GetVersion();
   }
 
   /// Sets all strategies for each player to equal probabilities
   void SetCentroid()
   {
     CheckVersion();
+    InvalidateCache();
     m_rep->SetCentroid();
   }
 
@@ -218,7 +251,7 @@ public:
   }
 
   /// Returns the total number of strategies in the profile
-  size_t MixedProfileLength() const { return m_rep->m_probs.size(); }
+  size_t MixedProfileLength() const { return m_rep->GetProbVector().size(); }
 
   /// Converts the profile to one on the full support of the game
   MixedStrategyProfile ToFullSupport() const;

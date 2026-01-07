@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/tools/simpdiv/simpdiv.cc
 // Compute Nash equilibria via simplicial subdivision on the normal form
@@ -145,7 +145,7 @@ Rational NashSimpdivStrategySolver::Simplex(MixedStrategyProfile<Rational> &y,
   for (size_t i = 1; i <= v.size(); i++) {
     v[i] = y[i];
   }
-  besty = static_cast<const Vector<Rational> &>(y);
+  besty = y.GetProbVector();
   int i = 0;
   int j, k, h, jj, hh, ii, kk, tot;
   Rational maxz;
@@ -536,7 +536,7 @@ NashSimpdivStrategySolver::Solve(const MixedStrategyProfile<Rational> &p_start) 
     throw UndefinedException(
         "Computing equilibria of games with imperfect recall is not supported.");
   }
-  Rational d(Integer(1), find_lcd(static_cast<const Vector<Rational> &>(p_start)));
+  Rational d(Integer(1), find_lcd(p_start.GetProbVector()));
   const Rational scale = p_start.GetGame()->GetMaxPayoff() - p_start.GetGame()->GetMinPayoff();
 
   MixedStrategyProfile<Rational> y(p_start);

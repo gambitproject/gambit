@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/tools/liap/efgliap.h
 // Compute Nash equilibria by minimizing Liapunov function on extensive game
@@ -28,8 +28,8 @@
 namespace Gambit::Nash {
 
 std::list<MixedBehaviorProfile<double>>
-LiapBehaviorSolve(const MixedBehaviorProfile<double> &p_start, double p_maxregret, int p_maxitsN,
-                  BehaviorCallbackType<double> p_callback = NullBehaviorCallback<double>);
+LiapAgentSolve(const MixedBehaviorProfile<double> &p_start, double p_maxregret, int p_maxitsN,
+               BehaviorCallbackType<double> p_callback = NullBehaviorCallback<double>);
 
 std::list<MixedStrategyProfile<double>>
 LiapStrategySolve(const MixedStrategyProfile<double> &p_start, double p_maxregret, int p_maxitsN,

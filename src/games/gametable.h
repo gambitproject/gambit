@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/libgambit/gametable.h
 // Declaration of strategic game representation
@@ -40,7 +40,7 @@ private:
 
   /// @name Private auxiliary functions
   //@{
-  void IndexStrategies();
+  void IndexStrategies() const;
   void RebuildTable();
   //@}
 
