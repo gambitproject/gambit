@@ -160,8 +160,6 @@ class TwoStageMatchingPennies(CatalogGameFromFile):
 
 
 class OneShotTrust(CatalogGame):
-
-    title = "One-shot trust game, after Kreps (1990)"
     game_type = "efg"
     description = """
     The unique_NE_variant makes Trust a dominant strategy, replacing the
