@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/libgambit/gamebagg.cc
 // Implementation of Bayesian action-graph game representation
@@ -99,8 +99,8 @@ public:
 template <class T> T BAGGMixedStrategyProfileRep<T>::GetPayoff(int pl) const
 {
   auto &g = dynamic_cast<GameBAGGRep &>(*(this->m_support.GetGame()));
-  std::vector<double> s(g.MixedProfileLength());
-  Array<int> ns = g.NumStrategies();
+  std::vector<double> s(g.GetStrategies().size());
+  const auto ns = g.GetStrategies().shape();
   int bplayer = -1, btype = -1;
   for (int i = 0, offs = 0; i < g.baggPtr->getNumPlayers(); ++i) {
     for (int tp = 0; tp < g.baggPtr->getNumTypes(i); ++tp) {
@@ -108,7 +108,7 @@ template <class T> T BAGGMixedStrategyProfileRep<T>::GetPayoff(int pl) const
         bplayer = i;
         btype = tp;
       }
-      for (int j = 0; j < ns[g.baggPtr->typeOffset[i] + tp + 1]; ++j, ++offs) {
+      for (int j = 0; j < ns[g.baggPtr->typeOffset[i] + tp]; ++j, ++offs) {
         const GameStrategy strategy = this->m_support.GetGame()
                                           ->GetPlayer(g.baggPtr->typeOffset[i] + tp + 1)
                                           ->GetStrategy(j + 1);
@@ -124,7 +124,7 @@ template <class T>
 T BAGGMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &ps) const
 {
   auto &g = dynamic_cast<GameBAGGRep &>(*(this->m_support.GetGame()));
-  std::vector<double> s(g.MixedProfileLength());
+  std::vector<double> s(g.GetStrategies().size());
   int bplayer = -1, btype = -1;
   for (int i = 0; i < g.baggPtr->getNumPlayers(); ++i) {
     for (int tp = 0; tp < g.baggPtr->getNumTypes(i); ++tp) {
@@ -163,7 +163,7 @@ T BAGGMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &ps1
   }
 
   auto &g = dynamic_cast<GameBAGGRep &>(*(this->m_support.GetGame()));
-  std::vector<double> s(g.MixedProfileLength());
+  std::vector<double> s(g.GetStrategies().size());
   int bplayer = -1, btype = -1;
   for (int i = 0; i < g.baggPtr->getNumPlayers(); ++i) {
     for (int tp = 0; tp < g.baggPtr->getNumTypes(i); ++tp) {
@@ -235,15 +235,6 @@ Game GameBAGGRep::Copy() const
 //------------------------------------------------------------------------
 //                 GameBAGGRep: Dimensions of the game
 //------------------------------------------------------------------------
-
-Array<int> GameBAGGRep::NumStrategies() const
-{
-  Array<int> ns;
-  for (const auto &player : m_players) {
-    ns.push_back(player->m_strategies.size());
-  }
-  return ns;
-}
 
 PureStrategyProfile GameBAGGRep::NewPureStrategyProfile() const
 {

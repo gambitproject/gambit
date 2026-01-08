@@ -2,22 +2,14 @@ name: Build executables
 
 on:
   push:
-    paths-ignore:
-      - 'doc/**'
-      - '.github/ISSUE_TEMPLATE/**'
-      - 'README.md'
   pull_request:
-    paths-ignore:
-      - 'doc/**'
-      - '.github/ISSUE_TEMPLATE/**'
-      - 'README.md'
 
 jobs:
   linux:
     runs-on: ubuntu-latest
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Install dependencies
         run: |
           sudo apt-key adv --fetch-keys http://repos.codelite.org/CodeLite.asc
@@ -41,10 +33,10 @@ jobs:
           sudo make install
 
   macos:
-    runs-on: macos-13
+    runs-on: macos-15
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Install dependencies
         run: brew install automake autoconf wxwidgets
       - run: aclocal
@@ -52,31 +44,6 @@ jobs:
       - run: autoconf
       - run: ./configure
       - run: make
-      - run: sudo make install
-      - run: make osx-dmg
-      - uses: actions/upload-artifact@v5
-        with:
-          name: artifact-osx-13
-          path: "*.dmg"
-
-  macos-14:
-    runs-on: macos-14
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
-    steps:
-      - uses: actions/checkout@v5
-      - name: Install dependencies
-        run: brew install automake autoconf wxwidgets
-      - run: aclocal
-      - run: automake --add-missing
-      - run: autoconf
-      - run: ./configure
-      - run: make
-      - run: sudo make install
-      - run: make osx-dmg
-      - uses: actions/upload-artifact@v5
-        with:
-          name: artifact-osx-14
-          path: "*.dmg"
 
   windows:
     runs-on: windows-latest
@@ -85,7 +52,7 @@ jobs:
       run:
         shell: msys2 {0}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: msys2/setup-msys2@v2
         with:
           install: mingw-w64-x86_64-toolchain make automake autoconf
@@ -99,9 +66,9 @@ jobs:
         run: |
           mkdir installer
           cp gambit* installer
-          "${WIX}bin/candle" gambit.wxs
+          "${WIX}bin/candle" build_support/msw/gambit.wxs
           "${WIX}bin/light" -ext WixUIExtension gambit.wixobj
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
           name: artifact-msw
           path: "*.msi"

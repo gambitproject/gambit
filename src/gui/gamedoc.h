@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/gui/gamedoc.h
 // Declaration of game document class
@@ -31,76 +31,6 @@ namespace Gambit::GUI {
 
 class GameView;
 class GameDocument;
-
-//!
-//! This class manages the "stack" of supports obtained by eliminating
-//! dominated actions from consideration.
-//!
-class BehaviorDominanceStack {
-  GameDocument *m_doc;
-  bool m_strict;
-  Array<std::shared_ptr<BehaviorSupportProfile>> m_supports;
-  size_t m_current{0};
-  bool m_noFurther;
-
-public:
-  BehaviorDominanceStack(GameDocument *p_doc, bool p_strict);
-  ~BehaviorDominanceStack() = default;
-
-  //!
-  //! Returns the number of supports in the stack
-  //!
-  int NumSupports() const { return m_supports.size(); }
-
-  //!
-  //! Get the i'th support in the stack
-  //! (where i=1 is always the "full" support)
-  //!
-  const BehaviorSupportProfile &GetSupport(int i) const { return *m_supports[i]; }
-
-  //!
-  //! Get the current support
-  //!
-  const BehaviorSupportProfile &GetCurrent() const { return *m_supports[m_current]; }
-
-  //!
-  //! Get the level of iteration (1 = no iteration)
-  //!
-  int GetLevel() const { return m_current; }
-
-  //!
-  //! Sets whether elimination is strict or weak.  If this changes the
-  //! internal setting, a Reset() is done
-  //!
-  void SetStrict(bool p_strict);
-
-  //!
-  //! Reset the stack by clearing out all supports
-  //!
-  void Reset();
-
-  //!
-  //! Go to the next level of iteration.  Returns 'true' if successful,
-  //! 'false' if no effect (i.e., no further actions could be eliminated)
-  //!
-  bool NextLevel();
-
-  //!
-  //! Go to the previous level of iteration.  Returns 'true' if successful,
-  //! 'false' if no effect (i.e., already at the full support)
-  //!
-  bool PreviousLevel();
-
-  //!
-  //! Go to the top level (the full support)
-  //!
-  void TopLevel() { m_current = 1; }
-
-  //!
-  //! Returns 'false' if it is known that no further eliminations can be done
-  //!
-  bool CanEliminate() const { return (m_current < m_supports.size() || !m_noFurther); }
-};
 
 //!
 //! This class manages the "stack" of supports obtained by eliminating
@@ -226,7 +156,6 @@ class GameDocument {
   GameNode m_selectNode;
   bool m_modified;
 
-  BehaviorDominanceStack m_behavSupports;
   StrategyDominanceStack m_stratSupports;
 
   Array<std::shared_ptr<AnalysisOutput>> m_profiles;
@@ -281,25 +210,12 @@ public:
     return (m_profiles.size() == 0) ? 0 : GetProfiles().GetCurrent();
   }
   void SetCurrentProfile(int p_profile);
-  /*
-  void AddProfiles(const List<MixedBehavProfile<double> > &);
-  void AddProfile(const MixedBehavProfile<double> &);
-  void AddProfiles(const List<MixedStrategyProfile<double> > &);
-  void AddProfile(const MixedStrategyProfile<double> &);
-  */
-  //@}
 
   //!
   //! @name Handling of behavior supports
   //!
   //@{
-  const BehaviorSupportProfile &GetEfgSupport() const { return m_behavSupports.GetCurrent(); }
-  void SetBehavElimStrength(bool p_strict);
-  bool NextBehavElimLevel();
-  void PreviousBehavElimLevel();
-  void TopBehavElimLevel();
-  bool CanBehavElim() const;
-  int GetBehavElimLevel() const;
+  BehaviorSupportProfile GetEfgSupport() const { return BehaviorSupportProfile(m_game); }
   //@}
 
   //!

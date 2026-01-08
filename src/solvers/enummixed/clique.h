@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: library/src/enummixed/clique.h
 // Maximal cliques and connected components
@@ -199,10 +199,9 @@ class CliqueEnumerator {
 public:
   class Edge {
   public:
-    int node1;
-    int node2;
-    int nextedge;
-    Edge() = default;
+    int node1, node2, nextedge{};
+
+    explicit Edge(const int n1, const int n2) : node1(n1), node2(n2) {}
     ~Edge() = default;
     bool operator==(const Edge &y) const { return (node1 == y.node1 && node2 == y.node2); }
     bool operator!=(const Edge &y) const { return !(*this == y); }
@@ -211,13 +210,13 @@ public:
   CliqueEnumerator(Array<Edge> &, int, int);
   ~CliqueEnumerator() = default;
 
-  const List<Array<int>> &GetCliques1() const { return m_cliques1; }
-  const List<Array<int>> &GetCliques2() const { return m_cliques2; }
+  const Array<Array<int>> &GetCliques1() const { return m_cliques1; }
+  const Array<Array<int>> &GetCliques2() const { return m_cliques2; }
 
 private:
   Array<int> firstedge;
   int maxinp1, maxinp2;
-  List<Array<int>> m_cliques1, m_cliques2;
+  Array<Array<int>> m_cliques1, m_cliques2;
 
   void candtry1(int stk[], // stack
                 bool connected[MAXM][MAXN],

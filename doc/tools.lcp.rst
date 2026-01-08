@@ -6,13 +6,20 @@
 
 :program:`gambit-lcp` reads a two-player game on standard input and
 computes Nash equilibria by finding solutions to a linear
-complementarity problem. For extensive games, the program uses the
+complementarity problem.
+
+For extensive games, the program uses the
 sequence form representation of the extensive game, as defined by
 Koller, Megiddo, and von Stengel [KolMegSte94]_, and applies the
-algorithm developed by Lemke. For strategic games, the program using
-the method of Lemke and Howson [LemHow64]_.  There exist strategic
-games for which some equilibria cannot be located by this method; see
-Shapley [Sha74]_.
+algorithm developed by Lemke. In that case, the method will find
+one Nash equilibrium.
+
+For strategic games, the program uses the method of Lemke and Howson
+[LemHow64]_. In this case, the method will find all "accessible"
+equilibria, i.e., those that can be found as concatenations of Lemke-Howson
+paths that start at the artificial equilibrium.
+There exist strategic-form games for which some equilibria cannot be found
+by this method, i.e., some equilibria are inaccessible; see Shapley [Sha74]_.
 
 In a two-player strategic game, the set of Nash equilibria can be expressed
 as the union of convex sets. This program will find extreme points
@@ -51,18 +58,13 @@ game.
    causes the program to output greater detail on each equilbrium
    profile computed.
 
-.. cmdoption:: -P
-
-   By default, the program computes Nash equilibria in an extensive
-   game. This switch instructs the program to find only equilibria
-   which are subgame perfect.  (This has no effect for strategic
-   games, since there are no proper subgames of a strategic game.)
-
 .. cmdoption:: -e EQA
 
-   By default, the program will find all equilibria accessible from
-   the origin of the polytopes.  This switch instructs the program
-   to terminate when EQA equilibria have been found.
+   By default, when working with the reduced strategic game, the program
+   will find all equilibria accessible from the origin of the polytopes.
+   This switch instructs the program to terminate when EQA equilibria
+   have been found. This has no effect when using the extensive representation
+   of a game, in which case the method always only returns one equilibrium.
 
 .. cmdoption:: -h
 
@@ -75,11 +77,11 @@ game.
 
 Computing an equilibrium of extensive game :download:`e02.efg
 <../contrib/games/e02.efg>`, the example in Figure 2 of Selten
-(International Journal of Game Theory, 1975)::
+(International Journal of Game Theory, 1975)
 
    $ gambit-lcp e02.efg
    Compute Nash equilibria by solving a linear complementarity program
-   Gambit version 16.4.0, Copyright (C) 1994-2025, The Gambit Project
+   Gambit version |release|, Copyright (C) 1994-2026, The Gambit Project
    This is free software, distributed under the GNU GPL
 
    NE,1,0,1/2,1/2,1/2,1/2

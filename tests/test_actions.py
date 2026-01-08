@@ -7,31 +7,43 @@ from . import games
 
 @pytest.mark.parametrize(
     "game,label",
-    [(games.create_myerson_2_card_poker_efg(), "random label")]
+    [(games.create_stripped_down_poker_efg(), "random label")]
 )
 def test_set_action_label(game: gbt.Game, label: str):
     game.root.infoset.actions[0].label = label
     assert game.root.infoset.actions[0].label == label
 
 
+def test_set_empty_action_futurewarning():
+    game = games.create_stripped_down_poker_efg()
+    with pytest.warns(FutureWarning):
+        game.root.infoset.actions[0].label = ""
+
+
+def test_set_duplicate_action_futurewarning():
+    game = games.create_stripped_down_poker_efg()
+    with pytest.warns(FutureWarning):
+        game.root.infoset.actions[0].label = "Queen"
+
+
 @pytest.mark.parametrize(
     "game,inprobs,outprobs",
-    [(games.create_myerson_2_card_poker_efg(),
+    [(games.create_stripped_down_poker_efg(),
       [0.75, 0.25], [0.75, 0.25]),
-     (games.create_myerson_2_card_poker_efg(),
+     (games.create_stripped_down_poker_efg(),
       ["16/17", "1/17"], [gbt.Rational("16/17"), gbt.Rational("1/17")])]
 )
 def test_set_chance_valid_probability(game: gbt.Game, inprobs: list, outprobs: list):
     game.set_chance_probs(game.root.infoset, inprobs)
-    for (action, prob) in zip(game.root.infoset.actions, outprobs):
+    for (action, prob) in zip(game.root.infoset.actions, outprobs, strict=True):
         assert action.prob == prob
 
 
 @pytest.mark.parametrize(
     "game,inprobs",
-    [(games.create_myerson_2_card_poker_efg(), [0.75, -0.10]),
-     (games.create_myerson_2_card_poker_efg(), [0.75, 0.40]),
-     (games.create_myerson_2_card_poker_efg(), ["foo", "bar"])]
+    [(games.create_stripped_down_poker_efg(), [0.75, -0.10]),
+     (games.create_stripped_down_poker_efg(), [0.75, 0.40]),
+     (games.create_stripped_down_poker_efg(), ["foo", "bar"])]
 )
 def test_set_chance_improper_probability(game: gbt.Game, inprobs: list):
     with pytest.raises(ValueError):
@@ -40,8 +52,8 @@ def test_set_chance_improper_probability(game: gbt.Game, inprobs: list):
 
 @pytest.mark.parametrize(
     "game,inprobs",
-    [(games.create_myerson_2_card_poker_efg(), [0.25, 0.75, 0.25]),
-     (games.create_myerson_2_card_poker_efg(), [1.00])]
+    [(games.create_stripped_down_poker_efg(), [0.25, 0.75, 0.25]),
+     (games.create_stripped_down_poker_efg(), [1.00])]
 )
 def test_set_chance_bad_dimension(game: gbt.Game, inprobs: list):
     with pytest.raises(IndexError):
@@ -50,7 +62,7 @@ def test_set_chance_bad_dimension(game: gbt.Game, inprobs: list):
 
 @pytest.mark.parametrize(
     "game",
-    [games.create_myerson_2_card_poker_efg()]
+    [games.create_stripped_down_poker_efg()]
 )
 def test_set_chance_personal(game: gbt.Game):
     with pytest.raises(gbt.UndefinedOperationError):
@@ -59,7 +71,7 @@ def test_set_chance_personal(game: gbt.Game):
 
 @pytest.mark.parametrize(
     "game",
-    [games.create_myerson_2_card_poker_efg()]
+    [games.create_stripped_down_poker_efg()]
 )
 def test_action_precedes(game: gbt.Game):
     child = game.root.children[0]
@@ -69,7 +81,7 @@ def test_action_precedes(game: gbt.Game):
 
 @pytest.mark.parametrize(
     "game",
-    [games.create_myerson_2_card_poker_efg()]
+    [games.create_stripped_down_poker_efg()]
 )
 def test_action_precedes_nonnode(game: gbt.Game):
     with pytest.raises(TypeError):
@@ -78,7 +90,7 @@ def test_action_precedes_nonnode(game: gbt.Game):
 
 @pytest.mark.parametrize(
     "game",
-    [games.create_myerson_2_card_poker_efg()]
+    [games.create_stripped_down_poker_efg()]
 )
 def test_action_delete_personal(game: gbt.Game):
     node = game.players[0].infosets[0].members[0]
@@ -90,7 +102,7 @@ def test_action_delete_personal(game: gbt.Game):
 
 @pytest.mark.parametrize(
     "game",
-    [games.create_myerson_2_card_poker_efg()]
+    [games.create_stripped_down_poker_efg()]
 )
 def test_action_delete_last(game: gbt.Game):
     node = game.players[0].infosets[0].members[0]
@@ -103,7 +115,7 @@ def test_action_delete_last(game: gbt.Game):
 @pytest.mark.parametrize(
     "game",
     [games.read_from_file("chance_root_3_moves_only_one_nonzero_prob.efg"),
-     games.create_myerson_2_card_poker_efg(),
+     games.create_stripped_down_poker_efg(),
      games.read_from_file("chance_root_5_moves_no_nonterm_player_nodes.efg")]
 )
 def test_action_delete_chance(game: gbt.Game):
@@ -120,7 +132,7 @@ def test_action_delete_chance(game: gbt.Game):
             for p in new_probs:
                 assert p == 1/len(new_probs)
         else:
-            for p1, p2 in zip(old_probs[1:], new_probs):
+            for p1, p2 in zip(old_probs[1:], new_probs, strict=True):
                 if p1 == 0:
                     assert p2 == 0
                 else:

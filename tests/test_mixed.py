@@ -107,18 +107,18 @@ def test_normalize(game, profile_data, expected_data, rational_flag):
      (games.create_coord_4x4_nfg(outcome_version=True), "1-1", 0.25, False),
      (games.create_coord_4x4_nfg(outcome_version=True), "1-1", "1/4", True),
      ###############################################################################
-     # myerson 2 card poker efg
-     (games.create_myerson_2_card_poker_efg(), "11", 0.25, False),
-     (games.create_myerson_2_card_poker_efg(), "12", 0.15, False),
-     (games.create_myerson_2_card_poker_efg(), "21", 0.99, False),
-     (games.create_myerson_2_card_poker_efg(), "11", "1/4", True),
-     (games.create_myerson_2_card_poker_efg(), "12", "3/4", True),
-     (games.create_myerson_2_card_poker_efg(), "21", "7/9", True),
+     # stripped-down poker efg
+     (games.create_stripped_down_poker_efg(), "11", 0.25, False),
+     (games.create_stripped_down_poker_efg(), "12", 0.15, False),
+     (games.create_stripped_down_poker_efg(), "21", 0.99, False),
+     (games.create_stripped_down_poker_efg(), "11", "1/4", True),
+     (games.create_stripped_down_poker_efg(), "12", "3/4", True),
+     (games.create_stripped_down_poker_efg(), "21", "7/9", True),
     ],
 )
 def test_set_and_get_probability_by_strategy_label(game: gbt.Game, strategy_label: str,
                                                    rational_flag: bool,
-                                                   prob: typing.Union[float, str]):
+                                                   prob: float | str):
     profile = game.mixed_strategy_profile(rational=rational_flag)
     prob = gbt.Rational(prob) if rational_flag else prob
     profile[strategy_label] = prob
@@ -137,11 +137,11 @@ def test_set_and_get_probability_by_strategy_label(game: gbt.Game, strategy_labe
      (games.create_coord_4x4_nfg(), P1, False, [0.25, 0, 0, 0.75]),
      (games.create_coord_4x4_nfg(), P1, True, ["1/4", 0, 0, "3/4"]),
      ##############################################################################
-     # myerson 2 card poker efg
-     (games.create_myerson_2_card_poker_efg(), P1, False, [0.25, 0.75, 0, 0]),
-     (games.create_myerson_2_card_poker_efg(), P2, False, [1, 0]),
-     (games.create_myerson_2_card_poker_efg(), P1, True, ["1/4", "3/4", 0, 0]),
-     (games.create_myerson_2_card_poker_efg(), P2, True, [1, 0]),
+     # stripped-down poker efg
+     (games.create_stripped_down_poker_efg(), "Alice", False, [0.25, 0.75, 0, 0]),
+     (games.create_stripped_down_poker_efg(), "Bob", False, [1, 0]),
+     (games.create_stripped_down_poker_efg(), "Alice", True, ["1/4", "3/4", 0, 0]),
+     (games.create_stripped_down_poker_efg(), "Bob", True, [1, 0]),
     ],
 )
 def test_set_and_get_probabilities_by_player_label(game: gbt.Game, player_label: str,
@@ -156,21 +156,21 @@ def test_set_and_get_probabilities_by_player_label(game: gbt.Game, player_label:
     "game,player_label,strategy_label,prob,rational_flag",
     [
      ##############################################################################
-     # myerson 2 card poker efg
+     # stripped-down poker efg
      # Player 1
-     (games.create_myerson_2_card_poker_efg(), P1, "11", 0.25, False),
-     (games.create_myerson_2_card_poker_efg(), P1, "12", 0.25, False),
-     (games.create_myerson_2_card_poker_efg(), P1, "21", 0.25, False),
-     (games.create_myerson_2_card_poker_efg(), P1, "22", 0.25, False),
-     (games.create_myerson_2_card_poker_efg(), P1, "11", "1/4", True),
-     (games.create_myerson_2_card_poker_efg(), P1, "12", "1/4", True),
-     (games.create_myerson_2_card_poker_efg(), P1, "21", "1/4", True),
-     (games.create_myerson_2_card_poker_efg(), P1, "22", "1/4", True),
+     (games.create_stripped_down_poker_efg(), "Alice", "11", 0.25, False),
+     (games.create_stripped_down_poker_efg(), "Alice", "12", 0.25, False),
+     (games.create_stripped_down_poker_efg(), "Alice", "21", 0.25, False),
+     (games.create_stripped_down_poker_efg(), "Alice", "22", 0.25, False),
+     (games.create_stripped_down_poker_efg(), "Alice", "11", "1/4", True),
+     (games.create_stripped_down_poker_efg(), "Alice", "12", "1/4", True),
+     (games.create_stripped_down_poker_efg(), "Alice", "21", "1/4", True),
+     (games.create_stripped_down_poker_efg(), "Alice", "22", "1/4", True),
      # Player 2
-     (games.create_myerson_2_card_poker_efg(), P2, "1", 0.5, False),
-     (games.create_myerson_2_card_poker_efg(), P2, "2", 0.5, False),
-     (games.create_myerson_2_card_poker_efg(), P2, "1", "1/2", True),
-     (games.create_myerson_2_card_poker_efg(), P2, "2", "1/2", True),
+     (games.create_stripped_down_poker_efg(), "Bob", "1", 0.5, False),
+     (games.create_stripped_down_poker_efg(), "Bob", "2", 0.5, False),
+     (games.create_stripped_down_poker_efg(), "Bob", "1", "1/2", True),
+     (games.create_stripped_down_poker_efg(), "Bob", "2", "1/2", True),
      ##############################################################################
      # coordination 4x4 nfg outcome version with strategy labels
      (games.create_coord_4x4_nfg(outcome_version=True), P1, "1-1", "1/4", True),
@@ -179,7 +179,7 @@ def test_set_and_get_probabilities_by_player_label(game: gbt.Game, player_label:
 )
 def test_profile_indexing_by_player_and_strategy_label_reference(game: gbt.Game, player_label: str,
                                                                  strategy_label: str,
-                                                                 prob: typing.Union[str, float],
+                                                                 prob: str | float,
                                                                  rational_flag: bool):
     profile = game.mixed_strategy_profile(rational=rational_flag)
     prob = gbt.Rational(prob) if rational_flag else prob
@@ -190,13 +190,13 @@ def test_profile_indexing_by_player_and_strategy_label_reference(game: gbt.Game,
     "game,player_label,strategy_label,rational_flag",
     [
      ##############################################################################
-     # myerson 2 card poker efg
-     (games.create_myerson_2_card_poker_efg(), P2, "11", True),
-     (games.create_myerson_2_card_poker_efg(), P2, "11", False),
-     (games.create_myerson_2_card_poker_efg(), P1, "1", True),
-     (games.create_myerson_2_card_poker_efg(), P1, "1", False),
-     (games.create_myerson_2_card_poker_efg(), P1, "2", True),
-     (games.create_myerson_2_card_poker_efg(), P1, "2", False),
+     # stripped-down poker efg
+     (games.create_stripped_down_poker_efg(), "Bob", "11", True),
+     (games.create_stripped_down_poker_efg(), "Bob", "11", False),
+     (games.create_stripped_down_poker_efg(), "Alice", "1", True),
+     (games.create_stripped_down_poker_efg(), "Alice", "1", False),
+     (games.create_stripped_down_poker_efg(), "Alice", "2", True),
+     (games.create_stripped_down_poker_efg(), "Alice", "2", False),
      ##############################################################################
      # coordination 4x4 nfg outcome version with strategy labels
      (games.create_coord_4x4_nfg(outcome_version=True), P1, "2-1", True),
@@ -216,8 +216,8 @@ def test_profile_indexing_by_player_and_invalid_strategy_label(game: gbt.Game,
     "game,strategy_label,rational_flag,error,message",
     [
      ##############################################################################
-     # myerson 2 card poker efg
-     (games.create_myerson_2_card_poker_efg(), "13", True, KeyError, "player or strategy"),
+     # stripped-down poker efg
+     (games.create_stripped_down_poker_efg(), "13", True, KeyError, "player or strategy"),
      ##############################################################################
      # coordination 4x4 nfg payoff version (default strategy labels created with duplicates)
      (games.create_coord_4x4_nfg(), "1", True, ValueError, "multiple strategies"),
@@ -229,8 +229,8 @@ def test_profile_indexing_by_player_and_invalid_strategy_label(game: gbt.Game,
 )
 def test_profile_indexing_by_invalid_strategy_label(game: gbt.Game, strategy_label: str,
                                                     rational_flag: bool,
-                                                    error: typing.Union[ValueError, KeyError],
-                                                    message: typing.Union[str, None]):
+                                                    error: ValueError | KeyError,
+                                                    message: str | None):
     """Check that we get a ValueError for an ambigious strategy label and a KeyError for one that
     is neither a player or strategy label in the game
     """
@@ -249,21 +249,21 @@ def test_profile_indexing_by_player_and_duplicate_strategy_label():
     "game,strategy_label,prob,rational_flag",
     [
      ###########################################################################
-     # myerson 2 card poker efg
+     # stripped-down poker efg
      # Player 1
-     (games.create_myerson_2_card_poker_efg(), "11", 0.25, False),
-     (games.create_myerson_2_card_poker_efg(), "12", 0.25, False),
-     (games.create_myerson_2_card_poker_efg(), "21", 0.25, False),
-     (games.create_myerson_2_card_poker_efg(), "22", 0.25, False),
-     (games.create_myerson_2_card_poker_efg(), "11", "1/4", True),
-     (games.create_myerson_2_card_poker_efg(), "12", "1/4", True),
-     (games.create_myerson_2_card_poker_efg(), "21", "1/4", True),
-     (games.create_myerson_2_card_poker_efg(), "22", "1/4", True),
+     (games.create_stripped_down_poker_efg(), "11", 0.25, False),
+     (games.create_stripped_down_poker_efg(), "12", 0.25, False),
+     (games.create_stripped_down_poker_efg(), "21", 0.25, False),
+     (games.create_stripped_down_poker_efg(), "22", 0.25, False),
+     (games.create_stripped_down_poker_efg(), "11", "1/4", True),
+     (games.create_stripped_down_poker_efg(), "12", "1/4", True),
+     (games.create_stripped_down_poker_efg(), "21", "1/4", True),
+     (games.create_stripped_down_poker_efg(), "22", "1/4", True),
      # Player 2
-     (games.create_myerson_2_card_poker_efg(), "1", 0.5, False),
-     (games.create_myerson_2_card_poker_efg(), "2", 0.5, False),
-     (games.create_myerson_2_card_poker_efg(), "1", "1/2", True),
-     (games.create_myerson_2_card_poker_efg(), "2", "1/2", True),
+     (games.create_stripped_down_poker_efg(), "1", 0.5, False),
+     (games.create_stripped_down_poker_efg(), "2", 0.5, False),
+     (games.create_stripped_down_poker_efg(), "1", "1/2", True),
+     (games.create_stripped_down_poker_efg(), "2", "1/2", True),
      ############################################################################
      # coordination 4x4 nfg outcome version with strategy labels
      # Player 1
@@ -275,7 +275,7 @@ def test_profile_indexing_by_player_and_duplicate_strategy_label():
     ]
 )
 def test_profile_indexing_by_strategy_label_reference(game: gbt.Game, strategy_label: str,
-                                                      prob: typing.Union[str, float],
+                                                      prob: str | float,
                                                       rational_flag: bool):
     profile = game.mixed_strategy_profile(rational=rational_flag)
     prob = gbt.Rational(prob) if rational_flag else prob
@@ -294,11 +294,11 @@ def test_profile_indexing_by_strategy_label_reference(game: gbt.Game, strategy_l
      (games.create_mixed_behav_game_efg(), P2, ["1/2", "1/2"], True),
      (games.create_mixed_behav_game_efg(), P3, ["1/2", "1/2"], True),
      ############################################################################
-     # myerson 2 card poker efg
-     (games.create_myerson_2_card_poker_efg(), P1, [0.25, 0.25, 0.25, 0.25], False),
-     (games.create_myerson_2_card_poker_efg(), P2, [0.5, 0.5], False),
-     (games.create_myerson_2_card_poker_efg(), P1, ["1/4", "1/4", "1/4", "1/4"], True),
-     (games.create_myerson_2_card_poker_efg(), P2, ["1/2", "1/2"], True),
+     # stripped-down poker efg
+     (games.create_stripped_down_poker_efg(), "Alice", [0.25, 0.25, 0.25, 0.25], False),
+     (games.create_stripped_down_poker_efg(), "Bob", [0.5, 0.5], False),
+     (games.create_stripped_down_poker_efg(), "Alice", ["1/4", "1/4", "1/4", "1/4"], True),
+     (games.create_stripped_down_poker_efg(), "Bob", ["1/2", "1/2"], True),
      ############################################################################
      # coordination 4x4 nfg
      (games.create_coord_4x4_nfg(), P1, [0.25, 0.25, 0.25, 0.25], False),
@@ -337,25 +337,25 @@ def test_profile_indexing_by_player_label_reference(game: gbt.Game, player_label
      (games.create_coord_4x4_nfg(), False, [[1, 0, 0, 0], [0, 1, 0, 0]], P2, 0),
      (games.create_coord_4x4_nfg(), True,  [[1, 0, 0, 0], [0, 1, 0, 0]], P2, 0),
      #########################################################################
-     # myerson 2 card poker efg
-     (games.create_myerson_2_card_poker_efg(), False, None, P1, -1.25),
-     (games.create_myerson_2_card_poker_efg(), False, None, P2, 1.25),
-     (games.create_myerson_2_card_poker_efg(), True,  None, P1, "-5/4"),
-     (games.create_myerson_2_card_poker_efg(), True,  None, P2, "5/4"),
-     # Raise/Raise for player 1
-     (games.create_myerson_2_card_poker_efg(), False, [[1, 0, 0, 0], [1, 0]], P1, -1),
-     (games.create_myerson_2_card_poker_efg(), False, [[1, 0, 0, 0], [1, 0]], P2, 1),
-     (games.create_myerson_2_card_poker_efg(), True,  [[1, 0, 0, 0], [1, 0]], P1, -1),
-     (games.create_myerson_2_card_poker_efg(), True,  [[1, 0, 0, 0], [1, 0]], P2, 1),
+     # stripped-down poker efg
+     (games.create_stripped_down_poker_efg(), False, None, "Alice", -0.25),
+     (games.create_stripped_down_poker_efg(), False, None, "Bob", 0.25),
+     (games.create_stripped_down_poker_efg(), True,  None, "Alice", "-1/4"),
+     (games.create_stripped_down_poker_efg(), True,  None, "Bob", "1/4"),
+     # Bet/Call
+     (games.create_stripped_down_poker_efg(), False, [[1, 0, 0, 0], [1, 0]], "Alice",  0),
+     (games.create_stripped_down_poker_efg(), False, [[1, 0, 0, 0], [1, 0]], "Bob", 0),
+     (games.create_stripped_down_poker_efg(), True,  [[1, 0, 0, 0], [1, 0]], "Alice",  0),
+     (games.create_stripped_down_poker_efg(), True,  [[1, 0, 0, 0], [1, 0]], "Bob", 0),
      # Fold/Fold for player 1 (player 2's strategy is payoff-irrelevant)
-     (games.create_myerson_2_card_poker_efg(), False, [[0, 0, 0, 1], [1, 0]], P1, -2),
-     (games.create_myerson_2_card_poker_efg(), False, [[0, 0, 0, 1], [1, 0]], P2, 2),
-     (games.create_myerson_2_card_poker_efg(), True,  [[0, 0, 0, 1], [1, 0]], P1, -2),
-     (games.create_myerson_2_card_poker_efg(), True,  [[0, 0, 0, 1], [1, 0]], P2, 2),
-     (games.create_myerson_2_card_poker_efg(), False, [[0, 0, 0, 1], [0.5, 0.5]], P1, -2),
-     (games.create_myerson_2_card_poker_efg(), False, [[0, 0, 0, 1], [0.5, 0.5]], P2, 2),
-     (games.create_myerson_2_card_poker_efg(), True,  [[0, 0, 0, 1], ["1/2", "1/2"]], P1, -2),
-     (games.create_myerson_2_card_poker_efg(), True,  [[0, 0, 0, 1], ["1/2", "1/2"]], P2, 2),
+     (games.create_stripped_down_poker_efg(), False, [[0, 0, 0, 1], [1, 0]], "Alice", -1),
+     (games.create_stripped_down_poker_efg(), False, [[0, 0, 0, 1], [1, 0]], "Bob", 1),
+     (games.create_stripped_down_poker_efg(), True,  [[0, 0, 0, 1], [1, 0]], "Alice", -1),
+     (games.create_stripped_down_poker_efg(), True,  [[0, 0, 0, 1], [1, 0]], "Bob", 1),
+     (games.create_stripped_down_poker_efg(), False, [[0, 0, 0, 1], [0.5, 0.5]], "Alice", -1),
+     (games.create_stripped_down_poker_efg(), False, [[0, 0, 0, 1], [0.5, 0.5]], "Bob", 1),
+     (games.create_stripped_down_poker_efg(), True,  [[0, 0, 0, 1], ["1/2", "1/2"]], "Alice", -1),
+     (games.create_stripped_down_poker_efg(), True,  [[0, 0, 0, 1], ["1/2", "1/2"]], "Bob", 1),
      #########################################################################
      (games.create_mixed_behav_game_efg(), False, None, P1, 3.0),
      (games.create_mixed_behav_game_efg(), False, None, P2, 3.0),
@@ -366,7 +366,7 @@ def test_profile_indexing_by_player_label_reference(game: gbt.Game, player_label
     ]
 )
 def test_payoff_by_label_reference(game: gbt.Game, rational_flag: bool, profile_data: list,
-                                   label: str, payoff: typing.Union[float, str]):
+                                   label: str, payoff: float | str):
     payoff = gbt.Rational(payoff) if rational_flag else payoff
     profile = game.mixed_strategy_profile(rational=rational_flag, data=profile_data)
     assert profile.payoff(label) == payoff
@@ -384,19 +384,19 @@ def test_payoff_by_label_reference(game: gbt.Game, rational_flag: bool, profile_
      (games.create_coord_4x4_nfg(outcome_version=True), False, "1-1", 0.25),
      (games.create_coord_4x4_nfg(outcome_version=True), True, "1-1", "1/4"),
      ##############################################################################
-     # myerson 2 card poker efg
-     (games.create_myerson_2_card_poker_efg(), False, "11", -0.5),  # Raise/Raise
-     (games.create_myerson_2_card_poker_efg(), False, "12", -0.75),  # Raise Red/Fold Black
-     (games.create_myerson_2_card_poker_efg(), False, "21", -1.75),  # Fold Red/Raise Black
-     (games.create_myerson_2_card_poker_efg(), False, "22", -2),  # Fold/Fold
-     (games.create_myerson_2_card_poker_efg(), True, "11", "-1/2"),
-     (games.create_myerson_2_card_poker_efg(), True, "12", "-3/4"),
-     (games.create_myerson_2_card_poker_efg(), True, "21", "-7/4"),
-     (games.create_myerson_2_card_poker_efg(), True, "22", -2),
+     # stripped-down poker efg
+     (games.create_stripped_down_poker_efg(), False, "11", 0.5),  # Bet/Bet
+     (games.create_stripped_down_poker_efg(), False, "12", 0.25),  # Bet King/Fold Queen
+     (games.create_stripped_down_poker_efg(), False, "21", -0.75),  # Fold King/Bet Queen
+     (games.create_stripped_down_poker_efg(), False, "22", -1),  # Fold/Fold
+     (games.create_stripped_down_poker_efg(), True, "11", "1/2"),
+     (games.create_stripped_down_poker_efg(), True, "12", "1/4"),
+     (games.create_stripped_down_poker_efg(), True, "21", "-3/4"),
+     (games.create_stripped_down_poker_efg(), True, "22", -1),
     ]
 )
 def test_strategy_value_by_label_reference(game: gbt.Game, rational_flag: bool, label: str,
-                                           value: typing.Union[float, str]):
+                                           value: float | str):
     value = gbt.Rational(value) if rational_flag else value
     assert game.mixed_strategy_profile(rational=rational_flag).strategy_value(label) == value
 
@@ -456,7 +456,7 @@ def test_as_behavior_error(game: gbt.Game, rational_flag: bool):
 def test_payoffs_reference(game: gbt.Game, profile_data: list, rational_flag: bool,
                            payoffs: tuple):
     profile = game.mixed_strategy_profile(rational=rational_flag, data=profile_data)
-    for payoff, player in zip(payoffs, profile.game.players):
+    for payoff, player in zip(payoffs, profile.game.players, strict=True):
         payoff = gbt.Rational(payoff) if rational_flag else payoff
         assert profile.payoff(player) == payoff
 
@@ -483,15 +483,16 @@ def test_payoffs_reference(game: gbt.Game, profile_data: list, rational_flag: bo
      (games.create_2x2x2_nfg(), None, True, (["1/2", "1/2"], [2, 2], ["1/2", "1/2"])),
      (games.create_2x2x2_nfg(), [[1, 0], [1, 0], [1, 0]], True, ([0, 1], [0, 4], [0, 1])),
      ###############################################################################
-     # myerson 2 card poker efg
-     (games.create_myerson_2_card_poker_efg(), None, False, [(-0.5, -0.75, -1.75, -2), (1.5, 1)]),
+     # stripped-down poker efg
+     (games.create_stripped_down_poker_efg(), None, False, [(0.5, 0.25, -0.75, -1), (0.5, 0)]),
     ]
 )
 def test_strategy_value_reference(game: gbt.Game, profile_data: list, rational_flag: bool,
                                   strategy_values: list):
     profile = game.mixed_strategy_profile(rational=rational_flag, data=profile_data)
     for strategy_values_for_player, player in zip(
-        strategy_values, profile.game.players
+        strategy_values, profile.game.players,
+        strict=True
     ):
         for i, s in enumerate(player.strategies):
             sv = strategy_values_for_player[i]
@@ -500,7 +501,7 @@ def test_strategy_value_reference(game: gbt.Game, profile_data: list, rational_f
 
 
 @pytest.mark.parametrize(
-    "game,profile_data,liap_expected,tol,rational_flag",
+    "game,profile_data,liap_exp,tol,rational_flag",
     [
      ##############################################################################
      # Zero matrix nfg, all liap_values are zero
@@ -512,37 +513,110 @@ def test_strategy_value_reference(game: gbt.Game, profile_data: list, rational_f
      # 4x4 coordination nfg
      (games.create_coord_4x4_nfg(), None, 0, ZERO, True),
      (games.create_coord_4x4_nfg(), None, 0, TOL, False),
-     (games.create_coord_4x4_nfg(),
-      [["1/3", "1/2", "1/12", "1/12"], ["3/8", "1/8", "1/4", "1/4"]], "245/2304", ZERO, True),
-     (games.create_coord_4x4_nfg(),
-      [["1/4", "1/4", "1/4", "1/4"], ["1/4", "1/4", "1/4", "1/4"]], 0, ZERO, True),
      (games.create_coord_4x4_nfg(), [[1, 0, 0, 0], [1, 0, 0, 0]], 0, ZERO, True),
+     (games.create_coord_4x4_nfg(), [[1, 0, 0, 0], [1, 0, 0, 0]], 0, TOL, False),
+     (games.create_coord_4x4_nfg(),
+      [["1/3", "1/2", "1/12", "1/12"], ["3/8", "1/8", "1/4", "1/4"]],
+      "245/2304", ZERO, True),
      (games.create_coord_4x4_nfg(), [[1/3, 1/2, 1/12, 1/12], [3/8, 1/8, 1/4, 1/4]],
       245/2304, TOL, False),
+     (games.create_coord_4x4_nfg(),
+      [["1/3", 0, 0, "2/3"], [1, 0, 0, 0]], "5/9", ZERO, True),
+     (games.create_coord_4x4_nfg(),
+      [[1/3, 0, 0, 2/3], [1, 0, 0, 0]], 5/9, TOL, False),
      ##############################################################################
      # El Farol bar game efg
      (games.create_el_farol_bar_game_efg(),
-      [["1/2", "1/2"], ["1/2", "1/2"], ["1/2", "1/2"], ["1/2", "1/2"], ["1/2", "1/2"]], "0",
-      ZERO, True),
-     (games.create_el_farol_bar_game_efg(),
-      [["1/1", "0/1"], ["1/1", "0/1"], ["0/1", "1/1"], ["0/1", "1/1"], ["0/1", "1/1"]], "0",
-      ZERO, True),
+      [["1/2", "1/2"], ["1/2", "1/2"], ["1/2", "1/2"], ["1/2", "1/2"], ["1/2", "1/2"]],
+      0, ZERO, True),
+     (games.create_el_farol_bar_game_efg(), [[1, 0], [1, 0], [0, 1], [0, 1], [0, 1]],
+      0, ZERO, True),
      ##############################################################################
-     # 2x2x2 nfg with 2 pure and 1 mixed eq
+     # # 2x2x2 nfg with 2 pure and 1 mixed eq
+     # Pure non-Nash eq:
      (games.create_2x2x2_nfg(), [[1, 0], [1, 0], [1, 0]], 18, ZERO, True),  # 4^2+1+1
      (games.create_2x2x2_nfg(), [[0, 1], [0, 1], [0, 1]], 18, ZERO, True),  # 4^2+1+1
+     (games.create_2x2x2_nfg(), [[1, 0], [0, 1], [0, 1]], 9, ZERO, True),  # 3^2
+     (games.create_2x2x2_nfg(), [[0, 1], [1, 0], [1, 0]], 9, ZERO, True),  # 3^2
+     (games.create_2x2x2_nfg(), [[1, 0], [0, 1], [0, 1]], 9, ZERO, True),  # 3^2
+     (games.create_2x2x2_nfg(), [[1, 1], [1, 0], [0, 0]], 9, ZERO, True),  # 3^2
+     # Non-pure non-Nash eq:
+     (games.create_2x2x2_nfg(), [["1/2", "1/2"], [1, 0], [1, 0]], "33/4", ZERO, True),
+     (games.create_2x2x2_nfg(), [[1, 0], ["1/2", "1/2"], [1, 0]], 4, ZERO, True),
+     (games.create_2x2x2_nfg(), [[1, 0], [1, 0], ["1/2", "1/2"]], "33/4", ZERO, True),
+     # Nash eq:
      (games.create_2x2x2_nfg(), [[1, 0], [0, 1], [1, 0]], 0, ZERO, True),
      (games.create_2x2x2_nfg(), [[0, 1], [1, 0], [0, 1]], 0, ZERO, True),
      (games.create_2x2x2_nfg(), None, 0, ZERO, True),  # uniform is Nash
     ]
 )
-def test_liapunov_value_reference(game: gbt.Game, profile_data: list,
-                                  liap_expected: typing.Union[float, str],
-                                  tol: typing.Union[float, gbt.Rational, int],
-                                  rational_flag: bool):
-    liap_expected = gbt.Rational(liap_expected) if rational_flag else liap_expected
+def test_liap_value_reference(game: gbt.Game, profile_data: list, liap_exp: float | str,
+                              tol: float | gbt.Rational | int, rational_flag: bool):
     profile = game.mixed_strategy_profile(rational=rational_flag, data=profile_data)
-    assert abs(profile.liap_value() - liap_expected) <= tol
+    liap_exp = gbt.Rational(liap_exp) if rational_flag else liap_exp
+    assert abs(profile.liap_value() - liap_exp) <= tol
+
+
+@pytest.mark.parametrize(
+    "game,profile_data,player_regrets_exp,tol,rational_flag",
+    [
+     ##############################################################################
+     # Zero matrix nfg, all liap_values are zero
+     (games.create_2x2_zero_nfg(), [["3/4", "1/4"], ["2/5", "3/5"]], [0]*2, ZERO, True),
+     (games.create_2x2_zero_nfg(), [["1/2", "1/2"], ["1/2", "1/2"]], [0]*2, ZERO, True),
+     (games.create_2x2_zero_nfg(), [[1, 0], [1, 0]], [0]*2, ZERO, True),
+     (games.create_2x2_zero_nfg(), [[1/4, 3/4], [2/5, 3/5]], [0]*2, TOL, False),
+     ##############################################################################
+     # 4x4 coordination nfg
+     (games.create_coord_4x4_nfg(), None, [0]*2, ZERO, True),
+     (games.create_coord_4x4_nfg(), None, [0]*2, TOL, False),
+     (games.create_coord_4x4_nfg(), [[1, 0, 0, 0], [1, 0, 0, 0]], [0]*2, ZERO, True),
+     (games.create_coord_4x4_nfg(), [[1, 0, 0, 0], [1, 0, 0, 0]], [0]*2, TOL, False),
+     (games.create_coord_4x4_nfg(),
+      [["1/3", "1/2", "1/12", "1/12"], ["3/8", "1/8", "1/4", "1/4"]],
+      ["7/48", "13/48"], ZERO, True),
+     (games.create_coord_4x4_nfg(), [[1/3, 1/2, 1/12, 1/12], [3/8, 1/8, 1/4, 1/4]],
+      [7/48, 13/48], TOL, False),
+     (games.create_coord_4x4_nfg(),
+      [["1/3", 0, 0, "2/3"], [1, 0, 0, 0]], ["2/3", "1/3"], ZERO, True),
+     (games.create_coord_4x4_nfg(),
+      [[1/3, 0, 0, 2/3], [1, 0, 0, 0]], [2/3, 1/3], TOL, False),
+     ##############################################################################
+     # El Farol bar game efg
+     (games.create_el_farol_bar_game_efg(),
+      [["1/2", "1/2"], ["1/2", "1/2"], ["1/2", "1/2"], ["1/2", "1/2"], ["1/2", "1/2"]],
+      [0]*5, ZERO, True),
+     (games.create_el_farol_bar_game_efg(), [[1, 0], [1, 0], [0, 1], [0, 1], [0, 1]],
+      [0]*5, ZERO, True),
+     ##############################################################################
+     # 2x2x2 nfg with 2 pure and 1 mixed eq
+     # Pure non-Nash
+     (games.create_2x2x2_nfg(), [[1, 0], [1, 0], [1, 0]], [1, 4, 1], ZERO, True),  # 111
+     (games.create_2x2x2_nfg(), [[0, 1], [0, 1], [0, 1]], [1, 4, 1], ZERO, True),  # 000
+     (games.create_2x2x2_nfg(), [[1, 0], [0, 1], [0, 1]], [0, 0, 3], ZERO, True),  # 100
+     (games.create_2x2x2_nfg(), [[0, 1], [1, 0], [1, 0]], [0, 0, 3], ZERO, True),  # 011
+     (games.create_2x2x2_nfg(), [[0, 1], [0, 1], [1, 0]], [3, 0, 0], ZERO, True),  # 001
+     (games.create_2x2x2_nfg(), [[1, 0], [1, 0], [0, 1]], [3, 0, 0], ZERO, True),  # 110
+     # Mixed non-Nash
+     (games.create_2x2x2_nfg(), [["1/2", "1/2"], [1, 0], [1, 0]], ["1/2", 2, 2], ZERO, True),
+     (games.create_2x2x2_nfg(), [[1, 0], ["1/2", "1/2"], [1, 0]], [0, 2, 0], ZERO, True),
+     (games.create_2x2x2_nfg(), [[1, 0], [1, 0], ["1/2", "1/2"]], [2, 2, "1/2"], ZERO, True),
+     # Nash eq:
+     (games.create_2x2x2_nfg(), [[1, 0], [0, 1], [1, 0]], [0]*3, ZERO, True),  # 101
+     (games.create_2x2x2_nfg(), [[0, 1], [1, 0], [0, 1]], [0]*3, ZERO, True),  # 010
+     (games.create_2x2x2_nfg(), None, [0]*3, ZERO, True),  # uniform is Nash
+    ]
+)
+def test_player_regret_max_regret_reference(game: gbt.Game, profile_data: list,
+                                            player_regrets_exp: list,
+                                            tol: float | gbt.Rational | int,
+                                            rational_flag: bool):
+    profile = game.mixed_strategy_profile(rational=rational_flag, data=profile_data)
+    if rational_flag:
+        player_regrets_exp = [gbt.Rational(r) for r in player_regrets_exp]
+    for p, r in zip(game.players, player_regrets_exp, strict=True):
+        assert abs(profile.player_regret(p) - r) <= tol
+    assert abs(profile.max_regret() - max(player_regrets_exp)) <= tol
 
 
 @pytest.mark.parametrize(
@@ -595,11 +669,11 @@ def test_strategy_regret_consistency(game: gbt.Game, rational_flag: bool):
      #################################################################################
      # Centipede with chance efg
      (games.create_centipede_game_with_chance_efg(),
-      [["1/3", "1/3", "1/3", "0/1"], ["1/10", "3/5", "3/10", "0/1"]], ZERO, True),
+      [["1/3", "1/3", "1/3", "0/1"], ["1/10", "3/5", "3/10", 0]], ZERO, True),
      (games.create_centipede_game_with_chance_efg(),
       [[1/3, 1/3, 1/3, 0], [.10, 3/5, .3, 0]], TOL, False),
      #################################################################################
-     # El Faor bar game efg
+     # El Farol bar game efg
      (games.create_el_farol_bar_game_efg(),
       [[1, 0], ["1/2", "1/2"], ["1/3", "2/3"], ["1/5", "4/5"], ["1/8", "7/8"]], ZERO, True),
      (games.create_el_farol_bar_game_efg(),
@@ -612,9 +686,9 @@ def test_strategy_regret_consistency(game: gbt.Game, rational_flag: bool):
      (games.create_2x2x2_nfg(), [[1, 0], [1, 0], [1, 0]], TOL, False),
     ]
 )
-def test_liapunov_value_consistency(game: gbt.Game, profile_data: list,
-                                    tol: typing.Union[float, gbt.Rational],
-                                    rational_flag: bool):
+def test_liap_value_consistency(game: gbt.Game, profile_data: list,
+                                tol: float | gbt.Rational,
+                                rational_flag: bool):
     profile = game.mixed_strategy_profile(rational=rational_flag, data=profile_data)
 
     assert (
@@ -622,6 +696,48 @@ def test_liapunov_value_consistency(game: gbt.Game, profile_data: list,
             sum([max(profile.strategy_value(strategy) - profile.payoff(player), 0)**2
                 for player in game.players for strategy in player.strategies])) <= tol
     )
+
+
+@pytest.mark.parametrize(
+    "game,profile_data,tol,rational_flag",
+    [
+     #################################################################################
+     # 4x4 coordination nfg
+     (games.create_coord_4x4_nfg(),
+      [["1/5", "2/5", "0/5", "2/5"], ["3/8", "1/4", "3/8", "0/4"]], ZERO, True),
+     (games.create_coord_4x4_nfg(),
+      [[1/3, 1/3, 0/3, 1/3], [1/4, 1/4, 3/8, 1/8]], TOL, False),
+     #################################################################################
+     # Centipede with chance efg
+     (games.create_centipede_game_with_chance_efg(),
+      [["1/3", "1/3", "1/3", "0/1"], ["1/10", "3/5", "3/10", 0]], ZERO, True),
+     (games.create_centipede_game_with_chance_efg(),
+      [[1/3, 1/3, 1/3, 0], [.10, 3/5, .3, 0]], TOL, False),
+     #################################################################################
+     # El Farol bar game efg
+     (games.create_el_farol_bar_game_efg(),
+      [[1, 0], ["1/2", "1/2"], ["1/3", "2/3"], ["1/5", "4/5"], ["1/8", "7/8"]], ZERO, True),
+     (games.create_el_farol_bar_game_efg(),
+      [[1, 0], [1/2, 1/2], [1/3, 2/3], [1/5, 4/5], [1/8, 7/8]], TOL, False),
+     #################################################################################
+     # 2x2x2 nfg with 2 pure and 1 mixed eq
+     (games.create_2x2x2_nfg(), None, ZERO, True),
+     (games.create_2x2x2_nfg(), [[1, 0], [1, 0], [1, 0]], ZERO, True),
+     (games.create_2x2x2_nfg(), None, TOL, False),
+     (games.create_2x2x2_nfg(), [[1, 0], [1, 0], [1, 0]], TOL, False),
+    ]
+)
+def test_player_regret_max_regret_consistency(game: gbt.Game, profile_data: list,
+                                              tol: float | gbt.Rational,
+                                              rational_flag: bool):
+    profile = game.mixed_strategy_profile(rational=rational_flag, data=profile_data)
+    player_regrets = []
+    for p in game.players:
+        p_regret = max([max(profile.strategy_value(strategy) - profile.payoff(p), 0)
+                       for strategy in p.strategies])
+        player_regrets.append(p_regret)
+        assert abs(profile.player_regret(p) - p_regret) <= tol
+    assert abs(profile.max_regret() - max(player_regrets)) <= tol
 
 
 @pytest.mark.parametrize(
@@ -665,8 +781,8 @@ def test_liapunov_value_consistency(game: gbt.Game, profile_data: list,
     ]
 )
 def test_linearity_payoff_property(game: gbt.Game, profile1: list, profile2: list,
-                                   alpha: typing.Union[float, gbt.Rational],
-                                   tol: typing.Union[float, gbt.Rational], rational_flag: bool):
+                                   alpha: float | gbt.Rational,
+                                   tol: float | gbt.Rational, rational_flag: bool):
     profile1 = game.mixed_strategy_profile(rational=rational_flag, data=profile1)
     profile2 = game.mixed_strategy_profile(rational=rational_flag, data=profile2)
 
@@ -713,7 +829,7 @@ def test_linearity_payoff_property(game: gbt.Game, profile1: list, profile2: lis
     ]
 )
 def test_payoff_and_strategy_value_consistency(game: gbt.Game, profile_data: list,
-                                               tol: typing.Union[float, gbt.Rational],
+                                               tol: float | gbt.Rational,
                                                rational_flag: bool):
     profile = game.mixed_strategy_profile(rational=rational_flag, data=profile_data)
     for player in game.players:
@@ -746,8 +862,8 @@ def test_payoff_and_strategy_value_consistency(game: gbt.Game, profile_data: lis
     ]
 )
 def test_property_linearity_strategy_value(game: gbt.Game, profile1: list, profile2: list,
-                                           alpha: typing.Union[float, str], rational_flag: bool,
-                                           tol: typing.Union[float, gbt.Rational]):
+                                           alpha: float | str, rational_flag: bool,
+                                           tol: float | gbt.Rational):
 
     alpha = gbt.Rational(alpha) if rational_flag else alpha
 
@@ -794,7 +910,7 @@ PROBS_1A_doub = (0.25, 0.25, 0.25, 0.25)
 PROBS_2A_doub = (0.5, 0, 0.5, 0)
 PROBS_1A_rat = ("1/4", "1/4", "1/4", "1/4")
 PROBS_2A_rat = ("1/2", "0", "1/2", "0")
-# For 2x2x2 nfg and Myserson 2-card poker efg (both have 6 strategies in total):
+# For 2x2x2 nfg and stripped_down_poker efg (both have 6 strategies in total):
 PROBS_1B_doub = (0.5, 0.5, 0.5, 0.5, 0.5, 0.5)
 PROBS_2B_doub = (1.0, 0.0, 1.0, 0.0, 1.0, 0.0)
 PROBS_1B_rat = ("1/2", "1/2", "1/2", "1/2", "1/2", "1/2")
@@ -821,11 +937,11 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
      pytest.param(games.create_2x2x2_nfg(), PROBS_1B_rat, PROBS_2B_rat, True,
                   lambda profile, player: profile.payoff(player), lambda game: game.players,
                   id="payoffs_2x2x2_rat"),
-     # Myerson 2-card poker efg
-     pytest.param(games.create_myerson_2_card_poker_efg(), PROBS_1B_doub, PROBS_2B_doub, False,
+     # stripped-down poker
+     pytest.param(games.create_stripped_down_poker_efg(), PROBS_1B_doub, PROBS_2B_doub, False,
                   lambda profile, player: profile.payoff(player), lambda game: game.players,
                   id="payoffs_poker_doub"),
-     pytest.param(games.create_myerson_2_card_poker_efg(), PROBS_1B_rat, PROBS_2B_rat, True,
+     pytest.param(games.create_stripped_down_poker_efg(), PROBS_1B_rat, PROBS_2B_rat, True,
                   lambda profile, player: profile.payoff(player), lambda game: game.players,
                   id="payoffs_poker_rat"),
      #################################################################################
@@ -844,11 +960,11 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
      pytest.param(games.create_2x2x2_nfg(), PROBS_1B_rat, PROBS_2B_rat, True,
                   lambda profile, strategy: profile.strategy_regret(strategy),
                   lambda game: game.strategies, id="regret_2x2x2_rat"),
-     # Myerson 2-card poker efg
-     pytest.param(games.create_myerson_2_card_poker_efg(), PROBS_1B_doub, PROBS_2B_doub, False,
+     # stripped-down poker
+     pytest.param(games.create_stripped_down_poker_efg(), PROBS_1B_doub, PROBS_2B_doub, False,
                   lambda profile, strategy: profile.strategy_regret(strategy),
                   lambda game: game.strategies, id="regret_poker_doub"),
-     pytest.param(games.create_myerson_2_card_poker_efg(), PROBS_1B_rat, PROBS_2B_rat, True,
+     pytest.param(games.create_stripped_down_poker_efg(), PROBS_1B_rat, PROBS_2B_rat, True,
                   lambda profile, strategy: profile.strategy_regret(strategy),
                   lambda game: game.strategies, id="regret_poker_rat"),
      #################################################################################
@@ -867,11 +983,11 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
      pytest.param(games.create_2x2x2_nfg(), PROBS_1B_rat, PROBS_2B_rat, True,
                   lambda profile, strategy: profile.strategy_value(strategy),
                   lambda game: game.strategies, id="strat_value_2x2x2_rat"),
-     # Myerson 2-card poker efg
-     pytest.param(games.create_myerson_2_card_poker_efg(), PROBS_1B_doub, PROBS_2B_doub, False,
+     # stripped-down poker
+     pytest.param(games.create_stripped_down_poker_efg(), PROBS_1B_doub, PROBS_2B_doub, False,
                   lambda profile, strategy: profile.strategy_value(strategy),
                   lambda game: game.strategies, id="strat_value_poker_doub"),
-     pytest.param(games.create_myerson_2_card_poker_efg(), PROBS_1B_rat, PROBS_2B_rat, True,
+     pytest.param(games.create_stripped_down_poker_efg(), PROBS_1B_rat, PROBS_2B_rat, True,
                   lambda profile, strategy: profile.strategy_value(strategy),
                   lambda game: game.strategies, id="strat_value_poker_rat"),
      #################################################################################
@@ -898,13 +1014,13 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
                   other=strat_pair[1]),
                   lambda game: list(product(game.strategies, game.strategies)),
                   id="strat_value_deriv_2x2x2_rat"),
-     # Myerson 2-card poker efg
-     pytest.param(games.create_myerson_2_card_poker_efg(), PROBS_1B_doub, PROBS_2B_doub, False,
+     # stripped-down poker
+     pytest.param(games.create_stripped_down_poker_efg(), PROBS_1B_doub, PROBS_2B_doub, False,
                   lambda profile, strat_pair: profile.strategy_value_deriv(strategy=strat_pair[0],
                   other=strat_pair[1]),
                   lambda game: list(product(game.strategies, game.strategies)),
                   id="strat_value_deriv_poker_doub"),
-     pytest.param(games.create_myerson_2_card_poker_efg(), PROBS_1B_rat, PROBS_2B_rat, True,
+     pytest.param(games.create_stripped_down_poker_efg(), PROBS_1B_rat, PROBS_2B_rat, True,
                   lambda profile, strat_pair: profile.strategy_value_deriv(strategy=strat_pair[0],
                   other=strat_pair[1]),
                   lambda game: list(product(game.strategies, game.strategies)),
@@ -925,13 +1041,36 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
      pytest.param(games.create_2x2x2_nfg(), PROBS_1B_rat, PROBS_2B_rat, True,
                   lambda profile, y: profile.liap_value(), lambda x: [1],
                   id="liap_value_2x2x2_rat"),
-     # Myerson 2-card poker efg
-     pytest.param(games.create_myerson_2_card_poker_efg(), PROBS_1B_doub, PROBS_2B_doub, False,
+     # stripped-down poker
+     pytest.param(games.create_stripped_down_poker_efg(), PROBS_1B_doub, PROBS_2B_doub, False,
                   lambda profile, y: profile.liap_value(), lambda x: [1],
                   id="liap_value_poker_doub"),
-     pytest.param(games.create_myerson_2_card_poker_efg(), PROBS_1B_rat, PROBS_2B_rat, True,
+     pytest.param(games.create_stripped_down_poker_efg(), PROBS_1B_rat, PROBS_2B_rat, True,
                   lambda profile, y: profile.liap_value(), lambda x: [1],
                   id="liap_value_poker_rat"),
+     #################################################################################
+     # max_regret (of profile, hence [1] for objects_to_test, any singleton collection would do)
+     # 4x4 coordination nfg
+     pytest.param(games.create_coord_4x4_nfg(), PROBS_1A_doub, PROBS_2A_doub, False,
+                  lambda profile, y: profile.max_regret(), lambda x: [1],
+                  id="max_regret_coord_doub"),
+     pytest.param(games.create_coord_4x4_nfg(), PROBS_1A_rat, PROBS_2A_rat, True,
+                  lambda profile, y: profile.max_regret(), lambda x: [1],
+                  id="max_regret_coord_rat"),
+     # 2x2x2 nfg
+     pytest.param(games.create_2x2x2_nfg(), PROBS_1B_doub, PROBS_2B_doub, False,
+                  lambda profile, y: profile.max_regret(), lambda x: [1],
+                  id="max_regret_2x2x2_doub"),
+     pytest.param(games.create_2x2x2_nfg(), PROBS_1B_rat, PROBS_2B_rat, True,
+                  lambda profile, y: profile.max_regret(), lambda x: [1],
+                  id="max_regret_2x2x2_rat"),
+     # stripped-down poker
+     pytest.param(games.create_stripped_down_poker_efg(), PROBS_1B_doub, PROBS_2B_doub, False,
+                  lambda profile, y: profile.max_regret(), lambda x: [1],
+                  id="max_regret_poker_doub"),
+     pytest.param(games.create_stripped_down_poker_efg(), PROBS_1B_rat, PROBS_2B_rat, True,
+                  lambda profile, y: profile.max_regret(), lambda x: [1],
+                  id="max_regret_poker_rat"),
      ]
 )
 def test_profile_order_consistency(game: gbt.Game,

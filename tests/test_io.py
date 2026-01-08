@@ -116,6 +116,16 @@ def test_read_write_efg():
 def test_read_write_nfg():
     nfg_game = create_2x2_zero_nfg()
     serialized_nfg_game = nfg_game.to_nfg()
-    deserialized_nfg_game = gbt.read_nfg(io.BytesIO(serialized_nfg_game.encode()))
+    deserialized_nfg_game = gbt.read_nfg(io.BytesIO(serialized_nfg_game.encode()),
+                                         normalize_labels=False)
     double_serialized_nfg_game = deserialized_nfg_game.to_nfg()
     assert serialized_nfg_game == double_serialized_nfg_game
+
+
+def test_read_write_nfg_normalize():
+    nfg_game = create_2x2_zero_nfg()
+    serialized_nfg_game = nfg_game.to_nfg()
+    deserialized_nfg_game = gbt.read_nfg(io.BytesIO(serialized_nfg_game.encode()),
+                                         normalize_labels=True)
+    double_serialized_nfg_game = deserialized_nfg_game.to_nfg()
+    assert serialized_nfg_game != double_serialized_nfg_game

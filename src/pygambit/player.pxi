@@ -1,6 +1,6 @@
 #
 # This file is part of Gambit
-# Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+# Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 #
 # FILE: src/pygambit/player.pxi
 # Cython wrapper for players
@@ -48,7 +48,7 @@ class PlayerInfosets:
         for infoset in self.player.deref().GetInfosets():
             yield Infoset.wrap(infoset)
 
-    def __getitem__(self, index: typing.Union[int, str]) -> Infoset:
+    def __getitem__(self, index: int | str) -> Infoset:
         if isinstance(index, str):
             if not index.strip():
                 raise ValueError("Infoset label cannot be empty or all whitespace")
@@ -88,7 +88,7 @@ class PlayerActions:
         for infoset in self.player.infosets:
             yield from infoset.actions
 
-    def __getitem__(self, index: typing.Union[int, str]) -> Action:
+    def __getitem__(self, index: int | str) -> Action:
         if isinstance(index, str):
             if not index.strip():
                 raise ValueError("Action label cannot be empty or all whitespace")
@@ -133,7 +133,7 @@ class PlayerStrategies:
         for strategy in self.player.deref().GetStrategies():
             yield Strategy.wrap(strategy)
 
-    def __getitem__(self, index: typing.Union[int, str]) -> Strategy:
+    def __getitem__(self, index: int | str) -> Strategy:
         if isinstance(index, str):
             if not index.strip():
                 raise ValueError("Strategy label cannot be empty or all whitespace")
@@ -192,9 +192,11 @@ class Player:
 
     @label.setter
     def label(self, value: str) -> None:
-        # check to see if the player's name has been used elsewhere
-        if value in [i.label for i in self.game.players]:
-            warnings.warn("Another player with an identical label exists")
+        if value == self.label:
+            return
+        if value == "" or value in (player.label for player in self.game.players):
+            warnings.warn("In a future version, players must have unique labels",
+                          FutureWarning)
         self.player.deref().SetLabel(value.encode("ascii"))
 
     @property
@@ -218,33 +220,65 @@ class Player:
     def infosets(self) -> PlayerInfosets:
         """Returns the set of information sets at which the player has the decision.
 
-        The order in which information sets are iterated is dependent on the order of
-        operations used to define the game.  A standard ordering, in which information
-        sets are iterated in the order encountered in a depth-first traversal of the tree,
-        can be obtained by calling `Game.sort_infosets` on the game after construction.
+        The iteration order of information sets is the order in which they
+        are encountered in the pre-order depth first traversal of the game tree.
 
-        .. versionchanged:: 16.4.0
-           The ordering of information sets is now dependent on the order of operations;
-           previously, information sets were (expensively) re-sorted after every change
-           to the game tree.
+        .. versionchanged:: 16.5.0
+           It is no longer necessary to call `Game.sort_infosets` to standardise
+           iteration order.
 
-        See also
-        --------
-        Game.sort_infosets
+        Raises
+        ------
+        UndefinedOperationError
+            If the game does not have a tree representation.
         """
+        if not self.game.is_tree:
+            raise UndefinedOperationError(
+                "Operation only defined for games with a tree representation"
+            )
         return PlayerInfosets.wrap(self.player)
 
     @property
     def actions(self) -> PlayerActions:
-        """Returns the set of actions available to the player at some information set."""
+        """Returns the set of actions available to the player at some information set.
+
+        Raises
+        ------
+        UndefinedOperationError
+            If the game does not have a tree representation.
+        """
+        if not self.game.is_tree:
+            raise UndefinedOperationError(
+                "Operation only defined for games with a tree representation"
+            )
         return PlayerActions.wrap(self)
 
     @property
     def min_payoff(self) -> Rational:
-        """Returns the smallest payoff for the player in any outcome of the game."""
-        return rat_to_py(self.player.deref().GetGame().deref().GetMinPayoff(self.player))
+        """Returns the smallest payoff for the player in any play of the game.
+
+        .. versionchanged:: 16.5.0
+           Changed from reporting minimum payoff in any (non-null) outcome to the minimum
+           payoff in any play of the game.
+
+        See also
+        --------
+        Player.max_payoff
+        Game.min_payoff
+        """
+        return rat_to_py(self.player.deref().GetGame().deref().GetPlayerMinPayoff(self.player))
 
     @property
     def max_payoff(self) -> Rational:
-        """Returns the largest payoff for the player in any outcome of the game."""
-        return rat_to_py(self.player.deref().GetGame().deref().GetMaxPayoff(self.player))
+        """Returns the largest payoff for the player in any play of the game.
+
+        .. versionchanged:: 16.5.0
+           Changed from reporting maximum payoff in any (non-null) outcome to the maximum
+           payoff in any play of the game.
+
+        See also
+        --------
+        Player.min_payoff
+        Game.max_payoff
+        """
+        return rat_to_py(self.player.deref().GetGame().deref().GetPlayerMaxPayoff(self.player))

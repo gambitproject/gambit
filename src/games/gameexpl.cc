@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/games/gameexpl.cc
 // Implementation of support for explicit internal representations of games
@@ -38,68 +38,20 @@ namespace Gambit {
 
 Rational GameExplicitRep::GetMinPayoff() const
 {
-  return std::accumulate(
-      std::next(m_players.begin()), m_players.end(), GetMinPayoff(m_players.front()),
-      [this](const Rational &r, const GamePlayer &p) { return std::min(r, GetMinPayoff(p)); });
-}
-
-Rational GameExplicitRep::GetMinPayoff(const GamePlayer &p_player) const
-{
-  if (m_outcomes.empty()) {
-    return Rational(0);
-  }
-  return std::accumulate(std::next(m_outcomes.begin()), m_outcomes.end(),
-                         m_outcomes.front()->GetPayoff<Rational>(p_player),
-                         [&p_player](const Rational &r, const std::shared_ptr<GameOutcomeRep> &c) {
-                           return std::min(r, c->GetPayoff<Rational>(p_player));
+  return std::accumulate(std::next(m_players.begin()), m_players.end(),
+                         GetPlayerMinPayoff(m_players.front()),
+                         [this](const Rational &r, const GamePlayer &p) {
+                           return std::min(r, GetPlayerMinPayoff(p));
                          });
 }
 
 Rational GameExplicitRep::GetMaxPayoff() const
 {
-  return std::accumulate(
-      std::next(m_players.begin()), m_players.end(), GetMaxPayoff(m_players.front()),
-      [this](const Rational &r, const GamePlayer &p) { return std::max(r, GetMaxPayoff(p)); });
-}
-
-Rational GameExplicitRep::GetMaxPayoff(const GamePlayer &p_player) const
-{
-  if (m_outcomes.empty()) {
-    return Rational(0);
-  }
-  return std::accumulate(std::next(m_outcomes.begin()), m_outcomes.end(),
-                         m_outcomes.front()->GetPayoff<Rational>(p_player),
-                         [&p_player](const Rational &r, const std::shared_ptr<GameOutcomeRep> &c) {
-                           return std::max(r, c->GetPayoff<Rational>(p_player));
+  return std::accumulate(std::next(m_players.begin()), m_players.end(),
+                         GetPlayerMaxPayoff(m_players.front()),
+                         [this](const Rational &r, const GamePlayer &p) {
+                           return std::max(r, GetPlayerMaxPayoff(p));
                          });
-}
-
-//------------------------------------------------------------------------
-//                GameExplicitRep: Dimensions of the game
-//------------------------------------------------------------------------
-
-Array<int> GameExplicitRep::NumStrategies() const
-{
-  BuildComputedValues();
-  Array<int> dim;
-  for (const auto &player : m_players) {
-    dim.push_back(player->m_strategies.size());
-  }
-  return dim;
-}
-
-GameStrategy GameExplicitRep::GetStrategy(int p_index) const
-{
-  BuildComputedValues();
-  int i = 1;
-  for (const auto &player : m_players) {
-    for (const auto &strategy : player->m_strategies) {
-      if (p_index == i++) {
-        return strategy;
-      }
-    }
-  }
-  throw std::out_of_range("Strategy index out of range");
 }
 
 //------------------------------------------------------------------------

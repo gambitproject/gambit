@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/gui/nfgpanel.cc
 // Implementation of normal form panel
@@ -296,10 +296,10 @@ void TablePlayerToolbar::PostPendingChanges()
 }
 
 //=====================================================================
-//               class gbtStrategyDominanceToolbar
+//               class StrategyDominanceToolbar
 //=====================================================================
 
-class gbtStrategyDominanceToolbar : public wxPanel, public GameView {
+class StrategyDominanceToolbar final : public wxPanel, public GameView {
 private:
   wxButton *m_topButton, *m_prevButton, *m_nextButton, *m_allButton;
   wxStaticText *m_level;
@@ -315,8 +315,8 @@ private:
   void OnLastLevel(wxCommandEvent &);
 
 public:
-  gbtStrategyDominanceToolbar(wxWindow *p_parent, GameDocument *p_doc);
-  ~gbtStrategyDominanceToolbar() override = default;
+  StrategyDominanceToolbar(wxWindow *p_parent, GameDocument *p_doc);
+  ~StrategyDominanceToolbar() override = default;
 };
 
 #include "bitmaps/next.xpm"
@@ -324,7 +324,7 @@ public:
 #include "bitmaps/tobegin.xpm"
 #include "bitmaps/toend.xpm"
 
-gbtStrategyDominanceToolbar::gbtStrategyDominanceToolbar(wxWindow *p_parent, GameDocument *p_doc)
+StrategyDominanceToolbar::StrategyDominanceToolbar(wxWindow *p_parent, GameDocument *p_doc)
   : wxPanel(p_parent, wxID_ANY), GameView(p_doc)
 {
   auto *topSizer = new wxBoxSizer(wxHORIZONTAL);
@@ -336,7 +336,7 @@ gbtStrategyDominanceToolbar::gbtStrategyDominanceToolbar(wxWindow *p_parent, Gam
   auto *choice = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 2, domChoices);
   choice->SetSelection(0);
   Connect(choice->GetId(), wxEVT_COMMAND_CHOICE_SELECTED,
-          wxCommandEventHandler(gbtStrategyDominanceToolbar::OnStrength));
+          wxCommandEventHandler(StrategyDominanceToolbar::OnStrength));
   topSizer->Add(choice, 0, wxALL | wxALIGN_CENTER, 5);
 
   topSizer->Add(new wxStaticText(this, wxID_STATIC, wxT("dominated:")), 0, wxALL | wxALIGN_CENTER,
@@ -345,13 +345,13 @@ gbtStrategyDominanceToolbar::gbtStrategyDominanceToolbar(wxWindow *p_parent, Gam
   m_topButton = new wxBitmapButton(this, wxID_ANY, wxBitmap(tobegin_xpm));
   m_topButton->SetToolTip(_("Show all strategies"));
   Connect(m_topButton->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
-          wxCommandEventHandler(gbtStrategyDominanceToolbar::OnTopLevel));
+          wxCommandEventHandler(StrategyDominanceToolbar::OnTopLevel));
   topSizer->Add(m_topButton, 0, wxALL | wxALIGN_CENTER, 5);
 
   m_prevButton = new wxBitmapButton(this, wxID_ANY, wxBitmap(prev_xpm));
   m_prevButton->SetToolTip(_("Previous round of elimination"));
   Connect(m_prevButton->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
-          wxCommandEventHandler(gbtStrategyDominanceToolbar::OnPreviousLevel));
+          wxCommandEventHandler(StrategyDominanceToolbar::OnPreviousLevel));
   topSizer->Add(m_prevButton, 0, wxALL | wxALIGN_CENTER, 5);
 
   m_level = new wxStaticText(this, wxID_STATIC, wxT("All strategies shown"), wxDefaultPosition,
@@ -361,40 +361,40 @@ gbtStrategyDominanceToolbar::gbtStrategyDominanceToolbar(wxWindow *p_parent, Gam
   m_nextButton = new wxBitmapButton(this, wxID_ANY, wxBitmap(next_xpm));
   m_nextButton->SetToolTip(_("Next round of elimination"));
   Connect(m_nextButton->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
-          wxCommandEventHandler(gbtStrategyDominanceToolbar::OnNextLevel));
+          wxCommandEventHandler(StrategyDominanceToolbar::OnNextLevel));
   topSizer->Add(m_nextButton, 0, wxALL | wxALIGN_CENTER, 5);
 
   m_allButton = new wxBitmapButton(this, wxID_ANY, wxBitmap(toend_xpm));
   m_allButton->SetToolTip(_("Eliminate iteratively"));
   Connect(m_allButton->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
-          wxCommandEventHandler(gbtStrategyDominanceToolbar::OnLastLevel));
+          wxCommandEventHandler(StrategyDominanceToolbar::OnLastLevel));
   topSizer->Add(m_allButton, 0, wxALL | wxALIGN_CENTER, 5);
 
   SetSizer(topSizer);
   wxWindowBase::Layout();
 }
 
-void gbtStrategyDominanceToolbar::OnStrength(wxCommandEvent &p_event)
+void StrategyDominanceToolbar::OnStrength(wxCommandEvent &p_event)
 {
   m_doc->SetStrategyElimStrength(p_event.GetSelection() == 0);
 }
 
-void gbtStrategyDominanceToolbar::OnTopLevel(wxCommandEvent &) { m_doc->TopStrategyElimLevel(); }
+void StrategyDominanceToolbar::OnTopLevel(wxCommandEvent &) { m_doc->TopStrategyElimLevel(); }
 
-void gbtStrategyDominanceToolbar::OnPreviousLevel(wxCommandEvent &)
+void StrategyDominanceToolbar::OnPreviousLevel(wxCommandEvent &)
 {
   m_doc->PreviousStrategyElimLevel();
 }
 
-void gbtStrategyDominanceToolbar::OnNextLevel(wxCommandEvent &) { m_doc->NextStrategyElimLevel(); }
+void StrategyDominanceToolbar::OnNextLevel(wxCommandEvent &) { m_doc->NextStrategyElimLevel(); }
 
-void gbtStrategyDominanceToolbar::OnLastLevel(wxCommandEvent &)
+void StrategyDominanceToolbar::OnLastLevel(wxCommandEvent &)
 {
   while (m_doc->NextStrategyElimLevel())
     ;
 }
 
-void gbtStrategyDominanceToolbar::OnUpdate()
+void StrategyDominanceToolbar::OnUpdate()
 {
   m_topButton->Enable(m_doc->GetStrategyElimLevel() > 1);
   m_prevButton->Enable(m_doc->GetStrategyElimLevel() > 1);
@@ -421,9 +421,9 @@ BEGIN_EVENT_TABLE(NfgPanel, wxPanel)
 EVT_MENU(GBT_MENU_TOOLS_DOMINANCE, NfgPanel::OnToolsDominance)
 END_EVENT_TABLE()
 
-NfgPanel::NfgPanel(wxWindow *p_parent, GameDocument *p_doc)
+NfgPanel::NfgPanel(wxWindow *p_parent, GameDocument *p_doc, bool p_showDominance)
   : wxPanel(p_parent, wxID_ANY), GameView(p_doc),
-    m_dominanceToolbar(new gbtStrategyDominanceToolbar(this, m_doc)),
+    m_dominanceToolbar(new StrategyDominanceToolbar(this, m_doc)),
     m_playerToolbar(new TablePlayerToolbar(this, m_doc)),
     m_tableWidget(new TableWidget(this, wxID_ANY, m_doc))
 {
@@ -433,7 +433,7 @@ NfgPanel::NfgPanel(wxWindow *p_parent, GameDocument *p_doc)
 
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
   topSizer->Add(m_dominanceToolbar, 0, wxEXPAND, 0);
-  topSizer->Show(m_dominanceToolbar, false);
+  topSizer->Show(m_dominanceToolbar, p_showDominance);
   topSizer->Add(playerSizer, 1, wxEXPAND, 0);
   SetSizer(topSizer);
   wxWindowBase::Layout();

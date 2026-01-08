@@ -83,15 +83,14 @@ subsets of equilibria being found.
 
 Computing an equilibrium of :download:`e02.nfg <../contrib/games/e02.nfg>`,
 the reduced strategic form of the example in Figure 2 of Selten
-(International Journal of Game Theory, 1975)::
+(International Journal of Game Theory, 1975)
 
-    $ gambit-gnm e02.nfg
-    Compute Nash equilibria using a global Newton method
-    Gametracer version 0.2, Copyright (C) 2002, Ben Blum and Christian Shelton
-    Gambit version 16.4.0, Copyright (C) 1994-2025, The Gambit Project
-    This is free software, distributed under the GNU GPL
-
-    NE,1,0,2.99905e-12,0.5,0.5
+   $ gambit-gnm e02.nfg
+   Compute Nash equilibria using a global Newton method
+   Gametracer version 0.2, Copyright (C) 2002, Ben Blum and Christian Shelton
+   Gambit version |release|, Copyright (C) 1994-2026, The Gambit Project
+   This is free software, distributed under the GNU GPL
+   NE,1,0,2.99905e-12,0.5,0.5
 
 
 .. seealso::

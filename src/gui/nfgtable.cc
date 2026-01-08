@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/gui/nfgtable.cc
 // Implementation of strategic game matrix display/editor
@@ -1021,13 +1021,13 @@ void TableWidget::OnUpdate()
   else if (m_doc->NumPlayers() < m_rowPlayers.size() + m_colPlayers.size()) {
     for (size_t i = 1; i <= m_rowPlayers.size(); i++) {
       if (m_rowPlayers[i] > static_cast<int>(m_doc->NumPlayers())) {
-        erase_atindex(m_rowPlayers, i--);
+        m_rowPlayers.erase_at(i--);
       }
     }
 
     for (size_t i = 1; i <= m_colPlayers.size(); i++) {
       if (m_colPlayers[i] > static_cast<int>(m_doc->NumPlayers())) {
-        erase_atindex(m_colPlayers, i--);
+        m_colPlayers.erase_at(i--);
       }
     }
   }

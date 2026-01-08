@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/tools/simpdiv/simpdiv.cc
 // Compute Nash equilibria via simplicial subdivision on the normal form
@@ -29,11 +29,11 @@ namespace Gambit::Nash {
 template <class T> class PVector {
 private:
   Vector<T> m_values;
-  Array<int> m_offsets;
-  Array<int> m_shape;
+  Array<size_t> m_offsets;
+  Array<size_t> m_shape;
 
 public:
-  explicit PVector(const Array<int> &p_shape)
+  explicit PVector(const Array<size_t> &p_shape)
     : m_values(std::accumulate(p_shape.begin(), p_shape.end(), 0)), m_offsets(p_shape.size()),
       m_shape(p_shape)
   {
@@ -62,7 +62,7 @@ public:
     return *this;
   }
 
-  const Array<int> &GetShape() const { return m_shape; }
+  const Array<size_t> &GetShape() const { return m_shape; }
   explicit operator const Vector<T> &() const { return m_values; }
 };
 
@@ -137,7 +137,7 @@ Rational NashSimpdivStrategySolver::Simplex(MixedStrategyProfile<Rational> &y,
   const Game game = y.GetGame();
   State state(m_leashLength);
   state.d = d;
-  Array<int> nstrats(game->NumStrategies());
+  Array<size_t> nstrats(game->GetStrategies().shape_array());
   Array<int> ylabel(2);
   RectArray<int> labels(y.MixedProfileLength(), 2), pi(y.MixedProfileLength(), 2);
   PVector<int> U(nstrats), TT(nstrats);
@@ -145,7 +145,7 @@ Rational NashSimpdivStrategySolver::Simplex(MixedStrategyProfile<Rational> &y,
   for (size_t i = 1; i <= v.size(); i++) {
     v[i] = y[i];
   }
-  besty = static_cast<const Vector<Rational> &>(y);
+  besty = y.GetProbVector();
   int i = 0;
   int j, k, h, jj, hh, ii, kk, tot;
   Rational maxz;
@@ -536,7 +536,7 @@ NashSimpdivStrategySolver::Solve(const MixedStrategyProfile<Rational> &p_start) 
     throw UndefinedException(
         "Computing equilibria of games with imperfect recall is not supported.");
   }
-  Rational d(Integer(1), find_lcd(static_cast<const Vector<Rational> &>(p_start)));
+  Rational d(Integer(1), find_lcd(p_start.GetProbVector()));
   const Rational scale = p_start.GetGame()->GetMaxPayoff() - p_start.GetGame()->GetMinPayoff();
 
   MixedStrategyProfile<Rational> y(p_start);

@@ -8,9 +8,11 @@ formats: all
 build:
   os: ubuntu-22.04
   tools:
-    python: "3.13"
+    python: "3.14"
   apt_packages:
     - libgmp-dev
+    - pandoc
+    - texlive-full
 
 python:
   install:

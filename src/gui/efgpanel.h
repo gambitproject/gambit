@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/gui/efgpanel.h
 // Main viewing panel for extensive forms
@@ -32,14 +32,13 @@ class EfgDisplay;
 
 class EfgPanel final : public wxPanel, public GameView {
   EfgDisplay *m_treeWindow;
-  wxWindow *m_dominanceToolbar, *m_playerToolbar;
+  wxWindow *m_playerToolbar;
 
   // Overriding GameView members
   void OnUpdate() override {}
 
   /// @name Command event handlers
   //@{
-  void OnToolsDominance(wxCommandEvent &);
   void OnViewZoomIn(wxCommandEvent &);
   void OnViewZoomOut(wxCommandEvent &);
   void OnViewZoom100(wxCommandEvent &);

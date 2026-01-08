@@ -5,6 +5,7 @@ import pathlib
 from abc import ABC, abstractmethod
 
 import numpy as np
+import pytest
 
 import pygambit as gbt
 
@@ -19,7 +20,7 @@ def read_from_file(fn: str) -> gbt.Game:
 
 
 def create_efg_corresponding_to_bimatrix_game(
-    A: np.ndarray, B: np.ndarray, title: str
+        A: np.ndarray, B: np.ndarray, title: str
 ) -> gbt.Game:
     """
     There is no direct pygambit method to create an EFG from a stategic-form game.
@@ -58,8 +59,9 @@ def create_2x2_zero_nfg() -> gbt.Game:
 
     game.players[1].label = "Dan"
     game.players["Dan"].strategies[0].label = "defect"
-    # intentional duplicate label for player (generates warning):
-    game.players["Dan"].strategies[1].label = "defect"
+    # intentional duplicate label for player
+    with pytest.warns(FutureWarning):
+        game.players["Dan"].strategies[1].label = "defect"
 
     return game
 
@@ -72,14 +74,14 @@ def create_2x2x2_nfg() -> gbt.Game:
     - The payoff to a player is the sum of their incident edges across the implied cut
     - Pure equilibrium iff local max cuts; in addition, uniform mixture is an equilibrium
     - Equilibrium analysis for pure profiles:
-        a a a:  0 0  0 -- Not Nash (2 can deviate and get 4)
-        b a a:  1 2 -1 -- Not Nash (3 can deviate and get 2)
+        a a a:  0 0  0 -- Not Nash (regrets: 1, 4, 1)
+        b a a:  1 2 -1 -- Not Nash (regrets: 0, 0, 3)
         a b a:  2 4  2 -- Nash (global max cut)
-        b b a: -1 2  1 -- Not Nash (1 can deviate and get 2)
-        a a b: -1 2  1 -- Not Nash (1 can deviate and get 2)
+        b b a: -1 2  1 -- Not Nash (regrets: 3, 0, 0)
+        a a b: -1 2  1 -- Not Nash (regrets: 3, 0, 0)
         b a b:  2 4  2 -- Nash (global max cut)
-        a b b:  1 2 -1 -- Not Nash (3 can deviate and get 2)
-        b b b:  0 0  0 -- Not Nash (2 can deviate and get 4)
+        a b b:  1 2 -1 -- Not Nash (regrets: 0, 0, 3)
+        b b b:  0 0  0 -- Not Nash (regrets: 1, 4, 1)
     """
     return read_from_file("2x2x2_nfg_with_two_pure_one_mixed_eq.nfg")
 
@@ -100,6 +102,281 @@ def create_coord_4x4_nfg(outcome_version: bool = False) -> gbt.Game:
 # Extensive-form games (efg)
 
 
+def create_2x2_zero_sum_efg(missing_term_outcome: bool = False) -> gbt.Game:
+    """
+    EFG corresponding to 2x2 zero-sum game (I,-I).
+    If missing_term_outcome, the terminal node after "T" then "r" does not have an outcome.
+    """
+    g = gbt.Game.new_tree(
+        players=["Alice", "Bob"], title="2x2 matrix games (I,-I)")
+    g.append_move(g.root, "Alice", ["T", "B"])
+    g.append_move(g.root.children, "Bob", ["l", "r"])
+
+    alice_win = g.add_outcome([1, -1], label="Alice win")
+    draw = g.add_outcome([0, 0], label="Draw")
+
+    g.set_outcome(g.root.children["T"].children["l"], alice_win)
+    g.set_outcome(g.root.children["B"].children["r"], alice_win)
+    g.set_outcome(g.root.children["B"].children["l"], draw)
+
+    if not missing_term_outcome:
+        g.set_outcome(g.root.children["T"].children["r"], draw)
+
+    return g
+
+
+def create_perfect_info_with_chance_efg() -> gbt.Game:
+    # Tests case in which sequence profile probabilities don't sum to 1
+    g = gbt.Game.new_tree(players=["1", "2"], title="2 player perfect info with chance")
+    g.append_move(g.root, "1", ["a", "b"])
+    g.append_move(g.root.children[0], g.players.chance, ["L", "R"])
+    g.append_move(g.root.children[0].children[0], "2", ["A", "B"])
+    g.append_move(g.root.children[0].children[1], "2", ["C", "D"])
+    g.set_outcome(
+        g.root.children[0].children[0].children[0], g.add_outcome([-2, 2], label="aLA")
+    )
+    g.set_outcome(
+        g.root.children[0].children[0].children[1], g.add_outcome([-2, 2], label="aLB")
+    )
+    g.set_outcome(
+        g.root.children[0].children[1].children[0], g.add_outcome([-2, 2], label="aRC")
+    )
+    g.set_outcome(
+        g.root.children[0].children[1].children[1], g.add_outcome([-2, 2], label="aRD")
+    )
+    g.set_outcome(g.root.children[1], g.add_outcome([-1, 1], label="b"))
+    return g
+
+
+def create_three_action_internal_outcomes_efg(nonterm_outcomes: bool = False) -> gbt.Game:
+    """
+    with nonterm_outcomes there are nonterminal outcomes, and missing outcomes at some leaves
+    """
+    g = gbt.Game.new_tree(players=["1", "2"], title="")
+    g.append_move(g.root, g.players.chance, ["H", "L"])
+    for i in range(2):
+        g.append_move(g.root.children[i], "1", ["A", "B", "C"])
+    for i in range(3):
+        g.append_move(g.root.children[0].children[i], "2", ["X", "Y"])
+        g.append_infoset(g.root.children[1].children[i], g.root.children[0].children[i].infoset)
+    o_1 = g.add_outcome([1, -1], label="1")
+    o_m1 = g.add_outcome([-1, 1], label="-1")
+    o_2 = g.add_outcome([2, -2], label="2")
+    o_m2 = g.add_outcome([-2, 2], label="-2")
+    o_z = g.add_outcome([0, 0], label="0")
+    if nonterm_outcomes:
+        g.set_outcome(g.root.children[0].children[0], o_1)
+        g.set_outcome(g.root.children[1].children[2], o_m1)
+        g.set_outcome(g.root.children[0].children[0].children[1], o_m2)
+        g.set_outcome(g.root.children[0].children[1].children[0], o_m1)
+        g.set_outcome(g.root.children[0].children[1].children[1], o_1)
+        g.set_outcome(g.root.children[0].children[2].children[0], o_1)
+        g.set_outcome(g.root.children[1].children[0].children[1], o_1)
+        g.set_outcome(g.root.children[1].children[1].children[0], o_1)
+        g.set_outcome(g.root.children[1].children[1].children[1], o_m1)
+        g.set_outcome(g.root.children[1].children[2].children[1], o_2)
+    else:
+        g.set_outcome(g.root.children[0].children[0].children[0], o_1)
+        g.set_outcome(g.root.children[0].children[0].children[1], o_m1)
+        g.set_outcome(g.root.children[0].children[1].children[0], o_m1)
+        g.set_outcome(g.root.children[0].children[1].children[1], o_1)
+        g.set_outcome(g.root.children[0].children[2].children[0], o_1)
+        g.set_outcome(g.root.children[0].children[2].children[1], o_z)
+
+        g.set_outcome(g.root.children[1].children[0].children[0], o_z)
+        g.set_outcome(g.root.children[1].children[0].children[1], o_1)
+        g.set_outcome(g.root.children[1].children[1].children[0], o_1)
+        g.set_outcome(g.root.children[1].children[1].children[1], o_m1)
+        g.set_outcome(g.root.children[1].children[2].children[0], o_m1)
+        g.set_outcome(g.root.children[1].children[2].children[1], o_1)
+    return g
+
+
+def create_entry_accomodation_efg(nonterm_outcomes: bool = False) -> gbt.Game:
+    g = gbt.Game.new_tree(players=["1", "2"],
+                          title="Entry-accomodation game")
+    g.append_move(g.root, "1", ["S", "T"])
+    g.append_move(g.root.children[0], "2", ["E", "O"])
+    g.append_infoset(g.root.children[1], g.root.children[0].infoset)
+    g.append_move(g.root.children[0].children[0], "1", ["A", "F"])
+    g.append_move(g.root.children[1].children[0], "1", ["A", "F"])
+    if nonterm_outcomes:
+        g.set_outcome(g.root.children[0], g.add_outcome([3, 2]))
+        g.set_outcome(g.root.children[0].children[0].children[1], g.add_outcome([-3, -1]))
+        g.set_outcome(g.root.children[0].children[1], g.add_outcome([-2, 1]))
+    else:
+        g.set_outcome(g.root.children[0].children[0].children[0], g.add_outcome([3, 2]))
+        g.set_outcome(g.root.children[0].children[0].children[1], g.add_outcome([0, 1]))
+        g.set_outcome(g.root.children[0].children[1], g.add_outcome([1, 3]))
+    g.set_outcome(g.root.children[1].children[0].children[0], g.add_outcome([2, 3]))
+    g.set_outcome(g.root.children[1].children[0].children[1], g.add_outcome([1, 0]))
+    g.set_outcome(g.root.children[1].children[1], g.add_outcome([3, 1]))
+    return g
+
+
+def create_non_zero_sum_lacking_outcome_efg(missing_term_outcome: bool = False) -> gbt.Game:
+    g = gbt.Game.new_tree(players=["1", "2"], title="Non constant-sum game lacking outcome")
+    g.append_move(g.root, g.players.chance, ["H", "T"])
+    g.set_chance_probs(g.root.infoset, ["1/2", "1/2"])
+    g.append_move(g.root.children[0], "1", ["A", "B"])
+    g.append_infoset(g.root.children[1], g.root.children[0].infoset)
+    g.append_move(g.root.children[0].children[0], "2", ["X", "Y"])
+    g.append_infoset(g.root.children[0].children[1], g.root.children[0].children[0].infoset)
+    g.append_infoset(g.root.children[1].children[0], g.root.children[0].children[0].infoset)
+    g.append_infoset(g.root.children[1].children[1], g.root.children[0].children[0].infoset)
+    g.set_outcome(g.root.children[0].children[0].children[0], g.add_outcome([2, 1]))
+    g.set_outcome(g.root.children[0].children[0].children[1], g.add_outcome([-1, 2]))
+    g.set_outcome(g.root.children[0].children[1].children[0], g.add_outcome([1, -1]))
+    if not missing_term_outcome:
+        g.set_outcome(g.root.children[0].children[1].children[1], g.add_outcome([0, 0]))
+    g.set_outcome(g.root.children[1].children[0].children[0], g.add_outcome([1, 0]))
+    g.set_outcome(g.root.children[1].children[0].children[1], g.add_outcome([0, 1]))
+    g.set_outcome(g.root.children[1].children[1].children[0], g.add_outcome([-1, 1]))
+    g.set_outcome(g.root.children[1].children[1].children[1], g.add_outcome([2, -1]))
+    return g
+
+
+def create_chance_in_middle_efg(nonterm_outcomes: bool = False) -> gbt.Game:
+    g = gbt.Game.new_tree(players=["1", "2"],
+                          title="Chance in middle game")
+    g.append_move(g.root, "1", ["A", "B"])
+    g.append_move(g.root.children[0], g.players.chance, ["H", "L"])
+    g.set_chance_probs(g.root.children[0].infoset, ["1/5", "4/5"])
+    g.append_move(g.root.children[1], g.players.chance, ["H", "L"])
+    g.set_chance_probs(g.root.children[1].infoset, ["7/10", "3/10"])
+    for i in range(2):
+        g.append_move(g.root.children[0].children[i], "2", ["X", "Y"])
+        ist = g.root.children[0].children[i].infoset
+        g.append_infoset(g.root.children[1].children[i], ist)
+    for i in range(2):
+        for j in range(2):
+            g.append_move(g.root.children[i].children[0].children[j], "1", ["C", "D"])
+            ist = g.root.children[i].children[0].children[j].infoset
+            g.append_infoset(g.root.children[i].children[1].children[j], ist)
+    o_1 = g.add_outcome([1, -1], label="1")
+    o_m1 = g.add_outcome([-1, 1], label="-1")
+    o_m2 = g.add_outcome([-2, 2], label="-2")
+    o_h = g.add_outcome(["1/2", "-1/2"], label="0.5")
+    o_mh = g.add_outcome(["-1/2", "1/2"], label="-0.5")
+    o_z = g.add_outcome([0, 0], label="0")
+    o_m3o2 = g.add_outcome(["-3/2", "3/2"], label="-1.5")
+    if nonterm_outcomes:
+        g.set_outcome(g.root.children[0].children[0], g.add_outcome([-1, 1], label="a"))
+        g.set_outcome(g.root.children[0].children[0].children[0].children[0], o_1)
+        g.set_outcome(g.root.children[0].children[0].children[0].children[1], o_m1)
+        g.set_outcome(g.root.children[0].children[0].children[1].children[0], o_h)
+        g.set_outcome(g.root.children[0].children[0].children[1].children[1], o_mh)
+    else:
+        g.set_outcome(g.root.children[0].children[0].children[0].children[0], o_z)
+        g.set_outcome(g.root.children[0].children[0].children[0].children[1], o_m2)
+        g.set_outcome(g.root.children[0].children[0].children[1].children[0], o_mh)
+        g.set_outcome(g.root.children[0].children[0].children[1].children[1], o_m3o2)
+    g.set_outcome(g.root.children[0].children[1].children[0].children[0], o_h)
+    g.set_outcome(g.root.children[0].children[1].children[0].children[1], o_mh)
+    g.set_outcome(g.root.children[0].children[1].children[1].children[0], o_1)
+    g.set_outcome(g.root.children[0].children[1].children[1].children[1], o_m1)
+    g.set_outcome(g.root.children[1].children[0].children[0].children[0], o_h)
+    g.set_outcome(g.root.children[1].children[0].children[0].children[1], o_mh)
+    g.set_outcome(g.root.children[1].children[0].children[1].children[0], o_1)
+    g.set_outcome(g.root.children[1].children[0].children[1].children[1], o_m1)
+    g.set_outcome(g.root.children[1].children[1].children[0].children[0], o_1)
+    g.set_outcome(g.root.children[1].children[1].children[0].children[1], o_m1)
+    g.set_outcome(g.root.children[1].children[1].children[1].children[0], o_h)
+    g.set_outcome(g.root.children[1].children[1].children[1].children[1], o_mh)
+    return g
+
+
+def create_large_payoff_game_efg() -> gbt.Game:
+    g = gbt.Game.new_tree(players=["1", "2"], title="Large payoff game")
+    g.append_move(g.root, g.players.chance, ["L", "R"])
+    for i in range(2):
+        g.append_move(g.root.children[i], "1", ["A", "B"])
+    for i in range(2):
+        g.append_move(g.root.children[0].children[i], "2", ["X", "Y"])
+        g.append_infoset(g.root.children[1].children[i], g.root.children[0].children[i].infoset)
+    o_large = g.add_outcome([10000000000000000000, -10000000000000000000], label="large payoff")
+    o_1 = g.add_outcome([1, -1], label="1")
+    o_m1 = g.add_outcome([-1, 1], label="-1")
+    o_zero = g.add_outcome([0, 0], label="0")
+    g.set_outcome(g.root.children[0].children[0].children[0], o_large)
+    g.set_outcome(g.root.children[0].children[0].children[1], o_1)
+    g.set_outcome(g.root.children[0].children[1].children[0], o_m1)
+    g.set_outcome(g.root.children[0].children[1].children[1], o_zero)
+    g.set_outcome(g.root.children[1].children[0].children[0], o_m1)
+    g.set_outcome(g.root.children[1].children[0].children[1], o_1)
+    g.set_outcome(g.root.children[1].children[1].children[0], o_zero)
+    g.set_outcome(g.root.children[1].children[1].children[1], o_large)
+    return g
+
+
+def create_3_player_with_internal_outcomes_efg(nonterm_outcomes: bool = False) -> gbt.Game:
+    g = gbt.Game.new_tree(players=["1", "2", "3"], title="3 player game")
+    g.append_move(g.root, g.players.chance, ["H", "T"])
+    g.set_chance_probs(g.root.infoset, ["1/2", "1/2"])
+    g.append_move(g.root.children[0], "1", ["a", "b"])
+    g.append_move(g.root.children[1], "1", ["c", "d"])
+    g.append_move(g.root.children[0].children[0], "2", ["A", "B"])
+    g.append_infoset(g.root.children[1].children[0], g.root.children[0].children[0].infoset)
+    g.append_move(g.root.children[0].children[1], "3", ["W", "X"])
+    g.append_infoset(g.root.children[1].children[1], g.root.children[0].children[1].infoset)
+    g.append_move(g.root.children[0].children[0].children[0], "3", ["Y", "Z"])
+    iset = g.root.children[0].children[0].children[0].infoset
+    g.append_infoset(g.root.children[0].children[0].children[1], iset)
+    g.append_move(g.root.children[0].children[1].children[1], "2", ["C", "D"])
+    o = g.add_outcome([3, 1, 4])
+    g.set_outcome(g.root.children[0].children[0].children[0].children[0], o)
+    o = g.add_outcome([4, 0, 1])
+    g.set_outcome(g.root.children[0].children[0].children[0].children[1], o)
+    o = g.add_outcome([1, 3, 2])
+    g.set_outcome(g.root.children[0].children[1].children[0], o)
+    o = g.add_outcome([2, 4, 1])
+    g.set_outcome(g.root.children[0].children[1].children[1].children[0], o)
+    o = g.add_outcome([4, 1, 3])
+    g.set_outcome(g.root.children[0].children[1].children[1].children[1], o)
+    if nonterm_outcomes:
+        o = g.add_outcome([1, 2, 3])
+        g.set_outcome(g.root.children[1], o)
+        o = g.add_outcome([1, 0, 1])
+        g.set_outcome(g.root.children[1].children[0].children[0], o)
+        o = g.add_outcome([2, -1, -2])
+        g.set_outcome(g.root.children[1].children[0].children[1], o)
+        o = g.add_outcome([-1, 2, -1])
+        g.set_outcome(g.root.children[1].children[1].children[0], o)
+    else:
+        o = g.add_outcome([2, 2, 4])
+        g.set_outcome(g.root.children[1].children[0].children[0], o)
+        o = g.add_outcome([3, 1, 1])
+        g.set_outcome(g.root.children[1].children[0].children[1], o)
+        o = g.add_outcome([0, 4, 2])
+        g.set_outcome(g.root.children[1].children[1].children[0], o)
+        o = g.add_outcome([1, 2, 3])
+        g.set_outcome(g.root.children[1].children[1].children[1], o)
+        o = g.add_outcome([0, 0, 0])
+        g.set_outcome(g.root.children[0].children[0].children[1].children[0], o)
+        g.set_outcome(g.root.children[0].children[0].children[1].children[1], o)
+    return g
+
+
+def create_matching_pennies_efg(with_neutral_outcome: bool = False) -> gbt.Game:
+    """
+    The version with_neutral_outcome adds a (0,0) payoff outcomes at a non-terminal node.
+    """
+    g = gbt.Game.new_tree(
+        players=["Alice", "Bob"], title="Matching pennies")
+    g.append_move(g.root, "Alice", ["H", "T"])
+    g.append_move(g.root.children, "Bob", ["h", "t"])
+    alice_lose = g.add_outcome([-1, 1], label="Alice lose")
+    alice_win = g.add_outcome([1, -1], label="Alice win")
+    if with_neutral_outcome:
+        neutral = g.add_outcome([0, 0], label="neutral")
+        g.set_outcome(g.root.children["H"], neutral)
+    g.set_outcome(g.root.children["H"].children["h"], alice_win)
+    g.set_outcome(g.root.children["T"].children["t"], alice_win)
+    g.set_outcome(g.root.children["H"].children["t"], alice_lose)
+    g.set_outcome(g.root.children["T"].children["h"], alice_lose)
+    return g
+
+
 def create_mixed_behav_game_efg() -> gbt.Game:
     """
     Returns
@@ -113,35 +390,67 @@ def create_mixed_behav_game_efg() -> gbt.Game:
     return read_from_file("mixed_behavior_game.efg")
 
 
-def create_1_card_poker_efg() -> gbt.Game:
+def create_stripped_down_poker_efg(nonterm_outcomes: bool = False) -> gbt.Game:
     """
     Returns
     -------
     Game
-        One-card two-player poker game, as used in the user guide
+        Stripped-Down Poker: A Classroom Game with Signaling and Bluﬃng
+        Reiley et al (2008)
+
+        Two-player extensive-form poker game between Alice and Bob
+        Chance deals King or Queen to Fred
+        Alice can then Bet or Fold; after raising Bob is in an infoset with two nodes
+        and can choose to Call or Fold
     """
-    return read_from_file("poker.efg")
+    if not nonterm_outcomes:
+        return read_from_file("stripped_down_poker.efg")
+
+    g = gbt.Game.new_tree(
+        players=["Alice", "Bob"], title="Stripped-Down Poker: a simple game of one-card\
+                                            poker from Reiley et al (2008)."
+    )
+    deals = ["King", "Queen"]
+    g.append_move(g.root, g.players.chance, deals)
+
+    ante_outcome = g.add_outcome([-1, -1], label="Ante")
+    g.set_outcome(g.root, ante_outcome)
+
+    alice_folds_outcome = g.add_outcome([0, 2], label="Alice Folds")
+    alice_bets_outcome = g.add_outcome([-1, 0], label="Alice Bets")
+    bob_folds_outcome = g.add_outcome([3, 0], label="Bob Folds")
+    bob_calls_and_wins_outcome = g.add_outcome([0, 3], label="Bob Calls and Wins")
+    bob_calls_and_loses_outcome = g.add_outcome([4, -1], label="Bob Calls and Loses")
+
+    for node in g.root.children:
+        g.append_move(
+            node,
+            player="Alice",
+            actions=["Bet", "Fold"]
+        )
+        g.set_outcome(node.children["Fold"], alice_folds_outcome)
+        g.set_outcome(node.children["Bet"], alice_bets_outcome)
+
+    alice_bets_nodes = [g.root.children["King"].children["Bet"],
+                        g.root.children["Queen"].children["Bet"]]
+    g.append_move(
+        alice_bets_nodes,
+        player="Bob",
+        actions=["Call", "Fold"]
+    )
+    for node in alice_bets_nodes:
+        g.set_outcome(node.children["Fold"], bob_folds_outcome)
+
+    bob_calls_and_loses_node = g.root.children["King"].children["Bet"].children["Call"]
+    g.set_outcome(bob_calls_and_loses_node, bob_calls_and_loses_outcome)
+    bob_calls_and_wins_node = g.root.children["Queen"].children["Bet"].children["Call"]
+    g.set_outcome(bob_calls_and_wins_node, bob_calls_and_wins_outcome)
+    return g
 
 
-def create_myerson_2_card_poker_efg() -> gbt.Game:
+def _create_kuhn_poker_efg_without_outcomes():
     """
-    Returns
-    -------
-    Game
-        Simplied "stripped down" version of Myerson 2-card poker:
-        Two-player extensive poker game with a chance move with two moves,
-        then player 1 can raise or fold; after raising player 2 is in an infoset with two nodes
-        and can choose to meet or pass
-    """
-    return read_from_file("myerson_2_card_poker.efg")
-
-
-def create_kuhn_poker_efg() -> gbt.Game:
-    """
-    Returns
-    -------
-    Game
-        Kuhn poker with 3 cards and 2 players
+    Used in create_kuhn_poker_efg()
     """
     g = gbt.Game.new_tree(
         players=["Alice", "Bob"], title="Three-card poker (J, Q, K), two-player"
@@ -174,6 +483,26 @@ def create_kuhn_poker_efg() -> gbt.Game:
         term_nodes = [g.root.children[d].children["Bet"]
                       for d in deals_by_infoset("Bob", bob_card)]
         g.append_move(term_nodes, "Bob", ["Fold", "Call"])
+    return g
+
+
+def _kuhn_showdown_winner(deal: str):
+    """
+    Used in:
+    _create_kuhn_poker_efg_only_term_outcomes();
+    _create_kuhn_poker_efg_nonterm_outcomes()
+    """
+    # deal is an element of deals = ["JQ", "JK", "QJ", "QK", "KJ", "KQ"]
+    card_values = dict(J=0, Q=1, K=2)
+    a, b = deal
+    return "Alice" if card_values[a] > card_values[b] else "Bob"
+
+
+def _create_kuhn_poker_efg_only_term_outcomes() -> gbt.Game:
+    """
+    Used in create_kuhn_poker_efg()
+    """
+    g = _create_kuhn_poker_efg_without_outcomes()
 
     def calculate_payoffs(term_node):
 
@@ -184,14 +513,8 @@ def create_kuhn_poker_efg() -> gbt.Game:
                 node = node.parent
             return path
 
-        def showdown_winner(deal):
-            # deal is an element of deals = ["JQ", "JK", "QJ", "QK", "KJ", "KQ"]
-            card_values = dict(J=0, Q=1, K=2)
-            a, b = deal
-            return "Alice" if card_values[a] > card_values[b] else "Bob"
-
         def showdown(deal, payoffs, pot):
-            payoffs[showdown_winner(deal)] += pot
+            payoffs[_kuhn_showdown_winner(deal)] += pot
             return payoffs
 
         def bet(player, payoffs, pot):
@@ -233,9 +556,120 @@ def create_kuhn_poker_efg() -> gbt.Game:
         outcome = payoffs_to_outcomes[calculate_payoffs(term_node)]
         g.set_outcome(term_node, outcome)
 
-    # Ensure infosets are in the same order as if game was written to efg and read back in
-    g.sort_infosets()
     return g
+
+
+def _create_kuhn_poker_efg_nonterm_outcomes() -> gbt.Game:
+    """
+    Used in create_kuhn_poker_efg()
+    """
+    g = _create_kuhn_poker_efg_without_outcomes()
+
+    ante_outcome = g.add_outcome([-1, -1], label="Ante")
+    g.set_outcome(g.root, ante_outcome)
+
+    outcomes_dict = dict()
+    for player in ["Alice", "Bob"]:
+        # non-terminal outcomes for betting
+        payoffs = [-1, 0] if player == "Alice" else [0, -1]
+        tmp = f"{player} bets"
+        outcomes_dict[tmp] = g.add_outcome(payoffs, label=tmp)
+
+        # terminal outcomes for showdown after both check (pot of 2)
+        payoffs = [2, 0] if player == "Alice" else [0, 2]
+        tmp = f"{player} wins showdown for pot of 2"
+        outcomes_dict[tmp] = g.add_outcome(payoffs, label=tmp)
+
+        # terminal outcomes after a player folds (pot of 3)
+        payoffs = [0, 3] if player == "Alice" else [3, 0]
+        tmp = f"{player} folds"
+        outcomes_dict[tmp] = g.add_outcome(payoffs, label=tmp)
+
+        # terminal outcomes after a player calls and wins: bet first (-1) then win pot (4)
+        payoffs = [3, 0] if player == "Alice" else [0, 3]
+        tmp = f"{player} calls and wins"
+        outcomes_dict[tmp] = g.add_outcome(payoffs, label=tmp)
+
+        # terminal outcomes after a player calls and loses: bet first (-1) then lose pot (4)
+        payoffs = [-1, 4] if player == "Alice" else [4, -1]
+        tmp = f"{player} calls and loses"
+        outcomes_dict[tmp] = g.add_outcome(payoffs, label=tmp)
+
+    def add_outcomes(term_node):
+
+        def get_path(node):
+            path = []
+            while node.parent:
+                path.append((node, node.prior_action.label))
+                node = node.parent
+            return path
+
+        path = get_path(term_node)
+        _, deal = path.pop()
+        winner = _kuhn_showdown_winner(deal)  # needed if there is a showdown
+
+        n, label = path.pop()
+        if label == "Check":  # Alice checks
+            n, label = path.pop()
+            if label == "Check":  # Bob checks
+                g.set_outcome(n, outcomes_dict[f"{winner} wins showdown for pot of 2"])
+            else:  # Bob bets
+                g.set_outcome(n, outcomes_dict["Bob bets"])
+                n, label = path.pop()
+                if label == "Fold":  # Alice folds
+                    g.set_outcome(n, outcomes_dict["Alice folds"])
+                else:  # Alice calls
+                    tmp = "wins" if winner == "Alice" else "loses"
+                    g.set_outcome(n, outcomes_dict[f"Alice calls and {tmp}"])
+        else:  # Alice bets
+            g.set_outcome(n, outcomes_dict["Alice bets"])
+            n, label = path.pop()
+            if label == "Fold":  # Bob
+                g.set_outcome(n, outcomes_dict["Bob folds"])
+            else:  # Bob calls
+                tmp = "wins" if winner == "Bob" else "loses"
+                g.set_outcome(n, outcomes_dict[f"Bob calls and {tmp}"])
+
+    for term_node in [n for n in g.nodes if n.is_terminal]:
+        add_outcomes(term_node)
+
+    return g
+
+
+def create_kuhn_poker_efg(nonterm_outcomes: bool = False) -> gbt.Game:
+    """
+    Returns
+    -------
+    Game
+        Kuhn poker with 3 cards and 2 players
+
+        If nonterm_outcomes is True then the ante and bets are captured with nonterminal
+        outcomes; else the only outcomes are at terminal nodes.
+        In both cases, all terminal nodes have outcomes.
+    """
+    if nonterm_outcomes:
+        g = _create_kuhn_poker_efg_nonterm_outcomes()
+    else:
+        g = _create_kuhn_poker_efg_only_term_outcomes()
+    return g
+
+
+def kuhn_poker_lp_mixed_strategy_prof():
+    """
+    Returns
+    -------
+    Data for the extreme equilibrium in mixed stategies for Kuhn poker found by lp_solve
+    """
+    alice = [0] * 27
+    alice[2] = "6/15"
+    alice[4] = "7/15"
+    alice[19] = "2/15"
+
+    bob = [0] * 64
+    bob[12] = "1/3"
+    bob[14] = "1/3"
+    bob[28] = "1/3"
+    return [alice, bob]
 
 
 def kuhn_poker_lcp_first_mixed_strategy_prof():
@@ -253,12 +687,15 @@ def kuhn_poker_lcp_first_mixed_strategy_prof():
     return [alice, bob]
 
 
-def create_one_shot_trust_efg() -> gbt.Game:
+def create_one_shot_trust_efg(unique_NE_variant: bool = False) -> gbt.Game:
     """
-    Returns
-    -------
-    Game
-        One-shot trust game, after Kreps (1990)
+    One-shot trust game, after Kreps (1990)
+
+    The unique_NE_variant makes Trust a dominant strategy, replacing the
+    non-singleton equilibrium component from the standard version of the game
+    where the Buyer plays "Not Trust" and the seller can play any mixture with
+    < 0.5 probability on Honor with a unique NE where the Buyer plays Trust and
+    the Seller plays Abuse.
     """
     g = gbt.Game.new_tree(
         players=["Buyer", "Seller"], title="One-shot trust game, after Kreps (1990)"
@@ -268,9 +705,14 @@ def create_one_shot_trust_efg() -> gbt.Game:
     g.set_outcome(
         g.root.children[0].children[0], g.add_outcome([1, 1], label="Trustworthy")
     )
-    g.set_outcome(
-        g.root.children[0].children[1], g.add_outcome([-1, 2], label="Untrustworthy")
-    )
+    if unique_NE_variant:
+        g.set_outcome(
+            g.root.children[0].children[1], g.add_outcome(["1/2", 2], label="Untrustworthy")
+        )
+    else:
+        g.set_outcome(
+            g.root.children[0].children[1], g.add_outcome([-1, 2], label="Untrustworthy")
+        )
     g.set_outcome(g.root.children[1], g.add_outcome([0, 0], label="Opt-out"))
     return g
 
@@ -406,6 +848,105 @@ def create_reduction_both_players_payoff_ties_efg() -> gbt.Game:
     return g
 
 
+def create_problem_example_efg() -> gbt.Game:
+    g = gbt.Game.new_tree(players=["1", "2"], title="")
+    g.append_move(g.root, player="1", actions=["L", "R"])
+    # do the second child first on purpose to diverge from sort infosets order
+    g.append_move(g.root.children[1], "2", actions=["l2", "r2"])
+    g.append_move(g.root.children[0], "2", actions=["l1", "r1"])
+    g.set_outcome(g.root.children[0].children[0], outcome=g.add_outcome(payoffs=[5, -5]))
+    g.set_outcome(g.root.children[0].children[1], outcome=g.add_outcome(payoffs=[2, -2]))
+    g.set_outcome(g.root.children[1].children[0], outcome=g.add_outcome(payoffs=[-5, 5]))
+    g.set_outcome(g.root.children[1].children[1], outcome=g.add_outcome(payoffs=[-2, 2]))
+    return g
+
+
+def create_STOC_simplified() -> gbt.Game:
+    """
+    """
+    g = gbt.Game.new_tree(players=["1", "2"], title="")
+    g.append_move(g.root, g.players.chance, actions=["1", "2"])
+    g.set_chance_probs(g.root.infoset, [0.2, 0.8])
+    g.append_move(g.root.children[0], player="1", actions=["l", "r"])
+    g.append_move(g.root.children[1], player="1", actions=["c", "d"])
+    g.append_move(g.root.children[0].children[1], player="2", actions=["p", "q"])
+    g.append_move(
+        g.root.children[0].children[1].children[0], player="1", actions=["L", "R"]
+    )
+    g.append_infoset(
+        g.root.children[0].children[1].children[1],
+        g.root.children[0].children[1].children[0].infoset,
+    )
+    g.set_outcome(
+        g.root.children[0].children[0],
+        outcome=g.add_outcome(payoffs=[5, -5], label="l"),
+    )
+    g.set_outcome(
+        g.root.children[0].children[1].children[0].children[0],
+        outcome=g.add_outcome(payoffs=[10, -10], label="rpL"),
+    )
+    g.set_outcome(
+        g.root.children[0].children[1].children[0].children[1],
+        outcome=g.add_outcome(payoffs=[15, -15], label="rpR"),
+    )
+    g.set_outcome(
+        g.root.children[0].children[1].children[1].children[0],
+        outcome=g.add_outcome(payoffs=[20, -20], label="rqL"),
+    )
+    g.set_outcome(
+        g.root.children[0].children[1].children[1].children[1],
+        outcome=g.add_outcome(payoffs=[-5, 5], label="rqR"),
+    )
+    g.set_outcome(
+        g.root.children[1].children[0],
+        outcome=g.add_outcome(payoffs=[10, -10], label="c"),
+    )
+    g.set_outcome(
+        g.root.children[1].children[1],
+        outcome=g.add_outcome(payoffs=[20, -20], label="d"),
+    )
+    return g
+
+
+def create_STOC_simplified2() -> gbt.Game:
+    """
+    """
+    g = gbt.Game.new_tree(players=["1", "2"], title="")
+    g.append_move(g.root, g.players.chance, actions=["1", "2"])
+    g.set_chance_probs(g.root.infoset, [0.2, 0.8])
+    g.append_move(g.root.children[0], player="1", actions=["r"])
+    g.append_move(g.root.children[1], player="1", actions=["c"])
+    g.append_move(g.root.children[0].children[0], player="2", actions=["p", "q"])
+    g.append_move(
+        g.root.children[0].children[0].children[0], player="1", actions=["L", "R"]
+    )
+    g.append_infoset(
+        g.root.children[0].children[0].children[1],
+        g.root.children[0].children[0].children[0].infoset,
+    )
+    g.set_outcome(
+        g.root.children[0].children[0].children[0].children[0],
+        outcome=g.add_outcome(payoffs=[10, -10], label="rpL"),
+    )
+    g.set_outcome(
+        g.root.children[0].children[0].children[0].children[1],
+        outcome=g.add_outcome(payoffs=[15, -15], label="rpR"),
+    )
+    g.set_outcome(
+        g.root.children[0].children[0].children[1].children[0],
+        outcome=g.add_outcome(payoffs=[20, -20], label="rqL"),
+    )
+    g.set_outcome(
+        g.root.children[0].children[0].children[1].children[1],
+        outcome=g.add_outcome(payoffs=[-5, 5], label="rqR"),
+    )
+    g.set_outcome(
+        g.root.children[1].children[0],
+        outcome=g.add_outcome(payoffs=[10, -10], label="c"),
+    )
+    return g
+
+
 def create_seq_form_STOC_paper_zero_sum_2_player_efg() -> gbt.Game:
     """
     Example from
@@ -484,25 +1025,36 @@ def create_seq_form_STOC_paper_zero_sum_2_player_efg() -> gbt.Game:
     g.root.children[0].children[1].infoset.label = "01"
     g.root.children[2].children[0].infoset.label = "20"
     g.root.children[0].children[1].children[0].infoset.label = "010"
-
     return g
 
 
-def create_two_player_perfect_info_win_lose_efg() -> gbt.Game:
+def create_two_player_perfect_info_win_lose_efg(nonterm_outcomes: bool = False) -> gbt.Game:
     g = gbt.Game.new_tree(players=["1", "2"], title="2 player perfect info win lose")
     g.append_move(g.root, "2", ["a", "b"])
     g.append_move(g.root.children[0], "1", ["L", "R"])
     g.append_move(g.root.children[1], "1", ["L", "R"])
     g.append_move(g.root.children[0].children[0], "2", ["l", "r"])
-    g.set_outcome(
-        g.root.children[0].children[0].children[0], g.add_outcome([1, -1], label="aLl")
-    )
-    g.set_outcome(
-        g.root.children[0].children[0].children[1], g.add_outcome([-1, 1], label="aLr")
-    )
-    g.set_outcome(g.root.children[0].children[1], g.add_outcome([1, -1], label="aR"))
-    g.set_outcome(g.root.children[1].children[0], g.add_outcome([1, -1], label="bL"))
-    g.set_outcome(g.root.children[1].children[1], g.add_outcome([-1, 1], label="bR"))
+    if not nonterm_outcomes:
+        g.set_outcome(
+            g.root.children[0].children[0].children[0], g.add_outcome([1, -1], label="aLl")
+        )
+        g.set_outcome(
+            g.root.children[0].children[0].children[1], g.add_outcome([-1, 1], label="aLr")
+        )
+        g.set_outcome(g.root.children[0].children[1], g.add_outcome([1, -1], label="aR"))
+        g.set_outcome(g.root.children[1].children[0], g.add_outcome([1, -1], label="bL"))
+        g.set_outcome(g.root.children[1].children[1], g.add_outcome([-1, 1], label="bR"))
+    else:
+        g.set_outcome(g.root.children[0], g.add_outcome([-100, 50], label="a"))
+        g.set_outcome(
+            g.root.children[0].children[0].children[0], g.add_outcome([101, -51], label="aLl")
+        )
+        g.set_outcome(
+            g.root.children[0].children[0].children[1], g.add_outcome([99, -49], label="aLr")
+        )
+        g.set_outcome(g.root.children[0].children[1], g.add_outcome([101, -51], label="aR"))
+        g.set_outcome(g.root.children[1].children[0], g.add_outcome([1, -1], label="bL"))
+        g.set_outcome(g.root.children[1].children[1], g.add_outcome([-1, 1], label="bR"))
     return g
 
 
@@ -777,14 +1329,14 @@ class BinEfgOnePlayerIR(BinaryTreeGames):
             first_half = tmp[:n_half]
             second_half = tmp[n_half:]
             n_stars = (
-                self.get_n_infosets(level)[1] - self.get_n_infosets(level - 1)[1] - 1
+                    self.get_n_infosets(level)[1] - self.get_n_infosets(level - 1)[1] - 1
             )
             stars = "*" * n_stars
             return (
-                ["11" + t + stars for t in first_half]
-                + ["12" + t + stars for t in second_half]
-                + ["21" + stars + t for t in first_half]
-                + ["22" + stars + t for t in second_half]
+                    ["11" + t + stars for t in first_half]
+                    + ["12" + t + stars for t in second_half]
+                    + ["21" + stars + t for t in first_half]
+                    + ["22" + stars + t for t in second_half]
             )
 
 

@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org
 //
 // FILE: src/games/behavpure.cc
 // Implementation of pure behavior profile
@@ -98,29 +98,15 @@ MixedBehaviorProfile<Rational> PureBehaviorProfile::ToMixedBehaviorProfile() con
 //                    class BehaviorContingencies
 //========================================================================
 
-BehaviorContingencies::BehaviorContingencies(const BehaviorSupportProfile &p_support,
-                                             const std::set<GameInfoset> &p_reachable,
-                                             const std::vector<GameAction> &p_frozen)
-  : m_support(p_support), m_frozen(p_frozen)
+BehaviorContingencies::BehaviorContingencies(const BehaviorSupportProfile &p_support)
+  : m_support(p_support)
 {
-  if (!p_reachable.empty()) {
-    for (const auto &infoset : p_reachable) {
-      m_activeInfosets.push_back(infoset);
-    }
-  }
-  else {
-    for (const auto &player : m_support.GetGame()->GetPlayers()) {
-      for (const auto &infoset : player->GetInfosets()) {
-        if (p_support.IsReachable(infoset)) {
-          m_activeInfosets.push_back(infoset);
-        }
+  for (const auto &player : m_support.GetGame()->GetPlayers()) {
+    for (const auto &infoset : player->GetInfosets()) {
+      if (p_support.IsReachable(infoset)) {
+        m_reachableInfosets.push_back(infoset);
       }
     }
-  }
-  for (const auto &action : m_frozen) {
-    m_activeInfosets.erase(std::find_if(
-        m_activeInfosets.begin(), m_activeInfosets.end(),
-        [action](const GameInfoset &infoset) { return infoset == action->GetInfoset(); }));
   }
 }
 
@@ -136,15 +122,12 @@ BehaviorContingencies::iterator::iterator(BehaviorContingencies *p_cont, bool p_
       m_profile.SetAction(*m_currentBehav[infoset]);
     }
   }
-  for (const auto &action : m_cont->m_frozen) {
-    m_profile.SetAction(action);
-  }
 }
 
 BehaviorContingencies::iterator &BehaviorContingencies::iterator::operator++()
 {
-  for (auto infoset = m_cont->m_activeInfosets.crbegin();
-       infoset != m_cont->m_activeInfosets.crend(); ++infoset) {
+  for (auto infoset = m_cont->m_reachableInfosets.crbegin();
+       infoset != m_cont->m_reachableInfosets.crend(); ++infoset) {
     ++m_currentBehav[*infoset];
     if (m_currentBehav.at(*infoset) != m_cont->m_support.GetActions(*infoset).end()) {
       m_profile.SetAction(*m_currentBehav[*infoset]);

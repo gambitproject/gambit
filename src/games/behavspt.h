@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/libgambit/behavspt.h
 // Interface to supports for extensive forms
@@ -30,7 +30,6 @@
 namespace Gambit {
 
 class GameSequenceForm;
-class GameSequenceRep;
 class SequencesWrapper;
 class PlayerSequencesWrapper;
 class InfosetsWrapper;
@@ -44,9 +43,10 @@ class ContingenciesWrapper;
 /// computational approaches that enumerate possible equilibrium
 /// supports.
 class BehaviorSupportProfile {
-protected:
   Game m_efg;
   std::map<GameInfoset, std::vector<GameAction>> m_actions;
+  mutable std::shared_ptr<GameSequenceForm> m_sequenceForm;
+  mutable std::shared_ptr<std::map<GameInfoset, bool>> m_reachableInfosets;
 
   std::map<GameInfoset, bool> m_infosetReachable;
   std::map<GameNode, bool> m_nonterminalReachable;
@@ -57,7 +57,6 @@ protected:
 
 public:
   class Support {
-  private:
     const BehaviorSupportProfile *m_profile;
     GameInfoset m_infoset;
 
@@ -147,19 +146,117 @@ public:
   BehaviorSupportProfile Undominated(bool p_strict) const;
   //@}
 
-  mutable std::shared_ptr<GameSequenceForm> m_sequenceForm;
+  class Infosets {
+    const BehaviorSupportProfile *m_support;
+
+  public:
+    Infosets(const BehaviorSupportProfile *p_support) : m_support(p_support) {}
+
+    size_t size() const
+    {
+      auto reachable_infosets = m_support->GetReachableInfosets();
+      size_t count = 0;
+      for (auto [infoset, is_reachable] : *reachable_infosets) {
+        if (is_reachable && !infoset->GetPlayer()->IsChance()) {
+          ++count;
+        }
+      }
+      return count;
+    }
+  };
+
+  class Sequences {
+    const BehaviorSupportProfile *m_support;
+
+  public:
+    class iterator {
+      const std::shared_ptr<GameSequenceForm> m_sfg;
+      std::map<GamePlayer, std::vector<GameSequence>>::const_iterator m_currentPlayer;
+      std::vector<GameSequence>::const_iterator m_currentSequence;
+
+    public:
+      iterator(const std::shared_ptr<GameSequenceForm> p_sfg, bool p_end);
+
+      GameSequence operator*() const { return *m_currentSequence; }
+      GameSequence operator->() const { return *m_currentSequence; }
+
+      iterator &operator++();
+
+      bool operator==(const iterator &it) const;
+      bool operator!=(const iterator &it) const { return !(*this == it); }
+    };
+
+    Sequences(const BehaviorSupportProfile *p_support) : m_support(p_support) {}
+
+    size_t size() const;
+
+    iterator begin() const;
+    iterator end() const;
+  };
+
+  class PlayerSequences {
+    const BehaviorSupportProfile *m_support;
+    GamePlayer m_player;
+
+  public:
+    PlayerSequences(const BehaviorSupportProfile *p_support, const GamePlayer &p_player)
+      : m_support(p_support), m_player(p_player)
+    {
+    }
+
+    size_t size() const;
+    std::vector<GameSequence>::const_iterator begin() const;
+    std::vector<GameSequence>::const_iterator end() const;
+  };
+
+  class SequenceContingencies {
+    const BehaviorSupportProfile *m_support;
+
+  public:
+    SequenceContingencies(const BehaviorSupportProfile *p_support) : m_support(p_support) {}
+
+    class iterator {
+    private:
+      const std::shared_ptr<GameSequenceForm> m_sfg;
+      bool m_end{false};
+      std::map<GamePlayer, size_t> m_indices;
+
+    public:
+      using iterator_category = std::input_iterator_tag;
+
+      iterator(const std::shared_ptr<GameSequenceForm> p_sfg, bool p_end = false);
+
+      std::map<GamePlayer, GameSequence> operator*() const;
+
+      std::map<GamePlayer, GameSequence> operator->() const;
+
+      iterator &operator++();
+
+      bool operator==(const iterator &it) const
+      {
+        return (m_end == it.m_end && m_sfg == it.m_sfg && m_indices == it.m_indices);
+      }
+      bool operator!=(const iterator &it) const { return !(*this == it); }
+    };
+
+    iterator begin() { return {m_support->GetSequenceForm()}; }
+    iterator end() { return {m_support->GetSequenceForm(), true}; }
+  };
+
   std::shared_ptr<GameSequenceForm> GetSequenceForm() const;
-  SequencesWrapper GetSequences() const;
-  PlayerSequencesWrapper GetSequences(GamePlayer &p_player) const;
+  Sequences GetSequences() const;
+  PlayerSequences GetSequences(GamePlayer &p_player) const;
   int GetConstraintEntry(const GameInfoset &p_infoset, const GameAction &p_action) const;
-  const Rational &
-  GetPayoff(const std::map<GamePlayer, std::shared_ptr<GameSequenceRep>> &p_profile,
-            const GamePlayer &p_player) const;
+  const Rational &GetPayoff(const std::map<GamePlayer, GameSequence> &p_profile,
+                            const GamePlayer &p_player) const;
   GameRep::Players GetPlayers() const { return GetGame()->GetPlayers(); }
   MixedBehaviorProfile<double>
-  ToMixedBehaviorProfile(const std::map<std::shared_ptr<GameSequenceRep>, double> &) const;
-  InfosetsWrapper GetInfosets() const;
-  ContingenciesWrapper GetContingencies() const;
+  ToMixedBehaviorProfile(const std::map<GameSequence, double> &) const;
+  Infosets GetInfosets() const { return {this}; };
+  SequenceContingencies GetSequenceContingencies() const;
+
+  void FindReachableInfosets(GameNode p_node) const;
+  std::shared_ptr<std::map<GameInfoset, bool>> GetReachableInfosets() const;
 };
 
 } // end namespace Gambit

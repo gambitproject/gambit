@@ -94,11 +94,11 @@ support of some set of equilibria.
 Computing equilibria of the strategic game :download:`e01.nfg
 <../contrib/games/e01.efg>`, the example in Figure 1 of Selten
 (International Journal of Game Theory, 1975) sometimes called
-"Selten's horse"::
+"Selten's horse"
 
    $ gambit-enumpoly e01.nfg
    Compute Nash equilibria by solving polynomial systems
-   Gambit version 16.4.0, Copyright (C) 1994-2025, The Gambit Project
+   Gambit version |release|, Copyright (C) 1994-2026, The Gambit Project
    This is free software, distributed under the GNU GPL
 
    NE,1.000000,0.000000,1.000000,0.000000,0.000000,1.000000

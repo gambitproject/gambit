@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/core/util.h
 // Core (game theory-independent) utilities for Gambit
@@ -28,7 +28,9 @@
 #include <iomanip>
 #include <cmath>
 #include <algorithm>
+#include <numeric>
 #include <map>
+#include <optional>
 
 namespace Gambit {
 
@@ -63,6 +65,197 @@ template <class Key, class T> bool contains(const std::map<Key, T> &map, const K
 {
   return map.find(key) != map.end();
 }
+
+template <class C> class EnumerateView {
+public:
+  explicit EnumerateView(C &p_range) : m_range(p_range) {}
+
+  class iterator {
+  public:
+    using base_iterator = decltype(std::begin(std::declval<C &>()));
+
+    iterator(const std::size_t p_index, base_iterator p_current)
+      : m_index(p_index), m_current(p_current)
+    {
+    }
+
+    iterator &operator++()
+    {
+      ++m_index;
+      ++m_current;
+      return *this;
+    }
+
+    bool operator!=(const iterator &p_other) const { return m_current != p_other.m_current; }
+    auto operator*() const { return std::tie(m_index, *m_current); }
+
+  private:
+    std::size_t m_index;
+    base_iterator m_current;
+  };
+
+  iterator begin() { return iterator{0, std::begin(m_range)}; }
+  iterator end() { return iterator{0, std::end(m_range)}; }
+
+private:
+  C &m_range;
+};
+
+template <class C> auto enumerate(C &p_range) { return EnumerateView<C>(p_range); }
+
+/// @brief A container adaptor which returns only the elements matching the predicate
+///        This is intended to look forward to C++20-style ranges
+template <typename Container, typename Pred> class filter_if {
+public:
+  using Iter = decltype(std::begin(std::declval<Container &>()));
+
+  class iterator {
+  public:
+    using iterator_category = std::forward_iterator_tag;
+    using value_type = typename std::iterator_traits<Iter>::value_type;
+    using difference_type = typename std::iterator_traits<Iter>::difference_type;
+    using reference = typename std::iterator_traits<Iter>::reference;
+    using pointer = typename std::iterator_traits<Iter>::pointer;
+
+    iterator(Iter current, Iter end, Pred pred)
+      : m_current(current), m_end(end), m_pred(std::move(pred))
+    {
+      advance_next_valid();
+    }
+
+    value_type operator*() const { return *m_current; }
+    pointer operator->() const { return std::addressof(*m_current); }
+
+    iterator &operator++()
+    {
+      ++m_current;
+      advance_next_valid();
+      return *this;
+    }
+
+    iterator operator++(int)
+    {
+      auto tmp = *this;
+      ++(*this);
+      return tmp;
+    }
+
+    friend bool operator==(const iterator &a, const iterator &b)
+    {
+      return a.m_current == b.m_current;
+    }
+
+    friend bool operator!=(const iterator &a, const iterator &b) { return !(a == b); }
+
+  private:
+    Iter m_current, m_end;
+    Pred m_pred;
+
+    void advance_next_valid()
+    {
+      while (m_current != m_end && !m_pred(*m_current)) {
+        ++m_current;
+      }
+    }
+  };
+
+  filter_if(const Container &c, Pred pred)
+    : m_begin(c.begin(), c.end(), pred), m_end(c.end(), c.end(), pred)
+  {
+  }
+
+  iterator begin() const { return m_begin; }
+  iterator end() const { return m_end; }
+
+private:
+  iterator m_begin, m_end;
+};
+
+template <typename Value, typename Range> class prepend_value {
+public:
+  using Iter = decltype(std::begin(std::declval<Range &>()));
+
+  class iterator {
+  public:
+    using iterator_category = std::forward_iterator_tag;
+    ;
+    using value_type = Value;
+    using difference_type = std::ptrdiff_t;
+    using reference = Value;
+    using pointer = Value;
+
+    iterator(std::optional<Value> first, Iter current, Iter end)
+      : m_first(std::move(first)), m_current(current), m_end(end)
+    {
+    }
+
+    reference operator*() const { return m_first ? *m_first : *m_current; }
+
+    iterator &operator++()
+    {
+      if (m_first) {
+        m_first.reset();
+      }
+      else {
+        ++m_current;
+      }
+      return *this;
+    }
+
+    bool operator==(const iterator &other) const
+    {
+      return m_first == other.m_first && m_current == other.m_current;
+    }
+
+    bool operator!=(const iterator &other) const { return !(*this == other); }
+
+  private:
+    std::optional<Value> m_first;
+    Iter m_current, m_end;
+  };
+
+  prepend_value(Value first, Range range) : m_first(first), m_range(std::move(range)) {}
+
+  iterator begin() const { return {m_first, std::begin(m_range), std::end(m_range)}; }
+
+  iterator end() const { return {std::nullopt, std::end(m_range), std::end(m_range)}; }
+
+private:
+  Value m_first;
+  Range m_range;
+};
+
+/// @brief Returns the maximum value of the function over the *non-empty* container
+template <class Container, class Func>
+auto maximize_function(const Container &p_container, const Func &p_function)
+{
+  auto it = p_container.begin();
+  using T = decltype(p_function(*it));
+  return std::transform_reduce(
+      std::next(it), p_container.end(), p_function(*it),
+      [](const T &a, const T &b) -> T { return std::max(a, b); }, p_function);
+}
+
+/// @brief Returns the minimum value of the function over the *non-empty* container
+template <class Container, class Func>
+auto minimize_function(const Container &p_container, const Func &p_function)
+{
+  auto it = p_container.begin();
+  using T = decltype(p_function(*it));
+  return std::transform_reduce(
+      std::next(it), p_container.end(), p_function(*it),
+      [](const T &a, const T &b) -> T { return std::min(a, b); }, p_function);
+}
+
+/// @brief Returns the sum of the function over the container
+template <class Container, class Func>
+auto sum_function(const Container &p_container, const Func &p_function)
+{
+  using T = decltype(p_function(*(p_container.begin())));
+  return std::transform_reduce(p_container.begin(), p_container.end(), static_cast<T>(0),
+                               std::plus<>{}, p_function);
+}
+
 //========================================================================
 //                        Exception classes
 //========================================================================

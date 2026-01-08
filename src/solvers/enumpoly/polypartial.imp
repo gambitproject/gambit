@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/solver/enumpoly/polypartial.imp
 // Implementation of partial derivatives of polynomials
@@ -172,9 +172,9 @@ Matrix<T> PolynomialSystemDerivatives<T>::DerivativeMatrix(const Vector<T> &p,
 }
 
 template <class T>
-SquareMatrix<T> PolynomialSystemDerivatives<T>::SquareDerivativeMatrix(const Vector<T> &p) const
+Matrix<T> PolynomialSystemDerivatives<T>::SquareDerivativeMatrix(const Vector<T> &p) const
 {
-  SquareMatrix<T> answer(GetDimension());
+  Matrix<T> answer(GetDimension(), GetDimension());
   auto poly = m_system.begin();
   for (int i = 1; i <= GetDimension(); i++, poly++) {
     for (int j = 1; j <= GetDimension(); j++) {

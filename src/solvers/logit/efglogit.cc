@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/tools/logit/efglogit.cc
 // Computation of agent quantal response equilibrium correspondence for
@@ -72,7 +72,7 @@ Vector<double> ProfileToPoint(const LogitQREMixedBehaviorProfile &p_profile)
 
 bool RegretTerminationFunction(const Game &p_game, const Vector<double> &p_point, double p_regret)
 {
-  return (p_point.back() < 0.0 || PointToProfile(p_game, p_point).GetMaxRegret() < p_regret);
+  return (p_point.back() < 0.0 || PointToProfile(p_game, p_point).GetAgentMaxRegret() < p_regret);
 }
 
 class EquationSystem {

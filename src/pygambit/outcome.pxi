@@ -1,6 +1,6 @@
 #
 # This file is part of Gambit
-# Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+# Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 #
 # FILE: src/pygambit/outcome.pxi
 # Cython wrapper for outcomes
@@ -68,8 +68,11 @@ class Outcome:
 
     @label.setter
     def label(self, value: str) -> None:
-        if value in [i.label for i in self.game.outcomes]:
-            warnings.warn("Another outcome with an identical label exists")
+        if value == self.label:
+            return
+        if value == "" or value in (outcome.label for outcome in self.game.outcomes):
+            warnings.warn("In a future version, outcomes must have unique labels",
+                          FutureWarning)
         self.outcome.deref().SetLabel(value.encode("ascii"))
 
     @property
@@ -80,8 +83,8 @@ class Outcome:
         return self.outcome.deref().GetNumber() - 1
 
     def __getitem__(
-            self, player: typing.Union[Player, str]
-    ) -> typing.Union[decimal.Decimal, Rational]:
+            self, player: Player | str
+    ) -> decimal.Decimal | Rational:
         """The payoff to `player` at the outcome.
 
         Raises
@@ -99,7 +102,7 @@ class Outcome:
         else:
             return Rational(payoff)
 
-    def __setitem__(self, player: typing.Union[Player, str], value: typing.Any) -> None:
+    def __setitem__(self, player: Player | str, value: typing.Any) -> None:
         """Set the payoff to `player` at the outcome.
 
         Parameters
@@ -153,7 +156,7 @@ class TreeGameOutcome:
             deref(self.psp).deref() == deref(cython.cast(TreeGameOutcome, other).psp).deref()
         )
 
-    def __getitem__(self, player: typing.Union[Player, str]) -> Rational:
+    def __getitem__(self, player: Player | str) -> Rational:
         """The payoff to `player` at the outcome.
 
         Parameters

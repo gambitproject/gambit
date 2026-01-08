@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/gui/efglayout.h
 // Interface to tree layout representation
@@ -26,15 +26,16 @@
 #include "gambit.h"
 #include "gamedoc.h"
 
+#include "games/layout.h"
+
 namespace Gambit::GUI {
 class NodeEntry {
   friend class TreeLayout;
-  GameNode m_node;                         // the corresponding node in the game
-  std::shared_ptr<NodeEntry> m_parent;     // parent node
-  int m_x{-1}, m_y{-1};                    // Cartesian coordinates of node
-  std::shared_ptr<NodeEntry> m_nextMember; // entry of next information set member
-  bool m_inSupport{true};                  // true if node reachable in current support
-  int m_size{20};                          // horizontal size of the node
+  GameNode m_node;                     // the corresponding node in the game
+  std::shared_ptr<NodeEntry> m_parent; // parent node
+  int m_x{-1}, m_y{-1};                // Cartesian coordinates of node
+  bool m_inSupport{true};              // true if node reachable in current support
+  int m_size{20};                      // horizontal size of the node
   mutable wxRect m_outcomeRect;
   mutable Array<wxRect> m_payoffRect;
   mutable wxRect m_branchAboveRect, m_branchBelowRect;
@@ -57,8 +58,6 @@ public:
 
   int GetX() const { return m_x; }
   int GetY() const { return m_y; }
-
-  std::shared_ptr<NodeEntry> GetNextMember() const { return m_nextMember; }
 
   int GetChildNumber() const
   {
@@ -107,24 +106,19 @@ public:
 class TreeLayout final : public GameView {
   std::list<std::shared_ptr<NodeEntry>> m_nodeList;
   std::map<GameNode, std::shared_ptr<NodeEntry>> m_nodeMap;
-  std::vector<int> m_numSublevels;
-  std::map<std::pair<int, GameInfoset>, int> m_infosetSublevels;
 
-  mutable int m_maxX{0}, m_maxY{0}, m_maxLevel{0};
+  mutable int m_maxX{0}, m_maxY{0};
   int m_infosetSpacing{40};
 
   const int c_leftMargin{20}, c_topMargin{40}, c_bottomMargin{25};
 
-  std::shared_ptr<NodeEntry> ComputeNextInInfoset(const std::shared_ptr<NodeEntry> &);
-  void ComputeSublevel(const std::shared_ptr<NodeEntry> &);
+  std::shared_ptr<NodeEntry> ComputeNextInInfoset(const std::shared_ptr<NodeEntry> &) const;
 
-  void BuildNodeList(const GameNode &, const BehaviorSupportProfile &, int);
+  void BuildNodeList(const GameNode &);
 
-  /// (Recursively) compute the y-offsets of all nodes
-  void ComputeOffsets(const GameNode &, const BehaviorSupportProfile &, int &);
   /// Based on node levels and information set sublevels, compute the depth
   /// (X coordinate) of all nodes
-  void ComputeNodeDepths() const;
+  void ComputeNodeDepths(const Layout &) const;
   void ComputeRenderedParents() const;
 
   wxString CreateNodeLabel(const std::shared_ptr<NodeEntry> &, int) const;
@@ -141,6 +135,7 @@ class TreeLayout final : public GameView {
   void DrawOutcome(wxDC &, const std::shared_ptr<NodeEntry> &, bool p_noHints) const;
 
   bool NodeHitTest(const std::shared_ptr<NodeEntry> &p_entry, int p_x, int p_y) const;
+  void BuildNodeList(const Game &);
 
 public:
   explicit TreeLayout(GameDocument *p_doc) : GameView(p_doc) {}
@@ -149,8 +144,7 @@ public:
   GameNode PriorSameLevel(const GameNode &) const;
   GameNode NextSameLevel(const GameNode &) const;
 
-  void BuildNodeList(const BehaviorSupportProfile &);
-  void Layout(const BehaviorSupportProfile &);
+  void Layout(const Game &);
   void GenerateLabels() const;
 
   std::shared_ptr<NodeEntry> GetNodeEntry(const GameNode &p_node) const

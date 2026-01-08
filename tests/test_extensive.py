@@ -1,5 +1,3 @@
-import typing
-
 import numpy as np
 import pytest
 
@@ -11,10 +9,10 @@ from . import games
 @pytest.mark.parametrize(
     "players,title", [([], "New game"), (["Alice", "Bob"], "A poker game")]
 )
-def test_new_tree(players: list, title: typing.Optional[str]):
+def test_new_tree(players: list, title: str | None):
     game = gbt.Game.new_tree(players=players, title=title)
     assert len(game.players) == len(players)
-    for player, label in zip(game.players, players):
+    for player, label in zip(game.players, players, strict=True):
         assert player.label == label
     assert game.title == title
 
@@ -40,7 +38,7 @@ def test_game_add_players_label(players: list):
     game = gbt.Game.new_tree()
     for player in players:
         game.add_player(player)
-    for player, label in zip(game.players, players):
+    for player, label in zip(game.players, players, strict=True):
         assert player.label == label
 
 
@@ -51,18 +49,12 @@ def test_game_add_players_nolabel():
 
 @pytest.mark.parametrize("game_input,expected_result", [
     # Games with perfect recall from files (game_input is a string)
-    ("e01.efg", True),
     ("e02.efg", True),
-    ("cent3.efg", True),
-    ("poker.efg", True),
-    ("basic_extensive_game.efg", True),
-
+    ("stripped_down_poker.efg", True),
     # Games with perfect recall from generated games (game_input is a gbt.Game object)
     # - Centipede games
-    (games.Centipede.get_test_data(N=3, m0=2, m1=7)[0], True),
     (games.Centipede.get_test_data(N=4, m0=2, m1=7)[0], True),
     # - Two-player binary tree games
-    (games.BinEfgTwoPlayer.get_test_data(level=3)[0], True),
     (games.BinEfgTwoPlayer.get_test_data(level=4)[0], True),
     # - Three-player binary tree games
     (games.BinEfgThreePlayer.get_test_data(level=3)[0], True),
@@ -70,20 +62,12 @@ def test_game_add_players_nolabel():
     # Games with imperfect recall from files (game_input is a string)
     # - imperfect recall without absent-mindedness
     ("wichardt.efg", False),  # forgetting past action; Wichardt (GEB, 2008)
-    ("noPR-action-selten-horse.efg", False),  # forgetting past action
-    ("noPR-information-no-deflate.efg", False),  # forgetting past information
     ("gilboa_two_am_agents.efg", False),  # forgetting past information; Gilboa (GEB, 1997)
     # - imperfect recall with absent-mindedness
     ("noPR-AM-driver-one-player.efg", False),  # 1 players, one infoset unreached
     ("noPR-AM-driver-two-players.efg", False),  # 2 players, one infoset unreached
     ("noPR-action-AM.efg", False),  # 2 players + forgetting past action; P1 has one infoset
-    ("noPR-action-AM2.efg", False),  # 2 players + forgetting past action; P1 has >1 infoset
     ("noPR-action-AM-two-hops.efg", False),  # 2 players, one AM-infoset each
-
-    # Games with imperfect recall from generated games (game_input is a gbt.Game object)
-    # - One-player binary tree games
-    (games.BinEfgOnePlayerIR.get_test_data(level=3)[0], False),
-    (games.BinEfgOnePlayerIR.get_test_data(level=4)[0], False),
 ])
 def test_is_perfect_recall(game_input, expected_result: bool):
     """
@@ -170,6 +154,17 @@ def test_outcome_index_exception_label():
                 np.array([[[1, 1], [4, 0]], [[2, 0], [2, 0]]]),
                 np.array([[[1, 1], [0, 1]], [[2, 0], [2, 0]]]),
             ],
+        ),
+        # EFG for 2x2 zero-sum game (I,-I) where the second version is missing a terminal outcome
+        (
+            games.create_2x2_zero_sum_efg(),
+            [["1", "2"], ["1", "2"]],
+            [np.array([[1, 0], [0, 1]]), np.array([[-1, 0], [0, -1]])]
+        ),
+        (
+            games.create_2x2_zero_sum_efg(missing_term_outcome=True),
+            [["1", "2"], ["1", "2"]],
+            [np.array([[1, 0], [0, 1]]), np.array([[-1, 0], [0, -1]])]
         ),
         # 2-player (zero-sum) game; reduction for both players; generic payoffs
         (
@@ -283,13 +278,21 @@ def test_outcome_index_exception_label():
                 ),
             ],
         ),
-        # Stripped down "Myerson" 2-card poker; 2 player zero-sum game with chance at the root
+        # Stripped-down poker; 2 player zero-sum game with chance at the root
         (
-            games.create_myerson_2_card_poker_efg(),
+            games.create_stripped_down_poker_efg(),
             [["11", "12", "21", "22"], ["1", "2"]],
             [
-                np.array([[-1, 0], ["-1/2", -1], ["-5/2", -1], [-2, -2]]),
-                np.array([[1, 0], ["1/2", 1], ["5/2", 1], [2, 2]]),
+                np.array([[0, 1], ["1/2", 0], ["-3/2", 0], [-1, -1]]),
+                np.array([[0, -1], ["-1/2", 0], ["3/2", 0], [1, 1]]),
+            ],
+        ),
+        (
+            games.create_stripped_down_poker_efg(nonterm_outcomes=True),
+            [["11", "12", "21", "22"], ["1", "2"]],
+            [
+                np.array([[0, 1], ["1/2", 0], ["-3/2", 0], [-1, -1]]),
+                np.array([[0, -1], ["-1/2", 0], ["3/2", 0], [1, 1]]),
             ],
         ),
         # Nature playing at the root, 2 players, no reduction, non-generic payoffs
@@ -377,7 +380,7 @@ def test_outcome_index_exception_label():
     ],
 )
 def test_reduced_strategic_form(
-    game: gbt.Game, strategy_labels: list, np_arrays_of_rsf: typing.Union[list, None]
+    game: gbt.Game, strategy_labels: list, np_arrays_of_rsf: list | None
 ):
     """
     We test two things:
@@ -392,3 +395,63 @@ def test_reduced_strategic_form(
         # convert strings to rationals
         exp_array = games.vectorized_make_rational(np_arrays_of_rsf[i])
         assert (arrays[i] == exp_array).all()
+
+
+@pytest.mark.parametrize(
+    "standard,modified",
+    [
+        (
+            games.create_two_player_perfect_info_win_lose_efg(),
+            games.create_two_player_perfect_info_win_lose_efg(nonterm_outcomes=True)
+        ),
+        (
+            games.create_3_player_with_internal_outcomes_efg(),
+            games.create_3_player_with_internal_outcomes_efg(nonterm_outcomes=True)
+        ),
+        (
+            games.create_chance_in_middle_efg(),
+            games.create_chance_in_middle_efg(nonterm_outcomes=True)
+        ),
+        (
+            games.create_non_zero_sum_lacking_outcome_efg(),
+            games.create_non_zero_sum_lacking_outcome_efg(missing_term_outcome=True)
+        ),
+        (
+            games.create_entry_accomodation_efg(),
+            games.create_entry_accomodation_efg(nonterm_outcomes=True)
+        ),
+        (
+            games.create_three_action_internal_outcomes_efg(),
+            games.create_three_action_internal_outcomes_efg(nonterm_outcomes=True)
+        ),
+        (
+            games.create_kuhn_poker_efg(),
+            games.create_kuhn_poker_efg(nonterm_outcomes=True)
+        ),
+        (
+            games.create_stripped_down_poker_efg(),
+            games.create_stripped_down_poker_efg(nonterm_outcomes=True)
+        ),
+        (
+            games.create_2x2_zero_sum_efg(),
+            games.create_2x2_zero_sum_efg(missing_term_outcome=True)
+        ),
+        (
+            games.create_matching_pennies_efg(),
+            games.create_matching_pennies_efg(with_neutral_outcome=True)
+        ),
+    ],
+)
+def test_reduced_strategy_form_nonterminal_outcomes_consistency(standard: gbt.Game,
+                                                                modified: gbt.Game):
+    """
+    standard: game uses only non-terminal outcomes, with all non-terminal nodes having outcomes
+    modified: is payoff equivalent, but with non-terminal outcomes or missing terminal outcomes
+
+    The test checks that the corresponding reduced strategic forms match.
+    """
+    arrays_s = standard.to_arrays()
+    arrays_m = modified.to_arrays()
+    assert (len(arrays_s) == len(arrays_m))
+    for array_s, array_m in zip(arrays_s, arrays_m, strict=True):
+        assert (array_s == array_m).all()

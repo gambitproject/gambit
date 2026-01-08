@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/libgambit/gametable.h
 // Declaration of strategic game representation
@@ -40,7 +40,7 @@ private:
 
   /// @name Private auxiliary functions
   //@{
-  void IndexStrategies();
+  void IndexStrategies() const;
   void RebuildTable();
   //@}
 
@@ -57,6 +57,12 @@ public:
   //@{
   bool IsTree() const override { return false; }
   bool IsConstSum() const override;
+
+  /// Returns the smallest payoff to the player in any play of the game
+  Rational GetPlayerMinPayoff(const GamePlayer &) const override;
+  /// Returns the largest payoff to the player in any play of the game
+  Rational GetPlayerMaxPayoff(const GamePlayer &) const override;
+
   bool IsPerfectRecall() const override { return true; }
   //@}
 

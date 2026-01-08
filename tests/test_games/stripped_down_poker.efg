@@ -1,0 +1,14 @@
+EFG 2 R "A simple Poker game" { "Alice" "Bob" }
+"Stripped-Down Poker: a simple game of one-card poker from Reiley et al (2008)."
+
+c "" 1 "Deal" { "King" 1/2 "Queen" 1/2 } 0
+p "" 1 1 "Alice has King" { "Bet" "Fold" } 0
+p "" 2 1 "Bob's response" { "Call" "Fold" } 0
+t "" 1 "Win Big" { 2, -2 }
+t "" 2 "Win" { 1, -1 }
+t "" 4 "Lose" { -1, 1 }
+p "" 1 2 "Alice has Queen" { "Bet" "Fold" } 0
+p "" 2 1 "Bob's response" { "Call" "Fold" } 0
+t "" 3 "Lose Big" { -2, 2 }
+t "" 2 "Win" { 1, -1 }
+t "" 4 "Lose" { -1, 1 }

@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/libgambit/gametable.cc
 // Implementation of strategic game representation
@@ -103,7 +103,7 @@ Rational TablePureStrategyProfileRep::GetPayoff(const GamePlayer &p_player) cons
 Rational TablePureStrategyProfileRep::GetStrategyValue(const GameStrategy &p_strategy) const
 {
   const auto &player = p_strategy->GetPlayer();
-  GameOutcomeRep *outcome =
+  const GameOutcomeRep *outcome =
       dynamic_cast<GameTableRep &>(*m_nfg)
           .m_results[m_index - m_profile.at(player)->m_offset + p_strategy->m_offset];
   if (outcome) {
@@ -159,17 +159,18 @@ std::unique_ptr<MixedStrategyProfileRep<T>> TableMixedStrategyProfileRep<T>::Cop
 template <class T>
 T TableMixedStrategyProfileRep<T>::GetPayoff(int pl, int index, int current) const
 {
-  if (current > static_cast<int>(this->m_support.GetGame()->NumPlayers())) {
-    const Game game = this->m_support.GetGame();
+  if (current > static_cast<int>(this->GetSupport().GetGame()->NumPlayers())) {
+    const Game game = this->GetSupport().GetGame();
     auto &g = dynamic_cast<GameTableRep &>(*game);
     if (const auto outcome = g.m_results[index]) {
-      return outcome->GetPayoff<T>(this->m_support.GetGame()->GetPlayer(pl));
+      return outcome->GetPayoff<T>(this->GetSupport().GetGame()->GetPlayer(pl));
     }
     return static_cast<T>(0);
   }
 
   T sum = static_cast<T>(0);
-  for (auto s : this->m_support.GetStrategies(this->m_support.GetGame()->GetPlayer(current))) {
+  for (auto s :
+       this->GetSupport().GetStrategies(this->GetSupport().GetGame()->GetPlayer(current))) {
     if ((*this)[s] != T(0)) {
       sum += ((*this)[s] * GetPayoff(pl, index + s->m_offset, current + 1));
     }
@@ -189,15 +190,16 @@ void TableMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, int const_pl, int c
   if (cur_pl == const_pl) {
     cur_pl++;
   }
-  if (cur_pl > static_cast<int>(this->m_support.GetGame()->NumPlayers())) {
-    const Game game = this->m_support.GetGame();
+  if (cur_pl > static_cast<int>(this->GetSupport().GetGame()->NumPlayers())) {
+    const Game game = this->GetSupport().GetGame();
     auto &g = dynamic_cast<GameTableRep &>(*game);
     if (const auto outcome = g.m_results[index]) {
-      value += prob * outcome->GetPayoff<T>(this->m_support.GetGame()->GetPlayer(pl));
+      value += prob * outcome->GetPayoff<T>(this->GetSupport().GetGame()->GetPlayer(pl));
     }
   }
   else {
-    for (auto s : this->m_support.GetStrategies(this->m_support.GetGame()->GetPlayer(cur_pl))) {
+    for (auto s :
+         this->GetSupport().GetStrategies(this->GetSupport().GetGame()->GetPlayer(cur_pl))) {
       if ((*this)[s] > T(0)) {
         GetPayoffDeriv(pl, const_pl, cur_pl + 1, index + s->m_offset, prob * (*this)[s], value);
       }
@@ -221,15 +223,16 @@ void TableMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, int const_pl1, int 
   while (cur_pl == const_pl1 || cur_pl == const_pl2) {
     cur_pl++;
   }
-  if (cur_pl > static_cast<int>(this->m_support.GetGame()->NumPlayers())) {
-    const Game game = this->m_support.GetGame();
+  if (cur_pl > static_cast<int>(this->GetSupport().GetGame()->NumPlayers())) {
+    const Game game = this->GetSupport().GetGame();
     auto &g = dynamic_cast<GameTableRep &>(*game);
     if (const auto outcome = g.m_results[index]) {
-      value += prob * outcome->GetPayoff<T>(this->m_support.GetGame()->GetPlayer(pl));
+      value += prob * outcome->GetPayoff<T>(this->GetSupport().GetGame()->GetPlayer(pl));
     }
   }
   else {
-    for (auto s : this->m_support.GetStrategies(this->m_support.GetGame()->GetPlayer(cur_pl))) {
+    for (auto s :
+         this->GetSupport().GetStrategies(this->GetSupport().GetGame()->GetPlayer(cur_pl))) {
       if ((*this)[s] > static_cast<T>(0)) {
         GetPayoffDeriv(pl, const_pl1, const_pl2, cur_pl + 1, index + s->m_offset,
                        prob * (*this)[s], value);
@@ -307,7 +310,8 @@ bool GameTableRep::IsConstSum() const
     sum += profile->GetPayoff(player);
   }
 
-  for (auto iter : StrategyContingencies(std::const_pointer_cast<GameRep>(shared_from_this()))) {
+  for (const auto iter :
+       StrategyContingencies(std::const_pointer_cast<GameRep>(shared_from_this()))) {
     Rational newsum(0);
     for (const auto &player : m_players) {
       newsum += iter->GetPayoff(player);
@@ -317,6 +321,26 @@ bool GameTableRep::IsConstSum() const
     }
   }
   return true;
+}
+
+Rational GameTableRep::GetPlayerMinPayoff(const GamePlayer &p_player) const
+{
+  Rational minpay = NewPureStrategyProfile()->GetPayoff(p_player);
+  for (const auto &profile :
+       StrategyContingencies(std::const_pointer_cast<GameRep>(shared_from_this()))) {
+    minpay = std::min(minpay, profile->GetPayoff(p_player));
+  }
+  return minpay;
+}
+
+Rational GameTableRep::GetPlayerMaxPayoff(const GamePlayer &p_player) const
+{
+  Rational maxpay = NewPureStrategyProfile()->GetPayoff(p_player);
+  for (const auto &profile :
+       StrategyContingencies(std::const_pointer_cast<GameRep>(shared_from_this()))) {
+    maxpay = std::max(maxpay, profile->GetPayoff(p_player));
+  }
+  return maxpay;
 }
 
 //------------------------------------------------------------------------
@@ -503,7 +527,7 @@ void GameTableRep::RebuildTable()
   IndexStrategies();
 }
 
-void GameTableRep::IndexStrategies()
+void GameTableRep::IndexStrategies() const
 {
   long offset = 1L;
   for (auto player : m_players) {

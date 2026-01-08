@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/libgambit/game.h
 // Declaration of base class for representing games
@@ -26,6 +26,7 @@
 #include <list>
 #include <set>
 #include <stack>
+#include <queue>
 #include <memory>
 
 #include "number.h"
@@ -47,6 +48,9 @@ using GameInfoset = GameObjectPtr<GameInfosetRep>;
 
 class GameStrategyRep;
 using GameStrategy = GameObjectPtr<GameStrategyRep>;
+
+class GameSequenceRep;
+using GameSequence = GameObjectPtr<GameSequenceRep>;
 
 class GamePlayerRep;
 using GamePlayer = GameObjectPtr<GamePlayerRep>;
@@ -236,13 +240,12 @@ public:
   }
   //@}
 
-  GameNode GetMember(int p_index) const { return m_members.at(p_index - 1); }
-  Members GetMembers() const
-  {
-    return Members(std::const_pointer_cast<GameInfosetRep>(shared_from_this()), &m_members);
-  }
+  GameNode GetMember(int p_index) const;
+  Members GetMembers() const;
 
   bool Precedes(GameNode) const;
+
+  std::set<GameAction> GetOwnPriorActions() const;
 
   const Number &GetActionProb(const GameAction &p_action) const
   {
@@ -316,6 +319,36 @@ public:
   //@}
 };
 
+class GameSequenceRep : public std::enable_shared_from_this<GameSequenceRep> {
+public:
+  bool m_valid{true};
+  GamePlayer player;
+  GameAction action;
+  size_t number;
+  std::weak_ptr<GameSequenceRep> parent;
+
+  explicit GameSequenceRep(const GamePlayer &p_player, const GameAction &p_action, size_t p_number,
+                           std::weak_ptr<GameSequenceRep> p_parent)
+    : player(p_player), action(p_action), number(p_number), parent(p_parent)
+  {
+  }
+
+  bool IsValid() const { return m_valid; }
+  void Invalidate() { m_valid = false; }
+
+  Game GetGame() const;
+  GameInfoset GetInfoset() const { return (action) ? action->GetInfoset() : nullptr; }
+
+  bool operator<(const GameSequenceRep &other) const
+  {
+    return player < other.player || (player == other.player && action < other.action);
+  }
+  bool operator==(const GameSequenceRep &other) const
+  {
+    return player == other.player && action == other.action;
+  }
+};
+
 /// A player in a game
 class GamePlayerRep : public std::enable_shared_from_this<GamePlayerRep> {
   friend class GameRep;
@@ -368,12 +401,9 @@ public:
   /// @name Information sets
   //@{
   /// Returns the p_index'th information set
-  GameInfoset GetInfoset(int p_index) const { return m_infosets.at(p_index - 1); }
+  GameInfoset GetInfoset(int p_index) const;
   /// Returns the information sets for the player
-  Infosets GetInfosets() const
-  {
-    return Infosets(std::const_pointer_cast<GamePlayerRep>(shared_from_this()), &m_infosets);
-  }
+  Infosets GetInfosets() const;
 
   /// @name Strategies
   //@{
@@ -441,7 +471,7 @@ public:
   const std::string &GetLabel() const { return m_label; }
   void SetLabel(const std::string &p_label) { m_label = p_label; }
 
-  int GetNumber() const { return m_number; }
+  int GetNumber() const;
   GameNode GetChild(const GameAction &p_action)
   {
     if (p_action->GetInfoset().get() != m_infoset) {
@@ -459,6 +489,7 @@ public:
   bool IsTerminal() const { return m_children.empty(); }
   GamePlayer GetPlayer() const { return (m_infoset) ? m_infoset->GetPlayer() : nullptr; }
   GameAction GetPriorAction() const; // returns null if root node
+  GameAction GetOwnPriorAction() const;
   GameNode GetParent() const { return (m_parent) ? m_parent->shared_from_this() : nullptr; }
   GameNode GetNextSibling() const;
   GameNode GetPriorSibling() const;
@@ -467,6 +498,7 @@ public:
 
   bool IsSuccessorOf(GameNode from) const;
   bool IsSubgameRoot() const;
+  bool IsStrategyReachable() const;
 };
 
 class GameNodeRep::Actions::iterator {
@@ -560,10 +592,14 @@ inline GameNodeRep::Actions::iterator::iterator(GameInfosetRep::Actions::iterato
 
 inline GameNode GameNodeRep::Actions::iterator::GetOwner() const { return m_child_it.GetOwner(); }
 
+enum class TraversalOrder { Preorder, Postorder };
+
 /// This is the class for representing an arbitrary finite game.
 class GameRep : public std::enable_shared_from_this<GameRep> {
   friend class GameOutcomeRep;
   friend class GameNodeRep;
+  friend class GameInfosetRep;
+  friend class GamePlayerRep;
   friend class PureStrategyProfileRep;
   friend class TablePureStrategyProfileRep;
   template <class T> friend class MixedBehaviorProfile;
@@ -584,91 +620,226 @@ protected:
   void IncrementVersion() { m_version++; }
   //@}
 
+  /// Hooks for derived classes to update lazily-computed orderings if required
+  virtual void EnsureNodeOrdering() const {}
+  virtual void EnsureInfosetOrdering() const {}
+
 public:
   using Players = ElementCollection<Game, GamePlayerRep>;
   using Outcomes = ElementCollection<Game, GameOutcomeRep>;
 
+  enum class DFSCallbackResult {
+    Continue, // continue with normal traversal
+    Prune,    // skip the subtree under this node
+    Stop      // end traversal early now
+  };
+
+  /// @brief Perform a depth-first traversal of the game tree.
+  ///
+  /// WalkDFS performs a depth-first traversal of the game tree starting at
+  /// the node @p p_root. Traversal order (preorder or postorder) controls when
+  /// the OnVisit() hook is called relative to the other callbacks.
+  ///
+  /// @tparam Callback A callback type implementing the required interface (see below)).
+  /// @param p_game The game object being traversed
+  /// @param p_root The root node of the subtree to traverse.
+  /// @param p_order Controls when OnVisit() is invoked:
+  ///   - TraversalOrder::Preorder: OnVisit() is called when a node is first entered.
+  ///   - TraversalOrder::Postorder: OnVisit() is called after all children have been processed.
+  /// @param p_callback The callback object
+  ///
+  /// The callback object must implement the following four member functions:
+  ///
+  /// @code
+  /// DFSCallbackResult OnEnter(GameNode node, int depth);
+  /// DFSCallbackResult OnAction(GameNode parent, GameNode child, int depth);
+  /// DFSCallbackResult OnExit(GameNode node, int depth);
+  /// void              OnVisit(GameNode node, int depth);
+  /// @endcode
+  ///
+  /// OnEnter(node, depth)
+  /// --------------------
+  /// Invoked exactly once for each node, when the node is first reached during DFS.
+  /// @p depth is the depth of the node relative to @p p_root (where the root is defined
+  /// to have depth 0).
+  ///
+  /// OnAction(parent, child, depth)
+  /// ------------------------------
+  /// Invoked immediately before descending from @p parent to one of its children.
+  /// @p depth is the depth of the parent node.
+  ///
+  /// OnExit(node, depth)
+  /// -------------------
+  /// Invoked exactly once for each node, after all of its children have been
+  /// processed (or skipped).  @p is the depth of the node.
+  ///
+  /// OnVisit(node, depth)
+  /// --------------------
+  /// Invoked exactly once per node, at a time determined by @p p_order:
+  /// - Preorder: called during OnEnter(), before any children are visited.
+  /// - Postorder: called after OnExit(), once all children are complete.
+  ///
+  template <class Callback>
+  static void WalkDFS(const Game &p_game, const GameNode &p_root, TraversalOrder p_order,
+                      Callback &p_callback)
+  {
+    using ChildIterator = ElementCollection<GameNode, GameNodeRep>::iterator;
+
+    struct Frame {
+      GameNode m_node;
+      ChildIterator m_current;
+      ChildIterator m_end;
+      int m_depth{};
+      bool m_entered{}, m_pruned{};
+    };
+
+    if (!p_root) {
+      return;
+    }
+    if (p_root->GetGame() != p_game) {
+      throw MismatchException();
+    }
+
+    std::stack<Frame> stack;
+    stack.push(Frame{p_root, {}, {}, 0, false, false});
+
+    while (!stack.empty()) {
+      Frame &f = stack.top();
+
+      if (!f.m_entered) {
+        f.m_entered = true;
+        const DFSCallbackResult result = p_callback.OnEnter(f.m_node, f.m_depth);
+        if (result == DFSCallbackResult::Stop) {
+          return;
+        }
+        if (result == DFSCallbackResult::Prune) {
+          f.m_pruned = true;
+        }
+        if (p_order == TraversalOrder::Preorder) {
+          p_callback.OnVisit(f.m_node, f.m_depth);
+        }
+        if (!f.m_pruned && !f.m_node->IsTerminal()) {
+          auto children = f.m_node->GetChildren();
+          f.m_current = children.begin();
+          f.m_end = children.end();
+        }
+      }
+
+      if (!f.m_pruned && !f.m_node->IsTerminal() && f.m_current != f.m_end) {
+        GameNode const child = *f.m_current;
+        ++f.m_current;
+        const DFSCallbackResult result = p_callback.OnAction(f.m_node, child, f.m_depth);
+
+        if (result == DFSCallbackResult::Stop) {
+          return;
+        }
+        if (result == DFSCallbackResult::Prune) {
+          continue;
+        }
+        stack.push(Frame{child, {}, {}, f.m_depth + 1, false, false});
+        continue;
+      }
+
+      const DFSCallbackResult result = p_callback.OnExit(f.m_node, f.m_depth);
+      if (result == DFSCallbackResult::Stop) {
+        return;
+      }
+      if (p_order == TraversalOrder::Postorder) {
+        p_callback.OnVisit(f.m_node, f.m_depth);
+      }
+      stack.pop();
+    }
+  }
+
   class Nodes {
     Game m_owner{nullptr};
+    TraversalOrder m_order{TraversalOrder::Preorder};
 
   public:
     class iterator {
       friend class Nodes;
-      using ChildIterator = ElementCollection<GameNode, GameNodeRep>::iterator;
+
+      struct NodeHandler {
+        std::queue<GameNode> m_queue;
+
+        static DFSCallbackResult OnEnter(const GameNode &, int)
+        {
+          return DFSCallbackResult::Continue;
+        }
+        static DFSCallbackResult OnAction(const GameNode &, const GameNode &, int)
+        {
+          return DFSCallbackResult::Continue;
+        }
+        static DFSCallbackResult OnExit(const GameNode &, int)
+        {
+          return DFSCallbackResult::Continue;
+        }
+        void OnVisit(const GameNode &p_node, int) { m_queue.push(p_node); }
+      };
 
       Game m_owner{nullptr};
-      GameNode m_current_node{nullptr};
-      std::stack<std::pair<ChildIterator, ChildIterator>> m_stack{};
+      std::shared_ptr<NodeHandler> m_handler;
+      GameNode m_current{nullptr};
 
-      iterator(const Game &game) : m_owner(game) {}
+      iterator(const Game &p_game, TraversalOrder p_order)
+        : m_owner(p_game), m_handler(std::make_shared<NodeHandler>())
+      {
+        if (!p_game) {
+          m_owner = nullptr;
+          return;
+        }
+        WalkDFS(p_game, p_game->GetRoot(), p_order, *m_handler);
+        advance();
+      }
+
+      void advance()
+      {
+        if (!m_handler || m_handler->m_queue.empty()) {
+          m_current = nullptr;
+          m_owner = nullptr;
+        }
+        else {
+          m_current = m_handler->m_queue.front();
+          m_handler->m_queue.pop();
+        }
+      }
 
     public:
-      using iterator_category = std::forward_iterator_tag;
+      using iterator_category = std::input_iterator_tag;
       using value_type = GameNode;
-      using pointer = value_type *;
+      using difference_type = std::ptrdiff_t;
+      using reference = GameNode;
+      using pointer = GameNode;
 
       iterator() = default;
 
-      iterator(const Game &game, const GameNode &start_node)
-        : m_owner(game), m_current_node(start_node)
-      {
-        if (!start_node) {
-          return;
-        }
-        if (start_node->GetGame() != m_owner) {
-          throw MismatchException();
-        }
-      }
-
       value_type operator*() const
       {
-        if (!m_current_node) {
-          throw std::runtime_error("Cannot dereference an end iterator");
+        if (!m_current) {
+          throw std::runtime_error("Dereferencing end iterator");
         }
-        return m_current_node;
+        return m_current;
       }
-
       iterator &operator++()
       {
-        if (!m_current_node) {
-          throw std::out_of_range("Cannot increment an end iterator");
-        }
-
-        if (!m_current_node->IsTerminal()) {
-          auto children = m_current_node->GetChildren();
-          m_stack.emplace(children.begin(), children.end());
-        }
-
-        while (!m_stack.empty()) {
-          auto &[current_it, end_it] = m_stack.top();
-
-          if (current_it != end_it) {
-            m_current_node = *current_it;
-            ++current_it;
-            return *this;
-          }
-          m_stack.pop();
-        }
-
-        m_current_node = nullptr;
+        advance();
         return *this;
       }
-
-      bool operator==(const iterator &other) const
+      bool operator==(const iterator &p_other) const
       {
-        return m_owner == other.m_owner && m_current_node == other.m_current_node;
+        return m_owner == p_other.m_owner && m_current == p_other.m_current;
       }
-      bool operator!=(const iterator &other) const { return !(*this == other); }
+      bool operator!=(const iterator &p_other) const { return !(*this == p_other); }
     };
 
     Nodes() = default;
-    explicit Nodes(const Game &p_owner) : m_owner(p_owner) {}
-
-    iterator begin() const
+    Nodes(const Game &p_owner, const TraversalOrder p_order = TraversalOrder::Preorder)
+      : m_owner(p_owner), m_order(p_order)
     {
-      return (m_owner) ? iterator{m_owner, m_owner->GetRoot()} : iterator{};
     }
-    iterator end() const { return (m_owner) ? iterator{m_owner} : iterator{}; }
+
+    iterator begin() const { return m_owner ? iterator{m_owner, m_order} : iterator{}; }
+    static iterator end() { return iterator{}; }
   };
 
   /// @name Lifecycle
@@ -704,14 +875,14 @@ public:
 
   /// Returns true if the game is constant-sum
   virtual bool IsConstSum() const = 0;
-  /// Returns the smallest payoff to any player in any outcome of the game
+  /// Returns the smallest payoff to any player in any play of the game
   virtual Rational GetMinPayoff() const = 0;
-  /// Returns the smallest payoff to the player in any outcome of the game
-  virtual Rational GetMinPayoff(const GamePlayer &p_player) const = 0;
-  /// Returns the largest payoff to any player in any outcome of the game
+  /// Returns the smallest payoff to the player in any play of the game
+  virtual Rational GetPlayerMinPayoff(const GamePlayer &p_player) const = 0;
+  /// Returns the largest payoff to any player in any play of the game
   virtual Rational GetMaxPayoff() const = 0;
-  /// Returns the largest payoff to the player in any outcome of the game
-  virtual Rational GetMaxPayoff(const GamePlayer &p_player) const = 0;
+  /// Returns the largest payoff to the player in any play of the game
+  virtual Rational GetPlayerMaxPayoff(const GamePlayer &p_player) const = 0;
 
   /// Returns the set of terminal nodes which are descendants of node
   virtual std::vector<GameNode> GetPlays(GameNode node) const { throw UndefinedException(); }
@@ -722,6 +893,14 @@ public:
 
   /// Returns true if the game is perfect recall
   virtual bool IsPerfectRecall() const = 0;
+  /// Returns true if the information set is absent-minded
+  virtual bool IsAbsentMinded(const GameInfoset &p_infoset) const
+  {
+    if (p_infoset->GetGame().get() != this) {
+      throw MismatchException();
+    }
+    return false;
+  }
   //@}
 
   /// @name Writing data files
@@ -744,7 +923,8 @@ public:
   {
     throw UndefinedException();
   }
-  virtual GameInfoset AppendMove(GameNode p_node, GamePlayer p_player, int p_actions)
+  virtual GameInfoset AppendMove(GameNode p_node, GamePlayer p_player, int p_actions,
+                                 bool p_generateLabels = false)
   {
     throw UndefinedException();
   }
@@ -752,7 +932,8 @@ public:
   {
     throw UndefinedException();
   }
-  virtual GameInfoset InsertMove(GameNode p_node, GamePlayer p_player, int p_actions)
+  virtual GameInfoset InsertMove(GameNode p_node, GamePlayer p_player, int p_actions,
+                                 bool p_generateLabels = false)
   {
     throw UndefinedException();
   }
@@ -774,40 +955,10 @@ public:
     throw UndefinedException();
   }
   virtual void DeleteAction(GameAction) { throw UndefinedException(); }
-  virtual void SetOutcome(GameNode, const GameOutcome &p_outcome) { throw UndefinedException(); }
-
-  /// @name Dimensions of the game
-  //@{
-  /// The number of strategies for each player
-  virtual Array<int> NumStrategies() const = 0;
-  /// Gets the i'th strategy in the game, numbered globally
-  virtual GameStrategy GetStrategy(int p_index) const = 0;
-  /// Creates a new strategy for the player
-  virtual GameStrategy NewStrategy(const GamePlayer &p_player, const std::string &p_label)
+  virtual void SetOutcome(const GameNode &p_node, const GameOutcome &p_outcome)
   {
     throw UndefinedException();
   }
-  /// Remove the strategy from the game
-  virtual void DeleteStrategy(const GameStrategy &p_strategy) { throw UndefinedException(); }
-  /// Returns the number of strategy contingencies in the game
-  int NumStrategyContingencies() const
-  {
-    BuildComputedValues();
-    return std::transform_reduce(
-        m_players.begin(), m_players.end(), 0, std::multiplies<>(),
-        [](const std::shared_ptr<GamePlayerRep> &p) { return p->m_strategies.size(); });
-  }
-  /// Returns the total number of actions in the game
-  virtual int BehavProfileLength() const = 0;
-  /// Returns the total number of strategies in the game
-  int MixedProfileLength() const
-  {
-    BuildComputedValues();
-    return std::transform_reduce(
-        m_players.begin(), m_players.end(), 0, std::plus<>(),
-        [](const std::shared_ptr<GamePlayerRep> &p) { return p->m_strategies.size(); });
-  }
-  //@}
 
   virtual PureStrategyProfile NewPureStrategyProfile() const = 0;
   virtual MixedStrategyProfile<double> NewMixedStrategyProfile(double) const = 0;
@@ -853,18 +1004,59 @@ public:
   }
   /// Returns the chance (nature) player
   virtual GamePlayer GetChance() const = 0;
+  auto GetPlayersWithChance() const { return prepend_value(GetChance(), GetPlayers()); }
   /// Creates a new player in the game, with no moves
   virtual GamePlayer NewPlayer() = 0;
   //@}
 
+  /// @name Dimensions of the game
+  //@{
+  using Strategies =
+      NestedElementCollection<Game, &GameRep::GetPlayers, &GamePlayerRep::GetStrategies>;
+  /// Returns the set of strategies in the game
+  Strategies GetStrategies() const
+  {
+    BuildComputedValues();
+    return Strategies(std::const_pointer_cast<GameRep>(this->shared_from_this()));
+  }
+  /// Gets the i'th strategy in the game, numbered globally starting from 1
+  GameStrategy GetStrategy(const std::size_t p_index) const
+  {
+    const auto strategies = GetStrategies();
+    if (p_index < 1 || p_index > strategies.size()) {
+      throw std::out_of_range("Strategy index out of range");
+    }
+    return *std::next(strategies.begin(), p_index - 1);
+  }
+  /// Creates a new strategy for the player
+  virtual GameStrategy NewStrategy(const GamePlayer &p_player, const std::string &p_label)
+  {
+    throw UndefinedException();
+  }
+  /// Remove the strategy from the game
+  virtual void DeleteStrategy(const GameStrategy &p_strategy) { throw UndefinedException(); }
+  /// Returns the total number of actions in the game
+  virtual int BehavProfileLength() const = 0;
+  //@}
+
   /// @name Information sets
   //@{
+  using Infosets =
+      NestedElementCollection<Game, &GameRep::GetPlayers, &GamePlayerRep::GetInfosets>;
+
   /// Returns the iset'th information set in the game (numbered globally)
   virtual GameInfoset GetInfoset(int iset) const { throw UndefinedException(); }
   /// Returns the set of information sets in the game
-  virtual std::vector<GameInfoset> GetInfosets() const { throw UndefinedException(); }
-  /// Sort the information sets for each player in a canonical order
-  virtual void SortInfosets() {}
+  virtual Infosets GetInfosets() const
+  {
+    return Infosets(std::const_pointer_cast<GameRep>(this->shared_from_this()));
+  }
+
+  /// Returns the set of actions taken by the infoset's owner before reaching this infoset
+  virtual std::set<GameAction> GetOwnPriorActions(const GameInfoset &p_infoset) const
+  {
+    throw UndefinedException();
+  }
   //@}
 
   /// @name Outcomes
@@ -887,11 +1079,28 @@ public:
   /// Returns the root node of the game
   virtual GameNode GetRoot() const = 0;
   /// Returns a range that can be used to iterate over the nodes of the game
-  Nodes GetNodes() const { return Nodes(std::const_pointer_cast<GameRep>(shared_from_this())); }
+  Nodes GetNodes(TraversalOrder p_traversal = TraversalOrder::Preorder) const
+  {
+    return {std::const_pointer_cast<GameRep>(shared_from_this()), p_traversal};
+  }
+  auto GetTerminalNodes() const
+  {
+    return filter_if(GetNodes(), [](const auto &node) -> bool { return node->IsTerminal(); });
+  }
+  auto GetNonterminalNodes(TraversalOrder p_traversal = TraversalOrder::Preorder) const
+  {
+    return filter_if(GetNodes(p_traversal),
+                     [](const auto &node) -> bool { return !node->IsTerminal(); });
+  }
   /// Returns the number of nodes in the game
   virtual size_t NumNodes() const = 0;
   /// Returns the number of non-terminal nodes in the game
   virtual size_t NumNonterminalNodes() const = 0;
+  /// Returns the last action taken by the node's owner before reaching this node
+  virtual GameAction GetOwnPriorAction(const GameNode &p_node) const
+  {
+    throw UndefinedException();
+  }
   //@}
 
   /// @name Modification
@@ -945,6 +1154,8 @@ inline void GameOutcomeRep::SetPayoff(const GamePlayer &p_player, const Number &
 inline GamePlayer GameStrategyRep::GetPlayer() const { return m_player->shared_from_this(); }
 inline Game GameStrategyRep::GetGame() const { return m_player->GetGame(); }
 
+inline Game GameSequenceRep::GetGame() const { return player->GetGame(); }
+
 inline Game GameActionRep::GetGame() const { return m_infoset->GetGame(); }
 
 inline Game GameInfosetRep::GetGame() const { return m_game->shared_from_this(); }
@@ -964,6 +1175,35 @@ inline GamePlayerRep::Strategies GamePlayerRep::GetStrategies() const
 }
 
 inline Game GameNodeRep::GetGame() const { return m_game->shared_from_this(); }
+inline int GameNodeRep::GetNumber() const
+{
+  m_game->EnsureNodeOrdering();
+  return m_number;
+}
+
+inline GameNode GameInfosetRep::GetMember(int p_index) const
+{
+  m_game->EnsureInfosetOrdering();
+  return m_members.at(p_index - 1);
+}
+
+inline GameInfosetRep::Members GameInfosetRep::GetMembers() const
+{
+  m_game->EnsureInfosetOrdering();
+  return Members(std::const_pointer_cast<GameInfosetRep>(shared_from_this()), &m_members);
+}
+
+inline GameInfoset GamePlayerRep::GetInfoset(int p_index) const
+{
+  m_game->EnsureInfosetOrdering();
+  return m_infosets.at(p_index - 1);
+}
+
+inline GamePlayerRep::Infosets GamePlayerRep::GetInfosets() const
+{
+  m_game->EnsureInfosetOrdering();
+  return Infosets(std::const_pointer_cast<GamePlayerRep>(shared_from_this()), &m_infosets);
+}
 
 //=======================================================================
 
@@ -975,32 +1215,38 @@ Game NewTable(const std::vector<int> &p_dim, bool p_sparseOutcomes = false);
 /// @brief Reads a game representation in .efg format
 ///
 /// @param[in] p_stream An input stream, positioned at the start of the text in .efg format
+/// @param[in] p_normalizeLabels Require element labels to be nonempty and unique within
+///                              their scope
 /// @return A handle to the game representation constructed
 /// @throw InvalidFileException If the stream does not contain a valid serialisation
 ///                             of a game in .efg format.
 /// @sa Game::WriteEfgFile, ReadNfgFile, ReadAggFile, ReadBaggFile
-Game ReadEfgFile(std::istream &p_stream);
+Game ReadEfgFile(std::istream &p_stream, bool p_normalizeLabels = false);
 
 /// @brief Reads a game representation in .nfg format
 /// @param[in] p_stream An input stream, positioned at the start of the text in .nfg format
+/// @param[in] p_normalizeLabels Require element labels to be nonempty and unique within
+///                              their scope
 /// @return A handle to the game representation constructed
 /// @throw InvalidFileException If the stream does not contain a valid serialisation
 ///                             of a game in .nfg format.
 /// @sa Game::WriteNfgFile, ReadEfgFile, ReadAggFile, ReadBaggFile
-Game ReadNfgFile(std::istream &p_stream);
+Game ReadNfgFile(std::istream &p_stream, bool p_normalizeLabels = false);
 
 /// @brief Reads a game representation from a graphical interface XML saveflie
 /// @param[in] p_stream An input stream, positioned at the start of the text
+/// @param[in] p_normalizeLabels Require element labels to be nonempty and unique within
+///                              their scope
 /// @return A handle to the game representation constructed
 /// @throw InvalidFileException If the stream does not contain a valid serialisation
 ///                             of a game in an XML savefile
 /// @sa ReadEfgFile, ReadNfgFile, ReadAggFile, ReadBaggFile
-Game ReadGbtFile(std::istream &p_stream);
+Game ReadGbtFile(std::istream &p_stream, bool p_normalizeLabels = false);
 
 /// @brief Reads a game from the input stream, attempting to autodetect file format
 /// @deprecated Deprecated in favour of the various ReadXXXGame functions.
 /// @sa ReadEfgFile, ReadNfgFile, ReadGbtFile, ReadAggFile, ReadBaggFile
-Game ReadGame(std::istream &p_stream);
+Game ReadGame(std::istream &p_stream, bool p_normalizeLabels = false);
 
 /// @brief Generate a distribution over a simplex restricted to rational numbers of given
 /// denominator

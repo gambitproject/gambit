@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/libgambit/gameexpl.h
 // Declaration of base class for explicit game representations
@@ -33,22 +33,10 @@ class GameExplicitRep : public GameRep {
 public:
   /// @name General data access
   //@{
-  /// Returns the smallest payoff to any player in any outcome of the game
+  /// Returns the smallest payoff to any player in any play of the game
   Rational GetMinPayoff() const override;
-  /// Returns the smallest payoff to the player in any outcome of the game
-  Rational GetMinPayoff(const GamePlayer &) const override;
-  /// Returns the largest payoff to any player in any outcome of the game
+  /// Returns the largest payoff to any player in any play of the game
   Rational GetMaxPayoff() const override;
-  /// Returns the largest payoff to the player in any outcome of the game
-  Rational GetMaxPayoff(const GamePlayer &) const override;
-  //@}
-
-  /// @name Dimensions of the game
-  //@{
-  /// The number of strategies for each player
-  Array<int> NumStrategies() const override;
-  /// Gets the i'th strategy in the game, numbered globally
-  GameStrategy GetStrategy(int p_index) const override;
   //@}
 
   /// @name Outcomes

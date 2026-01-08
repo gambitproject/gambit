@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/gui/nfgpanel.h
 // Panel to display normal form games in tabular format
@@ -39,7 +39,7 @@ class NfgPanel final : public wxPanel, public GameView {
   void OnToolsDominance(wxCommandEvent &);
 
 public:
-  NfgPanel(wxWindow *p_parent, GameDocument *p_doc);
+  NfgPanel(wxWindow *p_parent, GameDocument *p_doc, bool p_showDominance);
   ~NfgPanel() override = default;
 
   bool IsDominanceShown() const { return m_dominanceToolbar->IsShown(); }

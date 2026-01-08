@@ -69,3 +69,137 @@ def test_infoset_plays():
     }  # paths=[0, 1, 0], [1, 1, 0], [0, 1], [1, 1]
 
     assert set(test_infoset.plays) == expected_set_of_plays
+
+
+@pytest.mark.parametrize("game_file, expected_results", [
+    # Perfect recall game
+    (
+        "binary_3_levels_generic_payoffs.efg",
+        [
+            # Player 1, Infoset 0 (Root):
+            # No prior history.
+            ("Player 1", 0, {None}),
+
+            # Player 1, Infoset 1:
+            # Reached via "Left" from Infoset 0.
+            ("Player 1", 1, {("Player 1", 0, "Left")}),
+
+            # Player 1, Infoset 2:
+            # Reached via "Right" from Infoset 0.
+            ("Player 1", 2, {("Player 1", 0, "Right")}),
+
+            # Player 2, Infoset 0:
+            # No prior history.
+            ("Player 2", 0, {None}),
+        ]
+    ),
+    # Imperfect recall games, no absent-mindedness
+    (
+        "wichardt.efg",
+        [
+            # Player 1, Infoset 0 (Root):
+            # No prior history.
+            ("Player 1", 0, {None}),
+
+            # Player 1, Infoset 1:
+            # Reachable via "L" or "R" from Infoset 0.
+            ("Player 1", 1, {("Player 1", 0, "L"), ("Player 1", 0, "R")}),
+
+            # Player 2, Infoset 0:
+            # No prior history.
+            ("Player 2", 0, {None}),
+        ]
+    ),
+    (
+        "subgames.efg",
+        [
+            ("Player 1", 0, {None}),
+            ("Player 1", 1, {None}),
+            ("Player 1", 2, {("Player 1", 1, "1")}),
+            ("Player 1", 3, {("Player 1", 5, "1"), ("Player 1", 1, "2")}),
+            ("Player 1", 4, {("Player 1", 1, "2")}),
+            ("Player 1", 5, {("Player 1", 4, "2")}),
+            ("Player 1", 6, {("Player 1", 1, "2")}),
+            ("Player 2", 0, {None}),
+            ("Player 2", 1, {("Player 2", 0, "2")}),
+            ("Player 2", 2, {("Player 2", 1, "1")}),
+            ("Player 2", 3, {("Player 2", 2, "1")}),
+            ("Player 2", 4, {("Player 2", 2, "2")}),
+            ("Player 2", 5, {("Player 2", 4, "1")}),
+        ]
+    ),
+    # An absent-minded driver game
+    (
+        "AM-driver-subgame.efg",
+        [
+            # Player 1, Infoset 0:
+            # One member is the root (no prior history),
+            # the other is reached via "S" from this same infoset.
+            ("Player 1", 0, {None, ("Player 1", 0, "S")}),
+
+            # Player 2, Infoset 0:
+            # No prior history.
+            ("Player 2", 0, {None}),
+        ]
+    ),
+])
+def test_infoset_own_prior_actions(game_file, expected_results):
+    """
+    Tests `infoset.own_prior_actions` by collecting the action details
+    (player label, infoset num, label) and comparing against expected sets.
+    """
+    game = games.read_from_file(game_file)
+
+    for player_label, infoset_num, expected_set in expected_results:
+        player = game.players[player_label]
+        infoset = player.infosets[infoset_num]
+
+        actual_actions = infoset.own_prior_actions
+
+        actual_details = {
+            (a.infoset.player.label, a.infoset.number, a.label) if a is not None else None
+            for a in actual_actions
+        }
+
+        assert actual_details == expected_set
+
+
+def _get_node_by_path(game, path: list[str]) -> gbt.Node:
+    """
+    Helper to find a node by following a sequence of action labels.
+
+    Parameters
+    ----------
+    path : list[str]
+        A list of action labels in Node->Root order.
+    """
+    node = game.root
+    for action_label in reversed(path):
+        node = node.children[action_label]
+
+    return node
+
+
+@pytest.mark.parametrize("game_input, expected_am_paths", [
+    # Games without absent-mindedness
+    ("e02.efg", []),
+    ("stripped_down_poker.efg", []),
+    ("basic_extensive_game.efg", []),
+    ("gilboa_two_am_agents.efg", []),  # forgetting past information; Gilboa (GEB, 1997)
+    ("wichardt.efg", []),              # forgetting past action; Wichardt (GEB, 2008)
+
+    # Games with absent-mindedness
+    ("noPR-AM-driver-two-players.efg", [[]]),
+    ("noPR-action-AM.efg", [[]]),
+    ("noPR-action-AM-two-hops.efg", [["2", "1", "1", "1", "1"], ["1", "1", "1"]]),
+])
+def test_infoset_is_absent_minded(game_input, expected_am_paths):
+    """
+    Verify the is_absent_minded property of information sets.
+    """
+    game = games.read_from_file(game_input)
+
+    expected_infosets = {_get_node_by_path(game, path).infoset for path in expected_am_paths}
+    actual_infosets = {infoset for infoset in game.infosets if infoset.is_absent_minded}
+
+    assert actual_infosets == expected_infosets

@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/solvers/enumpoly/polysystem.h
 // Representation of a system (collection) of polynomials
@@ -28,13 +28,12 @@
 namespace Gambit {
 
 template <class T> class PolynomialSystem {
-private:
   std::shared_ptr<VariableSpace> m_space;
   std::list<Polynomial<T>> m_system;
 
 public:
-  using iterator = typename List<Polynomial<T>>::iterator;
-  using const_iterator = typename List<Polynomial<T>>::const_iterator;
+  using iterator = typename std::list<Polynomial<T>>::iterator;
+  using const_iterator = typename std::list<Polynomial<T>>::const_iterator;
 
   PolynomialSystem(std::shared_ptr<VariableSpace> p_space) : m_space(p_space) {}
   PolynomialSystem(const PolynomialSystem<T> &) = default;
@@ -89,7 +88,7 @@ public:
     return ret;
   }
   /// Transform system to new coordinates
-  PolynomialSystem<T> TransformCoords(const SquareMatrix<T> &M) const
+  PolynomialSystem<T> TransformCoords(const Matrix<T> &M) const
   {
     PolynomialSystem<T> ret(m_space);
     for (const auto &v : m_system) {

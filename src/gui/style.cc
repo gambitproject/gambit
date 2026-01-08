@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/gui/style.cc
 // Display configuration class for the extensive form
@@ -77,7 +77,6 @@ void TreeRenderConfig::SetDefaults()
   m_chanceToken = GBT_NODE_TOKEN_DOT;
   m_playerToken = GBT_NODE_TOKEN_DOT;
   m_terminalToken = GBT_NODE_TOKEN_DOT;
-  m_rootReachable = false;
   m_branchLength = 60;
   m_tineLength = 20;
   m_branchStyle = GBT_BRANCH_STYLE_FORKTINE;

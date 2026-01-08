@@ -1,6 +1,6 @@
 #
 # This file is part of Gambit
-# Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+# Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 #
 # FILE: src/python/gambit/qre.py
 # A set of utilities for copmuting and analyzing quantal response equilibria
@@ -195,14 +195,15 @@ def _empirical_log_logit_probs(lam: float, regrets: list) -> list:
         math.log(sum([math.exp(lam*r) for r in infoset]))
         for infoset in regrets
     ]
-    return [lam*a - s for (r, s) in zip(regrets, log_sums) for a in r]
+    return [lam*a - s for (r, s) in zip(regrets, log_sums, strict=True) for a in r]
 
 
 def _empirical_log_like(lam: float, regrets: list, flattened_data: list) -> float:
     """Given empirical choice regrets and a list of frequencies of choices, compute
     the log-likelihood of the choices given the regrets and assuming the logit
     choice model with lambda `lam`."""
-    return sum([f*p for (f, p) in zip(flattened_data, _empirical_log_logit_probs(lam, regrets))])
+    return sum([f*p for (f, p) in zip(flattened_data, _empirical_log_logit_probs(lam, regrets),
+                                      strict=True)])
 
 
 def _estimate_strategy_empirical(
@@ -219,7 +220,8 @@ def _estimate_strategy_empirical(
     )
     profile = data.game.mixed_strategy_profile()
     for strategy, log_prob in zip(data.game.strategies,
-                                  _empirical_log_logit_probs(res.x[0], regrets)):
+                                  _empirical_log_logit_probs(res.x[0], regrets),
+                                  strict=True):
         profile[strategy] = math.exp(log_prob)
     return LogitQREMixedStrategyFitResult(
         data, "empirical", res.x[0], profile, -res.fun
@@ -239,7 +241,8 @@ def _estimate_behavior_empirical(
         bounds=((0.0, None),)
     )
     profile = data.game.mixed_behavior_profile()
-    for action, log_prob in zip(data.game.actions, _empirical_log_logit_probs(res.x[0], regrets)):
+    for action, log_prob in zip(data.game.actions, _empirical_log_logit_probs(res.x[0], regrets),
+                                strict=True):
         profile[action] = math.exp(log_prob)
     return LogitQREMixedBehaviorFitResult(
         data, "empirical", res.x[0], profile, -res.fun

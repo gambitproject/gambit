@@ -5,7 +5,7 @@ import typing
 
 
 @contextlib.contextmanager
-def make_temporary(content: typing.Optional[str] = None) -> pathlib.Path:
+def make_temporary(content: str | None = None) -> typing.Generator[pathlib.Path, None, None]:
     """Context manager to create a temporary file containing `content', and
     provide the path to the temporary file.
 

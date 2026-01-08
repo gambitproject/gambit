@@ -1,6 +1,6 @@
 #
 # This file is part of Gambit
-# Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+# Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 #
 # FILE: src/pygambit/stratmixed.pxi
 # Cython wrapper for mixed strategy profiles
@@ -240,8 +240,8 @@ class MixedStrategyProfile:
 
     def __getitem__(
             self,
-            index: typing.Union[PlayerReference, StrategyReference]
-    ) -> typing.Union[MixedStrategy, ProfileDType]:
+            index: PlayerReference | StrategyReference
+    ) -> MixedStrategy | ProfileDType:
         """Access a component of the mixed strategy profile specified by `index`.
 
         Parameters
@@ -288,12 +288,12 @@ class MixedStrategyProfile:
             raise ValueError(
                 "when setting a mixed strategy, must specify exactly one value per strategy"
             )
-        for s, v in zip(player.strategies, value):
+        for s, v in zip(player.strategies, value, strict=True):
             self._setprob_strategy(s, v)
 
     def __setitem__(
             self,
-            index: typing.Union[PlayerReference, StrategyReference],
+            index: PlayerReference | StrategyReference,
             value: typing.Any
     ) -> None:
         """Sets a probability or a mixed strategy to `value`.
@@ -574,7 +574,7 @@ class MixedStrategyProfileDouble(MixedStrategyProfile):
         return obj
 
     def _check_validity(self) -> None:
-        if deref(self.profile).IsInvalidated():
+        if deref(self.profile).HasOutdatedGameVersion():
             raise GameStructureChangedError()
 
     def __len__(self) -> int:
@@ -651,7 +651,7 @@ class MixedStrategyProfileRational(MixedStrategyProfile):
         return obj
 
     def _check_validity(self) -> None:
-        if deref(self.profile).IsInvalidated():
+        if deref(self.profile).HasOutdatedGameVersion():
             raise GameStructureChangedError()
 
     def __len__(self) -> int:

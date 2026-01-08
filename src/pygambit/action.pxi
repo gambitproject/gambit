@@ -1,6 +1,6 @@
 #
 # This file is part of Gambit
-# Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+# Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 #
 # FILE: src/pygambit/action.pxi
 # Cython wrapper for actions
@@ -77,6 +77,12 @@ class Action:
 
     @label.setter
     def label(self, value: str) -> None:
+        if value == self.label:
+            return
+        if value == "" or value in (act.label for act in self.infoset.actions):
+            warnings.warn("In a future version, actions must have unique labels "
+                          "within their information set",
+                          FutureWarning)
         self.action.deref().SetLabel(value.encode("ascii"))
 
     @property
@@ -85,7 +91,7 @@ class Action:
         return Infoset.wrap(self.action.deref().GetInfoset())
 
     @property
-    def prob(self) -> typing.Union[decimal.Decimal, Rational]:
+    def prob(self) -> decimal.Decimal | Rational:
         """
         Get the probability a chance action is played.
 
@@ -108,7 +114,7 @@ class Action:
             return Rational(py_string.decode("ascii"))
 
     @property
-    def plays(self) -> typing.List[Node]:
+    def plays(self) -> list[Node]:
         """Returns a list of all terminal `Node` objects consistent with it.
         """
         return [

@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/solvers/enumpoly/polysolver.h
 // Interface to polynomial system solver
@@ -66,7 +66,7 @@ private:
   // the one produced by the last step
   double MaxDistanceFromPointToVertexAfterTransformation(const Rectangle<double> &,
                                                          const Vector<double> &,
-                                                         const SquareMatrix<double> &) const;
+                                                         const Matrix<double> &) const;
 
   bool HasNoOtherRootsIn(const Rectangle<double> &, const Vector<double> &) const;
 

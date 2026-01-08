@@ -1,8 +1,8 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
-// FILE: src/solvers/enumpoly/ndarray.h
+// FILE: src/games/ndarray.h
 // A simple N-dimensional array class
 //
 // This program is free software; you can redistribute it and/or modify
@@ -20,8 +20,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef NDARRAY_H
-#define NDARRAY_H
+#ifndef GAMBIT_GAMES_NDARRAY_H
+#define GAMBIT_GAMES_NDARRAY_H
 
 #include <numeric>
 
@@ -42,11 +42,14 @@ namespace Gambit {
 ///
 /// @tparam T The data type of elements of the array
 template <class T> class NDArray {
+  using reference = typename std::vector<T>::reference;
+  using const_reference = typename std::vector<T>::const_reference;
+
 protected:
   Array<int> m_index_dim;
-  int m_vector_dim;
+  int m_vector_dim{0};
   Array<int> m_offsets;
-  int m_offsets_sum;
+  int m_offsets_sum{0};
   std::vector<T> m_storage;
 
   int ComputeOffset(const Array<int> &p_array_index, int p_vector_index) const
@@ -59,10 +62,9 @@ protected:
   }
 
 public:
-  NDArray() : m_vector_dim(0), m_offsets_sum(0) {}
-  explicit NDArray(const Array<int> &p_index_dim, int p_vector_dim)
+  NDArray() = default;
+  explicit NDArray(const Array<int> &p_index_dim, const int p_vector_dim)
     : m_index_dim(p_index_dim), m_vector_dim(p_vector_dim), m_offsets(p_index_dim.size() + 1),
-      m_offsets_sum(0),
       m_storage(std::accumulate(m_index_dim.begin(), m_index_dim.end(), 1, std::multiplies<>()) *
                 m_vector_dim)
   {
@@ -74,21 +76,24 @@ public:
     // NOLINTEND(cppcoreguidelines-prefer-member-initializer)
   }
 
-  NDArray(const NDArray<T> &) = default;
+  NDArray(const NDArray &) = default;
   ~NDArray() = default;
 
-  NDArray<T> &operator=(const NDArray<T> &) = default;
+  NDArray &operator=(const NDArray &) = default;
 
-  const T &at(const Array<int> &v, int index) const
+  const_reference at(const Array<int> &v, const int index) const
   {
     return m_storage.at(ComputeOffset(v, index));
   }
-  T &at(const Array<int> &v, int index) { return m_storage.at(ComputeOffset(v, index)); }
+  reference at(const Array<int> &v, const int index)
+  {
+    return m_storage.at(ComputeOffset(v, index));
+  }
 
   const Array<int> &GetIndexDimension() const { return m_index_dim; }
-  int GetVectorDimension() { return m_vector_dim; }
+  int GetVectorDimension() const { return m_vector_dim; }
 };
 
 } // end namespace Gambit
 
-#endif // NDARRAY_H
+#endif // GAMBIT_GAMES_NDARRAY_H

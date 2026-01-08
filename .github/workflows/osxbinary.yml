@@ -2,10 +2,6 @@ name: MacOS static GUI binary
 
 on:
   push:
-    paths-ignore:
-      - 'doc/**'
-      - '.github/ISSUE_TEMPLATE/**'
-      - 'README.md'
     tags:
       - 'v*'
   schedule:
@@ -13,10 +9,10 @@ on:
 
 jobs:
   macos-13:
-    runs-on: macos-13
+    runs-on: macos-14
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.event.pull_request.base.repo.full_name
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - name: Install dependencies
         run: |
             brew install automake autoconf
@@ -35,7 +31,7 @@ jobs:
       - run: make
       - run: sudo make install
       - run: make osx-dmg
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         with:
-          name: artifact-osx-13
+          name: artifact-osx-14
           path: "*.dmg"

@@ -9,7 +9,7 @@ want to play around with the latest features before they make it
 into a pre-compiled binary version.
 
 This page requires at least some familiarity with programming.
-Most users will want to stick with released distributions; see the 
+Most users will want to stick with released distributions; see the
 :ref:`install` page for how to get the current version for
 your operating system.
 Following the instructions here will install the Gambit CLI, GUI and Python extension (PyGambit).
@@ -28,7 +28,7 @@ Install build tools and dependencies
 
 .. dropdown:: Install on macOS via Homebrew
    :class-container: sd-border-0
-   
+
    1. Check that you have Homebrew installed by running `brew --version`. If not, follow the instructions at `https://brew.sh/ <https://brew.sh/>`_.
 
    2. Install build dependencies:
@@ -181,15 +181,15 @@ Building the Python extension
 
 The :ref:`pygambit Python package <pygambit>` is in ``src/pygambit``
 in the Gambit source tree. We recommend to install `pygambit`
-as part of a virtual environment rather than in the system's Python.
-Use `pip` to install from the **root directory of the source tree**, optionally including the `-e` flag for an editable install:
+as part of a virtual environment rather than in the system's Python (for example using `venv`).
+Use `pip` to install from the **root directory of the source tree**:
 
 .. code-block:: bash
 
+   python -m venv venv
+   source venv/bin/activate
    python -m pip install .
 
-There is a set of test cases in `src/pygambit/tests`, which can be run
-using `pytest`.
 
 Once installed, simply ``import pygambit`` in your Python shell or
 script to get started.

@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/gui/gamedoc.cc
 // Implementation of game document class
@@ -33,68 +33,6 @@
 #include "gamedoc.h"
 
 namespace Gambit::GUI {
-//=========================================================================
-//                       class BehaviorDominanceStack
-//=========================================================================
-
-BehaviorDominanceStack::BehaviorDominanceStack(GameDocument *p_doc, bool p_strict)
-  : m_doc(p_doc), m_strict(p_strict), m_noFurther(false)
-{
-  Reset();
-}
-
-void BehaviorDominanceStack::SetStrict(bool p_strict)
-{
-  if (m_strict != p_strict) {
-    Reset();
-  }
-  m_strict = p_strict;
-}
-
-void BehaviorDominanceStack::Reset()
-{
-  m_supports.clear();
-  if (m_doc->IsTree()) {
-    m_supports.push_back(std::make_shared<BehaviorSupportProfile>(m_doc->GetGame()));
-    m_current = 1;
-  }
-  m_noFurther = false;
-}
-
-bool BehaviorDominanceStack::NextLevel()
-{
-  if (m_current < m_supports.size()) {
-    m_current++;
-    return true;
-  }
-
-  if (m_noFurther) {
-    return false;
-  }
-
-  const BehaviorSupportProfile newSupport = m_supports[m_current]->Undominated(m_strict);
-
-  if (newSupport != *m_supports[m_current]) {
-    m_supports.push_back(std::make_shared<BehaviorSupportProfile>(newSupport));
-    m_current++;
-    return true;
-  }
-  else {
-    m_noFurther = true;
-    return false;
-  }
-}
-
-bool BehaviorDominanceStack::PreviousLevel()
-{
-  if (m_current > 1) {
-    m_current--;
-    return true;
-  }
-  else {
-    return false;
-  }
-}
 
 //=========================================================================
 //                   class StrategyDominanceStack
@@ -162,8 +100,8 @@ bool StrategyDominanceStack::PreviousLevel()
 //=========================================================================
 
 GameDocument::GameDocument(Game p_game)
-  : m_game(p_game), m_selectNode(nullptr), m_modified(false), m_behavSupports(this, true),
-    m_stratSupports(this, true), m_currentProfileList(0)
+  : m_game(p_game), m_selectNode(nullptr), m_modified(false), m_stratSupports(this, true),
+    m_currentProfileList(0)
 {
   wxGetApp().AddDocument(this);
 
@@ -221,7 +159,6 @@ bool GameDocument::LoadDocument(const wxString &p_filename, bool p_saveUndo)
     return false;
   }
 
-  m_behavSupports.Reset();
   m_stratSupports.Reset();
 
   m_profiles.clear();
@@ -335,7 +272,6 @@ void GameDocument::UpdateViews(GameModificationType p_modifications)
   }
 
   if (p_modifications == GBT_DOC_MODIFIED_GAME || p_modifications == GBT_DOC_MODIFIED_PAYOFFS) {
-    m_behavSupports.Reset();
     m_stratSupports.Reset();
 
     // Even though modifications only to payoffs doesn't make the
@@ -401,73 +337,6 @@ void GameDocument::SetProfileList(int p_index)
   m_currentProfileList = p_index;
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
-
-/*
-void GameDocument::AddProfiles(const List<MixedBehavProfile<double> >
-&p_profiles)
-{
-  for (int i = 1; i <= p_profiles.Length(); i++) {
-    m_profiles[m_currentProfileList].Append(p_profiles[i]);
-  }
-
-  m_profiles[m_currentProfileList].SetCurrent(m_profiles[m_currentProfileList].NumProfiles());
-  UpdateViews(GBT_DOC_MODIFIED_VIEWS);
-}
-
-void GameDocument::AddProfile(const MixedBehavProfile<double> &p_profile)
-{
-  m_profiles[m_currentProfileList].Append(p_profile);
-  m_profiles[m_currentProfileList].SetCurrent(m_profiles[m_currentProfileList].NumProfiles());
-  UpdateViews(GBT_DOC_MODIFIED_VIEWS);
-}
-
-void GameDocument::AddProfiles(const List<MixedStrategyProfile<double> >
-&p_profiles)
-{
-  for (int i = 1; i <= p_profiles.Length(); i++) {
-    m_profiles[m_currentProfileList].Append(p_profiles[i]);
-  }
-
-  m_profiles[m_currentProfileList].SetCurrent(m_profiles[m_currentProfileList].NumProfiles());
-  UpdateViews(GBT_DOC_MODIFIED_VIEWS);
-}
-
-void GameDocument::AddProfile(const MixedStrategyProfile<double> &p_profile)
-{
-  m_profiles[m_currentProfileList].Append(p_profile);
-  m_profiles[m_currentProfileList].SetCurrent(m_profiles[m_currentProfileList].NumProfiles());
-  UpdateViews(GBT_DOC_MODIFIED_VIEWS);
-}
-*/
-
-void GameDocument::SetBehavElimStrength(bool p_strict)
-{
-  m_behavSupports.SetStrict(p_strict);
-  UpdateViews(GBT_DOC_MODIFIED_VIEWS);
-}
-
-bool GameDocument::NextBehavElimLevel()
-{
-  const bool ret = m_behavSupports.NextLevel();
-  UpdateViews(GBT_DOC_MODIFIED_VIEWS);
-  return ret;
-}
-
-void GameDocument::PreviousBehavElimLevel()
-{
-  m_behavSupports.PreviousLevel();
-  UpdateViews(GBT_DOC_MODIFIED_VIEWS);
-}
-
-void GameDocument::TopBehavElimLevel()
-{
-  m_behavSupports.TopLevel();
-  UpdateViews(GBT_DOC_MODIFIED_VIEWS);
-}
-
-bool GameDocument::CanBehavElim() const { return m_behavSupports.CanEliminate(); }
-
-int GameDocument::GetBehavElimLevel() const { return m_behavSupports.GetLevel(); }
 
 void GameDocument::SetStrategyElimStrength(bool p_strict)
 {
@@ -596,21 +465,18 @@ void GameDocument::DoSetActionProbs(GameInfoset p_infoset, const Array<Number> &
 void GameDocument::DoSetInfoset(GameNode p_node, GameInfoset p_infoset)
 {
   m_game->SetInfoset(p_node, p_infoset);
-  m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
 void GameDocument::DoLeaveInfoset(GameNode p_node)
 {
   m_game->LeaveInfoset(p_node);
-  m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
 void GameDocument::DoRevealAction(GameInfoset p_infoset, GamePlayer p_player)
 {
   m_game->Reveal(p_infoset, p_player);
-  m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
@@ -621,7 +487,6 @@ void GameDocument::DoInsertAction(GameNode p_node)
   }
   const GameAction action = m_game->InsertAction(p_node->GetInfoset());
   action->SetLabel(std::to_string(action->GetNumber()));
-  m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
@@ -634,38 +499,30 @@ void GameDocument::DoSetNodeLabel(GameNode p_node, const wxString &p_label)
 void GameDocument::DoAppendMove(GameNode p_node, GameInfoset p_infoset)
 {
   m_game->AppendMove(p_node, p_infoset);
-  m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
 void GameDocument::DoInsertMove(GameNode p_node, GamePlayer p_player, unsigned int p_actions)
 {
-  const GameInfoset infoset = m_game->InsertMove(p_node, p_player, p_actions);
-  auto actions = infoset->GetActions();
-  std::for_each(actions.begin(), actions.end(),
-                [act = 1](const GameAction &a) mutable { a->SetLabel(std::to_string(act)); });
-  m_game->SortInfosets();
+  m_game->InsertMove(p_node, p_player, p_actions, true);
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
 void GameDocument::DoInsertMove(GameNode p_node, GameInfoset p_infoset)
 {
   m_game->InsertMove(p_node, p_infoset);
-  m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
 void GameDocument::DoCopyTree(GameNode p_destNode, GameNode p_srcNode)
 {
   m_game->CopyTree(p_destNode, p_srcNode);
-  m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
 void GameDocument::DoMoveTree(GameNode p_destNode, GameNode p_srcNode)
 {
   m_game->MoveTree(p_destNode, p_srcNode);
-  m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
@@ -675,14 +532,12 @@ void GameDocument::DoDeleteParent(GameNode p_node)
     return;
   }
   m_game->DeleteParent(p_node);
-  m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
 void GameDocument::DoDeleteTree(GameNode p_node)
 {
   m_game->DeleteTree(p_node);
-  m_game->SortInfosets();
   UpdateViews(GBT_DOC_MODIFIED_GAME);
 }
 
@@ -691,7 +546,6 @@ void GameDocument::DoSetPlayer(GameInfoset p_infoset, GamePlayer p_player)
   if (!p_player->IsChance() && !p_infoset->GetPlayer()->IsChance()) {
     // Currently don't support switching nodes to/from chance player
     m_game->SetPlayer(p_infoset, p_player);
-    m_game->SortInfosets();
     UpdateViews(GBT_DOC_MODIFIED_GAME);
   }
 }
@@ -701,7 +555,6 @@ void GameDocument::DoSetPlayer(GameNode p_node, GamePlayer p_player)
   if (!p_player->IsChance() && !p_node->GetPlayer()->IsChance()) {
     // Currently don't support switching nodes to/from chance player
     m_game->SetPlayer(p_node->GetInfoset(), p_player);
-    m_game->SortInfosets();
     UpdateViews(GBT_DOC_MODIFIED_GAME);
   }
 }

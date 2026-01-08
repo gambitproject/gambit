@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/tools/enummixed/enummixed.cc
 // Compute Nash equilibria via Mangasarian's algorithm
@@ -20,7 +20,6 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include <cstdlib>
 #include <getopt.h>
 #include <iostream>
 #include <fstream>
@@ -33,12 +32,13 @@ using namespace Gambit;
 using namespace Gambit::Nash;
 
 template <class T>
-void PrintCliques(const List<List<MixedStrategyProfile<T>>> &p_cliques,
-                  std::shared_ptr<StrategyProfileRenderer<T>> p_renderer)
+void PrintCliques(const Array<Array<MixedStrategyProfile<T>>> &p_cliques,
+                  std::shared_ptr<MixedProfileRenderer<T>> p_renderer)
 {
-  for (size_t cl = 1; cl <= p_cliques.size(); cl++) {
-    for (size_t i = 1; i <= p_cliques[cl].size(); i++) {
-      p_renderer->Render(p_cliques[cl][i], "convex-" + lexical_cast<std::string>(cl));
+  for (auto [cl, clique] : enumerate(p_cliques)) {
+    const std::string label = "convex-" + std::to_string(cl + 1);
+    for (const auto &profile : clique) {
+      p_renderer->Render(profile, label);
     }
   }
 }
@@ -46,7 +46,7 @@ void PrintCliques(const List<List<MixedStrategyProfile<T>>> &p_cliques,
 void PrintBanner(std::ostream &p_stream)
 {
   p_stream << "Compute Nash equilibria by enumerating extreme points\n";
-  p_stream << "Gambit version " VERSION ", Copyright (C) 1994-2025, The Gambit Project\n";
+  p_stream << "Gambit version " VERSION ", Copyright (C) 1994-2026, The Gambit Project\n";
   p_stream << "This is free software, distributed under the GNU GPL\n\n";
 }
 
@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
   int numDecimals = 6;
 
   int long_opt_index = 0;
-  struct option long_options[] = {
+  option long_options[] = {
       {"help", 0, nullptr, 'h'}, {"version", 0, nullptr, 'v'}, {nullptr, 0, nullptr, 0}};
   while ((c = getopt_long(argc, argv, "d:vhqcS", long_options, &long_opt_index)) != -1) {
     switch (c) {
@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
       break;
     case '?':
       if (isprint(optopt)) {
-        std::cerr << argv[0] << ": Unknown option `-" << ((char)optopt) << "'.\n";
+        std::cerr << argv[0] << ": Unknown option `-" << static_cast<char>(optopt) << "'.\n";
       }
       else {
         std::cerr << argv[0] << ": Unknown option character `\\x" << optopt << "`.\n";
@@ -130,8 +130,7 @@ int main(int argc, char *argv[])
   try {
     const Game game = ReadGame(*input_stream);
     if (useFloat) {
-      std::shared_ptr<StrategyProfileRenderer<double>> renderer =
-          std::make_shared<MixedStrategyCSVRenderer<double>>(std::cout, numDecimals);
+      auto renderer = MakeMixedStrategyProfileRenderer<double>(std::cout, numDecimals, false);
       auto solution = EnumMixedStrategySolveDetailed<double>(
           game, [&](const MixedStrategyProfile<double> &p, const std::string &label) {
             renderer->Render(p, label);
@@ -141,8 +140,7 @@ int main(int argc, char *argv[])
       }
     }
     else {
-      std::shared_ptr<StrategyProfileRenderer<Rational>> renderer(
-          new MixedStrategyCSVRenderer<Rational>(std::cout));
+      auto renderer = MakeMixedStrategyProfileRenderer<Rational>(std::cout, numDecimals, false);
       auto solution = EnumMixedStrategySolveDetailed<Rational>(
           game, [&](const MixedStrategyProfile<Rational> &p, const std::string &label) {
             renderer->Render(p, label);

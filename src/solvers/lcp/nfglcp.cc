@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/tools/lcp/nfglcp.cc
 // Compute Nash equilibria via Lemke-Howson algorithm
@@ -132,7 +132,7 @@ private:
 
 template <class T> class NashLcpStrategySolver<T>::Solution {
 public:
-  List<Gambit::linalg::BFS<T>> m_bfsList;
+  Array<linalg::BFS<T>> m_bfsList;
   std::list<MixedStrategyProfile<T>> m_equilibria;
 
   bool Contains(const Gambit::linalg::BFS<T> &p_bfs) const { return contains(m_bfsList, p_bfs); }

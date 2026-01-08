@@ -1,6 +1,6 @@
 #
 # This file is part of Gambit
-# Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+# Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 #
 # FILE: src/pygambit/strategy.pxi
 # Cython wrapper for strategies
@@ -57,6 +57,11 @@ class Strategy:
 
     @label.setter
     def label(self, value: str) -> None:
+        if value == self.label:
+            return
+        if value == "" or value in (strategy.label for strategy in self.player.strategies):
+            warnings.warn("In a future version, strategies for a player must have unique labels",
+                          FutureWarning)
         self.strategy.deref().SetLabel(value.encode("ascii"))
 
     @property
@@ -74,7 +79,7 @@ class Strategy:
         """The number of the strategy."""
         return self.strategy.deref().GetNumber() - 1
 
-    def action(self, infoset: typing.Union[Infoset, str]) -> typing.Optional[Action]:
+    def action(self, infoset: Infoset | str) -> Action | None:
         """Get the action prescribed by a strategy for a given information set.
 
         .. versionadded:: 16.4.0

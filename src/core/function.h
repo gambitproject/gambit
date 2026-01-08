@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/core/function.h
 // Interface to function and function minimization routines
@@ -42,7 +42,7 @@ public:
 
 protected:
   // Project the gradient 'x' onto the plane of the product of simplices.
-  void Project(Vector<double> &x, const Array<int> &lengths) const;
+  void Project(Vector<double> &x, const Array<size_t> &lengths) const;
 };
 
 class FunctionMinimizerError : public std::runtime_error {

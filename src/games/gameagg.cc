@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/libgambit/gameagg.cc
 // Implementation of action-graph game representation
@@ -194,32 +194,6 @@ Game GameAGGRep::Copy() const
   WriteAggFile(os);
   std::istringstream is(os.str());
   return ReadAggFile(is);
-}
-
-//------------------------------------------------------------------------
-//                  GameAGGRep: Dimensions of the game
-//------------------------------------------------------------------------
-
-Array<int> GameAGGRep::NumStrategies() const
-{
-  Array<int> ns;
-  for (const auto &player : m_players) {
-    ns.push_back(player->GetStrategies().size());
-  }
-  return ns;
-}
-
-GameStrategy GameAGGRep::GetStrategy(int p_index) const
-{
-  for (const auto &player : m_players) {
-    if (static_cast<int>(player->GetStrategies().size()) >= p_index) {
-      return player->GetStrategy(p_index);
-    }
-    else {
-      p_index -= player->GetStrategies().size();
-    }
-  }
-  throw std::out_of_range("Strategy index out of range");
 }
 
 //------------------------------------------------------------------------

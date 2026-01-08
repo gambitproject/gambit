@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/libgambit/gametree.h
 // Declaration of extensive game representation
@@ -27,23 +27,32 @@
 
 namespace Gambit {
 
-class GameTreeRep : public GameExplicitRep {
+class GameTreeRep final : public GameExplicitRep {
   friend class GameNodeRep;
   friend class GameInfosetRep;
   friend class GameActionRep;
 
+  struct OwnPriorActionInfo {
+    std::map<GameNodeRep *, GameActionRep *> node_map;
+    std::map<GameInfosetRep *, std::set<GameActionRep *>> infoset_map;
+  };
+
 protected:
-  mutable bool m_computedValues{false};
+  mutable bool m_computedValues{false}, m_nodesOrdered{false}, m_infosetsOrdered{false};
   std::shared_ptr<GameNodeRep> m_root;
   std::shared_ptr<GamePlayerRep> m_chance;
   std::size_t m_numNodes = 1;
   std::size_t m_numNonterminalNodes = 0;
   std::map<GameNodeRep *, std::vector<GameNodeRep *>> m_nodePlays;
-  std::map<GameInfosetRep *, std::set<GameActionRep *>> m_infosetParents;
+  mutable std::shared_ptr<OwnPriorActionInfo> m_ownPriorActionInfo;
+  mutable std::unique_ptr<std::set<GameNodeRep *>> m_unreachableNodes;
+  mutable std::set<GameInfosetRep *> m_absentMindedInfosets;
 
   /// @name Private auxiliary functions
   //@{
-  void SortInfosets(GamePlayerRep *);
+  static void SortInfosets(GamePlayerRep *);
+  template <class Aggregator>
+  Rational AggregateSubtreePayoff(const GamePlayer &p_player, Aggregator p_aggregator) const;
   static void RenumberInfosets(GamePlayerRep *);
   /// Normalize the probability distribution of actions at a chance node
   Game NormalizeChanceProbs(GameInfosetRep *);
@@ -51,6 +60,15 @@ protected:
 
   /// @name Managing the representation
   //@{
+  void InvalidateNodeOrdering() const
+  {
+    m_nodesOrdered = false;
+    m_infosetsOrdered = false;
+  }
+  void InvalidateInfosetOrdering() const { m_infosetsOrdered = false; }
+  void EnsureNodeOrdering() const override;
+  void EnsureInfosetOrdering() const override;
+
   void BuildComputedValues() const override;
   void BuildConsistentPlays();
   void ClearComputedValues() const;
@@ -74,6 +92,12 @@ public:
   bool IsTree() const override { return true; }
   bool IsConstSum() const override;
   bool IsPerfectRecall() const override;
+
+  /// Returns the smallest payoff to the player in any play of the game
+  Rational GetPlayerMinPayoff(const GamePlayer &) const override;
+  /// Returns the largest payoff to the player in any play of the game
+  Rational GetPlayerMaxPayoff(const GamePlayer &) const override;
+  bool IsAbsentMinded(const GameInfoset &p_infoset) const override;
   //@}
 
   /// @name Players
@@ -92,6 +116,8 @@ public:
   size_t NumNodes() const override { return m_numNodes; }
   /// Returns the number of non-terminal nodes in the game
   size_t NumNonterminalNodes() const override { return m_numNonterminalNodes; }
+  /// Returns the last action taken by the node's owner before reaching this node
+  GameAction GetOwnPriorAction(const GameNode &p_node) const override;
   //@}
 
   void DeleteOutcome(const GameOutcome &) override;
@@ -112,17 +138,17 @@ public:
   //@{
   /// Returns the iset'th information set in the game (numbered globally)
   GameInfoset GetInfoset(int iset) const override;
-  /// Returns the set of information sets in the game
-  std::vector<GameInfoset> GetInfosets() const override;
-  /// Sort the information sets for each player in a canonical order
-  void SortInfosets() override;
+  /// Returns the set of actions taken by the infoset's owner before reaching this infoset
+  std::set<GameAction> GetOwnPriorActions(const GameInfoset &p_infoset) const override;
   //@}
 
   /// @name Modification
   //@{
-  GameInfoset AppendMove(GameNode p_node, GamePlayer p_player, int p_actions) override;
+  GameInfoset AppendMove(GameNode p_node, GamePlayer p_player, int p_actions,
+                         bool p_generateLabels = false) override;
   GameInfoset AppendMove(GameNode p_node, GameInfoset p_infoset) override;
-  GameInfoset InsertMove(GameNode p_node, GamePlayer p_player, int p_actions) override;
+  GameInfoset InsertMove(GameNode p_node, GamePlayer p_player, int p_actions,
+                         bool p_generateLabels = false) override;
   GameInfoset InsertMove(GameNode p_node, GameInfoset p_infoset) override;
   void CopyTree(GameNode dest, GameNode src) override;
   void MoveTree(GameNode dest, GameNode src) override;
@@ -135,7 +161,7 @@ public:
   Game SetChanceProbs(const GameInfoset &, const Array<Number> &) override;
   GameAction InsertAction(GameInfoset, GameAction p_where = nullptr) override;
   void DeleteAction(GameAction) override;
-  void SetOutcome(GameNode, const GameOutcome &p_outcome) override;
+  void SetOutcome(const GameNode &p_node, const GameOutcome &p_outcome) override;
 
   std::vector<GameNode> GetPlays(GameNode node) const override;
   std::vector<GameNode> GetPlays(GameInfoset infoset) const override;
@@ -154,7 +180,8 @@ public:
 
 private:
   std::vector<GameNodeRep *> BuildConsistentPlaysRecursiveImpl(GameNodeRep *node);
-  void BuildInfosetParents();
+  void BuildOwnPriorActions() const;
+  void BuildUnreachableNodes() const;
 };
 
 template <class T> class TreeMixedStrategyProfileRep : public MixedStrategyProfileRep<T> {
@@ -172,10 +199,10 @@ public:
   T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const override;
 
 private:
-  mutable std::shared_ptr<MixedBehaviorProfile<T>> mixed_behav_profile_sptr;
+  mutable std::shared_ptr<MixedBehaviorProfile<T>> m_mixedBehavior;
 
   void MakeBehavior() const;
-  void InvalidateCache() const override;
+  void OnProfileChanged() const override;
 };
 
 } // namespace Gambit

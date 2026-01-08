@@ -19,8 +19,15 @@ def test_get_infoset():
 def test_get_outcome():
     """Test to ensure that we can retrieve an outcome for a given node"""
     game = games.read_from_file("basic_extensive_game.efg")
-    assert game.root.children[0].children[1].children[0].outcome == game.outcomes[1]
+    assert game.root.children[0].children[1].children[0].outcome == game.outcomes["Outcome 1"]
     assert game.root.outcome is None
+
+
+def test_set_outcome_null():
+    """Test to set an outcome to the null outcome."""
+    game = games.read_from_file("basic_extensive_game.efg")
+    game.set_outcome(game.root.children[0].children[0].children[0], None)
+    assert game.root.children[0].children[0].children[0].outcome is None
 
 
 def test_get_player():
@@ -86,11 +93,165 @@ def test_is_successor_of():
         game.root.is_successor_of(game.players[0])
 
 
-def test_is_subgame_root():
-    """Test whether nodes are correctly labeled as roots of proper subgames."""
-    game = games.read_from_file("basic_extensive_game.efg")
-    assert game.root.is_subgame_root
-    assert not game.root.children[0].is_subgame_root
+@pytest.mark.parametrize("game, expected_result", [
+    # Games without Absent-Mindedness for which the legacy method is known to be correct.
+    (games.read_from_file("wichardt.efg"), {0}),
+    (games.read_from_file("e02.efg"), {0, 2, 4}),
+    (games.read_from_file("subgames.efg"), {0, 1, 4, 7, 11, 13, 34}),
+
+    pytest.param(
+        games.read_from_file("AM-driver-subgame.efg"),
+        {0, 3},  # The correct set of subgame roots
+        marks=pytest.mark.xfail(
+            reason="Current method does not detect roots of proper subgames "
+                   "that are members of AM-infosets."
+        )
+    ),
+])
+def test_legacy_is_subgame_root_set(game: gbt.Game, expected_result: set):
+    """
+    Tests the legacy `node.is_subgame_root` against an expected set of nodes.
+    Includes both passing cases and games with Absent-Mindedness where it is expected to fail.
+    """
+    list_nodes = list(game.nodes)
+    expected_roots = {list_nodes[i] for i in expected_result}
+    legacy_roots = {node for node in game.nodes if node.is_subgame_root}
+    assert legacy_roots == expected_roots
+
+
+def _get_path_of_action_labels(node: gbt.Node) -> list[str]:
+    """
+    Computes the path of action labels from the root to the given node.
+    Returns a list of strings.
+    """
+    if not isinstance(node, gbt.Node):
+        raise TypeError(f"Input must be a pygambit.Node, but got {type(node).__name__}")
+
+    path = []
+    current_node = node
+    while current_node.parent:
+        path.append(current_node.prior_action.label)
+        current_node = current_node.parent
+
+    return path
+
+
+@pytest.mark.parametrize("game_file, expected_node_data", [
+    (
+        "binary_3_levels_generic_payoffs.efg",
+        [
+            # Format: (Path in Node->Root order, (Player Label, Infoset Num, Action Label) or None)
+            ([], None),
+            (["Left"], None),
+            (["Left", "Left"], ("Player 1", 0, "Left")),
+            (["Right", "Left"], ("Player 1", 0, "Left")),
+            (["Right"], None),
+            (["Left", "Right"], ("Player 1", 0, "Right")),
+            (["Right", "Right"], ("Player 1", 0, "Right")),
+        ]
+    ),
+    (
+        "wichardt.efg",
+        [
+            ([], None),
+            (["R"], ("Player 1", 0, "R")),
+            (["r", "R"], None),
+            (["l", "R"], None),
+            (["L"], ("Player 1", 0, "L")),
+            (["r", "L"], None),
+            (["l", "L"], None),
+        ]
+    ),
+    (
+        "subgames.efg",
+        [
+            ([], None),
+            (["1"], None),
+            (["2"], None),
+            (["1", "2"], ("Player 2", 0, "2")),
+            (["2", "1", "2"], ("Player 1", 1, "1")),
+            (["2", "2"], ("Player 2", 0, "2")),
+            (["1", "2", "2"], ("Player 2", 1, "1")),
+            (["1", "1", "2", "2"], ("Player 1", 1, "2")),
+            (["1", "1", "1", "2", "2"], ("Player 2", 2, "1")),
+            (["2", "1", "2", "2"], ("Player 1", 1, "2")),
+            (["1", "2", "1", "2", "2"], ("Player 2", 2, "2")),
+            (["2", "2", "1", "2", "2"], ("Player 2", 2, "2")),
+            (["1", "2", "2", "1", "2", "2"], ("Player 1", 4, "2")),
+            (["1", "1", "2", "2", "1", "2", "2"], ("Player 2", 4, "1")),
+            (["1", "1", "1", "2", "2", "1", "2", "2"], ("Player 1", 5, "1")),
+            (["2", "1", "1", "2", "2", "1", "2", "2"], ("Player 1", 5, "1")),
+            (["2", "2", "2", "1", "2", "2"], ("Player 1", 4, "2")),
+            (["2", "2", "2"], ("Player 1", 1, "2")),
+        ]
+    ),
+    (
+        "AM-driver-subgame.efg",
+        [
+            ([], None),
+            (["S"], ("Player 1", 0, "S")),
+            (["T", "S"], None),
+        ]
+    ),
+])
+def test_node_own_prior_action_non_terminal(game_file, expected_node_data):
+    """
+    Tests `node.own_prior_action` for non-terminal nodes.
+    Also verifies that all terminal nodes return None.
+    """
+    game = games.read_from_file(game_file)
+
+    actual_node_data = []
+
+    for node in game.nodes:
+        if node.is_terminal:
+            assert node.own_prior_action is None, (
+                f"Terminal node at {_get_path_of_action_labels(node)} must be None"
+            )
+        else:
+            # Only collect data for non-terminal nodes
+            opa = node.own_prior_action
+            details = (
+                (opa.infoset.player.label, opa.infoset.number, opa.label)
+                if opa is not None else None
+            )
+            actual_node_data.append((_get_path_of_action_labels(node), details))
+
+    assert actual_node_data == expected_node_data
+
+
+@pytest.mark.parametrize("game_file, expected_unreachable_paths", [
+    # Games without absent-mindedness, where all nodes are reachable
+    ("e02.efg", []),
+    ("wichardt.efg", []),
+    ("subgames.efg", []),
+
+    # An absent-minded driver game with an unreachable terminal node
+    (
+        "AM-driver-one-infoset.efg",
+        [["T", "S"]]
+    ),
+
+    # An absent-minded driver game with an unreachable subtree
+    (
+        "AM-driver-subgame.efg",
+        [["T", "S"], ["r", "T", "S"], ["l", "T", "S"]]
+    ),
+])
+def test_is_strategy_reachable(game_file: str, expected_unreachable_paths: list[list[str]]):
+    """
+    Tests `node.is_strategy_reachable` by collecting all unreachable nodes,
+    converting them to their action-label paths, and comparing the resulting
+    list of paths against a known-correct list.
+    """
+    game = games.read_from_file(game_file)
+    nodes = game.nodes
+
+    actual_unreachable_paths = [
+        _get_path_of_action_labels(node) for node in nodes if not node.is_strategy_reachable
+    ]
+
+    assert actual_unreachable_paths == expected_unreachable_paths
 
 
 def test_append_move_error_player_actions():
@@ -177,7 +338,7 @@ def test_node_copy_across_games():
 def _subtrees_equal(
         n1: gbt.Node,
         n2: gbt.Node,
-        recursion_stop_node: typing.Union[gbt.Node, None] = None
+        recursion_stop_node: gbt.Node | None = None
 ) -> bool:
     if n1 == recursion_stop_node:
         return n2.is_terminal
@@ -194,7 +355,9 @@ def _subtrees_equal(
         return False
 
     return all(
-        _subtrees_equal(c1, c2, recursion_stop_node) for (c1, c2) in zip(n1.children, n2.children)
+        _subtrees_equal(c1, c2, recursion_stop_node) for (c1, c2) in zip(
+            n1.children, n2.children, strict=True
+            )
     )
 
 
@@ -324,7 +487,7 @@ def test_append_move_labels_list_of_nodes():
     tmp1 = game.root.children[1].children[0].infoset.actions
     tmp2 = game.root.children[0].children[0].infoset.actions
 
-    for (action, action1, action2) in zip(action_list, tmp1, tmp2):
+    for (action, action1, action2) in zip(action_list, tmp1, tmp2, strict=True):
         assert action.label == action1.label
         assert action.label == action2.label
 
@@ -599,182 +762,6 @@ def test_len_after_copy_tree():
     assert len(game.nodes) == initial_number_of_nodes + number_of_src_ancestors - 1
 
 
-def test_nonterminal_len_matches_expected_count():
-    """Verify `len(game._nonterminal_nodes)` matches expected count
-    """
-    game = games.read_from_file("e01.efg")
-    expected_nonterminal_node_count = 4
-
-    direct_nonterminal_len = len(game._nonterminal_nodes)
-    assert direct_nonterminal_len == expected_nonterminal_node_count
-
-
-def test_nonterminal_len_after_delete_tree():
-    """Verify `len(game._nonterminal_nodes)` is correct after `delete_tree`.
-    """
-    game = games.read_from_file("e01.efg")
-    initial_number_of_nonterminal_nodes = len(game._nonterminal_nodes)
-    list_nodes = list(game.nodes)
-
-    root_of_the_deleted_subtree = list_nodes[1]
-    number_of_deleted_nonterminal_nodes = _count_subtree_nodes(root_of_the_deleted_subtree, False)
-
-    game.delete_tree(root_of_the_deleted_subtree)
-
-    assert len(game._nonterminal_nodes) == initial_number_of_nonterminal_nodes \
-        - number_of_deleted_nonterminal_nodes
-
-
-def test_nonterminal_len_after_delete_parent_of_nonterminal_node():
-    """Verify `len(game._nonterminal_nodes)` is correct after `delete_parent`.
-    """
-    game = games.read_from_file("e02.efg")
-    list_nodes = list(game.nodes)
-    node_parent_to_delete = list_nodes[4]  # path=[1, 1]
-
-    initial_number_of_nonterminal_nodes = len(game._nonterminal_nodes)
-    diff = _count_subtree_nodes(node_parent_to_delete.parent, False) \
-        - _count_subtree_nodes(node_parent_to_delete, False)
-
-    game.delete_parent(node_parent_to_delete)
-
-    assert len(game._nonterminal_nodes) == initial_number_of_nonterminal_nodes - diff
-
-
-def test_nonterminal_len_after_delete_parent_of_terminal_node():
-    """Verify `len(game._nonterminal_nodes)` is correct after `delete_parent`.
-    """
-    game = games.read_from_file("e02.efg")
-    list_nodes = list(game.nodes)
-    node_parent_to_delete = list_nodes[5]  # path=[0, 1, 1]
-
-    initial_number_of_nonterminal_nodes = len(game._nonterminal_nodes)
-    diff = _count_subtree_nodes(node_parent_to_delete.parent, False) \
-        - _count_subtree_nodes(node_parent_to_delete, False)
-
-    game.delete_parent(node_parent_to_delete)
-
-    assert len(game._nonterminal_nodes) == initial_number_of_nonterminal_nodes - diff
-
-
-def test_nonterminal_len_after_append_move():
-    """Verify `len(game._nonterminal_nodes)` is correct after `append_move`.
-    """
-    game = games.read_from_file("e01.efg")
-    initial_number_of_nonterminal_nodes = len(game._nonterminal_nodes)
-    list_nodes = list(game.nodes)
-
-    terminal_node = list_nodes[5]         # path=[1, 1, 0]
-    player = game.players[0]
-    actions_to_add = ["T", "M", "B"]
-
-    game.append_move(terminal_node, player, actions_to_add)
-
-    assert len(game._nonterminal_nodes) == initial_number_of_nonterminal_nodes \
-        + _count_subtree_nodes(terminal_node, False)
-
-
-def test_nonterminal_len_after_append_infoset():
-    """Verify `len(game._nonterminal_nodes)` is correct after `append_infoset`.
-    """
-    game = games.read_from_file("e02.efg")
-    initial_number_of_nonterminal_nodes = len(game._nonterminal_nodes)
-    list_nodes = list(game.nodes)
-
-    member_node = list_nodes[2]           # path=[1]
-    infoset_to_modify = member_node.infoset
-    terminal_node_to_add = list_nodes[6]  # path=[1, 1, 1]
-
-    game.append_infoset(terminal_node_to_add, infoset_to_modify)
-
-    assert len(game._nonterminal_nodes) == initial_number_of_nonterminal_nodes \
-        + _count_subtree_nodes(terminal_node_to_add, False)
-
-
-def test_nonterminal_len_after_add_action():
-    """Verify `len(game._nonterminal_nodes)` does not change after `add_action` to an infoset.
-    """
-    game = games.read_from_file("e01.efg")
-    initial_number_of_nonterminal_nodes = len(game._nonterminal_nodes)
-
-    infoset_to_modify = game.infosets[1]
-
-    game.add_action(infoset_to_modify)
-
-    assert len(game._nonterminal_nodes) == initial_number_of_nonterminal_nodes
-
-
-def test_nonterminal_len_after_delete_action():
-    """Verify `len(game._nonterminal_nodes)` is correct after `delete_action`.
-    """
-    game = games.read_from_file("e02.efg")
-    initial_number_of_nonterminal_nodes = len(game._nonterminal_nodes)
-
-    action_to_delete = game.infosets[0].actions[1]
-
-    # Calculate the total number of nodes within all subtrees
-    # that begin immediately after taking the specified action.
-    nonterminal_nodes_to_delete = 0
-    action_nodes = _get_members(action_to_delete)
-
-    for subtree_root in action_nodes:
-        nonterminal_nodes_to_delete += _count_subtree_nodes(subtree_root, False)
-
-    game.delete_action(action_to_delete)
-
-    assert len(game._nonterminal_nodes) == initial_number_of_nonterminal_nodes \
-        - nonterminal_nodes_to_delete
-
-
-def test_nonterminal_len_after_insert_move():
-    """Verify `len(game._nonterminal_nodes)` correctly increaces by 1 after `insert_move`.
-    """
-    game = games.read_from_file("e01.efg")
-    initial_number_of_nonterminal_nodes = len(game._nonterminal_nodes)
-    list_nodes = list(game.nodes)
-
-    node_to_insert_above = list_nodes[3]
-
-    player = game.players[1]
-    num_actions_to_add = 3
-
-    game.insert_move(node_to_insert_above, player, num_actions_to_add)
-
-    assert len(game._nonterminal_nodes) == initial_number_of_nonterminal_nodes + 1
-
-
-def test_nonterminal_len_after_insert_infoset():
-    """Verify `len(game._nonterminal_nodes)` correctly increaces by 1 after `insert_infoset`.
-    """
-    game = games.read_from_file("e01.efg")
-    initial_number_of_nonterminal_nodes = len(game._nonterminal_nodes)
-    list_nodes = list(game.nodes)
-
-    member_node = list_nodes[6]           # path=[1]
-    infoset_to_modify = member_node.infoset
-    node_to_insert_above = list_nodes[7]  # path=[0, 1]
-
-    game.insert_infoset(node_to_insert_above, infoset_to_modify)
-
-    assert len(game._nonterminal_nodes) == initial_number_of_nonterminal_nodes + 1
-
-
-def test_nonterminal_len_after_copy_tree():
-    """Verify `len(game._nonterminal_nodes)` is correct after `copy_tree`.
-    """
-    game = games.read_from_file("e01.efg")
-    initial_number_of_nodes = len(game._nonterminal_nodes)
-    list_nodes = list(game.nodes)
-    src_node = list_nodes[3]              # path=[1, 0]
-    dest_node = list_nodes[2]             # path=[0, 0]
-    number_of_nonterminal_src_ancestors = _count_subtree_nodes(src_node, False)
-
-    game.copy_tree(src_node, dest_node)
-
-    assert len(game._nonterminal_nodes) == initial_number_of_nodes \
-        + number_of_nonterminal_src_ancestors
-
-
 def test_node_plays():
     """Verify `node.plays` returns plays reachable from a given node.
     """
@@ -791,26 +778,26 @@ def test_node_plays():
 
 
 def test_node_children_action_label():
-    game = games.read_from_file("poker.efg")
-    assert game.root.children["Red"] == game.root.children[0]
-    assert game.root.children["Black"].children["Fold"] == game.root.children[1].children[1]
+    game = games.read_from_file("stripped_down_poker.efg")
+    assert game.root.children["King"] == game.root.children[0]
+    assert game.root.children["Queen"].children["Fold"] == game.root.children[1].children[1]
 
 
 def test_node_children_action():
-    game = games.read_from_file("poker.efg")
-    assert game.root.children[game.root.infoset.actions["Red"]] == game.root.children[0]
+    game = games.read_from_file("stripped_down_poker.efg")
+    assert game.root.children[game.root.infoset.actions["King"]] == game.root.children[0]
 
 
 def test_node_children_nonexistent_action():
-    game = games.read_from_file("poker.efg")
+    game = games.read_from_file("stripped_down_poker.efg")
     with pytest.raises(ValueError):
-        _ = game.root.children["Green"]
+        _ = game.root.children["Jack"]
 
 
 def test_node_children_other_infoset_action():
-    game = games.read_from_file("poker.efg")
+    game = games.read_from_file("stripped_down_poker.efg")
     with pytest.raises(ValueError):
-        _ = game.root.children[game.root.children[0].infoset.actions["Raise"]]
+        _ = game.root.children[game.root.children[0].infoset.actions["Bet"]]
 
 
 @pytest.mark.parametrize(
@@ -821,7 +808,7 @@ def test_node_children_other_infoset_action():
         pytest.param(games.read_from_file("cent3.efg")),
         pytest.param(games.read_from_file("e01.efg")),
         pytest.param(games.read_from_file("e02.efg")),
-        pytest.param(games.read_from_file("poker.efg")),
+        pytest.param(games.read_from_file("stripped_down_poker.efg")),
         pytest.param(gbt.Game.new_tree()),
     ],
 )

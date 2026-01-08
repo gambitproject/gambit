@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/gui/nfgprofile.cc
 // Normal form mixed profile window
@@ -188,7 +188,7 @@ void MixedProfileList::OnUpdate()
   DeleteRows(0, GetNumberRows());
   InsertRows(0, newRows);
 
-  const int profileLength = m_doc->GetGame()->MixedProfileLength();
+  const int profileLength = m_doc->GetGame()->GetStrategies().size();
   const int newCols = profileLength;
   DeleteCols(0, GetNumberCols());
   InsertCols(0, newCols);

@@ -44,13 +44,6 @@ points of that set.
    causes the program to output greater detail on each equilbrium
    profile computed.
 
-.. cmdoption:: -P
-
-   By default, the program computes Nash equilibria in an extensive
-   game. This switch instructs the program to find only equilibria
-   which are subgame perfect.  (This has no effect for strategic
-   games, since there are no proper subgames of a strategic game.)
-
 .. cmdoption:: -h
 
    Prints a help message listing the available options.
@@ -61,11 +54,11 @@ points of that set.
 
 Computing an equilibrium of the game :download:`2x2const.nfg
 <../contrib/games/2x2const.nfg>`, a game with two players with two
-strategies each, with a unique equilibrium in mixed strategies::
+strategies each, with a unique equilibrium in mixed strategies
 
    $ gambit-lp 2x2const.nfg
    Compute Nash equilibria by solving a linear program
-   Gambit version 16.4.0, Copyright (C) 1994-2025, The Gambit Project
+   Gambit version |release|, Copyright (C) 1994-2026, The Gambit Project
    This is free software, distributed under the GNU GPL
 
    NE,1/3,2/3,1/3,2/3

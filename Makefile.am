@@ -1,6 +1,6 @@
 ##
 ## This file is part of Gambit
-## Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+## Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 ##
 ## FILE: Makefile.am
 ## Top-level automake input file for Gambit
@@ -23,11 +23,9 @@
 ACLOCAL_AMFLAGS = -I m4
 
 EXTRA_DIST = \
-	gambit.spec \
-	gambit.desktop \
-    gambit.wxs \
-	contrib/mac/Info.plist \
-	contrib/mac/gambit.icns \
+    build_support/msw/gambit.wxs.in \
+	build_support/osx/Info.plist.in \
+	build_support/osx/gambit.icns \
 	src/labenski/README.txt \
 	src/labenski/art/grab.xpm \
 	src/labenski/art/hand.xpm \
@@ -248,19 +246,14 @@ core_SOURCES = \
     src/core/core.h \
     src/core/util.h \
 	src/core/array.h \
-	src/core/list.h \
 	src/core/vector.h \
 	src/core/recarray.h \
 	src/core/matrix.h \
-	src/core/matrix.imp \
-	src/core/sqmatrix.h \
-	src/core/sqmatrix.imp \
 	src/core/integer.cc \
 	src/core/integer.h \
 	src/core/rational.cc \
 	src/core/rational.h \
 	src/core/matrix.cc \
-	src/core/sqmatrix.cc \
 	src/core/function.cc \
 	src/core/function.h \
 	src/core/tinyxml.cc \
@@ -309,10 +302,11 @@ game_SOURCES = \
 	src/games/stratpure.cc \
 	src/games/stratpure.h \
 	src/games/stratmixed.h \
-	src/games/nash.cc \
 	src/games/file.cc \
 	src/games/writer.cc \
 	src/games/writer.h \
+	src/games/layout.cc \
+    src/games/layout.h \
 	${agg_SOURCES} \
 	src/games/nash.h
 
@@ -373,9 +367,12 @@ if WITH_GUI
 bin_PROGRAMS += gambit
 endif
 
-EXTRA_PROGRAMS = gambit-enumpoly gambit
+# Read version from GAMBIT_VERSION file for use in compilation
+GAMBIT_VERSION = $(shell cat $(top_srcdir)/build_support/GAMBIT_VERSION)
 
-AM_CPPFLAGS = -I$(top_srcdir)/src -I$(top_srcdir)/src/labenski/include ${WX_CXXFLAGS}
+# Define VERSION for all C++ compilations and set include paths
+AM_CPPFLAGS = -I$(top_srcdir)/src -DVERSION=\"$(GAMBIT_VERSION)\"
+
 AM_CXXFLAGS = ${LLVM_CXXFLAGS}
 
 ## Command-line tools
@@ -405,7 +402,6 @@ gambit_enumpoly_SOURCES = \
 	src/solvers/enumpoly/rectangle.h \
 	src/solvers/enumpoly/poly.cc \
 	src/solvers/enumpoly/poly.h \
-	src/solvers/enumpoly/poly.imp \
 	src/solvers/enumpoly/polysystem.h \
     src/solvers/enumpoly/polypartial.h \
     src/solvers/enumpoly/polypartial.imp \
@@ -566,7 +562,6 @@ gambit_SOURCES = \
 	src/gui/dlefglogit.cc \
 	src/gui/dlefglogit.h \
 	src/gui/dlefgreveal.cc \
-	src/gui/dlefgreveal.h \
 	src/gui/dlexcept.h \
 	src/gui/dlgameprop.cc \
 	src/gui/dlgameprop.h \
@@ -603,6 +598,9 @@ gambit_SOURCES = \
 	src/gui/valnumber.cc \
 	src/gui/valnumber.h
 
+# Add wxWidgets compilation flags for the GUI program
+gambit_CXXFLAGS = $(AM_CXXFLAGS) $(WX_CXXFLAGS)
+gambit_CPPFLAGS = $(AM_CPPFLAGS) $(WX_CXXFLAGS) -I$(top_srcdir)/src/labenski/include
 
 if IS_WIN32
 gambit_LDADD = $(RC_OBJECT_PATH) $(WX_LIBS_STATIC) -ldeflate -lzstd -llerc -lWebP
@@ -618,8 +616,8 @@ osx-bundle:
 	-mkdir Gambit.app/Contents
 	-mkdir Gambit.app/Contents/MacOS
 	-mkdir Gambit.app/Contents/Resources
-	cp ${top_srcdir}/contrib/mac/Info.plist Gambit.app/Contents
-	cp ${top_srcdir}/contrib/mac/gambit.icns Gambit.app/Contents/Resources/gambit.icns
+	cp build_support/osx/Info.plist Gambit.app/Contents
+	cp ${top_srcdir}/build_support/osx/gambit.icns Gambit.app/Contents/Resources/gambit.icns
 	echo -n 'APPL????' > Gambit.app/Contents/PkgInfo
 	cp gambit Gambit.app/Contents/MacOS/gambit
 	cp ${bin_PROGRAMS} Gambit.app/Contents/MacOS
@@ -634,11 +632,11 @@ osx-dmg:  osx-bundle
 msw-msi:
 	-mkdir installer
 	cp gambit* installer
-	candle gambit.wxs
+	candle build_support/msw/gambit.wxs
 	light -ext WixUIExtension gambit.wixobj
 
 clang-tidy:
-	clang-tidy ${top_srcdir}/src/core/*.cc -- --std=c++17 -I ${top_srcdir}/src -DVERSION=""
-	clang-tidy ${top_srcdir}/src/games/*.cc ${top_srcdir}/src/games/*/*.cc -- --std=c++17 -I ${top_srcdir}/src -DVERSION=""
-	clang-tidy ${top_srcdir}/src/solvers/*/*.cc -- --std=c++17 -I ${top_srcdir}/src -DVERSION=""
-	clang-tidy ${top_srcdir}/src/tools/*/*.cc -- --std=c++17 -I ${top_srcdir}/src -DVERSION=""
+	clang-tidy ${top_srcdir}/src/core/*.cc -- --std=c++17 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"
+	clang-tidy ${top_srcdir}/src/games/*.cc ${top_srcdir}/src/games/*/*.cc -- --std=c++17 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"
+	clang-tidy ${top_srcdir}/src/solvers/*/*.cc -- --std=c++17 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"
+	clang-tidy ${top_srcdir}/src/tools/*/*.cc -- --std=c++17 -I ${top_srcdir}/src -DVERSION=\"$(GAMBIT_VERSION)\"

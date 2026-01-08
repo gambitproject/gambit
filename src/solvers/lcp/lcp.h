@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: library/include/gambit/nash/lcp.h
 // Compute Nash equilibria via linear complementarity programming
@@ -34,7 +34,7 @@ LcpStrategySolve(const Game &p_game, int p_stopAfter, int p_maxDepth,
 
 template <class T>
 std::list<MixedBehaviorProfile<T>>
-LcpBehaviorSolve(const Game &p_game, int p_stopAfter, int p_maxDepth,
+LcpBehaviorSolve(const Game &p_game,
                  BehaviorCallbackType<T> p_onEquilibrium = NullBehaviorCallback<T>);
 
 } // end namespace Gambit::Nash

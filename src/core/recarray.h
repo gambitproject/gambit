@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/core/recarray.h
 // Rectangular array base class
@@ -23,6 +23,7 @@
 #ifndef GAMBIT_CORE_RECARRAY_H
 #define GAMBIT_CORE_RECARRAY_H
 
+#include <vector>
 #include "util.h"
 
 namespace Gambit {
@@ -30,54 +31,162 @@ namespace Gambit {
 /// This class implements a rectangular (two-dimensional) array
 template <class T> class RectArray {
 protected:
-  int minrow, maxrow, mincol, maxcol;
-  T **data;
+  int m_minrow, m_maxrow, m_mincol, m_maxcol;
+  std::vector<T> m_storage;
+
+  size_t row_stride() const { return static_cast<size_t>(m_maxcol - m_mincol + 1); }
+
+  size_t index(int r, int c) const
+  {
+    return static_cast<size_t>(r - m_minrow) * row_stride() + static_cast<size_t>(c - m_mincol);
+  }
+
+public:
+  class RowView {
+    RectArray *m_array;
+    int m_row;
+
+  public:
+    class iterator {
+      RowView *m_view;
+      int m_col;
+
+    public:
+      using iterator_category = std::forward_iterator_tag;
+      using value_type = T;
+      using difference_type = int;
+      using pointer = T *;
+      using reference = T &;
+
+      iterator(RowView *p_view, int p_col) : m_view(p_view), m_col(p_col) {}
+
+      reference operator*() const { return (*m_view)[m_col]; }
+
+      iterator &operator++()
+      {
+        ++m_col;
+        return *this;
+      }
+
+      bool operator==(const iterator &p_other) const { return m_col == p_other.m_col; }
+      bool operator!=(const iterator &p_other) const { return !(*this == p_other); }
+    };
+
+    RowView(RectArray &p_array, int p_row) : m_array(&p_array), m_row(p_row)
+    {
+      if (!m_array->CheckRow(m_row)) {
+        throw std::out_of_range("RowView");
+      }
+    }
+    T &operator[](int c) { return (*m_array)(m_row, c); }
+    const T &operator[](int c) const { return (*m_array)(m_row, c); }
+    int MinIndex() const { return m_array->MinCol(); }
+    int MaxIndex() const { return m_array->MaxCol(); }
+    iterator begin() { return iterator(this, MinIndex()); }
+    iterator begin() const { return iterator(const_cast<RowView *>(this), MinIndex()); }
+    iterator end() { return iterator(this, MaxIndex() + 1); }
+    iterator end() const { return iterator(const_cast<RowView *>(this), MaxIndex() + 1); }
+  };
+
+  class ColumnView {
+    RectArray *m_array;
+    int m_col;
+
+  public:
+    class iterator {
+      ColumnView *m_view;
+      int m_row;
+
+    public:
+      using iterator_category = std::forward_iterator_tag;
+      using value_type = T;
+      using difference_type = int;
+      using pointer = T *;
+      using reference = T &;
+
+      iterator(ColumnView *p_view, int p_row) : m_view(p_view), m_row(p_row) {}
+
+      reference operator*() const { return (*m_view)[m_row]; }
+
+      iterator &operator++()
+      {
+        ++m_row;
+        return *this;
+      }
+
+      bool operator==(const iterator &p_other) const { return m_row == p_other.m_row; }
+      bool operator!=(const iterator &p_other) const { return !(*this == p_other); }
+    };
+
+    ColumnView(RectArray &p_array, int p_col) : m_array(&p_array), m_col(p_col)
+    {
+      if (!m_array->CheckColumn(m_col)) {
+        throw std::out_of_range("ColumnView");
+      }
+    }
+    T &operator[](int r) { return (*m_array)(r, m_col); }
+    const T &operator[](int r) const { return (*m_array)(r, m_col); }
+    int MinIndex() const { return m_array->MinRow(); }
+    int MaxIndex() const { return m_array->MaxRow(); }
+    iterator begin() { return iterator(this, MinIndex()); }
+    iterator begin() const { return iterator(const_cast<ColumnView *>(this), MinIndex()); }
+    iterator end() { return iterator(this, MaxIndex() + 1); }
+    iterator end() const { return iterator(const_cast<ColumnView *>(this), MaxIndex() + 1); }
+  };
+
+  /// @name Lifecycle
+  //@{
+  RectArray() : m_minrow(1), m_maxrow(0), m_mincol(1), m_maxcol(0), m_storage() {}
+  RectArray(const size_t nrows, const size_t ncols) : RectArray(1, nrows, 1, ncols) {}
+  RectArray(const int minrow, const int maxrow, const int mincol, const int maxcol)
+    : m_minrow(minrow), m_maxrow(maxrow), m_mincol(mincol), m_maxcol(maxcol),
+      m_storage((maxrow >= minrow && maxcol >= mincol)
+                    ? (maxrow - minrow + 1) * (maxcol - mincol + 1)
+                    : 0)
+  {
+  }
+  RectArray(const RectArray &) = default;
+  RectArray(RectArray &&) noexcept = default;
+  ~RectArray() = default;
+
+  RectArray &operator=(const RectArray &) = default;
+  RectArray &operator=(RectArray &&) noexcept = default;
+  //@}
 
   /// @name Range checking functions; returns true only if valid index/size
   //@{
-  /// check for correct row index
-  bool CheckRow(int row) const { return (minrow <= row && row <= maxrow); }
-  /// check row vector for correct column boundaries
-  template <class Vector> bool CheckRow(const Vector &v) const
+  /// check array for same row and column boundaries
+  bool ConformsTo(const RectArray &m) const
   {
-    return (v.front_index() == mincol && v.back_index() == maxcol);
+    return (m_minrow == m.m_minrow && m_maxrow == m.m_maxrow && m_mincol == m.m_mincol &&
+            m_maxcol == m.m_maxcol);
+  }
+  /// check for correct row index
+  bool CheckRow(const int row) const { return (m_minrow <= row && row <= m_maxrow); }
+  /// check row vector for correct column boundaries
+  template <class V> bool ConformsToRow(const V &v) const
+  {
+    return v.front_index() == m_mincol && v.back_index() == m_maxcol;
   }
   /// check for correct column index
-  bool CheckColumn(int col) const { return (mincol <= col && col <= maxcol); }
+  bool CheckColumn(const int col) const { return (m_mincol <= col && col <= m_maxcol); }
   /// check column vector for correct row boundaries
-  template <class Vector> bool CheckColumn(const Vector &v) const
+  template <class V> bool ConformsToColumn(const V &v) const
   {
-    return (v.front_index() == minrow && v.back_index() == maxrow);
+    return (v.front_index() == m_minrow && v.back_index() == m_maxrow);
   }
   /// check row and column indices
-  bool Check(int row, int col) const { return CheckRow(row) && CheckColumn(col); }
-  /// check matrix for same row and column boundaries
-  bool CheckBounds(const RectArray<T> &m) const
-  {
-    return (minrow == m.minrow && maxrow == m.maxrow && mincol == m.mincol && maxcol == m.maxcol);
-  }
+  bool Check(const int row, const int col) const { return CheckRow(row) && CheckColumn(col); }
+
   //@}
-
-public:
-  /// @name Lifecycle
-  //@{
-  RectArray() : minrow(1), maxrow(0), mincol(1), maxcol(0), data(nullptr) {}
-  RectArray(unsigned int nrows, unsigned int ncols);
-  RectArray(int minr, int maxr, int minc, int maxc);
-  RectArray(const RectArray<T> &);
-  virtual ~RectArray();
-
-  RectArray<T> &operator=(const RectArray<T> &);
-  //@}
-
   /// @name General data access
   //@{
-  size_t NumRows() const { return maxrow - minrow + 1; }
-  size_t NumColumns() const { return maxcol - mincol + 1; }
-  int MinRow() const { return minrow; }
-  int MaxRow() const { return maxrow; }
-  int MinCol() const { return mincol; }
-  int MaxCol() const { return maxcol; }
+  size_t NumRows() const { return m_maxrow - m_minrow + 1; }
+  size_t NumColumns() const { return m_maxcol - m_mincol + 1; }
+  int MinRow() const { return m_minrow; }
+  int MaxRow() const { return m_maxrow; }
+  int MinCol() const { return m_mincol; }
+  int MaxCol() const { return m_maxcol; }
   //@}
 
   /// @name Indexing operations
@@ -87,14 +196,14 @@ public:
     if (!Check(r, c)) {
       throw std::out_of_range("Index out of range in RectArray");
     }
-    return data[r][c];
+    return m_storage[index(r, c)];
   }
   const T &operator()(int r, int c) const
   {
     if (!Check(r, c)) {
       throw std::out_of_range("Index out of range in RectArray");
     }
-    return data[r][c];
+    return m_storage[index(r, c)];
   }
   //@}
 
@@ -111,92 +220,40 @@ public:
     if (!Check(i, j)) {
       throw std::out_of_range("Index out of range in RectArray");
     }
-    std::swap(data[i], data[j]);
+    if (i == j) {
+      return;
+    }
+
+    const auto stride = row_stride();
+    const size_t ai = index(i, m_mincol);
+    const size_t aj = index(j, m_mincol);
+    for (size_t k = 0; k < stride; ++k) {
+      std::swap(m_storage[ai + k], m_storage[aj + k]);
+    }
   }
+  RowView GetRowView(int r) { return RowView(*this, r); }
+  RowView GetRowView(int r) const { return RowView(const_cast<RectArray &>(*this), r); }
+  ColumnView GetColumnView(int c) { return ColumnView(*this, c); }
+  ColumnView GetColumnView(int c) const { return ColumnView(const_cast<RectArray &>(*this), c); }
   template <class Vector> void GetRow(int, Vector &) const;
 
   template <class Vector> void GetColumn(int, Vector &) const;
   template <class Vector> void SetColumn(int, const Vector &);
   //@}
+
+  /// @name Iteration
+  /// @{
+  using element_iterator = typename std::vector<T>::iterator;
+  using const_element_iterator = typename std::vector<T>::const_iterator;
+
+  element_iterator elements_begin() noexcept { return m_storage.begin(); }
+  element_iterator elements_end() noexcept { return m_storage.end(); }
+  const_element_iterator elements_begin() const noexcept { return m_storage.begin(); }
+  const_element_iterator elements_end() const noexcept { return m_storage.end(); }
+  const_element_iterator elements_cbegin() const noexcept { return m_storage.cbegin(); }
+  const_element_iterator elements_cend() const noexcept { return m_storage.cend(); }
+  /// @}
 };
-
-//------------------------------------------------------------------------
-//     RectArray<T>: Constructors, destructor, constructive operators
-//------------------------------------------------------------------------
-
-template <class T>
-RectArray<T>::RectArray(unsigned int rows, unsigned int cols)
-  : minrow(1), maxrow(rows), mincol(1), maxcol(cols),
-    data((rows > 0) ? new T *[maxrow] - 1 : nullptr)
-{
-  for (int i = 1; i <= maxrow; data[i++] = (cols > 0) ? new T[maxcol] - 1 : nullptr)
-    ;
-}
-
-template <class T>
-RectArray<T>::RectArray(int minr, int maxr, int minc, int maxc)
-  : minrow(minr), maxrow(maxr), mincol(minc), maxcol(maxc),
-    data((maxrow >= minrow) ? new T *[maxrow - minrow + 1] - minrow : nullptr)
-{
-  for (int i = minrow; i <= maxrow;
-       data[i++] = (maxcol - mincol + 1) ? new T[maxcol - mincol + 1] - mincol : nullptr)
-    ;
-}
-
-template <class T>
-RectArray<T>::RectArray(const RectArray<T> &a)
-  : minrow(a.minrow), maxrow(a.maxrow), mincol(a.mincol), maxcol(a.maxcol),
-    data((maxrow >= minrow) ? new T *[maxrow - minrow + 1] - minrow : nullptr)
-{
-  for (int i = minrow; i <= maxrow; i++) {
-    data[i] = (maxcol >= mincol) ? new T[maxcol - mincol + 1] - mincol : nullptr;
-    for (int j = mincol; j <= maxcol; j++) {
-      data[i][j] = a.data[i][j];
-    }
-  }
-}
-
-template <class T> RectArray<T>::~RectArray()
-{
-  for (int i = minrow; i <= maxrow; i++) {
-    if (data[i]) {
-      delete[] (data[i] + mincol);
-    }
-  }
-  if (data) {
-    delete[] (data + minrow);
-  }
-}
-
-template <class T> RectArray<T> &RectArray<T>::operator=(const RectArray<T> &a)
-{
-  if (this != &a) {
-    for (int i = minrow; i <= maxrow; i++) {
-      if (data[i]) {
-        delete[] (data[i] + mincol);
-      }
-    }
-    if (data) {
-      delete[] (data + minrow);
-    }
-
-    minrow = a.minrow;
-    maxrow = a.maxrow;
-    mincol = a.mincol;
-    maxcol = a.maxcol;
-
-    data = (maxrow >= minrow) ? new T *[maxrow - minrow + 1] - minrow : nullptr;
-
-    for (int i = minrow; i <= maxrow; i++) {
-      data[i] = (maxcol >= mincol) ? new T[maxcol - mincol + 1] - mincol : nullptr;
-      for (int j = mincol; j <= maxcol; j++) {
-        data[i][j] = a.data[i][j];
-      }
-    }
-  }
-
-  return *this;
-}
 
 //------------------------------------------------------------------------
 //                   RectArray<T>: Row and column rotation
@@ -204,28 +261,26 @@ template <class T> RectArray<T> &RectArray<T>::operator=(const RectArray<T> &a)
 
 template <class T> void RectArray<T>::RotateUp(int lo, int hi)
 {
-  if (lo < minrow || hi < lo || maxrow < hi) {
+  if (lo < m_minrow || hi < lo || m_maxrow < hi) {
     throw std::out_of_range("Index out of range in RectArray");
   }
-
-  T *temp = data[lo];
-  for (int k = lo; k < hi; k++) {
-    data[k] = data[k + 1];
-  }
-  data[hi] = temp;
+  const auto stride = row_stride();
+  const size_t first = index(lo, m_mincol);
+  const size_t last = index(hi + 1, m_mincol);
+  std::rotate(m_storage.begin() + first, m_storage.begin() + first + stride,
+              m_storage.begin() + last);
 }
 
 template <class T> void RectArray<T>::RotateDown(int lo, int hi)
 {
-  if (lo < minrow || hi < lo || maxrow < hi) {
+  if (lo < m_minrow || hi < lo || m_maxrow < hi) {
     throw std::out_of_range("Index out of range in RectArray");
   }
-
-  T *temp = data[hi];
-  for (int k = hi; k > lo; k--) {
-    data[k] = data[k - 1];
-  }
-  data[lo] = temp;
+  const auto stride = row_stride();
+  const size_t first = index(lo, m_mincol);
+  const size_t last = index(hi + 1, m_mincol);
+  std::rotate(m_storage.begin() + first, m_storage.begin() + last - stride,
+              m_storage.begin() + last);
 }
 
 //-------------------------------------------------------------------------
@@ -237,12 +292,12 @@ template <class T> template <class Vector> void RectArray<T>::GetRow(int row, Ve
   if (!CheckRow(row)) {
     throw std::out_of_range("Index out of range in RectArray");
   }
-  if (!CheckRow(v)) {
+  if (!ConformsToRow(v)) {
     throw DimensionException();
   }
-  T *rowptr = data[row];
-  for (int i = mincol; i <= maxcol; i++) {
-    v[i] = rowptr[i];
+  const size_t base = index(row, m_mincol);
+  for (int c = m_mincol; c <= m_maxcol; ++c) {
+    v[c] = m_storage[base + (c - m_mincol)];
   }
 }
 
@@ -255,11 +310,11 @@ template <class T> template <class Vector> void RectArray<T>::GetColumn(int col,
   if (!CheckColumn(col)) {
     throw std::out_of_range("Index out of range in RectArray");
   }
-  if (!CheckColumn(v)) {
+  if (!ConformsToColumn(v)) {
     throw DimensionException();
   }
-  for (int i = minrow; i <= maxrow; i++) {
-    v[i] = data[i][col];
+  for (int r = m_minrow; r <= m_maxrow; ++r) {
+    v[r] = m_storage[index(r, col)];
   }
 }
 
@@ -268,11 +323,11 @@ template <class T> template <class Vector> void RectArray<T>::SetColumn(int col,
   if (!CheckColumn(col)) {
     throw std::out_of_range("Index out of range in RectArray");
   }
-  if (!CheckColumn(v)) {
+  if (!ConformsToColumn(v)) {
     throw DimensionException();
   }
-  for (int i = minrow; i <= maxrow; i++) {
-    data[i][col] = v[i];
+  for (int r = m_minrow; r <= m_maxrow; ++r) {
+    m_storage[index(r, col)] = v[r];
   }
 }
 

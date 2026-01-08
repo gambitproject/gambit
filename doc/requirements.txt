@@ -1,10 +1,13 @@
-Cython==3.1.2
-numpy==2.3.2
-scipy==1.16.1
-pydata-sphinx-theme==0.16.1
-sphinx_design==0.6.1
-sphinx-autobuild==2024.10.3
-ipython==9.4.0
-matplotlib==3.10.5
-pickleshare==0.7.5
-jupyter==1.1.1
+Cython
+numpy
+scipy
+pydata-sphinx-theme
+sphinx_design
+sphinx-autobuild
+nbsphinx
+ipython
+matplotlib
+pickleshare
+jupyter
+open_spiel; sys_platform != 'win32'
+draw-tree @ git+https://github.com/gambitproject/draw_tree.git@v0.3.1

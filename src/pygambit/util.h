@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/pygambit/util.h
 // Convenience functions for Cython wrapper
@@ -30,31 +30,32 @@
 #include <fstream>
 #include <sstream>
 #include "gambit.h"
+#include "games/gameagg.h"
 #include "games/nash.h"
 
 using namespace std;
 using namespace Gambit;
 using namespace Gambit::Nash;
 
-Game ParseGbtGame(std::string const &s)
+Game ParseGbtGame(std::string const &s, bool p_normalizeLabels)
 {
   std::istringstream f(s);
   return ReadGbtFile(f);
 }
 
-Game ParseEfgGame(std::string const &s)
+Game ParseEfgGame(std::string const &s, bool p_normalizeLabels)
 {
   std::istringstream f(s);
-  return ReadEfgFile(f);
+  return ReadEfgFile(f, p_normalizeLabels);
 }
 
-Game ParseNfgGame(std::string const &s)
+Game ParseNfgGame(std::string const &s, bool p_normalizeLabels)
 {
   std::istringstream f(s);
-  return ReadNfgFile(f);
+  return ReadNfgFile(f, p_normalizeLabels);
 }
 
-Game ParseAggGame(std::string const &s)
+Game ParseAggGame(std::string const &s, bool p_normalizeLabels)
 {
   std::istringstream f(s);
   return ReadAggFile(f);

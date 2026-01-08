@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/gui/efgpanel.cc
 // Main viewing panel for extensive forms
@@ -36,141 +36,6 @@
 #include "edittext.h"
 
 namespace Gambit::GUI {
-//=====================================================================
-//                class gbtBehavDominanceToolbar
-//=====================================================================
-
-//!
-//! This panel serves as a toolbar for interactively viewing
-//! dominance information on extensive forms.
-//!
-class gbtBehavDominanceToolbar : public wxPanel, public GameView {
-private:
-  wxButton *m_topButton, *m_prevButton, *m_nextButton, *m_allButton;
-  wxStaticText *m_level;
-
-  // Overriding GameView members
-  void OnUpdate() override;
-
-  // Event handlers
-  void OnStrength(wxCommandEvent &);
-  void OnTopLevel(wxCommandEvent &);
-  void OnPreviousLevel(wxCommandEvent &);
-  void OnNextLevel(wxCommandEvent &);
-  void OnLastLevel(wxCommandEvent &);
-  void OnShowReachable(wxCommandEvent &);
-
-public:
-  gbtBehavDominanceToolbar(wxWindow *p_parent, GameDocument *p_doc);
-  ~gbtBehavDominanceToolbar() override = default;
-};
-
-#include "bitmaps/next.xpm"
-#include "bitmaps/prev.xpm"
-#include "bitmaps/tobegin.xpm"
-#include "bitmaps/toend.xpm"
-
-gbtBehavDominanceToolbar::gbtBehavDominanceToolbar(wxWindow *p_parent, GameDocument *p_doc)
-  : wxPanel(p_parent, wxID_ANY), GameView(p_doc)
-{
-  auto *topSizer = new wxBoxSizer(wxHORIZONTAL);
-
-  topSizer->Add(new wxStaticText(this, wxID_STATIC, wxT("Hide actions which are ")), 0,
-                wxALL | wxALIGN_CENTER, 5);
-
-  wxString domChoices[] = {wxT("strictly"), wxT("strictly or weakly")};
-  auto *choice = new wxChoice(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 2, domChoices);
-  choice->SetSelection(0);
-  Connect(choice->GetId(), wxEVT_COMMAND_CHOICE_SELECTED,
-          wxCommandEventHandler(gbtBehavDominanceToolbar::OnStrength));
-  topSizer->Add(choice, 0, wxALL | wxALIGN_CENTER, 5);
-
-  topSizer->Add(new wxStaticText(this, wxID_STATIC, wxT("dominated:")), 0, wxALL | wxALIGN_CENTER,
-                5);
-
-  m_topButton = new wxBitmapButton(this, wxID_ANY, wxBitmap(tobegin_xpm));
-  m_topButton->SetToolTip(_("Show all strategies"));
-  Connect(m_topButton->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
-          wxCommandEventHandler(gbtBehavDominanceToolbar::OnTopLevel));
-  topSizer->Add(m_topButton, 0, wxALL | wxALIGN_CENTER, 5);
-
-  m_prevButton = new wxBitmapButton(this, wxID_ANY, wxBitmap(prev_xpm));
-  m_prevButton->SetToolTip(_("Previous round of elimination"));
-  Connect(m_prevButton->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
-          wxCommandEventHandler(gbtBehavDominanceToolbar::OnPreviousLevel));
-  topSizer->Add(m_prevButton, 0, wxALL | wxALIGN_CENTER, 5);
-
-  m_level = new wxStaticText(this, wxID_STATIC, wxT("All actions shown"), wxDefaultPosition,
-                             wxDefaultSize, wxALIGN_CENTER | wxST_NO_AUTORESIZE);
-  topSizer->Add(m_level, 0, wxALL | wxALIGN_CENTER, 5);
-
-  m_nextButton = new wxBitmapButton(this, wxID_ANY, wxBitmap(next_xpm));
-  m_nextButton->SetToolTip(_("Next round of elimination"));
-  Connect(m_nextButton->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
-          wxCommandEventHandler(gbtBehavDominanceToolbar::OnNextLevel));
-  topSizer->Add(m_nextButton, 0, wxALL | wxALIGN_CENTER, 5);
-
-  m_allButton = new wxBitmapButton(this, wxID_ANY, wxBitmap(toend_xpm));
-  m_allButton->SetToolTip(_("Eliminate iteratively"));
-  Connect(m_allButton->GetId(), wxEVT_COMMAND_BUTTON_CLICKED,
-          wxCommandEventHandler(gbtBehavDominanceToolbar::OnLastLevel));
-  topSizer->Add(m_allButton, 0, wxALL | wxALIGN_CENTER, 5);
-
-  auto *showReachable = new wxCheckBox(this, wxID_ANY, wxT("Show only reachable nodes"));
-  showReachable->SetValue(m_doc->GetStyle().RootReachable());
-  Connect(showReachable->GetId(), wxEVT_COMMAND_CHECKBOX_CLICKED,
-          wxCommandEventHandler(gbtBehavDominanceToolbar::OnShowReachable));
-  topSizer->Add(showReachable, 0, wxALL | wxALIGN_CENTER, 5);
-
-  SetSizer(topSizer);
-  wxWindowBase::Layout();
-}
-
-void gbtBehavDominanceToolbar::OnStrength(wxCommandEvent &p_event)
-{
-  m_doc->SetBehavElimStrength(p_event.GetSelection() == 0);
-}
-
-void gbtBehavDominanceToolbar::OnTopLevel(wxCommandEvent &) { m_doc->TopBehavElimLevel(); }
-
-void gbtBehavDominanceToolbar::OnPreviousLevel(wxCommandEvent &)
-{
-  m_doc->PreviousBehavElimLevel();
-}
-
-void gbtBehavDominanceToolbar::OnNextLevel(wxCommandEvent &) { m_doc->NextBehavElimLevel(); }
-
-void gbtBehavDominanceToolbar::OnLastLevel(wxCommandEvent &)
-{
-  while (m_doc->NextBehavElimLevel())
-    ;
-}
-
-void gbtBehavDominanceToolbar::OnShowReachable(wxCommandEvent &)
-{
-  TreeRenderConfig style = m_doc->GetStyle();
-  style.SetRootReachable(!style.RootReachable());
-  m_doc->SetStyle(style);
-}
-
-void gbtBehavDominanceToolbar::OnUpdate()
-{
-  m_topButton->Enable(m_doc->GetBehavElimLevel() > 1);
-  m_prevButton->Enable(m_doc->GetBehavElimLevel() > 1);
-  m_nextButton->Enable(m_doc->CanBehavElim());
-  m_allButton->Enable(m_doc->CanBehavElim());
-  if (m_doc->GetBehavElimLevel() == 1) {
-    m_level->SetLabel(wxT("All actions shown"));
-  }
-  else if (m_doc->GetBehavElimLevel() == 2) {
-    m_level->SetLabel(wxT("Eliminated 1 level"));
-  }
-  else {
-    m_level->SetLabel(
-        wxString::Format(wxT("Eliminated %d levels"), m_doc->GetBehavElimLevel() - 1));
-  }
-  GetSizer()->Layout();
-}
 
 #include "bitmaps/color.xpm"
 #include "bitmaps/person.xpm"
@@ -610,7 +475,6 @@ void gbtTreePlayerToolbar::PostPendingChanges()
 //=====================================================================
 
 BEGIN_EVENT_TABLE(EfgPanel, wxPanel)
-EVT_MENU(GBT_MENU_TOOLS_DOMINANCE, EfgPanel::OnToolsDominance)
 EVT_MENU(GBT_MENU_VIEW_ZOOMIN, EfgPanel::OnViewZoomIn)
 EVT_MENU(GBT_MENU_VIEW_ZOOMOUT, EfgPanel::OnViewZoomOut)
 EVT_MENU(GBT_MENU_VIEW_ZOOM100, EfgPanel::OnViewZoom100)
@@ -619,12 +483,9 @@ END_EVENT_TABLE()
 
 EfgPanel::EfgPanel(wxWindow *p_parent, GameDocument *p_doc)
   : wxPanel(p_parent, wxID_ANY), GameView(p_doc), m_treeWindow(new EfgDisplay(this, m_doc)),
-    m_dominanceToolbar(new gbtBehavDominanceToolbar(this, m_doc)),
     m_playerToolbar(new gbtTreePlayerToolbar(this, m_doc))
 {
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
-  topSizer->Add(m_dominanceToolbar, 0, wxEXPAND, 0);
-  topSizer->Show(m_dominanceToolbar, false);
 
   auto *treeSizer = new wxBoxSizer(wxHORIZONTAL);
   treeSizer->Add(m_playerToolbar, 0, wxEXPAND, 0);
@@ -633,12 +494,6 @@ EfgPanel::EfgPanel(wxWindow *p_parent, GameDocument *p_doc)
   topSizer->Add(treeSizer, 1, wxEXPAND, 0);
   SetSizer(topSizer);
   wxWindowBase::Layout();
-}
-
-void EfgPanel::OnToolsDominance(wxCommandEvent &p_event)
-{
-  GetSizer()->Show(m_dominanceToolbar, p_event.IsChecked(), true);
-  GetSizer()->Layout();
 }
 
 void EfgPanel::OnViewZoomIn(wxCommandEvent &)

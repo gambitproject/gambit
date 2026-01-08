@@ -36,11 +36,11 @@ outputting the strategic form of the game in one of these formats:
    Suppresses printing of the banner at program launch.
 
 
-Example invocation for HTML output::
+Example invocation for HTML output
 
    $ gambit-convert -O html 2x2.nfg
    Convert games among various file formats
-   Gambit version 16.4.0, Copyright (C) 1994-2025, The Gambit Project
+   Gambit version |release|, Copyright (C) 1994-2026, The Gambit Project
    This is free software, distributed under the GNU GPL
 
    <center><h1>Two person 2 x 2 game with unique mixed equilibrium</h1></center>
@@ -51,11 +51,11 @@ Example invocation for HTML output::
    align=center>1,0</td></tr></table>
 
 
-Example invocation for LaTeX output::
+Example invocation for LaTeX output
 
    $ gambit-convert -O sgame 2x2.nfg
    Convert games among various file formats
-   Gambit version 16.4.0, Copyright (C) 1994-2025, The Gambit Project
+   Gambit version |release|, Copyright (C) 1994-2026, The Gambit Project
    This is free software, distributed under the GNU GPL
 
    \begin{game}{2}{2}[Player 1][Player 2]

@@ -1,6 +1,6 @@
 #
 # This file is part of Gambit
-# Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+# Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 #
 # FILE: src/python/gambit/levelk.py
 # Provides support for level-k/cognitive hierarchy modeling
@@ -97,7 +97,7 @@ def fit_coghier(game, data, min_tau, max_tau, min_lam, max_lam,
     points, to polish the maximizer.
     """
     def log_like(profile, data):
-        return sum(math.log(p) * d for (p, d) in zip(profile, data))
+        return sum(math.log(p) * d for (p, d) in zip(profile, data, strict=True))
 
     def objective(params, game, data):
         penalty = 0.0
