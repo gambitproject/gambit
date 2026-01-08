@@ -5,7 +5,7 @@ import numpy as np
 
 from pygambit import Game, read_efg, read_nfg
 
-_GAMEFILES_DIR = Path(__file__).parent.parent.parent.parent / "catalog/gamefiles"
+_GAMEFILES_DIR = Path(__file__).parent.parent.parent.parent / "contrib/games"
 
 
 class CatalogGame:
