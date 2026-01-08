@@ -93,7 +93,10 @@ class CatalogGameFromFile(CatalogGame):
         cls._extract_metadata_from_game(cls._cached_game)
 
 
-def games(game_type: Literal["all", "nfg", "efg"] = "all") -> list[str]:
+def games(
+    game_type: Literal["all", "nfg", "efg"] = "all",
+    num_players: int | None = None,
+) -> list[str]:
     """
     Return a list of catalog game names.
 
@@ -104,6 +107,8 @@ def games(game_type: Literal["all", "nfg", "efg"] = "all") -> list[str]:
         - "all": return all games
         - "nfg": return only normal-form (strategic) games
         - "efg": return only extensive-form games
+    num_players : int | None, default None
+        If specified, only return games with the given number of players.
 
     Returns
     -------
@@ -116,6 +121,8 @@ def games(game_type: Literal["all", "nfg", "efg"] = "all") -> list[str]:
         for subclass in cls.__subclasses__():
             if subclass.__name__ not in ["CatalogGameFromFile"] and (
                 game_type == "all" or subclass.game_type == game_type
+            ) and (
+                num_players is None or subclass.num_players == num_players
             ):
                 all_subclasses.append(subclass.__name__)
             all_subclasses.extend(get_all_subclasses(subclass))
