@@ -41,8 +41,8 @@ class CatalogGame:
         """Extract metadata when subclass is defined (if not a file-based game)."""
         super().__init_subclass__(**kwargs)
 
-        # Skip if this is CatalogGameFromFile or its subclasses
-        if cls.__name__ == "CatalogGameFromFile" or issubclass(cls, CatalogGameFromFile):
+        # Skip if this is CatalogGameFromContrib or its subclasses
+        if cls.__name__ == "CatalogGameFromContrib" or issubclass(cls, CatalogGameFromContrib):
             return
 
         # For non-file-based games, create a temporary instance to extract metadata
@@ -54,7 +54,7 @@ class CatalogGame:
             pass
 
 
-class CatalogGameFromFile(CatalogGame):
+class CatalogGameFromContrib(CatalogGame):
     """
     Base class for catalog games loaded from files.
     This class serves as a template for specific games in the catalog.
@@ -125,7 +125,7 @@ def games(
         """Recursively get all subclasses."""
         all_subclasses = []
         for subclass in cls.__subclasses__():
-            if subclass.__name__ not in ["CatalogGameFromFile"] and (
+            if subclass.__name__ not in ["CatalogGameFromContrib"] and (
                 game_type == "all" or subclass.game_type == game_type
             ) and (
                 num_players is None or subclass.num_players == num_players
@@ -142,13 +142,13 @@ def games(
 ############################
 
 
-class PrisonersDilemma(CatalogGameFromFile):
+class PrisonersDilemma(CatalogGameFromContrib):
     game_file = "pd.nfg"
     description = "Prisoner's Dilemma game."
     citation = "Example citation for Prisoner's Dilemma."
 
 
-class TwoStageMatchingPennies(CatalogGameFromFile):
+class TwoStageMatchingPennies(CatalogGameFromContrib):
     game_file = "2smp.efg"
     description = "Two-Stage Matching Pennies game."
     citation = "Example citation for Two-Stage Matching Pennies."
