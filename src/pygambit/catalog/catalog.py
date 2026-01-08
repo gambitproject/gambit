@@ -1,8 +1,7 @@
 from pathlib import Path
 from typing import Literal
 
-import numpy as np
-
+# import numpy as np
 from pygambit import Game, read_efg, read_nfg
 
 _GAMEFILES_DIR = Path(__file__).parent.parent.parent.parent / "contrib/games"
@@ -152,20 +151,33 @@ class TwoStageMatchingPennies(CatalogGameFromFile):
 ##########################################
 
 
-class PrisonersDilemmaTestgame(CatalogGame):
-    title = "Test Prisoner's Dilemma"
-    game_type = "nfg"
-    description = "A simple test game based on the Prisoner's Dilemma."
-    citation = "Example citation for Test Prisoner's Dilemma."
+class OneShotTrust(CatalogGame):
 
-    def __new__(cls) -> Game:
-        player1_payoffs = np.array([[-1, -3], [0, -2]])
-        player2_payoffs = np.transpose(player1_payoffs)
+    title = "One-shot trust game, after Kreps (1990)"
+    game_type = "efg"
+    description = """
+    The unique_NE_variant makes Trust a dominant strategy, replacing the
+    non-singleton equilibrium component from the standard version of the game
+    where the Buyer plays "Not Trust" and the seller can play any mixture with
+    < 0.5 probability on Honor with a unique NE where the Buyer plays Trust and
+    the Seller plays Abuse.
+    """
+    citation = "Kreps (1990)"
 
-        g1 = Game.from_arrays(
-            player1_payoffs,
-            player2_payoffs,
-            title=cls.title,
+    def __new__(cls, unique_NE_variant: bool = False) -> Game:
+        g = Game.new_tree(
+            players=["Buyer", "Seller"], title=cls.title
         )
-
-        return g1
+        g.append_move(g.root, "Buyer", ["Trust", "Not trust"])
+        g.append_move(g.root.children[0], "Seller", ["Honor", "Abuse"])
+        g.set_outcome(g.root.children[0].children[0], g.add_outcome([1, 1], label="Trustworthy"))
+        if unique_NE_variant:
+            g.set_outcome(
+                g.root.children[0].children[1], g.add_outcome(["1/2", 2], label="Untrustworthy")
+            )
+        else:
+            g.set_outcome(
+                g.root.children[0].children[1], g.add_outcome([-1, 2], label="Untrustworthy")
+            )
+        g.set_outcome(g.root.children[1], g.add_outcome([0, 0], label="Opt-out"))
+        return g
