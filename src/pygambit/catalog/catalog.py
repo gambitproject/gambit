@@ -20,8 +20,16 @@ class CatalogGame:
     description: str
     citation: str
 
-    def __new__(cls) -> Game:
-        raise NotImplementedError("Subclasses must implement __new__ method")
+    def __new__(cls, *args, **kwargs) -> Game:
+        """Create a game instance by calling the _game() method."""
+        if hasattr(cls, "_game") and cls._game is not CatalogGame._game:
+            return cls._game(*args, **kwargs)
+        raise NotImplementedError("Subclasses must implement _game() method")
+
+    @staticmethod
+    def _game() -> Game:
+        """Override this method in subclasses to define the game."""
+        raise NotImplementedError("Subclasses must implement _game() method")
 
     @classmethod
     def _extract_metadata_from_game(cls, game: Game) -> None:
@@ -39,7 +47,7 @@ class CatalogGame:
 
         # For non-file-based games, create a temporary instance to extract metadata
         try:
-            temp_game = cls.__new__(cls)
+            temp_game = cls._game()
             cls._extract_metadata_from_game(temp_game)
         except NotImplementedError:
             # Base class, skip
@@ -164,9 +172,10 @@ class OneShotTrust(CatalogGame):
     """
     citation = "Kreps (1990)"
 
-    def __new__(cls, unique_NE_variant: bool = False) -> Game:
+    @staticmethod
+    def _game(unique_NE_variant: bool = False):
         g = Game.new_tree(
-            players=["Buyer", "Seller"], title=cls.title
+            players=["Buyer", "Seller"], title="One-shot trust game, after Kreps (1990)"
         )
         g.append_move(g.root, "Buyer", ["Trust", "Not trust"])
         g.append_move(g.root.children[0], "Seller", ["Honor", "Abuse"])
