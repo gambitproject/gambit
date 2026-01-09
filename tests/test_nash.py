@@ -16,16 +16,127 @@ from . import games
 TOL = 1e-13  # tolerance for floating point assertions
 
 
-def test_enumpure_strategy():
-    """Test calls of enumeration of pure strategies."""
-    game = games.read_from_file("stripped_down_poker.efg")
-    assert len(gbt.nash.enumpure_solve(game).equilibria) == 0
+@pytest.mark.nash
+@pytest.mark.nash_enumpure_strategy
+@pytest.mark.parametrize(
+    "game,pure_strategy_prof_data",
+    [
+        # Zero-sum games
+        (
+            games.create_two_player_perfect_info_win_lose_efg(),
+            [
+                [[0, 0, 1, 0], [1, 0, 0]],
+                [[0, 0, 1, 0], [0, 1, 0]],
+                [[0, 0, 1, 0], [0, 0, 1]],
+            ]
+        ),
+        (games.create_stripped_down_poker_efg(), []),
+        # Non-zero-sum 2-player games
+        (games.create_one_shot_trust_efg(), [[[0, 1], [0, 1]]]),
+        (
+            games.create_EFG_for_nxn_bimatrix_coordination_game(3),
+            [
+                [[1, 0, 0], [1, 0, 0]],
+                [[0, 1, 0], [0, 1, 0]],
+                [[0, 0, 1], [0, 0, 1]],
+            ],
+        ),
+        (games.create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq(), []),
+        # 3-player game
+        (
+            games.create_mixed_behav_game_efg(),
+            [
+                [[1, 0], [1, 0], [1, 0]],
+                [[0, 1], [0, 1], [1, 0]],
+                [[0, 1], [1, 0], [0, 1]],
+                [[1, 0], [0, 1], [0, 1]],
+            ],
+        ),
+    ]
+)
+def test_enumpure_strategy(game: gbt.Game, pure_strategy_prof_data: list):
+    """Test calls of enumeration of pure strategy equilibria
+
+       Tests max regret being zero (internal consistency) and compares the computed sequence of
+       pure strategy equilibria to a previosuly computed sequence (regression test)
+    """
+    result = gbt.nash.enumpure_solve(game)
+    assert len(result.equilibria) == len(pure_strategy_prof_data)
+    for eq, exp in zip(result.equilibria, pure_strategy_prof_data, strict=True):
+        assert eq.max_regret() == 0
+        expected = game.mixed_strategy_profile(rational=True, data=exp)
+        assert eq == expected
 
 
-def test_enumpure_agent():
-    """Test calls of enumeration of pure agent strategies."""
-    game = games.read_from_file("stripped_down_poker.efg")
-    assert len(gbt.nash.enumpure_agent_solve(game).equilibria) == 0
+@pytest.mark.nash
+@pytest.mark.nash_enumpure_agent
+@pytest.mark.parametrize(
+    "game,pure_behav_prof_data",
+    [
+        #############################################################
+        # Examples where Nash pure behaviors and agent-form pure equillibrium behaviors coincide
+        #############################################################
+        # Zero-sum games
+        (
+            games.create_two_player_perfect_info_win_lose_efg(),
+            [
+                [[[1, 0], [1, 0]], [[0, 1], [1, 0]]],
+                [[[0, 1], [1, 0]], [[1, 0], [1, 0]]],
+                [[[0, 1], [1, 0]], [[1, 0], [0, 1]]],
+                [[[0, 1], [1, 0]], [[0, 1], [1, 0]]],
+                [[[0, 1], [1, 0]], [[0, 1], [0, 1]]]
+            ]
+        ),
+        (games.create_stripped_down_poker_efg(), []),
+        # Non-zero-sum 2-player games
+        (games.create_one_shot_trust_efg(), [[[[0, 1]], [[0, 1]]]]),
+        (
+            games.create_EFG_for_nxn_bimatrix_coordination_game(3),
+            [
+                [[[1, 0, 0]], [[1, 0, 0]]],
+                [[[0, 1, 0]], [[0, 1, 0]]],
+                [[[0, 0, 1]], [[0, 0, 1]]],
+            ],
+        ),
+        (games.create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq(), []),
+        # 3-player game
+        (
+            games.create_mixed_behav_game_efg(),
+            [
+                [[[1, 0]], [[1, 0]], [[1, 0]]],
+                [[[1, 0]], [[0, 1]], [[0, 1]]],
+                [[[0, 1]], [[1, 0]], [[0, 1]]],
+                [[[0, 1]], [[0, 1]], [[1, 0]]],
+            ],
+        ),
+        #############################################################
+        # Examples where the are agent-form pure equillibrium behaviors that are not Nash eq
+        #############################################################
+        (
+            games.read_from_file("myerson_fig_4_2.efg"),
+            [
+                [[[1, 0], [0, 1]], [[0, 1]]],
+                [[[0, 1], [0, 1]], [[1, 0]]]
+            ]
+        ),
+    ]
+)
+def test_enumpure_agent(game: gbt.Game, pure_behav_prof_data: list):
+    """Test calls of enumeration of pure agent (behavior) equilibria
+
+       Tests agent max regret being zero (internal consistency) and compares the computed
+       sequence of pure agent equilibria to a previosuly computed sequence (regression test)
+
+       This should include all Nash equilibria in pure behaviors, but may include further
+       profiles that are not Nash equilibria
+
+    """
+    result = gbt.nash.enumpure_agent_solve(game)
+    assert len(result.equilibria) == len(pure_behav_prof_data)
+    for eq, exp in zip(result.equilibria, pure_behav_prof_data, strict=True):
+        assert eq.agent_max_regret() == 0
+        expected = game.mixed_behavior_profile(rational=True, data=exp)
+        assert eq == expected
 
 
 def test_enummixed_double():

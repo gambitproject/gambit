@@ -75,12 +75,14 @@ max-line-length = 99
 [tool.pytest.ini_options]
 addopts = "--strict-markers"
 markers = [
+    "nash_enumpure_strategy: tests of enumpure_solve in pure strategies",
+    "nash_enumpure_agent: tests of enumpure_solve in pure behaviors",
     "nash_enummixed_strategy: tests of enummixed_solve in mixed strategies",
-    "nash_enumpoly_behavior: tests of enumpoly_solve in behavior strategies",
+    "nash_enumpoly_behavior: tests of enumpoly_solve in mixed behaviors",
     "nash_lcp_strategy: tests of lcp_solve in mixed strategies",
-    "nash_lcp_behavior: tests of lcp_solve in behavior strategies",
+    "nash_lcp_behavior: tests of lcp_solve in mixed behaviors",
     "nash_lp_strategy: tests of lp_solve in mixed strategies",
-    "nash_lp_behavior: tests of lp_solve in behavior strategies",
+    "nash_lp_behavior: tests of lp_solve in mixed behaviors",
     "nash: all tests of Nash equilibrium solvers",
     "slow: all time-consuming tests",
 ]
