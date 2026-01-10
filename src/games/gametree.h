@@ -47,6 +47,7 @@ protected:
   mutable std::shared_ptr<OwnPriorActionInfo> m_ownPriorActionInfo;
   mutable std::unique_ptr<std::set<GameNodeRep *>> m_unreachableNodes;
   mutable std::set<GameInfosetRep *> m_absentMindedInfosets;
+  mutable std::map<GameInfosetRep *, GameNodeRep *> m_infosetSubgameRoot;
 
   /// @name Private auxiliary functions
   //@{
@@ -98,6 +99,13 @@ public:
   /// Returns the largest payoff to the player in any play of the game
   Rational GetPlayerMaxPayoff(const GamePlayer &) const override;
   bool IsAbsentMinded(const GameInfoset &p_infoset) const override;
+  GameNode GetSubgameRoot(const GameInfoset &infoset) const override
+  {
+    if (m_infosetSubgameRoot.empty()) {
+      const_cast<GameTreeRep *>(this)->BuildSubgameRoots();
+    }
+    return {m_infosetSubgameRoot.at(infoset.get())->shared_from_this()};
+  }
   //@}
 
   /// @name Players
@@ -182,6 +190,7 @@ private:
   std::vector<GameNodeRep *> BuildConsistentPlaysRecursiveImpl(GameNodeRep *node);
   void BuildOwnPriorActions() const;
   void BuildUnreachableNodes() const;
+  void BuildSubgameRoots() const;
 };
 
 template <class T> class TreeMixedStrategyProfileRep : public MixedStrategyProfileRep<T> {

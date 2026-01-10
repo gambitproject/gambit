@@ -111,21 +111,23 @@ def test_infoset_plays():
         ]
     ),
     (
-        "subgames.efg",
+        "subgame-roots-finder-small-subgames-and-merges.efg",
         [
             ("Player 1", 0, {None}),
             ("Player 1", 1, {None}),
             ("Player 1", 2, {("Player 1", 1, "1")}),
-            ("Player 1", 3, {("Player 1", 5, "1"), ("Player 1", 1, "2")}),
+            ("Player 1", 3, {("Player 1", 1, "2"), ("Player 1", 5, "1")}),
             ("Player 1", 4, {("Player 1", 1, "2")}),
             ("Player 1", 5, {("Player 1", 4, "2")}),
             ("Player 1", 6, {("Player 1", 1, "2")}),
             ("Player 2", 0, {None}),
             ("Player 2", 1, {("Player 2", 0, "2")}),
-            ("Player 2", 2, {("Player 2", 1, "1")}),
-            ("Player 2", 3, {("Player 2", 2, "1")}),
-            ("Player 2", 4, {("Player 2", 2, "2")}),
+            ("Player 2", 2, {("Player 2", 1, "2"), ("Player 2", 3, "1")}),
+            ("Player 2", 3, {("Player 2", 2, "1"), ("Player 2", 1, "2")}),
+            ("Player 2", 4, {("Player 2", 1, "1")}),
             ("Player 2", 5, {("Player 2", 4, "1")}),
+            ("Player 2", 6, {("Player 2", 4, "2")}),
+            ("Player 2", 7, {("Player 2", 6, "1")}),
         ]
     ),
     # An absent-minded driver game
