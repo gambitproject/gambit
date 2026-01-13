@@ -1,3 +1,4 @@
+import inspect
 from pathlib import Path
 from typing import Literal
 
@@ -37,6 +38,14 @@ class CatalogGame:
         cls.title = game.title
         cls.num_players = len(game.players)
 
+    @classmethod
+    def _extract_description_from_docstring(cls) -> None:
+        """Populate description from the class docstring."""
+        if cls.__doc__:
+            cls.description = inspect.cleandoc(cls.__doc__)
+        else:
+            cls.description = ""
+
     def __init_subclass__(cls, **kwargs):
         """Extract metadata when subclass is defined (if not a file-based game)."""
         super().__init_subclass__(**kwargs)
@@ -44,6 +53,9 @@ class CatalogGame:
         # Skip if this is CatalogGameFromContrib or its subclasses
         if cls.__name__ == "CatalogGameFromContrib" or issubclass(cls, CatalogGameFromContrib):
             return
+
+        # Pull description from docstring
+        cls._extract_description_from_docstring()
 
         # For non-file-based games, create a temporary instance to extract metadata
         try:
@@ -94,6 +106,9 @@ class CatalogGameFromContrib(CatalogGame):
         if not hasattr(cls, "game_file") or cls.game_file is None:
             raise TypeError(f"{cls.__name__} must define 'game_file' class attribute")
 
+        # Pull description from docstring
+        cls._extract_description_from_docstring()
+
         # Load game and extract metadata immediately when class is defined
         cls._cached_game = cls._load_game()
         cls._extract_metadata_from_game(cls._cached_game)
@@ -143,14 +158,18 @@ def games(
 
 
 class PrisonersDilemma(CatalogGameFromContrib):
+    """
+    Prisoner's Dilemma game.
+    """
     game_file = "pd.nfg"
-    description = "Prisoner's Dilemma game."
     citation = "Example citation for Prisoner's Dilemma."
 
 
 class TwoStageMatchingPennies(CatalogGameFromContrib):
+    """
+    Two-Stage Matching Pennies game.
+    """
     game_file = "2smp.efg"
-    description = "Two-Stage Matching Pennies game."
     citation = "Example citation for Two-Stage Matching Pennies."
 
 
@@ -160,14 +179,14 @@ class TwoStageMatchingPennies(CatalogGameFromContrib):
 
 
 class OneShotTrust(CatalogGame):
-    game_type = "efg"
-    description = """
+    """
     The unique_NE_variant makes Trust a dominant strategy, replacing the
     non-singleton equilibrium component from the standard version of the game
     where the Buyer plays "Not Trust" and the seller can play any mixture with
     < 0.5 probability on Honor with a unique NE where the Buyer plays Trust and
     the Seller plays Abuse.
     """
+    game_type = "efg"
     citation = "Kreps (1990)"
 
     @staticmethod
