@@ -33,12 +33,6 @@ class CatalogGame:
         raise NotImplementedError("Subclasses must implement _game() method")
 
     @classmethod
-    def _extract_metadata_from_game(cls, game: Game) -> None:
-        """Extract metadata from the game and set as class attributes."""
-        cls.title = game.title
-        cls.num_players = len(game.players)
-
-    @classmethod
     def _extract_description_from_docstring(cls) -> None:
         """Populate description from the class docstring."""
         if cls.__doc__:
@@ -56,14 +50,6 @@ class CatalogGame:
 
         # Pull description from docstring
         cls._extract_description_from_docstring()
-
-        # For non-file-based games, create a temporary instance to extract metadata
-        try:
-            temp_game = cls._game()
-            cls._extract_metadata_from_game(temp_game)
-        except NotImplementedError:
-            # Base class, skip
-            pass
 
 
 class CatalogGameFromContrib(CatalogGame):
@@ -108,10 +94,6 @@ class CatalogGameFromContrib(CatalogGame):
 
         # Pull description from docstring
         cls._extract_description_from_docstring()
-
-        # Load game and extract metadata immediately when class is defined
-        cls._cached_game = cls._load_game()
-        cls._extract_metadata_from_game(cls._cached_game)
 
 
 def games(
@@ -162,6 +144,9 @@ class PrisonersDilemma(CatalogGameFromContrib):
     Prisoner's Dilemma game.
     """
     game_file = "pd.nfg"
+    game_type = "nfg"
+    title = "Prisoner's Dilemma"
+    num_players = 2
     citation = "Example citation for Prisoner's Dilemma."
 
 
@@ -170,6 +155,9 @@ class TwoStageMatchingPennies(CatalogGameFromContrib):
     Two-Stage Matching Pennies game.
     """
     game_file = "2smp.efg"
+    game_type = "efg"
+    title = "Two-Stage Matching Pennies game."
+    num_players = 2
     citation = "Example citation for Two-Stage Matching Pennies."
 
 
@@ -187,6 +175,8 @@ class OneShotTrust(CatalogGame):
     the Seller plays Abuse.
     """
     game_type = "efg"
+    title = "One shot trust game."
+    num_players = 2
     citation = "Kreps (1990)"
 
     @staticmethod
