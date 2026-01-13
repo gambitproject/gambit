@@ -47,23 +47,13 @@ class CatalogGameFromContrib(CatalogGame):
     Calling any subclass will return an instance of the corresponding game.
     """
 
-    game_file: str
-    _cached_game: Game | None = None
+    game_file: str | None = None
 
     def __new__(cls) -> Game:
-        # Return cached game if available, otherwise load it
-        if cls._cached_game is None:
-            cls._cached_game = cls._load_game()
-        # Return a fresh instance (not the cached one)
-        return cls._load_game()
-
-    @classmethod
-    def _load_game(cls) -> Game:
         """Load the game from file."""
         if cls.game_file is None:
             raise NotImplementedError(f"{cls.__name__} must define 'game_file'")
 
-        cls.game_type = cls.game_file.split(".")[-1]
         file_path = _GAMEFILES_DIR / cls.game_file
 
         if cls.game_type == "nfg":
