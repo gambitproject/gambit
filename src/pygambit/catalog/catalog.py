@@ -32,24 +32,12 @@ class CatalogGame:
         """Override this method in subclasses to define the game."""
         raise NotImplementedError("Subclasses must implement _game() method")
 
-    @classmethod
-    def _extract_description_from_docstring(cls) -> None:
-        """Populate description from the class docstring."""
+    def __init_subclass__(cls):
+        """Extract description from docstring when subclass defined."""
         if cls.__doc__:
             cls.description = inspect.cleandoc(cls.__doc__)
         else:
             cls.description = ""
-
-    def __init_subclass__(cls, **kwargs):
-        """Extract metadata when subclass is defined (if not a file-based game)."""
-        super().__init_subclass__(**kwargs)
-
-        # Skip if this is CatalogGameFromContrib or its subclasses
-        if cls.__name__ == "CatalogGameFromContrib" or issubclass(cls, CatalogGameFromContrib):
-            return
-
-        # Pull description from docstring
-        cls._extract_description_from_docstring()
 
 
 class CatalogGameFromContrib(CatalogGame):
@@ -84,16 +72,6 @@ class CatalogGameFromContrib(CatalogGame):
             return read_efg(str(file_path))
         else:
             raise ValueError(f"Game file extension must be 'nfg' or 'efg', got '{cls.game_type}'")
-
-    def __init_subclass__(cls, **kwargs):
-        """Validate and extract metadata when subclass is defined."""
-        super().__init_subclass__(**kwargs)
-
-        if not hasattr(cls, "game_file") or cls.game_file is None:
-            raise TypeError(f"{cls.__name__} must define 'game_file' class attribute")
-
-        # Pull description from docstring
-        cls._extract_description_from_docstring()
 
 
 def games(
