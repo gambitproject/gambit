@@ -80,7 +80,6 @@ def create_matching_pennies_efg(with_neutral_outcome: bool = False) -> gbt.Game:
     if with_neutral_outcome:
         neutral = g.add_outcome([0, 0], label="neutral")
         g.set_outcome(g.root.children[0], neutral)
-    g.to_efg(f"tmp2_{with_neutral_outcome}.efg")
     return g
 
 
