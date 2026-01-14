@@ -565,14 +565,14 @@ def test_lcp_behavior_double():
             [[[0, 1], [1, 0]], [[0, 1], ["1/2", "1/2"]]],
         ),
         (
-            games.create_three_action_internal_outcomes_efg(),
+            games.read_from_file("2_player_chance.efg"),
             [
                 [["1/3", 0, "2/3"], ["2/3", 0, "1/3"]],
                 [["2/3", "1/3"], ["1/3", "2/3"], ["1/3", "2/3"]],
             ]
         ),
         (
-            games.create_three_action_internal_outcomes_efg(nonterm_outcomes=True),
+            games.read_from_file("2_player_chance_nonterm_outcomes_and_missing_term_outcomes.efg"),
             [
                 [["1/3", 0, "2/3"], ["2/3", 0, "1/3"]],
                 [["2/3", "1/3"], ["1/3", "2/3"], ["1/3", "2/3"]],
@@ -770,14 +770,14 @@ def test_lp_behavior_double():
                 [[[0, 1]], [[1, 0], [1, 0]]],
         ),
         (
-            games.create_three_action_internal_outcomes_efg(),
+            games.read_from_file("2_player_chance.efg"),
             [
                 [["1/3", 0, "2/3"], ["2/3", 0, "1/3"]],
                 [["2/3", "1/3"], ["2/3", "1/3"], ["1/3", "2/3"]],
             ]
         ),
         (
-            games.create_three_action_internal_outcomes_efg(nonterm_outcomes=True),
+            games.read_from_file("2_player_chance_nonterm_outcomes_and_missing_term_outcomes.efg"),
             [
                 [["1/3", 0, "2/3"], ["2/3", 0, "1/3"]],
                 [["2/3", "1/3"], ["2/3", "1/3"], ["1/3", "2/3"]],

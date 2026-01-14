@@ -67,71 +67,20 @@ def create_2x2_zero_sum_efg(missing_term_outcome: bool = False) -> gbt.Game:
     return g
 
 
-def create_three_action_internal_outcomes_efg(nonterm_outcomes: bool = False) -> gbt.Game:
-    """
-    with nonterm_outcomes there are nonterminal outcomes, and missing outcomes at some leaves
-    """
-    g = gbt.Game.new_tree(players=["1", "2"], title="")
-    g.append_move(g.root, g.players.chance, ["H", "L"])
-    for i in range(2):
-        g.append_move(g.root.children[i], "1", ["A", "B", "C"])
-    for i in range(3):
-        g.append_move(g.root.children[0].children[i], "2", ["X", "Y"])
-        g.append_infoset(g.root.children[1].children[i], g.root.children[0].children[i].infoset)
-    o_1 = g.add_outcome([1, -1], label="1")
-    o_m1 = g.add_outcome([-1, 1], label="-1")
-    o_2 = g.add_outcome([2, -2], label="2")
-    o_m2 = g.add_outcome([-2, 2], label="-2")
-    o_z = g.add_outcome([0, 0], label="0")
-    if nonterm_outcomes:
-        g.set_outcome(g.root.children[0].children[0], o_1)
-        g.set_outcome(g.root.children[1].children[2], o_m1)
-        g.set_outcome(g.root.children[0].children[0].children[1], o_m2)
-        g.set_outcome(g.root.children[0].children[1].children[0], o_m1)
-        g.set_outcome(g.root.children[0].children[1].children[1], o_1)
-        g.set_outcome(g.root.children[0].children[2].children[0], o_1)
-        g.set_outcome(g.root.children[1].children[0].children[1], o_1)
-        g.set_outcome(g.root.children[1].children[1].children[0], o_1)
-        g.set_outcome(g.root.children[1].children[1].children[1], o_m1)
-        g.set_outcome(g.root.children[1].children[2].children[1], o_2)
-    else:
-        g.set_outcome(g.root.children[0].children[0].children[0], o_1)
-        g.set_outcome(g.root.children[0].children[0].children[1], o_m1)
-        g.set_outcome(g.root.children[0].children[1].children[0], o_m1)
-        g.set_outcome(g.root.children[0].children[1].children[1], o_1)
-        g.set_outcome(g.root.children[0].children[2].children[0], o_1)
-        g.set_outcome(g.root.children[0].children[2].children[1], o_z)
-
-        g.set_outcome(g.root.children[1].children[0].children[0], o_z)
-        g.set_outcome(g.root.children[1].children[0].children[1], o_1)
-        g.set_outcome(g.root.children[1].children[1].children[0], o_1)
-        g.set_outcome(g.root.children[1].children[1].children[1], o_m1)
-        g.set_outcome(g.root.children[1].children[2].children[0], o_m1)
-        g.set_outcome(g.root.children[1].children[2].children[1], o_1)
-    tmp = "_nonterm_outcomes_and_missing_term_outcomes" if nonterm_outcomes else ""
-    g.to_efg(f"2_player_chance_3_actions{tmp}.efg")
-    return g
-
-
 def create_matching_pennies_efg(with_neutral_outcome: bool = False) -> gbt.Game:
     """
-    TODO: use create_efg_corresponding_to_bimatrix_game
-
     The version with_neutral_outcome adds a (0,0) payoff outcomes at a non-terminal node.
     """
-    g = gbt.Game.new_tree(
-        players=["Alice", "Bob"], title="Matching pennies")
-    g.append_move(g.root, "Alice", ["H", "T"])
-    g.append_move(g.root.children, "Bob", ["h", "t"])
-    alice_lose = g.add_outcome([-1, 1], label="Alice lose")
-    alice_win = g.add_outcome([1, -1], label="Alice win")
+    title = "Matching Pennies"
+    if with_neutral_outcome:
+        title += " with nonterminal neutral outcome"
+    A = np.array([[1, -1], [-1, 1]])
+    B = -A
+    g = create_efg_corresponding_to_bimatrix_game(A, B, title)
     if with_neutral_outcome:
         neutral = g.add_outcome([0, 0], label="neutral")
-        g.set_outcome(g.root.children["H"], neutral)
-    g.set_outcome(g.root.children["H"].children["h"], alice_win)
-    g.set_outcome(g.root.children["T"].children["t"], alice_win)
-    g.set_outcome(g.root.children["H"].children["t"], alice_lose)
-    g.set_outcome(g.root.children["T"].children["h"], alice_lose)
+        g.set_outcome(g.root.children[0], neutral)
+    g.to_efg(f"tmp2_{with_neutral_outcome}.efg")
     return g
 
 

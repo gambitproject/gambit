@@ -421,8 +421,8 @@ def test_reduced_strategic_form(
             games.read_from_file("entry_accommodation_with_nonterm_outcomes.efg")
         ),
         (
-            games.create_three_action_internal_outcomes_efg(),
-            games.create_three_action_internal_outcomes_efg(nonterm_outcomes=True)
+            games.read_from_file("2_player_chance.efg"),
+            games.read_from_file("2_player_chance_nonterm_outcomes_and_missing_term_outcomes.efg"),
         ),
         (
             games.create_kuhn_poker_efg(),
