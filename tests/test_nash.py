@@ -618,11 +618,11 @@ def test_lcp_behavior_double():
                 [[[0, 0, 0, 1]], [[0, 0, 0, 1]]],
         ),
         (
-            games.create_entry_accomodation_efg(),
+            games.read_from_file("entry_accommodation.efg"),
             [[["2/3", "1/3"], [1, 0], [1, 0]], [["2/3", "1/3"]]]
         ),
         (
-            games.create_entry_accomodation_efg(nonterm_outcomes=True),
+            games.read_from_file("entry_accommodation_with_nonterm_outcomes.efg"),
             [[["2/3", "1/3"], [1, 0], [1, 0]], [["2/3", "1/3"]]],
         ),
         (

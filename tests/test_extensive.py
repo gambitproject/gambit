@@ -417,8 +417,8 @@ def test_reduced_strategic_form(
             games.create_non_zero_sum_lacking_outcome_efg(missing_term_outcome=True)
         ),
         (
-            games.create_entry_accomodation_efg(),
-            games.create_entry_accomodation_efg(nonterm_outcomes=True)
+            games.read_from_file("entry_accommodation.efg"),
+            games.read_from_file("entry_accommodation_with_nonterm_outcomes.efg")
         ),
         (
             games.create_three_action_internal_outcomes_efg(),
