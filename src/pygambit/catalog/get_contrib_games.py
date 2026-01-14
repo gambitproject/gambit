@@ -36,10 +36,16 @@ if __name__ == "__main__":
     lines = []
     lines.append("from .catalog_game import CatalogGameFromContrib\n\n")
 
+    class_names = []
     for path in all_files:
         stem = path.stem
         class_name = make_class_name(stem)
 
+        # Avoid duplicates (some EFG and NFG have same name)
+        if class_name in class_names:
+            class_name += path.suffix.split(".")[-1].upper()
+
+        class_names.append(class_name)
         lines.append(f"class {class_name}(CatalogGameFromContrib):")
         lines.append(f'    game_file = "{path.name}"')
         lines.append("\n")
