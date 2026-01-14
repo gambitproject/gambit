@@ -373,6 +373,8 @@ def kuhn_poker_lcp_first_mixed_strategy_prof():
 
 def create_one_shot_trust_efg(unique_NE_variant: bool = False) -> gbt.Game:
     """
+    TODO: this could be replaced with two .efg files
+
     One-shot trust game, after Kreps (1990)
 
     The unique_NE_variant makes Trust a dominant strategy, replacing the
