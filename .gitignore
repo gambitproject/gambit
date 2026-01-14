@@ -50,3 +50,4 @@ Gambit.app/*
 *.ef
 build_support/msw/gambit.wxs
 build_support/osx/Info.plist
+src/pygambit/catalog/generated_catalog_games.py
