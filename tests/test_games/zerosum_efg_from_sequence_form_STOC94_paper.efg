@@ -1,5 +1,10 @@
-EFG 2 R "From STOC'94 paper" { "1" "2" }
-""
+EFG 2 R "Two-player zero-sum EFG from sequence form STOC'94 paper" { "1" "2" }
+"
+Example from
+
+Fast Algorithms for Finding Randomized Strategies in Game Trees (STOC 1994)
+Koller, Megiddo, von Stengel
+"
 
 c "" 1 "" { "1" 0.2 "2" 0.2 "3" 0.2 "4" 0.4 } 0
 p "" 1 1 "0" { "l" "r" } 0

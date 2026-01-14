@@ -758,7 +758,7 @@ def test_lp_behavior_double():
             ],
         ),
         (
-                games.create_seq_form_STOC_paper_zero_sum_2_player_efg(),
+                games.read_from_file("zerosum_efg_from_sequence_form_STOC94_paper.efg"),
                 [
                     [[0, 1], ["2/3", "1/3"], ["1/3", "2/3"]],
                     [["5/6", "1/6"], ["5/9", "4/9"]],
