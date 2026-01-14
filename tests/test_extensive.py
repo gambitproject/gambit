@@ -168,7 +168,7 @@ def test_outcome_index_exception_label():
         ),
         # 2-player (zero-sum) game; reduction for both players; generic payoffs
         (
-            games.create_reduction_generic_payoffs_efg(),
+            games.read_from_file("reduction_generic_payoffs.efg"),
             [
                 ["1*1", "1*2", "211", "212", "221", "222"],
                 ["11*", "12*", "2**", "3*1", "3*2", "4**"],
