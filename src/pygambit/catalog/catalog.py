@@ -129,6 +129,29 @@ class TwoStageMatchingPennies(CatalogGameFromContrib):
     citation = "Example citation for Two-Stage Matching Pennies."
 
 
+class Game2s2x2x2(CatalogGameFromContrib):
+    """
+    Two stage McKelvey McLennan game with 9 equilibria each stage.
+    """
+
+    game_file = "2s2x2x2.efg"
+    game_type = "efg"
+    title = "Two stage McKelvey McLennan game with 9 equilibria each stage"
+    num_players = 3
+    citation = "Test."
+
+
+class Artist1(CatalogGameFromContrib):
+    """
+    Artist problem, one stage.
+    """
+
+    game_file = "artist1.efg"
+    game_type = "efg"
+    title = "Artist problem, one stage"
+    num_players = 2
+    citation = "Test."
+
 ##########################################
 # Catalog games defined programmatically #
 ##########################################
