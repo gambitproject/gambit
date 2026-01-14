@@ -210,7 +210,7 @@ def test_outcome_index_exception_label():
         ),
         # # 2-player game from GTE survey; reduction for both players; payoff ties
         (
-            games.create_reduction_both_players_payoff_ties_efg(),
+            games.read_from_file("reduction_both_players_payoff_ties_GTE_survey.efg"),
             [
                 ["1*", "2*", "31", "32", "4*"],
                 [

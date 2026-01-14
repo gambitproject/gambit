@@ -602,7 +602,7 @@ def test_lcp_behavior_double():
         ),
         # Non-zero-sum games
         (
-                games.create_reduction_both_players_payoff_ties_efg(),
+                games.read_from_file("reduction_both_players_payoff_ties_GTE_survey.efg"),
                 [[[0, 0, 1, 0], [1, 0]], [[0, 1], [0, 1], [0, 1], [0, 1]]],
         ),
         (
