@@ -45,7 +45,7 @@ if __name__ == "__main__":
         lines.append(f'    game_file = "{path.name}"')
         lines.append("\n")
 
-    output_path = Path(__file__) / OUTPUT_FILE
+    output_path = Path(__file__).parent / OUTPUT_FILE
     output_path.write_text("\n".join(lines), encoding="utf-8")
 
     print(f"Generated {len(all_files)} classes")
