@@ -67,30 +67,6 @@ def create_2x2_zero_sum_efg(missing_term_outcome: bool = False) -> gbt.Game:
     return g
 
 
-def create_perfect_info_with_chance_efg() -> gbt.Game:
-    # Tests case in which sequence profile probabilities don't sum to 1
-    g = gbt.Game.new_tree(players=["1", "2"], title="2 player perfect info with chance")
-    g.append_move(g.root, "1", ["a", "b"])
-    g.append_move(g.root.children[0], g.players.chance, ["L", "R"])
-    g.append_move(g.root.children[0].children[0], "2", ["A", "B"])
-    g.append_move(g.root.children[0].children[1], "2", ["C", "D"])
-    g.set_outcome(
-        g.root.children[0].children[0].children[0], g.add_outcome([-2, 2], label="aLA")
-    )
-    g.set_outcome(
-        g.root.children[0].children[0].children[1], g.add_outcome([-2, 2], label="aLB")
-    )
-    g.set_outcome(
-        g.root.children[0].children[1].children[0], g.add_outcome([-2, 2], label="aRC")
-    )
-    g.set_outcome(
-        g.root.children[0].children[1].children[1], g.add_outcome([-2, 2], label="aRD")
-    )
-    g.set_outcome(g.root.children[1], g.add_outcome([-1, 1], label="b"))
-    g.to_efg("perfect_info_with_chance.efg")
-    return g
-
-
 def create_three_action_internal_outcomes_efg(nonterm_outcomes: bool = False) -> gbt.Game:
     """
     with nonterm_outcomes there are nonterminal outcomes, and missing outcomes at some leaves
@@ -575,29 +551,6 @@ def create_selten_horse_game_efg() -> gbt.Game:
         5-player Selten's Horse Game
     """
     return read_from_file("e01.efg")
-
-
-def create_reduction_both_players_payoff_ties_efg() -> gbt.Game:
-    g = gbt.Game.new_tree(players=["1", "2"], title="From GTE survey")
-    g.append_move(g.root, "1", ["A", "B", "C", "D"])
-    g.append_move(g.root.children[0], "2", ["a", "b"])
-    g.append_move(g.root.children[1], "2", ["c", "d"])
-    g.append_move(g.root.children[2], "2", ["e", "f"])
-    g.append_move(g.root.children[0].children[1], "2", ["g", "h"])
-    g.append_move(g.root.children[2].children, "1", ["E", "F"])
-
-    g.set_outcome(g.root.children[0].children[0], g.add_outcome([2, 8]))
-    g.set_outcome(g.root.children[0].children[1].children[0], g.add_outcome([0, 1]))
-    g.set_outcome(g.root.children[0].children[1].children[1], g.add_outcome([5, 2]))
-    g.set_outcome(g.root.children[1].children[0], g.add_outcome([7, 6]))
-    g.set_outcome(g.root.children[1].children[1], g.add_outcome([4, 2]))
-    g.set_outcome(g.root.children[2].children[0].children[0], g.add_outcome([3, 7]))
-    g.set_outcome(g.root.children[2].children[0].children[1], g.add_outcome([8, 3]))
-    g.set_outcome(g.root.children[2].children[1].children[0], g.add_outcome([7, 8]))
-    g.set_outcome(g.root.children[2].children[1].children[1], g.add_outcome([2, 2]))
-    g.set_outcome(g.root.children[3], g.add_outcome([6, 4]))
-    g.to_efg("reduction_both_players_payoff_ties_GTE_survey.efg")
-    return g
 
 
 def create_EFG_for_nxn_bimatrix_coordination_game(n: int) -> gbt.Game:

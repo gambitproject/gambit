@@ -553,7 +553,7 @@ def test_lcp_behavior_double():
         # In the next test case:
         # 1/2-1/2 for l/r is determined by MixedBehaviorProfile.UndefinedToCentroid()
         (
-                games.create_perfect_info_with_chance_efg(),
+                games.read_from_file("perfect_info_with_chance.efg"),
                 [[[0, 1]], [[0, 1], [0, 1]]],
         ),
         (
@@ -766,7 +766,7 @@ def test_lp_behavior_double():
                 ],
         ),
         (
-                games.create_perfect_info_with_chance_efg(),
+                games.read_from_file("perfect_info_with_chance.efg"),
                 [[[0, 1]], [[1, 0], [1, 0]]],
         ),
         (
