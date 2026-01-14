@@ -401,26 +401,6 @@ def create_one_shot_trust_efg(unique_NE_variant: bool = False) -> gbt.Game:
     return g
 
 
-def create_centipede_game_with_chance_efg() -> gbt.Game:
-    """
-    Returns
-    -------
-    Game
-        2-player Centipede Game with 3 innings and a probability of altruism
-    """
-    return read_from_file("cent3.efg")
-
-
-def create_el_farol_bar_game_efg() -> gbt.Game:
-    """
-    Returns
-    -------
-    Game
-        5-player El Farol Bar Game
-    """
-    return read_from_file("el_farol_bar.efg")
-
-
 def create_EFG_for_nxn_bimatrix_coordination_game(n: int) -> gbt.Game:
     A = np.eye(n, dtype=int)
     B = A

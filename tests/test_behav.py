@@ -2039,11 +2039,11 @@ def test_specific_profile(game: gbt.Game, rational_flag: bool, data: list):
             [[["1/5", "4/5"], ["3/5", "2/5"]], [["1/4", "3/4"], ["1/4", "3/4"]]],
         ),
         (
-            games.create_el_farol_bar_game_efg(),
+            games.read_from_file("el_farol_bar.efg"),
             True,
             [[4 / 9, 5 / 9], [0], [1 / 2, 1 / 2], [11 / 12, 1 / 12], [1 / 2, 1 / 2]],
         ),
-        (games.create_el_farol_bar_game_efg(), True, [[1 / 2, 1 / 2]]),
+        (games.read_from_file("el_farol_bar.efg"), True, [[1 / 2, 1 / 2]]),
         (
             games.read_from_file("mixed_behavior_game.efg"),
             False,
@@ -2060,11 +2060,11 @@ def test_specific_profile(game: gbt.Game, rational_flag: bool, data: list):
             [[[1 / 5, 4 / 5], [3 / 5, 2 / 5]], [[1 / 4, 3 / 4], [1 / 4, 3 / 4]]],
         ),
         (
-            games.create_el_farol_bar_game_efg(),
+            games.read_from_file("el_farol_bar.efg"),
             False,
             [[4 / 9, 5 / 9], [0], [1 / 2, 1 / 2], [11 / 12, 1 / 12], [1 / 2, 1 / 2]],
         ),
-        (games.create_el_farol_bar_game_efg(), False, [[1 / 2, 1 / 2]]),
+        (games.read_from_file("el_farol_bar.efg"), False, [[1 / 2, 1 / 2]]),
     ],
 )
 def test_profile_data_error(game: gbt.Game, rational_flag: bool, data: list):

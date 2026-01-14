@@ -46,10 +46,10 @@ def _set_action_probs(profile: gbt.MixedStrategyProfile, probs: list, rational_f
         ),
         ###############################################################################
         # centipede with chance efg
-        (games.create_centipede_game_with_chance_efg(), [[0, 0, 0, 0], [1, 0, 0, 0]], True),
-        (games.create_centipede_game_with_chance_efg(), [[1, 0, 0, 0], [0, 0, 0, 0]], True),
-        (games.create_centipede_game_with_chance_efg(), [[0, 0, 0, 0], [1, 0, 0, 0]], False),
-        (games.create_centipede_game_with_chance_efg(), [[1, 0, 0, 0], [0, 0, 0, 0]], False),
+        (games.read_from_file("cent3.efg"), [[0, 0, 0, 0], [1, 0, 0, 0]], True),
+        (games.read_from_file("cent3.efg"), [[1, 0, 0, 0], [0, 0, 0, 0]], True),
+        (games.read_from_file("cent3.efg"), [[0, 0, 0, 0], [1, 0, 0, 0]], False),
+        (games.read_from_file("cent3.efg"), [[1, 0, 0, 0], [0, 0, 0, 0]], False),
     ],
 )
 def test_normalize_zero_value_error(game, profile_data, rational_flag):
@@ -83,10 +83,10 @@ def test_normalize_zero_value_error(game, profile_data, rational_flag):
         ),
         ###############################################################################
         # centipede with chance efg
-        (games.create_centipede_game_with_chance_efg(), [[-1, 0, 0, 0], [1, 0, 0, 0]], True),
-        (games.create_centipede_game_with_chance_efg(), [[1, 0, 0, 0], [-1, 0, 0, 0]], True),
-        (games.create_centipede_game_with_chance_efg(), [[-1, 0, 0, 0], [1, 0, 0, 0]], False),
-        (games.create_centipede_game_with_chance_efg(), [[1, 0, 0, 0], [-1, 0, 0, 0]], False),
+        (games.read_from_file("cent3.efg"), [[-1, 0, 0, 0], [1, 0, 0, 0]], True),
+        (games.read_from_file("cent3.efg"), [[1, 0, 0, 0], [-1, 0, 0, 0]], True),
+        (games.read_from_file("cent3.efg"), [[-1, 0, 0, 0], [1, 0, 0, 0]], False),
+        (games.read_from_file("cent3.efg"), [[1, 0, 0, 0], [-1, 0, 0, 0]], False),
     ],
 )
 def test_normalize_neg_entry_value_error(game, profile_data, rational_flag):
@@ -115,13 +115,13 @@ def test_normalize_neg_entry_value_error(game, profile_data, rational_flag):
         ###############################################################################
         # centipede with chance efg
         (
-            games.create_centipede_game_with_chance_efg(),
+            games.read_from_file("cent3.efg"),
             [[1, 2, 3, 14], [1, 1, 1, 1]],
             [["1/20", "2/20", "3/20", "14/20"], ["1/4", "1/4", "1/4", "1/4"]],
             True,
         ),
         (
-            games.create_centipede_game_with_chance_efg(),
+            games.read_from_file("cent3.efg"),
             [[1.0, 2.0, 3.0, 14.0], [1, 1, 1, 1]],
             [[1 / 20, 2 / 20, 3 / 20, 14 / 20], [0.25, 0.25, 0.25, 0.25]],
             False,
@@ -544,8 +544,8 @@ def test_strategy_value_by_label_reference(
     [
         (games.read_from_file("mixed_behavior_game.efg"), False),
         (games.read_from_file("mixed_behavior_game.efg"), True),
-        (games.create_centipede_game_with_chance_efg(), False),
-        (games.create_centipede_game_with_chance_efg(), True),
+        (games.read_from_file("cent3.efg"), False),
+        (games.read_from_file("cent3.efg"), True),
     ],
 )
 def test_as_behavior_roundtrip(game: gbt.Game, rational_flag: bool):
@@ -774,14 +774,14 @@ def test_strategy_value_reference(
         ##############################################################################
         # El Farol bar game efg
         (
-            games.create_el_farol_bar_game_efg(),
+            games.read_from_file("el_farol_bar.efg"),
             [["1/2", "1/2"], ["1/2", "1/2"], ["1/2", "1/2"], ["1/2", "1/2"], ["1/2", "1/2"]],
             0,
             ZERO,
             True,
         ),
         (
-            games.create_el_farol_bar_game_efg(),
+            games.read_from_file("el_farol_bar.efg"),
             [[1, 0], [1, 0], [0, 1], [0, 1], [0, 1]],
             0,
             ZERO,
@@ -972,14 +972,14 @@ def test_liap_value_reference(
         ##############################################################################
         # El Farol bar game efg
         (
-            games.create_el_farol_bar_game_efg(),
+            games.read_from_file("el_farol_bar.efg"),
             [["1/2", "1/2"], ["1/2", "1/2"], ["1/2", "1/2"], ["1/2", "1/2"], ["1/2", "1/2"]],
             [0] * 5,
             ZERO,
             True,
         ),
         (
-            games.create_el_farol_bar_game_efg(),
+            games.read_from_file("el_farol_bar.efg"),
             [[1, 0], [1, 0], [0, 1], [0, 1], [0, 1]],
             [0] * 5,
             ZERO,
@@ -1104,12 +1104,12 @@ def test_player_regret_max_regret_reference(
         (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), True),
         #################################################################################
         # El Farol bar game efg
-        (games.create_el_farol_bar_game_efg(), False),
-        (games.create_el_farol_bar_game_efg(), True),
+        (games.read_from_file("el_farol_bar.efg"), False),
+        (games.read_from_file("el_farol_bar.efg"), True),
         #################################################################################
         # Centipede with chance efg
-        (games.create_centipede_game_with_chance_efg(), False),
-        (games.create_centipede_game_with_chance_efg(), True),
+        (games.read_from_file("cent3.efg"), False),
+        (games.read_from_file("cent3.efg"), True),
         #################################################################################
         # 2x2x2 nfg
         (games.read_from_file("2x2x2_nfg_from_local_max_cut_2_pure_1_mixed_eq.nfg"), False),
@@ -1146,13 +1146,13 @@ def test_strategy_regret_consistency(game: gbt.Game, rational_flag: bool):
         #################################################################################
         # Centipede with chance efg
         (
-            games.create_centipede_game_with_chance_efg(),
+            games.read_from_file("cent3.efg"),
             [["1/3", "1/3", "1/3", "0/1"], ["1/10", "3/5", "3/10", 0]],
             ZERO,
             True,
         ),
         (
-            games.create_centipede_game_with_chance_efg(),
+            games.read_from_file("cent3.efg"),
             [[1 / 3, 1 / 3, 1 / 3, 0], [0.10, 3 / 5, 0.3, 0]],
             TOL,
             False,
@@ -1160,13 +1160,13 @@ def test_strategy_regret_consistency(game: gbt.Game, rational_flag: bool):
         #################################################################################
         # El Farol bar game efg
         (
-            games.create_el_farol_bar_game_efg(),
+            games.read_from_file("el_farol_bar.efg"),
             [[1, 0], ["1/2", "1/2"], ["1/3", "2/3"], ["1/5", "4/5"], ["1/8", "7/8"]],
             ZERO,
             True,
         ),
         (
-            games.create_el_farol_bar_game_efg(),
+            games.read_from_file("el_farol_bar.efg"),
             [[1, 0], [1 / 2, 1 / 2], [1 / 3, 2 / 3], [1 / 5, 4 / 5], [1 / 8, 7 / 8]],
             TOL,
             False,
@@ -1239,13 +1239,13 @@ def test_liap_value_consistency(
         #################################################################################
         # Centipede with chance efg
         (
-            games.create_centipede_game_with_chance_efg(),
+            games.read_from_file("cent3.efg"),
             [["1/3", "1/3", "1/3", "0/1"], ["1/10", "3/5", "3/10", 0]],
             ZERO,
             True,
         ),
         (
-            games.create_centipede_game_with_chance_efg(),
+            games.read_from_file("cent3.efg"),
             [[1 / 3, 1 / 3, 1 / 3, 0], [0.10, 3 / 5, 0.3, 0]],
             TOL,
             False,
@@ -1253,13 +1253,13 @@ def test_liap_value_consistency(
         #################################################################################
         # El Farol bar game efg
         (
-            games.create_el_farol_bar_game_efg(),
+            games.read_from_file("el_farol_bar.efg"),
             [[1, 0], ["1/2", "1/2"], ["1/3", "2/3"], ["1/5", "4/5"], ["1/8", "7/8"]],
             ZERO,
             True,
         ),
         (
-            games.create_el_farol_bar_game_efg(),
+            games.read_from_file("el_farol_bar.efg"),
             [[1, 0], [1 / 2, 1 / 2], [1 / 3, 2 / 3], [1 / 5, 4 / 5], [1 / 8, 7 / 8]],
             TOL,
             False,
@@ -1343,7 +1343,7 @@ def test_player_regret_max_regret_consistency(
         #################################################################################
         # Centipede game with chance
         (
-            games.create_centipede_game_with_chance_efg(),
+            games.read_from_file("cent3.efg"),
             [["1/3", "1/3", "1/3", "0/1"], ["1/10", "3/5", "3/10", "0/1"]],
             [["1/3", "1/3", "1/3", "0/1"], ["1/5", "2/5", "1/5", "1/5"]],
             gbt.Rational("1/12"),
@@ -1351,7 +1351,7 @@ def test_player_regret_max_regret_consistency(
             True,
         ),
         (
-            games.create_centipede_game_with_chance_efg(),
+            games.read_from_file("cent3.efg"),
             [[1 / 3, 1 / 3, 1 / 3, 0 / 1], [1 / 10, 3 / 5, 3 / 10, 0 / 1]],
             [[1 / 3, 1 / 3, 1 / 3, 0 / 1], [1 / 5, 2 / 5, 1 / 5, 1 / 5]],
             1 / 12,
@@ -1371,7 +1371,7 @@ def test_player_regret_max_regret_consistency(
         #################################################################################
         # El Farol bar game
         (
-            games.create_el_farol_bar_game_efg(),
+            games.read_from_file("el_farol_bar.efg"),
             [["4/9", "5/9"], ["1/3", "2/3"], ["1/2", "1/2"], ["11/12", "1/12"], ["1/2", "1/2"]],
             [["4/9", "5/9"], ["1/3", "2/3"], ["1/2", "1/2"], ["1/12", "11/12"], ["1/2", "1/2"]],
             gbt.Rational("1/2"),
@@ -1445,13 +1445,13 @@ def test_linearity_payoff_property(
         #################################################################################
         # Centipede game with chance
         (
-            games.create_centipede_game_with_chance_efg(),
+            games.read_from_file("cent3.efg"),
             [["1/5", "2/5", "1/5", "1/5"], ["1/10", "3/5", "3/10", "0/1"]],
             ZERO,
             True,
         ),
         (
-            games.create_centipede_game_with_chance_efg(),
+            games.read_from_file("cent3.efg"),
             [[1 / 3, 1 / 3, 1 / 3, 0 / 1], [1 / 10, 3 / 5, 3 / 10, 0 / 1]],
             TOL,
             False,
@@ -1473,7 +1473,7 @@ def test_linearity_payoff_property(
         #################################################################################
         # El Farol bar game
         (
-            games.create_el_farol_bar_game_efg(),
+            games.read_from_file("el_farol_bar.efg"),
             [["4/9", "5/9"], ["1/3", "2/3"], ["0/1", "1/1"], ["11/12", "1/12"], ["1/3", "2/3"]],
             ZERO,
             True,
@@ -1523,7 +1523,7 @@ def test_payoff_and_strategy_value_consistency(
         #################################################################################
         # centipede game with chance
         (
-            games.create_centipede_game_with_chance_efg(),
+            games.read_from_file("cent3.efg"),
             [["1/3", "1/3", "1/3", "0"], ["1/10", "3/5", "3/10", "0"]],
             [["1/3", "1/3", "1/3", "0"], ["1/10", "3/5", "3/10", "0"]],
             "82943/62500",
@@ -1531,7 +1531,7 @@ def test_payoff_and_strategy_value_consistency(
             ZERO,
         ),
         (
-            games.create_centipede_game_with_chance_efg(),
+            games.read_from_file("cent3.efg"),
             [[1 / 3, 1 / 3, 1 / 3, 0], [1 / 10, 3 / 5, 3 / 10, 0]],
             [[1 / 3, 1 / 3, 1 / 3, 0], [1 / 10, 3 / 5, 3 / 10, 0]],
             82943 / 62500,
