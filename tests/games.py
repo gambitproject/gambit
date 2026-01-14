@@ -5,7 +5,6 @@ import pathlib
 from abc import ABC, abstractmethod
 
 import numpy as np
-import pytest
 
 import pygambit as gbt
 
@@ -37,33 +36,6 @@ def create_efg_corresponding_to_bimatrix_game(
     for i, j in itertools.product(range(m), range(n)):
         g.set_outcome(g.root.children[i].children[j], g.add_outcome([A[i, j], B[i, j]]))
     return g
-
-
-################################################################################################
-# Normal-form (aka strategic-form) games (nfg)
-
-
-def create_2x2_zero_nfg() -> gbt.Game:
-    """
-    Returns
-    -------
-    Game
-        2x2 all-zero-payoffs bimatrix, with player names and a duplicate label set intentionally
-        for testing purposes
-    """
-    game = gbt.Game.new_table([2, 2])
-
-    game.players[0].label = "Joe"
-    game.players["Joe"].strategies[0].label = "cooperate"
-    game.players["Joe"].strategies[1].label = "defect"
-
-    game.players[1].label = "Dan"
-    game.players["Dan"].strategies[0].label = "defect"
-    # intentional duplicate label for player
-    with pytest.warns(FutureWarning):
-        game.players["Dan"].strategies[1].label = "defect"
-
-    return game
 
 
 ################################################################################################

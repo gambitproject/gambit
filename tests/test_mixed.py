@@ -75,8 +75,12 @@ def test_normalize_zero_value_error(game, profile_data, rational_flag):
         ),
         ###############################################################################
         # zero matrix nfg
-        (games.create_2x2_zero_nfg(), [[1, 0], [0, -1]], True),
-        (games.create_2x2_zero_nfg(), [[1.0, 1.0], [0, -1.0]], False),
+        (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), [[1, 0], [0, -1]], True),
+        (
+            games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"),
+            [[1.0, 1.0], [0, -1.0]],
+            False,
+        ),
         ###############################################################################
         # centipede with chance efg
         (games.create_centipede_game_with_chance_efg(), [[-1, 0, 0, 0], [1, 0, 0, 0]], True),
@@ -135,8 +139,8 @@ def test_normalize(game, profile_data, expected_data, rational_flag):
     [
         ##############################################################################
         # zero matrix nfg
-        (games.create_2x2_zero_nfg(), "cooperate", False, 0.72),
-        (games.create_2x2_zero_nfg(), "cooperate", True, "7/9"),
+        (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), "cooperate", False, 0.72),
+        (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), "cooperate", True, "7/9"),
         ###############################################################################
         # coordination 4x4 nfg outcome version with strategy labels
         (games.read_from_file("coordination_4x4_outcome.nfg"), "1-1", 0.25, False),
@@ -165,8 +169,8 @@ def test_set_and_get_probability_by_strategy_label(
     [
         ##############################################################################
         # zero matrix nfg
-        (games.create_2x2_zero_nfg(), "Joe", False, [0.72, 0.28]),
-        (games.create_2x2_zero_nfg(), "Joe", True, ["7/9", "2/9"]),
+        (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), "Joe", False, [0.72, 0.28]),
+        (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), "Joe", True, ["7/9", "2/9"]),
         ##############################################################################
         # coordination 4x4 nfg outcome version with strategy labels
         (games.read_from_file("coordination_4x4_payoff.nfg"), P1, False, [0.25, 0, 0, 0.75]),
@@ -306,7 +310,7 @@ def test_profile_indexing_by_invalid_strategy_label(
 
 
 def test_profile_indexing_by_player_and_duplicate_strategy_label():
-    game = games.create_2x2_zero_nfg()
+    game = games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg")
     profile = game.mixed_strategy_profile()
     with pytest.raises(ValueError):
         profile["Dan"]["defect"]
@@ -398,8 +402,8 @@ def test_profile_indexing_by_player_label_reference(
     [
         #########################################################################
         # zero matrix nfg
-        (games.create_2x2_zero_nfg(), False, None, "Joe", 0),
-        (games.create_2x2_zero_nfg(), True, None, "Joe", 0),
+        (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), False, None, "Joe", 0),
+        (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), True, None, "Joe", 0),
         #########################################################################
         # coordination 4x4 nfg
         (games.read_from_file("coordination_4x4_payoff.nfg"), False, None, P1, 0.25),
@@ -510,8 +514,8 @@ def test_payoff_by_label_reference(
     [
         ##############################################################################
         # zero matrix nfg
-        (games.create_2x2_zero_nfg(), False, "cooperate", 0),
-        (games.create_2x2_zero_nfg(), True, "cooperate", 0),
+        (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), False, "cooperate", 0),
+        (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), True, "cooperate", 0),
         ##############################################################################
         # coordination 4x4 nfg
         (games.read_from_file("coordination_4x4_outcome.nfg"), False, "1-1", 0.25),
@@ -553,8 +557,8 @@ def test_as_behavior_roundtrip(game: gbt.Game, rational_flag: bool):
 @pytest.mark.parametrize(
     "game,rational_flag",
     [
-        (games.create_2x2_zero_nfg(), False),
-        (games.create_2x2_zero_nfg(), True),
+        (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), False),
+        (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), True),
         (games.read_from_file("coordination_4x4_payoff.nfg"), False),
         (games.read_from_file("coordination_4x4_payoff.nfg"), True),
     ],
@@ -569,7 +573,7 @@ def test_as_behavior_error(game: gbt.Game, rational_flag: bool):
     [
         ###############################################################################
         # zero matrix nfg
-        (games.create_2x2_zero_nfg(), None, True, (0, 0)),
+        (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), None, True, (0, 0)),
         ###############################################################################
         # 4x4 coordination nfg
         (games.read_from_file("coordination_4x4_payoff.nfg"), None, False, (0.25, 0.25)),
@@ -628,8 +632,8 @@ def test_payoffs_reference(
     [
         ###############################################################################
         # zero matrix nfg
-        (games.create_2x2_zero_nfg(), None, False, ([0, 0], [0, 0])),
-        (games.create_2x2_zero_nfg(), None, True, ([0, 0], [0, 0])),
+        (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), None, False, ([0, 0], [0, 0])),
+        (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), None, True, ([0, 0], [0, 0])),
         ###############################################################################
         # 4x4 coordination nfg
         (
@@ -693,10 +697,34 @@ def test_strategy_value_reference(
     [
         ##############################################################################
         # Zero matrix nfg, all liap_values are zero
-        (games.create_2x2_zero_nfg(), [["3/4", "1/4"], ["2/5", "3/5"]], 0, ZERO, True),
-        (games.create_2x2_zero_nfg(), [["1/2", "1/2"], ["1/2", "1/2"]], 0, ZERO, True),
-        (games.create_2x2_zero_nfg(), [[1, 0], [1, 0]], 0, ZERO, True),
-        (games.create_2x2_zero_nfg(), [[1 / 4, 3 / 4], [2 / 5, 3 / 5]], 0, TOL, False),
+        (
+            games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"),
+            [["3/4", "1/4"], ["2/5", "3/5"]],
+            0,
+            ZERO,
+            True,
+        ),
+        (
+            games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"),
+            [["1/2", "1/2"], ["1/2", "1/2"]],
+            0,
+            ZERO,
+            True,
+        ),
+        (
+            games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"),
+            [[1, 0], [1, 0]],
+            0,
+            ZERO,
+            True,
+        ),
+        (
+            games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"),
+            [[1 / 4, 3 / 4], [2 / 5, 3 / 5]],
+            0,
+            TOL,
+            False,
+        ),
         ##############################################################################
         # 4x4 coordination nfg
         (games.read_from_file("coordination_4x4_payoff.nfg"), None, 0, ZERO, True),
@@ -867,10 +895,34 @@ def test_liap_value_reference(
     [
         ##############################################################################
         # Zero matrix nfg, all liap_values are zero
-        (games.create_2x2_zero_nfg(), [["3/4", "1/4"], ["2/5", "3/5"]], [0] * 2, ZERO, True),
-        (games.create_2x2_zero_nfg(), [["1/2", "1/2"], ["1/2", "1/2"]], [0] * 2, ZERO, True),
-        (games.create_2x2_zero_nfg(), [[1, 0], [1, 0]], [0] * 2, ZERO, True),
-        (games.create_2x2_zero_nfg(), [[1 / 4, 3 / 4], [2 / 5, 3 / 5]], [0] * 2, TOL, False),
+        (
+            games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"),
+            [["3/4", "1/4"], ["2/5", "3/5"]],
+            [0] * 2,
+            ZERO,
+            True,
+        ),
+        (
+            games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"),
+            [["1/2", "1/2"], ["1/2", "1/2"]],
+            [0] * 2,
+            ZERO,
+            True,
+        ),
+        (
+            games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"),
+            [[1, 0], [1, 0]],
+            [0] * 2,
+            ZERO,
+            True,
+        ),
+        (
+            games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"),
+            [[1 / 4, 3 / 4], [2 / 5, 3 / 5]],
+            [0] * 2,
+            TOL,
+            False,
+        ),
         ##############################################################################
         # 4x4 coordination nfg
         (games.read_from_file("coordination_4x4_payoff.nfg"), None, [0] * 2, ZERO, True),
@@ -1048,8 +1100,8 @@ def test_player_regret_max_regret_reference(
         (games.read_from_file("coordination_4x4_payoff.nfg"), True),
         #################################################################################
         # Zero matrix nfg
-        (games.create_2x2_zero_nfg(), False),
-        (games.create_2x2_zero_nfg(), True),
+        (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), False),
+        (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), True),
         #################################################################################
         # El Farol bar game efg
         (games.create_el_farol_bar_game_efg(), False),
@@ -1281,7 +1333,7 @@ def test_player_regret_max_regret_consistency(
         #################################################################################
         # Zero matrix nfg
         (
-            games.create_2x2_zero_nfg(),
+            games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"),
             [["1/4", "3/4"], ["3/5", "2/5"]],
             [["1/2", "1/2"], ["3/5", "2/5"]],
             gbt.Rational("5/6"),
@@ -1384,7 +1436,12 @@ def test_linearity_payoff_property(
         ),
         #################################################################################
         # Zero matrix nfg
-        (games.create_2x2_zero_nfg(), [["4/5", "1/5"], ["4/7", "3/7"]], ZERO, True),
+        (
+            games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"),
+            [["4/5", "1/5"], ["4/7", "3/7"]],
+            ZERO,
+            True,
+        ),
         #################################################################################
         # Centipede game with chance
         (

@@ -6,7 +6,7 @@ import pytest
 
 import pygambit as gbt
 
-from .games import create_2x2_zero_nfg, create_selten_horse_game_efg
+from . import games
 
 
 @pytest.mark.parametrize("game_path", glob(os.path.join("tests", "test_games", "*.efg")))
@@ -112,7 +112,7 @@ def test_write_latex():
 
 
 def test_read_write_efg():
-    efg_game = create_selten_horse_game_efg()
+    efg_game = games.create_selten_horse_game_efg()
     serialized_efg_game = efg_game.to_efg()
     deserialized_efg_game = gbt.read_efg(io.BytesIO(serialized_efg_game.encode()))
     double_serialized_efg_game = deserialized_efg_game.to_efg()
@@ -120,7 +120,7 @@ def test_read_write_efg():
 
 
 def test_read_write_nfg():
-    nfg_game = create_2x2_zero_nfg()
+    nfg_game = games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg")
     serialized_nfg_game = nfg_game.to_nfg()
     deserialized_nfg_game = gbt.read_nfg(
         io.BytesIO(serialized_nfg_game.encode()), normalize_labels=False
@@ -130,7 +130,7 @@ def test_read_write_nfg():
 
 
 def test_read_write_nfg_normalize():
-    nfg_game = create_2x2_zero_nfg()
+    nfg_game = games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg")
     serialized_nfg_game = nfg_game.to_nfg()
     deserialized_nfg_game = gbt.read_nfg(
         io.BytesIO(serialized_nfg_game.encode()), normalize_labels=True
