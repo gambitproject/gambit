@@ -66,26 +66,6 @@ def create_2x2_zero_nfg() -> gbt.Game:
     return game
 
 
-def create_2x2x2_nfg() -> gbt.Game:
-    """
-    - This comes from a local max cut instance:
-      players {1,2,3} are nodes; edge weight{1,2} = 2; weight{1,3} = -1; weight{2,3} = 2
-    - Pure strategies {a,b} encode if respective player is on left or right of the cut
-    - The payoff to a player is the sum of their incident edges across the implied cut
-    - Pure equilibrium iff local max cuts; in addition, uniform mixture is an equilibrium
-    - Equilibrium analysis for pure profiles:
-        a a a:  0 0  0 -- Not Nash (regrets: 1, 4, 1)
-        b a a:  1 2 -1 -- Not Nash (regrets: 0, 0, 3)
-        a b a:  2 4  2 -- Nash (global max cut)
-        b b a: -1 2  1 -- Not Nash (regrets: 3, 0, 0)
-        a a b: -1 2  1 -- Not Nash (regrets: 3, 0, 0)
-        b a b:  2 4  2 -- Nash (global max cut)
-        a b b:  1 2 -1 -- Not Nash (regrets: 0, 0, 3)
-        b b b:  0 0  0 -- Not Nash (regrets: 1, 4, 1)
-    """
-    return read_from_file("2x2x2_nfg_with_two_pure_one_mixed_eq.nfg")
-
-
 def create_coord_4x4_nfg(outcome_version: bool = False) -> gbt.Game:
     """
     Returns

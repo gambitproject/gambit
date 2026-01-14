@@ -16,7 +16,9 @@ def test_read_efg(game_path):
 
 
 def test_read_efg_invalid():
-    game_path = os.path.join("tests", "test_games", "2x2x2_nfg_with_two_pure_one_mixed_eq.nfg")
+    game_path = os.path.join(
+        "tests", "test_games", "2x2x2_nfg_from_local_max_cut_2_pure_1_mixed_eq.nfg"
+    )
     with pytest.raises(ValueError):
         gbt.read_efg(game_path)
 
@@ -40,13 +42,17 @@ def test_read_agg(game_path):
 
 
 def test_read_agg_invalid():
-    game_path = os.path.join("tests", "test_games", "2x2x2_nfg_with_two_pure_one_mixed_eq.nfg")
+    game_path = os.path.join(
+        "tests", "test_games", "2x2x2_nfg_from_local_max_cut_2_pure_1_mixed_eq.nfg"
+    )
     with pytest.raises(ValueError):
         gbt.read_agg(game_path)
 
 
 def test_read_gbt_invalid():
-    game_path = os.path.join("tests", "test_games", "2x2x2_nfg_with_two_pure_one_mixed_eq.nfg")
+    game_path = os.path.join(
+        "tests", "test_games", "2x2x2_nfg_from_local_max_cut_2_pure_1_mixed_eq.nfg"
+    )
     with pytest.raises(ValueError):
         gbt.read_gbt(game_path)
 
@@ -116,8 +122,9 @@ def test_read_write_efg():
 def test_read_write_nfg():
     nfg_game = create_2x2_zero_nfg()
     serialized_nfg_game = nfg_game.to_nfg()
-    deserialized_nfg_game = gbt.read_nfg(io.BytesIO(serialized_nfg_game.encode()),
-                                         normalize_labels=False)
+    deserialized_nfg_game = gbt.read_nfg(
+        io.BytesIO(serialized_nfg_game.encode()), normalize_labels=False
+    )
     double_serialized_nfg_game = deserialized_nfg_game.to_nfg()
     assert serialized_nfg_game == double_serialized_nfg_game
 
@@ -125,7 +132,8 @@ def test_read_write_nfg():
 def test_read_write_nfg_normalize():
     nfg_game = create_2x2_zero_nfg()
     serialized_nfg_game = nfg_game.to_nfg()
-    deserialized_nfg_game = gbt.read_nfg(io.BytesIO(serialized_nfg_game.encode()),
-                                         normalize_labels=True)
+    deserialized_nfg_game = gbt.read_nfg(
+        io.BytesIO(serialized_nfg_game.encode()), normalize_labels=True
+    )
     double_serialized_nfg_game = deserialized_nfg_game.to_nfg()
     assert serialized_nfg_game != double_serialized_nfg_game
