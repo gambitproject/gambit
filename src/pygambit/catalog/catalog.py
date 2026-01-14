@@ -19,7 +19,6 @@ class CatalogGame:
     num_players: int
     game_type: Literal["nfg", "efg"]
     description: str
-    citation: str
 
     def __new__(cls, *args, **kwargs) -> Game:
         """Create a game instance by calling the _game() method."""
@@ -32,12 +31,31 @@ class CatalogGame:
         """Override this method in subclasses to define the game."""
         raise NotImplementedError("Subclasses must implement _game() method")
 
-    def __init_subclass__(cls):
-        """Extract description from docstring when subclass defined."""
+    @classmethod
+    def _extract_metadata_from_game(cls, game: Game) -> None:
+        """Extract metadata from the game and set as class attributes."""
+        cls.title = game.title
+        cls.num_players = len(game.players)
         if cls.__doc__:
             cls.description = inspect.cleandoc(cls.__doc__)
         else:
-            cls.description = ""
+            cls.description = game.comment
+
+    def __init_subclass__(cls, **kwargs):
+        """Extract metadata when subclass is defined (if not a file-based game)."""
+        super().__init_subclass__(**kwargs)
+
+        # Skip if this is CatalogGameFromContrib or its subclasses
+        if cls.__name__ == "CatalogGameFromContrib" or issubclass(cls, CatalogGameFromContrib):
+            return
+
+        # For non-file-based games, create a temporary instance to extract metadata
+        try:
+            temp_game = cls._game()
+            cls._extract_metadata_from_game(temp_game)
+        except NotImplementedError:
+            # Base class, skip
+            pass
 
 
 class CatalogGameFromContrib(CatalogGame):
@@ -112,10 +130,6 @@ class PrisonersDilemma(CatalogGameFromContrib):
     Prisoner's Dilemma game.
     """
     game_file = "pd.nfg"
-    game_type = "nfg"
-    title = "Prisoner's Dilemma"
-    num_players = 2
-    citation = "Example citation for Prisoner's Dilemma."
 
 
 class TwoStageMatchingPennies(CatalogGameFromContrib):
@@ -123,34 +137,21 @@ class TwoStageMatchingPennies(CatalogGameFromContrib):
     Two-Stage Matching Pennies game.
     """
     game_file = "2smp.efg"
-    game_type = "efg"
-    title = "Two-Stage Matching Pennies game."
-    num_players = 2
-    citation = "Example citation for Two-Stage Matching Pennies."
 
 
 class Game2s2x2x2(CatalogGameFromContrib):
     """
     Two stage McKelvey McLennan game with 9 equilibria each stage.
     """
-
     game_file = "2s2x2x2.efg"
-    game_type = "efg"
-    title = "Two stage McKelvey McLennan game with 9 equilibria each stage"
-    num_players = 3
-    citation = "Test."
 
 
 class Artist1(CatalogGameFromContrib):
     """
     Artist problem, one stage.
     """
-
     game_file = "artist1.efg"
-    game_type = "efg"
-    title = "Artist problem, one stage"
-    num_players = 2
-    citation = "Test."
+
 
 ##########################################
 # Catalog games defined programmatically #
@@ -166,9 +167,6 @@ class OneShotTrust(CatalogGame):
     the Seller plays Abuse.
     """
     game_type = "efg"
-    title = "One shot trust game."
-    num_players = 2
-    citation = "Kreps (1990)"
 
     @staticmethod
     def _game(unique_NE_variant: bool = False):
