@@ -1,3 +1,4 @@
+import inspect
 from pathlib import Path
 from typing import Literal
 
@@ -18,7 +19,6 @@ class CatalogGame:
     num_players: int
     game_type: Literal["nfg", "efg"]
     description: str
-    citation: str
 
     def __new__(cls, *args, **kwargs) -> Game:
         """Create a game instance by calling the _game() method."""
@@ -36,6 +36,10 @@ class CatalogGame:
         """Extract metadata from the game and set as class attributes."""
         cls.title = game.title
         cls.num_players = len(game.players)
+        if cls.__doc__:
+            cls.description = inspect.cleandoc(cls.__doc__)
+        else:
+            cls.description = game.comment
 
     def __init_subclass__(cls, **kwargs):
         """Extract metadata when subclass is defined (if not a file-based game)."""
@@ -143,15 +147,31 @@ def games(
 
 
 class PrisonersDilemma(CatalogGameFromContrib):
+    """
+    Prisoner's Dilemma game.
+    """
     game_file = "pd.nfg"
-    description = "Prisoner's Dilemma game."
-    citation = "Example citation for Prisoner's Dilemma."
 
 
 class TwoStageMatchingPennies(CatalogGameFromContrib):
+    """
+    Two-Stage Matching Pennies game.
+    """
     game_file = "2smp.efg"
-    description = "Two-Stage Matching Pennies game."
-    citation = "Example citation for Two-Stage Matching Pennies."
+
+
+class Game2s2x2x2(CatalogGameFromContrib):
+    """
+    Two stage McKelvey McLennan game with 9 equilibria each stage.
+    """
+    game_file = "2s2x2x2.efg"
+
+
+class Artist1(CatalogGameFromContrib):
+    """
+    Artist problem, one stage.
+    """
+    game_file = "artist1.efg"
 
 
 ##########################################
@@ -160,15 +180,14 @@ class TwoStageMatchingPennies(CatalogGameFromContrib):
 
 
 class OneShotTrust(CatalogGame):
-    game_type = "efg"
-    description = """
+    """
     The unique_NE_variant makes Trust a dominant strategy, replacing the
     non-singleton equilibrium component from the standard version of the game
     where the Buyer plays "Not Trust" and the seller can play any mixture with
     < 0.5 probability on Honor with a unique NE where the Buyer plays Trust and
     the Seller plays Abuse.
     """
-    citation = "Kreps (1990)"
+    game_type = "efg"
 
     @staticmethod
     def _game(unique_NE_variant: bool = False):
