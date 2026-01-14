@@ -645,19 +645,6 @@ def create_reduction_generic_payoffs_efg() -> gbt.Game:
     return g
 
 
-def create_reduction_one_player_generic_payoffs_efg() -> gbt.Game:
-    g = gbt.Game.new_tree(players=["1"], title="One player reduction generic payoffs")
-    g.append_move(g.root, "1", ["a", "b", "c", "d"])
-    g.append_move(g.root.children[0], "1", ["e", "f"])
-    g.set_outcome(g.root.children[0].children[0], g.add_outcome([1]))
-    g.set_outcome(g.root.children[0].children[1], g.add_outcome([2]))
-    g.set_outcome(g.root.children[1], g.add_outcome([3]))
-    g.set_outcome(g.root.children[2], g.add_outcome([4]))
-    g.set_outcome(g.root.children[3], g.add_outcome([5]))
-    g.to_efg("reduction_one_player_generic_payoffs.efg")
-    return g
-
-
 def create_reduction_both_players_payoff_ties_efg() -> gbt.Game:
     g = gbt.Game.new_tree(players=["1", "2"], title="From GTE survey")
     g.append_move(g.root, "1", ["A", "B", "C", "D"])

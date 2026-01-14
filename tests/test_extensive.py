@@ -123,7 +123,7 @@ def test_outcome_index_exception_label():
         ###############################################################################
         # 1 player; reduction; generic payoffs
         (
-            games.create_reduction_one_player_generic_payoffs_efg(),
+            games.read_from_file("reduction_one_player_generic_payoffs.efg"),
             [["11", "12", "2*", "3*", "4*"]],
             [np.array(range(1, 6))],
         ),
