@@ -23,7 +23,7 @@ TOL = 1e-13  # tolerance for floating point assertions
     [
         # Zero-sum games
         (
-            games.create_two_player_perfect_info_win_lose_efg(),
+            games.read_from_file("two_player_perfect_info_win_lose.efg"),
             [
                 [[0, 0, 1, 0], [1, 0, 0]],
                 [[0, 0, 1, 0], [0, 1, 0]],
@@ -78,7 +78,7 @@ def test_enumpure_strategy(game: gbt.Game, pure_strategy_prof_data: list):
         #############################################################
         # Zero-sum games
         (
-            games.create_two_player_perfect_info_win_lose_efg(),
+            games.read_from_file("two_player_perfect_info_win_lose.efg"),
             [
                 [[[1, 0], [1, 0]], [[0, 1], [1, 0]]],
                 [[[0, 1], [1, 0]], [[1, 0], [1, 0]]],
@@ -557,11 +557,11 @@ def test_lcp_behavior_double():
                 [[[0, 1]], [[0, 1], [0, 1]]],
         ),
         (
-                games.create_two_player_perfect_info_win_lose_efg(),
+                games.read_from_file("two_player_perfect_info_win_lose.efg"),
                 [[[0, 1], [1, 0]], [[0, 1], ["1/2", "1/2"]]],
         ),
         (
-            games.create_two_player_perfect_info_win_lose_efg(nonterm_outcomes=True),
+            games.read_from_file("two_player_perfect_info_win_lose_with_nonterm_outcomes.efg"),
             [[[0, 1], [1, 0]], [[0, 1], ["1/2", "1/2"]]],
         ),
         (
@@ -707,30 +707,31 @@ def test_lp_behavior_double():
     "game,mixed_behav_prof_data",
     [
         (
-                games.create_two_player_perfect_info_win_lose_efg(),
-                [[[0, 1], [1, 0]], [[1, 0], [1, 0]]],
+            games.read_from_file("two_player_perfect_info_win_lose.efg"),
+            [[[0, 1], [1, 0]], [[1, 0], [1, 0]]],
         ),
         (
-                games.create_two_player_perfect_info_win_lose_efg(nonterm_outcomes=True),
-                [[[0, 1], [1, 0]], [[1, 0], [1, 0]]],
+            games.read_from_file("two_player_perfect_info_win_lose_with_nonterm_outcomes.efg"),
+            [[[0, 1], [1, 0]], [[1, 0], [1, 0]]],
         ),
         (
-                games.create_2x2_zero_sum_efg(missing_term_outcome=False),
-                [[["1/2", "1/2"]], [["1/2", "1/2"]]]
+            games.create_2x2_zero_sum_efg(missing_term_outcome=False),
+            [[["1/2", "1/2"]], [["1/2", "1/2"]]]
         ),
         (
             games.create_2x2_zero_sum_efg(missing_term_outcome=True),
             [[["1/2", "1/2"]], [["1/2", "1/2"]]],
         ),
-        (games.create_matching_pennies_efg(with_neutral_outcome=False),
-         [[["1/2", "1/2"]], [["1/2", "1/2"]]]),
+        (
+            games.create_matching_pennies_efg(with_neutral_outcome=False),
+            [[["1/2", "1/2"]], [["1/2", "1/2"]]]),
         (
             games.create_matching_pennies_efg(with_neutral_outcome=True),
             [[["1/2", "1/2"]], [["1/2", "1/2"]]],
         ),
         (
-                games.create_stripped_down_poker_efg(),
-                [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]],
+            games.create_stripped_down_poker_efg(),
+            [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]],
         ),
         (
             games.create_stripped_down_poker_efg(nonterm_outcomes=True),

@@ -401,8 +401,8 @@ def test_reduced_strategic_form(
     "standard,modified",
     [
         (
-            games.create_two_player_perfect_info_win_lose_efg(),
-            games.create_two_player_perfect_info_win_lose_efg(nonterm_outcomes=True)
+            games.read_from_file("two_player_perfect_info_win_lose.efg"),
+            games.read_from_file("two_player_perfect_info_win_lose_with_nonterm_outcomes.efg")
         ),
         (
             games.create_3_player_with_internal_outcomes_efg(),

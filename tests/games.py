@@ -755,38 +755,6 @@ def create_reduction_both_players_payoff_ties_efg() -> gbt.Game:
     return g
 
 
-def create_two_player_perfect_info_win_lose_efg(nonterm_outcomes: bool = False) -> gbt.Game:
-    g = gbt.Game.new_tree(players=["1", "2"], title="2 player perfect info win lose")
-    g.append_move(g.root, "2", ["a", "b"])
-    g.append_move(g.root.children[0], "1", ["L", "R"])
-    g.append_move(g.root.children[1], "1", ["L", "R"])
-    g.append_move(g.root.children[0].children[0], "2", ["l", "r"])
-    if not nonterm_outcomes:
-        g.set_outcome(
-            g.root.children[0].children[0].children[0], g.add_outcome([1, -1], label="aLl")
-        )
-        g.set_outcome(
-            g.root.children[0].children[0].children[1], g.add_outcome([-1, 1], label="aLr")
-        )
-        g.set_outcome(g.root.children[0].children[1], g.add_outcome([1, -1], label="aR"))
-        g.set_outcome(g.root.children[1].children[0], g.add_outcome([1, -1], label="bL"))
-        g.set_outcome(g.root.children[1].children[1], g.add_outcome([-1, 1], label="bR"))
-    else:
-        g.set_outcome(g.root.children[0], g.add_outcome([-100, 50], label="a"))
-        g.set_outcome(
-            g.root.children[0].children[0].children[0], g.add_outcome([101, -51], label="aLl")
-        )
-        g.set_outcome(
-            g.root.children[0].children[0].children[1], g.add_outcome([99, -49], label="aLr")
-        )
-        g.set_outcome(g.root.children[0].children[1], g.add_outcome([101, -51], label="aR"))
-        g.set_outcome(g.root.children[1].children[0], g.add_outcome([1, -1], label="bL"))
-        g.set_outcome(g.root.children[1].children[1], g.add_outcome([-1, 1], label="bR"))
-    tmp = "_with_nonterm_outcomes" if nonterm_outcomes else ""
-    g.to_efg(f"two_player_perfect_info_win_lose{tmp}.efg")
-    return g
-
-
 def create_EFG_for_nxn_bimatrix_coordination_game(n: int) -> gbt.Game:
     A = np.eye(n, dtype=int)
     B = A
