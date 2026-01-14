@@ -249,7 +249,7 @@ def test_enummixed_rational(game: gbt.Game, mixed_strategy_prof_data: list):
         ##############################################################################
         ##############################################################################
         (
-            games.create_3_player_with_internal_outcomes_efg(),
+            games.read_from_file("3_player.efg"),
             [
                 [[[1, 0], [1, 0]], [[1, 0], ["1/2", "1/2"]], [[1, 0], [0, 1]]],
                 [[[1, 0], [1, 0]], [[1, 0], [0, 1]],
@@ -257,7 +257,7 @@ def test_enummixed_rational(game: gbt.Game, mixed_strategy_prof_data: list):
             2,
         ),
         (
-            games.create_3_player_with_internal_outcomes_efg(nonterm_outcomes=True),
+            games.read_from_file("3_player_with_nonterm_outcomes.efg"),
             [
                 [[[1, 0], [1, 0]], [[1, 0], ["1/2", "1/2"]], [[1, 0], [0, 1]]],
                 [[[1, 0], [1, 0]], [[1, 0], [0, 1]],
@@ -579,7 +579,7 @@ def test_lcp_behavior_double():
             ],
         ),
         (
-                games.create_large_payoff_game_efg(),
+                games.read_from_file("large_payoff_game.efg"),
                 [
                     [[1, 0], [1, 0]],
                     [[0, 1], ["9999999999999999999/10000000000000000000",
@@ -784,7 +784,7 @@ def test_lp_behavior_double():
             ],
         ),
         (
-                games.create_large_payoff_game_efg(),
+                games.read_from_file("large_payoff_game.efg"),
                 [
                     [[1, 0], [1, 0]],
                     [[0, 1], ["9999999999999999999/10000000000000000000",

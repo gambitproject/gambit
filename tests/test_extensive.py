@@ -405,8 +405,8 @@ def test_reduced_strategic_form(
             games.read_from_file("two_player_perfect_info_win_lose_with_nonterm_outcomes.efg")
         ),
         (
-            games.create_3_player_with_internal_outcomes_efg(),
-            games.create_3_player_with_internal_outcomes_efg(nonterm_outcomes=True)
+            games.read_from_file("3_player.efg"),
+            games.read_from_file("3_player_with_nonterm_outcomes.efg")
         ),
         (
             games.read_from_file("chance_in_middle.efg"),

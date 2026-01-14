@@ -843,8 +843,8 @@ def test_infoset_regret_consistency(game: gbt.Game, rational_flag: bool):
      (games.create_stripped_down_poker_efg(), True),
      (games.create_kuhn_poker_efg(), False),
      (games.create_kuhn_poker_efg(), True),
-     (games.create_3_player_with_internal_outcomes_efg(), False),
-     (games.create_3_player_with_internal_outcomes_efg(), True)
+     (games.read_from_file("3_player.efg"), False),
+     (games.read_from_file("3_player.efg"), True)
      ]
 )
 def test_max_regret_consistency(game: gbt.Game, rational_flag: bool):
