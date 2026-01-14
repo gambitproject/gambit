@@ -279,14 +279,14 @@ def test_enummixed_rational(game: gbt.Game, mixed_strategy_prof_data: list):
         ##############################################################################
         ##############################################################################
         (
-                games.create_chance_in_middle_efg(),
+                games.read_from_file("chance_in_middle.efg"),
                 [[[["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]], [[1, 0], ["6/11", "5/11"]]],
                  ],  # [[[1, 0], [1, 0], [1, 0], [0, 0], [0, 0]], [[0, 1], [1, 0]]],
                      # [[[0, 1], [0, 0], [0, 0], [1, 0], [1, 0]], [[1, 0], [0, 1]]],
                 1,  # subsequent eqs have undefined infosets; include after #issue 660
         ),
         (
-                games.create_chance_in_middle_efg(nonterm_outcomes=True),
+                games.read_from_file("chance_in_middle_with_nonterm_outcomes.efg"),
                 [[[["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]], [[1, 0], ["6/11", "5/11"]]],
                  ],  # [[[1, 0], [1, 0], [1, 0], [0, 0], [0, 0]], [[0, 1], [1, 0]]],
                      # [[[0, 1], [0, 0], [0, 0], [1, 0], [1, 0]], [[1, 0], [0, 1]]],
@@ -587,14 +587,14 @@ def test_lcp_behavior_double():
                 ],
         ),
         (
-            games.create_chance_in_middle_efg(),
+            games.read_from_file("chance_in_middle.efg"),
             [
                 [["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]],
                 [[1, 0], ["6/11", "5/11"]]
             ]
         ),
         (
-            games.create_chance_in_middle_efg(nonterm_outcomes=True),
+            games.read_from_file("chance_in_middle_with_nonterm_outcomes.efg"),
             [
                 [["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]],
                 [[1, 0], ["6/11", "5/11"]]
@@ -791,14 +791,14 @@ def test_lp_behavior_double():
                 ],
         ),
         (
-            games.create_chance_in_middle_efg(),
+            games.read_from_file("chance_in_middle.efg"),
             [
                 [["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]],
                 [[1, 0], ["6/11", "5/11"]]
             ],
         ),
         (
-            games.create_chance_in_middle_efg(nonterm_outcomes=True),
+            games.read_from_file("chance_in_middle_with_nonterm_outcomes.efg"),
             [
                 [["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]],
                 [[1, 0], ["6/11", "5/11"]]

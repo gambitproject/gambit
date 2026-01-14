@@ -409,8 +409,8 @@ def test_reduced_strategic_form(
             games.create_3_player_with_internal_outcomes_efg(nonterm_outcomes=True)
         ),
         (
-            games.create_chance_in_middle_efg(),
-            games.create_chance_in_middle_efg(nonterm_outcomes=True)
+            games.read_from_file("chance_in_middle.efg"),
+            games.read_from_file("chance_in_middle_with_nonterm_outcomes.efg")
         ),
         (
             games.create_non_zero_sum_lacking_outcome_efg(),
