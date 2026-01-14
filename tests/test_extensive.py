@@ -413,8 +413,8 @@ def test_reduced_strategic_form(
             games.read_from_file("chance_in_middle_with_nonterm_outcomes.efg")
         ),
         (
-            games.create_non_zero_sum_lacking_outcome_efg(),
-            games.create_non_zero_sum_lacking_outcome_efg(missing_term_outcome=True)
+            games.read_from_file("2_player_non_zero_sum.efg"),
+            games.read_from_file("2_player_non_zero_sum_missing_term_outcome.efg"),
         ),
         (
             games.read_from_file("entry_accommodation.efg"),

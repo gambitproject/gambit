@@ -267,12 +267,12 @@ def test_enummixed_rational(game: gbt.Game, mixed_strategy_prof_data: list):
         ##############################################################################
         ##############################################################################
         (
-            games.create_non_zero_sum_lacking_outcome_efg(),
+            games.read_from_file("2_player_non_zero_sum.efg"),
             [[[["1/3", "2/3"]], [["1/2", "1/2"]]]],
             1,
         ),
         (
-            games.create_non_zero_sum_lacking_outcome_efg(missing_term_outcome=True),
+            games.read_from_file("2_player_non_zero_sum_missing_term_outcome.efg"),
             [[[["1/3", "2/3"]], [["1/2", "1/2"]]]],
             1,
         ),
@@ -626,11 +626,11 @@ def test_lcp_behavior_double():
             [[["2/3", "1/3"], [1, 0], [1, 0]], [["2/3", "1/3"]]],
         ),
         (
-            games.create_non_zero_sum_lacking_outcome_efg(),
+            games.read_from_file("2_player_non_zero_sum.efg"),
             [[["1/3", "2/3"]], [["1/2", "1/2"]]]
         ),
         (
-            games.create_non_zero_sum_lacking_outcome_efg(missing_term_outcome=True),
+            games.read_from_file("2_player_non_zero_sum_missing_term_outcome.efg"),
             [[["1/3", "2/3"]], [["1/2", "1/2"]]],
         ),
     ],
