@@ -34,7 +34,6 @@ if __name__ == "__main__":
     all_files = sorted(efg_files + nfg_files)
 
     lines = []
-    lines.append("# Auto-generated file. Do not edit manually.\n")
     lines.append("from .catalog_game import CatalogGameFromContrib\n\n")
 
     for path in all_files:
