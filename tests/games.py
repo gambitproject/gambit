@@ -66,18 +66,6 @@ def create_2x2_zero_nfg() -> gbt.Game:
     return game
 
 
-def create_coord_4x4_nfg(outcome_version: bool = False) -> gbt.Game:
-    """
-    Returns
-    -------
-    Game
-        4x4 coordination game, either via reading in a payoff version nfg, or an
-        outcome version nfg, which has strategy labels useful for testing
-    """
-    version = "outcome" if outcome_version else "payoff"
-    return read_from_file(f"coordination_4x4_{version}.nfg")
-
-
 ################################################################################################
 # Extensive-form games (efg)
 

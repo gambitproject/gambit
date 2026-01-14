@@ -28,10 +28,22 @@ def _set_action_probs(profile: gbt.MixedStrategyProfile, probs: list, rational_f
     [
         ###############################################################################
         # 4x4 coordination nfg
-        (games.create_coord_4x4_nfg(), [[0, 0, 0, 0], ["1/3", "1/3", "1/3", 0]], True),
-        (games.create_coord_4x4_nfg(), [[1, 0, 0, 0], [0, 0, 0, 0]], True),
-        (games.create_coord_4x4_nfg(), [[0, 0, 0, 0], [1.0, 1.0, 1.0, 1.0]], False),
-        (games.create_coord_4x4_nfg(), [[1.0, 1.0, 1.0, 1.0], [0, 0, 0, 0]], False),
+        (
+            games.read_from_file("coordination_4x4_payoff.nfg"),
+            [[0, 0, 0, 0], ["1/3", "1/3", "1/3", 0]],
+            True,
+        ),
+        (games.read_from_file("coordination_4x4_payoff.nfg"), [[1, 0, 0, 0], [0, 0, 0, 0]], True),
+        (
+            games.read_from_file("coordination_4x4_payoff.nfg"),
+            [[0, 0, 0, 0], [1.0, 1.0, 1.0, 1.0]],
+            False,
+        ),
+        (
+            games.read_from_file("coordination_4x4_payoff.nfg"),
+            [[1.0, 1.0, 1.0, 1.0], [0, 0, 0, 0]],
+            False,
+        ),
         ###############################################################################
         # centipede with chance efg
         (games.create_centipede_game_with_chance_efg(), [[0, 0, 0, 0], [1, 0, 0, 0]], True),
@@ -51,8 +63,16 @@ def test_normalize_zero_value_error(game, profile_data, rational_flag):
     [
         ###############################################################################
         # 4x4 coordination nfg
-        (games.create_coord_4x4_nfg(), [[1, 1, 0, -1], ["1/3", "1/3", "1/3", 0]], True),
-        (games.create_coord_4x4_nfg(), [[0, 0, 0, -1.0], [1.0, 1.0, 1.0, 1.0]], False),
+        (
+            games.read_from_file("coordination_4x4_payoff.nfg"),
+            [[1, 1, 0, -1], ["1/3", "1/3", "1/3", 0]],
+            True,
+        ),
+        (
+            games.read_from_file("coordination_4x4_payoff.nfg"),
+            [[0, 0, 0, -1.0], [1.0, 1.0, 1.0, 1.0]],
+            False,
+        ),
         ###############################################################################
         # zero matrix nfg
         (games.create_2x2_zero_nfg(), [[1, 0], [0, -1]], True),
@@ -77,13 +97,13 @@ def test_normalize_neg_entry_value_error(game, profile_data, rational_flag):
         ###############################################################################
         # 4x4 coordination nfg
         (
-            games.create_coord_4x4_nfg(),
+            games.read_from_file("coordination_4x4_payoff.nfg"),
             [[1, 2, 3, 14], [1, 1, 1, 1]],
             [["1/20", "2/20", "3/20", "14/20"], ["1/4", "1/4", "1/4", "1/4"]],
             True,
         ),
         (
-            games.create_coord_4x4_nfg(),
+            games.read_from_file("coordination_4x4_payoff.nfg"),
             [[1.0, 2.0, 3.0, 14.0], [1, 1, 1, 1]],
             [[1 / 20, 2 / 20, 3 / 20, 14 / 20], [0.25, 0.25, 0.25, 0.25]],
             False,
@@ -119,8 +139,8 @@ def test_normalize(game, profile_data, expected_data, rational_flag):
         (games.create_2x2_zero_nfg(), "cooperate", True, "7/9"),
         ###############################################################################
         # coordination 4x4 nfg outcome version with strategy labels
-        (games.create_coord_4x4_nfg(outcome_version=True), "1-1", 0.25, False),
-        (games.create_coord_4x4_nfg(outcome_version=True), "1-1", "1/4", True),
+        (games.read_from_file("coordination_4x4_outcome.nfg"), "1-1", 0.25, False),
+        (games.read_from_file("coordination_4x4_outcome.nfg"), "1-1", "1/4", True),
         ###############################################################################
         # stripped-down poker efg
         (games.create_stripped_down_poker_efg(), "11", 0.25, False),
@@ -149,8 +169,8 @@ def test_set_and_get_probability_by_strategy_label(
         (games.create_2x2_zero_nfg(), "Joe", True, ["7/9", "2/9"]),
         ##############################################################################
         # coordination 4x4 nfg outcome version with strategy labels
-        (games.create_coord_4x4_nfg(), P1, False, [0.25, 0, 0, 0.75]),
-        (games.create_coord_4x4_nfg(), P1, True, ["1/4", 0, 0, "3/4"]),
+        (games.read_from_file("coordination_4x4_payoff.nfg"), P1, False, [0.25, 0, 0, 0.75]),
+        (games.read_from_file("coordination_4x4_payoff.nfg"), P1, True, ["1/4", 0, 0, "3/4"]),
         ##############################################################################
         # stripped-down poker efg
         (games.create_stripped_down_poker_efg(), "Alice", False, [0.25, 0.75, 0, 0]),
@@ -189,8 +209,8 @@ def test_set_and_get_probabilities_by_player_label(
         (games.create_stripped_down_poker_efg(), "Bob", "2", "1/2", True),
         ##############################################################################
         # coordination 4x4 nfg outcome version with strategy labels
-        (games.create_coord_4x4_nfg(outcome_version=True), P1, "1-1", "1/4", True),
-        (games.create_coord_4x4_nfg(outcome_version=True), P2, "2-1", "1/4", True),
+        (games.read_from_file("coordination_4x4_outcome.nfg"), P1, "1-1", "1/4", True),
+        (games.read_from_file("coordination_4x4_outcome.nfg"), P2, "2-1", "1/4", True),
     ],
 )
 def test_profile_indexing_by_player_and_strategy_label_reference(
@@ -214,8 +234,8 @@ def test_profile_indexing_by_player_and_strategy_label_reference(
         (games.create_stripped_down_poker_efg(), "Alice", "2", False),
         ##############################################################################
         # coordination 4x4 nfg outcome version with strategy labels
-        (games.create_coord_4x4_nfg(outcome_version=True), P1, "2-1", True),
-        (games.create_coord_4x4_nfg(outcome_version=True), P2, "1-1", True),
+        (games.read_from_file("coordination_4x4_outcome.nfg"), P1, "2-1", True),
+        (games.read_from_file("coordination_4x4_outcome.nfg"), P2, "1-1", True),
     ],
 )
 def test_profile_indexing_by_player_and_invalid_strategy_label(
@@ -234,11 +254,41 @@ def test_profile_indexing_by_player_and_invalid_strategy_label(
         (games.create_stripped_down_poker_efg(), "13", True, KeyError, "player or strategy"),
         ##############################################################################
         # coordination 4x4 nfg payoff version (default strategy labels created with duplicates)
-        (games.create_coord_4x4_nfg(), "1", True, ValueError, "multiple strategies"),
-        (games.create_coord_4x4_nfg(), "2", True, ValueError, "multiple strategies"),
-        (games.create_coord_4x4_nfg(), "3", True, ValueError, "multiple strategies"),
-        (games.create_coord_4x4_nfg(), "4", True, ValueError, "multiple strategies"),
-        (games.create_coord_4x4_nfg(), "5", True, KeyError, "player or strategy"),
+        (
+            games.read_from_file("coordination_4x4_payoff.nfg"),
+            "1",
+            True,
+            ValueError,
+            "multiple strategies",
+        ),
+        (
+            games.read_from_file("coordination_4x4_payoff.nfg"),
+            "2",
+            True,
+            ValueError,
+            "multiple strategies",
+        ),
+        (
+            games.read_from_file("coordination_4x4_payoff.nfg"),
+            "3",
+            True,
+            ValueError,
+            "multiple strategies",
+        ),
+        (
+            games.read_from_file("coordination_4x4_payoff.nfg"),
+            "4",
+            True,
+            ValueError,
+            "multiple strategies",
+        ),
+        (
+            games.read_from_file("coordination_4x4_payoff.nfg"),
+            "5",
+            True,
+            KeyError,
+            "player or strategy",
+        ),
     ],
 )
 def test_profile_indexing_by_invalid_strategy_label(
@@ -284,11 +334,11 @@ def test_profile_indexing_by_player_and_duplicate_strategy_label():
         ############################################################################
         # coordination 4x4 nfg outcome version with strategy labels
         # Player 1
-        (games.create_coord_4x4_nfg(outcome_version=True), "1-1", "1/4", True),
-        (games.create_coord_4x4_nfg(outcome_version=True), "1-1", 0.25, False),
+        (games.read_from_file("coordination_4x4_outcome.nfg"), "1-1", "1/4", True),
+        (games.read_from_file("coordination_4x4_outcome.nfg"), "1-1", 0.25, False),
         # Player 2
-        (games.create_coord_4x4_nfg(outcome_version=True), "2-1", "1/4", True),
-        (games.create_coord_4x4_nfg(outcome_version=True), "2-1", 0.25, False),
+        (games.read_from_file("coordination_4x4_outcome.nfg"), "2-1", "1/4", True),
+        (games.read_from_file("coordination_4x4_outcome.nfg"), "2-1", 0.25, False),
     ],
 )
 def test_profile_indexing_by_strategy_label_reference(
@@ -318,10 +368,20 @@ def test_profile_indexing_by_strategy_label_reference(
         (games.create_stripped_down_poker_efg(), "Bob", ["1/2", "1/2"], True),
         ############################################################################
         # coordination 4x4 nfg
-        (games.create_coord_4x4_nfg(), P1, [0.25, 0.25, 0.25, 0.25], False),
-        (games.create_coord_4x4_nfg(), P2, [0.25, 0.25, 0.25, 0.25], False),
-        (games.create_coord_4x4_nfg(), P1, ["1/4", "1/4", "1/4", "1/4"], True),
-        (games.create_coord_4x4_nfg(), P2, ["1/4", "1/4", "1/4", "1/4"], True),
+        (games.read_from_file("coordination_4x4_payoff.nfg"), P1, [0.25, 0.25, 0.25, 0.25], False),
+        (games.read_from_file("coordination_4x4_payoff.nfg"), P2, [0.25, 0.25, 0.25, 0.25], False),
+        (
+            games.read_from_file("coordination_4x4_payoff.nfg"),
+            P1,
+            ["1/4", "1/4", "1/4", "1/4"],
+            True,
+        ),
+        (
+            games.read_from_file("coordination_4x4_payoff.nfg"),
+            P2,
+            ["1/4", "1/4", "1/4", "1/4"],
+            True,
+        ),
     ],
 )
 def test_profile_indexing_by_player_label_reference(
@@ -342,18 +402,66 @@ def test_profile_indexing_by_player_label_reference(
         (games.create_2x2_zero_nfg(), True, None, "Joe", 0),
         #########################################################################
         # coordination 4x4 nfg
-        (games.create_coord_4x4_nfg(), False, None, P1, 0.25),
-        (games.create_coord_4x4_nfg(), True, None, P1, "1/4"),
-        (games.create_coord_4x4_nfg(), False, None, P2, 0.25),
-        (games.create_coord_4x4_nfg(), True, None, P2, "1/4"),
-        (games.create_coord_4x4_nfg(), False, [[1, 0, 0, 0], [1, 0, 0, 0]], P1, 1),
-        (games.create_coord_4x4_nfg(), True, [[1, 0, 0, 0], [1, 0, 0, 0]], P1, 1),
-        (games.create_coord_4x4_nfg(), False, [[1, 0, 0, 0], [1, 0, 0, 0]], P2, 1),
-        (games.create_coord_4x4_nfg(), True, [[1, 0, 0, 0], [1, 0, 0, 0]], P2, 1),
-        (games.create_coord_4x4_nfg(), False, [[1, 0, 0, 0], [0, 1, 0, 0]], P1, 0),
-        (games.create_coord_4x4_nfg(), True, [[1, 0, 0, 0], [0, 1, 0, 0]], P1, 0),
-        (games.create_coord_4x4_nfg(), False, [[1, 0, 0, 0], [0, 1, 0, 0]], P2, 0),
-        (games.create_coord_4x4_nfg(), True, [[1, 0, 0, 0], [0, 1, 0, 0]], P2, 0),
+        (games.read_from_file("coordination_4x4_payoff.nfg"), False, None, P1, 0.25),
+        (games.read_from_file("coordination_4x4_payoff.nfg"), True, None, P1, "1/4"),
+        (games.read_from_file("coordination_4x4_payoff.nfg"), False, None, P2, 0.25),
+        (games.read_from_file("coordination_4x4_payoff.nfg"), True, None, P2, "1/4"),
+        (
+            games.read_from_file("coordination_4x4_payoff.nfg"),
+            False,
+            [[1, 0, 0, 0], [1, 0, 0, 0]],
+            P1,
+            1,
+        ),
+        (
+            games.read_from_file("coordination_4x4_payoff.nfg"),
+            True,
+            [[1, 0, 0, 0], [1, 0, 0, 0]],
+            P1,
+            1,
+        ),
+        (
+            games.read_from_file("coordination_4x4_payoff.nfg"),
+            False,
+            [[1, 0, 0, 0], [1, 0, 0, 0]],
+            P2,
+            1,
+        ),
+        (
+            games.read_from_file("coordination_4x4_payoff.nfg"),
+            True,
+            [[1, 0, 0, 0], [1, 0, 0, 0]],
+            P2,
+            1,
+        ),
+        (
+            games.read_from_file("coordination_4x4_payoff.nfg"),
+            False,
+            [[1, 0, 0, 0], [0, 1, 0, 0]],
+            P1,
+            0,
+        ),
+        (
+            games.read_from_file("coordination_4x4_payoff.nfg"),
+            True,
+            [[1, 0, 0, 0], [0, 1, 0, 0]],
+            P1,
+            0,
+        ),
+        (
+            games.read_from_file("coordination_4x4_payoff.nfg"),
+            False,
+            [[1, 0, 0, 0], [0, 1, 0, 0]],
+            P2,
+            0,
+        ),
+        (
+            games.read_from_file("coordination_4x4_payoff.nfg"),
+            True,
+            [[1, 0, 0, 0], [0, 1, 0, 0]],
+            P2,
+            0,
+        ),
         #########################################################################
         # stripped-down poker efg
         (games.create_stripped_down_poker_efg(), False, None, "Alice", -0.25),
@@ -406,8 +514,8 @@ def test_payoff_by_label_reference(
         (games.create_2x2_zero_nfg(), True, "cooperate", 0),
         ##############################################################################
         # coordination 4x4 nfg
-        (games.create_coord_4x4_nfg(outcome_version=True), False, "1-1", 0.25),
-        (games.create_coord_4x4_nfg(outcome_version=True), True, "1-1", "1/4"),
+        (games.read_from_file("coordination_4x4_outcome.nfg"), False, "1-1", 0.25),
+        (games.read_from_file("coordination_4x4_outcome.nfg"), True, "1-1", "1/4"),
         ##############################################################################
         # stripped-down poker efg
         (games.create_stripped_down_poker_efg(), False, "11", 0.5),  # Bet/Bet
@@ -447,8 +555,8 @@ def test_as_behavior_roundtrip(game: gbt.Game, rational_flag: bool):
     [
         (games.create_2x2_zero_nfg(), False),
         (games.create_2x2_zero_nfg(), True),
-        (games.create_coord_4x4_nfg(), False),
-        (games.create_coord_4x4_nfg(), True),
+        (games.read_from_file("coordination_4x4_payoff.nfg"), False),
+        (games.read_from_file("coordination_4x4_payoff.nfg"), True),
     ],
 )
 def test_as_behavior_error(game: gbt.Game, rational_flag: bool):
@@ -464,16 +572,16 @@ def test_as_behavior_error(game: gbt.Game, rational_flag: bool):
         (games.create_2x2_zero_nfg(), None, True, (0, 0)),
         ###############################################################################
         # 4x4 coordination nfg
-        (games.create_coord_4x4_nfg(), None, False, (0.25, 0.25)),
-        (games.create_coord_4x4_nfg(), None, True, ("1/4", "1/4")),
+        (games.read_from_file("coordination_4x4_payoff.nfg"), None, False, (0.25, 0.25)),
+        (games.read_from_file("coordination_4x4_payoff.nfg"), None, True, ("1/4", "1/4")),
         (
-            games.create_coord_4x4_nfg(),
+            games.read_from_file("coordination_4x4_payoff.nfg"),
             [["1/3", "1/3", "1/3", 0], ["1/3", "1/3", "1/3", 0]],
             True,
             ("1/3", "1/3"),
         ),
         (
-            games.create_coord_4x4_nfg(),
+            games.read_from_file("coordination_4x4_payoff.nfg"),
             [["1/3", "1/3", 0, "1/3"], ["1/3", "1/3", "1/3", 0]],
             True,
             ("2/9", "2/9"),
@@ -525,25 +633,25 @@ def test_payoffs_reference(
         ###############################################################################
         # 4x4 coordination nfg
         (
-            games.create_coord_4x4_nfg(),
+            games.read_from_file("coordination_4x4_payoff.nfg"),
             None,
             False,
             ([0.25, 0.25, 0.25, 0.25], [0.25, 0.25, 0.25, 0.25]),
         ),
         (
-            games.create_coord_4x4_nfg(),
+            games.read_from_file("coordination_4x4_payoff.nfg"),
             None,
             True,
             ([0.25, 0.25, 0.25, 0.25], [0.25, 0.25, 0.25, 0.25]),
         ),
         (
-            games.create_coord_4x4_nfg(),
+            games.read_from_file("coordination_4x4_payoff.nfg"),
             [["1", "0", "0", "0"], ["1", "0", "0", "0"]],
             True,
             (["1", "0", "0", "0"], ["1", "0", "0", "0"]),
         ),
         (
-            games.create_coord_4x4_nfg(),
+            games.read_from_file("coordination_4x4_payoff.nfg"),
             [["3/7", "0", "0", "4/7"], ["1/3", "1/3", "1/3", "0"]],
             True,
             (["1/3", "1/3", "1/3", "0"], ["3/7", "0", "0", "4/7"]),
@@ -591,26 +699,50 @@ def test_strategy_value_reference(
         (games.create_2x2_zero_nfg(), [[1 / 4, 3 / 4], [2 / 5, 3 / 5]], 0, TOL, False),
         ##############################################################################
         # 4x4 coordination nfg
-        (games.create_coord_4x4_nfg(), None, 0, ZERO, True),
-        (games.create_coord_4x4_nfg(), None, 0, TOL, False),
-        (games.create_coord_4x4_nfg(), [[1, 0, 0, 0], [1, 0, 0, 0]], 0, ZERO, True),
-        (games.create_coord_4x4_nfg(), [[1, 0, 0, 0], [1, 0, 0, 0]], 0, TOL, False),
+        (games.read_from_file("coordination_4x4_payoff.nfg"), None, 0, ZERO, True),
+        (games.read_from_file("coordination_4x4_payoff.nfg"), None, 0, TOL, False),
         (
-            games.create_coord_4x4_nfg(),
+            games.read_from_file("coordination_4x4_payoff.nfg"),
+            [[1, 0, 0, 0], [1, 0, 0, 0]],
+            0,
+            ZERO,
+            True,
+        ),
+        (
+            games.read_from_file("coordination_4x4_payoff.nfg"),
+            [[1, 0, 0, 0], [1, 0, 0, 0]],
+            0,
+            TOL,
+            False,
+        ),
+        (
+            games.read_from_file("coordination_4x4_payoff.nfg"),
             [["1/3", "1/2", "1/12", "1/12"], ["3/8", "1/8", "1/4", "1/4"]],
             "245/2304",
             ZERO,
             True,
         ),
         (
-            games.create_coord_4x4_nfg(),
+            games.read_from_file("coordination_4x4_payoff.nfg"),
             [[1 / 3, 1 / 2, 1 / 12, 1 / 12], [3 / 8, 1 / 8, 1 / 4, 1 / 4]],
             245 / 2304,
             TOL,
             False,
         ),
-        (games.create_coord_4x4_nfg(), [["1/3", 0, 0, "2/3"], [1, 0, 0, 0]], "5/9", ZERO, True),
-        (games.create_coord_4x4_nfg(), [[1 / 3, 0, 0, 2 / 3], [1, 0, 0, 0]], 5 / 9, TOL, False),
+        (
+            games.read_from_file("coordination_4x4_payoff.nfg"),
+            [["1/3", 0, 0, "2/3"], [1, 0, 0, 0]],
+            "5/9",
+            ZERO,
+            True,
+        ),
+        (
+            games.read_from_file("coordination_4x4_payoff.nfg"),
+            [[1 / 3, 0, 0, 2 / 3], [1, 0, 0, 0]],
+            5 / 9,
+            TOL,
+            False,
+        ),
         ##############################################################################
         # El Farol bar game efg
         (
@@ -741,33 +873,45 @@ def test_liap_value_reference(
         (games.create_2x2_zero_nfg(), [[1 / 4, 3 / 4], [2 / 5, 3 / 5]], [0] * 2, TOL, False),
         ##############################################################################
         # 4x4 coordination nfg
-        (games.create_coord_4x4_nfg(), None, [0] * 2, ZERO, True),
-        (games.create_coord_4x4_nfg(), None, [0] * 2, TOL, False),
-        (games.create_coord_4x4_nfg(), [[1, 0, 0, 0], [1, 0, 0, 0]], [0] * 2, ZERO, True),
-        (games.create_coord_4x4_nfg(), [[1, 0, 0, 0], [1, 0, 0, 0]], [0] * 2, TOL, False),
+        (games.read_from_file("coordination_4x4_payoff.nfg"), None, [0] * 2, ZERO, True),
+        (games.read_from_file("coordination_4x4_payoff.nfg"), None, [0] * 2, TOL, False),
         (
-            games.create_coord_4x4_nfg(),
+            games.read_from_file("coordination_4x4_payoff.nfg"),
+            [[1, 0, 0, 0], [1, 0, 0, 0]],
+            [0] * 2,
+            ZERO,
+            True,
+        ),
+        (
+            games.read_from_file("coordination_4x4_payoff.nfg"),
+            [[1, 0, 0, 0], [1, 0, 0, 0]],
+            [0] * 2,
+            TOL,
+            False,
+        ),
+        (
+            games.read_from_file("coordination_4x4_payoff.nfg"),
             [["1/3", "1/2", "1/12", "1/12"], ["3/8", "1/8", "1/4", "1/4"]],
             ["7/48", "13/48"],
             ZERO,
             True,
         ),
         (
-            games.create_coord_4x4_nfg(),
+            games.read_from_file("coordination_4x4_payoff.nfg"),
             [[1 / 3, 1 / 2, 1 / 12, 1 / 12], [3 / 8, 1 / 8, 1 / 4, 1 / 4]],
             [7 / 48, 13 / 48],
             TOL,
             False,
         ),
         (
-            games.create_coord_4x4_nfg(),
+            games.read_from_file("coordination_4x4_payoff.nfg"),
             [["1/3", 0, 0, "2/3"], [1, 0, 0, 0]],
             ["2/3", "1/3"],
             ZERO,
             True,
         ),
         (
-            games.create_coord_4x4_nfg(),
+            games.read_from_file("coordination_4x4_payoff.nfg"),
             [[1 / 3, 0, 0, 2 / 3], [1, 0, 0, 0]],
             [2 / 3, 1 / 3],
             TOL,
@@ -900,8 +1044,8 @@ def test_player_regret_max_regret_reference(
     [
         #################################################################################
         # 4x4 coordination nfg
-        (games.create_coord_4x4_nfg(), False),
-        (games.create_coord_4x4_nfg(), True),
+        (games.read_from_file("coordination_4x4_payoff.nfg"), False),
+        (games.read_from_file("coordination_4x4_payoff.nfg"), True),
         #################################################################################
         # Zero matrix nfg
         (games.create_2x2_zero_nfg(), False),
@@ -936,13 +1080,13 @@ def test_strategy_regret_consistency(game: gbt.Game, rational_flag: bool):
         #################################################################################
         # 4x4 coordination nfg
         (
-            games.create_coord_4x4_nfg(),
+            games.read_from_file("coordination_4x4_payoff.nfg"),
             [["1/5", "2/5", "0/5", "2/5"], ["3/8", "1/4", "3/8", "0/4"]],
             ZERO,
             True,
         ),
         (
-            games.create_coord_4x4_nfg(),
+            games.read_from_file("coordination_4x4_payoff.nfg"),
             [[1 / 3, 1 / 3, 0 / 3, 1 / 3], [1 / 4, 1 / 4, 3 / 8, 1 / 8]],
             TOL,
             False,
@@ -1029,13 +1173,13 @@ def test_liap_value_consistency(
         #################################################################################
         # 4x4 coordination nfg
         (
-            games.create_coord_4x4_nfg(),
+            games.read_from_file("coordination_4x4_payoff.nfg"),
             [["1/5", "2/5", "0/5", "2/5"], ["3/8", "1/4", "3/8", "0/4"]],
             ZERO,
             True,
         ),
         (
-            games.create_coord_4x4_nfg(),
+            games.read_from_file("coordination_4x4_payoff.nfg"),
             [[1 / 3, 1 / 3, 0 / 3, 1 / 3], [1 / 4, 1 / 4, 3 / 8, 1 / 8]],
             TOL,
             False,
@@ -1119,7 +1263,7 @@ def test_player_regret_max_regret_consistency(
         #################################################################################
         # 4x4 coordination nfg
         (
-            games.create_coord_4x4_nfg(),
+            games.read_from_file("coordination_4x4_payoff.nfg"),
             [["1/5", "2/5", "0/5", "2/5"], ["3/8", "1/4", "3/8", "0/4"]],
             [["1/5", "2/5", "0/5", "2/5"], ["1/4", "3/8", "0/4", "3/8"]],
             gbt.Rational("3/5"),
@@ -1127,7 +1271,7 @@ def test_player_regret_max_regret_consistency(
             True,
         ),
         (
-            games.create_coord_4x4_nfg(),
+            games.read_from_file("coordination_4x4_payoff.nfg"),
             [[1 / 5, 2 / 5, 0 / 5, 2 / 5], [3 / 8, 1 / 4, 3 / 8, 0 / 4]],
             [[1 / 5, 2 / 5, 0 / 5, 2 / 5], [1 / 4, 3 / 8, 0 / 4, 3 / 8]],
             3 / 5,
@@ -1221,12 +1365,17 @@ def test_linearity_payoff_property(
         #################################################################################
         # 4x4 coordination nfg
         (
-            games.create_coord_4x4_nfg(),
+            games.read_from_file("coordination_4x4_payoff.nfg"),
             [["1/5", "2/5", "0/5", "2/5"], ["1/4", "3/8", "0/4", "3/8"]],
             ZERO,
             True,
         ),
-        (games.create_coord_4x4_nfg(), [[0.2, 0.4, 0, 0.4], [1 / 4, 3 / 8, 0, 3 / 8]], TOL, False),
+        (
+            games.read_from_file("coordination_4x4_payoff.nfg"),
+            [[0.2, 0.4, 0, 0.4], [1 / 4, 3 / 8, 0, 3 / 8]],
+            TOL,
+            False,
+        ),
         (
             gbt.Game.from_arrays([[1, 2], [-3, 4]], [[-4, 3], [2, 1]]),
             [[1 / 2, 1 / 2], [3 / 5, 2 / 5]],
@@ -1299,7 +1448,7 @@ def test_payoff_and_strategy_value_consistency(
         #################################################################################
         # 4x4 coordination nfg
         (
-            games.create_coord_4x4_nfg(),
+            games.read_from_file("coordination_4x4_payoff.nfg"),
             [["1/1111", "10/1111", "100/1111", "1000/1111"], ["1/4", "1/8", "3/8", "1/4"]],
             [["1/1111", "10/1111", "99/1111", "1001/1111"], ["1/4", "1/8", "3/8", "1/4"]],
             "1/2",
@@ -1307,7 +1456,7 @@ def test_payoff_and_strategy_value_consistency(
             ZERO,
         ),
         (
-            games.create_coord_4x4_nfg(),
+            games.read_from_file("coordination_4x4_payoff.nfg"),
             [[1 / 1111, 10 / 1111, 100 / 1111, 1000 / 1111], [1 / 4, 1 / 8, 3 / 8, 1 / 4]],
             [[1 / 1111, 10 / 1111, 99 / 1111, 1001 / 1111], [1 / 4, 1 / 8, 3 / 8, 1 / 4]],
             1 / 2,
@@ -1426,7 +1575,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
         #######################
         # 4x4 coordination nfg
         pytest.param(
-            games.create_coord_4x4_nfg(),
+            games.read_from_file("coordination_4x4_payoff.nfg"),
             PROBS_1A_doub,
             PROBS_2A_doub,
             False,
@@ -1435,7 +1584,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             id="payoffs_coord_doub",
         ),
         pytest.param(
-            games.create_coord_4x4_nfg(),
+            games.read_from_file("coordination_4x4_payoff.nfg"),
             PROBS_1A_rat,
             PROBS_2A_rat,
             True,
@@ -1485,7 +1634,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
         # regret (for strategies)
         # 4x4 coordination nfg
         pytest.param(
-            games.create_coord_4x4_nfg(),
+            games.read_from_file("coordination_4x4_payoff.nfg"),
             PROBS_1A_doub,
             PROBS_2A_doub,
             False,
@@ -1494,7 +1643,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             id="regret_coord_doub",
         ),
         pytest.param(
-            games.create_coord_4x4_nfg(),
+            games.read_from_file("coordination_4x4_payoff.nfg"),
             PROBS_1A_rat,
             PROBS_2A_rat,
             True,
@@ -1544,7 +1693,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
         # strategy_value (for strategies)
         # 4x4 coordination nfg
         pytest.param(
-            games.create_coord_4x4_nfg(),
+            games.read_from_file("coordination_4x4_payoff.nfg"),
             PROBS_1A_doub,
             PROBS_2A_doub,
             False,
@@ -1553,7 +1702,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             id="strat_value_coord_doub",
         ),
         pytest.param(
-            games.create_coord_4x4_nfg(),
+            games.read_from_file("coordination_4x4_payoff.nfg"),
             PROBS_1A_rat,
             PROBS_2A_rat,
             True,
@@ -1603,7 +1752,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
         # strategy_value_deriv (for strategies * strategies)
         # 4x4 coordination nfg
         pytest.param(
-            games.create_coord_4x4_nfg(),
+            games.read_from_file("coordination_4x4_payoff.nfg"),
             PROBS_1A_doub,
             PROBS_2A_doub,
             False,
@@ -1614,7 +1763,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             id="strat_value_deriv_coord_doub",
         ),
         pytest.param(
-            games.create_coord_4x4_nfg(),
+            games.read_from_file("coordination_4x4_payoff.nfg"),
             PROBS_1A_rat,
             PROBS_2A_rat,
             True,
@@ -1674,7 +1823,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
         # liap_value (of profile, hence [1] for objects_to_test, any singleton collection would do)
         # 4x4 coordination nfg
         pytest.param(
-            games.create_coord_4x4_nfg(),
+            games.read_from_file("coordination_4x4_payoff.nfg"),
             PROBS_1A_doub,
             PROBS_2A_doub,
             False,
@@ -1683,7 +1832,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             id="liap_value_coord_doub",
         ),
         pytest.param(
-            games.create_coord_4x4_nfg(),
+            games.read_from_file("coordination_4x4_payoff.nfg"),
             PROBS_1A_rat,
             PROBS_2A_rat,
             True,
@@ -1733,7 +1882,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
         # max_regret (of profile, hence [1] for objects_to_test, any singleton collection would do)
         # 4x4 coordination nfg
         pytest.param(
-            games.create_coord_4x4_nfg(),
+            games.read_from_file("coordination_4x4_payoff.nfg"),
             PROBS_1A_doub,
             PROBS_2A_doub,
             False,
@@ -1742,7 +1891,7 @@ PROBS_2B_rat = ("1", "0", "1", "0", "1", "0")
             id="max_regret_coord_doub",
         ),
         pytest.param(
-            games.create_coord_4x4_nfg(),
+            games.read_from_file("coordination_4x4_payoff.nfg"),
             PROBS_1A_rat,
             PROBS_2A_rat,
             True,

@@ -1345,9 +1345,9 @@ def test_profile_data_error(game: gbt.Game, rational_flag: bool, data: list):
 
 @pytest.mark.parametrize(
     "game,rational_flag,data",
-    [(games.create_coord_4x4_nfg(), True,
+    [(games.read_from_file("coordination_4x4_payoff.nfg"), True,
       [["1/5", "2/5", 0, "2/5"], ["1/4", "3/8", "1/4", "3/8"]]),
-     (games.create_coord_4x4_nfg(), False,
+     (games.read_from_file("coordination_4x4_payoff.nfg"), False,
       [[1/5, 2/5, 0/5, 2/5], [1/4, 3/8, 1/4, 3/8]]),
      ]
 )
