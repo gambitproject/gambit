@@ -83,19 +83,6 @@ def create_matching_pennies_efg(with_neutral_outcome: bool = False) -> gbt.Game:
     return g
 
 
-def create_mixed_behav_game_efg() -> gbt.Game:
-    """
-    Returns
-    -------
-    Game
-        Three-player extensive form game: binary tree with 3 infomation sets, one per player,
-        with 1, 2, and 4 nodes respectively
-
-        Since no information is revealed this is directly equivalent to a simultaneous move game
-    """
-    return read_from_file("mixed_behavior_game.efg")
-
-
 def create_stripped_down_poker_efg(nonterm_outcomes: bool = False) -> gbt.Game:
     """
     Returns

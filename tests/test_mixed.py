@@ -358,12 +358,12 @@ def test_profile_indexing_by_strategy_label_reference(
     [
         ############################################################################
         # mixed behav efg
-        (games.create_mixed_behav_game_efg(), P1, [0.5, 0.5], False),
-        (games.create_mixed_behav_game_efg(), P2, [0.5, 0.5], False),
-        (games.create_mixed_behav_game_efg(), P3, [0.5, 0.5], False),
-        (games.create_mixed_behav_game_efg(), P1, ["1/2", "1/2"], True),
-        (games.create_mixed_behav_game_efg(), P2, ["1/2", "1/2"], True),
-        (games.create_mixed_behav_game_efg(), P3, ["1/2", "1/2"], True),
+        (games.read_from_file("mixed_behavior_game.efg"), P1, [0.5, 0.5], False),
+        (games.read_from_file("mixed_behavior_game.efg"), P2, [0.5, 0.5], False),
+        (games.read_from_file("mixed_behavior_game.efg"), P3, [0.5, 0.5], False),
+        (games.read_from_file("mixed_behavior_game.efg"), P1, ["1/2", "1/2"], True),
+        (games.read_from_file("mixed_behavior_game.efg"), P2, ["1/2", "1/2"], True),
+        (games.read_from_file("mixed_behavior_game.efg"), P3, ["1/2", "1/2"], True),
         ############################################################################
         # stripped-down poker efg
         (games.create_stripped_down_poker_efg(), "Alice", [0.25, 0.25, 0.25, 0.25], False),
@@ -493,12 +493,12 @@ def test_profile_indexing_by_player_label_reference(
         ),
         (games.create_stripped_down_poker_efg(), True, [[0, 0, 0, 1], ["1/2", "1/2"]], "Bob", 1),
         #########################################################################
-        (games.create_mixed_behav_game_efg(), False, None, P1, 3.0),
-        (games.create_mixed_behav_game_efg(), False, None, P2, 3.0),
-        (games.create_mixed_behav_game_efg(), False, None, P3, 3.25),
-        (games.create_mixed_behav_game_efg(), True, None, P1, 3),
-        (games.create_mixed_behav_game_efg(), True, None, P2, 3),
-        (games.create_mixed_behav_game_efg(), True, None, P3, "13/4"),
+        (games.read_from_file("mixed_behavior_game.efg"), False, None, P1, 3.0),
+        (games.read_from_file("mixed_behavior_game.efg"), False, None, P2, 3.0),
+        (games.read_from_file("mixed_behavior_game.efg"), False, None, P3, 3.25),
+        (games.read_from_file("mixed_behavior_game.efg"), True, None, P1, 3),
+        (games.read_from_file("mixed_behavior_game.efg"), True, None, P2, 3),
+        (games.read_from_file("mixed_behavior_game.efg"), True, None, P3, "13/4"),
     ],
 )
 def test_payoff_by_label_reference(
@@ -542,8 +542,8 @@ def test_strategy_value_by_label_reference(
 @pytest.mark.parametrize(
     "game,rational_flag",
     [
-        (games.create_mixed_behav_game_efg(), False),
-        (games.create_mixed_behav_game_efg(), True),
+        (games.read_from_file("mixed_behavior_game.efg"), False),
+        (games.read_from_file("mixed_behavior_game.efg"), True),
         (games.create_centipede_game_with_chance_efg(), False),
         (games.create_centipede_game_with_chance_efg(), True),
     ],

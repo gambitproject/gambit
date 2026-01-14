@@ -44,7 +44,7 @@ TOL = 1e-13  # tolerance for floating point assertions
         (games.create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq(), []),
         # 3-player game
         (
-            games.create_mixed_behav_game_efg(),
+            games.read_from_file("mixed_behavior_game.efg"),
             [
                 [[1, 0], [1, 0], [1, 0]],
                 [[0, 1], [0, 1], [1, 0]],
@@ -101,7 +101,7 @@ def test_enumpure_strategy(game: gbt.Game, pure_strategy_prof_data: list):
         (games.create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq(), []),
         # 3-player game
         (
-            games.create_mixed_behav_game_efg(),
+            games.read_from_file("mixed_behavior_game.efg"),
             [
                 [[[1, 0]], [[1, 0]], [[1, 0]]],
                 [[[1, 0]], [[0, 1]], [[0, 1]]],
@@ -239,7 +239,7 @@ def test_enummixed_rational(game: gbt.Game, mixed_strategy_prof_data: list):
         ),
         # 3-player game
         # (
-        # games.create_mixed_behav_game_efg(),
+        # games.read_from_file("mixed_behavior_game.efg"),
         # [
         # [[["1/2", "1/2"]], [["2/5", "3/5"]], [["1/4", "3/4"]]],
         # [[["2/5", "3/5"]], [["1/2", "1/2"]], [["1/3", "2/3"]]],
@@ -335,7 +335,7 @@ def test_enumpoly_ordered_behavior(
     [
         # 3-player game
         (
-                games.create_mixed_behav_game_efg(),
+                games.read_from_file("mixed_behavior_game.efg"),
                 [
                     [[["2/5", "3/5"]], [["1/2", "1/2"]], [["1/3", "2/3"]]],
                     [[["1/2", "1/2"]], [["2/5", "3/5"]], [["1/4", "3/4"]]],
