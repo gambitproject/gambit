@@ -788,19 +788,6 @@ def create_reduction_both_players_payoff_ties_efg() -> gbt.Game:
     return g
 
 
-def create_problem_example_efg() -> gbt.Game:
-    g = gbt.Game.new_tree(players=["1", "2"], title="")
-    g.append_move(g.root, player="1", actions=["L", "R"])
-    # do the second child first on purpose to diverge from sort infosets order
-    g.append_move(g.root.children[1], "2", actions=["l2", "r2"])
-    g.append_move(g.root.children[0], "2", actions=["l1", "r1"])
-    g.set_outcome(g.root.children[0].children[0], outcome=g.add_outcome(payoffs=[5, -5]))
-    g.set_outcome(g.root.children[0].children[1], outcome=g.add_outcome(payoffs=[2, -2]))
-    g.set_outcome(g.root.children[1].children[0], outcome=g.add_outcome(payoffs=[-5, 5]))
-    g.set_outcome(g.root.children[1].children[1], outcome=g.add_outcome(payoffs=[-2, 2]))
-    return g
-
-
 def create_two_player_perfect_info_win_lose_efg(nonterm_outcomes: bool = False) -> gbt.Game:
     g = gbt.Game.new_tree(players=["1", "2"], title="2 player perfect info win lose")
     g.append_move(g.root, "2", ["a", "b"])
