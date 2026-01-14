@@ -421,16 +421,6 @@ def create_el_farol_bar_game_efg() -> gbt.Game:
     return read_from_file("el_farol_bar.efg")
 
 
-def create_selten_horse_game_efg() -> gbt.Game:
-    """
-    Returns
-    -------
-    Game
-        5-player Selten's Horse Game
-    """
-    return read_from_file("e01.efg")
-
-
 def create_EFG_for_nxn_bimatrix_coordination_game(n: int) -> gbt.Game:
     A = np.eye(n, dtype=int)
     B = A

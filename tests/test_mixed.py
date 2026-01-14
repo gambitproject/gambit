@@ -1359,9 +1359,9 @@ def test_player_regret_max_regret_consistency(
             False,
         ),
         #################################################################################
-        # Selten's horse game
+        # Selten's horse
         (
-            games.create_selten_horse_game_efg(),
+            games.read_from_file("e01.efg"),
             [["4/9", "5/9"], ["1/11", "10/11"], ["8/9", "1/9"]],
             [["4/9", "5/9"], ["10/11", "1/11"], ["8/9", "1/9"]],
             gbt.Rational("4/9"),
@@ -1459,13 +1459,13 @@ def test_linearity_payoff_property(
         #################################################################################
         # Selten's horse
         (
-            games.create_selten_horse_game_efg(),
+            games.read_from_file("e01.efg"),
             [["4/9", "5/9"], ["6/11", "5/11"], ["4/7", "3/7"]],
             ZERO,
             True,
         ),
         (
-            games.create_selten_horse_game_efg(),
+            games.read_from_file("e01.efg"),
             [[4 / 9, 5 / 9], [6 / 11, 5 / 11], [4 / 7, 3 / 7]],
             TOL,
             False,
