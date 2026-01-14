@@ -44,26 +44,17 @@ def create_efg_corresponding_to_bimatrix_game(
 
 def create_2x2_zero_sum_efg(missing_term_outcome: bool = False) -> gbt.Game:
     """
-    TODO: use create_efg_corresponding_to_bimatrix_game
-
     EFG corresponding to 2x2 zero-sum game (I,-I).
-    If missing_term_outcome, the terminal node after "T" then "r" does not have an outcome.
+    If missing_term_outcome, the terminal node after action 0 then 1 does not have an outcome.
     """
-    g = gbt.Game.new_tree(
-        players=["Alice", "Bob"], title="2x2 matrix games (I,-I)")
-    g.append_move(g.root, "Alice", ["T", "B"])
-    g.append_move(g.root.children, "Bob", ["l", "r"])
-
-    alice_win = g.add_outcome([1, -1], label="Alice win")
-    draw = g.add_outcome([0, 0], label="Draw")
-
-    g.set_outcome(g.root.children["T"].children["l"], alice_win)
-    g.set_outcome(g.root.children["B"].children["r"], alice_win)
-    g.set_outcome(g.root.children["B"].children["l"], draw)
-
-    if not missing_term_outcome:
-        g.set_outcome(g.root.children["T"].children["r"], draw)
-
+    title = "EFG for 2x2 zero-sum game (I,-I)"
+    if missing_term_outcome:
+        title += " with missing terminal outcome"
+    A = np.eye(2)
+    B = -A
+    g = create_efg_corresponding_to_bimatrix_game(A, B, title)
+    if missing_term_outcome:
+        g.delete_outcome(g.root.children[0].children[1].outcome)
     return g
 
 
