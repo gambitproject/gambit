@@ -65,13 +65,23 @@ class CatalogGameFromContrib(CatalogGame):
     Calling any subclass will return an instance of the corresponding game.
     """
 
-    game_file: str | None = None
+    game_file: str
+    _cached_game: Game | None = None
 
     def __new__(cls) -> Game:
+        # Return cached game if available, otherwise load it
+        if cls._cached_game is None:
+            cls._cached_game = cls._load_game()
+        # Return a fresh instance (not the cached one)
+        return cls._load_game()
+
+    @classmethod
+    def _load_game(cls) -> Game:
         """Load the game from file."""
         if cls.game_file is None:
             raise NotImplementedError(f"{cls.__name__} must define 'game_file'")
 
+        cls.game_type = cls.game_file.split(".")[-1]
         file_path = _GAMEFILES_DIR / cls.game_file
 
         if cls.game_type == "nfg":
@@ -80,6 +90,17 @@ class CatalogGameFromContrib(CatalogGame):
             return read_efg(str(file_path))
         else:
             raise ValueError(f"Game file extension must be 'nfg' or 'efg', got '{cls.game_type}'")
+
+    def __init_subclass__(cls, **kwargs):
+        """Validate and extract metadata when subclass is defined."""
+        super().__init_subclass__(**kwargs)
+
+        if not hasattr(cls, "game_file") or cls.game_file is None:
+            raise TypeError(f"{cls.__name__} must define 'game_file' class attribute")
+
+        # Load game and extract metadata immediately when class is defined
+        cls._cached_game = cls._load_game()
+        cls._extract_metadata_from_game(cls._cached_game)
 
 
 def games(
@@ -104,14 +125,15 @@ def games(
     list[str]
         List of game class names matching the specified type.
     """
+
     def get_all_subclasses(cls):
         """Recursively get all subclasses."""
         all_subclasses = []
         for subclass in cls.__subclasses__():
-            if subclass.__name__ not in ["CatalogGameFromContrib"] and (
-                game_type == "all" or subclass.game_type == game_type
-            ) and (
-                num_players is None or subclass.num_players == num_players
+            if (
+                subclass.__name__ not in ["CatalogGameFromContrib"]
+                and (game_type == "all" or subclass.game_type == game_type)
+                and (num_players is None or subclass.num_players == num_players)
             ):
                 all_subclasses.append(subclass.__name__)
             all_subclasses.extend(get_all_subclasses(subclass))
