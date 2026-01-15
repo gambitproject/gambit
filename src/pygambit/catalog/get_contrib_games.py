@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-OUTPUT_FILE = "generated_catalog_games.py"
+OUTPUT_FILE = "catalog.yml"
 _GAMEFILES_DIR = Path(__file__).parent.parent.parent.parent / "contrib/games"
 
 
@@ -34,8 +34,6 @@ if __name__ == "__main__":
     all_files = sorted(efg_files + nfg_files)
 
     lines = []
-    lines.append("from .catalog_game import CatalogGameFromContrib\n\n")
-
     class_names = []
     for path in all_files:
         stem = path.stem
@@ -46,13 +44,13 @@ if __name__ == "__main__":
             class_name += path.suffix.split(".")[-1].upper()
 
         class_names.append(class_name)
-        lines.append(f"class {class_name}(CatalogGameFromContrib):")
-        lines.append(f'    game_file = "{path.name}"')
-        lines.append("\n")
+        lines.append(f"{class_name}:")
+        lines.append(f'  file: "{path.name}"')
+        lines.append("  metadata:\n")
 
     output_path = Path(__file__).parent / OUTPUT_FILE
     output_path.write_text("\n".join(lines), encoding="utf-8")
 
-    print(f"Generated {len(all_files)} classes")
+    print(f"Generated {len(all_files)} new entries to the catalog")
     print(f"Output written to: {output_path}")
     print("Done.")

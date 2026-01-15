@@ -1,0 +1,579 @@
+Game2s2x2x2:
+  file: "2s2x2x2.efg"
+  metadata:
+
+Game2smp:
+  file: "2smp.efg"
+  metadata:
+
+Game2x2:
+  file: "2x2.nfg"
+  metadata:
+
+Game2x2a:
+  file: "2x2a.nfg"
+  metadata:
+
+Game2x2const:
+  file: "2x2const.nfg"
+  metadata:
+
+Game2x2x2_nau:
+  file: "2x2x2-nau.nfg"
+  metadata:
+
+Game2x2x2:
+  file: "2x2x2.efg"
+  metadata:
+
+Game2x2x2NFG:
+  file: "2x2x2.nfg"
+  metadata:
+
+Game2x2x2x2:
+  file: "2x2x2x2.nfg"
+  metadata:
+
+Game2x2x2x2x2:
+  file: "2x2x2x2x2.nfg"
+  metadata:
+
+Game3x3x3:
+  file: "3x3x3.nfg"
+  metadata:
+
+Game4cards:
+  file: "4cards.efg"
+  metadata:
+
+Game5x4x3:
+  file: "5x4x3.nfg"
+  metadata:
+
+Game8x2x2:
+  file: "8x2x2.nfg"
+  metadata:
+
+Game8x8:
+  file: "8x8.nfg"
+  metadata:
+
+Artist1:
+  file: "artist1.efg"
+  metadata:
+
+Artist2:
+  file: "artist2.efg"
+  metadata:
+
+Badgame1:
+  file: "badgame1.efg"
+  metadata:
+
+Badgame2:
+  file: "badgame2.efg"
+  metadata:
+
+Bagwell:
+  file: "bagwell.efg"
+  metadata:
+
+Bayes1a:
+  file: "bayes1a.efg"
+  metadata:
+
+Bayes2a:
+  file: "bayes2a.efg"
+  metadata:
+
+Bcp2:
+  file: "bcp2.efg"
+  metadata:
+
+Bcp3:
+  file: "bcp3.efg"
+  metadata:
+
+Bcp4:
+  file: "bcp4.efg"
+  metadata:
+
+Bhg1:
+  file: "bhg1.efg"
+  metadata:
+
+Bhg2:
+  file: "bhg2.efg"
+  metadata:
+
+Bhg3:
+  file: "bhg3.efg"
+  metadata:
+
+Bhg4:
+  file: "bhg4.efg"
+  metadata:
+
+Bhg5:
+  file: "bhg5.efg"
+  metadata:
+
+Caro2:
+  file: "caro2.efg"
+  metadata:
+
+Cent2:
+  file: "cent2.efg"
+  metadata:
+
+Cent2NFG:
+  file: "cent2.nfg"
+  metadata:
+
+Cent3:
+  file: "cent3.efg"
+  metadata:
+
+Cent4:
+  file: "cent4.efg"
+  metadata:
+
+Cent6:
+  file: "cent6.efg"
+  metadata:
+
+Centcs10:
+  file: "centcs10.efg"
+  metadata:
+
+Centcs6:
+  file: "centcs6.efg"
+  metadata:
+
+Condjury:
+  file: "condjury.efg"
+  metadata:
+
+Coord2:
+  file: "coord2.efg"
+  metadata:
+
+Coord2NFG:
+  file: "coord2.nfg"
+  metadata:
+
+Coord2ts:
+  file: "coord2ts.efg"
+  metadata:
+
+Coord3:
+  file: "coord3.efg"
+  metadata:
+
+Coord3NFG:
+  file: "coord3.nfg"
+  metadata:
+
+Coord333:
+  file: "coord333.nfg"
+  metadata:
+
+Coord4:
+  file: "coord4.efg"
+  metadata:
+
+Coord4NFG:
+  file: "coord4.nfg"
+  metadata:
+
+Cross:
+  file: "cross.efg"
+  metadata:
+
+Cs:
+  file: "cs.efg"
+  metadata:
+
+Csg1:
+  file: "csg1.nfg"
+  metadata:
+
+Csg2:
+  file: "csg2.nfg"
+  metadata:
+
+Csg3:
+  file: "csg3.nfg"
+  metadata:
+
+Csg4:
+  file: "csg4.nfg"
+  metadata:
+
+Deg1:
+  file: "deg1.nfg"
+  metadata:
+
+Deg2:
+  file: "deg2.nfg"
+  metadata:
+
+E01:
+  file: "e01.efg"
+  metadata:
+
+E01NFG:
+  file: "e01.nfg"
+  metadata:
+
+E02:
+  file: "e02.efg"
+  metadata:
+
+E02NFG:
+  file: "e02.nfg"
+  metadata:
+
+E03:
+  file: "e03.efg"
+  metadata:
+
+E04:
+  file: "e04.efg"
+  metadata:
+
+E04NFG:
+  file: "e04.nfg"
+  metadata:
+
+E05:
+  file: "e05.efg"
+  metadata:
+
+E06:
+  file: "e06.efg"
+  metadata:
+
+E07:
+  file: "e07.efg"
+  metadata:
+
+E07NFG:
+  file: "e07.nfg"
+  metadata:
+
+E08:
+  file: "e08.efg"
+  metadata:
+
+E09:
+  file: "e09.efg"
+  metadata:
+
+E10:
+  file: "e10.efg"
+  metadata:
+
+E10a:
+  file: "e10a.efg"
+  metadata:
+
+E13:
+  file: "e13.efg"
+  metadata:
+
+E16:
+  file: "e16.efg"
+  metadata:
+
+E17:
+  file: "e17.efg"
+  metadata:
+
+E18:
+  file: "e18.efg"
+  metadata:
+
+G1:
+  file: "g1.efg"
+  metadata:
+
+G1NFG:
+  file: "g1.nfg"
+  metadata:
+
+G2:
+  file: "g2.efg"
+  metadata:
+
+G2NFG:
+  file: "g2.nfg"
+  metadata:
+
+G3:
+  file: "g3.efg"
+  metadata:
+
+G3NFG:
+  file: "g3.nfg"
+  metadata:
+
+Holdout:
+  file: "holdout.efg"
+  metadata:
+
+Holdout7:
+  file: "holdout7.efg"
+  metadata:
+
+Hs1:
+  file: "hs1.efg"
+  metadata:
+
+Jury_mr:
+  file: "jury_mr.efg"
+  metadata:
+
+Jury_un:
+  file: "jury_un.efg"
+  metadata:
+
+Km1:
+  file: "km1.efg"
+  metadata:
+
+Km2:
+  file: "km2.efg"
+  metadata:
+
+Km3:
+  file: "km3.efg"
+  metadata:
+
+Km6:
+  file: "km6.efg"
+  metadata:
+
+Loopback:
+  file: "loopback.nfg"
+  metadata:
+
+Mixdom:
+  file: "mixdom.nfg"
+  metadata:
+
+Mixdom2:
+  file: "mixdom2.nfg"
+  metadata:
+
+Montyhal:
+  file: "montyhal.efg"
+  metadata:
+
+My_2_1:
+  file: "my_2-1.efg"
+  metadata:
+
+My_2_4:
+  file: "my_2-4.efg"
+  metadata:
+
+My_2_8:
+  file: "my_2-8.efg"
+  metadata:
+
+My_3_3a:
+  file: "my_3-3a.efg"
+  metadata:
+
+My_3_3b:
+  file: "my_3-3b.efg"
+  metadata:
+
+My_3_3c:
+  file: "my_3-3c.efg"
+  metadata:
+
+My_3_3d:
+  file: "my_3-3d.efg"
+  metadata:
+
+My_3_3e:
+  file: "my_3-3e.efg"
+  metadata:
+
+My_3_4:
+  file: "my_3-4.efg"
+  metadata:
+
+Myerson:
+  file: "myerson.efg"
+  metadata:
+
+Myerson_fig_4_2:
+  file: "myerson_fig_4_2.efg"
+  metadata:
+
+Nim:
+  file: "nim.efg"
+  metadata:
+
+Nim7:
+  file: "nim7.efg"
+  metadata:
+
+Oneill:
+  file: "oneill.nfg"
+  metadata:
+
+Palf:
+  file: "palf.efg"
+  metadata:
+
+Palf2:
+  file: "palf2.efg"
+  metadata:
+
+Palf3:
+  file: "palf3.efg"
+  metadata:
+
+Pbride:
+  file: "pbride.efg"
+  metadata:
+
+Pd:
+  file: "pd.nfg"
+  metadata:
+
+Perfect1:
+  file: "perfect1.nfg"
+  metadata:
+
+Perfect2:
+  file: "perfect2.nfg"
+  metadata:
+
+Perfect3:
+  file: "perfect3.nfg"
+  metadata:
+
+Poker:
+  file: "poker.efg"
+  metadata:
+
+PokerNFG:
+  file: "poker.nfg"
+  metadata:
+
+Poker2:
+  file: "poker2.efg"
+  metadata:
+
+Pvw:
+  file: "pvw.efg"
+  metadata:
+
+Pvw2:
+  file: "pvw2.efg"
+  metadata:
+
+Sh3:
+  file: "sh3.efg"
+  metadata:
+
+Sh3NFG:
+  file: "sh3.nfg"
+  metadata:
+
+Spence:
+  file: "spence.efg"
+  metadata:
+
+Stengel:
+  file: "stengel.nfg"
+  metadata:
+
+Sww1:
+  file: "sww1.efg"
+  metadata:
+
+Sww1NFG:
+  file: "sww1.nfg"
+  metadata:
+
+Sww2:
+  file: "sww2.efg"
+  metadata:
+
+Sww3:
+  file: "sww3.efg"
+  metadata:
+
+Tim:
+  file: "tim.efg"
+  metadata:
+
+Todd1:
+  file: "todd1.nfg"
+  metadata:
+
+Todd2:
+  file: "todd2.nfg"
+  metadata:
+
+Todd3:
+  file: "todd3.nfg"
+  metadata:
+
+Ttt:
+  file: "ttt.efg"
+  metadata:
+
+Vd:
+  file: "vd.efg"
+  metadata:
+
+VdNFG:
+  file: "vd.nfg"
+  metadata:
+
+W_ex1:
+  file: "w_ex1.efg"
+  metadata:
+
+W_ex2:
+  file: "w_ex2.efg"
+  metadata:
+
+Wilson1:
+  file: "wilson1.efg"
+  metadata:
+
+Wink3:
+  file: "wink3.nfg"
+  metadata:
+
+Winkels:
+  file: "winkels.nfg"
+  metadata:
+
+Work1:
+  file: "work1.efg"
+  metadata:
+
+Work2:
+  file: "work2.efg"
+  metadata:
+
+Work3:
+  file: "work3.efg"
+  metadata:
+
+Yamamoto:
+  file: "yamamoto.nfg"
+  metadata:
+
+Zero:
+  file: "zero.nfg"
+  metadata:
