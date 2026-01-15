@@ -171,17 +171,29 @@ def _generate_contrib_game_classes(catalog: dict[str, dict]) -> None:
             raise ValueError(f"Missing 'file' for catalog entry '{class_name}'")
 
         game_file = entry["file"]
+        metadata = entry.get("metadata", {})
 
-        cls = type(
-            class_name,
-            (CatalogGameFromContrib,),
-            {
-                "game_file": game_file,
-                "__module__": __name__,
-            },
-        )
+        # Build class attributes dict
+        class_attrs = {
+            "game_file": game_file,
+            "__module__": __name__,
+        }
 
-        setattr(module, class_name, cls)
+        # Add metadata fields as class attributes
+        if metadata and "valid_game" in metadata and metadata["valid_game"] is False:
+            pass  # Marked as invalid game, do not create class
+        else:
+            if metadata:
+                for key, value in metadata.items():
+                    class_attrs[key] = value
+
+            cls = type(
+                class_name,
+                (CatalogGameFromContrib,),
+                class_attrs,
+            )
+
+            setattr(module, class_name, cls)
 
 
 # Generate classes at import time
