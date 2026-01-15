@@ -109,9 +109,10 @@ class CatalogGameFromContrib(CatalogGame):
 def games(
     game_type: Literal["all", "nfg", "efg"] = "all",
     num_players: int | None = None,
+    **metadata_filters,
 ) -> list[str]:
     """
-    Return a list of catalog game names.
+    Return a list of catalog game class names.
 
     Parameters
     ----------
@@ -122,23 +123,56 @@ def games(
         - "efg": return only extensive-form games
     num_players : int | None, default None
         If specified, only return games with the given number of players.
+    **metadata_filters
+        Additional keyword arguments to filter by metadata fields.
+        For example, `tutorial=1` filters for games with `tutorial: 1` in metadata.
 
     Returns
     -------
     list[str]
-        List of game class names matching the specified type.
+        List of game class names matching the specified filters.
+
+    Examples
+    --------
+    >>> games(tutorial=1)  # Games with a custom metadata field 'tutorial' equal to 1
+    >>> games(game_type="efg", num_players=2)  # 2-player extensive-form games
     """
 
     def get_all_subclasses(cls):
         """Recursively get all subclasses."""
         all_subclasses = []
         for subclass in cls.__subclasses__():
-            if (
-                subclass.__name__ not in ["CatalogGameFromContrib"]
-                and (game_type == "all" or subclass.game_type == game_type)
-                and (num_players is None or subclass.num_players == num_players)
-            ):
+            # Check standard filters
+            if subclass.__name__ in ["CatalogGameFromContrib"]:
+                all_subclasses.extend(get_all_subclasses(subclass))
+                continue
+
+            if game_type != "all" and not hasattr(subclass, "game_type"):
+                all_subclasses.extend(get_all_subclasses(subclass))
+                continue
+
+            if game_type != "all" and subclass.game_type != game_type:
+                all_subclasses.extend(get_all_subclasses(subclass))
+                continue
+
+            if num_players is not None and not hasattr(subclass, "num_players"):
+                all_subclasses.extend(get_all_subclasses(subclass))
+                continue
+
+            if num_players is not None and subclass.num_players != num_players:
+                all_subclasses.extend(get_all_subclasses(subclass))
+                continue
+
+            # Check metadata filters
+            metadata_match = True
+            for key, value in metadata_filters.items():
+                if not hasattr(subclass, key) or getattr(subclass, key) != value:
+                    metadata_match = False
+                    break
+
+            if metadata_match:
                 all_subclasses.append(subclass.__name__)
+
             all_subclasses.extend(get_all_subclasses(subclass))
         return all_subclasses
 
