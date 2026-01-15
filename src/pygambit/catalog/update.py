@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-import yaml
+from ruamel.yaml import YAML
 
 _CATALOG_YAML = Path(__file__).parent / "catalog.yml"
 _GAMEFILES_DIR = Path(__file__).parent.parent.parent.parent / "contrib/games"
@@ -27,6 +27,11 @@ def make_class_name(filename: str) -> str:
 
 
 if __name__ == "__main__":
+    # Use ruamel.yaml to preserve comments
+    yaml = YAML()
+    yaml.preserve_quotes = True
+    yaml.default_flow_style = False
+
     efg_files = list(_GAMEFILES_DIR.rglob("*.efg"))
     nfg_files = list(_GAMEFILES_DIR.rglob("*.nfg"))
 
@@ -37,13 +42,11 @@ if __name__ == "__main__":
 
     # Get the current class names from the catalog
     with open(_CATALOG_YAML, encoding="utf-8") as f:
-        catalog = yaml.safe_load(f) or {}
+        catalog = yaml.load(f) or {}
     file_names = [entry["file"] for entry in catalog.values() if "file" in entry]
 
     # Iterate through contrib/games and update the catalog
     # with new/missing entries
-    lines = []
-    class_names = []
     new_entries_counter = 0
     new_entries = {}
     for path in all_files:
@@ -61,12 +64,10 @@ if __name__ == "__main__":
             }
             new_entries_counter += 1
 
-    # Update the yml
-    new_entries = yaml.safe_load("\n".join(lines)) or {}
+    # Update the catalog
     catalog.update(new_entries)
     with _CATALOG_YAML.open("w", encoding="utf-8") as f:
-        dumped = yaml.safe_dump(catalog, sort_keys=False, default_flow_style=False)
-        f.write(dumped)
+        yaml.dump(catalog, f)
 
     print(f"Added {new_entries_counter} new entries to the catalog")
     print(f"Output written to: {_CATALOG_YAML}")

@@ -1,436 +1,436 @@
 Game2s2x2x2:
   file: 2s2x2x2.efg
-  metadata: null
+  metadata:
 Game2smp:
   file: 2smp.efg
-  metadata: null
+  metadata:
 Game2x2:
   file: 2x2.nfg
-  metadata: null
+  metadata:
 Game2x2a:
   file: 2x2a.nfg
-  metadata: null
+  metadata:
 Game2x2const:
   file: 2x2const.nfg
-  metadata: null
+  metadata:
 Game2x2x2_nau:
   file: 2x2x2-nau.nfg
-  metadata: null
+  metadata:
 Game2x2x2:
   file: 2x2x2.efg
-  metadata: null
+  metadata:
 Game2x2x2NFG:
   file: 2x2x2.nfg
-  metadata: null
+  metadata:
 Game2x2x2x2:
   file: 2x2x2x2.nfg
-  metadata: null
+  metadata:
 Game2x2x2x2x2:
   file: 2x2x2x2x2.nfg
-  metadata: null
+  metadata:
 Game3x3x3:
   file: 3x3x3.nfg
-  metadata: null
+  metadata:
 Game4cards:
   file: 4cards.efg
-  metadata: null
+  metadata:
 Game5x4x3:
   file: 5x4x3.nfg
-  metadata: null
+  metadata:
 Game8x2x2:
   file: 8x2x2.nfg
-  metadata: null
+  metadata:
 Game8x8:
   file: 8x8.nfg
-  metadata: null
+  metadata:
 Artist1:
   file: artist1.efg
-  metadata: null
+  metadata:
 Artist2:
   file: artist2.efg
-  metadata: null
+  metadata:
 Badgame1:
   file: badgame1.efg
-  metadata: null
+  metadata:
 Badgame2:
   file: badgame2.efg
-  metadata: null
+  metadata:
 Bagwell:
   file: bagwell.efg
-  metadata: null
+  metadata:
 Bayes1a:
   file: bayes1a.efg
-  metadata: null
+  metadata:
 Bayes2a:
   file: bayes2a.efg
-  metadata: null
+  metadata:
 Bcp2:
   file: bcp2.efg
-  metadata: null
+  metadata:
 Bcp3:
   file: bcp3.efg
-  metadata: null
+  metadata:
 Bcp4:
   file: bcp4.efg
-  metadata: null
+  metadata:
 Bhg1:
   file: bhg1.efg
-  metadata: null
+  metadata:
 Bhg2:
   file: bhg2.efg
-  metadata: null
+  metadata:
 Bhg3:
   file: bhg3.efg
-  metadata: null
+  metadata:
 Bhg4:
   file: bhg4.efg
-  metadata: null
+  metadata:
 Bhg5:
   file: bhg5.efg
-  metadata: null
+  metadata:
 Caro2:
   file: caro2.efg
-  metadata: null
+  metadata:
 Cent2:
   file: cent2.efg
-  metadata: null
+  metadata:
 Cent2NFG:
   file: cent2.nfg
-  metadata: null
+  metadata:
 Cent3:
   file: cent3.efg
-  metadata: null
+  metadata:
 Cent4:
   file: cent4.efg
-  metadata: null
+  metadata:
 Cent6:
   file: cent6.efg
-  metadata: null
+  metadata:
 Centcs10:
   file: centcs10.efg
-  metadata: null
+  metadata:
 Centcs6:
   file: centcs6.efg
-  metadata: null
+  metadata:
 Condjury:
   file: condjury.efg
-  metadata: null
+  metadata:
 Coord2:
   file: coord2.efg
-  metadata: null
+  metadata:
 Coord2NFG:
   file: coord2.nfg
-  metadata: null
+  metadata:
 Coord2ts:
   file: coord2ts.efg
-  metadata: null
+  metadata:
 Coord3:
   file: coord3.efg
-  metadata: null
+  metadata:
 Coord3NFG:
   file: coord3.nfg
-  metadata: null
+  metadata:
 Coord333:
   file: coord333.nfg
-  metadata: null
+  metadata:
 Coord4:
   file: coord4.efg
-  metadata: null
+  metadata:
 Coord4NFG:
   file: coord4.nfg
-  metadata: null
+  metadata:
 Cross:
   file: cross.efg
-  metadata: null
+  metadata:
 Cs:
   file: cs.efg
-  metadata: null
+  metadata:
 Csg1:
   file: csg1.nfg
-  metadata: null
+  metadata:
 Csg2:
   file: csg2.nfg
-  metadata: null
+  metadata:
 Csg3:
   file: csg3.nfg
-  metadata: null
+  metadata:
 Csg4:
   file: csg4.nfg
-  metadata: null
+  metadata:
 Deg1:
   file: deg1.nfg
-  metadata: null
+  metadata:
 Deg2:
   file: deg2.nfg
-  metadata: null
+  metadata:
 E01:
   file: e01.efg
-  metadata: null
+  metadata:
 E01NFG:
   file: e01.nfg
-  metadata: null
+  metadata:
 E02:
   file: e02.efg
-  metadata: null
+  metadata:
 E02NFG:
   file: e02.nfg
-  metadata: null
+  metadata:
 E03:
   file: e03.efg
-  metadata: null
+  metadata:
 E04:
   file: e04.efg
-  metadata: null
+  metadata:
 E04NFG:
   file: e04.nfg
-  metadata: null
+  metadata:
 E05:
   file: e05.efg
-  metadata: null
+  metadata:
 E06:
   file: e06.efg
-  metadata: null
+  metadata:
 E07:
   file: e07.efg
-  metadata: null
+  metadata:
 E07NFG:
   file: e07.nfg
-  metadata: null
+  metadata:
 E08:
   file: e08.efg
-  metadata: null
+  metadata:
 E09:
   file: e09.efg
-  metadata: null
+  metadata:
 E10:
   file: e10.efg
-  metadata: null
+  metadata:
 E10a:
   file: e10a.efg
-  metadata: null
+  metadata:
 E13:
   file: e13.efg
-  metadata: null
+  metadata:
 E16:
   file: e16.efg
-  metadata: null
+  metadata:
 E17:
   file: e17.efg
-  metadata: null
+  metadata:
 E18:
   file: e18.efg
-  metadata: null
+  metadata:
 G1:
   file: g1.efg
-  metadata: null
+  metadata:
 G1NFG:
   file: g1.nfg
-  metadata: null
+  metadata:
 G2:
   file: g2.efg
-  metadata: null
+  metadata:
 G2NFG:
   file: g2.nfg
-  metadata: null
+  metadata:
 G3:
   file: g3.efg
-  metadata: null
+  metadata:
 G3NFG:
   file: g3.nfg
-  metadata: null
+  metadata:
 Holdout:
   file: holdout.efg
-  metadata: null
+  metadata:
 Holdout7:
   file: holdout7.efg
   metadata:
     valid_game: false # This game does not work (ValueError: Parse error in game file: Probabilities must sum to exactly one)
 Hs1:
   file: hs1.efg
-  metadata: null
+  metadata:
 Jury_mr:
   file: jury_mr.efg
-  metadata: null
+  metadata:
 Jury_un:
   file: jury_un.efg
-  metadata: null
+  metadata:
 Km1:
   file: km1.efg
-  metadata: null
+  metadata:
 Km2:
   file: km2.efg
-  metadata: null
+  metadata:
 Km3:
   file: km3.efg
-  metadata: null
+  metadata:
 Km6:
   file: km6.efg
-  metadata: null
+  metadata:
 Loopback:
   file: loopback.nfg
-  metadata: null
+  metadata:
 Mixdom:
   file: mixdom.nfg
-  metadata: null
+  metadata:
 Mixdom2:
   file: mixdom2.nfg
-  metadata: null
+  metadata:
 Montyhal:
   file: montyhal.efg
-  metadata: null
+  metadata:
 My_2_1:
   file: my_2-1.efg
-  metadata: null
+  metadata:
 My_2_4:
   file: my_2-4.efg
-  metadata: null
+  metadata:
 My_2_8:
   file: my_2-8.efg
-  metadata: null
+  metadata:
 My_3_3a:
   file: my_3-3a.efg
-  metadata: null
+  metadata:
 My_3_3b:
   file: my_3-3b.efg
-  metadata: null
+  metadata:
 My_3_3c:
   file: my_3-3c.efg
-  metadata: null
+  metadata:
 My_3_3d:
   file: my_3-3d.efg
-  metadata: null
+  metadata:
 My_3_3e:
   file: my_3-3e.efg
-  metadata: null
+  metadata:
 My_3_4:
   file: my_3-4.efg
-  metadata: null
+  metadata:
 Myerson:
   file: myerson.efg
-  metadata: null
+  metadata:
 Myerson_fig_4_2:
   file: myerson_fig_4_2.efg
-  metadata: null
+  metadata:
 Nim:
   file: nim.efg
-  metadata: null
+  metadata:
 Nim7:
   file: nim7.efg
-  metadata: null
+  metadata:
 Oneill:
   file: oneill.nfg
-  metadata: null
+  metadata:
 Palf:
   file: palf.efg
-  metadata: null
+  metadata:
 Palf2:
   file: palf2.efg
-  metadata: null
+  metadata:
 Palf3:
   file: palf3.efg
-  metadata: null
+  metadata:
 Pbride:
   file: pbride.efg
-  metadata: null
+  metadata:
 PrisonersDilemma:
   file: pd.nfg
-  metadata: null
+  metadata:
 Perfect1:
   file: perfect1.nfg
-  metadata: null
+  metadata:
 Perfect2:
   file: perfect2.nfg
-  metadata: null
+  metadata:
 Perfect3:
   file: perfect3.nfg
-  metadata: null
+  metadata:
 Poker:
   file: poker.efg
-  metadata: null
+  metadata:
 PokerNFG:
   file: poker.nfg
-  metadata: null
+  metadata:
 Poker2:
   file: poker2.efg
-  metadata: null
+  metadata:
 Pvw:
   file: pvw.efg
-  metadata: null
+  metadata:
 Pvw2:
   file: pvw2.efg
-  metadata: null
+  metadata:
 Sh3:
   file: sh3.efg
-  metadata: null
+  metadata:
 Sh3NFG:
   file: sh3.nfg
-  metadata: null
+  metadata:
 Spence:
   file: spence.efg
-  metadata: null
+  metadata:
 Stengel:
   file: stengel.nfg
-  metadata: null
+  metadata:
 Sww1:
   file: sww1.efg
-  metadata: null
+  metadata:
 Sww1NFG:
   file: sww1.nfg
-  metadata: null
+  metadata:
 Sww2:
   file: sww2.efg
-  metadata: null
+  metadata:
 Sww3:
   file: sww3.efg
-  metadata: null
+  metadata:
 Tim:
   file: tim.efg
-  metadata: null
+  metadata:
 Todd1:
   file: todd1.nfg
-  metadata: null
+  metadata:
 Todd2:
   file: todd2.nfg
-  metadata: null
+  metadata:
 Todd3:
   file: todd3.nfg
-  metadata: null
+  metadata:
 Ttt:
   file: ttt.efg
-  metadata: null
+  metadata:
 Vd:
   file: vd.efg
-  metadata: null
+  metadata:
 VdNFG:
   file: vd.nfg
-  metadata: null
+  metadata:
 W_ex1:
   file: w_ex1.efg
-  metadata: null
+  metadata:
 W_ex2:
   file: w_ex2.efg
-  metadata: null
+  metadata:
 Wilson1:
   file: wilson1.efg
-  metadata: null
+  metadata:
 Wink3:
   file: wink3.nfg
-  metadata: null
+  metadata:
 Winkels:
   file: winkels.nfg
-  metadata: null
+  metadata:
 Work1:
   file: work1.efg
-  metadata: null
+  metadata:
 Work2:
   file: work2.efg
-  metadata: null
+  metadata:
 Work3:
   file: work3.efg
-  metadata: null
+  metadata:
 Yamamoto:
   file: yamamoto.nfg
-  metadata: null
+  metadata:
 Zero:
   file: zero.nfg
-  metadata: null
+  metadata:
