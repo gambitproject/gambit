@@ -1,579 +1,436 @@
 Game2s2x2x2:
-  file: "2s2x2x2.efg"
-  metadata:
-
+  file: 2s2x2x2.efg
+  metadata: null
 Game2smp:
-  file: "2smp.efg"
-  metadata:
-
+  file: 2smp.efg
+  metadata: null
 Game2x2:
-  file: "2x2.nfg"
-  metadata:
-
+  file: 2x2.nfg
+  metadata: null
 Game2x2a:
-  file: "2x2a.nfg"
-  metadata:
-
+  file: 2x2a.nfg
+  metadata: null
 Game2x2const:
-  file: "2x2const.nfg"
-  metadata:
-
+  file: 2x2const.nfg
+  metadata: null
 Game2x2x2_nau:
-  file: "2x2x2-nau.nfg"
-  metadata:
-
+  file: 2x2x2-nau.nfg
+  metadata: null
 Game2x2x2:
-  file: "2x2x2.efg"
-  metadata:
-
+  file: 2x2x2.efg
+  metadata: null
 Game2x2x2NFG:
-  file: "2x2x2.nfg"
-  metadata:
-
+  file: 2x2x2.nfg
+  metadata: null
 Game2x2x2x2:
-  file: "2x2x2x2.nfg"
-  metadata:
-
+  file: 2x2x2x2.nfg
+  metadata: null
 Game2x2x2x2x2:
-  file: "2x2x2x2x2.nfg"
-  metadata:
-
+  file: 2x2x2x2x2.nfg
+  metadata: null
 Game3x3x3:
-  file: "3x3x3.nfg"
-  metadata:
-
+  file: 3x3x3.nfg
+  metadata: null
 Game4cards:
-  file: "4cards.efg"
-  metadata:
-
+  file: 4cards.efg
+  metadata: null
 Game5x4x3:
-  file: "5x4x3.nfg"
-  metadata:
-
+  file: 5x4x3.nfg
+  metadata: null
 Game8x2x2:
-  file: "8x2x2.nfg"
-  metadata:
-
+  file: 8x2x2.nfg
+  metadata: null
 Game8x8:
-  file: "8x8.nfg"
-  metadata:
-
+  file: 8x8.nfg
+  metadata: null
 Artist1:
-  file: "artist1.efg"
-  metadata:
-
+  file: artist1.efg
+  metadata: null
 Artist2:
-  file: "artist2.efg"
-  metadata:
-
+  file: artist2.efg
+  metadata: null
 Badgame1:
-  file: "badgame1.efg"
-  metadata:
-
+  file: badgame1.efg
+  metadata: null
 Badgame2:
-  file: "badgame2.efg"
-  metadata:
-
+  file: badgame2.efg
+  metadata: null
 Bagwell:
-  file: "bagwell.efg"
-  metadata:
-
+  file: bagwell.efg
+  metadata: null
 Bayes1a:
-  file: "bayes1a.efg"
-  metadata:
-
+  file: bayes1a.efg
+  metadata: null
 Bayes2a:
-  file: "bayes2a.efg"
-  metadata:
-
+  file: bayes2a.efg
+  metadata: null
 Bcp2:
-  file: "bcp2.efg"
-  metadata:
-
+  file: bcp2.efg
+  metadata: null
 Bcp3:
-  file: "bcp3.efg"
-  metadata:
-
+  file: bcp3.efg
+  metadata: null
 Bcp4:
-  file: "bcp4.efg"
-  metadata:
-
+  file: bcp4.efg
+  metadata: null
 Bhg1:
-  file: "bhg1.efg"
-  metadata:
-
+  file: bhg1.efg
+  metadata: null
 Bhg2:
-  file: "bhg2.efg"
-  metadata:
-
+  file: bhg2.efg
+  metadata: null
 Bhg3:
-  file: "bhg3.efg"
-  metadata:
-
+  file: bhg3.efg
+  metadata: null
 Bhg4:
-  file: "bhg4.efg"
-  metadata:
-
+  file: bhg4.efg
+  metadata: null
 Bhg5:
-  file: "bhg5.efg"
-  metadata:
-
+  file: bhg5.efg
+  metadata: null
 Caro2:
-  file: "caro2.efg"
-  metadata:
-
+  file: caro2.efg
+  metadata: null
 Cent2:
-  file: "cent2.efg"
-  metadata:
-
+  file: cent2.efg
+  metadata: null
 Cent2NFG:
-  file: "cent2.nfg"
-  metadata:
-
+  file: cent2.nfg
+  metadata: null
 Cent3:
-  file: "cent3.efg"
-  metadata:
-
+  file: cent3.efg
+  metadata: null
 Cent4:
-  file: "cent4.efg"
-  metadata:
-
+  file: cent4.efg
+  metadata: null
 Cent6:
-  file: "cent6.efg"
-  metadata:
-
+  file: cent6.efg
+  metadata: null
 Centcs10:
-  file: "centcs10.efg"
-  metadata:
-
+  file: centcs10.efg
+  metadata: null
 Centcs6:
-  file: "centcs6.efg"
-  metadata:
-
+  file: centcs6.efg
+  metadata: null
 Condjury:
-  file: "condjury.efg"
-  metadata:
-
+  file: condjury.efg
+  metadata: null
 Coord2:
-  file: "coord2.efg"
-  metadata:
-
+  file: coord2.efg
+  metadata: null
 Coord2NFG:
-  file: "coord2.nfg"
-  metadata:
-
+  file: coord2.nfg
+  metadata: null
 Coord2ts:
-  file: "coord2ts.efg"
-  metadata:
-
+  file: coord2ts.efg
+  metadata: null
 Coord3:
-  file: "coord3.efg"
-  metadata:
-
+  file: coord3.efg
+  metadata: null
 Coord3NFG:
-  file: "coord3.nfg"
-  metadata:
-
+  file: coord3.nfg
+  metadata: null
 Coord333:
-  file: "coord333.nfg"
-  metadata:
-
+  file: coord333.nfg
+  metadata: null
 Coord4:
-  file: "coord4.efg"
-  metadata:
-
+  file: coord4.efg
+  metadata: null
 Coord4NFG:
-  file: "coord4.nfg"
-  metadata:
-
+  file: coord4.nfg
+  metadata: null
 Cross:
-  file: "cross.efg"
-  metadata:
-
+  file: cross.efg
+  metadata: null
 Cs:
-  file: "cs.efg"
-  metadata:
-
+  file: cs.efg
+  metadata: null
 Csg1:
-  file: "csg1.nfg"
-  metadata:
-
+  file: csg1.nfg
+  metadata: null
 Csg2:
-  file: "csg2.nfg"
-  metadata:
-
+  file: csg2.nfg
+  metadata: null
 Csg3:
-  file: "csg3.nfg"
-  metadata:
-
+  file: csg3.nfg
+  metadata: null
 Csg4:
-  file: "csg4.nfg"
-  metadata:
-
+  file: csg4.nfg
+  metadata: null
 Deg1:
-  file: "deg1.nfg"
-  metadata:
-
+  file: deg1.nfg
+  metadata: null
 Deg2:
-  file: "deg2.nfg"
-  metadata:
-
+  file: deg2.nfg
+  metadata: null
 E01:
-  file: "e01.efg"
-  metadata:
-
+  file: e01.efg
+  metadata: null
 E01NFG:
-  file: "e01.nfg"
-  metadata:
-
+  file: e01.nfg
+  metadata: null
 E02:
-  file: "e02.efg"
-  metadata:
-
+  file: e02.efg
+  metadata: null
 E02NFG:
-  file: "e02.nfg"
-  metadata:
-
+  file: e02.nfg
+  metadata: null
 E03:
-  file: "e03.efg"
-  metadata:
-
+  file: e03.efg
+  metadata: null
 E04:
-  file: "e04.efg"
-  metadata:
-
+  file: e04.efg
+  metadata: null
 E04NFG:
-  file: "e04.nfg"
-  metadata:
-
+  file: e04.nfg
+  metadata: null
 E05:
-  file: "e05.efg"
-  metadata:
-
+  file: e05.efg
+  metadata: null
 E06:
-  file: "e06.efg"
-  metadata:
-
+  file: e06.efg
+  metadata: null
 E07:
-  file: "e07.efg"
-  metadata:
-
+  file: e07.efg
+  metadata: null
 E07NFG:
-  file: "e07.nfg"
-  metadata:
-
+  file: e07.nfg
+  metadata: null
 E08:
-  file: "e08.efg"
-  metadata:
-
+  file: e08.efg
+  metadata: null
 E09:
-  file: "e09.efg"
-  metadata:
-
+  file: e09.efg
+  metadata: null
 E10:
-  file: "e10.efg"
-  metadata:
-
+  file: e10.efg
+  metadata: null
 E10a:
-  file: "e10a.efg"
-  metadata:
-
+  file: e10a.efg
+  metadata: null
 E13:
-  file: "e13.efg"
-  metadata:
-
+  file: e13.efg
+  metadata: null
 E16:
-  file: "e16.efg"
-  metadata:
-
+  file: e16.efg
+  metadata: null
 E17:
-  file: "e17.efg"
-  metadata:
-
+  file: e17.efg
+  metadata: null
 E18:
-  file: "e18.efg"
-  metadata:
-
+  file: e18.efg
+  metadata: null
 G1:
-  file: "g1.efg"
-  metadata:
-
+  file: g1.efg
+  metadata: null
 G1NFG:
-  file: "g1.nfg"
-  metadata:
-
+  file: g1.nfg
+  metadata: null
 G2:
-  file: "g2.efg"
-  metadata:
-
+  file: g2.efg
+  metadata: null
 G2NFG:
-  file: "g2.nfg"
-  metadata:
-
+  file: g2.nfg
+  metadata: null
 G3:
-  file: "g3.efg"
-  metadata:
-
+  file: g3.efg
+  metadata: null
 G3NFG:
-  file: "g3.nfg"
-  metadata:
-
+  file: g3.nfg
+  metadata: null
 Holdout:
-  file: "holdout.efg"
+  file: holdout.efg
+  metadata: null
+Holdout7:
+  file: holdout7.efg
   metadata:
-
-# Holdout7:  # This game does not work (ValueError: Parse error in game file: Probabilities must sum to exactly one)
-#   file: "holdout7.efg"
-#   metadata:
-
+    valid_game: false # This game does not work (ValueError: Parse error in game file: Probabilities must sum to exactly one)
 Hs1:
-  file: "hs1.efg"
-  metadata:
-
+  file: hs1.efg
+  metadata: null
 Jury_mr:
-  file: "jury_mr.efg"
-  metadata:
-
+  file: jury_mr.efg
+  metadata: null
 Jury_un:
-  file: "jury_un.efg"
-  metadata:
-
+  file: jury_un.efg
+  metadata: null
 Km1:
-  file: "km1.efg"
-  metadata:
-
+  file: km1.efg
+  metadata: null
 Km2:
-  file: "km2.efg"
-  metadata:
-
+  file: km2.efg
+  metadata: null
 Km3:
-  file: "km3.efg"
-  metadata:
-
+  file: km3.efg
+  metadata: null
 Km6:
-  file: "km6.efg"
-  metadata:
-
+  file: km6.efg
+  metadata: null
 Loopback:
-  file: "loopback.nfg"
-  metadata:
-
+  file: loopback.nfg
+  metadata: null
 Mixdom:
-  file: "mixdom.nfg"
-  metadata:
-
+  file: mixdom.nfg
+  metadata: null
 Mixdom2:
-  file: "mixdom2.nfg"
-  metadata:
-
+  file: mixdom2.nfg
+  metadata: null
 Montyhal:
-  file: "montyhal.efg"
-  metadata:
-
+  file: montyhal.efg
+  metadata: null
 My_2_1:
-  file: "my_2-1.efg"
-  metadata:
-
+  file: my_2-1.efg
+  metadata: null
 My_2_4:
-  file: "my_2-4.efg"
-  metadata:
-
+  file: my_2-4.efg
+  metadata: null
 My_2_8:
-  file: "my_2-8.efg"
-  metadata:
-
+  file: my_2-8.efg
+  metadata: null
 My_3_3a:
-  file: "my_3-3a.efg"
-  metadata:
-
+  file: my_3-3a.efg
+  metadata: null
 My_3_3b:
-  file: "my_3-3b.efg"
-  metadata:
-
+  file: my_3-3b.efg
+  metadata: null
 My_3_3c:
-  file: "my_3-3c.efg"
-  metadata:
-
+  file: my_3-3c.efg
+  metadata: null
 My_3_3d:
-  file: "my_3-3d.efg"
-  metadata:
-
+  file: my_3-3d.efg
+  metadata: null
 My_3_3e:
-  file: "my_3-3e.efg"
-  metadata:
-
+  file: my_3-3e.efg
+  metadata: null
 My_3_4:
-  file: "my_3-4.efg"
-  metadata:
-
+  file: my_3-4.efg
+  metadata: null
 Myerson:
-  file: "myerson.efg"
-  metadata:
-
+  file: myerson.efg
+  metadata: null
 Myerson_fig_4_2:
-  file: "myerson_fig_4_2.efg"
-  metadata:
-
+  file: myerson_fig_4_2.efg
+  metadata: null
 Nim:
-  file: "nim.efg"
-  metadata:
-
+  file: nim.efg
+  metadata: null
 Nim7:
-  file: "nim7.efg"
-  metadata:
-
+  file: nim7.efg
+  metadata: null
 Oneill:
-  file: "oneill.nfg"
-  metadata:
-
+  file: oneill.nfg
+  metadata: null
 Palf:
-  file: "palf.efg"
-  metadata:
-
+  file: palf.efg
+  metadata: null
 Palf2:
-  file: "palf2.efg"
-  metadata:
-
+  file: palf2.efg
+  metadata: null
 Palf3:
-  file: "palf3.efg"
-  metadata:
-
+  file: palf3.efg
+  metadata: null
 Pbride:
-  file: "pbride.efg"
-  metadata:
-
+  file: pbride.efg
+  metadata: null
 PrisonersDilemma:
-  file: "pd.nfg"
-  metadata:
-
+  file: pd.nfg
+  metadata: null
 Perfect1:
-  file: "perfect1.nfg"
-  metadata:
-
+  file: perfect1.nfg
+  metadata: null
 Perfect2:
-  file: "perfect2.nfg"
-  metadata:
-
+  file: perfect2.nfg
+  metadata: null
 Perfect3:
-  file: "perfect3.nfg"
-  metadata:
-
+  file: perfect3.nfg
+  metadata: null
 Poker:
-  file: "poker.efg"
-  metadata:
-
+  file: poker.efg
+  metadata: null
 PokerNFG:
-  file: "poker.nfg"
-  metadata:
-
+  file: poker.nfg
+  metadata: null
 Poker2:
-  file: "poker2.efg"
-  metadata:
-
+  file: poker2.efg
+  metadata: null
 Pvw:
-  file: "pvw.efg"
-  metadata:
-
+  file: pvw.efg
+  metadata: null
 Pvw2:
-  file: "pvw2.efg"
-  metadata:
-
+  file: pvw2.efg
+  metadata: null
 Sh3:
-  file: "sh3.efg"
-  metadata:
-
+  file: sh3.efg
+  metadata: null
 Sh3NFG:
-  file: "sh3.nfg"
-  metadata:
-
+  file: sh3.nfg
+  metadata: null
 Spence:
-  file: "spence.efg"
-  metadata:
-
+  file: spence.efg
+  metadata: null
 Stengel:
-  file: "stengel.nfg"
-  metadata:
-
+  file: stengel.nfg
+  metadata: null
 Sww1:
-  file: "sww1.efg"
-  metadata:
-
+  file: sww1.efg
+  metadata: null
 Sww1NFG:
-  file: "sww1.nfg"
-  metadata:
-
+  file: sww1.nfg
+  metadata: null
 Sww2:
-  file: "sww2.efg"
-  metadata:
-
+  file: sww2.efg
+  metadata: null
 Sww3:
-  file: "sww3.efg"
-  metadata:
-
+  file: sww3.efg
+  metadata: null
 Tim:
-  file: "tim.efg"
-  metadata:
-
+  file: tim.efg
+  metadata: null
 Todd1:
-  file: "todd1.nfg"
-  metadata:
-
+  file: todd1.nfg
+  metadata: null
 Todd2:
-  file: "todd2.nfg"
-  metadata:
-
+  file: todd2.nfg
+  metadata: null
 Todd3:
-  file: "todd3.nfg"
-  metadata:
-
+  file: todd3.nfg
+  metadata: null
 Ttt:
-  file: "ttt.efg"
-  metadata:
-
+  file: ttt.efg
+  metadata: null
 Vd:
-  file: "vd.efg"
-  metadata:
-
+  file: vd.efg
+  metadata: null
 VdNFG:
-  file: "vd.nfg"
-  metadata:
-
+  file: vd.nfg
+  metadata: null
 W_ex1:
-  file: "w_ex1.efg"
-  metadata:
-
+  file: w_ex1.efg
+  metadata: null
 W_ex2:
-  file: "w_ex2.efg"
-  metadata:
-
+  file: w_ex2.efg
+  metadata: null
 Wilson1:
-  file: "wilson1.efg"
-  metadata:
-
+  file: wilson1.efg
+  metadata: null
 Wink3:
-  file: "wink3.nfg"
-  metadata:
-
+  file: wink3.nfg
+  metadata: null
 Winkels:
-  file: "winkels.nfg"
-  metadata:
-
+  file: winkels.nfg
+  metadata: null
 Work1:
-  file: "work1.efg"
-  metadata:
-
+  file: work1.efg
+  metadata: null
 Work2:
-  file: "work2.efg"
-  metadata:
-
+  file: work2.efg
+  metadata: null
 Work3:
-  file: "work3.efg"
-  metadata:
-
+  file: work3.efg
+  metadata: null
 Yamamoto:
-  file: "yamamoto.nfg"
-  metadata:
-
+  file: yamamoto.nfg
+  metadata: null
 Zero:
-  file: "zero.nfg"
-  metadata:
+  file: zero.nfg
+  metadata: null

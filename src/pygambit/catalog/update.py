@@ -45,27 +45,28 @@ if __name__ == "__main__":
     lines = []
     class_names = []
     new_entries_counter = 0
+    new_entries = {}
     for path in all_files:
         stem = path.stem
-
         class_name = make_class_name(stem)
-        # Avoid duplicates by appending EFG or NFG
-        if class_name in class_names:
-            class_name += path.suffix.split(".")[-1].upper()
-        class_names.append(class_name)
 
-        # Add any new entries to the catalog
+        # Avoid duplicates by appending EFG or NFG
+        if class_name in new_entries:
+            class_name += path.suffix.split(".")[-1].upper()
+
         if path.name not in file_names:
-            lines.append(f"{class_name}:")
-            lines.append(f'  file: "{path.name}"')
-            lines.append("  metadata:\n")
+            new_entries[class_name] = {
+                "file": path.name,
+                "metadata": {},
+            }
             new_entries_counter += 1
 
     # Update the yml
     new_entries = yaml.safe_load("\n".join(lines)) or {}
     catalog.update(new_entries)
     with _CATALOG_YAML.open("w", encoding="utf-8") as f:
-        yaml.safe_dump(catalog, f, sort_keys=False)
+        dumped = yaml.safe_dump(catalog, sort_keys=False, default_flow_style=False)
+        f.write(dumped)
 
     print(f"Added {new_entries_counter} new entries to the catalog")
     print(f"Output written to: {_CATALOG_YAML}")
