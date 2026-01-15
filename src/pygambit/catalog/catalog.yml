@@ -322,9 +322,9 @@ Holdout:
   file: "holdout.efg"
   metadata:
 
-Holdout7:
-  file: "holdout7.efg"
-  metadata:
+# Holdout7:  # This game does not work (ValueError: Parse error in game file: Probabilities must sum to exactly one)
+#   file: "holdout7.efg"
+#   metadata:
 
 Hs1:
   file: "hs1.efg"
@@ -442,7 +442,7 @@ Pbride:
   file: "pbride.efg"
   metadata:
 
-Pd:
+PrisonersDilemma:
   file: "pd.nfg"
   metadata:
 
