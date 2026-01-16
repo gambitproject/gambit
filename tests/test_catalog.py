@@ -18,6 +18,7 @@ class TestCatalogGameBase:
         assert OneShotTrust.num_players == 2
         assert OneShotTrust.game_type == "efg"
         assert OneShotTrust.title == "One-shot trust game, after Kreps (1990)"
+        assert len(OneShotTrust.description) > 0
 
     def test_catalog_yml_game_instantiation(self):
         """Custom CatalogGame subclasses reading from catalog.yml should return Game instances."""
