@@ -75,25 +75,24 @@ class CatalogGameFromContrib(CatalogGame):
     @classmethod
     def _load_game(cls) -> Game:
         """Load the game from file."""
-        if cls.game_file is None:
-            raise NotImplementedError(f"{cls.__name__} must define 'game_file'")
+        if not hasattr(cls, "game_file") or cls.game_file is None:
+            raise TypeError(f"{cls.__name__} must define 'game_file' class attribute")
 
-        cls.game_type = cls.game_file.split(".")[-1]
+        game_type = cls.game_file.split(".")[-1]
         file_path = _GAMEFILES_DIR / cls.game_file
 
-        if cls.game_type == "nfg":
+        if game_type == "nfg":
+            cls.game_type = "nfg"
             return read_nfg(str(file_path))
-        elif cls.game_type == "efg":
+        elif game_type == "efg":
+            cls.game_type = "efg"
             return read_efg(str(file_path))
         else:
-            raise ValueError(f"Game file extension must be 'nfg' or 'efg', got '{cls.game_type}'")
+            raise ValueError(f"Game file extension must be 'nfg' or 'efg', got '{game_type}'")
 
     def __init_subclass__(cls, **kwargs):
         """Validate and extract metadata when subclass is defined."""
         super().__init_subclass__(**kwargs)
-
-        if not hasattr(cls, "game_file") or cls.game_file is None:
-            raise TypeError(f"{cls.__name__} must define 'game_file' class attribute")
 
         # Load game and extract metadata immediately when class is defined
         cls._cached_game = cls._load_game()
