@@ -6,6 +6,7 @@ from ruamel.yaml import YAML
 
 _CATALOG_YAML = Path(__file__).parent / "catalog.yml"
 _GAMEFILES_DIR = Path(__file__).parent.parent.parent.parent / "contrib/games"
+_API_RST = Path(__file__).parent.parent.parent.parent / "doc/pygambit.api.rst"
 
 
 def make_class_name(filename: str) -> str:
@@ -24,6 +25,48 @@ def make_class_name(filename: str) -> str:
         name = f"Game{name}"
 
     return name
+
+
+def update_api_rst(catalog: dict[str, dict]) -> None:
+    """Update the Game catalog section in pygambit.api.rst with all class names."""
+    with open(_API_RST, encoding="utf-8") as f:
+        content = f.read()
+
+    # Find the Game catalog section
+    game_catalog_start = content.find("Game catalog\n~~~~~~~~~~~~")
+    if game_catalog_start == -1:
+        print("Warning: 'Game catalog' section not found in pygambit.api.rst")
+        return
+
+    # Find the autosummary block
+    autosummary_start = content.find(".. autosummary::", game_catalog_start)
+    toctree_start = content.find(":toctree: api/", autosummary_start)
+
+    # Find the next section (starts with ~~)
+    next_section = content.find("\n~~", toctree_start)
+    if next_section == -1:
+        next_section = len(content)
+
+    # Build the new toctree content
+    class_names = sorted(catalog.keys())
+    new_toctree = ".. autosummary::\n   :toctree: api/\n\n   games\n"
+    for class_name in class_names:
+        new_toctree += f"   {class_name}\n"
+
+    # Replace the old toctree with the new one
+    old_toctree_start = content.rfind(".. autosummary::", game_catalog_start, toctree_start + 100)
+    old_toctree_end = next_section
+
+    new_content = (
+        content[:old_toctree_start]
+        + new_toctree
+        + content[old_toctree_end:]
+    )
+
+    with open(_API_RST, "w", encoding="utf-8") as f:
+        f.write(new_content)
+
+    print(f"Updated {_API_RST} with {len(class_names)} catalog games")
 
 
 if __name__ == "__main__":
@@ -68,6 +111,9 @@ if __name__ == "__main__":
     catalog.update(new_entries)
     with _CATALOG_YAML.open("w", encoding="utf-8") as f:
         yaml.dump(catalog, f)
+
+    # Update the RST documentation
+    update_api_rst(catalog)
 
     print(f"Added {new_entries_counter} new entries to the catalog")
     print(f"Output written to: {_CATALOG_YAML}")
