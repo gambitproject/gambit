@@ -48,10 +48,13 @@ def update_api_rst(catalog: dict[str, dict]) -> None:
         next_section = len(content)
 
     # Build the new toctree content
-    class_names = sorted(catalog.keys())
     new_toctree = ".. autosummary::\n   :toctree: api/\n\n   games\n"
-    for class_name in class_names:
-        new_toctree += f"   {class_name}\n"
+    for class_name, entry in catalog.items():
+        metadata = entry.get("metadata", {})
+        if metadata and "valid_game" in metadata and metadata["valid_game"] is False:
+            pass  # Marked as invalid game, do not add class
+        else:
+            new_toctree += f"   {class_name}\n"
 
     # Replace the old toctree with the new one
     old_toctree_start = content.rfind(".. autosummary::", game_catalog_start, toctree_start + 100)
@@ -66,7 +69,7 @@ def update_api_rst(catalog: dict[str, dict]) -> None:
     with open(_API_RST, "w", encoding="utf-8") as f:
         f.write(new_content)
 
-    print(f"Updated {_API_RST} with {len(class_names)} catalog games")
+    print(f"Updated {_API_RST} with new catalog game names")
 
 
 if __name__ == "__main__":

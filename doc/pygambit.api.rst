@@ -336,6 +336,21 @@ Game catalog
    :toctree: api/
 
    games
+   Game2s2x2x2
+   Game2smp
+   Game2x2
+   Game2x2a
+   Game2x2const
+   Game2x2x2_nau
+   Game2x2x2
+   Game2x2x2NFG
+   Game2x2x2x2
+   Game2x2x2x2x2
+   Game3x3x3
+   Game4cards
+   Game5x4x3
+   Game8x2x2
+   Game8x8
    Artist1
    Artist2
    Badgame1
@@ -364,8 +379,8 @@ Game catalog
    Coord2NFG
    Coord2ts
    Coord3
-   Coord333
    Coord3NFG
+   Coord333
    Coord4
    Coord4NFG
    Cross
@@ -401,23 +416,7 @@ Game catalog
    G2NFG
    G3
    G3NFG
-   Game2s2x2x2
-   Game2smp
-   Game2x2
-   Game2x2a
-   Game2x2const
-   Game2x2x2
-   Game2x2x2NFG
-   Game2x2x2_nau
-   Game2x2x2x2
-   Game2x2x2x2x2
-   Game3x3x3
-   Game4cards
-   Game5x4x3
-   Game8x2x2
-   Game8x8
    Holdout
-   Holdout7
    Hs1
    Jury_mr
    Jury_un
@@ -447,13 +446,13 @@ Game catalog
    Palf2
    Palf3
    Pbride
+   PrisonersDilemma
    Perfect1
    Perfect2
    Perfect3
    Poker
-   Poker2
    PokerNFG
-   PrisonersDilemma
+   Poker2
    Pvw
    Pvw2
    Sh3
