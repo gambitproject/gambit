@@ -26,11 +26,9 @@ class CatalogGame:
 
     def __new__(cls, *args, **kwargs) -> Game:
         """Create a game instance by calling the _game() method."""
-        if hasattr(cls, "_game") and cls._game is not CatalogGame._game:
-            if cls._cached_game is None:
-                cls._cached_game = cls._game(*args, **kwargs)
-            return cls._cached_game
-        raise NotImplementedError("Subclasses must implement _game() method")
+        if cls._cached_game is None:
+            cls._cached_game = cls._game(*args, **kwargs)
+        return cls._cached_game
 
     @staticmethod
     def _game() -> Game:
