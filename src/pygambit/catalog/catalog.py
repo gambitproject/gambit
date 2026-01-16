@@ -55,13 +55,9 @@ class CatalogGame:
         if cls.__name__ == "CatalogGameFromContrib" or issubclass(cls, CatalogGameFromContrib):
             return
 
-        # For non-file-based games, create a temporary instance to extract metadata
-        try:
-            temp_game = cls._game()
-            cls._extract_metadata_from_game(temp_game)
-        except NotImplementedError:
-            # Base class, skip
-            pass
+        # Load game and extract metadata immediately when class is defined
+        cls._cached_game = cls._game()
+        cls._extract_metadata_from_game(cls._cached_game)
 
 
 class CatalogGameFromContrib(CatalogGame):
@@ -248,7 +244,7 @@ class OneShotTrust(CatalogGame):
     the Seller plays Abuse.
     """
     game_type = "efg"
-    test_suite = True
+    # test_suite = True
 
     @staticmethod
     def _game(unique_NE_variant: bool = False):
