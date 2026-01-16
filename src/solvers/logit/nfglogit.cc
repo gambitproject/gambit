@@ -24,6 +24,7 @@
 #include <cmath>
 
 #include "gambit.h"
+#include "logbehav.h"
 #include "logit.h"
 #include "path.h"
 
@@ -70,93 +71,166 @@ bool RegretTerminationFunction(const Game &p_game, const Vector<double> &p_point
   return PointToProfile(p_game, p_point).GetMaxRegret() < p_regret;
 }
 
-void GetValue(const Game &p_game, const Vector<double> &p_point, Vector<double> &p_lhs)
-{
-  MixedStrategyProfile<double> profile(PointToProfile(p_game, p_point)),
-      logprofile(p_game->NewMixedStrategyProfile(0.0));
-  for (size_t i = 1; i <= profile.MixedProfileLength(); i++) {
-    logprofile[i] = p_point[i];
+class Equation {
+public:
+  virtual ~Equation() = default;
+
+  virtual double Value(const MixedStrategyProfile<double> &p_profile,
+                       const MixedStrategyProfile<double> &p_logProfile,
+                       double p_lambda) const = 0;
+  virtual void Gradient(const MixedStrategyProfile<double> &p_profile,
+                        const MixedStrategyProfile<double> &p_logProfile, double p_lambda,
+                        Vector<double> &p_gradient) const = 0;
+};
+
+class EquationSystem {
+public:
+  explicit EquationSystem(const Game &p_game);
+  ~EquationSystem() = default;
+
+  void GetValue(const Vector<double> &p_point, Vector<double> &p_lhs) const;
+  void GetJacobian(const Vector<double> &p_point, Matrix<double> &p_jac) const;
+
+private:
+  std::vector<std::shared_ptr<Equation>> m_equations;
+  const Game &m_game;
+};
+
+class SumToOneEquation final : public Equation {
+  Game m_game;
+  GamePlayer m_player;
+
+public:
+  explicit SumToOneEquation(const GamePlayer &p_player)
+    : m_game(p_player->GetGame()), m_player(p_player)
+  {
   }
-  const double lambda = p_point.back();
-  p_lhs = 0.0;
-  for (size_t rowno = 0, pl = 1; pl <= p_game->NumPlayers(); pl++) {
-    const GamePlayer player = p_game->GetPlayer(pl);
-    for (size_t st = 1; st <= player->GetStrategies().size(); st++) {
-      rowno++;
-      if (st == 1) {
-        // This is a sum-to-one equation
-        p_lhs[rowno] = -1.0;
-        for (size_t j = 1; j <= player->GetStrategies().size(); j++) {
-          p_lhs[rowno] += profile[player->GetStrategy(j)];
-        }
+
+  ~SumToOneEquation() override = default;
+  double Value(const MixedStrategyProfile<double> &p_profile,
+               const MixedStrategyProfile<double> &p_logProfile, double p_lambda) const override;
+  void Gradient(const MixedStrategyProfile<double> &p_profile,
+                const MixedStrategyProfile<double> &p_logProfile, double p_lambda,
+                Vector<double> &p_gradient) const override;
+};
+
+double SumToOneEquation::Value(const MixedStrategyProfile<double> &p_profile,
+                               const MixedStrategyProfile<double> &p_logProfile,
+                               double p_lambda) const
+{
+  double value = -1.0;
+  for (const auto &strategy : m_player->GetStrategies()) {
+    value += p_profile[strategy];
+  }
+  return value;
+}
+
+void SumToOneEquation::Gradient(const MixedStrategyProfile<double> &p_profile,
+                                const MixedStrategyProfile<double> &p_logProfile, double p_lambda,
+                                Vector<double> &p_gradient) const
+{
+  int col = 1;
+  for (const auto &player : m_game->GetPlayers()) {
+    for (const auto &strategy : player->GetStrategies()) {
+      p_gradient[col++] = (player == m_player) ? p_profile[strategy] : 0.0;
+    }
+  }
+  // Derivative wrt lambda is zero
+  p_gradient[col] = 0.0;
+}
+
+class RatioEquation final : public Equation {
+  Game m_game;
+  GamePlayer m_player;
+  GameStrategy m_strategy, m_refStrategy;
+
+public:
+  RatioEquation(const GameStrategy &p_strategy, const GameStrategy &p_refStrategy)
+    : m_game(p_strategy->GetGame()), m_player(p_strategy->GetPlayer()), m_strategy(p_strategy),
+      m_refStrategy(p_refStrategy)
+  {
+  }
+
+  ~RatioEquation() override = default;
+  double Value(const MixedStrategyProfile<double> &p_profile,
+               const MixedStrategyProfile<double> &p_logProfile, double p_lambda) const override;
+  void Gradient(const MixedStrategyProfile<double> &p_profile,
+                const MixedStrategyProfile<double> &p_logProfile, double p_lambda,
+                Vector<double> &p_gradient) const override;
+};
+
+double RatioEquation::Value(const MixedStrategyProfile<double> &p_profile,
+                            const MixedStrategyProfile<double> &p_logProfile,
+                            double p_lambda) const
+{
+  return (p_logProfile[m_strategy] - p_logProfile[m_refStrategy] -
+          p_lambda * (p_profile.GetPayoff(m_strategy) - p_profile.GetPayoff(m_refStrategy)));
+}
+
+void RatioEquation::Gradient(const MixedStrategyProfile<double> &p_profile,
+                             const MixedStrategyProfile<double> &p_logProfile, double p_lambda,
+                             Vector<double> &p_gradient) const
+{
+  int col = 1;
+  for (const auto &player : m_game->GetPlayers()) {
+    for (const auto &strategy : player->GetStrategies()) {
+      if (strategy == m_refStrategy) {
+        p_gradient[col] = -1.0;
+      }
+      else if (strategy == m_strategy) {
+        p_gradient[col] = 1.0;
+      }
+      else if (player == m_player) {
+        p_gradient[col] = 0.0;
       }
       else {
-        // This is a ratio equation
-        p_lhs[rowno] = (logprofile[player->GetStrategy(st)] - logprofile[player->GetStrategy(1)] -
-                        lambda * (profile.GetPayoff(player->GetStrategy(st)) -
-                                  profile.GetPayoff(player->GetStrategy(1))));
+        p_gradient[col] =
+            -p_lambda * p_profile[strategy] *
+            (p_profile.GetPayoffDeriv(m_player->GetNumber(), m_strategy, strategy) -
+             p_profile.GetPayoffDeriv(m_player->GetNumber(), m_refStrategy, strategy));
       }
+      col++;
+    }
+  }
+  p_gradient[col] = (p_profile.GetPayoff(m_refStrategy) - p_profile.GetPayoff(m_strategy));
+}
+
+EquationSystem::EquationSystem(const Game &p_game) : m_game(p_game)
+{
+  for (const auto &player : m_game->GetPlayers()) {
+    m_equations.push_back(std::make_shared<SumToOneEquation>(player));
+    auto strategies = player->GetStrategies();
+    for (auto strategy = std::next(strategies.begin()); strategy != strategies.end(); ++strategy) {
+      m_equations.push_back(std::make_shared<RatioEquation>(*strategy, strategies.front()));
     }
   }
 }
 
-void GetJacobian(const Game &p_game, const Vector<double> &p_point, Matrix<double> &p_matrix)
+void EquationSystem::GetValue(const Vector<double> &p_point, Vector<double> &p_lhs) const
 {
-  MixedStrategyProfile<double> profile(PointToProfile(p_game, p_point)),
-      logprofile(p_game->NewMixedStrategyProfile(0.0));
+  MixedStrategyProfile<double> profile(PointToProfile(m_game, p_point)),
+      logprofile(m_game->NewMixedStrategyProfile(0.0));
   for (size_t i = 1; i <= profile.MixedProfileLength(); i++) {
     logprofile[i] = p_point[i];
   }
   const double lambda = p_point.back();
+  std::transform(
+      m_equations.begin(), m_equations.end(), p_lhs.begin(),
+      [&profile, &logprofile, lambda](auto e) { return e->Value(profile, logprofile, lambda); });
+}
 
-  p_matrix = 0.0;
-
-  for (size_t rowno = 0, i = 1; i <= p_game->NumPlayers(); i++) {
-    const GamePlayer player = p_game->GetPlayer(i);
-    for (size_t j = 1; j <= player->GetStrategies().size(); j++) {
-      rowno++;
-      if (j == 1) {
-        // This is a sum-to-one equation
-        for (size_t colno = 0, ell = 1; ell <= p_game->NumPlayers(); ell++) {
-          const GamePlayer player2 = p_game->GetPlayer(ell);
-          for (size_t m = 1; m <= player2->GetStrategies().size(); m++) {
-            colno++;
-            if (i == ell) {
-              p_matrix(colno, rowno) = profile[player2->GetStrategy(m)];
-            }
-            // Otherwise, entry is zero
-          }
-        }
-        // The last column is derivative wrt lambda, which is zero
-      }
-      else {
-        // This is a ratio equation
-        for (size_t colno = 0, ell = 1; ell <= p_game->NumPlayers(); ell++) {
-          const GamePlayer player2 = p_game->GetPlayer(ell);
-          for (size_t m = 1; m <= player2->GetStrategies().size(); m++) {
-            colno++;
-            if (i == ell) {
-              if (m == 1) {
-                p_matrix(colno, rowno) = -1.0;
-              }
-              else if (m == j) {
-                p_matrix(colno, rowno) = 1.0;
-              }
-              // Entry is zero for all other strategy pairs
-            }
-            else {
-              p_matrix(colno, rowno) =
-                  -lambda * profile[player2->GetStrategy(m)] *
-                  (profile.GetPayoffDeriv(i, player->GetStrategy(j), player2->GetStrategy(m)) -
-                   profile.GetPayoffDeriv(i, player->GetStrategy(1), player2->GetStrategy(m)));
-            }
-          }
-        }
-        // Fill the last column, the derivative wrt lambda
-        p_matrix(p_matrix.NumRows(), rowno) = (profile.GetPayoff(player->GetStrategy(1)) -
-                                               profile.GetPayoff(player->GetStrategy(j)));
-      }
-    }
+void EquationSystem::GetJacobian(const Vector<double> &p_point, Matrix<double> &p_matrix) const
+{
+  MixedStrategyProfile<double> profile(PointToProfile(m_game, p_point)),
+      logprofile(m_game->NewMixedStrategyProfile(0.0));
+  for (size_t i = 1; i <= profile.MixedProfileLength(); i++) {
+    logprofile[i] = p_point[i];
+  }
+  const double lambda = p_point.back();
+  Vector<double> column(p_point.size());
+  for (size_t i = 1; i <= m_equations.size(); i++) {
+    m_equations[i - 1]->Gradient(profile, logprofile, lambda, column);
+    p_matrix.SetColumn(i, column);
   }
 }
 
@@ -237,14 +311,16 @@ LogitStrategySolve(const LogitQREMixedStrategyProfile &p_start, double p_regret,
     p_regret *= scale;
   }
 
+  const Game game = p_start.GetGame();
   Vector<double> x(ProfileToPoint(p_start));
-  TracingCallbackFunction callback(p_start.GetGame(), p_observer);
+  TracingCallbackFunction callback(game, p_observer);
+  EquationSystem system(game);
   tracer.TracePath(
-      [&p_start](const Vector<double> &p_point, Vector<double> &p_lhs) {
-        GetValue(p_start.GetGame(), p_point, p_lhs);
+      [&system](const Vector<double> &p_point, Vector<double> &p_lhs) {
+        system.GetValue(p_point, p_lhs);
       },
-      [&p_start](const Vector<double> &p_point, Matrix<double> &p_jac) {
-        GetJacobian(p_start.GetGame(), p_point, p_jac);
+      [&system](const Vector<double> &p_point, Matrix<double> &p_jac) {
+        system.GetJacobian(p_point, p_jac);
       },
       x, p_omega,
       [p_start, p_regret](const Vector<double> &p_point) {
@@ -264,16 +340,18 @@ LogitStrategySolveLambda(const LogitQREMixedStrategyProfile &p_start,
   tracer.SetMaxDecel(p_maxAccel);
   tracer.SetStepsize(p_firstStep);
 
+  const Game game = p_start.GetGame();
   Vector<double> x(ProfileToPoint(p_start));
-  TracingCallbackFunction callback(p_start.GetGame(), p_observer);
+  TracingCallbackFunction callback(game, p_observer);
   std::list<LogitQREMixedStrategyProfile> ret;
+  EquationSystem system(game);
   for (auto lam : p_targetLambda) {
     tracer.TracePath(
-        [&p_start](const Vector<double> &p_point, Vector<double> &p_lhs) {
-          GetValue(p_start.GetGame(), p_point, p_lhs);
+        [&system](const Vector<double> &p_point, Vector<double> &p_lhs) {
+          system.GetValue(p_point, p_lhs);
         },
-        [&p_start](const Vector<double> &p_point, Matrix<double> &p_jac) {
-          GetJacobian(p_start.GetGame(), p_point, p_jac);
+        [&system](const Vector<double> &p_point, Matrix<double> &p_jac) {
+          system.GetJacobian(p_point, p_jac);
         },
         x, p_omega, LambdaPositiveTerminationFunction,
         [&callback](const Vector<double> &p_point) -> void { callback.AppendPoint(p_point); },
@@ -295,16 +373,18 @@ LogitStrategyEstimate(const MixedStrategyProfile<double> &p_frequencies, double 
   tracer.SetMaxDecel(p_maxAccel);
   tracer.SetStepsize(p_firstStep);
 
+  const Game game;
   Vector<double> x(ProfileToPoint(start)), restart(x);
   const Vector<double> freq_vector(p_frequencies.GetProbVector());
   EstimatorCallbackFunction callback(start.GetGame(), p_frequencies.GetProbVector(), p_observer);
+  EquationSystem system(game);
   while (true) {
     tracer.TracePath(
-        [&start](const Vector<double> &p_point, Vector<double> &p_lhs) {
-          GetValue(start.GetGame(), p_point, p_lhs);
+        [&system](const Vector<double> &p_point, Vector<double> &p_lhs) {
+          system.GetValue(p_point, p_lhs);
         },
-        [&start](const Vector<double> &p_point, Matrix<double> &p_jac) {
-          GetJacobian(start.GetGame(), p_point, p_jac);
+        [&system](const Vector<double> &p_point, Matrix<double> &p_jac) {
+          system.GetJacobian(p_point, p_jac);
         },
         x, p_omega,
         [p_maxLambda](const Vector<double> &p_point) {
