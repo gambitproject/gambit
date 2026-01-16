@@ -75,7 +75,8 @@ class Equation {
 public:
   virtual ~Equation() = default;
 
-  virtual double Value(const MixedStrategyProfile<double> &p_profile, double p_lambda) const = 0;
+  virtual double Value(const MixedStrategyProfile<double> &p_profile,
+                       const Vector<double> &p_strategyValues, double p_lambda) const = 0;
   virtual void Gradient(const MixedStrategyProfile<double> &p_profile, double p_lambda,
                         Vector<double> &p_gradient) const = 0;
 };
@@ -92,6 +93,7 @@ private:
   std::vector<std::shared_ptr<Equation>> m_equations;
   const Game &m_game;
   mutable MixedStrategyProfile<double> m_profile;
+  mutable Vector<double> m_strategyValues;
 };
 
 class SumToOneEquation final : public Equation {
@@ -116,17 +118,18 @@ public:
   }
 
   ~SumToOneEquation() override = default;
-  double Value(const MixedStrategyProfile<double> &p_profile, double p_lambda) const override;
+  double Value(const MixedStrategyProfile<double> &p_profile,
+               const Vector<double> &p_strategyValues, double p_lambda) const override;
   void Gradient(const MixedStrategyProfile<double> &p_profile, double p_lambda,
                 Vector<double> &p_gradient) const override;
 };
 
 double SumToOneEquation::Value(const MixedStrategyProfile<double> &p_profile,
-                               double p_lambda) const
+                               const Vector<double> &p_strategyValues, double p_lambda) const
 {
   double value = -1.0;
-  for (const auto &strategy : m_player->GetStrategies()) {
-    value += p_profile[strategy];
+  for (int col = m_firstIndex; col < m_lastIndex; col++) {
+    value += p_profile[col];
   }
   return value;
 }
@@ -135,9 +138,8 @@ void SumToOneEquation::Gradient(const MixedStrategyProfile<double> &p_profile, d
                                 Vector<double> &p_gradient) const
 {
   p_gradient = 0.0;
-  int col = m_firstIndex;
-  for (const auto &strategy : m_player->GetStrategies()) {
-    p_gradient[col++] = p_profile[strategy];
+  for (int col = m_firstIndex; col < m_lastIndex; col++) {
+    p_gradient[col] = p_profile[col];
   }
 }
 
@@ -145,24 +147,37 @@ class RatioEquation final : public Equation {
   Game m_game;
   GamePlayer m_player;
   GameStrategy m_strategy, m_refStrategy;
+  int m_strategyIndex{0}, m_refStrategyIndex{0};
 
 public:
   RatioEquation(const GameStrategy &p_strategy, const GameStrategy &p_refStrategy)
     : m_game(p_strategy->GetGame()), m_player(p_strategy->GetPlayer()), m_strategy(p_strategy),
       m_refStrategy(p_refStrategy)
   {
+    int col = 1;
+    for (const auto &strategy : m_game->GetStrategies()) {
+      if (strategy == p_strategy) {
+        m_strategyIndex = col;
+      }
+      else if (strategy == p_refStrategy) {
+        m_refStrategyIndex = col;
+      }
+      col++;
+    }
   }
 
   ~RatioEquation() override = default;
-  double Value(const MixedStrategyProfile<double> &p_profile, double p_lambda) const override;
+  double Value(const MixedStrategyProfile<double> &p_profile,
+               const Vector<double> &p_strategyValues, double p_lambda) const override;
   void Gradient(const MixedStrategyProfile<double> &p_profile, double p_lambda,
                 Vector<double> &p_gradient) const override;
 };
 
-double RatioEquation::Value(const MixedStrategyProfile<double> &p_profile, double p_lambda) const
+double RatioEquation::Value(const MixedStrategyProfile<double> &p_profile,
+                            const Vector<double> &p_strategyValues, double p_lambda) const
 {
-  return (std::log(p_profile[m_strategy]) - std::log(p_profile[m_refStrategy]) -
-          p_lambda * (p_profile.GetPayoff(m_strategy) - p_profile.GetPayoff(m_refStrategy)));
+  return (std::log(p_profile[m_strategyIndex]) - std::log(p_profile[m_refStrategyIndex]) -
+          p_lambda * (p_strategyValues[m_strategyIndex] - p_strategyValues[m_refStrategyIndex]));
 }
 
 void RatioEquation::Gradient(const MixedStrategyProfile<double> &p_profile, double p_lambda,
@@ -193,7 +208,8 @@ void RatioEquation::Gradient(const MixedStrategyProfile<double> &p_profile, doub
 }
 
 EquationSystem::EquationSystem(const Game &p_game)
-  : m_game(p_game), m_profile(p_game->NewMixedStrategyProfile(0.0))
+  : m_game(p_game), m_profile(p_game->NewMixedStrategyProfile(0.0)),
+    m_strategyValues(m_profile.MixedProfileLength())
 {
   for (const auto &player : m_game->GetPlayers()) {
     m_equations.push_back(std::make_shared<SumToOneEquation>(player));
@@ -208,8 +224,12 @@ void EquationSystem::GetValue(const Vector<double> &p_point, Vector<double> &p_l
 {
   PointToProfile(m_profile, p_point);
   const double lambda = p_point.back();
+  int col = 1;
+  for (const auto &strategy : m_game->GetStrategies()) {
+    m_strategyValues[col++] = m_profile.GetPayoff(strategy);
+  }
   std::transform(m_equations.begin(), m_equations.end(), p_lhs.begin(),
-                 [this, lambda](auto e) { return e->Value(m_profile, lambda); });
+                 [this, lambda](auto e) { return e->Value(m_profile, m_strategyValues, lambda); });
 }
 
 void EquationSystem::GetJacobian(const Vector<double> &p_point, Matrix<double> &p_matrix) const
