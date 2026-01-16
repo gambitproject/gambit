@@ -82,21 +82,8 @@ class TestGamesFunction:
             assert hasattr(game_class, "test_suite")
             assert game_class.test_suite is True
 
-#     def test_games_all_filter(self):
-#         """games(game_type='all') should return all games."""
-#         all_games = gbt.catalog.games(game_type="all")
-#         nfg_games = gbt.catalog.games(game_type="nfg")
-#         efg_games = gbt.catalog.games(game_type="efg")
-#         # All games should be union of NFG and EFG
-#         assert len(all_games) == len(set(nfg_games + efg_games))
-
-#     def test_games_nonexistent_filter(self):
-#         """games() with non-matching filters should return empty list."""
-#         result = gbt.catalog.games(num_players=999)
-#         assert result == []
-
-#     def test_games_excludes_base_classes(self):
-#         """games() should not include base classes like CatalogGameFromContrib."""
-#         result = gbt.catalog.games()
-#         assert "CatalogGame" not in result
-#         assert "CatalogGameFromContrib" not in result
+    def test_games_excludes_base_classes(self):
+        """games() should not include base classes like CatalogGameFromContrib."""
+        result = catalog.games()
+        assert "CatalogGame" not in result
+        assert "CatalogGameFromContrib" not in result
