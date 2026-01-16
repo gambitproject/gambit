@@ -19,7 +19,14 @@ class TestCatalogGameBase:
         assert OneShotTrust.game_type == "efg"
         assert OneShotTrust.title == "One-shot trust game, after Kreps (1990)"
 
-    def test_custom_game_instantiation(self):
-        """Custom CatalogGame subclasses should return Game instances."""
-        assert isinstance(OneShotTrust(), Game)  # from catalog.py
-        assert isinstance(PrisonersDilemma(), Game)  # from catalog.yml
+    def test_catalog_yml_game_instantiation(self):
+        """Custom CatalogGame subclasses reading from catalog.yml should return Game instances."""
+        assert isinstance(PrisonersDilemma(), Game)
+
+    def test_catalog_py_game_with_parameters(self):
+        """
+            Custom CatalogGame subclass from catalog.py should return Game
+            and support parameters.
+        """
+        assert isinstance(OneShotTrust(unique_NE_variant=False), Game)
+        assert isinstance(OneShotTrust(unique_NE_variant=True), Game)
