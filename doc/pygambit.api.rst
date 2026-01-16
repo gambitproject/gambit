@@ -325,3 +325,14 @@ Computation of quantal response equilibria
    logit_estimate
    LogitQREMixedStrategyFitResult
    LogitQREMixedBehaviorFitResult
+
+
+Game catalog
+~~~~~~~~~~~~
+
+.. currentmodule:: pygambit.catalog
+
+.. autosummary::
+   :toctree: api/
+
+   games

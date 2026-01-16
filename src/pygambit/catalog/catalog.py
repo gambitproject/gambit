@@ -117,8 +117,8 @@ def games(
     num_players : int | None, default None
         If specified, only return games with the given number of players.
     **metadata_filters
-        Additional keyword arguments to filter by metadata fields.
-        For example, `tutorial=1` filters for games with `tutorial: 1` in metadata.
+        Additional keyword arguments to filter by catalog.yml metadata fields.
+        For example, `x=1` filters for games with `x: 1` in metadata.
 
     Returns
     -------
@@ -127,7 +127,7 @@ def games(
 
     Examples
     --------
-    >>> games(tutorial=1)  # Games with a custom metadata field 'tutorial' equal to 1
+    >>> games(x=1)  # Games with a custom metadata field 'x' equal to 1
     >>> games(game_type="efg", num_players=2)  # 2-player extensive-form games
     """
 
