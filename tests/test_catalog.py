@@ -66,12 +66,12 @@ class TestGamesFunction:
         all_games = catalog.games(game_type="all")
         assert len(all_games) == len(set(nfg_games + efg_games))
 
-#     def test_games_filter_by_num_players(self):
-#         """games(num_players=n) should return only n-player games."""
-#         two_player_games = gbt.catalog.games(num_players=2)
-#         for game_name in two_player_games:
-#             game_class = getattr(gbt.catalog, game_name)
-#             assert game_class.num_players == 2
+    def test_games_filter_by_num_players(self):
+        """games(num_players=n) should return only n-player games."""
+        two_player_games = catalog.games(num_players=3)
+        for game_name in two_player_games:
+            game_class = getattr(catalog, game_name)
+            assert game_class.num_players == 3
 
 #     def test_games_combined_filters(self):
 #         """games() should support combining multiple filters."""
