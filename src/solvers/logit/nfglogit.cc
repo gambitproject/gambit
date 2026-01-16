@@ -97,11 +97,22 @@ private:
 class SumToOneEquation final : public Equation {
   Game m_game;
   GamePlayer m_player;
+  int m_firstIndex, m_lastIndex;
 
 public:
   explicit SumToOneEquation(const GamePlayer &p_player)
-    : m_game(p_player->GetGame()), m_player(p_player)
+    : m_game(p_player->GetGame()), m_player(p_player), m_firstIndex(0), m_lastIndex(0)
   {
+    int col = 1;
+    for (const auto &player : m_game->GetPlayers()) {
+      if (player != m_player) {
+        col += player->GetStrategies().size();
+        continue;
+      }
+      m_firstIndex = col;
+      m_lastIndex = col + player->GetStrategies().size();
+      return;
+    }
   }
 
   ~SumToOneEquation() override = default;
@@ -123,14 +134,11 @@ double SumToOneEquation::Value(const MixedStrategyProfile<double> &p_profile,
 void SumToOneEquation::Gradient(const MixedStrategyProfile<double> &p_profile, double p_lambda,
                                 Vector<double> &p_gradient) const
 {
-  int col = 1;
-  for (const auto &player : m_game->GetPlayers()) {
-    for (const auto &strategy : player->GetStrategies()) {
-      p_gradient[col++] = (player == m_player) ? p_profile[strategy] : 0.0;
-    }
+  p_gradient = 0.0;
+  int col = m_firstIndex;
+  for (const auto &strategy : m_player->GetStrategies()) {
+    p_gradient[col++] = p_profile[strategy];
   }
-  // Derivative wrt lambda is zero
-  p_gradient[col] = 0.0;
 }
 
 class RatioEquation final : public Equation {
