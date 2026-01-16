@@ -73,25 +73,14 @@ class TestGamesFunction:
             game_class = getattr(catalog, game_name)
             assert game_class.num_players == 3
 
-#     def test_games_combined_filters(self):
-#         """games() should support combining multiple filters."""
-#         result = gbt.catalog.games(game_type="nfg", num_players=2)
-#         assert isinstance(result, list)
-#         for game_name in result:
-#             game_class = getattr(gbt.catalog, game_name)
-#             assert game_class.game_type == "nfg"
-#             assert game_class.num_players == 2
-
-#     def test_games_filter_by_custom_metadata(self):
-#         """games() should filter by custom metadata fields."""
-#         # Assuming PrisonersDilemma has tutorial: 1 in metadata
-#         tutorial_games = gbt.catalog.games(tutorial=1)
-#         assert isinstance(tutorial_games, list)
-#         if tutorial_games:
-#             for game_name in tutorial_games:
-#                 game_class = getattr(gbt.catalog, game_name)
-#                 assert hasattr(game_class, "tutorial")
-#                 assert game_class.tutorial == 1
+    def test_games_filter_by_custom_metadata(self):
+        """games() should filter by custom metadata fields."""
+        custom_filter_games = catalog.games(test_suite=True)
+        assert isinstance(custom_filter_games, list)
+        for game_name in custom_filter_games:
+            game_class = getattr(catalog, game_name)
+            assert hasattr(game_class, "test_suite")
+            assert game_class.test_suite is True
 
 #     def test_games_all_filter(self):
 #         """games(game_type='all') should return all games."""

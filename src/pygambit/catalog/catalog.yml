@@ -335,7 +335,7 @@ Pbride:
 PrisonersDilemma:
   file: pd.nfg
   metadata:
-    tutorial: 1
+    test_suite: true
 Perfect1:
   file: perfect1.nfg
   metadata:
