@@ -32,13 +32,11 @@ namespace Gambit {
 
 namespace {
 
-MixedStrategyProfile<double> PointToProfile(const Game &p_game, const Vector<double> &p_point)
+void PointToProfile(MixedStrategyProfile<double> &p_profile, const Vector<double> &p_point)
 {
-  MixedStrategyProfile<double> profile(p_game->NewMixedStrategyProfile(0.0));
   for (size_t i = 1; i < p_point.size(); i++) {
-    profile[i] = std::exp(p_point[i]);
+    p_profile[i] = std::exp(p_point[i]);
   }
-  return profile;
 }
 
 Vector<double> ProfileToPoint(const LogitQREMixedStrategyProfile &p_profile)
@@ -68,7 +66,9 @@ bool RegretTerminationFunction(const Game &p_game, const Vector<double> &p_point
   if (p_point.back() < 0.0) {
     return true;
   }
-  return PointToProfile(p_game, p_point).GetMaxRegret() < p_regret;
+  MixedStrategyProfile<double> profile(p_game->NewMixedStrategyProfile(0.0));
+  PointToProfile(profile, p_point);
+  return profile.GetMaxRegret() < p_regret;
 }
 
 class Equation {
@@ -91,6 +91,7 @@ public:
 private:
   std::vector<std::shared_ptr<Equation>> m_equations;
   const Game &m_game;
+  mutable MixedStrategyProfile<double> m_profile;
 };
 
 class SumToOneEquation final : public Equation {
@@ -183,7 +184,8 @@ void RatioEquation::Gradient(const MixedStrategyProfile<double> &p_profile, doub
   p_gradient[col] = (p_profile.GetPayoff(m_refStrategy) - p_profile.GetPayoff(m_strategy));
 }
 
-EquationSystem::EquationSystem(const Game &p_game) : m_game(p_game)
+EquationSystem::EquationSystem(const Game &p_game)
+  : m_game(p_game), m_profile(p_game->NewMixedStrategyProfile(0.0))
 {
   for (const auto &player : m_game->GetPlayers()) {
     m_equations.push_back(std::make_shared<SumToOneEquation>(player));
@@ -196,19 +198,19 @@ EquationSystem::EquationSystem(const Game &p_game) : m_game(p_game)
 
 void EquationSystem::GetValue(const Vector<double> &p_point, Vector<double> &p_lhs) const
 {
-  MixedStrategyProfile<double> profile(PointToProfile(m_game, p_point));
+  PointToProfile(m_profile, p_point);
   const double lambda = p_point.back();
   std::transform(m_equations.begin(), m_equations.end(), p_lhs.begin(),
-                 [&profile, lambda](auto e) { return e->Value(profile, lambda); });
+                 [this, lambda](auto e) { return e->Value(m_profile, lambda); });
 }
 
 void EquationSystem::GetJacobian(const Vector<double> &p_point, Matrix<double> &p_matrix) const
 {
-  MixedStrategyProfile<double> profile(PointToProfile(m_game, p_point));
+  PointToProfile(m_profile, p_point);
   const double lambda = p_point.back();
   Vector<double> column(p_point.size());
   for (size_t i = 1; i <= m_equations.size(); i++) {
-    m_equations[i - 1]->Gradient(profile, lambda, column);
+    m_equations[i - 1]->Gradient(m_profile, lambda, column);
     p_matrix.SetColumn(i, column);
   }
 }
@@ -232,7 +234,8 @@ private:
 
 void TracingCallbackFunction::AppendPoint(const Vector<double> &p_point)
 {
-  const MixedStrategyProfile<double> profile(PointToProfile(m_game, p_point));
+  MixedStrategyProfile<double> profile(m_game->NewMixedStrategyProfile(0.0));
+  PointToProfile(profile, p_point);
   m_profiles.emplace_back(profile, p_point.back(), 1.0);
   m_observer(m_profiles.back());
 }
@@ -265,7 +268,8 @@ EstimatorCallbackFunction::EstimatorCallbackFunction(const Game &p_game,
 
 void EstimatorCallbackFunction::EvaluatePoint(const Vector<double> &p_point)
 {
-  const MixedStrategyProfile<double> profile(PointToProfile(m_game, p_point));
+  MixedStrategyProfile<double> profile(m_game->NewMixedStrategyProfile(0.0));
+  PointToProfile(profile, p_point);
   auto qre = LogitQREMixedStrategyProfile(profile, p_point.back(),
                                           LogLike(m_frequencies, profile.GetProbVector()));
   m_observer(qre);
