@@ -22,11 +22,14 @@ class CatalogGame:
     num_players: int
     game_type: Literal["nfg", "efg"]
     description: str
+    _cached_game: Game | None = None
 
     def __new__(cls, *args, **kwargs) -> Game:
         """Create a game instance by calling the _game() method."""
         if hasattr(cls, "_game") and cls._game is not CatalogGame._game:
-            return cls._game(*args, **kwargs)
+            if cls._cached_game is None:
+                cls._cached_game = cls._game(*args, **kwargs)
+            return cls._cached_game
         raise NotImplementedError("Subclasses must implement _game() method")
 
     @staticmethod
@@ -69,14 +72,11 @@ class CatalogGameFromContrib(CatalogGame):
     """
 
     game_file: str
-    _cached_game: Game | None = None
 
     def __new__(cls) -> Game:
-        # Return cached game if available, otherwise load it
         if cls._cached_game is None:
             cls._cached_game = cls._load_game()
-        # Return a fresh instance (not the cached one)
-        return cls._load_game()
+        return cls._cached_game
 
     @classmethod
     def _load_game(cls) -> Game:
@@ -248,6 +248,7 @@ class OneShotTrust(CatalogGame):
     the Seller plays Abuse.
     """
     game_type = "efg"
+    test_suite = True
 
     @staticmethod
     def _game(unique_NE_variant: bool = False):
