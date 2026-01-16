@@ -35,7 +35,7 @@ class TestCatalogGame:
         assert TestGame.num_players == 2
         assert TestGame.game_type == "efg"
         assert TestGame.title == "Test game F"
-        assert len(TestGame.description) > 0
+        assert TestGame.description == "Test game description."
 
     def test_catalog_py_game_with_parameters(self):
         """
