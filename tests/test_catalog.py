@@ -4,7 +4,7 @@ from pygambit import Game, catalog
 from pygambit.catalog import CatalogGame, PrisonersDilemma
 
 
-class TestGame(CatalogGame):
+class ExampleGame(CatalogGame):
     """
     Test game description.
     """
@@ -32,18 +32,18 @@ class TestCatalogGame:
 
     def test_custom_game_subclass_extracts_metadata(self):
         """Custom CatalogGame subclasses should extract metadata from _game()."""
-        assert TestGame.num_players == 2
-        assert TestGame.game_type == "efg"
-        assert TestGame.title == "Test game F"
-        assert TestGame.description == "Test game description."
+        assert ExampleGame.num_players == 2
+        assert ExampleGame.game_type == "efg"
+        assert ExampleGame.title == "Test game F"
+        assert ExampleGame.description == "Test game description."
 
     def test_catalog_py_game_with_parameters(self):
         """
         Custom CatalogGame subclass should return Game
         and support parameters.
         """
-        assert isinstance(TestGame(some_param=False), Game)
-        assert isinstance(TestGame(some_param=True), Game)
+        assert isinstance(ExampleGame(some_param=False), Game)
+        assert isinstance(ExampleGame(some_param=True), Game)
 
     def test_catalog_yml_game_instantiation(self):
         """Custom CatalogGame subclasses reading from catalog.yml should return Game instances."""
