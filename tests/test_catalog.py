@@ -1,6 +1,7 @@
 # import pytest
 
-from pygambit.catalog import OneShotTrust
+from pygambit import Game
+from pygambit.catalog import OneShotTrust, PrisonersDilemma
 
 
 class TestCatalogGameBase:
@@ -17,3 +18,8 @@ class TestCatalogGameBase:
         assert OneShotTrust.num_players == 2
         assert OneShotTrust.game_type == "efg"
         assert OneShotTrust.title == "One-shot trust game, after Kreps (1990)"
+
+    def test_custom_game_instantiation(self):
+        """Custom CatalogGame subclasses should return Game instances."""
+        assert isinstance(OneShotTrust(), Game)  # from catalog.py
+        assert isinstance(PrisonersDilemma(), Game)  # from catalog.yml
