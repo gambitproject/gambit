@@ -43,7 +43,7 @@ class CatalogGame:
         if cls.__doc__:
             cls.description = inspect.cleandoc(cls.__doc__)
         else:
-            cls.description = game.comment
+            cls.description = game.description
 
     def __init_subclass__(cls, **kwargs):
         """Extract metadata when subclass is defined (if not a file-based game)."""

@@ -5,21 +5,27 @@ from pygambit.catalog import CatalogGame, PrisonersDilemma
 
 
 class ExampleGame(CatalogGame):
-    """
-    Test game description.
-    """
 
     game_type = "efg"
 
     @staticmethod
     def _game(some_param: bool = False):
         if some_param:
-            return Game.new_tree(
+            g = Game.new_tree(
                 players=["A", "B"], title="Test game T"
             )
-        return Game.new_tree(
-            players=["A", "B"], title="Test game F"
-        )
+        else:
+            g = Game.new_tree(
+                players=["A", "B"], title="Test game F"
+            )
+        g.description = "Test game description."
+        return g
+
+
+class ExampleGameWithDocstring(ExampleGame):
+    """
+    Alternative test game description.
+    """
 
 
 class TestCatalogGame:
@@ -36,6 +42,10 @@ class TestCatalogGame:
         assert ExampleGame.game_type == "efg"
         assert ExampleGame.title == "Test game F"
         assert ExampleGame.description == "Test game description."
+
+    def test_can_get_game_description_from_docstring(self):
+        """CatalogGame should get description from docstring over game description."""
+        assert ExampleGameWithDocstring.description == "Alternative test game description."
 
     def test_catalog_py_game_with_parameters(self):
         """
