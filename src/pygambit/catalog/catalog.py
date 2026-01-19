@@ -17,8 +17,6 @@ class CatalogGame:
     Calling any subclass will return an instance of the corresponding game.
     """
 
-    title: str
-    num_players: int
     game_type: Literal["nfg", "efg"]
     description: str
     game: Game | None = None
@@ -37,8 +35,6 @@ class CatalogGame:
     @classmethod
     def _extract_metadata_from_game(cls, game: Game) -> None:
         """Extract metadata from the game and set as class attributes."""
-        cls.title = game.title
-        cls.num_players = len(game.players)
         if cls.__doc__:
             cls.description = inspect.cleandoc(cls.__doc__)
         else:

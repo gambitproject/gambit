@@ -38,9 +38,7 @@ class TestCatalogGame:
 
     def test_custom_game_subclass_extracts_metadata(self):
         """Custom CatalogGame subclasses should extract metadata from _game()."""
-        assert ExampleGame.num_players == 2
         assert ExampleGame.game_type == "efg"
-        assert ExampleGame.title == "Test game F"
         assert ExampleGame.description == "Test game description."
 
     def test_can_get_game_description_from_docstring(self):
@@ -85,10 +83,10 @@ class TestGamesFunction:
 
     def test_games_filter_by_num_players(self):
         """games(num_players=n) should return only n-player games."""
-        two_player_games = catalog.games(num_players=3)
-        for game_name in two_player_games:
+        three_player_games = catalog.games(num_players=3)
+        for game_name in three_player_games:
             game_class = getattr(catalog, game_name)
-            assert game_class.num_players == 3
+            assert len(game_class().players) == 3
 
     def test_games_filter_by_custom_metadata(self):
         """games() should filter by custom metadata fields."""
