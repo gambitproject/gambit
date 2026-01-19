@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
 
+import sys
 from pathlib import Path
 
 from ruamel.yaml import YAML
+
+from pygambit.catalog import games
 
 _CATALOG_YAML = Path(__file__).parent / "catalog.yml"
 _GAMEFILES_DIR = Path(__file__).parent.parent.parent.parent / "contrib/games"
@@ -27,8 +30,9 @@ def make_class_name(filename: str) -> str:
     return name
 
 
-def update_api_rst(catalog: dict[str, dict]) -> None:
+def update_api_rst() -> None:
     """Update the Game catalog section in pygambit.api.rst with all class names."""
+    _all_catalog_classes = games()
     with open(_API_RST, encoding="utf-8") as f:
         content = f.read()
 
@@ -49,10 +53,10 @@ def update_api_rst(catalog: dict[str, dict]) -> None:
 
     # Build the new toctree content
     new_toctree = ".. autosummary::\n   :toctree: api/\n\n   games\n"
-    for class_name, entry in catalog.items():
-        metadata = entry.get("metadata", {})
-        if metadata and "valid_game" in metadata and metadata["valid_game"] is False:
-            pass  # Marked as invalid game, do not add class
+    for class_name in _all_catalog_classes:
+        cls = getattr(sys.modules[__name__], class_name, None)
+        if cls is not None and hasattr(cls, "valid_game") and cls.valid_game is False:
+            pass  # Marked as invalid game, do not add class to toctree
         else:
             new_toctree += f"   {class_name}\n"
 
@@ -115,8 +119,9 @@ if __name__ == "__main__":
     with _CATALOG_YAML.open("w", encoding="utf-8") as f:
         yaml.dump(catalog, f)
 
-    # Update the RST documentation
-    update_api_rst(catalog)
+    # Update the RST documentation with the new full catalog
+    # This includes games from coded_games.py as well as catalog.yml
+    update_api_rst()
 
     print(f"Added {new_entries_counter} new entries to the catalog")
     print(f"Output written to: {_CATALOG_YAML}")
