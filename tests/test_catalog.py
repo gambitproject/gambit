@@ -47,8 +47,8 @@ class TestCatalogGame:
         Custom CatalogGame subclass should return Game
         and support parameters.
         """
-        assert isinstance(ExampleGame(some_param=False), Game)
-        assert isinstance(ExampleGame(some_param=True), Game)
+        assert ExampleGame(some_param=False).title == "Test game F"
+        assert ExampleGame(some_param=True).title == "Test game T"
 
     def test_catalog_yml_game_instantiation(self):
         """Custom CatalogGame subclasses reading from catalog.yml should return Game instances."""
