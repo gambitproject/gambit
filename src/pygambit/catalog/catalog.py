@@ -1,7 +1,6 @@
 import inspect
 import sys
 from pathlib import Path
-from typing import Literal
 
 import yaml
 
@@ -94,8 +93,16 @@ class CatalogGameFromContrib(CatalogGame):
 
 
 def games(
-    game_type: Literal["all", "nfg", "efg"] = "all",
+    num_actions: int | None = None,
+    num_contingencies: int | None = None,
+    num_infosets: int | None = None,
+    is_const_sum: bool | None = None,
+    is_perfect_recall: bool | None = None,
+    is_tree: bool | None = None,
+    num_nodes: int | None = None,
+    num_outcomes: int | None = None,
     num_players: int | None = None,
+    num_strategies: int | None = None,
     **metadata_filters,
 ) -> list[str]:
     """
@@ -103,11 +110,24 @@ def games(
 
     Parameters
     ----------
-    game_type : {"all", "nfg", "efg"}, default "all"
-        Filter games by type:
-        - "all": return all games
-        - "nfg": return only normal-form (strategic) games
-        - "efg": return only extensive-form games
+    num_actions : int | None, default None
+        If specified, only return games with the given number of actions.
+    num_contingencies : int | None, default None
+        If specified, only return games with the given number of contingencies.
+    num_infosets : int | None, default None
+        If specified, only return games with the given number of information sets.
+    is_const_sum : bool | None, default None
+        If specified, only return games that are (or are not) constant-sum.
+    is_perfect_recall : bool | None, default None
+        If specified, only return games that have (or do not have) perfect recall.
+    is_tree : bool | None, default None
+        If specified, only return games that are (or are not) extensive-form.
+    num_nodes : int | None, default None
+        If specified, only return games with the given number of nodes.
+    num_outcomes : int | None, default None
+        If specified, only return games with the given number of outcomes.
+    num_strategies : int | None, default None
+        If specified, only return games with the given number of strategies.
     num_players : int | None, default None
         If specified, only return games with the given number of players.
     **metadata_filters
@@ -122,7 +142,7 @@ def games(
     Examples
     --------
     >>> games(x=1)  # Games with a custom metadata field 'x' equal to 1
-    >>> games(game_type="efg", num_players=2)  # 2-player extensive-form games
+    >>> games(is_tree=True, num_players=2)  # 2-player extensive-form games
     """
 
     def get_all_subclasses(cls):
@@ -138,11 +158,7 @@ def games(
             # Instantiate game to access metadata
             g = subclass()
 
-            # Check standard filters
-            g_game_type = "nfg"
-            if g.is_tree:
-                g_game_type = "efg"
-            if game_type != "all" and g_game_type != game_type:
+            if is_tree is not None and g.is_tree != is_tree:
                 all_subclasses.extend(get_all_subclasses(subclass))
                 continue
 

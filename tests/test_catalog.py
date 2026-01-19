@@ -73,9 +73,9 @@ class TestGamesFunction:
 
     def test_games_filter_by_game_type(self):
         """Filtering should split games into NFG/EFG."""
-        nfg_games = catalog.games(game_type="nfg")
-        efg_games = catalog.games(game_type="efg")
-        all_games = catalog.games(game_type="all")
+        nfg_games = catalog.games(is_tree=False)
+        efg_games = catalog.games(is_tree=True)
+        all_games = catalog.games(is_tree=None)
         assert len(all_games) == len(set(nfg_games + efg_games))
 
     def test_games_filter_by_num_players(self):
