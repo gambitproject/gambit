@@ -145,6 +145,14 @@ def games(
     >>> games(is_tree=True, num_players=2)  # 2-player extensive-form games
     """
 
+    # Filter by extensive-form if filtering by tree-specific attributes
+    if (
+        num_actions is not None or
+        num_infosets is not None or
+        num_nodes is not None
+    ):
+        is_tree = True
+
     def get_all_subclasses(cls):
         """Recursively get all subclasses."""
         all_subclasses = []
@@ -155,49 +163,64 @@ def games(
                 all_subclasses.extend(get_all_subclasses(subclass))
                 continue
 
-            if num_actions is not None and subclass.game.num_actions != num_actions:
+            if num_actions is not None and num_actions != len(subclass.game.actions):
                 all_subclasses.extend(get_all_subclasses(subclass))
                 continue
 
             if (
                 num_contingencies is not None
-                and subclass.game.num_contingencies != num_contingencies
+                and num_contingencies != len(subclass.game.contingencies)
             ):
                 all_subclasses.extend(get_all_subclasses(subclass))
                 continue
 
-            if num_infosets is not None and subclass.game.num_infosets != num_infosets:
+            if (
+                num_infosets is not None
+                and num_infosets != len(subclass.game.infosets)
+            ):
                 all_subclasses.extend(get_all_subclasses(subclass))
                 continue
 
-            if is_const_sum is not None and subclass.game.is_const_sum != is_const_sum:
+            if is_const_sum is not None and is_const_sum != subclass.game.is_const_sum:
                 all_subclasses.extend(get_all_subclasses(subclass))
                 continue
 
             if (
                 is_perfect_recall is not None
-                and subclass.game.is_perfect_recall != is_perfect_recall
+                and is_perfect_recall != subclass.game.is_perfect_recall
             ):
                 all_subclasses.extend(get_all_subclasses(subclass))
                 continue
 
-            if is_tree is not None and subclass.game.is_tree != is_tree:
+            if is_tree is not None and is_tree != subclass.game.is_tree:
                 all_subclasses.extend(get_all_subclasses(subclass))
                 continue
 
-            if num_nodes is not None and subclass.game.num_nodes != num_nodes:
+            if (
+                num_nodes is not None and
+                num_nodes != len(subclass.game.nodes)
+            ):
                 all_subclasses.extend(get_all_subclasses(subclass))
                 continue
 
-            if num_outcomes is not None and subclass.game.num_outcomes != num_outcomes:
+            if (
+                num_outcomes is not None
+                and num_outcomes != len(subclass.game.outcomes)
+            ):
                 all_subclasses.extend(get_all_subclasses(subclass))
                 continue
 
-            if num_strategies is not None and subclass.game.num_strategies != num_strategies:
+            if (
+                num_strategies is not None
+                and num_strategies != len(subclass.game.strategies)
+            ):
                 all_subclasses.extend(get_all_subclasses(subclass))
                 continue
 
-            if num_players is not None and len(subclass.game.players) != num_players:
+            if (
+                num_players is not None
+                and num_players != len(subclass.game.players)
+            ):
                 all_subclasses.extend(get_all_subclasses(subclass))
                 continue
 

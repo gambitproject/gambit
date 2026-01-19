@@ -83,7 +83,7 @@ class TestGamesFunction:
         three_player_games = catalog.games(num_players=3)
         for game_name in three_player_games:
             game_class = getattr(catalog, game_name)
-            assert len(game_class().players) == 3
+            assert len(game_class.game.players) == 3
 
     def test_games_filter_by_custom_metadata(self):
         """games() should filter by custom metadata fields."""
