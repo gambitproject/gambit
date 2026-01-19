@@ -60,6 +60,7 @@ class CatalogGameFromContrib(CatalogGame):
     """
 
     game_file: str
+    """Filename of the game file in contrib/games directory."""
 
     def __new__(cls) -> Game:
         if cls.game is None:
