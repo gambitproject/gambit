@@ -134,24 +134,24 @@ def games(
         """Recursively get all subclasses."""
         all_subclasses = []
         for subclass in cls.__subclasses__():
-            # Check standard filters
+
+            # Don't include CatalogGameFromContrib in result
             if subclass.__name__ in ["CatalogGameFromContrib"]:
                 all_subclasses.extend(get_all_subclasses(subclass))
                 continue
 
-            if game_type != "all" and not hasattr(subclass, "game_type"):
+            # Instantiate game to access metadata
+            g = subclass()
+
+            # Check standard filters
+            g_game_type = "nfg"
+            if g.is_tree:
+                g_game_type = "efg"
+            if game_type != "all" and g_game_type != game_type:
                 all_subclasses.extend(get_all_subclasses(subclass))
                 continue
 
-            if game_type != "all" and subclass.game_type != game_type:
-                all_subclasses.extend(get_all_subclasses(subclass))
-                continue
-
-            if num_players is not None and not hasattr(subclass, "num_players"):
-                all_subclasses.extend(get_all_subclasses(subclass))
-                continue
-
-            if num_players is not None and subclass.num_players != num_players:
+            if num_players is not None and len(g.players) != num_players:
                 all_subclasses.extend(get_all_subclasses(subclass))
                 continue
 
