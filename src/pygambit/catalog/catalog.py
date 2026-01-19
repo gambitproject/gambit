@@ -155,7 +155,45 @@ def games(
                 all_subclasses.extend(get_all_subclasses(subclass))
                 continue
 
+            if num_actions is not None and subclass.game.num_actions != num_actions:
+                all_subclasses.extend(get_all_subclasses(subclass))
+                continue
+
+            if (
+                num_contingencies is not None
+                and subclass.game.num_contingencies != num_contingencies
+            ):
+                all_subclasses.extend(get_all_subclasses(subclass))
+                continue
+
+            if num_infosets is not None and subclass.game.num_infosets != num_infosets:
+                all_subclasses.extend(get_all_subclasses(subclass))
+                continue
+
+            if is_const_sum is not None and subclass.game.is_const_sum != is_const_sum:
+                all_subclasses.extend(get_all_subclasses(subclass))
+                continue
+
+            if (
+                is_perfect_recall is not None
+                and subclass.game.is_perfect_recall != is_perfect_recall
+            ):
+                all_subclasses.extend(get_all_subclasses(subclass))
+                continue
+
             if is_tree is not None and subclass.game.is_tree != is_tree:
+                all_subclasses.extend(get_all_subclasses(subclass))
+                continue
+
+            if num_nodes is not None and subclass.game.num_nodes != num_nodes:
+                all_subclasses.extend(get_all_subclasses(subclass))
+                continue
+
+            if num_outcomes is not None and subclass.game.num_outcomes != num_outcomes:
+                all_subclasses.extend(get_all_subclasses(subclass))
+                continue
+
+            if num_strategies is not None and subclass.game.num_strategies != num_strategies:
                 all_subclasses.extend(get_all_subclasses(subclass))
                 continue
 
