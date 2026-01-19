@@ -84,16 +84,15 @@ using MixedStrategyObserverFunctionType =
 
 inline void NullMixedStrategyObserver(const LogitQREMixedStrategyProfile &) {}
 
-std::list<LogitQREMixedStrategyProfile>
-LogitStrategySolve(const LogitQREMixedStrategyProfile &p_start, double p_regret, double p_omega,
-                   double p_firstStep, double p_maxAccel,
-                   MixedStrategyObserverFunctionType p_observer = NullMixedStrategyObserver);
+std::list<LogitQREMixedStrategyProfile> LogitStrategySolve(
+    const LogitQREMixedStrategyProfile &p_start, double p_regret, double p_omega,
+    double p_firstStep, double p_maxAccel,
+    const MixedStrategyObserverFunctionType &p_observer = NullMixedStrategyObserver);
 
-std::list<LogitQREMixedStrategyProfile>
-LogitStrategySolveLambda(const LogitQREMixedStrategyProfile &p_start,
-                         const std::list<double> &p_targetLambda, double p_omega,
-                         double p_firstStep, double p_maxAccel,
-                         MixedStrategyObserverFunctionType p_observer = NullMixedStrategyObserver);
+std::list<LogitQREMixedStrategyProfile> LogitStrategySolveLambda(
+    const LogitQREMixedStrategyProfile &p_start, const std::list<double> &p_targetLambda,
+    double p_omega, double p_firstStep, double p_maxAccel,
+    const MixedStrategyObserverFunctionType &p_observer = NullMixedStrategyObserver);
 
 LogitQREMixedStrategyProfile
 LogitStrategyEstimate(const MixedStrategyProfile<double> &p_frequencies, double p_maxLambda,

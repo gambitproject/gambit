@@ -24,7 +24,6 @@
 #include <cmath>
 
 #include "gambit.h"
-#include "logbehav.h"
 #include "logit.h"
 #include "path.h"
 
@@ -83,30 +82,14 @@ public:
                         Vector<double> &p_gradient) const = 0;
 };
 
-class EquationSystem {
-public:
-  explicit EquationSystem(const Game &p_game);
-  ~EquationSystem() = default;
-
-  void GetValue(const Vector<double> &p_point, Vector<double> &p_lhs) const;
-  void GetJacobian(const Vector<double> &p_point, Matrix<double> &p_jac) const;
-
-private:
-  std::vector<std::shared_ptr<Equation>> m_equations;
-  const Game &m_game;
-  mutable MixedStrategyProfile<double> m_profile;
-  mutable Vector<double> m_strategyValues;
-  mutable Matrix<double> m_strategyDerivs;
-};
-
 class SumToOneEquation final : public Equation {
   Game m_game;
   GamePlayer m_player;
-  int m_firstIndex, m_lastIndex;
+  int m_firstIndex{0}, m_lastIndex{0};
 
 public:
   explicit SumToOneEquation(const GamePlayer &p_player)
-    : m_game(p_player->GetGame()), m_player(p_player), m_firstIndex(0), m_lastIndex(0)
+    : m_game(p_player->GetGame()), m_player(p_player)
   {
     int col = 1;
     for (const auto &player : m_game->GetPlayers()) {
@@ -215,6 +198,22 @@ void RatioEquation::Gradient(const MixedStrategyProfile<double> &p_profile,
   p_gradient[col] = p_strategyValues[m_refStrategyIndex] - p_strategyValues[m_strategyIndex];
 }
 
+class EquationSystem {
+public:
+  explicit EquationSystem(const Game &p_game);
+  ~EquationSystem() = default;
+
+  void GetValue(const Vector<double> &p_point, Vector<double> &p_lhs) const;
+  void GetJacobian(const Vector<double> &p_point, Matrix<double> &p_jac) const;
+
+private:
+  std::vector<std::shared_ptr<Equation>> m_equations;
+  const Game &m_game;
+  mutable MixedStrategyProfile<double> m_profile;
+  mutable Vector<double> m_strategyValues;
+  mutable Matrix<double> m_strategyDerivs;
+};
+
 EquationSystem::EquationSystem(const Game &p_game)
   : m_game(p_game), m_profile(p_game->NewMixedStrategyProfile(0.0)),
     m_strategyValues(m_profile.MixedProfileLength()),
@@ -242,7 +241,7 @@ void EquationSystem::GetValue(const Vector<double> &p_point, Vector<double> &p_l
                  [this, lambda](auto e) { return e->Value(m_profile, m_strategyValues, lambda); });
 }
 
-void EquationSystem::GetJacobian(const Vector<double> &p_point, Matrix<double> &p_matrix) const
+void EquationSystem::GetJacobian(const Vector<double> &p_point, Matrix<double> &p_jac) const
 {
   PointToProfile(m_profile, p_point);
   const double lambda = p_point.back();
@@ -263,13 +262,13 @@ void EquationSystem::GetJacobian(const Vector<double> &p_point, Matrix<double> &
   }
   for (size_t i = 1; i <= m_equations.size(); i++) {
     m_equations[i - 1]->Gradient(m_profile, m_strategyValues, m_strategyDerivs, lambda, column);
-    p_matrix.SetColumn(i, column);
+    p_jac.SetColumn(i, column);
   }
 }
 
 class TracingCallbackFunction {
 public:
-  TracingCallbackFunction(const Game &p_game, MixedStrategyObserverFunctionType p_observer)
+  TracingCallbackFunction(const Game &p_game, const MixedStrategyObserverFunctionType &p_observer)
     : m_game(p_game), m_observer(p_observer)
   {
   }
@@ -295,7 +294,7 @@ void TracingCallbackFunction::AppendPoint(const Vector<double> &p_point)
 class EstimatorCallbackFunction {
 public:
   EstimatorCallbackFunction(const Game &p_game, const Vector<double> &p_frequencies,
-                            MixedStrategyObserverFunctionType p_observer);
+                            const MixedStrategyObserverFunctionType &p_observer);
   ~EstimatorCallbackFunction() = default;
 
   void EvaluatePoint(const Vector<double> &p_point);
@@ -309,9 +308,9 @@ private:
   LogitQREMixedStrategyProfile m_bestProfile;
 };
 
-EstimatorCallbackFunction::EstimatorCallbackFunction(const Game &p_game,
-                                                     const Vector<double> &p_frequencies,
-                                                     MixedStrategyObserverFunctionType p_observer)
+EstimatorCallbackFunction::EstimatorCallbackFunction(
+    const Game &p_game, const Vector<double> &p_frequencies,
+    const MixedStrategyObserverFunctionType &p_observer)
   : m_game(p_game), m_frequencies(p_frequencies), m_observer(p_observer),
     m_bestProfile(p_game->NewMixedStrategyProfile(0.0), 0.0,
                   LogLike(p_frequencies, p_game->NewMixedStrategyProfile(0.0).GetProbVector()))
@@ -335,14 +334,14 @@ void EstimatorCallbackFunction::EvaluatePoint(const Vector<double> &p_point)
 std::list<LogitQREMixedStrategyProfile>
 LogitStrategySolve(const LogitQREMixedStrategyProfile &p_start, double p_regret, double p_omega,
                    double p_firstStep, double p_maxAccel,
-                   MixedStrategyObserverFunctionType p_observer)
+                   const MixedStrategyObserverFunctionType &p_observer)
 {
   PathTracer tracer;
   tracer.SetMaxDecel(p_maxAccel);
   tracer.SetStepsize(p_firstStep);
 
-  const double scale = p_start.GetGame()->GetMaxPayoff() - p_start.GetGame()->GetMinPayoff();
-  if (scale != 0.0) {
+  if (const double scale = p_start.GetGame()->GetMaxPayoff() - p_start.GetGame()->GetMinPayoff();
+      scale != 0.0) {
     p_regret *= scale;
   }
 
@@ -369,14 +368,14 @@ std::list<LogitQREMixedStrategyProfile>
 LogitStrategySolveLambda(const LogitQREMixedStrategyProfile &p_start,
                          const std::list<double> &p_targetLambda, double p_omega,
                          double p_firstStep, double p_maxAccel,
-                         MixedStrategyObserverFunctionType p_observer)
+                         const MixedStrategyObserverFunctionType &p_observer)
 {
   PathTracer tracer;
   tracer.SetMaxDecel(p_maxAccel);
   tracer.SetStepsize(p_firstStep);
 
   const Game game = p_start.GetGame();
-  Vector<double> x(ProfileToPoint(p_start));
+  Vector x(ProfileToPoint(p_start));
   TracingCallbackFunction callback(game, p_observer);
   std::list<LogitQREMixedStrategyProfile> ret;
   EquationSystem system(game);
@@ -403,14 +402,14 @@ LogitStrategyEstimate(const MixedStrategyProfile<double> &p_frequencies, double 
                       double p_omega, double p_stopAtLocal, double p_firstStep, double p_maxAccel,
                       MixedStrategyObserverFunctionType p_observer)
 {
-  LogitQREMixedStrategyProfile start(p_frequencies.GetGame());
+  const LogitQREMixedStrategyProfile start(p_frequencies.GetGame());
   PathTracer tracer;
   tracer.SetMaxDecel(p_maxAccel);
   tracer.SetStepsize(p_firstStep);
 
   const Game game = start.GetGame();
   Vector<double> x(ProfileToPoint(start)), restart(x);
-  const Vector<double> freq_vector(p_frequencies.GetProbVector());
+  const Vector freq_vector(p_frequencies.GetProbVector());
   EstimatorCallbackFunction callback(game, p_frequencies.GetProbVector(), p_observer);
   EquationSystem system(game);
   while (true) {
