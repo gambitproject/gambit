@@ -334,6 +334,7 @@ Pbride:
   metadata:
 PrisonersDilemma:
   file: pd.nfg
+  description: "A simple implementation of a two person Prisoner's Dilemma game."
   metadata:
     test_suite: true
 Perfect1:

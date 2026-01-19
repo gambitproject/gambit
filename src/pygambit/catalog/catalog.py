@@ -204,6 +204,7 @@ def _generate_contrib_game_classes(catalog: dict[str, dict]) -> None:
         class_attrs = {
             "game_file": game_file,
             "__module__": __name__,
+            "__doc__": entry.get("description", None),
         }
 
         # Add metadata fields as class attributes
