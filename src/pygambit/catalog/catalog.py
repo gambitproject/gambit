@@ -155,14 +155,11 @@ def games(
                 all_subclasses.extend(get_all_subclasses(subclass))
                 continue
 
-            # Instantiate game to access metadata
-            g = subclass()
-
-            if is_tree is not None and g.is_tree != is_tree:
+            if is_tree is not None and subclass.game.is_tree != is_tree:
                 all_subclasses.extend(get_all_subclasses(subclass))
                 continue
 
-            if num_players is not None and len(g.players) != num_players:
+            if num_players is not None and len(subclass.game.players) != num_players:
                 all_subclasses.extend(get_all_subclasses(subclass))
                 continue
 
