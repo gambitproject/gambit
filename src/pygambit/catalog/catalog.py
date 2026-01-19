@@ -18,12 +18,13 @@ class CatalogGame:
     """
 
     game: Game | None = None
+    """Cached ``Game`` instance. Overwritten on each instantiation."""
 
     def __new__(cls, *args, **kwargs) -> Game:
         """Create a game instance by calling the _game() method."""
-        g = cls._game(*args, **kwargs)
-        cls._extract_description(g)
-        return g
+        cls.game = cls._game(*args, **kwargs)
+        cls._extract_description(cls.game)
+        return cls.game
 
     @staticmethod
     def _game() -> Game:
