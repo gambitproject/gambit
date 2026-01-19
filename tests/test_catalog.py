@@ -85,6 +85,13 @@ class TestGamesFunction:
             game_class = getattr(catalog, game_name)
             assert len(game_class.game.players) == 3
 
+    def test_games_filter_by_num_infosets(self):
+        """games(num_infosets=n) should return only n-infoset games."""
+        two_infoset_games = catalog.games(num_infosets=2)
+        for game_name in two_infoset_games:
+            game_class = getattr(catalog, game_name)
+            assert len(game_class.game.infosets) == 2
+
     def test_games_filter_by_custom_metadata(self):
         """games() should filter by custom metadata fields."""
         custom_filter_games = catalog.games(test_suite=True)
