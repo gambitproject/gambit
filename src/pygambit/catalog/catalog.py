@@ -21,13 +21,13 @@ class CatalogGame:
     num_players: int
     game_type: Literal["nfg", "efg"]
     description: str
-    _cached_game: Game | None = None
+    game: Game | None = None
 
     def __new__(cls, *args, **kwargs) -> Game:
         """Create a game instance by calling the _game() method."""
-        if cls._cached_game is None:
-            cls._cached_game = cls._game(*args, **kwargs)
-        return cls._cached_game
+        if cls.game is None:
+            cls.game = cls._game(*args, **kwargs)
+        return cls.game
 
     @staticmethod
     def _game() -> Game:
@@ -53,8 +53,8 @@ class CatalogGame:
             return
 
         # Load game and extract metadata immediately when class is defined
-        cls._cached_game = cls._game()
-        cls._extract_metadata_from_game(cls._cached_game)
+        cls.game = cls._game()
+        cls._extract_metadata_from_game(cls.game)
 
 
 class CatalogGameFromContrib(CatalogGame):
@@ -67,9 +67,9 @@ class CatalogGameFromContrib(CatalogGame):
     game_file: str
 
     def __new__(cls) -> Game:
-        if cls._cached_game is None:
-            cls._cached_game = cls._load_game()
-        return cls._cached_game
+        if cls.game is None:
+            cls.game = cls._load_game()
+        return cls.game
 
     @classmethod
     def _load_game(cls) -> Game:
@@ -94,8 +94,8 @@ class CatalogGameFromContrib(CatalogGame):
         super().__init_subclass__(**kwargs)
 
         # Load game and extract metadata immediately when class is defined
-        cls._cached_game = cls._load_game()
-        cls._extract_metadata_from_game(cls._cached_game)
+        cls.game = cls._load_game()
+        cls._extract_metadata_from_game(cls.game)
 
 
 def games(
