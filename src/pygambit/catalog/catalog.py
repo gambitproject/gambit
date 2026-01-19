@@ -21,9 +21,9 @@ class CatalogGame:
 
     def __new__(cls, *args, **kwargs) -> Game:
         """Create a game instance by calling the _game() method."""
-        if cls.game is None:
-            cls.game = cls._game(*args, **kwargs)
-        return cls.game
+        g = cls._game(*args, **kwargs)
+        cls._extract_description(g)
+        return g
 
     @staticmethod
     def _game() -> Game:
