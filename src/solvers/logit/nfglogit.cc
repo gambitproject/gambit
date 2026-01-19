@@ -51,9 +51,9 @@ Vector<double> ProfileToPoint(const LogitQREMixedStrategyProfile &p_profile)
 
 double LogLike(const Vector<double> &p_frequencies, const Vector<double> &p_point)
 {
-  return std::inner_product(p_frequencies.begin(), p_frequencies.end(), p_point.begin(), 0.0,
-                            std::plus<>(),
-                            [](double freq, double prob) { return freq * std::log(prob); });
+  return std::inner_product(
+      p_frequencies.begin(), p_frequencies.end(), p_point.begin(), 0.0, std::plus<>(),
+      [](const double freq, const double prob) { return freq * std::log(prob); });
 }
 
 double DiffLogLike(const Vector<double> &p_frequencies, const Vector<double> &p_tangent)
@@ -77,7 +77,9 @@ public:
 
   virtual double Value(const MixedStrategyProfile<double> &p_profile,
                        const Vector<double> &p_strategyValues, double p_lambda) const = 0;
-  virtual void Gradient(const MixedStrategyProfile<double> &p_profile, double p_lambda,
+  virtual void Gradient(const MixedStrategyProfile<double> &p_profile,
+                        const Vector<double> &p_strategyValues,
+                        const Matrix<double> &p_strategyDerivs, double p_lambda,
                         Vector<double> &p_gradient) const = 0;
 };
 
@@ -94,6 +96,7 @@ private:
   const Game &m_game;
   mutable MixedStrategyProfile<double> m_profile;
   mutable Vector<double> m_strategyValues;
+  mutable Matrix<double> m_strategyDerivs;
 };
 
 class SumToOneEquation final : public Equation {
@@ -120,8 +123,9 @@ public:
   ~SumToOneEquation() override = default;
   double Value(const MixedStrategyProfile<double> &p_profile,
                const Vector<double> &p_strategyValues, double p_lambda) const override;
-  void Gradient(const MixedStrategyProfile<double> &p_profile, double p_lambda,
-                Vector<double> &p_gradient) const override;
+  void Gradient(const MixedStrategyProfile<double> &p_profile,
+                const Vector<double> &p_strategyValues, const Matrix<double> &p_strategyDerivs,
+                double p_lambda, Vector<double> &p_gradient) const override;
 };
 
 double SumToOneEquation::Value(const MixedStrategyProfile<double> &p_profile,
@@ -134,7 +138,9 @@ double SumToOneEquation::Value(const MixedStrategyProfile<double> &p_profile,
   return value;
 }
 
-void SumToOneEquation::Gradient(const MixedStrategyProfile<double> &p_profile, double p_lambda,
+void SumToOneEquation::Gradient(const MixedStrategyProfile<double> &p_profile,
+                                const Vector<double> &p_strategyValues,
+                                const Matrix<double> &p_strategyDerivs, double p_lambda,
                                 Vector<double> &p_gradient) const
 {
   p_gradient = 0.0;
@@ -169,8 +175,9 @@ public:
   ~RatioEquation() override = default;
   double Value(const MixedStrategyProfile<double> &p_profile,
                const Vector<double> &p_strategyValues, double p_lambda) const override;
-  void Gradient(const MixedStrategyProfile<double> &p_profile, double p_lambda,
-                Vector<double> &p_gradient) const override;
+  void Gradient(const MixedStrategyProfile<double> &p_profile,
+                const Vector<double> &p_strategyValues, const Matrix<double> &p_strategyDerivs,
+                double p_lambda, Vector<double> &p_gradient) const override;
 };
 
 double RatioEquation::Value(const MixedStrategyProfile<double> &p_profile,
@@ -180,7 +187,9 @@ double RatioEquation::Value(const MixedStrategyProfile<double> &p_profile,
           p_lambda * (p_strategyValues[m_strategyIndex] - p_strategyValues[m_refStrategyIndex]));
 }
 
-void RatioEquation::Gradient(const MixedStrategyProfile<double> &p_profile, double p_lambda,
+void RatioEquation::Gradient(const MixedStrategyProfile<double> &p_profile,
+                             const Vector<double> &p_strategyValues,
+                             const Matrix<double> &p_strategyDerivs, double p_lambda,
                              Vector<double> &p_gradient) const
 {
   int col = 1;
@@ -197,20 +206,21 @@ void RatioEquation::Gradient(const MixedStrategyProfile<double> &p_profile, doub
       }
       else {
         p_gradient[col] =
-            -p_lambda * p_profile[strategy] *
-            (p_profile.GetPayoffDeriv(m_player->GetNumber(), m_strategy, strategy) -
-             p_profile.GetPayoffDeriv(m_player->GetNumber(), m_refStrategy, strategy));
+            -p_lambda * p_profile[col] *
+            (p_strategyDerivs(m_strategyIndex, col) - p_strategyDerivs(m_refStrategyIndex, col));
       }
       col++;
     }
   }
-  p_gradient[col] = (p_profile.GetPayoff(m_refStrategy) - p_profile.GetPayoff(m_strategy));
+  p_gradient[col] = p_strategyValues[m_refStrategyIndex] - p_strategyValues[m_strategyIndex];
 }
 
 EquationSystem::EquationSystem(const Game &p_game)
   : m_game(p_game), m_profile(p_game->NewMixedStrategyProfile(0.0)),
-    m_strategyValues(m_profile.MixedProfileLength())
+    m_strategyValues(m_profile.MixedProfileLength()),
+    m_strategyDerivs(m_profile.MixedProfileLength(), m_profile.MixedProfileLength())
 {
+  m_equations.reserve(m_profile.MixedProfileLength());
   for (const auto &player : m_game->GetPlayers()) {
     m_equations.push_back(std::make_shared<SumToOneEquation>(player));
     auto strategies = player->GetStrategies();
@@ -237,8 +247,22 @@ void EquationSystem::GetJacobian(const Vector<double> &p_point, Matrix<double> &
   PointToProfile(m_profile, p_point);
   const double lambda = p_point.back();
   Vector<double> column(p_point.size());
+  m_strategyDerivs = 0.0;
+  int row = 1;
+  for (const auto &strategy1 : m_game->GetStrategies()) {
+    m_strategyValues[row] = m_profile.GetPayoff(strategy1);
+    int col = 1;
+    for (const auto &strategy2 : m_game->GetStrategies()) {
+      if (strategy1->GetPlayer() != strategy2->GetPlayer()) {
+        m_strategyDerivs(row, col) =
+            m_profile.GetPayoffDeriv(strategy1->GetPlayer()->GetNumber(), strategy1, strategy2);
+      }
+      col++;
+    }
+    row++;
+  }
   for (size_t i = 1; i <= m_equations.size(); i++) {
-    m_equations[i - 1]->Gradient(m_profile, lambda, column);
+    m_equations[i - 1]->Gradient(m_profile, m_strategyValues, m_strategyDerivs, lambda, column);
     p_matrix.SetColumn(i, column);
   }
 }
@@ -384,10 +408,10 @@ LogitStrategyEstimate(const MixedStrategyProfile<double> &p_frequencies, double 
   tracer.SetMaxDecel(p_maxAccel);
   tracer.SetStepsize(p_firstStep);
 
-  const Game game;
+  const Game game = start.GetGame();
   Vector<double> x(ProfileToPoint(start)), restart(x);
   const Vector<double> freq_vector(p_frequencies.GetProbVector());
-  EstimatorCallbackFunction callback(start.GetGame(), p_frequencies.GetProbVector(), p_observer);
+  EstimatorCallbackFunction callback(game, p_frequencies.GetProbVector(), p_observer);
   EquationSystem system(game);
   while (true) {
     tracer.TracePath(
