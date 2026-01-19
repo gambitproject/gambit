@@ -36,11 +36,11 @@ class TestCatalogGame:
 
     def test_custom_game_subclass_extracts_metadata(self):
         """Custom CatalogGame subclasses should extract metadata from _game()."""
-        assert ExampleGame.description == "Test game description."
+        assert ExampleGame().description == "Test game description."
 
     def test_can_get_game_description_from_docstring(self):
         """CatalogGame should get description from docstring over game description."""
-        assert ExampleGameWithDocstring.description == "Alternative test game description."
+        assert ExampleGameWithDocstring().description == "Alternative test game description."
 
     def test_catalog_py_game_with_parameters(self):
         """
@@ -57,7 +57,7 @@ class TestCatalogGame:
     def test_catalog_yml_game_description(self):
         """Custom CatalogGame subclasses reading from catalog.yml should return Game instances."""
         assert (
-            PrisonersDilemma.description
+            PrisonersDilemma().description
             == "A simple implementation of a two person Prisoner's Dilemma game."
         )
 

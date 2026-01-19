@@ -17,7 +17,6 @@ class CatalogGame:
     Calling any subclass will return an instance of the corresponding game.
     """
 
-    description: str
     game: Game | None = None
 
     def __new__(cls, *args, **kwargs) -> Game:
@@ -32,12 +31,13 @@ class CatalogGame:
         raise NotImplementedError("Subclasses must implement _game() method")
 
     @classmethod
-    def _extract_metadata_from_game(cls, game: Game) -> None:
-        """Extract metadata from the game and set as class attributes."""
+    def _extract_description(cls, game: Game) -> None:
+        """Extract game description from docstring and apply to game."""
+        cleaned_docstring = ""
         if cls.__doc__:
-            cls.description = inspect.cleandoc(cls.__doc__)
-        else:
-            cls.description = game.description
+            cleaned_docstring = inspect.cleandoc(cls.__doc__)
+        if len(cleaned_docstring) > 0:
+            game.description = cleaned_docstring
 
     def __init_subclass__(cls, **kwargs):
         """Extract metadata when subclass is defined (if not a file-based game)."""
@@ -49,7 +49,7 @@ class CatalogGame:
 
         # Load game and extract metadata immediately when class is defined
         cls.game = cls._game()
-        cls._extract_metadata_from_game(cls.game)
+        cls._extract_description(cls.game)
 
 
 class CatalogGameFromContrib(CatalogGame):
@@ -88,7 +88,7 @@ class CatalogGameFromContrib(CatalogGame):
 
         # Load game and extract metadata immediately when class is defined
         cls.game = cls._load_game()
-        cls._extract_metadata_from_game(cls.game)
+        cls._extract_description(cls.game)
 
 
 def games(
