@@ -17,7 +17,6 @@ class CatalogGame:
     Calling any subclass will return an instance of the corresponding game.
     """
 
-    game_type: Literal["nfg", "efg"]
     description: str
     game: Game | None = None
 
@@ -77,10 +76,8 @@ class CatalogGameFromContrib(CatalogGame):
         file_path = _GAMEFILES_DIR / cls.game_file
 
         if game_type == "nfg":
-            cls.game_type = "nfg"
             return read_nfg(str(file_path))
         elif game_type == "efg":
-            cls.game_type = "efg"
             return read_efg(str(file_path))
         else:
             raise ValueError(f"Game file extension must be 'nfg' or 'efg', got '{game_type}'")

@@ -6,8 +6,6 @@ from pygambit.catalog import CatalogGame, PrisonersDilemma
 
 class ExampleGame(CatalogGame):
 
-    game_type = "efg"
-
     @staticmethod
     def _game(some_param: bool = False):
         if some_param:
@@ -38,7 +36,6 @@ class TestCatalogGame:
 
     def test_custom_game_subclass_extracts_metadata(self):
         """Custom CatalogGame subclasses should extract metadata from _game()."""
-        assert ExampleGame.game_type == "efg"
         assert ExampleGame.description == "Test game description."
 
     def test_can_get_game_description_from_docstring(self):
