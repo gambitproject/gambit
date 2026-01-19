@@ -167,8 +167,8 @@ def games(
 
             all_subclasses.extend(get_all_subclasses(subclass))
         return all_subclasses
-
-    return get_all_subclasses(CatalogGame)
+    # Sort alphabetically for consistency
+    return sorted(get_all_subclasses(CatalogGame))
 
 
 _CATALOG_YAML = Path(__file__).parent / "catalog.yml"
