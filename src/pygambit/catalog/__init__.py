@@ -1,6 +1,5 @@
 from . import catalog
 from .catalog import games
-from .coded_games import *  # noqa: F403, F401
 
 # Ensure catalog module is fully imported including all YAML-generated classes
 _all_catalog_classes = games()
