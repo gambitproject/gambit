@@ -19,17 +19,21 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
-
-from .gambit import *  # noqa: F401,F403,I001
+import importlib.metadata
 
 from . import (  # noqa: F401
+    catalog,  # noqa: F401
     nash,  # noqa: F401
     qre,  # noqa: F401
     supports,  # noqa: F401
-    catalog,  # noqa: F401
 )
 
-import importlib.metadata
+# Import manually coded games to ensure they are registered in the catalog
+# after catalog module is fully initialized (avoid circular import issues)
+from .catalog.catalog import _load_coded_games
+from .gambit import *  # noqa: F401,F403,I001
+
+_load_coded_games()
 
 try:
     __version__ = importlib.metadata.version("pygambit")
