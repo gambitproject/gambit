@@ -106,3 +106,8 @@ class TestGamesFunction:
         result = catalog.games()
         assert "CatalogGame" not in result
         assert "CatalogGameFromContrib" not in result
+
+    def test_games_includes_coded_games(self):
+        """games() should include manually coded games."""
+        result = catalog.games(test_suite=True)
+        assert "OneShotTrust" in result

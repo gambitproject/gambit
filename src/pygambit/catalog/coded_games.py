@@ -11,6 +11,8 @@ class OneShotTrust(CatalogGame):
     < 0.5 probability on Honor with a unique NE where the Buyer plays Trust and
     the Seller plays Abuse.
     """
+    test_suite = True
+    """This game is included in the pygambit test suite."""
 
     @staticmethod
     def _game(unique_NE_variant: bool = False):
