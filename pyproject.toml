@@ -89,7 +89,10 @@ markers = [
 include-package-data = true
 
 [tool.setuptools.package-data]
-pygambit = ["catalog.yml"]
+pygambit = [
+    "catalog.yml",
+    "contrib/games/*",
+]
 
 [tool.setuptools.dynamic]
 version = {file = "build_support/GAMBIT_VERSION"}

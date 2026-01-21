@@ -1,13 +1,12 @@
 import inspect
 import sys
-from importlib.resources import files
-from pathlib import Path
+from importlib.resources import as_file, files
 
 import yaml
 
 import pygambit as gbt
 
-_GAMEFILES_DIR = Path(__file__).parent.parent.parent / "contrib/games"
+_GAMEFILES_DIR = files(__package__) / "contrib" / "games"
 
 
 class CatalogGame:
@@ -64,7 +63,7 @@ class CatalogGameFromContrib(CatalogGame):
     """Filename of the game file in contrib/games directory."""
 
     def __new__(cls) -> gbt.Game:
-        if cls.game is None:
+        if getattr(cls, "game", None) is None:
             cls.game = cls._load_game()
         return cls.game
 
@@ -72,17 +71,20 @@ class CatalogGameFromContrib(CatalogGame):
     def _load_game(cls) -> gbt.Game:
         """Load the game from file."""
         if not hasattr(cls, "game_file") or cls.game_file is None:
-            raise TypeError(f"{cls.__name__} must define 'game_file' class attribute")
+            raise TypeError(f"{cls.__name__} must define 'game_file'")
 
-        game_type = cls.game_file.split(".")[-1]
-        file_path = _GAMEFILES_DIR / cls.game_file
+        game_type = cls.game_file.rsplit(".", 1)[-1]
+        resource = _GAMEFILES_DIR / cls.game_file
 
-        if game_type == "nfg":
-            return gbt.read_nfg(str(file_path))
-        elif game_type == "efg":
-            return gbt.read_efg(str(file_path))
-        else:
-            raise ValueError(f"gbt.Game file extension must be 'nfg' or 'efg', got '{game_type}'")
+        with as_file(resource) as path:
+            if game_type == "nfg":
+                return gbt.read_nfg(str(path))
+            elif game_type == "efg":
+                return gbt.read_efg(str(path))
+            else:
+                raise ValueError(
+                    f"gbt.Game file extension must be 'nfg' or 'efg', got '{game_type}'"
+                )
 
     def __init_subclass__(cls, **kwargs):
         """Validate and extract metadata when subclass is defined."""
