@@ -1,5 +1,4 @@
-from pygambit.gambit import Game
-
+from ..gambit import Game
 from .catalog import CatalogGame
 
 
