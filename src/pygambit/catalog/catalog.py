@@ -92,160 +92,160 @@ class CatalogGameFromContrib(CatalogGame):
         cls._extract_description(cls.game)
 
 
-def games(
-    num_actions: int | None = None,
-    num_contingencies: int | None = None,
-    num_infosets: int | None = None,
-    is_const_sum: bool | None = None,
-    is_perfect_recall: bool | None = None,
-    is_tree: bool | None = None,
-    num_nodes: int | None = None,
-    num_outcomes: int | None = None,
-    num_players: int | None = None,
-    num_strategies: int | None = None,
-    **metadata_filters,
-) -> list[str]:
-    """
-    Return a list of catalog game class names.
+# def games(
+#     num_actions: int | None = None,
+#     num_contingencies: int | None = None,
+#     num_infosets: int | None = None,
+#     is_const_sum: bool | None = None,
+#     is_perfect_recall: bool | None = None,
+#     is_tree: bool | None = None,
+#     num_nodes: int | None = None,
+#     num_outcomes: int | None = None,
+#     num_players: int | None = None,
+#     num_strategies: int | None = None,
+#     **metadata_filters,
+# ) -> list[str]:
+#     """
+#     Return a list of catalog game class names.
 
-    Parameters
-    ----------
-    num_actions : int | None, default None
-        If specified, only return games with the given number of actions.
-    num_contingencies : int | None, default None
-        If specified, only return games with the given number of contingencies.
-    num_infosets : int | None, default None
-        If specified, only return games with the given number of information sets.
-    is_const_sum : bool | None, default None
-        If specified, only return games that are (or are not) constant-sum.
-    is_perfect_recall : bool | None, default None
-        If specified, only return games that have (or do not have) perfect recall.
-    is_tree : bool | None, default None
-        If specified, only return games that are (or are not) extensive-form.
-    num_nodes : int | None, default None
-        If specified, only return games with the given number of nodes.
-    num_outcomes : int | None, default None
-        If specified, only return games with the given number of outcomes.
-    num_strategies : int | None, default None
-        If specified, only return games with the given number of strategies.
-    num_players : int | None, default None
-        If specified, only return games with the given number of players.
-    **metadata_filters
-        Additional keyword arguments to filter by catalog.yml metadata fields.
-        For example, `x=1` filters for games with `x: 1` in metadata.
+#     Parameters
+#     ----------
+#     num_actions : int | None, default None
+#         If specified, only return games with the given number of actions.
+#     num_contingencies : int | None, default None
+#         If specified, only return games with the given number of contingencies.
+#     num_infosets : int | None, default None
+#         If specified, only return games with the given number of information sets.
+#     is_const_sum : bool | None, default None
+#         If specified, only return games that are (or are not) constant-sum.
+#     is_perfect_recall : bool | None, default None
+#         If specified, only return games that have (or do not have) perfect recall.
+#     is_tree : bool | None, default None
+#         If specified, only return games that are (or are not) extensive-form.
+#     num_nodes : int | None, default None
+#         If specified, only return games with the given number of nodes.
+#     num_outcomes : int | None, default None
+#         If specified, only return games with the given number of outcomes.
+#     num_strategies : int | None, default None
+#         If specified, only return games with the given number of strategies.
+#     num_players : int | None, default None
+#         If specified, only return games with the given number of players.
+#     **metadata_filters
+#         Additional keyword arguments to filter by catalog.yml metadata fields.
+#         For example, `x=1` filters for games with `x: 1` in metadata.
 
-    Returns
-    -------
-    list[str]
-        List of game class names matching the specified filters.
+#     Returns
+#     -------
+#     list[str]
+#         List of game class names matching the specified filters.
 
-    Examples
-    --------
-    >>> games(x=1)  # Games with a custom metadata field 'x' equal to 1
-    >>> games(is_tree=True, num_players=2)  # 2-player extensive-form games
-    """
-    # Import manually coded games to ensure they are registered in the catalog
-    # _load_coded_games()
+#     Examples
+#     --------
+#     >>> games(x=1)  # Games with a custom metadata field 'x' equal to 1
+#     >>> games(is_tree=True, num_players=2)  # 2-player extensive-form games
+#     """
+#     # Import manually coded games to ensure they are registered in the catalog
+#     # _load_coded_games()
 
-    # Filter by extensive-form if filtering by tree-specific attributes
-    if (
-        num_actions is not None or
-        num_infosets is not None or
-        num_nodes is not None
-    ):
-        is_tree = True
+#     # Filter by extensive-form if filtering by tree-specific attributes
+#     if (
+#         num_actions is not None or
+#         num_infosets is not None or
+#         num_nodes is not None
+#     ):
+#         is_tree = True
 
-    def get_all_subclasses(cls):
-        """Recursively get all subclasses."""
-        all_subclasses = []
-        for subclass in cls.__subclasses__():
+#     def get_all_subclasses(cls):
+#         """Recursively get all subclasses."""
+#         all_subclasses = []
+#         for subclass in cls.__subclasses__():
 
-            # Don't include CatalogGameFromContrib in result
-            if subclass.__name__ in ["CatalogGameFromContrib"]:
-                all_subclasses.extend(get_all_subclasses(subclass))
-                continue
+#             # Don't include CatalogGameFromContrib in result
+#             if subclass.__name__ in ["CatalogGameFromContrib"]:
+#                 all_subclasses.extend(get_all_subclasses(subclass))
+#                 continue
 
-            if is_tree is not None and is_tree != subclass.game.is_tree:
-                all_subclasses.extend(get_all_subclasses(subclass))
-                continue
+#             if is_tree is not None and is_tree != subclass.game.is_tree:
+#                 all_subclasses.extend(get_all_subclasses(subclass))
+#                 continue
 
-            if num_actions is not None:
-                if not getattr(subclass.game, "is_tree", False):
-                    all_subclasses.extend(get_all_subclasses(subclass))
-                    continue
-                if num_actions != len(getattr(subclass.game, "actions", [])):
-                    all_subclasses.extend(get_all_subclasses(subclass))
-                    continue
+#             if num_actions is not None:
+#                 if not getattr(subclass.game, "is_tree", False):
+#                     all_subclasses.extend(get_all_subclasses(subclass))
+#                     continue
+#                 if num_actions != len(getattr(subclass.game, "actions", [])):
+#                     all_subclasses.extend(get_all_subclasses(subclass))
+#                     continue
 
-            if num_infosets is not None:
-                if not getattr(subclass.game, "is_tree", False):
-                    all_subclasses.extend(get_all_subclasses(subclass))
-                    continue
-                if num_infosets != len(subclass.game.infosets):
-                    all_subclasses.extend(get_all_subclasses(subclass))
-                    continue
+#             if num_infosets is not None:
+#                 if not getattr(subclass.game, "is_tree", False):
+#                     all_subclasses.extend(get_all_subclasses(subclass))
+#                     continue
+#                 if num_infosets != len(subclass.game.infosets):
+#                     all_subclasses.extend(get_all_subclasses(subclass))
+#                     continue
 
-            if num_nodes is not None:
-                if not getattr(subclass.game, "is_tree", False):
-                    all_subclasses.extend(get_all_subclasses(subclass))
-                    continue
-                if num_nodes != len(subclass.game.nodes):
-                    all_subclasses.extend(get_all_subclasses(subclass))
-                    continue
+#             if num_nodes is not None:
+#                 if not getattr(subclass.game, "is_tree", False):
+#                     all_subclasses.extend(get_all_subclasses(subclass))
+#                     continue
+#                 if num_nodes != len(subclass.game.nodes):
+#                     all_subclasses.extend(get_all_subclasses(subclass))
+#                     continue
 
-            if (
-                num_contingencies is not None
-                and num_contingencies != len(subclass.game.contingencies)
-            ):
-                all_subclasses.extend(get_all_subclasses(subclass))
-                continue
+#             if (
+#                 num_contingencies is not None
+#                 and num_contingencies != len(subclass.game.contingencies)
+#             ):
+#                 all_subclasses.extend(get_all_subclasses(subclass))
+#                 continue
 
-            if is_const_sum is not None and is_const_sum != subclass.game.is_const_sum:
-                all_subclasses.extend(get_all_subclasses(subclass))
-                continue
+#             if is_const_sum is not None and is_const_sum != subclass.game.is_const_sum:
+#                 all_subclasses.extend(get_all_subclasses(subclass))
+#                 continue
 
-            if (
-                is_perfect_recall is not None
-                and is_perfect_recall != subclass.game.is_perfect_recall
-            ):
-                all_subclasses.extend(get_all_subclasses(subclass))
-                continue
+#             if (
+#                 is_perfect_recall is not None
+#                 and is_perfect_recall != subclass.game.is_perfect_recall
+#             ):
+#                 all_subclasses.extend(get_all_subclasses(subclass))
+#                 continue
 
-            if (
-                num_outcomes is not None
-                and num_outcomes != len(subclass.game.outcomes)
-            ):
-                all_subclasses.extend(get_all_subclasses(subclass))
-                continue
+#             if (
+#                 num_outcomes is not None
+#                 and num_outcomes != len(subclass.game.outcomes)
+#             ):
+#                 all_subclasses.extend(get_all_subclasses(subclass))
+#                 continue
 
-            if (
-                num_strategies is not None
-                and num_strategies != len(subclass.game.strategies)
-            ):
-                all_subclasses.extend(get_all_subclasses(subclass))
-                continue
+#             if (
+#                 num_strategies is not None
+#                 and num_strategies != len(subclass.game.strategies)
+#             ):
+#                 all_subclasses.extend(get_all_subclasses(subclass))
+#                 continue
 
-            if (
-                num_players is not None
-                and num_players != len(subclass.game.players)
-            ):
-                all_subclasses.extend(get_all_subclasses(subclass))
-                continue
+#             if (
+#                 num_players is not None
+#                 and num_players != len(subclass.game.players)
+#             ):
+#                 all_subclasses.extend(get_all_subclasses(subclass))
+#                 continue
 
-            # Check metadata filters
-            metadata_match = True
-            for key, value in metadata_filters.items():
-                if not hasattr(subclass, key) or getattr(subclass, key) != value:
-                    metadata_match = False
-                    break
+#             # Check metadata filters
+#             metadata_match = True
+#             for key, value in metadata_filters.items():
+#                 if not hasattr(subclass, key) or getattr(subclass, key) != value:
+#                     metadata_match = False
+#                     break
 
-            if metadata_match:
-                all_subclasses.append(subclass.__name__)
+#             if metadata_match:
+#                 all_subclasses.append(subclass.__name__)
 
-            all_subclasses.extend(get_all_subclasses(subclass))
-        return all_subclasses
-    # Sort alphabetically for consistency
-    return sorted(get_all_subclasses(CatalogGame))
+#             all_subclasses.extend(get_all_subclasses(subclass))
+#         return all_subclasses
+#     # Sort alphabetically for consistency
+#     return sorted(get_all_subclasses(CatalogGame))
 
 
 # _CATALOG_YAML = Path(__file__).parent / "catalog.yml"
