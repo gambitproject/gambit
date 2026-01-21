@@ -4,7 +4,8 @@ import inspect
 from pathlib import Path
 
 # import yaml
-from ..gambit import Game, read_efg, read_nfg
+# from ..gambit import Game, read_efg, read_nfg
+import pygambit as gbt
 
 _GAMEFILES_DIR = Path(__file__).parent.parent.parent.parent / "contrib/games"
 
@@ -16,22 +17,22 @@ class CatalogGame:
     Calling any subclass will return an instance of the corresponding game.
     """
 
-    game: Game | None = None
+    game: gbt.Game | None = None
     """Cached ``Game`` instance. Overwritten on each instantiation."""
 
-    def __new__(cls, *args, **kwargs) -> Game:
+    def __new__(cls, *args, **kwargs) -> gbt.Game:
         """Create a game instance by calling the _game() method."""
         cls.game = cls._game(*args, **kwargs)
         cls._extract_description(cls.game)
         return cls.game
 
     @staticmethod
-    def _game() -> Game:
+    def _game() -> gbt.Game:
         """Override this method in subclasses to define the game."""
         raise NotImplementedError("Subclasses must implement _game() method")
 
     @classmethod
-    def _extract_description(cls, game: Game) -> None:
+    def _extract_description(cls, game: gbt.Game) -> None:
         """Extract game description from docstring and apply to game."""
         cleaned_docstring = ""
         if cls.__doc__:
@@ -62,13 +63,13 @@ class CatalogGameFromContrib(CatalogGame):
     game_file: str
     """Filename of the game file in contrib/games directory."""
 
-    def __new__(cls) -> Game:
+    def __new__(cls) -> gbt.Game:
         if cls.game is None:
             cls.game = cls._load_game()
         return cls.game
 
     @classmethod
-    def _load_game(cls) -> Game:
+    def _load_game(cls) -> gbt.Game:
         """Load the game from file."""
         if not hasattr(cls, "game_file") or cls.game_file is None:
             raise TypeError(f"{cls.__name__} must define 'game_file' class attribute")
@@ -77,11 +78,11 @@ class CatalogGameFromContrib(CatalogGame):
         file_path = _GAMEFILES_DIR / cls.game_file
 
         if game_type == "nfg":
-            return read_nfg(str(file_path))
+            return gbt.read_nfg(str(file_path))
         elif game_type == "efg":
-            return read_efg(str(file_path))
+            return gbt.read_efg(str(file_path))
         else:
-            raise ValueError(f"Game file extension must be 'nfg' or 'efg', got '{game_type}'")
+            raise ValueError(f"gbt.Game file extension must be 'nfg' or 'efg', got '{game_type}'")
 
     def __init_subclass__(cls, **kwargs):
         """Validate and extract metadata when subclass is defined."""
