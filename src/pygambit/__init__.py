@@ -29,7 +29,7 @@ from . import (  # noqa: F401
     supports,  # noqa: F401
 )
 
-import importlib.metadata  # noqa: I001
+import importlib.metadata
 
 try:
     __version__ = importlib.metadata.version("pygambit")
