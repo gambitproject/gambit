@@ -29,12 +29,6 @@ from . import (  # noqa: F401
     supports,  # noqa: F401
 )
 
-# Import manually coded games to ensure they are registered in the catalog
-# after catalog module is fully initialized (avoid circular import issues)
-# from .catalog.catalog import _load_coded_games
-
-# _load_coded_games()
-
 try:
     __version__ = importlib.metadata.version("pygambit")
 except importlib.metadata.PackageNotFoundError:
