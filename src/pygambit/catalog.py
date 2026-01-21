@@ -1,5 +1,6 @@
 import inspect
 import sys
+from importlib.resources import files
 from pathlib import Path
 
 import yaml
@@ -248,12 +249,8 @@ def games(
     return sorted(get_all_subclasses(CatalogGame))
 
 
-_CATALOG_YAML = Path(__file__).parent / "catalog.yml"
-
-
-def _load_catalog_from_yaml(path: Path) -> dict[str, dict]:
-    if not path.exists():
-        raise FileNotFoundError(f"Catalog YAML not found: {path}")
+def _load_catalog_from_yaml() -> dict[str, dict]:
+    path = files(__package__) / "catalog.yml"
     with path.open("r", encoding="utf-8") as f:
         return yaml.safe_load(f) or {}
 
@@ -318,7 +315,7 @@ def _generate_contrib_game_classes(catalog: dict[str, dict]) -> None:
 
 
 # Generate classes at import time
-_catalog_data = _load_catalog_from_yaml(_CATALOG_YAML)
+_catalog_data = _load_catalog_from_yaml()
 _generate_contrib_game_classes(_catalog_data)
 # _load_coded_games()
 
