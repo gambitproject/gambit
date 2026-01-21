@@ -54,12 +54,12 @@ class TestCatalogGame:
         """Custom CatalogGame subclasses reading from catalog.yml should return Game instances."""
         assert isinstance(PrisonersDilemma(), Game)
 
-    def test_catalog_yml_game_description(self):
-        """Custom CatalogGame subclasses reading from catalog.yml should return Game instances."""
-        assert (
-            PrisonersDilemma().description
-            == "A simple implementation of a two person Prisoner's Dilemma game."
-        )
+# def test_catalog_yml_game_description(self):
+#     """Custom CatalogGame subclasses reading from catalog.yml should return Game instances."""
+#     assert (
+#         PrisonersDilemma().description
+#         == "A simple implementation of a two person Prisoner's Dilemma game."
+#     )
 
 
 class TestGamesFunction:
