@@ -19,7 +19,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 #
-import importlib.metadata  # noqa: I001
+
 from .gambit import *  # noqa: F401,F403,I001
 
 from . import (  # noqa: F401
@@ -28,6 +28,8 @@ from . import (  # noqa: F401
     qre,  # noqa: F401
     supports,  # noqa: F401
 )
+
+import importlib.metadata  # noqa: I001
 
 try:
     __version__ = importlib.metadata.version("pygambit")
