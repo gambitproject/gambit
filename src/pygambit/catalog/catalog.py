@@ -47,6 +47,10 @@ class CatalogGame:
         if cls.__name__ == "CatalogGameFromContrib" or issubclass(cls, CatalogGameFromContrib):
             return
 
+        # Load game and extract metadata immediately when class is defined
+        cls.game = cls._game()
+        cls._extract_description(cls.game)
+
 
 class CatalogGameFromContrib(CatalogGame):
     """
@@ -80,8 +84,12 @@ class CatalogGameFromContrib(CatalogGame):
             raise ValueError(f"Game file extension must be 'nfg' or 'efg', got '{game_type}'")
 
     def __init_subclass__(cls, **kwargs):
-        """Validate metadata when subclass is defined."""
+        """Validate and extract metadata when subclass is defined."""
         super().__init_subclass__(**kwargs)
+
+        # Load game and extract metadata immediately when class is defined
+        cls.game = cls._load_game()
+        cls._extract_description(cls.game)
 
 
 def games(
@@ -136,8 +144,8 @@ def games(
     >>> games(x=1)  # Games with a custom metadata field 'x' equal to 1
     >>> games(is_tree=True, num_players=2)  # 2-player extensive-form games
     """
-    # Ensure all games are loaded
-    _ensure_catalog_loaded()
+    # Import manually coded games to ensure they are registered in the catalog
+    _load_coded_games()
 
     # Filter by extensive-form if filtering by tree-specific attributes
     if (
@@ -156,19 +164,6 @@ def games(
             if subclass.__name__ in ["CatalogGameFromContrib"]:
                 all_subclasses.extend(get_all_subclasses(subclass))
                 continue
-
-            # Ensure game is instantiated before filtering
-            if subclass.game is None:
-                try:
-                    if issubclass(subclass, CatalogGameFromContrib):
-                        subclass.game = subclass._load_game()
-                    else:
-                        subclass.game = subclass._game()
-                    subclass._extract_description(subclass.game)
-                except Exception:
-                    # Skip games that fail to load
-                    all_subclasses.extend(get_all_subclasses(subclass))
-                    continue
 
             if is_tree is not None and is_tree != subclass.game.is_tree:
                 all_subclasses.extend(get_all_subclasses(subclass))
@@ -255,27 +250,6 @@ def games(
 
 _CATALOG_YAML = Path(__file__).parent / "catalog.yml"
 
-_catalog_initialized = False
-_catalog_initializing = False
-
-
-def _ensure_catalog_loaded():
-    """Ensure both YAML and coded games are loaded."""
-    global _catalog_initialized, _catalog_initializing
-    if _catalog_initialized:
-        return
-    if _catalog_initializing:
-        return  # Already loading, prevent re-entrance
-
-    _catalog_initializing = True
-    try:
-        _catalog_data = _load_catalog_from_yaml(_CATALOG_YAML)
-        _generate_contrib_game_classes(_catalog_data)
-        _load_coded_games()
-        _catalog_initialized = True
-    finally:
-        _catalog_initializing = False
-
 
 def _load_catalog_from_yaml(path: Path) -> dict[str, dict]:
     if not path.exists():
@@ -341,3 +315,8 @@ def _load_coded_games():
                 globals()[name] = obj
 
     _coded_games_loaded = True
+
+
+# Generate classes at import time
+_catalog_data = _load_catalog_from_yaml(_CATALOG_YAML)
+_generate_contrib_game_classes(_catalog_data)
