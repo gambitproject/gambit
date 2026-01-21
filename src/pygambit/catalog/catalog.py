@@ -1,9 +1,9 @@
 import inspect
-import sys
+
+# import sys
 from pathlib import Path
 
-import yaml
-
+# import yaml
 from ..gambit import Game, read_efg, read_nfg
 
 _GAMEFILES_DIR = Path(__file__).parent.parent.parent.parent / "contrib/games"
@@ -248,52 +248,52 @@ def games(
     return sorted(get_all_subclasses(CatalogGame))
 
 
-_CATALOG_YAML = Path(__file__).parent / "catalog.yml"
+# _CATALOG_YAML = Path(__file__).parent / "catalog.yml"
 
 
-def _load_catalog_from_yaml(path: Path) -> dict[str, dict]:
-    if not path.exists():
-        raise FileNotFoundError(f"Catalog YAML not found: {path}")
-    with path.open("r", encoding="utf-8") as f:
-        return yaml.safe_load(f) or {}
+# def _load_catalog_from_yaml(path: Path) -> dict[str, dict]:
+#     if not path.exists():
+#         raise FileNotFoundError(f"Catalog YAML not found: {path}")
+#     with path.open("r", encoding="utf-8") as f:
+#         return yaml.safe_load(f) or {}
 
 
-def _generate_contrib_game_classes(catalog: dict[str, dict]) -> None:
-    """
-    Dynamically generate CatalogGameFromContrib subclasses from YAML
-    and attach them to this module's namespace.
-    """
-    module = sys.modules[__name__]
+# def _generate_contrib_game_classes(catalog: dict[str, dict]) -> None:
+#     """
+#     Dynamically generate CatalogGameFromContrib subclasses from YAML
+#     and attach them to this module's namespace.
+#     """
+#     module = sys.modules[__name__]
 
-    for class_name, entry in catalog.items():
-        if "file" not in entry:
-            raise ValueError(f"Missing 'file' for catalog entry '{class_name}'")
+#     for class_name, entry in catalog.items():
+#         if "file" not in entry:
+#             raise ValueError(f"Missing 'file' for catalog entry '{class_name}'")
 
-        game_file = entry["file"]
-        metadata = entry.get("metadata", {})
+#         game_file = entry["file"]
+#         metadata = entry.get("metadata", {})
 
-        # Build class attributes dict
-        class_attrs = {
-            "game_file": game_file,
-            "__module__": __name__,
-            "__doc__": entry.get("description", None),
-        }
+#         # Build class attributes dict
+#         class_attrs = {
+#             "game_file": game_file,
+#             "__module__": __name__,
+#             "__doc__": entry.get("description", None),
+#         }
 
-        # Add metadata fields as class attributes
-        if metadata and "valid_game" in metadata and metadata["valid_game"] is False:
-            pass  # Marked as invalid game, do not create class
-        else:
-            if metadata:
-                for key, value in metadata.items():
-                    class_attrs[key] = value
+#         # Add metadata fields as class attributes
+#         if metadata and "valid_game" in metadata and metadata["valid_game"] is False:
+#             pass  # Marked as invalid game, do not create class
+#         else:
+#             if metadata:
+#                 for key, value in metadata.items():
+#                     class_attrs[key] = value
 
-            cls = type(
-                class_name,
-                (CatalogGameFromContrib,),
-                class_attrs,
-            )
+#             cls = type(
+#                 class_name,
+#                 (CatalogGameFromContrib,),
+#                 class_attrs,
+#             )
 
-            setattr(module, class_name, cls)
+#             setattr(module, class_name, cls)
 
 
 # _coded_games_loaded = False
@@ -318,5 +318,5 @@ def _generate_contrib_game_classes(catalog: dict[str, dict]) -> None:
 
 
 # Generate classes at import time
-_catalog_data = _load_catalog_from_yaml(_CATALOG_YAML)
-_generate_contrib_game_classes(_catalog_data)
+# _catalog_data = _load_catalog_from_yaml(_CATALOG_YAML)
+# _generate_contrib_game_classes(_catalog_data)
