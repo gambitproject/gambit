@@ -1,8 +1,7 @@
-# from ..gambit import Game
-# from .catalog import CatalogGame
+# import pygambit as gbt
 
 
-# class OneShotTrust(CatalogGame):
+# class OneShotTrust(gbt.catalog.CatalogGame):
 #     """
 #     The unique_NE_variant makes Trust a dominant strategy, replacing the
 #     non-singleton equilibrium component from the standard version of the game
@@ -15,7 +14,7 @@
 
 #     @staticmethod
 #     def _game(unique_NE_variant: bool = False):
-#         g = Game.new_tree(
+#         g = gbt.Game.new_tree(
 #             players=["Buyer", "Seller"], title="One-shot trust game, after Kreps (1990)"
 #         )
 #         g.append_move(g.root, "Buyer", ["Trust", "Not trust"])
