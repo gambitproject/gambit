@@ -39,7 +39,10 @@ class TestCatalogGame:
 
     def test_can_get_game_description_from_docstring(self):
         """CatalogGame should get description from docstring over game description."""
-        assert ExampleGameWithDocstring().description == "Alternative test game description."
+        assert (
+            "Alternative test game description." in
+            ExampleGameWithDocstring().description
+        )
 
     def test_catalog_py_game_with_parameters(self):
         """
@@ -56,8 +59,8 @@ class TestCatalogGame:
     def test_catalog_yml_game_description(self):
         """Custom CatalogGame subclasses reading from catalog.yml should return Game instances."""
         assert (
+            "A simple implementation of a two person Prisoner's Dilemma game." in
             gbt.catalog.PrisonersDilemma().description
-            == "A simple implementation of a two person Prisoner's Dilemma game."
         )
 
 

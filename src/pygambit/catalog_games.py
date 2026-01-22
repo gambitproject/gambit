@@ -26,6 +26,11 @@ class OneShotTrust(gbt.catalog.CatalogGame):
         -------
         gbt.Game
             The constructed extensive-form game.
+
+        Examples
+        --------
+        >>> OneShotTrust._game(unique_NE_variant=False) # Constructs the standard game
+        >>> OneShotTrust._game(unique_NE_variant=True) # Constructs the game with unique NE variant
         """
         g = gbt.Game.new_tree(
             players=["Buyer", "Seller"], title="One-shot trust game, after Kreps (1990)"

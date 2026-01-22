@@ -31,7 +31,11 @@ class CatalogGame:
 
     @staticmethod
     def _game() -> gbt.Game:
-        """Override this method in subclasses to define the game."""
+        """
+        Examples
+        --------
+        >>> {classname}()  # Gets the game instance
+        """
         raise NotImplementedError("Subclasses must implement _game() method")
 
     @classmethod
@@ -40,6 +44,14 @@ class CatalogGame:
         cleaned_docstring = ""
         if cls.__doc__:
             cleaned_docstring = inspect.cleandoc(cls.__doc__)
+            # If the class has a _game function, concatenate its docstring to the class docstring
+            game_docstring = inspect.getdoc(cls._game)
+            if game_docstring:
+                game_docstring = inspect.cleandoc(game_docstring)
+            # For games from file, sub in the class name
+            game_docstring = game_docstring.replace("{classname}", cls.__name__)
+            cleaned_docstring += "\n\n" + game_docstring
+            cls.__doc__ = cleaned_docstring
         if len(cleaned_docstring) > 0:
             game.description = cleaned_docstring
 
