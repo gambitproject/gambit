@@ -77,8 +77,6 @@ def update_api_rst(new_classes: list) -> None:
     with open(_API_RST, "w", encoding="utf-8") as f:
         f.write(new_content)
 
-    print(f"Updated {_API_RST} with new catalog game names")
-
 
 if __name__ == "__main__":
     # Use ruamel.yaml to preserve comments
@@ -128,5 +126,7 @@ if __name__ == "__main__":
     update_api_rst(new_classes=list(new_entries.keys()))
 
     print(f"Added {new_entries_counter} new entries to the catalog")
-    print(f"Output written to: {_CATALOG_YAML}")
+    if new_entries_counter > 0:
+        print(f"Updated: {_CATALOG_YAML}")
+        print(f"Updated {_API_RST}")
     print("Done.")
