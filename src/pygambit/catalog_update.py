@@ -8,7 +8,7 @@ from ruamel.yaml import YAML
 import pygambit as gbt
 
 _CATALOG_YAML = Path(__file__).parent / "catalog.yml"
-_GAMEFILES_DIR = Path(__file__).parent / "contrib/games"
+_GAMEFILES_DIR = Path(__file__).parent / "catalog_game_files"
 _API_RST = Path(__file__).parent.parent.parent / "doc/pygambit.api.rst"
 _MAKEFILE_AM = Path(__file__).parent.parent.parent / "Makefile.am"
 
@@ -91,7 +91,7 @@ def update_makefile():
     for entry in catalog.values():
         file_name = entry.get("file")
         if file_name:
-            game_files.append(f"src/pygambit/contrib/games/{file_name}")
+            game_files.append(f"src/pygambit/catalog_game_files/{file_name}")
 
     game_files.sort()
 
@@ -134,8 +134,8 @@ if __name__ == "__main__":
     efg_files = list(_GAMEFILES_DIR.rglob("*.efg"))
     nfg_files = list(_GAMEFILES_DIR.rglob("*.nfg"))
 
-    print(f"Found {len(efg_files)} .efg files in contrib/games")
-    print(f"Found {len(nfg_files)} .nfg files in contrib/games")
+    print(f"Found {len(efg_files)} .efg files in catalog_game_files")
+    print(f"Found {len(nfg_files)} .nfg files in catalog_game_files")
 
     all_files = sorted(efg_files + nfg_files)
 
@@ -144,7 +144,7 @@ if __name__ == "__main__":
         catalog = yaml.load(f) or {}
     file_names = [entry["file"] for entry in catalog.values() if "file" in entry]
 
-    # Iterate through contrib/games and update the catalog
+    # Iterate through catalog_game_files and update the catalog
     # with new/missing entries
     new_entries_counter = 0
     new_entries = {}

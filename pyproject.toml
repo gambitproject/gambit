@@ -91,7 +91,7 @@ include-package-data = true
 [tool.setuptools.package-data]
 pygambit = [
     "catalog.yml",
-    "contrib/games/*",
+    "catalog_game_files/*",
 ]
 
 [tool.setuptools.dynamic]

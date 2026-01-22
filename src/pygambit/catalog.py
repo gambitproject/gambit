@@ -6,7 +6,7 @@ import yaml
 
 import pygambit as gbt
 
-_GAMEFILES_DIR = files(__package__) / "contrib" / "games"
+_GAMEFILES_DIR = files(__package__) / "catalog_game_files"
 
 
 class CatalogGame:
@@ -47,8 +47,8 @@ class CatalogGame:
         """Extract metadata when subclass is defined (if not a file-based game)."""
         super().__init_subclass__(**kwargs)
 
-        # Skip if this is CatalogGameFromContrib or its subclasses
-        if cls.__name__ == "CatalogGameFromContrib" or issubclass(cls, CatalogGameFromContrib):
+        # Skip if this is CatalogGameFromFile or its subclasses
+        if cls.__name__ == "CatalogGameFromFile" or issubclass(cls, CatalogGameFromFile):
             return
 
         # Load game and extract metadata immediately when class is defined
@@ -56,7 +56,7 @@ class CatalogGame:
         cls._extract_description(cls.game)
 
 
-class CatalogGameFromContrib(CatalogGame):
+class CatalogGameFromFile(CatalogGame):
     """
     Base class for catalog games loaded from files.
     This class serves as a template for specific games in the catalog.
@@ -64,7 +64,7 @@ class CatalogGameFromContrib(CatalogGame):
     """
 
     game_file: str
-    """Filename of the game file in contrib/games directory."""
+    """Filename of the game file in catalog_game_files directory."""
 
     def __new__(cls) -> gbt.Game:
         if getattr(cls, "game", None) is None:
@@ -167,8 +167,8 @@ def games(
         all_subclasses = []
         for subclass in cls.__subclasses__():
 
-            # Don't include CatalogGameFromContrib in result
-            if subclass.__name__ in ["CatalogGameFromContrib"]:
+            # Don't include CatalogGameFromFile in result
+            if subclass.__name__ in ["CatalogGameFromFile"]:
                 all_subclasses.extend(get_all_subclasses(subclass))
                 continue
 
@@ -261,9 +261,9 @@ def _load_catalog_from_yaml() -> dict[str, dict]:
         return yaml.safe_load(f) or {}
 
 
-def _generate_contrib_game_classes(catalog: dict[str, dict]) -> None:
+def _generate_game_classes_from_catalog(catalog: dict[str, dict]) -> None:
     """
-    Dynamically generate CatalogGameFromContrib subclasses from YAML
+    Dynamically generate CatalogGameFromFile subclasses from YAML
     and attach them to this module's namespace.
     """
     module = sys.modules[__name__]
@@ -292,7 +292,7 @@ def _generate_contrib_game_classes(catalog: dict[str, dict]) -> None:
 
             cls = type(
                 class_name,
-                (CatalogGameFromContrib,),
+                (CatalogGameFromFile,),
                 class_attrs,
             )
 
@@ -313,4 +313,4 @@ def load_coded_games():
 
 # Generate classes at import time
 _catalog_data = _load_catalog_from_yaml()
-_generate_contrib_game_classes(_catalog_data)
+_generate_game_classes_from_catalog(_catalog_data)

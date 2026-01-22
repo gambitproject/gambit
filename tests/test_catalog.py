@@ -101,10 +101,10 @@ class TestGamesFunction:
             assert game_class.test_suite is True
 
     def test_games_excludes_base_classes(self):
-        """games() should not include base classes like CatalogGameFromContrib."""
+        """games() should not include base classes like CatalogGameFromFile."""
         result = gbt.catalog.games()
         assert "CatalogGame" not in result
-        assert "CatalogGameFromContrib" not in result
+        assert "CatalogGameFromFile" not in result
 
     def test_games_includes_coded_games(self):
         """games() should include manually coded games."""
