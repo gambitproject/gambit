@@ -295,62 +295,18 @@ def _generate_contrib_game_classes(catalog: dict[str, dict]) -> None:
             setattr(module, class_name, cls)
 
 
-# _coded_games_loaded = False
-
-
-# def _load_coded_games():
-#     """Lazy load coded games."""
-#     global _coded_games_loaded
-#     if _coded_games_loaded:
-#         return
-
-#     from . import coded_games  # noqa: F401
-#     # Import all coded game classes into this module's namespace
-#     # so they are registered as CatalogGame subclasses
-#     for name in dir(coded_games):
-#         if not name.startswith("_"):
-#             obj = getattr(coded_games, name)
-#             if isinstance(obj, type) and issubclass(obj, CatalogGame):
-#                 globals()[name] = obj
-
-#     _coded_games_loaded = True
+def load_coded_games():
+    """
+    Lazy load coded games.
+    This function is called in __init__.py to load manually coded games.
+    """
+    for name in dir(gbt.catalog_games):
+        if not name.startswith("_"):
+            obj = getattr(gbt.catalog_games, name)
+            if isinstance(obj, type) and issubclass(obj, CatalogGame):
+                globals()[name] = obj
 
 
 # Generate classes at import time
 _catalog_data = _load_catalog_from_yaml()
 _generate_contrib_game_classes(_catalog_data)
-# _load_coded_games()
-
-# Temporarily include coded games here
-
-
-class OneShotTrust(CatalogGame):
-    """
-    The unique_NE_variant makes Trust a dominant strategy, replacing the
-    non-singleton equilibrium component from the standard version of the game
-    where the Buyer plays "Not Trust" and the seller can play any mixture with
-    < 0.5 probability on Honor with a unique NE where the Buyer plays Trust and
-    the Seller plays Abuse.
-    """
-
-    test_suite = True
-    """This game is included in the pygambit test suite."""
-
-    @staticmethod
-    def _game(unique_NE_variant: bool = False):
-        g = gbt.Game.new_tree(
-            players=["Buyer", "Seller"], title="One-shot trust game, after Kreps (1990)"
-        )
-        g.append_move(g.root, "Buyer", ["Trust", "Not trust"])
-        g.append_move(g.root.children[0], "Seller", ["Honor", "Abuse"])
-        g.set_outcome(g.root.children[0].children[0], g.add_outcome([1, 1], label="Trustworthy"))
-        if unique_NE_variant:
-            g.set_outcome(
-                g.root.children[0].children[1], g.add_outcome(["1/2", 2], label="Untrustworthy")
-            )
-        else:
-            g.set_outcome(
-                g.root.children[0].children[1], g.add_outcome([-1, 2], label="Untrustworthy")
-            )
-        g.set_outcome(g.root.children[1], g.add_outcome([0, 0], label="Opt-out"))
-        return g

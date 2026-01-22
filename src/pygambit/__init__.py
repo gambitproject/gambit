@@ -27,9 +27,15 @@ from . import (  # noqa: F401
     qre,  # noqa: F401
     supports,  # noqa: F401
     catalog,  # noqa: F401
+    catalog_games,
 )
 
 import importlib.metadata
+
+# Import all coded game classes from catalog_games
+# into this module's namespace
+# so they are registered as CatalogGame subclasses
+catalog.load_coded_games()
 
 try:
     __version__ = importlib.metadata.version("pygambit")
