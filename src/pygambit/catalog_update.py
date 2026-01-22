@@ -125,7 +125,7 @@ if __name__ == "__main__":
     # This includes games from coded_games.py as well as catalog.yml
     update_api_rst(new_classes=list(new_entries.keys()))
 
-    print(f"Added {new_entries_counter} new entries to the catalog")
+    print(f"Added {new_entries_counter} new entries to the catalog: ", list(new_entries.keys()))
     if new_entries_counter > 0:
         print(f"Updated: {_CATALOG_YAML}")
         print(f"Updated {_API_RST}")
