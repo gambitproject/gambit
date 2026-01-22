@@ -81,7 +81,7 @@ subsets of equilibria being found.
    Show intermediate output of the algorithm.  If this option is
    not specified, only the equilibria found are reported.
 
-Computing an equilibrium of :download:`e02.nfg <../contrib/games/e02.nfg>`,
+Computing an equilibrium of :download:`e02.nfg <../src/pygambit/catalog_game_files/e02.nfg>`,
 the reduced strategic form of the example in Figure 2 of Selten
 (International Journal of Game Theory, 1975)
 
