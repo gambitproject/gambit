@@ -151,8 +151,6 @@ def games(
     >>> games(x=1)  # Games with a custom metadata field 'x' equal to 1
     >>> games(is_tree=True, num_players=2)  # 2-player extensive-form games
     """
-    # Import manually coded games to ensure they are registered in the catalog
-    # _load_coded_games()
 
     # Filter by extensive-form if filtering by tree-specific attributes
     if (
