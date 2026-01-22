@@ -3,16 +3,30 @@ import pygambit as gbt
 
 class OneShotTrust(gbt.catalog.CatalogGame):
     """
-    The unique_NE_variant makes Trust a dominant strategy, replacing the
-    non-singleton equilibrium component from the standard version of the game
-    where the Buyer plays "Not Trust" and the seller can play any mixture with
-    < 0.5 probability on Honor with a unique NE where the Buyer plays Trust and
-    the Seller plays Abuse.
+    One-shot trust game with binary actions, originally from Kreps (1990).
     """
     test_suite = True
 
     @staticmethod
     def _game(unique_NE_variant: bool = False):
+        """
+        The unique_NE_variant makes Trust a dominant strategy, replacing the
+        non-singleton equilibrium component from the standard version of the game
+        where the Buyer plays "Not Trust" and the seller can play any mixture with
+        < 0.5 probability on Honor with a unique NE where the Buyer plays Trust and
+        the Seller plays Abuse.
+
+        Parameters
+        ----------
+        unique_NE_variant : bool, optional
+            Whether to modify the game so that it has a unique Nash equilibrium.
+            Defaults to False.
+
+        Returns
+        -------
+        gbt.Game
+            The constructed extensive-form game.
+        """
         g = gbt.Game.new_tree(
             players=["Buyer", "Seller"], title="One-shot trust game, after Kreps (1990)"
         )
