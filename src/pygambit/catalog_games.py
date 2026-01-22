@@ -10,7 +10,6 @@ class OneShotTrust(gbt.catalog.CatalogGame):
     the Seller plays Abuse.
     """
     test_suite = True
-    """This game is included in the pygambit test suite."""
 
     @staticmethod
     def _game(unique_NE_variant: bool = False):

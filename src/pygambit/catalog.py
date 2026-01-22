@@ -19,6 +19,10 @@ class CatalogGame:
     game: gbt.Game | None = None
     """Cached ``Game`` instance. Overwritten on each instantiation."""
 
+    # Metadata fields
+    test_suite: bool = False
+    """Indicates if this game is included in the pygambit test suite."""
+
     def __new__(cls, *args, **kwargs) -> gbt.Game:
         """Create a game instance by calling the _game() method."""
         cls.game = cls._game(*args, **kwargs)
