@@ -30,9 +30,13 @@ def make_class_name(filename: str) -> str:
     return name
 
 
-def update_api_rst() -> None:
+def update_api_rst(new_classes: list) -> None:
     """Update the Game catalog section in pygambit.api.rst with all class names."""
     _all_catalog_classes = gbt.catalog.games()
+    for class_name in new_classes:
+        if class_name not in _all_catalog_classes:
+            _all_catalog_classes.append(class_name)
+    _all_catalog_classes.sort()
     with open(_API_RST, encoding="utf-8") as f:
         content = f.read()
 
@@ -121,7 +125,7 @@ if __name__ == "__main__":
 
     # Update the RST documentation with the new full catalog
     # This includes games from coded_games.py as well as catalog.yml
-    update_api_rst()
+    update_api_rst(new_classes=list(new_entries.keys()))
 
     print(f"Added {new_entries_counter} new entries to the catalog")
     print(f"Output written to: {_CATALOG_YAML}")
