@@ -247,6 +247,40 @@ EXTRA_DIST = \
 	src/pygambit/contrib/games/yamamoto.nfg \
 	src/pygambit/contrib/games/zero.nfg
 
+core_SOURCES = \
+    src/core/core.h \
+    src/core/util.h \
+	src/core/array.h \
+	src/core/vector.h \
+	src/core/recarray.h \
+	src/core/matrix.h \
+	src/core/integer.cc \
+	src/core/integer.h \
+	src/core/rational.cc \
+	src/core/rational.h \
+	src/core/matrix.cc \
+	src/core/function.cc \
+	src/core/function.h \
+	src/core/tinyxml.cc \
+	src/core/tinyxmlerror.cc \
+	src/core/tinyxmlparser.cc \
+	src/core/tinyxml.h
+
+agg_SOURCES = \
+	src/games/gameagg.cc \
+	src/games/gameagg.h \
+	src/games/gamebagg.cc \
+	src/games/gamebagg.h \
+	src/games/agg/gray.h \
+	src/games/agg/agg.cc \
+    src/games/agg/agg.h \
+	src/games/agg/bagg.cc \
+	src/games/agg/bagg.h \
+	src/games/agg/proj_func.h \
+	src/games/agg/trie_map.h \
+    src/games/agg/trie_map.imp \
+    src/games/agg/trie_map.cc
+
 game_SOURCES = \
 	src/gambit.h \
 	src/games/gameseq.cc \
