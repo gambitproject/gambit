@@ -8,7 +8,7 @@ from ruamel.yaml import YAML
 import pygambit as gbt
 
 _CATALOG_YAML = Path(__file__).parent / "catalog.yml"
-_GAMEFILES_DIR = Path(__file__).parent.parent.parent / "contrib/games"
+_GAMEFILES_DIR = Path(__file__).parent / "contrib/games"
 _API_RST = Path(__file__).parent.parent.parent / "doc/pygambit.api.rst"
 
 
