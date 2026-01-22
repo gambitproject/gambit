@@ -10,6 +10,7 @@ import pygambit as gbt
 _CATALOG_YAML = Path(__file__).parent / "catalog.yml"
 _GAMEFILES_DIR = Path(__file__).parent / "contrib/games"
 _API_RST = Path(__file__).parent.parent.parent / "doc/pygambit.api.rst"
+_MAKEFILE_AM = Path(__file__).parent.parent.parent / "Makefile.am"
 
 
 def make_class_name(filename: str) -> str:
@@ -78,6 +79,44 @@ def update_api_rst(new_classes: list) -> None:
         f.write(new_content)
 
 
+def update_makefile():
+    """Update the Makefile.am with all game files from the catalog."""
+    with open(_CATALOG_YAML, encoding="utf-8") as f:
+        yaml = YAML()
+        catalog = yaml.load(f) or {}
+
+    game_files = []
+    for entry in catalog.values():
+        file_name = entry.get("file")
+        if file_name:
+            game_files.append(f"src/pygambit/contrib/games/{file_name}")
+
+    game_files.sort()
+
+    with open(_MAKEFILE_AM, encoding="utf-8") as f:
+        content = f.readlines()
+
+    with open(_MAKEFILE_AM, "w", encoding="utf-8") as f:
+        in_gamefiles_section = False
+        for line in content:
+            # Add to the EXTRA_DIST after the README.rst line
+            if line.startswith("	src/README.rst \\"):
+                in_gamefiles_section = True
+                f.write("	src/README.rst \\\n")
+                for gf in game_files:
+                    if gf == game_files[-1]:
+                        f.write(f"\t{gf}\n")
+                    else:
+                        f.write(f"\t{gf} \\\n")
+                f.write("\n")
+            elif in_gamefiles_section:
+                if line.strip() == "":
+                    in_gamefiles_section = False
+                continue  # Skip old gamefiles lines
+            else:
+                f.write(line)
+
+
 if __name__ == "__main__":
     # Use ruamel.yaml to preserve comments
     yaml = YAML()
@@ -125,8 +164,12 @@ if __name__ == "__main__":
     # This includes games from coded_games.py as well as catalog.yml
     update_api_rst(new_classes=list(new_entries.keys()))
 
+    # Update the Makefile.am with all game files
+    update_makefile()
+
     print(f"Added {new_entries_counter} new entries to the catalog: ", list(new_entries.keys()))
     if new_entries_counter > 0:
         print(f"Updated: {_CATALOG_YAML}")
         print(f"Updated {_API_RST}")
+        print(f"Updated {_MAKEFILE_AM}")
     print("Done.")

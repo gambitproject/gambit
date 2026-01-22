@@ -100,14 +100,27 @@ EXTRA_DIST = \
 	src/gui/bitmaps/zoomout.xpm \
 	src/gui/bitmaps/zoom1.xpm \
 	src/gui/bitmaps/gambitrc.rc \
+	src/README.rst \
 	src/pygambit/contrib/games/2s2x2x2.efg \
 	src/pygambit/contrib/games/2smp.efg \
+	src/pygambit/contrib/games/2x2.nfg \
+	src/pygambit/contrib/games/2x2a.nfg \
+	src/pygambit/contrib/games/2x2const.nfg \
+	src/pygambit/contrib/games/2x2x2-nau.nfg \
 	src/pygambit/contrib/games/2x2x2.efg \
+	src/pygambit/contrib/games/2x2x2.nfg \
+	src/pygambit/contrib/games/2x2x2x2.nfg \
+	src/pygambit/contrib/games/2x2x2x2x2.nfg \
+	src/pygambit/contrib/games/3x3x3.nfg \
 	src/pygambit/contrib/games/4cards.efg \
+	src/pygambit/contrib/games/5x4x3.nfg \
+	src/pygambit/contrib/games/8x2x2.nfg \
+	src/pygambit/contrib/games/8x8.nfg \
 	src/pygambit/contrib/games/artist1.efg \
 	src/pygambit/contrib/games/artist2.efg \
 	src/pygambit/contrib/games/badgame1.efg \
 	src/pygambit/contrib/games/badgame2.efg \
+	src/pygambit/contrib/games/bagwell.efg \
 	src/pygambit/contrib/games/bayes1a.efg \
 	src/pygambit/contrib/games/bayes2a.efg \
 	src/pygambit/contrib/games/bcp2.efg \
@@ -120,6 +133,7 @@ EXTRA_DIST = \
 	src/pygambit/contrib/games/bhg5.efg \
 	src/pygambit/contrib/games/caro2.efg \
 	src/pygambit/contrib/games/cent2.efg \
+	src/pygambit/contrib/games/cent2.nfg \
 	src/pygambit/contrib/games/cent3.efg \
 	src/pygambit/contrib/games/cent4.efg \
 	src/pygambit/contrib/games/cent6.efg \
@@ -127,31 +141,48 @@ EXTRA_DIST = \
 	src/pygambit/contrib/games/centcs6.efg \
 	src/pygambit/contrib/games/condjury.efg \
 	src/pygambit/contrib/games/coord2.efg \
+	src/pygambit/contrib/games/coord2.nfg \
 	src/pygambit/contrib/games/coord2ts.efg \
 	src/pygambit/contrib/games/coord3.efg \
+	src/pygambit/contrib/games/coord3.nfg \
+	src/pygambit/contrib/games/coord333.nfg \
 	src/pygambit/contrib/games/coord4.efg \
+	src/pygambit/contrib/games/coord4.nfg \
 	src/pygambit/contrib/games/cross.efg \
 	src/pygambit/contrib/games/cs.efg \
+	src/pygambit/contrib/games/csg1.nfg \
+	src/pygambit/contrib/games/csg2.nfg \
+	src/pygambit/contrib/games/csg3.nfg \
+	src/pygambit/contrib/games/csg4.nfg \
+	src/pygambit/contrib/games/deg1.nfg \
+	src/pygambit/contrib/games/deg2.nfg \
 	src/pygambit/contrib/games/e01.efg \
+	src/pygambit/contrib/games/e01.nfg \
 	src/pygambit/contrib/games/e02.efg \
+	src/pygambit/contrib/games/e02.nfg \
 	src/pygambit/contrib/games/e03.efg \
 	src/pygambit/contrib/games/e04.efg \
+	src/pygambit/contrib/games/e04.nfg \
 	src/pygambit/contrib/games/e05.efg \
 	src/pygambit/contrib/games/e06.efg \
 	src/pygambit/contrib/games/e07.efg \
+	src/pygambit/contrib/games/e07.nfg \
 	src/pygambit/contrib/games/e08.efg \
 	src/pygambit/contrib/games/e09.efg \
-	src/pygambit/contrib/games/e10a.efg \
 	src/pygambit/contrib/games/e10.efg \
+	src/pygambit/contrib/games/e10a.efg \
 	src/pygambit/contrib/games/e13.efg \
 	src/pygambit/contrib/games/e16.efg \
 	src/pygambit/contrib/games/e17.efg \
 	src/pygambit/contrib/games/e18.efg \
 	src/pygambit/contrib/games/g1.efg \
+	src/pygambit/contrib/games/g1.nfg \
 	src/pygambit/contrib/games/g2.efg \
+	src/pygambit/contrib/games/g2.nfg \
 	src/pygambit/contrib/games/g3.efg \
-	src/pygambit/contrib/games/holdout7.efg \
+	src/pygambit/contrib/games/g3.nfg \
 	src/pygambit/contrib/games/holdout.efg \
+	src/pygambit/contrib/games/holdout7.efg \
 	src/pygambit/contrib/games/hs1.efg \
 	src/pygambit/contrib/games/jury_mr.efg \
 	src/pygambit/contrib/games/jury_un.efg \
@@ -159,6 +190,9 @@ EXTRA_DIST = \
 	src/pygambit/contrib/games/km2.efg \
 	src/pygambit/contrib/games/km3.efg \
 	src/pygambit/contrib/games/km6.efg \
+	src/pygambit/contrib/games/loopback.nfg \
+	src/pygambit/contrib/games/mixdom.nfg \
+	src/pygambit/contrib/games/mixdom2.nfg \
 	src/pygambit/contrib/games/montyhal.efg \
 	src/pygambit/contrib/games/my_2-1.efg \
 	src/pygambit/contrib/games/my_2-4.efg \
@@ -170,111 +204,48 @@ EXTRA_DIST = \
 	src/pygambit/contrib/games/my_3-3e.efg \
 	src/pygambit/contrib/games/my_3-4.efg \
 	src/pygambit/contrib/games/myerson.efg \
-	src/pygambit/contrib/games/nim7.efg \
+	src/pygambit/contrib/games/myerson_fig_4_2.efg \
 	src/pygambit/contrib/games/nim.efg \
+	src/pygambit/contrib/games/nim7.efg \
+	src/pygambit/contrib/games/oneill.nfg \
+	src/pygambit/contrib/games/palf.efg \
 	src/pygambit/contrib/games/palf2.efg \
 	src/pygambit/contrib/games/palf3.efg \
-	src/pygambit/contrib/games/palf.efg \
-	src/pygambit/contrib/games/poker2.efg \
-	src/pygambit/contrib/games/poker.efg \
-	src/pygambit/contrib/games/pvw2.efg \
-	src/pygambit/contrib/games/pvw.efg \
-	src/pygambit/contrib/games/sh3.efg \
-	src/pygambit/contrib/games/sww1.efg \
-	src/pygambit/contrib/games/sww2.efg \
-	src/pygambit/contrib/games/sww3.efg \
-	src/pygambit/contrib/games/tim.efg \
-	src/pygambit/contrib/games/ttt.efg \
-	src/pygambit/contrib/games/vd.efg \
-	src/pygambit/contrib/games/w_ex1.efg \
-	src/pygambit/contrib/games/w_ex2.efg \
-	src/pygambit/contrib/games/wilson1.efg \
-	src/pygambit/contrib/games/work1.efg \
-	src/pygambit/contrib/games/work2.efg \
-	src/pygambit/contrib/games/work3.efg \
-	src/pygambit/contrib/games/2x2a.nfg \
-	src/pygambit/contrib/games/2x2const.nfg \
-	src/pygambit/contrib/games/2x2.nfg \
-	src/pygambit/contrib/games/2x2x2.nfg \
-	src/pygambit/contrib/games/2x2x2x2.nfg \
-	src/pygambit/contrib/games/2x2x2x2x2.nfg \
-	src/pygambit/contrib/games/3x3x3.nfg \
-	src/pygambit/contrib/games/5x4x3.nfg \
-	src/pygambit/contrib/games/8x2x2.nfg \
-	src/pygambit/contrib/games/8x8.nfg \
-	src/pygambit/contrib/games/cent2.nfg \
-	src/pygambit/contrib/games/coord2.nfg \
-	src/pygambit/contrib/games/coord333.nfg \
-	src/pygambit/contrib/games/coord3.nfg \
-	src/pygambit/contrib/games/coord4.nfg \
-	src/pygambit/contrib/games/csg1.nfg \
-	src/pygambit/contrib/games/csg2.nfg \
-	src/pygambit/contrib/games/csg3.nfg \
-	src/pygambit/contrib/games/csg4.nfg \
-	src/pygambit/contrib/games/deg1.nfg \
-	src/pygambit/contrib/games/deg2.nfg \
-	src/pygambit/contrib/games/e01.nfg \
-	src/pygambit/contrib/games/e02.nfg \
-	src/pygambit/contrib/games/e04.nfg \
-	src/pygambit/contrib/games/e07.nfg \
-	src/pygambit/contrib/games/g1.nfg \
-	src/pygambit/contrib/games/g2.nfg \
-	src/pygambit/contrib/games/g3.nfg \
-	src/pygambit/contrib/games/loopback.nfg \
-	src/pygambit/contrib/games/mixdom2.nfg \
-	src/pygambit/contrib/games/mixdom.nfg \
-	src/pygambit/contrib/games/oneill.nfg \
+	src/pygambit/contrib/games/pbride.efg \
 	src/pygambit/contrib/games/pd.nfg \
 	src/pygambit/contrib/games/perfect1.nfg \
 	src/pygambit/contrib/games/perfect2.nfg \
 	src/pygambit/contrib/games/perfect3.nfg \
+	src/pygambit/contrib/games/poker.efg \
 	src/pygambit/contrib/games/poker.nfg \
+	src/pygambit/contrib/games/poker2.efg \
+	src/pygambit/contrib/games/pvw.efg \
+	src/pygambit/contrib/games/pvw2.efg \
+	src/pygambit/contrib/games/sh3.efg \
 	src/pygambit/contrib/games/sh3.nfg \
+	src/pygambit/contrib/games/spence.efg \
 	src/pygambit/contrib/games/stengel.nfg \
+	src/pygambit/contrib/games/sww1.efg \
 	src/pygambit/contrib/games/sww1.nfg \
+	src/pygambit/contrib/games/sww2.efg \
+	src/pygambit/contrib/games/sww3.efg \
+	src/pygambit/contrib/games/tim.efg \
 	src/pygambit/contrib/games/todd1.nfg \
 	src/pygambit/contrib/games/todd2.nfg \
 	src/pygambit/contrib/games/todd3.nfg \
+	src/pygambit/contrib/games/ttt.efg \
+	src/pygambit/contrib/games/vd.efg \
 	src/pygambit/contrib/games/vd.nfg \
+	src/pygambit/contrib/games/w_ex1.efg \
+	src/pygambit/contrib/games/w_ex2.efg \
+	src/pygambit/contrib/games/wilson1.efg \
 	src/pygambit/contrib/games/wink3.nfg \
 	src/pygambit/contrib/games/winkels.nfg \
+	src/pygambit/contrib/games/work1.efg \
+	src/pygambit/contrib/games/work2.efg \
+	src/pygambit/contrib/games/work3.efg \
 	src/pygambit/contrib/games/yamamoto.nfg \
-	src/pygambit/contrib/games/zero.nfg \
-	src/README.rst
-
-core_SOURCES = \
-    src/core/core.h \
-    src/core/util.h \
-	src/core/array.h \
-	src/core/vector.h \
-	src/core/recarray.h \
-	src/core/matrix.h \
-	src/core/integer.cc \
-	src/core/integer.h \
-	src/core/rational.cc \
-	src/core/rational.h \
-	src/core/matrix.cc \
-	src/core/function.cc \
-	src/core/function.h \
-	src/core/tinyxml.cc \
-	src/core/tinyxmlerror.cc \
-	src/core/tinyxmlparser.cc \
-	src/core/tinyxml.h
-
-agg_SOURCES = \
-	src/games/gameagg.cc \
-	src/games/gameagg.h \
-	src/games/gamebagg.cc \
-	src/games/gamebagg.h \
-	src/games/agg/gray.h \
-	src/games/agg/agg.cc \
-    src/games/agg/agg.h \
-	src/games/agg/bagg.cc \
-	src/games/agg/bagg.h \
-	src/games/agg/proj_func.h \
-	src/games/agg/trie_map.h \
-    src/games/agg/trie_map.imp \
-    src/games/agg/trie_map.cc
+	src/pygambit/contrib/games/zero.nfg
 
 game_SOURCES = \
 	src/gambit.h \
