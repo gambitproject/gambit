@@ -74,6 +74,8 @@ def update_api_rst(new_classes: list) -> None:
         + new_toctree
         + content[old_toctree_end:]
     )
+    if new_content != content:
+        print(f"Updated {_API_RST}")
 
     with open(_API_RST, "w", encoding="utf-8") as f:
         f.write(new_content)
@@ -115,6 +117,12 @@ def update_makefile():
                 continue  # Skip old gamefiles lines
             else:
                 f.write(line)
+
+    with open(_MAKEFILE_AM, encoding="utf-8") as f:
+        updated_content = f.readlines()
+
+    if content != updated_content:
+        print(f"Updated {_MAKEFILE_AM}")
 
 
 if __name__ == "__main__":
@@ -160,6 +168,10 @@ if __name__ == "__main__":
     with _CATALOG_YAML.open("w", encoding="utf-8") as f:
         yaml.dump(catalog, f)
 
+    print(f"Added {new_entries_counter} new entries to the catalog: ", list(new_entries.keys()))
+    if new_entries_counter > 0:
+        print(f"Updated: {_CATALOG_YAML}")
+
     # Update the RST documentation with the new full catalog
     # This includes games from coded_games.py as well as catalog.yml
     update_api_rst(new_classes=list(new_entries.keys()))
@@ -167,9 +179,4 @@ if __name__ == "__main__":
     # Update the Makefile.am with all game files
     update_makefile()
 
-    print(f"Added {new_entries_counter} new entries to the catalog: ", list(new_entries.keys()))
-    if new_entries_counter > 0:
-        print(f"Updated: {_CATALOG_YAML}")
-        print(f"Updated {_API_RST}")
-        print(f"Updated {_MAKEFILE_AM}")
     print("Done.")
