@@ -39,24 +39,35 @@ class CatalogGame:
         raise NotImplementedError("Subclasses must implement _game() method")
 
     @classmethod
+    def _img_docstring(cls) -> str:
+        """Return the image docstring for the game."""
+        # file = f"/_static/catalog_drawn/{cls.__name__}.png"
+        file = "/_static/gambit.png"
+        docstring = f"""
+            .. figure:: {file}
+                :align: center
+                :width: 400px
+
+                {cls.__name__} game diagram
+        """
+        return docstring
+
+    @classmethod
     def _extract_description(cls, game: gbt.Game) -> None:
         """Create game description and docstring from catalog."""
         cleaned_docstring = ""
         if cls.__doc__:
             cleaned_docstring = inspect.cleandoc(cls.__doc__)
+            cleaned_docstring += "\n"
+        cleaned_docstring += cls._img_docstring()
         # If the class has a _game function, concatenate its docstring to the class docstring
         game_docstring = inspect.getdoc(cls._game)
         if game_docstring:
             game_docstring = inspect.cleandoc(game_docstring)
             # For games from file, sub in the class name
             game_docstring = game_docstring.replace("{classname}", cls.__name__)
-            if cleaned_docstring:
-                combined_docstring = cleaned_docstring + "\n\n" + game_docstring
-            else:
-                combined_docstring = game_docstring
-        else:
-            combined_docstring = cleaned_docstring
-        cls.__doc__ = combined_docstring
+            cleaned_docstring += "\n\n" + game_docstring
+        cls.__doc__ = cleaned_docstring
         if cleaned_docstring and len(cleaned_docstring) > 0:
             game.description = cleaned_docstring
 
