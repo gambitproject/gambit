@@ -952,6 +952,7 @@ void GameTreeRep::BuildComputedValues() const
     std::map<GameNodeRep *, GameNodeRep *> ptr, whichbranch;
     player->MakeReducedStrats(m_root.get(), nullptr, behav, ptr, whichbranch);
   }
+  IndexStrategies();
   m_computedValues = true;
 }
 
@@ -1384,7 +1385,7 @@ MixedStrategyProfile<double> GameTreeRep::NewMixedStrategyProfile(double) const
   if (!IsPerfectRecall()) {
     throw UndefinedException("Mixed strategies not supported for games with imperfect recall.");
   }
-  EnsureInfosetOrdering();
+  BuildComputedValues();
   return StrategySupportProfile(std::const_pointer_cast<GameRep>(shared_from_this()))
       .NewMixedStrategyProfile<double>();
 }
@@ -1394,7 +1395,7 @@ MixedStrategyProfile<Rational> GameTreeRep::NewMixedStrategyProfile(const Ration
   if (!IsPerfectRecall()) {
     throw UndefinedException("Mixed strategies not supported for games with imperfect recall.");
   }
-  EnsureInfosetOrdering();
+  BuildComputedValues();
   return StrategySupportProfile(std::const_pointer_cast<GameRep>(shared_from_this()))
       .NewMixedStrategyProfile<Rational>();
 }
@@ -1405,7 +1406,7 @@ GameTreeRep::NewMixedStrategyProfile(double, const StrategySupportProfile &spt) 
   if (!IsPerfectRecall()) {
     throw UndefinedException("Mixed strategies not supported for games with imperfect recall.");
   }
-  EnsureInfosetOrdering();
+  BuildComputedValues();
   return MixedStrategyProfile<double>(std::make_unique<TreeMixedStrategyProfileRep<double>>(spt));
 }
 
@@ -1415,7 +1416,7 @@ GameTreeRep::NewMixedStrategyProfile(const Rational &, const StrategySupportProf
   if (!IsPerfectRecall()) {
     throw UndefinedException("Mixed strategies not supported for games with imperfect recall.");
   }
-  EnsureInfosetOrdering();
+  BuildComputedValues();
   return MixedStrategyProfile<Rational>(
       std::make_unique<TreeMixedStrategyProfileRep<Rational>>(spt));
 }
@@ -1445,7 +1446,7 @@ public:
 
 PureStrategyProfile GameTreeRep::NewPureStrategyProfile() const
 {
-  EnsureInfosetOrdering();
+  BuildComputedValues();
   return PureStrategyProfile(std::make_shared<TreePureStrategyProfileRep>(
       std::const_pointer_cast<GameRep>(shared_from_this())));
 }
@@ -1456,11 +1457,11 @@ PureStrategyProfile GameTreeRep::NewPureStrategyProfile() const
 
 Rational TreePureStrategyProfileRep::GetPayoff(const GamePlayer &p_player) const
 {
-  PureBehaviorProfile behav(m_nfg);
-  for (const auto &player : m_nfg->GetPlayers()) {
+  PureBehaviorProfile behav(m_game);
+  for (const auto &player : m_game->GetPlayers()) {
     for (const auto &infoset : player->GetInfosets()) {
       try {
-        behav.SetAction(infoset->GetAction(m_profile.at(player)->m_behav[infoset.get()]));
+        behav.SetAction(infoset->GetAction(GetStrategy(player)->m_behav[infoset.get()]));
       }
       catch (std::out_of_range &) {
       }

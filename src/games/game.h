@@ -267,6 +267,7 @@ public:
 /// relatively efficient.
 class GameStrategyRep : public std::enable_shared_from_this<GameStrategyRep> {
   friend class GameExplicitRep;
+  friend class GameRep;
   friend class GameTreeRep;
   friend class GameTableRep;
   friend class GameAGGRep;
@@ -283,7 +284,6 @@ class GameStrategyRep : public std::enable_shared_from_this<GameStrategyRep> {
   bool m_valid{true};
   GamePlayerRep *m_player;
   int m_number;
-  long m_offset{-1L};
   std::string m_label;
   std::map<GameInfosetRep *, int> m_behav;
 
@@ -360,6 +360,7 @@ class GamePlayerRep : public std::enable_shared_from_this<GamePlayerRep> {
   friend class GameInfosetRep;
   friend class GameNodeRep;
   friend class StrategySupportProfile;
+  friend class PureStrategyProfileRep;
   template <class T> friend class MixedBehaviorProfile;
   template <class T> friend class MixedStrategyProfile;
 
@@ -594,6 +595,24 @@ inline GameNode GameNodeRep::Actions::iterator::GetOwner() const { return m_chil
 
 enum class TraversalOrder { Preorder, Postorder };
 
+class CartesianProductSpace {
+public:
+  std::vector<int> m_radices;
+  std::vector<long> m_strides;
+};
+
+class CartesianSubset {
+public:
+  const CartesianProductSpace *m_space{nullptr};
+  std::vector<std::vector<int>> m_allowedDigits;
+};
+
+template <class T> class CartesianTensor {
+public:
+  const CartesianProductSpace *m_space{nullptr};
+  std::vector<T> m_data;
+};
+
 /// This is the class for representing an arbitrary finite game.
 class GameRep : public std::enable_shared_from_this<GameRep> {
   friend class GameOutcomeRep;
@@ -602,6 +621,7 @@ class GameRep : public std::enable_shared_from_this<GameRep> {
   friend class GamePlayerRep;
   friend class PureStrategyProfileRep;
   friend class TablePureStrategyProfileRep;
+  friend class StrategySupportProfile;
   template <class T> friend class MixedBehaviorProfile;
   template <class T> friend class MixedStrategyProfile;
   template <class T> friend class TableMixedStrategyProfileRep;
@@ -609,6 +629,7 @@ class GameRep : public std::enable_shared_from_this<GameRep> {
 protected:
   std::vector<std::shared_ptr<GamePlayerRep>> m_players;
   std::vector<std::shared_ptr<GameOutcomeRep>> m_outcomes;
+  mutable CartesianProductSpace m_pureStrategies;
   std::string m_title, m_comment;
   unsigned int m_version{0};
 
@@ -618,6 +639,7 @@ protected:
   //@{
   /// Mark that the content of the game has changed
   void IncrementVersion() { m_version++; }
+  void IndexStrategies() const;
   //@}
 
   /// Hooks for derived classes to update lazily-computed orderings if required
