@@ -31,10 +31,19 @@ namespace Gambit {
 template <class T> class MixedStrategyProfileRep {
 protected:
   SegmentedVector<T> m_probs;
+  SegmentedArray<long> m_offsets;
   StrategySupportProfile m_support;
   /// The index into the strategy profile for a strategy (-1 if not in support)
   std::map<GameStrategy, int> m_profileIndex;
   unsigned int m_gameversion;
+
+  long StrategyOffset(const GameStrategy &s) const
+  {
+    const auto &space = this->GetSupport().GetGame()->m_pureStrategies;
+    const auto &player = s->GetPlayer();
+    const size_t i = player->GetNumber() - 1;
+    return (s->GetNumber() - 1) * space.m_strides[i];
+  }
 
 public:
   explicit MixedStrategyProfileRep(const StrategySupportProfile &);

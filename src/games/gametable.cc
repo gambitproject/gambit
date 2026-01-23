@@ -115,14 +115,6 @@ private:
                       T &value) const;
   //@}
 
-  long StrategyOffset(const GameStrategy &s) const
-  {
-    const auto &space = this->GetSupport().GetGame()->m_pureStrategies;
-    const auto &player = s->GetPlayer();
-    const size_t i = player->GetNumber() - 1;
-    return (s->GetNumber() - 1) * space.m_strides[i];
-  }
-
 public:
   explicit TableMixedStrategyProfileRep(const StrategySupportProfile &p_support)
     : MixedStrategyProfileRep<T>(p_support)
@@ -158,7 +150,7 @@ T TableMixedStrategyProfileRep<T>::GetPayoff(int pl, int index, int current) con
   for (auto s :
        this->GetSupport().GetStrategies(this->GetSupport().GetGame()->GetPlayer(current))) {
     if ((*this)[s] != T(0)) {
-      sum += ((*this)[s] * GetPayoff(pl, index + StrategyOffset(s), current + 1));
+      sum += ((*this)[s] * GetPayoff(pl, index + this->StrategyOffset(s), current + 1));
     }
   }
   return sum;
@@ -187,8 +179,8 @@ void TableMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, int const_pl, int c
     for (auto s :
          this->GetSupport().GetStrategies(this->GetSupport().GetGame()->GetPlayer(cur_pl))) {
       if ((*this)[s] > T(0)) {
-        GetPayoffDeriv(pl, const_pl, cur_pl + 1, index + StrategyOffset(s), prob * (*this)[s],
-                       value);
+        GetPayoffDeriv(pl, const_pl, cur_pl + 1, index + this->StrategyOffset(s),
+                       prob * (*this)[s], value);
       }
     }
   }
@@ -198,7 +190,8 @@ template <class T>
 T TableMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &strategy) const
 {
   T value = T(0);
-  GetPayoffDeriv(pl, strategy->GetPlayer()->GetNumber(), 1, StrategyOffset(strategy), T(1), value);
+  GetPayoffDeriv(pl, strategy->GetPlayer()->GetNumber(), 1, this->StrategyOffset(strategy), T(1),
+                 value);
   return value;
 }
 
@@ -221,7 +214,7 @@ void TableMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, int const_pl1, int 
     for (auto s :
          this->GetSupport().GetStrategies(this->GetSupport().GetGame()->GetPlayer(cur_pl))) {
       if ((*this)[s] > static_cast<T>(0)) {
-        GetPayoffDeriv(pl, const_pl1, const_pl2, cur_pl + 1, index + StrategyOffset(s),
+        GetPayoffDeriv(pl, const_pl1, const_pl2, cur_pl + 1, index + this->StrategyOffset(s),
                        prob * (*this)[s], value);
       }
     }
@@ -240,7 +233,7 @@ T TableMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &st
 
   T value = T(0);
   GetPayoffDeriv(pl, player1->GetNumber(), player2->GetNumber(), 1,
-                 StrategyOffset(strategy1) + StrategyOffset(strategy2), T(1), value);
+                 this->StrategyOffset(strategy1) + this->StrategyOffset(strategy2), T(1), value);
   return value;
 }
 

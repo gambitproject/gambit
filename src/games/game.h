@@ -624,6 +624,7 @@ class GameRep : public std::enable_shared_from_this<GameRep> {
   friend class StrategySupportProfile;
   template <class T> friend class MixedBehaviorProfile;
   template <class T> friend class MixedStrategyProfile;
+  template <class T> friend class MixedStrategyProfileRep;
   template <class T> friend class TableMixedStrategyProfileRep;
 
 protected:
