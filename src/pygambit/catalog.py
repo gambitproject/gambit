@@ -34,7 +34,7 @@ class CatalogGame:
         """
         Examples
         --------
-        >>> {classname}()  # Gets the game instance
+        >>> {classname}()  # Return the Game
         """
         raise NotImplementedError("Subclasses must implement _game() method")
 
