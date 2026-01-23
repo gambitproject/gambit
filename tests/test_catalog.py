@@ -7,6 +7,7 @@ class ExampleGame(gbt.catalog.CatalogGame):
 
     @staticmethod
     def _game(some_param: bool = False):
+        """Desc2"""
         if some_param:
             g = gbt.Game.new_tree(
                 players=["A", "B"], title="Test game T"
@@ -15,13 +16,13 @@ class ExampleGame(gbt.catalog.CatalogGame):
             g = gbt.Game.new_tree(
                 players=["A", "B"], title="Test game F"
             )
-        g.description = "Test game description."
+        g.description = "Desc1"
         return g
 
 
 class ExampleGameWithDocstring(ExampleGame):
     """
-    Alternative test game description.
+    Desc3
     """
 
 
@@ -33,16 +34,17 @@ class TestCatalogGame:
         with pytest.raises(NotImplementedError):
             gbt.catalog.CatalogGame()
 
-    def test_custom_game_subclass_extracts_metadata(self):
-        """Custom CatalogGame subclasses should extract metadata from _game()."""
-        assert ExampleGame().description == "Test game description."
+    def test_description_handling_from_game(self):
+        """Custom CatalogGame subclass should extract description from game object."""
+        assert "Desc1" in ExampleGame().description
+        # Also should include _game docstring
+        assert "Desc2" in ExampleGame().description
 
-    def test_can_get_game_description_from_docstring(self):
-        """CatalogGame should get description from docstring over game description."""
-        assert (
-            "Alternative test game description." in
-            ExampleGameWithDocstring().description
-        )
+    def test_description_handling_from_docstring(self):
+        """Custom CatalogGame subclass should get docstring over game description."""
+        assert "Desc3" in ExampleGameWithDocstring().description
+        # Also should include _game docstring
+        assert "Desc2" in ExampleGameWithDocstring().description
 
     def test_catalog_py_game_with_parameters(self):
         """

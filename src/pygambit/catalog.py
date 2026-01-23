@@ -58,6 +58,10 @@ class CatalogGame:
         cleaned_docstring = ""
         if cls.__doc__:
             cleaned_docstring = inspect.cleandoc(cls.__doc__)
+            game.description = cleaned_docstring
+        else:
+            cleaned_docstring = game.description
+        if len(cleaned_docstring) > 0:
             cleaned_docstring += "\n"
         cleaned_docstring += cls._img_docstring()
         # If the class has a _game function, concatenate its docstring to the class docstring
@@ -67,9 +71,8 @@ class CatalogGame:
             # For games from file, sub in the class name
             game_docstring = game_docstring.replace("{classname}", cls.__name__)
             cleaned_docstring += "\n\n" + game_docstring
+            game.description += "\n\n" + game_docstring
         cls.__doc__ = cleaned_docstring
-        if cleaned_docstring and len(cleaned_docstring) > 0:
-            game.description = cleaned_docstring
 
     def __init_subclass__(cls, **kwargs):
         """Extract metadata when subclass is defined (if not a file-based game)."""
