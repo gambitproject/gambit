@@ -102,12 +102,157 @@ PureStrategyProfile GameTableRep::NewPureStrategyProfile() const
 //                   TableMixedStrategyProfileRep<T>
 //========================================================================
 
+template <class T> class ProductDistribution {
+public:
+  using index_type = long;
+  using prob_type = T;
+  using value_type = std::pair<index_type, prob_type>;
+
+  class iterator {
+  public:
+    using iterator_category = std::forward_iterator_tag;
+    using difference_type = std::ptrdiff_t;
+    using value_type = std::pair<index_type, prob_type>;
+    using reference = value_type;
+    using pointer = void;
+
+    iterator() = default;
+
+    iterator(const SegmentedVector<T> &probs, const SegmentedArray<long> &offsets, bool end)
+      : m_probs(&probs), m_offsets(&offsets), m_done(end)
+    {
+      if (m_done) {
+        return;
+      }
+
+      m_P = m_probs->GetShape().size();
+
+      m_digit.assign(m_P + 1, 0);
+      m_radix.assign(m_P + 1, 0);
+      m_cum_prob.assign(m_P + 1, T{});
+
+      // initialise radices
+      for (size_t p = 1; p <= m_P; ++p) {
+        m_radix[p] = m_probs->segment(p).size();
+        if (m_radix[p] == 0) {
+          m_done = true;
+          return;
+        }
+      }
+
+      // initial recompute for digit = all zero
+      recompute_from(1);
+
+      // advance to first non-zero probability state
+      advance_to_next_nonzero();
+    }
+
+    reference operator*() const { return {m_index, m_cum_prob[m_P]}; }
+
+    iterator &operator++()
+    {
+      if (m_done) {
+        return *this;
+      }
+
+      // increment odometer
+      size_t p = 1;
+      for (; p <= m_P; ++p) {
+        if (++m_digit[p] < m_radix[p]) {
+          break;
+        }
+        m_digit[p] = 0;
+      }
+
+      if (p > m_P) {
+        m_done = true;
+        return *this;
+      }
+
+      recompute_from(p);
+      advance_to_next_nonzero();
+      return *this;
+    }
+
+    iterator operator++(int)
+    {
+      iterator tmp = *this;
+      ++(*this);
+      return tmp;
+    }
+
+    bool operator==(const iterator &other) const { return m_done == other.m_done; }
+
+    bool operator!=(const iterator &other) const { return !(*this == other); }
+
+  private:
+    void recompute_from(size_t p)
+    {
+      m_index = 0;
+      m_cum_prob[0] = T{1};
+
+      for (size_t i = 1; i < p; ++i) {
+        m_index += m_offsets->segment(i)[m_digit[i] + 1];
+        m_cum_prob[i] = m_cum_prob[i - 1] * m_probs->segment(i)[m_digit[i] + 1];
+      }
+
+      for (size_t i = p; i <= m_P; ++i) {
+        const T pi = m_probs->segment(i)[m_digit[i] + 1];
+        m_cum_prob[i] = m_cum_prob[i - 1] * pi;
+        m_index += m_offsets->segment(i)[m_digit[i] + 1];
+      }
+    }
+
+    void advance_to_next_nonzero()
+    {
+      while (!m_done && m_cum_prob[m_P] == T{0}) {
+        size_t p = 1;
+        for (; p <= m_P; ++p) {
+          if (++m_digit[p] < m_radix[p]) {
+            break;
+          }
+          m_digit[p] = 0;
+        }
+
+        if (p > m_P) {
+          m_done = true;
+          return;
+        }
+
+        recompute_from(p);
+      }
+    }
+
+    const SegmentedVector<T> *m_probs{nullptr};
+    const SegmentedArray<long> *m_offsets{nullptr};
+
+    size_t m_P{0};
+    bool m_done{true};
+
+    std::vector<size_t> m_digit;
+    std::vector<size_t> m_radix;
+    std::vector<T> m_cum_prob;
+    index_type m_index{0};
+  };
+
+  ProductDistribution(const SegmentedVector<T> &probs, const SegmentedArray<long> &offsets)
+    : m_probs(probs), m_offsets(offsets)
+  {
+  }
+
+  iterator begin() const { return iterator(m_probs, m_offsets, false); }
+
+  iterator end() const { return iterator(m_probs, m_offsets, true); }
+
+private:
+  const SegmentedVector<T> &m_probs;
+  const SegmentedArray<long> &m_offsets;
+};
+
 template <class T> class TableMixedStrategyProfileRep : public MixedStrategyProfileRep<T> {
 private:
   /// @name Private recursive payoff functions
   //@{
-  /// Recursive computation of payoff to player pl
-  T GetPayoff(int pl, int index, int i) const;
   /// Recursive computation of payoff derivative
   void GetPayoffDeriv(int pl, int const_pl, int cur_pl, long index, const T &prob, T &value) const;
   /// Recursive computation of payoff second derivative
@@ -134,42 +279,18 @@ std::unique_ptr<MixedStrategyProfileRep<T>> TableMixedStrategyProfileRep<T>::Cop
   return std::make_unique<TableMixedStrategyProfileRep>(*this);
 }
 
-template <class T>
-T TableMixedStrategyProfileRep<T>::GetPayoff(int pl, int index, int current) const
-{
-  if (current > static_cast<int>(this->GetSupport().GetGame()->NumPlayers())) {
-    const Game game = this->GetSupport().GetGame();
-    auto &g = dynamic_cast<GameTableRep &>(*game);
-    if (const auto outcome = g.m_results[index]) {
-      return outcome->GetPayoff<T>(this->GetSupport().GetGame()->GetPlayer(pl));
-    }
-    return T{0};
-  }
-
-  T sum = T{0};
-  const auto &probs = this->m_probs.segment(current);
-  const auto &offsets = this->m_offsets.segment(current);
-  auto prob_it = probs.begin();
-  auto offset_it = offsets.begin();
-  for (; offset_it != offsets.end(); ++offset_it, ++prob_it) {
-    if (*prob_it != T{0}) {
-      sum += *prob_it * GetPayoff(pl, index + *offset_it, current + 1);
-    }
-  }
-  /*
-  for (auto s :
-       this->GetSupport().GetStrategies(this->GetSupport().GetGame()->GetPlayer(current))) {
-    if ((*this)[s] != T(0)) {
-      sum += ((*this)[s] * GetPayoff(pl, index + this->StrategyOffset(s), current + 1));
-    }
-  }
-  */
-  return sum;
-}
-
 template <class T> T TableMixedStrategyProfileRep<T>::GetPayoff(int pl) const
 {
-  return GetPayoff(pl, 0, 1);
+  const auto game = this->GetSupport().GetGame();
+  auto &g = dynamic_cast<GameTableRep &>(*game);
+
+  T value{0};
+  for (auto [index, prob] : ProductDistribution<T>(this->m_probs, this->m_offsets)) {
+    if (const auto outcome = g.m_results[index]) {
+      value += prob * outcome->template GetPayoff<T>(g.GetPlayer(pl));
+    }
+  }
+  return value;
 }
 
 template <class T>
