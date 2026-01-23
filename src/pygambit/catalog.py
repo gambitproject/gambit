@@ -40,19 +40,24 @@ class CatalogGame:
 
     @classmethod
     def _extract_description(cls, game: gbt.Game) -> None:
-        """Extract game description from docstring and apply to game."""
+        """Create game description and docstring from catalog."""
         cleaned_docstring = ""
         if cls.__doc__:
             cleaned_docstring = inspect.cleandoc(cls.__doc__)
-            # If the class has a _game function, concatenate its docstring to the class docstring
-            game_docstring = inspect.getdoc(cls._game)
-            if game_docstring:
-                game_docstring = inspect.cleandoc(game_docstring)
+        # If the class has a _game function, concatenate its docstring to the class docstring
+        game_docstring = inspect.getdoc(cls._game)
+        if game_docstring:
+            game_docstring = inspect.cleandoc(game_docstring)
             # For games from file, sub in the class name
             game_docstring = game_docstring.replace("{classname}", cls.__name__)
-            cleaned_docstring += "\n\n" + game_docstring
-            cls.__doc__ = cleaned_docstring
-        if len(cleaned_docstring) > 0:
+            if cleaned_docstring:
+                combined_docstring = cleaned_docstring + "\n\n" + game_docstring
+            else:
+                combined_docstring = game_docstring
+        else:
+            combined_docstring = cleaned_docstring
+        cls.__doc__ = combined_docstring
+        if cleaned_docstring and len(cleaned_docstring) > 0:
             game.description = cleaned_docstring
 
     def __init_subclass__(cls, **kwargs):
