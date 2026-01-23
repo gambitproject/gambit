@@ -249,7 +249,7 @@ void GameRep::WriteNfgFile(std::ostream &p_file) const
 
 template <class T>
 MixedStrategyProfileRep<T>::MixedStrategyProfileRep(const StrategySupportProfile &p_support)
-  : m_probs(p_support.MixedProfileLength()), m_support(p_support),
+  : m_probs(p_support.GetShape()), m_support(p_support),
     m_gameversion(p_support.GetGame()->GetVersion())
 {
   int index = 1;

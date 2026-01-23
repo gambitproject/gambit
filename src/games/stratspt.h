@@ -154,6 +154,13 @@ public:
   /// Returns the total number of strategies in the support.
   int MixedProfileLength() const;
 
+  Array<size_t> GetShape() const
+  {
+    Array<size_t> shape(NumPlayers());
+    std::transform(m_strategies.m_allowedDigits.begin(), m_strategies.m_allowedDigits.end(),
+                   shape.begin(), [](const auto &c) { return c.size(); });
+    return shape;
+  }
   template <class T> MixedStrategyProfile<T> NewMixedStrategyProfile() const;
 
   /// Returns the number of players in the game

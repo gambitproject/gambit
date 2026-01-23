@@ -30,7 +30,7 @@ namespace Gambit {
 
 template <class T> class MixedStrategyProfileRep {
 protected:
-  Vector<T> m_probs;
+  SegmentedVector<T> m_probs;
   StrategySupportProfile m_support;
   /// The index into the strategy profile for a strategy (-1 if not in support)
   std::map<GameStrategy, int> m_profileIndex;
@@ -46,22 +46,22 @@ public:
 
   void SetCentroid();
   std::unique_ptr<MixedStrategyProfileRep> Normalize() const;
-  const T &operator[](int i) const { return m_probs[i]; }
+  const T &operator[](int i) const { return m_probs.GetFlattened()[i]; }
   T &operator[](int i)
   {
     OnProfileChanged();
-    return m_probs[i];
+    return m_probs.GetFlattened()[i];
   }
   /// Returns the probability the strategy is played
   const T &operator[](const GameStrategy &p_strategy) const
   {
-    return m_probs[m_profileIndex.at(p_strategy)];
+    return m_probs.GetFlattened()[m_profileIndex.at(p_strategy)];
   }
   /// Returns the probability the strategy is played
   T &operator[](const GameStrategy &p_strategy)
   {
     OnProfileChanged();
-    return m_probs[m_profileIndex.at(p_strategy)];
+    return m_probs.GetFlattened()[m_profileIndex.at(p_strategy)];
   }
   /// Set the strategy of the corresponding player to a pure strategy
   void SetStrategy(const GameStrategy &p_strategy)
@@ -72,15 +72,15 @@ public:
     (*this)[p_strategy] = static_cast<T>(1);
     OnProfileChanged();
   }
-  const Vector<T> &GetProbVector() const { return m_probs; }
+  const Vector<T> &GetProbVector() const { return m_probs.GetFlattened(); }
   void SetProbVector(const Vector<T> &p_vector)
   {
-    m_probs = p_vector;
+    m_probs.SetFlattened(p_vector);
     OnProfileChanged();
   }
   void SetProbConstant(const T &c)
   {
-    m_probs = c;
+    m_probs.GetFlattened() = c;
     OnProfileChanged();
   }
   unsigned int GetProfileIndex(const GameStrategy &p_strategy) const
