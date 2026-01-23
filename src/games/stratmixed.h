@@ -98,6 +98,7 @@ public:
   }
   virtual T GetPayoff(int pl) const = 0;
   virtual T GetPayoffDeriv(int pl, const GameStrategy &) const = 0;
+  virtual bool GetPayoffDerivs(int pl, Vector<T> &p_derivs) const { return false; }
   virtual T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const = 0;
 
   T GetPayoff(const GamePlayer &p_player) const { return GetPayoff(p_player->GetNumber()); }

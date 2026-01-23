@@ -282,6 +282,7 @@ public:
   std::unique_ptr<MixedStrategyProfileRep<T>> Copy() const override;
   T GetPayoff(int pl) const override;
   T GetPayoffDeriv(int pl, const GameStrategy &) const override;
+  bool GetPayoffDerivs(int pl, Vector<T> &p_derivs) const override;
   T GetPayoffDeriv(int pl, const GameStrategy &, const GameStrategy &) const override;
 };
 
@@ -320,6 +321,26 @@ T TableMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &st
     }
   }
   return value;
+}
+
+template <class T>
+bool TableMixedStrategyProfileRep<T>::GetPayoffDerivs(int pl, Vector<T> &p_derivs) const
+{
+  const auto game = this->GetSupport().GetGame();
+  auto &g = dynamic_cast<GameTableRep &>(*game);
+  const auto player = game->GetPlayer(pl);
+  p_derivs = T{0};
+  auto segment = this->m_offsets.segment(pl);
+  for (auto [index, prob] : ProductDistribution<T>(this->m_probs, this->m_offsets, pl)) {
+    auto deriv_it = p_derivs.begin();
+    for (const auto base_index : segment) {
+      if (const auto outcome = g.m_results[base_index + index]) {
+        *deriv_it += prob * outcome->template GetPayoff<T>(player);
+        ++deriv_it;
+      }
+    }
+  }
+  return true;
 }
 
 template <class T>

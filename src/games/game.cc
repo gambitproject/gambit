@@ -369,8 +369,20 @@ template <class T> void MixedStrategyProfile<T>::ComputePayoffs() const
   Cache newCache;
   for (const auto &player : m_rep->GetSupport().GetPlayers()) {
     newCache.m_payoffs[player] = GetPayoff(player);
-    for (const auto &strategy : m_rep->GetSupport().GetStrategies(player)) {
-      newCache.m_strategyValues[player][strategy] = GetPayoff(strategy);
+    const auto &strategies = m_rep->GetSupport().GetStrategies(player);
+    Vector<T> values(strategies.size());
+    if (m_rep->GetPayoffDerivs(player->GetNumber(), values)) {
+      auto value_it = values.begin();
+      for (const auto &strategy : strategies) {
+        newCache.m_strategyValues[player][strategy] = *value_it;
+        ++value_it;
+        ;
+      }
+    }
+    else {
+      for (const auto &strategy : m_rep->GetSupport().GetStrategies(player)) {
+        newCache.m_strategyValues[player][strategy] = GetPayoff(strategy);
+      }
     }
   }
   newCache.m_valid = true;
