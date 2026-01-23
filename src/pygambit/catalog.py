@@ -38,19 +38,19 @@ class CatalogGame:
         """
         raise NotImplementedError("Subclasses must implement _game() method")
 
-    @classmethod
-    def _img_docstring(cls) -> str:
-        """Return the image docstring for the game."""
-        # file = f"/_static/catalog_drawn/{cls.__name__}.png"
-        file = "/_static/gambit.png"
-        docstring = f"""
-            .. figure:: {file}
-                :align: center
-                :width: 400px
+    # TODO: Add images for catalog games
+    # @classmethod
+    # def _img_docstring(cls) -> str:
+    #     """Return the image docstring for the game."""
+    #     file = f"/_static/catalog_drawn/{cls.__name__}.png"
+    #     docstring = f"""
+    #         .. figure:: {file}
+    #             :align: center
+    #             :width: 400px
 
-                {cls.__name__} game diagram
-        """
-        return docstring
+    #             {cls.__name__} game diagram
+    #     """
+    #     return docstring
 
     @classmethod
     def _extract_description(cls, game: gbt.Game) -> None:
@@ -63,7 +63,10 @@ class CatalogGame:
             cleaned_docstring = game.description
         if len(cleaned_docstring) > 0:
             cleaned_docstring += "\n"
-        cleaned_docstring += cls._img_docstring()
+
+        # TODO: Add images for catalog games
+        # cleaned_docstring += cls._img_docstring()
+
         # If the class has a _game function, concatenate its docstring to the class docstring
         game_docstring = inspect.getdoc(cls._game)
         if game_docstring:

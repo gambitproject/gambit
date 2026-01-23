@@ -125,6 +125,23 @@ def update_makefile():
         print(f"Updated {_MAKEFILE_AM}")
 
 
+# TODO: Add images for catalog games
+# def generate_draw_tree_images():
+#     """Generate tree images for all extensive-form games in the catalog."""
+#     from draw_tree import generate_png
+#     for class_name in gbt.catalog.games():
+#         cls = getattr(gbt.catalog, class_name)
+#         g = cls()
+#         if g.is_tree:
+#             image_path = (
+#                 Path(__file__).parent.parent.parent
+#                 / "doc/_static/catalog_drawn/"
+#                 / f"{class_name}.png"
+#             )
+#             generate_png(g, output_png=image_path)
+#             print(f"Generated tree image for {class_name} at {image_path}")
+
+
 if __name__ == "__main__":
     # Use ruamel.yaml to preserve comments
     yaml = YAML()
@@ -178,5 +195,9 @@ if __name__ == "__main__":
 
     # Update the Makefile.am with all game files
     update_makefile()
+
+    # TODO: Add images for catalog games
+    # Generate EFG game images and add to _static/catalog_drawn/
+    # generate_draw_tree_images()
 
     print("Done.")
