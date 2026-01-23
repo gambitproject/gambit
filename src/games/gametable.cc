@@ -143,16 +143,27 @@ T TableMixedStrategyProfileRep<T>::GetPayoff(int pl, int index, int current) con
     if (const auto outcome = g.m_results[index]) {
       return outcome->GetPayoff<T>(this->GetSupport().GetGame()->GetPlayer(pl));
     }
-    return static_cast<T>(0);
+    return T{0};
   }
 
-  T sum = static_cast<T>(0);
+  T sum = T{0};
+  const auto &probs = this->m_probs.segment(current);
+  const auto &offsets = this->m_offsets.segment(current);
+  auto prob_it = probs.begin();
+  auto offset_it = offsets.begin();
+  for (; offset_it != offsets.end(); ++offset_it, ++prob_it) {
+    if (*prob_it != T{0}) {
+      sum += *prob_it * GetPayoff(pl, index + *offset_it, current + 1);
+    }
+  }
+  /*
   for (auto s :
        this->GetSupport().GetStrategies(this->GetSupport().GetGame()->GetPlayer(current))) {
     if ((*this)[s] != T(0)) {
       sum += ((*this)[s] * GetPayoff(pl, index + this->StrategyOffset(s), current + 1));
     }
   }
+  */
   return sum;
 }
 
