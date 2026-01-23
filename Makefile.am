@@ -247,6 +247,7 @@ core_SOURCES = \
     src/core/util.h \
 	src/core/array.h \
 	src/core/vector.h \
+	src/core/segment.h \
 	src/core/recarray.h \
 	src/core/matrix.h \
 	src/core/integer.cc \
