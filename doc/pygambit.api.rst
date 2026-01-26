@@ -327,8 +327,10 @@ Computation of quantal response equilibria
    LogitQREMixedBehaviorFitResult
 
 
-Game catalog
-~~~~~~~~~~~~
+.. _pygambit-catalog:
+
+Catalog of games
+~~~~~~~~~~~~~~~~
 
 .. currentmodule:: pygambit.catalog
 
