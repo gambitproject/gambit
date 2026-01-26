@@ -40,7 +40,7 @@ namespace Gambit {
 /// in which they appear in the underlying game.
 class StrategySupportProfile {
   Game m_game;
-  CartesianSubset m_strategies;
+  CartesianSubset m_strategyDigits;
 
 public:
   class Support {
@@ -91,35 +91,38 @@ public:
     {
     }
 
-    size_t size() const { return m_profile->m_strategies.m_allowedDigits[m_playerIndex].size(); }
+    size_t size() const
+    {
+      return m_profile->m_strategyDigits.m_allowedDigits[m_playerIndex].size();
+    }
 
     GameStrategy operator[](const size_t index) const
     {
-      const int digit = m_profile->m_strategies.m_allowedDigits[m_playerIndex][index];
+      const int digit = m_profile->m_strategyDigits.m_allowedDigits[m_playerIndex][index];
       return m_profile->m_game->GetPlayer(m_playerIndex + 1)->GetStrategy(digit + 1);
     }
 
     GameStrategy front() const
     {
-      const int digit = m_profile->m_strategies.m_allowedDigits[m_playerIndex].front();
+      const int digit = m_profile->m_strategyDigits.m_allowedDigits[m_playerIndex].front();
       return m_profile->m_game->GetPlayer(m_playerIndex + 1)->GetStrategy(digit + 1);
     }
 
     GameStrategy back() const
     {
-      const int digit = m_profile->m_strategies.m_allowedDigits[m_playerIndex].back();
+      const int digit = m_profile->m_strategyDigits.m_allowedDigits[m_playerIndex].back();
       return m_profile->m_game->GetPlayer(m_playerIndex + 1)->GetStrategy(digit + 1);
     }
 
     const_iterator begin() const
     {
-      const auto &digits = m_profile->m_strategies.m_allowedDigits[m_playerIndex];
+      const auto &digits = m_profile->m_strategyDigits.m_allowedDigits[m_playerIndex];
       return {m_profile, m_playerIndex, digits.begin()};
     }
 
     const_iterator end() const
     {
-      const auto &digits = m_profile->m_strategies.m_allowedDigits[m_playerIndex];
+      const auto &digits = m_profile->m_strategyDigits.m_allowedDigits[m_playerIndex];
       return {m_profile, m_playerIndex, digits.end()};
     }
   };
@@ -136,13 +139,13 @@ public:
   bool operator==(const StrategySupportProfile &p_support) const
   {
     return m_game == p_support.m_game &&
-           m_strategies.m_allowedDigits == p_support.m_strategies.m_allowedDigits;
+           m_strategyDigits.m_allowedDigits == p_support.m_strategyDigits.m_allowedDigits;
   }
   /// Test for the inequality of two supports
   bool operator!=(const StrategySupportProfile &p_support) const
   {
     return m_game != p_support.m_game ||
-           m_strategies.m_allowedDigits != p_support.m_strategies.m_allowedDigits;
+           m_strategyDigits.m_allowedDigits != p_support.m_strategyDigits.m_allowedDigits;
   }
   //@}
 
@@ -166,7 +169,7 @@ public:
   /// Returns true exactly when the strategy is in the support.
   bool Contains(const GameStrategy &s) const
   {
-    const auto &digits = m_strategies.m_allowedDigits[s->GetPlayer()->GetNumber() - 1];
+    const auto &digits = m_strategyDigits.m_allowedDigits[s->GetPlayer()->GetNumber() - 1];
     const int digit = s->GetNumber() - 1;
     return std::binary_search(digits.begin(), digits.end(), digit);
   }
@@ -203,7 +206,7 @@ public:
     const size_t player_index = player->GetNumber() - 1;
     const int digit = p_strategy->GetNumber() - 1;
     StrategySupportProfile restricted(*this);
-    restricted.m_strategies.m_allowedDigits[player_index].assign(1, digit);
+    restricted.m_strategyDigits.m_allowedDigits[player_index].assign(1, digit);
     return restricted;
   }
   //@}
