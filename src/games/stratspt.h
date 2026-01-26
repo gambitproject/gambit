@@ -49,65 +49,23 @@ public:
     const GamePlayer m_player;
 
   public:
-    class const_iterator {
-      const StrategySupportProfile *m_profile{nullptr};
-      const GamePlayer m_player;
-      std::vector<GameStrategy>::const_iterator m_it;
+    using const_iterator = std::vector<GameStrategy>::const_iterator;
 
-    public:
-      using value_type = GameStrategy;
-      using reference = GameStrategy;
-      using pointer = void;
-      using difference_type = std::ptrdiff_t;
-      using iterator_category = std::forward_iterator_tag;
-
-      const_iterator() = default;
-      const_iterator(const StrategySupportProfile *profile, const GamePlayer &player,
-                     const std::vector<GameStrategy>::const_iterator it)
-        : m_profile(profile), m_player(player), m_it(it)
-      {
-      }
-
-      GameStrategy operator*() const { return *m_it; }
-
-      const_iterator &operator++()
-      {
-        ++m_it;
-        return *this;
-      }
-
-      bool operator==(const const_iterator &other) const { return m_it == other.m_it; }
-
-      bool operator!=(const const_iterator &other) const { return !(*this == other); }
-    };
-
-    Support() : m_profile(nullptr) {}
-
+    Support() : m_profile(nullptr), m_player(nullptr) {}
     Support(const StrategySupportProfile *profile, const GamePlayer &player)
       : m_profile(profile), m_player(player)
     {
     }
 
     size_t size() const { return m_profile->m_support.at(m_player).size(); }
-
     GameStrategy operator[](const size_t index) const
     {
       return m_profile->m_support.at(m_player)[index];
     }
-
     GameStrategy front() const { return m_profile->m_support.at(m_player).front(); }
-
     GameStrategy back() const { return m_profile->m_support.at(m_player).back(); }
-
-    const_iterator begin() const
-    {
-      return {m_profile, m_player, m_profile->m_support.at(m_player).begin()};
-    }
-
-    const_iterator end() const
-    {
-      return {m_profile, m_player, m_profile->m_support.at(m_player).end()};
-    }
+    const_iterator begin() const { return m_profile->m_support.at(m_player).begin(); }
+    const_iterator end() const { return m_profile->m_support.at(m_player).end(); }
   };
 
   /// @name Lifecycle
