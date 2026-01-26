@@ -84,7 +84,6 @@ class TestGamesFunction:
     def test_invalid_games_not_included(self):
         """games() should not return classes marked as valid_game=False."""
         result = gbt.catalog.games()
-        print(len(result))
         assert "InvalidGame" not in result
 
     def test_games_filter_by_game_type(self):
