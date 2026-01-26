@@ -57,11 +57,11 @@ You may wish to first review the :ref:`pygambit <pygambit>` docs pages.
       .. code-block:: yaml
 
         MyGame:
-        file: my_game.efg
-        metadata:
+          file: my_game.efg
+          metadata:
             my_metadata: 17
 
    6. Sumbmit a pull request to GitHub with all changes
 
       .. warning::
-        Make sure you commit all changed files e.g. run `git add --all ` before committing and pushing.
+        Make sure you commit all changed files e.g. run `git add --all` before committing and pushing.
