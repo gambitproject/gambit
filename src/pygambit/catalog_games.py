@@ -8,7 +8,7 @@ class OneShotTrust(gbt.catalog.CatalogGame):
     test_suite = True
 
     @staticmethod
-    def _game(unique_NE_variant: bool = False):
+    def _game(unique_NE_variant: bool = False) -> gbt.Game:
         """
         The unique_NE_variant makes Trust a dominant strategy, replacing the
         non-singleton equilibrium component from the standard version of the game
