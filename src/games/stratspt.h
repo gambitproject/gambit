@@ -101,8 +101,9 @@ public:
   Array<size_t> GetShape() const
   {
     Array<size_t> shape(NumPlayers());
-    std::transform(m_strategies.m_allowedDigits.begin(), m_strategies.m_allowedDigits.end(),
-                   shape.begin(), [](const auto &c) { return c.size(); });
+    std::transform(m_strategyDigits.m_allowedDigits.begin(),
+                   m_strategyDigits.m_allowedDigits.end(), shape.begin(),
+                   [](const auto &c) { return c.size(); });
     return shape;
   }
   template <class T> MixedStrategyProfile<T> NewMixedStrategyProfile() const;
