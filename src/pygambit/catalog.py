@@ -26,7 +26,7 @@ class CatalogGame:
     def __new__(cls, *args, **kwargs) -> gbt.Game:
         """Create a game instance by calling the _game() method."""
         cls.game = cls._game(*args, **kwargs)
-        cls._extract_description(cls.game)
+        cls._build_docstring(cls.game)
         return cls.game
 
     @staticmethod
@@ -53,15 +53,16 @@ class CatalogGame:
     #     return docstring
 
     @classmethod
-    def _extract_description(cls, game: gbt.Game) -> None:
-        """Create game description and docstring from catalog."""
-        cleaned_docstring = ""
+    def _build_docstring(cls, game: gbt.Game) -> None:
+        """Create the docstring for the catalog entry."""
+        cleaned_docstring = "**Title:** " + game.title + "\n\n**Description:** "
+        # If the subclass has a docstring, use this as description
         if cls.__doc__:
-            cleaned_docstring = inspect.cleandoc(cls.__doc__)
+            cleaned_docstring += inspect.cleandoc(cls.__doc__)
+        # Otherwise create one from the game
         else:
-            cleaned_docstring = game.title + "\n\n" + game.description
-        if len(cleaned_docstring) > 0:
-            cleaned_docstring += "\n"
+            cleaned_docstring += game.description
+        cleaned_docstring += "\n"
 
         # TODO: Add images for catalog games
         # cleaned_docstring += cls._img_docstring()
@@ -85,7 +86,7 @@ class CatalogGame:
 
         # Load game and extract metadata immediately when class is defined
         cls.game = cls._game()
-        cls._extract_description(cls.game)
+        cls._build_docstring(cls.game)
 
 
 class CatalogGameFromFile(CatalogGame):
@@ -128,7 +129,7 @@ class CatalogGameFromFile(CatalogGame):
 
         # Load game and extract metadata immediately when class is defined
         cls.game = cls._load_game()
-        cls._extract_description(cls.game)
+        cls._build_docstring(cls.game)
 
 
 def games(

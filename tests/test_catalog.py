@@ -48,7 +48,7 @@ class TestCatalogGame:
         assert "Class docstring" in ExampleGameWithDocstring.__doc__
         assert "Game description" not in ExampleGameWithDocstring.__doc__
         assert "_game docstring" in ExampleGameWithDocstring.__doc__
-        assert "Test game F" not in ExampleGameWithDocstring.__doc__
+        assert "Test game F" in ExampleGameWithDocstring.__doc__
 
     def test_catalog_py_game_with_parameters(self):
         """
