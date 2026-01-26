@@ -20,7 +20,7 @@ You may wish to first review the :ref:`pygambit <pygambit>` docs pages.
 
    2. **Add the game file:**
 
-      On a new branch, commit the new game to `src/pygambit/catalog_game_files`
+      Create a new branch in the `gambit` repo and commit the new game to `src/pygambit/catalog_game_files`
 
    3. **Update the catalog:**
 
@@ -35,7 +35,7 @@ You may wish to first review the :ref:`pygambit <pygambit>` docs pages.
       .. note::
        Run this script in a Python environment where `pygambit` itself is also :ref:`installed <build-python>`
 
-   4. **[Optional] Edit the catalog entry**
+   4. **[Optional] Edit the catalog entry:**
 
       Open `src/pygambit/catalog.yml` and find the new entry that was created in the previous step.
       The entry will be named after the game file, but in camel case, with "Game" prefixed if the file started with a number.
@@ -68,7 +68,7 @@ You may wish to first review the :ref:`pygambit <pygambit>` docs pages.
           metadata:
             my_metadata: 17
 
-   6. Sumbmit a pull request to GitHub with all changes
+   6. **Submit a pull request to GitHub with all changes:**
 
       .. warning::
         If you made changes in step 4 or 5 above, re-run the update script from step 3.
@@ -92,19 +92,15 @@ You may wish to first review the :ref:`pygambit <pygambit>` docs pages.
       Open `src/pygambit/catalog_games.py` and add a subclass of `CatalogGame` with your code implemented as the `_game` function,
       which should be defined as a `staticmethod` returning a ``Game`` object.
       You can optionally include paramaters to generate game variants.
-      Docstrings will appear in the Catalog API reference pages.
 
       .. code-block:: python
 
         class MyGame(gbt.catalog.CatalogGame):
-            """
-            High level description of game, originally from Author (2000).
-            """
 
             @staticmethod
             def _game(some_param: bool = False) -> gbt.Game:
                 """
-                Additional game description, describing variants.
+                Docstring for _game function.
 
                 Parameters
                 ----------
@@ -123,8 +119,9 @@ You may wish to first review the :ref:`pygambit <pygambit>` docs pages.
                 >>> MyGame(some_param=True) # Constructs the alternate game
                 """
                 g = gbt.Game.new_tree(
-                    players=["Buyer", "Seller"], title="My game, after Author (2000)"
+                    players=["Buyer", "Seller"], title="My game"
                 )
+                g.description = "Longer description of My game, originally by Author (2000)."
                 g.append_move(g.root, "Buyer", ["Trust", "Not trust"])
                 g.append_move(g.root.children[0], "Seller", ["Honor", "Abuse"])
                 g.set_outcome(g.root.children[0].children[0], g.add_outcome([1, 1], label="Trustworthy"))
@@ -138,6 +135,9 @@ You may wish to first review the :ref:`pygambit <pygambit>` docs pages.
                     )
                 g.set_outcome(g.root.children[1], g.add_outcome([0, 0], label="Opt-out"))
                 return g
+
+      .. note::
+        If you add a docstring to the class itself, this will be used in the API reference docs as the game description instead of `g.description`
 
    3. **Update the catalog:**
 
@@ -167,14 +167,11 @@ You may wish to first review the :ref:`pygambit <pygambit>` docs pages.
 
       .. code-block:: python
 
-        ...
-        """
-        High level description of game, originally from Author (2000).
-        """
-        my_metadata = 17
+        class MyGame(gbt.catalog.CatalogGame):
+            my_metadata = 17
         ...
 
-   6. Sumbmit a pull request to GitHub with all changes
+   6. **Submit a pull request to GitHub with all changes:**
 
       .. warning::
         If you made changes in step 4 above, re-run the update script from step 3.
