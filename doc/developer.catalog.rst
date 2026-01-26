@@ -89,7 +89,8 @@ You may wish to first review the :ref:`pygambit <pygambit>` docs pages.
 
    2. **Create a new Python class for your game:**
 
-      Open `src/pygambit/catalog_games.py` and add a subclass of `CatalogGame` with your code implemented as the `_game` function,
+      Create a new branch in the `gambit` repo and open `src/pygambit/catalog_games.py`.
+      Add a subclass of `CatalogGame` with your code implemented as the `_game` function,
       which should be defined as a `staticmethod` returning a ``Game`` object.
       You can optionally include paramaters to generate game variants.
 
