@@ -37,8 +37,16 @@ You may wish to first review the :ref:`pygambit <pygambit>` docs pages.
 
    4. **[Optional] Edit the catalog entry**
 
-      - Open `src/pygambit/catalog.yml` and find the new entry that was created in the previous step.
-      - The entry will be named after the game file, but in camel case, with "Game" prefixed if the file started with a number.
+      Open `src/pygambit/catalog.yml` and find the new entry that was created in the previous step.
+      The entry will be named after the game file, but in camel case, with "Game" prefixed if the file started with a number.
+
+      If the game file doesn't already include a description ("comments" in older versions of Gambit) you should add a description field:
+
+      .. code-block:: yaml
+
+        MyGame:
+          file: my_game.nfg
+          description: "A game that... originally created by Author (2000)."
 
    5. **[Optional] Add custom metadata to catalog games:**
 
