@@ -274,7 +274,8 @@ private:
 template <class T> class TableMixedStrategyProfileRep : public MixedStrategyProfileRep<T> {
 public:
   explicit TableMixedStrategyProfileRep(const StrategySupportProfile &p_support)
-    : MixedStrategyProfileRep<T>(p_support)
+    : MixedStrategyProfileRep<T>(p_support),
+      m_pureStrategies(p_support.GetGame()->m_pureStrategies)
   {
   }
   ~TableMixedStrategyProfileRep() override = default;
