@@ -58,9 +58,8 @@ class CatalogGame:
         cleaned_docstring = ""
         if cls.__doc__:
             cleaned_docstring = inspect.cleandoc(cls.__doc__)
-            game.description = cleaned_docstring
         else:
-            cleaned_docstring = game.description
+            cleaned_docstring = game.title + "\n\n" + game.description
         if len(cleaned_docstring) > 0:
             cleaned_docstring += "\n"
 
@@ -74,7 +73,6 @@ class CatalogGame:
             # For games from file, sub in the class name
             game_docstring = game_docstring.replace("{classname}", cls.__name__)
             cleaned_docstring += "\n\n" + game_docstring
-            game.description += "\n\n" + game_docstring
         cls.__doc__ = cleaned_docstring
 
     def __init_subclass__(cls, **kwargs):

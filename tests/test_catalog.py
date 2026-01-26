@@ -7,7 +7,7 @@ class ExampleGame(gbt.catalog.CatalogGame):
 
     @staticmethod
     def _game(some_param: bool = False):
-        """Desc2"""
+        """_game docstring"""
         if some_param:
             g = gbt.Game.new_tree(
                 players=["A", "B"], title="Test game T"
@@ -16,13 +16,13 @@ class ExampleGame(gbt.catalog.CatalogGame):
             g = gbt.Game.new_tree(
                 players=["A", "B"], title="Test game F"
             )
-        g.description = "Desc1"
+        g.description = "Game description"
         return g
 
 
 class ExampleGameWithDocstring(ExampleGame):
     """
-    Desc3
+    Class docstring
     """
 
 
@@ -34,17 +34,21 @@ class TestCatalogGame:
         with pytest.raises(NotImplementedError):
             gbt.catalog.CatalogGame()
 
-    def test_description_handling_from_game(self):
-        """Custom CatalogGame subclass should extract description from game object."""
-        assert "Desc1" in ExampleGame().description
-        # Also should include _game docstring
-        assert "Desc2" in ExampleGame().description
+    def test_docstring_handling_from_game(self):
+        """
+        Custom CatalogGame subclass should extract title and description
+        from game object and _game docstring.
+        """
+        assert "Game description" in ExampleGame.__doc__
+        assert "_game docstring" in ExampleGame.__doc__
+        assert "Test game F" in ExampleGame.__doc__
 
     def test_description_handling_from_docstring(self):
-        """Custom CatalogGame subclass should get docstring over game description."""
-        assert "Desc3" in ExampleGameWithDocstring().description
-        # Also should include _game docstring
-        assert "Desc2" in ExampleGameWithDocstring().description
+        """Custom CatalogGame subclass should get docstring over game description/title."""
+        assert "Class docstring" in ExampleGameWithDocstring.__doc__
+        assert "Game description" not in ExampleGameWithDocstring.__doc__
+        assert "_game docstring" in ExampleGameWithDocstring.__doc__
+        assert "Test game F" not in ExampleGameWithDocstring.__doc__
 
     def test_catalog_py_game_with_parameters(self):
         """
@@ -58,11 +62,11 @@ class TestCatalogGame:
         """Custom CatalogGame subclasses reading from catalog.yml should return Game instances."""
         assert isinstance(gbt.catalog.PrisonersDilemma(), gbt.Game)
 
-    def test_catalog_yml_game_description(self):
+    def test_catalog_yml_game_description_in_docstring(self):
         """Custom CatalogGame subclasses reading from catalog.yml should return Game instances."""
         assert (
             "A simple implementation of a two person Prisoner's Dilemma game." in
-            gbt.catalog.PrisonersDilemma().description
+            gbt.catalog.PrisonersDilemma.__doc__
         )
 
     def test_catalog_game_missing_game_method(self):

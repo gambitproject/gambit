@@ -2,9 +2,7 @@ import pygambit as gbt
 
 
 class OneShotTrust(gbt.catalog.CatalogGame):
-    """
-    One-shot trust game with binary actions, originally from Kreps (1990).
-    """
+
     test_suite = True
 
     @staticmethod
@@ -33,8 +31,10 @@ class OneShotTrust(gbt.catalog.CatalogGame):
         >>> OneShotTrust(unique_NE_variant=True) # Constructs the game with unique NE variant
         """
         g = gbt.Game.new_tree(
-            players=["Buyer", "Seller"], title="One-shot trust game, after Kreps (1990)"
+            players=["Buyer", "Seller"],
+            title="One-shot trust game"
         )
+        g.description = "One-shot trust game with binary actions, originally from Kreps (1990)."
         g.append_move(g.root, "Buyer", ["Trust", "Not trust"])
         g.append_move(g.root.children[0], "Seller", ["Honor", "Abuse"])
         g.set_outcome(g.root.children[0].children[0], g.add_outcome([1, 1], label="Trustworthy"))
