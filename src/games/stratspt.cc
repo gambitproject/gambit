@@ -35,12 +35,18 @@ namespace Gambit {
 StrategySupportProfile::StrategySupportProfile(const Game &p_game) : m_game(p_game)
 {
   m_game->BuildComputedValues();
-  m_strategies.m_space = &p_game->m_pureStrategies;
-  m_strategies.m_allowedDigits.resize(p_game->NumPlayers());
+  for (const auto &player : m_game->GetPlayers()) {
+    for (const auto &strategy : player->GetStrategies()) {
+      m_support[player].push_back(strategy);
+    }
+  }
+
+  m_strategyDigits.m_space = &p_game->m_pureStrategies;
+  m_strategyDigits.m_allowedDigits.resize(p_game->NumPlayers());
 
   for (size_t i = 0; i < p_game->NumPlayers(); ++i) {
     const int radix = p_game->m_pureStrategies.m_radices[i];
-    auto &digits = m_strategies.m_allowedDigits[i];
+    auto &digits = m_strategyDigits.m_allowedDigits[i];
     digits.resize(radix);
     std::iota(digits.begin(), digits.end(), 0);
   }
@@ -48,7 +54,7 @@ StrategySupportProfile::StrategySupportProfile(const Game &p_game) : m_game(p_ga
 
 int StrategySupportProfile::MixedProfileLength() const
 {
-  return sum_function(m_strategies.m_allowedDigits, [](const std::vector<int> &digits) {
+  return sum_function(m_strategyDigits.m_allowedDigits, [](const std::vector<int> &digits) {
     return static_cast<int>(digits.size());
   });
 }
@@ -68,8 +74,8 @@ bool StrategySupportProfile::IsSubsetOf(const StrategySupportProfile &p_other) c
   if (m_game != p_other.m_game) {
     return false;
   }
-  const auto &A = m_strategies.m_allowedDigits;
-  const auto &B = p_other.m_strategies.m_allowedDigits;
+  const auto &A = m_strategyDigits.m_allowedDigits;
+  const auto &B = p_other.m_strategyDigits.m_allowedDigits;
   const size_t n = A.size();
 
   for (size_t i = 0; i < n; ++i) {
@@ -112,12 +118,22 @@ void StrategySupportProfile::AddStrategy(const GameStrategy &p_strategy)
   if (p_strategy->GetGame() != m_game) {
     throw MismatchException();
   }
+
+  auto &support = m_support[p_strategy->GetPlayer()];
+  auto pos = std::find_if(support.begin(), support.end(), [p_strategy](const GameStrategy &s) {
+    return s->GetNumber() >= p_strategy->GetNumber();
+  });
+  if (pos == support.end() || *pos != p_strategy) {
+    // Strategy is not in the support for the player; add at this location to keep sorted by number
+    support.insert(pos, p_strategy);
+  }
+
   const size_t index = p_strategy->GetPlayer()->GetNumber() - 1;
   const int digit = p_strategy->GetNumber() - 1;
-  auto &digits = m_strategies.m_allowedDigits[index];
-  auto pos = std::lower_bound(digits.begin(), digits.end(), digit);
-  if (pos == digits.end() || *pos != digit) {
-    digits.insert(pos, digit);
+  auto &digits = m_strategyDigits.m_allowedDigits[index];
+  auto ipos = std::lower_bound(digits.begin(), digits.end(), digit);
+  if (ipos == digits.end() || *ipos != digit) {
+    digits.insert(ipos, digit);
   }
 }
 
@@ -126,15 +142,21 @@ bool StrategySupportProfile::RemoveStrategy(const GameStrategy &p_strategy)
   if (p_strategy->GetGame() != m_game) {
     throw MismatchException();
   }
-  const size_t index = p_strategy->GetPlayer()->GetNumber() - 1;
-  const int digit = p_strategy->GetNumber() - 1;
-  auto &digits = m_strategies.m_allowedDigits[index];
-  if (digits.size() == 1) {
+  auto &support = m_support[p_strategy->GetPlayer()];
+  if (support.size() == 1) {
     return false;
   }
-  auto pos = std::lower_bound(digits.begin(), digits.end(), digit);
-  if (pos != digits.end() && *pos == digit) {
-    digits.erase(pos);
+  auto pos = std::find(support.begin(), support.end(), p_strategy);
+  if (pos != support.end()) {
+    support.erase(pos);
+  }
+
+  const size_t index = p_strategy->GetPlayer()->GetNumber() - 1;
+  const int digit = p_strategy->GetNumber() - 1;
+  auto &digits = m_strategyDigits.m_allowedDigits[index];
+  auto ipos = std::lower_bound(digits.begin(), digits.end(), digit);
+  if (ipos != digits.end() && *ipos == digit) {
+    digits.erase(ipos);
     return true;
   }
   return false;

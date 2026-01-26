@@ -115,17 +115,17 @@ private:
                       T &value) const;
   //@}
 
+  const CartesianProductSpace &m_pureStrategies;
+
   long StrategyOffset(const GameStrategy &s) const
   {
-    const auto &space = this->GetSupport().GetGame()->m_pureStrategies;
-    const auto &player = s->GetPlayer();
-    const size_t i = player->GetNumber() - 1;
-    return (s->GetNumber() - 1) * space.m_strides[i];
+    return (s->GetNumber() - 1) * m_pureStrategies.m_strides[s->m_player->GetNumber() - 1];
   }
 
 public:
   explicit TableMixedStrategyProfileRep(const StrategySupportProfile &p_support)
-    : MixedStrategyProfileRep<T>(p_support)
+    : MixedStrategyProfileRep<T>(p_support),
+      m_pureStrategies(p_support.GetGame()->m_pureStrategies)
   {
   }
   ~TableMixedStrategyProfileRep() override = default;
