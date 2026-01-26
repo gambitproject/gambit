@@ -39,7 +39,6 @@ You may wish to first review the :ref:`pygambit <pygambit>` docs pages.
 
       - Open `src/pygambit/catalog.yml` and find the new entry that was created in the previous step.
       - The entry will be named after the game file, but in camel case, with "Game" prefixed if the file started with a number.
-      - If you edit the name of the entry, re-run the update script in the step above.
 
    5. **[Optional] Add custom metadata to catalog games:**
 
@@ -52,7 +51,7 @@ You may wish to first review the :ref:`pygambit <pygambit>` docs pages.
         my_metadata: int | None = None
         """Explanation of my_metadata field."""
 
-      Open `src/pygambit/catalog.yml` and the field under the `metadata` for the game you added, and any others that shouldn't have the default.
+      Open `src/pygambit/catalog.yml` and add the field under the `metadata` for the game you added, and any others that shouldn't have the default.
 
       .. code-block:: yaml
 
@@ -62,6 +61,115 @@ You may wish to first review the :ref:`pygambit <pygambit>` docs pages.
             my_metadata: 17
 
    6. Sumbmit a pull request to GitHub with all changes
+
+      .. warning::
+        If you made changes in step 4 or 5 above, re-run the update script from step 3.
+
+      .. warning::
+        Make sure you commit all changed files e.g. run `git add --all` before committing and pushing.
+
+.. dropdown:: Code games for the catalog
+   :class-container: sd-border-0
+
+   1. **Write the pygambit code:**
+
+      Write code for your game with :ref:`pygambit <pygambit>`.
+      Your code should create a ``Game`` object with a title and description.
+
+      .. note::
+        Test your game by visualising it in `draw_tree` and running Gambit's solvers.
+
+   2. **Create a new Python class for your game:**
+
+      Open `src/pygambit/catalog_games.py` and add a subclass of `CatalogGame` with your code implemented as the `_game` function,
+      which should be defined as a `staticmethod` returning a ``Game`` object.
+      You can optionally include paramaters to generate game variants.
+      Docstrings will appear in the Catalog API reference pages.
+
+      .. code-block:: python
+
+        class MyGame(gbt.catalog.CatalogGame):
+            """
+            High level description of game, originally from Author (2000).
+            """
+
+            @staticmethod
+            def _game(some_param: bool = False) -> gbt.Game:
+                """
+                Additional game description, describing variants.
+
+                Parameters
+                ----------
+                some_param : bool, optional
+                    Description of optional paramater.
+                    Defaults to False.
+
+                Returns
+                -------
+                gbt.Game
+                    The constructed game.
+
+                Examples
+                --------
+                >>> MyGame(some_param=False) # Constructs the standard game
+                >>> MyGame(some_param=True) # Constructs the alternate game
+                """
+                g = gbt.Game.new_tree(
+                    players=["Buyer", "Seller"], title="My game, after Author (2000)"
+                )
+                g.append_move(g.root, "Buyer", ["Trust", "Not trust"])
+                g.append_move(g.root.children[0], "Seller", ["Honor", "Abuse"])
+                g.set_outcome(g.root.children[0].children[0], g.add_outcome([1, 1], label="Trustworthy"))
+                if some_param:
+                    g.set_outcome(
+                        g.root.children[0].children[1], g.add_outcome(["1/2", 2], label="Untrustworthy")
+                    )
+                else:
+                    g.set_outcome(
+                        g.root.children[0].children[1], g.add_outcome([-1, 2], label="Untrustworthy")
+                    )
+                g.set_outcome(g.root.children[1], g.add_outcome([0, 0], label="Opt-out"))
+                return g
+
+   3. **Update the catalog:**
+
+      Use the `catalog_update.py` script to update the catalog and associated documatation & build files.
+
+      .. code-block:: bash
+
+         pip install ruamel.yaml
+         cd src/pygambit
+         python catalog_update.py
+
+      .. note::
+       Run this script in a Python environment where `pygambit` itself is also :ref:`installed <build-python>`
+
+   4. **[Optional] Add custom metadata to catalog games:**
+
+      Open `src/pygambit/catalog.py` and add update the `CatalogGame` base class with the new metadata field.
+      Include a type hint, a default value and a docstring.
+
+      .. code-block:: python
+
+        # Metadata fields
+        my_metadata: int | None = None
+        """Explanation of my_metadata field."""
+
+      Open `src/pygambit/catalog_games.py` and add a value for the field as a class attribute for the game(s) you added.
+
+      .. code-block:: python
+
+        ...
+        """
+        High level description of game, originally from Author (2000).
+        """
+        my_metadata = 17
+        ...
+
+   6. Sumbmit a pull request to GitHub with all changes
+
+      .. warning::
+        If you made changes in step 4 above, re-run the update script from step 3.
 
       .. warning::
         Make sure you commit all changed files e.g. run `git add --all` before committing and pushing.
