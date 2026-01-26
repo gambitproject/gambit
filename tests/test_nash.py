@@ -28,7 +28,7 @@ TOL = 1e-13  # tolerance for floating point assertions
     [
         # Zero-sum games
         (
-            games.create_two_player_perfect_info_win_lose_efg(),
+            games.read_from_file("two_player_perfect_info_win_lose.efg"),
             [
                 [[0, 0, 1, 0], [1, 0, 0]],
                 [[0, 0, 1, 0], [0, 1, 0]],
@@ -49,7 +49,7 @@ TOL = 1e-13  # tolerance for floating point assertions
         (games.create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq(), []),
         # 3-player game
         (
-            games.create_mixed_behav_game_efg(),
+            games.read_from_file("mixed_behavior_game.efg"),
             [
                 [[1, 0], [1, 0], [1, 0]],
                 [[0, 1], [0, 1], [1, 0]],
@@ -83,7 +83,7 @@ def test_enumpure_strategy(game: gbt.Game, pure_strategy_prof_data: list):
         #############################################################
         # Zero-sum games
         (
-            games.create_two_player_perfect_info_win_lose_efg(),
+            games.read_from_file("two_player_perfect_info_win_lose.efg"),
             [
                 [[[1, 0], [1, 0]], [[0, 1], [1, 0]]],
                 [[[0, 1], [1, 0]], [[1, 0], [1, 0]]],
@@ -106,7 +106,7 @@ def test_enumpure_strategy(game: gbt.Game, pure_strategy_prof_data: list):
         (games.create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq(), []),
         # 3-player game
         (
-            games.create_mixed_behav_game_efg(),
+            games.read_from_file("mixed_behavior_game.efg"),
             [
                 [[[1, 0]], [[1, 0]], [[1, 0]]],
                 [[[1, 0]], [[0, 1]], [[0, 1]]],
@@ -298,7 +298,7 @@ def test_nash_strategy_solver(test_case: EquilibriumTestCase, subtests) -> None:
         ),
         # 3-player game
         # (
-        # games.create_mixed_behav_game_efg(),
+        # games.read_from_file("mixed_behavior_game.efg"),
         # [
         # [[["1/2", "1/2"]], [["2/5", "3/5"]], [["1/4", "3/4"]]],
         # [[["2/5", "3/5"]], [["1/2", "1/2"]], [["1/3", "2/3"]]],
@@ -308,7 +308,7 @@ def test_nash_strategy_solver(test_case: EquilibriumTestCase, subtests) -> None:
         ##############################################################################
         ##############################################################################
         (
-            games.create_3_player_with_internal_outcomes_efg(),
+            games.read_from_file("3_player.efg"),
             [
                 [[[1, 0], [1, 0]], [[1, 0], ["1/2", "1/2"]], [[1, 0], [0, 1]]],
                 [[[1, 0], [1, 0]], [[1, 0], [0, 1]],
@@ -316,7 +316,7 @@ def test_nash_strategy_solver(test_case: EquilibriumTestCase, subtests) -> None:
             2,
         ),
         (
-            games.create_3_player_with_internal_outcomes_efg(nonterm_outcomes=True),
+            games.read_from_file("3_player_with_nonterm_outcomes.efg"),
             [
                 [[[1, 0], [1, 0]], [[1, 0], ["1/2", "1/2"]], [[1, 0], [0, 1]]],
                 [[[1, 0], [1, 0]], [[1, 0], [0, 1]],
@@ -326,26 +326,26 @@ def test_nash_strategy_solver(test_case: EquilibriumTestCase, subtests) -> None:
         ##############################################################################
         ##############################################################################
         (
-            games.create_non_zero_sum_lacking_outcome_efg(),
+            games.read_from_file("2_player_non_zero_sum.efg"),
             [[[["1/3", "2/3"]], [["1/2", "1/2"]]]],
             1,
         ),
         (
-            games.create_non_zero_sum_lacking_outcome_efg(missing_term_outcome=True),
+            games.read_from_file("2_player_non_zero_sum_missing_term_outcome.efg"),
             [[[["1/3", "2/3"]], [["1/2", "1/2"]]]],
             1,
         ),
         ##############################################################################
         ##############################################################################
         (
-                games.create_chance_in_middle_efg(),
+                games.read_from_file("chance_in_middle.efg"),
                 [[[["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]], [[1, 0], ["6/11", "5/11"]]],
                  ],  # [[[1, 0], [1, 0], [1, 0], [0, 0], [0, 0]], [[0, 1], [1, 0]]],
                      # [[[0, 1], [0, 0], [0, 0], [1, 0], [1, 0]], [[1, 0], [0, 1]]],
                 1,  # subsequent eqs have undefined infosets; include after #issue 660
         ),
         (
-                games.create_chance_in_middle_efg(nonterm_outcomes=True),
+                games.read_from_file("chance_in_middle_with_nonterm_outcomes.efg"),
                 [[[["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]], [[1, 0], ["6/11", "5/11"]]],
                  ],  # [[[1, 0], [1, 0], [1, 0], [0, 0], [0, 0]], [[0, 1], [1, 0]]],
                      # [[[0, 1], [0, 0], [0, 0], [1, 0], [1, 0]], [[1, 0], [0, 1]]],
@@ -394,7 +394,7 @@ def test_enumpoly_ordered_behavior(
     [
         # 3-player game
         (
-                games.create_mixed_behav_game_efg(),
+                games.read_from_file("mixed_behavior_game.efg"),
                 [
                     [[["2/5", "3/5"]], [["1/2", "1/2"]], [["1/3", "2/3"]]],
                     [[["1/2", "1/2"]], [["2/5", "3/5"]], [["1/4", "3/4"]]],
@@ -612,33 +612,33 @@ def test_lcp_behavior_double():
         # In the next test case:
         # 1/2-1/2 for l/r is determined by MixedBehaviorProfile.UndefinedToCentroid()
         (
-                games.create_perfect_info_with_chance_efg(),
+                games.read_from_file("perfect_info_with_chance.efg"),
                 [[[0, 1]], [[0, 1], [0, 1]]],
         ),
         (
-                games.create_two_player_perfect_info_win_lose_efg(),
+                games.read_from_file("two_player_perfect_info_win_lose.efg"),
                 [[[0, 1], [1, 0]], [[0, 1], ["1/2", "1/2"]]],
         ),
         (
-            games.create_two_player_perfect_info_win_lose_efg(nonterm_outcomes=True),
+            games.read_from_file("two_player_perfect_info_win_lose_with_nonterm_outcomes.efg"),
             [[[0, 1], [1, 0]], [[0, 1], ["1/2", "1/2"]]],
         ),
         (
-            games.create_three_action_internal_outcomes_efg(),
+            games.read_from_file("2_player_chance.efg"),
             [
                 [["1/3", 0, "2/3"], ["2/3", 0, "1/3"]],
                 [["2/3", "1/3"], ["1/3", "2/3"], ["1/3", "2/3"]],
             ]
         ),
         (
-            games.create_three_action_internal_outcomes_efg(nonterm_outcomes=True),
+            games.read_from_file("2_player_chance_nonterm_outcomes_and_missing_term_outcomes.efg"),
             [
                 [["1/3", 0, "2/3"], ["2/3", 0, "1/3"]],
                 [["2/3", "1/3"], ["1/3", "2/3"], ["1/3", "2/3"]],
             ],
         ),
         (
-                games.create_large_payoff_game_efg(),
+                games.read_from_file("large_payoff_game.efg"),
                 [
                     [[1, 0], [1, 0]],
                     [[0, 1], ["9999999999999999999/10000000000000000000",
@@ -646,14 +646,14 @@ def test_lcp_behavior_double():
                 ],
         ),
         (
-            games.create_chance_in_middle_efg(),
+            games.read_from_file("chance_in_middle.efg"),
             [
                 [["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]],
                 [[1, 0], ["6/11", "5/11"]]
             ]
         ),
         (
-            games.create_chance_in_middle_efg(nonterm_outcomes=True),
+            games.read_from_file("chance_in_middle_with_nonterm_outcomes.efg"),
             [
                 [["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]],
                 [[1, 0], ["6/11", "5/11"]]
@@ -661,7 +661,7 @@ def test_lcp_behavior_double():
         ),
         # Non-zero-sum games
         (
-                games.create_reduction_both_players_payoff_ties_efg(),
+                games.read_from_file("reduction_both_players_payoff_ties_GTE_survey.efg"),
                 [[[0, 0, 1, 0], [1, 0]], [[0, 1], [0, 1], [0, 1], [0, 1]]],
         ),
         (
@@ -677,19 +677,19 @@ def test_lcp_behavior_double():
                 [[[0, 0, 0, 1]], [[0, 0, 0, 1]]],
         ),
         (
-            games.create_entry_accomodation_efg(),
+            games.read_from_file("entry_accommodation.efg"),
             [[["2/3", "1/3"], [1, 0], [1, 0]], [["2/3", "1/3"]]]
         ),
         (
-            games.create_entry_accomodation_efg(nonterm_outcomes=True),
+            games.read_from_file("entry_accommodation_with_nonterm_outcomes.efg"),
             [[["2/3", "1/3"], [1, 0], [1, 0]], [["2/3", "1/3"]]],
         ),
         (
-            games.create_non_zero_sum_lacking_outcome_efg(),
+            games.read_from_file("2_player_non_zero_sum.efg"),
             [[["1/3", "2/3"]], [["1/2", "1/2"]]]
         ),
         (
-            games.create_non_zero_sum_lacking_outcome_efg(missing_term_outcome=True),
+            games.read_from_file("2_player_non_zero_sum_missing_term_outcome.efg"),
             [[["1/3", "2/3"]], [["1/2", "1/2"]]],
         ),
     ],
@@ -766,30 +766,31 @@ def test_lp_behavior_double():
     "game,mixed_behav_prof_data",
     [
         (
-                games.create_two_player_perfect_info_win_lose_efg(),
-                [[[0, 1], [1, 0]], [[1, 0], [1, 0]]],
+            games.read_from_file("two_player_perfect_info_win_lose.efg"),
+            [[[0, 1], [1, 0]], [[1, 0], [1, 0]]],
         ),
         (
-                games.create_two_player_perfect_info_win_lose_efg(nonterm_outcomes=True),
-                [[[0, 1], [1, 0]], [[1, 0], [1, 0]]],
+            games.read_from_file("two_player_perfect_info_win_lose_with_nonterm_outcomes.efg"),
+            [[[0, 1], [1, 0]], [[1, 0], [1, 0]]],
         ),
         (
-                games.create_2x2_zero_sum_efg(missing_term_outcome=False),
-                [[["1/2", "1/2"]], [["1/2", "1/2"]]]
+            games.create_2x2_zero_sum_efg(missing_term_outcome=False),
+            [[["1/2", "1/2"]], [["1/2", "1/2"]]]
         ),
         (
             games.create_2x2_zero_sum_efg(missing_term_outcome=True),
             [[["1/2", "1/2"]], [["1/2", "1/2"]]],
         ),
-        (games.create_matching_pennies_efg(with_neutral_outcome=False),
-         [[["1/2", "1/2"]], [["1/2", "1/2"]]]),
+        (
+            games.create_matching_pennies_efg(with_neutral_outcome=False),
+            [[["1/2", "1/2"]], [["1/2", "1/2"]]]),
         (
             games.create_matching_pennies_efg(with_neutral_outcome=True),
             [[["1/2", "1/2"]], [["1/2", "1/2"]]],
         ),
         (
-                games.create_stripped_down_poker_efg(),
-                [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]],
+            games.create_stripped_down_poker_efg(),
+            [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]],
         ),
         (
             games.create_stripped_down_poker_efg(nonterm_outcomes=True),
@@ -817,32 +818,32 @@ def test_lp_behavior_double():
             ],
         ),
         (
-                games.create_seq_form_STOC_paper_zero_sum_2_player_efg(),
+                games.read_from_file("zerosum_efg_from_sequence_form_STOC94_paper.efg"),
                 [
                     [[0, 1], ["2/3", "1/3"], ["1/3", "2/3"]],
                     [["5/6", "1/6"], ["5/9", "4/9"]],
                 ],
         ),
         (
-                games.create_perfect_info_with_chance_efg(),
+                games.read_from_file("perfect_info_with_chance.efg"),
                 [[[0, 1]], [[1, 0], [1, 0]]],
         ),
         (
-            games.create_three_action_internal_outcomes_efg(),
+            games.read_from_file("2_player_chance.efg"),
             [
                 [["1/3", 0, "2/3"], ["2/3", 0, "1/3"]],
                 [["2/3", "1/3"], ["2/3", "1/3"], ["1/3", "2/3"]],
             ]
         ),
         (
-            games.create_three_action_internal_outcomes_efg(nonterm_outcomes=True),
+            games.read_from_file("2_player_chance_nonterm_outcomes_and_missing_term_outcomes.efg"),
             [
                 [["1/3", 0, "2/3"], ["2/3", 0, "1/3"]],
                 [["2/3", "1/3"], ["2/3", "1/3"], ["1/3", "2/3"]],
             ],
         ),
         (
-                games.create_large_payoff_game_efg(),
+                games.read_from_file("large_payoff_game.efg"),
                 [
                     [[1, 0], [1, 0]],
                     [[0, 1], ["9999999999999999999/10000000000000000000",
@@ -850,14 +851,14 @@ def test_lp_behavior_double():
                 ],
         ),
         (
-            games.create_chance_in_middle_efg(),
+            games.read_from_file("chance_in_middle.efg"),
             [
                 [["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]],
                 [[1, 0], ["6/11", "5/11"]]
             ],
         ),
         (
-            games.create_chance_in_middle_efg(nonterm_outcomes=True),
+            games.read_from_file("chance_in_middle_with_nonterm_outcomes.efg"),
             [
                 [["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]],
                 [[1, 0], ["6/11", "5/11"]]
