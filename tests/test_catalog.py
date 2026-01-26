@@ -65,6 +65,12 @@ class TestCatalogGame:
             gbt.catalog.PrisonersDilemma().description
         )
 
+    def test_catalog_game_missing_game_method(self):
+        """CatalogGame subclass missing _game should raise NotImplementedError."""
+        with pytest.raises(NotImplementedError):
+            class InvalidGame(gbt.catalog.CatalogGame):
+                """A CatalogGame that does not implement _game."""
+
 
 class TestGamesFunction:
     """Tests for the games() query function."""
@@ -74,6 +80,12 @@ class TestGamesFunction:
         result = gbt.catalog.games()
         assert isinstance(result, list)
         assert all(isinstance(name, str) for name in result)
+
+    def test_invalid_games_not_included(self):
+        """games() should not return classes marked as valid_game=False."""
+        result = gbt.catalog.games()
+        print(len(result))
+        assert "InvalidGame" not in result
 
     def test_games_filter_by_game_type(self):
         """Filtering should split games into NFG/EFG."""

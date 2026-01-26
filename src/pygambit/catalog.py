@@ -204,6 +204,11 @@ def games(
                 all_subclasses.extend(get_all_subclasses(subclass))
                 continue
 
+            # Don't include classes that lack a cached game
+            if subclass.game is None:
+                all_subclasses.extend(get_all_subclasses(subclass))
+                continue
+
             if is_tree is not None and is_tree != subclass.game.is_tree:
                 all_subclasses.extend(get_all_subclasses(subclass))
                 continue
