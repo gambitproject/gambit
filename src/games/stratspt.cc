@@ -35,6 +35,12 @@ namespace Gambit {
 StrategySupportProfile::StrategySupportProfile(const Game &p_game) : m_game(p_game)
 {
   m_game->BuildComputedValues();
+  for (const auto &player : m_game->GetPlayers()) {
+    for (const auto &strategy : player->GetStrategies()) {
+      m_support[player].push_back(strategy);
+    }
+  }
+
   m_strategyDigits.m_space = &p_game->m_pureStrategies;
   m_strategyDigits.m_allowedDigits.resize(p_game->NumPlayers());
 
@@ -112,12 +118,22 @@ void StrategySupportProfile::AddStrategy(const GameStrategy &p_strategy)
   if (p_strategy->GetGame() != m_game) {
     throw MismatchException();
   }
+
+  auto &support = m_support[p_strategy->GetPlayer()];
+  auto pos = std::find_if(support.begin(), support.end(), [p_strategy](const GameStrategy &s) {
+    return s->GetNumber() >= p_strategy->GetNumber();
+  });
+  if (pos == support.end() || *pos != p_strategy) {
+    // Strategy is not in the support for the player; add at this location to keep sorted by number
+    support.insert(pos, p_strategy);
+  }
+
   const size_t index = p_strategy->GetPlayer()->GetNumber() - 1;
   const int digit = p_strategy->GetNumber() - 1;
   auto &digits = m_strategyDigits.m_allowedDigits[index];
-  auto pos = std::lower_bound(digits.begin(), digits.end(), digit);
-  if (pos == digits.end() || *pos != digit) {
-    digits.insert(pos, digit);
+  auto ipos = std::lower_bound(digits.begin(), digits.end(), digit);
+  if (ipos == digits.end() || *ipos != digit) {
+    digits.insert(ipos, digit);
   }
 }
 
@@ -126,15 +142,21 @@ bool StrategySupportProfile::RemoveStrategy(const GameStrategy &p_strategy)
   if (p_strategy->GetGame() != m_game) {
     throw MismatchException();
   }
+  auto &support = m_support[p_strategy->GetPlayer()];
+  if (support.size() == 1) {
+    return false;
+  }
+  auto pos = std::find(support.begin(), support.end(), p_strategy);
+  if (pos != support.end()) {
+    support.erase(pos);
+  }
+
   const size_t index = p_strategy->GetPlayer()->GetNumber() - 1;
   const int digit = p_strategy->GetNumber() - 1;
   auto &digits = m_strategyDigits.m_allowedDigits[index];
-  if (digits.size() == 1) {
-    return false;
-  }
-  auto pos = std::lower_bound(digits.begin(), digits.end(), digit);
-  if (pos != digits.end() && *pos == digit) {
-    digits.erase(pos);
+  auto ipos = std::lower_bound(digits.begin(), digits.end(), digit);
+  if (ipos != digits.end() && *ipos == digit) {
+    digits.erase(ipos);
     return true;
   }
   return false;

@@ -40,6 +40,7 @@ namespace Gambit {
 /// in which they appear in the underlying game.
 class StrategySupportProfile {
   Game m_game;
+  std::map<GamePlayer, std::vector<GameStrategy>> m_support;
   CartesianSubset m_strategyDigits;
 
 public:
