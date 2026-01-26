@@ -46,7 +46,7 @@ class StrategySupportProfile {
 public:
   class Support {
     const StrategySupportProfile *m_profile;
-    const GamePlayer m_player;
+    GamePlayer m_player;
 
   public:
     using const_iterator = std::vector<GameStrategy>::const_iterator;
