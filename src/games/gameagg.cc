@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/libgambit/gameagg.cc
 // Implementation of action-graph game representation
@@ -51,10 +51,10 @@ public:
 
 Rational AGGPureStrategyProfileRep::GetPayoff(const GamePlayer &p_player) const
 {
-  const std::shared_ptr<agg::AGG> aggPtr = dynamic_cast<GameAGGRep &>(*m_nfg).aggPtr;
+  const std::shared_ptr<agg::AGG> aggPtr = dynamic_cast<GameAGGRep &>(*m_game).aggPtr;
   std::vector<int> s(aggPtr->getNumPlayers());
   for (int i = 1; i <= aggPtr->getNumPlayers(); i++) {
-    s[i - 1] = m_profile.at(m_nfg->GetPlayer(i))->GetNumber() - 1;
+    s[i - 1] = GetStrategy(m_game->GetPlayer(i))->GetNumber() - 1;
   }
   return Rational(aggPtr->getPurePayoff(p_player->GetNumber() - 1, s));
 }
@@ -62,10 +62,10 @@ Rational AGGPureStrategyProfileRep::GetPayoff(const GamePlayer &p_player) const
 Rational AGGPureStrategyProfileRep::GetStrategyValue(const GameStrategy &p_strategy) const
 {
   const int player = p_strategy->GetPlayer()->GetNumber();
-  const std::shared_ptr<agg::AGG> aggPtr = dynamic_cast<GameAGGRep &>(*m_nfg).aggPtr;
+  const std::shared_ptr<agg::AGG> aggPtr = dynamic_cast<GameAGGRep &>(*m_game).aggPtr;
   std::vector<int> s(aggPtr->getNumPlayers());
   for (int i = 1; i <= aggPtr->getNumPlayers(); i++) {
-    s[i - 1] = m_profile.at(m_nfg->GetPlayer(i))->GetNumber() - 1;
+    s[i - 1] = GetStrategy(m_game->GetPlayer(i))->GetNumber() - 1;
   }
   s[player - 1] = p_strategy->GetNumber() - 1;
   return Rational(aggPtr->getPurePayoff(player - 1, s));
@@ -236,23 +236,14 @@ GameAGGRep::NewMixedStrategyProfile(const Rational &, const StrategySupportProfi
 
 bool GameAGGRep::IsConstSum() const
 {
-  auto profile = NewPureStrategyProfile();
-  Rational sum(0);
-  for (const auto &player : m_players) {
-    sum += profile->GetPayoff(player);
-  }
+  auto payoff_sum = [&](const PureStrategyProfile &p) {
+    return sum_function(m_players, [&](const auto &player) { return p->GetPayoff(player); });
+  };
+  const Rational sum = payoff_sum(NewPureStrategyProfile());
 
-  for (auto iter : StrategyContingencies(std::const_pointer_cast<GameRep>(shared_from_this()))) {
-    Rational newsum(0);
-    for (const auto &player : m_players) {
-      newsum += iter->GetPayoff(player);
-    }
-    if (newsum != sum) {
-      return false;
-    }
-  }
-
-  return true;
+  auto contingencies = StrategyContingencies(std::const_pointer_cast<GameRep>(shared_from_this()));
+  return std::all_of(contingencies.begin(), contingencies.end(),
+                     [&](const PureStrategyProfile &p) { return payoff_sum(p) == sum; });
 }
 
 //------------------------------------------------------------------------

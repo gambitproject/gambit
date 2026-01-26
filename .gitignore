@@ -48,3 +48,5 @@ doc/tutorials/*.png
 Gambit.app/*
 *.ipynb_checkpoints
 *.ef
+build_support/msw/gambit.wxs
+build_support/osx/Info.plist

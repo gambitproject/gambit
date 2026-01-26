@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/solvers/enumpoly/nfgpoly.cc
 // Enumerates all Nash equilibria in a normal form game, via solving
@@ -63,7 +63,7 @@ IndifferenceEquation(std::shared_ptr<VariableSpace> space, const StrategySupport
 {
   Polynomial<double> equation(space);
 
-  for (auto iter : StrategyContingencies(support, {s1})) {
+  for (const auto &iter : StrategyContingencies(support.RestrictTo(s1))) {
     Polynomial<double> term(space, 1);
     for (auto player : support.GetGame()->GetPlayers()) {
       if (player != s1->GetPlayer()) {

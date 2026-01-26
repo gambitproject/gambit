@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/libgambit/gamebagg.cc
 // Implementation of Bayesian action-graph game representation
@@ -50,12 +50,12 @@ public:
 
 Rational BAGGPureStrategyProfileRep::GetPayoff(const GamePlayer &p_player) const
 {
-  const std::shared_ptr<agg::BAGG> baggPtr = dynamic_cast<GameBAGGRep &>(*m_nfg).baggPtr;
-  std::vector<int> s(m_nfg->NumPlayers());
-  for (size_t i = 1; i <= m_nfg->NumPlayers(); i++) {
-    s[i - 1] = m_profile.at(m_nfg->GetPlayer(i))->GetNumber() - 1;
+  const std::shared_ptr<agg::BAGG> baggPtr = dynamic_cast<GameBAGGRep &>(*m_game).baggPtr;
+  std::vector<int> s(m_game->NumPlayers());
+  for (size_t i = 1; i <= m_game->NumPlayers(); i++) {
+    s[i - 1] = GetStrategy(m_game->GetPlayer(i))->GetNumber() - 1;
   }
-  const int bp = dynamic_cast<GameBAGGRep &>(*m_nfg).agent2baggPlayer[p_player->GetNumber()];
+  const int bp = dynamic_cast<GameBAGGRep &>(*m_game).agent2baggPlayer[p_player->GetNumber()];
   const int tp = p_player->GetNumber() - 1 - baggPtr->typeOffset[bp - 1];
   return Rational(baggPtr->getPurePayoff(bp - 1, tp, s));
 }
@@ -63,13 +63,13 @@ Rational BAGGPureStrategyProfileRep::GetPayoff(const GamePlayer &p_player) const
 Rational BAGGPureStrategyProfileRep::GetStrategyValue(const GameStrategy &p_strategy) const
 {
   const int player = p_strategy->GetPlayer()->GetNumber();
-  const std::shared_ptr<agg::BAGG> baggPtr = dynamic_cast<GameBAGGRep &>(*m_nfg).baggPtr;
-  std::vector<int> s(m_nfg->NumPlayers());
-  for (size_t i = 1; i <= m_nfg->NumPlayers(); i++) {
-    s[i - 1] = m_profile.at(m_nfg->GetPlayer(i))->GetNumber() - 1;
+  const std::shared_ptr<agg::BAGG> baggPtr = dynamic_cast<GameBAGGRep &>(*m_game).baggPtr;
+  std::vector<int> s(m_game->NumPlayers());
+  for (size_t i = 1; i <= m_game->NumPlayers(); i++) {
+    s[i - 1] = GetStrategy(m_game->GetPlayer(i))->GetNumber() - 1;
   }
   s[player - 1] = p_strategy->GetNumber() - 1;
-  const int bp = dynamic_cast<GameBAGGRep &>(*m_nfg).agent2baggPlayer[player];
+  const int bp = dynamic_cast<GameBAGGRep &>(*m_game).agent2baggPlayer[player];
   const int tp = player - 1 - baggPtr->typeOffset[bp - 1];
   return Rational(baggPtr->getPurePayoff(bp - 1, tp, s));
 }

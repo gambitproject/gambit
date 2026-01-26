@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2024, The Gambit Project (http://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (http://www.gambit-project.org)
 //
 // FILE: src/solvers/logit/logit.h
 // Computation of quantal response equilibrium correspondence
@@ -84,16 +84,15 @@ using MixedStrategyObserverFunctionType =
 
 inline void NullMixedStrategyObserver(const LogitQREMixedStrategyProfile &) {}
 
-std::list<LogitQREMixedStrategyProfile>
-LogitStrategySolve(const LogitQREMixedStrategyProfile &p_start, double p_regret, double p_omega,
-                   double p_firstStep, double p_maxAccel,
-                   MixedStrategyObserverFunctionType p_observer = NullMixedStrategyObserver);
+std::list<LogitQREMixedStrategyProfile> LogitStrategySolve(
+    const LogitQREMixedStrategyProfile &p_start, double p_regret, double p_omega,
+    double p_firstStep, double p_maxAccel,
+    const MixedStrategyObserverFunctionType &p_observer = NullMixedStrategyObserver);
 
-std::list<LogitQREMixedStrategyProfile>
-LogitStrategySolveLambda(const LogitQREMixedStrategyProfile &p_start,
-                         const std::list<double> &p_targetLambda, double p_omega,
-                         double p_firstStep, double p_maxAccel,
-                         MixedStrategyObserverFunctionType p_observer = NullMixedStrategyObserver);
+std::list<LogitQREMixedStrategyProfile> LogitStrategySolveLambda(
+    const LogitQREMixedStrategyProfile &p_start, const std::list<double> &p_targetLambda,
+    double p_omega, double p_firstStep, double p_maxAccel,
+    const MixedStrategyObserverFunctionType &p_observer = NullMixedStrategyObserver);
 
 LogitQREMixedStrategyProfile
 LogitStrategyEstimate(const MixedStrategyProfile<double> &p_frequencies, double p_maxLambda,

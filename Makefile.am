@@ -1,6 +1,6 @@
 ##
 ## This file is part of Gambit
-## Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+## Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 ##
 ## FILE: Makefile.am
 ## Top-level automake input file for Gambit
@@ -247,9 +247,9 @@ core_SOURCES = \
     src/core/util.h \
 	src/core/array.h \
 	src/core/vector.h \
+	src/core/segment.h \
 	src/core/recarray.h \
 	src/core/matrix.h \
-	src/core/matrix.imp \
 	src/core/integer.cc \
 	src/core/integer.h \
 	src/core/rational.cc \
@@ -300,7 +300,6 @@ game_SOURCES = \
 	src/games/behavmixed.h \
 	src/games/stratspt.cc \
 	src/games/stratspt.h \
-	src/games/stratpure.cc \
 	src/games/stratpure.h \
 	src/games/stratmixed.h \
 	src/games/file.cc \

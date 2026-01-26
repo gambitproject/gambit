@@ -6,18 +6,13 @@ The extensive game (.efg) file format
 The extensive game (.efg) file format has been used by Gambit, with
 minor variations, to represent extensive games since circa 1994. It
 replaced an earlier format, which had no particular name but which had
-the conventional extension .dt1. It is intended that some new formats
-will be introduced in the future; however, this format will be
-supported by Gambit, possibly through the use of converter programs to
-those putative future formats, for the foreseeable future.
+the conventional extension .dt1.
 
 
 A sample file
 -------------
 
-This is a sample file illustrating the general format of the file.
-This file is similar to the one distributed in the Gambit distribution
-under the name bayes1a.efg::
+This is a sample file illustrating the general format of the file::
 
     EFG 2 R "General Bayes game, one stage" { "Player 1" "Player 2" }
     c "ROOT" 1 "(0,1)" { "1G" 0.500000 "1B" 0.500000 } 0
@@ -51,8 +46,6 @@ under the name bayes1a.efg::
     p "" 2 2 "(2,2)" { "h" "l" } 0
     t "" 15 "Outcome 15" { 0.000000 4.000000 }
     t "" 16 "Outcome 16" { 10.000000 0.000000 }
-
-
 
 
 Structure of the prologue
@@ -97,11 +90,9 @@ of one line per node.
 Each node entry begins with an unquoted character indicating the type
 of the node. There are three node types:
 
-
-
-+ c for a chance node
-+ p for a personal player node
-+ t for a terminal node
++ `c` for a chance node
++ `p` for a personal player node
++ `t` for a terminal node
 
 Each node type will be discussed individually below. There are three
 numbering conventions which are used to identify the information
@@ -116,7 +107,8 @@ integer may be used to specify information sets for different players;
 this is not ambiguous since the player number appears as well.
 Finally, outcomes are also arbitrarily numbered in the file format in
 the same way in which information sets are, except for the special
-number 0 which indicates the null outcome.
+number 0 which is reserved to indicate the null outcome.
+Outcome 0 must not have a name or payoffs specified.
 
 Information sets and outcomes may (and frequently will) appear
 multiple times within a game. By convention, the second and subsequent
@@ -124,11 +116,12 @@ times an information set or outcome appears, the file may omit the
 descriptive information for that information set or outcome.
 Alternatively, the file may specify the descriptive information again;
 however, it must precisely match the original declaration of the
-information set or outcome. If any part of the description is omitted,
-the whole description must be omitted.
+information set or outcome. Any mismatch in repeated declarations
+is an error, and the file is not valid.
+If any part of the description is omitted, the whole description must be omitted.
 
 Outcomes may appear at nonterminal nodes. In these cases, payoffs are
-interepreted as incremental payoffs; the payoff to a player for a
+interpreted as incremental payoffs; the payoff to a player for a
 given path through the tree is interpreted as the sum of the payoffs
 at the outcomes encountered on that path (including at the terminal
 node). This is ideal for the representation of games with well-
@@ -146,41 +139,28 @@ with the character c . Following this, in order, are
 
 + a text string, giving the name of the node
 + a positive integer specifying the information set number
-+ (optional) the name of the information set
-+ (optional) a list of actions at the information set with their
++ (optional) the name of the information set and a list of actions at the information set with their
   corresponding probabilities
 + a nonnegative integer specifying the outcome
-+ (optional)the payoffs to each player for the outcome
-
-
++ (optional) the name of the outcome and the payoffs to each player for the outcome
 
 **Format of personal (player) nodes.** Entries for personal player
 decision nodes begin with the character p . Following this, in order,
 are:
 
-
-
 + a text string, giving the name of the node
 + a positive integer specifying the player who owns the node
 + a positive integer specifying the information set
-+ (optional) the name of the information set
-+ (optional) a list of action names for the information set
++ (optional) the name of the information set and a list of action names for the information set
 + a nonnegative integer specifying the outcome
-+ (optional) the name of the outcome
-+ the payoffs to each player for the outcome
-
++ (optional) the name of the outcome and the payoffs to each player for the outcome
 
 
 **Format of terminal nodes.** Entries for terminal nodes begin with
 the character t . Following this, in order, are:
 
-
-
 + a text string, giving the name of the node
 + a nonnegative integer specifying the outcome
-+ (optional) the name of the outcome
-+ the payoffs to each player for the outcome
-
-
++ (optional) the name of the outcome and the payoffs to each player for the outcome
 
 There is no explicit end-of-file delimiter for the file.

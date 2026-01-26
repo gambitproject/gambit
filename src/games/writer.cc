@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: library/include/gambit/writer.h
 // Classes for writing out games to various formats
@@ -31,8 +31,10 @@ std::string WriteHTMLFile(const Game &p_game, const GamePlayer &p_rowPlayer,
   std::string theHtml;
   theHtml += "<center><h1>" + p_game->GetTitle() + "</h1></center>\n";
 
-  for (auto iter : StrategyContingencies(
-           p_game, {p_rowPlayer->GetStrategies().front(), p_colPlayer->GetStrategies().front()})) {
+  auto support = StrategySupportProfile(p_game)
+                     .RestrictTo(p_rowPlayer->GetStrategies().front())
+                     .RestrictTo(p_colPlayer->GetStrategies().front());
+  for (const auto &iter : StrategyContingencies(support)) {
     if (p_game->NumPlayers() > 2) {
       theHtml += "<center><b>Subtable with strategies:</b></center>";
       for (auto player : p_game->GetPlayers()) {
@@ -99,8 +101,10 @@ std::string WriteLaTeXFile(const Game &p_game, const GamePlayer &p_rowPlayer,
 {
   std::string theHtml;
 
-  for (auto iter : StrategyContingencies(
-           p_game, {p_rowPlayer->GetStrategies().front(), p_colPlayer->GetStrategies().front()})) {
+  auto support = StrategySupportProfile(p_game)
+                     .RestrictTo(p_rowPlayer->GetStrategies().front())
+                     .RestrictTo(p_colPlayer->GetStrategies().front());
+  for (const auto &iter : StrategyContingencies(support)) {
     theHtml += "\\begin{game}{";
     theHtml += std::to_string(p_rowPlayer->GetStrategies().size());
     theHtml += "}{";

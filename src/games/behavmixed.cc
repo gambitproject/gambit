@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/libgambit/behav.cc
 // Instantiation of behavior profile classes.
@@ -37,6 +37,7 @@ MixedBehaviorProfile<T>::MixedBehaviorProfile(const Game &p_game)
   : m_probs(p_game->BehavProfileLength()), m_support(BehaviorSupportProfile(p_game)),
     m_gameversion(p_game->GetVersion())
 {
+  p_game->EnsureInfosetOrdering();
   int index = 1;
   for (const auto &infoset : p_game->GetInfosets()) {
     for (const auto &action : infoset->GetActions()) {
@@ -51,6 +52,7 @@ MixedBehaviorProfile<T>::MixedBehaviorProfile(const BehaviorSupportProfile &p_su
   : m_probs(p_support.BehaviorProfileLength()), m_support(p_support),
     m_gameversion(p_support.GetGame()->GetVersion())
 {
+  m_support.GetGame()->EnsureInfosetOrdering();
   int index = 1;
   for (const auto &infoset : p_support.GetGame()->GetInfosets()) {
     for (const auto &action : infoset->GetActions()) {
@@ -126,6 +128,7 @@ MixedBehaviorProfile<T>::MixedBehaviorProfile(const MixedStrategyProfile<T> &p_p
   : m_probs(p_profile.GetGame()->BehavProfileLength()), m_support(p_profile.GetGame()),
     m_gameversion(p_profile.GetGame()->GetVersion())
 {
+  m_support.GetGame()->EnsureInfosetOrdering();
   int index = 1;
   for (const auto &infoset : p_profile.GetGame()->GetInfosets()) {
     for (const auto &action : infoset->GetActions()) {
@@ -249,6 +252,12 @@ template <class T> MixedBehaviorProfile<T> MixedBehaviorProfile<T>::ToFullSuppor
 
 template <class T> T MixedBehaviorProfile<T>::GetLiapValue() const
 {
+  m_support.GetGame()->BuildComputedValues();
+  return MixedStrategyProfile<T>(*this).GetLiapValue();
+}
+
+template <class T> T MixedBehaviorProfile<T>::GetAgentLiapValue() const
+{
   CheckVersion();
   EnsureRegrets();
   auto value = static_cast<T>(0);
@@ -347,6 +356,12 @@ template <class T> T MixedBehaviorProfile<T>::GetRegret(const GameInfoset &p_inf
 }
 
 template <class T> T MixedBehaviorProfile<T>::GetMaxRegret() const
+{
+  m_support.GetGame()->BuildComputedValues();
+  return MixedStrategyProfile<T>(*this).GetMaxRegret();
+}
+
+template <class T> T MixedBehaviorProfile<T>::GetAgentMaxRegret() const
 {
   return maximize_function(m_support.GetGame()->GetInfosets(),
                            [this](const auto &infoset) -> T { return this->GetRegret(infoset); });
@@ -540,6 +555,7 @@ template <class T> bool MixedBehaviorProfile<T>::IsDefinedAt(GameInfoset p_infos
 template <class T> MixedStrategyProfile<T> MixedBehaviorProfile<T>::ToMixedProfile() const
 {
   CheckVersion();
+  m_support.GetGame()->BuildComputedValues();
   return MixedStrategyProfile<T>(*this);
 }
 

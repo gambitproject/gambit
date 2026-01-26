@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/libgambit/gametree.cc
 // Implementation of extensive game representation
@@ -145,6 +145,7 @@ void GameTreeRep::DeleteAction(GameAction p_action)
     member->m_children.erase(it);
   }
   ClearComputedValues();
+  InvalidateNodeOrdering();
 }
 
 GameInfoset GameActionRep::GetInfoset() const { return m_infoset->shared_from_this(); }
@@ -192,6 +193,7 @@ void GameTreeRep::SetPlayer(GameInfoset p_infoset, GamePlayer p_player)
   p_player->m_infosets.push_back(p_infoset);
 
   ClearComputedValues();
+  InvalidateNodeOrdering();
 }
 
 bool GameInfosetRep::Precedes(GameNode p_node) const
@@ -235,6 +237,7 @@ GameAction GameTreeRep::InsertAction(GameInfoset p_infoset, GameAction p_action 
   m_numNodes += p_infoset->m_members.size();
   // m_numNonterminalNodes stays unchanged when an action is appended to an information set
   ClearComputedValues();
+  InvalidateNodeOrdering();
   return action;
 }
 
@@ -250,6 +253,7 @@ void GameTreeRep::RemoveMember(GameInfosetRep *p_infoset, GameNodeRep *p_node)
         player->m_infosets.begin(), player->m_infosets.end(), p_infoset->shared_from_this()));
     RenumberInfosets(player);
   }
+  InvalidateNodeOrdering();
 }
 
 void GameTreeRep::Reveal(GameInfoset p_atInfoset, GamePlayer p_player)
@@ -278,6 +282,7 @@ void GameTreeRep::Reveal(GameInfoset p_atInfoset, GamePlayer p_player)
   }
 
   ClearComputedValues();
+  InvalidateNodeOrdering();
 }
 
 //========================================================================
@@ -437,6 +442,7 @@ void GameTreeRep::DeleteParent(GameNode p_node)
 
   oldParent->Invalidate();
   ClearComputedValues();
+  InvalidateNodeOrdering();
 }
 
 void GameTreeRep::DeleteTree(GameNode p_node)
@@ -463,6 +469,7 @@ void GameTreeRep::DeleteTree(GameNode p_node)
   node->m_label = "";
 
   ClearComputedValues();
+  InvalidateNodeOrdering();
 }
 
 void GameTreeRep::CopySubtree(GameNodeRep *dest, GameNodeRep *src, GameNodeRep *stop)
@@ -504,6 +511,7 @@ void GameTreeRep::CopyTree(GameNode p_dest, GameNode p_src)
       CopySubtree(dest_child->get(), src_child->get(), dest);
     }
     ClearComputedValues();
+    InvalidateNodeOrdering();
   }
 }
 
@@ -527,6 +535,7 @@ void GameTreeRep::MoveTree(GameNode p_dest, GameNode p_src)
   dest->m_outcome = nullptr;
 
   ClearComputedValues();
+  InvalidateNodeOrdering();
 }
 
 Game GameTreeRep::CopySubgame(GameNode p_root) const
@@ -558,6 +567,7 @@ void GameTreeRep::SetInfoset(GameNode p_node, GameInfoset p_infoset)
   node->m_infoset = p_infoset.get();
 
   ClearComputedValues();
+  InvalidateInfosetOrdering();
 }
 
 GameInfoset GameTreeRep::LeaveInfoset(GameNode p_node)
@@ -588,6 +598,7 @@ GameInfoset GameTreeRep::LeaveInfoset(GameNode p_node)
     (*new_act)->SetLabel((*old_act)->GetLabel());
   }
   ClearComputedValues();
+  InvalidateInfosetOrdering();
   return node->m_infoset->shared_from_this();
 }
 
@@ -633,6 +644,7 @@ GameInfoset GameTreeRep::AppendMove(GameNode p_node, GameInfoset p_infoset)
                 });
   m_numNonterminalNodes++;
   ClearComputedValues();
+  InvalidateNodeOrdering();
   return node->m_infoset->shared_from_this();
 }
 
@@ -689,6 +701,7 @@ GameInfoset GameTreeRep::InsertMove(GameNode p_node, GameInfoset p_infoset)
   m_numNodes += newNode->m_infoset->m_actions.size();
   m_numNonterminalNodes++;
   ClearComputedValues();
+  InvalidateNodeOrdering();
   return p_infoset;
 }
 
@@ -726,83 +739,112 @@ Game NewTree() { return std::make_shared<GameTreeRep>(); }
 //                 GameTreeRep: General data access
 //------------------------------------------------------------------------
 
-namespace {
-
-class NotZeroSumException final : public std::runtime_error {
-public:
-  NotZeroSumException() : std::runtime_error("Game is not constant sum") {}
-  ~NotZeroSumException() noexcept override = default;
-};
-
-Rational SubtreeSum(GameNode p_node)
-{
-  Rational sum(0);
-
-  if (!p_node->IsTerminal()) {
-    const auto children = p_node->GetChildren();
-    sum = SubtreeSum(children.front());
-    if (std::any_of(std::next(children.begin()), children.end(),
-                    [sum](const GameNode &n) { return SubtreeSum(n) != sum; })) {
-      throw NotZeroSumException();
-    }
-  }
-
-  if (p_node->GetOutcome()) {
-    for (const auto &player : p_node->GetGame()->GetPlayers()) {
-      sum += p_node->GetOutcome()->GetPayoff<Rational>(player);
-    }
-  }
-  return sum;
-}
-
-Rational
-AggregateSubtreePayoff(const GamePlayer &p_player, const GameNode &p_node,
-                       std::function<Rational(const Rational &, const Rational &)> p_aggregator)
-{
-  if (p_node->IsTerminal()) {
-    if (p_node->GetOutcome()) {
-      return p_node->GetOutcome()->GetPayoff<Rational>(p_player);
-    }
-    return Rational(0);
-  }
-  const auto &children = p_node->GetChildren();
-  auto subtree =
-      std::accumulate(std::next(children.begin()), children.end(),
-                      AggregateSubtreePayoff(p_player, children.front(), p_aggregator),
-                      [&p_aggregator, &p_player](const Rational &r, const GameNode &c) {
-                        return p_aggregator(r, AggregateSubtreePayoff(p_player, c, p_aggregator));
-                      });
-  if (p_node->GetOutcome()) {
-    return subtree + p_node->GetOutcome()->GetPayoff<Rational>(p_player);
-  }
-  return subtree;
-}
-
-} // end anonymous namespace
-
 bool GameTreeRep::IsConstSum() const
 {
-  try {
-    SubtreeSum(m_root);
-    return true;
-  }
-  catch (NotZeroSumException &) {
-    return false;
-  }
+  struct ConstSumCallback {
+    const GameTreeRep *m_game;
+    std::map<GameNode, Rational> m_subtreeSums;
+    bool m_isConstSum{true};
+
+    static DFSCallbackResult OnEnter(GameNode, int) { return DFSCallbackResult::Continue; }
+    static DFSCallbackResult OnAction(GameNode, GameNode, int)
+    {
+      return DFSCallbackResult::Continue;
+    }
+    DFSCallbackResult OnExit(const GameNode &p_node, int)
+    {
+      Rational sum(0);
+      if (!p_node->IsTerminal()) {
+        const auto children = p_node->GetChildren();
+
+        if (std::adjacent_find(children.begin(), children.end(),
+                               [&](const GameNode &a, const GameNode &b) {
+                                 return m_subtreeSums[a] != m_subtreeSums[b];
+                               }) != children.end()) {
+          m_isConstSum = false;
+          return DFSCallbackResult::Stop;
+        }
+        sum = m_subtreeSums[*children.begin()];
+        for (const auto &child : children) {
+          m_subtreeSums.erase(child);
+        }
+      }
+
+      if (const auto outcome = p_node->GetOutcome()) {
+        sum += sum_function(m_game->m_players, [&](const auto &p_player) {
+          return outcome->GetPayoff<Rational>(p_player);
+        });
+      }
+      m_subtreeSums[p_node] = sum;
+      return DFSCallbackResult::Continue;
+    }
+    static void OnVisit(GameNode, int) {}
+  };
+
+  ConstSumCallback callback{this};
+  WalkDFS(Game(const_cast<GameTreeRep *>(this)->shared_from_this()), m_root,
+          TraversalOrder::Postorder, callback);
+  return callback.m_isConstSum;
+}
+
+template <class Aggregator>
+Rational GameTreeRep::AggregateSubtreePayoff(const GamePlayer &p_player,
+                                             Aggregator p_aggregator) const
+{
+  struct AggregatePayoffCallback {
+    const GamePlayer &m_player;
+    Aggregator m_aggregator;
+
+    std::map<GameNode, Rational> m_subtreeValues;
+    Rational m_result{0};
+
+    static DFSCallbackResult OnEnter(GameNode, int) { return DFSCallbackResult::Continue; }
+    static DFSCallbackResult OnAction(GameNode, GameNode, int)
+    {
+      return DFSCallbackResult::Continue;
+    }
+    DFSCallbackResult OnExit(const GameNode &p_node, int)
+    {
+      Rational value(0);
+      if (!p_node->IsTerminal()) {
+        const auto children = p_node->GetChildren();
+        value = m_aggregator(children, [&](const GameNode &c) { return m_subtreeValues[c]; });
+        for (const auto &child : children) {
+          m_subtreeValues.erase(child);
+        }
+      }
+      if (const auto outcome = p_node->GetOutcome()) {
+        value += outcome->GetPayoff<Rational>(m_player);
+      }
+      m_subtreeValues[p_node] = value;
+      m_result = value; // We write the root node value last, so will be correct on termination
+      return DFSCallbackResult::Continue;
+    }
+
+    static void OnVisit(GameNode, int) {}
+  };
+
+  AggregatePayoffCallback callback{p_player, std::move(p_aggregator)};
+
+  WalkDFS(Game(const_cast<GameTreeRep *>(this)->shared_from_this()), m_root,
+          TraversalOrder::Postorder, callback);
+
+  return callback.m_result;
 }
 
 Rational GameTreeRep::GetPlayerMinPayoff(const GamePlayer &p_player) const
 {
-  return AggregateSubtreePayoff(
-      p_player, m_root, [](const Rational &a, const Rational &b) { return std::min(a, b); });
+  return AggregateSubtreePayoff(p_player, [](const auto &range, auto value_fn) {
+    return minimize_function(range, value_fn);
+  });
 }
 
 Rational GameTreeRep::GetPlayerMaxPayoff(const GamePlayer &p_player) const
 {
-  return AggregateSubtreePayoff(
-      p_player, m_root, [](const Rational &a, const Rational &b) { return std::max(a, b); });
+  return AggregateSubtreePayoff(p_player, [](const auto &range, auto value_fn) {
+    return maximize_function(range, value_fn);
+  });
 }
-
 bool GameTreeRep::IsPerfectRecall() const
 {
   if (!m_ownPriorActionInfo && !m_root->IsTerminal()) {
@@ -852,6 +894,7 @@ void GameTreeRep::SortInfosets(GamePlayerRep *p_player)
       });
   RenumberInfosets(p_player);
 }
+
 void GameTreeRep::RenumberInfosets(GamePlayerRep *p_player)
 {
   std::for_each(
@@ -859,16 +902,28 @@ void GameTreeRep::RenumberInfosets(GamePlayerRep *p_player)
       [iset = 1](const std::shared_ptr<GameInfosetRep> &s) mutable { s->m_number = iset++; });
 }
 
-void GameTreeRep::SortInfosets()
+void GameTreeRep::EnsureNodeOrdering() const
 {
+  if (m_nodesOrdered) {
+    return;
+  }
   int nodeindex = 1;
   for (const auto &node : GetNodes()) {
     node->m_number = nodeindex++;
   }
-  SortInfosets(m_chance.get());
-  for (auto player : m_players) {
+  m_nodesOrdered = true;
+}
+
+void GameTreeRep::EnsureInfosetOrdering() const
+{
+  if (m_infosetsOrdered) {
+    return;
+  }
+  EnsureNodeOrdering();
+  for (auto player : GetPlayersWithChance()) {
     SortInfosets(player.get());
   }
+  m_infosetsOrdered = true;
 }
 
 void GameTreeRep::ClearComputedValues() const
@@ -891,12 +946,13 @@ void GameTreeRep::BuildComputedValues() const
   if (m_computedValues) {
     return;
   }
-  const_cast<GameTreeRep *>(this)->SortInfosets();
+  EnsureInfosetOrdering();
   for (const auto &player : m_players) {
     std::map<GameInfosetRep *, int> behav;
     std::map<GameNodeRep *, GameNodeRep *> ptr, whichbranch;
     player->MakeReducedStrats(m_root.get(), nullptr, behav, ptr, whichbranch);
   }
+  IndexStrategies();
   m_computedValues = true;
 }
 
@@ -1329,6 +1385,7 @@ MixedStrategyProfile<double> GameTreeRep::NewMixedStrategyProfile(double) const
   if (!IsPerfectRecall()) {
     throw UndefinedException("Mixed strategies not supported for games with imperfect recall.");
   }
+  BuildComputedValues();
   return StrategySupportProfile(std::const_pointer_cast<GameRep>(shared_from_this()))
       .NewMixedStrategyProfile<double>();
 }
@@ -1338,6 +1395,7 @@ MixedStrategyProfile<Rational> GameTreeRep::NewMixedStrategyProfile(const Ration
   if (!IsPerfectRecall()) {
     throw UndefinedException("Mixed strategies not supported for games with imperfect recall.");
   }
+  BuildComputedValues();
   return StrategySupportProfile(std::const_pointer_cast<GameRep>(shared_from_this()))
       .NewMixedStrategyProfile<Rational>();
 }
@@ -1348,6 +1406,7 @@ GameTreeRep::NewMixedStrategyProfile(double, const StrategySupportProfile &spt) 
   if (!IsPerfectRecall()) {
     throw UndefinedException("Mixed strategies not supported for games with imperfect recall.");
   }
+  BuildComputedValues();
   return MixedStrategyProfile<double>(std::make_unique<TreeMixedStrategyProfileRep<double>>(spt));
 }
 
@@ -1357,6 +1416,7 @@ GameTreeRep::NewMixedStrategyProfile(const Rational &, const StrategySupportProf
   if (!IsPerfectRecall()) {
     throw UndefinedException("Mixed strategies not supported for games with imperfect recall.");
   }
+  BuildComputedValues();
   return MixedStrategyProfile<Rational>(
       std::make_unique<TreeMixedStrategyProfileRep<Rational>>(spt));
 }
@@ -1386,6 +1446,7 @@ public:
 
 PureStrategyProfile GameTreeRep::NewPureStrategyProfile() const
 {
+  BuildComputedValues();
   return PureStrategyProfile(std::make_shared<TreePureStrategyProfileRep>(
       std::const_pointer_cast<GameRep>(shared_from_this())));
 }
@@ -1396,11 +1457,11 @@ PureStrategyProfile GameTreeRep::NewPureStrategyProfile() const
 
 Rational TreePureStrategyProfileRep::GetPayoff(const GamePlayer &p_player) const
 {
-  PureBehaviorProfile behav(m_nfg);
-  for (const auto &player : m_nfg->GetPlayers()) {
+  PureBehaviorProfile behav(m_game);
+  for (const auto &player : m_game->GetPlayers()) {
     for (const auto &infoset : player->GetInfosets()) {
       try {
-        behav.SetAction(infoset->GetAction(m_profile.at(player)->m_behav[infoset.get()]));
+        behav.SetAction(infoset->GetAction(GetStrategy(player)->m_behav[infoset.get()]));
       }
       catch (std::out_of_range &) {
       }

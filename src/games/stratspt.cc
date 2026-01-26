@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/libgambit/stratspt.cc
 // Implementation of strategy classes for normal forms
@@ -32,51 +32,48 @@ namespace Gambit {
 //                        class StrategySupportProfile
 //===========================================================================
 
-StrategySupportProfile::StrategySupportProfile(const Game &p_nfg) : m_nfg(p_nfg)
+StrategySupportProfile::StrategySupportProfile(const Game &p_game) : m_game(p_game)
 {
-  for (auto player : m_nfg->GetPlayers()) {
-    for (auto strategy : player->GetStrategies()) {
-      m_support[player].push_back(strategy);
-    }
-  }
-}
+  m_game->BuildComputedValues();
+  m_strategies.m_space = &p_game->m_pureStrategies;
+  m_strategies.m_allowedDigits.resize(p_game->NumPlayers());
 
-Array<int> StrategySupportProfile::NumStrategies() const
-{
-  Array<int> dim(m_support.size());
-  std::transform(
-      m_support.cbegin(), m_support.cend(), dim.begin(),
-      [](std::pair<GamePlayer, std::vector<GameStrategy>> a) { return a.second.size(); });
-  return dim;
+  for (size_t i = 0; i < p_game->NumPlayers(); ++i) {
+    const int radix = p_game->m_pureStrategies.m_radices[i];
+    auto &digits = m_strategies.m_allowedDigits[i];
+    digits.resize(radix);
+    std::iota(digits.begin(), digits.end(), 0);
+  }
 }
 
 int StrategySupportProfile::MixedProfileLength() const
 {
-  return std::accumulate(m_support.cbegin(), m_support.cend(), 0,
-                         [](size_t tot, std::pair<GamePlayer, std::vector<GameStrategy>> a) {
-                           return tot + a.second.size();
-                         });
+  return sum_function(m_strategies.m_allowedDigits, [](const std::vector<int> &digits) {
+    return static_cast<int>(digits.size());
+  });
 }
 
 template <> MixedStrategyProfile<double> StrategySupportProfile::NewMixedStrategyProfile() const
 {
-  return m_nfg->NewMixedStrategyProfile(0.0, *this);
+  return m_game->NewMixedStrategyProfile(0.0, *this);
 }
 
 template <> MixedStrategyProfile<Rational> StrategySupportProfile::NewMixedStrategyProfile() const
 {
-  return m_nfg->NewMixedStrategyProfile(Rational(0), *this);
+  return m_game->NewMixedStrategyProfile(Rational(0), *this);
 }
 
-bool StrategySupportProfile::IsSubsetOf(const StrategySupportProfile &p_support) const
+bool StrategySupportProfile::IsSubsetOf(const StrategySupportProfile &p_other) const
 {
-  for (auto player : m_nfg->GetPlayers()) {
-    if (!std::includes(p_support.m_support.at(player).begin(),
-                       p_support.m_support.at(player).end(), m_support.at(player).begin(),
-                       m_support.at(player).end(),
-                       [](const GameStrategy &s, const GameStrategy &t) {
-                         return s->GetNumber() < t->GetNumber();
-                       })) {
+  if (m_game != p_other.m_game) {
+    return false;
+  }
+  const auto &A = m_strategies.m_allowedDigits;
+  const auto &B = p_other.m_strategies.m_allowedDigits;
+  const size_t n = A.size();
+
+  for (size_t i = 0; i < n; ++i) {
+    if (!std::includes(B[i].begin(), B[i].end(), A[i].begin(), A[i].end())) {
       return false;
     }
   }
@@ -85,8 +82,8 @@ bool StrategySupportProfile::IsSubsetOf(const StrategySupportProfile &p_support)
 
 void StrategySupportProfile::WriteNfgFile(std::ostream &p_file) const
 {
-  auto players = m_nfg->GetPlayers();
-  p_file << "NFG 1 R " << std::quoted(m_nfg->GetTitle()) << ' '
+  auto players = m_game->GetPlayers();
+  p_file << "NFG 1 R " << std::quoted(m_game->GetTitle()) << ' '
          << FormatList(players, [](const GamePlayer &p) { return QuoteString(p->GetLabel()); })
          << std::endl
          << std::endl;
@@ -97,9 +94,9 @@ void StrategySupportProfile::WriteNfgFile(std::ostream &p_file) const
     }) << std::endl;
   }
   p_file << "}" << std::endl;
-  p_file << std::quoted(m_nfg->GetComment()) << std::endl << std::endl;
+  p_file << std::quoted(m_game->GetComment()) << std::endl << std::endl;
 
-  for (auto iter : StrategyContingencies(*this)) {
+  for (const auto &iter : StrategyContingencies(*this)) {
     p_file << FormatList(
                   players,
                   [&iter](const GamePlayer &p) {
@@ -112,25 +109,32 @@ void StrategySupportProfile::WriteNfgFile(std::ostream &p_file) const
 
 void StrategySupportProfile::AddStrategy(const GameStrategy &p_strategy)
 {
-  auto &support = m_support[p_strategy->GetPlayer()];
-  auto pos = std::find_if(support.begin(), support.end(), [p_strategy](const GameStrategy &s) {
-    return s->GetNumber() >= p_strategy->GetNumber();
-  });
-  if (pos == support.end() || *pos != p_strategy) {
-    // Strategy is not in the support for the player; add at this location to keep sorted by number
-    support.insert(pos, p_strategy);
+  if (p_strategy->GetGame() != m_game) {
+    throw MismatchException();
+  }
+  const size_t index = p_strategy->GetPlayer()->GetNumber() - 1;
+  const int digit = p_strategy->GetNumber() - 1;
+  auto &digits = m_strategies.m_allowedDigits[index];
+  auto pos = std::lower_bound(digits.begin(), digits.end(), digit);
+  if (pos == digits.end() || *pos != digit) {
+    digits.insert(pos, digit);
   }
 }
 
 bool StrategySupportProfile::RemoveStrategy(const GameStrategy &p_strategy)
 {
-  auto &support = m_support[p_strategy->GetPlayer()];
-  if (support.size() == 1) {
+  if (p_strategy->GetGame() != m_game) {
+    throw MismatchException();
+  }
+  const size_t index = p_strategy->GetPlayer()->GetNumber() - 1;
+  const int digit = p_strategy->GetNumber() - 1;
+  auto &digits = m_strategies.m_allowedDigits[index];
+  if (digits.size() == 1) {
     return false;
   }
-  auto pos = std::find(support.begin(), support.end(), p_strategy);
-  if (pos != support.end()) {
-    support.erase(pos);
+  auto pos = std::lower_bound(digits.begin(), digits.end(), digit);
+  if (pos != digits.end() && *pos == digit) {
+    digits.erase(pos);
     return true;
   }
   return false;
@@ -145,7 +149,7 @@ bool StrategySupportProfile::Dominates(const GameStrategy &s, const GameStrategy
 {
   bool equal = true;
 
-  for (auto iter : StrategyContingencies(*this)) {
+  for (const auto &iter : StrategyContingencies(*this)) {
     const Rational ap = iter->GetStrategyValue(s);
     const Rational bp = iter->GetStrategyValue(t);
     if (p_strict && ap <= bp) {
@@ -263,7 +267,7 @@ bool UndominatedForPlayer(const StrategySupportProfile &p_support,
 StrategySupportProfile StrategySupportProfile::Undominated(bool p_strict, bool p_external) const
 {
   StrategySupportProfile newSupport(*this);
-  for (auto player : m_nfg->GetPlayers()) {
+  for (auto player : m_game->GetPlayers()) {
     UndominatedForPlayer(*this, newSupport, player, p_strict, p_external);
   }
   return newSupport;

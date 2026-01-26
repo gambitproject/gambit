@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/core/core.h
 // Core (game theory-independent) declarations and utilities for Gambit
@@ -28,6 +28,7 @@
 #include "recarray.h"
 #include "vector.h"
 #include "matrix.h"
+#include "segment.h"
 #include "rational.h"
 
 #endif // GAMBIT_CORE_CORE_H

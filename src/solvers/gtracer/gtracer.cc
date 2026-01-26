@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: library/include/gtracer/gtracer.cc
 // Top-level include file for Gametracer embedding in Gambit
@@ -44,7 +44,7 @@ std::shared_ptr<gnmgame> BuildGame(const Game &p_game, bool p_scaled)
   std::shared_ptr<gnmgame> A(new nfgame(actions));
 
   std::vector<int> profile(players.size());
-  for (auto iter : StrategyContingencies(p_game)) {
+  for (const auto &iter : StrategyContingencies(p_game)) {
     std::transform(players.cbegin(), players.cend(), profile.begin(),
                    [iter](const GamePlayer &p) { return iter->GetStrategy(p)->GetNumber() - 1; });
     for (auto player : players) {

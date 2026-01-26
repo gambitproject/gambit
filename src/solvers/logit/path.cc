@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/tools/logit/path.cc
 // Implementation of generic smooth path-following algorithm.
@@ -70,9 +70,17 @@ void Givens(Matrix<double> &b, Matrix<double> &q, double &c1, double &c2, int l1
   c2 = 0.0;
 }
 
+void SetAsIdentity(Matrix<double> &M)
+{
+  M = 0.0;
+  for (int i = M.MinRow(); i <= M.MaxRow(); ++i) {
+    M(i, i) = 1.0;
+  }
+}
+
 void QRDecomp(Matrix<double> &b, Matrix<double> &q)
 {
-  q.MakeIdent();
+  SetAsIdentity(q);
   for (size_t m = 1; m <= b.NumColumns(); m++) {
     for (size_t k = m + 1; k <= b.NumRows(); k++) {
       Givens(b, q, b(m, m), b(k, m), m, k, m + 1);

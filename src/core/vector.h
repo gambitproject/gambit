@@ -1,6 +1,6 @@
 //
 // This file is part of Gambit
-// Copyright (c) 1994-2025, The Gambit Project (https://www.gambit-project.org)
+// Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/core/vector.h
 // A vector class
@@ -41,6 +41,7 @@ template <class T> class Vector {
   }
 
 public:
+  using value_type = typename Array<T>::value_type;
   using iterator = typename Array<T>::iterator;
   using const_iterator = typename Array<T>::const_iterator;
 
