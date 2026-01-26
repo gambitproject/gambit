@@ -46,13 +46,13 @@ class StrategySupportProfile {
 public:
   class Support {
     const StrategySupportProfile *m_profile;
-    size_t m_playerIndex;
+    const GamePlayer m_player;
 
   public:
     class const_iterator {
       const StrategySupportProfile *m_profile{nullptr};
-      size_t m_playerIndex{0};
-      std::vector<int>::const_iterator m_it;
+      const GamePlayer m_player;
+      std::vector<GameStrategy>::const_iterator m_it;
 
     public:
       using value_type = GameStrategy;
@@ -62,17 +62,13 @@ public:
       using iterator_category = std::forward_iterator_tag;
 
       const_iterator() = default;
-      const_iterator(const StrategySupportProfile *profile, const size_t playerIndex,
-                     const std::vector<int>::const_iterator it)
-        : m_profile(profile), m_playerIndex(playerIndex), m_it(it)
+      const_iterator(const StrategySupportProfile *profile, const GamePlayer &player,
+                     const std::vector<GameStrategy>::const_iterator it)
+        : m_profile(profile), m_player(player), m_it(it)
       {
       }
 
-      GameStrategy operator*() const
-      {
-        const auto &player = m_profile->m_game->GetPlayer(m_playerIndex + 1);
-        return player->GetStrategy(*m_it + 1);
-      }
+      GameStrategy operator*() const { return *m_it; }
 
       const_iterator &operator++()
       {
@@ -85,46 +81,32 @@ public:
       bool operator!=(const const_iterator &other) const { return !(*this == other); }
     };
 
-    Support() : m_profile(nullptr), m_playerIndex(0) {}
+    Support() : m_profile(nullptr) {}
 
-    Support(const StrategySupportProfile *profile, GamePlayer player)
-      : m_profile(profile), m_playerIndex(player->GetNumber() - 1)
+    Support(const StrategySupportProfile *profile, const GamePlayer &player)
+      : m_profile(profile), m_player(player)
     {
     }
 
-    size_t size() const
-    {
-      return m_profile->m_strategyDigits.m_allowedDigits[m_playerIndex].size();
-    }
+    size_t size() const { return m_profile->m_support.at(m_player).size(); }
 
     GameStrategy operator[](const size_t index) const
     {
-      const int digit = m_profile->m_strategyDigits.m_allowedDigits[m_playerIndex][index];
-      return m_profile->m_game->GetPlayer(m_playerIndex + 1)->GetStrategy(digit + 1);
+      return m_profile->m_support.at(m_player)[index];
     }
 
-    GameStrategy front() const
-    {
-      const int digit = m_profile->m_strategyDigits.m_allowedDigits[m_playerIndex].front();
-      return m_profile->m_game->GetPlayer(m_playerIndex + 1)->GetStrategy(digit + 1);
-    }
+    GameStrategy front() const { return m_profile->m_support.at(m_player).front(); }
 
-    GameStrategy back() const
-    {
-      const int digit = m_profile->m_strategyDigits.m_allowedDigits[m_playerIndex].back();
-      return m_profile->m_game->GetPlayer(m_playerIndex + 1)->GetStrategy(digit + 1);
-    }
+    GameStrategy back() const { return m_profile->m_support.at(m_player).back(); }
 
     const_iterator begin() const
     {
-      const auto &digits = m_profile->m_strategyDigits.m_allowedDigits[m_playerIndex];
-      return {m_profile, m_playerIndex, digits.begin()};
+      return {m_profile, m_player, m_profile->m_support.at(m_player).begin()};
     }
 
     const_iterator end() const
     {
-      const auto &digits = m_profile->m_strategyDigits.m_allowedDigits[m_playerIndex];
-      return {m_profile, m_playerIndex, digits.end()};
+      return {m_profile, m_player, m_profile->m_support.at(m_player).end()};
     }
   };
 
