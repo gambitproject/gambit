@@ -21,138 +21,6 @@ from . import games
 TOL = 1e-13  # tolerance for floating point assertions
 
 
-@pytest.mark.nash
-@pytest.mark.nash_enumpure_strategy
-@pytest.mark.parametrize(
-    "game,pure_strategy_prof_data",
-    [
-        # Zero-sum games
-        (
-            games.read_from_file("two_player_perfect_info_win_lose.efg"),
-            [
-                [[0, 0, 1, 0], [1, 0, 0]],
-                [[0, 0, 1, 0], [0, 1, 0]],
-                [[0, 0, 1, 0], [0, 0, 1]],
-            ]
-        ),
-        (games.create_stripped_down_poker_efg(), []),
-        # Non-zero-sum 2-player games
-        (games.create_one_shot_trust_efg(), [[[0, 1], [0, 1]]]),
-        (
-            games.create_EFG_for_nxn_bimatrix_coordination_game(3),
-            [
-                [[1, 0, 0], [1, 0, 0]],
-                [[0, 1, 0], [0, 1, 0]],
-                [[0, 0, 1], [0, 0, 1]],
-            ],
-        ),
-        (games.create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq(), []),
-        # 3-player game
-        (
-            games.read_from_file("mixed_behavior_game.efg"),
-            [
-                [[1, 0], [1, 0], [1, 0]],
-                [[0, 1], [0, 1], [1, 0]],
-                [[0, 1], [1, 0], [0, 1]],
-                [[1, 0], [0, 1], [0, 1]],
-            ],
-        ),
-    ]
-)
-def test_enumpure_strategy(game: gbt.Game, pure_strategy_prof_data: list):
-    """Test calls of enumeration of pure strategy equilibria
-
-       Tests max regret being zero (internal consistency) and compares the computed sequence of
-       pure strategy equilibria to a previosuly computed sequence (regression test)
-    """
-    result = gbt.nash.enumpure_solve(game)
-    assert len(result.equilibria) == len(pure_strategy_prof_data)
-    for eq, exp in zip(result.equilibria, pure_strategy_prof_data, strict=True):
-        assert eq.max_regret() == 0
-        expected = game.mixed_strategy_profile(rational=True, data=exp)
-        assert eq == expected
-
-
-@pytest.mark.nash
-@pytest.mark.nash_enumpure_agent
-@pytest.mark.parametrize(
-    "game,pure_behav_prof_data",
-    [
-        #############################################################
-        # Examples where Nash pure behaviors and agent-form pure equillibrium behaviors coincide
-        #############################################################
-        # Zero-sum games
-        (
-            games.read_from_file("two_player_perfect_info_win_lose.efg"),
-            [
-                [[[1, 0], [1, 0]], [[0, 1], [1, 0]]],
-                [[[0, 1], [1, 0]], [[1, 0], [1, 0]]],
-                [[[0, 1], [1, 0]], [[1, 0], [0, 1]]],
-                [[[0, 1], [1, 0]], [[0, 1], [1, 0]]],
-                [[[0, 1], [1, 0]], [[0, 1], [0, 1]]]
-            ]
-        ),
-        (games.create_stripped_down_poker_efg(), []),
-        # Non-zero-sum 2-player games
-        (games.create_one_shot_trust_efg(), [[[[0, 1]], [[0, 1]]]]),
-        (
-            games.create_EFG_for_nxn_bimatrix_coordination_game(3),
-            [
-                [[[1, 0, 0]], [[1, 0, 0]]],
-                [[[0, 1, 0]], [[0, 1, 0]]],
-                [[[0, 0, 1]], [[0, 0, 1]]],
-            ],
-        ),
-        (games.create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq(), []),
-        # 3-player game
-        (
-            games.read_from_file("mixed_behavior_game.efg"),
-            [
-                [[[1, 0]], [[1, 0]], [[1, 0]]],
-                [[[1, 0]], [[0, 1]], [[0, 1]]],
-                [[[0, 1]], [[1, 0]], [[0, 1]]],
-                [[[0, 1]], [[0, 1]], [[1, 0]]],
-            ],
-        ),
-        #############################################################
-        # Examples where the are agent-form pure equillibrium behaviors that are not Nash eq
-        #############################################################
-        (
-            games.read_from_file("myerson_fig_4_2.efg"),
-            [
-                [[[1, 0], [0, 1]], [[0, 1]]],
-                [[[0, 1], [0, 1]], [[1, 0]]]
-            ]
-        ),
-    ]
-)
-def test_enumpure_agent(game: gbt.Game, pure_behav_prof_data: list):
-    """Test calls of enumeration of pure agent (behavior) equilibria
-
-       Tests agent max regret being zero (internal consistency) and compares the computed
-       sequence of pure agent equilibria to a previosuly computed sequence (regression test)
-
-       This should include all Nash equilibria in pure behaviors, but may include further
-       profiles that are not Nash equilibria
-
-    """
-    result = gbt.nash.enumpure_agent_solve(game)
-    assert len(result.equilibria) == len(pure_behav_prof_data)
-    for eq, exp in zip(result.equilibria, pure_behav_prof_data, strict=True):
-        assert eq.agent_max_regret() == 0
-        expected = game.mixed_behavior_profile(rational=True, data=exp)
-        assert eq == expected
-
-
-def test_enummixed_double():
-    """Test calls of enumeration of mixed strategy equilibria for 2-player games, floating-point.
-    """
-    game = games.read_from_file("stripped_down_poker.efg")
-    result = gbt.nash.enummixed_solve(game, rational=False)
-    assert len(result.equilibria) == 1
-    # For floating-point results are not exact, so we skip testing exact values for now
-
-
 def d(*probs) -> tuple:
     """Helper function to let us write d() to be suggestive of
     "probability distribution on simplex" ("Delta")
@@ -170,7 +38,123 @@ class EquilibriumTestCase:
     prob_tol: float | gbt.Rational = Q(0)
 
 
+NASH_ENUMPURE_CASES = [
+    # Zero-sum games
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, 
+                                      "two_player_perfect_info_win_lose.efg"),
+            solver=functools.partial(gbt.nash.enumpure_solve),
+            expected=[
+                [d(0, 0, 1, 0), d(1, 0, 0)],
+                [d(0, 0, 1, 0), d(0, 1, 0)],
+                [d(0, 0, 1, 0), d(0, 0, 1)],
+            ],
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test1_TODO",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=games.create_stripped_down_poker_efg,
+            solver=functools.partial(gbt.nash.enumpure_solve),
+            expected=[],
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test2_TODO",
+    ),
+    # Non-zero-sum 2-player games
+    pytest.param(
+        EquilibriumTestCase(
+            factory=games.create_one_shot_trust_efg,
+            solver=functools.partial(gbt.nash.enumpure_solve),
+            expected=[
+                [d(0, 1), d(0, 1)]
+            ],
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test3",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.create_one_shot_trust_efg, unique_NE_variant=True),
+            solver=functools.partial(gbt.nash.enumpure_solve),
+            expected=[
+                [d(1, 0), d(0, 1)]
+            ],
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test3b",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.create_EFG_for_nxn_bimatrix_coordination_game, n=3),
+            solver=functools.partial(gbt.nash.enumpure_solve),
+            expected=[
+                [d(1, 0, 0), d(1, 0, 0)],
+                [d(0, 1, 0), d(0, 1, 0)],
+                [d(0, 0, 1), d(0, 0, 1)],
+            ],
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test4",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=games.create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq,
+            solver=functools.partial(gbt.nash.enumpure_solve),
+            expected=[],
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test4",
+    ),
+    # 3-player game
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, "mixed_behavior_game.efg"),
+            solver=functools.partial(gbt.nash.enumpure_solve),
+            expected=[
+                [d(1, 0), d(1, 0), d(1, 0)],
+                [d(0, 1), d(0, 1), d(1, 0)],
+                [d(0, 1), d(1, 0), d(0, 1)],
+                [d(1, 0), d(0, 1), d(0, 1)],
+            ],
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test5",
+    ),
+    # 2x2x2 strategic form game based on local max cut -- 2 pure 
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, 
+                                      "2x2x2_nfg_from_local_max_cut_2_pure_1_mixed_eq.nfg"),
+            solver=functools.partial(gbt.nash.enumpure_solve),
+            expected=[
+                [d(1, 0), d(0, 1), d(1, 0)],
+                [d(0, 1), d(1, 0), d(0, 1)],
+            ],
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test6",
+    ),
+]
+
+
 NASH_ENUMMIXED_RATIONAL_CASES = [
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, 
+                                      "two_player_perfect_info_win_lose.efg"),
+            solver=functools.partial(gbt.nash.enummixed_solve, rational=True),
+            expected=[
+                [d(0, 0, 1, 0), d(1, 0, 0)],
+                [d(0, 0, 1, 0), d(0, 1, 0)],
+                [d(0, 0, 1, 0), d(0, 0, 1)],
+            ],
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test1_TODO",
+    ),
     pytest.param(
         EquilibriumTestCase(
             factory=games.create_stripped_down_poker_efg,
@@ -225,10 +209,22 @@ NASH_ENUMMIXED_RATIONAL_CASES = [
     )
 ]
 
+# def test_enummixed_double():
+    # """Test calls of enumeration of mixed strategy equilibria for 2-player games, floating-point.
+    # """
+    # game = games.read_from_file("stripped_down_poker.efg")
+    # result = gbt.nash.enummixed_solve(game, rational=False)
+    # assert len(result.equilibria) == 1
+    # # For floating-point results are not exact, so we skip testing exact values for now
+
+
+CASES = []
+CASES += NASH_ENUMPURE_CASES
+CASES += NASH_ENUMMIXED_RATIONAL_CASES
 
 @pytest.mark.nash
 @pytest.mark.parametrize(
-    "test_case", NASH_ENUMMIXED_RATIONAL_CASES, ids=lambda c: c.label
+    "test_case", CASES, ids=lambda c: c.label
 )
 def test_nash_strategy_solver(test_case: EquilibriumTestCase, subtests) -> None:
     """Test calls of Nash solvers.
@@ -250,6 +246,143 @@ def test_nash_strategy_solver(test_case: EquilibriumTestCase, subtests) -> None:
             for player in game.players:
                 for strategy in player.strategies:
                     assert abs(eq[strategy] - expected[strategy]) <= test_case.prob_tol
+
+
+NASH_ENUMPURE_AGENT_CASES = [
+    # #############################################################
+    # Examples where Nash pure behaviors and agent-form pure equillibrium behaviors coincide
+    # #############################################################
+    # Zero-sum games
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, 
+                                      "two_player_perfect_info_win_lose.efg"),
+            solver=functools.partial(gbt.nash.enumpure_agent_solve),
+            expected=[
+                [[d(1, 0), d(1, 0)], [d(0, 1), d(1, 0)]],
+                [[d(0, 1), d(1, 0)], [d(1, 0), d(1, 0)]],
+                [[d(0, 1), d(1, 0)], [d(1, 0), d(0, 1)]],
+                [[d(0, 1), d(1, 0)], [d(0, 1), d(1, 0)]],
+                [[d(0, 1), d(1, 0)], [d(0, 1), d(0, 1)]]
+            ],
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test1_TODO",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=games.create_stripped_down_poker_efg, 
+            solver=functools.partial(gbt.nash.enumpure_agent_solve),
+            expected=[],
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test2_TODO",
+    ),
+    # Non-zero-sum 2-player games
+    pytest.param(
+        EquilibriumTestCase(
+            factory=games.create_one_shot_trust_efg, 
+            solver=functools.partial(gbt.nash.enumpure_agent_solve),
+            expected=[
+                [[d(0, 1)], [d(0, 1)]],
+            ],
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test3_TODO",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.create_one_shot_trust_efg, unique_NE_variant=True),
+            solver=functools.partial(gbt.nash.enumpure_agent_solve),
+            expected=[
+                [[d(1, 0)], [d(0, 1)]],
+            ],
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test3b",
+    ),    
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.create_EFG_for_nxn_bimatrix_coordination_game, n=3),
+            solver=functools.partial(gbt.nash.enumpure_agent_solve),
+            expected=[
+                [[d(1, 0, 0)], [d(1, 0, 0)]],
+                [[d(0, 1, 0)], [d(0, 1, 0)]],
+                [[d(0, 0, 1)], [d(0, 0, 1)]],
+            ],
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test4",
+    ),  
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq),
+            solver=functools.partial(gbt.nash.enumpure_agent_solve),
+            expected=[],
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test4",
+    ),  
+    # 3-player games
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, "mixed_behavior_game.efg"),
+            solver=functools.partial(gbt.nash.enumpure_agent_solve),
+            expected=[
+                [[d(1, 0)], [d(1, 0)], [d(1, 0)]],
+                [[d(1, 0)], [d(0, 1)], [d(0, 1)]],
+                [[d(0, 1)], [d(1, 0)], [d(0, 1)]],
+                [[d(0, 1)], [d(0, 1)], [d(1, 0)]],
+            ]
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test5",
+    ),  
+    #############################################################
+    # Examples where the are agent-form pure equillibrium behaviors that are not Nash eq
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, "myerson_fig_4_2.efg"),
+            solver=functools.partial(gbt.nash.enumpure_agent_solve),
+            expected=[
+                [[d(1, 0), d(0, 1)], [d(0, 1)]],
+                [[d(0, 1), d(0, 1)], [d(1, 0)]]
+            ]
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test6",
+    ),  
+]
+
+
+@pytest.mark.nash
+@pytest.mark.parametrize(
+    "test_case", NASH_ENUMPURE_AGENT_CASES, ids=lambda c: c.label
+)
+def test_nash_agent_solver(test_case: EquilibriumTestCase, subtests) -> None:
+    """Test calls of Nash solvers in EFGs using "agent" versions.
+
+    Subtests:
+    - Agent max regret no more than `test_case.regret_tol`
+    - Agent max regret no more than max regret (+ `test_case.regret_tol`)
+    - Equilibria are output in the expected order.  Equilibria are deemed to match if the maximum
+      difference in probabilities is no more than `test_case.prob_tol`
+    """
+    game = test_case.factory()
+    result = test_case.solver(game)
+    with subtests.test("number of equilibria found"):
+        assert len(result.equilibria) == len(test_case.expected)
+    for (i, (eq, exp)) in enumerate(zip(result.equilibria, test_case.expected, strict=True)):
+        with subtests.test(eq=i, check="agent_max_regret"):
+            assert eq.agent_max_regret() <= test_case.regret_tol
+        with subtests.test(eq=i, check="max_regret"):
+            assert eq.agent_max_regret() <= eq.max_regret() + test_case.regret_tol
+        with subtests.test(eq=i, check="strategy_profile"):
+            expected = game.mixed_behavior_profile(rational=True, data=exp)
+            for player in game.players:
+                for action in player.actions:
+                    assert abs(eq[action] - expected[action]) <= test_case.prob_tol
 
 
 @pytest.mark.nash
