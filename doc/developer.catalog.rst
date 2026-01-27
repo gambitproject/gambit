@@ -11,6 +11,9 @@ You can add games to the catalog saved in a valid representation :ref:`format <f
 Alternatively, you can define games for the catalog in *pygambit* code.
 You may wish to first review the :ref:`pygambit <pygambit>` docs pages.
 
+Both options for adding to the catalog below include an optional step for adding metadata to the catalog for your game(s).
+Adding metadata to games will create a new filter for the :func:`pygambit.catalog.games` that users can search the catalog with.
+
 .. dropdown:: Add game files to the catalog
    :class-container: sd-border-0
 
