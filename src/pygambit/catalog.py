@@ -55,13 +55,18 @@ class CatalogGame:
     @classmethod
     def _build_docstring(cls, game: gbt.Game) -> None:
         """Create the docstring for the catalog entry."""
-        cleaned_docstring = "**Title:** " + game.title + "\n\n**Description:** "
-        # If the subclass has a docstring, use this as description
+        # Add the game title
+        cleaned_docstring = game.title
+        if game.title[-1] != ".":
+            cleaned_docstring += "."
+
+        # Add the game description (or docstring)
+        desc = game.description
         if cls.__doc__:
-            cleaned_docstring += inspect.cleandoc(cls.__doc__)
-        # Otherwise create one from the game
-        else:
-            cleaned_docstring += game.description
+            desc = inspect.cleandoc(cls.__doc__)
+        if desc:
+            cleaned_docstring += "\n\n**Description:** " + desc
+
         cleaned_docstring += "\n"
 
         # TODO: Add images for catalog games
