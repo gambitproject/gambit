@@ -99,6 +99,7 @@ public:
 
   void SetFlattened(const Storage &v) { m_values = v; }
   const Storage &GetFlattened() const { return m_values; }
+  Storage &GetFlattened() { return m_values; }
 };
 
 template <class T> using SegmentedArray = Segmented<Array<T>>;

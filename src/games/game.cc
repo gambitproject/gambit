@@ -249,14 +249,16 @@ void GameRep::WriteNfgFile(std::ostream &p_file) const
 
 template <class T>
 MixedStrategyProfileRep<T>::MixedStrategyProfileRep(const StrategySupportProfile &p_support)
-  : m_probs(p_support.MixedProfileLength()), m_support(p_support),
+  : m_probs(p_support.GetShape()), m_offsets(p_support.GetShape()), m_support(p_support),
     m_gameversion(p_support.GetGame()->GetVersion())
 {
   int index = 1;
   for (auto player : p_support.GetGame()->GetPlayers()) {
     for (auto strategy : player->GetStrategies()) {
       if (p_support.Contains(strategy)) {
-        m_profileIndex[strategy] = index++;
+        m_offsets.GetFlattened()[index] = StrategyOffset(strategy);
+        m_profileIndex[strategy] = index;
+        index++;
       }
       else {
         m_profileIndex[strategy] = -1;
@@ -367,8 +369,20 @@ template <class T> void MixedStrategyProfile<T>::ComputePayoffs() const
   Cache newCache;
   for (const auto &player : m_rep->GetSupport().GetPlayers()) {
     newCache.m_payoffs[player] = GetPayoff(player);
-    for (const auto &strategy : m_rep->GetSupport().GetStrategies(player)) {
-      newCache.m_strategyValues[player][strategy] = GetPayoff(strategy);
+    const auto &strategies = m_rep->GetSupport().GetStrategies(player);
+    Vector<T> values(strategies.size());
+    if (m_rep->GetPayoffDerivs(player->GetNumber(), values)) {
+      auto value_it = values.begin();
+      for (const auto &strategy : strategies) {
+        newCache.m_strategyValues[player][strategy] = *value_it;
+        ++value_it;
+        ;
+      }
+    }
+    else {
+      for (const auto &strategy : m_rep->GetSupport().GetStrategies(player)) {
+        newCache.m_strategyValues[player][strategy] = GetPayoff(strategy);
+      }
     }
   }
   newCache.m_valid = true;
