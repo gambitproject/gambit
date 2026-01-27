@@ -981,70 +981,61 @@ std::vector<GameNodeRep *> GameTreeRep::BuildConsistentPlaysRecursiveImpl(GameNo
 
 void GameTreeRep::BuildOwnPriorActions() const
 {
-  auto info = std::make_shared<OwnPriorActionInfo>();
-
   if (m_root->IsTerminal()) {
-    m_ownPriorActionInfo = info;
+    m_ownPriorActionInfo = std::make_shared<OwnPriorActionInfo>();
     return;
   }
 
-  info->node_map[m_root.get()] = nullptr;
-  if (m_root->m_infoset) {
-    info->infoset_map[m_root->m_infoset].insert(nullptr);
-  }
+  struct OwnPriorActionsVisitor {
+    std::shared_ptr<OwnPriorActionInfo> m_info;
+    std::map<GamePlayer, std::stack<GameAction>> m_priorActions;
 
-  using ActiveEdge = GameNodeRep::Actions::iterator;
-
-  std::stack<ActiveEdge> position;
-  std::map<GamePlayer, std::stack<GameAction>> prior_actions;
-
-  for (auto player_rep : m_players) {
-    prior_actions[GamePlayer(player_rep)].emplace(nullptr);
-  }
-  prior_actions[GamePlayer(m_chance)].emplace(nullptr);
-
-  position.emplace(m_root->GetActions().begin());
-  if (m_root->m_infoset) {
-    prior_actions[m_root->m_infoset->m_player->shared_from_this()].emplace(nullptr);
-  }
-
-  while (!position.empty()) {
-    ActiveEdge &current_edge = position.top();
-    auto node = current_edge.GetOwner();
-
-    if (current_edge == node->GetActions().end()) {
-      if (node->m_infoset) {
-        prior_actions.at(node->m_infoset->m_player->shared_from_this()).pop();
-      }
-      position.pop();
-      continue;
-    }
-
-    auto [action, child] = *current_edge;
-    ++current_edge;
-
-    if (node->m_infoset) {
-      prior_actions.at(node->m_infoset->m_player->shared_from_this()).top() = action;
-    }
-
-    if (!child->IsTerminal()) {
-      if (child->m_infoset) {
-        auto child_player = child->m_infoset->m_player->shared_from_this();
-        auto prior_action = prior_actions.at(child_player).top();
-        GameActionRep *raw_prior = prior_action ? prior_action.get() : nullptr;
-
-        info->node_map[child.get()] = raw_prior;
-        info->infoset_map[child->m_infoset].insert(raw_prior);
-
-        position.emplace(child->GetActions().begin());
-        prior_actions.at(child_player).emplace(nullptr);
-      }
-      else {
-        position.emplace(child->GetActions().begin());
+    explicit OwnPriorActionsVisitor(const GameTreeRep *p_game)
+      : m_info(std::make_shared<OwnPriorActionInfo>())
+    {
+      for (const auto &player : p_game->GetPlayersWithChance()) {
+        m_priorActions[player].emplace(nullptr);
       }
     }
-  }
-  m_ownPriorActionInfo = info;
+
+    DFSCallbackResult OnEnter(GameNode p_node, int)
+    {
+      if (auto *infoset = p_node->m_infoset) {
+        auto &stack = m_priorActions.at(infoset->m_player->shared_from_this());
+        GameActionRep *raw_prior = stack.top() ? stack.top().get() : nullptr;
+
+        m_info->node_map[p_node.get()] = raw_prior;
+        m_info->infoset_map[infoset].insert(raw_prior);
+
+        stack.emplace(nullptr);
+      }
+      return DFSCallbackResult::Continue;
+    }
+
+    DFSCallbackResult OnAction(GameNode p_parent, GameNode p_child, int)
+    {
+      m_priorActions.at(p_parent->m_infoset->m_player->shared_from_this()).top() =
+          p_child->GetPriorAction();
+      return DFSCallbackResult::Continue;
+    }
+
+    DFSCallbackResult OnExit(const GameNode &p_node, int)
+    {
+      if (auto *infoset = p_node->m_infoset) {
+        m_priorActions.at(infoset->m_player->shared_from_this()).pop();
+      }
+      return DFSCallbackResult::Continue;
+    }
+
+    void OnVisit(GameNode, int) {}
+  };
+
+  OwnPriorActionsVisitor visitor(this);
+
+  WalkDFS(const_cast<GameTreeRep *>(this)->shared_from_this(), m_root, TraversalOrder::Preorder,
+          visitor);
+
+  m_ownPriorActionInfo = visitor.m_info;
 }
 
 GameAction GameTreeRep::GetOwnPriorAction(const GameNode &p_node) const
