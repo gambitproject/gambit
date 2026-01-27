@@ -53,7 +53,7 @@ pure-strategy Nash equilibria.
 
 
 Computing the pure-strategy equilibria of extensive game :download:`e02.efg
-<../contrib/games/e02.efg>`, the example in Figure 2 of Selten
+<../src/pygambit/catalog_game_files/e02.efg>`, the example in Figure 2 of Selten
 (International Journal of Game Theory, 1975)
 
    $ gambit-enumpure e02.efg

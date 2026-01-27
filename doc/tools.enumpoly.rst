@@ -92,7 +92,7 @@ support of some set of equilibria.
    default, no information about supports is printed.
 
 Computing equilibria of the strategic game :download:`e01.nfg
-<../contrib/games/e01.efg>`, the example in Figure 1 of Selten
+<../src/pygambit/catalog_game_files/e01.efg>`, the example in Figure 1 of Selten
 (International Journal of Game Theory, 1975) sometimes called
 "Selten's horse"
 

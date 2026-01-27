@@ -48,7 +48,7 @@ equilibria being found.
    output of equilibria (excluding the initial NE tag).
 
 
-Computing an equilibrium of :download:`e02.nfg <../contrib/games/e02.nfg>`,
+Computing an equilibrium of :download:`e02.nfg <../src/pygambit/catalog_game_files/e02.nfg>`,
 the reduced strategic form of the example in Figure 2 of Selten
 (International Journal of Game Theory, 1975)
 

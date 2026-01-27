@@ -64,7 +64,7 @@ points.
    feature that has not been widely tested.
 
 Computing the equilibria, in mixed strategies, of :download:`e02.nfg
-<../contrib/games/e02.nfg>`, the reduced strategic form of the example
+<../src/pygambit/catalog_game_files/e02.nfg>`, the reduced strategic form of the example
 in Figure 2 of Selten (International Journal of Game Theory,
 1975)
 

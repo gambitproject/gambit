@@ -53,7 +53,7 @@ points of that set.
    Suppresses printing of the banner at program launch.
 
 Computing an equilibrium of the game :download:`2x2const.nfg
-<../contrib/games/2x2const.nfg>`, a game with two players with two
+<../src/pygambit/catalog_game_files/2x2const.nfg>`, a game with two players with two
 strategies each, with a unique equilibrium in mixed strategies
 
    $ gambit-lp 2x2const.nfg

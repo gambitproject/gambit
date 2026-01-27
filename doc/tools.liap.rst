@@ -96,7 +96,7 @@ not guaranteed to find all, or even any, Nash equilibria.
    equilibria found.
 
 Computing an equilibrium in mixed strategies of :download:`e02.efg
-<../contrib/games/e02.efg>`, the example in Figure 2 of Selten
+<../src/pygambit/catalog_game_files/e02.efg>`, the example in Figure 2 of Selten
 (International Journal of Game Theory, 1975)
 
    $ gambit-liap e02.nfg
