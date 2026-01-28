@@ -30,6 +30,20 @@ dependencies = [
     "scipy",
 ]
 
+[project.optional-dependencies]
+test = ["pytest", "nbformat", "nbclient", "ipykernel"]
+doc = [
+    "pydata-sphinx-themesphinx_design",
+    "sphinx-autobuild",
+    "nbsphinx",
+    "ipython",
+    "matplotlib",
+    "pickleshare",
+    "jupyter",
+    "open_spiel; sys_platform != 'win32'",
+    "draw-tree @ git+https://github.com/gambitproject/draw_tree.git@v0.3.1"
+]
+
 [project.urls]
 Homepage = "https://www.gambit-project.org"
 Documentation = "https://gambitproject.readthedocs.io"
