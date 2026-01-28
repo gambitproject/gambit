@@ -1,4 +1,5 @@
 pytest
+pytest-subtests
 nbformat
 nbclient
 ipykernel

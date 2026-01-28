@@ -7,190 +7,353 @@ There is better test coverage for
 lp_solve, lcp_solve, and enumpoly_solve, all in mixed behaviors.
 """
 
+import dataclasses
+import functools
+import typing
+
 import pytest
 
 import pygambit as gbt
+from pygambit import Rational as Q
 
 from . import games
 
 TOL = 1e-13  # tolerance for floating point assertions
 
 
-@pytest.mark.nash
-@pytest.mark.nash_enumpure_strategy
-@pytest.mark.parametrize(
-    "game,pure_strategy_prof_data",
-    [
-        # Zero-sum games
-        (
-            games.create_two_player_perfect_info_win_lose_efg(),
-            [
-                [[0, 0, 1, 0], [1, 0, 0]],
-                [[0, 0, 1, 0], [0, 1, 0]],
-                [[0, 0, 1, 0], [0, 0, 1]],
-            ]
-        ),
-        (games.create_stripped_down_poker_efg(), []),
-        # Non-zero-sum 2-player games
-        (games.create_one_shot_trust_efg(), [[[0, 1], [0, 1]]]),
-        (
-            games.create_EFG_for_nxn_bimatrix_coordination_game(3),
-            [
-                [[1, 0, 0], [1, 0, 0]],
-                [[0, 1, 0], [0, 1, 0]],
-                [[0, 0, 1], [0, 0, 1]],
-            ],
-        ),
-        (games.create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq(), []),
-        # 3-player game
-        (
-            games.create_mixed_behav_game_efg(),
-            [
-                [[1, 0], [1, 0], [1, 0]],
-                [[0, 1], [0, 1], [1, 0]],
-                [[0, 1], [1, 0], [0, 1]],
-                [[1, 0], [0, 1], [0, 1]],
-            ],
-        ),
-    ]
-)
-def test_enumpure_strategy(game: gbt.Game, pure_strategy_prof_data: list):
-    """Test calls of enumeration of pure strategy equilibria
-
-       Tests max regret being zero (internal consistency) and compares the computed sequence of
-       pure strategy equilibria to a previosuly computed sequence (regression test)
+def d(*probs) -> tuple:
+    """Helper function to let us write d() to be suggestive of
+    "probability distribution on simplex" ("Delta")
     """
-    result = gbt.nash.enumpure_solve(game)
-    assert len(result.equilibria) == len(pure_strategy_prof_data)
-    for eq, exp in zip(result.equilibria, pure_strategy_prof_data, strict=True):
-        assert eq.max_regret() == 0
-        expected = game.mixed_strategy_profile(rational=True, data=exp)
-        assert eq == expected
+    return tuple(probs)
 
 
-@pytest.mark.nash
-@pytest.mark.nash_enumpure_agent
-@pytest.mark.parametrize(
-    "game,pure_behav_prof_data",
-    [
-        #############################################################
-        # Examples where Nash pure behaviors and agent-form pure equillibrium behaviors coincide
-        #############################################################
-        # Zero-sum games
-        (
-            games.create_two_player_perfect_info_win_lose_efg(),
-            [
-                [[[1, 0], [1, 0]], [[0, 1], [1, 0]]],
-                [[[0, 1], [1, 0]], [[1, 0], [1, 0]]],
-                [[[0, 1], [1, 0]], [[1, 0], [0, 1]]],
-                [[[0, 1], [1, 0]], [[0, 1], [1, 0]]],
-                [[[0, 1], [1, 0]], [[0, 1], [0, 1]]]
-            ]
-        ),
-        (games.create_stripped_down_poker_efg(), []),
-        # Non-zero-sum 2-player games
-        (games.create_one_shot_trust_efg(), [[[[0, 1]], [[0, 1]]]]),
-        (
-            games.create_EFG_for_nxn_bimatrix_coordination_game(3),
-            [
-                [[[1, 0, 0]], [[1, 0, 0]]],
-                [[[0, 1, 0]], [[0, 1, 0]]],
-                [[[0, 0, 1]], [[0, 0, 1]]],
+@dataclasses.dataclass
+class EquilibriumTestCase:
+    """Summarising the data relevant for a test fixture of a call to an equilibrium solver."""
+
+    factory: typing.Callable[[], gbt.Game]
+    solver: typing.Callable[[gbt.Game], gbt.nash.NashComputationResult]
+    expected: list
+    regret_tol: float | gbt.Rational = Q(0)
+    prob_tol: float | gbt.Rational = Q(0)
+
+
+ENUMPURE_CASES = [
+    # Zero-sum games
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.read_from_file, "two_player_perfect_info_win_lose.efg"
+            ),
+            solver=functools.partial(gbt.nash.enumpure_solve),
+            expected=[
+                [d(0, 0, 1, 0), d(1, 0, 0)],
+                [d(0, 0, 1, 0), d(0, 1, 0)],
+                [d(0, 0, 1, 0), d(0, 0, 1)],
             ],
         ),
-        (games.create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq(), []),
-        # 3-player game
-        (
-            games.create_mixed_behav_game_efg(),
-            [
-                [[[1, 0]], [[1, 0]], [[1, 0]]],
-                [[[1, 0]], [[0, 1]], [[0, 1]]],
-                [[[0, 1]], [[1, 0]], [[0, 1]]],
-                [[[0, 1]], [[0, 1]], [[1, 0]]],
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test1_TODO",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=games.create_stripped_down_poker_efg,
+            solver=functools.partial(gbt.nash.enumpure_solve),
+            expected=[],
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test2_TODO",
+    ),
+    # Non-zero-sum 2-player games
+    pytest.param(
+        EquilibriumTestCase(
+            factory=games.create_one_shot_trust_efg,
+            solver=functools.partial(gbt.nash.enumpure_solve),
+            expected=[[d(0, 1), d(0, 1)]],
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test3",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.create_one_shot_trust_efg, unique_NE_variant=True),
+            solver=functools.partial(gbt.nash.enumpure_solve),
+            expected=[[d(1, 0), d(0, 1)]],
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test3b",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.create_EFG_for_nxn_bimatrix_coordination_game, n=3),
+            solver=functools.partial(gbt.nash.enumpure_solve),
+            expected=[
+                [d(1, 0, 0), d(1, 0, 0)],
+                [d(0, 1, 0), d(0, 1, 0)],
+                [d(0, 0, 1), d(0, 0, 1)],
             ],
         ),
-        #############################################################
-        # Examples where the are agent-form pure equillibrium behaviors that are not Nash eq
-        #############################################################
-        (
-            games.read_from_file("myerson_fig_4_2.efg"),
-            [
-                [[[1, 0], [0, 1]], [[0, 1]]],
-                [[[0, 1], [0, 1]], [[1, 0]]]
-            ]
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test4",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=games.create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq,
+            solver=functools.partial(gbt.nash.enumpure_solve),
+            expected=[],
         ),
-    ]
-)
-def test_enumpure_agent(game: gbt.Game, pure_behav_prof_data: list):
-    """Test calls of enumeration of pure agent (behavior) equilibria
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test4",
+    ),
+    # 3-player game
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, "mixed_behavior_game.efg"),
+            solver=functools.partial(gbt.nash.enumpure_solve),
+            expected=[
+                [d(1, 0), d(1, 0), d(1, 0)],
+                [d(0, 1), d(0, 1), d(1, 0)],
+                [d(0, 1), d(1, 0), d(0, 1)],
+                [d(1, 0), d(0, 1), d(0, 1)],
+            ],
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test5",
+    ),
+    # 2x2x2 strategic form game based on local max cut -- 2 pure
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.read_from_file, "2x2x2_nfg_from_local_max_cut_2_pure_1_mixed_eq.nfg"
+            ),
+            solver=functools.partial(gbt.nash.enumpure_solve),
+            expected=[
+                [d(1, 0), d(0, 1), d(1, 0)],
+                [d(0, 1), d(1, 0), d(0, 1)],
+            ],
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test6",
+    ),
+]
 
-       Tests agent max regret being zero (internal consistency) and compares the computed
-       sequence of pure agent equilibria to a previosuly computed sequence (regression test)
 
-       This should include all Nash equilibria in pure behaviors, but may include further
-       profiles that are not Nash equilibria
-
-    """
-    result = gbt.nash.enumpure_agent_solve(game)
-    assert len(result.equilibria) == len(pure_behav_prof_data)
-    for eq, exp in zip(result.equilibria, pure_behav_prof_data, strict=True):
-        assert eq.agent_max_regret() == 0
-        expected = game.mixed_behavior_profile(rational=True, data=exp)
-        assert eq == expected
-
-
-def test_enummixed_double():
-    """Test calls of enumeration of mixed strategy equilibria for 2-player games, floating-point.
-    """
-    game = games.read_from_file("stripped_down_poker.efg")
-    result = gbt.nash.enummixed_solve(game, rational=False)
-    assert len(result.equilibria) == 1
-    # For floating-point results are not exact, so we skip testing exact values for now
-
-
-@pytest.mark.nash
-@pytest.mark.nash_enummixed_strategy
-@pytest.mark.parametrize(
-    "game,mixed_strategy_prof_data",
-    [
-        # Zero-sum games
-        (games.create_stripped_down_poker_efg(), [[["1/3", "2/3", 0, 0], ["2/3", "1/3"]]]),
-        # Non-zero-sum games
-        (games.create_one_shot_trust_efg(), [[[0, 1], ["1/2", "1/2"]],
-                                             [[0, 1], [0, 1]]]),
-        (
-                games.create_EFG_for_nxn_bimatrix_coordination_game(3),
+ENUMMIXED_RATIONAL_CASES = [
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.read_from_file, "two_player_perfect_info_win_lose.efg"
+            ),
+            solver=functools.partial(gbt.nash.enummixed_solve, rational=True),
+            expected=[
+                [d(0, 0, 1, 0), d(1, 0, 0)],
+                [d(0, 0, 1, 0), d(0, 1, 0)],
+                [d(0, 0, 1, 0), d(0, 0, 1)],
+            ],
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test1_TODO",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=games.create_stripped_down_poker_efg,
+            solver=functools.partial(gbt.nash.enummixed_solve, rational=True),
+            expected=[
+                [d(Q("1/3"), Q("2/3"), 0, 0), d(Q("2/3"), Q("1/3"))],
+            ],
+        ),
+        marks=pytest.mark.nash_enummixed_strategy,
+        id="test1",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=games.create_one_shot_trust_efg,
+            solver=functools.partial(gbt.nash.enummixed_solve, rational=True),
+            expected=[
+                [d(0, 1), d(Q("1/2"), Q("1/2"))],
+                [d(0, 1), d(0, 1)],
+            ],
+        ),
+        marks=pytest.mark.nash_enummixed_strategy,
+        id="test2",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.create_EFG_for_nxn_bimatrix_coordination_game, n=3),
+            solver=functools.partial(gbt.nash.enummixed_solve, rational=True),
+            expected=[
+                [d(1, 0, 0), d(1, 0, 0)],
+                [d(Q("1/2"), Q("1/2"), 0), d(Q("1/2"), Q("1/2"), 0)],
+                [d(Q("1/3"), Q("1/3"), Q("1/3")), d(Q("1/3"), Q("1/3"), Q("1/3"))],
+                [d(Q("1/2"), 0, Q("1/2")), d(Q("1/2"), 0, Q("1/2"))],
+                [d(0, 1, 0), d(0, 1, 0)],
+                [d(0, Q("1/2"), Q("1/2")), d(0, Q("1/2"), Q("1/2"))],
+                [d(0, 0, 1), d(0, 0, 1)],
+            ],
+        ),
+        marks=pytest.mark.nash_enummixed_strategy,
+        id="test3",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=games.create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq,
+            solver=functools.partial(gbt.nash.enummixed_solve, rational=True),
+            expected=[
                 [
-                    [[1, 0, 0], [1, 0, 0]],
-                    [["1/2", "1/2", 0], ["1/2", "1/2", 0]],
-                    [["1/3", "1/3", "1/3"], ["1/3", "1/3", "1/3"]],
-                    [["1/2", 0, "1/2"], ["1/2", 0, "1/2"]],
-                    [[0, 1, 0], [0, 1, 0]],
-                    [[0, "1/2", "1/2"], [0, "1/2", "1/2"]],
-                    [[0, 0, 1], [0, 0, 1]],
+                    d(Q("1/30"), Q("1/6"), Q("3/10"), Q("3/10"), Q("1/6"), Q("1/30")),
+                    d(Q("1/6"), Q("1/30"), Q("3/10"), Q("3/10"), Q("1/30"), Q("1/6")),
                 ],
+            ],
         ),
-        (
-                games.create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq(),
-                [
-                    [["1/30", "1/6", "3/10", "3/10", "1/6", "1/30"],
-                     ["1/6", "1/30", "3/10", "3/10", "1/30", "1/6"]],
-                ],
-        ),
-    ]
-)
-def test_enummixed_rational(game: gbt.Game, mixed_strategy_prof_data: list):
-    """Test calls of enumeration of extreme mixed strategy equilibria, rational precision
+        marks=pytest.mark.nash_enummixed_strategy,
+        id="test4",
+    ),
+]
 
-       Tests max regret being zero (internal consistency) and compares the computed sequence of
-       extreme equilibria to a previosuly computed sequence (regression test)
+# def test_enummixed_double():
+# """Test calls of enumeration of mixed strategy equilibria for 2-player games, floating-point.
+# """
+# game = games.read_from_file("stripped_down_poker.efg")
+# result = gbt.nash.enummixed_solve(game, rational=False)
+# assert len(result.equilibria) == 1
+# # For floating-point results are not exact, so we skip testing exact values for now
+
+
+CASES = []
+CASES += ENUMPURE_CASES
+CASES += ENUMMIXED_RATIONAL_CASES
+
+
+@pytest.mark.nash
+@pytest.mark.parametrize("test_case", CASES, ids=lambda c: c.label)
+def test_nash_strategy_solver(test_case: EquilibriumTestCase, subtests) -> None:
+    """Test calls of Nash solvers.
+
+    Subtests:
+    - Max regret no more than `test_case.regret_tol`
+    - Equilibria are output in the expected order.  Equilibria are deemed to match if the maximum
+      difference in probabilities is no more than `test_case.prob_tol`
     """
-    result = gbt.nash.enummixed_solve(game, rational=True)
-    assert len(result.equilibria) == len(mixed_strategy_prof_data)
-    for eq, exp in zip(result.equilibria, mixed_strategy_prof_data, strict=True):
-        assert eq.max_regret() == 0
-        expected = game.mixed_strategy_profile(rational=True, data=exp)
-        assert eq == expected
+    game = test_case.factory()
+    result = test_case.solver(game)
+    with subtests.test("number of equilibria found"):
+        assert len(result.equilibria) == len(test_case.expected)
+    for i, (eq, exp) in enumerate(zip(result.equilibria, test_case.expected, strict=True)):
+        with subtests.test(eq=i, check="max_regret"):
+            assert eq.max_regret() <= test_case.regret_tol
+        with subtests.test(eq=i, check="strategy_profile"):
+            expected = game.mixed_strategy_profile(rational=True, data=exp)
+            for player in game.players:
+                for strategy in player.strategies:
+                    assert abs(eq[strategy] - expected[strategy]) <= test_case.prob_tol
+
+
+ENUMPURE_AGENT_CASES = [
+    # #############################################################
+    # Examples where Nash pure behaviors and agent-form pure equillibrium behaviors coincide
+    # #############################################################
+    # Zero-sum games
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.read_from_file, "two_player_perfect_info_win_lose.efg"
+            ),
+            solver=functools.partial(gbt.nash.enumpure_agent_solve),
+            expected=[
+                [[d(1, 0), d(1, 0)], [d(0, 1), d(1, 0)]],
+                [[d(0, 1), d(1, 0)], [d(1, 0), d(1, 0)]],
+                [[d(0, 1), d(1, 0)], [d(1, 0), d(0, 1)]],
+                [[d(0, 1), d(1, 0)], [d(0, 1), d(1, 0)]],
+                [[d(0, 1), d(1, 0)], [d(0, 1), d(0, 1)]],
+            ],
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test1_TODO",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=games.create_stripped_down_poker_efg,
+            solver=functools.partial(gbt.nash.enumpure_agent_solve),
+            expected=[],
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test2_TODO",
+    ),
+    # Non-zero-sum 2-player games
+    pytest.param(
+        EquilibriumTestCase(
+            factory=games.create_one_shot_trust_efg,
+            solver=functools.partial(gbt.nash.enumpure_agent_solve),
+            expected=[
+                [[d(0, 1)], [d(0, 1)]],
+            ],
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test3_TODO",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.create_one_shot_trust_efg, unique_NE_variant=True),
+            solver=functools.partial(gbt.nash.enumpure_agent_solve),
+            expected=[
+                [[d(1, 0)], [d(0, 1)]],
+            ],
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test3b",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.create_EFG_for_nxn_bimatrix_coordination_game, n=3),
+            solver=functools.partial(gbt.nash.enumpure_agent_solve),
+            expected=[
+                [[d(1, 0, 0)], [d(1, 0, 0)]],
+                [[d(0, 1, 0)], [d(0, 1, 0)]],
+                [[d(0, 0, 1)], [d(0, 0, 1)]],
+            ],
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test4",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq
+            ),
+            solver=functools.partial(gbt.nash.enumpure_agent_solve),
+            expected=[],
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test4",
+    ),
+    # 3-player games
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, "mixed_behavior_game.efg"),
+            solver=functools.partial(gbt.nash.enumpure_agent_solve),
+            expected=[
+                [[d(1, 0)], [d(1, 0)], [d(1, 0)]],
+                [[d(1, 0)], [d(0, 1)], [d(0, 1)]],
+                [[d(0, 1)], [d(1, 0)], [d(0, 1)]],
+                [[d(0, 1)], [d(0, 1)], [d(1, 0)]],
+            ],
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test5",
+    ),
+    #############################################################
+    # Examples where the are agent-form pure equillibrium behaviors that are not Nash eq
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, "myerson_fig_4_2.efg"),
+            solver=functools.partial(gbt.nash.enumpure_agent_solve),
+            expected=[[[d(1, 0), d(0, 1)], [d(0, 1)]], [[d(0, 1), d(0, 1)], [d(1, 0)]]],
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test6",
+    ),
+]
 
 
 @pytest.mark.nash
@@ -200,9 +363,9 @@ def test_enummixed_rational(game: gbt.Game, mixed_strategy_prof_data: list):
     [
         # 2-player zero-sum games
         (
-                games.create_stripped_down_poker_efg(),
-                [[[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]]],
-                None,
+            games.create_stripped_down_poker_efg(),
+            [[[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]]],
+            None,
         ),
         # 2-player non-zero-sum games
         pytest.param(
@@ -211,35 +374,35 @@ def test_enummixed_rational(game: gbt.Game, mixed_strategy_prof_data: list):
             # second entry assumes we extend to Nash using only pure behaviors
             # currently we get [[0, 1]], [[0, 0]]] as a second eq
             None,
-            marks=pytest.mark.xfail(reason="Problem with enumpoly, as per issue #660")
+            marks=pytest.mark.xfail(reason="Problem with enumpoly, as per issue #660"),
         ),
         pytest.param(
             games.create_one_shot_trust_efg(unique_NE_variant=True),
             [[[[1, 0]], [[0, 1]]]],  # currently we get [[0, 1]], [[0, 0]]] as a second eq
             None,
-            marks=pytest.mark.xfail(reason="Problem with enumpoly, as per issue #660")
+            marks=pytest.mark.xfail(reason="Problem with enumpoly, as per issue #660"),
         ),
         (
-                games.create_EFG_for_nxn_bimatrix_coordination_game(3),
-                [
-                    [[["1/3", "1/3", "1/3"]], [["1/3", "1/3", "1/3"]]],
-                    [[["1/2", "1/2", 0]], [["1/2", "1/2", 0]]],
-                    [[["1/2", 0, "1/2"]], [["1/2", 0, "1/2"]]],
-                    [[[1, 0, 0]], [[1, 0, 0]]],
-                    [[[0, "1/2", "1/2"]], [[0, "1/2", "1/2"]]],
-                    [[[0, 1, 0]], [[0, 1, 0]]],
-                    [[[0, 0, 1]], [[0, 0, 1]]],
-                ],
-                None,
+            games.create_EFG_for_nxn_bimatrix_coordination_game(3),
+            [
+                [[["1/3", "1/3", "1/3"]], [["1/3", "1/3", "1/3"]]],
+                [[["1/2", "1/2", 0]], [["1/2", "1/2", 0]]],
+                [[["1/2", 0, "1/2"]], [["1/2", 0, "1/2"]]],
+                [[[1, 0, 0]], [[1, 0, 0]]],
+                [[[0, "1/2", "1/2"]], [[0, "1/2", "1/2"]]],
+                [[[0, 1, 0]], [[0, 1, 0]]],
+                [[[0, 0, 1]], [[0, 0, 1]]],
+            ],
+            None,
         ),
         (
-                games.create_EFG_for_nxn_bimatrix_coordination_game(4),
-                [[[["1/4", "1/4", "1/4", "1/4"]], [["1/4", "1/4", "1/4", "1/4"]]]],
-                1,
+            games.create_EFG_for_nxn_bimatrix_coordination_game(4),
+            [[[["1/4", "1/4", "1/4", "1/4"]], [["1/4", "1/4", "1/4", "1/4"]]]],
+            1,
         ),
         # 3-player game
         # (
-        # games.create_mixed_behav_game_efg(),
+        # games.read_from_file("mixed_behavior_game.efg"),
         # [
         # [[["1/2", "1/2"]], [["2/5", "3/5"]], [["1/4", "3/4"]]],
         # [[["2/5", "3/5"]], [["1/2", "1/2"]], [["1/3", "2/3"]]],
@@ -249,53 +412,55 @@ def test_enummixed_rational(game: gbt.Game, mixed_strategy_prof_data: list):
         ##############################################################################
         ##############################################################################
         (
-            games.create_3_player_with_internal_outcomes_efg(),
+            games.read_from_file("3_player.efg"),
             [
                 [[[1, 0], [1, 0]], [[1, 0], ["1/2", "1/2"]], [[1, 0], [0, 1]]],
-                [[[1, 0], [1, 0]], [[1, 0], [0, 1]],
-                    [[1, 0], ["1/3", "2/3"]]]],
+                [[[1, 0], [1, 0]], [[1, 0], [0, 1]], [[1, 0], ["1/3", "2/3"]]],
+            ],
             2,
         ),
         (
-            games.create_3_player_with_internal_outcomes_efg(nonterm_outcomes=True),
+            games.read_from_file("3_player_with_nonterm_outcomes.efg"),
             [
                 [[[1, 0], [1, 0]], [[1, 0], ["1/2", "1/2"]], [[1, 0], [0, 1]]],
-                [[[1, 0], [1, 0]], [[1, 0], [0, 1]],
-                 [[1, 0], ["1/3", "2/3"]]]],
+                [[[1, 0], [1, 0]], [[1, 0], [0, 1]], [[1, 0], ["1/3", "2/3"]]],
+            ],
             2,
         ),
         ##############################################################################
         ##############################################################################
         (
-            games.create_non_zero_sum_lacking_outcome_efg(),
+            games.read_from_file("2_player_non_zero_sum.efg"),
             [[[["1/3", "2/3"]], [["1/2", "1/2"]]]],
             1,
         ),
         (
-            games.create_non_zero_sum_lacking_outcome_efg(missing_term_outcome=True),
+            games.read_from_file("2_player_non_zero_sum_missing_term_outcome.efg"),
             [[[["1/3", "2/3"]], [["1/2", "1/2"]]]],
             1,
         ),
         ##############################################################################
         ##############################################################################
         (
-                games.create_chance_in_middle_efg(),
-                [[[["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]], [[1, 0], ["6/11", "5/11"]]],
-                 ],  # [[[1, 0], [1, 0], [1, 0], [0, 0], [0, 0]], [[0, 1], [1, 0]]],
-                     # [[[0, 1], [0, 0], [0, 0], [1, 0], [1, 0]], [[1, 0], [0, 1]]],
-                1,  # subsequent eqs have undefined infosets; include after #issue 660
+            games.read_from_file("chance_in_middle.efg"),
+            [
+                [[["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]], [[1, 0], ["6/11", "5/11"]]],
+            ],  # [[[1, 0], [1, 0], [1, 0], [0, 0], [0, 0]], [[0, 1], [1, 0]]],
+            # [[[0, 1], [0, 0], [0, 0], [1, 0], [1, 0]], [[1, 0], [0, 1]]],
+            1,  # subsequent eqs have undefined infosets; include after #issue 660
         ),
         (
-                games.create_chance_in_middle_efg(nonterm_outcomes=True),
-                [[[["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]], [[1, 0], ["6/11", "5/11"]]],
-                 ],  # [[[1, 0], [1, 0], [1, 0], [0, 0], [0, 0]], [[0, 1], [1, 0]]],
-                     # [[[0, 1], [0, 0], [0, 0], [1, 0], [1, 0]], [[1, 0], [0, 1]]],
-                1,
+            games.read_from_file("chance_in_middle_with_nonterm_outcomes.efg"),
+            [
+                [[["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]], [[1, 0], ["6/11", "5/11"]]],
+            ],  # [[[1, 0], [1, 0], [1, 0], [0, 0], [0, 0]], [[0, 1], [1, 0]]],
+            # [[[0, 1], [0, 0], [0, 0], [1, 0], [1, 0]], [[1, 0], [0, 1]]],
+            1,
         ),
     ],
 )
 def test_enumpoly_ordered_behavior(
-        game: gbt.Game, mixed_behav_prof_data: list, stop_after: None | int
+    game: gbt.Game, mixed_behav_prof_data: list, stop_after: None | int
 ):
     """Test calls of enumpoly for mixed behavior equilibria,
     using max_regret and agent_max_regret (internal consistency); and
@@ -303,11 +468,6 @@ def test_enumpoly_ordered_behavior(
     This set will be the full set of all computed equilibria if stop_after is None,
     else the first stop_after-many equilibria.
 
-    This is the "ordered" version where we test for the outputs coming in a specific
-    order; there is also an "unordered" version.  The game 2x2x2.nfg, for example,
-    has a point at which the Jacobian is singular.  As a result, the order in which it
-    returns the two totally-mixed equilbria is system-dependent due, essentially,
-    to inherent numerical instability near that point.
     """
     if stop_after:
         result = gbt.nash.enumpoly_solve(
@@ -328,6 +488,234 @@ def test_enumpoly_ordered_behavior(
                     assert abs(eq[p][i][a] - expected[p][i][a]) <= TOL
 
 
+ENUMPOLY_AGENT_CASES = [
+    # #############################################################
+    # Examples where Nash pure behaviors and agent-form pure equillibrium behaviors coincide
+    # #############################################################
+    # 2-player zero-sum games
+    pytest.param(
+        EquilibriumTestCase(
+            factory=games.create_stripped_down_poker_efg,
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
+            expected=[
+                [[d(1, 0), d("1/3", "2/3")], [d("2/3", "1/3")]],
+            ],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enumpoly_behavior,
+        id="test1_TODO",
+    ),
+    # 2-player non-zero-sum games
+    pytest.param(
+        EquilibriumTestCase(
+            factory=games.create_one_shot_trust_efg,
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
+            expected=[
+                [[d(0, 1)], [d("1/2", "1/2")]],
+                [[d(0, 1)], [d(0, 1)]],
+                # second entry assumes we extend to Nash using only pure behaviors
+                # currently we get [[0, 1]], [[0, 0]]] as a second eq
+            ],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=[
+            pytest.mark.nash_enumpoly_behavior,
+            pytest.mark.xfail(reason="Problem with enumpoly, as per issue #660"),
+        ],
+        id="test2_TODO",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.create_one_shot_trust_efg, unique_NE_variant=True),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
+            expected=[
+                [[[d(1, 0)], [d(0, 1)]]],
+                # currently we get [d(0, 1)], [d(0, 0)]] as a second eq
+            ],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=[
+            pytest.mark.nash_enumpoly_behavior,
+            pytest.mark.xfail(reason="Problem with enumpoly, as per issue #660"),
+        ],
+        id="test3_TODO",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, "2_player_non_zero_sum.efg"),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=1),
+            expected=[
+                [[d("1/3", "2/3")], [d("1/2", "1/2")]],
+            ],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enumpoly_behavior,
+        id="test8_TODO",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.read_from_file, "2_player_non_zero_sum_missing_term_outcome.efg"
+            ),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=1),
+            expected=[
+                [[d("1/3", "2/3")], [d("1/2", "1/2")]],
+            ],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enumpoly_behavior,
+        id="test9_TODO",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, "chance_in_middle.efg"),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=1),
+            expected=[
+                [
+                    [d("3/11", "8/11"), d(1, 0), d(1, 0), d(1, 0), d(1, 0)],
+                    [d(1, 0), d("6/11", "5/11")],
+                ],
+                # [[[1, 0], [1, 0], [1, 0], [0, 0], [0, 0]], [[0, 1], [1, 0]]],
+                # [[[0, 1], [0, 0], [0, 0], [1, 0], [1, 0]], [[1, 0], [0, 1]]],
+            ],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enumpoly_behavior,
+        id="test9_TODO",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.read_from_file, "chance_in_middle_with_nonterm_outcomes.efg"
+            ),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=1),
+            expected=[
+                [
+                    [d("3/11", "8/11"), d(1, 0), d(1, 0), d(1, 0), d(1, 0)],
+                    [d(1, 0), d("6/11", "5/11")],
+                ],
+                # [[[1, 0], [1, 0], [1, 0], [0, 0], [0, 0]], [[0, 1], [1, 0]]],
+                # [[[0, 1], [0, 0], [0, 0], [1, 0], [1, 0]], [[1, 0], [0, 1]]],
+            ],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enumpoly_behavior,
+        id="test9_TODO",
+    ),
+    # 3-player games
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.create_EFG_for_nxn_bimatrix_coordination_game, n=3),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
+            expected=[
+                [[d("1/3", "1/3", "1/3")], [d("1/3", "1/3", "1/3")]],
+                [[d("1/2", "1/2", 0)], [d("1/2", "1/2", 0)]],
+                [[d("1/2", 0, "1/2")], [d("1/2", 0, "1/2")]],
+                [[d(1, 0, 0)], [d(1, 0, 0)]],
+                [[d(0, "1/2", "1/2")], [d(0, "1/2", "1/2")]],
+                [[d(0, 1, 0)], [d(0, 1, 0)]],
+                [[d(0, 0, 1)], [d(0, 0, 1)]],
+            ],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enumpoly_behavior,
+        id="test4_TODO",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, "3_player.efg"),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=2),
+            expected=[
+                [[d(1, 0), d(1, 0)], [d(1, 0), d("1/2", "1/2")], [d(1, 0), d(0, 1)]],
+                [[d(1, 0), d(1, 0)], [d(1, 0), d(0, 1)], [d(1, 0), d("1/3", "2/3")]],
+            ],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enumpoly_behavior,
+        id="test6_TODO",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, "3_player_with_nonterm_outcomes.efg"),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=2),
+            expected=[
+                [[d(1, 0), d(1, 0)], [d(1, 0), d("1/2", "1/2")], [d(1, 0), d(0, 1)]],
+                [[d(1, 0), d(1, 0)], [d(1, 0), d(0, 1)], [d(1, 0), d("1/3", "2/3")]],
+            ],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enumpoly_behavior,
+        id="test7_TODO",
+    ),
+    # 4-player game
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.create_EFG_for_nxn_bimatrix_coordination_game, n=4),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=1),
+            expected=[
+                [[d("1/4", "1/4", "1/4", "1/4")], [d("1/4", "1/4", "1/4", "1/4")]],
+            ],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enumpoly_behavior,
+        id="test5_TODO",
+    ),
+]
+# ##############################################################################
+# 3-player game
+# (
+# games.read_from_file("mixed_behavior_game.efg"),
+# [
+# [[["1/2", "1/2"]], [["2/5", "3/5"]], [["1/4", "3/4"]]],
+# [[["2/5", "3/5"]], [["1/2", "1/2"]], [["1/3", "2/3"]]],
+# ],
+# 2,  # 9 in total found by enumpoly (see unordered test)
+# ),
+# ##############################################################################
+
+AGENT_CASES = []
+AGENT_CASES += ENUMPURE_AGENT_CASES
+AGENT_CASES += ENUMPOLY_AGENT_CASES
+
+
+@pytest.mark.nash
+@pytest.mark.parametrize("test_case", AGENT_CASES, ids=lambda c: c.label)
+def test_nash_agent_solver(test_case: EquilibriumTestCase, subtests) -> None:
+    """Test calls of Nash solvers in EFGs using "agent" versions.
+
+    Subtests:
+    - Agent max regret no more than `test_case.regret_tol`
+    - Agent max regret no more than max regret (+ `test_case.regret_tol`)
+    - Equilibria are output in the expected order.  Equilibria are deemed to match if the maximum
+      difference in probabilities is no more than `test_case.prob_tol`
+    """
+    game = test_case.factory()
+    result = test_case.solver(game)
+    with subtests.test("number of equilibria found"):
+        assert len(result.equilibria) == len(test_case.expected)
+    for i, (eq, exp) in enumerate(zip(result.equilibria, test_case.expected, strict=True)):
+        with subtests.test(eq=i, check="agent_max_regret"):
+            assert eq.agent_max_regret() <= test_case.regret_tol
+        with subtests.test(eq=i, check="max_regret"):
+            assert eq.agent_max_regret() <= eq.max_regret() + test_case.regret_tol
+        with subtests.test(eq=i, check="strategy_profile"):
+            expected = game.mixed_behavior_profile(rational=True, data=exp)
+            for player in game.players:
+                for action in player.actions:
+                    assert abs(eq[action] - expected[action]) <= test_case.prob_tol
+
+
 @pytest.mark.nash
 @pytest.mark.nash_enumpoly_behavior
 @pytest.mark.parametrize(
@@ -335,24 +723,29 @@ def test_enumpoly_ordered_behavior(
     [
         # 3-player game
         (
-                games.create_mixed_behav_game_efg(),
-                [
-                    [[["2/5", "3/5"]], [["1/2", "1/2"]], [["1/3", "2/3"]]],
-                    [[["1/2", "1/2"]], [["2/5", "3/5"]], [["1/4", "3/4"]]],
-                    [[["1/2", "1/2"]], [["1/2", "1/2"]], [[1, 0]]],
-                    [[["1/3", "2/3"]], [[1, 0]], [["1/4", "3/4"]]],
-                    [[[1, 0]], [[1, 0]], [[1, 0]]],
-                    [[[1, 0]], [[0, 1]], [[0, 1]]],
-                    [[[0, 1]], [["1/4", "3/4"]], [["1/3", "2/3"]]],
-                    [[[0, 1]], [[1, 0]], [[0, 1]]],
-                    [[[0, 1]], [[0, 1]], [[1, 0]]],
-                ],
-                9,
+            games.read_from_file("mixed_behavior_game.efg"),
+            [
+                [[["2/5", "3/5"]], [["1/2", "1/2"]], [["1/3", "2/3"]]],
+                [[["1/2", "1/2"]], [["2/5", "3/5"]], [["1/4", "3/4"]]],
+                [[["1/2", "1/2"]], [["1/2", "1/2"]], [[1, 0]]],
+                [[["1/3", "2/3"]], [[1, 0]], [["1/4", "3/4"]]],
+                [[[1, 0]], [[1, 0]], [[1, 0]]],
+                [[[1, 0]], [[0, 1]], [[0, 1]]],
+                [[[0, 1]], [["1/4", "3/4"]], [["1/3", "2/3"]]],
+                [[[0, 1]], [[1, 0]], [[0, 1]]],
+                [[[0, 1]], [[0, 1]], [[1, 0]]],
+            ],
+            9,
         ),
     ],
 )
+# This is the "ordered" version where we test for the outputs coming in a specific
+# order; there is also an "unordered" version.  The game 2x2x2.nfg, for example,
+# has a point at which the Jacobian is singular.  As a result, the order in which it
+# returns the two totally-mixed equilbria is system-dependent due, essentially,
+# to inherent numerical instability near that point.
 def test_enumpoly_unordered_behavior(
-        game: gbt.Game, mixed_behav_prof_data: list, stop_after: None | int
+    game: gbt.Game, mixed_behav_prof_data: list, stop_after: None | int
 ):
     """Test calls of enumpoly for mixed behavior equilibria,
     using max_regret and agent_max_regret (internal consistency); and
@@ -413,60 +806,59 @@ def test_lcp_strategy_double():
     "game,mixed_strategy_prof_data,stop_after",
     [
         # Zero-sum games
+        (games.create_2x2_zero_sum_efg(), [[["1/2", "1/2"], ["1/2", "1/2"]]], None),
         (
-                games.create_2x2_zero_sum_efg(),
-                [[["1/2", "1/2"], ["1/2", "1/2"]]],
-                None
-        ),
-        (
-                games.create_2x2_zero_sum_efg(missing_term_outcome=True),
-                [[["1/2", "1/2"], ["1/2", "1/2"]]],
-                None
+            games.create_2x2_zero_sum_efg(missing_term_outcome=True),
+            [[["1/2", "1/2"], ["1/2", "1/2"]]],
+            None,
         ),
         (games.create_stripped_down_poker_efg(), [[["1/3", "2/3", 0, 0], ["2/3", "1/3"]]], None),
         (
-                games.create_stripped_down_poker_efg(nonterm_outcomes=True),
-                [[["1/3", "2/3", 0, 0], ["2/3", "1/3"]]],
-                None
+            games.create_stripped_down_poker_efg(nonterm_outcomes=True),
+            [[["1/3", "2/3", 0, 0], ["2/3", "1/3"]]],
+            None,
         ),
         (games.create_kuhn_poker_efg(), [games.kuhn_poker_lcp_first_mixed_strategy_prof()], 1),
         (
-                games.create_kuhn_poker_efg(nonterm_outcomes=True),
-                [games.kuhn_poker_lcp_first_mixed_strategy_prof()],
-                1
+            games.create_kuhn_poker_efg(nonterm_outcomes=True),
+            [games.kuhn_poker_lcp_first_mixed_strategy_prof()],
+            1,
         ),
         # Non-zero-sum games
         (games.create_one_shot_trust_efg(), [[[0, 1], ["1/2", "1/2"]]], None),
         (
-                games.create_EFG_for_nxn_bimatrix_coordination_game(3),
-                [
-                    [[1, 0, 0], [1, 0, 0]],
-                    [["1/2", "1/2", 0], ["1/2", "1/2", 0]],
-                    [[0, 1, 0], [0, 1, 0]],
-                    [[0, "1/2", "1/2"], [0, "1/2", "1/2"]],
-                    [["1/3", "1/3", "1/3"], ["1/3", "1/3", "1/3"]],
-                    [["1/2", 0, "1/2"], ["1/2", 0, "1/2"]],
-                    [[0, 0, 1], [0, 0, 1]],
-                ],
-                None,
+            games.create_EFG_for_nxn_bimatrix_coordination_game(3),
+            [
+                [[1, 0, 0], [1, 0, 0]],
+                [["1/2", "1/2", 0], ["1/2", "1/2", 0]],
+                [[0, 1, 0], [0, 1, 0]],
+                [[0, "1/2", "1/2"], [0, "1/2", "1/2"]],
+                [["1/3", "1/3", "1/3"], ["1/3", "1/3", "1/3"]],
+                [["1/2", 0, "1/2"], ["1/2", 0, "1/2"]],
+                [[0, 0, 1], [0, 0, 1]],
+            ],
+            None,
         ),
         (
-                games.create_EFG_for_nxn_bimatrix_coordination_game(4),
-                [[[1, 0, 0, 0], [1, 0, 0, 0]]],
-                1,
+            games.create_EFG_for_nxn_bimatrix_coordination_game(4),
+            [[[1, 0, 0, 0], [1, 0, 0, 0]]],
+            1,
         ),
         (
-                games.create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq(),
+            games.create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq(),
+            [
                 [
-                    [["1/30", "1/6", "3/10", "3/10", "1/6", "1/30"],
-                     ["1/6", "1/30", "3/10", "3/10", "1/30", "1/6"]],
+                    ["1/30", "1/6", "3/10", "3/10", "1/6", "1/30"],
+                    ["1/6", "1/30", "3/10", "3/10", "1/30", "1/6"],
                 ],
-                None
+            ],
+            None,
         ),
-    ]
+    ],
 )
-def test_lcp_strategy_rational(game: gbt.Game, mixed_strategy_prof_data: list,
-                               stop_after: None | int):
+def test_lcp_strategy_rational(
+    game: gbt.Game, mixed_strategy_prof_data: list, stop_after: None | int
+):
     """Test calls of LCP for mixed strategy equilibria, rational precision
     using max_regret (internal consistency); and comparison to a sequence of previously
     computed equilibria using this function (regression test).
@@ -503,16 +895,12 @@ def test_lcp_behavior_double():
     "game,mixed_behav_prof_data",
     [
         # Zero-sum games (also tested with lp solve)
-        (
-                games.create_2x2_zero_sum_efg(),
-                [[["1/2", "1/2"]], [["1/2", "1/2"]]]
-        ),
+        (games.create_2x2_zero_sum_efg(), [[["1/2", "1/2"]], [["1/2", "1/2"]]]),
         (
             games.create_2x2_zero_sum_efg(missing_term_outcome=True),
             [[["1/2", "1/2"]], [["1/2", "1/2"]]],
         ),
-        (games.create_matching_pennies_efg(),
-         [[["1/2", "1/2"]], [["1/2", "1/2"]]]),
+        (games.create_matching_pennies_efg(), [[["1/2", "1/2"]], [["1/2", "1/2"]]]),
         (
             games.create_matching_pennies_efg(with_neutral_outcome=True),
             [[["1/2", "1/2"]], [["1/2", "1/2"]]],
@@ -523,18 +911,18 @@ def test_lcp_behavior_double():
             [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]],
         ),
         (
-                games.create_kuhn_poker_efg(),
+            games.create_kuhn_poker_efg(),
+            [
                 [
-                    [
-                        ["2/3", "1/3"],
-                        [1, 0],
-                        [1, 0],
-                        ["1/3", "2/3"],
-                        [0, 1],
-                        ["1/2", "1/2"],
-                    ],
-                    [[1, 0], ["2/3", "1/3"], [0, 1], [0, 1], ["2/3", "1/3"], [1, 0]],
+                    ["2/3", "1/3"],
+                    [1, 0],
+                    [1, 0],
+                    ["1/3", "2/3"],
+                    [0, 1],
+                    ["1/2", "1/2"],
                 ],
+                [[1, 0], ["2/3", "1/3"], [0, 1], [0, 1], ["2/3", "1/3"], [1, 0]],
+            ],
         ),
         (
             games.create_kuhn_poker_efg(nonterm_outcomes=True),
@@ -553,84 +941,74 @@ def test_lcp_behavior_double():
         # In the next test case:
         # 1/2-1/2 for l/r is determined by MixedBehaviorProfile.UndefinedToCentroid()
         (
-                games.create_perfect_info_with_chance_efg(),
-                [[[0, 1]], [[0, 1], [0, 1]]],
+            games.read_from_file("perfect_info_with_chance.efg"),
+            [[[0, 1]], [[0, 1], [0, 1]]],
         ),
         (
-                games.create_two_player_perfect_info_win_lose_efg(),
-                [[[0, 1], [1, 0]], [[0, 1], ["1/2", "1/2"]]],
-        ),
-        (
-            games.create_two_player_perfect_info_win_lose_efg(nonterm_outcomes=True),
+            games.read_from_file("two_player_perfect_info_win_lose.efg"),
             [[[0, 1], [1, 0]], [[0, 1], ["1/2", "1/2"]]],
         ),
         (
-            games.create_three_action_internal_outcomes_efg(),
-            [
-                [["1/3", 0, "2/3"], ["2/3", 0, "1/3"]],
-                [["2/3", "1/3"], ["1/3", "2/3"], ["1/3", "2/3"]],
-            ]
+            games.read_from_file("two_player_perfect_info_win_lose_with_nonterm_outcomes.efg"),
+            [[[0, 1], [1, 0]], [[0, 1], ["1/2", "1/2"]]],
         ),
         (
-            games.create_three_action_internal_outcomes_efg(nonterm_outcomes=True),
+            games.read_from_file("2_player_chance.efg"),
             [
                 [["1/3", 0, "2/3"], ["2/3", 0, "1/3"]],
                 [["2/3", "1/3"], ["1/3", "2/3"], ["1/3", "2/3"]],
             ],
         ),
         (
-                games.create_large_payoff_game_efg(),
-                [
-                    [[1, 0], [1, 0]],
-                    [[0, 1], ["9999999999999999999/10000000000000000000",
-                              "1/10000000000000000000"]],
-                ],
-        ),
-        (
-            games.create_chance_in_middle_efg(),
+            games.read_from_file("2_player_chance_nonterm_outcomes_and_missing_term_outcomes.efg"),
             [
-                [["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]],
-                [[1, 0], ["6/11", "5/11"]]
-            ]
-        ),
-        (
-            games.create_chance_in_middle_efg(nonterm_outcomes=True),
-            [
-                [["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]],
-                [[1, 0], ["6/11", "5/11"]]
+                [["1/3", 0, "2/3"], ["2/3", 0, "1/3"]],
+                [["2/3", "1/3"], ["1/3", "2/3"], ["1/3", "2/3"]],
             ],
+        ),
+        (
+            games.read_from_file("large_payoff_game.efg"),
+            [
+                [[1, 0], [1, 0]],
+                [[0, 1], ["9999999999999999999/10000000000000000000", "1/10000000000000000000"]],
+            ],
+        ),
+        (
+            games.read_from_file("chance_in_middle.efg"),
+            [[["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]], [[1, 0], ["6/11", "5/11"]]],
+        ),
+        (
+            games.read_from_file("chance_in_middle_with_nonterm_outcomes.efg"),
+            [[["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]], [[1, 0], ["6/11", "5/11"]]],
         ),
         # Non-zero-sum games
         (
-                games.create_reduction_both_players_payoff_ties_efg(),
-                [[[0, 0, 1, 0], [1, 0]], [[0, 1], [0, 1], [0, 1], [0, 1]]],
+            games.read_from_file("reduction_both_players_payoff_ties_GTE_survey.efg"),
+            [[[0, 0, 1, 0], [1, 0]], [[0, 1], [0, 1], [0, 1], [0, 1]]],
         ),
         (
-                games.create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq(),
-                [
-                    [["1/30", "1/6", "3/10", "3/10", "1/6", "1/30"]],
-                    [["1/6", "1/30", "3/10", "3/10", "1/30", "1/6"]],
-                ],
+            games.create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq(),
+            [
+                [["1/30", "1/6", "3/10", "3/10", "1/6", "1/30"]],
+                [["1/6", "1/30", "3/10", "3/10", "1/30", "1/6"]],
+            ],
         ),
         (games.create_EFG_for_nxn_bimatrix_coordination_game(3), [[[0, 0, 1]], [[0, 0, 1]]]),
         (
-                games.create_EFG_for_nxn_bimatrix_coordination_game(4),
-                [[[0, 0, 0, 1]], [[0, 0, 0, 1]]],
+            games.create_EFG_for_nxn_bimatrix_coordination_game(4),
+            [[[0, 0, 0, 1]], [[0, 0, 0, 1]]],
         ),
         (
-            games.create_entry_accomodation_efg(),
-            [[["2/3", "1/3"], [1, 0], [1, 0]], [["2/3", "1/3"]]]
-        ),
-        (
-            games.create_entry_accomodation_efg(nonterm_outcomes=True),
+            games.read_from_file("entry_accommodation.efg"),
             [[["2/3", "1/3"], [1, 0], [1, 0]], [["2/3", "1/3"]]],
         ),
         (
-            games.create_non_zero_sum_lacking_outcome_efg(),
-            [[["1/3", "2/3"]], [["1/2", "1/2"]]]
+            games.read_from_file("entry_accommodation_with_nonterm_outcomes.efg"),
+            [[["2/3", "1/3"], [1, 0], [1, 0]], [["2/3", "1/3"]]],
         ),
+        (games.read_from_file("2_player_non_zero_sum.efg"), [[["1/3", "2/3"]], [["1/2", "1/2"]]]),
         (
-            games.create_non_zero_sum_lacking_outcome_efg(missing_term_outcome=True),
+            games.read_from_file("2_player_non_zero_sum_missing_term_outcome.efg"),
             [[["1/3", "2/3"]], [["1/2", "1/2"]]],
         ),
     ],
@@ -664,22 +1042,22 @@ def test_lp_strategy_double():
     "game,mixed_strategy_prof_data",
     [
         (
-                games.create_2x2_zero_sum_efg(),
-                [["1/2", "1/2"], ["1/2", "1/2"]],
+            games.create_2x2_zero_sum_efg(),
+            [["1/2", "1/2"], ["1/2", "1/2"]],
         ),
         (
-                games.create_2x2_zero_sum_efg(missing_term_outcome=True),
-                [["1/2", "1/2"], ["1/2", "1/2"]],
+            games.create_2x2_zero_sum_efg(missing_term_outcome=True),
+            [["1/2", "1/2"], ["1/2", "1/2"]],
         ),
         (games.create_stripped_down_poker_efg(), [["1/3", "2/3", 0, 0], ["2/3", "1/3"]]),
         (
-                games.create_stripped_down_poker_efg(nonterm_outcomes=True),
-                [["1/3", "2/3", 0, 0], ["2/3", "1/3"]]
+            games.create_stripped_down_poker_efg(nonterm_outcomes=True),
+            [["1/3", "2/3", 0, 0], ["2/3", "1/3"]],
         ),
         (games.create_kuhn_poker_efg(), games.kuhn_poker_lp_mixed_strategy_prof()),
         (
-                games.create_kuhn_poker_efg(nonterm_outcomes=True),
-                games.kuhn_poker_lp_mixed_strategy_prof()
+            games.create_kuhn_poker_efg(nonterm_outcomes=True),
+            games.kuhn_poker_lp_mixed_strategy_prof(),
         ),
     ],
 )
@@ -707,41 +1085,43 @@ def test_lp_behavior_double():
     "game,mixed_behav_prof_data",
     [
         (
-                games.create_two_player_perfect_info_win_lose_efg(),
-                [[[0, 1], [1, 0]], [[1, 0], [1, 0]]],
+            games.read_from_file("two_player_perfect_info_win_lose.efg"),
+            [[[0, 1], [1, 0]], [[1, 0], [1, 0]]],
         ),
         (
-                games.create_two_player_perfect_info_win_lose_efg(nonterm_outcomes=True),
-                [[[0, 1], [1, 0]], [[1, 0], [1, 0]]],
+            games.read_from_file("two_player_perfect_info_win_lose_with_nonterm_outcomes.efg"),
+            [[[0, 1], [1, 0]], [[1, 0], [1, 0]]],
         ),
         (
-                games.create_2x2_zero_sum_efg(missing_term_outcome=False),
-                [[["1/2", "1/2"]], [["1/2", "1/2"]]]
+            games.create_2x2_zero_sum_efg(missing_term_outcome=False),
+            [[["1/2", "1/2"]], [["1/2", "1/2"]]],
         ),
         (
             games.create_2x2_zero_sum_efg(missing_term_outcome=True),
             [[["1/2", "1/2"]], [["1/2", "1/2"]]],
         ),
-        (games.create_matching_pennies_efg(with_neutral_outcome=False),
-         [[["1/2", "1/2"]], [["1/2", "1/2"]]]),
+        (
+            games.create_matching_pennies_efg(with_neutral_outcome=False),
+            [[["1/2", "1/2"]], [["1/2", "1/2"]]],
+        ),
         (
             games.create_matching_pennies_efg(with_neutral_outcome=True),
             [[["1/2", "1/2"]], [["1/2", "1/2"]]],
         ),
         (
-                games.create_stripped_down_poker_efg(),
-                [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]],
+            games.create_stripped_down_poker_efg(),
+            [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]],
         ),
         (
             games.create_stripped_down_poker_efg(nonterm_outcomes=True),
             [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]],
         ),
         (
-                games.create_kuhn_poker_efg(),
-                [
-                    [[1, 0], [1, 0], [1, 0], ["2/3", "1/3"], [1, 0], [0, 1]],
-                    [[1, 0], ["2/3", "1/3"], [0, 1], [0, 1], ["2/3", "1/3"], [1, 0]],
-                ],
+            games.create_kuhn_poker_efg(),
+            [
+                [[1, 0], [1, 0], [1, 0], ["2/3", "1/3"], [1, 0], [0, 1]],
+                [[1, 0], ["2/3", "1/3"], [0, 1], [0, 1], ["2/3", "1/3"], [1, 0]],
+            ],
         ),
         (
             games.create_kuhn_poker_efg(nonterm_outcomes=True),
@@ -758,51 +1138,44 @@ def test_lp_behavior_double():
             ],
         ),
         (
-                games.create_seq_form_STOC_paper_zero_sum_2_player_efg(),
-                [
-                    [[0, 1], ["2/3", "1/3"], ["1/3", "2/3"]],
-                    [["5/6", "1/6"], ["5/9", "4/9"]],
-                ],
-        ),
-        (
-                games.create_perfect_info_with_chance_efg(),
-                [[[0, 1]], [[1, 0], [1, 0]]],
-        ),
-        (
-            games.create_three_action_internal_outcomes_efg(),
+            games.read_from_file("zerosum_efg_from_sequence_form_STOC94_paper.efg"),
             [
-                [["1/3", 0, "2/3"], ["2/3", 0, "1/3"]],
-                [["2/3", "1/3"], ["2/3", "1/3"], ["1/3", "2/3"]],
-            ]
+                [[0, 1], ["2/3", "1/3"], ["1/3", "2/3"]],
+                [["5/6", "1/6"], ["5/9", "4/9"]],
+            ],
         ),
         (
-            games.create_three_action_internal_outcomes_efg(nonterm_outcomes=True),
+            games.read_from_file("perfect_info_with_chance.efg"),
+            [[[0, 1]], [[1, 0], [1, 0]]],
+        ),
+        (
+            games.read_from_file("2_player_chance.efg"),
             [
                 [["1/3", 0, "2/3"], ["2/3", 0, "1/3"]],
                 [["2/3", "1/3"], ["2/3", "1/3"], ["1/3", "2/3"]],
             ],
         ),
         (
-                games.create_large_payoff_game_efg(),
-                [
-                    [[1, 0], [1, 0]],
-                    [[0, 1], ["9999999999999999999/10000000000000000000",
-                              "1/10000000000000000000"]],
-                ],
-        ),
-        (
-            games.create_chance_in_middle_efg(),
+            games.read_from_file("2_player_chance_nonterm_outcomes_and_missing_term_outcomes.efg"),
             [
-                [["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]],
-                [[1, 0], ["6/11", "5/11"]]
+                [["1/3", 0, "2/3"], ["2/3", 0, "1/3"]],
+                [["2/3", "1/3"], ["2/3", "1/3"], ["1/3", "2/3"]],
             ],
         ),
         (
-            games.create_chance_in_middle_efg(nonterm_outcomes=True),
+            games.read_from_file("large_payoff_game.efg"),
             [
-                [["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]],
-                [[1, 0], ["6/11", "5/11"]]
+                [[1, 0], [1, 0]],
+                [[0, 1], ["9999999999999999999/10000000000000000000", "1/10000000000000000000"]],
             ],
+        ),
+        (
+            games.read_from_file("chance_in_middle.efg"),
+            [[["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]], [[1, 0], ["6/11", "5/11"]]],
+        ),
+        (
+            games.read_from_file("chance_in_middle_with_nonterm_outcomes.efg"),
+            [[["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]], [[1, 0], ["6/11", "5/11"]]],
         ),
     ],
 )
@@ -893,8 +1266,9 @@ def test_logit_solve_branch_error_with_invalid_max_accel():
 
 def test_logit_solve_branch():
     game = games.read_from_file("const_sum_game.nfg")
-    assert len(gbt.qre.logit_solve_branch(
-        game=game, maxregret=0.2, first_step=0.2, max_accel=1)) > 0
+    assert (
+        len(gbt.qre.logit_solve_branch(game=game, maxregret=0.2, first_step=0.2, max_accel=1)) > 0
+    )
 
 
 def test_logit_solve_lambda_error_with_invalid_first_step():
@@ -915,5 +1289,6 @@ def test_logit_solve_lambda_error_with_invalid_max_accel():
 
 def test_logit_solve_lambda():
     game = games.read_from_file("const_sum_game.nfg")
-    assert len(gbt.qre.logit_solve_lambda(
-        game=game, lam=[1, 2, 3], first_step=0.2, max_accel=1)) > 0
+    assert (
+        len(gbt.qre.logit_solve_lambda(game=game, lam=[1, 2, 3], first_step=0.2, max_accel=1)) > 0
+    )
