@@ -28,7 +28,8 @@ jobs:
       - name: Build from source distribution
         run: |
           cd dist
-          pip install -v ./pygambit-*.tar.gz[test,doc]
+          sdist=$(ls pygambit-*.tar.gz)
+          pip install -v "${sdist}[test,doc]"
       - name: Run tests
         run: pytest --run-tutorials
 
