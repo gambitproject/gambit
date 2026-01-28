@@ -33,6 +33,9 @@ dependencies = [
 [project.optional-dependencies]
 test = ["pytest", "nbformat", "nbclient", "ipykernel"]
 doc = [
+    "Cython",
+    "numpy",
+    "scipy",
     "pydata-sphinx-themesphinx_design",
     "sphinx-autobuild",
     "nbsphinx",
