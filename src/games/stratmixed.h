@@ -20,8 +20,8 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#ifndef LIBGAMBIT_MIXED_H
-#define LIBGAMBIT_MIXED_H
+#ifndef GAMBIT_GAMES_STRATMIXED_H
+#define GAMBIT_GAMES_STRATMIXED_H
 
 #include "core/vector.h"
 #include "games/gamebagg.h"
@@ -33,26 +33,23 @@ protected:
   SegmentedVector<T> m_probs;
   SegmentedArray<long> m_offsets;
   StrategySupportProfile m_support;
-  /// The index into the strategy profile for a strategy (-1 if not in support)
-  std::map<GameStrategy, int> m_profileIndex;
+  /// The index into the strategy profile for a strategy (0 if not in support)
+  SegmentedArray<size_t> m_profileIndex;
   unsigned int m_gameversion;
 
 public:
   explicit MixedStrategyProfileRep(const StrategySupportProfile &p_support)
     : m_probs(p_support.GetShape()), m_offsets(p_support.GetShape()), m_support(p_support),
+      m_profileIndex(p_support.GetGame()->GetStrategies().shape_array()),
       m_gameversion(p_support.GetGame()->GetVersion())
   {
-    int index = 1;
+    std::fill(m_profileIndex.GetFlattened().begin(), m_profileIndex.GetFlattened().end(), 0);
+    auto offset_it = m_offsets.GetFlattened().begin();
     for (const auto &player : p_support.GetGame()->m_players) {
-      for (const auto &strategy : player->m_strategies) {
-        if (p_support.Contains(strategy)) {
-          m_offsets.GetFlattened()[index] = strategy->m_offset;
-          m_profileIndex[strategy] = index;
-          index++;
-        }
-        else {
-          m_profileIndex[strategy] = -1;
-        }
+      for (const auto &strategy : p_support.GetStrategies(player)) {
+        m_profileIndex.segment(player->m_number)[strategy->m_number] =
+            static_cast<size_t>(offset_it - m_offsets.GetFlattened().begin() + 1);
+        *offset_it++ = strategy->m_offset;
       }
     }
     SetCentroid();
@@ -91,15 +88,20 @@ public:
     return m_probs.GetFlattened()[i];
   }
   /// Returns the probability the strategy is played
-  const T &operator[](const GameStrategy &p_strategy) const
+  T operator[](const GameStrategy &p_strategy) const
   {
-    return m_probs.GetFlattened()[m_profileIndex.at(p_strategy)];
+    auto index = GetProfileIndex(p_strategy);
+    return (index > 0) ? m_probs.GetFlattened()[index] : T{0};
   }
   /// Returns the probability the strategy is played
   T &operator[](const GameStrategy &p_strategy)
   {
     OnProfileChanged();
-    return m_probs.GetFlattened()[m_profileIndex.at(p_strategy)];
+    auto index = GetProfileIndex(p_strategy);
+    if (index == 0) {
+      throw std::out_of_range("Strategy is not in the support of the profile");
+    }
+    return m_probs.GetFlattened()[index];
   }
   /// Set the strategy of the corresponding player to a pure strategy
   void SetStrategy(const GameStrategy &p_strategy)
@@ -120,9 +122,10 @@ public:
     m_probs.GetFlattened() = c;
     OnProfileChanged();
   }
-  unsigned int GetProfileIndex(const GameStrategy &p_strategy) const
+  size_t GetProfileIndex(const GameStrategy &p_strategy) const
   {
-    return m_profileIndex.at(p_strategy);
+    const auto strategy = p_strategy.get();
+    return m_profileIndex.segment(strategy->m_player->m_number)[strategy->m_number];
   }
   virtual T GetPayoff(int pl) const = 0;
   virtual T GetPayoffDeriv(int pl, const GameStrategy &) const = 0;
@@ -414,4 +417,4 @@ MixedStrategyProfile<Rational> GameRep::NewRandomStrategyProfile(int p_denom,
 
 } // end namespace Gambit
 
-#endif // LIBGAMBIT_MIXED_H
+#endif // GAMBIT_GAMES_STRATMIXED_H

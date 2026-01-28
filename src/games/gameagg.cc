@@ -101,8 +101,7 @@ template <class T> T AGGMixedStrategyProfileRep<T>::GetPayoff(int pl) const
     for (int j = 0; j < g.aggPtr->getNumActions(i); ++j) {
       const GameStrategy strategy =
           this->m_support.GetGame()->GetPlayer(i + 1)->GetStrategy(j + 1);
-      const int ind = this->m_profileIndex.at(strategy);
-      s[g.aggPtr->firstAction(i) + j] = (ind == -1) ? (T)0 : this->m_probs.GetFlattened()[ind];
+      s[g.aggPtr->firstAction(i) + j] = (*this)[strategy];
     }
   }
   return (T)g.aggPtr->getMixedPayoff(pl - 1, s);
@@ -124,8 +123,7 @@ T AGGMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &ps) 
       for (int j = 0; j < g.aggPtr->getNumActions(i); ++j) {
         const GameStrategy strategy =
             this->m_support.GetGame()->GetPlayer(i + 1)->GetStrategy(j + 1);
-        const int &ind = this->m_profileIndex.at(strategy);
-        s[g.aggPtr->firstAction(i) + j] = (ind == -1) ? (T)0 : this->m_probs.GetFlattened()[ind];
+        s[g.aggPtr->firstAction(i) + j] = (*this)[strategy];
       }
     }
   }
@@ -161,8 +159,7 @@ T AGGMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &ps1,
       for (int j = 0; j < g.aggPtr->getNumActions(i); ++j) {
         const GameStrategy strategy =
             this->m_support.GetGame()->GetPlayer(i + 1)->GetStrategy(j + 1);
-        const int ind = this->m_profileIndex.at(strategy);
-        s[g.aggPtr->firstAction(i) + j] = (ind == -1) ? (T)0 : this->m_probs.GetFlattened()[ind];
+        s[g.aggPtr->firstAction(i) + j] = (*this)[strategy];
       }
     }
   }
