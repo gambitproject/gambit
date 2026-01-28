@@ -45,7 +45,13 @@ public:
   const StrategySupportProfile &GetSupport() const { return m_support; }
   unsigned int GetGameVersion() const { return m_gameversion; }
 
-  void SetCentroid();
+  void SetCentroid()
+  {
+    for (auto segment : m_probs.segments()) {
+      std::fill(segment.begin(), segment.end(), T{1} / static_cast<T>(segment.size()));
+    }
+  }
+
   std::unique_ptr<MixedStrategyProfileRep> Normalize() const;
   const T &operator[](int i) const { return m_probs.GetFlattened()[i]; }
   T &operator[](int i)

@@ -64,6 +64,60 @@ public:
     const_iterator end() const { return m_data + m_size; }
   };
 
+  template <bool IsConst> class SegmentRange {
+    using parent_type = std::conditional_t<IsConst, const Segmented, Segmented>;
+    using elem_type = std::conditional_t<IsConst, const value_type, value_type>;
+    using view_type = SegmentView<elem_type>;
+
+    parent_type *m_parent{nullptr};
+
+  public:
+    class iterator {
+      parent_type *m_parent{nullptr};
+      std::size_t m_index{1};
+
+    public:
+      using iterator_category = std::forward_iterator_tag;
+      using value_type = view_type;
+      using difference_type = std::ptrdiff_t;
+      using reference = value_type;
+
+      iterator() = default;
+      iterator(parent_type *p_parent, std::size_t p_index) : m_parent(p_parent), m_index(p_index)
+      {
+      }
+
+      reference operator*() const { return m_parent->segment(m_index); }
+
+      iterator &operator++()
+      {
+        ++m_index;
+        return *this;
+      }
+      iterator operator++(int)
+      {
+        auto tmp = *this;
+        ++(*this);
+        return tmp;
+      }
+
+      bool operator==(const iterator &p_other) const
+      {
+        return m_parent == p_other.m_parent && m_index == p_other.m_index;
+      }
+      bool operator!=(const iterator &p_other) const { return !(*this == p_other); }
+    };
+
+    SegmentRange() = default;
+    explicit SegmentRange(parent_type *p_parent) : m_parent(p_parent) {}
+
+    std::size_t size() const { return m_parent->GetShape().size(); }
+    bool empty() const { return m_parent->GetShape().empty(); }
+
+    iterator begin() const { return iterator(m_parent, 1); }
+    iterator end() const { return iterator(m_parent, size() + 1); }
+  };
+
   Segmented() = delete;
   explicit Segmented(const Array<size_t> &p_shape)
     : m_values(std::accumulate(p_shape.begin(), p_shape.end(), 0)), m_offsets(p_shape.size()),
@@ -96,6 +150,8 @@ public:
   {
     return SegmentView<const value_type>(&m_values[m_offsets[a] + 1], m_shape[a]);
   }
+  SegmentRange<false> segments() { return SegmentRange<false>(this); }
+  SegmentRange<true> segments() const { return SegmentRange<true>(this); }
 
   void SetFlattened(const Storage &v) { m_values = v; }
   const Storage &GetFlattened() const { return m_values; }

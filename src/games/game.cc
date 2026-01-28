@@ -270,16 +270,6 @@ MixedStrategyProfileRep<T>::MixedStrategyProfileRep(const StrategySupportProfile
   SetCentroid();
 }
 
-template <class T> void MixedStrategyProfileRep<T>::SetCentroid()
-{
-  for (auto player : m_support.GetGame()->GetPlayers()) {
-    T center = static_cast<T>(1) / static_cast<T>(m_support.GetStrategies(player).size());
-    for (auto strategy : m_support.GetStrategies(player)) {
-      (*this)[strategy] = center;
-    }
-  }
-}
-
 template <class T>
 std::unique_ptr<MixedStrategyProfileRep<T>> MixedStrategyProfileRep<T>::Normalize() const
 {
