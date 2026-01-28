@@ -21,7 +21,6 @@ jobs:
       - name: Set up dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install setuptools build cython wheel
       - name: Build source distribution
         run:
           python -m build
@@ -48,7 +47,6 @@ jobs:
       - name: Set up dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install setuptools build cython wheel
       - name: Build extension
         run: |
           python -m pip install -v .[test,doc]
@@ -71,7 +69,6 @@ jobs:
       - name: Set up dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install setuptools build cython wheel
       - name: Build extension
         run: |
           python -m pip install -v .[test,doc]
@@ -94,7 +91,6 @@ jobs:
       - name: Set up dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install setuptools build cython wheel
       - name: Build extension
         run: |
           python -m pip install -v .[test,doc]
