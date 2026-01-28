@@ -131,9 +131,7 @@ You can also build the documentation locally to preview your changes before subm
 
 1. `Install Pandoc <https://pandoc.org/installing.html>`_ for your OS
 
-2. Install the docs dependencies (into the virtual environment where you installed PyGambit): ::
-
-    pip install -r doc/requirements.txt
+2. Ensure `pygambit` is installed with doc dependencies: see :ref:`build-python`.
 
 3. Navigate to the Gambit repo and build the docs: ::
 
@@ -153,7 +151,7 @@ To submit a tutorial for inclusion in the Gambit documentation, please follow th
 
 3. Update `doc/pygambit.rst` to ensure the tutorial is listed in the docs at an appropriate location.
 
-4. *[Optional]* If your tutorial requires additional dependencies not already listed in `doc/requirements.txt`, please add them to the file.
+4. *[Optional]* If your tutorial requires additional dependencies not already listed in the ``doc`` list under ``[project.optional-dependencies]`` inside ``pyproject.toml``, please add them to the file.
 
 
 Recognising contributions
