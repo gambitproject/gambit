@@ -311,7 +311,7 @@ T TableMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &st
 {
   const auto game = this->GetSupport().GetGame();
   auto &g = dynamic_cast<GameTableRep &>(*game);
-  auto base_index = this->StrategyOffset(strategy);
+  auto base_index = strategy->m_offset;
   const auto player = game->GetPlayer(pl);
   T value{0};
   for (auto [index, prob] : ProductDistribution<T>(this->m_probs, this->m_offsets,
@@ -352,7 +352,7 @@ T TableMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &st
   }
   const auto game = this->GetSupport().GetGame();
   auto &g = dynamic_cast<GameTableRep &>(*game);
-  auto base_index = this->StrategyOffset(strategy1) + this->StrategyOffset(strategy2);
+  auto base_index = strategy1->m_offset + strategy2->m_offset;
   const auto player = game->GetPlayer(pl);
   T value{0};
   for (auto [index, prob] :

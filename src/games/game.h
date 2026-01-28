@@ -278,6 +278,7 @@ class GameStrategyRep : public std::enable_shared_from_this<GameStrategyRep> {
   friend class TablePureStrategyProfileRep;
   friend class StrategySupportProfile;
   template <class T> friend class MixedStrategyProfile;
+  template <class T> friend class MixedStrategyProfileRep;
   template <class T> friend class TableMixedStrategyProfileRep;
   template <class T> friend class MixedBehaviorProfile;
 
@@ -285,6 +286,7 @@ class GameStrategyRep : public std::enable_shared_from_this<GameStrategyRep> {
   GamePlayerRep *m_player;
   int m_number;
   std::string m_label;
+  std::size_t m_offset{0};
   std::map<GameInfosetRep *, int> m_behav;
 
 public:
@@ -363,6 +365,7 @@ class GamePlayerRep : public std::enable_shared_from_this<GamePlayerRep> {
   friend class PureStrategyProfileRep;
   template <class T> friend class MixedBehaviorProfile;
   template <class T> friend class MixedStrategyProfile;
+  template <class T> friend class MixedStrategyProfileRep;
 
   /// @name Building reduced form strategies
   //@{
@@ -377,6 +380,7 @@ class GamePlayerRep : public std::enable_shared_from_this<GamePlayerRep> {
   GameRep *m_game;
   int m_number;
   std::string m_label;
+  std::size_t m_strategyStride{0};
   std::vector<std::shared_ptr<GameInfosetRep>> m_infosets;
   std::vector<std::shared_ptr<GameStrategyRep>> m_strategies;
 

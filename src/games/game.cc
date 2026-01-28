@@ -188,13 +188,15 @@ void GameRep::IndexStrategies() const
   m_pureStrategies.m_radices.resize(n);
   m_pureStrategies.m_strides.resize(n);
 
-  long stride = 1L;
-  for (size_t i = 0; i < n; ++i) {
+  std::size_t stride = 1L;
+  for (std::size_t i = 0; i < n; ++i) {
     const auto &player = m_players[i];
     m_pureStrategies.m_strides[i] = stride;
+    player->m_strategyStride = stride;
     m_pureStrategies.m_radices[i] = player->m_strategies.size();
     for (auto [st, strategy] : enumerate(player->m_strategies)) {
       strategy->m_number = st + 1;
+      strategy->m_offset = st * stride;
     }
     stride *= m_pureStrategies.m_radices[i];
   }
@@ -253,10 +255,10 @@ MixedStrategyProfileRep<T>::MixedStrategyProfileRep(const StrategySupportProfile
     m_gameversion(p_support.GetGame()->GetVersion())
 {
   int index = 1;
-  for (auto player : p_support.GetGame()->GetPlayers()) {
-    for (auto strategy : player->GetStrategies()) {
+  for (const auto &player : p_support.GetGame()->m_players) {
+    for (const auto &strategy : player->m_strategies) {
       if (p_support.Contains(strategy)) {
-        m_offsets.GetFlattened()[index] = StrategyOffset(strategy);
+        m_offsets.GetFlattened()[index] = strategy->m_offset;
         m_profileIndex[strategy] = index;
         index++;
       }

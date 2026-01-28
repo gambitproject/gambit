@@ -37,14 +37,6 @@ protected:
   std::map<GameStrategy, int> m_profileIndex;
   unsigned int m_gameversion;
 
-  long StrategyOffset(const GameStrategy &s) const
-  {
-    const auto &space = this->GetSupport().GetGame()->m_pureStrategies;
-    const auto &player = s->GetPlayer();
-    const size_t i = player->GetNumber() - 1;
-    return (s->GetNumber() - 1) * space.m_strides[i];
-  }
-
 public:
   explicit MixedStrategyProfileRep(const StrategySupportProfile &);
   virtual ~MixedStrategyProfileRep() = default;
@@ -75,10 +67,9 @@ public:
   /// Set the strategy of the corresponding player to a pure strategy
   void SetStrategy(const GameStrategy &p_strategy)
   {
-    for (const auto &s : m_support.GetStrategies(p_strategy->GetPlayer())) {
-      (*this)[s] = static_cast<T>(0);
-    }
-    (*this)[p_strategy] = static_cast<T>(1);
+    auto segment = m_probs.segment(p_strategy->m_player->m_number);
+    std::fill(segment.begin(), segment.end(), T{0});
+    (*this)[p_strategy] = T{1};
     OnProfileChanged();
   }
   const Vector<T> &GetProbVector() const { return m_probs.GetFlattened(); }
