@@ -16,6 +16,7 @@ build:
 
 python:
   install:
-    - requirements: doc/requirements.txt
-    - method: setuptools
+    - method: pip
       path: "."
+      extra_requirements:
+        - doc
