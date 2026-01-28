@@ -270,25 +270,6 @@ MixedStrategyProfileRep<T>::MixedStrategyProfileRep(const StrategySupportProfile
   SetCentroid();
 }
 
-template <class T>
-std::unique_ptr<MixedStrategyProfileRep<T>> MixedStrategyProfileRep<T>::Normalize() const
-{
-  auto norm = Copy();
-  for (auto player : m_support.GetGame()->GetPlayers()) {
-    T sum = static_cast<T>(0);
-    for (auto strategy : m_support.GetStrategies(player)) {
-      sum += (*this)[strategy];
-    }
-    if (sum == static_cast<T>(0)) {
-      continue;
-    }
-    for (auto strategy : m_support.GetStrategies(player)) {
-      (*norm)[strategy] /= sum;
-    }
-  }
-  return norm;
-}
-
 //========================================================================
 //                 MixedStrategyProfile<T>: Lifecycle
 //========================================================================

@@ -52,7 +52,20 @@ public:
     }
   }
 
-  std::unique_ptr<MixedStrategyProfileRep> Normalize() const;
+  std::unique_ptr<MixedStrategyProfileRep> Normalize() const
+  {
+    auto norm = Copy();
+    for (auto segment : norm->m_probs.segments()) {
+      auto sum = std::accumulate(segment.begin(), segment.end(), T{0});
+      if (sum > T{0}) {
+        std::transform(segment.begin(), segment.end(), segment.begin(),
+                       [&sum](const T &x) { return x / sum; });
+        ;
+      }
+    }
+    return norm;
+  }
+
   const T &operator[](int i) const { return m_probs.GetFlattened()[i]; }
   T &operator[](int i)
   {
