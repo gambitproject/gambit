@@ -246,31 +246,6 @@ void GameRep::WriteNfgFile(std::ostream &p_file) const
 }
 
 //========================================================================
-//                     MixedStrategyProfileRep<T>
-//========================================================================
-
-template <class T>
-MixedStrategyProfileRep<T>::MixedStrategyProfileRep(const StrategySupportProfile &p_support)
-  : m_probs(p_support.GetShape()), m_offsets(p_support.GetShape()), m_support(p_support),
-    m_gameversion(p_support.GetGame()->GetVersion())
-{
-  int index = 1;
-  for (const auto &player : p_support.GetGame()->m_players) {
-    for (const auto &strategy : player->m_strategies) {
-      if (p_support.Contains(strategy)) {
-        m_offsets.GetFlattened()[index] = strategy->m_offset;
-        m_profileIndex[strategy] = index;
-        index++;
-      }
-      else {
-        m_profileIndex[strategy] = -1;
-      }
-    }
-  }
-  SetCentroid();
-}
-
-//========================================================================
 //                 MixedStrategyProfile<T>: Lifecycle
 //========================================================================
 
@@ -290,16 +265,6 @@ MixedStrategyProfile<T>::MixedStrategyProfile(const MixedBehaviorProfile<T> &p_p
       (*m_rep)[strategy] = prob;
     }
   }
-}
-
-template <class T>
-MixedStrategyProfile<T> &MixedStrategyProfile<T>::operator=(const MixedStrategyProfile &p_profile)
-{
-  if (this != &p_profile) {
-    InvalidateCache();
-    m_rep = p_profile.m_rep->Copy();
-  }
-  return *this;
 }
 
 //========================================================================

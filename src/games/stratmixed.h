@@ -38,7 +38,25 @@ protected:
   unsigned int m_gameversion;
 
 public:
-  explicit MixedStrategyProfileRep(const StrategySupportProfile &);
+  explicit MixedStrategyProfileRep(const StrategySupportProfile &p_support)
+    : m_probs(p_support.GetShape()), m_offsets(p_support.GetShape()), m_support(p_support),
+      m_gameversion(p_support.GetGame()->GetVersion())
+  {
+    int index = 1;
+    for (const auto &player : p_support.GetGame()->m_players) {
+      for (const auto &strategy : player->m_strategies) {
+        if (p_support.Contains(strategy)) {
+          m_offsets.GetFlattened()[index] = strategy->m_offset;
+          m_profileIndex[strategy] = index;
+          index++;
+        }
+        else {
+          m_profileIndex[strategy] = -1;
+        }
+      }
+    }
+    SetCentroid();
+  }
   virtual ~MixedStrategyProfileRep() = default;
   virtual std::unique_ptr<MixedStrategyProfileRep> Copy() const = 0;
 
@@ -169,7 +187,14 @@ public:
   /// Destructor
   ~MixedStrategyProfile() = default;
 
-  MixedStrategyProfile &operator=(const MixedStrategyProfile &);
+  MixedStrategyProfile &operator=(const MixedStrategyProfile &p_profile)
+  {
+    if (this != &p_profile) {
+      InvalidateCache();
+      m_rep = p_profile.m_rep->Copy();
+    }
+    return *this;
+  }
   MixedStrategyProfile &operator=(const Vector<T> &v)
   {
     InvalidateCache();
