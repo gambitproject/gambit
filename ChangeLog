@@ -1,5 +1,11 @@
 # Changelog
 
+## [16.5.1] - unreleased
+
+### Fixed
+- `Game.reveal` raised a null pointer access exception or dumped core in some cases (#749)
+
+
 ## [16.5.0] - 2026-01-05
 
 ### Fixed
