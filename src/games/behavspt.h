@@ -136,16 +136,6 @@ public:
   std::list<GameNode> GetMembers(const GameInfoset &) const;
   //@}
 
-  /// @name Identification of dominated actions
-  //@{
-  /// Returns true if action 'a' is dominated by action 'b'
-  bool Dominates(const GameAction &a, const GameAction &b, bool p_strict) const;
-  /// Returns true if the action is dominated by some other action
-  bool IsDominated(const GameAction &a, bool p_strict) const;
-  /// Returns a copy of the support with dominated actions eliminated
-  BehaviorSupportProfile Undominated(bool p_strict) const;
-  //@}
-
   class Infosets {
     const BehaviorSupportProfile *m_support;
 
