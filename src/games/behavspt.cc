@@ -73,8 +73,10 @@ void BehaviorSupportProfile::AddAction(const GameAction &p_action)
   if (pos == support.end() || *pos != p_action) {
     // Action is not in the support at the infoset; add at this location to keep sorted by number
     support.insert(pos, p_action);
-    for (const auto &node : GetMembers(p_action->GetInfoset())) {
-      ActivateSubtree(node->GetChild(p_action));
+    for (const auto &node : p_action->GetInfoset()->GetMembers()) {
+      if (m_nonterminalReachable[node]) {
+        ActivateSubtree(node->GetChild(p_action));
+      }
     }
   }
 }
@@ -86,8 +88,10 @@ bool BehaviorSupportProfile::RemoveAction(const GameAction &p_action)
   auto pos = std::find(support.begin(), support.end(), p_action);
   if (pos != support.end()) {
     support.erase(pos);
-    for (const auto &node : GetMembers(p_action->GetInfoset())) {
-      DeactivateSubtree(node->GetChild(p_action));
+    for (const auto &node : p_action->GetInfoset()->GetMembers()) {
+      if (m_nonterminalReachable[node]) {
+        DeactivateSubtree(node->GetChild(p_action));
+      }
     }
     return !support.empty();
   }
@@ -137,17 +141,6 @@ void BehaviorSupportProfile::DeactivateSubtree(const GameNode &n)
       }
     }
   }
-}
-
-std::list<GameNode> BehaviorSupportProfile::GetMembers(const GameInfoset &p_infoset) const
-{
-  std::list<GameNode> answer;
-  for (const auto &member : p_infoset->GetMembers()) {
-    if (m_nonterminalReachable.at(member)) {
-      answer.push_back(member);
-    }
-  }
-  return answer;
 }
 
 //========================================================================

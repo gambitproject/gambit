@@ -130,8 +130,6 @@ public:
   //@{
   /// Can the information set be reached under this support?
   bool IsReachable(const GameInfoset &p_infoset) const { return m_infosetReachable.at(p_infoset); }
-  /// Get the members of the information set reachable under the support
-  std::list<GameNode> GetMembers(const GameInfoset &) const;
   //@}
 
   class Infosets {
