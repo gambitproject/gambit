@@ -289,7 +289,6 @@ bool ExtendsToNash(const MixedBehaviorProfile<double> &p_solution,
                    const BehaviorSupportProfile &little_supp,
                    const BehaviorSupportProfile &big_supp)
 {
-
   // First we compute the number of variables, and indexing information
   int num_vars = 0;
   std::map<GameInfoset, int> var_index;
