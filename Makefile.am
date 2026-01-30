@@ -407,9 +407,6 @@ gambit_enumpoly_SOURCES = \
     src/solvers/enumpoly/polypartial.imp \
 	src/solvers/enumpoly/polysolver.cc \
 	src/solvers/enumpoly/polysolver.h \
-	src/solvers/enumpoly/polyfeasible.h \
-	src/solvers/enumpoly/behavextend.cc \
-	src/solvers/enumpoly/behavextend.h \
 	src/solvers/enumpoly/efgpoly.cc \
 	src/solvers/enumpoly/nfgpoly.cc \
 	src/solvers/enumpoly/enumpoly.h \
