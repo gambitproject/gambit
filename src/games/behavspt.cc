@@ -94,17 +94,6 @@ bool BehaviorSupportProfile::RemoveAction(const GameAction &p_action)
   return false;
 }
 
-std::list<GameInfoset> BehaviorSupportProfile::GetInfosets(const GamePlayer &p_player) const
-{
-  std::list<GameInfoset> answer;
-  for (const auto &infoset : p_player->GetInfosets()) {
-    if (m_infosetReachable.at(infoset)) {
-      answer.push_back(infoset);
-    }
-  }
-  return answer;
-}
-
 bool BehaviorSupportProfile::HasReachableMembers(const GameInfoset &p_infoset) const
 {
   const auto &members = p_infoset->GetMembers();
