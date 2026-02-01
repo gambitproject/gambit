@@ -924,6 +924,9 @@ public:
     }
     return false;
   }
+  /// Returns a list of all subgame roots in the game
+  virtual std::vector<GameNode> GetSubgames() const { throw UndefinedException(); }
+
   //@}
 
   /// @name Writing data files
