@@ -5,12 +5,14 @@
 ### Changed
 - `Game.comment` has been renamed to `Game.description`
 
+### Added
+- Implement `GetSubgames()` (C++) to retrieve the list of subgame roots in standard post-order.
+  Detection uses a linear interval reachability algorithm adapted from the Tarjan's bridge-finder (IPL, 1974).
 
 ## [16.5.1] - unreleased
 
 ### Fixed
 - `Game.reveal` raised a null pointer access exception or dumped core in some cases (#749)
-
 
 ## [16.5.0] - 2026-01-05
 
