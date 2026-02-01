@@ -1,5 +1,11 @@
 # Changelog
 
+## [16.6.0] - Unreleased
+
+### Added
+- Implement `GetSubgames()` (C++) to retrieve the list of subgame roots in standard post-order.
+  Detection uses a linear interval reachability algorithm adapted from the Tarjan's bridge-finder.
+
 ## [16.5.0] - 2026-01-05
 
 ### Fixed
