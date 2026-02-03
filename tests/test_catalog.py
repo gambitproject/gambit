@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 
 import pygambit as gbt
 
@@ -15,6 +16,12 @@ def test_catalog_load_nfg():
     g = gbt.catalog.load("pd")
     assert isinstance(g, gbt.Game)
     assert g.title == "Two person Prisoner's Dilemma game"
+
+
+def test_catalog_load_invalid_slug():
+    """Test loading an invalid game slug"""
+    with pytest.raises(FileNotFoundError):
+        gbt.catalog.load("invalid_slug")
 
 
 def test_catalog_games():
