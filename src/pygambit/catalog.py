@@ -5,6 +5,10 @@ import pandas as pd
 import pygambit as gbt
 
 _GAMEFILES_DIR = files(__package__) / "catalog"
+READERS = {
+    ".nfg": gbt.read_nfg,
+    ".efg": gbt.read_efg,
+}
 
 
 def load(slug: str) -> gbt.Game:
@@ -35,12 +39,7 @@ def load(slug: str) -> gbt.Game:
     FileNotFoundError
         If no ``.nfg`` or ``.efg`` file exists for the given slug.
     """
-    candidates = {
-        ".nfg": gbt.read_nfg,
-        ".efg": gbt.read_efg,
-    }
-
-    for suffix, reader in candidates.items():
+    for suffix, reader in READERS.items():
         path = _GAMEFILES_DIR / f"{slug}{suffix}"
         if path.is_file():
             return reader(str(path))
@@ -67,13 +66,8 @@ def games() -> pd.DataFrame:
     """
     records: list[dict[str, str]] = []
 
-    readers = {
-        ".nfg": gbt.read_nfg,
-        ".efg": gbt.read_efg,
-    }
-
     for path in sorted(_GAMEFILES_DIR.iterdir()):
-        reader = readers.get(path.suffix)
+        reader = READERS.get(path.suffix)
         if reader is not None and path.is_file():
             game = reader(str(path))
             records.append(
