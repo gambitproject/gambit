@@ -28,6 +28,7 @@ classifiers=[
 dependencies = [
     "numpy",
     "scipy",
+    "pandas",
 ]
 
 [project.urls]
