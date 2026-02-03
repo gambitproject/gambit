@@ -1,11 +1,26 @@
+import pandas as pd
+
 import pygambit as gbt
 
 
 def test_catalog_load_efg():
+    """Test loading an extensive form game"""
     g = gbt.catalog.load("2smp")
     assert isinstance(g, gbt.Game)
+    assert g.title == "Two-stage matching pennies game"
 
 
 def test_catalog_load_nfg():
+    """Test loading a normal form game"""
     g = gbt.catalog.load("pd")
     assert isinstance(g, gbt.Game)
+    assert g.title == "Two person Prisoner's Dilemma game"
+
+
+def test_catalog_games():
+    """Test games() function returns df of game slugs and titles"""
+    all_games = gbt.catalog.games()
+    assert isinstance(all_games, pd.DataFrame)
+    assert len(all_games) > 0
+    assert "2smp" in list(all_games.slug)
+    assert "Two-stage matching pennies game" in list(all_games.title)
