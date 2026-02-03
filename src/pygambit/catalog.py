@@ -1,5 +1,7 @@
 from importlib.resources import files
 
+import pandas as pd
+
 import pygambit as gbt
 
 _GAMEFILES_DIR = files(__package__) / "catalog"
@@ -44,3 +46,41 @@ def load(slug: str) -> gbt.Game:
             return reader(str(path))
 
     raise FileNotFoundError(f"No catalog entry called {slug}.nfg or {slug}.efg")
+
+
+def games() -> pd.DataFrame:
+    """
+    List games available in the package catalog.
+
+    Iterates over ``.nfg`` and ``.efg`` files found in the catalog resource
+    directory, loads each game, and returns a pandas DataFrame summarising
+    the results.
+
+    The returned DataFrame has two columns:
+    - ``slug``: the filename without its extension
+    - ``title``: the game's ``title`` attribute
+
+    Returns
+    -------
+    pandas.DataFrame
+        A DataFrame with columns ``slug`` and ``title``.
+    """
+    records: list[dict[str, str]] = []
+
+    readers = {
+        ".nfg": gbt.read_nfg,
+        ".efg": gbt.read_efg,
+    }
+
+    for path in sorted(_GAMEFILES_DIR.iterdir()):
+        reader = readers.get(path.suffix)
+        if reader is not None and path.is_file():
+            game = reader(str(path))
+            records.append(
+                {
+                    "slug": path.stem,
+                    "title": game.title,
+                }
+            )
+
+    return pd.DataFrame.from_records(records, columns=["slug", "title"])
