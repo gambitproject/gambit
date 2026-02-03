@@ -88,5 +88,12 @@ markers = [
     "slow: all time-consuming tests",
 ]
 
+[tool.setuptools]
+packages = ["pygambit", "pygambit.catalog"]
+package-dir = { "pygambit" = "src/pygambit", "pygambit.catalog" = "catalog" }
+
+[tool.setuptools.package-data]
+"pygambit.catalog" = ["*"]
+
 [tool.setuptools.dynamic]
 version = {file = "build_support/GAMBIT_VERSION"}
