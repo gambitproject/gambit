@@ -16,7 +16,7 @@ build:
   jobs:
     # Create CSV for catalog table in docs
     post_install:
-      - python src/pygambit/update_catalog.py
+      - $READTHEDOCS_VIRTUALENV_PATH/bin/python src/pygambit/update_catalog.py
 
 python:
   install:
