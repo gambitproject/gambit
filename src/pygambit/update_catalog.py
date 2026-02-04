@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pygambit as gbt
 
-CATALOG_CSV = "doc/catalog.csv"  # Relative to where script run from (root)
+CATALOG_CSV = Path(__file__).parent.parent.parent / "doc" / "catalog.csv"
 MAKEFILE_AM = Path(__file__).parent.parent.parent / "Makefile.am"
 ALL_GAMES = gbt.catalog.games()
 CATALOG_DIR = Path(__file__).parent.parent.parent / "catalog"
