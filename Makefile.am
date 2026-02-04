@@ -240,6 +240,8 @@ EXTRA_DIST = \
 	contrib/games/zero.nfg \
 	src/README.rst \
 	catalog/2smp.efg \
+	catalog/2x2x2.nfg \
+	catalog/myerson_fig_4_2.efg \
 	catalog/pd.nfg
 
 core_SOURCES = \
