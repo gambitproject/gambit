@@ -34,6 +34,10 @@ Add new games
 
       Run this script in a Python environment where ``pygambit`` itself is also :ref:`installed <build-python>`.
 
+   .. warning::
+
+      This script updates `Makefile.am` with the game file added to the catalog, but if you moved games that were previously in `contrib/games` you'll want to manually remove those files from `EXTRA_DIST`.
+
 4. **Submit a pull request to GitHub with all changes.**
 
    .. warning::
