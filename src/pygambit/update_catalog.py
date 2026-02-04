@@ -1,3 +1,4 @@
+import argparse
 from pathlib import Path
 
 import pygambit as gbt
@@ -46,13 +47,20 @@ def update_makefile():
 
     if content != updated_content:
         print(f"Updated {str(MAKEFILE_AM)}")
+    else:
+        print(f"No changes to add to {str(MAKEFILE_AM)}")
 
 
 if __name__ == "__main__":
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--build", action="store_true")
+    args = parser.parse_args()
+
     # Create CSV used by RST docs page
     gbt.catalog.games().to_csv(CATALOG_CSV, index=False)
-    print(f"Generated {CATALOG_CSV} for use in docs build.")
+    print(f"Generated {CATALOG_CSV} for use in local docs build. DO NOT COMMIT.")
 
     # Update the Makefile.am with the current list of catalog files
-    update_makefile()
+    if args.build:
+        update_makefile()
