@@ -48,7 +48,7 @@ BAGG::BAGG(int N, int S, vector<int> &numTypes, vector<ProbDist> &TDist,
 
 namespace {
 
-void stripComment(istream &in)
+void stripDescription(istream &in)
 {
   const char COMMENT_CHAR = '#';
 
@@ -57,7 +57,7 @@ void stripComment(istream &in)
   stringbuf discard(ios_base::out);
   if (c == COMMENT_CHAR) {
     in.get(discard);
-    stripComment(in);
+    stripDescription(in);
   }
 }
 
@@ -67,14 +67,14 @@ std::shared_ptr<BAGG> BAGG::makeBAGG(istream &in)
 {
   int N, S, P;
 
-  stripComment(in);
+  stripDescription(in);
   in >> N;
-  stripComment(in);
+  stripDescription(in);
   in >> S;
-  stripComment(in);
+  stripDescription(in);
   in >> P;
 
-  stripComment(in);
+  stripDescription(in);
   vector<int> numTypes(N);
 
   // input number of types for each player
@@ -88,7 +88,7 @@ std::shared_ptr<BAGG> BAGG::makeBAGG(istream &in)
   }
 
   // input the type distributions
-  stripComment(in);
+  stripDescription(in);
   vector<ProbDist> TDist;
   for (int i = 0; i < N; ++i) {
     TDist.emplace_back(numTypes[i]);
@@ -100,7 +100,7 @@ std::shared_ptr<BAGG> BAGG::makeBAGG(istream &in)
     }
   }
 
-  stripComment(in);
+  stripDescription(in);
   // sizes of type action sets
   vector<vector<vector<int>>> typeActionSets(N);
   for (int i = 0; i < N; ++i) {
@@ -116,7 +116,7 @@ std::shared_ptr<BAGG> BAGG::makeBAGG(istream &in)
   }
 
   // type action sets
-  stripComment(in);
+  stripDescription(in);
   for (int i = 0; i < N; ++i) {
     for (int j = 0; j < numTypes[i]; ++j) {
       for (int &el : typeActionSets[i][j]) {
@@ -127,7 +127,7 @@ std::shared_ptr<BAGG> BAGG::makeBAGG(istream &in)
       }
     }
   }
-  stripComment(in);
+  stripDescription(in);
 
   // action sets
   vector<vector<int>> aggActionSets;

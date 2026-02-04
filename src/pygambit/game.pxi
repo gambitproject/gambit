@@ -667,11 +667,11 @@ class Game:
         A game's description is an arbitrary string, and may be more discursive
         than a title.
         """
-        return self.game.deref().GetComment().decode("ascii")
+        return self.game.deref().GetDescription().decode("ascii")
 
     @description.setter
     def description(self, value: str) -> None:
-        self.game.deref().SetComment(value.encode("ascii"))
+        self.game.deref().SetDescription(value.encode("ascii"))
 
     @property
     def actions(self) -> GameActions:

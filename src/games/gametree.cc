@@ -1196,7 +1196,7 @@ void GameTreeRep::WriteEfgFile(std::ostream &p_file, const GameNode &p_subtree /
          << FormatList(GetPlayers(),
                        [](const GamePlayer &p) { return QuoteString(p->GetLabel()); })
          << std::endl;
-  p_file << std::quoted(GetComment()) << std::endl << std::endl;
+  p_file << std::quoted(GetDescription()) << std::endl << std::endl;
   Gambit::WriteEfgFile(p_file, (p_subtree) ? p_subtree : GetRoot());
 }
 
