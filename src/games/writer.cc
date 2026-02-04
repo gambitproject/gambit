@@ -91,6 +91,7 @@ std::string WriteHTMLFile(const Game &p_game, const GamePlayer &p_rowPlayer,
     }
 
     theHtml += "</table>";
+    break;
   }
   theHtml += "\n";
   return theHtml;
