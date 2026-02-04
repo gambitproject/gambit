@@ -43,9 +43,9 @@ def games() -> pd.DataFrame:
                 game = reader(str(path))
                 records.append(
                     {
-                        "slug": resource_path.stem,
-                        "title": game.title,
+                        "Game": resource_path.stem,
+                        "Title": game.title,
                     }
                 )
 
-    return pd.DataFrame.from_records(records, columns=["slug", "title"])
+    return pd.DataFrame.from_records(records, columns=["Game", "Title"])

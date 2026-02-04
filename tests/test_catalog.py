@@ -29,5 +29,5 @@ def test_catalog_games():
     all_games = gbt.catalog.games()
     assert isinstance(all_games, pd.DataFrame)
     assert len(all_games) > 0
-    assert "2smp" in list(all_games.slug)
-    assert "Two-stage matching pennies game" in list(all_games.title)
+    assert "2smp" in list(all_games.Game)
+    assert "Two-stage matching pennies game" in list(all_games.Title)
