@@ -4,14 +4,13 @@ import pygambit as gbt
 
 CATALOG_CSV = Path(__file__).parent.parent.parent / "doc" / "catalog.csv"
 MAKEFILE_AM = Path(__file__).parent.parent.parent / "Makefile.am"
-ALL_GAMES = gbt.catalog.games()
-CATALOG_DIR = Path(__file__).parent.parent.parent / "catalog"
-efg_files = list(CATALOG_DIR.rglob("*.efg"))
-nfg_files = list(CATALOG_DIR.rglob("*.nfg"))
 
 
 def update_makefile():
     """Update the Makefile.am with all games from the catalog."""
+    catalog_dir = Path(__file__).parent.parent.parent / "catalog"
+    efg_files = list(catalog_dir.rglob("*.efg"))
+    nfg_files = list(catalog_dir.rglob("*.nfg"))
 
     game_files = []
     for entry in efg_files + nfg_files:
@@ -52,7 +51,7 @@ def update_makefile():
 if __name__ == "__main__":
 
     # Create CSV used by RST docs page
-    ALL_GAMES.to_csv(CATALOG_CSV, index=False)
+    gbt.catalog.games().to_csv(CATALOG_CSV, index=False)
     print(f"Generated {CATALOG_CSV} for use in docs build.")
 
     # Update the Makefile.am with the current list of catalog files
