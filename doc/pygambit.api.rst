@@ -95,7 +95,7 @@ Information about the game
    :toctree: api/
 
    Game.title
-   Game.description
+   Game.comment
    Game.is_const_sum
    Game.is_tree
    Game.is_perfect_recall

@@ -661,16 +661,16 @@ class Game:
         self.game.deref().SetTitle(value.encode("ascii"))
 
     @property
-    def description(self) -> str:
-        """Get or set the description of the game.
+    def comment(self) -> str:
+        """Get or set the comment of the game.
 
-        A game's description/comment is an arbitrary string, and may be more discursive
+        A game's comment is an arbitrary string, and may be more discursive
         than a title.
         """
         return self.game.deref().GetComment().decode("ascii")
 
-    @description.setter
-    def description(self, value: str) -> None:
+    @comment.setter
+    def comment(self, value: str) -> None:
         self.game.deref().SetComment(value.encode("ascii"))
 
     @property

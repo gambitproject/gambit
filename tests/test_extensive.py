@@ -25,12 +25,12 @@ def test_game_title(title: str):
 
 
 @pytest.mark.parametrize(
-    "description", ["This is a description of the game with more detail"]
+    "comment", ["This is a comment describing the game in more detail"]
 )
-def test_game_description(description: str):
+def test_game_comment(comment: str):
     game = gbt.Game.new_tree()
-    game.description = description
-    assert game.description == description
+    game.comment = comment
+    assert game.comment == comment
 
 
 @pytest.mark.parametrize("players", [["Alice"], ["Oscar", "Felix"]])
