@@ -31,6 +31,10 @@ jobs:
         run: |
           cd dist
           pip install -v pygambit*.tar.gz
+      - name: Generate Catalog CSV for docs
+        run: |
+          cd src/pygambit
+          python update_catalog.py
       - name: Run tests
         run: pytest --run-tutorials
 
@@ -56,6 +60,10 @@ jobs:
       - name: Build extension
         run: |
           python -m pip install -v .
+      - name: Generate Catalog CSV for docs
+        run: |
+          cd src/pygambit
+          python update_catalog.py
       - name: Run tests
         run: pytest --run-tutorials
 
@@ -81,6 +89,10 @@ jobs:
       - name: Build extension
         run: |
           python -m pip install -v .
+      - name: Generate Catalog CSV for docs
+        run: |
+          cd src/pygambit
+          python update_catalog.py
       - name: Run tests
         run: pytest --run-tutorials
 
@@ -106,5 +118,9 @@ jobs:
       - name: Build extension
         run: |
           python -m pip install -v .
+      - name: Generate Catalog CSV for docs
+        run: |
+          cd src/pygambit
+          python update_catalog.py
       - name: Run tests
         run: pytest --run-tutorials
