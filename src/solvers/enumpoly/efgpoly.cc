@@ -151,28 +151,72 @@ std::map<GameSequence, double> ToSequenceProbs(const ProblemData &p_data, const 
   return x;
 }
 
-std::list<MixedBehaviorProfile<double>>
-ExtendToFullSupport(const MixedBehaviorProfile<double> &p_profile)
+/// Compute the set of information sets which are not reachable given the actions in
+/// @p p_support, but are reachable via a *single* deviation to an action at a
+/// reachable information set.
+std::set<GameInfoset> FindDeviationInfosets(const BehaviorSupportProfile &p_support)
 {
-  const Game &game = p_profile.GetGame();
-  std::list<GameInfoset> extensionInfosets;
-  for (const auto &infoset : game->GetInfosets()) {
-    if (!p_profile.IsDefinedAt(infoset)) {
-      extensionInfosets.push_back(infoset);
+  struct SingleDeviationReachableVisitor {
+    const BehaviorSupportProfile &m_support;
+    std::set<GameInfoset> m_deviationReachable;
+
+    explicit SingleDeviationReachableVisitor(const BehaviorSupportProfile &p_support)
+      : m_support(p_support)
+    {
     }
-  }
+    GameRep::DFSCallbackResult OnEnter(const GameNode &p_node, int)
+    {
+      const auto infoset = p_node->GetInfoset();
+      if (!infoset) {
+        return GameRep::DFSCallbackResult::Continue;
+      }
+      if (p_node->GetPlayer()->IsChance()) {
+        return GameRep::DFSCallbackResult::Continue;
+      }
+      if (m_support.IsReachable(infoset)) {
+        return GameRep::DFSCallbackResult::Continue;
+      }
+      m_deviationReachable.insert(infoset);
+      return GameRep::DFSCallbackResult::Prune;
+    }
+    GameRep::DFSCallbackResult OnAction(const GameNode &, const GameNode &, int)
+    {
+      return GameRep::DFSCallbackResult::Continue;
+    }
+    GameRep::DFSCallbackResult OnExit(const GameNode &, int)
+    {
+      return GameRep::DFSCallbackResult::Continue;
+    }
+    void OnVisit(const GameNode &, int) {}
+  };
+
+  SingleDeviationReachableVisitor visitor(p_support);
+  const Game game = p_support.GetGame();
+  GameRep::WalkDFS(game, game->GetRoot(), TraversalOrder::Preorder, visitor);
+  return visitor.m_deviationReachable;
+}
+
+/// Produce the set of mixed behavior profiles which extend @param p_baseProfile
+/// to complete profiles by specifying a pure action at each information set which
+/// is reachable by a single deviation from the profile, and the centroid at all
+/// information sets which are reachable only by two deviations.
+std::list<MixedBehaviorProfile<double>>
+ExtendWithDeviations(const MixedBehaviorProfile<double> &p_baseProfile)
+{
+  const auto deviationInfosets = FindDeviationInfosets(p_baseProfile.GetSupport());
   std::list<MixedBehaviorProfile<double>> result;
-  Array<int> firstIndex(extensionInfosets.size());
+  Array<int> firstIndex(deviationInfosets.size());
   std::fill(firstIndex.begin(), firstIndex.end(), 1);
-  Array<int> lastIndex(extensionInfosets.size());
-  std::transform(extensionInfosets.begin(), extensionInfosets.end(), lastIndex.begin(),
+  Array<int> lastIndex(deviationInfosets.size());
+  std::transform(deviationInfosets.begin(), deviationInfosets.end(), lastIndex.begin(),
                  [](const auto &infoset) { return infoset->GetActions().size(); });
   CartesianIndexProduct indices(firstIndex, lastIndex);
   for (const auto &index : indices) {
-    auto extension = p_profile;
-    for (auto [i, infoset] : enumerate(extensionInfosets)) {
+    auto extension = p_baseProfile.ToFullSupport();
+    for (auto [i, infoset] : enumerate(deviationInfosets)) {
       extension[infoset->GetAction(index[i + 1])] = 1.0;
     }
+    extension.UndefinedToCentroid();
     result.push_back(extension);
   }
   return result;
@@ -207,8 +251,8 @@ std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfil
   std::list<MixedBehaviorProfile<double>> solutions;
   for (const auto &root : roots) {
     const MixedBehaviorProfile<double> sol(
-        data.m_support.ToMixedBehaviorProfile(ToSequenceProbs(data, root)).ToFullSupport());
-    solutions.splice(solutions.end(), ExtendToFullSupport(sol));
+        data.m_support.ToMixedBehaviorProfile(ToSequenceProbs(data, root)));
+    solutions.splice(solutions.end(), ExtendWithDeviations(sol));
   }
   return solutions;
 }
