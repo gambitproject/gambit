@@ -116,14 +116,14 @@ AGG::AGG(int numPlayers, std::vector<int> &_actions, int numANodes, int _numPNod
 
 namespace {
 
-void stripDescription(istream &in)
+void stripComment(istream &in)
 {
   in >> ws;
   const char c = in.peek();
   stringbuf discard(ios_base::out);
   if (c == AGG::COMMENT_CHAR) {
     in.get(discard);
-    stripDescription(in);
+    stripComment(in);
   }
 }
 
@@ -137,22 +137,22 @@ std::shared_ptr<AGG> AGG::makeAGG(istream &in)
   if (!in.good() || in.eof()) {
     throw std::runtime_error("Bad game file");
   }
-  stripDescription(in);
+  stripComment(in);
   in >> n;
   if (!in.good()) {
     throw std::runtime_error("Error reading the number of players");
   }
-  stripDescription(in);
+  stripComment(in);
   in >> S;
   if (!in.good()) {
     throw std::runtime_error("Error reading the number of action nodes");
   }
-  stripDescription(in);
+  stripComment(in);
   in >> P;
   if (!in.good()) {
     throw std::runtime_error("Error reading the number of function nodes");
   }
-  stripDescription(in);
+  stripComment(in);
 
   // enter sizes of action sets:
   std::vector<int> size(n);
@@ -165,10 +165,10 @@ std::shared_ptr<AGG> AGG::makeAGG(istream &in)
     }
   }
 
-  stripDescription(in);
+  stripComment(in);
   vector<vector<int>> ASets(n); // action sets
   for (i = 0; i < n; i++) {
-    stripDescription(in);
+    stripComment(in);
     for (j = 0; j < size[i]; j++) {
       int aindex;
       in >> aindex;
@@ -181,10 +181,10 @@ std::shared_ptr<AGG> AGG::makeAGG(istream &in)
     }
   }
 
-  stripDescription(in);
+  stripComment(in);
   vector<vector<int>> neighb(S + P); // neighbor lists
   for (i = 0; i < S + P; i++) {
-    stripDescription(in);
+    stripComment(in);
     in >> neighb_size;
     if (in.eof() || in.fail()) {
       throw std::runtime_error(
@@ -202,12 +202,12 @@ std::shared_ptr<AGG> AGG::makeAGG(istream &in)
     }
   }
 
-  stripDescription(in);
+  stripComment(in);
   // enter the projection types:
   vector<projtype> projTypes(P);
   for (i = 0; i < P; ++i) {
     int pt;
-    stripDescription(in);
+    stripComment(in);
     in >> pt;
     if (in.eof() || in.fail()) {
       throw std::runtime_error("Error in game file: expected integer for type of function node #" +
@@ -259,13 +259,13 @@ std::shared_ptr<AGG> AGG::makeAGG(istream &in)
     }
   }
 
-  stripDescription(in);
+  stripComment(in);
   // read in payoffs
   for (i = 0; i < S; i++) {
     if (in.eof() || in.bad()) {
       throw std::runtime_error("Error in game file: not enough payoffs");
     }
-    stripDescription(in);
+    stripComment(in);
     int t;
     in >> t;
     if (!in.good()) {
@@ -807,7 +807,7 @@ void AGG::makeMAPPINGpayoff(std::istream &in, aggpayoff &pay, int numNei)
   temp = pay;
   pay.clear();
 
-  stripDescription(in);
+  stripComment(in);
   in >> num;
   if (!in.good()) {
     throw std::runtime_error("Error reading the integer number of configuration-value pairs");
