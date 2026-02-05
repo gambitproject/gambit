@@ -5,6 +5,8 @@
 ### Fixed
 - `Game.reveal` raised a null pointer access exception or dumped core in some cases (#749)
 
+### Changed
+- `Game.comment` has been renamed to `Game.description`
 
 ## [16.5.0] - 2026-01-05
 

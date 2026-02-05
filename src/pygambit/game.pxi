@@ -666,6 +666,9 @@ class Game:
 
         A game's description is an arbitrary string, and may be more discursive
         than a title.
+
+        .. versionchanged:: 16.5.1
+           Renamed ``Game.comment`` to ``Game.description``.
         """
         return self.game.deref().GetDescription().decode("ascii")
 
