@@ -607,15 +607,12 @@ def test_nash_agent_solver_no_subtests_only_profile(test_case: EquilibriumTestCa
                 assert abs(eq[action] - expected[action]) <= test_case.prob_tol
 
 
-@pytest.mark.nash
-@pytest.mark.nash_enumpoly_behavior
-@pytest.mark.parametrize(
-    "game,mixed_behav_prof_data,stop_after",
-    [
-        # 3-player game
-        (
-            games.read_from_file("mixed_behavior_game.efg"),
-            [
+ENUMPOLY_AGENT_UNORDERED_CASES = [
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, "mixed_behavior_game.efg"),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=9),
+            expected=[
                 [[["2/5", "3/5"]], [["1/2", "1/2"]], [["1/3", "2/3"]]],
                 [[["1/2", "1/2"]], [["2/5", "3/5"]], [["1/4", "3/4"]]],
                 [[["1/2", "1/2"]], [["1/2", "1/2"]], [[1, 0]]],
@@ -626,61 +623,52 @@ def test_nash_agent_solver_no_subtests_only_profile(test_case: EquilibriumTestCa
                 [[[0, 1]], [[1, 0]], [[0, 1]]],
                 [[[0, 1]], [[0, 1]], [[1, 0]]],
             ],
-            9,
+            regret_tol=TOL,
+            prob_tol=TOL,
         ),
-    ],
-)
-# This is the "ordered" version where we test for the outputs coming in a specific
-# order; there is also an "unordered" version.  The game 2x2x2.nfg, for example,
-# has a point at which the Jacobian is singular.  As a result, the order in which it
-# returns the two totally-mixed equilbria is system-dependent due, essentially,
-# to inherent numerical instability near that point.
-def test_enumpoly_unordered_behavior(
-    game: gbt.Game, mixed_behav_prof_data: list, stop_after: None | int
-):
-    """Test calls of enumpoly for mixed behavior equilibria,
-    using max_regret and agent_max_regret (internal consistency); and
-    comparison to a set of previously computed equilibria using this function (regression test).
+        marks=pytest.mark.nash_enumpoly_behavior,
+        id="test5_TODO",
+    ),
+]
 
-    This set will be the full set of all computed equilibria if stop_after is None,
-    else the first stop_after-many equilibria.
 
-    This is the "unordered" version where we test for the outputs belong to a set
-    of expected output; there is also an "unordered" that expects the outputs in a specific order.
+@pytest.mark.nash
+@pytest.mark.parametrize("test_case", ENUMPOLY_AGENT_UNORDERED_CASES, ids=lambda c: c.label)
+def test_nash_agent_solver_unordered(test_case: EquilibriumTestCase, subtests) -> None:
+    """Test calls of Nash solvers in EFGs using "agent" versions.
 
-    In this unordered version, once something from the expected set is found it is removed,
-    so we are checking for no duplicate outputs.
+    Subtests:
+    - Agent max regret no more than `test_case.regret_tol`
+    - Agent max regret no more than max regret (+ `test_case.regret_tol`)
+    - Equilibria that are output are distinct and all appear in the expected set
+      Equilibria are deemed to match if the maximum difference in probabilities is no more
+      than `test_case.prob_tol`
     """
-    if stop_after:
-        result = gbt.nash.enumpoly_solve(
-            game, use_strategic=False, stop_after=stop_after, maxregret=0.00001
-        )
-        assert len(result.equilibria) == stop_after
-    else:
-        # compute all
-        result = gbt.nash.enumpoly_solve(game, use_strategic=False)
-
-    assert len(result.equilibria) == len(mixed_behav_prof_data)
-
     def are_the_same(game, found, candidate):
         for p in game.players:
-            for i in p.infosets:
-                for a in i.actions:
-                    if not abs(found[p][i][a] - candidate[p][i][a]) <= TOL:
-                        return False
+            for a in p.actions:
+                if not abs(found[a] - candidate[a]) <= TOL:
+                    return False
         return True
 
-    for eq in result.equilibria:
-        assert abs(eq.max_regret()) <= TOL
-        assert abs(eq.agent_max_regret()) <= TOL
-        found = False
-        for exp in mixed_behav_prof_data[:]:
-            expected = game.mixed_behavior_profile(rational=True, data=exp)
-            if are_the_same(game, eq, expected):
-                mixed_behav_prof_data.remove(exp)
-                found = True
-                break
-        assert found
+    game = test_case.factory()
+    result = test_case.solver(game)
+    with subtests.test("number of equilibria found"):
+        assert len(result.equilibria) == len(test_case.expected)
+    for i, eq in enumerate(result.equilibria):
+        with subtests.test(eq=i, check="agent_max_regret"):
+            assert eq.agent_max_regret() <= test_case.regret_tol
+        with subtests.test(eq=i, check="max_regret"):
+            assert eq.agent_max_regret() <= eq.max_regret() + test_case.regret_tol
+        with subtests.test(eq=i, check="strategy_profile"):
+            found = False
+            for exp in test_case.expected[:]:
+                expected = game.mixed_behavior_profile(rational=True, data=exp)
+                if are_the_same(game, eq, expected):
+                    test_case.expected.remove(exp)
+                    found = True
+                    break
+            assert found
 
 
 def test_lcp_strategy_double():
