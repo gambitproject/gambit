@@ -156,6 +156,7 @@ public:
     const int digit = p_strategy->GetNumber() - 1;
     StrategySupportProfile restricted(*this);
     restricted.m_strategyDigits.m_allowedDigits[player_index].assign(1, digit);
+    restricted.m_support.at(player) = {p_strategy};
     return restricted;
   }
   //@}
