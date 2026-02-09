@@ -1058,7 +1058,7 @@ void GameFrame::OnEditGame(wxCommandEvent &)
 {
   GamePropertiesDialog dialog(this, m_doc);
   if (dialog.ShowModal() == wxID_OK) {
-    m_doc->DoSetTitle(dialog.GetTitle(), dialog.GetComment());
+    m_doc->DoSetTitle(dialog.GetTitle(), dialog.GetDescription());
   }
 }
 

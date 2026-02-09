@@ -253,8 +253,8 @@ cdef extern from "games/game.h":
         string GetTitle() except +
         void SetTitle(string) except +
 
-        string GetComment() except +
-        void SetComment(string) except +
+        string GetDescription() except +
+        void SetDescription(string) except +
 
         int NumPlayers() except +
         c_GamePlayer GetPlayer(int) except +IndexError

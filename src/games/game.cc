@@ -229,7 +229,7 @@ void GameRep::WriteNfgFile(std::ostream &p_file) const
     }) << std::endl;
   }
   p_file << "}" << std::endl;
-  p_file << std::quoted(GetComment()) << std::endl << std::endl;
+  p_file << std::quoted(GetDescription()) << std::endl << std::endl;
 
   for (auto iter : StrategyContingencies(
            StrategySupportProfile(std::const_pointer_cast<GameRep>(shared_from_this())))) {

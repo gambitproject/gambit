@@ -100,7 +100,7 @@ void StrategySupportProfile::WriteNfgFile(std::ostream &p_file) const
     }) << std::endl;
   }
   p_file << "}" << std::endl;
-  p_file << std::quoted(m_game->GetComment()) << std::endl << std::endl;
+  p_file << std::quoted(m_game->GetDescription()) << std::endl << std::endl;
 
   for (const auto &iter : StrategyContingencies(*this)) {
     p_file << FormatList(

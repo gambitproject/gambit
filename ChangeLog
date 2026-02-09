@@ -1,5 +1,11 @@
 # Changelog
 
+## [16.6.0] - unreleased
+
+### Changed
+- `Game.comment` has been renamed to `Game.description`
+
+
 ## [16.5.1] - unreleased
 
 ### Fixed
