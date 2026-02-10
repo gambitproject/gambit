@@ -36,7 +36,7 @@ Add new games
 
    .. warning::
 
-      This script updates `Makefile.am` with the game file added to the catalog, but if you moved games that were previously in `contrib/games` you'll want to manually remove those files from `EXTRA_DIST`.
+      Running the script with the ``--build`` flag updates `Makefile.am`. If you moved games that were previously in `contrib/games` you'll need to also manually remove those files from `EXTRA_DIST`.
 
 4. **Submit a pull request to GitHub with all changes.**
 
