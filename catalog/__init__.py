@@ -6,7 +6,6 @@ import pygambit as gbt
 
 # Use the full string path to the virtual package we created
 _CATALOG_RESOURCE = files(__name__)
-_CATALOG_SUBDIRS = [p.name for p in _CATALOG_RESOURCE.iterdir() if p.is_dir()]
 
 READERS = {
     ".nfg": gbt.read_nfg,
