@@ -6,6 +6,7 @@ import pygambit as gbt
 
 # Use the full string path to the virtual package we created
 _CATALOG_RESOURCE = files(__name__)
+_CATALOG_SUBDIRS = [p.name for p in _CATALOG_RESOURCE.iterdir() if p.is_dir()]
 
 READERS = {
     ".nfg": gbt.read_nfg,
@@ -39,15 +40,19 @@ def games() -> pd.DataFrame:
         reader = READERS.get(resource_path.suffix)
 
         if reader is not None and resource_path.is_file():
+
             # Calculate the path relative to the root resource
             # and remove the suffix to get the "slug"
             rel_path = resource_path.relative_to(_CATALOG_RESOURCE)
             game_slug = str(rel_path.with_suffix(""))
+
+            # This code prevents duplicate slugs e.g. subdir/game1 and subdir_game1
             bad_slug = False
-            dir_names = [p.name for p in _CATALOG_RESOURCE.iterdir() if p.is_dir()]
-            for d in dir_names:
+            for d in _CATALOG_SUBDIRS:
                 if d in game_slug and d != game_slug and "/" not in game_slug:
                     bad_slug = True
+
+            # Update the dataframe
             if not bad_slug:
                 with as_file(resource_path) as path:
                     game = reader(str(path))
