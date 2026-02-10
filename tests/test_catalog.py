@@ -24,6 +24,12 @@ def test_catalog_load_invalid_slug():
         gbt.catalog.load("invalid_slug")
 
 
+def test_catalog_load_subdir_slug():
+    """Test loading a game from catalog/somedir"""
+    g = gbt.catalog.load("myerson/fig_4_2")
+    assert isinstance(g, gbt.Game)
+
+
 def test_catalog_games():
     """Test games() function returns df of game slugs and titles"""
     all_games = gbt.catalog.games()
