@@ -43,14 +43,19 @@ def games() -> pd.DataFrame:
             # and remove the suffix to get the "slug"
             rel_path = resource_path.relative_to(_CATALOG_RESOURCE)
             game_slug = str(rel_path.with_suffix(""))
-
-            with as_file(resource_path) as path:
-                game = reader(str(path))
-                records.append(
-                    {
-                        "Game": game_slug,
-                        "Title": game.title,
-                    }
-                )
+            bad_slug = False
+            dir_names = [p.name for p in _CATALOG_RESOURCE.iterdir() if p.is_dir()]
+            for d in dir_names:
+                if d in game_slug and d != game_slug and "/" not in game_slug:
+                    bad_slug = True
+            if not bad_slug:
+                with as_file(resource_path) as path:
+                    game = reader(str(path))
+                    records.append(
+                        {
+                            "Game": game_slug,
+                            "Title": game.title,
+                        }
+                    )
 
     return pd.DataFrame.from_records(records, columns=["Game", "Title"])
