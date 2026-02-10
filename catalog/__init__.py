@@ -30,20 +30,25 @@ def load(slug: str) -> gbt.Game:
 
 def games() -> pd.DataFrame:
     """
-    List games available in the package catalog.
+    List games available in the package catalog, including subdirectories.
     """
     records: list[dict[str, str]] = []
 
-    # iterdir() works directly on the Traversable object
-    for resource_path in sorted(_CATALOG_RESOURCE.iterdir()):
+    # Using rglob("*") to find files in all subdirectories
+    for resource_path in sorted(_CATALOG_RESOURCE.rglob("*")):
         reader = READERS.get(resource_path.suffix)
 
         if reader is not None and resource_path.is_file():
+            # Calculate the path relative to the root resource
+            # and remove the suffix to get the "slug"
+            rel_path = resource_path.relative_to(_CATALOG_RESOURCE)
+            game_slug = str(rel_path.with_suffix(""))
+
             with as_file(resource_path) as path:
                 game = reader(str(path))
                 records.append(
                     {
-                        "Game": resource_path.stem,
+                        "Game": game_slug,
                         "Title": game.title,
                     }
                 )
