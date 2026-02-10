@@ -33,7 +33,10 @@ def test_catalog_load_subdir_slug():
 def test_catalog_games():
     """Test games() function returns df of game slugs and titles"""
     all_games = gbt.catalog.games()
+    slugs = list(all_games.Game)
     assert isinstance(all_games, pd.DataFrame)
     assert len(all_games) > 0
-    assert "2smp" in list(all_games.Game)
+    assert "2smp" in slugs
     assert "Two-stage matching pennies game" in list(all_games.Title)
+    # Check slug of game in subdir
+    assert "myerson/fig_4_2" in slugs
