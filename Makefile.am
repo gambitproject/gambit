@@ -239,7 +239,7 @@ EXTRA_DIST = \
 	src/README.rst \
 	catalog/2smp.efg \
 	catalog/2x2x2.nfg \
-	catalog/fig_4_2.efg \
+	catalog/myerson/fig_4_2.efg \
 	catalog/pd.nfg
 
 core_SOURCES = \

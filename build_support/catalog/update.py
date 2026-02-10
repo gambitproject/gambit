@@ -10,13 +10,21 @@ MAKEFILE_AM = Path(__file__).parent.parent.parent / "Makefile.am"
 
 def update_makefile():
     """Update the Makefile.am with all games from the catalog."""
-    efg_files = list(CATALOG_DIR.rglob("*.efg"))
-    nfg_files = list(CATALOG_DIR.rglob("*.nfg"))
+
+    # Using rglob("*") to find files in all subdirectories
+    slugs = []
+    for resource_path in sorted(CATALOG_DIR.rglob("*.efg")):
+        if resource_path.is_file():
+            rel_path = resource_path.relative_to(CATALOG_DIR)
+            slugs.append(str(rel_path))
+    for resource_path in sorted(CATALOG_DIR.rglob("*.nfg")):
+        if resource_path.is_file():
+            rel_path = resource_path.relative_to(CATALOG_DIR)
+            slugs.append(str(rel_path))
 
     game_files = []
-    for entry in efg_files + nfg_files:
-        filename = str(entry).split("/")[-1]
-        game_files.append(f"catalog/{filename}")
+    for slug in slugs:
+        game_files.append(f"catalog/{slug}")
     game_files.sort()
 
     with open(MAKEFILE_AM, encoding="utf-8") as f:
