@@ -40,3 +40,4 @@ def test_catalog_games():
     assert "Two-stage matching pennies game" in list(all_games.Title)
     # Check slug of game in subdir
     assert "myerson/fig_4_2" in slugs
+    assert "myerson_fig_4_2" not in slugs
