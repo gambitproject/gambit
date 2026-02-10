@@ -24,11 +24,11 @@ Add new games
 
 3. **Update the catalog:**
 
-   Use the ``update_catalog.py`` script to update Gambit's documentation & build files.
+   Use the ``update.py`` script to update Gambit's documentation & build files.
 
    .. code-block:: bash
 
-       python src/pygambit/update_catalog.py --build
+       python build_support/catalog/update.py --build
 
    .. note::
 
