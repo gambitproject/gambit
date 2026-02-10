@@ -46,21 +46,13 @@ def games() -> pd.DataFrame:
             rel_path = resource_path.relative_to(_CATALOG_RESOURCE)
             game_slug = str(rel_path.with_suffix(""))
 
-            # This code prevents duplicate slugs e.g. subdir/game1 and subdir_game1
-            bad_slug = False
-            for d in _CATALOG_SUBDIRS:
-                if d in game_slug and d != game_slug and "/" not in game_slug:
-                    bad_slug = True
-
-            # Update the dataframe
-            if not bad_slug:
-                with as_file(resource_path) as path:
-                    game = reader(str(path))
-                    records.append(
-                        {
-                            "Game": game_slug,
-                            "Title": game.title,
-                        }
-                    )
+            with as_file(resource_path) as path:
+                game = reader(str(path))
+                records.append(
+                    {
+                        "Game": game_slug,
+                        "Title": game.title,
+                    }
+                )
 
     return pd.DataFrame.from_records(records, columns=["Game", "Title"])
