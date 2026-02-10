@@ -4,14 +4,14 @@ from pathlib import Path
 import pygambit as gbt
 
 CATALOG_CSV = Path(__file__).parent.parent.parent / "doc" / "catalog.csv"
+CATALOG_DIR = Path(__file__).parent.parent.parent / "catalog"
 MAKEFILE_AM = Path(__file__).parent.parent.parent / "Makefile.am"
 
 
 def update_makefile():
     """Update the Makefile.am with all games from the catalog."""
-    catalog_dir = Path(__file__).parent.parent.parent / "catalog"
-    efg_files = list(catalog_dir.rglob("*.efg"))
-    nfg_files = list(catalog_dir.rglob("*.nfg"))
+    efg_files = list(CATALOG_DIR.rglob("*.efg"))
+    nfg_files = list(CATALOG_DIR.rglob("*.nfg"))
 
     game_files = []
     for entry in efg_files + nfg_files:
