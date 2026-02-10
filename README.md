@@ -1,7 +1,4 @@
-<h1 style="text-align: center;">
-<img src="https://raw.githubusercontent.com/gambitproject/gambit/master/doc/_static/gambit.png"
-     width="300" alt="Gambit logo">
-</h1>
+![Logo](doc/_static/Gambit_logo_landscape_green_font_no_outline.png)
 <br/>
 
 ![Latest stable version](https://img.shields.io/github/v/release/gambitproject/gambit?filter=!*a*&label=Latest%20stable%20version)

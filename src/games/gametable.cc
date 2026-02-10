@@ -469,7 +469,7 @@ void GameTableRep::WriteNfgFile(std::ostream &p_file) const
     }) << std::endl;
   }
   p_file << "}" << std::endl;
-  p_file << std::quoted(GetComment()) << std::endl << std::endl;
+  p_file << std::quoted(GetDescription()) << std::endl << std::endl;
 
   p_file << "{" << std::endl;
   for (auto outcome : m_outcomes) {
