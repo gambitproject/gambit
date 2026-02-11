@@ -44,12 +44,12 @@ AboutDialog::AboutDialog(wxWindow *p_parent)
   wxWindow::SetFont(wxFont(12, wxFONTFAMILY_ROMAN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
-  topSizer->Add(new wxStaticBitmap(this, wxID_STATIC, wxBitmap(gambitbig_xpm)), 0,
-                wxALL | wxALIGN_CENTER, 20);
-  topSizer->Add(new wxStaticText(this, wxID_STATIC, _T("Gambit: Software Tools for Game Theory")),
+  topSizer->Add(new wxStaticBitmap(this, wxID_STATIC, wxBitmap(gambitbig_xpm), wxDefaultPosition,
+                                   wxSize(-1, 300)),
+                0, wxALL | wxALIGN_CENTER, 20);
+  topSizer->Add(new wxStaticText(this, wxID_STATIC,
+                                 _T("Gambit: The package for computation in game theory")),
                 0, wxTOP | wxLEFT | wxRIGHT | wxALIGN_CENTER, 20);
-  topSizer->Add(new wxStaticText(this, wxID_STATIC, _T("Graphical Interface")), 0,
-                wxLEFT | wxRIGHT | wxALIGN_CENTER, 5);
   topSizer->Add(new wxStaticText(this, wxID_STATIC, _T("Version " VERSION)), 0, wxALIGN_CENTER, 5);
 
   topSizer->Add(
