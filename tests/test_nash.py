@@ -39,6 +39,10 @@ class EquilibriumTestCase:
     prob_tol: float | gbt.Rational = Q(0)
 
 
+##################################################################################################
+# NASH SOLVER IN MIXED STRATEGIES
+##################################################################################################
+
 ENUMPURE_CASES = [
     # Zero-sum games
     pytest.param(
@@ -247,6 +251,153 @@ def test_nash_strategy_solver(test_case: EquilibriumTestCase, subtests) -> None:
             for player in game.players:
                 for strategy in player.strategies:
                     assert abs(eq[strategy] - expected[strategy]) <= test_case.prob_tol
+
+##################################################################################################
+# NASH SOLVER IN MIXED BEHAVIORS
+##################################################################################################
+
+# games.read_from_file("two_player_perfect_info_win_lose.efg"),
+# [[[0, 1], [1, 0]], [[1, 0], [1, 0]]],
+
+# games.read_from_file("two_player_perfect_info_win_lose_with_nonterm_outcomes.efg"),
+# [[[0, 1], [1, 0]], [[1, 0], [1, 0]]],
+
+# games.create_2x2_zero_sum_efg(missing_term_outcome=False),
+# [[["1/2", "1/2"]], [["1/2", "1/2"]]],
+
+# games.create_2x2_zero_sum_efg(missing_term_outcome=True),
+# [[["1/2", "1/2"]], [["1/2", "1/2"]]],
+
+# games.create_matching_pennies_efg(with_neutral_outcome=False),
+# [[["1/2", "1/2"]], [["1/2", "1/2"]]],
+
+# games.create_matching_pennies_efg(with_neutral_outcome=True),
+# [[["1/2", "1/2"]], [["1/2", "1/2"]]],
+
+# games.create_stripped_down_poker_efg(),
+# [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]],
+
+# games.create_stripped_down_poker_efg(nonterm_outcomes=True),
+# [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]],
+
+# games.create_kuhn_poker_efg(),
+# [
+    # [[1, 0], [1, 0], [1, 0], ["2/3", "1/3"], [1, 0], [0, 1]],
+    # [[1, 0], ["2/3", "1/3"], [0, 1], [0, 1], ["2/3", "1/3"], [1, 0]],
+# ],
+
+# games.create_kuhn_poker_efg(nonterm_outcomes=True),
+# [
+    # [
+        # [1, 0],
+        # [1, 0],
+        # [1, 0],
+        # ["2/3", "1/3"],
+        # [1, 0],
+        # [0, 1],
+    # ],
+    # [[1, 0], ["2/3", "1/3"], [0, 1], [0, 1], ["2/3", "1/3"], [1, 0]],
+# ],
+
+# games.read_from_file("zerosum_efg_from_sequence_form_STOC94_paper.efg"),
+# [
+    # [[0, 1], ["2/3", "1/3"], ["1/3", "2/3"]],
+    # [["5/6", "1/6"], ["5/9", "4/9"]],
+# ],
+
+# games.read_from_file("perfect_info_with_chance.efg"),
+# [[[0, 1]], [[1, 0], [1, 0]]],
+
+# games.read_from_file("2_player_chance.efg"),
+# [
+    # [["1/3", 0, "2/3"], ["2/3", 0, "1/3"]],
+    # [["2/3", "1/3"], ["2/3", "1/3"], ["1/3", "2/3"]],
+# ],
+
+# games.read_from_file("2_player_chance_nonterm_outcomes_and_missing_term_outcomes.efg"),
+# [
+    # [["1/3", 0, "2/3"], ["2/3", 0, "1/3"]],
+    # [["2/3", "1/3"], ["2/3", "1/3"], ["1/3", "2/3"]],
+# ],
+
+# games.read_from_file("large_payoff_game.efg"),
+# [
+    # [[1, 0], [1, 0]],
+    # [[0, 1], ["9999999999999999999/10000000000000000000", "1/10000000000000000000"]],
+# ],
+
+# games.read_from_file("chance_in_middle.efg"),
+# [[["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]], [[1, 0], ["6/11", "5/11"]]],
+
+# games.read_from_file("chance_in_middle_with_nonterm_outcomes.efg"),
+# [[["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]], [[1, 0], ["6/11", "5/11"]]],
+
+
+LP_BEHAVIOR_RATIONAL_CASES = [
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.read_from_file, "chance_in_middle_with_nonterm_outcomes.efg"
+            ),
+            solver=gbt.nash.lp_solve,
+            expected=[
+                [
+                 [d("3/11", "8/11"), d(1, 0), d(1, 0), d(1, 0), d(1, 0)],
+                 [d(1, 0), d("6/11", "5/11")]
+                ]
+            ],
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test1_TODO",
+    ),
+    ]
+
+CASES = []
+CASES += LP_BEHAVIOR_RATIONAL_CASES
+
+
+@pytest.mark.nash
+@pytest.mark.parametrize("test_case", CASES, ids=lambda c: c.label)
+def test_nash_behavior_solver(test_case: EquilibriumTestCase, subtests) -> None:
+    """Test calls of Nash solvers in mixed behaviors
+
+    Subtests:
+    - Max regret no more than `test_case.regret_tol`
+    - Agent max regret no more than max regret (+ `test_case.regret_tol`)
+    - Equilibria are output in the expected order.  Equilibria are deemed to match if the maximum
+      difference in probabilities is no more than `test_case.prob_tol`
+    """
+    game = test_case.factory()
+    result = test_case.solver(game)
+    with subtests.test("number of equilibria found"):
+        assert len(result.equilibria) == len(test_case.expected)
+    for i, (eq, exp) in enumerate(zip(result.equilibria, test_case.expected, strict=True)):
+        with subtests.test(eq=i, check="max_regret"):
+            assert eq.max_regret() <= test_case.regret_tol
+        with subtests.test(eq=i, check="max_regret"):
+            assert eq.agent_max_regret() <= eq.max_regret() + test_case.regret_tol
+        with subtests.test(eq=i, check="strategy_profile"):
+            expected = game.mixed_behavior_profile(rational=True, data=exp)
+            for player in game.players:
+                for action in player.actions:
+                    assert abs(eq[action] - expected[action]) <= test_case.prob_tol
+
+# def test_lp_behavior_rational(game: gbt.Game, mixed_behav_prof_data: list):
+    # """Test calls of LP for mixed behavior equilibria, rational precision,
+    # using max_regret and agent_max_regret (internal consistency); and
+    # comparison to a previously computed equilibrium using this function (regression test).
+    # """
+    # result = gbt.nash.lp_solve(game, use_strategic=False, rational=True)
+    # assert len(result.equilibria) == 1
+    # eq = result.equilibria[0]
+    # assert eq.max_regret() == 0
+    # assert eq.agent_max_regret() == 0
+    # expected = game.mixed_behavior_profile(rational=True, data=mixed_behav_prof_data)
+    # assert eq == expected
+
+##################################################################################################
+# AGENTS NASH SOLVERS (IN MIXED BEHAVIORS
+##################################################################################################
 
 
 ENUMPURE_AGENT_CASES = [
@@ -515,6 +666,7 @@ ENUMPOLY_AGENT_CASES = [
 # ),
 # ##############################################################################
 
+
 AGENT_CASES = []
 AGENT_CASES += ENUMPURE_AGENT_CASES
 AGENT_CASES += ENUMPOLY_AGENT_CASES
@@ -546,6 +698,10 @@ def test_nash_agent_solver(test_case: EquilibriumTestCase, subtests) -> None:
                 for action in player.actions:
                     assert abs(eq[action] - expected[action]) <= test_case.prob_tol
 
+
+##################################################################################################
+# TEMP FOR ISSUE 660
+##################################################################################################
 
 ENUMPOLY_ISSUE_660_CASES = [
     # 2-player non-zero-sum games
@@ -606,6 +762,10 @@ def test_nash_agent_solver_no_subtests_only_profile(test_case: EquilibriumTestCa
             for action in player.actions:
                 assert abs(eq[action] - expected[action]) <= test_case.prob_tol
 
+
+##################################################################################################
+# AGENT UNORDERED
+##################################################################################################
 
 ENUMPOLY_AGENT_UNORDERED_CASES = [
     pytest.param(
@@ -669,6 +829,11 @@ def test_nash_agent_solver_unordered(test_case: EquilibriumTestCase, subtests) -
                     found = True
                     break
             assert found
+
+
+##################################################################################################
+# STILL TODO........
+##################################################################################################
 
 
 def test_lcp_strategy_double():
@@ -956,120 +1121,6 @@ def test_lp_behavior_double():
     result = gbt.nash.lp_solve(game, use_strategic=False, rational=False)
     assert len(result.equilibria) == 1
     # For floating-point results are not exact, so we skip testing exact values for now
-
-
-@pytest.mark.nash
-@pytest.mark.nash_lp_behavior
-@pytest.mark.parametrize(
-    "game,mixed_behav_prof_data",
-    [
-        (
-            games.read_from_file("two_player_perfect_info_win_lose.efg"),
-            [[[0, 1], [1, 0]], [[1, 0], [1, 0]]],
-        ),
-        (
-            games.read_from_file("two_player_perfect_info_win_lose_with_nonterm_outcomes.efg"),
-            [[[0, 1], [1, 0]], [[1, 0], [1, 0]]],
-        ),
-        (
-            games.create_2x2_zero_sum_efg(missing_term_outcome=False),
-            [[["1/2", "1/2"]], [["1/2", "1/2"]]],
-        ),
-        (
-            games.create_2x2_zero_sum_efg(missing_term_outcome=True),
-            [[["1/2", "1/2"]], [["1/2", "1/2"]]],
-        ),
-        (
-            games.create_matching_pennies_efg(with_neutral_outcome=False),
-            [[["1/2", "1/2"]], [["1/2", "1/2"]]],
-        ),
-        (
-            games.create_matching_pennies_efg(with_neutral_outcome=True),
-            [[["1/2", "1/2"]], [["1/2", "1/2"]]],
-        ),
-        (
-            games.create_stripped_down_poker_efg(),
-            [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]],
-        ),
-        (
-            games.create_stripped_down_poker_efg(nonterm_outcomes=True),
-            [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]],
-        ),
-        (
-            games.create_kuhn_poker_efg(),
-            [
-                [[1, 0], [1, 0], [1, 0], ["2/3", "1/3"], [1, 0], [0, 1]],
-                [[1, 0], ["2/3", "1/3"], [0, 1], [0, 1], ["2/3", "1/3"], [1, 0]],
-            ],
-        ),
-        (
-            games.create_kuhn_poker_efg(nonterm_outcomes=True),
-            [
-                [
-                    [1, 0],
-                    [1, 0],
-                    [1, 0],
-                    ["2/3", "1/3"],
-                    [1, 0],
-                    [0, 1],
-                ],
-                [[1, 0], ["2/3", "1/3"], [0, 1], [0, 1], ["2/3", "1/3"], [1, 0]],
-            ],
-        ),
-        (
-            games.read_from_file("zerosum_efg_from_sequence_form_STOC94_paper.efg"),
-            [
-                [[0, 1], ["2/3", "1/3"], ["1/3", "2/3"]],
-                [["5/6", "1/6"], ["5/9", "4/9"]],
-            ],
-        ),
-        (
-            games.read_from_file("perfect_info_with_chance.efg"),
-            [[[0, 1]], [[1, 0], [1, 0]]],
-        ),
-        (
-            games.read_from_file("2_player_chance.efg"),
-            [
-                [["1/3", 0, "2/3"], ["2/3", 0, "1/3"]],
-                [["2/3", "1/3"], ["2/3", "1/3"], ["1/3", "2/3"]],
-            ],
-        ),
-        (
-            games.read_from_file("2_player_chance_nonterm_outcomes_and_missing_term_outcomes.efg"),
-            [
-                [["1/3", 0, "2/3"], ["2/3", 0, "1/3"]],
-                [["2/3", "1/3"], ["2/3", "1/3"], ["1/3", "2/3"]],
-            ],
-        ),
-        (
-            games.read_from_file("large_payoff_game.efg"),
-            [
-                [[1, 0], [1, 0]],
-                [[0, 1], ["9999999999999999999/10000000000000000000", "1/10000000000000000000"]],
-            ],
-        ),
-        (
-            games.read_from_file("chance_in_middle.efg"),
-            [[["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]], [[1, 0], ["6/11", "5/11"]]],
-        ),
-        (
-            games.read_from_file("chance_in_middle_with_nonterm_outcomes.efg"),
-            [[["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]], [[1, 0], ["6/11", "5/11"]]],
-        ),
-    ],
-)
-def test_lp_behavior_rational(game: gbt.Game, mixed_behav_prof_data: list):
-    """Test calls of LP for mixed behavior equilibria, rational precision,
-    using max_regret and agent_max_regret (internal consistency); and
-    comparison to a previously computed equilibrium using this function (regression test).
-    """
-    result = gbt.nash.lp_solve(game, use_strategic=False, rational=True)
-    assert len(result.equilibria) == 1
-    eq = result.equilibria[0]
-    assert eq.max_regret() == 0
-    assert eq.agent_max_regret() == 0
-    expected = game.mixed_behavior_profile(rational=True, data=mixed_behav_prof_data)
-    assert eq == expected
 
 
 def test_liap_strategy():
