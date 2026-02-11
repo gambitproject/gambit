@@ -24,83 +24,67 @@
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif // WX_PRECOMP
+#include <wx/hyperlink.h>
 
 #include "gambit.h"
 #include "dlabout.h"
 #include "bitmaps/gambitbig.xpm"
 
 namespace Gambit::GUI {
-static wxStaticText *FormattedText(wxWindow *p_parent, const wxString &p_label,
-                                   const wxFont &p_font)
-{
-  auto *t = new wxStaticText(p_parent, wxID_STATIC, p_label);
-  t->SetFont(p_font);
-  return t;
-}
 
 AboutDialog::AboutDialog(wxWindow *p_parent)
   : wxDialog(p_parent, wxID_ANY, _T("About Gambit..."), wxDefaultPosition, wxDefaultSize)
 {
-  wxWindow::SetFont(wxFont(12, wxFONTFAMILY_ROMAN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
+  const int M = FromDIP(20);
+  const int S = FromDIP(10);
+  const int XS = FromDIP(5);
+
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
-  topSizer->Add(new wxStaticBitmap(this, wxID_STATIC, wxBitmap(gambitbig_xpm), wxDefaultPosition,
+  topSizer->Add(new wxStaticBitmap(this, wxID_ANY, wxBitmap(gambitbig_xpm), wxDefaultPosition,
                                    wxSize(-1, 300)),
-                0, wxALL | wxALIGN_CENTER, 20);
-  topSizer->Add(new wxStaticText(this, wxID_STATIC,
-                                 _T("Gambit: The package for computation in game theory")),
-                0, wxTOP | wxLEFT | wxRIGHT | wxALIGN_CENTER, 20);
-  topSizer->Add(new wxStaticText(this, wxID_STATIC, _T("Version " VERSION)), 0, wxALIGN_CENTER, 5);
+                0, wxALL | wxALIGN_CENTER, M);
+  auto *title =
+      new wxStaticText(this, wxID_ANY, _T("Gambit: The package for computation in game theory"));
+  {
+    wxFont f = title->GetFont();
+    f.SetWeight(wxFONTWEIGHT_BOLD);
+    f.SetPointSize(f.GetPointSize() + 2);
+    title->SetFont(f);
+  }
+  topSizer->Add(title, 0, wxTOP | wxLEFT | wxRIGHT | wxALIGN_CENTER, M);
+  topSizer->Add(new wxStaticText(this, wxID_ANY, _T("Version " VERSION)), 0, wxALIGN_CENTER, 5);
 
   topSizer->Add(
-      FormattedText(this, _T("https://www.gambit-project.org"),
-                    wxFont(12, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL)),
-      0, wxTOP | wxALIGN_CENTER, 10);
+      new wxHyperlinkCtrl(this, wxID_ANY, "gambit-project.org", "https://www.gambit-project.org"),
+      0, wxTOP | wxALIGN_CENTER, S);
+
+  topSizer->Add(new wxStaticText(this, wxID_ANY, _("Built with " wxVERSION_STRING)), 0,
+                wxTOP | wxALIGN_CENTER, M);
+  topSizer->Add(new wxHyperlinkCtrl(this, wxID_ANY, "wxwidgets.org", "https://www.wxwidgets.org"),
+                0, wxALIGN_CENTER, XS);
 
   topSizer->Add(
-      FormattedText(this, _("Built with " wxVERSION_STRING),
-                    wxFont(12, wxFONTFAMILY_ROMAN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL)),
-      0, wxTOP | wxALIGN_CENTER, 20);
+      new wxStaticText(this, wxID_ANY, _T("Copyright (C) 1994-2026, The Gambit Project")), 0,
+      wxTOP | wxALIGN_CENTER, M);
+  topSizer->Add(new wxStaticText(this, wxID_ANY, _("Theodore Turocy, Project Maintainer")), 0,
+                wxALIGN_CENTER, XS);
   topSizer->Add(
-      FormattedText(this, _T("https://www.wxwidgets.org"),
-                    wxFont(12, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL)),
-      0, wxALIGN_CENTER, 5);
+      new wxHyperlinkCtrl(this, wxID_ANY, "T.Turocy@uea.ac.uk", "mailto:T.Turocy@uea.ac.uk"), 0,
+      wxALIGN_CENTER, XS);
 
-  topSizer->Add(
-      FormattedText(this, _T("Copyright (C) 1994-2026, The Gambit Project"),
-                    wxFont(12, wxFONTFAMILY_ROMAN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL)),
-      0, wxTOP | wxALIGN_CENTER, 20);
-  topSizer->Add(
-      FormattedText(this, _("Theodore Turocy, Project Maintainer"),
-                    wxFont(12, wxFONTFAMILY_ROMAN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL)),
-      0, wxALIGN_CENTER, 5);
-  topSizer->Add(
-      FormattedText(this, _T("T.Turocy@uea.ac.uk"),
-                    wxFont(12, wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL)),
-      0, wxALIGN_CENTER, 5);
-
-  topSizer->Add(
-      FormattedText(this, _("This program is free software,"),
-                    wxFont(12, wxFONTFAMILY_ROMAN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL)),
-      0, wxTOP | wxALIGN_CENTER, 20);
-  topSizer->Add(
-      FormattedText(this, _("distributed under the terms of"),
-                    wxFont(12, wxFONTFAMILY_ROMAN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL)),
-      0, wxALIGN_CENTER, 5);
-  topSizer->Add(
-      FormattedText(this, _("the GNU General Public License"),
-                    wxFont(12, wxFONTFAMILY_ROMAN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL)),
-      0, wxALIGN_CENTER, 5);
+  topSizer->Add(new wxStaticText(this, wxID_ANY, _("This program is free software,")), 0,
+                wxTOP | wxALIGN_CENTER, M);
+  topSizer->Add(new wxStaticText(this, wxID_ANY, _("distributed under the terms of")), 0,
+                wxALIGN_CENTER, XS);
+  topSizer->Add(new wxStaticText(this, wxID_ANY, _("the GNU General Public License")), 0,
+                wxALIGN_CENTER, XS);
 
   auto *okButton = new wxButton(this, wxID_OK, _("OK"));
   okButton->SetDefault();
-  topSizer->Add(okButton, 0, wxALL | wxALIGN_RIGHT, 20);
+  topSizer->Add(okButton, 0, wxALL | wxALIGN_RIGHT, M);
 
-  SetSizer(topSizer);
-  topSizer->Fit(this);
-  topSizer->SetSizeHints(this);
-
-  wxTopLevelWindowBase::Layout();
-  CenterOnParent();
+  SetSizerAndFit(topSizer);
+  CentreOnParent();
 }
 } // namespace Gambit::GUI
