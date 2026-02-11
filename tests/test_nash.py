@@ -326,14 +326,40 @@ def test_nash_strategy_solver(test_case: EquilibriumTestCase, subtests) -> None:
     # [[0, 1], ["9999999999999999999/10000000000000000000", "1/10000000000000000000"]],
 # ],
 
-# games.read_from_file("chance_in_middle.efg"),
-# [[["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]], [[1, 0], ["6/11", "5/11"]]],
-
-# games.read_from_file("chance_in_middle_with_nonterm_outcomes.efg"),
-# [[["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]], [[1, 0], ["6/11", "5/11"]]],
-
 
 LP_BEHAVIOR_RATIONAL_CASES = [
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.read_from_file, "large_payoff_game.efg"
+            ),
+            solver=gbt.nash.lp_solve,
+            expected=[
+             [
+              [d(1, 0), d(1, 0)],
+              [d(0, 1), d("9999999999999999999/10000000000000000000", "1/10000000000000000000")],
+             ]
+            ],
+        ),
+        marks=pytest.mark.nash_lp_behavior,
+        id="test1_TODO",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.read_from_file, "chance_in_middle.efg"
+            ),
+            solver=gbt.nash.lp_solve,
+            expected=[
+                [
+                 [d("3/11", "8/11"), d(1, 0), d(1, 0), d(1, 0), d(1, 0)],
+                 [d(1, 0), d("6/11", "5/11")]
+                ]
+            ],
+        ),
+        marks=pytest.mark.nash_lp_behavior,
+        id="test1_TODO",
+    ),
     pytest.param(
         EquilibriumTestCase(
             factory=functools.partial(
@@ -347,10 +373,10 @@ LP_BEHAVIOR_RATIONAL_CASES = [
                 ]
             ],
         ),
-        marks=pytest.mark.nash_enumpure_strategy,
+        marks=pytest.mark.nash_lp_behavior,
         id="test1_TODO",
     ),
-    ]
+]
 
 CASES = []
 CASES += LP_BEHAVIOR_RATIONAL_CASES
