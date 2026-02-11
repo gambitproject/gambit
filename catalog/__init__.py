@@ -1,5 +1,5 @@
-import sys
 from importlib.resources import as_file, files
+from pathlib import Path
 
 import pandas as pd
 
@@ -18,9 +18,7 @@ def load(slug: str) -> gbt.Game:
     """
     Load a game from the package catalog.
     """
-    # Handle backslashes for Windows
-    if sys.platform == "win32":
-        slug.replace("/", "\\")  # noqa: F821
+    slug = str(Path(slug)).replace("\\", "/")
 
     for suffix, reader in READERS.items():
         resource_path = _CATALOG_RESOURCE / f"{slug}{suffix}"
@@ -48,11 +46,7 @@ def games() -> pd.DataFrame:
             # Calculate the path relative to the root resource
             # and remove the suffix to get the "slug"
             rel_path = resource_path.relative_to(_CATALOG_RESOURCE)
-            slug = str(rel_path.with_suffix(""))
-
-            # Replace backslashes for Windows
-            if sys.platform == "win32":
-                slug.replace("\\", "/")  # noqa: F821
+            slug = rel_path.with_suffix("").as_posix()
 
             with as_file(resource_path) as path:
                 game = reader(str(path))
