@@ -123,7 +123,7 @@ def test_outcome_index_exception_label():
         ###############################################################################
         # 1 player; reduction; generic payoffs
         (
-            games.create_reduction_one_player_generic_payoffs_efg(),
+            games.read_from_file("reduction_one_player_generic_payoffs.efg"),
             [["11", "12", "2*", "3*", "4*"]],
             [np.array(range(1, 6))],
         ),
@@ -168,7 +168,7 @@ def test_outcome_index_exception_label():
         ),
         # 2-player (zero-sum) game; reduction for both players; generic payoffs
         (
-            games.create_reduction_generic_payoffs_efg(),
+            games.read_from_file("reduction_generic_payoffs.efg"),
             [
                 ["1*1", "1*2", "211", "212", "221", "222"],
                 ["11*", "12*", "2**", "3*1", "3*2", "4**"],
@@ -210,7 +210,7 @@ def test_outcome_index_exception_label():
         ),
         # # 2-player game from GTE survey; reduction for both players; payoff ties
         (
-            games.create_reduction_both_players_payoff_ties_efg(),
+            games.read_from_file("reduction_both_players_payoff_ties_GTE_survey.efg"),
             [
                 ["1*", "2*", "31", "32", "4*"],
                 [
@@ -401,28 +401,28 @@ def test_reduced_strategic_form(
     "standard,modified",
     [
         (
-            games.create_two_player_perfect_info_win_lose_efg(),
-            games.create_two_player_perfect_info_win_lose_efg(nonterm_outcomes=True)
+            games.read_from_file("two_player_perfect_info_win_lose.efg"),
+            games.read_from_file("two_player_perfect_info_win_lose_with_nonterm_outcomes.efg")
         ),
         (
-            games.create_3_player_with_internal_outcomes_efg(),
-            games.create_3_player_with_internal_outcomes_efg(nonterm_outcomes=True)
+            games.read_from_file("3_player.efg"),
+            games.read_from_file("3_player_with_nonterm_outcomes.efg")
         ),
         (
-            games.create_chance_in_middle_efg(),
-            games.create_chance_in_middle_efg(nonterm_outcomes=True)
+            games.read_from_file("chance_in_middle.efg"),
+            games.read_from_file("chance_in_middle_with_nonterm_outcomes.efg")
         ),
         (
-            games.create_non_zero_sum_lacking_outcome_efg(),
-            games.create_non_zero_sum_lacking_outcome_efg(missing_term_outcome=True)
+            games.read_from_file("2_player_non_zero_sum.efg"),
+            games.read_from_file("2_player_non_zero_sum_missing_term_outcome.efg"),
         ),
         (
-            games.create_entry_accomodation_efg(),
-            games.create_entry_accomodation_efg(nonterm_outcomes=True)
+            games.read_from_file("entry_accommodation.efg"),
+            games.read_from_file("entry_accommodation_with_nonterm_outcomes.efg")
         ),
         (
-            games.create_three_action_internal_outcomes_efg(),
-            games.create_three_action_internal_outcomes_efg(nonterm_outcomes=True)
+            games.read_from_file("2_player_chance.efg"),
+            games.read_from_file("2_player_chance_nonterm_outcomes_and_missing_term_outcomes.efg"),
         ),
         (
             games.create_kuhn_poker_efg(),
