@@ -20,11 +20,17 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+#include <cmath>
+
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif // WX_PRECOMP
+#include <wx/panel.h>
+#include <wx/statbmp.h>
+#include <wx/stattext.h>
 #include <wx/hyperlink.h>
+#include <wx/sizer.h>
 
 #include "gambit.h"
 #include "dlabout.h"
@@ -32,59 +38,120 @@
 
 namespace Gambit::GUI {
 
-AboutDialog::AboutDialog(wxWindow *p_parent)
-  : wxDialog(p_parent, wxID_ANY, _T("About Gambit..."), wxDefaultPosition, wxDefaultSize)
+static wxBitmap ScaleBitmapToMaxDIP(wxWindow *w, const wxBitmap &src, int maxDip)
+{
+  const int maxPx = w->FromDIP(maxDip);
+
+  wxImage img = src.ConvertToImage();
+  const int sw = img.GetWidth();
+  const int sh = img.GetHeight();
+
+  if (sw <= 0 || sh <= 0) {
+    return src;
+  }
+
+  const int smax = std::max(sw, sh);
+  if (smax <= maxPx) {
+    return src;
+  }
+
+  const double scale = double(maxPx) / double(smax);
+  const int nw = std::max(1, int(std::lround(sw * scale)));
+  const int nh = std::max(1, int(std::lround(sh * scale)));
+
+  img.Rescale(nw, nh, wxIMAGE_QUALITY_HIGH);
+  return wxBitmap(img);
+}
+
+AboutDialog::AboutDialog(wxWindow *parent)
+  : wxDialog(parent, wxID_ANY, _("About Gambit"), wxDefaultPosition, wxDefaultSize,
+             wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
 {
   const int M = FromDIP(20);
   const int S = FromDIP(10);
-  const int XS = FromDIP(5);
+  const int XS = FromDIP(6);
 
-  auto *topSizer = new wxBoxSizer(wxVERTICAL);
+  // Brand colour sampled earlier (adjust if desired)
+  const wxColour kBrandGreen(54, 100, 96);
 
-  topSizer->Add(new wxStaticBitmap(this, wxID_ANY, wxBitmap(gambitbig_xpm), wxDefaultPosition,
-                                   wxSize(-1, 300)),
-                0, wxALL | wxALIGN_CENTER, M);
-  auto *title =
-      new wxStaticText(this, wxID_ANY, _T("Gambit: The package for computation in game theory"));
-  {
-    wxFont f = title->GetFont();
-    f.SetWeight(wxFONTWEIGHT_BOLD);
-    f.SetPointSize(f.GetPointSize() + 2);
-    title->SetFont(f);
-  }
-  topSizer->Add(title, 0, wxTOP | wxLEFT | wxRIGHT | wxALIGN_CENTER, M);
-  topSizer->Add(new wxStaticText(this, wxID_ANY, _T("Version " VERSION)), 0, wxALIGN_CENTER, 5);
+  auto *panel = new wxPanel(this);
 
-  topSizer->Add(
-      new wxHyperlinkCtrl(this, wxID_ANY, "gambit-project.org", "https://www.gambit-project.org"),
-      0, wxTOP | wxALIGN_CENTER, S);
+  auto *root = new wxBoxSizer(wxVERTICAL);
+  auto *top = new wxBoxSizer(wxHORIZONTAL);
 
-  topSizer->Add(new wxStaticText(this, wxID_ANY, _("Built with " wxVERSION_STRING)), 0,
-                wxTOP | wxALIGN_CENTER, M);
-  topSizer->Add(new wxHyperlinkCtrl(this, wxID_ANY, "wxwidgets.org", "https://www.wxwidgets.org"),
-                0, wxALIGN_CENTER, XS);
+  // --- Left brand rail (fixed width, centered logo) ---
+  auto *left = new wxPanel(panel);
+  left->SetBackgroundColour(kBrandGreen);
 
-  topSizer->Add(
-      new wxStaticText(this, wxID_ANY, _T("Copyright (C) 1994-2026, The Gambit Project")), 0,
-      wxTOP | wxALIGN_CENTER, M);
-  topSizer->Add(new wxStaticText(this, wxID_ANY, _("Theodore Turocy, Project Maintainer")), 0,
-                wxALIGN_CENTER, XS);
-  topSizer->Add(
-      new wxHyperlinkCtrl(this, wxID_ANY, "T.Turocy@uea.ac.uk", "mailto:T.Turocy@uea.ac.uk"), 0,
-      wxALIGN_CENTER, XS);
+  const int railW = FromDIP(300); // tweak: 260–320 DIP
+  left->SetMinSize(wxSize(railW, -1));
 
-  topSizer->Add(new wxStaticText(this, wxID_ANY, _("This program is free software,")), 0,
-                wxTOP | wxALIGN_CENTER, M);
-  topSizer->Add(new wxStaticText(this, wxID_ANY, _("distributed under the terms of")), 0,
-                wxALIGN_CENTER, XS);
-  topSizer->Add(new wxStaticText(this, wxID_ANY, _("the GNU General Public License")), 0,
-                wxALIGN_CENTER, XS);
+  wxBitmap raw(gambitbig_xpm);
+  wxBitmap scaled = ScaleBitmapToMaxDIP(panel, raw, 180); // tweak: 160–200 DIP
+  auto *logo = new wxStaticBitmap(left, wxID_ANY, scaled);
 
-  auto *okButton = new wxButton(this, wxID_OK, _("OK"));
-  okButton->SetDefault();
-  topSizer->Add(okButton, 0, wxALL | wxALIGN_RIGHT, M);
+  auto *leftSizer = new wxBoxSizer(wxVERTICAL);
+  leftSizer->AddStretchSpacer();
+  leftSizer->Add(logo, 0, wxALIGN_CENTER);
+  leftSizer->AddStretchSpacer();
+  left->SetSizer(leftSizer);
 
-  SetSizerAndFit(topSizer);
+  top->Add(left, 0, wxEXPAND | wxRIGHT, M);
+
+  // --- Text column (right) ---
+  auto *textCol = new wxBoxSizer(wxVERTICAL);
+
+  // Tagline (keep, but wrap a bit narrower to avoid dialog getting wide)
+  auto *tagline =
+      new wxStaticText(panel, wxID_ANY, _("The package for computation in game theory"));
+  tagline->Wrap(FromDIP(360));
+  textCol->Add(tagline, 0, wxBOTTOM, S);
+
+  // Version line
+  textCol->Add(new wxStaticText(panel, wxID_ANY, _("Version " VERSION)), 0, wxBOTTOM, S);
+
+  // Built with line + link directly underneath (keeps width down)
+  textCol->Add(new wxStaticText(panel, wxID_ANY, _("Built with " wxVERSION_STRING)), 0, wxBOTTOM,
+               XS);
+
+  textCol->Add(new wxHyperlinkCtrl(panel, wxID_ANY, "wxwidgets.org", "https://www.wxwidgets.org"),
+               0, wxBOTTOM, M);
+
+  // Copyright + project link grouped together
+  textCol->Add(new wxStaticText(panel, wxID_ANY, _("Copyright © 1994–2026 The Gambit Project")), 0,
+               wxBOTTOM, XS);
+
+  textCol->Add(
+      new wxHyperlinkCtrl(panel, wxID_ANY, "gambit-project.org", "https://www.gambit-project.org"),
+      0, wxBOTTOM, S);
+
+  // If you still want maintainer/email, keep it—otherwise remove these two blocks.
+  textCol->Add(new wxStaticText(panel, wxID_ANY, _("Theodore Turocy, Project Maintainer")), 0,
+               wxBOTTOM, XS);
+
+  textCol->Add(
+      new wxHyperlinkCtrl(panel, wxID_ANY, "T.Turocy@uea.ac.uk", "mailto:T.Turocy@uea.ac.uk"), 0,
+      wxBOTTOM, M);
+
+  // License (single wrapped paragraph; narrower wrap helps overall width)
+  auto *license = new wxStaticText(panel, wxID_ANY,
+                                   _("This program is free software, distributed under the terms "
+                                     "of the GNU General Public License."));
+  license->Wrap(FromDIP(360));
+  textCol->Add(license, 0, wxBOTTOM, 0);
+
+  top->Add(textCol, 1, wxEXPAND);
+
+  root->Add(top, 1, wxALL | wxEXPAND, M);
+
+  root->Add(CreateStdDialogButtonSizer(wxOK), 0, wxLEFT | wxRIGHT | wxBOTTOM | wxALIGN_RIGHT, M);
+
+  panel->SetSizer(root);
+
+  auto *dlgSizer = new wxBoxSizer(wxVERTICAL);
+  dlgSizer->Add(panel, 1, wxEXPAND);
+  SetSizerAndFit(dlgSizer);
   CentreOnParent();
 }
+
 } // namespace Gambit::GUI
