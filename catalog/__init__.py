@@ -20,7 +20,7 @@ def load(slug: str) -> gbt.Game:
     """
     # Handle backslashes for Windows
     if sys.platform == "win32":
-        game_slug.replace("/", "\\")  # noqa: F821
+        slug.replace("/", "\\")  # noqa: F821
 
     for suffix, reader in READERS.items():
         resource_path = _CATALOG_RESOURCE / f"{slug}{suffix}"
@@ -48,17 +48,17 @@ def games() -> pd.DataFrame:
             # Calculate the path relative to the root resource
             # and remove the suffix to get the "slug"
             rel_path = resource_path.relative_to(_CATALOG_RESOURCE)
-            game_slug = str(rel_path.with_suffix(""))
+            slug = str(rel_path.with_suffix(""))
 
             # Replace backslashes for Windows
             if sys.platform == "win32":
-                game_slug.replace("\\", "/")  # noqa: F821
+                slug.replace("\\", "/")  # noqa: F821
 
             with as_file(resource_path) as path:
                 game = reader(str(path))
                 records.append(
                     {
-                        "Game": game_slug,
+                        "Game": slug,
                         "Title": game.title,
                     }
                 )
