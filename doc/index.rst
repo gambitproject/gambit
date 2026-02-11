@@ -32,12 +32,12 @@ We recommended most new users install the PyGambit Python package and read the a
          :expand:
 
 
-   .. grid-item-card:: Command-line tools
+   .. grid-item-card:: Algorithms for computing Nash equilibria
       :columns: 6
 
-      Quickly compute equilibria with the Gambit command-line tools.
+      Read out documentation on the algorithms available in Gambit for computing Nash equilibria.
 
-      .. button-ref:: command-line
+      .. button-ref:: algorithms
          :ref-type: ref
          :click-parent:
          :color: secondary
@@ -61,6 +61,7 @@ We recommended most new users install the PyGambit Python package and read the a
    :maxdepth: 1
 
    install
+   algorithms
    pygambit
    tools
    gui
