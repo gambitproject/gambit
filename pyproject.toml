@@ -43,7 +43,7 @@ doc = [
     "pickleshare",
     "jupyter",
     "open_spiel; sys_platform != 'win32'",
-    "draw-tree @ git+https://github.com/gambitproject/draw_tree.git@v0.3.1"
+    "draw-tree @ git+https://github.com/gambitproject/draw_tree.git@v0.4.0"
 ]
 
 [project.urls]
