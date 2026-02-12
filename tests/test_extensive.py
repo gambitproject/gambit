@@ -162,7 +162,7 @@ def test_outcome_index_exception_label():
             [np.array([[1, 0], [0, 1]]), np.array([[-1, 0], [0, -1]])]
         ),
         (
-            games.create_2x2_zero_sum_efg(missing_term_outcome=True),
+            games.create_2x2_zero_sum_efg(variant="missing term outcome"),
             [["1", "2"], ["1", "2"]],
             [np.array([[1, 0], [0, 1]]), np.array([[-1, 0], [0, -1]])]
         ),
@@ -434,7 +434,7 @@ def test_reduced_strategic_form(
         ),
         (
             games.create_2x2_zero_sum_efg(),
-            games.create_2x2_zero_sum_efg(missing_term_outcome=True)
+            games.create_2x2_zero_sum_efg(variant="missing term outcome"),
         ),
         (
             games.create_matching_pennies_efg(),

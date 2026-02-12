@@ -19,7 +19,7 @@ def read_from_file(fn: str) -> gbt.Game:
 
 
 def create_efg_corresponding_to_bimatrix_game(
-        A: np.ndarray, B: np.ndarray, title: str
+    A: np.ndarray, B: np.ndarray, title: str
 ) -> gbt.Game:
     """
     There is no direct pygambit method to create an EFG from a stategic-form game.
@@ -42,19 +42,29 @@ def create_efg_corresponding_to_bimatrix_game(
 # Extensive-form games (efg)
 
 
-def create_2x2_zero_sum_efg(missing_term_outcome: bool = False) -> gbt.Game:
+def create_2x2_zero_sum_efg(variant: None | str = None) -> gbt.Game:
     """
     EFG corresponding to 2x2 zero-sum game (I,-I).
-    If missing_term_outcome, the terminal node after action 0 then 1 does not have an outcome.
+
+    If variant is:
+        - "missing term outcome", terminal node after action 0 then 1 does not have an outcome.
+        - "with neutral outcome", there is a (0,0) payoff outcomes at a non-terminal node.
     """
     title = "EFG for 2x2 zero-sum game (I,-I)"
-    if missing_term_outcome:
-        title += " with missing terminal outcome"
+
+    if variant:
+        title += " " + variant
+
     A = np.eye(2)
     B = -A
     g = create_efg_corresponding_to_bimatrix_game(A, B, title)
-    if missing_term_outcome:
+
+    if variant == "missing term outcome":
         g.delete_outcome(g.root.children[0].children[1].outcome)
+    elif variant == "with neutral outcome":
+        neutral = g.add_outcome([0, 0], label="neutral")
+        g.set_outcome(g.root.children[0], neutral)
+
     return g
 
 
@@ -91,8 +101,9 @@ def create_stripped_down_poker_efg(nonterm_outcomes: bool = False) -> gbt.Game:
         return read_from_file("stripped_down_poker.efg")
 
     g = gbt.Game.new_tree(
-        players=["Alice", "Bob"], title="Stripped-Down Poker: a simple game of one-card\
-                                            poker from Reiley et al (2008)."
+        players=["Alice", "Bob"],
+        title="Stripped-Down Poker: a simple game of one-card\
+                                            poker from Reiley et al (2008).",
     )
     deals = ["King", "Queen"]
     g.append_move(g.root, g.players.chance, deals)
@@ -107,21 +118,15 @@ def create_stripped_down_poker_efg(nonterm_outcomes: bool = False) -> gbt.Game:
     bob_calls_and_loses_outcome = g.add_outcome([4, -1], label="Bob Calls and Loses")
 
     for node in g.root.children:
-        g.append_move(
-            node,
-            player="Alice",
-            actions=["Bet", "Fold"]
-        )
+        g.append_move(node, player="Alice", actions=["Bet", "Fold"])
         g.set_outcome(node.children["Fold"], alice_folds_outcome)
         g.set_outcome(node.children["Bet"], alice_bets_outcome)
 
-    alice_bets_nodes = [g.root.children["King"].children["Bet"],
-                        g.root.children["Queen"].children["Bet"]]
-    g.append_move(
-        alice_bets_nodes,
-        player="Bob",
-        actions=["Call", "Fold"]
-    )
+    alice_bets_nodes = [
+        g.root.children["King"].children["Bet"],
+        g.root.children["Queen"].children["Bet"],
+    ]
+    g.append_move(alice_bets_nodes, player="Bob", actions=["Call", "Fold"])
     for node in alice_bets_nodes:
         g.set_outcome(node.children["Fold"], bob_folds_outcome)
 
@@ -136,9 +141,7 @@ def _create_kuhn_poker_efg_without_outcomes():
     """
     Used in create_kuhn_poker_efg()
     """
-    g = gbt.Game.new_tree(
-        players=["Alice", "Bob"], title="Three-card poker (J, Q, K), two-player"
-    )
+    g = gbt.Game.new_tree(players=["Alice", "Bob"], title="Three-card poker (J, Q, K), two-player")
     cards = ["J", "Q", "K"]
     deals = ["JQ", "JK", "QJ", "QK", "KJ", "KQ"]
 
@@ -147,25 +150,29 @@ def _create_kuhn_poker_efg_without_outcomes():
         return [d for d in deals if d[player_idx] == card]
 
     g.append_move(g.root, g.players.chance, deals)
-    g.set_chance_probs(g.root.infoset, [gbt.Rational(1, 6)]*6)
+    g.set_chance_probs(g.root.infoset, [gbt.Rational(1, 6)] * 6)
     for alice_card in cards:
         # Alice's first move
         term_nodes = [g.root.children[d] for d in deals_by_infoset("Alice", alice_card)]
         g.append_move(term_nodes, "Alice", ["Check", "Bet"])
     for bob_card in cards:
         # Bob's move after Alice checks
-        term_nodes = [g.root.children[d].children["Check"]
-                      for d in deals_by_infoset("Bob", bob_card)]
+        term_nodes = [
+            g.root.children[d].children["Check"] for d in deals_by_infoset("Bob", bob_card)
+        ]
         g.append_move(term_nodes, "Bob", ["Check", "Bet"])
     for alice_card in cards:
         # Alice's move if Bob's second action is bet
-        term_nodes = [g.root.children[d].children["Check"].children["Bet"]
-                      for d in deals_by_infoset("Alice", alice_card)]
+        term_nodes = [
+            g.root.children[d].children["Check"].children["Bet"]
+            for d in deals_by_infoset("Alice", alice_card)
+        ]
         g.append_move(term_nodes, "Alice", ["Fold", "Call"])
     for bob_card in cards:
         # Bob's move after Alice bets initially
-        term_nodes = [g.root.children[d].children["Bet"]
-                      for d in deals_by_infoset("Bob", bob_card)]
+        term_nodes = [
+            g.root.children[d].children["Bet"] for d in deals_by_infoset("Bob", bob_card)
+        ]
         g.append_move(term_nodes, "Bob", ["Fold", "Call"])
     return g
 
@@ -189,7 +196,6 @@ def _create_kuhn_poker_efg_only_term_outcomes() -> gbt.Game:
     g = _create_kuhn_poker_efg_without_outcomes()
 
     def calculate_payoffs(term_node):
-
         def get_path(node):
             path = []
             while node.parent:
@@ -231,10 +237,12 @@ def _create_kuhn_poker_efg_only_term_outcomes() -> gbt.Game:
         return tuple(payoffs.values())
 
     # create 4 possible outcomes just once
-    payoffs_to_outcomes = {(1, -1): g.add_outcome([1, -1], label="Alice wins 1"),
-                           (2, -2): g.add_outcome([2, -2], label="Alice wins 2"),
-                           (-1, 1): g.add_outcome([-1, 1], label="Bob wins 1"),
-                           (-2, 2): g.add_outcome([-2, 2], label="Bob wins 2")}
+    payoffs_to_outcomes = {
+        (1, -1): g.add_outcome([1, -1], label="Alice wins 1"),
+        (2, -2): g.add_outcome([2, -2], label="Alice wins 2"),
+        (-1, 1): g.add_outcome([-1, 1], label="Bob wins 1"),
+        (-2, 2): g.add_outcome([-2, 2], label="Bob wins 2"),
+    }
 
     for term_node in [n for n in g.nodes if n.is_terminal]:
         outcome = payoffs_to_outcomes[calculate_payoffs(term_node)]
@@ -280,7 +288,6 @@ def _create_kuhn_poker_efg_nonterm_outcomes() -> gbt.Game:
         outcomes_dict[tmp] = g.add_outcome(payoffs, label=tmp)
 
     def add_outcomes(term_node):
-
         def get_path(node):
             path = []
             while node.parent:
@@ -388,9 +395,7 @@ def create_one_shot_trust_efg(unique_NE_variant: bool = False) -> gbt.Game:
     )
     g.append_move(g.root, "Buyer", ["Trust", "Not trust"])
     g.append_move(g.root.children[0], "Seller", ["Honor", "Abuse"])
-    g.set_outcome(
-        g.root.children[0].children[0], g.add_outcome([1, 1], label="Trustworthy")
-    )
+    g.set_outcome(g.root.children[0].children[0], g.add_outcome([1, 1], label="Trustworthy"))
     if unique_NE_variant:
         g.set_outcome(
             g.root.children[0].children[1], g.add_outcome(["1/2", 2], label="Untrustworthy")
@@ -489,9 +494,7 @@ class Centipede(EfgFamilyForReducedStrategicFormTests):
         self.m1 = params["m1"]
 
     def gbt_game(self):
-        g = gbt.Game.new_tree(
-            players=["1", "2"], title=f"Centipede Game with {self.N} rounds"
-        )
+        g = gbt.Game.new_tree(players=["1", "2"], title=f"Centipede Game with {self.N} rounds")
         current_node = g.root
         current_player = "1"
         for t in range(self.N):
@@ -510,7 +513,6 @@ class Centipede(EfgFamilyForReducedStrategicFormTests):
         return g
 
     def reduced_strategies(self):
-
         if self.N % 2 == 0:
             n_moves = [int(self.N / 2)] * 2
         else:
@@ -594,7 +596,6 @@ class BinaryTreeGames(EfgFamilyForReducedStrategicFormTests):
         self.n_players = n_players
 
     def get_n_infosets(self, level):
-
         if self.n_players == 1:
             return {1: 2 ** (level - 1)}
 
@@ -649,16 +650,13 @@ class BinaryTreeGames(EfgFamilyForReducedStrategicFormTests):
 
     def reduced_strategic_form(self):
         # special case for 1 player
-        dims = (
-            (self.size_of_rsf[0], 1) if len(self.size_of_rsf) == 1 else self.size_of_rsf
-        )
+        dims = (self.size_of_rsf[0], 1) if len(self.size_of_rsf) == 1 else self.size_of_rsf
 
         zeros = np.zeros(dims, dtype=int)
         return [zeros] * len(self.players)
 
 
 class BinEfgOnePlayerIR(BinaryTreeGames):
-
     def __init__(self, params):
         super().__init__(n_players=1, params=params)
 
@@ -667,26 +665,21 @@ class BinEfgOnePlayerIR(BinaryTreeGames):
             return self._redu_strategies_level_1(player)
         else:
             tmp = self._redu_strats(1, level - 1)
-            tmp = [
-                t[1:] for t in tmp
-            ]  # remove first action (1 from 1st half; 2 from 2nd half)
+            tmp = [t[1:] for t in tmp]  # remove first action (1 from 1st half; 2 from 2nd half)
             n_half = int(len(tmp) / 2)
             first_half = tmp[:n_half]
             second_half = tmp[n_half:]
-            n_stars = (
-                    self.get_n_infosets(level)[1] - self.get_n_infosets(level - 1)[1] - 1
-            )
+            n_stars = self.get_n_infosets(level)[1] - self.get_n_infosets(level - 1)[1] - 1
             stars = "*" * n_stars
             return (
-                    ["11" + t + stars for t in first_half]
-                    + ["12" + t + stars for t in second_half]
-                    + ["21" + stars + t for t in first_half]
-                    + ["22" + stars + t for t in second_half]
+                ["11" + t + stars for t in first_half]
+                + ["12" + t + stars for t in second_half]
+                + ["21" + stars + t for t in first_half]
+                + ["22" + stars + t for t in second_half]
             )
 
 
 class BinEfgTwoOrThreePlayers(BinaryTreeGames):
-
     def _redu_strats(self, player, level):
         if level == 1:
             return self._redu_strategies_level_1(player)
@@ -698,11 +691,9 @@ class BinEfgTwoOrThreePlayers(BinaryTreeGames):
                 n_stars = tmp1[player] - tmp2[last_player] - 1
                 stars = "*" * n_stars
                 return [
-                    "1" + t + stars
-                    for t in self._redu_strats(player=last_player, level=level - 1)
+                    "1" + t + stars for t in self._redu_strats(player=last_player, level=level - 1)
                 ] + [
-                    "2" + stars + t
-                    for t in self._redu_strats(player=last_player, level=level - 1)
+                    "2" + stars + t for t in self._redu_strats(player=last_player, level=level - 1)
                 ]
             elif player == 2:
                 tmp = self._redu_strats(player=1, level=level - 1)
