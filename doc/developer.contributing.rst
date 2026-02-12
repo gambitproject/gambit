@@ -104,18 +104,15 @@ Be sure to familiarise yourself with :ref:`contributing-code` before reading thi
 By default, pull requests on GitHub will trigger the running of Gambit's test suite using GitHub Actions.
 You can also run the tests locally before submitting your pull request, using `pytest`.
 
-1. Install the test dependencies (into the virtual environment where you installed PyGambit): ::
+1. Ensure `pygambit` is installed with test dependencies: see :ref:`build-python`.
 
-    pip install -r tests/requirements.txt
+2. Run pytest: ::
 
-2. Navigate to the Gambit repository and run the tests: ::
-
-    pytest
-
-3. [Optional] If you wish to run the tutorial notebook tests, you will need to add the ``--run-tutorials`` flag, which require the `doc` dependencies: ::
-
-    pip install -r doc/requirements.txt
     pytest --run-tutorials
+
+.. tip::
+    You can omit the `--run-tutorials` to skip running the tutorial notebook tests which take longest to run.
+    Running tests including tutorials requires `doc` as well as `test` dependencies; see :ref:`build-python`.
 
 Adding to the test suite
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -136,9 +133,7 @@ You can also build the documentation locally to preview your changes before subm
 
 1. `Install Pandoc <https://pandoc.org/installing.html>`_ for your OS
 
-2. Install the docs dependencies (into the virtual environment where you installed PyGambit): ::
-
-    pip install -r doc/requirements.txt
+2. Ensure `pygambit` is installed with doc dependencies: see :ref:`build-python`.
 
 3. Navigate to the Gambit repo and build the docs: ::
 
@@ -158,7 +153,7 @@ To submit a tutorial for inclusion in the Gambit documentation, please follow th
 
 3. Update `doc/pygambit.rst` to ensure the tutorial is listed in the docs at an appropriate location.
 
-4. *[Optional]* If your tutorial requires additional dependencies not already listed in `doc/requirements.txt`, please add them to the file.
+4. *[Optional]* If your tutorial requires additional dependencies not already listed in the ``doc`` list under ``[project.optional-dependencies]`` inside ``pyproject.toml``, please add them to the file.
 
 
 Recognising contributions

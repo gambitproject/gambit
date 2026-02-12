@@ -8,29 +8,24 @@ The tutorials are available as Jupyter notebooks and can be run interactively us
 
 .. tip:: Create a virtual environment with Python 3.10 or higher.
 
-1. To download the tutorials, open your OS's command prompt and clone the Gambit repository from GitHub, then navigate to the tutorials directory: ::
+1. To download the tutorials, open your OS's command prompt and clone the Gambit repository from GitHub: ::
 
     git clone https://github.com/gambitproject/gambit.git
 
-2. Install `pygambit`:
+2. Install `pygambit` with additional documentation dependencies:
 
    * To install the latest release from PyPI::
 
-       pip install pygambit
+       pip install pygambit[doc]
 
-   * Alternatively, to install the latest development version::
+   * Alternatively, to install the latest development version (from the top level of the gambit repo)::
 
-       pip install .
-
-3. Install other requirements (including `JupyterLab`) used by the tutorials ::
-
-    cd gambit/doc
-    pip install -r requirements.txt
+       pip install .[doc]
 
    .. warning::
        Windows users wishing to run the "Using Gambit with OpenSpiel" tutorial will need to install OpenSpiel manually; see the `OpenSpiel installation instructions <https://openspiel.readthedocs.io/en/latest/windows.html>`_ for details.
 
-4. Open `JupyterLab` and click on any of the tutorial notebooks (files ending in `.ipynb`) ::
+3. Open `JupyterLab` and click on any of the tutorial notebooks in ``doc/tutorials`` (files ending in `.ipynb`) ::
 
-    cd tutorials
+    cd doc/tutorials
     jupyter lab
