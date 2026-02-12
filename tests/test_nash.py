@@ -216,31 +216,6 @@ ENUMMIXED_RATIONAL_CASES = [
 ]
 
 
-def test_enummixed_double():
-    """Test calls of enumeration of mixed strategy equilibria for 2-player games,
-    floating-point."""
-    game = games.read_from_file("stripped_down_poker.efg")
-    result = gbt.nash.enummixed_solve(game, rational=False)
-    assert len(result.equilibria) == 1
-    # For floating-point results are not exact, so we skip testing exact values for now
-
-
-def test_lp_strategy_double():
-    """Test calls of LP for mixed strategy equilibria, floating-point."""
-    game = games.read_from_file("stripped_down_poker.efg")
-    result = gbt.nash.lp_solve(game, use_strategic=True, rational=False)
-    assert len(result.equilibria) == 1
-    # For floating-point results are not exact, so we skip testing exact values for now
-
-
-def test_lcp_strategy_double():
-    """Test calls of LCP for mixed strategy equilibria, floating-point."""
-    game = games.read_from_file("stripped_down_poker.efg")
-    result = gbt.nash.lcp_solve(game, use_strategic=True, rational=False)
-    assert len(result.equilibria) == 1
-    # For floating-point results are not exact, so we skip testing exact values for now
-
-
 LP_STRATEGY_RATIONAL_CASES = [
     pytest.param(
         EquilibriumTestCase(
@@ -464,6 +439,31 @@ def test_nash_strategy_solver(test_case: EquilibriumTestCase, subtests) -> None:
             for player in game.players:
                 for strategy in player.strategies:
                     assert abs(eq[strategy] - expected[strategy]) <= test_case.prob_tol
+
+
+def test_enummixed_double():
+    """Test calls of enumeration of mixed strategy equilibria for 2-player games,
+    floating-point."""
+    game = games.read_from_file("stripped_down_poker.efg")
+    result = gbt.nash.enummixed_solve(game, rational=False)
+    assert len(result.equilibria) == 1
+    # For floating-point results are not exact, so we skip testing exact values for now
+
+
+def test_lp_strategy_double():
+    """Test calls of LP for mixed strategy equilibria, floating-point."""
+    game = games.read_from_file("stripped_down_poker.efg")
+    result = gbt.nash.lp_solve(game, use_strategic=True, rational=False)
+    assert len(result.equilibria) == 1
+    # For floating-point results are not exact, so we skip testing exact values for now
+
+
+def test_lcp_strategy_double():
+    """Test calls of LCP for mixed strategy equilibria, floating-point."""
+    game = games.read_from_file("stripped_down_poker.efg")
+    result = gbt.nash.lcp_solve(game, use_strategic=True, rational=False)
+    assert len(result.equilibria) == 1
+    # For floating-point results are not exact, so we skip testing exact values for now
 
 
 ##################################################################################################
@@ -693,8 +693,6 @@ LP_BEHAVIOR_RATIONAL_CASES = [
     ),
 ]
 
-#################################################################################################
-#################################################################################################
 
 LCP_BEHAVIOR_RATIONAL_CASES = [
     # Zero-sum games (also tested with lp solve)
@@ -1441,7 +1439,7 @@ ENUMPOLY_AGENT_UNORDERED_CASES = [
 @pytest.mark.nash
 @pytest.mark.parametrize("test_case", ENUMPOLY_AGENT_UNORDERED_CASES, ids=lambda c: c.label)
 def test_nash_agent_solver_unordered(test_case: EquilibriumTestCase, subtests) -> None:
-    """Test calls of Nash solvers in EFGs using "agent" versions.
+    """Test calls of Nash solvers in EFGs using "agent" versions -- UNORDERED
 
     Subtests:
     - Agent max regret no more than `test_case.regret_tol`
