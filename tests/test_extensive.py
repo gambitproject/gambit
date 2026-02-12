@@ -437,8 +437,8 @@ def test_reduced_strategic_form(
             games.create_2x2_zero_sum_efg(variant="missing term outcome"),
         ),
         (
-            games.create_matching_pennies_efg(),
-            games.create_matching_pennies_efg(with_neutral_outcome=True)
+            games.create_2x2_zero_sum_efg(),
+            games.create_2x2_zero_sum_efg(variant="with nonterm outcome"),
         ),
     ],
 )

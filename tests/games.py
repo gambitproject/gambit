@@ -68,22 +68,6 @@ def create_2x2_zero_sum_efg(variant: None | str = None) -> gbt.Game:
     return g
 
 
-def create_matching_pennies_efg(with_neutral_outcome: bool = False) -> gbt.Game:
-    """
-    The version with_neutral_outcome adds a (0,0) payoff outcomes at a non-terminal node.
-    """
-    title = "Matching Pennies"
-    if with_neutral_outcome:
-        title += " with nonterminal neutral outcome"
-    A = np.array([[1, -1], [-1, 1]])
-    B = -A
-    g = create_efg_corresponding_to_bimatrix_game(A, B, title)
-    if with_neutral_outcome:
-        neutral = g.add_outcome([0, 0], label="neutral")
-        g.set_outcome(g.root.children[0], neutral)
-    return g
-
-
 def create_stripped_down_poker_efg(nonterm_outcomes: bool = False) -> gbt.Game:
     """
     Returns
