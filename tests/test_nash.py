@@ -551,8 +551,304 @@ LP_BEHAVIOR_RATIONAL_CASES = [
     ),
 ]
 
+#################################################################################################
+#################################################################################################
+
+LCP_BEHAVIOR_RATIONAL_CASES = [
+    # Zero-sum games (also tested with lp solve)
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.create_2x2_zero_sum_efg, variant=None
+            ),
+            solver=gbt.nash.lcp_solve,
+            expected=[
+                [
+                 [d("1/2", "1/2")],
+                 [d("1/2", "1/2")]
+                ]
+            ]
+        ),
+        marks=pytest.mark.nash_lcp_behavior,
+        id="test1_TODO",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.create_2x2_zero_sum_efg, variant="with neutral outcome"
+            ),
+            solver=gbt.nash.lcp_solve,
+            expected=[
+                [
+                 [d("1/2", "1/2")],
+                 [d("1/2", "1/2")]
+                ]
+            ]
+        ),
+        marks=pytest.mark.nash_lcp_behavior,
+        id="test1_TODO",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.create_2x2_zero_sum_efg, variant="missing term outcome"
+            ),
+            solver=gbt.nash.lcp_solve,
+            expected=[
+                [
+                 [d("1/2", "1/2")],
+                 [d("1/2", "1/2")]
+                ]
+            ]
+        ),
+        marks=pytest.mark.nash_lcp_behavior,
+        id="test1_TODO",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.create_stripped_down_poker_efg, nonterm_outcomes=True
+            ),
+            solver=gbt.nash.lcp_solve,
+            expected=[
+                [
+                 [d(1, 0), d("1/3", "2/3")],
+                 [d("2/3", "1/3")]
+                ]
+            ]
+        ),
+        marks=pytest.mark.nash_lcp_behavior,
+        id="test1_TODO",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.create_kuhn_poker_efg, nonterm_outcomes=False
+            ),
+            solver=gbt.nash.lcp_solve,
+            expected=[
+                [
+                 [d("2/3", "1/3"), d(1, 0), d(1, 0), d("1/3", "2/3"), d(0, 1), d("1/2", "1/2")],
+                 [d(1, 0), d("2/3", "1/3"), d(0, 1), d(0, 1), d("2/3", "1/3"), d(1, 0)]
+                ]
+            ]
+        ),
+        marks=pytest.mark.nash_lcp_behavior,
+        id="test1_TODO",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.create_kuhn_poker_efg, nonterm_outcomes=True
+            ),
+            solver=gbt.nash.lcp_solve,
+            expected=[
+                [
+                 [d("2/3", "1/3"), d(1, 0), d(1, 0), d("1/3", "2/3"), d(0, 1), d("1/2", "1/2")],
+                 [d(1, 0), d("2/3", "1/3"), d(0, 1), d(0, 1), d("2/3", "1/3"), d(1, 0)]
+                ]
+            ]
+        ),
+        marks=pytest.mark.nash_lcp_behavior,
+        id="test1_TODO",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.read_from_file,
+                "perfect_info_with_chance.efg"
+            ),
+            solver=gbt.nash.lcp_solve,
+            expected=[[[d(0, 1)],
+                       [d(0, 1), d(0, 1)]]],
+        ),
+        marks=pytest.mark.nash_lcp_behavior,
+        id="test1_TODO",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.read_from_file,
+                "two_player_perfect_info_win_lose.efg"
+            ),
+            solver=gbt.nash.lcp_solve,
+            expected=[[[d(0, 1), d(1, 0)],
+                       [d(0, 1), d("1/2", "1/2")]]],
+            # 1/2-1/2 for l/r is determined by MixedBehaviorProfile.UndefinedToCentroid()
+        ),
+        marks=pytest.mark.nash_lcp_behavior,
+        id="test1_TODO",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.read_from_file,
+                "two_player_perfect_info_win_lose_with_nonterm_outcomes.efg"
+            ),
+            solver=gbt.nash.lcp_solve,
+            expected=[[[d(0, 1), d(1, 0)],
+                       [d(0, 1), d("1/2", "1/2")]]],
+        ),
+        marks=pytest.mark.nash_lcp_behavior,
+        id="test1_TODO",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.read_from_file,
+                "2_player_chance.efg"
+            ),
+            solver=gbt.nash.lcp_solve,
+            expected=[[[d("1/3", 0, "2/3"), d("2/3", 0, "1/3")],
+                       [d("2/3", "1/3"), d("1/3", "2/3"), d("1/3", "2/3")]]],
+        ),
+        marks=pytest.mark.nash_lcp_behavior,
+        id="test1_TODO",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.read_from_file,
+                "2_player_chance_nonterm_outcomes_and_missing_term_outcomes.efg"
+            ),
+            solver=gbt.nash.lcp_solve,
+            expected=[[[d("1/3", 0, "2/3"), d("2/3", 0, "1/3")],
+                       [d("2/3", "1/3"), d("1/3", "2/3"), d("1/3", "2/3")]]],
+        ),
+        marks=pytest.mark.nash_lcp_behavior,
+        id="test1_TODO",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.read_from_file, "large_payoff_game.efg"
+            ),
+            solver=gbt.nash.lcp_solve,
+            expected=[[[d(1, 0), d(1, 0)], [d(0, 1),
+                      d("9999999999999999999/10000000000000000000", "1/10000000000000000000")]]],
+        ),
+        marks=pytest.mark.nash_lcp_behavior,
+        id="test1_TODO",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.read_from_file, "chance_in_middle.efg"
+            ),
+            solver=gbt.nash.lcp_solve,
+            expected=[[[d("3/11", "8/11"), d(1, 0), d(1, 0), d(1, 0), d(1, 0)],
+                       [d(1, 0), d("6/11", "5/11")]]],
+        ),
+        marks=pytest.mark.nash_lcp_behavior,
+        id="test1_TODO",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.read_from_file, "chance_in_middle_with_nonterm_outcomes.efg"
+            ),
+            solver=gbt.nash.lcp_solve,
+            expected=[[[d("3/11", "8/11"), d(1, 0), d(1, 0), d(1, 0), d(1, 0)],
+                       [d(1, 0), d("6/11", "5/11")]]],
+        ),
+        marks=pytest.mark.nash_lcp_behavior,
+        id="test1_TODO",
+    ),
+    # Non-zero-sum games
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.read_from_file, "reduction_both_players_payoff_ties_GTE_survey.efg"
+            ),
+            solver=gbt.nash.lcp_solve,
+            expected=[[[d(0, 0, 1, 0), d(1, 0)],
+                       [d(0, 1), d(0, 1), d(0, 1), d(0, 1)]]],
+        ),
+        marks=pytest.mark.nash_lcp_behavior,
+        id="test1_TODO",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=games.create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq,
+            solver=gbt.nash.lcp_solve,
+            expected=[[[d("1/30", "1/6", "3/10", "3/10", "1/6", "1/30")],
+                       [d("1/6", "1/30", "3/10", "3/10", "1/30", "1/6")]]],
+        ),
+        marks=pytest.mark.nash_lcp_behavior,
+        id="test1_TODO",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.create_EFG_for_nxn_bimatrix_coordination_game, 3
+            ),
+            solver=gbt.nash.lcp_solve,
+            expected=[[[d(0, 0, 1)], [d(0, 0, 1)]]],
+        ),
+        marks=pytest.mark.nash_lcp_behavior,
+        id="test1_TODO",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.create_EFG_for_nxn_bimatrix_coordination_game, 4
+            ),
+            solver=gbt.nash.lcp_solve,
+            expected=[[[d(0, 0, 0, 1)], [d(0, 0, 0, 1)]]],
+        ),
+        marks=pytest.mark.nash_lcp_behavior,
+        id="test1_TODO",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.read_from_file, "entry_accommodation.efg"
+            ),
+            solver=gbt.nash.lcp_solve,
+            expected=[[[d("2/3", "1/3"), d(1, 0), d(1, 0)], [d("2/3", "1/3")]]],
+        ),
+        marks=pytest.mark.nash_lcp_behavior,
+        id="test1_TODO",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.read_from_file, "entry_accommodation_with_nonterm_outcomes.efg"
+            ),
+            solver=gbt.nash.lcp_solve,
+            expected=[[[d("2/3", "1/3"), d(1, 0), d(1, 0)], [d("2/3", "1/3")]]],
+        ),
+        marks=pytest.mark.nash_lcp_behavior,
+        id="test1_TODO",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.read_from_file, "2_player_non_zero_sum.efg"
+            ),
+            solver=gbt.nash.lcp_solve,
+            expected=[[[d("1/3", "2/3")], [d("1/2", "1/2")]]],
+        ),
+        marks=pytest.mark.nash_lcp_behavior,
+        id="test1_TODO",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.read_from_file, "2_player_non_zero_sum_missing_term_outcome.efg"
+            ),
+            solver=gbt.nash.lcp_solve,
+            expected=[[[d("1/3", "2/3")], [d("1/2", "1/2")]]],
+        ),
+        marks=pytest.mark.nash_lcp_behavior,
+        id="test1_TODO",
+    ),
+]
+
+
 CASES = []
 CASES += LP_BEHAVIOR_RATIONAL_CASES
+CASES += LCP_BEHAVIOR_RATIONAL_CASES
 
 
 @pytest.mark.nash
@@ -1132,145 +1428,6 @@ def test_lcp_strategy_rational(
         assert eq.max_regret() == 0
         expected = game.mixed_strategy_profile(rational=True, data=exp)
         assert eq == expected
-
-
-@pytest.mark.nash
-@pytest.mark.nash_lcp_behavior
-@pytest.mark.parametrize(
-    "game,mixed_behav_prof_data",
-    [
-        # Zero-sum games (also tested with lp solve)
-        (games.create_2x2_zero_sum_efg(), [[["1/2", "1/2"]], [["1/2", "1/2"]]]),
-        (
-            games.create_2x2_zero_sum_efg(variant="missing term outcome"),
-            [[["1/2", "1/2"]], [["1/2", "1/2"]]],
-        ),
-        (games.create_matching_pennies_efg(), [[["1/2", "1/2"]], [["1/2", "1/2"]]]),
-        (
-            games.create_matching_pennies_efg(with_neutral_outcome=True),
-            [[["1/2", "1/2"]], [["1/2", "1/2"]]],
-        ),
-        (games.create_stripped_down_poker_efg(), [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]]),
-        (
-            games.create_stripped_down_poker_efg(nonterm_outcomes=True),
-            [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]],
-        ),
-        (
-            games.create_kuhn_poker_efg(),
-            [
-                [
-                    ["2/3", "1/3"],
-                    [1, 0],
-                    [1, 0],
-                    ["1/3", "2/3"],
-                    [0, 1],
-                    ["1/2", "1/2"],
-                ],
-                [[1, 0], ["2/3", "1/3"], [0, 1], [0, 1], ["2/3", "1/3"], [1, 0]],
-            ],
-        ),
-        (
-            games.create_kuhn_poker_efg(nonterm_outcomes=True),
-            [
-                [
-                    ["2/3", "1/3"],
-                    [1, 0],
-                    [1, 0],
-                    ["1/3", "2/3"],
-                    [0, 1],
-                    ["1/2", "1/2"],
-                ],
-                [[1, 0], ["2/3", "1/3"], [0, 1], [0, 1], ["2/3", "1/3"], [1, 0]],
-            ],
-        ),
-        # In the next test case:
-        # 1/2-1/2 for l/r is determined by MixedBehaviorProfile.UndefinedToCentroid()
-        (
-            games.read_from_file("perfect_info_with_chance.efg"),
-            [[[0, 1]], [[0, 1], [0, 1]]],
-        ),
-        (
-            games.read_from_file("two_player_perfect_info_win_lose.efg"),
-            [[[0, 1], [1, 0]], [[0, 1], ["1/2", "1/2"]]],
-        ),
-        (
-            games.read_from_file("two_player_perfect_info_win_lose_with_nonterm_outcomes.efg"),
-            [[[0, 1], [1, 0]], [[0, 1], ["1/2", "1/2"]]],
-        ),
-        (
-            games.read_from_file("2_player_chance.efg"),
-            [
-                [["1/3", 0, "2/3"], ["2/3", 0, "1/3"]],
-                [["2/3", "1/3"], ["1/3", "2/3"], ["1/3", "2/3"]],
-            ],
-        ),
-        (
-            games.read_from_file("2_player_chance_nonterm_outcomes_and_missing_term_outcomes.efg"),
-            [
-                [["1/3", 0, "2/3"], ["2/3", 0, "1/3"]],
-                [["2/3", "1/3"], ["1/3", "2/3"], ["1/3", "2/3"]],
-            ],
-        ),
-        (
-            games.read_from_file("large_payoff_game.efg"),
-            [
-                [[1, 0], [1, 0]],
-                [[0, 1], ["9999999999999999999/10000000000000000000", "1/10000000000000000000"]],
-            ],
-        ),
-        (
-            games.read_from_file("chance_in_middle.efg"),
-            [[["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]], [[1, 0], ["6/11", "5/11"]]],
-        ),
-        (
-            games.read_from_file("chance_in_middle_with_nonterm_outcomes.efg"),
-            [[["3/11", "8/11"], [1, 0], [1, 0], [1, 0], [1, 0]], [[1, 0], ["6/11", "5/11"]]],
-        ),
-        # Non-zero-sum games
-        (
-            games.read_from_file("reduction_both_players_payoff_ties_GTE_survey.efg"),
-            [[[0, 0, 1, 0], [1, 0]], [[0, 1], [0, 1], [0, 1], [0, 1]]],
-        ),
-        (
-            games.create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq(),
-            [
-                [["1/30", "1/6", "3/10", "3/10", "1/6", "1/30"]],
-                [["1/6", "1/30", "3/10", "3/10", "1/30", "1/6"]],
-            ],
-        ),
-        (games.create_EFG_for_nxn_bimatrix_coordination_game(3), [[[0, 0, 1]], [[0, 0, 1]]]),
-        (
-            games.create_EFG_for_nxn_bimatrix_coordination_game(4),
-            [[[0, 0, 0, 1]], [[0, 0, 0, 1]]],
-        ),
-        (
-            games.read_from_file("entry_accommodation.efg"),
-            [[["2/3", "1/3"], [1, 0], [1, 0]], [["2/3", "1/3"]]],
-        ),
-        (
-            games.read_from_file("entry_accommodation_with_nonterm_outcomes.efg"),
-            [[["2/3", "1/3"], [1, 0], [1, 0]], [["2/3", "1/3"]]],
-        ),
-        (games.read_from_file("2_player_non_zero_sum.efg"), [[["1/3", "2/3"]], [["1/2", "1/2"]]]),
-        (
-            games.read_from_file("2_player_non_zero_sum_missing_term_outcome.efg"),
-            [[["1/3", "2/3"]], [["1/2", "1/2"]]],
-        ),
-    ],
-)
-def test_lcp_behavior_rational(game: gbt.Game, mixed_behav_prof_data: list):
-    """Test calls of LCP for mixed behavior equilibria, rational precision.
-
-    using max_regret and agent_max_regret (internal consistency); and
-    comparison to a previously computed equilibrium using this function (regression test).
-    """
-    result = gbt.nash.lcp_solve(game, use_strategic=False, rational=True)
-    assert len(result.equilibria) == 1
-    eq = result.equilibria[0]
-    assert eq.max_regret() == 0
-    assert eq.agent_max_regret() == 0
-    expected = game.mixed_behavior_profile(rational=True, data=mixed_behav_prof_data)
-    assert eq == expected
 
 
 ##################################################################################################
