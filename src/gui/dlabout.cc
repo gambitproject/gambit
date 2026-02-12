@@ -63,8 +63,8 @@ static wxBitmap ScaleBitmapToMaxDIP(wxWindow *w, const wxBitmap &src, int maxDip
   return wxBitmap(img);
 }
 
-AboutDialog::AboutDialog(wxWindow *parent)
-  : wxDialog(parent, wxID_ANY, _("About Gambit"), wxDefaultPosition, wxDefaultSize,
+AboutDialog::AboutDialog(wxWindow *p_parent)
+  : wxDialog(p_parent, wxID_ANY, _("About Gambit"), wxDefaultPosition, wxDefaultSize,
              wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
 {
   const int M = FromDIP(20);
@@ -83,11 +83,11 @@ AboutDialog::AboutDialog(wxWindow *parent)
   auto *left = new wxPanel(panel);
   left->SetBackgroundColour(kBrandGreen);
 
-  const int railW = FromDIP(300); // tweak: 260–320 DIP
+  const int railW = FromDIP(120);
   left->SetMinSize(wxSize(railW, -1));
 
   wxBitmap raw(gambitbig_xpm);
-  wxBitmap scaled = ScaleBitmapToMaxDIP(panel, raw, 180); // tweak: 160–200 DIP
+  wxBitmap scaled = ScaleBitmapToMaxDIP(panel, raw, 120);
   auto *logo = new wxStaticBitmap(left, wxID_ANY, scaled);
 
   auto *leftSizer = new wxBoxSizer(wxVERTICAL);
@@ -104,34 +104,30 @@ AboutDialog::AboutDialog(wxWindow *parent)
   // Tagline (keep, but wrap a bit narrower to avoid dialog getting wide)
   auto *tagline =
       new wxStaticText(panel, wxID_ANY, _("The package for computation in game theory"));
+  {
+    wxFont f = tagline->GetFont();
+    f.SetWeight(wxFONTWEIGHT_BOLD);
+    f.SetPointSize(f.GetPointSize() + 2);
+    tagline->SetFont(f);
+  }
   tagline->Wrap(FromDIP(360));
   textCol->Add(tagline, 0, wxBOTTOM, S);
 
   // Version line
-  textCol->Add(new wxStaticText(panel, wxID_ANY, _("Version " VERSION)), 0, wxBOTTOM, S);
+  textCol->Add(new wxStaticText(panel, wxID_ANY, _("Gambit version " VERSION)), 0, wxBOTTOM, S);
 
-  // Built with line + link directly underneath (keeps width down)
-  textCol->Add(new wxStaticText(panel, wxID_ANY, _("Built with " wxVERSION_STRING)), 0, wxBOTTOM,
-               XS);
+  {
+    auto *copyRow = new wxBoxSizer(wxHORIZONTAL);
 
-  textCol->Add(new wxHyperlinkCtrl(panel, wxID_ANY, "wxwidgets.org", "https://www.wxwidgets.org"),
-               0, wxBOTTOM, M);
+    copyRow->Add(new wxStaticText(panel, wxID_ANY, _("Copyright © 1994–2026 ")), 0,
+                 wxALIGN_CENTER_VERTICAL);
 
-  // Copyright + project link grouped together
-  textCol->Add(new wxStaticText(panel, wxID_ANY, _("Copyright © 1994–2026 The Gambit Project")), 0,
-               wxBOTTOM, XS);
+    copyRow->Add(new wxHyperlinkCtrl(panel, wxID_ANY, _("The Gambit Project"),
+                                     "https://www.gambit-project.org"),
+                 0, wxALIGN_CENTER_VERTICAL);
 
-  textCol->Add(
-      new wxHyperlinkCtrl(panel, wxID_ANY, "gambit-project.org", "https://www.gambit-project.org"),
-      0, wxBOTTOM, S);
-
-  // If you still want maintainer/email, keep it—otherwise remove these two blocks.
-  textCol->Add(new wxStaticText(panel, wxID_ANY, _("Theodore Turocy, Project Maintainer")), 0,
-               wxBOTTOM, XS);
-
-  textCol->Add(
-      new wxHyperlinkCtrl(panel, wxID_ANY, "T.Turocy@uea.ac.uk", "mailto:T.Turocy@uea.ac.uk"), 0,
-      wxBOTTOM, M);
+    textCol->Add(copyRow, 0, wxEXPAND | wxBOTTOM, S);
+  }
 
   // License (single wrapped paragraph; narrower wrap helps overall width)
   auto *license = new wxStaticText(panel, wxID_ANY,
