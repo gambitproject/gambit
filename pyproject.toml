@@ -84,6 +84,7 @@ markers = [
     "nash_lp_strategy: tests of lp_solve in mixed strategies",
     "nash_lp_behavior: tests of lp_solve in mixed behaviors",
     "nash_logit_strategy: tests of logit_solve in mixed strategies",
+    "nash_logit_behavior: tests of logit_solve in behavior strategies",
     "nash_gnm_strategy: tests of gnm_solve in mixed strategies",
     "nash_ipa_strategy: tests of lpa_solve in mixed strategies",
     "nash: all tests of Nash equilibrium solvers",
