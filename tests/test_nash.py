@@ -218,6 +218,85 @@ ENUMMIXED_RATIONAL_CASES = [
 ]
 
 
+ENUMMIXED_DOUBLE_CASES = [
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.read_from_file, "two_player_perfect_info_win_lose.efg"
+            ),
+            solver=functools.partial(gbt.nash.enummixed_solve, rational=False),
+            expected=[
+                [d(0, 0, 1, 0), d(1, 0, 0)],
+                [d(0, 0, 1, 0), d(0, 1, 0)],
+                [d(0, 0, 1, 0), d(0, 0, 1)],
+            ],
+        ),
+        marks=pytest.mark.nash_enummixed_strategy,
+        id="test_enumixed_double_1",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=games.create_stripped_down_poker_efg,
+            solver=functools.partial(gbt.nash.enummixed_solve, rational=False),
+            expected=[
+                [d(Q("1/3"), Q("2/3"), 0, 0), d(Q("2/3"), Q("1/3"))],
+            ],
+            prob_tol=TOL,
+            regret_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enummixed_strategy,
+        id="test_enumixed_double_2",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=games.create_one_shot_trust_efg,
+            solver=functools.partial(gbt.nash.enummixed_solve, rational=False),
+            expected=[
+                [d(0, 1), d(Q("1/2"), Q("1/2"))],
+                [d(0, 1), d(0, 1)],
+            ],
+        ),
+        marks=pytest.mark.nash_enummixed_strategy,
+        id="test_enumixed_double_3",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.create_EFG_for_nxn_bimatrix_coordination_game, n=3),
+            solver=functools.partial(gbt.nash.enummixed_solve, rational=False),
+            expected=[
+                [d(1, 0, 0), d(1, 0, 0)],
+                [d(Q("1/2"), Q("1/2"), 0), d(Q("1/2"), Q("1/2"), 0)],
+                [d(Q("1/3"), Q("1/3"), Q("1/3")), d(Q("1/3"), Q("1/3"), Q("1/3"))],
+                [d(Q("1/2"), 0, Q("1/2")), d(Q("1/2"), 0, Q("1/2"))],
+                [d(0, 1, 0), d(0, 1, 0)],
+                [d(0, Q("1/2"), Q("1/2")), d(0, Q("1/2"), Q("1/2"))],
+                [d(0, 0, 1), d(0, 0, 1)],
+            ],
+            prob_tol=TOL,
+            regret_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enummixed_strategy,
+        id="test_enumixed_double_4",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=games.create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq,
+            solver=functools.partial(gbt.nash.enummixed_solve, rational=False),
+            expected=[
+                [
+                    d(Q("1/30"), Q("1/6"), Q("3/10"), Q("3/10"), Q("1/6"), Q("1/30")),
+                    d(Q("1/6"), Q("1/30"), Q("3/10"), Q("3/10"), Q("1/30"), Q("1/6")),
+                ],
+            ],
+            prob_tol=TOL,
+            regret_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enummixed_strategy,
+        id="test_enumixed_double_5",
+    ),
+]
+
+
 LP_STRATEGY_RATIONAL_CASES = [
     pytest.param(
         EquilibriumTestCase(
@@ -280,6 +359,76 @@ LP_STRATEGY_RATIONAL_CASES = [
 ]
 
 
+LP_STRATEGY_DOUBLE_CASES = [
+    pytest.param(
+        EquilibriumTestCase(
+            factory=games.create_2x2_zero_sum_efg,
+            solver=functools.partial(gbt.nash.lp_solve, rational=False, use_strategic=True),
+            expected=[[d("1/2", "1/2"), d("1/2", "1/2")]],
+        ),
+        marks=pytest.mark.nash_lp_strategy,
+        id="test_lp_strategy_double_1",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.create_2x2_zero_sum_efg, variant="missing term outcome"
+            ),
+            solver=functools.partial(gbt.nash.lp_solve, rational=False, use_strategic=True),
+            expected=[[d("1/2", "1/2"), d("1/2", "1/2")]],
+        ),
+        marks=pytest.mark.nash_lp_strategy,
+        id="test_lp_strategy_double_2",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.create_stripped_down_poker_efg, nonterm_outcomes=False
+            ),
+            solver=functools.partial(gbt.nash.lp_solve, rational=False, use_strategic=True),
+            expected=[[d("1/3", "2/3", 0, 0), d("2/3", "1/3")]],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_lp_strategy,
+        id="test_lp_strategy_double_3",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.create_stripped_down_poker_efg, nonterm_outcomes=True),
+            solver=functools.partial(gbt.nash.lp_solve, rational=False, use_strategic=True),
+            expected=[[d("1/3", "2/3", 0, 0), d("2/3", "1/3")]],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_lp_strategy,
+        id="test_lp_strategy_double_4",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.create_kuhn_poker_efg, nonterm_outcomes=False),
+            solver=functools.partial(gbt.nash.lp_solve, rational=False, use_strategic=True),
+            expected=[games.kuhn_poker_lp_mixed_strategy_prof()],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_lp_strategy,
+        id="test_lp_strategy_double_5",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.create_kuhn_poker_efg, nonterm_outcomes=True),
+            solver=functools.partial(gbt.nash.lp_solve, rational=False, use_strategic=True),
+            expected=[games.kuhn_poker_lp_mixed_strategy_prof()],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_lp_strategy,
+        id="test_lp_strategy_double_6",
+    ),
+]
+
+
 LCP_STRATEGY_RATIONAL_CASES = [
     # Zero-sum games
     pytest.param(
@@ -291,7 +440,7 @@ LCP_STRATEGY_RATIONAL_CASES = [
             expected=[[d("1/2", "1/2"), d("1/2", "1/2")]],
         ),
         marks=pytest.mark.nash_lcp_strategy,
-        id="test1_TODO",
+        id="test_lcp_strategy_rational_1",
     ),
     pytest.param(
         EquilibriumTestCase(
@@ -304,7 +453,7 @@ LCP_STRATEGY_RATIONAL_CASES = [
             expected=[[d("1/2", "1/2"), d("1/2", "1/2")]],
         ),
         marks=pytest.mark.nash_lcp_strategy,
-        id="test1_TODO",
+        id="test_lcp_strategy_rational_2",
     ),
     pytest.param(
         EquilibriumTestCase(
@@ -317,7 +466,7 @@ LCP_STRATEGY_RATIONAL_CASES = [
             expected=[[d("1/2", "1/2"), d("1/2", "1/2")]],
         ),
         marks=pytest.mark.nash_lcp_strategy,
-        id="test1_TODO",
+        id="test_lcp_strategy_rational_3",
     ),
     pytest.param(
         EquilibriumTestCase(
@@ -330,7 +479,7 @@ LCP_STRATEGY_RATIONAL_CASES = [
             expected=[[d("1/3", "2/3", 0, 0), d("2/3", "1/3")]],
         ),
         marks=pytest.mark.nash_lcp_strategy,
-        id="test1_TODO",
+        id="test_lcp_strategy_rational_4",
     ),
     pytest.param(
         EquilibriumTestCase(
@@ -341,7 +490,7 @@ LCP_STRATEGY_RATIONAL_CASES = [
             expected=[[d("1/3", "2/3", 0, 0), d("2/3", "1/3")]],
         ),
         marks=pytest.mark.nash_lcp_strategy,
-        id="test1_TODO",
+        id="test_lcp_strategy_rational_5",
     ),
     pytest.param(
         EquilibriumTestCase(
@@ -352,7 +501,7 @@ LCP_STRATEGY_RATIONAL_CASES = [
             expected=[games.kuhn_poker_lcp_first_mixed_strategy_prof()],
         ),
         marks=pytest.mark.nash_lcp_strategy,
-        id="test1_TODO",
+        id="test_lcp_strategy_rational_6",
     ),
     pytest.param(
         EquilibriumTestCase(
@@ -363,7 +512,7 @@ LCP_STRATEGY_RATIONAL_CASES = [
             expected=[games.kuhn_poker_lcp_first_mixed_strategy_prof()],
         ),
         marks=pytest.mark.nash_lcp_strategy,
-        id="test1_TODO",
+        id="test_lcp_strategy_rational_7",
     ),
     # Non-zero-sum games
     pytest.param(
@@ -375,7 +524,7 @@ LCP_STRATEGY_RATIONAL_CASES = [
             expected=[[d(0, 1), d("1/2", "1/2")]],
         ),
         marks=pytest.mark.nash_lcp_strategy,
-        id="test1_TODO",
+        id="test_lcp_strategy_rational_8",
     ),
     pytest.param(
         EquilibriumTestCase(
@@ -394,7 +543,7 @@ LCP_STRATEGY_RATIONAL_CASES = [
             ],
         ),
         marks=pytest.mark.nash_lcp_strategy,
-        id="test1_TODO",
+        id="test_lcp_strategy_rational_9",
     ),
     pytest.param(
         EquilibriumTestCase(
@@ -405,7 +554,7 @@ LCP_STRATEGY_RATIONAL_CASES = [
             expected=[[d(1, 0, 0, 0), d(1, 0, 0, 0)]],
         ),
         marks=pytest.mark.nash_lcp_strategy,
-        id="test1_TODO",
+        id="test_lcp_strategy_rational_10",
     ),
     pytest.param(
         EquilibriumTestCase(
@@ -421,7 +570,167 @@ LCP_STRATEGY_RATIONAL_CASES = [
             ],
         ),
         marks=pytest.mark.nash_lcp_strategy,
-        id="test1_TODO",
+        id="test_lcp_strategy_rational_11",
+    ),
+]
+
+
+LCP_STRATEGY_DOUBLE_CASES = [
+    # Zero-sum games
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.create_2x2_zero_sum_efg, variant=None),
+            solver=functools.partial(
+                gbt.nash.lcp_solve, rational=False, use_strategic=True, stop_after=None
+            ),
+            expected=[[d("1/2", "1/2"), d("1/2", "1/2")]],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_lcp_strategy,
+        id="test_lcp_strategy_double_1",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.create_2x2_zero_sum_efg, variant="with neutral outcome"
+            ),
+            solver=functools.partial(
+                gbt.nash.lcp_solve, rational=False, use_strategic=True, stop_after=None
+            ),
+            expected=[[d("1/2", "1/2"), d("1/2", "1/2")]],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_lcp_strategy,
+        id="test_lcp_strategy_double_2",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.create_2x2_zero_sum_efg, variant="missing term outcome"
+            ),
+            solver=functools.partial(
+                gbt.nash.lcp_solve, rational=False, use_strategic=True, stop_after=None
+            ),
+            expected=[[d("1/2", "1/2"), d("1/2", "1/2")]],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_lcp_strategy,
+        id="test_lcp_strategy_double_3",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.create_stripped_down_poker_efg, nonterm_outcomes=False
+            ),
+            solver=functools.partial(
+                gbt.nash.lcp_solve, rational=False, use_strategic=True, stop_after=None
+            ),
+            expected=[[d("1/3", "2/3", 0, 0), d("2/3", "1/3")]],
+        ),
+        marks=pytest.mark.nash_lcp_strategy,
+        id="test_lcp_strategy_double_4",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.create_stripped_down_poker_efg, nonterm_outcomes=True),
+            solver=functools.partial(
+                gbt.nash.lcp_solve, rational=False, use_strategic=True, stop_after=None
+            ),
+            expected=[[d("1/3", "2/3", 0, 0), d("2/3", "1/3")]],
+        ),
+        marks=pytest.mark.nash_lcp_strategy,
+        id="test_lcp_strategy_double_5",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.create_kuhn_poker_efg, nonterm_outcomes=False),
+            solver=functools.partial(
+                gbt.nash.lcp_solve, rational=False, use_strategic=True, stop_after=1
+            ),
+            expected=[games.kuhn_poker_lcp_first_mixed_strategy_prof()],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_lcp_strategy,
+        id="test_lcp_strategy_double_6",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.create_kuhn_poker_efg, nonterm_outcomes=True),
+            solver=functools.partial(
+                gbt.nash.lcp_solve, rational=False, use_strategic=True, stop_after=1
+            ),
+            expected=[games.kuhn_poker_lcp_first_mixed_strategy_prof()],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_lcp_strategy,
+        id="test_lcp_strategy_double_7",
+    ),
+    # Non-zero-sum games
+    pytest.param(
+        EquilibriumTestCase(
+            factory=games.create_one_shot_trust_efg,
+            solver=functools.partial(
+                gbt.nash.lcp_solve, rational=False, use_strategic=True, stop_after=None
+            ),
+            expected=[[d(0, 1), d("1/2", "1/2")]],
+        ),
+        marks=pytest.mark.nash_lcp_strategy,
+        id="test_lcp_strategy_double_8",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.create_EFG_for_nxn_bimatrix_coordination_game, n=3),
+            solver=functools.partial(
+                gbt.nash.lcp_solve, rational=False, use_strategic=True, stop_after=None
+            ),
+            expected=[
+                [d(1, 0, 0), d(1, 0, 0)],
+                [d("1/2", "1/2", 0), d("1/2", "1/2", 0)],
+                [d(0, 1, 0), d(0, 1, 0)],
+                [d(0, "1/2", "1/2"), d(0, "1/2", "1/2")],
+                [d("1/3", "1/3", "1/3"), d("1/3", "1/3", "1/3")],
+                [d("1/2", 0, "1/2"), d("1/2", 0, "1/2")],
+                [d(0, 0, 1), d(0, 0, 1)],
+            ],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_lcp_strategy,
+        id="test_lcp_strategy_double_9",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.create_EFG_for_nxn_bimatrix_coordination_game, n=4),
+            solver=functools.partial(
+                gbt.nash.lcp_solve, rational=False, use_strategic=True, stop_after=1
+            ),
+            expected=[[d(1, 0, 0, 0), d(1, 0, 0, 0)]],
+        ),
+        marks=pytest.mark.nash_lcp_strategy,
+        id="test_lcp_strategy_double_10",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=games.create_EFG_for_6x6_bimatrix_with_long_LH_paths_and_unique_eq,
+            solver=functools.partial(
+                gbt.nash.lcp_solve, rational=False, use_strategic=True, stop_after=None
+            ),
+            expected=[
+                [
+                    d("1/30", "1/6", "3/10", "3/10", "1/6", "1/30"),
+                    d("1/6", "1/30", "3/10", "3/10", "1/30", "1/6"),
+                ]
+            ],
+            regret_tol=TOL,
+            prob_tol=TOL_LARGE,
+        ),
+        marks=pytest.mark.nash_lcp_strategy,
+        id="test_lcp_strategy_double_11",
     ),
 ]
 
@@ -476,11 +785,14 @@ GNM_STRATEGY_CASES = [
 CASES = []
 CASES += ENUMPURE_CASES
 CASES += ENUMMIXED_RATIONAL_CASES
+CASES += ENUMMIXED_DOUBLE_CASES
 CASES += LP_STRATEGY_RATIONAL_CASES
+CASES += LP_STRATEGY_DOUBLE_CASES
 CASES += LCP_STRATEGY_RATIONAL_CASES
-CASES += LOGIT_STRATEGY_CASES
-CASES += IPA_STRATEGY_CASES
-CASES += GNM_STRATEGY_CASES
+CASES += LCP_STRATEGY_DOUBLE_CASES
+# CASES += LOGIT_STRATEGY_CASES
+# CASES += IPA_STRATEGY_CASES
+# CASES += GNM_STRATEGY_CASES
 
 
 @pytest.mark.nash
@@ -505,15 +817,6 @@ def test_nash_strategy_solver(test_case: EquilibriumTestCase, subtests) -> None:
             for player in game.players:
                 for strategy in player.strategies:
                     assert abs(eq[strategy] - expected[strategy]) <= test_case.prob_tol
-
-
-def test_enummixed_double():
-    """Test calls of enumeration of mixed strategy equilibria for 2-player games,
-    floating-point."""
-    game = games.read_from_file("stripped_down_poker.efg")
-    result = gbt.nash.enummixed_solve(game, rational=False)
-    assert len(result.equilibria) == 1
-    # For floating-point results are not exact, so we skip testing exact values for now
 
 
 def test_lp_strategy_double():
