@@ -5,6 +5,8 @@ import pandas as pd
 
 import pygambit as gbt
 
+from .families import family_games
+
 # Use the full string path to the virtual package we created
 _CATALOG_RESOURCE = files(__name__)
 
@@ -37,7 +39,7 @@ def games() -> pd.DataFrame:
     """
     records: list[dict[str, str]] = []
 
-    # Using rglob("*") to find files in all subdirectories
+    # Add all the games stored as EFG/NFG files
     for resource_path in sorted(_CATALOG_RESOURCE.rglob("*")):
         reader = READERS.get(resource_path.suffix)
 
@@ -55,5 +57,14 @@ def games() -> pd.DataFrame:
                         "Title": game.title,
                     }
                 )
+
+    # Add all the games from families
+    for slug, game in family_games().items():
+        records.append(
+            {
+                "Game": slug,
+                "Title": game.title,
+            }
+        )
 
     return pd.DataFrame.from_records(records, columns=["Game", "Title"])
