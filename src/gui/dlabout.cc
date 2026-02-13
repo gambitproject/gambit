@@ -76,7 +76,6 @@ AboutDialog::AboutDialog(wxWindow *p_parent)
 
   auto *panel = new wxPanel(this);
 
-  auto *root = new wxBoxSizer(wxVERTICAL);
   auto *top = new wxBoxSizer(wxHORIZONTAL);
 
   // --- Left brand rail (fixed width, centered logo) ---
@@ -138,15 +137,16 @@ AboutDialog::AboutDialog(wxWindow *p_parent)
 
   top->Add(textCol, 1, wxEXPAND);
 
-  root->Add(top, 1, wxALL | wxEXPAND, M);
+  auto *panelSizer = new wxBoxSizer(wxVERTICAL);
+  panelSizer->Add(top, 1, wxALL | wxEXPAND, M);
+  panel->SetSizer(panelSizer);
 
-  root->Add(CreateStdDialogButtonSizer(wxOK), 0, wxLEFT | wxRIGHT | wxBOTTOM | wxALIGN_RIGHT, M);
+  auto *dialogSizer = new wxBoxSizer(wxVERTICAL);
+  dialogSizer->Add(panel, 1, wxEXPAND);
+  dialogSizer->Add(CreateStdDialogButtonSizer(wxOK), 0,
+                   wxLEFT | wxRIGHT | wxBOTTOM | wxALIGN_RIGHT, M);
 
-  panel->SetSizer(root);
-
-  auto *dlgSizer = new wxBoxSizer(wxVERTICAL);
-  dlgSizer->Add(panel, 1, wxEXPAND);
-  SetSizerAndFit(dlgSizer);
+  SetSizerAndFit(dialogSizer);
   CentreOnParent();
 }
 
