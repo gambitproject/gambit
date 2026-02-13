@@ -19,6 +19,7 @@ from pygambit import Rational as Q
 from . import games
 
 TOL = 1e-13  # tolerance for floating point assertions
+TOL_LARGE = 1e-3  # larger tolerance for floating point assertions
 
 
 def d(*probs) -> tuple:
@@ -1427,10 +1428,39 @@ ENUMPURE_AGENT_CASES = [
     ),
 ]
 
+LIAP_AGENT_CASES = [
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.read_from_file, "two_player_perfect_info_win_lose.efg"
+            ),
+            solver=functools.partial(gbt.nash.liap_agent_solve),  # Need to pass the start arg
+            expected=[[[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]]],
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test1_TODO",
+    ),
+]
 
 AGENT_CASES = []
 AGENT_CASES += ENUMPURE_AGENT_CASES
 # TO ADD: pygambit.nash.liap_agent_solve
+
+
+def test_liap_agent():
+    """Test calls of agent liap for mixed behavior equilibria."""
+
+    game = games.read_from_file("stripped_down_poker.efg")
+    result = gbt.nash.liap_agent_solve(game.mixed_behavior_profile())
+    assert len(result.equilibria) == 1
+    eq = result.equilibria[0]
+
+    exp = [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]]
+    exp = game.mixed_behavior_profile(exp, rational=True)
+
+    for player in game.players:
+        for action in player.actions:
+            assert abs(eq[action] - exp[action]) <= TOL_LARGE
 
 
 @pytest.mark.nash
@@ -1461,21 +1491,21 @@ def test_nash_agent_solver(test_case: EquilibriumTestCase, subtests) -> None:
 
 
 ##################################################################################################
-# The following methods are are tested below but not beyond that they run:
-# liap, simpdiv, ipa, gnm, logit
+# TODO:
 ##################################################################################################
+
+
+def test_logit_solve_lambda():
+    game = games.read_from_file("const_sum_game.nfg")
+    assert (
+        len(gbt.qre.logit_solve_lambda(game=game, lam=[1, 2, 3], first_step=0.2, max_accel=1)) > 0
+    )
 
 
 def test_liap_strategy():
     """Test calls of liap for mixed strategy equilibria."""
     game = games.read_from_file("stripped_down_poker.efg")
     _ = gbt.nash.liap_solve(game.mixed_strategy_profile())
-
-
-def test_liap_agent():
-    """Test calls of agent liap for mixed behavior equilibria."""
-    game = games.read_from_file("stripped_down_poker.efg")
-    _ = gbt.nash.liap_agent_solve(game.mixed_behavior_profile())
 
 
 def test_simpdiv_strategy():
@@ -1513,6 +1543,18 @@ def test_logit_behavior():
     assert len(result.equilibria) == 1
 
 
+def test_logit_solve_branch():
+    game = games.read_from_file("const_sum_game.nfg")
+    assert (
+        len(gbt.qre.logit_solve_branch(game=game, maxregret=0.2, first_step=0.2, max_accel=1)) > 0
+    )
+
+
+##################################################################################################
+# The remaining tests check for raising errors
+##################################################################################################
+
+
 def test_logit_solve_branch_error_with_invalid_maxregret():
     game = games.read_from_file("const_sum_game.nfg")
     with pytest.raises(ValueError, match="must be positive"):
@@ -1537,13 +1579,6 @@ def test_logit_solve_branch_error_with_invalid_max_accel():
         gbt.qre.logit_solve_branch(game=game, max_accel=0.1)
 
 
-def test_logit_solve_branch():
-    game = games.read_from_file("const_sum_game.nfg")
-    assert (
-        len(gbt.qre.logit_solve_branch(game=game, maxregret=0.2, first_step=0.2, max_accel=1)) > 0
-    )
-
-
 def test_logit_solve_lambda_error_with_invalid_first_step():
     game = games.read_from_file("const_sum_game.nfg")
     with pytest.raises(ValueError, match="must be positive"):
@@ -1558,10 +1593,3 @@ def test_logit_solve_lambda_error_with_invalid_max_accel():
         gbt.qre.logit_solve_lambda(game=game, lam=[1, 2, 3], max_accel=0)
     with pytest.raises(ValueError, match="at least 1.0"):
         gbt.qre.logit_solve_lambda(game=game, lam=[1, 2, 3], max_accel=0.1)
-
-
-def test_logit_solve_lambda():
-    game = games.read_from_file("const_sum_game.nfg")
-    assert (
-        len(gbt.qre.logit_solve_lambda(game=game, lam=[1, 2, 3], first_step=0.2, max_accel=1)) > 0
-    )
