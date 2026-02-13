@@ -20,6 +20,7 @@ from . import games
 
 TOL = 1e-13  # tolerance for floating point assertions
 TOL_LARGE = 1e-3  # larger tolerance for floating point assertions
+TOL_HUGE = 1e-2  # huge tolerance for floating point assertions
 
 
 def d(*probs) -> tuple:
@@ -425,11 +426,61 @@ LCP_STRATEGY_RATIONAL_CASES = [
 ]
 
 
+LOGIT_STRATEGY_CASES = [
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, "stripped_down_poker.efg"),
+            solver=functools.partial(gbt.nash.logit_solve, use_strategic=True),
+            expected=[[d("0.334", "0.667", 0, 0), d("0.667", "0.3324")]],
+            # expected=[[d("1/3", "2/3", 0, 0), d("2/3", "1/3")]],
+            # [[[0.3342446335455467, 0.6657553666093431,
+            # 1.2005988475699076e-296, 2.3913775890307135e-296],
+            # [0.6675673092925399, 0.33243269085235666]]]
+            prob_tol=TOL_HUGE,
+            regret_tol=TOL_LARGE,
+        ),
+        marks=pytest.mark.nash_logit_strategy,
+        id="test1_TODO",
+    ),
+]
+
+
+IPA_STRATEGY_CASES = [
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, "stripped_down_poker.efg"),
+            solver=gbt.nash.ipa_solve,
+            expected=[[d("1/3", "2/3", 0, 0), d("2/3", "1/3")]],
+        ),
+        marks=pytest.mark.nash_ipa_strategy,
+        id="test1_TODO",
+    ),
+]
+
+
+GNM_STRATEGY_CASES = [
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, "stripped_down_poker.efg"),
+            solver=gbt.nash.gnm_solve,
+            expected=[[d("1/3", "2/3", 0, 0), d("2/3", "1/3")]],
+            prob_tol=TOL_LARGE,
+            regret_tol=TOL_LARGE,
+        ),
+        marks=pytest.mark.nash_gnm_strategy,
+        id="test1_TODO",
+    ),
+]
+
+
 CASES = []
 CASES += ENUMPURE_CASES
 CASES += ENUMMIXED_RATIONAL_CASES
 CASES += LP_STRATEGY_RATIONAL_CASES
 CASES += LCP_STRATEGY_RATIONAL_CASES
+CASES += LOGIT_STRATEGY_CASES
+CASES += IPA_STRATEGY_CASES
+CASES += GNM_STRATEGY_CASES
 
 
 @pytest.mark.nash
@@ -1447,22 +1498,6 @@ AGENT_CASES += ENUMPURE_AGENT_CASES
 # TO ADD: pygambit.nash.liap_agent_solve
 
 
-def test_liap_agent():
-    """Test calls of agent liap for mixed behavior equilibria."""
-
-    game = games.read_from_file("stripped_down_poker.efg")
-    result = gbt.nash.liap_agent_solve(game.mixed_behavior_profile())
-    assert len(result.equilibria) == 1
-    eq = result.equilibria[0]
-
-    exp = [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]]
-    exp = game.mixed_behavior_profile(exp, rational=True)
-
-    for player in game.players:
-        for action in player.actions:
-            assert abs(eq[action] - exp[action]) <= TOL_LARGE
-
-
 @pytest.mark.nash
 @pytest.mark.parametrize("test_case", AGENT_CASES, ids=lambda c: c.label)
 def test_nash_agent_solver(test_case: EquilibriumTestCase, subtests) -> None:
@@ -1495,17 +1530,48 @@ def test_nash_agent_solver(test_case: EquilibriumTestCase, subtests) -> None:
 ##################################################################################################
 
 
-def test_logit_solve_lambda():
-    game = games.read_from_file("const_sum_game.nfg")
-    assert (
-        len(gbt.qre.logit_solve_lambda(game=game, lam=[1, 2, 3], first_step=0.2, max_accel=1)) > 0
-    )
+def test_logit_behavior():
+    """Test calls of logit for behavior equilibria."""
+    game = games.read_from_file("stripped_down_poker.efg")
+    result = gbt.nash.logit_solve(game, use_strategic=False)
+    assert len(result.equilibria) == 1
+
+    # [[[[1.0, 0.0], [0.33333338649882943, 0.6666666135011706]],
+    # [[0.6666667065407631, 0.3333332934592369]]]]
+
+
+##################################################################################################
+# TODO:
+# The below all take a start argument that depends on the game, which doesn't immediately
+# work with our current implementation of EquilibriumTestClass
+##################################################################################################
+
+
+def test_liap_agent():
+    """Test calls of agent liap for mixed behavior equilibria."""
+
+    game = games.read_from_file("stripped_down_poker.efg")
+    result = gbt.nash.liap_agent_solve(game.mixed_behavior_profile())
+    assert len(result.equilibria) == 1
+    eq = result.equilibria[0]
+
+    exp = [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]]
+    exp = game.mixed_behavior_profile(exp, rational=True)
+
+    for player in game.players:
+        for action in player.actions:
+            assert abs(eq[action] - exp[action]) <= TOL_LARGE
 
 
 def test_liap_strategy():
     """Test calls of liap for mixed strategy equilibria."""
     game = games.read_from_file("stripped_down_poker.efg")
     _ = gbt.nash.liap_solve(game.mixed_strategy_profile())
+
+    # NashComputationResult(method='liap', rational=False, use_strategic=True, equilibria=[],
+    # parameters={'start': [[0.25, 0.25, 0.25, 0.25], [0.5, 0.5]],
+    # 'maxregret': 0.0001, 'maxiter': 1000})
+    # Nothing found!
 
 
 def test_simpdiv_strategy():
@@ -1514,33 +1580,27 @@ def test_simpdiv_strategy():
     result = gbt.nash.simpdiv_solve(game.mixed_strategy_profile(rational=True))
     assert len(result.equilibria) == 1
 
-
-def test_ipa_strategy():
-    """Test calls of IPA for mixed strategy equilibria."""
-    game = games.read_from_file("stripped_down_poker.efg")
-    result = gbt.nash.ipa_solve(game)
-    assert len(result.equilibria) == 1
+    # [[[Rational(174763, 524288), Rational(349525, 524288), Rational(0, 1), Rational(0, 1)],
+    # [Rational(699051, 1048576), Rational(349525, 1048576)]]]
 
 
-def test_gnm_strategy():
-    """Test calls of GNM for mixed strategy equilibria."""
-    game = games.read_from_file("stripped_down_poker.efg")
-    result = gbt.nash.gnm_solve(game)
-    assert len(result.equilibria) == 1
+##################################################################################################
+# QRE solvers
+##################################################################################################
 
 
-def test_logit_strategy():
-    """Test calls of logit for mixed strategy equilibria."""
-    game = games.read_from_file("stripped_down_poker.efg")
-    result = gbt.nash.logit_solve(game, use_strategic=True)
-    assert len(result.equilibria) == 1
-
-
-def test_logit_behavior():
-    """Test calls of logit for behavior equilibria."""
-    game = games.read_from_file("stripped_down_poker.efg")
-    result = gbt.nash.logit_solve(game, use_strategic=False)
-    assert len(result.equilibria) == 1
+# Needs a new solver tester
+def test_logit_solve_lambda():
+    game = games.read_from_file("const_sum_game.nfg")
+    assert (
+        len(gbt.qre.logit_solve_lambda(game=game, lam=[1, 2, 3], first_step=0.2, max_accel=1)) > 0
+    )
+    # [LogitQREMixedStrategyProfile(lam=1.000000,profile=[[0.6429793593274791, 0.3570206406725209],
+    # [0.588319024552166, 0.41168097544783405]]),
+    # LogitQREMixedStrategyProfile(lam=2.000000,profile=[[0.7726766071376159, 0.2273233928623842],
+    # [0.6117434791999494, 0.38825652080005063]]),
+    # LogitQREMixedStrategyProfile(lam=3.000000,profile=[[0.859536709259968, 0.14046329074003203],
+    # [0.6038157860344706, 0.39618421396552944]])]
 
 
 def test_logit_solve_branch():
@@ -1548,6 +1608,8 @@ def test_logit_solve_branch():
     assert (
         len(gbt.qre.logit_solve_branch(game=game, maxregret=0.2, first_step=0.2, max_accel=1)) > 0
     )
+
+    # [LogitQREMixedStrategyProfile(lam=0.000000,profile=[[0.5, 0.5], [0.5, 0.5]])]
 
 
 ##################################################################################################
