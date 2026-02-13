@@ -30,6 +30,12 @@ def test_catalog_load_subdir_slug():
     assert isinstance(g, gbt.Game)
 
 
+def test_catalog_load_family_game():
+    """Test loading a game generated from code with a game family func."""
+    g = gbt.catalog.load("one_shot_trust")
+    assert isinstance(g, gbt.Game)
+
+
 def test_catalog_games():
     """Test games() function returns df of game slugs and titles"""
     all_games = gbt.catalog.games()

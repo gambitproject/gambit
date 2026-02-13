@@ -22,15 +22,20 @@ def load(slug: str) -> gbt.Game:
     """
     slug = str(Path(slug)).replace("\\", "/")
 
+    # Try to load from file
     for suffix, reader in READERS.items():
         resource_path = _CATALOG_RESOURCE / f"{slug}{suffix}"
-
         if resource_path.is_file():
-            # as_file ensures we have a real filesystem path for the reader
             with as_file(resource_path) as path:
                 return reader(str(path))
 
-    raise FileNotFoundError(f"No catalog entry called {slug}.nfg or {slug}.efg")
+    # Try loading from family games
+    fg = family_games()
+    if slug in fg:
+        return fg[slug]
+
+    # Raise error if game does not exist
+    raise FileNotFoundError(f"No catalog entry called {slug}")
 
 
 def games() -> pd.DataFrame:
