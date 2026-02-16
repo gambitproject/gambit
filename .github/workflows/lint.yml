@@ -13,7 +13,7 @@ jobs:
       - name: Run clang-format style check for C/C++
         uses: jidicula/clang-format-action@v4.16.0
         with:
-          clang-format-version: '18'
+          clang-format-version: '17'
           check-path: 'src'
           include-regex: '^.*\.((((c|C)(c|pp|xx|\+\+)?$)|((h|H)h?(pp|xx|\+\+)?$))|(imp))$'
 
