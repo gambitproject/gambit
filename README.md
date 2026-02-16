@@ -13,7 +13,7 @@
 - See our [documentation](https://gambitproject.readthedocs.io/)
 - Check our [project website](https://www.gambit-project.org/)
 
-Gambit provides:
+**Gambit** provides:
 
 - Structures to represent games in extensive and strategic form
 - Methods for building and modifying games
