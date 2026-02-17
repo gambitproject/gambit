@@ -49,12 +49,12 @@ Code new games & add game families
 
 1. **Add the game code:**
 
-   Open `catalog/families.py` and create a new function, or modify an existing one. Ensure your function returns a ``Game`` object.
+   Open `catalog/__init__.py` and create a new function, or modify an existing one. Ensure your function returns a ``Game`` object.
    You may wish to vary the game title and/or description based on the chosen parameters.
 
 2. **Update the catalog:**
 
-   Update the dictionary returned by ``family_games()`` in `catalog/families.py` with all variants of your game(s) you want in the catalog.
+   Update the dictionary returned by ``family_games()`` in `catalog/__init__.py` with all variants of your game(s) you want in the catalog.
    Ensure each entry has unique game slug as key (this will be used by ``pygambit.catalog.load('slug')``), and returns a call of the function with specific parameters.
 
 3. **Submit a pull request to GitHub with all changes.**
