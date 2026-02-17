@@ -35,10 +35,21 @@ class EquilibriumTestCase:
     """Summarising the data relevant for a test fixture of a call to an equilibrium solver."""
 
     factory: typing.Callable[[], gbt.Game]
-    solver: typing.Callable[[gbt.Game], gbt.nash.NashComputationResult]
+    solver: typing.Callable[[gbt.Game], gbt.qre.LogitQREMixedStrategyFitResult]
     expected: list
     regret_tol: float | gbt.Rational = Q(0)
     prob_tol: float | gbt.Rational = Q(0)
+
+
+@dataclasses.dataclass
+class QREquilibriumTestCase:
+    """Summarising the data relevant for a test fixture of a call to an QRE solver."""
+
+    factory: typing.Callable[[], gbt.Game]
+    solver: typing.Callable[[gbt.Game], gbt.nash.NashComputationResult]
+    expected: list
+    prob_tol: float
+    lam_tol: float
 
 
 ##################################################################################################
@@ -2410,27 +2421,72 @@ def test_simpdiv_strategy():
 ##################################################################################################
 
 
-# Needs a new solver tester
-def test_logit_solve_lambda():
-    game = games.read_from_file("const_sum_game.nfg")
-    assert (
-        len(gbt.qre.logit_solve_lambda(game=game, lam=[1, 2, 3], first_step=0.2, max_accel=1)) > 0
-    )
-    # [LogitQREMixedStrategyProfile(lam=1.000000,profile=[[0.6429793593274791, 0.3570206406725209],
-    # [0.588319024552166, 0.41168097544783405]]),
-    # LogitQREMixedStrategyProfile(lam=2.000000,profile=[[0.7726766071376159, 0.2273233928623842],
-    # [0.6117434791999494, 0.38825652080005063]]),
-    # LogitQREMixedStrategyProfile(lam=3.000000,profile=[[0.859536709259968, 0.14046329074003203],
-    # [0.6038157860344706, 0.39618421396552944]])]
+LOGIT_BRANCH_CASES = [
+    pytest.param(
+        QREquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, "const_sum_game.nfg"),
+            solver=functools.partial(
+                gbt.qre.logit_solve_branch, maxregret=0.2, first_step=0.2, max_accel=1
+            ),
+            expected=[{"idx": 0, "lam": 0, "profile": [d(0.5, 0.5), d(0.5, 0.5)]}],
+            prob_tol=TOL_LARGE,
+            lam_tol=TOL_LARGE,
+        ),
+        marks=pytest.mark.qre_logit,
+        id="test_logit_branch_1",
+    ),
+]
 
 
-def test_logit_solve_branch():
-    game = games.read_from_file("const_sum_game.nfg")
-    assert (
-        len(gbt.qre.logit_solve_branch(game=game, maxregret=0.2, first_step=0.2, max_accel=1)) > 0
-    )
+LOGIT_LAMBDA_CASES = [
+    pytest.param(
+        QREquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, "const_sum_game.nfg"),
+            solver=functools.partial(
+                gbt.qre.logit_solve_lambda, lam=[1, 2, 3], first_step=0.2, max_accel=1
+            ),
+            expected=[
+                {"idx": 0, "lam": 1, "profile": [d(0.643, 0.357), d(0.5883, 0.41168)]},
+                {"idx": 1, "lam": 2, "profile": [d(0.7727, 0.2273), d(0.6117, 0.3883)]},
+                {"idx": 2, "lam": 3, "profile": [d(0.8595, 0.1405), d(0.6038, 0.39618)]},
+            ],
+            prob_tol=TOL_LARGE,
+            lam_tol=TOL_LARGE,
+        ),
+        marks=pytest.mark.qre_logit,
+        id="test_logit_lambda_1",
+    ),
+]
 
-    # [LogitQREMixedStrategyProfile(lam=0.000000,profile=[[0.5, 0.5], [0.5, 0.5]])]
+
+CASES = []
+CASES += LOGIT_BRANCH_CASES
+CASES += LOGIT_LAMBDA_CASES
+
+
+@pytest.mark.nash
+@pytest.mark.parametrize("test_case", CASES, ids=lambda c: c.label)
+def test_qre_solver(test_case: QREquilibriumTestCase, subtests) -> None:
+    """Test calls of QRE solvers.
+
+    Subtests:
+    - Expected value of lambda for given idx,
+        difference in lambda not more than `test_case.lam_tol`
+    - Expected profile for given idx and lambda,
+        difference in probabilities is no more than `test_case.prob_tol`
+    """
+    game = test_case.factory()
+    result = test_case.solver(game)
+
+    for i, exp in enumerate(test_case.expected):
+        found = result[exp["idx"]]
+        with subtests.test(eq=i, check="lambda"):
+            assert abs(exp["lam"] - found.lam) <= test_case.lam_tol
+        with subtests.test(eq=i, check="strategy_profile"):
+            exp_profile = game.mixed_strategy_profile(rational=True, data=exp["profile"])
+            for player in game.players:
+                for s in player.strategies:
+                    assert abs(found.profile[s] - exp_profile[s]) <= test_case.prob_tol
 
 
 ##################################################################################################
