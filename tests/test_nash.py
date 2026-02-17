@@ -1,10 +1,4 @@
-"""Test of calls to Nash equilibrium solvers.
-
-For many solvers the tests simply ensure that calling the solver works, and then for some cases,
-checking the expected results on a very simple game.
-
-There is better test coverage for
-lp_solve, lcp_solve, and enumpoly_solve, all in mixed behaviors.
+"""Test of calls to Nash equilibrium and QRE solvers.
 """
 
 import dataclasses
@@ -19,7 +13,6 @@ from pygambit import Rational as Q
 from . import games
 
 TOL = 1e-13  # standard tol for floating point assertions; not used only when it is too small
-
 TOL_LARGE = 1e-3  # larger tolerance for floating point assertions
 TOL_HUGE = 1e-2  # huge tolerance for floating point assertions
 
