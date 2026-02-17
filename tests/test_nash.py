@@ -18,7 +18,8 @@ from pygambit import Rational as Q
 
 from . import games
 
-TOL = 1e-13  # tolerance for floating point assertions
+TOL = 1e-13  # standard tol for floating point assertions; not used only when it is too small
+
 TOL_LARGE = 1e-3  # larger tolerance for floating point assertions
 TOL_HUGE = 1e-2  # huge tolerance for floating point assertions
 
@@ -35,7 +36,7 @@ class EquilibriumTestCase:
     """Summarising the data relevant for a test fixture of a call to an equilibrium solver."""
 
     factory: typing.Callable[[], gbt.Game]
-    solver: typing.Callable[[gbt.Game], gbt.qre.LogitQREMixedStrategyFitResult]
+    solver: typing.Callable[[gbt.Game], gbt.nash.NashComputationResult]
     expected: list
     regret_tol: float | gbt.Rational = Q(0)
     prob_tol: float | gbt.Rational = Q(0)
@@ -46,7 +47,7 @@ class QREquilibriumTestCase:
     """Summarising the data relevant for a test fixture of a call to an QRE solver."""
 
     factory: typing.Callable[[], gbt.Game]
-    solver: typing.Callable[[gbt.Game], gbt.nash.NashComputationResult]
+    solver: typing.Callable[[gbt.Game], gbt.qre.LogitQREMixedStrategyFitResult]
     expected: list
     prob_tol: float
     lam_tol: float
@@ -2450,8 +2451,8 @@ LOGIT_LAMBDA_CASES = [
                 {"idx": 1, "lam": 2, "profile": [d(0.7727, 0.2273), d(0.6117, 0.3883)]},
                 {"idx": 2, "lam": 3, "profile": [d(0.8595, 0.1405), d(0.6038, 0.39618)]},
             ],
-            prob_tol=TOL_LARGE,
-            lam_tol=TOL_LARGE,
+            prob_tol=TOL,
+            lam_tol=TOL,
         ),
         marks=pytest.mark.qre_logit,
         id="test_logit_lambda_1",
