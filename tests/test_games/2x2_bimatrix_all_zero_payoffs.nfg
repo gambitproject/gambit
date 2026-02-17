@@ -1,0 +1,14 @@
+NFG 1 R "2x2 bimatrix game with all zero payoffs, with strategy labels" { "Joe" "Dan" }
+
+{ { "cooperate" "defect" }
+{ "defect" "defect" }
+}
+""
+
+{
+{ "" 0, 0 }
+{ "" 0, 0 }
+{ "" 0, 0 }
+{ "" 0, 0 }
+}
+1 2 3 4

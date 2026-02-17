@@ -1,5 +1,10 @@
 EFG 2 R "Test Extensive Form Game" { "Player 1" "Player 2" "Player 3" }
-""
+"
+Three-player extensive form game: binary tree with 3 infomation sets, one per player,
+with 1, 2, and 4 nodes respectively.
+
+Since no information is revealed this is directly equivalent to a simultaneous move game.
+"
 
 p "" 1 1 "Infoset 1:1" { "U1" "D1" } 0
 p "" 2 1 "Infoset 2:1" { "U2" "D2" } 0
