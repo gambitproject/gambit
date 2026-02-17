@@ -63,6 +63,12 @@ def games() -> pd.DataFrame:
 
     # Add all the games from families
     for slug, game in family_games().items():
+        # Throw an error if there's a slug collision between family games and file-based games
+        if slug in records:
+            raise ValueError(
+                f"Slug collision: {slug} is present in both file-based and "
+                "family games."
+            )
         records.append(
             {
                 "Game": slug,
