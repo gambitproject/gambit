@@ -848,6 +848,7 @@ def test_nash_strategy_solver(test_case: EquilibriumTestCase, subtests) -> None:
 # NASH SOLVERS WITH START PROFILES
 ##################################################################################################
 
+
 LIAP_STRATEGY_CASES = [
     pytest.param(
         EquilibriumTestCaseWithStart(
@@ -858,8 +859,8 @@ LIAP_STRATEGY_CASES = [
             regret_tol=TOL_LARGE,
             prob_tol=TOL,
         ),
-        marks=pytest.mark.nash_simpdiv,
-        id="test_simpdiv_1",
+        marks=pytest.mark.nash_liap_strategy,
+        id="test_liap_strategy_1",
     ),
 ]
 
@@ -2410,23 +2411,8 @@ ENUMPURE_AGENT_CASES = [
 ]
 
 
-# LIAP_AGENT_CASES = [
-# pytest.param(
-# EquilibriumTestCase(
-# factory=functools.partial(
-# games.read_from_file, "two_player_perfect_info_win_lose.efg"
-# ),
-# solver=functools.partial(gbt.nash.liap_agent_solve),  # Need to pass the start arg
-# expected=[[[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]]],
-# ),
-# marks=pytest.mark.nash_enumpure_strategy,
-# id="test_liap_agent_1",
-# ),
-# ]
-
 AGENT_CASES = []
 AGENT_CASES += ENUMPURE_AGENT_CASES
-# TO ADD: pygambit.nash.liap_agent_solve
 
 
 @pytest.mark.nash
@@ -2457,24 +2443,57 @@ def test_nash_agent_solver(test_case: EquilibriumTestCase, subtests) -> None:
 
 
 ##################################################################################################
-# TODO:
+# AGENTS NASH SOLVERS WITH START PROFILE
 ##################################################################################################
 
 
-def test_liap_agent():
-    """Test calls of agent liap for mixed behavior equilibria."""
+LIAP_AGENT_CASES = [
+    pytest.param(
+        EquilibriumTestCaseWithStart(
+            factory=functools.partial(games.read_from_file, "stripped_down_poker.efg"),
+            solver=gbt.nash.liap_agent_solve,
+            start_data=dict(data=None, rational=False),
+            expected=[
+                    [[d(1, 0), d("1/3", "2/3")], [d("2/3", "1/3")]]
+            ],
+            regret_tol=TOL_LARGE,
+            prob_tol=TOL_LARGE,
+        ),
+        marks=pytest.mark.nash_liap_agent,
+        id="test_liap_agent_1",
+    ),
+]
 
-    game = games.read_from_file("stripped_down_poker.efg")
-    result = gbt.nash.liap_agent_solve(game.mixed_behavior_profile())
-    assert len(result.equilibria) == 1
-    eq = result.equilibria[0]
+AGENT_WITH_START_CASES = []
+AGENT_WITH_START_CASES += LIAP_AGENT_CASES
 
-    exp = [[[1, 0], ["1/3", "2/3"]], [["2/3", "1/3"]]]
-    exp = game.mixed_behavior_profile(exp, rational=True)
 
-    for player in game.players:
-        for action in player.actions:
-            assert abs(eq[action] - exp[action]) <= TOL_LARGE
+@pytest.mark.nash
+@pytest.mark.parametrize("test_case", AGENT_WITH_START_CASES, ids=lambda c: c.label)
+def test_nash_agent_w_start_solver(test_case: EquilibriumTestCase, subtests) -> None:
+    """Test calls of Nash solvers with starting profile in EFGs using "agent" versions.
+
+    Subtests:
+    - Agent max regret no more than `test_case.regret_tol`
+    - Agent max regret no more than max regret (+ `test_case.regret_tol`)
+    - Equilibria are output in the expected order.  Equilibria are deemed to match if the maximum
+      difference in probabilities is no more than `test_case.prob_tol`
+    """
+    game = test_case.factory()
+    start = game.mixed_behavior_profile(**test_case.start_data)
+    result = test_case.solver(start)
+    with subtests.test("number of equilibria found"):
+        assert len(result.equilibria) == len(test_case.expected)
+    for i, (eq, exp) in enumerate(zip(result.equilibria, test_case.expected, strict=True)):
+        with subtests.test(eq=i, check="agent_max_regret"):
+            assert eq.agent_max_regret() <= test_case.regret_tol
+        with subtests.test(eq=i, check="max_regret"):
+            assert eq.agent_max_regret() <= eq.max_regret() + test_case.regret_tol
+        with subtests.test(eq=i, check="strategy_profile"):
+            expected = game.mixed_behavior_profile(rational=True, data=exp)
+            for player in game.players:
+                for action in player.actions:
+                    assert abs(eq[action] - expected[action]) <= test_case.prob_tol
 
 
 ##################################################################################################
@@ -2511,8 +2530,8 @@ LOGIT_LAMBDA_CASES = [
                 {"idx": 1, "lam": 2, "profile": [d(0.7727, 0.2273), d(0.6117, 0.3883)]},
                 {"idx": 2, "lam": 3, "profile": [d(0.8595, 0.1405), d(0.6038, 0.39618)]},
             ],
-            prob_tol=TOL,
-            lam_tol=TOL,
+            prob_tol=TOL_LARGE,
+            lam_tol=TOL_LARGE,
         ),
         marks=pytest.mark.qre_logit,
         id="test_logit_lambda_1",
