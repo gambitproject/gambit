@@ -87,6 +87,7 @@ markers = [
     "nash_logit_behavior: tests of logit_solve in behavior strategies",
     "nash_gnm_strategy: tests of gnm_solve in mixed strategies",
     "nash_ipa_strategy: tests of lpa_solve in mixed strategies",
+    "nash_simpdiv: tests of simpdiv_solve (in mixed strategies)",
     "qre_logit: tests of logit_solve and related methods",
     "qre_logit_lambda: tests of logit_solve_lambda",
     "qre_logit_branch: tests of logit_solve_branch",

@@ -43,6 +43,19 @@ class EquilibriumTestCase:
 
 
 @dataclasses.dataclass
+class EquilibriumTestCaseWithStart:
+    """Summarising the data relevant for a test fixture of a call to an equilibrium solver
+    that needs a starting profile."""
+
+    factory: typing.Callable[[], gbt.Game]
+    solver: typing.Callable[[gbt.Game], gbt.nash.NashComputationResult]
+    start_data: None | list
+    expected: list
+    regret_tol: float | gbt.Rational = Q(0)
+    prob_tol: float | gbt.Rational = Q(0)
+
+
+@dataclasses.dataclass
 class QREquilibriumTestCase:
     """Summarising the data relevant for a test fixture of a call to an QRE solver."""
 
@@ -819,6 +832,76 @@ def test_nash_strategy_solver(test_case: EquilibriumTestCase, subtests) -> None:
     """
     game = test_case.factory()
     result = test_case.solver(game)
+    with subtests.test("number of equilibria found"):
+        assert len(result.equilibria) == len(test_case.expected)
+    for i, (eq, exp) in enumerate(zip(result.equilibria, test_case.expected, strict=True)):
+        with subtests.test(eq=i, check="max_regret"):
+            assert eq.max_regret() <= test_case.regret_tol
+        with subtests.test(eq=i, check="strategy_profile"):
+            expected = game.mixed_strategy_profile(rational=True, data=exp)
+            for player in game.players:
+                for strategy in player.strategies:
+                    assert abs(eq[strategy] - expected[strategy]) <= test_case.prob_tol
+
+
+##################################################################################################
+# NASH SOLVERS WITH START PROFILES
+##################################################################################################
+
+LIAP_STRATEGY_CASES = [
+    pytest.param(
+        EquilibriumTestCaseWithStart(
+            factory=functools.partial(games.read_from_file, "stripped_down_poker.efg"),
+            solver=gbt.nash.liap_solve,
+            start_data=dict(data=None, rational=False),
+            expected=[],
+            regret_tol=TOL_LARGE,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_simpdiv,
+        id="test_simpdiv_1",
+    ),
+]
+
+
+SIMPDIV_CASES = [
+    pytest.param(
+        EquilibriumTestCaseWithStart(
+            factory=functools.partial(games.read_from_file, "stripped_down_poker.efg"),
+            solver=functools.partial(gbt.nash.simpdiv_solve),
+            start_data=dict(data=None, rational=True),
+            expected=[
+                [
+                    d(Q(174763, 524288), Q(349525, 524288), 0, 0),
+                    d(Q(699051, 1048576), Q(349525, 1048576)),
+                ]
+            ],
+            regret_tol=TOL_LARGE,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_simpdiv,
+        id="test_simpdiv_1",
+    ),
+]
+
+CASES = []
+CASES += LIAP_STRATEGY_CASES
+CASES += SIMPDIV_CASES
+
+
+@pytest.mark.nash
+@pytest.mark.parametrize("test_case", CASES, ids=lambda c: c.label)
+def test_nash_strategy_solver_w_start(test_case: EquilibriumTestCaseWithStart, subtests) -> None:
+    """Test calls of Nash solvers that start a starting profile.
+
+    Subtests:
+    - Max regret no more than `test_case.regret_tol`
+    - Equilibria are output in the expected order.  Equilibria are deemed to match if the maximum
+      difference in probabilities is no more than `test_case.prob_tol`
+    """
+    game = test_case.factory()
+    start = game.mixed_strategy_profile(**test_case.start_data)
+    result = test_case.solver(start)
     with subtests.test("number of equilibria found"):
         assert len(result.equilibria) == len(test_case.expected)
     for i, (eq, exp) in enumerate(zip(result.equilibria, test_case.expected, strict=True)):
@@ -2375,8 +2458,6 @@ def test_nash_agent_solver(test_case: EquilibriumTestCase, subtests) -> None:
 
 ##################################################################################################
 # TODO:
-# The below all take a start argument that depends on the game, which doesn't immediately
-# work with our current implementation of EquilibriumTestClass
 ##################################################################################################
 
 
@@ -2394,27 +2475,6 @@ def test_liap_agent():
     for player in game.players:
         for action in player.actions:
             assert abs(eq[action] - exp[action]) <= TOL_LARGE
-
-
-def test_liap_strategy():
-    """Test calls of liap for mixed strategy equilibria."""
-    game = games.read_from_file("stripped_down_poker.efg")
-    _ = gbt.nash.liap_solve(game.mixed_strategy_profile())
-
-    # NashComputationResult(method='liap', rational=False, use_strategic=True, equilibria=[],
-    # parameters={'start': [[0.25, 0.25, 0.25, 0.25], [0.5, 0.5]],
-    # 'maxregret': 0.0001, 'maxiter': 1000})
-    # Nothing found!
-
-
-def test_simpdiv_strategy():
-    """Test calls of simplicial subdivision for mixed strategy equilibria."""
-    game = games.read_from_file("stripped_down_poker.efg")
-    result = gbt.nash.simpdiv_solve(game.mixed_strategy_profile(rational=True))
-    assert len(result.equilibria) == 1
-
-    # [[[Rational(174763, 524288), Rational(349525, 524288), Rational(0, 1), Rational(0, 1)],
-    # [Rational(699051, 1048576), Rational(349525, 1048576)]]]
 
 
 ##################################################################################################
