@@ -55,6 +55,29 @@ We recommended most new users install the PyGambit Python package and read the a
          :color: secondary
          :expand:
 
+   .. grid-item-card:: Report a bug or request a feature
+      :columns: 6
+
+      Log issues and feature requests on GitHub.
+
+      .. button-ref:: github-issues
+         :ref-type: ref
+         :click-parent:
+         :color: secondary
+         :expand:
+
+   .. grid-item-card:: Developer docs
+      :columns: 6
+
+      Guides for developers & contributors to the package.
+
+      .. button-ref:: developer
+         :ref-type: ref
+         :click-parent:
+         :color: secondary
+
+         :expand:
+
 
 .. toctree::
    :hidden:
