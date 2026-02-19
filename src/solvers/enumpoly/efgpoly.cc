@@ -161,8 +161,8 @@ std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfil
 
   // set up the rectangle of search
   Vector<double> bottoms(data.space->GetDimension()), tops(data.space->GetDimension());
-  bottoms = 0;
-  tops = 1;
+  bottoms = 1e-12;
+  tops = 1 - 1e-12;
 
   PolynomialSystemSolver solver(equations);
   std::list<Vector<double>> roots;
