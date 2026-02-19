@@ -53,9 +53,9 @@ def games(**kwargs) -> pd.DataFrame:
             return False
         if "n_contingencies" in kwargs and len(game.contingencies) != kwargs["n_contingencies"]:
             return False
-        if "n_info_sets" in kwargs and len(game.info_sets) != kwargs["n_info_sets"]:
+        if "n_infosets" in kwargs and len(game.infosets) != kwargs["n_infosets"]:
             return False
-        if "is_constant_sum" in kwargs and game.is_constant_sum != kwargs["is_constant_sum"]:
+        if "is_const_sum" in kwargs and game.is_const_sum != kwargs["is_const_sum"]:
             return False
         if "is_perfect_recall" in kwargs and game.is_perfect_recall != kwargs["is_perfect_recall"]:
             return False
@@ -65,8 +65,11 @@ def games(**kwargs) -> pd.DataFrame:
             return False
         if "max_payoff" in kwargs and game.max_payoff > kwargs["max_payoff"]:
             return False
-        if "n_nodes" in kwargs and len(game.nodes) != kwargs["n_nodes"]:
-            return False
+        if "n_nodes" in kwargs:
+            if not game.is_tree:
+                return False
+            if len(game.nodes) != kwargs["n_nodes"]:
+                return False
         if "n_outcomes" in kwargs and len(game.outcomes) != kwargs["n_outcomes"]:
             return False
         if "n_players" in kwargs and len(game.players) != kwargs["n_players"]:

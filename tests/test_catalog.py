@@ -71,20 +71,20 @@ def test_catalog_games_filter_n_contingencies(all_games):
     assert all(len(g.contingencies) == 2 for g in list(filtered_games.Game))
 
 
-def test_catalog_games_filter_n_info_sets(all_games):
-    """Test games() function can filter on length of gbt.Game attribute 'info_sets'"""
-    filtered_games = gbt.catalog.games(n_info_sets=2)
+def test_catalog_games_filter_n_infosets(all_games):
+    """Test games() function can filter on length of gbt.Game attribute 'infosets'"""
+    filtered_games = gbt.catalog.games(n_infosets=2)
     assert isinstance(filtered_games, pd.DataFrame)
     assert len(filtered_games) < len(all_games)
-    assert all(len(g.info_sets) == 2 for g in list(filtered_games.Game))
+    assert all(len(g.infosets) == 2 for g in list(filtered_games.Game))
 
 
-def test_catalog_games_filter_is_constant_sum(all_games):
-    """Test games() function can filter on boolean gbt.Game attribute 'is_constant_sum'"""
-    filtered_games = gbt.catalog.games(is_constant_sum=True)
+def test_catalog_games_filter_is_const_sum(all_games):
+    """Test games() function can filter on boolean gbt.Game attribute 'is_const_sum'"""
+    filtered_games = gbt.catalog.games(is_const_sum=True)
     assert isinstance(filtered_games, pd.DataFrame)
     assert len(filtered_games) < len(all_games)
-    assert all(g.is_constant_sum for g in list(filtered_games.Game))
+    assert all(g.is_const_sum for g in list(filtered_games.Game))
 
 
 def test_catalog_games_filter_is_perfect_recall(all_games):
