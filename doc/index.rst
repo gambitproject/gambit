@@ -8,10 +8,11 @@ We recommended most new users install the PyGambit Python package and read the a
 
 .. grid::
 
-   .. grid-item-card:: Installing Gambit
+   .. grid-item-card:: ⬇️ Installing Gambit
       :columns: 4
 
-      PyGambit quickstart: ``pip install pygambit``
+      Quick installation with PyGambit:
+      ``pip install pygambit``
 
       .. button-ref:: install
          :ref-type: ref
@@ -20,7 +21,7 @@ We recommended most new users install the PyGambit Python package and read the a
          :expand:
 
 
-   .. grid-item-card:: PyGambit Python package
+   .. grid-item-card:: 🐍 PyGambit
       :columns: 4
 
       Create games and compute equilibria with PyGambit.
@@ -32,7 +33,7 @@ We recommended most new users install the PyGambit Python package and read the a
          :expand:
 
 
-   .. grid-item-card:: Command-line tools
+   .. grid-item-card:: 🖥️ Command-line tools
       :columns: 4
 
       Quickly compute equilibria with the Gambit command-line tools.
@@ -43,7 +44,7 @@ We recommended most new users install the PyGambit Python package and read the a
          :color: secondary
          :expand:
 
-   .. grid-item-card:: Graphical interface
+   .. grid-item-card:: 🖱️ Graphical interface
       :columns: 4
 
       Interactively create, explore, and find equilibria of games.
@@ -54,7 +55,7 @@ We recommended most new users install the PyGambit Python package and read the a
          :color: secondary
          :expand:
 
-   .. grid-item-card:: Bugs and feature requests
+   .. grid-item-card:: 🐛 Bugs and feature requests
       :columns: 4
 
       Report bugs and feature requests on GitHub.
@@ -65,7 +66,7 @@ We recommended most new users install the PyGambit Python package and read the a
          :color: secondary
          :expand:
 
-   .. grid-item-card:: Developer docs
+   .. grid-item-card:: 📖 Developer docs
       :columns: 4
 
       Guides for developers & contributors to the package.
