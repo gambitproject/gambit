@@ -75,7 +75,6 @@ We recommended most new users install the PyGambit Python package and read the a
          :ref-type: ref
          :click-parent:
          :color: secondary
-
          :expand:
 
 
