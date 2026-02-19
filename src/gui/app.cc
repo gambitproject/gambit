@@ -26,19 +26,55 @@
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif // WX_PRECOMP
+#include <wx/display.h>
 #include <wx/image.h>
-#include <wx/splash.h>
 
 #include "gambit.h"
 
 #include "app.h"
 #include "gameframe.h"
 
+#include "bitmaps/gambitbig.xpm"
+
 namespace Gambit::GUI {
 
-bool Application::OnInit()
+static wxBitmap MakeScaledSplashBitmap(const wxBitmap &srcBmp, double fracOfShortSide)
 {
-#include "bitmaps/gambitbig.xpm"
+  const wxPoint mouse = wxGetMousePosition();
+  const int dispIdx = wxDisplay::GetFromPoint(mouse);
+  wxDisplay disp(dispIdx == wxNOT_FOUND ? 0 : dispIdx);
+
+  wxRect geom = disp.GetGeometry(); // pixels in that display
+  const int shortSide = std::min(geom.width, geom.height);
+  const int targetMax = std::max(200, int(shortSide * fracOfShortSide));
+
+  const int w = srcBmp.GetWidth();
+  const int h = srcBmp.GetHeight();
+  const double s = double(targetMax) / double(std::max(w, h));
+
+  const int newW = std::max(1, int(std::lround(w * s)));
+  const int newH = std::max(1, int(std::lround(h * s)));
+
+  wxImage img = srcBmp.ConvertToImage();
+  img.Rescale(newW, newH, wxIMAGE_QUALITY_HIGH);
+
+  return wxBitmap(img);
+}
+
+wxBEGIN_EVENT_TABLE(Application, wxApp) EVT_TIMER(wxID_ANY, Application::OnSplashDismissTimer)
+    wxEND_EVENT_TABLE()
+
+        bool Application::OnInit()
+{
+  wxApp::OnInit();
+
+  const wxBitmap bitmap(gambitbig_xpm);
+  m_splashTimer.Start();
+  m_splash = new wxSplashScreen(MakeScaledSplashBitmap(bitmap, 0.45),
+                                wxSPLASH_CENTRE_ON_SCREEN | wxSPLASH_NO_TIMEOUT, 0, nullptr,
+                                wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SIMPLE);
+  m_splash->Show();
+  m_splash->Update();
   wxConfigBase::Set(new wxConfig(_T("Gambit"), _T("Gambit")));
   m_fileHistory.Load(*wxConfigBase::Get());
   // Immediately saving this back forces the entries to be created at
@@ -46,12 +82,6 @@ bool Application::OnInit()
   // implementation (which seems to still be buggy).
   // m_fileHistory.Save(config);
   wxConfigBase::Get()->Read(_T("/General/CurrentDirectory"), &m_currentDir, _T(""));
-
-  const wxBitmap bitmap(gambitbig_xpm);
-  /*wxSplashScreen *splash =*/
-  new wxSplashScreen(bitmap, wxSPLASH_CENTRE_ON_SCREEN | wxSPLASH_TIMEOUT, 2000, nullptr, -1,
-                     wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER | wxSTAY_ON_TOP);
-  wxYield();
 
   // Process command line arguments, if any.
   for (int i = 1; i < wxApp::argc; i++) {
@@ -86,7 +116,28 @@ bool Application::OnInit()
   // Set up the help system.
   wxInitAllImageHandlers();
 
+  this->CallAfter(&Application::DismissSplash);
+
   return true;
+}
+
+void Application::DismissSplash()
+{
+  if (!m_splash) {
+    return;
+  }
+
+  const long minDisplay = 1000;
+  const long elapsed = m_splashTimer.Time();
+
+  if (elapsed < minDisplay) {
+    m_splashDismissTimer.SetOwner(this);
+    m_splashDismissTimer.StartOnce(minDisplay - elapsed);
+    return;
+  }
+
+  m_splash->Destroy();
+  m_splash = nullptr;
 }
 
 AppLoadResult Application::LoadFile(const wxString &p_filename)

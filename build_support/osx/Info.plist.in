@@ -1,37 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist SYSTEM "file://localhost/System/Library/DTDs/PropertyList.dtd">
-<plist version="0.9">
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
 <dict>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleIdentifier</key>
 	<string>org.gambit-project.gambit</string>
 	<key>CFBundleDevelopmentRegion</key>
-	<string>English</string>
+	<string>en</string>
 	<key>CFBundleExecutable</key>
 	<string>gambit</string>
 	<key>CFBundleIconFile</key>
 	<string>gambit</string>
 	<key>CFBundleName</key>
 	<string>Gambit</string>
+	<key>CFBundleDisplayName</key>
+	<string>Gambit</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
-	<key>CFBundleSignature</key>
-	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>@GAMBIT_VERSION@</string>
 	<key>CFBundleShortVersionString</key>
 	<string>@GAMBIT_VERSION@</string>
 	<key>CFBundleGetInfoString</key>
-	<string>Gambit version @GAMBIT_VERSION@, (c) 1994-2025 The Gambit Project</string>
-	<key>CFBundleLongVersionString</key>
-	<string>@GAMBIT_VERSION@, (c) 1994-2025 The Gambit Project</string>
+	<string>Gambit version @GAMBIT_VERSION@, (c) 1994-2026 The Gambit Project</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>Copyright 1994-2025 The Gambit Project</string>
-	<key>LSRequiresCarbon</key>
-	<true/>
-	<key>CSResourcesFileMapped</key>
-	<true/>
+	<string>Copyright 1994-2026 The Gambit Project</string>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 	  <dict>
