@@ -1,5 +1,6 @@
 from importlib.resources import as_file, files
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 
@@ -36,11 +37,41 @@ def load(slug: str) -> gbt.Game:
     raise FileNotFoundError(f"No catalog entry called {slug}")
 
 
-def games() -> pd.DataFrame:
+def games(**kwargs) -> pd.DataFrame:
     """
     List games available in the package catalog, including subdirectories.
+
+    If no arguments are provided, returns a pandas DataFrame with columns "Game" and "Title".
+
+    If arguments are provided, they are treated as filters and a pandas DataFrame is returned
+    where the "Game" column contains pygambit.Game objects matching the criteria.
     """
-    records: list[dict[str, str]] = []
+    records: list[dict[str, Any]] = []
+
+    def check_filters(game: gbt.Game) -> bool:
+        if "n_actions" in kwargs and len(game.actions) != kwargs["n_actions"]:
+            return False
+        if "n_contingencies" in kwargs and len(game.contingencies) != kwargs["n_contingencies"]:
+            return False
+        if "n_info_sets" in kwargs and len(game.info_sets) != kwargs["n_info_sets"]:
+            return False
+        if "is_constant_sum" in kwargs and game.is_constant_sum != kwargs["is_constant_sum"]:
+            return False
+        if "is_perfect_recall" in kwargs and game.is_perfect_recall != kwargs["is_perfect_recall"]:
+            return False
+        if "is_tree" in kwargs and game.is_tree != kwargs["is_tree"]:
+            return False
+        if "min_payoff" in kwargs and game.min_payoff < kwargs["min_payoff"]:
+            return False
+        if "max_payoff" in kwargs and game.max_payoff > kwargs["max_payoff"]:
+            return False
+        if "n_nodes" in kwargs and len(game.nodes) != kwargs["n_nodes"]:
+            return False
+        if "n_outcomes" in kwargs and len(game.outcomes) != kwargs["n_outcomes"]:
+            return False
+        if "n_players" in kwargs and len(game.players) != kwargs["n_players"]:
+            return False
+        return not ("n_strategies" in kwargs and len(game.strategies) != kwargs["n_strategies"])
 
     # Add all the games stored as EFG/NFG files
     for resource_path in sorted(_CATALOG_RESOURCE.rglob("*")):
@@ -54,27 +85,40 @@ def games() -> pd.DataFrame:
 
             with as_file(resource_path) as path:
                 game = reader(str(path))
-                records.append(
-                    {
-                        "Game": slug,
-                        "Title": game.title,
-                    }
-                )
+                if kwargs:
+                    if check_filters(game):
+                        records.append({
+                            "Game": game,
+                            "Title": game.title,
+                        })
+                else:
+                    records.append(
+                        {
+                            "Game": slug,
+                            "Title": game.title,
+                        }
+                    )
 
     # Add all the games from families
     for slug, game in family_games().items():
         # Throw an error if there's a slug collision between family games and file-based games
-        if slug in records:
+        if slug in [r["Game"] for r in records]:
             raise ValueError(
-                f"Slug collision: {slug} is present in both file-based and "
-                "family games."
+                f"Slug collision: {slug} is present in both file-based and family games."
             )
-        records.append(
-            {
-                "Game": slug,
-                "Title": game.title,
-            }
-        )
+        if kwargs:
+            if check_filters(game):
+                records.append({
+                    "Game": game,
+                    "Title": game.title,
+                })
+        else:
+            records.append(
+                {
+                    "Game": slug,
+                    "Title": game.title,
+                }
+            )
 
     return pd.DataFrame.from_records(records, columns=["Game", "Title"])
 
