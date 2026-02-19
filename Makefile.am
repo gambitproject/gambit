@@ -101,7 +101,6 @@ EXTRA_DIST = \
 	src/gui/bitmaps/zoom1.xpm \
 	src/gui/bitmaps/gambitrc.rc \
 	contrib/games/2s2x2x2.efg \
-	contrib/games/2smp.efg \
 	contrib/games/2x2x2.efg \
 	contrib/games/4cards.efg \
 	contrib/games/artist1.efg \
@@ -169,7 +168,6 @@ EXTRA_DIST = \
 	contrib/games/my_3-3d.efg \
 	contrib/games/my_3-3e.efg \
 	contrib/games/my_3-4.efg \
-	contrib/games/myerson.efg \
 	contrib/games/nim7.efg \
 	contrib/games/nim.efg \
 	contrib/games/palf2.efg \
@@ -195,7 +193,6 @@ EXTRA_DIST = \
 	contrib/games/2x2a.nfg \
 	contrib/games/2x2const.nfg \
 	contrib/games/2x2.nfg \
-	contrib/games/2x2x2.nfg \
 	contrib/games/2x2x2x2.nfg \
 	contrib/games/2x2x2x2x2.nfg \
 	contrib/games/3x3x3.nfg \
@@ -224,7 +221,6 @@ EXTRA_DIST = \
 	contrib/games/mixdom2.nfg \
 	contrib/games/mixdom.nfg \
 	contrib/games/oneill.nfg \
-	contrib/games/pd.nfg \
 	contrib/games/perfect1.nfg \
 	contrib/games/perfect2.nfg \
 	contrib/games/perfect3.nfg \
@@ -240,7 +236,11 @@ EXTRA_DIST = \
 	contrib/games/winkels.nfg \
 	contrib/games/yamamoto.nfg \
 	contrib/games/zero.nfg \
-	src/README.rst
+	src/README.rst \
+	catalog/2smp.efg \
+	catalog/2x2x2.nfg \
+	catalog/myerson/fig_4_2.efg \
+	catalog/pd.nfg
 
 core_SOURCES = \
     src/core/core.h \

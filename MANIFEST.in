@@ -1,6 +1,7 @@
 recursive-include src/core *.cc *.h *.imp
 recursive-include src/games *.cc *.h *.imp
 recursive-include src/solvers *.c *.cc *.h *.imp
+recursive-include catalog *
 include src/gambit.h
 include src/pygambit/*.pxd
 include src/pygambit/*.pyx

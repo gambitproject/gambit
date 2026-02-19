@@ -50,3 +50,5 @@ Gambit.app/*
 *.ef
 build_support/msw/gambit.wxs
 build_support/osx/Info.plist
+src/pygambit/catalog
+doc/catalog.csv

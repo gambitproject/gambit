@@ -11,3 +11,4 @@ This section contains information for developers who want to contribute to the G
 
    developer.build
    developer.contributing
+   developer.catalog
