@@ -3,16 +3,7 @@
 :program:`gambit-gnm`: Compute Nash equilibria in a strategic game using a global Newton method
 ===============================================================================================
 
-:program:`gambit-gnm` reads a game on standard input and computes Nash
-equilibria using a global Newton method approach developed by Govindan
-and Wilson [GovWil03]_. This program is based on the
-`Gametracer 0.2 <http://dags.stanford.edu/Games/gametracer.html>`_
-implementation by Ben Blum and Christian Shelton.
-
-The algorithm takes as a parameter a mixed strategy profile.  This profile is
-interpreted as defining a ray in the space of games.  The profile must have
-the property that, for each player, the most frequently played strategy must
-be unique.
+:ref:`Algorithm description <gnm>`
 
 The algorithm finds a subset of equilibria starting from any given profile.
 Multiple starting profiles may be generated via the `-n` option or specified

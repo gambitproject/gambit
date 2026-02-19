@@ -1,28 +1,9 @@
+.. _gambit-enumpoly:
+
 :program:`gambit-enumpoly`: Compute equilibria of a game using polynomial systems of equations
 ==============================================================================================
 
-:program:`gambit-enumpoly` reads a game on standard input and
-computes Nash equilibria by solving systems of polynomial equations
-and inequalities.
-
-This program searches for all Nash equilibria in a strategic game
-using a support enumeration approach. This approach computes all the
-supports which could, in principle, be the support of a Nash
-equilibrium.  For each candidate support, it attempts to compute
-totally mixed equilibria on that support by successively subdividing
-the space of mixed strategy profiles or mixed behavior profiles (as appropriate).
-By using the fact that the equilibrium conditions imply a collection
-of equations and inequalities which can be expressed as multilinear
-polynomials, the subdivision constructed is such that each cell
-contains either no equilibria or exactly one equilibrium.
-
-For strategic games, the program searches supports in the order proposed
-by Porter, Nudelman, and Shoham [PNS04]_.  For two-player games, this
-prioritises supports for which both players have the same number of
-strategies.  For games with three or more players, this prioritises
-supports which have the fewest strategies in total.  For many classes
-of games, this will tend to lower the average time until finding one equilibrium,
-as well as finding the second equilibrium (if one exists).
+:ref:`Algorithm description <enumpoly>`
 
 When the verbose switch `-v` is used, the program outputs each support
 as it is considered. The supports are presented as a comma-separated
