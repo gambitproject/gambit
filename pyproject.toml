@@ -28,6 +28,22 @@ classifiers=[
 dependencies = [
     "numpy",
     "scipy",
+    "pandas",
+]
+
+[project.optional-dependencies]
+test = ["pytest", "nbformat", "nbclient", "ipykernel"]
+doc = [
+    "pydata-sphinx-theme",
+    "sphinx_design",
+    "sphinx-autobuild",
+    "nbsphinx",
+    "ipython",
+    "matplotlib",
+    "pickleshare",
+    "jupyter",
+    "open_spiel; sys_platform != 'win32'",
+    "draw-tree @ git+https://github.com/gambitproject/draw_tree.git@v0.4.0"
 ]
 
 [project.optional-dependencies]
@@ -101,6 +117,13 @@ markers = [
     "nash: all tests of Nash equilibrium solvers",
     "slow: all time-consuming tests",
 ]
+
+[tool.setuptools]
+packages = ["pygambit", "pygambit.catalog"]
+package-dir = { "pygambit" = "src/pygambit", "pygambit.catalog" = "catalog" }
+
+[tool.setuptools.package-data]
+"pygambit.catalog" = ["*"]
 
 [tool.setuptools.dynamic]
 version = {file = "build_support/GAMBIT_VERSION"}

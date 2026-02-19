@@ -64,6 +64,7 @@ We recommended most new users install the PyGambit Python package and read the a
    pygambit
    tools
    gui
+   catalog
    samples
    developer
    formats
