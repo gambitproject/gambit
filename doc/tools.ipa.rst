@@ -19,6 +19,8 @@ The algorithm finds at most one equilibrium starting from any given profile.
 Multiple starting profiles may be generated via the `-n` option or specified
 via the `-s` option; different starting profiles may result in different
 equilibria being found.
+The options ``-s`` and ``-n`` are mutually exclusive; the program reports an
+error if both are specified.
 
 
 .. program:: gambit-ipa
@@ -35,6 +37,7 @@ equilibria being found.
 .. cmdoption:: -n
 
    Randomly generate the specified number of perturbation vectors.
+   Cannot be used together with :option:`gambit-ipa -s`.
 
 .. cmdoption:: -q
 
@@ -46,6 +49,7 @@ equilibria being found.
    for the algorithm. The format of the file is comma-separated values,
    one mixed strategy profile per line, in the same format used for
    output of equilibria (excluding the initial NE tag).
+   Cannot be used together with :option:`gambit-ipa -n`.
 
 
 Computing an equilibrium of :download:`e02.nfg <../contrib/games/e02.nfg>`,
