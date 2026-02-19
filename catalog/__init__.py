@@ -49,12 +49,18 @@ def games(**kwargs) -> pd.DataFrame:
     records: list[dict[str, Any]] = []
 
     def check_filters(game: gbt.Game) -> bool:
-        if "n_actions" in kwargs and len(game.actions) != kwargs["n_actions"]:
-            return False
+        if "n_actions" in kwargs:
+            if not game.is_tree:
+                return False
+            if len(game.actions) != kwargs["n_actions"]:
+                return False
         if "n_contingencies" in kwargs and len(game.contingencies) != kwargs["n_contingencies"]:
             return False
-        if "n_infosets" in kwargs and len(game.infosets) != kwargs["n_infosets"]:
-            return False
+        if "n_infosets" in kwargs:
+            if not game.is_tree:
+                return False
+            if len(game.infosets) != kwargs["n_infosets"]:
+                return False
         if "is_const_sum" in kwargs and game.is_const_sum != kwargs["is_const_sum"]:
             return False
         if "is_perfect_recall" in kwargs and game.is_perfect_recall != kwargs["is_perfect_recall"]:
