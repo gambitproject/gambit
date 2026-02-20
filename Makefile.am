@@ -132,9 +132,6 @@ EXTRA_DIST = \
 	contrib/games/coord4.efg \
 	contrib/games/cross.efg \
 	contrib/games/cs.efg \
-	contrib/games/e01.efg \
-	contrib/games/e02.efg \
-	contrib/games/e03.efg \
 	contrib/games/e04.efg \
 	contrib/games/e05.efg \
 	contrib/games/e06.efg \
@@ -213,8 +210,6 @@ EXTRA_DIST = \
 	contrib/games/csg4.nfg \
 	contrib/games/deg1.nfg \
 	contrib/games/deg2.nfg \
-	contrib/games/e01.nfg \
-	contrib/games/e02.nfg \
 	contrib/games/e04.nfg \
 	contrib/games/e07.nfg \
 	contrib/games/g1.nfg \
@@ -240,7 +235,11 @@ EXTRA_DIST = \
 	contrib/games/winkels.nfg \
 	contrib/games/yamamoto.nfg \
 	contrib/games/zero.nfg \
-	src/README.rst
+	src/README.rst \
+	catalog/myerson1991/fig4_2.efg \
+	catalog/selten1975/fig1.efg \
+	catalog/selten1975/fig2.efg \
+	catalog/selten1975/fig3.efg
 
 core_SOURCES = \
     src/core/core.h \

@@ -13,6 +13,10 @@ build:
     - libgmp-dev
     - pandoc
     - texlive-full
+  jobs:
+    # Create CSV for catalog table in docs
+    post_install:
+      - $READTHEDOCS_VIRTUALENV_PATH/bin/python build_support/catalog/update.py
 
 python:
   install:
