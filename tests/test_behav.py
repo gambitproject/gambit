@@ -1357,3 +1357,44 @@ def test_tree_representation_error(game: gbt.Game, rational_flag: bool, data: li
     """
     with pytest.raises(gbt.UndefinedOperationError):
         game.mixed_behavior_profile(rational=rational_flag, data=data)
+
+
+def test_astype_float():
+    game = games.create_stripped_down_poker_efg()
+    profile = game.mixed_behavior_profile(rational=True)
+    profile["Alice"] = [[gbt.Rational("1/3"), gbt.Rational("2/3")],
+                        [gbt.Rational("1/2"), gbt.Rational("1/2")]]
+    profile["Bob"] = [[gbt.Rational("1/4"), gbt.Rational("3/4")]]
+    
+    double_profile = profile.astype(float)
+    assert isinstance(double_profile, gbt.MixedBehaviorProfile)
+    assert not isinstance(double_profile, gbt.MixedBehaviorProfileRational)
+    actions = list(game.actions)
+    assert abs(double_profile[actions[0]] - (1/3)) < 1e-9
+    assert abs(double_profile[actions[4]] - 0.25) < 1e-9
+
+
+def test_astype_rational():
+    game = games.create_stripped_down_poker_efg()
+    profile = game.mixed_behavior_profile(rational=False)
+    profile["Alice"] = [[0.25, 0.75], [0.5, 0.5]]
+    profile["Bob"] = [[0.6, 0.4]]
+    
+    rational_profile = profile.astype(gbt.Rational)
+    assert isinstance(rational_profile, gbt.MixedBehaviorProfileRational)
+    actions = list(game.actions)
+    assert rational_profile[actions[0]] == gbt.Rational("1/4")
+    assert rational_profile[actions[4]] == gbt.Rational(0.6)
+
+
+def test_astype_identity():
+    game = games.create_stripped_down_poker_efg()
+    profile = game.mixed_behavior_profile(rational=True)
+    profile["Alice"] = [[gbt.Rational("1/3"), gbt.Rational("2/3")],
+                        [gbt.Rational("1/2"), gbt.Rational("1/2")]]
+    profile["Bob"] = [[gbt.Rational("1/4"), gbt.Rational("3/4")]]
+    
+    rational_profile = profile.astype(gbt.Rational)
+    assert isinstance(rational_profile, gbt.MixedBehaviorProfileRational)
+    assert rational_profile == profile
+    assert rational_profile is not profile

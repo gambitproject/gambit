@@ -911,6 +911,40 @@ class MixedBehaviorProfile:
         self._check_validity()
         return self._copy()
 
+    def astype(self, dtype) -> "MixedBehaviorProfile":
+        """Returns a copy of the profile converted to the specified precision.
+
+        Parameters
+        ----------
+        dtype : type
+            The type to convert the profile to.  Supported types are `float`
+            (for double-precision) and `Rational` (for rational precision).
+
+        Returns
+        -------
+        MixedBehaviorProfile
+            A new profile with the converted precision.
+        """
+        self._check_validity()
+        if dtype == float:
+            if isinstance(self, MixedBehaviorProfileDouble):
+                return self.copy()
+            else:
+                profile = self.game.mixed_behavior_profile(rational=False)
+                for action, prob in self:
+                    profile[action] = float(prob)
+                return profile
+        elif dtype == Rational:
+            if isinstance(self, MixedBehaviorProfileRational):
+                return self.copy()
+            else:
+                profile = self.game.mixed_behavior_profile(rational=True)
+                for action, prob in self:
+                    profile[action] = Rational(prob)
+                return profile
+        else:
+            raise TypeError(f"Unsupported dtype '{dtype.__name__ if hasattr(dtype, '__name__') else dtype}' for MixedBehaviorProfile conversion")
+
 
 @cython.cclass
 class MixedBehaviorProfileDouble(MixedBehaviorProfile):
