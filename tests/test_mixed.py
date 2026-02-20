@@ -18,9 +18,17 @@ def _set_action_probs(profile: gbt.MixedStrategyProfile, probs: list, rational_f
     """Set the action probabilities in a strategy profile called ```profile``` according to a
     list with probabilities in the order of ```profile.game.strategies```
     """
-    for i, p in enumerate(probs):
-        # assumes rationals given as strings
-        profile[profile.game.strategies[i]] = gbt.Rational(p) if rational_flag else p
+    idx = 0
+    for player in profile.game.players:
+        player_probs = []
+        for strategy in player.strategies:
+            if idx < len(probs):
+                p = probs[idx]
+                player_probs.append(gbt.Rational(p) if rational_flag else p)
+                idx += 1
+            else:
+                player_probs.append(profile[strategy])
+        profile[player] = player_probs
 
 
 @pytest.mark.parametrize(
@@ -116,13 +124,13 @@ def test_normalize(game, profile_data, expected_data, rational_flag):
      (games.create_stripped_down_poker_efg(), "21", "7/9", True),
     ],
 )
-def test_set_and_get_probability_by_strategy_label(game: gbt.Game, strategy_label: str,
-                                                   rational_flag: bool,
-                                                   prob: float | str):
+def test_set_individual_strategy_by_label_raises_error(game: gbt.Game, strategy_label: str,
+                                                            rational_flag: bool,
+                                                            prob: float | str):
     profile = game.mixed_strategy_profile(rational=rational_flag)
     prob = gbt.Rational(prob) if rational_flag else prob
-    profile[strategy_label] = prob
-    assert profile[strategy_label] == prob
+    with pytest.raises((TypeError, KeyError)):
+        profile[strategy_label] = prob
 
 
 @pytest.mark.parametrize(

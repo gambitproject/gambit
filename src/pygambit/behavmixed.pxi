@@ -130,40 +130,11 @@ class MixedAction:
                 raise KeyError(f"no action with label '{index}' at infoset") from None
         raise TypeError(f"strategy index must be Action or str, not {index.__class__.__name__}")
 
-    def __setitem__(self, index: ActionReference, value: typing.Any) -> None:
-        """Sets the probability an action is played.
-
-        Parameters
-        ----------
-        index : Action or str
-            The part of the profile to set:
-
-            * If `index` is an ``Action``, sets the probability the action is played.
-            * If `index` is a ``str``, attempts to resolve the referenced object by searching
-              for an action with that label, and sets the probability for that action.
-
-        value
-            Any value which can be converted to the data type of the ``MixedBehaviorProfile``.
-
-        Raises
-        ------
-        MismatchError
-            If `action` is an ``Action`` that does not belong to this ``MixedAction``'s
-            information set.
-        """
-        self.profile._check_validity()
-        if isinstance(index, Action):
-            if index.infoset != self.infoset:
-                raise MismatchError("action must belong to this infoset")
-            self.profile._setprob_action(index, value)
-            return
-        if isinstance(index, str):
-            try:
-                self.profile._setprob_action(self.infoset.actions[index], value)
-                return
-            except KeyError:
-                raise KeyError(f"no action with label '{index}' at infoset") from None
-        raise TypeError(f"strategy index must be Action or str, not {index.__class__.__name__}")
+    def __setitem__(self, index, value) -> None:
+        raise TypeError(
+            "Setting individual action probabilities is not supported. "
+            "Set the full distribution for an infoset using profile[infoset] = [...]."
+        )
 
 
 @cython.cclass
@@ -299,34 +270,34 @@ class MixedBehavior:
         )
 
     def __setitem__(self,
-                    index: InfosetReference | ActionReference,
+                    index: InfosetReference,
                     value: typing.Any) -> None:
-        """Sets a component of the mixed behavior to `value`.
+        """Sets the distribution over actions at an information set.
 
         Parameters
         ----------
-        index : Infoset, Action, or str
-            The component of the mixed behavior to set:
+        index : Infoset or str
+            The information set whose action distribution to set.
 
             * If `index` is an `Infoset`, sets the mixed action over that infoset's actions
-            * If `index` is an `Action`, sets the probability the action is played
-            * If `index` is a `str`, attempts to resolve the referenced object by first searching
-              for an infoset with that label, and then for an action with that label.
+            * If `index` is a `str`, attempts to resolve the referenced object by searching
+              for an infoset with that label.
 
         Raises
         ------
         MismatchError
-            If `infoset` not an ``Infoset`` for the mixed behavior's player, or `action`
-            is not an ``Action`` for the mixed behavior's player.
+            If `infoset` not an ``Infoset`` for the mixed behavior's player.
+        TypeError
+            If `index` is an ``Action`` or other unsupported type.
         """
+        if isinstance(index, Action):
+            raise TypeError(
+                "Setting individual action probabilities is not supported. "
+                "Set the full distribution for an infoset using profile[infoset] = [...]."
+            )
         if isinstance(index, Infoset):
             if index.player != self.player:
                 raise MismatchError("infoset must belong to this player")
-            self.profile[index] = value
-            return
-        if isinstance(index, Action):
-            if index.player != self.player:
-                raise MismatchError("action must belong to this player")
             self.profile[index] = value
             return
         if isinstance(index, str):
@@ -334,14 +305,9 @@ class MixedBehavior:
                 self.profile[self.player.infosets[index]] = value
                 return
             except KeyError:
-                pass
-            try:
-                self.profile[self.player.actions[index]] = value
-            except KeyError:
-                raise KeyError(f"no infoset or action with label '{index}' for player") from None
-            return
+                raise KeyError(f"no infoset with label '{index}' for player") from None
         raise TypeError(
-            f"behavior index must be Infoset, Action or str, not {index.__class__.__name__}"
+            f"behavior index must be Infoset or str, not {index.__class__.__name__}"
         )
 
 
@@ -506,35 +472,36 @@ class MixedBehaviorProfile:
 
     def __setitem__(
             self,
-            index: PlayerReference | InfosetReference | ActionReference,
+            index: PlayerReference | InfosetReference,
             value: typing.Any
     ) -> None:
-        """Sets a probability, mixed agent strategy, or mixed behavior strategy to `value`.
+        """Sets the distribution over actions at an information set, or the full
+        behavior strategy for a player.
 
         Parameters
         ----------
-        index : Player, Infoset, Action, or str
-            The part of the profile to return:
+        index : Player, Infoset, or str
+            The part of the profile to set:
 
             * If `index` is a ``Player``, sets the ``MixedBehavior`` over the player's infosets
             * If `index` is an ``Infoset``, sets the ``MixedAction`` over the infoset's actions
-            * If `index` is an ``Action``, sets the probability the action is played
             * If `index` is a ``str``, attempts to resolve the referenced object by first searching
-              for a player with that label, then for an infoset with that label, and finally for an
-              action with that label.
+              for a player with that label, then for an infoset with that label.
 
         Raises
         ------
         MismatchError
-            If `player` is a ``Player`` from a different game, `infoset` is an ``Infoset`` from a
-            different game, or `action` is an ``Action`` from a different game.`
+            If `player` is a ``Player`` from a different game, or `infoset` is an ``Infoset`` from a
+            different game.
+        TypeError
+            If `index` is an ``Action`` or other unsupported type.
         """
         self._check_validity()
         if isinstance(index, Action):
-            if index.infoset.game != self.game:
-                raise MismatchError("action must belong to this game")
-            self._setprob_action(index, value)
-            return
+            raise TypeError(
+                "Setting individual action probabilities is not supported. "
+                "Set the full distribution for an infoset using profile[infoset] = [...]."
+            )
         if isinstance(index, Infoset):
             if index.game != self.game:
                 raise MismatchError("infoset must belong to this game")
@@ -547,22 +514,17 @@ class MixedBehaviorProfile:
             return
         if isinstance(index, str):
             try:
-                self._setprob_player(self.game._resolve_player(index, "__getitem__"), value)
+                self._setprob_player(self.game._resolve_player(index, "__setitem__"), value)
                 return
             except KeyError:
                 pass
             try:
-                self._setprob_infoset(self.game._resolve_infoset(index, "__getitem__"), value)
+                self._setprob_infoset(self.game._resolve_infoset(index, "__setitem__"), value)
                 return
             except KeyError:
-                pass
-            try:
-                self._setprob_action(self.game._resolve_action(index, "__getitem__"), value)
-            except KeyError:
-                raise KeyError(f"no player, infoset, or action with label '{index}'")
-            return
+                raise KeyError(f"no player or infoset with label '{index}'") from None
         raise TypeError(
-            f"profile index must be Player, Infoset, Action, or str, "
+            f"profile index must be Player, Infoset, or str, "
             f"not {index.__class__.__name__}"
         )
 

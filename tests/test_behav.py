@@ -15,9 +15,18 @@ def _set_action_probs(profile: gbt.MixedBehaviorProfile, probs: list, rational_f
     """Set the action probabilities in a behavior profile called ```profile``` according to a
     list with probabilities in the order of ```profile.game.actions```
     """
-    for i, p in enumerate(probs):
-        # assumes rationals given as strings
-        profile[profile.game.actions[i]] = gbt.Rational(p) if rational_flag else p
+    idx = 0
+    for player in profile.game.players:
+        for infoset in player.infosets:
+            infoset_probs = []
+            for action in infoset.actions:
+                if idx < len(probs):
+                    p = probs[idx]
+                    infoset_probs.append(gbt.Rational(p) if rational_flag else p)
+                    idx += 1
+                else:
+                    infoset_probs.append(profile[action])
+            profile[infoset] = infoset_probs
 
 
 @pytest.mark.parametrize(
@@ -443,14 +452,14 @@ def test_profile_indexing_by_player_label_reference(game: gbt.Game, player_label
      (games.create_stripped_down_poker_efg(), 5, "6/10", True),
      ]
 )
-def test_set_probabilities_action(game: gbt.Game, action_idx: int, prob: str | float,
+def test_set_probabilities_action_raises_error(game: gbt.Game, action_idx: int, prob: str | float,
                                   rational_flag: bool):
-    """Test to set probabilities of actions by action index"""
+    """Test that setting individual action probabilities raises TypeError."""
     profile = game.mixed_behavior_profile(rational=rational_flag)
     prob = gbt.Rational(prob) if rational_flag else prob
     action = game.actions[action_idx]
-    profile[action] = prob
-    assert profile[action] == prob
+    with pytest.raises(TypeError):
+        profile[action] = prob
 
 
 @pytest.mark.parametrize(
@@ -471,12 +480,12 @@ def test_set_probabilities_action(game: gbt.Game, action_idx: int, prob: str | f
      (games.create_stripped_down_poker_efg(), "Call", "3/10", True),
      ]
 )
-def test_set_probabilities_action_by_label(game: gbt.Game, label: str,
+def test_set_probabilities_action_by_label_raises_error(game: gbt.Game, label: str,
                                            prob: str | float, rational_flag: bool):
     profile = game.mixed_behavior_profile(rational=rational_flag)
     prob = gbt.Rational(prob) if rational_flag else prob
-    profile[label] = prob
-    assert profile[label] == prob
+    with pytest.raises((TypeError, KeyError)):
+        profile[label] = prob
 
 
 @pytest.mark.parametrize(

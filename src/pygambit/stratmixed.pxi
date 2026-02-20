@@ -130,40 +130,11 @@ class MixedStrategy:
                 raise KeyError(f"no strategy with label '{index}' for player") from None
         raise TypeError(f"strategy index must be Strategy or str, not {index.__class__.__name__}")
 
-    def __setitem__(self, index: StrategyReference, value: typing.Any) -> None:
-        """Sets the probability a strategy is played.
-
-        Parameters
-        ----------
-        index : Strategy, or str
-            The part of the profile to set:
-
-            * If `index` is a ``Strategy``, sets the probability the strategy is played.
-            * If `index` is a ``str``, attempts to resolve the referenced object by searching
-              for a strategy with that label, and sets the probability for that strategy.
-
-        value
-            Any value which can be converted to the data type of the ``MixedStrategyProfile``.
-
-        Raises
-        ------
-        MismatchError
-            If `strategy` is a ``Strategy`` that does not belong to this ``MixedStrategy``'s
-            player.
-        """
-        self.profile._check_validity()
-        if isinstance(index, Strategy):
-            if index.player != self.player:
-                raise MismatchError("strategy must belong to this player")
-            self.profile._setprob_strategy(index, value)
-            return
-        if isinstance(index, str):
-            try:
-                self.profile._setprob_strategy(self.player.strategies[index], value)
-                return
-            except KeyError:
-                raise KeyError(f"no strategy with label '{index}' for player") from None
-        raise TypeError(f"strategy index must be Strategy or str, not {index.__class__.__name__}")
+    def __setitem__(self, index, value) -> None:
+        raise TypeError(
+            "Setting individual strategy probabilities is not supported. "
+            "Set the full distribution for a player using profile[player] = [...]."
+        )
 
 
 @cython.cclass
@@ -293,36 +264,36 @@ class MixedStrategyProfile:
 
     def __setitem__(
             self,
-            index: PlayerReference | StrategyReference,
+            index: PlayerReference,
             value: typing.Any
     ) -> None:
-        """Sets a probability or a mixed strategy to `value`.
+        """Sets the mixed strategy distribution for a player.
 
         Parameters
         ----------
-        index : Player, Strategy, or str
-            The part of the profile to set:
+        index : Player or str
+            The player whose mixed strategy distribution to set.
 
             * If `index` is a ``Player``, sets the ``MixedStrategy`` over the player's strategies.
-            * If `index` is a ``Strategy``, sets the probability the strategy is played.
-            * If `index` is a ``str``, attempts to resolve the referenced object by first searching
-              for a player with that label, and then for a strategy with that label.
+            * If `index` is a ``str``, attempts to resolve the referenced object by searching
+              for a player with that label.
 
         value
-            Any value which can be converted to the data type of the ``MixedStrategyProfile``.
+            A sequence of values specifying the probability of each strategy for the player.
 
         Raises
         ------
         MismatchError
-            If `player` is a ``Player`` from a different game, or `strategy` is a ``Strategy``
-            from a different game.
+            If `player` is a ``Player`` from a different game.
+        TypeError
+            If `index` is a ``Strategy`` or other unsupported type.
         """
         self._check_validity()
         if isinstance(index, Strategy):
-            if index.game != self.game:
-                raise MismatchError("strategy must belong to this game")
-            self._setprob_strategy(index, value)
-            return
+            raise TypeError(
+                "Setting individual strategy probabilities is not supported. "
+                "Set the full distribution for a player using profile[player] = [...]."
+            )
         if isinstance(index, Player):
             if index.game != self.game:
                 raise MismatchError("player must belong to this game")
@@ -333,14 +304,9 @@ class MixedStrategyProfile:
                 self._setprob_player(self.game._resolve_player(index, "__setitem__"), value)
                 return
             except KeyError:
-                pass
-            try:
-                self._setprob_strategy(self.game._resolve_strategy(index, "__setitem__"), value)
-            except KeyError:
-                raise KeyError(f"no player or strategy with label '{index}'")
-            return
+                raise KeyError(f"no player with label '{index}'") from None
         raise TypeError(
-            f"profile index must be Player, Strategy, or str, not {index.__class__.__name__}"
+            f"profile index must be Player or str, not {index.__class__.__name__}"
         )
 
     def payoff(self, player: PlayerReference) -> ProfileDType:

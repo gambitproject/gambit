@@ -219,10 +219,14 @@ def _estimate_strategy_empirical(
         bounds=((0.0, None),)
     )
     profile = data.game.mixed_strategy_profile()
-    for strategy, log_prob in zip(data.game.strategies,
-                                  _empirical_log_logit_probs(res.x[0], regrets),
-                                  strict=True):
-        profile[strategy] = math.exp(log_prob)
+    log_probs = _empirical_log_logit_probs(res.x[0], regrets)
+    idx = 0
+    for player in data.game.players:
+        player_probs = []
+        for strategy in player.strategies:
+            player_probs.append(math.exp(log_probs[idx]))
+            idx += 1
+        profile[player] = player_probs
     return LogitQREMixedStrategyFitResult(
         data, "empirical", res.x[0], profile, -res.fun
     )
@@ -241,9 +245,15 @@ def _estimate_behavior_empirical(
         bounds=((0.0, None),)
     )
     profile = data.game.mixed_behavior_profile()
-    for action, log_prob in zip(data.game.actions, _empirical_log_logit_probs(res.x[0], regrets),
-                                strict=True):
-        profile[action] = math.exp(log_prob)
+    log_probs = _empirical_log_logit_probs(res.x[0], regrets)
+    idx = 0
+    for player in data.game.players:
+        for infoset in player.infosets:
+            infoset_probs = []
+            for action in infoset.actions:
+                infoset_probs.append(math.exp(log_probs[idx]))
+                idx += 1
+            profile[infoset] = infoset_probs
     return LogitQREMixedBehaviorFitResult(
         data, "empirical", res.x[0], profile, -res.fun
     )

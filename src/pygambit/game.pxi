@@ -909,8 +909,7 @@ class Game:
                 raise ValueError(
                     f"Number of elements does not match number of strategies for {p}"
                 )
-            for (s, v) in zip(p.strategies, d, strict=True):
-                profile[s] = typefunc(v)
+            profile[p] = [typefunc(v) for v in d]
         return profile
 
     def mixed_strategy_profile(self, data=None, rational=False) -> MixedStrategyProfile:
@@ -986,15 +985,11 @@ class Game:
         if denom is None:
             profile = self.mixed_strategy_profile()
             for player in self.players:
-                for strategy, prob in zip(
-                        player.strategies,
-                        scipy.stats.dirichlet(
-                            alpha=[1 for strategy in player.strategies],
-                            seed=gen
-                        ).rvs(size=1)[0],
-                        strict=True
-                        ):
-                    profile[strategy] = prob
+                probs = scipy.stats.dirichlet(
+                    alpha=[1 for _ in player.strategies],
+                    seed=gen
+                ).rvs(size=1)[0]
+                profile[player] = list(probs)
             return profile
         elif denom < 1:
             raise ValueError("random_strategy_profile(): denom must be positive")
@@ -1009,16 +1004,11 @@ class Game:
                     ) +
                     [denom + k]
                 )
-                for strategy, (hi, lo) in zip(
-                    player.strategies,
-                    zip(
-                        sample[1:],
-                        sample[:-1],
-                        strict=True
-                    ),
-                    strict=True
-                ):
-                    profile[strategy] = Rational(hi - lo - 1, denom)
+                probs = [
+                    Rational(hi - lo - 1, denom)
+                    for (hi, lo) in zip(sample[1:], sample[:-1], strict=True)
+                ]
+                profile[player] = probs
             return profile
 
     def _fill_behavior_profile(self,
@@ -1039,8 +1029,7 @@ class Game:
                         f"Number of elements does not match number of "
                         f"actions for infoset {i} for {p}"
                     )
-                for (a, u) in zip(i.actions, v, strict=True):
-                    profile[a] = typefunc(u)
+                profile[i] = [typefunc(u) for u in v]
         return profile
 
     def mixed_behavior_profile(self, data=None, rational=False) -> MixedBehaviorProfile:
@@ -1119,13 +1108,11 @@ class Game:
         if denom is None:
             profile = self.mixed_behavior_profile()
             for infoset in self.infosets:
-                for action, prob in zip(
-                        infoset.actions,
-                        scipy.stats.dirichlet(alpha=[1 for action in infoset.actions],
-                                              seed=gen).rvs(size=1)[0],
-                        strict=True
-                ):
-                    profile[action] = prob
+                probs = scipy.stats.dirichlet(
+                    alpha=[1 for _ in infoset.actions],
+                    seed=gen
+                ).rvs(size=1)[0]
+                profile[infoset] = list(probs)
             return profile
         elif denom < 1:
             raise ValueError("random_behavior_profile(): denom must be positive")
@@ -1140,15 +1127,11 @@ class Game:
                     ) +
                     [denom + k]
                 )
-                for action, (hi, lo) in zip(
-                    infoset.actions,
-                    zip(
-                        sample[1:], sample[:-1],
-                        strict=True
-                    ),
-                    strict=True
-                ):
-                    profile[action] = Rational(hi - lo - 1, denom)
+                probs = [
+                    Rational(hi - lo - 1, denom)
+                    for (hi, lo) in zip(sample[1:], sample[:-1], strict=True)
+                ]
+                profile[infoset] = probs
             return profile
 
     def strategy_support_profile(
