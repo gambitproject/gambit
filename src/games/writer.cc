@@ -51,6 +51,14 @@ std::string WriteHTMLFile(const Game &p_game, const GamePlayer &p_rowPlayer,
     }
 
     theHtml += "<table>";
+    // Header row: top-left shows row player name; above all col strategy columns show col player name
+    theHtml += "<tr>";
+    theHtml += "<td align=center><b>" + p_rowPlayer->GetLabel() + "</b></td>";
+    theHtml += "<td align=center colspan=\"";
+    theHtml += std::to_string(p_colPlayer->GetStrategies().size());
+    theHtml += "\"><b>" + p_colPlayer->GetLabel() + "</b></td>";
+    theHtml += "</tr>";
+    // Strategy header row: blank corner, then each col strategy name
     theHtml += "<tr>";
     theHtml += "<td></td>";
     for (const auto &strategy : p_colPlayer->GetStrategies()) {
