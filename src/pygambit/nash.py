@@ -313,7 +313,7 @@ def lp_solve(
 
 
 def liap_solve(
-        start: libgbt.MixedStrategyProfileDouble,
+        start: libgbt.MixedStrategyProfile,
         maxregret: float = 1.0e-4,
         maxiter: int = 1000
 ) -> NashComputationResult:
@@ -333,7 +333,7 @@ def liap_solve(
 
     Parameters
     ----------
-    start : MixedStrategyProfileDouble
+    start : MixedStrategyProfile
         The starting profile for function minimization.  Up to one equilibrium will be found
         from any starting profile, and the equilibrium found may (and generally will)
         depend on the initial profile chosen.
@@ -357,6 +357,9 @@ def liap_solve(
     """
     if maxregret <= 0.0:
         raise ValueError("liap_solve(): maxregret argument must be positive")
+    
+    start = start.astype(float)
+        
     equilibria = libgbt._liap_strategy_solve(start,
                                              maxregret=maxregret, maxiter=maxiter)
     return NashComputationResult(
@@ -370,7 +373,7 @@ def liap_solve(
 
 
 def liap_agent_solve(
-        start: libgbt.MixedBehaviorProfileDouble,
+        start: libgbt.MixedBehaviorProfile,
         maxregret: float = 1.0e-4,
         maxiter: int = 1000
 ) -> NashComputationResult:
@@ -384,7 +387,7 @@ def liap_agent_solve(
 
     Parameters
     ----------
-    start : MixedBehaviorProfileDouble
+    start : MixedBehaviorProfile
         The starting profile for function minimization.  Up to one equilibrium will be found
         from any starting profile, and the equilibrium found may (and generally will)
         depend on the initial profile chosen.
@@ -404,6 +407,8 @@ def liap_agent_solve(
     """
     if maxregret <= 0.0:
         raise ValueError("liap_solve(): maxregret argument must be positive")
+    start = start.astype(float)
+        
     equilibria = libgbt._liap_behavior_solve(start,
                                              maxregret=maxregret, maxiter=maxiter)
     return NashComputationResult(

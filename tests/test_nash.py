@@ -826,10 +826,22 @@ def test_liap_strategy():
     _ = gbt.nash.liap_solve(game.mixed_strategy_profile())
 
 
+def test_liap_strategy_rational():
+    """Test calls of liap for mixed strategy equilibria with rational precision profiles."""
+    game = games.read_from_file("stripped_down_poker.efg")
+    _ = gbt.nash.liap_solve(game.mixed_strategy_profile(rational=True))
+
+
 def test_liap_agent():
     """Test calls of agent liap for mixed behavior equilibria."""
     game = games.read_from_file("stripped_down_poker.efg")
     _ = gbt.nash.liap_agent_solve(game.mixed_behavior_profile())
+
+
+def test_liap_agent_rational():
+    """Test calls of agent liap for mixed behavior equilibria with rational precision profiles."""
+    game = games.read_from_file("stripped_down_poker.efg")
+    _ = gbt.nash.liap_agent_solve(game.mixed_behavior_profile(rational=True))
 
 
 def test_simpdiv_strategy():

@@ -316,6 +316,7 @@ def logit_estimate(
         as a structural model for estimation: The missing manual.
         SSRN working paper 4425515.
     """
+    data = data.astype(float)
     if isinstance(data, libgbt.MixedStrategyProfile):
         if use_empirical:
             return _estimate_strategy_empirical(data)
