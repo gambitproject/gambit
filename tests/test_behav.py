@@ -1360,6 +1360,7 @@ def test_tree_representation_error(game: gbt.Game, rational_flag: bool, data: li
 
 
 def test_astype_float():
+    """Test astype(float) converts rational behavior profiles to float profiles."""
     game = games.create_stripped_down_poker_efg()
     profile = game.mixed_behavior_profile(rational=True)
     profile["Alice"] = [[gbt.Rational("1/3"), gbt.Rational("2/3")],
@@ -1375,6 +1376,7 @@ def test_astype_float():
 
 
 def test_astype_rational():
+    """Test astype(gbt.Rational) converts float behavior profiles to rational profiles."""
     game = games.create_stripped_down_poker_efg()
     profile = game.mixed_behavior_profile(rational=False)
     profile["Alice"] = [[0.25, 0.75], [0.5, 0.5]]
@@ -1388,6 +1390,8 @@ def test_astype_rational():
 
 
 def test_astype_identity():
+    """Test astype() returns an identical profile if the requested type
+    matches the profile precision."""
     game = games.create_stripped_down_poker_efg()
     profile = game.mixed_behavior_profile(rational=True)
     profile["Alice"] = [[gbt.Rational("1/3"), gbt.Rational("2/3")],

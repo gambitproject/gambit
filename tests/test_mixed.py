@@ -1083,6 +1083,7 @@ def test_profile_order_consistency(game: gbt.Game,
 
 
 def test_astype_float():
+    """Test astype(float) converts rational strategy profiles to float profiles."""
     game = games.create_stripped_down_poker_efg()
     profile = game.mixed_strategy_profile(rational=True)
     profile["Alice"] = [gbt.Rational("1/4")] * 4
@@ -1096,6 +1097,7 @@ def test_astype_float():
 
 
 def test_astype_rational():
+    """Test astype(gbt.Rational) converts float strategy profiles to rational profiles."""
     game = games.create_stripped_down_poker_efg()
     profile = game.mixed_strategy_profile(rational=False)
     profile["Alice"] = [0.25, 0.25, 0.25, 0.25]
@@ -1108,6 +1110,8 @@ def test_astype_rational():
 
 
 def test_astype_identity():
+    """Test astype() returns an identical profile if the requested type
+    matches the profile precision."""
     game = games.create_stripped_down_poker_efg()
     profile = game.mixed_strategy_profile(rational=True)
     profile["Alice"] = [gbt.Rational("1/4")] * 4
