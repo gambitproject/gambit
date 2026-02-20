@@ -102,6 +102,7 @@ Polynomial<double> GetPayoff(ProblemData &p_data, const GamePlayer &p_player)
 
   for (auto profile : p_data.m_support.GetSequenceContingencies()) {
     auto pay = p_data.m_support.GetPayoff(profile, p_player);
+
     if (pay != Rational(0)) {
       Polynomial<double> term(p_data.space, double(pay));
       for (auto player : p_data.m_support.GetPlayers()) {
@@ -157,7 +158,20 @@ std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfil
   ProblemData data(p_support);
   PolynomialSystem<double> equations(data.space);
   IndifferenceEquations(data, equations);
-  LastActionProbPositiveInequalities(data, equations);
+  // LastActionProbPositiveInequalities(data, equations); // Buggy: Forces x=0. Keep commented out.
+
+  // BYPASS: If the support is pure (0 variables), bypass the numerical solver
+  if (data.space->GetDimension() == 0) {
+    std::list<MixedBehaviorProfile<double>> solutions;
+    Vector<double> empty_root(0);
+    const MixedBehaviorProfile<double> sol(
+        data.m_support.ToMixedBehaviorProfile(ToSequenceProbs(data, empty_root)));
+    if (ExtendsToNash(sol, BehaviorSupportProfile(sol.GetGame()),
+                      BehaviorSupportProfile(sol.GetGame()))) {
+      solutions.push_back(sol);
+    }
+    return solutions;
+  }
 
   // set up the rectangle of search
   Vector<double> bottoms(data.space->GetDimension()), tops(data.space->GetDimension());
@@ -174,7 +188,6 @@ std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfil
     p_isSingular = true;
   }
   catch (const std::domain_error &) {
-    // std::cerr << "Assertion warning: " << e.what() << std::endl;
     p_isSingular = true;
   }
 
@@ -210,10 +223,34 @@ EnumPolyBehaviorSolve(const Game &p_game, int p_stopAfter, double p_maxregret,
   for (auto support : possible_supports->m_supports) {
     p_onSupport("candidate", support);
     bool isSingular = false;
+
     for (auto solution :
          SolveSupport(support, isSingular, std::max(p_stopAfter - int(ret.size()), 0))) {
-      const MixedBehaviorProfile<double> fullProfile = solution.ToFullSupport();
-      if (fullProfile.GetAgentMaxRegret() < p_maxregret) {
+
+      // Removed 'const' so we can normalize the missing unreached information sets
+      MixedBehaviorProfile<double> fullProfile = solution.ToFullSupport();
+
+      // FIX: Normalize unreached information sets that were pruned from the support.
+      // This prevents GetAgentMaxRegret() from corrupting the math due to 0-sum probabilities.
+      for (auto player : fullProfile.GetGame()->GetPlayers()) {
+        if (player->IsChance()) continue;
+        for (auto infoset : player->GetInfosets()) {
+          double sum = 0;
+          for (auto action : infoset->GetActions()) {
+            sum += fullProfile.GetActionProb(action);
+          }
+          if (sum < 1e-6) {
+            double uniform = 1.0 / infoset->GetActions().size();
+            for (auto action : infoset->GetActions()) {
+              fullProfile[action] = uniform;
+            }
+          }
+        }
+      }
+
+      double current_regret = fullProfile.GetAgentMaxRegret();
+
+      if (current_regret < p_maxregret) {
         p_onEquilibrium(fullProfile);
         ret.push_back(fullProfile);
       }
@@ -225,6 +262,7 @@ EnumPolyBehaviorSolve(const Game &p_game, int p_stopAfter, double p_maxregret,
       break;
     }
   }
+
   return ret;
 }
 
