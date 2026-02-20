@@ -549,6 +549,40 @@ class MixedStrategyProfile:
         self._check_validity()
         return self._copy()
 
+    def astype(self, dtype) -> "MixedStrategyProfile":
+        """Returns a copy of the profile converted to the specified precision.
+
+        Parameters
+        ----------
+        dtype : type
+            The type to convert the profile to.  Supported types are `float`
+            (for double-precision) and `Rational` (for rational precision).
+
+        Returns
+        -------
+        MixedStrategyProfile
+            A new profile with the converted precision.
+        """
+        self._check_validity()
+        if dtype == float:
+            if isinstance(self, MixedStrategyProfileDouble):
+                return self.copy()
+            else:
+                profile = self.game.mixed_strategy_profile(rational=False)
+                for strategy, prob in self:
+                    profile[strategy] = float(prob)
+                return profile
+        elif dtype == Rational:
+            if isinstance(self, MixedStrategyProfileRational):
+                return self.copy()
+            else:
+                profile = self.game.mixed_strategy_profile(rational=True)
+                for strategy, prob in self:
+                    profile[strategy] = Rational(prob)
+                return profile
+        else:
+            raise TypeError(f"Unsupported dtype '{dtype.__name__ if hasattr(dtype, '__name__') else dtype}' for MixedStrategyProfile conversion")
+
     def _all_zero_probs(self) -> bool:
         """Returns True if at least one player has only zero probabilities."""
         return any([all([self._getprob_strategy(s) == 0 for s in p.strategies])
