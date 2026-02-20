@@ -54,8 +54,8 @@ void PrintHelp(char *progname)
   std::cerr << "  -d DECIMALS      show equilibria as floating point with DECIMALS digits\n";
   std::cerr << "  -h, --help       print this help message\n";
   std::cerr << "  -n COUNT         number of perturbation vectors to generate\n";
-  std::cerr << "  -s FILE          file containing perturbation vectors (one per line, CSV "
-                "format)\n";
+  std::cerr << "  -s FILE          file containing perturbation vectors "
+               "(one per line, CSV format)\n";
   std::cerr << "  -q               quiet mode (suppresses banner)\n";
   std::cerr << "  -v, --version    print version information\n";
   std::cerr << "\n  -s and -n cannot be used together.\n";
