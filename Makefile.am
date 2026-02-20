@@ -213,8 +213,6 @@ EXTRA_DIST = \
 	contrib/games/csg4.nfg \
 	contrib/games/deg1.nfg \
 	contrib/games/deg2.nfg \
-	contrib/games/e01.nfg \
-	contrib/games/e02.nfg \
 	contrib/games/e04.nfg \
 	contrib/games/e07.nfg \
 	contrib/games/g1.nfg \
