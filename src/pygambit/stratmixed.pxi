@@ -581,7 +581,10 @@ class MixedStrategyProfile:
                     profile[strategy] = Rational(prob)
                 return profile
         else:
-            raise TypeError(f"Unsupported dtype '{dtype.__name__ if hasattr(dtype, '__name__') else dtype}' for MixedStrategyProfile conversion")
+            dt_name = dtype.__name__ if hasattr(dtype, "__name__") else dtype
+            raise TypeError(
+                f"Unsupported dtype '{dt_name}' for MixedStrategyProfile conversion"
+            )
 
     def _all_zero_probs(self) -> bool:
         """Returns True if at least one player has only zero probabilities."""

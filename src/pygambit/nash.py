@@ -357,9 +357,9 @@ def liap_solve(
     """
     if maxregret <= 0.0:
         raise ValueError("liap_solve(): maxregret argument must be positive")
-    
+
     start = start.astype(float)
-        
+
     equilibria = libgbt._liap_strategy_solve(start,
                                              maxregret=maxregret, maxiter=maxiter)
     return NashComputationResult(
@@ -408,7 +408,7 @@ def liap_agent_solve(
     if maxregret <= 0.0:
         raise ValueError("liap_solve(): maxregret argument must be positive")
     start = start.astype(float)
-        
+
     equilibria = libgbt._liap_behavior_solve(start,
                                              maxregret=maxregret, maxiter=maxiter)
     return NashComputationResult(

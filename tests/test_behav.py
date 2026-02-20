@@ -1365,7 +1365,7 @@ def test_astype_float():
     profile["Alice"] = [[gbt.Rational("1/3"), gbt.Rational("2/3")],
                         [gbt.Rational("1/2"), gbt.Rational("1/2")]]
     profile["Bob"] = [[gbt.Rational("1/4"), gbt.Rational("3/4")]]
-    
+
     double_profile = profile.astype(float)
     assert isinstance(double_profile, gbt.MixedBehaviorProfile)
     assert not isinstance(double_profile, gbt.MixedBehaviorProfileRational)
@@ -1379,7 +1379,7 @@ def test_astype_rational():
     profile = game.mixed_behavior_profile(rational=False)
     profile["Alice"] = [[0.25, 0.75], [0.5, 0.5]]
     profile["Bob"] = [[0.6, 0.4]]
-    
+
     rational_profile = profile.astype(gbt.Rational)
     assert isinstance(rational_profile, gbt.MixedBehaviorProfileRational)
     actions = list(game.actions)
@@ -1393,7 +1393,7 @@ def test_astype_identity():
     profile["Alice"] = [[gbt.Rational("1/3"), gbt.Rational("2/3")],
                         [gbt.Rational("1/2"), gbt.Rational("1/2")]]
     profile["Bob"] = [[gbt.Rational("1/4"), gbt.Rational("3/4")]]
-    
+
     rational_profile = profile.astype(gbt.Rational)
     assert isinstance(rational_profile, gbt.MixedBehaviorProfileRational)
     assert rational_profile == profile

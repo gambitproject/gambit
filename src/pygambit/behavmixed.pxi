@@ -943,7 +943,10 @@ class MixedBehaviorProfile:
                     profile[action] = Rational(prob)
                 return profile
         else:
-            raise TypeError(f"Unsupported dtype '{dtype.__name__ if hasattr(dtype, '__name__') else dtype}' for MixedBehaviorProfile conversion")
+            dt_name = dtype.__name__ if hasattr(dtype, "__name__") else dtype
+            raise TypeError(
+                f"Unsupported dtype '{dt_name}' for MixedBehaviorProfile conversion"
+            )
 
 
 @cython.cclass
