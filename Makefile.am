@@ -237,10 +237,10 @@ EXTRA_DIST = \
 	contrib/games/yamamoto.nfg \
 	contrib/games/zero.nfg \
 	src/README.rst \
-	catalog/2smp.efg \
-	catalog/2x2x2.nfg \
-	catalog/myerson/fig_4_2.efg \
-	catalog/pd.nfg
+	catalog/myerson1991/fig4_2.efg \
+	catalog/selten1975/fig1.efg \
+	catalog/selten1975/fig2.efg \
+	catalog/selten1975/fig3.efg
 
 core_SOURCES = \
     src/core/core.h \
