@@ -111,8 +111,8 @@ EnumPolyStrategySupportSolve(const StrategySupportProfile &support, bool &is_sin
   const PolynomialSystem<double> equations = ConstructEquations(space, support, strategy_poly);
 
   Vector<double> bottoms(space->GetDimension()), tops(space->GetDimension());
-  bottoms = 0;
-  tops = 1;
+  bottoms = 1e-12;
+  tops = 1 - 1e-12;
   PolynomialSystemSolver solver(equations);
   is_singular = false;
   std::list<Vector<double>> roots;
