@@ -1357,3 +1357,50 @@ def test_tree_representation_error(game: gbt.Game, rational_flag: bool, data: li
     """
     with pytest.raises(gbt.UndefinedOperationError):
         game.mixed_behavior_profile(rational=rational_flag, data=data)
+
+@pytest.mark.parametrize(
+    "game,rational_flag",
+    [(games.create_mixed_behav_game_efg(), False),
+     (games.create_mixed_behav_game_efg(), True),
+     (games.create_stripped_down_poker_efg(), False),
+     (games.create_stripped_down_poker_efg(), True),
+     ]
+)
+def test_mixed_behavior_profile_max_regret(game: gbt.Game, rational_flag: bool):
+    """Test that max_regret executes without error and returns a valid non-negative number."""
+    profile = game.mixed_behavior_profile(rational=rational_flag)
+
+    # Calculate the standard max regret
+    regret = profile.max_regret()
+
+    # Check type depending on the rational flag
+    if rational_flag:
+        assert isinstance(regret, gbt.Rational)
+    else:
+        assert isinstance(regret, float)
+
+    assert regret >= 0
+
+
+@pytest.mark.parametrize(
+    "game,rational_flag",
+    [(games.create_mixed_behav_game_efg(), False),
+     (games.create_mixed_behav_game_efg(), True),
+     (games.create_stripped_down_poker_efg(), False),
+     (games.create_stripped_down_poker_efg(), True),
+     ]
+)
+def test_mixed_behavior_profile_agent_max_regret(game: gbt.Game, rational_flag: bool):
+    """Test that agent_max_regret executes without error and returns a valid non-negative number."""
+    profile = game.mixed_behavior_profile(rational=rational_flag)
+
+    # Calculate the agent max regret
+    agent_regret = profile.agent_max_regret()
+
+    # Check type depending on the rational flag
+    if rational_flag:
+        assert isinstance(agent_regret, gbt.Rational)
+    else:
+        assert isinstance(agent_regret, float)
+
+    assert agent_regret >= 0
