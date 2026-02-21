@@ -29,8 +29,10 @@ import math
 import scipy.optimize
 
 import pygambit.gambit as libgbt
+from .util import warn_on_explicit_use_strategic_false
 
 
+@warn_on_explicit_use_strategic_false
 def logit_solve_branch(
         game: libgbt.Game,
         use_strategic: bool = False,
@@ -50,6 +52,7 @@ def logit_solve_branch(
         return libgbt._logit_behavior_branch(game, maxregret, first_step, max_accel)
 
 
+@warn_on_explicit_use_strategic_false
 def logit_solve_lambda(
         game: libgbt.Game,
         lam: float | list[float],

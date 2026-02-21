@@ -31,6 +31,7 @@ import pathlib
 import pygambit.gambit as libgbt
 
 from . import nashlrs, nashphc
+from .util import warn_on_explicit_use_strategic_false
 
 MixedStrategyEquilibriumSet = list[libgbt.MixedStrategyProfile]
 MixedBehaviorEquilibriumSet = list[libgbt.MixedBehaviorProfile]
@@ -186,6 +187,7 @@ def enummixed_solve(
     )
 
 
+@warn_on_explicit_use_strategic_false
 def lcp_solve(
         game: libgbt.Game,
         rational: bool = True,
@@ -263,6 +265,7 @@ def lcp_solve(
     )
 
 
+@warn_on_explicit_use_strategic_false
 def lp_solve(
         game: libgbt.Game,
         rational: bool = True,
@@ -656,6 +659,7 @@ def possible_nash_supports(game: libgbt.Game) -> list[libgbt.StrategySupportProf
     return libgbt._nashsupport_strategy_solve(game)
 
 
+@warn_on_explicit_use_strategic_false
 def enumpoly_solve(
         game: libgbt.Game,
         use_strategic: bool = False,
@@ -741,6 +745,7 @@ def enumpoly_solve(
     )
 
 
+@warn_on_explicit_use_strategic_false
 def logit_solve(
         game: libgbt.Game,
         use_strategic: bool = False,
