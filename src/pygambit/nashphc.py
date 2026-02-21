@@ -73,7 +73,7 @@ def _process_phc_output(output: str) -> list[dict]:
     return solutions
 
 
-def _run_phc(phcpack_path: pathlib.Path | str, equations: list[str]) -> list[dict]:
+def _run_phc(phcpack_path: pathlib.Path | str, phc_input_string: str) -> list[dict]:
     """Call PHCpack via an external binary to solve a set of equations, and return
     the details on solutions found.
 
@@ -82,31 +82,15 @@ def _run_phc(phcpack_path: pathlib.Path | str, equations: list[str]) -> list[dic
     phcpack_path : pathlib.Path or str
         The path to the PHC program binary
 
-    equations : list[str]
-        The set of equations to solve, expressed as string representations of the
-        polynomials.
+    phc_input_string : str
+        The exact formatted string representing the polynomial equations for PHCpack.
 
     Returns
     -------
-    A list of dictionaries, each representing one solution.  Each dictionary
-    may contain the following keys:
-        - `vars': A dictionary whose keys are the variable names,
-                  and whose values are the solution values, represented
-                  using the Python `complex` type.
-        - `type': The text string PHCpack emits describing the output
-                  (e.g., "no solution", "real regular", etc.)
-        - `startresidual'
-        - `iterations'
-        - `result'
-        - `t'
-        - `m'
-        - `err'
-        - `rco'
-        - `res'
+    A list of dictionaries, each representing one solution.
     """
     with (
-            util.make_temporary(f"{len(equations)}\n" +
-                                ";\n".join(equations) + ";\n\n\n") as infn,
+            util.make_temporary(phc_input_string) as infn,
             util.make_temporary() as outfn
     ):
         result = subprocess.run([phcpack_path, "-b", infn, outfn])
@@ -118,7 +102,7 @@ def _run_phc(phcpack_path: pathlib.Path | str, equations: list[str]) -> list[dic
 
 # Use this table to assign letters to player strategy variables
 # Skip 'e', 'i', and 'j', because PHC doesn't allow these in variable names.
-_playerletters = [c for c in string.ascii_lowercase if c != ["e", "i", "j"]]
+_playerletters = [c for c in string.ascii_lowercase if c not in ["e", "i", "j"]]
 
 
 def _contingencies(
@@ -157,6 +141,27 @@ def _equilibrium_equations(support: gbt.StrategySupportProfile, player: gbt.Play
                               for strat in strategies) + "-1")
     return equations
 
+def generate_phc_input(support: gbt.StrategySupportProfile) -> tuple[str, dict]:
+    """
+    Generates the PHCpack input string and the strategy-to-variable mapping.
+    """
+    # 1. Generate the polynomial equations
+    eqns = [eqn
+            for player in support.game.players
+            for eqn in _equilibrium_equations(support, player)]
+
+    # 2. Format the exact string PHCpack expects
+    phc_input_string = f"{len(eqns)}\n" + ";\n".join(eqns) + ";\n\n\n"
+
+    # 3. Create the mapping:
+    mapping = {}
+    for player in support.game.players:
+        playerchar = _playerletters[player.number]
+        for strategy in player.strategies:
+            var_name = playerchar + str(strategy.number)
+            mapping[var_name] = strategy
+
+    return phc_input_string, mapping
 
 def _is_nash(profile: gbt.MixedStrategyProfile, maxregret: float, negtol: float) -> bool:
     """Check if the profile is an (approximate) Nash equilibrium, allowing a maximum
@@ -168,17 +173,23 @@ def _is_nash(profile: gbt.MixedStrategyProfile, maxregret: float, negtol: float)
     return profile.max_regret() < maxregret
 
 
-def _solution_to_profile(game: gbt.Game, entry: dict) -> gbt.MixedStrategyProfileDouble:
+def _solution_to_profile(game: gbt.Game, entry: dict, strategy_mapping: dict) -> gbt.MixedStrategyProfileDouble:
+    """Converts a parsed PHCpack solution dictionary into a Gambit MixedStrategyProfile
+    using the provided strategy mapping.
+    """
     profile = game.mixed_strategy_profile()
-    for player in game.players:
-        playerchar = _playerletters[player.number]
-        for strategy in player.strategies:
-            try:
-                profile[strategy] = entry["vars"][playerchar + str(strategy.number)].real
-            except KeyError:
-                profile[strategy] = 0.0
-    return profile
 
+    # Initialize all strategy probabilities to 0.0 first
+    for player in game.players:
+        for strategy in player.strategies:
+            profile[strategy] = 0.0
+
+    # Apply the parsed probabilities using the mapping
+    for var_name, strategy in strategy_mapping.items():
+        if var_name in entry["vars"]:
+            profile[strategy] = entry["vars"][var_name].real
+
+    return profile
 
 def _format_support(support, label: str) -> str:
     strings = ["".join(str(int(strategy in support)) for strategy in player.strategies)
@@ -217,13 +228,17 @@ def _solve_support(support: gbt.StrategySupportProfile,
     if len(support) == len(support.game.players):
         profiles = [_profile_from_support(support)]
     else:
-        eqns = [eqn
-                for player in support.game.players
-                for eqn in _equilibrium_equations(support, player)]
+        # 1. Generate the formatted input string and the strategy mapping
+        phc_input_string, mapping = generate_phc_input(support)
+
         try:
+            # 2. Run PHCpack using the pre-formatted string
+            parsed_solutions = _run_phc(phcpack_path, phc_input_string)
+
+            # 3. Convert parsed solutions to Gambit profiles using the mapping
             profiles = [
-                _solution_to_profile(support.game, entry)
-                for entry in _run_phc(phcpack_path, eqns)
+                _solution_to_profile(support.game, entry, mapping)
+                for entry in parsed_solutions
             ]
         except ValueError:
             onsupport(support, "singular")
@@ -231,6 +246,7 @@ def _solve_support(support: gbt.StrategySupportProfile,
         except Exception:
             onsupport(support, "singular")
             raise
+
     profiles = [p for p in profiles if _is_nash(p, maxregret, negtol)]
     for profile in profiles:
         onequilibrium(profile, "NE")
