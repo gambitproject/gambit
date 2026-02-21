@@ -205,20 +205,18 @@ def test_enummixed_rational(game: gbt.Game, mixed_strategy_prof_data: list):
                 None,
         ),
         # 2-player non-zero-sum games
-        pytest.param(
+        (
             games.create_one_shot_trust_efg(),
-            [[[[0, 1]], [["1/2", "1/2"]]], [[[0, 1]], [[0, 1]]]],
-            # second entry assumes we extend to Nash using only pure behaviors
-            # currently we get [[0, 1]], [[0, 0]]] as a second eq
+            [[[[0, 1]], [["1/2", "1/2"]]]],
             None,
-            marks=pytest.mark.xfail(reason="Problem with enumpoly, as per issue #660")
         ),
-        pytest.param(
+        (
             games.create_one_shot_trust_efg(unique_NE_variant=True),
-            [[[[1, 0]], [[0, 1]]]],  # currently we get [[0, 1]], [[0, 0]]] as a second eq
+            [[[[1, 0]], [[0, 1]]]],
             None,
-            marks=pytest.mark.xfail(reason="Problem with enumpoly, as per issue #660")
         ),
+
+
         (
                 games.create_EFG_for_nxn_bimatrix_coordination_game(3),
                 [

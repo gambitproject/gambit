@@ -184,7 +184,69 @@ std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfil
         data.m_support.ToMixedBehaviorProfile(ToSequenceProbs(data, root)));
     if (ExtendsToNash(sol, BehaviorSupportProfile(sol.GetGame()),
                       BehaviorSupportProfile(sol.GetGame()))) {
-      solutions.push_back(sol);
+
+      Gambit::MixedBehaviorProfile<double> full_sol(sol.GetGame());
+
+      // Copy valid probabilities to the dense full_sol array
+      for (const auto& player : full_sol.GetGame()->GetPlayers()) {
+        for (const auto& iset : player->GetInfosets()) {
+          for (const auto& act : iset->GetActions()) {
+            full_sol[act] = sol.GetActionProb(act);
+          }
+        }
+      }
+
+      bool valid_eq = true;
+      for (const auto& player : full_sol.GetGame()->GetPlayers()) {
+        for (const auto& iset : player->GetInfosets()) {
+          double sum = 0.0;
+          for (const auto& act : iset->GetActions()) {
+            sum += static_cast<double>(full_sol.GetActionProb(act));
+          }
+
+          if (sum < 0.5) {
+            bool found_pure = false;
+            for (const auto& act : iset->GetActions()) {
+              full_sol[act] = 1.0;
+              if (ExtendsToNash(full_sol, BehaviorSupportProfile(full_sol.GetGame()),
+                                BehaviorSupportProfile(full_sol.GetGame()))) {
+                found_pure = true;
+                break;
+              }
+              full_sol[act] = 0.0;
+            }
+            if (!found_pure) {
+              valid_eq = false;
+              break;
+            }
+          }
+        }
+        if (!valid_eq) break;
+      }
+
+      if (valid_eq) {
+        // Prevent duplicate equilibria entries
+        bool is_duplicate = false;
+        for (const auto& existing : solutions) {
+           bool match = true;
+           for (const auto& player : full_sol.GetGame()->GetPlayers()) {
+             for (const auto& iset : player->GetInfosets()) {
+               for (const auto& act : iset->GetActions()) {
+                  if (std::abs(existing.GetActionProb(act) - full_sol.GetActionProb(act)) > 1e-6) {
+                      match = false; break;
+                  }
+               }
+               if(!match) break;
+             }
+             if(!match) break;
+           }
+           if (match) { is_duplicate = true; break; }
+        }
+
+        if (!is_duplicate) {
+            solutions.push_back(full_sol);
+        }
+      }
     }
   }
   return solutions;
