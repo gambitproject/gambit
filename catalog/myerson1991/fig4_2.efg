@@ -1,6 +1,16 @@
-EFG 2 R "Myerson (1991) Fig 4.2" { "Player 1" "Player 2" }
-"An example from Myerson (1991) Fig 4.2 which has an agent Nash equilibrium that is
-not a Nash equilibrium"
+EFG 2 R "Myerson (1991) Figure 4.2" { "Player 1" "Player 2" }
+"An example from Myerson [^Mye1991] which illustrates the distinction between
+an equilibrium of an extensive form game and an equilibrium of its
+(multi)agent representation.  The actions B1, Z1, and W2 form a
+behavior profile which is an equilibrium in the (multi)agent
+representation.  However, it is not a Nash equilibrium of the extensive
+game, because Player 1 would prefer to switch from (B1, Z1) to
+(A1, Y1); the (multi)agent representation rules out such coordinated
+deviations across information sets.
+
+[^Mye1991]: Myerson, Roger B. (1991)  Game Theory: Analysis of Conflict.
+  Cambridge: Harvard University Press.
+"
 
 p "" 1 1 "" { "A1" "B1" } 0
 p "" 2 1 "" { "W2" "X2" } 0
