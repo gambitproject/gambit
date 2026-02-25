@@ -24,7 +24,7 @@ We recommended most new users install the PyGambit Python package and read the a
    .. grid-item-card:: 🐍 PyGambit
       :columns: 4
 
-      Create games and compute equilibria with PyGambit.
+      Explore tutorial notebooks and API reference docs.
 
       .. button-ref:: pygambit
          :ref-type: ref
