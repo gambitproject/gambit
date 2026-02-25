@@ -31,4 +31,4 @@ def test_catalog_games():
     assert isinstance(all_games, pd.DataFrame)
     assert len(all_games) > 0
     assert "myerson1991/fig4_2" in list(all_games.Game)
-    assert "Myerson (1991) Fig 4.2" in list(all_games.Title)
+    assert "Myerson (1991) Figure 4.2" in list(all_games.Title)
