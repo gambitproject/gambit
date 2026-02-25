@@ -101,7 +101,6 @@ EXTRA_DIST = \
 	src/gui/bitmaps/zoom1.xpm \
 	src/gui/bitmaps/gambitrc.rc \
 	contrib/games/2s2x2x2.efg \
-	contrib/games/2smp.efg \
 	contrib/games/2x2x2.efg \
 	contrib/games/4cards.efg \
 	contrib/games/artist1.efg \
@@ -236,6 +235,7 @@ EXTRA_DIST = \
 	contrib/games/yamamoto.nfg \
 	contrib/games/zero.nfg \
 	src/README.rst \
+	catalog/2smp.efg \
 	catalog/myerson1991/fig4_2.efg \
 	catalog/selten1975/fig1.efg \
 	catalog/selten1975/fig2.efg \
