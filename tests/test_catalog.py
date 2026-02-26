@@ -4,6 +4,11 @@ import pytest
 import pygambit as gbt
 
 
+@pytest.fixture(scope="module")
+def all_games():
+    return gbt.catalog.games()
+
+
 def test_catalog_load_efg():
     """Test loading an extensive form game"""
     g = gbt.catalog.load("selten1975/fig1")
@@ -31,10 +36,14 @@ def test_catalog_load_family_game():
     assert isinstance(g, gbt.Game)
 
 
-def test_catalog_games():
+def test_catalog_games(all_games):
     """Test games() function returns df of game slugs and titles"""
     all_games = gbt.catalog.games()
+    slugs = list(all_games.Game)
     assert isinstance(all_games, pd.DataFrame)
     assert len(all_games) > 0
-    assert "myerson1991/fig4_2" in list(all_games.Game)
-    assert "Myerson (1991) Figure 4.2" in list(all_games.Title)
+    # Check slug of game in subdir
+    assert "myerson/fig_4_2" in slugs
+    assert "myerson_fig_4_2" not in slugs
+    # Check family game present
+    assert "one_shot_trust" in slugs
