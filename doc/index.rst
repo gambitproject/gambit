@@ -8,10 +8,11 @@ We recommended most new users install the PyGambit Python package and read the a
 
 .. grid::
 
-   .. grid-item-card:: Installing Gambit
-      :columns: 6
+   .. grid-item-card:: ⬇️ Installing Gambit
+      :columns: 4
 
-      Get started by installing Gambit. PyGambit quickstart: ``pip install pygambit``
+      Quick installation with PyGambit:
+      ``pip install pygambit``
 
       .. button-ref:: install
          :ref-type: ref
@@ -20,10 +21,10 @@ We recommended most new users install the PyGambit Python package and read the a
          :expand:
 
 
-   .. grid-item-card:: PyGambit Python package
-      :columns: 6
+   .. grid-item-card:: 🐍 PyGambit
+      :columns: 4
 
-      Create games and compute equilibria with the PyGambit package.
+      Explore tutorial notebooks and API reference docs.
 
       .. button-ref:: pygambit
          :ref-type: ref
@@ -32,8 +33,8 @@ We recommended most new users install the PyGambit Python package and read the a
          :expand:
 
 
-   .. grid-item-card:: Command-line tools
-      :columns: 6
+   .. grid-item-card:: 🖥️ Command-line tools
+      :columns: 4
 
       Quickly compute equilibria with the Gambit command-line tools.
 
@@ -43,13 +44,34 @@ We recommended most new users install the PyGambit Python package and read the a
          :color: secondary
          :expand:
 
-   .. grid-item-card:: Graphical interface
-      :columns: 6
+   .. grid-item-card:: 🖱️ Graphical interface
+      :columns: 4
 
-      Gambit's graphical interface lets you interactively
-      create, explore, and find equilibria of games.
+      Interactively create, explore, and find equilibria of games.
 
       .. button-ref:: section-gui
+         :ref-type: ref
+         :click-parent:
+         :color: secondary
+         :expand:
+
+   .. grid-item-card:: 🐛 Bugs and feature requests
+      :columns: 4
+
+      Report bugs and feature requests on GitHub.
+
+      .. button-ref:: github-issues
+         :ref-type: ref
+         :click-parent:
+         :color: secondary
+         :expand:
+
+   .. grid-item-card:: 📖 Developer docs
+      :columns: 4
+
+      Guides for developers & contributors to the package.
+
+      .. button-ref:: developer
          :ref-type: ref
          :click-parent:
          :color: secondary
