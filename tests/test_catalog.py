@@ -90,12 +90,13 @@ def test_catalog_games_filter_is_const_sum(all_games):
 #     assert all(g.is_perfect_recall for g in list(filtered_games.Game))
 
 
-def test_catalog_games_filter_is_tree(all_games):
-    """Test games() function can filter on boolean gbt.Game attribute 'is_tree'"""
-    filtered_games = gbt.catalog.games(is_tree=True)
-    assert isinstance(filtered_games, pd.DataFrame)
-    assert len(filtered_games) < len(all_games)
-    assert all(g.is_tree for g in list(filtered_games.Game))
+# TODO: Re-introduce this test when there are examples in the catalog of normal form games
+# def test_catalog_games_filter_is_tree(all_games):
+#     """Test games() function can filter on boolean gbt.Game attribute 'is_tree'"""
+#     filtered_games = gbt.catalog.games(is_tree=True)
+#     assert isinstance(filtered_games, pd.DataFrame)
+#     assert len(filtered_games) < len(all_games)
+#     assert all(g.is_tree for g in list(filtered_games.Game))
 
 
 def test_catalog_games_filter_min_payoff_and_max_payoff(all_games):
