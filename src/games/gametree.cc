@@ -259,16 +259,14 @@ void GameTreeRep::RemoveMember(GameInfosetRep *p_infoset, GameNodeRep *p_node)
 void GameTreeRep::Reveal(GameInfoset p_atInfoset, GamePlayer p_player)
 {
   IncrementVersion();
-  for (auto action : p_atInfoset->GetActions()) {
-    for (auto infoset : p_player->m_infosets) {
-      // make copy of members to iterate correctly
-      // (since the information set may be changed in the process)
+  for (const auto &action : p_atInfoset->m_actions) {
+    auto infosets = p_player->m_infosets;
+    for (const auto &infoset : infosets) {
       auto members = infoset->m_members;
-
       // This information set holds all members of information set
       // which follow 'action'.
       GameInfoset newiset = nullptr;
-      for (auto &member : members) {
+      for (const auto &member : members) {
         if (action->Precedes(member)) {
           if (!newiset) {
             newiset = LeaveInfoset(member);
@@ -1198,7 +1196,7 @@ void GameTreeRep::WriteEfgFile(std::ostream &p_file, const GameNode &p_subtree /
          << FormatList(GetPlayers(),
                        [](const GamePlayer &p) { return QuoteString(p->GetLabel()); })
          << std::endl;
-  p_file << std::quoted(GetComment()) << std::endl << std::endl;
+  p_file << std::quoted(GetDescription()) << std::endl << std::endl;
   Gambit::WriteEfgFile(p_file, (p_subtree) ? p_subtree : GetRoot());
 }
 

@@ -406,7 +406,7 @@ void GameDocument::DoExportNfg(const wxString &p_filename)
 void GameDocument::DoSetTitle(const wxString &p_title, const wxString &p_comment)
 {
   m_game->SetTitle(static_cast<const char *>(p_title.mb_str()));
-  m_game->SetComment(static_cast<const char *>(p_comment.mb_str()));
+  m_game->SetDescription(static_cast<const char *>(p_comment.mb_str()));
   UpdateViews(GBT_DOC_MODIFIED_LABELS);
 }
 
