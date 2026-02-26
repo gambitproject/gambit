@@ -38,12 +38,101 @@ def test_catalog_load_family_game():
 
 def test_catalog_games(all_games):
     """Test games() function returns df of game slugs and titles"""
-    all_games = gbt.catalog.games()
     slugs = list(all_games.Game)
     assert isinstance(all_games, pd.DataFrame)
     assert len(all_games) > 0
     # Check slug of game in subdir
-    assert "myerson/fig_4_2" in slugs
-    assert "myerson_fig_4_2" not in slugs
+    assert "myerson1991/fig4_2" in slugs
     # Check family game present
     assert "one_shot_trust" in slugs
+    # Check a known game title is present
+    assert "Myerson (1991) Figure 4.2" in list(all_games.Title)
+
+
+def test_catalog_games_filter_n_actions(all_games):
+    """Test games() function can filter on length of gbt.Game attribute 'actions'"""
+    filtered_games = gbt.catalog.games(n_actions=2)
+    assert isinstance(filtered_games, pd.DataFrame)
+    assert len(filtered_games) < len(all_games)
+    assert all(len(g.actions) == 2 for g in list(filtered_games.Game))
+
+
+def test_catalog_games_filter_n_contingencies(all_games):
+    """Test games() function can filter on length of gbt.Game attribute 'contingencies'"""
+    filtered_games = gbt.catalog.games(n_contingencies=2)
+    assert isinstance(filtered_games, pd.DataFrame)
+    assert len(filtered_games) < len(all_games)
+    assert all(len(g.contingencies) == 2 for g in list(filtered_games.Game))
+
+
+def test_catalog_games_filter_n_infosets(all_games):
+    """Test games() function can filter on length of gbt.Game attribute 'infosets'"""
+    filtered_games = gbt.catalog.games(n_infosets=2)
+    assert isinstance(filtered_games, pd.DataFrame)
+    assert len(filtered_games) < len(all_games)
+    assert all(len(g.infosets) == 2 for g in list(filtered_games.Game))
+
+
+def test_catalog_games_filter_is_const_sum(all_games):
+    """Test games() function can filter on boolean gbt.Game attribute 'is_const_sum'"""
+    filtered_games = gbt.catalog.games(is_const_sum=True)
+    assert isinstance(filtered_games, pd.DataFrame)
+    assert len(filtered_games) < len(all_games)
+    assert all(g.is_const_sum for g in list(filtered_games.Game))
+
+
+# TODO: Re-introduce this test when there are examples in the catalog without perfect recall
+# def test_catalog_games_filter_is_perfect_recall(all_games):
+#     """Test games() function can filter on boolean gbt.Game attribute 'is_perfect_recall'"""
+#     filtered_games = gbt.catalog.games(is_perfect_recall=True)
+#     assert isinstance(filtered_games, pd.DataFrame)
+#     assert len(filtered_games) < len(all_games)
+#     assert all(g.is_perfect_recall for g in list(filtered_games.Game))
+
+
+def test_catalog_games_filter_is_tree(all_games):
+    """Test games() function can filter on boolean gbt.Game attribute 'is_tree'"""
+    filtered_games = gbt.catalog.games(is_tree=True)
+    assert isinstance(filtered_games, pd.DataFrame)
+    assert len(filtered_games) < len(all_games)
+    assert all(g.is_tree for g in list(filtered_games.Game))
+
+
+def test_catalog_games_filter_min_payoff_and_max_payoff(all_games):
+    """Test games() function can filter on min and max payoff values"""
+    filtered_games = gbt.catalog.games(min_payoff=0, max_payoff=10)
+    assert isinstance(filtered_games, pd.DataFrame)
+    assert len(filtered_games) < len(all_games)
+    assert all(g.min_payoff >= 0 and g.max_payoff <= 10 for g in list(filtered_games.Game))
+
+
+def test_catalog_games_filter_n_nodes(all_games):
+    """Test games() function can filter on length of gbt.Game attribute 'nodes'"""
+    filtered_games = gbt.catalog.games(n_nodes=5)
+    assert isinstance(filtered_games, pd.DataFrame)
+    assert len(filtered_games) < len(all_games)
+    assert all(len(g.nodes) == 5 for g in list(filtered_games.Game))
+
+
+def test_catalog_games_filter_n_outcomes(all_games):
+    """Test games() function can filter on length of gbt.Game attribute 'outcomes'"""
+    filtered_games = gbt.catalog.games(n_outcomes=3)
+    assert isinstance(filtered_games, pd.DataFrame)
+    assert len(filtered_games) < len(all_games)
+    assert all(len(g.outcomes) == 3 for g in list(filtered_games.Game))
+
+
+def test_catalog_games_filter_n_players(all_games):
+    """Test games() function can filter on length of gbt.Game attribute 'players'"""
+    filtered_games = gbt.catalog.games(n_players=2)
+    assert isinstance(filtered_games, pd.DataFrame)
+    assert len(filtered_games) < len(all_games)
+    assert all(len(g.players) == 2 for g in list(filtered_games.Game))
+
+
+def test_catalog_games_filter_n_strategies(all_games):
+    """Test games() function can filter on length of gbt.Game attribute 'strategies'"""
+    filtered_games = gbt.catalog.games(n_strategies=4)
+    assert isinstance(filtered_games, pd.DataFrame)
+    assert len(filtered_games) < len(all_games)
+    assert all(len(g.strategies) == 4 for g in list(filtered_games.Game))
