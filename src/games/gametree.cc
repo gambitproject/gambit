@@ -1324,17 +1324,8 @@ Game GameTreeRep::SetChanceProbs(const GameInfoset &p_infoset, const Array<Numbe
   if (p_infoset->m_actions.size() != p_probs.size()) {
     throw DimensionException("The number of probabilities given must match the number of actions");
   }
+  ValidateDistribution(p_probs);
   IncrementVersion();
-  if (std::any_of(p_probs.begin(), p_probs.end(),
-                  [](const Number &x) { return static_cast<Rational>(x) < Rational(0); })) {
-    throw ValueException("Probabilities must be non-negative numbers");
-  }
-  auto sum = std::accumulate(
-      p_probs.begin(), p_probs.end(), Rational(0),
-      [](const Rational &r, const Number &n) { return r + static_cast<Rational>(n); });
-  if (sum != Rational(1)) {
-    throw ValueException("Probabilities must sum to exactly one");
-  }
   std::copy(p_probs.begin(), p_probs.end(), p_infoset->m_probs.begin());
   ClearComputedValues();
   return shared_from_this();
