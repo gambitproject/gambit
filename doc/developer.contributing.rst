@@ -21,7 +21,7 @@ Disagreements may happen, but they should be handled with respect and a focus on
 GitHub issues
 -------------
 
-Newcomer to the project? Please read the :ref:`code of conduct <code-of-conduct>` and :ref: `new contributors section <new-contributors>` sections before posting on GitHub.
+Newcomer to the project? Please read the :ref:`code of conduct <code-of-conduct>` and :ref:`new contributors section <new-contributors>` sections before posting on GitHub.
 
 In the first instance, bug reports, feature requests and improvements to the Gambit documentation should be
 posted to the Gambit issue tracker, located at
