@@ -64,10 +64,10 @@ We have always valued thoughtful contributions. A common issue for open-source p
 A great way to start is by:
 
 1. Looking through the code to understand the relevant parts for your intended change.
-2. Opening an issue to discuss a bug or feature.
-3. If you have a change in mind, open a draft pull request early in your process. This allows for discussion and feedback before you've invested too much time.
+2. Contacting the maintainers via commenting with a question on an open issue, or opening a Discussion on GitHub.
+3. After your discussion with the maintainers, open a draft pull request early in your process. This allows for discussion and feedback before you've invested too much time.
 
-We are happy to answer questions and provide guidance. Engaging with the development team early ensures that your contribution is likely to be accepted and integrated smoothly.
+We are happy to answer questions and provide guidance. Engaging with the maintainers early ensures that your contribution is likely to be accepted and integrated smoothly.
 
 .. _ai-policy:
 
