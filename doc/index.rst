@@ -1,3 +1,6 @@
+Gambit: User documentation
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 **Gambit** is a library of game theory software and tools for the
 construction and analysis of finite extensive and strategic games.
 
