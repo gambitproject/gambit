@@ -77,9 +77,7 @@ def games(**kwargs) -> pd.DataFrame:
     Returns
     -------
     pd.DataFrame
-        If no arguments are provided, the "Game" column contains string slugs.
-        If arguments are provided, the "Game" column contains `pygambit.Game`
-        objects that match the filters.
+        A DataFrame with columns "Game" and "Title", where "Game" is the slug to load the game.
     """
     records: list[dict[str, Any]] = []
 
@@ -129,19 +127,11 @@ def games(**kwargs) -> pd.DataFrame:
 
             with as_file(resource_path) as path:
                 game = reader(str(path))
-                if kwargs:
-                    if check_filters(game):
-                        records.append({
-                            "Game": game,
-                            "Title": game.title,
-                        })
-                else:
-                    records.append(
-                        {
-                            "Game": slug,
-                            "Title": game.title,
-                        }
-                    )
+                if check_filters(game):
+                    records.append({
+                        "Game": slug,
+                        "Title": game.title,
+                    })
 
     # Add all the games from families
     for slug, game in family_games().items():
@@ -150,19 +140,11 @@ def games(**kwargs) -> pd.DataFrame:
             raise ValueError(
                 f"Slug collision: {slug} is present in both file-based and family games."
             )
-        if kwargs:
-            if check_filters(game):
-                records.append({
-                    "Game": game,
-                    "Title": game.title,
-                })
-        else:
-            records.append(
-                {
-                    "Game": slug,
-                    "Title": game.title,
-                }
-            )
+        if check_filters(game):
+            records.append({
+                "Game": slug,
+                "Title": game.title,
+            })
 
     return pd.DataFrame.from_records(records, columns=["Game", "Title"])
 
