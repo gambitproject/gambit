@@ -18,6 +18,21 @@ READERS = {
 def load(slug: str) -> gbt.Game:
     """
     Load a game from the package catalog.
+
+    Parameters
+    ----------
+    slug : str
+        The slug of the game to load.
+
+    Returns
+    -------
+    gbt.Game
+        The loaded game.
+
+    Raises
+    ------
+    FileNotFoundError
+        If the game does not exist in the catalog.
     """
     slug = str(Path(slug)).replace("\\", "/")
 
