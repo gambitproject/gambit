@@ -61,7 +61,7 @@ We warmly welcome new contributors to the Gambit project! Your help is valuable 
 Before you start working on a contribution, we encourage you to familiarize yourself with the project.
 Gambit is a mature and complex codebase. Even issues marked as "good first issue" may require some understanding of the context and how different parts of the project interact.
 
-We have always valued thoughtful contributions. A common issue for open-source projects is receiving pull requests that are not well-aligned with the project's needs or coding standards. To avoid wasted effort on your part and on ours, we strongly encourage you to engage with us before you spend a lot of time on implementation.
+We have always valued thoughtful contributions. A common issue for open-source projects is receiving pull requests that are not well-aligned with the project's needs or coding standards. To avoid unproductive effort on your part and on ours, we strongly encourage you to engage with us before you spend a lot of time on implementation.
 
 A great way to start is by:
 
