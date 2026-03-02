@@ -81,6 +81,25 @@ def games(**kwargs) -> pd.DataFrame:
     """
     records: list[dict[str, Any]] = []
 
+    # Raise an error if any invalid filter keys are provided
+    valid_filter_keys = {
+        "n_actions",
+        "n_contingencies",
+        "n_infosets",
+        "is_const_sum",
+        "is_perfect_recall",
+        "is_tree",
+        "min_payoff",
+        "max_payoff",
+        "n_nodes",
+        "n_outcomes",
+        "n_players",
+        "n_strategies",
+    }
+    for key in kwargs:
+        if key not in valid_filter_keys:
+            raise ValueError(f"Invalid kwarg: {key}. Valid kwargs are: {valid_filter_keys}")
+
     def check_filters(game: gbt.Game) -> bool:
         if "n_actions" in kwargs:
             if not game.is_tree:

@@ -126,3 +126,9 @@ def test_catalog_games_filter_n_strategies(all_games):
     filtered_games = gbt.catalog.games(n_strategies=4)
     assert isinstance(filtered_games, pd.DataFrame)
     assert len(filtered_games) < len(all_games)
+
+
+def test_catalog_games_filter_bad_filter():
+    """Test games() function raises error on invalid filter key"""
+    with pytest.raises(ValueError):
+        gbt.catalog.games(invalid_filter=123)
