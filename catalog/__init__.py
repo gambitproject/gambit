@@ -37,7 +37,20 @@ def load(slug: str) -> gbt.Game:
     raise FileNotFoundError(f"No catalog entry called {slug}")
 
 
-def games(**kwargs) -> pd.DataFrame:
+def games(
+    n_actions: int | None = None,
+    n_contingencies: int | None = None,
+    n_infosets: int | None = None,
+    is_const_sum: bool | None = None,
+    is_perfect_recall: bool | None = None,
+    is_tree: bool | None = None,
+    min_payoff: float | None = None,
+    max_payoff: float | None = None,
+    n_nodes: int | None = None,
+    n_outcomes: int | None = None,
+    n_players: int | None = None,
+    n_strategies: int | None = None,
+) -> pd.DataFrame:
     """
     List games available in the package catalog.
 
@@ -81,58 +94,39 @@ def games(**kwargs) -> pd.DataFrame:
     """
     records: list[dict[str, Any]] = []
 
-    # Raise an error if any invalid filter keys are provided
-    valid_filter_keys = {
-        "n_actions",
-        "n_contingencies",
-        "n_infosets",
-        "is_const_sum",
-        "is_perfect_recall",
-        "is_tree",
-        "min_payoff",
-        "max_payoff",
-        "n_nodes",
-        "n_outcomes",
-        "n_players",
-        "n_strategies",
-    }
-    for key in kwargs:
-        if key not in valid_filter_keys:
-            raise ValueError(f"Invalid kwarg: {key}. Valid kwargs are: {valid_filter_keys}")
-
     def check_filters(game: gbt.Game) -> bool:
-        if "n_actions" in kwargs:
+        if n_actions is not None:
             if not game.is_tree:
                 return False
-            if len(game.actions) != kwargs["n_actions"]:
+            if len(game.actions) != n_actions:
                 return False
-        if "n_contingencies" in kwargs and len(game.contingencies) != kwargs["n_contingencies"]:
+        if n_contingencies is not None and len(game.contingencies) != n_contingencies:
             return False
-        if "n_infosets" in kwargs:
+        if n_infosets is not None:
             if not game.is_tree:
                 return False
-            if len(game.infosets) != kwargs["n_infosets"]:
+            if len(game.infosets) != n_infosets:
                 return False
-        if "is_const_sum" in kwargs and game.is_const_sum != kwargs["is_const_sum"]:
+        if is_const_sum is not None and game.is_const_sum != is_const_sum:
             return False
-        if "is_perfect_recall" in kwargs and game.is_perfect_recall != kwargs["is_perfect_recall"]:
+        if is_perfect_recall is not None and game.is_perfect_recall != is_perfect_recall:
             return False
-        if "is_tree" in kwargs and game.is_tree != kwargs["is_tree"]:
+        if is_tree is not None and game.is_tree != is_tree:
             return False
-        if "min_payoff" in kwargs and game.min_payoff < kwargs["min_payoff"]:
+        if min_payoff is not None and game.min_payoff < min_payoff:
             return False
-        if "max_payoff" in kwargs and game.max_payoff > kwargs["max_payoff"]:
+        if max_payoff is not None and game.max_payoff > max_payoff:
             return False
-        if "n_nodes" in kwargs:
+        if n_nodes is not None:
             if not game.is_tree:
                 return False
-            if len(game.nodes) != kwargs["n_nodes"]:
+            if len(game.nodes) != n_nodes:
                 return False
-        if "n_outcomes" in kwargs and len(game.outcomes) != kwargs["n_outcomes"]:
+        if n_outcomes is not None and len(game.outcomes) != n_outcomes:
             return False
-        if "n_players" in kwargs and len(game.players) != kwargs["n_players"]:
+        if n_players is not None and len(game.players) != n_players:
             return False
-        return not ("n_strategies" in kwargs and len(game.strategies) != kwargs["n_strategies"])
+        return not (n_strategies is not None and len(game.strategies) != n_strategies)
 
     # Add all the games stored as EFG/NFG files
     for resource_path in sorted(_CATALOG_RESOURCE.rglob("*")):
@@ -147,10 +141,12 @@ def games(**kwargs) -> pd.DataFrame:
             with as_file(resource_path) as path:
                 game = reader(str(path))
                 if check_filters(game):
-                    records.append({
-                        "Game": slug,
-                        "Title": game.title,
-                    })
+                    records.append(
+                        {
+                            "Game": slug,
+                            "Title": game.title,
+                        }
+                    )
 
     # Add all the games from families
     for slug, game in family_games().items():
@@ -160,10 +156,12 @@ def games(**kwargs) -> pd.DataFrame:
                 f"Slug collision: {slug} is present in both file-based and family games."
             )
         if check_filters(game):
-            records.append({
-                "Game": slug,
-                "Title": game.title,
-            })
+            records.append(
+                {
+                    "Game": slug,
+                    "Title": game.title,
+                }
+            )
 
     return pd.DataFrame.from_records(records, columns=["Game", "Title"])
 

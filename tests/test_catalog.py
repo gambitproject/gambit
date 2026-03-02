@@ -130,5 +130,5 @@ def test_catalog_games_filter_n_strategies(all_games):
 
 def test_catalog_games_filter_bad_filter():
     """Test games() function raises error on invalid filter key"""
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         gbt.catalog.games(invalid_filter=123)
