@@ -69,11 +69,8 @@ def games(
     """
     List games available in the package catalog.
 
-    If no arguments are provided, returns a pandas DataFrame with columns "Game"
-    and "Title", where "Game" is the slug to load the game.
-
-    If keyword arguments are provided, they are treated as filters on the
-    attributes of the game objects.
+    Arguments are treated as filters on the
+    attributes of the Game objects.
 
     Parameters
     ----------
