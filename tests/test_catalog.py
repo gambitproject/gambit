@@ -54,6 +54,8 @@ def test_catalog_games_filter_n_actions(all_games):
     filtered_games = gbt.catalog.games(n_actions=2)
     assert isinstance(filtered_games, pd.DataFrame)
     assert len(filtered_games) < len(all_games)
+    g = gbt.catalog.load(filtered_games.Game.iloc[0])
+    assert len(g.actions) == 2
 
 
 def test_catalog_games_filter_n_contingencies(all_games):
@@ -61,6 +63,8 @@ def test_catalog_games_filter_n_contingencies(all_games):
     filtered_games = gbt.catalog.games(n_contingencies=2)
     assert isinstance(filtered_games, pd.DataFrame)
     assert len(filtered_games) < len(all_games)
+    g = gbt.catalog.load(filtered_games.Game.iloc[0])
+    assert len(g.contingencies) == 2
 
 
 def test_catalog_games_filter_n_infosets(all_games):
@@ -68,6 +72,8 @@ def test_catalog_games_filter_n_infosets(all_games):
     filtered_games = gbt.catalog.games(n_infosets=2)
     assert isinstance(filtered_games, pd.DataFrame)
     assert len(filtered_games) < len(all_games)
+    g = gbt.catalog.load(filtered_games.Game.iloc[0])
+    assert len(g.infosets) == 2
 
 
 def test_catalog_games_filter_is_const_sum(all_games):
@@ -75,6 +81,8 @@ def test_catalog_games_filter_is_const_sum(all_games):
     filtered_games = gbt.catalog.games(is_const_sum=True)
     assert isinstance(filtered_games, pd.DataFrame)
     assert len(filtered_games) < len(all_games)
+    g = gbt.catalog.load(filtered_games.Game.iloc[0])
+    assert g.is_const_sum
 
 
 # TODO: Re-introduce this test when there are examples in the catalog without perfect recall
@@ -83,6 +91,8 @@ def test_catalog_games_filter_is_const_sum(all_games):
 #     filtered_games = gbt.catalog.games(is_perfect_recall=True)
 #     assert isinstance(filtered_games, pd.DataFrame)
 #     assert len(filtered_games) < len(all_games)
+#     g = gbt.catalog.load(filtered_games.Game.iloc[0])
+#     assert g.is_perfect_recall
 
 
 # TODO: Re-introduce this test when there are examples in the catalog of normal form games
@@ -91,6 +101,8 @@ def test_catalog_games_filter_is_const_sum(all_games):
 #     filtered_games = gbt.catalog.games(is_tree=True)
 #     assert isinstance(filtered_games, pd.DataFrame)
 #     assert len(filtered_games) < len(all_games)
+#     g = gbt.catalog.load(filtered_games.Game.iloc[0])
+#     assert g.is_tree
 
 
 def test_catalog_games_filter_min_payoff_and_max_payoff(all_games):
@@ -98,6 +110,9 @@ def test_catalog_games_filter_min_payoff_and_max_payoff(all_games):
     filtered_games = gbt.catalog.games(min_payoff=0, max_payoff=10)
     assert isinstance(filtered_games, pd.DataFrame)
     assert len(filtered_games) < len(all_games)
+    g = gbt.catalog.load(filtered_games.Game.iloc[0])
+    assert g.min_payoff >= 0
+    assert g.max_payoff <= 10
 
 
 def test_catalog_games_filter_n_nodes(all_games):
@@ -105,6 +120,8 @@ def test_catalog_games_filter_n_nodes(all_games):
     filtered_games = gbt.catalog.games(n_nodes=5)
     assert isinstance(filtered_games, pd.DataFrame)
     assert len(filtered_games) < len(all_games)
+    g = gbt.catalog.load(filtered_games.Game.iloc[0])
+    assert len(g.nodes) == 5
 
 
 def test_catalog_games_filter_n_outcomes(all_games):
@@ -112,6 +129,8 @@ def test_catalog_games_filter_n_outcomes(all_games):
     filtered_games = gbt.catalog.games(n_outcomes=3)
     assert isinstance(filtered_games, pd.DataFrame)
     assert len(filtered_games) < len(all_games)
+    g = gbt.catalog.load(filtered_games.Game.iloc[0])
+    assert len(g.outcomes) == 3
 
 
 def test_catalog_games_filter_n_players(all_games):
@@ -119,6 +138,8 @@ def test_catalog_games_filter_n_players(all_games):
     filtered_games = gbt.catalog.games(n_players=2)
     assert isinstance(filtered_games, pd.DataFrame)
     assert len(filtered_games) < len(all_games)
+    g = gbt.catalog.load(filtered_games.Game.iloc[0])
+    assert len(g.players) == 2
 
 
 def test_catalog_games_filter_n_strategies(all_games):
@@ -126,6 +147,8 @@ def test_catalog_games_filter_n_strategies(all_games):
     filtered_games = gbt.catalog.games(n_strategies=4)
     assert isinstance(filtered_games, pd.DataFrame)
     assert len(filtered_games) < len(all_games)
+    g = gbt.catalog.load(filtered_games.Game.iloc[0])
+    assert len(g.strategies) == 4
 
 
 def test_catalog_games_filter_bad_filter():
