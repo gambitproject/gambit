@@ -1,3 +1,5 @@
+.. _updating-catalog:
+
 Updating the Games Catalog
 ==========================
 
