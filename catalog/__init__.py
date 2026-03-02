@@ -185,6 +185,11 @@ def family_games() -> dict[str, gbt.Game]:
     """
     Generate a dict of games for inclusion in the catalog,
     using the game families in this module.
+
+    Returns
+    -------
+    dict[str, gbt.Game]
+        A dictionary mapping slugs to game objects for family games.
     """
     return {
         "one_shot_trust": one_shot_trust(),
