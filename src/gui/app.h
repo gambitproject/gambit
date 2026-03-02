@@ -26,6 +26,7 @@
 #include <wx/wx.h>
 #include <wx/config.h>  // for wxConfig
 #include <wx/docview.h> // for wxFileHistory
+#include <wx/splash.h>
 
 namespace Gambit::GUI {
 
@@ -37,8 +38,15 @@ class Application final : public wxApp {
   wxString m_currentDir; /* Current position in directory tree. */
   wxFileHistory m_fileHistory{10};
   std::list<GameDocument *> m_documents;
+  wxSplashScreen *m_splash{nullptr};
+  wxStopWatch m_splashTimer;
+  wxTimer m_splashDismissTimer;
 
   bool OnInit() override;
+  void DismissSplash();
+  void OnSplashDismissTimer(wxTimerEvent &) { DismissSplash(); }
+
+  wxDECLARE_EVENT_TABLE();
 
 public:
   Application() = default;
