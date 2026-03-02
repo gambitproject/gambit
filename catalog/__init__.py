@@ -39,12 +39,47 @@ def load(slug: str) -> gbt.Game:
 
 def games(**kwargs) -> pd.DataFrame:
     """
-    List games available in the package catalog, including subdirectories.
+    List games available in the package catalog.
 
-    If no arguments are provided, returns a pandas DataFrame with columns "Game" and "Title".
+    If no arguments are provided, returns a pandas DataFrame with columns "Game"
+    and "Title", where "Game" is the slug to load the game.
 
-    If arguments are provided, they are treated as filters and a pandas DataFrame is returned
-    where the "Game" column contains pygambit.Game objects matching the criteria.
+    If keyword arguments are provided, they are treated as filters on the
+    attributes of the game objects.
+
+    Parameters
+    ----------
+    n_actions: int, optional
+        The number of actions in the game. Only extensive games are returned.
+    n_contingencies: int, optional
+        The number of contingencies in the game.
+    n_infosets: int, optional
+        The number of information sets in the game. Only extensive games are returned.
+    is_const_sum: bool, optional
+        Whether the game is constant-sum.
+    is_perfect_recall: bool, optional
+        Whether the game has perfect recall.
+    is_tree: bool, optional
+        Whether the game is an extensive game (a tree).
+    min_payoff: float, optional
+        The minimum payoff in the game. Games returned have `min_payoff >= value`.
+    max_payoff: float, optional
+        The maximum payoff in the game. Games returned have `max_payoff <= value`.
+    n_nodes: int, optional
+        The number of nodes in the game. Only extensive games are returned.
+    n_outcomes: int, optional
+        The number of outcomes in the game.
+    n_players: int, optional
+        The number of players in the game.
+    n_strategies: int, optional
+        The number of pure strategies in the game.
+
+    Returns
+    -------
+    pd.DataFrame
+        If no arguments are provided, the "Game" column contains string slugs.
+        If arguments are provided, the "Game" column contains `pygambit.Game`
+        objects that match the filters.
     """
     records: list[dict[str, Any]] = []
 
