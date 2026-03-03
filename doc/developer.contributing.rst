@@ -16,6 +16,8 @@ We are committed to fostering a welcoming and harassment-free environment for ev
 Please be kind and considerate in your interactions. We are all here to build a better tool for game theory research and education.
 Disagreements may happen, but they should be handled with respect and a focus on constructive resolution.
 
+To raise any concerns, please contact `Ted Turocy <mailto:ted.turocy@gmail.com>` or `Rahul Savani <mailto:rahul.savani@gmail.com>`.
+
 .. _github-issues:
 
 GitHub issues
