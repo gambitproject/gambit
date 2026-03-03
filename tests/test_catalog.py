@@ -170,3 +170,4 @@ def test_catalog_games_include_descriptions():
     """Test games() function can include descriptions"""
     games_with_desc = gbt.catalog.games(include_descriptions=True)
     assert "Description" in games_with_desc.columns
+    assert "Download" in games_with_desc.columns

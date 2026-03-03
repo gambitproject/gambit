@@ -155,6 +155,8 @@ def games(
         }
         if include_descriptions:
             record["Description"] = game.description
+            ext = "efg" if game.is_tree else "nfg"
+            record["Download"] = f":download:`{slug}.{ext} <../catalog/{slug}.{ext}>`"
         records.append(record)
 
     # Add all the games stored as EFG/NFG files
@@ -183,7 +185,9 @@ def games(
             append_record(slug, game)
 
     if include_descriptions:
-        return pd.DataFrame.from_records(records, columns=["Game", "Title", "Description"])
+        return pd.DataFrame.from_records(
+            records, columns=["Game", "Title", "Description", "Download"]
+        )
     return pd.DataFrame.from_records(records, columns=["Game", "Title"])
 
 
