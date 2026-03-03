@@ -145,6 +145,18 @@ def games(
             return False
         return not (n_strategies is not None and len(game.strategies) != n_strategies)
 
+    def append_record(
+        slug: str,
+        game: gbt.Game,
+    ) -> None:
+        record = {
+            "Game": slug,
+            "Title": game.title,
+        }
+        if include_descriptions:
+            record["Description"] = game.description
+        records.append(record)
+
     # Add all the games stored as EFG/NFG files
     for resource_path in sorted(_CATALOG_RESOURCE.rglob("*")):
         reader = READERS.get(resource_path.suffix)
@@ -158,21 +170,7 @@ def games(
             with as_file(resource_path) as path:
                 game = reader(str(path))
                 if check_filters(game):
-                    if include_descriptions:
-                        records.append(
-                            {
-                                "Game": slug,
-                                "Title": game.title,
-                                "Description": game.description,
-                            }
-                        )
-                    else:
-                        records.append(
-                            {
-                                "Game": slug,
-                                "Title": game.title,
-                            }
-                        )
+                    append_record(slug, game)
 
     # Add all the games from families
     for slug, game in family_games().items():
@@ -182,21 +180,7 @@ def games(
                 f"Slug collision: {slug} is present in both file-based and family games."
             )
         if check_filters(game):
-            if include_descriptions:
-                records.append(
-                    {
-                        "Game": slug,
-                        "Title": game.title,
-                        "Description": game.description,
-                    }
-                )
-            else:
-                records.append(
-                    {
-                        "Game": slug,
-                        "Title": game.title,
-                    }
-                )
+            append_record(slug, game)
 
     if include_descriptions:
         return pd.DataFrame.from_records(records, columns=["Game", "Title", "Description"])
