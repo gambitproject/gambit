@@ -81,7 +81,7 @@ Policy on AI-Assisted Contributions
 We recognize that generative AI tools can be a useful aid in software development. We also expect authentic and thoughtful engagement from our contributors.
 
 - **You are responsible for your contributions.** If you use generative AI to help you write code or documentation, you must fully understand the output. You should be able to explain the changes and why they are the correct approach for the project.
-- **Add value.** Simply taking a prompt, feeding it to an AI, and posting the result as a contribution is not helpful. We expect you to use your own expertise to verify, test, and refine any AI-generated content. To preserve precious developer time, we reserve the right to rigorously reject low-value contributions, whether AI-generated or not.
+- **Add value.** Simply taking a prompt, feeding it to an AI, and posting the result as a contribution is not helpful. We expect you to use your own expertise to verify, test, and refine any AI-generated content. Out of respect for everyone's time, we reserve the right to rigorously reject low-value contributions, whether AI-generated or not.
 - **No AI-generated comments.** Please do not post output from Large Language Models (LLMs) or similar tools as comments on GitHub issues or pull requests. Such comments are often generic and do not add to the discussion.
 - **Humans over bots.** We discourage the use of automated tools, such as bots or agents, to post AI-generated content to issues or pull requests, without the advance approval of the core development team.
 
