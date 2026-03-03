@@ -227,7 +227,7 @@ def one_shot_trust(unique_NE_variant: bool = False) -> gbt.Game:
         The constructed extensive-form game.
     """
     g = gbt.Game.new_tree(players=["Buyer", "Seller"])
-    g.description = "One-shot trust game with binary actions, originally from Kreps (1990)."
+    g.description = "One-shot trust game with binary actions, originally from [Kre90]_."
     g.append_move(g.root, "Buyer", ["Trust", "Not trust"])
     g.append_move(g.root.children[0], "Seller", ["Honor", "Abuse"])
     g.set_outcome(g.root.children[0].children[0], g.add_outcome([1, 1], label="Trustworthy"))

@@ -1,6 +1,11 @@
 Bibliography
 ============
 
+.. note::
+
+   To reference an entry in this bibliography, use the format ``[key]_``, for example, ``[Mye91]_`` will link to the Myerson (1991) textbook entry.
+
+
 
 Articles on computation of Nash equilibria
 ------------------------------------------
@@ -88,6 +93,9 @@ General game theory articles and texts
 
 .. [KreWil82] David Kreps and Robert Wilson, "Sequential Equilibria",
    863-894, Econometrica , 50, 1982.
+
+.. [Kre90] David Kreps, 1990, A Course in Microeconomic Theory,
+   Princeton University Press.
 
 .. [McKPal95] Richard McKelvey and Tom Palfrey, "Quantal response
    equilibria for normal form games", 6-38, Games and Economic Behavior ,
