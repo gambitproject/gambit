@@ -1,4 +1,5 @@
 import argparse
+import csv
 from pathlib import Path
 
 import pygambit as gbt
@@ -65,8 +66,9 @@ if __name__ == "__main__":
     parser.add_argument("--build", action="store_true")
     args = parser.parse_args()
 
-    # Create CSV used by RST docs page
-    gbt.catalog.games(include_descriptions=True).to_csv(CATALOG_CSV, index=False)
+    # Create CSV used by doc/catalog.rst
+    df = gbt.catalog.games(include_descriptions=True)
+    df.to_csv(CATALOG_CSV, index=False, quoting=csv.QUOTE_NONNUMERIC)
     print(f"Generated {CATALOG_CSV} for use in local docs build. DO NOT COMMIT.")
 
     # Update the Makefile.am with the current list of catalog files

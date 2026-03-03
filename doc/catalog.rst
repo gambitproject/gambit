@@ -7,5 +7,5 @@ Check out the :ref:`pygambit API reference <pygambit-catalog>` for instructions 
 .. csv-table::
    :file: catalog.csv
    :header-rows: 1
-   :widths: 20, 80
+   :widths: 20, 80, 80
    :class: tight-table
