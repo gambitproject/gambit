@@ -15,31 +15,27 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
     with open(rst_path, "w", encoding="utf-8") as f:
         f.write(".. list-table::\n")
         f.write("   :header-rows: 1\n")
-        f.write("   :widths: 20 20 80 20\n")
+        f.write("   :widths: 20 80 20\n")
         f.write("   :class: tight-table\n")
         f.write("\n")
 
         f.write("   * - **Game**\n")
-        f.write("     - **Title**\n")
         f.write("     - **Description**\n")
         f.write("     - **Download**\n")
 
         for _, row in df.iterrows():
             f.write(f"   * - {row['Game']}\n")
-            f.write(f"     - {row['Title']}\n")
 
             description_cell_lines = []
+            title = str(row.get("Title", "")).strip()
             description = str(row.get("Description", "")).strip()
-            # Create a single-line summary for the dropdown title
-            temp_desc_for_summary = description.replace("\n", " ")
-            if len(description) > 80 and ". " in temp_desc_for_summary:
-                summary = temp_desc_for_summary.split(". ", 1)[0] + "."
-                description_cell_lines.append(f".. dropdown:: {summary}")
+            if description:
+                description_cell_lines.append(f".. dropdown:: {title}")
                 description_cell_lines.append("   ")  # Indented blank line
                 for line in description.splitlines():
                     description_cell_lines.append(f"   {line}")
             else:
-                description_cell_lines.append(description.replace("\n", " "))
+                description_cell_lines.append(title)
 
             f.write(f"     - {description_cell_lines[0]}\n")
             for line in description_cell_lines[1:]:
