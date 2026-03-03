@@ -1,12 +1,51 @@
 import argparse
-import csv
 from pathlib import Path
+
+import pandas as pd
 
 import pygambit as gbt
 
-CATALOG_CSV = Path(__file__).parent.parent.parent / "doc" / "catalog.csv"
+CATALOG_RST_TABLE = Path(__file__).parent.parent.parent / "doc" / "catalog_table.rst"
 CATALOG_DIR = Path(__file__).parent.parent.parent / "catalog"
 MAKEFILE_AM = Path(__file__).parent.parent.parent / "Makefile.am"
+
+
+def generate_rst_table(df: pd.DataFrame, rst_path: Path):
+    """Generate a list-table RST file with dropdowns for long descriptions."""
+    with open(rst_path, "w", encoding="utf-8") as f:
+        f.write(".. list-table::\n")
+        f.write("   :header-rows: 1\n")
+        f.write("   :widths: 20 20 80 20\n")
+        f.write("   :class: tight-table\n")
+        f.write("\n")
+
+        f.write("   * - **Game**\n")
+        f.write("     - **Title**\n")
+        f.write("     - **Description**\n")
+        f.write("     - **Download**\n")
+
+        for _, row in df.iterrows():
+            f.write(f"   * - {row['Game']}\n")
+            f.write(f"     - {row['Title']}\n")
+
+            description_cell_lines = []
+            description = str(row.get("Description", "")).strip()
+            # Create a single-line summary for the dropdown title
+            temp_desc_for_summary = description.replace("\n", " ")
+            if len(description) > 80 and ". " in temp_desc_for_summary:
+                summary = temp_desc_for_summary.split(". ", 1)[0] + "."
+                description_cell_lines.append(f".. dropdown:: {summary}")
+                description_cell_lines.append("   ")  # Indented blank line
+                for line in description.splitlines():
+                    description_cell_lines.append(f"   {line}")
+            else:
+                description_cell_lines.append(description.replace("\n", " "))
+
+            f.write(f"     - {description_cell_lines[0]}\n")
+            for line in description_cell_lines[1:]:
+                f.write(f"       {line}\n")
+
+            f.write(f"     - {row['Download']}\n")
 
 
 def update_makefile():
@@ -66,10 +105,10 @@ if __name__ == "__main__":
     parser.add_argument("--build", action="store_true")
     args = parser.parse_args()
 
-    # Create CSV used by doc/catalog.rst
+    # Create RST list-table used by doc/catalog.rst
     df = gbt.catalog.games(include_descriptions=True)
-    df.to_csv(CATALOG_CSV, index=False, quoting=csv.QUOTE_NONNUMERIC)
-    print(f"Generated {CATALOG_CSV} for use in local docs build. DO NOT COMMIT.")
+    generate_rst_table(df, CATALOG_RST_TABLE)
+    print(f"Generated {CATALOG_RST_TABLE} for use in local docs build. DO NOT COMMIT.")
 
     # Update the Makefile.am with the current list of catalog files
     if args.build:
