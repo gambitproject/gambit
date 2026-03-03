@@ -65,11 +65,12 @@ def games(
     n_outcomes: int | None = None,
     n_players: int | None = None,
     n_strategies: int | None = None,
+    include_descriptions: bool = False,
 ) -> pd.DataFrame:
     """
     List games available in the package catalog.
 
-    Arguments are treated as filters on the
+    Most arguments are treated as filters on the
     attributes of the Game objects.
 
     Parameters
@@ -98,11 +99,15 @@ def games(
         The number of players in the game.
     n_strategies: int, optional
         The number of pure strategies in the game.
+    include_descriptions: bool, optional
+        Whether to include the description of each game in the returned DataFrame.
+        Defaults to False.
 
     Returns
     -------
     pd.DataFrame
         A DataFrame with columns "Game" and "Title", where "Game" is the slug to load the game.
+        If `include_descriptions=True`, the DataFrame will also include a "Description" column.
     """
     records: list[dict[str, Any]] = []
 
@@ -153,12 +158,21 @@ def games(
             with as_file(resource_path) as path:
                 game = reader(str(path))
                 if check_filters(game):
-                    records.append(
-                        {
-                            "Game": slug,
-                            "Title": game.title,
-                        }
-                    )
+                    if include_descriptions:
+                        records.append(
+                            {
+                                "Game": slug,
+                                "Title": game.title,
+                                "Description": game.description,
+                            }
+                        )
+                    else:
+                        records.append(
+                            {
+                                "Game": slug,
+                                "Title": game.title,
+                            }
+                        )
 
     # Add all the games from families
     for slug, game in family_games().items():
@@ -168,13 +182,24 @@ def games(
                 f"Slug collision: {slug} is present in both file-based and family games."
             )
         if check_filters(game):
-            records.append(
-                {
-                    "Game": slug,
-                    "Title": game.title,
-                }
-            )
+            if include_descriptions:
+                records.append(
+                    {
+                        "Game": slug,
+                        "Title": game.title,
+                        "Description": game.description,
+                    }
+                )
+            else:
+                records.append(
+                    {
+                        "Game": slug,
+                        "Title": game.title,
+                    }
+                )
 
+    if include_descriptions:
+        return pd.DataFrame.from_records(records, columns=["Game", "Title", "Description"])
     return pd.DataFrame.from_records(records, columns=["Game", "Title"])
 
 
