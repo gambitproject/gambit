@@ -66,7 +66,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # Create CSV used by RST docs page
-    gbt.catalog.games().to_csv(CATALOG_CSV, index=False)
+    gbt.catalog.games(include_descriptions=True).to_csv(CATALOG_CSV, index=False)
     print(f"Generated {CATALOG_CSV} for use in local docs build. DO NOT COMMIT.")
 
     # Update the Makefile.am with the current list of catalog files
