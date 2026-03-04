@@ -10,8 +10,9 @@
 
 **Gambit** is the package for doing computation in (non-cooperative) game theory.
 
-- See our [documentation](https://gambitproject.readthedocs.io/)
-- Check our [project website](https://www.gambit-project.org/)
+- **Documentation:** for the package is hosted at [gambitproject.readthedocs.io](https://gambitproject.readthedocs.io/).
+- **The Gambit project:** Find out more about the project at [gambit-project.org](https://www.gambit-project.org/)
+- **Contributors:** Please read the [code of conduct and contribution guidelines](https://gambitproject.readthedocs.io/en/latest/developer.contributing.html) before posting on GitHub.
 
 Gambit provides:
 

@@ -6,10 +6,24 @@ Contributing to Gambit
 This section provides guidelines for contributing to Gambit, including how to report bugs, suggest features, and contribute code.
 It includes information relevant to both core developers and external contributors.
 
+.. _code-of-conduct:
+
+Code of Conduct
+---------------
+
+All participants in the Gambit community are expected to show respect and courtesy to others.
+We are committed to fostering a welcoming and harassment-free environment for everyone, regardless of background or identity.
+Please be kind and considerate in your interactions. We are all here to build a better tool for game theory research and education.
+Disagreements may happen, but they should be handled with respect and a focus on constructive resolution.
+
+To raise any concerns, please contact `Ted Turocy <mailto:ted.turocy@gmail.com>` or `Rahul Savani <mailto:rahul.savani@gmail.com>`.
+
 .. _github-issues:
 
 GitHub issues
 -------------
+
+Newcomer to the project? Please read the :ref:`code of conduct <code-of-conduct>` and :ref:`new contributors section <new-contributors>` sections before posting on GitHub.
 
 In the first instance, bug reports, feature requests and improvements to the Gambit documentation should be
 posted to the Gambit issue tracker, located at
@@ -38,6 +52,44 @@ In the git repository, the branch ``master`` always points to the
 latest development version.  New development should in general always
 be based off this branch.  Branches labeled ``maintX_Y``, where ``X`` is the major version number and ``Y`` is the minor version number, point to the latest commit on a stable
 version.
+
+.. _new-contributors:
+
+A Note for New Contributors
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+We warmly welcome new contributors to the Gambit project! Your help is valuable to us.
+
+Before you start working on a contribution, we encourage you to familiarize yourself with the project.
+Gambit is a mature and complex codebase. Even issues marked as "good first issue" may require some understanding of the context and how different parts of the project interact.
+
+We have always valued thoughtful contributions. A common issue for open-source projects is receiving pull requests that are not well-aligned with the project's needs or coding standards. To avoid unproductive effort on your part and on ours, we strongly encourage you to engage with us before you spend a lot of time on implementation.
+
+A great way to start is by:
+
+1. Looking through the code to understand the relevant parts for your intended change.
+2. Contacting the maintainers via commenting with a question on an open issue, or opening a Discussion on GitHub.
+3. After your discussion with the maintainers, open a draft pull request early in your process. This allows for discussion and feedback before you've invested too much time.
+
+We are happy to answer questions and provide guidance. Engaging with the maintainers early ensures that your contribution is likely to be accepted and integrated smoothly.
+
+.. _ai-policy:
+
+Policy on AI-Assisted Contributions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+We recognize that generative AI tools can be a useful aid in software development. We also expect authentic and thoughtful engagement from our contributors.
+
+- **You are responsible for your contributions.** If you use generative AI to help you write code or documentation, you must fully understand the output. You should be able to explain the changes and why they are the correct approach for the project.
+- **Add value.** Simply taking a prompt, feeding it to an AI, and posting the result as a contribution is not helpful. We expect you to use your own expertise to verify, test, and refine any AI-generated content. Out of respect for everyone's time, we reserve the right to rigorously reject low-value contributions, whether AI-generated or not.
+- **No AI-generated comments.** Please do not post output from Large Language Models (LLMs) or similar tools as comments on GitHub issues or pull requests. Such comments are often generic and do not add to the discussion.
+- **Humans over bots.** We discourage the use of automated tools, such as bots or agents, to post AI-generated content to issues or pull requests, without the advance approval of the core development team.
+
+
+How to submit a contribution
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To contribute code, please follow these steps:
 
 1. To get started contributing code in the `Gambit GitHub repo <https://github.com/gambitproject/gambit>`__, do one of the following:
 
