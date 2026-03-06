@@ -647,6 +647,8 @@ LCP_STRATEGY_DOUBLE_CASES = [
                 gbt.nash.lcp_solve, rational=False, use_strategic=True, stop_after=None
             ),
             expected=[[d("1/3", "2/3", 0, 0), d("2/3", "1/3")]],
+            regret_tol=TOL,
+            prob_tol=TOL,
         ),
         marks=pytest.mark.nash_lcp_strategy,
         id="test_lcp_strategy_double_4",
@@ -658,6 +660,8 @@ LCP_STRATEGY_DOUBLE_CASES = [
                 gbt.nash.lcp_solve, rational=False, use_strategic=True, stop_after=None
             ),
             expected=[[d("1/3", "2/3", 0, 0), d("2/3", "1/3")]],
+            regret_tol=TOL,
+            prob_tol=TOL,
         ),
         marks=pytest.mark.nash_lcp_strategy,
         id="test_lcp_strategy_double_5",
