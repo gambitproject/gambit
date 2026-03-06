@@ -624,6 +624,7 @@ class GameRep : public std::enable_shared_from_this<GameRep> {
   friend class StrategySupportProfile;
   template <class T> friend class MixedBehaviorProfile;
   template <class T> friend class MixedStrategyProfile;
+  template <class T> friend class MixedStrategyProfileRep;
   template <class T> friend class TableMixedStrategyProfileRep;
 
 protected:
@@ -887,9 +888,9 @@ public:
   virtual void SetTitle(const std::string &p_title) { m_title = p_title; }
 
   /// Get the text comment associated with the game
-  virtual const std::string &GetComment() const { return m_comment; }
+  virtual const std::string &GetDescription() const { return m_comment; }
   /// Set the text comment associated with the game
-  virtual void SetComment(const std::string &p_comment) { m_comment = p_comment; }
+  virtual void SetDescription(const std::string &p_comment) { m_comment = p_comment; }
 
   /// Return the version number of the game.  The version is incremented after each
   /// substantive change to the game (i.e. not merely involving labels)

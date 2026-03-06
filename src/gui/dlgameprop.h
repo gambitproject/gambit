@@ -34,7 +34,7 @@ public:
 
   // Data access (only valid when ShowModal() returns with wxID_OK)
   wxString GetTitle() const override { return m_title->GetValue(); }
-  wxString GetComment() const { return m_comment->GetValue(); }
+  wxString GetDescription() const { return m_comment->GetValue(); }
 };
 
 } // namespace Gambit::GUI

@@ -440,7 +440,7 @@ Game BuildNfg(GameFileLexer &p_parser, TableFileGame &p_data)
   // If this looks lke an outcome-based format, then don't create outcomes in advance
   Game nfg = NewTable(p_data.NumStrategies(), p_parser.GetCurrentToken() == TOKEN_LBRACE);
   nfg->SetTitle(p_data.m_title);
-  nfg->SetComment(p_data.m_comment);
+  nfg->SetDescription(p_data.m_comment);
 
   for (auto player : nfg->GetPlayers()) {
     player->SetLabel(p_data.GetPlayer(player->GetNumber()));
@@ -865,7 +865,7 @@ Game ReadEfgFile(std::istream &p_stream, bool p_normalizeLabels /* = false */)
   ReadPlayers(parser, game, treeData);
   if (parser.GetNextToken() == TOKEN_TEXT) {
     // Read optional comment
-    game->SetComment(parser.GetLastText());
+    game->SetDescription(parser.GetLastText());
     parser.GetNextToken();
   }
   ParseNode(parser, game, game->GetRoot(), treeData);
