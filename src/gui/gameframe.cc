@@ -513,7 +513,8 @@ void GameFrame::MakeMenus()
   toolsMenu->Append(GBT_MENU_TOOLS_QRE, _("&Qre"), _("Compute quantal response equilibria"));
 
   auto *helpMenu = new wxMenu;
-  AppendBitmapItem(helpMenu, wxID_ABOUT, _("&About"), _("About Gambit"), wxBitmap(about_xpm));
+  AppendBitmapItem(helpMenu, wxID_ABOUT, _("&About Gambit"), _("About Gambit"),
+                   wxBitmap(about_xpm));
 
   auto *menuBar = new wxMenuBar();
   menuBar->Append(fileMenu, _("&File"));
