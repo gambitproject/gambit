@@ -152,7 +152,7 @@ def test_player_strategy_bad_type():
     [
         # NFGs
         (
-            games.read_from_file("2x2x2_nfg_with_two_pure_one_mixed_eq.nfg"),
+            games.read_from_file("2x2x2_nfg_from_local_max_cut_2_pure_1_mixed_eq.nfg"),
             [-1, 0, -1],
             [2, 4, 2]
         ),
