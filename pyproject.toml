@@ -32,7 +32,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-test = ["pytest", "nbformat", "nbclient", "ipykernel"]
+test = ["pytest", "pytest-subtests", "nbformat", "nbclient", "ipykernel"]
 doc = [
     "pydata-sphinx-theme",
     "sphinx_design",
