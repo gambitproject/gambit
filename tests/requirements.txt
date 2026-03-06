@@ -1,4 +1,0 @@
-pytest
-nbformat
-nbclient
-ipykernel

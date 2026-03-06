@@ -26,6 +26,7 @@ from . import (  # noqa: F401
     nash,  # noqa: F401
     qre,  # noqa: F401
     supports,  # noqa: F401
+    catalog,
 )
 
 import importlib.metadata

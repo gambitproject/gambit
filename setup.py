@@ -103,8 +103,6 @@ setuptools.setup(
     libraries=[cppgambit_bimatrix, cppgambit_liap, cppgambit_logit, cppgambit_simpdiv,
                cppgambit_gtracer, cppgambit_enumpoly,
                cppgambit_games, cppgambit_core],
-    package_dir={"": "src"},
-    packages=["pygambit"],
     ext_modules=Cython.Build.cythonize(libgambit,
                                        language_level="3str",
                                        compiler_directives={"binding": True})

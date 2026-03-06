@@ -1,0 +1,22 @@
+EFG 2 R "Selten's horse (Selten IJGT 1975, Figure 1)" { "Player 1" "Player 2" "Player 3" }
+"This is a three-player game presented in Selten [^Sel1975], commonly referred
+to as \"Selten's horse\" owing to the layout in which it can be drawn.
+It is the motivating example for his definition of (trembling-hand)
+perfect equilibrium, by showing a game that has an equilibrium which
+is \"unreasonable\", but which is not ruled out by subgame perfection because
+this game has no proper subgames.
+
+[^Sel1975]: Selten, Reinhard (1975). A reexamination of the perfectness concept
+  for equilibrium points in extensive games.  International Journal of Game
+  Theory 4(1): 25-55.
+"
+
+p "" 1 1 "" { "R" "L" } 0
+p "" 2 1 "" { "R" "L" } 0
+t "" 1 "Outcome 1" { 1, 1, 1 }
+p "" 3 1 "" { "R" "L" } 0
+t "" 2 "Outcome 2" { 4, 4, 0 }
+t "" 3 "Outcome 3" { 0, 0, 1 }
+p "" 3 1 "" { "R" "L" } 0
+t "" 4 "Outcome 4" { 3, 2, 2 }
+t "" 5 "Outcome 5" { 0, 0, 0 }
