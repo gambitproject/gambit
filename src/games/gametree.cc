@@ -1158,13 +1158,15 @@ void GameTreeRep::BuildSubgameRoots() const
   std::unordered_map<GameInfosetRep *, Range> hull;
   int terminal_nodes_counter = 0;
 
-  // Interval Assignment
-  struct IntervalVisitor {
+  // Phase 1: Compute Subtree Spans and Information Set Hulls
+  struct SpanVisitor {
     std::unordered_map<GameNodeRep *, Range> &m_disc;
+    std::unordered_map<GameInfosetRep *, Range> &m_hull;
     int &m_counter;
 
-    IntervalVisitor(std::unordered_map<GameNodeRep *, Range> &p_disc, int &p_counter)
-      : m_disc(p_disc), m_counter(p_counter)
+    SpanVisitor(std::unordered_map<GameNodeRep *, Range> &p_disc,
+                std::unordered_map<GameInfosetRep *, Range> &p_hull, int &p_counter)
+      : m_disc(p_disc), m_hull(p_hull), m_counter(p_counter)
     {
     }
 
@@ -1187,21 +1189,22 @@ void GameTreeRep::BuildSubgameRoots() const
         for (const auto &child : p_node->GetChildren()) {
           node_disc.Merge(m_disc.at(child.get()));
         }
+        m_hull[node->m_infoset].Merge(node_disc);
       }
       return DFSCallbackResult::Continue;
     }
   };
 
-  // Adaptation of the Tarjan's bridge-finding algorithm: the game tree itself is the spanning tree
-  struct SubgameVisitor {
+  // Phase 2: Reachability and Detection
+  struct BridgeVisitor {
     std::unordered_map<GameNodeRep *, Range> &m_disc;
     std::unordered_map<GameInfosetRep *, Range> &m_hull;
     std::unordered_map<GameNodeRep *, Range> m_low;
     std::vector<GameNodeRep *> &m_subgames;
 
-    SubgameVisitor(std::unordered_map<GameNodeRep *, Range> &p_disc,
-                   std::unordered_map<GameInfosetRep *, Range> &p_hull,
-                   std::vector<GameNodeRep *> &p_subgames)
+    BridgeVisitor(std::unordered_map<GameNodeRep *, Range> &p_disc,
+                  std::unordered_map<GameInfosetRep *, Range> &p_hull,
+                  std::vector<GameNodeRep *> &p_subgames)
       : m_disc(p_disc), m_hull(p_hull), m_subgames(p_subgames)
     {
     }
@@ -1217,23 +1220,20 @@ void GameTreeRep::BuildSubgameRoots() const
     {
       GameNodeRep *node = p_node.get();
 
-      const Range &own_disc = m_disc.at(node);
-      Range low = own_disc;
-
-      // Expand via Information Set (Horizontal Edges)
-      if (auto *infoset = node->m_infoset) {
-        low.Merge(m_hull.at(infoset));
+      if (p_node->IsTerminal()) {
+        m_low[node] = m_disc.at(node);
+        return DFSCallbackResult::Continue;
       }
 
-      // Expand via Children (Vertical Edges)
+      Range low = m_hull.at(node->m_infoset);
+
       for (const auto &child : p_node->GetChildren()) {
         low.Merge(m_low.at(child.get()));
       }
 
       m_low[node] = low;
 
-      // Bridge Test
-      if (!p_node->IsTerminal() && low == own_disc) {
+      if (low == m_disc.at(node)) {
         m_subgames.push_back(node);
       }
 
@@ -1243,23 +1243,13 @@ void GameTreeRep::BuildSubgameRoots() const
 
   auto game = std::const_pointer_cast<GameRep>(shared_from_this());
 
-  // Step 1: Compute node intervals (analogous to Tarjan's disc)
-  IntervalVisitor interval_visitor(disc, terminal_nodes_counter);
-  WalkDFS(game, m_root, TraversalOrder::Postorder, interval_visitor);
+  // Phase 1: Compute subtree spans D(v) and information set hulls H(I)
+  SpanVisitor span_visitor(disc, hull, terminal_nodes_counter);
+  WalkDFS(game, m_root, TraversalOrder::Postorder, span_visitor);
 
-  // Step 2: Compute infoset hulls
-  for (const auto &player : GetPlayersWithChance()) {
-    for (const auto &infoset : player->m_infosets) {
-      Range &infoset_hull = hull[infoset.get()];
-      for (const auto &member : infoset->m_members) {
-        infoset_hull.Merge(disc.at(member.get()));
-      }
-    }
-  }
-
-  // Step 3: Detect subgame roots (analogous to Tarjan's low)
-  SubgameVisitor subgame_visitor(disc, hull, const_cast<std::vector<GameNodeRep *> &>(m_subgames));
-  WalkDFS(game, m_root, TraversalOrder::Postorder, subgame_visitor);
+  // Phase 2: Compute reachable spans L(v) and detect subgame roots
+  BridgeVisitor bridge_visitor(disc, hull, const_cast<std::vector<GameNodeRep *> &>(m_subgames));
+  WalkDFS(game, m_root, TraversalOrder::Postorder, bridge_visitor);
 }
 
 std::vector<GameNode> GameTreeRep::GetSubgames() const
