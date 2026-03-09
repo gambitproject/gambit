@@ -1156,19 +1156,12 @@ void GameTreeRep::BuildSubgameRoots() const
 
   std::unordered_map<GameNodeRep *, Range> disc;
   std::unordered_map<GameInfosetRep *, Range> hull;
-  int terminal_nodes_counter = 0;
 
-  // Phase 1: Compute Subtree Spans and Information Set Hulls
+  // Phase 1: Compute subtree spans and infoset hulls
   struct SpanVisitor {
     std::unordered_map<GameNodeRep *, Range> &m_disc;
     std::unordered_map<GameInfosetRep *, Range> &m_hull;
-    int &m_counter;
-
-    SpanVisitor(std::unordered_map<GameNodeRep *, Range> &p_disc,
-                std::unordered_map<GameInfosetRep *, Range> &p_hull, int &p_counter)
-      : m_disc(p_disc), m_hull(p_hull), m_counter(p_counter)
-    {
-    }
+    int m_counter = 0;
 
     static DFSCallbackResult OnEnter(GameNode, int) { return DFSCallbackResult::Continue; }
     static DFSCallbackResult OnAction(GameNode, GameNode, int)
@@ -1195,19 +1188,12 @@ void GameTreeRep::BuildSubgameRoots() const
     }
   };
 
-  // Phase 2: Reachability and Detection
+  // Phase 2: Reachability and detection
   struct BridgeVisitor {
-    std::unordered_map<GameNodeRep *, Range> &m_disc;
-    std::unordered_map<GameInfosetRep *, Range> &m_hull;
-    std::unordered_map<GameNodeRep *, Range> m_low;
+    const std::unordered_map<GameNodeRep *, Range> &m_disc;
+    const std::unordered_map<GameInfosetRep *, Range> &m_hull;
     std::vector<GameNodeRep *> &m_subgames;
-
-    BridgeVisitor(std::unordered_map<GameNodeRep *, Range> &p_disc,
-                  std::unordered_map<GameInfosetRep *, Range> &p_hull,
-                  std::vector<GameNodeRep *> &p_subgames)
-      : m_disc(p_disc), m_hull(p_hull), m_subgames(p_subgames)
-    {
-    }
+    std::unordered_map<GameNodeRep *, Range> m_low;
 
     static DFSCallbackResult OnEnter(GameNode, int) { return DFSCallbackResult::Continue; }
     static DFSCallbackResult OnAction(GameNode, GameNode, int)
@@ -1225,13 +1211,12 @@ void GameTreeRep::BuildSubgameRoots() const
         return DFSCallbackResult::Continue;
       }
 
-      Range low = m_hull.at(node->m_infoset);
+      Range &low = m_low[node];
+      low = m_hull.at(node->m_infoset);
 
       for (const auto &child : p_node->GetChildren()) {
         low.Merge(m_low.at(child.get()));
       }
-
-      m_low[node] = low;
 
       if (low == m_disc.at(node)) {
         m_subgames.push_back(node);
@@ -1243,12 +1228,10 @@ void GameTreeRep::BuildSubgameRoots() const
 
   auto game = std::const_pointer_cast<GameRep>(shared_from_this());
 
-  // Phase 1: Compute subtree spans D(v) and information set hulls H(I)
-  SpanVisitor span_visitor(disc, hull, terminal_nodes_counter);
+  SpanVisitor span_visitor{disc, hull};
   WalkDFS(game, m_root, TraversalOrder::Postorder, span_visitor);
 
-  // Phase 2: Compute reachable spans L(v) and detect subgame roots
-  BridgeVisitor bridge_visitor(disc, hull, const_cast<std::vector<GameNodeRep *> &>(m_subgames));
+  BridgeVisitor bridge_visitor{disc, hull, m_subgames};
   WalkDFS(game, m_root, TraversalOrder::Postorder, bridge_visitor);
 }
 
