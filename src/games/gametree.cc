@@ -1179,9 +1179,9 @@ void GameTreeRep::BuildSubgameRoots() const
       }
       else {
         Range &node_disc = m_disc[node];
-        for (const auto &child : p_node->GetChildren()) {
-          node_disc.Merge(m_disc.at(child.get()));
-        }
+        const auto &children = p_node->GetChildren();
+        node_disc.min = m_disc.at(children.front().get()).min;
+        node_disc.max = m_disc.at(children.back().get()).max;
         m_hull[node->m_infoset].Merge(node_disc);
       }
       return DFSCallbackResult::Continue;
@@ -1204,13 +1204,11 @@ void GameTreeRep::BuildSubgameRoots() const
 
     DFSCallbackResult OnExit(const GameNode &p_node, int)
     {
-      GameNodeRep *node = p_node.get();
-
       if (p_node->IsTerminal()) {
-        m_low[node] = m_disc.at(node);
         return DFSCallbackResult::Continue;
       }
 
+      GameNodeRep *node = p_node.get();
       Range &low = m_low[node];
       low = m_hull.at(node->m_infoset);
 
@@ -1231,7 +1229,7 @@ void GameTreeRep::BuildSubgameRoots() const
   SpanVisitor span_visitor{disc, hull};
   WalkDFS(game, m_root, TraversalOrder::Postorder, span_visitor);
 
-  BridgeVisitor bridge_visitor{disc, hull, m_subgames};
+  BridgeVisitor bridge_visitor{disc, hull, m_subgames, disc};
   WalkDFS(game, m_root, TraversalOrder::Postorder, bridge_visitor);
 }
 
