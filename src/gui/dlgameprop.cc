@@ -63,9 +63,11 @@ GamePropertiesDialog::GamePropertiesDialog(wxWindow *p_parent, GameDocument *p_d
       wxALL, 5);
 
   const Game game = m_doc->GetGame();
-  boxSizer->Add(new wxStaticText(this, wxID_STATIC,
-                                 wxString::Format(_("Number of players: %d"), game->NumPlayers())),
-                0, wxALL, 5);
+  {
+    wxString label;
+    label << _("Number of players: ") << game->NumPlayers();
+    boxSizer->Add(new wxStaticText(this, wxID_STATIC, label), 0, wxALL, 5);
+  }
   if (game->IsConstSum()) {
     boxSizer->Add(new wxStaticText(this, wxID_STATIC, _("This is a constant-sum game")), 0, wxALL,
                   5);

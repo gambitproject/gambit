@@ -428,11 +428,14 @@ wxString TreeLayout::CreateNodeLabel(const std::shared_ptr<NodeEntry> &p_entry, 
     case GBT_NODE_LABEL_ISETID:
       if (n->GetInfoset()) {
         if (n->GetInfoset()->IsChanceInfoset()) {
-          return wxString::Format(wxT("C:%d"), n->GetInfoset()->GetNumber());
+          wxString label;
+          label << "C:" << n->GetInfoset()->GetNumber();
+          return label;
         }
         else {
-          return wxString::Format(wxT("%d:%d"), n->GetPlayer()->GetNumber(),
-                                  n->GetInfoset()->GetNumber());
+          wxString label;
+          label << n->GetPlayer()->GetNumber() << ":" << n->GetInfoset()->GetNumber();
+          return label;
         }
       }
       else {

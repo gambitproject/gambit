@@ -158,10 +158,11 @@ wxBEGIN_EVENT_TABLE(EditMoveDialog, wxDialog) EVT_BUTTON(wxID_OK, EditMoveDialog
   labelSizer->Add(m_infosetName, 1, wxALL | wxEXPAND, 5);
   topSizer->Add(labelSizer, 0, wxALL | wxEXPAND, 0);
 
-  topSizer->Add(new wxStaticText(
-                    this, wxID_STATIC,
-                    wxString::Format(_("Number of members: %d"), p_infoset->GetMembers().size())),
-                0, wxALL | wxALIGN_CENTER, 5);
+  {
+    wxString label;
+    label << _("Number of members: ") << p_infoset->GetMembers().size();
+    topSizer->Add(new wxStaticText(this, wxID_STATIC, label), 0, wxALL | wxALIGN_CENTER, 5);
+  }
 
   auto *playerSizer = new wxBoxSizer(wxHORIZONTAL);
   playerSizer->Add(new wxStaticText(this, wxID_STATIC, _("Belongs to player")), 0,
@@ -173,8 +174,9 @@ wxBEGIN_EVENT_TABLE(EditMoveDialog, wxDialog) EVT_BUTTON(wxID_OK, EditMoveDialog
   }
   else {
     for (const auto &player : p_infoset->GetGame()->GetPlayers()) {
-      m_player->Append(wxString::Format(_T("%d: "), player->GetNumber()) +
-                       wxString(player->GetLabel().c_str(), *wxConvCurrent));
+      wxString label;
+      label << player->GetNumber() << ": " << player->GetLabel();
+      m_player->Append(label);
     }
     m_player->SetSelection(p_infoset->GetPlayer()->GetNumber() - 1);
   }
