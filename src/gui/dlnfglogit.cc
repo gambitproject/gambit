@@ -77,7 +77,12 @@ void LogitMixedBranch::AddProfile(const wxString &p_text)
   m_lambdas.push_back(std::stod(next.ToStdString()));
 
   for (size_t i = 1; i <= profile->MixedProfileLength(); i++) {
-    (*profile)[i] = std::stod(tok.GetNextToken().ToStdString());
+    try {
+      (*profile)[i] = std::stod(tok.GetNextToken().ToStdString());
+    }
+    catch (std::out_of_range &) {
+      (*profile)[i] = 0.0;
+    }
   }
 
   m_profiles.push_back(profile);

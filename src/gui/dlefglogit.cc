@@ -171,7 +171,12 @@ void LogitBehavList::AddProfile(const wxString &p_text, bool p_forceShow)
   }
   m_lambdas.push_back(std::stod(next.ToStdString()));
   for (size_t i = 1; i <= profile->BehaviorProfileLength(); i++) {
-    (*profile)[i] = std::stod(tok.GetNextToken().ToStdString());
+    try {
+      (*profile)[i] = std::stod(tok.GetNextToken().ToStdString());
+    }
+    catch (std::out_of_range &) {
+      (*profile)[i] = 0.0;
+    }
   }
   m_profiles.push_back(profile);
   if (p_forceShow || m_profiles.size() - GetNumberRows() > 20) {
