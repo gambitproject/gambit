@@ -16,13 +16,12 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
     with open(rst_path, "w", encoding="utf-8") as f:
         f.write(".. list-table::\n")
         f.write("   :header-rows: 1\n")
-        f.write("   :widths: 35 45 20\n")
+        f.write("   :widths: 60 40\n")
         f.write("   :class: tight-table\n")
         f.write("\n")
 
         f.write("   * - **Game**\n")
-        f.write("     - **Description**\n")
-        f.write("     - **Download**\n")
+        f.write("     - **Details**\n")
 
         for _, row in df.iterrows():
             g = gbt.catalog.load(row["Game"])
@@ -50,8 +49,8 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
             f.write(f"     - {description_cell_lines[0]}\n")
             for line in description_cell_lines[1:]:
                 f.write(f"       {line}\n")
-
-            f.write(f"     - {row['Download']}\n")
+            f.write("       \n")
+            f.write(f"       {row['Download']}\n")
 
 
 def update_makefile():
