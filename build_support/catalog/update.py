@@ -28,8 +28,6 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
             g = gbt.catalog.load(row["Game"])
             tikz = draw_tree(g, color_scheme="gambit")
 
-            f.write(f"   * - {row['Game']}\n")
-            f.write("       \n")
             f.write(f"       .. tikz:: {row['Game']}\n")
             f.write("          \n")
             for line in tikz.splitlines():
