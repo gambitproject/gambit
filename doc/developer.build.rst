@@ -188,7 +188,7 @@ Use `pip` to install from the **root directory of the source tree**:
 
    python -m venv venv
    source venv/bin/activate
-   python -m pip install .[test,doc]
+   python -m pip install ".[test,doc]"
 
 .. tip::
 

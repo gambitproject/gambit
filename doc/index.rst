@@ -1,10 +1,11 @@
-##########################
 Gambit: User documentation
-##########################
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **Gambit** is a library of game theory software and tools for the
 construction and analysis of finite extensive and strategic games.
-We recommended most new users install the PyGambit Python package and read the associated documentation, which includes tutorials and a complete API reference.
+
+- **Users:** We recommend most newcomers install the PyGambit Python package and read the associated documentation, which includes tutorials and a complete API reference.
+- **Contributors:** Please read the :ref:`code of conduct and contribution guidelines <contributing>` before posting on GitHub.
 
 .. grid::
 
