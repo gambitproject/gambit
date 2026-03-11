@@ -2,6 +2,7 @@ import argparse
 from pathlib import Path
 
 import pandas as pd
+from draw_tree import draw_tree
 
 import pygambit as gbt
 
@@ -15,15 +16,19 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
     with open(rst_path, "w", encoding="utf-8") as f:
         f.write(".. list-table::\n")
         f.write("   :header-rows: 1\n")
-        f.write("   :widths: 20 80 20\n")
+        f.write("   :widths: 15 45 30 10\n")
         f.write("   :class: tight-table\n")
         f.write("\n")
 
         f.write("   * - **Game**\n")
         f.write("     - **Description**\n")
+        f.write("     - **Visualization**\n")
         f.write("     - **Download**\n")
 
         for _, row in df.iterrows():
+            g = gbt.catalog.load(row["Game"])
+            tikz = draw_tree(g)
+
             f.write(f"   * - {row['Game']}\n")
 
             description_cell_lines = []
@@ -40,6 +45,11 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
             f.write(f"     - {description_cell_lines[0]}\n")
             for line in description_cell_lines[1:]:
                 f.write(f"       {line}\n")
+
+            f.write(f"     - .. tikz:: {row['Game']}\n")
+            f.write("          \n")
+            for line in tikz.splitlines():
+                f.write(f"          {line}\n")
 
             f.write(f"     - {row['Download']}\n")
 
@@ -96,7 +106,6 @@ def update_makefile():
 
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser()
     parser.add_argument("--build", action="store_true")
     args = parser.parse_args()
