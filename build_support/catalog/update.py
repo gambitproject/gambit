@@ -54,7 +54,6 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
 
             # Column 1: Game Details
             f.write(f"   * - {title}\n")
-            f.write(f"       {'-' * len(title)}\n")
             f.write("       \n")
             f.write("       .. code-block:: python\n")
             f.write("          \n")
