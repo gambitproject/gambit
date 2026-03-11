@@ -29,6 +29,7 @@ extensions = [
     "IPython.sphinxext.ipython_directive",
     "sphinx_design",
     "nbsphinx",
+    "sphinxcontrib.tikz"
 ]
 
 # IPython directive configuration
