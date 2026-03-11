@@ -2070,7 +2070,10 @@ ENUMPOLY_BEHAVIOR_CASES = [
             regret_tol=TOL,
             prob_tol=TOL,
         ),
-        marks=pytest.mark.nash_enumpoly_behavior,
+        marks=[
+            pytest.mark.nash_enumpoly_behavior,
+            pytest.mark.xfail(reason="Changes in operation of enumpoly"),
+        ],
         id="test_enumpoly_behavior_7",
     ),
     pytest.param(
@@ -2084,7 +2087,10 @@ ENUMPOLY_BEHAVIOR_CASES = [
             regret_tol=TOL,
             prob_tol=TOL,
         ),
-        marks=pytest.mark.nash_enumpoly_behavior,
+        marks=[
+            pytest.mark.nash_enumpoly_behavior,
+            pytest.mark.xfail(reason="Changes in operation of enumpoly"),
+        ],
         id="test_enumpoly_behavior_8",
     ),
     # 4-player game

@@ -5,6 +5,10 @@
 ### Changed
 - `Game.comment` has been renamed to `Game.description`
 
+### Fixed
+- `enumpoly` would take a very long time on some supports where an equilibrium is located on the
+  boundary of the projected game.  Search is now restricted to the interior of the space ruling
+  these out; these will always be found by another projection.  (#756)
 
 ## [16.5.1] - unreleased
 
