@@ -81,7 +81,7 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
             ]:
                 # Construct relative path for RST :download: directive
                 # catalog/slug.ext -> ../catalog/slug.ext (relative to doc/)
-                download_links.append(f":download:`{ext.upper()} <../catalog/{slug}.{ext}>`")
+                download_links.append(f":download:`{slug}.{ext} <../catalog/{slug}.{ext}>`")
 
             f.write(f"       {' '.join(download_links)}\n")
 
