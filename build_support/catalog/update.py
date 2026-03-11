@@ -72,7 +72,7 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
             f.write("       \n")
 
             if description:
-                f.write("       .. dropdown:: Description\n")
+                f.write("       .. dropdown:: Long description\n")
                 f.write("          \n")
                 for line in description.splitlines():
                     f.write(f"          {line}\n")
