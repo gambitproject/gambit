@@ -2065,7 +2065,7 @@ ENUMPOLY_BEHAVIOR_CASES = [
             solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
             expected=[
                 [[d(1, 0), d(1, 0)], [d(1, 0), d("1/2", "1/2")], [d(1, 0), d(1, 0)]],
-                [[d(1, 0), d(1, 0)], [d(1, 0), d("1/2", "1/2")], [d(1, 0), d(0, 1)]], 
+                [[d(1, 0), d(1, 0)], [d(1, 0), d("1/2", "1/2")], [d(1, 0), d(0, 1)]],
             ],
             regret_tol=TOL,
             prob_tol=TOL,
@@ -2076,10 +2076,10 @@ ENUMPOLY_BEHAVIOR_CASES = [
     pytest.param(
         EquilibriumTestCase(
             factory=functools.partial(games.read_from_file, "3_player_with_nonterm_outcomes.efg"),
-            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=2),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
             expected=[
                 [[d(1, 0), d(1, 0)], [d(1, 0), d("1/2", "1/2")], [d(1, 0), d(1, 0)]],
-                [[d(1, 0), d(1, 0)], [d(1, 0), d("1/2", "1/2")], [d(1, 0), d(0, 1)]], 
+                [[d(1, 0), d(1, 0)], [d(1, 0), d("1/2", "1/2")], [d(1, 0), d(0, 1)]],
             ],
             regret_tol=TOL,
             prob_tol=TOL,
@@ -2157,14 +2157,11 @@ def test_nash_behavior_solver(test_case: EquilibriumTestCase, subtests) -> None:
     with subtests.test("number of equilibria found"):
         assert len(result.equilibria) == len(test_case.expected)
     for i, (eq, exp) in enumerate(zip(result.equilibria, test_case.expected, strict=True)):
-
         # print("EQ:")
         # print(eq)
         # print("EXP:")
         # print(exp)
         # print("===================")
-
-
         with subtests.test(eq=i, check="max_regret"):
             assert eq.max_regret() <= test_case.regret_tol
         with subtests.test(eq=i, check="max_regret"):
