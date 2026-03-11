@@ -165,7 +165,9 @@ void AnalysisNotebook::OnUpdate()
 {
   m_choices->Clear();
   for (int i = 1; i <= m_doc->NumProfileLists(); i++) {
-    m_choices->Append(wxString::Format(wxT("Profiles %d"), i));
+    wxString label;
+    label << wxT("Profiles ") << i;
+    m_choices->Append(label);
   }
   m_choices->SetSelection(m_doc->GetCurrentProfileList() - 1);
 
@@ -513,7 +515,8 @@ void GameFrame::MakeMenus()
   toolsMenu->Append(GBT_MENU_TOOLS_QRE, _("&Qre"), _("Compute quantal response equilibria"));
 
   auto *helpMenu = new wxMenu;
-  AppendBitmapItem(helpMenu, wxID_ABOUT, _("&About"), _("About Gambit"), wxBitmap(about_xpm));
+  AppendBitmapItem(helpMenu, wxID_ABOUT, _("&About Gambit"), _("About Gambit"),
+                   wxBitmap(about_xpm));
 
   auto *menuBar = new wxMenuBar();
   menuBar->Append(fileMenu, _("&File"));
@@ -1114,12 +1117,13 @@ void GameFrame::OnViewStrategic(wxCommandEvent &p_event)
 
     if (const size_t contingencies = m_doc->GetGame()->GetStrategies().extent_product();
         !m_nfgPanel && contingencies >= 50000) {
-      if (wxMessageBox(wxString::Format(wxT("This game has %d contingencies in strategic form.\n"),
-                                        contingencies) +
-                           wxT("Performance in browsing strategic form will be poor,\n") +
-                           wxT("and may render the program nonresponsive.\n") +
-                           wxT("Do you wish to continue?"),
-                       _("Large strategic game warning"), wxOK | wxCANCEL | wxALIGN_CENTER,
+      wxString msg;
+      msg << "This game has " << contingencies << " contingencies in strategic form.\n"
+          << "Performance in browsing strategic form will be poor,\n"
+          << "and may render the program nonresponsive.\n"
+          << "Do you wish to continue?";
+
+      if (wxMessageBox(msg, _("Large strategic game warning"), wxOK | wxCANCEL | wxICON_WARNING,
                        this) != wxOK) {
         return;
       }
@@ -1246,14 +1250,14 @@ void GameFrame::OnToolsEquilibrium(wxCommandEvent &)
     if (dialog.UseStrategic()) {
       if (const int contingencies = m_doc->GetGame()->GetStrategies().extent_product();
           contingencies >= 50000) {
-        if (wxMessageBox(
-                wxString::Format(wxT("This game has %d contingencies in strategic form.\n"),
-                                 contingencies) +
-                    wxT("Performance in solving strategic form will be poor,\n") +
-                    wxT("and may render the program nonresponsive.\n") +
-                    wxT("Do you wish to continue?"),
-                _("Large strategic game warning"), wxOK | wxCANCEL | wxALIGN_CENTER,
-                this) != wxOK) {
+        wxString msg;
+        msg << "This game has " << contingencies << " contingencies in strategic form.\n"
+            << "Performance in solving strategic form will be poor,\n"
+            << "and may render the program nonresponsive.\n"
+            << "Do you wish to continue?";
+
+        if (wxMessageBox(msg, _("Large strategic game warning"), wxOK | wxCANCEL | wxALIGN_CENTER,
+                         this) != wxOK) {
           return;
         }
       }

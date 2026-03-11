@@ -45,8 +45,6 @@ public:
   int NumActions() const;
   wxString GetActionName(int p_act) const;
   Array<Number> GetActionProbs() const;
-
-  wxDECLARE_EVENT_TABLE();
 };
 } // namespace Gambit::GUI
 

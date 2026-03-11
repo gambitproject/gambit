@@ -40,10 +40,10 @@ InsertMoveDialog::InsertMoveDialog(wxWindow *p_parent, GameDocument *p_doc)
   for (const auto &player : m_doc->GetGame()->GetPlayers()) {
     wxString s = _("Insert move for ");
     if (player->GetLabel() != "") {
-      s += wxString(player->GetLabel().c_str(), *wxConvCurrent);
+      s << player->GetLabel();
     }
     else {
-      s += wxString::Format(_("player %d"), player->GetNumber());
+      s << _("player ") << player->GetNumber();
     }
     m_playerItem->Append(s);
   }
@@ -58,18 +58,18 @@ InsertMoveDialog::InsertMoveDialog(wxWindow *p_parent, GameDocument *p_doc)
   for (const auto &infoset : player->GetInfosets()) {
     wxString s = _("at information set ");
     if (infoset->GetLabel() != "") {
-      s += wxString(infoset->GetLabel().c_str(), *wxConvCurrent);
+      s << infoset->GetLabel();
     }
     else {
-      s += wxString::Format(wxT("%d"), infoset->GetNumber());
+      s << infoset->GetNumber();
     }
 
-    s += wxString::Format(wxT(" (%d action"), infoset->GetActions().size());
+    s << " (" << infoset->GetActions().size() << " action";
     if (infoset->GetActions().size() > 1) {
       s += wxT("s");
     }
 
-    s += wxString::Format(wxT(", %d member node"), infoset->GetMembers().size());
+    s << ", " << infoset->GetMembers().size() << " member node";
     if (infoset->GetMembers().size() > 1) {
       s += wxT("s)");
     }
@@ -134,18 +134,18 @@ void InsertMoveDialog::OnPlayer(wxCommandEvent &)
   for (const auto &infoset : player->GetInfosets()) {
     wxString s = _("at information set ");
     if (infoset->GetLabel() != "") {
-      s += wxString(infoset->GetLabel().c_str(), *wxConvCurrent);
+      s << infoset->GetLabel();
     }
     else {
-      s += wxString::Format(wxT("%d"), infoset->GetNumber());
+      s << infoset->GetNumber();
     }
 
-    s += wxString::Format(wxT(" (%d action"), infoset->GetActions().size());
+    s << " (" << infoset->GetActions().size() << " action";
     if (infoset->GetActions().size() > 1) {
       s += wxT("s");
     }
 
-    s += wxString::Format(wxT(", %d member node"), infoset->GetMembers().size());
+    s << ", " << infoset->GetMembers().size() << " member node";
     if (infoset->GetMembers().size() > 1) {
       s += wxT("s)");
     }

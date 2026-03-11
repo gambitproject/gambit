@@ -74,12 +74,15 @@ void BehaviorProfileList::OnCellClick(wxSheetEvent &p_event)
 wxString BehaviorProfileList::GetCellValue(const wxSheetCoords &p_coords)
 {
   if (IsRowLabelCell(p_coords)) {
-    return wxString::Format(wxT("%d"), p_coords.GetRow() + 1);
+    wxString label;
+    label << (p_coords.GetRow() + 1);
+    return label;
   }
   if (IsColLabelCell(p_coords)) {
     const GameAction action = m_doc->GetAction(p_coords.GetCol() + 1);
-    return (wxString::Format(wxT("%d: "), action->GetInfoset()->GetNumber()) +
-            wxString(action->GetLabel().c_str(), *wxConvCurrent));
+    wxString label;
+    label << action->GetInfoset()->GetNumber() << ": " << action->GetLabel();
+    return label;
   }
   if (IsCornerLabelCell(p_coords)) {
     return wxT("#");

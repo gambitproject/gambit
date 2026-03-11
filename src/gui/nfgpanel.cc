@@ -71,7 +71,9 @@ void TablePlayerIcon::OnLeftClick(wxMouseEvent &)
   image.CopyFromBitmap(bitmap);
 #endif // _WXMSW__
 
-  wxTextDataObject textData(wxString::Format(wxT("P%d"), m_player));
+  wxString label;
+  label << "P" << m_player;
+  wxTextDataObject textData(label);
   wxDropSource source(textData, this, image, image, image);
   source.DoDragDrop(wxDrag_DefaultMove);
 }
@@ -207,7 +209,9 @@ void TablePlayerPanel::OnSetColor(wxCommandEvent &)
   wxColourData data;
   data.SetColour(m_doc->GetStyle().GetPlayerColor(m_doc->GetGame()->GetPlayer(m_player)));
   wxColourDialog dialog(this, &data);
-  dialog.SetTitle(wxString::Format(_("Choose color for player %d"), m_player));
+  wxString label;
+  label << _("Choose color for player ") << m_player;
+  dialog.SetTitle(label);
 
   if (dialog.ShowModal() == wxID_OK) {
     const wxColour color = dialog.GetColourData().GetColour();
@@ -407,8 +411,9 @@ void StrategyDominanceToolbar::OnUpdate()
     m_level->SetLabel(wxT("Eliminated 1 level"));
   }
   else {
-    m_level->SetLabel(
-        wxString::Format(wxT("Eliminated %d levels"), m_doc->GetStrategyElimLevel() - 1));
+    wxString label;
+    label << "Eliminated " << (m_doc->GetStrategyElimLevel() - 1) << " levels";
+    m_level->SetLabel(label);
   }
   GetSizer()->Layout();
 }
