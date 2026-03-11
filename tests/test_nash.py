@@ -1,5 +1,4 @@
-"""Test of calls to Nash equilibrium and QRE solvers.
-"""
+"""Test of calls to Nash equilibrium and QRE solvers."""
 
 import dataclasses
 import functools
@@ -2128,6 +2127,79 @@ ENUMPOLY_BEHAVIOR_CASES = [
         marks=pytest.mark.nash_enumpoly_behavior,
         id="test_enumpoly_behavior_9",
     ),
+    # 3-player perfect info game to test behavior two off equilibrium path
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.read_from_file, "3_player_perfect_info_1_move_each.efg"
+            ),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
+            expected=[
+                # candidate,10,10,10000
+                # NE,1,0,1,0,1,0,0,0,0
+                [[d(1, 0)], [d(1, 0)], [d(1, 0, 0, 0, 0)]],
+                # candidate,01,00,00000
+                # NE,0,1,1,0,0.2,0.2,0.2,0.2,0.2
+                # NE,0,1,0,1,0.2,0.2,0.2,0.2,0.2
+                [[d(0, 1)], [d(1, 0)], [d("1/5", "1/5", "1/5", "1/5", "1/5")]],  # only 1 off path
+                [[d(0, 1)], [d(0, 1)], [d("1/5", "1/5", "1/5", "1/5", "1/5")]],
+            ],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enumpoly_behavior,
+        id="test_enumpoly_behavior_10",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.read_from_file, "3_player_perfect_info_1_move_each_extra_move_for_p2.efg"
+            ),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
+            expected=[
+                [[d(1, 0)], [d(1, 0), d(1, 0, 0, 0)], [d(1, 0, 0, 0, 0)]],
+                [
+                    [d(0, 1)],
+                    [d(1, 0), d("1/4", "1/4", "1/4", "1/4")],
+                    [d("1/5", "1/5", "1/5", "1/5", "1/5")],
+                ],
+                [
+                    [d(0, 1)],
+                    [d(0, 1), d("1/4", "1/4", "1/4", "1/4")],
+                    [d("1/5", "1/5", "1/5", "1/5", "1/5")],
+                ],
+            ],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enumpoly_behavior,
+        id="test_enumpoly_behavior_11",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.read_from_file,
+                "3_player_perfect_info_1_move_each_extra_move_for_p2_strict_dom_for_p1.efg",
+            ),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
+            expected=[
+                [
+                    [d(0, 1)],
+                    [d(1, 0), d("1/4", "1/4", "1/4", "1/4")],
+                    [d("1/5", "1/5", "1/5", "1/5", "1/5")],
+                ],
+                [
+                    [d(0, 1)],
+                    [d(0, 1), d("1/4", "1/4", "1/4", "1/4")],
+                    [d("1/5", "1/5", "1/5", "1/5", "1/5")],
+                ],
+            ],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enumpoly_behavior,
+        id="test_enumpoly_behavior_12",
+    ),
 ]
 # ##############################################################################
 # 3-player game
@@ -2423,9 +2495,7 @@ LIAP_AGENT_CASES = [
             factory=functools.partial(games.read_from_file, "stripped_down_poker.efg"),
             solver=gbt.nash.liap_agent_solve,
             start_data=dict(data=None, rational=False),
-            expected=[
-                    [[d(1, 0), d("1/3", "2/3")], [d("2/3", "1/3")]]
-            ],
+            expected=[[[d(1, 0), d("1/3", "2/3")], [d("2/3", "1/3")]]],
             regret_tol=TOL_LARGE,
             prob_tol=TOL_LARGE,
         ),
