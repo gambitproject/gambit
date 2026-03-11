@@ -15,7 +15,7 @@ build:
     - texlive-full
     - imagemagick
   jobs:
-    # Create CSV for catalog table in docs
+    # Create RST for catalog table in docs
     post_install:
       - $READTHEDOCS_VIRTUALENV_PATH/bin/python build_support/catalog/update.py
 
