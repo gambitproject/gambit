@@ -84,21 +84,24 @@ static Gambit::GameStrategy GetStrategy(GameDocument *p_doc, int p_index)
 wxString MixedProfileList::GetCellValue(const wxSheetCoords &p_coords)
 {
   if (IsRowLabelCell(p_coords)) {
-    return wxString::Format(wxT("%d"), RowToProfile(p_coords.GetRow()));
+    wxString label;
+    label << RowToProfile(p_coords.GetRow());
+    return label;
   }
-  else if (IsColLabelCell(p_coords)) {
+  if (IsColLabelCell(p_coords)) {
     int index = 0;
     for (const auto &player : m_doc->GetGame()->GetPlayers()) {
       for (const auto &strategy : player->GetStrategies()) {
         if (index++ == p_coords.GetCol()) {
-          return (wxString::Format(wxT("%d: "), player->GetNumber()) +
-                  wxString(strategy->GetLabel().c_str(), *wxConvCurrent));
+          wxString label;
+          label << player->GetNumber() << ": " << strategy->GetLabel();
+          return label;
         }
       }
     }
     return wxT("");
   }
-  else if (IsCornerLabelCell(p_coords)) {
+  if (IsCornerLabelCell(p_coords)) {
     return wxT("#");
   }
 

@@ -100,24 +100,28 @@ LayoutNodesPanel::LayoutNodesPanel(wxWindow *p_parent, const TreeRenderConfig &p
   gridSizer->Add(new wxStaticText(this, wxID_ANY, _("Horizontal size of nodes")), 0,
                  wxALIGN_CENTER_VERTICAL | wxALL, 5);
 
-  constexpr int NODE_LENGTH_MIN = 5;
-  constexpr int NODE_LENGTH_MAX = 100;
-
-  m_nodeSize = new wxSpinCtrl(this, wxID_ANY, wxString::Format(_T("%d"), p_settings.GetNodeSize()),
-                              wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, NODE_LENGTH_MIN,
-                              NODE_LENGTH_MAX);
-  gridSizer->Add(m_nodeSize, 1, wxEXPAND | wxALL, 5);
+  {
+    constexpr int NODE_LENGTH_MIN = 5;
+    constexpr int NODE_LENGTH_MAX = 100;
+    wxString label;
+    label << p_settings.GetNodeSize();
+    m_nodeSize = new wxSpinCtrl(this, wxID_ANY, label, wxDefaultPosition, wxDefaultSize,
+                                wxSP_ARROW_KEYS, NODE_LENGTH_MIN, NODE_LENGTH_MAX);
+    gridSizer->Add(m_nodeSize, 1, wxEXPAND | wxALL, 5);
+  }
 
   gridSizer->Add(new wxStaticText(this, wxID_ANY, _("Vertical spacing between terminal nodes")), 0,
                  wxALIGN_CENTER_VERTICAL | wxALL, 5);
 
-  constexpr int Y_SPACING_MIN = 15;
-  constexpr int Y_SPACING_MAX = 60;
-
-  m_terminalSpacing = new wxSpinCtrl(
-      this, wxID_ANY, wxString::Format(_T("%d"), p_settings.GetTerminalSpacing()),
-      wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, Y_SPACING_MIN, Y_SPACING_MAX);
-  gridSizer->Add(m_terminalSpacing, 1, wxEXPAND | wxALL, 5);
+  {
+    constexpr int Y_SPACING_MIN = 15;
+    constexpr int Y_SPACING_MAX = 60;
+    wxString label;
+    label << p_settings.GetTerminalSpacing();
+    m_terminalSpacing = new wxSpinCtrl(this, wxID_ANY, label, wxDefaultPosition, wxDefaultSize,
+                                       wxSP_ARROW_KEYS, Y_SPACING_MIN, Y_SPACING_MAX);
+    gridSizer->Add(m_terminalSpacing, 1, wxEXPAND | wxALL, 5);
+  }
 
   sizeSizer->Add(gridSizer, 1, wxALL | wxEXPAND, 5);
   topSizer->Add(sizeSizer, 0, wxALL | wxALIGN_CENTER, 5);
@@ -151,12 +155,6 @@ public:
 LayoutBranchesPanel::LayoutBranchesPanel(wxWindow *p_parent, const TreeRenderConfig &p_settings)
   : wxPanel(p_parent, wxID_ANY)
 {
-  constexpr int BRANCH_LENGTH_MIN = 0;
-  constexpr int BRANCH_LENGTH_MAX = 100;
-
-  constexpr int TINE_LENGTH_MIN = 20;
-  constexpr int TINE_LENGTH_MAX = 100;
-
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
   auto *styleBoxSizer = new wxStaticBoxSizer(wxHORIZONTAL, this, _("Drawing branches"));
@@ -186,19 +184,29 @@ LayoutBranchesPanel::LayoutBranchesPanel(wxWindow *p_parent, const TreeRenderCon
   auto *gridSizer = new wxFlexGridSizer(2);
   gridSizer->AddGrowableCol(1);
 
-  gridSizer->Add(new wxStaticText(this, wxID_ANY, _("size of branch fork")), 0,
-                 wxALIGN_CENTER_VERTICAL | wxALL, 5);
-  m_branchLength = new wxSpinCtrl(
-      this, wxID_ANY, wxString::Format(_T("%d"), p_settings.GetBranchLength()), wxDefaultPosition,
-      wxDefaultSize, wxSP_ARROW_KEYS, BRANCH_LENGTH_MIN, BRANCH_LENGTH_MAX);
-  gridSizer->Add(m_branchLength, 1, wxALL | wxEXPAND, 5);
+  {
+    constexpr int BRANCH_LENGTH_MIN = 0;
+    constexpr int BRANCH_LENGTH_MAX = 100;
+    gridSizer->Add(new wxStaticText(this, wxID_ANY, _("size of branch fork")), 0,
+                   wxALIGN_CENTER_VERTICAL | wxALL, 5);
+    wxString label;
+    label << p_settings.GetBranchLength();
+    m_branchLength = new wxSpinCtrl(this, wxID_ANY, label, wxDefaultPosition, wxDefaultSize,
+                                    wxSP_ARROW_KEYS, BRANCH_LENGTH_MIN, BRANCH_LENGTH_MAX);
+    gridSizer->Add(m_branchLength, 1, wxALL | wxEXPAND, 5);
+  }
 
-  gridSizer->Add(new wxStaticText(this, wxID_ANY, _("size of branch tine")), 1,
-                 wxALIGN_CENTER_VERTICAL | wxALL, 5);
-  m_tineLength = new wxSpinCtrl(
-      this, wxID_ANY, wxString::Format(_T("%d"), p_settings.GetTineLength()), wxDefaultPosition,
-      wxDefaultSize, wxSP_ARROW_KEYS, TINE_LENGTH_MIN, TINE_LENGTH_MAX);
-  gridSizer->Add(m_tineLength, 1, wxALL | wxEXPAND, 5);
+  {
+    constexpr int TINE_LENGTH_MIN = 20;
+    constexpr int TINE_LENGTH_MAX = 100;
+    gridSizer->Add(new wxStaticText(this, wxID_ANY, _("size of branch tine")), 1,
+                   wxALIGN_CENTER_VERTICAL | wxALL, 5);
+    wxString label;
+    label << p_settings.GetTineLength();
+    m_tineLength = new wxSpinCtrl(this, wxID_ANY, label, wxDefaultPosition, wxDefaultSize,
+                                  wxSP_ARROW_KEYS, TINE_LENGTH_MIN, TINE_LENGTH_MAX);
+    gridSizer->Add(m_tineLength, 1, wxALL | wxEXPAND, 5);
+  }
 
   lengthSizer->Add(gridSizer, 1, wxALL | wxEXPAND, 5);
   topSizer->Add(lengthSizer, 0, wxALL | wxALIGN_CENTER, 5);
