@@ -25,7 +25,7 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
         f.write("\n")
 
         f.write("   * - **Game**\n")
-        f.write("     - **Details**\n")
+        f.write("     - **Image**\n")
 
         for _, row in df.iterrows():
             slug = row["Game"]
@@ -49,31 +49,26 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
                 viz_path = CATALOG_DIR / f"{slug}"
                 func(g, save_to=str(viz_path), **viz_args)
 
-            f.write(f"   * - **{slug}**\n")
-            f.write("       \n")
-            f.write("       .. tikz::\n")
-            f.write("          \n")
-            for line in tikz.splitlines():
-                f.write(f"          {line}\n")
-
             title = str(row.get("Title", "")).strip()
             description = str(row.get("Description", "")).strip()
 
-            f.write(f"     - **{title}**\n")
+            # Column 1: Game Details
+            f.write(f"   * - {title}\n")
+            f.write(f"       {'-' * len(title)}\n")
+            f.write("       \n")
+            f.write("       .. code-block:: python\n")
+            f.write("          \n")
+            f.write(f'          pygambit.catalog.load("{slug}")\n')
             f.write("       \n")
 
-            # Add download links
+            # Prepare download links for the dropdown
             download_links = [row["Download"]]
-            for ext in [
-                "tex",
-                # "png",  # TODO enable once draw_tree #37 fixed
-                "pdf",
-            ]:
-                # Construct relative path for RST :download: directive
-                # catalog/slug.ext -> ../catalog/slug.ext (relative to doc/)
+            for ext in ["tex", "pdf"]:
                 download_links.append(f":download:`{slug}.{ext} <../catalog/{slug}.{ext}>`")
 
-            f.write(f"       {' '.join(download_links)}\n")
+            f.write("       .. dropdown:: Downloads\n")
+            f.write("          \n")
+            f.write(f"          {' '.join(download_links)}\n")
             f.write("       \n")
 
             if description:
@@ -81,6 +76,12 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
                 f.write("          \n")
                 for line in description.splitlines():
                     f.write(f"          {line}\n")
+
+            # Column 2: Image
+            f.write("     - .. tikz::\n")
+            f.write("          \n")
+            for line in tikz.splitlines():
+                f.write(f"          {line}\n")
 
 
 def update_makefile():
