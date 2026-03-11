@@ -1971,7 +1971,34 @@ ENUMPOLY_BEHAVIOR_CASES = [
             prob_tol=TOL,
         ),
         marks=pytest.mark.nash_enumpoly_behavior,
-        id="test_enumpoly_behavior_01",
+        id="test_enumpoly_behavior_0",
+    ),
+    # 2-player non-zero-sum games
+    pytest.param(
+        EquilibriumTestCase(
+            factory=games.create_one_shot_trust_efg,
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
+            expected=[
+                [[d(0, 1)], [d(0, 1)]],
+            ],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enumpoly_behavior,
+        id="test_enumpoly_behavior_1a",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.create_one_shot_trust_efg, unique_NE_variant=True),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
+            expected=[
+                [[d(1, 0)], [d(0, 1)]],
+            ],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enumpoly_behavior,
+        id="test_enumpoly_behavior_1b",
     ),
     pytest.param(
         EquilibriumTestCase(
@@ -2171,65 +2198,6 @@ def test_nash_behavior_solver(test_case: EquilibriumTestCase, subtests) -> None:
             for player in game.players:
                 for action in player.actions:
                     assert abs(eq[action] - expected[action]) <= test_case.prob_tol
-
-
-##################################################################################################
-# BEHAVIOR SOLVER WITHOUT SUBTESTS -- TEMP FOR ISSUE 660
-##################################################################################################
-
-ENUMPOLY_ISSUE_660_CASES = [
-    # 2-player non-zero-sum games
-    pytest.param(
-        EquilibriumTestCase(
-            factory=games.create_one_shot_trust_efg,
-            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
-            expected=[
-                [[d(0, 1)], [d("1/2", "1/2")]],
-                [[d(0, 1)], [d(0, 1)]],
-                # second entry assumes we extend to Nash using only pure behaviors
-                # currently we get [[0, 1]], [[0, 0]]] as a second eq
-            ],
-            regret_tol=TOL,
-            prob_tol=TOL,
-        ),
-        marks=[
-            pytest.mark.nash_enumpoly_behavior,
-            pytest.mark.xfail(reason="Problem with enumpoly, as per issue #660"),
-        ],
-        id="enumpoly_one_shot_trust_issue_660",
-    ),
-    pytest.param(
-        EquilibriumTestCase(
-            factory=functools.partial(games.create_one_shot_trust_efg, unique_NE_variant=True),
-            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
-            expected=[
-                [[[d(1, 0)], [d(0, 1)]]],
-                # currently we get [d(0, 1)], [d(0, 0)]] as a second eq
-            ],
-            regret_tol=TOL,
-            prob_tol=TOL,
-        ),
-        marks=[
-            pytest.mark.nash_enumpoly_behavior,
-            pytest.mark.xfail(reason="Problem with enumpoly, as per issue #660"),
-        ],
-        id="enumpoly_one_shot_trust_unique_NE_issue_660",
-    ),
-]
-
-
-@pytest.mark.nash
-@pytest.mark.parametrize("test_case", ENUMPOLY_ISSUE_660_CASES, ids=lambda c: c.label)
-def test_nash_behavior_solver_no_subtests_only_profile(test_case: EquilibriumTestCase) -> None:
-    """TEMP: to be included with test_nash_behavior_solver when 660 is resolved."""
-    game = test_case.factory()
-    result = test_case.solver(game)
-    assert len(result.equilibria) == len(test_case.expected)
-    for eq, exp in zip(result.equilibria, test_case.expected, strict=True):
-        expected = game.mixed_behavior_profile(rational=True, data=exp)
-        for player in game.players:
-            for action in player.actions:
-                assert abs(eq[action] - expected[action]) <= test_case.prob_tol
 
 
 ##################################################################################################
