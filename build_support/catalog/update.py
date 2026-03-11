@@ -16,13 +16,12 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
     with open(rst_path, "w", encoding="utf-8") as f:
         f.write(".. list-table::\n")
         f.write("   :header-rows: 1\n")
-        f.write("   :widths: 15 45 30 10\n")
+        f.write("   :widths: 35 45 20\n")
         f.write("   :class: tight-table\n")
         f.write("\n")
 
         f.write("   * - **Game**\n")
         f.write("     - **Description**\n")
-        f.write("     - **Visualization**\n")
         f.write("     - **Download**\n")
 
         for _, row in df.iterrows():
@@ -30,6 +29,11 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
             tikz = draw_tree(g, color_scheme="gambit")
 
             f.write(f"   * - {row['Game']}\n")
+            f.write("       \n")
+            f.write(f"       .. tikz:: {row['Game']}\n")
+            f.write("          \n")
+            for line in tikz.splitlines():
+                f.write(f"          {line}\n")
 
             description_cell_lines = []
             title = str(row.get("Title", "")).strip()
@@ -45,11 +49,6 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
             f.write(f"     - {description_cell_lines[0]}\n")
             for line in description_cell_lines[1:]:
                 f.write(f"       {line}\n")
-
-            f.write(f"     - .. tikz:: {row['Game']}\n")
-            f.write("          \n")
-            for line in tikz.splitlines():
-                f.write(f"          {line}\n")
 
             f.write(f"     - {row['Download']}\n")
 
