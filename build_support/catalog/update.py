@@ -53,7 +53,7 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
             description = str(row.get("Description", "")).strip()
 
             # Column 1: Game Details
-            f.write(f"   * - {title}\n")
+            f.write(f"   * - **{title}**\n")
             f.write("       \n")
             if description:
                 f.write("       .. dropdown:: Long description\n")
