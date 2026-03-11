@@ -26,7 +26,9 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
 
         for _, row in df.iterrows():
             g = gbt.catalog.load(row["Game"])
-            tikz = draw_tree(g, color_scheme="gambit")
+            tikz = draw_tree(
+                g, color_scheme="gambit", sublevel_scaling=0, shared_terminal_depth=True
+            )
 
             f.write(f"       .. tikz:: {row['Game']}\n")
             f.write("          \n")
