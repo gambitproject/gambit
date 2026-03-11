@@ -29,8 +29,9 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
                 g, color_scheme="gambit", sublevel_scaling=0, shared_terminal_depth=True
             )
 
-            f.write("   * - \n")
-            f.write(f"       .. tikz:: {row['Game']}\n")
+            f.write(f"   * - **{row['Game']}**\n")
+            f.write("       \n")
+            f.write("       .. tikz::\n")
             f.write("          \n")
             for line in tikz.splitlines():
                 f.write(f"          {line}\n")
