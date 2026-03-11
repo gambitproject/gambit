@@ -88,11 +88,14 @@ def update_makefile():
 
     # Using rglob("*") to find files in all subdirectories
     slugs = []
-    for ext in ["efg", "nfg", "tex", "png", "pdf"]:
-        for resource_path in sorted(CATALOG_DIR.rglob(f"*.{ext}")):
-            if resource_path.is_file():
-                rel_path = resource_path.relative_to(CATALOG_DIR)
-                slugs.append(str(rel_path))
+    for resource_path in sorted(CATALOG_DIR.rglob("*.efg")):
+        if resource_path.is_file():
+            rel_path = resource_path.relative_to(CATALOG_DIR)
+            slugs.append(str(rel_path))
+    for resource_path in sorted(CATALOG_DIR.rglob("*.nfg")):
+        if resource_path.is_file():
+            rel_path = resource_path.relative_to(CATALOG_DIR)
+            slugs.append(str(rel_path))
 
     game_files = []
     for slug in slugs:
