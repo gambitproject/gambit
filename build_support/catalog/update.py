@@ -56,20 +56,10 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
             for line in tikz.splitlines():
                 f.write(f"          {line}\n")
 
-            description_cell_lines = []
             title = str(row.get("Title", "")).strip()
             description = str(row.get("Description", "")).strip()
-            if description:
-                description_cell_lines.append(f".. dropdown:: {title}")
-                description_cell_lines.append("   ")  # Indented blank line
-                for line in description.splitlines():
-                    description_cell_lines.append(f"   {line}")
-            else:
-                description_cell_lines.append(title)
 
-            f.write(f"     - {description_cell_lines[0]}\n")
-            for line in description_cell_lines[1:]:
-                f.write(f"       {line}\n")
+            f.write(f"     - **{title}**\n")
             f.write("       \n")
 
             # Add download links
@@ -84,6 +74,13 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
                 download_links.append(f":download:`{slug}.{ext} <../catalog/{slug}.{ext}>`")
 
             f.write(f"       {' '.join(download_links)}\n")
+            f.write("       \n")
+
+            if description:
+                f.write("       .. dropdown:: Description\n")
+                f.write("          \n")
+                for line in description.splitlines():
+                    f.write(f"          {line}\n")
 
 
 def update_makefile():
