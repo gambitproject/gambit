@@ -2,11 +2,7 @@ import argparse
 from pathlib import Path
 
 import pandas as pd
-from draw_tree import (
-    draw_tree,
-    generate_pdf,
-    generate_tex,  # TODO: add generate_png once draw_tree #37 fixed
-)
+from draw_tree import draw_tree, generate_pdf, generate_png, generate_tex
 
 import pygambit as gbt
 
@@ -43,7 +39,7 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
             # Generate extra formats
             for func in [
                 generate_tex,
-                # generate_png,  # TODO enable once draw_tree #37 fixed
+                generate_png,
                 generate_pdf,
             ]:
                 viz_path = CATALOG_DIR / f"{slug}"
@@ -71,7 +67,7 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
 
             # Prepare download links for the dropdown
             download_links = [row["Download"]]
-            for ext in ["tex", "pdf"]:
+            for ext in ["tex", "png", "pdf"]:
                 download_links.append(f":download:`{slug}.{ext} <../catalog/{slug}.{ext}>`")
 
             f.write("       .. dropdown:: Downloads\n")
