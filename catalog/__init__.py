@@ -65,11 +65,12 @@ def games(
     n_outcomes: int | None = None,
     n_players: int | None = None,
     n_strategies: int | None = None,
+    include_descriptions: bool = False,
 ) -> pd.DataFrame:
     """
     List games available in the package catalog.
 
-    Arguments are treated as filters on the
+    Most arguments are treated as filters on the
     attributes of the Game objects.
 
     Parameters
@@ -98,11 +99,15 @@ def games(
         The number of players in the game.
     n_strategies: int, optional
         The number of pure strategies in the game.
+    include_descriptions: bool, optional
+        Whether to include the description of each game in the returned DataFrame.
+        Defaults to False.
 
     Returns
     -------
     pd.DataFrame
         A DataFrame with columns "Game" and "Title", where "Game" is the slug to load the game.
+        If `include_descriptions=True`, the DataFrame will also include a "Description" column.
     """
     records: list[dict[str, Any]] = []
 
@@ -140,6 +145,20 @@ def games(
             return False
         return not (n_strategies is not None and len(game.strategies) != n_strategies)
 
+    def append_record(
+        slug: str,
+        game: gbt.Game,
+    ) -> None:
+        record = {
+            "Game": slug,
+            "Title": game.title,
+        }
+        if include_descriptions:
+            record["Description"] = game.description
+            ext = "efg" if game.is_tree else "nfg"
+            record["Download"] = f":download:`{slug}.{ext} <../catalog/{slug}.{ext}>`"
+        records.append(record)
+
     # Add all the games stored as EFG/NFG files
     for resource_path in sorted(_CATALOG_RESOURCE.rglob("*")):
         reader = READERS.get(resource_path.suffix)
@@ -153,12 +172,7 @@ def games(
             with as_file(resource_path) as path:
                 game = reader(str(path))
                 if check_filters(game):
-                    records.append(
-                        {
-                            "Game": slug,
-                            "Title": game.title,
-                        }
-                    )
+                    append_record(slug, game)
 
     # Add all the games from families
     for slug, game in family_games().items():
@@ -168,13 +182,12 @@ def games(
                 f"Slug collision: {slug} is present in both file-based and family games."
             )
         if check_filters(game):
-            records.append(
-                {
-                    "Game": slug,
-                    "Title": game.title,
-                }
-            )
+            append_record(slug, game)
 
+    if include_descriptions:
+        return pd.DataFrame.from_records(
+            records, columns=["Game", "Title", "Description", "Download"]
+        )
     return pd.DataFrame.from_records(records, columns=["Game", "Title"])
 
 
@@ -218,7 +231,7 @@ def one_shot_trust(unique_NE_variant: bool = False) -> gbt.Game:
         The constructed extensive-form game.
     """
     g = gbt.Game.new_tree(players=["Buyer", "Seller"])
-    g.description = "One-shot trust game with binary actions, originally from Kreps (1990)."
+    g.description = "One-shot trust game with binary actions, originally from [Kre90]_."
     g.append_move(g.root, "Buyer", ["Trust", "Not trust"])
     g.append_move(g.root.children[0], "Seller", ["Honor", "Abuse"])
     g.set_outcome(g.root.children[0].children[0], g.add_outcome([1, 1], label="Trustworthy"))

@@ -87,7 +87,6 @@ We recommended most new users install the PyGambit Python package and read the a
    tools
    gui
    catalog
-   samples
    developer
    formats
    biblio
