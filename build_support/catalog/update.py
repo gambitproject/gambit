@@ -2,7 +2,11 @@ import argparse
 from pathlib import Path
 
 import pandas as pd
-from draw_tree import draw_tree
+from draw_tree import (
+    draw_tree,
+    generate_pdf,
+    generate_tex,  # TODO: add generate_png once draw_tree #37 fixed
+)
 
 import pygambit as gbt
 
@@ -24,12 +28,28 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
         f.write("     - **Details**\n")
 
         for _, row in df.iterrows():
-            g = gbt.catalog.load(row["Game"])
-            tikz = draw_tree(
-                g, color_scheme="gambit", sublevel_scaling=0, shared_terminal_depth=True
-            )
+            slug = row["Game"]
+            g = gbt.catalog.load(slug)
 
-            f.write(f"   * - **{row['Game']}**\n")
+            # Common arguments for visualization generation
+            viz_args = {
+                "color_scheme": "gambit",
+                "sublevel_scaling": 0,
+                "shared_terminal_depth": True,
+            }
+
+            tikz = draw_tree(g, **viz_args)
+
+            # Generate extra formats
+            for func in [
+                generate_tex,
+                # generate_png,  # TODO enable once draw_tree #37 fixed
+                generate_pdf,
+            ]:
+                viz_path = CATALOG_DIR / f"{slug}"
+                func(g, save_to=str(viz_path), **viz_args)
+
+            f.write(f"   * - **{slug}**\n")
             f.write("       \n")
             f.write("       .. tikz::\n")
             f.write("          \n")
@@ -51,7 +71,19 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
             for line in description_cell_lines[1:]:
                 f.write(f"       {line}\n")
             f.write("       \n")
-            f.write(f"       {row['Download']}\n")
+
+            # Add download links
+            download_links = [row["Download"]]
+            for ext in [
+                "tex",
+                # "png",  # TODO enable once draw_tree #37 fixed
+                "pdf",
+            ]:
+                # Construct relative path for RST :download: directive
+                # catalog/slug.ext -> ../catalog/slug.ext (relative to doc/)
+                download_links.append(f":download:`{ext.upper()} <../catalog/{slug}.{ext}>`")
+
+            f.write(f"       {' '.join(download_links)}\n")
 
 
 def update_makefile():
@@ -59,14 +91,11 @@ def update_makefile():
 
     # Using rglob("*") to find files in all subdirectories
     slugs = []
-    for resource_path in sorted(CATALOG_DIR.rglob("*.efg")):
-        if resource_path.is_file():
-            rel_path = resource_path.relative_to(CATALOG_DIR)
-            slugs.append(str(rel_path))
-    for resource_path in sorted(CATALOG_DIR.rglob("*.nfg")):
-        if resource_path.is_file():
-            rel_path = resource_path.relative_to(CATALOG_DIR)
-            slugs.append(str(rel_path))
+    for ext in ["efg", "nfg", "tex", "png", "pdf"]:
+        for resource_path in sorted(CATALOG_DIR.rglob(f"*.{ext}")):
+            if resource_path.is_file():
+                rel_path = resource_path.relative_to(CATALOG_DIR)
+                slugs.append(str(rel_path))
 
     game_files = []
     for slug in slugs:
