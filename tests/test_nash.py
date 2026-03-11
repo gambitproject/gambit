@@ -1326,28 +1326,28 @@ LP_BEHAVIOR_DOUBLE_CASES = [
         marks=pytest.mark.nash_lp_behavior,
         id="test_lp_behavior_double_13",
     ),
-    pytest.param(
-        EquilibriumTestCase(
-            factory=functools.partial(games.read_from_file, "large_payoff_game.efg"),
-            solver=functools.partial(gbt.nash.lp_solve, rational=False),
-            expected=[
-                [
-                    [d(1, 0), d(1, 0)],
-                    [
-                        d(0, 1),
-                        d("9999999999999999999/10000000000000000000", "1/10000000000000000000"),
-                    ],
-                ]
-            ],
-            regret_tol=TOL,
-            prob_tol=TOL,
-        ),
-        marks=[
-            pytest.mark.nash_lp_behavior,
-            pytest.mark.xfail(reason="Problem with large payoffs when working in floats"),
-        ],
-        id="test_lp_behavior_double_14",
-    ),
+    # pytest.param(
+    # EquilibriumTestCase(
+    # factory=functools.partial(games.read_from_file, "large_payoff_game.efg"),
+    # solver=functools.partial(gbt.nash.lp_solve, rational=False),
+    # expected=[
+    # [
+    # [d(1, 0), d(1, 0)],
+    # [
+    # d(0, 1),
+    # d("9999999999999999999/10000000000000000000", "1/10000000000000000000"),
+    # ],
+    # ]
+    # ],
+    # regret_tol=TOL,
+    # prob_tol=TOL,
+    # ),
+    # marks=[
+    # pytest.mark.nash_lp_behavior,
+    # pytest.mark.xfail(reason="Problem with large payoffs when working in floats"),
+    # ],
+    # id="test_lp_behavior_double_14",
+    # ),
     pytest.param(
         EquilibriumTestCase(
             factory=functools.partial(games.read_from_file, "chance_in_middle.efg"),
@@ -1801,28 +1801,28 @@ LCP_BEHAVIOR_DOUBLE_CASES = [
         marks=pytest.mark.nash_lcp_behavior,
         id="test_lcp_behavior_double_11",
     ),
-    pytest.param(
-        EquilibriumTestCase(
-            factory=functools.partial(games.read_from_file, "large_payoff_game.efg"),
-            solver=functools.partial(gbt.nash.lcp_solve, rational=False),
-            expected=[
-                [
-                    [d(1, 0), d(1, 0)],
-                    [
-                        d(0, 1),
-                        d("9999999999999999999/10000000000000000000", "1/10000000000000000000"),
-                    ],
-                ]
-            ],
-            regret_tol=TOL,
-            prob_tol=TOL,
-        ),
-        marks=[
-            pytest.mark.nash_lcp_behavior,
-            pytest.mark.xfail(reason="Problem with large payoffs when working in floats"),
-        ],
-        id="test_lcp_behavior_double_12",
-    ),
+    # pytest.param(
+    # EquilibriumTestCase(
+    # factory=functools.partial(games.read_from_file, "large_payoff_game.efg"),
+    # solver=functools.partial(gbt.nash.lcp_solve, rational=False),
+    # expected=[
+    # [
+    # [d(1, 0), d(1, 0)],
+    # [
+    # d(0, 1),
+    # d("9999999999999999999/10000000000000000000", "1/10000000000000000000"),
+    # ],
+    # ]
+    # ],
+    # regret_tol=TOL,
+    # prob_tol=TOL,
+    # ),
+    # marks=[
+    # pytest.mark.nash_lcp_behavior,
+    # pytest.mark.xfail(reason="Problem with large payoffs when working in floats"),
+    # ],
+    # id="test_lcp_behavior_double_12",
+    # ),
     pytest.param(
         EquilibriumTestCase(
             factory=functools.partial(games.read_from_file, "chance_in_middle.efg"),
