@@ -24,7 +24,7 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
         f.write("   :class: tight-table\n")
         f.write("\n")
 
-        f.write("   * - **Game details**\n")
+        f.write("   * - **Game**\n")
         f.write("     - **Extensive form representation**\n")
 
         for _, row in df.iterrows():
@@ -56,7 +56,7 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
             f.write(f"   * - **{title}**\n")
             f.write("       \n")
             if description:
-                f.write("       .. dropdown:: Long description\n")
+                f.write("       .. dropdown:: Game description\n")
                 f.write("          \n")
                 for line in description.splitlines():
                     f.write(f"          {line}\n")
