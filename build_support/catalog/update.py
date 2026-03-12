@@ -48,16 +48,18 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
             description = str(row.get("Description", "")).strip()
 
             # Column 1: Game Details
-            f.write(f"   * - **{title}**\n")
-            f.write("       \n")
             if description:
-                f.write("       .. dropdown:: Game description\n")
+                f.write(f"   * - .. dropdown:: {title}\n")
+                f.write("          :open:\n")
                 f.write("          \n")
                 for line in description.splitlines():
                     f.write(f"          {line}\n")
                 f.write("       \n")
+            else:
+                f.write(f"   * - **{title}**\n")
+                f.write("       \n")
 
-            f.write("       .. dropdown:: PyGambit\n")
+            f.write("       .. dropdown:: Load in PyGambit\n")
             f.write("          \n")
             f.write("          .. code-block:: python\n")
             f.write("             \n")
@@ -69,7 +71,7 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
             for ext in ["tex", "png", "pdf"]:
                 download_links.append(f":download:`{slug}.{ext} <../catalog/{slug}.{ext}>`")
 
-            f.write("       .. dropdown:: Downloads\n")
+            f.write("       .. dropdown:: Download game and image files\n")
             f.write("          \n")
             f.write(f"          {' '.join(download_links)}\n")
             f.write("       \n")
