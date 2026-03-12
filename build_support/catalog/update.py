@@ -16,12 +16,11 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
     with open(rst_path, "w", encoding="utf-8") as f:
         f.write(".. list-table::\n")
         f.write("   :header-rows: 1\n")
-        f.write("   :widths: 40 60\n")
+        f.write("   :widths: 100\n")
         f.write("   :class: tight-table\n")
         f.write("\n")
 
         f.write("   * - **Game**\n")
-        f.write("     - **Extensive form representation**\n")
 
         for _, row in df.iterrows():
             slug = row["Game"]
@@ -73,7 +72,10 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
             f.write("       .. dropdown:: Downloads\n")
             f.write("          \n")
             f.write(f"          {' '.join(download_links)}\n")
-            f.write("     - .. tikz::\n")
+            f.write("       \n")
+
+            # Visualization below dropdowns in the same cell
+            f.write("       .. tikz::\n")
             f.write("          \n")
             for line in tikz.splitlines():
                 f.write(f"          {line}\n")
