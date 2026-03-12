@@ -16,3 +16,7 @@ table.tight-table td .highlight pre,
 table.tight-table td .highlight {
     text-align: left;
 }
+
+table.tight-table td .sd-card-body {
+    text-align: left;
+}
