@@ -20,12 +20,14 @@
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-#include <iostream>
 #include <algorithm>
 #include <functional>
+#include <iostream>
+#include <limits>
 #include <numeric>
-#include <stack>
 #include <set>
+#include <stack>
+#include <unordered_map>
 #include <variant>
 
 #include "gambit.h"
@@ -373,32 +375,18 @@ bool GameNodeRep::IsSuccessorOf(GameNode p_node) const
 
 bool GameNodeRep::IsSubgameRoot() const
 {
-  // First take care of a couple easy cases
-  if (m_children.empty() || m_infoset->m_members.size() > 1) {
-    return false;
-  }
-  if (!m_parent) {
-    return true;
+  // TODO: Currently O(S) per call where S = number of subgames.
+  // Will become O(1) when GameSubgameRep adds a back-pointer (like m_infoset).
+  if (m_children.empty()) {
+    return !GetParent();
   }
 
-  // A node is a subgame root if and only if in every information set,
-  // either all members succeed the node in the tree,
-  // or all members do not succeed the node in the tree.
-  for (auto player : m_game->GetPlayers()) {
-    for (auto infoset : player->GetInfosets()) {
-      const bool precedes = infoset->m_members.front()->IsSuccessorOf(
-          std::const_pointer_cast<GameNodeRep>(shared_from_this()));
-      if (std::any_of(std::next(infoset->m_members.begin()), infoset->m_members.end(),
-                      [this, precedes](const std::shared_ptr<GameNodeRep> &m) {
-                        return m->IsSuccessorOf(std::const_pointer_cast<GameNodeRep>(
-                                   shared_from_this())) != precedes;
-                      })) {
-        return false;
-      }
-    }
+  auto *tree_game = static_cast<GameTreeRep *>(m_game);
+  if (tree_game->m_subgames.empty()) {
+    tree_game->BuildSubgameRoots();
   }
 
-  return true;
+  return contains(tree_game->m_subgames, const_cast<GameNodeRep *>(this));
 }
 
 bool GameNodeRep::IsStrategyReachable() const
@@ -936,6 +924,7 @@ void GameTreeRep::ClearComputedValues() const
   m_ownPriorActionInfo = nullptr;
   const_cast<GameTreeRep *>(this)->m_unreachableNodes = nullptr;
   m_absentMindedInfosets.clear();
+  m_subgames.clear();
   m_computedValues = false;
 }
 
@@ -1137,6 +1126,122 @@ void GameTreeRep::BuildUnreachableNodes() const
       }
     }
   }
+}
+
+void GameTreeRep::BuildSubgameRoots() const
+{
+  if (!m_subgames.empty()) {
+    return;
+  }
+
+  struct Range {
+    int m_min = std::numeric_limits<int>::max();
+    int m_max = 0;
+
+    void Merge(const Range &p_source)
+    {
+      m_min = std::min(m_min, p_source.m_min);
+      m_max = std::max(m_max, p_source.m_max);
+    }
+
+    bool operator==(const Range &p_other) const
+    {
+      return m_min == p_other.m_min && m_max == p_other.m_max;
+    }
+  };
+
+  std::unordered_map<GameNodeRep *, Range> disc;
+  std::unordered_map<GameInfosetRep *, Range> hull;
+
+  // Phase 1: Compute subtree spans and infoset hulls
+  struct SpanVisitor {
+    std::unordered_map<GameNodeRep *, Range> &m_disc;
+    std::unordered_map<GameInfosetRep *, Range> &m_hull;
+    int m_counter = 0;
+
+    static DFSCallbackResult OnEnter(GameNode, int) { return DFSCallbackResult::Continue; }
+    static DFSCallbackResult OnAction(GameNode, GameNode, int)
+    {
+      return DFSCallbackResult::Continue;
+    }
+    static void OnVisit(GameNode, int) {}
+
+    DFSCallbackResult OnExit(const GameNode &p_node, int)
+    {
+      GameNodeRep *node = p_node.get();
+      if (p_node->IsTerminal()) {
+        m_counter++;
+        m_disc[node] = {m_counter, m_counter};
+      }
+      else {
+        Range &node_disc = m_disc[node];
+        const auto &children = p_node->GetChildren();
+        node_disc.m_min = m_disc.at(children.front().get()).m_min;
+        node_disc.m_max = m_disc.at(children.back().get()).m_max;
+        m_hull[node->m_infoset].Merge(node_disc);
+      }
+      return DFSCallbackResult::Continue;
+    }
+  };
+
+  // Phase 2: Reachability and detection
+  struct BridgeVisitor {
+    const std::unordered_map<GameNodeRep *, Range> &m_disc;
+    const std::unordered_map<GameInfosetRep *, Range> &m_hull;
+    std::vector<GameNodeRep *> &m_subgames;
+    std::unordered_map<GameNodeRep *, Range> m_low;
+
+    static DFSCallbackResult OnEnter(GameNode, int) { return DFSCallbackResult::Continue; }
+    static DFSCallbackResult OnAction(GameNode, GameNode, int)
+    {
+      return DFSCallbackResult::Continue;
+    }
+    static void OnVisit(GameNode, int) {}
+
+    DFSCallbackResult OnExit(const GameNode &p_node, int)
+    {
+      GameNodeRep *node = p_node.get();
+      if (p_node->IsTerminal()) {
+        m_low[node] = m_disc.at(node);
+        return DFSCallbackResult::Continue;
+      }
+
+      Range &low = m_low[node];
+      low = m_hull.at(node->m_infoset);
+
+      for (const auto &child : p_node->GetChildren()) {
+        low.Merge(m_low.at(child.get()));
+      }
+
+      if (low == m_disc.at(node)) {
+        m_subgames.push_back(node);
+      }
+
+      return DFSCallbackResult::Continue;
+    }
+  };
+
+  auto game = std::const_pointer_cast<GameRep>(shared_from_this());
+
+  SpanVisitor span_visitor{disc, hull};
+  WalkDFS(game, m_root, TraversalOrder::Postorder, span_visitor);
+
+  BridgeVisitor bridge_visitor{disc, hull, m_subgames};
+  WalkDFS(game, m_root, TraversalOrder::Postorder, bridge_visitor);
+}
+
+std::vector<GameNode> GameTreeRep::GetSubgames() const
+{
+  if (m_subgames.empty()) {
+    BuildSubgameRoots();
+  }
+
+  std::vector<GameNode> result;
+  result.reserve(m_subgames.size());
+  for (auto *rep : m_subgames) {
+    result.emplace_back(rep->shared_from_this());
+  }
+  return result;
 }
 
 //------------------------------------------------------------------------
