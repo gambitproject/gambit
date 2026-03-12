@@ -4,7 +4,12 @@ NFG 1 R "2x2x2 example with 3 pure, 2 incompletely mixed, and a continuum of com
 { "1" "2" }
 { "1" "2" }
 }
-""
+"Example game from Nau et al [^Nau2004].
+
+[^Nau2004]: Nau, Robert, Gomez Canovas, Sabrina, and Hansen, Pierre (2004).
+     On the geometry of Nash equilibria and correlated equilibria.
+     International Journal of Game Theory 32(4): 443-453
+"
 
 {
 { "" 0, 0, 2 }
