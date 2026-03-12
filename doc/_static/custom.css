@@ -1,0 +1,8 @@
+/* Custom CSS for Gambit Documentation */
+.tight-table .figure img {
+    max-height: 500px;
+    width: auto;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}

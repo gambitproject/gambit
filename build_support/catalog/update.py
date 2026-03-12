@@ -76,6 +76,7 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
 
             # Visualization below description dropdown in the same cell
             f.write("       .. tikz::\n")
+            f.write("          :align: center\n")
             f.write("          \n")
             for line in tikz.splitlines():
                 f.write(f"          {line}\n")
