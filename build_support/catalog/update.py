@@ -48,22 +48,23 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
             description = str(row.get("Description", "")).strip()
 
             # Column 1: Game Details
+            f.write(f"   * - .. dropdown:: {title}\n")
+            f.write("          \n")
             if description:
-                f.write(f"   * - .. dropdown:: {title}\n")
-                f.write("          :open:\n")
-                f.write("          \n")
                 for line in description.splitlines():
                     f.write(f"          {line}\n")
-                f.write("       \n")
-            else:
-                f.write(f"   * - **{title}**\n")
-                f.write("       \n")
+                f.write("          \n")
 
-            f.write("       .. dropdown:: Load in PyGambit\n")
-            f.write("          \n")
             f.write("          .. code-block:: python\n")
             f.write("             \n")
             f.write(f'             pygambit.catalog.load("{slug}")\n')
+            f.write("       \n")
+
+            # Visualization below description dropdown in the same cell
+            f.write("       .. tikz::\n")
+            f.write("          \n")
+            for line in tikz.splitlines():
+                f.write(f"          {line}\n")
             f.write("       \n")
 
             # Prepare download links for the dropdown
@@ -71,16 +72,10 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
             for ext in ["tex", "png", "pdf"]:
                 download_links.append(f":download:`{slug}.{ext} <../catalog/{slug}.{ext}>`")
 
+            # Download dropdown below the image
             f.write("       .. dropdown:: Download game and image files\n")
             f.write("          \n")
             f.write(f"          {' '.join(download_links)}\n")
-            f.write("       \n")
-
-            # Visualization below dropdowns in the same cell
-            f.write("       .. tikz::\n")
-            f.write("          \n")
-            for line in tikz.splitlines():
-                f.write(f"          {line}\n")
 
 
 def update_makefile():
