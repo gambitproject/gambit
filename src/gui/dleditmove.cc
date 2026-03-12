@@ -32,8 +32,11 @@
 #include "renratio.h"
 
 namespace Gambit::GUI {
+
 class ActionSheet final : public wxSheet {
-  GameInfoset m_infoset;
+  GameInfoset m_infoset{nullptr};
+  wxSheetCellAttr m_labelAttr;
+  wxFont m_labelFont, m_cellFont;
 
   // Overriding wxSheet members
   wxSheetCellAttr GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const override;
@@ -48,8 +51,17 @@ public:
 };
 
 ActionSheet::ActionSheet(wxWindow *p_parent, const GameInfoset &p_infoset)
-  : wxSheet(p_parent, wxID_ANY), m_infoset(p_infoset)
+  : wxSheet(p_parent, wxID_ANY), m_infoset(p_infoset), m_labelFont(GetFont()),
+    m_cellFont(GetFont())
 {
+  m_labelFont.MakeBold();
+
+  m_labelAttr = GetSheetRefData()->m_defaultRowLabelAttr;
+  m_labelAttr.SetFont(m_labelFont);
+  m_labelAttr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
+  m_labelAttr.SetOrientation(wxHORIZONTAL);
+  m_labelAttr.SetReadOnly(true);
+
   CreateGrid(p_infoset->GetActions().size(), (p_infoset->IsChanceInfoset()) ? 2 : 1);
   SetRowLabelWidth(40);
   SetColLabelHeight(25);
@@ -103,29 +115,12 @@ Array<Number> ActionSheet::GetActionProbs()
 
 wxSheetCellAttr ActionSheet::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
 {
-  if (IsRowLabelCell(p_coords)) {
-    wxSheetCellAttr attr(GetSheetRefData()->m_defaultRowLabelAttr);
-    attr.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
-    attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
-    attr.SetOrientation(wxHORIZONTAL);
-    attr.SetReadOnly(true);
-    return attr;
-  }
-  else if (IsColLabelCell(p_coords)) {
-    wxSheetCellAttr attr(GetSheetRefData()->m_defaultColLabelAttr);
-    attr.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
-    attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
-    attr.SetOrientation(wxHORIZONTAL);
-    attr.SetReadOnly(true);
-    return attr;
-  }
-  else if (IsCornerLabelCell(p_coords)) {
-    const wxSheetCellAttr attr(GetSheetRefData()->m_defaultCornerLabelAttr);
-    return attr;
+  if (IsLabelCell(p_coords)) {
+    return m_labelAttr;
   }
 
   wxSheetCellAttr attr(GetSheetRefData()->m_defaultGridCellAttr);
-  attr.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
+  attr.SetFont(m_cellFont);
   attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
   attr.SetOrientation(wxHORIZONTAL);
   attr.SetReadOnly(false);
@@ -143,9 +138,7 @@ wxSheetCellAttr ActionSheet::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_
 //                      class EditMoveDialog
 //======================================================================
 
-wxBEGIN_EVENT_TABLE(EditMoveDialog, wxDialog) EVT_BUTTON(wxID_OK, EditMoveDialog::OnOK)
-    wxEND_EVENT_TABLE() EditMoveDialog::EditMoveDialog(wxWindow *p_parent,
-                                                       const GameInfoset &p_infoset)
+EditMoveDialog::EditMoveDialog(wxWindow *p_parent, const GameInfoset &p_infoset)
   : wxDialog(p_parent, wxID_ANY, _("Move properties"), wxDefaultPosition), m_infoset(p_infoset)
 {
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
@@ -158,10 +151,11 @@ wxBEGIN_EVENT_TABLE(EditMoveDialog, wxDialog) EVT_BUTTON(wxID_OK, EditMoveDialog
   labelSizer->Add(m_infosetName, 1, wxALL | wxEXPAND, 5);
   topSizer->Add(labelSizer, 0, wxALL | wxEXPAND, 0);
 
-  topSizer->Add(new wxStaticText(
-                    this, wxID_STATIC,
-                    wxString::Format(_("Number of members: %d"), p_infoset->GetMembers().size())),
-                0, wxALL | wxALIGN_CENTER, 5);
+  {
+    wxString label;
+    label << _("Number of members: ") << p_infoset->GetMembers().size();
+    topSizer->Add(new wxStaticText(this, wxID_STATIC, label), 0, wxALL | wxALIGN_CENTER, 5);
+  }
 
   auto *playerSizer = new wxBoxSizer(wxHORIZONTAL);
   playerSizer->Add(new wxStaticText(this, wxID_STATIC, _("Belongs to player")), 0,
@@ -170,11 +164,13 @@ wxBEGIN_EVENT_TABLE(EditMoveDialog, wxDialog) EVT_BUTTON(wxID_OK, EditMoveDialog
   if (p_infoset->IsChanceInfoset()) {
     m_player->Append(_("Chance"));
     m_player->SetSelection(0);
+    m_player->Disable();
   }
   else {
     for (const auto &player : p_infoset->GetGame()->GetPlayers()) {
-      m_player->Append(wxString::Format(_T("%d: "), player->GetNumber()) +
-                       wxString(player->GetLabel().c_str(), *wxConvCurrent));
+      wxString label;
+      label << player->GetNumber() << ": " << player->GetLabel();
+      m_player->Append(label);
     }
     m_player->SetSelection(p_infoset->GetPlayer()->GetNumber() - 1);
   }
@@ -187,18 +183,13 @@ wxBEGIN_EVENT_TABLE(EditMoveDialog, wxDialog) EVT_BUTTON(wxID_OK, EditMoveDialog
   actionBoxSizer->Add(m_actionSheet, 1, wxALL | wxEXPAND, 5);
   topSizer->Add(actionBoxSizer, 0, wxALL | wxEXPAND, 5);
 
-  auto *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
-  buttonSizer->Add(new wxButton(this, wxID_CANCEL, _("Cancel")), 0, wxALL, 5);
-  auto *okButton = new wxButton(this, wxID_OK, _("OK"));
-  okButton->SetDefault();
-  buttonSizer->Add(okButton, 0, wxALL, 5);
-  topSizer->Add(buttonSizer, 0, wxALL | wxALIGN_RIGHT, 5);
-
-  SetSizer(topSizer);
-  topSizer->Fit(this);
-  topSizer->SetSizeHints(this);
-  wxTopLevelWindowBase::Layout();
+  if (auto *buttons = CreateSeparatedButtonSizer(wxOK | wxCANCEL)) {
+    topSizer->Add(buttons, 0, wxALL | wxEXPAND, 5);
+  }
+  SetSizerAndFit(topSizer);
   CenterOnParent();
+
+  Bind(wxEVT_BUTTON, &EditMoveDialog::OnOK, this, wxID_OK);
 }
 
 void EditMoveDialog::OnOK(wxCommandEvent &p_event)
@@ -207,23 +198,16 @@ void EditMoveDialog::OnOK(wxCommandEvent &p_event)
     p_event.Skip();
     return;
   }
-  auto probs = m_actionSheet->GetActionProbs();
-  if (std::any_of(probs.begin(), probs.end(),
-                  [](const Number &p) { return static_cast<Rational>(p) < Rational(0); })) {
-    wxMessageBox("Action probabilities must be non-negative numbers.", "Error");
-    return;
+  try {
+    ValidateDistribution(m_actionSheet->GetActionProbs());
   }
-  if (std::accumulate(probs.begin(), probs.end(), Rational(0),
-                      [](const Rational &s, const Number &p) {
-                        return s + static_cast<Rational>(p);
-                      }) != Rational(1)) {
-    p_event.Skip();
-  }
-  else {
-    wxRichMessageDialog(this, "Action probabilities must sum to exactly one", "Error",
+  catch (ValueException &) {
+    wxRichMessageDialog(this, "Probabilities must be nonnegative numbers summing to one.", "Error",
                         wxOK | wxCENTRE | wxICON_ERROR)
         .ShowModal();
+    return;
   }
+  p_event.Skip();
 }
 
 int EditMoveDialog::NumActions() const { return m_actionSheet->NumActions(); }

@@ -9,6 +9,13 @@
 - Implement `GetSubgames()` (C++) to retrieve the list of subgame roots in standard post-order.
   Detection uses a linear interval reachability algorithm adapted from the Tarjan's bridge-finder (IPL, 1974).
 
+### Fixed
+- `enumpoly` would take a very long time on some supports where an equilibrium is located on the
+  boundary of the projected game.  Search is now restricted to the interior of the space ruling
+  these out; these will always be found by another projection.  (#756)
+- In the graphical interface, the logit correspondence display would fail and terminate the program
+  on very small (<10^{-300}) probabilities.
+
 ## [16.5.1] - unreleased
 
 ### Fixed

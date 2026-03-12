@@ -154,9 +154,9 @@ void NashMonitorDialog::OnIdle(wxIdleEvent &p_event)
     msg << tis.ReadLine();
 
     m_doc->DoAddOutput(*m_output, msg);
-    m_countText->SetLabel(
-        wxString::Format(wxT("Number of equilibria found so far: %d"), m_output->NumProfiles()));
-
+    wxString label;
+    label << wxT("Number of equilibria found so far: ") << m_output->NumProfiles();
+    m_countText->SetLabel(label);
     p_event.RequestMore();
   }
   else {
@@ -179,8 +179,9 @@ void NashMonitorDialog::OnEndProcess(wxProcessEvent &p_event)
 
     if (!msg.empty()) {
       m_doc->DoAddOutput(*m_output, msg);
-      m_countText->SetLabel(
-          wxString::Format(wxT("Number of equilibria found so far: %d"), m_output->NumProfiles()));
+      wxString label;
+      label << wxT("Number of equilibria found so far: ") << m_output->NumProfiles();
+      m_countText->SetLabel(label);
     }
   }
 

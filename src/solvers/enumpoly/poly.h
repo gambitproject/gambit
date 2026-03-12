@@ -375,7 +375,11 @@ public:
     });
   }
   [[nodiscard]] const std::vector<Monomial<T>> &GetTerms() const noexcept { return m_terms; }
-  bool IsZero() const noexcept { return m_terms.empty(); }
+  bool IsZero() const noexcept
+  {
+    return m_terms.empty() || std::all_of(m_terms.begin(), m_terms.end(),
+                                          [](const auto &mono) { return mono.IsZero(); });
+  }
   bool IsConstant() const noexcept
   {
     return m_terms.size() == 1 && m_terms.front().TotalDegree() == 0;

@@ -71,10 +71,10 @@ RevealMoveDialog::RevealMoveDialog(wxWindow *p_parent, const Game &p_game)
   for (const auto &player : players) {
     wxString label;
     if (!player->GetLabel().empty()) {
-      label = wxString::FromUTF8(player->GetLabel());
+      label << player->GetLabel();
     }
     else {
-      label = wxString::Format("Player %u", player->GetNumber());
+      label << "Player " << player->GetNumber();
     }
     auto *cb = new wxCheckBox(this, wxID_ANY, label);
     cb->SetValue(true);
