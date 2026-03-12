@@ -1140,12 +1140,8 @@ void GameTreeRep::BuildSubgameRoots() const
 
     void Merge(const Range &p_source)
     {
-      if (p_source.min < min) {
-        min = p_source.min;
-      }
-      if (p_source.max > max) {
-        max = p_source.max;
-      }
+      min = std::min(min, p_source.min);
+      max = std::max(max, p_source.max);
     }
 
     bool operator==(const Range &p_other) const
