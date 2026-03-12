@@ -57,10 +57,11 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
 
             # Load in PyGambit (should be in same dropdown)
             f.write("          **Load in PyGambit:**\n")
+            f.write("          \n")
             f.write("          .. code-block:: python\n")
             f.write("             \n")
             f.write(f'             pygambit.catalog.load("{slug}")\n')
-            f.write("       \n")
+            f.write("          \n")
 
             # Prepare download links for the dropdown
             download_links = [row["Download"]]
@@ -69,8 +70,9 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
 
             # Download dropdown below the code
             f.write("          **Download game and image files:**\n")
-            f.write("       \n")
+            f.write("          \n")
             f.write(f"          {' '.join(download_links)}\n")
+            f.write("       \n")
 
             # Visualization below description dropdown in the same cell
             f.write("       .. tikz::\n")
