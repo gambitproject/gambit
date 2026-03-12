@@ -21,18 +21,6 @@ Sample games
   International Journal of Game Theory 32(4): 443-453.
   <http://dx.doi.org/10.1007/s001820300162>`_
 
-:download:`bagwell.efg <../contrib/games/bagwell.efg>`
-  Stackelberg leader game with imperfectly observed commitment,
-  from `Bagwell, Kyle (1993) Commitment and observability in games.
-  Games and Economic Behavior 8: 271-280.
-  <http://dx.doi.org/10.1016/S0899-8256(05)80001-6>`_
-
-:download:`bayes2a.efg <../contrib/games/bayes2a.efg>`
-  A twice-repeated Bayesian game, with two players, each having two
-  types and two actions. This game also illustrates the use of payoffs
-  at nonterminal nodes in Gambit, which can substantially simplify the
-  representation of multi-stage games such as this.
-
 :download:`cent3.efg <../contrib/games/cent3.efg>`
   A three-stage centipede game, featuring an exogenous probability
   that one player is an altruistic type, who always passes.
