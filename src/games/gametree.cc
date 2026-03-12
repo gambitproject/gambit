@@ -1135,18 +1135,18 @@ void GameTreeRep::BuildSubgameRoots() const
   }
 
   struct Range {
-    int min = std::numeric_limits<int>::max();
-    int max = 0;
+    int m_min = std::numeric_limits<int>::max();
+    int m_max = 0;
 
     void Merge(const Range &p_source)
     {
-      min = std::min(min, p_source.min);
-      max = std::max(max, p_source.max);
+      m_min = std::min(m_min, p_source.m_min);
+      m_max = std::max(m_max, p_source.m_max);
     }
 
     bool operator==(const Range &p_other) const
     {
-      return min == p_other.min && max == p_other.max;
+      return m_min == p_other.m_min && m_max == p_other.m_max;
     }
   };
 
@@ -1176,8 +1176,8 @@ void GameTreeRep::BuildSubgameRoots() const
       else {
         Range &node_disc = m_disc[node];
         const auto &children = p_node->GetChildren();
-        node_disc.min = m_disc.at(children.front().get()).min;
-        node_disc.max = m_disc.at(children.back().get()).max;
+        node_disc.m_min = m_disc.at(children.front().get()).m_min;
+        node_disc.m_max = m_disc.at(children.back().get()).m_max;
         m_hull[node->m_infoset].Merge(node_disc);
       }
       return DFSCallbackResult::Continue;
