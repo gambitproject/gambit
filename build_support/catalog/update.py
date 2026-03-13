@@ -78,7 +78,7 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path, force_build: bool = Fal
 
             # Prepare download links for the dropdown
             download_links = [row["Download"]]
-            for ext in ["tex", "png", "pdf"]:
+            for ext in ["ef", "tex", "png", "pdf"]:
                 download_links.append(f":download:`{slug}.{ext} <../catalog/img/{slug}.{ext}>`")
 
             # Download dropdown below the code

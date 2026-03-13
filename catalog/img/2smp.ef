@@ -1,0 +1,38 @@
+player 1 name Player~1
+player 2 name Player~2
+level -2.0 node 1 player 1
+level 2.0 node 1 xshift -8.0 from -2.0,1 move H
+level 6.0 node 1 player 1 xshift -4.0 from 2.0,1 move H
+level 10.0 node 1 xshift -2.0 from 6.0,1 move H
+level 14.0 node 1 xshift -1.0 from 10.0,1 move H payoffs 1 -1
+level 14.0 node 2 xshift 1.0 from 10.0,1 move T payoffs -1 1
+level 10.0 node 2 xshift 2.0 from 6.0,1 move T
+level 14.0 node 3 xshift -1.0 from 10.0,2 move H payoffs -1 1
+level 14.0 node 4 xshift 1.0 from 10.0,2 move T payoffs 1 -1
+level 6.0 node 2 player 1 xshift 4.0 from 2.0,1 move T
+level 10.0 node 3 xshift -2.0 from 6.0,2 move H
+level 14.0 node 5 xshift -1.0 from 10.0,3 move H payoffs 1 -1
+level 14.0 node 6 xshift 1.0 from 10.0,3 move T payoffs -1 1
+level 10.0 node 4 xshift 2.0 from 6.0,2 move T
+level 14.0 node 7 xshift -1.0 from 10.0,4 move H payoffs -1 1
+level 14.0 node 8 xshift 1.0 from 10.0,4 move T payoffs 1 -1
+level 2.0 node 2 xshift 8.0 from -2.0,1 move T
+level 6.0 node 3 player 1 xshift -4.0 from 2.0,2 move H
+level 10.0 node 5 xshift -2.0 from 6.0,3 move H
+level 14.0 node 9 xshift -1.0 from 10.0,5 move H payoffs 1 -1
+level 14.0 node 10 xshift 1.0 from 10.0,5 move T payoffs -1 1
+level 10.0 node 6 xshift 2.0 from 6.0,3 move T
+level 14.0 node 11 xshift -1.0 from 10.0,6 move H payoffs -1 1
+level 14.0 node 12 xshift 1.0 from 10.0,6 move T payoffs 1 -1
+level 6.0 node 4 player 1 xshift 4.0 from 2.0,2 move T
+level 10.0 node 7 xshift -2.0 from 6.0,4 move H
+level 14.0 node 13 xshift -1.0 from 10.0,7 move H payoffs 1 -1
+level 14.0 node 14 xshift 1.0 from 10.0,7 move T payoffs -1 1
+level 10.0 node 8 xshift 2.0 from 6.0,4 move T
+level 14.0 node 15 xshift -1.0 from 10.0,8 move H payoffs -1 1
+level 14.0 node 16 xshift 1.0 from 10.0,8 move T payoffs 1 -1
+iset 2.0,1 2.0,2 player 2
+iset 10.0,1 10.0,2 player 2
+iset 10.0,3 10.0,4 player 2
+iset 10.0,5 10.0,6 player 2
+iset 10.0,7 10.0,8 player 2

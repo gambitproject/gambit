@@ -1,0 +1,15 @@
+player 1 name Player~1
+player 2 name Player~2
+player 3 name Player~3
+level -2.0 node 1 player 1
+level 2.0 node 1 xshift -3.625 from -2.0,1 move R
+level 14.0 node 1 xshift -1.0 from 2.0,1 move R payoffs 3 0 3
+level 14.0 node 2 xshift 1.0 from 2.0,1 move L payoffs 0 0 0
+level 2.0 node 2 player 2 xshift 3.625 from -2.0,1 move L
+level 6.0 node 1 player 1 xshift -1.75 from 2.0,2 move R
+level 10.0 node 1 xshift -1.5 from 6.0,1 move R
+level 14.0 node 3 xshift -1.0 from 10.0,1 move R payoffs 4 4 0
+level 14.0 node 4 xshift 1.0 from 10.0,1 move L payoffs 0 0 5
+level 14.0 node 5 xshift 1.5 from 6.0,1 move L payoffs 2 0 0
+level 14.0 node 6 xshift 1.75 from 2.0,2 move L payoffs 1 3 0
+iset 2.0,1 10.0,1 player 3

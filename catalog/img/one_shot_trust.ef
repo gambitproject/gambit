@@ -1,0 +1,7 @@
+player 1 name Buyer
+player 2 name Seller
+level -2.0 node 1 player 1
+level 2.0 node 1 player 2 xshift -1.5 from -2.0,1 move Trust
+level 6.0 node 1 xshift -1.0 from 2.0,1 move Honor payoffs 1 1
+level 6.0 node 2 xshift 1.0 from 2.0,1 move Abuse payoffs -1 2
+level 6.0 node 3 xshift 1.5 from -2.0,1 move Not~trust payoffs 0 0
