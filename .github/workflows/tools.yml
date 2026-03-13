@@ -68,7 +68,7 @@ jobs:
           cp gambit* installer
           "${WIX}bin/candle" build_support/msw/gambit.wxs
           "${WIX}bin/light" -ext WixUIExtension gambit.wixobj
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         with:
           name: artifact-msw
           path: "*.msi"

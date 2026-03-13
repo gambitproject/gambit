@@ -6,6 +6,7 @@ Updating the Games Catalog
 This page covers the process for contributing to and updating Gambit's :ref:`Games Catalog <pygambit-catalog>`.
 To do so, you will need to have the `gambit` GitHub repo cloned and be able to submit pull request via GitHub;
 you may wish to first review the :ref:`contributor guidelines <contributing>`.
+You'll also need to have a developer install of `pygambit` available in your Python environment, see :ref:`build-python`.
 
 You can add games to the catalog saved in a valid representation :ref:`format <file-formats>`.
 Currently supported representations are:
@@ -26,15 +27,13 @@ Add new game files
 
 3. **Update the catalog:**
 
-   Use the ``update.py`` script to update Gambit's documentation & build files.
+   Reinstall the package to pick up the new game file(s) in the ``pygambit.catalog`` module.
+   Then use the ``update.py`` script to update Gambit's documentation & build files.
 
    .. code-block:: bash
 
+       pip install .
        python build_support/catalog/update.py --build
-
-   .. note::
-
-      Run this script in a Python environment where ``pygambit`` itself is also :ref:`installed <build-python>`.
 
    .. warning::
 

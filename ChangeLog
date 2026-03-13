@@ -5,18 +5,24 @@
 ### Changed
 - `Game.comment` has been renamed to `Game.description`
 
+### Added
+- Implement linear-time algorithm to find all root nodes of proper subgames, using an adaptation of
+  Tarjan's (1974) algorithm for finding bridges in an undirected graph.  Subgame roots are cached so
+  subsequent lookup is constant-time (if the game is unchanged).  (#584)
+
 ### Fixed
 - `enumpoly` would take a very long time on some supports where an equilibrium is located on the
   boundary of the projected game.  Search is now restricted to the interior of the space ruling
   these out; these will always be found by another projection.  (#756)
 - In the graphical interface, the logit correspondence display would fail and terminate the program
   on very small (<10^{-300}) probabilities.
+- The new subgame root computation fixes a bug which failed to detect subgames where the subgame
+  root node is a member of an absent-minded infoset.  (#584)
 
 ## [16.5.1] - unreleased
 
 ### Fixed
 - `Game.reveal` raised a null pointer access exception or dumped core in some cases (#749)
-
 
 ## [16.5.0] - 2026-01-05
 
