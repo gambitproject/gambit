@@ -38,18 +38,19 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path, regnerate_images: bool 
 
             tex_path = CATALOG_DIR / "img" / f"{slug}.tex"
 
-            if regnerate_images or not tex_path.exists():
-                g = gbt.catalog.load(slug)
-                viz_path = CATALOG_DIR / "img" / f"{slug}"
-                viz_path.parent.mkdir(parents=True, exist_ok=True)
-                for func in [generate_tex, generate_png, generate_pdf]:
-                    func(g, save_to=str(viz_path), **draw_tree_args)
+            if row["Format"] == "efg":
+                if regnerate_images or not tex_path.exists():
+                    g = gbt.catalog.load(slug)
+                    viz_path = CATALOG_DIR / "img" / f"{slug}"
+                    viz_path.parent.mkdir(parents=True, exist_ok=True)
+                    for func in [generate_tex, generate_png, generate_pdf]:
+                        func(g, save_to=str(viz_path), **draw_tree_args)
 
-            # Read the generated tex to extract the tikz block for the RST
-            with open(tex_path, encoding="utf-8") as tex_f:
-                tex_content = tex_f.read()
-            match = tikz_re.search(tex_content)
-            tikz = match.group(1) if match else "% Could not extract tikzpicture from tex file"
+                # Read the generated tex to extract the tikz block for the RST
+                with open(tex_path, encoding="utf-8") as tex_f:
+                    tex_content = tex_f.read()
+                match = tikz_re.search(tex_content)
+                tikz = match.group(1) if match else "% Could not extract tikzpicture from tex file"
 
             title = str(row.get("Title", "")).strip()
             description = str(row.get("Description", "")).strip()
@@ -72,8 +73,11 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path, regnerate_images: bool 
 
             # Prepare download links for the dropdown
             download_links = [row["Download"]]
-            for ext in ["ef", "tex", "png", "pdf"]:
-                download_links.append(f":download:`{slug}.{ext} <../catalog/img/{slug}.{ext}>`")
+            if row["Format"] == "efg":
+                for ext in ["ef", "tex", "png", "pdf"]:
+                    download_links.append(
+                        f":download:`{slug}.{ext} <../catalog/img/{slug}.{ext}>`"
+                    )
 
             # Download dropdown below the code
             f.write("          **Download game and image files:**\n")
@@ -82,11 +86,20 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path, regnerate_images: bool 
             f.write("       \n")
 
             # Visualization below description dropdown in the same cell
-            f.write("       .. tikz::\n")
-            f.write("          :align: center\n")
-            f.write("          \n")
-            for line in tikz.splitlines():
-                f.write(f"          {line}\n")
+            if row["Format"] == "efg":
+                f.write("       .. tikz::\n")
+                f.write("          :align: center\n")
+                f.write("          \n")
+                for line in tikz.splitlines():
+                    f.write(f"          {line}\n")
+            elif row["Format"] == "nfg":
+                jupyter_code = f"""
+                .. jupyter-execute::
+                    import pygambit
+                    pygambit.catalog.load("{slug}")
+                """
+                for line in jupyter_code.splitlines():
+                    f.write(f"{line}\n")
             f.write("       \n")
 
 

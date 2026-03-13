@@ -29,7 +29,8 @@ extensions = [
     "IPython.sphinxext.ipython_directive",
     "sphinx_design",
     "nbsphinx",
-    "sphinxcontrib.tikz"
+    "sphinxcontrib.tikz",
+    "jupyter_sphinx",
 ]
 
 # IPython directive configuration
@@ -117,22 +118,10 @@ html_theme = "pydata_sphinx_theme"
 # documentation.
 html_theme_options = {
     "external_links": [
-        {
-            "name": "GitHub",
-            "url": "https://github.com/gambitproject/gambit"
-        },
-        {
-            "name": "Releases",
-            "url": "https://github.com/gambitproject/gambit/releases"
-        },
-        {
-            "name": "Older releases",
-            "url": "https://sourceforge.net/projects/gambit/files/"
-        },
-        {
-            "name": "Cite Gambit",
-            "url": "https://www.gambit-project.org/cite/"
-        }
+        {"name": "GitHub", "url": "https://github.com/gambitproject/gambit"},
+        {"name": "Releases", "url": "https://github.com/gambitproject/gambit/releases"},
+        {"name": "Older releases", "url": "https://sourceforge.net/projects/gambit/files/"},
+        {"name": "Cite Gambit", "url": "https://www.gambit-project.org/cite/"},
     ],
     "navbar_end": ["theme-switcher", "navbar-icon-links"],
     "icon_links": [
@@ -223,8 +212,7 @@ htmlhelp_basename = "Gambitdoc"
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-    ("index", "Gambit.tex", "Gambit Documentation",
-     "The Gambit Project", "manual"),
+    ("index", "Gambit.tex", "Gambit Documentation", "The Gambit Project", "manual"),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
