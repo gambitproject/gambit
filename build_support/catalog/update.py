@@ -158,6 +158,5 @@ if __name__ == "__main__":
     generate_rst_table(df, CATALOG_RST_TABLE, regnerate_images=args.regenerate_images)
     print(f"Generated {CATALOG_RST_TABLE} for use in local docs build. DO NOT COMMIT.")
     if args.build:
-        print("Images and tex files generated in catalog/img")
         # Update the Makefile.am with the current list of catalog files
         update_makefile()
