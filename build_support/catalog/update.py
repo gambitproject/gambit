@@ -1,8 +1,9 @@
 import argparse
+import re
 from pathlib import Path
 
 import pandas as pd
-from draw_tree import draw_tree, generate_pdf, generate_png, generate_tex
+from draw_tree import generate_pdf, generate_png, generate_tex
 
 import pygambit as gbt
 
@@ -11,7 +12,7 @@ CATALOG_DIR = Path(__file__).parent.parent.parent / "catalog"
 MAKEFILE_AM = Path(__file__).parent.parent.parent / "Makefile.am"
 
 
-def generate_rst_table(df: pd.DataFrame, rst_path: Path):
+def generate_rst_table(df: pd.DataFrame, rst_path: Path, force_build: bool = False):
     """Generate a list-table RST file with dropdowns for long descriptions."""
     with open(rst_path, "w", encoding="utf-8") as f:
         f.write(".. list-table::\n")
@@ -22,27 +23,39 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
 
         f.write("   * - **Game**\n")
 
+        # Compile regex to extract the tikzpicture environment from the generated tex
+        tikz_re = re.compile(r"(\\begin\{tikzpicture\}.*?\\end\{tikzpicture\})", re.DOTALL)
+
         for _, row in df.iterrows():
             slug = row["Game"]
-            g = gbt.catalog.load(slug)
 
-            # Common arguments for visualization generation
-            viz_args = {
-                "color_scheme": "gambit",
-                "sublevel_scaling": 0,
-                "shared_terminal_depth": True,
-            }
+            tex_path = CATALOG_DIR / "img" / f"{slug}.tex"
 
-            tikz = draw_tree(g, **viz_args)
+            if force_build or not tex_path.exists():
+                g = gbt.catalog.load(slug)
 
-            # Generate extra formats
-            for func in [
-                generate_tex,
-                generate_png,
-                generate_pdf,
-            ]:
-                viz_path = CATALOG_DIR / f"{slug}"
-                func(g, save_to=str(viz_path), **viz_args)
+                # Common arguments for visualization generation
+                viz_args = {
+                    "color_scheme": "gambit",
+                    "sublevel_scaling": 0,
+                    "shared_terminal_depth": True,
+                }
+
+                # Generate all formats
+                viz_path = CATALOG_DIR / "img" / f"{slug}"
+                viz_path.parent.mkdir(parents=True, exist_ok=True)
+                for func in [
+                    generate_tex,
+                    generate_png,
+                    generate_pdf,
+                ]:
+                    func(g, save_to=str(viz_path), **viz_args)
+
+            # Read the generated tex to extract the tikz block for the RST
+            with open(tex_path, encoding="utf-8") as tex_f:
+                tex_content = tex_f.read()
+            match = tikz_re.search(tex_content)
+            tikz = match.group(1) if match else "% Could not extract tikzpicture from tex file"
 
             title = str(row.get("Title", "")).strip()
             description = str(row.get("Description", "")).strip()
@@ -66,7 +79,7 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
             # Prepare download links for the dropdown
             download_links = [row["Download"]]
             for ext in ["tex", "png", "pdf"]:
-                download_links.append(f":download:`{slug}.{ext} <../catalog/{slug}.{ext}>`")
+                download_links.append(f":download:`{slug}.{ext} <../catalog/img/{slug}.{ext}>`")
 
             # Download dropdown below the code
             f.write("          **Download game and image files:**\n")
