@@ -19,85 +19,119 @@ draw_tree_args = {
 }
 
 
+def _write_efg_table(df: pd.DataFrame, f, tikz_re, regenerate_images: bool):
+    """Write the EFG games list-table to file handle f."""
+    f.write(".. list-table::\n")
+    f.write("   :header-rows: 1\n")
+    f.write("   :widths: 100\n")
+    f.write("   :class: tight-table\n")
+    f.write("\n")
+    f.write("   * - **Extensive form games**\n")
+
+    efg_df = df[df["Format"] == "efg"]
+    for _, row in efg_df.iterrows():
+        slug = row["Game"]
+        title = str(row.get("Title", "")).strip()
+        description = str(row.get("Description", "")).strip()
+
+        tex_path = CATALOG_DIR / "img" / f"{slug}.tex"
+        if regenerate_images or not tex_path.exists():
+            g = gbt.catalog.load(slug)
+            viz_path = CATALOG_DIR / "img" / f"{slug}"
+            viz_path.parent.mkdir(parents=True, exist_ok=True)
+            for func in [generate_tex, generate_png, generate_pdf]:
+                func(g, save_to=str(viz_path), **draw_tree_args)
+
+        with open(tex_path, encoding="utf-8") as tex_f:
+            tex_content = tex_f.read()
+        match = tikz_re.search(tex_content)
+        tikz = match.group(1).strip() if match else "% Could not extract tikzpicture from tex file"
+
+        # Main dropdown
+        f.write(f"   * - .. dropdown:: {title}\n")
+        f.write("          \n")
+        if description:
+            for line in description.splitlines():
+                f.write(f"          {line}\n")
+            f.write("          \n")
+        f.write("          **Load in PyGambit:**\n")
+        f.write("          \n")
+        f.write("          .. code-block:: python\n")
+        f.write("             \n")
+        f.write(f'             pygambit.catalog.load("{slug}")\n')
+        f.write("          \n")
+
+        # Download links (inside the dropdown)
+        download_links = [row["Download"]]
+        for ext in ["efg", "tex", "png", "pdf"]:
+            download_links.append(f":download:`{slug}.{ext} <../catalog/img/{slug}.{ext}>`")
+        f.write("          **Download game and image files:**\n")
+        f.write("          \n")
+        f.write(f"          {' '.join(download_links)}\n")
+        f.write("       \n")
+
+        # TiKZ image (outside dropdown)
+        f.write("       .. tikz::\n")
+        f.write("          :align: center\n")
+        f.write("          \n")
+        for line in tikz.splitlines():
+            f.write(f"          {line}\n")
+        f.write("       \n")
+
+
+def _write_nfg_table(df: pd.DataFrame, f):
+    """Write the NFG games list-table to file handle f."""
+    f.write(".. list-table::\n")
+    f.write("   :header-rows: 1\n")
+    f.write("   :widths: 100\n")
+    f.write("   :class: tight-table\n")
+    f.write("\n")
+    f.write("   * - **Strategic form games**\n")
+
+    nfg_df = df[df["Format"] == "nfg"]
+    for _, row in nfg_df.iterrows():
+        slug = row["Game"]
+        title = str(row.get("Title", "")).strip()
+
+        # Title as plain text header
+        f.write(f"   * - **{title}**\n")
+        f.write("       \n")
+
+        # Jupyter-execute block (no dropdown)
+        f.write("       .. jupyter-execute::\n")
+        f.write("          \n")
+        f.write("          import pygambit\n")
+        f.write(f'          pygambit.catalog.load("{slug}")\n')
+        f.write("       \n")
+
+        # Download link (plain, no dropdown)
+        f.write(f"       :download:`{slug}.nfg <../catalog/{slug}.nfg>`\n")
+        f.write("       \n")
+
+
 def generate_rst_table(df: pd.DataFrame, rst_path: Path, regnerate_images: bool = False):
-    """Generate a list-table RST file with dropdowns for long descriptions."""
+    """Generate RST output with two list-tables: one for EFG and one for NFG games."""
+    tikz_re = re.compile(r"\\begin\{document\}(.*?)\\end\{document\}", re.DOTALL)
+
     with open(rst_path, "w", encoding="utf-8") as f:
-        f.write(".. list-table::\n")
-        f.write("   :header-rows: 1\n")
-        f.write("   :widths: 100\n")
-        f.write("   :class: tight-table\n")
+        # TOC linking to both sections
+        f.write(".. contents::\n")
+        f.write("   :local:\n")
+        f.write("   :depth: 1\n")
         f.write("\n")
 
-        f.write("   * - **Game**\n")
+        # EFG section
+        f.write("Extensive form games\n")
+        f.write("--------------------\n")
+        f.write("\n")
+        _write_efg_table(df, f, tikz_re, regnerate_images)
+        f.write("\n")
 
-        # Compile regex to extract the content between \begin{document} and \end{document}
-        tikz_re = re.compile(r"\\begin\{document\}(.*?)\\end\{document\}", re.DOTALL)
-
-        for _, row in df.iterrows():
-            slug = row["Game"]
-
-            tex_path = CATALOG_DIR / "img" / f"{slug}.tex"
-
-            if row["Format"] == "efg":
-                if regnerate_images or not tex_path.exists():
-                    g = gbt.catalog.load(slug)
-                    viz_path = CATALOG_DIR / "img" / f"{slug}"
-                    viz_path.parent.mkdir(parents=True, exist_ok=True)
-                    for func in [generate_tex, generate_png, generate_pdf]:
-                        func(g, save_to=str(viz_path), **draw_tree_args)
-
-                # Read the generated tex to extract the tikz block for the RST
-                with open(tex_path, encoding="utf-8") as tex_f:
-                    tex_content = tex_f.read()
-                match = tikz_re.search(tex_content)
-                tikz = match.group(1) if match else "% Could not extract tikzpicture from tex file"
-
-            title = str(row.get("Title", "")).strip()
-            description = str(row.get("Description", "")).strip()
-
-            # Game Details
-            f.write(f"   * - .. dropdown:: {title}\n")
-            f.write("          \n")
-            if description:
-                for line in description.splitlines():
-                    f.write(f"          {line}\n")
-                f.write("          \n")
-
-            # Load in PyGambit (should be in same dropdown)
-            f.write("          **Load in PyGambit:**\n")
-            f.write("          \n")
-            f.write("          .. code-block:: python\n")
-            f.write("             \n")
-            f.write(f'             pygambit.catalog.load("{slug}")\n')
-            f.write("          \n")
-
-            # Prepare download links for the dropdown
-            download_links = [row["Download"]]
-            if row["Format"] == "efg":
-                for ext in ["ef", "tex", "png", "pdf"]:
-                    download_links.append(
-                        f":download:`{slug}.{ext} <../catalog/img/{slug}.{ext}>`"
-                    )
-
-            # Download dropdown below the code
-            f.write("          **Download game and image files:**\n")
-            f.write("          \n")
-            f.write(f"          {' '.join(download_links)}\n")
-            f.write("       \n")
-
-            # Visualization below description dropdown in the same cell
-            if row["Format"] == "efg":
-                f.write("       .. tikz::\n")
-                f.write("          :align: center\n")
-                f.write("          \n")
-                for line in tikz.splitlines():
-                    f.write(f"          {line}\n")
-            elif row["Format"] == "nfg":
-                f.write("       .. jupyter-execute::\n")
-                f.write("          \n")
-                f.write("          import pygambit\n")
-                f.write(f'          pygambit.catalog.load("{slug}")\n')
-            f.write("       \n")
+        # NFG section
+        f.write("Strategic form games\n")
+        f.write("--------------------\n")
+        f.write("\n")
+        _write_nfg_table(df, f)
 
 
 def update_makefile():
