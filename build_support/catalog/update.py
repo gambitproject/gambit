@@ -23,8 +23,8 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path, force_build: bool = Fal
 
         f.write("   * - **Game**\n")
 
-        # Compile regex to extract the tikzpicture environment from the generated tex
-        tikz_re = re.compile(r"(\\begin\{tikzpicture\}.*?\\end\{tikzpicture\})", re.DOTALL)
+        # Compile regex to extract the content between \begin{document} and \end{document}
+        tikz_re = re.compile(r"\\begin\{document\}(.*?)\\end\{document\}", re.DOTALL)
 
         for _, row in df.iterrows():
             slug = row["Game"]
