@@ -52,6 +52,3 @@ build_support/msw/gambit.wxs
 build_support/osx/Info.plist
 src/pygambit/catalog
 doc/catalog_table.rst
-catalog/**/*.tex
-catalog/**/*.pdf
-catalog/**/*.png

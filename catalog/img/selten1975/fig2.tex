@@ -1,0 +1,106 @@
+\documentclass[tikz,border=10pt]{standalone}
+                        \usepackage{newpxtext,newpxmath}
+                        \linespread{1.10}
+                        \usetikzlibrary{shapes}
+                        \usetikzlibrary{arrows.meta}
+
+                        \begin{document}
+
+                        % TikZ code with built-in styling for game trees
+% TikZ libraries required for game trees
+\usetikzlibrary{shapes}
+\usetikzlibrary{arrows.meta}
+
+% Style settings for game tree formatting
+\tikzset{
+    every node/.append style={font=\rmfamily},
+    every text node part/.append style={align=center},
+    node distance=1.5mm,
+    thick
+}
+
+% Built-in macro definitions for game tree drawing
+\newdimen\ndiam
+\ndiam1.5mm
+\newdimen\sqwidth
+\sqwidth1.6mm
+\newdimen\spx
+\spx.7mm
+\newdimen\spy
+\spy.5mm
+\newdimen\yup
+\yup0.5mm
+\newdimen\yfracup
+\yfracup1mm
+\newdimen\paydown
+\paydown2.5ex
+\newdimen\treethickn
+\treethickn1.0pt
+\definecolor{chancecolorrgb}{RGB}{117,145,56}
+\definecolor{gambitredrgb}{RGB}{234,51,35}
+\newcommand\chancecolor{chancecolorrgb}
+\newcommand\playeronecolor{gambitredrgb}
+\newcommand\playertwocolor{blue}
+\newcommand\playerthreecolor{orange}
+\newcommand\playerfourcolor{purple}
+\newcommand\playerfivecolor{cyan}
+\newcommand\playersixcolor{magenta}
+
+% Game tree content from /Users/echalstrey/projects/gambit/catalog/img/selten1975/fig2.ef
+\begin{tikzpicture}[scale=0.8
+  , StealthFill/.tip={Stealth[line width=.7pt,inset=0pt,length=13pt,angle'=30]}]
+% \draw [help lines, color=green] (-5,0) grid (5,-6);
+%% player 1 name Player~1
+\def\playerone{Player~1}
+%% player 2 name Player~2
+\def\playertwo{Player~2}
+%% level -2.0 node 1 player 1
+\draw [line width=\treethickn] (0,2)
+   ;
+%% level 10.0 node 1 xshift -1.75 from -2.0,1 move R payoffs 1 1
+\draw [line width=\treethickn,color=\playeronecolor] (-1.75,-10)
+   node[below,yshift=0.1\paydown] {$1$\strut}
+   node[below,yshift=-0.9\paydown] {$1$\strut}
+   -- (0,2);
+\draw (-0.875,-4) node[left,yshift=\yup,color=\playeronecolor] {$R$\strut};
+%% level 2.0 node 1 player 2 xshift 1.75 from -2.0,1 move L
+\draw [line width=\treethickn,color=\playeronecolor] (1.75,-2)
+   -- (0,2);
+\draw (0.875,0) node[right,yshift=\yup,color=\playeronecolor] {$L$\strut};
+%% level 10.0 node 2 xshift -1.5 from 2.0,1 move R payoffs 0 2
+\draw [line width=\treethickn,color=\playertwocolor] (0.25,-10)
+   node[below,yshift=0.1\paydown] {$0$\strut}
+   node[below,yshift=-0.9\paydown] {$2$\strut}
+   -- (1.75,-2);
+\draw (1,-6) node[left,yshift=\yup,color=\playertwocolor] {$R$\strut};
+%% level 6.0 node 1 player 1 xshift 1.5 from 2.0,1 move L
+\draw [line width=\treethickn,color=\playertwocolor] (3.25,-6)
+   -- (1.75,-2);
+\draw (2.5,-4) node[right,yshift=\yup,color=\playertwocolor] {$L$\strut};
+%% level 10.0 node 3 xshift -1.0 from 6.0,1 move r payoffs 0 3
+\draw [line width=\treethickn,color=\playeronecolor] (2.25,-10)
+   node[below,yshift=0.1\paydown] {$0$\strut}
+   node[below,yshift=-0.9\paydown] {$3$\strut}
+   -- (3.25,-6);
+\draw (2.75,-8) node[left,yshift=\yup,color=\playeronecolor] {$r$\strut};
+%% level 10.0 node 4 xshift 1.0 from 6.0,1 move l payoffs 2 0
+\draw [line width=\treethickn,color=\playeronecolor] (4.25,-10)
+   node[below,yshift=0.1\paydown] {$2$\strut}
+   node[below,yshift=-0.9\paydown] {$0$\strut}
+   -- (3.25,-6);
+\draw (3.75,-8) node[right,yshift=\yup,color=\playeronecolor] {$l$\strut};
+\node[inner sep=0pt,minimum size=\ndiam, draw=\playeronecolor, fill=\playeronecolor, shape=circle] at (0,2) {};
+\node[inner sep=0pt,minimum size=\ndiam, draw=\playertwocolor, fill=\playertwocolor, shape=circle] at (1.75,-2) {};
+\node[inner sep=0pt,minimum size=\ndiam, draw=\playeronecolor, fill=\playeronecolor, shape=circle] at (3.25,-6) {};
+
+% Player color legend
+\begin{scope}[scale=1,shift={(-3.25,2.0)}]
+\node[inner sep=0pt,minimum size=\ndiam,draw=\playeronecolor,fill=\playeronecolor,shape=circle] at (0,0) {};
+\node[anchor=west] at (0.3,0) {Player~1};
+\node[inner sep=0pt,minimum size=\ndiam,draw=\playertwocolor,fill=\playertwocolor,shape=circle] at (0,-0.625) {};
+\node[anchor=west] at (0.3,-0.625) {Player~2};
+\end{scope}
+
+\end{tikzpicture}
+
+                        \end{document}
