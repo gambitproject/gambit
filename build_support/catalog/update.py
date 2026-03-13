@@ -12,7 +12,7 @@ CATALOG_DIR = Path(__file__).parent.parent.parent / "catalog"
 MAKEFILE_AM = Path(__file__).parent.parent.parent / "Makefile.am"
 
 
-def generate_rst_table(df: pd.DataFrame, rst_path: Path, force_build: bool = False):
+def generate_rst_table(df: pd.DataFrame, rst_path: Path, regnerate_images: bool = False):
     """Generate a list-table RST file with dropdowns for long descriptions."""
     with open(rst_path, "w", encoding="utf-8") as f:
         f.write(".. list-table::\n")
@@ -31,7 +31,7 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path, force_build: bool = Fal
 
             tex_path = CATALOG_DIR / "img" / f"{slug}.tex"
 
-            if force_build or not tex_path.exists():
+            if regnerate_images or not tex_path.exists():
                 g = gbt.catalog.load(slug)
 
                 # Common arguments for visualization generation
@@ -150,11 +150,12 @@ def update_makefile():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--build", action="store_true")
+    parser.add_argument("--regenerate-images", action="store_true")
     args = parser.parse_args()
 
     # Create RST list-table used by doc/catalog.rst
     df = gbt.catalog.games(include_descriptions=True)
-    generate_rst_table(df, CATALOG_RST_TABLE, force_build=args.build)
+    generate_rst_table(df, CATALOG_RST_TABLE, regnerate_images=args.regenerate_images)
     print(f"Generated {CATALOG_RST_TABLE} for use in local docs build. DO NOT COMMIT.")
     if args.build:
         print("Images and tex files generated in catalog/img")

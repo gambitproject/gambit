@@ -28,12 +28,16 @@ Add new game files
 3. **Update the catalog:**
 
    Reinstall the package to pick up the new game file(s) in the ``pygambit.catalog`` module.
-   Then use the ``update.py`` script to update Gambit's documentation & build files.
+   Then use the ``update.py`` script to update Gambit's documentation & build files, as well as generating images for the new game(s).
 
    .. code-block:: bash
 
        pip install .
        python build_support/catalog/update.py --build
+
+   .. note::
+
+      You can also regenerate all images in the catalog with the ``--regenerate-images`` flag.
 
    .. warning::
 
