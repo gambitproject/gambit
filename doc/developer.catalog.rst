@@ -37,7 +37,8 @@ Add new game files
 
    .. note::
 
-      You can also regenerate all images in the catalog with the ``--regenerate-images`` flag.
+      Regenerate all images in the catalog with the ``--regenerate-images`` flag.
+      Update the ``draw_tree_args`` in ``build_support/catalog/update.py`` to change the default visualization parameters.
 
    .. warning::
 

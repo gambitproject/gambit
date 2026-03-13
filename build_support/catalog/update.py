@@ -11,6 +11,13 @@ CATALOG_RST_TABLE = Path(__file__).parent.parent.parent / "doc" / "catalog_table
 CATALOG_DIR = Path(__file__).parent.parent.parent / "catalog"
 MAKEFILE_AM = Path(__file__).parent.parent.parent / "Makefile.am"
 
+# Common arguments for visualization generation
+draw_tree_args = {
+    "color_scheme": "gambit",
+    "sublevel_scaling": 0,
+    "shared_terminal_depth": True,
+}
+
 
 def generate_rst_table(df: pd.DataFrame, rst_path: Path, regnerate_images: bool = False):
     """Generate a list-table RST file with dropdowns for long descriptions."""
@@ -34,13 +41,6 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path, regnerate_images: bool 
             if regnerate_images or not tex_path.exists():
                 g = gbt.catalog.load(slug)
 
-                # Common arguments for visualization generation
-                viz_args = {
-                    "color_scheme": "gambit",
-                    "sublevel_scaling": 0,
-                    "shared_terminal_depth": True,
-                }
-
                 # Generate all formats
                 viz_path = CATALOG_DIR / "img" / f"{slug}"
                 viz_path.parent.mkdir(parents=True, exist_ok=True)
@@ -49,7 +49,7 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path, regnerate_images: bool 
                     generate_png,
                     generate_pdf,
                 ]:
-                    func(g, save_to=str(viz_path), **viz_args)
+                    func(g, save_to=str(viz_path), **draw_tree_args)
 
             # Read the generated tex to extract the tikz block for the RST
             with open(tex_path, encoding="utf-8") as tex_f:
