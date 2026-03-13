@@ -93,13 +93,10 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path, regnerate_images: bool 
                 for line in tikz.splitlines():
                     f.write(f"          {line}\n")
             elif row["Format"] == "nfg":
-                jupyter_code = f"""
-                .. jupyter-execute::
-                    import pygambit
-                    pygambit.catalog.load("{slug}")
-                """
-                for line in jupyter_code.splitlines():
-                    f.write(f"{line}\n")
+                f.write("       .. jupyter-execute::\n")
+                f.write("          \n")
+                f.write("          import pygambit\n")
+                f.write(f'          pygambit.catalog.load("{slug}")\n')
             f.write("       \n")
 
 
