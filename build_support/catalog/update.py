@@ -40,15 +40,9 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path, regnerate_images: bool 
 
             if regnerate_images or not tex_path.exists():
                 g = gbt.catalog.load(slug)
-
-                # Generate all formats
                 viz_path = CATALOG_DIR / "img" / f"{slug}"
                 viz_path.parent.mkdir(parents=True, exist_ok=True)
-                for func in [
-                    generate_tex,
-                    generate_png,
-                    generate_pdf,
-                ]:
+                for func in [generate_tex, generate_png, generate_pdf]:
                     func(g, save_to=str(viz_path), **draw_tree_args)
 
             # Read the generated tex to extract the tikz block for the RST
