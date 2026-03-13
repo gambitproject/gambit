@@ -154,9 +154,9 @@ if __name__ == "__main__":
 
     # Create RST list-table used by doc/catalog.rst
     df = gbt.catalog.games(include_descriptions=True)
-    generate_rst_table(df, CATALOG_RST_TABLE)
+    generate_rst_table(df, CATALOG_RST_TABLE, force_build=args.build)
     print(f"Generated {CATALOG_RST_TABLE} for use in local docs build. DO NOT COMMIT.")
-
-    # Update the Makefile.am with the current list of catalog files
     if args.build:
+        print("Images and tex files generated in catalog/img")
+        # Update the Makefile.am with the current list of catalog files
         update_makefile()
