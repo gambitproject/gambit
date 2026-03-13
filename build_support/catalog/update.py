@@ -91,10 +91,9 @@ def _write_nfg_table(df: pd.DataFrame, f):
     nfg_df = df[df["Format"] == "nfg"]
     for _, row in nfg_df.iterrows():
         slug = row["Game"]
-        title = str(row.get("Title", "")).strip()
 
         # Title as plain text header
-        f.write(f"   * - **{title}**\n")
+        f.write("   * - \n")
         f.write("       \n")
 
         # Jupyter-execute block (no dropdown)
