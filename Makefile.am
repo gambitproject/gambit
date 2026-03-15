@@ -85,7 +85,6 @@ EXTRA_DIST = \
 	src/gui/bitmaps/prev.xpm \
 	src/gui/bitmaps/print.xpm \
 	src/gui/bitmaps/profiles.xpm \
-	src/gui/bitmaps/redo.xpm \
 	src/gui/bitmaps/saveas.xpm \
 	src/gui/bitmaps/savedata.xpm \
 	src/gui/bitmaps/save.xpm \
@@ -94,7 +93,6 @@ EXTRA_DIST = \
 	src/gui/bitmaps/tobegin.xpm \
 	src/gui/bitmaps/toend.xpm \
 	src/gui/bitmaps/tree.xpm \
-	src/gui/bitmaps/undo.xpm \
 	src/gui/bitmaps/zoomfit.xpm \
 	src/gui/bitmaps/zoomin.xpm \
 	src/gui/bitmaps/zoomout.xpm \

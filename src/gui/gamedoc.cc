@@ -24,7 +24,6 @@
 #include <fstream>
 
 #include <wx/wxprec.h>
-#include <wx/filename.h> // used to create temp files for undo/redo
 
 #include "gambit.h"
 #include "core/tinyxml.h" // for XML parser for LoadDocument()
@@ -111,7 +110,7 @@ GameDocument::GameDocument(Game p_game)
 
 GameDocument::~GameDocument() { wxGetApp().RemoveDocument(this); }
 
-bool GameDocument::LoadDocument(const wxString &p_filename, bool p_saveUndo)
+bool GameDocument::LoadDocument(const wxString &p_filename)
 {
   TiXmlDocument doc((const char *)p_filename.mb_str());
   if (!doc.LoadFile()) {
@@ -216,11 +215,6 @@ bool GameDocument::LoadDocument(const wxString &p_filename, bool p_saveUndo)
     int numDecimals = 4;
     numbers->ToElement()->QueryIntAttribute("decimals", &numDecimals);
     m_style.SetNumDecimals(numDecimals);
-  }
-
-  if (p_saveUndo) {
-    std::ostringstream s;
-    SaveDocument(s);
   }
 
   return true;

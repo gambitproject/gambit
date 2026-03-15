@@ -364,11 +364,9 @@ void GameFrame::OnUpdate()
 #include "bitmaps/preview.xpm"
 #include "bitmaps/print.xpm"
 #include "bitmaps/profiles.xpm"
-#include "bitmaps/redo.xpm"
 #include "bitmaps/save.xpm"
 #include "bitmaps/saveas.xpm"
 #include "bitmaps/table.xpm"
-#include "bitmaps/undo.xpm"
 #include "bitmaps/zoomfit.xpm"
 #include "bitmaps/zoomin.xpm"
 #include "bitmaps/zoomout.xpm"
@@ -557,13 +555,6 @@ void GameFrame::MakeToolbar()
                    _("Print this game"), _("Print this game"), nullptr);
   toolBar->AddTool(wxID_PREVIEW, wxEmptyString, wxBitmap(preview_xpm), wxNullBitmap, wxITEM_NORMAL,
                    _("Print preview"), _("View a preview of the game printout"), nullptr);
-
-  toolBar->AddSeparator();
-
-  toolBar->AddTool(wxID_UNDO, wxEmptyString, wxBitmap(undo_xpm), wxNullBitmap, wxITEM_NORMAL,
-                   _("Undo the last action"), _("Undo the last change to the game"), nullptr);
-  toolBar->AddTool(wxID_REDO, wxEmptyString, wxBitmap(redo_xpm), wxNullBitmap, wxITEM_NORMAL,
-                   _("Redo the undone action"), _("Redo the last undone change"), nullptr);
 
   toolBar->AddSeparator();
 

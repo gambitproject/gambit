@@ -120,12 +120,10 @@ public:
 // principle, be kept -- but they may no longer be Nash, etc.
 //
 // GBT_DOC_MODIFIED_LABELS: Labeling of players, strategies, etc. has
-// changed.  These have no effect on the game mathematically, so computed
-// data may be kept; but, we want to track the label change for undo, etc.
+// changed.
 //
 // GBT_DOC_MODIFIED_VIEWS: Information about how the document is viewed
-// (e.g., player colors) has changed.  We want to track this for undo,
-// but, again, this has no effect on the game mathematically.
+// (e.g., player colors) has changed.
 //
 using GameModificationType = enum {
   GBT_DOC_MODIFIED_NONE = 0x00,
@@ -173,7 +171,7 @@ public:
   //@{
   /// Load document from the specified file (which should be a .gbt file)
   /// Returns true if successful, false if error
-  bool LoadDocument(const wxString &p_filename, bool p_saveUndo = true);
+  bool LoadDocument(const wxString &p_filename);
   void SaveDocument(std::ostream &) const;
   //@}
 
