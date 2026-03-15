@@ -46,13 +46,6 @@ Sample games
   games. Games and Economic Behavior 79:
   223-232. <http:dx.doi.org/10.1016/j.geb.2013.02.003>`_
 
-:download:`pbride.efg <../contrib/games/pbride.efg>`
-  A signaling game from
-  `Joel Watson's Strategy textbook
-  <http://books.wwnorton.com/books/detail.aspx?ID=4294969499>`_,
-  modeling the confrontation in The Princess Bride between Humperdinck
-  and Roberts in the bedchamber.
-
 :download:`poker.efg <../contrib/games/poker.efg>`
   A simple game of one-card poker introduced in
   `Myerson, Roger (1991) Game Theory: Analysis of Conflict.
@@ -60,8 +53,3 @@ Sample games
   A bit unusually for poker, the "fold" action by a player with a
   strong hand counts for a win for that player, so folding is only
   weakly rather than strictly dominated in this case.
-
-:download:`spence.efg <../contrib/games/spence.efg>`
-  A version of Spence's classic job-market signaling game. This version
-  comes from `Joel Watson's Strategy textbook
-  <http://books.wwnorton.com/books/detail.aspx?ID=4294969499>`_.
