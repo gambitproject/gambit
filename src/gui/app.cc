@@ -85,16 +85,12 @@ wxBEGIN_EVENT_TABLE(Application, wxApp) EVT_TIMER(wxID_ANY, Application::OnSplas
   for (int i = 1; i < argc; i++) {
     const AppLoadResult result = LoadFile(argv[i]);
     if (result == GBT_APP_OPEN_FAILED) {
-      wxMessageDialog dialog(nullptr,
-                             wxT("Gambit could not open file '") + argv[i] + wxT("' for reading."),
-                             wxT("Unable to open file"), wxOK | wxICON_ERROR);
-      dialog.ShowModal();
+      wxMessageBox(wxString::Format(_("Gambit could not open file for reading:\n%s"), argv[i]),
+                   _("Unable to open file"), wxOK | wxICON_ERROR, nullptr);
     }
     else if (result == GBT_APP_PARSE_FAILED) {
-      wxMessageDialog dialog(
-          nullptr, wxT("File '") + argv[i] + wxT("' is not in a format Gambit recognizes."),
-          wxT("Unable to read file"), wxOK | wxICON_ERROR);
-      dialog.ShowModal();
+      wxMessageBox(wxString::Format(_("File is not in a format Gambit recognizes:\n%s"), argv[i]),
+                   _("Unable to read file"), wxOK | wxICON_ERROR, nullptr);
     }
   }
 
