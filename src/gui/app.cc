@@ -83,7 +83,7 @@ wxBEGIN_EVENT_TABLE(Application, wxApp) EVT_TIMER(wxID_ANY, Application::OnSplas
 
   // Process command line arguments, if any.
   for (int i = 1; i < argc; i++) {
-    const AppLoadResult result = LoadFile(argv[i]);
+    const AppLoadResult result = LoadFile(argv[i], nullptr);
     if (result == GBT_APP_OPEN_FAILED) {
       wxMessageBox(wxString::Format(_("Gambit could not open file for reading:\n%s"), argv[i]),
                    _("Unable to open file"), wxOK | wxICON_ERROR, nullptr);
@@ -131,10 +131,12 @@ void Application::DismissSplash()
   m_splash = nullptr;
 }
 
-AppLoadResult Application::LoadFile(const wxString &p_filename)
+AppLoadResult Application::LoadFile(const wxString &p_filename, wxWindow *p_parent)
 {
-  std::ifstream infile((const char *)p_filename.mb_str());
+  std::ifstream infile(p_filename.mb_str());
   if (!infile.good()) {
+    wxMessageBox(_("Gambit could not open file for reading:\n") + p_filename,
+                 _("Unable to open file"), wxOK | wxICON_ERROR, p_parent);
     return GBT_APP_OPEN_FAILED;
   }
 
@@ -146,9 +148,7 @@ AppLoadResult Application::LoadFile(const wxString &p_filename)
     (void)new GameFrame(nullptr, doc);
     return GBT_APP_FILE_OK;
   }
-  else {
-    delete doc;
-  }
+  delete doc;
 
   try {
     const Game nfg = ReadGame(infile);
@@ -156,11 +156,13 @@ AppLoadResult Application::LoadFile(const wxString &p_filename)
     m_fileHistory.AddFileToHistory(p_filename);
     m_fileHistory.Save(*wxConfigBase::Get());
     doc = new GameDocument(nfg);
-    doc->SetFilename(wxT(""));
+    doc->SetFilename("");
     (void)new GameFrame(nullptr, doc);
     return GBT_APP_FILE_OK;
   }
   catch (InvalidFileException &) {
+    wxMessageBox(_("File is not in a format Gambit recognizes:\n") + p_filename,
+                 _("Unable to read file"), wxOK | wxICON_ERROR, p_parent);
     return GBT_APP_PARSE_FAILED;
   }
 }

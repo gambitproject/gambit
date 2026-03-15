@@ -649,20 +649,7 @@ void GameFrame::OnFileOpen(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     const wxString filename = dialog.GetPath();
     wxGetApp().SetCurrentDir(wxPathOnly(filename));
-
-    const AppLoadResult result = wxGetApp().LoadFile(filename);
-    if (result == GBT_APP_OPEN_FAILED) {
-      wxMessageDialog msgdialog(
-          this, wxT("Gambit could not open file '") + filename + wxT("' for reading."),
-          wxT("Unable to open file"), wxOK | wxICON_ERROR);
-      msgdialog.ShowModal();
-    }
-    else if (result == GBT_APP_PARSE_FAILED) {
-      wxMessageDialog msgdialog(
-          this, wxT("File '") + filename + wxT("' is not in a format Gambit recognizes."),
-          wxT("Unable to read file"), wxOK | wxICON_ERROR);
-      msgdialog.ShowModal();
-    }
+    wxGetApp().LoadFile(filename, this);
   }
 }
 
@@ -903,20 +890,7 @@ void GameFrame::OnFileExit(wxCommandEvent &p_event)
 void GameFrame::OnFileMRUFile(wxCommandEvent &p_event)
 {
   const wxString filename = wxGetApp().GetHistoryFile(p_event.GetId() - wxID_FILE1);
-  const AppLoadResult result = wxGetApp().LoadFile(filename);
-
-  if (result == GBT_APP_OPEN_FAILED) {
-    wxMessageDialog dialog(this,
-                           wxT("Gambit could not open file '") + filename + wxT("' for reading."),
-                           wxT("Unable to open file"), wxOK | wxICON_ERROR);
-    dialog.ShowModal();
-  }
-  else if (result == GBT_APP_PARSE_FAILED) {
-    wxMessageDialog dialog(
-        this, wxT("File '") + filename + wxT("' is not in a format Gambit recognizes."),
-        wxT("Unable to read file"), wxOK | wxICON_ERROR);
-    dialog.ShowModal();
-  }
+  wxGetApp().LoadFile(filename, this);
 }
 
 //----------------------------------------------------------------------
