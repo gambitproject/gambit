@@ -66,8 +66,6 @@ wxBEGIN_EVENT_TABLE(Application, wxApp) EVT_TIMER(wxID_ANY, Application::OnSplas
 
         bool Application::OnInit()
 {
-  wxApp::OnInit();
-
   const wxBitmap bitmap(gambitbig_xpm);
   m_splashTimer.Start();
   m_splash = new wxSplashScreen(MakeScaledSplashBitmap(bitmap, 0.45),
@@ -84,26 +82,23 @@ wxBEGIN_EVENT_TABLE(Application, wxApp) EVT_TIMER(wxID_ANY, Application::OnSplas
   wxConfigBase::Get()->Read(_T("/General/CurrentDirectory"), &m_currentDir, _T(""));
 
   // Process command line arguments, if any.
-  for (int i = 1; i < wxApp::argc; i++) {
-    const AppLoadResult result = LoadFile(wxApp::argv[i]);
+  for (int i = 1; i < argc; i++) {
+    const AppLoadResult result = LoadFile(argv[i]);
     if (result == GBT_APP_OPEN_FAILED) {
-      wxMessageDialog dialog(
-          nullptr, wxT("Gambit could not open file '") + wxApp::argv[i] + wxT("' for reading."),
-          wxT("Unable to open file"), wxOK | wxICON_ERROR);
+      wxMessageDialog dialog(nullptr,
+                             wxT("Gambit could not open file '") + argv[i] + wxT("' for reading."),
+                             wxT("Unable to open file"), wxOK | wxICON_ERROR);
       dialog.ShowModal();
     }
     else if (result == GBT_APP_PARSE_FAILED) {
       wxMessageDialog dialog(
-          nullptr, wxT("File '") + wxApp::argv[i] + wxT("' is not in a format Gambit recognizes."),
+          nullptr, wxT("File '") + argv[i] + wxT("' is not in a format Gambit recognizes."),
           wxT("Unable to read file"), wxOK | wxICON_ERROR);
       dialog.ShowModal();
     }
   }
 
-  if (m_documents.size() == 0) {
-    // If we don't have any game files -- whether because none were
-    // specified on the command line, or because those specified couldn't
-    // be read -- create a default document.
+  if (m_documents.empty()) {
     const Game efg = NewTree();
     efg->NewPlayer()->SetLabel("Player 1");
     efg->NewPlayer()->SetLabel("Player 2");
