@@ -4,6 +4,7 @@ from libcpp.memory cimport shared_ptr, unique_ptr
 from libcpp.list cimport list as stdlist
 from libcpp.vector cimport vector as stdvector
 from libcpp.set cimport set as stdset
+from libcpp.optional cimport optional
 
 
 cdef extern from "gambit.h":
@@ -362,12 +363,12 @@ cdef extern from "games/behavmixed.h" namespace "Gambit":
         T getitem "operator[]"(int) except +IndexError
         T getaction "operator[]"(c_GameAction) except +IndexError
         T GetPayoff(c_GamePlayer) except +
-        T GetBeliefProb(c_GameNode) except +
+        optional[T] GetBeliefProb(c_GameNode) except +
         T GetRealizProb(c_GameNode) except +
         T GetInfosetProb(c_GameInfoset) except +
-        T GetPayoff(c_GameInfoset) except +
-        T GetPayoff(c_GamePlayer, c_GameNode) except +
-        T GetPayoff(c_GameAction) except +
+        optional[T] GetPayoff(c_GameInfoset) except +
+        optional[T] GetPayoff(c_GamePlayer, c_GameNode) except +
+        optional[T] GetPayoff(c_GameAction) except +
         T GetRegret(c_GameAction) except +
         T GetRegret(c_GameInfoset) except +
         T GetAgentMaxRegret() except +

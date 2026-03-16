@@ -241,11 +241,11 @@ public:
 
   const T &GetRealizProb(const GameNode &node) const;
   T GetInfosetProb(const GameInfoset &p_infoset) const;
-  const T &GetBeliefProb(const GameNode &node) const;
+  std::optional<T> GetBeliefProb(const GameNode &node) const;
   Vector<T> GetPayoff(const GameNode &node) const;
-  const T &GetPayoff(const GamePlayer &player, const GameNode &node) const;
-  const T &GetPayoff(const GameInfoset &p_infoset) const;
-  const T &GetPayoff(const GameAction &act) const;
+  std::optional<T> GetPayoff(const GamePlayer &player, const GameNode &node) const;
+  std::optional<T> GetPayoff(const GameInfoset &p_infoset) const;
+  std::optional<T> GetPayoff(const GameAction &act) const;
   T GetActionProb(const GameAction &act) const;
 
   /// @brief Computes the regret to playing \p p_action
@@ -256,7 +256,7 @@ public:
   /// @param[in] p_action  The action to compute the regret for.
   /// @sa GetRegret(const GameInfoset &) const
   ///     GetAgentMaxRegret() const
-  const T &GetRegret(const GameAction &p_action) const;
+  T GetRegret(const GameAction &p_action) const;
 
   /// @brief Computes the regret at information set \p p_infoset
   /// @details Computes the regret at the information set to the player of playing

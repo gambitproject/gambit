@@ -587,9 +587,12 @@ class MixedBehaviorProfile:
         self._check_validity()
         return self._is_defined_at(self.game._resolve_infoset(infoset, "is_defined_at"))
 
-    def belief(self, node: NodeReference) -> ProfileDType:
+    def belief(self, node: NodeReference) -> ProfileDType | None:
         """Returns the conditional probability that a node is reached, given that
         its information set is reached.
+
+        If the information set is not reachable, the belief is not well-defined.
+        In this case, the function returns `None`.
 
         Parameters
         ----------
@@ -630,9 +633,12 @@ class MixedBehaviorProfile:
         return self._payoff(resolved_player)
 
     def node_value(self, player: PlayerReference,
-                   node: NodeReference) -> ProfileDType:
+                   node: NodeReference) -> ProfileDType | None:
         """Returns the expected payoff to `player` conditional on play reaching `node`,
         if all players play according to the profile.
+
+        If the node's information set is not reachable, in general the node value
+        is not well-defined.  In this case, the function returns `None`.
 
         Parameters
         ----------
@@ -661,9 +667,12 @@ class MixedBehaviorProfile:
             raise ValueError("node_value() is not defined for the chance player")
         return self._node_value(resolved_player, resolved_node)
 
-    def infoset_value(self, infoset: InfosetReference) -> ProfileDType:
+    def infoset_value(self, infoset: InfosetReference) -> ProfileDType | None:
         """Returns the expected payoff to the player conditional on reaching an information set,
         if all players play according to the profile.
+
+        If the information set is not reachable, the expected payoff is not well-defined.
+        In this case, the function returns `None`.
 
         Parameters
         ----------
@@ -686,9 +695,12 @@ class MixedBehaviorProfile:
             raise ValueError("infoset_value() is not defined for the chance player")
         return self._infoset_value(resolved_infoset)
 
-    def action_value(self, action: ActionReference) -> ProfileDType:
+    def action_value(self, action: ActionReference) -> ProfileDType | None:
         """Returns the expected payoff to the player of playing an action conditional on reaching
         its information set, if all players play according to the profile.
+
+        If the information set is not reachable, the expected payoff is not well-defined.
+        In this case, the function returns `None`.
 
         Parameters
         ----------
@@ -704,6 +716,10 @@ class MixedBehaviorProfile:
             If `action` is a string and no action in the game has that label.
         ValueError
             If `action` resolves to an action that belongs to the chance player
+
+        See also
+        --------
+        MixedBehaviorProfile.infoset_prob
         """
         self._check_validity()
         resolved_action = self.game._resolve_action(action, "action_value")
@@ -945,7 +961,10 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
         return deref(self.profile).GetPayoff(player.player)
 
     def _belief(self, node: Node) -> float:
-        return deref(self.profile).GetBeliefProb(node.node)
+        cdef optional[double] value = deref(self.profile).GetBeliefProb(node.node)
+        if value.has_value():
+            return value.value()
+        return None
 
     def _realiz_prob(self, node: Node) -> float:
         return deref(self.profile).GetRealizProb(node.node)
@@ -953,14 +972,23 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
     def _infoset_prob(self, infoset: Infoset) -> float:
         return deref(self.profile).GetInfosetProb(infoset.infoset)
 
-    def _infoset_value(self, infoset: Infoset) -> float:
-        return deref(self.profile).GetPayoff(infoset.infoset)
+    def _infoset_value(self, infoset: Infoset) -> float | None:
+        cdef optional[double] value = deref(self.profile).GetPayoff(infoset.infoset)
+        if value.has_value():
+            return value.value()
+        return None
 
-    def _node_value(self, player: Player, node: Node) -> float:
-        return deref(self.profile).GetPayoff(player.player, node.node)
+    def _node_value(self, player: Player, node: Node) -> float | None:
+        cdef optional[double] value = deref(self.profile).GetPayoff(player.player, node.node)
+        if value.has_value():
+            return value.value()
+        return None
 
-    def _action_value(self, action: Action) -> float:
-        return deref(self.profile).GetPayoff(action.action)
+    def _action_value(self, action: Action) -> float | None:
+        cdef optional[double] value = deref(self.profile).GetPayoff(action.action)
+        if value.has_value():
+            return value.value()
+        return None
 
     def _action_regret(self, action: Action) -> float:
         return deref(self.profile).GetRegret(action.action)
@@ -1047,7 +1075,10 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
         return rat_to_py(deref(self.profile).GetPayoff(player.player))
 
     def _belief(self, node: Node) -> Rational:
-        return rat_to_py(deref(self.profile).GetBeliefProb(node.node))
+        cdef optional[c_Rational] value = deref(self.profile).GetBeliefProb(node.node)
+        if value.has_value():
+            return rat_to_py(value.value())
+        return None
 
     def _realiz_prob(self, node: Node) -> Rational:
         return rat_to_py(deref(self.profile).GetRealizProb(node.node))
@@ -1055,14 +1086,23 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
     def _infoset_prob(self, infoset: Infoset) -> Rational:
         return rat_to_py(deref(self.profile).GetInfosetProb(infoset.infoset))
 
-    def _infoset_value(self, infoset: Infoset) -> Rational:
-        return rat_to_py(deref(self.profile).GetPayoff(infoset.infoset))
+    def _infoset_value(self, infoset: Infoset) -> Rational | None:
+        cdef optional[c_Rational] value = deref(self.profile).GetPayoff(infoset.infoset)
+        if value.has_value():
+            return rat_to_py(value.value())
+        return None
 
-    def _node_value(self, player: Player, node: Node) -> Rational:
-        return rat_to_py(deref(self.profile).GetPayoff(player.player, node.node))
+    def _node_value(self, player: Player, node: Node) -> Rational | None:
+        cdef optional[c_Rational] value = deref(self.profile).GetPayoff(player.player, node.node)
+        if value.has_value():
+            return rat_to_py(value.value())
+        return None
 
-    def _action_value(self, action: Action) -> Rational:
-        return rat_to_py(deref(self.profile).GetPayoff(action.action))
+    def _action_value(self, action: Action) -> Rational | None:
+        cdef optional[c_Rational] value = deref(self.profile).GetPayoff(action.action)
+        if value.has_value():
+            return rat_to_py(value.value())
+        return None
 
     def _action_regret(self, action: Action) -> Rational:
         return rat_to_py(deref(self.profile).GetRegret(action.action))
