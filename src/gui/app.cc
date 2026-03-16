@@ -83,15 +83,7 @@ wxBEGIN_EVENT_TABLE(Application, wxApp) EVT_TIMER(wxID_ANY, Application::OnSplas
 
   // Process command line arguments, if any.
   for (int i = 1; i < argc; i++) {
-    const AppLoadResult result = LoadFile(argv[i], nullptr);
-    if (result == GBT_APP_OPEN_FAILED) {
-      wxMessageBox(wxString::Format(_("Gambit could not open file for reading:\n%s"), argv[i]),
-                   _("Unable to open file"), wxOK | wxICON_ERROR, nullptr);
-    }
-    else if (result == GBT_APP_PARSE_FAILED) {
-      wxMessageBox(wxString::Format(_("File is not in a format Gambit recognizes:\n%s"), argv[i]),
-                   _("Unable to read file"), wxOK | wxICON_ERROR, nullptr);
-    }
+    LoadFile(argv[i], nullptr);
   }
 
   if (m_documents.empty()) {
