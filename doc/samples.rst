@@ -26,11 +26,6 @@ Sample games
   under strategic voting. American Political Science Review 92(1):
   23-35. <http://www.jstor.org/stable/2585926>`_.
 
-:download:`loopback.nfg <../contrib/games/loopback.nfg>`
-  A game due to McKelvey which illustrates that the logit quantal
-  response equilibrium correspondence can have a "backward-bending"
-  segment on the principal branch.
-
 :download:`nim.efg <../contrib/games/nim.efg>`
   This is a Nim-like game, which is a useful example of the value
   of backward induction.
@@ -45,11 +40,3 @@ Sample games
   learning: Heuristics and response time in perfect information
   games. Games and Economic Behavior 79:
   223-232. <http:dx.doi.org/10.1016/j.geb.2013.02.003>`_
-
-:download:`poker.efg <../contrib/games/poker.efg>`
-  A simple game of one-card poker introduced in
-  `Myerson, Roger (1991) Game Theory: Analysis of Conflict.
-  <http://www.hup.harvard.edu/catalog.php?isbn=9780674341166>`_.
-  A bit unusually for poker, the "fold" action by a player with a
-  strong hand counts for a win for that player, so folding is only
-  weakly rather than strictly dominated in this case.
