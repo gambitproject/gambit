@@ -151,79 +151,37 @@ std::map<GameSequence, double> ToSequenceProbs(const ProblemData &p_data, const 
   return x;
 }
 
-/// Compute the set of information sets which are not reachable given the actions in
-/// @p p_support, but are reachable via a *single* deviation to an action at a
-/// reachable information set.
-std::set<GameInfoset> FindDeviationInfosets(const BehaviorSupportProfile &p_support)
+std::optional<MixedBehaviorProfile<double>>
+FindNashExtension(const MixedBehaviorProfile<double> &p_baseProfile, double p_maxRegret)
 {
-  struct SingleDeviationReachableVisitor {
-    const BehaviorSupportProfile &m_support;
-    std::set<GameInfoset> m_deviationReachable;
-
-    explicit SingleDeviationReachableVisitor(const BehaviorSupportProfile &p_support)
-      : m_support(p_support)
-    {
+  const Game &game = p_baseProfile.GetGame();
+  std::list<GameInfoset> extensionInfosets;
+  for (const auto &infoset : game->GetInfosets()) {
+    if (!p_baseProfile.IsDefinedAt(infoset)) {
+      extensionInfosets.push_back(infoset);
     }
-    GameRep::DFSCallbackResult OnEnter(const GameNode &p_node, int)
-    {
-      const auto infoset = p_node->GetInfoset();
-      if (!infoset) {
-        return GameRep::DFSCallbackResult::Continue;
-      }
-      if (p_node->GetPlayer()->IsChance()) {
-        return GameRep::DFSCallbackResult::Continue;
-      }
-      if (m_support.IsReachable(infoset)) {
-        return GameRep::DFSCallbackResult::Continue;
-      }
-      m_deviationReachable.insert(infoset);
-      return GameRep::DFSCallbackResult::Prune;
-    }
-    GameRep::DFSCallbackResult OnAction(const GameNode &, const GameNode &, int)
-    {
-      return GameRep::DFSCallbackResult::Continue;
-    }
-    GameRep::DFSCallbackResult OnExit(const GameNode &, int)
-    {
-      return GameRep::DFSCallbackResult::Continue;
-    }
-    void OnVisit(const GameNode &, int) {}
-  };
-
-  SingleDeviationReachableVisitor visitor(p_support);
-  const Game game = p_support.GetGame();
-  GameRep::WalkDFS(game, game->GetRoot(), TraversalOrder::Preorder, visitor);
-  return visitor.m_deviationReachable;
-}
-
-/// Produce the set of mixed behavior profiles which extend @param p_baseProfile
-/// to complete profiles by specifying a pure action at each information set which
-/// is reachable by a single deviation from the profile, and the centroid at all
-/// information sets which are reachable only by two deviations.
-std::list<MixedBehaviorProfile<double>>
-ExtendWithDeviations(const MixedBehaviorProfile<double> &p_baseProfile)
-{
-  const auto deviationInfosets = FindDeviationInfosets(p_baseProfile.GetSupport());
-  std::list<MixedBehaviorProfile<double>> result;
-  Array<int> firstIndex(deviationInfosets.size());
+  }
+  Array<int> firstIndex(extensionInfosets.size());
   std::fill(firstIndex.begin(), firstIndex.end(), 1);
-  Array<int> lastIndex(deviationInfosets.size());
-  std::transform(deviationInfosets.begin(), deviationInfosets.end(), lastIndex.begin(),
+  Array<int> lastIndex(extensionInfosets.size());
+  std::transform(extensionInfosets.begin(), extensionInfosets.end(), lastIndex.begin(),
                  [](const auto &infoset) { return infoset->GetActions().size(); });
   CartesianIndexProduct indices(firstIndex, lastIndex);
   for (const auto &index : indices) {
     auto extension = p_baseProfile.ToFullSupport();
-    for (auto [i, infoset] : enumerate(deviationInfosets)) {
+    for (auto [i, infoset] : enumerate(extensionInfosets)) {
       extension[infoset->GetAction(index[i + 1])] = 1.0;
     }
-    extension.UndefinedToCentroid();
-    result.push_back(extension);
+    if (extension.GetMaxRegret() < p_maxRegret) {
+      return extension;
+    }
   }
-  return result;
+  return std::nullopt;
 }
 
 std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfile &p_support,
-                                                     bool &p_isSingular, int p_stopAfter)
+                                                     bool &p_isSingular, int p_stopAfter,
+                                                     double p_maxRegret)
 {
   ProblemData data(p_support);
   PolynomialSystem<double> equations(data.space);
@@ -252,7 +210,10 @@ std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfil
   for (const auto &root : roots) {
     const MixedBehaviorProfile<double> sol(
         data.m_support.ToMixedBehaviorProfile(ToSequenceProbs(data, root)));
-    solutions.splice(solutions.end(), ExtendWithDeviations(sol));
+    auto extended = FindNashExtension(sol, p_maxRegret);
+    if (extended.has_value()) {
+      solutions.push_back(extended.value());
+    }
   }
   return solutions;
 }
@@ -277,12 +238,11 @@ EnumPolyBehaviorSolve(const Game &p_game, int p_stopAfter, double p_maxregret,
   for (auto support : possible_supports->m_supports) {
     p_onSupport("candidate", support);
     bool isSingular = false;
-    for (const auto &solution : SolveSupport(
-             support, isSingular, std::max(p_stopAfter - static_cast<int>(ret.size()), 0))) {
-      if (solution.GetMaxRegret() < p_maxregret) {
-        p_onEquilibrium(solution);
-        ret.push_back(solution);
-      }
+    for (const auto &solution :
+         SolveSupport(support, isSingular, std::max(p_stopAfter - static_cast<int>(ret.size()), 0),
+                      p_maxregret)) {
+      p_onEquilibrium(solution);
+      ret.push_back(solution);
     }
     if (isSingular) {
       p_onSupport("singular", support);

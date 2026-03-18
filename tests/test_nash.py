@@ -2122,8 +2122,7 @@ ENUMPOLY_BEHAVIOR_CASES = [
             factory=functools.partial(games.read_from_file, "3_player.efg"),
             solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
             expected=[
-                [[d(1, 0), d(1, 0)], [d(1, 0), d("1/2", "1/2")], [d(1, 0), d(1, 0)]],
-                [[d(1, 0), d(1, 0)], [d(1, 0), d("1/2", "1/2")], [d(1, 0), d(0, 1)]],
+                [[d(1, 0), d(1, 0)], [d(1, 0), d(1, 0)], [d(1, 0), d(1, 0)]],
             ],
             regret_tol=TOL,
             prob_tol=TOL,
@@ -2136,8 +2135,7 @@ ENUMPOLY_BEHAVIOR_CASES = [
             factory=functools.partial(games.read_from_file, "3_player_with_nonterm_outcomes.efg"),
             solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
             expected=[
-                [[d(1, 0), d(1, 0)], [d(1, 0), d("1/2", "1/2")], [d(1, 0), d(1, 0)]],
-                [[d(1, 0), d(1, 0)], [d(1, 0), d("1/2", "1/2")], [d(1, 0), d(0, 1)]],
+                [[d(1, 0), d(1, 0)], [d(1, 0), d(1, 0)], [d(1, 0), d(1, 0)]],
             ],
             regret_tol=TOL,
             prob_tol=TOL,
@@ -2170,10 +2168,8 @@ ENUMPOLY_BEHAVIOR_CASES = [
                 # candidate,10,10,1000,10000
                 [[d(1, 0)], [d(1, 0), d(1, 0, 0, 0)], [d(1, 0, 0, 0, 0)]],
                 # candidate,01,00,0000,00000
-                [[d(0, 1)], [d(1, 0), d("1/4", "1/4", "1/4", "1/4")],
-                 [d("1/5", "1/5", "1/5", "1/5", "1/5")]],  # only 1 off path
-                [[d(0, 1)], [d(0, 1), d("1/4", "1/4", "1/4", "1/4")],
-                 [d("1/5", "1/5", "1/5", "1/5", "1/5")]],
+                [[d(0, 1)], [d(1, 0), d(1, 0, 0, 0)],
+                 [d(1, 0, 0, 0, 0)]],
             ],
             regret_tol=TOL,
             prob_tol=TOL,
@@ -2191,13 +2187,8 @@ ENUMPOLY_BEHAVIOR_CASES = [
                 [[d(1, 0)], [d(1, 0), d(1, 0, 0, 0)], [d(1, 0, 0, 0, 0)]],
                 [
                     [d(0, 1)],
-                    [d(1, 0), d("1/4", "1/4", "1/4", "1/4")],
-                    [d("1/5", "1/5", "1/5", "1/5", "1/5")],
-                ],
-                [
-                    [d(0, 1)],
-                    [d(0, 1), d("1/4", "1/4", "1/4", "1/4")],
-                    [d("1/5", "1/5", "1/5", "1/5", "1/5")],
+                    [d(1, 0), d(1, 0, 0, 0)],
+                    [d(1, 0, 0, 0, 0)],
                 ],
             ],
             regret_tol=TOL,
@@ -2216,13 +2207,8 @@ ENUMPOLY_BEHAVIOR_CASES = [
             expected=[
                 [
                     [d(0, 1)],
-                    [d(1, 0), d("1/4", "1/4", "1/4", "1/4")],
-                    [d("1/5", "1/5", "1/5", "1/5", "1/5")],
-                ],
-                [
-                    [d(0, 1)],
-                    [d(0, 1), d("1/4", "1/4", "1/4", "1/4")],
-                    [d("1/5", "1/5", "1/5", "1/5", "1/5")],
+                    [d(1, 0), d(1, 0, 0, 0)],
+                    [d(1, 0, 0, 0, 0)],
                 ],
             ],
             regret_tol=TOL,
@@ -2239,8 +2225,7 @@ ENUMPOLY_BEHAVIOR_CASES = [
             ),
             solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
             expected=[
-                [[d(0, 1), d("1/5", "1/5", "1/5", "1/5", "1/5")], [d(1, 0)]],
-                [[d(0, 1), d("1/5", "1/5", "1/5", "1/5", "1/5")], [d(0, 1)]],
+                [[d(0, 1), d(1, 0, 0, 0, 0)], [d(1, 0)]],
             ],
             regret_tol=TOL,
             prob_tol=TOL,
