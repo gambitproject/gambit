@@ -1,0 +1,37 @@
+EFG 2 R "Princess Bride signaling game (from Watson)" { "Wesley" "Prince" }
+"This game is Exercise 29.6 from Watson [^Wat13], based on a scene from
+the Rob Reiner film, _The Princess Bride_:
+
+Wesley (the protagonist) confronts the evil prince Humperdinck.  Wesley
+is one of two types: weak or strong.  Wesley knows whether he is weak or
+strong, but the prince only knows that he is weak with probability 1/2 and
+strong with probability 1/2.  Wesley is lying in a bed in the prince's
+castle when the prince enters the room.  Wesley decides whether to get out
+of bed or stay in bed.  The prince observes Wesley's action but does not
+observe Wesley's type.  The prince then decides whether to fight or
+surrender to Wesley.  The payoffs are such that the prince prefers to fight
+only with the weak Wesley, because otherwise the prince is an inferior
+swordsman.  Also, the weak Wesley must pay a cost to get out of bed.
+
+In the game in this file, the cost the weak Wesley pays to get out of bed
+is set to 2.
+
+[^Wat13]: Watson, Joel.  (2013)  Strategy: An Introduction to Game Theory,
+   third edition.  W. W. Norton & Company.
+"
+
+c "" 1 "" { "Strong" 1/2 "Weak" 1/2 } 0
+p "" 1 1 "" { "Up" "Stay" } 0
+p "" 2 1 "" { "Surrender" "Fight" } 0
+t "" 1 "Outcome1" { 1, 0 }
+t "" 2 "Outcome2" { 0, -2 }
+p "" 2 2 "" { "Surrender" "Fight" } 0
+t "" 3 "Outcome3" { 1, 0 }
+t "" 4 "Outcome4" { 0, -2 }
+p "" 1 2 "" { "Up" "Stay" } 0
+p "" 2 1 "" { "Surrender" "Fight" } 0
+t "" 5 "Outcome5" { -1, 0 }
+t "" 6 "Outcome6" { -3, 1 }
+p "" 2 2 "" { "Surrender" "Fight" } 0
+t "" 7 "Outcome7" { 1, 0 }
+t "" 8 "Outcome8" { -1, 1 }

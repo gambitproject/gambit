@@ -169,8 +169,6 @@ EXTRA_DIST = \
 	contrib/games/palf2.efg \
 	contrib/games/palf3.efg \
 	contrib/games/palf.efg \
-	contrib/games/poker2.efg \
-	contrib/games/poker.efg \
 	contrib/games/pvw2.efg \
 	contrib/games/pvw.efg \
 	contrib/games/sh3.efg \
@@ -186,6 +184,7 @@ EXTRA_DIST = \
 	contrib/games/work1.efg \
 	contrib/games/work2.efg \
 	contrib/games/work3.efg \
+	contrib/games/2smp.efg \
 	contrib/games/2x2a.nfg \
 	contrib/games/2x2const.nfg \
 	contrib/games/2x2.nfg \
@@ -220,7 +219,6 @@ EXTRA_DIST = \
 	contrib/games/perfect1.nfg \
 	contrib/games/perfect2.nfg \
 	contrib/games/perfect3.nfg \
-	contrib/games/poker.nfg \
 	contrib/games/sh3.nfg \
 	contrib/games/stengel.nfg \
 	contrib/games/sww1.nfg \
@@ -233,11 +231,15 @@ EXTRA_DIST = \
 	contrib/games/yamamoto.nfg \
 	contrib/games/zero.nfg \
 	src/README.rst \
-	catalog/2smp.efg \
+	catalog/bagwell1995.efg \
+	catalog/myerson1991/fig2_1.efg \
 	catalog/myerson1991/fig4_2.efg \
+	catalog/reiley2008/fig1.efg \
 	catalog/selten1975/fig1.efg \
 	catalog/selten1975/fig2.efg \
-	catalog/selten1975/fig3.efg
+	catalog/selten1975/fig3.efg \
+	catalog/watson2013/exercise29_6.efg \
+	catalog/watson2013/fig29_1.efg
 
 core_SOURCES = \
     src/core/core.h \
