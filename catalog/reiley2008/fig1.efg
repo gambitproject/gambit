@@ -16,7 +16,7 @@ p "" 1 1 "" { "Bet" "Fold" } 0
 p "" 2 1 "" { "Call" "Fold" } 0
 t "" 1 "Professor Wins Big" { 2, -2 }
 t "" 2 "Professor Wins" { 1, -1 }
-t "" 4 "Professor Loses" { 1, -1 }
+t "" 4 "Professor Loses" { -1, 1 }
 p "" 1 2 "" { "Bet" "Fold" } 0
 p "" 2 1 "" { "Call" "Fold" } 0
 t "" 3 "Professor Loses Big" { -2, 2 }
