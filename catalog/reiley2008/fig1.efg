@@ -1,12 +1,12 @@
 EFG 2 R "Stripped-down poker (Reiley et al 2008)" { "Professor" "Student" }
-"This is a one-card poker game used in [^Rei2008] as a teaching exercise.
+"This is a one-card poker game used in [Rei2008]_ as a teaching exercise.
 
 See also
 --------
 myerson1991/fig2_1
     Another one-card poker game with slightly different rules.
 
-[^Rei2008]: Reiley, David H., Urbancic, Michael B, and Walker, Mark. (2008)
+[Rei2008]_: Reiley, David H., Urbancic, Michael B, and Walker, Mark. (2008)
     Stripped-Down Poker: A Classroom Game with Signaling and Bluffing.
     _The Journal of Economic Education_ 4: 323-341.
 "

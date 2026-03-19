@@ -1,8 +1,8 @@
 EFG 2 R "Job-market signaling game (version from Watson)" { "You" "Firm" }
 "This is a version of Spence's classic model of education being a job-market
-signal, as presented in Figure 29.1 of Watson [^Wat13].
+signal, as presented in Figure 29.1 of Watson [Wat13]_.
 
-[^Wat13]: Watson, Joel.  (2013)  Strategy: An Introduction to Game Theory,
+[Wat13]_: Watson, Joel.  (2013)  Strategy: An Introduction to Game Theory,
    third edition.  W. W. Norton & Company.
 "
 

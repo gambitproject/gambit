@@ -1,5 +1,5 @@
 EFG 2 R "A simple Poker game" { "Fred" "Alice" }
-"This is a simple game of one-card poker from Myerson [^Mye91], used as the
+"This is a simple game of one-card poker from Myerson [Mye91]_, used as the
 introductory example for game models.
 
 Note that as specified in the text, the game has the slightly unusual feature
@@ -13,7 +13,7 @@ reiley2008/fig1
    than a win.
 
 
-[^Mye1991]: Myerson, Roger B. (1991)  Game Theory: Analysis of Conflict.
+[Mye91]_: Myerson, Roger B. (1991)  Game Theory: Analysis of Conflict.
   Cambridge: Harvard University Press.
 "
 
