@@ -10,7 +10,6 @@ Detailed table of contents
    pygambit
    tools
    gui
-   samples
    developer
    formats
    biblio

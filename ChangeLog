@@ -18,6 +18,8 @@
   on very small (<10^{-300}) probabilities.
 - The new subgame root computation fixes a bug which failed to detect subgames where the subgame
   root node is a member of an absent-minded infoset.  (#584)
+- Removed spurious warning in graphical interface when loading file as a command-line argument
+  (or also by clicking on a file in MSW, as that uses the command-line mechanism).  (#801)
 
 ## [16.5.1] - unreleased
 

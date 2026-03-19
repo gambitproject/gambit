@@ -3,7 +3,9 @@ NFG 1 R "Backward-bending principal logit branch" { "Player 1" "Player 2" }
 { { "1" "2" }
 { "1" "2" }
 }
-"This game has a backwards bend in the principal branch of the logit quantal response equilibrium correspondence."
+"This game has a backwards bend in the principal branch of the logit quantal response equilibrium correspondence.
+This is based on an example originally found by Richard McKelvey.
+"
 
 {
 { "11" 6, 7 }

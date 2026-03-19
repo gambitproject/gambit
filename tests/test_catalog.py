@@ -9,23 +9,34 @@ def all_games():
     return gbt.catalog.games()
 
 
-def test_catalog_load_efg():
-    """Test loading an extensive form game"""
-    g = gbt.catalog.load("selten1975/fig1")
-    assert isinstance(g, gbt.Game)
-    assert g.title == "Selten's horse (Selten IJGT 1975, Figure 1)"
+@pytest.fixture
+def game_slugs():
+    """Fixture providing a set of all game slugs in the catalog."""
+    game_slugs = set()
+    for resource_path in gbt.catalog._CATALOG_RESOURCE.rglob("*"):
+        if resource_path.is_file() and resource_path.suffix in gbt.catalog.READERS:
+            rel_path = resource_path.relative_to(gbt.catalog._CATALOG_RESOURCE)
+            slug = rel_path.with_suffix("").as_posix()
+            game_slugs.add(slug)
+    return game_slugs
 
 
-# TODO: Reintroduce this test once we have a .nfg game in the catalog
-# def test_catalog_load_nfg():
-#     """Test loading a normal form game"""
-#     g = gbt.catalog.load("pd")
-#     assert isinstance(g, gbt.Game)
-#     assert g.title == "Two person Prisoner's Dilemma game"
+def test_catalog_load_all_game_slugs(game_slugs):
+    """Test loading all valid game files in the catalog."""
+    errors = []
+    for slug in game_slugs:
+        try:
+            g = gbt.catalog.load(slug)
+            assert isinstance(g, gbt.Game), f"Expected gbt.Game, got {type(g)}"
+        except Exception as e:
+            errors.append(f"Slug '{slug}' failed with {type(e).__name__}: {e}")
+
+    if errors:
+        pytest.fail(f"Errors loading {len(errors)} game(s):\n" + "\n".join(errors))
 
 
 def test_catalog_load_invalid_slug():
-    """Test loading an invalid game slug"""
+    """Test loading an invalid game slug."""
     with pytest.raises(FileNotFoundError):
         gbt.catalog.load("invalid_slug")
 
@@ -36,17 +47,17 @@ def test_catalog_load_family_game():
     assert isinstance(g, gbt.Game)
 
 
-def test_catalog_games(all_games):
-    """Test games() function returns df of game slugs and titles"""
-    slugs = list(all_games.Game)
+def test_catalog_games(game_slugs, all_games):
+    """Test games() function returns df of game slugs and titles."""
     assert isinstance(all_games, pd.DataFrame)
-    assert len(all_games) > 0
-    # Check slug of game in subdir
-    assert "myerson1991/fig4_2" in slugs
-    # Check family game present
-    assert "one_shot_trust" in slugs
-    # Check a known game title is present
-    assert "Myerson (1991) Figure 4.2" in list(all_games.Title)
+
+    # The games() function should return set of slugs plus family games
+    fg = gbt.catalog.family_games().keys()
+    assert set(all_games["Game"]) == game_slugs.union(fg)
+
+    # Test that standard columns are present
+    assert "Game" in all_games.columns
+    assert "Title" in all_games.columns
 
 
 def test_catalog_games_filter_n_actions(all_games):
