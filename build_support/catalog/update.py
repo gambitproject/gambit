@@ -63,7 +63,7 @@ def _write_efg_table(df: pd.DataFrame, f, tikz_re, regenerate_images: bool):
 
         # Download links (inside the dropdown)
         download_links = [row["Download"]]
-        for ext in ["efg", "ef", "tex", "png", "pdf"]:
+        for ext in ["ef", "tex", "png", "pdf"]:
             download_links.append(f":download:`{slug}.{ext} <../catalog/img/{slug}.{ext}>`")
         f.write("          **Download game and image files:**\n")
         f.write("          \n")
