@@ -38,6 +38,13 @@ void PointToProfile(MixedStrategyProfile<double> &p_profile, const Vector<double
   }
 }
 
+void PointToLogProfile(MixedStrategyProfile<double> &p_profile, const Vector<double> &p_point)
+{
+  for (size_t i = 1; i < p_point.size(); i++) {
+    p_profile[i] = p_point[i];
+  }
+}
+
 Vector<double> ProfileToPoint(const LogitQREMixedStrategyProfile &p_profile)
 {
   Vector<double> point(p_profile.size() + 1);
@@ -75,6 +82,7 @@ public:
   virtual ~Equation() = default;
 
   virtual double Value(const MixedStrategyProfile<double> &p_profile,
+                       const MixedStrategyProfile<double> &p_logProfile,
                        const Vector<double> &p_strategyValues, double p_lambda) const = 0;
   virtual void Gradient(const MixedStrategyProfile<double> &p_profile,
                         const Vector<double> &p_strategyValues,
@@ -105,6 +113,7 @@ public:
 
   ~SumToOneEquation() override = default;
   double Value(const MixedStrategyProfile<double> &p_profile,
+               const MixedStrategyProfile<double> &p_logProfile,
                const Vector<double> &p_strategyValues, double p_lambda) const override;
   void Gradient(const MixedStrategyProfile<double> &p_profile,
                 const Vector<double> &p_strategyValues, const Matrix<double> &p_strategyDerivs,
@@ -112,6 +121,7 @@ public:
 };
 
 double SumToOneEquation::Value(const MixedStrategyProfile<double> &p_profile,
+                               const MixedStrategyProfile<double> &p_logProfile,
                                const Vector<double> &p_strategyValues, double p_lambda) const
 {
   double value = -1.0;
@@ -157,6 +167,7 @@ public:
 
   ~RatioEquation() override = default;
   double Value(const MixedStrategyProfile<double> &p_profile,
+               const MixedStrategyProfile<double> &p_logProfile,
                const Vector<double> &p_strategyValues, double p_lambda) const override;
   void Gradient(const MixedStrategyProfile<double> &p_profile,
                 const Vector<double> &p_strategyValues, const Matrix<double> &p_strategyDerivs,
@@ -164,10 +175,11 @@ public:
 };
 
 double RatioEquation::Value(const MixedStrategyProfile<double> &p_profile,
+                            const MixedStrategyProfile<double> &p_logProfile,
                             const Vector<double> &p_strategyValues, double p_lambda) const
 {
-  return (std::log(p_profile[m_strategyIndex]) - std::log(p_profile[m_refStrategyIndex]) -
-          p_lambda * (p_strategyValues[m_strategyIndex] - p_strategyValues[m_refStrategyIndex]));
+  return p_logProfile[m_strategyIndex] - p_logProfile[m_refStrategyIndex] -
+         p_lambda * (p_strategyValues[m_strategyIndex] - p_strategyValues[m_refStrategyIndex]);
 }
 
 void RatioEquation::Gradient(const MixedStrategyProfile<double> &p_profile,
@@ -209,13 +221,14 @@ public:
 private:
   std::vector<std::shared_ptr<Equation>> m_equations;
   const Game &m_game;
-  mutable MixedStrategyProfile<double> m_profile;
+  mutable MixedStrategyProfile<double> m_profile, m_logProfile;
   mutable Vector<double> m_strategyValues;
   mutable Matrix<double> m_strategyDerivs;
 };
 
 EquationSystem::EquationSystem(const Game &p_game)
   : m_game(p_game), m_profile(p_game->NewMixedStrategyProfile(0.0)),
+    m_logProfile(p_game->NewMixedStrategyProfile(0.0)),
     m_strategyValues(m_profile.MixedProfileLength()),
     m_strategyDerivs(m_profile.MixedProfileLength(), m_profile.MixedProfileLength())
 {
@@ -232,13 +245,15 @@ EquationSystem::EquationSystem(const Game &p_game)
 void EquationSystem::GetValue(const Vector<double> &p_point, Vector<double> &p_lhs) const
 {
   PointToProfile(m_profile, p_point);
+  PointToLogProfile(m_logProfile, p_point);
   const double lambda = p_point.back();
   int col = 1;
   for (const auto &strategy : m_game->GetStrategies()) {
     m_strategyValues[col++] = m_profile.GetPayoff(strategy);
   }
-  std::transform(m_equations.begin(), m_equations.end(), p_lhs.begin(),
-                 [this, lambda](auto e) { return e->Value(m_profile, m_strategyValues, lambda); });
+  std::transform(m_equations.begin(), m_equations.end(), p_lhs.begin(), [this, lambda](auto e) {
+    return e->Value(m_profile, m_logProfile, m_strategyValues, lambda);
+  });
 }
 
 void EquationSystem::GetJacobian(const Vector<double> &p_point, Matrix<double> &p_jac) const
