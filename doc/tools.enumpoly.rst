@@ -30,7 +30,7 @@ used are those for the sequence form defined on the projection of the game
 to that support of actions.  A solution to these equations implies a probability
 distribution over terminal nodes.  The algorithm then searches for
 a profile that is a Nash equilibrium that implements that probability
-distribution.  If there exists such a profile, a sample one is returned.
+distribution.  If there exists at least one such profile, a sample one is returned.
 Note that for probability distributions which assign zero probability to some terminal
 nodes, it is generally the case that there are (infinitely) many such profiles.
 Subsequent analysis of unreached information sets can yield alternative
