@@ -24,6 +24,19 @@ supports which have the fewest strategies in total.  For many classes
 of games, this will tend to lower the average time until finding one equilibrium,
 as well as finding the second equilibrium (if one exists).
 
+For extensive games, a support of actions equates to allowing positive
+probabilities over a subset of terminal nodes.  The indifference conditions
+used are those for the sequence form defined on the projection of the game
+to that support of actions.  A solution to these equations implies a probability
+distribution over terminal nodes.  The algorithm then searches for
+a profile that is a Nash equilibrium that implements that probability
+distribution.  If there exists at least one such profile, a sample one is returned.
+Note that for probability distributions which assign zero probability to some terminal
+nodes, it is generally the case that there are (infinitely) many such profiles.
+Subsequent analysis of unreached information sets can yield alternative
+profiles that specify different choices at unreached information sets
+while still satisfying the Nash equilibrium conditions.
+
 When the verbose switch `-v` is used, the program outputs each support
 as it is considered. The supports are presented as a comma-separated
 list of binary strings, where each entry represents one player. The

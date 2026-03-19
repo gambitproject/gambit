@@ -234,12 +234,12 @@ template <class T> MixedBehaviorProfile<T> MixedBehaviorProfile<T>::Normalize() 
 template <class T> MixedBehaviorProfile<T> MixedBehaviorProfile<T>::ToFullSupport() const
 {
   CheckVersion();
-  MixedBehaviorProfile<T> full(GetGame());
+  MixedBehaviorProfile full(GetGame());
 
   for (auto player : m_support.GetGame()->GetPlayers()) {
     for (auto infoset : player->GetInfosets()) {
       for (auto action : infoset->GetActions()) {
-        full[action] = (m_support.Contains(action)) ? (*this)[action] : T(0);
+        full[action] = (m_support.Contains(action)) ? (*this)[action] : T{0};
       }
     }
   }

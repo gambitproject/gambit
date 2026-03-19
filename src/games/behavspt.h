@@ -130,20 +130,6 @@ public:
   //@{
   /// Can the information set be reached under this support?
   bool IsReachable(const GameInfoset &p_infoset) const { return m_infosetReachable.at(p_infoset); }
-  /// Get the information sets for the player reachable under the support
-  std::list<GameInfoset> GetInfosets(const GamePlayer &) const;
-  /// Get the members of the information set reachable under the support
-  std::list<GameNode> GetMembers(const GameInfoset &) const;
-  //@}
-
-  /// @name Identification of dominated actions
-  //@{
-  /// Returns true if action 'a' is dominated by action 'b'
-  bool Dominates(const GameAction &a, const GameAction &b, bool p_strict) const;
-  /// Returns true if the action is dominated by some other action
-  bool IsDominated(const GameAction &a, bool p_strict) const;
-  /// Returns a copy of the support with dominated actions eliminated
-  BehaviorSupportProfile Undominated(bool p_strict) const;
   //@}
 
   class Infosets {
