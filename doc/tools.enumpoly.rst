@@ -34,8 +34,8 @@ distribution.  If there exists at least one such profile, a sample one is return
 Note that for probability distributions which assign zero probability to some terminal
 nodes, it is generally the case that there are (infinitely) many such profiles.
 Subsequent analysis of unreached information sets can yield alternative
-profiles which specify different choices at unreached information sets
-while satisfying the Nash equilibrium conditions.
+profiles that specify different choices at unreached information sets
+while still satisfying the Nash equilibrium conditions.
 
 When the verbose switch `-v` is used, the program outputs each support
 as it is considered. The supports are presented as a comma-separated
