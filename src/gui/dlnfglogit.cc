@@ -77,7 +77,12 @@ void LogitMixedBranch::AddProfile(const wxString &p_text)
   m_lambdas.push_back(std::stod(next.ToStdString()));
 
   for (size_t i = 1; i <= profile->MixedProfileLength(); i++) {
-    (*profile)[i] = std::stod(tok.GetNextToken().ToStdString());
+    try {
+      (*profile)[i] = std::stod(tok.GetNextToken().ToStdString());
+    }
+    catch (std::out_of_range &) {
+      (*profile)[i] = 0.0;
+    }
   }
 
   m_profiles.push_back(profile);
@@ -131,7 +136,9 @@ wxString LogitMixedSheet::GetCellValue(const wxSheetCoords &p_coords)
   }
 
   if (IsRowLabelCell(p_coords)) {
-    return wxString::Format(wxT("%d"), p_coords.GetRow() + 1);
+    wxString label;
+    label << (p_coords.GetRow() + 1);
+    return label;
   }
   if (IsColLabelCell(p_coords)) {
     if (p_coords.GetCol() == 0) {
@@ -141,8 +148,9 @@ wxString LogitMixedSheet::GetCellValue(const wxSheetCoords &p_coords)
     for (const auto &player : m_doc->GetGame()->GetPlayers()) {
       for (const auto &strategy : player->GetStrategies()) {
         if (index++ == p_coords.GetCol()) {
-          return (wxString::Format(wxT("%d: "), player->GetNumber()) +
-                  wxString(strategy->GetLabel().c_str(), *wxConvCurrent));
+          wxString label;
+          label << player->GetNumber() << ": " << strategy->GetLabel();
+          return label;
         }
       }
       return wxT("");

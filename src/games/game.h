@@ -593,6 +593,21 @@ inline GameNodeRep::Actions::iterator::iterator(GameInfosetRep::Actions::iterato
 
 inline GameNode GameNodeRep::Actions::iterator::GetOwner() const { return m_child_it.GetOwner(); }
 
+inline void ValidateDistribution(const Array<Number> &p_probs, const bool p_normalized = true)
+{
+  if (std::any_of(p_probs.begin(), p_probs.end(),
+                  [](const Number &x) { return static_cast<Rational>(x) < Rational(0); })) {
+    throw ValueException("Probabilities must be non-negative numbers");
+  }
+  if (!p_normalized) {
+    return;
+  }
+  if (sum_function(p_probs, [](const Number &n) { return static_cast<Rational>(n); }) !=
+      Rational(1)) {
+    throw ValueException("Probabilities must sum to exactly one");
+  }
+}
+
 enum class TraversalOrder { Preorder, Postorder };
 
 class CartesianProductSpace {
@@ -924,6 +939,9 @@ public:
     }
     return false;
   }
+  /// Returns a list of all subgame roots in the game
+  virtual std::vector<GameNode> GetSubgames() const { throw UndefinedException(); }
+
   //@}
 
   /// @name Writing data files

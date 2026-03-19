@@ -1,3 +1,5 @@
+import dataclasses
+import functools
 import itertools
 import typing
 
@@ -93,32 +95,6 @@ def test_is_successor_of():
         game.root.is_successor_of(game.players[0])
 
 
-@pytest.mark.parametrize("game, expected_result", [
-    # Games without Absent-Mindedness for which the legacy method is known to be correct.
-    (games.read_from_file("wichardt.efg"), {0}),
-    (games.read_from_file("e02.efg"), {0, 2, 4}),
-    (games.read_from_file("subgames.efg"), {0, 1, 4, 7, 11, 13, 34}),
-
-    pytest.param(
-        games.read_from_file("AM-driver-subgame.efg"),
-        {0, 3},  # The correct set of subgame roots
-        marks=pytest.mark.xfail(
-            reason="Current method does not detect roots of proper subgames "
-                   "that are members of AM-infosets."
-        )
-    ),
-])
-def test_legacy_is_subgame_root_set(game: gbt.Game, expected_result: set):
-    """
-    Tests the legacy `node.is_subgame_root` against an expected set of nodes.
-    Includes both passing cases and games with Absent-Mindedness where it is expected to fail.
-    """
-    list_nodes = list(game.nodes)
-    expected_roots = {list_nodes[i] for i in expected_result}
-    legacy_roots = {node for node in game.nodes if node.is_subgame_root}
-    assert legacy_roots == expected_roots
-
-
 def _get_path_of_action_labels(node: gbt.Node) -> list[str]:
     """
     Computes the path of action labels from the root to the given node.
@@ -134,6 +110,109 @@ def _get_path_of_action_labels(node: gbt.Node) -> list[str]:
         current_node = current_node.parent
 
     return path
+
+
+@dataclasses.dataclass
+class SubgameRootsTestCase:
+    """TestCase for testing subgame root detection."""
+    factory: typing.Callable[[], gbt.Game]
+    expected_paths: list[list[str]]
+
+
+SUBGAME_ROOTS_CASES = [
+    # ------------------------------------------------------------------------
+    #                              Empty Game
+    # ------------------------------------------------------------------------
+    pytest.param(
+        SubgameRootsTestCase(factory=gbt.Game.new_tree, expected_paths=[[]]),
+        id="empty_tree"
+    ),
+    # ------------------------------------------------------------------------
+    #                      Perfect Information Games
+    # ------------------------------------------------------------------------
+    pytest.param(
+        SubgameRootsTestCase(
+            factory=functools.partial(games.read_from_file, "e02.efg"),
+            expected_paths=[[], ["L"], ["L", "L"]]
+        ),
+        id="centipede_3_rounds"
+    ),
+    pytest.param(
+        SubgameRootsTestCase(
+            factory=lambda: games.Centipede.get_test_data(N=5, m0=2, m1=7)[0],
+            expected_paths=[[], ["Push"], ["Push", "Push"], ["Push", "Push", "Push"],
+                            ["Push", "Push", "Push", "Push"]]
+        ),
+        id="centipede_5_rounds"
+    ),
+    # ------------------------------------------------------------------------
+    #              Imperfect Information (No Absent-Mindedness)
+    # ------------------------------------------------------------------------
+    pytest.param(
+        SubgameRootsTestCase(
+            factory=functools.partial(games.read_from_file, "wichardt.efg"),
+            expected_paths=[[]]
+        ),
+        id="wichardt_no_nontrivial_subgames"
+    ),
+    pytest.param(
+        SubgameRootsTestCase(
+            factory=functools.partial(games.read_from_file, "binary_3_levels_generic_payoffs.efg"),
+            expected_paths=[[]]
+        ),
+        id="binary_3_levels_no_nontrivial_subgames"
+    ),
+    pytest.param(
+        SubgameRootsTestCase(
+            factory=functools.partial(
+                games.read_from_file,
+                "subgame_roots_finder_small_subgames_and_overplapping_infosets.efg"),
+            expected_paths=[[], ["1"], ["2"], ["1", "2", "2"], ["2", "1", "2"],
+                            ["1", "1", "1", "2", "2"], ["2", "2", "2"]]
+        ),
+        id="small_subgames_and_overlapping_infosets_inside_subgames_no_Nature_moves"
+    ),
+    pytest.param(
+        SubgameRootsTestCase(
+            factory=functools.partial(
+                games.read_from_file,
+                "subgame_roots_finder_overplapping_infosets_with_Nature.efg"),
+            expected_paths=[[], ["1"], ["1", "1"], ["1", "1", "1"]]
+        ),
+        id="overlapping_infosets_inside_subgames_and_Nature_move"
+    ),
+    # ------------------------------------------------------------------------
+    #                           Absent-Minded Games
+    # ------------------------------------------------------------------------
+    pytest.param(
+        SubgameRootsTestCase(
+            factory=functools.partial(games.read_from_file, "AM-subgames.efg"),
+            expected_paths=[[], ["2"], ["1", "1"], ["2", "1"]]
+        ),
+        id="Absent-minded-game-with-paths-intersecting-infoset-two-times"
+    ),
+    pytest.param(
+        SubgameRootsTestCase(
+            factory=functools.partial(games.read_from_file, "noPR-action-AM-two-hops.efg"),
+            expected_paths=[[], ["2", "1", "1"]]
+        ),
+        id="Absent-minded-game-with-paths-intersecting-infoset-three-times"
+    ),
+]
+
+
+@pytest.mark.parametrize("test_case", SUBGAME_ROOTS_CASES)
+def test_subgame_roots(test_case: SubgameRootsTestCase):
+    """
+    Tests that the set of nodes marked as subgame roots matches the expected
+    set of paths (Action Labels from Root -> Node).
+    """
+    game = test_case.factory()
+
+    actual_roots = [node for node in game.nodes if node.is_subgame_root]
+    actual_paths = [_get_path_of_action_labels(node) for node in actual_roots]
+
+    assert sorted(actual_paths) == sorted(test_case.expected_paths)
 
 
 @pytest.mark.parametrize("game_file, expected_node_data", [

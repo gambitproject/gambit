@@ -165,7 +165,9 @@ void AnalysisNotebook::OnUpdate()
 {
   m_choices->Clear();
   for (int i = 1; i <= m_doc->NumProfileLists(); i++) {
-    m_choices->Append(wxString::Format(wxT("Profiles %d"), i));
+    wxString label;
+    label << wxT("Profiles ") << i;
+    m_choices->Append(label);
   }
   m_choices->SetSelection(m_doc->GetCurrentProfileList() - 1);
 
@@ -362,11 +364,9 @@ void GameFrame::OnUpdate()
 #include "bitmaps/preview.xpm"
 #include "bitmaps/print.xpm"
 #include "bitmaps/profiles.xpm"
-#include "bitmaps/redo.xpm"
 #include "bitmaps/save.xpm"
 #include "bitmaps/saveas.xpm"
 #include "bitmaps/table.xpm"
-#include "bitmaps/undo.xpm"
 #include "bitmaps/zoomfit.xpm"
 #include "bitmaps/zoomin.xpm"
 #include "bitmaps/zoomout.xpm"
@@ -558,13 +558,6 @@ void GameFrame::MakeToolbar()
 
   toolBar->AddSeparator();
 
-  toolBar->AddTool(wxID_UNDO, wxEmptyString, wxBitmap(undo_xpm), wxNullBitmap, wxITEM_NORMAL,
-                   _("Undo the last action"), _("Undo the last change to the game"), nullptr);
-  toolBar->AddTool(wxID_REDO, wxEmptyString, wxBitmap(redo_xpm), wxNullBitmap, wxITEM_NORMAL,
-                   _("Redo the undone action"), _("Redo the last undone change"), nullptr);
-
-  toolBar->AddSeparator();
-
   toolBar->AddTool(GBT_MENU_EDIT_NEWPLAYER, wxEmptyString, wxBitmap(newplayer_xpm), wxNullBitmap,
                    wxITEM_NORMAL, _("Add a new player"), _("Add a new player to the game"),
                    nullptr);
@@ -647,20 +640,7 @@ void GameFrame::OnFileOpen(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     const wxString filename = dialog.GetPath();
     wxGetApp().SetCurrentDir(wxPathOnly(filename));
-
-    const AppLoadResult result = wxGetApp().LoadFile(filename);
-    if (result == GBT_APP_OPEN_FAILED) {
-      wxMessageDialog msgdialog(
-          this, wxT("Gambit could not open file '") + filename + wxT("' for reading."),
-          wxT("Unable to open file"), wxOK | wxICON_ERROR);
-      msgdialog.ShowModal();
-    }
-    else if (result == GBT_APP_PARSE_FAILED) {
-      wxMessageDialog msgdialog(
-          this, wxT("File '") + filename + wxT("' is not in a format Gambit recognizes."),
-          wxT("Unable to read file"), wxOK | wxICON_ERROR);
-      msgdialog.ShowModal();
-    }
+    wxGetApp().LoadFile(filename, this);
   }
 }
 
@@ -901,20 +881,7 @@ void GameFrame::OnFileExit(wxCommandEvent &p_event)
 void GameFrame::OnFileMRUFile(wxCommandEvent &p_event)
 {
   const wxString filename = wxGetApp().GetHistoryFile(p_event.GetId() - wxID_FILE1);
-  const AppLoadResult result = wxGetApp().LoadFile(filename);
-
-  if (result == GBT_APP_OPEN_FAILED) {
-    wxMessageDialog dialog(this,
-                           wxT("Gambit could not open file '") + filename + wxT("' for reading."),
-                           wxT("Unable to open file"), wxOK | wxICON_ERROR);
-    dialog.ShowModal();
-  }
-  else if (result == GBT_APP_PARSE_FAILED) {
-    wxMessageDialog dialog(
-        this, wxT("File '") + filename + wxT("' is not in a format Gambit recognizes."),
-        wxT("Unable to read file"), wxOK | wxICON_ERROR);
-    dialog.ShowModal();
-  }
+  wxGetApp().LoadFile(filename, this);
 }
 
 //----------------------------------------------------------------------
@@ -1115,12 +1082,13 @@ void GameFrame::OnViewStrategic(wxCommandEvent &p_event)
 
     if (const size_t contingencies = m_doc->GetGame()->GetStrategies().extent_product();
         !m_nfgPanel && contingencies >= 50000) {
-      if (wxMessageBox(wxString::Format(wxT("This game has %d contingencies in strategic form.\n"),
-                                        contingencies) +
-                           wxT("Performance in browsing strategic form will be poor,\n") +
-                           wxT("and may render the program nonresponsive.\n") +
-                           wxT("Do you wish to continue?"),
-                       _("Large strategic game warning"), wxOK | wxCANCEL | wxALIGN_CENTER,
+      wxString msg;
+      msg << "This game has " << contingencies << " contingencies in strategic form.\n"
+          << "Performance in browsing strategic form will be poor,\n"
+          << "and may render the program nonresponsive.\n"
+          << "Do you wish to continue?";
+
+      if (wxMessageBox(msg, _("Large strategic game warning"), wxOK | wxCANCEL | wxICON_WARNING,
                        this) != wxOK) {
         return;
       }
@@ -1247,14 +1215,14 @@ void GameFrame::OnToolsEquilibrium(wxCommandEvent &)
     if (dialog.UseStrategic()) {
       if (const int contingencies = m_doc->GetGame()->GetStrategies().extent_product();
           contingencies >= 50000) {
-        if (wxMessageBox(
-                wxString::Format(wxT("This game has %d contingencies in strategic form.\n"),
-                                 contingencies) +
-                    wxT("Performance in solving strategic form will be poor,\n") +
-                    wxT("and may render the program nonresponsive.\n") +
-                    wxT("Do you wish to continue?"),
-                _("Large strategic game warning"), wxOK | wxCANCEL | wxALIGN_CENTER,
-                this) != wxOK) {
+        wxString msg;
+        msg << "This game has " << contingencies << " contingencies in strategic form.\n"
+            << "Performance in solving strategic form will be poor,\n"
+            << "and may render the program nonresponsive.\n"
+            << "Do you wish to continue?";
+
+        if (wxMessageBox(msg, _("Large strategic game warning"), wxOK | wxCANCEL | wxALIGN_CENTER,
+                         this) != wxOK) {
           return;
         }
       }
