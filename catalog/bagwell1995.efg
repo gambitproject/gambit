@@ -9,7 +9,7 @@ game.  There is an equilibrium in which the 'Stackelberg' action is played with 
 probability, but strictly less than one.
 
 [Bag1995]_: Bagwell, Kyle (1995)  Commitment and observability in games.
-    _Games and Economic Behavior_ 8: 271-280.
+    Games and Economic Behavior 8: 271-280.
 "
 
 p "" 1 1 "" { "S" "C" } 0
