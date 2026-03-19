@@ -18,12 +18,6 @@ def game_slugs():
 
 def test_catalog_load_all_game_slugs(game_slugs):
     """Test loading all valid game files in the catalog."""
-    for resource_path in gbt.catalog._CATALOG_RESOURCE.rglob("*"):
-        if resource_path.is_file() and resource_path.suffix in gbt.catalog.READERS:
-            rel_path = resource_path.relative_to(gbt.catalog._CATALOG_RESOURCE)
-            slug = rel_path.with_suffix("").as_posix()
-            game_slugs.add(slug)
-
     for slug in game_slugs:
         g = gbt.catalog.load(slug)
         assert isinstance(g, gbt.Game)
