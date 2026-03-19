@@ -18,9 +18,16 @@ def game_slugs():
 
 def test_catalog_load_all_game_slugs(game_slugs):
     """Test loading all valid game files in the catalog."""
+    errors = []
     for slug in game_slugs:
-        g = gbt.catalog.load(slug)
-        assert isinstance(g, gbt.Game)
+        try:
+            g = gbt.catalog.load(slug)
+            assert isinstance(g, gbt.Game), f"Expected gbt.Game, got {type(g)}"
+        except Exception as e:
+            errors.append(f"Slug '{slug}' failed with {type(e).__name__}: {e}")
+
+    if errors:
+        pytest.fail(f"Errors loading {len(errors)} game(s):\n" + "\n".join(errors))
 
 
 def test_catalog_load_invalid_slug():
