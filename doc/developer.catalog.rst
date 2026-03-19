@@ -19,6 +19,7 @@ Add new game files
 1. **Create the game file:**
 
    Use either :ref:`pygambit <pygambit>`, the Gambit :ref:`CLI <command-line>` or :ref:`GUI <section-gui>` to create and save game in a valid representation :ref:`format <file-formats>`.
+   Make sure the game includes a description, with any citations referencing the :ref:`bibliography <bibliography>` with the format ``[citation_key]_`` e.g. ``[Mye91]_``.
 
 2. **Add the game file:**
 
