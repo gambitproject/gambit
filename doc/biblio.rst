@@ -12,131 +12,144 @@ Bibliography
 Articles on computation of Nash equilibria
 ------------------------------------------
 
-.. [Bag1995] Bagwell, Kyle (1995)  Commitment and observability in games.
-   Games and Economic Behavior 8: 271-280.
+.. [BlaTur23] Bland, J. R. and Turocy, T. L. 2023,
+   'Quantal response equilibrium as a structural model for estimation: the
+   missing manual', *SSRN Working Paper*, no. 4425515.
 
-.. [BlaTur23] Bland, J. R. and Turocy, T. L., 2023.  Quantal response equilibrium
-   as a structural model for estimation: The missing manual.
-   SSRN working paper 4425515.
+.. [Eav71] Eaves, B. C. 1971, 'The linear complementarity problem',
+   *Management Science*, vol. 17, pp. 612-634.
 
-.. [Eav71] B. C. Eaves, "The linear complementarity problem", 612-634,
-   Management Science , 17, 1971.
+.. [GovWil03] Govindan, S. and Wilson, R. 2003,
+   'A global Newton method to compute Nash equilibria',
+   *Journal of Economic Theory*, vol. 110, no. 1, pp. 65-86.
 
-.. [GovWil03] Govindan, Srihari and Robert Wilson. (2003)
-   “A Global Newton Method to Compute Nash Equilibria.”
-   Journal of Economic Theory 110(1): 65-86.
+.. [GovWil04] Govindan, S. and Wilson, R. 2004,
+   'Computing Nash equilibria by iterated polymatrix approximation',
+   *Journal of Economic Dynamics and Control*, vol. 28, pp. 1229-1241.
 
-.. [GovWil04] Govindan, Srihari and Robert Wilson. (2004)
-   “Computing Nash Equilibria by Iterated Polymatrix Approximation.”
-   Journal of Economic Dynamics and Control 28: 1229-1241.
+.. [Jiang11] Jiang, A. X., Leyton-Brown, K. and Bhat, N. 2011,
+   'Action-graph games', *Games and Economic Behavior*, vol. 71, no. 1,
+   pp. 141-173.
 
-.. [Jiang11] A. X. Jiang, K. Leyton-Brown, and N. Bhat. (2011)
-   "Action-Graph Games." Games and Economic Behavior 71(1): 141-173.
+.. [KolMegSte94] Koller, D., Megiddo, N. and von Stengel, B. 1996,
+   'Efficient computation of equilibria for extensive two-person games',
+   *Games and Economic Behavior*, vol. 14, pp. 247-259.
 
-.. [KolMegSte94] Daphne Koller, Nimrod Megiddo, and Bernhard von
-   Stengel (1996).
-   "Efficient computation of equilibria for extensive two-person games."
-   Games and Economic Behavior 14: 247-259.
+.. [LemHow64] Lemke, C. E. and Howson, J. T. 1964,
+   'Equilibrium points of bimatrix games',
+   *Journal of the Society of Industrial and Applied Mathematics*,
+   vol. 12, pp. 413-423.
 
-.. [LemHow64] C. E. Lemke and J. T. Howson, "Equilibrium points of
-   bimatrix games", 413-423, Journal of the Society of Industrial and
-   Applied Mathematics , 12, 1964.
+.. [Man64] Mangasarian, O. 1964, 'Equilibrium points in bimatrix games',
+   *Journal of the Society for Industrial and Applied Mathematics*,
+   vol. 12, pp. 778-780.
 
-.. [Man64] O. Mangasarian, "Equilibrium points in bimatrix games",
-   778-780, Journal of the Society for Industrial and Applied
-   Mathematics, 12, 1964.
+.. [McK91] McKelvey, R. 1991, 'A Liapunov function for Nash equilibria',
+   California Institute of Technology.
 
-.. [McK91] Richard McKelvey, A Liapunov function for Nash equilibria,
-   1991, California Institute of Technology.
+.. [McKMcL96] McKelvey, R. and McLennan, A. 1996,
+   'Computation of equilibria in finite games', in Amman, H., Kendrick,
+   D. and Rust, J. (eds), *Handbook of Computational Economics*, Elsevier,
+   pp. 87-142.
 
-.. [McKMcL96] Richard McKelvey and Andrew McLennan, "Computation of
-   equilibria in finite games", 87-142, Handbook of Computational
-   Economics , Edited by H. Amman, D. Kendrick, J. Rust, Elsevier, 1996.
+.. [PNS04] Porter, R., Nudelman, E. and Shoham, Y. 2004,
+   'Simple search methods for finding a Nash equilibrium',
+   *Games and Economic Behavior*, pp. 664-669.
 
-.. [PNS04] Ryan Porter, Eugene Nudelman, and Yoav Shoham.
-   "Simple search methods for finding a Nash equilibrium."
-   Games and Economic Behavior 664-669, 2004.
+.. [Ros71] Rosenmuller, J. 1971,
+   'On a generalization of the Lemke-Howson algorithm to noncooperative
+   n-person games', *SIAM Journal of Applied Mathematics*, vol. 21,
+   pp. 73-79.
 
-.. [Rei2008] Reiley, David H., Urbancic, Michael B, and Walker, Mark. (2008)
-   Stripped-Down Poker: A Classroom Game with Signaling and Bluffing.
-   The Journal of Economic Education 4: 323-341.
+.. [Sha74] Shapley, L. 1974, 'A note on the Lemke-Howson algorithm',
+   *Mathematical Programming Study*, vol. 1, pp. 175-189.
 
-.. [Ros71] J. Rosenmuller, "On a generalization of the Lemke-Howson
-   Algorithm to noncooperative n-person games", 73-79, SIAM Journal of
-   Applied Mathematics, 21, 1971.
+.. [Tur05] Turocy, T. L. 2005,
+   'A dynamic homotopy interpretation of the logistic quantal response
+   equilibrium correspondence', *Games and Economic Behavior*, vol. 51,
+   pp. 243-263.
 
-.. [Sha74] Lloyd Shapley, "A note on the Lemke-Howson algorithm", 175-189,
-   Mathematical Programming Study , 1, 1974.
+.. [Tur10] Turocy, T. L. 2010,
+   'Using quantal response to compute Nash and sequential equilibria',
+   *Economic Theory*, vol. 42, no. 1, pp. 255-269.
 
-.. [Tur05] Theodore L. Turocy, "A dynamic homotopy interpretation of the
-   logistic quantal response equilibrium correspondence", 243-263, Games
-   and Economic Behavior, 51, 2005.
-
-.. [Tur10] Theodore L. Turocy, "Using Quantal Response to Compute
-   Nash and Sequential Equilibria." Economic Theory 42(1): 255-269, 2010.
-
-.. [VTH87] G. van der Laan, A. J. J. Talman, and L. van Der Heyden,
-   "Simplicial variable dimension algorithms for solving the nonlinear
+.. [VTH87] van der Laan, G., Talman, A. J. J. and van Der Heyden, L. 1987,
+   'Simplicial variable dimension algorithms for solving the nonlinear
    complementarity problem on a product of unit simplices using a general
-   labelling", 377-397, Mathematics of Operations Research , 1987.
+   labelling', *Mathematics of Operations Research*, pp. 377-397.
 
-.. [Wat13] Watson, Joel.  (2013)  Strategy: An Introduction to Game Theory,
-   third edition.  W. W. Norton & Company.
+.. [Wil71] Wilson, R. 1971, 'Computing equilibria of n-person games',
+   *SIAM Applied Math*, vol. 21, pp. 80-87.
 
-.. [Wil71] Robert Wilson, "Computing equilibria of n-person games", 80-87,
-   SIAM Applied Math, 21, 1971.
-
-.. [Yam93] Y. Yamamoto, 1993, "A Path-Following Procedure to Find a Proper
-   Equilibrium of Finite Games ", International Journal of Game Theory .
+.. [Yam93] Yamamoto, Y. 1993,
+   'A path-following procedure to find a proper equilibrium of finite
+   games', *International Journal of Game Theory*.
 
 
 
 General game theory articles and texts
 --------------------------------------
 
-.. [Harsanyi1967a] John Harsanyi, "Games of Incomplete Information Played
-   By Bayesian Players I", 159-182, Management Science , 14, 1967.
+.. [Bag1995] Bagwell, K. 1995, 'Commitment and observability in games',
+   *Games and Economic Behavior*, vol. 8, pp. 271-280.
 
-.. [Harsanyi1967b] John Harsanyi, "Games of Incomplete Information Played
-   By Bayesian Players II", 320-334, Management Science , 14, 1967.
+.. [Harsanyi1967a] Harsanyi, J. 1967,
+   'Games of incomplete information played by Bayesian players I',
+   *Management Science*, vol. 14, pp. 159-182.
 
-.. [Harsanyi1968] John Harsanyi, "Games of Incomplete Information Played
-   By Bayesian Players III", 486-502, Management Science , 14, 1968.
+.. [Harsanyi1967b] Harsanyi, J. 1967,
+   'Games of incomplete information played by Bayesian players II',
+   *Management Science*, vol. 14, pp. 320-334.
 
-.. [KreWil82] David Kreps and Robert Wilson, "Sequential Equilibria",
-   863-894, Econometrica , 50, 1982.
+.. [Harsanyi1968] Harsanyi, J. 1968,
+   'Games of incomplete information played by Bayesian players III',
+   *Management Science*, vol. 14, pp. 486-502.
 
-.. [Kre90] David Kreps, 1990, A Course in Microeconomic Theory,
+.. [KreWil82] Kreps, D. and Wilson, R. 1982, 'Sequential equilibria',
+   *Econometrica*, vol. 50, pp. 863-894.
+
+.. [Kre90] Kreps, D. 1990, *A Course in Microeconomic Theory*,
    Princeton University Press.
 
-.. [McKPal95] Richard McKelvey and Tom Palfrey, "Quantal response
-   equilibria for normal form games", 6-38, Games and Economic Behavior ,
-   10, 1995.
+.. [McKPal95] McKelvey, R. and Palfrey, T. 1995,
+   'Quantal response equilibria for normal form games',
+   *Games and Economic Behavior*, vol. 10, pp. 6-38.
 
-.. [McKPal98] Richard McKelvey and Tom Palfrey, "Quantal response
-   equilibria for extensive form games", 9-41, Experimental Economics ,
-   1, 1998.
+.. [McKPal98] McKelvey, R. and Palfrey, T. 1998,
+   'Quantal response equilibria for extensive form games',
+   *Experimental Economics*, vol. 1, pp. 9-41.
 
-.. [Mye78] Roger Myerson, "Refinements of the Nash equilibrium concept",
-   73-80, International Journal of Game Theory , 7, 1978.
+.. [Mye78] Myerson, R. 1978,
+   'Refinements of the Nash equilibrium concept',
+   *International Journal of Game Theory*, vol. 7, pp. 73-80.
 
-.. [Nas50] John Nash, "Equilibrium points in n-person games", 48-49,
-   Proceedings of the National Academy of Sciences , 36, 1950.
+.. [Nas50] Nash, J. 1950, 'Equilibrium points in n-person games',
+   *Proceedings of the National Academy of Sciences*, vol. 36,
+   pp. 48-49.
 
-.. [Och95] Jack Ochs, "Games with unique, mixed strategy equilibria:
-   An experimental study", Games and Economic Behavior 10: 202-217, 1995.
+.. [Och95] Ochs, J. 1995,
+   'Games with unique, mixed strategy equilibria: an experimental study',
+   *Games and Economic Behavior*, vol. 10, pp. 202-217.
 
-.. [Sel75] Reinhard Selten, Reexamination of the perfectness concept for
-   equilibrium points in extensive games , 25-55, International Journal
-   of Game Theory , 4, 1975.
+.. [Rei2008] Reiley, D. H., Urbancic, M. B. and Walker, M. 2008,
+   'Stripped-down poker: a classroom game with signaling and bluffing',
+   *The Journal of Economic Education*, vol. 4, pp. 323-341.
 
-.. [vanD83] Eric van Damme, 1983, Stability and Perfection of Nash
-   Equilibria , Springer-Verlag, Berlin.
+.. [Sel75] Selten, R. 1975,
+   'Reexamination of the perfectness concept for equilibrium points in
+   extensive games', *International Journal of Game Theory*, vol. 4,
+   pp. 25-55.
+
+.. [vanD83] van Damme, E. 1983, *Stability and Perfection of Nash
+   Equilibria*, Springer-Verlag, Berlin.
 
 
 
 Textbooks and general reference
 -------------------------------
 
-.. [Mye91] Roger Myerson, 1991, Game Theory : Analysis of Conflict ,
+.. [Mye91] Myerson, R. 1991, *Game Theory: Analysis of Conflict*,
    Harvard University Press.
+
+.. [Wat13] Watson, J. 2013, *Strategy: An Introduction to Game Theory*,
+   3rd edn, W. W. Norton & Company.
