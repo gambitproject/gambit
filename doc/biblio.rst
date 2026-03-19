@@ -12,6 +12,9 @@ Bibliography
 Articles on computation of Nash equilibria
 ------------------------------------------
 
+.. [Bag1995] Bagwell, Kyle (1995)  Commitment and observability in games.
+   Games and Economic Behavior 8: 271-280.
+
 .. [BlaTur23] Bland, J. R. and Turocy, T. L., 2023.  Quantal response equilibrium
    as a structural model for estimation: The missing manual.
    SSRN working paper 4425515.
@@ -54,6 +57,10 @@ Articles on computation of Nash equilibria
    "Simple search methods for finding a Nash equilibrium."
    Games and Economic Behavior 664-669, 2004.
 
+.. [Rei2008] Reiley, David H., Urbancic, Michael B, and Walker, Mark. (2008)
+   Stripped-Down Poker: A Classroom Game with Signaling and Bluffing.
+   The Journal of Economic Education 4: 323-341.
+
 .. [Ros71] J. Rosenmuller, "On a generalization of the Lemke-Howson
    Algorithm to noncooperative n-person games", 73-79, SIAM Journal of
    Applied Mathematics, 21, 1971.
@@ -72,6 +79,9 @@ Articles on computation of Nash equilibria
    "Simplicial variable dimension algorithms for solving the nonlinear
    complementarity problem on a product of unit simplices using a general
    labelling", 377-397, Mathematics of Operations Research , 1987.
+
+.. [Wat13] Watson, Joel.  (2013)  Strategy: An Introduction to Game Theory,
+   third edition.  W. W. Norton & Company.
 
 .. [Wil71] Robert Wilson, "Computing equilibria of n-person games", 80-87,
    SIAM Applied Math, 21, 1971.
