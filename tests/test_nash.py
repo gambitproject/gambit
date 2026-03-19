@@ -1591,11 +1591,9 @@ LCP_BEHAVIOR_RATIONAL_CASES = [
             expected=[
                 [[d(0, 1), d("1/5", "1/5", "1/5", "1/5", "1/5")], [d(0, 1)]],
             ],
-            regret_tol=TOL,
-            prob_tol=TOL,
         ),
         marks=pytest.mark.nash_lcp_behavior,
-        id="test_enumpoly_behavior_23",
+        id="test_lcp_behavior_rational_23",
     ),
     # Non-zero-sum games
     pytest.param(
