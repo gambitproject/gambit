@@ -51,8 +51,9 @@ def test_catalog_games(game_slugs, all_games):
     """Test games() function returns df of game slugs and titles."""
     assert isinstance(all_games, pd.DataFrame)
 
-    # The games() function should return exactly the set of slugs found above
-    assert set(all_games["Game"]) == game_slugs
+    # The games() function should return set of slugs plus family games
+    fg = gbt.catalog.family_games().keys()
+    assert set(all_games["Game"]) == game_slugs.union(fg)
 
     # Test that standard columns are present
     assert "Game" in all_games.columns
