@@ -1,0 +1,19 @@
+player 1 name Player~1
+player 2 name Player~2
+level -2.0 node 1 player 1
+level 2.0 node 1 player 0 xshift -4.0 from -2.0,1 move S
+level 6.0 node 1 xshift -2.0 from 2.0,1 move s~(\frac{99}{100})
+level 10.0 node 1 xshift -1.0 from 6.0,1 move S payoffs 5 2
+level 10.0 node 2 xshift 1.0 from 6.0,1 move C payoffs 3 1
+level 6.0 node 2 xshift 2.0 from 2.0,1 move c~(\frac{1}{100})
+level 10.0 node 3 xshift -1.0 from 6.0,2 move S payoffs 5 2
+level 10.0 node 4 xshift 1.0 from 6.0,2 move C payoffs 3 1
+level 2.0 node 2 player 0 xshift 4.0 from -2.0,1 move C
+level 6.0 node 3 xshift -2.0 from 2.0,2 move s~(\frac{1}{100})
+level 10.0 node 5 xshift -1.0 from 6.0,3 move S payoffs 6 3
+level 10.0 node 6 xshift 1.0 from 6.0,3 move C payoffs 4 4
+level 6.0 node 4 xshift 2.0 from 2.0,2 move c~(\frac{99}{100})
+level 10.0 node 7 xshift -1.0 from 6.0,4 move S payoffs 6 3
+level 10.0 node 8 xshift 1.0 from 6.0,4 move C payoffs 4 4
+iset 6.0,1 6.0,3 player 2
+iset 6.0,2 6.0,4 player 2
