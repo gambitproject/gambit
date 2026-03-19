@@ -186,7 +186,7 @@ EXTRA_DIST = \
 	contrib/games/work1.efg \
 	contrib/games/work2.efg \
 	contrib/games/work3.efg \
-	contrib/games/2smp.nfg \
+	contrib/games/2smp.efg \
 	contrib/games/2x2a.nfg \
 	contrib/games/2x2const.nfg \
 	contrib/games/2x2.nfg \
