@@ -1,5 +1,5 @@
 EFG 2 R "Princess Bride signaling game (from Watson)" { "Wesley" "Prince" }
-"This game is Exercise 29.6 from Watson [^Wat13], based on a scene from
+"This game is Exercise 29.6 from Watson [Wat13]_, based on a scene from
 the Rob Reiner film, _The Princess Bride_:
 
 Wesley (the protagonist) confronts the evil prince Humperdinck.  Wesley
@@ -16,7 +16,7 @@ swordsman.  Also, the weak Wesley must pay a cost to get out of bed.
 In the game in this file, the cost the weak Wesley pays to get out of bed
 is set to 2.
 
-[^Wat13]: Watson, Joel.  (2013)  Strategy: An Introduction to Game Theory,
+[Wat13]_: Watson, Joel.  (2013)  Strategy: An Introduction to Game Theory,
    third edition.  W. W. Norton & Company.
 "
 
