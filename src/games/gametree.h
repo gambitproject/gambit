@@ -24,6 +24,7 @@
 #define GAMETREE_H
 
 #include "gameexpl.h"
+#include <unordered_map>
 
 namespace Gambit {
 
@@ -31,6 +32,7 @@ class GameTreeRep final : public GameExplicitRep {
   friend class GameNodeRep;
   friend class GameInfosetRep;
   friend class GameActionRep;
+  friend class GameSubgameRep;
 
   struct OwnPriorActionInfo {
     std::map<GameNodeRep *, GameActionRep *> node_map;
@@ -48,7 +50,7 @@ protected:
   mutable std::unique_ptr<std::set<GameNodeRep *>> m_unreachableNodes;
   mutable std::set<GameInfosetRep *> m_absentMindedInfosets;
   mutable std::vector<GameNodeRep *> m_subgames;
-  mutable std::map<GameInfosetRep *, GameNodeRep *> m_infosetSubgameRoot;
+  mutable std::unordered_map<GameNodeRep *, std::shared_ptr<GameSubgameRep>> m_subgameCache;
 
   /// @name Private auxiliary functions
   //@{
@@ -101,7 +103,9 @@ public:
   /// Returns the largest payoff to the player in any play of the game
   Rational GetPlayerMaxPayoff(const GamePlayer &) const override;
   bool IsAbsentMinded(const GameInfoset &p_infoset) const override;
-  std::vector<GameNode> GetSubgames() const override;
+  std::vector<GameSubgame> GetSubgames() const override;
+  GameSubgame GetRootSubgame() const override;
+  GameNode GetSubgameRoot(const GameInfoset &) const override;
   //@}
 
   /// @name Players
