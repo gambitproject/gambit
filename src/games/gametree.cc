@@ -286,6 +286,28 @@ void GameTreeRep::Reveal(GameInfoset p_atInfoset, GamePlayer p_player)
 }
 
 //========================================================================
+//                      class GameSubgameRep
+//========================================================================
+
+GameSubgame GameSubgameRep::GetParent() const
+{
+  auto p = m_parent.lock();
+  return p ? p : nullptr;
+}
+
+GameSubgameRep::SubgameCollection GameSubgameRep::GetChildren() const
+{
+  return SubgameCollection(std::const_pointer_cast<GameSubgameRep>(shared_from_this()),
+                           &m_children);
+}
+
+GameSubgameRep::InfosetCollection GameSubgameRep::GetSubgameDifference() const
+{
+  return InfosetCollection(std::const_pointer_cast<GameSubgameRep>(shared_from_this()),
+                           &m_subgameDifference);
+}
+
+//========================================================================
 //                         class GameNodeRep
 //========================================================================
 
@@ -859,6 +881,29 @@ bool GameTreeRep::IsAbsentMinded(const GameInfoset &p_infoset) const
   return contains(m_absentMindedInfosets, p_infoset.get());
 }
 
+GameSubgame GameTreeRep::GetRootSubgame() const
+{
+  if (m_subgameCache.empty()) {
+    BuildSubgameRoots();
+  }
+  return m_subgameCache.at(m_root.get());
+}
+
+GameNode GameTreeRep::GetSubgameRoot(const GameInfoset &p_infoset) const
+{
+  if (p_infoset->GetGame().get() != this) {
+    throw MismatchException();
+  }
+  if (m_subgameCache.empty()) {
+    BuildSubgameRoots();
+  }
+  auto *n = p_infoset->m_members.front().get();
+  while (n && m_subgameCache.find(n) == m_subgameCache.end()) {
+    n = n->m_parent;
+  }
+  return n->shared_from_this();
+}
+
 //------------------------------------------------------------------------
 //               GameTreeRep: Managing the representation
 //------------------------------------------------------------------------
@@ -925,7 +970,10 @@ void GameTreeRep::ClearComputedValues() const
   const_cast<GameTreeRep *>(this)->m_unreachableNodes = nullptr;
   m_absentMindedInfosets.clear();
   m_subgames.clear();
-  m_infosetSubgameRoot.clear();
+  for (const auto &[node, subgame] : m_subgameCache) {
+    subgame->Invalidate();
+  }
+  m_subgameCache.clear();
   m_computedValues = false;
 }
 
@@ -1230,29 +1278,48 @@ void GameTreeRep::BuildSubgameRoots() const
   BridgeVisitor bridge_visitor{disc, hull, m_subgames};
   WalkDFS(game, m_root, TraversalOrder::Postorder, bridge_visitor);
 
-  // Phase 3: Map each infoset to its nearest subgame root ancestor
+  // Phase 3: Build GameSubgameRep objects with subgame differences
   std::unordered_set<GameNodeRep *> subgameRootSet(m_subgames.begin(), m_subgames.end());
+
   for (const auto &player : GetPlayersWithChance()) {
     for (const auto &infoset : player->m_infosets) {
       auto *n = infoset->m_members.front().get();
       while (n && !contains(subgameRootSet, n)) {
         n = n->m_parent;
       }
-      m_infosetSubgameRoot[infoset.get()] = n;
+      auto [it, inserted] = m_subgameCache.try_emplace(n, nullptr);
+      if (inserted) {
+        it->second = std::make_shared<GameSubgameRep>(const_cast<GameTreeRep *>(this), n);
+      }
+      it->second->m_subgameDifference.push_back(infoset);
+    }
+  }
+
+  // Phase 4: Establish parent-child relationships
+  for (auto *sroot : m_subgames) {
+    if (sroot == m_root.get()) {
+      continue;
+    }
+    auto *parent_node = sroot->m_parent;
+    while (parent_node && !contains(subgameRootSet, parent_node)) {
+      parent_node = parent_node->m_parent;
+    }
+    if (parent_node) {
+      m_subgameCache.at(sroot)->m_parent = m_subgameCache.at(parent_node);
+      m_subgameCache.at(parent_node)->m_children.push_back(m_subgameCache.at(sroot));
     }
   }
 }
 
-std::vector<GameNode> GameTreeRep::GetSubgames() const
+std::vector<GameSubgame> GameTreeRep::GetSubgames() const
 {
-  if (m_subgames.empty()) {
+  if (m_subgameCache.empty()) {
     BuildSubgameRoots();
   }
-
-  std::vector<GameNode> result;
-  result.reserve(m_subgames.size());
+  std::vector<GameSubgame> result;
+  result.reserve(m_subgameCache.size());
   for (auto *rep : m_subgames) {
-    result.emplace_back(rep->shared_from_this());
+    result.emplace_back(m_subgameCache.at(rep));
   }
   return result;
 }
