@@ -48,6 +48,7 @@ protected:
   mutable std::unique_ptr<std::set<GameNodeRep *>> m_unreachableNodes;
   mutable std::set<GameInfosetRep *> m_absentMindedInfosets;
   mutable std::vector<GameNodeRep *> m_subgames;
+  mutable std::map<GameInfosetRep *, GameNodeRep *> m_infosetSubgameRoot;
 
   /// @name Private auxiliary functions
   //@{

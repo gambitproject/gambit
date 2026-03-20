@@ -28,6 +28,7 @@
 #include <set>
 #include <stack>
 #include <unordered_map>
+#include <unordered_set>
 #include <variant>
 
 #include "gambit.h"
@@ -924,6 +925,7 @@ void GameTreeRep::ClearComputedValues() const
   const_cast<GameTreeRep *>(this)->m_unreachableNodes = nullptr;
   m_absentMindedInfosets.clear();
   m_subgames.clear();
+  m_infosetSubgameRoot.clear();
   m_computedValues = false;
 }
 
@@ -1227,6 +1229,18 @@ void GameTreeRep::BuildSubgameRoots() const
 
   BridgeVisitor bridge_visitor{disc, hull, m_subgames};
   WalkDFS(game, m_root, TraversalOrder::Postorder, bridge_visitor);
+
+  // Phase 3: Map each infoset to its nearest subgame root ancestor
+  std::unordered_set<GameNodeRep *> subgameRootSet(m_subgames.begin(), m_subgames.end());
+  for (const auto &player : GetPlayersWithChance()) {
+    for (const auto &infoset : player->m_infosets) {
+      auto *n = infoset->m_members.front().get();
+      while (n && !contains(subgameRootSet, n)) {
+        n = n->m_parent;
+      }
+      m_infosetSubgameRoot[infoset.get()] = n;
+    }
+  }
 }
 
 std::vector<GameNode> GameTreeRep::GetSubgames() const
