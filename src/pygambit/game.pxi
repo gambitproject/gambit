@@ -212,6 +212,38 @@ class GameNodes:
 
 
 @cython.cclass
+class GameSubgames:
+    """Represents the set of subgames in a game."""
+    game = cython.declare(c_Game)
+
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create GameSubgames outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(game: c_Game) -> GameSubgames:
+        obj: GameSubgames = GameSubgames.__new__(GameSubgames)
+        obj.game = game
+        return obj
+
+    def __repr__(self) -> str:
+        return f"GameSubgames(game={Game.wrap(self.game)})"
+
+    def __len__(self) -> int:
+        """The number of subgames in the game."""
+        if not self.game.deref().IsTree():
+            return 0
+        return self.game.deref().GetSubgames().size()
+
+    def __iter__(self) -> typing.Iterator[Subgame]:
+        """Iterate over the game subgames in postorder."""
+        if not self.game.deref().IsTree():
+            return
+        for subgame in self.game.deref().GetSubgames():
+            yield Subgame.wrap(subgame)
+
+
+@cython.cclass
 class GameOutcomes:
     """Represents the set of outcomes in a game."""
     game = cython.declare(c_Game)
@@ -805,6 +837,92 @@ class Game:
         Player.max_payoff
         """
         return rat_to_py(self.game.deref().GetMaxPayoff())
+
+    @property
+    def subgames(self) -> GameSubgames:
+        """The set of subgames in the game.
+
+        Iteration over this property yields the subgames in postorder
+        (children before parents).
+
+        .. versionadded:: 16.5.0
+
+        Raises
+        ------
+        UndefinedOperationError
+            If the game does not have a tree representation.
+        """
+        if not self.is_tree:
+            raise UndefinedOperationError(
+                "Operation only defined for games with a tree representation"
+            )
+        return GameSubgames.wrap(self.game)
+
+    @property
+    def root_subgame(self) -> Subgame:
+        """The root subgame of the game (the subgame containing the entire game tree).
+
+        .. versionadded:: 16.5.0
+
+        Raises
+        ------
+        UndefinedOperationError
+            If the game does not have a tree representation.
+        """
+        if not self.is_tree:
+            raise UndefinedOperationError(
+                "Operation only defined for games with a tree representation"
+            )
+        return Subgame.wrap(self.game.deref().GetRootSubgame())
+
+    @property
+    def terminal_subgames(self) -> list[Subgame]:
+        """The terminal subgames (subgames with no child subgames).
+
+        .. versionadded:: 16.5.0
+
+        Raises
+        ------
+        UndefinedOperationError
+            If the game does not have a tree representation.
+        """
+        if not self.is_tree:
+            raise UndefinedOperationError(
+                "Operation only defined for games with a tree representation"
+            )
+        return [sg for sg in self.subgames
+                if cython.cast(Subgame, sg).subgame.deref().GetChildren().size() == 0]
+
+    def subgame_root(self, infoset: typing.Union[Infoset, str]) -> Node:
+        """Returns the root node of the smallest subgame containing `infoset`.
+
+        Parameters
+        ----------
+        infoset : Infoset or str
+            The information set to query.
+
+        Returns
+        -------
+        Node
+            The root node of the smallest containing subgame.
+
+        .. versionadded:: 16.5.0
+
+        Raises
+        ------
+        UndefinedOperationError
+            If the game does not have a tree representation.
+        MismatchError
+            If `infoset` is from a different game.
+        """
+        if not self.is_tree:
+            raise UndefinedOperationError(
+                "Operation only defined for games with a tree representation"
+            )
+        resolved_infoset = self._resolve_infoset(infoset, "subgame_root")
+        return Node.wrap(
+            self.game.deref().GetSubgameRoot(cython.cast(Infoset, resolved_infoset).infoset)
+        )
 
     def set_chance_probs(self, infoset: Infoset | str, probs: typing.Sequence):
         """Set the action probabilities at chance information set `infoset`.
