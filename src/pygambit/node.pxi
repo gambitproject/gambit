@@ -259,3 +259,66 @@ class Node:
         """Returns a list of all terminal `Node` objects consistent with it.
         """
         return [Node.wrap(n) for n in self.node.deref().GetGame().deref().GetPlays(self.node)]
+
+
+@cython.cclass
+class Subgame:
+    """A subgame in a ``Game``.
+
+    .. versionadded:: 16.5.0
+    """
+    subgame = cython.declare(c_GameSubgame)
+
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create a Subgame outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(subgame: c_GameSubgame) -> Subgame:
+        obj: Subgame = Subgame.__new__(Subgame)
+        obj.subgame = subgame
+        return obj
+
+    def __repr__(self) -> str:
+        return f"Subgame(root={self.root})"
+
+    def __eq__(self, other: typing.Any) -> bool:
+        return (
+            isinstance(other, Subgame) and
+            self.subgame.deref() == cython.cast(Subgame, other).subgame.deref()
+        )
+
+    def __hash__(self) -> int:
+        return cython.cast(cython.long, self.subgame.deref())
+
+    @property
+    def game(self) -> Game:
+        """Gets the ``Game`` to which the subgame belongs."""
+        return Game.wrap(self.subgame.deref().GetGame())
+
+    @property
+    def root(self) -> Node:
+        """Returns the root node of the subgame."""
+        return Node.wrap(self.subgame.deref().GetRoot())
+
+    @property
+    def parent(self) -> typing.Optional[Subgame]:
+        """Returns the parent subgame, or None if this is the root subgame."""
+        parent: c_GameSubgame = self.subgame.deref().GetParent()
+        if parent != cython.cast(c_GameSubgame, NULL):
+            return Subgame.wrap(parent)
+        return None
+
+    @property
+    def children(self) -> list[Subgame]:
+        """Returns the immediate child subgames of this subgame."""
+        return [Subgame.wrap(child) for child in self.subgame.deref().GetChildren()]
+
+    @property
+    def difference(self) -> list[Infoset]:
+        """Returns the information sets in the subgame difference.
+
+        The subgame difference consists of information sets that belong
+        to this subgame but not to any of its child subgames.
+        """
+        return [Infoset.wrap(infoset) for infoset in self.subgame.deref().GetSubgameDifference()]
