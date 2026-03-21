@@ -1278,37 +1278,58 @@ void GameTreeRep::BuildSubgameRoots() const
   BridgeVisitor bridge_visitor{disc, hull, m_subgames};
   WalkDFS(game, m_root, TraversalOrder::Postorder, bridge_visitor);
 
-  // Phase 3: Build GameSubgameRep objects with subgame differences
-  std::unordered_set<GameNodeRep *> subgameRootSet(m_subgames.begin(), m_subgames.end());
+  // Phase 3: Build subgame tree with subgame differences
+  struct SubgameVisitor {
+    const std::unordered_set<GameNodeRep *> &m_roots;
+    std::unordered_map<GameNodeRep *, std::shared_ptr<GameSubgameRep>> &m_cache;
+    GameTreeRep *m_game;
+    // Subgame roots on the current DFS path, innermost at back
+    std::vector<GameNodeRep *> m_stack;
+    std::unordered_set<GameInfosetRep *> m_infoset_visited;
 
-  for (const auto &player : GetPlayersWithChance()) {
-    for (const auto &infoset : player->m_infosets) {
-      auto *n = infoset->m_members.front().get();
-      while (n && !contains(subgameRootSet, n)) {
-        n = n->m_parent;
+    DFSCallbackResult OnEnter(const GameNode &p_node, int)
+    {
+      if (p_node->IsTerminal()) {
+        return DFSCallbackResult::Continue;
       }
-      auto [it, inserted] = m_subgameCache.try_emplace(n, nullptr);
-      if (inserted) {
-        it->second = std::make_shared<GameSubgameRep>(const_cast<GameTreeRep *>(this), n);
+      GameNodeRep *node = p_node.get();
+      if (contains(m_roots, node)) {
+        auto subgame = std::make_shared<GameSubgameRep>(m_game, node);
+        if (!m_stack.empty()) {
+          auto &parent_subgame = m_cache.at(m_stack.back());
+          subgame->m_parent = parent_subgame;
+          parent_subgame->m_children.push_back(subgame);
+        }
+        m_cache.emplace(node, std::move(subgame));
+        m_stack.push_back(node);
       }
-      it->second->m_subgameDifference.push_back(infoset);
+      if (m_infoset_visited.insert(node->m_infoset).second) {
+        m_cache.at(m_stack.back())
+            ->m_subgameDifference.emplace_back(node->m_infoset->shared_from_this());
+      }
+      return DFSCallbackResult::Continue;
     }
-  }
 
-  // Phase 4: Establish parent-child relationships
-  for (auto *sroot : m_subgames) {
-    if (sroot == m_root.get()) {
-      continue;
+    DFSCallbackResult OnExit(const GameNode &p_node, int)
+    {
+      if (!m_stack.empty() && m_stack.back() == p_node.get()) {
+        m_stack.pop_back();
+      }
+      return DFSCallbackResult::Continue;
     }
-    auto *parent_node = sroot->m_parent;
-    while (parent_node && !contains(subgameRootSet, parent_node)) {
-      parent_node = parent_node->m_parent;
+
+    static DFSCallbackResult OnAction(GameNode, GameNode, int)
+    {
+      return DFSCallbackResult::Continue;
     }
-    if (parent_node) {
-      m_subgameCache.at(sroot)->m_parent = m_subgameCache.at(parent_node);
-      m_subgameCache.at(parent_node)->m_children.push_back(m_subgameCache.at(sroot));
-    }
-  }
+    static void OnVisit(GameNode, int) {}
+  };
+
+  const std::unordered_set<GameNodeRep *> subgame_root_set(m_subgames.begin(), m_subgames.end());
+
+  SubgameVisitor subgame_visitor{subgame_root_set, m_subgameCache,
+                                 const_cast<GameTreeRep *>(this)};
+  WalkDFS(game, m_root, TraversalOrder::Preorder, subgame_visitor);
 }
 
 std::vector<GameSubgame> GameTreeRep::GetSubgames() const
