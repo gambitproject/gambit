@@ -243,7 +243,7 @@ public:
   T GetInfosetProb(const GameInfoset &p_infoset) const;
   std::optional<T> GetBeliefProb(const GameNode &node) const;
   Vector<T> GetPayoff(const GameNode &node) const;
-  std::optional<T> GetPayoff(const GamePlayer &player, const GameNode &node) const;
+  const T &GetPayoff(const GamePlayer &p_player, const GameNode &p_node) const;
   std::optional<T> GetPayoff(const GameInfoset &p_infoset) const;
   std::optional<T> GetPayoff(const GameAction &act) const;
   T GetActionProb(const GameAction &act) const;

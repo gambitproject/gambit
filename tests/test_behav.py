@@ -2117,15 +2117,6 @@ def test_undefined_belief():
         assert profile.belief(node) is None
 
 
-def test_undefined_node_value():
-    """Test that undefined node values return `None`."""
-    game = gbt.catalog.load("selten1975/fig1")
-    node = game.players[2].infosets[0].members[0]
-    for rat in [False, True]:
-        profile = game.mixed_behavior_profile([[[1, 0]], [[1, 0]], [[1, 0]]], rational=rat)
-        assert profile.node_value(node.player, node) is None
-
-
 def test_undefined_infoset_value():
     """Test that undefined infoset values return `None`."""
     game = gbt.catalog.load("selten1975/fig1")

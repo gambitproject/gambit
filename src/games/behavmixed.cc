@@ -311,15 +311,12 @@ template <class T> Vector<T> MixedBehaviorProfile<T>::GetPayoff(const GameNode &
 }
 
 template <class T>
-std::optional<T> MixedBehaviorProfile<T>::GetPayoff(const GamePlayer &p_player,
-                                                    const GameNode &p_node) const
+const T &MixedBehaviorProfile<T>::GetPayoff(const GamePlayer &p_player,
+                                            const GameNode &p_node) const
 {
   CheckVersion();
   EnsureNodeValues();
-  if (p_node->GetInfoset() && GetInfosetProb(p_node->GetInfoset()) == T{0}) {
-    return std::nullopt;
-  }
-  return m_cache.m_nodeValues[p_node][p_player];
+  return m_cache.m_nodeValues.at(p_node).at(p_player);
 }
 
 template <class T>

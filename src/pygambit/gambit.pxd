@@ -367,7 +367,7 @@ cdef extern from "games/behavmixed.h" namespace "Gambit":
         T GetRealizProb(c_GameNode) except +
         T GetInfosetProb(c_GameInfoset) except +
         optional[T] GetPayoff(c_GameInfoset) except +
-        optional[T] GetPayoff(c_GamePlayer, c_GameNode) except +
+        T GetPayoff(c_GamePlayer, c_GameNode) except +
         optional[T] GetPayoff(c_GameAction) except +
         T GetRegret(c_GameAction) except +
         T GetRegret(c_GameInfoset) except +

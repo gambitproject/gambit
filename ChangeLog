@@ -5,7 +5,7 @@
 ### Changed
 - `Game.comment` has been renamed to `Game.description`
 - With behaviour profiles that reach some information sets with probability zero, beliefs, action
-  values, infoset values, and node values are not well-defined.  These functions now return a
+  values, and infoset values are not well-defined.  These functions now return a
   `std::optional` in C++ and type or `None` in Python, where nulls indicate these quantities
   are not defined.  (#446)
 

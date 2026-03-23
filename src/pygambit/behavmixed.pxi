@@ -637,12 +637,9 @@ class MixedBehaviorProfile:
         return self._payoff(resolved_player)
 
     def node_value(self, player: PlayerReference,
-                   node: NodeReference) -> ProfileDType | None:
+                   node: NodeReference) -> ProfileDType:
         """Returns the expected payoff to `player` conditional on play reaching `node`,
         if all players play according to the profile.
-
-        If the node's information set is not reachable, in general the node value
-        is not well-defined.  In this case, the function returns `None`.
 
         Parameters
         ----------
@@ -663,10 +660,6 @@ class MixedBehaviorProfile:
             `node` is a string and no node in the game has that label.
         ValueError
             If `player` resolves to the chance player
-
-        See Also
-        --------
-        MixedBehaviorProfile.infoset_prob
         """
         self._check_validity()
         resolved_player = self.game._resolve_player(player, "node_value")
@@ -990,11 +983,8 @@ class MixedBehaviorProfileDouble(MixedBehaviorProfile):
             return value.value()
         return None
 
-    def _node_value(self, player: Player, node: Node) -> float | None:
-        cdef optional[double] value = deref(self.profile).GetPayoff(player.player, node.node)
-        if value.has_value():
-            return value.value()
-        return None
+    def _node_value(self, player: Player, node: Node) -> float:
+        return deref(self.profile).GetPayoff(player.player, node.node)
 
     def _action_value(self, action: Action) -> float | None:
         cdef optional[double] value = deref(self.profile).GetPayoff(action.action)
@@ -1104,11 +1094,8 @@ class MixedBehaviorProfileRational(MixedBehaviorProfile):
             return rat_to_py(value.value())
         return None
 
-    def _node_value(self, player: Player, node: Node) -> Rational | None:
-        cdef optional[c_Rational] value = deref(self.profile).GetPayoff(player.player, node.node)
-        if value.has_value():
-            return rat_to_py(value.value())
-        return None
+    def _node_value(self, player: Player, node: Node) -> Rational:
+        return rat_to_py(deref(self.profile).GetPayoff(player.player, node.node))
 
     def _action_value(self, action: Action) -> Rational | None:
         cdef optional[c_Rational] value = deref(self.profile).GetPayoff(action.action)
