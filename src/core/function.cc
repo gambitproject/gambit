@@ -48,11 +48,11 @@ void FunctionOnSimplices::Project(Vector<double> &x, const Array<size_t> &length
   int index = 1;
   for (size_t part = 1; part <= lengths.size(); part++) {
     double avg = 0.0;
-    int j;
+    size_t j;
     for (j = 1; j <= lengths[part]; j++, index++) {
       avg += x[index];
     }
-    avg /= (double)lengths[part];
+    avg /= static_cast<double>(lengths[part]);
     index -= lengths[part];
     for (j = 1; j <= lengths[part]; j++, index++) {
       x[index] -= avg;
