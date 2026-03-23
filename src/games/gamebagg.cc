@@ -108,7 +108,7 @@ template <class T> T BAGGMixedStrategyProfileRep<T>::GetPayoff(int pl) const
         bplayer = i;
         btype = tp;
       }
-      for (int j = 0; j < ns[g.baggPtr->typeOffset[i] + tp]; ++j, ++offs) {
+      for (size_t j = 0; j < ns[g.baggPtr->typeOffset[i] + tp]; ++j, ++offs) {
         const GameStrategy strategy = this->m_support.GetGame()
                                           ->GetPlayer(g.baggPtr->typeOffset[i] + tp + 1)
                                           ->GetStrategy(j + 1);

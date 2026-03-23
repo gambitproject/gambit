@@ -201,7 +201,7 @@ void GenerateSupportProfiles(const Game &game,
 
 /// Solve over supports with a total number of strategies `size` and a maximum difference
 /// in player support size of `diff`.
-void GenerateSizeDiff(const Game &game, int size, int diff, CallbackFunction callback)
+void GenerateSizeDiff(const Game &game, int size, size_t diff, CallbackFunction callback)
 {
   auto players = game->GetPlayers();
   CartesianRange range(game->GetStrategies().shape_array());
