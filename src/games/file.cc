@@ -411,11 +411,10 @@ void ReadOutcomeList(GameFileLexer &p_parser, Game &p_nfg)
 void ParseOutcomeBody(GameFileLexer &p_parser, Game &p_nfg)
 {
   ReadOutcomeList(p_parser, p_nfg);
-  const StrategySupportProfile profile(p_nfg);
-  for (auto iter : StrategyContingencies(profile)) {
+  for (const auto &profile : StrategyContingencies(p_nfg)) {
     p_parser.ExpectCurrentToken(TOKEN_NUMBER, "outcome index");
     if (const int outcomeId = std::stoi(p_parser.GetLastText())) {
-      iter->SetOutcome(p_nfg->GetOutcome(outcomeId));
+      profile->SetOutcome(p_nfg->GetOutcome(outcomeId));
     }
     p_parser.GetNextToken();
   }
@@ -423,11 +422,10 @@ void ParseOutcomeBody(GameFileLexer &p_parser, Game &p_nfg)
 
 void ParsePayoffBody(GameFileLexer &p_parser, Game &p_nfg)
 {
-  const StrategySupportProfile profile(p_nfg);
-  for (auto iter : StrategyContingencies(profile)) {
+  for (const auto &profile : StrategyContingencies(p_nfg)) {
     for (const auto &player : p_nfg->GetPlayers()) {
       p_parser.ExpectCurrentToken(TOKEN_NUMBER, "numerical payoff");
-      iter->GetOutcome()->SetPayoff(player, Number(p_parser.GetLastText()));
+      profile->GetOutcome()->SetPayoff(player, Number(p_parser.GetLastText()));
       p_parser.GetNextToken();
     }
   }
@@ -442,7 +440,7 @@ Game BuildNfg(GameFileLexer &p_parser, TableFileGame &p_data)
   // If this looks lke an outcome-based format, then don't create outcomes in advance
   Game nfg = NewTable(p_data.NumStrategies(), p_parser.GetCurrentToken() == TOKEN_LBRACE);
   nfg->SetTitle(p_data.m_title);
-  nfg->SetComment(p_data.m_comment);
+  nfg->SetDescription(p_data.m_comment);
 
   for (auto player : nfg->GetPlayers()) {
     player->SetLabel(p_data.GetPlayer(player->GetNumber()));
@@ -867,7 +865,7 @@ Game ReadEfgFile(std::istream &p_stream, bool p_normalizeLabels /* = false */)
   ReadPlayers(parser, game, treeData);
   if (parser.GetNextToken() == TOKEN_TEXT) {
     // Read optional comment
-    game->SetComment(parser.GetLastText());
+    game->SetDescription(parser.GetLastText());
     parser.GetNextToken();
   }
   ParseNode(parser, game, game->GetRoot(), treeData);

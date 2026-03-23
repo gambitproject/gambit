@@ -85,7 +85,6 @@ EXTRA_DIST = \
 	src/gui/bitmaps/prev.xpm \
 	src/gui/bitmaps/print.xpm \
 	src/gui/bitmaps/profiles.xpm \
-	src/gui/bitmaps/redo.xpm \
 	src/gui/bitmaps/saveas.xpm \
 	src/gui/bitmaps/savedata.xpm \
 	src/gui/bitmaps/save.xpm \
@@ -94,14 +93,12 @@ EXTRA_DIST = \
 	src/gui/bitmaps/tobegin.xpm \
 	src/gui/bitmaps/toend.xpm \
 	src/gui/bitmaps/tree.xpm \
-	src/gui/bitmaps/undo.xpm \
 	src/gui/bitmaps/zoomfit.xpm \
 	src/gui/bitmaps/zoomin.xpm \
 	src/gui/bitmaps/zoomout.xpm \
 	src/gui/bitmaps/zoom1.xpm \
 	src/gui/bitmaps/gambitrc.rc \
 	contrib/games/2s2x2x2.efg \
-	contrib/games/2smp.efg \
 	contrib/games/2x2x2.efg \
 	contrib/games/4cards.efg \
 	contrib/games/artist1.efg \
@@ -132,9 +129,6 @@ EXTRA_DIST = \
 	contrib/games/coord4.efg \
 	contrib/games/cross.efg \
 	contrib/games/cs.efg \
-	contrib/games/e01.efg \
-	contrib/games/e02.efg \
-	contrib/games/e03.efg \
 	contrib/games/e04.efg \
 	contrib/games/e05.efg \
 	contrib/games/e06.efg \
@@ -175,8 +169,6 @@ EXTRA_DIST = \
 	contrib/games/palf2.efg \
 	contrib/games/palf3.efg \
 	contrib/games/palf.efg \
-	contrib/games/poker2.efg \
-	contrib/games/poker.efg \
 	contrib/games/pvw2.efg \
 	contrib/games/pvw.efg \
 	contrib/games/sh3.efg \
@@ -192,6 +184,7 @@ EXTRA_DIST = \
 	contrib/games/work1.efg \
 	contrib/games/work2.efg \
 	contrib/games/work3.efg \
+	contrib/games/2smp.efg \
 	contrib/games/2x2a.nfg \
 	contrib/games/2x2const.nfg \
 	contrib/games/2x2.nfg \
@@ -213,8 +206,6 @@ EXTRA_DIST = \
 	contrib/games/csg4.nfg \
 	contrib/games/deg1.nfg \
 	contrib/games/deg2.nfg \
-	contrib/games/e01.nfg \
-	contrib/games/e02.nfg \
 	contrib/games/e04.nfg \
 	contrib/games/e07.nfg \
 	contrib/games/g1.nfg \
@@ -228,7 +219,6 @@ EXTRA_DIST = \
 	contrib/games/perfect1.nfg \
 	contrib/games/perfect2.nfg \
 	contrib/games/perfect3.nfg \
-	contrib/games/poker.nfg \
 	contrib/games/sh3.nfg \
 	contrib/games/stengel.nfg \
 	contrib/games/sww1.nfg \
@@ -240,13 +230,23 @@ EXTRA_DIST = \
 	contrib/games/winkels.nfg \
 	contrib/games/yamamoto.nfg \
 	contrib/games/zero.nfg \
-	src/README.rst
+	src/README.rst \
+	catalog/bagwell1995.efg \
+	catalog/myerson1991/fig2_1.efg \
+	catalog/myerson1991/fig4_2.efg \
+	catalog/reiley2008/fig1.efg \
+	catalog/selten1975/fig1.efg \
+	catalog/selten1975/fig2.efg \
+	catalog/selten1975/fig3.efg \
+	catalog/watson2013/exercise29_6.efg \
+	catalog/watson2013/fig29_1.efg
 
 core_SOURCES = \
     src/core/core.h \
     src/core/util.h \
 	src/core/array.h \
 	src/core/vector.h \
+	src/core/segment.h \
 	src/core/recarray.h \
 	src/core/matrix.h \
 	src/core/integer.cc \
@@ -299,7 +299,6 @@ game_SOURCES = \
 	src/games/behavmixed.h \
 	src/games/stratspt.cc \
 	src/games/stratspt.h \
-	src/games/stratpure.cc \
 	src/games/stratpure.h \
 	src/games/stratmixed.h \
 	src/games/file.cc \
@@ -407,9 +406,6 @@ gambit_enumpoly_SOURCES = \
     src/solvers/enumpoly/polypartial.imp \
 	src/solvers/enumpoly/polysolver.cc \
 	src/solvers/enumpoly/polysolver.h \
-	src/solvers/enumpoly/polyfeasible.h \
-	src/solvers/enumpoly/behavextend.cc \
-	src/solvers/enumpoly/behavextend.h \
 	src/solvers/enumpoly/efgpoly.cc \
 	src/solvers/enumpoly/nfgpoly.cc \
 	src/solvers/enumpoly/enumpoly.h \

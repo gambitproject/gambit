@@ -47,10 +47,13 @@ protected:
   mutable std::shared_ptr<OwnPriorActionInfo> m_ownPriorActionInfo;
   mutable std::unique_ptr<std::set<GameNodeRep *>> m_unreachableNodes;
   mutable std::set<GameInfosetRep *> m_absentMindedInfosets;
+  mutable std::vector<GameNodeRep *> m_subgames;
 
   /// @name Private auxiliary functions
   //@{
   static void SortInfosets(GamePlayerRep *);
+  template <class Aggregator>
+  Rational AggregateSubtreePayoff(const GamePlayer &p_player, Aggregator p_aggregator) const;
   static void RenumberInfosets(GamePlayerRep *);
   /// Normalize the probability distribution of actions at a chance node
   Game NormalizeChanceProbs(GameInfosetRep *);
@@ -96,6 +99,7 @@ public:
   /// Returns the largest payoff to the player in any play of the game
   Rational GetPlayerMaxPayoff(const GamePlayer &) const override;
   bool IsAbsentMinded(const GameInfoset &p_infoset) const override;
+  std::vector<GameNode> GetSubgames() const override;
   //@}
 
   /// @name Players
@@ -180,6 +184,7 @@ private:
   std::vector<GameNodeRep *> BuildConsistentPlaysRecursiveImpl(GameNodeRep *node);
   void BuildOwnPriorActions() const;
   void BuildUnreachableNodes() const;
+  void BuildSubgameRoots() const;
 };
 
 template <class T> class TreeMixedStrategyProfileRep : public MixedStrategyProfileRep<T> {

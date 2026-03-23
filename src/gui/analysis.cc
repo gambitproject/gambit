@@ -240,9 +240,9 @@ std::string AnalysisProfileList<T>::GetBeliefProb(const GameNode &p_node, int p_
   }
 
   try {
-    if (m_behavProfiles[index]->GetInfosetProb(p_node->GetInfoset()) > Rational(0)) {
-      return lexical_cast<std::string>(m_behavProfiles[index]->GetBeliefProb(p_node),
-                                       m_doc->GetStyle().NumDecimals());
+    auto belief = m_behavProfiles[index]->GetBeliefProb(p_node);
+    if (belief.has_value()) {
+      return lexical_cast<std::string>(belief.value(), m_doc->GetStyle().NumDecimals());
     }
     // We don't compute assessments yet!
     return "*";
@@ -295,9 +295,9 @@ std::string AnalysisProfileList<T>::GetInfosetValue(const GameNode &p_node, int 
   }
 
   try {
-    if (m_behavProfiles[index]->GetInfosetProb(p_node->GetInfoset()) > Rational(0)) {
-      return lexical_cast<std::string>(m_behavProfiles[index]->GetPayoff(p_node->GetInfoset()),
-                                       m_doc->GetStyle().NumDecimals());
+    auto payoff = m_behavProfiles[index]->GetPayoff(p_node->GetInfoset());
+    if (payoff.has_value()) {
+      return lexical_cast<std::string>(payoff.value(), m_doc->GetStyle().NumDecimals());
     }
     // In the absence of beliefs, this is not well-defined in general
     return "*";
@@ -367,10 +367,10 @@ std::string AnalysisProfileList<T>::GetActionValue(const GameNode &p_node, int p
   }
 
   try {
-    if (m_behavProfiles[index]->GetInfosetProb(p_node->GetInfoset()) > Rational(0)) {
-      return lexical_cast<std::string>(
-          m_behavProfiles[index]->GetPayoff(p_node->GetInfoset()->GetAction(p_act)),
-          m_doc->GetStyle().NumDecimals());
+    std::optional<T> actionValue =
+        m_behavProfiles[index]->GetPayoff(p_node->GetInfoset()->GetAction(p_act));
+    if (actionValue.has_value()) {
+      return lexical_cast<std::string>(actionValue.value(), m_doc->GetStyle().NumDecimals());
     }
     // In the absence of beliefs, this is not well-defined
     return "*";

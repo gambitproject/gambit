@@ -1,7 +1,4 @@
-<h1 style="text-align: center;">
-<img src="https://raw.githubusercontent.com/gambitproject/gambit/master/doc/_static/gambit.png"
-     width="300" alt="Gambit logo">
-</h1>
+![Logo](doc/_static/Gambit_logo_landscape_green_font_no_outline.png)
 <br/>
 
 ![Latest stable version](https://img.shields.io/github/v/release/gambitproject/gambit?filter=!*a*&label=Latest%20stable%20version)
@@ -13,8 +10,9 @@
 
 **Gambit** is the package for doing computation in (non-cooperative) game theory.
 
-- See our [documentation](https://gambitproject.readthedocs.io/)
-- Check our [project website](https://www.gambit-project.org/)
+- **Documentation:** for the package is hosted at [gambitproject.readthedocs.io](https://gambitproject.readthedocs.io/).
+- **The Gambit project:** Find out more about the project at [gambit-project.org](https://www.gambit-project.org/)
+- **Contributors:** Please read the [code of conduct and contribution guidelines](https://gambitproject.readthedocs.io/en/latest/developer.contributing.html) before posting on GitHub.
 
 Gambit provides:
 

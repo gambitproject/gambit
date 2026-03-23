@@ -261,7 +261,7 @@ class Player:
            Changed from reporting minimum payoff in any (non-null) outcome to the minimum
            payoff in any play of the game.
 
-        See also
+        See Also
         --------
         Player.max_payoff
         Game.min_payoff
@@ -276,7 +276,7 @@ class Player:
            Changed from reporting maximum payoff in any (non-null) outcome to the maximum
            payoff in any play of the game.
 
-        See also
+        See Also
         --------
         Player.min_payoff
         Game.max_payoff

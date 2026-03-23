@@ -28,6 +28,22 @@ classifiers=[
 dependencies = [
     "numpy",
     "scipy",
+    "pandas",
+]
+
+[project.optional-dependencies]
+test = ["pytest", "pytest-subtests", "nbformat", "nbclient", "ipykernel"]
+doc = [
+    "pydata-sphinx-theme",
+    "sphinx_design",
+    "sphinx-autobuild",
+    "nbsphinx",
+    "ipython",
+    "matplotlib",
+    "pickleshare",
+    "jupyter",
+    "open_spiel; sys_platform != 'win32'",
+    "draw-tree @ git+https://github.com/gambitproject/draw_tree.git@v0.4.0"
 ]
 
 [project.urls]
@@ -75,15 +91,34 @@ max-line-length = 99
 [tool.pytest.ini_options]
 addopts = "--strict-markers"
 markers = [
+    "nash_enumpure_strategy: tests of enumpure_solve in pure strategies",
+    "nash_enumpure_agent: tests of enumpure_solve in pure behaviors",
     "nash_enummixed_strategy: tests of enummixed_solve in mixed strategies",
-    "nash_enumpoly_behavior: tests of enumpoly_solve in behavior strategies",
+    "nash_enumpoly_behavior: tests of enumpoly_solve in mixed behaviors",
     "nash_lcp_strategy: tests of lcp_solve in mixed strategies",
-    "nash_lcp_behavior: tests of lcp_solve in behavior strategies",
+    "nash_lcp_behavior: tests of lcp_solve in mixed behaviors",
     "nash_lp_strategy: tests of lp_solve in mixed strategies",
-    "nash_lp_behavior: tests of lp_solve in behavior strategies",
+    "nash_lp_behavior: tests of lp_solve in mixed behaviors",
+    "nash_logit_strategy: tests of logit_solve in mixed strategies",
+    "nash_logit_behavior: tests of logit_solve in behavior strategies",
+    "nash_gnm_strategy: tests of gnm_solve in mixed strategies",
+    "nash_ipa_strategy: tests of lpa_solve in mixed strategies",
+    "nash_simpdiv: tests of simpdiv_solve (in mixed strategies)",
+    "nash_liap_strategy: tests of liap_solve (in mixed strategies)",
+    "nash_liap_agent: tests of liap_agent_solve (in mixed behaviors)",
+    "qre_logit: tests of logit_solve and related methods",
+    "qre_logit_lambda: tests of logit_solve_lambda",
+    "qre_logit_branch: tests of logit_solve_branch",
     "nash: all tests of Nash equilibrium solvers",
     "slow: all time-consuming tests",
 ]
+
+[tool.setuptools]
+packages = ["pygambit", "pygambit.catalog"]
+package-dir = { "pygambit" = "src/pygambit", "pygambit.catalog" = "catalog" }
+
+[tool.setuptools.package-data]
+"pygambit.catalog" = ["*"]
 
 [tool.setuptools.dynamic]
 version = {file = "build_support/GAMBIT_VERSION"}

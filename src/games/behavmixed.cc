@@ -234,12 +234,12 @@ template <class T> MixedBehaviorProfile<T> MixedBehaviorProfile<T>::Normalize() 
 template <class T> MixedBehaviorProfile<T> MixedBehaviorProfile<T>::ToFullSupport() const
 {
   CheckVersion();
-  MixedBehaviorProfile<T> full(GetGame());
+  MixedBehaviorProfile full(GetGame());
 
   for (auto player : m_support.GetGame()->GetPlayers()) {
     for (auto infoset : player->GetInfosets()) {
       for (auto action : infoset->GetActions()) {
-        full[action] = (m_support.Contains(action)) ? (*this)[action] : T(0);
+        full[action] = (m_support.Contains(action)) ? (*this)[action] : T{0};
       }
     }
   }
@@ -252,6 +252,7 @@ template <class T> MixedBehaviorProfile<T> MixedBehaviorProfile<T>::ToFullSuppor
 
 template <class T> T MixedBehaviorProfile<T>::GetLiapValue() const
 {
+  m_support.GetGame()->BuildComputedValues();
   return MixedStrategyProfile<T>(*this).GetLiapValue();
 }
 
@@ -259,8 +260,11 @@ template <class T> T MixedBehaviorProfile<T>::GetAgentLiapValue() const
 {
   CheckVersion();
   EnsureRegrets();
-  auto value = static_cast<T>(0);
+  T value{0};
   for (auto infoset : m_support.GetGame()->GetInfosets()) {
+    if (GetInfosetProb(infoset) == T{0}) {
+      continue;
+    }
     for (auto action : m_support.GetActions(infoset)) {
       value += sqr(std::max(m_cache.m_actionValues[action] - m_cache.m_infosetValues[infoset],
                             static_cast<T>(0)));
@@ -284,10 +288,14 @@ template <class T> T MixedBehaviorProfile<T>::GetInfosetProb(const GameInfoset &
                       [&](const auto &node) -> T { return m_cache.m_realizProbs[node]; });
 }
 
-template <class T> const T &MixedBehaviorProfile<T>::GetBeliefProb(const GameNode &node) const
+template <class T>
+std::optional<T> MixedBehaviorProfile<T>::GetBeliefProb(const GameNode &node) const
 {
   CheckVersion();
   EnsureBeliefs();
+  if (!node->GetInfoset() || GetInfosetProb(node->GetInfoset()) == T{0}) {
+    return std::nullopt;
+  }
   return m_cache.m_beliefs[node];
 }
 
@@ -308,13 +316,17 @@ const T &MixedBehaviorProfile<T>::GetPayoff(const GamePlayer &p_player,
 {
   CheckVersion();
   EnsureNodeValues();
-  return m_cache.m_nodeValues[p_node][p_player];
+  return m_cache.m_nodeValues.at(p_node).at(p_player);
 }
 
-template <class T> const T &MixedBehaviorProfile<T>::GetPayoff(const GameInfoset &p_infoset) const
+template <class T>
+std::optional<T> MixedBehaviorProfile<T>::GetPayoff(const GameInfoset &p_infoset) const
 {
   CheckVersion();
   EnsureRegrets();
+  if (GetInfosetProb(p_infoset) == T{0}) {
+    return std::nullopt;
+  }
   return m_cache.m_infosetValues[p_infoset];
 }
 
@@ -330,17 +342,23 @@ template <class T> T MixedBehaviorProfile<T>::GetActionProb(const GameAction &ac
   return m_probs[m_profileIndex.at(action)];
 }
 
-template <class T> const T &MixedBehaviorProfile<T>::GetPayoff(const GameAction &act) const
+template <class T> std::optional<T> MixedBehaviorProfile<T>::GetPayoff(const GameAction &act) const
 {
   CheckVersion();
   EnsureActionValues();
+  if (GetInfosetProb(act->GetInfoset()) == T{0}) {
+    return std::nullopt;
+  }
   return m_cache.m_actionValues[act];
 }
 
-template <class T> const T &MixedBehaviorProfile<T>::GetRegret(const GameAction &act) const
+template <class T> T MixedBehaviorProfile<T>::GetRegret(const GameAction &act) const
 {
   CheckVersion();
   EnsureRegrets();
+  if (GetInfosetProb(act->GetInfoset()) == T{0}) {
+    return T{0};
+  }
   return m_cache.m_regret.at(act);
 }
 
@@ -348,6 +366,9 @@ template <class T> T MixedBehaviorProfile<T>::GetRegret(const GameInfoset &p_inf
 {
   CheckVersion();
   EnsureRegrets();
+  if (GetInfosetProb(p_infoset) == T{0}) {
+    return T{0};
+  }
   T br_payoff = maximize_function(p_infoset->GetActions(), [this](const auto &action) -> T {
     return m_cache.m_actionValues.at(action);
   });
@@ -356,6 +377,7 @@ template <class T> T MixedBehaviorProfile<T>::GetRegret(const GameInfoset &p_inf
 
 template <class T> T MixedBehaviorProfile<T>::GetMaxRegret() const
 {
+  m_support.GetGame()->BuildComputedValues();
   return MixedStrategyProfile<T>(*this).GetMaxRegret();
 }
 
@@ -553,6 +575,7 @@ template <class T> bool MixedBehaviorProfile<T>::IsDefinedAt(GameInfoset p_infos
 template <class T> MixedStrategyProfile<T> MixedBehaviorProfile<T>::ToMixedProfile() const
 {
   CheckVersion();
+  m_support.GetGame()->BuildComputedValues();
   return MixedStrategyProfile<T>(*this);
 }
 

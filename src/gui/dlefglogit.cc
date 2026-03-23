@@ -74,15 +74,18 @@ LogitBehavList::LogitBehavList(wxWindow *p_parent, GameDocument *p_doc)
 wxString LogitBehavList::GetCellValue(const wxSheetCoords &p_coords)
 {
   if (IsRowLabelCell(p_coords)) {
-    return wxString::Format(wxT("%d"), p_coords.GetRow() + 1);
+    wxString label;
+    label << (p_coords.GetRow() + 1);
+    return label;
   }
   if (IsColLabelCell(p_coords)) {
     if (p_coords.GetCol() == 0) {
       return wxT("Lambda");
     }
     const GameAction action = m_doc->GetAction(p_coords.GetCol());
-    return (wxString::Format(wxT("%d: "), action->GetInfoset()->GetNumber()) +
-            wxString(action->GetLabel().c_str(), *wxConvCurrent));
+    wxString label;
+    label << action->GetInfoset()->GetNumber() << ": " << action->GetLabel();
+    return label;
   }
   if (IsCornerLabelCell(p_coords)) {
     return wxT("#");
@@ -171,7 +174,12 @@ void LogitBehavList::AddProfile(const wxString &p_text, bool p_forceShow)
   }
   m_lambdas.push_back(std::stod(next.ToStdString()));
   for (size_t i = 1; i <= profile->BehaviorProfileLength(); i++) {
-    (*profile)[i] = std::stod(tok.GetNextToken().ToStdString());
+    try {
+      (*profile)[i] = std::stod(tok.GetNextToken().ToStdString());
+    }
+    catch (std::out_of_range &) {
+      (*profile)[i] = 0.0;
+    }
   }
   m_profiles.push_back(profile);
   if (p_forceShow || m_profiles.size() - GetNumberRows() > 20) {

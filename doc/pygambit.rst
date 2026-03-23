@@ -8,8 +8,9 @@ See installation instructions in the :ref:`install` section.
 
 
 For newcomers to Gambit, we recommend reading through the PyGambit tutorials, which demonstrate the API's key capabilities for analyzing and solving games.
-These tutorials are available to be run interactively as Jupyter notebooks, see :ref:`local_tutorials`.
-All of the tutorials assume a basic knowledge of programming in Python.
+All of these tutorials assume a basic knowledge of programming in Python.
+
+You can run the tutorials interactively as Jupyter notebooks, see :ref:`local_tutorials`.
 
 New user tutorials
 ------------------
@@ -20,10 +21,10 @@ They are numbered in the order they should be read.
 .. toctree::
    :maxdepth: 2
 
-   tutorials/running_locally
    tutorials/01_quickstart
    tutorials/02_extensive_form
    tutorials/03_stripped_down_poker
+   tutorials/04_creating_images
 
 Advanced user tutorials
 -----------------------

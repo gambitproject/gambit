@@ -26,19 +26,53 @@
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif // WX_PRECOMP
+#include <wx/display.h>
 #include <wx/image.h>
-#include <wx/splash.h>
 
 #include "gambit.h"
 
 #include "app.h"
 #include "gameframe.h"
 
+#include "bitmaps/gambitbig.xpm"
+
 namespace Gambit::GUI {
 
-bool Application::OnInit()
+static wxBitmap MakeScaledSplashBitmap(const wxBitmap &srcBmp, double fracOfShortSide)
 {
-#include "bitmaps/gambitbig.xpm"
+  const wxPoint mouse = wxGetMousePosition();
+  const int dispIdx = wxDisplay::GetFromPoint(mouse);
+  wxDisplay disp(dispIdx == wxNOT_FOUND ? 0 : dispIdx);
+
+  wxRect geom = disp.GetGeometry(); // pixels in that display
+  const int shortSide = std::min(geom.width, geom.height);
+  const int targetMax = std::max(200, int(shortSide * fracOfShortSide));
+
+  const int w = srcBmp.GetWidth();
+  const int h = srcBmp.GetHeight();
+  const double s = double(targetMax) / double(std::max(w, h));
+
+  const int newW = std::max(1, int(std::lround(w * s)));
+  const int newH = std::max(1, int(std::lround(h * s)));
+
+  wxImage img = srcBmp.ConvertToImage();
+  img.Rescale(newW, newH, wxIMAGE_QUALITY_HIGH);
+
+  return wxBitmap(img);
+}
+
+wxBEGIN_EVENT_TABLE(Application, wxApp) EVT_TIMER(wxID_ANY, Application::OnSplashDismissTimer)
+    wxEND_EVENT_TABLE()
+
+        bool Application::OnInit()
+{
+  const wxBitmap bitmap(gambitbig_xpm);
+  m_splashTimer.Start();
+  m_splash = new wxSplashScreen(MakeScaledSplashBitmap(bitmap, 0.45),
+                                wxSPLASH_CENTRE_ON_SCREEN | wxSPLASH_NO_TIMEOUT, 0, nullptr,
+                                wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SIMPLE);
+  m_splash->Show();
+  m_splash->Update();
   wxConfigBase::Set(new wxConfig(_T("Gambit"), _T("Gambit")));
   m_fileHistory.Load(*wxConfigBase::Get());
   // Immediately saving this back forces the entries to be created at
@@ -47,33 +81,12 @@ bool Application::OnInit()
   // m_fileHistory.Save(config);
   wxConfigBase::Get()->Read(_T("/General/CurrentDirectory"), &m_currentDir, _T(""));
 
-  const wxBitmap bitmap(gambitbig_xpm);
-  /*wxSplashScreen *splash =*/
-  new wxSplashScreen(bitmap, wxSPLASH_CENTRE_ON_SCREEN | wxSPLASH_TIMEOUT, 2000, nullptr, -1,
-                     wxDefaultPosition, wxDefaultSize, wxSIMPLE_BORDER | wxSTAY_ON_TOP);
-  wxYield();
-
   // Process command line arguments, if any.
-  for (int i = 1; i < wxApp::argc; i++) {
-    const AppLoadResult result = LoadFile(wxApp::argv[i]);
-    if (result == GBT_APP_OPEN_FAILED) {
-      wxMessageDialog dialog(
-          nullptr, wxT("Gambit could not open file '") + wxApp::argv[i] + wxT("' for reading."),
-          wxT("Unable to open file"), wxOK | wxICON_ERROR);
-      dialog.ShowModal();
-    }
-    else if (result == GBT_APP_PARSE_FAILED) {
-      wxMessageDialog dialog(
-          nullptr, wxT("File '") + wxApp::argv[i] + wxT("' is not in a format Gambit recognizes."),
-          wxT("Unable to read file"), wxOK | wxICON_ERROR);
-      dialog.ShowModal();
-    }
+  for (int i = 1; i < argc; i++) {
+    LoadFile(argv[i], nullptr);
   }
 
-  if (m_documents.size() == 0) {
-    // If we don't have any game files -- whether because none were
-    // specified on the command line, or because those specified couldn't
-    // be read -- create a default document.
+  if (m_documents.empty()) {
     const Game efg = NewTree();
     efg->NewPlayer()->SetLabel("Player 1");
     efg->NewPlayer()->SetLabel("Player 2");
@@ -86,13 +99,36 @@ bool Application::OnInit()
   // Set up the help system.
   wxInitAllImageHandlers();
 
+  this->CallAfter(&Application::DismissSplash);
+
   return true;
 }
 
-AppLoadResult Application::LoadFile(const wxString &p_filename)
+void Application::DismissSplash()
 {
-  std::ifstream infile((const char *)p_filename.mb_str());
+  if (!m_splash) {
+    return;
+  }
+
+  const long minDisplay = 1000;
+  const long elapsed = m_splashTimer.Time();
+
+  if (elapsed < minDisplay) {
+    m_splashDismissTimer.SetOwner(this);
+    m_splashDismissTimer.StartOnce(minDisplay - elapsed);
+    return;
+  }
+
+  m_splash->Destroy();
+  m_splash = nullptr;
+}
+
+AppLoadResult Application::LoadFile(const wxString &p_filename, wxWindow *p_parent)
+{
+  std::ifstream infile(p_filename.mb_str());
   if (!infile.good()) {
+    wxMessageBox(_("Gambit could not open file for reading:\n") + p_filename,
+                 _("Unable to open file"), wxOK | wxICON_ERROR, p_parent);
     return GBT_APP_OPEN_FAILED;
   }
 
@@ -104,9 +140,7 @@ AppLoadResult Application::LoadFile(const wxString &p_filename)
     (void)new GameFrame(nullptr, doc);
     return GBT_APP_FILE_OK;
   }
-  else {
-    delete doc;
-  }
+  delete doc;
 
   try {
     const Game nfg = ReadGame(infile);
@@ -114,11 +148,13 @@ AppLoadResult Application::LoadFile(const wxString &p_filename)
     m_fileHistory.AddFileToHistory(p_filename);
     m_fileHistory.Save(*wxConfigBase::Get());
     doc = new GameDocument(nfg);
-    doc->SetFilename(wxT(""));
+    doc->SetFilename("");
     (void)new GameFrame(nullptr, doc);
     return GBT_APP_FILE_OK;
   }
   catch (InvalidFileException &) {
+    wxMessageBox(_("File is not in a format Gambit recognizes:\n") + p_filename,
+                 _("Unable to read file"), wxOK | wxICON_ERROR, p_parent);
     return GBT_APP_PARSE_FAILED;
   }
 }

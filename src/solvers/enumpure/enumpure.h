@@ -53,9 +53,9 @@ inline std::list<MixedStrategyProfile<Rational>> EnumPureStrategySolve(
         "Computing equilibria of games with imperfect recall is not supported.");
   }
   std::list<MixedStrategyProfile<Rational>> solutions;
-  for (auto citer : StrategyContingencies(p_game)) {
-    if (IsNash(citer)) {
-      solutions.push_back(citer->ToMixedStrategyProfile());
+  for (const auto &profile : StrategyContingencies(p_game)) {
+    if (IsNash(profile)) {
+      solutions.push_back(profile->ToMixedStrategyProfile());
       p_onEquilibrium(solutions.back(), "NE");
     }
   }
@@ -68,7 +68,9 @@ inline bool IsAgentNash(const PureBehaviorProfile &p_profile)
     auto current = p_profile.GetPayoff<Rational>(player);
     for (const auto &infoset : player->GetInfosets()) {
       for (const auto &action : infoset->GetActions()) {
-        if (p_profile.GetPayoff<Rational>(action) > current) {
+        auto deviation = p_profile;
+        deviation.SetAction(action);
+        if (deviation.GetPayoff<Rational>(player) > current) {
           return false;
         }
       }

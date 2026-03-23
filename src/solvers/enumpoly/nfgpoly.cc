@@ -63,7 +63,7 @@ IndifferenceEquation(std::shared_ptr<VariableSpace> space, const StrategySupport
 {
   Polynomial<double> equation(space);
 
-  for (auto iter : StrategyContingencies(support, {s1})) {
+  for (const auto &iter : StrategyContingencies(support.RestrictTo(s1))) {
     Polynomial<double> term(space, 1);
     for (auto player : support.GetGame()->GetPlayers()) {
       if (player != s1->GetPlayer()) {
@@ -111,8 +111,8 @@ EnumPolyStrategySupportSolve(const StrategySupportProfile &support, bool &is_sin
   const PolynomialSystem<double> equations = ConstructEquations(space, support, strategy_poly);
 
   Vector<double> bottoms(space->GetDimension()), tops(space->GetDimension());
-  bottoms = 0;
-  tops = 1;
+  bottoms = 1e-12;
+  tops = 1 - 1e-12;
   PolynomialSystemSolver solver(equations);
   is_singular = false;
   std::list<Vector<double>> roots;

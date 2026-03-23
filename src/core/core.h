@@ -28,6 +28,7 @@
 #include "recarray.h"
 #include "vector.h"
 #include "matrix.h"
+#include "segment.h"
 #include "rational.h"
 
 #endif // GAMBIT_CORE_CORE_H

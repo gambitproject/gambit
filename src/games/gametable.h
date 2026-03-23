@@ -40,8 +40,7 @@ private:
 
   /// @name Private auxiliary functions
   //@{
-  void IndexStrategies() const;
-  void RebuildTable();
+  void RebuildTable(const std::vector<long> &old_radices);
   //@}
 
 public:

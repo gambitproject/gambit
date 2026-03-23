@@ -51,7 +51,7 @@ GamePropertiesDialog::GamePropertiesDialog(wxWindow *p_parent, GameDocument *p_d
   commentSizer->Add(new wxStaticText(this, wxID_STATIC, _("Comment")), 0, wxALL | wxALIGN_CENTER,
                     5);
   m_comment = new wxTextCtrl(this, wxID_ANY,
-                             wxString(m_doc->GetGame()->GetComment().c_str(), *wxConvCurrent),
+                             wxString(m_doc->GetGame()->GetDescription().c_str(), *wxConvCurrent),
                              wxDefaultPosition, wxSize(400, -1), wxTE_MULTILINE);
   commentSizer->Add(m_comment, 1, wxALL | wxALIGN_CENTER, 5);
   topSizer->Add(commentSizer, 1, wxALL | wxEXPAND, 0);
@@ -63,9 +63,11 @@ GamePropertiesDialog::GamePropertiesDialog(wxWindow *p_parent, GameDocument *p_d
       wxALL, 5);
 
   const Game game = m_doc->GetGame();
-  boxSizer->Add(new wxStaticText(this, wxID_STATIC,
-                                 wxString::Format(_("Number of players: %d"), game->NumPlayers())),
-                0, wxALL, 5);
+  {
+    wxString label;
+    label << _("Number of players: ") << game->NumPlayers();
+    boxSizer->Add(new wxStaticText(this, wxID_STATIC, label), 0, wxALL, 5);
+  }
   if (game->IsConstSum()) {
     boxSizer->Add(new wxStaticText(this, wxID_STATIC, _("This is a constant-sum game")), 0, wxALL,
                   5);

@@ -661,17 +661,20 @@ class Game:
         self.game.deref().SetTitle(value.encode("ascii"))
 
     @property
-    def comment(self) -> str:
-        """Get or set the comment of the game.
+    def description(self) -> str:
+        """Get or set the description of the game.
 
-        A game's comment is an arbitrary string, and may be more discursive
+        A game's description is an arbitrary string, and may be more discursive
         than a title.
-        """
-        return self.game.deref().GetComment().decode("ascii")
 
-    @comment.setter
-    def comment(self, value: str) -> None:
-        self.game.deref().SetComment(value.encode("ascii"))
+        .. versionchanged:: 16.6.0
+           Renamed ``Game.comment`` to ``Game.description``.
+        """
+        return self.game.deref().GetDescription().decode("ascii")
+
+    @description.setter
+    def description(self, value: str) -> None:
+        self.game.deref().SetDescription(value.encode("ascii"))
 
     @property
     def actions(self) -> GameActions:
@@ -781,7 +784,7 @@ class Game:
            Changed from reporting minimum payoff in any (non-null) outcome to the minimum
            payoff in any play of the game.
 
-        See also
+        See Also
         --------
         Game.max_payoff
         Player.min_payoff
@@ -796,7 +799,7 @@ class Game:
            Changed from reporting maximum payoff in any (non-null) outcome to the maximum
            payoff in any play of the game.
 
-        See also
+        See Also
         --------
         Game.min_payoff
         Player.max_payoff

@@ -50,12 +50,12 @@ public:
 
 Rational BAGGPureStrategyProfileRep::GetPayoff(const GamePlayer &p_player) const
 {
-  const std::shared_ptr<agg::BAGG> baggPtr = dynamic_cast<GameBAGGRep &>(*m_nfg).baggPtr;
-  std::vector<int> s(m_nfg->NumPlayers());
-  for (size_t i = 1; i <= m_nfg->NumPlayers(); i++) {
-    s[i - 1] = m_profile.at(m_nfg->GetPlayer(i))->GetNumber() - 1;
+  const std::shared_ptr<agg::BAGG> baggPtr = dynamic_cast<GameBAGGRep &>(*m_game).baggPtr;
+  std::vector<int> s(m_game->NumPlayers());
+  for (size_t i = 1; i <= m_game->NumPlayers(); i++) {
+    s[i - 1] = GetStrategy(m_game->GetPlayer(i))->GetNumber() - 1;
   }
-  const int bp = dynamic_cast<GameBAGGRep &>(*m_nfg).agent2baggPlayer[p_player->GetNumber()];
+  const int bp = dynamic_cast<GameBAGGRep &>(*m_game).agent2baggPlayer[p_player->GetNumber()];
   const int tp = p_player->GetNumber() - 1 - baggPtr->typeOffset[bp - 1];
   return Rational(baggPtr->getPurePayoff(bp - 1, tp, s));
 }
@@ -63,13 +63,13 @@ Rational BAGGPureStrategyProfileRep::GetPayoff(const GamePlayer &p_player) const
 Rational BAGGPureStrategyProfileRep::GetStrategyValue(const GameStrategy &p_strategy) const
 {
   const int player = p_strategy->GetPlayer()->GetNumber();
-  const std::shared_ptr<agg::BAGG> baggPtr = dynamic_cast<GameBAGGRep &>(*m_nfg).baggPtr;
-  std::vector<int> s(m_nfg->NumPlayers());
-  for (size_t i = 1; i <= m_nfg->NumPlayers(); i++) {
-    s[i - 1] = m_profile.at(m_nfg->GetPlayer(i))->GetNumber() - 1;
+  const std::shared_ptr<agg::BAGG> baggPtr = dynamic_cast<GameBAGGRep &>(*m_game).baggPtr;
+  std::vector<int> s(m_game->NumPlayers());
+  for (size_t i = 1; i <= m_game->NumPlayers(); i++) {
+    s[i - 1] = GetStrategy(m_game->GetPlayer(i))->GetNumber() - 1;
   }
   s[player - 1] = p_strategy->GetNumber() - 1;
-  const int bp = dynamic_cast<GameBAGGRep &>(*m_nfg).agent2baggPlayer[player];
+  const int bp = dynamic_cast<GameBAGGRep &>(*m_game).agent2baggPlayer[player];
   const int tp = player - 1 - baggPtr->typeOffset[bp - 1];
   return Rational(baggPtr->getPurePayoff(bp - 1, tp, s));
 }
@@ -113,7 +113,7 @@ template <class T> T BAGGMixedStrategyProfileRep<T>::GetPayoff(int pl) const
                                           ->GetPlayer(g.baggPtr->typeOffset[i] + tp + 1)
                                           ->GetStrategy(j + 1);
         const int ind = this->m_profileIndex.at(strategy);
-        s.at(offs) = (ind == -1) ? (T)0 : this->m_probs[ind];
+        s.at(offs) = (ind == -1) ? (T)0 : this->m_probs.GetFlattened()[ind];
       }
     }
   }
@@ -144,7 +144,8 @@ T BAGGMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &ps)
                                             ->GetPlayer(g.baggPtr->typeOffset[i] + tp + 1)
                                             ->GetStrategy(j + 1);
           const int ind = this->m_profileIndex.at(strategy);
-          s.at(g.baggPtr->firstAction(i, tp) + j) = (ind == -1) ? Rational(0) : this->m_probs[ind];
+          s.at(g.baggPtr->firstAction(i, tp) + j) =
+              (ind == -1) ? Rational(0) : this->m_probs.GetFlattened()[ind];
         }
       }
     }
@@ -191,7 +192,7 @@ T BAGGMixedStrategyProfileRep<T>::GetPayoffDeriv(int pl, const GameStrategy &ps1
                                             ->GetStrategy(j + 1);
           const int ind = this->m_profileIndex.at(strategy);
           s.at(g.baggPtr->firstAction(i, tp) + j) =
-              static_cast<T>((ind == -1) ? T(0) : this->m_probs[ind]);
+              static_cast<T>((ind == -1) ? T(0) : this->m_probs.GetFlattened()[ind]);
         }
       }
     }

@@ -39,13 +39,12 @@ namespace Gambit {
 /// Within the support, strategies are maintained in the same order
 /// in which they appear in the underlying game.
 class StrategySupportProfile {
-protected:
-  Game m_nfg;
+  Game m_game;
   std::map<GamePlayer, std::vector<GameStrategy>> m_support;
+  CartesianSubset m_strategyDigits;
 
 public:
   class Support {
-  private:
     const StrategySupportProfile *m_profile;
     GamePlayer m_player;
 
@@ -53,15 +52,18 @@ public:
     using const_iterator = std::vector<GameStrategy>::const_iterator;
 
     Support() : m_profile(nullptr), m_player(nullptr) {}
-    Support(const StrategySupportProfile *p_profile, GamePlayer p_player)
-      : m_profile(p_profile), m_player(p_player)
+    Support(const StrategySupportProfile *profile, const GamePlayer &player)
+      : m_profile(profile), m_player(player)
     {
     }
 
     size_t size() const { return m_profile->m_support.at(m_player).size(); }
+    GameStrategy operator[](const size_t index) const
+    {
+      return m_profile->m_support.at(m_player)[index];
+    }
     GameStrategy front() const { return m_profile->m_support.at(m_player).front(); }
     GameStrategy back() const { return m_profile->m_support.at(m_player).back(); }
-
     const_iterator begin() const { return m_profile->m_support.at(m_player).begin(); }
     const_iterator end() const { return m_profile->m_support.at(m_player).end(); }
   };
@@ -77,37 +79,49 @@ public:
   /// Test for the equality of two supports (same strategies for all players)
   bool operator==(const StrategySupportProfile &p_support) const
   {
-    return (m_support == p_support.m_support);
+    return m_game == p_support.m_game &&
+           m_strategyDigits.m_allowedDigits == p_support.m_strategyDigits.m_allowedDigits;
   }
   /// Test for the inequality of two supports
   bool operator!=(const StrategySupportProfile &p_support) const
   {
-    return (m_support != p_support.m_support);
+    return m_game != p_support.m_game ||
+           m_strategyDigits.m_allowedDigits != p_support.m_strategyDigits.m_allowedDigits;
   }
   //@}
 
   /// @name General information
   //@{
   /// Returns the game on which the support is defined.
-  Game GetGame() const { return m_nfg; }
-
-  /// Returns the number of strategies in the support for all players.
-  Array<int> NumStrategies() const;
+  Game GetGame() const { return m_game; }
 
   /// Returns the total number of strategies in the support.
   int MixedProfileLength() const;
 
+  Array<size_t> GetShape() const
+  {
+    Array<size_t> shape(NumPlayers());
+    std::transform(m_strategyDigits.m_allowedDigits.begin(),
+                   m_strategyDigits.m_allowedDigits.end(), shape.begin(),
+                   [](const auto &c) { return c.size(); });
+    return shape;
+  }
   template <class T> MixedStrategyProfile<T> NewMixedStrategyProfile() const;
 
   /// Returns the number of players in the game
-  int NumPlayers() const { return m_nfg->NumPlayers(); }
+  int NumPlayers() const { return m_game->NumPlayers(); }
   /// Returns the set of players in the game
-  GameRep::Players GetPlayers() const { return m_nfg->GetPlayers(); }
+  GameRep::Players GetPlayers() const { return m_game->GetPlayers(); }
   /// Returns the set of strategies in the support for a player
   Support GetStrategies(const GamePlayer &p_player) const { return {this, p_player}; }
 
   /// Returns true exactly when the strategy is in the support.
-  bool Contains(const GameStrategy &s) const { return contains(m_support.at(s->GetPlayer()), s); }
+  bool Contains(const GameStrategy &s) const
+  {
+    const auto &digits = m_strategyDigits.m_allowedDigits[s->GetPlayer()->GetNumber() - 1];
+    const int digit = s->GetNumber() - 1;
+    return std::binary_search(digits.begin(), digits.end(), digit);
+  }
 
   /// Returns true iff this support is a (weak) subset of the specified support
   bool IsSubsetOf(const StrategySupportProfile &) const;
@@ -131,6 +145,20 @@ public:
   /// player, it is not removed.  Returns true if the removal was
   /// executed, and false if not.
   bool RemoveStrategy(const GameStrategy &);
+
+  StrategySupportProfile RestrictTo(const GameStrategy &p_strategy) const
+  {
+    if (p_strategy->GetGame() != m_game) {
+      throw MismatchException();
+    }
+    const GamePlayer player = p_strategy->GetPlayer();
+    const size_t player_index = player->GetNumber() - 1;
+    const int digit = p_strategy->GetNumber() - 1;
+    StrategySupportProfile restricted(*this);
+    restricted.m_strategyDigits.m_allowedDigits[player_index].assign(1, digit);
+    restricted.m_support.at(player) = {p_strategy};
+    return restricted;
+  }
   //@}
 
   /// @name Identification of dominated strategies

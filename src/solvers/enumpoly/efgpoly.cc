@@ -25,7 +25,7 @@
 #include "games/gameseq.h"
 #include "polysystem.h"
 #include "polysolver.h"
-#include "behavextend.h"
+#include "indexproduct.h"
 
 using namespace Gambit;
 using namespace Gambit::Nash;
@@ -151,8 +151,37 @@ std::map<GameSequence, double> ToSequenceProbs(const ProblemData &p_data, const 
   return x;
 }
 
+std::optional<MixedBehaviorProfile<double>>
+FindNashExtension(const MixedBehaviorProfile<double> &p_baseProfile, double p_maxRegret)
+{
+  const Game &game = p_baseProfile.GetGame();
+  std::list<GameInfoset> extensionInfosets;
+  for (const auto &infoset : game->GetInfosets()) {
+    if (!p_baseProfile.IsDefinedAt(infoset)) {
+      extensionInfosets.push_back(infoset);
+    }
+  }
+  Array<int> firstIndex(extensionInfosets.size());
+  std::fill(firstIndex.begin(), firstIndex.end(), 1);
+  Array<int> lastIndex(extensionInfosets.size());
+  std::transform(extensionInfosets.begin(), extensionInfosets.end(), lastIndex.begin(),
+                 [](const auto &infoset) { return infoset->GetActions().size(); });
+  CartesianIndexProduct indices(firstIndex, lastIndex);
+  for (const auto &index : indices) {
+    auto extension = p_baseProfile.ToFullSupport();
+    for (auto [i, infoset] : enumerate(extensionInfosets)) {
+      extension[infoset->GetAction(index[i + 1])] = 1.0;
+    }
+    if (extension.GetMaxRegret() < p_maxRegret) {
+      return extension;
+    }
+  }
+  return std::nullopt;
+}
+
 std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfile &p_support,
-                                                     bool &p_isSingular, int p_stopAfter)
+                                                     bool &p_isSingular, int p_stopAfter,
+                                                     double p_maxRegret)
 {
   ProblemData data(p_support);
   PolynomialSystem<double> equations(data.space);
@@ -161,8 +190,8 @@ std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfil
 
   // set up the rectangle of search
   Vector<double> bottoms(data.space->GetDimension()), tops(data.space->GetDimension());
-  bottoms = 0;
-  tops = 1;
+  bottoms = 1e-12;
+  tops = 1 - 1e-12;
 
   PolynomialSystemSolver solver(equations);
   std::list<Vector<double>> roots;
@@ -174,17 +203,16 @@ std::list<MixedBehaviorProfile<double>> SolveSupport(const BehaviorSupportProfil
     p_isSingular = true;
   }
   catch (const std::domain_error &) {
-    // std::cerr << "Assertion warning: " << e.what() << std::endl;
     p_isSingular = true;
   }
 
   std::list<MixedBehaviorProfile<double>> solutions;
-  for (auto root : roots) {
+  for (const auto &root : roots) {
     const MixedBehaviorProfile<double> sol(
         data.m_support.ToMixedBehaviorProfile(ToSequenceProbs(data, root)));
-    if (ExtendsToNash(sol, BehaviorSupportProfile(sol.GetGame()),
-                      BehaviorSupportProfile(sol.GetGame()))) {
-      solutions.push_back(sol);
+    auto extended = FindNashExtension(sol, p_maxRegret);
+    if (extended.has_value()) {
+      solutions.push_back(extended.value());
     }
   }
   return solutions;
@@ -210,13 +238,11 @@ EnumPolyBehaviorSolve(const Game &p_game, int p_stopAfter, double p_maxregret,
   for (auto support : possible_supports->m_supports) {
     p_onSupport("candidate", support);
     bool isSingular = false;
-    for (auto solution :
-         SolveSupport(support, isSingular, std::max(p_stopAfter - int(ret.size()), 0))) {
-      const MixedBehaviorProfile<double> fullProfile = solution.ToFullSupport();
-      if (fullProfile.GetAgentMaxRegret() < p_maxregret) {
-        p_onEquilibrium(fullProfile);
-        ret.push_back(fullProfile);
-      }
+    for (const auto &solution :
+         SolveSupport(support, isSingular, std::max(p_stopAfter - static_cast<int>(ret.size()), 0),
+                      p_maxregret)) {
+      p_onEquilibrium(solution);
+      ret.push_back(solution);
     }
     if (isSingular) {
       p_onSupport("singular", support);

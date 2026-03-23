@@ -1,3 +1,7 @@
+import dataclasses
+import functools
+import typing
+
 import pytest
 
 import pygambit as gbt
@@ -71,86 +75,160 @@ def test_infoset_plays():
     assert set(test_infoset.plays) == expected_set_of_plays
 
 
-@pytest.mark.parametrize("game_file, expected_results", [
-    # Perfect recall game
-    (
-        "binary_3_levels_generic_payoffs.efg",
-        [
-            # Player 1, Infoset 0 (Root):
-            # No prior history.
-            ("Player 1", 0, {None}),
+@dataclasses.dataclass
+class PriorActionsTestCase:
+    """TestCase for testing own_prior_actions."""
+    factory: typing.Callable[[], gbt.Game]
+    expected_results: list[tuple]
 
-            # Player 1, Infoset 1:
-            # Reached via "Left" from Infoset 0.
-            ("Player 1", 1, {("Player 1", 0, "Left")}),
 
-            # Player 1, Infoset 2:
-            # Reached via "Right" from Infoset 0.
-            ("Player 1", 2, {("Player 1", 0, "Right")}),
+@dataclasses.dataclass
+class AbsentMindednessTestCase:
+    """TestCase for testing is_absent_minded."""
+    factory: typing.Callable[[], gbt.Game]
+    expected_am_paths: list[list[str]]
 
-            # Player 2, Infoset 0:
-            # No prior history.
-            ("Player 2", 0, {None}),
-        ]
+
+PRIOR_ACTIONS_CASES = [
+    pytest.param(
+        PriorActionsTestCase(
+            factory=functools.partial(games.read_from_file, "binary_3_levels_generic_payoffs.efg"),
+            expected_results=[
+                ("Player 1", 0, {None}),
+                ("Player 1", 1, {("Player 1", 0, "Left")}),
+                ("Player 1", 2, {("Player 1", 0, "Right")}),
+                ("Player 2", 0, {None}),
+            ]
+        ),
+        id="perfect_recall"
     ),
-    # Imperfect recall games, no absent-mindedness
-    (
-        "wichardt.efg",
-        [
-            # Player 1, Infoset 0 (Root):
-            # No prior history.
-            ("Player 1", 0, {None}),
-
-            # Player 1, Infoset 1:
-            # Reachable via "L" or "R" from Infoset 0.
-            ("Player 1", 1, {("Player 1", 0, "L"), ("Player 1", 0, "R")}),
-
-            # Player 2, Infoset 0:
-            # No prior history.
-            ("Player 2", 0, {None}),
-        ]
+    pytest.param(
+        PriorActionsTestCase(
+            factory=functools.partial(games.read_from_file, "wichardt.efg"),
+            expected_results=[
+                ("Player 1", 0, {None}),
+                ("Player 1", 1, {("Player 1", 0, "L"), ("Player 1", 0, "R")}),
+                ("Player 2", 0, {None}),
+            ]
+        ),
+        id="wichardt_forgetting_action"
     ),
-    (
-        "subgames.efg",
-        [
-            ("Player 1", 0, {None}),
-            ("Player 1", 1, {None}),
-            ("Player 1", 2, {("Player 1", 1, "1")}),
-            ("Player 1", 3, {("Player 1", 5, "1"), ("Player 1", 1, "2")}),
-            ("Player 1", 4, {("Player 1", 1, "2")}),
-            ("Player 1", 5, {("Player 1", 4, "2")}),
-            ("Player 1", 6, {("Player 1", 1, "2")}),
-            ("Player 2", 0, {None}),
-            ("Player 2", 1, {("Player 2", 0, "2")}),
-            ("Player 2", 2, {("Player 2", 1, "1")}),
-            ("Player 2", 3, {("Player 2", 2, "1")}),
-            ("Player 2", 4, {("Player 2", 2, "2")}),
-            ("Player 2", 5, {("Player 2", 4, "1")}),
-        ]
+    pytest.param(
+        PriorActionsTestCase(
+            factory=functools.partial(games.read_from_file, "subgames.efg"),
+            expected_results=[
+                ("Player 1", 0, {None}),
+                ("Player 1", 1, {None}),
+                ("Player 1", 2, {("Player 1", 1, "1")}),
+                ("Player 1", 3, {("Player 1", 5, "1"), ("Player 1", 1, "2")}),
+                ("Player 1", 4, {("Player 1", 1, "2")}),
+                ("Player 1", 5, {("Player 1", 4, "2")}),
+                ("Player 1", 6, {("Player 1", 1, "2")}),
+                ("Player 2", 0, {None}),
+                ("Player 2", 1, {("Player 2", 0, "2")}),
+                ("Player 2", 2, {("Player 2", 1, "1")}),
+                ("Player 2", 3, {("Player 2", 2, "1")}),
+                ("Player 2", 4, {("Player 2", 2, "2")}),
+                ("Player 2", 5, {("Player 2", 4, "1")}),
+            ]
+        ),
+        id="four_subgames"
     ),
-    # An absent-minded driver game
-    (
-        "AM-driver-subgame.efg",
-        [
-            # Player 1, Infoset 0:
-            # One member is the root (no prior history),
-            # the other is reached via "S" from this same infoset.
-            ("Player 1", 0, {None, ("Player 1", 0, "S")}),
+    pytest.param(
+        PriorActionsTestCase(
+            factory=functools.partial(games.read_from_file, "AM-driver-subgame.efg"),
+            expected_results=[
+                ("Player 1", 0, {None, ("Player 1", 0, "S")}),
+                ("Player 2", 0, {None}),
+            ]
+        ),
+        id="AM_driver"
+    ),
+]
 
-            # Player 2, Infoset 0:
-            # No prior history.
-            ("Player 2", 0, {None}),
-        ]
+ABSENT_MINDEDNESS_CASES = [
+    # Games without absent-mindedness
+    pytest.param(
+        AbsentMindednessTestCase(
+            factory=functools.partial(games.read_from_file, "e02.efg"),
+            expected_am_paths=[]
+        ),
+        id="short_centipede_perfect_info"
     ),
-])
-def test_infoset_own_prior_actions(game_file, expected_results):
+    pytest.param(
+        AbsentMindednessTestCase(
+            factory=functools.partial(games.read_from_file, "stripped_down_poker.efg"),
+            expected_am_paths=[]
+        ),
+        id="poker_stripped"
+    ),
+    pytest.param(
+        AbsentMindednessTestCase(
+            factory=functools.partial(games.read_from_file, "basic_extensive_game.efg"),
+            expected_am_paths=[]
+        ),
+        id="basic_extensive"
+    ),
+    pytest.param(
+        AbsentMindednessTestCase(
+            factory=functools.partial(games.read_from_file, "gilboa_two_am_agents.efg"),
+            expected_am_paths=[]
+        ),
+        id="gilboa_forgetting_info"
+    ),
+    pytest.param(
+        AbsentMindednessTestCase(
+            factory=functools.partial(games.read_from_file, "wichardt.efg"),
+            expected_am_paths=[]
+        ),
+        id="wichardt_forgetting_action"
+    ),
+    # Games with absent-mindedness
+    pytest.param(
+        AbsentMindednessTestCase(
+            factory=functools.partial(games.read_from_file, "noPR-AM-driver-two-players.efg"),
+            expected_am_paths=[[]]
+        ),
+        id="AM_driver_two_players"
+    ),
+    pytest.param(
+        AbsentMindednessTestCase(
+            factory=functools.partial(games.read_from_file, "noPR-action-AM.efg"),
+            expected_am_paths=[[]]
+        ),
+        id="AM_forgetting_action"
+    ),
+    pytest.param(
+        AbsentMindednessTestCase(
+            factory=functools.partial(games.read_from_file, "noPR-action-AM-two-hops.efg"),
+            expected_am_paths=[["2", "1", "1", "1", "1"], ["1", "1", "1"]]
+        ),
+        id="AM_infoset_takes_two_hops"
+    ),
+]
+
+
+def _get_node_by_path(game, path: list[str]) -> gbt.Node:
     """
-    Tests `infoset.own_prior_actions` by collecting the action details
-    (player label, infoset num, label) and comparing against expected sets.
+    Helper to find a node by following a sequence of action labels.
     """
-    game = games.read_from_file(game_file)
+    node = game.root
+    for action_label in reversed(path):
+        node = node.children[action_label]
+    return node
 
-    for player_label, infoset_num, expected_set in expected_results:
+
+@pytest.mark.parametrize("test_case", PRIOR_ACTIONS_CASES)
+def test_infoset_own_prior_actions(test_case: PriorActionsTestCase):
+    """
+    Test `infoset.own_prior_actions`.
+
+    Verifies that the set of prior actions (as player-infoset-label tuples)
+    matches the expected results.
+    """
+    game = test_case.factory()
+
+    for player_label, infoset_num, expected_set in test_case.expected_results:
         player = game.players[player_label]
         infoset = player.infosets[infoset_num]
 
@@ -164,42 +242,19 @@ def test_infoset_own_prior_actions(game_file, expected_results):
         assert actual_details == expected_set
 
 
-def _get_node_by_path(game, path: list[str]) -> gbt.Node:
+@pytest.mark.parametrize("test_case", ABSENT_MINDEDNESS_CASES)
+def test_infoset_is_absent_minded(test_case: AbsentMindednessTestCase):
     """
-    Helper to find a node by following a sequence of action labels.
+    Test `infoset.is_absent_minded`.
 
-    Parameters
-    ----------
-    path : list[str]
-        A list of action labels in Node->Root order.
+    Verifies that the set of infosets marked as absent-minded matches the
+    expected set derived from action paths.
     """
-    node = game.root
-    for action_label in reversed(path):
-        node = node.children[action_label]
+    game = test_case.factory()
 
-    return node
-
-
-@pytest.mark.parametrize("game_input, expected_am_paths", [
-    # Games without absent-mindedness
-    ("e02.efg", []),
-    ("stripped_down_poker.efg", []),
-    ("basic_extensive_game.efg", []),
-    ("gilboa_two_am_agents.efg", []),  # forgetting past information; Gilboa (GEB, 1997)
-    ("wichardt.efg", []),              # forgetting past action; Wichardt (GEB, 2008)
-
-    # Games with absent-mindedness
-    ("noPR-AM-driver-two-players.efg", [[]]),
-    ("noPR-action-AM.efg", [[]]),
-    ("noPR-action-AM-two-hops.efg", [["2", "1", "1", "1", "1"], ["1", "1", "1"]]),
-])
-def test_infoset_is_absent_minded(game_input, expected_am_paths):
-    """
-    Verify the is_absent_minded property of information sets.
-    """
-    game = games.read_from_file(game_input)
-
-    expected_infosets = {_get_node_by_path(game, path).infoset for path in expected_am_paths}
+    expected_infosets = {
+        _get_node_by_path(game, path).infoset for path in test_case.expected_am_paths
+        }
     actual_infosets = {infoset for infoset in game.infosets if infoset.is_absent_minded}
 
     assert actual_infosets == expected_infosets
