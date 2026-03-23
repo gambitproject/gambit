@@ -83,7 +83,7 @@ def enumpure_solve(game: libgbt.Game) -> NashComputationResult:
     res : NashComputationResult
         The result represented as a ``NashComputationResult`` object.
 
-    See also
+    See Also
     --------
     enumpure_agent_solve
     """
@@ -113,7 +113,7 @@ def enumpure_agent_solve(game: libgbt.Game) -> NashComputationResult:
     res : NashComputationResult
         The result represented as a ``NashComputationResult`` object.
 
-    See also
+    See Also
     --------
     enumpure_solve
     """

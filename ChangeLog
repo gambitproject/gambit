@@ -4,6 +4,10 @@
 
 ### Changed
 - `Game.comment` has been renamed to `Game.description`
+- With behaviour profiles that reach some information sets with probability zero, beliefs, action
+  values, infoset values, and node values are not well-defined.  These functions now return a
+  `std::optional` in C++ and type or `None` in Python, where nulls indicate these quantities
+  are not defined.  (#446)
 
 ### Added
 - Implement linear-time algorithm to find all root nodes of proper subgames, using an adaptation of
@@ -20,10 +24,6 @@
   root node is a member of an absent-minded infoset.  (#584)
 - Removed spurious warning in graphical interface when loading file as a command-line argument
   (or also by clicking on a file in MSW, as that uses the command-line mechanism).  (#801)
-
-## [16.5.1] - unreleased
-
-### Fixed
 - `Game.reveal` raised a null pointer access exception or dumped core in some cases (#749)
 
 ## [16.5.0] - 2026-01-05

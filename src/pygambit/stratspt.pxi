@@ -121,7 +121,7 @@ class StrategySupportProfile:
     def __and__(self, other: StrategySupportProfile) -> StrategySupportProfile:
         """Operator version of set intersection on support profiles.
 
-        See also
+        See Also
         --------
         intersection
         """
@@ -130,7 +130,7 @@ class StrategySupportProfile:
     def __or__(self, other: StrategySupportProfile) -> StrategySupportProfile:
         """Operator version of set union on support profiles.
 
-        See also
+        See Also
         --------
         union
         """
@@ -139,7 +139,7 @@ class StrategySupportProfile:
     def __sub__(self, other: StrategySupportProfile) -> StrategySupportProfile:
         """Operator version of set difference on support profiles.
 
-        See also
+        See Also
         --------
         difference
         """

@@ -603,6 +603,10 @@ class MixedBehaviorProfile:
         ------
         MismatchError
             If `node` is not in the same game as the profile
+
+        See Also
+        --------
+        MixedBehaviorProfile.infoset_prob
         """
         self._check_validity()
         return self._belief(self.game._resolve_node(node, "belief"))
@@ -659,6 +663,10 @@ class MixedBehaviorProfile:
             `node` is a string and no node in the game has that label.
         ValueError
             If `player` resolves to the chance player
+
+        See Also
+        --------
+        MixedBehaviorProfile.infoset_prob
         """
         self._check_validity()
         resolved_player = self.game._resolve_player(player, "node_value")
@@ -688,6 +696,10 @@ class MixedBehaviorProfile:
             If `infoset` is a string and no information set in the game has that label.
         ValueError
             If `infoset` resolves to an infoset that belongs to the chance player
+
+        See Also
+        --------
+        MixedBehaviorProfile.infoset_prob
         """
         self._check_validity()
         resolved_infoset = self.game._resolve_infoset(infoset, "infoset_value")
@@ -717,7 +729,7 @@ class MixedBehaviorProfile:
         ValueError
             If `action` resolves to an action that belongs to the chance player
 
-        See also
+        See Also
         --------
         MixedBehaviorProfile.infoset_prob
         """
