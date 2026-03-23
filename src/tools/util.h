@@ -229,7 +229,10 @@ void MixedBehaviorProfileDetailRenderer<T>::Render(const MixedBehaviorProfile<T>
         m_stream << lexical_cast<std::string>(p_profile[action], m_numDecimals);
         m_stream << "   ";
         m_stream << std::setw(11);
-        m_stream << lexical_cast<std::string>(p_profile.GetPayoff(action), m_numDecimals);
+        std::optional<T> actionValue = p_profile.GetPayoff(action);
+        if (actionValue.has_value()) {
+          m_stream << lexical_cast<std::string>(actionValue.value(), m_numDecimals);
+        }
         m_stream << std::endl;
       }
     }
@@ -253,7 +256,13 @@ void MixedBehaviorProfileDetailRenderer<T>::Render(const MixedBehaviorProfile<T>
           m_stream << std::setw(7) << node->GetNumber() << "   ";
         }
         m_stream << std::setw(11);
-        m_stream << lexical_cast<std::string>(p_profile.GetBeliefProb(node), m_numDecimals);
+        auto belief = p_profile.GetBeliefProb(node);
+        if (belief.has_value()) {
+          m_stream << lexical_cast<std::string>(belief.value(), m_numDecimals);
+        }
+        else {
+          m_stream << "";
+        }
         m_stream << "   ";
         m_stream << std::setw(11);
         m_stream << lexical_cast<std::string>(p_profile.GetRealizProb(node), m_numDecimals);

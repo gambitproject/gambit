@@ -68,7 +68,9 @@ inline bool IsAgentNash(const PureBehaviorProfile &p_profile)
     auto current = p_profile.GetPayoff<Rational>(player);
     for (const auto &infoset : player->GetInfosets()) {
       for (const auto &action : infoset->GetActions()) {
-        if (p_profile.GetPayoff<Rational>(action) > current) {
+        auto deviation = p_profile;
+        deviation.SetAction(action);
+        if (deviation.GetPayoff<Rational>(player) > current) {
           return false;
         }
       }
