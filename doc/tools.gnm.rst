@@ -1,9 +1,10 @@
 .. _gambit-gnm:
 
-:program:`gambit-gnm`: Compute Nash equilibria in a strategic game using a global Newton method
-===============================================================================================
+:program:`gambit-gnm`
+=====================
 
-:ref:`Algorithm description <gnm>`
+Compute Nash equilibria in a strategic game using a global Newton method.
+See the :ref:`algorithm description <gnm>` for full details.
 
 The algorithm finds a subset of equilibria starting from any given profile.
 Multiple starting profiles may be generated via the `-n` option or specified

@@ -1,20 +1,10 @@
 .. _gambit-logit:
 
-:program:`gambit-logit`: Compute quantal response equilbria
-===========================================================
+:program:`gambit-logit`
+=======================
 
-:ref:`Algorithm description <logit>`
-
-The option `-s` sets
-the initial step size for the predictor phase of the tracing. This
-step size is then dynamically adjusted based on the rate of
-convergence of Newton's method in the corrector step. If the
-convergence is fast, the step size is adjusted upward (accelerated);
-if it is slow, the step size is decreased (decelerated). The option
-`-a` sets the maximum acceleration (or deceleration). As described in
-Turocy [Tur05]_, this acceleration helps to
-efficiently trace the correspondence when it reaches its asymptotic
-phase for large values of the precision parameter lambda.
+Compute and/or estimate quantal response equilbria.
+See the :ref:`algorithm description <logit>` for full details.
 
 .. versionchanged:: 16.2.0
 

@@ -1,9 +1,10 @@
 .. _gambit-simpdiv:
 
-:program:`gambit-simpdiv`: Compute equilibria via simplicial subdivision
-========================================================================
+:program:`gambit-simpdiv`
+=========================
 
-:ref:`Algorithm description <simpdiv>`
+Compute equilibria via simplicial subdivision.
+See the :ref:`algorithm description <simpdiv>`.
 
 The algorithm begins with any mixed strategy profile consisting of
 rational numbers as probabilities. Without any options, the algorithm

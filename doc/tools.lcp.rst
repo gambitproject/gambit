@@ -1,10 +1,10 @@
 .. _gambit-lcp:
 
-:program:`gambit-lcp`: Compute equilibria in a two-player game via linear complementarity
-=========================================================================================
+:program:`gambit-lcp`
+=====================
 
-
-:ref:`Algorithm description <lcp>`
+Compute equilibria in a two-player game via linear complementarity.
+See the :ref:`algorithm description <lcp>` for full details.
 
 .. program:: gambit-lcp
 

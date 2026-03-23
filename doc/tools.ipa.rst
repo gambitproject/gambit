@@ -1,9 +1,10 @@
 .. _gambit-ipa:
 
-:program:`gambit-ipa`: Compute Nash equilibria in a strategic game using iterated polymatrix approximation
-==========================================================================================================
+:program:`gambit-ipa`
+=====================
 
-:ref:`Algorithm description <ipa>`
+Compute Nash equilibria in a strategic game using iterated polymatrix approximation.
+See the :ref:`algorithm description <ipa>` for full details.
 
 The algorithm finds at most one equilibrium starting from any given profile.
 Multiple starting profiles may be generated via the `-n` option or specified

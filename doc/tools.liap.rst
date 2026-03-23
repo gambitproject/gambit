@@ -1,9 +1,10 @@
 .. _gambit-liap:
 
-:program:`gambit-liap`: Compute Nash equilibria using function minimization
-===========================================================================
+:program:`gambit-liap`
+======================
 
-:ref:`Algorithm description <liap>`
+Compute Nash equilibria using function minimization.
+See the :ref:`algorithm description <liap>` for full details.
 
 .. versionchanged:: 16.2.0
 

@@ -1,10 +1,10 @@
 .. _algorithms:
 
-Nash equilibria algorithms
-==========================
+Equilibrium computation
+=======================
 
-The table below summarizes the available PyGambit functions and corresponding Gambit CLI commandsto algorithms for computing Nash equilibria.
-Scroll down for detailed descriptions of each algorithm.
+The table below summarizes the available PyGambit functions and corresponding Gambit CLI programs
+for algorithms for computing Nash equilibria.
 
 ================  ===========================================================================   ========================================  ==========================================
 Algorithm         Description                                                                   PyGambit function                         CLI command
@@ -14,11 +14,11 @@ Algorithm         Description                                                   
 :ref:`enumpoly`   Compute equilibria of a game using polynomial systems of equations            :py:func:`pygambit.nash.enumpoly_solve`   :ref:`gambit-enumpoly <gambit-enumpoly>`
 :ref:`lp`         Compute equilibria in a two-player constant-sum game via linear programming   :py:func:`pygambit.nash.lp_solve`         :ref:`gambit-lp <gambit-lp>`
 :ref:`lcp`        Compute equilibria in a two-player game via linear complementarity            :py:func:`pygambit.nash.lcp_solve`        :ref:`gambit-lcp <gambit-lcp>`
-:ref:`liap`       Compute Nash equilibria using function minimization                           :py:func:`pygambit.nash.liap_solve`       :ref:`gambit-liap <gambit-liap>`
-:ref:`logit`      Compute quantal response equilbria                                            :py:func:`pygambit.nash.logit_solve`      :ref:`gambit-logit <gambit-logit>`
+:ref:`liap`       Compute equilibria using function minimization                                :py:func:`pygambit.nash.liap_solve`       :ref:`gambit-liap <gambit-liap>`
+:ref:`logit`      Compute quantal response equilibria                                           :py:func:`pygambit.nash.logit_solve`      :ref:`gambit-logit <gambit-logit>`
 :ref:`simpdiv`    Compute equilibria via simplicial subdivision                                 :py:func:`pygambit.nash.simpdiv_solve`    :ref:`gambit-simpdiv <gambit-simpdiv>`
-:ref:`ipa`        Compute Nash equilibria using iterated polymatrix approximation               :py:func:`pygambit.nash.ipa_solve`        :ref:`gambit-ipa <gambit-ipa>`
-:ref:`gnm`        Compute Nash equilibria using a global Newton method                          :py:func:`pygambit.nash.gnm_solve`        :ref:`gambit-gnm <gambit-gnm>`
+:ref:`ipa`        Compute equilibria using iterated polymatrix approximation                    :py:func:`pygambit.nash.ipa_solve`        :ref:`gambit-ipa <gambit-ipa>`
+:ref:`gnm`        Compute equilibria using a global Newton method                               :py:func:`pygambit.nash.gnm_solve`        :ref:`gambit-gnm <gambit-gnm>`
 ================  ===========================================================================   ========================================  ==========================================
 
 .. _enumpure:
@@ -26,14 +26,14 @@ Algorithm         Description                                                   
 enumpure
 --------
 
-Reads a game on standard input and searches for pure-strategy Nash equilibria.
+Searches for pure-strategy Nash or agent Nash equilibria.
 
 .. _enummixed:
 
 enummixed
 ---------
 
-Reads a two-player game on standard input and computes Nash equilibria using extreme point enumeration.
+Computes Nash equilibria using extreme point enumeration.
 
 In a two-player strategic game, the set of Nash equilibria can be expressed as the union of convex sets.
 This program generates all the extreme points of those convex sets. (Mangasarian [Man64]_)
@@ -46,8 +46,7 @@ It was shown by Shapley [Sha74]_ that there are equilibria not accessible via th
 enumpoly
 --------
 
-Reads a game on standard input and
-computes Nash equilibria by solving systems of polynomial equations
+Computes Nash equilibria by solving systems of polynomial equations
 and inequalities.
 
 This program searches for all Nash equilibria in a strategic game
@@ -69,15 +68,28 @@ supports which have the fewest strategies in total.  For many classes
 of games, this will tend to lower the average time until finding one equilibrium,
 as well as finding the second equilibrium (if one exists).
 
+For extensive games, a support of actions equates to allowing positive
+probabilities over a subset of terminal nodes.  The indifference conditions
+used are those for the sequence form defined on the projection of the game
+to that support of actions.  A solution to these equations implies a probability
+distribution over terminal nodes.  The algorithm then searches for
+a profile that is a Nash equilibrium that implements that probability
+distribution.  If there exists at least one such profile, a sample one is returned.
+Note that for probability distributions which assign zero probability to some terminal
+nodes, it is generally the case that there are (infinitely) many such profiles.
+Subsequent analysis of unreached information sets can yield alternative
+profiles that specify different choices at unreached information sets
+while still satisfying the Nash equilibrium conditions.
+
 .. _lp:
 
 lp
 ---
 
-Reads a two-player constant-sum game on standard input
-and computes a Nash equilibrium by solving a linear program. The
+Computes a Nash equilibrium in a two-player game by solving a linear program.
+For extensive games, the
 program uses the sequence form formulation of Koller, Megiddo, and von
-Stengel [KolMegSte94]_ for extensive games.
+Stengel [KolMegSte94]_.
 
 While the set of equilibria in a two-player constant-sum strategic
 game is convex, this method will only identify one of the extreme
@@ -88,8 +100,7 @@ points of that set.
 lcp
 ---
 
-Reads a two-player game on standard input and
-computes Nash equilibria by finding solutions to a linear
+Computes Nash equilibria of a two-player game by finding solutions to a linear
 complementarity problem. For extensive games, the program uses the
 sequence form representation of the extensive game, as defined by
 Koller, Megiddo, and von Stengel [KolMegSte94]_, and applies the
@@ -113,8 +124,7 @@ game.
 liap
 ----
 
-Reads a game on standard input and computes
-approximate Nash equilibria using a function minimization approach.
+Computes approximate Nash equilibria using a function minimization approach.
 
 This procedure searches for equilibria by generating random starting
 points and using conjugate gradient descent to minimize the Lyapunov
@@ -129,7 +139,7 @@ not guaranteed to find all, or even any, Nash equilibria.
 logit
 -----
 
-Reads a game on standard input and computes the
+Computes the
 principal branch of the (logit) quantal response correspondence.
 
 The method is based on the procedure described in Turocy [Tur05]_ for
@@ -145,6 +155,16 @@ the correspondence, followed by a corrector step which refines the
 prediction using Newton's method for finding a zero of a function. Two
 parameters control the operation of this tracing.
 
+The algorithm accepts an initial step size for the predictor phase of the tracing. This
+step size is then dynamically adjusted based on the rate of
+convergence of Newton's method in the corrector step. If the
+convergence is fast, the step size is adjusted upward (accelerated);
+if it is slow, the step size is decreased (decelerated). The
+maximum acceleration (or deceleration) can be set as an argument.  As described in
+Turocy [Tur05]_, this acceleration helps to
+efficiently trace the correspondence when it reaches its asymptotic
+phase for large values of the precision parameter lambda.
+
 In extensive games, logit quantal response equilibria are not well-defined
 if an information set is not reached due to being the successor of chance
 moves with zero probability.  In such games, the implementation treats
@@ -155,8 +175,7 @@ the beliefs at such information sets as being uniform across all member nodes.
 simpdiv
 --------
 
-Reads a game on standard input and computes
-approximations to Nash equilibria using a simplicial subdivision
+Computes approximations to Nash equilibria using a simplicial subdivision
 approach.
 
 This program implements the algorithm of van der Laan, Talman, and van
@@ -173,7 +192,7 @@ small.
 ipa
 ---
 
-Reads a game on standard input and computes Nash
+Computes Nash
 equilibria using an iterated polymatrix approximation approach
 developed by Govindan and Wilson [GovWil04]_.
 This program is based on the
@@ -190,7 +209,7 @@ be unique.
 gnm
 ---
 
-Reads a game on standard input and computes Nash
+Computes Nash
 equilibria using a global Newton method approach developed by Govindan
 and Wilson [GovWil03]_. This program is based on the
 `Gametracer 0.2 <http://dags.stanford.edu/Games/gametracer.html>`_

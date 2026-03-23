@@ -1,9 +1,10 @@
 .. _gambit-enummixed:
 
-:program:`gambit-enummixed`: Enumerate equilibria in a two-player game
-======================================================================
+:program:`gambit-enummixed`
+===========================
 
-:ref:`Algorithm description <enummixed>`
+Enumerate equilibria in a two-player game.
+See the :ref:`algorithm description <enummixed>` for full details.
 
 .. program:: gambit-enummixed
 

@@ -1,9 +1,10 @@
 .. _gambit-enumpure:
 
-:program:`gambit-enumpure`: Enumerate pure-strategy equilibria of a game
-========================================================================
+:program:`gambit-enumpure`
+==========================
 
-:ref:`Algorithm description <enumpure>`
+Enumerate pure-strategy equilibria of a game.
+See the :ref:`algorithm description <enumpure>` for full details.
 
 .. versionchanged:: 14.0.2
    The effect of the `-S` switch is now purely cosmetic, determining

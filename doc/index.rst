@@ -34,10 +34,10 @@ construction and analysis of finite extensive and strategic games.
          :expand:
 
 
-   .. grid-item-card:: 🧮 Algorithms for computing Nash equilibria
+   .. grid-item-card:: 🧮 Analysing games
       :columns: 4
 
-      Read about the algorithms available in Gambit for computing Nash equilibria.
+      Compute equilibria and run econometric estimations.
 
       .. button-ref:: algorithms
          :ref-type: ref

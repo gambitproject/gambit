@@ -1,9 +1,10 @@
 .. _gambit-lp:
 
-:program:`gambit-lp`: Compute equilibria in a two-player constant-sum game via linear programming
-=================================================================================================
+:program:`gambit-lp`
+====================
 
-:ref:`Algorithm description <lp>`
+Compute equilibria in a two-player constant-sum game via linear programming.
+See the :ref:`algorithm description <lp>` for full details.
 
 .. program:: gambit-lp
 
