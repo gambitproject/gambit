@@ -34,12 +34,12 @@ construction and analysis of finite extensive and strategic games.
          :expand:
 
 
-   .. grid-item-card:: 🖥️ Command-line tools
+   .. grid-item-card:: 🧮 Analysing games
       :columns: 4
 
-      Quickly compute equilibria with the Gambit command-line tools.
+      Compute equilibria and run econometric estimations.
 
-      .. button-ref:: command-line
+      .. button-ref:: algorithms
          :ref-type: ref
          :click-parent:
          :color: secondary
@@ -84,6 +84,7 @@ construction and analysis of finite extensive and strategic games.
    :maxdepth: 1
 
    install
+   algorithms
    pygambit
    tools
    gui

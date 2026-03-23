@@ -1,20 +1,10 @@
 .. _gambit-simpdiv:
 
-:program:`gambit-simpdiv`: Compute equilibria via simplicial subdivision
-========================================================================
+:program:`gambit-simpdiv`
+=========================
 
-:program:`gambit-simpdiv` reads a game on standard input and computes
-approximations to Nash equilibria using a simplicial subdivision
-approach.
-
-This program implements the algorithm of van der Laan, Talman, and van
-Der Heyden [VTH87]_. The algorithm proceeds by constructing a triangulated grid
-over the space of mixed strategy profiles, and uses a path-following
-method to compute an approximate fixed point. This approximate fixed
-point can then be used as a starting point on a refinement of the
-grid. The program continues this process with finer and finer grids
-until locating a mixed strategy profile at which the maximum regret is
-small.
+Compute equilibria via simplicial subdivision.
+See the :ref:`algorithm description <simpdiv>`.
 
 The algorithm begins with any mixed strategy profile consisting of
 rational numbers as probabilities. Without any options, the algorithm
