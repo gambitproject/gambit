@@ -1,8 +1,9 @@
 # Changelog
 
-## [16.6.0] - unreleased
+## [16.6.0] - 2026-03-24
 
 ### Changed
+- Gambit has a refreshed branding and logo which is reflected in this release!
 - `Game.comment` has been renamed to `Game.description`
 - With behaviour profiles that reach some information sets with probability zero, beliefs, action
   values, and infoset values are not well-defined.  These functions now return a
