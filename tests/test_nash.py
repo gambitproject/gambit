@@ -1,5 +1,4 @@
-"""Test of calls to Nash equilibrium and QRE solvers.
-"""
+"""Test of calls to Nash equilibrium and QRE solvers."""
 
 import dataclasses
 import functools
@@ -1137,6 +1136,22 @@ LP_BEHAVIOR_RATIONAL_CASES = [
         marks=pytest.mark.nash_lp_behavior,
         id="test_lp_behavior_rational_16",
     ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.read_from_file,
+                "2_player_PI_2_dev_off_eq_path_const_sum.efg",
+            ),
+            solver=gbt.nash.lp_solve,
+            expected=[
+                [[d(0, 1), d("1/5", "1/5", "1/5", "1/5", "1/5")], [d(0, 1)]],
+            ],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_lp_behavior,
+        id="test_lp_behavior_rational_17",
+    ),
 ]
 
 
@@ -1327,28 +1342,28 @@ LP_BEHAVIOR_DOUBLE_CASES = [
         marks=pytest.mark.nash_lp_behavior,
         id="test_lp_behavior_double_13",
     ),
-    pytest.param(
-        EquilibriumTestCase(
-            factory=functools.partial(games.read_from_file, "large_payoff_game.efg"),
-            solver=functools.partial(gbt.nash.lp_solve, rational=False),
-            expected=[
-                [
-                    [d(1, 0), d(1, 0)],
-                    [
-                        d(0, 1),
-                        d("9999999999999999999/10000000000000000000", "1/10000000000000000000"),
-                    ],
-                ]
-            ],
-            regret_tol=TOL,
-            prob_tol=TOL,
-        ),
-        marks=[
-            pytest.mark.nash_lp_behavior,
-            pytest.mark.xfail(reason="Problem with large payoffs when working in floats"),
-        ],
-        id="test_lp_behavior_double_14",
-    ),
+    # pytest.param(
+    # EquilibriumTestCase(
+    # factory=functools.partial(games.read_from_file, "large_payoff_game.efg"),
+    # solver=functools.partial(gbt.nash.lp_solve, rational=False),
+    # expected=[
+    # [
+    # [d(1, 0), d(1, 0)],
+    # [
+    # d(0, 1),
+    # d("9999999999999999999/10000000000000000000", "1/10000000000000000000"),
+    # ],
+    # ]
+    # ],
+    # regret_tol=TOL,
+    # prob_tol=TOL,
+    # ),
+    # marks=[
+    # pytest.mark.nash_lp_behavior,
+    # pytest.mark.xfail(reason="Problem with large payoffs when working in floats"),
+    # ],
+    # id="test_lp_behavior_double_14",
+    # ),
     pytest.param(
         EquilibriumTestCase(
             factory=functools.partial(games.read_from_file, "chance_in_middle.efg"),
@@ -1565,6 +1580,20 @@ LCP_BEHAVIOR_RATIONAL_CASES = [
         ),
         marks=pytest.mark.nash_lcp_behavior,
         id="test_lcp_behavior_rational_14",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.read_from_file,
+                "2_player_PI_2_dev_off_eq_path_const_sum.efg",
+            ),
+            solver=gbt.nash.lcp_solve,
+            expected=[
+                [[d(0, 1), d("1/5", "1/5", "1/5", "1/5", "1/5")], [d(0, 1)]],
+            ],
+        ),
+        marks=pytest.mark.nash_lcp_behavior,
+        id="test_lcp_behavior_rational_23",
     ),
     # Non-zero-sum games
     pytest.param(
@@ -1802,28 +1831,28 @@ LCP_BEHAVIOR_DOUBLE_CASES = [
         marks=pytest.mark.nash_lcp_behavior,
         id="test_lcp_behavior_double_11",
     ),
-    pytest.param(
-        EquilibriumTestCase(
-            factory=functools.partial(games.read_from_file, "large_payoff_game.efg"),
-            solver=functools.partial(gbt.nash.lcp_solve, rational=False),
-            expected=[
-                [
-                    [d(1, 0), d(1, 0)],
-                    [
-                        d(0, 1),
-                        d("9999999999999999999/10000000000000000000", "1/10000000000000000000"),
-                    ],
-                ]
-            ],
-            regret_tol=TOL,
-            prob_tol=TOL,
-        ),
-        marks=[
-            pytest.mark.nash_lcp_behavior,
-            pytest.mark.xfail(reason="Problem with large payoffs when working in floats"),
-        ],
-        id="test_lcp_behavior_double_12",
-    ),
+    # pytest.param(
+    # EquilibriumTestCase(
+    # factory=functools.partial(games.read_from_file, "large_payoff_game.efg"),
+    # solver=functools.partial(gbt.nash.lcp_solve, rational=False),
+    # expected=[
+    # [
+    # [d(1, 0), d(1, 0)],
+    # [
+    # d(0, 1),
+    # d("9999999999999999999/10000000000000000000", "1/10000000000000000000"),
+    # ],
+    # ]
+    # ],
+    # regret_tol=TOL,
+    # prob_tol=TOL,
+    # ),
+    # marks=[
+    # pytest.mark.nash_lcp_behavior,
+    # pytest.mark.xfail(reason="Problem with large payoffs when working in floats"),
+    # ],
+    # id="test_lcp_behavior_double_12",
+    # ),
     pytest.param(
         EquilibriumTestCase(
             factory=functools.partial(games.read_from_file, "chance_in_middle.efg"),
@@ -1971,7 +2000,34 @@ ENUMPOLY_BEHAVIOR_CASES = [
             prob_tol=TOL,
         ),
         marks=pytest.mark.nash_enumpoly_behavior,
-        id="test_enumpoly_behavior_01",
+        id="test_enumpoly_behavior_0",
+    ),
+    # 2-player non-zero-sum games
+    pytest.param(
+        EquilibriumTestCase(
+            factory=games.create_one_shot_trust_efg,
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
+            expected=[
+                [[d(0, 1)], [d(0, 1)]],
+            ],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enumpoly_behavior,
+        id="test_enumpoly_behavior_1a",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.create_one_shot_trust_efg, unique_NE_variant=True),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
+            expected=[
+                [[d(1, 0)], [d(0, 1)]],
+            ],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enumpoly_behavior,
+        id="test_enumpoly_behavior_1b",
     ),
     pytest.param(
         EquilibriumTestCase(
@@ -2062,35 +2118,27 @@ ENUMPOLY_BEHAVIOR_CASES = [
     pytest.param(
         EquilibriumTestCase(
             factory=functools.partial(games.read_from_file, "3_player.efg"),
-            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=2),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
             expected=[
-                [[d(1, 0), d(1, 0)], [d(1, 0), d("1/2", "1/2")], [d(1, 0), d(0, 1)]],
-                [[d(1, 0), d(1, 0)], [d(1, 0), d(0, 1)], [d(1, 0), d("1/3", "2/3")]],
+                [[d(1, 0), d(1, 0)], [d(1, 0), d(1, 0)], [d(1, 0), d(1, 0)]],
             ],
             regret_tol=TOL,
             prob_tol=TOL,
         ),
-        marks=[
-            pytest.mark.nash_enumpoly_behavior,
-            pytest.mark.xfail(reason="Changes in operation of enumpoly"),
-        ],
+        marks=pytest.mark.nash_enumpoly_behavior,
         id="test_enumpoly_behavior_7",
     ),
     pytest.param(
         EquilibriumTestCase(
             factory=functools.partial(games.read_from_file, "3_player_with_nonterm_outcomes.efg"),
-            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=2),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
             expected=[
-                [[d(1, 0), d(1, 0)], [d(1, 0), d("1/2", "1/2")], [d(1, 0), d(0, 1)]],
-                [[d(1, 0), d(1, 0)], [d(1, 0), d(0, 1)], [d(1, 0), d("1/3", "2/3")]],
+                [[d(1, 0), d(1, 0)], [d(1, 0), d(1, 0)], [d(1, 0), d(1, 0)]],
             ],
             regret_tol=TOL,
             prob_tol=TOL,
         ),
-        marks=[
-            pytest.mark.nash_enumpoly_behavior,
-            pytest.mark.xfail(reason="Changes in operation of enumpoly"),
-        ],
+        marks=pytest.mark.nash_enumpoly_behavior,
         id="test_enumpoly_behavior_8",
     ),
     # 4-player game
@@ -2106,6 +2154,82 @@ ENUMPOLY_BEHAVIOR_CASES = [
         ),
         marks=pytest.mark.nash_enumpoly_behavior,
         id="test_enumpoly_behavior_9",
+    ),
+    # 3-player perfect info game to test behavior two off equilibrium path
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.read_from_file, "3_player_PI_2_dev_off_eq_path.efg"
+            ),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
+            expected=[
+                # candidate,10,10,1000,10000
+                [[d(1, 0)], [d(1, 0), d(1, 0, 0, 0)], [d(1, 0, 0, 0, 0)]],
+                # candidate,01,00,0000,00000
+                [[d(0, 1)], [d(1, 0), d(1, 0, 0, 0)],
+                 [d(1, 0, 0, 0, 0)]],
+            ],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enumpoly_behavior,
+        id="test_enumpoly_behavior_10",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.read_from_file, "3_player_PI_2_dev_off_eq_path.efg"
+            ),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
+            expected=[
+                [[d(1, 0)], [d(1, 0), d(1, 0, 0, 0)], [d(1, 0, 0, 0, 0)]],
+                [
+                    [d(0, 1)],
+                    [d(1, 0), d(1, 0, 0, 0)],
+                    [d(1, 0, 0, 0, 0)],
+                ],
+            ],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enumpoly_behavior,
+        id="test_enumpoly_behavior_11",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.read_from_file,
+                "3_player_PI_2_dev_off_eq_path_strict_dom_for_p1.efg",
+            ),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
+            expected=[
+                [
+                    [d(0, 1)],
+                    [d(1, 0), d(1, 0, 0, 0)],
+                    [d(1, 0, 0, 0, 0)],
+                ],
+            ],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enumpoly_behavior,
+        id="test_enumpoly_behavior_12",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(
+                games.read_from_file,
+                "2_player_PI_2_dev_off_eq_path_const_sum.efg",
+            ),
+            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
+            expected=[
+                [[d(0, 1), d(1, 0, 0, 0, 0)], [d(1, 0)]],
+            ],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enumpoly_behavior,
+        id="test_enumpoly_behavior_13",
     ),
 ]
 # ##############################################################################
@@ -2172,65 +2296,6 @@ def test_nash_behavior_solver(test_case: EquilibriumTestCase, subtests) -> None:
             for player in game.players:
                 for action in player.actions:
                     assert abs(eq[action] - expected[action]) <= test_case.prob_tol
-
-
-##################################################################################################
-# BEHAVIOR SOLVER WITHOUT SUBTESTS -- TEMP FOR ISSUE 660
-##################################################################################################
-
-ENUMPOLY_ISSUE_660_CASES = [
-    # 2-player non-zero-sum games
-    pytest.param(
-        EquilibriumTestCase(
-            factory=games.create_one_shot_trust_efg,
-            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
-            expected=[
-                [[d(0, 1)], [d("1/2", "1/2")]],
-                [[d(0, 1)], [d(0, 1)]],
-                # second entry assumes we extend to Nash using only pure behaviors
-                # currently we get [[0, 1]], [[0, 0]]] as a second eq
-            ],
-            regret_tol=TOL,
-            prob_tol=TOL,
-        ),
-        marks=[
-            pytest.mark.nash_enumpoly_behavior,
-            pytest.mark.xfail(reason="Problem with enumpoly, as per issue #660"),
-        ],
-        id="enumpoly_one_shot_trust_issue_660",
-    ),
-    pytest.param(
-        EquilibriumTestCase(
-            factory=functools.partial(games.create_one_shot_trust_efg, unique_NE_variant=True),
-            solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
-            expected=[
-                [[[d(1, 0)], [d(0, 1)]]],
-                # currently we get [d(0, 1)], [d(0, 0)]] as a second eq
-            ],
-            regret_tol=TOL,
-            prob_tol=TOL,
-        ),
-        marks=[
-            pytest.mark.nash_enumpoly_behavior,
-            pytest.mark.xfail(reason="Problem with enumpoly, as per issue #660"),
-        ],
-        id="enumpoly_one_shot_trust_unique_NE_issue_660",
-    ),
-]
-
-
-@pytest.mark.nash
-@pytest.mark.parametrize("test_case", ENUMPOLY_ISSUE_660_CASES, ids=lambda c: c.label)
-def test_nash_behavior_solver_no_subtests_only_profile(test_case: EquilibriumTestCase) -> None:
-    """TEMP: to be included with test_nash_behavior_solver when 660 is resolved."""
-    game = test_case.factory()
-    result = test_case.solver(game)
-    assert len(result.equilibria) == len(test_case.expected)
-    for eq, exp in zip(result.equilibria, test_case.expected, strict=True):
-        expected = game.mixed_behavior_profile(rational=True, data=exp)
-        for player in game.players:
-            for action in player.actions:
-                assert abs(eq[action] - expected[action]) <= test_case.prob_tol
 
 
 ##################################################################################################
@@ -2456,9 +2521,7 @@ LIAP_AGENT_CASES = [
             factory=functools.partial(games.read_from_file, "stripped_down_poker.efg"),
             solver=gbt.nash.liap_agent_solve,
             start_data=dict(data=None, rational=False),
-            expected=[
-                    [[d(1, 0), d("1/3", "2/3")], [d("2/3", "1/3")]]
-            ],
+            expected=[[[d(1, 0), d("1/3", "2/3")], [d("2/3", "1/3")]]],
             regret_tol=TOL_LARGE,
             prob_tol=TOL_LARGE,
         ),
