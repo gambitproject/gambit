@@ -105,7 +105,8 @@ Rational NashSimpdivStrategySolver::Simplex(MixedStrategyProfile<Rational> &y,
   v.SetFlattened(y.GetProbVector());
   besty.SetFlattened(y.GetProbVector());
   int i = 0;
-  int j, k, h, jj, hh, ii, kk, tot;
+  int jj, ii;
+  size_t j, h, hh, tot, k, kk;
   Rational maxz;
 
   // Label step0 not currently used, hence commented
@@ -113,7 +114,7 @@ Rational NashSimpdivStrategySolver::Simplex(MixedStrategyProfile<Rational> &y,
   TT = 0;
   U = 0;
   ab = Rational(0);
-  for (j = 1; j <= static_cast<int>(game->NumPlayers()); j++) {
+  for (j = 1; j <= game->NumPlayers(); j++) {
     const GamePlayer player = game->GetPlayer(j);
     for (h = 1; h <= nstrats[j]; h++) {
       if (v.segment(j)[h] == Rational(0)) {
@@ -149,7 +150,8 @@ step1:
   /* case1b */
   else if (TT.segment(j)[h]) {
     i = 1;
-    while (labels(i, 1) != j || labels(i, 2) != h || i == state.ibar) {
+    while (labels(i, 1) != static_cast<int>(j) || labels(i, 2) != static_cast<int>(h) ||
+           i == state.ibar) {
       i++;
     }
     goto step3;
@@ -168,7 +170,8 @@ step1:
     }
     else {
       i = 1;
-      while ((pi(i, 1) != j || pi(i, 2) != k) && i <= state.t) {
+      while ((pi(i, 1) != static_cast<int>(j) || pi(i, 2) != static_cast<int>(k)) &&
+             i <= state.t) {
         i++;
       }
     }
@@ -293,7 +296,7 @@ step4:
   pi.RotateUp(i - 1, state.t);
   state.t--;
   ii = 1;
-  while (labels(ii, 1) != j || labels(ii, 2) != h) {
+  while (labels(ii, 1) != static_cast<int>(j) || labels(ii, 2) != static_cast<int>(h)) {
     ii++;
   }
   i = ii;
@@ -339,7 +342,8 @@ void NashSimpdivStrategySolver::update(State &state, RectArray<int> &pi, RectArr
                                        SegmentedVector<Rational> &ab,
                                        const SegmentedVector<int> &U, int j, int i)
 {
-  int jj, hh, k, f = 1;
+  int jj, f = 1;
+  size_t k, hh;
 
   if (i >= 2 && i <= state.t) {
     pi.SwitchRows(i, i - 1);
