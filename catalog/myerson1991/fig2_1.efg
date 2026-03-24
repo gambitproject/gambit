@@ -1,20 +1,14 @@
 EFG 2 R "A simple Poker game" { "Fred" "Alice" }
-"This is a simple game of one-card poker from Myerson [Mye91]_, used as the
+"This is a simple game of one-card poker from `Mye91 <https://gambitproject.readthedocs.io/en/latest/biblio.html#Mye91>`_, used as the
 introductory example for game models.
 
 Note that as specified in the text, the game has the slightly unusual feature
 that folding with the high (red) card results in the player winning rather than
 losing.
 
-See also
---------
-reiley2008/fig1
+See also `Rei2008 <https://gambitproject.readthedocs.io/en/latest/biblio.html#Rei2008>`_
    Another one-card poker game where folding with the high card is a loss rather
    than a win.
-
-
-[Mye91]_: Myerson, Roger B. (1991)  Game Theory: Analysis of Conflict.
-  Cambridge: Harvard University Press.
 "
 
 c "" 1 "" { "Red" 1/2 "Black" 1/2 } 0
