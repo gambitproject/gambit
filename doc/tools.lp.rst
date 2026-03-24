@@ -1,17 +1,10 @@
 .. _gambit-lp:
 
-:program:`gambit-lp`: Compute equilibria in a two-player constant-sum game via linear programming
-=================================================================================================
+:program:`gambit-lp`
+====================
 
-:program:`gambit-lp` reads a two-player constant-sum game on standard input
-and computes a Nash equilibrium by solving a linear program. The
-program uses the sequence form formulation of Koller, Megiddo, and von
-Stengel [KolMegSte94]_ for extensive games.
-
-While the set of equilibria in a two-player constant-sum strategic
-game is convex, this method will only identify one of the extreme
-points of that set.
-
+Compute equilibria in a two-player constant-sum game via linear programming.
+See the :ref:`algorithm description <lp>` for full details.
 
 .. program:: gambit-lp
 
