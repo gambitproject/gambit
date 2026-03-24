@@ -10,7 +10,7 @@ construction and analysis of finite extensive and strategic games.
 .. grid::
 
    .. grid-item-card:: ⬇️ Installing Gambit
-      :columns: 4
+      :columns: 3
 
       Quick installation with PyGambit:
       ``pip install pygambit``
@@ -23,7 +23,7 @@ construction and analysis of finite extensive and strategic games.
 
 
    .. grid-item-card:: 🐍 PyGambit
-      :columns: 4
+      :columns: 3
 
       Explore tutorial notebooks and API reference docs.
 
@@ -35,7 +35,7 @@ construction and analysis of finite extensive and strategic games.
 
 
    .. grid-item-card:: 🧮 Analysing games
-      :columns: 4
+      :columns: 3
 
       Compute equilibria and run econometric estimations.
 
@@ -45,19 +45,8 @@ construction and analysis of finite extensive and strategic games.
          :color: secondary
          :expand:
 
-   .. grid-item-card:: 🖱️ Graphical interface
-      :columns: 4
-
-      Interactively create, explore, and find equilibria of games.
-
-      .. button-ref:: section-gui
-         :ref-type: ref
-         :click-parent:
-         :color: secondary
-         :expand:
-
    .. grid-item-card:: 📚 Catalog of games
-      :columns: 4
+      :columns: 3
 
       Browse a curated collection of game theory models.
 
@@ -67,8 +56,19 @@ construction and analysis of finite extensive and strategic games.
          :color: secondary
          :expand:
 
+   .. grid-item-card:: 🖱️ Graphical interface
+      :columns: 3
+
+      Interactively create, explore, and find equilibria of games.
+
+      .. button-ref:: section-gui
+         :ref-type: ref
+         :click-parent:
+         :color: secondary
+         :expand:
+
    .. grid-item-card:: 💻 Command-line interface
-      :columns: 4
+      :columns: 3
 
       Use Gambit's command-line tools for scripting.
 
@@ -79,7 +79,7 @@ construction and analysis of finite extensive and strategic games.
          :expand:
 
    .. grid-item-card:: 🐛 Bugs and feature requests
-      :columns: 4
+      :columns: 3
 
       Report bugs and feature requests on GitHub.
 
@@ -90,7 +90,7 @@ construction and analysis of finite extensive and strategic games.
          :expand:
 
    .. grid-item-card:: 📖 Developer docs
-      :columns: 4
+      :columns: 3
 
       Guides for developers & contributors to the package.
 
