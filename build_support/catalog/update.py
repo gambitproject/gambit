@@ -48,33 +48,33 @@ def _write_efg_table(df: pd.DataFrame, f):
             f.write("       \n")
 
 
-def _write_nfg_table(df: pd.DataFrame, f):
-    """Write the NFG games list-table to file handle f."""
-    f.write(".. list-table::\n")
-    f.write("   :header-rows: 1\n")
-    f.write("   :widths: 100\n")
-    f.write("   :class: tight-table\n")
-    f.write("\n")
-    f.write("   * - **Strategic form games**\n")
+# def _write_nfg_table(df: pd.DataFrame, f):
+#     """Write the NFG games list-table to file handle f."""
+#     f.write(".. list-table::\n")
+#     f.write("   :header-rows: 1\n")
+#     f.write("   :widths: 100\n")
+#     f.write("   :class: tight-table\n")
+#     f.write("\n")
+#     f.write("   * - **Strategic form games**\n")
 
-    nfg_df = df[df["Format"] == "nfg"]
-    for _, row in nfg_df.iterrows():
-        slug = row["Game"]
+#     nfg_df = df[df["Format"] == "nfg"]
+#     for _, row in nfg_df.iterrows():
+#         slug = row["Game"]
 
-        # Title as plain text header
-        f.write("   * - \n")
-        f.write("       \n")
+#         # Title as plain text header
+#         f.write("   * - \n")
+#         f.write("       \n")
 
-        # Jupyter-execute block (no dropdown)
-        f.write("       .. jupyter-execute::\n")
-        f.write("          \n")
-        f.write("          import pygambit\n")
-        f.write(f'          pygambit.catalog.load("{slug}")\n')
-        f.write("       \n")
+#         # Jupyter-execute block (no dropdown)
+#         f.write("       .. jupyter-execute::\n")
+#         f.write("          \n")
+#         f.write("          import pygambit\n")
+#         f.write(f'          pygambit.catalog.load("{slug}")\n')
+#         f.write("       \n")
 
-        # Download link (plain, no dropdown)
-        f.write(f"       :download:`{slug}.nfg <../catalog/{slug}.nfg>`\n")
-        f.write("       \n")
+#         # Download link (plain, no dropdown)
+#         f.write(f"       :download:`{slug}.nfg <../catalog/{slug}.nfg>`\n")
+#         f.write("       \n")
 
 
 def generate_rst_table(df: pd.DataFrame, rst_path: Path):
@@ -82,23 +82,23 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
 
     with open(rst_path, "w", encoding="utf-8") as f:
         # TOC linking to both sections
-        f.write(".. contents::\n")
-        f.write("   :local:\n")
-        f.write("   :depth: 1\n")
-        f.write("\n")
+        # f.write(".. contents::\n")
+        # f.write("   :local:\n")
+        # f.write("   :depth: 1\n")
+        # f.write("\n")
 
         # EFG section
-        f.write("Extensive form games\n")
-        f.write("--------------------\n")
-        f.write("\n")
+        # f.write("Extensive form games\n")
+        # f.write("--------------------\n")
+        # f.write("\n")
         _write_efg_table(df, f)
-        f.write("\n")
+        # f.write("\n")
 
-        # NFG section
-        f.write("Strategic form games\n")
-        f.write("--------------------\n")
-        f.write("\n")
-        _write_nfg_table(df, f)
+        # # NFG section
+        # f.write("Strategic form games\n")
+        # f.write("--------------------\n")
+        # f.write("\n")
+        # _write_nfg_table(df, f)
 
 
 def update_makefile():
