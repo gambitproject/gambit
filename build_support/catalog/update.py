@@ -24,13 +24,12 @@ def _write_efg_table(df: pd.DataFrame, f):
         slug = row["Game"]
         title = str(row.get("Title", "")).strip()
         description = str(row.get("Description", "")).strip()
-
-        # Main dropdown
-        f.write(f"   * - .. dropdown:: {title}\n")
-        f.write("          :open:\n")
-        f.write("          \n")
         # Skip any games which lack a description
         if description:
+            # Main dropdown
+            f.write(f"   * - .. dropdown:: {title}\n")
+            f.write("          :open:\n")
+            f.write("          \n")
             for line in description.splitlines():
                 f.write(f"          {line}\n")
             f.write("          \n")
