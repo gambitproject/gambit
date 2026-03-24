@@ -1,0 +1,19 @@
+EFG 2 R "Gilboa (1997) Two-Selves Absent-Minded Driver" { "Player 1" }
+"A reformulation of the absent-minded driver problem from
+`Gil97 <https://gambitproject.readthedocs.io/en/latest/biblio.html#Gil97>`_
+using a multi-self approach.  A chance move determines the order in which two selves act,
+each facing a binary choice.  Neither self knows the order of play, capturing absent-mindedness
+through information sets that cross the chance branches rather than through imperfect recall.
+"
+
+c "" 1 "" { "1" 1/2 "2" 1/2 } 0
+p "" 1 1 "" { "E" "B" } 0
+t "" 1 "Outcome 1" { 0 }
+p "" 1 2 "" { "B" "E" } 0
+t "" 2 "Outcome 2" { 1 }
+t "" 3 "Outcome 3" { 2 }
+p "" 1 2 "" { "B" "E" } 0
+p "" 1 1 "" { "E" "B" } 0
+t "" 4 "Outcome 4" { 4 }
+t "" 5 "Outcome 5" { 1 }
+t "" 6 "Outcome 6" { 0 }
