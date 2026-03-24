@@ -56,6 +56,28 @@ construction and analysis of finite extensive and strategic games.
          :color: secondary
          :expand:
 
+   .. grid-item-card:: 📚 Catalog of games
+      :columns: 4
+
+      Browse a curated collection of game theory models.
+
+      .. button-ref:: catalog
+         :ref-type: ref
+         :click-parent:
+         :color: secondary
+         :expand:
+
+   .. grid-item-card:: 💻 Command-line interface
+      :columns: 4
+
+      Use Gambit's command-line tools for scripting.
+
+      .. button-ref:: command-line
+         :ref-type: ref
+         :click-parent:
+         :color: secondary
+         :expand:
+
    .. grid-item-card:: 🐛 Bugs and feature requests
       :columns: 4
 

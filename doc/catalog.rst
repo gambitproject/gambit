@@ -1,3 +1,5 @@
+.. _catalog:
+
 Catalog of games
 ================
 
