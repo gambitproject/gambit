@@ -3,19 +3,31 @@
 Updating the Games Catalog
 ==========================
 
-This page covers the process for contributing to and updating Gambit's :ref:`Games Catalog <pygambit-catalog>`.
+This page includes developer notes regarding the catalog module, and the process for contributing to and updating Gambit's :ref:`Games Catalog <pygambit-catalog>`.
 To do so, you will need to have the `gambit` GitHub repo cloned and be able to submit pull request via GitHub;
 you may wish to first review the :ref:`contributor guidelines <contributing>`.
 You'll also need to have a developer install of `pygambit` available in your Python environment, see :ref:`build-python`.
+
+The catalog module
+------------------
+
+Although the ``catalog`` directory is located at the project root outside of ``src/pygambit/``, it is installed and bundled as the ``pygambit.catalog`` subpackage.
+
+This is handled by the package build configuration in ``pyproject.toml`` under ``[tool.setuptools]``:
+
+- The ``package-dir`` mapping instructs ``setuptools`` to source the ``pygambit.catalog`` subpackage from the physical ``catalog`` directory.
+- The ``package-data`` configuration ensures all non-Python data files (like ``.efg`` and ``.nfg`` files) inside the catalog are correctly bundled during installation.
+
+As a developer, this means you will need to reinstall the package (e.g., passing ``pip install .``) for any new game files or internal catalog changes to be reflected in the ``pygambit`` module.
+
+Add new game files
+------------------
 
 You can add games to the catalog saved in a valid representation :ref:`format <file-formats>`.
 Currently supported representations are:
 
 - `.efg` for extensive form games
 - `.nfg` for normal form games
-
-Add new game files
-------------------
 
 1. **Create the game file:**
 
