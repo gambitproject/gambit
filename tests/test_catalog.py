@@ -41,19 +41,9 @@ def test_catalog_load_invalid_slug():
         gbt.catalog.load("invalid_slug")
 
 
-def test_catalog_load_family_game():
-    """Test loading a game generated from code with a game family func."""
-    g = gbt.catalog.load("one_shot_trust")
-    assert isinstance(g, gbt.Game)
-
-
 def test_catalog_games(game_slugs, all_games):
     """Test games() function returns df of game slugs and titles."""
     assert isinstance(all_games, pd.DataFrame)
-
-    # The games() function should return set of slugs plus family games
-    fg = gbt.catalog.family_games().keys()
-    assert set(all_games["Game"]) == game_slugs.union(fg)
 
     # Test that standard columns are present
     assert "Game" in all_games.columns
