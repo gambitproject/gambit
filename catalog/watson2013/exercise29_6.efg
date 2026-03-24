@@ -1,6 +1,6 @@
 EFG 2 R "Princess Bride signaling game (from Watson)" { "Wesley" "Prince" }
-"This game is Exercise 29.6 from Watson [Wat13]_, based on a scene from
-the Rob Reiner film, _The Princess Bride_:
+"This game is Exercise 29.6 from Watson `Wat13 <https://gambitproject.readthedocs.io/en/latest/biblio.html#Wat13>`, based on a scene from
+the Rob Reiner film, The Princess Bride:
 
 Wesley (the protagonist) confronts the evil prince Humperdinck.  Wesley
 is one of two types: weak or strong.  Wesley knows whether he is weak or
@@ -15,9 +15,6 @@ swordsman.  Also, the weak Wesley must pay a cost to get out of bed.
 
 In the game in this file, the cost the weak Wesley pays to get out of bed
 is set to 2.
-
-[Wat13]_: Watson, Joel.  (2013)  Strategy: An Introduction to Game Theory,
-   third edition.  W. W. Norton & Company.
 "
 
 c "" 1 "" { "Strong" 1/2 "Weak" 1/2 } 0
