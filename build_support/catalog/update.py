@@ -27,24 +27,26 @@ def _write_efg_table(df: pd.DataFrame, f):
 
         # Main dropdown
         f.write(f"   * - .. dropdown:: {title}\n")
+        f.write("          :open:\n")
         f.write("          \n")
+        # Skip any games which lack a description
         if description:
             for line in description.splitlines():
                 f.write(f"          {line}\n")
             f.write("          \n")
-        f.write("          **Load in PyGambit:**\n")
-        f.write("          \n")
-        f.write("          .. code-block:: python\n")
-        f.write("             \n")
-        f.write(f'             pygambit.catalog.load("{slug}")\n')
-        f.write("          \n")
+            f.write("          **Load in PyGambit:**\n")
+            f.write("          \n")
+            f.write("          .. code-block:: python\n")
+            f.write("             \n")
+            f.write(f'             pygambit.catalog.load("{slug}")\n')
+            f.write("          \n")
 
-        # Download links (inside the dropdown)
-        download_links = [row["Download"]]
-        f.write("          **Download:**\n")
-        f.write("          \n")
-        f.write(f"          {' '.join(download_links)}\n")
-        f.write("       \n")
+            # Download links (inside the dropdown)
+            download_links = [row["Download"]]
+            f.write("          **Download:**\n")
+            f.write("          \n")
+            f.write(f"          {' '.join(download_links)}\n")
+            f.write("       \n")
 
 
 def _write_nfg_table(df: pd.DataFrame, f):
