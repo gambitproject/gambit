@@ -10,38 +10,94 @@ CATALOG_DIR = Path(__file__).parent.parent.parent / "catalog"
 MAKEFILE_AM = Path(__file__).parent.parent.parent / "Makefile.am"
 
 
+def _write_efg_table(df: pd.DataFrame, f):
+    """Write the EFG games list-table to file handle f."""
+    f.write(".. list-table::\n")
+    f.write("   :header-rows: 1\n")
+    f.write("   :widths: 100\n")
+    f.write("   :class: tight-table\n")
+    f.write("\n")
+    f.write("   * - **Extensive form games**\n")
+
+    efg_df = df[df["Format"] == "efg"]
+    for _, row in efg_df.iterrows():
+        slug = row["Game"]
+        title = str(row.get("Title", "")).strip()
+        description = str(row.get("Description", "")).strip()
+
+        # Main dropdown
+        f.write(f"   * - .. dropdown:: {title}\n")
+        f.write("          \n")
+        if description:
+            for line in description.splitlines():
+                f.write(f"          {line}\n")
+            f.write("          \n")
+        f.write("          **Load in PyGambit:**\n")
+        f.write("          \n")
+        f.write("          .. code-block:: python\n")
+        f.write("             \n")
+        f.write(f'             pygambit.catalog.load("{slug}")\n')
+        f.write("          \n")
+
+        # Download links (inside the dropdown)
+        download_links = [row["Download"]]
+        f.write("          **Download:**\n")
+        f.write("          \n")
+        f.write(f"          {' '.join(download_links)}\n")
+        f.write("       \n")
+
+
+def _write_nfg_table(df: pd.DataFrame, f):
+    """Write the NFG games list-table to file handle f."""
+    f.write(".. list-table::\n")
+    f.write("   :header-rows: 1\n")
+    f.write("   :widths: 100\n")
+    f.write("   :class: tight-table\n")
+    f.write("\n")
+    f.write("   * - **Strategic form games**\n")
+
+    nfg_df = df[df["Format"] == "nfg"]
+    for _, row in nfg_df.iterrows():
+        slug = row["Game"]
+
+        # Title as plain text header
+        f.write("   * - \n")
+        f.write("       \n")
+
+        # Jupyter-execute block (no dropdown)
+        f.write("       .. jupyter-execute::\n")
+        f.write("          \n")
+        f.write("          import pygambit\n")
+        f.write(f'          pygambit.catalog.load("{slug}")\n')
+        f.write("       \n")
+
+        # Download link (plain, no dropdown)
+        f.write(f"       :download:`{slug}.nfg <../catalog/{slug}.nfg>`\n")
+        f.write("       \n")
+
+
 def generate_rst_table(df: pd.DataFrame, rst_path: Path):
-    """Generate a list-table RST file with dropdowns for long descriptions."""
+    """Generate RST output with two list-tables: one for EFG and one for NFG games."""
+
     with open(rst_path, "w", encoding="utf-8") as f:
-        f.write(".. list-table::\n")
-        f.write("   :header-rows: 1\n")
-        f.write("   :widths: 20 80 20\n")
-        f.write("   :class: tight-table\n")
+        # TOC linking to both sections
+        f.write(".. contents::\n")
+        f.write("   :local:\n")
+        f.write("   :depth: 1\n")
         f.write("\n")
 
-        f.write("   * - **Game**\n")
-        f.write("     - **Description**\n")
-        f.write("     - **Download**\n")
+        # EFG section
+        f.write("Extensive form games\n")
+        f.write("--------------------\n")
+        f.write("\n")
+        _write_efg_table(df, f)
+        f.write("\n")
 
-        for _, row in df.iterrows():
-            f.write(f"   * - {row['Game']}\n")
-
-            description_cell_lines = []
-            title = str(row.get("Title", "")).strip()
-            description = str(row.get("Description", "")).strip()
-            if description:
-                description_cell_lines.append(f".. dropdown:: {title}")
-                description_cell_lines.append("   ")  # Indented blank line
-                for line in description.splitlines():
-                    description_cell_lines.append(f"   {line}")
-            else:
-                description_cell_lines.append(title)
-
-            f.write(f"     - {description_cell_lines[0]}\n")
-            for line in description_cell_lines[1:]:
-                f.write(f"       {line}\n")
-
-            f.write(f"     - {row['Download']}\n")
+        # NFG section
+        f.write("Strategic form games\n")
+        f.write("--------------------\n")
+        f.write("\n")
+        _write_nfg_table(df, f)
 
 
 def update_makefile():
@@ -96,7 +152,6 @@ def update_makefile():
 
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser()
     parser.add_argument("--build", action="store_true")
     args = parser.parse_args()
@@ -105,7 +160,6 @@ if __name__ == "__main__":
     df = gbt.catalog.games(include_descriptions=True)
     generate_rst_table(df, CATALOG_RST_TABLE)
     print(f"Generated {CATALOG_RST_TABLE} for use in local docs build. DO NOT COMMIT.")
-
-    # Update the Makefile.am with the current list of catalog files
     if args.build:
+        # Update the Makefile.am with the current list of catalog files
         update_makefile()
