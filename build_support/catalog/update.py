@@ -33,50 +33,54 @@ def _write_efg_table(df: pd.DataFrame, f, tikz_re, regenerate_images: bool):
         slug = row["Game"]
         title = str(row.get("Title", "")).strip()
         description = str(row.get("Description", "")).strip()
-
-        tex_path = CATALOG_DIR / "img" / f"{slug}.tex"
-        if regenerate_images or not tex_path.exists():
-            g = gbt.catalog.load(slug)
-            viz_path = CATALOG_DIR / "img" / f"{slug}"
-            viz_path.parent.mkdir(parents=True, exist_ok=True)
-            for func in [generate_tex, generate_png, generate_pdf]:
-                func(g, save_to=str(viz_path), **draw_tree_args)
-
-        with open(tex_path, encoding="utf-8") as tex_f:
-            tex_content = tex_f.read()
-        match = tikz_re.search(tex_content)
-        tikz = match.group(1).strip() if match else "% Could not extract tikzpicture from tex file"
-
-        # Main dropdown
-        f.write(f"   * - .. dropdown:: {title}\n")
-        f.write("          \n")
         if description:
+            tex_path = CATALOG_DIR / "img" / f"{slug}.tex"
+            if regenerate_images or not tex_path.exists():
+                g = gbt.catalog.load(slug)
+                viz_path = CATALOG_DIR / "img" / f"{slug}"
+                viz_path.parent.mkdir(parents=True, exist_ok=True)
+                for func in [generate_tex, generate_png, generate_pdf]:
+                    func(g, save_to=str(viz_path), **draw_tree_args)
+
+            with open(tex_path, encoding="utf-8") as tex_f:
+                tex_content = tex_f.read()
+            match = tikz_re.search(tex_content)
+            tikz = (
+                match.group(1).strip()
+                if match
+                else "% Could not extract tikzpicture from tex file"
+            )
+
+            # Main dropdown
+            f.write(f"   * - .. dropdown:: {title}\n")
+            f.write("          \n")
+
             for line in description.splitlines():
                 f.write(f"          {line}\n")
             f.write("          \n")
-        f.write("          **Load in PyGambit:**\n")
-        f.write("          \n")
-        f.write("          .. code-block:: python\n")
-        f.write("             \n")
-        f.write(f'             pygambit.catalog.load("{slug}")\n')
-        f.write("          \n")
+            f.write("          **Load in PyGambit:**\n")
+            f.write("          \n")
+            f.write("          .. code-block:: python\n")
+            f.write("             \n")
+            f.write(f'             pygambit.catalog.load("{slug}")\n')
+            f.write("          \n")
 
-        # Download links (inside the dropdown)
-        download_links = [row["Download"]]
-        for ext in ["ef", "tex", "png", "pdf"]:
-            download_links.append(f":download:`{slug}.{ext} <../catalog/img/{slug}.{ext}>`")
-        f.write("          **Download game and image files:**\n")
-        f.write("          \n")
-        f.write(f"          {' '.join(download_links)}\n")
-        f.write("       \n")
+            # Download links (inside the dropdown)
+            download_links = [row["Download"]]
+            for ext in ["ef", "tex", "png", "pdf"]:
+                download_links.append(f":download:`{slug}.{ext} <../catalog/img/{slug}.{ext}>`")
+            f.write("          **Download game and image files:**\n")
+            f.write("          \n")
+            f.write(f"          {' '.join(download_links)}\n")
+            f.write("       \n")
 
-        # TiKZ image (outside dropdown)
-        f.write("       .. tikz::\n")
-        f.write("          :align: center\n")
-        f.write("          \n")
-        for line in tikz.splitlines():
-            f.write(f"          {line}\n")
-        f.write("       \n")
+            # TiKZ image (outside dropdown)
+            f.write("       .. tikz::\n")
+            f.write("          :align: center\n")
+            f.write("          \n")
+            for line in tikz.splitlines():
+                f.write(f"          {line}\n")
+            f.write("       \n")
 
 
 def _write_nfg_table(df: pd.DataFrame, f):
