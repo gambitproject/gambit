@@ -1,5 +1,5 @@
-:program:`gambit-convert`: Convert games among various representations
-======================================================================
+:program:`gambit-convert`
+=========================
 
 :program:`gambit-convert` reads a game on standard input in any supported format
 and converts it to another text representation.  Currently, this tool supports

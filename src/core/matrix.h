@@ -86,9 +86,9 @@ public:
   /// @brief Highest valid column index
   int MaxCol() const { return m_data.MaxCol(); }
   /// @brief Number of rows in the matrix
-  int NumRows() const { return m_data.NumRows(); }
+  size_t NumRows() const { return m_data.NumRows(); }
   /// @brief Number of columns in the matrix
-  int NumColumns() const { return m_data.NumColumns(); }
+  size_t NumColumns() const { return m_data.NumColumns(); }
 
   /// @brief Check if the matrix is a square matrix (num rows == num columns)
   bool IsSquare() const { return MinRow() == MinCol() && MaxRow() == MaxCol(); }

@@ -71,17 +71,6 @@ T PureBehaviorProfile::GetPayoff(const GameNode &p_node, const GamePlayer &p_pla
 template double PureBehaviorProfile::GetPayoff(const GameNode &, const GamePlayer &) const;
 template Rational PureBehaviorProfile::GetPayoff(const GameNode &, const GamePlayer &) const;
 
-template <class T> T PureBehaviorProfile::GetPayoff(const GameAction &p_action) const
-{
-  PureBehaviorProfile copy(*this);
-  copy.SetAction(p_action);
-  return copy.GetPayoff<T>(p_action->GetInfoset()->GetPlayer());
-}
-
-// Explicit instantiations
-template double PureBehaviorProfile::GetPayoff(const GameAction &) const;
-template Rational PureBehaviorProfile::GetPayoff(const GameAction &) const;
-
 MixedBehaviorProfile<Rational> PureBehaviorProfile::ToMixedBehaviorProfile() const
 {
   MixedBehaviorProfile<Rational> temp(m_efg);

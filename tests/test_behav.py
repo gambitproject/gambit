@@ -2097,3 +2097,30 @@ def test_tree_representation_error(game: gbt.Game, rational_flag: bool, data: li
     """
     with pytest.raises(gbt.UndefinedOperationError):
         game.mixed_behavior_profile(rational=rational_flag, data=data)
+
+
+def test_undefined_action_value():
+    """Test that undefined action values return `None`."""
+    game = gbt.catalog.load("selten1975/fig1")
+    action = game.players[2].infosets[0].actions[0]
+    for rat in [False, True]:
+        profile = game.mixed_behavior_profile([[[1, 0]], [[1, 0]], [[1, 0]]], rational=rat)
+        assert profile.action_value(action) is None
+
+
+def test_undefined_belief():
+    """Test that undefined beliefs return `None`."""
+    game = gbt.catalog.load("selten1975/fig1")
+    node = game.players[2].infosets[0].members[0]
+    for rat in [False, True]:
+        profile = game.mixed_behavior_profile([[[1, 0]], [[1, 0]], [[1, 0]]], rational=rat)
+        assert profile.belief(node) is None
+
+
+def test_undefined_infoset_value():
+    """Test that undefined infoset values return `None`."""
+    game = gbt.catalog.load("selten1975/fig1")
+    infoset = game.players[2].infosets[0]
+    for rat in [False, True]:
+        profile = game.mixed_behavior_profile([[[1, 0]], [[1, 0]], [[1, 0]]], rational=rat)
+        assert profile.infoset_value(infoset) is None

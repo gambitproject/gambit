@@ -784,7 +784,7 @@ class Game:
            Changed from reporting minimum payoff in any (non-null) outcome to the minimum
            payoff in any play of the game.
 
-        See also
+        See Also
         --------
         Game.max_payoff
         Player.min_payoff
@@ -799,7 +799,7 @@ class Game:
            Changed from reporting maximum payoff in any (non-null) outcome to the maximum
            payoff in any play of the game.
 
-        See also
+        See Also
         --------
         Game.min_payoff
         Player.max_payoff

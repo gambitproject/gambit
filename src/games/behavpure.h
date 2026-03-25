@@ -61,8 +61,6 @@ public:
   template <class T> T GetPayoff(const GamePlayer &p_player) const;
   /// Get the payoff to the player, conditional on reaching a node
   template <class T> T GetPayoff(const GameNode &, const GamePlayer &) const;
-  /// Get the payoff to playing the action, conditional on the profile
-  template <class T> T GetPayoff(const GameAction &) const;
 
   /// Convert to a mixed behavior representation
   MixedBehaviorProfile<Rational> ToMixedBehaviorProfile() const;

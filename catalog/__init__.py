@@ -43,11 +43,6 @@ def load(slug: str) -> gbt.Game:
             with as_file(resource_path) as path:
                 return reader(str(path))
 
-    # Try loading from family games
-    fg = family_games()
-    if slug in fg:
-        return fg[slug]
-
     # Raise error if game does not exist
     raise FileNotFoundError(f"No catalog entry called {slug}")
 
@@ -174,16 +169,6 @@ def games(
                 game = reader(str(path))
                 if check_filters(game):
                     append_record(slug, game)
-
-    # Add all the games from families
-    for slug, game in family_games().items():
-        # Throw an error if there's a slug collision between family games and file-based games
-        if slug in [r["Game"] for r in records]:
-            raise ValueError(
-                f"Slug collision: {slug} is present in both file-based and family games."
-            )
-        if check_filters(game):
-            append_record(slug, game)
 
     if include_descriptions:
         return pd.DataFrame.from_records(
