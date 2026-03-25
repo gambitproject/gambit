@@ -1,5 +1,6 @@
 from importlib.resources import as_file, files
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 
@@ -17,32 +18,148 @@ READERS = {
 def load(slug: str) -> gbt.Game:
     """
     Load a game from the package catalog.
+
+    Parameters
+    ----------
+    slug : str
+        The slug of the game to load.
+
+    Returns
+    -------
+    gbt.Game
+        The loaded game.
+
+    Raises
+    ------
+    FileNotFoundError
+        If the game does not exist in the catalog.
     """
     slug = str(Path(slug)).replace("\\", "/")
 
+    # Try to load from file
     for suffix, reader in READERS.items():
         resource_path = _CATALOG_RESOURCE / f"{slug}{suffix}"
-
         if resource_path.is_file():
-            # as_file ensures we have a real filesystem path for the reader
             with as_file(resource_path) as path:
                 return reader(str(path))
 
-    raise FileNotFoundError(f"No catalog entry called {slug}.nfg or {slug}.efg")
+    # Raise error if game does not exist
+    raise FileNotFoundError(f"No catalog entry called {slug}")
 
 
-def games() -> pd.DataFrame:
+def games(
+    n_actions: int | None = None,
+    n_contingencies: int | None = None,
+    n_infosets: int | None = None,
+    is_const_sum: bool | None = None,
+    is_perfect_recall: bool | None = None,
+    is_tree: bool | None = None,
+    min_payoff: float | None = None,
+    max_payoff: float | None = None,
+    n_nodes: int | None = None,
+    n_outcomes: int | None = None,
+    n_players: int | None = None,
+    n_strategies: int | None = None,
+    include_descriptions: bool = False,
+) -> pd.DataFrame:
     """
-    List games available in the package catalog, including subdirectories.
-    """
-    records: list[dict[str, str]] = []
+    List games available in the package catalog.
 
-    # Using rglob("*") to find files in all subdirectories
+    Most arguments are treated as filters on the
+    attributes of the Game objects.
+
+    Parameters
+    ----------
+    n_actions: int, optional
+        The number of actions in the game. Only extensive games are returned.
+    n_contingencies: int, optional
+        The number of contingencies in the game.
+    n_infosets: int, optional
+        The number of information sets in the game. Only extensive games are returned.
+    is_const_sum: bool, optional
+        Whether the game is constant-sum.
+    is_perfect_recall: bool, optional
+        Whether the game has perfect recall.
+    is_tree: bool, optional
+        Whether the game is an extensive game (a tree).
+    min_payoff: float, optional
+        The minimum payoff in the game. Games returned have `min_payoff >= value`.
+    max_payoff: float, optional
+        The maximum payoff in the game. Games returned have `max_payoff <= value`.
+    n_nodes: int, optional
+        The number of nodes in the game. Only extensive games are returned.
+    n_outcomes: int, optional
+        The number of outcomes in the game.
+    n_players: int, optional
+        The number of players in the game.
+    n_strategies: int, optional
+        The number of pure strategies in the game.
+    include_descriptions: bool, optional
+        Whether to include the description of each game in the returned DataFrame.
+        Defaults to False.
+
+    Returns
+    -------
+    pd.DataFrame
+        A DataFrame with columns "Game" and "Title", where "Game" is the slug to load the game.
+        If `include_descriptions=True`, the DataFrame will also include a "Description" column.
+    """
+    records: list[dict[str, Any]] = []
+
+    def check_filters(game: gbt.Game) -> bool:
+        if n_actions is not None:
+            if not game.is_tree:
+                return False
+            if len(game.actions) != n_actions:
+                return False
+        if n_contingencies is not None and len(game.contingencies) != n_contingencies:
+            return False
+        if n_infosets is not None:
+            if not game.is_tree:
+                return False
+            if len(game.infosets) != n_infosets:
+                return False
+        if is_const_sum is not None and game.is_const_sum != is_const_sum:
+            return False
+        if is_perfect_recall is not None and game.is_perfect_recall != is_perfect_recall:
+            return False
+        if is_tree is not None and game.is_tree != is_tree:
+            return False
+        if min_payoff is not None and game.min_payoff < min_payoff:
+            return False
+        if max_payoff is not None and game.max_payoff > max_payoff:
+            return False
+        if n_nodes is not None:
+            if not game.is_tree:
+                return False
+            if len(game.nodes) != n_nodes:
+                return False
+        if n_outcomes is not None and len(game.outcomes) != n_outcomes:
+            return False
+        if n_players is not None and len(game.players) != n_players:
+            return False
+        return not (n_strategies is not None and len(game.strategies) != n_strategies)
+
+    def append_record(
+        slug: str,
+        game: gbt.Game,
+    ) -> None:
+        record = {
+            "Game": slug,
+            "Title": game.title,
+        }
+        if include_descriptions:
+            record["Description"] = game.description
+            ext = "efg" if game.is_tree else "nfg"
+            record["Download"] = f":download:`{slug}.{ext} <../catalog/{slug}.{ext}>`"
+            record["Format"] = ext
+        records.append(record)
+
+    # Add all the games stored as EFG/NFG files
     for resource_path in sorted(_CATALOG_RESOURCE.rglob("*")):
         reader = READERS.get(resource_path.suffix)
 
         if reader is not None and resource_path.is_file():
-
             # Calculate the path relative to the root resource
             # and remove the suffix to get the "slug"
             rel_path = resource_path.relative_to(_CATALOG_RESOURCE)
@@ -50,11 +167,11 @@ def games() -> pd.DataFrame:
 
             with as_file(resource_path) as path:
                 game = reader(str(path))
-                records.append(
-                    {
-                        "Game": slug,
-                        "Title": game.title,
-                    }
-                )
+                if check_filters(game):
+                    append_record(slug, game)
 
+    if include_descriptions:
+        return pd.DataFrame.from_records(
+            records, columns=["Game", "Title", "Description", "Download", "Format"]
+        )
     return pd.DataFrame.from_records(records, columns=["Game", "Title"])
