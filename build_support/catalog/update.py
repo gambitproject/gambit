@@ -58,6 +58,7 @@ def _write_efg_table(df: pd.DataFrame, f, tikz_re, regenerate_images: bool):
 
             # Main dropdown
             f.write(f"   * - .. dropdown:: {title}\n")
+            f.write("          :open:\n")
             f.write("          \n")
 
             for line in description.splitlines():
