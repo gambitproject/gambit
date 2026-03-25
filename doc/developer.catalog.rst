@@ -47,7 +47,6 @@ Currently supported representations are:
    .. code-block:: bash
 
        pip install .
-       pip install .
        python build_support/catalog/update.py --build
 
    .. note::
