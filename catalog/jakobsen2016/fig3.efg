@@ -5,7 +5,7 @@ Chance chooses a sender by drawing a signal from {0, 1, 2, 3} with equal probabi
 The sender does not make a strategic choice; only the two intermediary players act.
 For signal i:
 (a) the sender is the player whose index (mod 4) equals i,
-(b) the recipient is the player whose index (mod 4) equals i−1.
+(b) the recipient is the player whose index (mod 4) equals i-1.
 The first intermediary is Player i+2 (mod 4) and the second is Player i+1.
 The full mapping is as follows:
 Signal 0: Player 4 sends to Player 3.  Player 2 acts first, then Player 1.
