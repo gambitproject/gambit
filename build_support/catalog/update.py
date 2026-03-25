@@ -11,12 +11,17 @@ CATALOG_RST_TABLE = Path(__file__).parent.parent.parent / "doc" / "catalog_table
 CATALOG_DIR = Path(__file__).parent.parent.parent / "catalog"
 MAKEFILE_AM = Path(__file__).parent.parent.parent / "Makefile.am"
 
-# Common arguments for visualization generation
-draw_tree_args = {
-    "color_scheme": "gambit",
-    "sublevel_scaling": 0,
-    "shared_terminal_depth": True,
-}
+
+def catalog_draw_tree_settings(slug: str) -> dict:
+    """Return the draw_tree settings for a given catalog slug."""
+    settings = {"color_scheme": "gambit", "shared_terminal_depth": True, "sublevel_scaling": 0}
+    if slug == "bagwell1995" or "watson2013" in slug:
+        settings["sublevel_scaling"] = 1
+    elif slug == "myerson1991/fig2_1" or slug == "reiley2008/fig1":
+        settings["action_label_position"] = 0.4
+    elif "selten1975" in slug:
+        settings["shared_terminal_depth"] = False
+    return settings
 
 
 def _write_efg_table(df: pd.DataFrame, f, tikz_re, regenerate_images: bool):
@@ -40,7 +45,7 @@ def _write_efg_table(df: pd.DataFrame, f, tikz_re, regenerate_images: bool):
                 viz_path = CATALOG_DIR / "img" / f"{slug}"
                 viz_path.parent.mkdir(parents=True, exist_ok=True)
                 for func in [generate_tex, generate_png, generate_pdf]:
-                    func(g, save_to=str(viz_path), **draw_tree_args)
+                    func(g, save_to=str(viz_path), **catalog_draw_tree_settings(slug))
 
             with open(tex_path, encoding="utf-8") as tex_f:
                 tex_content = tex_f.read()
