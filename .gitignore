@@ -49,3 +49,7 @@ build_support/msw/gambit.wxs
 build_support/osx/Info.plist
 src/pygambit/catalog
 doc/catalog_table.rst
+catalog/img/**/*.pdf
+catalog/img/**/*.png
+catalog/img/**/*.tex
+catalog/img/**/*.ef
