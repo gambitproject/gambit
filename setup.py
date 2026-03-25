@@ -21,10 +21,12 @@
 #
 
 import glob
+import pathlib
 import platform
+import shutil
 
 import Cython.Build
-import setuptools
+import setuptools.command.build_py
 
 cppgambit_include_dirs = ["src"]
 cppgambit_cflags = (
@@ -78,6 +80,19 @@ def solver_library_config(library_name: str, paths: list) -> tuple:
     )
 
 
+class GambitBuildPy(setuptools.command.build_py.build_py):
+    """Extend `build_py` to copy the catalog games data into the build library."""
+    def run(self) -> None:
+        super().run()
+
+        catalog_source = pathlib.Path("catalog")
+        catalog_target = pathlib.Path(self.build_lib) / "pygambit/catalog_data"
+        if catalog_target.exists():
+            shutil.rmtree(catalog_target)
+        catalog_target.mkdir(exist_ok=True, parents=True)
+        shutil.copytree(catalog_source, catalog_target, dirs_exist_ok=True)
+
+
 cppgambit_bimatrix = solver_library_config("cppgambit_bimatrix",
                                            ["linalg", "lp", "lcp", "enummixed"])
 cppgambit_liap = solver_library_config("cppgambit_liap", ["liap"])
@@ -100,6 +115,7 @@ libgambit = setuptools.Extension(
 )
 
 setuptools.setup(
+    cmdclass={"build_py": GambitBuildPy},
     libraries=[cppgambit_bimatrix, cppgambit_liap, cppgambit_logit, cppgambit_simpdiv,
                cppgambit_gtracer, cppgambit_enumpoly,
                cppgambit_games, cppgambit_core],
