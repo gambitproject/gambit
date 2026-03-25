@@ -1,15 +1,12 @@
 EFG 2 R "Bagwell (GEB 1995) commitment and (un)observability" { "Player 1" "Player 2" }
 "This is a Stackelberg-type game with imperfectly observed commitment, following the
-analysis of Bagwell [^Bag1995].  The outcomes and payoffs are the same as in Bagwell's
+analysis of `Bag1995 <https://gambitproject.readthedocs.io/en/latest/biblio.html#Bag1995>`_.  The outcomes and payoffs are the same as in Bagwell's
 model.  This example sets the probability that the follower 'correctly' observes the
 leader's action as .99 (99/100).  The key result is that the only pure-strategy
 equilibrium that survives if observability is imperfect is the one in which players
 choose the actions that would form an equilibrium if the game was a *simultaneous-move*
 game.  There is an equilibrium in which the 'Stackelberg' action is played with high
 probability, but strictly less than one.
-
-[^Bag1995]: Bagwell, Kyle (1995)  Commitment and observability in games.
-    _Games and Economic Behavior_ 8: 271-280.
 "
 
 p "" 1 1 "" { "S" "C" } 0
