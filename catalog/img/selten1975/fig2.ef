@@ -1,9 +1,0 @@
-player 1 name Player~1
-player 2 name Player~2
-level -2.0 node 1 player 1
-level 10.0 node 1 xshift -1.75 from -2.0,1 move R payoffs 1 1
-level 2.0 node 1 player 2 xshift 1.75 from -2.0,1 move L
-level 10.0 node 2 xshift -1.5 from 2.0,1 move R payoffs 0 2
-level 6.0 node 1 player 1 xshift 1.5 from 2.0,1 move L
-level 10.0 node 3 xshift -1.0 from 6.0,1 move r payoffs 0 3
-level 10.0 node 4 xshift 1.0 from 6.0,1 move l payoffs 2 0

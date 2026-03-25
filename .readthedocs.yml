@@ -17,7 +17,7 @@ build:
   jobs:
     # Create RST for catalog table in docs
     post_install:
-      - $READTHEDOCS_VIRTUALENV_PATH/bin/python build_support/catalog/update.py
+      - $READTHEDOCS_VIRTUALENV_PATH/bin/python build_support/catalog/update.py --regenerate-images
 
 python:
   install:
