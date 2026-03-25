@@ -39,8 +39,8 @@ Currently supported representations are:
 
    .. note::
 
-      Regenerate all images in the catalog with the ``--regenerate-images`` flag.
-      Update the ``draw_tree_args`` in ``build_support/catalog/update.py`` to change the default visualization parameters.
+      Update the ``catalog_draw_tree_settings`` in ``build_support/catalog/update.py`` to change the default visualization parameters for your game(s).
+      You can use the ``--regenerate-images`` flag when building the docs locally (readthedocs does this by default).
 
    .. warning::
 
