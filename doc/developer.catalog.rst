@@ -8,18 +8,6 @@ To do so, you will need to have the `gambit` GitHub repo cloned and be able to s
 you may wish to first review the :ref:`contributor guidelines <contributing>`.
 You'll also need to have a developer install of `pygambit` available in your Python environment, see :ref:`build-python`.
 
-The catalog module
-------------------
-
-Although the ``catalog`` directory is located at the project root outside of ``src/pygambit/``, it is installed and bundled as the ``pygambit.catalog`` subpackage.
-
-This is handled by the package build configuration in ``pyproject.toml`` under ``[tool.setuptools]``:
-
-- The ``package-dir`` mapping instructs ``setuptools`` to source the ``pygambit.catalog`` subpackage from the physical ``catalog`` directory.
-- The ``package-data`` configuration ensures all non-Python data files (like ``.efg`` and ``.nfg`` files) inside the catalog are correctly bundled during installation.
-
-As a developer, this means you will need to reinstall the package (e.g., passing ``pip install .``) for any new game files or internal catalog changes to be reflected in the ``pygambit`` module.
-
 Add new game files
 ------------------
 
@@ -63,3 +51,20 @@ Currently supported representations are:
    .. warning::
 
       Make sure you commit all changed files e.g. run ``git add --all`` before committing and pushing.
+
+
+Access from pygambit
+--------------------
+
+We keep the ``catalog`` directory at the top level of the repository because it is in principle independent
+of the Python and C++ code.  However, in order to include these games with the Python package, there is a bit
+of extra infrastructure.
+
+In ``setup.py`` we have a custom build command which first copies the contents of ``catalog/`` into the build
+directory for the Python package.  These are then exposed as data in the ``catalog_data`` directory (changing
+the name to avoid confusion or clashes with ``catalog.py``, which is responsible for accessing the catalog).
+
+The main implication is that if you are working via the Python package and you add new games to the catalog,
+you will need to rebuild and reinstall the Python extension in order to access the new games.  That is, changing
+the contents of the catalog is no different than changing any other source code in the Python package; you'll
+need to execute ``pip install .`` after the addition or change.

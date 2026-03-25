@@ -116,11 +116,11 @@ markers = [
 ]
 
 [tool.setuptools]
-packages = ["pygambit", "pygambit.catalog"]
-package-dir = { "pygambit" = "src/pygambit", "pygambit.catalog" = "catalog" }
+packages = ["pygambit"]
+package-dir = { "pygambit" = "src/pygambit" }
 
 [tool.setuptools.package-data]
-"pygambit.catalog" = ["*"]
+pygambit = ["catalog_data/**/*"]
 
 [tool.setuptools.dynamic]
 version = {file = "build_support/GAMBIT_VERSION"}

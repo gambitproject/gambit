@@ -6,8 +6,8 @@ import pandas as pd
 
 import pygambit as gbt
 
-# Use the full string path to the virtual package we created
-_CATALOG_RESOURCE = files(__name__)
+# Use the full string path to where the catalog data are placed in the package
+_CATALOG_RESOURCE = files("pygambit")/"catalog_data"
 
 READERS = {
     ".nfg": gbt.read_nfg,
