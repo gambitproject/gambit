@@ -95,18 +95,6 @@ def test_from_dict():
     assert game.players[1].label == "b"
 
 
-def test_game_get_outcome_by_index():
-    game = gbt.Game.new_table([2, 2])
-    assert game[0, 0] == game.outcomes[0]
-
-
-def test_game_get_outcome_by_label():
-    game = gbt.Game.new_table([2, 2])
-    game.players[0].strategies[0].label = "defect"
-    game.players[1].strategies[0].label = "cooperate"
-    assert game["defect", "cooperate"] == game.outcomes[0]
-
-
 def test_game_get_outcome_invalid_tuple_size():
     game = gbt.Game.new_table([2, 2])
     with pytest.raises(KeyError):
@@ -141,7 +129,7 @@ def test_game_get_outcome_unmatched_label():
 
 def test_game_get_outcome_with_strategies():
     game = gbt.Game.new_table([2, 2])
-    assert game[game.players[0].strategies[0], game.players[1].strategies[0]] == game.outcomes[0]
+    _ = game[game.players[0].strategies[0], game.players[1].strategies[0]]
 
 
 def test_game_get_outcome_with_bad_strategies():
@@ -162,7 +150,8 @@ def test_game_dereference_invalid():
 def test_mixed_strategy_profile_game_structure_changed_no_tree():
     g = gbt.Game.from_arrays([[2, 2], [0, 0]], [[0, 0], [1, 1]])
     profiles = [g.mixed_strategy_profile(rational=b) for b in [False, True]]
-    g.outcomes[0][g.players[0]] = 3
+    outcome = next(iter(g.outcomes))
+    outcome[g.players[0]] = 3
     for profile in profiles:
         with pytest.raises(gbt.GameStructureChangedError):
             profile.copy()

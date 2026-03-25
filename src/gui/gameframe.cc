@@ -969,9 +969,9 @@ void GameFrame::OnEditNode(wxCommandEvent &)
   if (dialog.ShowModal() == wxID_OK) {
     try {
       m_doc->DoSetNodeLabel(m_doc->GetSelectNode(), dialog.GetNodeName());
-      if (dialog.GetOutcome() > 0) {
-        m_doc->DoSetOutcome(m_doc->GetSelectNode(),
-                            m_doc->GetGame()->GetOutcome(dialog.GetOutcome()));
+      if (const auto outcomeId = dialog.GetOutcome(); outcomeId > 0) {
+        const auto outcome = *std::next(m_doc->GetGame()->GetOutcomes().begin(), outcomeId - 1);
+        m_doc->DoSetOutcome(m_doc->GetSelectNode(), outcome);
       }
       else {
         m_doc->DoSetOutcome(m_doc->GetSelectNode(), nullptr);

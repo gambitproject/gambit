@@ -237,7 +237,7 @@ class GameOutcomes:
         for outcome in self.game.deref().GetOutcomes():
             yield Outcome.wrap(outcome)
 
-    def __getitem__(self, index: int | str) -> Outcome:
+    def __getitem__(self, index: str) -> Outcome:
         if isinstance(index, str):
             if not index.strip():
                 raise ValueError("Outcome label cannot be empty or all whitespace")
@@ -247,9 +247,7 @@ class GameOutcomes:
             if len(matches) > 1:
                 raise ValueError(f"Game has multiple outcomes with label '{index}'")
             return matches[0]
-        if isinstance(index, int):
-            return Outcome.wrap(self.game.deref().GetOutcome(index + 1))
-        raise TypeError(f"Outcome index must be int or str, not {index.__class__.__name__}")
+        raise TypeError(f"Outcome index must be str, not {index.__class__.__name__}")
 
 
 @cython.cclass

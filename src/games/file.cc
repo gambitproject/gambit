@@ -411,10 +411,14 @@ void ReadOutcomeList(GameFileLexer &p_parser, Game &p_nfg)
 void ParseOutcomeBody(GameFileLexer &p_parser, Game &p_nfg)
 {
   ReadOutcomeList(p_parser, p_nfg);
+  const auto &outcomes = p_nfg->GetOutcomes();
+  std::vector<GameOutcome> outcome_index;
+  outcome_index.reserve(outcomes.size());
+  std::copy(outcomes.begin(), outcomes.end(), std::back_inserter(outcome_index));
   for (const auto &profile : StrategyContingencies(p_nfg)) {
     p_parser.ExpectCurrentToken(TOKEN_NUMBER, "outcome index");
     if (const int outcomeId = std::stoi(p_parser.GetLastText())) {
-      profile->SetOutcome(p_nfg->GetOutcome(outcomeId));
+      profile->SetOutcome(outcome_index[outcomeId - 1]);
     }
     p_parser.GetNextToken();
   }

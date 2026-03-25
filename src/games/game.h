@@ -1102,8 +1102,6 @@ public:
 
   /// @name Outcomes
   //@{
-  /// Returns the index'th outcome defined in the game
-  GameOutcome GetOutcome(int index) const { return m_outcomes.at(index - 1); }
   /// Returns the set of outcomes in the game
   Outcomes GetOutcomes() const
   {
