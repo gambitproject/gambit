@@ -112,7 +112,7 @@ def _write_efg_table(df: pd.DataFrame, f, tikz_re, regenerate_images: bool):
 #         f.write("       \n")
 
 
-def generate_rst_table(df: pd.DataFrame, rst_path: Path, regnerate_images: bool = False):
+def generate_rst_table(df: pd.DataFrame, rst_path: Path, regenerate_images: bool = False):
     """Generate RST output with two list-tables: one for EFG and one for NFG games."""
     tikz_re = re.compile(r"\\begin\{document\}(.*?)\\end\{document\}", re.DOTALL)
 
@@ -127,7 +127,7 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path, regnerate_images: bool 
         # f.write("Extensive form games\n")
         # f.write("--------------------\n")
         # f.write("\n")
-        _write_efg_table(df, f, tikz_re, regnerate_images)
+        _write_efg_table(df, f, tikz_re, regenerate_images)
         # f.write("\n")
 
         # # NFG section
@@ -196,7 +196,7 @@ if __name__ == "__main__":
 
     # Create RST list-table used by doc/catalog.rst
     df = gbt.catalog.games(include_descriptions=True)
-    generate_rst_table(df, CATALOG_RST_TABLE, regnerate_images=args.regenerate_images)
+    generate_rst_table(df, CATALOG_RST_TABLE, regenerate_images=args.regenerate_images)
     print(f"Generated {CATALOG_RST_TABLE} for use in local docs build. DO NOT COMMIT.")
     if args.build:
         # Update the Makefile.am with the current list of catalog files
