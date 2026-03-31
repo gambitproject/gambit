@@ -52,18 +52,35 @@ std::string WriteHTMLFile(const Game &p_game, const GamePlayer &p_rowPlayer,
 
     theHtml += "<table>";
     theHtml += "<tr>";
-    theHtml += "<td></td>";
+    theHtml += "<td colspan=\"2\" rowspan=\"2\"></td>";
+    theHtml += "<td colspan=\"" + std::to_string(p_colPlayer->GetStrategies().size()) +
+               "\" align=\"center\"><b>";
+    theHtml += p_colPlayer->GetLabel();
+    theHtml += "</b></td>";
+    theHtml += "</tr>";
+    theHtml += "<tr>";
     for (const auto &strategy : p_colPlayer->GetStrategies()) {
-      theHtml += "<td align=center><b>";
+      theHtml += "<td align=\"center\"><b>";
       theHtml += strategy->GetLabel();
       theHtml += "</b></td>";
     }
     theHtml += "</tr>";
+
+    bool first_row_strategy = true;
     for (const auto &row_strategy : p_rowPlayer->GetStrategies()) {
       const PureStrategyProfile profile = iter;
       profile->SetStrategy(row_strategy);
       theHtml += "<tr>";
-      theHtml += "<td align=center><b>";
+
+      if (first_row_strategy) {
+        theHtml += "<td rowspan=\"" + std::to_string(p_rowPlayer->GetStrategies().size()) +
+                   "\" align=\"center\" valign=\"middle\"><b>";
+        theHtml += p_rowPlayer->GetLabel();
+        theHtml += "</b></td>";
+        first_row_strategy = false;
+      }
+
+      theHtml += "<td align=\"center\"><b>";
       theHtml += row_strategy->GetLabel();
       theHtml += "</b></td>";
       for (const auto &col_strategy : p_colPlayer->GetStrategies()) {
