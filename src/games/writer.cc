@@ -52,15 +52,15 @@ std::string WriteHTMLFile(const Game &p_game, const GamePlayer &p_rowPlayer,
 
     theHtml += "<table>";
     theHtml += "<tr>";
-    theHtml += "<td colspan=\"2\" rowspan=\"2\"></td>";
-    theHtml += "<td colspan=\"" + std::to_string(p_colPlayer->GetStrategies().size()) +
-               "\" align=\"center\"><b>";
+    theHtml += R"(<td colspan="2" rowspan="2"></td>)";
+    theHtml += R"(<td colspan=")" + std::to_string(p_colPlayer->GetStrategies().size()) +
+               R"(" align="center"><b>)";
     theHtml += p_colPlayer->GetLabel();
     theHtml += "</b></td>";
     theHtml += "</tr>";
     theHtml += "<tr>";
     for (const auto &strategy : p_colPlayer->GetStrategies()) {
-      theHtml += "<td align=\"center\"><b>";
+      theHtml += R"(<td align="center"><b>)";
       theHtml += strategy->GetLabel();
       theHtml += "</b></td>";
     }
@@ -73,14 +73,14 @@ std::string WriteHTMLFile(const Game &p_game, const GamePlayer &p_rowPlayer,
       theHtml += "<tr>";
 
       if (first_row_strategy) {
-        theHtml += "<td rowspan=\"" + std::to_string(p_rowPlayer->GetStrategies().size()) +
-                   "\" align=\"center\" valign=\"middle\"><b>";
+        theHtml += R"(<td rowspan=")" + std::to_string(p_rowPlayer->GetStrategies().size()) +
+                   R"(" align="center" valign="middle"><b>)";
         theHtml += p_rowPlayer->GetLabel();
         theHtml += "</b></td>";
         first_row_strategy = false;
       }
 
-      theHtml += "<td align=\"center\"><b>";
+      theHtml += R"(<td align="center"><b>)";
       theHtml += row_strategy->GetLabel();
       theHtml += "</b></td>";
       for (const auto &col_strategy : p_colPlayer->GetStrategies()) {
