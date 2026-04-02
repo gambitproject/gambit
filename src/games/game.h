@@ -1055,6 +1055,14 @@ public:
     }
     return false;
   }
+  /// Returns whether the path from the root to p_node passes through its infoset more than once
+  virtual bool IsAbsentMindedReentry(const GameNode &p_node) const
+  {
+    if (p_node->GetGame().get() != this) {
+      throw MismatchException();
+    }
+    return false;
+  }
   /// Returns a list of all subgame roots in the game
   virtual std::vector<GameSubgame> GetSubgames() const { throw UndefinedException(); }
   /// Returns the smallest subgame containing the information set
