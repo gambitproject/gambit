@@ -859,6 +859,23 @@ bool GameTreeRep::IsAbsentMinded(const GameInfoset &p_infoset) const
   return contains(m_absentMindedInfosets, p_infoset.get());
 }
 
+bool GameTreeRep::IsAbsentMindedReentry(const GameNode &p_node) const
+{
+  if (p_node->GetGame().get() != this) {
+    throw MismatchException();
+  }
+
+  if (!m_unreachableNodes && !m_root->IsTerminal()) {
+    BuildUnreachableNodes();
+  }
+
+  auto it = m_absentMindedReentries.find(p_node->m_infoset);
+  if (it == m_absentMindedReentries.end()) {
+    return false;
+  }
+  return contains(it->second, p_node.get());
+}
+
 //------------------------------------------------------------------------
 //               GameTreeRep: Managing the representation
 //------------------------------------------------------------------------
@@ -924,6 +941,7 @@ void GameTreeRep::ClearComputedValues() const
   m_ownPriorActionInfo = nullptr;
   const_cast<GameTreeRep *>(this)->m_unreachableNodes = nullptr;
   m_absentMindedInfosets.clear();
+  m_absentMindedReentries.clear();
   m_subgames.clear();
   m_computedValues = false;
 }
@@ -1100,6 +1118,7 @@ void GameTreeRep::BuildUnreachableNodes() const
       // Check for Absent-Minded Re-entry of the infoset
       if (path_choices.find(child->m_infoset->shared_from_this()) != path_choices.end()) {
         m_absentMindedInfosets.insert(child->m_infoset);
+        m_absentMindedReentries[child->m_infoset].insert(child.get());
         const GameAction replay_action = path_choices.at(child->m_infoset->shared_from_this());
         position.emplace(AbsentMindedEdge{replay_action, child});
 
