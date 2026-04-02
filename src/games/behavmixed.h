@@ -46,6 +46,7 @@ protected:
 
     Level m_level{Level::None};
     std::map<GameNode, T> m_realizProbs, m_beliefs;
+    std::map<GameInfoset, T> m_infosetProbs;
     std::map<GameNode, std::map<GamePlayer, T>> m_nodeValues;
     std::map<GameInfoset, T> m_infosetValues;
     std::map<GameAction, T> m_actionValues;
@@ -60,6 +61,7 @@ protected:
     {
       m_level = Level::None;
       m_realizProbs.clear();
+      m_infosetProbs.clear();
       m_beliefs.clear();
       m_nodeValues.clear();
       m_infosetValues.clear();
