@@ -210,8 +210,6 @@ NashMonitorDialog::NashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
   m_stopButton->SetToolTip(_("Stop the computation"));
   startSizer->Add(m_stopButton, 0, wxALL | wxALIGN_CENTER, 5);
 
-  Bind(wxEVT_BUTTON, &NashMonitorDialog::OnStop, this, wxID_CANCEL);
-
   sizer->Add(startSizer, 0, wxALL | wxALIGN_CENTER, 5);
 
   if (p_command->IsBehavior()) {
@@ -236,6 +234,8 @@ NashMonitorDialog::NashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
 
   Bind(wxEVT_EXTERNAL_RUNNER_LINE, &NashMonitorDialog::OnRunnerLine, this);
   Bind(wxEVT_EXTERNAL_RUNNER_FINISHED, &NashMonitorDialog::OnRunnerFinished, this);
+  Bind(wxEVT_BUTTON, &NashMonitorDialog::OnStop, this, wxID_CANCEL);
+  Bind(wxEVT_CLOSE_WINDOW, &NashMonitorDialog::OnClose, this);
 
   Start(p_command);
 }
@@ -285,7 +285,11 @@ void NashMonitorDialog::OnRunnerFinished(wxThreadEvent &p_event)
 {
   m_stopButton->Enable(false);
 
-  if (p_event.GetInt() == 0) {
+  if (m_stopRequested) {
+    m_statusText->SetLabel("The computation was stopped.");
+    m_statusText->SetForegroundColour(*wxRED);
+  }
+  else if (p_event.GetInt() == 0) {
     m_statusText->SetLabel(wxT("The computation has completed."));
     m_statusText->SetForegroundColour(wxColour(0, 192, 0));
   }
@@ -299,8 +303,29 @@ void NashMonitorDialog::OnRunnerFinished(wxThreadEvent &p_event)
 
 void NashMonitorDialog::OnStop(wxCommandEvent &)
 {
+  m_stopRequested = true;
   m_runner->Stop();
   m_stopButton->Enable(false);
+}
+
+void NashMonitorDialog::OnClose(wxCloseEvent &p_event)
+{
+  if (!m_runner || !m_stopButton->IsEnabled()) {
+    p_event.Skip();
+    return;
+  }
+
+  m_stopRequested = true;
+  m_runner->Stop();
+  m_stopButton->Enable(false);
+  m_statusText->SetLabel("Stopping computation...");
+
+  if (p_event.CanVeto()) {
+    p_event.Veto();
+  }
+  else {
+    p_event.Skip();
+  }
 }
 
 } // namespace Gambit::GUI

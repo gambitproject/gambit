@@ -34,9 +34,11 @@ class NashMonitorDialog final : public wxDialog {
   wxStaticText *m_statusText, *m_countText;
   wxButton *m_stopButton, *m_okButton;
   std::shared_ptr<AnalysisOutput> m_output;
+  bool m_stopRequested{false};
 
   void Start(const std::shared_ptr<AnalysisOutput> &p_command);
 
+  void OnClose(wxCloseEvent &);
   void OnStop(wxCommandEvent &);
   void OnRunnerLine(wxThreadEvent &);
   void OnRunnerFinished(wxThreadEvent &);
