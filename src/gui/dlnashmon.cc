@@ -204,6 +204,7 @@ class NashMonitorDialog final : public wxDialog {
   void SetStatusRunning() const
   {
     m_statusText->SetLabel(wxT("The computation is currently in progress."));
+    m_statusText->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_WINDOWTEXT));
     m_stopButton->Enable(true);
     m_okButton->Enable(false);
   }
@@ -277,7 +278,6 @@ NashMonitorDialog::NashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
   m_okButton->Enable(false);
 
   SetSizerAndFit(sizer);
-  sizer->Fit(this);
   sizer->SetSizeHints(this);
   CenterOnParent();
 
@@ -346,15 +346,16 @@ void NashMonitorDialog::OnRunnerFinished(wxThreadEvent &p_event)
     SetStatusFinishedNormally();
   }
   else {
-    SetStatusFinishedAbnormally(wxT("The computation ended abnormally."));
+    SetStatusFinishedAbnormally(
+        wxString::Format("The computation ended abnormally (code %d)", p_event.GetInt()));
   }
 }
 
 void NashMonitorDialog::OnStop(wxCommandEvent &)
 {
   m_stopRequested = true;
+  SetStatusStopping();
   m_runner->Stop();
-  m_stopButton->Enable(false);
 }
 
 void NashMonitorDialog::OnClose(wxCloseEvent &p_event)
@@ -365,8 +366,8 @@ void NashMonitorDialog::OnClose(wxCloseEvent &p_event)
   }
 
   m_stopRequested = true;
-  m_runner->Stop();
   SetStatusStopping();
+  m_runner->Stop();
 
   if (p_event.CanVeto()) {
     p_event.Veto();
