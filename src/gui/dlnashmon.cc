@@ -50,12 +50,11 @@ END_EVENT_TABLE()
 
 class ExternalProcessRunner {
   wxEvtHandler *m_parent;
+  wxProcess *m_process{nullptr};
+  long m_pid{0};
   wxString m_pending;
 
 public:
-  wxProcess *m_process{nullptr};
-  long m_pid{0};
-
   ExternalProcessRunner(wxEvtHandler *p_parent) : m_parent(p_parent) {}
 
   void Start(const wxString &p_command, const wxString &p_stdin)
@@ -86,10 +85,24 @@ public:
     m_process->CloseOutput();
   }
 
-  void PollOutput()
+  void Stop()
   {
+    // Per the wxWidgets wiki, under Windows, programs that run
+    // without a console window don't respond to the more polite
+    // SIGTERM, so instead we must be rude and SIGKILL it.
+#ifdef __WXMSW__
+    wxProcess::Kill(m_pid, wxSIGKILL);
+#else
+    wxProcess::Kill(m_pid, wxSIGTERM);
+#endif // __WXMSW__
+  }
+
+  bool PollOutput()
+  {
+    bool result = false;
+
     if (!m_process || !m_process->IsInputAvailable()) {
-      return;
+      return result;
     }
 
     wxInputStream *stream = m_process->GetInputStream();
@@ -104,11 +117,13 @@ public:
       if (ch == '\n') {
         PostLine(m_pending);
         m_pending.clear();
+        result = true;
       }
       else if (ch != '\r') {
         m_pending += ch;
       }
     }
+    return result;
   }
 
   void FlushPendingLine()
@@ -200,21 +215,20 @@ void NashMonitorDialog::Start(std::shared_ptr<AnalysisOutput> p_command)
 
   m_stopButton->Enable(true);
 
-  m_timer.Start(1000, false);
+  m_timer.StartOnce(1000);
 }
 
 void NashMonitorDialog::OnIdle(wxIdleEvent &p_event)
 {
-  if (!m_runner->m_process) {
+  if (!m_runner) {
     return;
   }
 
-  if (m_runner->m_process->IsInputAvailable()) {
-    m_runner->PollOutput();
+  if (m_runner->PollOutput()) {
     p_event.RequestMore();
   }
   else {
-    m_timer.Start(1000, false);
+    m_timer.StartOnce(1000);
   }
 }
 
@@ -252,17 +266,10 @@ void NashMonitorDialog::OnEndProcess(wxProcessEvent &p_event)
   m_okButton->Enable(true);
 }
 
-void NashMonitorDialog::OnStop(wxCommandEvent &p_event)
+void NashMonitorDialog::OnStop(wxCommandEvent &)
 {
-  // Per the wxWidgets wiki, under Windows, programs that run
-  // without a console window don't respond to the more polite
-  // SIGTERM, so instead we must be rude and SIGKILL it.
+  m_runner->Stop();
   m_stopButton->Enable(false);
-
-#ifdef __WXMSW__
-  wxProcess::Kill(m_runner->m_pid, wxSIGKILL);
-#else
-  wxProcess::Kill(m_runner->m_pid, wxSIGTERM);
-#endif // __WXMSW__
 }
+
 } // namespace Gambit::GUI
