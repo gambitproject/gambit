@@ -201,6 +201,40 @@ class NashMonitorDialog final : public wxDialog {
   void OnRunnerLine(wxThreadEvent &);
   void OnRunnerFinished(wxThreadEvent &);
 
+  void SetStatusRunning() const
+  {
+    m_statusText->SetLabel(wxT("The computation is currently in progress."));
+    m_stopButton->Enable(true);
+    m_okButton->Enable(false);
+  }
+  void SetStatusStopping() const
+  {
+    m_statusText->SetLabel(wxT("Stopping computation..."));
+    m_statusText->SetForegroundColour(wxColour(196, 128, 0));
+    m_stopButton->Enable(false);
+  }
+  void SetStatusStopped() const
+  {
+    m_statusText->SetLabel(wxT("The computation has been stopped."));
+    m_statusText->SetForegroundColour(wxColour(196, 128, 0));
+    m_okButton->Enable(true);
+    m_stopButton->Enable(false);
+  }
+  void SetStatusFinishedNormally() const
+  {
+    m_statusText->SetLabel(wxT("The computation has completed."));
+    m_statusText->SetForegroundColour(wxColour(0, 192, 0));
+    m_okButton->Enable(true);
+    m_stopButton->Enable(false);
+  }
+  void SetStatusFinishedAbnormally(const wxString &p_message) const
+  {
+    m_statusText->SetLabel(p_message);
+    m_statusText->SetForegroundColour(*wxRED);
+    m_okButton->Enable(true);
+    m_stopButton->Enable(false);
+  }
+
 public:
   NashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
                     const std::shared_ptr<AnalysisOutput> &p_command);
@@ -215,9 +249,7 @@ NashMonitorDialog::NashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
 
   auto *startSizer = new wxBoxSizer(wxHORIZONTAL);
 
-  m_statusText =
-      new wxStaticText(this, wxID_STATIC, wxT("The computation is currently in progress."));
-  m_statusText->SetForegroundColour(*wxBLUE);
+  m_statusText = new wxStaticText(this, wxID_STATIC, "The computation is currently in progress.");
   startSizer->Add(m_statusText, 0, wxALL | wxALIGN_CENTER, 5);
 
   m_countText = new wxStaticText(this, wxID_STATIC, wxT("Number of equilibria found so far: 0  "));
@@ -278,20 +310,18 @@ void NashMonitorDialog::Start(const std::shared_ptr<AnalysisOutput> &p_command)
   switch (const auto result = m_runner->Start(p_command->GetCommand(),
                                               wxString(s.str().c_str(), *wxConvCurrent))) {
   case ExternalProcessRunner::RunnerStartResult::Ok:
-    m_stopButton->Enable(true);
-    return;
+    SetStatusRunning();
+    break;
   case ExternalProcessRunner::RunnerStartResult::LaunchFailed:
-    m_statusText->SetLabel("Failed to launch solver.");
+    SetStatusFinishedAbnormally("Failed to launch solver.");
     break;
   case ExternalProcessRunner::RunnerStartResult::NoOutputPipe:
-    m_statusText->SetLabel("Solver launched, but I/O redirection failed.");
+    SetStatusFinishedAbnormally("Solver launched, but I/O redirection failed.");
     break;
   case ExternalProcessRunner::RunnerStartResult::StdinWriteFailed:
-    m_statusText->SetLabel("Failed to send input to solver.");
+    SetStatusFinishedAbnormally("Failed to send input to solver.");
     break;
   }
-  m_statusText->SetForegroundColour(*wxRED);
-  m_okButton->Enable(true);
 }
 
 void NashMonitorDialog::OnRunnerLine(wxThreadEvent &p_event)
@@ -310,19 +340,14 @@ void NashMonitorDialog::OnRunnerFinished(wxThreadEvent &p_event)
   m_stopButton->Enable(false);
 
   if (m_stopRequested) {
-    m_statusText->SetLabel("The computation was stopped.");
-    m_statusText->SetForegroundColour(*wxRED);
+    SetStatusStopped();
   }
   else if (p_event.GetInt() == 0) {
-    m_statusText->SetLabel(wxT("The computation has completed."));
-    m_statusText->SetForegroundColour(wxColour(0, 192, 0));
+    SetStatusFinishedNormally();
   }
   else {
-    m_statusText->SetLabel(wxT("The computation ended abnormally."));
-    m_statusText->SetForegroundColour(*wxRED);
+    SetStatusFinishedAbnormally(wxT("The computation ended abnormally."));
   }
-
-  m_okButton->Enable(true);
 }
 
 void NashMonitorDialog::OnStop(wxCommandEvent &)
@@ -341,8 +366,7 @@ void NashMonitorDialog::OnClose(wxCloseEvent &p_event)
 
   m_stopRequested = true;
   m_runner->Stop();
-  m_stopButton->Enable(false);
-  m_statusText->SetLabel("Stopping computation...");
+  SetStatusStopping();
 
   if (p_event.CanVeto()) {
     p_event.Veto();
