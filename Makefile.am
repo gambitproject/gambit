@@ -127,7 +127,6 @@ EXTRA_DIST = \
 	contrib/games/coord2ts.efg \
 	contrib/games/coord3.efg \
 	contrib/games/coord4.efg \
-	contrib/games/cross.efg \
 	contrib/games/cs.efg \
 	contrib/games/e04.efg \
 	contrib/games/e05.efg \
