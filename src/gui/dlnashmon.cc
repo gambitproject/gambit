@@ -54,7 +54,7 @@ class ExternalProcessRunner final : public wxEvtHandler {
 
   void OnTimer(wxTimerEvent &)
   {
-    PollOutput();
+    ReadAvailableOutput();
     if (m_process) {
       m_timer.StartOnce(1000);
     }
@@ -63,7 +63,7 @@ class ExternalProcessRunner final : public wxEvtHandler {
   void OnEndProcess(wxProcessEvent &p_event)
   {
     m_timer.Stop();
-    PollOutput();
+    ReadAvailableOutput();
     FlushPendingLine();
 
     auto *evt = new wxThreadEvent(wxEVT_EXTERNAL_RUNNER_FINISHED);
@@ -159,12 +159,10 @@ public:
     }
   }
 
-  bool PollOutput()
+  void ReadAvailableOutput()
   {
-    bool result = false;
-
     if (!m_process || !m_process->IsInputAvailable()) {
-      return result;
+      return;
     }
 
     wxInputStream *stream = m_process->GetInputStream();
@@ -179,13 +177,11 @@ public:
       if (ch == '\n') {
         PostLine(m_pending);
         m_pending.clear();
-        result = true;
       }
       else if (ch != '\r') {
         m_pending += ch;
       }
     }
-    return result;
   }
 };
 
