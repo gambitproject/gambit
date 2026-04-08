@@ -127,7 +127,6 @@ EXTRA_DIST = \
 	contrib/games/coord2ts.efg \
 	contrib/games/coord3.efg \
 	contrib/games/coord4.efg \
-	contrib/games/cross.efg \
 	contrib/games/cs.efg \
 	contrib/games/e04.efg \
 	contrib/games/e05.efg \
@@ -232,6 +231,11 @@ EXTRA_DIST = \
 	contrib/games/zero.nfg \
 	src/README.rst \
 	catalog/bagwell1995.efg \
+	catalog/gilboa1997/fig2.efg \
+	catalog/jakobsen2016/fig1a.efg \
+	catalog/jakobsen2016/fig1b.efg \
+	catalog/jakobsen2016/fig1c.efg \
+	catalog/jakobsen2016/fig3.efg \
 	catalog/myerson1991/fig2_1.efg \
 	catalog/myerson1991/fig4_2.efg \
 	catalog/reiley2008/fig1.efg \
