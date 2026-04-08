@@ -218,7 +218,7 @@ NashMonitorDialog::NashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
   else {
     m_profileList = new MixedProfileList(this, m_doc);
   }
-  m_profileList->SetSizeHints(wxSize(500, 300));
+  m_profileList->SetMinSize(wxSize(500, 300));
   sizer->Add(m_profileList, 1, wxALL | wxEXPAND, 5);
 
   auto *buttonSizer = CreateStdDialogButtonSizer(wxOK);
@@ -226,10 +226,9 @@ NashMonitorDialog::NashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
   m_okButton = dynamic_cast<wxButton *>(FindWindow(wxID_OK));
   m_okButton->Enable(false);
 
-  SetSizer(sizer);
+  SetSizerAndFit(sizer);
   sizer->Fit(this);
   sizer->SetSizeHints(this);
-  wxTopLevelWindowBase::Layout();
   CenterOnParent();
 
   Bind(wxEVT_EXTERNAL_RUNNER_LINE, &NashMonitorDialog::OnRunnerLine, this);
