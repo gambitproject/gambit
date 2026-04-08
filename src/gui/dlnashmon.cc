@@ -69,6 +69,7 @@ class ExternalProcessRunner final : public wxEvtHandler {
     evt->SetInt(p_event.GetExitCode());
     wxQueueEvent(m_parent, evt);
 
+    delete m_process;
     m_process = nullptr;
     m_pid = 0;
   }
@@ -209,8 +210,7 @@ NashMonitorDialog::NashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
   m_stopButton->SetToolTip(_("Stop the computation"));
   startSizer->Add(m_stopButton, 0, wxALL | wxALIGN_CENTER, 5);
 
-  Connect(wxID_CANCEL, wxEVT_COMMAND_BUTTON_CLICKED,
-          wxCommandEventHandler(NashMonitorDialog::OnStop));
+  Bind(wxEVT_BUTTON, &NashMonitorDialog::OnStop, this, wxID_CANCEL);
 
   sizer->Add(startSizer, 0, wxALL | wxALIGN_CENTER, 5);
 
@@ -223,8 +223,9 @@ NashMonitorDialog::NashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
   m_profileList->SetSizeHints(wxSize(500, 300));
   sizer->Add(m_profileList, 1, wxALL | wxEXPAND, 5);
 
-  m_okButton = new wxButton(this, wxID_OK, wxT("OK"));
-  sizer->Add(m_okButton, 0, wxALL | wxALIGN_RIGHT, 5);
+  auto *buttonSizer = CreateStdDialogButtonSizer(wxOK);
+  sizer->Add(buttonSizer, 0, wxALL | wxEXPAND, 5);
+  m_okButton = dynamic_cast<wxButton *>(FindWindow(wxID_OK));
   m_okButton->Enable(false);
 
   SetSizer(sizer);
