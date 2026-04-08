@@ -33,6 +33,10 @@
 #include "nfgprofile.h"
 
 namespace Gambit::GUI {
+
+wxDECLARE_EVENT(wxEVT_EXTERNAL_RUNNER_LINE, wxThreadEvent);
+wxDEFINE_EVENT(wxEVT_EXTERNAL_RUNNER_LINE, wxThreadEvent);
+
 constexpr int GBT_ID_TIMER = 1000;
 constexpr int GBT_ID_PROCESS = 1001;
 
@@ -46,6 +50,7 @@ END_EVENT_TABLE()
 
 class ExternalProcessRunner {
   wxEvtHandler *m_parent;
+  wxString m_pending;
 
 public:
   wxProcess *m_process{nullptr};
@@ -79,6 +84,46 @@ public:
       wxMilliSleep(100);
     }
     m_process->CloseOutput();
+  }
+
+  void PollOutput()
+  {
+    if (!m_process || !m_process->IsInputAvailable()) {
+      return;
+    }
+
+    wxInputStream *stream = m_process->GetInputStream();
+
+    while (m_process->IsInputAvailable()) {
+      char ch;
+      stream->Read(&ch, 1);
+      if (stream->LastRead() != 1) {
+        break;
+      }
+
+      if (ch == '\n') {
+        PostLine(m_pending);
+        m_pending.clear();
+      }
+      else if (ch != '\r') {
+        m_pending += ch;
+      }
+    }
+  }
+
+  void FlushPendingLine()
+  {
+    if (!m_pending.empty()) {
+      PostLine(m_pending);
+      m_pending.clear();
+    }
+  }
+
+  void PostLine(const wxString &line)
+  {
+    auto *evt = new wxThreadEvent(wxEVT_EXTERNAL_RUNNER_LINE);
+    evt->SetString(line);
+    wxQueueEvent(m_parent, evt);
   }
 };
 
@@ -128,6 +173,8 @@ NashMonitorDialog::NashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
   wxTopLevelWindowBase::Layout();
   CenterOnParent();
 
+  Bind(wxEVT_EXTERNAL_RUNNER_LINE, &NashMonitorDialog::OnRunnerLine, this);
+
   Start(p_command);
 }
 
@@ -163,19 +210,23 @@ void NashMonitorDialog::OnIdle(wxIdleEvent &p_event)
   }
 
   if (m_runner->m_process->IsInputAvailable()) {
-    wxTextInputStream tis(*m_runner->m_process->GetInputStream());
-
-    wxString msg;
-    msg << tis.ReadLine();
-
-    m_doc->DoAddOutput(*m_output, msg);
-    wxString label;
-    label << wxT("Number of equilibria found so far: ") << m_output->NumProfiles();
-    m_countText->SetLabel(label);
+    m_runner->PollOutput();
     p_event.RequestMore();
   }
   else {
     m_timer.Start(1000, false);
+  }
+}
+
+void NashMonitorDialog::OnRunnerLine(wxThreadEvent &p_event)
+{
+  const wxString msg = p_event.GetString();
+  std::cout << "Got message " << msg << std::endl;
+  if (!msg.empty()) {
+    m_doc->DoAddOutput(*m_output, msg);
+    wxString label;
+    label << wxT("Number of equilibria found so far: ") << m_output->NumProfiles();
+    m_countText->SetLabel(label);
   }
 }
 
@@ -186,19 +237,8 @@ void NashMonitorDialog::OnEndProcess(wxProcessEvent &p_event)
   m_stopButton->Enable(false);
   m_timer.Stop();
 
-  while (m_runner->m_process->IsInputAvailable()) {
-    wxTextInputStream tis(*m_runner->m_process->GetInputStream());
-
-    wxString msg;
-    msg << tis.ReadLine();
-
-    if (!msg.empty()) {
-      m_doc->DoAddOutput(*m_output, msg);
-      wxString label;
-      label << wxT("Number of equilibria found so far: ") << m_output->NumProfiles();
-      m_countText->SetLabel(label);
-    }
-  }
+  m_runner->PollOutput();
+  m_runner->FlushPendingLine();
 
   if (p_event.GetExitCode() == 0) {
     m_statusText->SetLabel(wxT("The computation has completed."));

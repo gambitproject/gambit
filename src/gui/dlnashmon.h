@@ -45,6 +45,7 @@ class NashMonitorDialog final : public wxDialog {
   void OnStop(wxCommandEvent &);
   void OnTimer(wxTimerEvent &);
   void OnIdle(wxIdleEvent &);
+  void OnRunnerLine(wxThreadEvent &p_event);
   void OnEndProcess(wxProcessEvent &);
 
 public:
