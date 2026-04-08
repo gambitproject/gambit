@@ -205,7 +205,7 @@ NashMonitorDialog::NashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
   m_countText = new wxStaticText(this, wxID_STATIC, wxT("Number of equilibria found so far: 0  "));
   startSizer->Add(m_countText, 0, wxALL | wxALIGN_CENTER, 5);
 
-  m_stopButton = new wxBitmapButton(this, wxID_CANCEL, wxBitmap(stop_xpm));
+  m_stopButton = new wxBitmapButton(this, wxID_ANY, wxBitmap(stop_xpm));
   m_stopButton->Enable(false);
   m_stopButton->SetToolTip(_("Stop the computation"));
   startSizer->Add(m_stopButton, 0, wxALL | wxALIGN_CENTER, 5);
@@ -234,7 +234,7 @@ NashMonitorDialog::NashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
 
   Bind(wxEVT_EXTERNAL_RUNNER_LINE, &NashMonitorDialog::OnRunnerLine, this);
   Bind(wxEVT_EXTERNAL_RUNNER_FINISHED, &NashMonitorDialog::OnRunnerFinished, this);
-  Bind(wxEVT_BUTTON, &NashMonitorDialog::OnStop, this, wxID_CANCEL);
+  m_stopButton->Bind(wxEVT_BUTTON, &NashMonitorDialog::OnStop, this);
   Bind(wxEVT_CLOSE_WINDOW, &NashMonitorDialog::OnClose, this);
 
   Start(p_command);
