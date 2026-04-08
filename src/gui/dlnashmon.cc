@@ -70,6 +70,7 @@ class ExternalProcessRunner final : public wxEvtHandler {
     wxQueueEvent(m_parent, evt);
 
     m_process = nullptr;
+    m_pid = 0;
   }
 
 public:
@@ -119,17 +120,27 @@ public:
     return RunnerStartResult::Ok;
   }
 
-  void Stop()
+  bool Stop()
   {
     m_timer.Stop();
-    // Per the wxWidgets wiki, under Windows, programs that run
-    // without a console window don't respond to the more polite
-    // SIGTERM, so instead we must be rude and SIGKILL it.
+    if (!m_process || m_pid == 0) {
+      return false;
+    }
 #ifdef __WXMSW__
-    wxProcess::Kill(m_pid, wxSIGKILL);
+    constexpr wxSignal signal = wxSIGKILL;
 #else
-    wxProcess::Kill(m_pid, wxSIGTERM);
-#endif // __WXMSW__
+    constexpr wxSignal signal = wxSIGTERM;
+#endif
+
+    switch (const auto rc = wxProcess::Kill(m_pid, signal)) {
+    case wxKILL_OK:
+      return true;
+    case wxKILL_NO_PROCESS:
+      m_pid = 0;
+      return false;
+    default:
+      return false;
+    }
   }
 
   bool PollOutput()
