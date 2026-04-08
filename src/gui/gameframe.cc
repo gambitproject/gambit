@@ -50,7 +50,6 @@
 #include "dlexcept.h"
 #include "dlgameprop.h"
 #include "dlnash.h"
-#include "dlnashmon.h"
 #include "dlefglogit.h"
 #include "dlabout.h"
 
@@ -1200,6 +1199,9 @@ void GameFrame::OnToolsDominance(wxCommandEvent &p_event)
   }
 }
 
+extern void ShowNashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
+                                  const std::shared_ptr<AnalysisOutput> &p_command);
+
 void GameFrame::OnToolsEquilibrium(wxCommandEvent &)
 {
   if (!m_doc->GetGame()->IsPerfectRecall()) {
@@ -1228,10 +1230,7 @@ void GameFrame::OnToolsEquilibrium(wxCommandEvent &)
       }
     }
 
-    auto command = dialog.GetCommand();
-
-    NashMonitorDialog monitordialog(this, m_doc, command);
-    monitordialog.ShowModal();
+    ShowNashMonitorDialog(this, m_doc, dialog.GetCommand());
 
     if (!m_splitter->IsSplit()) {
       if (m_efgPanel && m_efgPanel->IsShown()) {

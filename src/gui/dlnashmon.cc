@@ -28,13 +28,14 @@
 #include <wx/process.h>
 #include "wx/sheet/sheet.h"
 
-#include "dlnashmon.h"
 #include "gamedoc.h"
 
 #include "efgprofile.h"
 #include "nfgprofile.h"
 
-namespace Gambit::GUI {
+using namespace Gambit::GUI;
+
+namespace {
 
 wxDECLARE_EVENT(wxEVT_EXTERNAL_RUNNER_LINE, wxThreadEvent);
 wxDEFINE_EVENT(wxEVT_EXTERNAL_RUNNER_LINE, wxThreadEvent);
@@ -188,6 +189,27 @@ public:
   }
 };
 
+class NashMonitorDialog final : public wxDialog {
+  GameDocument *m_doc;
+  std::unique_ptr<class ExternalProcessRunner> m_runner;
+  wxWindow *m_profileList;
+  wxStaticText *m_statusText, *m_countText;
+  wxButton *m_stopButton, *m_okButton;
+  std::shared_ptr<AnalysisOutput> m_output;
+  bool m_stopRequested{false};
+
+  void Start(const std::shared_ptr<AnalysisOutput> &p_command);
+
+  void OnClose(wxCloseEvent &);
+  void OnStop(wxCommandEvent &);
+  void OnRunnerLine(wxThreadEvent &);
+  void OnRunnerFinished(wxThreadEvent &);
+
+public:
+  NashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
+                    const std::shared_ptr<AnalysisOutput> &p_command);
+};
+
 NashMonitorDialog::NashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
                                      const std::shared_ptr<AnalysisOutput> &p_command)
   : wxDialog(p_parent, wxID_ANY, wxT("Computing Nash equilibria"), wxDefaultPosition),
@@ -256,7 +278,7 @@ void NashMonitorDialog::Start(const std::shared_ptr<AnalysisOutput> &p_command)
     m_doc->GetGame()->Write(s, "nfg");
   }
 
-  m_runner = std::make_shared<ExternalProcessRunner>(this);
+  m_runner = std::make_unique<ExternalProcessRunner>(this);
   switch (const auto result = m_runner->Start(p_command->GetCommand(),
                                               wxString(s.str().c_str(), *wxConvCurrent))) {
   case ExternalProcessRunner::RunnerStartResult::Ok:
@@ -332,6 +354,17 @@ void NashMonitorDialog::OnClose(wxCloseEvent &p_event)
   else {
     p_event.Skip();
   }
+}
+
+} // anonymous namespace
+
+namespace Gambit::GUI {
+
+void ShowNashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
+                           const std::shared_ptr<AnalysisOutput> &p_command)
+{
+  NashMonitorDialog dialog(p_parent, p_doc, p_command);
+  dialog.ShowModal();
 }
 
 } // namespace Gambit::GUI
