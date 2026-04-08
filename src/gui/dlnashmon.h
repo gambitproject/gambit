@@ -23,8 +23,6 @@
 #ifndef GAMBIT_GUI_DLNASHMON_H
 #define GAMBIT_GUI_DLNASHMON_H
 
-#include <wx/process.h>
-#include "wx/sheet/sheet.h"
 #include "gamedoc.h"
 
 namespace Gambit::GUI {

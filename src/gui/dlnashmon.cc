@@ -25,6 +25,8 @@
 #include <wx/wx.h>
 #endif // WX_PRECOMP
 #include <wx/txtstrm.h>
+#include <wx/process.h>
+#include "wx/sheet/sheet.h"
 
 #include "dlnashmon.h"
 #include "gamedoc.h"
@@ -40,9 +42,6 @@ wxDEFINE_EVENT(wxEVT_EXTERNAL_RUNNER_LINE, wxThreadEvent);
 wxDECLARE_EVENT(wxEVT_EXTERNAL_RUNNER_FINISHED, wxThreadEvent);
 wxDEFINE_EVENT(wxEVT_EXTERNAL_RUNNER_FINISHED, wxThreadEvent);
 
-constexpr int GBT_ID_TIMER = 1000;
-constexpr int GBT_ID_PROCESS = 1001;
-
 #include "bitmaps/stop.xpm"
 
 class ExternalProcessRunner : public wxEvtHandler {
@@ -55,7 +54,9 @@ class ExternalProcessRunner : public wxEvtHandler {
   void OnTimer(wxTimerEvent &)
   {
     PollOutput();
-    m_timer.StartOnce(1000);
+    if (m_process) {
+      m_timer.StartOnce(1000);
+    }
   }
 
   void OnEndProcess(wxProcessEvent &p_event)
@@ -67,13 +68,15 @@ class ExternalProcessRunner : public wxEvtHandler {
     auto *evt = new wxThreadEvent(wxEVT_EXTERNAL_RUNNER_FINISHED);
     evt->SetInt(p_event.GetExitCode());
     wxQueueEvent(m_parent, evt);
+
+    m_process = nullptr;
   }
 
 public:
-  ExternalProcessRunner(wxEvtHandler *p_parent) : m_parent(p_parent), m_timer(this, GBT_ID_TIMER)
+  ExternalProcessRunner(wxEvtHandler *p_parent) : m_parent(p_parent), m_timer(this)
   {
-    Bind(wxEVT_TIMER, &ExternalProcessRunner::OnTimer, this, GBT_ID_TIMER);
-    Bind(wxEVT_END_PROCESS, &ExternalProcessRunner::OnEndProcess, this, GBT_ID_PROCESS);
+    Bind(wxEVT_TIMER, &ExternalProcessRunner::OnTimer, this);
+    Bind(wxEVT_END_PROCESS, &ExternalProcessRunner::OnEndProcess, this);
   }
 
   ~ExternalProcessRunner() override
@@ -86,7 +89,7 @@ public:
 
   void Start(const wxString &p_command, const wxString &p_stdin)
   {
-    m_process = new wxProcess(this, GBT_ID_PROCESS);
+    m_process = new wxProcess(this);
     m_process->Redirect();
     m_pid = wxExecute(p_command, wxEXEC_ASYNC, m_process);
 
