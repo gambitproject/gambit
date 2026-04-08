@@ -44,7 +44,7 @@ wxDEFINE_EVENT(wxEVT_EXTERNAL_RUNNER_FINISHED, wxThreadEvent);
 
 #include "bitmaps/stop.xpm"
 
-class ExternalProcessRunner : public wxEvtHandler {
+class ExternalProcessRunner final : public wxEvtHandler {
   wxEvtHandler *m_parent;
   wxProcess *m_process{nullptr};
   long m_pid{0};
@@ -73,7 +73,9 @@ class ExternalProcessRunner : public wxEvtHandler {
   }
 
 public:
-  ExternalProcessRunner(wxEvtHandler *p_parent) : m_parent(p_parent), m_timer(this)
+  enum class RunnerStartResult { Ok, LaunchFailed, NoOutputPipe, StdinWriteFailed };
+
+  explicit ExternalProcessRunner(wxEvtHandler *p_parent) : m_parent(p_parent), m_timer(this)
   {
     Bind(wxEVT_TIMER, &ExternalProcessRunner::OnTimer, this);
     Bind(wxEVT_END_PROCESS, &ExternalProcessRunner::OnEndProcess, this);
@@ -87,33 +89,34 @@ public:
     }
   }
 
-  void Start(const wxString &p_command, const wxString &p_stdin)
+  RunnerStartResult Start(const wxString &p_command, const wxString &p_stdin)
   {
     m_process = new wxProcess(this);
     m_process->Redirect();
     m_pid = wxExecute(p_command, wxEXEC_ASYNC, m_process);
+    if (m_pid == 0) {
+      delete m_process;
+      m_process = nullptr;
+      return RunnerStartResult::LaunchFailed;
+    }
 
-    wxString str(p_stdin);
-    // It is possible that the whole string won't write on one go, so
-    // we should take this possibility into account.  If this doesn't
-    // complete the whole way, we take a 100-millisecond siesta and try
-    // again.  (This seems to primarily be an issue with -- you guessed it --
-    // Windows!)
-    while (!str.empty()) {
-      wxTextOutputStream os(*m_process->GetOutputStream());
+    auto out = m_process->GetOutputStream();
+    if (!out || !out->IsOk()) {
+      Stop();
+      return RunnerStartResult::NoOutputPipe;
+    }
 
-      // It appears that (at least with mingw) the string itself contains
-      // only '\n' for newlines.  If we don't SetMode here, these get
-      // converted to '\r\n' sequences, and so the number of characters
-      // LastWrite() returns does not match the number of characters in
-      // our string.  Setting this explicitly solves this problem.
-      os.SetMode(wxEOL_UNIX);
-      os.WriteString(str);
-      str.Remove(0, m_process->GetOutputStream()->LastWrite());
-      wxMilliSleep(100);
+    const wxScopedCharBuffer bytes = p_stdin.utf8_str();
+    const char *data = bytes.data();
+    const size_t len = std::strlen(data);
+
+    if (!out->WriteAll(data, len)) {
+      Stop();
+      return RunnerStartResult::StdinWriteFailed;
     }
     m_process->CloseOutput();
     m_timer.StartOnce(1000);
+    return RunnerStartResult::Ok;
   }
 
   void Stop()
@@ -166,7 +169,7 @@ public:
     }
   }
 
-  void PostLine(const wxString &line)
+  void PostLine(const wxString &line) const
   {
     auto *evt = new wxThreadEvent(wxEVT_EXTERNAL_RUNNER_LINE);
     evt->SetString(line);
@@ -244,7 +247,14 @@ void NashMonitorDialog::Start(std::shared_ptr<AnalysisOutput> p_command)
   }
 
   m_runner = std::make_shared<ExternalProcessRunner>(this);
-  m_runner->Start(p_command->GetCommand(), wxString(s.str().c_str(), *wxConvCurrent));
+  if (auto result =
+          m_runner->Start(p_command->GetCommand(), wxString(s.str().c_str(), *wxConvCurrent));
+      result != ExternalProcessRunner::RunnerStartResult::Ok) {
+    m_statusText->SetLabel("Failed to start solver.");
+    m_statusText->SetForegroundColour(*wxRED);
+    m_okButton->Enable(true);
+    return;
+  }
 
   m_stopButton->Enable(true);
 }
