@@ -35,7 +35,7 @@ class NashMonitorDialog final : public wxDialog {
   wxButton *m_stopButton, *m_okButton;
   std::shared_ptr<AnalysisOutput> m_output;
 
-  void Start(std::shared_ptr<AnalysisOutput> p_command);
+  void Start(const std::shared_ptr<AnalysisOutput> &p_command);
 
   void OnStop(wxCommandEvent &);
   void OnRunnerLine(wxThreadEvent &);

@@ -73,6 +73,21 @@ class ExternalProcessRunner final : public wxEvtHandler {
     m_pid = 0;
   }
 
+  void PostLine(const wxString &line) const
+  {
+    auto *evt = new wxThreadEvent(wxEVT_EXTERNAL_RUNNER_LINE);
+    evt->SetString(line);
+    wxQueueEvent(m_parent, evt);
+  }
+
+  void FlushPendingLine()
+  {
+    if (!m_pending.empty()) {
+      PostLine(m_pending);
+      m_pending.clear();
+    }
+  }
+
 public:
   enum class RunnerStartResult { Ok, LaunchFailed, NoOutputPipe, StdinWriteFailed };
 
@@ -101,7 +116,7 @@ public:
       return RunnerStartResult::LaunchFailed;
     }
 
-    auto out = m_process->GetOutputStream();
+    const auto out = m_process->GetOutputStream();
     if (!out || !out->IsOk()) {
       Stop();
       return RunnerStartResult::NoOutputPipe;
@@ -109,9 +124,8 @@ public:
 
     const wxScopedCharBuffer bytes = p_stdin.utf8_str();
     const char *data = bytes.data();
-    const size_t len = std::strlen(data);
 
-    if (!out->WriteAll(data, len)) {
+    if (const size_t len = std::strlen(data); !out->WriteAll(data, len)) {
       Stop();
       return RunnerStartResult::StdinWriteFailed;
     }
@@ -171,21 +185,6 @@ public:
     }
     return result;
   }
-
-  void FlushPendingLine()
-  {
-    if (!m_pending.empty()) {
-      PostLine(m_pending);
-      m_pending.clear();
-    }
-  }
-
-  void PostLine(const wxString &line) const
-  {
-    auto *evt = new wxThreadEvent(wxEVT_EXTERNAL_RUNNER_LINE);
-    evt->SetString(line);
-    wxQueueEvent(m_parent, evt);
-  }
 };
 
 NashMonitorDialog::NashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
@@ -240,7 +239,7 @@ NashMonitorDialog::NashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
   Start(p_command);
 }
 
-void NashMonitorDialog::Start(std::shared_ptr<AnalysisOutput> p_command)
+void NashMonitorDialog::Start(const std::shared_ptr<AnalysisOutput> &p_command)
 {
   if (!p_command->IsBehavior()) {
     // Make sure we have a normal form representation
