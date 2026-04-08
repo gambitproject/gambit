@@ -40,14 +40,12 @@ class NashMonitorDialog final : public wxDialog {
   void Start(std::shared_ptr<AnalysisOutput> p_command);
 
   void OnStop(wxCommandEvent &);
-  void OnRunnerLine(wxThreadEvent &p_event);
-  void OnEndProcess(wxProcessEvent &);
+  void OnRunnerLine(wxThreadEvent &);
+  void OnRunnerFinished(wxThreadEvent &);
 
 public:
   NashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
                     const std::shared_ptr<AnalysisOutput> &p_command);
-
-  DECLARE_EVENT_TABLE()
 };
 } // namespace Gambit::GUI
 

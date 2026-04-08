@@ -37,12 +37,11 @@ namespace Gambit::GUI {
 wxDECLARE_EVENT(wxEVT_EXTERNAL_RUNNER_LINE, wxThreadEvent);
 wxDEFINE_EVENT(wxEVT_EXTERNAL_RUNNER_LINE, wxThreadEvent);
 
+wxDECLARE_EVENT(wxEVT_EXTERNAL_RUNNER_FINISHED, wxThreadEvent);
+wxDEFINE_EVENT(wxEVT_EXTERNAL_RUNNER_FINISHED, wxThreadEvent);
+
 constexpr int GBT_ID_TIMER = 1000;
 constexpr int GBT_ID_PROCESS = 1001;
-
-BEGIN_EVENT_TABLE(NashMonitorDialog, wxDialog)
-EVT_END_PROCESS(GBT_ID_PROCESS, NashMonitorDialog::OnEndProcess)
-END_EVENT_TABLE()
 
 #include "bitmaps/stop.xpm"
 
@@ -59,10 +58,22 @@ class ExternalProcessRunner : public wxEvtHandler {
     m_timer.StartOnce(1000);
   }
 
+  void OnEndProcess(wxProcessEvent &p_event)
+  {
+    m_timer.Stop();
+    PollOutput();
+    FlushPendingLine();
+
+    auto *evt = new wxThreadEvent(wxEVT_EXTERNAL_RUNNER_FINISHED);
+    evt->SetInt(p_event.GetExitCode());
+    wxQueueEvent(m_parent, evt);
+  }
+
 public:
   ExternalProcessRunner(wxEvtHandler *p_parent) : m_parent(p_parent), m_timer(this, GBT_ID_TIMER)
   {
     Bind(wxEVT_TIMER, &ExternalProcessRunner::OnTimer, this, GBT_ID_TIMER);
+    Bind(wxEVT_END_PROCESS, &ExternalProcessRunner::OnEndProcess, this, GBT_ID_PROCESS);
   }
 
   ~ExternalProcessRunner() override
@@ -75,7 +86,7 @@ public:
 
   void Start(const wxString &p_command, const wxString &p_stdin)
   {
-    m_process = new wxProcess(m_parent, GBT_ID_PROCESS);
+    m_process = new wxProcess(this, GBT_ID_PROCESS);
     m_process->Redirect();
     m_pid = wxExecute(p_command, wxEXEC_ASYNC, m_process);
 
@@ -207,6 +218,7 @@ NashMonitorDialog::NashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
   CenterOnParent();
 
   Bind(wxEVT_EXTERNAL_RUNNER_LINE, &NashMonitorDialog::OnRunnerLine, this);
+  Bind(wxEVT_EXTERNAL_RUNNER_FINISHED, &NashMonitorDialog::OnRunnerFinished, this);
 
   Start(p_command);
 }
@@ -245,15 +257,11 @@ void NashMonitorDialog::OnRunnerLine(wxThreadEvent &p_event)
   }
 }
 
-void NashMonitorDialog::OnEndProcess(wxProcessEvent &p_event)
+void NashMonitorDialog::OnRunnerFinished(wxThreadEvent &p_event)
 {
   m_stopButton->Enable(false);
 
-  m_runner->PollOutput();
-  m_runner->FlushPendingLine();
-  m_runner->Stop();
-
-  if (p_event.GetExitCode() == 0) {
+  if (p_event.GetInt() == 0) {
     m_statusText->SetLabel(wxT("The computation has completed."));
     m_statusText->SetForegroundColour(wxColour(0, 192, 0));
   }
