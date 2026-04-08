@@ -42,20 +42,36 @@ constexpr int GBT_ID_PROCESS = 1001;
 
 BEGIN_EVENT_TABLE(NashMonitorDialog, wxDialog)
 EVT_END_PROCESS(GBT_ID_PROCESS, NashMonitorDialog::OnEndProcess)
-EVT_IDLE(NashMonitorDialog::OnIdle)
-EVT_TIMER(GBT_ID_TIMER, NashMonitorDialog::OnTimer)
 END_EVENT_TABLE()
 
 #include "bitmaps/stop.xpm"
 
-class ExternalProcessRunner {
+class ExternalProcessRunner : public wxEvtHandler {
   wxEvtHandler *m_parent;
   wxProcess *m_process{nullptr};
   long m_pid{0};
+  wxTimer m_timer;
   wxString m_pending;
 
+  void OnTimer(wxTimerEvent &)
+  {
+    PollOutput();
+    m_timer.StartOnce(1000);
+  }
+
 public:
-  ExternalProcessRunner(wxEvtHandler *p_parent) : m_parent(p_parent) {}
+  ExternalProcessRunner(wxEvtHandler *p_parent) : m_parent(p_parent), m_timer(this, GBT_ID_TIMER)
+  {
+    Bind(wxEVT_TIMER, &ExternalProcessRunner::OnTimer, this, GBT_ID_TIMER);
+  }
+
+  ~ExternalProcessRunner() override
+  {
+    m_timer.Stop();
+    if (m_process) {
+      delete m_process;
+    }
+  }
 
   void Start(const wxString &p_command, const wxString &p_stdin)
   {
@@ -83,10 +99,12 @@ public:
       wxMilliSleep(100);
     }
     m_process->CloseOutput();
+    m_timer.StartOnce(1000);
   }
 
   void Stop()
   {
+    m_timer.Stop();
     // Per the wxWidgets wiki, under Windows, programs that run
     // without a console window don't respond to the more polite
     // SIGTERM, so instead we must be rude and SIGKILL it.
@@ -145,7 +163,7 @@ public:
 NashMonitorDialog::NashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
                                      const std::shared_ptr<AnalysisOutput> &p_command)
   : wxDialog(p_parent, wxID_ANY, wxT("Computing Nash equilibria"), wxDefaultPosition),
-    m_doc(p_doc), m_timer(this, GBT_ID_TIMER), m_output(p_command)
+    m_doc(p_doc), m_output(p_command)
 {
   auto *sizer = new wxBoxSizer(wxVERTICAL);
 
@@ -214,28 +232,11 @@ void NashMonitorDialog::Start(std::shared_ptr<AnalysisOutput> p_command)
   m_runner->Start(p_command->GetCommand(), wxString(s.str().c_str(), *wxConvCurrent));
 
   m_stopButton->Enable(true);
-
-  m_timer.StartOnce(1000);
-}
-
-void NashMonitorDialog::OnIdle(wxIdleEvent &p_event)
-{
-  if (!m_runner) {
-    return;
-  }
-
-  if (m_runner->PollOutput()) {
-    p_event.RequestMore();
-  }
-  else {
-    m_timer.StartOnce(1000);
-  }
 }
 
 void NashMonitorDialog::OnRunnerLine(wxThreadEvent &p_event)
 {
   const wxString msg = p_event.GetString();
-  std::cout << "Got message " << msg << std::endl;
   if (!msg.empty()) {
     m_doc->DoAddOutput(*m_output, msg);
     wxString label;
@@ -244,15 +245,13 @@ void NashMonitorDialog::OnRunnerLine(wxThreadEvent &p_event)
   }
 }
 
-void NashMonitorDialog::OnTimer(wxTimerEvent &p_event) { wxWakeUpIdle(); }
-
 void NashMonitorDialog::OnEndProcess(wxProcessEvent &p_event)
 {
   m_stopButton->Enable(false);
-  m_timer.Stop();
 
   m_runner->PollOutput();
   m_runner->FlushPendingLine();
+  m_runner->Stop();
 
   if (p_event.GetExitCode() == 0) {
     m_statusText->SetLabel(wxT("The computation has completed."));

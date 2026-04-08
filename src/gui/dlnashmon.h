@@ -29,22 +29,17 @@
 
 namespace Gambit::GUI {
 
-class ExternalProcessRunner;
-
 class NashMonitorDialog final : public wxDialog {
   GameDocument *m_doc;
-  std::shared_ptr<ExternalProcessRunner> m_runner;
+  std::shared_ptr<class ExternalProcessRunner> m_runner;
   wxWindow *m_profileList;
   wxStaticText *m_statusText, *m_countText;
   wxButton *m_stopButton, *m_okButton;
-  wxTimer m_timer;
   std::shared_ptr<AnalysisOutput> m_output;
 
   void Start(std::shared_ptr<AnalysisOutput> p_command);
 
   void OnStop(wxCommandEvent &);
-  void OnTimer(wxTimerEvent &);
-  void OnIdle(wxIdleEvent &);
   void OnRunnerLine(wxThreadEvent &p_event);
   void OnEndProcess(wxProcessEvent &);
 
