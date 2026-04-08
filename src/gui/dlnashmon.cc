@@ -44,10 +44,48 @@ END_EVENT_TABLE()
 
 #include "bitmaps/stop.xpm"
 
+class ExternalProcessRunner {
+  wxEvtHandler *m_parent;
+
+public:
+  wxProcess *m_process{nullptr};
+  long m_pid{0};
+
+  ExternalProcessRunner(wxEvtHandler *p_parent) : m_parent(p_parent) {}
+
+  void Start(const wxString &p_command, const wxString &p_stdin)
+  {
+    m_process = new wxProcess(m_parent, GBT_ID_PROCESS);
+    m_process->Redirect();
+    m_pid = wxExecute(p_command, wxEXEC_ASYNC, m_process);
+
+    wxString str(p_stdin);
+    // It is possible that the whole string won't write on one go, so
+    // we should take this possibility into account.  If this doesn't
+    // complete the whole way, we take a 100-millisecond siesta and try
+    // again.  (This seems to primarily be an issue with -- you guessed it --
+    // Windows!)
+    while (!str.empty()) {
+      wxTextOutputStream os(*m_process->GetOutputStream());
+
+      // It appears that (at least with mingw) the string itself contains
+      // only '\n' for newlines.  If we don't SetMode here, these get
+      // converted to '\r\n' sequences, and so the number of characters
+      // LastWrite() returns does not match the number of characters in
+      // our string.  Setting this explicitly solves this problem.
+      os.SetMode(wxEOL_UNIX);
+      os.WriteString(str);
+      str.Remove(0, m_process->GetOutputStream()->LastWrite());
+      wxMilliSleep(100);
+    }
+    m_process->CloseOutput();
+  }
+};
+
 NashMonitorDialog::NashMonitorDialog(wxWindow *p_parent, GameDocument *p_doc,
                                      const std::shared_ptr<AnalysisOutput> &p_command)
   : wxDialog(p_parent, wxID_ANY, wxT("Computing Nash equilibria"), wxDefaultPosition),
-    m_doc(p_doc), m_process(nullptr), m_timer(this, GBT_ID_TIMER), m_output(p_command)
+    m_doc(p_doc), m_timer(this, GBT_ID_TIMER), m_output(p_command)
 {
   auto *sizer = new wxBoxSizer(wxVERTICAL);
 
@@ -102,11 +140,6 @@ void NashMonitorDialog::Start(std::shared_ptr<AnalysisOutput> p_command)
 
   m_doc->AddProfileList(p_command);
 
-  m_process = new wxProcess(this, GBT_ID_PROCESS);
-  m_process->Redirect();
-
-  m_pid = wxExecute(p_command->GetCommand(), wxEXEC_ASYNC, m_process);
-
   std::ostringstream s;
   if (p_command->IsBehavior()) {
     m_doc->GetGame()->Write(s, "efg");
@@ -114,27 +147,9 @@ void NashMonitorDialog::Start(std::shared_ptr<AnalysisOutput> p_command)
   else {
     m_doc->GetGame()->Write(s, "nfg");
   }
-  wxString str(wxString(s.str().c_str(), *wxConvCurrent));
 
-  // It is possible that the whole string won't write on one go, so
-  // we should take this possibility into account.  If this doesn't
-  // complete the whole way, we take a 100-millisecond siesta and try
-  // again.  (This seems to primarily be an issue with -- you guessed it --
-  // Windows!)
-  while (str.length() > 0) {
-    wxTextOutputStream os(*m_process->GetOutputStream());
-
-    // It appears that (at least with mingw) the string itself contains
-    // only '\n' for newlines.  If we don't SetMode here, these get
-    // converted to '\r\n' sequences, and so the number of characters
-    // LastWrite() returns does not match the number of characters in
-    // our string.  Setting this explicitly solves this problem.
-    os.SetMode(wxEOL_UNIX);
-    os.WriteString(str);
-    str.Remove(0, m_process->GetOutputStream()->LastWrite());
-    wxMilliSleep(100);
-  }
-  m_process->CloseOutput();
+  m_runner = std::make_shared<ExternalProcessRunner>(this);
+  m_runner->Start(p_command->GetCommand(), wxString(s.str().c_str(), *wxConvCurrent));
 
   m_stopButton->Enable(true);
 
@@ -143,12 +158,12 @@ void NashMonitorDialog::Start(std::shared_ptr<AnalysisOutput> p_command)
 
 void NashMonitorDialog::OnIdle(wxIdleEvent &p_event)
 {
-  if (!m_process) {
+  if (!m_runner->m_process) {
     return;
   }
 
-  if (m_process->IsInputAvailable()) {
-    wxTextInputStream tis(*m_process->GetInputStream());
+  if (m_runner->m_process->IsInputAvailable()) {
+    wxTextInputStream tis(*m_runner->m_process->GetInputStream());
 
     wxString msg;
     msg << tis.ReadLine();
@@ -171,8 +186,8 @@ void NashMonitorDialog::OnEndProcess(wxProcessEvent &p_event)
   m_stopButton->Enable(false);
   m_timer.Stop();
 
-  while (m_process->IsInputAvailable()) {
-    wxTextInputStream tis(*m_process->GetInputStream());
+  while (m_runner->m_process->IsInputAvailable()) {
+    wxTextInputStream tis(*m_runner->m_process->GetInputStream());
 
     wxString msg;
     msg << tis.ReadLine();
@@ -205,9 +220,9 @@ void NashMonitorDialog::OnStop(wxCommandEvent &p_event)
   m_stopButton->Enable(false);
 
 #ifdef __WXMSW__
-  wxProcess::Kill(m_pid, wxSIGKILL);
+  wxProcess::Kill(m_runner->m_pid, wxSIGKILL);
 #else
-  wxProcess::Kill(m_pid, wxSIGTERM);
+  wxProcess::Kill(m_runner->m_pid, wxSIGTERM);
 #endif // __WXMSW__
 }
 } // namespace Gambit::GUI

@@ -28,10 +28,12 @@
 #include "gamedoc.h"
 
 namespace Gambit::GUI {
+
+class ExternalProcessRunner;
+
 class NashMonitorDialog final : public wxDialog {
   GameDocument *m_doc;
-  int m_pid{0};
-  wxProcess *m_process;
+  std::shared_ptr<ExternalProcessRunner> m_runner;
   wxWindow *m_profileList;
   wxStaticText *m_statusText, *m_countText;
   wxButton *m_stopButton, *m_okButton;
