@@ -257,16 +257,23 @@ void NashMonitorDialog::Start(const std::shared_ptr<AnalysisOutput> &p_command)
   }
 
   m_runner = std::make_shared<ExternalProcessRunner>(this);
-  if (auto result =
-          m_runner->Start(p_command->GetCommand(), wxString(s.str().c_str(), *wxConvCurrent));
-      result != ExternalProcessRunner::RunnerStartResult::Ok) {
-    m_statusText->SetLabel("Failed to start solver.");
-    m_statusText->SetForegroundColour(*wxRED);
-    m_okButton->Enable(true);
+  switch (const auto result = m_runner->Start(p_command->GetCommand(),
+                                              wxString(s.str().c_str(), *wxConvCurrent))) {
+  case ExternalProcessRunner::RunnerStartResult::Ok:
+    m_stopButton->Enable(true);
     return;
+  case ExternalProcessRunner::RunnerStartResult::LaunchFailed:
+    m_statusText->SetLabel("Failed to launch solver.");
+    break;
+  case ExternalProcessRunner::RunnerStartResult::NoOutputPipe:
+    m_statusText->SetLabel("Solver launched, but I/O redirection failed.");
+    break;
+  case ExternalProcessRunner::RunnerStartResult::StdinWriteFailed:
+    m_statusText->SetLabel("Failed to send input to solver.");
+    break;
   }
-
-  m_stopButton->Enable(true);
+  m_statusText->SetForegroundColour(*wxRED);
+  m_okButton->Enable(true);
 }
 
 void NashMonitorDialog::OnRunnerLine(wxThreadEvent &p_event)
