@@ -482,18 +482,11 @@ template <class T> void MixedBehaviorProfile<T>::ComputeRealizationProbs() const
   }
 
   for (const auto &infoset : game->GetInfosets()) {
-    if (game->IsAbsentMinded(infoset)) {
-      m_cache.m_infosetProbs[infoset] =
-          sum_function(infoset->GetMembers(), [&](const auto &node) -> T {
-            return game->IsAbsentMindedReentry(node) ? static_cast<T>(0)
-                                                     : m_cache.m_realizProbs[node];
-          });
-    }
-    else {
-      m_cache.m_infosetProbs[infoset] =
-          sum_function(infoset->GetMembers(),
-                       [&](const auto &node) -> T { return m_cache.m_realizProbs[node]; });
-    }
+    m_cache.m_infosetProbs[infoset] = sum_function(
+        infoset->GetMembers(), [&](const auto &node) -> T { return m_cache.m_realizProbs[node]; });
+  }
+  for (const auto &[infoset, node] : game->GetAbsentMindedReentries()) {
+    m_cache.m_infosetProbs[infoset] -= m_cache.m_realizProbs[node];
   }
 }
 
