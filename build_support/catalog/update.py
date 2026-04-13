@@ -40,7 +40,13 @@ def _write_efg_table(df: pd.DataFrame, f, tikz_re, regenerate_images: bool):
         description = str(row.get("Description", "")).strip()
         if description:
             tex_path = CATALOG_DIR / "img" / f"{slug}.tex"
-            if regenerate_images or not tex_path.exists():
+            png_path = CATALOG_DIR / "img" / f"{slug}.png"
+            pdf_path = CATALOG_DIR / "img" / f"{slug}.pdf"
+            ef_path = CATALOG_DIR / "img" / f"{slug}.ef"
+
+            missing_any = not all(p.exists() for p in [tex_path, png_path, pdf_path, ef_path])
+
+            if regenerate_images or missing_any:
                 g = gbt.catalog.load(slug)
                 viz_path = CATALOG_DIR / "img" / f"{slug}"
                 viz_path.parent.mkdir(parents=True, exist_ok=True)
