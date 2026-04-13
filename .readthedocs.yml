@@ -15,9 +15,10 @@ build:
     - texlive-full
     - imagemagick
   jobs:
-    # Create RST for catalog table in docs
     post_install:
-      - $READTHEDOCS_VIRTUALENV_PATH/bin/python build_support/catalog/update.py --regenerate-images
+      - pip install "draw-tree @ git+https://github.com/gambitproject/draw_tree.git@v0.4.1"
+      # Create RST for catalog table in docs
+      - $READTHEDOCS_VIRTUALENV_PATH/bin/python build_support/catalog/update.py
 
 python:
   install:

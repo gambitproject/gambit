@@ -93,6 +93,10 @@ General game theory articles and texts
 .. [Bag1995] Bagwell, K. 1995, 'Commitment and observability in games',
    *Games and Economic Behavior*, vol. 8, pp. 271-280.
 
+.. [Gil97] Gilboa, I. 1997,
+   'A Comment on the Absent-Minded Driver Paradox',
+   *Games and Economic Behavior*, vol. 20, pp. 25-30.
+
 .. [Harsanyi1967a] Harsanyi, J. 1967,
    'Games of incomplete information played by Bayesian players I',
    *Management Science*, vol. 14, pp. 159-182.
@@ -104,6 +108,11 @@ General game theory articles and texts
 .. [Harsanyi1968] Harsanyi, J. 1968,
    'Games of incomplete information played by Bayesian players III',
    *Management Science*, vol. 14, pp. 486-502.
+
+.. [JakSorCon16] Jakobsen, S. K, Sørensen, T. B. and Conitzer, V. 2016,
+   'Timeability of Extensive-Form Games',
+   *Proceedings of the Seventh Innovations in Theoretical Computer Science Conference*,
+   pp. 191-199.
 
 .. [KreWil82] Kreps, D. and Wilson, R. 1982, 'Sequential equilibria',
    *Econometrica*, vol. 50, pp. 863-894.
