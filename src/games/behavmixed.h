@@ -242,6 +242,15 @@ public:
   T GetAgentLiapValue() const;
 
   const T &GetRealizProb(const GameNode &node) const;
+  /// @brief Computes the probability the information set \p p_infoset is reached.
+  /// @details Computes the probability that \p p_infoset is reached assuming
+  ///          all players play according to the profile.  If \p p_infoset is an
+  ///          absent-minded infoset, this probability is the probability any
+  ///          member node is reached; multiple visits do not contribute further
+  ///          to the probability.
+  /// @param[in] p_infoset  The information set to compute the realization probability.
+  /// @sa GetRealizProb(const GameNode &) const
+  ///     GetBeliefProb(const GameNode &) const
   T GetInfosetProb(const GameInfoset &p_infoset) const;
   std::optional<T> GetBeliefProb(const GameNode &node) const;
   Vector<T> GetPayoff(const GameNode &node) const;
