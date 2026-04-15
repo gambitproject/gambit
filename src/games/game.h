@@ -338,6 +338,7 @@ public:
 
   Game GetGame() const;
   GameInfoset GetInfoset() const { return (action) ? action->GetInfoset() : nullptr; }
+  GameAction GetAction() const { return action; }
 
   bool operator<(const GameSequenceRep &other) const
   {
