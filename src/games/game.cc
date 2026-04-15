@@ -161,15 +161,6 @@ void GamePlayerRep::MakeReducedStrats(GameNodeRep *n, GameNodeRep *nn,
   }
 }
 
-size_t GamePlayerRep::NumSequences() const
-{
-  if (!m_game->IsTree()) {
-    throw UndefinedException();
-  }
-  dynamic_cast<GameTreeRep *>(m_game)->EnsureSequences();
-  return m_sequences.size();
-}
-
 //========================================================================
 //                            class GameRep
 //========================================================================

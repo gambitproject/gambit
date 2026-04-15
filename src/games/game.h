@@ -418,8 +418,6 @@ public:
 
   /// @name Sequences
   //@{
-  /// Returns the number of sequences available to the player
-  size_t NumSequences() const;
   /// Returns the collection of sequences available to the player
   Sequences GetSequences() const;
   //@}
