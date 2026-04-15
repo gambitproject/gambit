@@ -164,6 +164,16 @@ cdef extern from "games/game.h":
             iterator begin() except +
             iterator end() except +
 
+        cppclass Sequences:
+            cppclass iterator:
+                c_GameStrategy operator *()
+                iterator operator++()
+                bint operator ==(iterator)
+                bint operator !=(iterator)
+            int size() except +
+            iterator begin() except +
+            iterator end() except +
+
         c_Game GetGame() except +
         int GetNumber() except +
         int IsChance() except +
@@ -173,6 +183,8 @@ cdef extern from "games/game.h":
 
         c_GameStrategy GetStrategy(int) except +IndexError
         Strategies GetStrategies() except +
+
+        Sequences GetSequences() except +
 
         c_GameInfoset GetInfoset(int) except +IndexError
         Infosets GetInfosets() except +

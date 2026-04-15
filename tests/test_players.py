@@ -147,6 +147,14 @@ def test_player_strategy_bad_type():
         _ = game.players[0].strategies[1.3]
 
 
+def test_player_sequence_count():
+    """Test the identity that the number of sequences is the number of actions plus one."""
+    game = gbt.catalog.load("myerson1991/fig2_1")
+    for player in game.players:
+        action_count = sum(len(infoset.actions) for infoset in player.infosets)
+        assert len(player.sequences) == action_count + 1
+
+
 @pytest.mark.parametrize(
     "game,exp_min_payoffs,exp_max_payoffs",
     [

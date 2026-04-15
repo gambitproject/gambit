@@ -149,6 +149,33 @@ class PlayerStrategies:
 
 
 @cython.cclass
+class PlayerSequences:
+    """The collection of sequences available to a player."""
+    player = cython.declare(c_GamePlayer)
+
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create PlayerSequences outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(player: c_GamePlayer) -> PlayerSequences:
+        obj: PlayerSequences = PlayerSequences.__new__(PlayerSequences)
+        obj.player = player
+        return obj
+
+    def __repr__(self) -> str:
+        return f"PlayerSequences(player={Player.wrap(self.player)})"
+
+    def __len__(self):
+        """The number of sequences for the player in the game."""
+        return self.player.deref().GetSequences().size()
+
+    # def __iter__(self) -> typing.Iterator[Sequence]:
+    #     for sequence in self.player.deref().GetSequences():
+    #        yield Sequence.wrap(strategy)
+
+
+@cython.cclass
 class Player:
     """A player in a ``Game``."""
     player = cython.declare(c_GamePlayer)
@@ -213,8 +240,13 @@ class Player:
 
     @property
     def strategies(self) -> PlayerStrategies:
-        """Returns the set of strategies belonging to the player."""
+        """Returns the collection of strategies belonging to the player."""
         return PlayerStrategies.wrap(self.player)
+
+    @property
+    def sequences(self) -> PlayerSequences:
+        """Returns the collection of sequences belonging to the player."""
+        return PlayerSequences.wrap(self.player)
 
     @property
     def infosets(self) -> PlayerInfosets:
