@@ -77,11 +77,14 @@ GamePlayerRep::GamePlayerRep(GameRep *p_game, int p_id, int p_strats)
 
 GamePlayerRep::~GamePlayerRep()
 {
-  for (auto infoset : m_infosets) {
+  for (const auto &infoset : m_infosets) {
     infoset->Invalidate();
   }
-  for (auto strategy : m_strategies) {
+  for (const auto &strategy : m_strategies) {
     strategy->Invalidate();
+  }
+  for (const auto &sequence : m_sequences) {
+    sequence->Invalidate();
   }
 }
 
@@ -163,9 +166,8 @@ size_t GamePlayerRep::NumSequences() const
   if (!m_game->IsTree()) {
     throw UndefinedException();
   }
-  return std::transform_reduce(
-      m_infosets.cbegin(), m_infosets.cend(), 1, std::plus<>(),
-      [](const std::shared_ptr<GameInfosetRep> &s) { return s->m_actions.size(); });
+  dynamic_cast<GameTreeRep *>(m_game)->EnsureSequences();
+  return m_sequences.size();
 }
 
 //========================================================================

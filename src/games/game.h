@@ -379,10 +379,12 @@ class GamePlayerRep : public std::enable_shared_from_this<GamePlayerRep> {
   std::string m_label;
   std::vector<std::shared_ptr<GameInfosetRep>> m_infosets;
   std::vector<std::shared_ptr<GameStrategyRep>> m_strategies;
+  std::vector<std::shared_ptr<GameSequenceRep>> m_sequences;
 
 public:
   using Infosets = ElementCollection<GamePlayer, GameInfosetRep>;
   using Strategies = ElementCollection<GamePlayer, GameStrategyRep>;
+  using Sequences = ElementCollection<GamePlayer, GameSequenceRep>;
 
   GamePlayerRep(GameRep *p_game, int p_id) : m_game(p_game), m_number(p_id) {}
   GamePlayerRep(GameRep *p_game, int p_id, int m_strats);
@@ -410,7 +412,7 @@ public:
   //@{
   /// Returns the st'th strategy for the player
   GameStrategy GetStrategy(int st) const;
-  /// Returns the array of strategies available to the player
+  /// Returns the collection of strategies available to the player
   Strategies GetStrategies() const;
   //@}
 
@@ -418,6 +420,8 @@ public:
   //@{
   /// Returns the number of sequences available to the player
   size_t NumSequences() const;
+  /// Returns the collection of sequences available to the player
+  Sequences GetSequences() const;
   //@}
 };
 
@@ -1152,6 +1156,8 @@ public:
 
   /// Build any computed values anew
   virtual void BuildComputedValues() const {}
+  /// Ensure sequences have been computed
+  virtual void EnsureSequences() const { throw UndefinedException(); }
 };
 
 //=======================================================================
@@ -1213,6 +1219,11 @@ inline GamePlayerRep::Strategies GamePlayerRep::GetStrategies() const
 {
   m_game->BuildComputedValues();
   return Strategies(std::const_pointer_cast<GamePlayerRep>(shared_from_this()), &m_strategies);
+}
+inline GamePlayerRep::Sequences GamePlayerRep::GetSequences() const
+{
+  m_game->EnsureSequences();
+  return Sequences(std::const_pointer_cast<GamePlayerRep>(shared_from_this()), &m_sequences);
 }
 
 inline Game GameNodeRep::GetGame() const { return m_game->shared_from_this(); }
