@@ -30,7 +30,7 @@ jobs:
           cd dist
           sdist=$(ls pygambit-*.tar.gz)
           pip install -v "${sdist}[test,doc]"
-          pip install "draw-tree @ git+https://github.com/gambitproject/draw_tree.git@v0.4.3"
+          pip install "draw-tree @ git+https://github.com/gambitproject/draw_tree.git@v0.4.4"
       - name: Run tests
         run: pytest --run-tutorials
 
@@ -53,7 +53,7 @@ jobs:
       - name: Build extension
         run: |
           python -m pip install -v .[test,doc]
-          pip install "draw-tree @ git+https://github.com/gambitproject/draw_tree.git@v0.4.3"
+          pip install "draw-tree @ git+https://github.com/gambitproject/draw_tree.git@v0.4.4"
       - name: Run tests
         run: pytest --run-tutorials
 
@@ -76,7 +76,7 @@ jobs:
       - name: Build extension
         run: |
           python -m pip install -v .[test,doc]
-          pip install "draw-tree @ git+https://github.com/gambitproject/draw_tree.git@v0.4.3"
+          pip install "draw-tree @ git+https://github.com/gambitproject/draw_tree.git@v0.4.4"
       - name: Run tests
         run: pytest --run-tutorials
 
@@ -99,6 +99,6 @@ jobs:
       - name: Build extension
         run: |
           python -m pip install -v .[test,doc]
-          pip install "draw-tree @ git+https://github.com/gambitproject/draw_tree.git@v0.4.3"
+          pip install "draw-tree @ git+https://github.com/gambitproject/draw_tree.git@v0.4.4"
       - name: Run tests
         run: pytest --run-tutorials
