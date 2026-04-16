@@ -64,7 +64,6 @@ def _write_efg_table(df: pd.DataFrame, f, tikz_re, regenerate_images: bool):
 
             # Main dropdown
             f.write(f"   * - .. dropdown:: {title}\n")
-            f.write("          :open:\n")
             f.write("          \n")
 
             for line in description.splitlines():
@@ -77,22 +76,22 @@ def _write_efg_table(df: pd.DataFrame, f, tikz_re, regenerate_images: bool):
             f.write(f'             pygambit.catalog.load("{slug}")\n')
             f.write("          \n")
 
-            # Download links (inside the dropdown)
+            # Download links
             download_links = [row["Download"]]
             for ext in ["ef", "tex", "png", "pdf"]:
                 download_links.append(f":download:`{slug}.{ext} <../catalog/img/{slug}.{ext}>`")
             f.write("          **Download game and image files:**\n")
             f.write("          \n")
             f.write(f"          {' '.join(download_links)}\n")
-            f.write("       \n")
-
-            # TiKZ image (outside dropdown)
-            f.write("       .. tikz::\n")
-            f.write("          :align: center\n")
             f.write("          \n")
+
+            # TiKZ image
+            f.write("          .. tikz::\n")
+            f.write("             :align: center\n")
+            f.write("             \n")
             for line in tikz.splitlines():
-                f.write(f"          {line}\n")
-            f.write("       \n")
+                f.write(f"             {line}\n")
+            f.write("          \n")
 
 
 # def _write_nfg_table(df: pd.DataFrame, f):
