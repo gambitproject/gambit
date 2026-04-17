@@ -158,7 +158,7 @@ std::shared_ptr<GameSequenceForm> BehaviorSupportProfile::GetSequenceForm() cons
 BehaviorSupportProfile::Sequences BehaviorSupportProfile::GetSequences() const { return {this}; }
 
 BehaviorSupportProfile::PlayerSequences
-BehaviorSupportProfile::GetSequences(GamePlayer &p_player) const
+BehaviorSupportProfile::GetSequences(const GamePlayer &p_player) const
 {
   return {this, p_player};
 }
@@ -192,10 +192,10 @@ BehaviorSupportProfile::ToMixedBehaviorProfile(const std::map<GameSequence, doub
     }
     const double parent_prob = x.at(sequence->m_parent.lock());
     if (parent_prob > 0) {
-      b[sequence->m_action] = x.at(sequence) / parent_prob;
+      b[sequence->m_action->shared_from_this()] = x.at(sequence) / parent_prob;
     }
     else {
-      b[sequence->m_action] = 0;
+      b[sequence->m_action->shared_from_this()] = 0;
     }
   }
   return b;

@@ -320,15 +320,18 @@ public:
 };
 
 class GameSequenceRep : public std::enable_shared_from_this<GameSequenceRep> {
-public:
+  friend class GameTreeRep;
+  friend class BehaviorSupportProfile;
+
   bool m_valid{true};
-  GamePlayer m_player;
-  GameAction m_action;
+  GamePlayerRep *m_player;
+  GameActionRep *m_action;
   size_t m_number;
   std::weak_ptr<GameSequenceRep> m_parent;
 
-  explicit GameSequenceRep(const GamePlayer &p_player, const GameAction &p_action, size_t p_number,
-                           std::weak_ptr<GameSequenceRep> p_parent)
+public:
+  explicit GameSequenceRep(GamePlayerRep *p_player, GameActionRep *p_action, size_t p_number,
+                           const std::weak_ptr<GameSequenceRep> &p_parent)
     : m_player(p_player), m_action(p_action), m_number(p_number), m_parent(p_parent)
   {
   }
@@ -337,9 +340,9 @@ public:
   void Invalidate() { m_valid = false; }
 
   Game GetGame() const;
-  GamePlayer GetPlayer() const { return m_player; }
+  GamePlayer GetPlayer() const;
   GameInfoset GetInfoset() const { return (m_action) ? m_action->GetInfoset() : nullptr; }
-  GameAction GetAction() const { return m_action; }
+  GameAction GetAction() const { return (m_action) ? m_action->shared_from_this() : nullptr; }
   GameSequence GetParent() const { return m_parent.lock(); }
 
   bool operator<(const GameSequenceRep &other) const
@@ -1203,6 +1206,7 @@ inline GamePlayer GameStrategyRep::GetPlayer() const { return m_player->shared_f
 inline Game GameStrategyRep::GetGame() const { return m_player->GetGame(); }
 
 inline Game GameSequenceRep::GetGame() const { return m_player->GetGame(); }
+inline GamePlayer GameSequenceRep::GetPlayer() const { return m_player->shared_from_this(); }
 
 inline Game GameActionRep::GetGame() const { return m_infoset->GetGame(); }
 
