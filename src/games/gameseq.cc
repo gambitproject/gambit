@@ -81,7 +81,7 @@ void GameSequenceForm::FillTableau()
       if (p_node->GetInfoset() && !p_node->GetPlayer()->IsChance()) {
         const auto player = p_node->GetPlayer();
         const auto currentSequence = m_sequences.at(player).back();
-        m_sfg.m_constraints[{p_node->GetInfoset(), currentSequence->m_action}] = 1;
+        m_sfg.m_constraints[{p_node->GetInfoset(), currentSequence->GetAction()}] = 1;
       }
 
       return GameRep::DFSCallbackResult::Continue;

@@ -321,6 +321,7 @@ public:
 
 class GameSequenceRep : public std::enable_shared_from_this<GameSequenceRep> {
   friend class GameTreeRep;
+  friend class GamePlayerRep;
   friend class BehaviorSupportProfile;
 
   bool m_valid{true};
@@ -1235,7 +1236,7 @@ inline GameSequence GamePlayerRep::GetSequence(const GameAction &p_action) const
 {
   m_game->EnsureSequences();
   for (const auto &seq : m_sequences) {
-    if (seq->m_action == p_action) {
+    if (seq->m_action == p_action.get()) {
       return seq;
     }
   }
