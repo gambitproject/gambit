@@ -596,7 +596,9 @@ gambit_SOURCES = \
 	src/gui/style.cc \
 	src/gui/style.h \
 	src/gui/valnumber.cc \
-	src/gui/valnumber.h
+	src/gui/valnumber.h \
+	src/gui/welcome.cc \
+	src/gui/welcome.h
 
 # Add wxWidgets compilation flags for the GUI program
 gambit_CXXFLAGS = $(AM_CXXFLAGS) $(WX_CXXFLAGS)

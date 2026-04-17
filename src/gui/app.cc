@@ -33,6 +33,7 @@
 
 #include "app.h"
 #include "gameframe.h"
+#include "welcome.h"
 
 #include "bitmaps/gambitbig.xpm"
 
@@ -87,13 +88,9 @@ wxBEGIN_EVENT_TABLE(Application, wxApp) EVT_TIMER(wxID_ANY, Application::OnSplas
   }
 
   if (m_documents.empty()) {
-    const Game efg = NewTree();
-    efg->NewPlayer()->SetLabel("Player 1");
-    efg->NewPlayer()->SetLabel("Player 2");
-    efg->SetTitle("Untitled Extensive Game");
-
-    auto *game = new GameDocument(efg);
-    (void)new GameFrame(nullptr, game);
+    auto *frame = new WelcomeFrame(nullptr);
+    frame->Show(true);
+    SetTopWindow(frame);
   }
 
   // Set up the help system.
