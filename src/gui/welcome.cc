@@ -77,12 +77,12 @@ void WelcomePanel::CreateControls()
                                          "Load a saved .efg or .nfg file");
 
   m_newNormalFormButton =
-      new wxCommandLinkButton(this, ID_WELCOME_NEW_NORMAL_FORM, "New strategic-form game",
-                              "Create a game in strategic form");
+      new wxCommandLinkButton(this, ID_WELCOME_NEW_NORMAL_FORM, "New strategic form game",
+                              "Create a game with a strategic representation");
 
   m_newExtensiveFormButton =
-      new wxCommandLinkButton(this, ID_WELCOME_NEW_EXTENSIVE_FORM, "New extensive-form game",
-                              "Create a game as a decision tree");
+      new wxCommandLinkButton(this, ID_WELCOME_NEW_EXTENSIVE_FORM, "New extensive form game",
+                              "Create a game with a tree representation");
 
   m_openButton->SetBitmap(open_xpm);
   m_openButton->SetBitmapMargins(24, 12);
