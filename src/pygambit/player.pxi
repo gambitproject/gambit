@@ -125,7 +125,7 @@ class PlayerStrategies:
     def __repr__(self) -> str:
         return f"PlayerStrategies(player={Player.wrap(self.player)})"
 
-    def __len__(self):
+    def __len__(self) -> int:
         """The number of strategies for the player in the game."""
         return self.player.deref().GetStrategies().size()
 
@@ -166,7 +166,7 @@ class PlayerSequences:
     def __repr__(self) -> str:
         return f"PlayerSequences(player={Player.wrap(self.player)})"
 
-    def __len__(self):
+    def __len__(self) -> int:
         """The number of sequences for the player in the game."""
         return self.player.deref().GetSequences().size()
 
