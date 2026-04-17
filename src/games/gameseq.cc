@@ -27,7 +27,7 @@ using namespace Gambit;
 
 namespace Gambit {
 
-void GameSequenceForm::BuildSequences()
+void GameSequenceForm::IndexSequences()
 {
   for (const auto &player : GetPlayers()) {
     for (const auto &sequence : player->GetSequences()) {
@@ -76,7 +76,6 @@ void GameSequenceForm::FillTableau()
 
       if (p_node->GetOutcome()) {
         m_outcomes.push_back(p_node->GetOutcome());
-        ;
       }
 
       if (p_node->GetInfoset() && !p_node->GetPlayer()->IsChance()) {

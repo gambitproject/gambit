@@ -35,10 +35,9 @@ class GameSequenceForm {
   std::map<GamePlayer, std::vector<GameSequence>> m_sequences;
   NDArray<Rational> m_payoffs;
   std::map<std::pair<GameInfoset, GameAction>, int> m_constraints; // (sparse) constraint matrices
-  std::set<GameInfoset> m_infosets; // infosets actually reachable given support
   std::map<GameAction, GameSequence> m_correspondence;
 
-  void BuildSequences();
+  void IndexSequences();
   void FillTableau();
 
   Array<int> ProfileToIndex(const std::map<GamePlayer, GameSequence> &p_profile) const
@@ -62,18 +61,9 @@ class GameSequenceForm {
   }
 
 public:
-  class Infosets {
-    const GameSequenceForm *m_sfg;
-
-  public:
-    Infosets(const GameSequenceForm *p_sfg) : m_sfg(p_sfg) {}
-
-    size_t size() const { return m_sfg->m_infosets.size(); }
-  };
-
   explicit GameSequenceForm(const BehaviorSupportProfile &p_support) : m_support(p_support)
   {
-    BuildSequences();
+    IndexSequences();
     FillTableau();
   }
 
