@@ -4,6 +4,8 @@
 #include <wx/frame.h>
 #include <wx/panel.h>
 #include <wx/event.h>
+#include <wx/statbmp.h>
+#include <wx/commandlinkbutton.h>
 
 class wxButton;
 class wxStaticText;
@@ -11,7 +13,6 @@ class wxBoxSizer;
 
 enum class WelcomeNewProblemKind { NormalForm, ExtensiveForm };
 
-// Custom events emitted by WelcomePanel.
 wxDECLARE_EVENT(wxEVT_WELCOME_OPEN, wxCommandEvent);
 wxDECLARE_EVENT(wxEVT_WELCOME_NEW, wxCommandEvent);
 
@@ -30,13 +31,12 @@ private:
   void SendOpenEvent();
   void SendNewEvent(WelcomeNewProblemKind p_kind);
 
-private:
+  wxStaticBitmap *m_logoBitmap{nullptr};
   wxStaticText *m_titleText{nullptr};
-  wxStaticText *m_messageText{nullptr};
 
-  wxButton *m_openButton{nullptr};
-  wxButton *m_newNormalFormButton{nullptr};
-  wxButton *m_newExtensiveFormButton{nullptr};
+  wxCommandLinkButton *m_openButton{nullptr};
+  wxCommandLinkButton *m_newNormalFormButton{nullptr};
+  wxCommandLinkButton *m_newExtensiveFormButton{nullptr};
 };
 
 class WelcomeFrame : public wxFrame {

@@ -1,5 +1,6 @@
 
 #include <wx/button.h>
+#include <wx/commandlinkbutton.h>
 #include <wx/sizer.h>
 #include <wx/stattext.h>
 #include <wx/filedlg.h>
@@ -34,17 +35,68 @@ WelcomePanel::WelcomePanel(wxWindow *parent) : wxPanel(parent)
   LayoutControls();
 }
 
+#include "bitmaps/newtable.xpm"
+#include "bitmaps/newtree.xpm"
+#include "bitmaps/open.xpm"
+#include "bitmaps/gambitbig.xpm"
+
+namespace {
+
+wxBitmap MakeScaledBitmap(const char *const *xpm, int targetHeight)
+{
+  wxImage image(xpm);
+
+  if (!image.IsOk()) {
+    return wxBitmap();
+  }
+
+  const int width = image.GetWidth();
+  const int height = image.GetHeight();
+  if (width <= 0 || height <= 0) {
+    return wxBitmap();
+  }
+
+  const int targetWidth = (width * targetHeight) / height;
+  image.Rescale(targetWidth, targetHeight, wxIMAGE_QUALITY_HIGH);
+  return wxBitmap(image);
+}
+
+} // namespace
+
 void WelcomePanel::CreateControls()
 {
-  m_titleText = new wxStaticText(this, wxID_ANY, wxT("Welcome"));
-  m_messageText = new wxStaticText(
-      this, wxID_ANY, wxT("Open an existing file or create a new problem representation."));
+  m_logoBitmap = new wxStaticBitmap(this, wxID_ANY, MakeScaledBitmap(gambitbig_xpm, 72));
 
-  m_openButton = new wxButton(this, ID_WELCOME_OPEN, wxT("Open..."));
+  m_titleText = new wxStaticText(this, wxID_ANY, "Welcome to Gambit");
+  auto titleFont = m_titleText->GetFont();
+  titleFont.SetPointSize(titleFont.GetPointSize() + 6);
+  titleFont.SetWeight(wxFONTWEIGHT_BOLD);
+  m_titleText->SetFont(titleFont);
+
+  m_openButton = new wxCommandLinkButton(this, ID_WELCOME_OPEN, "Open existing game",
+                                         "Load a saved .efg or .nfg file");
+
   m_newNormalFormButton =
-      new wxButton(this, ID_WELCOME_NEW_NORMAL_FORM, wxT("New normal form game"));
+      new wxCommandLinkButton(this, ID_WELCOME_NEW_NORMAL_FORM, "New strategic-form game",
+                              "Create a game in strategic form");
+
   m_newExtensiveFormButton =
-      new wxButton(this, ID_WELCOME_NEW_EXTENSIVE_FORM, wxT("New extensive form game"));
+      new wxCommandLinkButton(this, ID_WELCOME_NEW_EXTENSIVE_FORM, "New extensive-form game",
+                              "Create a game as a decision tree");
+
+  m_openButton->SetBitmap(open_xpm);
+  m_openButton->SetBitmapMargins(24, 12);
+
+  m_newNormalFormButton->SetBitmap(newtable_xpm);
+  m_newNormalFormButton->SetBitmapMargins(24, 12);
+
+  m_newExtensiveFormButton->SetBitmap(newtree_xpm);
+  m_newExtensiveFormButton->SetBitmapMargins(24, 12);
+
+  const wxSize buttonSize(340, 72);
+  m_openButton->SetMinSize(buttonSize);
+  m_newNormalFormButton->SetMinSize(buttonSize);
+  m_newExtensiveFormButton->SetMinSize(buttonSize);
 
   Bind(wxEVT_BUTTON, &WelcomePanel::OnOpen, this, ID_WELCOME_OPEN);
   Bind(wxEVT_BUTTON, &WelcomePanel::OnNewNormalForm, this, ID_WELCOME_NEW_NORMAL_FORM);
@@ -53,20 +105,26 @@ void WelcomePanel::CreateControls()
 
 void WelcomePanel::LayoutControls()
 {
-  auto *topSizer = new wxBoxSizer(wxVERTICAL);
-  auto *buttonSizer = new wxBoxSizer(wxVERTICAL);
+  auto *outer = new wxBoxSizer(wxVERTICAL);
+  auto *row = new wxBoxSizer(wxHORIZONTAL);
+  auto *content = new wxBoxSizer(wxVERTICAL);
 
-  buttonSizer->Add(m_openButton, 0, wxEXPAND | wxBOTTOM, 8);
-  buttonSizer->Add(m_newNormalFormButton, 0, wxEXPAND | wxBOTTOM, 8);
-  buttonSizer->Add(m_newExtensiveFormButton, 0, wxEXPAND, 0);
+  content->Add(m_logoBitmap, 0, wxALIGN_CENTER_HORIZONTAL | wxBOTTOM, 16);
+  content->Add(m_titleText, 0, wxALIGN_CENTER_HORIZONTAL | wxBOTTOM, 20);
 
-  topSizer->AddStretchSpacer(1);
-  topSizer->Add(m_titleText, 0, wxALIGN_CENTER_HORIZONTAL | wxBOTTOM, 12);
-  topSizer->Add(m_messageText, 0, wxALIGN_CENTER_HORIZONTAL | wxLEFT | wxRIGHT | wxBOTTOM, 20);
-  topSizer->Add(buttonSizer, 0, wxALIGN_CENTER_HORIZONTAL | wxLEFT | wxRIGHT, 20);
-  topSizer->AddStretchSpacer(1);
+  content->Add(m_openButton, 0, wxEXPAND | wxBOTTOM, 16);
+  content->Add(m_newNormalFormButton, 0, wxEXPAND | wxBOTTOM, 16);
+  content->Add(m_newExtensiveFormButton, 0, wxEXPAND, 0);
 
-  SetSizer(topSizer);
+  row->AddStretchSpacer(1);
+  row->Add(content, 0, wxEXPAND | wxLEFT | wxRIGHT, 24);
+  row->AddStretchSpacer(1);
+
+  outer->AddStretchSpacer(1);
+  outer->Add(row, 0, wxEXPAND);
+  outer->AddStretchSpacer(1);
+
+  SetSizer(outer);
 }
 
 void WelcomePanel::OnOpen(wxCommandEvent &) { SendOpenEvent(); }
@@ -101,7 +159,7 @@ void WelcomePanel::SendNewEvent(WelcomeNewProblemKind p_kind)
 // --------------------
 
 WelcomeFrame::WelcomeFrame(wxWindow *parent)
-  : wxFrame(parent, wxID_ANY, wxT("Gambit"), wxDefaultPosition, wxSize(480, 320),
+  : wxFrame(parent, wxID_ANY, wxT("Gambit"), wxDefaultPosition, wxSize(600, 500),
             wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER | wxMAXIMIZE_BOX))
 {
   CreateControls();
@@ -148,11 +206,12 @@ bool WelcomeFrame::DoOpen()
       wxT("Gambit workbooks (*.gbt)|*.gbt|") wxT("Gambit extensive games (*.efg)|*.efg|")
           wxT("Gambit strategic games (*.nfg)|*.nfg|") wxT("All files (*.*)|*.*"));
 
-  if (dialog.ShowModal() == wxID_OK) {
-    const wxString filename = dialog.GetPath();
-    wxGetApp().SetCurrentDir(wxPathOnly(filename));
-    wxGetApp().LoadFile(filename, this);
+  if (dialog.ShowModal() != wxID_OK) {
+    return false;
   }
+  const wxString filename = dialog.GetPath();
+  wxGetApp().SetCurrentDir(wxPathOnly(filename));
+  wxGetApp().LoadFile(filename, this);
   return true;
 }
 
