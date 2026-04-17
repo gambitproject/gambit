@@ -40,7 +40,6 @@ class GameSequenceForm {
 
   void BuildSequences();
   void FillTableau();
-  void FillTableau(const GameNode &, const Rational &, std::map<GamePlayer, GameSequence> &);
 
   Array<int> ProfileToIndex(const std::map<GamePlayer, GameSequence> &p_profile) const
   {
@@ -48,6 +47,9 @@ class GameSequenceForm {
     for (auto player : GetPlayers()) {
       const auto &seqs = m_sequences.at(player);
       auto loc = std::find(seqs.begin(), seqs.end(), p_profile.at(player));
+      if (loc == seqs.end()) {
+        throw std::out_of_range("Sequence not found");
+      }
       index[player->GetNumber()] = loc - seqs.begin() + 1;
     }
     return index;

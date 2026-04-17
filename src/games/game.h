@@ -426,6 +426,7 @@ public:
   //@{
   /// Returns the collection of sequences available to the player
   Sequences GetSequences() const;
+  GameSequence GetSequence(const GameAction &p_action) const;
   //@}
 };
 
@@ -717,7 +718,7 @@ public:
   /// OnExit(node, depth)
   /// -------------------
   /// Invoked exactly once for each node, after all of its children have been
-  /// processed (or skipped).  @p is the depth of the node.
+  /// processed (or skipped).  @p depth is the depth of the node.
   ///
   /// OnVisit(node, depth)
   /// --------------------
@@ -1229,6 +1230,16 @@ inline GamePlayerRep::Sequences GamePlayerRep::GetSequences() const
 {
   m_game->EnsureSequences();
   return Sequences(std::const_pointer_cast<GamePlayerRep>(shared_from_this()), &m_sequences);
+}
+inline GameSequence GamePlayerRep::GetSequence(const GameAction &p_action) const
+{
+  m_game->EnsureSequences();
+  for (const auto &seq : m_sequences) {
+    if (seq->m_action == p_action) {
+      return seq;
+    }
+  }
+  throw std::out_of_range("action not found for player");
 }
 
 inline Game GameNodeRep::GetGame() const { return m_game->shared_from_this(); }
