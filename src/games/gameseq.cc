@@ -62,7 +62,7 @@ void GameSequenceForm::FillTableau(const GameNode &n, const Rational &prob,
   }
   else {
     auto tmp_sequence = p_currentSequences.at(n->GetPlayer());
-    m_constraints[{n->GetInfoset(), p_currentSequences.at(n->GetPlayer())->action}] = 1;
+    m_constraints[{n->GetInfoset(), p_currentSequences.at(n->GetPlayer())->m_action}] = 1;
     for (auto action : m_support.GetActions(n->GetInfoset())) {
       m_constraints[{n->GetInfoset(), action}] = -1;
       p_currentSequences[n->GetPlayer()] = m_correspondence.at(action);

@@ -959,7 +959,7 @@ void GameTreeRep::BuildSequences(const GameNode &n,
     const auto tmp_sequence = p_currentSequences.at(n->GetPlayer());
     for (const auto &action : n->GetInfoset()->GetActions()) {
       auto seq_it = std::find_if(player->m_sequences.begin(), player->m_sequences.end(),
-                                 [&action](const auto seq) { return seq->action == action; });
+                                 [&action](const auto seq) { return seq->m_action == action; });
       std::shared_ptr<GameSequenceRep> sequence;
       if (seq_it == player->m_sequences.end()) {
         player->m_sequences.emplace_back(std::make_shared<GameSequenceRep>(

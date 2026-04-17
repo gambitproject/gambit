@@ -187,15 +187,15 @@ BehaviorSupportProfile::ToMixedBehaviorProfile(const std::map<GameSequence, doub
 {
   MixedBehaviorProfile<double> b(*this);
   for (auto sequence : GetSequences()) {
-    if (sequence->action == nullptr) {
+    if (sequence->m_action == nullptr) {
       continue;
     }
-    const double parent_prob = x.at(sequence->parent.lock());
+    const double parent_prob = x.at(sequence->m_parent.lock());
     if (parent_prob > 0) {
-      b[sequence->action] = x.at(sequence) / parent_prob;
+      b[sequence->m_action] = x.at(sequence) / parent_prob;
     }
     else {
-      b[sequence->action] = 0;
+      b[sequence->m_action] = 0;
     }
   }
   return b;
