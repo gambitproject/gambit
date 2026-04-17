@@ -8,6 +8,7 @@
 #include "gambit.h"
 
 #include "welcome.h"
+#include "app.h"
 #include "gamedoc.h"
 #include "gameframe.h"
 
@@ -142,46 +143,21 @@ void WelcomeFrame::OnClose(wxCloseEvent &p_event) { p_event.Skip(); }
 
 bool WelcomeFrame::DoOpen()
 {
-  wxFileDialog dialog(this, wxT("Open game"), wxEmptyString, wxEmptyString,
-                      wxT("Game files (*.efg;*.nfg)|*.efg;*.nfg|All files (*.*)|*.*"),
-                      wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+  wxFileDialog dialog(
+      this, _("Choose file to open"), wxGetApp().GetCurrentDir(), _T(""),
+      wxT("Gambit workbooks (*.gbt)|*.gbt|") wxT("Gambit extensive games (*.efg)|*.efg|")
+          wxT("Gambit strategic games (*.nfg)|*.nfg|") wxT("All files (*.*)|*.*"));
 
-  if (dialog.ShowModal() != wxID_OK) {
-    return false;
+  if (dialog.ShowModal() == wxID_OK) {
+    const wxString filename = dialog.GetPath();
+    wxGetApp().SetCurrentDir(wxPathOnly(filename));
+    wxGetApp().LoadFile(filename, this);
   }
-
-  const wxString filename = dialog.GetPath();
-
-  // TODO: Replace with your existing application/document loading path.
-  //
-  // Example shape:
-  //   auto *frame = MyApp::GetApp().OpenDocumentFrame(filename);
-  //   if (!frame) return false;
-  //   frame->Show(true);
-
-  wxMessageBox(wxT("TODO: open file:\n") + filename, wxT("Stub"), wxOK | wxICON_INFORMATION, this);
-
   return true;
 }
 
 bool WelcomeFrame::DoCreateNew(WelcomeNewProblemKind p_kind)
 {
-  // TODO: Replace with your existing creation path.
-  //
-  // Example shape:
-  //   wxFrame *frame = nullptr;
-  //   switch (p_kind) {
-  //   case WelcomeNewProblemKind::NormalForm:
-  //     frame = MyApp::GetApp().CreateNewNormalFormFrame();
-  //     break;
-  //   case WelcomeNewProblemKind::ExtensiveForm:
-  //     frame = MyApp::GetApp().CreateNewExtensiveFormFrame();
-  //     break;
-  //   }
-  //   if (!frame) return false;
-  //   frame->Show(true);
-
-  wxString message;
   switch (p_kind) {
   case WelcomeNewProblemKind::NormalForm: {
     std::vector<int> dim = {2, 2};
