@@ -337,8 +337,10 @@ public:
   void Invalidate() { m_valid = false; }
 
   Game GetGame() const;
+  GamePlayer GetPlayer() const { return player; }
   GameInfoset GetInfoset() const { return (action) ? action->GetInfoset() : nullptr; }
   GameAction GetAction() const { return action; }
+  GameSequence GetParent() const { return parent.lock(); }
 
   bool operator<(const GameSequenceRep &other) const
   {

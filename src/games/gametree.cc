@@ -988,6 +988,7 @@ void GameTreeRep::EnsureSequences() const
     currentSequences[player] = player->m_sequences.front();
   }
   BuildSequences(m_root, currentSequences);
+  m_hasSequences = true;
 }
 
 void GameTreeRep::BuildConsistentPlays()

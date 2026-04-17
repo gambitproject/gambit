@@ -170,9 +170,9 @@ class PlayerSequences:
         """The number of sequences for the player in the game."""
         return self.player.deref().GetSequences().size()
 
-    # def __iter__(self) -> typing.Iterator[Sequence]:
-    #     for sequence in self.player.deref().GetSequences():
-    #        yield Sequence.wrap(strategy)
+    def __iter__(self) -> typing.Iterator[Sequence]:
+        for sequence in self.player.deref().GetSequences():
+            yield Sequence.wrap(sequence)
 
 
 @cython.cclass
