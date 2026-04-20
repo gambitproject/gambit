@@ -607,28 +607,9 @@ void GameFrame::MakeToolbar()
 //               GameFrame: Menu handlers - File menu
 //----------------------------------------------------------------------
 
-void GameFrame::OnFileNewEfg(wxCommandEvent &)
-{
-  const Game efg = NewTree();
-  efg->SetTitle("Untitled Extensive Game");
-  efg->NewPlayer()->SetLabel("Player 1");
-  efg->NewPlayer()->SetLabel("Player 2");
-  auto *doc = new GameDocument(efg);
-  (void)new GameFrame(nullptr, doc);
-}
+void GameFrame::OnFileNewEfg(wxCommandEvent &) { new GameFrame(nullptr, NewTreeDocument()); }
 
-void GameFrame::OnFileNewNfg(wxCommandEvent &)
-{
-  std::vector<int> dim(2);
-  dim[0] = 2;
-  dim[1] = 2;
-  const Game nfg = NewTable(dim);
-  nfg->SetTitle("Untitled Strategic Game");
-  nfg->GetPlayer(1)->SetLabel("Player 1");
-  nfg->GetPlayer(2)->SetLabel("Player 2");
-  auto *doc = new GameDocument(nfg);
-  (void)new GameFrame(nullptr, doc);
-}
+void GameFrame::OnFileNewNfg(wxCommandEvent &) { new GameFrame(nullptr, NewTableDocument()); }
 
 void GameFrame::OnFileOpen(wxCommandEvent &)
 {

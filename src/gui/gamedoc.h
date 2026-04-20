@@ -273,6 +273,25 @@ public:
   void DoAddOutput(AnalysisOutput &p_list, const wxString &p_output);
 };
 
+inline GameDocument *NewTreeDocument()
+{
+  const Game efg = NewTree();
+  efg->SetTitle("Untitled Extensive Game");
+  efg->NewPlayer()->SetLabel("Player 1");
+  efg->NewPlayer()->SetLabel("Player 2");
+  return new GameDocument(efg);
+}
+
+inline GameDocument *NewTableDocument()
+{
+  const std::vector dim = {2, 2};
+  const Game nfg = NewTable(dim);
+  nfg->SetTitle("Untitled Strategic Game");
+  nfg->GetPlayer(1)->SetLabel("Player 1");
+  nfg->GetPlayer(2)->SetLabel("Player 2");
+  return new GameDocument(nfg);
+}
+
 class GameView {
 protected:
   GameDocument *m_doc;

@@ -218,23 +218,12 @@ bool WelcomeFrame::DoOpen()
 bool WelcomeFrame::DoCreateNew(WelcomeNewProblemKind p_kind)
 {
   switch (p_kind) {
-  case WelcomeNewProblemKind::NormalForm: {
-    std::vector<int> dim = {2, 2};
-    const Game nfg = NewTable(dim);
-    nfg->SetTitle("Untitled Strategic Game");
-    nfg->GetPlayer(1)->SetLabel("Player 1");
-    nfg->GetPlayer(2)->SetLabel("Player 2");
-    auto *doc = new GameDocument(nfg);
-    (void)new GameFrame(nullptr, doc);
-  } break;
+  case WelcomeNewProblemKind::NormalForm:
+    new GameFrame(nullptr, NewTableDocument());
+    ;
+    break;
   case WelcomeNewProblemKind::ExtensiveForm:
-    const Game efg = NewTree();
-    efg->NewPlayer()->SetLabel("Player 1");
-    efg->NewPlayer()->SetLabel("Player 2");
-    efg->SetTitle("Untitled Extensive Game");
-
-    auto *game = new GameDocument(efg);
-    (void)new GameFrame(nullptr, game);
+    new GameFrame(nullptr, NewTreeDocument());
     break;
   }
 
