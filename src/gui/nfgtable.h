@@ -67,6 +67,10 @@ class TableWidget final : public wxPanel {
   void OnBeginEdit(wxSheetEvent &);
   //@}
 
+  int GetRowPaneWidth() const;
+  int GetColPaneHeight() const;
+  void UpdatePaneSizes();
+
 public:
   TableWidget(NfgPanel *p_parent, wxWindowID p_id, GameDocument *p_doc);
 

@@ -914,6 +914,33 @@ TableWidget::TableWidget(NfgPanel *p_parent, wxWindowID p_id, GameDocument *p_do
           wxSheetEventFunction, static_cast<wxSheetEventFunction>(&TableWidget::OnBeginEdit))));
 }
 
+int TableWidget::GetRowPaneWidth() const
+{
+  if (!m_rowSheet || m_rowSheet->GetNumberCols() == 0 || m_rowSheet->GetNumberRows() == 0) {
+    return 0;
+  }
+
+  return m_rowSheet->CellToRect(wxSheetCoords(0, m_rowSheet->GetNumberCols() - 1)).GetRight();
+}
+
+int TableWidget::GetColPaneHeight() const
+{
+  if (!m_colSheet || m_colSheet->GetNumberRows() == 0 || m_colSheet->GetNumberCols() == 0) {
+    return 0;
+  }
+
+  return m_colSheet->CellToRect(wxSheetCoords(m_colSheet->GetNumberRows() - 1, 0)).GetBottom();
+}
+
+void TableWidget::UpdatePaneSizes()
+{
+  m_rowSheet->SetMinSize(wxSize(GetRowPaneWidth(), -1));
+  m_colSheet->SetMinSize(wxSize(-1, GetColPaneHeight()));
+
+  m_rowSheet->InvalidateBestSize();
+  m_colSheet->InvalidateBestSize();
+}
+
 //!
 //! Scroll row and column label sheets to match payoff sheet origin.
 //! Note that wxSheet uses coordinates of -1 to indicate no scroll.
@@ -1048,7 +1075,8 @@ void TableWidget::OnUpdate()
 
   dynamic_cast<RowPlayerWidget *>(m_rowSheet)->OnUpdate();
   dynamic_cast<ColPlayerWidget *>(m_colSheet)->OnUpdate();
-  GetSizer()->Layout();
+  UpdatePaneSizes();
+  Layout();
 }
 
 void TableWidget::PostPendingChanges()
