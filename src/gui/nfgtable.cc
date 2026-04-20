@@ -855,7 +855,7 @@ TableWidget::TableWidget(NfgPanel *p_parent, wxWindowID p_id, GameDocument *p_do
   SetSizer(topSizer);
   wxWindowBase::Layout();
 
-  Connect(m_colSheet->GetId(), wxEVT_SHEET_VIEW_CHANGED,
+  Connect(m_rowSheet->GetId(), wxEVT_SHEET_VIEW_CHANGED,
           reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
               wxSheetEventFunction,
               static_cast<wxSheetEventFunction>(&TableWidget::OnRowSheetScroll))));
