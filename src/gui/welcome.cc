@@ -10,6 +10,7 @@
 
 #include "welcome.h"
 #include "app.h"
+#include "dlnewtable.h"
 #include "gamedoc.h"
 #include "gameframe.h"
 
@@ -218,10 +219,13 @@ bool WelcomeFrame::DoOpen()
 bool WelcomeFrame::DoCreateNew(WelcomeNewProblemKind p_kind)
 {
   switch (p_kind) {
-  case WelcomeNewProblemKind::NormalForm:
-    new GameFrame(nullptr, NewTableDocument());
-    ;
-    break;
+  case WelcomeNewProblemKind::NormalForm: {
+    NewTableDialog dialog(this);
+    if (dialog.ShowModal() != wxID_OK) {
+      return false;
+    }
+    new GameFrame(nullptr, NewTableDocument(dialog.GetDimensions()));
+  } break;
   case WelcomeNewProblemKind::ExtensiveForm:
     new GameFrame(nullptr, NewTreeDocument());
     break;

@@ -282,13 +282,14 @@ inline GameDocument *NewTreeDocument()
   return new GameDocument(efg);
 }
 
-inline GameDocument *NewTableDocument()
+inline GameDocument *NewTableDocument(const std::vector<int> &p_dim)
 {
-  const std::vector dim = {2, 2};
-  const Game nfg = NewTable(dim);
+  const Game nfg = NewTable(p_dim);
   nfg->SetTitle("Untitled Strategic Game");
-  nfg->GetPlayer(1)->SetLabel("Player 1");
-  nfg->GetPlayer(2)->SetLabel("Player 2");
+  int pl = 1;
+  for (auto player : nfg->GetPlayers()) {
+    player->SetLabel("Player " + std::to_string(pl++));
+  }
   return new GameDocument(nfg);
 }
 

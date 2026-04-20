@@ -59,6 +59,7 @@
 #include "dleditmove.h"
 #include "dlefglayout.h"
 #include "dlefglegend.h"
+#include "dlnewtable.h"
 
 namespace Gambit::GUI {
 
@@ -609,7 +610,14 @@ void GameFrame::MakeToolbar()
 
 void GameFrame::OnFileNewEfg(wxCommandEvent &) { new GameFrame(nullptr, NewTreeDocument()); }
 
-void GameFrame::OnFileNewNfg(wxCommandEvent &) { new GameFrame(nullptr, NewTableDocument()); }
+void GameFrame::OnFileNewNfg(wxCommandEvent &)
+{
+  NewTableDialog dialog(this);
+  if (dialog.ShowModal() != wxID_OK) {
+    return;
+  }
+  new GameFrame(nullptr, NewTableDocument(dialog.GetDimensions()));
+}
 
 void GameFrame::OnFileOpen(wxCommandEvent &)
 {
