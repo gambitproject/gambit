@@ -262,19 +262,17 @@ void RowPlayerWidget::DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords)
     return;
   }
 
-  const StrategySupportProfile &support = m_table->GetSupport();
-  const int player = m_table->GetRowHeaderPlayer(p_coords.GetCol());
-  const int strat = m_table->GetRowHeaderStrategy(p_coords.GetCol(), p_coords.GetRow());
-  const GameStrategy strategy = GetStrategy(support, player, strat);
-
-  if (support.IsDominated(strategy, false)) {
+  if (m_table->IsRowHeaderStrategyDominated(p_coords.GetCol(), p_coords.GetRow(), false)) {
+    const int player = m_table->GetRowHeaderPlayer(p_coords.GetCol());
     const wxRect rect = CellToRect(p_coords);
-    if (support.IsDominated(strategy, true)) {
+
+    if (m_table->IsRowHeaderStrategyDominated(p_coords.GetCol(), p_coords.GetRow(), true)) {
       p_dc.SetPen(wxPen(m_table->GetPlayerColor(player), 2, wxPENSTYLE_SOLID));
     }
     else {
       p_dc.SetPen(wxPen(m_table->GetPlayerColor(player), 1, wxPENSTYLE_SHORT_DASH));
     }
+
     p_dc.DrawLine(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
     p_dc.DrawLine(rect.x + rect.width, rect.y, rect.x, rect.y + rect.height);
   }
@@ -506,19 +504,17 @@ void ColPlayerWidget::DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords)
     return;
   }
 
-  const StrategySupportProfile &support = m_table->GetSupport();
-  const int player = m_table->GetColHeaderPlayer(p_coords.GetRow());
-  const int strat = m_table->GetColHeaderStrategy(p_coords.GetRow(), p_coords.GetCol());
-  const GameStrategy strategy = GetStrategy(support, player, strat);
-
-  if (support.IsDominated(strategy, false)) {
+  if (m_table->IsColHeaderStrategyDominated(p_coords.GetRow(), p_coords.GetCol(), false)) {
+    const int player = m_table->GetColHeaderPlayer(p_coords.GetRow());
     const wxRect rect = CellToRect(p_coords);
-    if (support.IsDominated(strategy, true)) {
+
+    if (m_table->IsColHeaderStrategyDominated(p_coords.GetRow(), p_coords.GetCol(), true)) {
       p_dc.SetPen(wxPen(m_table->GetPlayerColor(player), 2, wxPENSTYLE_SOLID));
     }
     else {
       p_dc.SetPen(wxPen(m_table->GetPlayerColor(player), 1, wxPENSTYLE_SHORT_DASH));
     }
+
     p_dc.DrawLine(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
     p_dc.DrawLine(rect.x + rect.width, rect.y, rect.x, rect.y + rect.height);
   }
