@@ -397,6 +397,8 @@ public:
     return m_layout->GetPayoffPlayerForColumn(payoffCol);
   }
 
+  GameStrategy GetStrategyByPlayerAndIndex(int player, int strategy) const;
+
   PureStrategyProfile GetPayoffProfile(const wxSheetCoords &coords) const
   {
     return CellToProfile(coords);

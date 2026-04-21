@@ -195,12 +195,6 @@ RowPlayerWidget::RowPlayerWidget(TableWidget *p_parent)
               static_cast<wxSheetEventFunction>(&RowPlayerWidget::OnCellRightClick))));
 }
 
-GameStrategy GetStrategy(const StrategySupportProfile &p_profile, int pl, int st)
-{
-  auto strategies = p_profile.GetStrategies(p_profile.GetGame()->GetPlayer(pl));
-  return *std::next(strategies.begin(), st - 1);
-}
-
 void RowPlayerWidget::OnCellRightClick(wxSheetEvent &p_event)
 {
   if (m_table->GetRowHeaderColCount() == 0 || m_table->IsReadOnly()) {
@@ -222,12 +216,10 @@ wxString RowPlayerWidget::GetCellValue(const wxSheetCoords &p_coords)
     return wxT("Payoffs");
   }
 
-  const StrategySupportProfile &support = m_table->GetSupport();
-
   const int player = m_table->GetRowHeaderPlayer(p_coords.GetCol());
   const int strat = m_table->GetRowHeaderStrategy(p_coords.GetCol(), p_coords.GetRow());
 
-  return {GetStrategy(support, player, strat)->GetLabel().c_str(), *wxConvCurrent};
+  return {m_table->GetStrategyByPlayerAndIndex(player, strat)->GetLabel().c_str(), *wxConvCurrent};
 }
 
 void RowPlayerWidget::SetCellValue(const wxSheetCoords &p_coords, const wxString &p_value)
@@ -464,12 +456,10 @@ wxString ColPlayerWidget::GetCellValue(const wxSheetCoords &p_coords)
     return wxT("Payoffs");
   }
 
-  const StrategySupportProfile &support = m_table->GetSupport();
-
   const int player = m_table->GetColHeaderPlayer(p_coords.GetRow());
   const int strat = m_table->GetColHeaderStrategy(p_coords.GetRow(), p_coords.GetCol());
 
-  return {GetStrategy(support, player, strat)->GetLabel().c_str(), *wxConvCurrent};
+  return {m_table->GetStrategyByPlayerAndIndex(player, strat)->GetLabel().c_str(), *wxConvCurrent};
 }
 
 void ColPlayerWidget::SetCellValue(const wxSheetCoords &p_coords, const wxString &p_value)
@@ -647,7 +637,7 @@ bool TableWidget::IsRowHeaderStrategyDominated(int headerCol, int headerRow, boo
   const StrategySupportProfile &support = GetSupport();
   const int player = GetRowHeaderPlayer(headerCol);
   const int strat = GetRowHeaderStrategy(headerCol, headerRow);
-  return support.IsDominated(GetStrategy(support, player, strat), strict);
+  return support.IsDominated(GetStrategyByPlayerAndIndex(player, strat), strict);
 }
 
 bool TableWidget::IsColHeaderStrategyDominated(int headerRow, int headerCol, bool strict) const
@@ -655,7 +645,7 @@ bool TableWidget::IsColHeaderStrategyDominated(int headerRow, int headerCol, boo
   const StrategySupportProfile &support = GetSupport();
   const int player = GetColHeaderPlayer(headerRow);
   const int strat = GetColHeaderStrategy(headerRow, headerCol);
-  return support.IsDominated(GetStrategy(support, player, strat), strict);
+  return support.IsDominated(GetStrategyByPlayerAndIndex(player, strat), strict);
 }
 
 wxString PayoffsWidget::GetCellValue(const wxSheetCoords &p_coords)
@@ -1186,42 +1176,34 @@ void TableWidget::RenderGame(wxDC &p_dc, int p_marginX, int p_marginY)
 
 void TableWidget::RenameRowHeaderStrategy(int headerCol, int headerRow, const wxString &value)
 {
-  const StrategySupportProfile &support = GetSupport();
-
   const int player = GetRowHeaderPlayer(headerCol);
   const int strat = GetRowHeaderStrategy(headerCol, headerRow);
 
-  m_doc->DoSetStrategyLabel(GetStrategy(support, player, strat), value);
+  m_doc->DoSetStrategyLabel(GetStrategyByPlayerAndIndex(player, strat), value);
 }
 
 void TableWidget::RenameColHeaderStrategy(int headerRow, int headerCol, const wxString &value)
 {
-  const StrategySupportProfile &support = GetSupport();
-
   const int player = GetColHeaderPlayer(headerRow);
   const int strat = GetColHeaderStrategy(headerRow, headerCol);
 
-  m_doc->DoSetStrategyLabel(GetStrategy(support, player, strat), value);
+  m_doc->DoSetStrategyLabel(GetStrategyByPlayerAndIndex(player, strat), value);
 }
 
 void TableWidget::DeleteRowHeaderStrategy(int headerCol, int headerRow)
 {
-  const StrategySupportProfile &support = GetSupport();
-
   const int player = GetRowHeaderPlayer(headerCol);
   const int strat = GetRowHeaderStrategy(headerCol, headerRow);
 
-  m_doc->DoDeleteStrategy(GetStrategy(support, player, strat));
+  m_doc->DoDeleteStrategy(GetStrategyByPlayerAndIndex(player, strat));
 }
 
 void TableWidget::DeleteColHeaderStrategy(int headerRow, int headerCol)
 {
-  const StrategySupportProfile &support = GetSupport();
-
   const int player = GetColHeaderPlayer(headerRow);
   const int strat = GetColHeaderStrategy(headerRow, headerCol);
 
-  m_doc->DoDeleteStrategy(GetStrategy(support, player, strat));
+  m_doc->DoDeleteStrategy(GetStrategyByPlayerAndIndex(player, strat));
 }
 
 void TableWidget::SetPayoffCellValue(const wxSheetCoords &coords, const wxString &value)
@@ -1261,6 +1243,12 @@ bool TableWidget::IsPayoffStrategyDominated(const wxSheetCoords &coords, bool st
   const PureStrategyProfile profile = GetPayoffProfile(coords);
   auto player = GetPayoffPlayer(coords.GetCol());
   return GetSupport().IsDominated(profile->GetStrategy(player), strict);
+}
+
+GameStrategy TableWidget::GetStrategyByPlayerAndIndex(int player, int strategy) const
+{
+  auto strategies = GetSupport().GetStrategies(GetSupport().GetGame()->GetPlayer(player));
+  return *std::next(strategies.begin(), strategy - 1);
 }
 
 } // namespace Gambit::GUI
