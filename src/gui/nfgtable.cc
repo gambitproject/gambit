@@ -139,7 +139,6 @@ public:
 //=========================================================================
 
 class RowPlayerWidget final : public TableWidgetBase {
-  GameDocument *m_doc;
   TableWidget *m_table;
 
   /// @name Overriding wxSheet members for data access
@@ -164,7 +163,7 @@ public:
   /// @name Lifecycle
   //@{
   /// Constructorw
-  RowPlayerWidget(TableWidget *p_parent, GameDocument *p_doc);
+  RowPlayerWidget(TableWidget *p_parent);
   //@}
 
   /// @name Synchronizing with document state
@@ -179,8 +178,8 @@ public:
   //@}
 };
 
-RowPlayerWidget::RowPlayerWidget(TableWidget *p_parent, GameDocument *p_doc)
-  : TableWidgetBase(p_parent, wxID_ANY), m_doc(p_doc), m_table(p_parent)
+RowPlayerWidget::RowPlayerWidget(TableWidget *p_parent)
+  : TableWidgetBase(p_parent, wxID_ANY), m_table(p_parent)
 {
   CreateGrid(m_table->NumRowContingencies(), m_table->NumRowPlayers());
   SetRowLabelWidth(1);
@@ -352,7 +351,6 @@ bool RowPlayerWidget::DropText(wxCoord p_x, wxCoord p_y, const wxString &p_text)
 //=========================================================================
 
 class ColPlayerWidget final : public TableWidgetBase {
-  GameDocument *m_doc;
   TableWidget *m_table;
 
   /// @name Overriding wxSheet members for data access
@@ -377,7 +375,7 @@ public:
   /// @name Lifecycle
   //@{
   /// Constructor
-  ColPlayerWidget(TableWidget *p_parent, GameDocument *p_doc);
+  ColPlayerWidget(TableWidget *p_parent);
   //@}
 
   /// @name Synchronizing with document state
@@ -392,8 +390,8 @@ public:
   //@}
 };
 
-ColPlayerWidget::ColPlayerWidget(TableWidget *p_parent, GameDocument *p_doc)
-  : TableWidgetBase(p_parent, wxID_ANY), m_doc(p_doc), m_table(p_parent)
+ColPlayerWidget::ColPlayerWidget(TableWidget *p_parent)
+  : TableWidgetBase(p_parent, wxID_ANY), m_table(p_parent)
 {
   CreateGrid(m_table->NumColPlayers(), 0);
   SetRowLabelWidth(1);
@@ -411,7 +409,7 @@ ColPlayerWidget::ColPlayerWidget(TableWidget *p_parent, GameDocument *p_doc)
 
 void ColPlayerWidget::OnCellRightClick(wxSheetEvent &p_event)
 {
-  if (m_table->GetColHeaderRowCount() == 0 || m_doc->GetGame()->IsTree()) {
+  if (m_table->GetColHeaderRowCount() == 0 || m_table->IsReadOnly()) {
     p_event.Skip();
     return;
   }
@@ -815,8 +813,8 @@ TableWidget::TableWidget(NfgPanel *p_parent, wxWindowID p_id, GameDocument *p_do
   // row and column players are recorded
   // NOLINTBEGIN(cppcoreguidelines-prefer-member-initializer)
   m_payoffSheet = new PayoffsWidget(this, p_doc);
-  m_rowSheet = new RowPlayerWidget(this, p_doc);
-  m_colSheet = new ColPlayerWidget(this, p_doc);
+  m_rowSheet = new RowPlayerWidget(this);
+  m_colSheet = new ColPlayerWidget(this);
   // NOLINTEND(cppcoreguidelines-prefer-member-initializer)
   m_payoffSheet->SetGridLineColour(*wxWHITE);
 
