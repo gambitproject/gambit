@@ -932,7 +932,7 @@ int TableWidget::GetColPaneHeight() const
   return m_colSheet->CellToRect(wxSheetCoords(m_colSheet->GetNumberRows() - 1, 0)).GetBottom();
 }
 
-void TableWidget::UpdatePaneSizes()
+void TableWidget::UpdateLabelPanelSizes()
 {
   m_rowSheet->SetMinSize(wxSize(GetRowPaneWidth(), -1));
   m_colSheet->SetMinSize(wxSize(-1, GetColPaneHeight()));
@@ -1036,7 +1036,7 @@ void TableWidget::OnColSheetRow(wxSheetEvent &p_event)
 //!
 void TableWidget::OnBeginEdit(wxSheetEvent &) { m_doc->PostPendingChanges(); }
 
-void TableWidget::OnUpdate()
+void TableWidget::ReconcilePlayers()
 {
   if (m_doc->NumPlayers() > m_rowPlayers.size() + m_colPlayers.size()) {
     for (size_t pl = 1; pl <= m_doc->NumPlayers(); pl++) {
@@ -1058,24 +1058,36 @@ void TableWidget::OnUpdate()
       }
     }
   }
+}
 
+void TableWidget::UpdatePayoffPanel()
+{
   dynamic_cast<gbtPayoffsWidget *>(m_payoffSheet)->OnUpdate();
+}
 
+void TableWidget::UpdateLabelPanelMargins()
+{
   // We add margins to the player labels to match the scrollbars,
   // so scrolling matches up
-  m_colSheet->SetMargins(dynamic_cast<gbtPayoffsWidget *>(m_payoffSheet)
-                             ->GetVerticalScrollBar()
-                             ->GetSize()
-                             .GetWidth(),
-                         -1);
-  m_rowSheet->SetMargins(-1, dynamic_cast<gbtPayoffsWidget *>(m_payoffSheet)
-                                 ->GetHorizontalScrollBar()
-                                 ->GetSize()
-                                 .GetHeight());
+  auto payoffs = dynamic_cast<gbtPayoffsWidget *>(m_payoffSheet);
+  m_colSheet->SetMargins(payoffs->GetVerticalScrollBar()->GetSize().GetWidth(), -1);
+  ;
+  m_rowSheet->SetMargins(-1, payoffs->GetHorizontalScrollBar()->GetSize().GetHeight());
+}
 
+void TableWidget::UpdateLabelPanels()
+{
   dynamic_cast<RowPlayerWidget *>(m_rowSheet)->OnUpdate();
   dynamic_cast<ColPlayerWidget *>(m_colSheet)->OnUpdate();
-  UpdatePaneSizes();
+}
+
+void TableWidget::OnUpdate()
+{
+  ReconcilePlayers();
+  UpdatePayoffPanel();
+  UpdateLabelPanelMargins();
+  UpdateLabelPanels();
+  UpdateLabelPanelSizes();
   Layout();
 }
 

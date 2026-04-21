@@ -65,11 +65,15 @@ class TableWidget final : public wxPanel {
 
   /// Called when editing begins in any cell
   void OnBeginEdit(wxSheetEvent &);
+  void ReconcilePlayers();
+  void UpdatePayoffPanel();
+  void UpdateLabelPanelMargins();
+  void UpdateLabelPanels();
   //@}
 
   int GetRowPaneWidth() const;
   int GetColPaneHeight() const;
-  void UpdatePaneSizes();
+  void UpdateLabelPanelSizes();
 
 public:
   TableWidget(NfgPanel *p_parent, wxWindowID p_id, GameDocument *p_doc);
