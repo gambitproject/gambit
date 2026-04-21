@@ -43,9 +43,8 @@ def create_repeated_game_efg(
 ) -> gbt.Game:
     """Create a T-period repeated game from a simultaneous m*n stage game.
 
-    Each round is a proper subgame difference.  Within a round, Player 1
-    moves first and Player 2 moves without observing Player 1's action.
-    Terminal payoffs are the sum of stage-game payoffs along the path.
+    At every round, each P1 decision node opens a proper subgame, so
+    the game contains ((m*n)^T - 1) / (m*n - 1) subgame roots in total.
 
     Parameters
     ----------
@@ -68,6 +67,7 @@ def create_repeated_game_efg(
         - ((m*n)^T - 1) / (m*n - 1) subgame roots
     """
     assert A.shape == B.shape
+    assert A.shape[0] >= 1 and A.shape[1] >= 1
     assert T >= 1
 
     m, n = A.shape
