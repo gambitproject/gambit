@@ -280,6 +280,14 @@ public:
   }
   //@}
 
+  bool IsReadOnly() const;
+  wxColour GetPlayerColor(int player) const;
+  const StrategySupportProfile &GetSupport() const { return m_doc->GetNfgSupport(); }
+  bool IsStrategyDominated(int player, int strat, bool strict) const;
+
+  bool IsRowHeaderStrategyDominated(int headerCol, int headerRow, bool strict) const;
+  bool IsColHeaderStrategyDominated(int headerRow, int headerCol, bool strict) const;
+
   /// @name Exporting/printing graphics
   //@{
   /// Creates a printout object of the game as currently displayed
