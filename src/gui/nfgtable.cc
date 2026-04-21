@@ -429,7 +429,7 @@ void ColPlayerWidget::OnCellRightClick(wxSheetEvent &p_event)
   const wxSheetCoords coords = p_event.GetCoords();
 
   const int player = m_table->GetColPlayer(coords.GetRow() + 1);
-  const int strat = m_table->RowToStrategy(coords.GetRow() + 1, coords.GetCol());
+  const int strat = m_table->ColToStrategy(coords.GetRow() + 1, coords.GetCol());
 
   m_doc->DoDeleteStrategy(GetStrategy(support, player, strat));
 }
@@ -556,15 +556,15 @@ bool ColPlayerWidget::DropText(wxCoord p_x, wxCoord p_y, const wxString &p_text)
       return true;
     }
 
-    for (int col = 0; col < GetNumberCols(); col++) {
-      const wxRect rect = CellToRect(wxSheetCoords(col, 0));
+    for (int row = 0; row < GetNumberRows(); row++) {
+      const wxRect rect = CellToRect(wxSheetCoords(row, 0));
 
       if (p_y >= rect.y && p_y < rect.y + rect.height / 2) {
-        m_table->SetColPlayer(col + 1, pl);
+        m_table->SetColPlayer(row + 1, pl);
         return true;
       }
       else if (p_y >= rect.y + rect.height / 2 && p_y < rect.y + rect.height) {
-        m_table->SetColPlayer(col + 2, pl);
+        m_table->SetColPlayer(row + 2, pl);
         return true;
       }
     }
@@ -1105,16 +1105,18 @@ void TableWidget::SetRowPlayer(int index, int pl)
   if (contains(m_colPlayers, pl)) {
     m_colPlayers.erase(std::find(m_colPlayers.begin(), m_colPlayers.end(), pl));
   }
-  Array<int> newPlayers;
-  for (const auto &player : m_rowPlayers) {
-    if (static_cast<int>(newPlayers.size()) == index - 1) {
-      newPlayers.push_back(pl);
-    }
-    else if (player != pl) {
-      newPlayers.push_back(player);
-    }
+
+  if (contains(m_rowPlayers, pl)) {
+    m_rowPlayers.erase(std::find(m_rowPlayers.begin(), m_rowPlayers.end(), pl));
   }
-  m_rowPlayers = newPlayers;
+
+  index = std::max(1, index);
+  index = std::min(index, static_cast<int>(m_rowPlayers.size()) + 1);
+
+  auto it = m_rowPlayers.begin();
+  std::advance(it, index - 1);
+  m_rowPlayers.insert(it, pl);
+
   OnUpdate();
 }
 
@@ -1152,16 +1154,18 @@ void TableWidget::SetColPlayer(int index, int pl)
   if (contains(m_rowPlayers, pl)) {
     m_rowPlayers.erase(std::find(m_rowPlayers.begin(), m_rowPlayers.end(), pl));
   }
-  Array<int> newPlayers;
-  for (const auto &player : m_colPlayers) {
-    if (static_cast<int>(newPlayers.size()) == index - 1) {
-      newPlayers.push_back(pl);
-    }
-    else if (player != pl) {
-      newPlayers.push_back(player);
-    }
+
+  if (contains(m_colPlayers, pl)) {
+    m_colPlayers.erase(std::find(m_colPlayers.begin(), m_colPlayers.end(), pl));
   }
-  m_colPlayers = newPlayers;
+
+  index = std::max(1, index);
+  index = std::min(index, static_cast<int>(m_colPlayers.size()) + 1);
+
+  auto it = m_colPlayers.begin();
+  std::advance(it, index - 1);
+  m_colPlayers.insert(it, pl);
+
   OnUpdate();
 }
 
