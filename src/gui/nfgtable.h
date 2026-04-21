@@ -28,11 +28,11 @@ class GameDocument;
 class NfgPanel;
 
 class StrategicTableLayout {
-public:
   GameDocument *m_doc;
   Array<int> m_rowPlayers;
   Array<int> m_colPlayers;
 
+public:
   explicit StrategicTableLayout(GameDocument *doc) : m_doc(doc)
   {
     if (m_doc->NumPlayers() >= 1) {
@@ -45,6 +45,18 @@ public:
       m_rowPlayers.push_back(pl);
     }
   }
+
+  /// Returns the number of players assigned to the rows
+  int NumRowPlayers() const { return m_rowPlayers.size(); }
+
+  /// Returns the index'th player assigned to the rows (1=slowest incrementing)
+  int GetRowPlayer(int index) const { return m_rowPlayers[index]; }
+
+  /// Returns the number of players assigned to the columns
+  int NumColPlayers() const { return m_colPlayers.size(); }
+
+  /// Returns the index'th player assigned to the columns (1=slowest)
+  int GetColPlayer(int index) const { return m_colPlayers[index]; }
 
   void ReconcilePlayers()
   {
@@ -175,10 +187,10 @@ public:
   /// @name View state
   //@{
   /// Returns the number of players assigned to the rows
-  int NumRowPlayers() const { return m_layout->m_rowPlayers.size(); }
+  int NumRowPlayers() const { return m_layout->NumRowPlayers(); }
 
   /// Returns the index'th player assigned to the rows (1=slowest incrementing)
-  int GetRowPlayer(int index) const { return m_layout->m_rowPlayers[index]; }
+  int GetRowPlayer(int index) const { return m_layout->GetRowPlayer(index); }
 
   /// Sets the index'th row player (1=slowest, n+1=fastest)
   void SetRowPlayer(int index, int pl);
@@ -193,10 +205,10 @@ public:
   int RowToStrategy(int player, int row) const;
 
   /// Returns the number of players assigned to the columns
-  int NumColPlayers() const { return m_layout->m_colPlayers.size(); }
+  int NumColPlayers() const { return m_layout->NumColPlayers(); }
 
   /// Returns the index'th player assigned to the columns (1=slowest)
-  int GetColPlayer(int index) const { return m_layout->m_colPlayers[index]; }
+  int GetColPlayer(int index) const { return m_layout->GetColPlayer(index); }
 
   /// Sets the index'th column player (1=slowest, n+1=fastest)
   void SetColPlayer(int index, int pl);
