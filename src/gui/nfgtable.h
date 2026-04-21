@@ -27,6 +27,88 @@ namespace Gambit::GUI {
 class GameDocument;
 class NfgPanel;
 
+class StrategicTableLayout {
+public:
+  GameDocument *m_doc;
+  Array<int> m_rowPlayers;
+  Array<int> m_colPlayers;
+
+  explicit StrategicTableLayout(GameDocument *doc) : m_doc(doc)
+  {
+    if (m_doc->NumPlayers() >= 1) {
+      m_rowPlayers.push_back(1);
+    }
+    if (m_doc->NumPlayers() >= 2) {
+      m_colPlayers.push_back(2);
+    }
+    for (int pl = 3; pl <= m_doc->NumPlayers(); ++pl) {
+      m_rowPlayers.push_back(pl);
+    }
+  }
+
+  void ReconcilePlayers()
+  {
+    if (m_doc->NumPlayers() > m_rowPlayers.size() + m_colPlayers.size()) {
+      for (size_t pl = 1; pl <= m_doc->NumPlayers(); pl++) {
+        if (!contains(m_rowPlayers, pl) && !contains(m_colPlayers, pl)) {
+          m_rowPlayers.push_back(pl);
+        }
+      }
+    }
+    else if (m_doc->NumPlayers() < m_rowPlayers.size() + m_colPlayers.size()) {
+      for (size_t i = 1; i <= m_rowPlayers.size(); i++) {
+        if (m_rowPlayers[i] > static_cast<int>(m_doc->NumPlayers())) {
+          m_rowPlayers.erase_at(i--);
+        }
+      }
+
+      for (size_t i = 1; i <= m_colPlayers.size(); i++) {
+        if (m_colPlayers[i] > static_cast<int>(m_doc->NumPlayers())) {
+          m_colPlayers.erase_at(i--);
+        }
+      }
+    }
+  }
+
+  void SetRowPlayer(int index, int pl)
+  {
+    if (contains(m_colPlayers, pl)) {
+      m_colPlayers.erase(std::find(m_colPlayers.begin(), m_colPlayers.end(), pl));
+    }
+
+    if (contains(m_rowPlayers, pl)) {
+      m_rowPlayers.erase(std::find(m_rowPlayers.begin(), m_rowPlayers.end(), pl));
+    }
+
+    index = std::max(1, index);
+    index = std::min(index, static_cast<int>(m_rowPlayers.size()) + 1);
+
+    auto it = m_rowPlayers.begin();
+    std::advance(it, index - 1);
+    m_rowPlayers.insert(it, pl);
+  }
+
+  void SetColPlayer(int index, int pl)
+  {
+    if (contains(m_rowPlayers, pl)) {
+      m_rowPlayers.erase(std::find(m_rowPlayers.begin(), m_rowPlayers.end(), pl));
+    }
+
+    if (contains(m_colPlayers, pl)) {
+      m_colPlayers.erase(std::find(m_colPlayers.begin(), m_colPlayers.end(), pl));
+    }
+
+    index = std::max(1, index);
+    index = std::min(index, static_cast<int>(m_colPlayers.size()) + 1);
+
+    auto it = m_colPlayers.begin();
+    std::advance(it, index - 1);
+    m_colPlayers.insert(it, pl);
+  }
+
+  GameDocument *GetDocument() const { return m_doc; }
+};
+
 //!
 //! This is a panel which manages three wxSheet instances: one which
 //! contains the payoffs of the strategic form, and two which handle
@@ -37,7 +119,7 @@ class TableWidget final : public wxPanel {
   NfgPanel *m_nfgPanel;
   wxSheet *m_payoffSheet, *m_rowSheet, *m_colSheet;
 
-  Array<int> m_rowPlayers, m_colPlayers;
+  std::shared_ptr<StrategicTableLayout> m_layout;
 
   /// @name Event handlers
   //@{
@@ -93,10 +175,10 @@ public:
   /// @name View state
   //@{
   /// Returns the number of players assigned to the rows
-  int NumRowPlayers() const { return m_rowPlayers.size(); }
+  int NumRowPlayers() const { return m_layout->m_rowPlayers.size(); }
 
   /// Returns the index'th player assigned to the rows (1=slowest incrementing)
-  int GetRowPlayer(int index) const { return m_rowPlayers[index]; }
+  int GetRowPlayer(int index) const { return m_layout->m_rowPlayers[index]; }
 
   /// Sets the index'th row player (1=slowest, n+1=fastest)
   void SetRowPlayer(int index, int pl);
@@ -111,10 +193,10 @@ public:
   int RowToStrategy(int player, int row) const;
 
   /// Returns the number of players assigned to the columns
-  int NumColPlayers() const { return m_colPlayers.size(); }
+  int NumColPlayers() const { return m_layout->m_colPlayers.size(); }
 
   /// Returns the index'th player assigned to the columns (1=slowest)
-  int GetColPlayer(int index) const { return m_colPlayers[index]; }
+  int GetColPlayer(int index) const { return m_layout->m_colPlayers[index]; }
 
   /// Sets the index'th column player (1=slowest, n+1=fastest)
   void SetColPlayer(int index, int pl);

@@ -38,6 +38,7 @@
 #include "dlexcept.h"
 
 namespace Gambit::GUI {
+
 //=========================================================================
 //                       class TableWidgetBase
 //=========================================================================
@@ -823,11 +824,9 @@ void PayoffsWidget::OnKeyDown(wxKeyEvent &p_event)
 
 TableWidget::TableWidget(NfgPanel *p_parent, wxWindowID p_id, GameDocument *p_doc)
   : wxPanel(p_parent, p_id), m_doc(p_doc), m_nfgPanel(p_parent), m_payoffSheet(nullptr),
-    m_rowSheet(nullptr), m_colSheet(nullptr)
+    m_rowSheet(nullptr), m_colSheet(nullptr),
+    m_layout(std::make_shared<StrategicTableLayout>(p_doc))
 {
-  m_rowPlayers.push_back(1);
-  m_colPlayers.push_back(2);
-
   // These depend on the row and column player lists having been populated,
   // which suggests some refactoring ought to be done as to where/how those
   // row and column players are recorded
@@ -1030,29 +1029,7 @@ void TableWidget::OnColSheetRow(wxSheetEvent &p_event)
 //!
 void TableWidget::OnBeginEdit(wxSheetEvent &) { m_doc->PostPendingChanges(); }
 
-void TableWidget::ReconcilePlayers()
-{
-  if (m_doc->NumPlayers() > m_rowPlayers.size() + m_colPlayers.size()) {
-    for (size_t pl = 1; pl <= m_doc->NumPlayers(); pl++) {
-      if (!contains(m_rowPlayers, pl) && !contains(m_colPlayers, pl)) {
-        m_rowPlayers.push_back(pl);
-      }
-    }
-  }
-  else if (m_doc->NumPlayers() < m_rowPlayers.size() + m_colPlayers.size()) {
-    for (size_t i = 1; i <= m_rowPlayers.size(); i++) {
-      if (m_rowPlayers[i] > static_cast<int>(m_doc->NumPlayers())) {
-        m_rowPlayers.erase_at(i--);
-      }
-    }
-
-    for (size_t i = 1; i <= m_colPlayers.size(); i++) {
-      if (m_colPlayers[i] > static_cast<int>(m_doc->NumPlayers())) {
-        m_colPlayers.erase_at(i--);
-      }
-    }
-  }
-}
+void TableWidget::ReconcilePlayers() { m_layout->ReconcilePlayers(); }
 
 void TableWidget::UpdatePayoffPanel() { dynamic_cast<PayoffsWidget *>(m_payoffSheet)->OnUpdate(); }
 
@@ -1105,21 +1082,7 @@ bool TableWidget::ShowDominance() const { return m_nfgPanel->IsDominanceShown();
 
 void TableWidget::SetRowPlayer(int index, int pl)
 {
-  if (contains(m_colPlayers, pl)) {
-    m_colPlayers.erase(std::find(m_colPlayers.begin(), m_colPlayers.end(), pl));
-  }
-
-  if (contains(m_rowPlayers, pl)) {
-    m_rowPlayers.erase(std::find(m_rowPlayers.begin(), m_rowPlayers.end(), pl));
-  }
-
-  index = std::max(1, index);
-  index = std::min(index, static_cast<int>(m_rowPlayers.size()) + 1);
-
-  auto it = m_rowPlayers.begin();
-  std::advance(it, index - 1);
-  m_rowPlayers.insert(it, pl);
-
+  m_layout->SetRowPlayer(index, pl);
   OnUpdate();
 }
 
@@ -1154,21 +1117,7 @@ int TableWidget::RowToStrategy(int player, int row) const
 
 void TableWidget::SetColPlayer(int index, int pl)
 {
-  if (contains(m_rowPlayers, pl)) {
-    m_rowPlayers.erase(std::find(m_rowPlayers.begin(), m_rowPlayers.end(), pl));
-  }
-
-  if (contains(m_colPlayers, pl)) {
-    m_colPlayers.erase(std::find(m_colPlayers.begin(), m_colPlayers.end(), pl));
-  }
-
-  index = std::max(1, index);
-  index = std::min(index, static_cast<int>(m_colPlayers.size()) + 1);
-
-  auto it = m_colPlayers.begin();
-  std::advance(it, index - 1);
-  m_colPlayers.insert(it, pl);
-
+  m_layout->SetColPlayer(index, pl);
   OnUpdate();
 }
 
