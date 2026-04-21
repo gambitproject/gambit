@@ -191,7 +191,7 @@ RowPlayerWidget::RowPlayerWidget(TableWidget *p_parent, GameDocument *p_doc)
   wxWindow::SetDropTarget(new gbtTableWidgetDropTarget(this));
 
   Connect(GetId(), wxEVT_SHEET_CELL_RIGHT_DOWN,
-          (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
+          reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
               wxSheetEventFunction,
               static_cast<wxSheetEventFunction>(&RowPlayerWidget::OnCellRightClick))));
 }
@@ -209,13 +209,8 @@ void RowPlayerWidget::OnCellRightClick(wxSheetEvent &p_event)
     return;
   }
 
-  const StrategySupportProfile &support = m_doc->GetNfgSupport();
   const wxSheetCoords coords = p_event.GetCoords();
-
-  const int player = m_table->GetRowHeaderPlayer(coords.GetCol());
-  const int strat = m_table->GetRowHeaderStrategy(coords.GetCol(), coords.GetRow());
-
-  m_doc->DoDeleteStrategy(GetStrategy(support, player, strat));
+  m_table->DeleteRowHeaderStrategy(coords.GetCol(), coords.GetRow());
 }
 
 wxString RowPlayerWidget::GetCellValue(const wxSheetCoords &p_coords)
@@ -238,12 +233,7 @@ wxString RowPlayerWidget::GetCellValue(const wxSheetCoords &p_coords)
 
 void RowPlayerWidget::SetCellValue(const wxSheetCoords &p_coords, const wxString &p_value)
 {
-  const StrategySupportProfile &support = m_doc->GetNfgSupport();
-
-  const int player = m_table->GetRowHeaderPlayer(p_coords.GetCol());
-  const int strat = m_table->GetRowHeaderStrategy(p_coords.GetCol(), p_coords.GetRow());
-
-  m_doc->DoSetStrategyLabel(GetStrategy(support, player, strat), p_value);
+  m_table->RenameRowHeaderStrategy(p_coords.GetCol(), p_coords.GetRow(), p_value);
 }
 
 wxSheetCellAttr RowPlayerWidget::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
@@ -415,7 +405,7 @@ ColPlayerWidget::ColPlayerWidget(TableWidget *p_parent, GameDocument *p_doc)
   wxWindow::SetDropTarget(new gbtTableWidgetDropTarget(this));
 
   Connect(GetId(), wxEVT_SHEET_CELL_RIGHT_DOWN,
-          (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
+          reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
               wxSheetEventFunction, wxSheetEventFunction(&ColPlayerWidget::OnCellRightClick))));
 }
 
@@ -426,13 +416,8 @@ void ColPlayerWidget::OnCellRightClick(wxSheetEvent &p_event)
     return;
   }
 
-  const StrategySupportProfile &support = m_doc->GetNfgSupport();
   const wxSheetCoords coords = p_event.GetCoords();
-
-  const int player = m_table->GetColHeaderPlayer(coords.GetRow());
-  const int strat = m_table->GetColHeaderStrategy(coords.GetRow(), coords.GetCol());
-
-  m_doc->DoDeleteStrategy(GetStrategy(support, player, strat));
+  m_table->DeleteColHeaderStrategy(coords.GetRow(), coords.GetCol());
 }
 
 void ColPlayerWidget::OnUpdate()
@@ -493,12 +478,7 @@ wxString ColPlayerWidget::GetCellValue(const wxSheetCoords &p_coords)
 
 void ColPlayerWidget::SetCellValue(const wxSheetCoords &p_coords, const wxString &p_value)
 {
-  const StrategySupportProfile &support = m_doc->GetNfgSupport();
-
-  const int player = m_table->GetColHeaderPlayer(p_coords.GetRow());
-  const int strat = m_table->GetColHeaderStrategy(p_coords.GetRow(), p_coords.GetCol());
-
-  m_doc->DoSetStrategyLabel(GetStrategy(support, player, strat), p_value);
+  m_table->RenameColHeaderStrategy(p_coords.GetRow(), p_coords.GetCol(), p_value);
 }
 
 wxSheetCellAttr ColPlayerWidget::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
@@ -676,25 +656,7 @@ wxString PayoffsWidget::GetCellValue(const wxSheetCoords &p_coords)
 
 void PayoffsWidget::SetCellValue(const wxSheetCoords &p_coords, const wxString &p_value)
 {
-  PureStrategyProfile profile = m_table->GetPayoffProfile(p_coords);
-  GameOutcome outcome = profile->GetOutcome();
-  if (!outcome) {
-    m_doc->DoNewOutcome(profile);
-    profile = m_table->GetPayoffProfile(p_coords);
-    outcome = profile->GetOutcome();
-  }
-  const int player = ColToPlayer(p_coords.GetCol());
-  try {
-    m_doc->DoSetPayoff(outcome, player, p_value);
-  }
-  catch (ValueException &) {
-    // For the moment, we will just silently discard edits which
-    // give payoffs that are not valid numbers
-    return;
-  }
-  catch (std::exception &ex) {
-    ExceptionDialog(this, ex.what()).ShowModal();
-  }
+  m_table->SetPayoffCellValue(p_coords, p_value);
 }
 
 wxSheetCellAttr PayoffsWidget::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
@@ -1281,4 +1243,70 @@ void TableWidget::RenderGame(wxDC &p_dc, int p_marginX, int p_marginY)
   m_payoffSheet->DrawGridCells(
       p_dc, wxSheetBlock(0, 0, m_payoffSheet->GetNumberRows(), m_payoffSheet->GetNumberCols()));
 }
+
+void TableWidget::RenameRowHeaderStrategy(int headerCol, int headerRow, const wxString &value)
+{
+  const StrategySupportProfile &support = m_doc->GetNfgSupport();
+
+  const int player = GetRowHeaderPlayer(headerCol);
+  const int strat = GetRowHeaderStrategy(headerCol, headerRow);
+
+  m_doc->DoSetStrategyLabel(GetStrategy(support, player, strat), value);
+}
+
+void TableWidget::RenameColHeaderStrategy(int headerRow, int headerCol, const wxString &value)
+{
+  const StrategySupportProfile &support = m_doc->GetNfgSupport();
+
+  const int player = GetColHeaderPlayer(headerRow);
+  const int strat = GetColHeaderStrategy(headerRow, headerCol);
+
+  m_doc->DoSetStrategyLabel(GetStrategy(support, player, strat), value);
+}
+
+void TableWidget::DeleteRowHeaderStrategy(int headerCol, int headerRow)
+{
+  const StrategySupportProfile &support = m_doc->GetNfgSupport();
+
+  const int player = GetRowHeaderPlayer(headerCol);
+  const int strat = GetRowHeaderStrategy(headerCol, headerRow);
+
+  m_doc->DoDeleteStrategy(GetStrategy(support, player, strat));
+}
+
+void TableWidget::DeleteColHeaderStrategy(int headerRow, int headerCol)
+{
+  const StrategySupportProfile &support = m_doc->GetNfgSupport();
+
+  const int player = GetColHeaderPlayer(headerRow);
+  const int strat = GetColHeaderStrategy(headerRow, headerCol);
+
+  m_doc->DoDeleteStrategy(GetStrategy(support, player, strat));
+}
+
+void TableWidget::SetPayoffCellValue(const wxSheetCoords &coords, const wxString &value)
+{
+  PureStrategyProfile profile = GetPayoffProfile(coords);
+  GameOutcome outcome = profile->GetOutcome();
+  if (!outcome) {
+    m_doc->DoNewOutcome(profile);
+    profile = GetPayoffProfile(coords);
+    outcome = profile->GetOutcome();
+  }
+
+  const int player = GetPayoffPlayerForColumn(coords.GetCol());
+
+  try {
+    m_doc->DoSetPayoff(outcome, player, value);
+  }
+  catch (ValueException &) {
+    // For the moment, we will just silently discard edits which
+    // give payoffs that are not valid numbers
+    return;
+  }
+  catch (std::exception &ex) {
+    ExceptionDialog(this, ex.what()).ShowModal();
+  }
+}
+
 } // namespace Gambit::GUI

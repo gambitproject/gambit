@@ -290,6 +290,11 @@ public:
   void GetSVG(const wxString &p_filename, int marginX, int marginY);
   /// Prints the game as currently displayed, centered on the DC
   void RenderGame(wxDC &p_dc, int marginX, int marginY);
+  void RenameRowHeaderStrategy(int headerCol, int headerRow, const wxString &value);
+  void RenameColHeaderStrategy(int headerRow, int headerCol, const wxString &value);
+  void DeleteRowHeaderStrategy(int headerCol, int headerRow);
+  void DeleteColHeaderStrategy(int headerRow, int headerCol);
+  void SetPayoffCellValue(const wxSheetCoords &coords, const wxString &value);
   //@}
 };
 } // namespace Gambit::GUI
