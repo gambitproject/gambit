@@ -29,8 +29,8 @@ class NfgPanel;
 
 class StrategicTableLayout {
   GameDocument *m_doc;
-  Array<int> m_rowPlayers;
-  Array<int> m_colPlayers;
+  std::vector<int> m_rowPlayers;
+  std::vector<int> m_colPlayers;
 
   static int NumStrategies(const StrategySupportProfile &profile, int player)
   {
@@ -64,35 +64,29 @@ public:
   int NumRowPlayers() const { return m_rowPlayers.size(); }
 
   /// Returns the index'th player assigned to the rows (1=slowest incrementing)
-  int GetRowPlayer(int index) const { return m_rowPlayers[index]; }
+  int GetRowPlayer(int index) const { return m_rowPlayers[index - 1]; }
 
   /// Returns the number of players assigned to the columns
   int NumColPlayers() const { return m_colPlayers.size(); }
 
   /// Returns the index'th player assigned to the columns (1=slowest)
-  int GetColPlayer(int index) const { return m_colPlayers[index]; }
+  int GetColPlayer(int index) const { return m_colPlayers[index - 1]; }
 
   void ReconcilePlayers()
   {
-    if (m_doc->NumPlayers() > m_rowPlayers.size() + m_colPlayers.size()) {
-      for (size_t pl = 1; pl <= m_doc->NumPlayers(); ++pl) {
-        if (!contains(m_rowPlayers, static_cast<int>(pl)) &&
-            !contains(m_colPlayers, static_cast<int>(pl))) {
-          m_rowPlayers.push_back(static_cast<int>(pl));
-        }
-      }
-    }
-    else if (m_doc->NumPlayers() < m_rowPlayers.size() + m_colPlayers.size()) {
-      for (size_t i = 1; i <= m_rowPlayers.size(); ++i) {
-        if (m_rowPlayers[i] > static_cast<int>(m_doc->NumPlayers())) {
-          m_rowPlayers.erase_at(i--);
-        }
-      }
+    const int maxPlayer = static_cast<int>(m_doc->NumPlayers());
 
-      for (size_t i = 1; i <= m_colPlayers.size(); ++i) {
-        if (m_colPlayers[i] > static_cast<int>(m_doc->NumPlayers())) {
-          m_colPlayers.erase_at(i--);
-        }
+    m_rowPlayers.erase(std::remove_if(m_rowPlayers.begin(), m_rowPlayers.end(),
+                                      [maxPlayer](int pl) { return pl > maxPlayer; }),
+                       m_rowPlayers.end());
+
+    m_colPlayers.erase(std::remove_if(m_colPlayers.begin(), m_colPlayers.end(),
+                                      [maxPlayer](int pl) { return pl > maxPlayer; }),
+                       m_colPlayers.end());
+
+    for (int pl = 1; pl <= maxPlayer; ++pl) {
+      if (!contains(m_rowPlayers, pl) && !contains(m_colPlayers, pl)) {
+        m_rowPlayers.push_back(pl);
       }
     }
   }
