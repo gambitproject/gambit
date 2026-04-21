@@ -32,6 +32,18 @@ class StrategicTableLayout {
   Array<int> m_rowPlayers;
   Array<int> m_colPlayers;
 
+  static int NumStrategies(const StrategySupportProfile &profile, int player)
+  {
+    return profile.GetStrategies(profile.GetGame()->GetPlayer(player)).size();
+  }
+
+  static GameStrategy LookupStrategy(const StrategySupportProfile &profile, int player,
+                                     int strategy)
+  {
+    auto strategies = profile.GetStrategies(profile.GetGame()->GetPlayer(player));
+    return *std::next(strategies.begin(), strategy - 1);
+  }
+
 public:
   explicit StrategicTableLayout(GameDocument *doc) : m_doc(doc)
   {
@@ -45,6 +57,8 @@ public:
       m_rowPlayers.push_back(pl);
     }
   }
+
+  GameDocument *GetDocument() const { return m_doc; }
 
   /// Returns the number of players assigned to the rows
   int NumRowPlayers() const { return m_rowPlayers.size(); }
@@ -61,20 +75,21 @@ public:
   void ReconcilePlayers()
   {
     if (m_doc->NumPlayers() > m_rowPlayers.size() + m_colPlayers.size()) {
-      for (size_t pl = 1; pl <= m_doc->NumPlayers(); pl++) {
-        if (!contains(m_rowPlayers, pl) && !contains(m_colPlayers, pl)) {
-          m_rowPlayers.push_back(pl);
+      for (size_t pl = 1; pl <= m_doc->NumPlayers(); ++pl) {
+        if (!contains(m_rowPlayers, static_cast<int>(pl)) &&
+            !contains(m_colPlayers, static_cast<int>(pl))) {
+          m_rowPlayers.push_back(static_cast<int>(pl));
         }
       }
     }
     else if (m_doc->NumPlayers() < m_rowPlayers.size() + m_colPlayers.size()) {
-      for (size_t i = 1; i <= m_rowPlayers.size(); i++) {
+      for (size_t i = 1; i <= m_rowPlayers.size(); ++i) {
         if (m_rowPlayers[i] > static_cast<int>(m_doc->NumPlayers())) {
           m_rowPlayers.erase_at(i--);
         }
       }
 
-      for (size_t i = 1; i <= m_colPlayers.size(); i++) {
+      for (size_t i = 1; i <= m_colPlayers.size(); ++i) {
         if (m_colPlayers[i] > static_cast<int>(m_doc->NumPlayers())) {
           m_colPlayers.erase_at(i--);
         }
@@ -118,7 +133,121 @@ public:
     m_colPlayers.insert(it, pl);
   }
 
-  GameDocument *GetDocument() const { return m_doc; }
+  int NumRowContingencies() const
+  {
+    int ncont = 1;
+    const StrategySupportProfile &support = m_doc->GetNfgSupport();
+    for (int i = 1; i <= NumRowPlayers(); ++i) {
+      ncont *= NumStrategies(support, GetRowPlayer(i));
+    }
+    return ncont;
+  }
+
+  int NumColContingencies() const
+  {
+    int ncont = 1;
+    const StrategySupportProfile &support = m_doc->GetNfgSupport();
+    for (int i = 1; i <= NumColPlayers(); ++i) {
+      ncont *= NumStrategies(support, GetColPlayer(i));
+    }
+    return ncont;
+  }
+
+  int NumRowsSpanned(int index) const
+  {
+    int ncont = 1;
+    const StrategySupportProfile &support = m_doc->GetNfgSupport();
+    for (int i = index + 1; i <= NumRowPlayers(); ++i) {
+      ncont *= NumStrategies(support, GetRowPlayer(i));
+    }
+    return ncont;
+  }
+
+  int NumColsSpanned(int index) const
+  {
+    int ncont = 1;
+    const StrategySupportProfile &support = m_doc->GetNfgSupport();
+    for (int i = index + 1; i <= NumColPlayers(); ++i) {
+      ncont *= NumStrategies(support, GetColPlayer(i));
+    }
+    return ncont;
+  }
+
+  int RowToStrategy(int player, int row) const
+  {
+    const int strat = row / NumRowsSpanned(player);
+    return (strat % NumStrategies(m_doc->GetNfgSupport(), GetRowPlayer(player)) + 1);
+  }
+
+  int ColToStrategy(int player, int col) const
+  {
+    const int strat = col / m_doc->NumPlayers() / NumColsSpanned(player);
+    return (strat % NumStrategies(m_doc->GetNfgSupport(), GetColPlayer(player)) + 1);
+  }
+
+  int GetRowHeaderRowCount() const { return NumRowContingencies(); }
+  int GetRowHeaderColCount() const { return NumRowPlayers(); }
+
+  int GetColHeaderRowCount() const { return NumColPlayers(); }
+  int GetColHeaderColCount() const { return NumColContingencies() * m_doc->NumPlayers(); }
+
+  int GetPayoffRowCount() const { return NumRowContingencies(); }
+  int GetPayoffColCount() const { return NumColContingencies() * m_doc->NumPlayers(); }
+
+  int GetRowHeaderPlayer(int headerCol) const { return GetRowPlayer(headerCol + 1); }
+
+  int GetColHeaderPlayer(int headerRow) const { return GetColPlayer(headerRow + 1); }
+
+  int GetRowHeaderStrategy(int headerCol, int headerRow) const
+  {
+    return RowToStrategy(headerCol + 1, headerRow);
+  }
+
+  int GetColHeaderStrategy(int headerRow, int headerCol) const
+  {
+    return ColToStrategy(headerRow + 1, headerCol);
+  }
+
+  int GetRowHeaderRowSpan(int headerCol) const { return NumRowsSpanned(headerCol + 1); }
+
+  int GetColHeaderColSpan(int headerRow) const
+  {
+    return NumColsSpanned(headerRow + 1) * m_doc->NumPlayers();
+  }
+
+  int GetPayoffPlayerForColumn(int payoffCol) const
+  {
+    const int index = payoffCol % m_doc->NumPlayers() + 1;
+    if (index <= NumRowPlayers()) {
+      return GetRowPlayer(index);
+    }
+    else {
+      return GetColPlayer(index - NumRowPlayers());
+    }
+  }
+
+  PureStrategyProfile CellToProfile(const wxSheetCoords &coords) const
+  {
+    const StrategySupportProfile &support = m_doc->GetNfgSupport();
+
+    const PureStrategyProfile profile = m_doc->GetGame()->NewPureStrategyProfile();
+    for (int i = 1; i <= NumRowPlayers(); ++i) {
+      const int player = GetRowPlayer(i);
+      profile->SetStrategy(LookupStrategy(support, player, RowToStrategy(i, coords.GetRow())));
+    }
+
+    for (int i = 1; i <= NumColPlayers(); ++i) {
+      const int player = GetColPlayer(i);
+      profile->SetStrategy(LookupStrategy(support, player, ColToStrategy(i, coords.GetCol())));
+    }
+
+    return profile;
+  }
+
+  PureStrategyProfile GetPayoffProfile(const wxSheetCoords &coords) const
+  {
+    return CellToProfile(coords);
+  }
 };
 
 //!
@@ -196,13 +325,13 @@ public:
   void SetRowPlayer(int index, int pl);
 
   /// Returns the number of row contingencies (i.e., rows in the table)
-  int NumRowContingencies() const;
+  int NumRowContingencies() const { return m_layout->NumRowContingencies(); }
 
   /// Returns the number of rows spanned by strategy of row player index
-  int NumRowsSpanned(int index) const;
+  int NumRowsSpanned(int index) const { return m_layout->NumRowsSpanned(index); }
 
   /// Returns the strategy index for row player 'player' corresponding to 'row'
-  int RowToStrategy(int player, int row) const;
+  int RowToStrategy(int player, int row) const { return m_layout->RowToStrategy(player, row); }
 
   /// Returns the number of players assigned to the columns
   int NumColPlayers() const { return m_layout->NumColPlayers(); }
@@ -215,75 +344,73 @@ public:
 
   /// Returns the number of column contingencies
   /// (Note that each column contingency corresponds to #players cols!)
-  int NumColContingencies() const;
+  int NumColContingencies() const { return m_layout->NumColContingencies(); }
 
   /// Returns the number of columns spanned by strategy of column player index
-  int NumColsSpanned(int index) const;
+  int NumColsSpanned(int index) const { return m_layout->NumColsSpanned(index); }
 
   /// Returns the strategy index for row player 'player' corresponding to 'row'
-  int ColToStrategy(int player, int row) const;
+  int ColToStrategy(int player, int row) const { return m_layout->ColToStrategy(player, row); }
 
   /// Returns the strategy profile corresponding to a cell
-  PureStrategyProfile CellToProfile(const wxSheetCoords &) const;
+  PureStrategyProfile CellToProfile(const wxSheetCoords &p_coords) const
+  {
+    return m_layout->CellToProfile(p_coords);
+  }
   //@}
 
   //@{
   // Header-pane dimensions
-  int GetRowHeaderRowCount() const { return NumRowContingencies(); }
-  int GetRowHeaderColCount() const { return NumRowPlayers(); }
+  int GetRowHeaderRowCount() const { return m_layout->GetRowHeaderRowCount(); }
+  int GetRowHeaderColCount() const { return m_layout->GetRowHeaderColCount(); }
 
-  int GetColHeaderRowCount() const { return NumColPlayers(); }
-  int GetColHeaderColCount() const { return NumColContingencies() * m_doc->NumPlayers(); }
+  int GetColHeaderRowCount() const { return m_layout->GetColHeaderRowCount(); }
+  int GetColHeaderColCount() const { return m_layout->GetColHeaderColCount(); }
 
   // Payoff-pane dimensions
-  int GetPayoffRowCount() const { return NumRowContingencies(); }
-  int GetPayoffColCount() const { return NumColContingencies() * m_doc->NumPlayers(); }
+  int GetPayoffRowCount() const { return m_layout->GetPayoffRowCount(); }
+  int GetPayoffColCount() const { return m_layout->GetPayoffColCount(); }
 
   // Header-pane player mapping
-  int GetRowHeaderPlayer(int headerCol) const { return GetRowPlayer(headerCol + 1); }
-  int GetColHeaderPlayer(int headerRow) const { return GetColPlayer(headerRow + 1); }
+  int GetRowHeaderPlayer(int headerCol) const { return m_layout->GetRowHeaderPlayer(headerCol); }
+  int GetColHeaderPlayer(int headerRow) const { return m_layout->GetColHeaderPlayer(headerRow); }
 
   // Header-pane strategy mapping
   int GetRowHeaderStrategy(int headerCol, int headerRow) const
   {
-    return RowToStrategy(headerCol + 1, headerRow);
+    return m_layout->GetRowHeaderStrategy(headerCol, headerRow);
   }
 
   int GetColHeaderStrategy(int headerRow, int headerCol) const
   {
-    return ColToStrategy(headerRow + 1, headerCol);
+    return m_layout->GetColHeaderStrategy(headerRow, headerCol);
   }
 
   // Header-pane span mapping
-  int GetRowHeaderRowSpan(int headerCol) const { return NumRowsSpanned(headerCol + 1); }
+  int GetRowHeaderRowSpan(int headerCol) const { return m_layout->GetRowHeaderRowSpan(headerCol); }
 
-  int GetColHeaderColSpan(int headerRow) const
-  {
-    return NumColsSpanned(headerRow + 1) * m_doc->NumPlayers();
-  }
+  int GetColHeaderColSpan(int headerRow) const { return m_layout->GetColHeaderColSpan(headerRow); }
 
   // Payoff-pane mapping helpers
   int GetPayoffPlayerForColumn(int payoffCol) const
   {
-    const int index = payoffCol % m_doc->NumPlayers() + 1;
-    if (index <= NumRowPlayers()) {
-      return GetRowPlayer(index);
-    }
-    else {
-      return GetColPlayer(index - NumRowPlayers());
-    }
+    return m_layout->GetPayoffPlayerForColumn(payoffCol);
   }
 
   PureStrategyProfile GetPayoffProfile(const wxSheetCoords &coords) const
   {
     return CellToProfile(coords);
   }
+
+  GamePlayer GetPayoffPlayer(int payoffCol) const;
+  int GetPayoffColumnsPerContingency() const;
+  bool IsPayoffStrategyDominated(const wxSheetCoords &coords, bool strict) const;
+
   //@}
 
   bool IsReadOnly() const;
   wxColour GetPlayerColor(int player) const;
   const StrategySupportProfile &GetSupport() const { return m_doc->GetNfgSupport(); }
-  bool IsStrategyDominated(int player, int strat, bool strict) const;
 
   bool IsRowHeaderStrategyDominated(int headerCol, int headerRow, bool strict) const;
   bool IsColHeaderStrategyDominated(int headerRow, int headerCol, bool strict) const;
