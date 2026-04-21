@@ -1059,11 +1059,6 @@ void TableWidget::SetRowPlayer(int index, int pl)
   OnUpdate();
 }
 
-int NumStrategies(const StrategySupportProfile &p_profile, int p_player)
-{
-  return p_profile.GetStrategies(p_profile.GetGame()->GetPlayer(p_player)).size();
-}
-
 void TableWidget::SetColPlayer(int index, int pl)
 {
   m_layout->SetColPlayer(index, pl);
