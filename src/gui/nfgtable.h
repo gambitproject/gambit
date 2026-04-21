@@ -133,6 +133,59 @@ public:
   PureStrategyProfile CellToProfile(const wxSheetCoords &) const;
   //@}
 
+  //@{
+  // Header-pane dimensions
+  int GetRowHeaderRowCount() const { return NumRowContingencies(); }
+  int GetRowHeaderColCount() const { return NumRowPlayers(); }
+
+  int GetColHeaderRowCount() const { return NumColPlayers(); }
+  int GetColHeaderColCount() const { return NumColContingencies() * m_doc->NumPlayers(); }
+
+  // Payoff-pane dimensions
+  int GetPayoffRowCount() const { return NumRowContingencies(); }
+  int GetPayoffColCount() const { return NumColContingencies() * m_doc->NumPlayers(); }
+
+  // Header-pane player mapping
+  int GetRowHeaderPlayer(int headerCol) const { return GetRowPlayer(headerCol + 1); }
+  int GetColHeaderPlayer(int headerRow) const { return GetColPlayer(headerRow + 1); }
+
+  // Header-pane strategy mapping
+  int GetRowHeaderStrategy(int headerCol, int headerRow) const
+  {
+    return RowToStrategy(headerCol + 1, headerRow);
+  }
+
+  int GetColHeaderStrategy(int headerRow, int headerCol) const
+  {
+    return ColToStrategy(headerRow + 1, headerCol);
+  }
+
+  // Header-pane span mapping
+  int GetRowHeaderRowSpan(int headerCol) const { return NumRowsSpanned(headerCol + 1); }
+
+  int GetColHeaderColSpan(int headerRow) const
+  {
+    return NumColsSpanned(headerRow + 1) * m_doc->NumPlayers();
+  }
+
+  // Payoff-pane mapping helpers
+  int GetPayoffPlayerForColumn(int payoffCol) const
+  {
+    const int index = payoffCol % m_doc->NumPlayers() + 1;
+    if (index <= NumRowPlayers()) {
+      return GetRowPlayer(index);
+    }
+    else {
+      return GetColPlayer(index - NumRowPlayers());
+    }
+  }
+
+  PureStrategyProfile GetPayoffProfile(const wxSheetCoords &coords) const
+  {
+    return CellToProfile(coords);
+  }
+  //@}
+
   /// @name Exporting/printing graphics
   //@{
   /// Creates a printout object of the game as currently displayed

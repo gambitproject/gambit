@@ -203,7 +203,7 @@ GameStrategy GetStrategy(const StrategySupportProfile &p_profile, int pl, int st
 
 void RowPlayerWidget::OnCellRightClick(wxSheetEvent &p_event)
 {
-  if (m_table->NumRowPlayers() == 0 || m_doc->GetGame()->IsTree()) {
+  if (m_table->GetRowHeaderColCount() == 0 || m_doc->GetGame()->IsTree()) {
     p_event.Skip();
     return;
   }
@@ -211,8 +211,8 @@ void RowPlayerWidget::OnCellRightClick(wxSheetEvent &p_event)
   const StrategySupportProfile &support = m_doc->GetNfgSupport();
   const wxSheetCoords coords = p_event.GetCoords();
 
-  const int player = m_table->GetRowPlayer(coords.GetCol() + 1);
-  const int strat = m_table->RowToStrategy(coords.GetCol() + 1, coords.GetRow());
+  const int player = m_table->GetRowHeaderPlayer(coords.GetCol());
+  const int strat = m_table->GetRowHeaderStrategy(coords.GetCol(), coords.GetRow());
 
   m_doc->DoDeleteStrategy(GetStrategy(support, player, strat));
 }
@@ -223,14 +223,14 @@ wxString RowPlayerWidget::GetCellValue(const wxSheetCoords &p_coords)
     return wxT("");
   }
 
-  if (m_table->NumRowPlayers() == 0) {
+  if (m_table->GetRowHeaderColCount() == 0) {
     return wxT("Payoffs");
   }
 
   const StrategySupportProfile &support = m_doc->GetNfgSupport();
 
-  const int player = m_table->GetRowPlayer(p_coords.GetCol() + 1);
-  const int strat = m_table->RowToStrategy(p_coords.GetCol() + 1, p_coords.GetRow());
+  const int player = m_table->GetRowHeaderPlayer(p_coords.GetCol());
+  const int strat = m_table->GetRowHeaderStrategy(p_coords.GetCol(), p_coords.GetRow());
 
   return {GetStrategy(support, player, strat)->GetLabel().c_str(), *wxConvCurrent};
 }
@@ -239,8 +239,8 @@ void RowPlayerWidget::SetCellValue(const wxSheetCoords &p_coords, const wxString
 {
   const StrategySupportProfile &support = m_doc->GetNfgSupport();
 
-  const int player = m_table->GetRowPlayer(p_coords.GetCol() + 1);
-  const int strat = m_table->RowToStrategy(p_coords.GetCol() + 1, p_coords.GetRow());
+  const int player = m_table->GetRowHeaderPlayer(p_coords.GetCol());
+  const int strat = m_table->GetRowHeaderStrategy(p_coords.GetCol(), p_coords.GetRow());
 
   m_doc->DoSetStrategyLabel(GetStrategy(support, player, strat), p_value);
 }
@@ -251,9 +251,9 @@ wxSheetCellAttr RowPlayerWidget::GetAttr(const wxSheetCoords &p_coords, wxSheetA
   attr.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
   attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
   attr.SetOrientation(wxHORIZONTAL);
-  if (m_table->NumRowPlayers() > 0) {
+  if (m_table->GetRowHeaderColCount() > 0) {
     attr.SetForegroundColour(
-        m_doc->GetStyle().GetPlayerColor(m_table->GetRowPlayer(p_coords.GetCol() + 1)));
+        m_doc->GetStyle().GetPlayerColor(m_table->GetRowHeaderPlayer(p_coords.GetCol())));
     attr.SetReadOnly(m_doc->IsTree());
   }
   else {
@@ -268,13 +268,13 @@ void RowPlayerWidget::DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords)
 {
   TableWidgetBase::DrawCell(p_dc, p_coords);
 
-  if (!m_table->ShowDominance() || IsLabelCell(p_coords) || m_table->NumRowPlayers() == 0) {
+  if (!m_table->ShowDominance() || IsLabelCell(p_coords) || m_table->GetRowHeaderColCount() == 0) {
     return;
   }
 
   const StrategySupportProfile &support = m_doc->GetNfgSupport();
-  const int player = m_table->GetRowPlayer(p_coords.GetCol() + 1);
-  const int strat = m_table->RowToStrategy(p_coords.GetCol() + 1, p_coords.GetRow());
+  const int player = m_table->GetRowHeaderPlayer(p_coords.GetCol());
+  const int strat = m_table->GetRowHeaderStrategy(p_coords.GetCol(), p_coords.GetRow());
   const GameStrategy strategy = GetStrategy(support, player, strat);
 
   if (support.IsDominated(strategy, false)) {
@@ -292,7 +292,7 @@ void RowPlayerWidget::DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords)
 
 void RowPlayerWidget::OnUpdate()
 {
-  const int newRows = m_table->NumRowContingencies();
+  const int newRows = m_table->GetRowHeaderRowCount();
   if (newRows > GetNumberRows()) {
     InsertRows(0, newRows - GetNumberRows());
   }
@@ -300,7 +300,7 @@ void RowPlayerWidget::OnUpdate()
     DeleteRows(0, GetNumberRows() - newRows);
   }
 
-  const int newCols = m_table->NumRowPlayers();
+  const int newCols = m_table->GetRowHeaderColCount();
   if (newCols > GetNumberCols()) {
     InsertCols(0, newCols - GetNumberCols());
   }
@@ -316,7 +316,7 @@ void RowPlayerWidget::OnUpdate()
          SetCellSpan(wxSheetCoords(row++, col), wxSheetCoords(1, 1)))
       ;
 
-    const int span = m_table->NumRowsSpanned(col + 1);
+    const int span = m_table->GetRowHeaderRowSpan(col);
 
     int row = 0;
     while (row < GetNumberRows()) {
@@ -420,7 +420,7 @@ ColPlayerWidget::ColPlayerWidget(TableWidget *p_parent, GameDocument *p_doc)
 
 void ColPlayerWidget::OnCellRightClick(wxSheetEvent &p_event)
 {
-  if (m_table->NumColPlayers() == 0 || m_doc->GetGame()->IsTree()) {
+  if (m_table->GetColHeaderRowCount() == 0 || m_doc->GetGame()->IsTree()) {
     p_event.Skip();
     return;
   }
@@ -428,15 +428,15 @@ void ColPlayerWidget::OnCellRightClick(wxSheetEvent &p_event)
   const StrategySupportProfile &support = m_doc->GetNfgSupport();
   const wxSheetCoords coords = p_event.GetCoords();
 
-  const int player = m_table->GetColPlayer(coords.GetRow() + 1);
-  const int strat = m_table->ColToStrategy(coords.GetRow() + 1, coords.GetCol());
+  const int player = m_table->GetColHeaderPlayer(coords.GetRow());
+  const int strat = m_table->GetColHeaderStrategy(coords.GetRow(), coords.GetCol());
 
   m_doc->DoDeleteStrategy(GetStrategy(support, player, strat));
 }
 
 void ColPlayerWidget::OnUpdate()
 {
-  const int newCols = m_table->NumColContingencies() * m_doc->NumPlayers();
+  const int newCols = m_table->GetColHeaderColCount();
   if (newCols > GetNumberCols()) {
     InsertCols(0, newCols - GetNumberCols());
   }
@@ -444,7 +444,7 @@ void ColPlayerWidget::OnUpdate()
     DeleteCols(0, GetNumberCols() - newCols);
   }
 
-  const int newRows = m_table->NumColPlayers();
+  const int newRows = m_table->GetColHeaderRowCount();
   if (newRows > GetNumberRows()) {
     InsertRows(0, newRows - GetNumberRows());
   }
@@ -460,7 +460,7 @@ void ColPlayerWidget::OnUpdate()
          SetCellSpan(wxSheetCoords(row, col++), wxSheetCoords(1, 1)))
       ;
 
-    const int span = m_table->NumColsSpanned(row + 1) * m_doc->NumPlayers();
+    const int span = m_table->GetColHeaderColSpan(row);
 
     int col = 0;
     while (col < GetNumberCols()) {
@@ -478,14 +478,14 @@ wxString ColPlayerWidget::GetCellValue(const wxSheetCoords &p_coords)
     return wxT("");
   }
 
-  if (m_table->NumColPlayers() == 0) {
+  if (m_table->GetColHeaderRowCount() == 0) {
     return wxT("Payoffs");
   }
 
   const StrategySupportProfile &support = m_doc->GetNfgSupport();
 
-  const int player = m_table->GetColPlayer(p_coords.GetRow() + 1);
-  const int strat = m_table->ColToStrategy(p_coords.GetRow() + 1, p_coords.GetCol());
+  const int player = m_table->GetColHeaderPlayer(p_coords.GetRow());
+  const int strat = m_table->GetColHeaderStrategy(p_coords.GetRow(), p_coords.GetCol());
 
   return {GetStrategy(support, player, strat)->GetLabel().c_str(), *wxConvCurrent};
 }
@@ -494,8 +494,8 @@ void ColPlayerWidget::SetCellValue(const wxSheetCoords &p_coords, const wxString
 {
   const StrategySupportProfile &support = m_doc->GetNfgSupport();
 
-  const int player = m_table->GetColPlayer(p_coords.GetRow() + 1);
-  const int strat = m_table->ColToStrategy(p_coords.GetRow() + 1, p_coords.GetCol());
+  const int player = m_table->GetColHeaderPlayer(p_coords.GetRow());
+  const int strat = m_table->GetColHeaderStrategy(p_coords.GetRow(), p_coords.GetCol());
 
   m_doc->DoSetStrategyLabel(GetStrategy(support, player, strat), p_value);
 }
@@ -506,9 +506,9 @@ wxSheetCellAttr ColPlayerWidget::GetAttr(const wxSheetCoords &p_coords, wxSheetA
   attr.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
   attr.SetAlignment(wxALIGN_CENTER, wxALIGN_CENTER);
   attr.SetOrientation(wxHORIZONTAL);
-  if (m_table->NumColPlayers() > 0) {
+  if (m_table->GetColHeaderRowCount() > 0) {
     attr.SetForegroundColour(
-        m_doc->GetStyle().GetPlayerColor(m_table->GetColPlayer(p_coords.GetRow() + 1)));
+        m_doc->GetStyle().GetPlayerColor(m_table->GetColHeaderPlayer(p_coords.GetRow())));
     attr.SetReadOnly(m_doc->IsTree());
   }
   else {
@@ -523,13 +523,13 @@ void ColPlayerWidget::DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords)
 {
   TableWidgetBase::DrawCell(p_dc, p_coords);
 
-  if (!m_table->ShowDominance() || IsLabelCell(p_coords) || m_table->NumColPlayers() == 0) {
+  if (!m_table->ShowDominance() || IsLabelCell(p_coords) || m_table->GetColHeaderRowCount() == 0) {
     return;
   }
 
   const StrategySupportProfile &support = m_doc->GetNfgSupport();
-  const int player = m_table->GetColPlayer(p_coords.GetRow() + 1);
-  const int strat = m_table->ColToStrategy(p_coords.GetRow() + 1, p_coords.GetCol());
+  const int player = m_table->GetColHeaderPlayer(p_coords.GetRow());
+  const int strat = m_table->GetColHeaderStrategy(p_coords.GetRow(), p_coords.GetCol());
   const GameStrategy strategy = GetStrategy(support, player, strat);
 
   if (support.IsDominated(strategy, false)) {
@@ -574,10 +574,10 @@ bool ColPlayerWidget::DropText(wxCoord p_x, wxCoord p_y, const wxString &p_text)
 }
 
 //=========================================================================
-//                       class gbtPayoffsWidget
+//                       class PayoffsWidget
 //=========================================================================
 
-class gbtPayoffsWidget : public TableWidgetBase {
+class PayoffsWidget : public TableWidgetBase {
 private:
   GameDocument *m_doc;
   TableWidget *m_table;
@@ -610,7 +610,7 @@ private:
   int ColToPlayer(int p_col) const;
 
 public:
-  gbtPayoffsWidget(TableWidget *p_parent, GameDocument *p_doc);
+  PayoffsWidget(TableWidget *p_parent, GameDocument *p_doc);
 
   /// @name Synchronizing with document state
   //@{
@@ -620,11 +620,11 @@ public:
   DECLARE_EVENT_TABLE()
 };
 
-BEGIN_EVENT_TABLE(gbtPayoffsWidget, TableWidgetBase)
-EVT_KEY_DOWN(gbtPayoffsWidget::OnKeyDown)
+BEGIN_EVENT_TABLE(PayoffsWidget, TableWidgetBase)
+EVT_KEY_DOWN(PayoffsWidget::OnKeyDown)
 END_EVENT_TABLE()
 
-gbtPayoffsWidget::gbtPayoffsWidget(TableWidget *p_parent, GameDocument *p_doc)
+PayoffsWidget::PayoffsWidget(TableWidget *p_parent, GameDocument *p_doc)
   : TableWidgetBase(p_parent, wxID_ANY), m_doc(p_doc), m_table(p_parent)
 {
   CreateGrid(0, 0);
@@ -636,20 +636,14 @@ gbtPayoffsWidget::gbtPayoffsWidget(TableWidget *p_parent, GameDocument *p_doc)
 // Payoffs are ordered first by row players (in hierarchical order),
 // followed by column players (in hierarchical order)
 //
-int gbtPayoffsWidget::ColToPlayer(int p_col) const
+int PayoffsWidget::ColToPlayer(int p_col) const
 {
-  const int index = p_col % m_doc->NumPlayers() + 1;
-  if (index <= m_table->NumRowPlayers()) {
-    return m_table->GetRowPlayer(index);
-  }
-  else {
-    return m_table->GetColPlayer(index - m_table->NumRowPlayers());
-  }
+  return m_table->GetPayoffPlayerForColumn(p_col);
 }
 
-void gbtPayoffsWidget::OnUpdate()
+void PayoffsWidget::OnUpdate()
 {
-  const int newCols = m_table->NumColContingencies() * m_doc->NumPlayers();
+  const int newCols = m_table->GetPayoffColCount();
   if (newCols > GetNumberCols()) {
     InsertCols(0, newCols - GetNumberCols());
   }
@@ -657,7 +651,7 @@ void gbtPayoffsWidget::OnUpdate()
     DeleteCols(0, GetNumberCols() - newCols);
   }
 
-  const int newRows = m_table->NumRowContingencies();
+  const int newRows = m_table->GetPayoffRowCount();
   if (newRows > GetNumberRows()) {
     InsertRows(0, newRows - GetNumberRows());
   }
@@ -668,24 +662,24 @@ void gbtPayoffsWidget::OnUpdate()
   Refresh();
 }
 
-wxString gbtPayoffsWidget::GetCellValue(const wxSheetCoords &p_coords)
+wxString PayoffsWidget::GetCellValue(const wxSheetCoords &p_coords)
 {
   if (IsLabelCell(p_coords)) {
     return wxT("");
   }
 
-  const PureStrategyProfile profile = m_table->CellToProfile(p_coords);
+  const PureStrategyProfile profile = m_table->GetPayoffProfile(p_coords);
   auto player = m_doc->GetGame()->GetPlayer(ColToPlayer(p_coords.GetCol()));
   return {lexical_cast<std::string>(profile->GetPayoff(player)).c_str(), *wxConvCurrent};
 }
 
-void gbtPayoffsWidget::SetCellValue(const wxSheetCoords &p_coords, const wxString &p_value)
+void PayoffsWidget::SetCellValue(const wxSheetCoords &p_coords, const wxString &p_value)
 {
-  PureStrategyProfile profile = m_table->CellToProfile(p_coords);
+  PureStrategyProfile profile = m_table->GetPayoffProfile(p_coords);
   GameOutcome outcome = profile->GetOutcome();
   if (!outcome) {
     m_doc->DoNewOutcome(profile);
-    profile = m_table->CellToProfile(p_coords);
+    profile = m_table->GetPayoffProfile(p_coords);
     outcome = profile->GetOutcome();
   }
   const int player = ColToPlayer(p_coords.GetCol());
@@ -702,7 +696,7 @@ void gbtPayoffsWidget::SetCellValue(const wxSheetCoords &p_coords, const wxStrin
   }
 }
 
-wxSheetCellAttr gbtPayoffsWidget::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
+wxSheetCellAttr PayoffsWidget::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
 {
   if (IsLabelCell(p_coords)) {
     wxSheetCellAttr attr(GetSheetRefData()->m_defaultColLabelAttr);
@@ -722,7 +716,7 @@ wxSheetCellAttr gbtPayoffsWidget::GetAttr(const wxSheetCoords &p_coords, wxSheet
   return attr;
 }
 
-void gbtPayoffsWidget::DrawCellBorder(wxDC &p_dc, const wxSheetCoords &p_coords)
+void PayoffsWidget::DrawCellBorder(wxDC &p_dc, const wxSheetCoords &p_coords)
 {
   TableWidgetBase::DrawCellBorder(p_dc, p_coords);
 
@@ -747,7 +741,7 @@ void gbtPayoffsWidget::DrawCellBorder(wxDC &p_dc, const wxSheetCoords &p_coords)
   }
 }
 
-void gbtPayoffsWidget::DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords)
+void PayoffsWidget::DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords)
 {
   TableWidgetBase::DrawCell(p_dc, p_coords);
 
@@ -755,7 +749,7 @@ void gbtPayoffsWidget::DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords)
     return;
   }
 
-  const PureStrategyProfile profile = m_table->CellToProfile(p_coords);
+  const PureStrategyProfile profile = m_table->GetPayoffProfile(p_coords);
   auto player = m_doc->GetGame()->GetPlayer(ColToPlayer(p_coords.GetCol()));
   const StrategySupportProfile &support = m_doc->GetNfgSupport();
 
@@ -781,7 +775,7 @@ void gbtPayoffsWidget::DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords)
 //! tabbing off the rightmost cell entry automatically "wraps" to the
 //! next row.
 //!
-void gbtPayoffsWidget::OnKeyDown(wxKeyEvent &p_event)
+void PayoffsWidget::OnKeyDown(wxKeyEvent &p_event)
 {
   if (GetNumberRows() && GetNumberCols()) {
     switch (p_event.GetKeyCode()) {
@@ -838,7 +832,7 @@ TableWidget::TableWidget(NfgPanel *p_parent, wxWindowID p_id, GameDocument *p_do
   // which suggests some refactoring ought to be done as to where/how those
   // row and column players are recorded
   // NOLINTBEGIN(cppcoreguidelines-prefer-member-initializer)
-  m_payoffSheet = new gbtPayoffsWidget(this, p_doc);
+  m_payoffSheet = new PayoffsWidget(this, p_doc);
   m_rowSheet = new RowPlayerWidget(this, p_doc);
   m_colSheet = new ColPlayerWidget(this, p_doc);
   // NOLINTEND(cppcoreguidelines-prefer-member-initializer)
@@ -1060,16 +1054,13 @@ void TableWidget::ReconcilePlayers()
   }
 }
 
-void TableWidget::UpdatePayoffPanel()
-{
-  dynamic_cast<gbtPayoffsWidget *>(m_payoffSheet)->OnUpdate();
-}
+void TableWidget::UpdatePayoffPanel() { dynamic_cast<PayoffsWidget *>(m_payoffSheet)->OnUpdate(); }
 
 void TableWidget::UpdateLabelPanelMargins()
 {
   // We add margins to the player labels to match the scrollbars,
   // so scrolling matches up
-  auto payoffs = dynamic_cast<gbtPayoffsWidget *>(m_payoffSheet);
+  auto payoffs = dynamic_cast<PayoffsWidget *>(m_payoffSheet);
   m_colSheet->SetMargins(payoffs->GetVerticalScrollBar()->GetSize().GetWidth(), -1);
   ;
   m_rowSheet->SetMargins(-1, payoffs->GetHorizontalScrollBar()->GetSize().GetHeight());
