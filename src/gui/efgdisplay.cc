@@ -312,7 +312,7 @@ EVT_MOTION(EfgDisplay::OnMouseMotion)
 EVT_LEFT_DOWN(EfgDisplay::OnLeftClick)
 EVT_LEFT_DCLICK(EfgDisplay::OnLeftDoubleClick)
 EVT_RIGHT_DOWN(EfgDisplay::OnRightClick)
-EVT_CHAR(EfgDisplay::OnKeyEvent)
+EVT_KEY_DOWN(EfgDisplay::OnKeyEvent)
 EVT_SIZE(EfgDisplay::OnSize)
 END_EVENT_TABLE()
 
@@ -397,6 +397,7 @@ void EfgDisplay::OnSize(wxSizeEvent &p_event)
     if (size.GetWidth() > 50 && size.GetHeight() > 50) {
       FitZoom();
       m_pendingInitialZoom = false;
+      FocusNode(m_doc->GetGame()->GetRoot(), 0.18, 0.5);
     }
   }
 
@@ -779,6 +780,8 @@ void EfgDisplay::EnsureNodeVisible(const GameNode &p_node)
 //
 void EfgDisplay::OnLeftClick(wxMouseEvent &p_event)
 {
+  SetFocus();
+
   int x, y;
   CalcUnscrolledPosition(p_event.GetX(), p_event.GetY(), &x, &y);
   x = static_cast<int>(static_cast<float>(x) / (.01 * m_zoom));
