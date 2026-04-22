@@ -593,6 +593,7 @@ void EfgDisplay::OnUpdate()
 void EfgDisplay::RefreshTree()
 {
   m_layout.Layout(m_doc->GetGame());
+  AdjustScrollbarSteps();
   Refresh();
 }
 
