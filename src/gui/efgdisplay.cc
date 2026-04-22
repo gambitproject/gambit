@@ -707,6 +707,9 @@ void EfgDisplay::EnsureNodeVisible(const GameNode &p_node)
     return;
   }
 
+  int pixelsPerUnitX, pixelsPerUnitY;
+  GetScrollPixelsPerUnit(&pixelsPerUnitX, &pixelsPerUnitY);
+
   auto entry = m_layout.GetNodeEntry(p_node);
   int xScroll, yScroll;
   GetViewStart(&xScroll, &yScroll);
@@ -717,13 +720,13 @@ void EfgDisplay::EnsureNodeVisible(const GameNode &p_node)
   CalcScrolledPosition(static_cast<int>(entry->GetX() * (.01 * m_zoom) - 20),
                        static_cast<int>(entry->GetY() * (.01 * m_zoom)), &xx, &yy);
   if (xx < 0) {
-    xScroll -= -xx / 50 + 1;
+    xScroll -= -xx / pixelsPerUnitX + 1;
   }
 
   CalcScrolledPosition(static_cast<int>(entry->GetX() * (.01 * m_zoom)),
                        static_cast<int>(entry->GetY() * (.01 * m_zoom)), &xx, &yy);
   if (xx > width) {
-    xScroll += (xx - width) / 50 + 1;
+    xScroll += (xx - width) / pixelsPerUnitX + 1;
   }
   if (xScroll < 0) {
     xScroll = 0;
@@ -735,12 +738,12 @@ void EfgDisplay::EnsureNodeVisible(const GameNode &p_node)
   CalcScrolledPosition(static_cast<int>(entry->GetX() * (.01 * m_zoom)),
                        static_cast<int>(entry->GetY() * (.01 * m_zoom) - 20), &xx, &yy);
   if (yy < 0) {
-    yScroll -= -yy / 50 + 1;
+    yScroll -= -yy / pixelsPerUnitY + 1;
   }
   CalcScrolledPosition(static_cast<int>(entry->GetX() * (.01 * m_zoom)),
                        static_cast<int>(entry->GetY() * (.01 * m_zoom) + 20), &xx, &yy);
   if (yy > height) {
-    yScroll += (yy - height) / 50 + 1;
+    yScroll += (yy - height) / pixelsPerUnitY + 1;
   }
   if (yScroll < 0) {
     yScroll = 0;
