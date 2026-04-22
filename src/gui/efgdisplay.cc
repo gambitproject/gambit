@@ -269,8 +269,8 @@ bool PlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y, const wxString &p_te
   m_owner->CalcUnscrolledPosition(p_x, p_y, &x, &y);
 #endif // __WXMSW__ or defined(__WXMAC__)
 
-  x = static_cast<int>(static_cast<float>(x) / (.01 * m_owner->GetZoom()));
-  y = static_cast<int>(static_cast<float>(y) / (.01 * m_owner->GetZoom()));
+  x = m_owner->DeviceToLayout(x);
+  y = m_owner->DeviceToLayout(y);
 
   const GameNode node = m_owner->GetLayout().NodeHitTest(x, y);
   if (!node) {
@@ -467,10 +467,9 @@ void EfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
         auto entry = m_layout.GetNodeEntry(node);
         const wxRect rect = entry->GetPayoffExtent(player + 1);
         int xx, yy;
-        CalcScrolledPosition(static_cast<int>(.01 * (rect.x - 3) * m_zoom),
-                             static_cast<int>(.01 * (rect.y - 3) * m_zoom), &xx, &yy);
-        const int width = static_cast<int>(.01 * (rect.width + 10) * m_zoom);
-        const int height = static_cast<int>(.01 * (rect.height + 6) * m_zoom);
+        CalcScrolledPosition(LayoutToDevice(rect.x - 3), LayoutToDevice(rect.y - 3), &xx, &yy);
+        const int width = LayoutToDevice(rect.width + 10);
+        const int height = LayoutToDevice(rect.height + 6);
         m_payoffEditor->SetSize(xx, yy, width, height);
         m_payoffEditor->BeginEdit(entry, player + 1);
       }
@@ -620,8 +619,8 @@ void EfgDisplay::AdjustScrollbarSteps()
   int scrollX, scrollY;
   GetViewStart(&scrollX, &scrollY);
 
-  SetScrollbars(50, 50, static_cast<int>(m_layout.MaxX() * (.01 * m_zoom) / 50 + 1),
-                static_cast<int>(m_layout.MaxY() * (.01 * m_zoom) / 50 + 1), scrollX, scrollY);
+  SetScrollbars(50, 50, LayoutToDevice(m_layout.MaxX()) / 50 + 1,
+                LayoutToDevice(m_layout.MaxY()) / 50 + 1, scrollX, scrollY);
 }
 
 void EfgDisplay::FitZoom()
@@ -650,7 +649,7 @@ void EfgDisplay::SetZoom(int p_zoom)
 
 void EfgDisplay::OnDraw(wxDC &p_dc)
 {
-  p_dc.SetUserScale(.01 * m_zoom, .01 * m_zoom);
+  p_dc.SetUserScale(GetScale(), GetScale());
   p_dc.Clear();
   const int maxX = m_layout.MaxX();
   m_layout.Render(p_dc, false);
@@ -668,7 +667,7 @@ void EfgDisplay::OnDraw(wxDC &p_dc, double p_zoom)
   const int saveZoom = m_zoom;
   m_zoom = static_cast<int>(100.0 * p_zoom);
 
-  p_dc.SetUserScale(.01 * m_zoom, .01 * m_zoom);
+  p_dc.SetUserScale(GetScale(), GetScale());
   p_dc.Clear();
   const int maxX = m_layout.MaxX();
   // A second hack: this is usually only called by functions for hardcopy
@@ -700,8 +699,8 @@ void EfgDisplay::FocusNode(const GameNode &p_node, double p_xFrac, double p_yFra
   int clientWidth, clientHeight;
   GetClientSize(&clientWidth, &clientHeight);
 
-  const int targetX = static_cast<int>(entry->GetX() * (.01 * m_zoom) - clientWidth * p_xFrac);
-  const int targetY = static_cast<int>(entry->GetY() * (.01 * m_zoom) - clientHeight * p_yFrac);
+  const int targetX = LayoutToDevice(entry->GetX()) - clientWidth * p_xFrac;
+  const int targetY = LayoutToDevice(entry->GetY()) - clientHeight * p_yFrac;
 
   int pixelsPerUnitX, pixelsPerUnitY;
   GetScrollPixelsPerUnit(&pixelsPerUnitX, &pixelsPerUnitY);
@@ -734,14 +733,13 @@ void EfgDisplay::EnsureNodeVisible(const GameNode &p_node)
   GetClientSize(&width, &height);
 
   int xx, yy;
-  CalcScrolledPosition(static_cast<int>(entry->GetX() * (.01 * m_zoom) - 20),
-                       static_cast<int>(entry->GetY() * (.01 * m_zoom)), &xx, &yy);
+  CalcScrolledPosition(LayoutToDevice(entry->GetX()) - 20, LayoutToDevice(entry->GetY()), &xx,
+                       &yy);
   if (xx < 0) {
     xScroll -= -xx / pixelsPerUnitX + 1;
   }
 
-  CalcScrolledPosition(static_cast<int>(entry->GetX() * (.01 * m_zoom)),
-                       static_cast<int>(entry->GetY() * (.01 * m_zoom)), &xx, &yy);
+  CalcScrolledPosition(LayoutToDevice(entry->GetX()), LayoutToDevice(entry->GetY()), &xx, &yy);
   if (xx > width) {
     xScroll += (xx - width) / pixelsPerUnitX + 1;
   }
@@ -752,13 +750,13 @@ void EfgDisplay::EnsureNodeVisible(const GameNode &p_node)
     xScroll = GetScrollRange(wxHORIZONTAL);
   }
 
-  CalcScrolledPosition(static_cast<int>(entry->GetX() * (.01 * m_zoom)),
-                       static_cast<int>(entry->GetY() * (.01 * m_zoom) - 20), &xx, &yy);
+  CalcScrolledPosition(LayoutToDevice(entry->GetX()), LayoutToDevice(entry->GetY()) - 20, &xx,
+                       &yy);
   if (yy < 0) {
     yScroll -= -yy / pixelsPerUnitY + 1;
   }
-  CalcScrolledPosition(static_cast<int>(entry->GetX() * (.01 * m_zoom)),
-                       static_cast<int>(entry->GetY() * (.01 * m_zoom) + 20), &xx, &yy);
+  CalcScrolledPosition(LayoutToDevice(entry->GetX()), LayoutToDevice(entry->GetY()) + 20, &xx,
+                       &yy);
   if (yy > height) {
     yScroll += (yy - height) / pixelsPerUnitY + 1;
   }
@@ -784,8 +782,8 @@ void EfgDisplay::OnLeftClick(wxMouseEvent &p_event)
 
   int x, y;
   CalcUnscrolledPosition(p_event.GetX(), p_event.GetY(), &x, &y);
-  x = static_cast<int>(static_cast<float>(x) / (.01 * m_zoom));
-  y = static_cast<int>(static_cast<float>(y) / (.01 * m_zoom));
+  x = DeviceToLayout(x);
+  y = DeviceToLayout(y);
 
   const GameNode node = m_layout.NodeHitTest(x, y);
   if (node != m_doc->GetSelectNode()) {
@@ -801,8 +799,8 @@ void EfgDisplay::OnLeftDoubleClick(wxMouseEvent &p_event)
 {
   int x, y;
   CalcUnscrolledPosition(p_event.GetX(), p_event.GetY(), &x, &y);
-  x = static_cast<int>(static_cast<float>(x) / (.01 * m_zoom));
-  y = static_cast<int>(static_cast<float>(y) / (.01 * m_zoom));
+  x = DeviceToLayout(x);
+  y = DeviceToLayout(y);
 
   GameNode node = m_layout.NodeHitTest(x, y);
   if (node) {
@@ -827,10 +825,9 @@ void EfgDisplay::OnLeftDoubleClick(wxMouseEvent &p_event)
       const wxRect rect = entry->GetPayoffExtent(1);
 
       int xx, yy;
-      CalcScrolledPosition(static_cast<int>(.01 * (rect.x - 3) * m_zoom),
-                           static_cast<int>(.01 * (rect.y - 3) * m_zoom), &xx, &yy);
-      const int width = static_cast<int>(.01 * (rect.width + 10) * m_zoom);
-      const int height = static_cast<int>(.01 * (rect.height + 6) * m_zoom);
+      CalcScrolledPosition(LayoutToDevice(rect.x - 3), LayoutToDevice(rect.y - 3), &xx, &yy);
+      const int width = LayoutToDevice(rect.width + 10);
+      const int height = LayoutToDevice(rect.height + 6);
       m_payoffEditor->SetSize(xx, yy, width, height);
       m_payoffEditor->BeginEdit(entry, 1);
       return;
@@ -842,10 +839,9 @@ void EfgDisplay::OnLeftDoubleClick(wxMouseEvent &p_event)
       const wxRect rect = entry->GetPayoffExtent(pl);
       if (rect.Contains(x, y)) {
         int xx, yy;
-        CalcScrolledPosition(static_cast<int>(.01 * (rect.x - 3) * m_zoom),
-                             static_cast<int>(.01 * (rect.y - 3) * m_zoom), &xx, &yy);
-        const int width = static_cast<int>(.01 * (rect.width + 10) * m_zoom);
-        const int height = static_cast<int>(.01 * (rect.height + 6) * m_zoom);
+        CalcScrolledPosition(LayoutToDevice(rect.x - 3), LayoutToDevice(rect.y - 3), &xx, &yy);
+        const int width = LayoutToDevice(rect.width + 10);
+        const int height = LayoutToDevice(rect.height + 6);
         m_payoffEditor->SetSize(xx, yy, width, height);
         m_payoffEditor->BeginEdit(entry, pl);
         return;
@@ -884,8 +880,8 @@ void EfgDisplay::OnMouseMotion(wxMouseEvent &p_event)
   if (p_event.LeftIsDown() && p_event.Dragging()) {
     int x, y;
     CalcUnscrolledPosition(p_event.GetX(), p_event.GetY(), &x, &y);
-    x = static_cast<int>(static_cast<float>(x) / (.01 * GetZoom()));
-    y = static_cast<int>(static_cast<float>(y) / (.01 * GetZoom()));
+    x = DeviceToLayout(x);
+    y = DeviceToLayout(y);
 
     GameNode node = m_layout.NodeHitTest(x, y);
 
@@ -989,8 +985,8 @@ void EfgDisplay::OnRightClick(wxMouseEvent &p_event)
 {
   int x, y;
   CalcUnscrolledPosition(p_event.GetX(), p_event.GetY(), &x, &y);
-  x = static_cast<int>(static_cast<float>(x) / (.01 * m_zoom));
-  y = static_cast<int>(static_cast<float>(y) / (.01 * m_zoom));
+  x = DeviceToLayout(x);
+  y = DeviceToLayout(y);
 
   const GameNode node = m_layout.NodeHitTest(x, y);
   if (node != m_doc->GetSelectNode()) {

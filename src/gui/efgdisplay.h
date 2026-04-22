@@ -96,6 +96,13 @@ public:
   void SetZoom(int p_zoom);
   void FitZoom();
 
+  double GetScale() const { return 0.01 * m_zoom; }
+  int LayoutToDevice(int p_value) const { return static_cast<int>(p_value * GetScale()); }
+  int DeviceToLayout(int p_value) const
+  {
+    return static_cast<int>(static_cast<double>(p_value) / GetScale());
+  }
+
   const TreeLayout &GetLayout() const { return m_layout; }
 
   void EnsureNodeVisible(const GameNode &);
