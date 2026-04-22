@@ -413,7 +413,7 @@ void EfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
 
   if (p_event.GetKeyCode() == 'R' || p_event.GetKeyCode() == 'r') {
     m_doc->SetSelectNode(m_doc->GetGame()->GetRoot());
-    EnsureNodeVisible(m_doc->GetSelectNode());
+    FocusNode(m_doc->GetSelectNode());
     return;
   }
 
@@ -667,6 +667,38 @@ void EfgDisplay::OnDraw(wxDC &p_dc, double p_zoom)
   }
 
   m_zoom = saveZoom;
+}
+
+void EfgDisplay::FocusNode(const GameNode &p_node, double p_xFrac, double p_yFrac)
+{
+  if (!p_node) {
+    return;
+  }
+
+  auto entry = m_layout.GetNodeEntry(p_node);
+  if (!entry) {
+    return;
+  }
+
+  int clientWidth, clientHeight;
+  GetClientSize(&clientWidth, &clientHeight);
+
+  const int targetX = static_cast<int>(entry->GetX() * (.01 * m_zoom) - clientWidth * p_xFrac);
+  const int targetY = static_cast<int>(entry->GetY() * (.01 * m_zoom) - clientHeight * p_yFrac);
+
+  int pixelsPerUnitX, pixelsPerUnitY;
+  GetScrollPixelsPerUnit(&pixelsPerUnitX, &pixelsPerUnitY);
+
+  int virtualWidth, virtualHeight;
+  GetVirtualSize(&virtualWidth, &virtualHeight);
+
+  const int maxPixelX = std::max(0, virtualWidth - clientWidth);
+  const int maxPixelY = std::max(0, virtualHeight - clientHeight);
+
+  const int clampedX = std::clamp(targetX, 0, maxPixelX);
+  const int clampedY = std::clamp(targetY, 0, maxPixelY);
+
+  Scroll(clampedX / pixelsPerUnitX, clampedY / pixelsPerUnitY);
 }
 
 void EfgDisplay::EnsureNodeVisible(const GameNode &p_node)

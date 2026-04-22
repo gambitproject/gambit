@@ -81,6 +81,9 @@ class EfgDisplay final : public wxScrolledWindow, public GameView {
 
   void RefreshTree();
 
+  /// @brief Scroll the viewport such that the node is at the specified fraction of the viewport
+  void FocusNode(const GameNode &p_node, double p_xFrac = 0.5, double p_yFrac = 0.5);
+
 public:
   EfgDisplay(wxWindow *p_parent, GameDocument *p_doc);
 
