@@ -1,5 +1,13 @@
 # Changelog
 
+## [16.7.0] - unreleased
+
+### Fixed
+- Improved initial zoom and centering of display of game trees on initial load, and focusing behavior
+  on currently-selected node or jumping to the root.  Also adjusted the initial size of the
+  game window to a more comfortable size.  (#569)
+
+
 ## [16.6.0] - 2026-03-24
 
 ### Changed
