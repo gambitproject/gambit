@@ -57,6 +57,7 @@ class EfgDisplay final : public wxScrolledWindow, public GameView {
   int m_zoom;
   wxMenu *m_nodeMenu{nullptr};
   TreePayoffEditor *m_payoffEditor;
+  bool m_pendingInitialZoom{true};
 
   // Private Functions
   void MakeMenus();
@@ -64,6 +65,7 @@ class EfgDisplay final : public wxScrolledWindow, public GameView {
 
   /// @name Event handlers
   //@{
+  void OnSize(wxSizeEvent &);
   void OnMouseMotion(wxMouseEvent &);
   void OnLeftClick(wxMouseEvent &);
   void OnRightClick(wxMouseEvent &);

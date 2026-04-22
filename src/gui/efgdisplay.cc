@@ -313,6 +313,7 @@ EVT_LEFT_DOWN(EfgDisplay::OnLeftClick)
 EVT_LEFT_DCLICK(EfgDisplay::OnLeftDoubleClick)
 EVT_RIGHT_DOWN(EfgDisplay::OnRightClick)
 EVT_CHAR(EfgDisplay::OnKeyEvent)
+EVT_SIZE(EfgDisplay::OnSize)
 END_EVENT_TABLE()
 
 //----------------------------------------------------------------------
@@ -387,6 +388,19 @@ static GameNode NextSameIset(const GameNode &n)
     return *std::next(node);
   }
   return nullptr;
+}
+
+void EfgDisplay::OnSize(wxSizeEvent &p_event)
+{
+  if (m_pendingInitialZoom) {
+    const wxSize size = p_event.GetSize();
+    if (size.GetWidth() > 50 && size.GetHeight() > 50) {
+      FitZoom();
+      m_pendingInitialZoom = false;
+    }
+  }
+
+  p_event.Skip();
 }
 
 //
@@ -619,7 +633,8 @@ void EfgDisplay::FitZoom()
 
   zoomx = std::min(zoomx, 1.0);
   zoomy = std::min(zoomy, 1.0); // never zoom in (only out)
-  m_zoom = static_cast<int>(100.0 * (std::min(zoomx, zoomy) * .9));
+  const int fittedZoom = static_cast<int>(100.0 * (std::min(zoomx, zoomy) * .9));
+  m_zoom = std::max(50, fittedZoom);
   AdjustScrollbarSteps();
   Refresh();
 }
