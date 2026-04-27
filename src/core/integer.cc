@@ -973,65 +973,11 @@ IntegerRep *multiply(const IntegerRep *x, const IntegerRep *y, IntegerRep *r)
       }
     }
   }
-  else // x, y, and r same; compute over diagonals
-  {
-    r = Iresize(r, rl);
-    unsigned short *botr = r->s;
-    // NOLINTBEGIN(misc-const-correctness)
-    unsigned short *topr = &(botr[rl]);
-    // NOLINTEND(misc-const-correctness)
-    unsigned short *rs = &(botr[rl - 2]);
-
-    const unsigned short *bota = (xrsame) ? botr : x->s;
-    const unsigned short *loa = &(bota[xl - 1]);
-    const unsigned short *hia = loa;
-
-    for (; rs >= botr; --rs) {
-      const unsigned short *h = hia;
-      const unsigned short *l = loa;
-      unsigned long prod = (unsigned long)(*h) * (unsigned long)(*l);
-      *rs = 0;
-
-      for (;;) {
-        // NOLINTBEGIN(misc-const-correctness)
-        unsigned short *rt = rs;
-        // NOLINTEND(misc-const-correctness)
-        unsigned long sum = prod + (unsigned long)(*rt);
-        *rt++ = extract(sum);
-        sum = down(sum);
-        while (sum != 0 && rt < topr) {
-          sum += (unsigned long)(*rt);
-          *rt++ = extract(sum);
-          sum = down(sum);
-        }
-        if (h > l) {
-          rt = rs;
-          sum = prod + (unsigned long)(*rt);
-          *rt++ = extract(sum);
-          sum = down(sum);
-          while (sum != 0 && rt < topr) {
-            sum += (unsigned long)(*rt);
-            *rt++ = extract(sum);
-            sum = down(sum);
-          }
-          if (--h >= ++l) {
-            prod = (unsigned long)(*h) * (unsigned long)(*l);
-          }
-          else {
-            break;
-          }
-        }
-        else {
-          break;
-        }
-      }
-      if (loa > bota) {
-        --loa;
-      }
-      else {
-        --hia;
-      }
-    }
+  else {
+    // x, y, and r same
+    IntegerRep *tmp = Icopy(nullptr, x);
+    r = multiply(tmp, tmp, r);
+    Ifree(tmp);
   }
   r->sgn = rsgn;
   Icheck(r);
