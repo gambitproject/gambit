@@ -31,28 +31,7 @@ EXTRA_DIST = \
 	src/labenski/art/hand.xpm \
 	src/labenski/art/ledgreen.xpm \
 	src/labenski/art/ledgrey.xpm \
-	src/labenski/doc/README-plotctrl.txt \
 	src/labenski/doc/README-sheet.txt \
-	src/labenski/doc/README-wxthings.txt \
-	src/labenski/include/wx/wxthings/bitmaps/copy.xpm \
-	src/labenski/include/wx/wxthings/bitmaps/cut.xpm \
-	src/labenski/include/wx/wxthings/bitmaps/findnext.xpm \
-	src/labenski/include/wx/wxthings/bitmaps/find.xpm \
-	src/labenski/include/wx/wxthings/bitmaps/grab.xpm \
-	src/labenski/include/wx/wxthings/bitmaps/hand.xpm \
-	src/labenski/include/wx/wxthings/bitmaps/help.xpm \
-	src/labenski/include/wx/wxthings/bitmaps/new.xpm \
-	src/labenski/include/wx/wxthings/bitmaps/open.xpm \
-	src/labenski/include/wx/wxthings/bitmaps/paste.xpm \
-	src/labenski/include/wx/wxthings/bitmaps/preview.xpm \
-	src/labenski/include/wx/wxthings/bitmaps/print.xpm \
-	src/labenski/include/wx/wxthings/bitmaps/question.xpm \
-	src/labenski/include/wx/wxthings/bitmaps/redo.xpm \
-	src/labenski/include/wx/wxthings/bitmaps/replace.xpm \
-	src/labenski/include/wx/wxthings/bitmaps/saveall.xpm \
-	src/labenski/include/wx/wxthings/bitmaps/saveas.xpm \
-	src/labenski/include/wx/wxthings/bitmaps/spell.xpm \
-	src/labenski/include/wx/wxthings/bitmaps/undo.xpm \
 	src/gui/bitmaps/about.xpm \
 	src/gui/bitmaps/adddecimal.xpm \
 	src/gui/bitmaps/calc.xpm \
