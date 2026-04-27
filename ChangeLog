@@ -1,5 +1,12 @@
 # Changelog
 
+## [16.7.0] - unreleased
+
+### Fixed
+- Corrected a regression in action graph games that left the internal data structure not fully initialised,
+  leading to segmentation faults.
+
+
 ## [16.6.0] - 2026-03-24
 
 ### Changed
