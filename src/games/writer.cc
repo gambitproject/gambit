@@ -159,20 +159,10 @@ public:
   void BeginSubtable(const Game &game, const GamePlayer &rowPlayer, const GamePlayer &colPlayer,
                      const PureStrategyProfile &profile) override
   {
-    // Initialize the LaTeX 'game' environment with dimensions and labels
-    m_result += "\\begin{game}{";
-    m_result += lexical_cast<std::string>(rowPlayer->GetStrategies().size());
-    m_result += "}{";
-    m_result += lexical_cast<std::string>(colPlayer->GetStrategies().size());
-    m_result += "}[";
-    m_result += rowPlayer->GetLabel();
-    m_result += "][";
-    m_result += colPlayer->GetLabel();
-    m_result += "]";
-
-    // Add info about fixed strategies for >2 players
+    // If the game has more than 2 players, display fixed strategies
     if (game->NumPlayers() > 2) {
-      m_result += "[";
+      m_result += "\\begin{center}\n";
+      m_result += "\\textbf{Subtable with strategies:}\\\\\n";
       for (auto player : game->GetPlayers()) {
         if (player == rowPlayer || player == colPlayer) {
           continue;
@@ -182,55 +172,77 @@ public:
         m_result += lexical_cast<std::string>(player->GetNumber());
         m_result += " Strategy ";
         m_result += lexical_cast<std::string>(profile->GetStrategy(player)->GetNumber());
-        m_result += " ";
+        m_result += "\\\\\n";
       }
-      m_result += "]";
+      m_result += "\\end{center}\n";
     }
-    m_result += "\n&";
+
+    m_colSize = colPlayer->GetStrategies().size();
+    m_result += "\\begin{center}\n";
+    m_result += "\\begin{tabular}{cc";
+    for (size_t i = 0; i < m_colSize; ++i) {
+      m_result += "|c";
+    }
+    m_result += "}\n";
+
+    // Column player label row
+    m_result += "\\multicolumn{2}{c}{} & \\multicolumn{";
+    m_result += lexical_cast<std::string>(m_colSize);
+    m_result += "}{c}{\\textbf{";
+    m_result += colPlayer->GetLabel();
+    m_result += "}} \\\\\n";
   }
 
-  void EndSubtable() override { m_result += "\n\\end{game}"; }
+  void EndSubtable() override
+  {
+    m_result += "\\end{tabular}\n";
+    m_result += "\\end{center}";
+  }
 
   void WriteColumnHeaders(const GamePlayer &colPlayer) override
   {
-    // Write out the labels for the column player's strategies
+    // Column strategies row
+    m_result += "\\multicolumn{2}{c}{} ";
     for (const auto &strategy : colPlayer->GetStrategies()) {
+      m_result += " & \\textbf{";
       m_result += strategy->GetLabel();
-      if (strategy != colPlayer->GetStrategies().back()) {
-        m_result += " & ";
-      }
+      m_result += "}";
     }
-    m_result += "\\\\\n";
+    m_result += " \\\\ \\cline{3-";
+    m_result += lexical_cast<std::string>(2 + m_colSize);
+    m_result += "}\n";
   }
 
   void BeginRow(const GamePlayer &rowPlayer, const GameStrategy &rowStrategy,
                 bool isFirst) override
   {
+    if (isFirst) {
+      m_result += "\\textbf{";
+      m_result += rowPlayer->GetLabel();
+      m_result += "} ";
+    }
+    m_result += "& \\textbf{";
     m_result += rowStrategy->GetLabel();
-    m_result += " & ";
+    m_result += "} ";
   }
 
   void WriteRowEnd(bool isLast) override
   {
-    // LaTeX uses \\ to end a row, but usually not on the very last row of a table
-    if (!isLast) {
-      m_result += "\\\\\n";
-    }
+    m_result += " \\\\ \\cline{3-";
+    m_result += lexical_cast<std::string>(2 + m_colSize);
+    m_result += "}\n";
   }
 
   void WriteCell(const std::string &payoffs, bool isLastCol) override
   {
-    // Payoffs are typically rendered in math mode $ $ in LaTeX
-    m_result += " $" + payoffs + "$ ";
-    if (!isLastCol) {
-      m_result += " & ";
-    }
+    m_result += "& $" + payoffs + "$ ";
   }
 
   std::string GetResult() const override { return m_result; }
 
 private:
   std::string m_result;
+  size_t m_colSize{0};
 };
 
 /**
