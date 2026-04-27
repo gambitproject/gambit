@@ -500,28 +500,6 @@ gambit_SOURCES = \
 	src/labenski/src/range.cpp \
 	src/labenski/src/spinctld.cpp \
 	src/labenski/src/toggle.cpp \
-	src/labenski/src/fparser.cpp \
-	src/labenski/src/fparser.hh \
-	src/labenski/src/fourier.c \
-	src/labenski/src/lm_lsqr.cpp \
-	src/labenski/src/plotctrl.cpp \
-	src/labenski/src/plotcurv.cpp \
-	src/labenski/src/plotdata.cpp \
-	src/labenski/src/plotdraw.cpp \
-	src/labenski/src/plotfunc.cpp \
-	src/labenski/src/plotmark.cpp \
-	src/labenski/src/plotprnt.cpp \
-	src/labenski/include/wx/plotctrl/fourier.h \
-	src/labenski/include/wx/plotctrl/fparser.h \
-	src/labenski/include/wx/plotctrl/lm_lsqr.h \
-	src/labenski/include/wx/plotctrl/plotctrl.h \
-	src/labenski/include/wx/plotctrl/plotcurv.h \
-	src/labenski/include/wx/plotctrl/plotdata.h \
-	src/labenski/include/wx/plotctrl/plotdefs.h \
-	src/labenski/include/wx/plotctrl/plotdraw.h \
-	src/labenski/include/wx/plotctrl/plotfunc.h \
-	src/labenski/include/wx/plotctrl/plotmark.h \
-	src/labenski/include/wx/plotctrl/plotprnt.h \
 	src/labenski/include/wx/sheet/pairarr.h \
 	src/labenski/include/wx/sheet/sheetatr.h \
 	src/labenski/include/wx/sheet/sheetdef.h \
