@@ -1,5 +1,10 @@
 # Changelog
 
+## [16.7.0] - unreleased
+
+### Removed
+- Built-in plotting of logit QRE for strategic games has been removed in the GUI (#809)
+
 ## [16.6.0] - 2026-03-24
 
 ### Changed
