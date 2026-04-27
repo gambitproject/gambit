@@ -27,10 +27,6 @@ EXTRA_DIST = \
 	build_support/osx/Info.plist.in \
 	build_support/osx/gambit.icns \
 	src/labenski/README.txt \
-	src/labenski/art/grab.xpm \
-	src/labenski/art/hand.xpm \
-	src/labenski/art/ledgreen.xpm \
-	src/labenski/art/ledgrey.xpm \
 	src/labenski/doc/README-sheet.txt \
 	src/gui/bitmaps/about.xpm \
 	src/gui/bitmaps/adddecimal.xpm \
