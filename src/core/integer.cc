@@ -35,10 +35,8 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 #include <iostream>
-#include <cctype>
 #include <cfloat>
-#include <climits>
-#include <cmath>
+#include <limits>
 #include <cstring>
 #include <stdexcept>
 
@@ -57,49 +55,34 @@ long lg(unsigned long x)
   return l;
 }
 
-#ifndef HUGE_VAL
-#ifdef HUGE
-#define HUGE_VAL HUGE
-#else
-#define HUGE_VAL DBL_MAX
-#endif
-#endif
-
 /*
  Sizes of shifts for multiple-precision arithmetic.
  These should not be changed unless Integer representation
  as unsigned shorts is changed in the implementation files.
 */
 
-#define I_SHIFT (sizeof(short) * CHAR_BIT)
-#define I_RADIX (1UL << I_SHIFT)
-#define I_MAXNUM (I_RADIX - 1UL)
-#define I_MINNUM (I_RADIX >> 1)
-#define I_POSITIVE 1
-#define I_NEGATIVE 0
+constexpr int I_SHIFT = sizeof(short) * CHAR_BIT;
+constexpr unsigned long I_RADIX = 1UL << I_SHIFT;
+constexpr unsigned long I_MAXNUM = I_RADIX - 1UL;
+constexpr unsigned long I_MINNUM = I_RADIX >> 1;
 
-/* All routines assume SHORT_PER_LONG > 1 */
-#define SHORT_PER_LONG ((unsigned)(((sizeof(long) + sizeof(short) - 1) / sizeof(short))))
-// #define CHAR_PER_LONG ((unsigned)sizeof(long))
+constexpr short I_POSITIVE = 1;
+constexpr short I_NEGATIVE = 0;
 
-/*
-  minimum and maximum sizes for an IntegerRep
-*/
+constexpr unsigned int SHORT_PER_LONG = (sizeof(long) + sizeof(short) - 1) / sizeof(short);
 
-#define MIN_INTREP_SIZE 16
-// #define MAX_INTREP_SIZE I_MAXNUM
+constexpr int MIN_INTREP_SIZE = 16;
+constexpr unsigned int MALLOC_MIN_OVERHEAD = 4;
 
-#ifndef MALLOC_MIN_OVERHEAD
-#define MALLOC_MIN_OVERHEAD 4
-#endif
-
-static IntegerRep ZeroRep = {0, 0, 1, {0}};
+static IntegerRep ZeroRep = {0, 0, I_POSITIVE, {0}};
 
 // utilities to extract and transfer bits
 
 // get low bits
-
-inline static unsigned short extract(unsigned long x) { return (unsigned short)(x & I_MAXNUM); }
+static unsigned short extract(unsigned long x)
+{
+  return static_cast<unsigned short>(x & I_MAXNUM);
+}
 
 // transfer high bits to low
 static unsigned long down(unsigned long x) { return (x >> I_SHIFT) & I_MAXNUM; }
@@ -204,7 +187,7 @@ static IntegerRep *Inew(int newlen)
 
 static void Ifree(IntegerRep *rep) noexcept
 {
-  if (rep != nullptr && !STATIC_IntegerRep(rep)) {
+  if (rep != nullptr && !IsStaticIntegerRep(rep)) {
     delete[] reinterpret_cast<char *>(rep);
   }
 }
@@ -361,7 +344,7 @@ IntegerRep *Icopy_ulong(IntegerRep *old, unsigned long x)
 
 IntegerRep *Icopy_zero(IntegerRep *old)
 {
-  if (old == nullptr || STATIC_IntegerRep(old)) {
+  if (old == nullptr || IsStaticIntegerRep(old)) {
     return &ZeroRep;
   }
 
@@ -373,7 +356,7 @@ IntegerRep *Icopy_zero(IntegerRep *old)
 
 IntegerRep *Icopy_one(IntegerRep *old, int newsgn)
 {
-  if (old == nullptr || STATIC_IntegerRep(old) || 1 > old->sz) {
+  if (old == nullptr || IsStaticIntegerRep(old) || 1 > old->sz) {
     Ifree(old);
     old = Inew(1);
   }
@@ -390,24 +373,21 @@ IntegerRep *Icopy_one(IntegerRep *old, int newsgn)
 
 long Itolong(const IntegerRep *rep)
 {
-  if ((unsigned)(rep->len) > (unsigned)(SHORT_PER_LONG)) {
+  if (static_cast<unsigned>(rep->len) > SHORT_PER_LONG) {
     return (rep->sgn == I_POSITIVE) ? LONG_MAX : LONG_MIN;
   }
   else if (rep->len == 0) {
     return 0;
   }
-  else if ((unsigned)(rep->len) < (unsigned)(SHORT_PER_LONG)) {
+  else if (static_cast<unsigned>(rep->len) < SHORT_PER_LONG) {
     unsigned long a = rep->s[rep->len - 1];
-#ifndef __BCC55__
-    // This condition is always false under BCC55
-    if (SHORT_PER_LONG > 2) // normally optimized out
+    if constexpr (SHORT_PER_LONG > 2) // normally optimized out
     {
       for (int i = rep->len - 2; i >= 0; --i) {
         a = up(a) | rep->s[i];
       }
     }
-#endif // __BCC55__
-    return (rep->sgn == I_POSITIVE) ? a : -((long)a);
+    return (rep->sgn == I_POSITIVE) ? a : -(static_cast<long>(a));
   }
   else {
     unsigned long a = rep->s[SHORT_PER_LONG - 1];
@@ -416,15 +396,12 @@ long Itolong(const IntegerRep *rep)
     }
     else {
       a = up(a) | rep->s[SHORT_PER_LONG - 2];
-#ifndef __BCC55__
-      // This condition is always false under BCC55
-      if (SHORT_PER_LONG > 2) {
+      if constexpr (SHORT_PER_LONG > 2) {
         for (int i = SHORT_PER_LONG - 3; i >= 0; --i) {
           a = up(a) | rep->s[i];
         }
       }
-#endif // __BCC55__
-      return (rep->sgn == I_POSITIVE) ? a : -((long)a);
+      return (rep->sgn == I_POSITIVE) ? a : -(static_cast<long>(a));
     }
   }
 }
@@ -441,7 +418,7 @@ int Iislong(const IntegerRep *rep)
   else if (l > SHORT_PER_LONG) {
     return 0;
   }
-  else if ((unsigned)(rep->s[SHORT_PER_LONG - 1]) < (unsigned)(I_MINNUM)) {
+  else if (static_cast<unsigned>(rep->s[SHORT_PER_LONG - 1]) < static_cast<unsigned>(I_MINNUM)) {
     return 1;
   }
   else if (rep->sgn == I_NEGATIVE && rep->s[SHORT_PER_LONG - 1] == I_MINNUM) {
@@ -462,12 +439,13 @@ int Iislong(const IntegerRep *rep)
 double Itodouble(const IntegerRep *rep)
 {
   double d = 0.0;
-  const double bound = DBL_MAX / 2.0;
+  constexpr double bound = DBL_MAX / 2.0;
   for (int i = rep->len - 1; i >= 0; --i) {
-    auto a = (unsigned short)(I_RADIX >> 1);
+    auto a = static_cast<unsigned short>(I_RADIX >> 1);
     while (a != 0) {
       if (d >= bound) {
-        return (rep->sgn == I_NEGATIVE) ? -HUGE_VAL : HUGE_VAL;
+        return (rep->sgn == I_NEGATIVE) ? -std::numeric_limits<double>::infinity()
+                                        : std::numeric_limits<double>::infinity();
       }
       d *= 2.0;
       if (rep->s[i] & a) {
@@ -491,9 +469,9 @@ double Itodouble(const IntegerRep *rep)
 int Iisdouble(const IntegerRep *rep)
 {
   double d = 0.0;
-  const double bound = DBL_MAX / 2.0;
+  constexpr double bound = DBL_MAX / 2.0;
   for (int i = rep->len - 1; i >= 0; --i) {
-    auto a = (unsigned short)(I_RADIX >> 1);
+    auto a = static_cast<unsigned short>(I_RADIX >> 1);
     while (a != 0) {
       if (d > bound || (d == bound && (i > 0 || (rep->s[i] & a)))) {
         return 0;
@@ -525,7 +503,7 @@ double ratio(const Integer &num, const Integer &den)
     double d3 = 0.0;
     int cont = 1;
     for (int i = den.rep->len - 1; i >= 0 && cont; --i) {
-      auto a = (unsigned short)(I_RADIX >> 1);
+      auto a = static_cast<unsigned short>(I_RADIX >> 1);
       while (a != 0) {
         if (d2 + 1.0 == d2) // out of precision when we get here
         {
@@ -701,12 +679,12 @@ IntegerRep *add(const IntegerRep *x, int negatex, const IntegerRep *y, int negat
     }
     unsigned long sum = 0;
     while (bs < topb) {
-      sum += (unsigned long)(*as++) + (unsigned long)(*bs++);
+      sum += static_cast<unsigned long>(*as++) + static_cast<unsigned long>(*bs++);
       *rs++ = extract(sum);
       sum = down(sum);
     }
     while (sum != 0 && as < topa) {
-      sum += (unsigned long)(*as++);
+      sum += static_cast<unsigned long>(*as++);
       *rs++ = extract(sum);
       sum = down(sum);
     }
@@ -754,12 +732,12 @@ IntegerRep *add(const IntegerRep *x, int negatex, const IntegerRep *y, int negat
       }
       unsigned long hi = 1;
       while (bs < topb) {
-        hi += (unsigned long)(*as++) + I_MAXNUM - (unsigned long)(*bs++);
+        hi += static_cast<unsigned long>(*as++) + I_MAXNUM - static_cast<unsigned long>(*bs++);
         *rs++ = extract(hi);
         hi = down(hi);
       }
       while (hi == 0 && as < topa) {
-        hi = (unsigned long)(*as++) + I_MAXNUM;
+        hi = static_cast<unsigned long>(*as++) + I_MAXNUM;
         *rs++ = extract(hi);
         hi = down(hi);
       }
@@ -805,12 +783,12 @@ IntegerRep *add(const IntegerRep *x, int negatex, long y, IntegerRep *r)
     while (as < topa && uy != 0) {
       const unsigned long u = extract(uy);
       uy = down(uy);
-      sum += (unsigned long)(*as++) + u;
+      sum += static_cast<unsigned long>(*as++) + u;
       *rs++ = extract(sum);
       sum = down(sum);
     }
     while (sum != 0 && as < topa) {
-      sum += (unsigned long)(*as++);
+      sum += static_cast<unsigned long>(*as++);
       *rs++ = extract(sum);
       sum = down(sum);
     }
@@ -867,12 +845,12 @@ IntegerRep *add(const IntegerRep *x, int negatex, long y, IntegerRep *r)
       }
       unsigned long hi = 1;
       while (bs < topb) {
-        hi += (unsigned long)(*as++) + I_MAXNUM - (unsigned long)(*bs++);
+        hi += static_cast<unsigned long>(*as++) + I_MAXNUM - static_cast<unsigned long>(*bs++);
         *rs++ = extract(hi);
         hi = down(hi);
       }
       while (hi == 0 && as < topa) {
-        hi = (unsigned long)(*as++) + I_MAXNUM;
+        hi = static_cast<unsigned long>(*as++) + I_MAXNUM;
         *rs++ = extract(hi);
         hi = down(hi);
       }
@@ -950,7 +928,7 @@ IntegerRep *multiply(const IntegerRep *x, const IntegerRep *y, IntegerRep *r)
     }
 
     for (int outer_index = outer_len; outer_index-- > 0;) {
-      const unsigned long ai = static_cast<unsigned long>(outer[outer_index]);
+      const auto ai = static_cast<unsigned long>(outer[outer_index]);
       unsigned short *out = rs + outer_index;
 
       *out = 0;
@@ -1044,7 +1022,7 @@ IntegerRep *multiply(const IntegerRep *x, long y, IntegerRep *r)
     }
 
     for (int outer_index = outer_len; outer_index-- > 0;) {
-      const unsigned long ai = static_cast<unsigned long>(outer[outer_index]);
+      const auto ai = static_cast<unsigned long>(outer[outer_index]);
       unsigned short *out = rs + outer_index;
 
       *out = 0;
@@ -1087,19 +1065,19 @@ static void do_divide(unsigned short *rs, const unsigned short *ys, int yl, unsi
   for (; l >= 0; --l, --i) {
     unsigned short qhat; // guess q
     if (d1 == rs[i]) {
-      qhat = (unsigned short)I_MAXNUM;
+      qhat = static_cast<unsigned short>(I_MAXNUM);
     }
     else {
-      const unsigned long lr = up((unsigned long)rs[i]) | rs[i - 1];
-      qhat = (unsigned short)(lr / d1);
+      const unsigned long lr = up(rs[i]) | rs[i - 1];
+      qhat = static_cast<unsigned short>(lr / d1);
     }
 
     for (;;) // adjust q, use docmp to avoid overflow problems
     {
       unsigned short ts[3];
-      unsigned long prod = (unsigned long)d2 * (unsigned long)qhat;
+      unsigned long prod = static_cast<unsigned long>(d2) * static_cast<unsigned long>(qhat);
       ts[0] = extract(prod);
-      prod = down(prod) + (unsigned long)d1 * (unsigned long)qhat;
+      prod = down(prod) + static_cast<unsigned long>(d1) * static_cast<unsigned long>(qhat);
       ts[1] = extract(prod);
       ts[2] = extract(down(prod));
       if (docmp(ts, &(rs[i - 2]), 3) > 0) {
@@ -1117,12 +1095,12 @@ static void do_divide(unsigned short *rs, const unsigned short *ys, int yl, unsi
     unsigned long prod = 0;
     unsigned long hi = 1;
     while (yt < topy) {
-      prod = (unsigned long)qhat * (unsigned long)(*yt++) + down(prod);
-      hi += (unsigned long)(*rt) + I_MAXNUM - (unsigned long)(extract(prod));
+      prod = static_cast<unsigned long>(qhat) * static_cast<unsigned long>(*yt++) + down(prod);
+      hi += static_cast<unsigned long>(*rt) + I_MAXNUM - static_cast<unsigned long>(extract(prod));
       *rt++ = extract(hi);
       hi = down(hi);
     }
-    hi += (unsigned long)(*rt) + I_MAXNUM - (unsigned long)(down(prod));
+    hi += static_cast<unsigned long>(*rt) + I_MAXNUM - (down(prod));
     *rt = extract(hi);
     hi = down(hi);
 
@@ -1134,7 +1112,7 @@ static void do_divide(unsigned short *rs, const unsigned short *ys, int yl, unsi
       rt = &(rs[l]);
       hi = 0;
       while (yt < topy) {
-        hi = (unsigned long)(*rt) + (unsigned long)(*yt++) + down(hi);
+        hi = static_cast<unsigned long>(*rt) + static_cast<unsigned long>(*yt++) + down(hi);
         *rt++ = extract(hi);
       }
       *rt = 0;
@@ -1199,10 +1177,10 @@ IntegerRep *div(const IntegerRep *x, const IntegerRep *y, IntegerRep *q)
   else {
     IntegerRep *yy = nullptr;
     IntegerRep *r = nullptr;
-    auto prescale = (unsigned short)(I_RADIX / (1 + y->s[yl - 1]));
+    auto prescale = static_cast<unsigned short>(I_RADIX / (1 + y->s[yl - 1]));
     if (prescale != 1 || y == q) {
-      yy = multiply(y, ((long)prescale & I_MAXNUM), yy);
-      r = multiply(x, ((long)prescale & I_MAXNUM), r);
+      yy = multiply(y, (static_cast<long>(prescale) & I_MAXNUM), yy);
+      r = multiply(x, (static_cast<long>(prescale) & I_MAXNUM), r);
     }
     else {
       yy = const_cast<IntegerRep *>(y);
@@ -1262,13 +1240,14 @@ IntegerRep *div(const IntegerRep *x, long y, IntegerRep *q)
   }
   else {
     IntegerRep *r = nullptr;
-    auto prescale = (unsigned short)(I_RADIX / (1 + ys[yl - 1]));
+    auto prescale = static_cast<unsigned short>(I_RADIX / (1 + ys[yl - 1]));
     if (prescale != 1) {
-      unsigned long prod = (unsigned long)prescale * (unsigned long)ys[0];
+      unsigned long prod =
+          static_cast<unsigned long>(prescale) * static_cast<unsigned long>(ys[0]);
       ys[0] = extract(prod);
-      prod = down(prod) + (unsigned long)prescale * (unsigned long)ys[1];
+      prod = down(prod) + static_cast<unsigned long>(prescale) * static_cast<unsigned long>(ys[1]);
       ys[1] = extract(prod);
-      r = multiply(x, ((long)prescale & I_MAXNUM), r);
+      r = multiply(x, static_cast<long>(prescale) & I_MAXNUM, r);
     }
     else {
       r = Icalloc(r, xl + 1);
@@ -1327,13 +1306,14 @@ void divide(const Integer &Ix, long y, Integer &Iq, long &rem)
   }
   else {
     IntegerRep *r = nullptr;
-    auto prescale = (unsigned short)(I_RADIX / (1 + ys[yl - 1]));
+    auto prescale = static_cast<unsigned short>(I_RADIX / (1 + ys[yl - 1]));
     if (prescale != 1) {
-      unsigned long prod = (unsigned long)prescale * (unsigned long)ys[0];
+      unsigned long prod =
+          static_cast<unsigned long>(prescale) * static_cast<unsigned long>(ys[0]);
       ys[0] = extract(prod);
-      prod = down(prod) + (unsigned long)prescale * (unsigned long)ys[1];
+      prod = down(prod) + static_cast<unsigned long>(prescale) * static_cast<unsigned long>(ys[1]);
       ys[1] = extract(prod);
-      r = multiply(x, ((long)prescale & I_MAXNUM), r);
+      r = multiply(x, static_cast<long>(prescale) & I_MAXNUM, r);
     }
     else {
       r = Icalloc(r, xl + 1);
@@ -1401,10 +1381,10 @@ void divide(const Integer &Ix, const Integer &Iy, Integer &Iq, Integer &Ir)
   }
   else {
     IntegerRep *yy = nullptr;
-    auto prescale = (unsigned short)(I_RADIX / (1 + y->s[yl - 1]));
+    auto prescale = static_cast<unsigned short>(I_RADIX / (1 + y->s[yl - 1]));
     if (prescale != 1 || y == q || y == r) {
-      yy = multiply(y, ((long)prescale & I_MAXNUM), yy);
-      r = multiply(x, ((long)prescale & I_MAXNUM), r);
+      yy = multiply(y, static_cast<long>(prescale) & I_MAXNUM, yy);
+      r = multiply(x, static_cast<long>(prescale) & I_MAXNUM, r);
     }
     else {
       yy = const_cast<IntegerRep *>(y);
@@ -1460,10 +1440,10 @@ IntegerRep *mod(const IntegerRep *x, const IntegerRep *y, IntegerRep *r)
   }
   else {
     IntegerRep *yy = nullptr;
-    auto prescale = (unsigned short)(I_RADIX / (1 + y->s[yl - 1]));
+    auto prescale = static_cast<unsigned short>(I_RADIX / (1 + y->s[yl - 1]));
     if (prescale != 1 || y == r) {
-      yy = multiply(y, ((long)prescale & I_MAXNUM), yy);
-      r = multiply(x, ((long)prescale & I_MAXNUM), r);
+      yy = multiply(y, static_cast<long>(prescale) & I_MAXNUM, yy);
+      r = multiply(x, static_cast<long>(prescale) & I_MAXNUM, r);
     }
     else {
       yy = const_cast<IntegerRep *>(y);
@@ -1522,13 +1502,14 @@ IntegerRep *mod(const IntegerRep *x, long y, IntegerRep *r)
     }
   }
   else {
-    auto prescale = (unsigned short)(I_RADIX / (1 + ys[yl - 1]));
+    auto prescale = static_cast<unsigned short>(I_RADIX / (1 + ys[yl - 1]));
     if (prescale != 1) {
-      unsigned long prod = (unsigned long)prescale * (unsigned long)ys[0];
+      unsigned long prod =
+          static_cast<unsigned long>(prescale) * static_cast<unsigned long>(ys[0]);
       ys[0] = extract(prod);
-      prod = down(prod) + (unsigned long)prescale * (unsigned long)ys[1];
+      prod = down(prod) + static_cast<unsigned long>(prescale) * static_cast<unsigned long>(ys[1]);
       ys[1] = extract(prod);
-      r = multiply(x, ((long)prescale & I_MAXNUM), r);
+      r = multiply(x, static_cast<long>(prescale) & I_MAXNUM, r);
     }
     else {
       r = Icalloc(r, xl + 1);
@@ -1705,7 +1686,10 @@ IntegerRep *bitop(const IntegerRep *x, const IntegerRep *y, IntegerRep *r, char 
       *rs++ = *as++;
     }
     break;
+  default:
+    Integer::error("Unknown bitwise operation");
   }
+
   Icheck(r);
   return r;
 }
@@ -1776,6 +1760,8 @@ IntegerRep *bitop(const IntegerRep *x, long y, IntegerRep *r, char op)
       *rs++ = *as++;
     }
     break;
+  default:
+    Integer::error("Unknown bitwise operation");
   }
   Icheck(r);
   return r;
@@ -1815,8 +1801,8 @@ IntegerRep *Compl(const IntegerRep *src, IntegerRep *r)
 void setbit(Integer &x, long b)
 {
   if (b >= 0) {
-    const int bw = (int)((unsigned long)b / I_SHIFT);
-    const int sw = (int)((unsigned long)b % I_SHIFT);
+    const int bw = static_cast<int>(static_cast<unsigned long>(b) / I_SHIFT);
+    const int sw = static_cast<int>(static_cast<unsigned long>(b) % I_SHIFT);
     const int xl = x.rep ? x.rep->len : 0;
     if (xl <= bw) {
       x.rep = Iresize(x.rep, calc_len(xl, bw + 1, 0));
@@ -1833,8 +1819,8 @@ void clearbit(Integer &x, long b)
       x.rep = &ZeroRep;
     }
     else {
-      const int bw = (int)((unsigned long)b / I_SHIFT);
-      const int sw = (int)((unsigned long)b % I_SHIFT);
+      const int bw = static_cast<int>(static_cast<unsigned long>(b) / I_SHIFT);
+      const int sw = static_cast<int>(static_cast<unsigned long>(b) % I_SHIFT);
       if (x.rep->len > bw) {
         x.rep->s[bw] &= ~(1 << sw);
       }
@@ -1846,8 +1832,8 @@ void clearbit(Integer &x, long b)
 int testbit(const Integer &x, long b)
 {
   if (x.rep != nullptr && b >= 0) {
-    const int bw = (int)((unsigned long)b / I_SHIFT);
-    const int sw = (int)((unsigned long)b % I_SHIFT);
+    const int bw = static_cast<int>(static_cast<unsigned long>(b) / I_SHIFT);
+    const int sw = static_cast<int>(static_cast<unsigned long>(b) % I_SHIFT);
     return (bw < x.rep->len && (x.rep->s[bw] & (1 << sw)) != 0);
   }
   else {
@@ -1989,7 +1975,7 @@ IntegerRep *power(const IntegerRep *x, long y, IntegerRep *r)
     r = Icopy(r, x);
   }
   else {
-    const int maxsize = (int)(((lg(x) + 1) * y) / I_SHIFT + 2); // pre-allocate space
+    const int maxsize = static_cast<int>(((lg(x) + 1) * y) / I_SHIFT + 2); // pre-allocate space
     IntegerRep *b = Ialloc(nullptr, x->s, xl, I_POSITIVE, maxsize);
     b->len = xl;
     r = Icalloc(r, maxsize);
@@ -2087,7 +2073,7 @@ IntegerRep *atoIntegerRep(const char *s, int base)
     throw std::invalid_argument("null string passed to atoIntegerRep");
   }
   const int sl = strlen(s);
-  IntegerRep *r = Icalloc(nullptr, (int)(sl * (lg(base) + 1) / I_SHIFT + 1));
+  IntegerRep *r = Icalloc(nullptr, static_cast<int>(sl * (lg(base) + 1) / I_SHIFT + 1));
   if (s != nullptr) {
     char sgn;
     while (std::isspace(static_cast<unsigned char>(*s))) {
@@ -2134,7 +2120,7 @@ std::string Itoa(const IntegerRep *x, int base, int width)
 {
   check_base(base);
   nonnil(x);
-  int fmtlen = (int)((x->len + 1) * I_SHIFT / lg(base) + 4 + width);
+  int fmtlen = static_cast<int>((x->len + 1) * I_SHIFT / lg(base) + 4 + width);
   std::string fmtbase;
   for (int i = 0; i < fmtlen; i++) {
     fmtbase += " ";
@@ -2168,7 +2154,7 @@ std::string cvtItoa(const IntegerRep *x, std::string fmt, int &fmtlen, int base,
     // find power
     int bpower = 1;
     unsigned short b = base;
-    auto maxb = (unsigned short)(I_MAXNUM / base);
+    auto maxb = static_cast<unsigned short>(I_MAXNUM / base);
     while (b < maxb) {
       b *= base;
       ++bpower;
@@ -2220,12 +2206,12 @@ std::string cvtItoa(const IntegerRep *x, std::string fmt, int &fmtlen, int base,
   else if (showpos) {
     *--s = '+';
   }
-  int w = (int)(e - s - 1);
+  int w = static_cast<int>(e - s - 1);
   if (!align_right || w >= width) {
     while (w++ < width) {
       *--s = fillchar;
     }
-    fmtlen = (int)(e - s - 1);
+    fmtlen = static_cast<int>(e - s - 1);
     return s;
   }
   else {
@@ -2291,14 +2277,14 @@ std::istream &operator>>(std::istream &s, Integer &y)
   return s;
 }
 
-int Integer::OK() const
+bool Integer::OK() const
 {
   if (rep != nullptr) {
     const int l = rep->len;
     const int s = rep->sgn;
-    int v = l <= rep->sz || STATIC_IntegerRep(rep); // length within bounds
-    v &= s == 0 || s == 1;                          // legal sign
-    Icheck(rep);                                    // and correctly adjusted
+    int v = l <= rep->sz || IsStaticIntegerRep(rep); // length within bounds
+    v &= s == 0 || s == 1;                           // legal sign
+    Icheck(rep);                                     // and correctly adjusted
     v &= rep->len == l;
     v &= rep->sgn == s;
     if (v) {
@@ -2306,25 +2292,12 @@ int Integer::OK() const
     }
   }
   error("invariant failure");
-  return 0;
+  return false;
 }
 
-void Integer::error(const char *msg) const { throw std::runtime_error(msg); }
-
-// The following were moved from the header file to stop BC from squealing
-// endless quantities of warnings
+void Integer::error(const char *msg) { throw std::runtime_error(msg); }
 
 Integer::Integer() : rep(&ZeroRep) {}
-
-Integer::Integer(IntegerRep *r) : rep(r) {}
-
-Integer::Integer(int y) : rep(Icopy_long(nullptr, (long)y)) {}
-
-Integer::Integer(long y) : rep(Icopy_long(nullptr, y)) {}
-
-Integer::Integer(unsigned long y) : rep(Icopy_ulong(nullptr, y)) {}
-
-Integer::Integer(const Integer &y) : rep(Icopy(nullptr, y.rep)) {}
 
 Integer::~Integer() { Ifree(rep); }
 
@@ -2339,8 +2312,6 @@ Integer &Integer::operator=(long y)
   rep = Icopy_long(rep, y);
   return *this;
 }
-
-int Integer::initialized() const { return rep != nullptr; }
 
 // procedural versions
 
