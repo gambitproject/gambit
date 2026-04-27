@@ -493,7 +493,6 @@ gambit_SOURCES = \
 	src/labenski/src/sheetsel.cpp \
 	src/labenski/src/sheetspt.cpp \
 	src/labenski/src/sheettbl.cpp \
-	src/labenski/src/spinctld.cpp \
 	src/labenski/include/wx/sheet/pairarr.h \
 	src/labenski/include/wx/sheet/sheetatr.h \
 	src/labenski/include/wx/sheet/sheetdef.h \
@@ -504,8 +503,6 @@ gambit_SOURCES = \
 	src/labenski/include/wx/sheet/sheetsel.h \
 	src/labenski/include/wx/sheet/sheetspt.h \
 	src/labenski/include/wx/sheet/sheettbl.h \
-	src/labenski/include/wx/wxthings/spinctld.h \
-	src/labenski/include/wx/wxthings/thingdef.h \
 	src/gui/analysis.cc \
 	src/gui/analysis.h \
 	src/gui/app.cc \
