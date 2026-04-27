@@ -31,29 +31,38 @@ namespace {
  */
 class TableFormatter {
 public:
+  // Virtual destructor ensures that the correct destructor is called when
+  // deleting a formatter through a pointer to this base class.
   virtual ~TableFormatter() = default;
 
+  // These virtual functions must be provided by subclasses.
   virtual void WriteTitle(const std::string &title) = 0;
 
+  // Setup for a specific 2D subtable (fixing strategies for other players)
   virtual void BeginSubtable(const Game &game, const GamePlayer &rowPlayer,
                              const GamePlayer &colPlayer, const PureStrategyProfile &profile) = 0;
 
   virtual void EndSubtable() = 0;
 
+  // Writes the top header of the table showing column strategies
   virtual void WriteColumnHeaders(const GamePlayer &colPlayer) = 0;
 
+  // Start a new row in the 2D table
   virtual void BeginRow(const GamePlayer &rowPlayer, const GameStrategy &rowStrategy,
                         bool isFirst) = 0;
 
+  // Close the current row (e.g., </tr> in HTML or \\ in LaTeX)
   virtual void WriteRowEnd(bool isLast) = 0;
 
+  // Write a single cell containing the payoffs for all players
   virtual void WriteCell(const std::string &payoffs, bool isLastCol) = 0;
 
+  // Return the final accumulated string result
   virtual std::string GetResult() const = 0;
 };
 
 /**
- * @brief Formatter for HTML output
+ * @brief Formatter for HTML output.
  */
 class HTMLTableFormatter : public TableFormatter {
 public:
@@ -65,11 +74,14 @@ public:
   void BeginSubtable(const Game &game, const GamePlayer &rowPlayer, const GamePlayer &colPlayer,
                      const PureStrategyProfile &profile) override
   {
+    // If the game has more than 2 players, we are looking at a "projection"
+    // of the game where all players except the row and column players have
+    // fixed strategies. We display those fixed strategies here.
     if (game->NumPlayers() > 2) {
       m_result += "<center><b>Subtable with strategies:</b></center>";
       for (auto player : game->GetPlayers()) {
         if (player == rowPlayer || player == colPlayer) {
-          continue;
+          continue; // Skip the players who are free in this subtable
         }
 
         m_result += "<center><b>Player ";
@@ -86,6 +98,7 @@ public:
 
   void WriteColumnHeaders(const GamePlayer &colPlayer) override
   {
+    // Create the header row for the column player's label and strategies
     m_result += "<tr>";
     m_result += R"(<td colspan="2" rowspan="2"></td>)";
     m_result += R"(<td colspan=")" + lexical_cast<std::string>(colPlayer->GetStrategies().size()) +
@@ -106,6 +119,8 @@ public:
                 bool isFirst) override
   {
     m_result += "<tr>";
+    // For the very first strategy row, add a cell that spans all rows
+    // to show the row player's name.
     if (isFirst) {
       m_result += R"(<td rowspan=")" +
                   lexical_cast<std::string>(rowPlayer->GetStrategies().size()) +
@@ -128,11 +143,11 @@ public:
   std::string GetResult() const override { return m_result; }
 
 private:
-  std::string m_result;
+  std::string m_result; // Accumulates the HTML string
 };
 
 /**
- * @brief Formatter for LaTeX output
+ * @brief Formatter for LaTeX output using the sgame package style.
  */
 class LaTeXTableFormatter : public TableFormatter {
 public:
@@ -144,6 +159,7 @@ public:
   void BeginSubtable(const Game &game, const GamePlayer &rowPlayer, const GamePlayer &colPlayer,
                      const PureStrategyProfile &profile) override
   {
+    // Initialize the LaTeX 'game' environment with dimensions and labels
     m_result += "\\begin{game}{";
     m_result += lexical_cast<std::string>(rowPlayer->GetStrategies().size());
     m_result += "}{";
@@ -154,6 +170,7 @@ public:
     m_result += colPlayer->GetLabel();
     m_result += "]";
 
+    // Add info about fixed strategies for >2 players
     if (game->NumPlayers() > 2) {
       m_result += "[";
       for (auto player : game->GetPlayers()) {
@@ -176,6 +193,7 @@ public:
 
   void WriteColumnHeaders(const GamePlayer &colPlayer) override
   {
+    // Write out the labels for the column player's strategies
     for (const auto &strategy : colPlayer->GetStrategies()) {
       m_result += strategy->GetLabel();
       if (strategy != colPlayer->GetStrategies().back()) {
@@ -194,6 +212,7 @@ public:
 
   void WriteRowEnd(bool isLast) override
   {
+    // LaTeX uses \\ to end a row, but usually not on the very last row of a table
     if (!isLast) {
       m_result += "\\\\\n";
     }
@@ -201,6 +220,7 @@ public:
 
   void WriteCell(const std::string &payoffs, bool isLastCol) override
   {
+    // Payoffs are typically rendered in math mode $ $ in LaTeX
     m_result += " $" + payoffs + "$ ";
     if (!isLastCol) {
       m_result += " & ";
@@ -214,32 +234,44 @@ private:
 };
 
 /**
- * @brief Shared logic for iterating over strategies and writing game tables
+ * @brief Shared logic for iterating over strategies and writing game tables.
+ *
+ * This function implements the logic of projecting a multi-player game
+ * into a series of 2D tables. It iterates over all possible strategy profiles
+ * of the "fixed" players and for each, creates a table showing all
+ * strategy combinations of the row and column players.
  */
 void WriteGameTableInternal(const Game &p_game, const GamePlayer &p_rowPlayer,
                             const GamePlayer &p_colPlayer, TableFormatter &p_formatter)
 {
   p_formatter.WriteTitle(p_game->GetTitle());
 
+  // Create a profile where row and column players are restricted to their first
+  // strategies. This allows us to find all combinations of strategies for
+  // the OTHER players.
   auto support = StrategySupportProfile(p_game)
                      .RestrictTo(p_rowPlayer->GetStrategies().front())
                      .RestrictTo(p_colPlayer->GetStrategies().front());
 
+  // Iterate through all subtables (contingencies for players other than row/col)
   for (const auto &iter : StrategyContingencies(support)) {
     p_formatter.BeginSubtable(p_game, p_rowPlayer, p_colPlayer, iter);
     p_formatter.WriteColumnHeaders(p_colPlayer);
 
+    // Loop over the row player's strategies
     for (const auto &row_strategy : p_rowPlayer->GetStrategies()) {
+      // Create a profile based on the current subtable's fixed strategies
       const PureStrategyProfile profile = iter;
       profile->SetStrategy(row_strategy);
 
       p_formatter.BeginRow(p_rowPlayer, row_strategy,
                            row_strategy == p_rowPlayer->GetStrategies().front());
 
+      // Loop over the column player's strategies
       for (const auto &col_strategy : p_colPlayer->GetStrategies()) {
         profile->SetStrategy(col_strategy);
 
-        // Generate payoffs string
+        // Extract the payoffs for every player for this specific outcome
         std::string payoffs;
         for (const auto &player : p_game->GetPlayers()) {
           try {
@@ -251,6 +283,7 @@ void WriteGameTableInternal(const Game &p_game, const GamePlayer &p_rowPlayer,
             }
           }
           catch (UndefinedException &) {
+            // Some game representations might not have outcomes defined directly
             payoffs += lexical_cast<std::string>(profile->GetPayoff(player));
           }
           if (player != p_game->GetPlayers().back()) {
@@ -261,6 +294,7 @@ void WriteGameTableInternal(const Game &p_game, const GamePlayer &p_rowPlayer,
         p_formatter.WriteCell(payoffs, col_strategy == p_colPlayer->GetStrategies().back());
       }
 
+      // Finalize the current row
       p_formatter.WriteRowEnd(row_strategy == p_rowPlayer->GetStrategies().back());
     }
     p_formatter.EndSubtable();
