@@ -1,0 +1,20 @@
+EFG 2 R "Jakobsen, Sorensen, Conitzer (2016) Figure 1(b)" { "Player 1" "Player 2" }
+"An example from `JakSorCon16 <https://gambitproject.readthedocs.io/en/latest/biblio.html#JakSorCon16>`_ illustrating a game
+that has an exact deterministic timing.  A coin toss determines the flow of the game;
+player 1 only plays if the coin comes up Heads, and if so plays first.
+Player 2 always plays, but cannot distinguish whether the coin came up Heads or Tails.
+Each player receives a payoff of 1 for a correct guess and 0 otherwise.
+This game can be timed by letting player 1 play at time 1 and player 2 at time 2.
+"
+
+c "" 1 "" { "1" 1/2 "2" 1/2 } 0
+p "" 2 1 "" { "1" "2" } 0
+t "" 1 "Outcome 1" { 0, 0 }
+t "" 2 "Outcome 2" { 0, 1 }
+p "" 1 1 "" { "1" "2" } 0
+p "" 2 1 "" { "1" "2" } 0
+t "" 3 "Outcome 3" { 0, 1 }
+t "" 4 "Outcome 4" { 0, 0 }
+p "" 2 1 "" { "1" "2" } 0
+t "" 5 "Outcome 5" { 1, 1 }
+t "" 6 "Outcome 6" { 1, 0 }
