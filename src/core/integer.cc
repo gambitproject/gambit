@@ -40,6 +40,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 #include <climits>
 #include <cmath>
 #include <cstring>
+#include <stdexcept>
 
 #include "integer.h"
 #include "util.h"
@@ -131,6 +132,13 @@ static int docmp(const unsigned short *x, const unsigned short *y, int l)
 inline static int calc_len(int len1, int len2, int pad)
 {
   return (len1 >= len2) ? len1 + pad : len2 + pad;
+}
+
+static void check_base(int base)
+{
+  if (base < 2 || base > 36) {
+    throw std::invalid_argument("Integer conversion base must be between 2 and 36");
+  }
 }
 
 // ensure len & sgn are correct
@@ -2168,11 +2176,15 @@ Integer lcm(const Integer &x, const Integer &y)
 
 IntegerRep *atoIntegerRep(const char *s, int base)
 {
+  check_base(base);
+  if (s == nullptr) {
+    throw std::invalid_argument("null string passed to atoIntegerRep");
+  }
   const int sl = strlen(s);
   IntegerRep *r = Icalloc(nullptr, (int)(sl * (lg(base) + 1) / I_SHIFT + 1));
   if (s != nullptr) {
     char sgn;
-    while (isspace(*s)) {
+    while (std::isspace(static_cast<unsigned char>(*s))) {
       ++s;
     }
     if (*s == '-') {
@@ -2214,6 +2226,8 @@ IntegerRep *atoIntegerRep(const char *s, int base)
 
 std::string Itoa(const IntegerRep *x, int base, int width)
 {
+  check_base(base);
+  nonnil(x);
   int fmtlen = (int)((x->len + 1) * I_SHIFT / lg(base) + 4 + width);
   std::string fmtbase;
   for (int i = 0; i < fmtlen; i++) {
@@ -2227,7 +2241,9 @@ std::ostream &operator<<(std::ostream &s, const Integer &y) { return s << Itoa(y
 std::string cvtItoa(const IntegerRep *x, std::string fmt, int &fmtlen, int base, int showbase,
                     int width, int align_right, char fillchar, char Xcase, int showpos)
 {
-  char *e = const_cast<char *>(fmt.c_str()) + fmtlen - 1;
+  check_base(base);
+  char *buf = fmt.data();
+  char *e = buf + fmtlen - 1;
   // NOLINTBEGIN(misc-const-correctness)
   char *s = e;
   // NOLINTEND(misc-const-correctness)
@@ -2307,10 +2323,7 @@ std::string cvtItoa(const IntegerRep *x, std::string fmt, int &fmtlen, int base,
     return s;
   }
   else {
-    char *p = const_cast<char *>(fmt.c_str());
-#ifdef UNUSED
-    int gap = (int)(s - p);
-#endif // UNUSED
+    char *p = buf;
     for (const char *t = s; *t != 0; ++t, ++p) {
       *p = *t;
     }
@@ -2318,7 +2331,7 @@ std::string cvtItoa(const IntegerRep *x, std::string fmt, int &fmtlen, int base,
       *p++ = fillchar;
     }
     *p = 0;
-    fmtlen = (int)(p - const_cast<char *>(fmt.c_str()));
+    fmtlen = static_cast<int>(p - buf);
     return fmt;
   }
 }
@@ -2326,14 +2339,19 @@ std::string cvtItoa(const IntegerRep *x, std::string fmt, int &fmtlen, int base,
 std::istream &operator>>(std::istream &s, Integer &y)
 {
   char sgn = 0;
-  char ch;
+  char ch = 0;
   y.rep = Icopy_zero(y.rep);
 
-  do {
-    s.get(ch);
-  } while (isspace(ch));
+  while (s.get(ch) && std::isspace(static_cast<unsigned char>(ch))) {
+  }
+
+  if (!s) {
+    return s;
+  }
 
   s.unget();
+
+  bool putback = false;
 
   while (s.get(ch)) {
     if (ch == '-') {
@@ -2341,21 +2359,24 @@ std::istream &operator>>(std::istream &s, Integer &y)
         sgn = '-';
       }
       else {
+        putback = true;
         break;
       }
+    }
+    else if (ch >= '0' && ch <= '9') {
+      const long digit = ch - '0';
+      y *= 10;
+      y += digit;
     }
     else {
-      if (ch >= '0' && ch <= '9') {
-        const long digit = ch - '0';
-        y *= 10;
-        y += digit;
-      }
-      else {
-        break;
-      }
+      putback = true;
+      break;
     }
   }
-  s.unget();
+
+  if (putback) {
+    s.unget();
+  }
 
   if (sgn == '-') {
     y.negate();
