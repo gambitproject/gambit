@@ -572,6 +572,7 @@ gambit_SOURCES = \
 	src/gui/dlnashmon.cc \
 	src/gui/dlnashmon.h \
 	src/gui/dlnfglogit.cc \
+	src/gui/dlnfglogit.h \
 	src/gui/efgdisplay.cc \
 	src/gui/efgdisplay.h \
 	src/gui/efglayout.cc \
