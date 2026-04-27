@@ -915,61 +915,59 @@ IntegerRep *multiply(const IntegerRep *x, const IntegerRep *y, IntegerRep *r)
     else {
       r = Icalloc(r, rl);
     }
-    unsigned short *rs = r->s;
-    // NOLINTBEGIN(misc-const-correctness)
-    unsigned short *topr = &(rs[rl]);
-    // NOLINTEND(misc-const-correctness)
 
-    // use best inner/outer loop params given constraints
-    unsigned short *currentr;
-    const unsigned short *bota;
-    const unsigned short *as;
-    const unsigned short *botb;
-    const unsigned short *topb;
+    unsigned short *rs = r->s;
+    unsigned short *topr = &(rs[rl]);
+
+    const unsigned short *outer;
+    int outer_len;
+    const unsigned short *inner;
+    int inner_len;
+
     if (xrsame) {
-      currentr = &(rs[xl - 1]);
-      bota = rs;
-      as = currentr;
-      botb = y->s;
-      topb = &(botb[yl]);
+      outer = rs;
+      outer_len = xl;
+      inner = y->s;
+      inner_len = yl;
     }
     else if (yrsame) {
-      currentr = &(rs[yl - 1]);
-      bota = rs;
-      as = currentr;
-      botb = x->s;
-      topb = &(botb[xl]);
+      outer = rs;
+      outer_len = yl;
+      inner = x->s;
+      inner_len = xl;
     }
     else if (xl <= yl) {
-      currentr = &(rs[xl - 1]);
-      bota = x->s;
-      as = &(bota[xl - 1]);
-      botb = y->s;
-      topb = &(botb[yl]);
+      outer = x->s;
+      outer_len = xl;
+      inner = y->s;
+      inner_len = yl;
     }
     else {
-      currentr = &(rs[yl - 1]);
-      bota = y->s;
-      as = &(bota[yl - 1]);
-      botb = x->s;
-      topb = &(botb[xl]);
+      outer = y->s;
+      outer_len = yl;
+      inner = x->s;
+      inner_len = xl;
     }
 
-    while (as >= bota) {
-      auto ai = (unsigned long)(*as--);
-      unsigned short *rs = currentr--;
-      *rs = 0;
+    for (int outer_index = outer_len; outer_index-- > 0;) {
+      const unsigned long ai = static_cast<unsigned long>(outer[outer_index]);
+      unsigned short *out = rs + outer_index;
+
+      *out = 0;
+
       if (ai != 0) {
         unsigned long sum = 0;
-        const unsigned short *bs = botb;
-        while (bs < topb) {
-          sum += ai * (unsigned long)(*bs++) + (unsigned long)(*rs);
-          *rs++ = extract(sum);
+
+        for (int inner_index = 0; inner_index < inner_len; ++inner_index) {
+          sum += ai * static_cast<unsigned long>(inner[inner_index]) +
+                 static_cast<unsigned long>(*out);
+          *out++ = extract(sum);
           sum = down(sum);
         }
-        while (sum != 0 && rs < topr) {
-          sum += (unsigned long)(*rs);
-          *rs++ = extract(sum);
+
+        while (sum != 0 && out < topr) {
+          sum += static_cast<unsigned long>(*out);
+          *out++ = extract(sum);
           sum = down(sum);
         }
       }
@@ -1075,49 +1073,49 @@ IntegerRep *multiply(const IntegerRep *x, long y, IntegerRep *r)
     // NOLINTBEGIN(misc-const-correctness)
     unsigned short *topr = &(rs[rl]);
     // NOLINTEND(misc-const-correctness)
-    unsigned short *currentr;
-    const unsigned short *bota;
-    const unsigned short *as;
-    const unsigned short *botb;
-    const unsigned short *topb;
+    const unsigned short *outer;
+    int outer_len;
+    const unsigned short *inner;
+    int inner_len;
 
     if (xrsame) {
-      currentr = &(rs[xl - 1]);
-      bota = rs;
-      as = currentr;
-      botb = tmp;
-      topb = &(botb[yl]);
+      outer = rs;
+      outer_len = xl;
+      inner = tmp;
+      inner_len = yl;
     }
     else if (xl <= yl) {
-      currentr = &(rs[xl - 1]);
-      bota = x->s;
-      as = &(bota[xl - 1]);
-      botb = tmp;
-      topb = &(botb[yl]);
+      outer = x->s;
+      outer_len = xl;
+      inner = tmp;
+      inner_len = yl;
     }
     else {
-      currentr = &(rs[yl - 1]);
-      bota = tmp;
-      as = &(bota[yl - 1]);
-      botb = x->s;
-      topb = &(botb[xl]);
+      outer = tmp;
+      outer_len = yl;
+      inner = x->s;
+      inner_len = xl;
     }
 
-    while (as >= bota) {
-      auto ai = (unsigned long)(*as--);
-      unsigned short *rs = currentr--;
-      *rs = 0;
+    for (int outer_index = outer_len; outer_index-- > 0;) {
+      const unsigned long ai = static_cast<unsigned long>(outer[outer_index]);
+      unsigned short *out = rs + outer_index;
+
+      *out = 0;
+
       if (ai != 0) {
         unsigned long sum = 0;
-        const unsigned short *bs = botb;
-        while (bs < topb) {
-          sum += ai * (unsigned long)(*bs++) + (unsigned long)(*rs);
-          *rs++ = extract(sum);
+
+        for (int inner_index = 0; inner_index < inner_len; ++inner_index) {
+          sum += ai * static_cast<unsigned long>(inner[inner_index]) +
+                 static_cast<unsigned long>(*out);
+          *out++ = extract(sum);
           sum = down(sum);
         }
-        while (sum != 0 && rs < topr) {
-          sum += (unsigned long)(*rs);
-          *rs++ = extract(sum);
+
+        while (sum != 0 && out < topr) {
+          sum += static_cast<unsigned long>(*out);
+          *out++ = extract(sum);
           sum = down(sum);
         }
       }
