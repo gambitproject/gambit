@@ -14,5 +14,4 @@ subpackages.
 The following packages and versions are currently included in this
 directory:
 
-wxThings      031605
 wxSheet       052405
