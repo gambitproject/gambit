@@ -35,7 +35,6 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
 #include <limits>
-#include <cstring>
 #include <stdexcept>
 
 #include "integer.h"
@@ -2074,47 +2073,65 @@ IntegerRep *atoIntegerRep(const char *s, int base)
   if (s == nullptr) {
     throw std::invalid_argument("null string passed to atoIntegerRep");
   }
-  const int sl = strlen(s);
-  IntegerRep *r = Icalloc(nullptr, static_cast<int>(sl * (lg(base) + 1) / I_SHIFT + 1));
-  if (s != nullptr) {
-    char sgn;
-    while (std::isspace(static_cast<unsigned char>(*s))) {
-      ++s;
+
+  while (std::isspace(static_cast<unsigned char>(*s))) {
+    ++s;
+  }
+
+  int sgn = I_POSITIVE;
+  if (*s == '-') {
+    sgn = I_NEGATIVE;
+    ++s;
+  }
+  else if (*s == '+') {
+    ++s;
+  }
+
+  const char *digits = s;
+  int digit_count = 0;
+
+  for (const char *p = digits;; ++p) {
+    int digit;
+    if (*p >= '0' && *p <= '9') {
+      digit = *p - '0';
     }
-    if (*s == '-') {
-      sgn = I_NEGATIVE;
-      s++;
+    else if (*p >= 'a' && *p <= 'z') {
+      digit = *p - 'a' + 10;
     }
-    else if (*s == '+') {
-      sgn = I_POSITIVE;
-      s++;
+    else if (*p >= 'A' && *p <= 'Z') {
+      digit = *p - 'A' + 10;
     }
     else {
-      sgn = I_POSITIVE;
+      break;
     }
-    for (;;) {
-      long digit;
-      if (*s >= '0' && *s <= '9') {
-        digit = *s - '0';
-      }
-      else if (*s >= 'a' && *s <= 'z') {
-        digit = *s - 'a' + 10;
-      }
-      else if (*s >= 'A' && *s <= 'Z') {
-        digit = *s - 'A' + 10;
-      }
-      else {
-        break;
-      }
-      if (digit >= base) {
-        break;
-      }
-      r = multiply(r, base, r);
-      r = add(r, 0, digit, r);
-      ++s;
+
+    if (digit >= base) {
+      break;
     }
-    r->sgn = sgn;
+
+    ++digit_count;
   }
+
+  IntegerRep *r = Icalloc(nullptr, static_cast<int>(digit_count * (lg(base) + 1) / I_SHIFT + 1));
+
+  for (int i = 0; i < digit_count; ++i, ++digits) {
+    long digit;
+    if (*digits >= '0' && *digits <= '9') {
+      digit = *digits - '0';
+    }
+    else if (*digits >= 'a' && *digits <= 'z') {
+      digit = *digits - 'a' + 10;
+    }
+    else {
+      digit = *digits - 'A' + 10;
+    }
+
+    r = multiply(r, base, r);
+    r = add(r, 0, digit, r);
+  }
+
+  r->sgn = sgn;
+  Icheck(r);
   return r;
 }
 
