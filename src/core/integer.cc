@@ -1209,35 +1209,21 @@ static int unscale(const unsigned short *x, int xl, unsigned short y, unsigned s
   if (xl == 0 || y == 1) {
     return 0;
   }
-  else if (q != nullptr) {
-    unsigned short *botq = q;
-    // NOLINTBEGIN(misc-const-correctness)
-    unsigned short *qs = &(botq[xl - 1]);
-    // NOLINTEND(misc-const-correctness)
-    const unsigned short *xs = &(x[xl - 1]);
-    unsigned long rem = 0;
-    while (qs >= botq) {
-      rem = up(rem) | *xs--;
-      const unsigned long u = rem / y;
-      *qs-- = extract(u);
-      rem -= u * y;
+
+  unsigned long rem = 0;
+
+  for (int i = xl; i-- > 0;) {
+    rem = up(rem) | x[i];
+    const unsigned long u = rem / y;
+
+    if (q != nullptr) {
+      q[i] = extract(u);
     }
-    const int r = extract(rem);
-    return r;
+
+    rem -= u * y;
   }
-  else // same loop, a bit faster if just need rem
-  {
-    const unsigned short *botx = x;
-    const unsigned short *xs = &(botx[xl - 1]);
-    unsigned long rem = 0;
-    while (xs >= botx) {
-      rem = up(rem) | *xs--;
-      const unsigned long u = rem / y;
-      rem -= u * y;
-    }
-    const int r = extract(rem);
-    return r;
-  }
+
+  return extract(rem);
 }
 
 IntegerRep *div(const IntegerRep *x, const IntegerRep *y, IntegerRep *q)
