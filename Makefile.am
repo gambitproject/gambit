@@ -497,7 +497,6 @@ gambit_SOURCES = \
 	src/labenski/src/optvalue.cpp \
 	src/labenski/src/range.cpp \
 	src/labenski/src/spinctld.cpp \
-	src/labenski/src/toggle.cpp \
 	src/labenski/include/wx/sheet/pairarr.h \
 	src/labenski/include/wx/sheet/sheetatr.h \
 	src/labenski/include/wx/sheet/sheetdef.h \
@@ -513,7 +512,6 @@ gambit_SOURCES = \
 	src/labenski/include/wx/wxthings/range.h \
 	src/labenski/include/wx/wxthings/spinctld.h \
 	src/labenski/include/wx/wxthings/thingdef.h \
-	src/labenski/include/wx/wxthings/toggle.h \
 	src/gui/analysis.cc \
 	src/gui/analysis.h \
 	src/gui/app.cc \
