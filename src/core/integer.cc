@@ -72,9 +72,9 @@ long lg(unsigned long x)
 */
 
 #define I_SHIFT (sizeof(short) * CHAR_BIT)
-#define I_RADIX ((unsigned long)(1L << I_SHIFT))
-#define I_MAXNUM ((unsigned long)((I_RADIX - 1)))
-#define I_MINNUM ((unsigned long)(I_RADIX >> 1))
+#define I_RADIX (1UL << I_SHIFT)
+#define I_MAXNUM (I_RADIX - 1UL)
+#define I_MINNUM (I_RADIX >> 1)
 #define I_POSITIVE 1
 #define I_NEGATIVE 0
 
