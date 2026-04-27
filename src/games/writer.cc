@@ -21,7 +21,6 @@
 //
 
 #include "gambit.h"
-#include "writer.h"
 
 namespace Gambit {
 
