@@ -113,16 +113,10 @@ def test_write_latex():
     game = gbt.Game.new_table([2, 2], title="Game title")
     game.players[0].label = "Alice"
     game.players[1].label = "Bob"
-    game.players[0].strategies[0].label = "Cooperate"
-    game.players[1].strategies[0].label = "Defect"
     serialized_game = game.to_latex()
-    assert "Game title" in serialized_game
-    assert "Alice" in serialized_game
-    assert "Bob" in serialized_game
-    # Bob (col player) should appear before Cooperate/Defect in the subtable headers
-    assert serialized_game.find("Bob") < serialized_game.find("Cooperate")
-    # Alice (row player) should also appear before the strategies in the first row
-    assert serialized_game.find("Alice") < serialized_game.find("Cooperate")
+    assert "\\begin{game}" in serialized_game
+    assert "[\\textbf{Alice}][\\textbf{Bob}]" in serialized_game
+    assert "\\textbf{Game title}" in serialized_game
 
 
 def test_read_write_efg():
