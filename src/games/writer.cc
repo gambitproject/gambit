@@ -214,7 +214,7 @@ public:
       m_result += strategy->GetLabel();
       m_result += "}";
     }
-    m_result += " \\\\ \\cline{3-";
+    m_result += R"( \\ \cline{3-)";
     m_result += lexical_cast<std::string>(2 + m_colSize);
     m_result += "}\n";
   }
@@ -234,7 +234,7 @@ public:
 
   void WriteRowEnd(bool isLast) override
   {
-    m_result += " \\\\ \\cline{3-";
+    m_result += R"( \\ \cline{3-)";
     m_result += lexical_cast<std::string>(2 + m_colSize);
     m_result += "}\n";
   }
