@@ -493,7 +493,6 @@ gambit_SOURCES = \
 	src/labenski/src/sheetsel.cpp \
 	src/labenski/src/sheetspt.cpp \
 	src/labenski/src/sheettbl.cpp \
-	src/labenski/src/block.cpp \
 	src/labenski/src/genergdi.cpp \
 	src/labenski/src/geometry.cpp \
 	src/labenski/src/optvalue.cpp \
