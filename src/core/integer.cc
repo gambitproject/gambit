@@ -101,15 +101,21 @@ static IntegerRep ZeroRep = {0, 0, 1, {0}};
 inline static unsigned short extract(unsigned long x) { return (unsigned short)(x & I_MAXNUM); }
 
 // transfer high bits to low
-
-inline static unsigned long down(unsigned long x) { return (x >> I_SHIFT) & I_MAXNUM; }
+static unsigned long down(unsigned long x) { return (x >> I_SHIFT) & I_MAXNUM; }
 
 // transfer low bits to high
+static unsigned long up(unsigned long x) { return x << I_SHIFT; }
 
-inline static unsigned long up(unsigned long x) { return x << I_SHIFT; }
+static unsigned long magnitude(long x) noexcept
+{
+  if (x >= 0) {
+    return static_cast<unsigned long>(x);
+  }
+  // Avoid `-x`, which is undefined when x == LONG_MIN.
+  return 0UL - static_cast<unsigned long>(x);
+}
 
 // compare two equal-length reps
-
 static int docmp(const unsigned short *x, const unsigned short *y, int l)
 {
   int diff = 0;
@@ -308,11 +314,10 @@ IntegerRep *Icopy(IntegerRep *old, const IntegerRep *src)
 }
 
 // allocate & copy space for a long
-
 IntegerRep *Icopy_long(IntegerRep *old, long x)
 {
   const int newsgn = (x >= 0);
-  IntegerRep *rep = Icopy_ulong(old, newsgn ? x : -x);
+  IntegerRep *rep = Icopy_ulong(old, magnitude(x));
   rep->sgn = newsgn;
   return rep;
 }
@@ -590,7 +595,7 @@ int compare(const IntegerRep *x, long y)
   }
   else {
     const int ysgn = y >= 0;
-    unsigned long uy = (ysgn) ? y : -y;
+    unsigned long uy = magnitude(y);
     int diff = xsgn - ysgn;
     if (diff == 0) {
       diff = xl - SHORT_PER_LONG;
@@ -621,7 +626,7 @@ int ucompare(const IntegerRep *x, long y)
     return xl;
   }
   else {
-    unsigned long uy = (y >= 0) ? y : -y;
+    unsigned long uy = magnitude(y);
     int diff = xl - SHORT_PER_LONG;
     if (diff <= 0) {
       unsigned short tmp[SHORT_PER_LONG];
@@ -769,7 +774,7 @@ IntegerRep *add(const IntegerRep *x, int negatex, long y, IntegerRep *r)
   const int xrsame = x == r;
 
   const int ysgn = (y >= 0);
-  unsigned long uy = (ysgn) ? y : -y;
+  unsigned long uy = magnitude(y);
 
   if (y == 0) {
     r = Ialloc(r, x->s, xl, xsgn, xl);
@@ -1041,7 +1046,7 @@ IntegerRep *multiply(const IntegerRep *x, long y, IntegerRep *r)
   else {
     const int ysgn = y >= 0;
     const int rsgn = x->sgn == ysgn;
-    unsigned long uy = (ysgn) ? y : -y;
+    unsigned long uy = magnitude(y);
     unsigned short tmp[SHORT_PER_LONG];
     int yl = 0;
     while (uy != 0) {
@@ -1287,18 +1292,12 @@ IntegerRep *div(const IntegerRep *x, long y, IntegerRep *q)
   nonnil(x);
   const int xl = x->len;
   if (y == 0) {
-    throw Gambit::ZeroDivideException();
+    throw ZeroDivideException();
   }
 
   unsigned short ys[SHORT_PER_LONG];
-  unsigned long u;
   const int ysgn = y >= 0;
-  if (ysgn) {
-    u = y;
-  }
-  else {
-    u = -y;
-  }
+  unsigned long u = magnitude(y);
   int yl = 0;
   while (u != 0) {
     ys[yl++] = extract(u);
@@ -1357,17 +1356,11 @@ void divide(const Integer &Ix, long y, Integer &Iq, long &rem)
   IntegerRep *q = Iq.rep;
   const int xl = x->len;
   if (y == 0) {
-    throw Gambit::ZeroDivideException();
+    throw ZeroDivideException();
   }
   unsigned short ys[SHORT_PER_LONG];
-  unsigned long u;
   const int ysgn = y >= 0;
-  if (ysgn) {
-    u = y;
-  }
-  else {
-    u = -y;
-  }
+  unsigned long u = magnitude(y);
   int yl = 0;
   while (u != 0) {
     ys[yl++] = extract(u);
@@ -1507,9 +1500,8 @@ IntegerRep *mod(const IntegerRep *x, const IntegerRep *y, IntegerRep *r)
   nonnil(y);
   const int xl = x->len;
   const int yl = y->len;
-  // if (yl == 0) (*lib_error_handler)("Integer", "attempted division by zero");
   if (yl == 0) {
-    throw Gambit::ZeroDivideException();
+    throw ZeroDivideException();
   }
 
   const int comp = ucompare(x, y);
@@ -1561,17 +1553,10 @@ IntegerRep *mod(const IntegerRep *x, long y, IntegerRep *r)
   nonnil(x);
   const int xl = x->len;
   if (y == 0) {
-    throw Gambit::ZeroDivideException();
+    throw ZeroDivideException();
   }
   unsigned short ys[SHORT_PER_LONG];
-  unsigned long u;
-  const int ysgn = y >= 0;
-  if (ysgn) {
-    u = y;
-  }
-  else {
-    u = -y;
-  }
+  unsigned long u = magnitude(y);
   int yl = 0;
   while (u != 0) {
     ys[yl++] = extract(u);
@@ -1635,9 +1620,12 @@ IntegerRep *lshift(const IntegerRep *x, long y, IntegerRep *r)
   const int xrsame = x == r;
   const int rsgn = x->sgn;
 
-  const long ay = (y < 0) ? -y : y;
-  const int bw = (int)(ay / I_SHIFT);
-  const int sw = (int)(ay % I_SHIFT);
+  const unsigned long ay = magnitude(y);
+  if (ay / I_SHIFT > static_cast<unsigned long>(INT_MAX)) {
+    throw std::overflow_error("Integer shift count too large");
+  }
+  const int bw = static_cast<int>(ay / I_SHIFT);
+  const int sw = static_cast<int>(ay % I_SHIFT);
 
   if (y > 0) {
     const int rl = bw + xl + 1;
@@ -1782,14 +1770,7 @@ IntegerRep *bitop(const IntegerRep *x, long y, IntegerRep *r, char op)
 {
   nonnil(x);
   unsigned short tmp[SHORT_PER_LONG];
-  unsigned long u;
-  const int newsgn = (y >= 0);
-  if (newsgn) {
-    u = y;
-  }
-  else {
-    u = -y;
-  }
+  unsigned long u = magnitude(y);
 
   int l = 0;
   while (u != 0) {
@@ -2494,7 +2475,11 @@ void pow(const Integer &x, const Integer &y, Integer &dest)
 
 void add(const Integer &x, long y, Integer &dest) { dest.rep = add(x.rep, 0, y, dest.rep); }
 
-void sub(const Integer &x, long y, Integer &dest) { dest.rep = add(x.rep, 0, -y, dest.rep); }
+void sub(const Integer &x, long y, Integer &dest)
+{
+  const Integer yy(y);
+  sub(x, yy, dest);
+}
 
 void mul(const Integer &x, long y, Integer &dest) { dest.rep = multiply(x.rep, y, dest.rep); }
 
@@ -2504,7 +2489,13 @@ void mod(const Integer &x, long y, Integer &dest) { dest.rep = mod(x.rep, y, des
 
 void lshift(const Integer &x, long y, Integer &dest) { dest.rep = lshift(x.rep, y, dest.rep); }
 
-void rshift(const Integer &x, long y, Integer &dest) { dest.rep = lshift(x.rep, -y, dest.rep); }
+void rshift(const Integer &x, long y, Integer &dest)
+{
+  if (y == LONG_MIN) {
+    throw std::overflow_error("Integer shift count too large");
+  }
+  dest.rep = lshift(x.rep, -y, dest.rep);
+}
 
 void pow(const Integer &x, long y, Integer &dest) { dest.rep = power(x.rep, y, dest.rep); }
 
