@@ -36,7 +36,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include <iostream>
 #include <cfloat>
-#include <limits>
+#include <climits>
 #include <cstring>
 #include <stdexcept>
 
@@ -112,7 +112,7 @@ static int docmp(const unsigned short *x, const unsigned short *y, int l)
 
 // figure out max length of result of +, -, etc.
 
-inline static int calc_len(int len1, int len2, int pad)
+static int calc_len(int len1, int len2, int pad)
 {
   return (len1 >= len2) ? len1 + pad : len2 + pad;
 }
