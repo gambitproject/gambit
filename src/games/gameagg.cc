@@ -186,6 +186,7 @@ GameAGGRep::GameAGGRep(std::shared_ptr<agg::AGG> p_aggPtr) : aggPtr(p_aggPtr)
                     s->m_label = std::to_string(st++);
                   });
   }
+  IndexStrategies();
 }
 
 Game GameAGGRep::Copy() const
