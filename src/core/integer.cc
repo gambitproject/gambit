@@ -34,9 +34,7 @@ Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
   Thanks to the creators of the algorithms.
 */
 
-#include <iostream>
-#include <cfloat>
-#include <climits>
+#include <limits>
 #include <cstring>
 #include <stdexcept>
 
@@ -61,7 +59,7 @@ long lg(unsigned long x)
  as unsigned shorts is changed in the implementation files.
 */
 
-constexpr int I_SHIFT = sizeof(short) * CHAR_BIT;
+constexpr int I_SHIFT = std::numeric_limits<unsigned short>::digits;
 constexpr unsigned long I_RADIX = 1UL << I_SHIFT;
 constexpr unsigned long I_MAXNUM = I_RADIX - 1UL;
 constexpr unsigned long I_MINNUM = I_RADIX >> 1;
@@ -95,7 +93,7 @@ static unsigned long magnitude(long x) noexcept
   if (x >= 0) {
     return static_cast<unsigned long>(x);
   }
-  // Avoid `-x`, which is undefined when x == LONG_MIN.
+  // Avoid `-x`, which is undefined when x == std::numeric_limits<long>::min().
   return 0UL - static_cast<unsigned long>(x);
 }
 
@@ -374,7 +372,8 @@ IntegerRep *Icopy_one(IntegerRep *old, int newsgn)
 long Itolong(const IntegerRep *rep)
 {
   if (static_cast<unsigned>(rep->len) > SHORT_PER_LONG) {
-    return (rep->sgn == I_POSITIVE) ? LONG_MAX : LONG_MIN;
+    return (rep->sgn == I_POSITIVE) ? std::numeric_limits<long>::max()
+                                    : std::numeric_limits<long>::min();
   }
   else if (rep->len == 0) {
     return 0;
@@ -392,7 +391,8 @@ long Itolong(const IntegerRep *rep)
   else {
     unsigned long a = rep->s[SHORT_PER_LONG - 1];
     if (a >= I_MINNUM) {
-      return (rep->sgn == I_POSITIVE) ? LONG_MAX : LONG_MIN;
+      return (rep->sgn == I_POSITIVE) ? std::numeric_limits<long>::max()
+                                      : std::numeric_limits<long>::min();
     }
     else {
       a = up(a) | rep->s[SHORT_PER_LONG - 2];
@@ -407,7 +407,8 @@ long Itolong(const IntegerRep *rep)
 }
 
 // test whether op long() will work.
-// careful about asymmetry between LONG_MIN & LONG_MAX
+// careful about asymmetry between std::numeric_limits<long>::max() &
+// std::numeric_limits<long>::min()
 
 int Iislong(const IntegerRep *rep)
 {
@@ -439,7 +440,7 @@ int Iislong(const IntegerRep *rep)
 double Itodouble(const IntegerRep *rep)
 {
   double d = 0.0;
-  constexpr double bound = DBL_MAX / 2.0;
+  constexpr double bound = std::numeric_limits<double>::max() / 2.0;
   for (int i = rep->len - 1; i >= 0; --i) {
     auto a = static_cast<unsigned short>(I_RADIX >> 1);
     while (a != 0) {
@@ -469,7 +470,7 @@ double Itodouble(const IntegerRep *rep)
 int Iisdouble(const IntegerRep *rep)
 {
   double d = 0.0;
-  constexpr double bound = DBL_MAX / 2.0;
+  constexpr double bound = std::numeric_limits<double>::max() / 2.0;
   for (int i = rep->len - 1; i >= 0; --i) {
     auto a = static_cast<unsigned short>(I_RADIX >> 1);
     while (a != 0) {
@@ -494,7 +495,8 @@ double ratio(const Integer &num, const Integer &den)
   divide(num, den, q, r);
   const double d1 = q.as_double();
 
-  if (d1 >= DBL_MAX || d1 <= -DBL_MAX || sign(r) == 0) {
+  if (d1 >= std::numeric_limits<double>::max() || d1 <= -std::numeric_limits<double>::max() ||
+      sign(r) == 0) {
     return d1;
   }
   else // use as much precision as available for fractional part
@@ -1541,7 +1543,7 @@ IntegerRep *lshift(const IntegerRep *x, long y, IntegerRep *r)
   const int rsgn = x->sgn;
 
   const unsigned long ay = magnitude(y);
-  if (ay / I_SHIFT > static_cast<unsigned long>(INT_MAX)) {
+  if (ay / I_SHIFT > static_cast<unsigned long>(std::numeric_limits<int>::max())) {
     throw std::overflow_error("Integer shift count too large");
   }
 
@@ -2385,7 +2387,7 @@ void lshift(const Integer &x, long y, Integer &dest) { dest.rep = lshift(x.rep, 
 
 void rshift(const Integer &x, long y, Integer &dest)
 {
-  if (y == LONG_MIN) {
+  if (y == std::numeric_limits<long>::min()) {
     throw std::overflow_error("Integer shift count too large");
   }
   dest.rep = lshift(x.rep, -y, dest.rep);
