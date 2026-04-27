@@ -190,6 +190,13 @@ static IntegerRep *Inew(int newlen)
   return rep;
 }
 
+static void Ifree(IntegerRep *rep) noexcept
+{
+  if (rep != nullptr && !STATIC_IntegerRep(rep)) {
+    delete[] reinterpret_cast<char *>(rep);
+  }
+}
+
 // allocate: use the bits in src if non-null, clear the rest
 
 IntegerRep *Ialloc(IntegerRep *old, const unsigned short *src, int srclen, int newsgn, int newlen)
@@ -208,8 +215,8 @@ IntegerRep *Ialloc(IntegerRep *old, const unsigned short *src, int srclen, int n
   scpy(src, rep->s, srclen);
   Iclear_from(rep, srclen);
 
-  if (old != rep && old != nullptr && !STATIC_IntegerRep(old)) {
-    delete old;
+  if (old != rep) {
+    Ifree(old);
   }
   return rep;
 }
@@ -220,9 +227,7 @@ IntegerRep *Icalloc(IntegerRep *old, int newlen)
 {
   IntegerRep *rep;
   if (old == nullptr || newlen > old->sz) {
-    if (old != nullptr && !STATIC_IntegerRep(old)) {
-      delete old;
-    }
+    Ifree(old);
     rep = Inew(newlen);
   }
   else {
@@ -253,9 +258,7 @@ IntegerRep *Iresize(IntegerRep *old, int newlen)
       rep = Inew(newlen);
       scpy(old->s, rep->s, oldlen);
       rep->sgn = old->sgn;
-      if (!STATIC_IntegerRep(old)) {
-        delete old;
-      }
+      Ifree(old);
     }
     else {
       rep = old;
@@ -290,9 +293,7 @@ IntegerRep *Icopy(IntegerRep *old, const IntegerRep *src)
   else {
     const int newlen = src->len;
     if (old == nullptr || newlen > old->sz) {
-      if (old != nullptr && !STATIC_IntegerRep(old)) {
-        delete old;
-      }
+      Ifree(old);
       rep = Inew(newlen);
     }
     else {
@@ -330,9 +331,7 @@ IntegerRep *Icopy_ulong(IntegerRep *old, unsigned long x)
 
   IntegerRep *rep;
   if (old == nullptr || srclen > old->sz) {
-    if (old != nullptr && !STATIC_IntegerRep(old)) {
-      delete old;
-    }
+    Ifree(old);
     rep = Inew(srclen);
   }
   else {
@@ -366,9 +365,7 @@ IntegerRep *Icopy_zero(IntegerRep *old)
 IntegerRep *Icopy_one(IntegerRep *old, int newsgn)
 {
   if (old == nullptr || 1 > old->sz) {
-    if (old != nullptr && !STATIC_IntegerRep(old)) {
-      delete old;
-    }
+    Ifree(old);
     return newsgn == I_NEGATIVE ? &MinusOneRep : &OneRep;
   }
 
@@ -1279,12 +1276,10 @@ IntegerRep *div(const IntegerRep *x, const IntegerRep *y, IntegerRep *q)
     q = Icalloc(q, ql);
     do_divide(r->s, yy->s, yl, q->s, ql);
 
-    if (yy != y && !STATIC_IntegerRep(yy)) {
-      delete yy;
+    if (yy != y) {
+      Ifree(yy);
     }
-    if (!STATIC_IntegerRep(r)) {
-      delete r;
-    }
+    Ifree(r);
   }
   q->sgn = samesign;
   Icheck(q);
@@ -1352,9 +1347,7 @@ IntegerRep *div(const IntegerRep *x, long y, IntegerRep *q)
     q = Icalloc(q, ql);
     do_divide(r->s, ys, yl, q->s, ql);
 
-    if (!STATIC_IntegerRep(r)) {
-      delete r;
-    }
+    Ifree(r);
   }
   q->sgn = samesign;
   Icheck(q);
@@ -1432,9 +1425,7 @@ void divide(const Integer &Ix, long y, Integer &Iq, long &rem)
     }
     Icheck(r);
     rem = Itolong(r);
-    if (!STATIC_IntegerRep(r)) {
-      delete r;
-    }
+    Ifree(r);
   }
   rem = abs(Integer(rem)).as_long();
   if (xsgn == I_NEGATIVE) {
@@ -1499,8 +1490,8 @@ void divide(const Integer &Ix, const Integer &Iy, Integer &Iq, Integer &Ir)
     q = Icalloc(q, ql);
     do_divide(r->s, yy->s, yl, q->s, ql);
 
-    if (yy != y && !STATIC_IntegerRep(yy)) {
-      delete yy;
+    if (yy != y) {
+      Ifree(yy);
     }
     if (prescale != 1) {
       Icheck(r);
@@ -1556,8 +1547,8 @@ IntegerRep *mod(const IntegerRep *x, const IntegerRep *y, IntegerRep *r)
 
     do_divide(r->s, yy->s, yl, nullptr, xl - yl + 1);
 
-    if (yy != y && !STATIC_IntegerRep(yy)) {
-      delete yy;
+    if (yy != y) {
+      Ifree(yy);
     }
 
     if (prescale != 1) {
@@ -2023,12 +2014,8 @@ IntegerRep *gcd(const IntegerRep *x, const IntegerRep *y)
       t = add(t, 0, u, 0, t);
     }
   }
-  if (!STATIC_IntegerRep(t)) {
-    delete t;
-  }
-  if (!STATIC_IntegerRep(v)) {
-    delete v;
-  }
+  Ifree(t);
+  Ifree(v);
   if (k != 0) {
     u = lshift(u, k, u);
   }
@@ -2092,9 +2079,7 @@ IntegerRep *power(const IntegerRep *x, long y, IntegerRep *r)
         b = multiply(b, b, b);
       }
     }
-    if (!STATIC_IntegerRep(b)) {
-      delete b;
-    }
+    Ifree(b);
   }
   r->sgn = sgn;
   Icheck(r);
@@ -2304,9 +2289,7 @@ std::string cvtItoa(const IntegerRep *x, std::string fmt, int &fmtlen, int base,
           }
           *--s = ch;
         }
-        if (!STATIC_IntegerRep(z)) {
-          delete z;
-        }
+        Ifree(z);
         break;
       }
       else {
@@ -2443,12 +2426,7 @@ Integer::Integer(unsigned long y) : rep(Icopy_ulong(nullptr, y)) {}
 
 Integer::Integer(const Integer &y) : rep(Icopy(nullptr, y.rep)) {}
 
-Integer::~Integer()
-{
-  if (rep && !STATIC_IntegerRep(rep)) {
-    delete[] rep;
-  }
-}
+Integer::~Integer() { Ifree(rep); }
 
 Integer &Integer::operator=(const Integer &y)
 {
