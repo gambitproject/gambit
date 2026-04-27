@@ -111,8 +111,11 @@ def test_write_html():
 
 def test_write_latex():
     game = gbt.Game.new_table([2, 2])
+    game.players[0].label = "Alice"
+    game.players[1].label = "Bob"
     serialized_game = game.to_latex()
     assert serialized_game.startswith(r"\begin{game}")
+    assert "[Alice][Bob]" in serialized_game
 
 
 def test_read_write_efg():
