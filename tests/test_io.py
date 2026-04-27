@@ -110,12 +110,13 @@ def test_write_html():
 
 
 def test_write_latex():
-    game = gbt.Game.new_table([2, 2])
+    game = gbt.Game.new_table([2, 2], title="Game title")
     game.players[0].label = "Alice"
     game.players[1].label = "Bob"
     game.players[0].strategies[0].label = "Cooperate"
     game.players[1].strategies[0].label = "Defect"
     serialized_game = game.to_latex()
+    assert "Game title" in serialized_game
     assert "Alice" in serialized_game
     assert "Bob" in serialized_game
     # Bob (col player) should appear before Cooperate/Defect in the subtable headers

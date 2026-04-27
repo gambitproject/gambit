@@ -153,7 +153,13 @@ class LaTeXTableFormatter : public TableFormatter {
 public:
   void WriteTitle(const std::string &title) override
   {
-    // LaTeX output currently doesn't include the title in this function
+    if (!title.empty()) {
+      m_result += "\\begin{center}\n";
+      m_result += "{\\Large \\textbf{";
+      m_result += title;
+      m_result += "}}\n";
+      m_result += "\\end{center}\n";
+    }
   }
 
   void BeginSubtable(const Game &game, const GamePlayer &rowPlayer, const GamePlayer &colPlayer,
