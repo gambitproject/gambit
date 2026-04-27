@@ -1605,6 +1605,7 @@ IntegerRep *mod(const IntegerRep *x, long y, IntegerRep *r)
 IntegerRep *lshift(const IntegerRep *x, long y, IntegerRep *r)
 {
   nonnil(x);
+
   const int xl = x->len;
   if (xl == 0 || y == 0) {
     r = Icopy(r, x);
@@ -1618,11 +1619,13 @@ IntegerRep *lshift(const IntegerRep *x, long y, IntegerRep *r)
   if (ay / I_SHIFT > static_cast<unsigned long>(INT_MAX)) {
     throw std::overflow_error("Integer shift count too large");
   }
+
   const int bw = static_cast<int>(ay / I_SHIFT);
   const int sw = static_cast<int>(ay % I_SHIFT);
 
   if (y > 0) {
     const int rl = bw + xl + 1;
+
     if (xrsame) {
       r = Iresize(r, rl);
     }
@@ -1631,24 +1634,28 @@ IntegerRep *lshift(const IntegerRep *x, long y, IntegerRep *r)
     }
 
     unsigned short *botr = r->s;
-    // NOLINTBEGIN(misc-const-correctness)
-    unsigned short *rs = &(botr[rl - 1]);
-    // NOLINTEND(misc-const-correctness)
-    const unsigned short *botx = (xrsame) ? botr : x->s;
-    const unsigned short *xs = &(botx[xl - 1]);
+    const unsigned short *botx = xrsame ? botr : x->s;
+
     unsigned long a = 0;
-    while (xs >= botx) {
-      a = up(a) | ((unsigned long)(*xs--) << sw);
-      *rs-- = extract(down(a));
+    int out = rl;
+
+    for (int in = xl; in-- > 0;) {
+      --out;
+      a = up(a) | (static_cast<unsigned long>(botx[in]) << sw);
+      botr[out] = extract(down(a));
     }
-    *rs-- = extract(a);
-    while (rs >= botr) {
-      *rs-- = 0;
+
+    --out;
+    botr[out] = extract(a);
+
+    for (int i = 0; i < out; ++i) {
+      botr[i] = 0;
     }
   }
   else {
     const int rl = xl - bw;
-    if (rl < 0) {
+
+    if (rl <= 0) {
       r = Icopy_zero(r);
     }
     else {
@@ -1658,29 +1665,28 @@ IntegerRep *lshift(const IntegerRep *x, long y, IntegerRep *r)
       else {
         r = Icalloc(r, rl);
       }
+
       const int rw = I_SHIFT - sw;
-      unsigned short *rs = r->s;
-      // NOLINTBEGIN(misc-const-correctness)
-      unsigned short *topr = &(rs[rl]);
-      // NOLINTEND(misc-const-correctness)
-      const unsigned short *botx = (xrsame) ? rs : x->s;
-      const unsigned short *xs = &(botx[bw]);
-      const unsigned short *topx = &(botx[xl]);
-      unsigned long a = (unsigned long)(*xs++) >> sw;
-      while (xs < topx) {
-        a |= (unsigned long)(*xs++) << rw;
-        *rs++ = extract(a);
+      unsigned short *botr = r->s;
+      const unsigned short *botx = xrsame ? botr : x->s;
+
+      unsigned long a = static_cast<unsigned long>(botx[bw]) >> sw;
+      int out = 0;
+
+      for (int in = bw + 1; in < xl; ++in) {
+        a |= static_cast<unsigned long>(botx[in]) << rw;
+        botr[out++] = extract(a);
         a = down(a);
       }
-      *rs++ = extract(a);
-      if (xrsame) {
-        topr = const_cast<unsigned short *>(topx);
-      }
-      while (rs < topr) {
-        *rs++ = 0;
+
+      botr[out++] = extract(a);
+
+      for (int i = out; i < rl; ++i) {
+        botr[i] = 0;
       }
     }
   }
+
   r->sgn = rsgn;
   Icheck(r);
   return r;
