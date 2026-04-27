@@ -92,9 +92,7 @@ long lg(unsigned long x)
 #define MALLOC_MIN_OVERHEAD 4
 #endif
 
-static IntegerRep ZeroRep = {1, 0, 1, {0}};
-static IntegerRep OneRep = {1, 0, 1, {1}};
-static IntegerRep MinusOneRep = {1, 0, 0, {1}};
+static IntegerRep ZeroRep = {0, 0, 1, {0}};
 
 // utilities to extract and transfer bits
 
@@ -360,13 +358,11 @@ IntegerRep *Icopy_zero(IntegerRep *old)
   return old;
 }
 
-// special case for 1 or -1
-
 IntegerRep *Icopy_one(IntegerRep *old, int newsgn)
 {
-  if (old == nullptr || 1 > old->sz) {
+  if (old == nullptr || STATIC_IntegerRep(old) || 1 > old->sz) {
     Ifree(old);
-    return newsgn == I_NEGATIVE ? &MinusOneRep : &OneRep;
+    old = Inew(1);
   }
 
   old->sgn = newsgn;
