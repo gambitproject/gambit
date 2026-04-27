@@ -1849,14 +1849,18 @@ IntegerRep *Compl(const IntegerRep *src, IntegerRep *r)
 {
   nonnil(src);
   r = Icopy(r, src);
+  if (r->len == 0) {
+    return r;
+  }
+
   unsigned short *s = r->s;
-  // NOLINTBEGIN(misc-const-correctness)
   unsigned short *top = &(s[r->len - 1]);
-  // NOLINTEND(misc-const-correctness)
+
   while (s < top) {
     const unsigned short cmp = ~(*s);
     *s++ = cmp;
   }
+
   unsigned short a = *s;
   unsigned short b = 0;
   while (a != 0) {
@@ -1866,12 +1870,13 @@ IntegerRep *Compl(const IntegerRep *src, IntegerRep *r)
     }
     a >>= 1;
   }
+
   *s = b;
   Icheck(r);
   return r;
 }
 
-void(setbit)(Integer &x, long b)
+void setbit(Integer &x, long b)
 {
   if (b >= 0) {
     const int bw = (int)((unsigned long)b / I_SHIFT);
@@ -2093,73 +2098,39 @@ IntegerRep *negate(const IntegerRep *src, IntegerRep *dest)
   return dest;
 }
 
-#if defined(__GNUG__) && !defined(NO_NRV)
-
-Integer sqrt(const Integer &x)
-{
-  Integer r;
-  const int s = sign(x);
-  if (s < 0) {
-    x.error("Attempted square root of negative Integer");
-  }
-  if (s != 0) {
-    r >>= (lg(x) / 2); // get close
-    Integer q;
-    div(x, r, q);
-    while (q < r) {
-      r += q;
-      r >>= 1;
-      div(x, r, q);
-    }
-  }
-  return r;
-}
-
-Integer lcm(const Integer &x, const Integer &y)
-{
-  Integer r;
-  if (!x.initialized() || !y.initialized()) {
-    x.error("operation on uninitialized Integer");
-  }
-  Integer g;
-  if (sign(x) == 0 || sign(y) == 0) {
-    g = 1;
-  }
-  else {
-    g = gcd(x, y);
-  }
-  div(x, g, r);
-  mul(r, y, r);
-  return r;
-}
-
-#else
 Integer sqrt(const Integer &x)
 {
   Integer r(x);
-  int s = sign(x);
+  const int s = sign(x);
+
   if (s < 0) {
     x.error("Attempted square root of negative Integer");
   }
+
   if (s != 0) {
     r >>= (lg(x) / 2); // get close
+
     Integer q;
     div(x, r, q);
+
     while (q < r) {
       r += q;
       r >>= 1;
       div(x, r, q);
     }
   }
+
   return r;
 }
 
 Integer lcm(const Integer &x, const Integer &y)
 {
   Integer r;
+
   if (!x.initialized() || !y.initialized()) {
     x.error("operation on uninitialized Integer");
   }
+
   Integer g;
   if (sign(x) == 0 || sign(y) == 0) {
     g = 1;
@@ -2167,12 +2138,11 @@ Integer lcm(const Integer &x, const Integer &y)
   else {
     g = gcd(x, y);
   }
+
   div(x, g, r);
   mul(r, y, r);
   return r;
 }
-
-#endif
 
 IntegerRep *atoIntegerRep(const char *s, int base)
 {
@@ -2403,11 +2373,7 @@ int Integer::OK() const
   return 0;
 }
 
-void Integer::error(const char *msg) const
-{
-  // (*lib_error_handler)("Integer", msg);
-  //  gerr << msg << '\n';
-}
+void Integer::error(const char *msg) const { throw std::runtime_error(msg); }
 
 // The following were moved from the header file to stop BC from squealing
 // endless quantities of warnings
