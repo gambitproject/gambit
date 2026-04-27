@@ -508,8 +508,6 @@ gambit_SOURCES = \
 	src/labenski/include/wx/sheet/sheetsel.h \
 	src/labenski/include/wx/sheet/sheetspt.h \
 	src/labenski/include/wx/sheet/sheettbl.h \
-	src/labenski/include/wx/wxthings/block.h \
-	src/labenski/include/wx/wxthings/dropdown.h \
 	src/labenski/include/wx/wxthings/geometry.h \
 	src/labenski/include/wx/wxthings/optvalue.h \
 	src/labenski/include/wx/wxthings/range.h \
