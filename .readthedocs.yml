@@ -16,7 +16,7 @@ build:
     - imagemagick
   jobs:
     post_install:
-      - pip install "draw-tree @ git+https://github.com/gambitproject/draw_tree.git@v0.5.0"
+      - pip install "draw-tree @ git+https://github.com/gambitproject/draw_tree.git@v0.5.1"
       # Create RST for catalog table in docs
       - $READTHEDOCS_VIRTUALENV_PATH/bin/python build_support/catalog/update.py
 
