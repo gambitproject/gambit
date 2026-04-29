@@ -3,7 +3,7 @@
 // Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
 //
 // FILE: src/gui/dlnfglogit.cc
-// Dialog for monitoring progress of logit equilibrium computation
+// Dialog for monitoring progress of strategic-form logit equilibrium computation
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,6 +21,8 @@
 //
 
 #include <fstream>
+#include <memory>
+#include <sstream>
 
 #include <wx/wxprec.h>
 #ifndef WX_PRECOMP
@@ -29,72 +31,16 @@
 #include <wx/stdpaths.h>
 #include <wx/txtstrm.h>
 #include <wx/tokenzr.h>
-#include <wx/process.h>
-#include <wx/print.h>
 
 #include "wx/sheet/sheet.h"
-#include "wx/plotctrl/plotctrl.h"
-#include "wx/wxthings/spinctld.h" // for wxSpinCtrlDbl
-
-#include "gamedoc.h"
-#include "menuconst.h" // for tool IDs
+#include "dlnfglogit.h"
 
 namespace Gambit::GUI {
-// Use an anonymous namespace to encapsulate the helper classes
-namespace {
 
-//========================================================================
-//                    class LogitMixedBranch
-//========================================================================
-
-/// Represents one branch of a logit equilibrium correspondence
-class LogitMixedBranch {
+class LogitMixedList final : public wxSheet {
   GameDocument *m_doc;
   Array<double> m_lambdas;
   Array<std::shared_ptr<MixedStrategyProfile<double>>> m_profiles;
-
-public:
-  explicit LogitMixedBranch(GameDocument *p_doc) : m_doc(p_doc) {}
-
-  void AddProfile(const wxString &p_text);
-
-  int NumPoints() const { return m_lambdas.size(); }
-  double GetLambda(int p_index) const { return m_lambdas[p_index]; }
-  const MixedStrategyProfile<double> &GetProfile(int p_index) { return *m_profiles[p_index]; }
-};
-
-void LogitMixedBranch::AddProfile(const wxString &p_text)
-{
-  auto profile = std::make_shared<MixedStrategyProfile<double>>(
-      m_doc->GetGame()->NewMixedStrategyProfile(0.0));
-
-  wxStringTokenizer tok(p_text, wxT(","));
-
-  const auto next = tok.GetNextToken();
-  if (next == "NE") {
-    return;
-  }
-  m_lambdas.push_back(std::stod(next.ToStdString()));
-
-  for (size_t i = 1; i <= profile->MixedProfileLength(); i++) {
-    try {
-      (*profile)[i] = std::stod(tok.GetNextToken().ToStdString());
-    }
-    catch (std::out_of_range &) {
-      (*profile)[i] = 0.0;
-    }
-  }
-
-  m_profiles.push_back(profile);
-}
-
-//========================================================================
-//                      class LogitMixedSheet
-//========================================================================
-
-class LogitMixedSheet final : public wxSheet {
-  GameDocument *m_doc;
-  LogitMixedBranch &m_branch;
 
   // Overriding wxSheet members for data access
   wxString GetCellValue(const wxSheetCoords &) override;
@@ -113,83 +59,69 @@ class LogitMixedSheet final : public wxSheet {
   void DrawCursorCellHighlight(wxDC &, const wxSheetCellAttr &) override {}
 
 public:
-  LogitMixedSheet(wxWindow *p_parent, GameDocument *p_doc, LogitMixedBranch &p_branch);
-  ~LogitMixedSheet() override;
+  LogitMixedList(wxWindow *p_parent, GameDocument *p_doc);
+  ~LogitMixedList() override = default;
+
+  void AddProfile(const wxString &p_text, bool p_forceShow);
 };
 
-LogitMixedSheet::LogitMixedSheet(wxWindow *p_parent, GameDocument *p_doc,
-                                 LogitMixedBranch &p_branch)
-  : wxSheet(p_parent, wxID_ANY, wxDefaultPosition, wxSize(800, 600)), m_doc(p_doc),
-    m_branch(p_branch)
+LogitMixedList::LogitMixedList(wxWindow *p_parent, GameDocument *p_doc)
+  : wxSheet(p_parent, wxID_ANY), m_doc(p_doc)
 {
-  CreateGrid(p_branch.NumPoints(), p_doc->GetGame()->GetStrategies().size() + 1);
+  CreateGrid(0, 0);
   SetRowLabelWidth(40);
   SetColLabelHeight(25);
 }
 
-LogitMixedSheet::~LogitMixedSheet() = default;
-
-wxString LogitMixedSheet::GetCellValue(const wxSheetCoords &p_coords)
+wxString LogitMixedList::GetCellValue(const wxSheetCoords &p_coords)
 {
-  if (!m_doc->GetGame()) {
-    return wxT("");
-  }
-
   if (IsRowLabelCell(p_coords)) {
     wxString label;
     label << (p_coords.GetRow() + 1);
     return label;
   }
+
   if (IsColLabelCell(p_coords)) {
     if (p_coords.GetCol() == 0) {
       return wxT("Lambda");
     }
-    int index = 1;
-    for (const auto &player : m_doc->GetGame()->GetPlayers()) {
-      for (const auto &strategy : player->GetStrategies()) {
-        if (index++ == p_coords.GetCol()) {
-          wxString label;
-          label << player->GetNumber() << ": " << strategy->GetLabel();
-          return label;
-        }
-      }
-      return wxT("");
-    }
+
+    const GameStrategy strategy = m_doc->GetGame()->GetStrategy(p_coords.GetCol());
+    const GamePlayer player = strategy->GetPlayer();
+
+    wxString label;
+    label << player->GetNumber() << ": " << strategy->GetLabel();
+    return label;
   }
+
   if (IsCornerLabelCell(p_coords)) {
     return wxT("#");
   }
 
   if (p_coords.GetCol() == 0) {
-    return {lexical_cast<std::string>(m_branch.GetLambda(p_coords.GetRow() + 1),
+    return {lexical_cast<std::string>(m_lambdas[p_coords.GetRow() + 1],
                                       m_doc->GetStyle().NumDecimals())
                 .c_str(),
             *wxConvCurrent};
   }
-  const MixedStrategyProfile<double> &profile = m_branch.GetProfile(p_coords.GetRow() + 1);
-  return {lexical_cast<std::string>(profile[p_coords.GetCol()], m_doc->GetStyle().NumDecimals())
+
+  const auto profile = m_profiles[p_coords.GetRow() + 1];
+  return {lexical_cast<std::string>((*profile)[p_coords.GetCol()], m_doc->GetStyle().NumDecimals())
               .c_str(),
           *wxConvCurrent};
 }
 
-wxColour GetPlayerColor(const GameDocument *p_doc, int p_index)
+static wxColour GetPlayerColor(const GameDocument *p_doc, int p_index)
 {
-  if (!p_doc->GetGame()) {
+  if (p_index == 0) {
     return *wxBLACK;
   }
 
-  int index = 1;
-  for (const auto &player : p_doc->GetGame()->GetPlayers()) {
-    for (const auto &strategy : player->GetStrategies()) {
-      if (index++ == p_index) {
-        return p_doc->GetStyle().GetPlayerColor(player);
-      }
-    }
-  }
-  return *wxBLACK;
+  const GameStrategy strategy = p_doc->GetGame()->GetStrategy(p_index);
+  return p_doc->GetStyle().GetPlayerColor(strategy->GetPlayer());
 }
 
-wxSheetCellAttr LogitMixedSheet::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
+wxSheetCellAttr LogitMixedList::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
 {
   if (IsRowLabelCell(p_coords)) {
     wxSheetCellAttr attr(GetSheetRefData()->m_defaultRowLabelAttr);
@@ -199,6 +131,7 @@ wxSheetCellAttr LogitMixedSheet::GetAttr(const wxSheetCoords &p_coords, wxSheetA
     attr.SetReadOnly(true);
     return attr;
   }
+
   if (IsColLabelCell(p_coords)) {
     wxSheetCellAttr attr(GetSheetRefData()->m_defaultColLabelAttr);
     attr.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
@@ -208,6 +141,7 @@ wxSheetCellAttr LogitMixedSheet::GetAttr(const wxSheetCoords &p_coords, wxSheetA
     attr.SetForegroundColour(GetPlayerColor(m_doc, p_coords.GetCol()));
     return attr;
   }
+
   if (IsCornerLabelCell(p_coords)) {
     return GetSheetRefData()->m_defaultCornerLabelAttr;
   }
@@ -216,394 +150,83 @@ wxSheetCellAttr LogitMixedSheet::GetAttr(const wxSheetCoords &p_coords, wxSheetA
   attr.SetFont(wxFont(10, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL));
   attr.SetAlignment(wxALIGN_RIGHT, wxALIGN_CENTER);
   attr.SetOrientation(wxHORIZONTAL);
-  attr.SetForegroundColour(GetPlayerColor(m_doc, p_coords.GetCol()));
+
+  if (p_coords.GetCol() > 0) {
+    const GameStrategy strategy = m_doc->GetGame()->GetStrategy(p_coords.GetCol());
+    const GamePlayer player = strategy->GetPlayer();
+
+    attr.SetForegroundColour(m_doc->GetStyle().GetPlayerColor(player));
+
+    if (player->GetNumber() % 2 == 0) {
+      attr.SetBackgroundColour(wxColour(250, 250, 250));
+    }
+    else {
+      attr.SetBackgroundColour(wxColour(225, 225, 225));
+    }
+  }
+  else {
+    attr.SetForegroundColour(*wxBLACK);
+    attr.SetBackgroundColour(wxColour(250, 250, 250));
+  }
+
   attr.SetReadOnly(true);
   return attr;
 }
 
-class LogitBranchDialog final : public wxDialog {
-  LogitMixedSheet *m_sheet;
-
-public:
-  LogitBranchDialog(wxWindow *p_parent, GameDocument *p_doc, LogitMixedBranch &p_branch);
-};
-
-LogitBranchDialog::LogitBranchDialog(wxWindow *p_parent, GameDocument *p_doc,
-                                     LogitMixedBranch &p_branch)
-  : wxDialog(p_parent, wxID_ANY, wxT("Logit equilibrium correspondence"), wxDefaultPosition),
-    m_sheet(new LogitMixedSheet(this, p_doc, p_branch))
+void LogitMixedList::AddProfile(const wxString &p_text, bool p_forceShow)
 {
-  m_sheet->AutoSizeCol(0);
-
-  auto *sizer = new wxBoxSizer(wxVERTICAL);
-  sizer->Add(m_sheet, 0, wxEXPAND | wxALL, 5);
-  sizer->Add(CreateButtonSizer(wxOK), 0, wxALL | wxEXPAND, 5);
-
-  SetSizer(sizer);
-  sizer->Fit(this);
-  sizer->SetSizeHints(this);
-  wxTopLevelWindowBase::Layout();
-  CenterOnParent();
-}
-
-//========================================================================
-//                      class gbtLogitPlotCtrl
-//========================================================================
-
-class gbtLogitPlotCtrl : public wxPlotCtrl {
-  double m_scaleFactor{1.0};
-
-  /// Overriding x (lambda) axis labeling
-  void CalcXAxisTickPositions() override;
-
-public:
-  gbtLogitPlotCtrl(wxWindow *p_parent, GameDocument *p_doc);
-
-  double LambdaToX(double p_lambda) const
-  {
-    return m_scaleFactor * p_lambda / (1.0 + m_scaleFactor * p_lambda);
-  }
-  double XToLambda(double p_x) const { return p_x / (m_scaleFactor * (1.0 - p_x)); }
-
-  void SetScaleFactor(double p_scale) { m_scaleFactor = p_scale; }
-};
-
-gbtLogitPlotCtrl::gbtLogitPlotCtrl(wxWindow *p_parent, GameDocument *p_doc) : wxPlotCtrl(p_parent)
-{
-  SetAxisLabelColour(*wxBLUE);
-  const wxFont labelFont(8, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD);
-  SetAxisLabelFont(labelFont);
-  SetAxisColour(*wxBLUE);
-  SetAxisFont(labelFont);
-  SetDrawSymbols(false);
-
-  // SetAxisFont resets the width of the y-axis labels, assuming
-  // a fairly long label.
-  int x = 6, y = 12, descent = 0, leading = 0;
-  GetTextExtent(wxT("0.88"), &x, &y, &descent, &leading, &labelFont);
-  m_y_axis_text_width = x + leading;
-
-  SetXAxisLabel(wxT("Lambda"));
-  SetShowXAxisLabel(true);
-  SetYAxisLabel(wxT("Probability"));
-  SetShowYAxisLabel(true);
-
-  SetShowKey(true);
-
-  m_xAxisTick_step = 0.2;
-  SetViewRect(wxRect2DDouble(0, 0, 1, 1));
-}
-
-//
-// This differs from the wxPlotWindow original only by the use of
-// XToLambda() to construct the tick labels.
-//
-void gbtLogitPlotCtrl::CalcXAxisTickPositions()
-{
-  double current = ceil(m_viewRect.GetLeft() / m_xAxisTick_step) * m_xAxisTick_step;
-  m_xAxisTicks.Clear();
-  m_xAxisTickLabels.Clear();
-  const int windowWidth = GetPlotAreaRect().width;
-  for (int i = 0; i < m_xAxisTick_count; i++) {
-    if (!IsFinite(current, wxT("axis label is not finite"))) {
-      return;
-    }
-
-    int const x = GetClientCoordFromPlotX(current);
-
-    if ((x >= -1) && (x < windowWidth + 2)) {
-      m_xAxisTicks.Add(x);
-      m_xAxisTickLabels.Add(wxString::Format(m_xAxisTickFormat.c_str(), XToLambda(current)));
-    }
-
-    current += m_xAxisTick_step;
-  }
-}
-
-//========================================================================
-//                     class LogitPlotStrategyList
-//========================================================================
-
-class LogitPlotStrategyList final : public wxSheet {
-  GameDocument *m_doc;
-
-  //!
-  //! @name Overriding wxSheet members to disable selection behavior
-  //!
-  //@{
-  bool SelectRow(int, bool = false, bool = false) override { return false; }
-  bool SelectRows(int, int, bool = false, bool = false) override { return false; }
-  bool SelectCol(int, bool = false, bool = false) override { return false; }
-  bool SelectCols(int, int, bool = false, bool = false) override { return false; }
-  bool SelectCell(const wxSheetCoords &, bool = false, bool = false) override { return false; }
-  bool SelectBlock(const wxSheetBlock &, bool = false, bool = false) override { return false; }
-  bool SelectAll(bool = false) override { return false; }
-
-  bool HasSelection(bool = true) const override { return false; }
-  bool IsCellSelected(const wxSheetCoords &) const override { return false; }
-  bool IsRowSelected(int) const override { return false; }
-  bool IsColSelected(int) const override { return false; }
-  bool DeselectBlock(const wxSheetBlock &, bool = false) override { return false; }
-  bool ClearSelection(bool = false) override { return false; }
-  //@}
-
-  /// Overriding wxSheet member to suppress drawing of cursor
-  void DrawCursorCellHighlight(wxDC &, const wxSheetCellAttr &) override {}
-
-  // Event handlers
-  // This disables moving the (unseen) cursor
-  void OnLeftDown(wxSheetEvent &) {}
-  void OnLeftUp(wxSheetEvent &);
-
-public:
-  LogitPlotStrategyList(wxWindow *p_parent, GameDocument *p_doc);
-
-  bool IsStrategyShown(int p_index)
-  {
-    return GetCellValue(wxSheetCoords(p_index - 1, 2)) == wxT("1");
-  }
-};
-
-LogitPlotStrategyList::LogitPlotStrategyList(wxWindow *p_parent, GameDocument *p_doc)
-  : wxSheet(p_parent, wxID_ANY), m_doc(p_doc)
-{
-  CreateGrid(m_doc->GetGame()->GetStrategies().size(), 3);
-
-  SetRowLabelWidth(0);
-  SetColLabelHeight(0);
-  SetGridLineColour(*wxWHITE);
-
-  for (int st = 1; st <= m_doc->GetGame()->GetStrategies().size(); st++) {
-    const GameStrategy strategy = m_doc->GetGame()->GetStrategy(st);
-    const GamePlayer player = strategy->GetPlayer();
-    const wxColour color = m_doc->GetStyle().GetPlayerColor(player);
-
-    if (strategy->GetNumber() == 1) {
-      SetCellSpan(wxSheetCoords(st - 1, 0), wxSheetCoords(player->GetStrategies().size(), 1));
-      wxSheet::SetCellValue(wxSheetCoords(st - 1, 0),
-                            wxString(player->GetLabel().c_str(), *wxConvCurrent));
-      SetAttrForegroundColour(wxSheetCoords(st - 1, 0), color);
-      SetAttrAlignment(wxSheetCoords(st - 1, 0), wxALIGN_CENTER | wxALIGN_CENTER_VERTICAL);
-    }
-
-    wxSheet::SetCellValue(wxSheetCoords(st - 1, 1),
-                          wxString(strategy->GetLabel().c_str(), *wxConvCurrent));
-    SetAttrForegroundColour(wxSheetCoords(st - 1, 1), color);
-
-    wxSheet::SetCellValue(wxSheetCoords(st - 1, 2), wxT("1"));
-    SetAttrForegroundColour(wxSheetCoords(st - 1, 2), color);
-    SetAttrRenderer(wxSheetCoords(st - 1, 2),
-                    wxSheetCellRenderer(new wxSheetCellBoolRendererRefData()));
-    SetAttrEditor(wxSheetCoords(st - 1, 2), wxSheetCellEditor(new wxSheetCellBoolEditorRefData()));
+  if (GetNumberCols() == 0) {
+    AppendCols(m_doc->GetGame()->GetStrategies().size() + 1);
   }
 
-  AutoSizeCols();
+  auto profile = std::make_shared<MixedStrategyProfile<double>>(
+      m_doc->GetGame()->NewMixedStrategyProfile(0.0));
 
-  Connect(GetId(), wxEVT_SHEET_CELL_LEFT_DOWN,
-          (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
-              wxSheetEventFunction,
-              static_cast<wxSheetEventFunction>(&LogitPlotStrategyList::OnLeftDown))));
+  wxStringTokenizer tok(p_text, wxT(","));
+  const auto next = tok.GetNextToken();
 
-  Connect(GetId(), wxEVT_SHEET_CELL_LEFT_UP,
-          (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
-              wxSheetEventFunction,
-              static_cast<wxSheetEventFunction>(&LogitPlotStrategyList::OnLeftUp))));
-}
-
-void LogitPlotStrategyList::OnLeftUp(wxSheetEvent &p_event)
-{
-  if (p_event.GetCoords().GetCol() != 2) {
+  if (next == "NE") {
     return;
   }
 
-  if (GetCellValue(p_event.GetCoords()) == wxT("1")) {
-    SetCellValue(p_event.GetCoords(), wxT("0"));
-  }
-  else {
-    SetCellValue(p_event.GetCoords(), wxT("1"));
-  }
+  m_lambdas.push_back(std::stod(next.ToStdString()));
 
-  // Allow normal processing -- parent window will want to update
-  p_event.Skip();
-}
-
-//========================================================================
-//                       class LogitPlotPanel
-//========================================================================
-
-class LogitPlotPanel final : public wxPanel {
-  GameDocument *m_doc;
-  LogitMixedBranch m_branch;
-  LogitPlotStrategyList *m_plotStrategies;
-  gbtLogitPlotCtrl *m_plotCtrl;
-
-  // Event handlers
-  void OnChangeStrategies(wxSheetEvent &) { Plot(); }
-
-public:
-  LogitPlotPanel(wxWindow *p_parent, GameDocument *p_doc);
-
-  void AddProfile(const wxString &p_text) { m_branch.AddProfile(p_text); }
-
-  void SetScaleFactor(double p_scale);
-  void FitZoom();
-  void Plot();
-
-  LogitMixedBranch &GetBranch() { return m_branch; }
-  wxPlotCtrl *GetPlotCtrl() const { return m_plotCtrl; }
-};
-
-LogitPlotPanel::LogitPlotPanel(wxWindow *p_parent, GameDocument *p_doc)
-  : wxPanel(p_parent, wxID_ANY), m_doc(p_doc), m_branch(p_doc),
-    m_plotStrategies(new LogitPlotStrategyList(this, p_doc)),
-    m_plotCtrl(new gbtLogitPlotCtrl(this, p_doc))
-{
-  m_plotCtrl->SetSizeHints(wxSize(600, 400));
-
-  auto *playerSizer = new wxStaticBoxSizer(wxHORIZONTAL, this, wxT("Show strategies"));
-  playerSizer->Add(m_plotStrategies, 1, wxALL | wxEXPAND, 5);
-
-  auto *sizer = new wxBoxSizer(wxHORIZONTAL);
-  sizer->Add(playerSizer, 0, wxALL | wxEXPAND, 5);
-  sizer->Add(m_plotCtrl, 0, wxALL, 5);
-
-  Connect(m_plotStrategies->GetId(), wxEVT_SHEET_CELL_LEFT_UP,
-          (wxObjectEventFunction) reinterpret_cast<wxEventFunction>(wxStaticCastEvent(
-              wxSheetEventFunction,
-              static_cast<wxSheetEventFunction>(&LogitPlotPanel::OnChangeStrategies))));
-
-  SetSizer(sizer);
-  wxWindowBase::Layout();
-}
-
-void LogitPlotPanel::Plot()
-{
-  if (m_branch.NumPoints() == 0) {
-    return;
-  }
-
-  m_plotCtrl->DeleteCurve(-1);
-
-  for (int st = 1; st <= m_doc->GetGame()->GetStrategies().size(); st++) {
-    if (!m_plotStrategies->IsStrategyShown(st)) {
-      continue;
+  for (size_t i = 1; i <= profile->MixedProfileLength(); i++) {
+    try {
+      (*profile)[i] = std::stod(tok.GetNextToken().ToStdString());
     }
-
-    auto *curve = new wxPlotData(m_branch.NumPoints());
-
-    const GameStrategy strategy = m_doc->GetGame()->GetStrategy(st);
-    const GamePlayer player = strategy->GetPlayer();
-
-    curve->SetFilename(wxString(player->GetLabel().c_str(), *wxConvCurrent) + wxT(":") +
-                       wxString(strategy->GetLabel().c_str(), *wxConvCurrent));
-
-    for (int i = 0; i < m_branch.NumPoints(); i++) {
-      curve->SetValue(i, m_plotCtrl->LambdaToX(m_branch.GetLambda(i + 1)),
-                      m_branch.GetProfile(i + 1)[st]);
+    catch (std::out_of_range &) {
+      (*profile)[i] = 0.0;
     }
-
-    curve->SetPen(wxPLOTPEN_NORMAL,
-                  wxPen(m_doc->GetStyle().GetPlayerColor(player), 1, wxPENSTYLE_SOLID));
-
-    m_plotCtrl->AddCurve(curve, false);
   }
+
+  m_profiles.push_back(profile);
+
+  if (p_forceShow || m_profiles.size() - GetNumberRows() > 20) {
+    AppendRows(m_profiles.size() - GetNumberRows());
+    MakeCellVisible(wxSheetCoords(GetNumberRows() - 1, 0));
+  }
+
+  // Lambda tends to get large, so this column usually needs resized
+  AutoSizeCol(0);
 }
-
-void LogitPlotPanel::SetScaleFactor(double p_scale)
-{
-  m_plotCtrl->SetScaleFactor(p_scale);
-  Plot();
-}
-
-void LogitPlotPanel::FitZoom() { m_plotCtrl->MakeCurveVisible(-1); }
-
-//========================================================================
-//                       class LogitPrintout
-//========================================================================
-
-class LogitPrintout : public wxPrintout {
-  wxPlotCtrl *m_plot;
-
-public:
-  LogitPrintout(wxPlotCtrl *p_plot, const wxString &p_label) : wxPrintout(p_label), m_plot(p_plot)
-  {
-  }
-  ~LogitPrintout() override = default;
-
-  bool OnPrintPage(int) override
-  {
-    const wxSize size = GetDC()->GetSize();
-    m_plot->DrawWholePlot(GetDC(), wxRect(50, 50, size.GetWidth() - 100, size.GetHeight() - 100));
-    return true;
-  }
-  bool HasPage(int page) override { return (page <= 1); }
-  void GetPageInfo(int *minPage, int *maxPage, int *selPageFrom, int *selPageTo) override
-  {
-    *minPage = 1;
-    *maxPage = 1;
-    *selPageFrom = 1;
-    *selPageTo = 1;
-  }
-};
-
-//========================================================================
-//                      class LogitMixedDialog
-//========================================================================
-
-class LogitMixedDialog final : public wxDialog {
-  GameDocument *m_doc;
-  int m_pid{0};
-  wxProcess *m_process{nullptr};
-  LogitPlotPanel *m_plot;
-  wxSpinCtrlDbl *m_scaler;
-  wxToolBar *m_toolBar;
-  wxStaticText *m_statusText;
-  wxButton *m_stopButton, *m_okButton;
-  wxTimer m_timer;
-  wxString m_output;
-
-  void OnStop(wxCommandEvent &);
-  void OnTimer(wxTimerEvent &);
-  void OnIdle(wxIdleEvent &);
-  void OnEndProcess(wxProcessEvent &);
-  void OnSave(wxCommandEvent &);
-  void OnPrint(wxCommandEvent &);
-
-  void OnChangeScale(wxSpinEvent &);
-  void OnZoomFit(wxCommandEvent &);
-  void OnViewData(wxCommandEvent &);
-
-  void Start();
-
-public:
-  LogitMixedDialog(wxWindow *p_parent, GameDocument *p_doc);
-
-  DECLARE_EVENT_TABLE()
-};
 
 constexpr int GBT_ID_TIMER = 2000;
 constexpr int GBT_ID_PROCESS = 2001;
-constexpr int GBT_MENU_VIEW_DATA = 2002;
 
 BEGIN_EVENT_TABLE(LogitMixedDialog, wxDialog)
 EVT_END_PROCESS(GBT_ID_PROCESS, LogitMixedDialog::OnEndProcess)
 EVT_IDLE(LogitMixedDialog::OnIdle)
 EVT_TIMER(GBT_ID_TIMER, LogitMixedDialog::OnTimer)
-EVT_MENU(wxID_SAVE, LogitMixedDialog::OnSave)
-EVT_MENU(wxID_PRINT, LogitMixedDialog::OnPrint)
-EVT_MENU(GBT_MENU_VIEW_ZOOMFIT, LogitMixedDialog::OnZoomFit)
-EVT_MENU(GBT_MENU_VIEW_DATA, LogitMixedDialog::OnViewData)
+EVT_BUTTON(wxID_SAVE, LogitMixedDialog::OnSave)
 END_EVENT_TABLE()
 
 #include "bitmaps/stop.xpm"
-#include "bitmaps/print.xpm"
-#include "bitmaps/savedata.xpm"
-#include "bitmaps/datasrc.xpm"
-#include "bitmaps/zoomfit.xpm"
 
 LogitMixedDialog::LogitMixedDialog(wxWindow *p_parent, GameDocument *p_doc)
   : wxDialog(p_parent, wxID_ANY, wxT("Compute quantal response equilibria"), wxDefaultPosition),
-    m_doc(p_doc), m_plot(new LogitPlotPanel(this, m_doc)), m_timer(this, GBT_ID_TIMER)
+    m_doc(p_doc), m_process(nullptr), m_mixedList(new LogitMixedList(this, m_doc)),
+    m_timer(this, GBT_ID_TIMER)
 {
   auto *sizer = new wxBoxSizer(wxVERTICAL);
 
@@ -622,47 +245,15 @@ LogitMixedDialog::LogitMixedDialog(wxWindow *p_parent, GameDocument *p_doc)
 
   sizer->Add(startSizer, 0, wxALL | wxALIGN_CENTER, 5);
 
-  m_toolBar = new wxToolBar(this, wxID_ANY);
-  m_toolBar->SetWindowStyle(wxTB_HORIZONTAL | wxTB_FLAT);
-  m_toolBar->SetMargins(4, 4);
-  m_toolBar->SetToolBitmapSize(wxSize(24, 24));
-
-  m_toolBar->AddTool(wxID_SAVE, wxEmptyString, wxBitmap(savedata_xpm), wxNullBitmap, wxITEM_NORMAL,
-                     _("Save the correspondence to a CSV file"),
-                     _("Save the correspondence to a CSV file"));
-
-  m_toolBar->EnableTool(wxID_SAVE, false);
-
-  m_toolBar->AddTool(GBT_MENU_VIEW_DATA, wxEmptyString, wxBitmap(datasrc_xpm), wxNullBitmap,
-                     wxITEM_NORMAL, _("View the points in the correspondence"),
-                     _("View the points in the correspondence"));
-
-  m_toolBar->EnableTool(GBT_MENU_VIEW_DATA, false);
-
-  m_toolBar->AddTool(wxID_PRINT, wxEmptyString, wxBitmap(print_xpm), wxNullBitmap, wxITEM_NORMAL,
-                     _("Print the graph"), _("Print the graph"));
-
-  m_toolBar->AddSeparator();
-
-  m_toolBar->AddTool(GBT_MENU_VIEW_ZOOMFIT, wxEmptyString, wxBitmap(zoomfit_xpm), wxNullBitmap,
-                     wxITEM_NORMAL, _("Show the whole graph"), _("Show the whole graph"));
-
-  m_toolBar->AddControl(new wxStaticText(m_toolBar, wxID_STATIC, wxT("Graph scaling:")));
-  m_scaler = new wxSpinCtrlDbl(*m_toolBar, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, 0,
-                               0.1, 10.0, 1.0, 0.1);
-  m_toolBar->AddControl(m_scaler);
-  Connect(m_scaler->GetId(), wxEVT_COMMAND_SPINCTRL_UPDATED,
-          wxSpinEventHandler(LogitMixedDialog::OnChangeScale));
-
-  m_toolBar->Realize();
-  sizer->Add(m_toolBar, 0, wxALL | wxEXPAND, 5);
-
-  auto *midSizer = new wxBoxSizer(wxHORIZONTAL);
-  midSizer->Add(m_plot, 0, wxALL | wxALIGN_CENTER, 5);
-
-  sizer->Add(midSizer, 0, wxALL | wxALIGN_CENTER, 5);
+  m_mixedList->SetSizeHints(wxSize(600, 400));
+  sizer->Add(m_mixedList, 0, wxALL | wxALIGN_CENTER, 5);
 
   auto *buttonSizer = new wxBoxSizer(wxHORIZONTAL);
+
+  m_saveButton = new wxButton(this, wxID_SAVE, wxT("Save correspondence to .csv file"));
+  m_saveButton->Enable(false);
+  buttonSizer->Add(m_saveButton, 0, wxALL | wxALIGN_CENTER, 5);
+
   m_okButton = new wxButton(this, wxID_OK, wxT("OK"));
   buttonSizer->Add(m_okButton, 0, wxALL | wxALIGN_CENTER, 5);
   m_okButton->Enable(false);
@@ -672,8 +263,9 @@ LogitMixedDialog::LogitMixedDialog(wxWindow *p_parent, GameDocument *p_doc)
   SetSizer(sizer);
   sizer->Fit(this);
   sizer->SetSizeHints(this);
-  Layout();
+  wxTopLevelWindowBase::Layout();
   CenterOnParent();
+
   Start();
 }
 
@@ -713,6 +305,7 @@ void LogitMixedDialog::Start()
     str.Remove(0, m_process->GetOutputStream()->LastWrite());
     wxMilliSleep(100);
   }
+
   m_process->CloseOutput();
 
   m_timer.Start(1000, false);
@@ -729,8 +322,8 @@ void LogitMixedDialog::OnIdle(wxIdleEvent &p_event)
 
     wxString msg;
     msg << tis.ReadLine();
-    m_plot->AddProfile(msg);
-    // m_mixedList->AddProfile(msg, false);
+
+    m_mixedList->AddProfile(msg, false);
     m_output += msg;
     m_output += wxT("\n");
 
@@ -741,7 +334,7 @@ void LogitMixedDialog::OnIdle(wxIdleEvent &p_event)
   }
 }
 
-void LogitMixedDialog::OnTimer(wxTimerEvent &p_event) { wxWakeUpIdle(); }
+void LogitMixedDialog::OnTimer(wxTimerEvent &) { wxWakeUpIdle(); }
 
 void LogitMixedDialog::OnEndProcess(wxProcessEvent &p_event)
 {
@@ -755,8 +348,7 @@ void LogitMixedDialog::OnEndProcess(wxProcessEvent &p_event)
     msg << tis.ReadLine();
 
     if (msg != wxT("")) {
-      m_plot->AddProfile(msg);
-      // m_mixedList->AddProfile(msg, true);
+      m_mixedList->AddProfile(msg, true);
       m_output += msg;
       m_output += wxT("\n");
     }
@@ -772,9 +364,7 @@ void LogitMixedDialog::OnEndProcess(wxProcessEvent &p_event)
   }
 
   m_okButton->Enable(true);
-  m_toolBar->EnableTool(wxID_SAVE, true);
-  m_toolBar->EnableTool(GBT_MENU_VIEW_DATA, true);
-  m_plot->Plot();
+  m_saveButton->Enable(true);
 }
 
 void LogitMixedDialog::OnStop(wxCommandEvent &)
@@ -798,48 +388,14 @@ void LogitMixedDialog::OnSave(wxCommandEvent &)
                       wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
   if (dialog.ShowModal() == wxID_OK) {
-    std::ofstream file((const char *)dialog.GetPath().mb_str());
+    std::ofstream file(dialog.GetPath().mb_str());
     file << static_cast<const char *>(m_output.mb_str());
   }
 }
-
-void LogitMixedDialog::OnPrint(wxCommandEvent &)
-{
-  wxPrintDialogData data;
-  wxPrinter printer(&data);
-
-  wxPrintout *printout = new LogitPrintout(m_plot->GetPlotCtrl(), wxT("Logit correspondence"));
-
-  if (!printer.Print(this, printout, true)) {
-    if (wxPrinter::GetLastError() == wxPRINTER_ERROR) {
-      wxMessageBox(_("There was an error in printing"), _("Error"), wxOK);
-    }
-    // Otherwise, user hit "cancel"; just be quiet and return.
-    return;
-  }
-}
-
-void LogitMixedDialog::OnChangeScale(wxSpinEvent &)
-{
-  m_plot->SetScaleFactor(m_scaler->GetValue());
-}
-
-void LogitMixedDialog::OnZoomFit(wxCommandEvent &) { m_plot->FitZoom(); }
-
-void LogitMixedDialog::OnViewData(wxCommandEvent &)
-{
-  LogitBranchDialog dialog(this, m_doc, m_plot->GetBranch());
-  dialog.ShowModal();
-}
-
-} // namespace
-
-//========================================================================
-//                        External interface
-//========================================================================
 
 void LogitStrategic(wxWindow *p_parent, GameDocument *p_doc)
 {
   LogitMixedDialog(p_parent, p_doc).ShowModal();
 }
+
 } // namespace Gambit::GUI
