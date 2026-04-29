@@ -506,6 +506,8 @@ gambit_SOURCES = \
 	src/gui/dlnash.h \
 	src/gui/dlnashmon.cc \
 	src/gui/dlnashmon.h \
+	src/gui/dlnewtable.cc \
+	src/gui/dlnewtable.h \
 	src/gui/dlnfglogit.cc \
 	src/gui/dlnfglogit.h \
 	src/gui/efgdisplay.cc \
@@ -532,7 +534,9 @@ gambit_SOURCES = \
 	src/gui/style.cc \
 	src/gui/style.h \
 	src/gui/valnumber.cc \
-	src/gui/valnumber.h
+	src/gui/valnumber.h \
+	src/gui/welcome.cc \
+	src/gui/welcome.h
 
 # Add wxWidgets compilation flags for the GUI program
 gambit_CXXFLAGS = $(AM_CXXFLAGS) $(WX_CXXFLAGS)
