@@ -21,164 +21,308 @@
 //
 
 #include "gambit.h"
-#include "writer.h"
 
 namespace Gambit {
+
+namespace {
+
+/**
+ * @brief Internal interface for formatting game tables in different formats
+ */
+class TableFormatter {
+public:
+  // Virtual destructor ensures that the correct destructor is called when
+  // deleting a formatter through a pointer to this base class.
+  virtual ~TableFormatter() = default;
+
+  // These virtual functions must be provided by subclasses.
+  virtual void WriteTitle(const std::string &title) = 0;
+
+  // Setup for a specific 2D subtable (fixing strategies for other players)
+  virtual void BeginSubtable(const Game &game, const GamePlayer &rowPlayer,
+                             const GamePlayer &colPlayer, const PureStrategyProfile &profile) = 0;
+
+  virtual void EndSubtable() = 0;
+
+  // Writes the top header of the table showing column strategies
+  virtual void WriteColumnHeaders(const GamePlayer &colPlayer) = 0;
+
+  // Start a new row in the 2D table
+  virtual void BeginRow(const GamePlayer &rowPlayer, const GameStrategy &rowStrategy,
+                        bool isFirst) = 0;
+
+  // Close the current row (e.g., </tr> in HTML or \\ in LaTeX)
+  virtual void WriteRowEnd(bool isLast) = 0;
+
+  // Write a single cell containing the payoffs for all players
+  virtual void WriteCell(const std::string &payoffs, bool isLastCol) = 0;
+
+  // Return the final accumulated string result
+  virtual std::string GetResult() const = 0;
+};
+
+/**
+ * @brief Formatter for HTML output.
+ */
+class HTMLTableFormatter : public TableFormatter {
+public:
+  void WriteTitle(const std::string &title) override
+  {
+    m_result += "<center><h1>" + title + "</h1></center>\n";
+  }
+
+  void BeginSubtable(const Game &game, const GamePlayer &rowPlayer, const GamePlayer &colPlayer,
+                     const PureStrategyProfile &profile) override
+  {
+    // If the game has more than 2 players, we are looking at a "projection"
+    // of the game where all players except the row and column players have
+    // fixed strategies. We display those fixed strategies here.
+    if (game->NumPlayers() > 2) {
+      m_result += "<center><b>Subtable with strategies:</b></center>";
+      for (auto player : game->GetPlayers()) {
+        if (player == rowPlayer || player == colPlayer) {
+          continue; // Skip the players who are free in this subtable
+        }
+
+        m_result += "<center><b>Player ";
+        m_result += lexical_cast<std::string>(player->GetNumber());
+        m_result += " Strategy ";
+        m_result += lexical_cast<std::string>(profile->GetStrategy(player)->GetNumber());
+        m_result += "</b></center>";
+      }
+    }
+    m_result += "<table>";
+  }
+
+  void EndSubtable() override { m_result += "</table>"; }
+
+  void WriteColumnHeaders(const GamePlayer &colPlayer) override
+  {
+    // Create the header row for the column player's label and strategies
+    m_result += "<tr>";
+    m_result += R"(<td colspan="2" rowspan="2"></td>)";
+    m_result += R"(<td colspan=")" + lexical_cast<std::string>(colPlayer->GetStrategies().size()) +
+                R"(" align="center"><b>)";
+    m_result += colPlayer->GetLabel();
+    m_result += "</b></td>";
+    m_result += "</tr>";
+    m_result += "<tr>";
+    for (const auto &strategy : colPlayer->GetStrategies()) {
+      m_result += R"(<td align="center"><b>)";
+      m_result += strategy->GetLabel();
+      m_result += "</b></td>";
+    }
+    m_result += "</tr>";
+  }
+
+  void BeginRow(const GamePlayer &rowPlayer, const GameStrategy &rowStrategy,
+                bool isFirst) override
+  {
+    m_result += "<tr>";
+    // For the very first strategy row, add a cell that spans all rows
+    // to show the row player's name.
+    if (isFirst) {
+      m_result += R"(<td rowspan=")" +
+                  lexical_cast<std::string>(rowPlayer->GetStrategies().size()) +
+                  R"(" align="center" valign="middle"><b>)";
+      m_result += rowPlayer->GetLabel();
+      m_result += "</b></td>";
+    }
+    m_result += R"(<td align="center"><b>)";
+    m_result += rowStrategy->GetLabel();
+    m_result += "</b></td>";
+  }
+
+  void WriteRowEnd(bool isLast) override { m_result += "</tr>"; }
+
+  void WriteCell(const std::string &payoffs, bool isLastCol) override
+  {
+    m_result += "<td align=center>" + payoffs + "</td>";
+  }
+
+  std::string GetResult() const override { return m_result; }
+
+private:
+  std::string m_result; // Accumulates the HTML string
+};
+
+/**
+ * @brief Formatter for LaTeX output using the sgame package style.
+ */
+class LaTeXTableFormatter : public TableFormatter {
+public:
+  void WriteTitle(const std::string &title) override
+  {
+    if (!title.empty()) {
+      m_result += "\\begin{center}\n";
+      m_result += "{\\Large \\textbf{";
+      m_result += title;
+      m_result += "}}\n";
+      m_result += "\\end{center}\n";
+    }
+  }
+
+  void BeginSubtable(const Game &game, const GamePlayer &rowPlayer, const GamePlayer &colPlayer,
+                     const PureStrategyProfile &profile) override
+  {
+    // If the game has more than 2 players, display fixed strategies
+    if (game->NumPlayers() > 2) {
+      m_result += "\\begin{center}\n";
+      m_result += "\\textbf{Subtable with strategies:}\\\\\n";
+      for (auto player : game->GetPlayers()) {
+        if (player == rowPlayer || player == colPlayer) {
+          continue;
+        }
+
+        m_result += "Player ";
+        m_result += lexical_cast<std::string>(player->GetNumber());
+        m_result += " Strategy ";
+        m_result += lexical_cast<std::string>(profile->GetStrategy(player)->GetNumber());
+        m_result += "\\\\\n";
+      }
+      m_result += "\\end{center}\n";
+    }
+
+    m_result += "\\begin{center}\n";
+    m_result += "\\begin{game}{";
+    m_result += lexical_cast<std::string>(rowPlayer->GetStrategies().size());
+    m_result += "}{";
+    m_result += lexical_cast<std::string>(colPlayer->GetStrategies().size());
+    m_result += R"(}[\textbf{)";
+    m_result += rowPlayer->GetLabel();
+    m_result += R"(}][\textbf{)";
+    m_result += colPlayer->GetLabel();
+    m_result += "}]\n& ";
+  }
+
+  void EndSubtable() override
+  {
+    m_result += "\\end{game}\n";
+    m_result += "\\end{center}";
+  }
+
+  void WriteColumnHeaders(const GamePlayer &colPlayer) override
+  {
+    // Column strategies row
+    for (const auto &strategy : colPlayer->GetStrategies()) {
+      m_result += "\\textbf{";
+      m_result += strategy->GetLabel();
+      m_result += "}";
+      if (strategy != colPlayer->GetStrategies().back()) {
+        m_result += " & ";
+      }
+    }
+    m_result += " \\\\\n";
+  }
+
+  void BeginRow(const GamePlayer &rowPlayer, const GameStrategy &rowStrategy,
+                bool isFirst) override
+  {
+    m_result += "\\textbf{";
+    m_result += rowStrategy->GetLabel();
+    m_result += "} & ";
+  }
+
+  void WriteRowEnd(bool isLast) override { m_result += " \\\\\n"; }
+
+  void WriteCell(const std::string &payoffs, bool isLastCol) override
+  {
+    m_result += " $" + payoffs + "$ ";
+    if (!isLastCol) {
+      m_result += " & ";
+    }
+  }
+
+  std::string GetResult() const override { return m_result; }
+
+private:
+  std::string m_result;
+};
+
+/**
+ * @brief Shared logic for iterating over strategies and writing game tables.
+ *
+ * This function implements the logic of projecting a multi-player game
+ * into a series of 2D tables. It iterates over all possible strategy profiles
+ * of the "fixed" players and for each, creates a table showing all
+ * strategy combinations of the row and column players.
+ */
+void WriteGameTableInternal(const Game &p_game, const GamePlayer &p_rowPlayer,
+                            const GamePlayer &p_colPlayer, TableFormatter &p_formatter)
+{
+  p_formatter.WriteTitle(p_game->GetTitle());
+
+  // Create a profile where row and column players are restricted to their first
+  // strategies. This allows us to find all combinations of strategies for
+  // the OTHER players.
+  auto support = StrategySupportProfile(p_game)
+                     .RestrictTo(p_rowPlayer->GetStrategies().front())
+                     .RestrictTo(p_colPlayer->GetStrategies().front());
+
+  // Iterate through all subtables (contingencies for players other than row/col)
+  for (const auto &iter : StrategyContingencies(support)) {
+    p_formatter.BeginSubtable(p_game, p_rowPlayer, p_colPlayer, iter);
+    p_formatter.WriteColumnHeaders(p_colPlayer);
+
+    // Loop over the row player's strategies
+    for (const auto &row_strategy : p_rowPlayer->GetStrategies()) {
+      // Create a profile based on the current subtable's fixed strategies
+      const PureStrategyProfile profile = iter;
+      profile->SetStrategy(row_strategy);
+
+      p_formatter.BeginRow(p_rowPlayer, row_strategy,
+                           row_strategy == p_rowPlayer->GetStrategies().front());
+
+      // Loop over the column player's strategies
+      for (const auto &col_strategy : p_colPlayer->GetStrategies()) {
+        profile->SetStrategy(col_strategy);
+
+        // Extract the payoffs for every player for this specific outcome
+        std::string payoffs;
+        for (const auto &player : p_game->GetPlayers()) {
+          try {
+            if (profile->GetOutcome()) {
+              payoffs += profile->GetOutcome()->GetPayoff<std::string>(player);
+            }
+            else {
+              payoffs += "0";
+            }
+          }
+          catch (UndefinedException &) {
+            // Some game representations might not have outcomes defined directly
+            payoffs += lexical_cast<std::string>(profile->GetPayoff(player));
+          }
+          if (player != p_game->GetPlayers().back()) {
+            payoffs += ",";
+          }
+        }
+
+        p_formatter.WriteCell(payoffs, col_strategy == p_colPlayer->GetStrategies().back());
+      }
+
+      // Finalize the current row
+      p_formatter.WriteRowEnd(row_strategy == p_rowPlayer->GetStrategies().back());
+    }
+    p_formatter.EndSubtable();
+  }
+}
+
+} // end anonymous namespace
 
 std::string WriteHTMLFile(const Game &p_game, const GamePlayer &p_rowPlayer,
                           const GamePlayer &p_colPlayer)
 {
-  std::string theHtml;
-  theHtml += "<center><h1>" + p_game->GetTitle() + "</h1></center>\n";
-
-  auto support = StrategySupportProfile(p_game)
-                     .RestrictTo(p_rowPlayer->GetStrategies().front())
-                     .RestrictTo(p_colPlayer->GetStrategies().front());
-  for (const auto &iter : StrategyContingencies(support)) {
-    if (p_game->NumPlayers() > 2) {
-      theHtml += "<center><b>Subtable with strategies:</b></center>";
-      for (auto player : p_game->GetPlayers()) {
-        if (player == p_rowPlayer || player == p_colPlayer) {
-          continue;
-        }
-
-        theHtml += "<center><b>Player ";
-        theHtml += std::to_string(player->GetNumber());
-        theHtml += " Strategy ";
-        theHtml += std::to_string(iter->GetStrategy(player)->GetNumber());
-        theHtml += "</b></center>";
-      }
-    }
-
-    theHtml += "<table>";
-    theHtml += "<tr>";
-    theHtml += "<td></td>";
-    for (const auto &strategy : p_colPlayer->GetStrategies()) {
-      theHtml += "<td align=center><b>";
-      theHtml += strategy->GetLabel();
-      theHtml += "</b></td>";
-    }
-    theHtml += "</tr>";
-    for (const auto &row_strategy : p_rowPlayer->GetStrategies()) {
-      const PureStrategyProfile profile = iter;
-      profile->SetStrategy(row_strategy);
-      theHtml += "<tr>";
-      theHtml += "<td align=center><b>";
-      theHtml += row_strategy->GetLabel();
-      theHtml += "</b></td>";
-      for (const auto &col_strategy : p_colPlayer->GetStrategies()) {
-        profile->SetStrategy(col_strategy);
-        theHtml += "<td align=center>";
-        for (const auto &player : p_game->GetPlayers()) {
-          try {
-            if (profile->GetOutcome()) {
-              theHtml += profile->GetOutcome()->GetPayoff<std::string>(player);
-            }
-            else {
-              theHtml += "0";
-            }
-          }
-          catch (UndefinedException &) {
-            theHtml += lexical_cast<std::string>(profile->GetPayoff(player));
-          }
-          if (player != p_game->GetPlayers().back()) {
-            theHtml += ",";
-          }
-        }
-        theHtml += "</td>";
-      }
-      theHtml += "</tr>";
-    }
-
-    theHtml += "</table>";
-  }
-  theHtml += "\n";
-  return theHtml;
+  HTMLTableFormatter formatter;
+  WriteGameTableInternal(p_game, p_rowPlayer, p_colPlayer, formatter);
+  return formatter.GetResult() + "\n";
 }
 
 std::string WriteLaTeXFile(const Game &p_game, const GamePlayer &p_rowPlayer,
                            const GamePlayer &p_colPlayer)
 {
-  std::string theHtml;
-
-  auto support = StrategySupportProfile(p_game)
-                     .RestrictTo(p_rowPlayer->GetStrategies().front())
-                     .RestrictTo(p_colPlayer->GetStrategies().front());
-  for (const auto &iter : StrategyContingencies(support)) {
-    theHtml += "\\begin{game}{";
-    theHtml += std::to_string(p_rowPlayer->GetStrategies().size());
-    theHtml += "}{";
-    theHtml += std::to_string(p_colPlayer->GetStrategies().size());
-    theHtml += "}[";
-    theHtml += p_rowPlayer->GetLabel();
-    theHtml += "][";
-    theHtml += p_colPlayer->GetLabel();
-    theHtml += "]";
-
-    if (p_game->NumPlayers() > 2) {
-      theHtml += "[";
-      for (auto player : p_game->GetPlayers()) {
-        if (player == p_rowPlayer || player == p_colPlayer) {
-          continue;
-        }
-
-        theHtml += "Player ";
-        theHtml += lexical_cast<std::string>(player->GetNumber());
-        theHtml += " Strategy ";
-        theHtml += lexical_cast<std::string>(iter->GetStrategy(player)->GetNumber());
-        theHtml += " ";
-      }
-      theHtml += "]";
-    }
-
-    theHtml += "\n&";
-
-    for (const auto &strategy : p_colPlayer->GetStrategies()) {
-      theHtml += strategy->GetLabel();
-      if (strategy != p_colPlayer->GetStrategies().back()) {
-        theHtml += " & ";
-      }
-    }
-    theHtml += "\\\\\n";
-
-    for (const auto &row_strategy : p_rowPlayer->GetStrategies()) {
-      const PureStrategyProfile profile = iter;
-      profile->SetStrategy(row_strategy);
-      theHtml += row_strategy->GetLabel();
-      theHtml += " & ";
-      for (const auto &col_strategy : p_colPlayer->GetStrategies()) {
-        profile->SetStrategy(col_strategy);
-        theHtml += " $";
-        for (const auto &player : p_game->GetPlayers()) {
-          try {
-            if (profile->GetOutcome()) {
-              theHtml += profile->GetOutcome()->GetPayoff<std::string>(player);
-            }
-            else {
-              theHtml += "0";
-            }
-          }
-          catch (UndefinedException &) {
-            theHtml += lexical_cast<std::string>(profile->GetPayoff(player));
-          }
-          if (player != p_game->GetPlayers().back()) {
-            theHtml += ",";
-          }
-        }
-        theHtml += "$ ";
-        if (col_strategy != p_colPlayer->GetStrategies().back()) {
-          theHtml += " & ";
-        }
-      }
-      if (row_strategy != p_rowPlayer->GetStrategies().back()) {
-        theHtml += "\\\\\n";
-      }
-    }
-
-    theHtml += "\n\\end{game}";
-  }
-  theHtml += "\n";
-  return theHtml;
+  LaTeXTableFormatter formatter;
+  WriteGameTableInternal(p_game, p_rowPlayer, p_colPlayer, formatter);
+  return formatter.GetResult() + "\n";
 }
 
 } // end namespace Gambit
