@@ -192,11 +192,6 @@ class Player:
 
     @label.setter
     def label(self, value: str) -> None:
-        if value == self.label:
-            return
-        if value == "" or value in (player.label for player in self.game.players):
-            warnings.warn("In a future version, players must have unique labels",
-                          FutureWarning)
         self.player.deref().SetLabel(value.encode("ascii"))
 
     @property

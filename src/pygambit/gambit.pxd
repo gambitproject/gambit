@@ -169,7 +169,7 @@ cdef extern from "games/game.h":
         int IsChance() except +
 
         string GetLabel() except +
-        void SetLabel(string) except +
+        void SetLabel(string) except +ValueError
 
         c_GameStrategy GetStrategy(int) except +IndexError
         Strategies GetStrategies() except +

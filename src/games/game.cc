@@ -85,6 +85,22 @@ GamePlayerRep::~GamePlayerRep()
   }
 }
 
+void GamePlayerRep::SetLabel(const std::string &p_label)
+{
+  if (p_label == m_label) {
+    return;
+  }
+  if (p_label == "") {
+    throw std::invalid_argument("Player label must not be empty");
+  }
+  for (const auto &player : m_game->m_players) {
+    if (player->m_label == p_label) {
+      throw std::invalid_argument("Player label must be unique within a game");
+    }
+  }
+  m_label = p_label;
+}
+
 void GamePlayerRep::MakeStrategy(const std::map<GameInfosetRep *, int> &behav)
 {
   auto strategy = std::make_shared<GameStrategyRep>(this, m_strategies.size() + 1, "");

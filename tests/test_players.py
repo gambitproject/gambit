@@ -61,15 +61,15 @@ def test_player_label_invalid():
         _ = game.players["Not a player"]
 
 
-def test_set_empty_player_futurewarning():
+def test_set_empty_player():
     game = games.create_stripped_down_poker_efg()
-    with pytest.warns(FutureWarning):
+    with pytest.raises(ValueError):
         game.players[0].label = ""
 
 
-def test_set_duplicate_player_futurewarning():
+def test_set_duplicate_player():
     game = games.create_stripped_down_poker_efg()
-    with pytest.warns(FutureWarning):
+    with pytest.raises(ValueError):
         game.players[0].label = game.players[1].label
 
 

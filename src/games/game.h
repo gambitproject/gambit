@@ -395,7 +395,7 @@ public:
   Game GetGame() const;
 
   const std::string &GetLabel() const { return m_label; }
-  void SetLabel(const std::string &p_label) { m_label = p_label; }
+  void SetLabel(const std::string &p_label);
 
   bool IsChance() const { return (m_number == 0); }
 
