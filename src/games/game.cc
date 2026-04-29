@@ -66,6 +66,22 @@ void GameOutcomeRep::SetLabel(const std::string &p_label)
 //                      class GameStrategyRep
 //========================================================================
 
+void GameStrategyRep::SetLabel(const std::string &p_label)
+{
+  if (p_label == m_label) {
+    return;
+  }
+  if (p_label == "") {
+    throw std::invalid_argument("Strategy label must not be empty");
+  }
+  for (const auto &strategy : m_player->GetStrategies()) {
+    if (strategy->m_label == p_label) {
+      throw std::invalid_argument("Strategy label must be unique for a player");
+    }
+  }
+  m_label = p_label;
+}
+
 GameAction GameStrategyRep::GetAction(const GameInfoset &p_infoset) const
 {
   if (p_infoset->GetPlayer().get() != m_player) {

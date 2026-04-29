@@ -305,7 +305,7 @@ public:
   /// Returns the text label associated with the strategy
   const std::string &GetLabel() const { return m_label; }
   /// Sets the text label associated with the strategy
-  void SetLabel(const std::string &p_label) { m_label = p_label; }
+  void SetLabel(const std::string &p_label);
 
   /// Returns the game on which the strategy is defined
   Game GetGame() const;
