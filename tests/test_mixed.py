@@ -139,8 +139,8 @@ def test_normalize(game, profile_data, expected_data, rational_flag):
     [
         ##############################################################################
         # zero matrix nfg
-        (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), "cooperate", False, 0.72),
-        (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), "cooperate", True, "7/9"),
+        (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), "C1", False, 0.72),
+        (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), "C1", True, "7/9"),
         ###############################################################################
         # coordination 4x4 nfg outcome version with strategy labels
         (games.read_from_file("coordination_4x4_outcome.nfg"), "1-1", 0.25, False),
@@ -312,7 +312,7 @@ def test_profile_indexing_by_invalid_strategy_label(
 def test_profile_indexing_by_player_and_duplicate_strategy_label():
     game = games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg")
     profile = game.mixed_strategy_profile()
-    with pytest.raises(ValueError):
+    with pytest.raises(KeyError):
         profile["Dan"]["defect"]
 
 
@@ -514,8 +514,8 @@ def test_payoff_by_label_reference(
     [
         ##############################################################################
         # zero matrix nfg
-        (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), False, "cooperate", 0),
-        (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), True, "cooperate", 0),
+        (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), False, "C1", 0),
+        (games.read_from_file("2x2_bimatrix_all_zero_payoffs.nfg"), True, "C1", 0),
         ##############################################################################
         # coordination 4x4 nfg
         (games.read_from_file("coordination_4x4_outcome.nfg"), False, "1-1", 0.25),

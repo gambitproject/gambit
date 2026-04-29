@@ -166,7 +166,7 @@ SUBGAME_ROOTS_CASES = [
         SubgameRootsTestCase(
             factory=functools.partial(
                 games.read_from_file,
-                "subgame_roots_finder_small_subgames_and_overplapping_infosets.efg"),
+                "subgame_roots_finder_small_subgames_and_overlapping_infosets.efg"),
             expected_paths=[[], ["1"], ["2"], ["1", "2", "2"], ["2", "1", "2"],
                             ["1", "1", "1", "2", "2"], ["2", "2", "2"]]
         ),
@@ -176,8 +176,8 @@ SUBGAME_ROOTS_CASES = [
         SubgameRootsTestCase(
             factory=functools.partial(
                 games.read_from_file,
-                "subgame_roots_finder_overplapping_infosets_with_Nature.efg"),
-            expected_paths=[[], ["1"], ["1", "1"], ["1", "1", "1"]]
+                "subgame_roots_finder_overlapping_infosets_with_Nature.efg"),
+            expected_paths=[[], ["2"], ["2", "3", "2"], ["3", "2"]]
         ),
         id="overlapping_infosets_inside_subgames_and_Nature_move"
     ),
