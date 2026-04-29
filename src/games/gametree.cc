@@ -103,6 +103,22 @@ template class TreeMixedStrategyProfileRep<Rational>;
 //                     class GameActionRep
 //========================================================================
 
+void GameActionRep::SetLabel(const std::string &p_label)
+{
+  if (p_label == m_label) {
+    return;
+  }
+  if (p_label == "") {
+    throw std::invalid_argument("Action label must not be empty");
+  }
+  for (const auto action : m_infoset->GetActions()) {
+    if (action->m_label == p_label) {
+      throw std::invalid_argument("Action label must be unique within an information set");
+    }
+  }
+  m_label = p_label;
+}
+
 bool GameActionRep::Precedes(const GameNode &n) const
 {
   GameNode node = n;

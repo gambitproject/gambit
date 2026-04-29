@@ -102,7 +102,7 @@ cdef extern from "games/game.h":
         bint Precedes(c_GameNode) except +
 
         string GetLabel() except +
-        void SetLabel(string) except +
+        void SetLabel(string) except +ValueError
 
     cdef cppclass c_GameInfosetRep "GameInfosetRep":
         cppclass Actions:
