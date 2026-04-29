@@ -16,12 +16,11 @@ def _parse_nfg(text: str) -> gbt.Game:
 
 
 def test_string_empty():
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(
+            ValueError,
+            match="Parse error in game file: line 1:2: Expecting EFG file type indicator"
+    ):
         _parse_efg("")
-    assert (
-        "Parse error in game file: line 1:2: Expecting EFG file type indicator"
-        in str(excinfo.value)
-    )
 
 
 def test_efg_no_newline_end():
@@ -34,63 +33,65 @@ def test_efg_no_newline_end():
 def test_string_wrong_magic():
     with open("tests/test_games/e01.efg") as f:
         file_text = f.read().replace("EFG", "")
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(
+            ValueError,
+            match="Parse error in game file: line 1:3: Expecting EFG file type indicator"
+    ):
         _parse_efg(file_text)
-    assert (
-        "Parse error in game file: line 1:3: Expecting EFG file type indicator"
-        in str(excinfo.value)
-    )
 
 
 def test_efg_unsupported_version():
     with open("tests/test_games/e01.efg") as f:
         file_text = f.read().replace("EFG 2", "EFG 1")
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(
+            ValueError,
+            match="Parse error in game file: line 1:6: Accepting only EFG version 2"
+    ):
         _parse_efg(file_text)
-    assert "Parse error in game file: line 1:6: Accepting only EFG version 2" in str(excinfo.value)
 
 
 def test_efg_unsupported_precision():
     with open("tests/test_games/e01.efg") as f:
         file_text = f.read().replace("EFG 2 R", "EFG 2 X")
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(
+            ValueError,
+            match="Parse error in game file: line 1:9: Accepting only EFG R or D data type"
+    ):
         _parse_efg(file_text)
-    assert (
-        "Parse error in game file: line 1:9: Accepting only EFG R or D data type"
-        in str(excinfo.value)
-    )
 
 
 def test_efg_invalid_node_type():
     with open("tests/test_games/e02.efg") as f:
         file_text = f.read().replace('p "" 1 1', 'x "" 1 1')
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(
+            ValueError,
+            match="Parse error in game file: line 4:3: Invalid type of node"
+    ):
         _parse_efg(file_text)
-    assert "Parse error in game file: line 4:3: Invalid type of node" in str(excinfo)
 
 
 def test_efg_payoffs_too_many():
     with open("tests/test_games/e02.efg") as f:
         file_text = f.read().replace("1, 1", "1, 2, 3")
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError, match="Parse error in game file: line 5:29: Expected '}'"):
         _parse_efg(file_text)
-    assert "Parse error in game file: line 5:29: Expected '}'" in str(excinfo)
 
 
 def test_nfg_title_missing():
     with open("tests/test_games/e02.nfg") as f:
         file_text = f.read().replace('"Selten (IJGT, 75), Figure 2, normal form"', "")
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(
+            ValueError,
+            match="Parse error in game file: line 1:11: Game title missing"
+    ):
         _parse_nfg(file_text)
-    assert "Parse error in game file: line 1:11: Game title missing" in str(excinfo)
 
 
 def test_nfg_player_missing():
     with open("tests/test_games/e02.nfg") as f:
         file_text = f.read().replace('"Player 2"', "")
-    with pytest.raises(ValueError) as excinfo:
+    with pytest.raises(ValueError, match="Parse error in game file: line 4:2: Expected '}'"):
         _parse_nfg(file_text)
-    assert "Parse error in game file: line 1:73: Expected '}'" in str(excinfo)
 
 
 def test_nfg_payoffs_not_enough():
