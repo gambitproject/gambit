@@ -919,7 +919,12 @@ void GameTreeRep::ClearComputedValues() const
       strategy->Invalidate();
     }
     player->m_strategies.clear();
+    for (const auto &sequence : player->m_sequences) {
+      sequence->Invalidate();
+    }
+    player->m_sequences.clear();
   }
+  m_hasSequences = false;
   const_cast<GameTreeRep *>(this)->m_nodePlays.clear();
   m_ownPriorActionInfo = nullptr;
   const_cast<GameTreeRep *>(this)->m_unreachableNodes = nullptr;
@@ -941,6 +946,56 @@ void GameTreeRep::BuildComputedValues() const
   }
   IndexStrategies();
   m_computedValues = true;
+}
+
+void GameTreeRep::BuildSequences(const GameNode &n,
+                                 std::map<GamePlayer, GameSequence> &p_currentSequences) const
+{
+  if (!n->GetInfoset()) {
+    return;
+  }
+  if (n->GetPlayer()->IsChance()) {
+    for (auto child : n->GetChildren()) {
+      BuildSequences(child, p_currentSequences);
+    }
+  }
+  else {
+    auto *player = n->m_infoset->m_player;
+    const auto tmp_sequence = p_currentSequences.at(n->GetPlayer());
+    for (const auto &action : n->m_infoset->m_actions) {
+      auto seq_it =
+          std::find_if(player->m_sequences.begin(), player->m_sequences.end(),
+                       [&action](const auto seq) { return seq->m_action == action.get(); });
+      std::shared_ptr<GameSequenceRep> sequence;
+      if (seq_it == player->m_sequences.end()) {
+        player->m_sequences.emplace_back(std::make_shared<GameSequenceRep>(
+            n->m_infoset->m_player, action.get(), player->m_sequences.size() + 1,
+            tmp_sequence.get_shared()));
+        sequence = player->m_sequences.back();
+      }
+      else {
+        sequence = *seq_it;
+      }
+      p_currentSequences[n->GetPlayer()] = sequence;
+      BuildSequences(n->GetChild(action), p_currentSequences);
+    }
+    p_currentSequences[n->GetPlayer()] = tmp_sequence;
+  }
+}
+
+void GameTreeRep::EnsureSequences() const
+{
+  if (m_hasSequences) {
+    return;
+  }
+  std::map<GamePlayer, GameSequence> currentSequences;
+  for (const auto &player : m_players) {
+    player->m_sequences = {std::make_shared<GameSequenceRep>(player.get(), nullptr, 1,
+                                                             std::weak_ptr<GameSequenceRep>())};
+    currentSequences[player] = player->m_sequences.front();
+  }
+  BuildSequences(m_root, currentSequences);
+  m_hasSequences = true;
 }
 
 void GameTreeRep::BuildConsistentPlays()

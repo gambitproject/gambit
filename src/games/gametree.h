@@ -31,6 +31,7 @@ class GameTreeRep final : public GameExplicitRep {
   friend class GameNodeRep;
   friend class GameInfosetRep;
   friend class GameActionRep;
+  friend class GamePlayerRep;
 
   struct OwnPriorActionInfo {
     std::map<GameNodeRep *, GameActionRep *> node_map;
@@ -38,7 +39,8 @@ class GameTreeRep final : public GameExplicitRep {
   };
 
 protected:
-  mutable bool m_computedValues{false}, m_nodesOrdered{false}, m_infosetsOrdered{false};
+  mutable bool m_computedValues{false}, m_nodesOrdered{false}, m_infosetsOrdered{false},
+      m_hasSequences{false};
   std::shared_ptr<GameNodeRep> m_root;
   std::shared_ptr<GamePlayerRep> m_chance;
   std::size_t m_numNodes = 1;
@@ -73,6 +75,10 @@ protected:
   void BuildComputedValues() const override;
   void BuildConsistentPlays();
   void ClearComputedValues() const;
+
+  void EnsureSequences() const override;
+  void BuildSequences(const GameNode &n,
+                      std::map<GamePlayer, GameSequence> &p_currentSequences) const;
 
   /// Removes the node from the information set, invalidating if emptied
   void RemoveMember(GameInfosetRep *, GameNodeRep *);

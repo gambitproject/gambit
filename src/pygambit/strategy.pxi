@@ -121,3 +121,82 @@ class Strategy:
         if not action:
             return None
         return Action.wrap(action)
+
+
+@cython.cclass
+class Sequence:
+    """A sequence ``Player`` in a ``Game``.
+
+    .. versionadded:: 16.7.0
+    """
+    sequence = cython.declare(c_GameSequence)
+
+    def __init__(self, *args, **kwargs) -> None:
+        raise ValueError("Cannot create a Sequence outside a Game.")
+
+    @staticmethod
+    @cython.cfunc
+    def wrap(sequence: c_GameSequence) -> Sequence:
+        obj: Sequence = Sequence.__new__(Sequence)
+        obj.sequence = sequence
+        return obj
+
+    def __repr__(self) -> str:
+        return f"Sequence(player={self.player}, actions={self.actions})"
+
+    def __eq__(self, other: typing.Any) -> bool:
+        print("__eq__")
+        print(isinstance(other, Sequence))
+        print(type(other))
+        if isinstance(other, Sequence):
+            print(self.sequence.deref() == cython.cast(Sequence, other).sequence.deref())
+        return (
+            isinstance(other, Sequence) and
+            self.sequence.deref() == cython.cast(Sequence, other).sequence.deref()
+        )
+
+    def __hash__(self) -> int:
+        return cython.cast(cython.long, self.sequence.deref())
+
+    @property
+    def game(self) -> Game:
+        """The game to which the sequence belongs."""
+        return Game.wrap(self.sequence.deref().GetPlayer().deref().GetGame())
+
+    @property
+    def player(self) -> Player:
+        """The player to which the sequence belongs."""
+        return Player.wrap(self.sequence.deref().GetPlayer())
+
+    @property
+    def parent(self) -> Sequence | None:
+        """The parent (predecessor) of the sequence."""
+        print(self)
+        if self.sequence.deref().GetParent() == cython.cast(c_GameSequence, NULL):
+            return None
+        return Sequence.wrap(self.sequence.deref().GetParent())
+
+    @property
+    def children(self) -> list[Sequence]:
+        """The immediate children (successors) of the sequence."""
+        ret: list[Sequence] = []
+        print("Looking for children of", self)
+        for seq in self.player.sequences:
+            print("Sequence", seq)
+            print("Parent", seq.parent)
+            if seq.parent == self:
+                ret.append(seq)
+        return ret
+
+    @property
+    def actions(self) -> list[Action]:
+        """Get the collection of actions defining this sequence.
+
+        Returns the empty list for the root sequence of the player.
+        """
+        actions: list[Action] = []
+        seq = self.sequence
+        while seq.deref().GetAction() != cython.cast(c_GameAction, NULL):
+            actions.insert(0, Action.wrap(seq.deref().GetAction()))
+            seq = seq.deref().GetParent()
+        return actions

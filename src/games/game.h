@@ -320,16 +320,19 @@ public:
 };
 
 class GameSequenceRep : public std::enable_shared_from_this<GameSequenceRep> {
-public:
-  bool m_valid{true};
-  GamePlayer player;
-  GameAction action;
-  size_t number;
-  std::weak_ptr<GameSequenceRep> parent;
+  friend class GameTreeRep;
+  friend class BehaviorSupportProfile;
 
-  explicit GameSequenceRep(const GamePlayer &p_player, const GameAction &p_action, size_t p_number,
-                           std::weak_ptr<GameSequenceRep> p_parent)
-    : player(p_player), action(p_action), number(p_number), parent(p_parent)
+  bool m_valid{true};
+  GamePlayerRep *m_player;
+  GameActionRep *m_action;
+  size_t m_number;
+  std::weak_ptr<GameSequenceRep> m_parent;
+
+public:
+  explicit GameSequenceRep(GamePlayerRep *p_player, GameActionRep *p_action, size_t p_number,
+                           const std::weak_ptr<GameSequenceRep> &p_parent)
+    : m_player(p_player), m_action(p_action), m_number(p_number), m_parent(p_parent)
   {
   }
 
@@ -337,15 +340,18 @@ public:
   void Invalidate() { m_valid = false; }
 
   Game GetGame() const;
-  GameInfoset GetInfoset() const { return (action) ? action->GetInfoset() : nullptr; }
+  GamePlayer GetPlayer() const;
+  GameInfoset GetInfoset() const { return (m_action) ? m_action->GetInfoset() : nullptr; }
+  GameAction GetAction() const { return (m_action) ? m_action->shared_from_this() : nullptr; }
+  GameSequence GetParent() const { return m_parent.lock(); }
 
   bool operator<(const GameSequenceRep &other) const
   {
-    return player < other.player || (player == other.player && action < other.action);
+    return m_player < other.m_player || (m_player == other.m_player && m_action < other.m_action);
   }
   bool operator==(const GameSequenceRep &other) const
   {
-    return player == other.player && action == other.action;
+    return m_player == other.m_player && m_action == other.m_action;
   }
 };
 
@@ -379,10 +385,12 @@ class GamePlayerRep : public std::enable_shared_from_this<GamePlayerRep> {
   std::string m_label;
   std::vector<std::shared_ptr<GameInfosetRep>> m_infosets;
   std::vector<std::shared_ptr<GameStrategyRep>> m_strategies;
+  std::vector<std::shared_ptr<GameSequenceRep>> m_sequences;
 
 public:
   using Infosets = ElementCollection<GamePlayer, GameInfosetRep>;
   using Strategies = ElementCollection<GamePlayer, GameStrategyRep>;
+  using Sequences = ElementCollection<GamePlayer, GameSequenceRep>;
 
   GamePlayerRep(GameRep *p_game, int p_id) : m_game(p_game), m_number(p_id) {}
   GamePlayerRep(GameRep *p_game, int p_id, int m_strats);
@@ -410,14 +418,14 @@ public:
   //@{
   /// Returns the st'th strategy for the player
   GameStrategy GetStrategy(int st) const;
-  /// Returns the array of strategies available to the player
+  /// Returns the collection of strategies available to the player
   Strategies GetStrategies() const;
   //@}
 
   /// @name Sequences
   //@{
-  /// Returns the number of sequences available to the player
-  size_t NumSequences() const;
+  /// Returns the collection of sequences available to the player
+  Sequences GetSequences() const;
   //@}
 };
 
@@ -1152,6 +1160,8 @@ public:
 
   /// Build any computed values anew
   virtual void BuildComputedValues() const {}
+  /// Ensure sequences have been computed
+  virtual void EnsureSequences() const { throw UndefinedException(); }
 };
 
 //=======================================================================
@@ -1195,7 +1205,8 @@ inline void GameOutcomeRep::SetPayoff(const GamePlayer &p_player, const Number &
 inline GamePlayer GameStrategyRep::GetPlayer() const { return m_player->shared_from_this(); }
 inline Game GameStrategyRep::GetGame() const { return m_player->GetGame(); }
 
-inline Game GameSequenceRep::GetGame() const { return player->GetGame(); }
+inline Game GameSequenceRep::GetGame() const { return m_player->GetGame(); }
+inline GamePlayer GameSequenceRep::GetPlayer() const { return m_player->shared_from_this(); }
 
 inline Game GameActionRep::GetGame() const { return m_infoset->GetGame(); }
 
@@ -1213,6 +1224,11 @@ inline GamePlayerRep::Strategies GamePlayerRep::GetStrategies() const
 {
   m_game->BuildComputedValues();
   return Strategies(std::const_pointer_cast<GamePlayerRep>(shared_from_this()), &m_strategies);
+}
+inline GamePlayerRep::Sequences GamePlayerRep::GetSequences() const
+{
+  m_game->EnsureSequences();
+  return Sequences(std::const_pointer_cast<GamePlayerRep>(shared_from_this()), &m_sequences);
 }
 
 inline Game GameNodeRep::GetGame() const { return m_game->shared_from_this(); }

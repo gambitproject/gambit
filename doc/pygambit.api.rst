@@ -122,7 +122,7 @@ Information about the game
    Player.is_chance
    Player.min_payoff
    Player.max_payoff
-   Player.strategies
+   Player.sequences
 
 .. autosummary::
    :toctree: api/
@@ -186,6 +186,13 @@ Information about the game
    Strategy.number
    Strategy.action
 
+.. autosummary::
+
+   :toctree: api/
+
+   Sequence.player
+   Sequence.parent
+   Sequence.actions
 
 Player behavior
 ...............
