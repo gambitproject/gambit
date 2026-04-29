@@ -1,0 +1,22 @@
+/* Custom CSS for Gambit Documentation */
+.tight-table .figure img {
+    max-height: 500px;
+    width: auto;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+table.tight-table th,
+table.tight-table td {
+    text-align: center;
+}
+
+table.tight-table td .highlight pre,
+table.tight-table td .highlight {
+    text-align: left;
+}
+
+table.tight-table td .sd-card-body {
+    text-align: left;
+}

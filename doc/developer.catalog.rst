@@ -30,12 +30,17 @@ Currently supported representations are:
 3. **Update the catalog:**
 
    Reinstall the package to pick up the new game file(s) in the ``pygambit.catalog`` module.
-   Then use the ``update.py`` script to update Gambit's documentation & build files.
+   Then use the ``update.py`` script to update Gambit's documentation & build files, as well as generating images for the new game(s).
 
    .. code-block:: bash
 
        pip install .
        python build_support/catalog/update.py --build
+
+   .. note::
+
+      Update the ``catalog_draw_tree_settings`` in ``build_support/catalog/update.py`` to change the default visualization parameters for your game(s).
+      You can use the ``--regenerate-images`` flag when building the docs locally (readthedocs does this by default).
 
    .. warning::
 

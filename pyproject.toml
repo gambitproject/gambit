@@ -43,6 +43,8 @@ doc = [
     "pickleshare",
     "jupyter",
     "open_spiel; sys_platform != 'win32'",
+    "sphinxcontrib-tikz",
+    "jupyter_sphinx",
 ]
 
 [project.urls]
