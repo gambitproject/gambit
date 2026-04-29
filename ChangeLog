@@ -2,6 +2,9 @@
 
 ## [16.7.0] - unreleased
 
+### Fixed
+- Corrected resizing of row and column index labels in strategic form so pivoting works correctly. (#844)
+
 ### Removed
 - Built-in plotting of logit QRE for strategic games has been removed in the GUI (#809)
 
