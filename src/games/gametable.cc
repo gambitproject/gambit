@@ -457,13 +457,13 @@ Rational GameTableRep::GetPlayerMaxPayoff(const GamePlayer &p_player) const
 ///
 void GameTableRep::WriteNfgFile(std::ostream &p_file) const
 {
-  auto players = GetPlayers();
+  const auto players = GetPlayers();
   p_file << "NFG 1 R " << std::quoted(GetTitle()) << ' '
          << FormatList(players, [](const GamePlayer &p) { return QuoteString(p->GetLabel()); })
          << std::endl
          << std::endl;
   p_file << "{ ";
-  for (auto player : players) {
+  for (const auto player : players) {
     p_file << FormatList(player->GetStrategies(), [](const GameStrategy &s) {
       return QuoteString(s->GetLabel());
     }) << std::endl;
@@ -482,8 +482,13 @@ void GameTableRep::WriteNfgFile(std::ostream &p_file) const
   }
   p_file << "}" << std::endl;
 
-  for (auto result : m_results) {
-    p_file << ((result) ? result->m_number : 0) << ' ';
+  bool first = true;
+  for (const auto result : m_results) {
+    if (!first) {
+      p_file << ' ';
+    }
+    first = false;
+    p_file << (result ? result->m_number : 0);
   }
   p_file << std::endl;
 }
