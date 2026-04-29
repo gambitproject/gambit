@@ -1,5 +1,11 @@
 # Changelog
 
+## [16.7.0] - unreleased
+
+### Fixed
+- Corrected resizing of row and column index labels in strategic form so pivoting works correctly. (#844)
+
+
 ## [16.6.0] - 2026-03-24
 
 ### Changed
