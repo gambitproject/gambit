@@ -6,9 +6,9 @@ NFG 1 R "2x2 bimatrix game with all zero payoffs, with strategy labels" { "Joe" 
 ""
 
 {
-{ "" 0, 0 }
-{ "" 0, 0 }
-{ "" 0, 0 }
-{ "" 0, 0 }
+{ "_1" 0, 0 }
+{ "_2" 0, 0 }
+{ "_3" 0, 0 }
+{ "_4" 0, 0 }
 }
 1 2 3 4
