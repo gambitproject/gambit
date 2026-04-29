@@ -1,3 +1,16 @@
-NFG 1 D "Kreps-Wilson (Econometrica, 85), Figures 1,4,9,14, normal form" { "Player 1" "Player 2" } { 3 2 }
+NFG 1 R "Kreps-Wilson (Econometrica, 85), Figures 1,4,9,14, normal form" { "Player 1" "Player 2" }
 
-0.000000 0.000000 -1.000000 2.000000 -2.000000 -2.000000 0.000000 0.000000 -1.000000 0.000000 3.000000 -1.000000
+{ { "1" "2" "3" }
+{ "1" "2" }
+}
+""
+
+{
+{ "Outcome 1" 0.000000, 0.000000 }
+{ "Outcome 2" -1.000000, 2.000000 }
+{ "Outcome 3" -2.000000, -2.000000 }
+{ "Outcome 4" 0.000000, 0.000000 }
+{ "Outcome 5" -1.000000, 0.000000 }
+{ "Outcome 6" 3.000000, -1.000000 }
+}
+1 2 3 4 5 6

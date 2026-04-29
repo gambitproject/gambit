@@ -6,9 +6,9 @@ NFG 1 R "Two person 2 x 2 game with unique mixed equilibrium" { "Player 1" "Play
 ""
 
 {
-{ "" 9, 0 }
-{ "" 0, 1 }
-{ "" 0, 1 }
-{ "" 1, 0 }
+{ "Outcome 1" 9, 0 }
+{ "Outcome 2" 0, 1 }
+{ "Outcome 3" 0, 1 }
+{ "Outcome 4" 1, 0 }
 }
 1 2 3 4

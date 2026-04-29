@@ -1,3 +1,19 @@
-NFG 1 R "Example game from Yamamoto (IJGT, 1993)" { "Player 1" "Player 2" } { 3 3 }
+NFG 1 R "Example game from Yamamoto (IJGT, 1993)" { "Player 1" "Player 2" }
 
-1 1 0 0 -9 -9 0 0 0 0 -7 -6 -9 -9 -7 -7 -7 -7
+{ { "1" "2" "3" }
+{ "1" "2" "3" }
+}
+""
+
+{
+{ "Outcome 1" 1, 1 }
+{ "Outcome 2" 0, 0 }
+{ "Outcome 3" -9, -9 }
+{ "Outcome 4" 0, 0 }
+{ "Outcome 5" 0, 0 }
+{ "Outcome 6" -7, -6 }
+{ "Outcome 7" -9, -9 }
+{ "Outcome 8" -7, -7 }
+{ "Outcome 9" -7, -7 }
+}
+1 2 3 4 5 6 7 8 9

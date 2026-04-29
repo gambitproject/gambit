@@ -1,3 +1,14 @@
-NFG 1 D "Schotter-Weigelt-Wilson Fig 1 game in normal form" { "" "" } { 2 2 }
+NFG 1 R "Schotter-Weigelt-Wilson Fig 1 game in normal form" { "Outcome 1" "Outcome 2" }
 
-4.000000 3.000000 0.000000 0.000000 4.000000 3.000000 6.000000 2.000000
+{ { "1" "2" }
+{ "1" "2" }
+}
+""
+
+{
+{ "Outcome 1" 4.000000, 3.000000 }
+{ "Outcome 2" 0.000000, 0.000000 }
+{ "Outcome 3" 4.000000, 3.000000 }
+{ "Outcome 4" 6.000000, 2.000000 }
+}
+1 2 3 4

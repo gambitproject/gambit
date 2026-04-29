@@ -1,7 +1,19 @@
-NFG 1 D "Wilson's example of inaccessible equilibria (Shapley, 1974, Math Prog Stud)" { "Player 1" "Player 2" }
+NFG 1 R "Wilson's example of inaccessible equilibria (Shapley, 1974, Math Prog Stud)" { "Player 1" "Player 2" }
 
 { { "1" "2" "3" }
 { "1" "2" "3" }
 }
+""
 
-0.000000 0.000000 2.000000 3.000000 3.000000 0.000000 3.000000 2.000000 2.000000 2.000000 0.000000 0.000000 0.000000 3.000000 0.000000 0.000000 1.000000 1.000000
+{
+{ "Outcome 1" 0.000000, 0.000000 }
+{ "Outcome 2" 2.000000, 3.000000 }
+{ "Outcome 3" 3.000000, 0.000000 }
+{ "Outcome 4" 3.000000, 2.000000 }
+{ "Outcome 5" 2.000000, 2.000000 }
+{ "Outcome 6" 0.000000, 0.000000 }
+{ "Outcome 7" 0.000000, 3.000000 }
+{ "Outcome 8" 0.000000, 0.000000 }
+{ "Outcome 9" 1.000000, 1.000000 }
+}
+1 2 3 4 5 6 7 8 9

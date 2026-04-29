@@ -6,14 +6,14 @@ NFG 1 R "2x2 constant sum game with a continuum of equilibria" { "Player 1" "Pla
 ""
 
 {
-{ "" 0, 0 }
-{ "" -1, 1 }
-{ "" 0, 0 }
-{ "" 1, -1 }
-{ "" 0, 0 }
-{ "" 1, -1 }
-{ "" 0, 0 }
-{ "" -1, 1 }
-{ "" 0, 0 }
+{ "Outcome 1" 0, 0 }
+{ "Outcome 2" -1, 1 }
+{ "Outcome 3" 0, 0 }
+{ "Outcome 4" 1, -1 }
+{ "Outcome 5" 0, 0 }
+{ "Outcome 6" 1, -1 }
+{ "Outcome 7" 0, 0 }
+{ "Outcome 8" -1, 1 }
+{ "Outcome 9" 0, 0 }
 }
 1 2 3 4 5 6 7 8 9

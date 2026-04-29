@@ -3,5 +3,12 @@ NFG 1 R "Two person 2x2 coordination game with 3 Nash equilibria" { "Player 1" "
 { { "1" "2" }
 { "1" "2" }
 }
+""
 
-3 2 0 0 0 0 2 2
+{
+{ "_1" 3, 2 }
+{ "_2" 0, 0 }
+{ "_3" 0, 0 }
+{ "_4" 2, 2 }
+}
+1 2 3 4

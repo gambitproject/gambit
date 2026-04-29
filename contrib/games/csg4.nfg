@@ -6,21 +6,21 @@ NFG 1 R "Two person 4x4 constant sum game with a continuum of equilibria" { "Pla
 ""
 
 {
-{ "" 3, 1 }
-{ "" 1, 3 }
-{ "" 2, 2 }
-{ "" 2, 2 }
-{ "" 1, 3 }
-{ "" 3, 1 }
-{ "" 2, 2 }
-{ "" 2, 2 }
-{ "" 2, 2 }
-{ "" 2, 2 }
-{ "" 1, 3 }
-{ "" 3, 1 }
-{ "" 2, 2 }
-{ "" 2, 2 }
-{ "" 3, 1 }
-{ "" 1, 3 }
+{ "Outcome 1" 3, 1 }
+{ "Outcome 2" 1, 3 }
+{ "Outcome 3" 2, 2 }
+{ "Outcome 4" 2, 2 }
+{ "Outcome 5" 1, 3 }
+{ "Outcome 6" 3, 1 }
+{ "Outcome 7" 2, 2 }
+{ "Outcome 8" 2, 2 }
+{ "Outcome 9" 2, 2 }
+{ "Outcome 10" 2, 2 }
+{ "Outcome 11" 1, 3 }
+{ "Outcome 12" 3, 1 }
+{ "Outcome 13" 2, 2 }
+{ "Outcome 14" 2, 2 }
+{ "Outcome 15" 3, 1 }
+{ "Outcome 16" 1, 3 }
 }
 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16

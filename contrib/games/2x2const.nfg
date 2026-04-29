@@ -6,9 +6,9 @@ NFG 1 R "2 x 2 constant sum game with unique mixed equilibrium" { "Player 1" "Pl
 ""
 
 {
-{ "" 2, 0 }
-{ "" 0, 2 }
-{ "" 0, 2 }
-{ "" 1, 1 }
+{ "Outcome 1" 2, 0 }
+{ "Outcome 2" 0, 2 }
+{ "Outcome 3" 0, 2 }
+{ "Outcome 4" 1, 1 }
 }
 1 2 3 4

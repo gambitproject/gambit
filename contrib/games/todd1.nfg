@@ -6,20 +6,20 @@ NFG 1 R "Todd's (incorrect) example of incaccessible equilibria" { "Player 1" "P
 ""
 
 {
-{ "" 8, 4 }
-{ "" 6, 0 }
-{ "" 12, 0 }
-{ "" 0, 0 }
-{ "" 0, 0 }
-{ "" -4, 0 }
-{ "" 3, 0 }
-{ "" 0, 4 }
-{ "" 0, 4 }
-{ "" 4, 1 }
-{ "" 8, 0 }
-{ "" 6, 4 }
-{ "" 0, 0 }
-{ "" 12, 0 }
-{ "" 0, 0 }
+{ "Outcome 1" 8, 4 }
+{ "Outcome 2" 6, 0 }
+{ "Outcome 3" 12, 0 }
+{ "Outcome 4" 0, 0 }
+{ "Outcome 5" 0, 0 }
+{ "Outcome 6" -4, 0 }
+{ "Outcome 7" 3, 0 }
+{ "Outcome 8" 0, 4 }
+{ "Outcome 9" 0, 4 }
+{ "Outcome 10" 4, 1 }
+{ "Outcome 11" 8, 0 }
+{ "Outcome 12" 6, 4 }
+{ "Outcome 13" 0, 0 }
+{ "Outcome 14" 12, 0 }
+{ "Outcome 15" 0, 0 }
 }
 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15

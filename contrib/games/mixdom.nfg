@@ -6,21 +6,21 @@ NFG 1 R "Two person 4x4 game needing mixed domination" { "Player 1" "Player 2" }
 ""
 
 {
-{ "" 6, -6 }
-{ "" 7, -7 }
-{ "" 5, -5 }
-{ "" 1, -1 }
-{ "" 2, -2 }
-{ "" 1, -1 }
-{ "" 4, -4 }
-{ "" 3, -3 }
-{ "" 1, -1 }
-{ "" 2, -2 }
-{ "" 6, -6 }
-{ "" 7, -7 }
-{ "" 4, -4 }
-{ "" 5, -5 }
-{ "" 7, -7 }
-{ "" 2, -2 }
+{ "Outcome 1" 6, -6 }
+{ "Outcome 2" 7, -7 }
+{ "Outcome 3" 5, -5 }
+{ "Outcome 4" 1, -1 }
+{ "Outcome 5" 2, -2 }
+{ "Outcome 6" 1, -1 }
+{ "Outcome 7" 4, -4 }
+{ "Outcome 8" 3, -3 }
+{ "Outcome 9" 1, -1 }
+{ "Outcome 10" 2, -2 }
+{ "Outcome 11" 6, -6 }
+{ "Outcome 12" 7, -7 }
+{ "Outcome 13" 4, -4 }
+{ "Outcome 14" 5, -5 }
+{ "Outcome 15" 7, -7 }
+{ "Outcome 16" 2, -2 }
 }
 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16
