@@ -831,6 +831,7 @@ Rational GameTreeRep::GetPlayerMaxPayoff(const GamePlayer &p_player) const
     return maximize_function(range, value_fn);
   });
 }
+
 bool GameTreeRep::IsPerfectRecall() const
 {
   if (!m_ownPriorActionInfo && !m_root->IsTerminal()) {
@@ -857,6 +858,23 @@ bool GameTreeRep::IsAbsentMinded(const GameInfoset &p_infoset) const
   }
 
   return contains(m_absentMindedInfosets, p_infoset.get());
+}
+
+std::vector<std::pair<GameInfoset, GameNode>> GameTreeRep::GetAbsentMindedReentries() const
+{
+  if (!m_unreachableNodes && !m_root->IsTerminal()) {
+    BuildUnreachableNodes();
+  }
+  if (m_absentMindedReentries.empty()) {
+    return {};
+  }
+
+  std::vector<std::pair<GameInfoset, GameNode>> result;
+  result.reserve(m_absentMindedReentries.size());
+  for (const auto &[infoset, node] : m_absentMindedReentries) {
+    result.emplace_back(infoset->shared_from_this(), node->shared_from_this());
+  }
+  return result;
 }
 
 //------------------------------------------------------------------------
@@ -924,6 +942,7 @@ void GameTreeRep::ClearComputedValues() const
   m_ownPriorActionInfo = nullptr;
   const_cast<GameTreeRep *>(this)->m_unreachableNodes = nullptr;
   m_absentMindedInfosets.clear();
+  m_absentMindedReentries.clear();
   m_subgames.clear();
   m_computedValues = false;
 }
@@ -1100,6 +1119,7 @@ void GameTreeRep::BuildUnreachableNodes() const
       // Check for Absent-Minded Re-entry of the infoset
       if (path_choices.find(child->m_infoset->shared_from_this()) != path_choices.end()) {
         m_absentMindedInfosets.insert(child->m_infoset);
+        m_absentMindedReentries.emplace_back(child->m_infoset, child.get());
         const GameAction replay_action = path_choices.at(child->m_infoset->shared_from_this());
         position.emplace(AbsentMindedEdge{replay_action, child});
 

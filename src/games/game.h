@@ -939,6 +939,11 @@ public:
     }
     return false;
   }
+  /// Returns (infoset, node) pairs where the node is a reentry of an absent-minded infoset
+  virtual std::vector<std::pair<GameInfoset, GameNode>> GetAbsentMindedReentries() const
+  {
+    return {};
+  }
   /// Returns a list of all subgame roots in the game
   virtual std::vector<GameNode> GetSubgames() const { throw UndefinedException(); }
 

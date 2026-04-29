@@ -754,10 +754,14 @@ class MixedBehaviorProfile:
     def infoset_prob(self, infoset: NodeReference) -> ProfileDType:
         """Returns the probability with which an information set is reached.
 
+        For absent-minded information sets, this returns the probability that any
+        member is reached; a second or subsequent visit to the information set does
+        not contribute further to the realization probability.
+
         Parameters
         ----------
         infoset : Infoset or str
-            The information set to get the payoff for.  If a string is passed, the
+            The information set to get the probability of.  If a string is passed, the
             information set is determined by finding the information set with that label, if any.
 
         Raises

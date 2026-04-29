@@ -284,8 +284,7 @@ template <class T> T MixedBehaviorProfile<T>::GetInfosetProb(const GameInfoset &
 {
   CheckVersion();
   EnsureRealizations();
-  return sum_function(p_infoset->GetMembers(),
-                      [&](const auto &node) -> T { return m_cache.m_realizProbs[node]; });
+  return m_cache.m_infosetProbs[p_infoset];
 }
 
 template <class T>
@@ -471,6 +470,7 @@ T MixedBehaviorProfile<T>::DiffNodeValue(const GameNode &p_node, const GamePlaye
 template <class T> void MixedBehaviorProfile<T>::ComputeRealizationProbs() const
 {
   m_cache.m_realizProbs.clear();
+  m_cache.m_infosetProbs.clear();
 
   const auto &game = m_support.GetGame();
   m_cache.m_realizProbs[game->GetRoot()] = static_cast<T>(1);
@@ -479,6 +479,14 @@ template <class T> void MixedBehaviorProfile<T>::ComputeRealizationProbs() const
     for (auto [action, child] : node->GetActions()) {
       m_cache.m_realizProbs[child] = incomingProb * GetActionProb(action);
     }
+  }
+
+  for (const auto &infoset : game->GetInfosets()) {
+    m_cache.m_infosetProbs[infoset] = sum_function(
+        infoset->GetMembers(), [&](const auto &node) -> T { return m_cache.m_realizProbs[node]; });
+  }
+  for (const auto &[infoset, node] : game->GetAbsentMindedReentries()) {
+    m_cache.m_infosetProbs[infoset] -= m_cache.m_realizProbs[node];
   }
 }
 
