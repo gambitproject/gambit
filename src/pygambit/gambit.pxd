@@ -182,7 +182,7 @@ cdef extern from "games/game.h":
         int GetNumber() except +
 
         string GetLabel() except +
-        void SetLabel(string) except +
+        void SetLabel(string) except +ValueError
 
         T GetPayoff[T](c_GamePlayer) except +IndexError
         void SetPayoff(c_GamePlayer, c_Number) except +IndexError

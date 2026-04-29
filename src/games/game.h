@@ -146,7 +146,7 @@ public:
   /// Returns the text label associated with the outcome
   const std::string &GetLabel() const { return m_label; }
   /// Sets the text label associated with the outcome
-  void SetLabel(const std::string &p_label) { m_label = p_label; }
+  void SetLabel(const std::string &p_label);
 
   /// Gets the payoff associated with the outcome to the player
   template <class T> const T &GetPayoff(const GamePlayer &p_player) const;

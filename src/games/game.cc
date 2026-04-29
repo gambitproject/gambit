@@ -46,6 +46,22 @@ GameOutcomeRep::GameOutcomeRep(GameRep *p_game, int p_number) : m_game(p_game), 
   }
 }
 
+void GameOutcomeRep::SetLabel(const std::string &p_label)
+{
+  if (p_label == m_label) {
+    return;
+  }
+  if (p_label == "") {
+    throw std::invalid_argument("Outcome label must not be empty");
+  }
+  for (const auto &outcome : m_game->m_outcomes) {
+    if (outcome->m_label == p_label) {
+      throw std::invalid_argument("Outcome label must be unique within a game");
+    }
+  }
+  m_label = p_label;
+}
+
 //========================================================================
 //                      class GameStrategyRep
 //========================================================================
