@@ -217,6 +217,18 @@ EXTRA_DIST = \
 	catalog/selten1975/fig1.efg \
 	catalog/selten1975/fig2.efg \
 	catalog/selten1975/fig3.efg \
+	catalog/selten2008/game1.nfg \
+	catalog/selten2008/game10.nfg \
+	catalog/selten2008/game11.nfg \
+	catalog/selten2008/game12.nfg \
+	catalog/selten2008/game2.nfg \
+	catalog/selten2008/game3.nfg \
+	catalog/selten2008/game4.nfg \
+	catalog/selten2008/game5.nfg \
+	catalog/selten2008/game6.nfg \
+	catalog/selten2008/game7.nfg \
+	catalog/selten2008/game8.nfg \
+	catalog/selten2008/game9.nfg \
 	catalog/watson2013/exercise29_6.efg \
 	catalog/watson2013/fig29_1.efg
 
