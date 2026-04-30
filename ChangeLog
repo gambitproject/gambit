@@ -2,6 +2,11 @@
 
 ## [16.7.0] - unreleased
 
+### Fixed
+- In the GUI, tab-traversal on tables (such as the strategic form payoff table) now works
+  as expected (TAB moves one cell to the right, wrapping if appropriate; SHIFT-TAB moves
+  to the left, wrapping if appropriate).
+
 ### Removed
 - Built-in plotting of logit QRE for strategic games has been removed in the GUI (#809)
 

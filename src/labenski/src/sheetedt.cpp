@@ -406,8 +406,8 @@ bool wxSheetCellEditorRefData::IsAcceptedKey(wxKeyEvent &event)
 void wxSheetCellTextEditorRefData::CreateEditor(wxWindow *parent, wxWindowID id,
                                                 wxEvtHandler *evtHandler, wxSheet *sheet)
 {
-  SetControl(new wxTextCtrl(parent, id, wxEmptyString, wxDefaultPosition,
-                            wxDefaultSize //,wxBORDER_NONE
+  SetControl(new wxTextCtrl(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+                            wxTE_PROCESS_TAB //,wxBORDER_NONE
 #if defined(__WXMSW__)
                             ,
                             wxTE_PROCESS_TAB
