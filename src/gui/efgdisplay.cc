@@ -535,16 +535,17 @@ void EfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
 
 void EfgDisplay::OnAcceptPayoffEdit(wxCommandEvent &)
 {
-  m_payoffEditor->EndEdit();
   const GameOutcome outcome = m_payoffEditor->GetOutcome();
   const int player = m_payoffEditor->GetPlayer();
-  try {
-    m_doc->DoSetPayoff(outcome, player, m_payoffEditor->GetValue());
+  wxString value = m_payoffEditor->GetValue();
+  if (value.EndsWith("/")) {
+    value = value + "1";
   }
-  catch (ValueException &) {
-    // For the moment, we will just silently discard edits which
-    // give payoffs that are not valid numbers
-    return;
+  try {
+    m_doc->DoSetPayoff(outcome, player, value);
+    m_payoffEditor->EndEdit();
+  }
+  catch (ZeroDivideException &) {
   }
   catch (std::exception &ex) {
     ExceptionDialog(this, ex.what()).ShowModal();

@@ -2,6 +2,10 @@
 
 ## [16.7.0] - unreleased
 
+### Fixed
+- In GUI, typing a payoff with a trailing slash is now interpreted as a whole number rational
+  (previously this led to a validation error dialog)
+
 ### Removed
 - Built-in plotting of logit QRE for strategic games has been removed in the GUI (#809)
 
