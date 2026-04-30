@@ -535,7 +535,6 @@ void EfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
 
 void EfgDisplay::OnAcceptPayoffEdit(wxCommandEvent &)
 {
-  m_payoffEditor->EndEdit();
   const GameOutcome outcome = m_payoffEditor->GetOutcome();
   const int player = m_payoffEditor->GetPlayer();
   wxString value = m_payoffEditor->GetValue();
@@ -544,6 +543,9 @@ void EfgDisplay::OnAcceptPayoffEdit(wxCommandEvent &)
   }
   try {
     m_doc->DoSetPayoff(outcome, player, value);
+    m_payoffEditor->EndEdit();
+  }
+  catch (ZeroDivideException &) {
   }
   catch (std::exception &ex) {
     ExceptionDialog(this, ex.what()).ShowModal();
