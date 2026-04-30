@@ -266,14 +266,10 @@ class GamePlayers:
 
     def __getitem__(self, index: int | str) -> Player:
         if isinstance(index, str):
-            if not index.strip():
-                raise ValueError("Player label cannot be empty or all whitespace")
-            matches = [x for x in self if x.label == index.strip()]
-            if not matches:
-                raise KeyError(f"Game has no player with label '{index}'")
-            if len(matches) > 1:
-                raise ValueError(f"Game has multiple players with label '{index}'")
-            return matches[0]
+            try:
+                return Player.wrap(self.game.deref().GetPlayers().at(index.encode("ascii")))
+            except KeyError:
+                raise KeyError(f"Game has no player with label '{index}'") from None
         if isinstance(index, int):
             try:
                 return Player.wrap(self.game.deref().GetPlayer(index + 1))

@@ -228,6 +228,7 @@ cdef extern from "games/game.h":
                 bint operator ==(iterator)
                 bint operator !=(iterator)
             int size() except +
+            c_GamePlayer at(string) except +KeyError
             iterator begin() except +
             iterator end() except +
 
