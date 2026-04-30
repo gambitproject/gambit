@@ -149,6 +149,10 @@ General game theory articles and texts
    extensive games', *International Journal of Game Theory*, vol. 4,
    pp. 25-55.
 
+.. [Sel08] Selten, R., and Chmura, T. 2008,
+   'Stationary concepts for experimental 2x2-games',
+   *American Economic Review*, vol. 98, pp. 938-966.
+
 .. [vanD83] van Damme, E. 1983, *Stability and Perfection of Nash
    Equilibria*, Springer-Verlag, Berlin.
 
