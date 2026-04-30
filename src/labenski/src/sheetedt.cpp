@@ -406,17 +406,24 @@ bool wxSheetCellEditorRefData::IsAcceptedKey(wxKeyEvent &event)
 void wxSheetCellTextEditorRefData::CreateEditor(wxWindow *parent, wxWindowID id,
                                                 wxEvtHandler *evtHandler, wxSheet *sheet)
 {
-  SetControl(new wxTextCtrl(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize,
-                            wxTE_PROCESS_TAB //,wxBORDER_NONE
-#if defined(__WXMSW__)
-                            ,
-                            wxTE_PROCESS_TAB
-#endif // defined(__WXMSW__)
-                            ));
+  auto *textCtrl = new wxTextCtrl(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+                                  wxTE_PROCESS_TAB | wxBORDER_NONE);
+  SetControl(textCtrl);
+  textCtrl->Bind(wxEVT_KILL_FOCUS, [sheet](wxFocusEvent &event) {
+    if (!sheet->IsTabTraversing()) {
+      sheet->CallAfter([sheet]() {
+        if (!sheet->IsTabTraversing() && sheet->IsCellEditControlShown()) {
+          sheet->DisableCellEditControl(true);
+          sheet->Refresh();
+        }
+      });
+    }
+    event.Skip();
+  });
 
   // set max length allowed in the textctrl, if the parameter was set
   if (m_maxChars != 0) {
-    ((wxTextCtrl *)GetControl())->SetMaxLength(m_maxChars);
+    textCtrl->SetMaxLength(m_maxChars);
   }
 
   wxSheetCellEditorRefData::CreateEditor(parent, id, evtHandler, sheet);

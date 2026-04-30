@@ -781,41 +781,49 @@ void gbtPayoffsWidget::DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords)
 
 void gbtPayoffsWidget::MoveEditorByTab(bool p_backwards)
 {
-  if (!GetNumberRows() || !GetNumberCols()) {
+  if (!GetNumberRows() || !GetNumberCols() || !IsCellEditControlCreated()) {
     return;
   }
 
-  if (IsCellEditControlCreated()) {
-    DisableCellEditControl(true);
-  }
+  SetTabTraversing(true);
+  try {
+    if (IsCellEditControlCreated()) {
+      DisableCellEditControl(true);
+    }
 
-  int newRow = GetGridCursorRow();
-  int newCol = GetGridCursorCol();
+    int newRow = GetGridCursorRow();
+    int newCol = GetGridCursorCol();
 
-  if (p_backwards) {
-    --newCol;
-    if (newCol < 0) {
-      newCol = GetNumberCols() - 1;
-      --newRow;
-      if (newRow < 0) {
-        newRow = GetNumberRows() - 1;
+    if (p_backwards) {
+      --newCol;
+      if (newCol < 0) {
+        newCol = GetNumberCols() - 1;
+        --newRow;
+        if (newRow < 0) {
+          newRow = GetNumberRows() - 1;
+        }
       }
     }
-  }
-  else {
-    ++newCol;
-    if (newCol >= GetNumberCols()) {
-      newCol = 0;
-      ++newRow;
-      if (newRow >= GetNumberRows()) {
-        newRow = 0;
+    else {
+      ++newCol;
+      if (newCol >= GetNumberCols()) {
+        newCol = 0;
+        ++newRow;
+        if (newRow >= GetNumberRows()) {
+          newRow = 0;
+        }
       }
     }
-  }
 
-  SetGridCursorCell(wxSheetCoords(newRow, newCol));
-  MakeCellVisible(GetGridCursorCell());
-  EnableCellEditControl(GetGridCursorCell());
+    SetGridCursorCell(wxSheetCoords(newRow, newCol));
+    MakeCellVisible(GetGridCursorCell());
+    EnableCellEditControl(GetGridCursorCell());
+  }
+  catch (...) {
+    SetTabTraversing(false);
+    throw;
+  }
+  SetTabTraversing(false);
 }
 
 void gbtPayoffsWidget::HandleTabTraversal(wxKeyEvent &p_event)
