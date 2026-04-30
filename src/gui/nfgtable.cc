@@ -681,6 +681,11 @@ wxString gbtPayoffsWidget::GetCellValue(const wxSheetCoords &p_coords)
 
 void gbtPayoffsWidget::SetCellValue(const wxSheetCoords &p_coords, const wxString &p_value)
 {
+  // Normalisation: Interpret trailing bare slash as /1".
+  wxString value = p_value;
+  if (value.EndsWith(_T("/"))) {
+    value = value.Left(value.length() - 1);
+  }
   PureStrategyProfile profile = m_table->CellToProfile(p_coords);
   GameOutcome outcome = profile->GetOutcome();
   if (!outcome) {
@@ -690,12 +695,7 @@ void gbtPayoffsWidget::SetCellValue(const wxSheetCoords &p_coords, const wxStrin
   }
   const int player = ColToPlayer(p_coords.GetCol());
   try {
-    m_doc->DoSetPayoff(outcome, player, p_value);
-  }
-  catch (ValueException &) {
-    // For the moment, we will just silently discard edits which
-    // give payoffs that are not valid numbers
-    return;
+    m_doc->DoSetPayoff(outcome, player, value);
   }
   catch (std::exception &ex) {
     ExceptionDialog(this, ex.what()).ShowModal();
