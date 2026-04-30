@@ -109,9 +109,10 @@ cdef extern from "games/game.h":
             cppclass iterator:
                 c_GameAction operator *()
                 iterator operator++()
-                bint operator ==(iterator)
-                bint operator !=(iterator)
+                bint operator==(iterator)
+                bint operator!=(iterator)
             int size() except +
+            c_GameAction at(string) except +KeyError
             iterator begin() except +
             iterator end() except +
 

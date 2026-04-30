@@ -90,12 +90,10 @@ class InfosetActions:
         if isinstance(index, str):
             if not index.strip():
                 raise ValueError("Action label cannot be empty or all whitespace")
-            matches = [x for x in self if x.label == index.strip()]
-            if not matches:
+            try:
+                return Action.wrap(self.infoset.deref().GetActions().at(index.encode("ascii")))
+            except KeyError:
                 raise KeyError(f"Infoset has no action with label '{index}'")
-            if len(matches) > 1:
-                raise ValueError(f"Infoset has multiple actions with label '{index}'")
-            return matches[0]
         if isinstance(index, int):
             return Action.wrap(self.infoset.deref().GetAction(index + 1))
         raise TypeError(f"Action index must be int or str, not {index.__class__.__name__}")

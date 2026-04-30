@@ -196,17 +196,27 @@ public:
     : m_owner(p_owner), m_container(p_container)
   {
   }
-  ElementCollection(const ElementCollection<P, T> &) = default;
+  ElementCollection(const ElementCollection &) = default;
   ~ElementCollection() = default;
-  ElementCollection &operator=(const ElementCollection<P, T> &) = default;
+  ElementCollection &operator=(const ElementCollection &) = default;
 
-  bool operator==(const ElementCollection<P, T> &p_other) const
+  bool operator==(const ElementCollection &p_other) const
   {
     return m_owner == p_other.m_owner && m_container == p_other.m_container;
   }
   size_t size() const { return m_container->size(); }
   GameObjectPtr<T> front() const { return m_container->front(); }
   GameObjectPtr<T> back() const { return m_container->back(); }
+
+  GameObjectPtr<T> at(const std::string &p_label) const
+  {
+    for (const auto &obj : *m_container) {
+      if (obj->GetLabel() == p_label) {
+        return obj->shared_from_this();
+      }
+    }
+    throw std::out_of_range(p_label);
+  }
 
   iterator begin() const { return {m_owner, m_container, 0}; }
   iterator end() const { return {m_owner, m_container, (m_owner) ? m_container->size() : 0}; }
