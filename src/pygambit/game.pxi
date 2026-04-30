@@ -225,14 +225,10 @@ class GameOutcomes:
 
     def __getitem__(self, index: int | str) -> Outcome:
         if isinstance(index, str):
-            if not index.strip():
-                raise ValueError("Outcome label cannot be empty or all whitespace")
-            matches = [x for x in self if x.label == index.strip()]
-            if not matches:
-                raise KeyError(f"Game has no outcome with label '{index}'")
-            if len(matches) > 1:
-                raise ValueError(f"Game has multiple outcomes with label '{index}'")
-            return matches[0]
+            try:
+                return Outcome.wrap(self.game.deref().GetOutcomes().at(index.encode("ascii")))
+            except KeyError:
+                raise KeyError(f"Game has no outcome with label '{index}'") from None
         if isinstance(index, int):
             return Outcome.wrap(self.game.deref().GetOutcome(index + 1))
         raise TypeError(f"Outcome index must be int or str, not {index.__class__.__name__}")
