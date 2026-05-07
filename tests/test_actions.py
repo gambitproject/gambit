@@ -144,7 +144,7 @@ def test_action_delete_chance(game: gbt.Game):
 def test_action_plays():
     """Verify `action.plays` returns plays reachable from a given action.
     """
-    game = games.read_from_file("e01.efg")
+    game = gbt.catalog.load("selten1975/fig1")
     list_nodes = list(game.nodes)
     list_infosets = list(game.infosets)
 
@@ -160,16 +160,16 @@ def test_action_plays():
 @pytest.mark.parametrize(
     "game, player_ind, str_ind, infoset_ind, expected_action_ind",
     [
-        (games.read_from_file("e01.efg"), 0, 0, 0, 0),
-        (games.read_from_file("e01.efg"), 0, 1, 0, 1),
-        (games.read_from_file("e01.efg"), 1, 0, 1, 0),
-        (games.read_from_file("e01.efg"), 1, 1, 1, 1),
-        (games.read_from_file("e01.efg"), 2, 0, 2, 0),
-        (games.read_from_file("e01.efg"), 2, 1, 2, 1),
-        (games.read_from_file("e02.efg"), 0, 0, 0, 0),
-        (games.read_from_file("e02.efg"), 0, 1, 0, 1),
-        (games.read_from_file("e02.efg"), 1, 0, 2, 0),
-        (games.read_from_file("e02.efg"), 1, 1, 2, 1),
+        (gbt.catalog.load("selten1975/fig1"), 0, 0, 0, 0),
+        (gbt.catalog.load("selten1975/fig1"), 0, 1, 0, 1),
+        (gbt.catalog.load("selten1975/fig1"), 1, 0, 1, 0),
+        (gbt.catalog.load("selten1975/fig1"), 1, 1, 1, 1),
+        (gbt.catalog.load("selten1975/fig1"), 2, 0, 2, 0),
+        (gbt.catalog.load("selten1975/fig1"), 2, 1, 2, 1),
+        (gbt.catalog.load("selten1975/fig2"), 0, 0, 0, 0),
+        (gbt.catalog.load("selten1975/fig2"), 0, 1, 0, 1),
+        (gbt.catalog.load("selten1975/fig2"), 1, 0, 2, 0),
+        (gbt.catalog.load("selten1975/fig2"), 1, 1, 2, 1),
         (games.read_from_file("basic_extensive_game.efg"), 0, 0, 0, 0),
         (games.read_from_file("basic_extensive_game.efg"), 0, 1, 0, 1),
         (games.read_from_file("basic_extensive_game.efg"), 1, 0, 1, 0),
@@ -194,7 +194,7 @@ def test_strategy_action_defined(game, player_ind, str_ind, infoset_ind, expecte
 @pytest.mark.parametrize(
     "game, player_ind, str_ind, infoset_ind",
     [
-        (games.read_from_file("e02.efg"), 0, 0, 1),
+        (gbt.catalog.load("selten1975/fig2"), 0, 0, 1),
         (games.read_from_file("cent3.efg"), 0, 0, 1),
         (games.read_from_file("cent3.efg"), 0, 0, 2),
         (games.read_from_file("cent3.efg"), 0, 1, 2),
@@ -218,10 +218,10 @@ def test_strategy_action_undefined_returns_none(game, player_ind, str_ind, infos
 @pytest.mark.parametrize(
     "game, player_ind, infoset_ind",
     [
-        (games.read_from_file("e01.efg"), 0, 1),
-        (games.read_from_file("e01.efg"), 1, 0),
-        (games.read_from_file("e02.efg"), 0, 2),
-        (games.read_from_file("e02.efg"), 1, 0),
+        (gbt.catalog.load("selten1975/fig1"), 0, 1),
+        (gbt.catalog.load("selten1975/fig1"), 1, 0),
+        (gbt.catalog.load("selten1975/fig2"), 0, 2),
+        (gbt.catalog.load("selten1975/fig2"), 1, 0),
         (games.read_from_file("basic_extensive_game.efg"), 0, 1),
         (games.read_from_file("basic_extensive_game.efg"), 1, 2),
         (games.read_from_file("basic_extensive_game.efg"), 2, 0),
@@ -243,7 +243,7 @@ def test_strategy_action_raises_value_error_for_wrong_player(game, player_ind, i
 def test_strategy_action_raises_error_for_strategic_game():
     """Verify `Strategy.action` retrieves the action prescribed by the strategy
     """
-    game_efg = games.read_from_file("e02.efg")
+    game_efg = gbt.catalog.load("selten1975/fig2")
     game_nfg = game_efg.from_arrays(game_efg.to_arrays()[0], game_efg.to_arrays()[1])
     alice = game_nfg.players[0]
     strategy = alice.strategies[0]
