@@ -49,7 +49,7 @@ def test_game_add_players_nolabel():
 
 @pytest.mark.parametrize("game_input,expected_result", [
     # Games with perfect recall from files (game_input is a string)
-    ("e02.efg", True),
+    (gbt.catalog.load("selten1975/fig2"), True),
     ("stripped_down_poker.efg", True),
     # Games with perfect recall from generated games (game_input is a gbt.Game object)
     # - Centipede games
@@ -129,7 +129,7 @@ def test_outcome_index_exception_label():
         ),
         # 2 players; reduction possible for player 1; payoff ties
         (
-            games.read_from_file("e02.efg"),
+            gbt.catalog.load("selten1975/fig2"),
             [["1*", "21", "22"], ["1", "2"]],
             [
                 np.array([[1, 1], [0, 0], [0, 2]]),

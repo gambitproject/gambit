@@ -62,16 +62,16 @@ def test_efg_unsupported_precision():
 
 
 def test_efg_invalid_node_type():
-    with open("tests/test_games/e02.efg") as f:
-        file_text = f.read().replace('p "" 1 1', 'x "" 1 1')
+    file_text = gbt.catalog.load("selten1975/fig2").to_efg()
+    file_text = file_text.replace('p "" 1 1', 'x "" 1 1')
     with pytest.raises(ValueError) as excinfo:
         _parse_efg(file_text)
     assert "Parse error in game file: line 4:3: Invalid type of node" in str(excinfo)
 
 
 def test_efg_payoffs_too_many():
-    with open("tests/test_games/e02.efg") as f:
-        file_text = f.read().replace("1, 1", "1, 2, 3")
+    file_text = gbt.catalog.load("selten1975/fig2").to_efg()
+    file_text = file_text.replace("1, 1", "1, 2, 3")
     with pytest.raises(ValueError) as excinfo:
         _parse_efg(file_text)
     assert "Parse error in game file: line 5:29: Expected '}'" in str(excinfo)
