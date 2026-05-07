@@ -147,7 +147,7 @@ def test_outcome_index_exception_label():
         ),
         # Selten's Horse: game with three players
         (
-            games.read_from_file("e01.efg"),
+            gbt.catalog.load("selten1975/fig1"),
             [["1", "2"], ["1", "2"], ["1", "2"]],
             [
                 np.array([[[1, 1], [4, 0]], [[3, 0], [3, 0]]]),

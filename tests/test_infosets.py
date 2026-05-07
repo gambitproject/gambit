@@ -62,7 +62,7 @@ def test_infoset_add_action_error():
 def test_infoset_plays():
     """Verify `infoset.plays` returns plays reachable from a given infoset.
     """
-    game = games.read_from_file("e01.efg")
+    game = gbt.catalog.load("selten1975/fig1")
     list_nodes = list(game.nodes)
     list_infosets = list(game.infosets)
 

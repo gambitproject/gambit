@@ -32,8 +32,8 @@ def test_efg_no_newline_end():
 
 
 def test_string_wrong_magic():
-    with open("tests/test_games/e01.efg") as f:
-        file_text = f.read().replace("EFG", "")
+    file_text = gbt.catalog.load("selten1975/fig1").to_efg()
+    file_text = file_text.replace("EFG", "")
     with pytest.raises(ValueError) as excinfo:
         _parse_efg(file_text)
     assert (
@@ -43,16 +43,16 @@ def test_string_wrong_magic():
 
 
 def test_efg_unsupported_version():
-    with open("tests/test_games/e01.efg") as f:
-        file_text = f.read().replace("EFG 2", "EFG 1")
+    file_text = gbt.catalog.load("selten1975/fig1").to_efg()
+    file_text = file_text.replace("EFG 2", "EFG 1")
     with pytest.raises(ValueError) as excinfo:
         _parse_efg(file_text)
     assert "Parse error in game file: line 1:6: Accepting only EFG version 2" in str(excinfo.value)
 
 
 def test_efg_unsupported_precision():
-    with open("tests/test_games/e01.efg") as f:
-        file_text = f.read().replace("EFG 2 R", "EFG 2 X")
+    file_text = gbt.catalog.load("selten1975/fig1").to_efg()
+    file_text = file_text.replace("EFG 2 R", "EFG 2 X")
     with pytest.raises(ValueError) as excinfo:
         _parse_efg(file_text)
     assert (

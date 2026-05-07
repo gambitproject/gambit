@@ -112,7 +112,7 @@ def test_write_latex():
 
 
 def test_read_write_efg():
-    efg_game = games.read_from_file("e01.efg")
+    efg_game = gbt.catalog.load("selten1975/fig1")
     serialized_efg_game = efg_game.to_efg()
     deserialized_efg_game = gbt.read_efg(io.BytesIO(serialized_efg_game.encode()))
     double_serialized_efg_game = deserialized_efg_game.to_efg()
