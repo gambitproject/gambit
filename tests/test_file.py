@@ -78,19 +78,19 @@ def test_efg_payoffs_too_many():
 
 
 def test_nfg_title_missing():
-    with open("tests/test_games/e02.nfg") as f:
-        file_text = f.read().replace('"Selten (IJGT, 75), Figure 2, normal form"', "")
+    file_text = gbt.catalog.load("selten1975/fig2").to_nfg()
+    file_text = file_text.replace('"Selten (IJGT 1975) Figure 2"', "")
     with pytest.raises(ValueError) as excinfo:
         _parse_nfg(file_text)
     assert "Parse error in game file: line 1:11: Game title missing" in str(excinfo)
 
 
 def test_nfg_player_missing():
-    with open("tests/test_games/e02.nfg") as f:
-        file_text = f.read().replace('"Player 2"', "")
+    file_text = gbt.catalog.load("selten1975/fig2").to_nfg()
+    file_text = file_text.replace('"Player 2"', "")
     with pytest.raises(ValueError) as excinfo:
         _parse_nfg(file_text)
-    assert "Parse error in game file: line 1:73: Expected '}'" in str(excinfo)
+    assert "Parse error in game file: line 4:2: Expected '}'" in str(excinfo)
 
 
 def test_nfg_payoffs_not_enough():
