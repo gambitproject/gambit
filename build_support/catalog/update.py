@@ -14,7 +14,13 @@ MAKEFILE_AM = Path(__file__).parent.parent.parent / "Makefile.am"
 
 def catalog_draw_tree_settings(slug: str) -> dict:
     """Return the draw_tree settings for a given catalog slug."""
-    settings = {"color_scheme": "gambit", "shared_terminal_depth": True, "sublevel_scaling": 0}
+    settings = {
+        "color_scheme": "gambit",
+        "font_family": "sffamily",
+        "font_italic": True,
+        "shared_terminal_depth": True,
+        "sublevel_scaling": 0,
+    }
     if slug == "bagwell1995" or "watson2013" in slug:
         settings["sublevel_scaling"] = 1
     elif slug == "myerson1991/fig2_1" or slug == "reiley2008/fig1":
