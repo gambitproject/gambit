@@ -253,8 +253,10 @@ ENUMMIXED_RATIONAL_CASES = [
             expected=[
                 [d(1, 0), d(1, 0)],
                 [d(0, 1), d(0, 1)],
-                [d("4186770418979088/4641467073735727", "454696654756639/4641467073735727"), 
-                 d("4186770418979088/4641467073735727", "454696654756639/4641467073735727")] 
+                [
+                    d("4186770418979088/4641467073735727", "454696654756639/4641467073735727"),
+                    d("4186770418979088/4641467073735727", "454696654756639/4641467073735727"),
+                ],
             ],
         ),
         marks=pytest.mark.nash_enummixed_strategy,
@@ -626,9 +628,11 @@ LCP_STRATEGY_RATIONAL_CASES = [
             ),
             expected=[
                 [d(1, 0), d(1, 0)],
-                [d("4186770418979088/4641467073735727", "454696654756639/4641467073735727"), 
-                 d("4186770418979088/4641467073735727", "454696654756639/4641467073735727")],
-                [d(0, 1), d(0, 1)]
+                [
+                    d("4186770418979088/4641467073735727", "454696654756639/4641467073735727"),
+                    d("4186770418979088/4641467073735727", "454696654756639/4641467073735727"),
+                ],
+                [d(0, 1), d(0, 1)],
             ],
         ),
         marks=pytest.mark.nash_lcp_strategy,
@@ -2203,16 +2207,13 @@ ENUMPOLY_BEHAVIOR_CASES = [
     # 3-player perfect info game to test behavior two off equilibrium path
     pytest.param(
         EquilibriumTestCase(
-            factory=functools.partial(
-                games.read_from_file, "3_player_PI_2_dev_off_eq_path.efg"
-            ),
+            factory=functools.partial(games.read_from_file, "3_player_PI_2_dev_off_eq_path.efg"),
             solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
             expected=[
                 # candidate,10,10,1000,10000
                 [[d(1, 0)], [d(1, 0), d(1, 0, 0, 0)], [d(1, 0, 0, 0, 0)]],
                 # candidate,01,00,0000,00000
-                [[d(0, 1)], [d(1, 0), d(1, 0, 0, 0)],
-                 [d(1, 0, 0, 0, 0)]],
+                [[d(0, 1)], [d(1, 0), d(1, 0, 0, 0)], [d(1, 0, 0, 0, 0)]],
             ],
             regret_tol=TOL,
             prob_tol=TOL,
@@ -2222,9 +2223,7 @@ ENUMPOLY_BEHAVIOR_CASES = [
     ),
     pytest.param(
         EquilibriumTestCase(
-            factory=functools.partial(
-                games.read_from_file, "3_player_PI_2_dev_off_eq_path.efg"
-            ),
+            factory=functools.partial(games.read_from_file, "3_player_PI_2_dev_off_eq_path.efg"),
             solver=functools.partial(gbt.nash.enumpoly_solve, stop_after=None),
             expected=[
                 [[d(1, 0)], [d(1, 0), d(1, 0, 0, 0)], [d(1, 0, 0, 0, 0)]],
