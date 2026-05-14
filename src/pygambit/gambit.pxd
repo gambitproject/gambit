@@ -249,7 +249,8 @@ cdef extern from "games/game.h":
             iterator begin() except +
             iterator end() except +
 
-        int IsTree() except +
+        bool IsTree() except +
+        bool IsAgg() except +
 
         string GetTitle() except +
         void SetTitle(string) except +
