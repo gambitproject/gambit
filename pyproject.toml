@@ -43,6 +43,7 @@ doc = [
     "matplotlib",
     "pickleshare",
     "jupyter",
+    "jupyter-sphinx",
     "open_spiel; sys_platform != 'win32'",
 ]
 
