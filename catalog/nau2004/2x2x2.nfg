@@ -4,7 +4,7 @@ NFG 1 R "2x2x2 example with 3 pure, 2 incompletely mixed, and a continuum of com
 { "1" "2" }
 { "1" "2" }
 }
-"Example game from `Nau2004 <https://gambitproject.readthedocs.io/en/latest/biblio.html#Nau2004>`."
+"Example game from `Nau2004 <https://gambitproject.readthedocs.io/en/latest/biblio.html#Nau2004>`_."
 
 {
 { "" 0, 0, 2 }
