@@ -52,6 +52,10 @@ Articles on computation of Nash equilibria
    D. and Rust, J. (eds), *Handbook of Computational Economics*, Elsevier,
    pp. 87-142.
 
+.. [Nau2004] Nau, Robert, Gomez Canovas, Sabrina, and Hansen, Pierre (2004).
+   On the geometry of Nash equilibria and correlated equilibria.
+   International Journal of Game Theory 32(4): 443-453
+
 .. [PNS04] Porter, R., Nudelman, E. and Shoham, Y. 2004,
    'Simple search methods for finding a Nash equilibrium',
    *Games and Economic Behavior*, pp. 664-669.
