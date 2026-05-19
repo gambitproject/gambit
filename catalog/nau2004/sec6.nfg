@@ -1,0 +1,27 @@
+NFG 1 R "2x2x4 game with Nash equilibria in the relative interior of the correlated equilibrium polytope" { "Row" "Column" "Matrix" }
+
+{ { "Top" "Bottom" }
+{ "Left" "Right" }
+{ "1" "2" "3" "4" }
+}
+"A three-player 2x2x4 game (section 6 of `Nau2004 <https://gambitproject.readthedocs.io/en/latest/biblio.html#Nau2004>`_). The correlated equilibrium polytope is four-dimensional with six vertices. The set of Nash equilibria is a line segment in the relative interior of the polytope."
+
+{
+{ "" 2, 0, 0 }
+{ "" 0, 2, 1 }
+{ "" 0, 1, 1 }
+{ "" 1, 0, 2 }
+{ "" 1, 0, 2 }
+{ "" 0, 1, 1 }
+{ "" 0, 2, 1 }
+{ "" 2, 0, 0 }
+{ "" 1, 0, 1 }
+{ "" 0, 2, 0 }
+{ "" 0, 1, 2 }
+{ "" 2, 0, 1 }
+{ "" 2, 0, 1 }
+{ "" 0, 1, 2 }
+{ "" 0, 2, 0 }
+{ "" 1, 0, 1 }
+}
+1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16

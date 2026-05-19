@@ -1,0 +1,19 @@
+NFG 1 R "Game with a continuum of completely mixed-strategy Nash equilibria" { "Row" "Column" "Matrix" }
+
+{ { "Top" "Bottom" }
+{ "Left" "Right" }
+{ "1" "2" }
+}
+"A three-player 2x2x2 game with 3 pure, 2 incompletely mixed, and a continuum of completely mixed Nash equilibria (section 5 of `Nau2004 <https://gambitproject.readthedocs.io/en/latest/biblio.html#Nau2004>`_). The correlated equilibrium polytope is seven-dimensional with 8 vertices."
+
+{
+{ "" 0, 0, 2 }
+{ "" 3, 0, 0 }
+{ "" 0, 3, 0 }
+{ "" 0, 0, 0 }
+{ "" 1, 1, 0 }
+{ "" 0, 0, 0 }
+{ "" 0, 0, 0 }
+{ "" 0, 0, 3 }
+}
+1 2 3 4 5 6 7 8
