@@ -29,6 +29,8 @@ extensions = [
     "IPython.sphinxext.ipython_directive",
     "sphinx_design",
     "nbsphinx",
+    "sphinxcontrib.tikz",
+    "jupyter_sphinx",
 ]
 
 # IPython directive configuration
@@ -83,6 +85,7 @@ else:
 # List of directories, relative to source directory, that shouldn't be searched
 # for source files.
 exclude_trees = ["_build"]
+exclude_patterns = ["_build", "catalog_table.rst"]
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 # default_role = None
@@ -116,22 +119,10 @@ html_theme = "pydata_sphinx_theme"
 # documentation.
 html_theme_options = {
     "external_links": [
-        {
-            "name": "GitHub",
-            "url": "https://github.com/gambitproject/gambit"
-        },
-        {
-            "name": "Releases",
-            "url": "https://github.com/gambitproject/gambit/releases"
-        },
-        {
-            "name": "Older releases",
-            "url": "https://sourceforge.net/projects/gambit/files/"
-        },
-        {
-            "name": "Cite Gambit",
-            "url": "https://www.gambit-project.org/cite/"
-        }
+        {"name": "GitHub", "url": "https://github.com/gambitproject/gambit"},
+        {"name": "Releases", "url": "https://github.com/gambitproject/gambit/releases"},
+        {"name": "Older releases", "url": "https://sourceforge.net/projects/gambit/files/"},
+        {"name": "Cite Gambit", "url": "https://www.gambit-project.org/cite/"},
     ],
     "navbar_end": ["theme-switcher", "navbar-icon-links"],
     "icon_links": [
@@ -167,6 +158,11 @@ html_theme_options = {
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ["_static"]
+
+# Custom CSS files
+html_css_files = [
+    "custom.css",
+]
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
@@ -217,8 +213,7 @@ htmlhelp_basename = "Gambitdoc"
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-    ("index", "Gambit.tex", "Gambit Documentation",
-     "The Gambit Project", "manual"),
+    ("index", "Gambit.tex", "Gambit Documentation", "The Gambit Project", "manual"),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
