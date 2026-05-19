@@ -1,0 +1,25 @@
+NFG 1 R "McKelvey and Palfrey (1995) zero-sum game from Lieberman (1960)" { "Player 1" "Player 2" }
+
+{ { "A1" "A2" "A3" }
+{ "B1" "B2" "B3" }
+}
+"This is the first example game in
+`McKPal95 <https://gambitproject.readthedocs.io/en/latest/biblio.html#McKPal95>`_,
+with data from [Lie60]_.
+
+.. [Lie60] Lieberman, B. (1960) Human behavior in a strictly determined 3x3 matrix
+   game.  Behavioural Science 5: 317-322.
+"
+
+{
+{ "A1B1" 15, -15 }
+{ "A1B2" 0, 0 }
+{ "A1B3" 0, 0 }
+{ "A2B1" -15, 15 }
+{ "A2B2" -2, 2 }
+{ "A2B3" -1, 1 }
+{ "A3B1" 1, -1 }
+{ "A3B2" 2, -2 }
+{ "A3B3" 0, 0 }
+}
+1 2 7 3 4 8 5 6 9

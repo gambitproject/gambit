@@ -1,0 +1,20 @@
+NFG 1 R "McKelvey and Palfrey (1995) zero-sum game from Ochs (1995), variant 2" { "Player 1" "Player 2" }
+
+{ { "A1" "A2" }
+{ "B1" "B2" }
+}
+"This is the fourth example game in
+`McKPal95 <https://gambitproject.readthedocs.io/en/latest/biblio.html#McKPal95>`_,
+with data from [Och95]_.  This variant sets the row player's payoff from (A1, B1) to 9.
+
+.. [Och95] Ochs, J. (1995) Games with unique mixed strategy equilibria: An experimental study.
+   Games and Economic Behavior 10: 174-189.
+"
+
+{
+{ "A1B1" 9, 0 }
+{ "A1B2" 0, 1 }
+{ "A2B1" 0, 1 }
+{ "A2B2" 1, 0 }
+}
+1 2 3 4
