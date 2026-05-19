@@ -1,0 +1,21 @@
+NFG 1 R "McKelvey and Palfrey (1995), Figure 1" { "Player 1" "Player 2" }
+
+{ { "U" "M" "D" }
+{ "L" "M" "R" }
+}
+"Example from `McKPal95 <<https://gambitproject.readthedocs.io/en/latest/biblio.html#McKPal95>`_,
+in which the limiting logit equilibrium is different from the unique perfect equilibrium.
+This version sets the parameters A=B=5."
+
+{
+{ "UL" 1, 1 }
+{ "ML" 0, 0 }
+{ "DL" 0, 0 }
+{ "UM" 0, 0 }
+{ "MM" 1, 1 }
+{ "DM" 0, 5 }
+{ "UR" 1, 1 }
+{ "MR" 5, 0 }
+{ "DR" 1, 1 }
+}
+1 2 7 3 4 8 5 6 9
