@@ -14,6 +14,7 @@ build:
     - pandoc
     - texlive-full
     - imagemagick
+    - pdf2svg
   jobs:
     post_install:
       - pip install "draw-tree @ git+https://github.com/gambitproject/draw_tree.git@v0.9.0"
