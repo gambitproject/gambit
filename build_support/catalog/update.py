@@ -117,12 +117,13 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path, regenerate_images: bool
                 f.write("          \n")
 
                 # TiKZ image
-                f.write("          .. tikz::\n")
-                f.write("             :align: center\n")
-                f.write("             \n")
-                for line in tikz.splitlines():
-                    f.write(f"             {line}\n")
-                f.write("          \n")
+                if row["Format"] == "efg":
+                    f.write("          .. tikz::\n")
+                    f.write("             :align: center\n")
+                    f.write("             \n")
+                    for line in tikz.splitlines():
+                        f.write(f"             {line}\n")
+                    f.write("          \n")
 
 
 def update_makefile():
