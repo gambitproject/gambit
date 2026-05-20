@@ -21,7 +21,6 @@
 //
 
 #include <cmath>
-#include <cstdlib>
 #include <algorithm> // for std::max
 
 #include "gambit.h"
