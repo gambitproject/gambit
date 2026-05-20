@@ -36,7 +36,7 @@ outputting the strategic form of the game in one of these formats:
    Suppresses printing of the banner at program launch.
 
 
-Example invocation for HTML output
+Example invocation for HTML output::
 
    $ gambit-convert -O html 2x2.nfg
    Convert games among various file formats
@@ -51,7 +51,7 @@ Example invocation for HTML output
    align=center>1,0</td></tr></table>
 
 
-Example invocation for LaTeX output
+Example invocation for LaTeX output::
 
    $ gambit-convert -O sgame 2x2.nfg
    Convert games among various file formats

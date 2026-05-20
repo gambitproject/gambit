@@ -2,6 +2,7 @@ import argparse
 from pathlib import Path
 
 import pandas as pd
+from draw_tree import generate_pdf, generate_png, generate_svg, generate_tex
 
 import pygambit as gbt
 
@@ -10,7 +11,25 @@ CATALOG_DIR = Path(__file__).parent.parent.parent / "catalog"
 MAKEFILE_AM = Path(__file__).parent.parent.parent / "Makefile.am"
 
 
-def generate_rst_table(df: pd.DataFrame, rst_path: Path):
+def catalog_draw_tree_settings(slug: str) -> dict:
+    """Return the draw_tree settings for a given catalog slug."""
+    settings = {
+        "color_scheme": "gambit",
+        "font_family": "sffamily",
+        "font_italic": True,
+        "shared_terminal_depth": True,
+        "sublevel_scaling": 0,
+    }
+    if slug == "bagwell1995" or "watson2013" in slug:
+        settings["sublevel_scaling"] = 1
+    elif slug == "myerson1991/fig2_1" or slug == "reiley2008/fig1":
+        settings["action_label_position"] = 0.4
+    elif "selten1975" in slug:
+        settings["shared_terminal_depth"] = False
+    return settings
+
+
+def generate_rst_table(df: pd.DataFrame, rst_path: Path, tikz_re, regenerate_images: bool):
     """Generate RST output with a list-table for games."""
 
     with open(rst_path, "w", encoding="utf-8") as f:
@@ -24,7 +43,7 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
         f.write("   :widths: 100\n")
         f.write("   :class: tight-table\n")
         f.write("\n")
-        f.write("   * - **Extensive form games**\n")
+        f.write("   * - **Catalog of games**\n")
 
         for _, row in df.iterrows():
             slug = row["Game"]
@@ -32,6 +51,29 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
             description = str(row.get("Description", "")).strip()
             # Skip any games which lack a description
             if description:
+                tex_path = CATALOG_DIR / "img" / f"{slug}.tex"
+                png_path = CATALOG_DIR / "img" / f"{slug}.png"
+                pdf_path = CATALOG_DIR / "img" / f"{slug}.pdf"
+                ef_path = CATALOG_DIR / "img" / f"{slug}.ef"
+
+                missing_any = not all(p.exists() for p in [tex_path, png_path, pdf_path, ef_path])
+
+                if regenerate_images or missing_any:
+                    g = gbt.catalog.load(slug)
+                    viz_path = CATALOG_DIR / "img" / f"{slug}"
+                    viz_path.parent.mkdir(parents=True, exist_ok=True)
+                    for func in [generate_tex, generate_png, generate_pdf, generate_svg]:
+                        func(g, save_to=str(viz_path), **catalog_draw_tree_settings(slug))
+
+                with open(tex_path, encoding="utf-8") as tex_f:
+                    tex_content = tex_f.read()
+                match = tikz_re.search(tex_content)
+                tikz = (
+                    match.group(1).strip()
+                    if match
+                    else "% Could not extract tikzpicture from tex file"
+                )
+
                 # Main dropdown
                 f.write(f"   * - .. dropdown:: {title}\n")
                 f.write("          :open:\n")
@@ -54,12 +96,24 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path):
                     f.write(f'             pygambit.catalog.load("{slug}")\n')
                     f.write("          \n")
 
-                # Download links (inside the dropdown)
+                # Download links
                 download_links = [row["Download"]]
-                f.write("          **Download:**\n")
+                for ext in ["ef", "tex", "png", "pdf", "svg"]:
+                    download_links.append(
+                        f":download:`{slug}.{ext} <../catalog/img/{slug}.{ext}>`"
+                    )
+                f.write("          **Download game and image files:**\n")
                 f.write("          \n")
                 f.write(f"          {' '.join(download_links)}\n")
-                f.write("       \n")
+                f.write("          \n")
+
+                # TiKZ image
+                f.write("          .. tikz::\n")
+                f.write("             :align: center\n")
+                f.write("             \n")
+                for line in tikz.splitlines():
+                    f.write(f"             {line}\n")
+                f.write("          \n")
 
 
 def update_makefile():
@@ -116,6 +170,7 @@ def update_makefile():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--build", action="store_true")
+    parser.add_argument("--regenerate-images", action="store_true")
     args = parser.parse_args()
 
     # Create RST list-table used by doc/catalog.rst
