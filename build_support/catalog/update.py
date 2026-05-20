@@ -93,17 +93,10 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path, regenerate_images: bool
                 f.write("          \n")
                 f.write("          **Load in PyGambit:**\n")
                 f.write("          \n")
-                if row["Format"] == "efg":
-                    f.write("          .. code-block:: python\n")
-                    f.write("             \n")
-                    f.write(f'             pygambit.catalog.load("{slug}")\n')
-                    f.write("          \n")
-                elif row["Format"] == "nfg":
-                    f.write("          .. jupyter-execute::\n")
-                    f.write("             \n")
-                    f.write("             import pygambit\n")
-                    f.write(f'             pygambit.catalog.load("{slug}")\n')
-                    f.write("          \n")
+                f.write("          .. code-block:: python\n")
+                f.write("             \n")
+                f.write(f'             pygambit.catalog.load("{slug}")\n')
+                f.write("          \n")
 
                 # Download links
                 download_links = [row["Download"]]
@@ -123,6 +116,14 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path, regenerate_images: bool
                     f.write("             \n")
                     for line in tikz.splitlines():
                         f.write(f"             {line}\n")
+                    f.write("          \n")
+                elif row["Format"] == "nfg":
+                    f.write("          .. jupyter-execute::\n")
+                    f.write("             :hide-code:\n")
+                    f.write("             \n")
+                    f.write("             import pygambit\n")
+                    f.write("             from draw_tree import draw_tree\n")
+                    f.write(f'             draw_tree(pygambit.catalog.load("{slug}"))\n')
                     f.write("          \n")
 
 
