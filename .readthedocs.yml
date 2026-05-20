@@ -14,9 +14,10 @@ build:
     - pandoc
     - texlive-full
     - imagemagick
+    - pdf2svg
   jobs:
     post_install:
-      - pip install "draw-tree @ git+https://github.com/gambitproject/draw_tree.git@v0.6.1"
+      - pip install "draw-tree @ git+https://github.com/gambitproject/draw_tree.git@v0.9.0"
       # Create RST for catalog table in docs
       - $READTHEDOCS_VIRTUALENV_PATH/bin/python build_support/catalog/update.py
 

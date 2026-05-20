@@ -53,3 +53,4 @@ catalog/img/**/*.pdf
 catalog/img/**/*.png
 catalog/img/**/*.tex
 catalog/img/**/*.ef
+catalog/img/**/*.svg

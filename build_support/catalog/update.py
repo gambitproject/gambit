@@ -1,9 +1,8 @@
 import argparse
-import re
 from pathlib import Path
 
 import pandas as pd
-from draw_tree import generate_pdf, generate_png, generate_tex
+from draw_tree import generate_pdf, generate_png, generate_svg, generate_tex
 
 import pygambit as gbt
 
@@ -30,128 +29,95 @@ def catalog_draw_tree_settings(slug: str) -> dict:
     return settings
 
 
-def _write_efg_table(df: pd.DataFrame, f, tikz_re, regenerate_images: bool):
-    """Write the EFG games list-table to file handle f."""
-    f.write(".. list-table::\n")
-    f.write("   :header-rows: 1\n")
-    f.write("   :widths: 100\n")
-    f.write("   :class: tight-table\n")
-    f.write("\n")
-    f.write("   * - **Extensive form games**\n")
-
-    efg_df = df[df["Format"] == "efg"]
-    for _, row in efg_df.iterrows():
-        slug = row["Game"]
-        title = str(row.get("Title", "")).strip()
-        description = str(row.get("Description", "")).strip()
-        if description:
-            tex_path = CATALOG_DIR / "img" / f"{slug}.tex"
-            png_path = CATALOG_DIR / "img" / f"{slug}.png"
-            pdf_path = CATALOG_DIR / "img" / f"{slug}.pdf"
-            ef_path = CATALOG_DIR / "img" / f"{slug}.ef"
-
-            missing_any = not all(p.exists() for p in [tex_path, png_path, pdf_path, ef_path])
-
-            if regenerate_images or missing_any:
-                g = gbt.catalog.load(slug)
-                viz_path = CATALOG_DIR / "img" / f"{slug}"
-                viz_path.parent.mkdir(parents=True, exist_ok=True)
-                for func in [generate_tex, generate_png, generate_pdf]:
-                    func(g, save_to=str(viz_path), **catalog_draw_tree_settings(slug))
-
-            with open(tex_path, encoding="utf-8") as tex_f:
-                tex_content = tex_f.read()
-            match = tikz_re.search(tex_content)
-            tikz = (
-                match.group(1).strip()
-                if match
-                else "% Could not extract tikzpicture from tex file"
-            )
-
-            # Main dropdown
-            f.write(f"   * - .. dropdown:: {title}\n")
-            f.write("          \n")
-
-            for line in description.splitlines():
-                f.write(f"          {line}\n")
-            f.write("          \n")
-            f.write("          **Load in PyGambit:**\n")
-            f.write("          \n")
-            f.write("          .. code-block:: python\n")
-            f.write("             \n")
-            f.write(f'             pygambit.catalog.load("{slug}")\n')
-            f.write("          \n")
-
-            # Download links
-            download_links = [row["Download"]]
-            for ext in ["ef", "tex", "png", "pdf"]:
-                download_links.append(f":download:`{slug}.{ext} <../catalog/img/{slug}.{ext}>`")
-            f.write("          **Download game and image files:**\n")
-            f.write("          \n")
-            f.write(f"          {' '.join(download_links)}\n")
-            f.write("          \n")
-
-            # TiKZ image
-            f.write("          .. tikz::\n")
-            f.write("             :align: center\n")
-            f.write("             \n")
-            for line in tikz.splitlines():
-                f.write(f"             {line}\n")
-            f.write("          \n")
-
-
-# def _write_nfg_table(df: pd.DataFrame, f):
-#     """Write the NFG games list-table to file handle f."""
-#     f.write(".. list-table::\n")
-#     f.write("   :header-rows: 1\n")
-#     f.write("   :widths: 100\n")
-#     f.write("   :class: tight-table\n")
-#     f.write("\n")
-#     f.write("   * - **Strategic form games**\n")
-
-#     nfg_df = df[df["Format"] == "nfg"]
-#     for _, row in nfg_df.iterrows():
-#         slug = row["Game"]
-
-#         # Title as plain text header
-#         f.write("   * - \n")
-#         f.write("       \n")
-
-#         # Jupyter-execute block (no dropdown)
-#         f.write("       .. jupyter-execute::\n")
-#         f.write("          \n")
-#         f.write("          import pygambit\n")
-#         f.write(f'          pygambit.catalog.load("{slug}")\n')
-#         f.write("       \n")
-
-#         # Download link (plain, no dropdown)
-#         f.write(f"       :download:`{slug}.nfg <../catalog/{slug}.nfg>`\n")
-#         f.write("       \n")
-
-
 def generate_rst_table(df: pd.DataFrame, rst_path: Path, regenerate_images: bool = False):
-    """Generate RST output with two list-tables: one for EFG and one for NFG games."""
-    tikz_re = re.compile(r"\\begin\{document\}(.*?)\\end\{document\}", re.DOTALL)
-
+    """Generate RST output with a list-table for games."""
     with open(rst_path, "w", encoding="utf-8") as f:
         # TOC linking to both sections
-        # f.write(".. contents::\n")
-        # f.write("   :local:\n")
-        # f.write("   :depth: 1\n")
-        # f.write("\n")
+        f.write(".. contents::\n")
+        f.write("   :local:\n")
+        f.write("   :depth: 1\n")
+        f.write("\n")
+        f.write(".. list-table::\n")
+        f.write("   :header-rows: 1\n")
+        f.write("   :widths: 100\n")
+        f.write("   :class: tight-table\n")
+        f.write("\n")
+        f.write("   * - **Catalog of games**\n")
 
-        # # EFG section
-        # f.write("Extensive form games\n")
-        # f.write("--------------------\n")
-        # f.write("\n")
-        _write_efg_table(df, f, tikz_re, regenerate_images)
-        # f.write("\n")
+        for _, row in df.iterrows():
+            slug = row["Game"]
+            title = str(row.get("Title", "")).strip()
+            description = str(row.get("Description", "")).strip()
+            # Skip any games which lack a description
+            if description:
+                all_exts = []
+                all_paths = []
+                if row["Format"] == "efg":
+                    ef_path = CATALOG_DIR / "img" / f"{slug}.ef"
+                    all_exts.append("ef")
+                    all_paths.append(ef_path)
+                all_exts = all_exts + ["tex", "png", "pdf", "svg"]
+                tex_path = CATALOG_DIR / "img" / f"{slug}.tex"
+                all_paths.append(tex_path)
+                all_paths.append(CATALOG_DIR / "img" / f"{slug}.png")
+                all_paths.append(CATALOG_DIR / "img" / f"{slug}.pdf")
+                all_paths.append(CATALOG_DIR / "img" / f"{slug}.svg")
+                missing_any = not all(p.exists() for p in all_paths)
 
-        # # NFG section
-        # f.write("Strategic form games\n")
-        # f.write("--------------------\n")
-        # f.write("\n")
-        # _write_nfg_table(df, f)
+                if regenerate_images or missing_any:
+                    g = gbt.catalog.load(slug)
+                    viz_path = CATALOG_DIR / "img" / f"{slug}"
+                    viz_path.parent.mkdir(parents=True, exist_ok=True)
+                    for func in [generate_tex, generate_png, generate_pdf, generate_svg]:
+                        func(g, save_to=str(viz_path), **catalog_draw_tree_settings(slug))
+
+                # Main dropdown
+                f.write(f"   * - .. dropdown:: {title}\n")
+                f.write("          :open:\n")
+                f.write("          \n")
+                for line in description.splitlines():
+                    f.write(f"          {line}\n")
+
+                f.write("          \n")
+                f.write("          **Load in PyGambit:**\n")
+                f.write("          \n")
+                f.write("          .. code-block:: python\n")
+                f.write("             \n")
+                f.write(f'             pygambit.catalog.load("{slug}")\n')
+                f.write("          \n")
+
+                # Download links
+                download_links = [row["Download"]]
+                for ext in all_exts:
+                    download_links.append(
+                        f":download:`{slug}.{ext} <../catalog/img/{slug}.{ext}>`"
+                    )
+                f.write("          **Download game and image files:**\n")
+                f.write("          \n")
+                f.write(f"          {' '.join(download_links)}\n")
+                f.write("          \n")
+
+                # Draw image
+                f.write("          .. jupyter-execute::\n")
+                f.write("             :hide-code:\n")
+                f.write("             \n")
+                f.write("             import pygambit\n")
+                f.write("             from draw_tree import draw_tree\n")
+                if row["Format"] == "efg":
+                    settings = catalog_draw_tree_settings(slug)
+                    settings_str = ", ".join(f"{k}={v!r}" for k, v in settings.items())
+                    f.write(
+                        f"             draw_tree("
+                        f'pygambit.catalog.load("{slug}"), '
+                        f"{settings_str})\n"
+                    )
+                elif row["Format"] == "nfg":
+                    f.write(
+                        f"             draw_tree("
+                        f'pygambit.catalog.load("{slug}"), '
+                        f'save_to="../catalog/img/{slug}.png")\n'
+                    )
+                f.write("          \n")
 
 
 def update_makefile():

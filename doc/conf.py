@@ -31,6 +31,7 @@ extensions = [
     "nbsphinx",
     "sphinxcontrib.tikz",
     "jupyter_sphinx",
+    "jupyter_sphinx",
 ]
 
 # IPython directive configuration

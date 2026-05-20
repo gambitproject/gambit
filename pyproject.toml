@@ -34,6 +34,7 @@ dependencies = [
 [project.optional-dependencies]
 test = ["pytest", "pytest-subtests", "nbformat", "nbclient", "ipykernel"]
 doc = [
+    "sphinx>=7.0",
     "pydata-sphinx-theme",
     "sphinx_design",
     "sphinx-autobuild",
@@ -42,6 +43,7 @@ doc = [
     "matplotlib",
     "pickleshare",
     "jupyter",
+    "jupyter-sphinx",
     "open_spiel; sys_platform != 'win32'",
     "sphinxcontrib-tikz",
     "jupyter_sphinx",
