@@ -112,7 +112,11 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path, regenerate_images: bool
                         f"{settings_str})\n"
                     )
                 elif row["Format"] == "nfg":
-                    f.write(f'             draw_tree(pygambit.catalog.load("{slug}"))\n')
+                    f.write(
+                        f"             draw_tree("
+                        f'pygambit.catalog.load("{slug}"), '
+                        f'save_to="../catalog/img/{slug}.png")\n'
+                    )
                 f.write("          \n")
 
 
