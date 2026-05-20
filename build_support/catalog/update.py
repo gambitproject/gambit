@@ -1,4 +1,5 @@
 import argparse
+import re
 from pathlib import Path
 
 import pandas as pd
@@ -29,8 +30,9 @@ def catalog_draw_tree_settings(slug: str) -> dict:
     return settings
 
 
-def generate_rst_table(df: pd.DataFrame, rst_path: Path, tikz_re, regenerate_images: bool):
+def generate_rst_table(df: pd.DataFrame, rst_path: Path, regenerate_images: bool = False):
     """Generate RST output with a list-table for games."""
+    tikz_re = re.compile(r"\\begin\{document\}(.*?)\\end\{document\}", re.DOTALL)
 
     with open(rst_path, "w", encoding="utf-8") as f:
         # TOC linking to both sections
@@ -175,7 +177,7 @@ if __name__ == "__main__":
 
     # Create RST list-table used by doc/catalog.rst
     df = gbt.catalog.games(include_descriptions=True)
-    generate_rst_table(df, CATALOG_RST_TABLE)
+    generate_rst_table(df, CATALOG_RST_TABLE, regenerate_images=args.regenerate_images)
     print(f"Generated {CATALOG_RST_TABLE} for use in local docs build. DO NOT COMMIT.")
     if args.build:
         # Update the Makefile.am with the current list of catalog files
