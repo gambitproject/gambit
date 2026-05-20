@@ -1,4 +1,4 @@
-NFG 1 R "Three-player game with a unique Nash solution in irrational strategies" { "Row" "Column" "Matrix" }
+NFG 1 R "Three-player game with a unique Nash solution in irrational strategies" { "Player 1" "Player 2" "Player 3" }
 
 { { "Top" "Bottom" }
 { "Left" "Right" }

@@ -1,4 +1,4 @@
-NFG 1 R "Game with a continuum of completely mixed-strategy Nash equilibria" { "Row" "Column" "Matrix" }
+NFG 1 R "Game with a continuum of completely mixed-strategy Nash equilibria" { "Player 1" "Player 2" "Player 3" }
 
 { { "Top" "Bottom" }
 { "Left" "Right" }
