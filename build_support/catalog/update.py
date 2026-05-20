@@ -1,5 +1,4 @@
 import argparse
-import re
 from pathlib import Path
 
 import pandas as pd
@@ -32,8 +31,6 @@ def catalog_draw_tree_settings(slug: str) -> dict:
 
 def generate_rst_table(df: pd.DataFrame, rst_path: Path, regenerate_images: bool = False):
     """Generate RST output with a list-table for games."""
-    tikz_re = re.compile(r"\\begin\{document\}(.*?)\\end\{document\}", re.DOTALL)
-
     with open(rst_path, "w", encoding="utf-8") as f:
         # TOC linking to both sections
         f.write(".. contents::\n")
@@ -74,15 +71,6 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path, regenerate_images: bool
                     for func in [generate_tex, generate_png, generate_pdf, generate_svg]:
                         func(g, save_to=str(viz_path), **catalog_draw_tree_settings(slug))
 
-                with open(tex_path, encoding="utf-8") as tex_f:
-                    tex_content = tex_f.read()
-                match = tikz_re.search(tex_content)
-                tikz = (
-                    match.group(1).strip()
-                    if match
-                    else "% Could not extract tikzpicture from tex file"
-                )
-
                 # Main dropdown
                 f.write(f"   * - .. dropdown:: {title}\n")
                 f.write("          :open:\n")
@@ -109,22 +97,23 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path, regenerate_images: bool
                 f.write(f"          {' '.join(download_links)}\n")
                 f.write("          \n")
 
-                # TiKZ image
+                # Draw image
+                f.write("          .. jupyter-execute::\n")
+                f.write("             :hide-code:\n")
+                f.write("             \n")
+                f.write("             import pygambit\n")
+                f.write("             from draw_tree import draw_tree\n")
                 if row["Format"] == "efg":
-                    f.write("          .. tikz::\n")
-                    f.write("             :align: center\n")
-                    f.write("             \n")
-                    for line in tikz.splitlines():
-                        f.write(f"             {line}\n")
-                    f.write("          \n")
+                    settings = catalog_draw_tree_settings(slug)
+                    settings_str = ", ".join(f"{k}={v!r}" for k, v in settings.items())
+                    f.write(
+                        f"             draw_tree("
+                        f'pygambit.catalog.load("{slug}"), '
+                        f"{settings_str})\n"
+                    )
                 elif row["Format"] == "nfg":
-                    f.write("          .. jupyter-execute::\n")
-                    f.write("             :hide-code:\n")
-                    f.write("             \n")
-                    f.write("             import pygambit\n")
-                    f.write("             from draw_tree import draw_tree\n")
                     f.write(f'             draw_tree(pygambit.catalog.load("{slug}"))\n')
-                    f.write("          \n")
+                f.write("          \n")
 
 
 def update_makefile():
