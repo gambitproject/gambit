@@ -369,7 +369,7 @@ LogitBehaviorSolve(const LogitQREMixedBehaviorProfile &p_start, double p_regret,
         std::cout << "Best profile found = "; 
         p_observer(callback.GetBestProfileRegret());
         std::cout << std::endl;   
-        exit(1);
+        return std::list<LogitQREMixedBehaviorProfile>();
       }      
       
       return callback.GetProfiles();
@@ -413,7 +413,7 @@ LogitBehaviorSolveLambda(const LogitQREMixedBehaviorProfile &p_start,
                 << " with regret = " << callback.GetBestProfileLambda().GetProfile().GetAgentMaxRegret()
                 << " (Goal was lambda = " << p_targetLambda.back() << ")" << std::endl;
       std::cout << "Best profile found = "; p_observer(callback.GetBestProfileLambda());std::cout << std::endl;
-      exit(1);
+      return std::list<LogitQREMixedBehaviorProfile>();
   }            
   
   return ret;

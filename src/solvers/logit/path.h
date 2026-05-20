@@ -83,7 +83,7 @@ public:
             CriterionBracketFunctionType p_criterionBracker = NullCriterionBracketFunction) const;
 
 private:
-  double m_maxDecel{1.1}, m_hStart{0.03};
+  double m_maxDecel{1.1}, m_hStart{0.1};
 };
 
 } // end namespace Gambit

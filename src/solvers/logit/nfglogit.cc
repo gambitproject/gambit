@@ -406,7 +406,7 @@ LogitStrategySolve(const LogitQREMixedStrategyProfile &p_start, double p_regret,
         std::cout << "Best profile found = "; 
         p_observer(callback.GetBestProfileRegret());
         std::cout << std::endl;
-        exit(1);
+        return std::list<LogitQREMixedStrategyProfile>();
       }
 
 
@@ -452,7 +452,7 @@ LogitStrategySolveLambda(const LogitQREMixedStrategyProfile &p_start,
     std::cout << "Best profile found = "; 
     p_observer(callback.GetBestProfileLambda());
     std::cout << std::endl;
-    exit(1);
+    return std::list<LogitQREMixedStrategyProfile>();
   }
   return ret;
 }

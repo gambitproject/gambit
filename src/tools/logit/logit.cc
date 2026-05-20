@@ -85,6 +85,7 @@ bool ReadProfile(std::istream &p_stream, MixedStrategyProfile<double> &p_profile
 template <class T>
 void PrintProfile(std::ostream &p_stream, int p_decimals, const T &p_profile, bool p_nash = false)
 {
+  
   if (p_nash) {
     p_stream << "NE";
   }
@@ -113,7 +114,7 @@ int main(int argc, char *argv[])
   double maxregret = 1.0e-8;
   std::string mleFile;
   double maxDecel = 1.1;
-  double hStart = 0.03;
+  double hStart = 0.1;
   std::list<double> targetLambda;
   bool fullGraph = true;
   int decimals = 6;
@@ -195,6 +196,19 @@ int main(int argc, char *argv[])
           "Computing equilibria of games with imperfect recall is not supported.");
     }
 
+    if (game->IsTree()) {
+      bool has_decisions = false;
+      for (auto player : game->GetPlayers()) {
+        if (player->GetInfosets().size() > 0 && !has_decisions) {
+          has_decisions = true;
+        }
+      }        
+      if (!has_decisions) {
+        std::cout << "ERROR: The game does not contain decision nodes for the players (only chance). No equilibria to calculate." << std::endl;
+        return 0;
+      }
+    }
+
     if (!mleFile.empty() && (!game->IsTree() || useStrategic)) {
       MixedStrategyProfile<double> frequencies(game->NewMixedStrategyProfile(0.0));
       std::ifstream mleData(mleFile.c_str());
@@ -227,7 +241,8 @@ int main(int argc, char *argv[])
       }
       else {
         auto result = LogitStrategySolve(start, maxregret, 1.0, hStart, maxDecel, printer);
-        PrintProfile(std::cout, decimals, result.back(), true);
+        if(!result.empty()) 
+          PrintProfile(std::cout, decimals, result.back(), true);
       }
     }
     else {
@@ -246,7 +261,8 @@ int main(int argc, char *argv[])
       }
       else {
         auto result = LogitBehaviorSolve(start, maxregret, 1.0, hStart, maxDecel, printer);
-        PrintProfile(std::cout, decimals, result.back(), true);
+        if(!result.empty()) 
+          PrintProfile(std::cout, decimals, result.back(), true);
       }
     }
     return 0;
