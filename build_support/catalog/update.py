@@ -53,12 +53,19 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path, regenerate_images: bool
             description = str(row.get("Description", "")).strip()
             # Skip any games which lack a description
             if description:
+                all_exts = []
+                all_paths = []
+                if row["Format"] == "efg":
+                    ef_path = CATALOG_DIR / "img" / f"{slug}.ef"
+                    all_exts.append("ef")
+                    all_paths.append(ef_path)
+                all_exts = all_exts + ["tex", "png", "pdf", "svg"]
                 tex_path = CATALOG_DIR / "img" / f"{slug}.tex"
-                png_path = CATALOG_DIR / "img" / f"{slug}.png"
-                pdf_path = CATALOG_DIR / "img" / f"{slug}.pdf"
-                ef_path = CATALOG_DIR / "img" / f"{slug}.ef"
-
-                missing_any = not all(p.exists() for p in [tex_path, png_path, pdf_path, ef_path])
+                all_paths.append(tex_path)
+                all_paths.append(CATALOG_DIR / "img" / f"{slug}.png")
+                all_paths.append(CATALOG_DIR / "img" / f"{slug}.pdf")
+                all_paths.append(CATALOG_DIR / "img" / f"{slug}.svg")
+                missing_any = not all(p.exists() for p in all_paths)
 
                 if regenerate_images or missing_any:
                     g = gbt.catalog.load(slug)
@@ -100,7 +107,7 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path, regenerate_images: bool
 
                 # Download links
                 download_links = [row["Download"]]
-                for ext in ["ef", "tex", "png", "pdf", "svg"]:
+                for ext in all_exts:
                     download_links.append(
                         f":download:`{slug}.{ext} <../catalog/img/{slug}.{ext}>`"
                     )
