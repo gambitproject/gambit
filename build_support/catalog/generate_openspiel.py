@@ -34,6 +34,12 @@ def generate_openspiel_games():
     devnull = os.open(os.devnull, os.O_WRONLY)
     os.dup2(devnull, sys.stderr.fileno())
 
+    description = (
+        "This game originates in the "
+        "`OpenSpiel <https://openspiel.readthedocs.io/en/latest/games.html>`_ "
+        "game library"
+    )
+
     try:
         games = pyspiel.registered_games()
         for game_type in games:
@@ -62,7 +68,7 @@ def generate_openspiel_games():
                     game_obj = gbt.read_nfg(f)
 
                 game_obj.title = title
-                game_obj.description = "[INSERT DESCRIPTION]"
+                game_obj.description = description
 
                 with open(openspiel_dir / f"{name}.nfg", "w") as f:
                     f.write(game_obj.to_nfg())
@@ -85,7 +91,7 @@ def generate_openspiel_games():
                     game_obj = gbt.read_efg(f)
 
                 game_obj.title = title
-                game_obj.description = "[INSERT DESCRIPTION]"
+                game_obj.description = description
 
                 with open(openspiel_dir / f"{name}.efg", "w") as f:
                     f.write(game_obj.to_efg())
