@@ -253,7 +253,6 @@ void GameTreeRep::RemoveMember(GameInfosetRep *p_infoset, GameNodeRep *p_node)
     p_infoset->Invalidate();
     p_infoset->m_player->m_infosets.erase(std::find(
         player->m_infosets.begin(), player->m_infosets.end(), p_infoset->shared_from_this()));
-    RenumberInfosets(player);
   }
   InvalidateNodeOrdering();
 }
