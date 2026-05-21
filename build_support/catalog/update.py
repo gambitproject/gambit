@@ -20,12 +20,22 @@ def catalog_draw_tree_settings(slug: str) -> dict:
         "shared_terminal_depth": True,
         "sublevel_scaling": 0,
     }
-    if slug == "bagwell1995" or "watson2013" in slug:
+    if (
+        slug == "bagwell1995"
+        or slug == "open_spiel/coordinated_mp"
+        or slug == "open_spiel/tiny_hanabi"
+        or "watson2013" in slug
+    ):
         settings["sublevel_scaling"] = 1
-    elif slug == "myerson1991/fig2_1" or slug == "reiley2008/fig1":
+
+    if slug == "myerson1991/fig2_1" or slug == "reiley2008/fig1":
         settings["action_label_position"] = 0.4
-    elif "selten1975" in slug:
+    elif slug == "open_spiel/tiny_hanabi":
+        settings["action_label_position"] = 0.7
+
+    if "selten1975" in slug:
         settings["shared_terminal_depth"] = False
+
     return settings
 
 
