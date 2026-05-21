@@ -68,8 +68,11 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path, regenerate_images: bool
                     g = gbt.catalog.load(slug)
                     viz_path = CATALOG_DIR / "img" / f"{slug}"
                     viz_path.parent.mkdir(parents=True, exist_ok=True)
-                    for func in [generate_tex, generate_png, generate_pdf, generate_svg]:
-                        func(g, save_to=str(viz_path), **catalog_draw_tree_settings(slug))
+                    try:
+                        for func in [generate_tex, generate_png, generate_pdf, generate_svg]:
+                            func(g, save_to=str(viz_path), **catalog_draw_tree_settings(slug))
+                    except RuntimeError:
+                        print("Image generation failed for ", g.title)
 
                 # Main dropdown
                 f.write(f"   * - .. dropdown:: {title}\n")
