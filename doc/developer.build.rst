@@ -190,10 +190,6 @@ Use `pip` to install from the **root directory of the source tree**:
    source venv/bin/activate
    python -m pip install ".[dev]"
 
-.. tip::
-
-   The "test" and "doc" optional dependencies are useful for developers wishing to run the test suite or build this documentation locally.
-
 
 Once installed, simply ``import pygambit`` in your Python shell or
 script to get started.
