@@ -77,8 +77,15 @@ Adding games from external libraries
 
 You can use the catalog update script to pull games from external libraries by providing the appropriate flags.
 
-For example, to pull games from OpenSpiel:
+OpenSpiel_
+^^^^^^^^^^
+
+.. _OpenSpiel: https://openspiel.readthedocs.io/en/latest/games.html
 
 .. code-block:: bash
 
-    python build_support/catalog/update.py --generate-openspiel --build
+    python build_support/catalog/generate_openspiel.py
+
+.. important::
+
+   If any games are added or changed by running this script, you'll need to run the ``update.py`` script as per step 3 above.
