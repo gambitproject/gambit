@@ -217,6 +217,19 @@ EXTRA_DIST = \
 	catalog/nau2004/sec4.nfg \
 	catalog/nau2004/sec5.nfg \
 	catalog/nau2004/sec6.nfg \
+	catalog/open_spiel/coordinated_mp.efg \
+	catalog/open_spiel/matching_pennies_3p.nfg \
+	catalog/open_spiel/matrix_bos.nfg \
+	catalog/open_spiel/matrix_brps.nfg \
+	catalog/open_spiel/matrix_cd.nfg \
+	catalog/open_spiel/matrix_coordination.nfg \
+	catalog/open_spiel/matrix_mp.nfg \
+	catalog/open_spiel/matrix_pd.nfg \
+	catalog/open_spiel/matrix_rps.nfg \
+	catalog/open_spiel/matrix_rpsw.nfg \
+	catalog/open_spiel/matrix_sh.nfg \
+	catalog/open_spiel/matrix_shapleys_game.nfg \
+	catalog/open_spiel/tiny_hanabi.efg \
 	catalog/reiley2008/fig1.efg \
 	catalog/selten1975/fig1.efg \
 	catalog/selten1975/fig2.efg \

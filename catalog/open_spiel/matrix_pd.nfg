@@ -1,0 +1,14 @@
+NFG 1 R "Prisoner's Dilemma" { "Player 0" "Player 1" }
+
+{ { "1" "2" }
+{ "1" "2" }
+}
+"This game originates from the `OpenSpiel <https://openspiel.readthedocs.io/en/latest/games.html>`_ game library."
+
+{
+{ "" 5, 5 }
+{ "" 10, 0 }
+{ "" 0, 10 }
+{ "" 1, 1 }
+}
+1 2 3 4

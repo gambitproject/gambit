@@ -1,0 +1,18 @@
+EFG 2 R "Coordinated Matching Pennies" { "Pl0" "Pl1" }
+"This game originates from the `OpenSpiel <https://openspiel.readthedocs.io/en/latest/games.html>`_ game library."
+
+p "" 1 1 "" { "Heads" "Tails" } 0
+c "H" 1 "" { "Top" 0.5000000000000000 "Bottom" 0.5000000000000000 } 0
+p "HT" 2 1 "" { "Heads" "Tails" } 0
+t "HTH" 1 "" { 1.0, -1.0 }
+t "HTT" 2 "" { -1.0, 1.0 }
+p "HB" 2 2 "" { "Heads" "Tails" } 0
+t "HBH" 3 "" { 1.0, -1.0 }
+t "HBT" 4 "" { -1.0, 1.0 }
+c "T" 2 "" { "Top" 0.5000000000000000 "Bottom" 0.5000000000000000 } 0
+p "TT" 2 1 "" { "Heads" "Tails" } 0
+t "TTH" 5 "" { -1.0, 1.0 }
+t "TTT" 6 "" { 1.0, -1.0 }
+p "TB" 2 2 "" { "Heads" "Tails" } 0
+t "TBH" 7 "" { -1.0, 1.0 }
+t "TBT" 8 "" { 1.0, -1.0 }

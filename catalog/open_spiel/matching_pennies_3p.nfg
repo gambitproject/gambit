@@ -1,0 +1,19 @@
+NFG 1 R "Three-Player Matching Pennies" { "Player 0" "Player 1" "Player 2" }
+
+{ { "1" "2" }
+{ "1" "2" }
+{ "1" "2" }
+}
+"This game originates from the `OpenSpiel <https://openspiel.readthedocs.io/en/latest/games.html>`_ game library."
+
+{
+{ "" 1, 1, -1 }
+{ "" -1, 1, 1 }
+{ "" -1, -1, -1 }
+{ "" 1, -1, 1 }
+{ "" 1, -1, 1 }
+{ "" -1, -1, -1 }
+{ "" -1, 1, 1 }
+{ "" 1, 1, -1 }
+}
+1 2 3 4 5 6 7 8
