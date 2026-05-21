@@ -51,20 +51,3 @@ Currently supported representations are:
    .. warning::
 
       Make sure you commit all changed files e.g. run ``git add --all`` before committing and pushing.
-
-
-Access from pygambit
---------------------
-
-We keep the ``catalog`` directory at the top level of the repository because it is in principle independent
-of the Python and C++ code.  However, in order to include these games with the Python package, there is a bit
-of extra infrastructure.
-
-In ``setup.py`` we have a custom build command which first copies the contents of ``catalog/`` into the build
-directory for the Python package.  These are then exposed as data in the ``catalog_data`` directory (changing
-the name to avoid confusion or clashes with ``catalog.py``, which is responsible for accessing the catalog).
-
-The main implication is that if you are working via the Python package and you add new games to the catalog,
-you will need to rebuild and reinstall the Python extension in order to access the new games.  That is, changing
-the contents of the catalog is no different than changing any other source code in the Python package; you'll
-need to execute ``pip install .`` after the addition or change.
