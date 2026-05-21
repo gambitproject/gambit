@@ -85,6 +85,7 @@ We recognize that generative AI tools can be a useful aid in software developmen
 - **No AI-generated comments.** Please do not post output from Large Language Models (LLMs) or similar tools as comments on GitHub issues or pull requests. Such comments are often generic and do not add to the discussion.
 - **Humans over bots.** We discourage the use of automated tools, such as bots or agents, to post AI-generated content to issues or pull requests, without the advance approval of the core development team.
 
+.. _submit-contribution:
 
 How to submit a contribution
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
