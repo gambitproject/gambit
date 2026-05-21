@@ -16,11 +16,11 @@ The tutorials are available as Jupyter notebooks and can be run interactively us
 
    * To install the latest release from PyPI::
 
-       pip install pygambit[doc]
+       pip install pygambit[dev]
 
    * Alternatively, to install the latest development version (from the top level of the gambit repo)::
 
-       pip install .[doc]
+       pip install .[dev]
 
    .. warning::
        Windows users wishing to run the "Using Gambit with OpenSpiel" tutorial will need to install OpenSpiel manually; see the `OpenSpiel installation instructions <https://openspiel.readthedocs.io/en/latest/windows.html>`_ for details.
