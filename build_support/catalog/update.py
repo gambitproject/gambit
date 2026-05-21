@@ -158,10 +158,18 @@ def generate_openspiel_games():
 
             # Verify it can be loaded
             with io.StringIO(nfg) as f:
-                gbt.read_nfg(f)
+                game_obj = gbt.read_nfg(f)
+
+            game_type = game.get_type()
+            title = getattr(game_type, "long_name", None)
+            if not title:
+                title = "[INSERT TITLE]"
+
+            game_obj.title = title
+            game_obj.description = "[INSERT DESCRIPTION]"
 
             with open(openspiel_dir / f"{name}.nfg", "w") as f:
-                f.write(nfg)
+                f.write(game_obj.to_nfg())
             continue
         except Exception:
             signal.alarm(0)
@@ -173,10 +181,18 @@ def generate_openspiel_games():
             signal.alarm(0)
 
             with io.StringIO(efg) as f:
-                gbt.read_efg(f)
+                game_obj = gbt.read_efg(f)
+
+            game_type = game.get_type()
+            title = getattr(game_type, "long_name", None)
+            if not title:
+                title = "[INSERT TITLE]"
+
+            game_obj.title = title
+            game_obj.description = "[INSERT DESCRIPTION]"
 
             with open(openspiel_dir / f"{name}.efg", "w") as f:
-                f.write(efg)
+                f.write(game_obj.to_efg())
         except Exception:
             signal.alarm(0)
 
