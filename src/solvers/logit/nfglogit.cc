@@ -284,18 +284,28 @@ void EquationSystem::GetJacobian(const Vector<double> &p_point, Matrix<double> &
 class TracingCallbackFunction {
 public:
   TracingCallbackFunction(const Game &p_game, const MixedStrategyObserverFunctionType &p_observer)
-    : m_game(p_game), m_observer(p_observer)
+    : m_game(p_game), m_observer(p_observer), m_best_lambda(-INFINITY), m_best_regret(INFINITY),
+      m_bestProfile_lambda(p_game),
+      m_bestProfile_regret(p_game)
   {
   }
   ~TracingCallbackFunction() = default;
 
   void AppendPoint(const Vector<double> &p_point);
   const std::list<LogitQREMixedStrategyProfile> &GetProfiles() const { return m_profiles; }
+  double GetMinRegret() const { return m_best_regret; }
+  double GetMaxLambda() const { return m_best_lambda; }
+  LogitQREMixedStrategyProfile GetBestProfileLambda() const { return m_bestProfile_lambda; }
+  LogitQREMixedStrategyProfile GetBestProfileRegret() const { return m_bestProfile_regret; }
 
 private:
   Game m_game;
   MixedStrategyObserverFunctionType m_observer;
   std::list<LogitQREMixedStrategyProfile> m_profiles;
+  double m_best_lambda;
+  double m_best_regret;
+  LogitQREMixedStrategyProfile m_bestProfile_lambda;
+  LogitQREMixedStrategyProfile m_bestProfile_regret;
 };
 
 void TracingCallbackFunction::AppendPoint(const Vector<double> &p_point)
@@ -304,6 +314,16 @@ void TracingCallbackFunction::AppendPoint(const Vector<double> &p_point)
   PointToProfile(profile, p_point);
   m_profiles.emplace_back(profile, p_point.back(), 1.0);
   m_observer(m_profiles.back());
+  double lambda = m_profiles.back().GetLambda();
+  if (lambda > m_best_lambda) {
+    m_best_lambda = lambda;
+    m_bestProfile_lambda = m_profiles.back();
+  }
+  double regret = m_profiles.back().GetProfile().GetMaxRegret();
+  if(regret < m_best_regret) {
+    m_best_regret = regret;
+    m_bestProfile_regret = m_profiles.back();
+  }
 }
 
 class EstimatorCallbackFunction {
@@ -372,10 +392,24 @@ LogitStrategySolve(const LogitQREMixedStrategyProfile &p_start, double p_regret,
         system.GetJacobian(p_point, p_jac);
       },
       x, p_omega,
-      [p_start, p_regret](const Vector<double> &p_point) {
+      [p_start, p_regret](const Vector<double> &p_point) { //Termination
         return RegretTerminationFunction(p_start.GetGame(), p_point, p_regret);
       },
       [&callback](const Vector<double> &p_point) -> void { callback.AppendPoint(p_point); });
+      
+      //Checking Nash Equilibrium has been reached
+      double regret = callback.GetMinRegret();
+      if(regret > p_regret)  { 
+        std::cerr << "WARNING: Logit solver stopped at lambda = " << callback.GetBestProfileRegret().GetLambda()
+                  << " with max regret = " << regret
+                  << " (Goal was " << p_regret << ")" << std::endl;
+        std::cout << "Best profile found = "; 
+        p_observer(callback.GetBestProfileRegret());
+        std::cout << std::endl;
+        return std::list<LogitQREMixedStrategyProfile>();
+      }
+
+
   return callback.GetProfiles();
 }
 
@@ -408,6 +442,17 @@ LogitStrategySolveLambda(const LogitQREMixedStrategyProfile &p_start,
           return x.back() - lam;
         });
     ret.push_back(callback.GetProfiles().back());
+  }
+  //Checking Nash Equilibrium has been reached
+  double lambda = callback.GetMaxLambda();
+  if(lambda < p_targetLambda.back())  {
+    std::cerr << "WARNING: Logit solver stopped at lambda = " << lambda
+              << " with regret = " << callback.GetBestProfileLambda().GetProfile().GetMaxRegret()
+              << " (Goal was lambda = " << p_targetLambda.back() << ")" << std::endl;
+    std::cout << "Best profile found = "; 
+    p_observer(callback.GetBestProfileLambda());
+    std::cout << std::endl;
+    return std::list<LogitQREMixedStrategyProfile>();
   }
   return ret;
 }
@@ -455,3 +500,4 @@ LogitStrategyEstimate(const MixedStrategyProfile<double> &p_frequencies, double 
 }
 
 } // end namespace Gambit
+

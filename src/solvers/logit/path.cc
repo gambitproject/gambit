@@ -110,6 +110,7 @@ void NewtonStep(Matrix<double> &q, Matrix<double> &b, Vector<double> &u, Vector<
   d = std::sqrt(d);
 }
 
+
 } // end anonymous namespace
 
 //----------------------------------------------------------------------------
@@ -125,6 +126,8 @@ void NewtonStep(Matrix<double> &q, Matrix<double> &b, Vector<double> &u, Vector<
 // bifurcation point that the tracing gets stuck there as it is not possible
 // to find a small enough step size to avoid stepping over the bifurcation
 // point.
+
+
 void PathTracer::TracePath(
     std::function<void(const Vector<double> &, Vector<double> &)> p_function,
     std::function<void(const Vector<double> &, Matrix<double> &)> p_jacobian, Vector<double> &x,
@@ -137,14 +140,15 @@ void PathTracer::TracePath(
   const double c_eta = 0.1;      // perturbation to avoid cancellation
                                  // in calculating contraction rate
   double h = m_hStart;           // initial stepsize
-  const double c_hmin = 1.0e-8;  // minimal stepsize
-  const int c_maxIter = 100;     // maximum iterations in corrector
+  const double c_hmin = 1.0e-11;  // minimal stepsize
+  const int c_maxIter = 400;     // maximum iterations in corrector
 
   bool newton = false;             // using Newton steplength (for zero-finding)
-  const double c_pert = 0.0000001; // The size of perturbation to apply to avoid bifurcation traps
+  const double c_pert = 0.0001; // The size of perturbation to apply to avoid bifurcation traps
   double pert = 0.0;               // The current version of the perturbation being applied
   double pert_countdown = 0.0;     // How much longer (in arclength) to apply perturbation
-
+  const double min_pert_countdown = 0.05; // Minimum amount of perturbation to apply.
+  double min_lambda = -1e-6;;     // Minimum value for lambda when in previous iteration it was positive. 
   Vector<double> u(x.size());
   // t is current tangent at x; newT is tangent at u, which is the next point.
   Vector<double> t(x.size()), newT(x.size());
@@ -179,11 +183,16 @@ void PathTracer::TracePath(
       double dist;
 
       p_function(u, y);
-      y[1] += pert;
+      if (pert != 0.0) {
+        for (size_t i = 1; i <= y.size(); i++) {
+            // Symmetry breaking, perturbing all directions with an altenating sign
+            y[i] += pert * (i % 2 == 0 ? 1.0 : -1.0); 
+        }
+      }
       NewtonStep(q, b, u, y, dist);
 
       if (dist >= c_maxDist) {
-        accept = false;
+        accept = false;   //H(u,y) is too far from zero; reject PC step and reduce stepsize
         break;
       }
 
@@ -204,6 +213,8 @@ void PathTracer::TracePath(
       disto = dist;
       iter++;
       if (iter > c_maxIter) {
+        std::cerr << "Warning: corrector failed to converge after " << c_maxIter
+             << " iterations; rejecting predictor step." << std::endl;
         return;
       }
     }
@@ -213,20 +224,26 @@ void PathTracer::TracePath(
     const double omega_flip = (t * newT < 0.0) ? -1.0 : 1.0;
 
     if (omega_flip == -1.0) {
+      
       // The orientation of the curve has changed, indicating a bifurcation.
       // Switch on perturbation and attempt to continue following the branch that
       // is oriented in the same direction as we were originally following
       if (pert_countdown == 0.0) {
         pert = c_pert;
-        pert_countdown = abs(2 * h);
+        pert_countdown = std::max(fabs(10.0 * h), min_pert_countdown);
       }
-      accept = false;
     }
+
+
+    // If lambda was positive in the previous iteration, and we are now in the region of negative lambda, 
+    // we are likely heading towards the wrong direction, so we reject this step and reduce the stepsize.     
+    if (u.back() < min_lambda && x.back() >= 0.0) 
+      accept = false; 
 
     if (!accept) {
       h /= m_maxDecel; // PC not accepted; change stepsize and retry
       if (fabs(h) <= c_hmin) {
-        return;
+      return;
       }
       continue;
     }
@@ -271,3 +288,5 @@ void PathTracer::TracePath(
 }
 
 } // end namespace Gambit
+
+

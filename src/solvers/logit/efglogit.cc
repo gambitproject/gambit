@@ -245,18 +245,28 @@ void EquationSystem::GetJacobian(const Vector<double> &p_point, Matrix<double> &
 class TracingCallbackFunction {
 public:
   TracingCallbackFunction(const Game &p_game, MixedBehaviorObserverFunctionType p_observer)
-    : m_game(p_game), m_observer(p_observer)
+    : m_game(p_game), m_observer(p_observer), m_best_lambda(-INFINITY), m_best_regret(INFINITY),
+    m_bestProfile_lambda(p_game),
+    m_bestProfile_regret(p_game)
   {
   }
   ~TracingCallbackFunction() = default;
 
   void AppendPoint(const Vector<double> &p_point);
   const std::list<LogitQREMixedBehaviorProfile> &GetProfiles() const { return m_profiles; }
+  double GetMinRegret() const { return m_best_regret; }
+  double GetMaxLambda() const { return m_best_lambda; }
+  LogitQREMixedBehaviorProfile GetBestProfileLambda() const { return m_bestProfile_lambda; }
+  LogitQREMixedBehaviorProfile GetBestProfileRegret() const { return m_bestProfile_regret; }
 
 private:
   Game m_game;
   MixedBehaviorObserverFunctionType m_observer;
   std::list<LogitQREMixedBehaviorProfile> m_profiles;
+  double m_best_lambda;
+  double m_best_regret;
+  LogitQREMixedBehaviorProfile m_bestProfile_lambda;
+  LogitQREMixedBehaviorProfile m_bestProfile_regret;
 };
 
 void TracingCallbackFunction::AppendPoint(const Vector<double> &p_point)
@@ -264,7 +274,18 @@ void TracingCallbackFunction::AppendPoint(const Vector<double> &p_point)
   const MixedBehaviorProfile<double> profile(PointToProfile(m_game, p_point));
   m_profiles.emplace_back(profile, p_point.back(), 1.0);
   m_observer(m_profiles.back());
+  double lambda = m_profiles.back().GetLambda();
+  if (lambda > m_best_lambda) {
+    m_best_lambda = lambda;
+    m_bestProfile_lambda = m_profiles.back();
+  }
+  double regret = m_profiles.back().GetProfile().GetAgentMaxRegret();
+  if(regret < m_best_regret) {
+    m_best_regret = regret;
+    m_bestProfile_regret = m_profiles.back();
+  }
 }
+  
 
 class EstimatorCallbackFunction {
 public:
@@ -338,7 +359,20 @@ LogitBehaviorSolve(const LogitQREMixedBehaviorProfile &p_start, double p_regret,
         return RegretTerminationFunction(game, p_point, p_regret);
       },
       [&callback](const Vector<double> &p_point) -> void { callback.AppendPoint(p_point); });
-  return callback.GetProfiles();
+
+      //Checking Nash Equilibrium has been reached
+      double regret = callback.GetMinRegret();
+      if(regret > p_regret) {               
+        std::cerr << "WARNING: Logit solver stopped at lambda = " << callback.GetBestProfileRegret().GetLambda()
+                  << " with regret = " << regret
+                  << " (Goal was regret = " << p_regret << ")" << std::endl;
+        std::cout << "Best profile found = "; 
+        p_observer(callback.GetBestProfileRegret());
+        std::cout << std::endl;   
+        return std::list<LogitQREMixedBehaviorProfile>();
+      }      
+      
+      return callback.GetProfiles();
 }
 
 std::list<LogitQREMixedBehaviorProfile>
@@ -370,7 +404,18 @@ LogitBehaviorSolveLambda(const LogitQREMixedBehaviorProfile &p_start,
           return x.back() - lam;
         });
     ret.push_back(callback.GetProfiles().back());
-  }
+    }
+  //Checking Nash Equilibrium has been reached
+  //In this case, we check that the lambda value is at least as large as the target lambda,
+  double lambda = callback.GetMaxLambda();
+  if(lambda < p_targetLambda.back())  {
+      std::cerr << "WARNING: Logit solver stopped at lambda = " << lambda
+                << " with regret = " << callback.GetBestProfileLambda().GetProfile().GetAgentMaxRegret()
+                << " (Goal was lambda = " << p_targetLambda.back() << ")" << std::endl;
+      std::cout << "Best profile found = "; p_observer(callback.GetBestProfileLambda());std::cout << std::endl;
+      return std::list<LogitQREMixedBehaviorProfile>();
+  }            
+  
   return ret;
 }
 
