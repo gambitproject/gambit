@@ -159,7 +159,7 @@ ENUMPURE_CASES = [
         marks=pytest.mark.nash_enumpure_strategy,
         id="test_enumpure_8",
     ),
-    # Action graph game
+    # Action graph games
     pytest.param(
         EquilibriumTestCase(
             factory=functools.partial(games.read_from_file, "2x2.agg"),
@@ -171,6 +171,18 @@ ENUMPURE_CASES = [
         ),
         marks=pytest.mark.nash_enumpure_strategy,
         id="test_enumpure_9",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, "2x2_small_payoffs.agg"),
+            solver=functools.partial(gbt.nash.enumpure_solve),
+            expected=[
+                [d(1, 0), d(1, 0)],
+                [d(0, 1), d(0, 1)],
+            ],
+        ),
+        marks=pytest.mark.nash_enumpure_strategy,
+        id="test_enumpure_10",
     ),
 ]
 
@@ -245,7 +257,7 @@ ENUMMIXED_RATIONAL_CASES = [
         marks=pytest.mark.nash_enummixed_strategy,
         id="test_enumixed_rational_5",
     ),
-    # Action graph game
+    # Action graph games
     pytest.param(
         EquilibriumTestCase(
             factory=functools.partial(games.read_from_file, "2x2.agg"),
@@ -261,6 +273,38 @@ ENUMMIXED_RATIONAL_CASES = [
         ),
         marks=pytest.mark.nash_enummixed_strategy,
         id="test_enummixed_rational_6",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, "2x2_rounded_payoffs.agg"),
+            solver=functools.partial(gbt.nash.enummixed_solve, rational=True),
+            expected=[
+                [d(1, 0), d(1, 0)],
+                [d(0, 1), d(0, 1)],
+                [
+                    d("10/11", "1/11"),
+                    d("10/11", "1/11"),
+                ],
+            ],
+        ),
+        marks=pytest.mark.nash_enummixed_strategy,
+        id="test_enummixed_rational_7",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, "2x2_small_payoffs.agg"),
+            solver=functools.partial(gbt.nash.enummixed_solve, rational=True),
+            expected=[
+                [d(1, 0), d(1, 0)],
+                [d(0, 1), d(0, 1)],
+                [
+                    d("1/2", "1/2"),
+                    d("1/2", "1/2"),
+                ],
+            ],
+        ),
+        marks=pytest.mark.nash_enummixed_strategy,
+        id="test_enummixed_rational_8",
     ),
 ]
 
