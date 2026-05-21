@@ -35,9 +35,9 @@ def generate_openspiel_games():
     os.dup2(devnull, sys.stderr.fileno())
 
     description = (
-        "This game originates in the "
+        "This game originates from the "
         "`OpenSpiel <https://openspiel.readthedocs.io/en/latest/games.html>`_ "
-        "game library"
+        "game library."
     )
 
     try:
