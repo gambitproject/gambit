@@ -1,0 +1,14 @@
+NFG 1 R "Coordination" { "Player 0" "Player 1" }
+
+{ { "1" "2" }
+{ "1" "2" }
+}
+"This game originates from the `OpenSpiel <https://openspiel.readthedocs.io/en/latest/games.html>`_ game library."
+
+{
+{ "" 1, 1 }
+{ "" 0, 0 }
+{ "" 0, 0 }
+{ "" 1, 1 }
+}
+1 2 3 4

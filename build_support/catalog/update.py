@@ -20,12 +20,22 @@ def catalog_draw_tree_settings(slug: str) -> dict:
         "shared_terminal_depth": True,
         "sublevel_scaling": 0,
     }
-    if slug == "bagwell1995" or "watson2013" in slug:
+    if (
+        slug == "bagwell1995"
+        or slug == "open_spiel/coordinated_mp"
+        or slug == "open_spiel/tiny_hanabi"
+        or "watson2013" in slug
+    ):
         settings["sublevel_scaling"] = 1
-    elif slug == "myerson1991/fig2_1" or slug == "reiley2008/fig1":
+
+    if slug == "myerson1991/fig2_1" or slug == "reiley2008/fig1":
         settings["action_label_position"] = 0.4
-    elif "selten1975" in slug:
+    elif slug == "open_spiel/tiny_hanabi":
+        settings["action_label_position"] = 0.7
+
+    if "selten1975" in slug:
         settings["shared_terminal_depth"] = False
+
     return settings
 
 
@@ -68,8 +78,11 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path, regenerate_images: bool
                     g = gbt.catalog.load(slug)
                     viz_path = CATALOG_DIR / "img" / f"{slug}"
                     viz_path.parent.mkdir(parents=True, exist_ok=True)
-                    for func in [generate_tex, generate_png, generate_pdf, generate_svg]:
-                        func(g, save_to=str(viz_path), **catalog_draw_tree_settings(slug))
+                    try:
+                        for func in [generate_tex, generate_png, generate_pdf, generate_svg]:
+                            func(g, save_to=str(viz_path), **catalog_draw_tree_settings(slug))
+                    except RuntimeError:
+                        print("Image generation failed for ", g.title)
 
                 # Main dropdown
                 f.write(f"   * - .. dropdown:: {title}\n")
@@ -175,12 +188,14 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--build", action="store_true")
     parser.add_argument("--regenerate-images", action="store_true")
+
     args = parser.parse_args()
 
     # Create RST list-table used by doc/catalog.rst
     df = gbt.catalog.games(include_descriptions=True)
     generate_rst_table(df, CATALOG_RST_TABLE, regenerate_images=args.regenerate_images)
     print(f"Generated {CATALOG_RST_TABLE} for use in local docs build. DO NOT COMMIT.")
+
     if args.build:
         # Update the Makefile.am with the current list of catalog files
         update_makefile()
