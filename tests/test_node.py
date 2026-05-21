@@ -3,6 +3,7 @@ import functools
 import itertools
 import typing
 
+import numpy as np
 import pytest
 
 import pygambit as gbt
@@ -144,6 +145,47 @@ SUBGAME_ROOTS_CASES = [
                             ["Push", "Push", "Push", "Push"]]
         ),
         id="centipede_5_rounds"
+    ),
+    # ------------------------------------------------------------------------
+    #                           Repeated Games
+    # ------------------------------------------------------------------------
+    pytest.param(
+        SubgameRootsTestCase(
+            factory=lambda: games.create_repeated_game_efg(
+                np.array([[1, 2, 3], [4, 5, 6]]),
+                np.array([[6, 5, 4], [3, 2, 1]]),
+                T=2, title="2*3 asymmetric repeated twice"
+            ),
+            expected_paths=(
+                [[]]
+                + [
+                    [str(j), str(i)]
+                    for i, j in itertools.product(range(2), range(3))
+                ]
+            )
+        ),
+        id="repeated_asymmetric_2*3_T2"
+    ),
+    pytest.param(
+        SubgameRootsTestCase(
+            factory=lambda: games.create_repeated_game_efg(
+                np.array([[3, 0], [5, 1]]),
+                np.array([[3, 5], [0, 1]]),
+                T=3, title="Prisoner's Dilemma repeated thrice"
+            ),
+            expected_paths=(
+                [[]]
+                + [
+                    [str(j), str(i)]
+                    for i, j in itertools.product(range(2), repeat=2)
+                ]
+                + [
+                    [str(m), str(k), str(j), str(i)]
+                    for i, j, k, m in itertools.product(range(2), repeat=4)
+                ]
+            )
+        ),
+        id="repeated_prisoners_dilemma_T3"
     ),
     # ------------------------------------------------------------------------
     #              Imperfect Information (No Absent-Mindedness)

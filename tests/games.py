@@ -38,6 +38,65 @@ def create_efg_corresponding_to_bimatrix_game(
     return g
 
 
+def create_repeated_game_efg(
+    A: np.ndarray, B: np.ndarray, T: int, title: str
+) -> gbt.Game:
+    """Create a T-period repeated game from a simultaneous m*n stage game.
+
+    At every round, each P1 decision node opens a proper subgame, so
+    the game contains ((m*n)^T - 1) / (m*n - 1) subgame roots in total.
+
+    Parameters
+    ----------
+    A : np.ndarray
+        Payoff matrix for Player 1 (m*n).
+    B : np.ndarray
+        Payoff matrix for Player 2 (m*n).
+    T : int
+        Number of repetitions (>= 1).
+    title : str
+        Title for the game.
+
+    Returns
+    -------
+    Game
+        The extensive-form repeated game with:
+        - (m*n)^T terminal nodes
+        - (1 + m) · ((m*n)^T - 1) / (m*n - 1) non-terminal nodes
+        - 2 · ((m*n)^T - 1) / (m*n - 1) information sets
+        - ((m*n)^T - 1) / (m*n - 1) subgame roots
+    """
+    assert A.shape == B.shape
+    assert A.shape[0] >= 1 and A.shape[1] >= 1
+    assert T >= 1
+
+    m, n = A.shape
+    g = gbt.Game.new_tree(players=["1", "2"], title=title)
+    actions1 = [str(i) for i in range(m)]
+    actions2 = [str(i) for i in range(n)]
+
+    payoffs_to_outcomes = {}
+    frontier = [(g.root, 0, 0)]
+    for t in range(1, T + 1):
+        next_frontier = []
+        for node, acc_payoff_a, acc_payoff_b in frontier:
+            g.append_move(node, "1", actions1)
+            g.append_move(node.children, "2", actions2)
+            for i, j in itertools.product(range(m), range(n)):
+                child = node.children[i].children[j]
+                new_payoff_a = acc_payoff_a + A[i, j]
+                new_payoff_b = acc_payoff_b + B[i, j]
+                if t == T:
+                    key = (new_payoff_a, new_payoff_b)
+                    if key not in payoffs_to_outcomes:
+                        payoffs_to_outcomes[key] = g.add_outcome(list(key))
+                    g.set_outcome(child, payoffs_to_outcomes[key])
+                else:
+                    next_frontier.append((child, new_payoff_a, new_payoff_b))
+        frontier = next_frontier
+    return g
+
+
 ################################################################################################
 # Extensive-form games (efg)
 
