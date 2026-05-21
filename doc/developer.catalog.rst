@@ -70,3 +70,15 @@ Currently supported representations are:
    .. important::
 
       If you didn't run the update script in step 3, you should manually update ``EXTRA_DIST`` in ``Makefile.am`` with any new game files.
+
+
+Adding games from external libraries
+------------------------------------
+
+You can use the catalog update script to pull games from external libraries by providing the appropriate flags.
+
+For example, to pull games from OpenSpiel:
+
+.. code-block:: bash
+
+    python build_support/catalog/update.py --generate-openspiel --build
