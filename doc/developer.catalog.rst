@@ -42,10 +42,12 @@ Currently supported representations are:
 
          pygambit.catalog.load("watson2013/exercise29_6")
 
-3. **[Optional] Test your updates locally:**
+3. **[Optional] Test your updates locally (and customise visuals):**
 
    Reinstall the package to pick up the new game file(s) in the ``pygambit.catalog`` module.
    Then use the ``update.py`` script to update Gambit's documentation & build files, as well as generating images for the new game(s).
+   If you want, you can first edit the ``catalog_draw_tree_settings`` in ``build_support/catalog/update.py`` to change the default visualisation parameters for your game(s).
+   Consult the `DrawTree docs <https://www.gambit-project.org/draw_tree/>`_ for the available options.
 
    .. code-block:: bash
 
@@ -54,17 +56,17 @@ Currently supported representations are:
 
    .. note::
 
-      Update the ``catalog_draw_tree_settings`` in ``build_support/catalog/update.py`` to change the default visualization parameters for your game(s).
-      You can use the ``--regenerate-images`` flag when building the docs locally (readthedocs does this by default).
+      You can use the ``--regenerate-images`` flag when building the docs locally for a second time to force any changes to be picked up.
 
    .. warning::
 
-      Running the script with the ``--build`` flag updates `Makefile.am`. If you moved games that were previously in `contrib/games` you'll need to also manually remove those files from `EXTRA_DIST`.
+      Running the script with the ``--build`` flag updates ``Makefile.am``. If you moved games that were previously in ``contrib/games`` you'll need to also manually remove those files from ``EXTRA_DIST``.
 
 4. **Submit a pull request to GitHub with all changes.**
 
    Submit a PR according to the :ref:`usual workflow <submit-contribution>`.
+   Ensure that any additions and changes to game files, ``build_support/catalog/update.py`` and ``Makefile.am`` are included.
 
-   .. note::
+   .. important::
 
-      If you didn't run the update script in step 3, you should manually update `EXTRA_DIST` in `Makefile.am` with any new game files.
+      If you didn't run the update script in step 3, you should manually update ``EXTRA_DIST`` in ``Makefile.am`` with any new game files.
