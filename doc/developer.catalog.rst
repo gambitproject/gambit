@@ -24,6 +24,10 @@ Currently supported representations are:
    Make sure the game includes a description, with any citations referencing the :ref:`bibliography <bibliography>`.
    Use a full link to the bibliography entry, so the link can be accessed from the file directly, as well as being rendered in the docs e.g. ```Rei2008 <https://gambitproject.readthedocs.io/en/latest/biblio.html#Rei2008>`_``
 
+   .. important::
+
+      If no bibliography entry exists, you should add one by editing `doc/biblio.rst`.
+
 2. **Commit the changes:**
 
    Create a new branch in the ``gambit`` repo.
