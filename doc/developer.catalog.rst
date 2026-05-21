@@ -3,7 +3,7 @@
 Updating the Games Catalog
 ==========================
 
-This page includes developer notes regarding the catalog module, and the process for contributing to and updating Gambit's :ref:`Games Catalog <pygambit-catalog>`.
+This page includes developer notes regarding the catalog module, and the process for contributing to and updating Gambit's :ref:`Games Catalog <catalog>`.
 To do so, you will need to have the `gambit` GitHub repo cloned and be able to submit pull request via GitHub;
 you may wish to first review the :ref:`contributor guidelines <contributing>`.
 
