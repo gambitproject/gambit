@@ -1,4 +1,5 @@
 import argparse
+import io
 from pathlib import Path
 
 import pandas as pd
@@ -120,6 +121,66 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path, regenerate_images: bool
                 f.write("          \n")
 
 
+def generate_openspiel_games():
+    """Generate NFG/EFG files for OpenSpiel games."""
+    try:
+        import pyspiel
+        from open_spiel.python.algorithms.gambit import export_gambit
+    except ImportError:
+        print("open_spiel not installed, skipping generation of openspiel games.")
+        return
+
+    import signal
+
+    class TimeoutException(Exception):
+        pass
+
+    def timeout_handler(signum, frame):
+        raise TimeoutException()
+
+    signal.signal(signal.SIGALRM, timeout_handler)
+
+    openspiel_dir = CATALOG_DIR / "open_spiel"
+    openspiel_dir.mkdir(parents=True, exist_ok=True)
+
+    games = pyspiel.registered_names()
+    for name in games:
+        try:
+            game = pyspiel.load_game(name)
+        except Exception:
+            continue
+
+        # Try NFG first
+        try:
+            signal.alarm(2)  # 2 second timeout per game
+            nfg = pyspiel.game_to_nfg_string(game)
+            signal.alarm(0)
+
+            # Verify it can be loaded
+            with io.StringIO(nfg) as f:
+                gbt.read_nfg(f)
+
+            with open(openspiel_dir / f"{name}.nfg", "w") as f:
+                f.write(nfg)
+            continue
+        except Exception:
+            signal.alarm(0)
+
+        # Try EFG
+        try:
+            signal.alarm(2)
+            efg = export_gambit(game)
+            signal.alarm(0)
+
+            with io.StringIO(efg) as f:
+                gbt.read_efg(f)
+
+            with open(openspiel_dir / f"{name}.efg", "w") as f:
+                f.write(efg)
+        except Exception:
+            signal.alarm(0)
+
+
 def update_makefile():
     """Update the Makefile.am with all games from the catalog."""
 
@@ -175,12 +236,19 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--build", action="store_true")
     parser.add_argument("--regenerate-images", action="store_true")
+    parser.add_argument("--generate-openspiel", action="store_true")
     args = parser.parse_args()
+
+    # Generate OpenSpiel games if available
+    if args.generate_openspiel:
+        generate_openspiel_games()
+        print("Generated OpenSpiel games.")
 
     # Create RST list-table used by doc/catalog.rst
     df = gbt.catalog.games(include_descriptions=True)
     generate_rst_table(df, CATALOG_RST_TABLE, regenerate_images=args.regenerate_images)
     print(f"Generated {CATALOG_RST_TABLE} for use in local docs build. DO NOT COMMIT.")
+
     if args.build:
         # Update the Makefile.am with the current list of catalog files
         update_makefile()
