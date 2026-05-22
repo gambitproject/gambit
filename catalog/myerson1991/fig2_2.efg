@@ -1,4 +1,4 @@
-EFG 2 R "A simple Poker game" { "Fred" "Alice" }
+EFG 2 R "A simple Poker game (Myerson 1991, Figure 2.2)" { "Fred" "Alice" }
 "This is a simple game of one-card poker from `Mye91 <https://gambitproject.readthedocs.io/en/latest/biblio.html#Mye91>`_, used as the
 introductory example for game models.
 
@@ -11,14 +11,14 @@ See also `Rei2008 <https://gambitproject.readthedocs.io/en/latest/biblio.html#Re
    than a win.
 "
 
-c "" 1 "" { "Red" 1/2 "Black" 1/2 } 0
-p "" 1 1 "" { "Raise" "Fold" } 0
-p "" 2 1 "" { "Meet" "Pass" } 0
+c "0" 1 "" { "Red" 1/2 "Black" 1/2 } 0
+p "1.a" 1 1 "" { "Raise" "Fold" } 0
+p "2.0" 2 1 "" { "Meet" "Pass" } 0
 t "" 1 "Win Big" { 2, -2 }
 t "" 2 "Win" { 1, -1 }
 t "" 2 "Win" { 1, -1 }
-p "" 1 2 "" { "Raise" "Fold" } 0
-p "" 2 1 "" { "Meet" "Pass" } 0
+p "1.b" 1 2 "" { "Raise" "Fold" } 0
+p "2.0" 2 1 "" { "Meet" "Pass" } 0
 t "" 3 "Lose Big" { -2, 2 }
 t "" 2 "Win" { 1, -1 }
 t "" 4 "Lose" { -1, 1 }

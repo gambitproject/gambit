@@ -211,7 +211,9 @@ EXTRA_DIST = \
 	catalog/jakobsen2016/fig1b.efg \
 	catalog/jakobsen2016/fig1c.efg \
 	catalog/jakobsen2016/fig3.efg \
-	catalog/myerson1991/fig2_1.efg \
+	catalog/myerson1991/fig2_2.efg \
+	catalog/myerson1991/fig2_3.efg \
+	catalog/myerson1991/fig2_4.efg \
 	catalog/myerson1991/fig4_2.efg \
 	catalog/nau2004/sec3.nfg \
 	catalog/nau2004/sec4.nfg \
