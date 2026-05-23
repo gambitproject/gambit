@@ -1,0 +1,21 @@
+EFG 2 R "Figure 10.12 from von Stengel (2022)" { "I" "II" }
+"
+Figure 10.12 from `vS22 <https://gambitproject.readthedocs.io/en/latest/biblio.html#vS22>`_.
+It refers to a non-standard version of the Monty Hall problem where the television show host Monty
+Hall has the option of opening another door without a prize to the contestant (player I), rather
+than opening such a door all the time. Its purpose is to demonstrate a whole convex set of optimal
+strategies for player II.
+"
+
+
+c "" 1 "" { "1/3" 1/3 "2/3" 2/3 } 0
+p "" 2 1 "" { "C" "O" } 0
+t "" 1 "" { 1 -1 }
+p "" 1 1 "" { "K" "S" } 0
+t "" 2 "" { 1 -1 }
+t "" 3 "" { 0 0 }
+p "" 2 2 "" { "c" "o" } 0
+t "" 4 "" { 0 0 }
+p "" 1 1 0
+t "" 5 "" { 0 0 }
+t "" 6 "" { 1 -1 }
