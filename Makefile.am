@@ -221,6 +221,7 @@ EXTRA_DIST = \
 	catalog/selten1975/fig1.efg \
 	catalog/selten1975/fig2.efg \
 	catalog/selten1975/fig3.efg \
+	catalog/vonstengelforges2008/fig6.efg \
 	catalog/watson2013/exercise29_6.efg \
 	catalog/watson2013/fig29_1.efg
 
