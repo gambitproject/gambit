@@ -26,6 +26,9 @@ def catalog_draw_tree_settings(slug: str) -> dict:
         settings["action_label_position"] = 0.4
     elif "selten1975" in slug:
         settings["shared_terminal_depth"] = False
+    elif slug == "vonstengel2022/fig10.1":
+        settings["sublevel_scaling"] = 0.75
+        settings["shared_terminal_depth"] = False
     return settings
 
 
