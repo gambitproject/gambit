@@ -60,13 +60,13 @@ Currently supported representations are:
 
    .. warning::
 
-      Running the script with the ``--build`` flag updates ``Makefile.am``. If you moved games that were previously in ``contrib/games`` you'll need to also manually remove those files from ``EXTRA_DIST``.
+      Running the script with the ``--build`` flag updates ``build_support/catalog/catalog.am``, which is included in ``Makefile.am``. If you moved games that were previously in ``contrib/games`` you'll need to also manually remove those files from ``EXTRA_DIST`` in ``Makefile.am``.
 
 4. **Submit a pull request to GitHub with all changes.**
 
    Submit a PR according to the :ref:`usual workflow <submit-contribution>`.
-   Ensure that any additions and changes to game files, ``build_support/catalog/update.py`` and ``Makefile.am`` are included.
+   Ensure that any additions and changes to game files, ``build_support/catalog/update.py`` and ``build_support/catalog/catalog.am`` are included.
 
    .. important::
 
-      If you didn't run the update script in step 3, you should manually update ``EXTRA_DIST`` in ``Makefile.am`` with any new game files.
+      If you didn't run the update script in step 3, you should manually update the list of files in ``build_support/catalog/catalog.am`` with any new game files.

@@ -121,7 +121,7 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path, regenerate_images: bool
 
 
 def update_makefile():
-    """Update the Makefile.am with all games from the catalog."""
+    """Update the catalog.am with all games from the catalog."""
 
     # Using rglob("*") to find files in all subdirectories
     slugs = []
@@ -139,36 +139,27 @@ def update_makefile():
         game_files.append(f"catalog/{slug}")
     game_files.sort()
 
-    with open(MAKEFILE_AM, encoding="utf-8") as f:
-        content = f.readlines()
+    am_path = Path(__file__).parent / "catalog.am"
 
-    with open(MAKEFILE_AM, "w", encoding="utf-8") as f:
-        in_gamefiles_section = False
-        for line in content:
-            # Add to the EXTRA_DIST after the README.rst line
-            if line.startswith("	src/README.rst \\"):
-                in_gamefiles_section = True
-                f.write("	src/README.rst \\\n")
-                for gf in game_files:
-                    if gf == game_files[-1]:
-                        f.write(f"\t{gf}\n")
-                    else:
-                        f.write(f"\t{gf} \\\n")
-                f.write("\n")
-            elif in_gamefiles_section:
-                if line.strip() == "":
-                    in_gamefiles_section = False
-                continue  # Skip old gamefiles lines
-            else:
-                f.write(line)
+    if am_path.exists():
+        with open(am_path, encoding="utf-8") as f:
+            content = f.read()
+    else:
+        content = ""
 
-    with open(MAKEFILE_AM, encoding="utf-8") as f:
-        updated_content = f.readlines()
+    updated_content = "CATALOG_FILES = \\\n"
+    for gf in game_files:
+        if gf == game_files[-1]:
+            updated_content += f"\t{gf}\n"
+        else:
+            updated_content += f"\t{gf} \\\n"
 
     if content != updated_content:
-        print(f"Updated {str(MAKEFILE_AM)}")
+        with open(am_path, "w", encoding="utf-8") as f:
+            f.write(updated_content)
+        print(f"Updated {str(am_path)}")
     else:
-        print(f"No changes to add to {str(MAKEFILE_AM)}")
+        print(f"No changes to add to {str(am_path)}")
 
 
 if __name__ == "__main__":
