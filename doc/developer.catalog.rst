@@ -28,7 +28,7 @@ Currently supported representations are:
 
       If no bibliography entry exists, you should add one by editing `doc/biblio.rst`.
 
-2. **Commit the changes:**
+2. **Add the game(s) to the repo:**
 
    Create a new branch in the ``gambit`` repo.
    Add your new game file(s) inside the ``catalog`` dir and commit them, or edit an existing game.
@@ -42,7 +42,7 @@ Currently supported representations are:
 
          pygambit.catalog.load("watson2013/exercise29_6")
 
-3. **Test your updates locally (and customise visuals):**
+3. **Update the build files:**
 
    Reinstall the package to pick up the new game file(s) in the ``pygambit.catalog`` module.
    Then use the ``update.py`` script to update Gambit's documentation & build files, as well as generating images for the new game(s).
@@ -62,7 +62,18 @@ Currently supported representations are:
 
       Running the script with the ``--build`` flag updates ``build_support/catalog/catalog.am``, which is included in ``Makefile.am``. If you moved games that were previously in ``contrib/games`` you'll need to also manually remove those files from ``EXTRA_DIST`` in ``Makefile.am``.
 
-4. **Submit a pull request to GitHub with all changes.**
+4. **[Optional] Test your updates to the documentation locally:**
+
+   The previous step will (re)build your local copy of the Gambit Catalog RST page used by the documentation.
+   You should then build the docs in the :ref:`usual way <editing-docs>`.
+   Open the catalog page at ``doc/_build/html/catalog.html`` to view your changes.
+   Iterate steps 2-4 as required.
+
+5. **Submit a pull request to GitHub with all changes.**
 
    Submit a PR according to the :ref:`usual workflow <submit-contribution>`.
    Ensure that any additions and changes to game files, ``build_support/catalog/update.py`` and ``build_support/catalog/catalog.am`` are included.
+
+   .. important::
+
+      Even if you already checked the local docs build, ensure the Catalog page on the ReadTheDocs preview build on the pull request looks right.
