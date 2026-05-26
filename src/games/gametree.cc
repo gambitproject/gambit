@@ -147,7 +147,7 @@ void GameTreeRep::DeleteAction(GameAction p_action)
     member->m_children.erase(it);
   }
   ClearComputedValues();
-  InvalidateNodeOrdering();
+  InvalidateTreeOrdering();
 }
 
 GameInfoset GameActionRep::GetInfoset() const { return m_infoset->shared_from_this(); }
@@ -195,7 +195,7 @@ void GameTreeRep::SetPlayer(GameInfoset p_infoset, GamePlayer p_player)
   p_player->m_infosets.push_back(p_infoset);
 
   ClearComputedValues();
-  InvalidateNodeOrdering();
+  InvalidateTreeOrdering();
 }
 
 bool GameInfosetRep::Precedes(GameNode p_node) const
@@ -239,7 +239,7 @@ GameAction GameTreeRep::InsertAction(GameInfoset p_infoset, GameAction p_action 
   m_numNodes += p_infoset->m_members.size();
   // m_numNonterminalNodes stays unchanged when an action is appended to an information set
   ClearComputedValues();
-  InvalidateNodeOrdering();
+  InvalidateTreeOrdering();
   return action;
 }
 
@@ -254,7 +254,7 @@ void GameTreeRep::RemoveMember(GameInfosetRep *p_infoset, GameNodeRep *p_node)
     p_infoset->m_player->m_infosets.erase(std::find(
         player->m_infosets.begin(), player->m_infosets.end(), p_infoset->shared_from_this()));
   }
-  InvalidateNodeOrdering();
+  InvalidateTreeOrdering();
 }
 
 void GameTreeRep::Reveal(GameInfoset p_atInfoset, GamePlayer p_player)
@@ -281,7 +281,7 @@ void GameTreeRep::Reveal(GameInfoset p_atInfoset, GamePlayer p_player)
   }
 
   ClearComputedValues();
-  InvalidateNodeOrdering();
+  InvalidateTreeOrdering();
 }
 
 //========================================================================
@@ -427,7 +427,7 @@ void GameTreeRep::DeleteParent(GameNode p_node)
 
   oldParent->Invalidate();
   ClearComputedValues();
-  InvalidateNodeOrdering();
+  InvalidateTreeOrdering();
 }
 
 void GameTreeRep::DeleteTree(GameNode p_node)
@@ -454,7 +454,7 @@ void GameTreeRep::DeleteTree(GameNode p_node)
   node->m_label = "";
 
   ClearComputedValues();
-  InvalidateNodeOrdering();
+  InvalidateTreeOrdering();
 }
 
 void GameTreeRep::CopySubtree(GameNodeRep *dest, GameNodeRep *src, GameNodeRep *stop)
@@ -496,7 +496,7 @@ void GameTreeRep::CopyTree(GameNode p_dest, GameNode p_src)
       CopySubtree(dest_child->get(), src_child->get(), dest);
     }
     ClearComputedValues();
-    InvalidateNodeOrdering();
+    InvalidateTreeOrdering();
   }
 }
 
@@ -520,7 +520,7 @@ void GameTreeRep::MoveTree(GameNode p_dest, GameNode p_src)
   dest->m_outcome = nullptr;
 
   ClearComputedValues();
-  InvalidateNodeOrdering();
+  InvalidateTreeOrdering();
 }
 
 Game GameTreeRep::CopySubgame(GameNode p_root) const
@@ -629,7 +629,7 @@ GameInfoset GameTreeRep::AppendMove(GameNode p_node, GameInfoset p_infoset)
                 });
   m_numNonterminalNodes++;
   ClearComputedValues();
-  InvalidateNodeOrdering();
+  InvalidateTreeOrdering();
   return node->m_infoset->shared_from_this();
 }
 
@@ -686,7 +686,7 @@ GameInfoset GameTreeRep::InsertMove(GameNode p_node, GameInfoset p_infoset)
   m_numNodes += newNode->m_infoset->m_actions.size();
   m_numNonterminalNodes++;
   ClearComputedValues();
-  InvalidateNodeOrdering();
+  InvalidateTreeOrdering();
   return p_infoset;
 }
 
