@@ -7,7 +7,12 @@ import pandas as pd
 import pygambit as gbt
 
 # Use the full string path to where the catalog data are placed in the package
-_CATALOG_RESOURCE = files("pygambit")/"catalog_data"
+_CATALOG_RESOURCE = files("pygambit") / "catalog_data"
+# This ensures that catalog files are included in editable installs too
+if not _CATALOG_RESOURCE.is_dir():
+    _repo_catalog = Path(__file__).parent.parent.parent / "catalog"
+    if _repo_catalog.is_dir():
+        _CATALOG_RESOURCE = _repo_catalog
 
 READERS = {
     ".nfg": gbt.read_nfg,
