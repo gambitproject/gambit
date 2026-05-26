@@ -19,7 +19,7 @@ Currently supported representations are:
    To test changes locally, you'll need to have an editable developer install of `pygambit` available in your Python environment.
 
    .. code-block:: python
-       pip install -e ".[doc]"
+      pip install -e ".[doc]"
 
 1. **Create or edit a game file:**
 
