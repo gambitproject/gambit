@@ -42,7 +42,7 @@ Currently supported representations are:
 
          pygambit.catalog.load("watson2013/exercise29_6")
 
-3. **[Optional] Test your updates locally (and customise visuals):**
+3. **Test your updates locally (and customise visuals):**
 
    Reinstall the package to pick up the new game file(s) in the ``pygambit.catalog`` module.
    Then use the ``update.py`` script to update Gambit's documentation & build files, as well as generating images for the new game(s).
@@ -66,7 +66,3 @@ Currently supported representations are:
 
    Submit a PR according to the :ref:`usual workflow <submit-contribution>`.
    Ensure that any additions and changes to game files, ``build_support/catalog/update.py`` and ``build_support/catalog/catalog.am`` are included.
-
-   .. important::
-
-      If you didn't run the update script in step 3, you should manually update the list of files in ``build_support/catalog/catalog.am`` with any new game files.
