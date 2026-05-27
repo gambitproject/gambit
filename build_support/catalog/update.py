@@ -12,6 +12,7 @@ CATALOG_RST_TABLE = Path(__file__).parent.parent.parent / "doc" / "catalog_table
 CATALOG_DIR = Path(__file__).parent.parent.parent / "catalog"
 MAKEFILE_AM = Path(__file__).parent.parent.parent / "Makefile.am"
 DRAW_TREE_SETTINGS_CONFIG = Path(__file__).parent / "draw_tree_settings.yaml"
+SUPPORTED_GAME_FORMATS = {"efg", "nfg"}
 
 
 def catalog_draw_tree_settings(slug: str) -> dict:
@@ -20,6 +21,8 @@ def catalog_draw_tree_settings(slug: str) -> dict:
         config = yaml.safe_load(f)
     settings = dict(config["defaults"])
     overrides = config.get("overrides", {})
+    # Apply overrides shortest-key-first so that more specific (longer) entries
+    # such as "myerson1991/fig2_1" win over group-level entries like "myerson1991".
     for key in sorted(overrides, key=len):
         if slug == key or slug.startswith(key + "/"):
             settings.update(overrides[key])
@@ -45,8 +48,13 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path, regenerate_images: bool
             slug = row["Game"]
             title = str(row.get("Title", "")).strip()
             description = str(row.get("Description", "")).strip()
+            # Skip rows with unrecognised formats (defensive guard).
+            if row["Format"] not in SUPPORTED_GAME_FORMATS:
+                continue
             # Skip any games which lack a description
             if description:
+                # Build the list of expected image files so we can check whether
+                # any are missing and need to be generated.
                 all_exts = []
                 all_paths = []
                 if row["Format"] == "efg":
@@ -64,10 +72,14 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path, regenerate_images: bool
                 if regenerate_images or missing_any:
                     viz_path = CATALOG_DIR / "img" / f"{slug}"
                     viz_path.parent.mkdir(parents=True, exist_ok=True)
+                    # Use a committed curated .ef file if present; otherwise derive
+                    # the layout automatically from the game object.
                     curated_ef = CATALOG_DIR / f"{slug}.ef"
                     source = str(curated_ef) if curated_ef.exists() else gbt.catalog.load(slug)
                     for func in [generate_tex, generate_png, generate_pdf, generate_svg]:
                         func(source, save_to=str(viz_path), **catalog_draw_tree_settings(slug))
+                    # DrawTree may not write catalog/img/{slug}.ef when its input is
+                    # already an .ef file, so copy it if the img copy is still absent.
                     img_ef = CATALOG_DIR / "img" / f"{slug}.ef"
                     if not img_ef.exists() and curated_ef.exists():
                         shutil.copy2(curated_ef, img_ef)
@@ -110,9 +122,7 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path, regenerate_images: bool
                     curated_ef = CATALOG_DIR / f"{slug}.ef"
                     if curated_ef.exists():
                         f.write(
-                            f"             draw_tree("
-                            f'"../catalog/{slug}.ef", '
-                            f"{settings_str})\n"
+                            f'             draw_tree("../catalog/{slug}.ef", {settings_str})\n'
                         )
                     else:
                         f.write(
@@ -132,7 +142,6 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path, regenerate_images: bool
 def update_makefile():
     """Update the catalog.am with all games from the catalog."""
 
-    # Using rglob("*") to find files in all subdirectories
     slugs = []
     for resource_path in sorted(CATALOG_DIR.rglob("*.efg")):
         if resource_path.is_file():
@@ -143,6 +152,8 @@ def update_makefile():
             rel_path = resource_path.relative_to(CATALOG_DIR)
             slugs.append(str(rel_path))
     for resource_path in sorted(CATALOG_DIR.rglob("*.ef")):
+        # Exclude the generated .ef files under catalog/img/; only curated
+        # .ef files committed alongside game files should be distributed.
         if resource_path.is_file() and CATALOG_DIR / "img" not in resource_path.parents:
             rel_path = resource_path.relative_to(CATALOG_DIR)
             slugs.append(str(rel_path))
@@ -176,9 +187,30 @@ def update_makefile():
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--build", action="store_true")
-    parser.add_argument("--regenerate-images", action="store_true")
+    parser = argparse.ArgumentParser(
+        description=(
+            "Update Gambit catalog documentation and build files. "
+            "Always regenerates doc/catalog_table.rst from the current catalog. "
+            "Run from the repo root or build_support/catalog/."
+        )
+    )
+    parser.add_argument(
+        "--build",
+        action="store_true",
+        help=(
+            "Also update build_support/catalog/catalog.am with the current list of "
+            "catalog game files. Required after adding or removing games."
+        ),
+    )
+    parser.add_argument(
+        "--regenerate-images",
+        action="store_true",
+        help=(
+            "Force regeneration of all game visualisation images (PNG, PDF, SVG, TeX), "
+            "even if they already exist. Use this to pick up changes to game files or "
+            "draw_tree_settings.yaml."
+        ),
+    )
     args = parser.parse_args()
 
     # Create RST list-table used by doc/catalog.rst
