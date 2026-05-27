@@ -51,8 +51,10 @@ Currently supported representations are:
 
    Ensure you have installed the package in editable mode to automatically pick up the new game file(s) in the ``pygambit.catalog`` module without reinstalling each time.
    Then use the ``update.py`` script to update Gambit's documentation & build files, as well as generating images for the new game(s).
-   If you want, you can first edit the ``catalog_draw_tree_settings`` in ``build_support/catalog/update.py`` to change the default visualisation parameters for your game(s).
-   Consult the `DrawTree docs <https://www.gambit-project.org/draw_tree/>`_ for the available options.
+   If you want to customise the visualisation parameters for your game(s), edit ``build_support/catalog/draw_tree_settings.yaml``.
+   Add an entry under ``overrides`` keyed by your game's exact slug, or by a shared prefix (e.g. the author-year folder name) to apply settings to all games from that source.
+   More specific entries (longer keys) take precedence over shorter ones.
+   Consult the `DrawTree docs <https://www.gambit-project.org/draw_tree/>`_ for available settings.
 
    .. code-block:: bash
 
@@ -77,7 +79,7 @@ Currently supported representations are:
 5. **Submit a pull request to GitHub with all changes.**
 
    Submit a PR according to the :ref:`usual workflow <submit-contribution>`.
-   Ensure that any additions and changes to game files, ``build_support/catalog/update.py`` and ``build_support/catalog/catalog.am`` are included.
+   Ensure that any additions and changes to game files, ``build_support/catalog/draw_tree_settings.yaml``, ``build_support/catalog/update.py`` and ``build_support/catalog/catalog.am`` are included.
 
    .. important::
 

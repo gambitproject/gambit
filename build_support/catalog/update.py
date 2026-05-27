@@ -2,6 +2,7 @@ import argparse
 from pathlib import Path
 
 import pandas as pd
+import yaml
 from draw_tree import generate_pdf, generate_png, generate_svg, generate_tex
 
 import pygambit as gbt
@@ -9,23 +10,18 @@ import pygambit as gbt
 CATALOG_RST_TABLE = Path(__file__).parent.parent.parent / "doc" / "catalog_table.rst"
 CATALOG_DIR = Path(__file__).parent.parent.parent / "catalog"
 MAKEFILE_AM = Path(__file__).parent.parent.parent / "Makefile.am"
+DRAW_TREE_SETTINGS_CONFIG = Path(__file__).parent / "draw_tree_settings.yaml"
 
 
 def catalog_draw_tree_settings(slug: str) -> dict:
     """Return the draw_tree settings for a given catalog slug."""
-    settings = {
-        "color_scheme": "gambit",
-        "font_family": "sffamily",
-        "font_italic": True,
-        "shared_terminal_depth": True,
-        "sublevel_scaling": 0,
-    }
-    if slug == "bagwell1995" or "watson2013" in slug:
-        settings["sublevel_scaling"] = 1
-    elif slug == "myerson1991/fig2_1" or slug == "reiley2008/fig1":
-        settings["action_label_position"] = 0.4
-    elif "selten1975" in slug:
-        settings["shared_terminal_depth"] = False
+    with open(DRAW_TREE_SETTINGS_CONFIG, encoding="utf-8") as f:
+        config = yaml.safe_load(f)
+    settings = dict(config["defaults"])
+    overrides = config.get("overrides", {})
+    for key in sorted(overrides, key=len):
+        if slug == key or slug.startswith(key + "/"):
+            settings.update(overrides[key])
     return settings
 
 
