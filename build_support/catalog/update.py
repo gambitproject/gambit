@@ -29,8 +29,14 @@ def catalog_draw_tree_settings(slug: str) -> dict:
     return settings
 
 
-def generate_rst_table(df: pd.DataFrame, rst_path: Path, regenerate_images: bool = False):
+def generate_rst_table(
+    df: pd.DataFrame,
+    rst_path: Path,
+    regenerate_images: bool = False,
+    catalog_dir: Path | None = None,
+):
     """Generate RST output with a list-table for games."""
+    catalog_dir = catalog_dir or CATALOG_DIR
     with open(rst_path, "w", encoding="utf-8") as f:
         # TOC linking to both sections
         f.write(".. contents::\n")
@@ -58,29 +64,29 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path, regenerate_images: bool
                 all_exts = []
                 all_paths = []
                 if row["Format"] == "efg":
-                    ef_path = CATALOG_DIR / "img" / f"{slug}.ef"
+                    ef_path = catalog_dir / "img" / f"{slug}.ef"
                     all_exts.append("ef")
                     all_paths.append(ef_path)
                 all_exts = all_exts + ["tex", "png", "pdf", "svg"]
-                tex_path = CATALOG_DIR / "img" / f"{slug}.tex"
+                tex_path = catalog_dir / "img" / f"{slug}.tex"
                 all_paths.append(tex_path)
-                all_paths.append(CATALOG_DIR / "img" / f"{slug}.png")
-                all_paths.append(CATALOG_DIR / "img" / f"{slug}.pdf")
-                all_paths.append(CATALOG_DIR / "img" / f"{slug}.svg")
+                all_paths.append(catalog_dir / "img" / f"{slug}.png")
+                all_paths.append(catalog_dir / "img" / f"{slug}.pdf")
+                all_paths.append(catalog_dir / "img" / f"{slug}.svg")
                 missing_any = not all(p.exists() for p in all_paths)
 
                 if regenerate_images or missing_any:
-                    viz_path = CATALOG_DIR / "img" / f"{slug}"
+                    viz_path = catalog_dir / "img" / f"{slug}"
                     viz_path.parent.mkdir(parents=True, exist_ok=True)
                     # Use a committed curated .ef file if present; otherwise derive
                     # the layout automatically from the game object.
-                    curated_ef = CATALOG_DIR / f"{slug}.ef"
+                    curated_ef = catalog_dir / f"{slug}.ef"
                     source = str(curated_ef) if curated_ef.exists() else gbt.catalog.load(slug)
                     for func in [generate_tex, generate_png, generate_pdf, generate_svg]:
                         func(source, save_to=str(viz_path), **catalog_draw_tree_settings(slug))
                     # DrawTree may not write catalog/img/{slug}.ef when its input is
                     # already an .ef file, so copy it if the img copy is still absent.
-                    img_ef = CATALOG_DIR / "img" / f"{slug}.ef"
+                    img_ef = catalog_dir / "img" / f"{slug}.ef"
                     if not img_ef.exists() and curated_ef.exists():
                         shutil.copy2(curated_ef, img_ef)
 
@@ -119,7 +125,7 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path, regenerate_images: bool
                 if row["Format"] == "efg":
                     settings = catalog_draw_tree_settings(slug)
                     settings_str = ", ".join(f"{k}={v!r}" for k, v in settings.items())
-                    curated_ef = CATALOG_DIR / f"{slug}.ef"
+                    curated_ef = catalog_dir / f"{slug}.ef"
                     if curated_ef.exists():
                         f.write(
                             f'             draw_tree("../catalog/{slug}.ef", {settings_str})\n'
@@ -139,31 +145,34 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path, regenerate_images: bool
                 f.write("          \n")
 
 
-def update_makefile():
+def update_makefile(
+    catalog_dir: Path | None = None,
+    am_path: Path | None = None,
+):
     """Update the catalog.am with all games from the catalog."""
+    catalog_dir = catalog_dir or CATALOG_DIR
+    am_path = am_path or Path(__file__).parent / "catalog.am"
 
     slugs = []
-    for resource_path in sorted(CATALOG_DIR.rglob("*.efg")):
+    for resource_path in sorted(catalog_dir.rglob("*.efg")):
         if resource_path.is_file():
-            rel_path = resource_path.relative_to(CATALOG_DIR)
+            rel_path = resource_path.relative_to(catalog_dir)
             slugs.append(str(rel_path))
-    for resource_path in sorted(CATALOG_DIR.rglob("*.nfg")):
+    for resource_path in sorted(catalog_dir.rglob("*.nfg")):
         if resource_path.is_file():
-            rel_path = resource_path.relative_to(CATALOG_DIR)
+            rel_path = resource_path.relative_to(catalog_dir)
             slugs.append(str(rel_path))
-    for resource_path in sorted(CATALOG_DIR.rglob("*.ef")):
+    for resource_path in sorted(catalog_dir.rglob("*.ef")):
         # Exclude the generated .ef files under catalog/img/; only curated
         # .ef files committed alongside game files should be distributed.
-        if resource_path.is_file() and CATALOG_DIR / "img" not in resource_path.parents:
-            rel_path = resource_path.relative_to(CATALOG_DIR)
+        if resource_path.is_file() and catalog_dir / "img" not in resource_path.parents:
+            rel_path = resource_path.relative_to(catalog_dir)
             slugs.append(str(rel_path))
 
     game_files = []
     for slug in slugs:
         game_files.append(f"catalog/{slug}")
     game_files.sort()
-
-    am_path = Path(__file__).parent / "catalog.am"
 
     if am_path.exists():
         with open(am_path, encoding="utf-8") as f:
