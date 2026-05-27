@@ -232,8 +232,12 @@ END_EVENT_TABLE()
 //---------------------------------------------------------------------
 
 GameFrame::GameFrame(wxWindow *p_parent, GameDocument *p_doc)
-  : wxFrame(p_parent, wxID_ANY, _T(""), wxDefaultPosition, wxSize(800, 600)), GameView(p_doc)
+  : wxFrame(p_parent, wxID_ANY, _T(""), wxDefaultPosition, wxDefaultSize), GameView(p_doc)
 {
+  const wxRect area = wxGetClientDisplayRect();
+  SetClientSize(area.GetWidth() * 4 / 5, area.GetHeight() * 4 / 5);
+  Centre();
+
 #if defined(__WXMSW__)
   SetIcon(wxIcon(wxT("efg_icn")));
 #else

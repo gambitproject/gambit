@@ -73,11 +73,10 @@ subsets of equilibria being found.
    Show intermediate output of the algorithm.  If this option is
    not specified, only the equilibria found are reported.
 
-Computing an equilibrium of :download:`e02.nfg <../contrib/games/e02.nfg>`,
-the reduced strategic form of the example in Figure 2 of Selten
-(International Journal of Game Theory, 1975)
+Computing an equilibrium of
+the reduced strategic form of the example in Figure 2 of [Sel75]_::
 
-   $ gambit-gnm e02.nfg
+   $ gambit-gnm catalog/selten1975/fig2.efg
    Compute Nash equilibria using a global Newton method
    Gametracer version 0.2, Copyright (C) 2002, Ben Blum and Christian Shelton
    Gambit version |release|, Copyright (C) 1994-2026, The Gambit Project

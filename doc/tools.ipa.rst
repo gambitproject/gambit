@@ -39,11 +39,10 @@ equilibria being found.
    output of equilibria (excluding the initial NE tag).
 
 
-Computing an equilibrium of :download:`e02.nfg <../contrib/games/e02.nfg>`,
-the reduced strategic form of the example in Figure 2 of Selten
-(International Journal of Game Theory, 1975)
+Computing an equilibrium of
+the reduced strategic form of the example in Figure 2 of [Sel75]_::
 
-   $ gambit-ipa e02.nfg
+   $ gambit-ipa catalog/selten1975/fig2.efg
    Compute Nash equilibria using iterated polymatrix approximation
    Gametracer version 0.2, Copyright (C) 2002, Ben Blum and Christian Shelton
    Gambit version |release|, Copyright (C) 1994-2026, The Gambit Project

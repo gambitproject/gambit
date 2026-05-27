@@ -220,7 +220,7 @@ public:
   void Invalidate() { m_valid = false; }
 
   Game GetGame() const;
-  int GetNumber() const { return m_number; }
+  int GetNumber() const;
 
   GamePlayer GetPlayer() const;
 
@@ -1226,6 +1226,12 @@ inline GameNode GameInfosetRep::GetMember(int p_index) const
 {
   m_game->EnsureInfosetOrdering();
   return m_members.at(p_index - 1);
+}
+
+inline int GameInfosetRep::GetNumber() const
+{
+  m_game->EnsureInfosetOrdering();
+  return m_number;
 }
 
 inline GameInfosetRep::Members GameInfosetRep::GetMembers() const
