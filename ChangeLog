@@ -10,6 +10,9 @@
   for example `simpdiv_solve`) (#868)
 - In GUI, typing a payoff with a trailing slash is now interpreted as a whole number
   (previously this led to a validation error dialog)
+- Improved initial zoom and centering of display of game trees on initial load, and focusing behavior
+  on currently-selected node or jumping to the root.  Also adjusted the initial size of the
+  game window to a more comfortable size.  (#569)
 
 ### Removed
 - Built-in plotting of logit QRE for strategic games has been removed in the GUI (#809)
