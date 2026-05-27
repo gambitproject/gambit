@@ -661,7 +661,6 @@ wxString PayoffsWidget::GetCellValue(const wxSheetCoords &p_coords)
 
 void PayoffsWidget::SetCellValue(const wxSheetCoords &p_coords, const wxString &p_value)
 {
-  // Normalisation: Interpret trailing bare slash as /1".
   wxString value = p_value;
   if (value.EndsWith(_T("/"))) {
     value = value.Left(value.length() - 1);

@@ -538,8 +538,8 @@ void EfgDisplay::OnAcceptPayoffEdit(wxCommandEvent &)
   const GameOutcome outcome = m_payoffEditor->GetOutcome();
   const int player = m_payoffEditor->GetPlayer();
   wxString value = m_payoffEditor->GetValue();
-  if (value.EndsWith("/")) {
-    value = value + "1";
+  if (value.EndsWith(_T("/"))) {
+    value = value.Left(value.length() - 1);
   }
   try {
     m_doc->DoSetPayoff(outcome, player, value);
