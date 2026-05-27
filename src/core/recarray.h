@@ -217,7 +217,7 @@ public:
   //@{
   void SwitchRows(int i, int j)
   {
-    if (!Check(i, j)) {
+    if (!CheckRow(i) || !CheckRow(j)) {
       throw std::out_of_range("Index out of range in RectArray");
     }
     if (i == j) {
