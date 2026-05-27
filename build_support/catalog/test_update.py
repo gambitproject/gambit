@@ -1,4 +1,34 @@
-"""Tests for build_support/catalog/update.py."""
+"""Tests for build_support/catalog/update.py.
+
+All catalog slugs used here are clearly fictional (e.g. ``"testgroup2000/fig1"``)
+and do not correspond to any game in the real catalog.  This is intentional: the
+tests construct their own temporary catalog directories and DataFrame rows so they
+are completely isolated from the actual catalog on disk.
+
+Monkeypatching strategy
+-----------------------
+``update.py`` depends on three external resources that are replaced in tests:
+
+1. ``DRAW_TREE_SETTINGS_CONFIG`` (a ``Path``) — swapped for a tmp YAML file so
+   ``catalog_draw_tree_settings`` reads controlled config without touching the
+   real ``draw_tree_settings.yaml``.  ``monkeypatch.setattr(update,
+   "DRAW_TREE_SETTINGS_CONFIG", yaml_file)`` replaces the module-level path for
+   the duration of a single test and restores it automatically on teardown.
+
+2. ``generate_tex`` / ``generate_png`` / ``generate_pdf`` / ``generate_svg``
+   (functions imported from ``draw_tree``) — replaced with no-ops or
+   call-tracking lambdas.  This lets us test RST-generation logic without
+   actually invoking LaTeX, and lets us assert whether image
+   generation was triggered at all.
+
+3. ``catalog_dir`` (an argument to ``generate_rst_table`` and
+   ``update_makefile``) — both functions accept an optional ``catalog_dir``
+   kwarg that defaults to the real ``CATALOG_DIR``.  Tests pass a
+   ``tmp_path``-based directory instead, keeping all file I/O inside pytest's
+   temporary directory and avoiding any reads from or writes to the repo.
+"""
+
+import textwrap
 
 import pytest
 
@@ -9,9 +39,11 @@ import pandas as pd  # noqa: E402
 import update  # noqa: E402
 
 # ---------------------------------------------------------------------------
-# Helpers
+# Module-level test fixtures
 # ---------------------------------------------------------------------------
 
+# The expected dict produced by _YAML_CONFIG with no slug-specific override.
+# Tests that expect defaults-only results compare against this constant.
 _YAML_DEFAULTS = {
     "color_scheme": "gambit",
     "font_family": "sffamily",
@@ -20,30 +52,49 @@ _YAML_DEFAULTS = {
     "sublevel_scaling": 0,
 }
 
-_YAML_CONFIG = """
-                    defaults:
-                      color_scheme: gambit
-                      font_family: sffamily
-                      font_italic: true
-                      shared_terminal_depth: true
-                      sublevel_scaling: 0
+# A self-contained draw_tree_settings YAML config used by settings tests.
+# Slugs are entirely fictional:
+#   "testgroup2000"       – group-level prefix covering testgroup2000/*
+#   "othergroup1999"      – group-level prefix covering othergroup1999/*
+#   "testgroup2000/fig2"  – game-specific entry that overrides the group above
+_YAML_CONFIG = textwrap.dedent("""\
+    defaults:
+      color_scheme: gambit
+      font_family: sffamily
+      font_italic: true
+      shared_terminal_depth: true
+      sublevel_scaling: 0
 
-                    overrides:
-                      watson2013:
-                        sublevel_scaling: 1
-                      selten1975:
-                        shared_terminal_depth: false
-                      myerson1991/fig2_1:
-                        action_label_position: 0.4
-                """
+    overrides:
+      testgroup2000:
+        sublevel_scaling: 1
+      othergroup1999:
+        shared_terminal_depth: false
+      testgroup2000/fig2:
+        action_label_position: 0.4
+""")
+
+
+# ---------------------------------------------------------------------------
+# Helper functions
+# ---------------------------------------------------------------------------
 
 
 def _write_yaml(path, content=_YAML_CONFIG):
+    """Write *content* to *path* and return *path*.
+
+    Used to create a temporary draw_tree_settings YAML file that can be
+    pointed at via ``monkeypatch.setattr(update, "DRAW_TREE_SETTINGS_CONFIG",
+    path)`` without touching the real config file.
+    """
     path.write_text(content, encoding="utf-8")
     return path
 
 
-def _efg_row(slug, title="Game Title", description="A description."):
+def _efg_row(slug, title="Test EFG Game", description="A description."):
+    """Return a dict representing one row of the DataFrame produced by
+    ``gbt.catalog.games(include_descriptions=True)`` for an extensive-form game.
+    """
     return {
         "Game": slug,
         "Title": title,
@@ -53,7 +104,8 @@ def _efg_row(slug, title="Game Title", description="A description."):
     }
 
 
-def _nfg_row(slug, title="NFG Title", description="NFG description."):
+def _nfg_row(slug, title="Test NFG Game", description="A description."):
+    """Return a dict representing one row of the DataFrame for a normal-form game."""
     return {
         "Game": slug,
         "Title": title,
@@ -64,109 +116,169 @@ def _nfg_row(slug, title="NFG Title", description="NFG description."):
 
 
 def _make_df(*rows):
+    """Build a DataFrame from one or more row dicts as ``generate_rst_table`` expects."""
     return pd.DataFrame(list(rows))
 
 
 def _make_image_files(catalog_dir, slug, fmt="efg"):
-    """Create the stub image files so the existence check passes."""
-    img = catalog_dir / "img" / slug
-    img.parent.mkdir(parents=True, exist_ok=True)
+    """Create stub image files under *catalog_dir*/img/ for *slug*.
+
+    ``generate_rst_table`` checks that all expected image files exist before
+    deciding whether to regenerate them.  Touching empty files satisfies that
+    check without requiring real draw_tree output, so tests that are not
+    specifically about image generation can use this helper to set up the
+    pre-existing-images state.
+
+    For EFG games the ``.ef`` intermediate file is also created, since it
+    appears in the existence check and the download links.
+    """
+    img_dir = catalog_dir / "img"
+    img_dir.mkdir(parents=True, exist_ok=True)
+    slug_path = img_dir / slug
+    slug_path.parent.mkdir(parents=True, exist_ok=True)
     for ext in ["tex", "png", "pdf", "svg"]:
-        (catalog_dir / "img" / f"{slug}.{ext}").touch()
+        (img_dir / f"{slug}.{ext}").touch()
     if fmt == "efg":
-        (catalog_dir / "img" / f"{slug}.ef").touch()
+        (img_dir / f"{slug}.ef").touch()
 
 
 # ---------------------------------------------------------------------------
-# catalog_draw_tree_settings
+# Tests for catalog_draw_tree_settings
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.catalog_update
 class TestCatalogDrawTreeSettings:
+    """Unit tests for ``catalog_draw_tree_settings(slug) -> dict``.
+
+    Each test writes a temporary YAML config and redirects the module-level
+    ``DRAW_TREE_SETTINGS_CONFIG`` path to it via ``monkeypatch.setattr``.
+    This means the real ``draw_tree_settings.yaml`` is never read or modified.
+    """
+
     def test_no_override_returns_defaults(self, tmp_path, monkeypatch):
+        """A slug with no matching entry in ``overrides`` returns the defaults verbatim."""
         yaml_file = _write_yaml(tmp_path / "settings.yaml")
         monkeypatch.setattr(update, "DRAW_TREE_SETTINGS_CONFIG", yaml_file)
-        result = update.catalog_draw_tree_settings("unknown/game")
+        result = update.catalog_draw_tree_settings("unknowngame/v1")
         assert result == _YAML_DEFAULTS
 
     def test_exact_slug_override_applied(self, tmp_path, monkeypatch):
+        """A key in ``overrides`` that exactly matches the slug is merged into defaults."""
         yaml_file = _write_yaml(tmp_path / "settings.yaml")
         monkeypatch.setattr(update, "DRAW_TREE_SETTINGS_CONFIG", yaml_file)
-        result = update.catalog_draw_tree_settings("myerson1991/fig2_1")
+        result = update.catalog_draw_tree_settings("testgroup2000/fig2")
         assert result["action_label_position"] == pytest.approx(0.4)
         assert result["color_scheme"] == "gambit"  # defaults still present
 
     def test_prefix_slug_override_applied(self, tmp_path, monkeypatch):
+        """A group-level key (e.g. ``"testgroup2000"``) matches any slug that starts with it."""
         yaml_file = _write_yaml(tmp_path / "settings.yaml")
         monkeypatch.setattr(update, "DRAW_TREE_SETTINGS_CONFIG", yaml_file)
-        result = update.catalog_draw_tree_settings("watson2013/exercise29_6")
+        # "testgroup2000/fig1" is not listed explicitly; it matches the group prefix
+        result = update.catalog_draw_tree_settings("testgroup2000/fig1")
         assert result["sublevel_scaling"] == 1
 
     def test_specific_key_wins_over_group(self, tmp_path, monkeypatch):
-        config = """
-                    defaults:
-                      color_scheme: gambit
-                      sublevel_scaling: 0
-                    overrides:
-                      myerson1991:
-                        sublevel_scaling: 1
-                      myerson1991/fig2_1:
-                        sublevel_scaling: 2
-                """
+        """When both a group key and a more specific key match, the specific key wins.
+
+        The config has ``testgroup2000`` (sets sublevel_scaling=1) and
+        ``testgroup2000/fig2`` (sets sublevel_scaling=2).  The game
+        ``testgroup2000/fig2`` matches both, but the longer/specific key is
+        applied last, so sublevel_scaling should be 2.
+        """
+        config = textwrap.dedent("""\
+            defaults:
+              color_scheme: gambit
+              sublevel_scaling: 0
+            overrides:
+              testgroup2000:
+                sublevel_scaling: 1
+              testgroup2000/fig2:
+                sublevel_scaling: 2
+        """)
         yaml_file = _write_yaml(tmp_path / "settings.yaml", config)
         monkeypatch.setattr(update, "DRAW_TREE_SETTINGS_CONFIG", yaml_file)
-        result = update.catalog_draw_tree_settings("myerson1991/fig2_1")
+        result = update.catalog_draw_tree_settings("testgroup2000/fig2")
         assert result["sublevel_scaling"] == 2
 
     def test_group_override_does_not_bleed_to_other_game(self, tmp_path, monkeypatch):
+        """A group-level override applies only to games whose slug starts with that prefix."""
         yaml_file = _write_yaml(tmp_path / "settings.yaml")
         monkeypatch.setattr(update, "DRAW_TREE_SETTINGS_CONFIG", yaml_file)
-        result = update.catalog_draw_tree_settings("selten1975/fig1")
-        assert result["shared_terminal_depth"] is False
-        result2 = update.catalog_draw_tree_settings("watson2013/fig29_1")
-        assert result2["shared_terminal_depth"] is True  # selten override not applied
+        # "othergroup1999" override sets shared_terminal_depth = False
+        result_other = update.catalog_draw_tree_settings("othergroup1999/fig1")
+        assert result_other["shared_terminal_depth"] is False
+        # "testgroup2000" has a different override; shared_terminal_depth should be True (default)
+        result_test = update.catalog_draw_tree_settings("testgroup2000/fig1")
+        assert result_test["shared_terminal_depth"] is True
 
     def test_no_overrides_section_returns_defaults(self, tmp_path, monkeypatch):
-        config = "defaults:\n  color_scheme: gambit\n  sublevel_scaling: 0\n"
+        """A config with no ``overrides`` key at all returns only the defaults."""
+        config = textwrap.dedent("""\
+            defaults:
+              color_scheme: gambit
+              sublevel_scaling: 0
+        """)
         yaml_file = _write_yaml(tmp_path / "settings.yaml", config)
         monkeypatch.setattr(update, "DRAW_TREE_SETTINGS_CONFIG", yaml_file)
-        result = update.catalog_draw_tree_settings("any/game")
+        result = update.catalog_draw_tree_settings("anygame/v1")
         assert result == {"color_scheme": "gambit", "sublevel_scaling": 0}
 
 
 # ---------------------------------------------------------------------------
-# generate_rst_table
+# Tests for generate_rst_table
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.catalog_update
 class TestGenerateRstTable:
+    """Tests for ``generate_rst_table(df, rst_path, ...)``.
+
+    Image generation (generate_tex / generate_png / etc.) is mocked out so
+    that tests can run without LaTeX installed and without reading
+    from the real catalog directory.
+
+    ``_mock_generates`` uses ``monkeypatch.setattr`` to replace each of the
+    four draw_tree generate functions in the ``update`` module's namespace with
+    a no-op.  Because the replacement is scoped to the test, the originals are
+    automatically restored afterward.
+
+    Tests that need to verify *whether* generation was triggered replace the
+    functions with lambdas that append to a ``calls`` list instead.
+
+    All catalog directories and RST output files are created inside ``tmp_path``
+    (pytest's per-test temporary directory) so nothing is written to the repo.
+    """
+
     def _no_op_generate(self, *args, **kwargs):
-        """Replacement for draw_tree generate_* functions that does nothing."""
+        """Stand-in for draw_tree generate_* functions; does nothing."""
 
     def _mock_generates(self, monkeypatch):
+        """Replace all four draw_tree image-generation functions with no-ops."""
         for name in ["generate_tex", "generate_png", "generate_pdf", "generate_svg"]:
             monkeypatch.setattr(update, name, self._no_op_generate)
 
     def test_efg_row_produces_rst_with_slug_and_title(self, tmp_path, monkeypatch):
+        """An EFG game row appears in the RST with its title, load call, and download links."""
         self._mock_generates(monkeypatch)
         catalog_dir = tmp_path / "catalog"
-        slug = "bagwell1995"
+        slug = "fakeauthor2000/fig1"
         _make_image_files(catalog_dir, slug, "efg")
-        df = _make_df(_efg_row(slug, title="Bagwell 1995"))
+        df = _make_df(_efg_row(slug, title="Fake Author (2000) Figure 1"))
         rst_path = tmp_path / "out.rst"
         update.generate_rst_table(df, rst_path, catalog_dir=catalog_dir)
         rst = rst_path.read_text()
-        assert "Bagwell 1995" in rst
+        assert "Fake Author (2000) Figure 1" in rst
         assert f'pygambit.catalog.load("{slug}")' in rst
-        assert f":download:`{slug}.efg" in rst
-        assert f":download:`{slug}.ef" in rst
+        assert f":download:`{slug}.efg" in rst  # source game file download link
+        assert f":download:`{slug}.ef" in rst  # draw_tree intermediate file download link
 
     def test_nfg_row_produces_rst_with_save_to(self, tmp_path, monkeypatch):
+        """An NFG game row uses the ``save_to`` form of the draw_tree call (no .ef involved)."""
         self._mock_generates(monkeypatch)
         catalog_dir = tmp_path / "catalog"
-        slug = "nau2004/sec3"
+        slug = "fakeauthor2001/matrix1"
         _make_image_files(catalog_dir, slug, "nfg")
         df = _make_df(_nfg_row(slug))
         rst_path = tmp_path / "out.rst"
@@ -175,38 +287,42 @@ class TestGenerateRstTable:
         assert f'save_to="../catalog/img/{slug}.png"' in rst
 
     def test_unknown_format_row_is_skipped(self, tmp_path, monkeypatch):
+        """A row whose Format is not 'efg' or 'nfg' is silently omitted from the RST."""
         self._mock_generates(monkeypatch)
         catalog_dir = tmp_path / "catalog"
         catalog_dir.mkdir()
         row = {
-            "Game": "bogus/game",
-            "Title": "Bogus",
+            "Game": "fakegame/v1",
+            "Title": "Fake Game",
             "Description": "Has a description.",
             "Download": "",
-            "Format": "efg_2",
+            "Format": "efg_2",  # not in SUPPORTED_GAME_FORMATS
         }
         df = _make_df(row)
         rst_path = tmp_path / "out.rst"
         update.generate_rst_table(df, rst_path, catalog_dir=catalog_dir)
         rst = rst_path.read_text()
-        assert "Bogus" not in rst
+        assert "Fake Game" not in rst
 
     def test_row_without_description_is_skipped(self, tmp_path, monkeypatch):
+        """A game with an empty description is not included in the RST output."""
         self._mock_generates(monkeypatch)
         catalog_dir = tmp_path / "catalog"
         catalog_dir.mkdir()
-        df = _make_df(_efg_row("bagwell1995", description=""))
+        df = _make_df(_efg_row("fakeauthor2000/fig1", description=""))
         rst_path = tmp_path / "out.rst"
         update.generate_rst_table(df, rst_path, catalog_dir=catalog_dir)
         rst = rst_path.read_text()
-        assert "bagwell1995" not in rst
+        assert "fakeauthor2000/fig1" not in rst
 
     def test_curated_ef_used_in_draw_tree_call(self, tmp_path, monkeypatch):
+        """When a curated .ef file exists alongside the .efg, the RST draw_tree call
+        references the .ef path directly rather than ``pygambit.catalog.load``."""
         self._mock_generates(monkeypatch)
         catalog_dir = tmp_path / "catalog"
-        slug = "selten1975/fig1"
+        slug = "fakeauthor1999/fig1"
         _make_image_files(catalog_dir, slug, "efg")
-        # Place a curated .ef alongside the .efg
+        # Place a curated .ef file alongside the game — this is what update.py checks for
         curated = catalog_dir / f"{slug}.ef"
         curated.parent.mkdir(parents=True, exist_ok=True)
         curated.touch()
@@ -214,36 +330,47 @@ class TestGenerateRstTable:
         rst_path = tmp_path / "out.rst"
         update.generate_rst_table(df, rst_path, catalog_dir=catalog_dir)
         rst = rst_path.read_text()
-        # The draw_tree() call line should reference the .ef file path directly
+        # Find the draw_tree( call line in the jupyter-execute block
         draw_tree_call = next(line for line in rst.splitlines() if "draw_tree(" in line)
         assert f'"../catalog/{slug}.ef"' in draw_tree_call
         assert "catalog.load" not in draw_tree_call
 
     def test_images_not_regenerated_when_all_exist(self, tmp_path, monkeypatch):
+        """If all expected image files are already present and ``regenerate_images`` is
+        False, none of the draw_tree generate functions are called."""
         calls = []
+        # Replace generate_* with lambdas that record invocations
         monkeypatch.setattr(update, "generate_tex", lambda *a, **k: calls.append("tex"))
         monkeypatch.setattr(update, "generate_png", lambda *a, **k: calls.append("png"))
         monkeypatch.setattr(update, "generate_pdf", lambda *a, **k: calls.append("pdf"))
         monkeypatch.setattr(update, "generate_svg", lambda *a, **k: calls.append("svg"))
         catalog_dir = tmp_path / "catalog"
-        slug = "bagwell1995"
-        _make_image_files(catalog_dir, slug, "efg")
+        slug = "fakeauthor2000/fig1"
+        _make_image_files(catalog_dir, slug, "efg")  # all images already exist
         df = _make_df(_efg_row(slug))
         rst_path = tmp_path / "out.rst"
         update.generate_rst_table(df, rst_path, regenerate_images=False, catalog_dir=catalog_dir)
         assert calls == []
 
     def test_images_regenerated_when_flag_set(self, tmp_path, monkeypatch):
+        """When ``regenerate_images=True``, all four generate functions are called even
+        if the image files already exist.
+
+        A curated .ef file is placed in the catalog dir so ``update.py`` uses it
+        as the draw_tree source rather than calling ``gbt.catalog.load``, which
+        would require the real catalog to be present.
+        """
         calls = []
         monkeypatch.setattr(update, "generate_tex", lambda *a, **k: calls.append("tex"))
         monkeypatch.setattr(update, "generate_png", lambda *a, **k: calls.append("png"))
         monkeypatch.setattr(update, "generate_pdf", lambda *a, **k: calls.append("pdf"))
         monkeypatch.setattr(update, "generate_svg", lambda *a, **k: calls.append("svg"))
         catalog_dir = tmp_path / "catalog"
-        slug = "bagwell1995"
+        slug = "fakeauthor2000/fig1"
         _make_image_files(catalog_dir, slug, "efg")
-        # Use a curated .ef so gbt.catalog.load is not called (avoids needing real catalog)
+        # Place a curated .ef file alongside the game — this is what update.py checks for
         curated = catalog_dir / f"{slug}.ef"
+        curated.parent.mkdir(parents=True, exist_ok=True)
         curated.touch()
         df = _make_df(_efg_row(slug))
         rst_path = tmp_path / "out.rst"
@@ -252,58 +379,75 @@ class TestGenerateRstTable:
 
 
 # ---------------------------------------------------------------------------
-# update_makefile
+# Tests for update_makefile
 # ---------------------------------------------------------------------------
 
 
 @pytest.mark.catalog_update
 class TestUpdateMakefile:
+    """Tests for ``update_makefile(catalog_dir, am_path)``.
+
+    Both arguments are injected via ``tmp_path`` so the real catalog directory
+    and the real ``catalog.am`` file are never read or written.
+    """
+
     def test_efg_and_nfg_files_included(self, tmp_path):
-        (tmp_path / "foo.efg").touch()
-        (tmp_path / "sub").mkdir()
-        (tmp_path / "sub" / "bar.nfg").touch()
+        """Game files with .efg and .nfg extensions appear in the generated catalog.am."""
+        (tmp_path / "standalone.efg").touch()
+        (tmp_path / "subfolder").mkdir()
+        (tmp_path / "subfolder" / "matrix.nfg").touch()
         am = tmp_path / "catalog.am"
         update.update_makefile(catalog_dir=tmp_path, am_path=am)
         content = am.read_text()
-        assert "catalog/foo.efg" in content
-        assert "catalog/sub/bar.nfg" in content
+        assert "catalog/standalone.efg" in content
+        assert "catalog/subfolder/matrix.nfg" in content
 
     def test_curated_ef_included(self, tmp_path):
-        (tmp_path / "myerson1991").mkdir()
-        (tmp_path / "myerson1991" / "fig1.efg").touch()
-        (tmp_path / "myerson1991" / "fig1.ef").touch()
+        """A curated .ef file committed alongside a game file appears in catalog.am."""
+        (tmp_path / "fakegame").mkdir()
+        (tmp_path / "fakegame" / "fig1.efg").touch()
+        (tmp_path / "fakegame" / "fig1.ef").touch()  # curated layout file
         am = tmp_path / "catalog.am"
         update.update_makefile(catalog_dir=tmp_path, am_path=am)
         content = am.read_text()
-        assert "catalog/myerson1991/fig1.ef" in content
+        assert "catalog/fakegame/fig1.ef" in content
 
     def test_ef_in_img_dir_excluded(self, tmp_path):
-        img = tmp_path / "img" / "selten1975"
+        """Generated .ef files under the img/ subdirectory are excluded from catalog.am."""
+        img = tmp_path / "img" / "fakegame"
         img.mkdir(parents=True)
-        (img / "fig1.ef").touch()
+        (img / "fig1.ef").touch()  # generated artifact — should not be distributed
         am = tmp_path / "catalog.am"
         update.update_makefile(catalog_dir=tmp_path, am_path=am)
         content = am.read_text()
         assert "img" not in content
 
     def test_non_game_file_excluded(self, tmp_path):
-        (tmp_path / "foo.efg_2").touch()
-        (tmp_path / "readme.txt").touch()
+        """Files with non-game extensions (e.g. .efg_2, .txt) are not included."""
+        (tmp_path / "fakegame.efg_2").touch()  # hidden/renamed file
+        (tmp_path / "README.txt").touch()
         am = tmp_path / "catalog.am"
         update.update_makefile(catalog_dir=tmp_path, am_path=am)
         content = am.read_text()
         assert "efg_2" not in content
-        assert "readme" not in content
+        assert "README" not in content
 
     def test_no_write_when_content_unchanged(self, tmp_path):
-        (tmp_path / "foo.efg").touch()
+        """If catalog.am already contains the correct content, it is not rewritten.
+
+        The mtime of the file is captured after the first write and compared
+        after the second call.  If the file were overwritten, the mtime would
+        change; if the content-equality check works correctly, it stays the same.
+        """
+        (tmp_path / "standalone.efg").touch()
         am = tmp_path / "catalog.am"
         update.update_makefile(catalog_dir=tmp_path, am_path=am)
-        mtime_after_first = am.stat().st_mtime
+        mtime_after_first_write = am.stat().st_mtime
         update.update_makefile(catalog_dir=tmp_path, am_path=am)
-        assert am.stat().st_mtime == mtime_after_first
+        assert am.stat().st_mtime == mtime_after_first_write
 
     def test_empty_catalog_produces_valid_am(self, tmp_path):
+        """An empty catalog directory produces a catalog.am with a valid (empty) CATALOG_FILES."""
         am = tmp_path / "catalog.am"
         update.update_makefile(catalog_dir=tmp_path, am_path=am)
         content = am.read_text()
