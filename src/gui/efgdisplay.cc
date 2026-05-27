@@ -545,8 +545,6 @@ void EfgDisplay::OnAcceptPayoffEdit(wxCommandEvent &)
     m_doc->DoSetPayoff(outcome, player, value);
     m_payoffEditor->EndEdit();
   }
-  catch (ZeroDivideException &) {
-  }
   catch (std::exception &ex) {
     ExceptionDialog(this, ex.what()).ShowModal();
   }

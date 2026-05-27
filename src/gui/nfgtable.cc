@@ -1225,11 +1225,6 @@ void TableWidget::SetPayoffCellValue(const wxSheetCoords &coords, const wxString
   try {
     m_doc->DoSetPayoff(outcome, player, value);
   }
-  catch (ValueException &) {
-    // For the moment, we will just silently discard edits which
-    // give payoffs that are not valid numbers
-    return;
-  }
   catch (std::exception &ex) {
     ExceptionDialog(this, ex.what()).ShowModal();
   }
