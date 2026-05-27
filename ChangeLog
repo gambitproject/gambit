@@ -4,6 +4,8 @@
 
 ### Fixed
 - Corrected resizing of row and column index labels in strategic form so pivoting works correctly. (#844)
+- Corrected incorrect output of strategic game tables to .nfg files if strategies have previously been
+  deleted in the game (#875)
 
 ### Removed
 - Built-in plotting of logit QRE for strategic games has been removed in the GUI (#809)
