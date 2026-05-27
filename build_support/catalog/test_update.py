@@ -21,21 +21,21 @@ _YAML_DEFAULTS = {
 }
 
 _YAML_CONFIG = """
-defaults:
-  color_scheme: gambit
-  font_family: sffamily
-  font_italic: true
-  shared_terminal_depth: true
-  sublevel_scaling: 0
+                    defaults:
+                      color_scheme: gambit
+                      font_family: sffamily
+                      font_italic: true
+                      shared_terminal_depth: true
+                      sublevel_scaling: 0
 
-overrides:
-  watson2013:
-    sublevel_scaling: 1
-  selten1975:
-    shared_terminal_depth: false
-  myerson1991/fig2_1:
-    action_label_position: 0.4
-"""
+                    overrides:
+                      watson2013:
+                        sublevel_scaling: 1
+                      selten1975:
+                        shared_terminal_depth: false
+                      myerson1991/fig2_1:
+                        action_label_position: 0.4
+                """
 
 
 def _write_yaml(path, content=_YAML_CONFIG):
