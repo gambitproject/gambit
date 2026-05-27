@@ -597,7 +597,7 @@ PayoffsWidget::PayoffsWidget(TableWidget *p_parent)
   SetRowLabelWidth(1);
   SetColLabelHeight(1);
 
-  Bind(wxEVT_CHAR_HOOK, &gbtPayoffsWidget::OnCharHook, this);
+  Bind(wxEVT_CHAR_HOOK, &PayoffsWidget::OnCharHook, this);
 }
 
 //
@@ -788,7 +788,7 @@ void PayoffsWidget::MoveEditorByTab(bool p_backwards)
   SetTabTraversing(false);
 }
 
-void gbtPayoffsWidget::HandleTabTraversal(wxKeyEvent &p_event)
+void PayoffsWidget::HandleTabTraversal(wxKeyEvent &p_event)
 {
   if (p_event.GetKeyCode() != WXK_TAB || !IsCellEditControlCreated()) {
     p_event.Skip();
@@ -797,9 +797,9 @@ void gbtPayoffsWidget::HandleTabTraversal(wxKeyEvent &p_event)
   MoveEditorByTab(p_event.ShiftDown());
 }
 
-void gbtPayoffsWidget::OnKeyDown(wxKeyEvent &p_event) { HandleTabTraversal(p_event); }
+void PayoffsWidget::OnKeyDown(wxKeyEvent &p_event) { HandleTabTraversal(p_event); }
 
-void gbtPayoffsWidget::OnCharHook(wxKeyEvent &p_event) { HandleTabTraversal(p_event); }
+void PayoffsWidget::OnCharHook(wxKeyEvent &p_event) { HandleTabTraversal(p_event); }
 
 //=========================================================================
 //                       TableWidget: Lifecycle
