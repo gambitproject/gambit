@@ -1,3 +1,4 @@
+
 #
 # This file is part of Gambit
 # Copyright (c) 1994-2026, The Gambit Project (https://www.gambit-project.org)
@@ -99,7 +100,7 @@ def enumpure_solve(game: libgbt.Game) -> NashComputationResult:
 def enumpure_agent_solve(game: libgbt.Game) -> NashComputationResult:
     """Compute all :ref:`pure-strategy agent Nash equilibria <gambit-enumpure>` of game.
 
-    .. versioncadded:: 16.5.0
+    .. versionadded:: 16.5.0
 
        Formerly implemented as `enumpure_solve` with `use_strategic=False`.
 

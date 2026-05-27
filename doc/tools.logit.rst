@@ -74,12 +74,11 @@ See the :ref:`algorithm description <logit>` for full details.
    this switch is specified, only the approximation to the Nash
    equilibrium at the end of the branch is output.
 
-Computing the principal branch, in mixed strategies, of :download:`e02.nfg
-<../contrib/games/e02.nfg>`, the reduced strategic form of the example
-in Figure 2 of Selten (International Journal of Game Theory,
-1975)
+Computing the principal branch, in mixed strategies, of
+the reduced strategic form of the example
+in Figure 2 of [Sel75]_::
 
-   $ gambit-logit e02.nfg
+   $ gambit-logit -S catalog/selten1975/fig2.efg
    Compute a branch of the logit equilibrium correspondence
    Gambit version |release|, Copyright (C) 1994-2026, The Gambit Project
    This is free software, distributed under the GNU GPL

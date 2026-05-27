@@ -1303,8 +1303,7 @@ def test_agent_liap_value_reference(
             "1/16",
         ),
         (games.read_from_file("mixed_behavior_game.efg"), None, False, 0.25, 0.25, 0.0625, 0.0625),
-        # Myerson fig 4.2
-        (games.read_from_file("myerson_fig_4_2.efg"), [0, 1, 0, 1, 1, 0], True, 1, 0, 1, 0),
+        (gbt.catalog.load("myerson1991/fig4_2"), [0, 1, 0, 1, 1, 0], True, 1, 0, 1, 0),
     ],
 )
 def test_agent_max_regret_versus_non_agent(

@@ -3,9 +3,19 @@
 ## [16.7.0] - unreleased
 
 ### Fixed
+- Corrected resizing of row and column index labels in strategic form so pivoting works correctly. (#844)
+- Corrected incorrect output of strategic game tables to .nfg files if strategies have previously been
+  deleted in the game (#875)
+- Fix incorrect row index checking in swapping rows of a rectangular array (leading to errors in
+  for example `simpdiv_solve`) (#868)
+- In GUI, typing a payoff with a trailing slash is now interpreted as a whole number
+  (previously this led to a validation error dialog)
 - Improved initial zoom and centering of display of game trees on initial load, and focusing behavior
   on currently-selected node or jumping to the root.  Also adjusted the initial size of the
   game window to a more comfortable size.  (#569)
+
+### Removed
+- Built-in plotting of logit QRE for strategic games has been removed in the GUI (#809)
 
 
 ## [16.6.0] - 2026-03-24
