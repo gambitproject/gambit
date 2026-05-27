@@ -157,17 +157,17 @@ def update_makefile(
     for resource_path in sorted(catalog_dir.rglob("*.efg")):
         if resource_path.is_file():
             rel_path = resource_path.relative_to(catalog_dir)
-            slugs.append(str(rel_path))
+            slugs.append(rel_path.as_posix())
     for resource_path in sorted(catalog_dir.rglob("*.nfg")):
         if resource_path.is_file():
             rel_path = resource_path.relative_to(catalog_dir)
-            slugs.append(str(rel_path))
+            slugs.append(rel_path.as_posix())
     for resource_path in sorted(catalog_dir.rglob("*.ef")):
         # Exclude the generated .ef files under catalog/img/; only curated
         # .ef files committed alongside game files should be distributed.
         if resource_path.is_file() and catalog_dir / "img" not in resource_path.parents:
             rel_path = resource_path.relative_to(catalog_dir)
-            slugs.append(str(rel_path))
+            slugs.append(rel_path.as_posix())
 
     game_files = []
     for slug in slugs:
