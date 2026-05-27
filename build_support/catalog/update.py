@@ -1,4 +1,5 @@
 import argparse
+import shutil
 from pathlib import Path
 
 import pandas as pd
@@ -61,11 +62,15 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path, regenerate_images: bool
                 missing_any = not all(p.exists() for p in all_paths)
 
                 if regenerate_images or missing_any:
-                    g = gbt.catalog.load(slug)
                     viz_path = CATALOG_DIR / "img" / f"{slug}"
                     viz_path.parent.mkdir(parents=True, exist_ok=True)
+                    curated_ef = CATALOG_DIR / f"{slug}.ef"
+                    source = str(curated_ef) if curated_ef.exists() else gbt.catalog.load(slug)
                     for func in [generate_tex, generate_png, generate_pdf, generate_svg]:
-                        func(g, save_to=str(viz_path), **catalog_draw_tree_settings(slug))
+                        func(source, save_to=str(viz_path), **catalog_draw_tree_settings(slug))
+                    img_ef = CATALOG_DIR / "img" / f"{slug}.ef"
+                    if not img_ef.exists() and curated_ef.exists():
+                        shutil.copy2(curated_ef, img_ef)
 
                 # Main dropdown
                 f.write(f"   * - .. dropdown:: {title}\n")
@@ -127,6 +132,10 @@ def update_makefile():
             slugs.append(str(rel_path))
     for resource_path in sorted(CATALOG_DIR.rglob("*.nfg")):
         if resource_path.is_file():
+            rel_path = resource_path.relative_to(CATALOG_DIR)
+            slugs.append(str(rel_path))
+    for resource_path in sorted(CATALOG_DIR.rglob("*.ef")):
+        if resource_path.is_file() and CATALOG_DIR / "img" not in resource_path.parents:
             rel_path = resource_path.relative_to(CATALOG_DIR)
             slugs.append(str(rel_path))
 

@@ -39,6 +39,14 @@ Currently supported representations are:
    Add your new game file(s) inside the ``catalog`` dir and commit them, or edit an existing game.
    If there are multiple games from a particular source, place them in an appropriately named folder.
 
+   .. note::
+
+      For extensive form games, you may optionally commit a curated ``.ef`` file alongside the ``.efg``
+      (e.g. ``catalog/source/game.ef``).
+      When present, ``update.py`` will use this file directly as input to DrawTree instead of
+      auto-generating the layout from the ``.efg``, preserving any hand-tuned layout.
+      Consult the `DrawTree docs <https://www.gambit-project.org/draw_tree/>`_ for the ``.ef`` format.
+
    .. important::
 
       The name of the game file will determine it's "slug", used by the load function of the catalog module:
