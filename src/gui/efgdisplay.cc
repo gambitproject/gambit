@@ -34,6 +34,7 @@
 #include "efgdisplay.h"
 #include "menuconst.h"
 #include "dlexcept.h"
+#include "valnumber.h"
 
 namespace Gambit::GUI {
 //--------------------------------------------------------------------------
@@ -47,6 +48,7 @@ END_EVENT_TABLE()
 TreePayoffEditor::TreePayoffEditor(wxWindow *p_parent)
   : wxTextCtrl(p_parent, wxID_ANY, wxT(""), wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER)
 {
+  wxWindowBase::SetValidator(NumberValidator(nullptr));
   wxWindow::Show(false);
 }
 
