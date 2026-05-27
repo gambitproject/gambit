@@ -655,7 +655,7 @@ wxString PayoffsWidget::GetCellValue(const wxSheetCoords &p_coords)
   }
 
   const PureStrategyProfile profile = m_table->GetPayoffProfile(p_coords);
-  auto player = m_table->GetPayoffPlayer(ColToPlayer(p_coords.GetCol()));
+  auto player = m_table->GetPayoffPlayer(p_coords.GetCol());
   return {lexical_cast<std::string>(profile->GetPayoff(player)).c_str(), *wxConvCurrent};
 }
 
