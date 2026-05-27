@@ -107,11 +107,19 @@ def generate_rst_table(df: pd.DataFrame, rst_path: Path, regenerate_images: bool
                 if row["Format"] == "efg":
                     settings = catalog_draw_tree_settings(slug)
                     settings_str = ", ".join(f"{k}={v!r}" for k, v in settings.items())
-                    f.write(
-                        f"             draw_tree("
-                        f'pygambit.catalog.load("{slug}"), '
-                        f"{settings_str})\n"
-                    )
+                    curated_ef = CATALOG_DIR / f"{slug}.ef"
+                    if curated_ef.exists():
+                        f.write(
+                            f"             draw_tree("
+                            f'"../catalog/{slug}.ef", '
+                            f"{settings_str})\n"
+                        )
+                    else:
+                        f.write(
+                            f"             draw_tree("
+                            f'pygambit.catalog.load("{slug}"), '
+                            f"{settings_str})\n"
+                        )
                 elif row["Format"] == "nfg":
                     f.write(
                         f"             draw_tree("
