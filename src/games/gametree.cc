@@ -1185,7 +1185,7 @@ void GameTreeRep::BuildSubgameRoots() const
 
   // Phase 2: Reachability and detection
   struct BridgeVisitor {
-    const std::unordered_map<GameNodeRep *, Range> &m_disc;
+    std::unordered_map<GameNodeRep *, Range> &m_disc;
     const std::unordered_map<GameInfosetRep *, Range> &m_hull;
     std::vector<GameNodeRep *> &m_subgames;
     std::unordered_map<GameNodeRep *, Range> m_low;
@@ -1210,6 +1210,7 @@ void GameTreeRep::BuildSubgameRoots() const
 
       for (const auto &child : p_node->GetChildren()) {
         low.Merge(m_low.at(child.get()));
+        m_low.erase(child.get());
       }
 
       if (low == m_disc.at(node)) {
