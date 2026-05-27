@@ -8,7 +8,8 @@
   deleted in the game (#875)
 - Fix incorrect row index checking in swapping rows of a rectangular array (leading to errors in
   for example `simpdiv_solve`) (#868)
-
+- In GUI, typing a payoff with a trailing slash is now interpreted as a whole number
+  (previously this led to a validation error dialog)
 
 ### Removed
 - Built-in plotting of logit QRE for strategic games has been removed in the GUI (#809)

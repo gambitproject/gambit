@@ -661,7 +661,11 @@ wxString PayoffsWidget::GetCellValue(const wxSheetCoords &p_coords)
 
 void PayoffsWidget::SetCellValue(const wxSheetCoords &p_coords, const wxString &p_value)
 {
-  m_table->SetPayoffCellValue(p_coords, p_value);
+  wxString value = p_value;
+  if (value.EndsWith(_T("/"))) {
+    value = value.Left(value.length() - 1);
+  }
+  m_table->SetPayoffCellValue(p_coords, value);
 }
 
 wxSheetCellAttr PayoffsWidget::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
@@ -1220,11 +1224,6 @@ void TableWidget::SetPayoffCellValue(const wxSheetCoords &coords, const wxString
 
   try {
     m_doc->DoSetPayoff(outcome, player, value);
-  }
-  catch (ValueException &) {
-    // For the moment, we will just silently discard edits which
-    // give payoffs that are not valid numbers
-    return;
   }
   catch (std::exception &ex) {
     ExceptionDialog(this, ex.what()).ShowModal();
