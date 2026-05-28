@@ -227,6 +227,94 @@ class TestCatalogDrawTreeSettings:
 
 
 # ---------------------------------------------------------------------------
+# Tests for catalog_ef_file_variants
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.catalog_update
+class TestCatalogEfFileVariants:
+    """Tests for ``catalog_ef_file_variants(slug, catalog_dir) -> list[dict] | None``.
+
+    The function scans the directory for the game slug inside ``catalog_dir``
+    for ``.ef`` files matching the naming convention::
+
+        {stem}.ef            primary variant
+        {stem}__{suffix}.ef  additional variant
+
+    All slugs use the fictional prefix ``fakevariant2000`` to make it clear
+    these tests do not depend on the real catalog contents.
+    """
+
+    def _game_dir(self, catalog_dir, slug):
+        """Create and return the directory that would contain the game's files."""
+        game_dir = (catalog_dir / slug).parent
+        game_dir.mkdir(parents=True, exist_ok=True)
+        return game_dir
+
+    def test_no_ef_files_returns_none(self, tmp_path):
+        """No .ef files in the game directory → returns None (no tab-set needed)."""
+        catalog_dir = tmp_path / "catalog"
+        slug = "fakevariant2000/fig1"
+        self._game_dir(catalog_dir, slug)
+        assert update.catalog_ef_file_variants(slug, catalog_dir) is None
+
+    def test_single_ef_file_returns_none(self, tmp_path):
+        """A single curated .ef file → returns None (single image, no tabs needed)."""
+        catalog_dir = tmp_path / "catalog"
+        slug = "fakevariant2000/fig1"
+        game_dir = self._game_dir(catalog_dir, slug)
+        (game_dir / "fig1.ef").touch()
+        assert update.catalog_ef_file_variants(slug, catalog_dir) is None
+
+    def test_two_ef_files_returns_variant_list(self, tmp_path):
+        """Two .ef files → 2-item list with correct label, ef_path, and variant_key."""
+        catalog_dir = tmp_path / "catalog"
+        slug = "fakevariant2000/fig1"
+        game_dir = self._game_dir(catalog_dir, slug)
+        (game_dir / "fig1.ef").touch()
+        (game_dir / "fig1__wide.ef").touch()
+        result = update.catalog_ef_file_variants(slug, catalog_dir)
+        assert result is not None
+        assert len(result) == 2
+        assert {v["label"] for v in result} == {"Default", "Wide"}
+        assert {v["variant_key"] for v in result} == {slug, f"{slug}__wide"}
+
+    def test_label_derived_from_filename_suffix(self, tmp_path):
+        """The tab label is the suffix after ``__``, title-cased."""
+        catalog_dir = tmp_path / "catalog"
+        slug = "fakevariant2000/fig1"
+        game_dir = self._game_dir(catalog_dir, slug)
+        (game_dir / "fig1.ef").touch()
+        (game_dir / "fig1__compact.ef").touch()
+        result = update.catalog_ef_file_variants(slug, catalog_dir)
+        assert {v["label"] for v in result} == {"Default", "Compact"}
+
+    def test_multi_word_suffix_title_cased(self, tmp_path):
+        """Underscores in the suffix become spaces: ``fig1__very_wide.ef`` → "Very Wide"."""
+        catalog_dir = tmp_path / "catalog"
+        slug = "fakevariant2000/fig1"
+        game_dir = self._game_dir(catalog_dir, slug)
+        (game_dir / "fig1.ef").touch()
+        (game_dir / "fig1__very_wide.ef").touch()
+        result = update.catalog_ef_file_variants(slug, catalog_dir)
+        assert "Very Wide" in {v["label"] for v in result}
+
+    def test_file_without_double_underscore_excluded(self, tmp_path):
+        """A file whose stem is ``{stem}extra`` (no ``__``) is not treated as a variant.
+
+        Only files matching exactly ``{stem}.ef`` or ``{stem}__*.ef`` are counted.
+        If the non-conforming file is the only candidate alongside the base, the
+        function still returns None (only one conforming file found).
+        """
+        catalog_dir = tmp_path / "catalog"
+        slug = "fakevariant2000/fig1"
+        game_dir = self._game_dir(catalog_dir, slug)
+        (game_dir / "fig1.ef").touch()
+        (game_dir / "fig1extra.ef").touch()  # no __ separator — must be ignored
+        assert update.catalog_ef_file_variants(slug, catalog_dir) is None
+
+
+# ---------------------------------------------------------------------------
 # Tests for generate_rst_table
 # ---------------------------------------------------------------------------
 
@@ -376,6 +464,85 @@ class TestGenerateRstTable:
         rst_path = tmp_path / "out.rst"
         update.generate_rst_table(df, rst_path, regenerate_images=True, catalog_dir=catalog_dir)
         assert set(calls) == {"tex", "png", "pdf", "svg"}
+
+    def test_multi_variant_efg_produces_tab_set(self, tmp_path, monkeypatch):
+        """Two curated .ef files alongside a game trigger a ``tab-set`` in the RST.
+
+        The RST should contain ``.. tab-set::`` and one ``.. tab-item::`` per
+        variant, with labels derived from the filename suffixes.
+        """
+        self._mock_generates(monkeypatch)
+        catalog_dir = tmp_path / "catalog"
+        slug = "fakevariant2001/fig1"
+        game_dir = catalog_dir / "fakevariant2001"
+        game_dir.mkdir(parents=True)
+        (game_dir / "fig1.ef").touch()
+        (game_dir / "fig1__wide.ef").touch()
+        df = _make_df(_efg_row(slug))
+        rst_path = tmp_path / "out.rst"
+        update.generate_rst_table(df, rst_path, regenerate_images=True, catalog_dir=catalog_dir)
+        rst = rst_path.read_text()
+        assert ".. tab-set::" in rst
+        assert ".. tab-item:: Default" in rst
+        assert ".. tab-item:: Wide" in rst
+
+    def test_single_variant_efg_produces_no_tab_set(self, tmp_path, monkeypatch):
+        """A single curated .ef file (or no .ef file) does not produce a ``tab-set``."""
+        self._mock_generates(monkeypatch)
+        catalog_dir = tmp_path / "catalog"
+        slug = "fakevariant2001/fig1"
+        _make_image_files(catalog_dir, slug, "efg")
+        game_dir = catalog_dir / "fakevariant2001"
+        game_dir.mkdir(parents=True, exist_ok=True)
+        (game_dir / "fig1.ef").touch()  # only one .ef — no tabs
+        df = _make_df(_efg_row(slug))
+        rst_path = tmp_path / "out.rst"
+        update.generate_rst_table(df, rst_path, catalog_dir=catalog_dir)
+        rst = rst_path.read_text()
+        assert ".. tab-set::" not in rst
+
+    def test_per_variant_images_generated(self, tmp_path, monkeypatch):
+        """When multiple .ef variants exist, image generation is called once per variant.
+
+        Two variants × four generate functions = eight total calls.
+        """
+        calls = []
+        monkeypatch.setattr(update, "generate_tex", lambda *a, **k: calls.append("tex"))
+        monkeypatch.setattr(update, "generate_png", lambda *a, **k: calls.append("png"))
+        monkeypatch.setattr(update, "generate_pdf", lambda *a, **k: calls.append("pdf"))
+        monkeypatch.setattr(update, "generate_svg", lambda *a, **k: calls.append("svg"))
+        catalog_dir = tmp_path / "catalog"
+        slug = "fakevariant2001/fig1"
+        game_dir = catalog_dir / "fakevariant2001"
+        game_dir.mkdir(parents=True)
+        (game_dir / "fig1.ef").touch()
+        (game_dir / "fig1__wide.ef").touch()
+        df = _make_df(_efg_row(slug))
+        rst_path = tmp_path / "out.rst"
+        update.generate_rst_table(df, rst_path, regenerate_images=True, catalog_dir=catalog_dir)
+        assert len(calls) == 8  # 4 functions × 2 variants
+
+    def test_per_variant_images_not_regenerated_when_all_exist(self, tmp_path, monkeypatch):
+        """If all variant image files already exist and ``regenerate_images`` is False,
+        generate functions are not called."""
+        calls = []
+        monkeypatch.setattr(update, "generate_tex", lambda *a, **k: calls.append("tex"))
+        monkeypatch.setattr(update, "generate_png", lambda *a, **k: calls.append("png"))
+        monkeypatch.setattr(update, "generate_pdf", lambda *a, **k: calls.append("pdf"))
+        monkeypatch.setattr(update, "generate_svg", lambda *a, **k: calls.append("svg"))
+        catalog_dir = tmp_path / "catalog"
+        slug = "fakevariant2001/fig1"
+        game_dir = catalog_dir / "fakevariant2001"
+        game_dir.mkdir(parents=True)
+        (game_dir / "fig1.ef").touch()
+        (game_dir / "fig1__wide.ef").touch()
+        # Pre-create all image files for both variants so nothing needs regenerating
+        for vkey in [slug, f"{slug}__wide"]:
+            _make_image_files(catalog_dir, vkey, "efg")
+        df = _make_df(_efg_row(slug))
+        rst_path = tmp_path / "out.rst"
+        update.generate_rst_table(df, rst_path, regenerate_images=False, catalog_dir=catalog_dir)
+        assert calls == []
 
 
 # ---------------------------------------------------------------------------

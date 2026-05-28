@@ -29,6 +29,39 @@ def catalog_draw_tree_settings(slug: str) -> dict:
     return settings
 
 
+def catalog_ef_file_variants(slug: str, catalog_dir: Path) -> list[dict] | None:
+    """Scan catalog_dir for multiple curated .ef files for a game slug.
+
+    Returns a list of dicts with keys ``label``, ``ef_path``, and
+    ``variant_key`` when more than one .ef file is found alongside the game;
+    returns None when zero or one .ef file exists (no tabs needed).
+
+    File-naming convention::
+
+        catalog/{slug}.ef            primary variant → label "Default"
+        catalog/{slug}__{suffix}.ef  additional variant → label derived from suffix
+
+    The suffix part (after ``__``) is title-cased with underscores replaced by
+    spaces, e.g. ``fig1__very_wide.ef`` → label "Very Wide".
+    """
+    game_dir = (catalog_dir / slug).parent
+    stem = Path(slug).name
+
+    ef_files = sorted(
+        p for p in game_dir.glob(f"{stem}*.ef") if p.stem == stem or p.stem.startswith(stem + "__")
+    )
+    if len(ef_files) <= 1:
+        return None
+
+    variants = []
+    for ef_file in ef_files:
+        suffix = "" if ef_file.stem == stem else ef_file.stem[len(stem) + 2:]
+        label = "Default" if not suffix else suffix.replace("_", " ").title()
+        variant_key = slug if not suffix else f"{slug}__{suffix}"
+        variants.append({"label": label, "ef_path": ef_file, "variant_key": variant_key})
+    return variants
+
+
 def generate_rst_table(
     df: pd.DataFrame,
     rst_path: Path,
@@ -58,25 +91,49 @@ def generate_rst_table(
             if row["Format"] not in SUPPORTED_GAME_FORMATS:
                 continue
             # Skip any games which lack a description
-            if description:
-                # Build the list of expected image files so we can check whether
-                # any are missing and need to be generated.
+            if not description:
+                continue
+
+            # Detect whether this EFG has multiple curated .ef layout variants.
+            ef_variants = (
+                catalog_ef_file_variants(slug, catalog_dir) if row["Format"] == "efg" else None
+            )
+
+            if ef_variants:
+                # Multi-variant: generate one image set per variant
+                _variant_img_exts = ["ef", "tex", "png", "pdf", "svg"]
+                for variant in ef_variants:
+                    vkey = variant["variant_key"]
+                    variant_paths = [
+                        catalog_dir / "img" / f"{vkey}.{ext}" for ext in _variant_img_exts
+                    ]
+                    if regenerate_images or not all(p.exists() for p in variant_paths):
+                        viz_path = catalog_dir / "img" / vkey
+                        viz_path.parent.mkdir(parents=True, exist_ok=True)
+                        source = str(variant["ef_path"])
+                        for func in [generate_tex, generate_png, generate_pdf, generate_svg]:
+                            func(
+                                source,
+                                save_to=str(viz_path),
+                                **catalog_draw_tree_settings(vkey),
+                            )
+                        img_ef = catalog_dir / "img" / f"{vkey}.ef"
+                        if not img_ef.exists():
+                            shutil.copy2(variant["ef_path"], img_ef)
+            else:
+                # Single variant
                 all_exts = []
                 all_paths = []
                 if row["Format"] == "efg":
-                    ef_path = catalog_dir / "img" / f"{slug}.ef"
                     all_exts.append("ef")
-                    all_paths.append(ef_path)
-                all_exts = all_exts + ["tex", "png", "pdf", "svg"]
-                tex_path = catalog_dir / "img" / f"{slug}.tex"
-                all_paths.append(tex_path)
-                all_paths.append(catalog_dir / "img" / f"{slug}.png")
-                all_paths.append(catalog_dir / "img" / f"{slug}.pdf")
-                all_paths.append(catalog_dir / "img" / f"{slug}.svg")
+                    all_paths.append(catalog_dir / "img" / f"{slug}.ef")
+                all_exts += ["tex", "png", "pdf", "svg"]
+                for ext in ["tex", "png", "pdf", "svg"]:
+                    all_paths.append(catalog_dir / "img" / f"{slug}.{ext}")
                 missing_any = not all(p.exists() for p in all_paths)
 
                 if regenerate_images or missing_any:
-                    viz_path = catalog_dir / "img" / f"{slug}"
+                    viz_path = catalog_dir / "img" / slug
                     viz_path.parent.mkdir(parents=True, exist_ok=True)
                     # Use a committed curated .ef file if present; otherwise derive
                     # the layout automatically from the game object.
@@ -90,33 +147,63 @@ def generate_rst_table(
                     if not img_ef.exists() and curated_ef.exists():
                         shutil.copy2(curated_ef, img_ef)
 
-                # Main dropdown
-                f.write(f"   * - .. dropdown:: {title}\n")
-                f.write("          :open:\n")
-                f.write("          \n")
-                for line in description.splitlines():
-                    f.write(f"          {line}\n")
+            # Main dropdown
+            f.write(f"   * - .. dropdown:: {title}\n")
+            f.write("          :open:\n")
+            f.write("          \n")
+            for line in description.splitlines():
+                f.write(f"          {line}\n")
 
-                f.write("          \n")
-                f.write("          **Load in PyGambit:**\n")
-                f.write("          \n")
-                f.write("          .. code-block:: python\n")
-                f.write("             \n")
-                f.write(f'             pygambit.catalog.load("{slug}")\n')
-                f.write("          \n")
+            f.write("          \n")
+            f.write("          **Load in PyGambit:**\n")
+            f.write("          \n")
+            f.write("          .. code-block:: python\n")
+            f.write("             \n")
+            f.write(f'             pygambit.catalog.load("{slug}")\n')
+            f.write("          \n")
 
-                # Download links
-                download_links = [row["Download"]]
+            # Download links
+            download_links = [row["Download"]]
+            if ef_variants:
+                _variant_img_exts = ["ef", "tex", "png", "pdf", "svg"]
+                for variant in ef_variants:
+                    vkey = variant["variant_key"]
+                    for ext in _variant_img_exts:
+                        download_links.append(
+                            f":download:`{vkey}.{ext} <../catalog/img/{vkey}.{ext}>`"
+                        )
+            else:
                 for ext in all_exts:
                     download_links.append(
                         f":download:`{slug}.{ext} <../catalog/img/{slug}.{ext}>`"
                     )
-                f.write("          **Download game and image files:**\n")
-                f.write("          \n")
-                f.write(f"          {' '.join(download_links)}\n")
-                f.write("          \n")
+            f.write("          **Download game and image files:**\n")
+            f.write("          \n")
+            f.write(f"          {' '.join(download_links)}\n")
+            f.write("          \n")
 
-                # Draw image
+            # Draw image — tab-set for multiple variants, single block otherwise
+            if ef_variants:
+                f.write("          .. tab-set::\n")
+                f.write("          \n")
+                for variant in ef_variants:
+                    label = variant["label"]
+                    vkey = variant["variant_key"]
+                    settings = catalog_draw_tree_settings(vkey)
+                    settings_str = ", ".join(f"{k}={val!r}" for k, val in settings.items())
+                    f.write(f"             .. tab-item:: {label}\n")
+                    f.write("             \n")
+                    f.write("                .. jupyter-execute::\n")
+                    f.write("                   :hide-code:\n")
+                    f.write("                   \n")
+                    f.write("                   import pygambit\n")
+                    f.write("                   from draw_tree import draw_tree\n")
+                    f.write(
+                        f'                   draw_tree("../catalog/{vkey}.ef", {settings_str})\n'
+                    )
+                    f.write("             \n")
+                f.write("          \n")
+            else:
                 f.write("          .. jupyter-execute::\n")
                 f.write("             :hide-code:\n")
                 f.write("             \n")
@@ -124,7 +211,7 @@ def generate_rst_table(
                 f.write("             from draw_tree import draw_tree\n")
                 if row["Format"] == "efg":
                     settings = catalog_draw_tree_settings(slug)
-                    settings_str = ", ".join(f"{k}={v!r}" for k, v in settings.items())
+                    settings_str = ", ".join(f"{k}={val!r}" for k, val in settings.items())
                     curated_ef = catalog_dir / f"{slug}.ef"
                     if curated_ef.exists():
                         f.write(

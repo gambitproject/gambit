@@ -39,6 +39,14 @@ Currently supported representations are:
    Add your new game file(s) inside the ``catalog`` dir and commit them, or edit an existing game.
    If there are multiple games from a particular source, place them in an appropriately named folder.
 
+   .. important::
+
+      The name of the game file will determine it's "slug", used by the load function of the catalog module:
+
+      .. code-block:: python
+
+         pygambit.catalog.load("watson2013/exercise29_6")
+
    .. note::
 
       For extensive form games, you may optionally commit a curated ``.ef`` file alongside the ``.efg``
@@ -47,13 +55,17 @@ Currently supported representations are:
       auto-generating the layout from the ``.efg``, preserving any hand-tuned layout.
       Consult the `DrawTree docs <https://www.gambit-project.org/draw_tree/>`_ for the ``.ef`` format.
 
-   .. important::
+      **Layout variants:** To display multiple layout variants on the catalog page (rendered as
+      clickable tabs), commit additional ``.ef`` files using the ``{slug}__{label}.ef`` naming
+      convention (double underscore separator), e.g.:
 
-      The name of the game file will determine it's "slug", used by the load function of the catalog module:
+      .. code-block:: text
 
-      .. code-block:: python
+         catalog/example/game.ef          # primary (tab label "Default")
+         catalog/example/game__wide.ef    # additional (tab label "Wide")
 
-         pygambit.catalog.load("watson2013/exercise29_6")
+      The label shown on each tab is derived automatically from the filename suffix: underscores
+      are replaced by spaces and the result is title-cased (e.g. ``__very_wide`` → "Very Wide").
 
 3. **Update the build files:**
 
