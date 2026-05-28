@@ -22,3 +22,10 @@ overrides:
     action_label_position: 0.4
   reiley2008/fig1:
     action_label_position: 0.4
+  vonstengel2022/fig10.1:
+    sublevel_scaling: 0.75
+    shared_terminal_depth: false
+  vonstengelforges2008/fig1:
+    sublevel_scaling: 1
+  vonstengelforges2008/fig9:
+    sublevel_scaling: 0.5
