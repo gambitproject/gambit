@@ -1,0 +1,20 @@
+EFG 2 R "Figure 1 from von Stengel and Forges (2008)" { "1" "2" }
+"
+Figure 1 from `vSF08 <https://gambitproject.readthedocs.io/en/latest/biblio.html#vSF08>`_.
+"
+
+c "" 1 "" { "1/2" 1/2 "1/2" 1/2 } 0
+p "" 1 1 "" { "X_G" "Y_G" } 0
+p "" 2 1 "" { "l_X" "r_X" } 0
+t "" 1 "" { 4 10 }
+t "" 2 "" { 0 6 }
+p "" 2 2 "" { "l_Y" "r_Y" } 0
+t "" 3 "" { 4 10 }
+t "" 4 "" { 0 6 }
+p "" 1 2 "" { "X_B" "X_G" } 0
+p "" 2 1 0
+t "" 5 "" { 6 0 }
+t "" 6 "" { 0 6 }
+p "" 2 2 0
+t "" 7 "" { 6 0 }
+t "" 8 "" { 0 6 }
