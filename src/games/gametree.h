@@ -61,7 +61,8 @@ protected:
 
   /// @name Managing the representation
   //@{
-  void InvalidateNodeOrdering() const
+  /// Jointly invalidates the ordering of the nodes and the ordering of the information sets.
+  void InvalidateTreeOrdering() const
   {
     m_nodesOrdered = false;
     m_infosetsOrdered = false;

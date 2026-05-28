@@ -9,8 +9,8 @@ Bibliography
 
 
 
-Articles on computation of Nash equilibria
-------------------------------------------
+Articles on computation of equilibria
+-------------------------------------
 
 .. [BlaTur23] Bland, J. R. and Turocy, T. L. 2023,
    'Quantal response equilibrium as a structural model for estimation: the
@@ -53,12 +53,12 @@ Articles on computation of Nash equilibria
    pp. 87-142.
 
 .. [Nau2004] Nau, Robert, Gomez Canovas, Sabrina, and Hansen, Pierre (2004).
-   On the geometry of Nash equilibria and correlated equilibria.
-   International Journal of Game Theory 32(4): 443-453
+   'On the geometry of Nash equilibria and correlated equilibria',
+   *International Journal of Game Theory*, vol. 32, pp. 443-453.
 
 .. [PNS04] Porter, R., Nudelman, E. and Shoham, Y. 2004,
    'Simple search methods for finding a Nash equilibrium',
-   *Games and Economic Behavior*, pp. 664-669.
+   *Games and Economic Behavior*, vol. 63,  pp. 664-662.
 
 .. [Ros71] Rosenmuller, J. 1971,
    'On a generalization of the Lemke-Howson algorithm to noncooperative
@@ -75,19 +75,23 @@ Articles on computation of Nash equilibria
 
 .. [Tur10] Turocy, T. L. 2010,
    'Using quantal response to compute Nash and sequential equilibria',
-   *Economic Theory*, vol. 42, no. 1, pp. 255-269.
+   *Economic Theory*, vol. 42, pp. 255-269.
 
 .. [VTH87] van der Laan, G., Talman, A. J. J. and van Der Heyden, L. 1987,
    'Simplicial variable dimension algorithms for solving the nonlinear
    complementarity problem on a product of unit simplices using a general
-   labelling', *Mathematics of Operations Research*, pp. 377-397.
+   labelling', *Mathematics of Operations Research*, vol. 12, pp. 377-397.
+
+.. [vSF08] von Stengel, B. and Forges, F., 2008,
+   'Extensive-form correlated equilibrium: Definition and computational complexity',
+   *Mathematics of Operations Research*, vol. 33, pp. 1002–1022.
 
 .. [Wil71] Wilson, R. 1971, 'Computing equilibria of n-person games',
    *SIAM Applied Math*, vol. 21, pp. 80-87.
 
 .. [Yam93] Yamamoto, Y. 1993,
    'A path-following procedure to find a proper equilibrium of finite
-   games', *International Journal of Game Theory*.
+   games', *International Journal of Game Theory*, vol. 22, pp. 249–259.
 
 
 
@@ -158,11 +162,18 @@ General game theory articles and texts
 
 
 
-Textbooks and general reference
--------------------------------
+Textbooks and general references
+--------------------------------
 
 .. [Mye91] Myerson, R. 1991, *Game Theory: Analysis of Conflict*,
    Harvard University Press.
+
+.. [TvS02] Turocy, T.L. and von Stengel, B., 2002,
+   'Game theory', in: *Encyclopedia of Information Systems*, vol. 2, pp. 403–420,
+   Elsevier Science.
+
+.. [vS22] von Stengel, B., 2022, *Game Theory Basics*,
+   Cambridge University Press.
 
 .. [Wat13] Watson, J. 2013, *Strategy: An Introduction to Game Theory*,
    3rd edn, W. W. Norton & Company.
