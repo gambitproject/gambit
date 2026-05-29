@@ -1,5 +1,5 @@
 EFG 2 R "Jakobsen, Sorensen, Conitzer (2016) Figure 3" { "Player 1" "Player 2" "Player 3" "Player 4" }
-"An example from `JakSorCon16 <https://gambitproject.readthedocs.io/en/latest/biblio.html#JakSorCon16>`_ illustrating
+"An example from :cite:p:`JakSorCon16` illustrating
 the extensive form of an onion routing game that is not exactly timeable.
 Chance chooses a sender by drawing a signal from {0, 1, 2, 3} with equal probability.
 The sender does not make a strategic choice; only the two intermediary players act.

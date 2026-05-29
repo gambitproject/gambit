@@ -1,6 +1,6 @@
 EFG 2 R "Figure 10.7 from von Stengel (2022)" { "I" "II" }
 "
-Figure 10.7 from `vS22 <https://gambitproject.readthedocs.io/en/latest/biblio.html#vS22>`_.
+Figure 10.7 from :cite:p:`vS22`.
 It is a game with imperfect recall, but it has the same strategic form as the game in Figure 10.5
 from the same book.
 One equilibrium strategy of player II as computed from the strategic form is not realization

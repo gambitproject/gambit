@@ -1,9 +1,9 @@
 EFG 2 R "Figure 10.1 from von Stengel (2022)" { "I" "II" }
 "
-Figure 10.1 from `vS22 <https://gambitproject.readthedocs.io/en/latest/biblio.html#vS22>`_.
+Figure 10.1 from :cite:p:`vS22`.
 It is essentially a type of poker game.
 Its description as a competition between software firms is due to
-`TvS02 <https://gambitproject.readthedocs.io/en/latest/biblio.html#TvS02>`_.
+:cite:p:`TvS02`.
 "
 
 c "" 1 "" { "1/2" 1/2 "1/2" 1/2 } 0

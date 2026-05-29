@@ -48,6 +48,7 @@ doc = [
     "sphinxcontrib-tikz",
     "jupyter_sphinx",
     "pyyaml",
+    "sphinxcontrib-bibtex",
 ]
 
 [project.urls]

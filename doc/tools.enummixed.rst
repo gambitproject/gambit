@@ -49,7 +49,7 @@ See the :ref:`algorithm description <enummixed>` for full details.
 
 
 Computing the equilibria, in mixed strategies, of
-the reduced strategic form of the example in Figure 2 of [Sel75]_::
+the reduced strategic form of the example in Figure 2 of :cite:p:`Sel75`::
 
    $ gambit-enummixed catalog/selten1975/fig2.efg
    Compute Nash equilibria by enumerating extreme points

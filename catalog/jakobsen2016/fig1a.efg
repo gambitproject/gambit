@@ -1,5 +1,5 @@
 EFG 2 R "Jakobsen, Sorensen, Conitzer (2016) Figure 1(a)" { "Player 1" "Player 2" }
-"An example from `JakSorCon16 <https://gambitproject.readthedocs.io/en/latest/biblio.html#JakSorCon16>`_ illustrating a game
+"An example from :cite:p:`JakSorCon16` illustrating a game
 that is not exactly timeable.  A coin toss determines which player moves first.
 Each player guesses whether she went first, without distinguishing going first from going second.
 Each player receives a payoff of 1 for a correct guess and 0 otherwise.

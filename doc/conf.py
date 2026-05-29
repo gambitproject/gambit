@@ -31,8 +31,11 @@ extensions = [
     "nbsphinx",
     "sphinxcontrib.tikz",
     "jupyter_sphinx",
-    "jupyter_sphinx",
+    "sphinxcontrib.bibtex",
 ]
+
+# BibTeX configuration
+bibtex_bibfiles = ["references.bib"]
 
 # IPython directive configuration
 ipython_execlines = ["import pygambit as gbt", "import os", "import sys"]
