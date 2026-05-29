@@ -653,10 +653,12 @@ void GameFrame::OnFileClose(wxCommandEvent &) { Close(); }
 void GameFrame::OnFileSave(wxCommandEvent &p_event)
 {
   if (p_event.GetId() == wxID_SAVEAS || m_doc->GetFilename().empty()) {
-    wxFileDialog dialog(this, _("Choose file"), wxPathOnly(m_doc->GetFilename()),
-                        wxFileNameFromPath(m_doc->GetFilename()),
-                        wxT("Gambit workbooks (*.gbt)|*.gbt|") wxT("All files (*.*)|*.*"),
-                        wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+    wxFileDialog dialog(
+        this, _("Choose file"), wxPathOnly(m_doc->GetFilename()),
+        wxFileNameFromPath(m_doc->GetFilename()),
+        wxT("Gambit workbooks (*.gbt)|*.gbt|") wxT("Gambit extensive games (*.efg)|*.efg|")
+            wxT("Gambit strategic games (*.nfg)|*.nfg|") wxT("All files (*.*)|*.*"),
+        wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
     if (dialog.ShowModal() == wxID_OK) {
       try {
