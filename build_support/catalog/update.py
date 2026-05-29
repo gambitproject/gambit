@@ -177,9 +177,9 @@ def generate_rst_table(
                     download_links.append(
                         f":download:`{slug}.{ext} <../catalog/img/{slug}.{ext}>`"
                     )
-            f.write("          **Download game and image files:**\n")
-            f.write("          \n")
-            f.write(f"          {' '.join(download_links)}\n")
+            f.write("          .. dropdown:: Download game and image files\n")
+            f.write("             \n")
+            f.write(f"             {' '.join(download_links)}\n")
             f.write("          \n")
 
             # Draw image — tab-set for multiple variants, single block otherwise
