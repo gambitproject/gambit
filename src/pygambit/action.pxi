@@ -73,7 +73,7 @@ class Action:
     @property
     def label(self) -> str:
         """Get or set the text label of the action."""
-        return self.action.deref().GetLabel().decode("ascii")
+       return self.action.deref().GetLabel().decode("utf-8")
 
     @label.setter
     def label(self, value: str) -> None:
@@ -83,8 +83,7 @@ class Action:
             warnings.warn("In a future version, actions must have unique labels "
                           "within their information set",
                           FutureWarning)
-        self.action.deref().SetLabel(value.encode("ascii"))
-
+        self.action.deref().SetLabel(value.encode("utf-8"))
     @property
     def infoset(self) -> Infoset:
         """Get the information set to which the action belongs."""
@@ -108,10 +107,10 @@ class Action:
             string,
             self.action.deref().GetInfoset().deref().GetActionProb(self.action)
         )
-        if "." in py_string.decode("ascii"):
-            return decimal.Decimal(py_string.decode("ascii"))
+        if "." in py_string.decode("utf-8"):
+          return decimal.Decimal(py_string.decode("utf-8"))
         else:
-            return Rational(py_string.decode("ascii"))
+           return Rational(py_string.decode("utf-8"))
 
     @property
     def plays(self) -> list[Node]:
