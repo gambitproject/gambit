@@ -211,34 +211,6 @@ int main(int argc, char *argv[])
       return 0;
     }
 
-    bool has_decisions = false;
-    if (game->IsTree()) {
-      for (auto player : game->GetPlayers()) {
-        if (player->GetInfosets().size() > 0) {
-          has_decisions = true;
-          break;
-        }
-      }
-    }
-    else {
-      for (auto player : game->GetPlayers()) {
-        if (player->GetStrategies().size() > 0) {
-          has_decisions = true;
-          break;
-        }
-      }
-    }
-    if (!has_decisions) {
-      if (!game->IsTree() || useStrategic) {
-        const LogitQREMixedStrategyProfile trivial_profile(game);
-        PrintProfile(std::cout, decimals, trivial_profile, true);
-      } else {
-        const LogitQREMixedBehaviorProfile trivial_profile(game);
-        PrintProfile(std::cout, decimals, trivial_profile, true);
-      }
-      return 0;
-    }
-
     if (!game->IsTree() || useStrategic) {
       auto printer = [fullGraph, decimals](const LogitQREMixedStrategyProfile &p) {
         if (fullGraph) {
