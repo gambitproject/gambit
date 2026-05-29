@@ -206,7 +206,7 @@ EXTRA_DIST = \
 	contrib/games/zero.nfg \
 	src/README.rst \
 	catalog/bagwell1995.efg \
-	catalog/gilboa1997/fig1.efg
+	catalog/gilboa1997/fig1.efg \
 	catalog/gilboa1997/fig2.efg \
 	catalog/jakobsen2016/fig1a.efg \
 	catalog/jakobsen2016/fig1b.efg \
