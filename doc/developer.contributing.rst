@@ -230,6 +230,14 @@ To add a new entry:
 3. To cite the entry in documentation or game files, use the format ``:cite:p:`key```,
    where ``key`` is the BibTeX key of your entry.
 
+.. note::
+
+   The bibliography is formatted using a custom Harvard referencing style.
+   This style and its formatting templates are defined within ``doc/conf.py``.
+   A custom Python implementation is used instead of a traditional ``.bst``
+   file because `.bst` styles output raw LaTeX formatting, which cannot be
+   rendered to HTML by Sphinx.
+
 Recognising contributions
 -------------------------
 
