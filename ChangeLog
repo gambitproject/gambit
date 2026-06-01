@@ -2,6 +2,14 @@
 
 ## [16.7.0] - unreleased
 
+### Added
+- Implement `GameSubgameRep` (C++) and `Subgame` (Python), a first-class object representing a subgame,
+  exposing its root node, parent and child subgames, and the infosets constituting its difference
+  (the infosets belonging to the subgame but not to any of its child subgames).
+  On `Game`, add `subgames` in the reverse topological order produced by the detection algorithm,
+  `root_subgame`, `terminal_subgames`, and `subgame_root` (the smallest subgame containing a given infoset).
+  Builds on the subgame-root detection added in 16.6.0.  (#585)
+
 ### Fixed
 - Corrected resizing of row and column index labels in strategic form so pivoting works correctly. (#844)
 - Corrected incorrect output of strategic game tables to .nfg files if strategies have previously been
