@@ -351,6 +351,7 @@ cdef extern from "games/game.h":
         c_GameSubgame GetRootSubgame() except +
         c_GameNode GetSubgameRoot(c_GameInfoset) except +
         stdvector[c_GameSubgame] GetSubgames() except +
+        stdvector[c_GameSubgame] GetTerminalSubgames() except +
 
     c_Game NewTree() except +
     c_Game NewTable(stdvector[int]) except +
