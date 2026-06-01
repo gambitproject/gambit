@@ -351,6 +351,9 @@ LogitStrategySolve(const LogitQREMixedStrategyProfile &p_start, double p_regret,
                    double p_firstStep, double p_maxAccel,
                    const MixedStrategyObserverFunctionType &p_observer)
 {
+  if (p_start.size() == 0) {
+    return {p_start};
+  }
   PathTracer tracer;
   tracer.SetMaxDecel(p_maxAccel);
   tracer.SetStepsize(p_firstStep);
@@ -385,6 +388,9 @@ LogitStrategySolveLambda(const LogitQREMixedStrategyProfile &p_start,
                          double p_firstStep, double p_maxAccel,
                          const MixedStrategyObserverFunctionType &p_observer)
 {
+  if (p_start.size() == 0) {
+    return {p_start};
+  }
   PathTracer tracer;
   tracer.SetMaxDecel(p_maxAccel);
   tracer.SetStepsize(p_firstStep);
@@ -418,6 +424,9 @@ LogitStrategyEstimate(const MixedStrategyProfile<double> &p_frequencies, double 
                       MixedStrategyObserverFunctionType p_observer)
 {
   const LogitQREMixedStrategyProfile start(p_frequencies.GetGame());
+  if (start.size() == 0) {
+    return start;
+  }
   PathTracer tracer;
   tracer.SetMaxDecel(p_maxAccel);
   tracer.SetStepsize(p_firstStep);
