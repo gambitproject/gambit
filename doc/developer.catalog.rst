@@ -30,7 +30,8 @@ Currently supported representations are:
 
    .. important::
 
-      If no bibliography entry exists, you should add one by editing `doc/biblio.rst`.
+      If no bibliography entry exists, you should add one. For instructions,
+      see :ref:`updating-bibliography`.
 
 2. **Add the game(s) to the repo:**
 

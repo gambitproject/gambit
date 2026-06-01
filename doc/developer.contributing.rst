@@ -211,6 +211,24 @@ To submit a tutorial for inclusion in the Gambit documentation, please follow th
 
 4. *[Optional]* If your tutorial requires additional dependencies not already listed in the ``doc`` list under ``[project.optional-dependencies]`` inside ``pyproject.toml``, please add them to the file.
 
+.. _updating-bibliography:
+
+Updating the Bibliography
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The bibliography entries are stored in BibTeX format in the file `doc/references.bib`.
+To add a new entry:
+
+1. Open `doc/references.bib` and add the BibTeX citation.
+2. In your BibTeX entry, include a ``category`` field to specify where the reference
+   should appear on the bibliography page. The allowed categories are:
+
+   * ``computation`` for articles on computation of equilibria.
+   * ``general`` for general game theory articles and texts.
+   * ``textbooks`` for textbooks and general references.
+
+3. To cite the entry in documentation or game files, use the format ``:cite:p:`key```,
+   where ``key`` is the BibTeX key of your entry.
 
 Recognising contributions
 -------------------------
