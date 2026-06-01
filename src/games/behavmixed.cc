@@ -383,7 +383,11 @@ template <class T> T MixedBehaviorProfile<T>::GetMaxRegret() const
 
 template <class T> T MixedBehaviorProfile<T>::GetAgentMaxRegret() const
 {
-  return maximize_function(m_support.GetGame()->GetInfosets(),
+  auto infosets = m_support.GetGame()->GetInfosets();
+  if (infosets.size() == 0) {
+    return T{0};
+  }
+  return maximize_function(infosets,
                            [this](const auto &infoset) -> T { return this->GetRegret(infoset); });
 }
 

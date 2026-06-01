@@ -279,6 +279,21 @@ class TestCatalogEfFileVariants:
         assert {v["label"] for v in result} == {"Default", "Wide"}
         assert {v["variant_key"] for v in result} == {slug, f"{slug}__wide"}
 
+    def test_variant_without_primary_ef_returns_variants(self, tmp_path):
+        """A variant .ef file exists but no primary .ef file exists ->
+        returns variants list including Default.
+        """
+        catalog_dir = tmp_path / "catalog"
+        slug = "fakevariant2000/fig1"
+        game_dir = self._game_dir(catalog_dir, slug)
+        (game_dir / "fig1__wide.ef").touch()
+        result = update.catalog_ef_file_variants(slug, catalog_dir)
+        assert result is not None
+        assert len(result) == 2
+        assert {v["label"] for v in result} == {"Default", "Wide"}
+        assert {v["variant_key"] for v in result} == {slug, f"{slug}__wide"}
+        assert not (game_dir / "fig1.ef").exists()
+
     def test_label_derived_from_filename_suffix(self, tmp_path):
         """The tab label is the suffix after ``__``, title-cased."""
         catalog_dir = tmp_path / "catalog"
@@ -485,6 +500,27 @@ class TestGenerateRstTable:
         assert ".. tab-set::" in rst
         assert ".. tab-item:: Default" in rst
         assert ".. tab-item:: Wide" in rst
+
+    def test_multi_variant_efg_without_primary_ef_produces_tab_set(self, tmp_path, monkeypatch):
+        """A variant .ef file without a primary .ef file triggers a tab-set in the RST
+        containing both a Default and the custom variant, calling catalog.load for the Default.
+        """
+        self._mock_generates(monkeypatch)
+        monkeypatch.setattr(update.gbt.catalog, "load", lambda slug: "dummy_game")
+        catalog_dir = tmp_path / "catalog"
+        slug = "fakevariant2001/fig1"
+        game_dir = catalog_dir / "fakevariant2001"
+        game_dir.mkdir(parents=True)
+        (game_dir / "fig1__wide.ef").touch()
+        df = _make_df(_efg_row(slug))
+        rst_path = tmp_path / "out.rst"
+        update.generate_rst_table(df, rst_path, regenerate_images=True, catalog_dir=catalog_dir)
+        rst = rst_path.read_text()
+        assert ".. tab-set::" in rst
+        assert ".. tab-item:: Default" in rst
+        assert ".. tab-item:: Wide" in rst
+        assert 'draw_tree(pygambit.catalog.load("fakevariant2001/fig1")' in rst
+        assert 'draw_tree("../catalog/fakevariant2001/fig1__wide.ef"' in rst
 
     def test_single_variant_efg_produces_no_tab_set(self, tmp_path, monkeypatch):
         """A single curated .ef file (or no .ef file) does not produce a ``tab-set``."""
