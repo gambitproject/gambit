@@ -397,18 +397,16 @@ bool GameNodeRep::IsSuccessorOf(GameNode p_node) const
 
 bool GameNodeRep::IsSubgameRoot() const
 {
-  // TODO: Currently O(S) per call where S = number of subgames.
-  // Will become O(1) when GameSubgameRep adds a back-pointer (like m_infoset).
   if (m_children.empty()) {
     return !GetParent();
   }
 
   auto *tree_game = static_cast<GameTreeRep *>(m_game);
-  if (tree_game->m_subgames.empty()) {
+  if (tree_game->m_subgameCache.empty()) {
     tree_game->BuildSubgameRoots();
   }
 
-  return contains(tree_game->m_subgames, const_cast<GameNodeRep *>(this));
+  return tree_game->m_subgameCache.count(const_cast<GameNodeRep *>(this)) > 0;
 }
 
 bool GameNodeRep::IsStrategyReachable() const
