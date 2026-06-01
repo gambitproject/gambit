@@ -106,6 +106,7 @@ public:
   std::vector<GameSubgame> GetSubgames() const override;
   GameSubgame GetRootSubgame() const override;
   GameNode GetSubgameRoot(const GameInfoset &) const override;
+  std::vector<GameSubgame> GetTerminalSubgames() const override;
   //@}
 
   /// @name Players
