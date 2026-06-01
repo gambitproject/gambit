@@ -7,7 +7,12 @@ import pandas as pd
 import pygambit as gbt
 
 # Use the full string path to where the catalog data are placed in the package
-_CATALOG_RESOURCE = files("pygambit")/"catalog_data"
+_CATALOG_RESOURCE = files("pygambit") / "catalog_data"
+# This ensures that catalog files are included in editable installs too
+if not _CATALOG_RESOURCE.is_dir():
+    _repo_catalog = Path(__file__).parent.parent.parent / "catalog"
+    if _repo_catalog.is_dir():
+        _CATALOG_RESOURCE = _repo_catalog
 
 READERS = {
     ".nfg": gbt.read_nfg,
@@ -155,20 +160,23 @@ def games(
             record["Format"] = ext
         records.append(record)
 
-    # Add all the games stored as EFG/NFG files
-    for resource_path in sorted(_CATALOG_RESOURCE.rglob("*")):
-        reader = READERS.get(resource_path.suffix)
+    # Add all the games stored as EFG/NFG files.
+    # Collect paths matching each supported extension, sort together to preserve
+    # a consistent alphabetical order, then load using the known reader.
+    for resource_path in sorted(
+        path
+        for suffix in READERS
+        for path in _CATALOG_RESOURCE.rglob(f"*{suffix}")
+        if path.is_file()
+    ):
+        reader = READERS[resource_path.suffix]
+        rel_path = resource_path.relative_to(_CATALOG_RESOURCE)
+        slug = rel_path.with_suffix("").as_posix()
 
-        if reader is not None and resource_path.is_file():
-            # Calculate the path relative to the root resource
-            # and remove the suffix to get the "slug"
-            rel_path = resource_path.relative_to(_CATALOG_RESOURCE)
-            slug = rel_path.with_suffix("").as_posix()
-
-            with as_file(resource_path) as path:
-                game = reader(str(path))
-                if check_filters(game):
-                    append_record(slug, game)
+        with as_file(resource_path) as path:
+            game = reader(str(path))
+            if check_filters(game):
+                append_record(slug, game)
 
     if include_descriptions:
         return pd.DataFrame.from_records(

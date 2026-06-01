@@ -176,6 +176,7 @@ Tests can be added to the test suite by creating new test files in the ``tests``
 Tests should be written using the `pytest` framework.
 Refer to existing test files for examples of how to write tests or see the `pytest documentation <https://docs.pytest.org/en/stable/>`_ for more information.
 
+.. _editing-docs:
 
 Editing this documentation
 ---------------------------

@@ -22,6 +22,8 @@
 
 ACLOCAL_AMFLAGS = -I m4
 
+include build_support/catalog/catalog.am
+
 EXTRA_DIST = \
     build_support/msw/gambit.wxs.in \
 	build_support/osx/Info.plist.in \
@@ -205,32 +207,7 @@ EXTRA_DIST = \
 	contrib/games/yamamoto.nfg \
 	contrib/games/zero.nfg \
 	src/README.rst \
-	catalog/bagwell1995.efg \
-	catalog/gilboa1997/fig1.efg \
-	catalog/gilboa1997/fig2.efg \
-	catalog/jakobsen2016/fig1a.efg \
-	catalog/jakobsen2016/fig1b.efg \
-	catalog/jakobsen2016/fig1c.efg \
-	catalog/jakobsen2016/fig3.efg \
-	catalog/myerson1991/fig2_1.efg \
-	catalog/myerson1991/fig4_2.efg \
-	catalog/nau2004/sec3.nfg \
-	catalog/nau2004/sec4.nfg \
-	catalog/nau2004/sec5.nfg \
-	catalog/nau2004/sec6.nfg \
-	catalog/reiley2008/fig1.efg \
-	catalog/selten1975/fig1.efg \
-	catalog/selten1975/fig2.efg \
-	catalog/selten1975/fig3.efg \
-	catalog/vonstengel2022/fig10.1.efg \
-	catalog/vonstengel2022/fig10.12.efg \
-	catalog/vonstengel2022/fig10.5.efg \
-	catalog/vonstengel2022/fig10.7.efg \
-	catalog/vonstengelforges2008/fig1.efg \
-	catalog/vonstengelforges2008/fig6.efg \
-	catalog/vonstengelforges2008/fig9.efg \
-	catalog/watson2013/exercise29_6.efg \
-	catalog/watson2013/fig29_1.efg
+	$(CATALOG_FILES)
 
 core_SOURCES = \
     src/core/core.h \
