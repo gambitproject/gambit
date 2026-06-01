@@ -32,7 +32,6 @@ class GameTreeRep final : public GameExplicitRep {
   friend class GameNodeRep;
   friend class GameInfosetRep;
   friend class GameActionRep;
-  friend class GameSubgameRep;
 
   struct OwnPriorActionInfo {
     std::map<GameNodeRep *, GameActionRep *> node_map;
