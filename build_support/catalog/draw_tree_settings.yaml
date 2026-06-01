@@ -29,3 +29,5 @@ overrides:
     sublevel_scaling: 1
   vonstengelforges2008/fig9:
     sublevel_scaling: 0.5
+  gilboa1997/fig1:
+    action_label_dist: 5.0
