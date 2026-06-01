@@ -292,7 +292,7 @@ void GameTreeRep::Reveal(GameInfoset p_atInfoset, GamePlayer p_player)
 GameSubgame GameSubgameRep::GetParent() const
 {
   auto p = m_parent.lock();
-  return p ? p : nullptr;
+  return p;
 }
 
 GameSubgameRep::SubgameCollection GameSubgameRep::GetChildren() const
@@ -884,7 +884,8 @@ GameSubgame GameTreeRep::GetRootSubgame() const
   if (m_subgameCache.empty()) {
     BuildSubgameRoots();
   }
-  return m_subgameCache.at(m_root.get());
+  auto it = m_subgameCache.find(m_root.get());
+  return (it == m_subgameCache.end()) ? nullptr : it->second;
 }
 
 GameNode GameTreeRep::GetSubgameRoot(const GameInfoset &p_infoset) const
@@ -896,7 +897,7 @@ GameNode GameTreeRep::GetSubgameRoot(const GameInfoset &p_infoset) const
     BuildSubgameRoots();
   }
   auto *n = p_infoset->m_members.front().get();
-  while (n && m_subgameCache.find(n) == m_subgameCache.end()) {
+  while (m_subgameCache.find(n) == m_subgameCache.end()) {
     n = n->m_parent;
   }
   return n->shared_from_this();
@@ -1177,7 +1178,7 @@ void GameTreeRep::BuildUnreachableNodes() const
 
 void GameTreeRep::BuildSubgameRoots() const
 {
-  if (!m_subgames.empty()) {
+  if (!m_subgameCache.empty() || m_root->IsTerminal()) {
     return;
   }
 
@@ -1283,7 +1284,7 @@ void GameTreeRep::BuildSubgameRoots() const
     GameTreeRep *m_game;
     // Subgame roots on the current DFS path, innermost at back
     std::vector<GameNodeRep *> m_stack;
-    std::unordered_set<GameInfosetRep *> m_infoset_visited;
+    std::unordered_set<GameInfosetRep *> m_infosetVisited;
 
     DFSCallbackResult OnEnter(const GameNode &p_node, int)
     {
@@ -1301,7 +1302,7 @@ void GameTreeRep::BuildSubgameRoots() const
         m_cache.emplace(node, std::move(subgame));
         m_stack.push_back(node);
       }
-      if (m_infoset_visited.insert(node->m_infoset).second) {
+      if (m_infosetVisited.insert(node->m_infoset).second) {
         m_cache.at(m_stack.back())
             ->m_subgameDifference.emplace_back(node->m_infoset->shared_from_this());
       }
@@ -1336,7 +1337,7 @@ std::vector<GameSubgame> GameTreeRep::GetSubgames() const
     BuildSubgameRoots();
   }
   std::vector<GameSubgame> result;
-  result.reserve(m_subgameCache.size());
+  result.reserve(m_subgames.size());
   for (auto *rep : m_subgames) {
     result.emplace_back(m_subgameCache.at(rep));
   }
@@ -1351,7 +1352,7 @@ std::vector<GameSubgame> GameTreeRep::GetTerminalSubgames() const
   std::vector<GameSubgame> result;
   for (auto *rep : m_subgames) {
     const auto &subgame = m_subgameCache.at(rep);
-    if (subgame->GetChildren().size() == 0) {
+    if (subgame->m_children.empty()) {
       result.emplace_back(subgame);
     }
   }
