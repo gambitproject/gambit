@@ -1345,6 +1345,21 @@ std::vector<GameSubgame> GameTreeRep::GetSubgames() const
   return result;
 }
 
+std::vector<GameSubgame> GameTreeRep::GetTerminalSubgames() const
+{
+  if (m_subgameCache.empty()) {
+    BuildSubgameRoots();
+  }
+  std::vector<GameSubgame> result;
+  for (auto *rep : m_subgames) {
+    const auto &subgame = m_subgameCache.at(rep);
+    if (subgame->GetChildren().size() == 0) {
+      result.emplace_back(subgame);
+    }
+  }
+  return result;
+}
+
 //------------------------------------------------------------------------
 //                  GameTreeRep: Writing data files
 //------------------------------------------------------------------------

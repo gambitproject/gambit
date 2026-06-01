@@ -975,6 +975,8 @@ public:
 
   virtual GameSubgame GetRootSubgame() const { throw UndefinedException(); }
   virtual GameNode GetSubgameRoot(const GameInfoset &) const { throw UndefinedException(); }
+  /// Returns the terminal subgames (subgames with no child subgames)
+  virtual std::vector<GameSubgame> GetTerminalSubgames() const { throw UndefinedException(); }
 
   //@}
 

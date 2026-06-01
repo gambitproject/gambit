@@ -890,8 +890,7 @@ class Game:
             raise UndefinedOperationError(
                 "Operation only defined for games with a tree representation"
             )
-        return [sg for sg in self.subgames
-                if cython.cast(Subgame, sg).subgame.deref().GetChildren().size() == 0]
+        return [Subgame.wrap(sg) for sg in self.game.deref().GetTerminalSubgames()]
 
     def subgame_root(self, infoset: typing.Union[Infoset, str]) -> Node:
         """Returns the root node of the smallest subgame containing `infoset`.
