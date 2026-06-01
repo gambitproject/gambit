@@ -845,7 +845,7 @@ class Game:
         Iteration over this property yields the subgames in postorder
         (children before parents).
 
-        .. versionadded:: 16.5.0
+        .. versionadded:: 16.7.0
 
         Raises
         ------
@@ -859,10 +859,12 @@ class Game:
         return GameSubgames.wrap(self.game)
 
     @property
-    def root_subgame(self) -> Subgame:
-        """The root subgame of the game (the subgame containing the entire game tree).
+    def root_subgame(self) -> Subgame | None:
+        """The root subgame of the game (the subgame containing the entire
+        game tree), or None if the game has no subgames (for example, a tree
+        consisting of a single terminal node).
 
-        .. versionadded:: 16.5.0
+        .. versionadded:: 16.7.0
 
         Raises
         ------
@@ -873,13 +875,16 @@ class Game:
             raise UndefinedOperationError(
                 "Operation only defined for games with a tree representation"
             )
-        return Subgame.wrap(self.game.deref().GetRootSubgame())
+        subgame = self.game.deref().GetRootSubgame()
+        if subgame != cython.cast(c_GameSubgame, NULL):
+            return Subgame.wrap(subgame)
+        return None
 
     @property
     def terminal_subgames(self) -> list[Subgame]:
         """The terminal subgames (subgames with no child subgames).
 
-        .. versionadded:: 16.5.0
+        .. versionadded:: 16.7.0
 
         Raises
         ------
@@ -905,7 +910,7 @@ class Game:
         Node
             The root node of the smallest containing subgame.
 
-        .. versionadded:: 16.5.0
+        .. versionadded:: 16.7.0
 
         Raises
         ------
