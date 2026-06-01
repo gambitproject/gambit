@@ -223,8 +223,8 @@ To add a new entry:
 2. In your BibTeX entry, include a ``category`` field to specify where the reference
    should appear on the bibliography page. The allowed categories are:
 
-   * ``computation`` for articles on computation of equilibria.
-   * ``general`` for general game theory articles and texts.
+   * ``articles_equilibria`` for articles on computation of equilibria.
+   * ``articles_general`` for general game theory articles and texts.
    * ``textbooks`` for textbooks and general references.
 
 3. To cite the entry in documentation or game files, use the format ``:cite:p:`key```,

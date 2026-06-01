@@ -14,7 +14,7 @@ Articles on computation of equilibria
 
 .. bibliography:: references.bib
    :style: keystyle
-   :filter: category == "computation"
+   :filter: category == "articles_equilibria"
    :all:
 
 
@@ -24,7 +24,7 @@ General game theory articles and texts
 
 .. bibliography:: references.bib
    :style: keystyle
-   :filter: category == "general"
+   :filter: category == "articles_general"
    :all:
 
 
