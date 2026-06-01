@@ -16,6 +16,8 @@
 - In the GUI, tab-traversal on tables (such as the strategic form payoff table) now works
   as expected (TAB moves one cell to the right, wrapping if appropriate; SHIFT-TAB moves
   to the left, wrapping if appropriate).
+- Max regret is calculated correctly for strategy and behavior profiles on games with zero player
+  strategies or actions (is defined to be 0 trivially)  (#904)
 
 ### Removed
 - Built-in plotting of logit QRE for strategic games has been removed in the GUI (#809)
