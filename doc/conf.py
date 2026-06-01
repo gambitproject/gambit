@@ -1,5 +1,9 @@
 import pathlib
 
+import pybtex.plugin
+from pybtex.style.formatting.alpha import Style as AlphaStyle
+from pybtex.style.labels import BaseLabelStyle
+
 #
 # Gambit documentation build configuration file, created by
 # sphinx-quickstart on Sun Mar 21 14:35:06 2010.
@@ -36,6 +40,24 @@ extensions = [
 
 # BibTeX configuration
 bibtex_bibfiles = ["references.bib"]
+
+
+class KeyLabelStyle(BaseLabelStyle):
+    """Custom label style that uses the BibTeX entry key as the citation label."""
+
+    def format_labels(self, sorted_entries):
+        for entry in sorted_entries:
+            yield entry.key
+
+
+class CustomAlphaStyle(AlphaStyle):
+    """Custom formatting style that uses KeyLabelStyle for labels."""
+
+    default_label_style = "keystyle"
+
+
+pybtex.plugin.register_plugin("pybtex.style.labels", "keystyle", KeyLabelStyle)
+pybtex.plugin.register_plugin("pybtex.style.formatting", "keystyle", CustomAlphaStyle)
 
 # IPython directive configuration
 ipython_execlines = ["import pygambit as gbt", "import os", "import sys"]

@@ -13,7 +13,7 @@ Articles on computation of equilibria
 -------------------------------------
 
 .. bibliography:: references.bib
-   :style: alpha
+   :style: keystyle
    :filter: category == "computation"
    :all:
 
@@ -23,7 +23,7 @@ General game theory articles and texts
 --------------------------------------
 
 .. bibliography:: references.bib
-   :style: alpha
+   :style: keystyle
    :filter: category == "general"
    :all:
 
@@ -33,6 +33,6 @@ Textbooks and general references
 --------------------------------
 
 .. bibliography:: references.bib
-   :style: alpha
+   :style: keystyle
    :filter: category == "textbooks"
    :all:
