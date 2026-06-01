@@ -33,8 +33,9 @@ def catalog_ef_file_variants(slug: str, catalog_dir: Path) -> list[dict] | None:
     """Scan catalog_dir for multiple curated .ef files for a game slug.
 
     Returns a list of dicts with keys ``label``, ``ef_path``, and
-    ``variant_key`` when more than one .ef file is found alongside the game;
-    returns None when zero or one .ef file exists (no tabs needed).
+    ``variant_key`` when multiple .ef variants are detected alongside the game;
+    returns None when zero or one .ef file exists and no suffix variants are present
+    (no tabs needed).
 
     File-naming convention::
 
@@ -47,17 +48,26 @@ def catalog_ef_file_variants(slug: str, catalog_dir: Path) -> list[dict] | None:
     game_dir = (catalog_dir / slug).parent
     stem = Path(slug).name
 
-    ef_files = sorted(
-        p for p in game_dir.glob(f"{stem}*.ef") if p.stem == stem or p.stem.startswith(stem + "__")
-    )
-    if len(ef_files) <= 1:
+    primary_ef = game_dir / f"{stem}.ef"
+    additional_efs = sorted(game_dir.glob(f"{stem}__*.ef"))
+
+    # If there are no additional/suffix variants, it's not a multi-variant game.
+    if not additional_efs:
         return None
 
     variants = []
-    for ef_file in ef_files:
-        suffix = "" if ef_file.stem == stem else ef_file.stem[len(stem) + 2:]
-        label = "Default" if not suffix else suffix.replace("_", " ").title()
-        variant_key = slug if not suffix else f"{slug}__{suffix}"
+    # Add the primary/default variant
+    variants.append({
+        "label": "Default",
+        "ef_path": primary_ef,
+        "variant_key": slug,
+    })
+
+    # Add the additional suffix variants
+    for ef_file in additional_efs:
+        suffix = ef_file.stem[len(stem) + 2:]
+        label = suffix.replace("_", " ").title()
+        variant_key = f"{slug}__{suffix}"
         variants.append({"label": label, "ef_path": ef_file, "variant_key": variant_key})
     return variants
 
@@ -110,7 +120,10 @@ def generate_rst_table(
                     if regenerate_images or not all(p.exists() for p in variant_paths):
                         viz_path = catalog_dir / "img" / vkey
                         viz_path.parent.mkdir(parents=True, exist_ok=True)
-                        source = str(variant["ef_path"])
+                        if variant["ef_path"].exists():
+                            source = str(variant["ef_path"])
+                        else:
+                            source = gbt.catalog.load(slug)
                         for func in [generate_tex, generate_png, generate_pdf, generate_svg]:
                             func(
                                 source,
@@ -118,7 +131,7 @@ def generate_rst_table(
                                 **catalog_draw_tree_settings(vkey),
                             )
                         img_ef = catalog_dir / "img" / f"{vkey}.ef"
-                        if not img_ef.exists():
+                        if not img_ef.exists() and variant["ef_path"].exists():
                             shutil.copy2(variant["ef_path"], img_ef)
             else:
                 # Single variant
@@ -198,9 +211,17 @@ def generate_rst_table(
                     f.write("                   \n")
                     f.write("                   import pygambit\n")
                     f.write("                   from draw_tree import draw_tree\n")
-                    f.write(
-                        f'                   draw_tree("../catalog/{vkey}.ef", {settings_str})\n'
-                    )
+                    if variant["ef_path"].exists():
+                        f.write(
+                            "                   draw_tree("
+                            f'"../catalog/{vkey}.ef", {settings_str})\n'
+                        )
+                    else:
+                        f.write(
+                            f"                   draw_tree("
+                            f'pygambit.catalog.load("{slug}"), '
+                            f"{settings_str})\n"
+                        )
                     f.write("             \n")
                 f.write("          \n")
             else:
