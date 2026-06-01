@@ -1,0 +1,41 @@
+player 1 name 1
+player 2 name 2
+level 0 node 1 player 2
+level 1.5 node 1 xshift -a=3.5 from 0,1 move a
+level 1.5 node 2 xshift a from 0,1 move b
+iset 1.5,1 1.5,2 player 1
+% level 4 node 1 xshift -b=1.6 from 1.5,1 move L
+level 2.75 node 1 xshift -b=1.6 from 1.5,1 move L
+level 4 node 2 xshift 2b from 1.5,1 move R
+
+level 4 node 3 xshift -s=1 from 2.75,1 move S payoffs 0
+level 4 node 1 xshift 1.2 from 2.75,1 move T
+% iset k
+iset 4,1 4,2 player 2
+
+level 5 node 1 xshift -c=.6 from 4,1 move c payoffs 0
+level 5 node 2 xshift c from 4,1 move d payoffs 0
+level 5 node 3 xshift -c from 4,2 move c payoffs 0
+level 6 node 1 xshift 2c from 4,2 move d
+level 6 node 2 xshift 2r=.5 from 1.5,2 move R
+iset 6,1 6,2 player 1
+
+level 7 node 1 xshift -u=.6 from 6,1 move U payoffs 0
+level 7 node 2 xshift u from 6,1 move V payoffs 0
+level 7 node 3 xshift -u from 6,2 move U payoffs 0
+
+level 8 node 1 xshift -3r from 1.5,2 move L
+level 8 node 2 xshift 2u from 6,2 move V
+iset 8,1 8,2 player 2
+
+% level 4 node 4 xshift 1.02 from 1.5,2 move R
+% level 6 node 4 xshift 1.02 from 4,4 move V
+
+level 10 node 1 xshift -7 from 8,1 move e
+level 10 node 2 xshift f=0.7 from 8,1 move f payoffs 0
+level 10 node 3 xshift -f from 8,2 move e payoffs 0
+level 10 node 4 xshift f from 8,2 move f payoffs 0
+iset 2.75,1 10,1 player 1
+
+level 11 node 1 xshift -s from 10,1 move S payoffs 0
+level 11 node 2 xshift s from 10,1 move T payoffs 0
