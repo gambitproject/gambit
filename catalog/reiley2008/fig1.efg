@@ -1,7 +1,7 @@
 EFG 2 R "Stripped-down poker (Reiley et al 2008)" { "Professor" "Student" }
-"This is a one-card poker game used in `Rei2008 <https://gambitproject.readthedocs.io/en/latest/biblio.html#Rei2008>`_ as a teaching exercise.
+"This is a one-card poker game used in :cite:p:`Rei2008` as a teaching exercise.
 
-See also `Mye91 <https://gambitproject.readthedocs.io/en/latest/biblio.html#Mye91>`_
+See also :cite:p:`Mye91`
     Another one-card poker game with slightly different rules.
 "
 

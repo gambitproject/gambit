@@ -76,7 +76,7 @@ options to specify additional starting points for the algorithm.
    in addition to the approximate equilibrium profile found.
 
 
-Computing an equilibrium in mixed strategies of the example in Figure 2 of [Sel75]_::
+Computing an equilibrium in mixed strategies of the example in Figure 2 of :cite:p:`Sel75`::
 
    $ gambit-simpdiv catalog/selten1975/fig2.efg
    Compute Nash equilibria using simplicial subdivision

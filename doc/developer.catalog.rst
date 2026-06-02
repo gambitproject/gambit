@@ -26,12 +26,12 @@ Currently supported representations are:
 1. **Create or edit a game file:**
 
    Use either :ref:`pygambit <pygambit>`, the Gambit :ref:`CLI <command-line>` or :ref:`GUI <section-gui>` to create (or edit) and save game in a valid representation :ref:`format <file-formats>`.
-   Make sure the game includes a description, with any citations referencing the :ref:`bibliography <bibliography>`.
-   Use a full link to the bibliography entry, so the link can be accessed from the file directly, as well as being rendered in the docs e.g. ```Rei2008 <https://gambitproject.readthedocs.io/en/latest/biblio.html#Rei2008>`_``
+   Make sure the game includes a description, with any citations referencing the :ref:`bibliography <bibliography>` using the ``:cite:p:`key``` format, e.g. ``:cite:p:`Rei2008```.
 
    .. important::
 
-      If no bibliography entry exists, you should add one by editing `doc/biblio.rst`.
+      If no bibliography entry exists, you should add one. For instructions,
+      see :ref:`updating-bibliography`.
 
 2. **Add the game(s) to the repo:**
 

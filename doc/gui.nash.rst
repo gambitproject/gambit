@@ -141,9 +141,9 @@ Computing quantal response equilibria
 -------------------------------------
 
 Gambit provides methods for computing the logit quantal response
-equilibrium correspondence for extensive games [McKPal98]_
-and strategic games [McKPal95]_,
-using the tracing method of [Tur05]_.
+equilibrium correspondence for extensive games :cite:p:`McKPal98`
+and strategic games :cite:p:`McKPal95`,
+using the tracing method of :cite:p:`Tur05`.
 
 .. image::  screens/qre.*
             :width: 33%

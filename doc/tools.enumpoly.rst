@@ -73,7 +73,7 @@ support of some set of equilibria.
    singular supports are identified with the label "singular." By
    default, no information about supports is printed.
 
-Computing equilibria of the example in Figure 1 of [Sel75]_, sometimes called
+Computing equilibria of the example in Figure 1 of :cite:p:`Sel75`, sometimes called
 "Selten's horse"::
 
    $ gambit-enumpoly -S catalog/selten1975/fig1.efg

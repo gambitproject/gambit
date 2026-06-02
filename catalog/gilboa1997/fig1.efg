@@ -1,6 +1,6 @@
 EFG 2 R "Absent-Minded Driver (Gilboa 1997, GEB, Figure 2)" { "Player 1" }
 "The original absent-minded driver problem from
-`Gil97 <https://gambitproject.readthedocs.io/en/latest/biblio.html#Gil97>`_"
+:cite:p:`Gil97`"
 
 p "" 1 1 "" { "B" "E" } 0
 p "" 1 1 "" { "B" "E" } 0

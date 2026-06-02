@@ -52,7 +52,7 @@ See the :ref:`algorithm description <enumpure>` for full details.
    Suppresses printing of the banner at program launch.
 
 
-Computing the pure-strategy equilibria of extensive game in Figure 2 of [Sel75]_::
+Computing the pure-strategy equilibria of extensive game in Figure 2 of :cite:p:`Sel75`::
 
    $ gambit-enumpure catalog/selten1975/fig2.efg
 

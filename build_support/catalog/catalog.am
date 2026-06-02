@@ -16,6 +16,8 @@ CATALOG_FILES = \
 	catalog/selten1975/fig1.efg \
 	catalog/selten1975/fig2.efg \
 	catalog/selten1975/fig3.efg \
+	catalog/shapley1974/fig2.nfg \
+	catalog/shapley1974/fig3.nfg \
 	catalog/vonstengel2022/fig10.1.efg \
 	catalog/vonstengel2022/fig10.12.efg \
 	catalog/vonstengel2022/fig10.5.efg \
