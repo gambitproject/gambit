@@ -1,0 +1,19 @@
+NFG 1 R "Fig 2 from 'A Note on the Lemke-Howson Algorithm' (Shapley 1974)" { "1" "2" }
+
+{ { "1" "2" "3" }
+{ "1" "2" "3" }
+}
+"Fig 2 from :cite:p:`Shap74`. This bimatrix game is used to demonstrate the Lemke-Howson algorithm."
+
+{
+{ "" 2, 3 }
+{ "" 0, 0 }
+{ "" 3, 0 }
+{ "" 2, 0 }
+{ "" 3, 3 }
+{ "" 0, 0 }
+{ "" 0, 2 }
+{ "" 0, 2 }
+{ "" 1, 1 }
+}
+1 2 3 4 5 6 7 8 9
