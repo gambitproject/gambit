@@ -1,0 +1,26 @@
+EFG 2 R "Figure 10.7 from von Stengel (2022)" { "I" "II" }
+"
+Figure 10.7 from `vS22 <https://gambitproject.readthedocs.io/en/latest/biblio.html#vS22>`_.
+It is a game with imperfect recall, but it has the same strategic form as the game in Figure 10.5
+from the same book.
+One equilibrium strategy of player II as computed from the strategic form is not realization
+equivalent to any behavior strategy, namely the mixed strategy (0, 2/5, 3/5, 0)
+for (la, lb, ra, rb).
+"
+
+
+p "" 2 1 "" { "l" "r" } 0
+p "" 1 1 "" { "T" "B" } 0
+p "" 2 2 "" { "a" "b" } 0
+t "" 1 "" { 1 5 }
+t "" 2 "" { 3 4 }
+p "" 2 2 0
+t "" 3 "" { 0 0 }
+t "" 4 "" { 0 2 }
+p "" 1 1 0
+p "" 2 2 0
+t "" 5 "" { 0 3 }
+t "" 6 "" { 1 0 }
+p "" 2 2 0
+t "" 7 "" { 2 3 }
+t "" 8 "" { 0 4 }

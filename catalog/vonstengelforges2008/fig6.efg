@@ -1,0 +1,31 @@
+EFG 2 R "Figure 6 from von Stengel and Forges (2008)" { "1" "2" }
+"
+Figure 6 from `vSF08 <https://gambitproject.readthedocs.io/en/latest/biblio.html#vSF08>`_.
+This game has perfect recall and no chance moves, yet it has a circular precedence structure among
+the information sets of the two players. The payoffs are not important.
+"
+
+
+p "" 2 1 "" { "a" "b" } 0
+p "" 1 1 "" { "L" "R" } 0
+p "" 1 2 "" { "S" "T" } 0
+t "" 1 "" { 0 0 }
+p "" 2 2 "" { "c" "d" } 0
+t "" 2 "" { 0 0 }
+t "" 3 "" { 0 0 }
+p "" 2 2 0
+t "" 4 "" { 0 0 }
+p "" 1 3 "" { "U" "V" } 0
+t "" 5 "" { 0 0 }
+t "" 6 "" { 0 0 }
+p "" 1 1 0
+p "" 2 3 "" { "e" "f" } 0
+p "" 1 2 0
+t "" 7 "" { 0 0 }
+t "" 8 "" { 0 0 }
+t "" 9 "" { 0 0 }
+p "" 1 3 0
+t "" 10 "" { 0 0 }
+p "" 2 3 0
+t "" 11 "" { 0 0 }
+t "" 12 "" { 0 0 }

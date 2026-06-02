@@ -567,6 +567,9 @@ class PayoffsWidget : public TableWidgetBase {
   //@{
   /// Implement custom tab-traversal behavior
   void OnKeyDown(wxKeyEvent &);
+  void OnCharHook(wxKeyEvent &);
+  void HandleTabTraversal(wxKeyEvent &);
+  void MoveEditorByTab(bool p_backwards);
   //@}
 
   /// Maps columns to corresponding player
@@ -593,6 +596,8 @@ PayoffsWidget::PayoffsWidget(TableWidget *p_parent)
   CreateGrid(0, 0);
   SetRowLabelWidth(1);
   SetColLabelHeight(1);
+
+  Bind(wxEVT_CHAR_HOOK, &PayoffsWidget::OnCharHook, this);
 }
 
 //
@@ -655,13 +660,17 @@ wxString PayoffsWidget::GetCellValue(const wxSheetCoords &p_coords)
   }
 
   const PureStrategyProfile profile = m_table->GetPayoffProfile(p_coords);
-  auto player = m_table->GetPayoffPlayer(ColToPlayer(p_coords.GetCol()));
+  auto player = m_table->GetPayoffPlayer(p_coords.GetCol());
   return {lexical_cast<std::string>(profile->GetPayoff(player)).c_str(), *wxConvCurrent};
 }
 
 void PayoffsWidget::SetCellValue(const wxSheetCoords &p_coords, const wxString &p_value)
 {
-  m_table->SetPayoffCellValue(p_coords, p_value);
+  wxString value = p_value;
+  if (value.EndsWith(_T("/"))) {
+    value = value.Left(value.length() - 1);
+  }
+  m_table->SetPayoffCellValue(p_coords, value);
 }
 
 wxSheetCellAttr PayoffsWidget::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
@@ -732,54 +741,65 @@ void PayoffsWidget::DrawCell(wxDC &p_dc, const wxSheetCoords &p_coords)
   }
 }
 
-//!
-//! Overriding default wxSheet behavior: when editing, accepting the
-//! edited value via the TAB key automatically moves the cursor to
-//! the right *and* creates the editor in the next cell.  In addition,
-//! tabbing off the rightmost cell entry automatically "wraps" to the
-//! next row.
-//!
-void PayoffsWidget::OnKeyDown(wxKeyEvent &p_event)
+void PayoffsWidget::MoveEditorByTab(bool p_backwards)
 {
-  if (GetNumberRows() && GetNumberCols()) {
-    switch (p_event.GetKeyCode()) {
-    case WXK_TAB: {
-      if (IsCellEditControlCreated()) {
-        DisableCellEditControl(true);
-
-        int newRow = GetGridCursorRow(), newCol = GetGridCursorCol();
-
-        if (p_event.ShiftDown()) {
-          newCol--;
-          if (newCol < 0) {
-            newCol = GetNumberCols() - 1;
-            newRow--;
-            if (newRow < 0) {
-              newRow = GetNumberRows() - 1;
-            }
-          }
-        }
-        else {
-          newCol++;
-          if (newCol >= GetNumberCols()) {
-            newCol = 0;
-            newRow++;
-            if (newRow >= GetNumberRows()) {
-              newRow = 0;
-            }
-          }
-        }
-        SetGridCursorCell(wxSheetCoords(newRow, newCol));
-        MakeCellVisible(GetGridCursorCell());
-        EnableCellEditControl(GetGridCursorCell());
-      }
-      break;
-    }
-    default:
-      p_event.Skip();
-    }
+  if (!GetNumberRows() || !GetNumberCols() || !IsCellEditControlCreated()) {
+    return;
   }
+
+  SetTabTraversing(true);
+  try {
+    if (IsCellEditControlCreated()) {
+      DisableCellEditControl(true);
+    }
+
+    int newRow = GetGridCursorRow();
+    int newCol = GetGridCursorCol();
+
+    if (p_backwards) {
+      --newCol;
+      if (newCol < 0) {
+        newCol = GetNumberCols() - 1;
+        --newRow;
+        if (newRow < 0) {
+          newRow = GetNumberRows() - 1;
+        }
+      }
+    }
+    else {
+      ++newCol;
+      if (newCol >= GetNumberCols()) {
+        newCol = 0;
+        ++newRow;
+        if (newRow >= GetNumberRows()) {
+          newRow = 0;
+        }
+      }
+    }
+
+    SetGridCursorCell(wxSheetCoords(newRow, newCol));
+    MakeCellVisible(GetGridCursorCell());
+    EnableCellEditControl(GetGridCursorCell());
+  }
+  catch (...) {
+    SetTabTraversing(false);
+    throw;
+  }
+  SetTabTraversing(false);
 }
+
+void PayoffsWidget::HandleTabTraversal(wxKeyEvent &p_event)
+{
+  if (p_event.GetKeyCode() != WXK_TAB || !IsCellEditControlCreated()) {
+    p_event.Skip();
+    return;
+  }
+  MoveEditorByTab(p_event.ShiftDown());
+}
+
+void PayoffsWidget::OnKeyDown(wxKeyEvent &p_event) { HandleTabTraversal(p_event); }
+
+void PayoffsWidget::OnCharHook(wxKeyEvent &p_event) { HandleTabTraversal(p_event); }
 
 //=========================================================================
 //                       TableWidget: Lifecycle
@@ -1220,11 +1240,6 @@ void TableWidget::SetPayoffCellValue(const wxSheetCoords &coords, const wxString
 
   try {
     m_doc->DoSetPayoff(outcome, player, value);
-  }
-  catch (ValueException &) {
-    // For the moment, we will just silently discard edits which
-    // give payoffs that are not valid numbers
-    return;
   }
   catch (std::exception &ex) {
     ExceptionDialog(this, ex.what()).ShowModal();
