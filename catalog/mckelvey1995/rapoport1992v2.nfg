@@ -1,0 +1,43 @@
+NFG 1 R "McKelvey and Palfrey (1995) zero-sum game from Rapoport and Boebel (1992), variant 2" { "Player 1" "Player 2" }
+
+{ { "A1" "A2" "A3" "A4" "A5" }
+{ "B1" "B2" "B3" "B4" "B5" }
+}
+"This is the third example game in
+`McKPal95 <https://gambitproject.readthedocs.io/en/latest/biblio.html#McKPal95>`_,
+with data from [Rap92]_.  This variant sets the payoff to the 'W' outcome at $15
+and the 'L' outcome at -$1.
+
+.. [Rap92] Rapoport, A. and Boebel, R. (1992) Mixed strategies in strictly
+   competitive games: A further test of the minimax hypothesis.  Games and
+   Economic Behavior 4: 261-283.
+"
+
+{
+{ "A1B1" 15, -15 }
+{ "A1B2" -1, 1 }
+{ "A1B3" -1, 1 }
+{ "A1B4" -1, 1 }
+{ "A1B5" -1, 1 }
+{ "A2B1" -1, 1 }
+{ "A2B2" -1, 1 }
+{ "A2B3" 15, -15 }
+{ "A2B4" 15, -15 }
+{ "A2B5" 15, -15 }
+{ "A3B1" -1, 1 }
+{ "A3B2" 15, -15 }
+{ "A3B3" -1, 1 }
+{ "A3B4" -1, 1 }
+{ "A3B5" 15, -15 }
+{ "A4B1" -1, 1 }
+{ "A4B2" 15, -15 }
+{ "A4B3" -1, 1 }
+{ "A4B4" 15, -15 }
+{ "A4B5" -1, 1 }
+{ "A5B1" -1, 1 }
+{ "A5B2" 15, -15 }
+{ "A5B3" 15, -15 }
+{ "A5B4" -1, 1 }
+{ "A5B5" -1, 1 }
+}
+1 2 11 16 21 3 4 12 17 22 5 8 13 18 23 6 9 14 19 24 7 10 15 20 25

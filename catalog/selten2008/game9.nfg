@@ -1,0 +1,17 @@
+NFG 1 R "Selten and Chmura (AER, 2008), Game 9" { "Player 1" "Player 2" }
+
+{ { "U" "D" }
+{ "L" "R" }
+}
+"Game 9 of the 12 games in `Sel08 <https://gambitproject.readthedocs.io/en/latest/biblio.html#Sel75>`_.
+This set of 12 games was intended to investigate experimentally differences in
+predictions among four static solution concepts: quantal response equilibrium,
+action-sampling equilibrium, payoff-sampling equilibrium, and impulse-balance equilibrium."
+
+{
+{ "UL" 8, 9 }
+{ "DL" 7, 7 }
+{ "UR" 3, 17 }
+{ "DR" 13, 4 }
+}
+1 2 3 4

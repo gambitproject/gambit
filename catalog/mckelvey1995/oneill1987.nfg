@@ -1,0 +1,32 @@
+NFG 1 R "McKelvey and Palfrey (1995) zero-sum game from O'Neill (1987)" { "Player 1" "Player 2" }
+
+{ { "A1" "A2" "A3" "A4" }
+{ "B1" "B2" "B3" "B4" }
+}
+"This is the second example game in
+`McKPal95 <https://gambitproject.readthedocs.io/en/latest/biblio.html#McKPal95>`_,
+with data from [ON87]_.
+
+.. [ON87] O'Neill, B. (1987) Nonmetric test of the minimax theory of two-person
+   zerosum games.  Proceedings of the National Academy of Sciences USA 84: 2106-2109.
+"
+
+{
+{ "A1B1" 5, -5 }
+{ "A1B2" -5, 5 }
+{ "A1B3" -5, 5 }
+{ "A1B4" -5, 5 }
+{ "A2B1" -5, 5 }
+{ "A2B2" -5, 5 }
+{ "A2B3" 5, -5 }
+{ "A2B4" 5, -5 }
+{ "A3B1" -5, 5 }
+{ "A3B2" 5, -5 }
+{ "A3B3" -5, 5 }
+{ "A3B4" 5, -5 }
+{ "A4B1" -5, 5 }
+{ "A4B2" 5, -5 }
+{ "A4B3" 5, -5 }
+{ "A4B4" -5, 5 }
+}
+1 2 9 13 3 4 10 14 5 7 11 15 6 8 12 16
