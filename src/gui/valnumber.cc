@@ -178,6 +178,23 @@ void NumberValidator::OnChar(wxKeyEvent &p_event)
     auto *control = dynamic_cast<wxTextCtrl *>(m_validatorWindow);
     const wxString value = control->GetValue();
 
+    long start, end;
+    control->GetSelection(&start, &end);
+
+    // Reject edits which would produce a slash immediately followed by zero.
+    if (keyCode == '/' || keyCode == '0') {
+      wxString proposed = value;
+      proposed.Remove(start, end - start);
+      proposed.insert(start, wxString::Format("%c", keyCode));
+
+      if (proposed.Find(wxT("/0")) != wxNOT_FOUND) {
+        if (!IsSilent()) {
+          wxBell();
+        }
+        return;
+      }
+    }
+
     if ((keyCode == '.' || keyCode == '/') && (value.Find('.') != -1 || value.Find('/') != -1)) {
       // At most one slash or decimal point is allowed
       if (!IsSilent()) {

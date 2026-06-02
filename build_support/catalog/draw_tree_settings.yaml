@@ -1,0 +1,33 @@
+# Default draw_tree settings applied to all catalog games.
+defaults:
+  color_scheme: gambit
+  font_family: sffamily
+  font_italic: true
+  shared_terminal_depth: true
+  sublevel_scaling: 0
+
+# Per-game overrides. Keys are slug prefixes or exact slugs.
+# For a given game, all matching keys are applied shortest-first,
+# so more specific entries (longer keys) override more general ones.
+# A key matches if slug == key or slug starts with key + "/".
+# Consult https://www.gambit-project.org/draw_tree/ for available settings.
+overrides:
+  bagwell1995:
+    sublevel_scaling: 1
+  watson2013:
+    sublevel_scaling: 1
+  selten1975:
+    shared_terminal_depth: false
+  myerson1991/fig2_1:
+    action_label_position: 0.4
+  reiley2008/fig1:
+    action_label_position: 0.4
+  vonstengel2022/fig10.1:
+    sublevel_scaling: 0.75
+    shared_terminal_depth: false
+  vonstengelforges2008/fig1:
+    sublevel_scaling: 1
+  vonstengelforges2008/fig9:
+    sublevel_scaling: 0.5
+  gilboa1997/fig1:
+    action_label_dist: 5.0
