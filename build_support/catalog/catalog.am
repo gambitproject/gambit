@@ -6,6 +6,15 @@ CATALOG_FILES = \
 	catalog/jakobsen2016/fig1b.efg \
 	catalog/jakobsen2016/fig1c.efg \
 	catalog/jakobsen2016/fig3.efg \
+	catalog/mckelvey1995/lieberman1960.nfg \
+	catalog/mckelvey1995/ochs1995v1.nfg \
+	catalog/mckelvey1995/ochs1995v2.nfg \
+	catalog/mckelvey1995/ochs1995v3.nfg \
+	catalog/mckelvey1995/oneill1987.nfg \
+	catalog/mckelvey1995/rapoport1992v1.nfg \
+	catalog/mckelvey1995/rapoport1992v2.nfg \
+	catalog/mckelvey1995/table1v100.nfg \
+	catalog/mckelvey1995/table1v5.nfg \
 	catalog/myerson1991/fig2_1.efg \
 	catalog/myerson1991/fig4_2.efg \
 	catalog/nau2004/sec3.nfg \
@@ -16,6 +25,18 @@ CATALOG_FILES = \
 	catalog/selten1975/fig1.efg \
 	catalog/selten1975/fig2.efg \
 	catalog/selten1975/fig3.efg \
+	catalog/selten2008/game1.nfg \
+	catalog/selten2008/game10.nfg \
+	catalog/selten2008/game11.nfg \
+	catalog/selten2008/game12.nfg \
+	catalog/selten2008/game2.nfg \
+	catalog/selten2008/game3.nfg \
+	catalog/selten2008/game4.nfg \
+	catalog/selten2008/game5.nfg \
+	catalog/selten2008/game6.nfg \
+	catalog/selten2008/game7.nfg \
+	catalog/selten2008/game8.nfg \
+	catalog/selten2008/game9.nfg \
 	catalog/vonstengel2022/fig10.1.efg \
 	catalog/vonstengel2022/fig10.12.efg \
 	catalog/vonstengel2022/fig10.5.efg \
