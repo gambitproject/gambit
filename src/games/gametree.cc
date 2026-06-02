@@ -1134,100 +1134,68 @@ void GameTreeRep::BuildSubgameRoots() const
     return;
   }
 
-  struct Range {
-    int m_min = std::numeric_limits<int>::max();
-    int m_max = 0;
-
-    void Merge(const Range &p_source)
-    {
-      m_min = std::min(m_min, p_source.m_min);
-      m_max = std::max(m_max, p_source.m_max);
-    }
-
-    bool operator==(const Range &p_other) const
-    {
-      return m_min == p_other.m_min && m_max == p_other.m_max;
-    }
-  };
-
-  std::unordered_map<GameNodeRep *, Range> disc;
-  std::unordered_map<GameInfosetRep *, Range> hull;
-
-  // Phase 1: Compute subtree spans and infoset hulls
-  struct SpanVisitor {
-    std::unordered_map<GameNodeRep *, Range> &m_disc;
-    std::unordered_map<GameInfosetRep *, Range> &m_hull;
-    int m_counter = 0;
-
-    static DFSCallbackResult OnEnter(GameNode, int) { return DFSCallbackResult::Continue; }
-    static DFSCallbackResult OnAction(GameNode, GameNode, int)
-    {
-      return DFSCallbackResult::Continue;
-    }
-    static void OnVisit(GameNode, int) {}
-
-    DFSCallbackResult OnExit(const GameNode &p_node, int)
-    {
-      GameNodeRep *node = p_node.get();
-      if (p_node->IsTerminal()) {
-        m_counter++;
-        m_disc[node] = {m_counter, m_counter};
-      }
-      else {
-        Range &node_disc = m_disc[node];
-        const auto &children = p_node->GetChildren();
-        node_disc.m_min = m_disc.at(children.front().get()).m_min;
-        node_disc.m_max = m_disc.at(children.back().get()).m_max;
-        m_hull[node->m_infoset].Merge(node_disc);
-      }
-      return DFSCallbackResult::Continue;
-    }
-  };
-
-  // Phase 2: Reachability and detection
-  struct BridgeVisitor {
-    const std::unordered_map<GameNodeRep *, Range> &m_disc;
-    const std::unordered_map<GameInfosetRep *, Range> &m_hull;
+  struct ZobristVisitor {
+    std::unordered_map<GameNodeRep *, uint64_t> m_weight;
+    std::unordered_map<GameNodeRep *, uint64_t> m_flux;
+    std::mt19937_64 m_rng;
     std::vector<GameNodeRep *> &m_subgames;
-    std::unordered_map<GameNodeRep *, Range> m_low;
 
-    static DFSCallbackResult OnEnter(GameNode, int) { return DFSCallbackResult::Continue; }
-    static DFSCallbackResult OnAction(GameNode, GameNode, int)
+    explicit ZobristVisitor(std::vector<GameNodeRep *> &p_subgames)
+      : m_rng(std::random_device{}()), m_subgames(p_subgames)
     {
+    }
+
+    DFSCallbackResult OnEnter(GameNode p_node, int)
+    {
+      GameNodeRep *u = p_node.get();
+
+      if (auto *infoset = u->m_infoset) {
+        // If this node already has a weight, its infoset was already processed
+        if (m_weight.find(u) == m_weight.end()) {
+          uint64_t xor_sum = 0;
+          auto &members = infoset->m_members;
+          for (size_t i = 0; i + 1 < members.size(); ++i) {
+            uint64_t w = m_rng();
+            m_weight[members[i].get()] = w;
+            xor_sum ^= w;
+          }
+          m_weight[members.back().get()] = xor_sum;
+        }
+      }
+
       return DFSCallbackResult::Continue;
     }
-    static void OnVisit(GameNode, int) {}
+
+    DFSCallbackResult OnAction(GameNode, GameNode, int) { return DFSCallbackResult::Continue; }
 
     DFSCallbackResult OnExit(const GameNode &p_node, int)
     {
-      GameNodeRep *node = p_node.get();
-      if (p_node->IsTerminal()) {
-        m_low[node] = m_disc.at(node);
-        return DFSCallbackResult::Continue;
+      GameNodeRep *u = p_node.get();
+
+      // Flux = own weight XOR children's flux
+      // (m_weight[u] returns 0 if not set, which is correct for terminals)
+      uint64_t phi = m_weight.count(u) ? m_weight.at(u) : uint64_t{0};
+      m_weight.erase(u);
+      for (const auto &child : u->GetChildren()) {
+        phi ^= m_flux.at(child.get());
+        m_flux.erase(child.get());
       }
+      m_flux[u] = phi;
 
-      Range &low = m_low[node];
-      low = m_hull.at(node->m_infoset);
-
-      for (const auto &child : p_node->GetChildren()) {
-        low.Merge(m_low.at(child.get()));
-      }
-
-      if (low == m_disc.at(node)) {
-        m_subgames.push_back(node);
+      // Subgame root iff flux == 0 and not terminal
+      if (phi == 0 && !u->IsTerminal()) {
+        m_subgames.push_back(u);
       }
 
       return DFSCallbackResult::Continue;
     }
+
+    void OnVisit(GameNode, int) {}
   };
 
-  auto game = std::const_pointer_cast<GameRep>(shared_from_this());
-
-  SpanVisitor span_visitor{disc, hull};
-  WalkDFS(game, m_root, TraversalOrder::Postorder, span_visitor);
-
-  BridgeVisitor bridge_visitor{disc, hull, m_subgames};
-  WalkDFS(game, m_root, TraversalOrder::Postorder, bridge_visitor);
+  ZobristVisitor visitor(m_subgames);
+  WalkDFS(const_cast<GameTreeRep *>(this)->shared_from_this(), m_root, TraversalOrder::Preorder,
+          visitor);
 }
 
 std::vector<GameNode> GameTreeRep::GetSubgames() const
