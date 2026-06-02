@@ -1,0 +1,11 @@
+EFG 2 R "Myerson (1991), Figure 2.3" { "Player 1" "Player 2" }
+"This game is one of a pair of games (see also Figure 2.4) used to illustrate the relevance of information sets.
+In this version Player 2 does not learn the decision of Player 1."
+
+p "" 1 1 "" { "T" "B" } 0
+p "2.2" 2 1 "" { "L" "R" } 0
+t "" 1 "Outcome 1" { 2, 2 }
+t "" 2 "Outcome 2" { 4, 0 }
+p "2.2" 2 1 "" { "L" "R" } 0
+t "" 3 "Outcome 3" { 1, 0 }
+t "" 4 "Outcome 4" { 3, 1 }
