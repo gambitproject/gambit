@@ -1155,7 +1155,7 @@ void GameTreeRep::BuildSubgameRoots() const
           uint64_t xor_sum = 0;
           auto &members = infoset->m_members;
           for (size_t i = 0; i + 1 < members.size(); ++i) {
-            uint64_t w = m_rng();
+            const uint64_t w = m_rng();
             m_weight[members[i].get()] = w;
             xor_sum ^= w;
           }
