@@ -1214,7 +1214,27 @@ void GameTreeRep::BuildSubgameRoots() const
       }
 
       if (low == m_disc.at(node)) {
-        m_subgames.push_back(node);
+        // low == disc is an exact bridge test only when nodes have distinct terminal spans.
+        // On a single-action chain the spans collapse, so reject a node satisfying low == disc
+        // if an absent-minded infoset above it contains a member in the node's subtree.
+        bool spurious = false;
+        for (auto *anc = node->m_parent; anc && anc->m_children.size() == 1; anc = anc->m_parent) {
+          if (anc->m_infoset->m_members.size() < 2) {
+            continue;
+          }
+          for (const auto &member : anc->m_infoset->m_members) {
+            if (member.get() != anc && member->IsSuccessorOf(p_node)) {
+              spurious = true;
+              break;
+            }
+          }
+          if (spurious) {
+            break;
+          }
+        }
+        if (!spurious) {
+          m_subgames.push_back(node);
+        }
       }
 
       return DFSCallbackResult::Continue;
