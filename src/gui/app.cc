@@ -126,7 +126,7 @@ AppLoadResult Application::LoadFile(const wxString &p_filename, wxWindow *p_pare
   if (!infile.good()) {
     wxMessageBox(_("Gambit could not open file for reading:\n") + p_filename,
                  _("Unable to open file"), wxOK | wxICON_ERROR, p_parent);
-    return GBT_APP_OPEN_FAILED;
+    return AppLoadResult::OpenFailed;
   }
 
   auto *doc = new GameDocument(NewTree());
@@ -135,24 +135,29 @@ AppLoadResult Application::LoadFile(const wxString &p_filename, wxWindow *p_pare
     m_fileHistory.AddFileToHistory(p_filename);
     m_fileHistory.Save(*wxConfigBase::Get());
     (void)new GameFrame(nullptr, doc);
-    return GBT_APP_FILE_OK;
+    return AppLoadResult::Success;
   }
   delete doc;
 
   try {
-    const Game nfg = ReadGame(infile);
+    const Game game = ReadGame(infile);
+    if (game->IsAgg()) {
+      wxMessageBox(_("Action graph games are not currently supported by the graphical interface"),
+                   _("Unsupported game representation"), wxOK | wxICON_ERROR, p_parent);
+      return AppLoadResult::UnsupportedRepresentation;
+    }
 
     m_fileHistory.AddFileToHistory(p_filename);
     m_fileHistory.Save(*wxConfigBase::Get());
-    doc = new GameDocument(nfg);
+    doc = new GameDocument(game);
     doc->SetFilename(p_filename);
     (void)new GameFrame(nullptr, doc);
-    return GBT_APP_FILE_OK;
+    return AppLoadResult::Success;
   }
   catch (InvalidFileException &) {
     wxMessageBox(_("File is not in a format Gambit recognizes:\n") + p_filename,
                  _("Unable to read file"), wxOK | wxICON_ERROR, p_parent);
-    return GBT_APP_PARSE_FAILED;
+    return AppLoadResult::ParseFailed;
   }
 }
 
