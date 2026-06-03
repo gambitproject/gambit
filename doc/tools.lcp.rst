@@ -54,7 +54,7 @@ See the :ref:`algorithm description <lcp>` for full details.
    Suppresses printing of the banner at program launch.
 
 
-Computing an equilibrium of the example in Figure 2 of [Sel75]_::
+Computing an equilibrium of the example in Figure 2 of :cite:p:`Sel75`::
 
    $ gambit-lcp catalog/selten1975/fig2.efg
    Compute Nash equilibria by solving a linear complementarity program

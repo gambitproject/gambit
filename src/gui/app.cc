@@ -33,6 +33,7 @@
 
 #include "app.h"
 #include "gameframe.h"
+#include "welcome.h"
 
 #include "bitmaps/gambitbig.xpm"
 
@@ -66,13 +67,6 @@ wxBEGIN_EVENT_TABLE(Application, wxApp) EVT_TIMER(wxID_ANY, Application::OnSplas
 
         bool Application::OnInit()
 {
-  const wxBitmap bitmap(gambitbig_xpm);
-  m_splashTimer.Start();
-  m_splash = new wxSplashScreen(MakeScaledSplashBitmap(bitmap, 0.45),
-                                wxSPLASH_CENTRE_ON_SCREEN | wxSPLASH_NO_TIMEOUT, 0, nullptr,
-                                wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SIMPLE);
-  m_splash->Show();
-  m_splash->Update();
   wxConfigBase::Set(new wxConfig(_T("Gambit"), _T("Gambit")));
   m_fileHistory.Load(*wxConfigBase::Get());
   // Immediately saving this back forces the entries to be created at
@@ -87,19 +81,22 @@ wxBEGIN_EVENT_TABLE(Application, wxApp) EVT_TIMER(wxID_ANY, Application::OnSplas
   }
 
   if (m_documents.empty()) {
-    const Game efg = NewTree();
-    efg->NewPlayer()->SetLabel("Player 1");
-    efg->NewPlayer()->SetLabel("Player 2");
-    efg->SetTitle("Untitled Extensive Game");
-
-    auto *game = new GameDocument(efg);
-    (void)new GameFrame(nullptr, game);
+    auto *frame = new WelcomeFrame(nullptr);
+    frame->Show(true);
+    SetTopWindow(frame);
   }
-
+  else {
+    const wxBitmap bitmap(gambitbig_xpm);
+    m_splashTimer.Start();
+    m_splash = new wxSplashScreen(MakeScaledSplashBitmap(bitmap, 0.45),
+                                  wxSPLASH_CENTRE_ON_SCREEN | wxSPLASH_NO_TIMEOUT, 0, nullptr,
+                                  wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SIMPLE);
+    m_splash->Show();
+    m_splash->Update();
+    this->CallAfter(&Application::DismissSplash);
+  }
   // Set up the help system.
   wxInitAllImageHandlers();
-
-  this->CallAfter(&Application::DismissSplash);
 
   return true;
 }

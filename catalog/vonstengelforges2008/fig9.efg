@@ -1,6 +1,6 @@
 EFG 2 R "Figure 9 from von Stengel and Forges (2008)" { "1" "2" }
 "
-Figure 9 from `vSF08 <https://gambitproject.readthedocs.io/en/latest/biblio.html#vSF08>`_.
+Figure 9 from :cite:p:`vSF08`.
 It encodes the SAT formula :math:`x\wedge (\neg x \vee y) \wedge (\neg x \vee \neg y)`
 (writing $-x$ for :math:`\neg x`).
 The formula is satisfiable (which here it is not) if and only

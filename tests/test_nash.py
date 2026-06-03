@@ -2259,6 +2259,20 @@ LOGIT_BEHAVIOR_CASES = [
         marks=pytest.mark.nash_logit_behavior,
         id="test_logit_behavior_01",
     ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file,
+                                      "chance_root_5_moves_no_nonterm_player_nodes.efg"),
+            solver=gbt.nash.logit_solve,
+            expected=[
+                [[]]  # Zero-dimension edge case (two players)
+            ],
+            regret_tol=TOL_LARGE,
+            prob_tol=TOL_LARGE,
+        ),
+        marks=pytest.mark.nash_logit_behavior,
+        id="test_logit_behavior_degenerate",
+    ),
 ]
 
 
