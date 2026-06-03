@@ -219,7 +219,7 @@ GameDocument::GameDocument(Game p_game)
 
 GameDocument::~GameDocument() { wxGetApp().RemoveDocument(this); }
 
-bool GameDocument::LoadDocument(const wxString &p_filename)
+bool GameDocument::LoadWorkspace(const wxString &p_filename)
 {
   TiXmlDocument doc(p_filename.mb_str());
   if (!doc.LoadFile()) {

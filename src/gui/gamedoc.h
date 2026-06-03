@@ -235,12 +235,12 @@ public:
   ~GameDocument();
 
   //!
-  //! @name Reading and writing .gbt savefiles
+  //! @name Reading and writing savefiles
   //!
   //@{
-  /// Load document from the specified file (which should be a .gbt file)
+  /// Load workspace from the specified file (which should be a .gbt file)
   /// Returns true if successful, false if error
-  bool LoadDocument(const wxString &p_filename);
+  bool LoadWorkspace(const wxString &p_filename);
   void SaveDocument(std::ostream &) const;
   //@}
 
