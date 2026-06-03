@@ -11,8 +11,7 @@ Games from the OpenSpiel library are also available; see :ref:`Loading OpenSpiel
 
 .. _catalog-openspiel:
 
-Loading OpenSpiel games
------------------------
+.. rubric:: Loading OpenSpiel games
 
 Games from the `OpenSpiel <https://openspiel.readthedocs.io/en/latest/games.html>`_ library
 can be loaded dynamically using the ``open_spiel/`` prefix:
