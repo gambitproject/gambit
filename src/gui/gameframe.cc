@@ -84,7 +84,7 @@ ProfileListPanel::ProfileListPanel(wxWindow *p_parent, GameDocument *p_doc)
 {
   auto *topSizer = new wxBoxSizer(wxHORIZONTAL);
 
-  if (p_doc->IsTree()) {
+  if (p_doc->GetGame()->IsTree()) {
     m_behavProfiles = new BehaviorProfileList(this, p_doc);
     m_behavProfiles->Show(false);
     topSizer->Add(m_behavProfiles, 1, wxEXPAND, 0);
@@ -262,7 +262,7 @@ GameFrame::GameFrame(wxWindow *p_parent, GameDocument *p_doc)
   wxWindowBase::SetAcceleratorTable(accel);
 
   m_splitter = new wxSplitterWindow(this, wxID_ANY);
-  if (p_doc->IsTree()) {
+  if (p_doc->GetGame()->IsTree()) {
     m_efgPanel = new EfgPanel(m_splitter, p_doc);
     m_efgPanel->Show(true);
     m_splitter->Initialize(m_efgPanel);
@@ -289,7 +289,7 @@ GameFrame::GameFrame(wxWindow *p_parent, GameDocument *p_doc)
   SetSizer(topSizer);
   wxTopLevelWindowBase::Layout();
 
-  if (p_doc->IsTree()) {
+  if (p_doc->GetGame()->IsTree()) {
     m_efgPanel->SetFocus();
   }
   else {
@@ -558,7 +558,7 @@ void GameFrame::MakeToolbar()
   toolBar->AddTool(GBT_MENU_EDIT_NEWPLAYER, wxEmptyString, wxBitmap(newplayer_xpm), wxNullBitmap,
                    wxITEM_NORMAL, _("Add a new player"), _("Add a new player to the game"),
                    nullptr);
-  if (m_doc->IsTree()) {
+  if (m_doc->GetGame()->IsTree()) {
     toolBar->AddTool(GBT_MENU_VIEW_ZOOMIN, wxEmptyString, wxBitmap(zoomin_xpm), wxNullBitmap,
                      wxITEM_NORMAL, _("Zoom in"), _("Increase magnification"), nullptr);
     toolBar->AddTool(GBT_MENU_VIEW_ZOOMOUT, wxEmptyString, wxBitmap(zoomout_xpm), wxNullBitmap,
@@ -579,7 +579,7 @@ void GameFrame::MakeToolbar()
 
   toolBar->AddSeparator();
 
-  if (m_doc->IsTree()) {
+  if (m_doc->GetGame()->IsTree()) {
     toolBar->AddTool(GBT_MENU_VIEW_STRATEGIC, wxEmptyString, wxBitmap(table_xpm), wxNullBitmap,
                      wxITEM_CHECK, _("Display the reduced strategic representation of the game"),
                      _("Display the reduced strategic representation of the game"), nullptr);

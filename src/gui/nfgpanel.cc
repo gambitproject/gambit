@@ -123,7 +123,7 @@ TablePlayerPanel::TablePlayerPanel(wxWindow *p_parent, NfgPanel *p_nfgPanel, Gam
   wxStaticBitmap *playerIcon = new TablePlayerIcon(this, m_player);
   labelSizer->Add(playerIcon, 0, wxALL | wxALIGN_CENTER, 0);
 
-  if (!m_doc->IsTree()) {
+  if (!m_doc->GetGame()->IsTree()) {
     auto *addStrategyIcon = new wxBitmapButton(this, wxID_ANY, wxBitmap(newrow_xpm),
                                                wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
     addStrategyIcon->SetToolTip(_("Add a strategy for this player"));
@@ -264,7 +264,7 @@ TablePlayerToolbar::TablePlayerToolbar(NfgPanel *p_parent, GameDocument *p_doc)
 {
   auto *topSizer = new wxBoxSizer(wxVERTICAL);
 
-  for (size_t pl = 1; pl <= m_doc->NumPlayers(); pl++) {
+  for (size_t pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
     m_playerPanels.push_back(new TablePlayerPanel(this, p_parent, m_doc, pl));
     topSizer->Add(m_playerPanels[pl], 0, wxALL | wxEXPAND, 5);
   }
@@ -275,13 +275,13 @@ TablePlayerToolbar::TablePlayerToolbar(NfgPanel *p_parent, GameDocument *p_doc)
 
 void TablePlayerToolbar::OnUpdate()
 {
-  while (m_playerPanels.size() < m_doc->NumPlayers()) {
+  while (m_playerPanels.size() < m_doc->GetGame()->NumPlayers()) {
     auto *panel = new TablePlayerPanel(this, m_nfgPanel, m_doc, m_playerPanels.size() + 1);
     m_playerPanels.push_back(panel);
     GetSizer()->Add(panel, 0, wxALL | wxEXPAND, 5);
   }
 
-  while (m_playerPanels.size() > m_doc->NumPlayers()) {
+  while (m_playerPanels.size() > m_doc->GetGame()->NumPlayers()) {
     TablePlayerPanel *panel = m_playerPanels.back();
     GetSizer()->Detach(panel);
     panel->Destroy();

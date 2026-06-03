@@ -465,7 +465,7 @@ void EfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
       PrepareDC(dc);
       OnDraw(dc);
 
-      if (player < static_cast<int>(m_doc->NumPlayers())) {
+      if (player < static_cast<int>(m_doc->GetGame()->NumPlayers())) {
         auto entry = m_layout.GetNodeEntry(node);
         const wxRect rect = entry->GetPayoffExtent(player + 1);
         int xx, yy;
@@ -836,7 +836,7 @@ void EfgDisplay::OnLeftDoubleClick(wxMouseEvent &p_event)
 
     // Editing an existing outcome
     auto entry = m_layout.GetNodeEntry(node);
-    for (size_t pl = 1; pl <= m_doc->NumPlayers(); pl++) {
+    for (size_t pl = 1; pl <= m_doc->GetGame()->NumPlayers(); pl++) {
       const wxRect rect = entry->GetPayoffExtent(pl);
       if (rect.Contains(x, y)) {
         int xx, yy;

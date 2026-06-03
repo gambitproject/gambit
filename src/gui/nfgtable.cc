@@ -630,7 +630,7 @@ void PayoffsWidget::OnUpdate()
   Refresh();
 }
 
-bool TableWidget::IsReadOnly() const { return m_doc->IsTree(); }
+bool TableWidget::IsReadOnly() const { return m_doc->GetGame()->IsTree(); }
 
 wxColour TableWidget::GetPlayerColor(int player) const
 {

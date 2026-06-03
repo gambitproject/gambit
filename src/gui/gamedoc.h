@@ -235,9 +235,6 @@ public:
   const TreeRenderConfig &GetStyle() const { return m_style; }
   void SetStyle(const TreeRenderConfig &p_style);
 
-  size_t NumPlayers() const { return m_game->NumPlayers(); }
-  bool IsConstSum() const { return m_game->IsConstSum(); }
-  bool IsTree() const { return m_game->IsTree(); }
   GameAction GetAction(int p_index) const;
 
   void DoAddEquilibriumOutput(std::shared_ptr<AnalysisOutput> p_profs);
