@@ -27,6 +27,7 @@
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif // WX_PRECOMP
+#include <wx/filename.h>
 #include <wx/fontdlg.h>
 #include <wx/printdlg.h>
 #if !defined(__WXMSW__) || wxUSE_POSTSCRIPT
