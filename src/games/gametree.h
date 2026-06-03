@@ -103,9 +103,7 @@ public:
   Rational GetPlayerMaxPayoff(const GamePlayer &) const override;
   bool IsAbsentMinded(const GameInfoset &p_infoset) const override;
   std::vector<GameSubgame> GetSubgames() const override;
-  GameSubgame GetRootSubgame() const override;
   GameNode GetSubgameRoot(const GameInfoset &) const override;
-  std::vector<GameSubgame> GetTerminalSubgames() const override;
   //@}
 
   /// @name Players

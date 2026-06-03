@@ -111,8 +111,6 @@ Information about the game
    Game.nodes
    Game.contingencies
    Game.subgames
-   Game.root_subgame
-   Game.terminal_subgames
    Game.subgame_root
 
 .. autosummary::

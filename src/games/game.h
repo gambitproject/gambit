@@ -972,13 +972,8 @@ public:
   }
   /// Returns a list of all subgame roots in the game
   virtual std::vector<GameSubgame> GetSubgames() const { throw UndefinedException(); }
-
-  /// Returns the subgame rooted at the root of the game, or null if the game has no subgames
-  virtual GameSubgame GetRootSubgame() const { throw UndefinedException(); }
   /// Returns the root of the smallest subgame containing the information set
   virtual GameNode GetSubgameRoot(const GameInfoset &) const { throw UndefinedException(); }
-  /// Returns the terminal subgames (subgames with no child subgames)
-  virtual std::vector<GameSubgame> GetTerminalSubgames() const { throw UndefinedException(); }
 
   //@}
 

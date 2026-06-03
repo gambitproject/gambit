@@ -230,8 +230,6 @@ class SubgameStructureTestCase:
 
     `children` maps each subgame-root path to the set of its child subgame paths.
 
-    `terminal_subgames` lists the subgame roots with no children, in the postorder.
-
     `differences` maps each subgame-root path to the set of
     (player_label, infoset_number) keys in that subgame's difference ---
     the information sets belonging to the subgame but not to any child subgame.
@@ -240,7 +238,6 @@ class SubgameStructureTestCase:
     roots: list[list[str]]
     parents: dict[tuple[str, ...], tuple[str, ...] | None]
     children: dict[tuple[str, ...], set[tuple[str, ...]]]
-    terminal_subgames: list[list[str]]
     differences: dict[tuple[str, ...], set[tuple[str, int]]]
 
 
@@ -254,7 +251,6 @@ SUBGAME_STRUCTURE_CASES = [
             roots=[[]],
             parents={(): None},
             children={(): set()},
-            terminal_subgames=[[]],
             differences={(): {("Player 1", 0), ("Player 1", 1), ("Player 2", 0)}},
         ),
         id="wichardt_no_nontrivial_subgames",
@@ -296,12 +292,6 @@ SUBGAME_STRUCTURE_CASES = [
                 ("R",): set(),
                 (): {("L",), ("R",)},
             },
-            terminal_subgames=[
-                ["L", "L", "L", "L", "L"],
-                ["R", "L", "L", "L", "L"],
-                ["R", "L"],
-                ["R"],
-            ],
             differences={
                 ("L", "L", "L", "L", "L"): {
                     ("Player 1", 3), ("Player 2", 2), ("Player 2", 3),
@@ -332,14 +322,6 @@ def test_subgames_postorder_sequence(test_case: SubgameStructureTestCase):
 
 
 @pytest.mark.parametrize("test_case", SUBGAME_STRUCTURE_CASES)
-def test_root_subgame_is_game_root(test_case: SubgameStructureTestCase):
-    """`game.root_subgame` is rooted at `game.root` and has no parent."""
-    game = test_case.factory()
-    assert game.root_subgame.root == game.root
-    assert game.root_subgame.parent is None
-
-
-@pytest.mark.parametrize("test_case", SUBGAME_STRUCTURE_CASES)
 def test_subgame_parent_links(test_case: SubgameStructureTestCase):
     """Each subgame's `parent` matches the expected parent path."""
     game = test_case.factory()
@@ -365,16 +347,6 @@ def test_subgame_children(test_case: SubgameStructureTestCase):
 
 
 @pytest.mark.parametrize("test_case", SUBGAME_STRUCTURE_CASES)
-def test_terminal_subgames(test_case: SubgameStructureTestCase):
-    """`game.terminal_subgames` matches the expected terminal subgames, in
-    postorder.
-    """
-    game = test_case.factory()
-    actual = [_get_path_of_action_labels(sg.root) for sg in game.terminal_subgames]
-    assert actual == test_case.terminal_subgames
-
-
-@pytest.mark.parametrize("test_case", SUBGAME_STRUCTURE_CASES)
 def test_subgame_differences(test_case: SubgameStructureTestCase):
     """Each subgame's difference matches the expected infoset set."""
     game = test_case.factory()
@@ -384,13 +356,6 @@ def test_subgame_differences(test_case: SubgameStructureTestCase):
         for sg in game.subgames
     }
     assert actual == test_case.differences
-
-
-def test_empty_tree_has_no_subgames():
-    game = gbt.Game.new_tree()
-    assert list(game.subgames) == []
-    assert list(game.terminal_subgames) == []
-    assert game.root_subgame is None
 
 
 @pytest.mark.parametrize("game_file, expected_node_data", [

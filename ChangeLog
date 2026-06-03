@@ -6,8 +6,8 @@
 - Implement `GameSubgameRep` (C++) and `Subgame` (Python), a first-class object representing a subgame,
   exposing its root node, parent and child subgames, and the infosets constituting its difference
   (the infosets belonging to the subgame but not to any of its child subgames).
-  On `Game`, add `subgames` in the reverse topological order produced by the detection algorithm,
-  `root_subgame`, `terminal_subgames`, and `subgame_root` (the smallest subgame containing a given infoset).
+  On `Game`, add `subgames` (in the reverse topological order produced by the detection algorithm)
+  and `subgame_root` (the smallest subgame containing a given infoset).
   Builds on the subgame-root detection added in 16.6.0.  (#585)
 
 ### Fixed

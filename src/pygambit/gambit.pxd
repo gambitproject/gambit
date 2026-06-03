@@ -348,10 +348,8 @@ cdef extern from "games/game.h":
         c_PureStrategyProfile NewPureStrategyProfile()  # except + doesn't compile
         c_MixedStrategyProfile[T] NewMixedStrategyProfile[T](T)  # except + doesn't compile
 
-        c_GameSubgame GetRootSubgame() except +
         c_GameNode GetSubgameRoot(c_GameInfoset) except +
         stdvector[c_GameSubgame] GetSubgames() except +
-        stdvector[c_GameSubgame] GetTerminalSubgames() except +
 
     c_Game NewTree() except +
     c_Game NewTable(stdvector[int]) except +

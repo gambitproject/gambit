@@ -879,15 +879,6 @@ bool GameTreeRep::IsAbsentMinded(const GameInfoset &p_infoset) const
   return contains(m_absentMindedInfosets, p_infoset.get());
 }
 
-GameSubgame GameTreeRep::GetRootSubgame() const
-{
-  if (m_subgameCache.empty()) {
-    BuildSubgameRoots();
-  }
-  auto it = m_subgameCache.find(m_root.get());
-  return (it == m_subgameCache.end()) ? nullptr : it->second;
-}
-
 GameNode GameTreeRep::GetSubgameRoot(const GameInfoset &p_infoset) const
 {
   if (p_infoset->GetGame().get() != this) {
@@ -1340,21 +1331,6 @@ std::vector<GameSubgame> GameTreeRep::GetSubgames() const
   result.reserve(m_subgames.size());
   for (auto *rep : m_subgames) {
     result.emplace_back(m_subgameCache.at(rep));
-  }
-  return result;
-}
-
-std::vector<GameSubgame> GameTreeRep::GetTerminalSubgames() const
-{
-  if (m_subgameCache.empty()) {
-    BuildSubgameRoots();
-  }
-  std::vector<GameSubgame> result;
-  for (auto *rep : m_subgames) {
-    const auto &subgame = m_subgameCache.at(rep);
-    if (subgame->m_children.empty()) {
-      result.emplace_back(subgame);
-    }
   }
   return result;
 }
