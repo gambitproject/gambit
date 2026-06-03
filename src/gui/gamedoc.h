@@ -152,7 +152,7 @@ class GameDocument {
 
   TreeRenderConfig m_style;
   GameNode m_selectNode;
-  bool m_modified;
+  bool m_gameModified, m_unsavedResults;
 
   StrategyDominanceStack m_stratSupports;
 
@@ -181,8 +181,9 @@ public:
   const wxString &GetFilename() const { return m_filename; }
   void SetFilename(const wxString &p_filename) { m_filename = p_filename; }
 
-  bool IsModified() const { return m_modified; }
-  void SetModified(bool p_modified) { m_modified = p_modified; }
+  bool IsModified() const { return m_gameModified || m_unsavedResults; }
+  void SetGameModified(bool p_modified) { m_gameModified = p_modified; }
+  void SetUnsavedResults(bool p_unsaved) { m_unsavedResults = p_unsaved; }
 
   const TreeRenderConfig &GetStyle() const { return m_style; }
   void SetStyle(const TreeRenderConfig &p_style);
