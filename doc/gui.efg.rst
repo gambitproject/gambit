@@ -417,7 +417,7 @@ To select the font used to draw the labels in the tree, select
 :menuselection:`Format --> Font`.
 The standard font selection dialog for the operating
 system is displayed, showing the fonts available on the system. Since
-available fonts vary across systems, when opening a workbook on a
+available fonts vary across systems, when opening a workspace on a
 system different from the system on which it was saved, Gambit tries
 to match the font style as closely as possible when the original font
 is not available.
