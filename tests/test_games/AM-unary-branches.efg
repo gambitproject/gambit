@@ -1,5 +1,8 @@
-EFG 2 R "Untitled Extensive Game" { "Player 1" "Player 2" }
-""
+EFG 2 R "Unary chain with AM-infosets: Example 2" { "Player 1" "Player 2" }
+"A tailored edge case for the interval Tarjan subgame detector:
+low == disc is an exact bridge test only when nodes have distinct terminal spans.
+On this single-action chain an absent-minded infoset collapses the spans, so the
+Player 1 branching node passes the low == disc test but is not a subgame root."
 
 p "" 2 1 "" { "T" "B" } 0
 p "" 1 1 "" { "1" } 0
