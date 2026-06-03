@@ -382,7 +382,6 @@ void GameDocument::DoSave(const wxString &p_filename, GameSaveFormat p_format)
   }
   switch (p_format) {
   case GameSaveFormat::Workbook:
-    std::cout << "Got format as workbook\n";
     SaveDocument(file);
     m_filename = p_filename;
     SetModified(false);
@@ -390,12 +389,10 @@ void GameDocument::DoSave(const wxString &p_filename, GameSaveFormat p_format)
 
   case GameSaveFormat::Efg:
     m_game->Write(file, "efg");
-    std::cout << "Got format as efg\n";
     break;
 
   case GameSaveFormat::Nfg:
     BuildNfg();
-    std::cout << "Got format as nfg\n";
     m_game->Write(file, "nfg");
     break;
   }
