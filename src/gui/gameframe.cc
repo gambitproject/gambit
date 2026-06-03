@@ -1274,16 +1274,46 @@ void GameFrame::OnUnsplit(wxSplitterEvent &)
   GetToolBar()->ToggleTool(GBT_MENU_VIEW_PROFILES, false);
 }
 
+namespace {
+
+wxString CloseWarningMessage(GameDocument *p_doc)
+{
+  if (p_doc->IsGameModified() && !p_doc->AreResultsUnsaved()) {
+    return _("This game has unsaved changes.\n\n"
+             "Close without saving?");
+  }
+  if (!p_doc->IsGameModified() && p_doc->AreResultsUnsaved()) {
+    return _("There are unsaved computational results.\n\n"
+             "These changes are not saved in ordinary game files.\n"
+             "Close without saving?");
+  }
+  if (p_doc->IsGameModified() && p_doc->AreResultsUnsaved()) {
+    return _("This game has unsaved changes, and there are unsaved computational results "
+             "unsaved computational results or workspace changes.\n\n"
+             "Close without saving?");
+  }
+  return wxEmptyString;
+}
+
+} // namespace
+
 void GameFrame::OnCloseWindow(wxCloseEvent &p_event)
 {
-  if (p_event.CanVeto() && m_doc->IsModified()) {
-    if (wxMessageBox(wxT("Game has been modified.\n") wxT("Unsaved changes will be lost!\n")
-                         wxT("Close anyway?"),
-                     _("Warning"), wxOK | wxCANCEL) == wxCANCEL) {
+  if (!p_event.CanVeto()) {
+    p_event.Skip();
+    return;
+  }
+
+  if (m_doc->IsModified()) {
+    const int response = wxMessageBox(CloseWarningMessage(m_doc), _("Unsaved Changes"),
+                                      wxYES_NO | wxNO_DEFAULT | wxICON_WARNING, this);
+
+    if (response != wxYES) {
       p_event.Veto();
       return;
     }
   }
+
   p_event.Skip();
 }
 

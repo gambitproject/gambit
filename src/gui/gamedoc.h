@@ -182,6 +182,8 @@ public:
   void SetFilename(const wxString &p_filename) { m_filename = p_filename; }
 
   bool IsModified() const { return m_gameModified || m_unsavedResults; }
+  bool IsGameModified() const { return m_gameModified; }
+  bool AreResultsUnsaved() const { return m_unsavedResults; }
   void SetGameModified(bool p_modified) { m_gameModified = p_modified; }
   void SetUnsavedResults(bool p_unsaved) { m_unsavedResults = p_unsaved; }
 
