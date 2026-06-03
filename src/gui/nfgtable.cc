@@ -810,16 +810,6 @@ TableWidget::TableWidget(NfgPanel *p_parent, wxWindowID p_id, GameDocument *p_do
     m_rowSheet(nullptr), m_colSheet(nullptr),
     m_layout(std::make_shared<StrategicTableLayout>(p_doc))
 {
-  if (p_doc->GetGame()->GetPlayers().size() == 2) {
-    m_rowPlayers.push_back(1);
-    m_colPlayers.push_back(2);
-  }
-  else {
-    for (int pl = 1; pl <= p_doc->GetGame()->GetPlayers().size(); pl++) {
-      m_rowPlayers.push_back(pl);
-    }
-  }
-
   // These depend on the row and column player lists having been populated,
   // which suggests some refactoring ought to be done as to where/how those
   // row and column players are recorded
