@@ -1,4 +1,6 @@
+import contextlib
 import io
+import os
 from importlib.resources import as_file, files
 from pathlib import Path
 from typing import Any
@@ -21,6 +23,30 @@ READERS = {
 }
 
 _OPENSPIEL_PREFIX = "open_spiel/"
+
+
+@contextlib.contextmanager
+def _suppress_c_stderr():
+    """Redirect C-level stderr (fd 2) to /dev/null for the duration of the block.
+
+    This prevents OpenSpiel's C++ code from printing error messages (e.g.
+    "OpenSpiel exception: Must be a normal-form game") to the user's terminal or
+    notebook when we speculatively attempt an export that may not be supported.
+    Falls back silently if the fd-level redirect is unavailable (e.g. Windows).
+    """
+    try:
+        devnull_fd = os.open(os.devnull, os.O_WRONLY)
+        saved_fd = os.dup(2)
+        os.dup2(devnull_fd, 2)
+        os.close(devnull_fd)
+    except OSError:
+        yield
+        return
+    try:
+        yield
+    finally:
+        os.dup2(saved_fd, 2)
+        os.close(saved_fd)
 
 
 def _load_from_openspiel(game_name: str) -> gbt.Game:
@@ -46,9 +72,13 @@ def _load_from_openspiel(game_name: str) -> gbt.Game:
     except Exception as exc:
         raise ValueError(f"Could not load OpenSpiel game '{game_name}': {exc}") from exc
 
-    # Try NFG first (works for normal-form games)
+    # Try NFG first (works for normal-form games).
+    # Suppress C-level stderr so OpenSpiel's C++ error message for non-NFG games
+    # (e.g. "OpenSpiel exception: Must be a normal-form game") is not shown when
+    # we fall through to the EFG path.
     try:
-        nfg_str = pyspiel.game_to_nfg_string(game)
+        with _suppress_c_stderr():
+            nfg_str = pyspiel.game_to_nfg_string(game)
         return gbt.read_nfg(io.StringIO(nfg_str))
     except Exception:
         pass
