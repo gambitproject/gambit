@@ -125,12 +125,17 @@ public:
 // GBT_DOC_MODIFIED_VIEWS: Information about how the document is viewed
 // (e.g., player colors) has changed.
 //
+// GBT_DOC_MODIFIED_WORKSPACE: Stored analysis workspace data has changed.
+// This affects workbook/workspace persistence, but does not modify the
+// underlying game model.
+//
 using GameModificationType = enum {
   GBT_DOC_MODIFIED_NONE = 0x00,
   GBT_DOC_MODIFIED_GAME = 0x01,
   GBT_DOC_MODIFIED_PAYOFFS = 0x02,
   GBT_DOC_MODIFIED_LABELS = 0x04,
-  GBT_DOC_MODIFIED_VIEWS = 0x08
+  GBT_DOC_MODIFIED_VIEWS = 0x08,
+  GBT_DOC_MODIFIED_WORKSPACE = 0x10
 };
 
 class AnalysisWorkspace {
@@ -193,7 +198,7 @@ class GameDocument {
 
   TreeRenderConfig m_style;
   GameNode m_selectNode;
-  bool m_gameModified, m_unsavedResults;
+  bool m_gameModified, m_workspaceModified;
 
   AnalysisWorkspace m_workspace;
 
@@ -219,11 +224,11 @@ public:
   const wxString &GetFilename() const { return m_filename; }
   void SetFilename(const wxString &p_filename) { m_filename = p_filename; }
 
-  bool IsModified() const { return m_gameModified || m_unsavedResults; }
+  bool IsModified() const { return m_gameModified || m_workspaceModified; }
   bool IsGameModified() const { return m_gameModified; }
-  bool AreResultsUnsaved() const { return m_unsavedResults; }
+  bool IsWorkspaceModified() const { return m_workspaceModified; }
   void SetGameModified(bool p_modified) { m_gameModified = p_modified; }
-  void SetUnsavedResults(bool p_unsaved) { m_unsavedResults = p_unsaved; }
+  void SetWorkspaceModified(bool p_unsaved) { m_workspaceModified = p_unsaved; }
 
   const TreeRenderConfig &GetStyle() const { return m_style; }
   void SetStyle(const TreeRenderConfig &p_style);

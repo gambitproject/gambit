@@ -210,7 +210,7 @@ bool AnalysisWorkspace::Load(TiXmlNode *p_game)
 //=========================================================================
 
 GameDocument::GameDocument(Game p_game)
-  : m_game(p_game), m_selectNode(nullptr), m_gameModified(false), m_unsavedResults(false),
+  : m_game(p_game), m_selectNode(nullptr), m_gameModified(false), m_workspaceModified(false),
     m_workspace(this)
 {
   wxGetApp().AddDocument(this);
@@ -341,6 +341,9 @@ void GameDocument::UpdateViews(GameModificationType p_modifications)
       p_modifications == GBT_DOC_MODIFIED_LABELS) {
     m_gameModified = true;
   }
+  if (p_modifications == GBT_DOC_MODIFIED_WORKSPACE) {
+    m_workspaceModified = true;
+  }
   if (p_modifications == GBT_DOC_MODIFIED_GAME || p_modifications == GBT_DOC_MODIFIED_PAYOFFS) {
     m_workspace.ResetForGameChange();
   }
@@ -390,8 +393,13 @@ void GameDocument::SetCurrentProfile(int p_profile)
 void GameDocument::AddProfileList(std::shared_ptr<AnalysisOutput> p_profs)
 {
   m_workspace.AddProfileList(p_profs);
-  m_unsavedResults = true;
-  UpdateViews(GBT_DOC_MODIFIED_VIEWS);
+  UpdateViews(GBT_DOC_MODIFIED_WORKSPACE);
+}
+
+void GameDocument::DoAddOutput(AnalysisOutput &p_list, const wxString &p_output)
+{
+  p_list.AddOutput(p_output);
+  UpdateViews(GBT_DOC_MODIFIED_WORKSPACE);
 }
 
 void GameDocument::SetProfileList(int p_index)
@@ -456,7 +464,7 @@ void GameDocument::DoSave(const wxString &p_filename, GameSaveFormat p_format)
     SaveDocument(file);
     m_filename = p_filename;
     m_gameModified = false;
-    m_unsavedResults = false;
+    m_workspaceModified = false;
     break;
 
   case GameSaveFormat::Efg:
@@ -671,13 +679,6 @@ void GameDocument::DoSetPayoff(GameOutcome p_outcome, int p_player, const wxStri
 {
   p_outcome->SetPayoff(m_game->GetPlayer(p_player), Number(p_value.ToStdString()));
   UpdateViews(GBT_DOC_MODIFIED_PAYOFFS);
-}
-
-void GameDocument::DoAddOutput(AnalysisOutput &p_list, const wxString &p_output)
-{
-  p_list.AddOutput(p_output);
-  m_unsavedResults = true;
-  UpdateViews(GBT_DOC_MODIFIED_NONE);
 }
 
 } // namespace Gambit::GUI

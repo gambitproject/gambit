@@ -1279,16 +1279,16 @@ namespace {
 
 wxString CloseWarningMessage(GameDocument *p_doc)
 {
-  if (p_doc->IsGameModified() && !p_doc->AreResultsUnsaved()) {
+  if (p_doc->IsGameModified() && !p_doc->IsWorkspaceModified()) {
     return _("This game has unsaved changes.\n\n"
              "Close without saving?");
   }
-  if (!p_doc->IsGameModified() && p_doc->AreResultsUnsaved()) {
+  if (!p_doc->IsGameModified() && p_doc->IsWorkspaceModified()) {
     return _("There are unsaved computational results.\n\n"
              "These changes are not saved in ordinary game files.\n"
              "Close without saving?");
   }
-  if (p_doc->IsGameModified() && p_doc->AreResultsUnsaved()) {
+  if (p_doc->IsGameModified() && p_doc->IsWorkspaceModified()) {
     return _("This game has unsaved changes, and there are unsaved computational results "
              "unsaved computational results or workspace changes.\n\n"
              "Close without saving?");
