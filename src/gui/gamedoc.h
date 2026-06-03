@@ -282,7 +282,7 @@ public:
   void PostPendingChanges();
 
   /// Operations on game model
-  enum class GameSaveFormat { Efg, Nfg, Workbook };
+  enum class GameSaveFormat { Efg, Nfg, Workspace };
   GameSaveFormat GetCurrentSaveFormat() const
   {
     if (m_filename.EndsWith(".efg")) {
@@ -291,7 +291,7 @@ public:
     if (m_filename.EndsWith(".nfg")) {
       return GameSaveFormat::Nfg;
     }
-    return GameSaveFormat::Workbook;
+    return GameSaveFormat::Workspace;
   }
   void DoSave(const wxString &p_filename, GameSaveFormat p_format);
   void DoSetTitle(const wxString &p_title, const wxString &p_comment);

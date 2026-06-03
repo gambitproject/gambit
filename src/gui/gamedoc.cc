@@ -451,7 +451,7 @@ void GameDocument::DoSave(const wxString &p_filename, GameSaveFormat p_format)
                              static_cast<const char *>(p_filename.mb_str()));
   }
   switch (p_format) {
-  case GameSaveFormat::Workbook:
+  case GameSaveFormat::Workspace:
     SaveWorkspace(file);
     m_filename = p_filename;
     m_gameModified = false;

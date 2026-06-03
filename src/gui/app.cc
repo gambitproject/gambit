@@ -162,12 +162,6 @@ void Application::SetCurrentDir(const wxString &p_dir)
   wxConfigBase::Get()->Write(_T("/General/CurrentDirectory"), p_dir);
 }
 
-bool Application::AreDocumentsModified() const
-{
-  return std::any_of(m_documents.begin(), m_documents.end(),
-                     std::mem_fn(&GameDocument::IsModified));
-}
-
 } // namespace Gambit::GUI
 
 IMPLEMENT_APP(Gambit::GUI::Application)

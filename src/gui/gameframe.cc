@@ -653,7 +653,7 @@ void GameFrame::OnFileSave(wxCommandEvent &p_event)
 
   wxFileDialog dialog(
       this, _("Save game as"), wxPathOnly(currentFilename), wxFileNameFromPath(currentFilename),
-      wxT("Gambit workbooks (*.gbt)|*.gbt|") wxT("Gambit extensive games (*.efg)|*.efg|")
+      wxT("Gambit workspaces (*.gbt)|*.gbt|") wxT("Gambit extensive games (*.efg)|*.efg|")
           wxT("Gambit strategic games (*.nfg)|*.nfg|") wxT("All files (*.*)|*.*"),
       wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
 
@@ -678,7 +678,7 @@ void GameFrame::OnFileSave(wxCommandEvent &p_event)
       break;
     }
   }
-  GameDocument::GameSaveFormat format = GameDocument::GameSaveFormat::Workbook;
+  GameDocument::GameSaveFormat format = GameDocument::GameSaveFormat::Workspace;
   if (filename.GetExt() == wxT("efg")) {
     format = GameDocument::GameSaveFormat::Efg;
   }
@@ -856,18 +856,18 @@ void GameFrame::OnFileExportSVG(wxCommandEvent &)
   }
 }
 
-void GameFrame::OnFileExit(wxCommandEvent &p_event)
+void GameFrame::OnFileExit(wxCommandEvent &)
 {
-  if (wxGetApp().AreDocumentsModified()) {
-    if (wxMessageBox(wxT("There are modified games.\n") wxT("Any unsaved changes will be lost!\n")
-                         wxT("Close anyway?"),
-                     _("Warning"), wxOK | wxCANCEL) == wxCANCEL) {
+  while (auto *topWindow = wxGetApp().GetTopWindow()) {
+    topWindow->Raise();
+    const auto before = wxGetApp().GetTopWindow();
+    topWindow->Close();
+
+    // The close was vetoed, or otherwise did not destroy/advance the top window.
+    // In that case, abort application exit.
+    if (wxGetApp().GetTopWindow() == before) {
       return;
     }
-  }
-
-  while (wxGetApp().GetTopWindow()) {
-    delete wxGetApp().GetTopWindow();
   }
 }
 
@@ -1285,12 +1285,11 @@ wxString CloseWarningMessage(GameDocument *p_doc)
   }
   if (!p_doc->IsGameModified() && p_doc->IsWorkspaceModified()) {
     return _("There are unsaved computational results.\n\n"
-             "These changes are not saved in ordinary game files.\n"
+             "These can be saved in a Gambit workspace file.\n"
              "Close without saving?");
   }
   if (p_doc->IsGameModified() && p_doc->IsWorkspaceModified()) {
-    return _("This game has unsaved changes, and there are unsaved computational results "
-             "unsaved computational results or workspace changes.\n\n"
+    return _("This game has unsaved changes, and there are unsaved computational results.\n\n"
              "Close without saving?");
   }
   return wxEmptyString;
