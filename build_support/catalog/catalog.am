@@ -26,6 +26,6 @@ CATALOG_FILES = \
 	catalog/journals/mor/vonstengelforges2008/fig6__Original_Layout.ef \
 	catalog/journals/mor/vonstengelforges2008/fig9.efg \
 	catalog/journals/mor/vonstengelforges2008/fig9__Original_Layout.ef \
-	catalog/misc/reiley2008/fig1.efg \
-	catalog/misc/shapley1974/fig2.nfg \
-	catalog/misc/shapley1974/fig3.nfg
+	catalog/journals/other/reiley2008/fig1.efg \
+	catalog/journals/other/shapley1974/fig2.nfg \
+	catalog/journals/other/shapley1974/fig3.nfg
