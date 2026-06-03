@@ -380,21 +380,21 @@ StrategyDominanceToolbar::StrategyDominanceToolbar(wxWindow *p_parent, GameDocum
 
 void StrategyDominanceToolbar::OnStrength(wxCommandEvent &p_event)
 {
-  m_doc->SetStrategyElimStrength(p_event.GetSelection() == 0);
+  m_doc->DoSetDominanceStrictness(p_event.GetSelection() == 0);
 }
 
-void StrategyDominanceToolbar::OnTopLevel(wxCommandEvent &) { m_doc->TopStrategyElimLevel(); }
+void StrategyDominanceToolbar::OnTopLevel(wxCommandEvent &) { m_doc->DoTopDominanceLevel(); }
 
 void StrategyDominanceToolbar::OnPreviousLevel(wxCommandEvent &)
 {
-  m_doc->PreviousStrategyElimLevel();
+  m_doc->DoPreviousDominanceLevel();
 }
 
-void StrategyDominanceToolbar::OnNextLevel(wxCommandEvent &) { m_doc->NextStrategyElimLevel(); }
+void StrategyDominanceToolbar::OnNextLevel(wxCommandEvent &) { m_doc->DoNextDominanceLevel(); }
 
 void StrategyDominanceToolbar::OnLastLevel(wxCommandEvent &)
 {
-  while (m_doc->NextStrategyElimLevel())
+  while (m_doc->DoNextDominanceLevel())
     ;
 }
 

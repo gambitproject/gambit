@@ -160,7 +160,7 @@ void AnalysisNotebook::ShowMixed(bool p_show) { m_profiles->ShowMixed(p_show); }
 
 void AnalysisNotebook::OnChoice(wxCommandEvent &p_event)
 {
-  m_doc->SetProfileList(p_event.GetSelection() + 1);
+  m_doc->DoSelectEquilibriumOutput(p_event.GetSelection() + 1);
 }
 
 void AnalysisNotebook::OnUpdate()
@@ -1189,7 +1189,7 @@ void GameFrame::OnToolsDominance(wxCommandEvent &p_event)
     wxPostEvent(m_nfgPanel, p_event);
   }
   if (!p_event.IsChecked()) {
-    m_doc->TopStrategyElimLevel();
+    m_doc->DoTopDominanceLevel();
   }
 }
 

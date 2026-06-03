@@ -240,31 +240,17 @@ public:
   bool IsTree() const { return m_game->IsTree(); }
   GameAction GetAction(int p_index) const;
 
-  //!
-  //! @name Handling of list of computed profiles
-  //!
-  //@{
-  void AddProfileList(std::shared_ptr<AnalysisOutput> p_profs);
-  void SetProfileList(int p_index);
-  void SetCurrentProfile(int p_profile);
+  void DoAddEquilibriumOutput(std::shared_ptr<AnalysisOutput> p_profs);
+  void DoSelectEquilibriumOutput(int p_index);
+  void DoSelectProfile(int p_profile);
 
-  //!
-  //! @name Handling of behavior supports
-  //!
-  //@{
   BehaviorSupportProfile GetEfgSupport() const { return BehaviorSupportProfile(m_game); }
-  //@}
-
-  //!
-  //! @name Handling of strategy supports
-  //!
-  //@{
   const StrategySupportProfile &GetNfgSupport() const { return m_workspace.GetNfgSupport(); }
-  void SetStrategyElimStrength(bool p_strict);
-  bool NextStrategyElimLevel();
-  void PreviousStrategyElimLevel();
-  void TopStrategyElimLevel();
-  //@}
+
+  void DoSetDominanceStrictness(bool p_strict);
+  bool DoNextDominanceLevel();
+  void DoPreviousDominanceLevel();
+  void DoTopDominanceLevel();
 
   GameNode GetSelectNode() const { return m_selectNode; }
   void SetSelectNode(GameNode);

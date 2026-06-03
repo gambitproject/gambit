@@ -56,13 +56,13 @@ MixedProfileList::~MixedProfileList() = default;
 void MixedProfileList::OnLabelClick(wxSheetEvent &p_event)
 {
   if (p_event.GetCol() == -1) {
-    m_doc->SetCurrentProfile(RowToProfile(p_event.GetRow()));
+    m_doc->DoSelectProfile(RowToProfile(p_event.GetRow()));
   }
 }
 
 void MixedProfileList::OnCellClick(wxSheetEvent &p_event)
 {
-  m_doc->SetCurrentProfile(RowToProfile(p_event.GetRow()));
+  m_doc->DoSelectProfile(RowToProfile(p_event.GetRow()));
 }
 
 #ifdef UNUSED

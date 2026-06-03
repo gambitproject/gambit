@@ -100,7 +100,7 @@ void NashMonitorDialog::Start(std::shared_ptr<AnalysisOutput> p_command)
     m_doc->BuildNfg();
   }
 
-  m_doc->AddProfileList(p_command);
+  m_doc->DoAddEquilibriumOutput(p_command);
 
   m_process = new wxProcess(this, GBT_ID_PROCESS);
   m_process->Redirect();

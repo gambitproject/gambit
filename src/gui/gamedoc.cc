@@ -384,13 +384,13 @@ void GameDocument::SetStyle(const TreeRenderConfig &p_style)
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-void GameDocument::SetCurrentProfile(int p_profile)
+void GameDocument::DoSelectProfile(int p_profile)
 {
   m_workspace.SetCurrentProfile(p_profile);
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-void GameDocument::AddProfileList(std::shared_ptr<AnalysisOutput> p_profs)
+void GameDocument::DoAddEquilibriumOutput(std::shared_ptr<AnalysisOutput> p_profs)
 {
   m_workspace.AddProfileList(p_profs);
   UpdateViews(GBT_DOC_MODIFIED_WORKSPACE);
@@ -402,32 +402,32 @@ void GameDocument::DoAddOutput(AnalysisOutput &p_list, const wxString &p_output)
   UpdateViews(GBT_DOC_MODIFIED_WORKSPACE);
 }
 
-void GameDocument::SetProfileList(int p_index)
+void GameDocument::DoSelectEquilibriumOutput(int p_index)
 {
   m_workspace.SetProfileList(p_index);
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-void GameDocument::SetStrategyElimStrength(bool p_strict)
+void GameDocument::DoSetDominanceStrictness(bool p_strict)
 {
   m_workspace.SetStrategyElimStrength(p_strict);
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-bool GameDocument::NextStrategyElimLevel()
+bool GameDocument::DoNextDominanceLevel()
 {
   const bool ret = m_workspace.NextStrategyElimLevel();
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
   return ret;
 }
 
-void GameDocument::PreviousStrategyElimLevel()
+void GameDocument::DoPreviousDominanceLevel()
 {
   m_workspace.PreviousStrategyElimLevel();
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-void GameDocument::TopStrategyElimLevel()
+void GameDocument::DoTopDominanceLevel()
 {
   m_workspace.TopStrategyElimLevel();
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);

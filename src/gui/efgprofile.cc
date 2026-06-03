@@ -56,7 +56,7 @@ BehaviorProfileList::~BehaviorProfileList() = default;
 void BehaviorProfileList::OnLabelClick(wxSheetEvent &p_event)
 {
   if (p_event.GetCol() == -1) {
-    m_doc->SetCurrentProfile(p_event.GetRow() + 1);
+    m_doc->DoSelectProfile(p_event.GetRow() + 1);
   }
   else {
     // Clicking on an action column sets the selected node to the first
@@ -68,7 +68,7 @@ void BehaviorProfileList::OnLabelClick(wxSheetEvent &p_event)
 
 void BehaviorProfileList::OnCellClick(wxSheetEvent &p_event)
 {
-  m_doc->SetCurrentProfile(p_event.GetRow() + 1);
+  m_doc->DoSelectProfile(p_event.GetRow() + 1);
 }
 
 wxString BehaviorProfileList::GetCellValue(const wxSheetCoords &p_coords)
