@@ -237,9 +237,18 @@ public:
   void PostPendingChanges();
 
   /// Operations on game model
-  void DoSave(const wxString &p_filename);
-  void DoExportEfg(const wxString &p_filename);
-  void DoExportNfg(const wxString &p_filename);
+  enum class GameSaveFormat { Efg, Nfg, Workbook };
+  GameSaveFormat GetCurrentSaveFormat() const
+  {
+    if (m_filename.EndsWith(".efg")) {
+      return GameSaveFormat::Efg;
+    }
+    if (m_filename.EndsWith(".nfg")) {
+      return GameSaveFormat::Nfg;
+    }
+    return GameSaveFormat::Workbook;
+  }
+  void DoSave(const wxString &p_filename, GameSaveFormat p_format);
   void DoSetTitle(const wxString &p_title, const wxString &p_comment);
   void DoNewPlayer();
   void DoSetPlayerLabel(GamePlayer p_player, const wxString &p_label);

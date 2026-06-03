@@ -373,27 +373,32 @@ void GameDocument::SetSelectNode(GameNode p_node)
 // Commands for model part of MVC architecture start here.
 //======================================================================
 
-void GameDocument::DoSave(const wxString &p_filename)
+void GameDocument::DoSave(const wxString &p_filename, GameSaveFormat p_format)
 {
-  std::ofstream file(static_cast<const char *>(p_filename.mb_str()));
-  SaveDocument(file);
-  m_filename = p_filename;
-  SetModified(false);
-  UpdateViews(GBT_DOC_MODIFIED_NONE);
-}
+  std::ofstream file(p_filename.mb_str());
+  if (!file) {
+    throw std::runtime_error(std::string("Unable to open file for writing: ") +
+                             static_cast<const char *>(p_filename.mb_str()));
+  }
+  switch (p_format) {
+  case GameSaveFormat::Workbook:
+    std::cout << "Got format as workbook\n";
+    SaveDocument(file);
+    m_filename = p_filename;
+    SetModified(false);
+    break;
 
-void GameDocument::DoExportEfg(const wxString &p_filename)
-{
-  std::ofstream file(static_cast<const char *>(p_filename.mb_str()));
-  m_game->Write(file, "efg");
-  UpdateViews(GBT_DOC_MODIFIED_NONE);
-}
+  case GameSaveFormat::Efg:
+    m_game->Write(file, "efg");
+    std::cout << "Got format as efg\n";
+    break;
 
-void GameDocument::DoExportNfg(const wxString &p_filename)
-{
-  std::ofstream file(static_cast<const char *>(p_filename.mb_str()));
-  BuildNfg();
-  m_game->Write(file, "nfg");
+  case GameSaveFormat::Nfg:
+    BuildNfg();
+    std::cout << "Got format as nfg\n";
+    m_game->Write(file, "nfg");
+    break;
+  }
   UpdateViews(GBT_DOC_MODIFIED_NONE);
 }
 
