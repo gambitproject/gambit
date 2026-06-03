@@ -124,21 +124,44 @@ public:
 // GBT_DOC_MODIFIED_LABELS: Labeling of players, strategies, etc. has
 // changed.
 //
-// GBT_DOC_MODIFIED_VIEWS: Information about how the document is viewed
-// (e.g., player colors) has changed.
-//
 // GBT_DOC_MODIFIED_WORKSPACE: Stored analysis workspace data has changed.
 // This affects workbook/workspace persistence, but does not modify the
 // underlying game model.
 //
-using GameModificationType = enum {
-  GBT_DOC_MODIFIED_NONE = 0x00,
-  GBT_DOC_MODIFIED_GAME = 0x01,
-  GBT_DOC_MODIFIED_PAYOFFS = 0x02,
-  GBT_DOC_MODIFIED_LABELS = 0x04,
-  GBT_DOC_MODIFIED_VIEWS = 0x08,
-  GBT_DOC_MODIFIED_WORKSPACE = 0x10
+// GBT_DOC_MODIFIED_PRESENTATION: Settings on how information is rendered
+// (for example, colors) have changed.
+//
+enum class GameModificationType : unsigned int {
+  None = 0x00,
+  GameForm = 0x01,
+  GamePayoffs = 0x02,
+  GameLabels = 0x04,
+  Workspace = 0x08,
+  Presentation = 0x10
 };
+
+inline GameModificationType operator|(GameModificationType p_left, GameModificationType p_right)
+{
+  return static_cast<GameModificationType>(static_cast<unsigned int>(p_left) |
+                                           static_cast<unsigned int>(p_right));
+}
+
+inline GameModificationType operator&(GameModificationType p_left, GameModificationType p_right)
+{
+  return static_cast<GameModificationType>(static_cast<unsigned int>(p_left) &
+                                           static_cast<unsigned int>(p_right));
+}
+
+inline GameModificationType &operator|=(GameModificationType &p_left, GameModificationType p_right)
+{
+  p_left = p_left | p_right;
+  return p_left;
+}
+
+inline bool HasModification(GameModificationType p_modifications, GameModificationType p_test)
+{
+  return static_cast<unsigned int>(p_modifications & p_test) != 0;
+}
 
 class AnalysisWorkspace {
   GameDocument *m_doc;
@@ -204,7 +227,8 @@ class GameDocument {
 
   AnalysisWorkspace m_workspace;
 
-  void UpdateViews(GameModificationType p_modifications);
+  void NotifyChanged(GameModificationType p_modifications);
+  void UpdateViews();
 
 public:
   explicit GameDocument(Game p_game);
