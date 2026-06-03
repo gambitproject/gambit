@@ -619,7 +619,7 @@ void GameFrame::OnFileOpen(wxCommandEvent &)
 {
   wxFileDialog dialog(
       this, _("Choose file to open"), wxGetApp().GetCurrentDir(), _T(""),
-      wxT("Gambit workbooks (*.gbt)|*.gbt|") wxT("Gambit extensive games (*.efg)|*.efg|")
+      wxT("Gambit workspaces (*.gbt)|*.gbt|") wxT("Gambit extensive games (*.efg)|*.efg|")
           wxT("Gambit strategic games (*.nfg)|*.nfg|") wxT("All files (*.*)|*.*"));
 
   if (dialog.ShowModal() == wxID_OK) {
