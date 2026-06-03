@@ -76,11 +76,9 @@ options to specify additional starting points for the algorithm.
    in addition to the approximate equilibrium profile found.
 
 
-Computing an equilibrium in mixed strategies of :download:`e02.efg
-<../contrib/games/e02.efg>`, the example in Figure 2 of Selten
-(International Journal of Game Theory, 1975)
+Computing an equilibrium in mixed strategies of the example in Figure 2 of :cite:p:`Sel75`::
 
-   $ gambit-simpdiv e02.nfg
+   $ gambit-simpdiv catalog/selten1975/fig2.efg
    Compute Nash equilibria using simplicial subdivision
    Gambit version |release|, Copyright (C) 1994-2026, The Gambit Project
    This is free software, distributed under the GNU GPL

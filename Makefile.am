@@ -22,37 +22,14 @@
 
 ACLOCAL_AMFLAGS = -I m4
 
+include build_support/catalog/catalog.am
+
 EXTRA_DIST = \
     build_support/msw/gambit.wxs.in \
 	build_support/osx/Info.plist.in \
 	build_support/osx/gambit.icns \
 	src/labenski/README.txt \
-	src/labenski/art/grab.xpm \
-	src/labenski/art/hand.xpm \
-	src/labenski/art/ledgreen.xpm \
-	src/labenski/art/ledgrey.xpm \
-	src/labenski/doc/README-plotctrl.txt \
 	src/labenski/doc/README-sheet.txt \
-	src/labenski/doc/README-wxthings.txt \
-	src/labenski/include/wx/wxthings/bitmaps/copy.xpm \
-	src/labenski/include/wx/wxthings/bitmaps/cut.xpm \
-	src/labenski/include/wx/wxthings/bitmaps/findnext.xpm \
-	src/labenski/include/wx/wxthings/bitmaps/find.xpm \
-	src/labenski/include/wx/wxthings/bitmaps/grab.xpm \
-	src/labenski/include/wx/wxthings/bitmaps/hand.xpm \
-	src/labenski/include/wx/wxthings/bitmaps/help.xpm \
-	src/labenski/include/wx/wxthings/bitmaps/new.xpm \
-	src/labenski/include/wx/wxthings/bitmaps/open.xpm \
-	src/labenski/include/wx/wxthings/bitmaps/paste.xpm \
-	src/labenski/include/wx/wxthings/bitmaps/preview.xpm \
-	src/labenski/include/wx/wxthings/bitmaps/print.xpm \
-	src/labenski/include/wx/wxthings/bitmaps/question.xpm \
-	src/labenski/include/wx/wxthings/bitmaps/redo.xpm \
-	src/labenski/include/wx/wxthings/bitmaps/replace.xpm \
-	src/labenski/include/wx/wxthings/bitmaps/saveall.xpm \
-	src/labenski/include/wx/wxthings/bitmaps/saveas.xpm \
-	src/labenski/include/wx/wxthings/bitmaps/spell.xpm \
-	src/labenski/include/wx/wxthings/bitmaps/undo.xpm \
 	src/gui/bitmaps/about.xpm \
 	src/gui/bitmaps/adddecimal.xpm \
 	src/gui/bitmaps/calc.xpm \
@@ -230,20 +207,7 @@ EXTRA_DIST = \
 	contrib/games/yamamoto.nfg \
 	contrib/games/zero.nfg \
 	src/README.rst \
-	catalog/bagwell1995.efg \
-	catalog/gilboa1997/fig2.efg \
-	catalog/jakobsen2016/fig1a.efg \
-	catalog/jakobsen2016/fig1b.efg \
-	catalog/jakobsen2016/fig1c.efg \
-	catalog/jakobsen2016/fig3.efg \
-	catalog/myerson1991/fig2_1.efg \
-	catalog/myerson1991/fig4_2.efg \
-	catalog/reiley2008/fig1.efg \
-	catalog/selten1975/fig1.efg \
-	catalog/selten1975/fig2.efg \
-	catalog/selten1975/fig3.efg \
-	catalog/watson2013/exercise29_6.efg \
-	catalog/watson2013/fig29_1.efg
+	$(CATALOG_FILES)
 
 core_SOURCES = \
     src/core/core.h \
@@ -493,35 +457,6 @@ gambit_SOURCES = \
 	src/labenski/src/sheetsel.cpp \
 	src/labenski/src/sheetspt.cpp \
 	src/labenski/src/sheettbl.cpp \
-	src/labenski/src/block.cpp \
-	src/labenski/src/genergdi.cpp \
-	src/labenski/src/geometry.cpp \
-	src/labenski/src/optvalue.cpp \
-	src/labenski/src/range.cpp \
-	src/labenski/src/spinctld.cpp \
-	src/labenski/src/toggle.cpp \
-	src/labenski/src/fparser.cpp \
-	src/labenski/src/fparser.hh \
-	src/labenski/src/fourier.c \
-	src/labenski/src/lm_lsqr.cpp \
-	src/labenski/src/plotctrl.cpp \
-	src/labenski/src/plotcurv.cpp \
-	src/labenski/src/plotdata.cpp \
-	src/labenski/src/plotdraw.cpp \
-	src/labenski/src/plotfunc.cpp \
-	src/labenski/src/plotmark.cpp \
-	src/labenski/src/plotprnt.cpp \
-	src/labenski/include/wx/plotctrl/fourier.h \
-	src/labenski/include/wx/plotctrl/fparser.h \
-	src/labenski/include/wx/plotctrl/lm_lsqr.h \
-	src/labenski/include/wx/plotctrl/plotctrl.h \
-	src/labenski/include/wx/plotctrl/plotcurv.h \
-	src/labenski/include/wx/plotctrl/plotdata.h \
-	src/labenski/include/wx/plotctrl/plotdefs.h \
-	src/labenski/include/wx/plotctrl/plotdraw.h \
-	src/labenski/include/wx/plotctrl/plotfunc.h \
-	src/labenski/include/wx/plotctrl/plotmark.h \
-	src/labenski/include/wx/plotctrl/plotprnt.h \
 	src/labenski/include/wx/sheet/pairarr.h \
 	src/labenski/include/wx/sheet/sheetatr.h \
 	src/labenski/include/wx/sheet/sheetdef.h \
@@ -532,17 +467,6 @@ gambit_SOURCES = \
 	src/labenski/include/wx/sheet/sheetsel.h \
 	src/labenski/include/wx/sheet/sheetspt.h \
 	src/labenski/include/wx/sheet/sheettbl.h \
-	src/labenski/include/wx/wxthings/block.h \
-	src/labenski/include/wx/wxthings/bmpcombo.h \
-	src/labenski/include/wx/wxthings/dropdown.h \
-	src/labenski/include/wx/wxthings/genergdi.h \
-	src/labenski/include/wx/wxthings/geometry.h \
-	src/labenski/include/wx/wxthings/medsort.h \
-	src/labenski/include/wx/wxthings/optvalue.h \
-	src/labenski/include/wx/wxthings/range.h \
-	src/labenski/include/wx/wxthings/spinctld.h \
-	src/labenski/include/wx/wxthings/thingdef.h \
-	src/labenski/include/wx/wxthings/toggle.h \
 	src/gui/analysis.cc \
 	src/gui/analysis.h \
 	src/gui/app.cc \
@@ -574,6 +498,7 @@ gambit_SOURCES = \
 	src/gui/dlnewtable.cc \
 	src/gui/dlnewtable.h \
 	src/gui/dlnfglogit.cc \
+	src/gui/dlnfglogit.h \
 	src/gui/efgdisplay.cc \
 	src/gui/efgdisplay.h \
 	src/gui/efglayout.cc \

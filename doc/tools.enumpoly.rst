@@ -73,12 +73,10 @@ support of some set of equilibria.
    singular supports are identified with the label "singular." By
    default, no information about supports is printed.
 
-Computing equilibria of the strategic game :download:`e01.nfg
-<../contrib/games/e01.efg>`, the example in Figure 1 of Selten
-(International Journal of Game Theory, 1975) sometimes called
-"Selten's horse"
+Computing equilibria of the example in Figure 1 of :cite:p:`Sel75`, sometimes called
+"Selten's horse"::
 
-   $ gambit-enumpoly e01.nfg
+   $ gambit-enumpoly -S catalog/selten1975/fig1.efg
    Compute Nash equilibria by solving polynomial systems
    Gambit version |release|, Copyright (C) 1994-2026, The Gambit Project
    This is free software, distributed under the GNU GPL

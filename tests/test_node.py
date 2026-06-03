@@ -132,7 +132,7 @@ SUBGAME_ROOTS_CASES = [
     # ------------------------------------------------------------------------
     pytest.param(
         SubgameRootsTestCase(
-            factory=functools.partial(games.read_from_file, "e02.efg"),
+            factory=functools.partial(gbt.catalog.load, "selten1975/fig2"),
             expected_paths=[[], ["L"], ["L", "L"]]
         ),
         id="centipede_3_rounds"
@@ -301,7 +301,6 @@ def test_node_own_prior_action_non_terminal(game_file, expected_node_data):
 
 @pytest.mark.parametrize("game_file, expected_unreachable_paths", [
     # Games without absent-mindedness, where all nodes are reachable
-    ("e02.efg", []),
     ("wichardt.efg", []),
     ("subgames.efg", []),
 
@@ -442,7 +441,7 @@ def _subtrees_equal(
 
 def test_copy_tree_onto_nondescendent_terminal_node():
     """Test copying a subtree to a non-descendent node."""
-    g = games.read_from_file("e01.efg")
+    g = gbt.catalog.load("selten1975/fig1")
     list_nodes = list(g.nodes)
     src_node = list_nodes[3]   # path=[1, 0]
     dest_node = list_nodes[2]  # path=[0, 0]
@@ -454,7 +453,7 @@ def test_copy_tree_onto_nondescendent_terminal_node():
 
 def test_copy_tree_onto_descendent_terminal_node():
     """Test copying a subtree to a node that's a descendent of the original."""
-    g = games.read_from_file("e01.efg")
+    g = gbt.catalog.load("selten1975/fig1")
     list_nodes = list(g.nodes)
     src_node = list_nodes[1]   # path=[0]
     dest_node = list_nodes[4]  # path=[0, 1, 0]
@@ -681,7 +680,7 @@ def _count_subtree_nodes(start_node: gbt.Node, count_terminal: bool) -> int:
 def test_len_matches_expected_node_count():
     """Verify `len(game.nodes)` matches expected node count
     """
-    game = games.read_from_file("e01.efg")
+    game = gbt.catalog.load("selten1975/fig1")
     expected_node_count = 9
 
     direct_len = len(game.nodes)
@@ -693,7 +692,7 @@ def test_len_matches_expected_node_count():
 def test_len_after_delete_tree():
     """Verify `len(game.nodes)` is correct after `delete_tree`.
     """
-    game = games.read_from_file("e01.efg")
+    game = gbt.catalog.load("selten1975/fig1")
     initial_number_of_nodes = len(game.nodes)
     list_nodes = list(game.nodes)
 
@@ -708,7 +707,7 @@ def test_len_after_delete_tree():
 def test_len_after_delete_parent():
     """Verify `len(game.nodes)` is correct after `delete_parent`.
     """
-    game = games.read_from_file("e02.efg")
+    game = gbt.catalog.load("selten1975/fig2")
     initial_number_of_nodes = len(game.nodes)
     list_nodes = list(game.nodes)
 
@@ -726,7 +725,7 @@ def test_len_after_delete_parent():
 def test_len_after_append_move():
     """Verify `len(game.nodes)` is correct after `append_move`.
     """
-    game = games.read_from_file("e01.efg")
+    game = gbt.catalog.load("selten1975/fig1")
     initial_number_of_nodes = len(game.nodes)
     list_nodes = list(game.nodes)
 
@@ -742,7 +741,7 @@ def test_len_after_append_move():
 def test_len_after_append_infoset():
     """Verify `len(game.nodes)` is correct after `append_infoset`.
     """
-    game = games.read_from_file("e02.efg")
+    game = gbt.catalog.load("selten1975/fig2")
     initial_number_of_nodes = len(game.nodes)
     list_nodes = list(game.nodes)
 
@@ -759,7 +758,7 @@ def test_len_after_append_infoset():
 def test_len_after_add_action():
     """Verify `len(game.nodes)` is correct after `add_action`.
     """
-    game = games.read_from_file("e01.efg")
+    game = gbt.catalog.load("selten1975/fig1")
     initial_number_of_nodes = len(game.nodes)
 
     infoset_to_modify = game.infosets[1]
@@ -774,7 +773,7 @@ def test_len_after_add_action():
 def test_len_after_delete_action():
     """Verify `len(game.nodes)` is correct after `delete_action`.
     """
-    game = games.read_from_file("e02.efg")
+    game = gbt.catalog.load("selten1975/fig2")
     initial_number_of_nodes = len(game.nodes)
 
     action_to_delete = game.infosets[0].actions[1]
@@ -795,7 +794,7 @@ def test_len_after_delete_action():
 def test_len_after_insert_move():
     """Verify `len(game.nodes)` is correct after `insert_move`.
     """
-    game = games.read_from_file("e01.efg")
+    game = gbt.catalog.load("selten1975/fig1")
     initial_number_of_nodes = len(game.nodes)
     list_nodes = list(game.nodes)
 
@@ -812,7 +811,7 @@ def test_len_after_insert_move():
 def test_len_after_insert_infoset():
     """Verify `len(game.nodes)` is correct after `insert_infoset`.
     """
-    game = games.read_from_file("e01.efg")
+    game = gbt.catalog.load("selten1975/fig1")
     initial_number_of_nodes = len(game.nodes)
     list_nodes = list(game.nodes)
 
@@ -829,7 +828,7 @@ def test_len_after_insert_infoset():
 def test_len_after_copy_tree():
     """Verify `len(game.nodes)` is correct after `copy_tree`.
     """
-    game = games.read_from_file("e01.efg")
+    game = gbt.catalog.load("selten1975/fig1")
     initial_number_of_nodes = len(game.nodes)
     list_nodes = list(game.nodes)
     src_node = list_nodes[3]              # path=[1, 0]
@@ -844,7 +843,7 @@ def test_len_after_copy_tree():
 def test_node_plays():
     """Verify `node.plays` returns plays reachable from a given node.
     """
-    game = games.read_from_file("e02.efg")
+    game = gbt.catalog.load("selten1975/fig2")
     list_nodes = list(game.nodes)
 
     test_node = list_nodes[2]  # path=[1]
@@ -885,8 +884,8 @@ def test_node_children_other_infoset_action():
         pytest.param(games.read_from_file("basic_extensive_game.efg")),
         pytest.param(games.read_from_file("binary_3_levels_generic_payoffs.efg")),
         pytest.param(games.read_from_file("cent3.efg")),
-        pytest.param(games.read_from_file("e01.efg")),
-        pytest.param(games.read_from_file("e02.efg")),
+        pytest.param(gbt.catalog.load("selten1975/fig1")),
+        pytest.param(gbt.catalog.load("selten1975/fig2")),
         pytest.param(games.read_from_file("stripped_down_poker.efg")),
         pytest.param(gbt.Game.new_tree()),
     ],

@@ -482,8 +482,10 @@ void GameTableRep::WriteNfgFile(std::ostream &p_file) const
   }
   p_file << "}" << std::endl;
 
-  for (auto result : m_results) {
-    p_file << ((result) ? result->m_number : 0) << ' ';
+  for (auto iter : StrategyContingencies(
+           StrategySupportProfile(std::const_pointer_cast<GameRep>(shared_from_this())))) {
+    const auto outcome = iter->GetOutcome();
+    p_file << ((outcome) ? outcome->m_number : 0) << ' ';
   }
   p_file << std::endl;
 }

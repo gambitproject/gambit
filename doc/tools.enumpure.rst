@@ -52,25 +52,21 @@ See the :ref:`algorithm description <enumpure>` for full details.
    Suppresses printing of the banner at program launch.
 
 
-Computing the pure-strategy equilibria of extensive game :download:`e02.efg
-<../contrib/games/e02.efg>`, the example in Figure 2 of Selten
-(International Journal of Game Theory, 1975)
+Computing the pure-strategy equilibria of extensive game in Figure 2 of :cite:p:`Sel75`::
 
-   $ gambit-enumpure e02.efg
+   $ gambit-enumpure catalog/selten1975/fig2.efg
 
    Search for Nash equilibria in pure strategies
-
    Gambit version |release|, Copyright (C) 1994-2026, The Gambit Project
-
    This is free software, distributed under the GNU GPL
 
    NE,1,0,0,0,1,0
 
 With the `-S` switch, the set of equilibria returned is the same,
 except expressed in strategic game strategies rather than behavior
-strategies
+strategies::
 
-   $ gambit-enumpure -S e02.efg
+   $ gambit-enumpure -S catalog/selten1975/fig2.efg
 
    Search for Nash equilibria in pure strategies
    Gambit version |release|, Copyright (C) 1994-2026, The Gambit Project
@@ -80,9 +76,9 @@ strategies
 
 The `-A` switch considers only behavior strategy profiles where there
 is no way for a player to improve his payoff by changing action at
-only one information set; therefore the set of solutions is larger
+only one information set; therefore the set of solutions is larger::
 
-   $ gambit-enumpure -A e02.efg
+   $ gambit-enumpure -A catalog/selten1975/fig2.efg
    Search for Nash equilibria in pure strategies
    Gambit version |release|, Copyright (C) 1994-2026, The Gambit Project
    This is free software, distributed under the GNU GPL
