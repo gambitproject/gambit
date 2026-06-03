@@ -156,6 +156,9 @@ class CustomAlphaStyle(AlphaStyle):
             self.format_web_refs(e),
         ]
 
+    def get_inbook_template(self, e):
+        return self.get_incollection_template(e)
+
     def get_inproceedings_template(self, e):
         return toplevel[
             sentence[

@@ -27,6 +27,7 @@
 #ifndef WX_PRECOMP
 #include <wx/wx.h>
 #endif // WX_PRECOMP
+#include <wx/filename.h>
 #include <wx/fontdlg.h>
 #include <wx/printdlg.h>
 #if !defined(__WXMSW__) || wxUSE_POSTSCRIPT
@@ -59,6 +60,7 @@
 #include "dleditmove.h"
 #include "dlefglayout.h"
 #include "dlefglegend.h"
+#include "dlnewtable.h"
 
 namespace Gambit::GUI {
 
@@ -187,8 +189,6 @@ EVT_MENU(wxID_OPEN, GameFrame::OnFileOpen)
 EVT_MENU(wxID_CLOSE, GameFrame::OnFileClose)
 EVT_MENU(wxID_SAVE, GameFrame::OnFileSave)
 EVT_MENU(wxID_SAVEAS, GameFrame::OnFileSave)
-EVT_MENU(GBT_MENU_FILE_EXPORT_EFG, GameFrame::OnFileExportEfg)
-EVT_MENU(GBT_MENU_FILE_EXPORT_NFG, GameFrame::OnFileExportNfg)
 EVT_MENU(GBT_MENU_FILE_EXPORT_BMP, GameFrame::OnFileExportGraphic)
 EVT_MENU(GBT_MENU_FILE_EXPORT_JPEG, GameFrame::OnFileExportGraphic)
 EVT_MENU(GBT_MENU_FILE_EXPORT_PNG, GameFrame::OnFileExportGraphic)
@@ -322,8 +322,6 @@ void GameFrame::OnUpdate()
   const GameNode selectNode = m_doc->GetSelectNode();
   wxMenuBar *menuBar = GetMenuBar();
 
-  menuBar->Enable(GBT_MENU_FILE_EXPORT_EFG, m_doc->IsTree());
-
   menuBar->Enable(GBT_MENU_EDIT_INSERT_MOVE, selectNode != nullptr);
   menuBar->Enable(GBT_MENU_EDIT_INSERT_ACTION, selectNode && selectNode->GetInfoset());
   menuBar->Enable(GBT_MENU_EDIT_REVEAL, selectNode && selectNode->GetInfoset());
@@ -418,11 +416,6 @@ void GameFrame::MakeMenus()
 
   fileMenu->AppendSeparator();
   auto *fileExportMenu = new wxMenu;
-  fileExportMenu->Append(GBT_MENU_FILE_EXPORT_EFG, _("Gambit .&efg format"),
-                         _("Save the extensive game in .efg format"));
-  fileExportMenu->Append(GBT_MENU_FILE_EXPORT_NFG, _("Gambit .&nfg format"),
-                         _("Save the strategic game in .nfg format"));
-  fileExportMenu->AppendSeparator();
   fileExportMenu->Append(GBT_MENU_FILE_EXPORT_BMP, _("&BMP"),
                          _("Save a rendering of the game as a Windows bitmap"));
   fileExportMenu->Append(GBT_MENU_FILE_EXPORT_JPEG, _("&JPEG"),
@@ -611,27 +604,15 @@ void GameFrame::MakeToolbar()
 //               GameFrame: Menu handlers - File menu
 //----------------------------------------------------------------------
 
-void GameFrame::OnFileNewEfg(wxCommandEvent &)
-{
-  const Game efg = NewTree();
-  efg->SetTitle("Untitled Extensive Game");
-  efg->NewPlayer()->SetLabel("Player 1");
-  efg->NewPlayer()->SetLabel("Player 2");
-  auto *doc = new GameDocument(efg);
-  (void)new GameFrame(nullptr, doc);
-}
+void GameFrame::OnFileNewEfg(wxCommandEvent &) { new GameFrame(nullptr, NewTreeDocument()); }
 
 void GameFrame::OnFileNewNfg(wxCommandEvent &)
 {
-  std::vector<int> dim(2);
-  dim[0] = 2;
-  dim[1] = 2;
-  const Game nfg = NewTable(dim);
-  nfg->SetTitle("Untitled Strategic Game");
-  nfg->GetPlayer(1)->SetLabel("Player 1");
-  nfg->GetPlayer(2)->SetLabel("Player 2");
-  auto *doc = new GameDocument(nfg);
-  (void)new GameFrame(nullptr, doc);
+  NewTableDialog dialog(this);
+  if (dialog.ShowModal() != wxID_OK) {
+    return;
+  }
+  new GameFrame(nullptr, NewTableDocument(dialog.GetDimensions()));
 }
 
 void GameFrame::OnFileOpen(wxCommandEvent &)
@@ -652,29 +633,59 @@ void GameFrame::OnFileClose(wxCommandEvent &) { Close(); }
 
 void GameFrame::OnFileSave(wxCommandEvent &p_event)
 {
-  if (p_event.GetId() == wxID_SAVEAS || m_doc->GetFilename().empty()) {
-    wxFileDialog dialog(this, _("Choose file"), wxPathOnly(m_doc->GetFilename()),
-                        wxFileNameFromPath(m_doc->GetFilename()),
-                        wxT("Gambit workbooks (*.gbt)|*.gbt|") wxT("All files (*.*)|*.*"),
-                        wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+  const bool saveAs = p_event.GetId() == wxID_SAVEAS || m_doc->GetFilename().empty();
 
-    if (dialog.ShowModal() == wxID_OK) {
-      try {
-        m_doc->DoSave(dialog.GetPath());
-      }
-      catch (std::exception &ex) {
-        ExceptionDialog(this, ex.what()).ShowModal();
-      }
-    }
-  }
-  else {
+  auto doSave = [this](const wxString &path, GameDocument::GameSaveFormat format) {
     try {
-      m_doc->DoSave(m_doc->GetFilename());
+      m_doc->DoSave(path, format);
     }
-    catch (std::exception &ex) {
+    catch (const std::exception &ex) {
       ExceptionDialog(this, ex.what()).ShowModal();
     }
+  };
+
+  if (!saveAs) {
+    doSave(wxString::FromUTF8(m_doc->GetFilename()), m_doc->GetCurrentSaveFormat());
+    return;
   }
+
+  const wxString currentFilename = wxString::FromUTF8(m_doc->GetFilename());
+
+  wxFileDialog dialog(
+      this, _("Save game as"), wxPathOnly(currentFilename), wxFileNameFromPath(currentFilename),
+      wxT("Gambit workbooks (*.gbt)|*.gbt|") wxT("Gambit extensive games (*.efg)|*.efg|")
+          wxT("Gambit strategic games (*.nfg)|*.nfg|") wxT("All files (*.*)|*.*"),
+      wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+
+  if (dialog.ShowModal() != wxID_OK) {
+    return;
+  }
+
+  wxFileName filename(dialog.GetPath());
+
+  if (!filename.HasExt()) {
+    switch (dialog.GetFilterIndex()) {
+    case 0:
+      filename.SetExt(wxT("gbt"));
+      break;
+    case 1:
+      filename.SetExt(wxT("efg"));
+      break;
+    case 2:
+      filename.SetExt(wxT("nfg"));
+      break;
+    default:
+      break;
+    }
+  }
+  GameDocument::GameSaveFormat format = GameDocument::GameSaveFormat::Workbook;
+  if (filename.GetExt() == wxT("efg")) {
+    format = GameDocument::GameSaveFormat::Efg;
+  }
+  else if (filename.GetExt() == wxT("nfg")) {
+    format = GameDocument::GameSaveFormat::Nfg;
+  }
+  doSave(filename.GetFullPath(), format);
 }
 
 void GameFrame::OnFilePageSetup(wxCommandEvent &)
@@ -732,28 +743,6 @@ void GameFrame::OnFilePrint(wxCommandEvent &)
   }
   else {
     m_printData = printer.GetPrintDialogData().GetPrintData();
-  }
-}
-
-void GameFrame::OnFileExportEfg(wxCommandEvent &)
-{
-  wxFileDialog dialog(this, _("Choose file"), wxGetApp().GetCurrentDir(), _T(""),
-                      wxT("Gambit extensive games (*.efg)|*.efg|") wxT("All files (*.*)|*.*"),
-                      wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-
-  if (dialog.ShowModal() == wxID_OK) {
-    m_doc->DoExportEfg(dialog.GetPath());
-  }
-}
-
-void GameFrame::OnFileExportNfg(wxCommandEvent &)
-{
-  wxFileDialog dialog(this, _("Choose file"), wxGetApp().GetCurrentDir(), _T(""),
-                      wxT("Gambit strategic games (*.nfg)|*.nfg|") wxT("All files (*.*)|*.*"),
-                      wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-
-  if (dialog.ShowModal() == wxID_OK) {
-    m_doc->DoExportNfg(dialog.GetPath());
   }
 }
 
@@ -1286,16 +1275,46 @@ void GameFrame::OnUnsplit(wxSplitterEvent &)
   GetToolBar()->ToggleTool(GBT_MENU_VIEW_PROFILES, false);
 }
 
+namespace {
+
+wxString CloseWarningMessage(GameDocument *p_doc)
+{
+  if (p_doc->IsGameModified() && !p_doc->AreResultsUnsaved()) {
+    return _("This game has unsaved changes.\n\n"
+             "Close without saving?");
+  }
+  if (!p_doc->IsGameModified() && p_doc->AreResultsUnsaved()) {
+    return _("There are unsaved computational results.\n\n"
+             "These changes are not saved in ordinary game files.\n"
+             "Close without saving?");
+  }
+  if (p_doc->IsGameModified() && p_doc->AreResultsUnsaved()) {
+    return _("This game has unsaved changes, and there are unsaved computational results "
+             "unsaved computational results or workspace changes.\n\n"
+             "Close without saving?");
+  }
+  return wxEmptyString;
+}
+
+} // namespace
+
 void GameFrame::OnCloseWindow(wxCloseEvent &p_event)
 {
-  if (p_event.CanVeto() && m_doc->IsModified()) {
-    if (wxMessageBox(wxT("Game has been modified.\n") wxT("Unsaved changes will be lost!\n")
-                         wxT("Close anyway?"),
-                     _("Warning"), wxOK | wxCANCEL) == wxCANCEL) {
+  if (!p_event.CanVeto()) {
+    p_event.Skip();
+    return;
+  }
+
+  if (m_doc->IsModified()) {
+    const int response = wxMessageBox(CloseWarningMessage(m_doc), _("Unsaved Changes"),
+                                      wxYES_NO | wxNO_DEFAULT | wxICON_WARNING, this);
+
+    if (response != wxYES) {
       p_event.Veto();
       return;
     }
   }
+
   p_event.Skip();
 }
 

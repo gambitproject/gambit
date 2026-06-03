@@ -56,8 +56,6 @@ class GameFrame final : public wxFrame, public GameView {
   void OnFileOpen(wxCommandEvent &);
   void OnFileClose(wxCommandEvent &);
   void OnFileSave(wxCommandEvent &);
-  void OnFileExportEfg(wxCommandEvent &);
-  void OnFileExportNfg(wxCommandEvent &);
   void OnFileExportGraphic(wxCommandEvent &);
   void OnFileExportPS(wxCommandEvent &);
   void OnFileExportSVG(wxCommandEvent &);
