@@ -166,15 +166,15 @@ void AnalysisNotebook::OnChoice(wxCommandEvent &p_event)
 void AnalysisNotebook::OnUpdate()
 {
   m_choices->Clear();
-  for (int i = 1; i <= m_doc->NumProfileLists(); i++) {
+  for (int i = 1; i <= m_doc->GetWorkspace().NumProfileLists(); i++) {
     wxString label;
     label << wxT("Profiles ") << i;
     m_choices->Append(label);
   }
-  m_choices->SetSelection(m_doc->GetCurrentProfileList() - 1);
+  m_choices->SetSelection(m_doc->GetWorkspace().GetCurrentProfileList() - 1);
 
-  if (m_doc->GetCurrentProfileList() > 0) {
-    m_description->SetLabel(m_doc->GetProfiles().GetDescription());
+  if (m_doc->GetWorkspace().GetCurrentProfileList() > 0) {
+    m_description->SetLabel(m_doc->GetWorkspace().GetProfiles().GetDescription());
   }
 }
 
@@ -333,11 +333,11 @@ void GameFrame::OnUpdate()
 
   GetToolBar()->EnableTool(GBT_MENU_EDIT_NEWPLAYER, !m_efgPanel || m_efgPanel->IsShown());
 
-  menuBar->Enable(GBT_MENU_VIEW_PROFILES, m_doc->NumProfileLists() > 0);
-  GetToolBar()->EnableTool(GBT_MENU_VIEW_PROFILES, m_doc->NumProfileLists() > 0);
+  menuBar->Enable(GBT_MENU_VIEW_PROFILES, m_doc->GetWorkspace().NumProfileLists() > 0);
+  GetToolBar()->EnableTool(GBT_MENU_VIEW_PROFILES, m_doc->GetWorkspace().NumProfileLists() > 0);
   GetToolBar()->EnableTool(GBT_MENU_FORMAT_DECIMALS_DELETE, m_doc->GetStyle().NumDecimals() > 1);
 
-  if (m_doc->NumProfileLists() == 0 && m_splitter->IsSplit()) {
+  if (m_doc->GetWorkspace().NumProfileLists() == 0 && m_splitter->IsSplit()) {
     m_splitter->Unsplit(m_analysisPanel);
   }
   menuBar->Check(GBT_MENU_VIEW_PROFILES, m_splitter->IsSplit());

@@ -88,7 +88,10 @@ wxString BehaviorProfileList::GetCellValue(const wxSheetCoords &p_coords)
     return wxT("#");
   }
 
-  return {m_doc->GetProfiles().GetActionProb(p_coords.GetCol() + 1, p_coords.GetRow() + 1).c_str(),
+  return {m_doc->GetWorkspace()
+              .GetProfiles()
+              .GetActionProb(p_coords.GetCol() + 1, p_coords.GetRow() + 1)
+              .c_str(),
           *wxConvCurrent};
 }
 
@@ -100,7 +103,7 @@ static wxColour GetPlayerColor(const GameDocument *p_doc, int p_index)
 
 wxSheetCellAttr BehaviorProfileList::GetAttr(const wxSheetCoords &p_coords, wxSheetAttr_Type) const
 {
-  const int currentProfile = m_doc->GetCurrentProfile();
+  const int currentProfile = m_doc->GetWorkspace().GetCurrentProfile();
 
   if (IsRowLabelCell(p_coords)) {
     wxSheetCellAttr attr(GetSheetRefData()->m_defaultRowLabelAttr);
@@ -161,12 +164,12 @@ wxSheetCellAttr BehaviorProfileList::GetAttr(const wxSheetCoords &p_coords, wxSh
 
 void BehaviorProfileList::OnUpdate()
 {
-  if (!m_doc->GetGame() || m_doc->NumProfileLists() == 0) {
+  if (!m_doc->GetGame() || m_doc->GetWorkspace().NumProfileLists() == 0) {
     DeleteRows(0, GetNumberRows());
     return;
   }
 
-  const AnalysisOutput &profiles = m_doc->GetProfiles();
+  const AnalysisOutput &profiles = m_doc->GetWorkspace().GetProfiles();
   const int profileLength = m_doc->GetGame()->BehavProfileLength();
 
   BeginBatch();

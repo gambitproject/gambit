@@ -230,6 +230,8 @@ public:
   void SetGameModified(bool p_modified) { m_gameModified = p_modified; }
   void SetWorkspaceModified(bool p_unsaved) { m_workspaceModified = p_unsaved; }
 
+  const AnalysisWorkspace &GetWorkspace() const { return m_workspace; }
+
   const TreeRenderConfig &GetStyle() const { return m_style; }
   void SetStyle(const TreeRenderConfig &p_style);
 
@@ -242,14 +244,8 @@ public:
   //! @name Handling of list of computed profiles
   //!
   //@{
-  const AnalysisOutput &GetProfiles() const { return m_workspace.GetProfiles(); }
-  const AnalysisOutput &GetProfiles(int p_index) const { return m_workspace.GetProfiles(p_index); }
   void AddProfileList(std::shared_ptr<AnalysisOutput> p_profs);
   void SetProfileList(int p_index);
-  int NumProfileLists() const { return m_workspace.NumProfileLists(); }
-  int GetCurrentProfileList() const { return m_workspace.GetCurrentProfileList(); }
-
-  int GetCurrentProfile() const { return m_workspace.GetCurrentProfile(); }
   void SetCurrentProfile(int p_profile);
 
   //!

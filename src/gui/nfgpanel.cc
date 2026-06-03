@@ -172,10 +172,10 @@ void TablePlayerPanel::OnUpdate()
   m_playerLabel->SetValue(
       wxString(m_doc->GetGame()->GetPlayer(m_player)->GetLabel().c_str(), *wxConvCurrent));
 
-  if (m_doc->GetCurrentProfile() > 0) {
+  if (m_doc->GetWorkspace().GetCurrentProfile() > 0) {
     m_payoff->SetForegroundColour(color);
 
-    const std::string pay = m_doc->GetProfiles().GetPayoff(m_player);
+    const std::string pay = m_doc->GetWorkspace().GetProfiles().GetPayoff(m_player);
     m_payoff->SetLabel(wxT("Payoff: ") + wxString(pay.c_str(), *wxConvCurrent));
     GetSizer()->Show(m_payoff, true);
   }
