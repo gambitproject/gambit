@@ -402,11 +402,8 @@ bool GameNodeRep::IsSubgameRoot() const
   }
 
   auto *tree_game = static_cast<GameTreeRep *>(m_game);
-  if (tree_game->m_subgameCache.empty()) {
-    tree_game->BuildSubgameRoots();
-  }
-
-  return tree_game->m_subgameCache.count(const_cast<GameNodeRep *>(this)) > 0;
+  tree_game->BuildSubgameRoots();
+  return tree_game->m_subgameData.m_subgameByRoot.count(const_cast<GameNodeRep *>(this)) > 0;
 }
 
 bool GameNodeRep::IsStrategyReachable() const
@@ -884,14 +881,12 @@ GameSubgame GameTreeRep::GetMinimalSubgame(const GameInfoset &p_infoset) const
   if (p_infoset->GetGame().get() != this) {
     throw MismatchException();
   }
-  if (m_subgameCache.empty()) {
-    BuildSubgameRoots();
-  }
+  BuildSubgameRoots();
   auto *n = p_infoset->m_members.front().get();
-  auto it = m_subgameCache.find(n);
-  while (it == m_subgameCache.end()) {
+  auto it = m_subgameData.m_subgameByRoot.find(n);
+  while (it == m_subgameData.m_subgameByRoot.end()) {
     n = n->m_parent;
-    it = m_subgameCache.find(n);
+    it = m_subgameData.m_subgameByRoot.find(n);
   }
   return it->second;
 }
@@ -961,11 +956,7 @@ void GameTreeRep::ClearComputedValues() const
   m_ownPriorActionInfo = nullptr;
   const_cast<GameTreeRep *>(this)->m_unreachableNodes = nullptr;
   m_absentMindedInfosets.clear();
-  m_subgames.clear();
-  for (const auto &[node, subgame] : m_subgameCache) {
-    subgame->Invalidate();
-  }
-  m_subgameCache.clear();
+  m_subgameData.Invalidate();
   m_computedValues = false;
 }
 
@@ -1171,7 +1162,11 @@ void GameTreeRep::BuildUnreachableNodes() const
 
 void GameTreeRep::BuildSubgameRoots() const
 {
-  if (!m_subgameCache.empty() || m_root->IsTerminal()) {
+  if (m_subgameData.m_valid) {
+    return;
+  }
+  if (m_root->IsTerminal()) {
+    m_subgameData.m_valid = true;
     return;
   }
 
@@ -1267,7 +1262,7 @@ void GameTreeRep::BuildSubgameRoots() const
   SpanVisitor span_visitor{disc, hull};
   WalkDFS(game, m_root, TraversalOrder::Postorder, span_visitor);
 
-  BridgeVisitor bridge_visitor{disc, hull, m_subgames};
+  BridgeVisitor bridge_visitor{disc, hull, m_subgameData.m_subgamePostorder};
   WalkDFS(game, m_root, TraversalOrder::Postorder, bridge_visitor);
 
   // Phase 3: Build subgame tree with subgame differences
@@ -1317,22 +1312,22 @@ void GameTreeRep::BuildSubgameRoots() const
     static void OnVisit(GameNode, int) {}
   };
 
-  const std::unordered_set<GameNodeRep *> subgame_root_set(m_subgames.begin(), m_subgames.end());
+  const std::unordered_set<GameNodeRep *> subgame_root_set(
+      m_subgameData.m_subgamePostorder.begin(), m_subgameData.m_subgamePostorder.end());
 
-  SubgameVisitor subgame_visitor{subgame_root_set, m_subgameCache,
+  SubgameVisitor subgame_visitor{subgame_root_set, m_subgameData.m_subgameByRoot,
                                  const_cast<GameTreeRep *>(this)};
   WalkDFS(game, m_root, TraversalOrder::Preorder, subgame_visitor);
+  m_subgameData.m_valid = true;
 }
 
 std::vector<GameSubgame> GameTreeRep::GetSubgames() const
 {
-  if (m_subgameCache.empty()) {
-    BuildSubgameRoots();
-  }
+  BuildSubgameRoots();
   std::vector<GameSubgame> result;
-  result.reserve(m_subgames.size());
-  for (auto *rep : m_subgames) {
-    result.emplace_back(m_subgameCache.at(rep));
+  result.reserve(m_subgameData.m_subgamePostorder.size());
+  for (auto *rep : m_subgameData.m_subgamePostorder) {
+    result.emplace_back(m_subgameData.m_subgameByRoot.at(rep));
   }
   return result;
 }
