@@ -95,12 +95,123 @@ bool StrategyDominanceStack::PreviousLevel()
 }
 
 //=========================================================================
+//                          class AnalysisWorkspace
+//=========================================================================
+
+AnalysisWorkspace::AnalysisWorkspace(GameDocument *p_doc)
+  : m_doc(p_doc), m_stratSupports(p_doc, true), m_currentProfileList(0)
+{
+}
+
+void AnalysisWorkspace::Clear()
+{
+  m_stratSupports.Reset();
+  m_profiles.clear();
+  m_currentProfileList = 0;
+}
+
+void AnalysisWorkspace::ResetForGameChange()
+{
+  m_stratSupports.Reset();
+
+  // Even though modifications only to payoffs doesn't make the
+  // computed profiles invalid for the edited game, it does mean
+  // that, in general, they won't be Nash.  For now, to avoid confusion,
+  // we will wipe them out.
+  m_profiles.clear();
+  m_currentProfileList = 0;
+}
+
+void AnalysisWorkspace::BuildNfg()
+{
+  m_stratSupports.Reset();
+  std::for_each(m_profiles.begin(), m_profiles.end(), std::mem_fn(&AnalysisOutput::BuildNfg));
+}
+
+void AnalysisWorkspace::AddProfileList(std::shared_ptr<AnalysisOutput> p_profs)
+{
+  m_profiles.push_back(p_profs);
+  m_currentProfileList = m_profiles.size();
+}
+
+void AnalysisWorkspace::SetProfileList(int p_index) { m_currentProfileList = p_index; }
+
+void AnalysisWorkspace::SetCurrentProfile(int p_profile)
+{
+  m_profiles[m_currentProfileList]->SetCurrent(p_profile);
+}
+
+void AnalysisWorkspace::SetStrategyElimStrength(bool p_strict)
+{
+  m_stratSupports.SetStrict(p_strict);
+}
+
+bool AnalysisWorkspace::GetStrategyElimStrength() const { return m_stratSupports.GetStrict(); }
+
+bool AnalysisWorkspace::NextStrategyElimLevel() { return m_stratSupports.NextLevel(); }
+
+void AnalysisWorkspace::PreviousStrategyElimLevel() { m_stratSupports.PreviousLevel(); }
+
+void AnalysisWorkspace::TopStrategyElimLevel() { m_stratSupports.TopLevel(); }
+
+bool AnalysisWorkspace::CanStrategyElim() const { return m_stratSupports.CanEliminate(); }
+
+int AnalysisWorkspace::GetStrategyElimLevel() const { return m_stratSupports.GetLevel(); }
+
+void AnalysisWorkspace::Save(std::ostream &p_file) const
+{
+  std::for_each(m_profiles.begin(), m_profiles.end(),
+                [&p_file](std::shared_ptr<AnalysisOutput> a) { a->Save(p_file); });
+}
+
+bool AnalysisWorkspace::Load(TiXmlNode *p_game)
+{
+  m_stratSupports.Reset();
+
+  m_profiles.clear();
+
+  for (TiXmlNode *analysis = p_game->FirstChild("analysis"); analysis;
+       analysis = analysis->NextSibling()) {
+    const char *type = analysis->ToElement()->Attribute("type");
+    // const char *rep = analysis->ToElement()->Attribute("rep");
+    if (type && !strcmp(type, "list")) {
+      // Read in a list of profiles
+      // We need to try to guess whether the profiles are float or rational
+      bool isFloat = false;
+      for (TiXmlNode *profile = analysis->FirstChild("profile"); profile;
+           profile = profile->NextSiblingElement()) {
+        if (std::string(profile->FirstChild()->Value()).find('.') != std::string::npos ||
+            std::string(profile->FirstChild()->Value()).find('e') != std::string::npos) {
+          isFloat = true;
+          break;
+        }
+      }
+
+      if (isFloat) {
+        auto plist = std::make_shared<AnalysisProfileList<double>>(m_doc, false);
+        plist->Load(analysis);
+        m_profiles.push_back(plist);
+      }
+      else {
+        auto plist = std::make_shared<AnalysisProfileList<Rational>>(m_doc, false);
+        plist->Load(analysis);
+        m_profiles.push_back(plist);
+      }
+    }
+  }
+
+  m_currentProfileList = m_profiles.size();
+
+  return true;
+}
+
+//=========================================================================
 //                          class GameDocument
 //=========================================================================
 
 GameDocument::GameDocument(Game p_game)
   : m_game(p_game), m_selectNode(nullptr), m_gameModified(false), m_unsavedResults(false),
-    m_stratSupports(this, true), m_currentProfileList(0)
+    m_workspace(this)
 {
   wxGetApp().AddDocument(this);
 
@@ -158,41 +269,9 @@ bool GameDocument::LoadDocument(const wxString &p_filename)
     return false;
   }
 
-  m_stratSupports.Reset();
-
-  m_profiles.clear();
-
-  for (TiXmlNode *analysis = game->FirstChild("analysis"); analysis;
-       analysis = analysis->NextSibling()) {
-    const char *type = analysis->ToElement()->Attribute("type");
-    // const char *rep = analysis->ToElement()->Attribute("rep");
-    if (type && !strcmp(type, "list")) {
-      // Read in a list of profiles
-      // We need to try to guess whether the profiles are float or rational
-      bool isFloat = false;
-      for (TiXmlNode *profile = analysis->FirstChild("profile"); profile;
-           profile = profile->NextSiblingElement()) {
-        if (std::string(profile->FirstChild()->Value()).find('.') != std::string::npos ||
-            std::string(profile->FirstChild()->Value()).find('e') != std::string::npos) {
-          isFloat = true;
-          break;
-        }
-      }
-
-      if (isFloat) {
-        auto plist = std::make_shared<AnalysisProfileList<double>>(this, false);
-        plist->Load(analysis);
-        m_profiles.push_back(plist);
-      }
-      else {
-        auto plist = std::make_shared<AnalysisProfileList<Rational>>(this, false);
-        plist->Load(analysis);
-        m_profiles.push_back(plist);
-      }
-    }
+  if (!m_workspace.Load(game)) {
+    return false;
   }
-
-  m_currentProfileList = m_profiles.size();
 
   TiXmlNode *colors = docroot->FirstChild("colors");
   if (colors) {
@@ -249,8 +328,7 @@ void GameDocument::SaveDocument(std::ostream &p_file) const
     p_file << "</nfgfile>\n";
   }
 
-  std::for_each(m_profiles.begin(), m_profiles.end(),
-                [&p_file](std::shared_ptr<AnalysisOutput> a) { a->Save(p_file); });
+  m_workspace.Save(p_file);
 
   p_file << "</game>\n";
 
@@ -264,14 +342,7 @@ void GameDocument::UpdateViews(GameModificationType p_modifications)
     m_gameModified = true;
   }
   if (p_modifications == GBT_DOC_MODIFIED_GAME || p_modifications == GBT_DOC_MODIFIED_PAYOFFS) {
-    m_stratSupports.Reset();
-
-    // Even though modifications only to payoffs doesn't make the
-    // computed profiles invalid for the edited game, it does mean
-    // that, in general, they won't be Nash.  For now, to avoid confusion,
-    // we will wipe them out.
-    m_profiles.clear();
-    m_currentProfileList = 0;
+    m_workspace.ResetForGameChange();
   }
 
   std::for_each(m_views.begin(), m_views.end(), std::mem_fn(&GameView::OnUpdate));
@@ -285,8 +356,7 @@ void GameDocument::PostPendingChanges()
 void GameDocument::BuildNfg()
 {
   if (m_game->IsTree()) {
-    m_stratSupports.Reset();
-    std::for_each(m_profiles.begin(), m_profiles.end(), std::mem_fn(&AnalysisOutput::BuildNfg));
+    m_workspace.BuildNfg();
   }
 }
 
@@ -313,53 +383,56 @@ void GameDocument::SetStyle(const TreeRenderConfig &p_style)
 
 void GameDocument::SetCurrentProfile(int p_profile)
 {
-  m_profiles[m_currentProfileList]->SetCurrent(p_profile);
+  m_workspace.SetCurrentProfile(p_profile);
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
 void GameDocument::AddProfileList(std::shared_ptr<AnalysisOutput> p_profs)
 {
-  m_profiles.push_back(p_profs);
-  m_currentProfileList = m_profiles.size();
+  m_workspace.AddProfileList(p_profs);
+  m_unsavedResults = true;
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
 void GameDocument::SetProfileList(int p_index)
 {
-  m_currentProfileList = p_index;
+  m_workspace.SetProfileList(p_index);
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
 void GameDocument::SetStrategyElimStrength(bool p_strict)
 {
-  m_stratSupports.SetStrict(p_strict);
+  m_workspace.SetStrategyElimStrength(p_strict);
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-bool GameDocument::GetStrategyElimStrength() const { return m_stratSupports.GetStrict(); }
+bool GameDocument::GetStrategyElimStrength() const
+{
+  return m_workspace.GetStrategyElimStrength();
+}
 
 bool GameDocument::NextStrategyElimLevel()
 {
-  const bool ret = m_stratSupports.NextLevel();
+  const bool ret = m_workspace.NextStrategyElimLevel();
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
   return ret;
 }
 
 void GameDocument::PreviousStrategyElimLevel()
 {
-  m_stratSupports.PreviousLevel();
+  m_workspace.PreviousStrategyElimLevel();
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
 void GameDocument::TopStrategyElimLevel()
 {
-  m_stratSupports.TopLevel();
+  m_workspace.TopStrategyElimLevel();
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-bool GameDocument::CanStrategyElim() const { return m_stratSupports.CanEliminate(); }
+bool GameDocument::CanStrategyElim() const { return m_workspace.CanStrategyElim(); }
 
-int GameDocument::GetStrategyElimLevel() const { return m_stratSupports.GetLevel(); }
+int GameDocument::GetStrategyElimLevel() const { return m_workspace.GetStrategyElimLevel(); }
 
 void GameDocument::SetSelectNode(GameNode p_node)
 {
@@ -603,6 +676,7 @@ void GameDocument::DoSetPayoff(GameOutcome p_outcome, int p_player, const wxStri
 void GameDocument::DoAddOutput(AnalysisOutput &p_list, const wxString &p_output)
 {
   p_list.AddOutput(p_output);
+  m_unsavedResults = true;
   UpdateViews(GBT_DOC_MODIFIED_NONE);
 }
 

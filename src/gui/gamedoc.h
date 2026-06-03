@@ -133,6 +133,47 @@ using GameModificationType = enum {
   GBT_DOC_MODIFIED_VIEWS = 0x08
 };
 
+class AnalysisWorkspace {
+  GameDocument *m_doc;
+
+  StrategyDominanceStack m_stratSupports;
+
+  Array<std::shared_ptr<AnalysisOutput>> m_profiles;
+  int m_currentProfileList;
+
+public:
+  explicit AnalysisWorkspace(GameDocument *p_doc);
+
+  void Clear();
+  void ResetForGameChange();
+  void BuildNfg();
+
+  const AnalysisOutput &GetProfiles() const { return *m_profiles[m_currentProfileList]; }
+  const AnalysisOutput &GetProfiles(int p_index) const { return *m_profiles[p_index]; }
+  void AddProfileList(std::shared_ptr<AnalysisOutput> p_profs);
+  void SetProfileList(int p_index);
+  int NumProfileLists() const { return m_profiles.size(); }
+  int GetCurrentProfileList() const { return m_currentProfileList; }
+
+  int GetCurrentProfile() const
+  {
+    return (m_profiles.size() == 0) ? 0 : GetProfiles().GetCurrent();
+  }
+  void SetCurrentProfile(int p_profile);
+
+  const StrategySupportProfile &GetNfgSupport() const { return m_stratSupports.GetCurrent(); }
+  void SetStrategyElimStrength(bool p_strict);
+  bool GetStrategyElimStrength() const;
+  bool NextStrategyElimLevel();
+  void PreviousStrategyElimLevel();
+  void TopStrategyElimLevel();
+  bool CanStrategyElim() const;
+  int GetStrategyElimLevel() const;
+
+  void Save(std::ostream &) const;
+  bool Load(TiXmlNode *p_game);
+};
+
 class GameDocument {
   friend class GameView;
 
@@ -154,10 +195,7 @@ class GameDocument {
   GameNode m_selectNode;
   bool m_gameModified, m_unsavedResults;
 
-  StrategyDominanceStack m_stratSupports;
-
-  Array<std::shared_ptr<AnalysisOutput>> m_profiles;
-  int m_currentProfileList;
+  AnalysisWorkspace m_workspace;
 
   void UpdateViews(GameModificationType p_modifications);
 
@@ -199,17 +237,14 @@ public:
   //! @name Handling of list of computed profiles
   //!
   //@{
-  const AnalysisOutput &GetProfiles() const { return *m_profiles[m_currentProfileList]; }
-  const AnalysisOutput &GetProfiles(int p_index) const { return *m_profiles[p_index]; }
+  const AnalysisOutput &GetProfiles() const { return m_workspace.GetProfiles(); }
+  const AnalysisOutput &GetProfiles(int p_index) const { return m_workspace.GetProfiles(p_index); }
   void AddProfileList(std::shared_ptr<AnalysisOutput> p_profs);
   void SetProfileList(int p_index);
-  int NumProfileLists() const { return m_profiles.size(); }
-  int GetCurrentProfileList() const { return m_currentProfileList; }
+  int NumProfileLists() const { return m_workspace.NumProfileLists(); }
+  int GetCurrentProfileList() const { return m_workspace.GetCurrentProfileList(); }
 
-  int GetCurrentProfile() const
-  {
-    return (m_profiles.size() == 0) ? 0 : GetProfiles().GetCurrent();
-  }
+  int GetCurrentProfile() const { return m_workspace.GetCurrentProfile(); }
   void SetCurrentProfile(int p_profile);
 
   //!
@@ -223,7 +258,7 @@ public:
   //! @name Handling of strategy supports
   //!
   //@{
-  const StrategySupportProfile &GetNfgSupport() const { return m_stratSupports.GetCurrent(); }
+  const StrategySupportProfile &GetNfgSupport() const { return m_workspace.GetNfgSupport(); }
   void SetStrategyElimStrength(bool p_strict);
   bool GetStrategyElimStrength() const;
   bool NextStrategyElimLevel();
