@@ -27,6 +27,8 @@
 #include "style.h"
 #include "analysis.h"
 
+class TiXmlNode;
+
 namespace Gambit::GUI {
 
 class GameView;
@@ -155,8 +157,8 @@ public:
 
   const AnalysisOutput &GetProfiles() const { return *m_profiles[m_currentProfileList]; }
   const AnalysisOutput &GetProfiles(int p_index) const { return *m_profiles[p_index]; }
-  void AddProfileList(std::shared_ptr<AnalysisOutput> p_profs);
-  void SetProfileList(int p_index);
+  void AddEquilibriumOutput(std::shared_ptr<AnalysisOutput> p_profs);
+  void SelectEquilibriumOutput(int p_index);
   int NumProfileLists() const { return m_profiles.size(); }
   int GetCurrentProfileList() const { return m_currentProfileList; }
 
@@ -164,14 +166,14 @@ public:
   {
     return (m_profiles.size() == 0) ? 0 : GetProfiles().GetCurrent();
   }
-  void SetCurrentProfile(int p_profile);
+  void SelectProfile(int p_profile);
 
   const StrategySupportProfile &GetNfgSupport() const { return m_stratSupports.GetCurrent(); }
-  void SetStrategyElimStrength(bool p_strict);
+  void SetDominanceStrictness(bool p_strict);
   bool GetStrategyElimStrength() const;
-  bool NextStrategyElimLevel();
-  void PreviousStrategyElimLevel();
-  void TopStrategyElimLevel();
+  bool NextDominanceLevel();
+  void PreviousDominanceLevel();
+  void TopDominanceLevel();
   bool CanStrategyElim() const;
   int GetStrategyElimLevel() const;
 
