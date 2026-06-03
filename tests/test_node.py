@@ -358,6 +358,21 @@ def test_subgame_differences(test_case: SubgameStructureTestCase):
     assert actual == test_case.differences
 
 
+@pytest.mark.parametrize("test_case", SUBGAME_STRUCTURE_CASES)
+def test_minimal_subgame_for_each_infoset(test_case: SubgameStructureTestCase):
+    """`game.minimal_subgame(infoset)` returns the smallest subgame containing the infoset."""
+    game = test_case.factory()
+    expected_path_for_key = {
+        key: path
+        for path, keys in test_case.differences.items()
+        for key in keys
+    }
+    for infoset in game.infosets:
+        key = (infoset.player.label, infoset.number)
+        actual_path = tuple(_get_path_of_action_labels(game.minimal_subgame(infoset).root))
+        assert actual_path == expected_path_for_key[key]
+
+
 @pytest.mark.parametrize("game_file, expected_node_data", [
     (
         "binary_3_levels_generic_payoffs.efg",

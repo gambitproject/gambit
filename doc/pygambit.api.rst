@@ -111,7 +111,7 @@ Information about the game
    Game.nodes
    Game.contingencies
    Game.subgames
-   Game.subgame_root
+   Game.minimal_subgame
 
 .. autosummary::
    :toctree: api/

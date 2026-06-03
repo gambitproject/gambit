@@ -858,8 +858,8 @@ class Game:
             )
         return GameSubgames.wrap(self.game)
 
-    def subgame_root(self, infoset: typing.Union[Infoset, str]) -> Node:
-        """Returns the root node of the smallest subgame containing `infoset`.
+    def minimal_subgame(self, infoset: typing.Union[Infoset, str]) -> Subgame:
+        """Returns the smallest subgame containing `infoset`.
 
         Parameters
         ----------
@@ -868,8 +868,8 @@ class Game:
 
         Returns
         -------
-        Node
-            The root node of the smallest containing subgame.
+        Subgame
+            The smallest subgame containing `infoset`.
 
         .. versionadded:: 16.7.0
 
@@ -884,9 +884,9 @@ class Game:
             raise UndefinedOperationError(
                 "Operation only defined for games with a tree representation"
             )
-        resolved_infoset = self._resolve_infoset(infoset, "subgame_root")
-        return Node.wrap(
-            self.game.deref().GetSubgameRoot(cython.cast(Infoset, resolved_infoset).infoset)
+        resolved_infoset = self._resolve_infoset(infoset, "minimal_subgame")
+        return Subgame.wrap(
+            self.game.deref().GetMinimalSubgame(cython.cast(Infoset, resolved_infoset).infoset)
         )
 
     def set_chance_probs(self, infoset: Infoset | str, probs: typing.Sequence):

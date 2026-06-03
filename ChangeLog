@@ -7,7 +7,7 @@
   exposing its root node, parent and child subgames, and the infosets constituting its difference
   (the infosets belonging to the subgame but not to any of its child subgames).
   On `Game`, add `subgames` (in the reverse topological order produced by the detection algorithm)
-  and `subgame_root` (the smallest subgame containing a given infoset).
+  and `minimal_subgame` (the minimal subgame containing a given infoset).
   Builds on the subgame-root detection added in 16.6.0.  (#585)
 
 ### Fixed

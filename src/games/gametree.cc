@@ -879,7 +879,7 @@ bool GameTreeRep::IsAbsentMinded(const GameInfoset &p_infoset) const
   return contains(m_absentMindedInfosets, p_infoset.get());
 }
 
-GameNode GameTreeRep::GetSubgameRoot(const GameInfoset &p_infoset) const
+GameSubgame GameTreeRep::GetMinimalSubgame(const GameInfoset &p_infoset) const
 {
   if (p_infoset->GetGame().get() != this) {
     throw MismatchException();
@@ -888,10 +888,12 @@ GameNode GameTreeRep::GetSubgameRoot(const GameInfoset &p_infoset) const
     BuildSubgameRoots();
   }
   auto *n = p_infoset->m_members.front().get();
-  while (m_subgameCache.find(n) == m_subgameCache.end()) {
+  auto it = m_subgameCache.find(n);
+  while (it == m_subgameCache.end()) {
     n = n->m_parent;
+    it = m_subgameCache.find(n);
   }
-  return n->shared_from_this();
+  return it->second;
 }
 
 //------------------------------------------------------------------------
