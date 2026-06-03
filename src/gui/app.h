@@ -32,7 +32,12 @@ namespace Gambit::GUI {
 
 class GameDocument;
 
-enum AppLoadResult { GBT_APP_FILE_OK = 0, GBT_APP_OPEN_FAILED = 1, GBT_APP_PARSE_FAILED = 2 };
+enum class AppLoadResult : unsigned int {
+  Success = 0,
+  OpenFailed = 1,
+  ParseFailed = 2,
+  UnsupportedRepresentation = 3
+};
 
 class Application final : public wxApp {
   wxString m_currentDir; /* Current position in directory tree. */
