@@ -214,7 +214,7 @@ GameDocument::GameDocument(Game p_game)
   wxGetApp().AddDocument(this);
 
   std::ostringstream s;
-  SaveDocument(s);
+  SaveWorkspace(s);
 }
 
 GameDocument::~GameDocument() { wxGetApp().RemoveDocument(this); }
@@ -297,7 +297,7 @@ bool GameDocument::LoadWorkspace(const wxString &p_filename)
   return true;
 }
 
-void GameDocument::SaveDocument(std::ostream &p_file) const
+void GameDocument::SaveWorkspace(std::ostream &p_file) const
 {
   p_file << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 
@@ -452,7 +452,7 @@ void GameDocument::DoSave(const wxString &p_filename, GameSaveFormat p_format)
   }
   switch (p_format) {
   case GameSaveFormat::Workbook:
-    SaveDocument(file);
+    SaveWorkspace(file);
     m_filename = p_filename;
     m_gameModified = false;
     m_workspaceModified = false;

@@ -241,7 +241,7 @@ public:
   /// Load workspace from the specified file (which should be a .gbt file)
   /// Returns true if successful, false if error
   bool LoadWorkspace(const wxString &p_filename);
-  void SaveDocument(std::ostream &) const;
+  void SaveWorkspace(std::ostream &) const;
   //@}
 
   Game GetGame() const { return m_game; }
