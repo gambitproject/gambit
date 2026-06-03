@@ -652,31 +652,53 @@ void GameFrame::OnFileClose(wxCommandEvent &) { Close(); }
 
 void GameFrame::OnFileSave(wxCommandEvent &p_event)
 {
-  if (p_event.GetId() == wxID_SAVEAS || m_doc->GetFilename().empty()) {
-    wxFileDialog dialog(
-        this, _("Choose file"), wxPathOnly(m_doc->GetFilename()),
-        wxFileNameFromPath(m_doc->GetFilename()),
-        wxT("Gambit workbooks (*.gbt)|*.gbt|") wxT("Gambit extensive games (*.efg)|*.efg|")
-            wxT("Gambit strategic games (*.nfg)|*.nfg|") wxT("All files (*.*)|*.*"),
-        wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+  const bool saveAs = p_event.GetId() == wxID_SAVEAS || m_doc->GetFilename().empty();
 
-    if (dialog.ShowModal() == wxID_OK) {
-      try {
-        m_doc->DoSave(dialog.GetPath());
-      }
-      catch (std::exception &ex) {
-        ExceptionDialog(this, ex.what()).ShowModal();
-      }
-    }
-  }
-  else {
+  auto doSave = [this](const wxString &path) {
     try {
-      m_doc->DoSave(m_doc->GetFilename());
+      m_doc->DoSave(path);
     }
-    catch (std::exception &ex) {
+    catch (const std::exception &ex) {
       ExceptionDialog(this, ex.what()).ShowModal();
     }
+  };
+
+  if (!saveAs) {
+    doSave(wxString::FromUTF8(m_doc->GetFilename()));
+    return;
   }
+
+  const wxString currentFilename = wxString::FromUTF8(m_doc->GetFilename());
+
+  wxFileDialog dialog(
+      this, _("Save game as"), wxPathOnly(currentFilename), wxFileNameFromPath(currentFilename),
+      wxT("Gambit workbooks (*.gbt)|*.gbt|") wxT("Gambit extensive games (*.efg)|*.efg|")
+          wxT("Gambit strategic games (*.nfg)|*.nfg|") wxT("All files (*.*)|*.*"),
+      wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+
+  if (dialog.ShowModal() != wxID_OK) {
+    return;
+  }
+
+  wxFileName filename(dialog.GetPath());
+
+  if (!filename.HasExt()) {
+    switch (dialog.GetFilterIndex()) {
+    case 0:
+      filename.SetExt(wxT("gbt"));
+      break;
+    case 1:
+      filename.SetExt(wxT("efg"));
+      break;
+    case 2:
+      filename.SetExt(wxT("nfg"));
+      break;
+    default:
+      break;
+    }
+  }
+
+  doSave(filename.GetFullPath());
 }
 
 void GameFrame::OnFilePageSetup(wxCommandEvent &)

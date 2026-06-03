@@ -1,3 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gambit:document xmlns:gambit="http://gambit.sourceforge.net/" version="0.1">
+<colors>
+<player id="-1" red="0" green="0" blue="0" />
+<player id="0" red="154" green="205" blue="50" />
+<player id="1" red="255" green="0" blue="0" />
+<player id="2" red="0" green="0" blue="255" />
+</colors>
+<font size="10" family="74" face="Helvetica" style="90" weight="700" />
+<autolayout>
+<nodes size="10" spacing="50" chance="dot" player="dot" terminal="dot"/>
+<branches size="60" tine="20" branch="forktine" labels="horizontal"/>
+<infosets style="circles"/>
+</autolayout>
+<labels abovenode="label" belownode="isetid" abovebranch="label" belowbranch="probs" />
+<numbers decimals="4"/>
+<game>
+<efgfile>
 EFG 2 R "4 Card poker, from Alix Martin" { "Player 1" "Player 2" }
 ""
 
@@ -110,3 +128,6 @@ p "" 1 8 "1p2rJ" { "call" "fold" } 0
 t "" 4 "Outcome 4" { -1, 3 }
 t "" 3 "Outcome 3" { 0, 2 }
 t "" 3 "Outcome 3" { 0, 2 }
+</efgfile>
+</game>
+</gambit:document>
