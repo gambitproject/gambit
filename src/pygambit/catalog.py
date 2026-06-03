@@ -1,3 +1,4 @@
+import io
 from importlib.resources import as_file, files
 from pathlib import Path
 from typing import Any
@@ -18,6 +19,48 @@ READERS = {
     ".nfg": gbt.read_nfg,
     ".efg": gbt.read_efg,
 }
+
+_OPENSPIEL_PREFIX = "open_spiel/"
+
+
+def _load_from_openspiel(game_name: str) -> gbt.Game:
+    """
+    Load a game from the OpenSpiel library by name.
+
+    Tries NFG export first; falls back to EFG export via the
+    open_spiel.python.algorithms.gambit exporter. Raises ImportError
+    if open_spiel is not installed, ValueError if the game cannot be
+    exported to either format.
+    """
+    try:
+        import pyspiel
+        from open_spiel.python.algorithms.gambit import export_gambit
+    except ImportError as exc:
+        raise ImportError(
+            "open_spiel is required to load OpenSpiel games. "
+            "Install it with: pip install open_spiel"
+        ) from exc
+
+    try:
+        game = pyspiel.load_game(game_name)
+    except Exception as exc:
+        raise ValueError(f"Could not load OpenSpiel game '{game_name}': {exc}") from exc
+
+    # Try NFG first (works for normal-form games)
+    try:
+        nfg_str = pyspiel.game_to_nfg_string(game)
+        return gbt.read_nfg(io.StringIO(nfg_str))
+    except Exception:
+        pass
+
+    # Fall back to EFG export
+    try:
+        efg_str = export_gambit(game)
+        return gbt.read_efg(io.StringIO(efg_str))
+    except Exception as exc:
+        raise ValueError(
+            f"OpenSpiel game '{game_name}' could not be exported to NFG or EFG format."
+        ) from exc
 
 
 def load(slug: str) -> gbt.Game:
@@ -40,6 +83,9 @@ def load(slug: str) -> gbt.Game:
         If the game does not exist in the catalog.
     """
     slug = str(Path(slug)).replace("\\", "/")
+
+    if slug.startswith(_OPENSPIEL_PREFIX):
+        return _load_from_openspiel(slug[len(_OPENSPIEL_PREFIX):])
 
     # Try to load from file
     for suffix, reader in READERS.items():
