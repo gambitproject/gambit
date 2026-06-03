@@ -414,11 +414,6 @@ void GameDocument::SetStrategyElimStrength(bool p_strict)
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
 
-bool GameDocument::GetStrategyElimStrength() const
-{
-  return m_workspace.GetStrategyElimStrength();
-}
-
 bool GameDocument::NextStrategyElimLevel()
 {
   const bool ret = m_workspace.NextStrategyElimLevel();
@@ -437,10 +432,6 @@ void GameDocument::TopStrategyElimLevel()
   m_workspace.TopStrategyElimLevel();
   UpdateViews(GBT_DOC_MODIFIED_VIEWS);
 }
-
-bool GameDocument::CanStrategyElim() const { return m_workspace.CanStrategyElim(); }
-
-int GameDocument::GetStrategyElimLevel() const { return m_workspace.GetStrategyElimLevel(); }
 
 void GameDocument::SetSelectNode(GameNode p_node)
 {

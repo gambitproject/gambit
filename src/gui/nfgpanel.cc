@@ -400,19 +400,19 @@ void StrategyDominanceToolbar::OnLastLevel(wxCommandEvent &)
 
 void StrategyDominanceToolbar::OnUpdate()
 {
-  m_topButton->Enable(m_doc->GetStrategyElimLevel() > 1);
-  m_prevButton->Enable(m_doc->GetStrategyElimLevel() > 1);
-  m_nextButton->Enable(m_doc->CanStrategyElim());
-  m_allButton->Enable(m_doc->CanStrategyElim());
-  if (m_doc->GetStrategyElimLevel() == 1) {
+  m_topButton->Enable(m_doc->GetWorkspace().GetStrategyElimLevel() > 1);
+  m_prevButton->Enable(m_doc->GetWorkspace().GetStrategyElimLevel() > 1);
+  m_nextButton->Enable(m_doc->GetWorkspace().CanStrategyElim());
+  m_allButton->Enable(m_doc->GetWorkspace().CanStrategyElim());
+  if (m_doc->GetWorkspace().GetStrategyElimLevel() == 1) {
     m_level->SetLabel(wxT("All strategies shown"));
   }
-  else if (m_doc->GetStrategyElimLevel() == 2) {
+  else if (m_doc->GetWorkspace().GetStrategyElimLevel() == 2) {
     m_level->SetLabel(wxT("Eliminated 1 level"));
   }
   else {
     wxString label;
-    label << "Eliminated " << (m_doc->GetStrategyElimLevel() - 1) << " levels";
+    label << "Eliminated " << (m_doc->GetWorkspace().GetStrategyElimLevel() - 1) << " levels";
     m_level->SetLabel(label);
   }
   GetSizer()->Layout();

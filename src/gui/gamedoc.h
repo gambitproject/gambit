@@ -261,12 +261,9 @@ public:
   //@{
   const StrategySupportProfile &GetNfgSupport() const { return m_workspace.GetNfgSupport(); }
   void SetStrategyElimStrength(bool p_strict);
-  bool GetStrategyElimStrength() const;
   bool NextStrategyElimLevel();
   void PreviousStrategyElimLevel();
   void TopStrategyElimLevel();
-  bool CanStrategyElim() const;
-  int GetStrategyElimLevel() const;
   //@}
 
   GameNode GetSelectNode() const { return m_selectNode; }
