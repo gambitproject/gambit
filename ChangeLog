@@ -23,6 +23,8 @@
 - Added a new welcome/landing window on launching the GUI without a game.  This has the effect of
   avoiding creating a window with a trivial extensive game which the user then has to dismiss if
   they do not require it. (#80)
+- Clarified handling of .efg/.nfg/.gbt file types in graphical interface and refined warnings about
+  unsaved work.  (#12)
 
 ### Removed
 - Built-in plotting of logit QRE for strategic games has been removed in the GUI (#809)
