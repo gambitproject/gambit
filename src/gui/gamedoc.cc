@@ -99,8 +99,8 @@ bool StrategyDominanceStack::PreviousLevel()
 //=========================================================================
 
 GameDocument::GameDocument(Game p_game)
-  : m_game(p_game), m_selectNode(nullptr), m_modified(false), m_stratSupports(this, true),
-    m_currentProfileList(0)
+  : m_game(p_game), m_selectNode(nullptr), m_gameModified(false), m_unsavedResults(false),
+    m_stratSupports(this, true), m_currentProfileList(0)
 {
   wxGetApp().AddDocument(this);
 
@@ -112,7 +112,7 @@ GameDocument::~GameDocument() { wxGetApp().RemoveDocument(this); }
 
 bool GameDocument::LoadDocument(const wxString &p_filename)
 {
-  TiXmlDocument doc((const char *)p_filename.mb_str());
+  TiXmlDocument doc(p_filename.mb_str());
   if (!doc.LoadFile()) {
     // Some error occurred.  Do something smart later.
     return false;
@@ -259,12 +259,10 @@ void GameDocument::SaveDocument(std::ostream &p_file) const
 
 void GameDocument::UpdateViews(GameModificationType p_modifications)
 {
-  if (p_modifications != GBT_DOC_MODIFIED_NONE) {
-    m_modified = true;
-    std::ostringstream s;
-    SaveDocument(s);
+  if (p_modifications == GBT_DOC_MODIFIED_GAME || p_modifications == GBT_DOC_MODIFIED_PAYOFFS ||
+      p_modifications == GBT_DOC_MODIFIED_LABELS) {
+    m_gameModified = true;
   }
-
   if (p_modifications == GBT_DOC_MODIFIED_GAME || p_modifications == GBT_DOC_MODIFIED_PAYOFFS) {
     m_stratSupports.Reset();
 
@@ -373,27 +371,32 @@ void GameDocument::SetSelectNode(GameNode p_node)
 // Commands for model part of MVC architecture start here.
 //======================================================================
 
-void GameDocument::DoSave(const wxString &p_filename)
+void GameDocument::DoSave(const wxString &p_filename, GameSaveFormat p_format)
 {
-  std::ofstream file(static_cast<const char *>(p_filename.mb_str()));
-  SaveDocument(file);
-  m_filename = p_filename;
-  SetModified(false);
-  UpdateViews(GBT_DOC_MODIFIED_NONE);
-}
+  std::ofstream file(p_filename.mb_str());
+  if (!file) {
+    throw std::runtime_error(std::string("Unable to open file for writing: ") +
+                             static_cast<const char *>(p_filename.mb_str()));
+  }
+  switch (p_format) {
+  case GameSaveFormat::Workbook:
+    SaveDocument(file);
+    m_filename = p_filename;
+    m_gameModified = false;
+    m_unsavedResults = false;
+    break;
 
-void GameDocument::DoExportEfg(const wxString &p_filename)
-{
-  std::ofstream file(static_cast<const char *>(p_filename.mb_str()));
-  m_game->Write(file, "efg");
-  UpdateViews(GBT_DOC_MODIFIED_NONE);
-}
+  case GameSaveFormat::Efg:
+    m_game->Write(file, "efg");
+    m_gameModified = false;
+    break;
 
-void GameDocument::DoExportNfg(const wxString &p_filename)
-{
-  std::ofstream file(static_cast<const char *>(p_filename.mb_str()));
-  BuildNfg();
-  m_game->Write(file, "nfg");
+  case GameSaveFormat::Nfg:
+    BuildNfg();
+    m_game->Write(file, "nfg");
+    m_gameModified = false;
+    break;
+  }
   UpdateViews(GBT_DOC_MODIFIED_NONE);
 }
 

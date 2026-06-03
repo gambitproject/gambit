@@ -145,7 +145,7 @@ AppLoadResult Application::LoadFile(const wxString &p_filename, wxWindow *p_pare
     m_fileHistory.AddFileToHistory(p_filename);
     m_fileHistory.Save(*wxConfigBase::Get());
     doc = new GameDocument(nfg);
-    doc->SetFilename("");
+    doc->SetFilename(p_filename);
     (void)new GameFrame(nullptr, doc);
     return GBT_APP_FILE_OK;
   }
