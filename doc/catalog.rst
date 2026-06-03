@@ -5,6 +5,12 @@ Catalog of games
 
 Below is a complete list of games included in Gambit's catalog.
 Check out the :ref:`pygambit API reference <pygambit-catalog>` for instructions on how to search and load these games in Python, and the :ref:`Updating the games catalog <updating-catalog>` guide for instructions on how to contribute new games to the catalog.
+Games from the OpenSpiel library are also available; see :ref:`Loading OpenSpiel games <catalog-openspiel>`.
+
+Loading Gambit games
+-----------------------
+
+.. include:: catalog_table.rst
 
 .. _catalog-openspiel:
 
@@ -24,5 +30,3 @@ not available on Windows). The game is exported to NFG or EFG format on the fly
 and loaded into Gambit. Not all OpenSpiel games can be exported; a
 :class:`ValueError` is raised for games that are incompatible with either format.
 See the OpenSpiel interoperability tutorial for worked examples.
-
-.. include:: catalog_table.rst
