@@ -45,7 +45,7 @@ Currently supported representations are:
 
       .. code-block:: python
 
-         pygambit.catalog.load("watson2013/exercise29_6")
+         pygambit.catalog.load("books/watson2013/exercise29_6")
 
    .. note::
 

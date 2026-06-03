@@ -2483,7 +2483,7 @@ ENUMPURE_AGENT_CASES = [
     # Examples where the are agent-form pure equillibrium behaviors that are not Nash eq
     pytest.param(
         EquilibriumTestCase(
-            factory=functools.partial(gbt.catalog.load, "myerson1991/fig4_2"),
+            factory=functools.partial(gbt.catalog.load, "books/myerson1991/fig4_2"),
             solver=functools.partial(gbt.nash.enumpure_agent_solve),
             expected=[[[d(1, 0), d(0, 1)], [d(0, 1)]], [[d(0, 1), d(0, 1)], [d(1, 0)]]],
         ),

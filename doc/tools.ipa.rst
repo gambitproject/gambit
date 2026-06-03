@@ -42,7 +42,7 @@ equilibria being found.
 Computing an equilibrium of
 the reduced strategic form of the example in Figure 2 of :cite:p:`Sel75`::
 
-   $ gambit-ipa catalog/selten1975/fig2.efg
+   $ gambit-ipa catalog/journals/ijgt/selten1975/fig2.efg
    Compute Nash equilibria using iterated polymatrix approximation
    Gametracer version 0.2, Copyright (C) 2002, Ben Blum and Christian Shelton
    Gambit version |release|, Copyright (C) 1994-2026, The Gambit Project
