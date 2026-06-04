@@ -224,21 +224,21 @@ def _setup_pyspiel_mock(
     return mock_ps, mock_export_fn
 
 
-def test_openspiel_load_nfg_success(monkeypatch):
-    """NFG export succeeds: catalog.load returns a valid Game."""
-    _setup_pyspiel_mock(monkeypatch, nfg_str=_MOCK_NFG)
-    game = gbt.catalog.load("open_spiel/matrix_rps")
+def test_openspiel_load_efg_success(monkeypatch):
+    """EFG export succeeds: catalog.load returns a valid Game."""
+    _setup_pyspiel_mock(monkeypatch, efg_str=_MOCK_EFG)
+    game = gbt.catalog.load("open_spiel/tiny_hanabi")
     assert isinstance(game, gbt.Game)
 
 
-def test_openspiel_load_efg_fallback(monkeypatch):
-    """NFG export fails, EFG export succeeds: catalog.load returns a valid Game."""
+def test_openspiel_load_nfg_fallback(monkeypatch):
+    """EFG export fails, NFG export succeeds: catalog.load returns a valid Game."""
     _setup_pyspiel_mock(
         monkeypatch,
-        nfg_raises=RuntimeError("nfg not supported"),
-        efg_str=_MOCK_EFG,
+        efg_raises=RuntimeError("efg not supported"),
+        nfg_str=_MOCK_NFG,
     )
-    game = gbt.catalog.load("open_spiel/tiny_hanabi")
+    game = gbt.catalog.load("open_spiel/matrix_rps")
     assert isinstance(game, gbt.Game)
 
 
@@ -257,11 +257,11 @@ def test_openspiel_load_game_not_found(monkeypatch):
 
 
 def test_openspiel_load_export_failure(monkeypatch):
-    """Both NFG and EFG exports fail: raises ValueError."""
+    """Both EFG and NFG exports fail: raises ValueError."""
     _setup_pyspiel_mock(
         monkeypatch,
-        nfg_raises=RuntimeError("nfg not supported"),
         efg_raises=RuntimeError("efg not supported"),
+        nfg_raises=RuntimeError("nfg not supported"),
     )
     with pytest.raises(ValueError, match="could not be exported"):
         gbt.catalog.load("open_spiel/matrix_rps")

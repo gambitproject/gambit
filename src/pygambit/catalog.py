@@ -72,24 +72,23 @@ def _load_from_openspiel(game_name: str) -> gbt.Game:
     except Exception as exc:
         raise ValueError(f"Could not load OpenSpiel game '{game_name}': {exc}") from exc
 
-    # Try NFG first (works for normal-form games).
-    # Suppress C-level stderr so OpenSpiel's C++ error message for non-NFG games
-    # (e.g. "OpenSpiel exception: Must be a normal-form game") is not shown when
-    # we fall through to the EFG path.
+    # Try EFG first (works for extensive-form games).
+    # Suppress C-level stderr so any C++ error messages for games that don't
+    # support EFG export are not shown when we fall through to the NFG path.
     try:
         with _suppress_c_stderr():
-            nfg_str = pyspiel.game_to_nfg_string(game)
-        return gbt.read_nfg(io.StringIO(nfg_str))
+            efg_str = export_gambit(game)
+        return gbt.read_efg(io.StringIO(efg_str))
     except Exception:
         pass
 
-    # Fall back to EFG export
+    # Fall back to NFG export (works for normal-form games)
     try:
-        efg_str = export_gambit(game)
-        return gbt.read_efg(io.StringIO(efg_str))
+        nfg_str = pyspiel.game_to_nfg_string(game)
+        return gbt.read_nfg(io.StringIO(nfg_str))
     except Exception as exc:
         raise ValueError(
-            f"OpenSpiel game '{game_name}' could not be exported to NFG or EFG format."
+            f"OpenSpiel game '{game_name}' could not be exported to EFG or NFG format."
         ) from exc
 
 
