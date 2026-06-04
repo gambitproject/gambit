@@ -858,8 +858,8 @@ class Game:
                 self.game.deref().GetPlayer(pl+1).deref().GetStrategy(st+1)
             )
 
-        if self.is_tree:
-            return TreeGameOutcome.wrap(self.game, psp)
+        if self.is_tree or self.game.deref().IsAgg():
+            return DerivedGameOutcome.wrap(self.game, psp)
         else:
             outcome = Outcome.wrap(deref(deref(psp).deref()).GetOutcome())
             if outcome.outcome != cython.cast(c_GameOutcome, NULL):
