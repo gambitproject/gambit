@@ -49,7 +49,7 @@ def _suppress_c_stderr():
 
 def load_openspiel(game_name: str, params: dict | None = None) -> gbt.Game:
     """
-    Load a game from the OpenSpiel library into Gambit.
+    Load a game from the OpenSpiel library.
 
     Parameters
     ----------
