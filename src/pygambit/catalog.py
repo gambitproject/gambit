@@ -6,13 +6,13 @@ import pandas as pd
 
 import pygambit as gbt
 
-# Use the full string path to where the catalog data are placed in the package
-_CATALOG_RESOURCE = files("pygambit") / "catalog_data"
-# This ensures that catalog files are included in editable installs too
-if not _CATALOG_RESOURCE.is_dir():
-    _repo_catalog = Path(__file__).parent.parent.parent / "catalog"
-    if _repo_catalog.is_dir():
-        _CATALOG_RESOURCE = _repo_catalog
+# Prefer the repo's live catalog/ directory when working in a development checkout.
+# This ensures changes to catalog/ are picked up immediately without reinstalling,
+# and avoids stale files in catalog_data/ left over from previous installs.
+# Fall back to the installed catalog_data/ only for deployed (non-development) packages,
+# where catalog/ does not exist relative to the installed source file.
+_repo_catalog = Path(__file__).parent.parent.parent / "catalog"
+_CATALOG_RESOURCE = _repo_catalog if _repo_catalog.is_dir() else files("pygambit") / "catalog_data"
 
 READERS = {
     ".nfg": gbt.read_nfg,

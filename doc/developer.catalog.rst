@@ -69,8 +69,7 @@ Currently supported representations are:
 
 3. **Update the build files:**
 
-   Ensure you have installed the package in editable mode to automatically pick up the new game file(s) in the ``pygambit.catalog`` module without reinstalling each time.
-   Then use the ``update.py`` script to update Gambit's documentation & build files, as well as generating images for the new game(s).
+   Use the ``update.py`` script to update Gambit's documentation & build files, as well as generating images for the new game(s).
    If you want to customise the visualisation parameters for your game(s), edit ``build_support/catalog/draw_tree_settings.yaml``.
    Add an entry under ``overrides`` keyed by your game's exact slug, or by a shared prefix (e.g. the author-year folder name) to apply settings to all games from that source.
    More specific entries (longer keys) take precedence over shorter ones.
@@ -82,12 +81,12 @@ Currently supported representations are:
 
    .. note::
 
-      You can use the ``--regenerate-images`` flag when building the docs locally for a second time to force any changes to be picked up.
+      - The ``pygambit.catalog`` module reads games directly from the repo's ``catalog/`` directory when working in a development checkout.
+      - You can use the ``--regenerate-images`` flag when building the docs locally for a second time to force any changes to be picked up.
 
    .. warning::
 
-      - If haven't done an editable install of ``pygambit`` in your python environment, you'll need to re-install it before running the update script to include new games in the catalog module.
-      - Running the script with the ``--build`` flag updates ``build_support/catalog/catalog.am``, which is included in ``Makefile.am``. If you moved games that were previously in ``contrib/games`` you'll need to also manually remove those files from ``EXTRA_DIST`` in ``Makefile.am``.
+      Running the script with the ``--build`` flag updates ``build_support/catalog/catalog.am``, which is included in ``Makefile.am``. If you moved games that were previously in ``contrib/games`` you'll need to also manually remove those files from ``EXTRA_DIST`` in ``Makefile.am``.
 
 4. **[Optional] Test your updates to the documentation locally:**
 
