@@ -225,20 +225,20 @@ def _setup_pyspiel_mock(
 
 
 def test_openspiel_load_efg_success(monkeypatch):
-    """EFG export succeeds: catalog.load returns a valid Game."""
+    """EFG export succeeds: load_openspiel returns a valid Game."""
     _setup_pyspiel_mock(monkeypatch, efg_str=_MOCK_EFG)
-    game = gbt.catalog.load("open_spiel/tiny_hanabi")
+    game = gbt.catalog.load_openspiel("tiny_hanabi")
     assert isinstance(game, gbt.Game)
 
 
 def test_openspiel_load_nfg_fallback(monkeypatch):
-    """EFG export fails, NFG export succeeds: catalog.load returns a valid Game."""
+    """EFG export fails, NFG export succeeds: load_openspiel returns a valid Game."""
     _setup_pyspiel_mock(
         monkeypatch,
         efg_raises=RuntimeError("efg not supported"),
         nfg_str=_MOCK_NFG,
     )
-    game = gbt.catalog.load("open_spiel/matrix_rps")
+    game = gbt.catalog.load_openspiel("matrix_rps")
     assert isinstance(game, gbt.Game)
 
 
@@ -246,14 +246,14 @@ def test_openspiel_load_import_error(monkeypatch):
     """Missing open_spiel raises ImportError with a helpful message."""
     monkeypatch.setitem(sys.modules, "pyspiel", None)
     with pytest.raises(ImportError, match="open_spiel"):
-        gbt.catalog.load("open_spiel/matrix_rps")
+        gbt.catalog.load_openspiel("matrix_rps")
 
 
 def test_openspiel_load_game_not_found(monkeypatch):
     """pyspiel.load_game failure raises ValueError."""
     _setup_pyspiel_mock(monkeypatch, load_raises=RuntimeError("unknown game"))
     with pytest.raises(ValueError, match="bogus_game"):
-        gbt.catalog.load("open_spiel/bogus_game")
+        gbt.catalog.load_openspiel("bogus_game")
 
 
 def test_openspiel_load_export_failure(monkeypatch):
@@ -264,4 +264,11 @@ def test_openspiel_load_export_failure(monkeypatch):
         nfg_raises=RuntimeError("nfg not supported"),
     )
     with pytest.raises(ValueError, match="could not be exported"):
-        gbt.catalog.load("open_spiel/matrix_rps")
+        gbt.catalog.load_openspiel("matrix_rps")
+
+
+def test_openspiel_load_with_params(monkeypatch):
+    """params dict is forwarded to pyspiel.load_game."""
+    mock_ps, _ = _setup_pyspiel_mock(monkeypatch, nfg_str=_MOCK_NFG)
+    gbt.catalog.load_openspiel("blotto", params={"players": 2, "coins": 3, "fields": 2})
+    mock_ps.load_game.assert_called_once_with("blotto", {"players": 2, "coins": 3, "fields": 2})

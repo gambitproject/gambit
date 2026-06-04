@@ -338,4 +338,5 @@ Catalog of games
    :toctree: api/
 
    load
+   load_openspiel
    games

@@ -22,8 +22,6 @@ READERS = {
     ".efg": gbt.read_efg,
 }
 
-_OPENSPIEL_PREFIX = "open_spiel/"
-
 
 @contextlib.contextmanager
 def _suppress_c_stderr():
@@ -49,14 +47,34 @@ def _suppress_c_stderr():
         os.close(saved_fd)
 
 
-def _load_from_openspiel(game_name: str) -> gbt.Game:
+def load_openspiel(game_name: str, params: dict | None = None) -> gbt.Game:
     """
-    Load a game from the OpenSpiel library by name.
+    Load a game from the OpenSpiel library into Gambit.
 
-    Tries NFG export first; falls back to EFG export via the
-    open_spiel.python.algorithms.gambit exporter. Raises ImportError
-    if open_spiel is not installed, ValueError if the game cannot be
-    exported to either format.
+    Parameters
+    ----------
+    game_name : str
+        The short name of the OpenSpiel game (e.g. ``"matrix_rps"``,
+        ``"tiny_hanabi"``). Passed directly to ``pyspiel.load_game``.
+    params : dict, optional
+        Game parameters forwarded to ``pyspiel.load_game``
+        (e.g. ``{"players": 2, "coins": 3, "fields": 2}`` for ``"blotto"``).
+        See the `OpenSpiel game list
+        <https://openspiel.readthedocs.io/en/latest/games.html>`_ for
+        available parameters per game. Defaults to an empty dict.
+
+    Returns
+    -------
+    gbt.Game
+        The loaded game.
+
+    Raises
+    ------
+    ImportError
+        If ``open_spiel`` is not installed.
+    ValueError
+        If ``pyspiel.load_game`` fails, or if the game cannot be exported
+        to EFG or NFG format.
     """
     try:
         import pyspiel
@@ -68,7 +86,7 @@ def _load_from_openspiel(game_name: str) -> gbt.Game:
         ) from exc
 
     try:
-        game = pyspiel.load_game(game_name)
+        game = pyspiel.load_game(game_name, params or {})
     except Exception as exc:
         raise ValueError(f"Could not load OpenSpiel game '{game_name}': {exc}") from exc
 
@@ -112,9 +130,6 @@ def load(slug: str) -> gbt.Game:
         If the game does not exist in the catalog.
     """
     slug = str(Path(slug)).replace("\\", "/")
-
-    if slug.startswith(_OPENSPIEL_PREFIX):
-        return _load_from_openspiel(slug[len(_OPENSPIEL_PREFIX):])
 
     # Try to load from file
     for suffix, reader in READERS.items():
