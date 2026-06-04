@@ -1,6 +1,4 @@
-import contextlib
 import io
-import os
 from importlib.resources import as_file, files
 from pathlib import Path
 from typing import Any
@@ -21,30 +19,6 @@ READERS = {
     ".nfg": gbt.read_nfg,
     ".efg": gbt.read_efg,
 }
-
-
-@contextlib.contextmanager
-def _suppress_c_stderr():
-    """Redirect C-level stderr (fd 2) to /dev/null for the duration of the block.
-
-    This prevents OpenSpiel's C++ code from printing error messages (e.g.
-    "OpenSpiel exception: Must be a normal-form game") to the user's terminal or
-    notebook when we speculatively attempt an export that may not be supported.
-    Falls back silently if the fd-level redirect is unavailable (e.g. Windows).
-    """
-    try:
-        devnull_fd = os.open(os.devnull, os.O_WRONLY)
-        saved_fd = os.dup(2)
-        os.dup2(devnull_fd, 2)
-        os.close(devnull_fd)
-    except OSError:
-        yield
-        return
-    try:
-        yield
-    finally:
-        os.dup2(saved_fd, 2)
-        os.close(saved_fd)
 
 
 def load_openspiel(game_name: str, params: dict | None = None) -> gbt.Game:
@@ -73,8 +47,11 @@ def load_openspiel(game_name: str, params: dict | None = None) -> gbt.Game:
     ImportError
         If ``open_spiel`` is not installed.
     ValueError
-        If ``pyspiel.load_game`` fails, or if the game cannot be exported
-        to EFG or NFG format.
+        If the game's dynamics type is not supported for export, or if the
+        format exporter raises an error for this specific game.
+    Other exceptions from ``pyspiel.load_game`` propagate directly.
+        For example, ``pyspiel.SpielError`` is raised for unknown game names
+        or invalid/missing parameters.
     """
     try:
         import pyspiel
@@ -85,29 +62,37 @@ def load_openspiel(game_name: str, params: dict | None = None) -> gbt.Game:
             "Install it with: pip install open_spiel"
         ) from exc
 
-    try:
-        game = pyspiel.load_game(game_name, params or {})
-    except Exception as exc:
-        raise ValueError(f"Could not load OpenSpiel game '{game_name}': {exc}") from exc
+    # Let pyspiel's own exceptions propagate unchanged — they already carry
+    # informative messages ("Unknown game '...'", "Unknown parameter '...'", etc.)
+    game = pyspiel.load_game(game_name, params or {})
 
-    # Try EFG first (works for extensive-form games).
-    # Suppress C-level stderr so any C++ error messages for games that don't
-    # support EFG export are not shown when we fall through to the NFG path.
-    try:
-        with _suppress_c_stderr():
+    dynamics = game.get_type().dynamics
+
+    # OpenSpiel's SEQUENTIAL corresponds to extensive-form (tree) games in Gambit;
+    # SIMULTANEOUS corresponds to normal-form (strategic-form) games.
+    if dynamics == pyspiel.GameType.Dynamics.SEQUENTIAL:
+        try:
             efg_str = export_gambit(game)
+        except Exception as exc:
+            raise ValueError(
+                f"OpenSpiel game '{game_name}' could not be exported to EFG format: {exc}"
+            ) from exc
         return gbt.read_efg(io.StringIO(efg_str))
-    except Exception:
-        pass
 
-    # Fall back to NFG export (works for normal-form games)
-    try:
-        nfg_str = pyspiel.game_to_nfg_string(game)
+    elif dynamics == pyspiel.GameType.Dynamics.SIMULTANEOUS:
+        try:
+            nfg_str = pyspiel.game_to_nfg_string(game)
+        except Exception as exc:
+            raise ValueError(
+                f"OpenSpiel game '{game_name}' could not be exported to NFG format: {exc}"
+            ) from exc
         return gbt.read_nfg(io.StringIO(nfg_str))
-    except Exception as exc:
+
+    else:
         raise ValueError(
-            f"OpenSpiel game '{game_name}' could not be exported to EFG or NFG format."
-        ) from exc
+            f"OpenSpiel game '{game_name}' has unsupported dynamics type "
+            f"'{dynamics}' and cannot be exported to Gambit format."
+        )
 
 
 def load(slug: str) -> gbt.Game:

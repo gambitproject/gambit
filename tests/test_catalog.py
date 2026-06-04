@@ -193,15 +193,34 @@ def _setup_pyspiel_mock(
     efg_str=None,
     efg_raises=None,
     load_raises=None,
+    dynamics="sequential",
 ):
-    """Inject a fake pyspiel + open_spiel.python.algorithms.gambit into sys.modules."""
+    """Inject a fake pyspiel + open_spiel.python.algorithms.gambit into sys.modules.
+
+    ``dynamics`` controls which export path the code takes:
+    - ``"sequential"`` → game.get_type().dynamics == pyspiel.GameType.Dynamics.SEQUENTIAL
+      (OpenSpiel's term for extensive-form / tree games in Gambit)
+    - ``"simultaneous"`` → SIMULTANEOUS (normal-form / strategic-form games in Gambit)
+    - ``"other"`` → any other value, triggers the unsupported-dynamics ValueError
+    """
     mock_ps = MagicMock()
     mock_export_fn = MagicMock()
+    mock_game = MagicMock()
+
+    # Wire the dynamics attribute so the == comparison in load_openspiel resolves correctly.
+    # MagicMock attribute access is idempotent: mock_ps.GameType.Dynamics.SEQUENTIAL always
+    # returns the same object, so the equality check passes.
+    if dynamics == "sequential":
+        mock_game.get_type.return_value.dynamics = mock_ps.GameType.Dynamics.SEQUENTIAL
+    elif dynamics == "simultaneous":
+        mock_game.get_type.return_value.dynamics = mock_ps.GameType.Dynamics.SIMULTANEOUS
+    else:
+        mock_game.get_type.return_value.dynamics = object()  # matches neither branch
 
     if load_raises is not None:
         mock_ps.load_game.side_effect = load_raises
     else:
-        mock_ps.load_game.return_value = MagicMock()
+        mock_ps.load_game.return_value = mock_game
 
     if nfg_raises is not None:
         mock_ps.game_to_nfg_string.side_effect = nfg_raises
@@ -225,19 +244,15 @@ def _setup_pyspiel_mock(
 
 
 def test_openspiel_load_efg_success(monkeypatch):
-    """EFG export succeeds: load_openspiel returns a valid Game."""
-    _setup_pyspiel_mock(monkeypatch, efg_str=_MOCK_EFG)
+    """Sequential (extensive-form) game: EFG export is used and returns a valid Game."""
+    _setup_pyspiel_mock(monkeypatch, dynamics="sequential", efg_str=_MOCK_EFG)
     game = gbt.catalog.load_openspiel("tiny_hanabi")
     assert isinstance(game, gbt.Game)
 
 
-def test_openspiel_load_nfg_fallback(monkeypatch):
-    """EFG export fails, NFG export succeeds: load_openspiel returns a valid Game."""
-    _setup_pyspiel_mock(
-        monkeypatch,
-        efg_raises=RuntimeError("efg not supported"),
-        nfg_str=_MOCK_NFG,
-    )
+def test_openspiel_load_nfg_success(monkeypatch):
+    """Simultaneous (normal-form) game: NFG export is used and returns a valid Game."""
+    _setup_pyspiel_mock(monkeypatch, dynamics="simultaneous", nfg_str=_MOCK_NFG)
     game = gbt.catalog.load_openspiel("matrix_rps")
     assert isinstance(game, gbt.Game)
 
@@ -250,25 +265,45 @@ def test_openspiel_load_import_error(monkeypatch):
 
 
 def test_openspiel_load_game_not_found(monkeypatch):
-    """pyspiel.load_game failure raises ValueError."""
-    _setup_pyspiel_mock(monkeypatch, load_raises=RuntimeError("unknown game"))
-    with pytest.raises(ValueError, match="bogus_game"):
+    """pyspiel.load_game errors propagate directly without wrapping."""
+    _setup_pyspiel_mock(monkeypatch, load_raises=RuntimeError("Unknown game 'bogus_game'"))
+    with pytest.raises(RuntimeError, match="Unknown game"):
         gbt.catalog.load_openspiel("bogus_game")
 
 
-def test_openspiel_load_export_failure(monkeypatch):
-    """Both EFG and NFG exports fail: raises ValueError."""
+def test_openspiel_load_efg_export_failure(monkeypatch):
+    """EFG export failure on a sequential game raises ValueError with format context."""
     _setup_pyspiel_mock(
         monkeypatch,
-        efg_raises=RuntimeError("efg not supported"),
-        nfg_raises=RuntimeError("nfg not supported"),
+        dynamics="sequential",
+        efg_raises=RuntimeError("export error"),
     )
-    with pytest.raises(ValueError, match="could not be exported"):
+    with pytest.raises(ValueError, match="EFG format"):
+        gbt.catalog.load_openspiel("tiny_hanabi")
+
+
+def test_openspiel_load_nfg_export_failure(monkeypatch):
+    """NFG export failure on a simultaneous game raises ValueError with format context."""
+    _setup_pyspiel_mock(
+        monkeypatch,
+        dynamics="simultaneous",
+        nfg_raises=RuntimeError("export error"),
+    )
+    with pytest.raises(ValueError, match="NFG format"):
         gbt.catalog.load_openspiel("matrix_rps")
 
 
+def test_openspiel_load_unsupported_dynamics(monkeypatch):
+    """A game with unsupported dynamics (e.g. MEAN_FIELD) raises ValueError."""
+    _setup_pyspiel_mock(monkeypatch, dynamics="other")
+    with pytest.raises(ValueError, match="unsupported dynamics"):
+        gbt.catalog.load_openspiel("some_mfg_game")
+
+
 def test_openspiel_load_with_params(monkeypatch):
-    """params dict is forwarded to pyspiel.load_game."""
-    mock_ps, _ = _setup_pyspiel_mock(monkeypatch, nfg_str=_MOCK_NFG)
+    """params dict is forwarded verbatim to pyspiel.load_game."""
+    mock_ps, _ = _setup_pyspiel_mock(
+        monkeypatch, dynamics="simultaneous", nfg_str=_MOCK_NFG
+    )
     gbt.catalog.load_openspiel("blotto", params={"players": 2, "coins": 3, "fields": 2})
     mock_ps.load_game.assert_called_once_with("blotto", {"players": 2, "coins": 3, "fields": 2})
