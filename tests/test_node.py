@@ -198,6 +198,20 @@ SUBGAME_ROOTS_CASES = [
         ),
         id="Absent-minded-game-with-paths-intersecting-infoset-three-times"
     ),
+    pytest.param(
+        SubgameRootsTestCase(
+            factory=functools.partial(games.read_from_file, "AM-unary-hops.efg"),
+            expected_paths=[[], ["1", "1"], ["T", "1", "1", "1", "1", "1"]]
+        ),
+        id="Absent-minded-game-with-paths-intersecting-infoset-two-times"
+    ),
+    pytest.param(
+        SubgameRootsTestCase(
+            factory=functools.partial(games.read_from_file, "AM-unary-branches.efg"),
+            expected_paths=[[], ["1", "1", "1", "T"]]
+        ),
+        id="Absent-minded-game-with-paths-intersecting-infoset-two-times"
+    ),
 ]
 
 
