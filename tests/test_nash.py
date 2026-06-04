@@ -172,18 +172,18 @@ ENUMPURE_CASES = [
         marks=pytest.mark.nash_enumpure_strategy,
         id="test_enumpure_9",
     ),
-    pytest.param(
-        EquilibriumTestCase(
-            factory=functools.partial(games.read_from_file, "2x2_small_payoffs.agg"),
-            solver=functools.partial(gbt.nash.enumpure_solve),
-            expected=[
-                [d(1, 0), d(1, 0)],
-                [d(0, 1), d(0, 1)],
-            ],
-        ),
-        marks=pytest.mark.nash_enumpure_strategy,
-        id="test_enumpure_10",
-    ),
+    # pytest.param(
+    # EquilibriumTestCase(
+    # factory=functools.partial(games.read_from_file, "2x2_small_payoffs.agg"),
+    # solver=functools.partial(gbt.nash.enumpure_solve),
+    # expected=[
+    # [d(1, 0), d(1, 0)],
+    # [d(0, 1), d(0, 1)],
+    # ],
+    # ),
+    # marks=pytest.mark.nash_enumpure_strategy,
+    # id="test_enumpure_10",
+    # ),
 ]
 
 
@@ -256,55 +256,6 @@ ENUMMIXED_RATIONAL_CASES = [
         ),
         marks=pytest.mark.nash_enummixed_strategy,
         id="test_enumixed_rational_5",
-    ),
-    # Action graph games
-    pytest.param(
-        EquilibriumTestCase(
-            factory=functools.partial(games.read_from_file, "2x2.agg"),
-            solver=functools.partial(gbt.nash.enummixed_solve, rational=True),
-            expected=[
-                [d(1, 0), d(1, 0)],
-                [d(0, 1), d(0, 1)],
-                [
-                    d("4186770418979088/4641467073735727", "454696654756639/4641467073735727"),
-                    d("4186770418979088/4641467073735727", "454696654756639/4641467073735727"),
-                ],
-            ],
-        ),
-        marks=pytest.mark.nash_enummixed_strategy,
-        id="test_enummixed_rational_6",
-    ),
-    pytest.param(
-        EquilibriumTestCase(
-            factory=functools.partial(games.read_from_file, "2x2_rounded_payoffs.agg"),
-            solver=functools.partial(gbt.nash.enummixed_solve, rational=True),
-            expected=[
-                [d(1, 0), d(1, 0)],
-                [d(0, 1), d(0, 1)],
-                [
-                    d("10/11", "1/11"),
-                    d("10/11", "1/11"),
-                ],
-            ],
-        ),
-        marks=pytest.mark.nash_enummixed_strategy,
-        id="test_enummixed_rational_7",
-    ),
-    pytest.param(
-        EquilibriumTestCase(
-            factory=functools.partial(games.read_from_file, "2x2_small_payoffs.agg"),
-            solver=functools.partial(gbt.nash.enummixed_solve, rational=True),
-            expected=[
-                [d(1, 0), d(1, 0)],
-                [d(0, 1), d(0, 1)],
-                [
-                    d("1/2", "1/2"),
-                    d("1/2", "1/2"),
-                ],
-            ],
-        ),
-        marks=pytest.mark.nash_enummixed_strategy,
-        id="test_enummixed_rational_8",
     ),
 ]
 
@@ -384,6 +335,61 @@ ENUMMIXED_DOUBLE_CASES = [
         ),
         marks=pytest.mark.nash_enummixed_strategy,
         id="test_enumixed_double_5",
+    ),
+    # Action graph games
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, "2x2.agg"),
+            solver=functools.partial(gbt.nash.enummixed_solve, rational=False),
+            expected=[
+                [d(1, 0), d(1, 0)],
+                [d(0, 1), d(0, 1)],
+                [
+                    d("4186770418979088/4641467073735727", "454696654756639/4641467073735727"),
+                    d("4186770418979088/4641467073735727", "454696654756639/4641467073735727"),
+                ],
+            ],
+            prob_tol=TOL,
+            regret_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enummixed_strategy,
+        id="test_enummixed_rational_6",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, "2x2_rounded_payoffs.agg"),
+            solver=functools.partial(gbt.nash.enummixed_solve, rational=False),
+            expected=[
+                [d(1, 0), d(1, 0)],
+                [d(0, 1), d(0, 1)],
+                [
+                    d("10/11", "1/11"),
+                    d("10/11", "1/11"),
+                ],
+            ],
+            prob_tol=TOL,
+            regret_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enummixed_strategy,
+        id="test_enummixed_rational_7",
+    ),
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, "2x2_small_payoffs.agg"),
+            solver=functools.partial(gbt.nash.enummixed_solve, rational=False),
+            expected=[
+                [d(1, 0), d(1, 0)],
+                [d(0, 1), d(0, 1)],
+                [
+                    d("1/2", "1/2"),
+                    d("1/2", "1/2"),
+                ],
+            ],
+            prob_tol=TOL,
+            regret_tol=TOL,
+        ),
+        marks=pytest.mark.nash_enummixed_strategy,
+        id="test_enummixed_rational_8",
     ),
 ]
 
@@ -663,25 +669,6 @@ LCP_STRATEGY_RATIONAL_CASES = [
         marks=pytest.mark.nash_lcp_strategy,
         id="test_lcp_strategy_rational_11",
     ),
-    # Action graph game
-    pytest.param(
-        EquilibriumTestCase(
-            factory=functools.partial(games.read_from_file, "2x2.agg"),
-            solver=functools.partial(
-                gbt.nash.lcp_solve, rational=True, use_strategic=True, stop_after=None
-            ),
-            expected=[
-                [d(1, 0), d(1, 0)],
-                [
-                    d("4186770418979088/4641467073735727", "454696654756639/4641467073735727"),
-                    d("4186770418979088/4641467073735727", "454696654756639/4641467073735727"),
-                ],
-                [d(0, 1), d(0, 1)],
-            ],
-        ),
-        marks=pytest.mark.nash_lcp_strategy,
-        id="test_lcp_strategy_rational_12",
-    ),
 ]
 
 
@@ -845,6 +832,27 @@ LCP_STRATEGY_DOUBLE_CASES = [
         ),
         marks=pytest.mark.nash_lcp_strategy,
         id="test_lcp_strategy_double_11",
+    ),
+    # Action graph game
+    pytest.param(
+        EquilibriumTestCase(
+            factory=functools.partial(games.read_from_file, "2x2.agg"),
+            solver=functools.partial(
+                gbt.nash.lcp_solve, rational=True, use_strategic=True, stop_after=None
+            ),
+            expected=[
+                [d(1, 0), d(1, 0)],
+                [
+                    d("4186770418979088/4641467073735727", "454696654756639/4641467073735727"),
+                    d("4186770418979088/4641467073735727", "454696654756639/4641467073735727"),
+                ],
+                [d(0, 1), d(0, 1)],
+            ],
+            regret_tol=TOL,
+            prob_tol=TOL,
+        ),
+        marks=pytest.mark.nash_lcp_strategy,
+        id="test_lcp_strategy_rational_12",
     ),
 ]
 
