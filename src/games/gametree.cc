@@ -1214,9 +1214,11 @@ void GameTreeRep::BuildSubgameRoots() const
       }
 
       if (low == m_disc.at(node)) {
-        // low == disc is an exact bridge test only when nodes have distinct terminal spans.
-        // On a single-action chain the spans collapse, so reject a node satisfying low == disc
-        // if an absent-minded infoset above it contains a member in the node's subtree.
+        // The `low == disc` test is exact only with distinct terminal spans. A single-action
+        // chain above a candidate node collapses the spans and can create false positives.
+        // Reject a node if some single-action ancestor's infoset (possibly the node's own)
+        // has a member in the node's subtree (possibly the node itself).
+        // Note that such an infoset is necessarily absent-minded.
         bool spurious = false;
         for (auto *anc = node->m_parent; anc && anc->m_children.size() == 1 && !spurious;
              anc = anc->m_parent) {
