@@ -37,11 +37,33 @@ Currently supported representations are:
 
    Create a new branch in the ``gambit`` repo.
    Add your new game file(s) inside the ``catalog`` dir and commit them, or edit an existing game.
-   If there are multiple games from a particular source, place them in an appropriately named folder.
+   The catalog uses a hierarchical folder structure that groups games by publication type and venue:
+
+   .. code-block:: text
+
+      catalog/
+        books/{author-year}/{game}.efg       # games from textbooks
+        journals/{venue}/{author-year}/{game}.efg  # games from journals (venue = geb, ijgt, mor, …)
+        conf/{venue}/{author-year}/{game}.efg      # games from conferences
+
+   The folder path determines the game's slug, used by the load function:
+
+   .. code-block:: python
+
+      pygambit.catalog.load("books/watson2013/exercise29_6")
+      pygambit.catalog.load("journals/geb/bagwell1995")
+
+   .. note::
+
+      When adding a game from a **new** journal, conference, or other top-level category,
+      add a human-readable label for the new hierarchy node(s) to
+      ``build_support/catalog/catalog_hierarchy.yaml``.
+      The catalog documentation page groups and labels games based on this file.
+      Nodes without an entry fall back to a title-cased version of the folder name.
 
    .. important::
 
-      The name of the game file will determine it's "slug", used by the load function of the catalog module:
+      The name of the game file will determine its "slug", used by the load function of the catalog module:
 
       .. code-block:: python
 
