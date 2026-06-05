@@ -104,7 +104,7 @@ Currently supported representations are:
 
    .. note::
 
-      - The ``pygambit.catalog`` module reads games directly from the repo's ``catalog/`` directory when working in a development checkout.
+      - The ``pygambit.catalog`` module reads games directly from the repo's ``catalog/`` directory when working with an editable install of ``pygambit``.
       - You can use the ``--regenerate-images`` flag when building the docs locally for a second time to force any changes to be picked up.
 
    .. warning::
