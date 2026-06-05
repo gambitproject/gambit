@@ -82,29 +82,6 @@ void TreePayoffEditor::OnChar(wxKeyEvent &p_event)
 }
 
 //--------------------------------------------------------------------------
-//                       Bitmap drawing functions
-//--------------------------------------------------------------------------
-
-static wxBitmap MakeOutcomeBitmap()
-{
-  wxBitmap bitmap(24, 24);
-  wxMemoryDC dc;
-  dc.SelectObject(bitmap);
-  dc.Clear();
-  dc.SetPen(wxPen(*wxBLACK, 1, wxPENSTYLE_SOLID));
-  // Make a gold-colored background
-  dc.SetBrush(wxBrush(wxColour(255, 215, 0), wxBRUSHSTYLE_SOLID));
-  dc.DrawCircle(12, 12, 10);
-  dc.SetFont(wxFont(12, wxFONTFAMILY_SWISS, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
-  dc.SetTextForeground(wxColour(0, 192, 0));
-
-  int width, height;
-  dc.GetTextExtent(wxT("u"), &width, &height);
-  dc.DrawText(wxT("u"), 12 - width / 2, 12 - height / 2);
-  return bitmap;
-}
-
-//--------------------------------------------------------------------------
 //                      class PlayerDropTarget
 //--------------------------------------------------------------------------
 
@@ -113,9 +90,7 @@ class PlayerDropTarget : public wxTextDropTarget {
   GameDocument *m_model;
 
   bool OnDropPlayer(const GameNode &p_node, const wxString &p_text);
-  bool OnDropSetOutcome(const GameNode &p_node, const wxString &p_text);
-  bool OnDropMoveOutcome(const GameNode &p_node, const wxString &p_text);
-  bool OnDropCopyOutcome(const GameNode &p_node, const wxString &p_text);
+  bool OnDropOutcome(const GameNode &p_node, const wxString &p_text, const wxPoint &p_pos);
   bool OnDropTreeNode(const GameNode &p_node, const wxString &p_text, const wxPoint &p_pos);
 
 public:
@@ -167,41 +142,18 @@ bool PlayerDropTarget::OnDropPlayer(const GameNode &p_node, const wxString &p_te
   return true;
 }
 
-bool PlayerDropTarget::OnDropSetOutcome(const GameNode &p_node, const wxString &p_text)
+bool PlayerDropTarget::OnDropOutcome(const GameNode &p_node, const wxString &p_text,
+                                     const wxPoint &p_pos)
 {
   long n;
   p_text.Right(p_text.Length() - 1).ToLong(&n);
-  const GameNode srcNode = GetNode(m_model->GetGame()->GetRoot(), n);
-  if (!srcNode || p_node == srcNode) {
-    return false;
-  }
-  m_model->DoSetOutcome(p_node, srcNode->GetOutcome());
-  return true;
-}
 
-bool PlayerDropTarget::OnDropMoveOutcome(const GameNode &p_node, const wxString &p_text)
-{
-  long n;
-  p_text.Right(p_text.Length() - 1).ToLong(&n);
   const GameNode srcNode = GetNode(m_model->GetGame()->GetRoot(), n);
-  if (!srcNode || p_node == srcNode) {
+  if (!srcNode || srcNode == p_node || !srcNode->GetOutcome()) {
     return false;
   }
-  m_model->DoSetOutcome(p_node, srcNode->GetOutcome());
-  m_model->DoSetOutcome(srcNode, nullptr);
-  return true;
-}
 
-bool PlayerDropTarget::OnDropCopyOutcome(const GameNode &p_node, const wxString &p_text)
-{
-  long n;
-  p_text.Right(p_text.Length() - 1).ToLong(&n);
-  const GameNode srcNode = GetNode(m_model->GetGame()->GetRoot(), n);
-  if (!srcNode || p_node == srcNode) {
-    return false;
-  }
-  m_model->DoCopyOutcome(p_node, srcNode->GetOutcome());
-  return true;
+  return m_owner->ShowOutcomeDropMenu(p_node, srcNode, p_pos);
 }
 
 bool PlayerDropTarget::OnDropTreeNode(const GameNode &p_node, const wxString &p_text,
@@ -240,11 +192,7 @@ bool PlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y, const wxString &p_te
     case 'P':
       return OnDropPlayer(node, p_text);
     case 'O':
-      return OnDropSetOutcome(node, p_text);
-    case 'o':
-      return OnDropMoveOutcome(node, p_text);
-    case 'p':
-      return OnDropCopyOutcome(node, p_text);
+      return OnDropOutcome(node, p_text, wxPoint(p_x, p_y));
     default:
       return false;
     }
@@ -370,6 +318,48 @@ bool EfgDisplay::ShowTreeDropMenu(const GameNode &p_targetNode, const GameNode &
       else {
         m_doc->DoAppendMove(p_targetNode, p_sourceNode->GetInfoset());
       }
+      return true;
+    }
+  }
+  catch (std::exception &ex) {
+    ExceptionDialog(this, ex.what()).ShowModal();
+  }
+
+  return false;
+}
+
+bool EfgDisplay::ShowOutcomeDropMenu(const GameNode &p_targetNode, const GameNode &p_sourceNode,
+                                     const wxPoint &p_pos)
+{
+  if (!p_targetNode || !p_sourceNode || p_targetNode == p_sourceNode ||
+      !p_sourceNode->GetOutcome()) {
+    return false;
+  }
+
+  const int useSameOutcomeId = wxWindow::NewControlId();
+  const int copyOutcomeId = wxWindow::NewControlId();
+  const int moveOutcomeId = wxWindow::NewControlId();
+
+  wxMenu menu;
+  menu.Append(useSameOutcomeId, _("Use same outcome here"));
+  menu.Append(copyOutcomeId, _("Copy outcome here"));
+  menu.AppendSeparator();
+  menu.Append(moveOutcomeId, _("Move outcome here"));
+
+  const int selection = GetPopupMenuSelectionFromUser(menu, p_pos);
+
+  try {
+    if (selection == useSameOutcomeId) {
+      m_doc->DoSetOutcome(p_targetNode, p_sourceNode->GetOutcome());
+      return true;
+    }
+    if (selection == copyOutcomeId) {
+      m_doc->DoCopyOutcome(p_targetNode, p_sourceNode->GetOutcome());
+      return true;
+    }
+    if (selection == moveOutcomeId) {
+      m_doc->DoSetOutcome(p_targetNode, p_sourceNode->GetOutcome());
+      m_doc->DoSetOutcome(p_sourceNode, nullptr);
       return true;
     }
   }
@@ -982,62 +972,6 @@ void EfgDisplay::OnMagnify(wxMouseEvent &p_event)
   }
 }
 
-namespace {
-
-wxCursor MakeTreeDragCursor()
-{
-  constexpr int width = 24;
-  constexpr int height = 24;
-
-  wxBitmap bitmap(width, height, 32);
-
-  {
-    wxMemoryDC dc(bitmap);
-    dc.SetBackground(*wxTRANSPARENT_BRUSH);
-    dc.Clear();
-
-    const wxColour stroke(70, 70, 70);
-    const wxColour fill(255, 255, 255);
-
-    dc.SetPen(wxPen(stroke, 2));
-    dc.SetBrush(wxBrush(fill, wxBRUSHSTYLE_SOLID));
-
-    // Simple subtree glyph: one parent node and two children.
-    dc.DrawCircle(7, 5, 3);
-    dc.DrawCircle(7, 18, 3);
-    dc.DrawCircle(18, 18, 3);
-
-    dc.SetPen(wxPen(stroke, 1));
-    dc.DrawLine(7, 8, 7, 15);
-    dc.DrawLine(10, 18, 15, 18);
-
-    dc.SelectObject(wxNullBitmap);
-  }
-
-  wxImage image = bitmap.ConvertToImage();
-  if (image.HasAlpha()) {
-    // Good.
-  }
-  else {
-    image.InitAlpha();
-  }
-
-  image.SetOption(wxIMAGE_OPTION_CUR_HOTSPOT_X, 0);
-  image.SetOption(wxIMAGE_OPTION_CUR_HOTSPOT_Y, 0);
-
-  return wxCursor(image);
-}
-
-wxCursor MakeDragCursor(const wxBitmap &p_bitmap, int p_hotspotX, int p_hotspotY)
-{
-  wxImage image = p_bitmap.ConvertToImage();
-  image.SetOption(wxIMAGE_OPTION_CUR_HOTSPOT_X, p_hotspotX);
-  image.SetOption(wxIMAGE_OPTION_CUR_HOTSPOT_Y, p_hotspotY);
-  return wxCursor(image);
-}
-
-} // namespace
-
 void EfgDisplay::OnMouseMotion(wxMouseEvent &p_event)
 {
   if (p_event.LeftIsDown() && p_event.Dragging()) {
@@ -1057,38 +991,16 @@ void EfgDisplay::OnMouseMotion(wxMouseEvent &p_event)
       source.DoDragDrop(wxDrag_DefaultMove);
       return;
     }
+
     node = m_layout.OutcomeHitTest(x, y);
 
     if (node && node->GetOutcome()) {
-      const wxBitmap bitmap = MakeOutcomeBitmap();
-#if defined(__WXMSW__) or defined(__WXMAC__)
-      const auto image = wxCursor(bitmap.ConvertToImage());
-#else
-      wxIcon image;
-      image.CopyFromBitmap(bitmap);
-#endif // _WXMSW__
+      wxString label;
+      label << "O" << node->GetNumber();
+      wxTextDataObject textData(label);
 
-      if (p_event.ControlDown()) {
-        wxString label;
-        label << "O" << node->GetNumber();
-        wxTextDataObject textData(label);
-        wxDropSource source(textData, this, image, image, image);
-        /*wxDragResult result =*/source.DoDragDrop(true);
-      }
-      else if (p_event.ShiftDown()) {
-        wxString label;
-        label << "p" << node->GetNumber();
-        wxTextDataObject textData(label);
-        wxDropSource source(textData, this, image, image, image);
-        /*wxDragResult result =*/source.DoDragDrop(true);
-      }
-      else {
-        wxString label;
-        label << "o" << node->GetNumber();
-        wxTextDataObject textData(label);
-        wxDropSource source(textData, this, image, image, image);
-        /*wxDragResult result =*/source.DoDragDrop(wxDrag_DefaultMove);
-      }
+      wxDropSource source(textData, this);
+      source.DoDragDrop(wxDrag_DefaultMove);
     }
   }
 }

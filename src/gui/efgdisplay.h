@@ -111,6 +111,8 @@ public:
 
   bool ShowTreeDropMenu(const GameNode &p_targetNode, const GameNode &p_sourceNode,
                         const wxPoint &p_pos);
+  bool ShowOutcomeDropMenu(const GameNode &p_targetNode, const GameNode &p_sourceNode,
+                           const wxPoint &p_pos);
 
   DECLARE_EVENT_TABLE()
 };
