@@ -5,6 +5,7 @@
 ### Added
 - Implement `GameSubgameRep` (C++) and `Subgame` (Python), a first-class object representing a subgame. (#585)
 - Games can be materialised directly from OpenSpiel games if `pyspiel` is installed. (#917)
+- Magnify events are now supported in GUI for zooming in/out on trees.
 
 ### Fixed
 - Corrected resizing of row and column index labels in strategic form so pivoting works correctly. (#844)

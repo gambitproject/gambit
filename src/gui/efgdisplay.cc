@@ -313,6 +313,7 @@ BEGIN_EVENT_TABLE(EfgDisplay, wxScrolledWindow)
 EVT_MOTION(EfgDisplay::OnMouseMotion)
 EVT_LEFT_DOWN(EfgDisplay::OnLeftClick)
 EVT_LEFT_DCLICK(EfgDisplay::OnLeftDoubleClick)
+EVT_MAGNIFY(EfgDisplay::OnMagnify)
 EVT_RIGHT_DOWN(EfgDisplay::OnRightClick)
 EVT_KEY_DOWN(EfgDisplay::OnKeyEvent)
 EVT_SIZE(EfgDisplay::OnSize)
@@ -605,16 +606,34 @@ void EfgDisplay::RefreshTree()
   Refresh();
 }
 
+constexpr int kScrollPixelsPerUnit = 1;
+
 void EfgDisplay::AdjustScrollbarSteps()
 {
-  int width, height;
-  GetClientSize(&width, &height);
+  int oldPixelsPerUnitX, oldPixelsPerUnitY;
+  GetScrollPixelsPerUnit(&oldPixelsPerUnitX, &oldPixelsPerUnitY);
 
   int scrollX, scrollY;
   GetViewStart(&scrollX, &scrollY);
 
-  SetScrollbars(50, 50, LayoutToDevice(m_layout.MaxX()) / 50 + 1,
-                LayoutToDevice(m_layout.MaxY()) / 50 + 1, scrollX, scrollY);
+  const int currentPixelX = scrollX * oldPixelsPerUnitX;
+  const int currentPixelY = scrollY * oldPixelsPerUnitY;
+
+  int clientWidth, clientHeight;
+  GetClientSize(&clientWidth, &clientHeight);
+
+  const int virtualWidth = LayoutToDevice(m_layout.MaxX());
+  const int virtualHeight = LayoutToDevice(m_layout.MaxY());
+
+  const int maxPixelX = std::max(0, virtualWidth - clientWidth);
+  const int maxPixelY = std::max(0, virtualHeight - clientHeight);
+
+  const int clampedPixelX = std::clamp(currentPixelX, 0, maxPixelX);
+  const int clampedPixelY = std::clamp(currentPixelY, 0, maxPixelY);
+
+  SetScrollbars(kScrollPixelsPerUnit, kScrollPixelsPerUnit,
+                virtualWidth / kScrollPixelsPerUnit + 1, virtualHeight / kScrollPixelsPerUnit + 1,
+                clampedPixelX / kScrollPixelsPerUnit, clampedPixelY / kScrollPixelsPerUnit);
 }
 
 void EfgDisplay::FitZoom()
@@ -633,12 +652,83 @@ void EfgDisplay::FitZoom()
   Refresh();
 }
 
-void EfgDisplay::SetZoom(int p_zoom)
+namespace {
+
+constexpr int kMinZoom = 10;
+constexpr int kMaxZoom = 150;
+constexpr int kZoomStep = 10;
+constexpr int kScrollPixelsPerUnit = 1;
+
+int ClampZoom(int p_zoom) { return std::clamp(p_zoom, kMinZoom, kMaxZoom); }
+
+} // namespace
+
+void EfgDisplay::SetZoom(int p_zoom, bool p_keepSelectionVisible)
 {
-  m_zoom = p_zoom;
+  const int zoom = ClampZoom(p_zoom);
+  if (zoom == m_zoom) {
+    return;
+  }
+
+  m_zoom = zoom;
   AdjustScrollbarSteps();
-  EnsureNodeVisible(m_doc->GetSelectNode());
+
+  if (p_keepSelectionVisible) {
+    EnsureNodeVisible(m_doc->GetSelectNode());
+  }
+
   Refresh();
+}
+
+void EfgDisplay::ZoomByFactor(double p_factor, const wxPoint &p_clientPoint)
+{
+  if (p_factor <= 0.0) {
+    return;
+  }
+
+  const int oldZoom = GetZoom();
+  const int newZoom = ClampZoom(static_cast<int>(std::lround(oldZoom * p_factor)));
+
+  if (newZoom == oldZoom) {
+    return;
+  }
+
+  int unscrolledX, unscrolledY;
+  CalcUnscrolledPosition(p_clientPoint.x, p_clientPoint.y, &unscrolledX, &unscrolledY);
+
+  const double oldScale = GetZoom() / 100.0;
+  const double layoutX = unscrolledX / oldScale;
+  const double layoutY = unscrolledY / oldScale;
+
+  SetZoom(newZoom, false);
+
+  const double newScale = GetZoom() / 100.0;
+  const int targetUnscrolledX = static_cast<int>(std::lround(layoutX * newScale));
+  const int targetUnscrolledY = static_cast<int>(std::lround(layoutY * newScale));
+
+  int pixelsPerUnitX, pixelsPerUnitY;
+  GetScrollPixelsPerUnit(&pixelsPerUnitX, &pixelsPerUnitY);
+
+  if (pixelsPerUnitX <= 0 || pixelsPerUnitY <= 0) {
+    return;
+  }
+
+  const int targetScrollX = targetUnscrolledX - p_clientPoint.x;
+  const int targetScrollY = targetUnscrolledY - p_clientPoint.y;
+
+  int clientWidth, clientHeight;
+  GetClientSize(&clientWidth, &clientHeight);
+
+  int virtualWidth, virtualHeight;
+  GetVirtualSize(&virtualWidth, &virtualHeight);
+
+  const int maxPixelX = std::max(0, virtualWidth - clientWidth);
+  const int maxPixelY = std::max(0, virtualHeight - clientHeight);
+
+  const int clampedScrollX = std::clamp(targetScrollX, 0, maxPixelX);
+  const int clampedScrollY = std::clamp(targetScrollY, 0, maxPixelY);
+
+  Scroll(clampedScrollX / pixelsPerUnitX, clampedScrollY / pixelsPerUnitY);
 }
 
 void EfgDisplay::OnDraw(wxDC &p_dc)
@@ -863,6 +953,13 @@ void EfgDisplay::OnLeftDoubleClick(wxMouseEvent &p_event)
       wxPostEvent(this, event);
       return;
     }
+  }
+}
+
+void EfgDisplay::OnMagnify(wxMouseEvent &p_event)
+{
+  if (const double factor = 1.0 + p_event.GetMagnification(); factor > 0.0) {
+    ZoomByFactor(factor, p_event.GetPosition());
   }
 }
 
