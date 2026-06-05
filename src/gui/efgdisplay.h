@@ -109,6 +109,9 @@ public:
 
   void EnsureNodeVisible(const GameNode &);
 
+  bool ShowTreeDropMenu(const GameNode &p_targetNode, const GameNode &p_sourceNode,
+                        const wxPoint &p_pos);
+
   DECLARE_EVENT_TABLE()
 };
 } // namespace Gambit::GUI
