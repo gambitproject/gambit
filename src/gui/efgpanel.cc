@@ -609,8 +609,6 @@ void EfgPanel::RenderGame(wxDC &p_dc, int p_marginX, int p_marginY)
   auto posY = ((h - (maxY * scale)) / 2.0);
   p_dc.SetDeviceOrigin(static_cast<int>(posX), static_cast<int>(posY));
 
-  printf("Drawing with scale %f\n", scale);
-
   // Draw!
   m_treeWindow->OnDraw(p_dc, scale);
 }
