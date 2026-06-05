@@ -113,9 +113,6 @@ class PlayerDropTarget : public wxTextDropTarget {
   GameDocument *m_model;
 
   bool OnDropPlayer(const GameNode &p_node, const wxString &p_text);
-  bool OnDropCopyNode(const GameNode &p_node, const wxString &p_text);
-  bool OnDropMoveNode(const GameNode &p_node, const wxString &p_text);
-  bool OnDropInfoset(const GameNode &p_node, const wxString &p_text);
   bool OnDropSetOutcome(const GameNode &p_node, const wxString &p_text);
   bool OnDropMoveOutcome(const GameNode &p_node, const wxString &p_text);
   bool OnDropCopyOutcome(const GameNode &p_node, const wxString &p_text);
@@ -168,55 +165,6 @@ bool PlayerDropTarget::OnDropPlayer(const GameNode &p_node, const wxString &p_te
     m_model->DoSetPlayer(p_node, player);
   }
   return true;
-}
-
-bool PlayerDropTarget::OnDropCopyNode(const GameNode &p_node, const wxString &p_text)
-{
-  long n;
-  p_text.Right(p_text.Length() - 1).ToLong(&n);
-  const GameNode srcNode = GetNode(m_model->GetGame()->GetRoot(), n);
-  if (!srcNode) {
-    return false;
-  }
-  if (p_node->IsTerminal() && !srcNode->IsTerminal()) {
-    m_model->DoCopyTree(p_node, srcNode);
-    return true;
-  }
-  return false;
-}
-
-bool PlayerDropTarget::OnDropMoveNode(const GameNode &p_node, const wxString &p_text)
-{
-  long n;
-  p_text.Right(p_text.Length() - 1).ToLong(&n);
-  const GameNode srcNode = GetNode(m_model->GetGame()->GetRoot(), n);
-  if (!srcNode) {
-    return false;
-  }
-  if (p_node->IsTerminal() && !srcNode->IsTerminal()) {
-    m_model->DoMoveTree(p_node, srcNode);
-    return true;
-  }
-  return false;
-}
-
-bool PlayerDropTarget::OnDropInfoset(const GameNode &p_node, const wxString &p_text)
-{
-  long n;
-  p_text.Right(p_text.Length() - 1).ToLong(&n);
-  const GameNode srcNode = GetNode(m_model->GetGame()->GetRoot(), n);
-  if (!srcNode) {
-    return false;
-  }
-  if (!p_node->IsTerminal() && p_node->GetChildren().size() == srcNode->GetChildren().size()) {
-    m_model->DoSetInfoset(p_node, srcNode->GetInfoset());
-    return true;
-  }
-  else if (p_node->IsTerminal() && !srcNode->IsTerminal()) {
-    m_model->DoAppendMove(p_node, srcNode->GetInfoset());
-    return true;
-  }
-  return false;
 }
 
 bool PlayerDropTarget::OnDropSetOutcome(const GameNode &p_node, const wxString &p_text)
@@ -300,12 +248,6 @@ bool PlayerDropTarget::OnDropText(wxCoord p_x, wxCoord p_y, const wxString &p_te
       return OnDropTreeNode(node, p_text, wxPoint(p_x, p_y));
     case 'P':
       return OnDropPlayer(node, p_text);
-    case 'C':
-      return OnDropCopyNode(node, p_text);
-    case 'M':
-      return OnDropMoveNode(node, p_text);
-    case 'I':
-      return OnDropInfoset(node, p_text);
     case 'O':
       return OnDropSetOutcome(node, p_text);
     case 'o':
@@ -1050,7 +992,6 @@ void EfgDisplay::OnMagnify(wxMouseEvent &p_event)
 }
 
 #include "bitmaps/tree.xpm"
-#include "bitmaps/move.xpm"
 
 void EfgDisplay::OnMouseMotion(wxMouseEvent &p_event)
 {
