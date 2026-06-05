@@ -1,5 +1,6 @@
 EFG 2 R "Wichardt (2008): 2 players, imperfect recall" { "Player 1" "Player 2" }
-""
+"The first counterexample showing that finite extensive-form games
+with imperfect recall need not have a Nash equilibrium in behaviour strategies"
 
 p "" 1 1 "" { "R" "L" } 0
 p "" 1 2 "" { "r" "l" } 0
