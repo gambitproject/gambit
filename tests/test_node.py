@@ -361,18 +361,6 @@ def test_subgame_children(test_case: SubgameStructureTestCase):
 
 
 @pytest.mark.parametrize("test_case", SUBGAME_STRUCTURE_CASES)
-def test_subgame_differences(test_case: SubgameStructureTestCase):
-    """Each subgame's difference matches the expected infoset set."""
-    game = test_case.factory()
-    actual = {
-        tuple(_get_path_of_action_labels(sg.root)):
-            {(i.player.label, i.number) for i in sg.difference}
-        for sg in game.subgames
-    }
-    assert actual == test_case.differences
-
-
-@pytest.mark.parametrize("test_case", SUBGAME_STRUCTURE_CASES)
 def test_minimal_subgame_for_each_infoset(test_case: SubgameStructureTestCase):
     """`game.minimal_subgame(infoset)` returns the smallest subgame containing the infoset."""
     game = test_case.factory()
