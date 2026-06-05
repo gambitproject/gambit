@@ -364,33 +364,34 @@ void EfgDisplay::MakeMenus()
 //                  EfgDisplay: Event-hook members
 //---------------------------------------------------------------------
 
-static GameNode PriorSameIset(const GameNode &n)
+namespace {
+GameNode PriorSameInfoset(const GameNode &n)
 {
-  const GameInfoset iset = n->GetInfoset();
-  if (!iset) {
+  const GameInfoset infoset = n->GetInfoset();
+  if (!infoset) {
     return nullptr;
   }
-  auto members = iset->GetMembers();
-  auto node = std::find(members.begin(), members.end(), n);
-  if (node != members.begin()) {
+  const auto members = infoset->GetMembers();
+  if (auto node = std::find(members.begin(), members.end(), n); node != members.begin()) {
     return *std::prev(node);
   }
   return nullptr;
 }
 
-static GameNode NextSameIset(const GameNode &n)
+GameNode NextSameInfoset(const GameNode &n)
 {
-  const GameInfoset iset = n->GetInfoset();
-  if (!iset) {
+  const GameInfoset infoset = n->GetInfoset();
+  if (!infoset) {
     return nullptr;
   }
-  auto members = iset->GetMembers();
-  auto node = std::find(members.begin(), members.end(), n);
-  if (node != members.end()) {
+  const auto members = infoset->GetMembers();
+  if (auto node = std::find(members.begin(), members.end(), n);
+      node != members.end() && std::next(node) != members.end()) {
     return *std::next(node);
   }
   return nullptr;
 }
+} // namespace
 
 void EfgDisplay::OnSize(wxSizeEvent &p_event)
 {
@@ -516,8 +517,8 @@ void EfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
     }
     return;
   case WXK_UP: {
-    const GameNode prior =
-        ((!p_event.AltDown()) ? m_layout.PriorSameLevel(selectNode) : PriorSameIset(selectNode));
+    const GameNode prior = ((!p_event.AltDown()) ? m_layout.PriorSameLevel(selectNode)
+                                                 : PriorSameInfoset(selectNode));
     if (prior) {
       m_doc->SetSelectNode(prior);
       EnsureNodeVisible(m_doc->GetSelectNode());
@@ -526,7 +527,7 @@ void EfgDisplay::OnKeyEvent(wxKeyEvent &p_event)
   }
   case WXK_DOWN: {
     const GameNode next =
-        ((!p_event.AltDown()) ? m_layout.NextSameLevel(selectNode) : NextSameIset(selectNode));
+        ((!p_event.AltDown()) ? m_layout.NextSameLevel(selectNode) : NextSameInfoset(selectNode));
     if (next) {
       m_doc->SetSelectNode(next);
       EnsureNodeVisible(m_doc->GetSelectNode());
