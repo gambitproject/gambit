@@ -249,7 +249,7 @@ GameFrame::GameFrame(wxWindow *p_parent, GameDocument *p_doc)
   MakeMenus();
   MakeToolbar();
 
-  wxAcceleratorEntry entries[8];
+  wxAcceleratorEntry entries[10];
   entries[0].Set(wxACCEL_CTRL, 'o', wxID_OPEN);
   entries[1].Set(wxACCEL_CTRL, 's', wxID_SAVE);
   entries[2].Set(wxACCEL_CTRL | wxACCEL_SHIFT, 's', wxID_SAVEAS);
@@ -257,8 +257,10 @@ GameFrame::GameFrame(wxWindow *p_parent, GameDocument *p_doc)
   entries[4].Set(wxACCEL_CTRL, 'w', wxID_CLOSE);
   entries[5].Set(wxACCEL_CTRL, 'q', wxID_EXIT);
   entries[6].Set(wxACCEL_CTRL, '+', GBT_MENU_VIEW_ZOOMIN);
-  entries[7].Set(wxACCEL_CTRL, '-', GBT_MENU_VIEW_ZOOMOUT);
-  const wxAcceleratorTable accel(8, entries);
+  entries[7].Set(wxACCEL_CTRL, '=', GBT_MENU_VIEW_ZOOMIN);
+  entries[8].Set(wxACCEL_CTRL, '-', GBT_MENU_VIEW_ZOOMOUT);
+  entries[9].Set(wxACCEL_CTRL, '0', GBT_MENU_VIEW_ZOOM100);
+  const wxAcceleratorTable accel(10, entries);
   wxWindowBase::SetAcceleratorTable(accel);
 
   m_splitter = new wxSplitterWindow(this, wxID_ANY);
@@ -480,12 +482,12 @@ void GameFrame::MakeMenus()
   viewMenu->Check(GBT_MENU_VIEW_PROFILES, false);
   viewMenu->AppendSeparator();
 
-  AppendBitmapItem(viewMenu, GBT_MENU_VIEW_ZOOMIN, _("Zoom &in"),
+  AppendBitmapItem(viewMenu, GBT_MENU_VIEW_ZOOMIN, _("Zoom &in\tCtrl-+"),
                    _("Increase display magnification"), wxBitmap(zoomin_xpm));
-  AppendBitmapItem(viewMenu, GBT_MENU_VIEW_ZOOMOUT, _("Zoom &out"),
+  AppendBitmapItem(viewMenu, GBT_MENU_VIEW_ZOOMOUT, _("Zoom &out\tCtrl--"),
                    _("Decrease display magnification"), wxBitmap(zoomout_xpm));
-  AppendBitmapItem(viewMenu, GBT_MENU_VIEW_ZOOM100, _("&Zoom 1:1"), _("Set magnification to 1:1"),
-                   wxBitmap(zoom1_xpm));
+  AppendBitmapItem(viewMenu, GBT_MENU_VIEW_ZOOM100, _("&Zoom 1:1\tCtrl-0"),
+                   _("Set magnification to 1:1"), wxBitmap(zoom1_xpm));
   AppendBitmapItem(viewMenu, GBT_MENU_VIEW_ZOOMFIT, _("&Fit tree to window"),
                    _("Rescale to show entire tree in window"), wxBitmap(zoomfit_xpm));
 
