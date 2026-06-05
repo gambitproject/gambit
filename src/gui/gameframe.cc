@@ -1066,7 +1066,9 @@ void GameFrame::OnViewProfiles(wxCommandEvent &p_event)
 void GameFrame::OnViewZoom(wxCommandEvent &p_event)
 {
   // All zoom events get passed along to the panel
-  wxPostEvent(m_efgPanel, p_event);
+  if (m_efgPanel && m_efgPanel->IsShown()) {
+    wxPostEvent(m_efgPanel, p_event);
+  }
 }
 
 void GameFrame::OnViewStrategic(wxCommandEvent &p_event)
@@ -1123,16 +1125,11 @@ void GameFrame::OnViewStrategic(wxCommandEvent &p_event)
   const bool canZoomTree = m_efgPanel && m_efgPanel->IsShown();
 
   GetMenuBar()->Check(GBT_MENU_VIEW_STRATEGIC, m_nfgPanel->IsShown());
-  GetMenuBar()->Enable(GBT_MENU_VIEW_ZOOMIN, canZoomTree);
-  GetMenuBar()->Enable(GBT_MENU_VIEW_ZOOMOUT, canZoomTree);
-  GetMenuBar()->Enable(GBT_MENU_VIEW_ZOOMFIT, canZoomTree);
-  GetMenuBar()->Enable(GBT_MENU_VIEW_ZOOM100, canZoomTree);
   GetMenuBar()->Enable(GBT_MENU_TOOLS_DOMINANCE, m_nfgPanel->IsShown());
 
   GetToolBar()->ToggleTool(GBT_MENU_VIEW_STRATEGIC, p_event.IsChecked());
-  GetToolBar()->EnableTool(GBT_MENU_VIEW_ZOOMIN, canZoomTree);
-  GetToolBar()->EnableTool(GBT_MENU_VIEW_ZOOMOUT, canZoomTree);
-  GetToolBar()->EnableTool(GBT_MENU_VIEW_ZOOMFIT, canZoomTree);
+
+  OnUpdate();
 }
 
 //----------------------------------------------------------------------
