@@ -27,7 +27,6 @@
 #include <wx/wx.h>
 #endif              // WX_PRECOMP
 #include <wx/dnd.h> // for drag-and-drop support
-#include <wx/image.h>
 
 #include "gambit.h"
 
