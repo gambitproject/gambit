@@ -42,11 +42,12 @@ using :func:`pygambit.catalog.load_gamut`:
 
 .. code-block:: python
 
-   pygambit.catalog.load_gamut("RandomGame", params={"players": 2, "actions": 3})
-   pygambit.catalog.load_gamut("CovariantGame", params={"players": 2, "actions": [3, 3]})
+   pygambit.catalog.load_gamut("RandomGame", params={"players": 2, "actions": 3}, gamut_jar="/path/to/gamut.jar")
+   pygambit.catalog.load_gamut("CovariantGame", params={"players": 2, "actions": [3, 3]}, gamut_jar="/path/to/gamut.jar")
    pygambit.catalog.load_gamut(
        "RandomGame",
        params={"players": 3, "actions": 4, "normalize": True, "min_payoff": 0, "max_payoff": 100},
+       gamut_jar="/path/to/gamut.jar",
    )
 
 The ``params`` argument maps directly to GAMUT command-line flags. Boolean flags such as
