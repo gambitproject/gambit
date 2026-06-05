@@ -53,6 +53,10 @@ def test_execute_notebook(nb_path):
     if sys.platform == "win32" and "openspiel" in nb_path.name.lower():
         pytest.skip("OpenSpiel notebook requires OpenSpiel, which is not available on Windows")
 
+    # GAMUT notebook requires Java and gamut.jar; outputs are pre-saved for docs builds
+    if "gamut" in nb_path.name.lower():
+        pytest.skip("GAMUT notebook requires Java and gamut.jar (see catalog documentation)")
+
     nb = nbformat.read(str(nb_path), as_version=4)
 
     # Prefer the notebook's kernelspec if provided, otherwise let nbclient pick the default.
