@@ -99,7 +99,7 @@ def load_openspiel(game_name: str, params: dict | None = None) -> gbt.Game:
         )
 
 
-def load_gamut(
+def generate_gamut(
     game_class: str,
     params: dict | None = None,
     gamut_jar: Path | str | None = None,

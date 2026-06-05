@@ -38,13 +38,13 @@ See the :doc:`OpenSpiel interoperability tutorial <tutorials/interoperability_tu
 .. rubric:: Generating GAMUT games
 
 Games from the `GAMUT <http://gamut.stanford.edu>`_ generator suite can be created
-using :func:`pygambit.catalog.load_gamut`:
+using :func:`pygambit.catalog.generate_gamut`:
 
 .. code-block:: python
 
-   pygambit.catalog.load_gamut("RandomGame", params={"players": 2, "actions": 3}, gamut_jar="/path/to/gamut.jar")
-   pygambit.catalog.load_gamut("CovariantGame", params={"players": 2, "actions": [3, 3]}, gamut_jar="/path/to/gamut.jar")
-   pygambit.catalog.load_gamut(
+   pygambit.catalog.generate_gamut("RandomGame", params={"players": 2, "actions": 3}, gamut_jar="/path/to/gamut.jar")
+   pygambit.catalog.generate_gamut("CovariantGame", params={"players": 2, "actions": [3, 3]}, gamut_jar="/path/to/gamut.jar")
+   pygambit.catalog.generate_gamut(
        "RandomGame",
        params={"players": 3, "actions": 4, "normalize": True, "min_payoff": 0, "max_payoff": 100},
        gamut_jar="/path/to/gamut.jar",
@@ -56,6 +56,7 @@ expand to space-separated tokens. See the
 `GAMUT documentation <http://gamut.stanford.edu/documentation.htm>`_ for the full list
 of game classes and parameters.
 
-GAMUT requires Java and ``gamut.jar`` to be installed. Provide the path to ``gamut.jar``
-via the ``gamut_jar`` argument or the ``GAMUT_JAR`` environment variable. Download
-GAMUT from http://gamut.stanford.edu/.
+GAMUT requires Java (install from `java.com <https://www.java.com/en/download/>`_) and
+``gamut.jar`` to be installed. Provide the path to ``gamut.jar`` via the ``gamut_jar``
+argument or the ``GAMUT_JAR`` environment variable. Download GAMUT from
+http://gamut.stanford.edu/.
