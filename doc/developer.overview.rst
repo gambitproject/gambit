@@ -33,7 +33,7 @@ Gambit's core is also incorporated into a graphical user interface, also written
 in C++ using wxWidgets (see ``src/gui``).  This is built by ``make`` if an installation
 of a suitable version of wxWidgets is detected.
 
-This hybrid architecture aims to maintain some flexibility for future development, by
+This hybrid architecture aims to maintain some flexibility for future development as follows:
 
 1.  Although in practice we expect ``pygambit`` will be the most common path for writing
     code using Gambit, the C++ implementations are kept separate from the Python wrapper
